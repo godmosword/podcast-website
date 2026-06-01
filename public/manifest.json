@@ -1,0 +1,25 @@
+{
+  "name": "車車故事屋",
+  "short_name": "車車故事屋",
+  "description": "給孩子看圖聽故事的小天地",
+  "lang": "zh-Hant",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fff7ec",
+  "theme_color": "#fff7ec",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

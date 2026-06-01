@@ -1,0 +1,93 @@
+.main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: calc(24px + var(--safe-top)) calc(20px + var(--safe-right))
+    calc(40px + var(--safe-bottom)) calc(20px + var(--safe-left));
+}
+
+.header {
+  text-align: center;
+  margin: 16px 0 28px;
+}
+
+.title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.titleEmoji {
+  font-size: 2.4rem;
+}
+
+.subtitle {
+  margin: 6px 0 0;
+  color: var(--ink-soft);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--card);
+  border: 3px solid; /* 顏色由 inline style 指定 */
+  border-radius: 22px;
+  padding: 16px 18px;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+/* 按下時像實體按鈕被壓下 */
+.card:active {
+  transform: translateY(4px);
+  box-shadow: none !important;
+}
+
+.cardEmoji {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+.cardText {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.cardMeta {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.cardArrow {
+  flex: 0 0 auto;
+  font-size: 1.1rem;
+}
