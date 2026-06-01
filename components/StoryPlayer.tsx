@@ -27,6 +27,8 @@ export default function StoryPlayer({
 }: StoryPlayerProps) {
   const [page, setPage] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [mediaError, setMediaError] = useState<"audio" | "image" | null>(null);
+  const [playBlocked, setPlayBlocked] = useState(false);
   // 字幕跟讀：播放時依音檔進度自動換句/換頁（繪本朗讀感），預設開啟。
   const [autoFlip, setAutoFlip] = useState(true);
 
@@ -79,10 +81,14 @@ export default function StoryPlayer({
   // 由播放鈕觸發（滿足手機需使用者手勢才能播放的限制）。
   function togglePlay() {
     const el = audioRef.current;
-    if (!el) return;
+    if (!el || mediaError === "audio") return;
 
     if (el.paused) {
-      void el.play().catch(() => setIsPlaying(false));
+      setPlayBlocked(false);
+      void el.play().catch(() => {
+        setIsPlaying(false);
+        setPlayBlocked(true);
+      });
     } else {
       el.pause();
     }
@@ -123,9 +129,18 @@ export default function StoryPlayer({
             className={styles.image}
             style={{ opacity: i === page ? 1 : 0 }}
             draggable={false}
+            onError={() => setMediaError("image")}
           />
         ))}
       </div>
+
+      {(mediaError || playBlocked) && (
+        <div className={styles.errorBanner} role="alert">
+          {mediaError === "image" && "插圖載入失敗，請稍後再試或回上一頁。"}
+          {mediaError === "audio" && "音檔載入失敗，請檢查網路後再試。"}
+          {!mediaError && playBlocked && "無法播放，請再按一次播放鈕。"}
+        </div>
+      )}
 
       {/* 左右透明 tap zone，各佔 35%（自動翻頁時停用） */}
       {!autoFlip && (
@@ -176,6 +191,7 @@ export default function StoryPlayer({
           style={{ backgroundColor: color }}
           onClick={togglePlay}
           aria-label={isPlaying ? "暫停" : "播放"}
+          disabled={mediaError === "audio"}
           type="button"
         >
           {isPlaying ? "❚❚" : "▶"}
@@ -200,7 +216,12 @@ export default function StoryPlayer({
         </span>
       </div>
 
-      <audio ref={audioRef} src={audio} preload="auto" />
+      <audio
+        ref={audioRef}
+        src={audio}
+        preload="metadata"
+        onError={() => setMediaError("audio")}
+      />
     </div>
   );
 }

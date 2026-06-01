@@ -1,15 +1,7 @@
 import Link from "next/link";
 import type { Story } from "@/data/stories";
+import { formatDate, storyCoverPath } from "@/lib/story-utils";
 import styles from "./StoryCard.module.css";
-
-function pad2(n: number): string {
-  return String(n).padStart(2, "0");
-}
-
-/** 把 "2026-06-01" 顯示成 "2026.06.01" */
-function formatDate(iso: string): string {
-  return iso.replaceAll("-", ".");
-}
 
 type StoryCardProps = {
   story: Story;
@@ -25,7 +17,7 @@ export default function StoryCard({ story }: StoryCardProps) {
       {/* 縮圖：用第一張圖 */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={`/stories/${story.slug}/${pad2(1)}.jpg`}
+        src={storyCoverPath(story.slug)}
         alt=""
         className={styles.thumb}
         style={{ backgroundColor: `${story.color}22` }}

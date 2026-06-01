@@ -10,10 +10,32 @@ const baloo = Baloo_2({
   variable: "--font-baloo",
 });
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined);
+
 export const metadata: Metadata = {
-  title: "車車遊樂園",
+  metadataBase: siteUrl ? new URL(siteUrl) : undefined,
+  title: {
+    default: "車車遊樂園",
+    template: "%s · 車車遊樂園",
+  },
   description: "給孩子看圖聽故事的小天地，左右翻頁、聽聽聲音。",
   manifest: "/manifest.json",
+  openGraph: {
+    title: "車車遊樂園",
+    description: "每天一個車車故事，陪孩子長大。Bonbon & 馬米親子 podcast。",
+    locale: "zh_TW",
+    type: "website",
+    siteName: "車車遊樂園",
+    images: [{ url: "/mascot.png", alt: "車車遊樂園吉祥物" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "車車遊樂園",
+    description: "每天一個車車故事，陪孩子長大。",
+    images: ["/mascot.png"],
+  },
   icons: {
     icon: [
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
