@@ -11,13 +11,13 @@ const baloo = Baloo_2({
 });
 
 export const metadata: Metadata = {
-  title: "車車故事屋",
+  title: "車車遊樂園",
   description: "給孩子看圖聽故事的小天地，左右翻頁、聽聽聲音。",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "車車故事屋",
+    title: "車車遊樂園",
   },
 };
 

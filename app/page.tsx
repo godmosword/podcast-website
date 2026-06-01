@@ -21,7 +21,7 @@ export default function HomePage() {
           width={200}
           height={150}
         />
-        <h1 className={styles.title}>車車故事屋</h1>
+        <h1 className={styles.title}>車車遊樂園</h1>
         <p className={styles.subtitle}>每天一個車車故事，陪孩子長大 🚗</p>
       </header>
 

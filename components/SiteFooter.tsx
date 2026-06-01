@@ -9,9 +9,18 @@ const SOCIAL_LINKS: { label: string; url: string }[] = [
 ];
 
 const PLATFORM_LINKS: { label: string; url: string }[] = [
-  { label: "Spotify", url: "" },
-  { label: "Apple Podcasts", url: "" },
-  { label: "RSS", url: "" },
+  {
+    label: "Apple Podcasts",
+    url: "https://podcasts.apple.com/us/podcast/id1896610920",
+  },
+  {
+    label: "SoundOn",
+    url: "https://player.soundon.fm/p/c478dbec-701a-4f1c-8c4a-736c52e7c4f5",
+  },
+  {
+    label: "RSS",
+    url: "https://feeds.soundon.fm/podcasts/c478dbec-701a-4f1c-8c4a-736c52e7c4f5.xml",
+  },
 ];
 
 // 贊助 / 支持連結（選填）。
@@ -63,7 +72,7 @@ export default function SiteFooter() {
         </a>
       )}
 
-      <p className={styles.copyright}>© 車車故事屋</p>
+      <p className={styles.copyright}>© 車車遊樂園 · Bonbon &amp; 馬米</p>
     </footer>
   );
 }

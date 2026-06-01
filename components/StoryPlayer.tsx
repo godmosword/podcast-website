@@ -27,8 +27,8 @@ export default function StoryPlayer({
 }: StoryPlayerProps) {
   const [page, setPage] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  // 自動翻頁：播放時依音檔進度平均分配到每一頁（繪本朗讀感）。
-  const [autoFlip, setAutoFlip] = useState(false);
+  // 字幕跟讀：播放時依音檔進度自動換句/換頁（繪本朗讀感），預設開啟。
+  const [autoFlip, setAutoFlip] = useState(true);
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const touchStartX = useRef<number | null>(null);
@@ -117,7 +117,7 @@ export default function StoryPlayer({
         {images.map((src, i) => (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            key={src}
+            key={i}
             src={src}
             alt={`${title} 第 ${i + 1} 頁`}
             className={styles.image}
@@ -158,7 +158,7 @@ export default function StoryPlayer({
           aria-pressed={autoFlip}
           type="button"
         >
-          自動翻頁 {autoFlip ? "開" : "關"}
+          字幕跟讀 {autoFlip ? "開" : "關"}
         </button>
       </div>
 
@@ -182,9 +182,9 @@ export default function StoryPlayer({
         </button>
 
         <div className={styles.dots}>
-          {images.map((src, i) => (
+          {images.map((_, i) => (
             <button
-              key={src}
+              key={i}
               className={`${styles.dot} ${i === page ? styles.dotActive : ""}`}
               style={i === page ? { backgroundColor: color } : undefined}
               onClick={() => !autoFlip && goTo(i)}

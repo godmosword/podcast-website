@@ -42,6 +42,9 @@ def draw_truck(d, cx, cy, s, color, body=CREAM):
 
 
 def make_page(slug, idx, title, color):
+    path = os.path.join(ROOT, "stories", slug, f"{idx:02d}.jpg")
+    if os.path.exists(path):
+        return  # 已有真實插圖，不覆蓋
     W, H = 1200, 900
     img = Image.new("RGB", (W, H), color)
     d = ImageDraw.Draw(img)
@@ -56,7 +59,7 @@ def make_page(slug, idx, title, color):
     d.text((W // 2, 700), title, font=font(56), fill=(255, 255, 255), anchor="mm")
     d.text((W // 2, H - 36), "佔位圖 · 請替換成真正的插畫", font=font(28),
            fill=(255, 255, 255), anchor="mm")
-    img.save(os.path.join(ROOT, "stories", slug, f"{idx:02d}.jpg"), "JPEG", quality=88)
+    img.save(path, "JPEG", quality=88)
 
 
 def make_mascot():

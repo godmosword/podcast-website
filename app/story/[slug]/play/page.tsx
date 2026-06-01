@@ -25,10 +25,15 @@ export default async function StoryPlayPage({
   }
 
   const base = `/stories/${story.slug}`;
-  const images = Array.from(
-    { length: story.pageCount },
-    (_, i) => `${base}/${pad2(i + 1)}.jpg`
-  );
+
+  // 每集目前只有一張 artwork（01.jpg）。若有字幕軌，就讓這張圖
+  // 對應每一句字幕（播放時字幕會跟著音檔進度換句）；否則依插圖張數。
+  const segments = story.captions?.length ?? story.pageCount;
+  const cover = `${base}/${pad2(1)}.jpg`;
+  const images =
+    story.pageCount <= 1
+      ? Array.from({ length: Math.max(1, segments) }, () => cover)
+      : Array.from({ length: story.pageCount }, (_, i) => `${base}/${pad2(i + 1)}.jpg`);
 
   return (
     <StoryPlayer
