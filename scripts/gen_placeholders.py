@@ -91,6 +91,47 @@ def make_page(idx, caption):
     return path
 
 
+def make_mascot():
+    """擬人化的吉祥物紅卡車（有眼睛、笑臉），透明背景，給首頁 Header 用。"""
+    S = 4  # 超取樣後縮小，邊緣較平滑
+    W, H = 480 * S, 360 * S
+    img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cx, cy, s = W // 2, int(H * 0.42), 70 * S
+
+    def rr(box, r, fill):
+        d.rounded_rectangle(box, radius=r, fill=fill)
+
+    # 車身（紅）
+    rr([cx - 2.2 * s, cy - 1.2 * s, cx + 0.6 * s, cy + 0.8 * s], 0.28 * s, COLOR)
+    rr([cx + 0.55 * s, cy - 0.35 * s, cx + 2.0 * s, cy + 0.8 * s], 0.28 * s, COLOR)
+    # 車窗（當作臉，淺色）
+    rr([cx - 1.9 * s, cy - 0.95 * s, cx + 0.35 * s, cy + 0.45 * s], 0.2 * s, CREAM)
+    # 眼睛
+    for ex in (cx - 1.25 * s, cx - 0.35 * s):
+        d.ellipse([ex - 0.26 * s, cy - 0.62 * s, ex + 0.26 * s, cy - 0.1 * s],
+                  fill=(60, 45, 35))
+        d.ellipse([ex - 0.02 * s, cy - 0.58 * s, ex + 0.12 * s, cy - 0.44 * s],
+                  fill=CREAM)
+    # 微笑
+    d.arc([cx - 1.1 * s, cy - 0.35 * s, cx - 0.3 * s, cy + 0.25 * s],
+          start=20, end=160, fill=(228, 120, 90), width=int(0.12 * s))
+    # 腮紅
+    for bx in (cx - 1.55 * s, cx + 0.0 * s):
+        d.ellipse([bx - 0.16 * s, cy - 0.12 * s, bx + 0.16 * s, cy + 0.12 * s],
+                  fill=(255, 170, 140, 180))
+    # 輪子
+    for wx in (cx - 1.4 * s, cx + 1.3 * s):
+        d.ellipse([wx - 0.45 * s, cy + 0.5 * s, wx + 0.45 * s, cy + 1.4 * s],
+                  fill=COLOR_DARK)
+        d.ellipse([wx - 0.18 * s, cy + 0.77 * s, wx + 0.18 * s, cy + 1.13 * s],
+                  fill=CREAM)
+    img = img.resize((W // S, H // S), Image.LANCZOS)
+    path = os.path.join(ROOT, "mascot.png")
+    img.save(path, "PNG")
+    return path
+
+
 def make_icon(size):
     img = Image.new("RGB", (size, size), COLOR)
     d = ImageDraw.Draw(img)
@@ -106,5 +147,6 @@ if __name__ == "__main__":
     os.makedirs(TRUCK_DIR, exist_ok=True)
     for i, cap in enumerate(CAPTIONS, start=1):
         print("wrote", make_page(i, cap))
+    print("wrote", make_mascot())
     for s in (192, 512):
         print("wrote", make_icon(s))

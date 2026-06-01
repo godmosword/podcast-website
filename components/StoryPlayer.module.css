@@ -78,6 +78,7 @@
 }
 
 .topTitle {
+  flex: 1 1 auto;
   color: #fff;
   font-size: 1.1rem;
   font-weight: 700;
@@ -85,6 +86,24 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.autoBtn {
+  flex: 0 0 auto;
+  pointer-events: auto;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(4px);
+  white-space: nowrap;
+}
+
+.autoBtnOn {
+  /* 開啟時底色由 inline style（故事主題色）指定 */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
 /* ---- 字幕 ---- */
@@ -108,7 +127,12 @@
   font-size: 1.15rem;
   font-weight: 600;
   line-height: 1.5;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+  /* 半透明圓角底板，幼兒場景下字更清楚 */
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  padding: 12px 18px;
+  border-radius: 18px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
 /* ---- 底部控制列 ---- */

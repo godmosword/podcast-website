@@ -23,6 +23,10 @@ export type Story = {
   audio: string;
   /** 圖片張數；檔名固定 01.jpg ~ NN.jpg（補零兩位） */
   pageCount: number;
+  /** 選填：一句話故事簡介，顯示在首頁卡片上 */
+  summary?: string;
+  /** 選填：主題標籤（如「分享」「勇氣」），幫家長挑選 */
+  tags?: string[];
   /** 選填：每頁一句字幕，長度應等於 pageCount */
   captions?: string[];
 };
@@ -36,6 +40,8 @@ export const stories: Story[] = [
     color: "#e4572e",
     audio: "audio.mp3",
     pageCount: 10,
+    summary: "紅色大卡車載著滿滿的蘋果，從清晨工作到天黑回家，學會努力與堅持。",
+    tags: ["努力", "負責", "友善"],
     captions: [
       "這是一台紅色的大卡車，它最喜歡載東西了。",
       "早上太陽公公起床，大卡車也發動引擎，嘟嘟！",
@@ -63,6 +69,8 @@ export const stories: Story[] = [
   //   color: "#2e86e4",
   //   audio: "audio.mp3",
   //   pageCount: 8,
+  //   summary: "藍色小船航向遠方的小島，認識海上的新朋友。",
+  //   tags: ["勇氣", "探索"],
   //   captions: [
   //     "藍色小船浮在海面上⋯⋯",
   //     // ⋯ 共 8 句，長度要等於 pageCount
