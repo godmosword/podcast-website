@@ -37,8 +37,17 @@
 .skeletonImage {
   width: 60%;
   height: auto;
-  opacity: 0.35;
-  filter: blur(2px);
+  opacity: 0.3;
+  filter: blur(3px);
+}
+
+.spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
 }
 
 @keyframes pulse {
@@ -71,11 +80,27 @@
   text-align: center;
 }
 
+.endSparkle {
+  position: absolute;
+  z-index: 1;
+}
+
+.endSparkle1 {
+  top: 30%;
+  left: 24%;
+}
+
+.endSparkle2 {
+  top: 36%;
+  right: 26%;
+}
+
 .endTitle {
   margin: 0;
   color: #fff;
-  font-size: 1.6rem;
+  font-size: 1.7rem;
   font-weight: 700;
+  z-index: 2;
 }
 
 .endSubtitle {
@@ -92,20 +117,29 @@
 }
 
 .endBtn {
-  padding: 14px 20px;
-  border-radius: var(--radius-md);
+  padding: 15px 20px;
+  border-radius: var(--radius-lg);
   color: #fff;
   font-size: 1.05rem;
   font-weight: 700;
+  z-index: 2;
+  background-image: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.22),
+    rgba(0, 0, 0, 0.12)
+  );
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45), var(--gloss);
 }
 
 .endBtnSecondary {
   padding: 12px 20px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   background: rgba(255, 255, 255, 0.15);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
   color: #fff;
   font-size: 0.95rem;
   font-weight: 600;
+  z-index: 2;
 }
 
 .bedtimeBadge {
@@ -295,14 +329,17 @@
   max-width: 600px;
   text-align: center;
   color: #fff;
-  font-size: 1.15rem;
-  font-weight: 600;
-  line-height: 1.5;
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
   /* 半透明圓角底板，幼兒場景下字更清楚 */
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(6px);
-  padding: 12px 18px;
-  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.58);
+  backdrop-filter: blur(8px);
+  padding: 14px 22px;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
@@ -323,8 +360,8 @@
 
 .playBtn {
   flex: 0 0 auto;
-  width: 64px;
-  height: 64px;
+  width: 66px;
+  height: 66px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -332,11 +369,20 @@
   color: #fff;
   font-size: 1.6rem;
   line-height: 1;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  background-image: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.28),
+    rgba(0, 0, 0, 0.15)
+  );
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5),
+    inset 0 2px 2px rgba(255, 255, 255, 0.4);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  transition: transform var(--motion-press);
 }
 
 .playBtn:active {
-  transform: scale(0.94);
+  transform: scale(0.92);
 }
 
 .dots {
@@ -364,12 +410,14 @@
 
 .counter {
   flex: 0 0 auto;
-  min-width: 44px;
-  text-align: right;
+  text-align: center;
   color: #fff;
-  font-size: 0.95rem;
-  font-weight: 600;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(4px);
 }
 
 .errorBanner {

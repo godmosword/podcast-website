@@ -1,36 +1,78 @@
 .header {
   text-align: center;
-  margin: 8px 0 24px;
+  margin: 8px 0 26px;
 }
 
 .compact {
   margin: 0 0 16px;
 }
 
-.mascot {
-  width: 200px;
-  max-width: 60%;
-  height: auto;
-  display: block;
-  margin: 0 auto -6px;
-  animation: bob 3s ease-in-out infinite;
+/* ---- Hero 場景（藍天 + 雲 + 卡車 + 馬路） ---- */
+.scene {
+  position: relative;
+  height: 188px;
+  margin: 0 0 14px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--sky-2) 0%, var(--sky) 100%);
+  box-shadow: var(--shadow-md), var(--gloss);
+  border: 1px solid var(--line);
 }
 
-.mascotCompact {
-  width: 48px;
-  max-width: none;
+.cloud {
+  position: absolute;
+  filter: drop-shadow(0 3px 4px rgba(74, 59, 42, 0.06));
+}
+
+.cloud1 {
+  top: 26px;
+  left: 18px;
+}
+
+.cloud2 {
+  top: 50px;
+  right: 26px;
+}
+
+.mascot {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  width: 168px;
+  max-width: 64%;
+  height: auto;
+  transform: translateX(-50%);
   margin: 0;
-  animation: none;
+  animation: bob 3s ease-in-out infinite;
+  z-index: 2;
+}
+
+.road {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: block;
 }
 
 @keyframes bob {
   0%,
   100% {
-    transform: translateY(0);
+    transform: translateX(-50%) translateY(0);
   }
   50% {
-    transform: translateY(-6px);
+    transform: translateX(-50%) translateY(-6px);
   }
+}
+
+.mascotCompact {
+  position: static;
+  width: 48px;
+  max-width: none;
+  margin: 0;
+  transform: none;
+  animation: none;
+  z-index: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -39,29 +81,55 @@
   }
 }
 
-.compactRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  text-align: left;
+/* ---- 標題 ---- */
+.titleWrap {
+  position: relative;
+  display: inline-block;
+}
+
+.sun {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 84px;
+  height: 84px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 212, 59, 0.55),
+    rgba(255, 212, 59, 0) 70%
+  );
+  z-index: -1;
 }
 
 .title {
-  font-size: 2.2rem;
+  font-size: 2.3rem;
   font-weight: 700;
+  letter-spacing: 0.02em;
   margin: 0;
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.6);
 }
 
 .titleCompact {
   font-size: 1.3rem;
   margin: 0;
+  letter-spacing: 0;
+  text-shadow: none;
 }
 
 .subtitle {
-  margin: 6px 0 0;
+  margin: 8px 0 0;
   color: var(--ink-soft);
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 600;
+}
+
+.compactRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
 }
 
 .link {

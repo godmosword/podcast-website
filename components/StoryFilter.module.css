@@ -1,22 +1,25 @@
 .filterBlock {
-  background: var(--card);
-  border: 2px solid var(--bg-dot);
-  border-radius: 20px;
-  padding: 16px 18px;
+  background: linear-gradient(180deg, var(--card-2), var(--card));
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-xl);
+  padding: 18px;
   margin-bottom: 18px;
+  box-shadow: var(--shadow-md);
 }
 
 .filterHeading {
-  margin: 0 0 12px;
+  margin: 0 0 14px;
+  padding-bottom: 10px;
+  border-bottom: 1.5px dashed var(--bg-dot);
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--ink);
 }
 
 .groupLabel {
-  margin: 12px 0 8px;
+  margin: 14px 0 8px;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--ink-soft);
 }
 
@@ -30,43 +33,35 @@
   gap: 8px;
 }
 
-.chip {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--ink);
-  padding: 6px 13px;
-  border-radius: 999px;
-  background: var(--bg);
-  border: 2px solid var(--bg-dot);
-  transition: transform 0.06s ease;
-}
-
-.chip:active {
-  transform: scale(0.95);
-}
-
-.chipActive {
-  color: #fff;
-  background: var(--ink);
-  border-color: var(--ink);
-}
-
 .count {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 0 4px 14px;
-  font-size: 0.9rem;
-  font-weight: 600;
+  margin: 0 4px 16px;
+  font-size: 0.85rem;
+  font-weight: 700;
   color: var(--ink-soft);
+}
+
+.count::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--leaf);
+  box-shadow: 0 0 0 3px rgba(105, 219, 124, 0.25);
 }
 
 .clear {
   font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--ink);
-  text-decoration: underline;
-  padding: 0;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  box-shadow: var(--shadow-sm);
 }
 
 .list {

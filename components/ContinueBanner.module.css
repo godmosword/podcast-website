@@ -1,17 +1,41 @@
 .banner {
-  display: block;
-  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
   padding: 14px 18px;
-  border-radius: var(--radius-md);
-  background: var(--card);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, var(--card-2), var(--card));
   border: 3px solid var(--ink);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-card), var(--gloss);
   font-size: 1rem;
   font-weight: 700;
   text-align: center;
+  transition: transform var(--motion-press), box-shadow var(--motion-press);
+}
+
+.banner::before {
+  content: "▶";
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  color: #fff;
+  background: var(--ink);
+  border-radius: 50%;
 }
 
 .banner:active {
   transform: translateY(4px);
   box-shadow: none;
+}
+
+@media (hover: hover) {
+  .banner:hover {
+    transform: translateY(-2px);
+  }
 }

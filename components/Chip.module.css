@@ -2,11 +2,19 @@
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--ink);
-  padding: 6px 13px;
+  padding: 7px 14px;
   border-radius: 999px;
-  background: var(--bg);
-  border: 2px solid var(--bg-dot);
-  transition: transform var(--motion-press);
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--motion-press), box-shadow var(--motion-press),
+    background var(--motion-press);
+}
+
+@media (hover: hover) {
+  .chip:hover {
+    transform: translateY(-1px);
+  }
 }
 
 .chip:active {
@@ -17,20 +25,24 @@
   color: #fff;
   background: var(--ink);
   border-color: var(--ink);
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .tag {
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.82rem;
+  font-weight: 700;
   color: var(--ink-soft);
-  padding: 4px 12px;
+  padding: 3px 11px;
   border-radius: 999px;
   background: var(--bg-dot);
+  border: 1px solid rgba(74, 59, 42, 0.06);
 }
 
 .vehicle {
   font-size: 0.85rem;
   font-weight: 700;
-  padding: 4px 12px;
+  padding: 4px 13px;
   border-radius: 999px;
+  border: 1px solid currentColor;
+  box-shadow: var(--shadow-sm);
 }

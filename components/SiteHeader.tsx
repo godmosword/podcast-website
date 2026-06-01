@@ -1,4 +1,7 @@
 import Link from "next/link";
+import Cloud from "./decor/Cloud";
+import Road from "./decor/Road";
+import decor from "./decor/decor.module.css";
 import styles from "./SiteHeader.module.css";
 
 type SiteHeaderProps = {
@@ -29,15 +32,30 @@ export default function SiteHeader({ variant = "full" }: SiteHeaderProps) {
 
   return (
     <header className={styles.header}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/mascot.png"
-        alt="揮手的紅色小卡車"
-        className={styles.mascot}
-        width={200}
-        height={150}
-      />
-      <h1 className={styles.title}>車車遊樂園</h1>
+      <div className={styles.scene}>
+        <Cloud
+          className={`${styles.cloud} ${styles.cloud1} ${decor.drift}`}
+          width={84}
+        />
+        <Cloud
+          className={`${styles.cloud} ${styles.cloud2} ${decor.drift}`}
+          width={60}
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/mascot.png"
+          alt="揮手的紅色小卡車"
+          className={styles.mascot}
+          width={200}
+          height={150}
+        />
+        <Road className={styles.road} height={34} />
+      </div>
+
+      <div className={styles.titleWrap}>
+        <span className={styles.sun} aria-hidden />
+        <h1 className={styles.title}>車車遊樂園</h1>
+      </div>
       <p className={styles.subtitle}>每天一個車車故事，陪孩子長大 🚗</p>
     </header>
   );

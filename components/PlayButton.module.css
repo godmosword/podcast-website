@@ -5,17 +5,29 @@
   color: #fff;
   font-size: 1.2rem;
   font-weight: 700;
+  letter-spacing: 0.02em;
   padding: 16px;
-  border-radius: var(--radius-md);
-  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.12);
-  transition:
-    transform var(--motion-press),
-    box-shadow var(--motion-press);
+  border-radius: var(--radius-lg);
+  /* 疊在 inline backgroundColor 之上的光澤層 */
+  background-image: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.22),
+    rgba(0, 0, 0, 0.12)
+  );
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.16), var(--shadow-md), var(--gloss);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+  transition: transform var(--motion-press), box-shadow var(--motion-press);
 }
 
 .button:active {
-  transform: translateY(4px);
-  box-shadow: none;
+  transform: translateY(5px);
+  box-shadow: var(--gloss);
+}
+
+@media (hover: hover) {
+  .button:hover {
+    transform: translateY(-2px);
+  }
 }
 
 .inline {
@@ -23,4 +35,5 @@
   width: auto;
   font-size: 1rem;
   padding: 12px 24px;
+  border-radius: var(--radius-md);
 }

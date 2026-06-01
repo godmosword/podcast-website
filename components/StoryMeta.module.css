@@ -14,7 +14,11 @@
 }
 
 .ep {
-  /* 顏色由 inline style 指定 */
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  border: 1.5px solid currentColor;
+  /* 文字顏色由 inline style 指定 */
 }
 
 .tags {

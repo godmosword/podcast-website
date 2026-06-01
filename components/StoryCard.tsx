@@ -7,14 +7,20 @@ import styles from "./StoryCard.module.css";
 
 type StoryCardProps = {
   story: Story;
+  /** 列表索引，用於進場依序彈入 */
+  index?: number;
 };
 
-export default function StoryCard({ story }: StoryCardProps) {
+export default function StoryCard({ story, index = 0 }: StoryCardProps) {
   return (
     <Link
       href={`/story/${story.slug}`}
-      className={styles.card}
-      style={{ borderColor: story.color, boxShadow: `0 6px 0 ${story.color}` }}
+      className={`${styles.card} popIn`}
+      style={{
+        borderColor: story.color,
+        boxShadow: `var(--shadow-md), 0 6px 0 ${story.color}`,
+        animationDelay: `${Math.min(index, 8) * 55}ms`,
+      }}
     >
       <div
         className={styles.thumbWrap}
@@ -26,20 +32,28 @@ export default function StoryCard({ story }: StoryCardProps) {
           fill
           className={styles.thumb}
         />
+        <span
+          className={styles.emojiBadge}
+          style={{ backgroundColor: story.color }}
+          aria-hidden
+        >
+          {story.emoji}
+        </span>
       </div>
 
       <span className={styles.body}>
         <span className={styles.meta}>
-          <span className={styles.ep} style={{ color: story.color }}>
+          <span
+            className={styles.ep}
+            style={{ backgroundColor: `${story.color}1f`, color: story.color }}
+          >
             EP {story.ep}
           </span>
           <span>{formatDate(story.date)}</span>
           {story.duration && <span>{story.duration}</span>}
         </span>
 
-        <span className={styles.title}>
-          <span aria-hidden>{story.emoji}</span> {story.title}
-        </span>
+        <span className={styles.title}>{story.title}</span>
 
         {story.summary && <span className={styles.summary}>{story.summary}</span>}
 
@@ -53,7 +67,11 @@ export default function StoryCard({ story }: StoryCardProps) {
               ))}
             </span>
           )}
-          <span className={styles.arrow} style={{ color: story.color }} aria-hidden>
+          <span
+            className={styles.arrow}
+            style={{ backgroundColor: `${story.color}1f`, color: story.color }}
+            aria-hidden
+          >
             ▶
           </span>
         </span>

@@ -2,11 +2,11 @@
   display: flex;
   align-items: stretch;
   gap: 14px;
-  background: var(--card);
+  background: linear-gradient(180deg, var(--card-2), var(--card));
   border: 3px solid; /* 顏色由 inline style 指定 */
-  border-radius: 22px;
+  border-radius: var(--radius-xl);
   padding: 14px;
-  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  transition: transform var(--motion-press), box-shadow var(--motion-press);
 }
 
 .card:active {
@@ -16,7 +16,7 @@
 
 @media (hover: hover) {
   .card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px) rotate(-0.6deg);
   }
 }
 
@@ -25,12 +25,29 @@
   flex: 0 0 auto;
   width: 96px;
   height: 96px;
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   overflow: hidden;
+  box-shadow: var(--gloss);
 }
 
 .thumb {
   object-fit: cover;
+}
+
+.emojiBadge {
+  position: absolute;
+  top: -7px;
+  left: -7px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  border-radius: 50%;
+  border: 2px solid var(--card);
+  box-shadow: var(--shadow-sm);
+  z-index: 2;
 }
 
 .body {
@@ -38,7 +55,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
 }
 
 .meta {
@@ -52,6 +69,9 @@
 }
 
 .ep {
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-weight: 700;
   /* 顏色由 inline style 指定 */
 }
 
@@ -59,6 +79,7 @@
   font-size: 1.2rem;
   font-weight: 700;
   color: var(--ink);
+  line-height: 1.25;
 }
 
 .summary {
@@ -87,15 +108,13 @@
   gap: 6px;
 }
 
-.tag {
-  font-size: 0.76rem;
-  font-weight: 600;
-  padding: 3px 9px;
-  border-radius: 999px;
-  /* 顏色由 inline style 指定 */
-}
-
 .arrow {
   flex: 0 0 auto;
-  font-size: 1rem;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  border-radius: 50%;
 }

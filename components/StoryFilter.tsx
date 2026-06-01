@@ -101,9 +101,9 @@ function StoryFilterInner({ stories, vehicles, tags }: StoryFilterProps) {
 
       {filtered.length > 0 ? (
         <ul className={styles.list}>
-          {filtered.map((story) => (
+          {filtered.map((story, i) => (
             <li key={story.slug}>
-              <StoryCard story={story} />
+              <StoryCard story={story} index={i} />
             </li>
           ))}
         </ul>

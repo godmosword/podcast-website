@@ -8,9 +8,14 @@
 .back {
   display: inline-block;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--ink-soft);
   margin-bottom: 16px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  box-shadow: var(--shadow-sm);
 }
 
 .hero {
@@ -22,19 +27,37 @@
   width: 100%;
   max-width: 420px;
   aspect-ratio: 4 / 3;
-  margin: 0 auto 16px;
-  border-radius: var(--radius-lg);
+  margin: 0 auto 18px;
+  border-radius: var(--radius-xl);
   border: 4px solid;
   overflow: hidden;
+  box-shadow: var(--shadow-md), var(--gloss);
 }
 
 .cover {
   object-fit: cover;
 }
 
+.emojiSticker {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  border-radius: 50%;
+  border: 3px solid var(--card);
+  box-shadow: var(--shadow-sm);
+  z-index: 2;
+}
+
 .title {
   font-size: 1.8rem;
   font-weight: 700;
+  letter-spacing: 0.01em;
   margin: 12px 0 0;
   color: var(--ink);
 }
@@ -44,26 +67,38 @@
 }
 
 .summarySection {
-  margin-top: 26px;
+  margin-top: 28px;
+  padding: 16px 18px;
+  border-left: 5px solid; /* 顏色由 inline style 指定 */
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, var(--card-2), var(--card));
+  box-shadow: var(--shadow-sm);
 }
 
 .sectionHeading {
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   font-weight: 700;
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   color: var(--ink);
 }
 
 .summary {
   margin: 0;
   font-size: 1rem;
-  line-height: 1.7;
+  line-height: 1.75;
   color: var(--ink);
 }
 
 .nextHint {
-  margin: 20px 0 0;
+  display: block;
+  margin: 22px 0 0;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  box-shadow: var(--shadow-sm);
   font-size: 0.92rem;
+  font-weight: 600;
   color: var(--ink-soft);
   line-height: 1.5;
 }

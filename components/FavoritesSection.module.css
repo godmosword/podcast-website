@@ -1,11 +1,15 @@
 .section {
-  margin-bottom: 24px;
+  margin-bottom: 26px;
 }
 
 .heading {
-  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.15rem;
   font-weight: 700;
-  margin: 0 0 14px;
+  margin: 0 0 16px;
+  color: var(--ink);
 }
 
 .list {
@@ -18,7 +22,7 @@
 }
 
 .hint {
-  margin: 12px 0 0;
+  margin: 14px 0 0;
   font-size: 0.85rem;
   color: var(--ink-soft);
 }

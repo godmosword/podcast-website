@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { clearContinue, loadContinue, saveContinue } from "@/lib/continue-playback";
+import Wheel from "./decor/Wheel";
+import Sparkle from "./decor/Sparkle";
+import decor from "./decor/decor.module.css";
 import styles from "./StoryPlayer.module.css";
 
 type StoryPlayerProps = {
@@ -216,6 +219,11 @@ export default function StoryPlayer({
           <div className={styles.skeleton} aria-hidden>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={images[0]} alt="" className={styles.skeletonImage} />
+            <Wheel
+              size={52}
+              color="#fff"
+              className={`${styles.spinner} ${decor.spin}`}
+            />
           </div>
         )}
         {images.map((src, i) => (
@@ -235,6 +243,14 @@ export default function StoryPlayer({
 
       {hasEnded && (
         <div className={styles.endScreen}>
+          <Sparkle
+            className={`${styles.endSparkle} ${styles.endSparkle1} ${decor.sparkleAnim}`}
+            size={26}
+          />
+          <Sparkle
+            className={`${styles.endSparkle} ${styles.endSparkle2} ${decor.sparkleAnim}`}
+            size={18}
+          />
           <p className={styles.endTitle}>故事聽完囉 🌙</p>
           <p className={styles.endSubtitle}>{title}</p>
           <div className={styles.endActions}>

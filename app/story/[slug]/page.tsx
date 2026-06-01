@@ -60,13 +60,18 @@ export default async function StoryDetailPage({
               className={styles.cover}
               priority
             />
+            <span
+              className={styles.emojiSticker}
+              style={{ backgroundColor: story.color }}
+              aria-hidden
+            >
+              {story.emoji}
+            </span>
           </div>
 
           <StoryMeta story={story} showTags={false} />
 
-          <h1 className={styles.title}>
-            <span aria-hidden>{story.emoji}</span> {story.title}
-          </h1>
+          <h1 className={styles.title}>{story.title}</h1>
 
           <StoryTags story={story} />
         </div>
@@ -81,7 +86,10 @@ export default async function StoryDetailPage({
         </div>
 
         {story.summary && (
-          <section className={styles.summarySection}>
+          <section
+            className={styles.summarySection}
+            style={{ borderLeftColor: story.color }}
+          >
             <h2 className={styles.sectionHeading}>故事大綱</h2>
             <p className={styles.summary}>{story.summary}</p>
           </section>

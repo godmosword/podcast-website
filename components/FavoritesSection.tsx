@@ -23,9 +23,9 @@ export default function FavoritesSection() {
     <section className={styles.section}>
       <h2 className={styles.heading}>❤️ 常聽的故事</h2>
       <ul className={styles.list}>
-        {favoriteStories.map((story) => (
+        {favoriteStories.map((story, i) => (
           <li key={story.slug}>
-            <StoryCard story={story} />
+            <StoryCard story={story} index={i} />
           </li>
         ))}
       </ul>

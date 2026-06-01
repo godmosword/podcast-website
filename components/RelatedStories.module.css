@@ -1,12 +1,23 @@
 .section {
-  margin-top: 32px;
+  margin-top: 34px;
 }
 
 .heading {
-  margin: 0 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
   font-size: 1.2rem;
   font-weight: 700;
   color: var(--ink);
+}
+
+.heading::before {
+  content: "";
+  width: 6px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--sky-blue);
 }
 
 .list {

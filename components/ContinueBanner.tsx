@@ -23,7 +23,7 @@ export default function ContinueBanner() {
 
   return (
     <Link href={href} className={styles.banner}>
-      ▶ {label}
+      {label}
     </Link>
   );
 }
