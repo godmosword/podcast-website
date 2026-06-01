@@ -22,6 +22,7 @@ npm run dev
 | `npm run build` | 正式建置（SSG） |
 | `npm run start` | 執行建置結果 |
 | `npm test` | 執行資料層單元測試 |
+| `npm run font:subset` | 重新子集化中文字型（新增文案後執行，見下方） |
 
 ## 部署
 
@@ -68,14 +69,20 @@ NEXT_PUBLIC_SITE_URL=https://你的網域
 },
 ```
 
-4. **驗證**
+4. **重生中文字型子集**（若新增了標題/大綱/字幕等新文字）
+
+```bash
+npm run font:subset   # 需要 /tmp/huninn.ttf，見「字型維護」
+```
+
+5. **驗證**
 
 ```bash
 npm test
 npm run build
 ```
 
-5. **部署** — push 後 CI/平台自動建置即可。
+6. **部署** — push 後 CI/平台自動建置即可。
 
 ### 檢查清單
 
@@ -84,6 +91,7 @@ npm run build
 - [ ] `audio.mp3` 可在播放器播放
 - [ ] `ep` 為目前最大集數 + 1
 - [ ] 詳情頁分享預覽正常（title / 描述 / 封面圖）
+- [ ] 若有新中文字 → 已重跑 `npm run font:subset`
 
 ## 專案結構
 
@@ -92,9 +100,12 @@ app/                    Next.js App Router
   page.tsx              首頁（篩選 + 卡片）
   story/[slug]/         故事詳情（SEO metadata）
   story/[slug]/play/    全螢幕播放器
+  fonts/                自託管中文字型子集（huninn woff2）
 components/             UI 元件
+  decor/                SVG 裝飾（雲、馬路、輪子、星星、彩帶）
 data/stories.ts         故事資料（單一真相源）
 lib/                    共用工具（路徑、metadata）
+scripts/                字型子集 / 圖示 / 佔位圖產生器
 public/stories/         每集音檔與插圖
 ```
 
@@ -108,6 +119,32 @@ ffmpeg -i audio.mp3 -codec:a libmp3lame -b:a 128k -ac 1 audio-optimized.mp3
 ```
 
 播放器使用 `preload="metadata"`，進入播放頁才開始載入完整音檔。
+
+## 字型維護（圓體中文）
+
+中文用自託管的 **jf-open 粉圓（huninn）**，但只內嵌「網站實際用到的字」以維持輕量
+（`app/fonts/huninn-subset.woff2`，約 100KB；完整字型 4.9MB）。拉丁字母與數字由
+Baloo 2 提供，字型堆疊見 `app/globals.css`。
+
+**新增/修改文案後**，若出現先前沒用過的中文字，需重生子集，否則該字會回退系統圓體：
+
+```bash
+# 1) 下載完整字型（一次即可）
+curl -sL https://github.com/justfont/open-huninn-font/releases/download/v2.1/jf-openhuninn-2.1.ttf -o /tmp/huninn.ttf
+# 2) 重生子集（掃描 data/app/components/lib 的文字）
+npm run font:subset
+# 3) commit app/fonts/huninn-subset.woff2
+```
+
+子集腳本：`scripts/subset_font.py`（需 `fonttools` + `brotli`：`pip install fonttools brotli`）。
+
+## 視覺素材（佔位圖 / 圖示 / 吉祥物）
+
+- **裝飾元件**：`components/decor/`（雲、馬路、輪子、星星、彩帶，皆為內嵌 SVG）。
+- **佔位插圖**：`scripts/gen_placeholders.py` 產生；若資料夾已有真實插圖則不覆蓋。
+- **PWA / iOS 圖示與吉祥物**：`scripts/gen_icons.py`（`python3 scripts/gen_icons.py build sky`）。
+
+動效全部包在 `prefers-reduced-motion: reduce` 守門內（`app/globals.css`），系統開啟「減少動態」時自動停用位移/旋轉。
 
 ## 授權與內容
 
