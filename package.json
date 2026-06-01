@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "font:subset": "python3 scripts/subset_font.py"
   },
   "dependencies": {
     "next": "^15.1.0",

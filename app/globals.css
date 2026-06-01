@@ -60,8 +60,9 @@ body {
 }
 
 body {
-  font-family: var(--font-baloo), "PingFang TC", "Microsoft JhengHei",
-    "Noto Sans TC", sans-serif;
+  /* Baloo 先供拉丁/數字，huninn 供中文字，其餘回退系統圓體 */
+  font-family: var(--font-baloo), var(--font-huninn), "PingFang TC",
+    "Microsoft JhengHei", "Noto Sans TC", sans-serif;
   color: var(--ink);
   background-color: var(--bg);
   /* 多層背景：點點 + 左右柔光 + 頂部天空 */

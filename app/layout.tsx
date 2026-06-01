@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Baloo_2 } from "next/font/google";
+import localFont from "next/font/local";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import "./globals.css";
 
@@ -9,6 +10,16 @@ const baloo = Baloo_2({
   weight: ["400", "500", "600", "700"],
   display: "swap",
   variable: "--font-baloo",
+});
+
+// jf-open 粉圓（huninn）— 已子集化成站內用到的中文字（~100KB）。
+// 拉丁/數字交給 Baloo（字型堆疊在前），中文字由此提供。
+// 新增文案後重跑：npm run font:subset
+const huninn = localFont({
+  src: "./fonts/huninn-subset.woff2",
+  weight: "400 700",
+  display: "swap",
+  variable: "--font-huninn",
 });
 
 const siteUrl =
@@ -73,7 +84,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-Hant" className={baloo.variable}>
+    <html lang="zh-Hant" className={`${baloo.variable} ${huninn.variable}`}>
       <body>
         {children}
         <ServiceWorkerRegister />
