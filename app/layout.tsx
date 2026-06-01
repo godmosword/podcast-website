@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Baloo_2 } from "next/font/google";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import "./globals.css";
 
 // 童趣圓潤字型，避免使用 Inter/Arial 等通用字型。
@@ -41,8 +42,12 @@ export const metadata: Metadata = {
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
       { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
     ],
-    // iPhone「加入主畫面」會用這張（180x180，滿版、iOS 自動套圓角）
-    apple: "/apple-touch-icon.png",
+    apple: [
+      { url: "/apple-touch-icon-180.png", sizes: "180x180", type: "image/png" },
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      { url: "/apple-touch-icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/apple-touch-icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
   },
   appleWebApp: {
     capable: true,
@@ -69,7 +74,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-Hant" className={baloo.variable}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <ServiceWorkerRegister />
+      </body>
     </html>
   );
 }

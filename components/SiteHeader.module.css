@@ -1,0 +1,73 @@
+.header {
+  text-align: center;
+  margin: 8px 0 24px;
+}
+
+.compact {
+  margin: 0 0 16px;
+}
+
+.mascot {
+  width: 200px;
+  max-width: 60%;
+  height: auto;
+  display: block;
+  margin: 0 auto -6px;
+  animation: bob 3s ease-in-out infinite;
+}
+
+.mascotCompact {
+  width: 48px;
+  max-width: none;
+  margin: 0;
+  animation: none;
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mascot {
+    animation: none;
+  }
+}
+
+.compactRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+
+.title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.titleCompact {
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.subtitle {
+  margin: 6px 0 0;
+  color: var(--ink-soft);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.link {
+  color: inherit;
+}
+
+.link:hover {
+  text-decoration: underline;
+}

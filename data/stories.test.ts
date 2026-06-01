@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   allTags,
   allVehicles,
+  getNextStory,
   getRelated,
+  getStoriesByVehicle,
   getStory,
   stories,
   storiesByNewest,
@@ -59,5 +61,30 @@ describe("getRelated", () => {
 
   it("未知 slug 回傳空陣列", () => {
     expect(getRelated("missing")).toEqual([]);
+  });
+});
+
+describe("getNextStory", () => {
+  it("回傳下一集（較早 ep）", () => {
+    const next = getNextStory("ambulance");
+    expect(next?.slug).toBe("excavator");
+  });
+
+  it("最舊一集無下一集", () => {
+    expect(getNextStory("ev")).toBeUndefined();
+  });
+});
+
+describe("getStoriesByVehicle", () => {
+  it("依車種篩選", () => {
+    const list = getStoriesByVehicle("救護車");
+    expect(list.every((s) => s.vehicle === "救護車")).toBe(true);
+    expect(list.length).toBe(1);
+  });
+});
+
+describe("pageCount", () => {
+  it("每集皆為 6 頁插畫", () => {
+    expect(stories.every((s) => s.pageCount === 6)).toBe(true);
   });
 });

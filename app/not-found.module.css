@@ -1,0 +1,44 @@
+.main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: calc(48px + var(--safe-top)) calc(20px + var(--safe-right))
+    calc(40px + var(--safe-bottom)) calc(20px + var(--safe-left));
+  text-align: center;
+}
+
+.mascot {
+  width: 160px;
+  max-width: 50%;
+  height: auto;
+  display: block;
+  margin: 0 auto 16px;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.message {
+  margin: 0 0 24px;
+  color: var(--ink-soft);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.cta {
+  display: inline-block;
+  padding: 14px 28px;
+  border-radius: var(--radius-md);
+  background: var(--card);
+  border: 3px solid var(--ink);
+  box-shadow: var(--shadow-card);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.cta:active {
+  transform: translateY(4px);
+  box-shadow: none;
+}

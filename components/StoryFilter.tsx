@@ -1,23 +1,39 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { Story } from "@/data/stories";
+import { ChipButton } from "./Chip";
 import StoryCard from "./StoryCard";
 import styles from "./StoryFilter.module.css";
 
 type StoryFilterProps = {
-  stories: Story[]; // 已排序（由新到舊）
+  stories: Story[];
   vehicles: string[];
   tags: string[];
 };
 
-export default function StoryFilter({
-  stories,
-  vehicles,
-  tags,
-}: StoryFilterProps) {
-  const [vehicle, setVehicle] = useState<string | null>(null);
-  const [tag, setTag] = useState<string | null>(null);
+function StoryFilterInner({ stories, vehicles, tags }: StoryFilterProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const vehicleParam = searchParams.get("vehicle");
+  const tagParam = searchParams.get("tag");
+
+  const [vehicle, setVehicle] = useState<string | null>(vehicleParam);
+  const [tag, setTag] = useState<string | null>(tagParam);
+
+  useEffect(() => {
+    setVehicle(vehicleParam);
+    setTag(tagParam);
+  }, [vehicleParam, tagParam]);
+
+  function updateParams(nextVehicle: string | null, nextTag: string | null) {
+    const params = new URLSearchParams();
+    if (nextVehicle) params.set("vehicle", nextVehicle);
+    if (nextTag) params.set("tag", nextTag);
+    const qs = params.toString();
+    router.replace(qs ? `/?${qs}` : "/", { scroll: false });
+  }
 
   const filtered = useMemo(() => {
     return stories.filter((s) => {
@@ -34,33 +50,38 @@ export default function StoryFilter({
 
         <p className={styles.groupLabel}>🚗 車種</p>
         <div className={styles.chips}>
-          <Chip active={vehicle === null} onClick={() => setVehicle(null)}>
+          <ChipButton
+            active={vehicle === null}
+            onClick={() => updateParams(null, tag)}
+          >
             全部
-          </Chip>
+          </ChipButton>
           {vehicles.map((v) => (
-            <Chip
+            <ChipButton
               key={v}
               active={vehicle === v}
-              onClick={() => setVehicle(vehicle === v ? null : v)}
+              onClick={() =>
+                updateParams(vehicle === v ? null : v, tag)
+              }
             >
               {v}
-            </Chip>
+            </ChipButton>
           ))}
         </div>
 
         <p className={styles.groupLabel}>🏷️ 故事關鍵字</p>
         <div className={styles.chips}>
-          <Chip active={tag === null} onClick={() => setTag(null)}>
+          <ChipButton active={tag === null} onClick={() => updateParams(vehicle, null)}>
             全部
-          </Chip>
+          </ChipButton>
           {tags.map((t) => (
-            <Chip
+            <ChipButton
               key={t}
               active={tag === t}
-              onClick={() => setTag(tag === t ? null : t)}
+              onClick={() => updateParams(vehicle, tag === t ? null : t)}
             >
               {t}
-            </Chip>
+            </ChipButton>
           ))}
         </div>
       </div>
@@ -70,10 +91,7 @@ export default function StoryFilter({
         {(vehicle || tag) && (
           <button
             className={styles.clear}
-            onClick={() => {
-              setVehicle(null);
-              setTag(null);
-            }}
+            onClick={() => updateParams(null, null)}
             type="button"
           >
             清除篩選
@@ -90,29 +108,16 @@ export default function StoryFilter({
           ))}
         </ul>
       ) : (
-        <p className={styles.empty}>沒有符合的故事，換個分類看看吧 🚧</p>
+        <p className={styles.empty}>沒有符合的故事，試試其他車車或關鍵字吧 🚗</p>
       )}
     </section>
   );
 }
 
-function Chip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
+export default function StoryFilter(props: StoryFilterProps) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`${styles.chip} ${active ? styles.chipActive : ""}`}
-      aria-pressed={active}
-    >
-      {children}
-    </button>
+    <Suspense fallback={<p className={styles.empty}>載入故事中…</p>}>
+      <StoryFilterInner {...props} />
+    </Suspense>
   );
 }

@@ -6,6 +6,21 @@
   --ink-soft: #8a7a66;
   --card: #ffffff;
 
+  /* 圓角 */
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
+
+  /* 陰影（實體按鈕感） */
+  --shadow-card: 0 4px 0 var(--ink);
+
+  /* 間距 */
+  --space-page: 20px;
+
+  /* 動效 */
+  --motion-press: 0.12s ease;
+  --motion-page: 0.4s ease;
+
   /* 安全區域（瀏海 / 圓角螢幕） */
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -48,4 +63,10 @@ button {
   cursor: pointer;
   border: none;
   background: none;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
 }

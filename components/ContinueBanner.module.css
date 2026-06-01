@@ -1,0 +1,17 @@
+.banner {
+  display: block;
+  margin-bottom: 18px;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  background: var(--card);
+  border: 3px solid var(--ink);
+  box-shadow: var(--shadow-card);
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.banner:active {
+  transform: translateY(4px);
+  box-shadow: none;
+}

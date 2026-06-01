@@ -1,0 +1,63 @@
+.hero {
+  display: block;
+  margin-bottom: 20px;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  border: 4px solid;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
+  color: inherit;
+  transition: transform var(--motion-press);
+}
+
+.hero:active {
+  transform: translateY(4px);
+  box-shadow: none;
+}
+
+@media (hover: hover) {
+  .hero:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.badge {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.coverWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  margin-bottom: 12px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.cover {
+  object-fit: cover;
+}
+
+.title {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.summary {
+  display: block;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.cta {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+}

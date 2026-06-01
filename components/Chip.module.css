@@ -1,0 +1,36 @@
+.chip {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+  padding: 6px 13px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 2px solid var(--bg-dot);
+  transition: transform var(--motion-press);
+}
+
+.chip:active {
+  transform: scale(0.95);
+}
+
+.active {
+  color: #fff;
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.tag {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--bg-dot);
+}
+
+.vehicle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 999px;
+}

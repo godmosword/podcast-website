@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getStory, getRelated, stories } from "@/data/stories";
+import { getStory, getRelated, getNextStory, stories } from "@/data/stories";
 import { storyDetailMetadata } from "@/lib/story-metadata";
-import { formatDate, storyCoverPath } from "@/lib/story-utils";
+import { storyCoverPath } from "@/lib/story-utils";
+import FavoriteButton from "@/components/FavoriteButton";
+import PlayButton from "@/components/PlayButton";
 import RelatedStories from "@/components/RelatedStories";
 import SiteFooter from "@/components/SiteFooter";
+import StoryImage from "@/components/StoryImage";
+import StoryMeta, { StoryTags } from "@/components/StoryMeta";
 import styles from "./page.module.css";
 
 export function generateStaticParams() {
@@ -25,7 +29,6 @@ export async function generateMetadata({
   return storyDetailMetadata(story);
 }
 
-// Next 15 的 params 是 Promise，要 await。
 export default async function StoryDetailPage({
   params,
 }: {
@@ -39,6 +42,7 @@ export default async function StoryDetailPage({
   }
 
   const related = getRelated(slug, 3);
+  const nextStory = getNextStory(slug);
 
   return (
     <main className={styles.main}>
@@ -48,54 +52,48 @@ export default async function StoryDetailPage({
 
       <article>
         <div className={styles.hero}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={storyCoverPath(story.slug)}
-            alt={`${story.title} 封面`}
-            className={styles.cover}
-            style={{ borderColor: story.color }}
-          />
-
-          <div className={styles.meta}>
-            <span className={styles.ep} style={{ color: story.color }}>
-              EP {story.ep}
-            </span>
-            <span>{formatDate(story.date)}</span>
-            {story.duration && <span>{story.duration}</span>}
+          <div className={styles.coverWrap} style={{ borderColor: story.color }}>
+            <StoryImage
+              src={storyCoverPath(story.slug)}
+              alt={`${story.title} 封面`}
+              fill
+              className={styles.cover}
+              priority
+            />
           </div>
+
+          <StoryMeta story={story} showTags={false} />
 
           <h1 className={styles.title}>
             <span aria-hidden>{story.emoji}</span> {story.title}
           </h1>
 
-          <div className={styles.tags}>
-            <span
-              className={styles.vehicle}
-              style={{ color: story.color, backgroundColor: `${story.color}1f` }}
-            >
-              🚗 {story.vehicle}
-            </span>
-            {story.tags?.map((tag) => (
-              <span key={tag} className={styles.tag}>
-                {tag}
-              </span>
-            ))}
-          </div>
+          <StoryTags story={story} />
         </div>
 
-        <Link
-          href={`/story/${story.slug}/play`}
-          className={styles.playCta}
-          style={{ backgroundColor: story.color }}
-        >
-          ▶ 開始看故事
-        </Link>
+        <FavoriteButton slug={story.slug} />
+
+        <div className={styles.playWrap}>
+          <PlayButton
+            href={`/story/${story.slug}/play`}
+            color={story.color}
+          />
+        </div>
 
         {story.summary && (
           <section className={styles.summarySection}>
             <h2 className={styles.sectionHeading}>故事大綱</h2>
             <p className={styles.summary}>{story.summary}</p>
           </section>
+        )}
+
+        {nextStory && (
+          <p className={styles.nextHint}>
+            聽完這集可以接著聽{" "}
+            <Link href={`/story/${nextStory.slug}`} style={{ color: story.color }}>
+              EP {nextStory.ep} {nextStory.title}
+            </Link>
+          </p>
         )}
 
         <RelatedStories stories={related} />

@@ -1,0 +1,29 @@
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.metaLeft {
+  justify-content: flex-start;
+}
+
+.ep {
+  /* 顏色由 inline style 指定 */
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.tagsLeft {
+  justify-content: flex-start;
+}

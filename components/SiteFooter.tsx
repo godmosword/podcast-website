@@ -1,3 +1,4 @@
+import Link from "next/link";
 import styles from "./SiteFooter.module.css";
 
 // 社群與收聽平台連結。把 url 填上即會自動顯示；
@@ -60,6 +61,12 @@ export default function SiteFooter() {
 
       <LinkRow links={SOCIAL_LINKS} />
       <LinkRow links={PLATFORM_LINKS} />
+
+      <nav className={styles.row}>
+        <Link href="/about" className={styles.link}>
+          關於我們
+        </Link>
+      </nav>
 
       {SUPPORT_URL.trim() !== "" && (
         <a

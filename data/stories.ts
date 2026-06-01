@@ -4,7 +4,7 @@
 // 內容對應 podcast《車車遊樂園》(Bonbon & 馬米) 的真實集數。
 // 每則故事對應 public/stories/<slug>/：
 //   - audio.mp3        該集真實音檔（已自 SoundOn 下載自存）
-//   - 01.jpg ~ NN.jpg  看圖翻頁用的插畫（目前為佔位圖，待替換）
+//   - 01.jpg ~ NN.jpg  看圖翻頁用的插畫（pageCount 需與檔案數一致）
 //
 // 新增 / 更新故事兩步：
 //   1. 在 public/stories/<slug>/ 放圖片與音檔
@@ -31,7 +31,7 @@ export type Story = {
   color: string;
   /** 音檔檔名，放在 public/stories/<slug>/ 底下 */
   audio: string;
-  /** 插圖張數；目前每集一張 artwork（01.jpg）。 */
+  /** 插圖張數（01.jpg～NN.jpg） */
   pageCount: number;
   /** 選填：一句話故事大綱 */
   summary?: string;
@@ -56,7 +56,7 @@ export const stories: Story[] = [
     emoji: "🚑",
     color: "#e03131",
     audio: "audio.mp3",
-    pageCount: 1,
+    pageCount: 6,
     summary: "安安救護車出任務時遇到困難，學會開口求助，和夥伴一起合作完成任務。",
     tags: ["勇敢", "合作", "求助"],
     captions: [
@@ -78,7 +78,7 @@ export const stories: Story[] = [
     emoji: "🚜",
     color: "#f59f00",
     audio: "audio.mp3",
-    pageCount: 1,
+    pageCount: 6,
     summary: "東東挖土機有點膽小，卻鼓起勇氣，一步步完成任務。",
     tags: ["勇氣", "成長"],
     captions: [
@@ -100,7 +100,7 @@ export const stories: Story[] = [
     emoji: "🚛",
     color: "#0ca678",
     audio: "audio.mp3",
-    pageCount: 1,
+    pageCount: 6,
     summary:
       "鈴鈴清潔車的早安音樂鈴壞掉了，她仍努力提醒車車朋友起床，學會守信用、說到做到。",
     tags: ["守信用", "負責"],
@@ -123,7 +123,7 @@ export const stories: Story[] = [
     emoji: "🏎️",
     color: "#e64980",
     audio: "audio.mp3",
-    pageCount: 1,
+    pageCount: 6,
     summary:
       "小紅賽車在比賽中遇到挫折，學會接受失敗、整理心情，明白不是第一名也沒關係。",
     tags: ["勇氣", "接受失敗"],
@@ -146,7 +146,7 @@ export const stories: Story[] = [
     emoji: "🛸",
     color: "#4263eb",
     audio: "audio.mp3",
-    pageCount: 1,
+    pageCount: 6,
     summary:
       "在公園遇見可愛的無人機小飛，大家一起幫小妹妹找回小兔子，學會安全飛行、遵守規則。",
     tags: ["安全", "合作", "助人"],
@@ -169,7 +169,7 @@ export const stories: Story[] = [
     emoji: "🚗",
     color: "#7048e8",
     audio: "audio.mp3",
-    pageCount: 1,
+    pageCount: 6,
     summary:
       "Bonbon 發揮創意，想出有剪頭髮車、洗澡車、運動車的未來電動車，坐車不無聊還能完成好多事。",
     tags: ["想像力", "創意"],
@@ -192,6 +192,19 @@ export const stories: Story[] = [
 /** 依 slug 取得故事；找不到回傳 undefined。 */
 export function getStory(slug: string): Story | undefined {
   return stories.find((story) => story.slug === slug);
+}
+
+/** 依集數由新到舊，取得「下一集」（較早的集數）。 */
+export function getNextStory(slug: string): Story | undefined {
+  const sorted = storiesByNewest();
+  const idx = sorted.findIndex((s) => s.slug === slug);
+  if (idx < 0 || idx >= sorted.length - 1) return undefined;
+  return sorted[idx + 1];
+}
+
+/** 依車種篩選故事（由新到舊）。 */
+export function getStoriesByVehicle(vehicle: string): Story[] {
+  return storiesByNewest().filter((s) => s.vehicle === vehicle);
 }
 
 /** 所有故事，依集數由新到舊排序（不改動原陣列）。 */

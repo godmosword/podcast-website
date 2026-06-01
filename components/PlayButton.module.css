@@ -1,0 +1,26 @@
+.button {
+  display: block;
+  width: 100%;
+  text-align: center;
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.12);
+  transition:
+    transform var(--motion-press),
+    box-shadow var(--motion-press);
+}
+
+.button:active {
+  transform: translateY(4px);
+  box-shadow: none;
+}
+
+.inline {
+  display: inline-block;
+  width: auto;
+  font-size: 1rem;
+  padding: 12px 24px;
+}

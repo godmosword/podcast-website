@@ -14,11 +14,22 @@
   box-shadow: none !important;
 }
 
-.thumb {
+@media (hover: hover) {
+  .card:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.thumbWrap {
+  position: relative;
   flex: 0 0 auto;
   width: 96px;
   height: 96px;
   border-radius: 16px;
+  overflow: hidden;
+}
+
+.thumb {
   object-fit: cover;
 }
 

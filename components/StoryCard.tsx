@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { Story } from "@/data/stories";
 import { formatDate, storyCoverPath } from "@/lib/story-utils";
+import StoryImage from "./StoryImage";
+import { TagChip } from "./Chip";
 import styles from "./StoryCard.module.css";
 
 type StoryCardProps = {
@@ -14,15 +16,17 @@ export default function StoryCard({ story }: StoryCardProps) {
       className={styles.card}
       style={{ borderColor: story.color, boxShadow: `0 6px 0 ${story.color}` }}
     >
-      {/* 縮圖：用第一張圖 */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={storyCoverPath(story.slug)}
-        alt=""
-        className={styles.thumb}
+      <div
+        className={styles.thumbWrap}
         style={{ backgroundColor: `${story.color}22` }}
-        loading="lazy"
-      />
+      >
+        <StoryImage
+          src={storyCoverPath(story.slug)}
+          alt=""
+          fill
+          className={styles.thumb}
+        />
+      </div>
 
       <span className={styles.body}>
         <span className={styles.meta}>
@@ -42,17 +46,10 @@ export default function StoryCard({ story }: StoryCardProps) {
         <span className={styles.footer}>
           {story.tags && story.tags.length > 0 && (
             <span className={styles.tags}>
-              {story.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className={styles.tag}
-                  style={{
-                    color: story.color,
-                    backgroundColor: `${story.color}1f`,
-                  }}
-                >
-                  {tag}
-                </span>
+              {story.tags.map((t) => (
+                <TagChip key={t} color={story.color}>
+                  {t}
+                </TagChip>
               ))}
             </span>
           )}
