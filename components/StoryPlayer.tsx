@@ -10,6 +10,8 @@ type StoryPlayerProps = {
   images: string[];
   audio: string;
   captions?: string[];
+  /** 關閉鈕的去處（預設回首頁） */
+  backHref?: string;
 };
 
 // 滑動觸發翻頁的最小位移（px）。
@@ -21,6 +23,7 @@ export default function StoryPlayer({
   images,
   audio,
   captions,
+  backHref = "/",
 }: StoryPlayerProps) {
   const [page, setPage] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -144,7 +147,7 @@ export default function StoryPlayer({
 
       {/* 頂部：關閉鈕 + 標題 + 自動翻頁開關 */}
       <div className={styles.topBar}>
-        <Link href="/" className={styles.closeBtn} aria-label="回首頁">
+        <Link href={backHref} className={styles.closeBtn} aria-label="關閉">
           ✕
         </Link>
         <span className={styles.topTitle}>{title}</span>

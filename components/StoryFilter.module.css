@@ -1,0 +1,86 @@
+.filterBlock {
+  background: var(--card);
+  border: 2px solid var(--bg-dot);
+  border-radius: 20px;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+}
+
+.filterHeading {
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.groupLabel {
+  margin: 12px 0 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.groupLabel:first-of-type {
+  margin-top: 0;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+  padding: 6px 13px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 2px solid var(--bg-dot);
+  transition: transform 0.06s ease;
+}
+
+.chip:active {
+  transform: scale(0.95);
+}
+
+.chipActive {
+  color: #fff;
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.count {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 4px 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.clear {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: underline;
+  padding: 0;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.empty {
+  text-align: center;
+  color: var(--ink-soft);
+  font-weight: 600;
+  padding: 32px 0;
+}
