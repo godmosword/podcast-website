@@ -14,6 +14,14 @@ export const metadata: Metadata = {
   title: "車車遊樂園",
   description: "給孩子看圖聽故事的小天地，左右翻頁、聽聽聲音。",
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    // iPhone「加入主畫面」會用這張（180x180，滿版、iOS 自動套圓角）
+    apple: "/apple-touch-icon.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
