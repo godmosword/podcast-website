@@ -10,22 +10,23 @@
 /* ---- Hero 主視覺（遊樂園場景圖） ---- */
 .scene {
   position: relative;
-  margin: 0 0 14px;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto 14px;
   border-radius: var(--radius-xl);
   overflow: hidden;
-  aspect-ratio: 1 / 1;
-  max-height: min(72vw, 420px);
   box-shadow: var(--shadow-md), var(--gloss);
   border: 1px solid var(--line);
   background: var(--sky);
+  line-height: 0;
 }
 
 .heroImage {
   display: block;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
+  height: auto;
+  max-width: 100%;
+  vertical-align: top;
 }
 
 .mascotCompact {
