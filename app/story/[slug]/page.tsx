@@ -5,6 +5,7 @@ import { getStory, getRelated, getNextStory, stories } from "@/data/stories";
 import { storyDetailMetadata } from "@/lib/story-metadata";
 import { storyCoverPath } from "@/lib/story-utils";
 import FavoriteButton from "@/components/FavoriteButton";
+import PlatformLinks from "@/components/PlatformLinks";
 import PlayButton from "@/components/PlayButton";
 import RelatedStories from "@/components/RelatedStories";
 import SiteFooter from "@/components/SiteFooter";
@@ -94,6 +95,8 @@ export default async function StoryDetailPage({
             <p className={styles.summary}>{story.summary}</p>
           </section>
         )}
+
+        <PlatformLinks accent={story.color} />
 
         {nextStory && (
           <p className={styles.nextHint}>

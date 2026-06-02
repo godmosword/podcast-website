@@ -1,19 +1,17 @@
 import Link from "next/link";
+import { PLATFORMS } from "@/lib/platforms";
+import { SOCIALS } from "@/lib/social";
 import styles from "./SiteFooter.module.css";
 
-// 社群與收聽平台連結。把 url 填上即會自動顯示；
-// 留空字串的項目會被隱藏，避免出現失效連結。
-const SOCIAL_LINKS: { label: string; url: string }[] = [
-  { label: "Instagram", url: "" },
-  { label: "YouTube", url: "" },
-  { label: "Threads", url: "" },
-];
+// 社群連結：共用 lib/social.ts 單一資料來源。
+const SOCIAL_LINKS: { label: string; url: string }[] = SOCIALS.map((s) => ({
+  label: s.label,
+  url: s.url,
+}));
 
+// 收聽平台：共用 lib/platforms.ts 單一資料來源，再補上 SoundOn / RSS 訂閱。
 const PLATFORM_LINKS: { label: string; url: string }[] = [
-  {
-    label: "Apple Podcasts",
-    url: "https://podcasts.apple.com/us/podcast/id1896610920",
-  },
+  ...PLATFORMS.map((p) => ({ label: p.label, url: p.url })),
   {
     label: "SoundOn",
     url: "https://player.soundon.fm/p/c478dbec-701a-4f1c-8c4a-736c52e7c4f5",

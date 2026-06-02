@@ -1,4 +1,5 @@
 import Link from "next/link";
+import SocialLinks from "./SocialLinks";
 import Cloud from "./decor/Cloud";
 import Road from "./decor/Road";
 import decor from "./decor/decor.module.css";
@@ -57,6 +58,7 @@ export default function SiteHeader({ variant = "full" }: SiteHeaderProps) {
         <h1 className={styles.title}>車車遊樂園</h1>
       </div>
       <p className={styles.subtitle}>每天一個車車故事，陪孩子長大 🚗</p>
+      <SocialLinks />
     </header>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { allVehicles, getStoriesByVehicle } from "@/data/stories";
+import PlatformLinks from "@/components/PlatformLinks";
 import SiteFooter from "@/components/SiteFooter";
 import StoryCard from "@/components/StoryCard";
 import styles from "./page.module.css";
@@ -44,24 +45,9 @@ export default function AboutPage() {
       <section className={styles.section}>
         <h2 className={styles.heading}>訂閱 Podcast</h2>
         <p className={styles.text}>
-          想聽更多集數？歡迎到 Apple Podcasts、SoundOn 訂閱《車車遊樂園》。
+          想聽更多集數？歡迎在以下平台訂閱《車車遊樂園》。
         </p>
-        <div className={styles.links}>
-          <a
-            href="https://podcasts.apple.com/us/podcast/id1896610920"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Apple Podcasts
-          </a>
-          <a
-            href="https://player.soundon.fm/p/c478dbec-701a-4f1c-8c4a-736c52e7c4f5"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            SoundOn
-          </a>
-        </div>
+        <PlatformLinks heading="" />
       </section>
 
       <section className={styles.section}>

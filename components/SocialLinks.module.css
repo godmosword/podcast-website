@@ -1,0 +1,49 @@
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.item {
+  display: inline-flex;
+  text-decoration: none;
+  transition: transform var(--motion-press);
+}
+
+.badge {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #fff;
+  border: 3px solid var(--card);
+  box-shadow: var(--shadow-md), var(--gloss);
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+}
+
+@media (hover: hover) {
+  .item:hover {
+    transform: translateY(-3px);
+  }
+}
+
+.item:active {
+  transform: translateY(1px) scale(0.94);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item,
+  .item:hover,
+  .item:active {
+    transform: none;
+  }
+}
