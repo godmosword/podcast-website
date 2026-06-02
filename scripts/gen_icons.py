@@ -1,102 +1,96 @@
 #!/usr/bin/env python3
-"""產生 iPhone 主畫面圖示候選 / 最終檔。
-iOS 會自動套圓角且不支援透明，所以圖示為滿版正方形、不留透明、不自己畫圓角。
-用法：
-  python3 scripts/gen_icons.py preview          # 產生 3 個方案到 /tmp
-  python3 scripts/gen_icons.py build <style>     # 產生最終多尺寸到 public/
+"""從首頁主視覺 hero-home.jpg 產生「加入主畫面」用的 App 圖示。
+
+做法：自動找出畫面中最醒目的紅色車車當主角，置中裁成方形（留出
+安全邊距，讓 Android 圓形遮罩 / iOS 圓角不會切到車車），再輸出
+各尺寸 PNG。風格自然與站上黏土插畫一致。
+
+重跑：python3 scripts/gen_icons.py
 """
-import sys
-from PIL import Image, ImageDraw
+import os
 
-CREAM = (255, 247, 236)
-TRUCK = (228, 87, 46)       # 品牌紅
-TRUCK_DARK = (178, 60, 28)
-WHEEL = (74, 59, 47)
+from PIL import Image, ImageDraw, ImageFilter
 
+ROOT = os.path.join(os.path.dirname(__file__), "..", "public")
+SRC = os.path.join(ROOT, "hero-home.jpg")
+CREAM = (255, 247, 236)  # #fff7ec，與網站底色一致
 
-def lerp(a, b, t):
-    return tuple(int(a[i] * (1 - t) + b[i] * t) for i in range(3))
-
-
-def v_gradient(img, top, bottom):
-    d = ImageDraw.Draw(img)
-    W, H = img.size
-    for y in range(H):
-        d.line([(0, y), (W, y)], fill=lerp(top, bottom, y / H))
-
-
-def draw_face_truck(d, cx, cy, s):
-    """笑臉卡車（紅車身 + 淺色臉窗 + 眼睛 + 微笑 + 腮紅）。"""
-    def rr(box, r, fill):
-        d.rounded_rectangle(box, radius=r, fill=fill)
-
-    rr([cx - 2.2 * s, cy - 1.2 * s, cx + 0.6 * s, cy + 0.8 * s], 0.30 * s, TRUCK)
-    rr([cx + 0.55 * s, cy - 0.35 * s, cx + 2.0 * s, cy + 0.8 * s], 0.30 * s, TRUCK)
-    rr([cx - 1.9 * s, cy - 0.95 * s, cx + 0.35 * s, cy + 0.45 * s], 0.22 * s, CREAM)
-    for ex in (cx - 1.25 * s, cx - 0.35 * s):
-        d.ellipse([ex - 0.27 * s, cy - 0.62 * s, ex + 0.27 * s, cy - 0.06 * s], fill=(60, 45, 35))
-        d.ellipse([ex - 0.02 * s, cy - 0.58 * s, ex + 0.13 * s, cy - 0.42 * s], fill=CREAM)
-    d.arc([cx - 1.15 * s, cy - 0.35 * s, cx - 0.3 * s, cy + 0.28 * s], start=20, end=160,
-          fill=(228, 120, 90), width=int(0.13 * s))
-    for bx in (cx - 1.6 * s, cx + 0.02 * s):
-        d.ellipse([bx - 0.17 * s, cy - 0.10 * s, bx + 0.17 * s, cy + 0.16 * s], fill=(255, 170, 140))
-    for wx in (cx - 1.4 * s, cx + 1.3 * s):
-        d.ellipse([wx - 0.46 * s, cy + 0.5 * s, wx + 0.46 * s, cy + 1.42 * s], fill=WHEEL)
-        d.ellipse([wx - 0.18 * s, cy + 0.78 * s, wx + 0.18 * s, cy + 1.14 * s], fill=CREAM)
+# 輸出檔名 -> 邊長(px)
+OUTPUTS = {
+    "icon-192.png": 192,
+    "icon-512.png": 512,
+    "apple-touch-icon.png": 180,
+    "apple-touch-icon-180.png": 180,
+    "apple-touch-icon-192.png": 192,
+    "apple-touch-icon-512.png": 512,
+    "apple-touch-icon-1024.png": 1024,
+}
 
 
-def render(style, size):
-    SS = 4
-    W = size * SS
-    img = Image.new("RGB", (W, W), CREAM)
-    d = ImageDraw.Draw(img)
-    cx, cy, s = W // 2, int(W * 0.46), W * 0.165
+def red_car_center(im: Image.Image) -> tuple[int, int]:
+    """以紅色像素重心估計紅車中心（限定畫面下半部，避開摩天輪等紅點）。"""
+    px = im.load()
+    w, h = im.size
+    sx = sy = n = 0
+    for y in range(int(h * 0.55), h, 2):
+        for x in range(0, w, 2):
+            r, g, b = px[x, y][:3]
+            if r > 150 and g < 110 and b < 90 and r - g > 70:
+                sx += x
+                sy += y
+                n += 1
+    if n == 0:
+        return w // 2, int(h * 0.78)
+    return sx // n, sy // n
 
-    if style == "soft":
-        v_gradient(img, (255, 247, 236), (255, 207, 153))
-        d = ImageDraw.Draw(img)
-        # 柔和的地面陰影（比背景略深的橘）
-        d.ellipse([cx - 2.0 * s, cy + 1.28 * s, cx + 2.0 * s, cy + 1.66 * s], fill=(240, 180, 120))
-        draw_face_truck(d, cx, cy, s)
 
-    elif style == "sky":
-        v_gradient(img, (165, 216, 255), (77, 171, 247))
-        d = ImageDraw.Draw(img)
-        for (cxb, cyb, rb) in [(0.24, 0.26, 0.10), (0.74, 0.20, 0.08), (0.6, 0.34, 0.06)]:
-            x, y, r = W * cxb, W * cyb, W * rb
-            for off in (-1.2, 0, 1.2):
-                d.ellipse([x + off * r - r, y - r * 0.7, x + off * r + r, y + r * 0.7], fill=CREAM)
-        draw_face_truck(d, cx, cy, s)
+def build_master(im: Image.Image) -> Image.Image:
+    """裁出以紅車為中心的方形主視覺（1024×1024）。"""
+    w, h = im.size
+    cx, cy = red_car_center(im)
 
-    elif style == "scene":
-        # 黏土風場景：藍天 + 沙地 + 草叢，呼應 podcast 插圖
-        v_gradient(img, (120, 192, 255), (180, 224, 255))
-        d = ImageDraw.Draw(img)
-        ground_y = int(W * 0.66)
-        d.rectangle([0, ground_y, W, W], fill=(229, 200, 156))
-        d.ellipse([-W * 0.1, ground_y - W * 0.06, W * 0.4, ground_y + W * 0.12], fill=(124, 196, 110))
-        d.ellipse([W * 0.62, ground_y - W * 0.05, W * 1.1, ground_y + W * 0.12], fill=(124, 196, 110))
-        for (cxb, cyb, rb) in [(0.22, 0.2, 0.075), (0.78, 0.16, 0.06)]:
-            x, y, r = W * cxb, W * cyb, W * rb
-            for off in (-1.2, 0, 1.2):
-                d.ellipse([x + off * r - r, y - r * 0.7, x + off * r + r, y + r * 0.7], fill=CREAM)
-        draw_face_truck(d, cx, int(W * 0.5), W * 0.155)
+    # 車車約佔 width 的 0.32；讓它在 icon 中佔約 56%，留安全邊距。
+    side = int(w * 0.32 / 0.56)
+    side = min(side, w, h)
 
-    return img.resize((size, size), Image.LANCZOS)
+    left = cx - side // 2
+    top = cy - side // 2
+    # 夾在邊界內
+    left = max(0, min(left, w - side))
+    top = max(0, min(top, h - side))
+
+    crop = im.crop((left, top, left + side, top + side))
+    return crop.resize((1024, 1024), Image.LANCZOS)
+
+
+def rounded(im: Image.Image, radius_ratio: float = 0.0) -> Image.Image:
+    """選用：加圓角（這裡輸出方形全幅，圓角交給系統處理）。"""
+    if radius_ratio <= 0:
+        return im
+    w, h = im.size
+    r = int(w * radius_ratio)
+    mask = Image.new("L", (w, h), 0)
+    d = ImageDraw.Draw(mask)
+    d.rounded_rectangle([0, 0, w, h], radius=r, fill=255)
+    out = Image.new("RGB", (w, h), CREAM)
+    out.paste(im, (0, 0), mask)
+    return out
+
+
+def main() -> None:
+    im = Image.open(SRC).convert("RGB")
+    master = build_master(im)
+    # 輕微銳化，讓縮圖後車車輪廓更清楚
+    master = master.filter(ImageFilter.UnsharpMask(radius=2, percent=80, threshold=2))
+
+    for name, size in OUTPUTS.items():
+        out = master.resize((size, size), Image.LANCZOS)
+        # 量化到 256 色 + optimize，照片風 PNG 也能壓到很小，
+        # 對黏土插畫的觀感幾乎無損。
+        out_q = out.quantize(colors=256, method=Image.MEDIANCUT, dither=Image.NONE)
+        out_q.save(os.path.join(ROOT, name), "PNG", optimize=True)
+        print(f"wrote {name} ({size}x{size})")
 
 
 if __name__ == "__main__":
-    mode = sys.argv[1] if len(sys.argv) > 1 else "preview"
-    if mode == "preview":
-        for st in ("soft", "sky", "scene"):
-            render(st, 512).save(f"/tmp/icon-{st}.png")
-            print("wrote", f"/tmp/icon-{st}.png")
-    elif mode == "build":
-        style = sys.argv[2]
-        for size in (180, 192, 512, 1024):
-            render(style, size).save(f"public/apple-touch-icon-{size}.png")
-        # 同步覆蓋 PWA 圖示
-        render(style, 192).save("public/icon-192.png")
-        render(style, 512).save("public/icon-512.png")
-        render(style, 180).save("public/apple-touch-icon.png")
-        print("built icons with style:", style)
+    main()

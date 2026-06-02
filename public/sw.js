@@ -1,5 +1,11 @@
-const CACHE_NAME = "chechecar-v1";
-const SHELL = ["/", "/manifest.json", "/mascot.png", "/icon-192.png", "/icon-512.png"];
+const CACHE_NAME = "chechecar-v2";
+const SHELL = [
+  "/",
+  "/manifest.json",
+  "/hero-home.jpg",
+  "/icon-192.png",
+  "/icon-512.png",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

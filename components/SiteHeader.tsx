@@ -50,7 +50,9 @@ export default function SiteHeader({ variant = "full" }: SiteHeaderProps) {
         <span className={styles.sun} aria-hidden />
         <h1 className={styles.title}>車車遊樂園</h1>
       </div>
-      <p className={styles.subtitle}>每天一個車車故事，陪孩子長大 🚗</p>
+      <p className={styles.subtitle}>
+        用車車故事陪伴孩子成長，一起開進歡樂的小天地
+      </p>
       <SocialLinks />
     </header>
   );
