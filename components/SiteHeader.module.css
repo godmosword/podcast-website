@@ -7,62 +7,25 @@
   margin: 0 0 16px;
 }
 
-/* ---- Hero 場景（藍天 + 雲 + 卡車 + 馬路） ---- */
+/* ---- Hero 主視覺（遊樂園場景圖） ---- */
 .scene {
   position: relative;
-  height: 188px;
   margin: 0 0 14px;
   border-radius: var(--radius-xl);
   overflow: hidden;
-  background: linear-gradient(180deg, var(--sky-2) 0%, var(--sky) 100%);
+  aspect-ratio: 1 / 1;
+  max-height: min(72vw, 420px);
   box-shadow: var(--shadow-md), var(--gloss);
   border: 1px solid var(--line);
+  background: var(--sky);
 }
 
-.cloud {
-  position: absolute;
-  filter: drop-shadow(0 3px 4px rgba(74, 59, 42, 0.06));
-}
-
-.cloud1 {
-  top: 26px;
-  left: 18px;
-}
-
-.cloud2 {
-  top: 50px;
-  right: 26px;
-}
-
-.mascot {
-  position: absolute;
-  left: 50%;
-  bottom: 18px;
-  width: 168px;
-  max-width: 64%;
-  height: auto;
-  transform: translateX(-50%);
-  margin: 0;
-  animation: bob 3s ease-in-out infinite;
-  z-index: 2;
-}
-
-.road {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
+.heroImage {
   display: block;
-}
-
-@keyframes bob {
-  0%,
-  100% {
-    transform: translateX(-50%) translateY(0);
-  }
-  50% {
-    transform: translateX(-50%) translateY(-6px);
-  }
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
 }
 
 .mascotCompact {
@@ -73,12 +36,6 @@
   transform: none;
   animation: none;
   z-index: auto;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .mascot {
-    animation: none;
-  }
 }
 
 /* ---- 標題 ---- */

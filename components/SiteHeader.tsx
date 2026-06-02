@@ -1,9 +1,9 @@
 import Link from "next/link";
 import SocialLinks from "./SocialLinks";
-import Cloud from "./decor/Cloud";
-import Road from "./decor/Road";
-import decor from "./decor/decor.module.css";
 import styles from "./SiteHeader.module.css";
+
+/** 首頁 Hero 主視覺（車車遊樂園黏土風格場景圖） */
+const HERO_IMAGE = "/hero-home.jpg";
 
 type SiteHeaderProps = {
   variant?: "full" | "compact";
@@ -34,23 +34,16 @@ export default function SiteHeader({ variant = "full" }: SiteHeaderProps) {
   return (
     <header className={styles.header}>
       <div className={styles.scene}>
-        <Cloud
-          className={`${styles.cloud} ${styles.cloud1} ${decor.drift}`}
-          width={84}
-        />
-        <Cloud
-          className={`${styles.cloud} ${styles.cloud2} ${decor.drift}`}
-          width={60}
-        />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/mascot.png"
-          alt="揮手的紅色小卡車"
-          className={styles.mascot}
-          width={200}
-          height={150}
+          src={HERO_IMAGE}
+          alt="車車遊樂園：卡通車車在遊樂園裡開心玩耍的黏土風格插畫"
+          className={styles.heroImage}
+          width={1024}
+          height={1024}
+          fetchPriority="high"
+          decoding="async"
         />
-        <Road className={styles.road} height={34} />
       </div>
 
       <div className={styles.titleWrap}>
