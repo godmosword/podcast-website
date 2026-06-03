@@ -3,7 +3,7 @@
 Bonbon & 馬米親子 podcast《車車遊樂園》的官方 **看圖聽故事** 網站。Next.js 15 全靜態（SSG），零後端。
 
 - **正式站（範例）：** [https://podcast-website-mu.vercel.app](https://podcast-website-mu.vercel.app)
-- **版本：** [1.2.0](./CHANGELOG.md) — 詳見 [CHANGELOG.md](./CHANGELOG.md)
+- **版本：** [1.2.1](./CHANGELOG.md) — 詳見 [CHANGELOG.md](./CHANGELOG.md)
 - **待辦與路線圖：** [TODOS.md](./TODOS.md)
 - **授權：** 程式碼 [MIT](./LICENSE) · 節目內容與使用條款見 [DISCLAIMER.md](./DISCLAIMER.md)
 
@@ -11,7 +11,7 @@ Bonbon & 馬米親子 podcast《車車遊樂園》的官方 **看圖聽故事** 
 
 | 功能 | 說明 |
 |------|------|
-| 故事牆 | 首頁網格列出全部分集，車種 chip + URL 篩選；主題見 `/topic` |
+| 故事牆 | 首頁網格列出全部分集；**依車車找故事**（車種 chip + `?vehicle=`）；主題見 `/topic` |
 | 看圖聽故事 | 全螢幕播放器、字幕跟讀、進度與家長設定 |
 | 主題分類 | `/topic`、`/topic/[tag]` 靜態頁（SEO） |
 | 車種分類 | `/vehicles/[vehicle]` |
@@ -54,6 +54,8 @@ NEXT_PUBLIC_SITE_URL=https://你的網域
 
 ## 新增一集故事（SOP）
 
+> **SoundOn 新集：** 多數情況由 [Apple Podcast 自動同步](#apple-podcast-自動同步) 每日上架（`ep-N` slug、`pageCount: 1`）。以下為**手動**在 `manualStories` 新增完整繪本或多圖體驗時使用。
+
 1. **建立資料夾**  
    `public/stories/<slug>/`  
    - `slug` 用英文小寫，與網址一致（例：`firetruck`）
@@ -77,7 +79,7 @@ NEXT_PUBLIC_SITE_URL=https://你的網域
   audio: "audio.mp3",
   pageCount: 6,             // 與 01.jpg～NN.jpg 張數一致
   summary: "一句話大綱",
-  ageRange: "3–8 歲",       // 選填；未填則 UI 不顯示
+  ageRange: "3–8 歲",       // 選填；內頁目前不顯示年齡，僅資料用
   tags: ["勇敢", "合作"],
   captions: [               // 選填：字幕跟讀，每句一行
     "第一句…",
@@ -167,17 +169,26 @@ app/
 components/
   ConnectHub.tsx        頁尾追蹤／訂閱圖示區
   StoryFilter.tsx       首頁車種 chip 篩選
+  VehicleClayIcon.tsx   車種 chip 黏土封面縮圖
   StoryWall.tsx         故事網格
+  StoryMeta.tsx         內頁 EP + 時長
   decor/                SVG 裝飾
-data/stories.ts         故事資料（單一真相源）
+data/
+  stories.ts            手動集 + apple-synced 合併
+  apple-synced.json     GHA／sync 腳本寫入的新集
+  apple-sync.defaults.json
+scripts/
+  sync-apple-podcast.ts Apple RSS 同步
+  lib/apple-rss.ts      RSS 解析與摘要清理
+  lib/apple-sync-profile.ts
+  subset_font.py 等     字型子集、圖示產生器
 lib/
   platforms.ts          收聽平台連結
   social.ts             社群連結
   feed.ts               RSS 產生
   site-url.ts           站點絕對網址
   story-metadata.ts     每集 SEO
-scripts/                字型子集、圖示產生器
-public/stories/         每集音檔與插圖
+public/stories/         每集音檔與插圖（含 `ep-N/` 同步目錄）
 ```
 
 ## 音檔體積建議

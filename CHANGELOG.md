@@ -2,6 +2,34 @@
 
 本專案變更紀錄。格式參考 [Keep a Changelog](https://keepachangelog.com/zh-TW/1.1.0/)。
 
+## [1.2.1] - 2026-06-03
+
+### Added
+
+- **Apple Podcast 每日同步**：`npm run sync:apple`、`scripts/sync-apple-podcast.ts`；GHA [`.github/workflows/sync-apple-podcast.yml`](.github/workflows/sync-apple-podcast.yml) 每日 UTC 01:00，有新集時依官網現行框架上架並 push `main`
+- `data/apple-synced.json`、`data/apple-sync-state.json`、`data/apple-sync.defaults.json`（含 `overrides.<slug>`）
+- `scripts/lib/apple-sync-profile.ts`：標題推斷車種（含高鐵）、`pageCount` 預設 1
+- `cleanEpisodeSummary()`：RSS 摘要去除 SoundOn 尾註與節目宣傳段
+- 首頁車種 chip **`VehicleClayIcon`**（以該車種故事封面 `01.jpg` 作黏土縮圖）
+- EP7（`ep-7`）經同步上架：高鐵、`pageCount: 1`
+
+### Changed
+
+- 首頁篩選改為 **車種 chip 列**（「依車車找故事」），URL `?vehicle=`；主題改由 `/topic` 進入（移除抽屜／主題標籤列）
+- 故事內頁 **`StoryMeta`**：僅 EP + **時長**；不再顯示日期與年齡（同步新集亦不寫入 `ageRange`）
+- Apple 同步新集預設 **`pageCount: 1`**、單圖 MVP；完整繪本需手動補圖與 overrides
+- GHA 同步 workflow 新增 **`npm run build`** 關卡
+
+### Removed
+
+- 故事卡片與封面（Hero、詳情頁）**左下角 emoji 貼紙**
+- 首頁故事卡 **縮圖角標 emoji**（`StoryCard`）
+
+### Fixed
+
+- EP7 車種／emoji 鎖定為高鐵 🚄；`overrides.ep-7` 補主題標籤
+- RSS 無 `itunes:episode` 時以標題比對，避免重複建立 slug
+
 ## [1.2.0] - 2026-06-03
 
 ### Added
