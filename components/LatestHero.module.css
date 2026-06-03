@@ -40,22 +40,6 @@
   object-fit: cover;
 }
 
-.emojiSticker {
-  position: absolute;
-  left: 10px;
-  bottom: 10px;
-  width: 42px;
-  height: 42px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.4rem;
-  border-radius: 50%;
-  border: 3px solid var(--card);
-  box-shadow: var(--shadow-sm);
-  z-index: 2;
-}
-
 .sparkle {
   position: absolute;
   top: 10px;

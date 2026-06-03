@@ -35,13 +35,6 @@ export default function LatestHero({ story }: LatestHeroProps) {
           className={styles.cover}
           priority
         />
-        <span
-          className={styles.emojiSticker}
-          style={{ backgroundColor: story.color }}
-          aria-hidden
-        >
-          {story.emoji}
-        </span>
         <Sparkle
           className={`${styles.sparkle} ${decor.sparkleAnim}`}
           size={22}

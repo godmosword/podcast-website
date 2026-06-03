@@ -61,13 +61,6 @@ export default async function StoryDetailPage({
               className={styles.cover}
               priority
             />
-            <span
-              className={styles.emojiSticker}
-              style={{ backgroundColor: story.color }}
-              aria-hidden
-            >
-              {story.emoji}
-            </span>
           </div>
 
           <StoryMeta story={story} showTags={false} />
