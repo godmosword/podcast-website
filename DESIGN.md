@@ -18,21 +18,62 @@ Bonbon & 馬米親子 podcast「看圖聽故事」網站的視覺與互動規範
 
 ## 色彩
 
+多彩粉嫩風（純白底）：白為主，彩色出現在裝飾、卡片邊框與 chip。
+
 | Token | 值 | 用途 |
 |-------|-----|------|
-| `--bg` | `#fff7ec` | 頁面背景（奶油） |
-| `--bg-dot` | `#ffe6c7` | 點狀底紋 |
-| `--ink` | `#4a3b2a` | 主文字 |
-| `--ink-soft` | `#8a7a66` | 次要文字 |
+| `--bg` | `#ffffff` | 頁面背景（純白） |
+| `--bg-2` | `#fbfbfd` | 次背景 / 卡片漸層 |
+| `--bg-dot` | `#eef1f6` | 極淡灰藍底紋 |
+| `--ink` | `#34302b` | 主文字（中性深灰） |
+| `--ink-soft` | `#8d857b` | 次要文字 |
 | `--card` | `#ffffff` | 卡片背景 |
 
+多彩粉嫩 accent（裝飾、chip、邊框輪播）：
+
+| Token | 值 |
+|-------|-----|
+| `--c-pink` | `#f7a8c4` |
+| `--c-yellow` | `#ffd866` |
+| `--c-mint` | `#b7df9b` |
+| `--c-sky` | `#8fcde8` |
+| `--c-teal` | `#79c8c1` |
+| `--c-lilac` | `#c5b3e6` |
+
+body 背景為四角極淡多彩 radial-gradient 柔光（pink / sky / mint / yellow）。
 每則故事另有 `story.color`（hex），用於邊框、陰影、CTA、播放鈕。
+
+## 手繪塗鴉裝飾（v2：全力塗鴉框）
+
+整體手法升級為「手繪不規則外框 + 高密度塗鴉 + 螢光筆色塊 + 仿麥克筆標題」，貼近參考圖的全手繪塗鴉氛圍。
+
+### 全域 SVG 粗糙濾鏡
+- `components/decor/SvgDefs.tsx`：定義 `#rough-1/2/3` 三組 `feTurbulence + feDisplacementMap`（抖動量遞增），於 `app/layout.tsx <body>` 掛載一次。
+- 供 RoughFrame 外框與 `.marker` 螢光筆色塊以 `filter: url(#rough-N)` 引用，讓直線/色塊邊緣產生手繪抖動。
+
+### 手繪不規則外框 RoughFrame
+- `components/decor/RoughFrame.tsx`：絕對定位 `inset:0` 覆蓋父層（父層需 `position: relative`），`border` + `filter: url(#rough-N)`，顏色吃 `story.color` 或 accent。
+- 已取代乾淨實線邊框：StoryCard（list/grid）、LatestHero、StoryFilter `.filterBlock`。對應 padding 補回原邊框寬度。
+- topic 索引頁的標籤膠囊維持乾淨邊框（數量多，避免逐顆濾鏡的 GPU 成本與可讀性損失）。
+
+### 塗鴉散布
+- `components/decor/Doodle.tsx`：inline SVG 塗鴉（`squiggle` / `loop` / `dots` / `burst` / `blob` / `zigzag`），`aria-hidden`，顏色吃 accent token。
+- 定位 class 於 `components/decor/decor.module.css`（`.doodle` + `.doodleTL/TR/BL/BR` + `.tiltA/B/C`）。
+- 加密接入：SiteHeader 標題四周（5 個）、LatestHero（3 個）、StoryFilter 區塊（3 個）、SiteFooter（4 個），混色 pink/yellow/mint/sky/lilac。尊重 `prefers-reduced-motion`。
+
+### 螢光筆色塊 `.marker`
+- 定義於 `app/globals.css`：文字壓在手繪螢光筆色塊上（`::before` 上色 + 微旋轉 + `filter: url(#rough-3)`）。
+- 變體：`.marker-pink/sky/mint/lilac`，或以 inline `--marker-color` 帶入 `story.color`。
+- 已套用：SiteHeader 副標、StoryFilter `groupLabel`/`topicLabel`、StoryCard EP、LatestHero CTA。
 
 ## 字型
 
-- **Baloo 2**（Google Fonts，`next/font`）
+- **Baloo 2**（Google Fonts，`next/font`）— 拉丁/數字內文
+- **jf-open 粉圓 huninn**（`next/font/local`，子集化）— 中文字
+- **Gochi Hand**（Google Fonts，`--font-marker`）— 手繪麥克筆風，僅含拉丁/數字；用於標題拉丁字符與英文標誌，中文回退 huninn。
 - Fallback：`PingFang TC`、`Microsoft JhengHei`、`Noto Sans TC`
-- 標題 1.8–2.2rem / 內文 1rem / 播放器字幕 1.15rem
+- 標題 1.8–2.3rem / 內文 1rem / 播放器字幕 1.15rem
+- **仿麥克筆標題**：中文標題（SiteHeader `.title`、topic 標題）以 `-webkit-text-stroke` + 偏移色塊陰影模擬手寫粗描邊（中文無現成麥克筆字型）。
 
 ## 圓角與陰影
 

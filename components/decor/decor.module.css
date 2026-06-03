@@ -17,6 +17,70 @@
   transform-origin: 50% 50%;
 }
 
+/* ---- 手繪塗鴉裝飾定位 ---- */
+/* 容器需 position: relative；塗鴉絕對定位、不攔截點擊 */
+.doodleLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 0;
+}
+
+.doodle {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+/* 角落定位輔助（搭配 inline 微調） */
+.doodleTL {
+  top: -10px;
+  left: -6px;
+}
+.doodleTR {
+  top: -12px;
+  right: -4px;
+}
+.doodleBL {
+  bottom: -10px;
+  left: -4px;
+}
+.doodleBR {
+  bottom: -12px;
+  right: -6px;
+}
+
+/* ---- 手繪不規則外框（RoughFrame） ---- */
+/* 父層需 position: relative；覆蓋整塊、不攔截點擊 */
+.roughFrame {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-style: solid;
+  border-color: currentColor;
+  /* border-width / border-radius / filter 由 inline style 指定 */
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* 降低動態：濾鏡仍為靜態抖動，無需特別處理；保留結構 */
+  .roughFrame {
+    filter: none !important;
+  }
+}
+
+/* 輕微旋轉，增添手繪隨性感 */
+.tiltA {
+  transform: rotate(-12deg);
+}
+.tiltB {
+  transform: rotate(10deg);
+}
+.tiltC {
+  transform: rotate(-6deg);
+}
+
 /* 最新一集彩帶 */
 .ribbon {
   display: inline-flex;

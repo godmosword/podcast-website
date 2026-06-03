@@ -1,11 +1,11 @@
 .card {
+  position: relative;
   display: flex;
   align-items: stretch;
   gap: 14px;
   background: linear-gradient(180deg, var(--card-2), var(--card));
-  border: 3px solid; /* 顏色由 inline style 指定 */
   border-radius: var(--radius-xl);
-  padding: 14px;
+  padding: 17px; /* 原 14 + 原邊框 3，補回手繪外框移除的空間 */
   transition: transform var(--motion-press), box-shadow var(--motion-press);
 }
 
@@ -125,7 +125,7 @@
   align-items: stretch;
   gap: 12px;
   height: 100%;
-  padding: 12px;
+  padding: 15px; /* 原 12 + 補回外框 3 */
 }
 
 .thumbWrapGrid {

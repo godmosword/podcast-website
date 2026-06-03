@@ -1,22 +1,30 @@
 :root {
-  /* 童趣配色 */
-  --bg: #fff7ec;
-  --bg-2: #fff1de;
-  --bg-dot: #ffe6c7;
-  --ink: #4a3b2a;
-  --ink-soft: #8a7a66;
+  /* 多彩粉嫩配色（純白底） */
+  --bg: #ffffff;
+  --bg-2: #fbfbfd;
+  --bg-dot: #eef1f6;
+  --ink: #34302b;
+  --ink-soft: #8d857b;
   --card: #ffffff;
-  --card-2: #fffdf9;
-  --line: rgba(74, 59, 42, 0.1);
+  --card-2: #fcfdff;
+  --line: rgba(0, 0, 0, 0.08);
+
+  /* 多彩粉嫩 accent（裝飾、chip、邊框輪播） */
+  --c-pink: #f7a8c4;
+  --c-yellow: #ffd866;
+  --c-mint: #b7df9b;
+  --c-sky: #8fcde8;
+  --c-teal: #79c8c1;
+  --c-lilac: #c5b3e6;
 
   /* 場景色（裝飾用） */
   --sky: #d4ecff;
   --sky-2: #eaf6ff;
   --cloud: #ffffff;
-  --road: #8a7a66;
-  --sun: #ffd43b;
-  --leaf: #69db7c;
-  --sky-blue: #4dabf7;
+  --road: #8d857b;
+  --sun: #ffd866;
+  --leaf: #b7df9b;
+  --sky-blue: #8fcde8;
 
   /* 圓角 */
   --radius-sm: 12px;
@@ -25,9 +33,9 @@
   --radius-xl: 30px;
 
   /* 陰影 */
-  --shadow-card: 0 4px 0 var(--ink); /* 實體按鈕感（深色） */
-  --shadow-sm: 0 2px 6px rgba(74, 59, 42, 0.08);
-  --shadow-md: 0 10px 24px rgba(74, 59, 42, 0.12);
+  --shadow-card: 0 4px 0 rgba(52, 48, 43, 0.18); /* 實體按鈕感（柔化） */
+  --shadow-sm: 0 2px 6px rgba(52, 48, 43, 0.07);
+  --shadow-md: 0 10px 24px rgba(52, 48, 43, 0.1);
   --gloss: inset 0 2px 0 rgba(255, 255, 255, 0.7);
 
   /* 間距 */
@@ -70,14 +78,14 @@ body {
     "Microsoft JhengHei", "Noto Sans TC", sans-serif;
   color: var(--ink);
   background-color: var(--bg);
-  /* 多層背景：點點 + 左右柔光 + 頂部天空 */
-  background-image: radial-gradient(var(--bg-dot) 2px, transparent 2px),
-    radial-gradient(120% 80% at 15% -10%, rgba(77, 171, 247, 0.1), transparent 60%),
-    radial-gradient(120% 80% at 90% -5%, rgba(255, 212, 59, 0.13), transparent 55%),
-    linear-gradient(180deg, var(--sky-2), transparent 26%);
-  background-size: 24px 24px, 100% 100%, 100% 100%, 100% 100%;
-  background-repeat: repeat, no-repeat, no-repeat, no-repeat;
-  background-attachment: scroll, fixed, fixed, fixed;
+  /* 純白底 + 角落極淡多彩柔光（pink / sky / mint / yellow） */
+  background-image: radial-gradient(110% 70% at 12% -8%, rgba(247, 168, 196, 0.16), transparent 58%),
+    radial-gradient(110% 70% at 92% -4%, rgba(143, 205, 232, 0.16), transparent 56%),
+    radial-gradient(120% 80% at 88% 102%, rgba(183, 223, 155, 0.14), transparent 60%),
+    radial-gradient(120% 80% at 8% 104%, rgba(255, 216, 102, 0.12), transparent 58%);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
+  background-attachment: fixed, fixed, fixed, fixed;
   background-position: 0 0, 0 0, 0 0, 0 0;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -153,6 +161,47 @@ button:focus-visible {
 /* 進場：依序彈入（卡片/區塊用 inline animation-delay 做 stagger） */
 .popIn {
   animation: pop-in var(--motion-pop) both;
+}
+
+/* ============ 螢光筆色塊（副標 / 標籤 / EP / CTA 強調） ============ */
+/* 文字壓在手繪螢光筆色塊上；顏色預設黃，可用變體或 --marker-color 覆寫 */
+.marker {
+  position: relative;
+  display: inline-block;
+  padding: 0.06em 0.45em;
+  color: var(--ink);
+  isolation: isolate;
+}
+
+.marker::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--marker-color, var(--c-yellow));
+  border-radius: 7px 11px 6px 10px;
+  transform: rotate(-1.4deg);
+  filter: url(#rough-3);
+  opacity: 0.85;
+}
+
+.marker-pink::before {
+  background: var(--c-pink);
+}
+.marker-sky::before {
+  background: var(--c-sky);
+}
+.marker-mint::before {
+  background: var(--c-mint);
+}
+.marker-lilac::before {
+  background: var(--c-lilac);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marker::before {
+    filter: none;
+  }
 }
 
 /* ============ 無障礙：減少動態時關閉所有動畫/位移 ============ */

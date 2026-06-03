@@ -1,10 +1,10 @@
 .hero {
+  position: relative;
   display: block;
   margin-bottom: 22px;
-  padding: 16px;
+  padding: 20px; /* 原 16 + 補回原 4px 邊框空間 */
   border-radius: var(--radius-xl);
   background: linear-gradient(180deg, var(--card-2), var(--card));
-  border: 4px solid;
   color: inherit;
   transition: transform var(--motion-press), box-shadow var(--motion-press);
 }

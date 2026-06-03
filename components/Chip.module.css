@@ -35,7 +35,7 @@
   padding: 3px 11px;
   border-radius: 999px;
   background: var(--bg-dot);
-  border: 1px solid rgba(74, 59, 42, 0.06);
+  border: 1px solid var(--line);
 }
 
 .vehicle {

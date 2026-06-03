@@ -14,9 +14,13 @@
 }
 
 .title {
+  font-family: var(--font-marker), var(--font-baloo), var(--font-huninn),
+    "PingFang TC", "Microsoft JhengHei", sans-serif;
   font-size: 1.8rem;
   font-weight: 700;
   margin: 0 0 6px;
+  -webkit-text-stroke: 0.6px var(--ink);
+  text-shadow: 2px 2px 0 var(--c-yellow);
 }
 
 .subtitle {

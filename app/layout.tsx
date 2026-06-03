@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Baloo_2 } from "next/font/google";
+import { Baloo_2, Gochi_Hand } from "next/font/google";
 import localFont from "next/font/local";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
-import { SITE_RSS_PATH } from "@/lib/feed";
+import SvgDefs from "@/components/decor/SvgDefs";
 import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
@@ -12,6 +12,15 @@ const baloo = Baloo_2({
   weight: ["400", "500", "600", "700"],
   display: "swap",
   variable: "--font-baloo",
+});
+
+// 手繪麥克筆風字型（僅含拉丁/數字）。中文字會回退到 huninn。
+// 用於標題的拉丁字符與英文標誌，營造參考圖的手寫塗鴉感。
+const gochi = Gochi_Hand({
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+  variable: "--font-marker",
 });
 
 // jf-open 粉圓（huninn）— 已子集化成站內用到的中文字（~100KB）。
@@ -77,7 +86,7 @@ export const viewport: Viewport = {
   userScalable: false,
   // 處理瀏海 / 圓角螢幕，搭配 globals.css 的 env(safe-area-inset-*)。
   viewportFit: "cover",
-  themeColor: "#fff7ec",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
@@ -86,8 +95,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-Hant" className={`${baloo.variable} ${huninn.variable}`}>
+    <html
+      lang="zh-Hant"
+      className={`${baloo.variable} ${huninn.variable} ${gochi.variable}`}
+    >
       <body>
+        <SvgDefs />
         {children}
         <ServiceWorkerRegister />
       </body>

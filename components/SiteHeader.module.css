@@ -62,17 +62,23 @@
 }
 
 .title {
+  /* 拉丁/數字優先吃手繪字型；中文回退 huninn */
+  font-family: var(--font-marker), var(--font-baloo), var(--font-huninn),
+    "PingFang TC", "Microsoft JhengHei", sans-serif;
   font-size: 2.3rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   margin: 0;
-  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.6);
+  /* 仿麥克筆粗描邊：細描邊 + 雙層偏移陰影 */
+  -webkit-text-stroke: 1px var(--ink);
+  text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.9), 3px 3px 0 var(--c-yellow);
 }
 
 .titleCompact {
   font-size: 1.3rem;
   margin: 0;
   letter-spacing: 0;
+  -webkit-text-stroke: 0;
   text-shadow: none;
 }
 

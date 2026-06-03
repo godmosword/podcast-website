@@ -1,10 +1,8 @@
 import Link from "next/link";
 import {
   PLATFORM_ICON_PATHS,
-  RSS_ICON_PATH,
   SOCIAL_ICON_PATHS,
 } from "@/lib/connect-icons";
-import { SITE_RSS_PATH } from "@/lib/feed";
 import { visiblePlatforms } from "@/lib/platforms";
 import { visibleSocials } from "@/lib/social";
 import styles from "./ConnectHub.module.css";
@@ -105,7 +103,7 @@ export default function ConnectHub({ id = "connect", className }: Props) {
         </section>
       )}
 
-      {(platforms.length > 0 || SITE_RSS_PATH) && (
+      {platforms.length > 0 && (
         <section
           className={styles.block}
           aria-labelledby={`${id}-platforms`}
@@ -137,23 +135,6 @@ export default function ConnectHub({ id = "connect", className }: Props) {
                 </svg>
               </IconLink>
             ))}
-            <IconLink
-              href={SITE_RSS_PATH}
-              label="RSS"
-              ariaLabel="訂閱 RSS Feed"
-              badgeStyle={{ backgroundColor: "#f08c00" }}
-              external={false}
-            >
-              <svg
-                viewBox="0 0 24 24"
-                className={styles.icon}
-                fill="currentColor"
-                aria-hidden
-                focusable="false"
-              >
-                {RSS_ICON_PATH}
-              </svg>
-            </IconLink>
           </nav>
         </section>
       )}

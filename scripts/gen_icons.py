@@ -13,7 +13,7 @@ from PIL import Image, ImageDraw, ImageFilter
 
 ROOT = os.path.join(os.path.dirname(__file__), "..", "public")
 SRC = os.path.join(ROOT, "hero-home.jpg")
-CREAM = (255, 247, 236)  # #fff7ec，與網站底色一致
+CREAM = (255, 255, 255)  # #ffffff，與網站底色一致（白底）
 
 # 輸出檔名 -> 邊長(px)
 OUTPUTS = {

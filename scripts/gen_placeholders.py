@@ -6,7 +6,7 @@ import os
 from PIL import Image, ImageDraw, ImageFont
 
 FONT = "/System/Library/Fonts/STHeiti Medium.ttc"
-CREAM = (255, 247, 236)  # #fff7ec
+CREAM = (255, 255, 255)  # #ffffff（白底）
 BRAND = (228, 87, 46)    # #e4572e 品牌色（吉祥物/圖示）
 ROOT = os.path.join(os.path.dirname(__file__), "..", "public")
 

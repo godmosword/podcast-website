@@ -4,6 +4,7 @@ import { formatDate, storyCoverPath } from "@/lib/story-utils";
 import StoryImage from "./StoryImage";
 import { TagChip } from "./Chip";
 import StoryAge from "./StoryAge";
+import RoughFrame from "./decor/RoughFrame";
 import styles from "./StoryCard.module.css";
 
 type StoryCardProps = {
@@ -12,12 +13,15 @@ type StoryCardProps = {
   index?: number;
   /** list：橫式列表（預設）；grid：故事牆直式卡片 */
   variant?: "list" | "grid";
+  /** 隱藏日期 / 時長 / 年齡（僅保留 EP）；首頁列表用 */
+  hideMeta?: boolean;
 };
 
 export default function StoryCard({
   story,
   index = 0,
   variant = "list",
+  hideMeta = false,
 }: StoryCardProps) {
   const isGrid = variant === "grid";
 
@@ -26,11 +30,11 @@ export default function StoryCard({
       href={`/story/${story.slug}`}
       className={`${styles.card} ${isGrid ? styles.cardGrid : ""} popIn`}
       style={{
-        borderColor: story.color,
         boxShadow: `var(--shadow-md), 0 6px 0 ${story.color}`,
         animationDelay: `${Math.min(index, 8) * 55}ms`,
       }}
     >
+      <RoughFrame color={story.color} rough={index % 2 === 0 ? 1 : 2} width={3} />
       <div
         className={`${styles.thumbWrap} ${isGrid ? styles.thumbWrapGrid : ""}`}
         style={{ backgroundColor: `${story.color}22` }}
@@ -53,14 +57,18 @@ export default function StoryCard({
       <span className={`${styles.body} ${isGrid ? styles.bodyGrid : ""}`}>
         <span className={styles.meta}>
           <span
-            className={styles.ep}
-            style={{ backgroundColor: `${story.color}1f`, color: story.color }}
+            className={`${styles.ep} marker`}
+            style={{ ["--marker-color" as string]: story.color }}
           >
             EP {story.ep}
           </span>
-          <span>{formatDate(story.date)}</span>
-          {story.duration && <span>{story.duration}</span>}
-          <StoryAge ageRange={story.ageRange} />
+          {!hideMeta && (
+            <>
+              <span>{formatDate(story.date)}</span>
+              {story.duration && <span>{story.duration}</span>}
+              <StoryAge ageRange={story.ageRange} />
+            </>
+          )}
         </span>
 
         <span className={styles.title}>{story.title}</span>
