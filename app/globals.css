@@ -52,6 +52,11 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+html {
+  /* 系統縮放時避免水平裁切（家長放大閱讀） */
+  overflow-x: auto;
+}
+
 html,
 body {
   margin: 0;

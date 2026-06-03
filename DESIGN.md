@@ -14,7 +14,7 @@ Bonbon & 馬米親子 podcast「看圖聽故事」網站的視覺與互動規範
 - **Mobile-first**，內容欄寬 `max-width: 640px` 置中
 - 桌面端維持單欄，兩側留白
 - PWA：`manifest.json` + Apple Web App meta
-- Viewport 鎖定縮放（`userScalable: false`）— 避免幼兒誤觸；低視力使用者需依賴系統放大，此為已知取捨
+- Viewport 允許使用者縮放（未設 `maximum-scale` / `user-scalable=no`），方便家長放大閱讀
 
 ## 色彩
 

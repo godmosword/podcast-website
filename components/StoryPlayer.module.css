@@ -2,10 +2,11 @@
   position: fixed;
   inset: 0;
   background: #000;
-  overflow: hidden;
+  overflow: auto;
   user-select: none;
   -webkit-user-select: none;
-  touch-action: pan-y;
+  /* 不限制 pinch-zoom；保留滑動手勢給元件內翻頁 */
+  touch-action: manipulation;
 }
 
 .stage {
