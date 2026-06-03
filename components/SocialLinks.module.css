@@ -1,10 +1,17 @@
 .row {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  gap: 12px;
+  gap: 14px 18px;
+}
+
+.sizeCompact {
   margin-top: 14px;
+}
+
+.sizeDefault {
+  margin-top: 0;
 }
 
 .item {
@@ -13,9 +20,14 @@
   transition: transform var(--motion-press);
 }
 
+.itemLabeled {
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 64px;
+}
+
 .badge {
-  width: 44px;
-  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -25,9 +37,36 @@
   box-shadow: var(--shadow-md), var(--gloss);
 }
 
+.sizeCompact .badge {
+  width: 44px;
+  height: 44px;
+}
+
+.sizeDefault .badge {
+  width: 52px;
+  height: 52px;
+}
+
 .icon {
+  display: block;
+}
+
+.sizeCompact .icon {
   width: 24px;
   height: 24px;
+}
+
+.sizeDefault .icon {
+  width: 28px;
+  height: 28px;
+}
+
+.label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ink-soft);
+  text-align: center;
 }
 
 @media (hover: hover) {

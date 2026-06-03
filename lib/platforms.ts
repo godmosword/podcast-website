@@ -9,7 +9,13 @@
 // ============================================================
 
 /** 圖示識別字，對應 PlatformLinks 內的 SVG。 */
-export type PlatformIcon = "apple" | "spotify" | "kkbox" | "youtube";
+export type PlatformIcon =
+  | "apple"
+  | "spotify"
+  | "kkbox"
+  | "youtube"
+  | "soundon"
+  | "rss";
 
 export type Platform = {
   /** 顯示名稱（也作為 aria-label） */

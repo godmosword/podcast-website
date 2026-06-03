@@ -15,19 +15,29 @@ const ICONS: Record<SocialIcon, React.ReactNode> = {
 type Props = {
   /** 額外 class（讓呼叫端微調外距） */
   className?: string;
+  /** 是否在圖示下方顯示平台名稱 */
+  showLabels?: boolean;
+  /** 圖示尺寸：compact 用於標頭，default 用於頁尾 */
+  size?: "compact" | "default";
 };
 
 /**
  * 社群圖示列：Instagram / Threads。
  * 連結來自 lib/social.ts，首頁標頭與頁尾共用。
  */
-export default function SocialLinks({ className }: Props) {
+export default function SocialLinks({
+  className,
+  showLabels = false,
+  size = "compact",
+}: Props) {
   const socials = visibleSocials();
   if (socials.length === 0) return null;
 
+  const sizeClass = size === "default" ? styles.sizeDefault : styles.sizeCompact;
+
   return (
     <nav
-      className={`${styles.row}${className ? ` ${className}` : ""}`}
+      className={`${styles.row} ${sizeClass}${className ? ` ${className}` : ""}`}
       aria-label="社群連結"
     >
       {socials.map((s) => (
@@ -36,7 +46,7 @@ export default function SocialLinks({ className }: Props) {
           href={s.url}
           target="_blank"
           rel="noopener noreferrer"
-          className={styles.item}
+          className={`${styles.item}${showLabels ? ` ${styles.itemLabeled}` : ""}`}
           aria-label={`前往 ${s.label}`}
           title={s.label}
         >
@@ -51,6 +61,7 @@ export default function SocialLinks({ className }: Props) {
               {ICONS[s.icon]}
             </svg>
           </span>
+          {showLabels && <span className={styles.label}>{s.label}</span>}
         </a>
       ))}
     </nav>
