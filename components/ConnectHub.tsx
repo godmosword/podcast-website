@@ -9,8 +9,37 @@ type Props = {
   className?: string;
 };
 
+function IconLink({
+  href,
+  label,
+  ariaLabel,
+  badgeStyle,
+  children,
+}: {
+  href: string;
+  label: string;
+  ariaLabel: string;
+  badgeStyle?: React.CSSProperties;
+  children: React.ReactNode;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={styles.item}
+      aria-label={ariaLabel}
+    >
+      <span className={styles.badge} style={badgeStyle}>
+        {children}
+      </span>
+      <span className={styles.label}>{label}</span>
+    </a>
+  );
+}
+
 /**
- * 訂閱與追蹤：社群 + 收聽平台合併為單一精簡區塊（全站頁尾唯一入口）。
+ * 頁尾訂閱／追蹤：社群與收聽平台分開顯示，圖示下方附平台名稱。
  */
 export default function ConnectHub({ id = "connect", className }: Props) {
   const socials = visibleSocials();
@@ -19,68 +48,78 @@ export default function ConnectHub({ id = "connect", className }: Props) {
   if (socials.length === 0 && platforms.length === 0) return null;
 
   return (
-    <section
+    <div
       id={id}
       className={`${styles.hub}${className ? ` ${className}` : ""}`}
-      aria-labelledby={`${id}-title`}
     >
-      <h2 id={`${id}-title`} className={styles.title}>
-        <span className={styles.dot} aria-hidden />
-        訂閱與追蹤
-      </h2>
-      <p className={styles.lead}>在喜歡的平台追蹤我們，就不會錯過新集數。</p>
+      {socials.length > 0 && (
+        <section
+          className={styles.block}
+          aria-labelledby={`${id}-social`}
+        >
+          <h2 id={`${id}-social`} className={styles.blockTitle}>
+            <span className={`${styles.dot} ${styles.dotSocial}`} aria-hidden />
+            追蹤我們
+          </h2>
+          <nav className={styles.row} aria-label="社群連結">
+            {socials.map((s) => (
+              <IconLink
+                key={s.label}
+                href={s.url}
+                label={s.label}
+                ariaLabel={`前往 ${s.label}`}
+                badgeStyle={{ background: s.background }}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className={styles.icon}
+                  fill="currentColor"
+                  aria-hidden
+                  focusable="false"
+                >
+                  {SOCIAL_ICON_PATHS[s.icon]}
+                </svg>
+              </IconLink>
+            ))}
+          </nav>
+        </section>
+      )}
 
-      <nav className={styles.grid} aria-label="訂閱與追蹤連結">
-        {socials.map((s) => (
-          <a
-            key={s.label}
-            href={s.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.item}
-            aria-label={`前往 ${s.label}`}
-            title={s.label}
-          >
-            <span className={styles.badge} style={{ background: s.background }}>
-              <svg
-                viewBox="0 0 24 24"
-                className={styles.icon}
-                fill="currentColor"
-                aria-hidden
-                focusable="false"
-              >
-                {SOCIAL_ICON_PATHS[s.icon]}
-              </svg>
-            </span>
-          </a>
-        ))}
-        {platforms.map((p) => (
-          <a
-            key={p.label}
-            href={p.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.item}
-            aria-label={`在 ${p.label} 收聽`}
-            title={p.label}
-          >
+      {platforms.length > 0 && (
+        <section
+          className={styles.block}
+          aria-labelledby={`${id}-platforms`}
+        >
+          <h2 id={`${id}-platforms`} className={styles.blockTitle}>
             <span
-              className={styles.badge}
-              style={{ backgroundColor: p.color }}
-            >
-              <svg
-                viewBox="0 0 24 24"
-                className={styles.icon}
-                fill="currentColor"
-                aria-hidden
-                focusable="false"
+              className={`${styles.dot} ${styles.dotPlatform}`}
+              aria-hidden
+            />
+            訂閱收聽
+          </h2>
+          <nav className={styles.row} aria-label="收聽平台">
+            {platforms.map((p) => (
+              <IconLink
+                key={p.label}
+                href={p.url}
+                label={p.label}
+                ariaLabel={`在 ${p.label} 收聽`}
+                badgeStyle={{ backgroundColor: p.color }}
               >
-                {PLATFORM_ICON_PATHS[p.icon]}
-              </svg>
-            </span>
-          </a>
-        ))}
-      </nav>
-    </section>
+                <svg
+                  viewBox="0 0 24 24"
+                  className={styles.icon}
+                  fill="currentColor"
+                  aria-hidden
+                  focusable="false"
+                >
+                  {PLATFORM_ICON_PATHS[p.icon]}
+                </svg>
+              </IconLink>
+            ))}
+          </nav>
+        </section>
+      )}
+    </div>
   );
 }

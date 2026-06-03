@@ -9,13 +9,7 @@
 // ============================================================
 
 /** 圖示識別字，對應 connect-icons 內的 SVG。 */
-export type PlatformIcon =
-  | "apple"
-  | "spotify"
-  | "kkbox"
-  | "youtube"
-  | "soundon"
-  | "rss";
+export type PlatformIcon = "apple" | "spotify" | "kkbox" | "youtube";
 
 export type Platform = {
   /** 顯示名稱（也作為 aria-label） */
@@ -53,18 +47,6 @@ export const PLATFORMS: Platform[] = [
     url: "https://www.youtube.com/playlist?list=PLVbyl20K8lOeuJ2ky6dEsmpew7xAxZDhF",
     color: "#FF0000",
     icon: "youtube",
-  },
-  {
-    label: "SoundOn",
-    url: "https://player.soundon.fm/p/c478dbec-701a-4f1c-8c4a-736c52e7c4f5",
-    color: "#FF6B35",
-    icon: "soundon",
-  },
-  {
-    label: "RSS",
-    url: "https://feeds.soundon.fm/podcasts/c478dbec-701a-4f1c-8c4a-736c52e7c4f5.xml",
-    color: "#F26522",
-    icon: "rss",
   },
 ];
 

@@ -1,8 +1,9 @@
+import type { ReactNode } from "react";
 import type { PlatformIcon } from "@/lib/platforms";
 import type { SocialIcon } from "@/lib/social";
 
 /** 收聽平台 SVG path（viewBox 0 0 24 24） */
-export const PLATFORM_ICON_PATHS: Record<PlatformIcon, React.ReactNode> = {
+export const PLATFORM_ICON_PATHS: Record<PlatformIcon, ReactNode> = {
   apple: (
     <path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z" />
   ),
@@ -15,16 +16,10 @@ export const PLATFORM_ICON_PATHS: Record<PlatformIcon, React.ReactNode> = {
   youtube: (
     <path d="M23.5 6.2a3.02 3.02 0 0 0-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.51A3.02 3.02 0 0 0 .5 6.2 31.5 31.5 0 0 0 0 12a31.5 31.5 0 0 0 .5 5.8 3.02 3.02 0 0 0 2.12 2.14c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.14A31.5 31.5 0 0 0 24 12a31.5 31.5 0 0 0-.5-5.8zM9.55 15.57V8.43L15.82 12l-6.27 3.57z" />
   ),
-  soundon: (
-    <path d="M12 3a9 9 0 1 0 9 9h-2a7 7 0 1 1-7-7V3zm0 4a5 5 0 0 0-5 5h2a3 3 0 1 1 3-3V7zm-1 6v6l5-3-5-3z" />
-  ),
-  rss: (
-    <path d="M6.18 15.64a2.18 2.18 0 1 1 0 4.36 2.18 2.18 0 0 1 0-4.36zM4 4v4.36c7.44 0 13.5 6.06 13.5 13.5H22C22 11.03 12.97 2 4 2V4zm0 6v4.36c3.73 0 6.78 3.05 6.78 6.78H18c0-5.47-4.53-10-10-10z" />
-  ),
 };
 
 /** 社群 SVG path（viewBox 0 0 24 24） */
-export const SOCIAL_ICON_PATHS: Record<SocialIcon, React.ReactNode> = {
+export const SOCIAL_ICON_PATHS: Record<SocialIcon, ReactNode> = {
   instagram: (
     <path d="M7 2C4.24 2 2 4.24 2 7v10c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5V7c0-2.76-2.24-5-5-5H7zm0 2h10c1.66 0 3 1.34 3 3v10c0 1.66-1.34 3-3 3H7c-1.66 0-3-1.34-3-3V7c0-1.66 1.34-3 3-3zm5 3a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm5.5-2.75a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5z" />
   ),

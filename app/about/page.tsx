@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { allVehicles, getStoriesByVehicle } from "@/data/stories";
+import { allVehicles, getStoriesByVehicle, getVehicleEmoji } from "@/data/stories";
 import SiteFooter from "@/components/SiteFooter";
 import styles from "./page.module.css";
 
@@ -41,7 +41,7 @@ export default function AboutPage() {
         <p className={styles.text}>
           想訂閱 podcast 或追蹤社群？請見本頁下方的
           <Link href="/#connect" className={styles.inlineLink}>
-            訂閱與追蹤
+            追蹤與訂閱
           </Link>
           。
         </p>
@@ -59,7 +59,7 @@ export default function AboutPage() {
                 href={`/?vehicle=${encodeURIComponent(v)}`}
                 className={styles.chip}
               >
-                🚗 {v}
+                {getVehicleEmoji(v)} {v}
                 <span className={styles.chipCount}>
                   {getStoriesByVehicle(v).length} 則
                 </span>

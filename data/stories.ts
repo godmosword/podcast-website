@@ -217,6 +217,11 @@ export function allVehicles(): string[] {
   return Array.from(new Set(stories.map((s) => s.vehicle)));
 }
 
+/** 車種對應 emoji（取該車種第一則故事的 emoji，找不到則回傳 🚗）。 */
+export function getVehicleEmoji(vehicle: string): string {
+  return stories.find((s) => s.vehicle === vehicle)?.emoji ?? "🚗";
+}
+
 /** 所有出現過的主題關鍵字（去重）。 */
 export function allTags(): string[] {
   return Array.from(new Set(stories.flatMap((s) => s.tags ?? [])));

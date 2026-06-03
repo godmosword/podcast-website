@@ -1,5 +1,11 @@
 .hub {
   margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.block {
   padding: 16px 18px 18px;
   border-radius: var(--radius-md);
   background: linear-gradient(180deg, var(--card-2), var(--card));
@@ -8,12 +14,12 @@
   text-align: center;
 }
 
-.title {
+.blockTitle {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin: 0;
+  margin: 0 0 14px;
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--ink);
@@ -23,34 +29,38 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--leaf);
   box-shadow: var(--shadow-sm);
 }
 
-.lead {
-  margin: 8px 0 14px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  line-height: 1.5;
-  color: var(--ink-soft);
+.dotSocial {
+  background: #e6683c;
 }
 
-.grid {
+.dotPlatform {
+  background: var(--leaf);
+}
+
+.row {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 10px;
+  gap: 14px 16px;
 }
 
 .item {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 72px;
   text-decoration: none;
+  color: var(--ink);
   transition: transform var(--motion-press);
 }
 
 .badge {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -61,8 +71,17 @@
 }
 
 .icon {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
+}
+
+.label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--ink-soft);
+  text-align: center;
+  max-width: 100%;
 }
 
 @media (hover: hover) {
