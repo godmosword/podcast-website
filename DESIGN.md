@@ -99,7 +99,7 @@ body 背景為四角極淡多彩 radial-gradient 柔光（pink / sky / mint / ye
 | `StoryCard` | 封面 4:3、EP meta、主題色邊框 + 6px 底陰影 |
 | `Chip` | 篩選與標籤 pill，`aria-pressed` |
 | `PlayButton` | 全寬 CTA，主題色底 |
-| `StoryMeta` | EP / 日期 / 時長 / 車種 chip |
+| `StoryMeta` | EP / 時長（標註） / 車種 chip |
 | `StoryPlayer` | 全螢幕黑底、字幕底板、底部控制列 |
 | `SiteFooter` | 家長說明 + 平台連結 |
 

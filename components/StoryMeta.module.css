@@ -21,6 +21,11 @@
   /* 文字顏色由 inline style 指定 */
 }
 
+.durationValue {
+  font-weight: 700;
+  color: var(--ink);
+}
+
 .tags {
   display: flex;
   flex-wrap: wrap;

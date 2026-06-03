@@ -1,7 +1,5 @@
 import type { Story } from "@/data/stories";
-import { formatDate } from "@/lib/story-utils";
 import { TagChip } from "./Chip";
-import StoryAge from "./StoryAge";
 import styles from "./StoryMeta.module.css";
 
 type StoryMetaProps = {
@@ -23,9 +21,11 @@ export default function StoryMeta({
         <span className={styles.ep} style={{ color: story.color }}>
           EP {story.ep}
         </span>
-        <span>{formatDate(story.date)}</span>
-        {story.duration && <span>{story.duration}</span>}
-        <StoryAge ageRange={story.ageRange} />
+        {story.duration && (
+          <span>
+            時長 <span className={styles.durationValue}>{story.duration}</span>
+          </span>
+        )}
       </div>
 
       {showTags && (
