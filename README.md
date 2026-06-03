@@ -1,9 +1,23 @@
 # 車車遊樂園
 
-Bonbon & 馬米親子 podcast 的官方看圖聽故事網站。Next.js 15 全靜態（SSG），零後端。
+Bonbon & 馬米親子 podcast《車車遊樂園》的官方 **看圖聽故事** 網站。Next.js 15 全靜態（SSG），零後端。
 
-- 版本：**1.1.0** — 詳見 [CHANGELOG.md](./CHANGELOG.md)
-- 待辦與路線圖 — 見 [TODOS.md](./TODOS.md)
+- **正式站（範例）：** [https://podcast-website-mu.vercel.app](https://podcast-website-mu.vercel.app)
+- **版本：** [1.2.0](./CHANGELOG.md) — 詳見 [CHANGELOG.md](./CHANGELOG.md)
+- **待辦與路線圖：** [TODOS.md](./TODOS.md)
+- **授權：** 程式碼 [MIT](./LICENSE) · 節目內容與使用條款見 [DISCLAIMER.md](./DISCLAIMER.md)
+
+## 功能概覽
+
+| 功能 | 說明 |
+|------|------|
+| 故事牆 | 首頁網格列出全部分集，車種 URL 篩選、主題 tag 即時篩選 |
+| 看圖聽故事 | 全螢幕播放器、字幕跟讀、進度與家長設定 |
+| 主題分類 | `/topic`、`/topic/[tag]` 靜態頁（SEO） |
+| 車種分類 | `/vehicles/[vehicle]` |
+| 訂閱／追蹤 | 頁尾 `ConnectHub`（平台 + RSS） |
+| RSS | [`/feed.xml`](./app/feed.xml/route.ts) podcast feed |
+| PWA | `manifest.json`、主畫面圖示、繼續收聽／收藏（localStorage） |
 
 ## 本機開發
 
@@ -21,21 +35,21 @@ npm run dev
 | `npm run dev` | 開發伺服器 |
 | `npm run build` | 正式建置（SSG） |
 | `npm run start` | 執行建置結果 |
-| `npm test` | 執行資料層單元測試 |
-| `npm run font:subset` | 重新子集化中文字型（新增文案後執行，見下方） |
+| `npm test` | Vitest 單元測試 |
+| `npm run test:e2e` | Playwright E2E（若有設定） |
+| `npm run font:subset` | 重新子集化中文字型（新增文案後執行） |
 
 ## 部署
 
-適合 Vercel、Netlify 等靜態/Edge 平台。建置後所有頁面預渲染，無伺服器需求。
+適合 Vercel、Netlify 等靜態/Edge 平台。建置後頁面預渲染，無伺服器需求。
 
 **正式環境請設定：**
 
 ```bash
-NEXT_PUBLIC_SITE_URL=https://podcast-website-mu.vercel.app
+NEXT_PUBLIC_SITE_URL=https://你的網域
 ```
 
-用於 `metadataBase`；OG／Twitter 圖片請用站內相對路徑（如 `/mascot.png`），由 Next 自動組成絕對網址。  
-**請勿**依賴 `VERCEL_URL`（preview 部署回收後分享圖會破圖）。可複製 [.env.example](./.env.example)。
+用於 Open Graph、Twitter 卡片、RSS 與站內絕對連結。未設定時建置可能 fallback 至 `localhost` 或 `VERCEL_URL`，分享預覽可能不正確。
 
 ## 新增一集故事（SOP）
 
@@ -60,8 +74,9 @@ NEXT_PUBLIC_SITE_URL=https://podcast-website-mu.vercel.app
   emoji: "🚒",
   color: "#e03131",
   audio: "audio.mp3",
-  pageCount: 1,             // 多頁插圖時改為實際張數
+  pageCount: 6,             // 與 01.jpg～NN.jpg 張數一致
   summary: "一句話大綱",
+  ageRange: "3–8 歲",       // 選填；未填則 UI 不顯示
   tags: ["勇敢", "合作"],
   captions: [               // 選填：字幕跟讀，每句一行
     "第一句…",
@@ -91,22 +106,36 @@ npm run build
 - [ ] `01.jpg` 存在且可在本機開啟
 - [ ] `audio.mp3` 可在播放器播放
 - [ ] `ep` 為目前最大集數 + 1
+- [ ] `pageCount` 與插圖張數一致
 - [ ] 詳情頁分享預覽正常（title / 描述 / 封面圖）
 - [ ] 若有新中文字 → 已重跑 `npm run font:subset`
+- [ ] `/feed.xml` 含新集（建置後抽查）
 
 ## 專案結構
 
 ```
-app/                    Next.js App Router
-  page.tsx              首頁（篩選 + 卡片）
+app/
+  page.tsx              首頁（Hero、篩選、故事牆）
+  feed.xml/route.ts     RSS podcast feed
+  topic/                主題標籤索引與分類頁
+  vehicles/[vehicle]/   車種分類頁
   story/[slug]/         故事詳情（SEO metadata）
   story/[slug]/play/    全螢幕播放器
+  about/                關於我們
   fonts/                自託管中文字型子集（huninn woff2）
-components/             UI 元件
-  decor/                SVG 裝飾（雲、馬路、輪子、星星、彩帶）
+components/
+  ConnectHub.tsx        頁尾追蹤／訂閱圖示區
+  StoryFilter.tsx       車種 + 主題篩選
+  StoryWall.tsx         故事網格
+  decor/                SVG 裝飾
 data/stories.ts         故事資料（單一真相源）
-lib/                    共用工具（路徑、metadata）
-scripts/                字型子集 / 圖示 / 佔位圖產生器
+lib/
+  platforms.ts          收聽平台連結
+  social.ts             社群連結
+  feed.ts               RSS 產生
+  site-url.ts           站點絕對網址
+  story-metadata.ts     每集 SEO
+scripts/                字型子集、圖示產生器
 public/stories/         每集音檔與插圖
 ```
 
@@ -123,30 +152,32 @@ ffmpeg -i audio.mp3 -codec:a libmp3lame -b:a 128k -ac 1 audio-optimized.mp3
 
 ## 字型維護（圓體中文）
 
-中文用自託管的 **jf-open 粉圓（huninn）**，但只內嵌「網站實際用到的字」以維持輕量
-（`app/fonts/huninn-subset.woff2`，約 100KB；完整字型 4.9MB）。拉丁字母與數字由
-Baloo 2 提供，字型堆疊見 `app/globals.css`。
+中文用自託管的 **jf-open 粉圓（huninn）** 子集（`app/fonts/huninn-subset.woff2`，約 100KB）。拉丁與數字由 Baloo 2 提供。
 
-**新增/修改文案後**，若出現先前沒用過的中文字，需重生子集，否則該字會回退系統圓體：
+**新增/修改文案後**，若出現先前沒用過的中文字，需重生子集：
 
 ```bash
-# 1) 下載完整字型（一次即可）
 curl -sL https://github.com/justfont/open-huninn-font/releases/download/v2.1/jf-openhuninn-2.1.ttf -o /tmp/huninn.ttf
-# 2) 重生子集（掃描 data/app/components/lib 的文字）
 npm run font:subset
-# 3) commit app/fonts/huninn-subset.woff2
+# commit app/fonts/huninn-subset.woff2
 ```
 
-子集腳本：`scripts/subset_font.py`（需 `fonttools` + `brotli`：`pip install fonttools brotli`）。
+子集腳本：`scripts/subset_font.py`（需 `fonttools`、`brotli`）。
 
-## 視覺素材（佔位圖 / 圖示 / 吉祥物）
+## 視覺素材
 
-- **裝飾元件**：`components/decor/`（雲、馬路、輪子、星星、彩帶，皆為內嵌 SVG）。
-- **佔位插圖**：`scripts/gen_placeholders.py` 產生；若資料夾已有真實插圖則不覆蓋。
-- **PWA / iOS 圖示與吉祥物**：`scripts/gen_icons.py`（`python3 scripts/gen_icons.py build sky`）。
+- **裝飾：** `components/decor/`（SVG）
+- **佔位插圖：** `scripts/gen_placeholders.py`
+- **PWA / 吉祥物：** `scripts/gen_icons.py`
+- **首頁 Hero：** `public/hero-home.jpg`
 
-動效全部包在 `prefers-reduced-motion: reduce` 守門內（`app/globals.css`），系統開啟「減少動態」時自動停用位移/旋轉。
+動效尊重 `prefers-reduced-motion: reduce`（`app/globals.css`）。
 
-## 授權與內容
+## 授權與免責
 
-Podcast 音檔與品牌內容屬 Bonbon & 馬米。再分發前請確認 SoundOn / 版權授權範圍。
+| 文件 | 說明 |
+|------|------|
+| [LICENSE](./LICENSE) | 網站**程式碼** MIT 授權 |
+| [DISCLAIMER.md](./DISCLAIMER.md) | 節目內容版權、字幕說明、建議年齡、第三方連結、免責條款 |
+
+Podcast 音檔、插畫與品牌內容屬 Bonbon & 馬米；再製或商業使用前請確認授權範圍。
