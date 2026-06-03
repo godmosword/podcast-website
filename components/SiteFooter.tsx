@@ -3,6 +3,9 @@ import PlatformLinks from "@/components/PlatformLinks";
 import SocialLinks from "@/components/SocialLinks";
 import styles from "./SiteFooter.module.css";
 
+/** 與首頁 Hero 相同的主視覺（SiteHeader） */
+const HERO_IMAGE = "/hero-home.jpg";
+
 // 贊助 / 支持連結（選填）。
 const SUPPORT_URL = "";
 
@@ -33,7 +36,13 @@ export default function SiteFooter() {
           <Link href="/about" className={styles.siteCard}>
             <span className={styles.siteIcon} aria-hidden>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/mascot.png" alt="" width={40} height={30} />
+              <img
+                src={HERO_IMAGE}
+                alt=""
+                className={styles.siteHeroImage}
+                width={64}
+                height={64}
+              />
             </span>
             <span className={styles.siteText}>
               <span className={styles.siteLabel}>關於我們</span>
