@@ -7,6 +7,7 @@ import {
   getStoriesByTag,
   getStoriesByVehicle,
   getStory,
+  manualStories,
   stories,
   storiesByNewest,
 } from "./stories";
@@ -97,7 +98,11 @@ describe("getStoriesByTag", () => {
 });
 
 describe("pageCount", () => {
-  it("每集皆為 6 頁插畫", () => {
-    expect(stories.every((s) => s.pageCount === 6)).toBe(true);
+  it("每集 pageCount 至少為 1", () => {
+    expect(stories.every((s) => s.pageCount >= 1)).toBe(true);
+  });
+
+  it("手動維護的集數仍為 6 頁插畫", () => {
+    expect(manualStories.every((s) => s.pageCount === 6)).toBe(true);
   });
 });

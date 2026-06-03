@@ -3,13 +3,18 @@
 // ============================================================
 // 內容對應 podcast《車車遊樂園》(Bonbon & 馬米) 的真實集數。
 // 每則故事對應 public/stories/<slug>/：
-//   - audio.mp3        該集真實音檔（已自 SoundOn 下載自存）
+//   - audio.mp3        該集真實音檔
 //   - 01.jpg ~ NN.jpg  看圖翻頁用的插畫（pageCount 需與檔案數一致）
 //
-// 新增 / 更新故事兩步：
-//   1. 在 public/stories/<slug>/ 放圖片與音檔
-//   2. 在下方 stories 陣列加 / 改一筆
+// 資料來源：
+//   - manualStories：下方手動維護（既有 6 集，完整插畫）
+//   - apple-synced.json：npm run sync:apple 從 Apple Podcast 追加（MVP 單圖）
+//
+// 手動新增一集：在 manualStories 加一筆 + public/stories/<slug>/
+// Apple 新集：每日 GHA 或本機 sync:apple，再視需要改 apple-synced.json / overrides
 // ============================================================
+
+import appleSynced from "./apple-synced.json";
 
 /** 一則故事的資料結構。 */
 export type Story = {
@@ -46,8 +51,8 @@ export type Story = {
   captions?: string[];
 };
 
-/** 所有故事。手動在這裡新增、編輯。 */
-export const stories: Story[] = [
+/** 手動維護的故事（sync 腳本不會修改此陣列）。 */
+export const manualStories: Story[] = [
   {
     slug: "ambulance",
     ep: 6,
@@ -60,7 +65,7 @@ export const stories: Story[] = [
     audio: "audio.mp3",
     pageCount: 6,
     summary: "安安救護車出任務時遇到困難，學會開口求助，和夥伴一起合作完成任務。",
-        ageRange: "3–8 歲",
+    ageRange: "3–8 歲",
     tags: ["勇敢", "合作", "求助"],
     captions: [
       "安安救護車今天要出任務，幫助需要幫忙的朋友。",
@@ -83,7 +88,7 @@ export const stories: Story[] = [
     audio: "audio.mp3",
     pageCount: 6,
     summary: "東東挖土機有點膽小，卻鼓起勇氣，一步步完成任務。",
-        ageRange: "3–8 歲",
+    ageRange: "3–8 歲",
     tags: ["勇氣", "成長"],
     captions: [
       "東東挖土機有點膽小，做事常常怕怕的。",
@@ -107,7 +112,7 @@ export const stories: Story[] = [
     pageCount: 6,
     summary:
       "鈴鈴清潔車的早安音樂鈴壞掉了，她仍努力提醒車車朋友起床，學會守信用、說到做到。",
-        ageRange: "3–8 歲",
+    ageRange: "3–8 歲",
     tags: ["守信用", "負責"],
     captions: [
       "鈴鈴清潔車每天用音樂鈴叫大家起床。",
@@ -131,7 +136,7 @@ export const stories: Story[] = [
     pageCount: 6,
     summary:
       "小紅賽車在比賽中遇到挫折，學會接受失敗、整理心情，明白不是第一名也沒關係。",
-        ageRange: "4–8 歲",
+    ageRange: "4–8 歲",
     tags: ["勇氣", "接受失敗"],
     captions: [
       "小紅賽車最喜歡比賽，跑得飛快。",
@@ -155,7 +160,7 @@ export const stories: Story[] = [
     pageCount: 6,
     summary:
       "在公園遇見可愛的無人機小飛，大家一起幫小妹妹找回小兔子，學會安全飛行、遵守規則。",
-        ageRange: "4–8 歲",
+    ageRange: "4–8 歲",
     tags: ["安全", "合作", "助人"],
     captions: [
       "公園裡來了一台可愛的無人機小飛。",
@@ -179,7 +184,7 @@ export const stories: Story[] = [
     pageCount: 6,
     summary:
       "Bonbon 發揮創意，想出有剪頭髮車、洗澡車、運動車的未來電動車，坐車不無聊還能完成好多事。",
-        ageRange: "3–7 歲",
+    ageRange: "3–7 歲",
     tags: ["想像力", "創意"],
     captions: [
       "Bonbon 想像出神奇的未來電動車。",
@@ -190,12 +195,17 @@ export const stories: Story[] = [
       "發揮想像力，未來什麼都有可能。",
     ],
   },
-
-  // ----------------------------------------------------------
-  // 新增下一集：ep 用最大值（目前是 7），建好 public/stories/<slug>/
-  // 放入 audio.mp3 與 01.jpg~NN.jpg，再照上面格式加一筆即可。
-  // ----------------------------------------------------------
 ];
+
+function sortByEp(list: Story[]): Story[] {
+  return [...list].sort((a, b) => b.ep - a.ep);
+}
+
+/** 所有故事（手動 + Apple 同步），依集數由新到舊。 */
+export const stories: Story[] = sortByEp([
+  ...manualStories,
+  ...(appleSynced as Story[]),
+]);
 
 /** 依 slug 取得故事；找不到回傳 undefined。 */
 export function getStory(slug: string): Story | undefined {

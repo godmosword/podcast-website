@@ -38,6 +38,7 @@ npm run dev
 | `npm test` | Vitest 單元測試 |
 | `npm run test:e2e` | Playwright E2E（若有設定） |
 | `npm run font:subset` | 重新子集化中文字型（新增文案後執行） |
+| `npm run sync:apple` | 從 Apple Podcast RSS 同步新集（見下方） |
 
 ## 部署
 
@@ -61,7 +62,7 @@ NEXT_PUBLIC_SITE_URL=https://你的網域
    - `audio.mp3` — 該集音檔（建議 mono 128kbps，單檔 < 5MB）
    - `01.jpg` — 封面/第一頁插圖（若有更多頁：`02.jpg`、`03.jpg`…）
 
-3. **編輯 `data/stories.ts`** — 在 `stories` 陣列加一筆：
+3. **編輯 `data/stories.ts`** — 在 `manualStories` 陣列加一筆：
 
 ```ts
 {
@@ -110,6 +111,37 @@ npm run build
 - [ ] 詳情頁分享預覽正常（title / 描述 / 封面圖）
 - [ ] 若有新中文字 → 已重跑 `npm run font:subset`
 - [ ] `/feed.xml` 含新集（建置後抽查）
+
+## Apple Podcast 自動同步
+
+官網與 SoundOn **不會**自動連動；此管線只讀 **Apple Podcast** 公開 RSS（透過 iTunes Lookup，無需 API key）。
+
+| 檔案 | 用途 |
+|------|------|
+| `data/apple-synced.json` | 由 sync 腳本追加的新集 metadata |
+| `data/apple-sync-state.json` | 已處理的 RSS `guid` |
+| `data/apple-sync.defaults.json` | 新集預設 `vehicle` / `emoji` / `color`；`overrides.<slug>` 可覆寫單集 |
+
+**本機預覽（不寫檔）：**
+
+```bash
+npm run sync:apple -- --dry-run
+```
+
+**實際同步：**
+
+```bash
+npm run sync:apple
+npm test && npm run build
+```
+
+**GitHub Actions：** [`.github/workflows/sync-apple-podcast.yml`](.github/workflows/sync-apple-podcast.yml) 每天 UTC 01:00 執行；有新集時下載 `audio.mp3` 與 Apple 封面 `01.jpg`（`pageCount: 1`），通過測試後 **commit 並 push 到 `main`**。若 repo 有 branch protection，需允許 `github-actions[bot]` 寫入。
+
+新集 slug 規則：`ep-<集數>`（例：`ep-7`）。同步後若要完整看圖體驗：
+
+1. 在 `public/stories/<slug>/` 補 `02.jpg`～`06.jpg`，並在 `data/apple-synced.json`（或 `apple-sync.defaults.json` 的 `overrides`）改 `pageCount` 與 `captions`
+2. 有新中文文案時執行 `npm run font:subset`
+3. push 後 Vercel 自動部署，抽查 `/feed.xml` 與播放器
 
 ## 專案結構
 
