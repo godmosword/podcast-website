@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Baloo_2 } from "next/font/google";
 import localFont from "next/font/local";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import { DEFAULT_OG_IMAGE, getMetadataBase } from "@/lib/site-url";
 import "./globals.css";
 
 // 童趣圓潤字型，避免使用 Inter/Arial 等通用字型。
@@ -22,12 +23,8 @@ const huninn = localFont({
   variable: "--font-huninn",
 });
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined);
-
 export const metadata: Metadata = {
-  metadataBase: siteUrl ? new URL(siteUrl) : undefined,
+  metadataBase: getMetadataBase(),
   title: {
     default: "車車遊樂園",
     template: "%s · 車車遊樂園",
@@ -40,13 +37,13 @@ export const metadata: Metadata = {
     locale: "zh_TW",
     type: "website",
     siteName: "車車遊樂園",
-    images: [{ url: "/mascot.png", alt: "車車遊樂園吉祥物" }],
+    images: [{ url: DEFAULT_OG_IMAGE, alt: "車車遊樂園吉祥物" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "車車遊樂園",
     description: "每天一個車車故事，陪孩子長大。",
-    images: ["/mascot.png"],
+    images: [DEFAULT_OG_IMAGE],
   },
   icons: {
     icon: [

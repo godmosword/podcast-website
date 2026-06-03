@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { Story } from "@/data/stories";
+import { DEFAULT_OG_IMAGE } from "@/lib/site-url";
 import { storyCoverPath } from "@/lib/story-utils";
 
 const SITE_NAME = "車車遊樂園";
@@ -11,10 +12,18 @@ export function storyDescription(story: Story): string {
   );
 }
 
+/** 故事分享圖：有插圖用封面，否則全站預設 mascot */
+export function storyOgImagePath(story: Story): string {
+  if (story.pageCount > 0) {
+    return storyCoverPath(story.slug);
+  }
+  return DEFAULT_OG_IMAGE;
+}
+
 /** 故事詳情頁的 SEO / 分享 metadata */
 export function storyDetailMetadata(story: Story): Metadata {
   const description = storyDescription(story);
-  const cover = storyCoverPath(story.slug);
+  const imagePath = storyOgImagePath(story);
 
   return {
     title: story.title,
@@ -25,13 +34,13 @@ export function storyDetailMetadata(story: Story): Metadata {
       type: "website",
       locale: "zh_TW",
       siteName: SITE_NAME,
-      images: [{ url: cover, alt: `${story.title} 封面` }],
+      images: [{ url: imagePath, alt: `${story.title} 封面` }],
     },
     twitter: {
       card: "summary_large_image",
       title: story.title,
       description,
-      images: [cover],
+      images: [imagePath],
     },
   };
 }

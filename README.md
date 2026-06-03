@@ -31,10 +31,11 @@ npm run dev
 **正式環境請設定：**
 
 ```bash
-NEXT_PUBLIC_SITE_URL=https://你的網域
+NEXT_PUBLIC_SITE_URL=https://podcast-website-mu.vercel.app
 ```
 
-用於 Open Graph / Twitter 分享圖的絕對網址。在 Vercel 上若未設定，會 fallback 到 `https://${VERCEL_URL}`。
+用於 `metadataBase`；OG／Twitter 圖片請用站內相對路徑（如 `/mascot.png`），由 Next 自動組成絕對網址。  
+**請勿**依賴 `VERCEL_URL`（preview 部署回收後分享圖會破圖）。可複製 [.env.example](./.env.example)。
 
 ## 新增一集故事（SOP）
 
