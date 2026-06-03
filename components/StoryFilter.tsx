@@ -11,6 +11,9 @@ import RoughFrame from "./decor/RoughFrame";
 import decor from "./decor/decor.module.css";
 import styles from "./StoryFilter.module.css";
 
+/** 與 SiteHeader 首頁 Hero 主視覺相同 */
+const HERO_IMAGE = "/hero-home.jpg";
+
 type StoryFilterProps = {
   stories: Story[];
   vehicles: string[];
@@ -70,11 +73,7 @@ function StoryFilterInner({ stories, vehicles, tags }: StoryFilterProps) {
 
   return (
     <section>
-      {/* 篩選入口：手機上 sticky + 強調 CTA */}
       <div className={styles.filterBar}>
-        <p className={styles.filterLead}>
-          <span className="marker marker-pink">想找特定車車或主題？</span>
-        </p>
         <button
           type="button"
           className={styles.filterOpen}
@@ -83,39 +82,29 @@ function StoryFilterInner({ stories, vehicles, tags }: StoryFilterProps) {
           aria-expanded={open}
           aria-controls="story-filter-drawer"
         >
-          <span className={styles.filterOpenMain}>
-            <span className={styles.filterOpenIcon} aria-hidden>
-              🚗
-            </span>
-            <span className={styles.filterOpenText}>
-              <span className={styles.filterOpenTitle}>用分類找故事</span>
-              <span className={styles.filterOpenSub}>點開選車種、主題標籤</span>
-            </span>
+          <span className={styles.filterThumb} aria-hidden>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={HERO_IMAGE} alt="" className={styles.filterThumbImg} />
           </span>
+          <span className={styles.filterOpenTitle}>用分類找故事</span>
           <span className={styles.filterOpenChevron} aria-hidden>
             ›
           </span>
-          {hasFilter && <span className={styles.filterDot} aria-hidden />}
         </button>
         {hasFilter && (
           <p className={styles.filterActive}>
-            已選：
             {vehicle && (
               <span className={styles.filterActiveChip}>{vehicle}</span>
             )}
             {activeTag && (
               <span className={styles.filterActiveChip}>{activeTag}</span>
             )}
-          </p>
-        )}
-        <p className={styles.count}>
-          {filtered.length} 則故事
-          {hasFilter && (
             <button className={styles.clear} onClick={clearAll} type="button">
               清除
             </button>
-          )}
-        </p>
+          </p>
+        )}
+        <p className={styles.count}>{filtered.length} 則故事</p>
       </div>
 
       {/* 抽屜遮罩 */}
