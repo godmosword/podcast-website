@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   storiesByNewest,
   allVehicles,
@@ -10,7 +9,6 @@ import LatestHero from "@/components/LatestHero";
 import SiteHeader from "@/components/SiteHeader";
 import StoryFilter from "@/components/StoryFilter";
 import SiteFooter from "@/components/SiteFooter";
-import { SITE_RSS_PATH } from "@/lib/feed";
 import styles from "./page.module.css";
 
 export default function HomePage() {
@@ -28,10 +26,6 @@ export default function HomePage() {
         vehicles={allVehicles()}
         tags={allTags()}
       />
-      <p className={styles.subscribe}>
-        訂閱新集通知：
-        <Link href={SITE_RSS_PATH}>RSS Feed</Link>
-      </p>
       <SiteFooter />
     </main>
   );

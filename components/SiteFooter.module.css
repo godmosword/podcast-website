@@ -13,30 +13,37 @@
   color: var(--ink-soft);
 }
 
-.row {
+.bottomBar {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   gap: 10px;
-  margin-top: 16px;
+  margin-top: 20px;
 }
 
-.link {
-  font-size: 0.85rem;
+.aboutLink {
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--ink);
-  padding: 8px 16px;
+  padding: 8px 18px;
   border-radius: 999px;
   background: linear-gradient(180deg, var(--card-2), var(--card));
   border: 1.5px solid var(--line);
   box-shadow: var(--shadow-sm);
+  text-decoration: none;
   transition: transform var(--motion-press);
 }
 
 @media (hover: hover) {
-  .link:hover {
+  .aboutLink:hover {
     transform: translateY(-2px);
   }
+}
+
+.copyright {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
 }
 
 .support {
@@ -55,25 +62,4 @@
 .support:active {
   transform: translateY(3px);
   box-shadow: none;
-}
-
-.subscribeNote {
-  margin: 14px 0 0;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--ink-soft);
-}
-
-.subscribeRss {
-  margin-left: 6px;
-  font-weight: 700;
-  color: var(--ink);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.copyright {
-  margin: 20px 0 0;
-  font-size: 0.8rem;
-  color: var(--ink-soft);
 }

@@ -8,7 +8,7 @@
 // 內的品牌圖示。url 留空字串的項目會自動隱藏，避免失效連結。
 // ============================================================
 
-/** 圖示識別字，對應 connect-icons 內的 SVG。 */
+/** 圖示識別字，對應 PlatformLinks 內的 SVG。 */
 export type PlatformIcon = "apple" | "spotify" | "kkbox" | "youtube";
 
 export type Platform = {

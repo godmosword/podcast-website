@@ -1,4 +1,10 @@
-import { PLATFORM_ICON_PATHS, SOCIAL_ICON_PATHS } from "@/lib/connect-icons";
+import Link from "next/link";
+import {
+  PLATFORM_ICON_PATHS,
+  RSS_ICON_PATH,
+  SOCIAL_ICON_PATHS,
+} from "@/lib/connect-icons";
+import { SITE_RSS_PATH } from "@/lib/feed";
 import { visiblePlatforms } from "@/lib/platforms";
 import { visibleSocials } from "@/lib/social";
 import styles from "./ConnectHub.module.css";
@@ -15,25 +21,42 @@ function IconLink({
   ariaLabel,
   badgeStyle,
   children,
+  external = true,
 }: {
   href: string;
   label: string;
   ariaLabel: string;
   badgeStyle?: React.CSSProperties;
   children: React.ReactNode;
+  external?: boolean;
 }) {
+  const className = styles.item;
+  const badge = (
+    <>
+      <span className={styles.badge} style={badgeStyle}>
+        {children}
+      </span>
+      <span className={styles.label}>{label}</span>
+    </>
+  );
+
+  if (!external) {
+    return (
+      <Link href={href} className={className} aria-label={ariaLabel}>
+        {badge}
+      </Link>
+    );
+  }
+
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className={styles.item}
+      className={className}
       aria-label={ariaLabel}
     >
-      <span className={styles.badge} style={badgeStyle}>
-        {children}
-      </span>
-      <span className={styles.label}>{label}</span>
+      {badge}
     </a>
   );
 }
@@ -53,10 +76,7 @@ export default function ConnectHub({ id = "connect", className }: Props) {
       className={`${styles.hub}${className ? ` ${className}` : ""}`}
     >
       {socials.length > 0 && (
-        <section
-          className={styles.block}
-          aria-labelledby={`${id}-social`}
-        >
+        <section className={styles.block} aria-labelledby={`${id}-social`}>
           <h2 id={`${id}-social`} className={styles.blockTitle}>
             <span className={`${styles.dot} ${styles.dotSocial}`} aria-hidden />
             追蹤我們
@@ -85,7 +105,7 @@ export default function ConnectHub({ id = "connect", className }: Props) {
         </section>
       )}
 
-      {platforms.length > 0 && (
+      {(platforms.length > 0 || SITE_RSS_PATH) && (
         <section
           className={styles.block}
           aria-labelledby={`${id}-platforms`}
@@ -117,6 +137,23 @@ export default function ConnectHub({ id = "connect", className }: Props) {
                 </svg>
               </IconLink>
             ))}
+            <IconLink
+              href={SITE_RSS_PATH}
+              label="RSS"
+              ariaLabel="訂閱 RSS Feed"
+              badgeStyle={{ backgroundColor: "#f08c00" }}
+              external={false}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className={styles.icon}
+                fill="currentColor"
+                aria-hidden
+                focusable="false"
+              >
+                {RSS_ICON_PATH}
+              </svg>
+            </IconLink>
           </nav>
         </section>
       )}
