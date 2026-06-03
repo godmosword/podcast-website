@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { allVehicles, getStoriesByVehicle } from "@/data/stories";
-import PlatformLinks from "@/components/PlatformLinks";
 import SiteFooter from "@/components/SiteFooter";
-import StoryCard from "@/components/StoryCard";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
@@ -40,25 +38,32 @@ export default function AboutPage() {
           <li>預設「字幕跟讀」會隨語音自動翻頁；也可關閉後手動滑動</li>
           <li>家長可在播放器底部開啟「家長設定」：睡前定時、播放進度</li>
         </ol>
-      </section>
-
-      <section className={styles.section}>
-        <h2 className={styles.heading}>訂閱 Podcast</h2>
         <p className={styles.text}>
-          想聽更多集數？歡迎在以下平台訂閱《車車遊樂園》。
+          想訂閱 podcast 或追蹤社群？請見本頁下方的
+          <Link href="/#connect" className={styles.inlineLink}>
+            訂閱與追蹤
+          </Link>
+          。
         </p>
-        <PlatformLinks heading="" />
       </section>
 
       <section className={styles.section}>
-        <h2 className={styles.heading}>依車種探索</h2>
-        <ul className={styles.vehicleList}>
+        <h2 className={styles.heading}>用車種找故事</h2>
+        <p className={styles.text}>
+          點選車種會回到首頁並自動篩選，不必另外記不同頁面。
+        </p>
+        <ul className={styles.chipList}>
           {vehicles.map((v) => (
             <li key={v}>
-              <Link href={`/vehicles/${encodeURIComponent(v)}`}>{v}</Link>
-              <span className={styles.count}>
-                {getStoriesByVehicle(v).length} 則
-              </span>
+              <Link
+                href={`/?vehicle=${encodeURIComponent(v)}`}
+                className={styles.chip}
+              >
+                🚗 {v}
+                <span className={styles.chipCount}>
+                  {getStoriesByVehicle(v).length} 則
+                </span>
+              </Link>
             </li>
           ))}
         </ul>

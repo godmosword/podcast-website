@@ -1,5 +1,4 @@
 import Link from "next/link";
-import SocialLinks from "./SocialLinks";
 import styles from "./SiteHeader.module.css";
 
 /** 首頁 Hero 主視覺（車車遊樂園黏土風格場景圖） */
@@ -53,7 +52,6 @@ export default function SiteHeader({ variant = "full" }: SiteHeaderProps) {
       <p className={styles.subtitle}>
         用車車故事陪伴孩子成長，一起開進歡樂的小天地
       </p>
-      <SocialLinks />
     </header>
   );
 }

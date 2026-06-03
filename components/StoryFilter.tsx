@@ -44,9 +44,9 @@ function StoryFilterInner({ stories, vehicles, tags }: StoryFilterProps) {
   }, [stories, vehicle, tag]);
 
   return (
-    <section>
+    <section id="stories" aria-labelledby="stories-heading">
       <div className={styles.filterBlock}>
-        <h2 className={styles.filterHeading}>用分類找故事</h2>
+        <h2 id="stories-heading" className={styles.filterHeading}>探索故事</h2>
 
         <p className={styles.groupLabel}>🚗 車種</p>
         <div className={styles.chips}>

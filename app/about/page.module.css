@@ -53,31 +53,46 @@
   text-decoration: underline;
 }
 
-.vehicleList {
+.inlineLink {
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.chipList {
   list-style: none;
-  margin: 0;
+  margin: 12px 0 0;
   padding: 0;
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
-.vehicleList li {
-  display: flex;
+.chip {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 12px 14px;
-  border-radius: var(--radius-md);
-  background: var(--card);
-  border: 2px solid var(--bg-dot);
-}
-
-.vehicleList a {
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 999px;
   font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--card-2), var(--card));
+  border: 1.5px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+  transition: transform var(--motion-press);
 }
 
-.count {
-  font-size: 0.85rem;
-  color: var(--ink-soft);
+.chipCount {
+  font-size: 0.78rem;
   font-weight: 600;
+  color: var(--ink-soft);
+}
+
+@media (hover: hover) {
+  .chip:hover {
+    transform: translateY(-2px);
+  }
 }

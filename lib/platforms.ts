@@ -4,11 +4,11 @@
 // 這裡集中管理「整個節目」的收聽平台連結。
 // 頁尾、關於頁、每集故事頁的平台圖示都讀這份資料，改一次即全站同步。
 //
-// 要新增 / 換連結：改下方 url 即可；icon 對應 components/PlatformLinks.tsx
+// 要新增 / 換連結：改下方 url 即可；icon 對應 lib/connect-icons.tsx
 // 內的品牌圖示。url 留空字串的項目會自動隱藏，避免失效連結。
 // ============================================================
 
-/** 圖示識別字，對應 PlatformLinks 內的 SVG。 */
+/** 圖示識別字，對應 connect-icons 內的 SVG。 */
 export type PlatformIcon =
   | "apple"
   | "spotify"
@@ -53,6 +53,18 @@ export const PLATFORMS: Platform[] = [
     url: "https://www.youtube.com/playlist?list=PLVbyl20K8lOeuJ2ky6dEsmpew7xAxZDhF",
     color: "#FF0000",
     icon: "youtube",
+  },
+  {
+    label: "SoundOn",
+    url: "https://player.soundon.fm/p/c478dbec-701a-4f1c-8c4a-736c52e7c4f5",
+    color: "#FF6B35",
+    icon: "soundon",
+  },
+  {
+    label: "RSS",
+    url: "https://feeds.soundon.fm/podcasts/c478dbec-701a-4f1c-8c4a-736c52e7c4f5.xml",
+    color: "#F26522",
+    icon: "rss",
   },
 ];
 

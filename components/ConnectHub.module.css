@@ -1,0 +1,84 @@
+.hub {
+  margin-top: 24px;
+  padding: 16px 18px 18px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, var(--card-2), var(--card));
+  border: 1.5px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--leaf);
+  box-shadow: var(--shadow-sm);
+}
+
+.lead {
+  margin: 8px 0 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.item {
+  display: inline-flex;
+  text-decoration: none;
+  transition: transform var(--motion-press);
+}
+
+.badge {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #fff;
+  border: 2.5px solid var(--card);
+  box-shadow: var(--shadow-sm), var(--gloss);
+}
+
+.icon {
+  width: 22px;
+  height: 22px;
+}
+
+@media (hover: hover) {
+  .item:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.item:active {
+  transform: translateY(1px) scale(0.96);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item,
+  .item:hover,
+  .item:active {
+    transform: none;
+  }
+}
