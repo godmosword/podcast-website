@@ -70,8 +70,11 @@ function StoryFilterInner({ stories, vehicles, tags }: StoryFilterProps) {
 
   return (
     <section>
-      {/* 置頂工具列：篩選按鈕 + 故事數（隨頁面捲動，不浮動） */}
-      <div className={styles.toolbar}>
+      {/* 篩選入口：手機上 sticky + 強調 CTA */}
+      <div className={styles.filterBar}>
+        <p className={styles.filterLead}>
+          <span className="marker marker-pink">想找特定車車或主題？</span>
+        </p>
         <button
           type="button"
           className={styles.filterOpen}
@@ -80,10 +83,31 @@ function StoryFilterInner({ stories, vehicles, tags }: StoryFilterProps) {
           aria-expanded={open}
           aria-controls="story-filter-drawer"
         >
-          <span aria-hidden>🔍</span>
-          用分類找故事
+          <span className={styles.filterOpenMain}>
+            <span className={styles.filterOpenIcon} aria-hidden>
+              🚗
+            </span>
+            <span className={styles.filterOpenText}>
+              <span className={styles.filterOpenTitle}>用分類找故事</span>
+              <span className={styles.filterOpenSub}>點開選車種、主題標籤</span>
+            </span>
+          </span>
+          <span className={styles.filterOpenChevron} aria-hidden>
+            ›
+          </span>
           {hasFilter && <span className={styles.filterDot} aria-hidden />}
         </button>
+        {hasFilter && (
+          <p className={styles.filterActive}>
+            已選：
+            {vehicle && (
+              <span className={styles.filterActiveChip}>{vehicle}</span>
+            )}
+            {activeTag && (
+              <span className={styles.filterActiveChip}>{activeTag}</span>
+            )}
+          </p>
+        )}
         <p className={styles.count}>
           {filtered.length} 則故事
           {hasFilter && (
