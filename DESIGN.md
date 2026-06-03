@@ -53,7 +53,7 @@ body 背景為四角極淡多彩 radial-gradient 柔光（pink / sky / mint / ye
 
 ### 手繪不規則外框 RoughFrame
 - `components/decor/RoughFrame.tsx`：絕對定位 `inset:0` 覆蓋父層（父層需 `position: relative`），`border` + `filter: url(#rough-N)`，顏色吃 `story.color` 或 accent。
-- 已取代乾淨實線邊框：StoryCard（list/grid）、LatestHero、StoryFilter `.filterBlock`。對應 padding 補回原邊框寬度。
+- 已取代乾淨實線邊框：StoryCard（list/grid）、LatestHero。對應 padding 補回原邊框寬度。
 - topic 索引頁的標籤膠囊維持乾淨邊框（數量多，避免逐顆濾鏡的 GPU 成本與可讀性損失）。
 
 ### 塗鴉散布

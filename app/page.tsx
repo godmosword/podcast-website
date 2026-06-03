@@ -1,8 +1,4 @@
-import {
-  storiesByNewest,
-  allVehicles,
-  allTags,
-} from "@/data/stories";
+import { storiesByNewest, allVehicles } from "@/data/stories";
 import ContinueBanner from "@/components/ContinueBanner";
 import FavoritesSection from "@/components/FavoritesSection";
 import LatestHero from "@/components/LatestHero";
@@ -21,11 +17,7 @@ export default function HomePage() {
       <ContinueBanner />
       {latest && <LatestHero story={latest} />}
       <FavoritesSection />
-      <StoryFilter
-        stories={stories}
-        vehicles={allVehicles()}
-        tags={allTags()}
-      />
+      <StoryFilter stories={stories} vehicles={allVehicles()} />
       <SiteFooter />
     </main>
   );

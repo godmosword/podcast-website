@@ -1,232 +1,29 @@
-/* ============ 篩選入口（簡潔列、手機 sticky） ============ */
+/* ============ 車種篩選區（手機 sticky） ============ */
 .filterBar {
   position: sticky;
   top: calc(6px + var(--safe-top));
   z-index: 30;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   margin: 0 2px 16px;
-  padding-bottom: 4px;
+  padding: 14px 12px;
+  border-radius: var(--radius-xl);
   background: color-mix(in srgb, var(--bg) 92%, transparent);
   backdrop-filter: blur(8px);
-}
-
-.filterOpen {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: var(--radius-xl);
-  text-align: left;
-  color: var(--ink);
-  background: linear-gradient(180deg, var(--card-2), var(--card));
   border: 1.5px solid var(--line);
   box-shadow: var(--shadow-sm);
-  transition:
-    transform var(--motion-press),
-    box-shadow var(--motion-press);
 }
 
-.filterOpen:active {
-  transform: translateY(2px);
-  box-shadow: none;
-}
-
-.filterThumb {
-  flex: none;
-  width: 52px;
-  height: 52px;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  box-shadow: var(--gloss);
-}
-
-.filterThumbImg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.filterOpenTitle {
-  flex: 1;
-  min-width: 0;
-  font-size: 1.02rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  color: var(--ink);
-}
-
-.filterOpenChevron {
-  flex: none;
-  font-size: 1.25rem;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--ink-soft);
-}
-
-.filterActive {
+.filterHead {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  margin: 0 4px;
-}
-
-.filterActiveChip {
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--ink);
-  background: var(--card-2);
-  border: 1px solid var(--line);
-}
-
-@media (min-width: 640px) {
-  .filterBar {
-    position: static;
-    backdrop-filter: none;
-    background: transparent;
-  }
-}
-
-/* ============ 抽屜遮罩 + 面板 ============ */
-.overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  background: rgba(40, 40, 60, 0.32);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.25s ease, visibility 0.25s ease;
-}
-
-.overlay[data-open] {
-  opacity: 1;
-  visibility: visible;
-}
-
-.drawer {
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  z-index: 50;
-  width: min(86vw, 340px);
-  display: flex;
-  flex-direction: column;
-  background: var(--card);
-  border-right: 3px solid var(--c-sky);
-  border-radius: 0 var(--radius-xl) var(--radius-xl) 0;
-  box-shadow: 8px 0 28px rgba(40, 40, 60, 0.18);
-  transform: translateX(-104%);
-  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-  padding: calc(16px + var(--safe-top)) 0 calc(16px + var(--safe-bottom))
-    var(--safe-left);
-}
-
-.drawer[data-open] {
-  transform: translateX(0);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .overlay,
-  .drawer {
-    transition: none;
-  }
-}
-
-.drawerHead {
-  position: relative;
-  display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  padding: 0 18px 14px;
-  margin-bottom: 4px;
-  border-bottom: 1.5px dashed var(--bg-dot);
 }
 
-.drawerTitle {
+.filterSectionTitle {
   margin: 0;
-  font-family: var(--font-marker), var(--font-baloo), var(--font-huninn),
-    "PingFang TC", "Microsoft JhengHei", sans-serif;
-  font-size: 1.3rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  color: var(--ink);
-}
-
-.drawerClose {
-  flex: none;
-  width: 36px;
-  height: 36px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--ink);
-  border-radius: 50%;
-  background: var(--card-2);
-  border: 1.5px solid var(--line);
-  box-shadow: var(--shadow-sm);
-}
-
-.drawerBody {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 8px 18px 4px;
-}
-
-.drawerFoot {
-  display: flex;
-  gap: 10px;
-  padding: 14px 18px calc(4px + var(--safe-bottom));
-  border-top: 1.5px dashed var(--bg-dot);
-}
-
-.drawerApply {
-  flex: 1;
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: #fff;
-  padding: 12px 16px;
-  border-radius: 999px;
-  background: var(--leaf);
-  border: 2px solid #52b86a;
-  box-shadow: var(--shadow-sm), 0 3px 0 #52b86a;
-}
-
-.drawerClear {
-  flex: none;
-  font-weight: 700;
-  font-size: 0.9rem;
-  color: var(--ink);
-  padding: 12px 16px;
-  border-radius: 999px;
-  background: var(--card);
-  border: 1.5px solid var(--line);
-  box-shadow: var(--shadow-sm);
-}
-
-.filterBlock {
-  position: relative;
-  background: linear-gradient(180deg, var(--card-2), var(--card));
-  border-radius: var(--radius-xl);
-  padding: 16px;
-  margin-bottom: 16px;
-  box-shadow: var(--shadow-sm);
-}
-
-.filterHeading {
-  margin: 0 0 14px;
-  padding-bottom: 10px;
-  border-bottom: 1.5px dashed var(--bg-dot);
   font-family: var(--font-marker), var(--font-baloo), var(--font-huninn),
     "PingFang TC", "Microsoft JhengHei", sans-serif;
   font-size: 1.15rem;
@@ -235,29 +32,41 @@
   color: var(--ink);
 }
 
-.groupLabel {
-  margin: 14px 0 8px;
-  font-size: 0.85rem;
-  font-weight: 700;
+.filterHint {
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+  font-weight: 600;
   color: var(--ink-soft);
 }
 
-.groupLabel:first-of-type {
-  margin-top: 0;
+.topicLink {
+  flex: none;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ink);
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  white-space: nowrap;
 }
 
-.chips {
+.vehicleChipRow {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
 .count {
-  margin: 0 6px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--ink-soft);
-  text-align: right;
 }
 
 .clear {
@@ -267,6 +76,14 @@
   color: var(--ink-soft);
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+@media (min-width: 640px) {
+  .filterBar {
+    position: static;
+    backdrop-filter: none;
+    background: linear-gradient(180deg, var(--card-2), var(--card));
+  }
 }
 
 .list {
@@ -283,64 +100,4 @@
   color: var(--ink-soft);
   font-weight: 600;
   padding: 32px 0;
-}
-
-.topicBlock {
-  margin-bottom: 18px;
-}
-
-.topicHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-
-.topicLabel {
-  margin: 0;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--ink-soft);
-}
-
-.topicIndexLink {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--ink);
-  padding: 4px 12px;
-  border-radius: 999px;
-  background: var(--card);
-  border: 1.5px solid var(--line);
-  box-shadow: var(--shadow-sm);
-}
-
-.topicChip {
-  transition:
-    transform var(--motion-press),
-    box-shadow var(--motion-press),
-    background var(--motion-press),
-    border-color var(--motion-press);
-}
-
-.topicChipActive {
-  color: #fff !important;
-  background: var(--leaf) !important;
-  border-color: #52b86a !important;
-  box-shadow:
-    var(--shadow-sm),
-    0 0 0 3px rgba(105, 219, 124, 0.28) !important;
-}
-
-.topicShare {
-  margin: 12px 0 0;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--ink-soft);
-}
-
-.topicShare a {
-  font-weight: 700;
-  color: var(--ink);
-  margin-left: 4px;
 }
