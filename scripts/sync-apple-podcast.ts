@@ -10,10 +10,14 @@ import type { Story } from "../data/stories";
 import { manualStories } from "../data/stories";
 import { lookupFeedUrl } from "../lib/podcast-apple";
 import {
+  APPLE_SYNC_PAGE_COUNT,
+  applyVehicleInference,
+} from "./lib/apple-sync-profile";
+import {
+  cleanEpisodeSummary,
   parseRssEpisodes,
   pubDateToIsoDate,
   slugForEpisode,
-  stripHtml,
   type RssEpisode,
 } from "./lib/apple-rss";
 
@@ -39,6 +43,8 @@ type SyncDefaults = {
   emoji: string;
   color: string;
   tags: string[];
+  /** 新集預設插圖張數；與官網 MVP 單圖播放器一致 */
+  pageCount: number;
   overrides: Record<string, Partial<Story>>;
 };
 
@@ -95,10 +101,9 @@ function applyDefaults(
     color: override.color ?? defaults.color,
     tags: override.tags ?? defaults.tags,
     ...(override.summary !== undefined ? { summary: override.summary } : {}),
-    ...(override.ageRange !== undefined ? { ageRange: override.ageRange } : {}),
     ...(override.captions !== undefined ? { captions: override.captions } : {}),
     ...(override.duration !== undefined ? { duration: override.duration } : {}),
-    ...(override.pageCount !== undefined ? { pageCount: override.pageCount } : {}),
+    pageCount: override.pageCount ?? defaults.pageCount ?? APPLE_SYNC_PAGE_COUNT,
   };
 }
 
@@ -108,7 +113,7 @@ function rssToStory(
   defaults: SyncDefaults,
 ): Story {
   const slug = slugForEpisode(ep);
-  const summary = stripHtml(item.description).slice(0, 500) || undefined;
+  const summary = cleanEpisodeSummary(item.description);
   const base: Story = {
     slug,
     ep,
@@ -119,11 +124,18 @@ function rssToStory(
     emoji: defaults.emoji,
     color: defaults.color,
     audio: "audio.mp3",
-    pageCount: 1,
+    pageCount: defaults.pageCount ?? APPLE_SYNC_PAGE_COUNT,
     summary,
     tags: [...defaults.tags],
   };
-  return applyDefaults(base, defaults);
+  const withDefaults = applyDefaults(base, defaults);
+  const hasVehicleOverride = defaults.overrides[slug]?.vehicle != null;
+  return applyVehicleInference(
+    withDefaults,
+    item.title,
+    defaults.vehicle,
+    hasVehicleOverride,
+  );
 }
 
 async function downloadFile(url: string, dest: string): Promise<void> {
@@ -213,6 +225,7 @@ async function main(): Promise<void> {
       emoji: "🚗",
       color: "#7048e8",
       tags: [],
+      pageCount: APPLE_SYNC_PAGE_COUNT,
       overrides: {},
     }),
   ]);
@@ -309,6 +322,9 @@ async function main(): Promise<void> {
   });
 
   console.log(`Synced ${added.length} episode(s): ${added.map((s) => s.slug).join(", ")}`);
+  console.log(
+    "上架框架：pageCount=1、Apple 封面 01.jpg、首頁列表/內頁現行 UI；請視需要於 apple-sync.defaults.json 的 overrides 補 tags / pageCount / captions。",
+  );
 }
 
 main().catch((err) => {

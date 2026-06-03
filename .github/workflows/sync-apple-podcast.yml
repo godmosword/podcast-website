@@ -28,6 +28,9 @@ jobs:
       - name: Run unit tests
         run: npm test
 
+      - name: Production build
+        run: npm run build
+
       - name: Commit and push if changed
         run: |
           git config user.name "github-actions[bot]"

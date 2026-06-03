@@ -120,7 +120,16 @@ npm run build
 |------|------|
 | `data/apple-synced.json` | 由 sync 腳本追加的新集 metadata |
 | `data/apple-sync-state.json` | 已處理的 RSS `guid` |
-| `data/apple-sync.defaults.json` | 新集預設 `vehicle` / `emoji` / `color`；`overrides.<slug>` 可覆寫單集 |
+| `data/apple-sync.defaults.json` | 新集預設與上架框架；`overrides.<slug>` 可覆寫單集 |
+
+**每日 GHA 新集上架框架（與官網現行版面一致）：**
+
+- 資產：`public/stories/ep-N/audio.mp3` + Apple 封面 `01.jpg`
+- 資料：`data/apple-synced.json`，`pageCount: 1`（單圖 MVP 播放器）
+- 摘要：自動去除 SoundOn 託管尾註；內頁只顯示 EP + **時長**（不寫入 `ageRange`）
+- 車種：標題含關鍵字時自動推斷（如「高鐵」→ 高鐵）；否則預設「其他」，可於 `overrides` 手動指定
+- 首頁：進入故事列表、車種 chip 篩選、卡片無封面角標 emoji
+- CI：通過 `npm test` 與 `npm run build` 後 commit push `main`
 
 **本機預覽（不寫檔）：**
 
@@ -135,7 +144,7 @@ npm run sync:apple
 npm test && npm run build
 ```
 
-**GitHub Actions：** [`.github/workflows/sync-apple-podcast.yml`](.github/workflows/sync-apple-podcast.yml) 每天 UTC 01:00 執行；有新集時下載 `audio.mp3` 與 Apple 封面 `01.jpg`（`pageCount: 1`），通過測試後 **commit 並 push 到 `main`**。若 repo 有 branch protection，需允許 `github-actions[bot]` 寫入。
+**GitHub Actions：** [`.github/workflows/sync-apple-podcast.yml`](.github/workflows/sync-apple-podcast.yml) 每天 UTC 01:00 執行；有新集時依上列框架上架，通過測試與 build 後 **commit 並 push 到 `main`**。若 repo 有 branch protection，需允許 `github-actions[bot]` 寫入。
 
 新集 slug 規則：`ep-<集數>`（例：`ep-7`）。同步後若要完整看圖體驗：
 

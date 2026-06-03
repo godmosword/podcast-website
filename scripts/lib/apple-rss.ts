@@ -47,6 +47,22 @@ export function stripHtml(html: string): string {
     .trim();
 }
 
+/** 從 RSS 描述產生站內摘要（去除 SoundOn 等託管尾註）。 */
+export function cleanEpisodeSummary(
+  description: string,
+  maxLen = 500,
+): string | undefined {
+  let text = stripHtml(description);
+  text = text.replace(/\s*--\s*Hosting provided by SoundOn.*$/i, "");
+  const promoIdx = text.search(/這篇為真實故事改編/);
+  if (promoIdx >= 0) {
+    text = text.slice(0, promoIdx);
+  }
+  text = text.trim();
+  if (!text) return undefined;
+  return text.length > maxLen ? text.slice(0, maxLen) : text;
+}
+
 /** 將 RSS pubDate 轉成 YYYY-MM-DD（UTC 日曆日）。 */
 export function pubDateToIsoDate(pubDate: string): string {
   const d = new Date(pubDate);

@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
+  cleanEpisodeSummary,
   formatItunesDuration,
   parseRssEpisodes,
   pubDateToIsoDate,
@@ -34,6 +35,16 @@ describe("parseRssEpisodes", () => {
 describe("stripHtml", () => {
   it("移除 HTML 標籤", () => {
     expect(stripHtml("<p>你好 <b>世界</b></p>")).toBe("你好 世界");
+  });
+});
+
+describe("cleanEpisodeSummary", () => {
+  it("移除 SoundOn 託管尾註", () => {
+    const raw =
+      "遇到高鐵晚到延遲怎麼辦呢？Bonbon和馬米學會冷靜。 這篇為真實故事改編，很謝謝您的收聽。 -- Hosting provided by SoundOn";
+    expect(cleanEpisodeSummary(raw)).toBe(
+      "遇到高鐵晚到延遲怎麼辦呢？Bonbon和馬米學會冷靜。",
+    );
   });
 });
 
