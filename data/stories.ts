@@ -222,6 +222,19 @@ export function getVehicleEmoji(vehicle: string): string {
   return stories.find((s) => s.vehicle === vehicle)?.emoji ?? "🚗";
 }
 
+/** 依車種、關鍵字篩選故事（null 表示不篩該欄位）。 */
+export function filterStories(
+  list: Story[],
+  vehicle: string | null,
+  tag: string | null,
+): Story[] {
+  return list.filter((s) => {
+    const okVehicle = vehicle === null || s.vehicle === vehicle;
+    const okTag = tag === null || (s.tags ?? []).includes(tag);
+    return okVehicle && okTag;
+  });
+}
+
 /** 所有出現過的主題關鍵字（去重）。 */
 export function allTags(): string[] {
   return Array.from(new Set(stories.flatMap((s) => s.tags ?? [])));
