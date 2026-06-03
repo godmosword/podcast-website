@@ -70,31 +70,29 @@ function StoryFilterInner({ stories, vehicles, tags }: StoryFilterProps) {
 
   return (
     <section>
-      {/* 目前故事數 */}
-      <p className={styles.count}>
-        {filtered.length} 則故事
-        {hasFilter && (
-          <button className={styles.clear} onClick={clearAll} type="button">
-            清除
-          </button>
-        )}
-      </p>
-
-      {/* 浮動篩選按鈕（固定左下角，與抽屜同側；抽屜開啟時淡出） */}
-      <button
-        type="button"
-        className={styles.fab}
-        data-hidden={open || undefined}
-        onClick={() => setOpen(true)}
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        aria-controls="story-filter-drawer"
-        tabIndex={open ? -1 : undefined}
-      >
-        <span aria-hidden>🔍</span>
-        用分類找故事
-        {hasFilter && <span className={styles.filterDot} aria-hidden />}
-      </button>
+      {/* 置頂工具列：篩選按鈕 + 故事數（隨頁面捲動，不浮動） */}
+      <div className={styles.toolbar}>
+        <button
+          type="button"
+          className={styles.filterOpen}
+          onClick={() => setOpen(true)}
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          aria-controls="story-filter-drawer"
+        >
+          <span aria-hidden>🔍</span>
+          用分類找故事
+          {hasFilter && <span className={styles.filterDot} aria-hidden />}
+        </button>
+        <p className={styles.count}>
+          {filtered.length} 則故事
+          {hasFilter && (
+            <button className={styles.clear} onClick={clearAll} type="button">
+              清除
+            </button>
+          )}
+        </p>
+      </div>
 
       {/* 抽屜遮罩 */}
       <div

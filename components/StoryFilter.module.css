@@ -1,48 +1,35 @@
-/* ============ 浮動篩選按鈕（FAB，固定右下角） ============ */
-.fab {
-  position: fixed;
-  left: calc(16px + var(--safe-left));
-  bottom: calc(18px + var(--safe-bottom));
-  z-index: 30;
+/* ============ 置頂工具列（篩選 + 故事數） ============ */
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 2px 16px;
+}
+
+.filterOpen {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  width: 100%;
   font-family: var(--font-marker), var(--font-baloo), var(--font-huninn),
     "PingFang TC", "Microsoft JhengHei", sans-serif;
-  font-size: 1.02rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  color: #fff;
-  padding: 12px 20px;
-  border-radius: 999px;
-  background: var(--leaf);
-  border: 2.5px solid #52b86a;
-  box-shadow: 0 6px 18px rgba(40, 40, 60, 0.22), 0 4px 0 #52b86a;
-  transform: rotate(-1.5deg);
+  color: var(--ink);
+  padding: 12px 18px;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(180deg, var(--card-2), var(--card));
+  border: 2.5px solid var(--c-sky);
+  box-shadow: var(--shadow-sm), 0 3px 0 var(--c-sky);
   transition:
-    transform 0.2s ease,
-    opacity 0.2s ease,
+    transform var(--motion-press),
     box-shadow var(--motion-press);
 }
 
-.fab:active {
-  transform: rotate(-1.5deg) translateY(3px);
-  box-shadow: 0 4px 12px rgba(40, 40, 60, 0.22);
-}
-
-/* 抽屜開啟時淡出收起，畫面更清爽 */
-.fab[data-hidden] {
-  opacity: 0;
-  transform: rotate(-1.5deg) translateY(12px) scale(0.92);
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .fab,
-  .fab:active,
-  .fab[data-hidden] {
-    transform: none;
-    transition: opacity 0.2s ease;
-  }
+.filterOpen:active {
+  transform: translateY(2px);
+  box-shadow: var(--shadow-sm);
 }
 
 .filterDot {
@@ -50,7 +37,7 @@
   height: 9px;
   border-radius: 50%;
   background: var(--c-pink);
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.55);
+  box-shadow: 0 0 0 3px rgba(255, 138, 178, 0.28);
 }
 
 /* ============ 抽屜遮罩 + 面板 ============ */
@@ -215,8 +202,9 @@
 .count {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 10px;
-  margin: 0 2px 16px;
+  margin: 0;
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--ink-soft);
