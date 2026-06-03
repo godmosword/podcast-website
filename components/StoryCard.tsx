@@ -45,13 +45,6 @@ export default function StoryCard({
           fill
           className={styles.thumb}
         />
-        <span
-          className={styles.emojiBadge}
-          style={{ backgroundColor: story.color }}
-          aria-hidden
-        >
-          {story.emoji}
-        </span>
       </div>
 
       <span className={`${styles.body} ${isGrid ? styles.bodyGrid : ""}`}>

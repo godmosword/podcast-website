@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { allVehicles, getStoriesByVehicle, getVehicleEmoji } from "@/data/stories";
+import { allVehicles, getStoriesByVehicle } from "@/data/stories";
 import SiteFooter from "@/components/SiteFooter";
+import VehicleClayIcon from "@/components/VehicleClayIcon";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
@@ -59,7 +60,8 @@ export default function AboutPage() {
                 href={`/?vehicle=${encodeURIComponent(v)}`}
                 className={styles.chip}
               >
-                {getVehicleEmoji(v)} {v}
+                <VehicleClayIcon vehicle={v} size={28} />
+                {v}
                 <span className={styles.chipCount}>
                   {getStoriesByVehicle(v).length} 則
                 </span>

@@ -1,0 +1,7 @@
+.icon {
+  display: block;
+  border-radius: 6px;
+  object-fit: cover;
+  box-shadow: var(--gloss);
+  flex: none;
+}

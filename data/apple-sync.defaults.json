@@ -6,7 +6,8 @@
   "overrides": {
     "ep-7": {
       "vehicle": "高鐵",
-      "emoji": "🚄"
+      "emoji": "🚄",
+      "tags": ["冷靜", "解決問題", "成長"]
     }
   }
 }

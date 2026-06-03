@@ -58,6 +58,12 @@
   gap: 8px;
 }
 
+.chipWithIcon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .count {
   display: flex;
   align-items: center;

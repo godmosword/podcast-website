@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useMemo, useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Story } from "@/data/stories";
-import { getVehicleEmoji } from "@/data/stories";
 import { ChipButton } from "./Chip";
 import StoryCard from "./StoryCard";
+import VehicleClayIcon from "./VehicleClayIcon";
 import styles from "./StoryFilter.module.css";
 
 type StoryFilterProps = {
@@ -63,10 +63,12 @@ function StoryFilterInner({ stories, vehicles }: StoryFilterProps) {
           {vehicles.map((v) => (
             <ChipButton
               key={v}
+              className={styles.chipWithIcon}
               active={vehicle === v}
               onClick={() => updateVehicle(vehicle === v ? null : v)}
             >
-              {getVehicleEmoji(v)} {v}
+              <VehicleClayIcon vehicle={v} size={24} />
+              {v}
             </ChipButton>
           ))}
         </div>

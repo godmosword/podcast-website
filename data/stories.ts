@@ -15,6 +15,7 @@
 // ============================================================
 
 import appleSynced from "./apple-synced.json";
+import { storyCoverPath } from "@/lib/story-utils";
 
 /** 一則故事的資料結構。 */
 export type Story = {
@@ -238,6 +239,12 @@ export function allVehicles(): string[] {
 /** 依車種取得代表 emoji（取該車種第一則故事的 emoji）。 */
 export function getVehicleEmoji(vehicle: string): string {
   return stories.find((s) => s.vehicle === vehicle)?.emoji ?? "🚗";
+}
+
+/** 依車種取得黏土風代表封面（該車種第一則故事的 01.jpg）。 */
+export function getVehicleCoverPath(vehicle: string): string | null {
+  const slug = stories.find((s) => s.vehicle === vehicle)?.slug;
+  return slug ? storyCoverPath(slug) : null;
 }
 
 /** 所有出現過的主題標籤（去重、繁中排序）。 */
