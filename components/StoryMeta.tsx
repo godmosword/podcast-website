@@ -1,6 +1,7 @@
 import type { Story } from "@/data/stories";
 import { formatDate } from "@/lib/story-utils";
 import { TagChip } from "./Chip";
+import StoryAge from "./StoryAge";
 import styles from "./StoryMeta.module.css";
 
 type StoryMetaProps = {
@@ -24,6 +25,7 @@ export default function StoryMeta({
         </span>
         <span>{formatDate(story.date)}</span>
         {story.duration && <span>{story.duration}</span>}
+        <StoryAge ageRange={story.ageRange} />
       </div>
 
       {showTags && (

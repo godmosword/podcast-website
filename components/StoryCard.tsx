@@ -3,20 +3,21 @@ import type { Story } from "@/data/stories";
 import { formatDate, storyCoverPath } from "@/lib/story-utils";
 import StoryImage from "./StoryImage";
 import { TagChip } from "./Chip";
+import StoryAge from "./StoryAge";
 import styles from "./StoryCard.module.css";
 
 type StoryCardProps = {
   story: Story;
   /** 列表索引，用於進場依序彈入 */
   index?: number;
-  /** row：橫式列表；grid：直式網格卡（首頁故事牆） */
-  variant?: "row" | "grid";
+  /** list：橫式列表（預設）；grid：故事牆直式卡片 */
+  variant?: "list" | "grid";
 };
 
 export default function StoryCard({
   story,
   index = 0,
-  variant = "row",
+  variant = "list",
 }: StoryCardProps) {
   const isGrid = variant === "grid";
 
@@ -31,7 +32,7 @@ export default function StoryCard({
       }}
     >
       <div
-        className={styles.thumbWrap}
+        className={`${styles.thumbWrap} ${isGrid ? styles.thumbWrapGrid : ""}`}
         style={{ backgroundColor: `${story.color}22` }}
       >
         <StoryImage
@@ -49,7 +50,7 @@ export default function StoryCard({
         </span>
       </div>
 
-      <span className={styles.body}>
+      <span className={`${styles.body} ${isGrid ? styles.bodyGrid : ""}`}>
         <span className={styles.meta}>
           <span
             className={styles.ep}
@@ -59,13 +60,14 @@ export default function StoryCard({
           </span>
           <span>{formatDate(story.date)}</span>
           {story.duration && <span>{story.duration}</span>}
+          <StoryAge ageRange={story.ageRange} />
         </span>
 
         <span className={styles.title}>{story.title}</span>
 
         {story.summary && <span className={styles.summary}>{story.summary}</span>}
 
-        <span className={styles.footer}>
+        <span className={`${styles.footer} ${isGrid ? styles.footerGrid : ""}`}>
           {story.tags && story.tags.length > 0 && (
             <span className={styles.tags}>
               {story.tags.map((t) => (

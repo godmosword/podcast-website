@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Baloo_2 } from "next/font/google";
 import localFont from "next/font/local";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import { SITE_RSS_PATH } from "@/lib/feed";
+import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 // 童趣圓潤字型，避免使用 Inter/Arial 等通用字型。
@@ -70,7 +72,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  // 不鎖縮放，方便家長放大閱讀與系統輔助功能。
+  maximumScale: 1,
+  // 鎖住縮放，避免孩子誤觸放大。
+  userScalable: false,
+  // 處理瀏海 / 圓角螢幕，搭配 globals.css 的 env(safe-area-inset-*)。
   viewportFit: "cover",
   themeColor: "#fff7ec",
 };

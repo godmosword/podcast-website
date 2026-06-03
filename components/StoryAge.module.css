@@ -1,0 +1,12 @@
+.age {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--bg-dot);
+  border: 1px solid rgba(74, 59, 42, 0.08);
+  white-space: nowrap;
+}

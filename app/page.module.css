@@ -1,6 +1,22 @@
 .main {
-  max-width: 960px;
+  max-width: 640px;
   margin: 0 auto;
   padding: calc(24px + var(--safe-top)) calc(20px + var(--safe-right))
     calc(40px + var(--safe-bottom)) calc(20px + var(--safe-left));
+}
+
+.subscribe {
+  margin: 8px 0 0;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.subscribe a {
+  margin-left: 6px;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }

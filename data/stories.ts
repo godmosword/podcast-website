@@ -35,6 +35,8 @@ export type Story = {
   pageCount: number;
   /** 選填：一句話故事大綱 */
   summary?: string;
+  /** 選填：建議年齡，如「3–8 歲」；未填則 UI 不顯示 */
+  ageRange?: string;
   /** 選填：主題關鍵字（用於篩選與推薦） */
   tags?: string[];
   /**
@@ -58,6 +60,7 @@ export const stories: Story[] = [
     audio: "audio.mp3",
     pageCount: 6,
     summary: "安安救護車出任務時遇到困難，學會開口求助，和夥伴一起合作完成任務。",
+        ageRange: "3–8 歲",
     tags: ["勇敢", "合作", "求助"],
     captions: [
       "安安救護車今天要出任務，幫助需要幫忙的朋友。",
@@ -80,6 +83,7 @@ export const stories: Story[] = [
     audio: "audio.mp3",
     pageCount: 6,
     summary: "東東挖土機有點膽小，卻鼓起勇氣，一步步完成任務。",
+        ageRange: "3–8 歲",
     tags: ["勇氣", "成長"],
     captions: [
       "東東挖土機有點膽小，做事常常怕怕的。",
@@ -103,6 +107,7 @@ export const stories: Story[] = [
     pageCount: 6,
     summary:
       "鈴鈴清潔車的早安音樂鈴壞掉了，她仍努力提醒車車朋友起床，學會守信用、說到做到。",
+        ageRange: "3–8 歲",
     tags: ["守信用", "負責"],
     captions: [
       "鈴鈴清潔車每天用音樂鈴叫大家起床。",
@@ -126,6 +131,7 @@ export const stories: Story[] = [
     pageCount: 6,
     summary:
       "小紅賽車在比賽中遇到挫折，學會接受失敗、整理心情，明白不是第一名也沒關係。",
+        ageRange: "4–8 歲",
     tags: ["勇氣", "接受失敗"],
     captions: [
       "小紅賽車最喜歡比賽，跑得飛快。",
@@ -149,6 +155,7 @@ export const stories: Story[] = [
     pageCount: 6,
     summary:
       "在公園遇見可愛的無人機小飛，大家一起幫小妹妹找回小兔子，學會安全飛行、遵守規則。",
+        ageRange: "4–8 歲",
     tags: ["安全", "合作", "助人"],
     captions: [
       "公園裡來了一台可愛的無人機小飛。",
@@ -172,6 +179,7 @@ export const stories: Story[] = [
     pageCount: 6,
     summary:
       "Bonbon 發揮創意，想出有剪頭髮車、洗澡車、運動車的未來電動車，坐車不無聊還能完成好多事。",
+        ageRange: "3–7 歲",
     tags: ["想像力", "創意"],
     captions: [
       "Bonbon 想像出神奇的未來電動車。",
@@ -212,15 +220,14 @@ export function storiesByNewest(): Story[] {
   return [...stories].sort((a, b) => b.ep - a.ep);
 }
 
+/** 所有出現過的車種（依故事順序去重）。 */
+export function allVehicles(): string[] {
+  return Array.from(new Set(stories.map((s) => s.vehicle)));
+}
 
 /** 依車種取得代表 emoji（取該車種第一則故事的 emoji）。 */
 export function getVehicleEmoji(vehicle: string): string {
   return stories.find((s) => s.vehicle === vehicle)?.emoji ?? "🚗";
-}
-
-/** 所有出現過的車種（依故事順序去重）。 */
-export function allVehicles(): string[] {
-  return Array.from(new Set(stories.map((s) => s.vehicle)));
 }
 
 /** 所有出現過的主題標籤（去重、繁中排序）。 */
