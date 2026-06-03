@@ -9,13 +9,21 @@ type StoryCardProps = {
   story: Story;
   /** 列表索引，用於進場依序彈入 */
   index?: number;
+  /** row：橫式列表；grid：直式網格卡（首頁故事牆） */
+  variant?: "row" | "grid";
 };
 
-export default function StoryCard({ story, index = 0 }: StoryCardProps) {
+export default function StoryCard({
+  story,
+  index = 0,
+  variant = "row",
+}: StoryCardProps) {
+  const isGrid = variant === "grid";
+
   return (
     <Link
       href={`/story/${story.slug}`}
-      className={`${styles.card} popIn`}
+      className={`${styles.card} ${isGrid ? styles.cardGrid : ""} popIn`}
       style={{
         borderColor: story.color,
         boxShadow: `var(--shadow-md), 0 6px 0 ${story.color}`,

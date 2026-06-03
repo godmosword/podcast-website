@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Story } from "@/data/stories";
-import StoryCard from "./StoryCard";
 import StoryFilterChips from "./StoryFilterChips";
+import StoryWall from "./StoryWall";
 import styles from "./StoryFilter.module.css";
 
 type StoryFilterProps = {
@@ -24,8 +24,9 @@ export default function StoryFilter({
     <section id="stories" aria-labelledby="stories-heading">
       <div className={styles.filterBlock}>
         <h2 id="stories-heading" className={styles.filterHeading}>
-          探索故事
+          所有故事
         </h2>
+        <p className={styles.lead}>點選卡片進入故事，依發布日期由新到舊排列。</p>
         <StoryFilterChips
           vehicles={vehicles}
           tags={tags}
@@ -43,19 +44,7 @@ export default function StoryFilter({
         )}
       </p>
 
-      {stories.length > 0 ? (
-        <ul className={styles.list}>
-          {stories.map((story, i) => (
-            <li key={story.slug}>
-              <StoryCard story={story} index={i} />
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className={styles.empty}>
-          沒有符合的故事，試試其他車車或關鍵字吧 🚗
-        </p>
-      )}
+      <StoryWall stories={stories} />
     </section>
   );
 }
