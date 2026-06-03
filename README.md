@@ -11,7 +11,7 @@ Bonbon & 馬米親子 podcast《車車遊樂園》的官方 **看圖聽故事** 
 
 | 功能 | 說明 |
 |------|------|
-| 故事牆 | 首頁網格列出全部分集，車種 URL 篩選、主題 tag 即時篩選 |
+| 故事牆 | 首頁網格列出全部分集，車種 chip + URL 篩選；主題見 `/topic` |
 | 看圖聽故事 | 全螢幕播放器、字幕跟讀、進度與家長設定 |
 | 主題分類 | `/topic`、`/topic/[tag]` 靜態頁（SEO） |
 | 車種分類 | `/vehicles/[vehicle]` |
@@ -157,7 +157,7 @@ app/
   fonts/                自託管中文字型子集（huninn woff2）
 components/
   ConnectHub.tsx        頁尾追蹤／訂閱圖示區
-  StoryFilter.tsx       車種 + 主題篩選
+  StoryFilter.tsx       首頁車種 chip 篩選
   StoryWall.tsx         故事網格
   decor/                SVG 裝飾
 data/stories.ts         故事資料（單一真相源）
