@@ -3,5 +3,10 @@
   "emoji": "🚗",
   "color": "#7048e8",
   "tags": [],
-  "overrides": {}
+  "overrides": {
+    "ep-7": {
+      "vehicle": "高鐵",
+      "emoji": "🚄"
+    }
+  }
 }
