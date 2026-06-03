@@ -212,22 +212,10 @@ export function storiesByNewest(): Story[] {
   return [...stories].sort((a, b) => b.ep - a.ep);
 }
 
-/** 所有故事，依發布日期由新到舊排序。 */
-export function storiesByDate(): Story[] {
-  return [...stories].sort((a, b) => b.date.localeCompare(a.date));
-}
 
-/** 依車種、關鍵字篩選故事（null 表示不篩該欄位）。 */
-export function filterStories(
-  list: Story[],
-  vehicle: string | null,
-  tag: string | null,
-): Story[] {
-  return list.filter((s) => {
-    const okVehicle = vehicle === null || s.vehicle === vehicle;
-    const okTag = tag === null || (s.tags ?? []).includes(tag);
-    return okVehicle && okTag;
-  });
+/** 依車種取得代表 emoji（取該車種第一則故事的 emoji）。 */
+export function getVehicleEmoji(vehicle: string): string {
+  return stories.find((s) => s.vehicle === vehicle)?.emoji ?? "🚗";
 }
 
 /** 所有出現過的車種（依故事順序去重）。 */
@@ -235,14 +223,16 @@ export function allVehicles(): string[] {
   return Array.from(new Set(stories.map((s) => s.vehicle)));
 }
 
-/** 車種對應 emoji（取該車種第一則故事的 emoji，找不到則回傳 🚗）。 */
-export function getVehicleEmoji(vehicle: string): string {
-  return stories.find((s) => s.vehicle === vehicle)?.emoji ?? "🚗";
+/** 所有出現過的主題標籤（去重、繁中排序）。 */
+export function allTags(): string[] {
+  return Array.from(new Set(stories.flatMap((s) => s.tags ?? []))).sort((a, b) =>
+    a.localeCompare(b, "zh-Hant"),
+  );
 }
 
-/** 所有出現過的主題關鍵字（去重）。 */
-export function allTags(): string[] {
-  return Array.from(new Set(stories.flatMap((s) => s.tags ?? [])));
+/** 依主題標籤篩選故事（由新到舊）。 */
+export function getStoriesByTag(tag: string): Story[] {
+  return storiesByNewest().filter((s) => (s.tags ?? []).includes(tag));
 }
 
 /**

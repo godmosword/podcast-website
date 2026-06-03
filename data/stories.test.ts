@@ -4,6 +4,7 @@ import {
   allVehicles,
   getNextStory,
   getRelated,
+  getStoriesByTag,
   getStoriesByVehicle,
   getStory,
   stories,
@@ -80,6 +81,18 @@ describe("getStoriesByVehicle", () => {
     const list = getStoriesByVehicle("救護車");
     expect(list.every((s) => s.vehicle === "救護車")).toBe(true);
     expect(list.length).toBe(1);
+  });
+});
+
+describe("getStoriesByTag", () => {
+  it("依主題標籤篩選", () => {
+    const list = getStoriesByTag("合作");
+    expect(list.every((s) => (s.tags ?? []).includes("合作"))).toBe(true);
+    expect(list.length).toBe(2);
+  });
+
+  it("未知標籤回傳空陣列", () => {
+    expect(getStoriesByTag("不存在")).toEqual([]);
   });
 });
 
