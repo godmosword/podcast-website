@@ -232,6 +232,7 @@ export default function StoryPlayer({
             key={i}
             src={src}
             alt={`${title} 第 ${i + 1} 頁`}
+            aria-hidden={i !== page}
             className={styles.image}
             style={{ opacity: i === page && !hasEnded ? 1 : 0 }}
             draggable={false}
