@@ -78,6 +78,7 @@ body {
     "Microsoft JhengHei", "Noto Sans TC", sans-serif;
   color: var(--ink);
   background-color: var(--bg);
+  isolation: isolate;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
