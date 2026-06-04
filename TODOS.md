@@ -279,7 +279,7 @@
 
 **Why:** 聽覺產品在網頁上的基本功；睡前場景多為手機與弱網。
 
-**Context:** 見「壓縮 podcast 音檔」「Service Worker」；播放器在 `StoryPlayer`；已允許 viewport 縮放。
+**Context:** 見「壓縮 podcast 音檔」「Service Worker」；播放器在 `StoryPlayer`；縮放見設計區「家長放大閱讀」（目前 `maximumScale: 1`）。
 
 **Effort:** M（持續）  
 **Priority:** P1–P2  
@@ -357,6 +357,155 @@
 **Priority:** P3  
 **Depends on:** 營運資源
 
+---
+
+## 設計／體驗（plan-design-review 2026-06）
+
+> 整體設計完整度約 **7/10**；風格（黏土車種、RoughFrame、塗鴉）已避開 AI 模板感。  
+> 對標：Circle Round、Brains On、Story Pirates、兒童音訊平台「繼續收聽 + 主題發現」、podcast 官網「每集落地頁 + 訂閱 CTA」。  
+> 實作建議順序：**P0 → P1 → P2**；與上方「成長」「官網成長」並行時，訂閱位置上移優先於純視覺。
+
+### 同步 DESIGN.md 與實作（設計系統）
+
+**What:** 更新 `DESIGN.md`：`--ink-soft` 改為 `#7a7268`、背景改 `.site-backdrop` + `.site-root`、`viewport` 鎖定縮放說明、StoryFilter 是否掛塗鴉與現況一致。
+
+**Why:** 設計文件與程式漂移時，之後改版容易回到舊 token 或錯誤假設（例如又寫 body 四角 gradient）。
+
+**Context:** 實作見 `app/globals.css`、`app/layout.tsx`；`DESIGN.md` 仍寫舊 `--ink-soft` 與 body 背景。
+
+**Effort:** S  
+**Priority:** P0  
+**Depends on:** None
+
+### 首屏價值主張與資訊架構精簡
+
+**What:** Header 或 `LatestHero` 上方補一句可掃讀價值（例：「每天一個車車故事，點開就能看圖聽」）；評估精簡區塊順序，避免「最新集」與列表重複同一集過久。
+
+**Why:** 新訪客 3 秒內需懂「這不是一般 podcast 嵌入頁，是互動繪本」；回訪者則靠繼續收聽。
+
+**Context:** 現序：Header → `ContinueBanner` → `LatestHero` → `FavoritesSection` → `StoryFilter` + 列表。對標 podcast 官網「第一屏一件事」。
+
+**Effort:** S–M  
+**Priority:** P0  
+**Depends on:** None
+
+### 單集頁訂閱 CTA 上移（平台 A）
+
+**What:** 在 `/story/[slug]`「看圖聽故事」主按鈕下方加次要區：「在 Spotify／Apple Podcasts 聽完整版並訂閱」，連到 `ConnectHub` 平台連結。
+
+**Why:** 訂閱按鈕只在 Footer 時，從社群進單集的人要滑到底才轉換；對齊 A 戰場與 goodwill 原則（先給要的，再要訂閱）。
+
+**Context:** 與「試聽片段 → 平台訂閱橋接」可並行；此項可先只做文案 + 連結，不必先有試聽檔。
+
+**Effort:** S  
+**Priority:** P0  
+**Depends on:** None
+
+### 首頁錨點導覽（取代手機 sticky 篩選）
+
+**What:** 長列表時加頁內錨點或捷徑列（例：最新｜全部故事｜依車車），讓捲動後仍能快速回到篩選區。
+
+**Why:** iOS 上 `StoryFilter` 已改 `position: static` 避免合成破圖，但犧牲吸頂；錨點可補「找得到篩選」而不恢復 sticky。
+
+**Context:** `StoryFilter.module.css` 手機 `@media (max-width: 640px)`；若集數 >15 優先度提高。
+
+**Effort:** S–M  
+**Priority:** P1  
+**Depends on:** None
+
+### 首頁／篩選空狀態插畫化
+
+**What:** 為「載入中」「篩選無結果」「尚無收藏」「尚無繼續收聽」設計插畫或吉祥物 + 一句話 + 明確下一步（例：換車種、聽最新一集）。
+
+**Why:** 純文字空狀態在兒童產品裡像工程預設；空狀態應算功能，不是 afterthought。
+
+**Context:** `app/page.tsx` 載入 fallback；`StoryFilter` 無結果文案；`FavoritesSection`／`ContinueBanner` 空態。
+
+**Effort:** M  
+**Priority:** P1  
+**Depends on:** 插畫或既有塗鴉素材
+
+### 首頁載入骨架（skeleton）
+
+**What:** 故事列表載入時以骨架卡取代「載入故事中…」單行文字。
+
+**Why:** 弱網睡前場景需要「還在載入」的視覺回饋，減少空白屏焦慮。
+
+**Context:** `app/page.tsx` client 載入 `stories`；可複用 `StoryCard` 外框比例。
+
+**Effort:** S  
+**Priority:** P1  
+**Depends on:** None
+
+### 家長放大閱讀（縮放或字級）
+
+**What:** 二選一或並行：① 放寬 `viewport.maximumScale`（接受孩子誤縮放風險）② 設定內「大字模式」只放大說明與字幕區。
+
+**Why:** `DESIGN.md` 寫允許縮放，但 `app/layout.tsx` 為 `maximumScale: 1`；家長共聽時需要放大文字。
+
+**Context:** 與 WCAG 對比修復（`--ink-soft`）互補；需實機驗證 3–5 歲是否誤觸縮放。
+
+**Effort:** S–M  
+**Priority:** P2  
+**Depends on:** 產品決策（鎖縮放 vs 家長模式）
+
+### 篩選 chip 觸控與鍵盤順序
+
+**What:** 實機確認車種 chip 最小觸控區 **44×44px**；Tab 順序：主 CTA → chip 列 → 第一張故事卡。
+
+**Why:** 兒童與家長多為觸控；鍵盤使用者需可完成「選車種 → 開第一集」。
+
+**Context:** `StoryFilter` 已用 `<button>`；`globals.css` 有 `:focus-visible`。
+
+**Effort:** S  
+**Priority:** P2  
+**Depends on:** None
+
+### StoryFilter 區塊視覺一致性（塗鴉）
+
+**What:** 決定「依車車找故事」區要補 1～2 個 `Doodle`（與 Header 呼應）或刻意留白；寫入 `DESIGN.md` 並實作一致。
+
+**Why:** 中段若完全無裝飾，全站上下塗鴉多、中間素，像兩套設計拼貼。
+
+**Context:** `DESIGN.md` 寫 StoryFilter 有塗鴉，元件目前未掛載。
+
+**Effort:** S  
+**Priority:** P2  
+**Depends on:** 同步 DESIGN.md
+
+### 單集「節目筆記」區（家長分享）
+
+**What:** 詳情頁在摘要下加可選「這集可以聊什麼」2～3 句（`parentNote` 或 `episodeNotes`），利於家長轉發 Threads。
+
+**Why:** 對標 Circle Round／podcast 官網 show notes；與「給家長的小提示」可合併欄位設計。
+
+**Context:** 與 `data/stories.ts` 擴欄；SEO 可與 JSON-LD description 共用摘要。
+
+**Effort:** S  
+**Priority:** P2  
+**Depends on:** Bonbon & 馬米文案
+
+### 首頁列表「大圖單欄」模式（可選）
+
+**What:** 若主攻 3–5 歲，評估故事牆改大封面單欄卡（少文字、大圖磚），或僅在窄螢幕啟用。
+
+**Why:** 對標 YouTube Kids 大圖磚；現左圖右文在 5+ 較合適。
+
+**Context:** `StoryCard` + `StoryCard.module.css`；需使用者研究再定，非必做。
+
+**Effort:** M  
+**Priority:** P3  
+**Depends on:** 年齡定位確認
+
+### 設計區延後
+
+| 項目 | 原因 |
+|------|------|
+| 全站 redesign／換字體 | 現有手繪風格已具辨識度 |
+| 首頁 3 欄 icon 功能介紹 | 違反 AI slop 黑名單，與品牌不符 |
+| iOS sticky 篩選列復活 | 除非有 fixed 複製列方案且通過 iOS 26 實機 |
+
+---
 
 ## Completed
 
