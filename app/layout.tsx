@@ -100,8 +100,9 @@ export default function RootLayout({
       className={`${baloo.variable} ${huninn.variable} ${gochi.variable}`}
     >
       <body>
+        <div className="site-backdrop" aria-hidden />
         <SvgDefs />
-        {children}
+        <div className="site-root">{children}</div>
         <ServiceWorkerRegister />
       </body>
     </html>

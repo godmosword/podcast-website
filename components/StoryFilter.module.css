@@ -1,22 +1,15 @@
-/* ============ 車種篩選區（手機 sticky） ============ */
+/* ============ 車種篩選區（手機不 sticky：iOS 26 Safari 吸頂合成仍會白塊跑版） ============ */
 .filterBar {
-  position: sticky;
-  top: calc(6px + var(--safe-top));
-  z-index: 30;
+  position: static;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin: 0 2px 16px;
+  margin: 0 0 16px;
   padding: 14px 12px;
   border-radius: var(--radius-xl);
-  /* 實底：iOS Safari 上 sticky + backdrop-filter 會露出方塊白底、圓角裁切失效 */
-  overflow: hidden;
-  background: linear-gradient(180deg, var(--card-2), var(--card));
+  background: var(--card);
   border: 1.5px solid var(--line);
   box-shadow: var(--shadow-sm);
-  isolation: isolate;
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
 }
 
 .filterHead {
@@ -90,8 +83,6 @@
 
 @media (min-width: 640px) {
   .filterBar {
-    position: static;
-    backdrop-filter: none;
     background: linear-gradient(180deg, var(--card-2), var(--card));
   }
 }
