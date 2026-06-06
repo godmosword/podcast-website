@@ -306,6 +306,34 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
+/* 字幕字級切換鈕（Aa，膠囊樣式與 autoBtn／timerBtn 一致）。 */
+.captionSizeBtn {
+  flex: 0 0 auto;
+  pointer-events: auto;
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+  color: #fff;
+  font-weight: 700;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(4px);
+  line-height: 1;
+}
+
+.captionSizeBtn:active {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+.aaSmall {
+  font-size: 0.72rem;
+}
+
+.aaLarge {
+  font-size: 1.02rem;
+}
+
 /* ---- 睡前定時（右上角 ⏱） ---- */
 .timerWrap {
   position: relative;
@@ -373,12 +401,24 @@
   pointer-events: none;
 }
 
+/* 字幕字級三段（字往上長，bottom 不變、不擠壓控制列）。 */
+.captionWrap[data-size="sm"] {
+  --caption-size: 1rem;
+}
+.captionWrap[data-size="md"] {
+  --caption-size: 1.2rem;
+}
+.captionWrap[data-size="lg"] {
+  --caption-size: 1.55rem;
+}
+
 .caption {
   margin: 0;
   max-width: 600px;
   text-align: center;
   color: #fff;
-  font-size: 1.2rem;
+  /* 字級由 captionWrap 的 data-size 提供 --caption-size 變數（預設中）。 */
+  font-size: var(--caption-size, 1.2rem);
   font-weight: 700;
   line-height: 1.55;
   letter-spacing: 0.01em;
@@ -425,13 +465,24 @@
   color: #fff;
   font-size: 1.15rem;
   line-height: 1;
-  background: rgba(255, 255, 255, 0.14);
+  /* 黏土質感：上亮下暗漸層 + 內高光 + 柔陰影 + 細邊框，與播放鈕同語彙。 */
+  background-image: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.26),
+    rgba(0, 0, 0, 0.16)
+  );
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45),
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.4);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(4px);
-  transition: transform var(--motion-press), background 0.15s ease;
+  transition: transform var(--motion-press), box-shadow 0.15s ease;
 }
 
 .ctrlBtn:active {
   transform: scale(0.9);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5),
+    inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .ctrlBtn:disabled {
@@ -439,9 +490,16 @@
 }
 
 .ctrlBtnOn {
-  /* 開啟時白底 + 主題色字（color 由 inline style 指定） */
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  /* 開啟時白底 + 主題色字（color 由 inline style 指定），保留同系陰影。 */
+  background-image: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 1),
+    rgba(230, 230, 235, 0.92)
+  );
+  border-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45),
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.8);
+  text-shadow: none;
 }
 
 .skip {

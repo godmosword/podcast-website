@@ -27,6 +27,20 @@ type StoryPlayerProps = {
 const SWIPE_THRESHOLD = 50;
 const BEDTIME_OPTIONS = [15, 30, 45] as const;
 
+// 字幕字級偏好（跨集保留於 localStorage）。
+const CAPTION_SIZES = ["sm", "md", "lg"] as const;
+type CaptionSize = (typeof CAPTION_SIZES)[number];
+const CAPTION_SIZE_KEY = "cc:caption-size";
+const CAPTION_SIZE_LABEL: Record<CaptionSize, string> = {
+  sm: "小",
+  md: "中",
+  lg: "大",
+};
+
+function isCaptionSize(v: unknown): v is CaptionSize {
+  return typeof v === "string" && (CAPTION_SIZES as readonly string[]).includes(v);
+}
+
 /**
  * 即時字幕定位：回傳 currentTime 當下應顯示的句子索引（最後一個起始秒數 ≤ t 的句子）。
  * times 需遞增；回傳值夾在 [0, max]。
@@ -72,6 +86,7 @@ export default function StoryPlayer({
   const [cueCopied, setCueCopied] = useState(false);
   const [cueNow, setCueNow] = useState(0);
   const [subIndex, setSubIndex] = useState(0);
+  const [captionSize, setCaptionSize] = useState<CaptionSize>("md");
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const touchStartX = useRef<number | null>(null);
@@ -92,6 +107,29 @@ export default function StoryPlayer({
       setCueMode(true);
     }
   }, []);
+
+  // 還原字幕字級偏好（SSR 初值固定 md，掛載後才讀，避免 hydration mismatch）。
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(CAPTION_SIZE_KEY);
+      if (isCaptionSize(saved)) setCaptionSize(saved);
+    } catch {
+      // localStorage 不可用（隱私模式等）時維持預設。
+    }
+  }, []);
+
+  function cycleCaptionSize() {
+    setCaptionSize((cur) => {
+      const idx = CAPTION_SIZES.indexOf(cur);
+      const next = CAPTION_SIZES[(idx + 1) % CAPTION_SIZES.length];
+      try {
+        window.localStorage.setItem(CAPTION_SIZE_KEY, next);
+      } catch {
+        // 寫入失敗（隱私模式）時不阻斷切換，僅本次有效。
+      }
+      return next;
+    });
+  }
 
   // 對時模式：每 100ms 更新目前秒數顯示（不影響正常播放路徑）。
   useEffect(() => {
@@ -495,6 +533,15 @@ export default function StoryPlayer({
             )}
           </div>
           <button
+            type="button"
+            className={styles.captionSizeBtn}
+            onClick={cycleCaptionSize}
+            aria-label={`字幕字級：${CAPTION_SIZE_LABEL[captionSize]}（點擊切換）`}
+          >
+            <span className={styles.aaSmall}>A</span>
+            <span className={styles.aaLarge}>A</span>
+          </button>
+          <button
             className={`${styles.autoBtn} ${autoFlip ? styles.autoBtnOn : ""}`}
             style={autoFlip ? { backgroundColor: color } : undefined}
             onClick={() => setAutoFlip((v) => !v)}
@@ -540,7 +587,7 @@ export default function StoryPlayer({
       )}
 
       {caption && !hasEnded && (
-        <div className={styles.captionWrap}>
+        <div className={styles.captionWrap} data-size={captionSize}>
           <p className={styles.caption}>{caption}</p>
         </div>
       )}
