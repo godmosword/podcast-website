@@ -1,6 +1,6 @@
 {
   "name": "chechecar",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -19,12 +19,14 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "fast-xml-parser": "^5.2.5",
-    "tsx": "^4.20.3",
     "@playwright/test": "^1.52.0",
     "@types/node": "^22.10.0",
+    "@types/opencc-js": "^1.0.3",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "fast-xml-parser": "^5.2.5",
+    "opencc-js": "^1.3.1",
+    "tsx": "^4.20.3",
     "typescript": "^5.7.0",
     "vitest": "^3.2.4"
   }

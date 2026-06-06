@@ -204,7 +204,7 @@ ffmpeg -i audio.mp3 -codec:a libmp3lame -b:a 128k -ac 1 audio-optimized.mp3
 
 ## 自動字幕：逐字即時字幕（`npm run transcribe`）
 
-每集的即時字幕存在**側車檔** `data/subtitles/<slug>.json`（`[{ "t": 秒數, "text": "…" }]`），由音檔**本機轉錄**（whisper.cpp）產生，音檔不外送、免費、零金鑰。播放器**有側車檔就自動套用**（依音檔時間顯示字幕，獨立於翻頁）；沒有則回退舊的 `captions`/`captionTimes` 邏輯。
+每集的即時字幕存在**側車檔** `data/subtitles/<slug>.json`（`[{ "t": 秒數, "text": "…" }]`），由音檔**本機轉錄**（whisper.cpp）產生，音檔不外送、免費、零金鑰。轉錄時**自動簡轉繁**（OpenCC `cn→twp`，台灣用語）並過濾常見幻覺鳴謝。播放器**有側車檔就自動套用**（依音檔時間顯示字幕，獨立於翻頁）；沒有則回退舊的 `captions`/`captionTimes` 邏輯。
 
 **一次性安裝：**
 
@@ -222,6 +222,7 @@ curl -L -o models/ggml-large-v3.bin \
 npm run transcribe -- ev drone ep-7    # 指定數集
 npm run transcribe -- --all            # 全部 public/stories/* 有 audio.mp3 的集
 WHISPER_MODEL=models/ggml-small.bin npm run transcribe -- ev   # 指定模型
+npm run transcribe -- --convert --all  # 只對既有側車檔重跑簡轉繁/過濾（不跑 Whisper）
 ```
 
 **新集自動上字幕：** `npm run sync:apple` 下載新集音檔後，**本機若有 whisper-cli + 模型會自動轉錄**並寫側車檔；缺工具/模型（如一般 CI）或設 `SKIP_TRANSCRIBE=1` 會自動跳過、不中斷同步。CI 要自動上字幕，需在 workflow 安裝 `whisper-cpp` 並快取模型。
@@ -229,9 +230,9 @@ WHISPER_MODEL=models/ggml-small.bin npm run transcribe -- ev   # 指定模型
 **草稿必校對（兒童產品上架前）：**
 
 - Whisper 在音樂/靜音段常加**假字幕鳴謝**（如「字幕:XXX」「請訂閱…」）；腳本已自動過濾常見幻覺，仍建議抽查。
-- 輸出為**逐字稿**（語氣詞、口語、**人名可能誤聽**，如 Bonbon→啵啵）；直接編輯側車 JSON 修正即可。
-- 偶有簡體需簡轉繁。
-- `small` 模型時間軸在配樂段較鬆、誤字較多；`large-v3` 明顯較準（建議正式用）。
+- 輸出為**逐字稿**（語氣詞、口語）；**品牌/人名仍會誤聽**（Bonbon→寶寶、馬米→媽咪，Whisper 無從得知），直接編輯側車 JSON 修正即可。
+- 簡轉繁已自動（OpenCC）；偶有未涵蓋詞仍需抽查。
+- `small` 模型誤字較多；目前 EP1–7 用 `large-v3`（繁中較準，建議正式用）。
 
 > 模型檔放 `models/`（已 gitignore，勿入庫）。側車檔 `data/subtitles/*.json` 會入庫（即字幕內容）。
 

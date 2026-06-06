@@ -17,8 +17,12 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import * as OpenCC from "opencc-js";
 
 export type Subtitle = { t: number; text: string };
+
+// Whisper 中文常輸出簡體；本站為繁中（台灣），統一簡轉繁（含台灣用語）。
+const toTraditional = OpenCC.Converter({ from: "cn", to: "twp" });
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 export const SUBTITLES_DIR = join(ROOT, "data", "subtitles");
@@ -44,16 +48,25 @@ function isHallucination(text: string): boolean {
   return HALLUCINATION.some((re) => re.test(text));
 }
 
-/** 清除幻覺、去除前後空白、合併連續重複句。 */
+/** 簡轉繁（台灣用語）+ 清除幻覺、去除前後空白、合併連續重複句。 */
 export function cleanSegments(segments: Subtitle[]): Subtitle[] {
   const out: Subtitle[] = [];
   for (const seg of segments) {
-    const text = seg.text.trim();
+    const text = toTraditional(seg.text.trim());
     if (!text || isHallucination(text)) continue;
     if (out.length > 0 && out[out.length - 1].text === text) continue;
     out.push({ t: seg.t, text });
   }
   return out;
+}
+
+/** 重新本地化既有側車檔（簡轉繁 + 重新過濾），不重跑 Whisper。 */
+export function relocalizeSidecar(slug: string): { count: number; file: string } {
+  const file = join(SUBTITLES_DIR, `${slug}.json`);
+  const segments = JSON.parse(readFileSync(file, "utf-8")) as Subtitle[];
+  const cleaned = cleanSegments(segments);
+  writeSubtitles(slug, cleaned);
+  return { count: cleaned.length, file };
 }
 
 export function whisperAvailable(

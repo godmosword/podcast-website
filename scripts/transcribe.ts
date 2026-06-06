@@ -24,6 +24,8 @@ import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import {
   ROOT,
+  SUBTITLES_DIR,
+  relocalizeSidecar,
   transcribeToSidecar,
   whisperAvailable,
 } from "./lib/transcribe-core";
@@ -42,14 +44,44 @@ function allSlugsWithAudio(): string[] {
     .sort();
 }
 
+function allSidecarSlugs(): string[] {
+  if (!existsSync(SUBTITLES_DIR)) return [];
+  return readdirSync(SUBTITLES_DIR)
+    .filter((f) => f.endsWith(".json"))
+    .map((f) => f.replace(/\.json$/, ""))
+    .sort();
+}
+
+function runConvert(args: string[]): void {
+  const slugs = args.includes("--all")
+    ? allSidecarSlugs()
+    : args.filter((a) => !a.startsWith("--"));
+  if (slugs.length === 0) fail("用法：npm run transcribe -- --convert <slug...|--all>");
+  for (const slug of slugs) {
+    try {
+      const { count } = relocalizeSidecar(slug);
+      console.log(`✓ ${slug}：簡轉繁完成（${count} 句）`);
+    } catch (err) {
+      console.error(`✗ ${slug} 失敗：${(err as Error).message}`);
+    }
+  }
+}
+
 function main(): void {
   const args = process.argv.slice(2);
+
+  // --convert：對既有側車檔簡轉繁/重新過濾，不重跑 Whisper。
+  if (args.includes("--convert")) {
+    runConvert(args);
+    return;
+  }
+
   const slugs = args.includes("--all")
     ? allSlugsWithAudio()
     : args.filter((a) => !a.startsWith("--"));
 
   if (slugs.length === 0) {
-    fail("用法：npm run transcribe -- <slug...> 或 --all");
+    fail("用法：npm run transcribe -- <slug...> 或 --all（或 --convert）");
   }
   if (!whisperAvailable()) {
     fail(

@@ -96,8 +96,8 @@ Vercel 設 `NEXT_PUBLIC_SITE_URL=https://正式網域`。OG／Twitter／RSS／si
 ### 每集「給家長的小提示」/ 節目筆記　`P2 · S · 文案`　〔content+design〕
 詳情頁大綱下加可選「這集可以聊什麼」2–3 句（`data/stories.ts` 加 `parentNote` 欄）。提升信任、利家長轉發 Threads、可與 JSON-LD description 共用。對標 Circle Round show notes。
 
-### 字幕校對 + 換 large-v3 重跑　`P2 · S/集 · 無`　〔content〕
-EP1–7 已有 Whisper 逐字字幕（`data/subtitles/*.json`，small 模型草稿）。待辦：① 下載 `large-v3` 重跑（`npm run transcribe -- --all`）提升準確；② 校對誤聽人名（Bonbon→啵啵、馬米→馬咪等，直接改側車 JSON）；③ 抽查簡轉繁。屬資料校對、非工程。
+### 字幕人名校對　`P2 · S/集 · 無`　〔content〕
+EP1–7 已用 `large-v3` 轉錄 + 自動簡轉繁（`data/subtitles/*.json`）。**剩**：校對品牌/人名誤聽——Bonbon→寶寶、馬米→媽咪等（Whisper 無從得知），直接改側車 JSON。屬資料校對、非工程。
 
 ### 新集通知路徑（家長向白話說明）　`P2 · S · 無`　〔growth〕
 訂閱區簡短說明「如何訂閱／用 App 收新集」。RSS 技術面已有，家長多不熟 RSS，需白話引導。`ConnectHub` 加一兩句 FAQ 或連關於頁錨點。
@@ -162,7 +162,7 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 ## Completed
 
 ### 逐字即時字幕框架 + EP1–7 自動上字幕（本機 whisper.cpp）
-字幕從翻頁解耦：存側車檔 `data/subtitles/<slug>.json`（`lib/subtitles.ts` 載入、播放器依音檔時間顯示、獨立翻頁；無側車則回退舊邏輯）。轉錄核心 `scripts/lib/transcribe-core.ts`（ffmpeg→whisper.cpp、自動濾幻覺鳴謝），CLI `npm run transcribe -- <slug...|--all>`。Apple 同步下載新集後自動轉錄（有 whisper 才跑，CI/缺模型自動跳過，`SKIP_TRANSCRIBE=1` 可關）。EP1–7 已產字幕（small 草稿，校對見 P2）。音檔不外送、零金鑰；`models/` gitignore。
+字幕從翻頁解耦：存側車檔 `data/subtitles/<slug>.json`（`lib/subtitles.ts` 載入、播放器依音檔時間顯示、獨立翻頁；無側車則回退舊邏輯）。轉錄核心 `scripts/lib/transcribe-core.ts`（ffmpeg→whisper.cpp、**自動簡轉繁 OpenCC**、濾幻覺鳴謝），CLI `npm run transcribe -- <slug...|--all|--convert>`。Apple 同步下載新集後自動轉錄（有 whisper 才跑，CI/缺模型自動跳過，`SKIP_TRANSCRIBE=1` 可關）。EP1–7 已用 `large-v3` 產繁中字幕（人名校對見 P2）。音檔不外送、零金鑰；`models/` gitignore。
 **Completed:** main（2026-06）
 
 ### 即時字幕機制 + 字幕對時模式（頁綁定，舊式）
