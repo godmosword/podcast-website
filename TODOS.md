@@ -5,6 +5,60 @@
 
 ---
 
+## 完整產品 Roadmap（plan 2026-06）
+
+> 起因：線上站第一印象被評為「很簡陋：只有最新一集 + loading、沒有集數列表、沒看到播放器/訂閱」。  
+> 對照程式碼後 **功能其實都在**（故事牆、播放器、訂閱平台連結、RSS、每集 OG/SEO、PWA），不重做；  
+> 但「loading、只有最新一集」是真 bug（見下方 0.0）。本 roadmap = 修第一印象 + 補及格線 + 視覺升級的分期排序。
+
+**分期與排序（每期可獨立成一支 commit/PR）：**
+
+| 期 | 主題 | 條目（多數已在本檔，照序執行） |
+|----|------|------|
+| **P0 地基** | 看起來完整 + 被搜尋到 | 0.0 首頁渲染修復（↓本節）· 正式網域 · `sitemap`/`robots` · JSON-LD（見〔成功及格線〕〔產品〕） |
+| **P1 訂閱轉換** | 「沒看到訂閱」消失 | 單集訂閱 CTA 上移（〔設計〕P0）· 首頁可見訂閱入口（↓本節）· ConnectHub 文案/排序 |
+| **P2 信任/合規** | 兒童產品權重 | 隱私頁（先於 analytics）· analytics · 主持人信任區（見〔成功及格線〕〔成長〕） |
+| **P3 視覺/親子** | 更溫暖、更黏 | 空狀態插畫 · 車車角色圖鑑（↓本節）· 每集親子提示/節目筆記（已列）· 縮放決策 |
+| **P4 體驗/可靠** | 載得快、不掛 | 音檔壓縮 · 錯誤/上線監控 · Playwright smoke · ESLint CI（已列） |
+
+### 0.0 首頁集數列表渲染修復（client bail-out，**新發現**）
+
+**What:** `StoryFilter` 把整段故事牆包在 `<Suspense fallback="載入故事中…">`，內層用 `useSearchParams()`。Next.js 15 App Router 中此舉使該邊界退化為 client-only → **靜態 HTML 只有最新一集 + 「載入故事中…」，完整集數列表要等 client JS 才出現**。同時拖累首屏觀感與首頁 SEO（內容不在 HTML 裡）。
+
+**Why:** 這正是「看起來很簡陋」的根因，也是首頁 SEO 空洞的根因（與 sitemap/JSON-LD 同一條線）。改完首屏即完整、骨架載入需求基本消失。
+
+**Context:** 修法避免 hydration mismatch：`useState` 初值改 `null`（= server 的「全部」），`vehicleParam` 只在 `useEffect` 套用；移除把列表藏在 fallback 的結構，或把 fallback 設為「全部故事」而非載入字串。影響檔 `components/StoryFilter.tsx`；`app/page.tsx`（server component）已傳入完整 `stories`，不動。
+
+**Effort:** S（人工 ~1h / CC ~15min）  
+**Priority:** P0  
+**Depends on:** None
+
+### 首頁可見的訂閱入口
+
+**What:** 在 `SiteHeader` 或 `LatestHero` 區附一個小型訂閱入口（連 `#connect` 或平台），讓首屏不必滑到 footer 才看到訂閱。
+
+**Why:** 訂閱平台連結其實已設定（`lib/platforms.ts` 含 Apple/Spotify/KKBOX/YouTube），但只在頁尾；首屏看不到 → 被誤判為「沒有訂閱」。與〔設計〕單集 CTA 上移互補。
+
+**Context:** `components/SiteHeader.tsx` / `components/LatestHero.tsx`；連到既有 `ConnectHub`（id="connect"）。
+
+**Effort:** S  
+**Priority:** P1  
+**Depends on:** None
+
+### 車車角色圖鑑（新頁 `/characters`，**新增**）
+
+**What:** 用既有資料做角色小圖鑑：安安救護車、東東挖土機、鈴鈴清潔車、小紅賽車、小飛無人機、未來電動車…（角色名已在各集標題）。每個角色卡：黏土縮圖 + 一句個性 + 連到該集。
+
+**Why:** recurring 角色是親子 IP 的記憶點；圖鑑頁同時是新的 SEO 落地頁與「找下一集」入口，強化留存（對齊 A）。
+
+**Context:** **重用** `VehicleClayIcon`、`getVehicleCoverPath()`、`allVehicles()`、`getStoriesByVehicle()`（`data/stories.ts` 已具）。可仿 `/topic` 結構靜態生成。個性文案需 Bonbon & 馬米 確認。
+
+**Effort:** M  
+**Priority:** P3  
+**Depends on:** 角色個性文案
+
+---
+
 ## 成功及格線（必備地基，plan-ceo-review 2026-06）
 
 > **「成功 podcast 官網」的承重項**，對齊已選策略（平台訂閱 A + 社群導流 B）。  
