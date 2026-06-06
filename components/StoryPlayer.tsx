@@ -25,7 +25,6 @@ type StoryPlayerProps = {
 };
 
 const SWIPE_THRESHOLD = 50;
-const BEDTIME_OPTIONS = [15, 30, 45] as const;
 
 /**
  * 即時字幕定位：回傳 currentTime 當下應顯示的句子索引（最後一個起始秒數 ≤ t 的句子）。
@@ -60,9 +59,6 @@ export default function StoryPlayer({
   const [autoFlip, setAutoFlip] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [hasEnded, setHasEnded] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  const [bedtimeMinutes, setBedtimeMinutes] = useState<number | null>(null);
-  const [bedtimeRemaining, setBedtimeRemaining] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
   const [cueMode, setCueMode] = useState(false);
   const [cueMarks, setCueMarks] = useState<number[]>([]);
@@ -72,7 +68,6 @@ export default function StoryPlayer({
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const touchStartX = useRef<number | null>(null);
-  const bedtimeEndRef = useRef<number | null>(null);
 
   const total = images.length;
   // 即時字幕軌（轉錄產生）優先；獨立於翻頁，依音檔時間顯示。
@@ -192,32 +187,6 @@ export default function StoryPlayer({
     };
   }, [autoFlip, total, hasCueTimes, captionTimes, hasSubtitles, subtitles]);
 
-  useEffect(() => {
-    if (bedtimeMinutes === null) {
-      bedtimeEndRef.current = null;
-      setBedtimeRemaining(null);
-      return;
-    }
-
-    bedtimeEndRef.current = Date.now() + bedtimeMinutes * 60_000;
-    const tick = () => {
-      const end = bedtimeEndRef.current;
-      if (!end) return;
-      const remaining = Math.max(0, Math.ceil((end - Date.now()) / 1000));
-      setBedtimeRemaining(remaining);
-      if (remaining <= 0) {
-        audioRef.current?.pause();
-        setIsPlaying(false);
-        setHasEnded(true);
-        setBedtimeMinutes(null);
-      }
-    };
-
-    tick();
-    const id = window.setInterval(tick, 1000);
-    return () => window.clearInterval(id);
-  }, [bedtimeMinutes]);
-
   function togglePlay() {
     const el = audioRef.current;
     if (!el || mediaError === "audio") return;
@@ -260,12 +229,6 @@ export default function StoryPlayer({
     if (Math.abs(deltaX) < SWIPE_THRESHOLD) return;
     if (deltaX > 0) prev();
     else next();
-  }
-
-  function formatBedtime(seconds: number): string {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}:${String(s).padStart(2, "0")}`;
   }
 
   // ---- 字幕對時模式：邊聽邊記下每句起始秒數 ----
@@ -441,15 +404,34 @@ export default function StoryPlayer({
         </div>
       )}
 
-      {bedtimeRemaining !== null && !hasEnded && (
-        <div className={styles.bedtimeBadge}>
-          睡前 {formatBedtime(bedtimeRemaining)}
-        </div>
-      )}
-
       {caption && !hasEnded && (
         <div className={styles.captionWrap}>
           <p className={styles.caption}>{caption}</p>
+        </div>
+      )}
+
+      {!hasEnded && (
+        <div className={styles.seekRow}>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            step={0.1}
+            value={progress}
+            className={styles.seekBar}
+            style={
+              {
+                "--seek": `${progress}%`,
+                "--seek-color": color,
+              } as React.CSSProperties
+            }
+            aria-label="播放進度"
+            onChange={(e) => {
+              const el = audioRef.current;
+              if (!el?.duration) return;
+              el.currentTime = (Number(e.target.value) / 100) * el.duration;
+            }}
+          />
         </div>
       )}
 
@@ -467,12 +449,7 @@ export default function StoryPlayer({
           </button>
 
           <div className={styles.dotsWrap}>
-            {autoFlip && (
-              <p className={styles.autoHint} id="auto-flip-hint">
-                跟讀中會自動翻頁喔
-              </p>
-            )}
-            <div className={styles.dots} aria-describedby={autoFlip ? "auto-flip-hint" : undefined}>
+            <div className={styles.dots}>
               {images.map((_, i) => (
                 <button
                   key={i}
@@ -481,7 +458,6 @@ export default function StoryPlayer({
                   onClick={() => !autoFlip && goTo(i)}
                   aria-label={`跳到第 ${i + 1} 頁`}
                   disabled={autoFlip}
-                  title={autoFlip ? "跟讀中會自動翻頁" : undefined}
                   type="button"
                 />
               ))}
@@ -491,55 +467,6 @@ export default function StoryPlayer({
           <span className={styles.counter}>
             {page + 1}/{total}
           </span>
-        </div>
-      )}
-
-      {!hasEnded && (
-        <div className={styles.advancedBar}>
-          <button
-            type="button"
-            className={styles.advancedToggle}
-            onClick={() => setShowAdvanced((v) => !v)}
-            aria-expanded={showAdvanced}
-          >
-            家長設定 {showAdvanced ? "▲" : "▼"}
-          </button>
-          {showAdvanced && (
-            <div className={styles.advancedPanel}>
-              <p className={styles.advancedLabel}>睡前定時</p>
-              <div className={styles.bedtimeOptions}>
-                {BEDTIME_OPTIONS.map((min) => (
-                  <button
-                    key={min}
-                    type="button"
-                    className={`${styles.bedtimeBtn} ${bedtimeMinutes === min ? styles.bedtimeBtnActive : ""}`}
-                    onClick={() =>
-                      setBedtimeMinutes((current) =>
-                        current === min ? null : min,
-                      )
-                    }
-                  >
-                    {min} 分
-                  </button>
-                ))}
-              </div>
-              {showAdvanced && (
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={progress}
-                  className={styles.seekBar}
-                  aria-label="播放進度"
-                  onChange={(e) => {
-                    const el = audioRef.current;
-                    if (!el?.duration) return;
-                    el.currentTime = (Number(e.target.value) / 100) * el.duration;
-                  }}
-                />
-              )}
-            </div>
-          )}
         </div>
       )}
 

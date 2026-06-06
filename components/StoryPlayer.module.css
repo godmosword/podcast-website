@@ -143,20 +143,6 @@
   z-index: 2;
 }
 
-.bedtimeBadge {
-  position: absolute;
-  top: calc(56px + var(--safe-top));
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 6;
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.65);
-  color: #fff;
-  font-size: 0.82rem;
-  font-weight: 600;
-}
-
 .dotsWrap {
   flex: 1 1 auto;
   display: flex;
@@ -165,68 +151,75 @@
   gap: 4px;
 }
 
-.autoHint {
-  margin: 0;
-  color: rgba(255, 255, 255, 0.65);
-  font-size: 0.72rem;
-  font-weight: 600;
-}
-
-.advancedBar {
+/* ---- 進度條（常駐、可拖曳） ---- */
+.seekRow {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: calc(88px + var(--safe-bottom));
-  z-index: 6;
-  padding: 0 16px;
-}
-
-.advancedToggle {
-  display: block;
-  margin: 0 auto;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.78rem;
-  font-weight: 600;
-  padding: 4px 8px;
-}
-
-.advancedPanel {
-  margin-top: 6px;
-  padding: 10px 12px;
-  border-radius: var(--radius-sm);
-  background: rgba(0, 0, 0, 0.55);
-}
-
-.advancedLabel {
-  margin: 0 0 6px;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-
-.bedtimeOptions {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.bedtimeBtn {
-  flex: 1;
-  padding: 6px 8px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-
-.bedtimeBtnActive {
-  background: rgba(255, 255, 255, 0.35);
+  bottom: calc(92px + var(--safe-bottom));
+  z-index: 5;
+  padding: 0 calc(20px + var(--safe-right)) 0 calc(20px + var(--safe-left));
 }
 
 .seekBar {
   width: 100%;
-  accent-color: #fff;
+  height: 22px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.seekBar::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--seek-color, #fff) var(--seek, 0%),
+    rgba(255, 255, 255, 0.3) var(--seek, 0%)
+  );
+}
+
+.seekBar::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.seekBar::-moz-range-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--seek-color, #fff);
+}
+
+.seekBar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--seek-color, #fff);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.seekBar::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--seek-color, #fff);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.seekBar:focus-visible {
+  outline: none;
+}
+
+.seekBar:focus-visible::-webkit-slider-runnable-track {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
 }
 
 /* ---- 左右 tap zone（透明、各 35%） ---- */
