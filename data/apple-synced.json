@@ -1,5 +1,19 @@
 [
   {
+    "slug": "ep-8",
+    "ep": 8,
+    "title": "怪獸卡車輕輕開｜學會顧及別人的感受",
+    "date": "2026-06-05",
+    "duration": "4:54",
+    "vehicle": "其他",
+    "emoji": "🚗",
+    "color": "#7048e8",
+    "audio": "audio.mp3",
+    "pageCount": 1,
+    "summary": "大聲又勇敢的怪獸卡車 Monster Truck，這次要學會輕輕開、放慢速度，顧及螢火蟲的感受，完成一場溫柔的月光森林任務。適合親共聽、情緒教育、睡前故事。 喜歡《車車遊樂園》，歡迎留下五星好評與留言。孩子許願想聽的車車種類故事，我們會優先安排喔！謝謝您的支持，讓我們更有動力繼續說故事。 🚗IG https://www.instagram.com/s32183218?igsh=YWViZ2V4aHNka3Jm&amp;utm_source=qr 🚗threads https://www.threads.com/@s32183218?igshid=NTc4MTIwNjQ2YQ==",
+    "tags": []
+  },
+  {
     "slug": "ep-7",
     "ep": 7,
     "title": "小橘高鐵晚到了｜如何順利抵達目的地",
@@ -11,6 +25,10 @@
     "audio": "audio.mp3",
     "pageCount": 1,
     "summary": "遇到高鐵晚到延遲怎麼辦呢？Bonbon和馬米學會先冷靜、想辦法解決，換條路也能順利抵達目的地。",
-    "tags": ["冷靜", "解決問題", "成長"]
+    "tags": [
+      "冷靜",
+      "解決問題",
+      "成長"
+    ]
   }
 ]
