@@ -25,6 +25,7 @@ type StoryPlayerProps = {
 };
 
 const SWIPE_THRESHOLD = 50;
+const BEDTIME_OPTIONS = [15, 30, 45] as const;
 
 /**
  * 即時字幕定位：回傳 currentTime 當下應顯示的句子索引（最後一個起始秒數 ≤ t 的句子）。
@@ -60,6 +61,9 @@ export default function StoryPlayer({
   const [isLoading, setIsLoading] = useState(true);
   const [hasEnded, setHasEnded] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [bedtimeMinutes, setBedtimeMinutes] = useState<number | null>(null);
+  const [bedtimeRemaining, setBedtimeRemaining] = useState<number | null>(null);
+  const [showTimer, setShowTimer] = useState(false);
   const [cueMode, setCueMode] = useState(false);
   const [cueMarks, setCueMarks] = useState<number[]>([]);
   const [cueCopied, setCueCopied] = useState(false);
@@ -68,6 +72,7 @@ export default function StoryPlayer({
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const touchStartX = useRef<number | null>(null);
+  const bedtimeEndRef = useRef<number | null>(null);
 
   const total = images.length;
   // 即時字幕軌（轉錄產生）優先；獨立於翻頁，依音檔時間顯示。
@@ -186,6 +191,38 @@ export default function StoryPlayer({
       el.removeEventListener("loadstart", handleLoadStart);
     };
   }, [autoFlip, total, hasCueTimes, captionTimes, hasSubtitles, subtitles]);
+
+  useEffect(() => {
+    if (bedtimeMinutes === null) {
+      bedtimeEndRef.current = null;
+      setBedtimeRemaining(null);
+      return;
+    }
+
+    bedtimeEndRef.current = Date.now() + bedtimeMinutes * 60_000;
+    const tick = () => {
+      const end = bedtimeEndRef.current;
+      if (!end) return;
+      const remaining = Math.max(0, Math.ceil((end - Date.now()) / 1000));
+      setBedtimeRemaining(remaining);
+      if (remaining <= 0) {
+        audioRef.current?.pause();
+        setIsPlaying(false);
+        setHasEnded(true);
+        setBedtimeMinutes(null);
+      }
+    };
+
+    tick();
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, [bedtimeMinutes]);
+
+  function formatBedtime(seconds: number): string {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${String(s).padStart(2, "0")}`;
+  }
 
   function togglePlay() {
     const el = audioRef.current;
@@ -359,6 +396,49 @@ export default function StoryPlayer({
             ✕
           </Link>
           <span className={styles.topTitle}>{title}</span>
+          <div className={styles.timerWrap}>
+            <button
+              type="button"
+              className={`${styles.timerBtn} ${bedtimeMinutes ? styles.timerBtnOn : ""}`}
+              onClick={() => setShowTimer((v) => !v)}
+              aria-label="睡前定時"
+              aria-expanded={showTimer}
+            >
+              ⏱
+              {bedtimeRemaining !== null ? ` ${formatBedtime(bedtimeRemaining)}` : ""}
+            </button>
+            {showTimer && (
+              <div className={styles.timerMenu} role="menu">
+                {BEDTIME_OPTIONS.map((min) => (
+                  <button
+                    key={min}
+                    type="button"
+                    role="menuitemradio"
+                    aria-checked={bedtimeMinutes === min}
+                    className={`${styles.timerOpt} ${bedtimeMinutes === min ? styles.timerOptOn : ""}`}
+                    onClick={() => {
+                      setBedtimeMinutes((c) => (c === min ? null : min));
+                      setShowTimer(false);
+                    }}
+                  >
+                    睡前 {min} 分
+                  </button>
+                ))}
+                {bedtimeMinutes !== null && (
+                  <button
+                    type="button"
+                    className={styles.timerOpt}
+                    onClick={() => {
+                      setBedtimeMinutes(null);
+                      setShowTimer(false);
+                    }}
+                  >
+                    取消定時
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
           <button
             className={`${styles.autoBtn} ${autoFlip ? styles.autoBtnOn : ""}`}
             style={autoFlip ? { backgroundColor: color } : undefined}
