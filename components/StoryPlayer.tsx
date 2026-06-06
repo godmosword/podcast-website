@@ -61,6 +61,9 @@ export default function StoryPlayer({
   const [isLoading, setIsLoading] = useState(true);
   const [hasEnded, setHasEnded] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [repeat, setRepeat] = useState(false);
   const [bedtimeMinutes, setBedtimeMinutes] = useState<number | null>(null);
   const [bedtimeRemaining, setBedtimeRemaining] = useState<number | null>(null);
   const [showTimer, setShowTimer] = useState(false);
@@ -73,6 +76,7 @@ export default function StoryPlayer({
   const audioRef = useRef<HTMLAudioElement>(null);
   const touchStartX = useRef<number | null>(null);
   const bedtimeEndRef = useRef<number | null>(null);
+  const timerWrapRef = useRef<HTMLDivElement>(null);
 
   const total = images.length;
   // 即時字幕軌（轉錄產生）優先；獨立於翻頁，依音檔時間顯示。
@@ -97,6 +101,23 @@ export default function StoryPlayer({
     }, 100);
     return () => window.clearInterval(id);
   }, [cueMode]);
+
+  // 睡前定時選單：點選單外或按 Esc 自動收起。
+  useEffect(() => {
+    if (!showTimer) return;
+    const onDown = (e: PointerEvent) => {
+      if (!timerWrapRef.current?.contains(e.target as Node)) setShowTimer(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowTimer(false);
+    };
+    document.addEventListener("pointerdown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [showTimer]);
 
   function goTo(next: number) {
     setPage(() => Math.max(0, Math.min(total - 1, next)));
@@ -138,6 +159,12 @@ export default function StoryPlayer({
     if (!el) return;
 
     const handleEnded = () => {
+      if (repeat) {
+        el.currentTime = 0;
+        setPage(0);
+        void el.play().catch(() => setIsPlaying(false));
+        return;
+      }
       setIsPlaying(false);
       setHasEnded(true);
       clearContinue();
@@ -151,7 +178,9 @@ export default function StoryPlayer({
     const subTimes = hasSubtitles ? subtitles!.map((s) => s.t) : null;
     const handleTimeUpdate = () => {
       const t = el.currentTime;
+      setCurrentTime(t);
       if (el.duration && Number.isFinite(el.duration)) {
+        setDuration(el.duration);
         setProgress((t / el.duration) * 100);
       }
       // 即時字幕軌：獨立於翻頁，永遠跟讀。
@@ -172,7 +201,10 @@ export default function StoryPlayer({
         setPage((prev) => (prev === target ? prev : target));
       }
     };
-    const handleCanPlay = () => setIsLoading(false);
+    const handleCanPlay = () => {
+      setIsLoading(false);
+      if (el.duration && Number.isFinite(el.duration)) setDuration(el.duration);
+    };
     const handleLoadStart = () => setIsLoading(true);
 
     el.addEventListener("ended", handleEnded);
@@ -190,7 +222,7 @@ export default function StoryPlayer({
       el.removeEventListener("canplay", handleCanPlay);
       el.removeEventListener("loadstart", handleLoadStart);
     };
-  }, [autoFlip, total, hasCueTimes, captionTimes, hasSubtitles, subtitles]);
+  }, [autoFlip, total, hasCueTimes, captionTimes, hasSubtitles, subtitles, repeat]);
 
   useEffect(() => {
     if (bedtimeMinutes === null) {
@@ -222,6 +254,29 @@ export default function StoryPlayer({
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m}:${String(s).padStart(2, "0")}`;
+  }
+
+  function formatTime(sec: number): string {
+    const v = Number.isFinite(sec) && sec > 0 ? sec : 0;
+    const m = Math.floor(v / 60);
+    const s = Math.floor(v % 60);
+    return `${m}:${String(s).padStart(2, "0")}`;
+  }
+
+  function skip(delta: number) {
+    const el = audioRef.current;
+    if (!el) return;
+    const dur = Number.isFinite(el.duration) ? el.duration : el.currentTime + delta;
+    el.currentTime = Math.max(0, Math.min(dur, el.currentTime + delta));
+  }
+
+  function stop() {
+    const el = audioRef.current;
+    if (!el) return;
+    el.pause();
+    el.currentTime = 0;
+    setPage(0);
+    setIsPlaying(false);
   }
 
   function togglePlay() {
@@ -396,7 +451,7 @@ export default function StoryPlayer({
             ✕
           </Link>
           <span className={styles.topTitle}>{title}</span>
-          <div className={styles.timerWrap}>
+          <div className={styles.timerWrap} ref={timerWrapRef}>
             <button
               type="button"
               className={`${styles.timerBtn} ${bedtimeMinutes ? styles.timerBtnOn : ""}`}
@@ -491,44 +546,87 @@ export default function StoryPlayer({
       )}
 
       {!hasEnded && (
-        <div className={styles.seekRow}>
-          <input
-            type="range"
-            min={0}
-            max={100}
-            step={0.1}
-            value={progress}
-            className={styles.seekBar}
-            style={
-              {
-                "--seek": `${progress}%`,
-                "--seek-color": color,
-              } as React.CSSProperties
-            }
-            aria-label="播放進度"
-            onChange={(e) => {
-              const el = audioRef.current;
-              if (!el?.duration) return;
-              el.currentTime = (Number(e.target.value) / 100) * el.duration;
-            }}
-          />
-        </div>
-      )}
+        <div className={styles.controls}>
+          <div className={styles.seekRow}>
+            <span className={styles.time}>{formatTime(currentTime)}</span>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={0.1}
+              value={progress}
+              className={styles.seekBar}
+              style={
+                {
+                  "--seek": `${progress}%`,
+                  "--seek-color": color,
+                } as React.CSSProperties
+              }
+              aria-label="播放進度"
+              onChange={(e) => {
+                const el = audioRef.current;
+                if (!el?.duration) return;
+                el.currentTime = (Number(e.target.value) / 100) * el.duration;
+              }}
+            />
+            <span className={styles.time}>{formatTime(duration)}</span>
+          </div>
 
-      {!hasEnded && (
-        <div className={styles.bottomBar}>
-          <button
-            className={styles.playBtn}
-            style={{ backgroundColor: color }}
-            onClick={togglePlay}
-            aria-label={isPlaying ? "暫停" : "播放"}
-            disabled={mediaError === "audio"}
-            type="button"
-          >
-            {isPlaying ? "❚❚" : "▶"}
-          </button>
+          <div className={styles.transport}>
+            <button
+              type="button"
+              className={`${styles.ctrlBtn} ${repeat ? styles.ctrlBtnOn : ""}`}
+              style={repeat ? { color } : undefined}
+              onClick={() => setRepeat((v) => !v)}
+              aria-pressed={repeat}
+              aria-label="重複播放"
+            >
+              🔁
+            </button>
+            <button
+              type="button"
+              className={styles.ctrlBtn}
+              onClick={() => skip(-10)}
+              aria-label="倒退 10 秒"
+              disabled={mediaError === "audio"}
+            >
+              <span className={styles.skip}>
+                ⏪<span className={styles.skipNum}>10</span>
+              </span>
+            </button>
+            <button
+              className={styles.playBtn}
+              style={{ backgroundColor: color }}
+              onClick={togglePlay}
+              aria-label={isPlaying ? "暫停" : "播放"}
+              disabled={mediaError === "audio"}
+              type="button"
+            >
+              {isPlaying ? "❚❚" : "▶"}
+            </button>
+            <button
+              type="button"
+              className={styles.ctrlBtn}
+              onClick={() => skip(10)}
+              aria-label="快進 10 秒"
+              disabled={mediaError === "audio"}
+            >
+              <span className={styles.skip}>
+                ⏩<span className={styles.skipNum}>10</span>
+              </span>
+            </button>
+            <button
+              type="button"
+              className={styles.ctrlBtn}
+              onClick={stop}
+              aria-label="停止"
+              disabled={mediaError === "audio"}
+            >
+              ⏹
+            </button>
+          </div>
 
-          <div className={styles.dotsWrap}>
+          {total > 1 && (
             <div className={styles.dots}>
               {images.map((_, i) => (
                 <button
@@ -542,11 +640,7 @@ export default function StoryPlayer({
                 />
               ))}
             </div>
-          </div>
-
-          <span className={styles.counter}>
-            {page + 1}/{total}
-          </span>
+          )}
         </div>
       )}
 

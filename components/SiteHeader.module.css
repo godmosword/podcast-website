@@ -115,30 +115,51 @@
   --btn-fg: var(--ink);
   display: grid;
   place-items: center;
-  width: clamp(86px, 27vw, 108px);
+  width: clamp(88px, 27vw, 112px);
   aspect-ratio: 1;
   border-radius: 50%;
-  background: var(--btn);
   color: var(--btn-fg);
   font-weight: 700;
-  font-size: clamp(0.98rem, 3.8vw, 1.1rem);
-  letter-spacing: 0.03em;
+  font-size: clamp(0.98rem, 3.8vw, 1.12rem);
+  letter-spacing: 0.04em;
   line-height: 1.2;
   text-align: center;
   text-decoration: none;
-  border: 3px solid rgba(255, 255, 255, 0.7);
-  box-shadow: var(--shadow-md), inset 0 2px 0 rgba(255, 255, 255, 0.35);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  /* 黏土／糖果質感：左上徑向高光 + 主色漸層 + 底部微暗 */
+  background: radial-gradient(
+      120% 120% at 30% 22%,
+      rgba(255, 255, 255, 0.55),
+      rgba(255, 255, 255, 0) 46%
+    ),
+    linear-gradient(
+      165deg,
+      var(--btn),
+      color-mix(in srgb, var(--btn) 76%, #000) 100%
+    );
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  /* 立體：貼紙硬邊投影 + 柔光 + 內高光 + 底部內陰影 */
+  box-shadow: 0 7px 0 -1px rgba(52, 48, 43, 0.18),
+    0 12px 22px rgba(52, 48, 43, 0.22),
+    inset 0 3px 4px rgba(255, 255, 255, 0.5),
+    inset 0 -6px 10px rgba(0, 0, 0, 0.12);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+  transition: transform 0.14s ease, box-shadow 0.14s ease;
 }
 
 .actionBtn:hover {
   transform: translateY(-3px);
-  box-shadow: var(--shadow-md), 0 12px 0 -4px rgba(52, 48, 43, 0.12),
-    inset 0 2px 0 rgba(255, 255, 255, 0.35);
+  box-shadow: 0 10px 0 -1px rgba(52, 48, 43, 0.18),
+    0 16px 26px rgba(52, 48, 43, 0.26),
+    inset 0 3px 4px rgba(255, 255, 255, 0.5),
+    inset 0 -6px 10px rgba(0, 0, 0, 0.12);
 }
 
 .actionBtn:active {
-  transform: translateY(0);
+  transform: translateY(2px);
+  box-shadow: 0 3px 0 -1px rgba(52, 48, 43, 0.18),
+    0 6px 12px rgba(52, 48, 43, 0.2),
+    inset 0 3px 4px rgba(255, 255, 255, 0.45),
+    inset 0 -5px 8px rgba(0, 0, 0, 0.12);
 }
 
 @media (prefers-reduced-motion: reduce) {
