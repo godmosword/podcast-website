@@ -202,6 +202,26 @@ ffmpeg -i audio.mp3 -codec:a libmp3lame -b:a 128k -ac 1 audio-optimized.mp3
 
 播放器使用 `preload="metadata"`，進入播放頁才開始載入完整音檔。
 
+## 即時字幕（captionTimes，選填）
+
+字幕預設「跟讀」會把音檔時長**平均切**成每句一段，念快念慢會漂移。若要**精準在每句的時間點換句**（插圖也同步），在 `data/stories.ts` 該集加 `captionTimes`：每句的「起始秒數」，與 `captions` 一一對應且遞增。
+
+```ts
+captions:     ["第一句…", "第二句…", "第三句…"],
+captionTimes: [0,          4.5,        9.2],   // 第二句在 4.5 秒出現，依此類推
+```
+
+未提供 `captionTimes` 時，自動回退為原本的平均切換（向下相容，不影響舊集）。
+
+**怎麼取得秒數（字幕對時模式）：**
+
+1. 開該集播放頁並在網址加 `?cue=1`，例：`/story/ev/play?cue=1`
+2. 按播放，**每聽到新的一句開始就點「⏱ 記下這一句」**
+3. 點「複製」取得 `captionTimes: [...]`，貼回 `data/stories.ts` 該集
+4. 重新整理（不帶 `?cue=1`）確認字幕準確跟著語音
+
+> `?cue=1` 為作者對時用，未連結於站上任何地方；不影響一般使用者，播放頁仍為靜態（SSG）。
+
 ## 字型維護（圓體中文）
 
 中文用自託管的 **jf-open 粉圓（huninn）** 子集（`app/fonts/huninn-subset.woff2`，約 100KB）。拉丁與數字由 Baloo 2 提供。

@@ -54,6 +54,7 @@ export default async function StoryPlayPage({
       images={images}
       audio={storyAudioPath(story.slug, story.audio)}
       captions={story.captions}
+      captionTimes={story.captionTimes}
       backHref={`/story/${story.slug}`}
       nextStorySlug={nextStory?.slug}
       nextStoryTitle={nextStory?.title}

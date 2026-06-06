@@ -15,6 +15,8 @@ type StoryPlayerProps = {
   images: string[];
   audio: string;
   captions?: string[];
+  /** 即時字幕：每句起始秒數，與頁數一一對應且遞增。 */
+  captionTimes?: number[];
   backHref?: string;
   nextStorySlug?: string;
   nextStoryTitle?: string;
@@ -23,6 +25,19 @@ type StoryPlayerProps = {
 const SWIPE_THRESHOLD = 50;
 const BEDTIME_OPTIONS = [15, 30, 45] as const;
 
+/**
+ * 即時字幕定位：回傳 currentTime 當下應顯示的句子索引（最後一個起始秒數 ≤ t 的句子）。
+ * times 需遞增；回傳值夾在 [0, max]。
+ */
+function activeCueIndex(times: number[], t: number, max: number): number {
+  let idx = 0;
+  for (let i = 0; i < times.length; i += 1) {
+    if (t >= times[i]) idx = i;
+    else break;
+  }
+  return Math.min(idx, Math.max(0, max));
+}
+
 export default function StoryPlayer({
   slug,
   title,
@@ -30,6 +45,7 @@ export default function StoryPlayer({
   images,
   audio,
   captions,
+  captionTimes,
   backHref = "/",
   nextStorySlug,
   nextStoryTitle,
@@ -45,6 +61,10 @@ export default function StoryPlayer({
   const [bedtimeMinutes, setBedtimeMinutes] = useState<number | null>(null);
   const [bedtimeRemaining, setBedtimeRemaining] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
+  const [cueMode, setCueMode] = useState(false);
+  const [cueMarks, setCueMarks] = useState<number[]>([]);
+  const [cueCopied, setCueCopied] = useState(false);
+  const [cueNow, setCueNow] = useState(0);
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const touchStartX = useRef<number | null>(null);
@@ -52,6 +72,25 @@ export default function StoryPlayer({
 
   const total = images.length;
   const caption = captions?.[page];
+  // 有提供且句數對得上時，啟用即時字幕（精準秒數換句）；否則回退時長平均切換。
+  const hasCueTimes =
+    Array.isArray(captionTimes) && captionTimes.length === total;
+
+  // 字幕對時模式：播放頁網址帶 ?cue=1 時啟用（純客戶端偵測，頁面維持 SSG）。
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("cue") === "1") {
+      setCueMode(true);
+    }
+  }, []);
+
+  // 對時模式：每 100ms 更新目前秒數顯示（不影響正常播放路徑）。
+  useEffect(() => {
+    if (!cueMode) return;
+    const id = window.setInterval(() => {
+      setCueNow(audioRef.current?.currentTime ?? 0);
+    }, 100);
+    return () => window.clearInterval(id);
+  }, [cueMode]);
 
   function goTo(next: number) {
     setPage(() => Math.max(0, Math.min(total - 1, next)));
@@ -107,10 +146,19 @@ export default function StoryPlayer({
       if (el.duration && Number.isFinite(el.duration)) {
         setProgress((el.currentTime / el.duration) * 100);
       }
-      if (!autoFlip || !el.duration || !Number.isFinite(el.duration)) return;
-      const perPage = el.duration / total;
-      const target = Math.min(total - 1, Math.floor(el.currentTime / perPage));
-      setPage((prev) => (prev === target ? prev : target));
+      if (!autoFlip) return;
+      let target: number | null = null;
+      if (hasCueTimes) {
+        // 即時字幕：用每句起始秒數精準定位（插圖也跟著準）。
+        target = activeCueIndex(captionTimes!, el.currentTime, total - 1);
+      } else if (el.duration && Number.isFinite(el.duration)) {
+        // 回退：時長平均切換。
+        const perPage = el.duration / total;
+        target = Math.min(total - 1, Math.floor(el.currentTime / perPage));
+      }
+      if (target !== null) {
+        setPage((prev) => (prev === target ? prev : target));
+      }
     };
     const handleCanPlay = () => setIsLoading(false);
     const handleLoadStart = () => setIsLoading(true);
@@ -130,7 +178,7 @@ export default function StoryPlayer({
       el.removeEventListener("canplay", handleCanPlay);
       el.removeEventListener("loadstart", handleLoadStart);
     };
-  }, [autoFlip, total]);
+  }, [autoFlip, total, hasCueTimes, captionTimes]);
 
   useEffect(() => {
     if (bedtimeMinutes === null) {
@@ -206,6 +254,33 @@ export default function StoryPlayer({
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m}:${String(s).padStart(2, "0")}`;
+  }
+
+  // ---- 字幕對時模式：邊聽邊記下每句起始秒數 ----
+  function markCue() {
+    const t = audioRef.current?.currentTime ?? 0;
+    setCueMarks((m) => [...m, Math.round(t * 10) / 10]);
+    setCueCopied(false);
+  }
+
+  function undoCue() {
+    setCueMarks((m) => m.slice(0, -1));
+    setCueCopied(false);
+  }
+
+  function resetCue() {
+    setCueMarks([]);
+    setCueCopied(false);
+  }
+
+  async function copyCue() {
+    const text = `captionTimes: [${cueMarks.join(", ")}],`;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCueCopied(true);
+    } catch {
+      // 剪貼簿不可用時靜默：使用者仍可手動從畫面複製。
+    }
   }
 
   return (
@@ -318,6 +393,39 @@ export default function StoryPlayer({
           >
             字幕跟讀 {autoFlip ? "開" : "關"}
           </button>
+        </div>
+      )}
+
+      {cueMode && !hasEnded && (
+        <div className={styles.cuePanel} role="region" aria-label="字幕對時模式">
+          <div className={styles.cueHead}>
+            <span className={styles.cueNow}>{cueNow.toFixed(1)}s</span>
+            <span className={styles.cueCount}>
+              已記 {cueMarks.length}/{captions?.length ?? total} 句
+            </span>
+          </div>
+          <button
+            type="button"
+            className={styles.cueMark}
+            style={{ backgroundColor: color }}
+            onClick={markCue}
+          >
+            ⏱ 記下這一句（第 {cueMarks.length + 1} 句）
+          </button>
+          <code className={styles.cueOut}>
+            captionTimes: [{cueMarks.join(", ")}],
+          </code>
+          <div className={styles.cueBtns}>
+            <button type="button" onClick={undoCue} disabled={cueMarks.length === 0}>
+              復原
+            </button>
+            <button type="button" onClick={resetCue} disabled={cueMarks.length === 0}>
+              清除
+            </button>
+            <button type="button" onClick={copyCue} disabled={cueMarks.length === 0}>
+              {cueCopied ? "已複製 ✓" : "複製"}
+            </button>
+          </div>
         </div>
       )}
 

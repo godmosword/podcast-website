@@ -437,3 +437,84 @@
   text-align: center;
   pointer-events: none;
 }
+
+/* ---- 字幕對時模式（authoring，?cue=1）---- */
+.cuePanel {
+  position: fixed;
+  top: 64px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  width: min(92vw, 460px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--radius-md, 18px);
+  background: rgba(20, 20, 24, 0.88);
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.cueHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.cueNow {
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.cueCount {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.cueMark {
+  padding: 14px 12px;
+  border: none;
+  border-radius: var(--radius-sm, 12px);
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cueOut {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  word-break: break-all;
+  white-space: pre-wrap;
+}
+
+.cueBtns {
+  display: flex;
+  gap: 8px;
+}
+
+.cueBtns button {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cueBtns button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
