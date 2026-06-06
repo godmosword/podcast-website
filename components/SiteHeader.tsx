@@ -6,6 +6,18 @@ import styles from "./SiteHeader.module.css";
 /** 首頁 Hero 主視覺（車車遊樂園黏土風格場景圖） */
 const HERO_IMAGE = "/hero-home.jpg";
 
+/**
+ * 首頁圓鈕：合作聯繫 / 許願投稿 / 留言給我。
+ * 連結待補——把每一筆的 href 換成實際網址即可（mailto:、表單、IG/Threads 等）。
+ * 以 https:// 開頭者會自動在新分頁開啟。
+ * 色彩與文字色已挑選為通過對比（白字配紅/綠、深墨字配黃）。
+ */
+const ACTIONS: { label: string; href: string; bg: string; fg: string }[] = [
+  { label: "合作聯繫", href: "#", bg: "#e03131", fg: "#ffffff" },
+  { label: "許願投稿", href: "#", bg: "#f59f00", fg: "#34302b" },
+  { label: "留言給我", href: "#", bg: "#2b8a3e", fg: "#ffffff" },
+];
+
 type SiteHeaderProps = {
   variant?: "full" | "compact";
 };
@@ -86,11 +98,37 @@ export default function SiteHeader({ variant = "full" }: SiteHeaderProps) {
           style={{ left: "50%", top: "-22px", transform: "translateX(-50%)" }}
         />
       </div>
-      <p className={styles.subtitle}>
-        <span className="marker marker-mint">
-          用車車故事陪伴孩子成長，一起開進歡樂的小天地
-        </span>
-      </p>
+      <div className={styles.lede}>
+        <p className={styles.tagline}>
+          <span className="marker marker-mint">用車車故事陪伴孩子成長</span>
+        </p>
+        <p className={styles.taglineSub}>融合生活中事件及發揮想像出發</p>
+        <p className={styles.taglineSub}>一起探險、學習、勇敢闖關！</p>
+      </div>
+
+      <nav className={styles.actions} aria-label="聯絡與互動">
+        {ACTIONS.map((a) => {
+          const external = /^https?:/i.test(a.href);
+          return (
+            <a
+              key={a.label}
+              href={a.href}
+              className={styles.actionBtn}
+              style={
+                {
+                  "--btn": a.bg,
+                  "--btn-fg": a.fg,
+                } as React.CSSProperties
+              }
+              {...(external
+                ? { target: "_blank", rel: "noopener noreferrer" }
+                : {})}
+            >
+              {a.label}
+            </a>
+          );
+        })}
+      </nav>
     </header>
   );
 }
