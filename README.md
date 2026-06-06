@@ -50,7 +50,7 @@ npm run dev
 NEXT_PUBLIC_SITE_URL=https://你的網域
 ```
 
-用於 Open Graph、Twitter 卡片、RSS 與站內絕對連結。未設定時建置可能 fallback 至 `localhost` 或 `VERCEL_URL`，分享預覽可能不正確。
+用於 Open Graph、Twitter 卡片、RSS 與站內絕對連結。**Production 請務必設 `NEXT_PUBLIC_SITE_URL`**；未設時 production 會 fallback 到 canonical 網域（`lib/site-url.ts` 的 `CANONICAL_SITE_URL`）而非每次部署的臨時 Vercel 網域，preview／本機才用 `VERCEL_URL`／`localhost`。
 
 ## 新增一集故事（SOP）
 

@@ -33,12 +33,9 @@ const huninn = localFont({
   variable: "--font-huninn",
 });
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined);
-
 export const metadata: Metadata = {
-  metadataBase: siteUrl ? new URL(siteUrl) : undefined,
+  // 單一來源：production 永不用臨時 deployment 網域（見 lib/site-url.ts）。
+  metadataBase: new URL(getSiteUrl()),
   title: {
     default: "車車遊樂園",
     template: "%s · 車車遊樂園",
@@ -81,9 +78,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  // 鎖住縮放，避免孩子誤觸放大。
-  userScalable: false,
+  // 開放縮放：家長共讀可放大文字／插圖，符合 WCAG 1.4.4（不鎖 maximumScale／userScalable）。
   // 處理瀏海 / 圓角螢幕，搭配 globals.css 的 env(safe-area-inset-*)。
   viewportFit: "cover",
   themeColor: "#ffffff",
