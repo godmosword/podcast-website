@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "font:subset": "python3 scripts/subset_font.py",
-    "sync:apple": "tsx scripts/sync-apple-podcast.ts"
+    "sync:apple": "tsx scripts/sync-apple-podcast.ts",
+    "transcribe": "tsx scripts/transcribe.ts"
   },
   "dependencies": {
     "next": "^15.1.0",

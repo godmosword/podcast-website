@@ -222,6 +222,38 @@ captionTimes: [0,          4.5,        9.2],   // 第二句在 4.5 秒出現，�
 
 > `?cue=1` 為作者對時用，未連結於站上任何地方；不影響一般使用者，播放頁仍為靜態（SSG）。
 
+### 自動轉錄字幕草稿（`npm run transcribe`，本機）
+
+從音檔自動產生帶時間軸的字幕草稿（`captions` + `captionTimes`），最適合補上 **Apple 自動同步、本無字幕的新集**。全程**本機**（whisper.cpp），音檔不外送、免費、零金鑰。
+
+**一次性安裝：**
+
+```bash
+brew install whisper-cpp          # 提供 whisper-cli（已驗證 1.8.x）
+mkdir -p models
+# 繁中品質建議 large-v3（約 3GB）；要快可先用 small（約 465MB）
+curl -L -o models/ggml-large-v3.bin \
+  https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3.bin
+```
+
+**轉錄一集：**
+
+```bash
+npm run transcribe -- ev                                   # 預設找 models/ggml-large-v3.bin
+WHISPER_MODEL=models/ggml-small.bin npm run transcribe -- ev   # 指定其他模型
+```
+
+輸出可直接貼回 `data/stories.ts` 該集的 `captions` / `captionTimes`。
+
+**草稿必校對（兒童產品上架前）：**
+
+- Whisper 常在音樂/靜音段加**假字幕鳴謝**（如「字幕:XXX」），務必刪除。
+- 輸出為**逐字稿**（語氣詞、口語、人名可能誤聽），與繪本式摘要不同；可保留逐字、或精簡成摘要句。
+- 多數為繁體，偶有簡體需簡轉繁。
+- `small` 模型時間軸在配樂段較鬆；`large-v3` 明顯較準。
+
+> 模型檔放 `models/`（已 gitignore，勿入庫）。此為作者端工具，不影響站上執行。
+
 ## 字型維護（圓體中文）
 
 中文用自託管的 **jf-open 粉圓（huninn）** 子集（`app/fonts/huninn-subset.woff2`，約 100KB）。拉丁與數字由 Baloo 2 提供。

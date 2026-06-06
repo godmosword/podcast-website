@@ -30,3 +30,6 @@ next-env.d.ts
 
 # playwright
 /test-results/
+
+# whisper.cpp 模型（轉錄字幕用，體積大，勿入庫）
+/models/
