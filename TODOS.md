@@ -5,6 +5,63 @@
 
 ---
 
+## 成功及格線（必備地基，plan-ceo-review 2026-06）
+
+> **「成功 podcast 官網」的承重項**，對齊已選策略（平台訂閱 A + 社群導流 B）。  
+> 與下方「成長」「官網成長」「設計」並非加分，而是**及格線**：缺一項，分享／SEO／轉換／合規其一就空轉。  
+> **相依鏈（務必照序）：** 正式網域 → `sitemap`/`robots` + JSON-LD → **隱私頁（先於 analytics）** → analytics → 單集訂閱 CTA 上移 → 音檔壓縮。
+
+| 層級 | 項目 | 現況 | 在本檔位置 |
+|------|------|------|-----------|
+| 🔴 地基 | 正式網域 + `NEXT_PUBLIC_SITE_URL` | 仍 `*.vercel.app` | 〔產品〕設定正式站網域 |
+| 🔴 地基 | `sitemap.xml` + `robots.txt` | **缺** | ↓ 本節新增 |
+| 🔴 地基 | 數據量測（analytics） | **缺（零）** | 〔成長/官網成長〕平台點擊分析 |
+| 🟠 被發現 | JSON-LD（PodcastSeries/Episode） | **缺** | 〔產品〕Podcast 結構化資料 |
+| 🟡 信任/合規 | 隱私政策頁（兒童內容） | 僅 DISCLAIMER | ↓ 本節新增 |
+| 🟢 體驗 | 音檔壓縮 | 每集 5–10MB | 〔內容〕壓縮 podcast 音檔 |
+| 🟢 可靠 | 錯誤/上線監控 | **缺** | ↓ 本節新增 |
+| ⭐ 轉換 | 單集頁訂閱 CTA 上移 | footer only | 〔設計〕單集頁訂閱 CTA 上移（P0） |
+
+> 已備齊（勿重做）：每集落地頁 + **每集 OG 圖**（`lib/story-metadata.ts` 已含 `openGraph.images`）、`/topic` 與車種 SEO 頁、RSS `/feed.xml`、看圖聽故事、PWA／收藏／繼續收聽、ConnectHub。
+
+### sitemap.xml 與 robots.txt（SEO 地基）
+
+**What:** 新增 `app/sitemap.ts`（首頁、每集 `/story/[slug]`、`/topic`、`/topic/[tag]`、`/vehicles/[vehicle]`、`/about`）與 `app/robots.ts`（允許爬取、指向 sitemap）。
+
+**Why:** 策略主打「每集落地頁被搜尋到」，但目前沒給搜尋引擎站點地圖，等於蓋了房子不給地址。這是 SEO + 分享落地頁策略的最低門檻，先前 TODOS 未明列。
+
+**Context:** Next.js 15 原生支援 `app/sitemap.ts` / `app/robots.ts`（`MetadataRoute`）。URL 需用 `lib/site-url.ts` 絕對網址 → **依賴正式網域**。集數來源同 `data/stories.ts`。
+
+**Effort:** S（人工 ~30min / CC ~10min）  
+**Priority:** P1  
+**Depends on:** `NEXT_PUBLIC_SITE_URL` 正式網域
+
+### 隱私政策頁（兒童內容，analytics 前置）
+
+**What:** 新增 `/privacy` 頁（或將 `DISCLAIMER.md` 升級為頁面 + 隱私段落）：說明是否收集資料、localStorage（收藏／繼續收聽）用途、若導入 analytics 用何種無 cookie 方案、家長聯絡方式。
+
+**Why:** 兒童導向產品，**一旦加 analytics，個資合規（COPPA / GDPR-K）即為法律問題而非加分**。順序上隱私頁必須先於量測上線；也是家長信任的一環。
+
+**Context:** 與 `DISCLAIMER.md` 互補；頁尾 `SiteFooter`／`ConnectHub` 加連結。若採無 cookie、不蒐集個資的 analytics，可大幅簡化合規負擔。
+
+**Effort:** S（人工 ~半天含文案 / CC ~15min 結構）  
+**Priority:** P1  
+**Depends on:** analytics 方案決策（先決定要不要量測、用哪家）
+
+### 錯誤／上線監控（可靠性）
+
+**What:** 接入輕量錯誤監控（如 Sentry free tier 或 Vercel 內建）與 uptime 檢查（如 UptimeRobot），至少涵蓋首頁與一個單集播放頁。
+
+**Why:** 「成功」的站知道自己何時壞掉。目前站掛了、播放器在某機型崩了都不會有人通知；睡前弱網場景失敗成本高。
+
+**Context:** 純靜態 SSG，client error 為主要風險（播放器、iOS 合成破圖回歸）。可先只裝 client-side error 上報，避免引入後端。
+
+**Effort:** S（人工 ~半天 / CC ~15min）  
+**Priority:** P3  
+**Depends on:** None
+
+---
+
 ## 成長（平台 A + 社群 B）
 
 實作建議順序：**1 → 2 → 3 → 4 → 5 → 7**；第 6 項為營運節奏，可不寫程式。
