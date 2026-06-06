@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getStory, getNextStory, stories } from "@/data/stories";
 import { storyPlayMetadata } from "@/lib/story-metadata";
+import { getSubtitles } from "@/lib/subtitles";
 import { pad2, storyAudioPath, storyCoverPath } from "@/lib/story-utils";
 import StoryPlayer from "@/components/StoryPlayer";
 
@@ -36,12 +37,17 @@ export default async function StoryPlayPage({
 
   const nextStory = getNextStory(slug);
   const base = `/stories/${story.slug}`;
-
-  const segments = story.captions?.length ?? story.pageCount;
+  const subtitles = getSubtitles(story.slug);
   const cover = storyCoverPath(story.slug);
+
+  // 單圖集：有即時字幕時只需一張封面（字幕獨立跑時間軸）；
+  // 沒字幕時沿用舊行為（用句數複製封面，靠 captions 翻「頁」）。
+  const segments = story.captions?.length ?? story.pageCount;
   const images =
     story.pageCount <= 1
-      ? Array.from({ length: Math.max(1, segments) }, () => cover)
+      ? subtitles?.length
+        ? [cover]
+        : Array.from({ length: Math.max(1, segments) }, () => cover)
       : Array.from({ length: story.pageCount }, (_, i) =>
           `${base}/${pad2(i + 1)}.jpg`,
         );
@@ -55,6 +61,7 @@ export default async function StoryPlayPage({
       audio={storyAudioPath(story.slug, story.audio)}
       captions={story.captions}
       captionTimes={story.captionTimes}
+      subtitles={subtitles ?? undefined}
       backHref={`/story/${story.slug}`}
       nextStorySlug={nextStory?.slug}
       nextStoryTitle={nextStory?.title}

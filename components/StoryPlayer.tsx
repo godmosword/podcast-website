@@ -15,8 +15,10 @@ type StoryPlayerProps = {
   images: string[];
   audio: string;
   captions?: string[];
-  /** 即時字幕：每句起始秒數，與頁數一一對應且遞增。 */
+  /** 即時字幕（舊式）：每句起始秒數，與頁數一一對應且遞增。 */
   captionTimes?: number[];
+  /** 即時字幕軌（轉錄產生）：獨立於翻頁，依音檔時間顯示。 */
+  subtitles?: { t: number; text: string }[];
   backHref?: string;
   nextStorySlug?: string;
   nextStoryTitle?: string;
@@ -46,6 +48,7 @@ export default function StoryPlayer({
   audio,
   captions,
   captionTimes,
+  subtitles,
   backHref = "/",
   nextStorySlug,
   nextStoryTitle,
@@ -65,14 +68,17 @@ export default function StoryPlayer({
   const [cueMarks, setCueMarks] = useState<number[]>([]);
   const [cueCopied, setCueCopied] = useState(false);
   const [cueNow, setCueNow] = useState(0);
+  const [subIndex, setSubIndex] = useState(0);
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const touchStartX = useRef<number | null>(null);
   const bedtimeEndRef = useRef<number | null>(null);
 
   const total = images.length;
-  const caption = captions?.[page];
-  // 有提供且句數對得上時，啟用即時字幕（精準秒數換句）；否則回退時長平均切換。
+  // 即時字幕軌（轉錄產生）優先；獨立於翻頁，依音檔時間顯示。
+  const hasSubtitles = Array.isArray(subtitles) && subtitles.length > 0;
+  const caption = hasSubtitles ? subtitles![subIndex]?.text : captions?.[page];
+  // 舊式：captionTimes 與頁數對得上時，精準秒數換頁；否則時長平均切換。
   const hasCueTimes =
     Array.isArray(captionTimes) && captionTimes.length === total;
 
@@ -142,19 +148,25 @@ export default function StoryPlayer({
       setHasEnded(false);
       setPlayBlocked(false);
     };
+    const subTimes = hasSubtitles ? subtitles!.map((s) => s.t) : null;
     const handleTimeUpdate = () => {
+      const t = el.currentTime;
       if (el.duration && Number.isFinite(el.duration)) {
-        setProgress((el.currentTime / el.duration) * 100);
+        setProgress((t / el.duration) * 100);
+      }
+      // 即時字幕軌：獨立於翻頁，永遠跟讀。
+      if (subTimes) {
+        const si = activeCueIndex(subTimes, t, subTimes.length - 1);
+        setSubIndex((prev) => (prev === si ? prev : si));
       }
       if (!autoFlip) return;
+      // 翻頁定位。
       let target: number | null = null;
       if (hasCueTimes) {
-        // 即時字幕：用每句起始秒數精準定位（插圖也跟著準）。
-        target = activeCueIndex(captionTimes!, el.currentTime, total - 1);
+        target = activeCueIndex(captionTimes!, t, total - 1);
       } else if (el.duration && Number.isFinite(el.duration)) {
-        // 回退：時長平均切換。
         const perPage = el.duration / total;
-        target = Math.min(total - 1, Math.floor(el.currentTime / perPage));
+        target = Math.min(total - 1, Math.floor(t / perPage));
       }
       if (target !== null) {
         setPage((prev) => (prev === target ? prev : target));
@@ -178,7 +190,7 @@ export default function StoryPlayer({
       el.removeEventListener("canplay", handleCanPlay);
       el.removeEventListener("loadstart", handleLoadStart);
     };
-  }, [autoFlip, total, hasCueTimes, captionTimes]);
+  }, [autoFlip, total, hasCueTimes, captionTimes, hasSubtitles, subtitles]);
 
   useEffect(() => {
     if (bedtimeMinutes === null) {

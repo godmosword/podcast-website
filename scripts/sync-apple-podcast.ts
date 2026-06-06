@@ -20,6 +20,7 @@ import {
   slugForEpisode,
   type RssEpisode,
 } from "./lib/apple-rss";
+import { transcribeToSidecar, whisperAvailable } from "./lib/transcribe-core";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const MAX_NEW_PER_RUN = 3;
@@ -155,6 +156,26 @@ async function downloadFile(url: string, dest: string): Promise<void> {
     throw new Error(`File too large (${buf.length} bytes): ${url}`);
   }
   await fs.writeFile(dest, buf);
+}
+
+/**
+ * 新集自動上字幕：本機有 whisper-cli + 模型時，轉錄音檔產生即時字幕側車檔。
+ * 缺工具/模型（如一般 CI）或設 SKIP_TRANSCRIBE=1 時自動跳過，絕不中斷同步。
+ * 轉錄為草稿，仍建議人工校對。
+ */
+function maybeTranscribe(slug: string, audioPath: string): void {
+  if (process.env.SKIP_TRANSCRIBE === "1") return;
+  if (!whisperAvailable()) {
+    console.log(`  字幕：跳過（本機無 whisper-cli/模型；可後續 npm run transcribe -- ${slug}）`);
+    return;
+  }
+  try {
+    console.log("  字幕：轉錄中（本機 whisper）…");
+    const { count, file } = transcribeToSidecar(slug, audioPath);
+    console.log(`  字幕：${count} 句 → ${path.relative(ROOT, file)}（草稿，請校對）`);
+  } catch (err) {
+    console.warn(`  字幕：轉錄失敗，略過（${(err as Error).message}）`);
+  }
 }
 
 type NewEpisodeCandidate = { item: RssEpisode; ep: number };
@@ -296,6 +317,8 @@ async function main(): Promise<void> {
     } else {
       console.warn(`  No cover image for ${slug}; create 01.jpg manually.`);
     }
+
+    maybeTranscribe(slug, audioPath);
 
     added.push(story);
     newGuids.push(item.guid);

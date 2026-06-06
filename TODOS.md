@@ -96,8 +96,8 @@ Vercel 設 `NEXT_PUBLIC_SITE_URL=https://正式網域`。OG／Twitter／RSS／si
 ### 每集「給家長的小提示」/ 節目筆記　`P2 · S · 文案`　〔content+design〕
 詳情頁大綱下加可選「這集可以聊什麼」2–3 句（`data/stories.ts` 加 `parentNote` 欄）。提升信任、利家長轉發 Threads、可與 JSON-LD description 共用。對標 Circle Round show notes。
 
-### 逐集補字幕與 captionTimes　`P2 · S/集 · 無`　〔content〕
-機制與工具皆已完成（見 Completed）。兩條路：① 有摘要的集用播放頁 `?cue=1` 對時 → 貼回 `captionTimes`；② 沒字幕的集（Apple 自動同步）用 `npm run transcribe -- <slug>` 自動產草稿 → **人工校對**（刪幻覺鳴謝、簡轉繁、決定逐字 vs 精簡）後貼回。屬資料輸入/校對、非工程。建議模型 `large-v3`（繁中較準）。
+### 字幕校對 + 換 large-v3 重跑　`P2 · S/集 · 無`　〔content〕
+EP1–7 已有 Whisper 逐字字幕（`data/subtitles/*.json`，small 模型草稿）。待辦：① 下載 `large-v3` 重跑（`npm run transcribe -- --all`）提升準確；② 校對誤聽人名（Bonbon→啵啵、馬米→馬咪等，直接改側車 JSON）；③ 抽查簡轉繁。屬資料校對、非工程。
 
 ### 新集通知路徑（家長向白話說明）　`P2 · S · 無`　〔growth〕
 訂閱區簡短說明「如何訂閱／用 App 收新集」。RSS 技術面已有，家長多不熟 RSS，需白話引導。`ConnectHub` 加一兩句 FAQ 或連關於頁錨點。
@@ -161,9 +161,11 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 
 ## Completed
 
-### 音檔自動轉錄字幕草稿（本機 whisper.cpp）
-`scripts/transcribe.ts` + `npm run transcribe -- <slug>`：ffmpeg → whisper.cpp 產 `captions` + `captionTimes` 草稿，音檔不外送、零金鑰。最適合補 Apple 同步無字幕的新集。輸出為草稿需人工校對（幻覺鳴謝、簡轉繁、逐字 vs 精簡）。`models/` 已 gitignore。文件見 README。
-**Completed:** main（2026-06，逐集校對待補，見 P2）
+### 逐字即時字幕框架 + EP1–7 自動上字幕（本機 whisper.cpp）
+字幕從翻頁解耦：存側車檔 `data/subtitles/<slug>.json`（`lib/subtitles.ts` 載入、播放器依音檔時間顯示、獨立翻頁；無側車則回退舊邏輯）。轉錄核心 `scripts/lib/transcribe-core.ts`（ffmpeg→whisper.cpp、自動濾幻覺鳴謝），CLI `npm run transcribe -- <slug...|--all>`。Apple 同步下載新集後自動轉錄（有 whisper 才跑，CI/缺模型自動跳過，`SKIP_TRANSCRIBE=1` 可關）。EP1–7 已產字幕（small 草稿，校對見 P2）。音檔不外送、零金鑰；`models/` gitignore。
+**Completed:** main（2026-06）
+
+### 即時字幕機制 + 字幕對時模式（頁綁定，舊式）
 
 ### 即時字幕機制 + 字幕對時模式
 `Story` 加選填 `captionTimes`（每句起始秒數）；播放器有提供時精準換句（插圖同步），未提供回退時長平均切換（向下相容）。新增 `?cue=1` 對時模式：邊聽邊記每句秒數、複製貼回資料。播放頁維持 SSG。檔案：`data/stories.ts`、`components/StoryPlayer.tsx`、`app/story/[slug]/play/page.tsx`、README。

@@ -202,29 +202,9 @@ ffmpeg -i audio.mp3 -codec:a libmp3lame -b:a 128k -ac 1 audio-optimized.mp3
 
 播放器使用 `preload="metadata"`，進入播放頁才開始載入完整音檔。
 
-## 即時字幕（captionTimes，選填）
+## 自動字幕：逐字即時字幕（`npm run transcribe`）
 
-字幕預設「跟讀」會把音檔時長**平均切**成每句一段，念快念慢會漂移。若要**精準在每句的時間點換句**（插圖也同步），在 `data/stories.ts` 該集加 `captionTimes`：每句的「起始秒數」，與 `captions` 一一對應且遞增。
-
-```ts
-captions:     ["第一句…", "第二句…", "第三句…"],
-captionTimes: [0,          4.5,        9.2],   // 第二句在 4.5 秒出現，依此類推
-```
-
-未提供 `captionTimes` 時，自動回退為原本的平均切換（向下相容，不影響舊集）。
-
-**怎麼取得秒數（字幕對時模式）：**
-
-1. 開該集播放頁並在網址加 `?cue=1`，例：`/story/ev/play?cue=1`
-2. 按播放，**每聽到新的一句開始就點「⏱ 記下這一句」**
-3. 點「複製」取得 `captionTimes: [...]`，貼回 `data/stories.ts` 該集
-4. 重新整理（不帶 `?cue=1`）確認字幕準確跟著語音
-
-> `?cue=1` 為作者對時用，未連結於站上任何地方；不影響一般使用者，播放頁仍為靜態（SSG）。
-
-### 自動轉錄字幕草稿（`npm run transcribe`，本機）
-
-從音檔自動產生帶時間軸的字幕草稿（`captions` + `captionTimes`），最適合補上 **Apple 自動同步、本無字幕的新集**。全程**本機**（whisper.cpp），音檔不外送、免費、零金鑰。
+每集的即時字幕存在**側車檔** `data/subtitles/<slug>.json`（`[{ "t": 秒數, "text": "…" }]`），由音檔**本機轉錄**（whisper.cpp）產生，音檔不外送、免費、零金鑰。播放器**有側車檔就自動套用**（依音檔時間顯示字幕，獨立於翻頁）；沒有則回退舊的 `captions`/`captionTimes` 邏輯。
 
 **一次性安裝：**
 
@@ -236,23 +216,28 @@ curl -L -o models/ggml-large-v3.bin \
   https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3.bin
 ```
 
-**轉錄一集：**
+**產生字幕（寫入 `data/subtitles/<slug>.json`）：**
 
 ```bash
-npm run transcribe -- ev                                   # 預設找 models/ggml-large-v3.bin
-WHISPER_MODEL=models/ggml-small.bin npm run transcribe -- ev   # 指定其他模型
+npm run transcribe -- ev drone ep-7    # 指定數集
+npm run transcribe -- --all            # 全部 public/stories/* 有 audio.mp3 的集
+WHISPER_MODEL=models/ggml-small.bin npm run transcribe -- ev   # 指定模型
 ```
 
-輸出可直接貼回 `data/stories.ts` 該集的 `captions` / `captionTimes`。
+**新集自動上字幕：** `npm run sync:apple` 下載新集音檔後，**本機若有 whisper-cli + 模型會自動轉錄**並寫側車檔；缺工具/模型（如一般 CI）或設 `SKIP_TRANSCRIBE=1` 會自動跳過、不中斷同步。CI 要自動上字幕，需在 workflow 安裝 `whisper-cpp` 並快取模型。
 
 **草稿必校對（兒童產品上架前）：**
 
-- Whisper 常在音樂/靜音段加**假字幕鳴謝**（如「字幕:XXX」），務必刪除。
-- 輸出為**逐字稿**（語氣詞、口語、人名可能誤聽），與繪本式摘要不同；可保留逐字、或精簡成摘要句。
-- 多數為繁體，偶有簡體需簡轉繁。
-- `small` 模型時間軸在配樂段較鬆；`large-v3` 明顯較準。
+- Whisper 在音樂/靜音段常加**假字幕鳴謝**（如「字幕:XXX」「請訂閱…」）；腳本已自動過濾常見幻覺，仍建議抽查。
+- 輸出為**逐字稿**（語氣詞、口語、**人名可能誤聽**，如 Bonbon→啵啵）；直接編輯側車 JSON 修正即可。
+- 偶有簡體需簡轉繁。
+- `small` 模型時間軸在配樂段較鬆、誤字較多；`large-v3` 明顯較準（建議正式用）。
 
-> 模型檔放 `models/`（已 gitignore，勿入庫）。此為作者端工具，不影響站上執行。
+> 模型檔放 `models/`（已 gitignore，勿入庫）。側車檔 `data/subtitles/*.json` 會入庫（即字幕內容）。
+
+### 舊式：頁綁定字幕（captionTimes，`?cue=1`）
+
+沒有側車字幕時，播放器用 `data/stories.ts` 的 `captions`（每頁一句）；可加 `captionTimes`（每句起始秒數）讓它精準換句，否則時長平均切換。手動對時：開播放頁加 `?cue=1` 進入「字幕對時模式」，邊聽邊點記下秒數再複製貼回。一旦該集有側車字幕，會優先用側車字幕。
 
 ## 字型維護（圓體中文）
 
