@@ -48,11 +48,23 @@ function isHallucination(text: string): boolean {
   return HALLUCINATION.some((re) => re.test(text));
 }
 
-/** 簡轉繁（台灣用語）+ 清除幻覺、去除前後空白、合併連續重複句。 */
+// 主持人開場白誤聽修正（Whisper 不知道品牌名）。只改固定開場句，
+// 不動故事裡真正的「寶寶／媽咪」（如 EP7 彭彭和媽咪）。
+// 品牌寫法對齊全站：Bonbon & 馬米。
+const NAME_FIXES: [RegExp, string][] = [
+  [/我是(寶寶|蹦蹦|崩崩|波波|本本)/g, "我是 Bonbon"],
+  [/我是(媽咪|馬明|馬咪|麻咪)/g, "我是馬米"],
+];
+
+function fixNames(text: string): string {
+  return NAME_FIXES.reduce((s, [re, to]) => s.replace(re, to), text);
+}
+
+/** 簡轉繁（台灣用語）+ 修正主持人名 + 清除幻覺、去空白、合併連續重複句。 */
 export function cleanSegments(segments: Subtitle[]): Subtitle[] {
   const out: Subtitle[] = [];
   for (const seg of segments) {
-    const text = toTraditional(seg.text.trim());
+    const text = fixNames(toTraditional(seg.text.trim()));
     if (!text || isHallucination(text)) continue;
     if (out.length > 0 && out[out.length - 1].text === text) continue;
     out.push({ t: seg.t, text });
