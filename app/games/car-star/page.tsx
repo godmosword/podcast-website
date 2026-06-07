@@ -6,10 +6,12 @@ import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "車車吃星星",
-  description: "適合 3–7 歲的開車吃金幣迷宮小遊戲，邊聽故事邊玩。",
+  description:
+    "和故事裡的電動車、安安救護車、小紅賽車一起玩迷宮，適合 3–7 歲。",
   openGraph: {
     title: "車車吃星星 · 車車遊樂園",
-    description: "適合 3–7 歲的開車吃金幣迷宮小遊戲。",
+    description:
+      "和故事裡的車車朋友一起吃星星，適合 3–7 歲的迷宮小遊戲。",
     url: `${getSiteUrl()}/games/car-star`,
   },
 };

@@ -47,7 +47,7 @@ export default function SiteFooter() {
 
       <div className={styles.bottomBar}>
         <Link href="/games/car-star" className={styles.aboutLink}>
-          🚕 車車吃星星
+          🚗 車車吃星星
         </Link>
         <Link href="/about" className={styles.aboutLink}>
           關於我們
