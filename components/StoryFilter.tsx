@@ -7,6 +7,7 @@ import type { Story } from "@/data/stories";
 import { ChipButton } from "./Chip";
 import StoryCard from "./StoryCard";
 import VehicleClayIcon from "./VehicleClayIcon";
+import { playSfx } from "@/lib/sfx";
 import styles from "./StoryFilter.module.css";
 
 type StoryFilterProps = {
@@ -26,6 +27,7 @@ function StoryFilterInner({ stories, vehicles }: StoryFilterProps) {
   }, [vehicleParam]);
 
   function updateVehicle(nextVehicle: string | null) {
+    playSfx("tap");
     const params = new URLSearchParams();
     if (nextVehicle) params.set("vehicle", nextVehicle);
     const qs = params.toString();

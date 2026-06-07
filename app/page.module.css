@@ -5,6 +5,56 @@
     calc(40px + var(--safe-bottom)) calc(20px + var(--safe-left));
 }
 
+/* 角色圖鑑入口（首頁延伸黏土風邀請卡）。 */
+.charsEntry {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 14px 18px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, var(--bg-2), var(--card));
+  border: 2px solid var(--c-lilac);
+  box-shadow: 0 5px 0 var(--c-lilac);
+  transition: transform var(--motion-press), box-shadow var(--motion-press);
+}
+
+.charsEntry:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 var(--c-lilac);
+}
+
+.charsEntryEmoji {
+  font-size: 1.9rem;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+
+.charsEntryText {
+  flex: 1 1 auto;
+}
+
+.charsEntryTitle {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.charsEntrySub {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.charsEntryArrow {
+  flex: 0 0 auto;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--c-lilac);
+}
+
 .subscribe {
   margin: 8px 0 0;
   text-align: center;

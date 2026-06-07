@@ -306,6 +306,22 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
+/* 音效靜音切換鈕（🔊/🔇，膠囊樣式與 timerBtn 一致）。 */
+.sfxBtn {
+  flex: 0 0 auto;
+  pointer-events: auto;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  line-height: 1;
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(4px);
+}
+
+.sfxBtn:active {
+  background: rgba(255, 255, 255, 0.32);
+}
+
 /* 字幕字級切換鈕（Aa，膠囊樣式與 autoBtn／timerBtn 一致）。 */
 .captionSizeBtn {
   flex: 0 0 auto;

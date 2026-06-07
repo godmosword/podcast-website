@@ -32,7 +32,7 @@ export default function LatestHero({ story }: LatestHeroProps) {
           src={storyCoverPath(story.slug)}
           alt={`${story.title} 封面`}
           fill
-          className={styles.cover}
+          className={`${styles.cover} ${decor.carIdle}`}
           priority
         />
         <Sparkle

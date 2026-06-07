@@ -172,6 +172,56 @@ button:focus-visible {
   }
 }
 
+/* 吉祥物打招呼：輕點頭 + 揮手般的小晃動（讓站「說哈囉」）。 */
+@keyframes mascot-greet {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  20% {
+    transform: translateY(-4px) rotate(-4deg);
+  }
+  40% {
+    transform: translateY(0) rotate(0deg);
+  }
+  55% {
+    transform: translateY(-2px) rotate(5deg);
+  }
+  70% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  85% {
+    transform: translateY(-1px) rotate(2deg);
+  }
+}
+
+/* 車車輕浮：封面/車車緩緩上下，永遠有生命感。 */
+@keyframes car-idle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+/* 車車滑步：hover 時像小車「咻」地動一下。 */
+@keyframes car-scoot {
+  0% {
+    transform: translateX(0) rotate(0deg);
+  }
+  30% {
+    transform: translateX(-3px) rotate(-6deg);
+  }
+  60% {
+    transform: translateX(4px) rotate(5deg);
+  }
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+}
+
 /* 進場：依序彈入（卡片/區塊用 inline animation-delay 做 stagger） */
 .popIn {
   animation: pop-in var(--motion-pop) both;

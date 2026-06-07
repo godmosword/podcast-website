@@ -12,6 +12,11 @@
   transform-origin: 50% 50%;
 }
 
+/* 車車輕浮：封面緩緩上下，homepage 永遠有一台車在動。 */
+.carIdle {
+  animation: car-idle 5s ease-in-out infinite;
+}
+
 .sparkleAnim {
   animation: sparkle 1.8s ease-in-out infinite;
   transform-origin: 50% 50%;

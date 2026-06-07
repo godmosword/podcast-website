@@ -34,8 +34,9 @@
   width: 48px;
   max-width: none;
   margin: 0;
-  transform: none;
-  animation: none;
+  /* 打招呼動畫：每頁左上吉祥物輕點頭揮手；reduced-motion 由 globals 全域關閉。 */
+  transform-origin: 50% 85%;
+  animation: mascot-greet 3.6s ease-in-out infinite;
   z-index: auto;
 }
 

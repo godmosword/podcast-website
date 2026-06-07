@@ -5,3 +5,10 @@
   box-shadow: var(--gloss);
   flex: none;
 }
+
+/* hover 時車車「咻」滑一下（桌機）；reduced-motion 由 globals 全域關閉。 */
+@media (hover: hover) {
+  .icon:hover {
+    animation: car-scoot 0.5s ease;
+  }
+}
