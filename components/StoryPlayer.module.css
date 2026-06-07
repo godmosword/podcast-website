@@ -454,64 +454,84 @@
   gap: 16px;
 }
 
+/* 次級控制鈕：透明本體 + 白色線性圖示（Spotify／Apple 風）。
+   不再用立體球／半透明底，避免疊在背景照片上糊掉。
+   只有 hover／按下時才浮現淡圓底；圖示加陰影在亮背景也清楚。 */
 .ctrlBtn {
+  position: relative;
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 46px;
-  height: 46px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  color: #fff;
-  font-size: 1.15rem;
-  line-height: 1;
-  /* 黏土質感：上亮下暗漸層 + 內高光 + 柔陰影 + 細邊框，與播放鈕同語彙。 */
-  background-image: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.26),
-    rgba(0, 0, 0, 0.16)
-  );
-  border: 1.5px solid rgba(255, 255, 255, 0.35);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45),
-    inset 0 1.5px 2px rgba(255, 255, 255, 0.4);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(4px);
-  transition: transform var(--motion-press), box-shadow 0.15s ease;
+  color: rgba(255, 255, 255, 0.92);
+  background: transparent;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.55));
+  transition: transform var(--motion-press), background 0.08s ease,
+    color 0.12s ease;
+}
+
+@media (hover: hover) {
+  .ctrlBtn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+  }
 }
 
 .ctrlBtn:active {
-  transform: scale(0.9);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5),
-    inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  transform: scale(0.86);
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .ctrlBtn:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
+}
+
+.ctrlBtn:disabled:active {
+  transform: none;
+  background: transparent;
 }
 
 .ctrlBtnOn {
-  /* 開啟時白底 + 主題色字（color 由 inline style 指定），保留同系陰影。 */
-  background-image: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 1),
-    rgba(230, 230, 235, 0.92)
-  );
-  border-color: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45),
-    inset 0 1.5px 2px rgba(255, 255, 255, 0.8);
-  text-shadow: none;
+  /* 重複開啟：圖示轉主題色（color 由 inline style），底下加小圓點標記。 */
+  color: inherit;
 }
 
+/* 倒退／快進：圖示 + 疊在中央的秒數。 */
 .skip {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  font-size: 1.05rem;
+  justify-content: center;
 }
 
 .skipNum {
-  font-size: 0.6rem;
-  font-weight: 700;
-  margin-left: 1px;
+  position: absolute;
+  top: 52%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.56rem;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 重複開啟態的小圓點（主題色由 inline style 指定）。 */
+.onDot {
+  position: absolute;
+  bottom: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+}
+
+/* 播放三角形視覺置中（三角形重心偏左，往右推一點）。 */
+.playGlyph {
+  margin-left: 4px;
 }
 
 .playBtn {
@@ -523,17 +543,17 @@
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: 1.6rem;
   line-height: 1;
+  /* 唯一實心立體鈕：主題色實底 + 上亮高光，與透明次級鈕拉開主從。 */
   background-image: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.32),
-    rgba(0, 0, 0, 0.18)
+    rgba(255, 255, 255, 0.28),
+    rgba(0, 0, 0, 0.14)
   );
-  border: 3px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5),
-    inset 0 2px 3px rgba(255, 255, 255, 0.45);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  border: 3px solid rgba(255, 255, 255, 0.92);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5),
+    inset 0 2px 4px rgba(255, 255, 255, 0.5);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
   transition: transform var(--motion-press);
 }
 

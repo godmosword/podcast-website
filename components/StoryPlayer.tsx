@@ -5,6 +5,14 @@ import Link from "next/link";
 import { clearContinue, loadContinue, saveContinue } from "@/lib/continue-playback";
 import Wheel from "./decor/Wheel";
 import Sparkle from "./decor/Sparkle";
+import {
+  RepeatIcon,
+  RewindIcon,
+  ForwardIcon,
+  StopIcon,
+  PlayGlyph,
+  PauseGlyph,
+} from "./decor/PlayerIcon";
 import decor from "./decor/decor.module.css";
 import styles from "./StoryPlayer.module.css";
 
@@ -628,7 +636,8 @@ export default function StoryPlayer({
               aria-pressed={repeat}
               aria-label="重複播放"
             >
-              🔁
+              <RepeatIcon size={22} />
+              {repeat && <span className={styles.onDot} style={{ backgroundColor: color }} />}
             </button>
             <button
               type="button"
@@ -638,7 +647,8 @@ export default function StoryPlayer({
               disabled={mediaError === "audio"}
             >
               <span className={styles.skip}>
-                ⏪<span className={styles.skipNum}>10</span>
+                <RewindIcon size={24} />
+                <span className={styles.skipNum}>10</span>
               </span>
             </button>
             <button
@@ -649,7 +659,7 @@ export default function StoryPlayer({
               disabled={mediaError === "audio"}
               type="button"
             >
-              {isPlaying ? "❚❚" : "▶"}
+              {isPlaying ? <PauseGlyph size={30} /> : <PlayGlyph size={30} className={styles.playGlyph} />}
             </button>
             <button
               type="button"
@@ -659,7 +669,8 @@ export default function StoryPlayer({
               disabled={mediaError === "audio"}
             >
               <span className={styles.skip}>
-                ⏩<span className={styles.skipNum}>10</span>
+                <ForwardIcon size={24} />
+                <span className={styles.skipNum}>10</span>
               </span>
             </button>
             <button
@@ -669,7 +680,7 @@ export default function StoryPlayer({
               aria-label="停止"
               disabled={mediaError === "audio"}
             >
-              ⏹
+              <StopIcon size={20} />
             </button>
           </div>
 
