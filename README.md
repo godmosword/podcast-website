@@ -146,7 +146,7 @@ npm run sync:apple
 npm test && npm run build
 ```
 
-**GitHub Actions：** [`.github/workflows/sync-apple-podcast.yml`](.github/workflows/sync-apple-podcast.yml)（feed 來源即 SoundOn 官方 RSS）。**無新集時直接早退**（sync 不動任何檔案、`git status` 乾淨），不浪費 CI 跑 test/build；有新集才依上列框架上架，通過測試與 build 後 **commit 並 push 到 `main`**。`concurrency` 鎖避免交疊。三個觸發來源：
+**GitHub Actions：** [`.github/workflows/sync-apple-podcast.yml`](.github/workflows/sync-apple-podcast.yml)（feed 來源即 SoundOn 官方 RSS）。同步腳本會**追加新集**並**更新已同步集數的 title / date / duration / summary**；僅在 RSS 與 repo 完全一致時早退（`git status` 乾淨）。有變更時通過測試與 build 後 **commit 並 push 到 `main`**。`concurrency` 鎖避免交疊。三個觸發來源：
 
 | 來源 | 準時性 | 用途 |
 |------|--------|------|

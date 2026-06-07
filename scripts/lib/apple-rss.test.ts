@@ -46,6 +46,18 @@ describe("cleanEpisodeSummary", () => {
       "遇到高鐵晚到延遲怎麼辦呢？Bonbon和馬米學會冷靜。",
     );
   });
+
+  it("移除節目宣傳段與社群連結", () => {
+    const raw =
+      "大聲又勇敢的怪獸卡車，完成月光森林任務。 喜歡《車車遊樂園》，歡迎留言。孩子許願想聽的故事 🚗IG https://instagram.com/x";
+    expect(cleanEpisodeSummary(raw)).toBe(
+      "大聲又勇敢的怪獸卡車，完成月光森林任務。",
+    );
+  });
+
+  it("解碼 HTML 實體", () => {
+    expect(cleanEpisodeSummary("A &amp; B 喜歡《車車遊樂園》尾註")).toBe("A & B");
+  });
 });
 
 describe("pubDateToIsoDate", () => {

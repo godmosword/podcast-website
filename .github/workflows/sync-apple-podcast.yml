@@ -33,10 +33,10 @@ jobs:
 
       - run: npm ci
 
-      - name: Sync new episodes from Apple Podcast
+      - name: Sync episodes from Apple Podcast
         run: npm run sync:apple
 
-      # 沒有新集時 sync 不動任何檔案（state 也不寫），可早退、不浪費 CI 跑 test+build。
+      # RSS 與 repo 完全一致時 sync 不動任何檔案，可早退、不浪費 CI 跑 test+build。
       - name: Detect changes
         id: changes
         run: |
@@ -66,5 +66,5 @@ jobs:
             echo "No staged changes to commit."
             exit 0
           fi
-          git commit -m "chore: sync new episodes from Apple Podcast"
+          git commit -m "chore: sync Apple Podcast from RSS"
           git push

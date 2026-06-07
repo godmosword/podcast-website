@@ -1,6 +1,8 @@
 #!/usr/bin/env npx tsx
 /**
- * 從 Apple Podcast RSS 同步新集到 data/apple-synced.json 與 public/stories/<slug>/。
+ * 從 Apple Podcast RSS 同步到 data/apple-synced.json 與 public/stories/<slug>/。
+ * - 新集：下載音檔／封面並追加至 apple-synced.json
+ * - 既有集：比對 RSS 更新 title / date / duration / summary 等 metadata
  * 用法：npm run sync:apple [-- --dry-run] [-- --force]
  */
 import fs from "node:fs/promises";
@@ -37,6 +39,8 @@ const PATHS = {
 type SyncState = {
   seenGuids: string[];
   lastRun: string | null;
+  /** slug → RSS guid，標題變更時仍能對到正確集數 */
+  guidBySlug?: Record<string, string>;
 };
 
 type SyncDefaults = {
@@ -81,6 +85,16 @@ function existingSlugs(synced: Story[]): Set<string> {
 
 function normalizeTitle(title: string): string {
   return title.trim().replace(/\s+/g, " ");
+}
+
+/** SoundOn 標題常為「主標｜副標」，副標變更時仍能以主標對到 RSS。 */
+function titleStem(title: string): string {
+  const normalized = normalizeTitle(title);
+  const pipe = normalized.indexOf("｜");
+  if (pipe >= 0) return normalized.slice(0, pipe).trim();
+  const asciiPipe = normalized.indexOf("|");
+  if (asciiPipe >= 0) return normalized.slice(0, asciiPipe).trim();
+  return normalized;
 }
 
 /** SoundOn 等 feed 常無 itunes:episode，改以標題對照既有目錄。 */
@@ -180,6 +194,98 @@ function maybeTranscribe(slug: string, audioPath: string): void {
 
 type NewEpisodeCandidate = { item: RssEpisode; ep: number };
 
+function findRssItemForStory(
+  story: Story,
+  rssItems: RssEpisode[],
+  guidBySlug: Record<string, string>,
+): RssEpisode | null {
+  const mappedGuid = guidBySlug[story.slug];
+  if (mappedGuid) {
+    const byGuid = rssItems.find((i) => i.guid === mappedGuid);
+    if (byGuid) return byGuid;
+  }
+  if (story.ep != null) {
+    const byEp = rssItems.find((i) => i.episode === story.ep);
+    if (byEp) return byEp;
+  }
+  const key = normalizeTitle(story.title);
+  const byTitle = rssItems.find((i) => normalizeTitle(i.title) === key);
+  if (byTitle) return byTitle;
+
+  const stem = titleStem(story.title);
+  if (stem.length >= 4) {
+    const byStem = rssItems.find((i) => titleStem(i.title) === stem);
+    if (byStem) return byStem;
+  }
+
+  return null;
+}
+
+function storyFromRssMetadata(
+  existing: Story,
+  item: RssEpisode,
+  defaults: SyncDefaults,
+): Story {
+  const summary = cleanEpisodeSummary(item.description);
+  const base: Story = {
+    ...existing,
+    title: item.title,
+    date: pubDateToIsoDate(item.pubDate),
+    duration: item.duration ?? existing.duration,
+    ...(summary !== undefined ? { summary } : {}),
+  };
+  const withDefaults = applyDefaults(base, defaults);
+  const hasVehicleOverride = defaults.overrides[existing.slug]?.vehicle != null;
+  return applyVehicleInference(
+    withDefaults,
+    item.title,
+    defaults.vehicle,
+    hasVehicleOverride,
+  );
+}
+
+function metadataFieldsChanged(before: Story, after: Story): boolean {
+  return (
+    before.title !== after.title ||
+    before.date !== after.date ||
+    before.duration !== after.duration ||
+    before.summary !== after.summary ||
+    before.vehicle !== after.vehicle
+  );
+}
+
+type MetadataUpdateResult = {
+  stories: Story[];
+  updatedSlugs: string[];
+  guidBySlug: Record<string, string>;
+};
+
+/** 將 RSS 最新 metadata 套回已同步集數（不重新下載音檔）。 */
+function updateSyncedMetadata(
+  synced: Story[],
+  rssItems: RssEpisode[],
+  defaults: SyncDefaults,
+  guidBySlug: Record<string, string>,
+): MetadataUpdateResult {
+  const updatedSlugs: string[] = [];
+  const nextGuidBySlug = { ...guidBySlug };
+
+  const stories = synced.map((story) => {
+    const item = findRssItemForStory(story, rssItems, nextGuidBySlug);
+    if (!item) return story;
+
+    nextGuidBySlug[story.slug] = item.guid;
+    const next = storyFromRssMetadata(story, item, defaults);
+    if (metadataFieldsChanged(story, next)) {
+      updatedSlugs.push(story.slug);
+      return next;
+    }
+    return story;
+  });
+
+  return { stories, updatedSlugs, guidBySlug: nextGuidBySlug };
+}
+
 function pickNewEpisodes(
   rssItems: RssEpisode[],
   state: SyncState,
@@ -264,25 +370,15 @@ async function main(): Promise<void> {
   const rssItems = parseRssEpisodes(xml);
   console.log(`RSS items: ${rssItems.length}`);
 
-  const newCandidates = pickNewEpisodes(rssItems, state, catalog, eps, slugs);
-  if (newCandidates.length === 0) {
-    console.log("No new episodes to sync.");
-    if (!dryRun) {
-      // 只在 seenGuids 真的有變動時才寫 state，讓「無新集」維持 git 乾淨，
-      // 供 CI 用 git diff 判斷早退（避免每次都因 lastRun 產生 noise diff）。
-      const nextSeen = reconcileSeenGuids(rssItems, state, catalog, eps);
-      const changed =
-        nextSeen.length !== state.seenGuids.length ||
-        nextSeen.some((g) => !state.seenGuids.includes(g));
-      if (changed) {
-        await writeJson(PATHS.state, {
-          seenGuids: nextSeen,
-          lastRun: new Date().toISOString(),
-        });
-      }
-    }
-    return;
+  const guidBySlug = state.guidBySlug ?? {};
+  const metadataResult = updateSyncedMetadata(synced, rssItems, defaults, guidBySlug);
+  if (metadataResult.updatedSlugs.length > 0) {
+    console.log(
+      `Metadata update: ${metadataResult.updatedSlugs.join(", ")}`,
+    );
   }
+
+  const newCandidates = pickNewEpisodes(rssItems, state, catalog, eps, slugs);
 
   const added: Story[] = [];
   const newGuids: string[] = [];
@@ -330,32 +426,70 @@ async function main(): Promise<void> {
 
     added.push(story);
     newGuids.push(item.guid);
+    metadataResult.guidBySlug[slug] = item.guid;
     eps.add(ep);
     slugs.add(slug);
   }
 
+  const hasMetadataChanges = metadataResult.updatedSlugs.length > 0;
+  const hasNewEpisodes = added.length > 0;
+
   if (dryRun) {
-    console.log(`[dry-run] Would add ${added.length} episode(s): ${added.map((s) => s.slug).join(", ")}`);
+    if (hasNewEpisodes) {
+      console.log(
+        `[dry-run] Would add ${added.length} episode(s): ${added.map((s) => s.slug).join(", ")}`,
+      );
+    }
+    if (!hasMetadataChanges && !hasNewEpisodes) {
+      console.log("[dry-run] No new episodes or metadata changes.");
+    }
     return;
   }
 
-  if (added.length === 0) {
-    console.log("Nothing written.");
+  if (!hasMetadataChanges && !hasNewEpisodes) {
+    console.log("No new episodes or metadata changes.");
+    const nextSeen = reconcileSeenGuids(rssItems, state, catalog, eps);
+    const seenChanged =
+      nextSeen.length !== state.seenGuids.length ||
+      nextSeen.some((g) => !state.seenGuids.includes(g));
+    const guidChanged =
+      Object.keys(metadataResult.guidBySlug).length !==
+        Object.keys(guidBySlug).length ||
+      Object.entries(metadataResult.guidBySlug).some(
+        ([slug, guid]) => guidBySlug[slug] !== guid,
+      );
+    if (seenChanged || guidChanged) {
+      await writeJson(PATHS.state, {
+        seenGuids: nextSeen,
+        lastRun: new Date().toISOString(),
+        guidBySlug: metadataResult.guidBySlug,
+      });
+    }
     return;
   }
 
-  const nextSynced = [...synced, ...added].sort((a, b) => b.ep - a.ep);
+  const nextSynced = [...metadataResult.stories, ...added].sort(
+    (a, b) => b.ep - a.ep,
+  );
   await writeJson(PATHS.synced, nextSynced);
   const seenGuids = reconcileSeenGuids(rssItems, state, catalog, eps);
   await writeJson(PATHS.state, {
     seenGuids: [...new Set([...seenGuids, ...newGuids])],
     lastRun: new Date().toISOString(),
+    guidBySlug: metadataResult.guidBySlug,
   });
 
-  console.log(`Synced ${added.length} episode(s): ${added.map((s) => s.slug).join(", ")}`);
-  console.log(
-    "上架框架：pageCount=1、Apple 封面 01.jpg、首頁列表/內頁現行 UI；請視需要於 apple-sync.defaults.json 的 overrides 補 tags / pageCount / captions。",
-  );
+  if (hasNewEpisodes) {
+    console.log(`Synced ${added.length} episode(s): ${added.map((s) => s.slug).join(", ")}`);
+    console.log(
+      "上架框架：pageCount=1、Apple 封面 01.jpg、首頁列表/內頁現行 UI；請視需要於 apple-sync.defaults.json 的 overrides 補 tags / pageCount / captions。",
+    );
+  }
+  if (hasMetadataChanges) {
+    console.log(
+      `Updated metadata for: ${metadataResult.updatedSlugs.join(", ")}`,
+    );
+  }
 }
 
 main().catch((err) => {

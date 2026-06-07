@@ -47,18 +47,40 @@ export function stripHtml(html: string): string {
     .trim();
 }
 
-/** 從 RSS 描述產生站內摘要（去除 SoundOn 等託管尾註）。 */
+function decodeBasicEntities(text: string): string {
+  return text
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/gi, "'");
+}
+
+/** SoundOn / 節目後台常見的宣傳尾段起點（取最早出現處截斷）。 */
+const SUMMARY_PROMO_MARKERS = [
+  /這篇為真實故事改編/,
+  /喜歡《車車遊樂園》/,
+  /🏎️這集小小賽車配音員/,
+];
+
+function trimSummaryPromo(text: string): string {
+  let cutAt = text.length;
+  for (const marker of SUMMARY_PROMO_MARKERS) {
+    const idx = text.search(marker);
+    if (idx >= 0) cutAt = Math.min(cutAt, idx);
+  }
+  return text.slice(0, cutAt).trim();
+}
+
+/** 從 RSS 描述產生站內摘要（去除 SoundOn 等託管尾註與節目宣傳段）。 */
 export function cleanEpisodeSummary(
   description: string,
   maxLen = 500,
 ): string | undefined {
-  let text = stripHtml(description);
+  let text = decodeBasicEntities(stripHtml(description));
   text = text.replace(/\s*--\s*Hosting provided by SoundOn.*$/i, "");
-  const promoIdx = text.search(/這篇為真實故事改編/);
-  if (promoIdx >= 0) {
-    text = text.slice(0, promoIdx);
-  }
-  text = text.trim();
+  text = trimSummaryPromo(text);
   if (!text) return undefined;
   return text.length > maxLen ? text.slice(0, maxLen) : text;
 }
