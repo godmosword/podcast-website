@@ -87,8 +87,25 @@ const OPP: Record<Dir, Dir> = {
   left: "right",
   right: "left",
 };
-const ANGLE: Record<Dir, number> = { up: 0, right: 90, down: 180, left: 270 };
 const ALL_DIRS: readonly Dir[] = ["up", "down", "left", "right"];
+
+// ── 車輛美術設定（素材：public/games/cars/）────────────────
+const CAR_ORIENTATION: "topdown" | "sideview" = "topdown";
+const CAR_SCARED_MODE: "tint" | "variant" = "tint";
+
+const CAR_ART: Record<CarRole, { src: string; scaredSrc?: string }> = {
+  player: { src: "/games/cars/taxi.svg" },
+  police: { src: "/games/cars/police.svg" },
+  red: { src: "/games/cars/truck.svg" },
+};
+
+function carTransform(dir: Dir | null, orientation: "topdown" | "sideview"): string {
+  if (orientation === "topdown") {
+    const angle = { up: 0, right: 90, down: 180, left: 270 }[dir ?? "up"];
+    return `rotate(${angle}deg)`;
+  }
+  return dir === "left" ? "scaleX(-1)" : "none";
+}
 
 // 解析地圖
 const grid: string[][] = MAZE.map((r) => r.split(""));
@@ -130,7 +147,7 @@ function freshState(): GameState {
   };
 }
 
-// ── 俯視角自繪汽車 ──────────────────────────────────────
+// ── 車輛算繪（素材圖 + 內建 SVG fallback）────────────────────
 interface CarProps {
   role: CarRole;
   dir: Dir | null;
@@ -138,8 +155,7 @@ interface CarProps {
   reduced?: boolean;
 }
 
-function Car({ role, scared = false, dir, reduced = false }: CarProps) {
-  const angle = ANGLE[dir ?? "up"];
+function CarFallbackSvg({ role, scared = false }: { role: CarRole; scared?: boolean }) {
   let body = "#ff6b6b";
   const glass = "#bfe8ff";
   let roof = "#d64545";
@@ -154,60 +170,91 @@ function Car({ role, scared = false, dir, reduced = false }: CarProps) {
     roof = "#c7cedd";
   }
   return (
-    <div
+    <svg
+      viewBox="0 0 100 100"
       style={{
         width: "100%",
         height: "100%",
-        transform: `rotate(${angle}deg)`,
-        transition: reduced ? "none" : "transform .15s ease",
+        display: "block",
+        filter: "drop-shadow(0 2px 1.5px rgba(0,0,0,.4))",
       }}
     >
-      <svg
-        viewBox="0 0 100 100"
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "block",
-          filter: "drop-shadow(0 2px 1.5px rgba(0,0,0,.4))",
-        }}
-      >
-        {/* 車輪 */}
-        <rect x="17" y="24" width="9" height="18" rx="4" fill="#23262f" />
-        <rect x="74" y="24" width="9" height="18" rx="4" fill="#23262f" />
-        <rect x="17" y="58" width="9" height="18" rx="4" fill="#23262f" />
-        <rect x="74" y="58" width="9" height="18" rx="4" fill="#23262f" />
-        {/* 車身 */}
-        <rect
-          x="25"
-          y="13"
-          width="50"
-          height="74"
-          rx="17"
-          fill={body}
-          stroke="rgba(0,0,0,.22)"
-          strokeWidth="2"
+      <rect x="17" y="24" width="9" height="18" rx="4" fill="#23262f" />
+      <rect x="74" y="24" width="9" height="18" rx="4" fill="#23262f" />
+      <rect x="17" y="58" width="9" height="18" rx="4" fill="#23262f" />
+      <rect x="74" y="58" width="9" height="18" rx="4" fill="#23262f" />
+      <rect
+        x="25"
+        y="13"
+        width="50"
+        height="74"
+        rx="17"
+        fill={body}
+        stroke="rgba(0,0,0,.22)"
+        strokeWidth="2"
+      />
+      <rect x="29" y="14" width="13" height="7" rx="3" fill="#fff3b0" />
+      <rect x="58" y="14" width="13" height="7" rx="3" fill="#fff3b0" />
+      <rect x="32" y="23" width="36" height="19" rx="8" fill={glass} opacity="0.92" />
+      <rect x="34" y="44" width="32" height="14" rx="6" fill={roof} opacity="0.55" />
+      <rect x="34" y="60" width="32" height="15" rx="7" fill={glass} opacity="0.7" />
+      {role === "player" && (
+        <rect x="41" y="46" width="18" height="9" rx="2" fill="#fff" stroke="#c79a00" strokeWidth="1.5" />
+      )}
+      {role === "police" && !scared && (
+        <g>
+          <rect x="37" y="46" width="13" height="9" rx="2" fill="#ff4d4d" />
+          <rect x="50" y="46" width="13" height="9" rx="2" fill="#4d7dff" />
+        </g>
+      )}
+    </svg>
+  );
+}
+
+function Car({ role, scared = false, dir, reduced = false }: CarProps) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const art = CAR_ART[role];
+  const useVariantScared =
+    scared && CAR_SCARED_MODE === "variant" && Boolean(art.scaredSrc);
+  const imgSrc = useVariantScared ? art.scaredSrc! : art.src;
+  const showImg = Boolean(imgSrc) && !imgFailed;
+
+  const scaredFilter =
+    scared && !useVariantScared
+      ? "saturate(.55) hue-rotate(175deg) brightness(1.2) drop-shadow(0 0 4px #6cf)"
+      : "drop-shadow(0 2px 1.5px rgba(0,0,0,.4))";
+
+  const shellStyle: CSSProperties = {
+    width: "100%",
+    height: "100%",
+    transform: carTransform(dir, CAR_ORIENTATION),
+    transition: reduced ? "none" : "transform .15s ease",
+  };
+
+  if (showImg) {
+    return (
+      <div style={shellStyle}>
+        <img
+          src={imgSrc}
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          onError={() => setImgFailed(true)}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+            filter: scaredFilter,
+            pointerEvents: "none",
+          }}
         />
-        {/* 前車燈 */}
-        <rect x="29" y="14" width="13" height="7" rx="3" fill="#fff3b0" />
-        <rect x="58" y="14" width="13" height="7" rx="3" fill="#fff3b0" />
-        {/* 前擋風玻璃 */}
-        <rect x="32" y="23" width="36" height="19" rx="8" fill={glass} opacity="0.92" />
-        {/* 車頂 */}
-        <rect x="34" y="44" width="32" height="14" rx="6" fill={roof} opacity="0.55" />
-        {/* 後窗 */}
-        <rect x="34" y="60" width="32" height="15" rx="7" fill={glass} opacity="0.7" />
-        {/* 計程車頂燈 */}
-        {role === "player" && (
-          <rect x="41" y="46" width="18" height="9" rx="2" fill="#fff" stroke="#c79a00" strokeWidth="1.5" />
-        )}
-        {/* 警車警示燈 */}
-        {role === "police" && !scared && (
-          <g>
-            <rect x="37" y="46" width="13" height="9" rx="2" fill="#ff4d4d" />
-            <rect x="50" y="46" width="13" height="9" rx="2" fill="#4d7dff" />
-          </g>
-        )}
-      </svg>
+      </div>
+    );
+  }
+
+  return (
+    <div style={shellStyle}>
+      <CarFallbackSvg role={role} scared={scared} />
     </div>
   );
 }
