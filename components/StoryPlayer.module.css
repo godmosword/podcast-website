@@ -579,28 +579,6 @@
   transform: scale(0.92);
 }
 
-.dots {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.45);
-  transition: width 0.2s ease, background 0.2s ease;
-}
-
-.dotActive {
-  width: 22px;
-  border-radius: 5px;
-  /* 顏色由 inline style 指定 */
-}
-
 .errorBanner {
   position: absolute;
   left: 50%;

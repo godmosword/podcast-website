@@ -689,22 +689,6 @@ export default function StoryPlayer({
               <StopIcon size={26} />
             </button>
           </div>
-
-          {total > 1 && (
-            <div className={styles.dots}>
-              {images.map((_, i) => (
-                <button
-                  key={i}
-                  className={`${styles.dot} ${i === page ? styles.dotActive : ""}`}
-                  style={i === page ? { backgroundColor: color } : undefined}
-                  onClick={() => !autoFlip && goTo(i)}
-                  aria-label={`跳到第 ${i + 1} 頁`}
-                  disabled={autoFlip}
-                  type="button"
-                />
-              ))}
-            </div>
-          )}
         </div>
       )}
 
