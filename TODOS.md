@@ -27,23 +27,23 @@
 
 ## P0 — 地基 + 第一印象
 
-### 首頁集數列表渲染修復　`P0 · S · 無`　〔eng〕
+### ~~首頁集數列表渲染修復~~　`P0 · S · 無`　〔eng〕 ✅
 `StoryFilter` 把整段故事牆包在 `<Suspense fallback="載入故事中…">`，內層用 `useSearchParams()`，Next.js 15 中此舉使該邊界退化為 client-only → **靜態 HTML 只有最新一集 + 「載入故事中…」，列表要等 JS 才出現**。這正是「看起來很簡陋」+ 首頁 SEO 空洞的根因。
 **修法：** `useState` 初值改 `null`（= server 的「全部」），`vehicleParam` 只在 `useEffect` 套用，避免 hydration mismatch；移除把列表藏在 fallback 的結構。影響檔 `components/StoryFilter.tsx`；`app/page.tsx` 已傳完整 `stories`，不動。修完「首頁載入骨架」需求基本消失。
 
-### 設定正式站網域 + `NEXT_PUBLIC_SITE_URL`　`P0 · S · 確認網域`　〔ceo〕
+### ~~設定正式站網域 + `NEXT_PUBLIC_SITE_URL`~~　`P0 · S · 確認網域`　〔ceo〕 ✅
 Vercel 設 `NEXT_PUBLIC_SITE_URL=https://正式網域`。OG／Twitter／RSS／sitemap 的絕對連結都靠它；未設時 fallback 到 `VERCEL_URL`／`localhost`。**擋住 sitemap、JSON-LD、每集分享預覽。** `app/layout.tsx` 已讀此變數。
 
-### `sitemap.xml` + `robots.txt`　`P0 · S · 網域`　〔ceo〕
+### ~~`sitemap.xml` + `robots.txt`~~　`P0 · S · 網域`　〔ceo〕 ✅
 新增 `app/sitemap.ts`（首頁、`/story/[slug]`、`/topic`、`/topic/[tag]`、`/vehicles/[vehicle]`、`/about`）與 `app/robots.ts`（允許爬取、指向 sitemap）。主打「每集落地頁被搜尋到」卻沒給站點地圖，這是 SEO 最低門檻。Next.js 15 原生 `MetadataRoute`；重用 `storiesByNewest()`、`allTags()`、`allVehicles()`、`lib/site-url.ts`。
 
-### Podcast 結構化資料 JSON-LD　`P0–P1 · S · 網域`　〔ceo〕
+### ~~Podcast 結構化資料 JSON-LD~~　`P0–P1 · S · 網域`　〔ceo〕 ✅
 首頁輸出 `PodcastSeries`、單集頁輸出 `PodcastEpisode`（schema.org `<script type="application/ld+json">`），欄位對應標題／日期／音檔 URL／封面，對齊 `/feed.xml`。協助 Google 理解節目與單集（豐富摘要）。建議抽 `lib/json-ld.ts` 集中產生。
 
-### 同步 DESIGN.md 與實作　`P0 · S · 無`　〔design〕
+### ~~同步 DESIGN.md 與實作~~　`P0 · S · 無`　〔design〕 ✅
 更新 `DESIGN.md`：`--ink-soft` → `#7a7268`、背景改 `.site-backdrop` + `.site-root`、viewport 鎖縮放說明、StoryFilter 塗鴉現況。設計文件漂移時改版易回到舊 token（例如又寫 body 四角 gradient）。實作見 `app/globals.css`、`app/layout.tsx`。
 
-### 首屏價值主張與資訊架構精簡　`P0 · S–M · 無`　〔design+ceo〕
+### ~~首屏價值主張與資訊架構精簡~~　`P0 · S–M · 無`　〔design+ceo〕 ✅
 新訪客需 3 秒內懂「這不是一般 podcast 嵌入頁，是互動繪本」。**已做：** 標頭三行 tagline + 合作/許願/留言圓鈕（見 Completed）。**剩餘：** 檢視區塊順序（Header → ContinueBanner → LatestHero → FavoritesSection → StoryFilter），避免「最新集」與列表長期重複同一集；副標清楚傳達「給誰聽、睡前幾分鐘」。
 
 ---

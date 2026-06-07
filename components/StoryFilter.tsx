@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useMemo, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import type { Story } from "@/data/stories";
 import { ChipButton } from "./Chip";
 import StoryCard from "./StoryCard";
@@ -13,21 +13,25 @@ import styles from "./StoryFilter.module.css";
 type StoryFilterProps = {
   stories: Story[];
   vehicles: string[];
+  /** 由 server 從 URL searchParams 傳入，確保首屏 HTML 含完整列表 */
+  initialVehicle?: string | null;
 };
 
-function StoryFilterInner({ stories, vehicles }: StoryFilterProps) {
+export default function StoryFilter({
+  stories,
+  vehicles,
+  initialVehicle = null,
+}: StoryFilterProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const vehicleParam = searchParams.get("vehicle");
-
-  const [vehicle, setVehicle] = useState<string | null>(vehicleParam);
+  const [vehicle, setVehicle] = useState<string | null>(initialVehicle);
 
   useEffect(() => {
-    setVehicle(vehicleParam);
-  }, [vehicleParam]);
+    setVehicle(initialVehicle);
+  }, [initialVehicle]);
 
   function updateVehicle(nextVehicle: string | null) {
     playSfx("tap");
+    setVehicle(nextVehicle);
     const params = new URLSearchParams();
     if (nextVehicle) params.set("vehicle", nextVehicle);
     const qs = params.toString();
@@ -101,13 +105,5 @@ function StoryFilterInner({ stories, vehicles }: StoryFilterProps) {
         <p className={styles.empty}>沒有這種車車的故事，試試其他車車吧 🚗</p>
       )}
     </section>
-  );
-}
-
-export default function StoryFilter(props: StoryFilterProps) {
-  return (
-    <Suspense fallback={<p className={styles.empty}>載入故事中…</p>}>
-      <StoryFilterInner {...props} />
-    </Suspense>
   );
 }

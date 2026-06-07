@@ -1,4 +1,5 @@
 import type { Story } from "@/data/stories";
+import { CHANNEL_DESCRIPTION, CHANNEL_TITLE } from "@/lib/feed-constants";
 import { storyDescription } from "@/lib/story-metadata";
 import { getSiteUrl } from "@/lib/site-url";
 import { storyAudioPath, storyCoverPath } from "@/lib/story-utils";
@@ -26,10 +27,6 @@ function toRssPubDate(iso: string): string {
 function cdata(text: string): string {
   return `<![CDATA[${text.replace(/]]>/g, "]]]]><![CDATA[>")}]]>`;
 }
-
-const CHANNEL_TITLE = "車車遊樂園";
-const CHANNEL_DESCRIPTION =
-  "Bonbon & 馬米的親子 podcast《車車遊樂園》— 看圖聽故事，適合睡前親子共讀。";
 
 /** 依故事資料產生 RSS 2.0（含 podcast enclosure 與 iTunes 延伸欄位）。 */
 export function buildRssFeed(stories: Story[]): string {

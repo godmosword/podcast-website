@@ -26,7 +26,7 @@ Bonbon & 馬米親子 podcast「看圖聽故事」網站的視覺與互動規範
 | `--bg-2` | `#fbfbfd` | 次背景 / 卡片漸層 |
 | `--bg-dot` | `#eef1f6` | 極淡灰藍底紋 |
 | `--ink` | `#34302b` | 主文字（中性深灰） |
-| `--ink-soft` | `#8d857b` | 次要文字 |
+| `--ink-soft` | `#7a7268` | 次要文字 |
 | `--card` | `#ffffff` | 卡片背景 |
 
 多彩粉嫩 accent（裝飾、chip、邊框輪播）：
@@ -40,7 +40,7 @@ Bonbon & 馬米親子 podcast「看圖聽故事」網站的視覺與互動規範
 | `--c-teal` | `#79c8c1` |
 | `--c-lilac` | `#c5b3e6` |
 
-body 背景為四角極淡多彩 radial-gradient 柔光（pink / sky / mint / yellow）。
+頁面背景為純白（`--bg`），四角極淡多彩柔光由獨立節點 `.site-backdrop`（`position: fixed`）繪製，內容包在 `.site-root` 內；**不在 `body::before` 上畫 gradient**，避免 iOS Safari 上 sticky／合成層白塊跑版。實作見 `app/globals.css`、`app/layout.tsx`。
 每則故事另有 `story.color`（hex），用於邊框、陰影、CTA、播放鈕。
 
 ## 手繪塗鴉裝飾（v2：全力塗鴉框）
@@ -59,7 +59,8 @@ body 背景為四角極淡多彩 radial-gradient 柔光（pink / sky / mint / ye
 ### 塗鴉散布
 - `components/decor/Doodle.tsx`：inline SVG 塗鴉（`squiggle` / `loop` / `dots` / `burst` / `blob` / `zigzag`），`aria-hidden`，顏色吃 accent token。
 - 定位 class 於 `components/decor/decor.module.css`（`.doodle` + `.doodleTL/TR/BL/BR` + `.tiltA/B/C`）。
-- 加密接入：SiteHeader 標題四周（5 個）、LatestHero（3 個）、StoryFilter 區塊（3 個）、SiteFooter（4 個），混色 pink/yellow/mint/sky/lilac。尊重 `prefers-reduced-motion`。
+- 已接入：SiteHeader 標題四周（5 個）、LatestHero（3 個）、SiteFooter（4 個），混色 pink/yellow/mint/sky/lilac。尊重 `prefers-reduced-motion`。
+- **StoryFilter 區塊目前刻意留白**（無 Doodle），避免中段裝飾過密；若補 1–2 個塗鴉須與 Header 呼應並回寫本文件（見 TODOS P2）。
 
 ### 螢光筆色塊 `.marker`
 - 定義於 `app/globals.css`：文字壓在手繪螢光筆色塊上（`::before` 上色 + 微旋轉 + `filter: url(#rough-3)`）。

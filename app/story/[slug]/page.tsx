@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getStory, getRelated, getNextStory, stories } from "@/data/stories";
+import { podcastEpisodeJsonLd } from "@/lib/json-ld";
 import { storyDetailMetadata } from "@/lib/story-metadata";
 import { storyCoverPath } from "@/lib/story-utils";
 import FavoriteButton from "@/components/FavoriteButton";
+import JsonLd from "@/components/JsonLd";
 import PlatformLinks from "@/components/PlatformLinks";
 import PlayButton from "@/components/PlayButton";
 import RelatedStories from "@/components/RelatedStories";
@@ -47,6 +49,7 @@ export default async function StoryDetailPage({
 
   return (
     <main className={styles.main}>
+      <JsonLd data={podcastEpisodeJsonLd(story)} />
       <Link href="/" className={styles.back}>
         ← 回故事屋
       </Link>
