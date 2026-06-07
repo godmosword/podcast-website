@@ -6,6 +6,7 @@
 
 ### Added
 
+- **車車吃星星小遊戲** `/games/car-star`：給 3–7 歲的原創迷宮開車吃金幣遊戲（自繪 SVG 車輛、自訂地圖、WebAudio 音效）。方向鍵／WASD／觸控方向盤操作；`prefers-reduced-motion` 停用所有動畫仍可玩；SSR/hydration 安全、分頁切走自動暫停、320px 不溢出；最佳分數存 `localStorage`。`hooks/useReducedMotion.ts`、`components/games/CarStarGame.tsx`；footer 加入口
 - **互動音效回饋**：點播放／翻頁／選車種 chip／開音效有輕「啵」聲，用 **WebAudio 振盪器即時合成**（零音檔、零下載、零網路，貼合「音檔不外送」精神）；播放器頂部 🔊／🔇 靜音切換，偏好存 `localStorage`、預設開（`lib/sfx.ts`）
 - **動態生命感**：每頁左上吉祥物輕點頭揮手打招呼、首頁最新一集封面緩緩浮動、車種 chip hover 滑步；全部純 CSS、`prefers-reduced-motion` 由 globals 全域關閉
 - **新集近即時上架**：Apple／SoundOn 同步排程由每日一次改為**每 15 分鐘**檢查 feed（來源即 SoundOn 官方 RSS），SoundOn 上架後最多約 15 分上站；新增 `concurrency` 鎖避免排程交疊。可在 Actions 頁手動 **Run workflow** 立即上架
