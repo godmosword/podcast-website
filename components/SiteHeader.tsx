@@ -7,15 +7,15 @@ import styles from "./SiteHeader.module.css";
 const HERO_IMAGE = "/hero-home.jpg";
 
 /**
- * 首頁圓鈕：合作聯繫 / 許願投稿 / 留言給我。
+ * 首頁次級連結：合作聯繫 / 許願投稿 / 留言給我。
  * 連結待補——把每一筆的 href 換成實際網址即可（mailto:、表單、IG/Threads 等）。
  * 以 https:// 開頭者會自動在新分頁開啟。
- * 色彩與文字色已挑選為通過對比（白字配紅/綠、深墨字配黃）。
+ * 低調柔色膠囊（各帶一個粉嫩 accent），不搶首頁主視覺。
  */
-const ACTIONS: { label: string; href: string; bg: string; fg: string }[] = [
-  { label: "合作聯繫", href: "#", bg: "#e03131", fg: "#ffffff" },
-  { label: "許願投稿", href: "#", bg: "#f59f00", fg: "#34302b" },
-  { label: "留言給我", href: "#", bg: "#2b8a3e", fg: "#ffffff" },
+const ACTIONS: { label: string; href: string; bg: string }[] = [
+  { label: "合作聯繫", href: "#", bg: "var(--c-sky)" },
+  { label: "許願投稿", href: "#", bg: "var(--c-yellow)" },
+  { label: "留言給我", href: "#", bg: "var(--c-mint)" },
 ];
 
 type SiteHeaderProps = {
@@ -114,12 +114,7 @@ export default function SiteHeader({ variant = "full" }: SiteHeaderProps) {
               key={a.label}
               href={a.href}
               className={styles.actionBtn}
-              style={
-                {
-                  "--btn": a.bg,
-                  "--btn-fg": a.fg,
-                } as React.CSSProperties
-              }
+              style={{ "--btn": a.bg } as React.CSSProperties}
               {...(external
                 ? { target: "_blank", rel: "noopener noreferrer" }
                 : {})}
