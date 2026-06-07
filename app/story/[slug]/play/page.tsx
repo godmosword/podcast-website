@@ -57,7 +57,6 @@ export default async function StoryPlayPage({
       slug={story.slug}
       title={story.title}
       color={story.color}
-      vehicle={story.vehicle}
       images={images}
       audio={storyAudioPath(story.slug, story.audio)}
       captions={story.captions}

@@ -6,7 +6,6 @@
 
 ### Added
 
-- **車車角色圖鑑 + 收集車庫** `/characters`：每台車車一個角色（安安救護車、東東挖土機…）含黏土頭像與第一人稱台詞；**聽過的車車會點亮並蓋「認識了！」章**，頂部顯示「已認識 N/總 台車車」進度。收集狀態純本機（`lib/met-characters.ts`，播放時記入），SSR 完整渲染、收集為增強。首頁新增邀請入口卡
 - **互動音效回饋**：點播放／翻頁／選車種 chip／開音效有輕「啵」聲，用 **WebAudio 振盪器即時合成**（零音檔、零下載、零網路，貼合「音檔不外送」精神）；播放器頂部 🔊／🔇 靜音切換，偏好存 `localStorage`、預設開（`lib/sfx.ts`）
 - **動態生命感**：每頁左上吉祥物輕點頭揮手打招呼、首頁最新一集封面緩緩浮動、車種 chip hover 滑步；全部純 CSS、`prefers-reduced-motion` 由 globals 全域關閉
 - **新集近即時上架**：Apple／SoundOn 同步排程由每日一次改為**每 15 分鐘**檢查 feed（來源即 SoundOn 官方 RSS），SoundOn 上架後最多約 15 分上站；新增 `concurrency` 鎖避免排程交疊。可在 Actions 頁手動 **Run workflow** 立即上架

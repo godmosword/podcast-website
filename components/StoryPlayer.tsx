@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { clearContinue, loadContinue, saveContinue } from "@/lib/continue-playback";
 import { playSfx } from "@/lib/sfx";
-import { markVehicleMet } from "@/lib/met-characters";
 import SfxToggle from "./SfxToggle";
 import Wheel from "./decor/Wheel";
 import Sparkle from "./decor/Sparkle";
@@ -23,8 +22,6 @@ type StoryPlayerProps = {
   slug: string;
   title: string;
   color: string;
-  /** 車種：開始播放時記入「認識過的車車」，供角色圖鑑點亮車庫。 */
-  vehicle?: string;
   images: string[];
   audio: string;
   captions?: string[];
@@ -71,7 +68,6 @@ export default function StoryPlayer({
   slug,
   title,
   color,
-  vehicle,
   images,
   audio,
   captions,
@@ -228,7 +224,6 @@ export default function StoryPlayer({
       setIsPlaying(true);
       setHasEnded(false);
       setPlayBlocked(false);
-      if (vehicle) markVehicleMet(vehicle);
     };
     const subTimes = hasSubtitles ? subtitles!.map((s) => s.t) : null;
     const handleTimeUpdate = () => {
@@ -277,7 +272,7 @@ export default function StoryPlayer({
       el.removeEventListener("canplay", handleCanPlay);
       el.removeEventListener("loadstart", handleLoadStart);
     };
-  }, [autoFlip, total, hasCueTimes, captionTimes, hasSubtitles, subtitles, repeat, vehicle]);
+  }, [autoFlip, total, hasCueTimes, captionTimes, hasSubtitles, subtitles, repeat]);
 
   useEffect(() => {
     if (bedtimeMinutes === null) {
