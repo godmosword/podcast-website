@@ -49,6 +49,9 @@ export default function SiteFooter() {
         <Link href="/about" className={styles.aboutLink}>
           關於我們
         </Link>
+        <Link href="/studio" className={styles.studioLink}>
+          節目數據
+        </Link>
         <p className={styles.copyright}>© 車車遊樂園 · Bonbon &amp; 馬米</p>
       </div>
 

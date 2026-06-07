@@ -114,6 +114,18 @@ npm run build
 - [ ] 若有新中文字 → 已重跑 `npm run font:subset`
 - [ ] `/feed.xml` 含新集（建置後抽查）
 
+## 節目數據中心（`/studio`）
+
+製作團隊專用頁面，**不在首頁 Hero 曝光**；頁尾有極小字連結「節目數據」可進入，或直接書籤 `/studio`。頁面設 `noindex`，且不在 `sitemap.xml`。
+
+| 檔案 | 用途 |
+|------|------|
+| `app/studio/page.tsx` | 節目數據中心頁面 |
+| `lib/studio/platforms.ts` | 各平台**後台** URL（含 SoundOn，不進公開 ConnectHub） |
+| `data/studio-metrics.json` | API 指標快照（初期為空，結構見 `lib/studio/types.ts`） |
+
+**第二期（規劃）：** `scripts/sync-studio-metrics.ts` 從各平台 API 寫入 `studio-metrics.json`，卡片上的播放／聽眾等數字會自動顯示。目前請用各平台「開啟後台」捷徑查看完整報表。
+
 ## Apple Podcast 自動同步
 
 官網與 SoundOn **不會**自動連動；此管線只讀 **Apple Podcast** 公開 RSS（透過 iTunes Lookup，無需 API key）。

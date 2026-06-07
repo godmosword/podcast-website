@@ -41,6 +41,21 @@
   }
 }
 
+.studioLink {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  text-decoration: none;
+  opacity: 0.85;
+}
+
+@media (hover: hover) {
+  .studioLink:hover {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}
+
 .copyright {
   margin: 0;
   font-size: 0.8rem;
