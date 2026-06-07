@@ -636,7 +636,7 @@ export default function StoryPlayer({
               aria-pressed={repeat}
               aria-label="重複播放"
             >
-              <RepeatIcon size={22} />
+              <RepeatIcon size={28} />
               {repeat && <span className={styles.onDot} style={{ backgroundColor: color }} />}
             </button>
             <button
@@ -647,7 +647,7 @@ export default function StoryPlayer({
               disabled={mediaError === "audio"}
             >
               <span className={styles.skip}>
-                <RewindIcon size={24} />
+                <RewindIcon size={30} />
                 <span className={styles.skipNum}>10</span>
               </span>
             </button>
@@ -669,7 +669,7 @@ export default function StoryPlayer({
               disabled={mediaError === "audio"}
             >
               <span className={styles.skip}>
-                <ForwardIcon size={24} />
+                <ForwardIcon size={30} />
                 <span className={styles.skipNum}>10</span>
               </span>
             </button>
@@ -680,7 +680,7 @@ export default function StoryPlayer({
               aria-label="停止"
               disabled={mediaError === "audio"}
             >
-              <StopIcon size={20} />
+              <StopIcon size={26} />
             </button>
           </div>
 

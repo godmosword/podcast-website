@@ -463,8 +463,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   color: rgba(255, 255, 255, 0.92);
   background: transparent;
@@ -509,10 +509,10 @@
 
 .skipNum {
   position: absolute;
-  top: 52%;
+  top: 53%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 0.56rem;
+  font-size: 0.62rem;
   font-weight: 800;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -521,7 +521,7 @@
 /* 重複開啟態的小圓點（主題色由 inline style 指定）。 */
 .onDot {
   position: absolute;
-  bottom: 7px;
+  bottom: 9px;
   left: 50%;
   transform: translateX(-50%);
   width: 4px;
