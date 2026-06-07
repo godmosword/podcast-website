@@ -117,24 +117,26 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
-  padding: 10px 20px;
+  min-height: 46px;
+  padding: 11px 22px;
   border-radius: 999px;
   color: var(--ink);
-  font-weight: 600;
-  font-size: 0.95rem;
+  font-weight: 700;
+  font-size: 1rem;
   line-height: 1.2;
   text-decoration: none;
-  /* 低調柔色：淡色底 + 細邊框，回到次級連結層級，不搶首頁主視覺。 */
-  background: color-mix(in srgb, var(--btn) 12%, #fff);
-  border: 1.5px solid color-mix(in srgb, var(--btn) 32%, #fff);
-  transition: transform 0.14s ease, background 0.14s ease, color 0.14s ease;
+  /* 柔色膠囊：彩底 + 同色邊框 + 一點柔陰影，明顯但不立體不商業。 */
+  background: color-mix(in srgb, var(--btn) 30%, #fff);
+  border: 2px solid color-mix(in srgb, var(--btn) 62%, #fff);
+  box-shadow: 0 2px 5px rgba(52, 48, 43, 0.1);
+  transition: transform 0.14s ease, background 0.14s ease, box-shadow 0.14s ease;
 }
 
 @media (hover: hover) {
   .actionBtn:hover {
-    transform: translateY(-1px);
-    background: color-mix(in srgb, var(--btn) 28%, #fff);
+    transform: translateY(-2px);
+    background: color-mix(in srgb, var(--btn) 42%, #fff);
+    box-shadow: 0 5px 10px rgba(52, 48, 43, 0.16);
   }
 }
 
