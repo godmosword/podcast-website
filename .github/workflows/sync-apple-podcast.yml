@@ -1,10 +1,15 @@
 name: Sync Apple Podcast
 
 on:
+  # 可靠來源：外部排程（cron-job.org 等）打 repository_dispatch API 觸發，
+  # 繞過 GitHub 內建 schedule 的不可靠（best-effort、常延遲數小時甚至跳過）。
+  # 設定步驟見 README「外部排程觸發」。
+  repository_dispatch:
+    types: [sync-now]
+  # 後備：GitHub 內建排程（best-effort，幾小時內會補到；準時性靠上面的外部觸發）。
   schedule:
-    # 每 15 分鐘檢查一次 Apple RSS（SoundOn 推送到 Apple 後最多 ~15 分上站）。
-    # 註：GitHub 排程不保證準點，高峰可能延遲幾分鐘，對 15 分間隔無妨。
     - cron: "*/15 * * * *"
+  # 手動：Actions 頁 Run workflow，上架後想立即上站時用。
   workflow_dispatch:
 
 # 同一時間只跑一支，避免兩個排程交疊各自 push 衝突。

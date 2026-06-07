@@ -24,6 +24,7 @@
 - 首頁圓鈕（合作聯繫／許願投稿／留言給我）改為**黏土質感**（高光漸層 + 貼紙立體陰影 + 按壓回饋）
 - 播放器控制列**重新設計為線性圖示風**（Spotify／Apple Podcasts 風）：次級鈕（重複／倒退／快進／停止）改為透明本體 + 白色 SVG 線性圖示（`PlayerIcon.tsx`，取代 emoji，跨平台一致且銳利），hover／按下才浮現淡圓底；中央紫色播放鈕為唯一實心立體鈕，主從分明；倒退／快進的「10」秒數疊在弧線中央，重複開啟態以主題色 + 小圓點標記
 - **viewport 開放縮放**：移除 `maximumScale`／`userScalable`，家長共讀可放大文字／插圖，符合 WCAG 1.4.4
+- 同步 workflow 加 **`repository_dispatch`（`sync-now`）外部觸發**：可用免費外部 cron 打 GitHub API 準時觸發,繞過 GitHub 內建 `schedule` 的不可靠(best-effort、常延遲數小時);內建 cron 降為後備。設定步驟見 README「外部排程觸發」
 - 同步排程加上**無新集早退**：`sync:apple` 在無新集時不再無意義改寫 `apple-sync-state.json`，CI 以 `git status` 判斷早退，省去空轉的 test／build
 
 ### Fixed

@@ -146,7 +146,39 @@ npm run sync:apple
 npm test && npm run build
 ```
 
-**GitHub Actions：** [`.github/workflows/sync-apple-podcast.yml`](.github/workflows/sync-apple-podcast.yml) **每 15 分鐘**檢查一次 feed（feed 來源即 SoundOn 官方 RSS，SoundOn 上架後最多約 15 分上站）。**無新集時直接早退**（sync 不動任何檔案、`git status` 乾淨），不浪費 CI 跑 test/build；有新集才依上列框架上架，通過測試與 build 後 **commit 並 push 到 `main`**。`concurrency` 鎖避免兩支排程交疊。要立即上架可在 Actions 頁手動 **Run workflow**（`workflow_dispatch`）。若 repo 有 branch protection，需允許 `github-actions[bot]` 寫入。
+**GitHub Actions：** [`.github/workflows/sync-apple-podcast.yml`](.github/workflows/sync-apple-podcast.yml)（feed 來源即 SoundOn 官方 RSS）。**無新集時直接早退**（sync 不動任何檔案、`git status` 乾淨），不浪費 CI 跑 test/build；有新集才依上列框架上架，通過測試與 build 後 **commit 並 push 到 `main`**。`concurrency` 鎖避免交疊。三個觸發來源：
+
+| 來源 | 準時性 | 用途 |
+|------|--------|------|
+| `repository_dispatch`（外部排程打 API） | ✅ 準時 | 主要、可靠的定時觸發（見下方設定） |
+| `schedule`（GitHub 內建 cron `*/15`） | ⚠️ best-effort，常延遲數小時甚至跳過 | 後備，幾小時內會補到 |
+| `workflow_dispatch`（Actions 頁 Run workflow） | ✅ 即時 | 上架後想立刻上站時手動按 |
+
+> ⚠️ **GitHub 內建 `schedule` 不可靠**：官方為 best-effort，高負載時延遲數小時或整次跳過、不補跑（本 repo 實測 `0 1` 的 cron 常跑在 05:00 左右）。要真正準時，請設定下方外部排程。
+
+#### 外部排程觸發（可靠定時，免費）
+
+讓外部 cron 服務定時打 GitHub API 觸發 workflow，繞過內建 schedule 的不可靠：
+
+1. **建 token**：GitHub → Settings → Developer settings → **Fine-grained personal access tokens** → 只授權本 repo、權限 **Contents: Read and write**（`repository_dispatch` 端點所需），複製 token。
+2. **註冊免費 cron**（如 [cron-job.org](https://cron-job.org)）→ 新增 job：
+   - **URL**：`https://api.github.com/repos/godmosword/podcast-website/dispatches`
+   - **Method**：`POST`
+   - **Headers**：`Authorization: Bearer <你的 token>`、`Accept: application/vnd.github+json`
+   - **Body**：`{"event_type":"sync-now"}`
+   - **間隔**：每 15 分（或你要的頻率）
+3. 本機驗證指令（把 `<TOKEN>` 換掉跑一次，應觸發一次 sync）：
+   ```bash
+   curl -X POST \
+     -H "Authorization: Bearer <TOKEN>" \
+     -H "Accept: application/vnd.github+json" \
+     https://api.github.com/repos/godmosword/podcast-website/dispatches \
+     -d '{"event_type":"sync-now"}'
+   ```
+
+> token 是密鑰：只放進 cron 服務的 request header，**不要 commit 進 repo**。權限只給單一 repo + Contents，外洩風險最小。
+
+若 repo 有 branch protection，需允許 `github-actions[bot]` 寫入。
 
 新集 slug 規則：`ep-<集數>`（例：`ep-7`）。同步後若要完整看圖體驗：
 
