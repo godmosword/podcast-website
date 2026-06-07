@@ -8,7 +8,7 @@ export function formatDate(iso: string): string {
   return iso.replaceAll("-", ".");
 }
 
-export function storyAssetBase(slug: string): string {
+function storyAssetBase(slug: string): string {
   return `/stories/${slug}`;
 }
 

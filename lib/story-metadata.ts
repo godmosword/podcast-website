@@ -13,7 +13,7 @@ export function storyDescription(story: Story): string {
 }
 
 /** 故事分享圖：有插圖用封面，否則全站預設 mascot */
-export function storyOgImagePath(story: Story): string {
+function storyOgImagePath(story: Story): string {
   if (story.pageCount > 0) {
     return storyCoverPath(story.slug);
   }

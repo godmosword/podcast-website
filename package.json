@@ -21,7 +21,6 @@
   "devDependencies": {
     "@playwright/test": "^1.52.0",
     "@types/node": "^22.10.0",
-    "@types/opencc-js": "^1.0.3",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "fast-xml-parser": "^5.2.5",

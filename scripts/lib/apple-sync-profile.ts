@@ -25,14 +25,14 @@ const VEHICLE_EMOJI: Record<string, string> = {
   其他: "🚗",
 };
 
-export function inferVehicleFromTitle(title: string): string | null {
+function inferVehicleFromTitle(title: string): string | null {
   for (const [pattern, vehicle] of VEHICLE_FROM_TITLE) {
     if (pattern.test(title)) return vehicle;
   }
   return null;
 }
 
-export function emojiForVehicle(vehicle: string): string {
+function emojiForVehicle(vehicle: string): string {
   return VEHICLE_EMOJI[vehicle] ?? VEHICLE_EMOJI["其他"];
 }
 

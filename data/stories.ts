@@ -242,11 +242,6 @@ export function allVehicles(): string[] {
   return Array.from(new Set(stories.map((s) => s.vehicle)));
 }
 
-/** 依車種取得代表 emoji（取該車種第一則故事的 emoji）。 */
-export function getVehicleEmoji(vehicle: string): string {
-  return stories.find((s) => s.vehicle === vehicle)?.emoji ?? "🚗";
-}
-
 /** 依車種取得黏土風代表封面（該車種第一則故事的 01.jpg）。 */
 export function getVehicleCoverPath(vehicle: string): string | null {
   const slug = stories.find((s) => s.vehicle === vehicle)?.slug;

@@ -19,7 +19,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as OpenCC from "opencc-js";
 
-export type Subtitle = { t: number; text: string };
+type Subtitle = { t: number; text: string };
 
 // Whisper 中文常輸出簡體；本站為繁中（台灣），統一簡轉繁（含台灣用語）。
 const toTraditional = OpenCC.Converter({ from: "cn", to: "twp" });
@@ -61,7 +61,7 @@ function fixNames(text: string): string {
 }
 
 /** 簡轉繁（台灣用語）+ 修正主持人名 + 清除幻覺、去空白、合併連續重複句。 */
-export function cleanSegments(segments: Subtitle[]): Subtitle[] {
+function cleanSegments(segments: Subtitle[]): Subtitle[] {
   const out: Subtitle[] = [];
   for (const seg of segments) {
     const text = fixNames(toTraditional(seg.text.trim()));
@@ -98,7 +98,7 @@ type WhisperSeg = { offsets?: { from: number }; text?: string };
 type WhisperJson = { transcription?: WhisperSeg[] };
 
 /** 轉錄單一音檔，回傳清理後的字幕段。 */
-export function transcribeAudio(
+function transcribeAudio(
   audioPath: string,
   opts: { bin?: string; model?: string; lang?: string } = {},
 ): Subtitle[] {
@@ -133,7 +133,7 @@ export function transcribeAudio(
 }
 
 /** 寫入 data/subtitles/<slug>.json（即時字幕側車檔）。 */
-export function writeSubtitles(slug: string, segments: Subtitle[]): string {
+function writeSubtitles(slug: string, segments: Subtitle[]): string {
   if (!existsSync(SUBTITLES_DIR)) mkdirSync(SUBTITLES_DIR, { recursive: true });
   const file = join(SUBTITLES_DIR, `${slug}.json`);
   writeFileSync(file, `${JSON.stringify(segments)}\n`, "utf-8");

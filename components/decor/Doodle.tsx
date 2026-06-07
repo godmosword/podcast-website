@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 
 /** 可用的手繪塗鴉造型。 */
-export type DoodleKind =
+type DoodleKind =
   | "squiggle" // 波浪線
   | "loop" // 線圈
   | "dots" // 散點

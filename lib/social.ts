@@ -5,7 +5,7 @@
 // url 留空字串會自動隱藏，避免失效連結。
 // ============================================================
 
-/** 圖示識別字，對應 components/SocialLinks.tsx 內的 SVG。 */
+/** 圖示識別字，對應 lib/connect-icons.tsx 內的 SVG。 */
 export type SocialIcon = "instagram" | "threads";
 
 export type Social = {
@@ -20,7 +20,7 @@ export type Social = {
 };
 
 /** 社群清單（顯示順序即陣列順序）。 */
-export const SOCIALS: Social[] = [
+const SOCIALS: Social[] = [
   {
     label: "Instagram",
     url: "https://www.instagram.com/s32183218",

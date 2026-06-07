@@ -1,5 +1,5 @@
 /** Apple Podcasts 節目 ID（與 lib/platforms.ts 連結一致）。 */
-export const APPLE_PODCAST_ID = "1896610920";
+const APPLE_PODCAST_ID = "1896610920";
 
 const LOOKUP_URL = `https://itunes.apple.com/lookup?id=${APPLE_PODCAST_ID}&entity=podcast`;
 
