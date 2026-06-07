@@ -116,11 +116,13 @@
   --btn: var(--c-mint);
   display: inline-flex;
   align-items: center;
-  padding: 6px 14px;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 20px;
   border-radius: 999px;
   color: var(--ink);
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   line-height: 1.2;
   text-decoration: none;
   /* 低調柔色：淡色底 + 細邊框，回到次級連結層級，不搶首頁主視覺。 */
