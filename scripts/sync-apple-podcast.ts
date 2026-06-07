@@ -268,10 +268,18 @@ async function main(): Promise<void> {
   if (newCandidates.length === 0) {
     console.log("No new episodes to sync.");
     if (!dryRun) {
-      await writeJson(PATHS.state, {
-        seenGuids: reconcileSeenGuids(rssItems, state, catalog, eps),
-        lastRun: new Date().toISOString(),
-      });
+      // 只在 seenGuids 真的有變動時才寫 state，讓「無新集」維持 git 乾淨，
+      // 供 CI 用 git diff 判斷早退（避免每次都因 lastRun 產生 noise diff）。
+      const nextSeen = reconcileSeenGuids(rssItems, state, catalog, eps);
+      const changed =
+        nextSeen.length !== state.seenGuids.length ||
+        nextSeen.some((g) => !state.seenGuids.includes(g));
+      if (changed) {
+        await writeJson(PATHS.state, {
+          seenGuids: nextSeen,
+          lastRun: new Date().toISOString(),
+        });
+      }
     }
     return;
   }

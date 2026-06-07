@@ -146,7 +146,7 @@ npm run sync:apple
 npm test && npm run build
 ```
 
-**GitHub Actions：** [`.github/workflows/sync-apple-podcast.yml`](.github/workflows/sync-apple-podcast.yml) 每天 UTC 01:00 執行；有新集時依上列框架上架，通過測試與 build 後 **commit 並 push 到 `main`**。若 repo 有 branch protection，需允許 `github-actions[bot]` 寫入。
+**GitHub Actions：** [`.github/workflows/sync-apple-podcast.yml`](.github/workflows/sync-apple-podcast.yml) **每 15 分鐘**檢查一次 feed（feed 來源即 SoundOn 官方 RSS，SoundOn 上架後最多約 15 分上站）。**無新集時直接早退**（sync 不動任何檔案、`git status` 乾淨），不浪費 CI 跑 test/build；有新集才依上列框架上架，通過測試與 build 後 **commit 並 push 到 `main`**。`concurrency` 鎖避免兩支排程交疊。要立即上架可在 Actions 頁手動 **Run workflow**（`workflow_dispatch`）。若 repo 有 branch protection，需允許 `github-actions[bot]` 寫入。
 
 新集 slug 規則：`ep-<集數>`（例：`ep-7`）。同步後若要完整看圖體驗：
 
