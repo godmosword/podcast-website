@@ -393,7 +393,7 @@
   left: 0;
   right: 0;
   /* 與底部控制列保持距離 */
-  bottom: calc(196px + var(--safe-bottom));
+  bottom: calc(162px + var(--safe-bottom));
   z-index: 4;
   display: flex;
   justify-content: center;
@@ -586,7 +586,7 @@
 .errorBanner {
   position: absolute;
   left: 50%;
-  bottom: calc(204px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(170px + env(safe-area-inset-bottom, 0px));
   z-index: 6;
   transform: translateX(-50%);
   max-width: min(92vw, 420px);
