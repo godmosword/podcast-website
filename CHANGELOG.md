@@ -6,6 +6,7 @@
 
 ### Added
 
+- **跨集角色一致（角色名冊 + 定裝照）**：`data/characters.json` 記每角色名／別名／車種／外觀描述／canonical 定裝照；切場景時文字模型辨識每幕出場角色，生圖時以該角色的定裝照（`public/characters/<名>.jpg`，可多張同框）當參考圖，讓同一角色跨集維持形象。新角色首次登場自動生定裝照，審圖後 `--approve` 存進名冊；`--char <名>` 可重抽定裝照
 - **每集劇情插圖自動生成管線**（`npm run illustrate -- <slug>`）：由字幕側車檔切場景（OpenAI 文字模型，或 `--deterministic` 免 key 後備）→ 每幕以該集 `01.jpg` 當參考圖生**黏土風插圖**（OpenAI image，固定 `CLAY_STYLE_PREFIX`）→ 暫存 + `contact.html` **人工審圖** → `--approve` 進 `public/` 並寫 `overrides` 的 `pageCount`/`captionTimes`。播放器既有「依時間換圖」邏輯直接套用，**零播放器改動**。本機手動、CI 不放 key 不生圖。`scripts/illustrate.ts`、`scripts/lib/illustrate-core.ts`；修補 `applyDefaults` 讓 `captionTimes` 能從 overrides 傳遞
 - **車車吃星星小遊戲** `/games/car-star`：給 3–7 歲的原創迷宮開車吃金幣遊戲（自繪 SVG 車輛、自訂地圖、WebAudio 音效）。方向鍵／WASD／觸控方向盤操作；`prefers-reduced-motion` 停用所有動畫仍可玩；SSR/hydration 安全、分頁切走自動暫停、320px 不溢出；最佳分數存 `localStorage`。`hooks/useReducedMotion.ts`、`components/games/CarStarGame.tsx`；footer 加入口
 - **互動音效回饋**：點播放／翻頁／選車種 chip／開音效有輕「啵」聲，用 **WebAudio 振盪器即時合成**（零音檔、零下載、零網路，貼合「音檔不外送」精神）；播放器頂部 🔊／🔇 靜音切換，偏好存 `localStorage`、預設開（`lib/sfx.ts`）

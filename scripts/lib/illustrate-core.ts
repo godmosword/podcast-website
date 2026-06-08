@@ -4,6 +4,10 @@
 // 由字幕側車檔（data/subtitles/<slug>.json）切場景 → 每幕生黏土風插圖
 // → 暫存 + contact sheet 人工審 → --approve 進 public/ 並寫 pageCount/captionTimes。
 //
+// 角色一致：data/characters.json 為跨集角色名冊；每個角色有 canonical 定裝照
+// public/characters/<name>.jpg。生圖時把該幕出場角色的定裝照當參考圖，跨集維持形象。
+// 新角色首次登場時自動產定裝照（暫存），--approve 後存進名冊。
+//
 // 隱私：送出的是已公開的劇本文字（非音檔）。需 OPENAI_API_KEY。
 // 本機手動執行、人工審圖；CI 不放 key、不生圖。
 // ============================================================
@@ -34,6 +38,14 @@ export interface Scene {
   end: number; // 秒
   summary: string; // 中文，給 contact sheet
   prompt: string; // 英文，給圖像模型
+  characters: string[]; // 該幕出場的角色 canonical 名稱
+}
+
+export interface NewCharacter {
+  name: string; // canonical 中文名（如 多多）
+  aliases: string[]; // whisper 可能的誤聽（朵朵…）
+  vehicle?: string;
+  desc: string; // 英文外觀描述，給生圖穩定形象
 }
 
 export interface ScenesFile {
@@ -42,6 +54,17 @@ export interface ScenesFile {
   model: string;
   generatedAt: string;
   scenes: Scene[];
+  newCharacters: NewCharacter[];
+}
+
+/** 名冊一筆。以 name 為 key。 */
+export interface Character {
+  name: string;
+  aliases: string[];
+  vehicle?: string;
+  desc: string;
+  ref?: string; // web 路徑，如 "characters/多多.jpg"
+  firstSeen?: string; // 首次登場的 slug
 }
 
 export interface StoryMeta {
@@ -52,7 +75,10 @@ export interface StoryMeta {
 // ── 路徑 ────────────────────────────────────────────────
 export const SCENES_DIR = join(ROOT, "data", "scenes");
 export const STAGING_DIR = join(ROOT, "public", ".illustrate-staging");
+export const CHARACTERS_DIR = join(ROOT, "public", "characters");
+const CHARACTERS_PATH = join(ROOT, "data", "characters.json");
 const DEFAULTS_PATH = join(ROOT, "data", "apple-sync.defaults.json");
+const SYNCED_PATH = join(ROOT, "data", "apple-synced.json");
 
 export function scenesSidecarPath(slug: string): string {
   return join(SCENES_DIR, `${slug}.json`);
@@ -66,12 +92,22 @@ export function publicDirForSlug(slug: string): string {
 function pad2(n: number): string {
   return String(n).padStart(2, "0");
 }
+/** 角色名 → 檔名安全字串（保留中日韓字、英數、-、_）。 */
+function safeName(name: string): string {
+  return name.replace(/[^\p{L}\p{N}_-]/gu, "").slice(0, 40) || "char";
+}
+export function characterRefFsPath(name: string): string {
+  return join(CHARACTERS_DIR, `${safeName(name)}.jpg`);
+}
+export function stagingPortraitPath(slug: string, name: string): string {
+  return join(stagingDirForSlug(slug), `_char-${safeName(name)}.jpg`);
+}
 
 // ── 場景長度目標（秒）─────────────────────────────────────
 const TARGET_MIN = 30;
 const TARGET_MAX = 60;
-const HARD_MIN = 25; // 短於此併入鄰幕
-const HARD_MAX = 75; // 長於此再切
+const HARD_MIN = 25;
+const HARD_MAX = 75;
 
 // ── 黏土風格 prompt（萃取自 DESIGN.md）──────────────────────
 export const CLAY_STYLE_PREFIX =
@@ -88,9 +124,7 @@ export const CLAY_NEGATIVE =
 export function readSubtitles(slug: string): Subtitle[] {
   const p = subtitleSidecarPath(slug);
   if (!existsSync(p)) {
-    throw new Error(
-      `找不到字幕側車檔 ${p}；請先 npm run transcribe -- ${slug}`,
-    );
+    throw new Error(`找不到字幕側車檔 ${p}；請先 npm run transcribe -- ${slug}`);
   }
   const raw: unknown = JSON.parse(readFileSync(p, "utf8"));
   if (!Array.isArray(raw)) throw new Error(`字幕格式錯誤：${p}`);
@@ -105,43 +139,72 @@ export function readSubtitles(slug: string): Subtitle[] {
   return subs;
 }
 
-/** 估整集音檔長度（秒）：最後一句起始 + 緩衝。 */
 export function estimateDuration(subs: Subtitle[]): number {
   return Math.ceil(subs[subs.length - 1].t + 5);
 }
 
+// ── 名冊讀寫 ─────────────────────────────────────────────
+export function readCharacters(): Character[] {
+  if (!existsSync(CHARACTERS_PATH)) return [];
+  const raw: unknown = JSON.parse(readFileSync(CHARACTERS_PATH, "utf8"));
+  return Array.isArray(raw) ? (raw as Character[]) : [];
+}
+function writeCharacters(chars: Character[]): void {
+  writeFileSync(CHARACTERS_PATH, `${JSON.stringify(chars, null, 2)}\n`, "utf8");
+}
+function charByName(chars: Character[]): Map<string, Character> {
+  return new Map(chars.map((c) => [c.name, c]));
+}
+
 // ── 後處理：把場景夾在 25–75 秒、邊界落在句界 ──────────────────
-function buildScenesFromStartIndices(
+interface RawScene {
+  startIdx: number;
+  start: number;
+  end: number;
+  summary: string;
+  prompt: string;
+  characters: string[];
+}
+
+function buildScenes(
   subs: Subtitle[],
   startIndices: number[],
   duration: number,
   summaries: string[],
   prompts: string[],
+  charactersArr: string[][],
 ): Scene[] {
-  // 去重、排序、確保第一幕從 0 開始
   const idx = Array.from(new Set(startIndices)).sort((a, b) => a - b);
   if (idx[0] !== 0) idx.unshift(0);
 
-  const raw = idx.map((startIdx, i) => {
+  const raw: RawScene[] = idx.map((startIdx, i) => {
     const start = subs[startIdx].t;
     const nextIdx = idx[i + 1];
     const end = nextIdx != null ? subs[nextIdx].t : duration;
-    return { startIdx, start, end, summary: summaries[i] ?? "", prompt: prompts[i] ?? "" };
+    return {
+      startIdx,
+      start,
+      end,
+      summary: summaries[i] ?? "",
+      prompt: prompts[i] ?? "",
+      characters: charactersArr[i] ?? [],
+    };
   });
 
-  // 併入過短的場景（往前一幕合併）
-  const merged: typeof raw = [];
+  // 併入過短場景（往前一幕合併，角色取聯集）
+  const merged: RawScene[] = [];
   for (const sc of raw) {
     const prev = merged[merged.length - 1];
     if (prev && sc.end - prev.start < HARD_MIN) {
-      prev.end = sc.end; // 延長前一幕
+      prev.end = sc.end;
+      prev.characters = [...new Set([...prev.characters, ...sc.characters])];
     } else {
       merged.push({ ...sc });
     }
   }
 
-  // 切開過長的場景（在最近的句界，朝 TARGET_MAX 切）
-  const split: typeof merged = [];
+  // 切開過長場景（最近句界）
+  const split: RawScene[] = [];
   for (const sc of merged) {
     let segStart = sc.start;
     while (sc.end - segStart > HARD_MAX) {
@@ -161,10 +224,10 @@ function buildScenesFromStartIndices(
     end: Math.round(sc.end * 10) / 10,
     summary: sc.summary,
     prompt: sc.prompt,
+    characters: sc.characters,
   }));
 }
 
-/** 拼一個場景的台詞（給生圖 prompt 補語境）。 */
 function sceneDialogue(subs: Subtitle[], start: number, end: number): string {
   return subs
     .filter((s) => s.t >= start && s.t < end)
@@ -172,11 +235,11 @@ function sceneDialogue(subs: Subtitle[], start: number, end: number): string {
     .join(" ");
 }
 
-// ── ① 切場景：純時間（keyless 後備）──────────────────────────
+// ── ① 切場景：純時間（keyless 後備，無角色辨識）──────────────
 export function segmentDeterministic(
   subs: Subtitle[],
   duration: number,
-): Scene[] {
+): { scenes: Scene[]; newCharacters: NewCharacter[] } {
   const startIndices: number[] = [];
   let bucketStart = subs[0].t;
   subs.forEach((s, i) => {
@@ -189,9 +252,7 @@ export function segmentDeterministic(
       bucketStart = s.t;
     }
   });
-  const scenes = buildScenesFromStartIndices(subs, startIndices, duration, [], []);
-  // 用台詞片段當 summary、英文 prompt 先放占位（deterministic 無語意理解）
-  return scenes.map((sc) => {
+  const scenes = buildScenes(subs, startIndices, duration, [], [], []).map((sc) => {
     const dlg = sceneDialogue(subs, sc.start, sc.end);
     return {
       ...sc,
@@ -199,19 +260,31 @@ export function segmentDeterministic(
       prompt: `A cozy scene from a toddler car story. Context: ${dlg.slice(0, 200)}`,
     };
   });
+  return { scenes, newCharacters: [] };
 }
 
-// ── ① 切場景：OpenAI 文字模型（主要）────────────────────────
-const SceneLLMSchema = z.object({
+// ── ① 切場景：OpenAI 文字模型（含角色辨識）────────────────────
+const SegmentSchema = z.object({
   scenes: z
     .array(
       z.object({
         startIndex: z.number().int().nonnegative(),
         summary: z.string().min(1),
         prompt: z.string().min(1),
+        characters: z.array(z.string()).default([]),
       }),
     )
     .min(1),
+  newCharacters: z
+    .array(
+      z.object({
+        name: z.string().min(1),
+        aliases: z.array(z.string()).default([]),
+        vehicle: z.string().optional(),
+        desc: z.string().min(1),
+      }),
+    )
+    .default([]),
 });
 
 export function getTextModel(): string {
@@ -221,38 +294,51 @@ export function getImageModel(): string {
   return process.env.OPENAI_IMAGE_MODEL ?? "gpt-image-2";
 }
 
-function requireKey(): string {
-  const key = process.env.OPENAI_API_KEY;
-  if (!key) {
+function requireKey(): void {
+  if (!process.env.OPENAI_API_KEY) {
     throw new Error(
-      "缺 OPENAI_API_KEY。請設環境變數後再跑（見 .env.example）。\n" +
+      "缺 OPENAI_API_KEY。請設環境變數（或 .env.local）後再跑（見 .env.example）。\n" +
         "  或加 --deterministic 用本機切場景（不生圖、不需 key）。",
     );
   }
-  return key;
 }
 
 export async function segmentByOpenAI(
   subs: Subtitle[],
   duration: number,
   meta: StoryMeta,
-): Promise<Scene[]> {
+): Promise<{ scenes: Scene[]; newCharacters: NewCharacter[] }> {
   requireKey();
   const { default: OpenAI } = await import("openai");
   const client = new OpenAI();
 
+  const roster = readCharacters();
+  const rosterText =
+    roster.length > 0
+      ? roster
+          .map(
+            (c) =>
+              `- ${c.name} (aliases: ${c.aliases.join("/") || "—"}; ${c.vehicle ?? ""}): ${c.desc}`,
+          )
+          .join("\n")
+      : "(none yet)";
+
   const lines = subs.map((s, i) => `${i}\t${s.t}\t${s.text}`).join("\n");
   const system =
-    "You segment a children's audio story transcript into visual scenes for a picture book. " +
-    "Each scene should span roughly 30-60 seconds of audio and break on plot beats (new place, new action, new emotion). " +
-    "Return JSON {scenes:[{startIndex, summary, prompt}]}. " +
-    "startIndex = index of the FIRST transcript line of that scene (strictly increasing, the first scene MUST start at index 0). " +
-    "summary = a short Traditional Chinese phrase describing the scene. " +
-    "prompt = an English image prompt naming the protagonist vehicle, its action, and the mood (no style words, no text in image).";
+    "You segment a children's audio story transcript into visual scenes for a picture book, and track recurring characters. " +
+    "Each scene spans roughly 30-60 seconds and breaks on plot beats (new place, action, or emotion). " +
+    "You are given a KNOWN CHARACTER ROSTER (canonical names + aliases). " +
+    "Return JSON {scenes:[{startIndex, summary, prompt, characters}], newCharacters:[{name, aliases, vehicle, desc}]}. " +
+    "startIndex = index of the FIRST transcript line of the scene (strictly increasing; first scene MUST be 0). " +
+    "summary = short Traditional Chinese phrase. " +
+    "prompt = English image prompt: the action and mood of the scene (do NOT restate character appearance; do not ask for text in the image). " +
+    "characters = array of CANONICAL names of characters present in that scene; map mis-heard aliases to the roster's canonical name. " +
+    "newCharacters = named characters that are NOT already in the roster, each with a canonical Traditional Chinese name, likely aliases, vehicle type, and an English visual appearance description (color, vehicle kind, distinctive features) suitable for keeping it consistent across episodes.";
   const user =
     `Episode title: ${meta.title ?? "(unknown)"}\n` +
     `Protagonist vehicle: ${meta.vehicle ?? "(a friendly car)"}\n` +
     `Audio duration: ${duration}s\n\n` +
+    `KNOWN CHARACTER ROSTER:\n${rosterText}\n\n` +
     `Transcript (index<TAB>seconds<TAB>text):\n${lines}`;
 
   const resp = await client.chat.completions.create({
@@ -266,21 +352,22 @@ export async function segmentByOpenAI(
   });
 
   const content = resp.choices[0]?.message?.content ?? "{}";
-  const parsed = SceneLLMSchema.parse(JSON.parse(content));
+  const parsed = SegmentSchema.parse(JSON.parse(content));
 
   const valid = parsed.scenes
     .filter((s) => s.startIndex < subs.length)
     .sort((a, b) => a.startIndex - b.startIndex);
   if (valid.length === 0) throw new Error("OpenAI 切場景回傳空結果");
 
-  const scenes = buildScenesFromStartIndices(
+  const scenes = buildScenes(
     subs,
     valid.map((s) => s.startIndex),
     duration,
     valid.map((s) => s.summary),
     valid.map((s) => s.prompt),
+    valid.map((s) => s.characters),
   );
-  return scenes;
+  return { scenes, newCharacters: parsed.newCharacters };
 }
 
 // ── 場景檔讀寫 ───────────────────────────────────────────
@@ -292,42 +379,61 @@ export function writeScenesFile(file: ScenesFile): string {
 }
 export function readScenesFile(slug: string): ScenesFile {
   const p = scenesSidecarPath(slug);
-  if (!existsSync(p)) throw new Error(`找不到場景檔 ${p}；請先跑 npm run illustrate -- ${slug} --segment-only`);
+  if (!existsSync(p))
+    throw new Error(`找不到場景檔 ${p}；請先跑 npm run illustrate -- ${slug} --segment-only`);
   return JSON.parse(readFileSync(p, "utf8")) as ScenesFile;
 }
 
-// ── ② 生圖（OpenAI 圖像模型 + 參考圖）──────────────────────
+// ── ② 生圖 ───────────────────────────────────────────────
 const TARGET_PX = 1400;
 
-/** 把模型回傳的 PNG buffer 轉成 1400×1400 JPEG（對齊既有資產）。 */
 async function toStandardJpeg(buf: Buffer): Promise<Buffer> {
-  return sharp(buf)
-    .resize(TARGET_PX, TARGET_PX, { fit: "cover" })
-    .jpeg({ quality: 88 })
-    .toBuffer();
+  return sharp(buf).resize(TARGET_PX, TARGET_PX, { fit: "cover" }).jpeg({ quality: 88 }).toBuffer();
+}
+
+/** 新角色定裝照：純文字生成（強黏土前綴 + 外觀描述），單一角色正面。 */
+export async function generateCharacterPortrait(char: NewCharacter): Promise<Buffer> {
+  requireKey();
+  const { default: OpenAI } = await import("openai");
+  const client = new OpenAI();
+  const prompt =
+    `${CLAY_STYLE_PREFIX}Character model sheet: ${char.desc}. ` +
+    `A single ${char.vehicle ?? "vehicle"} character, centered, front three-quarter view, full body, neutral happy pose, plain soft background. ${CLAY_NEGATIVE}`;
+  const res = await client.images.generate({
+    model: getImageModel(),
+    prompt,
+    size: "1024x1024",
+  });
+  const b64 = res.data?.[0]?.b64_json;
+  if (!b64) throw new Error("圖像模型未回傳影像（portrait）");
+  return toStandardJpeg(Buffer.from(b64, "base64"));
 }
 
 /**
- * 生成單幕插圖。以該集既有 01.jpg 當風格/角色參考（OpenAI images.edit）。
- * 回傳 1400×1400 JPEG buffer。
+ * 生成單幕插圖。refPaths = 該幕出場角色的定裝照（可多張）；空則退回該集封面。
+ * descs = 角色外觀描述，接進 prompt 加強一致。
  */
 export async function generateSceneImage(
   scene: Scene,
-  refImagePath: string,
+  refPaths: string[],
+  descs: string[],
 ): Promise<Buffer> {
   requireKey();
   const { default: OpenAI, toFile } = await import("openai");
   const client = new OpenAI();
 
-  const prompt = `${CLAY_STYLE_PREFIX}Scene: ${scene.prompt}. ${CLAY_NEGATIVE}`;
+  const charLine =
+    descs.length > 0 ? ` Keep these characters exactly on-model: ${descs.join("; ")}.` : "";
+  const prompt = `${CLAY_STYLE_PREFIX}Scene: ${scene.prompt}.${charLine} ${CLAY_NEGATIVE}`;
 
-  if (existsSync(refImagePath)) {
-    const ref = await toFile(readFileSync(refImagePath), "ref.jpg", {
-      type: "image/jpeg",
-    });
+  const refs = refPaths.filter((p) => existsSync(p));
+  if (refs.length > 0) {
+    const files = await Promise.all(
+      refs.map((p, i) => toFile(readFileSync(p), `ref${i}.jpg`, { type: "image/jpeg" })),
+    );
     const res = await client.images.edit({
       model: getImageModel(),
-      image: ref,
+      image: files,
       prompt,
       size: "1024x1024",
     });
@@ -353,41 +459,104 @@ export function writeStagingImage(slug: string, index: number, buf: Buffer): str
   writeFileSync(p, buf);
   return p;
 }
+export function writeStagingPortrait(slug: string, name: string, buf: Buffer): string {
+  mkdirSync(stagingDirForSlug(slug), { recursive: true });
+  const p = stagingPortraitPath(slug, name);
+  writeFileSync(p, buf);
+  return p;
+}
 
-// ── ③ contact sheet（純 HTML，人工審）──────────────────────
-export function buildContactSheet(slug: string, scenes: Scene[]): string {
+/**
+ * 解析該幕的角色參考圖與描述：
+ * - 已在名冊且有定裝照 → 用 public/characters 的圖
+ * - 本集新角色（暫存有定裝照）→ 用暫存圖
+ * - 都沒有 → 退回該集封面 01.jpg
+ */
+export function resolveSceneRefs(
+  slug: string,
+  scene: Scene,
+  descByName: Map<string, string>,
+): { paths: string[]; descs: string[] } {
+  const registry = charByName(readCharacters());
+  const paths: string[] = [];
+  const descs: string[] = [];
+  for (const name of scene.characters ?? []) {
+    const reg = registry.get(name);
+    if (reg?.ref) {
+      const fp = characterRefFsPath(name);
+      if (existsSync(fp)) paths.push(fp);
+    } else {
+      const sp = stagingPortraitPath(slug, name);
+      if (existsSync(sp)) paths.push(sp);
+    }
+    const d = descByName.get(name) ?? reg?.desc;
+    if (d) descs.push(`${name}: ${d}`);
+  }
+  if (paths.length === 0) {
+    const cover = join(publicDirForSlug(slug), "01.jpg");
+    if (existsSync(cover)) paths.push(cover);
+  }
+  return { paths, descs };
+}
+
+// ── ③ contact sheet ─────────────────────────────────────
+export function buildContactSheet(
+  slug: string,
+  scenes: Scene[],
+  newCharacters: NewCharacter[],
+): string {
   const dir = stagingDirForSlug(slug);
   mkdirSync(dir, { recursive: true });
+  const fmt = (n: number) =>
+    `${Math.floor(n / 60)}:${String(Math.floor(n % 60)).padStart(2, "0")}`;
+
+  const charCards = newCharacters
+    .map(
+      (c) => `
+    <figure class="char">
+      <img src="./_char-${safeName(c.name)}.jpg" alt="" loading="lazy" />
+      <figcaption><b>新角色：${escapeHtml(c.name)}</b><br/>
+        <span class="en">${escapeHtml(c.desc)}</span></figcaption>
+    </figure>`,
+    )
+    .join("\n");
+
   const cards = scenes
-    .map((sc) => {
-      const fmt = (n: number) => `${Math.floor(n / 60)}:${String(Math.floor(n % 60)).padStart(2, "0")}`;
-      return `
+    .map(
+      (sc) => `
     <figure>
       <img src="./${pad2(sc.index)}.jpg" alt="" loading="lazy" />
       <figcaption>
-        <b>#${sc.index}</b> ${fmt(sc.start)}–${fmt(sc.end)}（${Math.round(sc.end - sc.start)}s）<br/>
+        <b>#${sc.index}</b> ${fmt(sc.start)}–${fmt(sc.end)}（${Math.round(sc.end - sc.start)}s）
+        ${(sc.characters ?? []).length ? `· 👤 ${escapeHtml((sc.characters ?? []).join("、"))}` : ""}<br/>
         <span class="zh">${escapeHtml(sc.summary)}</span><br/>
         <span class="en">${escapeHtml(sc.prompt)}</span>
       </figcaption>
-    </figure>`;
-    })
+    </figure>`,
+    )
     .join("\n");
+
+  const charSection = newCharacters.length
+    ? `<h2>🆕 本集新角色（${newCharacters.length}）— 審過將存進名冊當定裝照</h2><div class="grid">${charCards}</div>`
+    : "";
 
   const html = `<!doctype html><meta charset="utf-8" />
 <title>${slug} — 插圖審稿</title>
 <style>
   body{font-family:system-ui,"PingFang TC",sans-serif;background:#fafafa;margin:24px;color:#222}
-  h1{font-size:20px}
+  h1{font-size:20px} h2{font-size:16px;margin-top:24px}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
   figure{margin:0;background:#fff;border:1px solid #e5e5e5;border-radius:12px;overflow:hidden}
+  figure.char{border-color:#c5b3e6}
   img{width:100%;display:block;aspect-ratio:1/1;object-fit:cover;background:#eee}
   figcaption{padding:8px 10px;font-size:12px;line-height:1.5}
-  .zh{font-weight:700}
-  .en{color:#666}
+  .zh{font-weight:700} .en{color:#666}
   .note{color:#a00;font-weight:700;margin:6px 0 18px}
 </style>
 <h1>🎬 ${slug} — 共 ${scenes.length} 幕插圖審稿</h1>
-<p class="note">⚠️ 兒童內容：逐幕檢查有無走樣／不適／文字。壞幕用 <code>npm run illustrate -- ${slug} --scene N</code> 重抽；全部 OK 用 <code>--approve</code> 上線。</p>
+<p class="note">⚠️ 兒童內容：逐幕檢查走樣／不適／文字。壞幕 <code>npm run illustrate -- ${slug} --scene N</code>；新角色定裝照不好 <code>--char 名字</code>；全部 OK <code>--approve</code>。</p>
+${charSection}
+<h2>🎞️ 場景（${scenes.length}）</h2>
 <div class="grid">${cards}</div>
 `;
   const p = join(dir, "contact.html");
@@ -396,15 +565,13 @@ export function buildContactSheet(slug: string, scenes: Scene[]): string {
 }
 
 function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-// ── ③ approve：暫存 → public + 寫接線 ──────────────────────
+// ── ③ approve：暫存 → public + 登記角色 + 寫接線 ───────────────
 export interface ApproveResult {
   copied: number;
+  registered: string[];
   publicDir: string;
   captionTimes: number[];
   wiredVia: "overrides" | "manual-instructions";
@@ -415,15 +582,19 @@ export function approve(slug: string): ApproveResult {
   const staging = stagingDirForSlug(slug);
   const scenes = scenesFile.scenes;
 
-  // 確認每幕暫存圖都在
   for (const sc of scenes) {
     const img = join(staging, `${pad2(sc.index)}.jpg`);
     if (!existsSync(img)) {
-      throw new Error(`缺暫存圖 ${img}；請先跑 npm run illustrate -- ${slug}（必要時 --scene ${sc.index}）`);
+      throw new Error(
+        `缺暫存圖 ${img}；請先跑 npm run illustrate -- ${slug}（必要時 --scene ${sc.index}）`,
+      );
     }
   }
 
-  // 複製進 public，並清掉舊的多餘頁（避免殘留 N+1.jpg）
+  // 先登記新角色（定裝照 → public/characters + 名冊）
+  const registered = registerCharacters(slug, scenesFile.newCharacters ?? []);
+
+  // 場景圖 → public（清掉舊頁避免殘留）
   const pub = publicDirForSlug(slug);
   mkdirSync(pub, { recursive: true });
   for (const f of readdirSync(pub)) {
@@ -435,28 +606,44 @@ export function approve(slug: string): ApproveResult {
 
   const captionTimes = scenes.map((s) => s.start);
   const wiredVia = writeWiring(slug, scenes.length, captionTimes);
-  return { copied: scenes.length, publicDir: pub, captionTimes, wiredVia };
+  return { copied: scenes.length, registered, publicDir: pub, captionTimes, wiredVia };
 }
 
-/**
- * 寫 pageCount/captionTimes：
- * - 同步集（ep-N）：寫進 apple-sync.defaults.json 的 overrides.<slug>，
- *   下次 npm run sync:apple 會併入 apple-synced.json。
- * - 手動集：無法安全程式化改 stories.ts，印出手動指示。
- */
-const SYNCED_PATH = join(ROOT, "data", "apple-synced.json");
+/** 把本集新角色定裝照存進 public/characters 並 upsert 名冊（已存在則略過）。 */
+function registerCharacters(slug: string, newCharacters: NewCharacter[]): string[] {
+  if (newCharacters.length === 0) return [];
+  const chars = readCharacters();
+  const existing = charByName(chars);
+  const registered: string[] = [];
+  mkdirSync(CHARACTERS_DIR, { recursive: true });
 
-/** 直接把 pageCount/captionTimes 寫進已 baked 的 apple-synced.json 的該集（立即生效）。 */
+  for (const nc of newCharacters) {
+    if (existing.has(nc.name)) continue; // 已登記，保留原定裝照
+    const portrait = stagingPortraitPath(slug, nc.name);
+    if (!existsSync(portrait)) continue; // 沒生定裝照就跳過（可 --char 補）
+    copyFileSync(portrait, characterRefFsPath(nc.name));
+    chars.push({
+      name: nc.name,
+      aliases: nc.aliases,
+      vehicle: nc.vehicle,
+      desc: nc.desc,
+      ref: `characters/${safeName(nc.name)}.jpg`,
+      firstSeen: slug,
+    });
+    registered.push(nc.name);
+  }
+  if (registered.length > 0) writeCharacters(chars);
+  return registered;
+}
+
+// ── 接線：pageCount / captionTimes ───────────────────────
 function materializeIntoSynced(
   slug: string,
   pageCount: number,
   captionTimes: number[],
 ): boolean {
   if (!existsSync(SYNCED_PATH)) return false;
-  const synced = JSON.parse(readFileSync(SYNCED_PATH, "utf8")) as Record<
-    string,
-    unknown
-  >[];
+  const synced = JSON.parse(readFileSync(SYNCED_PATH, "utf8")) as Record<string, unknown>[];
   const entry = synced.find((s) => s.slug === slug);
   if (!entry) return false;
   entry.pageCount = pageCount;
@@ -471,7 +658,6 @@ function writeWiring(
   captionTimes: number[],
 ): "overrides" | "manual-instructions" {
   if (/^ep-\d+$/.test(slug)) {
-    // overrides：未來 re-sync 重 bake 時的耐久來源
     const defaults = JSON.parse(readFileSync(DEFAULTS_PATH, "utf8")) as {
       overrides: Record<string, Record<string, unknown>>;
     };
@@ -482,7 +668,6 @@ function writeWiring(
       captionTimes,
     };
     writeFileSync(DEFAULTS_PATH, `${JSON.stringify(defaults, null, 2)}\n`, "utf8");
-    // 同步集若已 baked，直接寫進 apple-synced.json 立即生效（不必等 RSS 變動才 re-bake）
     materializeIntoSynced(slug, pageCount, captionTimes);
     return "overrides";
   }

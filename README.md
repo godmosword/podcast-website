@@ -317,6 +317,8 @@ npm run sync:apple && npm run build      # overrides 併入 apple-synced.json
 
 **風格一致性**：每幕以該集既有 `01.jpg` 當**參考圖**（OpenAI image edit）+ 固定黏土風前綴（`CLAY_STYLE_PREFIX`，萃取自 DESIGN.md），讓材質／配色／主角車跨幕一致。
 
+**跨集角色一致**：名冊 `data/characters.json`（每角色 `name`／`aliases`(誤聽別名)／`vehicle`／`desc`(英文外觀)／`ref`(定裝照)）。切場景時文字模型**從台詞認出每幕出場角色**並標 `characters`；生圖時把該幕角色的**定裝照**（`public/characters/<名>.jpg`）當參考圖（可多張同框），跨集維持同一形象。**新角色首次登場自動生定裝照**進暫存，contact sheet 有「新角色」區，`--approve` 後存進名冊成 canonical（之後各集引用）。定裝照不好用 `--char 名字` 重抽。已登記角色不會被覆寫。
+
 **model id**：預設 `OPENAI_TEXT_MODEL=gpt-4o`、`OPENAI_IMAGE_MODEL=gpt-image-2`；圖像模型若當下不可用，設 `OPENAI_IMAGE_MODEL=gpt-image-1`（程式不改）。
 
 **手動集**（ambulance/ev 等已有手繪 6 頁）：`--approve` 會印出要手填到 `data/stories.ts` 的 `pageCount`/`captionTimes`（不自動改 TS）。
