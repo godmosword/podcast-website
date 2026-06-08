@@ -1,0 +1,165 @@
+.container {
+  position: relative;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 16px;
+  background: #f8f1e3;
+  border-radius: 20px;
+  box-shadow: 0 8px 0 #d4b48c;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.header h2 {
+  font-size: 1.35rem;
+  margin: 0 0 8px;
+  color: #3a2f1f;
+}
+
+.stats {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: #5c4a2e;
+  font-weight: 600;
+}
+
+.canvasWrap {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.canvas {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 480 / 320;
+  border: 6px solid #3a2f1f;
+  border-radius: 12px;
+  background: #1a2a1f;
+  display: block;
+  touch-action: none;
+}
+
+.controls {
+  margin-top: 16px;
+}
+
+.controlRow {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.controlBtn {
+  flex: 1;
+  min-height: 48px;
+  padding: 14px 0;
+  font-size: 1rem;
+  font-weight: 700;
+  border: 4px solid #3a2f1f;
+  border-radius: 16px;
+  background: #fff;
+  color: #3a2f1f;
+  box-shadow: 0 5px 0 #3a2f1f;
+  cursor: pointer;
+  user-select: none;
+  font-family: inherit;
+  touch-action: manipulation;
+}
+
+.controlBtn:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #3a2f1f;
+}
+
+.slowBtn {
+  background: #d1fae5;
+  border-color: #166534;
+}
+
+.honkBtn {
+  background: #fef08c;
+  border-color: #854d0e;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(248, 241, 227, 0.95);
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  border: 5px solid #3a2f1f;
+  z-index: 10;
+}
+
+.overlay h3 {
+  margin: 0;
+  font-size: 1.35rem;
+  color: #3a2f1f;
+}
+
+.overlay p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #5c4a2e;
+  line-height: 1.5;
+}
+
+.hint {
+  margin-top: 8px !important;
+  font-size: 0.85rem !important;
+  color: #7a6a52 !important;
+}
+
+.bigButton {
+  padding: 16px 48px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  background: #ff6b6b;
+  color: #fff;
+  border: 5px solid #3a2f1f;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.endButtons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.secondaryButton {
+  padding: 10px 24px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  background: #fff;
+  border: 3px solid #3a2f1f;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: none;
+  color: #3a2f1f;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .controlBtn:active {
+    transform: none;
+  }
+}
