@@ -150,6 +150,8 @@ function applySyncProfile(
   const withVehicle = applyVehicleInference(
     story,
     title,
+    summary,
+    keywords,
     defaults.vehicle,
     hasVehicleOverride(defaults, slug),
   );
@@ -349,6 +351,36 @@ function backfillMissingTags(
   return { stories, updatedSlugs };
 }
 
+/** 補齊 apple-synced 中仍為預設車種「其他」的集數（用 title/summary 推斷）。 */
+function backfillMissingVehicles(
+  synced: Story[],
+  defaults: SyncDefaults,
+): { stories: Story[]; updatedSlugs: string[] } {
+  const updatedSlugs: string[] = [];
+  const stories = synced.map((story) => {
+    if (
+      hasVehicleOverride(defaults, story.slug) ||
+      story.vehicle !== defaults.vehicle
+    ) {
+      return story;
+    }
+    const next = applyVehicleInference(
+      story,
+      story.title,
+      story.summary,
+      undefined,
+      defaults.vehicle,
+      false,
+    );
+    if (story.vehicle !== next.vehicle || story.emoji !== next.emoji) {
+      updatedSlugs.push(story.slug);
+      return next;
+    }
+    return story;
+  });
+  return { stories, updatedSlugs };
+}
+
 type MetadataUpdateResult = {
   stories: Story[];
   updatedSlugs: string[];
@@ -529,7 +561,7 @@ async function main(): Promise<void> {
   const hasMetadataChanges = metadataResult.updatedSlugs.length > 0;
   const hasNewEpisodes = added.length > 0;
   const tagBackfill = backfillMissingTags(
-    [...metadataResult.stories, ...added],
+    metadataResult.stories,
     defaults,
   );
   const hasTagBackfill = tagBackfill.updatedSlugs.length > 0;
@@ -537,21 +569,42 @@ async function main(): Promise<void> {
     console.log(`Tags backfill: ${tagBackfill.updatedSlugs.join(", ")}`);
   }
 
+  const vehicleBackfill = backfillMissingVehicles(
+    [...tagBackfill.stories, ...added],
+    defaults,
+  );
+  const hasVehicleBackfill = vehicleBackfill.updatedSlugs.length > 0;
+  if (hasVehicleBackfill) {
+    console.log(`Vehicle backfill: ${vehicleBackfill.updatedSlugs.join(", ")}`);
+  }
+
+  const nextSyncedCatalog = vehicleBackfill.stories.sort((a, b) => b.ep - a.ep);
+
   if (dryRun) {
     if (hasNewEpisodes) {
       console.log(
         `[dry-run] Would add ${added.length} episode(s): ${added.map((s) => s.slug).join(", ")}`,
       );
     }
-    if (!hasMetadataChanges && !hasNewEpisodes && !hasTagBackfill) {
+    if (
+      !hasMetadataChanges &&
+      !hasNewEpisodes &&
+      !hasTagBackfill &&
+      !hasVehicleBackfill
+    ) {
       console.log("[dry-run] No new episodes or metadata changes.");
     }
     return;
   }
 
-  const finalCatalog = [...manualStories, ...tagBackfill.stories];
+  const finalCatalog = [...manualStories, ...nextSyncedCatalog];
 
-  if (!hasMetadataChanges && !hasNewEpisodes && !hasTagBackfill) {
+  if (
+    !hasMetadataChanges &&
+    !hasNewEpisodes &&
+    !hasTagBackfill &&
+    !hasVehicleBackfill
+  ) {
     console.log("No new episodes or metadata changes.");
     const nextSeen = reconcileSeenGuids(rssItems, state, catalog, eps);
     const seenChanged =
@@ -574,11 +627,15 @@ async function main(): Promise<void> {
     return;
   }
 
-  if (!hasMetadataChanges && !hasNewEpisodes && hasTagBackfill) {
-    console.log("No RSS metadata changes; applying tag backfill only.");
+  if (
+    !hasMetadataChanges &&
+    !hasNewEpisodes &&
+    (hasTagBackfill || hasVehicleBackfill)
+  ) {
+    console.log("No RSS metadata changes; applying profile backfill only.");
   }
 
-  const nextSynced = [...tagBackfill.stories].sort((a, b) => b.ep - a.ep);
+  const nextSynced = nextSyncedCatalog;
   await writeJson(PATHS.synced, nextSynced);
   const seenGuids = reconcileSeenGuids(rssItems, state, catalog, eps);
   await writeJson(PATHS.state, {

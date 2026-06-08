@@ -6,8 +6,10 @@ export const APPLE_SYNC_PAGE_COUNT = 1;
 /** 每集最多自動標幾個主題 tag（與手動集數一致）。 */
 export const MAX_INFERRED_TAGS = 3;
 
-/** 標題關鍵字 → 車種（無 overrides 時使用，避免新集一律變「其他」）。 */
-const VEHICLE_FROM_TITLE: [RegExp, string][] = [
+/** 標題／摘要／關鍵字 → 車種（無 overrides 時使用，避免新集一律變「其他」）。 */
+const VEHICLE_FROM_TEXT: [RegExp, string][] = [
+  [/怪獸卡車|Monster Truck/i, "怪獸卡車"],
+  [/恐龍車/, "恐龍車"],
   [/救護車/, "救護車"],
   [/挖土機/, "挖土機"],
   [/清潔車/, "清潔車"],
@@ -18,6 +20,8 @@ const VEHICLE_FROM_TITLE: [RegExp, string][] = [
 ];
 
 const VEHICLE_EMOJI: Record<string, string> = {
+  怪獸卡車: "🚚",
+  恐龍車: "🦕",
   救護車: "🚑",
   挖土機: "🚜",
   清潔車: "🚛",
@@ -66,9 +70,17 @@ const TEXT_TO_TAG: [RegExp, string][] = [
   [/成長|學會|長大/, "成長"],
 ];
 
-function inferVehicleFromTitle(title: string): string | null {
-  for (const [pattern, vehicle] of VEHICLE_FROM_TITLE) {
-    if (pattern.test(title)) return vehicle;
+function inferVehicleFromText(
+  title: string,
+  summary: string | undefined,
+  keywords: string[] = [],
+): string | null {
+  const subtitle = subtitleFromTitle(title);
+  const textBlob = [title, subtitle, summary ?? "", keywords.join(" ")]
+    .filter(Boolean)
+    .join(" ");
+  for (const [pattern, vehicle] of VEHICLE_FROM_TEXT) {
+    if (pattern.test(textBlob)) return vehicle;
   }
   return null;
 }
@@ -124,17 +136,28 @@ export function inferThemeTags(
   return out;
 }
 
+/** 從 RSS 關鍵字、標題（含｜副標）與摘要推斷車種。 */
+export function inferVehicle(
+  title: string,
+  summary: string | undefined,
+  keywords: string[] = [],
+): string | null {
+  return inferVehicleFromText(title, summary, keywords);
+}
+
 /** 依標題推斷車種（僅在仍為預設「其他」且無 slug override 的 vehicle 時）。 */
 export function applyVehicleInference(
   story: Story,
   title: string,
+  summary: string | undefined,
+  keywords: string[] | undefined,
   defaultVehicle: string,
   hasVehicleOverride: boolean,
 ): Story {
   if (hasVehicleOverride || story.vehicle !== defaultVehicle) {
     return story;
   }
-  const inferred = inferVehicleFromTitle(title);
+  const inferred = inferVehicleFromText(title, summary, keywords ?? []);
   if (!inferred) return story;
   return {
     ...story,
