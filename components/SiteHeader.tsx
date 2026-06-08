@@ -106,6 +106,12 @@ export default function SiteHeader({ variant = "full" }: SiteHeaderProps) {
         <p className={styles.taglineSub}>一起探險、學習、勇敢闖關！</p>
       </div>
 
+      <p className={styles.hubNav}>
+        <Link href="/games" className={styles.hubLink}>
+          🎮 遊樂園
+        </Link>
+      </p>
+
       <nav className={styles.actions} aria-label="聯絡與互動">
         {ACTIONS.map((a) => {
           const external = /^https?:/i.test(a.href);

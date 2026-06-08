@@ -1,0 +1,48 @@
+.main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: calc(20px + var(--safe-top)) calc(16px + var(--safe-right))
+    calc(40px + var(--safe-bottom)) calc(16px + var(--safe-left));
+  overflow-x: clip;
+}
+
+.back {
+  display: inline-block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin-bottom: 16px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0 0 8px;
+  letter-spacing: 0.02em;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}

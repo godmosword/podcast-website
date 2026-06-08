@@ -103,6 +103,33 @@
   line-height: 1.5;
 }
 
+.hubNav {
+  margin: 14px 0 0;
+}
+
+.hubLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--ink);
+  text-decoration: none;
+  background: color-mix(in srgb, var(--c-teal) 28%, var(--card));
+  border: 2px solid color-mix(in srgb, var(--c-teal) 55%, var(--line));
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--motion-press);
+}
+
+@media (hover: hover) {
+  .hubLink:hover {
+    transform: translateY(-2px);
+  }
+}
+
 /* ---- 圓鈕：合作聯繫 / 許願投稿 / 留言給我 ---- */
 .actions {
   display: flex;
