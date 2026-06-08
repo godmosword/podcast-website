@@ -115,6 +115,9 @@ export default function ConnectHub({ id = "connect", className }: Props) {
             />
             訂閱收聽
           </h2>
+          <p className={styles.blockBlurb}>
+            訂閱後，新集會自動出現在你的 Podcast App
+          </p>
           <nav className={styles.row} aria-label="收聽平台">
             {platforms.map((p) => (
               <IconLink

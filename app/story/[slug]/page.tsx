@@ -3,12 +3,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getStory, getRelated, getNextStory, stories } from "@/data/stories";
 import { podcastEpisodeJsonLd } from "@/lib/json-ld";
+import { lineShareUrl, storyLineShareText, storyShareUrl } from "@/lib/share-story";
 import { storyDetailMetadata } from "@/lib/story-metadata";
 import { storyCoverPath } from "@/lib/story-utils";
 import FavoriteButton from "@/components/FavoriteButton";
 import JsonLd from "@/components/JsonLd";
 import PlatformLinks from "@/components/PlatformLinks";
 import PlayButton from "@/components/PlayButton";
+import ShareButton from "@/components/ShareButton";
 import RelatedStories from "@/components/RelatedStories";
 import SiteFooter from "@/components/SiteFooter";
 import StoryImage from "@/components/StoryImage";
@@ -79,6 +81,17 @@ export default async function StoryDetailPage({
           <PlayButton
             href={`/story/${story.slug}/play`}
             color={story.color}
+          />
+          <ShareButton
+            shareUrl={storyShareUrl(story.slug)}
+            lineUrl={lineShareUrl(
+              storyLineShareText({
+                ep: story.ep,
+                title: story.title,
+                slug: story.slug,
+                summary: story.summary,
+              }),
+            )}
           />
         </div>
 

@@ -22,19 +22,19 @@ export type Platform = {
   icon: PlatformIcon;
 };
 
-/** 收聽平台清單（顯示順序即陣列順序）。 */
+/** 收聽平台清單（顯示順序即陣列順序；Spotify、Apple 優先）。 */
 const PLATFORMS: Platform[] = [
-  {
-    label: "Apple Podcasts",
-    url: "https://podcasts.apple.com/tw/podcast/%E8%BB%8A%E8%BB%8A%E9%81%8A%E6%A8%82%E5%9C%92/id1896610920",
-    color: "#9933CC",
-    icon: "apple",
-  },
   {
     label: "Spotify",
     url: "https://open.spotify.com/show/2Ohik6D77MvLTyqHbM6CYt",
     color: "#1DB954",
     icon: "spotify",
+  },
+  {
+    label: "Apple Podcasts",
+    url: "https://podcasts.apple.com/tw/podcast/%E8%BB%8A%E8%BB%8A%E9%81%8A%E6%A8%82%E5%9C%92/id1896610920",
+    color: "#9933CC",
+    icon: "apple",
   },
   {
     label: "KKBOX",
