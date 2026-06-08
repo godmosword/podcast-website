@@ -18,6 +18,7 @@ type Dir = "up" | "down" | "left" | "right";
 type GhostRole = "police" | "red";
 type CarRole = GhostRole | "player";
 type Status = "start" | "playing" | "won" | "lost";
+type Difficulty = "easy" | "normal";
 
 interface Player {
   r: number;
@@ -77,6 +78,7 @@ const CELL = 34;
 const BOARD_W = COLS * CELL;
 const BOARD_H = ROWS * CELL;
 const TICK = 260; // ms，數字越大車子越慢（給 3–7 歲）
+const GHOST_MOVE_EVERY: Record<Difficulty, number> = { easy: 2, normal: 1 };
 
 const DIRS: Record<Dir, { dr: number; dc: number }> = {
   up: { dr: -1, dc: 0 },
@@ -274,6 +276,8 @@ export default function CarStarGame() {
 
   const [, force] = useState(0);
   const [status, setStatus] = useState<Status>("start");
+  const [difficulty, setDifficulty] = useState<Difficulty>("easy");
+  const difficultyRef = useRef<Difficulty>("easy");
   const [soundUi, setSoundUi] = useState(true);
   const [scale, setScale] = useState(1);
   const [popups, setPopups] = useState<Popup[]>([]);
@@ -374,29 +378,37 @@ export default function CarStarGame() {
   }, [tone]);
 
   // ── 追逐車 AI ──────────────────────────────────────
-  const moveGhost = useCallback((gh: Ghost, scared: boolean, p: Player) => {
-    let choices = ALL_DIRS.filter(
-      (d) => canMove(gh.r, gh.c, d) && d !== OPP[gh.dir],
-    );
-    if (choices.length === 0) choices = ALL_DIRS.filter((d) => canMove(gh.r, gh.c, d));
-    if (choices.length === 0) return;
-    let best: Dir;
-    if (Math.random() < 0.4) {
-      best = choices[Math.floor(Math.random() * choices.length)];
-    } else {
-      const scored = choices.map((d) => {
-        const dd = DIRS[d];
-        const dist = Math.abs(gh.r + dd.dr - p.r) + Math.abs(gh.c + dd.dc - p.c);
-        return { d, dist };
-      });
-      scored.sort((a, b) => (scared ? b.dist - a.dist : a.dist - b.dist));
-      best = scored[0].d;
-    }
-    gh.dir = best;
-    const d = DIRS[best];
-    gh.r += d.dr;
-    gh.c += d.dc;
-  }, []);
+  const moveGhost = useCallback(
+    (gh: Ghost, scared: boolean, p: Player, mode: Difficulty) => {
+      let choices = ALL_DIRS.filter(
+        (d) => canMove(gh.r, gh.c, d) && d !== OPP[gh.dir],
+      );
+      if (choices.length === 0) {
+        choices = ALL_DIRS.filter((d) => canMove(gh.r, gh.c, d));
+      }
+      if (choices.length === 0) return;
+      let best: Dir;
+      // 簡單模式較常亂走；普通模式較積極追逐（原邏輯約 60% 追逐）
+      const randomChance = mode === "easy" ? 0.68 : 0.4;
+      if (Math.random() < randomChance) {
+        best = choices[Math.floor(Math.random() * choices.length)];
+      } else {
+        const scored = choices.map((d) => {
+          const dd = DIRS[d];
+          const dist =
+            Math.abs(gh.r + dd.dr - p.r) + Math.abs(gh.c + dd.dc - p.c);
+          return { d, dist };
+        });
+        scored.sort((a, b) => (scared ? b.dist - a.dist : a.dist - b.dist));
+        best = scored[0].d;
+      }
+      gh.dir = best;
+      const d = DIRS[best];
+      gh.r += d.dr;
+      gh.c += d.dc;
+    },
+    [],
+  );
 
   const resetPositions = useCallback((g: GameState) => {
     g.player = { ...playerStart, dir: null, desired: null };
@@ -436,7 +448,11 @@ export default function CarStarGame() {
     }
 
     const scared = Date.now() < g.scaredUntil;
-    g.ghosts.forEach((gh) => moveGhost(gh, scared, p));
+    const mode = difficultyRef.current;
+    const ghostEvery = GHOST_MOVE_EVERY[mode];
+    if (g.tick % ghostEvery === 0) {
+      g.ghosts.forEach((gh) => moveGhost(gh, scared, p, mode));
+    }
 
     let lostLife = false;
     for (const gh of g.ghosts) {
@@ -531,12 +547,13 @@ export default function CarStarGame() {
 
   const beginGame = useCallback(() => {
     ensureAudio();
+    difficultyRef.current = difficulty;
     game.current = freshState();
     setPopups([]);
     setStatus("playing");
     startLoop();
     rerender();
-  }, [ensureAudio, startLoop, rerender]);
+  }, [ensureAudio, startLoop, rerender, difficulty]);
 
   const toggleSound = useCallback(() => {
     soundOn.current = !soundOn.current;
@@ -724,6 +741,36 @@ export default function CarStarGame() {
                 )}
                 {status !== "start" && (
                   <p className={styles.overlayScore}>得分 ⭐ {g.score}</p>
+                )}
+                {status === "start" && (
+                  <div className={styles.difficultyPicker}>
+                    <div className={styles.difficultyLabel}>選擇難度</div>
+                    <div className={styles.difficultyRow}>
+                      <button
+                        type="button"
+                        className={`${styles.difficultyBtn} ${
+                          difficulty === "easy" ? styles.difficultyBtnEasyActive : ""
+                        }`}
+                        onClick={() => setDifficulty("easy")}
+                      >
+                        🌟 簡單模式（推薦）
+                      </button>
+                      <button
+                        type="button"
+                        className={`${styles.difficultyBtn} ${
+                          difficulty === "normal" ? styles.difficultyBtnNormalActive : ""
+                        }`}
+                        onClick={() => setDifficulty("normal")}
+                      >
+                        普通模式
+                      </button>
+                    </div>
+                    <p className={styles.difficultyHint}>
+                      {difficulty === "easy"
+                        ? "敵人比較慢，適合小朋友自己玩"
+                        : "經典挑戰模式"}
+                    </p>
+                  </div>
                 )}
                 <button type="button" onClick={beginGame} className={styles.primaryBtn}>
                   {status === "start" ? "開始玩 ▶" : "再玩一次 🔁"}

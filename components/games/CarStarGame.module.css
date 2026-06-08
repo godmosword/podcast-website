@@ -277,33 +277,104 @@
   box-shadow: 0 2px 0 #c97f00;
 }
 
+.difficultyPicker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.difficultyLabel {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.difficultyRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.difficultyBtn {
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+}
+
+.difficultyBtnEasyActive {
+  border: 3px solid #4ade80;
+  background: rgba(220, 252, 231, 0.95);
+  color: #166534;
+}
+
+.difficultyBtnNormalActive {
+  border: 3px solid #f59e0b;
+  background: rgba(254, 243, 199, 0.95);
+  color: #92400e;
+}
+
+.difficultyHint {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.78);
+  margin: 0;
+  line-height: 1.4;
+}
+
 .dpadWrap {
   display: flex;
   justify-content: center;
-  margin-top: 18px;
+  width: 100%;
+  max-width: 300px;
+  margin: 16px auto 0;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .dpadGrid {
   display: grid;
-  grid-template-columns: repeat(3, 62px);
-  grid-template-rows: repeat(3, 62px);
-  gap: 8px;
+  grid-template-columns: repeat(3, 78px);
+  grid-template-rows: repeat(3, 78px);
+  gap: 14px;
 }
 
 .dpadBtn {
-  border: none;
-  background: var(--card);
-  border-radius: var(--radius-md);
-  font-size: 1.6rem;
+  width: 78px;
+  height: 78px;
+  border: 4px solid #333;
+  border-radius: 18px;
+  background: #fff;
+  color: #333;
+  font-size: 32px;
   cursor: pointer;
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 5px 0 #333;
   touch-action: none;
   font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
 }
 
 .dpadBtn:active {
   transform: translateY(3px);
-  box-shadow: 0 1px 0 rgba(52, 48, 43, 0.18);
+  box-shadow: 0 2px 0 #333;
+  background: #fff3b0;
 }
 
 .legend {
