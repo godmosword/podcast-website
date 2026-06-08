@@ -444,12 +444,34 @@ export function approve(slug: string): ApproveResult {
  *   下次 npm run sync:apple 會併入 apple-synced.json。
  * - 手動集：無法安全程式化改 stories.ts，印出手動指示。
  */
+const SYNCED_PATH = join(ROOT, "data", "apple-synced.json");
+
+/** 直接把 pageCount/captionTimes 寫進已 baked 的 apple-synced.json 的該集（立即生效）。 */
+function materializeIntoSynced(
+  slug: string,
+  pageCount: number,
+  captionTimes: number[],
+): boolean {
+  if (!existsSync(SYNCED_PATH)) return false;
+  const synced = JSON.parse(readFileSync(SYNCED_PATH, "utf8")) as Record<
+    string,
+    unknown
+  >[];
+  const entry = synced.find((s) => s.slug === slug);
+  if (!entry) return false;
+  entry.pageCount = pageCount;
+  entry.captionTimes = captionTimes;
+  writeFileSync(SYNCED_PATH, `${JSON.stringify(synced, null, 2)}\n`, "utf8");
+  return true;
+}
+
 function writeWiring(
   slug: string,
   pageCount: number,
   captionTimes: number[],
 ): "overrides" | "manual-instructions" {
   if (/^ep-\d+$/.test(slug)) {
+    // overrides：未來 re-sync 重 bake 時的耐久來源
     const defaults = JSON.parse(readFileSync(DEFAULTS_PATH, "utf8")) as {
       overrides: Record<string, Record<string, unknown>>;
     };
@@ -460,6 +482,8 @@ function writeWiring(
       captionTimes,
     };
     writeFileSync(DEFAULTS_PATH, `${JSON.stringify(defaults, null, 2)}\n`, "utf8");
+    // 同步集若已 baked，直接寫進 apple-synced.json 立即生效（不必等 RSS 變動才 re-bake）
+    materializeIntoSynced(slug, pageCount, captionTimes);
     return "overrides";
   }
   console.log(

@@ -1,0 +1,64 @@
+{
+  "slug": "ep-9",
+  "audioDuration": 457,
+  "model": "gpt-4o",
+  "generatedAt": "2026-06-08T14:34:47.077Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 0,
+      "end": 49,
+      "summary": "介紹多多和他的問題",
+      "prompt": "Dodo the dinosaur car looking worried about his yellow teeth, feeling embarrassed"
+    },
+    {
+      "index": 2,
+      "start": 49,
+      "end": 110,
+      "summary": "多多的日常和愛吃糖果",
+      "prompt": "Dodo the dinosaur car happily eating candy at the candy shop, feeling joyful"
+    },
+    {
+      "index": 3,
+      "start": 110,
+      "end": 131,
+      "summary": "多多的日常和愛吃糖果",
+      "prompt": "Dodo the dinosaur car happily eating candy at the candy shop, feeling joyful"
+    },
+    {
+      "index": 4,
+      "start": 131,
+      "end": 206,
+      "summary": "多多因為懶惰不刷牙",
+      "prompt": "Dodo the dinosaur car feeling sleepy and skipping brushing teeth, feeling tired"
+    },
+    {
+      "index": 5,
+      "start": 206,
+      "end": 269,
+      "summary": "多多的口臭被發現",
+      "prompt": "Dodo the dinosaur car talking to the blue bus, feeling embarrassed about bad breath"
+    },
+    {
+      "index": 6,
+      "start": 269,
+      "end": 335,
+      "summary": "玲玲清潔車的建議",
+      "prompt": "Lingling the cleaning car advising Dodo about dental care, feeling helpful"
+    },
+    {
+      "index": 7,
+      "start": 335,
+      "end": 395,
+      "summary": "多多學習刷牙",
+      "prompt": "Dodo the dinosaur car diligently brushing teeth, feeling determined"
+    },
+    {
+      "index": 8,
+      "start": 395,
+      "end": 457,
+      "summary": "多多養成刷牙習慣",
+      "prompt": "Dodo the dinosaur car smiling confidently with clean teeth, feeling proud"
+    }
+  ]
+}
