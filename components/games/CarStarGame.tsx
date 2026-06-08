@@ -9,7 +9,9 @@ import {
   type ReactNode,
 } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import RoughFrame from "@/components/decor/RoughFrame";
+import { useBestScore } from "@/hooks/useBestScore";
+import { useGameAudio } from "@/hooks/useGameAudio";
+import GameShell from "@/components/games/GameShell";
 import { CAR_STAR_CAST, CAR_STAR_TUTORIAL } from "@/lib/games/car-star-cast";
 import styles from "./CarStarGame.module.css";
 
@@ -50,9 +52,6 @@ interface GameState {
   scaredUntil: number;
   tick: number;
 }
-
-// webkit 舊版前綴
-type WebkitWindow = Window & { webkitAudioContext?: typeof AudioContext };
 
 // ── 迷宮地圖 ─────────────────────────────────────────────
 // #=牆  .=金幣  o=加速道具  P=玩家起點  G=追逐車起點
@@ -268,8 +267,8 @@ export default function CarStarGame() {
   const reduced = useReducedMotion();
 
   const game = useRef<GameState>(freshState());
-  const actx = useRef<AudioContext | null>(null);
-  const soundOn = useRef<boolean>(true);
+  const { ensureAudio, tone, soundUi, toggleSound } = useGameAudio(true);
+  const [best, saveBest] = useBestScore("car-star-best");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const popupId = useRef<number>(0);
@@ -278,10 +277,8 @@ export default function CarStarGame() {
   const [status, setStatus] = useState<Status>("start");
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const difficultyRef = useRef<Difficulty>("easy");
-  const [soundUi, setSoundUi] = useState(true);
   const [scale, setScale] = useState(1);
   const [popups, setPopups] = useState<Popup[]>([]);
-  const [best, setBest] = useState<number | null>(null);
 
   const rerender = useCallback(() => force((n) => n + 1), []);
   const addPopup = useCallback(
@@ -293,31 +290,6 @@ export default function CarStarGame() {
     [],
   );
 
-  // 最佳分數（localStorage，掛載後才讀）
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem("car-star-best");
-      if (raw != null) {
-        const n = Number(raw);
-        if (Number.isFinite(n)) setBest(n);
-      }
-    } catch {
-      // localStorage 不可用時略過
-    }
-  }, []);
-
-  const saveBest = useCallback((score: number) => {
-    setBest((prev) => {
-      if (prev != null && score <= prev) return prev;
-      try {
-        window.localStorage.setItem("car-star-best", String(score));
-      } catch {
-        // 略過
-      }
-      return score;
-    });
-  }, []);
-
   // 響應式縮放
   useEffect(() => {
     const onResize = () => {
@@ -328,44 +300,6 @@ export default function CarStarGame() {
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
-
-  // ── 音效 ───────────────────────────────────────────
-  const ensureAudio = useCallback(() => {
-    if (!actx.current) {
-      try {
-        const Ctor =
-          window.AudioContext ?? (window as WebkitWindow).webkitAudioContext;
-        if (Ctor) actx.current = new Ctor();
-      } catch {
-        // 無音訊環境時略過
-      }
-    }
-    if (actx.current && actx.current.state === "suspended") {
-      void actx.current.resume();
-    }
-  }, []);
-
-  const tone = useCallback(
-    (freq: number, dur: number, type: OscillatorType = "square", vol = 0.05) => {
-      const ctx = actx.current;
-      if (!soundOn.current || !ctx) return;
-      try {
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.type = type;
-        o.frequency.value = freq;
-        g.gain.value = vol;
-        o.connect(g);
-        g.connect(ctx.destination);
-        o.start();
-        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + dur);
-        o.stop(ctx.currentTime + dur);
-      } catch {
-        // 略過
-      }
-    },
-    [],
-  );
 
   const sBlip = useCallback(() => tone(740, 0.06, "square", 0.035), [tone]);
   const sPower = useCallback(() => tone(300, 0.25, "triangle", 0.06), [tone]);
@@ -555,11 +489,6 @@ export default function CarStarGame() {
     rerender();
   }, [ensureAudio, startLoop, rerender, difficulty]);
 
-  const toggleSound = useCallback(() => {
-    soundOn.current = !soundOn.current;
-    setSoundUi(soundOn.current);
-  }, []);
-
   const g = game.current;
   const now = Date.now();
   const scared = now < g.scaredUntil;
@@ -573,17 +502,17 @@ export default function CarStarGame() {
     : styles.boardNormal;
 
   return (
-    <div className={styles.shell}>
-      <RoughFrame color={CAR_STAR_CAST.player.color} rough={1} width={3} />
-
-      <header className={styles.header}>
-        <div className={styles.titleBlock}>
-          <h1 className={styles.title}>
-            {CAR_STAR_CAST.player.emoji} 車車吃星星
-          </h1>
-          <p className={styles.subtitle}>和故事裡的車車朋友一起玩迷宮</p>
-        </div>
-        <div className={styles.hud}>
+    <GameShell
+      frameColor={CAR_STAR_CAST.player.color}
+      frameAccent="var(--c-yellow)"
+      title={
+        <>
+          {CAR_STAR_CAST.player.emoji} 車車吃星星
+        </>
+      }
+      subtitle="和故事裡的車車朋友一起玩迷宮"
+      hud={
+        <>
           <Pill>⭐ {g.score}</Pill>
           {best != null && <Pill>最佳 ⭐ {best}</Pill>}
           <Pill>{"❤️".repeat(Math.max(0, g.lives)) || "—"}</Pill>
@@ -596,9 +525,9 @@ export default function CarStarGame() {
           >
             {soundUi ? "🔊" : "🔇"}
           </button>
-        </div>
-      </header>
-
+        </>
+      }
+    >
       <CastBar />
 
       {showPlayHint && (
@@ -820,7 +749,7 @@ export default function CarStarGame() {
         <strong>🌟</strong> 後可以把{CAR_STAR_CAST.police.shortName}和
         {CAR_STAR_CAST.red.shortName}撞回家！
       </p>
-    </div>
+    </GameShell>
   );
 }
 
