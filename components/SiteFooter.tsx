@@ -46,15 +46,6 @@ export default function SiteFooter() {
       <ConnectHub />
 
       <div className={styles.bottomBar}>
-        <Link href="/games" className={styles.aboutLink}>
-          🎮 遊樂園
-        </Link>
-        <Link href="/games/car-star" className={styles.aboutLink}>
-          🚗 車車吃星星
-        </Link>
-        <Link href="/games/car-mission" className={styles.aboutLink}>
-          🚚 溫柔任務
-        </Link>
         <Link href="/about" className={styles.aboutLink}>
           關於我們
         </Link>
