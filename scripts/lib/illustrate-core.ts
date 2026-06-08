@@ -38,7 +38,9 @@ export interface Scene {
   end: number; // 秒
   summary: string; // 中文，給 contact sheet
   prompt: string; // 英文，給圖像模型
-  characters: string[]; // 該幕出場的角色 canonical 名稱
+  characters?: string[]; // 該幕出場的角色 canonical 名稱
+  /** 保留 public 既有頁面（如 Apple podcast 封面），不生圖、approve 時不覆蓋 */
+  keepCover?: boolean;
 }
 
 export interface NewCharacter {
@@ -459,6 +461,19 @@ export function writeStagingImage(slug: string, index: number, buf: Buffer): str
   writeFileSync(p, buf);
   return p;
 }
+
+/** 把已發佈的 NN.jpg 複製到暫存（keepCover 幕用）。 */
+export function copyPublishedPageToStaging(slug: string, index: number): string {
+  const src = join(publicDirForSlug(slug), `${pad2(index)}.jpg`);
+  if (!existsSync(src)) {
+    throw new Error(`找不到已發佈圖 ${src}；keepCover 幕需先有 public 封面`);
+  }
+  const dir = stagingDirForSlug(slug);
+  mkdirSync(dir, { recursive: true });
+  const dst = join(dir, `${pad2(index)}.jpg`);
+  copyFileSync(src, dst);
+  return dst;
+}
 export function writeStagingPortrait(slug: string, name: string, buf: Buffer): string {
   mkdirSync(stagingDirForSlug(slug), { recursive: true });
   const p = stagingPortraitPath(slug, name);
@@ -594,14 +609,22 @@ export function approve(slug: string): ApproveResult {
   // 先登記新角色（定裝照 → public/characters + 名冊）
   const registered = registerCharacters(slug, scenesFile.newCharacters ?? []);
 
-  // 場景圖 → public（清掉舊頁避免殘留）
+  // 場景圖 → public（清掉舊頁避免殘留；keepCover 保留既有頁）
   const pub = publicDirForSlug(slug);
   mkdirSync(pub, { recursive: true });
+  const keepCoverIndices = new Set(
+    scenes.filter((sc) => sc.keepCover).map((sc) => sc.index),
+  );
   for (const f of readdirSync(pub)) {
-    if (/^\d{2}\.jpg$/.test(f)) rmSync(join(pub, f));
+    if (!/^\d{2}\.jpg$/.test(f)) continue;
+    const idx = Number(f.slice(0, 2));
+    if (keepCoverIndices.has(idx) && existsSync(join(pub, f))) continue;
+    rmSync(join(pub, f));
   }
   for (const sc of scenes) {
-    copyFileSync(join(staging, `${pad2(sc.index)}.jpg`), join(pub, `${pad2(sc.index)}.jpg`));
+    const pubPage = join(pub, `${pad2(sc.index)}.jpg`);
+    if (sc.keepCover && existsSync(pubPage)) continue;
+    copyFileSync(join(staging, `${pad2(sc.index)}.jpg`), pubPage);
   }
 
   const captionTimes = scenes.map((s) => s.start);
