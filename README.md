@@ -284,6 +284,43 @@ npm run transcribe -- --convert --all  # 只對既有側車檔重跑簡轉繁/�
 
 沒有側車字幕時，播放器用 `data/stories.ts` 的 `captions`（每頁一句）；可加 `captionTimes`（每句起始秒數）讓它精準換句，否則時長平均切換。手動對時：開播放頁加 `?cue=1` 進入「字幕對時模式」，邊聽邊點記下秒數再複製貼回。一旦該集有側車字幕，會優先用側車字幕。
 
+## 每集劇情插圖自動生成（`npm run illustrate`）
+
+讓只有單封面的集數（`ep-N`，`pageCount:1`）依台詞自動產生**一系列黏土風插圖**，播放時隨音檔時間切換（理想每 30–60 秒一張，依劇情轉折）。播放器既有的「依時間換圖」邏輯（`captionTimes` + `pageCount`）直接套用，**不改播放器**。
+
+> ⚠️ 這是專案**唯一需要外部付費 API 的功能**，需 `OPENAI_API_KEY`。送出的是**已公開的劇本文字**（由本機字幕來，非音檔，仍守「音檔不外送」）。**本機手動執行、人工審圖後才上線；CI 不放此 key、不生圖。**
+
+**資料流：** `data/subtitles/<slug>.json`（whisper 本機已產）→ 切場景 `data/scenes/<slug>.json` → 生圖到暫存 `public/.illustrate-staging/<slug>/`（gitignore）→ 人工審 `contact.html` → `--approve` 進 `public/stories/<slug>/NN.jpg` 並寫 `overrides.<slug>` 的 `pageCount`/`captionTimes`。
+
+```bash
+# 1) 切場景（可先 --segment-only --deterministic 免 key 看切分節奏）
+OPENAI_API_KEY=sk-... npm run illustrate -- ep-9 --segment-only
+
+# 2) 生圖到暫存 + contact sheet（停在這審圖）
+OPENAI_API_KEY=sk-... npm run illustrate -- ep-9
+open public/.illustrate-staging/ep-9/contact.html   # 逐幕檢查走樣／不適／文字
+
+# 3) 壞幕單張重抽
+OPENAI_API_KEY=sk-... npm run illustrate -- ep-9 --scene 4
+
+# 4) 全部 OK → 上線（複製進 public + 寫 pageCount/captionTimes）
+npm run illustrate -- ep-9 --approve
+npm run sync:apple && npm run build      # overrides 併入 apple-synced.json
+```
+
+| 旗標 | 作用 |
+|------|------|
+| `--segment-only` | 只產 `data/scenes/<slug>.json`，不生圖（便宜，先審切分） |
+| `--deterministic` | 本機切場景（不呼叫文字模型，免 key；切分較不貼劇情，當後備/測試用） |
+| `--scene N` | 重抽第 N 幕（暫存），不用整集重生 |
+| `--approve` | 暫存 → `public/` + 寫接線 |
+
+**風格一致性**：每幕以該集既有 `01.jpg` 當**參考圖**（OpenAI image edit）+ 固定黏土風前綴（`CLAY_STYLE_PREFIX`，萃取自 DESIGN.md），讓材質／配色／主角車跨幕一致。
+
+**model id**：預設 `OPENAI_TEXT_MODEL=gpt-4o`、`OPENAI_IMAGE_MODEL=gpt-image-2`；圖像模型若當下不可用，設 `OPENAI_IMAGE_MODEL=gpt-image-1`（程式不改）。
+
+**手動集**（ambulance/ev 等已有手繪 6 頁）：`--approve` 會印出要手填到 `data/stories.ts` 的 `pageCount`/`captionTimes`（不自動改 TS）。
+
 ## 字型維護（圓體中文）
 
 中文用自託管的 **jf-open 粉圓（huninn）** 子集（`app/fonts/huninn-subset.woff2`，約 100KB）。拉丁與數字由 Baloo 2 提供。

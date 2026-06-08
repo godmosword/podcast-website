@@ -11,12 +11,16 @@
     "test:e2e": "playwright test",
     "font:subset": "python3 scripts/subset_font.py",
     "sync:apple": "tsx scripts/sync-apple-podcast.ts",
-    "transcribe": "tsx scripts/transcribe.ts"
+    "transcribe": "tsx scripts/transcribe.ts",
+    "illustrate": "tsx scripts/illustrate.ts"
   },
   "dependencies": {
     "next": "^15.1.0",
+    "openai": "^6.42.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "sharp": "^0.34.5",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@playwright/test": "^1.52.0",

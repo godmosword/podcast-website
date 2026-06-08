@@ -36,3 +36,6 @@ next-env.d.ts
 
 # CI 本機編譯 whisper.cpp 快取
 /.cache/
+
+# AI 插圖暫存（人工審圖前的草稿，勿入庫）
+/public/.illustrate-staging/
