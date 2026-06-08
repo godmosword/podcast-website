@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "name": "鈴鈴清潔車",
+    "aliases": ["玲玲清潔車", "玲玲", "鈴鈴", "清潔車"],
+    "vehicle": "street sweeper",
+    "desc": "a cute claymation street-sweeper truck, cream/off-white cab with a bright green lower body, an orange light-bar sign on the roof, two big round yellow spinning brushes at the front bottom, big friendly round eyes and a cheerful smile",
+    "ref": "characters/鈴鈴清潔車.jpg",
+    "firstSeen": "ep-9"
+  },
+  {
+    "name": "恐龍車多多",
+    "aliases": ["多多", "恐龍車", "恐龍多多"],
+    "vehicle": "dinosaur car",
+    "desc": "a cute claymation green dinosaur car, a small green car body with a friendly T-rex head, orange spikes along its back, big round cartoon eyes, and a wide happy mouth showing rows of teeth",
+    "ref": "characters/恐龍車多多.jpg",
+    "firstSeen": "ep-9"
+  }
+]
