@@ -6,7 +6,7 @@
 // ============================================================
 
 /** 圖示識別字，對應 lib/connect-icons.tsx 內的 SVG。 */
-export type SocialIcon = "instagram" | "threads";
+export type SocialIcon = "instagram" | "threads" | "facebook";
 
 export type Social = {
   /** 顯示名稱（也作為 aria-label） */
@@ -33,6 +33,12 @@ const SOCIALS: Social[] = [
     url: "https://www.threads.com/@s32183218",
     background: "#000000",
     icon: "threads",
+  },
+  {
+    label: "Facebook",
+    url: "https://www.facebook.com/profile.php?id=61590533437349",
+    background: "#1877F2",
+    icon: "facebook",
   },
 ];
 
