@@ -12,7 +12,7 @@
     "font:subset": "python3 scripts/subset_font.py",
     "sync:apple": "tsx scripts/sync-apple-podcast.ts",
     "transcribe": "tsx scripts/transcribe.ts",
-    "illustrate": "tsx scripts/illustrate.ts"
+    "illustrate": "tsx --env-file-if-exists=.env.local scripts/illustrate.ts"
   },
   "dependencies": {
     "next": "^15.1.0",
