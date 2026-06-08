@@ -319,6 +319,34 @@ npm run sync:apple && npm run build      # overrides 併入 apple-synced.json
 
 **跨集角色一致**：名冊 `data/characters.json`（每角色 `name`／`aliases`(誤聽別名)／`vehicle`／`desc`(英文外觀)／`ref`(定裝照)）。切場景時文字模型**從台詞認出每幕出場角色**並標 `characters`；生圖時把該幕角色的**定裝照**（`public/characters/<名>.jpg`）當參考圖（可多張同框），跨集維持同一形象。**新角色首次登場自動生定裝照**進暫存，contact sheet 有「新角色」區，`--approve` 後存進名冊成 canonical（之後各集引用）。定裝照不好用 `--char 名字` 重抽。已登記角色不會被覆寫。
 
+### 手動補定裝照（自己畫／外部生圖時）
+
+不想讓管線自動生定裝照、想用自己準備的圖時：
+
+1. 把圖放進 `public/characters/`，正規化成 **1400×1400 JPEG、小寫 `.jpg`**（對齊既有資產）：
+   ```bash
+   npx tsx -e 'import sharp from "sharp";import{readFileSync,unlinkSync}from"node:fs";
+   (async()=>{const s="public/characters/原檔.JPG";const b=readFileSync(s);unlinkSync(s);
+   await sharp(b).resize(1400,1400,{fit:"cover"}).jpeg({quality:90}).toFile("public/characters/角色名.jpg");})()'
+   ```
+2. **檔名要等於 `safeName(角色名)`**：去掉空白與符號、保留中日韓字與英數（例：「怪獸卡車 Monster Truck」→ 角色名取 `怪獸卡車`、英文放 `aliases`）。
+3. 在 `data/characters.json` 加一筆 `{ name, aliases, vehicle, desc(英文外觀), ref:"characters/<名>.jpg" }`。`aliases` 放台詞可能的誤聽／別稱，讓切場景時認得出。
+
+### 重抽單幕並指定角色（保留 Apple 封面）
+
+這次 ep-9 #6 的流程——把某幕換成指定角色、**但封面 `01.jpg` 要保留 Apple 原圖**時，**不要用 `--approve`**（它會把暫存全 8 張連封面一起蓋進 `public/`）：
+
+```bash
+# 1) 在 data/scenes/<slug>.json 的該幕加 "characters": ["角色A","角色B"]（名字需與名冊 name 一致）
+# 2) 用定裝照當參考重抽該幕到暫存
+npm run illustrate -- ep-9 --scene 6
+open public/.illustrate-staging/ep-9/06.jpg          # 審圖
+# 3) 滿意後「只」單張複製進 public（不動 01.jpg、不重寫接線）
+cp public/.illustrate-staging/ep-9/06.jpg public/stories/ep-9/06.jpg
+```
+
+`pageCount`／`captionTimes` 不變時無需 `sync:apple`／改 overrides；直接 commit 該張圖即可。
+
 **model id**：預設 `OPENAI_TEXT_MODEL=gpt-4o`、`OPENAI_IMAGE_MODEL=gpt-image-2`；圖像模型若當下不可用，設 `OPENAI_IMAGE_MODEL=gpt-image-1`（程式不改）。
 
 **手動集**（ambulance/ev 等已有手繪 6 頁）：`--approve` 會印出要手填到 `data/stories.ts` 的 `pageCount`/`captionTimes`（不自動改 TS）。

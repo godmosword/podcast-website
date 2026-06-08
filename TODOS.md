@@ -135,6 +135,7 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 
 ### 車車角色圖鑑（新頁 `/characters`）　`P3 · M · 角色文案`　〔ceo〕
 用既有資料做角色小圖鑑（安安救護車、東東挖土機、鈴鈴清潔車、小紅賽車、小飛無人機、未來電動車…，角色名已在標題）：黏土縮圖 + 一句個性 + 連到該集。新 SEO 落地頁 + 「找下一集」入口。重用 `VehicleClayIcon`、`getVehicleCoverPath()`、`allVehicles()`、`getStoriesByVehicle()`，仿 `/topic` 結構。
+**素材進度：** 已有 6 位 canonical 定裝照於 `public/characters/`（安安救護車／小紅賽車／怪獸卡車／東東挖土機／鈴鈴清潔車／恐龍車多多），登記於 `data/characters.json`（含別名／車種／英文外觀）——可直接當圖鑑縮圖與內部跨集一致來源；剩「一句個性」中文文案待 Bonbon & 馬米。
 
 ### 首頁列表「大圖單欄」模式（可選）　`P3 · M · 年齡定位`　〔design〕
 若主攻 3–5 歲，評估故事牆改大封面單欄卡（少文字、大圖磚）或僅窄螢幕啟用。對標 YouTube Kids；現左圖右文在 5+ 較合適。需使用者研究，非必做。`StoryCard`。
