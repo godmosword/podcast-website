@@ -33,3 +33,6 @@ next-env.d.ts
 
 # whisper.cpp 模型（轉錄字幕用，體積大，勿入庫）
 /models/
+
+# CI 本機編譯 whisper.cpp 快取
+/.cache/

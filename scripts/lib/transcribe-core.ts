@@ -10,6 +10,7 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  readdirSync,
   readFileSync,
   rmSync,
   writeFileSync,
@@ -26,6 +27,34 @@ const toTraditional = OpenCC.Converter({ from: "cn", to: "twp" });
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 export const SUBTITLES_DIR = join(ROOT, "data", "subtitles");
+export const STORIES_DIR = join(ROOT, "public", "stories");
+
+export function audioPathForSlug(slug: string): string {
+  return join(STORIES_DIR, slug, "audio.mp3");
+}
+
+export function subtitleSidecarPath(slug: string): string {
+  return join(SUBTITLES_DIR, `${slug}.json`);
+}
+
+export function hasSubtitleSidecar(slug: string): boolean {
+  return existsSync(subtitleSidecarPath(slug));
+}
+
+/** 有音檔但缺 data/subtitles/<slug>.json 的集數（可選限定 slug 清單）。 */
+export function listSlugsMissingSubtitles(candidates?: string[]): string[] {
+  const slugs =
+    candidates ??
+    (existsSync(STORIES_DIR)
+      ? readdirSync(STORIES_DIR, { withFileTypes: true })
+          .filter((d) => d.isDirectory())
+          .map((d) => d.name)
+      : []);
+
+  return slugs
+    .filter((slug) => existsSync(audioPathForSlug(slug)) && !hasSubtitleSidecar(slug))
+    .sort();
+}
 
 const DEFAULT_BIN = process.env.WHISPER_BIN ?? "whisper-cli";
 const DEFAULT_MODEL = process.env.WHISPER_MODEL ?? "models/ggml-large-v3.bin";
@@ -81,16 +110,21 @@ export function relocalizeSidecar(slug: string): { count: number; file: string }
   return { count: cleaned.length, file };
 }
 
+function commandAvailable(cmd: string): boolean {
+  if (cmd.includes("/")) return existsSync(cmd);
+  try {
+    execFileSync("which", [cmd], { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function whisperAvailable(
   bin = DEFAULT_BIN,
   model = DEFAULT_MODEL,
 ): boolean {
-  try {
-    execFileSync("which", [bin], { stdio: "ignore" });
-    execFileSync("which", ["ffmpeg"], { stdio: "ignore" });
-  } catch {
-    return false;
-  }
+  if (!commandAvailable(bin) || !commandAvailable("ffmpeg")) return false;
   return existsSync(resolve(ROOT, model)) || existsSync(model);
 }
 

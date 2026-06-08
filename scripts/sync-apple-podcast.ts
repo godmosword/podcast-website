@@ -22,7 +22,12 @@ import {
   slugForEpisode,
   type RssEpisode,
 } from "./lib/apple-rss";
-import { transcribeToSidecar, whisperAvailable } from "./lib/transcribe-core";
+import {
+  hasSubtitleSidecar,
+  listSlugsMissingSubtitles,
+  transcribeToSidecar,
+  whisperAvailable,
+} from "./lib/transcribe-core";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const MAX_NEW_PER_RUN = 3;
@@ -179,6 +184,7 @@ async function downloadFile(url: string, dest: string): Promise<void> {
  */
 function maybeTranscribe(slug: string, audioPath: string): void {
   if (process.env.SKIP_TRANSCRIBE === "1") return;
+  if (hasSubtitleSidecar(slug)) return;
   if (!whisperAvailable()) {
     console.log(`  字幕：跳過（本機無 whisper-cli/模型；可後續 npm run transcribe -- ${slug}）`);
     return;
@@ -189,6 +195,27 @@ function maybeTranscribe(slug: string, audioPath: string): void {
     console.log(`  字幕：${count} 句 → ${path.relative(ROOT, file)}（草稿，請校對）`);
   } catch (err) {
     console.warn(`  字幕：轉錄失敗，略過（${(err as Error).message}）`);
+  }
+}
+
+/** 同步後補齊缺字幕的集數（含先前 CI 只下載音檔、未轉錄者）。 */
+function backfillMissingSubtitles(catalog: Story[]): void {
+  if (dryRun || process.env.SKIP_TRANSCRIBE === "1") return;
+
+  const missing = listSlugsMissingSubtitles(catalog.map((s) => s.slug));
+  if (missing.length === 0) return;
+
+  if (!whisperAvailable()) {
+    console.log(
+      `字幕補齊：${missing.length} 集缺側車檔（${missing.join(", ")}），跳過（無 whisper-cli/模型）`,
+    );
+    return;
+  }
+
+  console.log(`字幕補齊：${missing.length} 集（${missing.join(", ")}）`);
+  for (const slug of missing) {
+    const audioPath = path.join(PATHS.storiesPublic, slug, "audio.mp3");
+    maybeTranscribe(slug, audioPath);
   }
 }
 
@@ -446,6 +473,8 @@ async function main(): Promise<void> {
     return;
   }
 
+  const finalCatalog = [...manualStories, ...metadataResult.stories, ...added];
+
   if (!hasMetadataChanges && !hasNewEpisodes) {
     console.log("No new episodes or metadata changes.");
     const nextSeen = reconcileSeenGuids(rssItems, state, catalog, eps);
@@ -465,6 +494,7 @@ async function main(): Promise<void> {
         guidBySlug: metadataResult.guidBySlug,
       });
     }
+    backfillMissingSubtitles(finalCatalog);
     return;
   }
 
@@ -490,6 +520,8 @@ async function main(): Promise<void> {
       `Updated metadata for: ${metadataResult.updatedSlugs.join(", ")}`,
     );
   }
+
+  backfillMissingSubtitles(finalCatalog);
 }
 
 main().catch((err) => {
