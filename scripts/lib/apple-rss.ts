@@ -9,6 +9,8 @@ export type RssEpisode = {
   imageUrl: string | null;
   episode: number | null;
   duration: string | null;
+  /** itunes:keywords，逗號分隔之主題／行銷關鍵字。 */
+  keywords: string[];
 };
 
 type XmlValue = string | number | Record<string, unknown>;
@@ -129,6 +131,16 @@ function parseEpisode(raw: unknown): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
+/** 解析 itunes:keywords（SoundOn 後台設定的逗號分隔關鍵字）。 */
+export function parseItunesKeywords(raw: unknown): string[] {
+  const str = text(raw);
+  if (!str) return [];
+  return str
+    .split(/[,，、]/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
 function itemToEpisode(item: Record<string, XmlValue>, channelImage: string | null): RssEpisode | null {
   const guid = text(item.guid) || text(item.link);
   const title = text(item.title);
@@ -144,6 +156,7 @@ function itemToEpisode(item: Record<string, XmlValue>, channelImage: string | nu
   const itunesEpisode = item["itunes:episode"] ?? itunes?.episode;
   const itunesDuration = item["itunes:duration"] ?? itunes?.duration;
   const itunesImage = item["itunes:image"] ?? itunes?.image;
+  const itunesKeywords = item["itunes:keywords"] ?? itunes?.keywords;
 
   const imageUrl =
     attrHref(itunesImage) ??
@@ -158,6 +171,7 @@ function itemToEpisode(item: Record<string, XmlValue>, channelImage: string | nu
     imageUrl,
     episode: parseEpisode(itunesEpisode),
     duration: formatItunesDuration(itunesDuration),
+    keywords: parseItunesKeywords(itunesKeywords),
   };
 }
 

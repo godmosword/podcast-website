@@ -13,6 +13,7 @@ import { manualStories } from "../data/stories";
 import { lookupFeedUrl } from "../lib/podcast-apple";
 import {
   APPLE_SYNC_PAGE_COUNT,
+  applyTagInference,
   applyVehicleInference,
 } from "./lib/apple-sync-profile";
 import {
@@ -122,9 +123,47 @@ function applyDefaults(
     tags: override.tags ?? defaults.tags,
     ...(override.summary !== undefined ? { summary: override.summary } : {}),
     ...(override.captions !== undefined ? { captions: override.captions } : {}),
+    ...(override.captionTimes !== undefined
+      ? { captionTimes: override.captionTimes }
+      : {}),
     ...(override.duration !== undefined ? { duration: override.duration } : {}),
     pageCount: override.pageCount ?? defaults.pageCount ?? APPLE_SYNC_PAGE_COUNT,
   };
+}
+
+function hasTagsOverride(defaults: SyncDefaults, slug: string): boolean {
+  return defaults.overrides[slug]?.tags != null;
+}
+
+function hasVehicleOverride(defaults: SyncDefaults, slug: string): boolean {
+  return defaults.overrides[slug]?.vehicle != null;
+}
+
+function applySyncProfile(
+  story: Story,
+  title: string,
+  summary: string | undefined,
+  keywords: string[] | undefined,
+  defaults: SyncDefaults,
+  slug: string,
+): Story {
+  const withVehicle = applyVehicleInference(
+    story,
+    title,
+    defaults.vehicle,
+    hasVehicleOverride(defaults, slug),
+  );
+  return applyTagInference(
+    withVehicle,
+    title,
+    summary,
+    keywords,
+    hasTagsOverride(defaults, slug),
+  );
+}
+
+function tagsEqual(a?: string[], b?: string[]): boolean {
+  return JSON.stringify(a ?? []) === JSON.stringify(b ?? []);
 }
 
 function rssToStory(
@@ -149,12 +188,13 @@ function rssToStory(
     tags: [...defaults.tags],
   };
   const withDefaults = applyDefaults(base, defaults);
-  const hasVehicleOverride = defaults.overrides[slug]?.vehicle != null;
-  return applyVehicleInference(
+  return applySyncProfile(
     withDefaults,
     item.title,
-    defaults.vehicle,
-    hasVehicleOverride,
+    summary,
+    item.keywords,
+    defaults,
+    slug,
   );
 }
 
@@ -262,12 +302,13 @@ function storyFromRssMetadata(
     ...(summary !== undefined ? { summary } : {}),
   };
   const withDefaults = applyDefaults(base, defaults);
-  const hasVehicleOverride = defaults.overrides[existing.slug]?.vehicle != null;
-  return applyVehicleInference(
+  return applySyncProfile(
     withDefaults,
     item.title,
-    defaults.vehicle,
-    hasVehicleOverride,
+    summary,
+    item.keywords,
+    defaults,
+    existing.slug,
   );
 }
 
@@ -277,8 +318,35 @@ function metadataFieldsChanged(before: Story, after: Story): boolean {
     before.date !== after.date ||
     before.duration !== after.duration ||
     before.summary !== after.summary ||
-    before.vehicle !== after.vehicle
+    before.vehicle !== after.vehicle ||
+    !tagsEqual(before.tags, after.tags)
   );
+}
+
+/** 補齊 apple-synced 中仍缺 tags 的集數（用本地 title/summary，無 RSS 關鍵字時）。 */
+function backfillMissingTags(
+  synced: Story[],
+  defaults: SyncDefaults,
+): { stories: Story[]; updatedSlugs: string[] } {
+  const updatedSlugs: string[] = [];
+  const stories = synced.map((story) => {
+    if (hasTagsOverride(defaults, story.slug) || (story.tags?.length ?? 0) > 0) {
+      return story;
+    }
+    const next = applyTagInference(
+      story,
+      story.title,
+      story.summary,
+      undefined,
+      false,
+    );
+    if (!tagsEqual(story.tags, next.tags)) {
+      updatedSlugs.push(story.slug);
+      return next;
+    }
+    return story;
+  });
+  return { stories, updatedSlugs };
 }
 
 type MetadataUpdateResult = {
@@ -460,6 +528,14 @@ async function main(): Promise<void> {
 
   const hasMetadataChanges = metadataResult.updatedSlugs.length > 0;
   const hasNewEpisodes = added.length > 0;
+  const tagBackfill = backfillMissingTags(
+    [...metadataResult.stories, ...added],
+    defaults,
+  );
+  const hasTagBackfill = tagBackfill.updatedSlugs.length > 0;
+  if (hasTagBackfill) {
+    console.log(`Tags backfill: ${tagBackfill.updatedSlugs.join(", ")}`);
+  }
 
   if (dryRun) {
     if (hasNewEpisodes) {
@@ -467,15 +543,15 @@ async function main(): Promise<void> {
         `[dry-run] Would add ${added.length} episode(s): ${added.map((s) => s.slug).join(", ")}`,
       );
     }
-    if (!hasMetadataChanges && !hasNewEpisodes) {
+    if (!hasMetadataChanges && !hasNewEpisodes && !hasTagBackfill) {
       console.log("[dry-run] No new episodes or metadata changes.");
     }
     return;
   }
 
-  const finalCatalog = [...manualStories, ...metadataResult.stories, ...added];
+  const finalCatalog = [...manualStories, ...tagBackfill.stories];
 
-  if (!hasMetadataChanges && !hasNewEpisodes) {
+  if (!hasMetadataChanges && !hasNewEpisodes && !hasTagBackfill) {
     console.log("No new episodes or metadata changes.");
     const nextSeen = reconcileSeenGuids(rssItems, state, catalog, eps);
     const seenChanged =
@@ -498,9 +574,11 @@ async function main(): Promise<void> {
     return;
   }
 
-  const nextSynced = [...metadataResult.stories, ...added].sort(
-    (a, b) => b.ep - a.ep,
-  );
+  if (!hasMetadataChanges && !hasNewEpisodes && hasTagBackfill) {
+    console.log("No RSS metadata changes; applying tag backfill only.");
+  }
+
+  const nextSynced = [...tagBackfill.stories].sort((a, b) => b.ep - a.ep);
   await writeJson(PATHS.synced, nextSynced);
   const seenGuids = reconcileSeenGuids(rssItems, state, catalog, eps);
   await writeJson(PATHS.state, {

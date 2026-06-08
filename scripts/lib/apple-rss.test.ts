@@ -29,6 +29,7 @@ describe("parseRssEpisodes", () => {
     expect(ep7?.audioUrl).toContain("ep7.mp3");
     expect(ep7?.imageUrl).toBe("https://example.com/ep7.jpg");
     expect(ep7?.duration).toBe("5:48");
+    expect(ep7?.keywords).toEqual(["睡前故事", "高鐵故事", "冷靜"]);
   });
 });
 

@@ -12,6 +12,7 @@
       <itunes:episode>7</itunes:episode>
       <itunes:duration>348</itunes:duration>
       <itunes:image href="https://example.com/ep7.jpg"/>
+      <itunes:keywords>睡前故事,高鐵故事,冷靜</itunes:keywords>
     </item>
     <item>
       <guid>ep-6-guid</guid>
