@@ -108,28 +108,28 @@
 }
 
 .hubLink {
+  --hub-a: var(--c-sky);
+  --hub-b: var(--c-lilac);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  min-height: 56px;
-  padding: 12px 22px 12px 16px;
+  gap: 11px;
+  min-height: 52px;
+  padding: 10px 20px 10px 12px;
   border-radius: 999px;
   text-decoration: none;
-  color: #4a2c00;
+  color: var(--ink);
   background: linear-gradient(
-    135deg,
-    #ffe566 0%,
-    #ffd23f 38%,
-    #ffb347 100%
+    145deg,
+    color-mix(in srgb, var(--hub-a) 20%, var(--card)),
+    color-mix(in srgb, var(--hub-b) 16%, var(--card))
   );
-  border: 2.5px solid #f5a623;
-  box-shadow:
-    0 6px 0 #d48806,
-    0 10px 22px rgba(244, 162, 32, 0.35),
-    var(--gloss);
-  transition: transform var(--motion-press), box-shadow var(--motion-press);
-  animation: hub-wiggle 4s ease-in-out infinite;
+  border: 2px solid color-mix(in srgb, var(--hub-b) 42%, var(--line));
+  box-shadow: var(--shadow-sm), var(--gloss);
+  transition:
+    transform var(--motion-press),
+    box-shadow var(--motion-press),
+    background 0.14s ease;
 }
 
 .hubIconWrap {
@@ -137,74 +137,67 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.55);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--hub-a) 12%, #fff),
+    color-mix(in srgb, var(--hub-b) 10%, #fff)
+  );
+  border: 1.5px solid color-mix(in srgb, var(--hub-a) 28%, var(--line));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
 }
 
 .hubBadge {
   display: block;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.12));
 }
 
 .hubCopy {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 1px;
+  gap: 2px;
   text-align: left;
 }
 
 .hubTitle {
   font-weight: 800;
-  font-size: 1.12rem;
+  font-size: 1.05rem;
   line-height: 1.15;
   letter-spacing: 0.01em;
+  color: var(--ink);
 }
 
 .hubSub {
-  font-size: 0.78rem;
-  font-weight: 700;
-  opacity: 0.82;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--ink-soft);
   line-height: 1.2;
-}
-
-@keyframes hub-wiggle {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  25% {
-    transform: rotate(-0.6deg);
-  }
-  75% {
-    transform: rotate(0.6deg);
-  }
 }
 
 @media (hover: hover) {
   .hubLink:hover {
-    transform: translateY(-3px) scale(1.02);
-    box-shadow:
-      0 8px 0 #d48806,
-      0 14px 28px rgba(244, 162, 32, 0.42),
-      var(--gloss);
+    transform: translateY(-2px);
+    background: linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--hub-a) 28%, var(--card)),
+      color-mix(in srgb, var(--hub-b) 22%, var(--card))
+    );
+    box-shadow: 0 5px 14px rgba(52, 48, 43, 0.1), var(--gloss);
   }
 }
 
 .hubLink:active {
-  transform: translateY(4px);
-  box-shadow: 0 2px 0 #d48806, var(--gloss);
+  transform: translateY(1px);
+  box-shadow: var(--shadow-sm);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hubLink {
-    animation: none;
-  }
+  .hubLink,
   .hubLink:hover,
   .hubLink:active {
+    transition: none;
     transform: none;
   }
 }
