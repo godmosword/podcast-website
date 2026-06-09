@@ -37,7 +37,24 @@
 | **P3** 家長端 | 儀表板、家長閘門、共讀指引、列印物 | 延伸到現實 | 提升轉換與信任 |
 | **P4** 商業化 | freemium + 訂閱（家長付費） | 會員進階實驗 | 對標月 99／年 999；進度綁定收費 |
 
-**最該優先做的一件事：** P1「**故事頁點按熱點 + 每集結尾開放提問**」— 成本最低、最快驗證互動意願，並鋪路 P2。
+**最該優先做的一件事：** STEM-P1「**故事頁點按熱點 + 每集結尾開放提問**」— 成本最低、最快驗證互動意願，並鋪路 P2。
+
+### 命名對照（避免 Growth-P1 與 STEM-P1 混淆）
+
+| 前綴 | 含義 | 範例 |
+|------|------|------|
+| **P0–P3**（無 STEM 前綴） | **成長／官網** — 訂閱轉換、SEO、信任、工程 | P1 分享鈕、P2 隱私頁 |
+| **STEM-P1–P4** | **產品／互動** — 故事熱點、STEM 實驗室、家長端、商業化 | STEM-P1 點按熱點 |
+
+### 本季 Top 5（2026-06 執行優先序）
+
+1. **STEM-P1** 故事頁點按熱點（tap-to-explore）
+2. **STEM-P1** 每集結尾開放提問（`reflectionPrompt`）
+3. **Growth-P1** 單集頁訂閱 CTA 上移（主按鈕下方）
+4. **Growth-P1** 首頁可見訂閱入口（Header／Hero → `#connect`）
+5. **Growth-P2** 隱私政策頁（analytics 前置）
+
+> 分享鈕、平台排序、訂閱文案、viewport 縮放、sitemap 擴充等已上線，見 Completed；不再佔 Top 5 名額。
 
 ---
 
@@ -87,8 +104,8 @@
 #### 家長閘門（parent gate）　`STEM-P3 · S · 付費／設定頁`　〔stem+eng〕
 設定、未來付費頁前簡單算術題，防孩子誤觸（對齊 Sago Mini）。
 
-#### 每集「家長共讀指引」　`STEM-P3 · S · 文案`　〔stem+content〕
-與 P2「給家長的小提示」合併或升級：`parentNote` + 1–2 個可延伸到現實的提問／活動。對標睡前共讀訴求。
+#### 每集「家長共讀指引」　`STEM-P3 · S · P2 parentGuide 上線`　〔stem+content〕
+**依賴 P2 合併欄位 `parentGuide`**（見 Growth-P2 同名任務）。P3 階段僅評估：是否在儀表板摘要顯示、是否連結列印物；不再另建 `parentNote`。
 
 #### 可下載列印物（著色、剪貼、迷宮）　`STEM-P3 · M · 插畫素材`　〔stem+growth〕
 PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
@@ -118,17 +135,31 @@ PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
 
 | 期 | 主題 | 條目 |
 |----|------|------|
-| **P0** 地基 + 第一印象 | 看起來完整、被搜尋到 | 首頁渲染修復 · 正式網域 · sitemap/robots · JSON-LD · DESIGN.md 同步 · 首屏精簡 |
-| **P1** 訂閱轉換 + 分享 | 「沒看到訂閱」消失、可被轉發 | 單集訂閱 CTA 上移 · 首頁訂閱入口 · ConnectHub 文案/排序 · 每集分享鈕 · 試聽橋接 · 入門三集 · 空狀態 · 錨點導覽 |
-| **P2** 信任/合規 + 內容 | 兒童產品權重、內容變深 | 隱私頁 → analytics · 主持人信任區 · 真實插畫 · 親子提示 · 新集通知說明 · 主題頁 SEO · 音檔壓縮 · 縮放/觸控/塗鴉 |
+| **P0** 地基 + 第一印象 | 看起來完整、被搜尋到 | 首頁渲染修復 · 正式網域 · sitemap/robots（含 `/games`、`/legal`）· JSON-LD · DESIGN.md 同步 · 首屏精簡 |
+| **P1** 訂閱轉換 + 分享 | 「沒看到訂閱」消失、可被轉發 | 單集訂閱 CTA 上移 · 首頁訂閱入口 · ~~ConnectHub 文案/排序~~ · ~~每集分享鈕~~ · 試聽橋接 · 入門三集 · 空狀態 · 錨點導覽 |
+| **P2** 信任/合規 + 內容 | 兒童產品權重、內容變深 | 隱私頁 → analytics · 主持人信任區 · 真實插畫 · 家長共讀指引（`parentGuide`）· 新集通知說明 · 主題頁 SEO · 音檔壓縮 · ~~縮放~~/觸控/塗鴉 |
 | **P3** 可靠/工程/可選 | 不掛、可回歸、加分 | 監控 · Service Worker · E2E smoke · ESLint CI · 角色圖鑑 · 大圖單欄 |
 | **STEM-P1→P4** 互動×STEM×商業 | 差異化與變現 | 見上表；**當務之急：故事點按熱點 + 結尾提問** |
 
 **相依鏈（務必照序）：** 正式網域 → sitemap/robots + JSON-LD → 隱私頁（先於 analytics）→ analytics。
 
-**已備齊（勿重做）：** 故事牆、全螢幕播放器、每集落地頁 + **每集 OG 圖**（`lib/story-metadata.ts`）、`/topic` 與車種 SEO 頁、RSS `/feed.xml`、`ageRange`、PWA／收藏／繼續收聽、ConnectHub（平台 + 社群連結已填）、相關推薦、**`/games` 遊樂園**（車車吃星星／溫柔任務／車車大冒險／繽紛方塊）、`/legal` 與版權合規、逐字字幕管線、角色定裝照名冊、Apple 15 分鐘同步。
+**已備齊（勿重做）：** 故事牆、全螢幕播放器、每集落地頁 + **每集 OG 圖**（`lib/story-metadata.ts`）、**每集分享鈕**（`ShareButton`）、`/topic` 與車種 SEO 頁、RSS `/feed.xml`、`ageRange`、PWA／收藏／繼續收聽、ConnectHub（Spotify／Apple 優先 + 訂閱文案）、相關推薦、**`/games` 遊樂園**（車車吃星星／溫柔任務／車車大冒險／繽紛方塊）、`/legal` 與版權合規、逐字字幕管線、角色定裝照名冊、Apple 15 分鐘同步、**viewport 開放縮放**。
 
-**待決策（實作前定）：** ① 網域（`chechepark.tw` / `checheland.tw` / 其他）② analytics 工具（Vercel Analytics 省事 / Plausible 無 cookie / 不做）③ 縮放（鎖 vs 家長大字模式）④ 角色圖鑑與親子提示是否現在做（需 Bonbon & 馬米 文案）。
+**待決策（實作前定）：** ① 自訂網域最終選擇（`chechepark.tw` / `checheland.tw` / 其他）— **基建已就緒**（`NEXT_PUBLIC_SITE_URL` + `CANONICAL_SITE_URL` fallback，P0 ✅）；② analytics 工具（Vercel Analytics 省事 / Plausible 無 cookie / 不做）③ ~~縮放（鎖 vs 家長大字模式）~~ → **已決：開放縮放**（`app/layout.tsx`，P2 ✅）④ 角色圖鑑與親子提示是否現在做（需 Bonbon & 馬米 文案）⑤ **現有 4 款遊樂園遊戲與 STEM 原則** — 見下方「產品決策」。
+
+### 產品決策：現有遊樂園 vs STEM「不計時、不競爭」
+
+現有 4 款遊戲（車車吃星星、溫柔任務、車車大冒險、繽紛方塊）含 **localStorage 最佳分／生命數** 等競賽元素，與 STEM 路線「學齡前避免計時與競爭計分」不完全一致。
+
+**建議方向（擇一或混合，實作 STEM-P2 前定案）：**
+
+| 選項 | 說明 |
+|------|------|
+| **A. 分層** | 現有 4 款保留為「遊樂園經典區」；STEM-P2 新模組嚴守無計時／無排行榜 checklist |
+| **B. 漸進淡化** | 保留 best 分顯示但移除生命／Game Over 壓力；大冒險改為無限續關或探索模式 |
+| **C. 雙模式** | 每款加「輕鬆玩」（無分數）／「挑戰玩」（可選，預設輕鬆） |
+
+**新遊戲預設：** 無計時、無排行榜、可隨時離開（見 STEM-P2 設計紀律）。舊遊戲是否改版依上表決策後排入 P2 或 P3。
 
 ---
 
@@ -142,13 +173,13 @@ PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
 Vercel 設 `NEXT_PUBLIC_SITE_URL=https://正式網域`。OG／Twitter／RSS／sitemap 的絕對連結都靠它；未設時 fallback 到 `VERCEL_URL`／`localhost`。**擋住 sitemap、JSON-LD、每集分享預覽。** `app/layout.tsx` 已讀此變數。
 
 ### ~~`sitemap.xml` + `robots.txt`~~　`P0 · S · 網域`　〔ceo〕 ✅
-新增 `app/sitemap.ts`（首頁、`/story/[slug]`、`/topic`、`/topic/[tag]`、`/vehicles/[vehicle]`、`/about`）與 `app/robots.ts`（允許爬取、指向 sitemap）。主打「每集落地頁被搜尋到」卻沒給站點地圖，這是 SEO 最低門檻。Next.js 15 原生 `MetadataRoute`；重用 `storiesByNewest()`、`allTags()`、`allVehicles()`、`lib/site-url.ts`。
+新增 `app/sitemap.ts`（首頁、`/story/[slug]`、`/topic`、`/topic/[tag]`、`/vehicles/[vehicle]`、`/about`、**`/games` hub + 各遊戲頁**、**`/legal`**）與 `app/robots.ts`（允許爬取、指向 sitemap）。主打「每集落地頁被搜尋到」卻沒給站點地圖，這是 SEO 最低門檻。Next.js 15 原生 `MetadataRoute`；重用 `stories()`、`allTags()`、`allVehicles()`、`lib/site-url.ts`。
 
 ### ~~Podcast 結構化資料 JSON-LD~~　`P0–P1 · S · 網域`　〔ceo〕 ✅
 首頁輸出 `PodcastSeries`、單集頁輸出 `PodcastEpisode`（schema.org `<script type="application/ld+json">`），欄位對應標題／日期／音檔 URL／封面，對齊 `/feed.xml`。協助 Google 理解節目與單集（豐富摘要）。建議抽 `lib/json-ld.ts` 集中產生。
 
 ### ~~同步 DESIGN.md 與實作~~　`P0 · S · 無`　〔design〕 ✅
-更新 `DESIGN.md`：`--ink-soft` → `#7a7268`、背景改 `.site-backdrop` + `.site-root`、viewport 鎖縮放說明、StoryFilter 塗鴉現況。設計文件漂移時改版易回到舊 token（例如又寫 body 四角 gradient）。實作見 `app/globals.css`、`app/layout.tsx`。
+更新 `DESIGN.md`：`--ink-soft` → `#7a7268`、背景改 `.site-backdrop` + `.site-root`、StoryFilter 塗鴉現況。**待補：** viewport 段落改為「已開放縮放」（實作見 `app/layout.tsx`）。設計文件漂移時改版易回到舊 token。實作見 `app/globals.css`。
 
 ### ~~首屏價值主張與資訊架構精簡~~　`P0 · S–M · 無`　〔design+ceo〕 ✅
 新訪客需 3 秒內懂「這不是一般 podcast 嵌入頁，是互動繪本」。**已做：** 標頭三行 tagline + 合作/許願/留言圓鈕（見 Completed）。**剩餘：** 檢視區塊順序（Header → ContinueBanner → LatestHero → FavoritesSection → StoryFilter），避免「最新集」與列表長期重複同一集；副標清楚傳達「給誰聽、睡前幾分鐘」。
@@ -163,11 +194,11 @@ Vercel 設 `NEXT_PUBLIC_SITE_URL=https://正式網域`。OG／Twitter／RSS／si
 ### 首頁可見的訂閱入口　`P1 · S · 無`　〔eng〕
 `SiteHeader`／`LatestHero` 區附小型訂閱入口（連 `#connect`）。平台連結已設定（`lib/platforms.ts` 含 Apple/Spotify/KKBOX/YouTube）但只在頁尾 → 首屏看不到被誤判「沒有訂閱」。
 
-### ConnectHub 訂閱文案與平台排序　`P1 · S · 無`　〔growth〕
-頁尾「訂閱收聽」加一句價值說明（訂閱後新集自動出現在 Podcast App）；平台順序改 **Spotify、Apple 優先**（對齊 A 多數聽眾）。`components/ConnectHub.tsx`、`lib/platforms.ts` 陣列序。SoundOn／RSS 已移除，勿加回。
+### ~~ConnectHub 訂閱文案與平台排序~~　`P1 · S · 無`　〔growth〕 ✅
+頁尾「訂閱收聽」已加「訂閱後，新集會自動出現在你的 Podcast App」；`lib/platforms.ts` 陣列序為 **Spotify → Apple → KKBOX → YouTube**。`components/ConnectHub.tsx`。SoundOn／RSS 已移除，勿加回。
 
-### 每集分享鈕（複製連結 / LINE 模板）　`P1 · S · 網域`　〔growth〕
-單集頁加「分享這集」：複製連結，可選 LINE 分享文案模板。**OG 預覽圖已備齊**（`lib/story-metadata.ts`），此項只剩分享鈕。B 戰場每則貼文固定連單集。
+### ~~每集分享鈕（複製連結 / LINE）~~　`P1 · S · 網域`　〔growth〕 ✅
+單集頁 `ShareButton`：複製連結 + LINE 分享（`lib/share-story.ts` 組 URL）；可插 `leading` 放收藏鈕。OG 預覽圖已備齊（`lib/story-metadata.ts`）。B 戰場每則貼文固定連單集。
 
 ### 試聽片段 → 平台訂閱橋接　`P1 · M · 無`　〔growth〕
 單集頁加 30–60 秒試聽（裁切 `public/stories/<slug>/` 預覽檔或播放器限制 `currentTime`），突出 CTA 導去平台聽完整版。社群進站者先感受聲音氣質再轉換。
@@ -200,8 +231,8 @@ Vercel 設 `NEXT_PUBLIC_SITE_URL=https://正式網域`。OG／Twitter／RSS／si
 ### 替換真實多頁插畫　`P2 · M · 授權插畫`　〔growth〕
 各集 `public/stories/<slug>/` 佔位圖換成官方插畫，視需要提高 `pageCount`。真實繪本強化「看圖聽故事」睡前儀式感。`pageCount` 與 `01.jpg`～`NN.jpg` 對齊；一圖多句時 `captions` 可多於 `pageCount`（播放器重複封面）。
 
-### 每集「給家長的小提示」/ 節目筆記　`P2 · S · 文案`　〔content+design〕
-詳情頁大綱下加可選「這集可以聊什麼」2–3 句（`data/stories.ts` 加 `parentNote` 欄）。提升信任、利家長轉發 Threads、可與 JSON-LD description 共用。對標 Circle Round show notes。**與 STEM-P3「家長共讀指引」合併規劃，避免重複欄位。**
+### 每集「家長共讀指引」（合併欄位）　`P2 · S · 文案`　〔content+design+stem〕
+**單一資料欄 `parentGuide`**（取代分散的 `parentNote` 構想）：詳情頁大綱下可選區塊，含 ①「這集可以聊什麼」2–3 句 ② 1–2 個可延伸到現實的提問／小活動（對標睡前共讀、Circle Round show notes）。可與 JSON-LD `description` 共用摘要句。**STEM-P3「家長共讀指引」與此為同一任務**，P3 僅加儀表板呈現或列印物連結，不再新增第二欄位。
 
 ### 字幕人名校對　`P2 · S/集 · 無`　〔content〕
 EP1–7 已用 `large-v3` 轉錄 + 自動簡轉繁（`data/subtitles/*.json`）。**剩**：校對品牌/人名誤聽——Bonbon→寶寶、馬米→媽咪等（Whisper 無從得知），直接改側車 JSON。屬資料校對、非工程。
@@ -215,8 +246,8 @@ EP1–7 已用 `large-v3` 轉錄 + 自動簡轉繁（`data/subtitles/*.json`）�
 ### 壓縮 podcast 音檔　`P2 · S · 無`　〔content〕
 ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–10MB，總 50MB+）。睡前=手機弱網，載入慢。指令見 README；壓後本機聽確認音質再覆蓋。
 
-### 家長放大閱讀（縮放決策）　`P2 · S–M · 產品決策`　〔design〕
-目前 `maximumScale:1, userScalable:false` 鎖縮放，與 DESIGN.md「允許縮放」衝突。二選一：① 放寬縮放（接受孩子誤觸）② 設定內「大字模式」只放大說明/字幕。與 WCAG 對比修復互補；需實機驗證 3–5 歲。
+### ~~家長放大閱讀（viewport 縮放）~~　`P2 · S · 產品決策`　〔design〕 ✅
+**已決並實作：** `app/layout.tsx` 移除 `maximumScale`／`userScalable: false`，開放 pinch-zoom，家長共讀可放大文字／插圖（WCAG 1.4.4）。**剩餘（可選）：** 實機驗證 3–5 歲誤觸縮放是否影響操作；若困擾再評估「大字模式」而非重新鎖縮放。`DESIGN.md` viewport 段落待同步為「已開放縮放」。
 
 ### 篩選 chip 觸控與鍵盤順序　`P2 · S · 無`　〔design〕
 實機確認車種 chip 觸控區 ≥ 44×44px；Tab 順序：主 CTA → chip 列 → 第一張故事卡。兒童/家長多觸控，鍵盤使用者需可「選車種 → 開第一集」。`StoryFilter` 已用 `<button>`，`globals.css` 有 `:focus-visible`。
@@ -269,6 +300,18 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 
 ## Completed
 
+### 每集分享鈕 + ConnectHub 訂閱優化
+單集頁 `ShareButton`（複製連結、LINE）；收藏鈕可同排 `leading`。ConnectHub「訂閱後，新集會自動出現在你的 Podcast App」；`lib/platforms.ts` Spotify／Apple 優先排序。
+**Completed:** main（2026-06）
+
+### Viewport 開放縮放
+`app/layout.tsx` 移除鎖縮放，家長可 pinch-zoom 放大共讀內容。
+**Completed:** main（2026-06）
+
+### Sitemap 擴充（遊樂園 + 法律頁）
+`app/sitemap.ts` 含 `/games`、各遊戲子頁、`/legal`。
+**Completed:** main（2026-06）
+
 ### 遊樂園小遊戲 hub + 4 款原創遊戲 + 黏土風視覺
 `/games` 目錄卡（車車吃星星、怪獸卡車溫柔任務、車車大冒險橫向過關、繽紛方塊）；首頁馬卡龍「去遊樂園玩」入口；卡片黏土風 SVG 縮圖（`GameThumbArt`、`lib/games/clay-svg.ts`）。各遊戲：觸控、localStorage 最佳分、`prefers-reduced-motion`、暫停。
 **Completed:** main（2026-06）
@@ -285,11 +328,9 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 字幕從翻頁解耦：存側車檔 `data/subtitles/<slug>.json`（`lib/subtitles.ts` 載入、播放器依音檔時間顯示、獨立翻頁；無側車則回退舊邏輯）。轉錄核心 `scripts/lib/transcribe-core.ts`（ffmpeg→whisper.cpp、**自動簡轉繁 OpenCC**、濾幻覺鳴謝），CLI `npm run transcribe -- <slug...|--all|--convert>`。Apple 同步下載新集後自動轉錄（有 whisper 才跑，CI/缺模型自動跳過，`SKIP_TRANSCRIBE=1` 可關）。EP1–7 已用 `large-v3` 產繁中字幕（人名校對見 P2）。音檔不外送、零金鑰；`models/` gitignore。
 **Completed:** main（2026-06）
 
-### 即時字幕機制 + 字幕對時模式（頁綁定，舊式）
-
-### 即時字幕機制 + 字幕對時模式
-`Story` 加選填 `captionTimes`（每句起始秒數）；播放器有提供時精準換句（插圖同步），未提供回退時長平均切換（向下相容）。新增 `?cue=1` 對時模式：邊聽邊記每句秒數、複製貼回資料。播放頁維持 SSG。檔案：`data/stories.ts`、`components/StoryPlayer.tsx`、`app/story/[slug]/play/page.tsx`、README。
-**Completed:** main（2026-06，逐集 captionTimes 待補，見 P2）
+### 即時字幕機制 + 字幕對時模式（頁綁定 captionTimes，舊式）
+`Story` 加選填 `captionTimes`（每句起始秒數）；播放器有提供時精準換句（插圖同步），未提供回退時長平均切換。`?cue=1` 對時模式邊聽邊記秒數。後續已由「逐字即時字幕框架 + 側車 JSON」取代為主路徑；`captionTimes` 仍向下相容。檔案：`data/stories.ts`、`components/StoryPlayer.tsx`、`app/story/[slug]/play/page.tsx`。
+**Completed:** main（2026-06）
 
 ### 首頁標頭：三行 tagline + 合作/許願/留言 圓鈕
 標頭單行副標 → 三行 tagline（用車車故事陪伴孩子成長／融合生活中事件及發揮想像出發／一起探險、學習、勇敢闖關！）；新增三顆圓鈕（連結由 `SiteHeader.tsx` 頂部 `ACTIONS` 陣列維護），維持手繪黏土風與 WCAG 對比；重生中文字型子集含新字。
