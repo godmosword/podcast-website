@@ -1,0 +1,993 @@
+"use client";
+
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  type CSSProperties,
+  type ReactNode,
+  type PointerEvent,
+} from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+
+const TILE = 36;
+const VW = 720;
+const VH = 432;
+const ROWS = 12;
+const GRAV = 2000;
+const MOVE = 1700;
+const MAXVX = 235;
+const FRICTION = 1600;
+const JUMP = 720;
+const MAXFALL = 920;
+const COYOTE = 0.09;
+const BUFFER = 0.12;
+const BOUNCE = 440;
+const INVULN = 1.4;
+const BEST_KEY = "car-adventure-best";
+
+type Status = "ready" | "playing" | "paused" | "won" | "over";
+interface Input {
+  left: boolean;
+  right: boolean;
+  jump: boolean;
+}
+interface Player {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  vx: number;
+  vy: number;
+  onGround: boolean;
+  facing: number;
+  coyote: number;
+  jumpBuf: number;
+  jumpHeld: boolean;
+  jumpCut: boolean;
+  invuln: number;
+}
+interface Enemy {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  vx: number;
+  dir: number;
+  alive: boolean;
+}
+interface Coin {
+  x: number;
+  y: number;
+  taken: boolean;
+}
+interface Finish {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+interface Level {
+  solid: Set<string>;
+  spikes: Set<string>;
+  coins: Coin[];
+  enemies: Enemy[];
+  cols: number;
+  worldW: number;
+  worldH: number;
+  start: { x: number; y: number };
+  finish: Finish;
+  total: number;
+}
+interface GameState {
+  lv: Level;
+  player: Player;
+  cam: number;
+  score: number;
+  lives: number;
+  taken: number;
+  input: Input;
+  last: number | null;
+}
+
+const approach = (v: number, target: number, amt: number) =>
+  v > target ? Math.max(target, v - amt) : Math.min(target, v + amt);
+
+function buildLevel(): Level {
+  const solid = new Set<string>();
+  const spikes = new Set<string>();
+  const coins: Coin[] = [];
+  const enemies: Enemy[] = [];
+  const S = (x: number, y: number) => solid.add(`${x},${y}`);
+  const ground = (a: number, b: number) => {
+    for (let x = a; x <= b; x++) {
+      S(x, 10);
+      S(x, 11);
+    }
+  };
+  const plat = (a: number, b: number, r: number) => {
+    for (let x = a; x <= b; x++) S(x, r);
+  };
+  const coin = (x: number, y: number) =>
+    coins.push({ x: x * TILE + TILE / 2, y: y * TILE + TILE / 2, taken: false });
+  const coinRow = (a: number, b: number, y: number) => {
+    for (let x = a; x <= b; x++) coin(x, y);
+  };
+  const spike = (x: number, y: number) => spikes.add(`${x},${y}`);
+  const enemy = (x: number, y: number) =>
+    enemies.push({
+      x: x * TILE + 3,
+      y: y * TILE + (TILE - 24),
+      w: 30,
+      h: 24,
+      vx: 62,
+      dir: -1,
+      alive: true,
+    });
+
+  ground(0, 13);
+  ground(17, 29);
+  ground(32, 49);
+  ground(52, 89);
+  ground(92, 107);
+  plat(5, 8, 7);
+  plat(20, 24, 7);
+  plat(36, 40, 6);
+  S(42, 9);
+  S(43, 8);
+  S(44, 7);
+  plat(45, 48, 6);
+  plat(56, 60, 7);
+  plat(64, 68, 5);
+  spike(70, 9);
+  spike(71, 9);
+  spike(72, 9);
+  coinRow(5, 8, 6);
+  coinRow(14, 16, 7);
+  coinRow(20, 24, 6);
+  coinRow(36, 40, 5);
+  coin(43, 7);
+  coin(44, 6);
+  coinRow(45, 48, 5);
+  coinRow(56, 60, 6);
+  coinRow(64, 68, 4);
+  coinRow(78, 82, 9);
+  coinRow(95, 100, 9);
+  enemy(24, 9);
+  enemy(40, 9);
+  enemy(60, 9);
+  enemy(82, 9);
+
+  const cols = 108;
+  return {
+    solid,
+    spikes,
+    coins,
+    enemies,
+    cols,
+    worldW: cols * TILE,
+    worldH: ROWS * TILE,
+    start: { x: 2 * TILE, y: 9 * TILE - 2 },
+    finish: { x: 104 * TILE, y: 8 * TILE, w: TILE, h: 2 * TILE },
+    total: coins.length,
+  };
+}
+
+const primaryBtn: CSSProperties = {
+  marginTop: 4,
+  border: "none",
+  background: "linear-gradient(180deg,#ffd23f,#ffa600)",
+  color: "#4a2c00",
+  fontWeight: 800,
+  fontSize: 20,
+  padding: "12px 30px",
+  borderRadius: 16,
+  cursor: "pointer",
+  boxShadow: "0 5px 0 #b97600",
+};
+
+export default function CarPlatformer() {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const game = useRef<GameState | null>(null);
+  const actx = useRef<AudioContext | null>(null);
+  const soundOn = useRef(true);
+  const statusRef = useRef<Status>("ready");
+  const reducedRef = useRef(false);
+  const bestRef = useRef(0);
+  const reduced = useReducedMotion();
+
+  const [status, setStatus] = useState<Status>("ready");
+  const [soundUi, setSoundUi] = useState(true);
+  const [best, setBest] = useState(0);
+
+  useEffect(() => {
+    reducedRef.current = reduced;
+  }, [reduced]);
+
+  useEffect(() => {
+    try {
+      const v = window.localStorage.getItem(BEST_KEY);
+      if (v) {
+        const n = parseInt(v, 10) || 0;
+        bestRef.current = n;
+        setBest(n);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const setStat = useCallback((s: Status) => {
+    if (
+      (s === "won" || s === "over") &&
+      game.current &&
+      game.current.score > bestRef.current
+    ) {
+      bestRef.current = game.current.score;
+      setBest(game.current.score);
+      try {
+        window.localStorage.setItem(BEST_KEY, String(game.current.score));
+      } catch {
+        /* ignore */
+      }
+    }
+    statusRef.current = s;
+    setStatus(s);
+  }, []);
+
+  const ensureAudio = () => {
+    if (!actx.current) {
+      try {
+        const W = window as Window & {
+          webkitAudioContext?: typeof AudioContext;
+        };
+        const Ctx = window.AudioContext ?? W.webkitAudioContext;
+        if (Ctx) actx.current = new Ctx();
+      } catch {
+        /* ignore */
+      }
+    }
+    if (actx.current?.state === "suspended") actx.current.resume();
+  };
+
+  const tone = (
+    freq: number,
+    dur: number,
+    type: OscillatorType = "square",
+    vol = 0.05,
+  ) => {
+    const ac = actx.current;
+    if (!soundOn.current || !ac) return;
+    try {
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.type = type;
+      o.frequency.value = freq;
+      g.gain.value = vol;
+      o.connect(g);
+      g.connect(ac.destination);
+      o.start();
+      g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + dur);
+      o.stop(ac.currentTime + dur);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const sJump = () => tone(520, 0.12, "square", 0.04);
+  const sCoin = () => tone(880, 0.08, "triangle", 0.05);
+  const sStomp = () => tone(300, 0.1, "square", 0.05);
+  const sHurt = () => tone(180, 0.3, "sawtooth", 0.06);
+  const sWin = () =>
+    [523, 659, 784, 1046].forEach((f, i) =>
+      setTimeout(() => tone(f, 0.2, "triangle", 0.06), i * 130),
+    );
+
+  const reset = useCallback(() => {
+    const lv = buildLevel();
+    game.current = {
+      lv,
+      player: {
+        x: lv.start.x,
+        y: lv.start.y,
+        w: 30,
+        h: 26,
+        vx: 0,
+        vy: 0,
+        onGround: false,
+        facing: 1,
+        coyote: 0,
+        jumpBuf: 0,
+        jumpHeld: false,
+        jumpCut: false,
+        invuln: 0,
+      },
+      cam: 0,
+      score: 0,
+      lives: 3,
+      taken: 0,
+      input: { left: false, right: false, jump: false },
+      last: null,
+    };
+  }, []);
+
+  const begin = useCallback(() => {
+    ensureAudio();
+    reset();
+    setStat("playing");
+  }, [reset, setStat]);
+
+  const togglePause = useCallback(() => {
+    if (statusRef.current === "playing") setStat("paused");
+    else if (statusRef.current === "paused") {
+      if (game.current) game.current.last = null;
+      setStat("playing");
+    }
+  }, [setStat]);
+
+  const solidAt = (g: GameState, tx: number, ty: number) =>
+    g.lv.solid.has(`${tx},${ty}`);
+
+  const collide = (g: GameState, axis: "x" | "y") => {
+    const p = g.player;
+    const x0 = Math.floor(p.x / TILE);
+    const x1 = Math.floor((p.x + p.w - 0.01) / TILE);
+    const y0 = Math.floor(p.y / TILE);
+    const y1 = Math.floor((p.y + p.h - 0.01) / TILE);
+    for (let ty = y0; ty <= y1; ty++) {
+      for (let tx = x0; tx <= x1; tx++) {
+        if (!solidAt(g, tx, ty)) continue;
+        if (axis === "x") {
+          if (p.vx > 0) p.x = tx * TILE - p.w;
+          else if (p.vx < 0) p.x = (tx + 1) * TILE;
+          p.vx = 0;
+          return;
+        }
+        if (p.vy > 0) {
+          p.y = ty * TILE - p.h;
+          p.onGround = true;
+        } else if (p.vy < 0) p.y = (ty + 1) * TILE;
+        p.vy = 0;
+        return;
+      }
+    }
+  };
+
+  const overlapsTileSet = (
+    set: Set<string>,
+    box: { l: number; r: number; t: number; b: number },
+  ) => {
+    const x0 = Math.floor(box.l / TILE);
+    const x1 = Math.floor((box.r - 0.01) / TILE);
+    const y0 = Math.floor(box.t / TILE);
+    const y1 = Math.floor((box.b - 0.01) / TILE);
+    for (let ty = y0; ty <= y1; ty++)
+      for (let tx = x0; tx <= x1; tx++)
+        if (set.has(`${tx},${ty}`)) return true;
+    return false;
+  };
+
+  const die = (g: GameState) => {
+    sHurt();
+    g.lives--;
+    if (g.lives <= 0) {
+      setStat("over");
+      return;
+    }
+    const p = g.player;
+    p.x = g.lv.start.x;
+    p.y = g.lv.start.y;
+    p.vx = 0;
+    p.vy = 0;
+    p.invuln = INVULN;
+    g.cam = 0;
+  };
+
+  const update = (g: GameState, dt: number) => {
+    const p = g.player;
+    const inp = g.input;
+    if (inp.left && !inp.right) {
+      p.vx = Math.max(-MAXVX, p.vx - MOVE * dt);
+      p.facing = -1;
+    } else if (inp.right && !inp.left) {
+      p.vx = Math.min(MAXVX, p.vx + MOVE * dt);
+      p.facing = 1;
+    } else p.vx = approach(p.vx, 0, FRICTION * dt);
+
+    p.jumpBuf -= dt;
+    p.coyote -= dt;
+    if (inp.jump && !p.jumpHeld) {
+      p.jumpBuf = BUFFER;
+      p.jumpHeld = true;
+    }
+    if (!inp.jump) {
+      if (p.jumpHeld && p.vy < 0 && !p.jumpCut) {
+        p.vy *= 0.45;
+        p.jumpCut = true;
+      }
+      p.jumpHeld = false;
+    }
+    if (p.jumpBuf > 0 && (p.onGround || p.coyote > 0)) {
+      p.vy = -JUMP;
+      p.onGround = false;
+      p.coyote = 0;
+      p.jumpBuf = 0;
+      p.jumpCut = false;
+      sJump();
+    }
+    p.vy = Math.min(MAXFALL, p.vy + GRAV * dt);
+
+    p.x += p.vx * dt;
+    collide(g, "x");
+    p.y += p.vy * dt;
+    p.onGround = false;
+    collide(g, "y");
+    if (p.onGround) p.coyote = COYOTE;
+    if (p.invuln > 0) p.invuln -= dt;
+
+    const box = { l: p.x, r: p.x + p.w, t: p.y, b: p.y + p.h };
+    if (overlapsTileSet(g.lv.spikes, box)) return die(g);
+    if (p.y > g.lv.worldH + 80) return die(g);
+
+    for (const c of g.lv.coins) {
+      if (c.taken) continue;
+      if (
+        Math.abs(c.x - (p.x + p.w / 2)) < 20 &&
+        Math.abs(c.y - (p.y + p.h / 2)) < 22
+      ) {
+        c.taken = true;
+        g.taken++;
+        g.score += 100;
+        sCoin();
+      }
+    }
+
+    for (const e of g.lv.enemies) {
+      if (!e.alive) continue;
+      e.x += e.vx * e.dir * dt;
+      const footTx = Math.floor((e.x + (e.dir > 0 ? e.w + 2 : -2)) / TILE);
+      const footTy = Math.floor((e.y + e.h + 2) / TILE);
+      const wallTy = Math.floor((e.y + e.h / 2) / TILE);
+      const wallTx = Math.floor((e.x + (e.dir > 0 ? e.w + 1 : -1)) / TILE);
+      if (!solidAt(g, footTx, footTy) || solidAt(g, wallTx, wallTy)) {
+        e.dir *= -1;
+        e.x += e.vx * e.dir * dt;
+      }
+      if (
+        box.r > e.x &&
+        box.l < e.x + e.w &&
+        box.b > e.y &&
+        box.t < e.y + e.h
+      ) {
+        if (p.vy > 0 && box.b - e.y < 18) {
+          e.alive = false;
+          p.vy = -BOUNCE;
+          g.score += 200;
+          sStomp();
+        } else if (p.invuln <= 0) return die(g);
+      }
+    }
+
+    const f = g.lv.finish;
+    if (box.r > f.x && box.l < f.x + f.w) {
+      sWin();
+      setStat("won");
+    }
+
+    g.cam = Math.max(
+      0,
+      Math.min(g.lv.worldW - VW, p.x + p.w / 2 - VW / 2),
+    );
+  };
+
+  const rr = (
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    r: number,
+  ) => {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  };
+
+  const cloud = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
+    ctx.beginPath();
+    ctx.arc(x, y, 16, 0, Math.PI * 2);
+    ctx.arc(x + 18, y + 4, 13, 0, Math.PI * 2);
+    ctx.arc(x - 16, y + 5, 12, 0, Math.PI * 2);
+    ctx.fill();
+  };
+
+  const drawCar = (
+    ctx: CanvasRenderingContext2D,
+    sx: number,
+    sy: number,
+    w: number,
+    h: number,
+    body: string,
+    roof: string,
+    facing: number,
+  ) => {
+    ctx.save();
+    ctx.translate(sx + w / 2, sy + h / 2);
+    if (facing < 0) ctx.scale(-1, 1);
+    ctx.translate(-w / 2, -h / 2);
+    ctx.fillStyle = "rgba(0,0,0,.18)";
+    ctx.beginPath();
+    ctx.ellipse(w / 2, h + 2, w / 2, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#222831";
+    [w * 0.27, w * 0.75].forEach((wx) => {
+      ctx.beginPath();
+      ctx.arc(wx, h - 3, 6, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.fillStyle = "#9aa3b2";
+    [w * 0.27, w * 0.75].forEach((wx) => {
+      ctx.beginPath();
+      ctx.arc(wx, h - 3, 2.4, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.fillStyle = body;
+    rr(ctx, 1, h * 0.4, w - 2, h * 0.45, 6);
+    ctx.fill();
+    ctx.fillStyle = roof;
+    rr(ctx, w * 0.28, h * 0.1, w * 0.46, h * 0.4, 6);
+    ctx.fill();
+    ctx.fillStyle = "#bfe8ff";
+    rr(ctx, w * 0.34, h * 0.17, w * 0.34, h * 0.26, 4);
+    ctx.fill();
+    ctx.fillStyle = "#fff3b0";
+    ctx.beginPath();
+    ctx.arc(w - 4, h * 0.6, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  };
+
+  const render = (ctx: CanvasRenderingContext2D, g: GameState) => {
+    const cam = g.cam;
+    const px = reducedRef.current ? 0 : cam;
+    const sky = ctx.createLinearGradient(0, 0, 0, VH);
+    sky.addColorStop(0, "#8fd3ff");
+    sky.addColorStop(1, "#dff3ff");
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, VW, VH);
+    ctx.fillStyle = "rgba(255,255,255,.85)";
+    for (let i = 0; i < 8; i++) {
+      const cx =
+        (((i * 260 - px * 0.2) % (VW + 260)) + (VW + 260)) % (VW + 260) - 130;
+      cloud(ctx, cx, 50 + (i % 3) * 36);
+    }
+    ctx.fillStyle = "#7fc98a";
+    for (let i = 0; i < 12; i++) {
+      const hx =
+        (((i * 220 - px * 0.45) % (VW + 220)) + (VW + 220)) % (VW + 220) -
+        110;
+      ctx.beginPath();
+      ctx.moveTo(hx, VH);
+      ctx.quadraticCurveTo(hx + 110, VH - 150, hx + 220, VH);
+      ctx.fill();
+    }
+
+    const tx0 = Math.floor(cam / TILE) - 1;
+    const tx1 = Math.floor((cam + VW) / TILE) + 1;
+    for (let ty = 0; ty < ROWS; ty++)
+      for (let tx = tx0; tx <= tx1; tx++) {
+        if (!g.lv.solid.has(`${tx},${ty}`)) continue;
+        const sx = tx * TILE - cam;
+        const sy = ty * TILE;
+        ctx.fillStyle = "#7a5230";
+        ctx.fillRect(sx, sy, TILE, TILE);
+        ctx.fillStyle = "rgba(0,0,0,.08)";
+        ctx.fillRect(sx, sy + TILE - 4, TILE, 4);
+        if (!g.lv.solid.has(`${tx},${ty - 1}`)) {
+          ctx.fillStyle = "#5fc15f";
+          ctx.fillRect(sx, sy, TILE, 9);
+          ctx.fillStyle = "#4aa84a";
+          ctx.fillRect(sx, sy + 9, TILE, 3);
+        }
+      }
+
+    ctx.fillStyle = "#b9c0cc";
+    for (const key of g.lv.spikes) {
+      const [tx, ty] = key.split(",").map(Number);
+      const sx = tx * TILE - cam;
+      const sy = ty * TILE;
+      for (let k = 0; k < 3; k++) {
+        ctx.beginPath();
+        ctx.moveTo(sx + k * 12, sy + TILE);
+        ctx.lineTo(sx + k * 12 + 6, sy + 10);
+        ctx.lineTo(sx + k * 12 + 12, sy + TILE);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    for (const c of g.lv.coins) {
+      if (c.taken) continue;
+      const sx = c.x - cam;
+      ctx.fillStyle = "#ffc107";
+      ctx.beginPath();
+      ctx.arc(sx, c.y, 9, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#ffe27a";
+      ctx.beginPath();
+      ctx.arc(sx - 2, c.y - 2, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    const f = g.lv.finish;
+    const fx = f.x - cam;
+    ctx.fillStyle = "#888";
+    ctx.fillRect(fx + TILE / 2 - 2, f.y - 8, 4, f.h + 8);
+    for (let i = 0; i < 4; i++)
+      for (let j = 0; j < 3; j++) {
+        ctx.fillStyle = (i + j) % 2 ? "#fff" : "#ff5252";
+        ctx.fillRect(fx + TILE / 2 + 2 + j * 8, f.y - 6 + i * 8, 8, 8);
+      }
+
+    for (const e of g.lv.enemies)
+      if (e.alive)
+        drawCar(ctx, e.x - cam, e.y, e.w, e.h, "#ff6b6b", "#d64545", e.dir);
+
+    const p = g.player;
+    if (!(p.invuln > 0 && Math.floor(p.invuln * 12) % 2))
+      drawCar(ctx, p.x - cam, p.y, p.w, p.h, "#ffd23f", "#e0a800", p.facing);
+
+    ctx.fillStyle = "rgba(0,0,0,.35)";
+    rr(ctx, 12, 12, 200, 34, 10);
+    ctx.fill();
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 18px system-ui, sans-serif";
+    ctx.textBaseline = "middle";
+    ctx.fillText(`⭐ ${g.score}`, 24, 30);
+    ctx.fillText(`🪙 ${g.taken}/${g.lv.total}`, 100, 30);
+    ctx.fillText(`❤️ ${g.lives}`, 178, 30);
+  };
+
+  useEffect(() => {
+    reset();
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = VW * dpr;
+    canvas.height = VH * dpr;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.scale(dpr, dpr);
+    let raf = 0;
+    const loop = (t: number) => {
+      const g = game.current;
+      if (g) {
+        if (g.last == null) g.last = t;
+        let dt = (t - g.last) / 1000;
+        g.last = t;
+        if (dt > 0.033) dt = 0.033;
+        if (statusRef.current === "playing") update(g, dt);
+        render(ctx, g);
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reset]);
+
+  useEffect(() => {
+    if (status === "playing" && game.current) game.current.last = null;
+  }, [status]);
+
+  useEffect(() => {
+    const onVis = () => {
+      if (document.hidden && statusRef.current === "playing") setStat("paused");
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, [setStat]);
+
+  useEffect(() => {
+    const set = (k: string, v: boolean) => {
+      const g = game.current;
+      if (!g) return;
+      if (k === "ArrowLeft" || k === "a" || k === "A") g.input.left = v;
+      else if (k === "ArrowRight" || k === "d" || k === "D") g.input.right = v;
+      else if (k === "ArrowUp" || k === "w" || k === "W" || k === " ")
+        g.input.jump = v;
+    };
+    const onDown = (e: KeyboardEvent) => {
+      if (["ArrowLeft", "ArrowRight", "ArrowUp", " "].includes(e.key))
+        e.preventDefault();
+      const s = statusRef.current;
+      if (
+        (s === "ready" || s === "won" || s === "over") &&
+        (e.key === " " || e.key === "Enter")
+      ) {
+        begin();
+        return;
+      }
+      if (
+        (e.key === "p" || e.key === "P") &&
+        (s === "playing" || s === "paused")
+      ) {
+        togglePause();
+        return;
+      }
+      if (s !== "playing") return;
+      set(e.key, true);
+    };
+    const onUp = (e: KeyboardEvent) => set(e.key, false);
+    window.addEventListener("keydown", onDown);
+    window.addEventListener("keyup", onUp);
+    return () => {
+      window.removeEventListener("keydown", onDown);
+      window.removeEventListener("keyup", onUp);
+    };
+  }, [begin, togglePause]);
+
+  const hold =
+    (key: keyof Input, v: boolean) => () => {
+      const g = game.current;
+      if (g) g.input[key] = v;
+    };
+
+  const toggleSound = () => {
+    soundOn.current = !soundOn.current;
+    setSoundUi(soundOn.current);
+  };
+
+  return (
+    <div
+      style={{
+        maxWidth: 760,
+        margin: "0 auto",
+        fontFamily:
+          "var(--font-sans,'PingFang TC','Microsoft JhengHei',system-ui,sans-serif)",
+        userSelect: "none",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 10,
+          gap: 8,
+          flexWrap: "wrap",
+        }}
+      >
+        <div style={{ fontSize: 22, fontWeight: 800, color: "#15428f" }}>
+          🏁 車車大冒險
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {best > 0 && (
+            <span
+              style={{ fontSize: 14, fontWeight: 700, color: "#3a5a8c" }}
+              aria-label={`最佳得分 ${best}`}
+            >
+              最佳 ⭐ {best}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={togglePause}
+            aria-label={status === "paused" ? "繼續遊戲" : "暫停"}
+            disabled={
+              status === "ready" || status === "won" || status === "over"
+            }
+            style={{
+              border: "none",
+              background: "#eef3fb",
+              borderRadius: 11,
+              width: 40,
+              height: 40,
+              fontSize: 16,
+              cursor: "pointer",
+            }}
+          >
+            {status === "paused" ? "▶" : "⏸"}
+          </button>
+          <button
+            type="button"
+            onClick={toggleSound}
+            aria-label={soundUi ? "關閉音效" : "開啟音效"}
+            style={{
+              border: "none",
+              background: "#eef3fb",
+              borderRadius: 11,
+              width: 40,
+              height: 40,
+              fontSize: 18,
+              cursor: "pointer",
+            }}
+          >
+            {soundUi ? "🔊" : "🔇"}
+          </button>
+        </div>
+      </div>
+
+      <div
+        style={{
+          position: "relative",
+          borderRadius: 16,
+          overflow: "hidden",
+          boxShadow: "0 16px 36px rgba(40,90,160,.25)",
+        }}
+      >
+        <canvas
+          ref={canvasRef}
+          style={{
+            width: "100%",
+            display: "block",
+            aspectRatio: `${VW} / ${VH}`,
+            background: "#8fd3ff",
+          }}
+        />
+        {status !== "playing" && (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "rgba(12,20,40,.74)",
+              backdropFilter: "blur(2px)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 12,
+              color: "#fff",
+              textAlign: "center",
+              padding: 20,
+            }}
+          >
+            <div style={{ fontSize: 44 }}>
+              {status === "won"
+                ? "🏆"
+                : status === "over"
+                  ? "💥"
+                  : status === "paused"
+                    ? "⏸"
+                    : "🏁"}
+            </div>
+            <div style={{ fontSize: 24, fontWeight: 800 }}>
+              {status === "won"
+                ? "抵達終點！"
+                : status === "over"
+                  ? "再試一次吧"
+                  : status === "paused"
+                    ? "暫停中"
+                    : "車車大冒險"}
+            </div>
+            {(status === "won" || status === "over") && game.current && (
+              <div style={{ fontSize: 16 }}>得分 ⭐ {game.current.score}</div>
+            )}
+            {status === "ready" && (
+              <div
+                style={{
+                  fontSize: 14,
+                  color: "#cdd9f0",
+                  maxWidth: 320,
+                  lineHeight: 1.6,
+                }}
+              >
+                方向鍵移動、上鍵/空白鍵跳；按住跳越久跳越高。踩在搗蛋車頭上可以彈飛它，吃金幣、躲尖刺、衝向終點旗！
+              </div>
+            )}
+            {status === "paused" ? (
+              <button type="button" onClick={togglePause} style={primaryBtn}>
+                繼續 ▶
+              </button>
+            ) : (
+              <button type="button" onClick={begin} style={primaryBtn}>
+                {status === "ready" ? "開始冒險 ▶" : "再玩一次 🔁"}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginTop: 16,
+          gap: 10,
+        }}
+      >
+        <div style={{ display: "flex", gap: 10 }}>
+          <TouchBtn
+            label="左"
+            onDown={hold("left", true)}
+            onUp={hold("left", false)}
+          >
+            ⬅️
+          </TouchBtn>
+          <TouchBtn
+            label="右"
+            onDown={hold("right", true)}
+            onUp={hold("right", false)}
+          >
+            ➡️
+          </TouchBtn>
+        </div>
+        <TouchBtn
+          label="跳"
+          big
+          onDown={hold("jump", true)}
+          onUp={hold("jump", false)}
+        >
+          ⬆️ 跳
+        </TouchBtn>
+      </div>
+
+      <p
+        style={{
+          textAlign: "center",
+          color: "#3a5a8c",
+          fontSize: 13,
+          marginTop: 10,
+        }}
+      >
+        ← → / A D 移動 · ↑ / W / 空白鍵 跳（可變高度）· 踩敵人頭可彈飛 · P
+        暫停
+      </p>
+    </div>
+  );
+}
+
+function TouchBtn({
+  children,
+  label,
+  big,
+  onDown,
+  onUp,
+}: {
+  children: ReactNode;
+  label: string;
+  big?: boolean;
+  onDown: () => void;
+  onUp: () => void;
+}) {
+  const d = (e: PointerEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    onDown();
+  };
+  const u = (e: PointerEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    onUp();
+  };
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      onPointerDown={d}
+      onPointerUp={u}
+      onPointerLeave={u}
+      onPointerCancel={u}
+      style={{
+        border: "none",
+        background: big
+          ? "linear-gradient(180deg,#5bd0ff,#2f9fe0)"
+          : "#fff",
+        color: big ? "#06324a" : "#333",
+        borderRadius: 16,
+        minWidth: big ? 130 : 64,
+        height: 64,
+        fontSize: big ? 22 : 26,
+        fontWeight: 800,
+        cursor: "pointer",
+        boxShadow: "0 4px 0 rgba(0,0,0,.2)",
+        touchAction: "none",
+      }}
+    >
+      {children}
+    </button>
+  );
+}

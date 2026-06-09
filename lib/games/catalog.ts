@@ -28,6 +28,15 @@ export const GAMES: GameCatalogEntry[] = [
     ageRange: "3–7 歲",
   },
   {
+    id: "car-adventure",
+    title: "車車大冒險",
+    desc: "橫向跑跳過關：吃金幣、踩搗蛋車、躲尖刺、衝向終點旗。",
+    href: "/games/car-adventure",
+    emoji: "🏁",
+    accent: "var(--c-sky)",
+    ageRange: "5–12 歲",
+  },
+  {
     id: "block-drop",
     title: "繽紛方塊",
     desc: "排滿整行就消除，挑戰最高分。",
