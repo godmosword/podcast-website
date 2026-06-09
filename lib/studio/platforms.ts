@@ -1,3 +1,4 @@
+import { BRAND_COLORS } from "@/lib/connect-icons";
 import type { PlatformIcon } from "@/lib/platforms";
 import { visiblePlatforms } from "@/lib/platforms";
 
@@ -20,7 +21,7 @@ const STUDIO_PLATFORMS: StudioPlatform[] = [
     label: "Spotify for Podcasters",
     hint: "收聽數 · 完聽率 · 訂閱來源",
     analyticsUrl: "https://podcasters.spotify.com/",
-    color: "#1DB954",
+    color: BRAND_COLORS.spotify,
     icon: "spotify",
     listenPlatformLabel: "Spotify",
   },
@@ -29,7 +30,7 @@ const STUDIO_PLATFORMS: StudioPlatform[] = [
     label: "Apple Podcasts Connect",
     hint: "播放次數 · 聽眾 · 追蹤者",
     analyticsUrl: "https://podcastsconnect.apple.com/",
-    color: "#9933CC",
+    color: BRAND_COLORS.applePodcasts,
     icon: "apple",
     listenPlatformLabel: "Apple Podcasts",
   },
@@ -46,7 +47,7 @@ const STUDIO_PLATFORMS: StudioPlatform[] = [
     label: "KKBOX Podcast",
     hint: "頻道數據 · 收聽表現",
     analyticsUrl: "https://podcast.kkbox.com/tw/",
-    color: "#0073E6",
+    color: BRAND_COLORS.kkbox,
     icon: "kkbox",
     listenPlatformLabel: "KKBOX",
   },
@@ -55,7 +56,7 @@ const STUDIO_PLATFORMS: StudioPlatform[] = [
     label: "YouTube Studio",
     hint: "播放清單觀看 · 訂閱 · 流量來源",
     analyticsUrl: "https://studio.youtube.com/",
-    color: "#FF0000",
+    color: BRAND_COLORS.youtube,
     icon: "youtube",
     listenPlatformLabel: "YouTube",
   },

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  BrandSvg,
   PLATFORM_ICON_PATHS,
   SOCIAL_ICON_PATHS,
 } from "@/lib/connect-icons";
@@ -88,15 +89,9 @@ export default function ConnectHub({ id = "connect", className }: Props) {
                 ariaLabel={`前往 ${s.label}`}
                 badgeStyle={{ background: s.background }}
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  className={styles.icon}
-                  fill="currentColor"
-                  aria-hidden
-                  focusable="false"
-                >
+                <BrandSvg className={styles.icon}>
                   {SOCIAL_ICON_PATHS[s.icon]}
-                </svg>
+                </BrandSvg>
               </IconLink>
             ))}
           </nav>
@@ -127,15 +122,9 @@ export default function ConnectHub({ id = "connect", className }: Props) {
                 ariaLabel={`在 ${p.label} 收聽`}
                 badgeStyle={{ backgroundColor: p.color }}
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  className={styles.icon}
-                  fill="currentColor"
-                  aria-hidden
-                  focusable="false"
-                >
+                <BrandSvg className={styles.icon}>
                   {PLATFORM_ICON_PATHS[p.icon]}
-                </svg>
+                </BrandSvg>
               </IconLink>
             ))}
           </nav>

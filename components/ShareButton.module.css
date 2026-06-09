@@ -23,17 +23,27 @@
   transition: transform var(--motion-press);
 }
 
+/* LINE 官方組合：白字標 + #06C755 底（指示性分享連結） */
 .line {
-  width: 44px;
-  padding: 0;
+  gap: 6px;
+  padding: 0 14px;
+  min-width: 44px;
   border-color: #06c755;
-  color: #06c755;
+  background: #06c755;
+  color: #fff;
 }
 
 .lineIcon {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   display: block;
+  flex: 0 0 auto;
+}
+
+.lineText {
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
 }
 
 .btn:active {

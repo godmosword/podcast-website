@@ -56,10 +56,34 @@
   }
 }
 
+.legalLink {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  text-decoration: none;
+  opacity: 0.9;
+}
+
+@media (hover: hover) {
+  .legalLink:hover {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}
+
 .copyright {
   margin: 0;
   font-size: 0.8rem;
   color: var(--ink-soft);
+}
+
+.redistribution {
+  margin: 0;
+  max-width: 420px;
+  font-size: 0.72rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  opacity: 0.9;
 }
 
 .support {

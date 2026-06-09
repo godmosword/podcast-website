@@ -1,4 +1,4 @@
-import { PLATFORM_ICON_PATHS } from "@/lib/connect-icons";
+import { BrandSvg, PLATFORM_ICON_PATHS } from "@/lib/connect-icons";
 import { metricsForPlatform } from "@/lib/studio/metrics";
 import {
   listenUrlForStudioPlatform,
@@ -34,12 +34,11 @@ function PlatformBadge({ icon, color }: { icon: StudioIcon; color: string }) {
       </span>
     );
   }
-  const path = PLATFORM_ICON_PATHS[icon];
   return (
     <span className={styles.badge} style={{ backgroundColor: color }}>
-      <svg viewBox="0 0 24 24" aria-hidden>
-        {path}
-      </svg>
+      <BrandSvg className={styles.badgeIcon}>
+        {PLATFORM_ICON_PATHS[icon]}
+      </BrandSvg>
     </span>
   );
 }

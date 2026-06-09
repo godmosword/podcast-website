@@ -1,6 +1,8 @@
 # 免責聲明與內容說明
 
-最後更新：2026-06-03
+最後更新：2026-06-08
+
+> 對外網站請見 [/legal](/legal) 頁面（與本檔同步維護）。
 
 ## 網站性質
 
@@ -9,12 +11,17 @@
 ## 版權與商標
 
 - 節目音檔、插圖、封面、吉祥物、標題與相關文案，其著作權與商標權屬 **Bonbon & 馬米** 或原權利人所有（除非頁面另有標示）。
-- 未經權利人書面同意，請勿以本網站素材進行**再製、公開傳輸、販售**或暗示官方代言之商業用途。
+- **未經權利人書面同意，禁止**以本網站或儲存庫內之節目素材進行**再製、公開傳輸、散布、販售**或暗示官方代言之商業用途。
+- 原始碼儲存庫為**私人**性質；取得程式碼**不**表示取得節目內容之使用授權。
 - 本儲存庫中的**網站程式碼**依 [LICENSE](./LICENSE)（MIT）授權；**節目內容**不在該授權範圍內。
 
 ## 字幕與故事文案
 
-- 播放器上的「字幕跟讀」為依節目大綱改寫的**故事摘要**，**非**逐字稿，可能與實際語音用字略有差異，僅供親子共讀輔助。
+- 播放器上的即時字幕（或故事摘要）可能由本機轉錄或依節目大綱整理，**非**保證與實際語音逐字一致，僅供親子共讀輔助。
+
+## 插圖與 AI 生圖
+
+- 部分劇情插圖由工具輔助產生；產出先進暫存目錄，維護者以 `contact.html` 審圖清單**逐張人工審稿**，通過後才發佈。未通過審核之暫存圖不對外提供。
 
 ## 建議年齡
 
@@ -22,13 +29,18 @@
 
 ## 第三方連結與服務
 
-- 網站上的 Apple Podcasts、Spotify、KKBOX、YouTube、Instagram、Threads 等連結，將導向**第三方平台**；其服務條款、隱私政策與內容由該平台負責，本網站不控制亦不就第三方服務負責。
+- 網站上的 Apple Podcasts、Spotify、KKBOX、YouTube、LINE、Instagram、Threads、Facebook 等連結，將導向**第三方平台**；其服務條款、隱私政策與內容由該平台負責，本網站不控制亦不就第三方服務負責。
+- 各平台名稱與圖示為商標；本網站僅作**指示性連結**，不代表合作或代言關係。
 - RSS（`/feed.xml`）供訂閱本網站彙整之節目資訊；完整收聽體驗仍以各平台與權利人公告為準。
 
 ## 字型
 
-- 中文圓體使用 [justfont 粉圓（jf-open huninn）](https://github.com/justfont/open-huninn-font) 之子集檔，請遵守該字型專案之授權條款。
-- 拉丁字母與數字使用 [Baloo 2](https://fonts.google.com/specimen/Baloo+2)（SIL Open Font License）。
+- 中文圓體使用 [justfont 粉圓（jf-open huninn）](https://github.com/justfont/open-huninn-font) 之子集檔（SIL OFL 1.1），條款見 [app/fonts/OFL-huninn.txt](./app/fonts/OFL-huninn.txt) 與 [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)。
+- 拉丁字母與數字使用 [Baloo 2](https://fonts.google.com/specimen/Baloo+2)、[Gochi Hand](https://fonts.google.com/specimen/Gochi+Hand)（SIL Open Font License，經 Google Fonts 自託管）。
+
+## 本機資料
+
+- 網站可能在瀏覽器 `localStorage` 儲存收藏、繼續播放、遊戲分數等偏好，資料留在使用者裝置上（靜態網站，無伺服器端帳號）。
 
 ## 網站免責
 

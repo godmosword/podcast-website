@@ -1,3 +1,5 @@
+import { BRAND_COLORS } from "@/lib/connect-icons";
+
 // ============================================================
 // 車車遊樂園 — 收聽平台連結（單一資料來源）
 // ============================================================
@@ -27,25 +29,25 @@ const PLATFORMS: Platform[] = [
   {
     label: "Spotify",
     url: "https://open.spotify.com/show/2Ohik6D77MvLTyqHbM6CYt",
-    color: "#1DB954",
+    color: BRAND_COLORS.spotify,
     icon: "spotify",
   },
   {
     label: "Apple Podcasts",
     url: "https://podcasts.apple.com/tw/podcast/%E8%BB%8A%E8%BB%8A%E9%81%8A%E6%A8%82%E5%9C%92/id1896610920",
-    color: "#9933CC",
+    color: BRAND_COLORS.applePodcasts,
     icon: "apple",
   },
   {
     label: "KKBOX",
     url: "https://podcast.kkbox.com/tw/channel/4lgSa7YAwpk6neQme3",
-    color: "#0073E6",
+    color: BRAND_COLORS.kkbox,
     icon: "kkbox",
   },
   {
     label: "YouTube",
     url: "https://www.youtube.com/playlist?list=PLVbyl20K8lOeuJ2ky6dEsmpew7xAxZDhF",
-    color: "#FF0000",
+    color: BRAND_COLORS.youtube,
     icon: "youtube",
   },
 ];

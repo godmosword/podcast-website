@@ -37,7 +37,8 @@ export default function ShareButton({ shareUrl, lineUrl }: ShareButtonProps) {
         className={`${styles.btn} ${styles.line}`}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="LINE 分享"
+        aria-label="以 LINE 分享"
+        title="以 LINE 分享"
       >
         <svg
           viewBox="0 0 24 24"
@@ -45,9 +46,11 @@ export default function ShareButton({ shareUrl, lineUrl }: ShareButtonProps) {
           fill="currentColor"
           aria-hidden
           focusable="false"
+          role="img"
         >
           {LINE_ICON_PATH}
         </svg>
+        <span className={styles.lineText}>LINE</span>
       </a>
     </div>
   );

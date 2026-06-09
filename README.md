@@ -5,7 +5,8 @@ Bonbon & 馬米親子 podcast《車車遊樂園》的官方 **看圖聽故事** 
 - **正式站（範例）：** [https://podcast-website-mu.vercel.app](https://podcast-website-mu.vercel.app)
 - **版本：** [1.2.1](./CHANGELOG.md) — 詳見 [CHANGELOG.md](./CHANGELOG.md)
 - **待辦與路線圖：** [TODOS.md](./TODOS.md)
-- **授權：** 程式碼 [MIT](./LICENSE) · 節目內容與使用條款見 [DISCLAIMER.md](./DISCLAIMER.md)
+- **儲存庫：** **private** — `public/stories/`、`public/characters/` 內音訊與插圖**禁止再散布**（見下方授權與免責）
+- **授權：** 程式碼 [MIT](./LICENSE) · 網站條文 [/legal](./app/legal/page.tsx) · 維護者全文 [DISCLAIMER.md](./DISCLAIMER.md)
 
 ## 功能概覽
 
@@ -379,6 +380,8 @@ npm run font:subset
 | 文件 | 說明 |
 |------|------|
 | [LICENSE](./LICENSE) | 網站**程式碼** MIT 授權 |
-| [DISCLAIMER.md](./DISCLAIMER.md) | 節目內容版權、字幕說明、建議年齡、第三方連結、免責條款 |
+| [DISCLAIMER.md](./DISCLAIMER.md) | 節目內容版權、禁止散布、字幕說明、建議年齡、第三方連結、免責條款 |
+| [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) | 字型（含 [OFL-huninn.txt](./app/fonts/OFL-huninn.txt)）與商標指示性使用摘要 |
+| [/legal](./app/legal/page.tsx) | 對外網站使用條款與免責聲明頁 |
 
-Podcast 音檔、插畫與品牌內容屬 Bonbon & 馬米；再製或商業使用前請確認授權範圍。
+Podcast 音檔、插圖、字幕與品牌內容屬 Bonbon & 馬米；**未經書面同意禁止轉載、下載或散布**。AI 插圖須人工審圖後才 `--approve` 上線（見 `scripts/lib/illustrate-core.ts`）。

@@ -1,3 +1,5 @@
+import { BRAND_COLORS } from "@/lib/connect-icons";
+
 // ============================================================
 // 車車遊樂園 — 社群連結（單一資料來源）
 // ============================================================
@@ -25,19 +27,19 @@ const SOCIALS: Social[] = [
     label: "Instagram",
     url: "https://www.instagram.com/s32183218",
     background:
-      "linear-gradient(45deg, #f09433, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888)",
+      "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)",
     icon: "instagram",
   },
   {
     label: "Threads",
     url: "https://www.threads.com/@s32183218",
-    background: "#000000",
+    background: BRAND_COLORS.threads,
     icon: "threads",
   },
   {
     label: "Facebook",
     url: "https://www.facebook.com/profile.php?id=61590533437349",
-    background: "#1877F2",
+    background: BRAND_COLORS.facebook,
     icon: "facebook",
   },
 ];
