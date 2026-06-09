@@ -1,5 +1,15 @@
+import { useId } from "react";
 import type { CSSProperties } from "react";
 import type { GameCatalogEntry } from "@/lib/games/catalog";
+import {
+  ClayBlob,
+  ClayCar,
+  ClayCircle,
+  ClayGrad,
+  ClayScene,
+  ClayStar,
+  clayIds,
+} from "@/lib/games/clay-svg";
 
 type Props = {
   gameId: GameCatalogEntry["id"];
@@ -8,9 +18,12 @@ type Props = {
 };
 
 /**
- * 遊樂園卡片縮圖：每款遊戲專屬 mini 場景 SVG（取代單一 emoji）。
+ * 遊樂園卡片縮圖：黏土風 mini 場景 SVG（柔光、圓角、高光）。
  */
 export default function GameThumbArt({ gameId, className, style }: Props) {
+  const uid = useId().replace(/:/g, "");
+  const sh = clayIds(uid, "sh");
+
   const common = {
     viewBox: "0 0 120 90",
     className,
@@ -24,153 +37,444 @@ export default function GameThumbArt({ gameId, className, style }: Props) {
     case "car-star":
       return (
         <svg {...common}>
-          <defs>
-            <linearGradient id="gts-sky" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#dcd0f5" />
-              <stop offset="100%" stopColor="#f5efff" />
-            </linearGradient>
-          </defs>
-          <rect width="120" height="90" fill="url(#gts-sky)" />
-          <ellipse cx="60" cy="78" rx="52" ry="8" fill="rgba(0,0,0,.08)" />
-          <rect x="8" y="62" width="104" height="10" rx="5" fill="#8d857b" />
-          <path d="M28 48l8-6 14 0 6 6h-28z" fill="#ffd866" />
-          <rect x="34" y="42" width="16" height="8" rx="3" fill="#8fcde8" />
-          <circle cx="32" cy="56" r="5" fill="#333" />
-          <circle cx="52" cy="56" r="5" fill="#333" />
-          <circle cx="32" cy="56" r="2" fill="#ccc" />
-          <circle cx="52" cy="56" r="2" fill="#ccc" />
-          {[18, 38, 58, 78, 98].map((x, i) => (
-            <path
-              key={x}
-              d={`M${x} ${22 + (i % 2) * 6}l3-6 3 6-6 0z`}
-              fill="#ffd866"
-              opacity={0.85 + (i % 3) * 0.05}
+          <ClayScene
+            uid={uid}
+            bg={
+              <>
+                <ClayGrad
+                  id={clayIds(uid, "sky")}
+                  light="#ebe4ff"
+                  mid="#dcd0f5"
+                  dark="#c5b3e6"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "road")}
+                  light="#a8927a"
+                  mid="#8d857b"
+                  dark="#6e655c"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "body")}
+                  light="#ffe566"
+                  mid="#ffd866"
+                  dark="#e8b82a"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "roof")}
+                  light="#b8e8ff"
+                  mid="#8fcde8"
+                  dark="#6eb8d4"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "win")}
+                  light="#dff6ff"
+                  mid="#b8e8ff"
+                  dark="#8fcde8"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "star")}
+                  light="#fff3a8"
+                  mid="#ffd866"
+                  dark="#e8b82a"
+                />
+              </>
+            }
+          >
+            <rect width="120" height="90" rx="12" fill={`url(#${clayIds(uid, "sky")})`} />
+            <ellipse cx="60" cy="82" rx="46" ry="7" fill="rgba(61,48,40,0.1)" />
+            <ClayBlob
+              x={6}
+              y={62}
+              w={108}
+              h={14}
+              r={7}
+              gradId={clayIds(uid, "road")}
+              shadowId={sh}
             />
-          ))}
-          <circle cx="88" cy="28" r="6" fill="#ffd866" opacity="0.35" />
-          <circle cx="88" cy="28" r="3.5" fill="#ffd866" />
+            <ClayCar
+              x={32}
+              y={38}
+              bodyGrad={clayIds(uid, "body")}
+              roofGrad={clayIds(uid, "roof")}
+              windowGrad={clayIds(uid, "win")}
+              shadowId={sh}
+            />
+            <ClayStar cx={22} cy={26} size={9} gradId={clayIds(uid, "star")} shadowId={sh} />
+            <ClayStar cx={52} cy={18} size={7} gradId={clayIds(uid, "star")} shadowId={sh} />
+            <ClayStar cx={78} cy={24} size={8} gradId={clayIds(uid, "star")} shadowId={sh} />
+            <ClayStar cx={98} cy={30} size={6} gradId={clayIds(uid, "star")} shadowId={sh} />
+            <ClayCircle
+              cx={94}
+              cy={14}
+              r={8}
+              gradId={clayIds(uid, "star")}
+              shadowId={sh}
+            />
+          </ClayScene>
         </svg>
       );
 
     case "car-mission":
       return (
         <svg {...common}>
-          <defs>
-            <linearGradient id="gtm-sky" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#1a2744" />
-              <stop offset="100%" stopColor="#2d4a6e" />
-            </linearGradient>
-          </defs>
-          <rect width="120" height="90" fill="url(#gtm-sky)" />
-          <circle cx="95" cy="18" r="10" fill="#fff8dc" opacity="0.9" />
-          {[
-            [22, 35],
-            [48, 28],
-            [72, 40],
-            [90, 32],
-            [35, 50],
-          ].map(([x, y], i) => (
-            <circle
-              key={`${x}-${y}`}
-              cx={x}
-              cy={y}
-              r={2 + (i % 2)}
-              fill="#e8ff9a"
-              opacity={0.7 + i * 0.06}
+          <ClayScene
+            uid={uid}
+            bg={
+              <>
+                <ClayGrad
+                  id={clayIds(uid, "night")}
+                  light="#3d5a80"
+                  mid="#2d4a6e"
+                  dark="#1a2744"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "moon")}
+                  light="#fffef5"
+                  mid="#fff8dc"
+                  dark="#f0e6b8"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "truck")}
+                  light="#d4f0bc"
+                  mid="#b7df9b"
+                  dark="#8fc872"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "win")}
+                  light="#dff6ff"
+                  mid="#b8e8ff"
+                  dark="#8fcde8"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "glow")}
+                  light="#f4ffb8"
+                  mid="#e8ff9a"
+                  dark="#c8e86a"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "path")}
+                  light="#9a9088"
+                  mid="#7a7268"
+                  dark="#5a534c"
+                />
+              </>
+            }
+          >
+            <rect width="120" height="90" rx="12" fill={`url(#${clayIds(uid, "night")})`} />
+            <ClayCircle
+              cx={96}
+              cy={18}
+              r={11}
+              gradId={clayIds(uid, "moon")}
+              shadowId={sh}
             />
-          ))}
-          <rect x="10" y="58" width="100" height="8" rx="4" fill="#5a534c" />
-          <path d="M34 50l10-8 22 0 8 8h-40z" fill="#b7df9b" />
-          <rect x="44" y="44" width="14" height="8" rx="2" fill="#8fcde8" />
-          <circle cx="38" cy="58" r="5" fill="#333" />
-          <circle cx="62" cy="58" r="5" fill="#333" />
-          <path
-            d="M18 68 Q40 52 60 68"
-            fill="none"
-            stroke="#79c8c1"
-            strokeWidth="2"
-            strokeDasharray="4 4"
-            opacity="0.6"
-          />
+            {[
+              [24, 34],
+              [50, 26],
+              [72, 38],
+              [88, 30],
+              [38, 48],
+            ].map(([x, y]) => (
+              <ClayCircle
+                key={`${x}-${y}`}
+                cx={x}
+                cy={y}
+                r={3.2}
+                gradId={clayIds(uid, "glow")}
+                shadowId={sh}
+              />
+            ))}
+            <ClayBlob
+              x={8}
+              y={60}
+              w={104}
+              h={12}
+              r={6}
+              gradId={clayIds(uid, "path")}
+              shadowId={sh}
+            />
+            <ClayCar
+              x={36}
+              y={36}
+              bodyGrad={clayIds(uid, "truck")}
+              roofGrad={clayIds(uid, "truck")}
+              windowGrad={clayIds(uid, "win")}
+              shadowId={sh}
+              scale={1.08}
+            />
+          </ClayScene>
         </svg>
       );
 
     case "car-adventure":
       return (
         <svg {...common}>
-          <defs>
-            <linearGradient id="gta-sky" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#8fd3ff" />
-              <stop offset="100%" stopColor="#dff3ff" />
-            </linearGradient>
-          </defs>
-          <rect width="120" height="90" fill="url(#gta-sky)" />
-          <ellipse cx="30" cy="24" rx="16" ry="8" fill="rgba(255,255,255,.75)" />
-          <ellipse cx="85" cy="18" rx="12" ry="6" fill="rgba(255,255,255,.6)" />
-          <rect x="0" y="68" width="50" height="12" fill="#7a5230" />
-          <rect x="0" y="68" width="50" height="4" fill="#5fc15f" />
-          <rect x="55" y="58" width="30" height="8" fill="#7a5230" />
-          <rect x="55" y="58" width="30" height="3" fill="#5fc15f" />
-          <rect x="95" y="52" width="25" height="28" fill="#7a5230" />
-          <rect x="95" y="52" width="25" height="4" fill="#5fc15f" />
-          <rect x="102" y="48" width="4" height="32" fill="#888" />
-          <rect x="106" y="50" width="8" height="8" fill="#fff" />
-          <rect x="114" y="50" width="8" height="8" fill="#ff5252" />
-          <rect x="106" y="58" width="8" height="8" fill="#ff5252" />
-          <rect x="114" y="58" width="8" height="8" fill="#fff" />
-          <circle cx="72" cy="52" r="5" fill="#ffc107" />
-          <circle cx="82" cy="48" r="4" fill="#ffc107" />
-          <path d="M38 58l8-5 12 0 5 5h-25z" fill="#ffd23f" />
-          <circle cx="36" cy="66" r="4" fill="#333" />
-          <circle cx="50" cy="66" r="4" fill="#333" />
-          <path d="M68 62l6-4 10 0 4 4h-20z" fill="#ff6b6b" opacity="0.85" />
+          <ClayScene
+            uid={uid}
+            bg={
+              <>
+                <ClayGrad
+                  id={clayIds(uid, "sky")}
+                  light="#b8e8ff"
+                  mid="#8fd3ff"
+                  dark="#6eb8e8"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "cloud")}
+                  light="#fff"
+                  mid="#f8fcff"
+                  dark="#e8f4ff"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "dirt")}
+                  light="#9a7050"
+                  mid="#7a5230"
+                  dark="#5c3d22"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "grass")}
+                  light="#7fd87f"
+                  mid="#5fc15f"
+                  dark="#4aa84a"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "hero")}
+                  light="#ffe566"
+                  mid="#ffd23f"
+                  dark="#e8b82a"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "enemy")}
+                  light="#ff8a8a"
+                  mid="#ff6b6b"
+                  dark="#e04545"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "coin")}
+                  light="#ffe566"
+                  mid="#ffc107"
+                  dark="#e8a800"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "win")}
+                  light="#dff6ff"
+                  mid="#b8e8ff"
+                  dark="#8fcde8"
+                />
+              </>
+            }
+          >
+            <rect width="120" height="90" rx="12" fill={`url(#${clayIds(uid, "sky")})`} />
+            <ClayBlob
+              x={14}
+              y={16}
+              w={34}
+              h={14}
+              r={7}
+              gradId={clayIds(uid, "cloud")}
+              shadowId={sh}
+              highlight={false}
+            />
+            <ClayBlob
+              x={72}
+              y={10}
+              w={28}
+              h={12}
+              r={6}
+              gradId={clayIds(uid, "cloud")}
+              shadowId={sh}
+              highlight={false}
+            />
+            <ClayBlob
+              x={0}
+              y={68}
+              w={48}
+              h={14}
+              r={5}
+              gradId={clayIds(uid, "dirt")}
+              shadowId={sh}
+            />
+            <ClayBlob
+              x={0}
+              y={68}
+              w={48}
+              h={5}
+              r={3}
+              gradId={clayIds(uid, "grass")}
+              shadowId={sh}
+            />
+            <ClayBlob
+              x={54}
+              y={58}
+              w={28}
+              h={10}
+              r={4}
+              gradId={clayIds(uid, "dirt")}
+              shadowId={sh}
+            />
+            <ClayBlob
+              x={54}
+              y={58}
+              w={28}
+              h={4}
+              r={2}
+              gradId={clayIds(uid, "grass")}
+              shadowId={sh}
+            />
+            <ClayBlob
+              x={92}
+              y={52}
+              w={24}
+              h={26}
+              r={4}
+              gradId={clayIds(uid, "dirt")}
+              shadowId={sh}
+            />
+            <ClayBlob
+              x={92}
+              y={52}
+              w={24}
+              h={5}
+              r={2}
+              gradId={clayIds(uid, "grass")}
+              shadowId={sh}
+            />
+            <ClayBlob
+              x={102}
+              y={46}
+              w={5}
+              h={32}
+              r={2}
+              gradId={clayIds(uid, "dirt")}
+              shadowId={sh}
+              highlight={false}
+            />
+            <ClayBlob x={106} y={48} w={8} h={8} r={2} gradId={clayIds(uid, "cloud")} shadowId={sh} />
+            <ClayBlob x={114} y={48} w={8} h={8} r={2} gradId={clayIds(uid, "enemy")} shadowId={sh} />
+            <ClayBlob x={106} y={56} w={8} h={8} r={2} gradId={clayIds(uid, "enemy")} shadowId={sh} />
+            <ClayBlob x={114} y={56} w={8} h={8} r={2} gradId={clayIds(uid, "cloud")} shadowId={sh} />
+            <ClayCircle cx={70} cy={50} r={5} gradId={clayIds(uid, "coin")} shadowId={sh} />
+            <ClayCircle cx={82} cy={46} r={4.5} gradId={clayIds(uid, "coin")} shadowId={sh} />
+            <ClayCar
+              x={28}
+              y={44}
+              bodyGrad={clayIds(uid, "hero")}
+              roofGrad={clayIds(uid, "hero")}
+              windowGrad={clayIds(uid, "win")}
+              shadowId={sh}
+            />
+            <ClayCar
+              x={58}
+              y={48}
+              bodyGrad={clayIds(uid, "enemy")}
+              roofGrad={clayIds(uid, "enemy")}
+              windowGrad={clayIds(uid, "win")}
+              shadowId={sh}
+              scale={0.82}
+            />
+          </ClayScene>
         </svg>
       );
 
     case "block-drop":
       return (
         <svg {...common}>
-          <rect width="120" height="90" fill="#f0f4ff" />
-          <rect
-            x="28"
-            y="12"
-            width="64"
-            height="66"
-            rx="6"
-            fill="#1a1f35"
-            opacity="0.92"
-          />
-          {[
-            ["#5bd0ff", 34, 58],
-            ["#ffd866", 50, 58],
-            ["#f7a8c4", 66, 58],
-            ["#b7df9b", 42, 42],
-            ["#c5b3e6", 58, 42],
-            ["#ff9f68", 50, 26],
-          ].map(([color, x, y]) => (
-            <rect
-              key={`${color}-${x}-${y}`}
-              x={x as number}
-              y={y as number}
-              width="14"
-              height="14"
-              rx="3"
-              fill={color as string}
-              stroke="rgba(255,255,255,.35)"
-              strokeWidth="1"
+          <ClayScene
+            uid={uid}
+            bg={
+              <>
+                <ClayGrad
+                  id={clayIds(uid, "bg")}
+                  light="#f8faff"
+                  mid="#f0f4ff"
+                  dark="#e2e8f5"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "frame")}
+                  light="#3a4258"
+                  mid="#1a1f35"
+                  dark="#0f1220"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "c1")}
+                  light="#8ee4ff"
+                  mid="#5bd0ff"
+                  dark="#2f9fe0"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "c2")}
+                  light="#ffe566"
+                  mid="#ffd866"
+                  dark="#e8b82a"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "c3")}
+                  light="#ffc8dc"
+                  mid="#f7a8c4"
+                  dark="#e8789c"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "c4")}
+                  light="#d4f0bc"
+                  mid="#b7df9b"
+                  dark="#8fc872"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "c5")}
+                  light="#ddd0f5"
+                  mid="#c5b3e6"
+                  dark="#a892d4"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "c6")}
+                  light="#ffc89a"
+                  mid="#ff9f68"
+                  dark="#e87840"
+                />
+              </>
+            }
+          >
+            <rect width="120" height="90" rx="12" fill={`url(#${clayIds(uid, "bg")})`} />
+            <ClayBlob
+              x={26}
+              y={10}
+              w={68}
+              h={70}
+              r={10}
+              gradId={clayIds(uid, "frame")}
+              shadowId={sh}
+              highlight={false}
             />
-          ))}
-          <rect x="28" y="12" width="64" height="66" rx="6" fill="none" stroke="#4a5568" strokeWidth="2" />
+            <rect x={30} y={14} width={60} height={62} rx={7} fill="#12182a" />
+            {(
+              [
+                [clayIds(uid, "c4"), 36, 54],
+                [clayIds(uid, "c5"), 52, 54],
+                [clayIds(uid, "c3"), 68, 54],
+                [clayIds(uid, "c1"), 44, 38],
+                [clayIds(uid, "c2"), 60, 38],
+                [clayIds(uid, "c6"), 52, 22],
+              ] as const
+            ).map(([grad, x, y]) => (
+              <ClayBlob
+                key={`${grad}-${x}`}
+                x={x}
+                y={y}
+                w={14}
+                h={14}
+                r={4}
+                gradId={grad}
+                shadowId={sh}
+              />
+            ))}
+          </ClayScene>
         </svg>
       );
 
     default:
       return (
         <svg {...common}>
-          <rect width="120" height="90" fill="var(--sky-2)" />
-          <text x="60" y="52" textAnchor="middle" fontSize="28">
-            🎮
-          </text>
+          <rect width="120" height="90" rx="12" fill="var(--sky-2)" />
         </svg>
       );
   }

@@ -104,9 +104,6 @@ export default function GamesHubPage() {
                 }}
               >
                 <GameThumbArt gameId={game.id} className={styles.thumbArt} />
-                <span className={styles.thumbEmoji} aria-hidden="true">
-                  {game.emoji}
-                </span>
               </div>
               <span className={styles.body}>
                 <span className={styles.meta}>

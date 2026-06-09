@@ -161,15 +161,16 @@
   border-radius: var(--radius-md);
   box-shadow:
     var(--gloss),
-    inset 0 0 0 2px color-mix(in srgb, var(--thumb-accent, var(--c-sky)) 35%, transparent);
+    inset 0 2px 8px rgba(255, 255, 255, 0.65),
+    inset 0 -3px 6px color-mix(in srgb, var(--thumb-accent, var(--c-sky)) 12%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: color-mix(
-    in srgb,
-    var(--thumb-accent, var(--c-sky)) 12%,
-    var(--card)
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--thumb-accent, var(--c-sky)) 8%, #fff),
+    color-mix(in srgb, var(--thumb-accent, var(--c-sky)) 18%, var(--card))
   );
 }
 
@@ -180,20 +181,7 @@
   height: 100%;
   display: block;
   transition: transform 0.25s var(--ease-spring);
-}
-
-.thumbEmoji {
-  position: absolute;
-  right: 8px;
-  bottom: 6px;
-  font-size: 1.35rem;
-  line-height: 1;
-  padding: 4px 6px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.88);
-  border: 1.5px solid var(--line);
-  box-shadow: var(--shadow-sm);
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.08));
+  padding: 4px;
 }
 
 .body {
