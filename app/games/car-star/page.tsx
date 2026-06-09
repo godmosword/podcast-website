@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 export default function CarStarPage() {
   return (
-    <GamePageShell title="車車吃星星小遊戲">
+    <GamePageShell title="車車吃星星小遊戲" gameId="car-star">
       <CarStarGame />
     </GamePageShell>
   );

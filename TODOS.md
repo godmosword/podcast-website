@@ -327,8 +327,8 @@ repo secret 存 `LINE_NOTIFY_TOKEN` 或 `DISCORD_WEBHOOK_URL`；同步偵測新�
 ### ~~Game Kit Phase 7 — 外框／a11y／兒童模式~~　`P3 · L · Phase 6 ✅`　〔eng+design〕 ✅
 `GameChrome`（暫停選單、設定、工具列）、`GamePageShell`（跳過連結、回遊樂園）、`useGameInput` Gamepad、`settings` 兒童模式預設；四款接入。**Phase 8 待做**：效能 QA。
 
-### Game Kit Phase 8 — 效能 QA　`P3 · L · Phase 7 ✅`　〔eng〕
-固定步進+插值、物件池、資產預載、Lighthouse ≥95。
+### ~~Game Kit Phase 8 — 效能 QA~~　`P3 · L · Phase 7 ✅`　〔eng〕 ✅
+`ObjectPool`、`preload`／`GameLoadingGate`、`useGameLoop` 固定步進＋插值（car-adventure）、hub 預載、`/games` layout a11y。**Game Kit 八階段路線完成**。
 
 ### ① 車車吃星星精進　`P3 · M · Game Kit Phase 2`　〔eng+design〕
 多迷宮（3–5）、四種追逐 AI、像素 tileset、4 方向行駛幀、連段/過關 juice、三星制。對標街機能量感，兒童原創。

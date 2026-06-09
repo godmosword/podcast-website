@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 export default function CarMissionPage() {
   return (
-    <GamePageShell title="怪獸卡車溫柔任務小遊戲">
+    <GamePageShell title="怪獸卡車溫柔任務小遊戲" gameId="car-mission">
       <CarMissionGame />
     </GamePageShell>
   );

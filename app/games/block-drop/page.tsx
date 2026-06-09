@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export default function BlockDropPage() {
   return (
-    <GamePageShell title="繽紛方塊小遊戲">
+    <GamePageShell title="繽紛方塊小遊戲" gameId="block-drop">
       <BlockDropGame />
     </GamePageShell>
   );

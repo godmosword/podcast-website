@@ -3,6 +3,8 @@ export * from "./constants";
 export * from "./palette";
 export * from "./renderer";
 export * from "./loop";
+export * from "./pool";
+export * from "./preload";
 export * from "./input";
 export * from "./style";
 export * from "./sprite";

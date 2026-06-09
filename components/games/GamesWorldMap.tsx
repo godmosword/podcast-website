@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { useGameKitProgress } from "@/hooks/useGameKitProgress";
+import { preloadAllGameAssets } from "@/lib/gamekit/preload";
 import {
   GARAGE_VEHICLES,
   GAME_STICKERS,
@@ -27,6 +29,10 @@ function formatBest(gameId: GameKitGameId, best: number): string {
 
 export function GamesWorldMap() {
   const { profile } = useGameKitProgress();
+
+  useEffect(() => {
+    void preloadAllGameAssets();
+  }, []);
 
   if (!profile) {
     return <p className={styles.loading}>載入進度中…</p>;

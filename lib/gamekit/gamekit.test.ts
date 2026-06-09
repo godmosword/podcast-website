@@ -49,6 +49,10 @@ import {
 import { GARAGE_VEHICLES, vehiclesUnlockedAt } from "@/lib/gamekit/garage";
 import { reportGameSession, gameMedalStars } from "@/lib/gamekit/session";
 import { loadGameKitSettings, setKidsMode } from "@/lib/gamekit/settings";
+import { ObjectPool } from "@/lib/gamekit/pool";
+import { GAME_PRELOAD_SHEETS } from "@/lib/gamekit/preload";
+import { GameLoop } from "@/lib/gamekit/loop";
+import { FIXED_DT } from "@/lib/gamekit/constants";
 
 describe("gamekit constants", () => {
   it("四款 viewport 為正整數", () => {
@@ -140,6 +144,45 @@ describe("garage", () => {
     expect(vehiclesUnlockedAt(0)).toEqual(["小黃"]);
     expect(vehiclesUnlockedAt(3)).toContain("怪獸卡車");
     expect(GARAGE_VEHICLES.length).toBe(5);
+  });
+});
+
+describe("ObjectPool", () => {
+  it("acquire/release 重用物件", () => {
+    const pool = new ObjectPool(
+      () => ({ n: 0 }),
+      (o) => {
+        o.n = 0;
+      },
+      2,
+    );
+    const a = pool.acquire();
+    a.n = 5;
+    pool.release(a);
+    const b = pool.acquire();
+    expect(b.n).toBe(0);
+    expect(pool.size).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe("preload manifest", () => {
+  it("四款皆有 sheet 清單", () => {
+    for (const id of ["car-star", "car-mission", "car-adventure", "block-drop"] as const) {
+      expect(GAME_PRELOAD_SHEETS[id].length).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe("GameLoop", () => {
+  it("FIXED_DT 錨定 120Hz", () => {
+    expect(FIXED_DT).toBeCloseTo(1 / 120, 5);
+  });
+
+  it("GameLoop 初始為未執行", () => {
+    const loop = new GameLoop();
+    expect(loop.isRunning).toBe(false);
+    loop.stop();
+    expect(loop.isRunning).toBe(false);
   });
 });
 

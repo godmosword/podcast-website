@@ -33,6 +33,7 @@ import { reportGameSession } from "@/lib/gamekit/session";
 import GameChrome, { GameChromeToolbar } from "@/components/games/GameChrome";
 import { useGameKitSettings } from "@/hooks/useGameKitSettings";
 import { useGameInput } from "@/hooks/useGameInput";
+import { useGameLoop } from "@/hooks/useGameLoop";
 
 const TILE = 36;
 const VW = 720;
@@ -95,7 +96,11 @@ interface GameState {
   input: Input;
   last: number | null;
   finishCleared: boolean;
+  prevPlayer: { x: number; y: number };
+  renderAlpha: number;
 }
+
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 const approach = (v: number, target: number, amt: number) =>
   v > target ? Math.max(target, v - amt) : Math.min(target, v + amt);
@@ -141,27 +146,35 @@ function CarPlatformerCanvas({
   reducedRef: RefObject<boolean>;
 }) {
   const { rendererRef, present } = usePixelGameSurface();
+  const skipPhysicsRef = useRef(false);
 
   useEffect(() => {
     reset();
-    let raf = 0;
-    const loop = (t: number) => {
-      const renderer = rendererRef.current;
-      const g = game.current;
-      if (!renderer) {
-        raf = requestAnimationFrame(loop);
-        return;
-      }
-      if (g) {
-        if (g.last == null) g.last = t;
-        let dt = (t - g.last) / 1000;
-        g.last = t;
-        if (dt > 0.033) dt = 0.033;
+  }, [reset]);
+
+  useGameLoop(
+    {
+      fixedUpdate: (dt) => {
+        const g = game.current;
+        if (!g || statusRef.current !== "playing" || skipPhysicsRef.current) {
+          skipPhysicsRef.current = false;
+          return;
+        }
+        g.prevPlayer = { x: g.player.x, y: g.player.y };
+        update(g, dt);
+      },
+      render: (alpha) => {
+        const renderer = rendererRef.current;
+        const g = game.current;
+        if (!renderer || !g) return;
+
         const reduced = reducedRef.current;
         const j = reduced
           ? { shakeX: 0, shakeY: 0, skipLogic: false }
-          : juiceRef.current.update(dt);
-        if (statusRef.current === "playing" && !j.skipLogic) update(g, dt);
+          : juiceRef.current.update(1 / 60);
+        if (j.skipLogic) skipPhysicsRef.current = true;
+
+        g.renderAlpha = alpha;
         const ctx = renderer.context;
         renderer.clear("#8fd3ff");
         ctx.save();
@@ -172,12 +185,10 @@ function CarPlatformerCanvas({
         ctx.restore();
         drawHud(ctx, g);
         present();
-      }
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
-  }, [drawHud, game, juiceRef, present, reducedRef, render, reset, rendererRef, statusRef, update]);
+      },
+    },
+    true,
+  );
 
   return null;
 }
@@ -282,6 +293,8 @@ export default function CarPlatformer() {
       input: { left: false, right: false, jump: false },
       last: null,
       finishCleared: false,
+      prevPlayer: { x: lv.start.x, y: lv.start.y },
+      renderAlpha: 1,
     };
     levelStartLivesRef.current = 3;
   }, []);
@@ -331,6 +344,8 @@ export default function CarPlatformer() {
     g.taken = 0;
     g.last = null;
     g.finishCleared = false;
+    g.prevPlayer = { x: lv.start.x, y: lv.start.y };
+    g.renderAlpha = 1;
     levelStartLivesRef.current = g.lives;
     statusRef.current = "playing";
     setStatus("playing");
@@ -701,8 +716,10 @@ export default function CarPlatformer() {
         drawCar(ctx, e.x - cam, e.y, e.w, e.h, "#ff6b6b", "#d64545", e.dir);
 
     const p = g.player;
+    const drawX = lerp(g.prevPlayer.x, p.x, g.renderAlpha);
+    const drawY = lerp(g.prevPlayer.y, p.y, g.renderAlpha);
     if (!(p.invuln > 0 && Math.floor(p.invuln * 12) % 2))
-      drawCar(ctx, p.x - cam, p.y, p.w, p.h, "#ffd23f", "#e0a800", p.facing);
+      drawCar(ctx, drawX - cam, drawY, p.w, p.h, "#ffd23f", "#e0a800", p.facing);
 
   };
 
