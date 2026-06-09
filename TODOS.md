@@ -147,7 +147,7 @@ PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
 |----|------|------|
 | **P0** 地基 + 第一印象 | 看起來完整、被搜尋到 | 首頁渲染修復 · 正式網域 · sitemap/robots（含 `/games`、`/legal`）· JSON-LD · DESIGN.md 同步 · 首屏精簡 |
 | **P1** 訂閱轉換 + 分享 | 「沒看到訂閱」消失、可被轉發 | 單集訂閱 CTA 上移 · 首頁訂閱入口 · ~~ConnectHub 文案/排序~~ · ~~每集分享鈕~~ · 試聽橋接 · 入門三集 · 空狀態 · 錨點導覽 |
-| **P2** 信任/合規 + 內容 | 兒童產品權重、內容變深 | 隱私頁 → analytics · 主持人信任區 · 真實插畫 · 家長共讀指引（`parentGuide`）· 新集通知說明 · 主題頁 SEO · 音檔壓縮 · ~~縮放~~/觸控/塗鴉 |
+| **P2** 信任/合規 + 內容 | 兒童產品權重、內容變深 | 隱私頁 → analytics · **同步→生圖通知** · 主持人信任區 · 真實插畫 · 家長共讀指引（`parentGuide`）· 新集通知說明 · 主題頁 SEO · 音檔壓縮 · ~~縮放~~/觸控/塗鴉 |
 | **P3** 可靠/工程/可選 | 不掛、可回歸、加分 | 監控 · Service Worker · E2E smoke · ESLint CI · 角色圖鑑 · 大圖單欄 |
 | **STEM-P1→P4** 互動×STEM×商業 | 差異化與變現 | 見上表；**當務之急：故事點按熱點 + 結尾提問** |
 
@@ -290,6 +290,132 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 
 ### 成長與商業（依階段）　`P3 · L · 營運階段`　〔growth〕
 逐步把官網從「連結集合」變「成長與變現中樞」：贊助 landing、周邊／活動、多語等。親子 IP 可先不做電商。**訂閱與 freemium 細節見 STEM-P4，勿在 P1 互動驗證前上付費牆。**
+
+### 同步後生圖通知（GitHub Issue）　`P2 · S · 新集偵測`　〔eng+ops〕
+**缺口：** GHA 同步新集後只 push MVP（`pageCount: 1`），無人被告知要跑 `npm run illustrate`。在 [`.github/workflows/sync-apple-podcast.yml`](.github/workflows/sync-apple-podcast.yml) 偵測新 `ep-N` 後，用 `gh issue create` 開單（標籤 `illustration` + `sync`），內附 checklist：校對字幕 → segment → 生圖 → 審 `contact.html` → `--approve` → push。Issue 範本見下方 [營運管線](#營運管線soundon--apple-同步--生圖)。
+
+### 同步 commit 訊息帶生圖提示　`P2 · S · 無`　〔eng+ops〕
+GHA commit 由 `chore: sync Apple Podcast from RSS` 改為多行 body，列出本輪新 slug、`data/subtitles/<slug>.json` 狀態、下一行指令 `npm run illustrate -- ep-N`。零依賴、與 Issue 並行。
+
+### 生圖完成推播（LINE Notify／Discord）　`P2 · S · Issue 上線`　〔eng+ops〕
+repo secret 存 `LINE_NOTIFY_TOKEN` 或 `DISCORD_WEBHOOK_URL`；同步偵測新集後 POST 簡訊（slug、MVP 已上線、待生圖指令、Issue 連結）。給 Bonbon／馬米手機即時提醒；第二期加在 Issue 之後。
+
+### 生圖佇列 `data/illustration-queue.json`　`P3 · S · 通知基建`　〔eng+ops〕
+`sync-apple-podcast.ts` 新集寫入 `{ slug, ep, syncedAt, subtitleReady, status: awaiting-illustrate }`；`illustrate --approve` 改 `approved` 或移除。Issue／webhook／未來 Studio 儀表板共用單一真相來源。
+
+---
+
+## 營運管線：SoundOn／Apple 同步 × 生圖
+
+> **關係：** SoundOn 上架 → Apple Podcast RSS（SoundOn 託管 feed）→ `npm run sync:apple`（GHA 每 15 分或手動）→ 站上 **MVP**（單封面）→ **人工**生圖 → 完整繪本版。官網與 SoundOn **不直連**；只讀 Apple 公開 RSS。詳見 [README — Apple Podcast 自動同步](./README.md#apple-podcast-自動同步)。
+
+### 觸發來源
+
+| 來源 | 準時性 | 用途 |
+|------|--------|------|
+| `repository_dispatch`（外部 cron 打 API） | 準時 | 主要定時（cron-job.org 等） |
+| `schedule`（GitHub cron `*/15`） | best-effort，常延遲 | 後備 |
+| `workflow_dispatch` | 即時 | SoundOn 上架後手動 Run |
+
+### Phase 1 — CI 自動（GHA，已實作）
+
+| # | 項目 | 產出 | 備註 |
+|---|------|------|------|
+| 1 | Checkout + `npm ci` | — | Node 22 |
+| 2 | Whisper 安裝（ffmpeg + large-v3） | `models/ggml-large-v3.bin` | 快取 ~3GB |
+| 3 | iTunes Lookup → RSS | SoundOn 託管 feed URL | 無 API key |
+| 4 | 解析 RSS、比對 `seenGuids` | — | 每輪最多 **3 集**新集 |
+| 5 | 更新既有集 metadata | title／date／duration／summary | 不重下載音檔 |
+| 6 | 下載新集音檔 | `public/stories/ep-N/audio.mp3` | 上限 50MB |
+| 7 | 下載 Apple 封面 | `01.jpg` | 單圖 MVP |
+| 8 | Whisper 轉錄 | `data/subtitles/ep-N.json` | 草稿，需人名校對 |
+| 9 | 寫入 metadata | `data/apple-synced.json` | `pageCount: 1` |
+| 10 | 更新狀態 | `data/apple-sync-state.json` | guid 對照 |
+| 11 | 車種／標籤推斷 | vehicle、tags | 關鍵字或「其他」 |
+| 12 | 字幕 backfill | 缺字幕的舊集補轉 | 同 run 內 |
+| 13 | `npm test` + `npm run build` | — | 有變更才跑 |
+| 14 | Commit + push `main` | Vercel 部署 MVP | 見下方 commit 範圍 |
+| 15 | **生圖通知** | Issue／webhook | **待實作**（見 P2 條目） |
+
+**GHA 目前 `git add` 範圍：** `data/apple-synced.json`、`data/apple-sync-state.json`、`public/stories/`、`data/subtitles/`。
+
+**GHA 不會碰：** `public/.illustrate-staging/`、`data/apple-sync.defaults.json`（approve 寫入 overrides）、`data/characters.json`、`data/scenes/` — 生圖產物需**人工 commit**。
+
+### Phase 2 — 同步後人工（生圖前）
+
+| # | 項目 | 負責 |
+|---|------|------|
+| 16 | 收到通知（Issue／LINE） | 維護者 |
+| 17 | 抽查站上 MVP | `/story/ep-N` 能播、封面正確 |
+| 18 | 校對字幕 | Bonbon／馬米（見 P2「字幕人名校對」） |
+| 19 | 確認車種／標籤 | `apple-sync.defaults.json` overrides |
+| 20 | （可選）`npm run font:subset` | 新摘要有生僻字時 |
+
+### Phase 3 — 生圖管線（本機，需 `OPENAI_API_KEY`）
+
+| # | 指令／步驟 | 產出 |
+|---|-----------|------|
+| 21 | `npm run illustrate -- ep-N --segment-only` | `data/scenes/ep-N.json` |
+| 22 | `npm run illustrate -- ep-N` | staging 圖 + `contact.html` |
+| 23 | 審圖 | 逐幕檢查走樣／角色 |
+| 24 | `--scene N`／`--char 名` | 單張重抽（可選） |
+| 25 | `npm run illustrate -- ep-N --approve` | `02.jpg`～`NN.jpg` + `pageCount` + `captionTimes` |
+| 26 | `npm run sync:apple && npm run build` | overrides 併入 synced |
+| 27 | Commit + push | 含 `public/stories/`、`defaults`、`characters`、`scenes` |
+| 28 | 關 Issue／清佇列 | 標記生圖完成 |
+
+詳見 [README — 每集劇情插圖自動生成](./README.md#每集劇情插圖自動生成npm-run-illustrate)。
+
+### Phase 4 — 營運（可選）
+
+| # | 項目 |
+|---|------|
+| 29 | Threads／IG 貼文（單集 URL + OG） |
+| 30 | 平台訂閱提醒 |
+| 31 | 家長向新集說明（見 P2「新集通知路徑」） |
+
+### 端到端時序（一集新故事）
+
+```
+T+0     SoundOn 上架
+T+15m   外部 cron → GHA sync
+T+20m   ep-N MVP 上線（1 封面 + 字幕草稿）
+T+20m   【待建】Issue + LINE：「請生圖 ep-N」
+T+1d    校對字幕 → illustrate → 審圖 → approve
+T+1d    push 完整繪本版
+T+2d    社群貼文（B 戰場）
+```
+
+### 生圖通知方案（實作優先序）
+
+| 期 | 方案 | 說明 |
+|----|------|------|
+| **一期** | D commit 訊息強化 + A GitHub Issue | 零／低依賴，可追蹤 checklist |
+| **二期** | B LINE／Discord webhook | 手機即時推播 |
+| **三期** | C `illustration-queue.json` + Studio 顯示 | 機器可讀佇列 |
+
+**GitHub Issue 範本（一期）：**
+
+```markdown
+## 新集待生圖：ep-N
+
+- 同步：{ISO 時間} · 觸發：Apple RSS（SoundOn）
+- 狀態：MVP 已上線（pageCount=1），待多頁插圖
+
+### Checklist
+- [ ] 校對 data/subtitles/ep-N.json
+- [ ] npm run illustrate -- ep-N --segment-only
+- [ ] OPENAI_API_KEY=... npm run illustrate -- ep-N
+- [ ] 審 public/.illustrate-staging/ep-N/contact.html
+- [ ] npm run illustrate -- ep-N --approve
+- [ ] npm run sync:apple && npm run build → commit push
+```
+
+### 現況缺口（勿忘）
+
+- 同步與 `illustrate` **完全脫鉤**；腳本僅 log「請視需要補 overrides」。
+- 無 `illustrationStatus` 欄位；`ep-8`（1 頁）vs `ep-9`（8 頁）即典型落差。
+- CI **不放** `OPENAI_API_KEY`；生圖永遠本機手動 + 人工審圖（設計如此）。
 
 ---
 
