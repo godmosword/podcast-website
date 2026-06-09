@@ -27,4 +27,13 @@ export const GAMES: GameCatalogEntry[] = [
     accent: "var(--c-mint)",
     ageRange: "3–7 歲",
   },
+  {
+    id: "block-drop",
+    title: "繽紛方塊",
+    desc: "排滿整行就消除，挑戰最高分。",
+    href: "/games/block-drop",
+    emoji: "🧩",
+    accent: "var(--c-pink)",
+    ageRange: "5–12 歲",
+  },
 ];
