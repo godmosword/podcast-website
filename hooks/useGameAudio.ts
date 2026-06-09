@@ -1,26 +1,23 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { GameKitAudioBus } from "@/lib/gamekit/audio";
+import type { GameKitGameId } from "@/lib/gamekit/types";
 
-type WebkitWindow = Window & { webkitAudioContext?: typeof AudioContext };
-
-export function useGameAudio(initialOn = true) {
-  const actx = useRef<AudioContext | null>(null);
+export function useGameAudio(initialOn = true, gameId?: GameKitGameId) {
+  const busRef = useRef<GameKitAudioBus | null>(null);
   const soundOn = useRef(initialOn);
+  const bgmWanted = useRef(false);
   const [soundUi, setSoundUi] = useState(initialOn);
 
-  const ensureAudio = useCallback(() => {
-    if (!actx.current) {
-      try {
-        const Ctor =
-          window.AudioContext ?? (window as WebkitWindow).webkitAudioContext;
-        if (Ctor) actx.current = new Ctor();
-      } catch {
-        // 無音訊環境時略過
-      }
-    }
-    if (actx.current && actx.current.state === "suspended") {
-      void actx.current.resume();
-    }
+  const getBus = useCallback(() => {
+    if (!busRef.current) busRef.current = new GameKitAudioBus();
+    return busRef.current;
   }, []);
+
+  const ensureAudio = useCallback(() => {
+    const bus = getBus();
+    bus.ensureContext();
+    bus.setMuted(!soundOn.current);
+  }, [getBus]);
 
   const tone = useCallback(
     (
@@ -29,30 +26,63 @@ export function useGameAudio(initialOn = true) {
       type: OscillatorType = "square",
       vol = 0.05,
     ) => {
-      const ctx = actx.current;
-      if (!soundOn.current || !ctx) return;
-      try {
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.type = type;
-        o.frequency.value = freq;
-        g.gain.value = vol;
-        o.connect(g);
-        g.connect(ctx.destination);
-        o.start();
-        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + dur);
-        o.stop(ctx.currentTime + dur);
-      } catch {
-        // 略過
-      }
+      if (!soundOn.current) return;
+      getBus().playTone(freq, dur, type, vol);
+    },
+    [getBus],
+  );
+
+  const playBgm = useCallback(() => {
+    if (!gameId) return;
+    bgmWanted.current = true;
+    if (!soundOn.current) return;
+    const bus = getBus();
+    bus.ensureContext();
+    bus.setMuted(false);
+    bus.playBgm(gameId);
+  }, [gameId, getBus]);
+
+  const stopBgm = useCallback(() => {
+    bgmWanted.current = false;
+    getBus().stopBgm();
+  }, [getBus]);
+
+  const pauseBgm = useCallback(() => {
+    getBus().pauseBgm();
+  }, [getBus]);
+
+  const resumeBgm = useCallback(() => {
+    if (!soundOn.current || !bgmWanted.current) return;
+    getBus().resumeBgm();
+  }, [getBus]);
+
+  const toggleSound = useCallback(() => {
+    const next = !soundOn.current;
+    soundOn.current = next;
+    setSoundUi(next);
+    const bus = getBus();
+    bus.setMuted(!next);
+    if (next && bgmWanted.current && gameId) {
+      bus.playBgm(gameId);
+    }
+  }, [gameId, getBus]);
+
+  useEffect(
+    () => () => {
+      busRef.current?.stopBgm();
     },
     [],
   );
 
-  const toggleSound = useCallback(() => {
-    soundOn.current = !soundOn.current;
-    setSoundUi(soundOn.current);
-  }, []);
-
-  return { ensureAudio, tone, soundOn, soundUi, toggleSound };
+  return {
+    ensureAudio,
+    tone,
+    soundOn,
+    soundUi,
+    toggleSound,
+    playBgm,
+    stopBgm,
+    pauseBgm,
+    resumeBgm,
+  };
 }

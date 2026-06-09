@@ -17,6 +17,14 @@ import {
   TRUCK_DRIVE,
   TRUCK_IDLE,
 } from "@/lib/gamekit/sprite-defs";
+import {
+  BGM_THEMES,
+  validateBgmTheme,
+} from "@/lib/gamekit/chiptune-bgm";
+import {
+  DEFAULT_MUSIC_VOLUME,
+  DEFAULT_SFX_VOLUME,
+} from "@/lib/gamekit/audio";
 import { emptyTilemap } from "@/lib/gamekit/tilemap";
 import { recordBestScore, loadPlayerProfile } from "@/lib/gamekit/save";
 
@@ -131,5 +139,19 @@ describe("sprite-defs", () => {
         expect(f.h).toBeGreaterThan(0);
       }
     }
+  });
+});
+
+describe("chiptune BGM", () => {
+  it("四款主題通過 validateBgmTheme", () => {
+    for (const [id, theme] of Object.entries(BGM_THEMES)) {
+      expect(validateBgmTheme(theme), id).toBe(true);
+      expect(theme.bpm).toBeGreaterThan(60);
+    }
+  });
+
+  it("createAudioBus 預設音量在合理範圍", () => {
+    expect(DEFAULT_MUSIC_VOLUME).toBeGreaterThan(0);
+    expect(DEFAULT_MUSIC_VOLUME).toBeLessThan(DEFAULT_SFX_VOLUME);
   });
 });

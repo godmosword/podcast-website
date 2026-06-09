@@ -492,7 +492,16 @@ function CarMissionPlayfield({
 export default function CarMissionGame() {
   const reduced = useReducedMotion();
   const shellRef = useRef<HTMLDivElement>(null);
-  const { ensureAudio, tone, soundUi, toggleSound } = useGameAudio(true);
+  const {
+    ensureAudio,
+    tone,
+    soundUi,
+    toggleSound,
+    playBgm,
+    stopBgm,
+    pauseBgm,
+    resumeBgm,
+  } = useGameAudio(true, "car-mission");
   const [best, saveBest] = useBestScore("car-mission-best");
 
   const [gentleness, setGentleness] = useState(100);
@@ -504,6 +513,24 @@ export default function CarMissionGame() {
   const liveSummary = `溫柔度 ${Math.floor(gentleness)}%，距離 ${distance}%，分數 ${score}${
     combo >= 2 ? `，連續溫柔 ${combo} 次` : ""
   }`;
+
+  useEffect(() => {
+    if (status === "playing") {
+      ensureAudio();
+      playBgm();
+    } else {
+      stopBgm();
+    }
+  }, [status, ensureAudio, playBgm, stopBgm]);
+
+  useEffect(() => {
+    const onVis = () => {
+      if (document.hidden) pauseBgm();
+      else if (status === "playing") resumeBgm();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, [status, pauseBgm, resumeBgm]);
 
   return (
     <GameShell

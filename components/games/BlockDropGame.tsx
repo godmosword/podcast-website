@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useGameAudio } from "@/hooks/useGameAudio";
 import GamePixelBoard from "@/components/games/GamePixelBoard";
 import { blockDropKitColors } from "@/lib/gamekit/bridge";
 import { BLOCK_INDEX, blockUrl } from "@/lib/gamekit/procedural-sheets";
@@ -453,15 +454,22 @@ function CtrlBtn({
 
 export default function BlockDropGame() {
   const G = useRef<GameState>(freshGame());
-  const actx = useRef<AudioContext | null>(null);
-  const soundOn = useRef(true);
   const repeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const bestRef = useRef(0);
   const reduced = useReducedMotion();
 
   const [, force] = useState(0);
-  const [soundUi, setSoundUi] = useState(true);
   const [best, setBest] = useState(0);
+  const {
+    ensureAudio,
+    tone,
+    soundUi,
+    toggleSound,
+    playBgm,
+    stopBgm,
+    pauseBgm,
+    resumeBgm,
+  } = useGameAudio(true, "block-drop");
 
   const repaint = useCallback(() => force((n) => n + 1), []);
 
@@ -489,48 +497,6 @@ export default function BlockDropGame() {
       ) as Record<PieceType, string>,
     );
   }, []);
-
-  const ensureAudio = () => {
-    if (!actx.current) {
-      try {
-        const Ctor =
-          window.AudioContext ||
-          (
-            window as Window & {
-              webkitAudioContext?: typeof AudioContext;
-            }
-          ).webkitAudioContext;
-        if (Ctor) actx.current = new Ctor();
-      } catch {
-        /* ignore */
-      }
-    }
-    if (actx.current?.state === "suspended") void actx.current.resume();
-  };
-
-  const tone = (
-    freq: number,
-    dur: number,
-    type: OscillatorType = "square",
-    vol = 0.05,
-  ) => {
-    const ac = actx.current;
-    if (!soundOn.current || !ac) return;
-    try {
-      const o = ac.createOscillator();
-      const g = ac.createGain();
-      o.type = type;
-      o.frequency.value = freq;
-      g.gain.value = vol;
-      o.connect(g);
-      g.connect(ac.destination);
-      o.start();
-      g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + dur);
-      o.stop(ac.currentTime + dur);
-    } catch {
-      /* ignore */
-    }
-  };
 
   const sMove = () => tone(220, 0.03, "square", 0.025);
   const sRotate = () => tone(420, 0.04, "square", 0.03);
@@ -583,6 +549,7 @@ export default function BlockDropGame() {
     if (!valid(g.active, g.board)) {
       g.status = "over";
       sOver();
+      stopBgm();
     } else {
       updateGrounded(g);
     }
@@ -612,6 +579,7 @@ export default function BlockDropGame() {
     if (SHAPES[g.active.type][g.active.rot].some(([, r]) => g.active!.y + r < 0)) {
       g.status = "over";
       sOver();
+      stopBgm();
       g.dirty = true;
       return;
     }
@@ -710,6 +678,7 @@ export default function BlockDropGame() {
       if (!valid(g.active, g.board)) {
         g.status = "over";
         sOver();
+        stopBgm();
       } else {
         updateGrounded(g);
       }
@@ -722,6 +691,7 @@ export default function BlockDropGame() {
 
   const begin = useCallback(() => {
     ensureAudio();
+    playBgm();
     const g = freshGame();
     g.status = "playing";
     refill(g);
@@ -729,23 +699,20 @@ export default function BlockDropGame() {
     g.lastTime = null;
     G.current = g;
     repaint();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [repaint]);
+  }, [ensureAudio, playBgm, repaint]);
 
   const togglePause = useCallback(() => {
     const g = G.current;
-    if (g.status === "playing") g.status = "paused";
-    else if (g.status === "paused") {
+    if (g.status === "playing") {
+      g.status = "paused";
+      pauseBgm();
+    } else if (g.status === "paused") {
       g.status = "playing";
       g.lastTime = null;
+      resumeBgm();
     }
     repaint();
-  }, [repaint]);
-
-  const toggleSound = () => {
-    soundOn.current = !soundOn.current;
-    setSoundUi(soundOn.current);
-  };
+  }, [pauseBgm, repaint, resumeBgm]);
 
   useEffect(() => {
     let raf = 0;

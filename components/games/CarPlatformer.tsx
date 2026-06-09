@@ -11,6 +11,7 @@ import {
   type RefObject,
 } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useGameAudio } from "@/hooks/useGameAudio";
 import PixelGameCanvas, {
   usePixelGameSurface,
 } from "@/components/games/PixelGameCanvas";
@@ -256,16 +257,23 @@ function CarPlatformerCanvas({
 
 export default function CarPlatformer() {
   const game = useRef<GameState | null>(null);
-  const actx = useRef<AudioContext | null>(null);
-  const soundOn = useRef(true);
   const statusRef = useRef<Status>("ready");
   const reducedRef = useRef(false);
   const bestRef = useRef(0);
   const reduced = useReducedMotion();
 
   const [status, setStatus] = useState<Status>("ready");
-  const [soundUi, setSoundUi] = useState(true);
   const [best, setBest] = useState(0);
+  const {
+    ensureAudio,
+    tone,
+    soundUi,
+    toggleSound,
+    playBgm,
+    stopBgm,
+    pauseBgm,
+    resumeBgm,
+  } = useGameAudio(true, "car-adventure");
 
   useEffect(() => {
     reducedRef.current = reduced;
@@ -301,45 +309,6 @@ export default function CarPlatformer() {
     statusRef.current = s;
     setStatus(s);
   }, []);
-
-  const ensureAudio = () => {
-    if (!actx.current) {
-      try {
-        const W = window as Window & {
-          webkitAudioContext?: typeof AudioContext;
-        };
-        const Ctx = window.AudioContext ?? W.webkitAudioContext;
-        if (Ctx) actx.current = new Ctx();
-      } catch {
-        /* ignore */
-      }
-    }
-    if (actx.current?.state === "suspended") actx.current.resume();
-  };
-
-  const tone = (
-    freq: number,
-    dur: number,
-    type: OscillatorType = "square",
-    vol = 0.05,
-  ) => {
-    const ac = actx.current;
-    if (!soundOn.current || !ac) return;
-    try {
-      const o = ac.createOscillator();
-      const g = ac.createGain();
-      o.type = type;
-      o.frequency.value = freq;
-      g.gain.value = vol;
-      o.connect(g);
-      g.connect(ac.destination);
-      o.start();
-      g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + dur);
-      o.stop(ac.currentTime + dur);
-    } catch {
-      /* ignore */
-    }
-  };
 
   const sJump = () => tone(520, 0.12, "square", 0.04);
   const sCoin = () => tone(880, 0.08, "triangle", 0.05);
@@ -700,12 +669,23 @@ export default function CarPlatformer() {
   }, [status]);
 
   useEffect(() => {
+    if (status === "playing") playBgm();
+    else if (status === "paused") pauseBgm();
+    else stopBgm();
+  }, [status, playBgm, pauseBgm, stopBgm]);
+
+  useEffect(() => {
     const onVis = () => {
-      if (document.hidden && statusRef.current === "playing") setStat("paused");
+      if (document.hidden) {
+        pauseBgm();
+        if (statusRef.current === "playing") setStat("paused");
+      } else if (statusRef.current === "playing") {
+        resumeBgm();
+      }
     };
     document.addEventListener("visibilitychange", onVis);
     return () => document.removeEventListener("visibilitychange", onVis);
-  }, [setStat]);
+  }, [setStat, pauseBgm, resumeBgm]);
 
   useEffect(() => {
     const set = (k: string, v: boolean) => {
@@ -751,11 +731,6 @@ export default function CarPlatformer() {
       const g = game.current;
       if (g) g.input[key] = v;
     };
-
-  const toggleSound = () => {
-    soundOn.current = !soundOn.current;
-    setSoundUi(soundOn.current);
-  };
 
   return (
     <div

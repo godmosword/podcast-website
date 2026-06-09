@@ -269,7 +269,16 @@ export default function CarStarGame() {
   const reduced = useReducedMotion();
 
   const game = useRef<GameState>(freshState());
-  const { ensureAudio, tone, soundUi, toggleSound } = useGameAudio(true);
+  const {
+    ensureAudio,
+    tone,
+    soundUi,
+    toggleSound,
+    playBgm,
+    stopBgm,
+    pauseBgm,
+    resumeBgm,
+  } = useGameAudio(true, "car-star");
   const [best, saveBest] = useBestScore("car-star-best");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const popupId = useRef<number>(0);
@@ -433,19 +442,30 @@ export default function CarStarGame() {
 
   // 分頁切走時暫停，切回且仍在遊戲中時重啟迴圈
   useEffect(() => {
+    if (status === "playing") {
+      ensureAudio();
+      playBgm();
+    } else {
+      stopBgm();
+    }
+  }, [status, ensureAudio, playBgm, stopBgm]);
+
+  useEffect(() => {
     const onVisibility = () => {
       if (document.hidden) {
+        pauseBgm();
         if (intervalRef.current) {
           clearInterval(intervalRef.current);
           intervalRef.current = null;
         }
       } else if (game.current.status === "playing") {
+        resumeBgm();
         startLoop();
       }
     };
     document.addEventListener("visibilitychange", onVisibility);
     return () => document.removeEventListener("visibilitychange", onVisibility);
-  }, [startLoop]);
+  }, [startLoop, pauseBgm, resumeBgm]);
 
   // ── 鍵盤 ───────────────────────────────────────────
   useEffect(() => {
