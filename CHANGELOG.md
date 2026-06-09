@@ -6,6 +6,7 @@
 
 ### Added
 
+- **競品研究筆記**：`RESEARCH.md` 收錄 Hey Clay App 架構拆解（phygital、分步教學、收藏解鎖）與車車遊樂園適用性評分；`TODOS.md` 同步 `craft` 手作教學、車庫圖鑑養成、phygital 第四原則與拍照分享待決策
 - **產品路線圖（互動故事 × 車車 STEM × 商業）**：`TODOS.md` 新增 STEM-P1～P4 四階段（點按熱點、STEM 實驗室、家長端、freemium 訂閱）、三項設計原則、台灣市場定位與一頁總表；README 同步產品定位與遊樂園功能
 - **車車遊樂園 `/games`**：4 款原創小遊戲（車車吃星星、怪獸卡車溫柔任務、車車大冒險、繽紛方塊）；黏土風 SVG 縮圖、首頁馬卡龍入口
 - **版權合規**：`/legal`、字型 OFL、`THIRD_PARTY_NOTICES.md`、品牌圖示指示性使用、禁止素材再散布說明

@@ -6,19 +6,20 @@
 > **產品主戰場（2026-06 STEM roadmap）：** 把「音檔 + 看圖 + 字幕 + 網頁小遊戲」放大成**互動故事 × 車車 STEM 實驗室**；學齡前～低年級、開放式探索、家長信任優先。詳見下方 [**產品路線圖（互動 + STEM + 商業）**](#產品路線圖互動--stem--商業)。
 
 > 格式：每項一段，行末標 `優先序 · 工時(人工) · 依賴`。工時 S/M/L；CC+gstack 約 1/10。
-> 來源標記：〔eng〕程式發現 · 〔ceo〕plan-ceo-review · 〔design〕plan-design-review · 〔growth〕成長共識 · 〔stem〕產品-roadmap。
+> 來源標記：〔eng〕程式發現 · 〔ceo〕plan-ceo-review · 〔design〕plan-design-review · 〔growth〕成長共識 · 〔stem〕產品-roadmap · 〔research〕[RESEARCH.md](./RESEARCH.md)。
 
 ---
 
 ## 產品路線圖（互動 + STEM + 商業）
 
-> 依據：兒童數位產品研究共識（Thinkrolls／DragonBox／Khan Kids／Sago Mini 等）、台灣市場（《顛覆！故事 STEAM》、Firstory 付費成長、叮噹家族 VIP 月 99／年 999）、以及本站現況（Next.js SSG、逐字字幕、4 款小遊戲、private 素材庫）。
+> 依據：兒童數位產品研究共識（Thinkrolls／DragonBox／Khan Kids／Sago Mini 等）、台灣市場（《顛覆！故事 STEAM》、Firstory 付費成長、叮噹家族 VIP 月 99／年 999）、競品拆解（[RESEARCH.md — Hey Clay](./RESEARCH.md#2026-06-09hey-clay-app-架構拆解與適用性評估)）、以及本站現況（Next.js SSG、逐字字幕、4 款小遊戲、private 素材庫）。
 
 ### 三個貫穿原則
 
 1. **不要做成「作業」，要做成「玩」** — 益智與適性任務包裝成遊戲；車車主題是優勢，別把 STEM 變講課。
 2. **學齡前：開放式探索，避免計時與競爭計分** — 沙盒、獎勵發現與創造；無廣告、無時間壓力（對齊 Sago Mini／Khan Kids）。
 3. **商業：家長信任 > 一切** — 費用購前透明、無 dark patterns；付費牆只在家長區，不讓孩子誤觸。
+4. **螢幕是手段，動手是目的（phygital）** — 引導孩子離開螢幕做線下手作／實驗；反「純螢幕時間」賣點（見 Hey Clay 研究）。
 
 ### 台灣市場定位
 
@@ -26,7 +27,7 @@
 |------|------|
 | 對標 | 《顛覆！故事 STEAM》已驗證「故事 + STEM」；我們用**車車**更聚焦、更有畫面 |
 | 付費範本 | 叮噹家族 VIP（月 99／年 999）：會員故事合輯、限定無廣告原創 |
-| 護城河 | **自製音檔 + 看圖翻頁 + 逐字字幕 + 網頁互動** — 純 podcast 做不到；roadmap 全力放大「網頁互動」 |
+| 護城河 | **自製音檔 + 看圖翻頁 + 逐字字幕 + 網頁互動 + phygital 手作引導** — 純 podcast（叮噹、信誼）做不到；roadmap 放大「翻頁引導 → 線下動手」 |
 
 ### 四階段總表（一頁摘要）
 
@@ -92,14 +93,23 @@
 #### 分類／數數小遊戲　`STEM-P2 · M · 車種素材`　〔stem+eng〕
 依顏色、大小、車種分類；符號功能與數學啟蒙。可重用 `VehicleClayIcon`、`/vehicles` 資料。
 
+#### 「車車 DIY」手作教學（`craft` 內容類型）　`STEM-P2 · M · 插畫素材`　〔stem+research〕
+新增與 `Story` 並存的 **`craft`** 型別：分步 `steps[]`（每步示意圖 + 語音引導句），複用 `StoryPlayer` 翻頁與字幕同步（同 `captions`／`captionTimes` 時間序列）。例：色紙摺救護車、回收物做垃圾車。架構成本近零，產品從「聽故事」升級為 phygital 引導平台。見 [RESEARCH.md](./RESEARCH.md)。
+
+#### Phygital 故事延伸（聽完 → 線下手作）　`STEM-P2 · S · craft 上線`　〔stem+research+content〕
+每集故事結尾、`parentGuide` 或詳情頁 CTA 連結對應 `craft` 教學；明確傳達「螢幕引導你動手做」。車車版循環：聽故事（線上）→ 跟著做（線下）→ 完成後解鎖圖鑑（見 STEM-P3）。
+
 **設計紀律：** 新遊戲 checklist — 無計時、無排行榜、可隨時離開、觸控 ≥ 44px、reduced-motion 可玩。
 
 ---
 
 ### STEM-P3 — 家長端與信任（3–5 個月，可與 P2 並行）
 
+#### 車車圖鑑養成（完成度解鎖）　`STEM-P3 · M · /characters 頁`　〔stem+research〕
+聽完一集／完成對應 `craft` → 解鎖該集車進「車庫圖鑑」（localStorage 進度）。純數位版取代 Hey Clay 實體 code：用**完成度解鎖**驅動回訪；進階車款預留**會員解鎖**（STEM-P4）。與下方 `/characters` 角色圖鑑頁合併規劃。
+
 #### 家長簡易儀表板　`STEM-P3 · M · localStorage 或帳號決策`　〔stem+design〕
-用星星／笑臉呈現「聽了哪幾集、玩了什麼」，不做成績單。可先讀現有收藏／繼續播放／遊戲 best 分（localStorage）。
+用星星／笑臉呈現「聽了哪幾集、玩了什麼、解鎖了幾台車」，不做成績單。可先讀現有收藏／繼續播放／遊戲 best 分／圖鑑解鎖（localStorage）。
 
 #### 家長閘門（parent gate）　`STEM-P3 · S · 付費／設定頁`　〔stem+eng〕
 設定、未來付費頁前簡單算術題，防孩子誤觸（對齊 Sago Mini）。
@@ -120,8 +130,8 @@ PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
 #### Freemium + 家長端訂閱　`STEM-P4 · L · P3 閘門`　〔stem+ceo〕
 免費＝基本故事 + 部分互動；會員＝無廣告、限定故事、進階 STEM 實驗、列印物全解鎖。**付費牆不出現在孩子主流程。**
 
-#### 收費時機綁「進度／累積」　`STEM-P4 · M · 訂閱基建`　〔stem+growth〕
-累積收聽／收藏／星星後再推會員，非註冊當下；中斷會可惜時轉換較高。
+#### 收費時機綁「進度／累積」　`STEM-P4 · M · 訂閱基建`　〔stem+growth+research〕
+累積收聽／收藏／圖鑑解鎖／craft 完成後再推會員，非註冊當下；中斷會可惜時轉換較高。進階車款、進階 craft、列印物全解鎖可作會員差異（取代 Hey Clay 實體 code 內購）。
 
 #### 訂閱價格帶驗證　`STEM-P4 · S · 營運`　〔stem+growth〕
 對標台灣已驗證 **月 99／年 999**；內容節奏靠 Apple 同步新集 + 會員限定互動模組。
@@ -145,7 +155,7 @@ PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
 
 **已備齊（勿重做）：** 故事牆、全螢幕播放器、每集落地頁 + **每集 OG 圖**（`lib/story-metadata.ts`）、**每集分享鈕**（`ShareButton`）、`/topic` 與車種 SEO 頁、RSS `/feed.xml`、`ageRange`、PWA／收藏／繼續收聽、ConnectHub（Spotify／Apple 優先 + 訂閱文案）、相關推薦、**`/games` 遊樂園**（車車吃星星／溫柔任務／車車大冒險／繽紛方塊）、`/legal` 與版權合規、逐字字幕管線、角色定裝照名冊、Apple 15 分鐘同步、**viewport 開放縮放**。
 
-**待決策（實作前定）：** ① 自訂網域最終選擇（`chechepark.tw` / `checheland.tw` / 其他）— **基建已就緒**（`NEXT_PUBLIC_SITE_URL` + `CANONICAL_SITE_URL` fallback，P0 ✅）；② analytics 工具（Vercel Analytics 省事 / Plausible 無 cookie / 不做）③ ~~縮放（鎖 vs 家長大字模式）~~ → **已決：開放縮放**（`app/layout.tsx`，P2 ✅）④ 角色圖鑑與親子提示是否現在做（需 Bonbon & 馬米 文案）⑤ **現有 4 款遊樂園遊戲與 STEM 原則** — 見下方「產品決策」。
+**待決策（實作前定）：** ① 自訂網域最終選擇（`chechepark.tw` / `checheland.tw` / 其他）— **基建已就緒**（`NEXT_PUBLIC_SITE_URL` + `CANONICAL_SITE_URL` fallback，P0 ✅）；② analytics 工具（Vercel Analytics 省事 / Plausible 無 cookie / 不做）③ ~~縮放（鎖 vs 家長大字模式）~~ → **已決：開放縮放**（`app/layout.tsx`，P2 ✅）④ 角色圖鑑與親子提示是否現在做（需 Bonbon & 馬米 文案）⑤ **現有 4 款遊樂園遊戲與 STEM 原則** — 見下方「產品決策」⑥ **兒童拍照分享** — 是否做、如何去識別化；跨裝置圖鑑是否需帳號與家長同意（見 [RESEARCH.md](./RESEARCH.md) 風險段）。
 
 ### 產品決策：現有遊樂園 vs STEM「不計時、不競爭」
 
@@ -271,8 +281,8 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 ### ESLint CI 設定　`P3 · S · 無`　〔eng〕
 `next lint` 改非互動設定（`eslint.config.mjs` + `@next/eslint-plugin-next`）以接 CI。目前會跳首次設定精靈，無法在 CI 用。
 
-### 車車角色圖鑑（新頁 `/characters`）　`P3 · M · 角色文案`　〔ceo〕
-用既有資料做角色小圖鑑（安安救護車、東東挖土機、鈴鈴清潔車、小紅賽車、小飛無人機、未來電動車…，角色名已在標題）：黏土縮圖 + 一句個性 + 連到該集。新 SEO 落地頁 + 「找下一集」入口。重用 `VehicleClayIcon`、`getVehicleCoverPath()`、`allVehicles()`、`getStoriesByVehicle()`，仿 `/topic` 結構。
+### 車車角色圖鑑（新頁 `/characters`）　`P3 · M · 角色文案`　〔ceo+research〕
+用既有資料做角色小圖鑑（安安救護車、東東挖土機、鈴鈴清潔車、小紅賽車、小飛無人機、未來電動車…，角色名已在標題）：黏土縮圖 + 一句個性 + 連到該集；**疊加完成度解鎖**（未聽／未完成 craft 的車灰階或問號，見 STEM-P3 車庫養成）。新 SEO 落地頁 + 「找下一集」入口。重用 `VehicleClayIcon`、`getVehicleCoverPath()`、`allVehicles()`、`getStoriesByVehicle()`，仿 `/topic` 結構。
 **素材進度：** 已有 6 位 canonical 定裝照於 `public/characters/`（安安救護車／小紅賽車／怪獸卡車／東東挖土機／鈴鈴清潔車／恐龍車多多），登記於 `data/characters.json`（含別名／車種／英文外觀）——可直接當圖鑑縮圖與內部跨集一致來源；剩「一句個性」中文文案待 Bonbon & 馬米。
 
 ### 首頁列表「大圖單欄」模式（可選）　`P3 · M · 年齡定位`　〔design〕
@@ -295,6 +305,7 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 | 全站 redesign／換字體 | 現有手繪風格已具辨識度 |
 | 首頁 3 欄 icon 功能介紹 | 違反 AI slop 黑名單，與品牌不符 |
 | iOS sticky 篩選列復活 | 除非有 fixed 複製列方案且通過 iOS 26 實機 |
+| 兒童照片上傳／分享手作作品 | COPPA／兒童隱私風險高；見 [RESEARCH.md](./RESEARCH.md) 待確認；可先只做本機「完成」勾選不傳圖 |
 
 ---
 
