@@ -148,7 +148,7 @@ PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
 | **P0** 地基 + 第一印象 | 看起來完整、被搜尋到 | 首頁渲染修復 · 正式網域 · sitemap/robots（含 `/games`、`/legal`）· JSON-LD · DESIGN.md 同步 · 首屏精簡 |
 | **P1** 訂閱轉換 + 分享 | 「沒看到訂閱」消失、可被轉發 | 單集訂閱 CTA 上移 · 首頁訂閱入口 · ~~ConnectHub 文案/排序~~ · ~~每集分享鈕~~ · 試聽橋接 · 入門三集 · 空狀態 · 錨點導覽 |
 | **P2** 信任/合規 + 內容 | 兒童產品權重、內容變深 | 隱私頁 → analytics · **同步→生圖通知** · 主持人信任區 · 真實插畫 · 家長共讀指引（`parentGuide`）· 新集通知說明 · 主題頁 SEO · 音檔壓縮 · ~~縮放~~/觸控/塗鴉 |
-| **P3** 可靠/工程/可選 | 不掛、可回歸、加分 | 監控 · Service Worker · E2E smoke · ESLint CI · 角色圖鑑 · 大圖單欄 |
+| **P3** 可靠/工程/可選 | 不掛、可回歸、加分 | 監控 · SW · E2E · ESLint · **Game Kit 0–1** · 四款 pixel 精進 · 角色圖鑑 · 大圖單欄 |
 | **STEM-P1→P4** 互動×STEM×商業 | 差異化與變現 | 見上表；**當務之急：故事點按熱點 + 結尾提問** |
 
 **相依鏈（務必照序）：** 正式網域 → sitemap/robots + JSON-LD → 隱私頁（先於 analytics）→ analytics。
@@ -169,7 +169,7 @@ PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
 | **B. 漸進淡化** | 保留 best 分顯示但移除生命／Game Over 壓力；大冒險改為無限續關或探索模式 |
 | **C. 雙模式** | 每款加「輕鬆玩」（無分數）／「挑戰玩」（可選，預設輕鬆） |
 
-**新遊戲預設：** 無計時、無排行榜、可隨時離開（見 STEM-P2 設計紀律）。舊遊戲是否改版依上表決策後排入 P2 或 P3。
+**新遊戲預設：** 無計時、無排行榜、可隨時離開（見 STEM-P2 設計紀律）。舊遊戲是否改版依上表決策後排入 P2 或 P3。**市售 pixel 精進**（Game Kit、三星、高分）見 [遊樂園精進](#遊樂園精進game-kit--市售-pixel-品質)——建議以**兒童模式預設**保留 STEM 調性。
 
 ---
 
@@ -302,6 +302,100 @@ repo secret 存 `LINE_NOTIFY_TOKEN` 或 `DISCORD_WEBHOOK_URL`；同步偵測新�
 
 ### 生圖佇列 `data/illustration-queue.json`　`P3 · S · 通知基建`　〔eng+ops〕
 `sync-apple-podcast.ts` 新集寫入 `{ slug, ep, syncedAt, subtitleReady, status: awaiting-illustrate }`；`illustrate --approve` 改 `approved` 或移除。Issue／webhook／未來 Studio 儀表板共用單一真相來源。
+
+### Game Kit Phase 0 — 方向與技術定錨　`P3 · M · 無`　〔eng+design+research〕
+鎖四款內部解析度（240×320／200×360／320×180／320×240）、32 色主調色盤、點陣字、整數倍 pixelated 渲染管線；決定純自建 `lib/gamekit` vs **kontra.js** 底層。產出 1 頁美術聖經 + `lib/gamekit/` 骨架（renderer/style/loop 空殼）。詳見 [RESEARCH — 四款小遊戲精進](./RESEARCH.md#2026-06-09四款小遊戲精進方案對標可市售-pixel-game)。
+
+### Game Kit Phase 1 — 渲染管線＋設計系統套用四款　`P3 · L · Phase 0`　〔eng+design〕
+**視覺 ROI 最高**：點陣 HUD、統一調色盤、offscreen→整數放大；四款立刻「像遊戲」。改 `GameShell` 接入 kit renderer；保留 `prefers-reduced-motion` 關閉 juice 動畫。
+
+### Game Kit Phase 2–4 — 美術／音訊／juice　`P3 · L · Phase 1`　〔eng+design〕
+Phase 2：sprite sheet + tileset（可先 Kenney CC0）。Phase 3：四款 chiptune BGM + SFX 混音（擴充 `useGameAudio`）。Phase 4：粒子/震動/頓幀/緩動工具組逐款套用。
+
+### Game Kit Phase 5–8 — 內容／元系統／外框／QA　`P3 · L · Phase 4`　〔eng〕
+Phase 5：Tiled → JSON 關卡 loader（大冒險優先）、多迷宮/多模式。Phase 6：跨遊戲星星、三星、車庫解鎖、`/games` 世界地圖 hub、貼紙簿。Phase 7：標題/暫停/設定/Gamepad/a11y/兒童模式。Phase 8：固定步進+插值、物件池、資產預載、Lighthouse ≥95。
+
+### ① 車車吃星星精進　`P3 · M · Game Kit Phase 2`　〔eng+design〕
+多迷宮（3–5）、四種追逐 AI、像素 tileset、4 方向行駛幀、連段/過關 juice、三星制。對標街機能量感，兒童原創。
+
+### ② 繽紛方塊精進　`P3 · M · Game Kit Phase 2`　〔eng+design〕
+像素方塊皮膚、Marathon/Sprint/Ultra/**兒童模式**（慢速、不會輸）、消行音畫 juice（依音階奏音）、T-spin/combo 計分（挑戰模式）。
+
+### ③ 車車大冒險精進　`P3 · L · Game Kit + Tiled`　〔eng+design〕
+**四款最重**：Tiled 關卡管線、6–10 關+世界地圖、檢查點、多敵人類型、視差背景、boss 關；coyote/buffer 已有，加 hitstop/落地塵土。age 5–12，需兒童/挑戰雙模式。
+
+### ④ 溫柔任務（car-mission）精進　`P3 · M · Game Kit Phase 2`　〔eng+design〕
+**類型確認**：三車道縱向溫柔駕駛（非俯視賽車）。像素卡車+螢火虫動畫、多任務類型（蒐集/限時/避障）、道路 parallax、溫柔度 UI 像素化、與 STEM 調性最合。
+
+### 遊樂園 hub 世界地圖化　`P3 · M · Phase 6 meta`　〔design+eng〕
+`/games` 由清單改主機選單／世界地圖；顯示各款星數、最佳、解鎖進度；共用 IP 卡司入口。
+
+---
+
+## 遊樂園精進：Game Kit × 市售 pixel 品質
+
+> 完整研究與驗收表：[RESEARCH.md — 四款小遊戲精進](./RESEARCH.md#2026-06-09四款小遊戲精進方案對標可市售-pixel-game)。現況元件：`components/games/{CarStarGame,BlockDropGame,CarPlatformer,CarMissionGame}.tsx`、`GameShell`、`lib/games/catalog.ts`。
+>
+> **與 STEM 路線關係**：精進版屬「遊樂園經典區」商業級升級；新 STEM 沙盒仍守無計時／無排行榜。每款加**兒童模式**（預設）＋可選挑戰模式，化解年齡與競賽張力。
+
+### 市售級品質門檻（十項，每款必達）
+
+像素完美 60fps · 統一調色盤/點陣字 · 多態精靈 · BGM+SFX+混音 · juice · 完整外框 · 三星/解鎖/存檔 · 鍵盤+觸控+手把 · a11y · 工程品質（固定步進/池/預載）。
+
+### Game Kit 九大模組（`lib/gamekit/`）
+
+| 模組 | 職責 |
+|------|------|
+| `renderer` | 固定內部解析度、整數倍放大 |
+| `sprite` + `tilemap` | 動畫、autotiling |
+| `style` | 32 色盤、點陣字、共用 UI |
+| `audio` | BGM/SFX/混音 |
+| `juice` | 粒子、震動、頓幀、tween |
+| `save` + `meta` | 存檔、星星經濟、成就 |
+| `input` | 鍵盤/觸控/Gamepad |
+| `scene` | title→play→result |
+| `loop` | 固定步進 + 插值 |
+
+### 四款對照（slug → 精進重點）
+
+| slug | 現況 | 內部解析度（建議） | 精進核心 |
+|------|------|-------------------|----------|
+| `car-star` | 單迷宮、canvas 形狀 | 240×320 | 多迷宮、4 AI、tileset、連段 |
+| `block-drop` | CSS 漸層方塊、無 BGM | 200×360 | 像素皮、多模式、消行 juice |
+| `car-adventure` | 1 關硬編、形狀 canvas | 320×180 | **Tiled 管線**、6–10 關、boss |
+| `car-mission` | 三車道溫柔任務、480×320 | 320×240 | 像素 lane runner、多任務 |
+
+### 八階段路線（相依序）
+
+```
+Phase 0 定錨 → 1 渲染+UI（起手式）→ 2 美術 → 3 音訊 → 4 juice
+→ 5 內容深度 → 6 元系統/hub → 7 外框/a11y → 8 效能 QA
+```
+
+**分款出貨建議**：Phase 0–1 四款一起做 → Phase 2–4 先做 **car-star + car-mission**（3–7 歲核心）→ 再做 block-drop → 最後 car-adventure（工時最大）。
+
+### 跨遊戲 IP（Phase 6）
+
+共用像素卡司 · 跨遊戲星星→車庫解鎖 · `/games` 世界地圖 · podcast 貼紙簿（聽集+玩遊戲）。
+
+### 資產與工具
+
+| 用途 | 工具 |
+|------|------|
+| 像素美術 | Aseprite；佔位 Kenney CC0 |
+| 關卡 | Tiled → JSON（大冒險、溫柔任務） |
+| SFX | jsfxr / 短 ogg |
+| BGM | BeepBox / FamiStudio |
+| 點陣字 | pixel TTF + pixelated 或 bitmap font |
+| 可選底層 | kontra.js |
+
+### 瓶頸（誠實）
+
+美術人力是市售與否最大門檻；CC0 先跑通管線。四款全商業級 = 數月工程，**勿一次開太大**。
+
+### 市售驗收 checklist（每款發版前）
+
+見 [RESEARCH §7](./RESEARCH.md#7-市售級驗收檢查表每款) 十項全勾。
 
 ---
 

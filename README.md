@@ -7,7 +7,7 @@ Bonbon & 馬米親子 podcast《車車遊樂園》的官方 **看圖聽故事** 
 - **正式站（範例）：** [https://podcast-website-mu.vercel.app](https://podcast-website-mu.vercel.app)
 - **版本：** [1.3.0](./CHANGELOG.md) — 詳見 [CHANGELOG.md](./CHANGELOG.md)
 - **待辦與路線圖：** [TODOS.md](./TODOS.md)（成長 A/B + STEM 四階段）
-- **競品與設計研究：** [RESEARCH.md](./RESEARCH.md)（Hey Clay phygital、craft 內容類型等）
+- **競品與設計研究：** [RESEARCH.md](./RESEARCH.md)（Hey Clay phygital、**四款 pixel 遊戲精進**、craft 等）
 - **儲存庫：** **private** — `public/stories/`、`public/characters/` 內音訊與插圖**禁止再散布**（見下方授權與免責）
 - **授權：** 程式碼 [MIT](./LICENSE) · 網站條文 [/legal](./app/legal/page.tsx) · 維護者全文 [DISCLAIMER.md](./DISCLAIMER.md)
 
