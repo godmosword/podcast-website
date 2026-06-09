@@ -39,6 +39,8 @@ export interface Scene {
   summary: string; // 中文，給 contact sheet
   prompt: string; // 英文，給圖像模型
   characters: string[]; // 該幕出場的角色 canonical 名稱
+  /** 沿用 public/stories/<slug>/NN.jpg（Apple 封面等），不生新圖、approve 時優先保留 */
+  keepCover?: boolean;
 }
 
 export interface NewCharacter {
@@ -459,6 +461,18 @@ export function writeStagingImage(slug: string, index: number, buf: Buffer): str
   writeFileSync(p, buf);
   return p;
 }
+
+/** 把已發佈的頁面圖複製到暫存（供 keepCover 幕使用）。 */
+export function copyPublishedPageToStaging(slug: string, index: number): string {
+  const src = join(publicDirForSlug(slug), `${pad2(index)}.jpg`);
+  if (!existsSync(src)) {
+    throw new Error(`keepCover 第 ${index} 幕需要 ${src}，但檔案不存在`);
+  }
+  const dest = join(stagingDirForSlug(slug), `${pad2(index)}.jpg`);
+  mkdirSync(stagingDirForSlug(slug), { recursive: true });
+  copyFileSync(src, dest);
+  return dest;
+}
 export function writeStagingPortrait(slug: string, name: string, buf: Buffer): string {
   mkdirSync(stagingDirForSlug(slug), { recursive: true });
   const p = stagingPortraitPath(slug, name);
@@ -582,9 +596,18 @@ export function approve(slug: string): ApproveResult {
   const staging = stagingDirForSlug(slug);
   const scenes = scenesFile.scenes;
 
+  const pub = publicDirForSlug(slug);
+  const coverBackup = new Map<number, Buffer>();
+  for (const sc of scenes) {
+    if (sc.keepCover) {
+      const existing = join(pub, `${pad2(sc.index)}.jpg`);
+      if (existsSync(existing)) coverBackup.set(sc.index, readFileSync(existing));
+    }
+  }
+
   for (const sc of scenes) {
     const img = join(staging, `${pad2(sc.index)}.jpg`);
-    if (!existsSync(img)) {
+    if (!existsSync(img) && !sc.keepCover) {
       throw new Error(
         `缺暫存圖 ${img}；請先跑 npm run illustrate -- ${slug}（必要時 --scene ${sc.index}）`,
       );
@@ -595,13 +618,17 @@ export function approve(slug: string): ApproveResult {
   const registered = registerCharacters(slug, scenesFile.newCharacters ?? []);
 
   // 場景圖 → public（清掉舊頁避免殘留）
-  const pub = publicDirForSlug(slug);
   mkdirSync(pub, { recursive: true });
   for (const f of readdirSync(pub)) {
     if (/^\d{2}\.jpg$/.test(f)) rmSync(join(pub, f));
   }
   for (const sc of scenes) {
-    copyFileSync(join(staging, `${pad2(sc.index)}.jpg`), join(pub, `${pad2(sc.index)}.jpg`));
+    const dest = join(pub, `${pad2(sc.index)}.jpg`);
+    if (sc.keepCover && coverBackup.has(sc.index)) {
+      writeFileSync(dest, coverBackup.get(sc.index)!);
+    } else {
+      copyFileSync(join(staging, `${pad2(sc.index)}.jpg`), dest);
+    }
   }
 
   const captionTimes = scenes.map((s) => s.start);

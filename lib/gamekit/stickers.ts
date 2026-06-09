@@ -7,8 +7,6 @@ export type StickerDef = {
 };
 
 export const GAME_STICKERS: StickerDef[] = [
-  { id: "played-car-star", label: "吃星星", emoji: "⭐", hint: "玩過車車吃星星" },
-  { id: "played-car-mission", label: "溫柔任務", emoji: "🌙", hint: "玩過溫柔任務" },
   { id: "played-car-adventure", label: "大冒險", emoji: "🏁", hint: "玩過車車大冒險" },
   { id: "played-block-drop", label: "繽紛方塊", emoji: "🧩", hint: "玩過繽紛方塊" },
   { id: "medal-master", label: "三星達人", emoji: "🏆", hint: "任一款遊戲拿滿 3 顆星" },

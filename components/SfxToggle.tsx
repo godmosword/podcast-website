@@ -1,37 +1,50 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type RefObject } from "react";
 import {
   SFX_CHANGE_EVENT,
   isSfxEnabled,
   playSfx,
   setSfxEnabled,
 } from "@/lib/sfx";
+import { VolumeOffIcon, VolumeOnIcon } from "./decor/PlayerIcon";
 
 type SfxToggleProps = {
   className?: string;
+  audioRef?: RefObject<HTMLAudioElement | null>;
 };
 
-/** 音效靜音切換 🔊/🔇。SSR 初值固定（開），掛載後讀 localStorage，避免 hydration mismatch。 */
-export default function SfxToggle({ className = "" }: SfxToggleProps) {
+/** 音量切換：旁白 muted + UI 互動短音一鍵控制。 */
+export default function SfxToggle({ className = "", audioRef }: SfxToggleProps) {
   const [on, setOn] = useState(true);
 
   useEffect(() => {
-    setOn(isSfxEnabled());
-    const sync = () => setOn(isSfxEnabled());
+    const enabled = isSfxEnabled();
+    setOn(enabled);
+    const el = audioRef?.current;
+    if (el) el.muted = !enabled;
+
+    const sync = () => {
+      const next = isSfxEnabled();
+      setOn(next);
+      const audio = audioRef?.current;
+      if (audio) audio.muted = !next;
+    };
     window.addEventListener(SFX_CHANGE_EVENT, sync);
     window.addEventListener("storage", sync);
     return () => {
       window.removeEventListener(SFX_CHANGE_EVENT, sync);
       window.removeEventListener("storage", sync);
     };
-  }, []);
+  }, [audioRef]);
 
   function toggle() {
     const next = !on;
     setSfxEnabled(next);
     setOn(next);
-    if (next) playSfx("tap"); // 開啟時給個回饋音
+    const el = audioRef?.current;
+    if (el) el.muted = !next;
+    if (next) playSfx("tap");
   }
 
   return (
@@ -40,10 +53,10 @@ export default function SfxToggle({ className = "" }: SfxToggleProps) {
       className={className}
       onClick={toggle}
       aria-pressed={on}
-      aria-label={on ? "關閉音效" : "開啟音效"}
-      title={on ? "音效：開" : "音效：關"}
+      aria-label={on ? "關閉聲音" : "開啟聲音"}
+      title={on ? "聲音：開" : "聲音：關"}
     >
-      {on ? "🔊" : "🔇"}
+      {on ? <VolumeOnIcon size={22} /> : <VolumeOffIcon size={22} />}
     </button>
   );
 }

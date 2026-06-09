@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react";
 import { useState } from "react";
-import { LINE_ICON_PATH } from "@/lib/connect-icons";
 import styles from "./ShareButton.module.css";
 
 type ShareButtonProps = {
@@ -10,6 +9,46 @@ type ShareButtonProps = {
   lineUrl: string;
   leading?: ReactNode;
 };
+
+function LinkIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width={18}
+      height={18}
+      aria-hidden
+      focusable="false"
+    >
+      <path
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+      />
+      <path
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+      />
+    </svg>
+  );
+}
+
+function LineIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width={18} height={18} aria-hidden focusable="false">
+      <path
+        fill="#06C755"
+        d="M19.5 4.5C17.2 2.8 14.2 2 11 2 5.5 2 1 5.6 1 10.5c0 2.8 1.5 5.3 3.9 6.9-.2.7-.7 2.5-.8 2.9-.1.4.1.8.5.9.3.1.6 0 .8-.2.3-.2 2.8-1.9 3.9-2.7.7.1 1.4.2 2.1.2 5.5 0 10-3.6 10-8.5S24.8 6.2 19.5 4.5z"
+      />
+    </svg>
+  );
+}
 
 export default function ShareButton({
   shareUrl,
@@ -40,7 +79,10 @@ export default function ShareButton({
         onClick={copyLink}
         aria-live="polite"
       >
-        {copied ? "✓ 已複製連結" : "🔗 複製連結"}
+        <span className={styles.icon}>
+          <LinkIcon />
+        </span>
+        <span>{copied ? "已複製連結" : "複製連結"}</span>
       </button>
       <a
         href={lineUrl}
@@ -50,17 +92,10 @@ export default function ShareButton({
         aria-label="以 LINE 分享"
         title="以 LINE 分享"
       >
-        <svg
-          viewBox="0 0 24 24"
-          className={styles.lineIcon}
-          fill="currentColor"
-          aria-hidden
-          focusable="false"
-          role="img"
-        >
-          {LINE_ICON_PATH}
-        </svg>
-        <span className={styles.lineText}>LINE</span>
+        <span className={styles.icon}>
+          <LineIcon />
+        </span>
+        <span>LINE 分享</span>
       </a>
     </div>
   );

@@ -9,11 +9,14 @@
   position: fixed;
   inset: 0;
   background: #000;
-  overflow: auto;
+  overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
-  /* 不限制 pinch-zoom；保留滑動手勢給元件內翻頁 */
   touch-action: manipulation;
+  --glass-bg: rgba(255, 255, 255, 0.14);
+  --glass-border: rgba(255, 255, 255, 0.28);
+  --glass-blur: blur(20px) saturate(180%);
+  --controls-height: 154px;
 }
 
 @media (min-width: 480px) {
@@ -178,7 +181,7 @@
 .seekRow {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .time {
@@ -208,14 +211,14 @@
   background: linear-gradient(
     to right,
     var(--seek-color, #fff) var(--seek, 0%),
-    rgba(255, 255, 255, 0.3) var(--seek, 0%)
+    rgba(255, 255, 255, 0.28) var(--seek, 0%)
   );
 }
 
 .seekBar::-moz-range-track {
   height: var(--seek-track, 7px);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.28);
 }
 
 .seekBar::-moz-range-progress {
@@ -233,7 +236,7 @@
   border-radius: 50%;
   background: #fff;
   border: 2px solid var(--seek-color, #fff);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
 }
 
 .seekBar::-moz-range-thumb {
@@ -242,7 +245,7 @@
   border-radius: 50%;
   background: #fff;
   border: 2px solid var(--seek-color, #fff);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
 }
 
 .seekBar:focus-visible {
@@ -281,37 +284,60 @@
   z-index: 5;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: calc(12px + var(--safe-top)) calc(16px + var(--safe-right)) 28px
-    calc(16px + var(--safe-left));
+  gap: 8px;
+  padding: calc(10px + var(--safe-top)) calc(12px + var(--safe-right)) 20px
+    calc(12px + var(--safe-left));
   background: linear-gradient(
     to bottom,
-    rgba(0, 0, 0, 0.55),
+    rgba(0, 0, 0, 0.45),
     rgba(0, 0, 0, 0)
   );
   pointer-events: none;
 }
 
-.closeBtn {
+.glassPill {
   flex: 0 0 auto;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
+  pointer-events: auto;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.25);
+  gap: 4px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 999px;
   color: #fff;
-  font-size: 1.2rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  white-space: nowrap;
+}
+
+.glassPill:active {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.glassPillOn {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.closeBtn {
+  composes: glassPill;
+  width: 44px;
+  min-width: 44px;
+  padding: 0;
+  font-size: 1.15rem;
   font-weight: 700;
-  backdrop-filter: blur(4px);
-  pointer-events: auto;
 }
 
 .topTitle {
   flex: 1 1 auto;
+  min-width: 0;
   color: #fff;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
   overflow: hidden;
@@ -319,91 +345,32 @@
   white-space: nowrap;
 }
 
-/* 字幕同步開關：標籤 + 滑動開關，比「開／關」文字更直覺。 */
-.subtitleToggle {
-  flex: 0 0 auto;
-  pointer-events: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: #fff;
+.subtitlesBtn {
+  composes: glassPill;
+}
+
+.subtitlesBtnOn {
+  composes: glassPill glassPillOn;
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.subtitlesLabel {
   font-size: 0.82rem;
   font-weight: 700;
-  padding: 6px 10px 6px 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(4px);
-  white-space: nowrap;
 }
 
-.subtitleToggleLabel {
-  line-height: 1;
-}
-
-.subtitleSwitch {
-  position: relative;
-  flex: 0 0 auto;
-  width: 38px;
-  height: 22px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.28);
-  transition: background 0.15s ease;
-}
-
-.subtitleToggleOn .subtitleSwitch {
-  background: var(--toggle-color, #fff);
-}
-
-.subtitleSwitchThumb {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
-  transition: transform 0.15s ease;
-}
-
-.subtitleToggleOn .subtitleSwitchThumb {
-  transform: translateX(16px);
-}
-
-/* 音效靜音切換鈕（🔊/🔇，膠囊樣式與 timerBtn 一致）。 */
 .sfxBtn {
-  flex: 0 0 auto;
-  pointer-events: auto;
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-size: 0.95rem;
-  line-height: 1;
-  background: rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(4px);
+  composes: glassPill;
+  width: 44px;
+  min-width: 44px;
+  padding: 0;
 }
 
-.sfxBtn:active {
-  background: rgba(255, 255, 255, 0.32);
-}
-
-/* 字幕字級切換鈕（Aa，膠囊樣式與 autoBtn／timerBtn 一致）。 */
 .captionSizeBtn {
-  flex: 0 0 auto;
-  pointer-events: auto;
-  display: flex;
+  composes: glassPill;
   align-items: baseline;
   gap: 1px;
-  color: #fff;
-  font-weight: 700;
-  padding: 6px 11px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(4px);
   line-height: 1;
-}
-
-.captionSizeBtn:active {
-  background: rgba(255, 255, 255, 0.32);
 }
 
 .aaSmall {
@@ -422,20 +389,13 @@
 }
 
 .timerBtn {
-  color: #fff;
-  font-size: 0.82rem;
-  font-weight: 600;
-  padding: 7px 11px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(4px);
-  white-space: nowrap;
+  composes: glassPill;
   font-variant-numeric: tabular-nums;
 }
 
 .timerBtnOn {
-  background: rgba(255, 255, 255, 0.36);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  composes: glassPill glassPillOn;
+  background: rgba(255, 255, 255, 0.24);
 }
 
 .timerMenu {
@@ -448,8 +408,10 @@
   gap: 4px;
   padding: 6px;
   border-radius: var(--radius-sm);
-  background: rgba(20, 20, 24, 0.92);
-  backdrop-filter: blur(6px);
+  background: rgba(20, 20, 24, 0.88);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
 }
 
@@ -472,17 +434,14 @@
   position: absolute;
   left: 0;
   right: 0;
-  /* 貼近進度條上方（隨控制列高度調整） */
   bottom: calc(var(--controls-block, 156px) + var(--safe-bottom));
   z-index: 4;
   display: flex;
   justify-content: center;
-  padding: 0 24px;
+  padding: 0 20px;
   pointer-events: none;
 }
 
-/* 字幕字級三段（字往上長，bottom 不變、不擠壓控制列）。
-   用 clamp 隨螢幕寬成長：窄手機維持原值，桌機／平板自動放大、更好讀。 */
 .captionWrap[data-size="sm"] {
   --caption-size: clamp(1rem, 0.85rem + 1.4vw, 1.6rem);
 }
@@ -498,23 +457,21 @@
   max-width: min(88vw, 920px);
   text-align: center;
   color: #fff;
-  /* 字級由 captionWrap 的 data-size 提供 --caption-size 變數（預設中）。 */
   font-size: var(--caption-size, 1.2rem);
   font-weight: 800;
   line-height: 1.5;
   letter-spacing: 0.01em;
-  /* 半透明圓角字卡，幼兒場景下字更清楚；padding 隨字級成長。 */
-  background: rgba(0, 0, 0, 0.66);
-  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
   padding: 0.7em 1.1em;
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
-  /* 雙層描邊讓白字在任何插圖上都清楚（幼兒辨識度優先）。 */
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85), 0 0 12px rgba(0, 0, 0, 0.5);
 }
 
-/* ---- 底部控制列（音樂播放器式） ---- */
+/* ---- 底部控制列 ---- */
 .controls {
   position: absolute;
   left: 0;
@@ -526,7 +483,38 @@
   gap: 16px;
   padding: 36px calc(20px + var(--safe-right)) calc(16px + var(--safe-bottom))
     calc(20px + var(--safe-left));
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0));
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0));
+}
+
+.controlsInner {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px 16px 12px;
+  border-radius: 22px 22px 0 0;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-bottom: none;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.25);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .controlsInner {
+    background: rgba(24, 24, 28, 0.88);
+  }
+
+  .glassPill,
+  .closeBtn,
+  .subtitlesBtn,
+  .subtitlesBtnOn,
+  .sfxBtn,
+  .captionSizeBtn,
+  .timerBtn,
+  .timerBtnOn {
+    background: rgba(40, 40, 44, 0.92);
+  }
 }
 
 .transport {
@@ -536,9 +524,6 @@
   gap: var(--transport-gap);
 }
 
-/* 次級控制鈕：透明本體 + 白色線性圖示（Spotify／Apple 風）。
-   不再用立體球／半透明底，避免疊在背景照片上糊掉。
-   只有 hover／按下時才浮現淡圓底；圖示加陰影在亮背景也清楚。 */
 .ctrlBtn {
   position: relative;
   flex: 0 0 auto;
@@ -548,23 +533,26 @@
   width: var(--ctrl-size);
   height: var(--ctrl-size);
   border-radius: 50%;
-  color: rgba(255, 255, 255, 0.92);
-  background: transparent;
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.55));
+  color: rgba(255, 255, 255, 0.95);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45));
   transition: transform var(--motion-press), background 0.08s ease,
     color 0.12s ease;
 }
 
 @media (hover: hover) {
   .ctrlBtn:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.22);
     color: #fff;
   }
 }
 
 .ctrlBtn:active {
-  transform: scale(0.86);
-  background: rgba(255, 255, 255, 0.18);
+  transform: scale(0.9);
+  background: rgba(255, 255, 255, 0.28);
 }
 
 .ctrlBtn:disabled {
@@ -573,15 +561,13 @@
 
 .ctrlBtn:disabled:active {
   transform: none;
-  background: transparent;
 }
 
 .ctrlBtnOn {
-  /* 重複開啟：圖示轉主題色（color 由 inline style），底下加小圓點標記。 */
   color: inherit;
+  background: rgba(255, 255, 255, 0.2);
 }
 
-/* 倒退／快進：圖示 + 疊在中央的秒數。 */
 .skip {
   position: relative;
   display: inline-flex;
@@ -600,18 +586,16 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* 重複開啟態的小圓點（主題色由 inline style 指定）。 */
 .onDot {
   position: absolute;
-  bottom: 9px;
+  bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
 }
 
-/* 播放三角形視覺置中（三角形重心偏左，往右推一點）。 */
 .playGlyph {
   margin-left: 4px;
 }
@@ -626,15 +610,14 @@
   justify-content: center;
   color: #fff;
   line-height: 1;
-  /* 唯一實心立體鈕：主題色實底 + 上亮高光，與透明次級鈕拉開主從。 */
   background-image: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.28),
-    rgba(0, 0, 0, 0.14)
+    rgba(255, 255, 255, 0.32),
+    rgba(0, 0, 0, 0.12)
   );
-  border: 3px solid rgba(255, 255, 255, 0.92);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5),
-    inset 0 2px 4px rgba(255, 255, 255, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45),
+    inset 0 2px 4px rgba(255, 255, 255, 0.45);
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
   transition: transform var(--motion-press);
 }
@@ -658,6 +641,25 @@
   line-height: 1.45;
   text-align: center;
   pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .player {
+    --controls-height: 142px;
+  }
+
+  .controls {
+    padding-top: 16px;
+  }
+
+  .controlsInner {
+    padding: 12px 14px 10px;
+    gap: 12px;
+  }
+
+  .transport {
+    gap: 10px;
+  }
 }
 
 /* ---- 字幕對時模式（authoring，?cue=1）---- */

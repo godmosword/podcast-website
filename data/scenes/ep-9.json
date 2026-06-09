@@ -1,65 +1,178 @@
 {
   "slug": "ep-9",
   "audioDuration": 457,
-  "model": "gpt-4o",
-  "generatedAt": "2026-06-08T14:34:47.077Z",
+  "model": "manual-semantic-15-20s",
+  "generatedAt": "2026-06-08T22:45:00.000Z",
   "scenes": [
     {
       "index": 1,
       "start": 0,
       "end": 49,
-      "summary": "介紹多多和他的問題",
-      "prompt": "Dodo the dinosaur car looking worried about his yellow teeth, feeling embarrassed"
+      "summary": "主持人開場閒聊與故事預告",
+      "prompt": "",
+      "characters": [],
+      "keepCover": true
     },
     {
       "index": 2,
       "start": 49,
-      "end": 110,
-      "summary": "多多的日常和愛吃糖果",
-      "prompt": "Dodo the dinosaur car happily eating candy at the candy shop, feeling joyful"
+      "end": 69,
+      "summary": "遊樂園裡最有精神的恐龍車多多",
+      "prompt": "A cheerful green dinosaur car zooming through a colorful clay amusement park with rounded rides and pastel paths, energetic and proud, sunny morning mood",
+      "characters": ["恐龍車多多"]
     },
     {
       "index": 3,
-      "start": 110,
-      "end": 131,
-      "summary": "多多的日常和愛吃糖果",
-      "prompt": "Dodo the dinosaur car happily eating candy at the candy shop, feeling joyful"
+      "start": 69,
+      "end": 90,
+      "summary": "多多的秘密：超愛吃糖果",
+      "prompt": "The green dinosaur car looking shy with a tiny secret smile, a thought bubble of colorful candies floating nearby, playful cozy mood",
+      "characters": ["恐龍車多多"]
     },
     {
       "index": 4,
-      "start": 131,
-      "end": 206,
-      "summary": "多多因為懶惰不刷牙",
-      "prompt": "Dodo the dinosaur car feeling sleepy and skipping brushing teeth, feeling tired"
+      "start": 90,
+      "end": 112,
+      "summary": "下班後去糖果屋買軟糖",
+      "prompt": "The green dinosaur car parked outside a cute clay candy shop with rainbow lollipops and gummy bears in the window, happy excited mood",
+      "characters": ["恐龍車多多"]
     },
     {
       "index": 5,
-      "start": 206,
-      "end": 269,
-      "summary": "多多的口臭被發現",
-      "prompt": "Dodo the dinosaur car talking to the blue bus, feeling embarrassed about bad breath"
+      "start": 112,
+      "end": 131,
+      "summary": "老闆提醒睡前要刷牙",
+      "prompt": "Inside the candy shop, the green dinosaur car nodding politely while a friendly shopkeeper vehicle gestures toward a tiny toothbrush, warm reminder mood",
+      "characters": ["恐龍車多多"]
     },
     {
       "index": 6,
-      "start": 269,
-      "end": 335,
-      "summary": "鈴鈴清潔車的建議",
-      "prompt": "The cream-and-green street-sweeper truck kindly advising the green dinosaur car about brushing teeth and dental care, the two friends chatting on a sunny street, warm and helpful mood",
-      "characters": ["鈴鈴清潔車", "恐龍車多多"]
+      "start": 131,
+      "end": 152,
+      "summary": "太睏了決定不刷牙",
+      "prompt": "The green dinosaur car in a cozy garage at night, sleepy half-closed eyes glancing between a toothbrush cup and a fluffy pillow, drowsy conflict mood",
+      "characters": ["恐龍車多多"]
     },
     {
       "index": 7,
-      "start": 335,
-      "end": 395,
-      "summary": "多多學習刷牙",
-      "prompt": "Dodo the dinosaur car diligently brushing teeth, feeling determined"
+      "start": 152,
+      "end": 172,
+      "summary": "連續好幾天都沒刷牙",
+      "prompt": "The green dinosaur car snoring peacefully in bed hugging a small teddy bear, a dusty neglected toothbrush on the nightstand, gentle humorous night mood",
+      "characters": ["恐龍車多多"]
     },
     {
       "index": 8,
+      "start": 172,
+      "end": 189,
+      "summary": "牙齒裡的糖果渣變成黏泥",
+      "prompt": "Close view of teeth with sticky yellow candy residue forming goo, the green dinosaur car asleep unaware, slightly worried fairy-tale mood",
+      "characters": ["恐龍車多多"]
+    },
+    {
+      "index": 9,
+      "start": 189,
+      "end": 206,
+      "summary": "牙菌斑蓋起黑黑洞洞城堡",
+      "prompt": "Tiny playful plaque creatures building dark little castles between teeth like mischievous clay imps, whimsical but not scary, soft pastel background",
+      "characters": ["恐龍車多多"]
+    },
+    {
+      "index": 10,
+      "start": 206,
+      "end": 225,
+      "summary": "小藍巴士發現口臭",
+      "prompt": "The green dinosaur car greeting a cute blue bus on a sunny park road, the blue bus leaning back with a surprised expression, embarrassed awkward mood",
+      "characters": ["恐龍車多多"]
+    },
+    {
+      "index": 11,
+      "start": 225,
+      "end": 249,
+      "summary": "照鏡子發現黃牙與大笑比賽",
+      "prompt": "The green dinosaur car looking shocked in a round mirror showing yellow stained teeth, a festive laugh contest banner in the amusement park background, anxious mood",
+      "characters": ["恐龍車多多"]
+    },
+    {
+      "index": 12,
+      "start": 249,
+      "end": 269,
+      "summary": "不敢大笑、把嘴閉緊緊",
+      "prompt": "A bright red race car inviting the green dinosaur car to join fun, but the dinosaur car keeps mouth tightly closed and looks worried, contrast of joy and shyness",
+      "characters": ["恐龍車多多", "小紅賽車"]
+    },
+    {
+      "index": 13,
+      "start": 269,
+      "end": 293,
+      "summary": "鈴鈴清潔車溫柔關心",
+      "prompt": "The cream-and-green street sweeper truck kindly talking to the embarrassed green dinosaur car on a quiet park lane, gentle caring friendship mood",
+      "characters": ["鈴鈴清潔車", "恐龍車多多"]
+    },
+    {
+      "index": 14,
+      "start": 293,
+      "end": 315,
+      "summary": "說明牙菌斑與蛀牙",
+      "prompt": "The street sweeper truck explaining with a soft gesture while showing a simple diagram of clean vs sticky teeth made of clay shapes, educational friendly mood",
+      "characters": ["鈴鈴清潔車", "恐龍車多多"]
+    },
+    {
+      "index": 15,
+      "start": 315,
+      "end": 335,
+      "summary": "現在開始還來得及",
+      "prompt": "The green dinosaur car looking relieved and hopeful, nodding while the street sweeper truck smiles encouragingly, warm sunrise hope mood",
+      "characters": ["鈴鈴清潔車", "恐龍車多多"]
+    },
+    {
+      "index": 16,
+      "start": 335,
+      "end": 355,
+      "summary": "睡前刷牙任務卡（一、二）",
+      "prompt": "The street sweeper truck holding a cute illustrated task card with icons of rinsing water and bedtime brushing, the green dinosaur car paying close attention, cozy bathroom corner setting",
+      "characters": ["鈴鈴清潔車", "恐龍車多多"]
+    },
+    {
+      "index": 17,
+      "start": 355,
+      "end": 375,
+      "summary": "認真刷牙任務（三）",
+      "prompt": "The green dinosaur car brushing teeth diligently with foam bubbles like little white clouds, determined focused expression, bright clean bathroom mood",
+      "characters": ["恐龍車多多"]
+    },
+    {
+      "index": 18,
+      "start": 375,
+      "end": 395,
+      "summary": "刷完牙乾淨多了",
+      "prompt": "The green dinosaur car smiling at a mirror with much cleaner teeth, fresh minty feeling, proud relieved mood",
+      "characters": ["恐龍車多多"]
+    },
+    {
+      "index": 19,
       "start": 395,
+      "end": 410,
+      "summary": "養成每天睡前刷牙習慣",
+      "prompt": "The green dinosaur car brushing teeth at night even when tired, talking kindly to himself with a little yawn, cozy bedtime routine mood",
+      "characters": ["恐龍車多多"]
+    },
+    {
+      "index": 20,
+      "start": 410,
+      "end": 428,
+      "summary": "一週後大笑比賽大方微笑",
+      "prompt": "The green dinosaur car laughing openly at the amusement park laugh contest, big happy smile, friends cheering, bright celebratory mood",
+      "characters": ["恐龍車多多"]
+    },
+    {
+      "index": 21,
+      "start": 428,
       "end": 457,
-      "summary": "多多養成刷牙習慣",
-      "prompt": "Dodo the dinosaur car smiling confidently with clean teeth, feeling proud"
+      "summary": "提醒小朋友也要刷牙",
+      "prompt": "The green dinosaur car waving goodbye with a sparkling clean smile under a starry soft sky, warm encouraging farewell mood for children",
+      "characters": ["恐龍車多多"]
     }
-  ]
+  ],
+  "newCharacters": []
 }

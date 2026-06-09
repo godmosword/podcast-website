@@ -7,8 +7,6 @@ import { GAMES } from "@/lib/games/catalog";
 import styles from "./GameLoadingGate.module.css";
 
 const LABELS: Record<GameKitGameId, string> = {
-  "car-star": "車車吃星星",
-  "car-mission": "怪獸卡車的溫柔任務",
   "car-adventure": "車車大冒險",
   "block-drop": "繽紛方塊",
 };

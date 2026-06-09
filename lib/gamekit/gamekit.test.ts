@@ -13,11 +13,6 @@ import {
   TILE_SIZE,
 } from "@/lib/gamekit";
 import {
-  FIREFLY_BLINK,
-  TRUCK_DRIVE,
-  TRUCK_IDLE,
-} from "@/lib/gamekit/sprite-defs";
-import {
   BGM_THEMES,
   validateBgmTheme,
 } from "@/lib/gamekit/chiptune-bgm";
@@ -38,7 +33,6 @@ import {
   tiledToAdventureJson,
 } from "@/lib/gamekit/tiled-loader";
 import { CAR_ADVENTURE_LEVELS } from "@/lib/games/car-adventure/levels";
-import { CAR_STAR_MAZES, parseCarStarMaze } from "@/lib/games/car-star-mazes";
 import { emptyTilemap } from "@/lib/gamekit/tilemap";
 import {
   recordBestScore,
@@ -55,11 +49,11 @@ import { GameLoop } from "@/lib/gamekit/loop";
 import { FIXED_DT } from "@/lib/gamekit/constants";
 
 describe("gamekit constants", () => {
-  it("四款 viewport 為正整數", () => {
+  it("Game Kit viewport 為正整數", () => {
     for (const [id, vp] of Object.entries(GAME_VIEWPORTS)) {
       expect(vp.width).toBeGreaterThan(0);
       expect(vp.height).toBeGreaterThan(0);
-      expect(id).toMatch(/^car-|^block-/);
+      expect(id).toMatch(/^car-adventure$|^block-drop$/);
     }
   });
 });
@@ -98,7 +92,7 @@ describe("palette", () => {
   });
 
   it("colorsForGame 回傳子調色盤", () => {
-    const c = colorsForGame("car-star");
+    const c = colorsForGame("car-adventure");
     expect(c.length).toBeGreaterThan(0);
     expect(c[0]).toMatch(/^#/);
   });
@@ -115,19 +109,19 @@ describe("meta medals", () => {
 describe("save", () => {
   it("recordBestScore 只在新高分時更新", () => {
     const base = loadPlayerProfile();
-    const next = recordBestScore(base, "car-star", 100);
-    expect(next.bests["car-star"]).toBe(100);
-    const same = recordBestScore(next, "car-star", 50);
-    expect(same.bests["car-star"]).toBe(100);
+    const next = recordBestScore(base, "car-adventure", 100);
+    expect(next.bests["car-adventure"]).toBe(100);
+    const same = recordBestScore(next, "car-adventure", 50);
+    expect(same.bests["car-adventure"]).toBe(100);
   });
 
   it("recordMedal 合併三星 bit", () => {
     const base = loadPlayerProfile();
     const f1 = medalFlags(true, false, false);
     const f2 = medalFlags(false, true, true);
-    let p = recordMedal(base, "car-star", 0, f1);
-    p = recordMedal(p, "car-star", 0, f2);
-    expect(medalCount(p.medals["car-star"]?.[0] ?? 0)).toBe(3);
+    let p = recordMedal(base, "car-adventure", 0, f1);
+    p = recordMedal(p, "car-adventure", 0, f2);
+    expect(medalCount(p.medals["car-adventure"]?.[0] ?? 0)).toBe(3);
   });
 
   it("addStars 解鎖車庫車輛", () => {
@@ -166,8 +160,8 @@ describe("ObjectPool", () => {
 });
 
 describe("preload manifest", () => {
-  it("四款皆有 sheet 清單", () => {
-    for (const id of ["car-star", "car-mission", "car-adventure", "block-drop"] as const) {
+  it("Game Kit 遊戲皆有 sheet 清單", () => {
+    for (const id of ["car-adventure", "block-drop"] as const) {
       expect(GAME_PRELOAD_SHEETS[id].length).toBeGreaterThan(0);
     }
   });
@@ -202,24 +196,24 @@ describe("session", () => {
   it("reportGameSession 通關發星與貼紙", () => {
     const base = loadPlayerProfile();
     const cleared = reportGameSession({
-      gameId: "car-star",
+      gameId: "car-adventure",
       score: 500,
       levelIndex: 0,
       cleared: true,
       flawless: true,
       collectedAll: true,
     });
-    expect(cleared.gamesPlayed["car-star"]).toBe(true);
-    expect(cleared.stickers).toContain("played-car-star");
+    expect(cleared.gamesPlayed["car-adventure"]).toBe(true);
+    expect(cleared.stickers).toContain("played-car-adventure");
     expect(cleared.stars).toBeGreaterThan(0);
-    expect(gameMedalStars(cleared, "car-star")).toBeGreaterThan(0);
-    expect(cleared.bests["car-star"]).toBe(500);
+    expect(gameMedalStars(cleared, "car-adventure")).toBeGreaterThan(0);
+    expect(cleared.bests["car-adventure"]).toBe(500);
   });
 });
 
 describe("bridge", () => {
   it("canvasPaletteFromKit 回傳 hex 色", () => {
-    const p = canvasPaletteFromKit("car-mission");
+    const p = canvasPaletteFromKit("car-adventure");
     expect(p.road).toMatch(/^#/);
     expect(p.truck).toMatch(/^#/);
   });
@@ -246,20 +240,6 @@ describe("procedural sheets index", () => {
     expect(BLOCK_INDEX.I).toBe(0);
     expect(BLOCK_INDEX.L).toBe(6);
     expect(Object.keys(BLOCK_INDEX)).toHaveLength(7);
-  });
-});
-
-describe("sprite-defs", () => {
-  it("卡車與螢火虫動畫含有效幀", () => {
-    expect(TRUCK_IDLE.frames).toHaveLength(1);
-    expect(TRUCK_DRIVE.frames).toHaveLength(2);
-    expect(FIREFLY_BLINK.frames).toHaveLength(2);
-    for (const anim of [TRUCK_IDLE, TRUCK_DRIVE, FIREFLY_BLINK]) {
-      for (const f of anim.frames) {
-        expect(f.w).toBeGreaterThan(0);
-        expect(f.h).toBeGreaterThan(0);
-      }
-    }
   });
 });
 
@@ -326,20 +306,8 @@ describe("adventure levels", () => {
   });
 });
 
-describe("car-star mazes", () => {
-  it("三個迷宮行列一致且可解析", () => {
-    for (const def of CAR_STAR_MAZES) {
-      const w = def.rows[0].length;
-      for (const row of def.rows) expect(row.length).toBe(w);
-      const maze = parseCarStarMaze(def);
-      expect(maze.initStars.size).toBeGreaterThan(0);
-      expect(maze.playerStart.r).toBeGreaterThanOrEqual(0);
-    }
-  });
-});
-
 describe("chiptune BGM", () => {
-  it("四款主題通過 validateBgmTheme", () => {
+  it("Game Kit 主題通過 validateBgmTheme", () => {
     for (const [id, theme] of Object.entries(BGM_THEMES)) {
       expect(validateBgmTheme(theme), id).toBe(true);
       expect(theme.bpm).toBeGreaterThan(60);

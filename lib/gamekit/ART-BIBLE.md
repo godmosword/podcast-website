@@ -1,15 +1,13 @@
 # Game Kit 美術聖經（Phase 0）
 
-> 四款小遊戲共用視覺規範。完整 roadmap 見 [RESEARCH.md](../RESEARCH.md)、[TODOS.md](../../TODOS.md)。
+> 遊樂園 Game Kit 共用視覺規範。完整 roadmap 見 [RESEARCH.md](../RESEARCH.md)、[TODOS.md](../../TODOS.md)。
 
 ## 渲染
 
 | 遊戲 id | 內部解析度 | 比例 |
 |---------|-----------|------|
-| `car-star` | 240×320 | 3:4 直式迷宮 |
 | `block-drop` | 200×360 | 5:9 直式井 |
 | `car-adventure` | 320×180 | 16:9 橫向關卡 |
-| `car-mission` | 320×240 | 4:3 三車道 |
 
 - **放大**：僅整數倍 nearest-neighbor（`image-rendering: pixelated`）。
 - **相機**：座標 `Math.round`，禁止次像素漂移。
@@ -58,7 +56,7 @@
 
 1. **佔位**：Kenney CC0 tileset / sprite。
 2. **原創**：Aseprite → PNG sprite sheet → `public/games/<id>/`。
-3. **關卡**：Tiled → JSON（`car-adventure`、`car-mission` 優先）。
+3. **關卡**：Tiled → JSON（`car-adventure` 優先）。
 
 ## 技術錨點
 

@@ -14,11 +14,11 @@ import styles from "./page.module.css";
 export const metadata: Metadata = {
   title: "車車遊樂園",
   description:
-    "和故事裡的車車朋友一起玩小遊戲：吃星星、溫柔任務、大冒險、繽紛方塊，適合 3–12 歲親子。",
+    "和故事裡的車車朋友一起玩小遊戲：闖關、方塊、卡丁車與海盜賽車，適合 5–12 歲親子。",
   openGraph: {
     title: "車車遊樂園 · 小遊戲",
     description:
-      "車車吃星星、怪獸卡車溫柔任務、車車大冒險、繽紛方塊——親子小遊戲一站玩。",
+      "車車大冒險、繽紛方塊、車車卡丁車、海盜卡丁車大賽——親子小遊戲一站玩。",
     url: `${getSiteUrl()}/games`,
   },
 };
@@ -66,7 +66,7 @@ export default function GamesHubPage() {
 
         <h1 className={styles.title}>車車遊樂園</h1>
         <p className={styles.subtitle}>
-          和故事裡的車車朋友一起練反應、練溫柔、闖關冒險！
+          和故事裡的車車朋友一起闖關、堆方塊、開卡丁車！
           <br />
           免下載、點開就能玩，最適合親子同樂。
         </p>
@@ -76,7 +76,7 @@ export default function GamesHubPage() {
             <Wheel size={18} color="var(--c-lilac)" />
             {GAMES.length} 款小遊戲
           </li>
-          <li className={styles.chip}>👨‍👩‍👧 3–12 歲</li>
+          <li className={styles.chip}>👨‍👩‍👧 5–12 歲</li>
           <li className={styles.chip}>📱 手機也能玩</li>
         </ul>
       </header>

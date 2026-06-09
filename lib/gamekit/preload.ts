@@ -3,8 +3,6 @@ import { getGameSheet, type SheetId } from "./procedural-sheets";
 
 /** 各款遊戲啟動前需暖機的程序生成 sheet。 */
 export const GAME_PRELOAD_SHEETS: Record<GameKitGameId, SheetId[]> = {
-  "car-star": ["tiles-common", "car-topdown", "star-icon"],
-  "car-mission": ["truck-mission", "firefly"],
   "car-adventure": ["tiles-common"],
   "block-drop": ["blocks-drop"],
 };
@@ -41,7 +39,7 @@ export function preloadGameAssets(gameId: GameKitGameId): Promise<void> {
   });
 }
 
-/** 遊樂園 hub 可選：一次暖機四款共用 sheet。 */
+/** 遊樂園 hub 可選：一次暖機所有 Game Kit 共用 sheet。 */
 export function preloadAllGameAssets(): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
   const ids = new Set<SheetId>();

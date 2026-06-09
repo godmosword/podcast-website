@@ -85,7 +85,7 @@ NEXT_PUBLIC_SITE_URL=https://你的網域
   audio: "audio.mp3",
   pageCount: 6,             // 與 01.jpg～NN.jpg 張數一致
   summary: "一句話大綱",
-  ageRange: "3–8 歲",       // 選填；內頁目前不顯示年齡，僅資料用
+  ageRange: "3–7 歲",       // 選填；內頁目前不顯示年齡，僅資料用
   tags: ["勇敢", "合作"],
   captions: [               // 選填：字幕跟讀，每句一行
     "第一句…",

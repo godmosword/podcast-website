@@ -24,8 +24,7 @@ export default function FavoriteButton({ slug }: FavoriteButtonProps) {
       aria-label={active ? "取消收藏" : "加入最愛"}
       onClick={() => setActive(toggleFavorite(slug).includes(slug))}
     >
-      <HeartIcon className={styles.icon} filled={active} />
-      <span>{active ? "已收藏" : "加入最愛"}</span>
+      <HeartIcon size={26} filled={active} />
     </button>
   );
 }

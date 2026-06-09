@@ -5,28 +5,15 @@ import type { GameKitGameId } from "./types";
 /** 從 Game Kit 子調色盤建立 canvas 遊戲用色（Phase 1）。 */
 export function canvasPaletteFromKit(gameId: GameKitGameId): CanvasPalette {
   const c = colorsForGame(gameId);
-  switch (gameId) {
-    case "car-mission":
-      return {
-        road: c[4] ?? MASTER_PALETTE[19],
-        roadMark: "rgba(255,255,255,0.28)",
-        truck: c[1] ?? MASTER_PALETTE[9],
-        wheel: c[0] ?? MASTER_PALETTE[18],
-        firefly: c[2] ?? MASTER_PALETTE[7],
-        fireflyGlow: "rgba(255,255,255,0.22)",
-        gentleHint: c[3] ?? MASTER_PALETTE[14],
-      };
-    default:
-      return {
-        road: c[0] ?? MASTER_PALETTE[19],
-        roadMark: "rgba(255,255,255,0.25)",
-        truck: c[1] ?? MASTER_PALETTE[9],
-        wheel: MASTER_PALETTE[18],
-        firefly: c[2] ?? MASTER_PALETTE[7],
-        fireflyGlow: "rgba(255,255,255,0.2)",
-        gentleHint: c[3] ?? MASTER_PALETTE[14],
-      };
-  }
+  return {
+    road: c[0] ?? MASTER_PALETTE[19],
+    roadMark: "rgba(255,255,255,0.25)",
+    truck: c[1] ?? MASTER_PALETTE[9],
+    wheel: MASTER_PALETTE[18],
+    firefly: c[2] ?? MASTER_PALETTE[7],
+    fireflyGlow: "rgba(255,255,255,0.2)",
+    gentleHint: c[3] ?? MASTER_PALETTE[14],
+  };
 }
 
 /** 橫向過關天空／地面色。 */

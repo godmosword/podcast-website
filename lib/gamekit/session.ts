@@ -13,8 +13,6 @@ import { medalFlags, medalCount } from "./meta";
 export const GAMEKIT_PROGRESS_EVENT = "cheche:gamekit-progress";
 
 const LEGACY_BEST_KEYS: Record<GameKitGameId, string> = {
-  "car-star": "car-star-best",
-  "car-mission": "car-mission-best",
   "car-adventure": "car-adventure-best",
   "block-drop": "block-drop-best",
 };
@@ -22,7 +20,7 @@ const LEGACY_BEST_KEYS: Record<GameKitGameId, string> = {
 export type GameSessionResult = {
   gameId: GameKitGameId;
   score: number;
-  /** 關卡／迷宮索引（大冒險、吃星星） */
+  /** 關卡索引。 */
   levelIndex?: number;
   cleared?: boolean;
   flawless?: boolean;

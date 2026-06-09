@@ -12,6 +12,7 @@
 //   npm run illustrate -- ep-9 --deterministic # 本機切場景（不呼叫文字模型、無角色辨識）
 //   npm run illustrate -- ep-9 --scene 4       # 重抽第 4 幕
 //   npm run illustrate -- ep-9 --char 多多      # 重抽某新角色定裝照
+//   npm run illustrate -- ep-9 --from-scenes   # 略過切場景，依 data/scenes/<slug>.json 生圖
 //   npm run illustrate -- ep-9 --approve       # 暫存→public + 登記角色 + 寫 pageCount/captionTimes
 // ============================================================
 
@@ -22,6 +23,7 @@ import { ROOT } from "./lib/transcribe-core";
 import {
   approve,
   buildContactSheet,
+  copyPublishedPageToStaging,
   estimateDuration,
   generateCharacterPortrait,
   generateSceneImage,
@@ -108,6 +110,12 @@ async function generateAll(
   await ensurePortraits(slug, newCharacters);
   const descs = descMap(newCharacters);
   for (const sc of scenes) {
+    if (sc.keepCover) {
+      process.stderr.write(`  保留封面 #${sc.index}/${scenes.length}…`);
+      const p = copyPublishedPageToStaging(slug, sc.index);
+      process.stderr.write(` → ${rel(p)}\n`);
+      continue;
+    }
     const { paths, descs: cdescs } = resolveSceneRefs(slug, sc, descs);
     process.stderr.write(`  生圖 #${sc.index}/${scenes.length}（${sc.characters.join("、") || "封面參考"}）…`);
     const buf = await generateSceneImage(sc, paths, cdescs);
@@ -129,6 +137,7 @@ async function regenScene(slug: string, sceneNo: number): Promise<void> {
   file.newCharacters ??= [];
   const sc = file.scenes.find((s) => s.index === sceneNo);
   if (!sc) fail(`場景檔沒有第 ${sceneNo} 幕（共 ${file.scenes.length} 幕）`);
+  if (sc.keepCover) fail(`第 ${sceneNo} 幕標記 keepCover，不可重抽；請改場景檔或 public 封面`);
   const { paths, descs } = resolveSceneRefs(slug, sc!, descMap(file.newCharacters));
   const buf = await generateSceneImage(sc!, paths, descs);
   const p = writeStagingImage(slug, sc!.index, buf);
@@ -151,6 +160,7 @@ async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const slugs = args.filter((a) => !a.startsWith("--"));
   const segmentOnly = args.includes("--segment-only");
+  const fromScenes = args.includes("--from-scenes");
   const deterministic = args.includes("--deterministic");
   const doApprove = args.includes("--approve");
   const sceneIdx = args.indexOf("--scene");
@@ -163,7 +173,9 @@ async function main(): Promise<void> {
     (s) => s !== String(sceneNo) && s !== charName,
   );
   if (realSlugs.length === 0) {
-    fail("用法：npm run illustrate -- <slug> [--segment-only|--deterministic|--scene N|--char 名|--approve]");
+    fail(
+      "用法：npm run illustrate -- <slug> [--segment-only|--from-scenes|--deterministic|--scene N|--char 名|--approve]",
+    );
   }
 
   for (const slug of realSlugs) {
@@ -186,9 +198,17 @@ async function main(): Promise<void> {
         await regenScene(slug, sceneNo);
         continue;
       }
-      const out = await segment(slug, deterministic);
+      let out: { scenes: Scene[]; newCharacters: NewCharacter[] };
+      if (fromScenes) {
+        const file = readScenesFile(slug);
+        file.newCharacters ??= [];
+        out = { scenes: file.scenes, newCharacters: file.newCharacters };
+        console.log(`✓ ${slug}：讀取 ${out.scenes.length} 幕場景檔（--from-scenes）`);
+      } else {
+        out = await segment(slug, deterministic);
+      }
       if (segmentOnly) {
-        console.log(`  （--segment-only）審切分後再跑 npm run illustrate -- ${slug} 生圖。`);
+        console.log(`  （--segment-only）審切分後再跑 npm run illustrate -- ${slug} --from-scenes 生圖。`);
         continue;
       }
       await generateAll(slug, out.scenes, out.newCharacters);

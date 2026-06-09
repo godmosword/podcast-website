@@ -1,9 +1,5 @@
-/** 四款遊樂園遊戲在 Game Kit 內的識別字（對齊 `lib/games/catalog.ts` id）。 */
-export type GameKitGameId =
-  | "car-star"
-  | "block-drop"
-  | "car-adventure"
-  | "car-mission";
+/** Game Kit 內的識別字（對齊 `lib/games/catalog.ts` id）。 */
+export type GameKitGameId = "block-drop" | "car-adventure";
 
 export type ViewportSize = {
   width: number;

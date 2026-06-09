@@ -3,11 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { clearContinue, loadContinue, saveContinue } from "@/lib/continue-playback";
-import { playSfx } from "@/lib/sfx";
+import { playSfx, isSfxEnabled } from "@/lib/sfx";
 import SfxToggle from "./SfxToggle";
 import Wheel from "./decor/Wheel";
 import Sparkle from "./decor/Sparkle";
 import {
+  CaptionsIcon,
   RepeatIcon,
   RewindIcon,
   ForwardIcon,
@@ -81,7 +82,7 @@ export default function StoryPlayer({
   const [isPlaying, setIsPlaying] = useState(false);
   const [mediaError, setMediaError] = useState<"audio" | "image" | null>(null);
   const [playBlocked, setPlayBlocked] = useState(false);
-  const [autoFlip, setAutoFlip] = useState(true);
+  const [subtitlesOn, setSubtitlesOn] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [hasEnded, setHasEnded] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -182,6 +183,11 @@ export default function StoryPlayer({
   }
 
   useEffect(() => {
+    const el = audioRef.current;
+    if (el) el.muted = !isSfxEnabled();
+  }, [audio]);
+
+  useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
     void navigator.serviceWorker.ready.then((reg) => {
       reg.active?.postMessage({ type: "CACHE_STORY", urls: [audio, ...images] });
@@ -238,7 +244,7 @@ export default function StoryPlayer({
         const si = activeCueIndex(subTimes, t, subTimes.length - 1);
         setSubIndex((prev) => (prev === si ? prev : si));
       }
-      if (!autoFlip) return;
+      if (!subtitlesOn) return;
       // 翻頁定位。
       let target: number | null = null;
       if (hasCueTimes) {
@@ -272,7 +278,7 @@ export default function StoryPlayer({
       el.removeEventListener("canplay", handleCanPlay);
       el.removeEventListener("loadstart", handleLoadStart);
     };
-  }, [autoFlip, total, hasCueTimes, captionTimes, hasSubtitles, subtitles, repeat]);
+  }, [subtitlesOn, total, hasCueTimes, captionTimes, hasSubtitles, subtitles, repeat]);
 
   useEffect(() => {
     if (bedtimeMinutes === null) {
@@ -361,12 +367,12 @@ export default function StoryPlayer({
   }
 
   function handleTouchStart(e: React.TouchEvent) {
-    if (autoFlip || hasEnded) return;
+    if (subtitlesOn || hasEnded) return;
     touchStartX.current = e.changedTouches[0].clientX;
   }
 
   function handleTouchEnd(e: React.TouchEvent) {
-    if (autoFlip || hasEnded || touchStartX.current === null) return;
+    if (subtitlesOn || hasEnded || touchStartX.current === null) return;
     const deltaX = e.changedTouches[0].clientX - touchStartX.current;
     touchStartX.current = null;
     if (Math.abs(deltaX) < SWIPE_THRESHOLD) return;
@@ -407,6 +413,12 @@ export default function StoryPlayer({
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
+      <audio
+        ref={audioRef}
+        src={audio}
+        preload="metadata"
+        onError={() => setMediaError("audio")}
+      />
       <div className={styles.stage}>
         {isLoading && (
           <div className={styles.skeleton} aria-hidden>
@@ -479,7 +491,7 @@ export default function StoryPlayer({
         </div>
       )}
 
-      {!autoFlip && !hasEnded && (
+      {!subtitlesOn && !hasEnded && (
         <>
           <button
             className={`${styles.tapZone} ${styles.tapLeft}`}
@@ -545,7 +557,7 @@ export default function StoryPlayer({
               </div>
             )}
           </div>
-          <SfxToggle className={styles.sfxBtn} />
+          <SfxToggle className={styles.sfxBtn} audioRef={audioRef} />
           <button
             type="button"
             className={styles.captionSizeBtn}
@@ -556,22 +568,15 @@ export default function StoryPlayer({
             <span className={styles.aaLarge}>A</span>
           </button>
           <button
-            className={`${styles.subtitleToggle} ${autoFlip ? styles.subtitleToggleOn : ""}`}
-            style={
-              autoFlip
-                ? ({ "--toggle-color": color } as React.CSSProperties)
-                : undefined
-            }
-            onClick={() => setAutoFlip((v) => !v)}
-            aria-pressed={autoFlip}
-            aria-label={autoFlip ? "關閉字幕同步" : "開啟字幕同步"}
-            title={autoFlip ? "字幕：開" : "字幕：關"}
+            className={subtitlesOn ? styles.subtitlesBtnOn : styles.subtitlesBtn}
+            style={subtitlesOn ? { backgroundColor: color } : undefined}
+            onClick={() => setSubtitlesOn((v) => !v)}
+            aria-pressed={subtitlesOn}
+            aria-label={subtitlesOn ? "字幕：開" : "字幕：關"}
             type="button"
           >
-            <span className={styles.subtitleToggleLabel}>字幕</span>
-            <span className={styles.subtitleSwitch} aria-hidden>
-              <span className={styles.subtitleSwitchThumb} />
-            </span>
+            <CaptionsIcon size={18} />
+            <span className={styles.subtitlesLabel}>字幕</span>
           </button>
         </div>
       )}
@@ -609,7 +614,7 @@ export default function StoryPlayer({
         </div>
       )}
 
-      {caption && !hasEnded && (
+      {subtitlesOn && caption && !hasEnded && (
         <div className={styles.captionWrap} data-size={captionSize}>
           <p className={styles.caption}>{caption}</p>
         </div>
@@ -617,96 +622,96 @@ export default function StoryPlayer({
 
       {!hasEnded && (
         <div className={styles.controls}>
-          <div className={styles.seekRow}>
-            <span className={styles.time}>{formatTime(currentTime)}</span>
-            <input
-              type="range"
-              min={0}
-              max={100}
-              step={0.1}
-              value={progress}
-              className={styles.seekBar}
-              style={
-                {
-                  "--seek": `${progress}%`,
-                  "--seek-color": color,
-                } as React.CSSProperties
-              }
-              aria-label="播放進度"
-              onChange={(e) => {
-                const el = audioRef.current;
-                if (!el?.duration) return;
-                el.currentTime = (Number(e.target.value) / 100) * el.duration;
-              }}
-            />
-            <span className={styles.time}>{formatTime(duration)}</span>
-          </div>
+          <div className={styles.controlsInner}>
+            <div className={styles.seekRow}>
+              <span className={styles.time}>{formatTime(currentTime)}</span>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                step={0.1}
+                value={progress}
+                className={styles.seekBar}
+                style={
+                  {
+                    "--seek": `${progress}%`,
+                    "--seek-color": color,
+                  } as React.CSSProperties
+                }
+                aria-label="播放進度"
+                onChange={(e) => {
+                  const el = audioRef.current;
+                  if (!el?.duration) return;
+                  el.currentTime = (Number(e.target.value) / 100) * el.duration;
+                }}
+              />
+              <span className={styles.time}>{formatTime(duration)}</span>
+            </div>
 
-          <div className={styles.transport}>
-            <button
-              type="button"
-              className={`${styles.ctrlBtn} ${repeat ? styles.ctrlBtnOn : ""}`}
-              style={repeat ? { color } : undefined}
-              onClick={() => setRepeat((v) => !v)}
-              aria-pressed={repeat}
-              aria-label="重複播放"
-            >
-              <RepeatIcon size={34} />
-              {repeat && <span className={styles.onDot} style={{ backgroundColor: color }} />}
-            </button>
-            <button
-              type="button"
-              className={styles.ctrlBtn}
-              onClick={() => skip(-10)}
-              aria-label="倒退 10 秒"
-              disabled={mediaError === "audio"}
-            >
-              <span className={styles.skip}>
-                <RewindIcon size={36} />
-                <span className={styles.skipNum}>10</span>
-              </span>
-            </button>
-            <button
-              className={styles.playBtn}
-              style={{ backgroundColor: color }}
-              onClick={togglePlay}
-              aria-label={isPlaying ? "暫停" : "播放"}
-              disabled={mediaError === "audio"}
-              type="button"
-            >
-              {isPlaying ? <PauseGlyph size={34} /> : <PlayGlyph size={34} className={styles.playGlyph} />}
-            </button>
-            <button
-              type="button"
-              className={styles.ctrlBtn}
-              onClick={() => skip(10)}
-              aria-label="快進 10 秒"
-              disabled={mediaError === "audio"}
-            >
-              <span className={styles.skip}>
-                <ForwardIcon size={36} />
-                <span className={styles.skipNum}>10</span>
-              </span>
-            </button>
-            <button
-              type="button"
-              className={styles.ctrlBtn}
-              onClick={stop}
-              aria-label="停止"
-              disabled={mediaError === "audio"}
-            >
-              <StopIcon size={32} />
-            </button>
+            <div className={styles.transport}>
+              <button
+                type="button"
+                className={`${styles.ctrlBtn} ${repeat ? styles.ctrlBtnOn : ""}`}
+                style={repeat ? { color } : undefined}
+                onClick={() => setRepeat((v) => !v)}
+                aria-pressed={repeat}
+                aria-label="重複播放"
+              >
+                <RepeatIcon size={34} />
+                {repeat && <span className={styles.onDot} style={{ backgroundColor: color }} />}
+              </button>
+              <button
+                type="button"
+                className={styles.ctrlBtn}
+                onClick={() => skip(-10)}
+                aria-label="倒退 10 秒"
+                disabled={mediaError === "audio"}
+              >
+                <span className={styles.skip}>
+                  <RewindIcon size={36} />
+                  <span className={styles.skipNum}>10</span>
+                </span>
+              </button>
+              <button
+                className={styles.playBtn}
+                style={{ backgroundColor: color }}
+                onClick={togglePlay}
+                aria-label={isPlaying ? "暫停" : "播放"}
+                disabled={mediaError === "audio"}
+                type="button"
+              >
+                {isPlaying ? (
+                  <PauseGlyph size={32} />
+                ) : (
+                  <PlayGlyph size={32} className={styles.playGlyph} />
+                )}
+              </button>
+              <button
+                type="button"
+                className={styles.ctrlBtn}
+                onClick={() => skip(10)}
+                aria-label="快進 10 秒"
+                disabled={mediaError === "audio"}
+              >
+                <span className={styles.skip}>
+                  <ForwardIcon size={36} />
+                  <span className={styles.skipNum}>10</span>
+                </span>
+              </button>
+              <button
+                type="button"
+                className={styles.ctrlBtn}
+                onClick={stop}
+                aria-label="停止"
+                disabled={mediaError === "audio"}
+              >
+                <StopIcon size={32} />
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      <audio
-        ref={audioRef}
-        src={audio}
-        preload="metadata"
-        onError={() => setMediaError("audio")}
-      />
     </div>
   );
 }

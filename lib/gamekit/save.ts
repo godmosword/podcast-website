@@ -5,8 +5,6 @@ const SAVE_KEY = "cheche:gamekit-profile";
 const SAVE_VERSION = 2;
 
 const LEGACY_BEST_KEYS: Record<GameKitGameId, string> = {
-  "car-star": "car-star-best",
-  "car-mission": "car-mission-best",
   "car-adventure": "car-adventure-best",
   "block-drop": "block-drop-best",
 };

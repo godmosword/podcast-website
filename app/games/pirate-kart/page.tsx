@@ -768,7 +768,7 @@ export default function PirateKartPage() {
         方向鍵轉向與前進 · Shift 張帆加速 · 空白鍵大砲 · 收集金色寶藏、跑完三圈即獲勝
       </p>
 
-      {/* TODO: 觸控虛擬按鈕（參考 car-mission mobile-controls） */}
+      {/* TODO: 觸控虛擬按鈕 */}
       {/* TODO: 接入 lib/gamekit/session reportGameSession */}
       {/* TODO: 抽到 lib/gamekit/ 共用 Kart 物理與賽道資料 */}
       {/* TODO: 更多賽道／道具種類／本地最高分 */}

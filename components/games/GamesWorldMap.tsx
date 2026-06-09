@@ -15,12 +15,15 @@ import { GAMES } from "@/lib/games/catalog";
 import styles from "./GamesWorldMap.module.css";
 
 const GAME_ICONS: Record<string, string> = {
-  "car-star": "⭐",
-  "car-mission": "🌙",
   "car-adventure": "🏁",
   "block-drop": "🧩",
   kart: "🏎️",
+  "pirate-kart": "🏴‍☠️",
 };
+
+function isGameKitGameId(gameId: string): gameId is GameKitGameId {
+  return gameId === "car-adventure" || gameId === "block-drop";
+}
 
 function formatBest(gameId: GameKitGameId, best: number): string {
   if (best <= 0) return "—";
@@ -40,7 +43,8 @@ export function GamesWorldMap() {
   }
 
   const medalTotal = GAMES.reduce(
-    (sum, game) => sum + gameMedalStars(profile, game.id as GameKitGameId),
+    (sum, game) =>
+      sum + (isGameKitGameId(game.id) ? gameMedalStars(profile, game.id) : 0),
     0,
   );
   const unlockedCount = GARAGE_VEHICLES.filter((v) =>
@@ -74,10 +78,12 @@ export function GamesWorldMap() {
 
       <section className={styles.map} aria-label="遊戲地圖">
         {GAMES.map((game, i) => {
-          const isKitGame = game.id !== "kart";
-          const gameId = game.id as GameKitGameId;
-          const medals = isKitGame ? gameMedalStars(profile, gameId) : 0;
-          const best = isKitGame ? (profile.bests[gameId] ?? 0) : 0;
+          const meta = isGameKitGameId(game.id)
+            ? {
+                medals: gameMedalStars(profile, game.id),
+                bestLabel: formatBest(game.id, profile.bests[game.id] ?? 0),
+              }
+            : null;
           return (
             <Link
               key={game.id}
@@ -86,13 +92,15 @@ export function GamesWorldMap() {
               style={{ "--i": i } as React.CSSProperties}
             >
               <span className={styles.islandIcon} aria-hidden>
-                {GAME_ICONS[gameId]}
+                {GAME_ICONS[game.id] ?? game.emoji}
               </span>
               <span className={styles.islandTitle}>{game.title}</span>
               <span className={styles.islandMeta}>
-                {isKitGame
-                  ? `🏅 ${medals} · 最佳 ${formatBest(gameId, best)}`
-                  : "3D 漂移競速 · 新上架"}
+                {meta
+                  ? `🏅 ${meta.medals} · 最佳 ${meta.bestLabel}`
+                  : game.id === "pirate-kart"
+                    ? "海盜競速 · 新上架"
+                    : "3D 漂移競速 · 新上架"}
               </span>
             </Link>
           );

@@ -6,6 +6,7 @@ type PlayButtonProps = {
   color: string;
   children?: React.ReactNode;
   inline?: boolean;
+  className?: string;
 };
 
 export default function PlayButton({
@@ -13,11 +14,12 @@ export default function PlayButton({
   color,
   children = "▶ 開始看故事",
   inline = false,
+  className = "",
 }: PlayButtonProps) {
   return (
     <Link
       href={href}
-      className={`${styles.button} ${inline ? styles.inline : ""}`}
+      className={`${styles.button} ${inline ? styles.inline : ""} ${className}`.trim()}
       style={{ backgroundColor: color }}
     >
       {children}

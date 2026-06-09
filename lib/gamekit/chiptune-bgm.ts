@@ -17,59 +17,24 @@ export type BgmTheme = {
 const C3 = 131;
 const D3 = 147;
 const E3 = 165;
-const F3 = 175;
 const G3 = 196;
 const A3 = 220;
 const B3 = 247;
 const C4 = 262;
 const D4 = 294;
 const E4 = 330;
-const F4 = 349;
 const G4 = 392;
 const A4 = 440;
 const B4 = 494;
 const C5 = 523;
 const D5 = 587;
 const E5 = 659;
-const F5 = 698;
 const G5 = 784;
 const A5 = 880;
 const R = 0;
 
-/** 四款遊戲的程序生成 chiptune 主題（Phase 3 佔位，日後可換 BeepBox 匯出）。 */
+/** Game Kit 遊戲的程序生成 chiptune 主題（Phase 3 佔位，日後可換 BeepBox 匯出）。 */
 export const BGM_THEMES: Record<GameKitGameId, BgmTheme> = {
-  "car-mission": {
-    bpm: 72,
-    stepsPerBeat: 2,
-    melodyWave: "triangle",
-    bassWave: "triangle",
-    melodyVol: 0.1,
-    bassVol: 0.07,
-    melody: [
-      [G4, R, A4, R, B4, A4, G4, R, E4, G4, A4, R, G4, E4, D4, R],
-      [E4, R, G4, R, A4, G4, E4, R, D4, E4, G4, R, A4, G4, E4, R],
-    ],
-    bass: [
-      [G3, R, G3, R, E4, R, E4, R, C4, R, C4, R, G3, R, G3, R],
-      [E4, R, E4, R, C4, R, C4, R, G3, R, G3, R, D4, R, D4, R],
-    ],
-  },
-  "car-star": {
-    bpm: 96,
-    stepsPerBeat: 4,
-    melodyWave: "square",
-    bassWave: "square",
-    melodyVol: 0.08,
-    bassVol: 0.06,
-    melody: [
-      [C5, E5, G5, E5, C5, E5, G5, E5, D5, F5, A4, F5, D5, F5, A4, F5],
-      [E5, G5, B4, G5, E5, G5, B4, G5, F5, A4, C5, A4, F5, A4, C5, A4],
-    ],
-    bass: [
-      [C4, R, G3, R, C4, R, G3, R, F3, R, C4, R, F3, R, C4, R],
-      [G3, R, E3, R, G3, R, E3, R, A3, R, E3, R, A3, R, E3, R],
-    ],
-  },
   "car-adventure": {
     bpm: 108,
     stepsPerBeat: 4,

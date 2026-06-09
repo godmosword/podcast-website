@@ -117,3 +117,39 @@ export function HeartIcon({
     </svg>
   );
 }
+
+/** 字幕（CC）。 */
+export function CaptionsIcon({ size = 20, className }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <g {...STROKE}>
+        <rect x="3" y="5" width="18" height="14" rx="2.5" />
+        <path d="M7.5 11.5h2.2a1.8 1.8 0 0 1 0 3.6H7.5M14.3 11.5h2.2a1.8 1.8 0 0 1 0 3.6h-2.2" />
+      </g>
+    </svg>
+  );
+}
+
+/** 音量開啟。 */
+export function VolumeOnIcon({ size = 22, className }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <g {...STROKE}>
+        <path d="M5 9.5v5h3.5L14 19V5L8.5 9.5H5z" fill="currentColor" stroke="none" />
+        <path d="M16.5 9.5a3.5 3.5 0 0 1 0 5M18.8 7.2a6.5 6.5 0 0 1 0 9.6" />
+      </g>
+    </svg>
+  );
+}
+
+/** 靜音。 */
+export function VolumeOffIcon({ size = 22, className }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <g {...STROKE}>
+        <path d="M5 9.5v5h3.5L14 19V5L8.5 9.5H5z" fill="currentColor" stroke="none" />
+        <path d="M17 9l4 6M21 9l-4 6" />
+      </g>
+    </svg>
+  );
+}

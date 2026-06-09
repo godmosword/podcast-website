@@ -6,6 +6,11 @@
   text-align: center;
 }
 
+.compact {
+  margin-top: 20px;
+  padding-top: 16px;
+}
+
 .parentNote {
   margin: 0 auto;
   max-width: 460px;

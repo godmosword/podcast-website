@@ -7,9 +7,13 @@ import styles from "./SiteFooter.module.css";
 // 贊助 / 支持連結（選填）。
 const SUPPORT_URL = "";
 
-export default function SiteFooter() {
+type SiteFooterProps = {
+  compact?: boolean;
+};
+
+export default function SiteFooter({ compact = false }: SiteFooterProps) {
   return (
-    <footer className={styles.footer}>
+    <footer className={`${styles.footer} ${compact ? styles.compact : ""}`}>
       <Doodle
         kind="squiggle"
         size={36}

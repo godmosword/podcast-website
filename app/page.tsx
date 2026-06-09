@@ -34,7 +34,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       {latest && <LatestHero story={latest} />}
       <FavoritesSection />
       <p className={styles.audienceNote}>
-        給 3–8 歲孩子與家長 · 每集約 5 分鐘，適合睡前看圖聽故事
+        給 3–7 歲孩子與家長 · 每集 5–10 分鐘，適合睡前看圖聽故事
       </p>
       <StoryFilter
         stories={listStories}

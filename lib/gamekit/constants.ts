@@ -14,15 +14,10 @@ export const MAX_FRAME_STEPS = 8;
 /** 像素畫最大整數放大倍率（避免超大 canvas）。 */
 export const MAX_PIXEL_SCALE = 4;
 
-/**
- * 各款固定內部解析度（Phase 0 定錨）。
- * 實際遊戲尚未全部遷移；新渲染管線以此為準。
- */
+/** 各款 Game Kit 遊戲固定內部解析度。 */
 export const GAME_VIEWPORTS: Record<GameKitGameId, ViewportSize> = {
-  "car-star": { width: 240, height: 320 },
   "block-drop": { width: 200, height: 360 },
   "car-adventure": { width: 320, height: 180 },
-  "car-mission": { width: 320, height: 240 },
 };
 
 export function viewportFor(gameId: GameKitGameId): ViewportSize {

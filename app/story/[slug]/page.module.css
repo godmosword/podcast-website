@@ -46,6 +46,30 @@
   color: var(--ink);
 }
 
+.actions {
+  margin: 24px 0 8px;
+}
+
+.primaryRow {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.playMain {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: stretch;
+}
+
+.playMain a {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .playWrap {
   margin: 24px 0 8px;
 }
@@ -71,6 +95,12 @@
   font-size: 1rem;
   line-height: 1.75;
   color: var(--ink);
+}
+
+@media (max-width: 640px) {
+  .main {
+    padding-bottom: calc(12px + var(--safe-bottom));
+  }
 }
 
 .nextHint {
