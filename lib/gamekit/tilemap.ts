@@ -13,7 +13,7 @@ export type TilemapData = {
 };
 
 /**
- * Tilemap 載入與繪製 stub（Phase 5 接 Tiled JSON）。
+ * Tilemap 繪製輔助（關卡資料見 `adventure-level`／`tiled-loader`）。
  */
 export class Tilemap {
   constructor(private readonly data: TilemapData) {}

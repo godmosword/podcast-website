@@ -316,10 +316,13 @@ repo secret 存 `LINE_NOTIFY_TOKEN` 或 `DISCORD_WEBHOOK_URL`；同步偵測新�
 `lib/gamekit/chiptune-bgm` 四款程序生成循環 BGM；`GameKitAudioBus` music／sfx 分軌；擴充 `useGameAudio(gameId)`（`playBgm`／`pauseBgm`／`stopBgm`）；四款遊戲接入，分頁隱藏暫停 BGM。
 
 ### ~~Game Kit Phase 4 — juice＋手機操控~~　`P3 · L · Phase 3 ✅`　〔eng+design〕 ✅
-`lib/gamekit/juice` 粒子／震動／頓幀／緩動；四款接入 juice；`useCoarsePointer`／`useSwipeGesture`／`mobile-controls` 手機大按鈕＋滑動手勢。**Phase 5 待做**：Tiled 關卡 loader。
+`lib/gamekit/juice` 粒子／震動／頓幀／緩動；四款接入 juice；`useCoarsePointer`／`useSwipeGesture`／`mobile-controls` 手機大按鈕＋滑動手勢。
 
-### Game Kit Phase 5–8 — 內容／元系統／外框／QA　`P3 · L · Phase 4 ✅`　〔eng〕
-Phase 5：Tiled → JSON 關卡 loader（大冒險優先）、多迷宮/多模式。Phase 6：跨遊戲星星、三星、車庫解鎖、`/games` 世界地圖 hub、貼紙簿。Phase 7：標題/暫停/設定/Gamepad/a11y/兒童模式。Phase 8：固定步進+插值、物件池、資產預載、Lighthouse ≥95。
+### ~~Game Kit Phase 5 — Tiled／JSON 關卡 loader~~　`P3 · L · Phase 4 ✅`　〔eng〕 ✅
+`adventure-level`／`tiled-loader`；car-adventure 2 關 JSON + 關卡選擇；car-star 3 迷宮選擇。**Phase 6 待做**：跨遊戲 meta。
+
+### Game Kit Phase 6–8 — 元系統／外框／QA　`P3 · L · Phase 5 ✅`　〔eng〕
+Phase 6：跨遊戲星星、三星、車庫解鎖、`/games` 世界地圖 hub、貼紙簿。Phase 7：標題/暫停/設定/Gamepad/a11y/兒童模式。Phase 8：固定步進+插值、物件池、資產預載、Lighthouse ≥95。
 
 ### ① 車車吃星星精進　`P3 · M · Game Kit Phase 2`　〔eng+design〕
 多迷宮（3–5）、四種追逐 AI、像素 tileset、4 方向行駛幀、連段/過關 juice、三星制。對標街機能量感，兒童原創。
@@ -536,6 +539,10 @@ T+2d    社群貼文（B 戰場）
 ---
 
 ## Completed
+
+### Game Kit Phase 5（Tiled／JSON 關卡 loader）
+`adventure-level`／`tiled-loader`；car-adventure 2 關 + 選關；car-star 3 迷宮。
+**Completed:** main（2026-06）
 
 ### Game Kit Phase 4（juice＋手機操控）
 四款 juice（粒子／震動／頓幀）；`useSwipeGesture` 滑動換道／方向；粗指標大按鈕與 safe-area。

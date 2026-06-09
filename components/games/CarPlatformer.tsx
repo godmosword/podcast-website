@@ -24,6 +24,11 @@ import {
   drawAdventureGroundTile,
   drawAdventureSpike,
 } from "@/lib/gamekit/tileset-draw";
+import {
+  levelFromJson,
+  type AdventureLevel,
+} from "@/lib/gamekit/adventure-level";
+import { CAR_ADVENTURE_LEVELS } from "@/lib/games/car-adventure/levels";
 
 const TILE = 36;
 const VW = 720;
@@ -75,31 +80,9 @@ interface Enemy {
   dir: number;
   alive: boolean;
 }
-interface Coin {
-  x: number;
-  y: number;
-  taken: boolean;
-}
-interface Finish {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
-interface Level {
-  solid: Set<string>;
-  spikes: Set<string>;
-  coins: Coin[];
-  enemies: Enemy[];
-  cols: number;
-  worldW: number;
-  worldH: number;
-  start: { x: number; y: number };
-  finish: Finish;
-  total: number;
-}
 interface GameState {
-  lv: Level;
+  lv: AdventureLevel;
+  levelIndex: number;
   player: Player;
   cam: number;
   score: number;
@@ -112,84 +95,12 @@ interface GameState {
 const approach = (v: number, target: number, amt: number) =>
   v > target ? Math.max(target, v - amt) : Math.min(target, v + amt);
 
-function buildLevel(): Level {
-  const solid = new Set<string>();
-  const spikes = new Set<string>();
-  const coins: Coin[] = [];
-  const enemies: Enemy[] = [];
-  const S = (x: number, y: number) => solid.add(`${x},${y}`);
-  const ground = (a: number, b: number) => {
-    for (let x = a; x <= b; x++) {
-      S(x, 10);
-      S(x, 11);
-    }
-  };
-  const plat = (a: number, b: number, r: number) => {
-    for (let x = a; x <= b; x++) S(x, r);
-  };
-  const coin = (x: number, y: number) =>
-    coins.push({ x: x * TILE + TILE / 2, y: y * TILE + TILE / 2, taken: false });
-  const coinRow = (a: number, b: number, y: number) => {
-    for (let x = a; x <= b; x++) coin(x, y);
-  };
-  const spike = (x: number, y: number) => spikes.add(`${x},${y}`);
-  const enemy = (x: number, y: number) =>
-    enemies.push({
-      x: x * TILE + 3,
-      y: y * TILE + (TILE - 24),
-      w: 30,
-      h: 24,
-      vx: 62,
-      dir: -1,
-      alive: true,
-    });
-
-  ground(0, 13);
-  ground(17, 29);
-  ground(32, 49);
-  ground(52, 89);
-  ground(92, 107);
-  plat(5, 8, 7);
-  plat(20, 24, 7);
-  plat(36, 40, 6);
-  S(42, 9);
-  S(43, 8);
-  S(44, 7);
-  plat(45, 48, 6);
-  plat(56, 60, 7);
-  plat(64, 68, 5);
-  spike(70, 9);
-  spike(71, 9);
-  spike(72, 9);
-  coinRow(5, 8, 6);
-  coinRow(14, 16, 7);
-  coinRow(20, 24, 6);
-  coinRow(36, 40, 5);
-  coin(43, 7);
-  coin(44, 6);
-  coinRow(45, 48, 5);
-  coinRow(56, 60, 6);
-  coinRow(64, 68, 4);
-  coinRow(78, 82, 9);
-  coinRow(95, 100, 9);
-  enemy(24, 9);
-  enemy(40, 9);
-  enemy(60, 9);
-  enemy(82, 9);
-
-  const cols = 108;
-  return {
-    solid,
-    spikes,
-    coins,
-    enemies,
-    cols,
-    worldW: cols * TILE,
-    worldH: ROWS * TILE,
-    start: { x: 2 * TILE, y: 9 * TILE - 2 },
-    finish: { x: 104 * TILE, y: 8 * TILE, w: TILE, h: 2 * TILE },
-    total: coins.length,
-  };
+function loadAdventureLevel(index: number): AdventureLevel {
+  const json =
+    CAR_ADVENTURE_LEVELS[
+      Math.max(0, Math.min(index, CAR_ADVENTURE_LEVELS.length - 1))
+    ];
+  return levelFromJson(json);
 }
 
 const primaryBtn: CSSProperties = {
@@ -276,6 +187,8 @@ export default function CarPlatformer() {
   const reduced = useReducedMotion();
 
   const [status, setStatus] = useState<Status>("ready");
+  const [levelIndex, setLevelIndex] = useState(0);
+  const levelIndexRef = useRef(0);
   const [best, setBest] = useState(0);
   const {
     ensureAudio,
@@ -332,10 +245,11 @@ export default function CarPlatformer() {
       setTimeout(() => tone(f, 0.2, "triangle", 0.06), i * 130),
     );
 
-  const reset = useCallback(() => {
-    const lv = buildLevel();
+  const reset = useCallback((idx = levelIndexRef.current) => {
+    const lv = loadAdventureLevel(idx);
     game.current = {
       lv,
+      levelIndex: idx,
       player: {
         x: lv.start.x,
         y: lv.start.y,
@@ -362,9 +276,51 @@ export default function CarPlatformer() {
 
   const begin = useCallback(() => {
     ensureAudio();
-    reset();
+    reset(levelIndexRef.current);
     setStat("playing");
-  }, [reset, setStat]);
+  }, [ensureAudio, reset, setStat]);
+
+  const beginLevel = useCallback(
+    (idx: number) => {
+      levelIndexRef.current = idx;
+      setLevelIndex(idx);
+      ensureAudio();
+      reset(idx);
+      setStat("playing");
+    },
+    [ensureAudio, reset, setStat],
+  );
+
+  const advanceLevel = useCallback(() => {
+    const g = game.current;
+    if (!g) return;
+    const next = Math.min(g.levelIndex + 1, CAR_ADVENTURE_LEVELS.length - 1);
+    levelIndexRef.current = next;
+    setLevelIndex(next);
+    const lv = loadAdventureLevel(next);
+    g.lv = lv;
+    g.levelIndex = next;
+    g.player = {
+      x: lv.start.x,
+      y: lv.start.y,
+      w: 30,
+      h: 26,
+      vx: 0,
+      vy: 0,
+      onGround: false,
+      facing: 1,
+      coyote: 0,
+      jumpBuf: 0,
+      jumpHeld: false,
+      jumpCut: false,
+      invuln: INVULN,
+    };
+    g.cam = 0;
+    g.taken = 0;
+    g.last = null;
+    statusRef.current = "playing";
+    setStatus("playing");
+  }, []);
 
   const togglePause = useCallback(() => {
     if (statusRef.current === "playing") setStat("paused");
@@ -534,8 +490,13 @@ export default function CarPlatformer() {
 
     const f = g.lv.finish;
     if (box.r > f.x && box.l < f.x + f.w) {
-      sWin();
-      setStat("won");
+      if (g.levelIndex >= CAR_ADVENTURE_LEVELS.length - 1) {
+        sWin();
+        setStat("won");
+      } else {
+        sCoin();
+        advanceLevel();
+      }
     }
 
     g.cam = Math.max(
@@ -690,6 +651,13 @@ export default function CarPlatformer() {
     drawPixelText(ctx, `SC ${g.score}`, 8, 6, { scale: 1, shadow: true });
     drawPixelText(ctx, `C ${g.taken}/${g.lv.total}`, 8, 18, { scale: 1 });
     drawPixelText(ctx, `HP ${g.lives}`, 8, 30, { scale: 1 });
+    drawPixelText(
+      ctx,
+      `L${g.levelIndex + 1}/${CAR_ADVENTURE_LEVELS.length}`,
+      8,
+      42,
+      { scale: 1 },
+    );
   };
 
   useEffect(() => {
@@ -870,7 +838,7 @@ export default function CarPlatformer() {
             </div>
             <div style={{ fontSize: 24, fontWeight: 800 }}>
               {status === "won"
-                ? "抵達終點！"
+                ? "全關卡通關！"
                 : status === "over"
                   ? "再試一次吧"
                   : status === "paused"
@@ -881,23 +849,68 @@ export default function CarPlatformer() {
               <div style={{ fontSize: 16 }}>得分 ⭐ {game.current.score}</div>
             )}
             {status === "ready" && (
-              <div
-                style={{
-                  fontSize: 14,
-                  color: "#cdd9f0",
-                  maxWidth: 320,
-                  lineHeight: 1.6,
-                }}
-              >
-                方向鍵移動、上鍵/空白鍵跳；按住跳越久跳越高。踩在搗蛋車頭上可以彈飛它，吃金幣、躲尖刺、衝向終點旗！
-              </div>
+              <>
+                <div
+                  style={{
+                    fontSize: 14,
+                    color: "#cdd9f0",
+                    maxWidth: 320,
+                    lineHeight: 1.6,
+                  }}
+                >
+                  方向鍵移動、上鍵/空白鍵跳；踩在搗蛋車頭上可以彈飛它，吃金幣、躲尖刺、衝向終點旗！
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 8,
+                    width: "100%",
+                    maxWidth: 280,
+                  }}
+                >
+                  <div style={{ fontSize: 13, color: "#a8bce8" }}>選擇關卡</div>
+                  {CAR_ADVENTURE_LEVELS.map((lv, i) => (
+                    <button
+                      key={lv.id}
+                      type="button"
+                      onClick={() => {
+                        levelIndexRef.current = i;
+                        setLevelIndex(i);
+                      }}
+                      style={{
+                        border:
+                          levelIndex === i
+                            ? "2px solid #ffd23f"
+                            : "2px solid rgba(255,255,255,.25)",
+                        background:
+                          levelIndex === i
+                            ? "rgba(255,210,63,.2)"
+                            : "rgba(255,255,255,.08)",
+                        color: "#fff",
+                        borderRadius: 12,
+                        padding: "10px 14px",
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        fontFamily: "inherit",
+                      }}
+                    >
+                      關卡 {i + 1} · {lv.name}
+                    </button>
+                  ))}
+                </div>
+              </>
             )}
             {status === "paused" ? (
               <button type="button" onClick={togglePause} style={primaryBtn}>
                 繼續 ▶
               </button>
             ) : (
-              <button type="button" onClick={begin} style={primaryBtn}>
+              <button
+                type="button"
+                onClick={() => beginLevel(levelIndex)}
+                style={primaryBtn}
+              >
                 {status === "ready" ? "開始冒險 ▶" : "再玩一次 🔁"}
               </button>
             )}

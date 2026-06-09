@@ -31,6 +31,14 @@ import {
   tweenToward,
   JuiceController,
 } from "@/lib/gamekit/juice";
+import { levelFromJson } from "@/lib/gamekit/adventure-level";
+import {
+  isTiledMapJson,
+  normalizeAdventureLevelJson,
+  tiledToAdventureJson,
+} from "@/lib/gamekit/tiled-loader";
+import { CAR_ADVENTURE_LEVELS } from "@/lib/games/car-adventure/levels";
+import { CAR_STAR_MAZES, parseCarStarMaze } from "@/lib/games/car-star-mazes";
 import { emptyTilemap } from "@/lib/gamekit/tilemap";
 import { recordBestScore, loadPlayerProfile } from "@/lib/gamekit/save";
 
@@ -163,6 +171,63 @@ describe("juice", () => {
     j.burst(10, 10, 4, "#fff");
     const r = j.update(0.016);
     expect(r.shakeX).toBeDefined();
+  });
+});
+
+describe("adventure levels", () => {
+  it("CAR_ADVENTURE_LEVELS 可轉為執行期關卡", () => {
+    for (const json of CAR_ADVENTURE_LEVELS) {
+      const lv = levelFromJson(json);
+      expect(lv.solid.size).toBeGreaterThan(0);
+      expect(lv.total).toBe(json.coins?.length ?? 0);
+      expect(lv.worldW).toBe(json.cols * json.tileSize);
+    }
+  });
+
+  it("tiledToAdventureJson 解析 tilelayer 與 objects", () => {
+    const tiled = {
+      width: 8,
+      height: 6,
+      tilewidth: 36,
+      tileheight: 36,
+      layers: [
+        {
+          type: "tilelayer" as const,
+          name: "solid",
+          width: 8,
+          height: 6,
+          data: [0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        },
+        {
+          type: "objectgroup" as const,
+          name: "objects",
+          objects: [
+            { type: "player", x: 36, y: 144, width: 36, height: 36 },
+            { type: "coin", x: 108, y: 108, width: 16, height: 16 },
+            { type: "finish", x: 252, y: 108, width: 36, height: 72 },
+          ],
+        },
+      ],
+    };
+    expect(isTiledMapJson(tiled)).toBe(true);
+    const json = tiledToAdventureJson(tiled, { id: "test", name: "測試" });
+    expect(json.solid.length).toBeGreaterThan(0);
+    expect(json.coins).toHaveLength(1);
+    expect(json.start).toEqual([1, 4]);
+    const lv = levelFromJson(normalizeAdventureLevelJson(json));
+    expect(lv.coins).toHaveLength(1);
+  });
+});
+
+describe("car-star mazes", () => {
+  it("三個迷宮行列一致且可解析", () => {
+    for (const def of CAR_STAR_MAZES) {
+      const w = def.rows[0].length;
+      for (const row of def.rows) expect(row.length).toBe(w);
+      const maze = parseCarStarMaze(def);
+      expect(maze.initStars.size).toBeGreaterThan(0);
+      expect(maze.playerStart.r).toBeGreaterThanOrEqual(0);
+    }
   });
 });
 

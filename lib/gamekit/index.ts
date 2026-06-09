@@ -17,5 +17,7 @@ export * from "./procedural-sheets";
 export * from "./assets";
 export * from "./sprite-defs";
 export * from "./tileset-draw";
+export * from "./adventure-level";
+export * from "./tiled-loader";
 
 export { GAMEKIT_VERSION } from "./constants";

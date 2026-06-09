@@ -20,6 +20,11 @@ import { useDomJuice } from "@/hooks/useDomJuice";
 import { useSwipeGesture } from "@/hooks/useSwipeGesture";
 import mobileStyles from "./mobile-controls.module.css";
 import styles from "./CarStarGame.module.css";
+import {
+  CAR_STAR_MAZES,
+  getCarStarMaze,
+  type MazeRuntime,
+} from "@/lib/games/car-star-mazes";
 
 // ── 型別 ────────────────────────────────────────────────
 type Dir = "up" | "down" | "left" | "right";
@@ -48,6 +53,7 @@ interface Popup {
   color: string;
 }
 interface GameState {
+  mazeId: string;
   player: Player;
   ghosts: Ghost[];
   stars: Set<string>;
@@ -59,29 +65,7 @@ interface GameState {
   tick: number;
 }
 
-// ── 迷宮地圖 ─────────────────────────────────────────────
-// #=牆  .=金幣  o=加速道具  P=玩家起點  G=追逐車起點
-const MAZE = [
-  "###############",
-  "#o...........o#",
-  "#.##.##.##.##.#",
-  "#.##.##.##.##.#",
-  "#.............#",
-  "#.##.##.##.##.#",
-  "#.##.##G##.##.#",
-  "#.##.##.##.##.#",
-  "#.............#",
-  "#.##.##.##.##.#",
-  "#.##.##P##.##.#",
-  "#o...........o#",
-  "###############",
-] as const;
-
-const ROWS = MAZE.length;
-const COLS = MAZE[0].length;
 const CELL = 16;
-const BOARD_W = COLS * CELL;
-const BOARD_H = ROWS * CELL;
 const TICK = 260; // ms，數字越大車子越慢（給 3–7 歲）
 const GHOST_MOVE_EVERY: Record<Difficulty, number> = { easy: 2, normal: 1 };
 
@@ -117,38 +101,24 @@ function carTransform(dir: Dir | null, orientation: "topdown" | "sideview"): str
   return dir === "left" ? "scaleX(-1)" : "none";
 }
 
-// 解析地圖
-const grid: string[][] = MAZE.map((r) => r.split(""));
-const initStars = new Set<string>();
-const initPowers = new Set<string>();
-let playerStart = { r: 10, c: 7 };
-let ghostStart = { r: 6, c: 7 };
-grid.forEach((row, r) =>
-  row.forEach((ch, c) => {
-    if (ch === ".") initStars.add(`${r},${c}`);
-    else if (ch === "o") initPowers.add(`${r},${c}`);
-    else if (ch === "P") playerStart = { r, c };
-    else if (ch === "G") ghostStart = { r, c };
-  }),
-);
-
-function canMove(r: number, c: number, dir: Dir): boolean {
+function canMove(maze: MazeRuntime, r: number, c: number, dir: Dir): boolean {
   const d = DIRS[dir];
   const nr = r + d.dr;
   const nc = c + d.dc;
-  if (nr < 0 || nc < 0 || nr >= ROWS || nc >= COLS) return false;
-  return grid[nr][nc] !== "#";
+  if (nr < 0 || nc < 0 || nr >= maze.rows || nc >= maze.cols) return false;
+  return maze.grid[nr][nc] !== "#";
 }
 
-function freshState(): GameState {
+function freshState(maze: MazeRuntime): GameState {
   return {
-    player: { ...playerStart, dir: null, desired: null },
+    mazeId: maze.id,
+    player: { ...maze.playerStart, dir: null, desired: null },
     ghosts: [
-      { r: ghostStart.r, c: ghostStart.c, dir: "up", role: "police" },
-      { r: ghostStart.r, c: ghostStart.c, dir: "down", role: "red" },
+      { r: maze.ghostStart.r, c: maze.ghostStart.c, dir: "up", role: "police" },
+      { r: maze.ghostStart.r, c: maze.ghostStart.c, dir: "down", role: "red" },
     ],
-    stars: new Set(initStars),
-    powers: new Set(initPowers),
+    stars: new Set(maze.initStars),
+    powers: new Set(maze.initPowers),
     score: 0,
     lives: 3,
     status: "playing",
@@ -274,7 +244,8 @@ export default function CarStarGame() {
   const isCoarse = useCoarsePointer();
   const { juice, boardTransform } = useDomJuice(reduced);
 
-  const game = useRef<GameState>(freshState());
+  const [mazeId, setMazeId] = useState(CAR_STAR_MAZES[0].id);
+  const game = useRef<GameState>(freshState(getCarStarMaze(CAR_STAR_MAZES[0].id)));
   const {
     ensureAudio,
     tone,
@@ -322,12 +293,12 @@ export default function CarStarGame() {
 
   // ── 追逐車 AI ──────────────────────────────────────
   const moveGhost = useCallback(
-    (gh: Ghost, scared: boolean, p: Player, mode: Difficulty) => {
+    (maze: MazeRuntime, gh: Ghost, scared: boolean, p: Player, mode: Difficulty) => {
       let choices = ALL_DIRS.filter(
-        (d) => canMove(gh.r, gh.c, d) && d !== OPP[gh.dir],
+        (d) => canMove(maze, gh.r, gh.c, d) && d !== OPP[gh.dir],
       );
       if (choices.length === 0) {
-        choices = ALL_DIRS.filter((d) => canMove(gh.r, gh.c, d));
+        choices = ALL_DIRS.filter((d) => canMove(maze, gh.r, gh.c, d));
       }
       if (choices.length === 0) return;
       let best: Dir;
@@ -354,10 +325,11 @@ export default function CarStarGame() {
   );
 
   const resetPositions = useCallback((g: GameState) => {
-    g.player = { ...playerStart, dir: null, desired: null };
+    const maze = getCarStarMaze(g.mazeId);
+    g.player = { ...maze.playerStart, dir: null, desired: null };
     g.ghosts = [
-      { r: ghostStart.r, c: ghostStart.c, dir: "up", role: "police" },
-      { r: ghostStart.r, c: ghostStart.c, dir: "down", role: "red" },
+      { r: maze.ghostStart.r, c: maze.ghostStart.c, dir: "up", role: "police" },
+      { r: maze.ghostStart.r, c: maze.ghostStart.c, dir: "down", role: "red" },
     ];
     g.scaredUntil = 0;
   }, []);
@@ -366,11 +338,12 @@ export default function CarStarGame() {
   const step = useCallback(() => {
     const g = game.current;
     if (g.status !== "playing") return;
+    const maze = getCarStarMaze(g.mazeId);
     g.tick++;
     const p = g.player;
 
-    if (p.desired && canMove(p.r, p.c, p.desired)) p.dir = p.desired;
-    if (p.dir && canMove(p.r, p.c, p.dir)) {
+    if (p.desired && canMove(maze, p.r, p.c, p.desired)) p.dir = p.desired;
+    if (p.dir && canMove(maze, p.r, p.c, p.dir)) {
       const d = DIRS[p.dir];
       p.r += d.dr;
       p.c += d.dc;
@@ -396,7 +369,7 @@ export default function CarStarGame() {
     const mode = difficultyRef.current;
     const ghostEvery = GHOST_MOVE_EVERY[mode];
     if (g.tick % ghostEvery === 0) {
-      g.ghosts.forEach((gh) => moveGhost(gh, scared, p, mode));
+      g.ghosts.forEach((gh) => moveGhost(maze, gh, scared, p, mode));
     }
 
     let lostLife = false;
@@ -404,8 +377,8 @@ export default function CarStarGame() {
       if (gh.r === p.r && gh.c === p.c) {
         if (scared) {
           addPopup(gh.r, gh.c, "+200", "#7CFFB2");
-          gh.r = ghostStart.r;
-          gh.c = ghostStart.c;
+          gh.r = maze.ghostStart.r;
+          gh.c = maze.ghostStart.c;
           g.score += 200;
           sHonk();
         } else {
@@ -512,14 +485,17 @@ export default function CarStarGame() {
   const beginGame = useCallback(() => {
     ensureAudio();
     difficultyRef.current = difficulty;
-    game.current = freshState();
+    game.current = freshState(getCarStarMaze(mazeId));
     setPopups([]);
     setStatus("playing");
     startLoop();
     rerender();
-  }, [ensureAudio, startLoop, rerender, difficulty]);
+  }, [ensureAudio, mazeId, startLoop, rerender, difficulty]);
 
   const g = game.current;
+  const displayMaze = getCarStarMaze(status === "start" ? mazeId : g.mazeId);
+  const BOARD_W = displayMaze.cols * CELL;
+  const BOARD_H = displayMaze.rows * CELL;
   const now = Date.now();
   const scared = now < g.scaredUntil;
   const flashing = scared && g.scaredUntil - now < 1500;
@@ -598,7 +574,7 @@ export default function CarStarGame() {
                 />
               </>
             )}
-            {grid.map((row, r) =>
+            {displayMaze.grid.map((row, r) =>
               row.map((ch, c) =>
                 ch !== "#" ? (
                   <div
@@ -728,6 +704,21 @@ export default function CarStarGame() {
                 )}
                 {status === "start" && (
                   <div className={styles.difficultyPicker}>
+                    <div className={styles.difficultyLabel}>選擇迷宮</div>
+                    <div className={styles.difficultyRow}>
+                      {CAR_STAR_MAZES.map((m) => (
+                        <button
+                          key={m.id}
+                          type="button"
+                          className={`${styles.difficultyBtn} ${
+                            mazeId === m.id ? styles.difficultyBtnEasyActive : ""
+                          }`}
+                          onClick={() => setMazeId(m.id)}
+                        >
+                          {m.emoji} {m.name}
+                        </button>
+                      ))}
+                    </div>
                     <div className={styles.difficultyLabel}>選擇難度</div>
                     <div className={styles.difficultyRow}>
                       <button
