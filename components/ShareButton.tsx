@@ -8,6 +8,7 @@ type ShareButtonProps = {
   shareUrl: string;
   lineUrl: string;
   leading?: ReactNode;
+  className?: string;
 };
 
 function LinkIcon() {
@@ -54,6 +55,7 @@ export default function ShareButton({
   shareUrl,
   lineUrl,
   leading,
+  className,
 }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
 
@@ -69,7 +71,7 @@ export default function ShareButton({
 
   return (
     <div
-      className={styles.row}
+      className={[styles.row, className].filter(Boolean).join(" ")}
       aria-label={leading ? "故事操作" : "分享這集"}
     >
       {leading}

@@ -47,27 +47,26 @@
 }
 
 .actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   margin: 24px 0 8px;
 }
 
-.primaryRow {
-  display: flex;
-  align-items: stretch;
-  gap: 10px;
-}
-
 .playMain {
-  flex: 1 1 auto;
-  min-width: 0;
-  display: flex;
-  align-items: stretch;
+  display: block;
+  width: 100%;
 }
 
 .playMain a {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+}
+
+.shareRow {
+  margin-top: 0;
 }
 
 .playWrap {

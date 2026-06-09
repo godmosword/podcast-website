@@ -13,9 +13,9 @@
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
-  --glass-bg: rgba(255, 255, 255, 0.14);
-  --glass-border: rgba(255, 255, 255, 0.28);
-  --glass-blur: blur(20px) saturate(180%);
+  --glass-bg: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-blur: blur(18px) saturate(160%);
   --controls-height: 154px;
 }
 
@@ -45,7 +45,10 @@
 
 .stage {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--controls-block, 156px) + var(--safe-bottom));
 }
 
 .image {
@@ -368,17 +371,25 @@
 
 .captionSizeBtn {
   composes: glassPill;
-  align-items: baseline;
-  gap: 1px;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0;
+  padding: 8px 11px 9px;
   line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.05em;
 }
 
 .aaSmall {
-  font-size: 0.72rem;
+  font-size: 0.62rem;
+  line-height: 1;
 }
 
 .aaLarge {
-  font-size: 1.02rem;
+  font-size: 0.98rem;
+  line-height: 1;
+  transform: translateY(-1px);
 }
 
 /* ---- 睡前定時（右上角 ⏱） ---- */
@@ -481,9 +492,9 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 36px calc(20px + var(--safe-right)) calc(16px + var(--safe-bottom))
+  padding: 20px calc(20px + var(--safe-right)) calc(12px + var(--safe-bottom))
     calc(20px + var(--safe-left));
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0));
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0));
 }
 
 .controlsInner {
@@ -492,12 +503,12 @@
   gap: 14px;
   padding: 14px 16px 12px;
   border-radius: 22px 22px 0 0;
-  background: var(--glass-bg);
+  background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--glass-border);
   border-bottom: none;
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.18);
 }
 
 @media (prefers-reduced-motion: reduce) {

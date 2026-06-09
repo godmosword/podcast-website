@@ -76,14 +76,11 @@ export default async function StoryDetailPage({
         </div>
 
         <div className={styles.actions}>
-          <div className={styles.primaryRow}>
-            <FavoriteButton slug={story.slug} />
-            <PlayButton
-              href={`/story/${story.slug}/play`}
-              color={story.color}
-              className={styles.playMain}
-            />
-          </div>
+          <PlayButton
+            href={`/story/${story.slug}/play`}
+            color={story.color}
+            className={styles.playMain}
+          />
           <ShareButton
             shareUrl={storyShareUrl(story.slug)}
             lineUrl={lineShareUrl(
@@ -94,6 +91,8 @@ export default async function StoryDetailPage({
                 summary: story.summary,
               }),
             )}
+            leading={<FavoriteButton slug={story.slug} />}
+            className={styles.shareRow}
           />
         </div>
 
