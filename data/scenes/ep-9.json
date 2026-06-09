@@ -170,8 +170,9 @@
       "start": 428,
       "end": 457,
       "summary": "提醒小朋友也要刷牙",
-      "prompt": "The green dinosaur car with the exact same wide happy laugh and same bright white teeth as the laugh contest scene, mouth open smiling just like scene 20, now at soft starry night in the amusement park waving one wheel goodbye to children, moonlit cozy night mood, encouraging warm farewell",
-      "characters": ["恐龍車多多"]
+      "prompt": "Wide open happy laugh with two rows of pure bright white teeth clearly visible (not yellow). Same green dinosaur car as reference: wheel-only vehicle body with four black wheels, absolutely no arms, no hands, no limbs, do not hold any tire. Starry night amusement park with crescent moon, Ferris wheel and carousel softly lit, same small colorful car friends nearby as the laugh contest, cozy encouraging farewell mood",
+      "characters": ["恐龍車多多"],
+      "refPages": [20]
     }
   ],
   "newCharacters": []

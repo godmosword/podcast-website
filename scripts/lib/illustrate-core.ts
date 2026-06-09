@@ -41,6 +41,8 @@ export interface Scene {
   characters: string[]; // 該幕出場的角色 canonical 名稱
   /** 沿用 public/stories/<slug>/NN.jpg（Apple 封面等），不生新圖、approve 時優先保留 */
   keepCover?: boolean;
+  /** 生圖時額外附上已發佈的 NN.jpg 當視覺參考（連戲用，如 #21 參考 #20） */
+  refPages?: number[];
 }
 
 export interface NewCharacter {
@@ -426,7 +428,11 @@ export async function generateSceneImage(
 
   const charLine =
     descs.length > 0 ? ` Keep these characters exactly on-model: ${descs.join("; ")}.` : "";
-  const prompt = `${CLAY_STYLE_PREFIX}Scene: ${scene.prompt}.${charLine} ${CLAY_NEGATIVE}`;
+  const refPageLine =
+    (scene.refPages?.length ?? 0) > 0
+      ? " Match the protagonist's open-mouth laugh, mouth shape, pure white teeth, and exact body silhouette (including no arms or hands if the reference has none) exactly from the provided story-panel reference image(s); only change lighting and background as described."
+      : "";
+  const prompt = `${CLAY_STYLE_PREFIX}Scene: ${scene.prompt}.${refPageLine}${charLine} ${CLAY_NEGATIVE}`;
 
   const refs = refPaths.filter((p) => existsSync(p));
   if (refs.length > 0) {
@@ -509,6 +515,10 @@ export function resolveSceneRefs(
   if (paths.length === 0) {
     const cover = join(publicDirForSlug(slug), "01.jpg");
     if (existsSync(cover)) paths.push(cover);
+  }
+  for (const page of scene.refPages ?? []) {
+    const fp = join(publicDirForSlug(slug), `${pad2(page)}.jpg`);
+    if (existsSync(fp)) paths.push(fp);
   }
   return { paths, descs };
 }
