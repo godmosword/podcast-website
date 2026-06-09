@@ -848,27 +848,14 @@ export default function BlockDropGame() {
         if (k === " " || k === "Enter") begin();
         return;
       }
-      if (k === "p" || k === "P") {
-        togglePause();
-        return;
-      }
       if (g.status !== "playing") return;
-      if (k === "ArrowLeft") move(-1);
-      else if (k === "ArrowRight") move(1);
-      else if (k === "ArrowUp" || k === "x" || k === "X") rotate(1);
+      if (k === "x" || k === "X") rotate(1);
       else if (k === "z" || k === "Z") rotate(-1);
-      else if (k === "ArrowDown") g.softDrop = true;
-      else if (k === " ") hardDrop();
       else if (k === "c" || k === "C" || k === "Shift") holdPiece();
     };
-    const onUp = (e: KeyboardEvent) => {
-      if (e.key === "ArrowDown") G.current.softDrop = false;
-    };
     window.addEventListener("keydown", onKey);
-    window.addEventListener("keyup", onUp);
     return () => {
       window.removeEventListener("keydown", onKey);
-      window.removeEventListener("keyup", onUp);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [begin, togglePause]);

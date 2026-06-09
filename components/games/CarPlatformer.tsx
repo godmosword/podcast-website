@@ -268,6 +268,7 @@ export default function CarPlatformer() {
 
   const reset = useCallback((idx = levelIndexRef.current) => {
     const lv = loadAdventureLevel(idx);
+    const startLives = kidsModeRef.current ? 5 : 3;
     game.current = {
       lv,
       levelIndex: idx,
@@ -288,7 +289,7 @@ export default function CarPlatformer() {
       },
       cam: 0,
       score: 0,
-      lives: kidsModeRef.current ? 5 : 3,
+      lives: startLives,
       taken: 0,
       input: { left: false, right: false, jump: false },
       last: null,
@@ -296,7 +297,7 @@ export default function CarPlatformer() {
       prevPlayer: { x: lv.start.x, y: lv.start.y },
       renderAlpha: 1,
     };
-    levelStartLivesRef.current = 3;
+    levelStartLivesRef.current = startLives;
   }, []);
 
   const begin = useCallback(() => {

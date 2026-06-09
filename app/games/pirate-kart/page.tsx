@@ -33,7 +33,7 @@ const WAYPOINTS = Array.from({ length: 20 }, (_, i) => {
   return { x: CX + Math.sin(a) * rx, y: CY - Math.cos(a) * ry };
 });
 
-const CHECK_ANGLES = [0, Math.PI * 0.5, Math.PI, Math.PI * 1.5];
+const CHECK_ANGLES = [Math.PI * 0.5, Math.PI, Math.PI * 1.5, Math.PI * 2];
 
 // ── 型別 ────────────────────────────────────────────────────
 type Phase = "start" | "countdown" | "playing" | "won";
