@@ -1,4 +1,12 @@
 .player {
+  --controls-block: 156px;
+  --ctrl-size: 60px;
+  --play-size: 76px;
+  --time-size: 0.88rem;
+  --seek-track: 7px;
+  --seek-thumb: 18px;
+  --seek-hit: 28px;
+  --transport-gap: 14px;
   position: fixed;
   inset: 0;
   background: #000;
@@ -7,6 +15,32 @@
   -webkit-user-select: none;
   /* 不限制 pinch-zoom；保留滑動手勢給元件內翻頁 */
   touch-action: manipulation;
+}
+
+@media (min-width: 480px) {
+  .player {
+    --controls-block: 168px;
+    --ctrl-size: 64px;
+    --play-size: 82px;
+    --time-size: 0.95rem;
+    --seek-track: 8px;
+    --seek-thumb: 20px;
+    --seek-hit: 30px;
+    --transport-gap: 18px;
+  }
+}
+
+@media (min-width: 768px) {
+  .player {
+    --controls-block: 176px;
+    --ctrl-size: 68px;
+    --play-size: 88px;
+    --time-size: 1.02rem;
+    --seek-track: 8px;
+    --seek-thumb: 22px;
+    --seek-hit: 32px;
+    --transport-gap: 22px;
+  }
 }
 
 .stage {
@@ -152,19 +186,19 @@
 
 .time {
   flex: 0 0 auto;
-  min-width: 36px;
+  min-width: 42px;
   text-align: center;
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 0.75rem;
-  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: var(--time-size, 0.88rem);
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
 }
 
 .seekBar {
   flex: 1 1 auto;
   min-width: 0;
-  height: 22px;
+  height: var(--seek-hit, 28px);
   -webkit-appearance: none;
   appearance: none;
   background: transparent;
@@ -172,7 +206,7 @@
 }
 
 .seekBar::-webkit-slider-runnable-track {
-  height: 6px;
+  height: var(--seek-track, 7px);
   border-radius: 999px;
   background: linear-gradient(
     to right,
@@ -182,13 +216,13 @@
 }
 
 .seekBar::-moz-range-track {
-  height: 6px;
+  height: var(--seek-track, 7px);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.3);
 }
 
 .seekBar::-moz-range-progress {
-  height: 6px;
+  height: var(--seek-track, 7px);
   border-radius: 999px;
   background: var(--seek-color, #fff);
 }
@@ -196,9 +230,9 @@
 .seekBar::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 16px;
-  height: 16px;
-  margin-top: -5px;
+  width: var(--seek-thumb, 18px);
+  height: var(--seek-thumb, 18px);
+  margin-top: calc((var(--seek-track, 7px) - var(--seek-thumb, 18px)) / 2);
   border-radius: 50%;
   background: #fff;
   border: 2px solid var(--seek-color, #fff);
@@ -206,8 +240,8 @@
 }
 
 .seekBar::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+  width: var(--seek-thumb, 18px);
+  height: var(--seek-thumb, 18px);
   border-radius: 50%;
   background: #fff;
   border: 2px solid var(--seek-color, #fff);
@@ -288,22 +322,55 @@
   white-space: nowrap;
 }
 
-.autoBtn {
+/* 字幕同步開關：標籤 + 滑動開關，比「開／關」文字更直覺。 */
+.subtitleToggle {
   flex: 0 0 auto;
   pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   color: #fff;
   font-size: 0.82rem;
-  font-weight: 600;
-  padding: 7px 12px;
+  font-weight: 700;
+  padding: 6px 10px 6px 12px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.22);
   backdrop-filter: blur(4px);
   white-space: nowrap;
 }
 
-.autoBtnOn {
-  /* 開啟時底色由 inline style（故事主題色）指定 */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+.subtitleToggleLabel {
+  line-height: 1;
+}
+
+.subtitleSwitch {
+  position: relative;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
+  transition: background 0.15s ease;
+}
+
+.subtitleToggleOn .subtitleSwitch {
+  background: var(--toggle-color, #fff);
+}
+
+.subtitleSwitchThumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  transition: transform 0.15s ease;
+}
+
+.subtitleToggleOn .subtitleSwitchThumb {
+  transform: translateX(16px);
 }
 
 /* 音效靜音切換鈕（🔊/🔇，膠囊樣式與 timerBtn 一致）。 */
@@ -408,8 +475,8 @@
   position: absolute;
   left: 0;
   right: 0;
-  /* 貼近進度條上方 */
-  bottom: calc(132px + var(--safe-bottom));
+  /* 貼近進度條上方（隨控制列高度調整） */
+  bottom: calc(var(--controls-block, 156px) + var(--safe-bottom));
   z-index: 4;
   display: flex;
   justify-content: center;
@@ -459,7 +526,7 @@
   z-index: 5;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
   padding: 36px calc(20px + var(--safe-right)) calc(16px + var(--safe-bottom))
     calc(20px + var(--safe-left));
   background: linear-gradient(to top, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0));
@@ -469,7 +536,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: var(--transport-gap);
 }
 
 /* 次級控制鈕：透明本體 + 白色線性圖示（Spotify／Apple 風）。
@@ -481,8 +548,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
+  width: var(--ctrl-size);
+  height: var(--ctrl-size);
   border-radius: 50%;
   color: rgba(255, 255, 255, 0.92);
   background: transparent;
@@ -530,7 +597,7 @@
   top: 53%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 0.62rem;
+  font-size: 0.72rem;
   font-weight: 800;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -554,8 +621,8 @@
 
 .playBtn {
   flex: 0 0 auto;
-  width: 68px;
-  height: 68px;
+  width: var(--play-size);
+  height: var(--play-size);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -582,7 +649,7 @@
 .errorBanner {
   position: absolute;
   left: 50%;
-  bottom: calc(170px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(var(--controls-block, 156px) + 14px + env(safe-area-inset-bottom, 0px));
   z-index: 6;
   transform: translateX(-50%);
   max-width: min(92vw, 420px);

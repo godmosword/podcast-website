@@ -556,13 +556,22 @@ export default function StoryPlayer({
             <span className={styles.aaLarge}>A</span>
           </button>
           <button
-            className={`${styles.autoBtn} ${autoFlip ? styles.autoBtnOn : ""}`}
-            style={autoFlip ? { backgroundColor: color } : undefined}
+            className={`${styles.subtitleToggle} ${autoFlip ? styles.subtitleToggleOn : ""}`}
+            style={
+              autoFlip
+                ? ({ "--toggle-color": color } as React.CSSProperties)
+                : undefined
+            }
             onClick={() => setAutoFlip((v) => !v)}
             aria-pressed={autoFlip}
+            aria-label={autoFlip ? "關閉字幕同步" : "開啟字幕同步"}
+            title={autoFlip ? "字幕：開" : "字幕：關"}
             type="button"
           >
-            字幕跟讀 {autoFlip ? "開" : "關"}
+            <span className={styles.subtitleToggleLabel}>字幕</span>
+            <span className={styles.subtitleSwitch} aria-hidden>
+              <span className={styles.subtitleSwitchThumb} />
+            </span>
           </button>
         </div>
       )}
@@ -642,7 +651,7 @@ export default function StoryPlayer({
               aria-pressed={repeat}
               aria-label="重複播放"
             >
-              <RepeatIcon size={28} />
+              <RepeatIcon size={34} />
               {repeat && <span className={styles.onDot} style={{ backgroundColor: color }} />}
             </button>
             <button
@@ -653,7 +662,7 @@ export default function StoryPlayer({
               disabled={mediaError === "audio"}
             >
               <span className={styles.skip}>
-                <RewindIcon size={30} />
+                <RewindIcon size={36} />
                 <span className={styles.skipNum}>10</span>
               </span>
             </button>
@@ -665,7 +674,7 @@ export default function StoryPlayer({
               disabled={mediaError === "audio"}
               type="button"
             >
-              {isPlaying ? <PauseGlyph size={30} /> : <PlayGlyph size={30} className={styles.playGlyph} />}
+              {isPlaying ? <PauseGlyph size={38} /> : <PlayGlyph size={38} className={styles.playGlyph} />}
             </button>
             <button
               type="button"
@@ -675,7 +684,7 @@ export default function StoryPlayer({
               disabled={mediaError === "audio"}
             >
               <span className={styles.skip}>
-                <ForwardIcon size={30} />
+                <ForwardIcon size={36} />
                 <span className={styles.skipNum}>10</span>
               </span>
             </button>
@@ -686,7 +695,7 @@ export default function StoryPlayer({
               aria-label="停止"
               disabled={mediaError === "audio"}
             >
-              <StopIcon size={26} />
+              <StopIcon size={32} />
             </button>
           </div>
         </div>

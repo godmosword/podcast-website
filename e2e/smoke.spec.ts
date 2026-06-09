@@ -12,7 +12,7 @@ test("首頁 → 詳情 → 播放頁 smoke", async ({ page }) => {
   await page.getByRole("link", { name: "▶ 開始看故事" }).click();
 
   await expect(page.getByRole("button", { name: "播放" })).toBeVisible();
-  await expect(page.getByText("字幕跟讀")).toBeVisible();
+  await expect(page.getByRole("button", { name: /字幕/ })).toBeVisible();
 });
 
 test("404 頁面", async ({ page }) => {
