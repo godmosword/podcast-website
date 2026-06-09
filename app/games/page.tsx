@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Doodle from "@/components/decor/Doodle";
 import RoughFrame from "@/components/decor/RoughFrame";
+import Wheel from "@/components/decor/Wheel";
+import decor from "@/components/decor/decor.module.css";
+import GameThumbArt from "@/components/games/GameThumbArt";
+import PlaygroundHubBadge from "@/components/games/PlaygroundHubBadge";
 import { GAMES } from "@/lib/games/catalog";
 import { getSiteUrl } from "@/lib/site-url";
 import styles from "./page.module.css";
@@ -8,11 +13,11 @@ import styles from "./page.module.css";
 export const metadata: Metadata = {
   title: "車車遊樂園",
   description:
-    "和故事裡的車車朋友一起玩小遊戲：吃星星迷宮、溫柔任務，適合 3–7 歲親子。",
+    "和故事裡的車車朋友一起玩小遊戲：吃星星、溫柔任務、大冒險、繽紛方塊，適合 3–12 歲親子。",
   openGraph: {
     title: "車車遊樂園 · 小遊戲",
     description:
-      "車車吃星星、怪獸卡車溫柔任務——適合 3–7 歲的親子小遊戲。",
+      "車車吃星星、怪獸卡車溫柔任務、車車大冒險、繽紛方塊——親子小遊戲一站玩。",
     url: `${getSiteUrl()}/games`,
   },
 };
@@ -24,11 +29,55 @@ export default function GamesHubPage() {
         ← 回故事屋
       </Link>
 
-      <header className={styles.head}>
+      <header className={styles.hero}>
+        <Doodle
+          kind="burst"
+          size={36}
+          color="var(--c-yellow)"
+          className={`${decor.doodle} ${decor.tiltA}`}
+          style={{ left: "4%", top: "8px" }}
+        />
+        <Doodle
+          kind="loop"
+          size={32}
+          color="var(--c-pink)"
+          className={`${decor.doodle} ${decor.tiltB}`}
+          style={{ right: "6%", top: "12px" }}
+        />
+        <Doodle
+          kind="dots"
+          size={28}
+          color="var(--c-mint)"
+          className={`${decor.doodle}`}
+          style={{ left: "12%", bottom: "18px" }}
+        />
+        <Doodle
+          kind="zigzag"
+          size={30}
+          color="var(--c-sky)"
+          className={`${decor.doodle} ${decor.tiltC}`}
+          style={{ right: "10%", bottom: "14px" }}
+        />
+
+        <div className={styles.heroBadge} aria-hidden>
+          <PlaygroundHubBadge size={52} />
+        </div>
+
         <h1 className={styles.title}>車車遊樂園</h1>
         <p className={styles.subtitle}>
-          給 3–7 歲孩子與家長的輕量小遊戲，和故事裡的車車朋友一起練反應、練溫柔。
+          和故事裡的車車朋友一起練反應、練溫柔、闖關冒險！
+          <br />
+          免下載、點開就能玩，最適合親子同樂。
         </p>
+
+        <ul className={styles.highlights} aria-label="遊樂園特色">
+          <li className={styles.chip}>
+            <Wheel size={18} color="var(--c-lilac)" />
+            {GAMES.length} 款小遊戲
+          </li>
+          <li className={styles.chip}>👨‍👩‍👧 3–12 歲</li>
+          <li className={styles.chip}>📱 手機也能玩</li>
+        </ul>
       </header>
 
       <ul className={styles.grid}>
@@ -51,9 +100,10 @@ export default function GamesHubPage() {
               <div
                 className={styles.thumb}
                 style={{
-                  backgroundColor: `color-mix(in srgb, ${game.accent} 18%, var(--card))`,
+                  ["--thumb-accent" as string]: game.accent,
                 }}
               >
+                <GameThumbArt gameId={game.id} className={styles.thumbArt} />
                 <span className={styles.thumbEmoji} aria-hidden="true">
                   {game.emoji}
                 </span>
@@ -87,6 +137,10 @@ export default function GamesHubPage() {
           </li>
         ))}
       </ul>
+
+      <p className={styles.footerNote}>
+        更多車車小遊戲陸續加入中 🎡
+      </p>
     </main>
   );
 }

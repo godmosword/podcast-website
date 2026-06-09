@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Doodle from "@/components/decor/Doodle";
+import PlaygroundHubBadge from "@/components/games/PlaygroundHubBadge";
 import decor from "@/components/decor/decor.module.css";
 import styles from "./SiteHeader.module.css";
 
@@ -108,7 +109,13 @@ export default function SiteHeader({ variant = "full" }: SiteHeaderProps) {
 
       <p className={styles.hubNav}>
         <Link href="/games" className={styles.hubLink}>
-          🎮 遊樂園
+          <span className={styles.hubIconWrap} aria-hidden>
+            <PlaygroundHubBadge size={36} className={styles.hubBadge} />
+          </span>
+          <span className={styles.hubCopy}>
+            <span className={styles.hubTitle}>去遊樂園玩！</span>
+            <span className={styles.hubSub}>小遊戲 · 免下載</span>
+          </span>
         </Link>
       </p>
 

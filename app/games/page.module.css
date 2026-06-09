@@ -16,24 +16,100 @@
   margin-bottom: 16px;
 }
 
-.head {
+.hero {
+  position: relative;
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+  padding: 28px 20px 24px;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(
+    165deg,
+    #fff9e6 0%,
+    #fff 35%,
+    color-mix(in srgb, var(--c-sky) 22%, #fff) 100%
+  );
+  border: 2px solid color-mix(in srgb, var(--c-yellow) 45%, var(--line));
+  box-shadow: var(--shadow-md), var(--gloss);
+  overflow: hidden;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 18% 12%,
+    rgba(255, 216, 102, 0.35),
+    transparent 42%
+  );
+  pointer-events: none;
+}
+
+.heroBadge {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #fff, #fff8e8);
+  border: 2.5px solid color-mix(in srgb, var(--c-yellow) 70%, #fff);
+  box-shadow:
+    0 4px 0 color-mix(in srgb, var(--c-yellow) 55%, transparent),
+    var(--shadow-sm);
 }
 
 .title {
-  font-size: 1.8rem;
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-marker), var(--font-baloo), var(--font-huninn),
+    "PingFang TC", sans-serif;
+  font-size: 2rem;
   font-weight: 800;
   color: var(--ink);
-  margin: 0 0 6px;
-  line-height: 1.2;
+  margin: 0 0 8px;
+  line-height: 1.15;
+  text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.85);
 }
 
 .subtitle {
+  position: relative;
+  z-index: 1;
   font-size: 0.95rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--ink-soft);
-  margin: 0;
+  margin: 0 auto;
+  max-width: 420px;
+  line-height: 1.65;
+}
+
+.highlights {
+  position: relative;
+  z-index: 1;
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.82);
+  border: 1.5px solid var(--line);
+  box-shadow: var(--shadow-sm);
 }
 
 /* ---- 卡片網格（沿用故事牆的 grid 語言） ---- */
@@ -72,6 +148,10 @@
   .card:hover {
     transform: translateY(-3px) rotate(-0.6deg);
   }
+
+  .card:hover .thumbArt {
+    transform: scale(1.03);
+  }
 }
 
 .thumb {
@@ -79,17 +159,41 @@
   width: 100%;
   aspect-ratio: 4 / 3;
   border-radius: var(--radius-md);
-  box-shadow: var(--gloss);
+  box-shadow:
+    var(--gloss),
+    inset 0 0 0 2px color-mix(in srgb, var(--thumb-accent, var(--c-sky)) 35%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  background: color-mix(
+    in srgb,
+    var(--thumb-accent, var(--c-sky)) 12%,
+    var(--card)
+  );
+}
+
+.thumbArt {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  transition: transform 0.25s var(--ease-spring);
 }
 
 .thumbEmoji {
-  font-size: 3.4rem;
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+  font-size: 1.35rem;
   line-height: 1;
-  filter: drop-shadow(0 3px 2px color-mix(in srgb, var(--ink) 18%, transparent));
+  padding: 4px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1.5px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.08));
 }
 
 .body {
@@ -160,11 +264,27 @@
   border-radius: 50%;
 }
 
+.footerNote {
+  margin: 28px 0 0;
+  text-align: center;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .card,
   .card:active,
   .card:hover {
     transition: none;
+    transform: none;
+  }
+
+  .thumbArt {
+    transition: none;
+  }
+
+  .card:hover .thumbArt {
     transform: none;
   }
 }
