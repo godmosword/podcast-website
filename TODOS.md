@@ -2,9 +2,115 @@
 
 > **成長主戰場（2026-06 共識）：** **A** Spotify／Apple 平台收聽與訂閱 · **B** Threads／IG 短內容導流。
 > 官網定位：每集可分享的落地頁 + 訂閱轉換中心；「看圖聽故事」為差異化體驗，不與平台搶完整收聽。
+>
+> **產品主戰場（2026-06 STEM roadmap）：** 把「音檔 + 看圖 + 字幕 + 網頁小遊戲」放大成**互動故事 × 車車 STEM 實驗室**；學齡前～低年級、開放式探索、家長信任優先。詳見下方 [**產品路線圖（互動 + STEM + 商業）**](#產品路線圖互動--stem--商業)。
 
 > 格式：每項一段，行末標 `優先序 · 工時(人工) · 依賴`。工時 S/M/L；CC+gstack 約 1/10。
-> 來源標記：〔eng〕程式發現 · 〔ceo〕plan-ceo-review · 〔design〕plan-design-review · 〔growth〕成長共識。
+> 來源標記：〔eng〕程式發現 · 〔ceo〕plan-ceo-review · 〔design〕plan-design-review · 〔growth〕成長共識 · 〔stem〕產品-roadmap。
+
+---
+
+## 產品路線圖（互動 + STEM + 商業）
+
+> 依據：兒童數位產品研究共識（Thinkrolls／DragonBox／Khan Kids／Sago Mini 等）、台灣市場（《顛覆！故事 STEAM》、Firstory 付費成長、叮噹家族 VIP 月 99／年 999）、以及本站現況（Next.js SSG、逐字字幕、4 款小遊戲、private 素材庫）。
+
+### 三個貫穿原則
+
+1. **不要做成「作業」，要做成「玩」** — 益智與適性任務包裝成遊戲；車車主題是優勢，別把 STEM 變講課。
+2. **學齡前：開放式探索，避免計時與競爭計分** — 沙盒、獎勵發現與創造；無廣告、無時間壓力（對齊 Sago Mini／Khan Kids）。
+3. **商業：家長信任 > 一切** — 費用購前透明、無 dark patterns；付費牆只在家長區，不讓孩子誤觸。
+
+### 台灣市場定位
+
+| 面向 | 說明 |
+|------|------|
+| 對標 | 《顛覆！故事 STEAM》已驗證「故事 + STEM」；我們用**車車**更聚焦、更有畫面 |
+| 付費範本 | 叮噹家族 VIP（月 99／年 999）：會員故事合輯、限定無廣告原創 |
+| 護城河 | **自製音檔 + 看圖翻頁 + 逐字字幕 + 網頁互動** — 純 podcast 做不到；roadmap 全力放大「網頁互動」 |
+
+### 四階段總表（一頁摘要）
+
+| 階段 | 核心 | STEM 連結 | 商業 |
+|------|------|-----------|------|
+| **P1** 互動故事 | 點按熱點、結尾開放提問、正向回饋 | 提問啟蒙、因果 | 純留存驗證，零訂閱 |
+| **P2** 車車 STEM 實驗室 | 組裝車沙盒、斜坡實驗、路徑編碼、分類數數 | 工程、物理、運算思維、數學 | 差異化價值主張 |
+| **P3** 家長端 | 儀表板、家長閘門、共讀指引、列印物 | 延伸到現實 | 提升轉換與信任 |
+| **P4** 商業化 | freemium + 訂閱（家長付費） | 會員進階實驗 | 對標月 99／年 999；進度綁定收費 |
+
+**最該優先做的一件事：** P1「**故事頁點按熱點 + 每集結尾開放提問**」— 成本最低、最快驗證互動意願，並鋪路 P2。
+
+---
+
+### STEM-P1 — 互動故事（1–2 個月）
+
+目標：不重做架構，在現有故事頁加輕互動，驗證孩子是否更願回訪。
+
+#### 故事頁點按熱點（tap-to-explore）　`STEM-P1 · M · 插畫座標`　〔stem+eng〕
+翻到某頁時，輪子／引擎／紅綠燈等可點 → 音效 + 一句知識（例：「輪子是圓的，才能滾動～」）。`data/stories` 或 per-slug JSON 存熱點 bbox + 文案 + 音效 id；播放器／詳情頁疊熱區；觸控目標 **≥ 44×44px**。依據：隱藏互動驚喜促探索；幼兒透過與物件互動建構知識。
+
+#### 每集結尾開放式「小提問」　`STEM-P1 · S · 文案`　〔stem+content〕
+詳情或播放結束畫面加一句不計分提問（例：「你覺得消防車為什麼是紅色的？」）。`data/stories.ts` 加 `reflectionPrompt`；無標準答案。依據：STEM 核心是發問與學習主導權。
+
+#### 互動正向回饋（音效／星星動畫）　`STEM-P1 · S · 熱點`　〔stem+eng〕
+點對：溫和音效 + 小星星動畫（重用 `lib/sfx.ts`）；點錯：引導不處罰。`prefers-reduced-motion` 可關動畫保留音效。
+
+#### 互動留存簡易量測（本機 + 可選 analytics）　`STEM-P1 · S · P1 熱點上線`　〔stem+ceo〕
+先記錄：熱點點擊率、同集重訪（localStorage 或日後 analytics）；確認互動是否提升回訪再談收費。
+
+---
+
+### STEM-P2 — 車車 STEM 實驗室（2–4 個月）
+
+目標：系統性把「車」連到 STEM；**全部開放式、不計時、不排名**（現有 `car-star` 計分僅作參考，新模組預設無競賽）。
+
+#### 「組裝你的車」沙盒　`STEM-P2 · L · 無`　〔stem+eng〕
+拖拉輪子、車身、引擎組車，組好可動。工程／結構直覺（對標 marshmallow 橋 + Sago 機器人組裝的車車版）。`/games` hub 新入口。
+
+#### 「斜坡實驗」互動　`STEM-P2 · M · 無`　〔stem+eng〕
+調坡度看車滑多遠／多快，玩因果與簡單物理。Canvas 或 DOM + 輕物理即可。
+
+#### 無螢幕式路徑編碼（強化 Car Mission）　`STEM-P2 · M · 無`　〔stem+eng〕
+方向箭頭排路徑讓車到終點；擴充現有 `CarMissionGame` 或獨立關卡編輯器。適齡演算法啟蒙。
+
+#### 分類／數數小遊戲　`STEM-P2 · M · 車種素材`　〔stem+eng〕
+依顏色、大小、車種分類；符號功能與數學啟蒙。可重用 `VehicleClayIcon`、`/vehicles` 資料。
+
+**設計紀律：** 新遊戲 checklist — 無計時、無排行榜、可隨時離開、觸控 ≥ 44px、reduced-motion 可玩。
+
+---
+
+### STEM-P3 — 家長端與信任（3–5 個月，可與 P2 並行）
+
+#### 家長簡易儀表板　`STEM-P3 · M · localStorage 或帳號決策`　〔stem+design〕
+用星星／笑臉呈現「聽了哪幾集、玩了什麼」，不做成績單。可先讀現有收藏／繼續播放／遊戲 best 分（localStorage）。
+
+#### 家長閘門（parent gate）　`STEM-P3 · S · 付費／設定頁`　〔stem+eng〕
+設定、未來付費頁前簡單算術題，防孩子誤觸（對齊 Sago Mini）。
+
+#### 每集「家長共讀指引」　`STEM-P3 · S · 文案`　〔stem+content〕
+與 P2「給家長的小提示」合併或升級：`parentNote` + 1–2 個可延伸到現實的提問／活動。對標睡前共讀訴求。
+
+#### 可下載列印物（著色、剪貼、迷宮）　`STEM-P3 · M · 插畫素材`　〔stem+growth〕
+PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
+
+#### KidSAFE／隱私行銷賣點　`STEM-P3 · S · /legal 已有`　〔stem+ceo〕
+對外強調：無廣告、不蒐集兒童帳號、進度在裝置本機；若未來跨裝置帳號，需家長同意與最小蒐集。
+
+---
+
+### STEM-P4 — 商業化（5 個月後，留存與信任跑通後）
+
+#### Freemium + 家長端訂閱　`STEM-P4 · L · P3 閘門`　〔stem+ceo〕
+免費＝基本故事 + 部分互動；會員＝無廣告、限定故事、進階 STEM 實驗、列印物全解鎖。**付費牆不出現在孩子主流程。**
+
+#### 收費時機綁「進度／累積」　`STEM-P4 · M · 訂閱基建`　〔stem+growth〕
+累積收聽／收藏／星星後再推會員，非註冊當下；中斷會可惜時轉換較高。
+
+#### 訂閱價格帶驗證　`STEM-P4 · S · 營運`　〔stem+growth〕
+對標台灣已驗證 **月 99／年 999**；內容節奏靠 Apple 同步新集 + 會員限定互動模組。
+
+#### 持續新鮮內容管線　`STEM-P4 · 持續 · 既有 sync`　〔stem+eng〕
+每季 1–2 個新 STEM 小遊戲或互動故事功能；依 P1 留存數據排優先序。
 
 ---
 
@@ -15,11 +121,12 @@
 | **P0** 地基 + 第一印象 | 看起來完整、被搜尋到 | 首頁渲染修復 · 正式網域 · sitemap/robots · JSON-LD · DESIGN.md 同步 · 首屏精簡 |
 | **P1** 訂閱轉換 + 分享 | 「沒看到訂閱」消失、可被轉發 | 單集訂閱 CTA 上移 · 首頁訂閱入口 · ConnectHub 文案/排序 · 每集分享鈕 · 試聽橋接 · 入門三集 · 空狀態 · 錨點導覽 |
 | **P2** 信任/合規 + 內容 | 兒童產品權重、內容變深 | 隱私頁 → analytics · 主持人信任區 · 真實插畫 · 親子提示 · 新集通知說明 · 主題頁 SEO · 音檔壓縮 · 縮放/觸控/塗鴉 |
-| **P3** 可靠/工程/可選 | 不掛、可回歸、加分 | 監控 · Service Worker · E2E smoke · ESLint CI · 角色圖鑑 · 大圖單欄 · 商業化 |
+| **P3** 可靠/工程/可選 | 不掛、可回歸、加分 | 監控 · Service Worker · E2E smoke · ESLint CI · 角色圖鑑 · 大圖單欄 |
+| **STEM-P1→P4** 互動×STEM×商業 | 差異化與變現 | 見上表；**當務之急：故事點按熱點 + 結尾提問** |
 
 **相依鏈（務必照序）：** 正式網域 → sitemap/robots + JSON-LD → 隱私頁（先於 analytics）→ analytics。
 
-**已備齊（勿重做）：** 故事牆、全螢幕播放器、每集落地頁 + **每集 OG 圖**（`lib/story-metadata.ts`）、`/topic` 與車種 SEO 頁、RSS `/feed.xml`、`ageRange`、PWA／收藏／繼續收聽、ConnectHub（平台 + 社群連結已填）、相關推薦。
+**已備齊（勿重做）：** 故事牆、全螢幕播放器、每集落地頁 + **每集 OG 圖**（`lib/story-metadata.ts`）、`/topic` 與車種 SEO 頁、RSS `/feed.xml`、`ageRange`、PWA／收藏／繼續收聽、ConnectHub（平台 + 社群連結已填）、相關推薦、**`/games` 遊樂園**（車車吃星星／溫柔任務／車車大冒險／繽紛方塊）、`/legal` 與版權合規、逐字字幕管線、角色定裝照名冊、Apple 15 分鐘同步。
 
 **待決策（實作前定）：** ① 網域（`chechepark.tw` / `checheland.tw` / 其他）② analytics 工具（Vercel Analytics 省事 / Plausible 無 cookie / 不做）③ 縮放（鎖 vs 家長大字模式）④ 角色圖鑑與親子提示是否現在做（需 Bonbon & 馬米 文案）。
 
@@ -82,7 +189,7 @@ Vercel 設 `NEXT_PUBLIC_SITE_URL=https://正式網域`。OG／Twitter／RSS／si
 ## P2 — 信任/合規 + 內容深化
 
 ### 隱私政策頁（analytics 前置）　`P2 · S · analytics 決策`　〔ceo〕
-新增 `/privacy`（或把 `DISCLAIMER.md` 升為頁面 + 隱私段）：說明是否收集資料、localStorage 用途、analytics 方案、家長聯絡。**兒童產品一旦加 analytics，個資合規（COPPA/GDPR-K）即法律問題**，順序上必須先於量測。footer 加連結。
+新增 `/privacy`（或擴充 `/legal` + 隱私段）：說明是否收集資料、localStorage 用途、analytics 方案、家長聯絡。**兒童產品一旦加 analytics，個資合規（COPPA/GDPR-K）即法律問題**，順序上必須先於量測。footer 加連結。**`/legal` 已上線，可在此基礎擴充隱私專章。**
 
 ### Analytics：平台點擊分析　`P2 · S–M · 隱私頁`　〔ceo+growth〕
 追蹤「哪集詳情頁 → 點了哪個收聽平台」（`ConnectHub`／`PlatformLinks` 外連加事件，必要時 UTM），對照 Spotify／Apple 後台完聽率與訂閱來源。下一集選題依數據而非猜測。無 cookie 方案優先（隱私）。
@@ -94,7 +201,7 @@ Vercel 設 `NEXT_PUBLIC_SITE_URL=https://正式網域`。OG／Twitter／RSS／si
 各集 `public/stories/<slug>/` 佔位圖換成官方插畫，視需要提高 `pageCount`。真實繪本強化「看圖聽故事」睡前儀式感。`pageCount` 與 `01.jpg`～`NN.jpg` 對齊；一圖多句時 `captions` 可多於 `pageCount`（播放器重複封面）。
 
 ### 每集「給家長的小提示」/ 節目筆記　`P2 · S · 文案`　〔content+design〕
-詳情頁大綱下加可選「這集可以聊什麼」2–3 句（`data/stories.ts` 加 `parentNote` 欄）。提升信任、利家長轉發 Threads、可與 JSON-LD description 共用。對標 Circle Round show notes。
+詳情頁大綱下加可選「這集可以聊什麼」2–3 句（`data/stories.ts` 加 `parentNote` 欄）。提升信任、利家長轉發 Threads、可與 JSON-LD description 共用。對標 Circle Round show notes。**與 STEM-P3「家長共讀指引」合併規劃，避免重複欄位。**
 
 ### 字幕人名校對　`P2 · S/集 · 無`　〔content〕
 EP1–7 已用 `large-v3` 轉錄 + 自動簡轉繁（`data/subtitles/*.json`）。**剩**：校對品牌/人名誤聽——Bonbon→寶寶、馬米→媽咪等（Whisper 無從得知），直接改側車 JSON。屬資料校對、非工程。
@@ -141,7 +248,7 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 若主攻 3–5 歲，評估故事牆改大封面單欄卡（少文字、大圖磚）或僅窄螢幕啟用。對標 YouTube Kids；現左圖右文在 5+ 較合適。需使用者研究，非必做。`StoryCard`。
 
 ### 成長與商業（依階段）　`P3 · L · 營運階段`　〔growth〕
-逐步把官網從「連結集合」變「成長與變現中樞」：贊助 landing、周邊／活動、多語等。親子 IP 可先不做電商。
+逐步把官網從「連結集合」變「成長與變現中樞」：贊助 landing、周邊／活動、多語等。親子 IP 可先不做電商。**訂閱與 freemium 細節見 STEM-P4，勿在 P1 互動驗證前上付費牆。**
 
 ---
 
@@ -149,8 +256,8 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 
 | 項目 | 原因 |
 |------|------|
-| Email 電子報 / 會員 | 平台 App 已有新集通知；先用 Threads 導流，需後端/第三方與隱私同意 |
-| 著色頁／活動單 PDF | IP 成熟後再做，先拉高單集分享率 |
+| Email 電子報 / 會員 | 平台 App 已有新集通知；先用 Threads 導流；**正式會員制見 STEM-P4** |
+| 著色頁／活動單 PDF | **已納入 STEM-P3 列印物**；P1–P2 前先拉高單集分享與互動留存 |
 | 部落格長文 SEO | 初期單集頁 + 平台關鍵字效益較直接 |
 | 網站內 RSS 播放器 | 訂閱導向 Spotify／Apple 即可 |
 | 睡前模式／季節主題皮 | 溫馨感加分，但不擋 A+B 主線 |
@@ -161,6 +268,18 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 ---
 
 ## Completed
+
+### 遊樂園小遊戲 hub + 4 款原創遊戲 + 黏土風視覺
+`/games` 目錄卡（車車吃星星、怪獸卡車溫柔任務、車車大冒險橫向過關、繽紛方塊）；首頁馬卡龍「去遊樂園玩」入口；卡片黏土風 SVG 縮圖（`GameThumbArt`、`lib/games/clay-svg.ts`）。各遊戲：觸控、localStorage 最佳分、`prefers-reduced-motion`、暫停。
+**Completed:** main（2026-06）
+
+### 版權合規與 `/legal`
+私人 repo 說明、禁止再散布、第三方商標指示性使用、字型 OFL、`THIRD_PARTY_NOTICES.md`、頁尾法律連結。
+**Completed:** main（2026-06）
+
+### 產品路線圖文件（互動故事 × 車車 STEM × 商業）
+`TODOS.md` 新增 STEM-P1～P4 四階段、三原則、台灣市場定位與一頁總表；README／CHANGELOG 同步。
+**Completed:** main（2026-06）
 
 ### 逐字即時字幕框架 + EP1–7 自動上字幕（本機 whisper.cpp）
 字幕從翻頁解耦：存側車檔 `data/subtitles/<slug>.json`（`lib/subtitles.ts` 載入、播放器依音檔時間顯示、獨立翻頁；無側車則回退舊邏輯）。轉錄核心 `scripts/lib/transcribe-core.ts`（ffmpeg→whisper.cpp、**自動簡轉繁 OpenCC**、濾幻覺鳴謝），CLI `npm run transcribe -- <slug...|--all|--convert>`。Apple 同步下載新集後自動轉錄（有 whisper 才跑，CI/缺模型自動跳過，`SKIP_TRANSCRIBE=1` 可關）。EP1–7 已用 `large-v3` 產繁中字幕（人名校對見 P2）。音檔不外送、零金鑰；`models/` gitignore。

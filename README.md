@@ -2,9 +2,11 @@
 
 Bonbon & 馬米親子 podcast《車車遊樂園》的官方 **看圖聽故事** 網站。Next.js 15 全靜態（SSG），零後端。
 
+面向 **學齡前～低年級** 親子：每集音檔 + 黏土風插圖翻頁 + 逐字字幕 + **網頁小遊戲**（純 podcast 做不到的互動層）。產品路線見 [TODOS.md — 產品路線圖](./TODOS.md#產品路線圖互動--stem--商業)（互動故事 → 車車 STEM 實驗室 → 家長端 → 訂閱）。
+
 - **正式站（範例）：** [https://podcast-website-mu.vercel.app](https://podcast-website-mu.vercel.app)
-- **版本：** [1.2.1](./CHANGELOG.md) — 詳見 [CHANGELOG.md](./CHANGELOG.md)
-- **待辦與路線圖：** [TODOS.md](./TODOS.md)
+- **版本：** [1.3.0](./CHANGELOG.md) — 詳見 [CHANGELOG.md](./CHANGELOG.md)
+- **待辦與路線圖：** [TODOS.md](./TODOS.md)（成長 A/B + STEM 四階段）
 - **儲存庫：** **private** — `public/stories/`、`public/characters/` 內音訊與插圖**禁止再散布**（見下方授權與免責）
 - **授權：** 程式碼 [MIT](./LICENSE) · 網站條文 [/legal](./app/legal/page.tsx) · 維護者全文 [DISCLAIMER.md](./DISCLAIMER.md)
 
@@ -13,12 +15,14 @@ Bonbon & 馬米親子 podcast《車車遊樂園》的官方 **看圖聽故事** 
 | 功能 | 說明 |
 |------|------|
 | 故事牆 | 首頁網格列出全部分集；**依車車找故事**（車種 chip + `?vehicle=`）；主題見 `/topic` |
-| 看圖聽故事 | 全螢幕播放器、逐字即時字幕、可拖曳進度條 |
+| 看圖聽故事 | 全螢幕播放器、逐字即時字幕、可拖曳進度條、字幕字級切換 |
+| 車車遊樂園 | [`/games`](./app/games/page.tsx) — 4 款原創小遊戲（吃星星、溫柔任務、大冒險、繽紛方塊）；首頁「去遊樂園玩」入口 |
 | 主題分類 | `/topic`、`/topic/[tag]` 靜態頁（SEO） |
 | 車種分類 | `/vehicles/[vehicle]` |
-| 訂閱／追蹤 | 頁尾 `ConnectHub`（平台 + RSS） |
+| 訂閱／追蹤 | 頁尾 `ConnectHub`（Spotify／Apple 等） |
 | RSS | [`/feed.xml`](./app/feed.xml/route.ts) podcast feed |
 | PWA | `manifest.json`、主畫面圖示、繼續收聽／收藏（localStorage） |
+| 法律與信任 | [`/legal`](./app/legal/page.tsx) 使用條款；素材 private、禁止再散布 |
 
 ## 本機開發
 
@@ -374,6 +378,19 @@ npm run font:subset
 - **首頁 Hero：** `public/hero-home.jpg`
 
 動效尊重 `prefers-reduced-motion: reduce`（`app/globals.css`）。
+
+## 產品路線（摘要）
+
+完整條目與工時見 [TODOS.md](./TODOS.md#產品路線圖互動--stem--商業)。
+
+| 階段 | 重點 | 下一步 |
+|------|------|--------|
+| STEM-P1 互動故事 | 故事頁點按熱點、結尾開放提問、正向回饋 | **當務之急** — 驗證互動留存 |
+| STEM-P2 實驗室 | 組裝車、斜坡物理、路徑編碼、分類數數 | 開放式、不計時 |
+| STEM-P3 家長端 | 簡易儀表板、家長閘門、共讀指引、列印物 | 信任與轉換 |
+| STEM-P4 商業化 | freemium + 家長訂閱（對標月 99／年 999） | 留存跑通後再上 |
+
+設計原則：**玩不像作業** · **幼兒不競賽計時** · **家長信任與透明付費**。
 
 ## 授權與免責
 
