@@ -114,7 +114,7 @@
       "start": 293,
       "end": 315,
       "summary": "說明牙菌斑與蛀牙",
-      "prompt": "The street sweeper truck explaining with a soft gesture while showing a simple diagram of clean vs sticky teeth made of clay shapes, educational friendly mood",
+      "prompt": "The street sweeper truck gently pointing at a large simple educational poster: one neat U-shaped row of evenly spaced cartoon teeth in correct order (no extra teeth, no crooked gaps), left half sparkling clean white, right half same neat row with soft yellow sticky spots for plaque, side-by-side comparison, friendly teaching mood, no realistic dental horror",
       "characters": ["鈴鈴清潔車", "恐龍車多多"]
     },
     {
@@ -130,7 +130,7 @@
       "start": 335,
       "end": 355,
       "summary": "睡前刷牙任務卡（一、二）",
-      "prompt": "The street sweeper truck holding a cute illustrated task card with icons of rinsing water and bedtime brushing, the green dinosaur car paying close attention, cozy bathroom corner setting",
+      "prompt": "The street sweeper truck holding up a cute illustrated bedtime-brushing mission card with exactly two big numbered pictograms: (1) drink water and rinse mouth after eating sweets — cup of water icon, (2) remember to brush teeth before sleep — toothbrush with moon and stars icon, child-friendly checklist not a chalkboard or dental chart, the green dinosaur car listening in a cozy garage",
       "characters": ["鈴鈴清潔車", "恐龍車多多"]
     },
     {
@@ -154,7 +154,7 @@
       "start": 395,
       "end": 410,
       "summary": "養成每天睡前刷牙習慣",
-      "prompt": "The green dinosaur car brushing teeth at night even when tired, talking kindly to himself with a little yawn, cozy bedtime routine mood",
+      "prompt": "The green dinosaur car brushing teeth at night even when tired, visible mouth showing bright sparkling shiny white teeth behind gentle foam bubbles, little yawn but determined, cozy bedtime routine mood",
       "characters": ["恐龍車多多"]
     },
     {
@@ -162,7 +162,7 @@
       "start": 410,
       "end": 428,
       "summary": "一週後大笑比賽大方微笑",
-      "prompt": "The green dinosaur car laughing openly at the amusement park laugh contest, big happy smile, friends cheering, bright celebratory mood",
+      "prompt": "The green dinosaur car laughing openly at the amusement park laugh contest, mouth wide with bright sparkling shiny white teeth clearly visible, big happy smile, friends cheering, bright celebratory mood",
       "characters": ["恐龍車多多"]
     },
     {
@@ -170,7 +170,7 @@
       "start": 428,
       "end": 457,
       "summary": "提醒小朋友也要刷牙",
-      "prompt": "The green dinosaur car waving goodbye with a sparkling clean smile under a starry soft sky, warm encouraging farewell mood for children",
+      "prompt": "The green dinosaur car waving goodbye with a big warm smile, teeth clearly bright sparkling shiny white and glittering clean, starry soft sky, encouraging farewell mood for children",
       "characters": ["恐龍車多多"]
     }
   ],

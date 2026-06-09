@@ -36,7 +36,19 @@ type StoryPlayerProps = {
 };
 
 const SWIPE_THRESHOLD = 50;
+const SKIP_SECONDS = 10;
 const BEDTIME_OPTIONS = [15, 30, 45] as const;
+
+function isEditableKeyboardTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  const tag = target.tagName;
+  return (
+    tag === "INPUT" ||
+    tag === "TEXTAREA" ||
+    tag === "SELECT" ||
+    target.isContentEditable
+  );
+}
 
 // 字幕字級偏好（跨集保留於 localStorage）。
 const CAPTION_SIZES = ["sm", "md", "lg"] as const;
@@ -100,6 +112,7 @@ export default function StoryPlayer({
   const [captionSize, setCaptionSize] = useState<CaptionSize>("md");
 
   const audioRef = useRef<HTMLAudioElement>(null);
+  const transportRef = useRef({ togglePlay: () => {}, skip: (_delta: number) => {} });
   const touchStartX = useRef<number | null>(null);
   const bedtimeEndRef = useRef<number | null>(null);
   const timerWrapRef = useRef<HTMLDivElement>(null);
@@ -356,6 +369,33 @@ export default function StoryPlayer({
       el.pause();
     }
   }
+
+  transportRef.current = { togglePlay, skip };
+
+  // 鍵盤：空白鍵播放/暫停，左右方向鍵 ±10 秒（與控制列一致）。
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (isEditableKeyboardTarget(e.target)) return;
+
+      if (e.key === " " || e.code === "Space") {
+        e.preventDefault();
+        transportRef.current.togglePlay();
+        return;
+      }
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        transportRef.current.skip(-SKIP_SECONDS);
+        return;
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        transportRef.current.skip(SKIP_SECONDS);
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   function replay() {
     const el = audioRef.current;
@@ -663,7 +703,7 @@ export default function StoryPlayer({
               <button
                 type="button"
                 className={styles.ctrlBtn}
-                onClick={() => skip(-10)}
+                onClick={() => skip(-SKIP_SECONDS)}
                 aria-label="倒退 10 秒"
                 disabled={mediaError === "audio"}
               >
@@ -689,7 +729,7 @@ export default function StoryPlayer({
               <button
                 type="button"
                 className={styles.ctrlBtn}
-                onClick={() => skip(10)}
+                onClick={() => skip(SKIP_SECONDS)}
                 aria-label="快進 10 秒"
                 disabled={mediaError === "audio"}
               >
