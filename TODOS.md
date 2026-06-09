@@ -303,10 +303,10 @@ repo secret 存 `LINE_NOTIFY_TOKEN` 或 `DISCORD_WEBHOOK_URL`；同步偵測新�
 ### 生圖佇列 `data/illustration-queue.json`　`P3 · S · 通知基建`　〔eng+ops〕
 `sync-apple-podcast.ts` 新集寫入 `{ slug, ep, syncedAt, subtitleReady, status: awaiting-illustrate }`；`illustrate --approve` 改 `approved` 或移除。Issue／webhook／未來 Studio 儀表板共用單一真相來源。
 
-### Game Kit Phase 0 — 方向與技術定錨　`P3 · M · 無`　〔eng+design+research〕
-鎖四款內部解析度（240×320／200×360／320×180／320×240）、32 色主調色盤、點陣字、整數倍 pixelated 渲染管線；決定純自建 `lib/gamekit` vs **kontra.js** 底層。產出 1 頁美術聖經 + `lib/gamekit/` 骨架（renderer/style/loop 空殼）。詳見 [RESEARCH — 四款小遊戲精進](./RESEARCH.md#2026-06-09四款小遊戲精進方案對標可市售-pixel-game)。
+### ~~Game Kit Phase 0 — 方向與技術定錨~~　`P3 · M · 無`　〔eng+design+research〕 ✅
+`lib/gamekit/` 九大模組骨架（renderer/loop/input/style/sprite/tilemap/juice/save/meta/scene/audio）、32 色盤、四款 viewport 定錨、[ART-BIBLE.md](./lib/gamekit/ART-BIBLE.md)、`PixelGameCanvas` + `usePixelRenderer`/`usePixelGameSurface`、`lib/gamekit/gamekit.test.ts`。**Phase 1 待做**：四款 canvas 遊戲遷移 pixel 管線。
 
-### Game Kit Phase 1 — 渲染管線＋設計系統套用四款　`P3 · L · Phase 0`　〔eng+design〕
+### Game Kit Phase 1 — 渲染管線＋設計系統套用四款　`P3 · L · Phase 0 ✅`　〔eng+design〕
 **視覺 ROI 最高**：點陣 HUD、統一調色盤、offscreen→整數放大；四款立刻「像遊戲」。改 `GameShell` 接入 kit renderer；保留 `prefers-reduced-motion` 關閉 juice 動畫。
 
 ### Game Kit Phase 2–4 — 美術／音訊／juice　`P3 · L · Phase 1`　〔eng+design〕
@@ -530,6 +530,10 @@ T+2d    社群貼文（B 戰場）
 ---
 
 ## Completed
+
+### Game Kit Phase 0（`lib/gamekit` 骨架）
+九大模組、32 色主調色盤、四款 viewport 定錨、`PixelRenderer` 整數放大、`GameLoop` 固定步進、`InputManager`、`ART-BIBLE.md`、`PixelGameCanvas`／`usePixelGameSurface`、Vitest 單元測試。
+**Completed:** main（2026-06）
 
 ### 每集分享鈕 + ConnectHub 訂閱優化
 單集頁 `ShareButton`（複製連結、LINE）；收藏鈕可同排 `leading`。ConnectHub「訂閱後，新集會自動出現在你的 Podcast App」；`lib/platforms.ts` Spotify／Apple 優先排序。

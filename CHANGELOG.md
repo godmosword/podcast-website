@@ -7,7 +7,8 @@
 ### Added
 
 - **營運管線文件**：`TODOS.md` 新增 SoundOn／Apple 同步四階段工作流、生圖通知方案（Issue／webhook／佇列）與 P2–P3 實作條目
-- **遊樂園 pixel 精進方案**：`RESEARCH.md` + `TODOS.md` 新增 Game Kit（`lib/gamekit`）八階段路線、四款對標與驗收表；校正 `car-mission` 為三車道溫柔任務（非俯視賽車）
+- **Game Kit Phase 0**：`lib/gamekit/` 九大模組骨架、`PixelRenderer`／`GameLoop`／`InputManager`、`ART-BIBLE.md`、`PixelGameCanvas` + hook、單元測試
+- **遊樂園 pixel 精進方案**：`RESEARCH.md` + `TODOS.md` 新增 Game Kit 八階段路線、四款對標與驗收表；校正 `car-mission` 為三車道溫柔任務（非俯視賽車）
 - **競品研究筆記**：`RESEARCH.md` 收錄 Hey Clay App 架構拆解（phygital、分步教學、收藏解鎖）與車車遊樂園適用性評分；`TODOS.md` 同步 `craft` 手作教學、車庫圖鑑養成、phygital 第四原則與拍照分享待決策
 - **產品路線圖（互動故事 × 車車 STEM × 商業）**：`TODOS.md` 新增 STEM-P1～P4 四階段（點按熱點、STEM 實驗室、家長端、freemium 訂閱）、三項設計原則、台灣市場定位與一頁總表；README 同步產品定位與遊樂園功能
 - **車車遊樂園 `/games`**：4 款原創小遊戲（車車吃星星、怪獸卡車溫柔任務、車車大冒險、繽紛方塊）；黏土風 SVG 縮圖、首頁馬卡龍入口

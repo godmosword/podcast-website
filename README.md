@@ -234,6 +234,7 @@ scripts/
   subset_font.py 等     字型子集、圖示產生器
 lib/
   platforms.ts          收聽平台連結
+  gamekit/              四款小遊戲共用 Game Kit（像素渲染、loop、輸入等；見 ART-BIBLE.md）
   social.ts             社群連結
   feed.ts               RSS 產生
   site-url.ts           站點絕對網址
