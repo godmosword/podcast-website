@@ -1,0 +1,90 @@
+.touchBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+  padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
+  width: 100%;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.touchCluster {
+  display: flex;
+  gap: 10px;
+}
+
+.controlGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
+  width: 100%;
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.swipeLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.swipeHint {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ink-soft, rgba(255, 255, 255, 0.75));
+  background: color-mix(in srgb, var(--card, #fff) 88%, transparent);
+  padding: 4px 10px;
+  border-radius: 999px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@media (pointer: coarse) {
+  .touchBar {
+    gap: 12px;
+  }
+
+  .controlGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    max-width: 100%;
+  }
+
+  .coarseBtn {
+    min-height: 56px !important;
+    min-width: 56px !important;
+    font-size: 1.35rem !important;
+  }
+
+  .coarseBtnWide {
+    min-height: 56px !important;
+    grid-column: span 2;
+    font-size: 1.1rem !important;
+  }
+
+  .coarseDpad {
+    width: 88px !important;
+    height: 88px !important;
+    font-size: 2rem !important;
+  }
+
+  .coarseControlBtn {
+    min-height: 56px;
+    font-size: 1.05rem;
+  }
+}

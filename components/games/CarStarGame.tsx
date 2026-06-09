@@ -15,6 +15,10 @@ import GameShell from "@/components/games/GameShell";
 import GamePixelBoard from "@/components/games/GamePixelBoard";
 import { CAR_STAR_CAST, CAR_STAR_TUTORIAL } from "@/lib/games/car-star-cast";
 import { TILE_INDEX, tileUrl } from "@/lib/gamekit/procedural-sheets";
+import { useCoarsePointer } from "@/hooks/useCoarsePointer";
+import { useDomJuice } from "@/hooks/useDomJuice";
+import { useSwipeGesture } from "@/hooks/useSwipeGesture";
+import mobileStyles from "./mobile-controls.module.css";
 import styles from "./CarStarGame.module.css";
 
 // ── 型別 ────────────────────────────────────────────────
@@ -267,6 +271,8 @@ function Car({ role, scared = false, dir, reduced = false }: CarProps) {
 
 export default function CarStarGame() {
   const reduced = useReducedMotion();
+  const isCoarse = useCoarsePointer();
+  const { juice, boardTransform } = useDomJuice(reduced);
 
   const game = useRef<GameState>(freshState());
   const {
@@ -375,6 +381,7 @@ export default function CarStarGame() {
       g.stars.delete(key);
       g.score += 10;
       sBlip();
+      if (!reduced) juice.shake.trigger(0.06, 1.5);
     }
     if (g.powers.has(key)) {
       g.powers.delete(key);
@@ -382,6 +389,7 @@ export default function CarStarGame() {
       g.scaredUntil = Date.now() + 6000;
       sPower();
       addPopup(p.r, p.c, "+50", "#ffd23f");
+      if (!reduced) juice.shake.trigger(0.1, 2.5);
     }
 
     const scared = Date.now() < g.scaredUntil;
@@ -408,6 +416,7 @@ export default function CarStarGame() {
     if (lostLife) {
       g.lives -= 1;
       sCrash();
+      if (!reduced) juice.shake.trigger(0.2, 5);
       addPopup(p.r, p.c, "💥", "#fff");
       if (g.lives <= 0) {
         g.status = "lost";
@@ -493,6 +502,13 @@ export default function CarStarGame() {
     game.current.player.desired = dir;
   }, []);
 
+  const swipe = useSwipeGesture({
+    up: () => setDir("up"),
+    down: () => setDir("down"),
+    left: () => setDir("left"),
+    right: () => setDir("right"),
+  });
+
   const beginGame = useCallback(() => {
     ensureAudio();
     difficultyRef.current = difficulty;
@@ -566,8 +582,22 @@ export default function CarStarGame() {
               width: BOARD_W,
               height: BOARD_H,
               transition: reduced ? "none" : "box-shadow .3s",
+              transform: boardTransform,
             }}
           >
+            {status === "playing" && isCoarse && (
+              <>
+                <div className={mobileStyles.swipeHint} aria-hidden="true">
+                  滑動控制方向
+                </div>
+                <div
+                  className={mobileStyles.swipeLayer}
+                  onPointerDown={swipe.onPointerDown}
+                  onPointerUp={swipe.onPointerUp}
+                  onPointerCancel={swipe.onPointerCancel}
+                />
+              </>
+            )}
             {grid.map((row, r) =>
               row.map((ch, c) =>
                 ch !== "#" ? (
@@ -850,6 +880,7 @@ interface DPadProps {
 }
 
 function DPad({ dir, label, children, onDir }: DPadProps) {
+  const coarse = useCoarsePointer();
   const press = (e: React.PointerEvent<HTMLButtonElement>) => {
     e.preventDefault();
     onDir(dir);
@@ -857,7 +888,7 @@ function DPad({ dir, label, children, onDir }: DPadProps) {
   return (
     <button
       type="button"
-      className={styles.dpadBtn}
+      className={`${styles.dpadBtn}${coarse ? ` ${mobileStyles.coarseDpad}` : ""}`}
       aria-label={label}
       onPointerDown={press}
     >

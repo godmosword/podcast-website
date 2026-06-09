@@ -31,6 +31,26 @@ export class ParticlePool {
     }
   }
 
+  /** 一次噴出多顆粒子（收集、落地、消行等）。 */
+  burst(
+    x: number,
+    y: number,
+    count = 8,
+    options: Partial<Pick<Particle, "vx" | "vy" | "life" | "color" | "size">> = {},
+  ): void {
+    for (let i = 0; i < count; i += 1) {
+      const angle = (Math.PI * 2 * i) / count + Math.random() * 0.4;
+      const speed = 1.2 + Math.random() * 2.2;
+      this.emit(x, y, {
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 1.2,
+        life: options.life ?? 0.35 + Math.random() * 0.2,
+        color: options.color,
+        size: options.size ?? 2 + Math.floor(Math.random() * 2),
+      });
+    }
+  }
+
   emit(
     x: number,
     y: number,
@@ -127,4 +147,48 @@ export class JuiceController {
   draw(ctx: CanvasRenderingContext2D): void {
     this.particles.draw(ctx);
   }
+
+  burst(
+    x: number,
+    y: number,
+    count = 8,
+    color = "#ffd166",
+    size = 2,
+  ): void {
+    this.particles.burst(x, y, count, { color, size });
+  }
+}
+
+/** 緩動：0→1 */
+export function easeOutQuad(t: number): number {
+  return 1 - (1 - t) * (1 - t);
+}
+
+export function easeOutCubic(t: number): number {
+  return 1 - (1 - t) ** 3;
+}
+
+export function easeOutBack(t: number): number {
+  const c1 = 1.70158;
+  const c3 = c1 + 1;
+  return 1 + c3 * (t - 1) ** 3 + c1 * (t - 1) ** 2;
+}
+
+/** 指數趨近 target（用於 UI 縮放、鏡頭等）。 */
+export function tweenToward(
+  current: number,
+  target: number,
+  speed: number,
+  dt: number,
+): number {
+  const t = 1 - Math.exp(-speed * dt);
+  return current + (target - current) * t;
+}
+
+export function applyCanvasShake(
+  ctx: CanvasRenderingContext2D,
+  shakeX: number,
+  shakeY: number,
+): void {
+  ctx.translate(shakeX, shakeY);
 }

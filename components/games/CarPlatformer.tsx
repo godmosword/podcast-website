@@ -12,6 +12,9 @@ import {
 } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useGameAudio } from "@/hooks/useGameAudio";
+import { useCoarsePointer } from "@/hooks/useCoarsePointer";
+import { JuiceController } from "@/lib/gamekit/juice";
+import mobileStyles from "./mobile-controls.module.css";
 import PixelGameCanvas, {
   usePixelGameSurface,
 } from "@/components/games/PixelGameCanvas";
@@ -205,6 +208,7 @@ const primaryBtn: CSSProperties = {
 function CarPlatformerCanvas({
   game,
   statusRef,
+  juiceRef,
   reset,
   update,
   render,
@@ -213,6 +217,7 @@ function CarPlatformerCanvas({
 }: {
   game: RefObject<GameState | null>;
   statusRef: RefObject<Status>;
+  juiceRef: RefObject<JuiceController>;
   reset: () => void;
   update: (g: GameState, dt: number) => void;
   render: (ctx: CanvasRenderingContext2D, g: GameState) => void;
@@ -236,12 +241,18 @@ function CarPlatformerCanvas({
         let dt = (t - g.last) / 1000;
         g.last = t;
         if (dt > 0.033) dt = 0.033;
-        if (statusRef.current === "playing") update(g, dt);
+        const reduced = reducedRef.current;
+        const j = reduced
+          ? { shakeX: 0, shakeY: 0, skipLogic: false }
+          : juiceRef.current.update(dt);
+        if (statusRef.current === "playing" && !j.skipLogic) update(g, dt);
         const ctx = renderer.context;
         renderer.clear("#8fd3ff");
         ctx.save();
         ctx.scale(RENDER_SX, RENDER_SY);
+        ctx.translate(j.shakeX / RENDER_SX, j.shakeY / RENDER_SY);
         render(ctx, g);
+        if (!reduced) juiceRef.current.draw(ctx);
         ctx.restore();
         drawHud(ctx, g);
         present();
@@ -250,14 +261,16 @@ function CarPlatformerCanvas({
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [drawHud, game, present, reducedRef, render, reset, rendererRef, statusRef, update]);
+  }, [drawHud, game, juiceRef, present, reducedRef, render, reset, rendererRef, statusRef, update]);
 
   return null;
 }
 
 export default function CarPlatformer() {
   const game = useRef<GameState | null>(null);
+  const juiceRef = useRef(new JuiceController());
   const statusRef = useRef<Status>("ready");
+  const isCoarse = useCoarsePointer();
   const reducedRef = useRef(false);
   const bestRef = useRef(0);
   const reduced = useReducedMotion();
@@ -405,6 +418,7 @@ export default function CarPlatformer() {
 
   const die = (g: GameState) => {
     sHurt();
+    if (!reducedRef.current) juiceRef.current.shake.trigger(0.22, 6);
     g.lives--;
     if (g.lives <= 0) {
       setStat("over");
@@ -475,6 +489,9 @@ export default function CarPlatformer() {
         g.taken++;
         g.score += 100;
         sCoin();
+        if (!reducedRef.current) {
+          juiceRef.current.burst(c.x - g.cam, c.y, 8, "#ffc107", 2);
+        }
       }
     }
 
@@ -500,6 +517,17 @@ export default function CarPlatformer() {
           p.vy = -BOUNCE;
           g.score += 200;
           sStomp();
+          if (!reducedRef.current) {
+            juiceRef.current.hitstop.trigger(0.05);
+            juiceRef.current.shake.trigger(0.1, 3);
+            juiceRef.current.burst(
+              e.x - g.cam + e.w / 2,
+              e.y + e.h / 2,
+              10,
+              "#ff6b6b",
+              2,
+            );
+          }
         } else if (p.invuln <= 0) return die(g);
       }
     }
@@ -806,6 +834,7 @@ export default function CarPlatformer() {
         <CarPlatformerCanvas
           game={game}
           statusRef={statusRef}
+          juiceRef={juiceRef}
           reset={reset}
           update={update}
           render={render}
@@ -876,17 +905,11 @@ export default function CarPlatformer() {
         )}
       </PixelGameCanvas>
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginTop: 16,
-          gap: 10,
-        }}
-      >
-        <div style={{ display: "flex", gap: 10 }}>
+      <div className={mobileStyles.touchBar}>
+        <div className={mobileStyles.touchCluster}>
           <TouchBtn
             label="左"
+            coarse={isCoarse}
             onDown={hold("left", true)}
             onUp={hold("left", false)}
           >
@@ -894,6 +917,7 @@ export default function CarPlatformer() {
           </TouchBtn>
           <TouchBtn
             label="右"
+            coarse={isCoarse}
             onDown={hold("right", true)}
             onUp={hold("right", false)}
           >
@@ -903,6 +927,7 @@ export default function CarPlatformer() {
         <TouchBtn
           label="跳"
           big
+          coarse={isCoarse}
           onDown={hold("jump", true)}
           onUp={hold("jump", false)}
         >
@@ -918,8 +943,9 @@ export default function CarPlatformer() {
           marginTop: 10,
         }}
       >
-        ← → / A D 移動 · ↑ / W / 空白鍵 跳（可變高度）· 踩敵人頭可彈飛 · P
-        暫停
+        {isCoarse
+          ? "按住左右移動 · 右側大按鈕跳躍 · 踩敵人頭可彈飛"
+          : "← → / A D 移動 · ↑ / W / 空白鍵 跳（可變高度）· 踩敵人頭可彈飛 · P 暫停"}
       </p>
     </div>
   );
@@ -929,12 +955,14 @@ function TouchBtn({
   children,
   label,
   big,
+  coarse,
   onDown,
   onUp,
 }: {
   children: ReactNode;
   label: string;
   big?: boolean;
+  coarse?: boolean;
   onDown: () => void;
   onUp: () => void;
 }) {
@@ -954,6 +982,13 @@ function TouchBtn({
       onPointerUp={u}
       onPointerLeave={u}
       onPointerCancel={u}
+      className={
+        coarse
+          ? big
+            ? mobileStyles.coarseBtnWide
+            : mobileStyles.coarseBtn
+          : undefined
+      }
       style={{
         border: "none",
         background: big
@@ -961,9 +996,9 @@ function TouchBtn({
           : "#fff",
         color: big ? "#06324a" : "#333",
         borderRadius: 16,
-        minWidth: big ? 130 : 64,
-        height: 64,
-        fontSize: big ? 22 : 26,
+        minWidth: big ? (coarse ? 160 : 130) : coarse ? 72 : 64,
+        height: coarse ? 72 : 64,
+        fontSize: big ? (coarse ? 24 : 22) : coarse ? 30 : 26,
         fontWeight: 800,
         cursor: "pointer",
         boxShadow: "0 4px 0 rgba(0,0,0,.2)",

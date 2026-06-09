@@ -16,8 +16,12 @@ import {
   TRUCK_DRIVE,
   TRUCK_IDLE,
 } from "@/lib/gamekit/sprite-defs";
+import { JuiceController } from "@/lib/gamekit/juice";
 import { drawPixelText } from "@/lib/gamekit/style";
 import type { CanvasPalette } from "@/lib/games/canvas-palette";
+import { useCoarsePointer } from "@/hooks/useCoarsePointer";
+import { useSwipeGesture } from "@/hooks/useSwipeGesture";
+import mobileStyles from "./mobile-controls.module.css";
 import styles from "./CarMissionGame.module.css";
 
 interface Firefly {
@@ -89,6 +93,8 @@ function CarMissionPlayfield({
   const frameRef = useRef(0);
   const truckSpriteRef = useRef<SpriteHandle | null>(null);
   const fireflySpriteRef = useRef<SpriteHandle | null>(null);
+  const juiceRef = useRef(new JuiceController());
+  const shakeRef = useRef({ x: 0, y: 0 });
 
   const gameStateRef = useRef({
     truckX: LANE_WIDTH * 1.5,
@@ -133,6 +139,8 @@ function CarMissionPlayfield({
     const p = paletteRef.current;
 
     ctx.imageSmoothingEnabled = false;
+    ctx.save();
+    ctx.translate(shakeRef.current.x, shakeRef.current.y);
     ctx.fillStyle = p.road;
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
@@ -172,8 +180,10 @@ function CarMissionPlayfield({
       });
     }
 
+    if (!reduced) juiceRef.current.draw(ctx);
+    ctx.restore();
     present();
-  }, [present, rendererRef]);
+  }, [present, reduced, rendererRef]);
 
   const gameLoop = useCallback(() => {
     if (statusRef.current !== "playing") return;
@@ -182,6 +192,11 @@ function CarMissionPlayfield({
     const motionScale = reduced ? 0.45 : 1;
     const frameSkip = reduced ? 2 : 1;
     const dt = (1 / 60) * motionScale;
+    const juice = juiceRef.current;
+    const j = reduced
+      ? { shakeX: 0, shakeY: 0, skipLogic: false }
+      : juice.update(dt);
+    shakeRef.current = { x: j.shakeX, y: j.shakeY };
     truckSpriteRef.current?.update(dt);
     fireflySpriteRef.current?.update(dt);
     if (frameRef.current % frameSkip !== 0) {
@@ -190,6 +205,13 @@ function CarMissionPlayfield({
     }
 
     const state = gameStateRef.current;
+    const p = paletteRef.current;
+
+    if (j.skipLogic) {
+      draw();
+      animationRef.current = requestAnimationFrame(gameLoop);
+      return;
+    }
 
     if (slowRef.current) {
       state.speed = Math.max(0.5, state.speed - 0.08 * motionScale);
@@ -220,6 +242,10 @@ function CarMissionPlayfield({
           setCombo(0);
           setGentleness((prev) => Math.max(0, prev - 8));
           sBump();
+          if (!reduced) {
+            juice.shake.trigger(0.18, 5);
+            juice.burst(fly.x, fly.y, 6, p.firefly, 2);
+          }
         } else {
           fly.happy = true;
           state.gentleCombo += 1;
@@ -229,6 +255,10 @@ function CarMissionPlayfield({
           setScore((prev) => prev + 15 + comboBonus);
           setGentleness((prev) => Math.min(100, prev + 5));
           sGentle();
+          if (!reduced) {
+            juice.burst(fly.x, fly.y, 8, p.gentleHint, 2);
+            if (state.gentleCombo >= 2) juice.hitstop.trigger(0.04);
+          }
         }
       }
     });
@@ -337,6 +367,9 @@ function CarMissionPlayfield({
       if (dist < 56 && !fly.happy) {
         fly.happy = true;
         hit = true;
+        if (!reduced) {
+          juiceRef.current.burst(fly.x, fly.y, 6, paletteRef.current.firefly, 2);
+        }
       }
     });
 
@@ -345,7 +378,7 @@ function CarMissionPlayfield({
       setScore((prev) => prev + 25);
       setGentleness((prev) => Math.min(100, prev + 8));
     }
-  }, [sHonk, setGentleness, setScore]);
+  }, [reduced, sHonk, setGentleness, setScore]);
 
   const restart = useCallback(() => {
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
@@ -416,8 +449,32 @@ function CarMissionPlayfield({
     [],
   );
 
+  const isCoarse = useCoarsePointer();
+  const swipe = useSwipeGesture({
+    left: () => changeLane(-1),
+    right: () => changeLane(1),
+    down: () => honk(),
+  });
+
+  const controlBtnClass = isCoarse
+    ? `${styles.controlBtn} ${mobileStyles.coarseControlBtn}`
+    : styles.controlBtn;
+
   return (
     <>
+      {status === "playing" && isCoarse && (
+        <div className={mobileStyles.swipeHint} aria-hidden="true">
+          滑動換道 · 下滑按喇叭
+        </div>
+      )}
+      {status === "playing" && isCoarse && (
+        <div
+          className={mobileStyles.swipeLayer}
+          onPointerDown={swipe.onPointerDown}
+          onPointerUp={swipe.onPointerUp}
+          onPointerCancel={swipe.onPointerCancel}
+        />
+      )}
       {status === "ready" && (
         <div className={styles.overlay}>
           <button type="button" onClick={startGame} className={styles.bigButton}>
@@ -448,14 +505,14 @@ function CarMissionPlayfield({
           <div className={styles.controlRow}>
             <button
               type="button"
-              className={styles.controlBtn}
+              className={controlBtnClass}
               onClick={() => changeLane(-1)}
             >
               ←
             </button>
             <button
               type="button"
-              className={styles.controlBtn}
+              className={controlBtnClass}
               onClick={() => changeLane(1)}
             >
               →
@@ -464,7 +521,7 @@ function CarMissionPlayfield({
           <div className={styles.controlRow}>
             <button
               type="button"
-              className={`${styles.controlBtn} ${styles.slowBtn}`}
+              className={`${controlBtnClass} ${styles.slowBtn}`}
               onPointerDown={(e) => {
                 e.preventDefault();
                 setSlow(true);
@@ -477,7 +534,7 @@ function CarMissionPlayfield({
             </button>
             <button
               type="button"
-              className={`${styles.controlBtn} ${styles.honkBtn}`}
+              className={`${controlBtnClass} ${styles.honkBtn}`}
               onClick={honk}
             >
               叭

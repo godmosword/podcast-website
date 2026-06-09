@@ -10,6 +10,9 @@ import {
 } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useGameAudio } from "@/hooks/useGameAudio";
+import { useCoarsePointer } from "@/hooks/useCoarsePointer";
+import { useDomJuice } from "@/hooks/useDomJuice";
+import mobileStyles from "./mobile-controls.module.css";
 import GamePixelBoard from "@/components/games/GamePixelBoard";
 import { blockDropKitColors } from "@/lib/gamekit/bridge";
 import { BLOCK_INDEX, blockUrl } from "@/lib/gamekit/procedural-sheets";
@@ -416,18 +419,28 @@ function MiniBox({ type, label }: { type: PieceType | null; label: string }) {
 function CtrlBtn({
   label,
   children,
+  coarse,
+  wide,
   onDown,
   onUp,
 }: {
   label: string;
   children: ReactNode;
+  coarse?: boolean;
+  wide?: boolean;
   onDown: () => void;
   onUp?: () => void;
 }) {
+  const extraClass = coarse
+    ? wide
+      ? mobileStyles.coarseBtnWide
+      : mobileStyles.coarseBtn
+    : "";
   return (
     <button
       type="button"
       aria-label={label}
+      className={extraClass || undefined}
       onPointerDown={(e) => {
         e.preventDefault();
         onDown();
@@ -436,13 +449,13 @@ function CtrlBtn({
       onPointerLeave={onUp}
       onPointerCancel={onUp}
       style={{
-        minWidth: 52,
-        minHeight: 52,
+        minWidth: coarse ? 56 : 52,
+        minHeight: coarse ? 56 : 52,
         border: "none",
         background: "rgba(255,255,255,.1)",
         color: "#fff",
         borderRadius: 14,
-        fontSize: 22,
+        fontSize: coarse ? 26 : 22,
         cursor: "pointer",
         touchAction: "manipulation",
       }}
@@ -457,6 +470,8 @@ export default function BlockDropGame() {
   const repeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const bestRef = useRef(0);
   const reduced = useReducedMotion();
+  const isCoarse = useCoarsePointer();
+  const { juice, boardTransform } = useDomJuice(reduced);
 
   const [, force] = useState(0);
   const [best, setBest] = useState(0);
@@ -594,6 +609,7 @@ export default function BlockDropGame() {
       g.clearRows = full;
       g.clearUntil = performance.now() + 260;
       sLine(full.length);
+      if (!reduced) juice.shake.trigger(0.12, 2 + full.length);
     } else {
       spawnNext(g);
     }
@@ -919,6 +935,7 @@ export default function BlockDropGame() {
                 position: "relative",
                 width: BOARD_W,
                 height: BOARD_H,
+                transform: boardTransform,
                 background: KIT_BLOCK.well,
                 borderRadius: 4,
                 boxShadow: `inset 0 0 0 2px ${KIT_BLOCK.wellBorder}`,
@@ -1088,26 +1105,29 @@ export default function BlockDropGame() {
           </div>
       </GamePixelBoard>
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: 8,
-          marginTop: 16,
-          flexWrap: "wrap",
-        }}
-      >
-        <CtrlBtn label="左" onDown={() => startRepeat(() => move(-1))} onUp={stopRepeat}>
+      <div className={mobileStyles.controlGrid}>
+        <CtrlBtn
+          label="左"
+          coarse={isCoarse}
+          onDown={() => startRepeat(() => move(-1))}
+          onUp={stopRepeat}
+        >
           ⬅️
         </CtrlBtn>
-        <CtrlBtn label="旋轉" onDown={() => rotate(1)}>
+        <CtrlBtn label="旋轉" coarse={isCoarse} onDown={() => rotate(1)}>
           🔄
         </CtrlBtn>
-        <CtrlBtn label="右" onDown={() => startRepeat(() => move(1))} onUp={stopRepeat}>
+        <CtrlBtn
+          label="右"
+          coarse={isCoarse}
+          onDown={() => startRepeat(() => move(1))}
+          onUp={stopRepeat}
+        >
           ➡️
         </CtrlBtn>
         <CtrlBtn
           label="軟降"
+          coarse={isCoarse}
           onDown={() => {
             G.current.softDrop = true;
           }}
@@ -1117,10 +1137,10 @@ export default function BlockDropGame() {
         >
           ⬇️
         </CtrlBtn>
-        <CtrlBtn label="落下" onDown={hardDrop}>
-          ⤓
+        <CtrlBtn label="落下" coarse={isCoarse} wide onDown={hardDrop}>
+          ⤓ 落下
         </CtrlBtn>
-        <CtrlBtn label="暫存" onDown={holdPiece}>
+        <CtrlBtn label="暫存" coarse={isCoarse} onDown={holdPiece}>
           📦
         </CtrlBtn>
       </div>
@@ -1133,7 +1153,9 @@ export default function BlockDropGame() {
           marginTop: 12,
         }}
       >
-        ← → 移動 · ↑/X 旋轉 · ↓ 軟降 · 空白鍵落下 · C 暫存 · P 暫停
+        {isCoarse
+          ? "大按鈕操作 · 按住左右可連續移動"
+          : "← → 移動 · ↑/X 旋轉 · ↓ 軟降 · 空白鍵落下 · C 暫存 · P 暫停"}
       </p>
     </div>
   );

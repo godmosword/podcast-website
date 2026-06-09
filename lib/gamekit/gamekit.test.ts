@@ -25,6 +25,12 @@ import {
   DEFAULT_MUSIC_VOLUME,
   DEFAULT_SFX_VOLUME,
 } from "@/lib/gamekit/audio";
+import {
+  easeOutQuad,
+  easeOutCubic,
+  tweenToward,
+  JuiceController,
+} from "@/lib/gamekit/juice";
 import { emptyTilemap } from "@/lib/gamekit/tilemap";
 import { recordBestScore, loadPlayerProfile } from "@/lib/gamekit/save";
 
@@ -139,6 +145,24 @@ describe("sprite-defs", () => {
         expect(f.h).toBeGreaterThan(0);
       }
     }
+  });
+});
+
+describe("juice", () => {
+  it("緩動與 tween 單調", () => {
+    expect(easeOutQuad(0)).toBe(0);
+    expect(easeOutQuad(1)).toBe(1);
+    expect(easeOutCubic(0.5)).toBeGreaterThan(0.5);
+    const next = tweenToward(0, 10, 8, 0.1);
+    expect(next).toBeGreaterThan(0);
+    expect(next).toBeLessThan(10);
+  });
+
+  it("JuiceController burst 不拋錯", () => {
+    const j = new JuiceController();
+    j.burst(10, 10, 4, "#fff");
+    const r = j.update(0.016);
+    expect(r.shakeX).toBeDefined();
   });
 });
 

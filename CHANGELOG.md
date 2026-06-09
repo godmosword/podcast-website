@@ -6,6 +6,7 @@
 
 ### Added
 
+- **Game Kit Phase 4**：juice 工具組（粒子／震動／頓幀／緩動）接入四款遊戲；手機操控優化（`useCoarsePointer`、`useSwipeGesture`、大按鈕、滑動手勢、safe-area）
 - **Game Kit Phase 3**：四款程序生成 chiptune 循環 BGM（`chiptune-bgm`）、`GameKitAudioBus` music/sfx 分軌混音、擴充 `useGameAudio(gameId)`；四款遊戲接入 BGM 與分頁暫停
 - **Game Kit Phase 2**：程序生成 sprite sheet／tileset（`procedural-sheets`、`assets`、`sprite-defs`、`tileset-draw`）；car-mission 卡車＋螢火虫動畫、car-adventure 地形／金幣／尖刺 tile、car-star 道路 tile 背景、block-drop 七色方塊 tile 皮膚
 - **營運管線文件**：`TODOS.md` 新增 SoundOn／Apple 同步四階段工作流、生圖通知方案（Issue／webhook／佇列）與 P2–P3 實作條目
