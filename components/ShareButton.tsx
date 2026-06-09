@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useState } from "react";
 import { LINE_ICON_PATH } from "@/lib/connect-icons";
 import styles from "./ShareButton.module.css";
@@ -7,9 +8,15 @@ import styles from "./ShareButton.module.css";
 type ShareButtonProps = {
   shareUrl: string;
   lineUrl: string;
+  /** 分享列最左側插槽（例：收藏愛心） */
+  leading?: ReactNode;
 };
 
-export default function ShareButton({ shareUrl, lineUrl }: ShareButtonProps) {
+export default function ShareButton({
+  shareUrl,
+  lineUrl,
+  leading,
+}: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
 
   async function copyLink() {
@@ -23,7 +30,11 @@ export default function ShareButton({ shareUrl, lineUrl }: ShareButtonProps) {
   }
 
   return (
-    <div className={styles.row} aria-label="分享這集">
+    <div
+      className={styles.row}
+      aria-label={leading ? "故事操作" : "分享這集"}
+    >
+      {leading}
       <button
         type="button"
         className={styles.btn}

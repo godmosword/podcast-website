@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { HeartIcon } from "@/components/decor/PlayerIcon";
 import { isFavorite, toggleFavorite } from "@/lib/favorites";
 import styles from "./FavoriteButton.module.css";
 
@@ -21,9 +22,10 @@ export default function FavoriteButton({ slug }: FavoriteButtonProps) {
       className={`${styles.btn} ${active ? styles.active : ""}`}
       aria-pressed={active}
       aria-label={active ? "取消收藏" : "加入最愛"}
+      title={active ? "取消收藏" : "加入最愛"}
       onClick={() => setActive(toggleFavorite(slug).includes(slug))}
     >
-      {active ? "❤️ 已收藏" : "🤍 加入最愛"}
+      <HeartIcon className={styles.icon} filled={active} />
     </button>
   );
 }
