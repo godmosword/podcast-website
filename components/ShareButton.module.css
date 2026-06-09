@@ -24,8 +24,16 @@
 }
 
 .line {
+  width: 44px;
+  padding: 0;
   border-color: #06c755;
   color: #06c755;
+}
+
+.lineIcon {
+  width: 22px;
+  height: 22px;
+  display: block;
 }
 
 .btn:active {

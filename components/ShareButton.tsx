@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { LINE_ICON_PATH } from "@/lib/connect-icons";
 import styles from "./ShareButton.module.css";
 
 type ShareButtonProps = {
@@ -36,8 +37,17 @@ export default function ShareButton({ shareUrl, lineUrl }: ShareButtonProps) {
         className={`${styles.btn} ${styles.line}`}
         target="_blank"
         rel="noopener noreferrer"
+        aria-label="LINE 分享"
       >
-        LINE 分享
+        <svg
+          viewBox="0 0 24 24"
+          className={styles.lineIcon}
+          fill="currentColor"
+          aria-hidden
+          focusable="false"
+        >
+          {LINE_ICON_PATH}
+        </svg>
       </a>
     </div>
   );
