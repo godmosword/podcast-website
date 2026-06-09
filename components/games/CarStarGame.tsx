@@ -12,6 +12,7 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useBestScore } from "@/hooks/useBestScore";
 import { useGameAudio } from "@/hooks/useGameAudio";
 import GameShell from "@/components/games/GameShell";
+import GamePixelBoard from "@/components/games/GamePixelBoard";
 import { CAR_STAR_CAST, CAR_STAR_TUTORIAL } from "@/lib/games/car-star-cast";
 import styles from "./CarStarGame.module.css";
 
@@ -73,7 +74,7 @@ const MAZE = [
 
 const ROWS = MAZE.length;
 const COLS = MAZE[0].length;
-const CELL = 34;
+const CELL = 16;
 const BOARD_W = COLS * CELL;
 const BOARD_H = ROWS * CELL;
 const TICK = 260; // ms，數字越大車子越慢（給 3–7 歲）
@@ -270,14 +271,12 @@ export default function CarStarGame() {
   const { ensureAudio, tone, soundUi, toggleSound } = useGameAudio(true);
   const [best, saveBest] = useBestScore("car-star-best");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const wrapRef = useRef<HTMLDivElement>(null);
   const popupId = useRef<number>(0);
 
   const [, force] = useState(0);
   const [status, setStatus] = useState<Status>("start");
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const difficultyRef = useRef<Difficulty>("easy");
-  const [scale, setScale] = useState(1);
   const [popups, setPopups] = useState<Popup[]>([]);
 
   const rerender = useCallback(() => force((n) => n + 1), []);
@@ -289,17 +288,6 @@ export default function CarStarGame() {
     },
     [],
   );
-
-  // 響應式縮放
-  useEffect(() => {
-    const onResize = () => {
-      const w = wrapRef.current ? wrapRef.current.clientWidth : BOARD_W;
-      setScale(Math.min(1, w / BOARD_W));
-    };
-    onResize();
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
 
   const sBlip = useCallback(() => tone(740, 0.06, "square", 0.035), [tone]);
   const sPower = useCallback(() => tone(300, 0.25, "triangle", 0.06), [tone]);
@@ -540,18 +528,17 @@ export default function CarStarGame() {
         </div>
       )}
 
-      <div ref={wrapRef} className={styles.boardWrap}>
-        <div
-          className={styles.boardScaler}
-          style={{ width: BOARD_W * scale, height: BOARD_H * scale }}
-        >
+      <GamePixelBoard
+        gameId="car-star"
+        nativeWidth={BOARD_W}
+        nativeHeight={BOARD_H}
+        className={styles.boardWrap}
+      >
           <div
             className={`${styles.board} ${boardClass}`}
             style={{
               width: BOARD_W,
               height: BOARD_H,
-              transform: `scale(${scale})`,
-              transformOrigin: "top left",
               transition: reduced ? "none" : "box-shadow .3s",
             }}
           >
@@ -707,8 +694,7 @@ export default function CarStarGame() {
               </div>
             )}
           </div>
-        </div>
-      </div>
+      </GamePixelBoard>
 
       <div className={styles.dpadWrap}>
         <div className={styles.dpadGrid}>

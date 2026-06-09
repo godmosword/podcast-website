@@ -1,7 +1,8 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import type { GameKitGameId } from "@/lib/gamekit";
+import { colorsForGame, viewportFor } from "@/lib/gamekit";
 import {
   PixelGameSurfaceContext,
   usePixelGameSurface,
@@ -18,17 +19,26 @@ export type PixelGameCanvasProps = {
 };
 
 function PixelGameCanvasFrame({
+  gameId,
   className,
   children,
 }: {
+  gameId: GameKitGameId;
   className?: string;
   children?: ReactNode;
 }) {
   const { containerRef, displayRef } = usePixelGameSurface();
+  const vp = viewportFor(gameId);
+  const frameStyle = {
+    "--pixel-game-aspect": `${vp.width} / ${vp.height}`,
+    "--pixel-game-bg": colorsForGame(gameId)[0],
+  } as CSSProperties;
+
   return (
     <div
       ref={containerRef}
       className={`${styles.wrap}${className ? ` ${className}` : ""}`}
+      style={frameStyle}
     >
       <canvas
         ref={displayRef}
@@ -77,7 +87,9 @@ export default function PixelGameCanvas({
       background={background}
       maxScale={maxScale}
     >
-      <PixelGameCanvasFrame className={className}>{children}</PixelGameCanvasFrame>
+      <PixelGameCanvasFrame gameId={gameId} className={className}>
+        {children}
+      </PixelGameCanvasFrame>
     </PixelGameCanvasProvider>
   );
 }

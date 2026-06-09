@@ -35,25 +35,28 @@
 .canvasWrap {
   position: relative;
   width: 100%;
-  max-width: 480px;
+  max-width: 400px;
   margin: 0 auto;
-  --canvas-road-mark: color-mix(in srgb, var(--card) 35%, transparent);
-  --canvas-firefly-glow: color-mix(in srgb, var(--c-yellow) 22%, transparent);
 }
 
-.canvas {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 480 / 320;
-  border: 6px solid var(--ink);
-  border-radius: var(--radius-md);
-  background: var(--road);
-  display: block;
-  touch-action: none;
+.pixelFrame {
+  border: none;
+  box-shadow: none;
+}
+
+.controlsOverlay {
+  position: absolute;
+  inset: auto 8px 8px 8px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.controlsOverlay .controlRow {
+  pointer-events: auto;
 }
 
 .controls {
-  margin-top: 16px;
+  margin-top: 12px;
 }
 
 .controlRow {

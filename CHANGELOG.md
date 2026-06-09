@@ -7,6 +7,7 @@
 ### Added
 
 - **營運管線文件**：`TODOS.md` 新增 SoundOn／Apple 同步四階段工作流、生圖通知方案（Issue／webhook／佇列）與 P2–P3 實作條目
+- **Game Kit Phase 1**：四款遊戲接入 `PixelGameCanvas`／`GamePixelBoard`、統一調色盤 bridge、整數倍像素放大；car-star／block-drop 格子縮放對齊 viewport
 - **Game Kit Phase 0**：`lib/gamekit/` 九大模組骨架、`PixelRenderer`／`GameLoop`／`InputManager`、`ART-BIBLE.md`、`PixelGameCanvas` + hook、單元測試
 - **遊樂園 pixel 精進方案**：`RESEARCH.md` + `TODOS.md` 新增 Game Kit 八階段路線、四款對標與驗收表；校正 `car-mission` 為三車道溫柔任務（非俯視賽車）
 - **競品研究筆記**：`RESEARCH.md` 收錄 Hey Clay App 架構拆解（phygital、分步教學、收藏解鎖）與車車遊樂園適用性評分；`TODOS.md` 同步 `craft` 手作教學、車庫圖鑑養成、phygital 第四原則與拍照分享待決策

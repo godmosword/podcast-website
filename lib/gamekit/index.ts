@@ -12,5 +12,6 @@ export * from "./save";
 export * from "./meta";
 export * from "./scene";
 export * from "./audio";
+export * from "./bridge";
 
 export { GAMEKIT_VERSION } from "./constants";

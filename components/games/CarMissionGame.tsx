@@ -3,14 +3,15 @@
 import Link from "next/link";
 import { useRef, useEffect, useState, useCallback } from "react";
 import GameShell from "@/components/games/GameShell";
+import PixelGameCanvas, {
+  usePixelGameSurface,
+} from "@/components/games/PixelGameCanvas";
 import { useBestScore } from "@/hooks/useBestScore";
 import { useGameAudio } from "@/hooks/useGameAudio";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import {
-  readCanvasPalette,
-  type CanvasPalette,
-  DEFAULT_CANVAS_PALETTE,
-} from "@/lib/games/canvas-palette";
+import { canvasPaletteFromKit } from "@/lib/gamekit/bridge";
+import { drawPixelText } from "@/lib/gamekit/style";
+import type { CanvasPalette } from "@/lib/games/canvas-palette";
 import styles from "./CarMissionGame.module.css";
 
 interface Firefly {
@@ -22,8 +23,8 @@ interface Firefly {
 
 type GameStatus = "ready" | "playing" | "finished";
 
-const CANVAS_WIDTH = 480;
-const CANVAS_HEIGHT = 320;
+const CANVAS_WIDTH = 320;
+const CANVAS_HEIGHT = 240;
 const LANES = 3;
 const LANE_WIDTH = CANVAS_WIDTH / LANES;
 const BASE_SPEED = 1.2;
@@ -32,26 +33,54 @@ function GamePill({ children }: { children: React.ReactNode }) {
   return <span className={styles.pill}>{children}</span>;
 }
 
-export default function CarMissionGame() {
-  const reduced = useReducedMotion();
-  const shellRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+type PlayfieldProps = {
+  status: GameStatus;
+  setStatus: (s: GameStatus) => void;
+  gentleness: number;
+  setGentleness: React.Dispatch<React.SetStateAction<number>>;
+  distance: number;
+  setDistance: React.Dispatch<React.SetStateAction<number>>;
+  score: number;
+  setScore: React.Dispatch<React.SetStateAction<number>>;
+  combo: number;
+  setCombo: React.Dispatch<React.SetStateAction<number>>;
+  saveBest: (n: number) => void;
+  reduced: boolean;
+  ensureAudio: () => void;
+  tone: (
+    f: number,
+    d: number,
+    type?: OscillatorType,
+    vol?: number,
+  ) => void;
+  onStart: () => void;
+  onRestart: () => void;
+};
+
+function CarMissionPlayfield({
+  status,
+  setStatus,
+  gentleness,
+  setGentleness,
+  distance,
+  setDistance,
+  score,
+  setScore,
+  combo,
+  setCombo,
+  saveBest,
+  reduced,
+  ensureAudio,
+  tone,
+  onStart,
+  onRestart,
+}: PlayfieldProps) {
+  const { rendererRef, present } = usePixelGameSurface();
   const animationRef = useRef<number | null>(null);
-  const statusRef = useRef<GameStatus>("ready");
-  const paletteRef = useRef<CanvasPalette>(DEFAULT_CANVAS_PALETTE);
+  const statusRef = useRef<GameStatus>(status);
+  const paletteRef = useRef<CanvasPalette>(canvasPaletteFromKit("car-mission"));
   const slowRef = useRef(false);
   const frameRef = useRef(0);
-
-  const { ensureAudio, tone, soundUi, toggleSound } = useGameAudio(true);
-  const [best, saveBest] = useBestScore("car-mission-best");
-
-  const [gentleness, setGentleness] = useState(100);
-  const [distance, setDistance] = useState(0);
-  const [status, setStatus] = useState<GameStatus>("ready");
-  const [score, setScore] = useState(0);
-  const [combo, setCombo] = useState(0);
-
-  statusRef.current = status;
 
   const gameStateRef = useRef({
     truckX: LANE_WIDTH * 1.5,
@@ -61,6 +90,8 @@ export default function CarMissionGame() {
     distance: 0,
     gentleCombo: 0,
   });
+
+  statusRef.current = status;
 
   const sRoll = useCallback(() => tone(520, 0.05, "square", 0.03), [tone]);
   const sHonk = useCallback(() => tone(180, 0.18, "sawtooth", 0.06), [tone]);
@@ -72,17 +103,13 @@ export default function CarMissionGame() {
     );
   }, [tone]);
 
-  const refreshPalette = useCallback(() => {
-    paletteRef.current = readCanvasPalette(shellRef.current);
-  }, []);
-
   const initFireflies = useCallback(() => {
     const flies: Firefly[] = [];
     for (let i = 0; i < 8; i++) {
       flies.push({
         x: Math.random() * CANVAS_WIDTH,
-        y: 80 + Math.random() * (CANVAS_HEIGHT - 160),
-        size: 8 + Math.random() * 6,
+        y: 60 + Math.random() * (CANVAS_HEIGHT - 120),
+        size: 5 + Math.random() * 4,
         happy: false,
       });
     }
@@ -90,20 +117,19 @@ export default function CarMissionGame() {
   }, []);
 
   const draw = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const renderer = rendererRef.current;
+    if (!renderer) return;
 
-    const ctx = canvas.getContext("2d", { alpha: true });
-    if (!ctx) return;
-
+    const ctx = renderer.context;
     const state = gameStateRef.current;
     const p = paletteRef.current;
 
+    ctx.imageSmoothingEnabled = false;
     ctx.fillStyle = p.road;
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
     ctx.strokeStyle = p.roadMark;
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 1;
     for (let i = 1; i < LANES; i++) {
       ctx.beginPath();
       ctx.moveTo(i * LANE_WIDTH, 0);
@@ -111,12 +137,12 @@ export default function CarMissionGame() {
       ctx.stroke();
     }
 
-    const truckY = CANVAS_HEIGHT - 70;
+    const truckY = CANVAS_HEIGHT - 52;
     ctx.fillStyle = p.truck;
-    ctx.fillRect(state.truckX - 22, truckY, 44, 32);
+    ctx.fillRect(state.truckX - 15, truckY, 30, 24);
     ctx.fillStyle = p.wheel;
-    ctx.fillRect(state.truckX - 18, truckY + 24, 12, 8);
-    ctx.fillRect(state.truckX + 6, truckY + 24, 12, 8);
+    ctx.fillRect(state.truckX - 12, truckY + 18, 8, 6);
+    ctx.fillRect(state.truckX + 4, truckY + 18, 8, 6);
 
     state.fireflies.forEach((fly) => {
       ctx.fillStyle = p.firefly;
@@ -127,17 +153,20 @@ export default function CarMissionGame() {
       if (!fly.happy) {
         ctx.fillStyle = p.fireflyGlow;
         ctx.beginPath();
-        ctx.arc(fly.x, fly.y, fly.size * 1.6, 0, Math.PI * 2);
+        ctx.arc(fly.x, fly.y, fly.size * 1.5, 0, Math.PI * 2);
         ctx.fill();
       }
     });
 
     if (state.speed < 0.8) {
-      ctx.fillStyle = p.gentleHint;
-      ctx.font = "14px sans-serif";
-      ctx.fillText("溫柔模式", state.truckX - 30, truckY - 15);
+      drawPixelText(ctx, "溫柔", state.truckX - 12, truckY - 14, {
+        color: p.gentleHint,
+        scale: 1,
+      });
     }
-  }, []);
+
+    present();
+  }, [present, rendererRef]);
 
   const gameLoop = useCallback(() => {
     if (statusRef.current !== "playing") return;
@@ -164,18 +193,18 @@ export default function CarMissionGame() {
     state.fireflies.forEach((fly) => {
       fly.y += 0.8 * motionScale;
       if (fly.y > CANVAS_HEIGHT) {
-        fly.y = 60;
+        fly.y = 45;
         fly.x = Math.random() * CANVAS_WIDTH;
         fly.happy = false;
       }
     });
 
-    const truckY = CANVAS_HEIGHT - 70;
+    const truckY = CANVAS_HEIGHT - 52;
     state.fireflies.forEach((fly) => {
       const distX = Math.abs(fly.x - state.truckX);
       const distY = Math.abs(fly.y - truckY);
 
-      if (distX < 35 && distY < 35 && !fly.happy) {
+      if (distX < 24 && distY < 24 && !fly.happy) {
         if (state.speed > 1.0) {
           state.gentleCombo = 0;
           setCombo(0);
@@ -220,11 +249,23 @@ export default function CarMissionGame() {
     }
 
     animationRef.current = requestAnimationFrame(gameLoop);
-  }, [draw, reduced, saveBest, sBump, sGentle, sWin]);
+  }, [
+    draw,
+    reduced,
+    saveBest,
+    sBump,
+    sGentle,
+    sWin,
+    setCombo,
+    setDistance,
+    setGentleness,
+    setScore,
+    setStatus,
+  ]);
 
   const startGame = useCallback(() => {
     ensureAudio();
-    refreshPalette();
+    paletteRef.current = canvasPaletteFromKit("car-mission");
     gameStateRef.current = {
       truckX: LANE_WIDTH * 1.5,
       truckLane: 1,
@@ -241,10 +282,21 @@ export default function CarMissionGame() {
     setCombo(0);
     statusRef.current = "playing";
     setStatus("playing");
+    onStart();
 
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
     animationRef.current = requestAnimationFrame(gameLoop);
-  }, [ensureAudio, gameLoop, initFireflies, refreshPalette]);
+  }, [
+    ensureAudio,
+    gameLoop,
+    initFireflies,
+    onStart,
+    setCombo,
+    setDistance,
+    setGentleness,
+    setScore,
+    setStatus,
+  ]);
 
   const changeLane = useCallback(
     (direction: number) => {
@@ -272,7 +324,7 @@ export default function CarMissionGame() {
 
     state.fireflies.forEach((fly) => {
       const dist = Math.abs(fly.x - state.truckX);
-      if (dist < 80 && !fly.happy) {
+      if (dist < 56 && !fly.happy) {
         fly.happy = true;
         hit = true;
       }
@@ -283,20 +335,21 @@ export default function CarMissionGame() {
       setScore((prev) => prev + 25);
       setGentleness((prev) => Math.min(100, prev + 8));
     }
-  }, [sHonk]);
+  }, [sHonk, setGentleness, setScore]);
 
   const restart = useCallback(() => {
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
     statusRef.current = "ready";
     setStatus("ready");
-    refreshPalette();
+    paletteRef.current = canvasPaletteFromKit("car-mission");
     draw();
-  }, [draw, refreshPalette]);
+    onRestart();
+  }, [draw, onRestart, setStatus]);
 
   useEffect(() => {
-    refreshPalette();
+    paletteRef.current = canvasPaletteFromKit("car-mission");
     draw();
-  }, [draw, refreshPalette]);
+  }, [draw]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -351,6 +404,91 @@ export default function CarMissionGame() {
     [],
   );
 
+  return (
+    <>
+      {status === "ready" && (
+        <div className={styles.overlay}>
+          <button type="button" onClick={startGame} className={styles.bigButton}>
+            開始溫柔任務
+          </button>
+          <p className={styles.hint}>慢慢開、輕輕對待螢火蟲</p>
+        </div>
+      )}
+
+      {status === "finished" && (
+        <div className={styles.overlay}>
+          <h3>太棒了！</h3>
+          <p>你讓怪獸卡車溫柔完成了任務！</p>
+          <p>最終分數：{score}</p>
+          <div className={styles.endButtons}>
+            <button type="button" onClick={restart} className={styles.bigButton}>
+              再玩一次
+            </button>
+            <Link href="/" className={styles.secondaryButton}>
+              回故事屋
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {status === "playing" && (
+        <div className={styles.controlsOverlay}>
+          <div className={styles.controlRow}>
+            <button
+              type="button"
+              className={styles.controlBtn}
+              onClick={() => changeLane(-1)}
+            >
+              ←
+            </button>
+            <button
+              type="button"
+              className={styles.controlBtn}
+              onClick={() => changeLane(1)}
+            >
+              →
+            </button>
+          </div>
+          <div className={styles.controlRow}>
+            <button
+              type="button"
+              className={`${styles.controlBtn} ${styles.slowBtn}`}
+              onPointerDown={(e) => {
+                e.preventDefault();
+                setSlow(true);
+              }}
+              onPointerUp={() => setSlow(false)}
+              onPointerLeave={() => setSlow(false)}
+              onPointerCancel={() => setSlow(false)}
+            >
+              慢
+            </button>
+            <button
+              type="button"
+              className={`${styles.controlBtn} ${styles.honkBtn}`}
+              onClick={honk}
+            >
+              叭
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+export default function CarMissionGame() {
+  const reduced = useReducedMotion();
+  const shellRef = useRef<HTMLDivElement>(null);
+  const { ensureAudio, tone, soundUi, toggleSound } = useGameAudio(true);
+  const [best, saveBest] = useBestScore("car-mission-best");
+
+  const [gentleness, setGentleness] = useState(100);
+  const [distance, setDistance] = useState(0);
+  const [status, setStatus] = useState<GameStatus>("ready");
+  const [score, setScore] = useState(0);
+  const [combo, setCombo] = useState(0);
+
   const liveSummary = `溫柔度 ${Math.floor(gentleness)}%，距離 ${distance}%，分數 ${score}${
     combo >= 2 ? `，連續溫柔 ${combo} 次` : ""
   }`;
@@ -395,82 +533,33 @@ export default function CarMissionGame() {
       )}
 
       <div className={styles.canvasWrap}>
-        <canvas
-          ref={canvasRef}
-          width={CANVAS_WIDTH}
-          height={CANVAS_HEIGHT}
-          className={styles.canvas}
-          aria-label="怪獸卡車溫柔任務遊戲畫面"
-        />
-
-        {status === "ready" && (
-          <div className={styles.overlay}>
-            <button type="button" onClick={startGame} className={styles.bigButton}>
-              開始溫柔任務
-            </button>
-            <p className={styles.hint}>慢慢開、輕輕對待螢火蟲</p>
-          </div>
-        )}
-
-        {status === "finished" && (
-          <div className={styles.overlay}>
-            <h3>太棒了！</h3>
-            <p>你讓怪獸卡車溫柔完成了任務！</p>
-            <p>最終分數：{score}</p>
-            {best != null && <p>最佳分數：{best}</p>}
-            <div className={styles.endButtons}>
-              <button type="button" onClick={restart} className={styles.bigButton}>
-                再玩一次
-              </button>
-              <Link href="/" className={styles.secondaryButton}>
-                回故事屋
-              </Link>
-            </div>
-          </div>
-        )}
+        <PixelGameCanvas gameId="car-mission" className={styles.pixelFrame}>
+          <CarMissionPlayfield
+            status={status}
+            setStatus={setStatus}
+            gentleness={gentleness}
+            setGentleness={setGentleness}
+            distance={distance}
+            setDistance={setDistance}
+            score={score}
+            setScore={setScore}
+            combo={combo}
+            setCombo={setCombo}
+            saveBest={saveBest}
+            reduced={reduced}
+            ensureAudio={ensureAudio}
+            tone={tone}
+            onStart={() => {}}
+            onRestart={() => {}}
+          />
+        </PixelGameCanvas>
       </div>
 
       {status === "playing" && (
         <div className={styles.controls}>
-          <div className={styles.controlRow}>
-            <button
-              type="button"
-              className={styles.controlBtn}
-              onClick={() => changeLane(-1)}
-            >
-              ← 向左
-            </button>
-            <button
-              type="button"
-              className={styles.controlBtn}
-              onClick={() => changeLane(1)}
-            >
-              向右 →
-            </button>
-          </div>
-
-          <div className={styles.controlRow}>
-            <button
-              type="button"
-              className={`${styles.controlBtn} ${styles.slowBtn}`}
-              onPointerDown={(e) => {
-                e.preventDefault();
-                setSlow(true);
-              }}
-              onPointerUp={() => setSlow(false)}
-              onPointerLeave={() => setSlow(false)}
-              onPointerCancel={() => setSlow(false)}
-            >
-              溫柔前進
-            </button>
-            <button
-              type="button"
-              className={`${styles.controlBtn} ${styles.honkBtn}`}
-              onClick={honk}
-            >
-              輕輕喇叭
-            </button>
-          </div>
+          <p className={styles.hint} aria-hidden="true">
+            方向鍵或下方按鈕：左右換道、按住「慢」溫柔前進、按「叭」輕按喇叭
+          </p>
         </div>
       )}
     </GameShell>

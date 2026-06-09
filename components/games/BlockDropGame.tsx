@@ -9,10 +9,12 @@ import {
   type ReactNode,
 } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import GamePixelBoard from "@/components/games/GamePixelBoard";
+import { blockDropKitColors } from "@/lib/gamekit/bridge";
 
 const COLS = 10;
 const ROWS = 20;
-const CELL = 26;
+const CELL = 18;
 const BOARD_W = COLS * CELL;
 const BOARD_H = ROWS * CELL;
 const SIDE_W = 96;
@@ -55,14 +57,15 @@ interface GameState {
 
 const TYPES: PieceType[] = ["I", "O", "T", "S", "Z", "J", "L"];
 const LINE_SCORE = [0, 100, 300, 500, 800];
+const KIT_BLOCK = blockDropKitColors();
 const COLORS: Record<PieceType, string> = {
-  I: "#45d0e0",
-  O: "#ffd23f",
-  T: "#b06bff",
-  S: "#5fd35f",
-  Z: "#ff6b6b",
-  J: "#4d7dff",
-  L: "#ff9f43",
+  I: KIT_BLOCK.I,
+  O: KIT_BLOCK.O,
+  T: KIT_BLOCK.T,
+  S: KIT_BLOCK.S,
+  Z: KIT_BLOCK.Z,
+  J: KIT_BLOCK.J,
+  L: KIT_BLOCK.L,
 };
 const SHAPES: Record<PieceType, [number, number][][]> = {
   I: [
@@ -451,27 +454,15 @@ export default function BlockDropGame() {
   const G = useRef<GameState>(freshGame());
   const actx = useRef<AudioContext | null>(null);
   const soundOn = useRef(true);
-  const wrapRef = useRef<HTMLDivElement | null>(null);
   const repeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const bestRef = useRef(0);
   const reduced = useReducedMotion();
 
   const [, force] = useState(0);
-  const [scale, setScale] = useState(1);
   const [soundUi, setSoundUi] = useState(true);
   const [best, setBest] = useState(0);
 
   const repaint = useCallback(() => force((n) => n + 1), []);
-
-  useEffect(() => {
-    const onResize = () => {
-      const w = wrapRef.current ? wrapRef.current.clientWidth : LAYOUT_W;
-      setScale(Math.min(1, w / LAYOUT_W));
-    };
-    onResize();
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
 
   useEffect(() => {
     try {
@@ -857,8 +848,8 @@ export default function BlockDropGame() {
     width: "100%",
     height: "100%",
     background: color,
-    borderRadius: 5,
-    boxShadow: `inset 2px 2px 0 rgba(255,255,255,.4), inset -2px -2px 0 rgba(0,0,0,.28)${glow ? `, 0 0 8px ${color}` : ""}`,
+    borderRadius: 2,
+    boxShadow: `inset 1px 1px 0 rgba(255,255,255,.35), inset -1px -1px 0 rgba(0,0,0,.35)${glow ? `, 0 0 6px ${color}` : ""}`,
   });
 
   const font = "var(--font-sans, 'PingFang TC','Microsoft JhengHei',system-ui,sans-serif)";
@@ -920,17 +911,15 @@ export default function BlockDropGame() {
         <Stat label="最佳" value={Math.max(best, g.score)} />
       </div>
 
-      <div
-        ref={wrapRef}
-        style={{ width: "100%", display: "flex", justifyContent: "center" }}
+      <GamePixelBoard
+        gameId="block-drop"
+        nativeWidth={LAYOUT_W}
+        nativeHeight={BOARD_H}
       >
-        <div style={{ width: LAYOUT_W * scale, height: BOARD_H * scale }}>
           <div
             style={{
               width: LAYOUT_W,
               height: BOARD_H,
-              transform: `scale(${scale})`,
-              transformOrigin: "top left",
               display: "flex",
               gap: 14,
             }}
@@ -940,9 +929,9 @@ export default function BlockDropGame() {
                 position: "relative",
                 width: BOARD_W,
                 height: BOARD_H,
-                background: "#0a0d14",
-                borderRadius: 12,
-                boxShadow: "inset 0 0 0 3px #222a3d",
+                background: KIT_BLOCK.well,
+                borderRadius: 4,
+                boxShadow: `inset 0 0 0 2px ${KIT_BLOCK.wellBorder}`,
                 display: "grid",
                 gridTemplateColumns: `repeat(${COLS}, ${CELL}px)`,
                 gridTemplateRows: `repeat(${ROWS}, ${CELL}px)`,
@@ -1107,8 +1096,7 @@ export default function BlockDropGame() {
               </div>
             </div>
           </div>
-        </div>
-      </div>
+      </GamePixelBoard>
 
       <div
         style={{

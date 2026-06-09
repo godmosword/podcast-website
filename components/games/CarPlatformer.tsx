@@ -8,12 +8,21 @@ import {
   type CSSProperties,
   type ReactNode,
   type PointerEvent,
+  type RefObject,
 } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import PixelGameCanvas, {
+  usePixelGameSurface,
+} from "@/components/games/PixelGameCanvas";
+import { drawPixelText } from "@/lib/gamekit/style";
 
 const TILE = 36;
 const VW = 720;
 const VH = 432;
+const KIT_W = 320;
+const KIT_H = 180;
+const RENDER_SX = KIT_W / VW;
+const RENDER_SY = KIT_H / VH;
 const ROWS = 12;
 const GRAV = 2000;
 const MOVE = 1700;
@@ -187,8 +196,60 @@ const primaryBtn: CSSProperties = {
   boxShadow: "0 5px 0 #b97600",
 };
 
+function CarPlatformerCanvas({
+  game,
+  statusRef,
+  reset,
+  update,
+  render,
+  drawHud,
+  reducedRef,
+}: {
+  game: RefObject<GameState | null>;
+  statusRef: RefObject<Status>;
+  reset: () => void;
+  update: (g: GameState, dt: number) => void;
+  render: (ctx: CanvasRenderingContext2D, g: GameState) => void;
+  drawHud: (ctx: CanvasRenderingContext2D, g: GameState) => void;
+  reducedRef: RefObject<boolean>;
+}) {
+  const { rendererRef, present } = usePixelGameSurface();
+
+  useEffect(() => {
+    reset();
+    let raf = 0;
+    const loop = (t: number) => {
+      const renderer = rendererRef.current;
+      const g = game.current;
+      if (!renderer) {
+        raf = requestAnimationFrame(loop);
+        return;
+      }
+      if (g) {
+        if (g.last == null) g.last = t;
+        let dt = (t - g.last) / 1000;
+        g.last = t;
+        if (dt > 0.033) dt = 0.033;
+        if (statusRef.current === "playing") update(g, dt);
+        const ctx = renderer.context;
+        renderer.clear("#8fd3ff");
+        ctx.save();
+        ctx.scale(RENDER_SX, RENDER_SY);
+        render(ctx, g);
+        ctx.restore();
+        drawHud(ctx, g);
+        present();
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [drawHud, game, present, reducedRef, render, reset, rendererRef, statusRef, update]);
+
+  return null;
+}
+
 export default function CarPlatformer() {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const game = useRef<GameState | null>(null);
   const actx = useRef<AudioContext | null>(null);
   const soundOn = useRef(true);
@@ -642,44 +703,13 @@ export default function CarPlatformer() {
     if (!(p.invuln > 0 && Math.floor(p.invuln * 12) % 2))
       drawCar(ctx, p.x - cam, p.y, p.w, p.h, "#ffd23f", "#e0a800", p.facing);
 
-    ctx.fillStyle = "rgba(0,0,0,.35)";
-    rr(ctx, 12, 12, 200, 34, 10);
-    ctx.fill();
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 18px system-ui, sans-serif";
-    ctx.textBaseline = "middle";
-    ctx.fillText(`⭐ ${g.score}`, 24, 30);
-    ctx.fillText(`🪙 ${g.taken}/${g.lv.total}`, 100, 30);
-    ctx.fillText(`❤️ ${g.lives}`, 178, 30);
   };
 
-  useEffect(() => {
-    reset();
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
-    canvas.width = VW * dpr;
-    canvas.height = VH * dpr;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.scale(dpr, dpr);
-    let raf = 0;
-    const loop = (t: number) => {
-      const g = game.current;
-      if (g) {
-        if (g.last == null) g.last = t;
-        let dt = (t - g.last) / 1000;
-        g.last = t;
-        if (dt > 0.033) dt = 0.033;
-        if (statusRef.current === "playing") update(g, dt);
-        render(ctx, g);
-      }
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reset]);
+  const drawHud = (ctx: CanvasRenderingContext2D, g: GameState) => {
+    drawPixelText(ctx, `SC ${g.score}`, 8, 6, { scale: 1, shadow: true });
+    drawPixelText(ctx, `C ${g.taken}/${g.lv.total}`, 8, 18, { scale: 1 });
+    drawPixelText(ctx, `HP ${g.lives}`, 8, 30, { scale: 1 });
+  };
 
   useEffect(() => {
     if (status === "playing" && game.current) game.current.last = null;
@@ -813,22 +843,15 @@ export default function CarPlatformer() {
         </div>
       </div>
 
-      <div
-        style={{
-          position: "relative",
-          borderRadius: 16,
-          overflow: "hidden",
-          boxShadow: "0 16px 36px rgba(40,90,160,.25)",
-        }}
-      >
-        <canvas
-          ref={canvasRef}
-          style={{
-            width: "100%",
-            display: "block",
-            aspectRatio: `${VW} / ${VH}`,
-            background: "#8fd3ff",
-          }}
+      <PixelGameCanvas gameId="car-adventure">
+        <CarPlatformerCanvas
+          game={game}
+          statusRef={statusRef}
+          reset={reset}
+          update={update}
+          render={render}
+          drawHud={drawHud}
+          reducedRef={reducedRef}
         />
         {status !== "playing" && (
           <div
@@ -845,6 +868,7 @@ export default function CarPlatformer() {
               color: "#fff",
               textAlign: "center",
               padding: 20,
+              zIndex: 10,
             }}
           >
             <div style={{ fontSize: 44 }}>
@@ -891,7 +915,7 @@ export default function CarPlatformer() {
             )}
           </div>
         )}
-      </div>
+      </PixelGameCanvas>
 
       <div
         style={{

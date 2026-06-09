@@ -6,6 +6,8 @@ import {
   medalFlags,
   snapPixel,
   colorsForGame,
+  canvasPaletteFromKit,
+  blockDropKitColors,
 } from "@/lib/gamekit";
 import { emptyTilemap } from "@/lib/gamekit/tilemap";
 import { recordBestScore, loadPlayerProfile } from "@/lib/gamekit/save";
@@ -75,6 +77,20 @@ describe("save", () => {
     expect(next.bests["car-star"]).toBe(100);
     const same = recordBestScore(next, "car-star", 50);
     expect(same.bests["car-star"]).toBe(100);
+  });
+});
+
+describe("bridge", () => {
+  it("canvasPaletteFromKit 回傳 hex 色", () => {
+    const p = canvasPaletteFromKit("car-mission");
+    expect(p.road).toMatch(/^#/);
+    expect(p.truck).toMatch(/^#/);
+  });
+
+  it("blockDropKitColors 含七種方塊", () => {
+    const c = blockDropKitColors();
+    expect(c.I).toMatch(/^#/);
+    expect(c.well).toMatch(/^#/);
   });
 });
 

@@ -306,8 +306,8 @@ repo secret 存 `LINE_NOTIFY_TOKEN` 或 `DISCORD_WEBHOOK_URL`；同步偵測新�
 ### ~~Game Kit Phase 0 — 方向與技術定錨~~　`P3 · M · 無`　〔eng+design+research〕 ✅
 `lib/gamekit/` 九大模組骨架（renderer/loop/input/style/sprite/tilemap/juice/save/meta/scene/audio）、32 色盤、四款 viewport 定錨、[ART-BIBLE.md](./lib/gamekit/ART-BIBLE.md)、`PixelGameCanvas` + `usePixelRenderer`/`usePixelGameSurface`、`lib/gamekit/gamekit.test.ts`。**Phase 1 待做**：四款 canvas 遊戲遷移 pixel 管線。
 
-### Game Kit Phase 1 — 渲染管線＋設計系統套用四款　`P3 · L · Phase 0 ✅`　〔eng+design〕
-**視覺 ROI 最高**：點陣 HUD、統一調色盤、offscreen→整數放大；四款立刻「像遊戲」。改 `GameShell` 接入 kit renderer；保留 `prefers-reduced-motion` 關閉 juice 動畫。
+### ~~Game Kit Phase 1 — 渲染管線＋設計系統套用四款~~　`P3 · L · Phase 0 ✅`　〔eng+design〕 ✅
+四款接入 Game Kit：`PixelGameCanvas`（car-mission、car-adventure）、`GamePixelBoard`（car-star、block-drop）；內部解析度定錨、整數倍放大、`lib/gamekit/bridge` 調色盤、點陣 HUD（大冒險）。**Phase 2 待做**：sprite sheet／tileset 美術。
 
 ### Game Kit Phase 2–4 — 美術／音訊／juice　`P3 · L · Phase 1`　〔eng+design〕
 Phase 2：sprite sheet + tileset（可先 Kenney CC0）。Phase 3：四款 chiptune BGM + SFX 混音（擴充 `useGameAudio`）。Phase 4：粒子/震動/頓幀/緩動工具組逐款套用。
@@ -530,6 +530,10 @@ T+2d    社群貼文（B 戰場）
 ---
 
 ## Completed
+
+### Game Kit Phase 1（四款 pixel 管線）
+`PixelGameCanvas`／`GamePixelBoard` 套用四款；car-star `CELL=16`（240×208）、block-drop `CELL=18`、car-mission 320×240 buffer、car-adventure 320×180 縮放渲染 + 點陣 HUD。
+**Completed:** main（2026-06）
 
 ### Game Kit Phase 0（`lib/gamekit` 骨架）
 九大模組、32 色主調色盤、四款 viewport 定錨、`PixelRenderer` 整數放大、`GameLoop` 固定步進、`InputManager`、`ART-BIBLE.md`、`PixelGameCanvas`／`usePixelGameSurface`、Vitest 單元測試。
