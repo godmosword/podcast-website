@@ -330,6 +330,9 @@ repo secret 存 `LINE_NOTIFY_TOKEN` 或 `DISCORD_WEBHOOK_URL`；同步偵測新�
 ### ~~Game Kit Phase 8 — 效能 QA~~　`P3 · L · Phase 7 ✅`　〔eng〕 ✅
 `ObjectPool`、`preload`／`GameLoadingGate`、`useGameLoop` 固定步進＋插值（car-adventure）、hub 預載、`/games` layout a11y。**Game Kit 八階段路線完成**。
 
+### ~~車車卡丁車 Kart P0 — Scaffold~~　`P3 · M · 無`　〔eng〕 ✅
+`kart-game/`（Vite+TS+Three）：固定步進、kinematic 方塊車、spline 練習道、跟隨相機、HUD；`npm run build:kart` → `public/kart/`；`/games/kart` iframe 嵌入。**P1–P6 待做**：漂移調校、檢查點/AI、GLB/音效、觸控打磨、多人（選配）。
+
 ### ① 車車吃星星精進　`P3 · M · Game Kit Phase 2`　〔eng+design〕
 多迷宮（3–5）、四種追逐 AI、像素 tileset、4 方向行駛幀、連段/過關 juice、三星制。對標街機能量感，兒童原創。
 

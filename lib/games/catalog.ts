@@ -45,4 +45,22 @@ export const GAMES: GameCatalogEntry[] = [
     accent: "var(--c-pink)",
     ageRange: "5–12 歲",
   },
+  {
+    id: "kart",
+    title: "車車卡丁車",
+    desc: "3D arcade 漂移卡丁車：甩尾蓄力、迷你加速，在橢圓賽道競速。",
+    href: "/games/kart",
+    emoji: "🏎️",
+    accent: "var(--c-yellow)",
+    ageRange: "5–12 歲",
+  },
+  {
+    id: "pirate-kart",
+    title: "海盜卡丁車大賽",
+    desc: "16-bit 熱帶海盜賽車：張帆加速、大砲射擊，搶寶藏跑三圈！",
+    href: "/games/pirate-kart",
+    emoji: "🏴‍☠️",
+    accent: "var(--c-sky)",
+    ageRange: "5–12 歲",
+  },
 ];

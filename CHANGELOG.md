@@ -6,6 +6,9 @@
 
 ### Added
 
+- **海盜卡丁車大賽（`/games/pirate-kart`）**：16-bit 像素 top-down 海盜賽車；`Kart` 類別、橢圓賽道碰撞、3 AI、圈數＋寶藏計分、Shift 張帆加速、空白鍵大砲；開始／結束畫面
+- **車車卡丁車（kart-game P1–P6）**：漂移手感調校、檢查點／圈速 HUD／小地圖、3 AI＋倒數＋結算、Web Audio BGM/SFX、標題／車庫／獎牌存檔、觸控／手把／reduced-motion、載入畫面與粒子池；`net/Net.ts` 多人 stub
+- **車車卡丁車（kart-game P0）**：獨立 Vite+Three.js 專案、arcade kinematic 方塊車＋spline 練習道、嵌入 `/games/kart`（iframe → `public/kart/`）
 - **Game Kit Phase 8**：`ObjectPool`、`preload` 資產暖機、`GameLoadingGate`、`useGameLoop` 固定步進＋渲染插值（car-adventure）；`/games` hub 預載；a11y layout
 - **Game Kit Phase 7**：`GameChrome` 暫停／設定外框、`GamePageShell`（跳過連結、a11y）、`useGameInput` Gamepad、`useGameKitSettings` 兒童模式（預設開啟）；四款接入
 - **Game Kit Phase 6**：跨遊戲 meta（`session`／`garage`／`stickers`、存檔 v2 與舊 best 遷移）；`/games` 世界地圖進度（`GamesWorldMap`、車庫、貼紙簿）；四款遊戲通關／結束時 `reportGameSession`

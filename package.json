@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run build:kart && next build",
+    "build:kart": "npm ci --prefix kart-game --include=dev && npm run build --prefix kart-game",
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",

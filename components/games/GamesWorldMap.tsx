@@ -14,11 +14,12 @@ import {
 import { GAMES } from "@/lib/games/catalog";
 import styles from "./GamesWorldMap.module.css";
 
-const GAME_ICONS: Record<GameKitGameId, string> = {
+const GAME_ICONS: Record<string, string> = {
   "car-star": "⭐",
   "car-mission": "🌙",
   "car-adventure": "🏁",
   "block-drop": "🧩",
+  kart: "🏎️",
 };
 
 function formatBest(gameId: GameKitGameId, best: number): string {
@@ -73,9 +74,10 @@ export function GamesWorldMap() {
 
       <section className={styles.map} aria-label="遊戲地圖">
         {GAMES.map((game, i) => {
+          const isKitGame = game.id !== "kart";
           const gameId = game.id as GameKitGameId;
-          const medals = gameMedalStars(profile, gameId);
-          const best = profile.bests[gameId] ?? 0;
+          const medals = isKitGame ? gameMedalStars(profile, gameId) : 0;
+          const best = isKitGame ? (profile.bests[gameId] ?? 0) : 0;
           return (
             <Link
               key={game.id}
@@ -88,7 +90,9 @@ export function GamesWorldMap() {
               </span>
               <span className={styles.islandTitle}>{game.title}</span>
               <span className={styles.islandMeta}>
-                🏅 {medals} · 最佳 {formatBest(gameId, best)}
+                {isKitGame
+                  ? `🏅 ${medals} · 最佳 ${formatBest(gameId, best)}`
+                  : "3D 漂移競速 · 新上架"}
               </span>
             </Link>
           );
