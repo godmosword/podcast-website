@@ -1,7 +1,6 @@
 .player {
   --controls-block: 156px;
   --ctrl-size: 60px;
-  --play-size: 76px;
   --time-size: 0.88rem;
   --seek-track: 7px;
   --seek-thumb: 18px;
@@ -21,7 +20,6 @@
   .player {
     --controls-block: 168px;
     --ctrl-size: 64px;
-    --play-size: 82px;
     --time-size: 0.95rem;
     --seek-track: 8px;
     --seek-thumb: 20px;
@@ -34,7 +32,6 @@
   .player {
     --controls-block: 176px;
     --ctrl-size: 68px;
-    --play-size: 88px;
     --time-size: 1.02rem;
     --seek-track: 8px;
     --seek-thumb: 22px;
@@ -621,8 +618,8 @@
 
 .playBtn {
   flex: 0 0 auto;
-  width: var(--play-size);
-  height: var(--play-size);
+  width: var(--ctrl-size);
+  height: var(--ctrl-size);
   border-radius: 50%;
   display: flex;
   align-items: center;

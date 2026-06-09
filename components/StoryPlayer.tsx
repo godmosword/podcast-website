@@ -674,7 +674,7 @@ export default function StoryPlayer({
               disabled={mediaError === "audio"}
               type="button"
             >
-              {isPlaying ? <PauseGlyph size={38} /> : <PlayGlyph size={38} className={styles.playGlyph} />}
+              {isPlaying ? <PauseGlyph size={34} /> : <PlayGlyph size={34} className={styles.playGlyph} />}
             </button>
             <button
               type="button"
