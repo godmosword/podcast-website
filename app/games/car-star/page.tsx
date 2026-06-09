@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import CarStarGame from "@/components/games/CarStarGame";
+import { GamePageShell } from "@/components/games/GamePageShell";
 import { getSiteUrl } from "@/lib/site-url";
-import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "車車吃星星",
@@ -18,11 +17,8 @@ export const metadata: Metadata = {
 
 export default function CarStarPage() {
   return (
-    <main className={styles.main} aria-label="車車吃星星小遊戲">
-      <Link href="/" className={styles.back}>
-        ← 回故事屋
-      </Link>
+    <GamePageShell title="車車吃星星小遊戲">
       <CarStarGame />
-    </main>
+    </GamePageShell>
   );
 }

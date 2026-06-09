@@ -12,6 +12,10 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useBestScore } from "@/hooks/useBestScore";
 import { useGameAudio } from "@/hooks/useGameAudio";
 import GameShell from "@/components/games/GameShell";
+import GameChrome, { GameChromeToolbar } from "@/components/games/GameChrome";
+import { useGameKitSettings } from "@/hooks/useGameKitSettings";
+import { useGameInput } from "@/hooks/useGameInput";
+import type { GameAction } from "@/lib/gamekit/types";
 import GamePixelBoard from "@/components/games/GamePixelBoard";
 import { CAR_STAR_CAST, CAR_STAR_TUTORIAL } from "@/lib/games/car-star-cast";
 import { TILE_INDEX, tileUrl } from "@/lib/gamekit/procedural-sheets";
@@ -31,7 +35,7 @@ import {
 type Dir = "up" | "down" | "left" | "right";
 type GhostRole = "police" | "red";
 type CarRole = GhostRole | "player";
-type Status = "start" | "playing" | "won" | "lost";
+type Status = "start" | "playing" | "paused" | "won" | "lost";
 type Difficulty = "easy" | "normal";
 
 interface Player {
@@ -115,7 +119,7 @@ function mazeLevelIndex(mazeId: string): number {
   return i >= 0 ? i : 0;
 }
 
-function freshState(maze: MazeRuntime): GameState {
+function freshState(maze: MazeRuntime, kidsMode = true): GameState {
   return {
     mazeId: maze.id,
     player: { ...maze.playerStart, dir: null, desired: null },
@@ -126,7 +130,7 @@ function freshState(maze: MazeRuntime): GameState {
     stars: new Set(maze.initStars),
     powers: new Set(maze.initPowers),
     score: 0,
-    lives: 3,
+    lives: kidsMode ? 5 : 3,
     status: "playing",
     scaredUntil: 0,
     tick: 0,
@@ -248,6 +252,7 @@ function Car({ role, scared = false, dir, reduced = false }: CarProps) {
 export default function CarStarGame() {
   const reduced = useReducedMotion();
   const isCoarse = useCoarsePointer();
+  const { kidsMode } = useGameKitSettings();
   const { juice, boardTransform } = useDomJuice(reduced);
 
   const [mazeId, setMazeId] = useState(CAR_STAR_MAZES[0].id);
@@ -268,6 +273,7 @@ export default function CarStarGame() {
 
   const [, force] = useState(0);
   const [status, setStatus] = useState<Status>("start");
+  const [announce, setAnnounce] = useState("");
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const difficultyRef = useRef<Difficulty>("easy");
   const [popups, setPopups] = useState<Popup[]>([]);
@@ -398,14 +404,22 @@ export default function CarStarGame() {
       if (!reduced) juice.shake.trigger(0.2, 5);
       addPopup(p.r, p.c, "💥", "#fff");
       if (g.lives <= 0) {
-        g.status = "lost";
-        setStatus("lost");
-        saveBest(g.score);
-        reportGameSession({
-          gameId: "car-star",
-          score: g.score,
-          levelIndex: mazeLevelIndex(g.mazeId),
-        });
+        if (kidsMode) {
+          g.lives = kidsMode ? 5 : 3;
+          resetPositions(g);
+          addPopup(p.r, p.c, "💛", "#fff");
+          setAnnounce("沒關係，再試一次！");
+        } else {
+          g.status = "lost";
+          setStatus("lost");
+          setAnnounce(`遊戲結束，得分 ${g.score}`);
+          saveBest(g.score);
+          reportGameSession({
+            gameId: "car-star",
+            score: g.score,
+            levelIndex: mazeLevelIndex(g.mazeId),
+          });
+        }
       } else {
         resetPositions(g);
       }
@@ -414,6 +428,7 @@ export default function CarStarGame() {
     if (g.stars.size === 0 && g.powers.size === 0 && g.status === "playing") {
       g.status = "won";
       setStatus("won");
+      setAnnounce(`通關！得分 ${g.score}`);
       saveBest(g.score);
       reportGameSession({
         gameId: "car-star",
@@ -426,7 +441,7 @@ export default function CarStarGame() {
       sWin();
     }
     rerender();
-  }, [rerender, addPopup, moveGhost, resetPositions, saveBest, sBlip, sPower, sHonk, sCrash, sWin]);
+  }, [rerender, addPopup, moveGhost, resetPositions, saveBest, kidsMode, sBlip, sPower, sHonk, sCrash, sWin]);
 
   const startLoop = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -468,31 +483,52 @@ export default function CarStarGame() {
     return () => document.removeEventListener("visibilitychange", onVisibility);
   }, [startLoop, pauseBgm, resumeBgm]);
 
-  // ── 鍵盤 ───────────────────────────────────────────
-  useEffect(() => {
-    const map: Record<string, Dir> = {
-      ArrowUp: "up",
-      ArrowDown: "down",
-      ArrowLeft: "left",
-      ArrowRight: "right",
-      w: "up",
-      s: "down",
-      a: "left",
-      d: "right",
-    };
-    const onKey = (e: KeyboardEvent) => {
-      const dir = map[e.key];
-      if (!dir) return;
-      e.preventDefault();
-      game.current.player.desired = dir;
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-
   const setDir = useCallback((dir: Dir) => {
     game.current.player.desired = dir;
   }, []);
+
+  const pauseGame = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    game.current.status = "paused";
+    setStatus("paused");
+    pauseBgm();
+    setAnnounce("遊戲已暫停");
+  }, [pauseBgm]);
+
+  const resumeGame = useCallback(() => {
+    game.current.status = "playing";
+    setStatus("playing");
+    resumeBgm();
+    startLoop();
+    setAnnounce("繼續遊戲");
+  }, [resumeBgm, startLoop]);
+
+  const actionToDir = useCallback((input: { isHeld: (a: GameAction) => boolean }) => {
+    if (input.isHeld("move-up")) return "up" as Dir;
+    if (input.isHeld("move-down")) return "down" as Dir;
+    if (input.isHeld("move-left")) return "left" as Dir;
+    if (input.isHeld("move-right")) return "right" as Dir;
+    return null;
+  }, []);
+
+  useGameInput(
+    (input) => {
+      if (status === "playing") {
+        if (input.wasPressed("pause")) {
+          pauseGame();
+          return;
+        }
+        const dir = actionToDir(input);
+        if (dir) setDir(dir);
+      } else if (status === "paused" && input.wasPressed("pause")) {
+        resumeGame();
+      }
+    },
+    status === "playing" || status === "paused",
+  );
 
   const swipe = useSwipeGesture({
     up: () => setDir("up"),
@@ -504,12 +540,13 @@ export default function CarStarGame() {
   const beginGame = useCallback(() => {
     ensureAudio();
     difficultyRef.current = difficulty;
-    game.current = freshState(getCarStarMaze(mazeId));
+    game.current = freshState(getCarStarMaze(mazeId), kidsMode);
     setPopups([]);
     setStatus("playing");
+    setAnnounce("遊戲開始");
     startLoop();
     rerender();
-  }, [ensureAudio, mazeId, startLoop, rerender, difficulty]);
+  }, [ensureAudio, mazeId, startLoop, rerender, difficulty, kidsMode]);
 
   const g = game.current;
   const displayMaze = getCarStarMaze(status === "start" ? mazeId : g.mazeId);
@@ -527,6 +564,14 @@ export default function CarStarGame() {
     : styles.boardNormal;
 
   return (
+    <GameChrome
+      canPause={status === "playing" || status === "paused"}
+      paused={status === "paused"}
+      onPause={pauseGame}
+      onResume={resumeGame}
+      onRestart={status !== "start" ? beginGame : undefined}
+      announce={announce}
+    >
     <GameShell
       frameColor={CAR_STAR_CAST.player.color}
       frameAccent="var(--c-yellow)"
@@ -541,15 +586,15 @@ export default function CarStarGame() {
           <Pill>⭐ {g.score}</Pill>
           {best != null && <Pill>最佳 ⭐ {best}</Pill>}
           <Pill>{"❤️".repeat(Math.max(0, g.lives)) || "—"}</Pill>
-          <button
-            type="button"
-            onClick={toggleSound}
-            className={styles.soundBtn}
-            aria-label={soundUi ? "關閉音效" : "開啟音效"}
-            aria-pressed={soundUi}
-          >
-            {soundUi ? "🔊" : "🔇"}
-          </button>
+          {kidsMode && <Pill aria-label="兒童模式">🧒</Pill>}
+          <GameChromeToolbar
+            canPause={status === "playing" || status === "paused"}
+            paused={status === "paused"}
+            onPause={pauseGame}
+            onResume={resumeGame}
+            soundOn={soundUi}
+            onToggleSound={toggleSound}
+          />
         </>
       }
     >
@@ -814,6 +859,7 @@ export default function CarStarGame() {
         {CAR_STAR_CAST.red.shortName}撞回家！
       </p>
     </GameShell>
+    </GameChrome>
   );
 }
 

@@ -19,6 +19,9 @@ import {
 import { JuiceController } from "@/lib/gamekit/juice";
 import { drawPixelText } from "@/lib/gamekit/style";
 import { reportGameSession } from "@/lib/gamekit/session";
+import GameChrome, { GameChromeToolbar } from "@/components/games/GameChrome";
+import { useGameKitSettings } from "@/hooks/useGameKitSettings";
+import { useGameInput } from "@/hooks/useGameInput";
 import type { CanvasPalette } from "@/lib/games/canvas-palette";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useSwipeGesture } from "@/hooks/useSwipeGesture";
@@ -32,7 +35,7 @@ interface Firefly {
   happy: boolean;
 }
 
-type GameStatus = "ready" | "playing" | "finished";
+type GameStatus = "ready" | "playing" | "paused" | "finished";
 
 const CANVAS_WIDTH = 320;
 const CANVAS_HEIGHT = 240;
@@ -66,6 +69,7 @@ type PlayfieldProps = {
   ) => void;
   onStart: () => void;
   onRestart: () => void;
+  kidsMode: boolean;
 };
 
 function CarMissionPlayfield({
@@ -84,11 +88,14 @@ function CarMissionPlayfield({
   ensureAudio,
   tone,
   onStart,
+  kidsMode,
   onRestart,
 }: PlayfieldProps) {
   const { rendererRef, present } = usePixelGameSurface();
   const animationRef = useRef<number | null>(null);
   const statusRef = useRef<GameStatus>(status);
+  const kidsModeRef = useRef(kidsMode);
+  kidsModeRef.current = kidsMode;
   const paletteRef = useRef<CanvasPalette>(canvasPaletteFromKit("car-mission"));
   const slowRef = useRef(false);
   const frameRef = useRef(0);
@@ -266,9 +273,10 @@ function CarMissionPlayfield({
       }
     });
 
+    const speedCap = kidsModeRef.current ? 1.1 : 1.35;
     const targetSpeed = Math.min(
       BASE_SPEED + state.distance * 0.003,
-      1.35,
+      speedCap,
     );
     if (state.speed < targetSpeed) {
       state.speed += 0.015 * motionScale;
@@ -441,6 +449,18 @@ function CarMissionPlayfield({
     };
   }, [changeLane, honk, setSlow]);
 
+  useGameInput(
+    (input) => {
+      if (statusRef.current !== "playing") return;
+      if (input.wasPressed("move-left")) changeLane(-1);
+      if (input.wasPressed("move-right")) changeLane(1);
+      if (input.isHeld("move-up")) setSlow(true);
+      else if (input.wasReleased("move-up")) setSlow(false);
+      if (input.wasPressed("action") || input.wasPressed("move-down")) honk();
+    },
+    status === "playing",
+  );
+
   useEffect(() => {
     const onVisibility = () => {
       if (document.hidden && animationRef.current) {
@@ -560,7 +580,9 @@ function CarMissionPlayfield({
 
 export default function CarMissionGame() {
   const reduced = useReducedMotion();
+  const { kidsMode } = useGameKitSettings();
   const shellRef = useRef<HTMLDivElement>(null);
+  const [announce, setAnnounce] = useState("");
   const {
     ensureAudio,
     tone,
@@ -583,14 +605,34 @@ export default function CarMissionGame() {
     combo >= 2 ? `，連續溫柔 ${combo} 次` : ""
   }`;
 
+  const togglePause = useCallback(() => {
+    if (status === "playing") {
+      setStatus("paused");
+      setAnnounce("遊戲已暫停");
+    } else if (status === "paused") {
+      setStatus("playing");
+      setAnnounce("繼續遊戲");
+    }
+  }, [status]);
+
+  useGameInput(
+    (input) => {
+      if (status === "playing" && input.wasPressed("pause")) togglePause();
+      else if (status === "paused" && input.wasPressed("pause")) togglePause();
+    },
+    status === "playing" || status === "paused",
+  );
+
   useEffect(() => {
     if (status === "playing") {
       ensureAudio();
       playBgm();
+    } else if (status === "paused") {
+      pauseBgm();
     } else {
       stopBgm();
     }
-  }, [status, ensureAudio, playBgm, stopBgm]);
+  }, [status, ensureAudio, playBgm, stopBgm, pauseBgm]);
 
   useEffect(() => {
     const onVis = () => {
@@ -602,25 +644,31 @@ export default function CarMissionGame() {
   }, [status, pauseBgm, resumeBgm]);
 
   return (
+    <GameChrome
+      canPause={status === "playing" || status === "paused"}
+      paused={status === "paused"}
+      onPause={togglePause}
+      onResume={togglePause}
+      announce={announce}
+    >
     <GameShell
       shellRef={shellRef}
       frameColor="var(--c-pink)"
       frameAccent="var(--c-pink)"
-      title="🚚 怪獸卡車的溫柔任務"
+      title={`🚚 怪獸卡車的溫柔任務${kidsMode ? " 🧒" : ""}`}
       subtitle="慢慢開、輕輕對待螢火蟲"
       hud={
         <>
           <GamePill>⭐ {score}</GamePill>
           {best != null && <GamePill>最佳 ⭐ {best}</GamePill>}
-          <button
-            type="button"
-            onClick={toggleSound}
-            className={styles.soundBtn}
-            aria-label={soundUi ? "關閉音效" : "開啟音效"}
-            aria-pressed={soundUi}
-          >
-            {soundUi ? "🔊" : "🔇"}
-          </button>
+          <GameChromeToolbar
+            canPause={status === "playing" || status === "paused"}
+            paused={status === "paused"}
+            onPause={togglePause}
+            onResume={togglePause}
+            soundOn={soundUi}
+            onToggleSound={toggleSound}
+          />
         </>
       }
     >
@@ -659,6 +707,7 @@ export default function CarMissionGame() {
             tone={tone}
             onStart={() => {}}
             onRestart={() => {}}
+            kidsMode={kidsMode}
           />
         </PixelGameCanvas>
       </div>
@@ -671,5 +720,6 @@ export default function CarMissionGame() {
         </div>
       )}
     </GameShell>
+    </GameChrome>
   );
 }

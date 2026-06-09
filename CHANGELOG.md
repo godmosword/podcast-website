@@ -6,6 +6,7 @@
 
 ### Added
 
+- **Game Kit Phase 7**：`GameChrome` 暫停／設定外框、`GamePageShell`（跳過連結、a11y）、`useGameInput` Gamepad、`useGameKitSettings` 兒童模式（預設開啟）；四款接入
 - **Game Kit Phase 6**：跨遊戲 meta（`session`／`garage`／`stickers`、存檔 v2 與舊 best 遷移）；`/games` 世界地圖進度（`GamesWorldMap`、車庫、貼紙簿）；四款遊戲通關／結束時 `reportGameSession`
 - **Game Kit Phase 5**：`adventure-level`／`tiled-loader`（Tiled JSON → 關卡）；car-adventure 2 關可選；car-star 3 座迷宮可選
 - **Game Kit Phase 4**：juice 工具組（粒子／震動／頓幀／緩動）接入四款遊戲；手機操控優化（`useCoarsePointer`、`useSwipeGesture`、大按鈕、滑動手勢、safe-area）

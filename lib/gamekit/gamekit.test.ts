@@ -48,6 +48,7 @@ import {
 } from "@/lib/gamekit/save";
 import { GARAGE_VEHICLES, vehiclesUnlockedAt } from "@/lib/gamekit/garage";
 import { reportGameSession, gameMedalStars } from "@/lib/gamekit/session";
+import { loadGameKitSettings, setKidsMode } from "@/lib/gamekit/settings";
 
 describe("gamekit constants", () => {
   it("四款 viewport 為正整數", () => {
@@ -139,6 +140,18 @@ describe("garage", () => {
     expect(vehiclesUnlockedAt(0)).toEqual(["小黃"]);
     expect(vehiclesUnlockedAt(3)).toContain("怪獸卡車");
     expect(GARAGE_VEHICLES.length).toBe(5);
+  });
+});
+
+describe("settings", () => {
+  it("預設開啟兒童模式", () => {
+    expect(loadGameKitSettings().kidsMode).toBe(true);
+  });
+
+  it("setKidsMode 可切換", () => {
+    const off = setKidsMode(false);
+    expect(off.kidsMode).toBe(false);
+    setKidsMode(true);
   });
 });
 

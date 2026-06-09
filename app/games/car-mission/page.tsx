@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import CarMissionGame from "@/components/games/CarMissionGame";
+import { GamePageShell } from "@/components/games/GamePageShell";
 import { getSiteUrl } from "@/lib/site-url";
-import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "怪獸卡車的溫柔任務",
@@ -18,11 +17,8 @@ export const metadata: Metadata = {
 
 export default function CarMissionPage() {
   return (
-    <main className={styles.main} aria-label="怪獸卡車溫柔任務小遊戲">
-      <Link href="/" className={styles.back}>
-        ← 回故事屋
-      </Link>
+    <GamePageShell title="怪獸卡車溫柔任務小遊戲">
       <CarMissionGame />
-    </main>
+    </GamePageShell>
   );
 }

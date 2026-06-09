@@ -13,6 +13,7 @@ export * from "./meta";
 export * from "./garage";
 export * from "./stickers";
 export * from "./session";
+export * from "./settings";
 export * from "./scene";
 export * from "./audio";
 export * from "./bridge";

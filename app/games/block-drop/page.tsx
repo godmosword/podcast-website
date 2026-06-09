@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import BlockDropGame from "@/components/games/BlockDropGame";
+import { GamePageShell } from "@/components/games/GamePageShell";
 import { getSiteUrl } from "@/lib/site-url";
-import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "繽紛方塊",
@@ -16,11 +15,8 @@ export const metadata: Metadata = {
 
 export default function BlockDropPage() {
   return (
-    <main className={styles.main} aria-label="繽紛方塊小遊戲">
-      <Link href="/games" className={styles.back}>
-        ← 回遊樂園
-      </Link>
+    <GamePageShell title="繽紛方塊小遊戲">
       <BlockDropGame />
-    </main>
+    </GamePageShell>
   );
 }

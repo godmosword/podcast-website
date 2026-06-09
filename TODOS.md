@@ -322,10 +322,13 @@ repo secret 存 `LINE_NOTIFY_TOKEN` 或 `DISCORD_WEBHOOK_URL`；同步偵測新�
 `adventure-level`／`tiled-loader`；car-adventure 2 關 JSON + 關卡選擇；car-star 3 迷宮選擇。
 
 ### ~~Game Kit Phase 6 — 跨遊戲 meta~~　`P3 · L · Phase 5 ✅`　〔eng+design〕 ✅
-`session`／`garage`／`stickers`、存檔 v2（`cheche:gamekit-profile`）與舊 best 遷移；`/games` 世界地圖 hub（`GamesWorldMap`、車庫、貼紙簿）；四款 `reportGameSession`。**Phase 7 待做**：外框／a11y。
+`session`／`garage`／`stickers`、存檔 v2（`cheche:gamekit-profile`）與舊 best 遷移；`/games` 世界地圖 hub（`GamesWorldMap`、車庫、貼紙簿）；四款 `reportGameSession`。
 
-### Game Kit Phase 7–8 — 外框／QA　`P3 · L · Phase 6 ✅`　〔eng〕
-Phase 7：標題/暫停/設定/Gamepad/a11y/兒童模式。Phase 8：固定步進+插值、物件池、資產預載、Lighthouse ≥95。
+### ~~Game Kit Phase 7 — 外框／a11y／兒童模式~~　`P3 · L · Phase 6 ✅`　〔eng+design〕 ✅
+`GameChrome`（暫停選單、設定、工具列）、`GamePageShell`（跳過連結、回遊樂園）、`useGameInput` Gamepad、`settings` 兒童模式預設；四款接入。**Phase 8 待做**：效能 QA。
+
+### Game Kit Phase 8 — 效能 QA　`P3 · L · Phase 7 ✅`　〔eng〕
+固定步進+插值、物件池、資產預載、Lighthouse ≥95。
 
 ### ① 車車吃星星精進　`P3 · M · Game Kit Phase 2`　〔eng+design〕
 多迷宮（3–5）、四種追逐 AI、像素 tileset、4 方向行駛幀、連段/過關 juice、三星制。對標街機能量感，兒童原創。

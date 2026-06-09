@@ -30,6 +30,9 @@ import {
 } from "@/lib/gamekit/adventure-level";
 import { CAR_ADVENTURE_LEVELS } from "@/lib/games/car-adventure/levels";
 import { reportGameSession } from "@/lib/gamekit/session";
+import GameChrome, { GameChromeToolbar } from "@/components/games/GameChrome";
+import { useGameKitSettings } from "@/hooks/useGameKitSettings";
+import { useGameInput } from "@/hooks/useGameInput";
 
 const TILE = 36;
 const VW = 720;
@@ -189,9 +192,13 @@ export default function CarPlatformer() {
   const reduced = useReducedMotion();
 
   const [status, setStatus] = useState<Status>("ready");
+  const { kidsMode } = useGameKitSettings();
   const [levelIndex, setLevelIndex] = useState(0);
+  const [announce, setAnnounce] = useState("");
   const levelIndexRef = useRef(0);
   const levelStartLivesRef = useRef(3);
+  const kidsModeRef = useRef(kidsMode);
+  kidsModeRef.current = kidsMode;
   const [best, setBest] = useState(0);
   const {
     ensureAudio,
@@ -270,7 +277,7 @@ export default function CarPlatformer() {
       },
       cam: 0,
       score: 0,
-      lives: 3,
+      lives: kidsModeRef.current ? 5 : 3,
       taken: 0,
       input: { left: false, right: false, jump: false },
       last: null,
@@ -330,12 +337,41 @@ export default function CarPlatformer() {
   }, []);
 
   const togglePause = useCallback(() => {
-    if (statusRef.current === "playing") setStat("paused");
-    else if (statusRef.current === "paused") {
+    if (statusRef.current === "playing") {
+      setAnnounce("遊戲已暫停");
+      setStat("paused");
+    } else if (statusRef.current === "paused") {
       if (game.current) game.current.last = null;
+      setAnnounce("繼續遊戲");
       setStat("playing");
     }
   }, [setStat]);
+
+  useGameInput(
+    (input) => {
+      const g = game.current;
+      if (!g) return;
+      if (statusRef.current === "playing") {
+        if (input.wasPressed("pause")) {
+          togglePause();
+          return;
+        }
+        g.input.left = input.isHeld("move-left");
+        g.input.right = input.isHeld("move-right");
+        g.input.jump = input.isHeld("move-up") || input.isHeld("action");
+      } else if (statusRef.current === "paused" && input.wasPressed("pause")) {
+        togglePause();
+      } else if (
+        (statusRef.current === "ready" ||
+          statusRef.current === "won" ||
+          statusRef.current === "over") &&
+        input.wasPressed("confirm")
+      ) {
+        begin();
+      }
+    },
+    status === "playing" || status === "paused" || status === "ready" || status === "won" || status === "over",
+  );
 
   const solidAt = (g: GameState, tx: number, ty: number) =>
     g.lv.solid.has(`${tx},${ty}`);
@@ -752,6 +788,18 @@ export default function CarPlatformer() {
     };
 
   return (
+    <GameChrome
+      canPause={status === "playing" || status === "paused"}
+      paused={status === "paused"}
+      onPause={() => {
+        if (statusRef.current === "playing") togglePause();
+      }}
+      onResume={() => {
+        if (statusRef.current === "paused") togglePause();
+      }}
+      onRestart={begin}
+      announce={announce}
+    >
     <div
       style={{
         maxWidth: 760,
@@ -772,7 +820,7 @@ export default function CarPlatformer() {
         }}
       >
         <div style={{ fontSize: 22, fontWeight: 800, color: "#15428f" }}>
-          🏁 車車大冒險
+          🏁 車車大冒險 {kidsMode ? "🧒" : ""}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {best > 0 && (
@@ -783,41 +831,18 @@ export default function CarPlatformer() {
               最佳 ⭐ {best}
             </span>
           )}
-          <button
-            type="button"
-            onClick={togglePause}
-            aria-label={status === "paused" ? "繼續遊戲" : "暫停"}
-            disabled={
-              status === "ready" || status === "won" || status === "over"
-            }
-            style={{
-              border: "none",
-              background: "#eef3fb",
-              borderRadius: 11,
-              width: 40,
-              height: 40,
-              fontSize: 16,
-              cursor: "pointer",
+          <GameChromeToolbar
+            canPause={status === "playing" || status === "paused"}
+            paused={status === "paused"}
+            onPause={() => {
+              if (statusRef.current === "playing") togglePause();
             }}
-          >
-            {status === "paused" ? "▶" : "⏸"}
-          </button>
-          <button
-            type="button"
-            onClick={toggleSound}
-            aria-label={soundUi ? "關閉音效" : "開啟音效"}
-            style={{
-              border: "none",
-              background: "#eef3fb",
-              borderRadius: 11,
-              width: 40,
-              height: 40,
-              fontSize: 18,
-              cursor: "pointer",
+            onResume={() => {
+              if (statusRef.current === "paused") togglePause();
             }}
-          >
-            {soundUi ? "🔊" : "🔇"}
-          </button>
+            soundOn={soundUi}
+            onToggleSound={toggleSound}
+          />
         </div>
       </div>
 
@@ -981,9 +1006,10 @@ export default function CarPlatformer() {
       >
         {isCoarse
           ? "按住左右移動 · 右側大按鈕跳躍 · 踩敵人頭可彈飛"
-          : "← → / A D 移動 · ↑ / W / 空白鍵 跳（可變高度）· 踩敵人頭可彈飛 · P 暫停"}
+          : "← → / A D 移動 · ↑ / W / 空白鍵 跳（可變高度）· 踩敵人頭可彈飛 · P 暫停 · 手把支援"}
       </p>
     </div>
+    </GameChrome>
   );
 }
 

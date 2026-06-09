@@ -17,6 +17,9 @@ import GamePixelBoard from "@/components/games/GamePixelBoard";
 import { blockDropKitColors } from "@/lib/gamekit/bridge";
 import { BLOCK_INDEX, blockUrl } from "@/lib/gamekit/procedural-sheets";
 import { reportGameSession } from "@/lib/gamekit/session";
+import GameChrome, { GameChromeToolbar } from "@/components/games/GameChrome";
+import { useGameKitSettings } from "@/hooks/useGameKitSettings";
+import { useGameInput } from "@/hooks/useGameInput";
 
 const COLS = 10;
 const ROWS = 20;
@@ -474,10 +477,14 @@ export default function BlockDropGame() {
   const bestRef = useRef(0);
   const reduced = useReducedMotion();
   const isCoarse = useCoarsePointer();
+  const { kidsMode } = useGameKitSettings();
+  const kidsModeRef = useRef(kidsMode);
+  kidsModeRef.current = kidsMode;
   const { juice, boardTransform } = useDomJuice(reduced);
 
   const [, force] = useState(0);
   const [best, setBest] = useState(0);
+  const [announce, setAnnounce] = useState("");
   const {
     ensureAudio,
     tone,
@@ -556,6 +563,19 @@ export default function BlockDropGame() {
     }
   };
 
+  const forgiveStack = (g: GameState) => {
+    for (let y = 0; y < 4; y++) g.board[y] = Array<Cell>(COLS).fill(null);
+    if (g.active) {
+      g.active.y = 0;
+      g.active.x = 3;
+    }
+    g.status = "playing";
+    g.metaReported = false;
+    playBgm();
+    g.dirty = true;
+    setAnnounce("方塊太多了，幫你清掉一些，繼續玩！");
+  };
+
   const spawnNext = (g: GameState) => {
     refill(g);
     const type = g.bag.shift()!;
@@ -565,9 +585,13 @@ export default function BlockDropGame() {
     g.lockTimer = 0;
     g.resets = 0;
     if (!valid(g.active, g.board)) {
-      g.status = "over";
-      sOver();
-      stopBgm();
+      if (kidsModeRef.current) forgiveStack(g);
+      else {
+        g.status = "over";
+        setAnnounce(`遊戲結束，得分 ${g.score}`);
+        sOver();
+        stopBgm();
+      }
     } else {
       updateGrounded(g);
     }
@@ -595,7 +619,12 @@ export default function BlockDropGame() {
   const lockPiece = (g: GameState) => {
     if (!g.active) return;
     if (SHAPES[g.active.type][g.active.rot].some(([, r]) => g.active!.y + r < 0)) {
+      if (kidsModeRef.current) {
+        forgiveStack(g);
+        return;
+      }
       g.status = "over";
+      setAnnounce(`遊戲結束，得分 ${g.score}`);
       sOver();
       stopBgm();
       g.dirty = true;
@@ -695,9 +724,12 @@ export default function BlockDropGame() {
       g.hold = cur;
       g.active = { type: h, rot: 0, x: 3, y: 0 };
       if (!valid(g.active, g.board)) {
-        g.status = "over";
-        sOver();
-        stopBgm();
+        if (kidsModeRef.current) forgiveStack(g);
+        else {
+          g.status = "over";
+          sOver();
+          stopBgm();
+        }
       } else {
         updateGrounded(g);
       }
@@ -725,13 +757,36 @@ export default function BlockDropGame() {
     if (g.status === "playing") {
       g.status = "paused";
       pauseBgm();
+      setAnnounce("遊戲已暫停");
     } else if (g.status === "paused") {
       g.status = "playing";
       g.lastTime = null;
       resumeBgm();
+      setAnnounce("繼續遊戲");
     }
     repaint();
   }, [pauseBgm, repaint, resumeBgm]);
+
+  const playStatus = G.current.status;
+  useGameInput(
+    (input) => {
+      const g = G.current;
+      if (g.status === "playing") {
+        if (input.wasPressed("pause")) {
+          togglePause();
+          return;
+        }
+        if (input.wasPressed("move-left")) move(-1);
+        if (input.wasPressed("move-right")) move(1);
+        if (input.wasPressed("move-up")) rotate(1);
+        if (input.wasPressed("action")) hardDrop();
+        g.softDrop = input.isHeld("move-down");
+      } else if (g.status === "paused" && input.wasPressed("pause")) {
+        togglePause();
+      }
+    },
+    playStatus === "playing" || playStatus === "paused",
+  );
 
   useEffect(() => {
     let raf = 0;
@@ -745,7 +800,8 @@ export default function BlockDropGame() {
         if (g.clearing) {
           if (t >= g.clearUntil) finishClear(g);
         } else if (g.active) {
-          const interval = g.softDrop ? 45 : gravityMs(g.level);
+          const slow = kidsModeRef.current ? 1.35 : 1;
+          const interval = (g.softDrop ? 45 : gravityMs(g.level)) * slow;
           g.dropAcc += dt;
           while (!g.clearing && g.dropAcc >= interval) {
             g.dropAcc -= interval;
@@ -868,6 +924,14 @@ export default function BlockDropGame() {
   const font = "var(--font-sans, 'PingFang TC','Microsoft JhengHei',system-ui,sans-serif)";
 
   return (
+    <GameChrome
+      canPause={g.status === "playing" || g.status === "paused"}
+      paused={g.status === "paused"}
+      onPause={togglePause}
+      onResume={togglePause}
+      onRestart={begin}
+      announce={announce}
+    >
     <div
       style={{
         fontFamily: font,
@@ -894,27 +958,16 @@ export default function BlockDropGame() {
         }}
       >
         <div style={{ fontSize: 24, fontWeight: 800, color: "#eaf0ff" }}>
-          🧩 繽紛方塊
+          🧩 繽紛方塊 {kidsMode ? "🧒" : ""}
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <button
-            type="button"
-            onClick={togglePause}
-            aria-label="暫停"
-            style={iconBtn}
-            disabled={g.status === "ready" || g.status === "over"}
-          >
-            {g.status === "paused" ? "▶" : "⏸"}
-          </button>
-          <button
-            type="button"
-            onClick={toggleSound}
-            aria-label={soundUi ? "關閉音效" : "開啟音效"}
-            style={iconBtn}
-          >
-            {soundUi ? "🔊" : "🔇"}
-          </button>
-        </div>
+        <GameChromeToolbar
+          canPause={g.status === "playing" || g.status === "paused"}
+          paused={g.status === "paused"}
+          onPause={togglePause}
+          onResume={togglePause}
+          soundOn={soundUi}
+          onToggleSound={toggleSound}
+        />
       </div>
 
       <div style={{ display: "flex", gap: 8, marginBottom: 14, flexWrap: "wrap" }}>
@@ -1162,8 +1215,9 @@ export default function BlockDropGame() {
       >
         {isCoarse
           ? "大按鈕操作 · 按住左右可連續移動"
-          : "← → 移動 · ↑/X 旋轉 · ↓ 軟降 · 空白鍵落下 · C 暫存 · P 暫停"}
+          : "← → 移動 · ↑ 旋轉 · ↓ 軟降 · 空白鍵落下 · P 暫停 · 手把支援"}
       </p>
     </div>
+    </GameChrome>
   );
 }
