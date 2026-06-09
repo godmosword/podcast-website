@@ -5,6 +5,7 @@ import RoughFrame from "@/components/decor/RoughFrame";
 import Wheel from "@/components/decor/Wheel";
 import decor from "@/components/decor/decor.module.css";
 import GameThumbArt from "@/components/games/GameThumbArt";
+import { GamesWorldMap } from "@/components/games/GamesWorldMap";
 import PlaygroundHubBadge from "@/components/games/PlaygroundHubBadge";
 import { GAMES } from "@/lib/games/catalog";
 import { getSiteUrl } from "@/lib/site-url";
@@ -79,6 +80,8 @@ export default function GamesHubPage() {
           <li className={styles.chip}>📱 手機也能玩</li>
         </ul>
       </header>
+
+      <GamesWorldMap />
 
       <ul className={styles.grid}>
         {GAMES.map((game, index) => (

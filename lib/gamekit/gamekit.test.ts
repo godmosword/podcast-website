@@ -40,7 +40,14 @@ import {
 import { CAR_ADVENTURE_LEVELS } from "@/lib/games/car-adventure/levels";
 import { CAR_STAR_MAZES, parseCarStarMaze } from "@/lib/games/car-star-mazes";
 import { emptyTilemap } from "@/lib/gamekit/tilemap";
-import { recordBestScore, loadPlayerProfile } from "@/lib/gamekit/save";
+import {
+  recordBestScore,
+  loadPlayerProfile,
+  recordMedal,
+  addStars,
+} from "@/lib/gamekit/save";
+import { GARAGE_VEHICLES, vehiclesUnlockedAt } from "@/lib/gamekit/garage";
+import { reportGameSession, gameMedalStars } from "@/lib/gamekit/session";
 
 describe("gamekit constants", () => {
   it("四款 viewport 為正整數", () => {
@@ -107,6 +114,50 @@ describe("save", () => {
     expect(next.bests["car-star"]).toBe(100);
     const same = recordBestScore(next, "car-star", 50);
     expect(same.bests["car-star"]).toBe(100);
+  });
+
+  it("recordMedal 合併三星 bit", () => {
+    const base = loadPlayerProfile();
+    const f1 = medalFlags(true, false, false);
+    const f2 = medalFlags(false, true, true);
+    let p = recordMedal(base, "car-star", 0, f1);
+    p = recordMedal(p, "car-star", 0, f2);
+    expect(medalCount(p.medals["car-star"]?.[0] ?? 0)).toBe(3);
+  });
+
+  it("addStars 解鎖車庫車輛", () => {
+    const base = loadPlayerProfile();
+    const p = addStars(base, 6);
+    expect(p.stars).toBe(6);
+    expect(p.unlockedVehicles).toContain("怪獸卡車");
+    expect(p.unlockedVehicles).toContain("小紅賽車");
+  });
+});
+
+describe("garage", () => {
+  it("vehiclesUnlockedAt 依星星門檻", () => {
+    expect(vehiclesUnlockedAt(0)).toEqual(["小黃"]);
+    expect(vehiclesUnlockedAt(3)).toContain("怪獸卡車");
+    expect(GARAGE_VEHICLES.length).toBe(5);
+  });
+});
+
+describe("session", () => {
+  it("reportGameSession 通關發星與貼紙", () => {
+    const base = loadPlayerProfile();
+    const cleared = reportGameSession({
+      gameId: "car-star",
+      score: 500,
+      levelIndex: 0,
+      cleared: true,
+      flawless: true,
+      collectedAll: true,
+    });
+    expect(cleared.gamesPlayed["car-star"]).toBe(true);
+    expect(cleared.stickers).toContain("played-car-star");
+    expect(cleared.stars).toBeGreaterThan(0);
+    expect(gameMedalStars(cleared, "car-star")).toBeGreaterThan(0);
+    expect(cleared.bests["car-star"]).toBe(500);
   });
 });
 

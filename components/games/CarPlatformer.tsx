@@ -29,6 +29,7 @@ import {
   type AdventureLevel,
 } from "@/lib/gamekit/adventure-level";
 import { CAR_ADVENTURE_LEVELS } from "@/lib/games/car-adventure/levels";
+import { reportGameSession } from "@/lib/gamekit/session";
 
 const TILE = 36;
 const VW = 720;
@@ -90,6 +91,7 @@ interface GameState {
   taken: number;
   input: Input;
   last: number | null;
+  finishCleared: boolean;
 }
 
 const approach = (v: number, target: number, amt: number) =>
@@ -189,6 +191,7 @@ export default function CarPlatformer() {
   const [status, setStatus] = useState<Status>("ready");
   const [levelIndex, setLevelIndex] = useState(0);
   const levelIndexRef = useRef(0);
+  const levelStartLivesRef = useRef(3);
   const [best, setBest] = useState(0);
   const {
     ensureAudio,
@@ -271,7 +274,9 @@ export default function CarPlatformer() {
       taken: 0,
       input: { left: false, right: false, jump: false },
       last: null,
+      finishCleared: false,
     };
+    levelStartLivesRef.current = 3;
   }, []);
 
   const begin = useCallback(() => {
@@ -318,6 +323,8 @@ export default function CarPlatformer() {
     g.cam = 0;
     g.taken = 0;
     g.last = null;
+    g.finishCleared = false;
+    levelStartLivesRef.current = g.lives;
     statusRef.current = "playing";
     setStatus("playing");
   }, []);
@@ -377,6 +384,12 @@ export default function CarPlatformer() {
     if (!reducedRef.current) juiceRef.current.shake.trigger(0.22, 6);
     g.lives--;
     if (g.lives <= 0) {
+      if (statusRef.current !== "over") {
+        reportGameSession({
+          gameId: "car-adventure",
+          score: g.levelIndex,
+        });
+      }
       setStat("over");
       return;
     }
@@ -489,7 +502,17 @@ export default function CarPlatformer() {
     }
 
     const f = g.lv.finish;
-    if (box.r > f.x && box.l < f.x + f.w) {
+    if (!g.finishCleared && box.r > f.x && box.l < f.x + f.w) {
+      g.finishCleared = true;
+      const levelScore = g.levelIndex + 1;
+      reportGameSession({
+        gameId: "car-adventure",
+        score: levelScore,
+        levelIndex: g.levelIndex,
+        cleared: true,
+        flawless: g.lives === levelStartLivesRef.current,
+        collectedAll: g.taken >= g.lv.total,
+      });
       if (g.levelIndex >= CAR_ADVENTURE_LEVELS.length - 1) {
         sWin();
         setStat("won");

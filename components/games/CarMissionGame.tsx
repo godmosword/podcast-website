@@ -18,6 +18,7 @@ import {
 } from "@/lib/gamekit/sprite-defs";
 import { JuiceController } from "@/lib/gamekit/juice";
 import { drawPixelText } from "@/lib/gamekit/style";
+import { reportGameSession } from "@/lib/gamekit/session";
 import type { CanvasPalette } from "@/lib/games/canvas-palette";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useSwipeGesture } from "@/hooks/useSwipeGesture";
@@ -103,6 +104,7 @@ function CarMissionPlayfield({
     fireflies: [] as Firefly[],
     distance: 0,
     gentleCombo: 0,
+    bumps: 0,
   });
 
   statusRef.current = status;
@@ -238,6 +240,7 @@ function CarMissionPlayfield({
 
       if (distX < 24 && distY < 24 && !fly.happy) {
         if (state.speed > 1.0) {
+          state.bumps += 1;
           state.gentleCombo = 0;
           setCombo(0);
           setGentleness((prev) => Math.max(0, prev - 8));
@@ -276,13 +279,21 @@ function CarMissionPlayfield({
     if (newDistance >= 100) {
       statusRef.current = "finished";
       setStatus("finished");
-      setGentleness((g) => {
+      setGentleness((gentle) => {
         setScore((prev) => {
-          const finalScore = prev + Math.floor(g / 2);
+          const finalScore = prev + Math.floor(gentle / 2);
           saveBest(finalScore);
+          reportGameSession({
+            gameId: "car-mission",
+            score: finalScore,
+            levelIndex: 0,
+            cleared: true,
+            flawless: gameStateRef.current.bumps === 0,
+            collectedAll: gentle >= 80,
+          });
           return finalScore;
         });
-        return g;
+        return gentle;
       });
       sWin();
       return;
@@ -313,6 +324,7 @@ function CarMissionPlayfield({
       fireflies: [],
       distance: 0,
       gentleCombo: 0,
+      bumps: 0,
     };
     frameRef.current = 0;
     initFireflies();

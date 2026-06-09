@@ -20,6 +20,7 @@ import { useDomJuice } from "@/hooks/useDomJuice";
 import { useSwipeGesture } from "@/hooks/useSwipeGesture";
 import mobileStyles from "./mobile-controls.module.css";
 import styles from "./CarStarGame.module.css";
+import { reportGameSession } from "@/lib/gamekit/session";
 import {
   CAR_STAR_MAZES,
   getCarStarMaze,
@@ -107,6 +108,11 @@ function canMove(maze: MazeRuntime, r: number, c: number, dir: Dir): boolean {
   const nc = c + d.dc;
   if (nr < 0 || nc < 0 || nr >= maze.rows || nc >= maze.cols) return false;
   return maze.grid[nr][nc] !== "#";
+}
+
+function mazeLevelIndex(mazeId: string): number {
+  const i = CAR_STAR_MAZES.findIndex((m) => m.id === mazeId);
+  return i >= 0 ? i : 0;
 }
 
 function freshState(maze: MazeRuntime): GameState {
@@ -395,6 +401,11 @@ export default function CarStarGame() {
         g.status = "lost";
         setStatus("lost");
         saveBest(g.score);
+        reportGameSession({
+          gameId: "car-star",
+          score: g.score,
+          levelIndex: mazeLevelIndex(g.mazeId),
+        });
       } else {
         resetPositions(g);
       }
@@ -404,6 +415,14 @@ export default function CarStarGame() {
       g.status = "won";
       setStatus("won");
       saveBest(g.score);
+      reportGameSession({
+        gameId: "car-star",
+        score: g.score,
+        levelIndex: mazeLevelIndex(g.mazeId),
+        cleared: true,
+        flawless: g.lives === 3,
+        collectedAll: true,
+      });
       sWin();
     }
     rerender();

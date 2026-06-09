@@ -16,6 +16,7 @@ import mobileStyles from "./mobile-controls.module.css";
 import GamePixelBoard from "@/components/games/GamePixelBoard";
 import { blockDropKitColors } from "@/lib/gamekit/bridge";
 import { BLOCK_INDEX, blockUrl } from "@/lib/gamekit/procedural-sheets";
+import { reportGameSession } from "@/lib/gamekit/session";
 
 const COLS = 10;
 const ROWS = 20;
@@ -58,6 +59,7 @@ interface GameState {
   clearUntil: number;
   lastTime: number | null;
   dirty: boolean;
+  metaReported: boolean;
 }
 
 const TYPES: PieceType[] = ["I", "O", "T", "S", "Z", "J", "L"];
@@ -291,6 +293,7 @@ function freshGame(): GameState {
     clearUntil: 0,
     lastTime: null,
     dirty: true,
+    metaReported: false,
   };
 }
 
@@ -758,14 +761,18 @@ export default function BlockDropGame() {
           repaint();
         }
       }
-      if (g.status === "over" && g.score > bestRef.current) {
-        bestRef.current = g.score;
-        setBest(g.score);
-        try {
-          window.localStorage.setItem(BEST_KEY, String(g.score));
-        } catch {
-          /* ignore */
+      if (g.status === "over" && !g.metaReported) {
+        g.metaReported = true;
+        if (g.score > bestRef.current) {
+          bestRef.current = g.score;
+          setBest(g.score);
+          try {
+            window.localStorage.setItem(BEST_KEY, String(g.score));
+          } catch {
+            /* ignore */
+          }
         }
+        reportGameSession({ gameId: "block-drop", score: g.score });
       }
       raf = requestAnimationFrame(loop);
     };
