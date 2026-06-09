@@ -42,15 +42,12 @@
   font-size: 1.8rem;
   font-weight: 700;
   letter-spacing: 0.01em;
-  margin: 10px 0 0;
+  margin: 12px 0 0;
   color: var(--ink);
 }
 
 .playWrap {
-  margin: 20px 0 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
+  margin: 24px 0 8px;
 }
 
 .summarySection {
