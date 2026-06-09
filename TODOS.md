@@ -307,10 +307,13 @@ repo secret 存 `LINE_NOTIFY_TOKEN` 或 `DISCORD_WEBHOOK_URL`；同步偵測新�
 `lib/gamekit/` 九大模組骨架（renderer/loop/input/style/sprite/tilemap/juice/save/meta/scene/audio）、32 色盤、四款 viewport 定錨、[ART-BIBLE.md](./lib/gamekit/ART-BIBLE.md)、`PixelGameCanvas` + `usePixelRenderer`/`usePixelGameSurface`、`lib/gamekit/gamekit.test.ts`。**Phase 1 待做**：四款 canvas 遊戲遷移 pixel 管線。
 
 ### ~~Game Kit Phase 1 — 渲染管線＋設計系統套用四款~~　`P3 · L · Phase 0 ✅`　〔eng+design〕 ✅
-四款接入 Game Kit：`PixelGameCanvas`（car-mission、car-adventure）、`GamePixelBoard`（car-star、block-drop）；內部解析度定錨、整數倍放大、`lib/gamekit/bridge` 調色盤、點陣 HUD（大冒險）。**Phase 2 待做**：sprite sheet／tileset 美術。
+四款接入 Game Kit：`PixelGameCanvas`（car-mission、car-adventure）、`GamePixelBoard`（car-star、block-drop）；內部解析度定錨、整數倍放大、`lib/gamekit/bridge` 調色盤、點陣 HUD（大冒險）。
 
-### Game Kit Phase 2–4 — 美術／音訊／juice　`P3 · L · Phase 1`　〔eng+design〕
-Phase 2：sprite sheet + tileset（可先 Kenney CC0）。Phase 3：四款 chiptune BGM + SFX 混音（擴充 `useGameAudio`）。Phase 4：粒子/震動/頓幀/緩動工具組逐款套用。
+### ~~Game Kit Phase 2 — sprite sheet／tileset 佔位美術~~　`P3 · L · Phase 1 ✅`　〔eng+design〕 ✅
+程序生成 16×16 sheet（`procedural-sheets`／`assets`／`sprite-defs`／`tileset-draw`）；四款接入：car-mission 卡車＋螢火虫 `SpriteAnimator`、car-adventure 草地磚／金幣／尖刺 tile、car-star 道路 tile 背景、block-drop 七色方塊 tile。**Phase 3 待做**：chiptune BGM／SFX 混音。
+
+### Game Kit Phase 3–4 — 音訊／juice　`P3 · L · Phase 2 ✅`　〔eng+design〕
+Phase 3：四款 chiptune BGM + SFX 混音（擴充 `useGameAudio`）。Phase 4：粒子/震動/頓幀/緩動工具組逐款套用。
 
 ### Game Kit Phase 5–8 — 內容／元系統／外框／QA　`P3 · L · Phase 4`　〔eng〕
 Phase 5：Tiled → JSON 關卡 loader（大冒險優先）、多迷宮/多模式。Phase 6：跨遊戲星星、三星、車庫解鎖、`/games` 世界地圖 hub、貼紙簿。Phase 7：標題/暫停/設定/Gamepad/a11y/兒童模式。Phase 8：固定步進+插值、物件池、資產預載、Lighthouse ≥95。
@@ -530,6 +533,10 @@ T+2d    社群貼文（B 戰場）
 ---
 
 ## Completed
+
+### Game Kit Phase 2（sprite sheet／tileset 佔位）
+`lib/gamekit/procedural-sheets` 程序生成 tile／卡車／螢火虫／方塊 sheet；`createKitSprite`／`drawKitTile`／`tileset-draw`；四款遊戲取代純色塊繪製。
+**Completed:** main（2026-06）
 
 ### Game Kit Phase 1（四款 pixel 管線）
 `PixelGameCanvas`／`GamePixelBoard` 套用四款；car-star `CELL=16`（240×208）、block-drop `CELL=18`、car-mission 320×240 buffer、car-adventure 320×180 縮放渲染 + 點陣 HUD。

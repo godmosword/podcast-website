@@ -6,6 +6,7 @@
 
 ### Added
 
+- **Game Kit Phase 2**：程序生成 sprite sheet／tileset（`procedural-sheets`、`assets`、`sprite-defs`、`tileset-draw`）；car-mission 卡車＋螢火虫動畫、car-adventure 地形／金幣／尖刺 tile、car-star 道路 tile 背景、block-drop 七色方塊 tile 皮膚
 - **營運管線文件**：`TODOS.md` 新增 SoundOn／Apple 同步四階段工作流、生圖通知方案（Issue／webhook／佇列）與 P2–P3 實作條目
 - **Game Kit Phase 1**：四款遊戲接入 `PixelGameCanvas`／`GamePixelBoard`、統一調色盤 bridge、整數倍像素放大；car-star／block-drop 格子縮放對齊 viewport
 - **Game Kit Phase 0**：`lib/gamekit/` 九大模組骨架、`PixelRenderer`／`GameLoop`／`InputManager`、`ART-BIBLE.md`、`PixelGameCanvas` + hook、單元測試

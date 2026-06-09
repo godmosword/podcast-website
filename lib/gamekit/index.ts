@@ -13,5 +13,9 @@ export * from "./meta";
 export * from "./scene";
 export * from "./audio";
 export * from "./bridge";
+export * from "./procedural-sheets";
+export * from "./assets";
+export * from "./sprite-defs";
+export * from "./tileset-draw";
 
 export { GAMEKIT_VERSION } from "./constants";

@@ -8,7 +8,15 @@ import {
   colorsForGame,
   canvasPaletteFromKit,
   blockDropKitColors,
+  TILE_INDEX,
+  BLOCK_INDEX,
+  TILE_SIZE,
 } from "@/lib/gamekit";
+import {
+  FIREFLY_BLINK,
+  TRUCK_DRIVE,
+  TRUCK_IDLE,
+} from "@/lib/gamekit/sprite-defs";
 import { emptyTilemap } from "@/lib/gamekit/tilemap";
 import { recordBestScore, loadPlayerProfile } from "@/lib/gamekit/save";
 
@@ -99,5 +107,29 @@ describe("tilemap stub", () => {
     const map = emptyTilemap(4, 4);
     expect(map.width).toBe(4);
     expect(map.isWalkable(0, 0)).toBe(false);
+  });
+});
+
+describe("procedural sheets index", () => {
+  it("TILE_INDEX 與 BLOCK_INDEX 對齊七種方塊", () => {
+    expect(TILE_SIZE).toBe(16);
+    expect(TILE_INDEX.road).toBe(0);
+    expect(BLOCK_INDEX.I).toBe(0);
+    expect(BLOCK_INDEX.L).toBe(6);
+    expect(Object.keys(BLOCK_INDEX)).toHaveLength(7);
+  });
+});
+
+describe("sprite-defs", () => {
+  it("卡車與螢火虫動畫含有效幀", () => {
+    expect(TRUCK_IDLE.frames).toHaveLength(1);
+    expect(TRUCK_DRIVE.frames).toHaveLength(2);
+    expect(FIREFLY_BLINK.frames).toHaveLength(2);
+    for (const anim of [TRUCK_IDLE, TRUCK_DRIVE, FIREFLY_BLINK]) {
+      for (const f of anim.frames) {
+        expect(f.w).toBeGreaterThan(0);
+        expect(f.h).toBeGreaterThan(0);
+      }
+    }
   });
 });

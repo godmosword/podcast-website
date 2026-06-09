@@ -11,6 +11,7 @@ import {
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import GamePixelBoard from "@/components/games/GamePixelBoard";
 import { blockDropKitColors } from "@/lib/gamekit/bridge";
+import { BLOCK_INDEX, blockUrl } from "@/lib/gamekit/procedural-sheets";
 
 const COLS = 10;
 const ROWS = 20;
@@ -477,6 +478,18 @@ export default function BlockDropGame() {
     }
   }, []);
 
+  const [blockTileUrls, setBlockTileUrls] = useState<Record<PieceType, string> | null>(
+    null,
+  );
+
+  useEffect(() => {
+    setBlockTileUrls(
+      Object.fromEntries(
+        TYPES.map((t) => [t, blockUrl(BLOCK_INDEX[t])]),
+      ) as Record<PieceType, string>,
+    );
+  }, []);
+
   const ensureAudio = () => {
     if (!actx.current) {
       try {
@@ -844,13 +857,23 @@ export default function BlockDropGame() {
   }
   const clearSet = new Set(g.clearing ? g.clearRows : []);
 
-  const blockStyle = (color: string, glow?: boolean): CSSProperties => ({
-    width: "100%",
-    height: "100%",
-    background: color,
-    borderRadius: 2,
-    boxShadow: `inset 1px 1px 0 rgba(255,255,255,.35), inset -1px -1px 0 rgba(0,0,0,.35)${glow ? `, 0 0 6px ${color}` : ""}`,
-  });
+  const blockStyle = (
+    type: PieceType,
+    glow?: boolean,
+  ): CSSProperties => {
+    const color = COLORS[type];
+    const tile = blockTileUrls?.[type];
+    return {
+      width: "100%",
+      height: "100%",
+      background: tile ? undefined : color,
+      backgroundImage: tile ? `url(${tile})` : undefined,
+      backgroundSize: "cover",
+      imageRendering: "pixelated",
+      borderRadius: 2,
+      boxShadow: `inset 1px 1px 0 rgba(255,255,255,.35), inset -1px -1px 0 rgba(0,0,0,.35)${glow ? `, 0 0 6px ${color}` : ""}`,
+    };
+  };
 
   const font = "var(--font-sans, 'PingFang TC','Microsoft JhengHei',system-ui,sans-serif)";
 
@@ -944,9 +967,9 @@ export default function BlockDropGame() {
                 const isClearing = clearSet.has(y);
                 let cell: ReactNode = null;
                 if (activeSet.has(idx) && g.active) {
-                  cell = <div style={blockStyle(COLORS[g.active.type], true)} />;
+                  cell = <div style={blockStyle(g.active.type, true)} />;
                 } else if (view[y][x]) {
-                  cell = <div style={blockStyle(COLORS[view[y][x] as PieceType])} />;
+                  cell = <div style={blockStyle(view[y][x] as PieceType)} />;
                 } else if (ghostSet.has(idx)) {
                   cell = (
                     <div
@@ -1085,7 +1108,7 @@ export default function BlockDropGame() {
                           <div
                             key={k}
                             style={
-                              on ? blockStyle(COLORS[t]) : { background: "transparent" }
+                              on ? blockStyle(t) : { background: "transparent" }
                             }
                           />
                         );

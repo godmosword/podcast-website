@@ -15,6 +15,11 @@ import PixelGameCanvas, {
   usePixelGameSurface,
 } from "@/components/games/PixelGameCanvas";
 import { drawPixelText } from "@/lib/gamekit/style";
+import {
+  drawAdventureCoin,
+  drawAdventureGroundTile,
+  drawAdventureSpike,
+} from "@/lib/gamekit/tileset-draw";
 
 const TILE = 36;
 const VW = 720;
@@ -645,44 +650,23 @@ export default function CarPlatformer() {
         if (!g.lv.solid.has(`${tx},${ty}`)) continue;
         const sx = tx * TILE - cam;
         const sy = ty * TILE;
-        ctx.fillStyle = "#7a5230";
-        ctx.fillRect(sx, sy, TILE, TILE);
-        ctx.fillStyle = "rgba(0,0,0,.08)";
-        ctx.fillRect(sx, sy + TILE - 4, TILE, 4);
-        if (!g.lv.solid.has(`${tx},${ty - 1}`)) {
-          ctx.fillStyle = "#5fc15f";
-          ctx.fillRect(sx, sy, TILE, 9);
-          ctx.fillStyle = "#4aa84a";
-          ctx.fillRect(sx, sy + 9, TILE, 3);
-        }
+        drawAdventureGroundTile(
+          ctx,
+          sx,
+          sy,
+          TILE,
+          !g.lv.solid.has(`${tx},${ty - 1}`),
+        );
       }
 
-    ctx.fillStyle = "#b9c0cc";
     for (const key of g.lv.spikes) {
       const [tx, ty] = key.split(",").map(Number);
-      const sx = tx * TILE - cam;
-      const sy = ty * TILE;
-      for (let k = 0; k < 3; k++) {
-        ctx.beginPath();
-        ctx.moveTo(sx + k * 12, sy + TILE);
-        ctx.lineTo(sx + k * 12 + 6, sy + 10);
-        ctx.lineTo(sx + k * 12 + 12, sy + TILE);
-        ctx.closePath();
-        ctx.fill();
-      }
+      drawAdventureSpike(ctx, tx * TILE - cam, ty * TILE, TILE);
     }
 
     for (const c of g.lv.coins) {
       if (c.taken) continue;
-      const sx = c.x - cam;
-      ctx.fillStyle = "#ffc107";
-      ctx.beginPath();
-      ctx.arc(sx, c.y, 9, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = "#ffe27a";
-      ctx.beginPath();
-      ctx.arc(sx - 2, c.y - 2, 3.5, 0, Math.PI * 2);
-      ctx.fill();
+      drawAdventureCoin(ctx, c.x - cam, c.y, 9);
     }
 
     const f = g.lv.finish;

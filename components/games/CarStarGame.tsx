@@ -14,6 +14,7 @@ import { useGameAudio } from "@/hooks/useGameAudio";
 import GameShell from "@/components/games/GameShell";
 import GamePixelBoard from "@/components/games/GamePixelBoard";
 import { CAR_STAR_CAST, CAR_STAR_TUTORIAL } from "@/lib/games/car-star-cast";
+import { TILE_INDEX, tileUrl } from "@/lib/gamekit/procedural-sheets";
 import styles from "./CarStarGame.module.css";
 
 // ── 型別 ────────────────────────────────────────────────
@@ -278,6 +279,11 @@ export default function CarStarGame() {
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const difficultyRef = useRef<Difficulty>("easy");
   const [popups, setPopups] = useState<Popup[]>([]);
+  const [roadTileUrl, setRoadTileUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    setRoadTileUrl(tileUrl(TILE_INDEX.road));
+  }, []);
 
   const rerender = useCallback(() => force((n) => n + 1), []);
   const addPopup = useCallback(
@@ -548,7 +554,19 @@ export default function CarStarGame() {
                   <div
                     key={`rd${r}-${c}`}
                     className={styles.roadCell}
-                    style={{ left: c * CELL, top: r * CELL, width: CELL, height: CELL }}
+                    style={{
+                      left: c * CELL,
+                      top: r * CELL,
+                      width: CELL,
+                      height: CELL,
+                      ...(roadTileUrl
+                        ? {
+                            backgroundImage: `url(${roadTileUrl})`,
+                            backgroundSize: "cover",
+                            imageRendering: "pixelated",
+                          }
+                        : {}),
+                    }}
                   >
                     <span className={styles.roadMark} aria-hidden="true" />
                   </div>

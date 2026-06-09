@@ -10,6 +10,12 @@ import { useBestScore } from "@/hooks/useBestScore";
 import { useGameAudio } from "@/hooks/useGameAudio";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { canvasPaletteFromKit } from "@/lib/gamekit/bridge";
+import { createKitSprite, type SpriteHandle } from "@/lib/gamekit/assets";
+import {
+  FIREFLY_BLINK,
+  TRUCK_DRIVE,
+  TRUCK_IDLE,
+} from "@/lib/gamekit/sprite-defs";
 import { drawPixelText } from "@/lib/gamekit/style";
 import type { CanvasPalette } from "@/lib/games/canvas-palette";
 import styles from "./CarMissionGame.module.css";
@@ -81,6 +87,8 @@ function CarMissionPlayfield({
   const paletteRef = useRef<CanvasPalette>(canvasPaletteFromKit("car-mission"));
   const slowRef = useRef(false);
   const frameRef = useRef(0);
+  const truckSpriteRef = useRef<SpriteHandle | null>(null);
+  const fireflySpriteRef = useRef<SpriteHandle | null>(null);
 
   const gameStateRef = useRef({
     truckX: LANE_WIDTH * 1.5,
@@ -138,25 +146,24 @@ function CarMissionPlayfield({
     }
 
     const truckY = CANVAS_HEIGHT - 52;
-    ctx.fillStyle = p.truck;
-    ctx.fillRect(state.truckX - 15, truckY, 30, 24);
-    ctx.fillStyle = p.wheel;
-    ctx.fillRect(state.truckX - 12, truckY + 18, 8, 6);
-    ctx.fillRect(state.truckX + 4, truckY + 18, 8, 6);
+    const truckSprite = truckSpriteRef.current;
+    if (truckSprite) {
+      truckSprite.play(state.speed < 0.85 ? TRUCK_IDLE : TRUCK_DRIVE, false);
+      truckSprite.draw(ctx, state.truckX, truckY + 24, 1);
+    }
 
-    state.fireflies.forEach((fly) => {
-      ctx.fillStyle = p.firefly;
-      ctx.beginPath();
-      ctx.arc(fly.x, fly.y, fly.size, 0, Math.PI * 2);
-      ctx.fill();
-
-      if (!fly.happy) {
-        ctx.fillStyle = p.fireflyGlow;
-        ctx.beginPath();
-        ctx.arc(fly.x, fly.y, fly.size * 1.5, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    });
+    const fireflySprite = fireflySpriteRef.current;
+    if (fireflySprite) {
+      state.fireflies.forEach((fly) => {
+        if (!fly.happy) {
+          ctx.fillStyle = p.fireflyGlow;
+          ctx.beginPath();
+          ctx.arc(fly.x, fly.y, fly.size * 1.6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        fireflySprite.draw(ctx, fly.x, fly.y, fly.size / 4);
+      });
+    }
 
     if (state.speed < 0.8) {
       drawPixelText(ctx, "溫柔", state.truckX - 12, truckY - 14, {
@@ -174,6 +181,9 @@ function CarMissionPlayfield({
     frameRef.current += 1;
     const motionScale = reduced ? 0.45 : 1;
     const frameSkip = reduced ? 2 : 1;
+    const dt = (1 / 60) * motionScale;
+    truckSpriteRef.current?.update(dt);
+    fireflySpriteRef.current?.update(dt);
     if (frameRef.current % frameSkip !== 0) {
       animationRef.current = requestAnimationFrame(gameLoop);
       return;
@@ -347,6 +357,8 @@ function CarMissionPlayfield({
   }, [draw, onRestart, setStatus]);
 
   useEffect(() => {
+    truckSpriteRef.current = createKitSprite("truck-mission", TRUCK_IDLE, 0.5, 1);
+    fireflySpriteRef.current = createKitSprite("firefly", FIREFLY_BLINK, 0.5, 0.5);
     paletteRef.current = canvasPaletteFromKit("car-mission");
     draw();
   }, [draw]);
