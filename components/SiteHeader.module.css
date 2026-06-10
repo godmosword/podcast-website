@@ -24,9 +24,25 @@
 .heroImage {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
   max-width: 100%;
+  object-fit: cover;
+  object-position: center 35%;
   vertical-align: top;
+}
+
+@media (max-height: 700px), (max-width: 390px) {
+  .scene {
+    max-height: 180px;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .header {
+    margin-bottom: 16px;
+  }
 }
 
 .mascotCompact {
@@ -95,43 +111,72 @@
   font-weight: 700;
 }
 
-.taglineSub {
-  margin: 4px 0 0;
+.audienceNote {
+  margin: 8px 0 0;
   color: var(--ink-soft);
-  font-size: 0.98rem;
+  font-size: 0.88rem;
   font-weight: 600;
-  line-height: 1.5;
+  line-height: 1.45;
 }
 
-.hubNav {
-  margin: 16px 0 0;
+.ctaRow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 0 4px;
 }
 
-.hubLink {
-  --hub-a: var(--c-sky);
-  --hub-b: var(--c-pink);
-  --hub-c: var(--c-lilac);
-  --hub-edge: color-mix(in srgb, var(--hub-c) 38%, var(--ink-soft));
+.primaryCta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  min-height: 54px;
-  padding: 11px 22px 11px 13px;
+  width: min(100%, 320px);
+  min-height: 48px;
+  padding: 12px 20px;
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  color: var(--ink);
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  background: var(--c-yellow);
+  box-shadow: var(--shadow-card), var(--gloss);
+  transition:
+    transform var(--motion-press),
+    box-shadow var(--motion-press);
+}
+
+.primaryCta:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 rgba(52, 48, 43, 0.18), var(--gloss);
+}
+
+@media (hover: hover) {
+  .primaryCta:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 6px 0 rgba(52, 48, 43, 0.18),
+      var(--shadow-sm),
+      var(--gloss);
+  }
+}
+
+.secondaryCta {
+  --hub-a: var(--c-sky);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 8px 16px 8px 10px;
   border-radius: 999px;
   text-decoration: none;
   color: var(--ink);
-  background: linear-gradient(
-    128deg,
-    color-mix(in srgb, var(--hub-a) 58%, #fff) 0%,
-    color-mix(in srgb, var(--hub-b) 52%, #fff) 46%,
-    color-mix(in srgb, var(--hub-c) 50%, #fff) 100%
-  );
-  border: 2.5px solid var(--hub-edge);
-  box-shadow:
-    0 4px 0 color-mix(in srgb, var(--hub-edge) 72%, transparent),
-    0 8px 18px color-mix(in srgb, var(--hub-b) 28%, transparent),
-    var(--gloss);
+  background: transparent;
+  border: 2px solid var(--line);
+  box-shadow: var(--shadow-sm);
   transition:
     transform var(--motion-press),
     box-shadow var(--motion-press),
@@ -143,14 +188,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: #fff;
-  border: 2px solid color-mix(in srgb, var(--hub-a) 55%, #fff);
+  background: var(--card);
+  border: 2px solid color-mix(in srgb, var(--hub-a) 55%, var(--card));
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    0 1px 3px color-mix(in srgb, var(--hub-edge) 35%, transparent);
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 1px 3px color-mix(in srgb, var(--ink-soft) 25%, transparent);
 }
 
 .hubBadge {
@@ -166,48 +211,44 @@
 }
 
 .hubTitle {
-  font-weight: 800;
-  font-size: 1.1rem;
+  font-weight: 700;
+  font-size: 0.92rem;
   line-height: 1.15;
   letter-spacing: 0.01em;
   color: var(--ink);
 }
 
 .hubSub {
-  font-size: 0.77rem;
-  font-weight: 700;
-  color: color-mix(in srgb, var(--ink) 72%, var(--ink-soft));
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ink-soft);
   line-height: 1.2;
 }
 
 @media (hover: hover) {
-  .hubLink:hover {
+  .secondaryCta:hover {
+    transform: translateY(-1px);
+    background: color-mix(in srgb, var(--hub-a) 12%, var(--card));
+    box-shadow: var(--shadow-md);
+  }
+
+  .primaryCta:hover {
     transform: translateY(-2px);
-    background: linear-gradient(
-      128deg,
-      color-mix(in srgb, var(--hub-a) 64%, #fff) 0%,
-      color-mix(in srgb, var(--hub-b) 58%, #fff) 46%,
-      color-mix(in srgb, var(--hub-c) 56%, #fff) 100%
-    );
-    box-shadow:
-      0 6px 0 color-mix(in srgb, var(--hub-edge) 72%, transparent),
-      0 12px 22px color-mix(in srgb, var(--hub-b) 32%, transparent),
-      var(--gloss);
   }
 }
 
-.hubLink:active {
-  transform: translateY(3px);
-  box-shadow:
-    0 1px 0 color-mix(in srgb, var(--hub-edge) 72%, transparent),
-    0 3px 8px color-mix(in srgb, var(--hub-b) 18%, transparent),
-    var(--gloss);
+.secondaryCta:active {
+  transform: translateY(2px);
+  box-shadow: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hubLink,
-  .hubLink:hover,
-  .hubLink:active {
+  .primaryCta,
+  .primaryCta:hover,
+  .primaryCta:active,
+  .secondaryCta,
+  .secondaryCta:hover,
+  .secondaryCta:active {
     transition: none;
     transform: none;
   }

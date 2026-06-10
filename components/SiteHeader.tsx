@@ -36,9 +36,13 @@ function visibleActions() {
 
 type SiteHeaderProps = {
   variant?: "full" | "compact";
+  latestStory?: { slug: string; title: string } | null;
 };
 
-export default function SiteHeader({ variant = "full" }: SiteHeaderProps) {
+export default function SiteHeader({
+  variant = "full",
+  latestStory = null,
+}: SiteHeaderProps) {
   const actions = visibleActions();
 
   if (variant === "compact") {
@@ -120,21 +124,30 @@ export default function SiteHeader({ variant = "full" }: SiteHeaderProps) {
         <p className={styles.tagline}>
           <span className="marker marker-mint">用車車故事陪伴孩子成長</span>
         </p>
-        <p className={styles.taglineSub}>融合生活中事件及發揮想像出發</p>
-        <p className={styles.taglineSub}>一起探險、學習、勇敢闖關！</p>
+        <p className={styles.audienceNote}>
+          給 3–7 歲孩子與家長 · 每集 5–10 分鐘，適合睡前看圖聽故事
+        </p>
       </div>
 
-      <p className={styles.hubNav}>
-        <Link href="/games" className={styles.hubLink}>
+      <div className={styles.ctaRow}>
+        {latestStory && (
+          <Link
+            href={`/story/${latestStory.slug}`}
+            className={styles.primaryCta}
+          >
+            ▶ 看圖聽最新一集
+          </Link>
+        )}
+        <Link href="/games" className={styles.secondaryCta}>
           <span className={styles.hubIconWrap} aria-hidden>
-            <PlaygroundHubBadge size={36} className={styles.hubBadge} />
+            <PlaygroundHubBadge size={28} className={styles.hubBadge} />
           </span>
           <span className={styles.hubCopy}>
-            <span className={styles.hubTitle}>去遊樂園玩！</span>
+            <span className={styles.hubTitle}>去遊樂園玩</span>
             <span className={styles.hubSub}>小遊戲 · 免下載</span>
           </span>
         </Link>
-      </p>
+      </div>
 
       {actions.length > 0 && (
         <nav className={styles.actions} aria-label="聯絡與互動">

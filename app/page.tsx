@@ -31,15 +31,16 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   return (
     <main className={styles.main}>
       <JsonLd data={podcastSeriesJsonLd()} />
-      <SiteHeader />
+      <SiteHeader
+        latestStory={
+          latest ? { slug: latest.slug, title: latest.title } : null
+        }
+      />
       <ContinueBanner />
       {latest && <LatestHero story={latest} />}
       <StarterEpisodes />
       <HomeSubscribeBand />
       <FavoritesSection />
-      <p className={styles.audienceNote}>
-        給 3–7 歲孩子與家長 · 每集 5–10 分鐘，適合睡前看圖聽故事
-      </p>
       <StoryFilter
         stories={listStories}
         vehicles={vehicles}

@@ -27,7 +27,7 @@ export default function AboutPage() {
         <p className={styles.text}>
           《車車遊樂園》是 Bonbon &amp; 馬米的親子 podcast
           官方「看圖聽故事」網站。每集搭配插畫與語音，讓孩子邊看邊聽，適合
-          3–7 歲與家長一起的睡前時光，每集約 5–10 分鐘。
+          3–7 歲與家長一起的睡前時光，每集約 5–10 分鐘。融合生活中事件及發揮想像出發，一起探險、學習、勇敢闖關。
         </p>
       </section>
 

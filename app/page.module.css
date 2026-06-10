@@ -4,13 +4,3 @@
   padding: calc(24px + var(--safe-top)) calc(20px + var(--safe-right))
     calc(40px + var(--safe-bottom)) calc(20px + var(--safe-left));
 }
-
-.audienceNote {
-  margin: 0 0 16px;
-  text-align: center;
-  font-size: 0.9rem;
-  font-weight: 600;
-  line-height: 1.5;
-  color: var(--ink-soft);
-}
-
