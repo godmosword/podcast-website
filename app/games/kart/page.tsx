@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { KartIframeHost } from "@/components/games/KartIframeHost";
 import { getSiteUrl } from "@/lib/site-url";
 import styles from "./page.module.css";
 
@@ -20,12 +21,10 @@ export default function KartGamePage() {
       <Link href="/games" className={styles.back}>
         ← 回遊樂園
       </Link>
-      <iframe
+      <KartIframeHost
         title="車車卡丁車遊戲"
         src="/kart/index.html"
         className={styles.kartFrame}
-        allow="autoplay; gamepad *"
-        loading="eager"
       />
       {/* Dev: ensure `npm run build:kart` has run before deploy. */}
       <p className={styles.kartNote}>

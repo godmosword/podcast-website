@@ -108,6 +108,19 @@ export class Game {
     );
     writeSave(this.save);
     const medal = medalForLapMs(finish.bestLapMs, track.medals.gold, track.medals.silver);
+    if (typeof window !== "undefined" && window.parent !== window) {
+      window.parent.postMessage(
+        {
+          source: "cheche-kart",
+          type: "race-finish",
+          playerPos: finish.playerPos,
+          totalMs: finish.totalMs,
+          bestLapMs: finish.bestLapMs,
+          trackId: track.id,
+        },
+        window.location.origin,
+      );
+    }
     this.scenes.dispose();
     this.menus.showResults(finish, medal, track.name);
   }
