@@ -65,6 +65,7 @@ export default async function StoryPlayPage({
       backHref={`/story/${story.slug}`}
       nextStorySlug={nextStory?.slug}
       nextStoryTitle={nextStory?.title}
+      reflectionPrompt={story.reflectionPrompt}
     />
   );
 }

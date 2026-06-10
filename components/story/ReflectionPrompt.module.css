@@ -1,0 +1,39 @@
+.wrap {
+  margin: 1.25rem 0;
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  border-left: 4px solid var(--accent, var(--c-sky));
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.heading {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.child {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.parent {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--text-muted, #555);
+  line-height: 1.45;
+}
+
+.parentLabel {
+  font-weight: 600;
+}
+
+.compact {
+  margin: 0.75rem 0 0;
+  text-align: center;
+}
+
+.compact .child {
+  font-size: 1rem;
+}

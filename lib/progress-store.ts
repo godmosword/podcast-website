@@ -15,6 +15,14 @@ export type ContinueState = {
   updatedAt: number;
 };
 
+export type EngagementStore = {
+  hotspotTaps: number;
+  hotspotIds: Record<string, number>;
+  storiesCompleted: string[];
+  reflectionShown: string[];
+  platformClicks: Record<string, number>;
+};
+
 export type ProgressStore = {
   schemaVersion: number;
   favorites: string[];
@@ -30,6 +38,15 @@ export type ProgressStore = {
     characters: string[];
     vehicles: string[];
   };
+  engagement: EngagementStore;
+};
+
+const DEFAULT_ENGAGEMENT: EngagementStore = {
+  hotspotTaps: 0,
+  hotspotIds: {},
+  storiesCompleted: [],
+  reflectionShown: [],
+  platformClicks: {},
 };
 
 const LEGACY_KEYS = {
@@ -68,6 +85,7 @@ export const DEFAULT_PROGRESS: ProgressStore = {
     characters: [],
     vehicles: [],
   },
+  engagement: { ...DEFAULT_ENGAGEMENT },
 };
 
 const listeners = new Set<() => void>();
@@ -232,6 +250,17 @@ function normalizeProgress(raw: Partial<ProgressStore>): ProgressStore {
     unlocks: {
       ...DEFAULT_PROGRESS.unlocks,
       ...raw.unlocks,
+    },
+    engagement: {
+      ...DEFAULT_ENGAGEMENT,
+      ...raw.engagement,
+      hotspotIds: { ...DEFAULT_ENGAGEMENT.hotspotIds, ...raw.engagement?.hotspotIds },
+      platformClicks: {
+        ...DEFAULT_ENGAGEMENT.platformClicks,
+        ...raw.engagement?.platformClicks,
+      },
+      storiesCompleted: raw.engagement?.storiesCompleted ?? DEFAULT_ENGAGEMENT.storiesCompleted,
+      reflectionShown: raw.engagement?.reflectionShown ?? DEFAULT_ENGAGEMENT.reflectionShown,
     },
     schemaVersion: PROGRESS_SCHEMA_VERSION,
   };

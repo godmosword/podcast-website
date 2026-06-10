@@ -12,6 +12,7 @@ import PlatformLinks from "@/components/PlatformLinks";
 import PlayButton from "@/components/PlayButton";
 import ShareButton from "@/components/ShareButton";
 import RelatedStories from "@/components/RelatedStories";
+import ReflectionPrompt from "@/components/story/ReflectionPrompt";
 import SiteFooter from "@/components/SiteFooter";
 import StoryImage from "@/components/StoryImage";
 import StoryMeta, { StoryTags } from "@/components/StoryMeta";
@@ -106,7 +107,14 @@ export default async function StoryDetailPage({
           </section>
         )}
 
-        {/* TODO: reflectionPrompt 親子對話區 — story.reflectionPrompt 文案補齊後在此渲染 */}
+        {story.reflectionPrompt && (
+          <ReflectionPrompt
+            slug={story.slug}
+            child={story.reflectionPrompt.child}
+            parentFollowUp={story.reflectionPrompt.parentFollowUp}
+            accent={story.color}
+          />
+        )}
 
         <PlatformLinks accent={story.color} />
 

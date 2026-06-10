@@ -1,5 +1,6 @@
 import appleSynced from "./apple-synced.json";
 import { getCharactersForStory } from "./characters";
+import { getReflectionPrompt } from "./reflection-prompts";
 import { manualStories, type ManualStory } from "./stories";
 import { storyCoverPath } from "@/lib/story-utils";
 
@@ -52,10 +53,13 @@ type RawStory = ManualStory;
 
 function enrichStory(raw: RawStory): Story {
   const characters = getCharactersForStory(raw.slug);
+  const reflectionPrompt =
+    raw.reflectionPrompt ?? getReflectionPrompt(raw.slug);
   return {
     ...raw,
     kind: "story",
     characterIds: characters.map((c) => c.id),
+    reflectionPrompt,
   };
 }
 

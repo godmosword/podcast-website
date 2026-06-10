@@ -8,7 +8,11 @@ import {
   setCaptionSizeInStore,
   type CaptionSize,
 } from "@/lib/progress-store";
+import { recordStoryCompleted } from "@/lib/engagement";
+import { getHotspotsForPage } from "@/lib/hotspots";
 import { playSfx, isSfxEnabled } from "@/lib/sfx";
+import HotspotLayer from "@/components/story/HotspotLayer";
+import ReflectionPrompt from "@/components/story/ReflectionPrompt";
 import SfxToggle from "./SfxToggle";
 import Wheel from "./decor/Wheel";
 import Sparkle from "./decor/Sparkle";
@@ -38,6 +42,10 @@ type StoryPlayerProps = {
   backHref?: string;
   nextStorySlug?: string;
   nextStoryTitle?: string;
+  reflectionPrompt?: {
+    child: string;
+    parentFollowUp: string;
+  };
 };
 
 const SWIPE_THRESHOLD = 50;
@@ -92,6 +100,7 @@ export default function StoryPlayer({
   backHref = "/",
   nextStorySlug,
   nextStoryTitle,
+  reflectionPrompt,
 }: StoryPlayerProps) {
   const [page, setPage] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -119,8 +128,10 @@ export default function StoryPlayer({
   const touchStartX = useRef<number | null>(null);
   const bedtimeEndRef = useRef<number | null>(null);
   const timerWrapRef = useRef<HTMLDivElement>(null);
+  const completionRecorded = useRef(false);
 
   const total = images.length;
+  const pageHotspots = getHotspotsForPage(slug, page);
   // 即時字幕軌（轉錄產生）優先；獨立於翻頁，依音檔時間顯示。
   const hasSubtitles = Array.isArray(subtitles) && subtitles.length > 0;
   const caption = hasSubtitles ? subtitles![subIndex]?.text : captions?.[page];
@@ -375,6 +386,13 @@ export default function StoryPlayer({
 
   transportRef.current = { togglePlay, skip };
 
+  useEffect(() => {
+    if (!hasEnded) return;
+    if (completionRecorded.current) return;
+    completionRecorded.current = true;
+    recordStoryCompleted(slug);
+  }, [hasEnded, slug]);
+
   // 鍵盤：空白鍵播放/暫停，左右方向鍵 ±10 秒（與控制列一致）。
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -403,6 +421,7 @@ export default function StoryPlayer({
   function replay() {
     const el = audioRef.current;
     if (!el) return;
+    completionRecorded.current = false;
     setHasEnded(false);
     setPage(0);
     el.currentTime = 0;
@@ -488,6 +507,9 @@ export default function StoryPlayer({
             onError={() => setMediaError("image")}
           />
         ))}
+        {!hasEnded && pageHotspots.length > 0 && (
+          <HotspotLayer hotspots={pageHotspots} accent={color} />
+        )}
       </div>
 
       {hasEnded && (
@@ -502,6 +524,15 @@ export default function StoryPlayer({
           />
           <p className={styles.endTitle}>故事聽完囉 🌙</p>
           <p className={styles.endSubtitle}>{title}</p>
+          {reflectionPrompt && (
+            <ReflectionPrompt
+              slug={slug}
+              child={reflectionPrompt.child}
+              parentFollowUp={reflectionPrompt.parentFollowUp}
+              accent={color}
+              compact
+            />
+          )}
           <div className={styles.endActions}>
             <button
               type="button"

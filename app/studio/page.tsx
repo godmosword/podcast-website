@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import EngagementMetricsPanel from "@/components/studio/EngagementMetricsPanel";
 import MetricsOverview from "@/components/studio/MetricsOverview";
 import PlatformStudioCard from "@/components/studio/PlatformStudioCard";
 import { studioPlatforms } from "@/lib/studio/platforms";
@@ -29,6 +30,7 @@ export default function StudioPage() {
       </p>
 
       <MetricsOverview />
+      <EngagementMetricsPanel />
 
       <section className={styles.section} aria-labelledby="studio-platforms-heading">
         <h2 id="studio-platforms-heading" className={styles.sectionHeading}>
