@@ -1,3 +1,4 @@
+import type { GameScoreId } from "@/lib/progress-store";
 import type { GameKitGameId, PlayerProfile } from "./types";
 import { vehiclesUnlockedAt } from "./garage";
 import {
@@ -14,7 +15,7 @@ import { saveBestScoreInStore } from "@/lib/progress-store";
 export const GAMEKIT_PROGRESS_EVENT = "cheche:gamekit-progress";
 
 export type GameSessionResult = {
-  gameId: GameKitGameId;
+  gameId: GameScoreId;
   score: number;
   /** 關卡索引。 */
   levelIndex?: number;
@@ -22,6 +23,10 @@ export type GameSessionResult = {
   flawless?: boolean;
   collectedAll?: boolean;
 };
+
+function isGameKitGameId(gameId: GameScoreId): gameId is GameKitGameId {
+  return gameId === "block-drop" || gameId === "car-adventure";
+}
 
 function awardSticker(profile: PlayerProfile, stickerId: string): PlayerProfile {
   if (profile.stickers.includes(stickerId)) return profile;
@@ -68,7 +73,7 @@ export function reportGameSession(result: GameSessionResult): PlayerProfile {
     profile = awardSticker(profile, `played-${result.gameId}`);
   }
 
-  if (result.cleared) {
+  if (result.cleared && isGameKitGameId(result.gameId)) {
     const idx = result.levelIndex ?? 0;
     const prevFlags = profile.medals[result.gameId]?.[idx] ?? 0;
     const flags = medalFlags(

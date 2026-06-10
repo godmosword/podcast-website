@@ -7,7 +7,7 @@ function source(path: string): string {
 
 describe("game logic regressions", () => {
   it("海盜卡丁車必須繞回起點才算完成一圈", () => {
-    const page = source("app/games/pirate-kart/page.tsx");
+    const page = source("lib/games/pirate-kart/tracks.ts");
 
     expect(page).toContain(
       "const CHECK_ANGLES = [Math.PI * 0.5, Math.PI, Math.PI * 1.5, Math.PI * 2];",

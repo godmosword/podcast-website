@@ -1,3 +1,4 @@
+import type { GameScoreId } from "@/lib/progress-store";
 import type { GameKitGameId, PlayerProfile } from "./types";
 import { vehiclesUnlockedAt } from "./garage";
 import {
@@ -52,7 +53,7 @@ export function savePlayerProfile(profile: PlayerProfile): void {
 
 export function recordBestScore(
   profile: PlayerProfile,
-  gameId: GameKitGameId,
+  gameId: GameScoreId,
   score: number,
 ): PlayerProfile {
   const prev = profile.bests[gameId] ?? 0;
