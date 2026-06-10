@@ -213,6 +213,29 @@
   }
 }
 
+.subscribeLink {
+  margin: 12px 0 0;
+}
+
+.subscribeAnchor {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+  background: color-mix(in srgb, var(--c-lilac) 28%, #fff);
+  border: 2px solid color-mix(in srgb, var(--c-lilac) 55%, #fff);
+  box-shadow: var(--shadow-sm);
+}
+
+.subscribeAnchor:hover {
+  text-decoration: underline;
+}
+
 /* ---- 圓鈕：合作聯繫 / 許願投稿 / 留言給我 ---- */
 .actions {
   display: flex;

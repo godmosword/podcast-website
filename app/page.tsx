@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { allVehicles, storiesByNewest } from "@/data/content";
 import ContinueBanner from "@/components/ContinueBanner";
 import FavoritesSection from "@/components/FavoritesSection";
@@ -6,6 +7,7 @@ import LatestHero from "@/components/LatestHero";
 import SiteHeader from "@/components/SiteHeader";
 import StoryFilter from "@/components/StoryFilter";
 import SiteFooter from "@/components/SiteFooter";
+import StarterEpisodes from "@/components/StarterEpisodes";
 import { podcastSeriesJsonLd } from "@/lib/json-ld";
 import styles from "./page.module.css";
 
@@ -32,6 +34,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       <SiteHeader />
       <ContinueBanner />
       {latest && <LatestHero story={latest} />}
+      <p className={styles.subscribe}>
+        訂閱節目，新集自動推送 →
+        <Link href="/#connect">在 Spotify／Apple 收聽</Link>
+      </p>
+      <StarterEpisodes />
       <FavoritesSection />
       <p className={styles.audienceNote}>
         給 3–7 歲孩子與家長 · 每集 5–10 分鐘，適合睡前看圖聽故事

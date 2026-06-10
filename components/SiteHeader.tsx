@@ -124,6 +124,12 @@ export default function SiteHeader({ variant = "full" }: SiteHeaderProps) {
         <p className={styles.taglineSub}>一起探險、學習、勇敢闖關！</p>
       </div>
 
+      <p className={styles.subscribeLink}>
+        <Link href="/#connect" className={styles.subscribeAnchor}>
+          🎧 訂閱收聽 · 新集自動推送
+        </Link>
+      </p>
+
       <p className={styles.hubNav}>
         <Link href="/games" className={styles.hubLink}>
           <span className={styles.hubIconWrap} aria-hidden>

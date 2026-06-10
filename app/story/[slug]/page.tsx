@@ -13,6 +13,7 @@ import PlayButton from "@/components/PlayButton";
 import ShareButton from "@/components/ShareButton";
 import RelatedStories from "@/components/RelatedStories";
 import ReflectionPrompt from "@/components/story/ReflectionPrompt";
+import SubscriptionCTA from "@/components/SubscriptionCTA";
 import SiteFooter from "@/components/SiteFooter";
 import StoryImage from "@/components/StoryImage";
 import StoryMeta, { StoryTags } from "@/components/StoryMeta";
@@ -82,6 +83,7 @@ export default async function StoryDetailPage({
             color={story.color}
             className={styles.playMain}
           />
+          <SubscriptionCTA accent={story.color} />
           <ShareButton
             shareUrl={storyShareUrl(story.slug)}
             lineUrl={lineShareUrl(
