@@ -21,6 +21,26 @@
   padding: 8px;
 }
 
+.iconOnly {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.iconOnly:hover {
+  box-shadow: none;
+  transform: scale(1.08);
+}
+
+.iconOnly:active {
+  transform: scale(0.94);
+}
+
 .label {
   line-height: 1;
 }

@@ -1,8 +1,7 @@
 "use client";
 
-import { shouldShowPlatformLabel } from "@/lib/brand-assets";
+import { BrandSvg, PLATFORM_ICON_PATHS } from "@/lib/connect-icons";
 import { visiblePlatforms } from "@/lib/platforms";
-import PlatformBrandMark from "@/components/PlatformBrandMark";
 import TrackedPlatformLink from "./TrackedPlatformLink";
 import styles from "./PlatformLinks.module.css";
 
@@ -45,10 +44,16 @@ export default function PlatformLinks({
             source="story-platforms"
             className={styles.item}
           >
-            <PlatformBrandMark icon={p.icon} label={p.label} />
-            {shouldShowPlatformLabel(p.icon) && (
-              <span className={styles.label}>{p.label}</span>
-            )}
+            <span
+              className={styles.badge}
+              style={{ background: p.color }}
+              aria-hidden
+            >
+              <BrandSvg className={styles.icon}>
+                {PLATFORM_ICON_PATHS[p.icon]}
+              </BrandSvg>
+            </span>
+            <span className={styles.label}>{p.label}</span>
           </TrackedPlatformLink>
         ))}
       </nav>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import HeaderThemeToggle from "@/components/HeaderThemeToggle";
 import Doodle from "@/components/decor/Doodle";
 import decor from "@/components/decor/decor.module.css";
 import styles from "./SiteHeader.module.css";
@@ -116,9 +117,12 @@ export default function SiteHeader({ variant = "full" }: SiteHeaderProps) {
         />
       </div>
       <div className={styles.lede}>
-        <p className={styles.tagline}>
-          <span className="marker marker-mint">用車車故事陪伴孩子成長</span>
-        </p>
+        <div className={styles.taglineRow}>
+          <p className={styles.tagline}>
+            <span className="marker marker-mint">用車車故事陪伴孩子成長</span>
+          </p>
+          <HeaderThemeToggle />
+        </div>
         <p className={styles.audienceNote}>
           給 3–7 歲孩子與家長 · 每集 5–10 分鐘，適合睡前看圖聽故事
         </p>

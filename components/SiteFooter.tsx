@@ -1,8 +1,6 @@
 import Link from "next/link";
 import ConnectHub from "@/components/ConnectHub";
-import HomeSubscribeBand from "@/components/HomeSubscribeBand";
 import PlaygroundHubBadge from "@/components/games/PlaygroundHubBadge";
-import ThemeToggle from "@/components/ThemeToggle";
 import Doodle from "@/components/decor/Doodle";
 import decor from "@/components/decor/decor.module.css";
 import styles from "./SiteFooter.module.css";
@@ -12,9 +10,9 @@ const SUPPORT_URL = "";
 
 type SiteFooterProps = {
   compact?: boolean;
-  /** 首頁：訂閱與遊樂園置於頁尾，ConnectHub 僅顯示社群 */
+  /** 首頁：遊樂園入口置於頁尾訂閱區上方 */
   layout?: "default" | "home";
-  /** 非首頁：頁尾是否顯示收聽平台列 */
+  /** 非首頁：頁尾是否顯示收聽平台 */
   showPlatformSubscribe?: boolean;
 };
 
@@ -24,7 +22,7 @@ export default function SiteFooter({
   showPlatformSubscribe = true,
 }: SiteFooterProps) {
   const isHome = layout === "home";
-  const platformsInHub = !isHome && showPlatformSubscribe;
+  const showPlatforms = isHome || showPlatformSubscribe;
 
   return (
     <footer className={`${styles.footer} ${compact ? styles.compact : ""}`}>
@@ -61,9 +59,8 @@ export default function SiteFooter({
         適合睡前親子共讀。
       </p>
 
-      {isHome && (
-        <div className={styles.homeExtras}>
-          <HomeSubscribeBand />
+      <div className={styles.footerConnect}>
+        {isHome && (
           <Link href="/games" className={`${styles.playgroundLink} press-squash`}>
             <span className={styles.playgroundIcon} aria-hidden>
               <PlaygroundHubBadge size={32} />
@@ -73,16 +70,15 @@ export default function SiteFooter({
               <span className={styles.playgroundSub}>小遊戲 · 免下載</span>
             </span>
           </Link>
-        </div>
-      )}
+        )}
 
-      <ConnectHub
-        showPlatforms={platformsInHub}
-        id={platformsInHub ? "connect" : undefined}
-      />
+        <ConnectHub
+          id={showPlatforms ? "connect" : undefined}
+          showPlatforms={showPlatforms}
+        />
+      </div>
 
       <div className={styles.bottomBar}>
-        <ThemeToggle />
         <Link href="/about" className={styles.aboutLink}>
           關於我們
         </Link>
