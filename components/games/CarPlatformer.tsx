@@ -425,7 +425,7 @@ export default function CarPlatformer() {
       if (statusRef.current !== "over") {
         reportGameSession({
           gameId: "car-adventure",
-          score: g.levelIndex,
+          score: g.score,
         });
       }
       setStat("over");
@@ -542,10 +542,9 @@ export default function CarPlatformer() {
     const f = g.lv.finish;
     if (!g.finishCleared && box.r > f.x && box.l < f.x + f.w) {
       g.finishCleared = true;
-      const levelScore = g.levelIndex + 1;
       reportGameSession({
         gameId: "car-adventure",
-        score: levelScore,
+        score: g.score,
         levelIndex: g.levelIndex,
         cleared: true,
         flawless: g.lives === levelStartLivesRef.current,
