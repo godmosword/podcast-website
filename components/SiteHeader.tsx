@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Doodle from "@/components/decor/Doodle";
-import PlaygroundHubBadge from "@/components/games/PlaygroundHubBadge";
 import decor from "@/components/decor/decor.module.css";
 import styles from "./SiteHeader.module.css";
 
@@ -36,13 +35,9 @@ function visibleActions() {
 
 type SiteHeaderProps = {
   variant?: "full" | "compact";
-  latestStory?: { slug: string; title: string } | null;
 };
 
-export default function SiteHeader({
-  variant = "full",
-  latestStory = null,
-}: SiteHeaderProps) {
+export default function SiteHeader({ variant = "full" }: SiteHeaderProps) {
   const actions = visibleActions();
 
   if (variant === "compact") {
@@ -127,26 +122,6 @@ export default function SiteHeader({
         <p className={styles.audienceNote}>
           給 3–7 歲孩子與家長 · 每集 5–10 分鐘，適合睡前看圖聽故事
         </p>
-      </div>
-
-      <div className={styles.ctaRow}>
-        {latestStory && (
-          <Link
-            href={`/story/${latestStory.slug}`}
-            className={`${styles.primaryCta} press-squash`}
-          >
-            ▶ 看圖聽最新一集
-          </Link>
-        )}
-        <Link href="/games" className={`${styles.secondaryCta} press-squash`}>
-          <span className={styles.hubIconWrap} aria-hidden>
-            <PlaygroundHubBadge size={28} className={styles.hubBadge} />
-          </span>
-          <span className={styles.hubCopy}>
-            <span className={styles.hubTitle}>去遊樂園玩</span>
-            <span className={styles.hubSub}>小遊戲 · 免下載</span>
-          </span>
-        </Link>
       </div>
 
       {actions.length > 0 && (

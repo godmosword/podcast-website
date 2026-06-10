@@ -1,5 +1,7 @@
 import Link from "next/link";
 import ConnectHub from "@/components/ConnectHub";
+import HomeSubscribeBand from "@/components/HomeSubscribeBand";
+import PlaygroundHubBadge from "@/components/games/PlaygroundHubBadge";
 import ThemeToggle from "@/components/ThemeToggle";
 import Doodle from "@/components/decor/Doodle";
 import decor from "@/components/decor/decor.module.css";
@@ -10,14 +12,20 @@ const SUPPORT_URL = "";
 
 type SiteFooterProps = {
   compact?: boolean;
-  /** 首頁訂閱區已上移時，頁尾隱藏平台列避免重複 */
+  /** 首頁：訂閱與遊樂園置於頁尾，ConnectHub 僅顯示社群 */
+  layout?: "default" | "home";
+  /** 非首頁：頁尾是否顯示收聽平台列 */
   showPlatformSubscribe?: boolean;
 };
 
 export default function SiteFooter({
   compact = false,
+  layout = "default",
   showPlatformSubscribe = true,
 }: SiteFooterProps) {
+  const isHome = layout === "home";
+  const platformsInHub = !isHome && showPlatformSubscribe;
+
   return (
     <footer className={`${styles.footer} ${compact ? styles.compact : ""}`}>
       <Doodle
@@ -53,9 +61,24 @@ export default function SiteFooter({
         適合睡前親子共讀。
       </p>
 
+      {isHome && (
+        <div className={styles.homeExtras}>
+          <HomeSubscribeBand />
+          <Link href="/games" className={`${styles.playgroundLink} press-squash`}>
+            <span className={styles.playgroundIcon} aria-hidden>
+              <PlaygroundHubBadge size={32} />
+            </span>
+            <span className={styles.playgroundCopy}>
+              <span className={styles.playgroundTitle}>去遊樂園玩</span>
+              <span className={styles.playgroundSub}>小遊戲 · 免下載</span>
+            </span>
+          </Link>
+        </div>
+      )}
+
       <ConnectHub
-        showPlatforms={showPlatformSubscribe}
-        id={showPlatformSubscribe ? "connect" : undefined}
+        showPlatforms={platformsInHub}
+        id={platformsInHub ? "connect" : undefined}
       />
 
       <div className={styles.bottomBar}>

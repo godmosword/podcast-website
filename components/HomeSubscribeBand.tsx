@@ -7,8 +7,7 @@ import PlatformBrandMark from "@/components/PlatformBrandMark";
 import styles from "./HomeSubscribeBand.module.css";
 
 /**
- * 首頁唯一訂閱收聽區（錨點 #connect）。
- * 平台圖示集中於此；頁尾 ConnectHub 僅保留社群，避免重複。
+ * 訂閱收聽區（錨點 #connect）。首頁置於頁尾、追蹤我們上方。
  */
 export default function HomeSubscribeBand() {
   const platforms = visiblePlatforms();

@@ -12,11 +12,80 @@
 }
 
 .parentNote {
-  margin: 0 auto;
+  margin: 0 auto 20px;
   max-width: 460px;
   font-size: 0.88rem;
   line-height: 1.6;
   color: var(--ink-soft);
+}
+
+.homeExtras {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto 20px;
+}
+
+.playgroundLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: min(100%, 360px);
+  min-height: 52px;
+  padding: 10px 18px 10px 12px;
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform var(--motion-press),
+    box-shadow var(--motion-press);
+}
+
+.playgroundIcon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--c-sky) 18%, var(--card));
+  border: 1.5px solid var(--line);
+}
+
+.playgroundCopy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  text-align: left;
+}
+
+.playgroundTitle {
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.playgroundSub {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  line-height: 1.2;
+}
+
+@media (hover: hover) {
+  .playgroundLink:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
 }
 
 .bottomBar {

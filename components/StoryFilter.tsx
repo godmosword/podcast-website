@@ -85,10 +85,10 @@ export default function StoryFilter({
   const hasFilter = Boolean(vehicle);
 
   return (
-    <section aria-label="依車車找故事">
+    <section className={styles.section} aria-label="依車車找故事">
       <div className={styles.filterBar}>
         <div className={styles.filterHead}>
-          <div>
+          <div className={styles.filterTitleBlock}>
             <h2 className={styles.filterSectionTitle}>依車車找故事</h2>
             <p className={styles.filterHint}>點車車，下面故事會變喔</p>
           </div>

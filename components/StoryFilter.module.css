@@ -1,11 +1,15 @@
-/* ============ 車種篩選區（手機不 sticky：iOS 26 Safari 吸頂合成仍會白塊跑版） ============ */
+/* ============ 車種篩選區 ============ */
+.section {
+  margin-top: 4px;
+}
+
 .filterBar {
   position: static;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin: 0 0 16px;
-  padding: 14px 12px;
+  gap: 14px;
+  margin: 0 0 20px;
+  padding: 16px 14px 14px;
   border-radius: var(--radius-xl);
   background: var(--card);
   border: 1.5px solid var(--line);
@@ -14,44 +18,50 @@
 
 .filterHead {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.filterTitleBlock {
+  min-width: 0;
 }
 
 .filterSectionTitle {
   margin: 0;
   font-family: var(--font-marker), var(--font-baloo), var(--font-huninn),
     "PingFang TC", "Microsoft JhengHei", sans-serif;
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   color: var(--ink);
 }
 
 .filterHint {
-  margin: 4px 0 0;
-  font-size: 0.82rem;
+  margin: 6px 0 0;
+  font-size: 0.84rem;
   font-weight: 600;
+  line-height: 1.45;
   color: var(--ink-soft);
 }
 
 .topicLink {
-  flex: none;
-  font-size: 0.78rem;
+  align-self: flex-start;
+  font-size: 0.8rem;
   font-weight: 700;
   color: var(--ink);
-  padding: 6px 10px;
+  padding: 8px 12px;
   border-radius: 999px;
-  background: var(--card);
+  background: var(--bg-dot);
   border: 1.5px solid var(--line);
   box-shadow: var(--shadow-sm);
   white-space: nowrap;
+  text-decoration: none;
 }
 
 .chipScrollWrap {
   position: relative;
-  margin: 0 -4px;
+  margin: 0 -2px;
 }
 
 .chipScrollWrap[data-scrollable="true"]::after {
@@ -74,7 +84,7 @@
   scroll-snap-type: x proximity;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  padding: 2px 4px;
+  padding: 4px 2px;
 }
 
 .vehicleChipRow::-webkit-scrollbar {
@@ -89,6 +99,8 @@
 @media (min-width: 768px) {
   .chipScrollWrap:not([data-scrollable="true"]) .vehicleChipRow {
     justify-content: center;
+    flex-wrap: wrap;
+    overflow-x: visible;
   }
 }
 
@@ -104,6 +116,8 @@
   flex-wrap: wrap;
   gap: 8px;
   margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--ink-soft);
@@ -118,8 +132,23 @@
   text-underline-offset: 2px;
 }
 
+@media (min-width: 480px) {
+  .filterHead {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .topicLink {
+    align-self: flex-start;
+    flex: none;
+  }
+}
+
 @media (min-width: 640px) {
   .filterBar {
+    padding: 18px 16px 16px;
     background: linear-gradient(180deg, var(--card-2), var(--card));
   }
 }
