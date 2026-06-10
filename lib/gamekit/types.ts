@@ -1,3 +1,5 @@
+import type { GameScoreId } from "@/lib/progress-store";
+
 /** Game Kit 內的識別字（對齊 `lib/games/catalog.ts` id）。 */
 export type GameKitGameId = "block-drop" | "car-adventure";
 
@@ -24,9 +26,9 @@ export type PlayerProfile = {
   /** 車庫解鎖用累積星星 */
   stars: number;
   unlockedVehicles: string[];
-  bests: Partial<Record<GameKitGameId, number>>;
+  bests: Partial<Record<GameScoreId, number>>;
   /** 每款遊戲各關／迷宮的三星 bit flags */
   medals: Partial<Record<GameKitGameId, number[]>>;
   stickers: string[];
-  gamesPlayed: Partial<Record<GameKitGameId, boolean>>;
+  gamesPlayed: Partial<Record<GameScoreId, boolean>>;
 };

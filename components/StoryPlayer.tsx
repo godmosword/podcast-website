@@ -11,6 +11,7 @@ import {
   setNightPromptDismissedInStore,
   type CaptionSize,
 } from "@/lib/progress-store";
+import { FEATURES } from "@/lib/features";
 import { LIGHT_THEME, NIGHT_THEME } from "@/lib/theme";
 import { recordStoryCompleted } from "@/lib/engagement";
 import { playSfx, isSfxEnabled } from "@/lib/sfx";
@@ -524,7 +525,7 @@ export default function StoryPlayer({
           />
           <p className={styles.endTitle}>故事聽完囉 🌙</p>
           <p className={styles.endSubtitle}>{title}</p>
-          {reflectionPrompt && (
+          {FEATURES.reflectionPrompt && reflectionPrompt && (
             <ReflectionPrompt
               slug={slug}
               child={reflectionPrompt.child}
@@ -612,6 +613,7 @@ export default function StoryPlayer({
                       setBedtimeMinutes((c) => {
                         const next = c === min ? null : min;
                         if (
+                          FEATURES.nightMode &&
                           next !== null &&
                           c === null &&
                           !getNightPromptDismissedFromStore() &&
@@ -641,7 +643,7 @@ export default function StoryPlayer({
                 )}
               </div>
             )}
-            {showNightPrompt && (
+            {FEATURES.nightMode && showNightPrompt && (
               <div className={styles.nightPrompt} role="dialog" aria-label="夜晚模式提示">
                 <p className={styles.nightPromptText}>要進入夜晚模式嗎？</p>
                 <div className={styles.nightPromptActions}>

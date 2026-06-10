@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/react";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { FEATURES } from "@/lib/features";
 import SvgDefs from "@/components/decor/SvgDefs";
 import { getSiteUrl } from "@/lib/site-url";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
@@ -99,10 +100,12 @@ export default function RootLayout({
       className={`${baloo.variable} ${huninn.variable} ${gochi.variable}`}
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        {FEATURES.nightMode && (
+          <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        )}
       </head>
       <body>
-        <ThemeProvider>
+        <ThemeProvider nightModeEnabled={FEATURES.nightMode}>
           <div className="site-backdrop" aria-hidden />
           <SvgDefs />
           <div className="site-root">{children}</div>

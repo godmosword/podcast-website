@@ -1,10 +1,8 @@
 import { allVehicles, storiesByNewest } from "@/data/content";
-import ContinueBanner from "@/components/ContinueBanner";
-import FavoritesSection from "@/components/FavoritesSection";
+import { HomeSectionList } from "@/components/home/HomeSectionRenderer";
+import type { HomeSectionProps } from "@/components/home/HomeSectionRenderer";
 import JsonLd from "@/components/JsonLd";
-import LatestHero from "@/components/LatestHero";
 import SiteHeader from "@/components/SiteHeader";
-import StoryFilter from "@/components/StoryFilter";
 import SiteFooter from "@/components/SiteFooter";
 import { podcastSeriesJsonLd } from "@/lib/json-ld";
 import styles from "./page.module.css";
@@ -26,18 +24,18 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     ? stories.filter((s) => s.slug !== latest.slug)
     : stories;
 
+  const sectionProps: HomeSectionProps = {
+    latest,
+    listStories,
+    vehicles,
+    initialVehicle,
+  };
+
   return (
     <main className={styles.main}>
       <JsonLd data={podcastSeriesJsonLd()} />
       <SiteHeader />
-      <ContinueBanner />
-      {latest && <LatestHero story={latest} />}
-      <FavoritesSection />
-      <StoryFilter
-        stories={listStories}
-        vehicles={vehicles}
-        initialVehicle={initialVehicle}
-      />
+      <HomeSectionList props={sectionProps} />
       <SiteFooter layout="home" />
     </main>
   );
