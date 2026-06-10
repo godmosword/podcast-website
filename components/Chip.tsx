@@ -5,6 +5,7 @@ type ChipButtonProps = {
   onClick?: () => void;
   children: React.ReactNode;
   className?: string;
+  buttonRef?: React.Ref<HTMLButtonElement>;
 };
 
 export function ChipButton({
@@ -12,12 +13,14 @@ export function ChipButton({
   onClick,
   children,
   className = "",
+  buttonRef,
 }: ChipButtonProps) {
   return (
     <button
+      ref={buttonRef}
       type="button"
       onClick={onClick}
-      className={`${styles.chip} ${active ? styles.active : ""} ${className}`}
+      className={`${styles.chip} ${active ? `${styles.active} ${styles.chipPop}` : ""} ${className}`.trim()}
       aria-pressed={active}
     >
       {children}

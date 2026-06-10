@@ -28,6 +28,16 @@
   box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
+.chipPop {
+  animation: pop-in var(--motion-pop) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chipPop {
+    animation: none;
+  }
+}
+
 .tag {
   font-size: 0.82rem;
   font-weight: 700;

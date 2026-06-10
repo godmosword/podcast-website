@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef, useCallback } from "react";
+import { canScrollHorizontal, scrollChipIntoView } from "@/lib/chip-scroll";
 import { useRouter } from "next/navigation";
 import type { Story } from "@/data/content";
 import { ChipButton } from "./Chip";
@@ -24,10 +25,47 @@ export default function StoryFilter({
 }: StoryFilterProps) {
   const router = useRouter();
   const [vehicle, setVehicle] = useState<string | null>(initialVehicle);
+  const chipRowRef = useRef<HTMLDivElement>(null);
+  const [chipRowScrollable, setChipRowScrollable] = useState(false);
+  const chipRefs = useRef(new Map<string, HTMLButtonElement>());
+
+  const updateChipScrollable = useCallback(() => {
+    const el = chipRowRef.current;
+    if (!el) return;
+    setChipRowScrollable(canScrollHorizontal(el));
+  }, []);
 
   useEffect(() => {
     setVehicle(initialVehicle);
   }, [initialVehicle]);
+
+  useEffect(() => {
+    const el = chipRowRef.current;
+    if (!el) return;
+    updateChipScrollable();
+    const ro = new ResizeObserver(updateChipScrollable);
+    ro.observe(el);
+    window.addEventListener("resize", updateChipScrollable);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", updateChipScrollable);
+    };
+  }, [vehicles, updateChipScrollable]);
+
+  useEffect(() => {
+    const key = vehicle ?? "__all__";
+    const chip = chipRefs.current.get(key);
+    if (!chip) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    scrollChipIntoView(chip, { behavior: reduced ? "auto" : "smooth" });
+  }, [vehicle]);
+
+  function registerChipRef(key: string) {
+    return (node: HTMLButtonElement | null) => {
+      if (node) chipRefs.current.set(key, node);
+      else chipRefs.current.delete(key);
+    };
+  }
 
   function updateVehicle(nextVehicle: string | null) {
     playSfx("tap");
@@ -59,24 +97,31 @@ export default function StoryFilter({
           </Link>
         </div>
 
-        <div className={styles.vehicleChipRow}>
-          <ChipButton
-            active={vehicle === null}
-            onClick={() => updateVehicle(null)}
-          >
-            全部
-          </ChipButton>
-          {vehicles.map((v) => (
+        <div
+          className={styles.chipScrollWrap}
+          data-scrollable={chipRowScrollable ? "true" : "false"}
+        >
+          <div ref={chipRowRef} className={styles.vehicleChipRow}>
             <ChipButton
-              key={v}
-              className={styles.chipWithIcon}
-              active={vehicle === v}
-              onClick={() => updateVehicle(vehicle === v ? null : v)}
+              active={vehicle === null}
+              buttonRef={registerChipRef("__all__")}
+              onClick={() => updateVehicle(null)}
             >
-              <VehicleClayIcon vehicle={v} size={24} />
-              {v}
+              全部
             </ChipButton>
-          ))}
+            {vehicles.map((v) => (
+              <ChipButton
+                key={v}
+                className={styles.chipWithIcon}
+                active={vehicle === v}
+                buttonRef={registerChipRef(v)}
+                onClick={() => updateVehicle(vehicle === v ? null : v)}
+              >
+                <VehicleClayIcon vehicle={v} size={24} />
+                {v}
+              </ChipButton>
+            ))}
+          </div>
         </div>
 
         <p className={styles.count}>

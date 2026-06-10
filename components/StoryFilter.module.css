@@ -49,10 +49,47 @@
   white-space: nowrap;
 }
 
+.chipScrollWrap {
+  position: relative;
+  margin: 0 -4px;
+}
+
+.chipScrollWrap[data-scrollable="true"]::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 36px;
+  pointer-events: none;
+  background: linear-gradient(to left, var(--card) 20%, transparent);
+  border-radius: 0 12px 12px 0;
+}
+
 .vehicleChipRow {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 2px 4px;
+}
+
+.vehicleChipRow::-webkit-scrollbar {
+  display: none;
+}
+
+.vehicleChipRow > button {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+@media (min-width: 768px) {
+  .chipScrollWrap:not([data-scrollable="true"]) .vehicleChipRow {
+    justify-content: center;
+  }
 }
 
 .chipWithIcon {
