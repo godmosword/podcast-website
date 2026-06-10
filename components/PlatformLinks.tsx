@@ -1,5 +1,6 @@
 "use client";
 
+import { shouldShowPlatformLabel } from "@/lib/brand-assets";
 import { visiblePlatforms } from "@/lib/platforms";
 import PlatformBrandMark from "@/components/PlatformBrandMark";
 import TrackedPlatformLink from "./TrackedPlatformLink";
@@ -45,7 +46,9 @@ export default function PlatformLinks({
             className={styles.item}
           >
             <PlatformBrandMark icon={p.icon} label={p.label} />
-            <span className={styles.label}>{p.label}</span>
+            {shouldShowPlatformLabel(p.icon) && (
+              <span className={styles.label}>{p.label}</span>
+            )}
           </TrackedPlatformLink>
         ))}
       </nav>

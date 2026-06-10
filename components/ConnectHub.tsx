@@ -4,6 +4,7 @@ import Link from "next/link";
 import { BrandSvg, SOCIAL_ICON_PATHS } from "@/lib/connect-icons";
 import PlatformBrandMark from "@/components/PlatformBrandMark";
 import { trackPlatformClick } from "@/lib/analytics";
+import { shouldShowPlatformLabel } from "@/lib/brand-assets";
 import { visiblePlatforms } from "@/lib/platforms";
 import { visibleSocials } from "@/lib/social";
 import styles from "./ConnectHub.module.css";
@@ -25,6 +26,7 @@ function IconLink({
   external = true,
   onClick,
   unbadged = false,
+  hideLabel = false,
 }: {
   href: string;
   label: string;
@@ -35,19 +37,23 @@ function IconLink({
   onClick?: () => void;
   /** 收聽平台官方徽章（不可套用圓形色底） */
   unbadged?: boolean;
+  hideLabel?: boolean;
 }) {
   const className = `${styles.item}${unbadged ? ` ${styles.itemPlatform}` : ""}`;
+  const textLabel = !hideLabel ? (
+    <span className={styles.label}>{label}</span>
+  ) : null;
   const badge = unbadged ? (
     <>
       {children}
-      <span className={styles.label}>{label}</span>
+      {textLabel}
     </>
   ) : (
     <>
       <span className={styles.badge} style={badgeStyle}>
         {children}
       </span>
-      <span className={styles.label}>{label}</span>
+      {textLabel}
     </>
   );
 
@@ -136,9 +142,10 @@ export default function ConnectHub({
                 key={p.label}
                 href={p.url}
                 label={p.label}
-                ariaLabel={`在 ${p.label} 收聽`}
+                ariaLabel={`在 ${p.label} 訂閱`}
                 onClick={() => trackPlatformClick(p.label, "footer-connect")}
                 unbadged
+                hideLabel={!shouldShowPlatformLabel(p.icon)}
               >
                 <PlatformBrandMark icon={p.icon} label={p.label} />
               </IconLink>

@@ -16,7 +16,7 @@
 ### Spotify
 
 - **資產：** `public/brand/spotify-icon-green.png`（官方綠色圖示）。
-- **背景：** 僅可置於**白或黑**底（[Design Guidelines](https://developer.spotify.com/documentation/design)）。
+- **背景：** 僅可置於**白或黑**底（[Design Guidelines](https://developer.spotify.com/documentation/design)）。站內以白底膠囊卡呈現（合規）。
 - **禁止：** 白線條圖示疊在 `#1DB954` 自訂圓角底（非官方圖示呈現）。
 - **尺寸：** 圖示顯示高度 ≥ 21px；建議容器 ≥ 32px。
 - **搭配：** 必須保留文字標籤「Spotify」。

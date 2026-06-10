@@ -1,7 +1,7 @@
 .wrap {
-  --platform-mark-tile-w: 120px;
-  --platform-mark-tile-h: 44px;
-  --platform-mark-image-max-h: 28px;
+  --platform-mark-tile-w: 140px;
+  --platform-mark-tile-h: 60px;
+  --platform-mark-image-max-h: 36px;
 
   box-sizing: border-box;
   display: inline-flex;
@@ -11,11 +11,12 @@
   height: var(--platform-mark-tile-h);
   min-width: var(--platform-mark-tile-w);
   min-height: var(--platform-mark-tile-h);
-  padding: 6px 8px;
-  border-radius: 12px;
-  background: var(--card);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: var(--shadow-sm);
+  padding: 8px 12px;
+  border-radius: var(--radius-lg);
+  /* Spotify 規範：官方綠 icon 僅置於白/黑底 */
+  background: #ffffff;
+  border: 1.5px solid var(--line);
+  box-shadow: var(--shadow-card);
 }
 
 .image {
@@ -25,4 +26,8 @@
   max-width: 100%;
   max-height: var(--platform-mark-image-max-h);
   object-fit: contain;
+}
+
+.imageWide {
+  max-height: calc(var(--platform-mark-tile-h) - 16px);
 }

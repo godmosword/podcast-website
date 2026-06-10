@@ -1,6 +1,7 @@
 "use client";
 
 import { trackPlatformClick } from "@/lib/analytics";
+import { shouldShowPlatformLabel } from "@/lib/brand-assets";
 import { visiblePlatforms } from "@/lib/platforms";
 import PlatformBrandMark from "@/components/PlatformBrandMark";
 import styles from "./HomeSubscribeBand.module.css";
@@ -35,12 +36,14 @@ export default function HomeSubscribeBand() {
             href={p.url}
             target="_blank"
             rel="noopener noreferrer"
-            className={styles.item}
+            className={`${styles.item} press-squash`}
             aria-label={`在 ${p.label} 訂閱`}
             onClick={() => trackPlatformClick(p.label, "home-subscribe")}
           >
             <PlatformBrandMark icon={p.icon} label={p.label} />
-            <span className={styles.label}>{p.label}</span>
+            {shouldShowPlatformLabel(p.icon) && (
+              <span className={styles.label}>{p.label}</span>
+            )}
           </a>
         ))}
       </nav>

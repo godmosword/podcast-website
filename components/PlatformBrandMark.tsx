@@ -20,8 +20,14 @@ export default function PlatformBrandMark({ icon, className }: Props) {
   const tileStyle = {
     "--platform-mark-tile-w": `${PLATFORM_MARK_TILE.widthPx}px`,
     "--platform-mark-tile-h": `${PLATFORM_MARK_TILE.heightPx}px`,
-    "--platform-mark-image-max-h": `${PLATFORM_MARK_TILE.imageMaxHeightPx}px`,
+    "--platform-mark-image-max-h": mark.wide
+      ? `${PLATFORM_MARK_TILE.heightPx - 16}px`
+      : `${PLATFORM_MARK_TILE.imageMaxHeightPx}px`,
   } as React.CSSProperties;
+
+  const imageClass = [styles.image, mark.wide ? styles.imageWide : ""]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <span className={wrapClass} style={tileStyle}>
@@ -30,7 +36,7 @@ export default function PlatformBrandMark({ icon, className }: Props) {
         alt=""
         width={mark.intrinsicWidth}
         height={mark.intrinsicHeight}
-        className={styles.image}
+        className={imageClass}
         aria-hidden
       />
     </span>

@@ -1,6 +1,7 @@
 "use client";
 
 import { trackPlatformClick } from "@/lib/analytics";
+import { shouldShowPlatformLabel } from "@/lib/brand-assets";
 import { visiblePlatforms } from "@/lib/platforms";
 import PlatformBrandMark from "@/components/PlatformBrandMark";
 import styles from "./SubscriptionCTA.module.css";
@@ -33,7 +34,9 @@ export default function SubscriptionCTA({ accent }: Props) {
             onClick={() => trackPlatformClick(p.label, "subscription-cta")}
           >
             <PlatformBrandMark icon={p.icon} label={p.label} />
-            <span className={styles.label}>{p.label}</span>
+            {shouldShowPlatformLabel(p.icon) && (
+              <span className={styles.label}>{p.label}</span>
+            )}
           </a>
         ))}
       </nav>

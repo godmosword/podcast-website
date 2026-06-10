@@ -5,6 +5,7 @@ import {
   BRAND_COLORS,
   PLATFORM_MARKS,
   PLATFORM_MARK_TILE,
+  shouldShowPlatformLabel,
 } from "./brand-assets";
 
 const BRAND_DIR = join(process.cwd(), "public/brand");
@@ -44,9 +45,26 @@ describe("brand assets compliance", () => {
 
   it("uses a single shared tile size for all platforms", () => {
     expect(PLATFORM_MARK_TILE.widthPx).toBeGreaterThanOrEqual(44);
-    expect(PLATFORM_MARK_TILE.heightPx).toBeGreaterThanOrEqual(44);
+    expect(PLATFORM_MARK_TILE.heightPx).toBeGreaterThanOrEqual(56);
+    expect(PLATFORM_MARK_TILE.heightPx).toBeLessThanOrEqual(64);
     expect(PLATFORM_MARK_TILE.imageMaxHeightPx).toBeLessThan(
       PLATFORM_MARK_TILE.heightPx,
+    );
+  });
+
+  it("marks apple badge as wide and hides external label", () => {
+    expect(PLATFORM_MARKS.apple.wide).toBe(true);
+    expect(shouldShowPlatformLabel("apple")).toBe(false);
+    expect(shouldShowPlatformLabel("spotify")).toBe(true);
+  });
+
+  it("spotify png has sufficient retina resolution", () => {
+    const { intrinsicWidth, intrinsicHeight } = PLATFORM_MARKS.spotify;
+    expect(intrinsicWidth).toBeGreaterThanOrEqual(
+      PLATFORM_MARK_TILE.imageMaxHeightPx * 2,
+    );
+    expect(intrinsicHeight).toBeGreaterThanOrEqual(
+      PLATFORM_MARK_TILE.imageMaxHeightPx * 2,
     );
   });
 });
