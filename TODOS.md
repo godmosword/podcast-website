@@ -67,7 +67,7 @@
 
 目標：不重做架構，在現有故事頁加輕互動，驗證孩子是否更願回訪。
 
-#### ~~故事頁點按熱點（tap-to-explore）~~　`STEM-P1 · M · 插畫座標`　〔stem+eng〕 — **已移除（2026-06）**：虛線提示體驗不佳，待重新設計後再評估。`978e783`
+#### ~~故事頁點按熱點（tap-to-explore）~~　`STEM-P1 · M · 插畫座標`　〔stem+eng〕 — **已移除（2026-06）**：虛線提示體驗不佳，待重新設計後再評估。`0d77d7f`
 
 #### 每集結尾開放式「小提問」　`STEM-P1 · S · 文案`　〔stem+content〕
 詳情或播放結束畫面加一句不計分提問（例：「你覺得消防車為什麼是紅色的？」）。`data/stories.ts` 加 `reflectionPrompt`；無標準答案。依據：STEM 核心是發問與學習主導權。
@@ -560,7 +560,7 @@ T+2d    社群貼文（B 戰場）
 
 ### 移除故事頁插圖點按互動（tap-to-explore）
 下架插圖虛線橢圓提示層；保留 `reflectionPrompt`、完播／重訪量測。刪除對應元件、資料與 engagement 量測欄位。
-**Completed:** `978e783`（2026-06）
+**Completed:** `0d77d7f`（2026-06）
 
 ### 收聽平台圖示視覺統一（白底膠囊卡）
 四平台等高白底膠囊（`PLATFORM_MARK_TILE` 60px）、2×2 手機 grid；Apple `wide` 徽章隱藏外部 label；Spotify PNG 939×940 驗證 Retina 足夠；HARD-RULES Spotify 白底註記。
