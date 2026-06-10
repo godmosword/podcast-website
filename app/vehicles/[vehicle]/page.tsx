@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { allVehicles, getStoriesByVehicle } from "@/data/stories";
+import { allVehicles, getStoriesByVehicle } from "@/data/content";
 import SiteFooter from "@/components/SiteFooter";
 import StoryCard from "@/components/StoryCard";
 import styles from "./page.module.css";

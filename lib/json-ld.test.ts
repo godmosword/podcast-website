@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { storiesByNewest } from "@/data/stories";
+import { storiesByNewest } from "@/data/content";
 import { podcastEpisodeJsonLd, podcastSeriesJsonLd } from "./json-ld";
 
 describe("podcastSeriesJsonLd", () => {

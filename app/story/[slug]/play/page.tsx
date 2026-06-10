@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getStory, getNextStory, stories } from "@/data/stories";
+import { getStory, getNextStory, stories } from "@/data/content";
 import { storyPlayMetadata } from "@/lib/story-metadata";
 import { getSubtitles } from "@/lib/subtitles";
 import { pad2, storyAudioPath, storyCoverPath } from "@/lib/story-utils";

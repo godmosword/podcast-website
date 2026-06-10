@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getStory, getRelated, getNextStory, stories } from "@/data/stories";
+import { getStory, getRelated, getNextStory, stories } from "@/data/content";
 import { podcastEpisodeJsonLd } from "@/lib/json-ld";
 import { lineShareUrl, storyLineShareText, storyShareUrl } from "@/lib/share-story";
 import { storyDetailMetadata } from "@/lib/story-metadata";
@@ -105,6 +105,8 @@ export default async function StoryDetailPage({
             <p className={styles.summary}>{story.summary}</p>
           </section>
         )}
+
+        {/* TODO: reflectionPrompt 親子對話區 — story.reflectionPrompt 文案補齊後在此渲染 */}
 
         <PlatformLinks accent={story.color} />
 

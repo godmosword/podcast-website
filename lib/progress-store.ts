@@ -240,8 +240,6 @@ function normalizeProgress(raw: Partial<ProgressStore>): ProgressStore {
 function readProgress(): ProgressStore {
   if (!isClient()) return { ...DEFAULT_PROGRESS };
   return migrateProgress();
-  const raw = parseJson<ProgressStore>(localStorage.getItem(PROGRESS_STORAGE_KEY));
-  return raw ? normalizeProgress(raw) : { ...DEFAULT_PROGRESS };
 }
 
 function writeProgress(next: ProgressStore): ProgressStore {

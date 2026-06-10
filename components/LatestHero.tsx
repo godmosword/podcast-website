@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Story } from "@/data/stories";
+import type { Story } from "@/data/content";
 import { storyCoverPath } from "@/lib/story-utils";
 import StoryImage from "./StoryImage";
 import Ribbon from "./decor/Ribbon";

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { allTags, getStoriesByTag } from "@/data/stories";
+import { allTags, getStoriesByTag } from "@/data/content";
 import SiteFooter from "@/components/SiteFooter";
 import StoryCard from "@/components/StoryCard";
 import styles from "./page.module.css";

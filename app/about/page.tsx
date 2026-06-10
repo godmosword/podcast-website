@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { allVehicles, getStoriesByVehicle } from "@/data/stories";
+import { allVehicles, getStoriesByVehicle } from "@/data/content";
 import SiteFooter from "@/components/SiteFooter";
 import VehicleClayIcon from "@/components/VehicleClayIcon";
 import styles from "./page.module.css";

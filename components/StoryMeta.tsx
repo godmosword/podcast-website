@@ -1,4 +1,4 @@
-import type { Story } from "@/data/stories";
+import type { Story } from "@/data/content";
 import { TagChip } from "./Chip";
 import styles from "./StoryMeta.module.css";
 

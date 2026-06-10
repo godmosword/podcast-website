@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getStory, stories } from "@/data/stories";
+import { getStory, stories } from "@/data/content";
 import { getFavorites } from "@/lib/favorites";
 import StoryCard from "./StoryCard";
 import styles from "./FavoritesSection.module.css";

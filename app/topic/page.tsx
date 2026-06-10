@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { allTags } from "@/data/stories";
+import { allTags } from "@/data/content";
 import SiteFooter from "@/components/SiteFooter";
 import styles from "./page.module.css";
 

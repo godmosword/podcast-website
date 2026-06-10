@@ -7,10 +7,10 @@ import {
   getStoriesByTag,
   getStoriesByVehicle,
   getStory,
-  manualStories,
   stories,
   storiesByNewest,
-} from "./stories";
+} from "./content";
+import { manualStories } from "./stories";
 
 describe("getStory", () => {
   it("依 slug 找到故事", () => {

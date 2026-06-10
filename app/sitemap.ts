@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { allTags, allVehicles, stories } from "@/data/stories";
+import { allTags, allVehicles, stories } from "@/data/content";
 import { getSiteUrl } from "@/lib/site-url";
 
 export default function sitemap(): MetadataRoute.Sitemap {

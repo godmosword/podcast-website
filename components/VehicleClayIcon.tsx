@@ -1,4 +1,4 @@
-import { getVehicleCoverPath } from "@/data/stories";
+import { getVehicleCoverPath } from "@/data/content";
 import styles from "./VehicleClayIcon.module.css";
 
 type VehicleClayIconProps = {

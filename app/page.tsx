@@ -1,4 +1,4 @@
-import { allVehicles, storiesByNewest } from "@/data/stories";
+import { allVehicles, storiesByNewest } from "@/data/content";
 import ContinueBanner from "@/components/ContinueBanner";
 import FavoritesSection from "@/components/FavoritesSection";
 import JsonLd from "@/components/JsonLd";

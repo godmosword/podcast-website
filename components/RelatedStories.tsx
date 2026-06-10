@@ -1,4 +1,4 @@
-import type { Story } from "@/data/stories";
+import type { Story } from "@/data/content";
 import StoryCard from "./StoryCard";
 import styles from "./RelatedStories.module.css";
 

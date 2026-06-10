@@ -10,56 +10,34 @@
 //   - manualStories：下方手動維護（既有 6 集，完整插畫）
 //   - apple-synced.json：npm run sync:apple 從 Apple Podcast 追加（MVP 單圖）
 //
-// 手動新增一集：在 manualStories 加一筆 + public/stories/<slug>/
-// Apple 新集：每日 GHA 或本機 sync:apple，再視需要改 apple-synced.json / overrides
+// 查詢 API 請使用 data/content.ts（getStories / getAllContent）。
 // ============================================================
 
-import appleSynced from "./apple-synced.json";
-import { storyCoverPath } from "@/lib/story-utils";
-
-/** 一則故事的資料結構。 */
-export type Story = {
-  /** 網址與資料夾名稱，對應 public/stories/<slug>/ */
+/** 手動維護的故事原始資料（不含 kind；由 content.ts 補齊）。 */
+export type ManualStory = {
   slug: string;
-  /** 集數編號（越大越新，首頁依此由新到舊排序） */
   ep: number;
-  /** 標題 */
   title: string;
-  /** 發布日期，ISO 格式 "YYYY-MM-DD" */
   date: string;
-  /** 選填：音檔時長字串，如 "5:48" */
   duration?: string;
-  /** 車種（主分類），用於首頁篩選 */
   vehicle: string;
-  /** 卡片圖示（emoji） */
   emoji: string;
-  /** 主題色（hex），用於邊框、陰影、播放鈕 */
   color: string;
-  /** 音檔檔名，放在 public/stories/<slug>/ 底下 */
   audio: string;
-  /** 插圖張數（01.jpg～NN.jpg） */
   pageCount: number;
-  /** 選填：一句話故事大綱 */
   summary?: string;
-  /** 選填：建議年齡，如「3–7 歲」；未填則 UI 不顯示 */
   ageRange?: string;
-  /** 選填：主題關鍵字（用於篩選與推薦） */
   tags?: string[];
-  /**
-   * 選填：字幕軌。播放時會跟著音檔進度自動換句（疊在插圖上）。
-   * 為依官方節目大綱改寫的故事摘要，非逐字稿；可自由編輯。
-   */
   captions?: string[];
-  /**
-   * 選填：即時字幕。每句字幕的「起始秒數」，需與 captions 一一對應且遞增。
-   * 有提供時，播放器在精準時間換句（與插圖同步）；未提供則回退為時長平均切換。
-   * 取得方式：在播放頁加 `?cue=1` 進入「字幕對時模式」，邊聽邊點記下每句秒數再複製貼回。
-   */
   captionTimes?: number[];
+  reflectionPrompt?: {
+    child: string;
+    parentFollowUp: string;
+  };
 };
 
 /** 手動維護的故事（sync 腳本不會修改此陣列）。 */
-export const manualStories: Story[] = [
+export const manualStories: ManualStory[] = [
   {
     slug: "ambulance",
     ep: 6,
@@ -203,82 +181,3 @@ export const manualStories: Story[] = [
     ],
   },
 ];
-
-function sortByEp(list: Story[]): Story[] {
-  return [...list].sort((a, b) => b.ep - a.ep);
-}
-
-/** 所有故事（手動 + Apple 同步），依集數由新到舊。 */
-export const stories: Story[] = sortByEp([
-  ...manualStories,
-  ...(appleSynced as Story[]),
-]);
-
-/** 依 slug 取得故事；找不到回傳 undefined。 */
-export function getStory(slug: string): Story | undefined {
-  return stories.find((story) => story.slug === slug);
-}
-
-/** 依集數由新到舊，取得「下一集」（較早的集數）。 */
-export function getNextStory(slug: string): Story | undefined {
-  const sorted = storiesByNewest();
-  const idx = sorted.findIndex((s) => s.slug === slug);
-  if (idx < 0 || idx >= sorted.length - 1) return undefined;
-  return sorted[idx + 1];
-}
-
-/** 依車種篩選故事（由新到舊）。 */
-export function getStoriesByVehicle(vehicle: string): Story[] {
-  return storiesByNewest().filter((s) => s.vehicle === vehicle);
-}
-
-/** 所有故事，依集數由新到舊排序（不改動原陣列）。 */
-export function storiesByNewest(): Story[] {
-  return [...stories].sort((a, b) => b.ep - a.ep);
-}
-
-/** 所有出現過的車種（依故事順序去重）。 */
-export function allVehicles(): string[] {
-  return Array.from(new Set(stories.map((s) => s.vehicle)));
-}
-
-/** 依車種取得黏土風代表封面（該車種第一則故事的 01.jpg）。 */
-export function getVehicleCoverPath(vehicle: string): string | null {
-  const slug = stories.find((s) => s.vehicle === vehicle)?.slug;
-  return slug ? storyCoverPath(slug) : null;
-}
-
-/** 所有出現過的主題標籤（去重、繁中排序）。 */
-export function allTags(): string[] {
-  return Array.from(new Set(stories.flatMap((s) => s.tags ?? []))).sort((a, b) =>
-    a.localeCompare(b, "zh-Hant"),
-  );
-}
-
-/** 依主題標籤篩選故事（由新到舊）。 */
-export function getStoriesByTag(tag: string): Story[] {
-  return storiesByNewest().filter((s) => (s.tags ?? []).includes(tag));
-}
-
-/**
- * 相關故事：優先同車種或共用標籤，依重疊程度排序，排除自己。
- * @param slug 目前故事
- * @param limit 最多回傳幾筆（預設 3）
- */
-export function getRelated(slug: string, limit = 3): Story[] {
-  const current = getStory(slug);
-  if (!current) return [];
-
-  const currentTags = new Set(current.tags ?? []);
-
-  return stories
-    .filter((s) => s.slug !== slug)
-    .map((s) => {
-      const sharedTags = (s.tags ?? []).filter((t) => currentTags.has(t)).length;
-      const sameVehicle = s.vehicle === current.vehicle ? 1 : 0;
-      return { story: s, score: sharedTags + sameVehicle };
-    })
-    .sort((a, b) => b.score - a.score || b.story.ep - a.story.ep)
-    .slice(0, limit)
-    .map((x) => x.story);
-}

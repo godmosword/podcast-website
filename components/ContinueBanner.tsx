@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getStory } from "@/data/stories";
+import { getStory } from "@/data/content";
 import { loadContinue } from "@/lib/continue-playback";
 import styles from "./ContinueBanner.module.css";
 

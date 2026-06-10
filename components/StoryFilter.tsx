@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import type { Story } from "@/data/stories";
+import type { Story } from "@/data/content";
 import { ChipButton } from "./Chip";
 import StoryCard from "./StoryCard";
 import VehicleClayIcon from "./VehicleClayIcon";

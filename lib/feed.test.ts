@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { storiesByNewest } from "@/data/stories";
+import { storiesByNewest } from "@/data/content";
 import { buildRssFeed } from "./feed";
 
 describe("buildRssFeed", () => {

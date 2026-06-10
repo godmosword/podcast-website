@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import type { Story } from "@/data/stories";
+import type { Story } from "@/data/content";
 import { DEFAULT_OG_IMAGE } from "@/lib/site-url";
 import { storyCoverPath } from "@/lib/story-utils";
 

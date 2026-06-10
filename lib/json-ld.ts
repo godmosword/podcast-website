@@ -1,4 +1,4 @@
-import type { Story } from "@/data/stories";
+import type { Story } from "@/data/content";
 import { CHANNEL_DESCRIPTION, CHANNEL_TITLE } from "@/lib/feed-constants";
 import { siteRssUrl } from "@/lib/feed";
 import { getSiteUrl } from "@/lib/site-url";

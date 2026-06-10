@@ -1,4 +1,4 @@
-import { storiesByNewest } from "@/data/stories";
+import { storiesByNewest } from "@/data/content";
 import { buildRssFeed } from "@/lib/feed";
 
 export function GET() {
