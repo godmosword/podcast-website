@@ -21,8 +21,18 @@
   line-height: 0;
 }
 
-[data-theme="night"] .scene {
-  animation: gentle-float var(--motion-float) ease-in-out infinite;
+@media (min-width: 640px) {
+  [data-theme="night"] .scene {
+    animation: gentle-float var(--motion-float) ease-in-out infinite;
+  }
+}
+
+.sceneMobile {
+  display: block;
+}
+
+.sceneDesktop {
+  display: none;
 }
 
 .heroImage {
@@ -32,6 +42,16 @@
   max-width: 100%;
   vertical-align: top;
   filter: var(--illus-warm);
+}
+
+@media (min-width: 640px) {
+  .sceneMobile {
+    display: none;
+  }
+
+  .sceneDesktop {
+    display: block;
+  }
 }
 
 @media (max-height: 700px), (max-width: 390px) {
@@ -93,7 +113,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-theme="night"] .scene,
+  [data-theme="night"] .sceneDesktop,
   [data-theme="night"] .sun {
     animation: none;
   }
