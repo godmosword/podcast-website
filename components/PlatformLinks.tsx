@@ -1,5 +1,8 @@
+"use client";
+
 import { BrandSvg, PLATFORM_ICON_PATHS } from "@/lib/connect-icons";
 import { visiblePlatforms } from "@/lib/platforms";
+import TrackedPlatformLink from "./TrackedPlatformLink";
 import styles from "./PlatformLinks.module.css";
 
 type Props = {
@@ -34,14 +37,12 @@ export default function PlatformLinks({
       )}
       <nav className={styles.row}>
         {platforms.map((p) => (
-          <a
+          <TrackedPlatformLink
             key={p.label}
             href={p.url}
-            target="_blank"
-            rel="noopener noreferrer"
+            label={p.label}
+            source="story-platforms"
             className={styles.item}
-            aria-label={`在 ${p.label} 收聽`}
-            title={p.label}
           >
             <span
               className={styles.badge}
@@ -52,7 +53,7 @@ export default function PlatformLinks({
               </BrandSvg>
             </span>
             <span className={styles.label}>{p.label}</span>
-          </a>
+          </TrackedPlatformLink>
         ))}
       </nav>
     </section>

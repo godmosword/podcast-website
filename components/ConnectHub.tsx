@@ -1,9 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import {
   BrandSvg,
   PLATFORM_ICON_PATHS,
   SOCIAL_ICON_PATHS,
 } from "@/lib/connect-icons";
+import { trackPlatformClick } from "@/lib/analytics";
 import { visiblePlatforms } from "@/lib/platforms";
 import { visibleSocials } from "@/lib/social";
 import styles from "./ConnectHub.module.css";
@@ -21,6 +24,7 @@ function IconLink({
   badgeStyle,
   children,
   external = true,
+  onClick,
 }: {
   href: string;
   label: string;
@@ -28,6 +32,7 @@ function IconLink({
   badgeStyle?: React.CSSProperties;
   children: React.ReactNode;
   external?: boolean;
+  onClick?: () => void;
 }) {
   const className = styles.item;
   const badge = (
@@ -54,6 +59,7 @@ function IconLink({
       rel="noopener noreferrer"
       className={className}
       aria-label={ariaLabel}
+      onClick={onClick}
     >
       {badge}
     </a>
@@ -121,6 +127,7 @@ export default function ConnectHub({ id = "connect", className }: Props) {
                 label={p.label}
                 ariaLabel={`在 ${p.label} 收聽`}
                 badgeStyle={{ backgroundColor: p.color }}
+                onClick={() => trackPlatformClick(p.label, "footer-connect")}
               >
                 <BrandSvg className={styles.icon}>
                   {PLATFORM_ICON_PATHS[p.icon]}

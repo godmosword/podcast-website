@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Baloo_2, Gochi_Hand } from "next/font/google";
 import localFont from "next/font/local";
+import { Analytics } from "@vercel/analytics/react";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import SvgDefs from "@/components/decor/SvgDefs";
 import { getSiteUrl } from "@/lib/site-url";
@@ -99,6 +100,7 @@ export default function RootLayout({
         <SvgDefs />
         <div className="site-root">{children}</div>
         <ServiceWorkerRegister />
+        <Analytics />
       </body>
     </html>
   );

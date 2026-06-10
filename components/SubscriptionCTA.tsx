@@ -1,7 +1,7 @@
 "use client";
 
 import { BrandSvg, PLATFORM_ICON_PATHS } from "@/lib/connect-icons";
-import { recordPlatformClick } from "@/lib/engagement";
+import { trackPlatformClick } from "@/lib/analytics";
 import { visiblePlatforms } from "@/lib/platforms";
 import styles from "./SubscriptionCTA.module.css";
 
@@ -30,7 +30,7 @@ export default function SubscriptionCTA({ accent }: Props) {
             rel="noopener noreferrer"
             className={styles.item}
             aria-label={`在 ${p.label} 訂閱`}
-            onClick={() => recordPlatformClick(p.label)}
+            onClick={() => trackPlatformClick(p.label, "subscription-cta")}
           >
             <span
               className={styles.badge}

@@ -51,8 +51,8 @@ export default function StudioPage() {
           官網轉換（預留）
         </h2>
         <p className={styles.future}>
-          未來將對照「單集頁 → 點了哪個收聽平台」與各後台完聽率，協助選題與導流優化。
-          需先完成隱私頁與平台點擊追蹤（見 TODOS P2）。
+          官網已透過 Vercel Analytics 記錄匿名「平台連結點擊」事件；本機互動摘要見上方面板。
+          之後可對照各平台後台完聽率，協助選題與導流優化。
         </p>
       </section>
 

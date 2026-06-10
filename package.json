@@ -16,6 +16,7 @@
     "illustrate": "tsx --env-file-if-exists=.env.local scripts/illustrate.ts"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "next": "^15.1.0",
     "openai": "^6.42.0",
     "react": "^19.0.0",

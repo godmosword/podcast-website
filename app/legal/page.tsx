@@ -18,7 +18,7 @@ export default function LegalPage() {
         </Link>
 
         <h1 className={styles.title}>使用條款與免責聲明</h1>
-        <p className={styles.updated}>最後更新：2026-06-08</p>
+        <p className={styles.updated}>最後更新：2026-06-10</p>
 
         <section className={styles.section} id="nature">
           <h2 className={styles.heading}>網站性質</h2>
@@ -109,10 +109,29 @@ export default function LegalPage() {
 
         <section className={styles.section} id="privacy">
           <h2 className={styles.heading}>本機資料與隱私</h2>
-          <p className={styles.text}>
-            網站可能在瀏覽器 <code>localStorage</code>{" "}
-            儲存收藏、繼續播放進度、遊戲最佳分數等偏好，資料留在您的裝置上，不由本網站伺服器收集（本站為靜態網站，無登入帳號）。
-          </p>
+          <ul className={styles.list}>
+            <li>
+              網站可能在瀏覽器 <code>localStorage</code>{" "}
+              儲存收藏、繼續播放進度、遊戲最佳分數、熱點互動與平台連結點擊次數等偏好。這些資料<strong>留在您的裝置上</strong>，不由本網站伺服器收集個人帳號資料（本站無登入功能）。
+            </li>
+            <li>
+              為了解官網導流成效，本站使用{" "}
+              <a href="https://vercel.com/docs/analytics">
+                Vercel Web Analytics
+              </a>
+              收集<strong>匿名</strong>的頁面瀏覽與自訂事件（例如「點了哪個收聽平台」）。我們<strong>不</strong>
+              收集孩子姓名、年齡或其他可識別個人身分的欄位；亦不在播放器內嵌入第三方廣告追蹤。
+            </li>
+            <li>
+              點選 Spotify、Apple Podcasts、KKBOX、YouTube
+              等外連將離開本站，各平台依其隱私政策處理資料。家長可透過瀏覽器清除網站資料，刪除本機{" "}
+              <code>localStorage</code> 中的偏好紀錄。
+            </li>
+            <li>
+              製作團隊後台（<code>/studio</code>）可讀取<strong>同一台裝置</strong>
+              的本機互動摘要，僅供內部驗收，非全站統計報表。
+            </li>
+          </ul>
         </section>
 
         <section className={styles.section} id="disclaimer">
