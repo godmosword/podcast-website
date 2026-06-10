@@ -21,10 +21,24 @@ export type GameAction =
 
 export type GameSceneId = "title" | "menu" | "play" | "pause" | "result";
 
+export type StarLedgerEntry = {
+  id: string;
+  amount: number;
+  source: string;
+  at: string;
+};
+
+export type Economy = {
+  lifetimeStars: number;
+  balance: number;
+  ledger: StarLedgerEntry[];
+};
+
 export type PlayerProfile = {
   version: number;
-  /** 車庫解鎖用累積星星 */
+  /** 車庫解鎖用累積星星（與 economy.lifetimeStars 同步） */
   stars: number;
+  economy?: Economy;
   unlockedVehicles: string[];
   bests: Partial<Record<GameScoreId, number>>;
   /** 每款遊戲各關／迷宮的三星 bit flags */

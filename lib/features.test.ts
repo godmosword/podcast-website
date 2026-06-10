@@ -45,10 +45,11 @@ describe("flag", () => {
     expect(flag("NIGHT_MODE", false)).toBe(false);
   });
 
-  it("FEATURES 預設全開", async () => {
+  it("FEATURES 預設全開（goodnightButton 除外）", async () => {
     const { FEATURES } = await loadFeatures();
     expect(FEATURES.nightMode).toBe(true);
     expect(FEATURES.starterEpisodes).toBe(true);
     expect(FEATURES.reflectionPrompt).toBe(true);
+    expect(FEATURES.goodnightButton).toBe(false);
   });
 });

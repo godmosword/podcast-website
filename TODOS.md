@@ -558,6 +558,10 @@ T+2d    社群貼文（B 戰場）
 
 ## Completed
 
+### 遊戲地基工程（星星帳本 × 能力表 × 結算插槽 × Kart 橋接）
+`economy` 帳本 v3、`VEHICLE_ABILITIES` + Tiled `breakable`/`ability-gate`/`secret`、`GameResultActions` + `goodnightButton`（預設關）、Kart `postMessage` 橋接；玩家可見行為零變更。ADR `docs/adr/0002-star-economy-ledger.md`。
+**Completed:** `3be429e` `8893952` `48643d6` `a606c89`（2026-06）
+
 ### 架構重塑第一批（Feature Flags × 路由薄殼 × Home Registry）
 `lib/features.ts` 集中 flag；`data/home-sections.ts` registry 驅動首頁；pirate-kart 邏輯抽至 `lib/games/pirate-kart/*` + `PirateKartGame`；`reportGameSession` 接線；ADR `docs/adr/0001-shell-kernel-architecture.md`。
 **Completed:** `dcceca1` `e280a6d` `ddeae8b`（2026-06）

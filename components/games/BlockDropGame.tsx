@@ -24,6 +24,7 @@ import { blockDropKitColors } from "@/lib/gamekit/bridge";
 import { BLOCK_INDEX, blockUrl } from "@/lib/gamekit/procedural-sheets";
 import { reportGameSession } from "@/lib/gamekit/session";
 import GameChrome, { GameChromeToolbar } from "@/components/games/GameChrome";
+import { GameResultActions } from "@/components/games/GameResultActions";
 import { useGameKitSettings } from "@/hooks/useGameKitSettings";
 
 const COLS = 10;
@@ -1006,9 +1007,11 @@ export default function BlockDropGame() {
                     <div style={{ fontSize: 15, color: "#cdd7ee" }}>分數 {g.score}</div>
                   )}
                   {g.status !== "paused" ? (
-                    <button type="button" onClick={begin} style={primaryBtn(font)}>
-                      {g.status === "over" ? "再玩一次 🔁" : "開始 ▶"}
-                    </button>
+                    <GameResultActions
+                      onReplay={begin}
+                      replayLabel={g.status === "over" ? "再玩一次 🔁" : "開始 ▶"}
+                      replayStyle={primaryBtn(font)}
+                    />
                   ) : (
                     <button type="button" onClick={togglePause} style={primaryBtn(font)}>
                       繼續 ▶

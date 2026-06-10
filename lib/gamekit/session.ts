@@ -1,8 +1,8 @@
 import type { GameScoreId } from "@/lib/progress-store";
 import type { GameKitGameId, PlayerProfile } from "./types";
 import { vehiclesUnlockedAt } from "./garage";
+import { applyGrantStars, getLifetimeStars } from "./economy";
 import {
-  addStars,
   loadPlayerProfile,
   recordBestScore,
   recordMedal,
@@ -12,7 +12,9 @@ import {
 import { medalFlags, medalCount } from "./meta";
 import { saveBestScoreInStore } from "@/lib/progress-store";
 
-export const GAMEKIT_PROGRESS_EVENT = "cheche:gamekit-progress";
+import { GAMEKIT_PROGRESS_EVENT } from "./constants";
+
+export { GAMEKIT_PROGRESS_EVENT } from "./constants";
 
 export type GameSessionResult = {
   gameId: GameScoreId;
@@ -35,7 +37,7 @@ function awardSticker(profile: PlayerProfile, stickerId: string): PlayerProfile 
 
 function checkBonusStickers(profile: PlayerProfile): PlayerProfile {
   let next = profile;
-  const unlocked = vehiclesUnlockedAt(profile.stars);
+  const unlocked = vehiclesUnlockedAt(getLifetimeStars(profile));
   if (unlocked.length >= 3) {
     next = awardSticker(next, "garage-5");
   }
@@ -49,14 +51,6 @@ function checkBonusStickers(profile: PlayerProfile): PlayerProfile {
     }
   }
   return next;
-}
-
-function starsFromNewMedalBits(oldFlags: number, newFlags: number): number {
-  let earned = 0;
-  for (let bit = 1; bit <= 4; bit <<= 1) {
-    if ((newFlags & bit) && !(oldFlags & bit)) earned += 1;
-  }
-  return earned;
 }
 
 /** 回報一局結果，更新存檔並廣播進度事件。 */
@@ -83,11 +77,18 @@ export function reportGameSession(result: GameSessionResult): PlayerProfile {
     );
     profile = recordMedal(profile, result.gameId, idx, flags);
     const merged = profile.medals[result.gameId]?.[idx] ?? flags;
-    const starGain = starsFromNewMedalBits(prevFlags, merged);
-    if (starGain > 0) profile = addStars(profile, starGain);
+    for (let bit = 1; bit <= 4; bit <<= 1) {
+      if ((merged & bit) && !(prevFlags & bit)) {
+        profile = applyGrantStars(profile, {
+          id: `medal:${result.gameId}:${idx}:${bit}`,
+          amount: 1,
+          source: `game:${result.gameId}:medal`,
+        });
+      }
+    }
   }
 
-  for (const id of vehiclesUnlockedAt(profile.stars)) {
+  for (const id of vehiclesUnlockedAt(getLifetimeStars(profile))) {
     profile = unlockVehicle(profile, id);
   }
   profile = checkBonusStickers(profile);

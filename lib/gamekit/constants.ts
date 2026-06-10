@@ -2,6 +2,8 @@ import type { GameKitGameId, ViewportSize } from "./types";
 
 export const GAMEKIT_VERSION = "0.2.0";
 
+export const GAMEKIT_PROGRESS_EVENT = "cheche:gamekit-progress";
+
 /** 渲染與物理目標幀率。 */
 export const TARGET_FPS = 60;
 

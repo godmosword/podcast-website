@@ -16,6 +16,12 @@ export type AdventureLevelJson = {
   start: [number, number];
   /** 終點旗 tile：x, y, 寬高（格數，預設 1×2） */
   finish: [number, number, number?, number?];
+  /** 可撞碎地形格，格式 `"tx,ty"` */
+  breakable?: string[];
+  /** 能力門：需特定車輛能力才能通過 */
+  abilityGates?: { x: number; y: number; ability: string }[];
+  /** 祕密區域格，格式 `"tx,ty"` */
+  secrets?: string[];
 };
 
 export type AdventureCoin = {
