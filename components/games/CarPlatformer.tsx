@@ -23,6 +23,7 @@ import {
 import PixelGameCanvas, {
   usePixelGameSurface,
 } from "@/components/games/PixelGameCanvas";
+import { GameResultActions } from "@/components/games/GameResultActions";
 import { drawPixelText } from "@/lib/gamekit/style";
 import {
   drawAdventureCoin,
@@ -954,13 +955,11 @@ export default function CarPlatformer() {
                 繼續 ▶
               </button>
             ) : (
-              <button
-                type="button"
-                onClick={() => beginLevel(levelIndex)}
-                style={primaryBtn}
-              >
-                {status === "ready" ? "開始冒險 ▶" : "再玩一次 🔁"}
-              </button>
+              <GameResultActions
+                onReplay={() => beginLevel(levelIndex)}
+                replayLabel={status === "ready" ? "開始冒險 ▶" : "再玩一次 🔁"}
+                replayStyle={primaryBtn}
+              />
             )}
           </div>
         )}

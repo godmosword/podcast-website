@@ -23,6 +23,7 @@ import {
 } from "@/lib/games/pirate-kart/tracks";
 import type { Cannonball, Keys, Phase } from "@/lib/games/pirate-kart/types";
 import { reportGameSession } from "@/lib/gamekit/session";
+import { GameResultActions } from "@/components/games/GameResultActions";
 import styles from "./PirateKartGame.module.css";
 
 export default function PirateKartGame() {
@@ -337,20 +338,24 @@ export default function PirateKartGame() {
               <strong>{result.score}</strong> · 寶藏{" "}
               <strong>{result.treasures}</strong> 個
             </p>
-            <button type="button" className={styles.btn} onClick={startGame}>
-              再玩一次
-            </button>
-            <button
-              type="button"
-              className={styles.btn}
-              style={{
-                background: "linear-gradient(180deg,#64748b,#475569)",
-                boxShadow: "0 4px 0 #334155",
-              }}
-              onClick={() => setPhase("start")}
-            >
-              回主選單
-            </button>
+            <GameResultActions
+              onReplay={startGame}
+              replayLabel="再玩一次"
+              replayClassName={styles.btn}
+              extraActions={
+                <button
+                  type="button"
+                  className={styles.btn}
+                  style={{
+                    background: "linear-gradient(180deg,#64748b,#475569)",
+                    boxShadow: "0 4px 0 #334155",
+                  }}
+                  onClick={() => setPhase("start")}
+                >
+                  回主選單
+                </button>
+              }
+            />
           </div>
         )}
       </div>

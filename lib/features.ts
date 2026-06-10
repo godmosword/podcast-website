@@ -23,6 +23,7 @@ export const FEATURES = {
   nightMode: flag("NIGHT_MODE", true),
   starterEpisodes: flag("STARTER_EPISODES", true),
   reflectionPrompt: flag("REFLECTION_PROMPT", true),
+  goodnightButton: flag("GOODNIGHT_BUTTON", false),
 } as const;
 
 export type FeatureKey = keyof typeof FEATURES;
