@@ -3,11 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { clearContinue, loadContinue, saveContinue } from "@/lib/continue-playback";
+import { useTheme } from "@/components/ThemeProvider";
 import {
   getCaptionSizeFromStore,
+  getNightPromptDismissedFromStore,
   setCaptionSizeInStore,
+  setNightPromptDismissedInStore,
   type CaptionSize,
 } from "@/lib/progress-store";
+import { LIGHT_THEME, NIGHT_THEME } from "@/lib/theme";
 import { recordStoryCompleted } from "@/lib/engagement";
 import { getHotspotsForPage } from "@/lib/hotspots";
 import { playSfx, isSfxEnabled } from "@/lib/sfx";
@@ -116,6 +120,8 @@ export default function StoryPlayer({
   const [bedtimeMinutes, setBedtimeMinutes] = useState<number | null>(null);
   const [bedtimeRemaining, setBedtimeRemaining] = useState<number | null>(null);
   const [showTimer, setShowTimer] = useState(false);
+  const [showNightPrompt, setShowNightPrompt] = useState(false);
+  const { theme, setTheme } = useTheme();
   const [cueMode, setCueMode] = useState(false);
   const [cueMarks, setCueMarks] = useState<number[]>([]);
   const [cueCopied, setCueCopied] = useState(false);
@@ -609,7 +615,18 @@ export default function StoryPlayer({
                     aria-checked={bedtimeMinutes === min}
                     className={`${styles.timerOpt} ${bedtimeMinutes === min ? styles.timerOptOn : ""}`}
                     onClick={() => {
-                      setBedtimeMinutes((c) => (c === min ? null : min));
+                      setBedtimeMinutes((c) => {
+                        const next = c === min ? null : min;
+                        if (
+                          next !== null &&
+                          c === null &&
+                          !getNightPromptDismissedFromStore() &&
+                          theme === LIGHT_THEME
+                        ) {
+                          setShowNightPrompt(true);
+                        }
+                        return next;
+                      });
                       setShowTimer(false);
                     }}
                   >
@@ -628,6 +645,34 @@ export default function StoryPlayer({
                     取消定時
                   </button>
                 )}
+              </div>
+            )}
+            {showNightPrompt && (
+              <div className={styles.nightPrompt} role="dialog" aria-label="夜晚模式提示">
+                <p className={styles.nightPromptText}>要進入夜晚模式嗎？</p>
+                <div className={styles.nightPromptActions}>
+                  <button
+                    type="button"
+                    className={styles.nightPromptYes}
+                    onClick={() => {
+                      setTheme(NIGHT_THEME);
+                      setNightPromptDismissedInStore(true);
+                      setShowNightPrompt(false);
+                    }}
+                  >
+                    好呀
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.nightPromptNo}
+                    onClick={() => {
+                      setNightPromptDismissedInStore(true);
+                      setShowNightPrompt(false);
+                    }}
+                  >
+                    不用了
+                  </button>
+                </div>
               </div>
             )}
           </div>
