@@ -559,6 +559,10 @@ T+2d    社群貼文（B 戰場）
 
 ## Completed
 
+### 首屏 CTA 層級重排 × 睡前模式 × 微動畫系統
+主 CTA「▶ 看圖聽最新一集」+ 次 CTA「去遊樂園玩」；受眾定位句上移 SiteHeader；`[data-theme="night"]` token 覆寫 + `ThemeProvider` + FOUC inline script；車種 chips 橫滑單列 + fade；`app/motion.css`（`press-squash`／`pop-in`／`star-burst`／`gentle-float`）；睡眠計時器夜晚模式一次性提示。
+**Completed:** `c9fb4ab` `f89fbdd` `f273298` `1d53115` `e69c00d` `66cb4b7`（2026-06）
+
 ### Game Kit Phase 5（Tiled／JSON 關卡 loader）
 `adventure-level`／`tiled-loader`；car-adventure 2 關 + 選關；car-star 3 迷宮。
 **Completed:** main（2026-06）
