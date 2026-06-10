@@ -5,6 +5,7 @@ import { storyPlayMetadata } from "@/lib/story-metadata";
 import { getSubtitles } from "@/lib/subtitles";
 import { pad2, storyAudioPath, storyCoverPath } from "@/lib/story-utils";
 import StoryPlayer from "@/components/StoryPlayer";
+import { FEATURES } from "@/lib/features";
 
 export function generateStaticParams() {
   return stories.map((story) => ({ slug: story.slug }));
@@ -65,7 +66,9 @@ export default async function StoryPlayPage({
       backHref={`/story/${story.slug}`}
       nextStorySlug={nextStory?.slug}
       nextStoryTitle={nextStory?.title}
-      reflectionPrompt={story.reflectionPrompt}
+      reflectionPrompt={
+        FEATURES.reflectionPrompt ? story.reflectionPrompt : undefined
+      }
     />
   );
 }

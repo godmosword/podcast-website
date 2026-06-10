@@ -13,6 +13,7 @@ import PlayButton from "@/components/PlayButton";
 import ShareButton from "@/components/ShareButton";
 import RelatedStories from "@/components/RelatedStories";
 import ReflectionPrompt from "@/components/story/ReflectionPrompt";
+import { FEATURES } from "@/lib/features";
 import SubscriptionCTA from "@/components/SubscriptionCTA";
 import SiteFooter from "@/components/SiteFooter";
 import StoryImage from "@/components/StoryImage";
@@ -109,7 +110,7 @@ export default async function StoryDetailPage({
           </section>
         )}
 
-        {story.reflectionPrompt && (
+        {FEATURES.reflectionPrompt && story.reflectionPrompt && (
           <ReflectionPrompt
             slug={story.slug}
             child={story.reflectionPrompt.child}
