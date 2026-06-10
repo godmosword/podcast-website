@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import type { Story } from "@/data/content";
 import {
   isHomeSectionActive,
@@ -47,9 +48,9 @@ export function HomeSectionList({ props }: { props: HomeSectionProps }) {
   return (
     <>
       {HOME_SECTIONS.filter(isHomeSectionActive).map((section) => (
-        <div key={section.id}>
+        <Fragment key={section.id}>
           {renderSection(section.id, props)}
-        </div>
+        </Fragment>
       ))}
     </>
   );
