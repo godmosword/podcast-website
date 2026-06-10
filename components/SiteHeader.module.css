@@ -29,6 +29,7 @@
   object-fit: cover;
   object-position: center 35%;
   vertical-align: top;
+  filter: var(--illus-warm);
 }
 
 @media (max-height: 700px), (max-width: 390px) {
@@ -76,6 +77,23 @@
     rgba(255, 212, 59, 0) 70%
   );
   z-index: -1;
+}
+
+[data-theme="night"] .sun {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 35%,
+    rgba(240, 234, 216, 0.95) 0%,
+    rgba(232, 212, 138, 0.85) 28%,
+    rgba(232, 212, 138, 0) 72%
+  );
+  box-shadow: 12px -6px 0 -4px rgba(240, 234, 216, 0.35);
+}
+
+[data-theme="night"] .title {
+  text-shadow: 2px 2px 0 rgba(28, 36, 64, 0.9), 3px 3px 0 var(--c-yellow);
 }
 
 .title {
@@ -277,8 +295,8 @@
   line-height: 1.2;
   text-decoration: none;
   /* 柔色膠囊：彩底 + 同色邊框 + 一點柔陰影，明顯但不立體不商業。 */
-  background: color-mix(in srgb, var(--btn) 30%, #fff);
-  border: 2px solid color-mix(in srgb, var(--btn) 62%, #fff);
+  background: color-mix(in srgb, var(--btn) 30%, var(--mix-base));
+  border: 2px solid color-mix(in srgb, var(--btn) 62%, var(--mix-base));
   box-shadow: 0 2px 5px rgba(52, 48, 43, 0.1);
   transition: transform 0.14s ease, background 0.14s ease, box-shadow 0.14s ease;
 }
@@ -286,7 +304,7 @@
 @media (hover: hover) {
   .actionBtn:hover {
     transform: translateY(-2px);
-    background: color-mix(in srgb, var(--btn) 42%, #fff);
+    background: color-mix(in srgb, var(--btn) 42%, var(--mix-base));
     box-shadow: 0 5px 10px rgba(52, 48, 43, 0.16);
   }
 }

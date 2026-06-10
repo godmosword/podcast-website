@@ -22,7 +22,7 @@
 }
 
 .active {
-  color: #fff;
+  color: var(--chip-active-fg);
   background: var(--ink);
   border-color: var(--ink);
   box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.18);

@@ -13,7 +13,7 @@
   min-height: var(--platform-mark-tile-h);
   padding: 6px 8px;
   border-radius: 12px;
-  background: #fff;
+  background: var(--card);
   border: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: var(--shadow-sm);
 }

@@ -3,8 +3,10 @@ import { Baloo_2, Gochi_Hand } from "next/font/google";
 import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/react";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import SvgDefs from "@/components/decor/SvgDefs";
 import { getSiteUrl } from "@/lib/site-url";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
 // 童趣圓潤字型，避免使用 Inter/Arial 等通用字型。
@@ -93,14 +95,20 @@ export default function RootLayout({
   return (
     <html
       lang="zh-Hant"
+      suppressHydrationWarning
       className={`${baloo.variable} ${huninn.variable} ${gochi.variable}`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body>
-        <div className="site-backdrop" aria-hidden />
-        <SvgDefs />
-        <div className="site-root">{children}</div>
-        <ServiceWorkerRegister />
-        <Analytics />
+        <ThemeProvider>
+          <div className="site-backdrop" aria-hidden />
+          <SvgDefs />
+          <div className="site-root">{children}</div>
+          <ServiceWorkerRegister />
+          <Analytics />
+        </ThemeProvider>
       </body>
     </html>
   );

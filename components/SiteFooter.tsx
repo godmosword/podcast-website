@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ConnectHub from "@/components/ConnectHub";
+import ThemeToggle from "@/components/ThemeToggle";
 import Doodle from "@/components/decor/Doodle";
 import decor from "@/components/decor/decor.module.css";
 import styles from "./SiteFooter.module.css";
@@ -58,6 +59,7 @@ export default function SiteFooter({
       />
 
       <div className={styles.bottomBar}>
+        <ThemeToggle />
         <Link href="/about" className={styles.aboutLink}>
           關於我們
         </Link>

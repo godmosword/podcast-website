@@ -6,6 +6,7 @@ export const PROGRESS_CHANGE_EVENT = "cheche:progress-change";
 export const PROGRESS_SCHEMA_VERSION = 2;
 
 export type CaptionSize = "sm" | "md" | "lg";
+export type ThemePreference = "light" | "night";
 export type GameScoreId = GameKitGameId | "kart" | "pirate-kart";
 
 export type ContinueState = {
@@ -31,6 +32,8 @@ export type ProgressStore = {
   preferences: {
     captionSize: CaptionSize;
     gameKit: { kidsMode: boolean };
+    theme: ThemePreference;
+    nightPromptDismissed?: boolean;
   };
   bestScores: Partial<Record<GameScoreId, number>>;
   gameProfile: PlayerProfile;
@@ -78,6 +81,8 @@ export const DEFAULT_PROGRESS: ProgressStore = {
   preferences: {
     captionSize: "md",
     gameKit: { kidsMode: true },
+    theme: "light",
+    nightPromptDismissed: false,
   },
   bestScores: {},
   gameProfile: { ...DEFAULT_GAME_PROFILE },
@@ -423,5 +428,29 @@ export function saveGameKitSettingsToStore(settings: { kidsMode: boolean }): voi
       ...current.preferences,
       gameKit: settings,
     },
+  });
+}
+
+export function getThemeFromStore(): ThemePreference {
+  return readProgress().preferences.theme ?? "light";
+}
+
+export function setThemeInStore(theme: ThemePreference): void {
+  const current = readProgress();
+  writeProgress({
+    ...current,
+    preferences: { ...current.preferences, theme },
+  });
+}
+
+export function getNightPromptDismissedFromStore(): boolean {
+  return readProgress().preferences.nightPromptDismissed ?? false;
+}
+
+export function setNightPromptDismissedInStore(dismissed: boolean): void {
+  const current = readProgress();
+  writeProgress({
+    ...current,
+    preferences: { ...current.preferences, nightPromptDismissed: dismissed },
   });
 }

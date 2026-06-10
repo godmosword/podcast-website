@@ -24,9 +24,9 @@
   border-radius: var(--radius-xl);
   background: linear-gradient(
     165deg,
-    #fff9e6 0%,
-    #fff 35%,
-    color-mix(in srgb, var(--c-sky) 22%, #fff) 100%
+    color-mix(in srgb, var(--c-yellow) 18%, var(--mix-base)) 0%,
+    var(--mix-base) 35%,
+    color-mix(in srgb, var(--c-sky) 22%, var(--mix-base)) 100%
   );
   border: 2px solid color-mix(in srgb, var(--c-yellow) 45%, var(--line));
   box-shadow: var(--shadow-md), var(--gloss);
@@ -55,8 +55,8 @@
   height: 76px;
   margin: 0 auto 10px;
   border-radius: 50%;
-  background: linear-gradient(180deg, #fff, #fff8e8);
-  border: 2.5px solid color-mix(in srgb, var(--c-yellow) 70%, #fff);
+  background: linear-gradient(180deg, var(--mix-base), color-mix(in srgb, var(--c-yellow) 12%, var(--mix-base)));
+  border: 2.5px solid color-mix(in srgb, var(--c-yellow) 70%, var(--mix-base));
   box-shadow:
     0 4px 0 color-mix(in srgb, var(--c-yellow) 55%, transparent),
     var(--shadow-sm);

@@ -1,0 +1,46 @@
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--motion-press), box-shadow var(--motion-press);
+}
+
+.compact {
+  min-width: 44px;
+  padding: 8px;
+}
+
+.label {
+  line-height: 1;
+}
+
+.toggle:active {
+  transform: scale(0.96);
+}
+
+@media (hover: hover) {
+  .toggle:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggle,
+  .toggle:hover,
+  .toggle:active {
+    transform: none;
+    transition: none;
+  }
+}
