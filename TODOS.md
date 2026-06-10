@@ -97,7 +97,7 @@
 依顏色、大小、車種分類；符號功能與數學啟蒙。可重用 `VehicleClayIcon`、`/vehicles` 資料。
 
 #### 「車車 DIY」手作教學（`craft` 內容類型）　`STEM-P2 · M · 插畫素材`　〔stem+research〕
-新增與 `Story` 並存的 **`craft`** 型別：分步 `steps[]`（每步示意圖 + 語音引導句），複用 `StoryPlayer` 翻頁與字幕同步（同 `captions`／`captionTimes` 時間序列）。例：色紙摺救護車、回收物做垃圾車。架構成本近零，產品從「聽故事」升級為 phygital 引導平台。見 [RESEARCH.md](./RESEARCH.md)。
+新增與 `Story` 並存的 **`craft`** 型別：分步 `steps[]`（每步示意圖 + 語音引導句），複用 `StoryPlayer` 翻頁與字幕同步（同 `captions`／`captionTimes` 時間序列）。例：色紙摺救護車、回收物做垃圾車。架構成本近零，產品從「聽故事」升級為 phygital 引導平台。見 [RESEARCH.md](./RESEARCH.md)。研究見 [RESEARCH.md 2026-06-11 節](./RESEARCH.md#2026-06-11逐步共作模式--lego-說明書--hey-clay-的共同機制與本站轉譯)。
 
 #### Phygital 故事延伸（聽完 → 線下手作）　`STEM-P2 · S · craft 上線`　〔stem+research+content〕
 每集故事結尾、`parentGuide` 或詳情頁 CTA 連結對應 `craft` 教學；明確傳達「螢幕引導你動手做」。車車版循環：聽故事（線上）→ 跟著做（線下）→ 完成後解鎖圖鑑（見 STEM-P3）。
