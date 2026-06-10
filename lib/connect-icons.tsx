@@ -1,47 +1,18 @@
 import React, { type CSSProperties, type ReactNode } from "react";
-import type { PlatformIcon } from "@/lib/platforms";
 import type { SocialIcon } from "@/lib/social";
 
+export {
+  BRAND_COLORS,
+  BRAND_ICON_MIN_PX,
+  PLATFORM_MARKS,
+  getPlatformMark,
+} from "@/lib/brand-assets";
+
 /**
- * 第三方品牌圖示使用原則（指示性連結，非代言）：
- * - 僅用於連至官方頁面；不變形、不改色（LINE 白字標 on #06C755 為官方組合）。
- * - 不仿製 Apple 標誌；Apple Podcasts 以通用 podcast 圖示 + 文字標籤表示。
- * - Spotify 圓形圖示 ≥21px；徽章底色用官方 #1DB954。
- * - 各平台商標屬原權利人所有，見 /legal#trademarks。
+ * 社群圖示（LINE／IG 等）— 指示性連結，非代言。
+ * **收聽平台**請用 `components/PlatformBrandMark` + `public/brand/*`；
+ * HARD RULES：lib/BRAND-ASSETS-HARD-RULES.md
  */
-export const BRAND_ICON_MIN_PX = 21;
-
-export const BRAND_COLORS = {
-  spotify: "#1DB954",
-  applePodcasts: "#9933CC",
-  kkbox: "#0073E6",
-  youtube: "#FF0000",
-  line: "#06C755",
-  facebook: "#1877F2",
-  threads: "#000000",
-} as const;
-
-/** 收聽平台 SVG（viewBox 0 0 24 24，fill 白色於品牌色底） */
-export const PLATFORM_ICON_PATHS: Record<PlatformIcon, ReactNode> = {
-  /** 通用 podcast 廣播圖示（非 Apple 標誌）；搭配文字「Apple Podcasts」。 */
-  apple: (
-    <>
-      <circle cx="12" cy="17" r="2.2" />
-      <path d="M12 5a7 7 0 0 0-7 7h1.8a5.2 5.2 0 0 1 10.4 0H19a7 7 0 0 0-7-7z" />
-      <path d="M12 8.5a3.5 3.5 0 0 0-3.5 3.5h1.6a1.9 1.9 0 0 1 3.8 0h1.6A3.5 3.5 0 0 0 12 8.5z" />
-    </>
-  ),
-  /** Spotify 官方圓形圖示輪廓（#1DB954 底 + 白色填色）。 */
-  spotify: (
-    <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.52 17.34c-.24.36-.66.48-1.02.24-2.82-1.74-6.36-2.1-10.56-1.14-.42.12-.78-.18-.9-.54-.12-.42.18-.78.54-.9 4.56-1.02 8.52-.6 11.64 1.32.42.18.48.66.3 1.02zm1.44-3.3c-.3.42-.84.6-1.26.3-3.24-1.98-8.16-2.58-11.94-1.38-.48.12-1.02-.12-1.14-.6-.12-.48.12-1.02.6-1.14 4.38-1.32 9.84-.66 13.56 1.62.36.18.6.78.18 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.1 9.3c-.6.18-1.26-.18-1.44-.78-.18-.6.18-1.26.78-1.44 4.32-1.32 11.4-1.02 15.84 1.62.54.3.72 1.02.42 1.56-.3.48-1.02.66-1.56.36z" />
-  ),
-  kkbox: (
-    <path d="M19 3l-9 2v9.55A4 4 0 1 0 12 18V7.6l5-1.11V12.5A4 4 0 1 0 19 16V3z" />
-  ),
-  youtube: (
-    <path d="M23.5 6.2a3.02 3.02 0 0 0-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.51A3.02 3.02 0 0 0 .5 6.2 31.5 31.5 0 0 0 0 12a31.5 31.5 0 0 0 .5 5.8 3.02 3.02 0 0 0 2.12 2.14c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.14A31.5 31.5 0 0 0 24 12a31.5 31.5 0 0 0-.5-5.8zM9.55 15.57V8.43L15.82 12l-6.27 3.57z" />
-  ),
-};
 
 /** LINE 字標（viewBox 0 0 24 24）；僅用於 #06C755 底之白色版本。 */
 export const LINE_ICON_PATH = (
@@ -68,14 +39,14 @@ type BrandSvgProps = {
   style?: CSSProperties;
 };
 
-/** 品牌圖示 SVG 包裝：固定 viewBox、最小尺寸；無障礙標籤由父層連結 aria-label 提供。 */
+/** 社群品牌 SVG 包裝；收聽平台請勿使用 — 見 PlatformBrandMark。 */
 export function BrandSvg({
   children,
   className,
   size = 24,
   style,
 }: BrandSvgProps) {
-  const px = Math.max(size, BRAND_ICON_MIN_PX);
+  const px = Math.max(size, 21);
   return (
     <svg
       viewBox="0 0 24 24"

@@ -1,4 +1,4 @@
-import { BRAND_COLORS } from "@/lib/connect-icons";
+import { BRAND_COLORS } from "@/lib/brand-assets";
 import type { PlatformIcon } from "@/lib/platforms";
 import { visiblePlatforms } from "@/lib/platforms";
 

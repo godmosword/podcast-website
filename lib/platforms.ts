@@ -1,4 +1,4 @@
-import { BRAND_COLORS } from "@/lib/connect-icons";
+import { BRAND_COLORS } from "@/lib/brand-assets";
 
 // ============================================================
 // 車車遊樂園 — 收聽平台連結（單一資料來源）
@@ -6,8 +6,8 @@ import { BRAND_COLORS } from "@/lib/connect-icons";
 // 這裡集中管理「整個節目」的收聽平台連結。
 // 頁尾、關於頁、每集故事頁的平台圖示都讀這份資料，改一次即全站同步。
 //
-// 要新增 / 換連結：改下方 url 即可；icon 對應 lib/connect-icons.tsx
-// 內的品牌圖示。url 留空字串的項目會自動隱藏，避免失效連結。
+// 要新增 / 換連結：改下方 url 即可；圖示由 public/brand/* + PlatformBrandMark 渲染。
+// HARD RULES：lib/BRAND-ASSETS-HARD-RULES.md。url 留空字串的項目會自動隱藏。
 // ============================================================
 
 /** 圖示識別字，對應 PlatformLinks 內的 SVG。 */
@@ -18,7 +18,7 @@ export type Platform = {
   label: string;
   /** 收聽連結 */
   url: string;
-  /** 品牌主色（圖示底色） */
+  /** 品牌主色（僅供邊框／強調；禁止作圖示底色） */
   color: string;
   /** 品牌圖示識別字 */
   icon: PlatformIcon;

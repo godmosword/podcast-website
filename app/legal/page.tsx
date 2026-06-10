@@ -78,7 +78,8 @@ export default function LegalPage() {
           <ul className={styles.list}>
             <li>
               Apple Podcasts、Spotify、KKBOX、YouTube、LINE、Instagram、Threads、Facebook
-              等名稱與圖示為各權利人之商標；本網站僅作<strong>指示性連結</strong>
+              等名稱與圖示為各權利人之商標；收聽平台使用官方提供之徽章／標誌檔（見站內{" "}
+              <code>public/brand/</code>），僅作<strong>指示性連結</strong>
               （導向官方頁面），不代表與上述公司之合作或代言關係。
             </li>
             <li>

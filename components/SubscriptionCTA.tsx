@@ -1,8 +1,8 @@
 "use client";
 
-import { BrandSvg, PLATFORM_ICON_PATHS } from "@/lib/connect-icons";
 import { trackPlatformClick } from "@/lib/analytics";
 import { visiblePlatforms } from "@/lib/platforms";
+import PlatformBrandMark from "@/components/PlatformBrandMark";
 import styles from "./SubscriptionCTA.module.css";
 
 type Props = {
@@ -32,14 +32,7 @@ export default function SubscriptionCTA({ accent }: Props) {
             aria-label={`在 ${p.label} 訂閱`}
             onClick={() => trackPlatformClick(p.label, "subscription-cta")}
           >
-            <span
-              className={styles.badge}
-              style={{ backgroundColor: p.color }}
-            >
-              <BrandSvg className={styles.icon}>
-                {PLATFORM_ICON_PATHS[p.icon]}
-              </BrandSvg>
-            </span>
+            <PlatformBrandMark icon={p.icon} label={p.label} />
             <span className={styles.label}>{p.label}</span>
           </a>
         ))}

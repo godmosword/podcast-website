@@ -14,7 +14,7 @@
 ## 商標（指示性使用）
 
 頁面上的 Apple Podcasts、Spotify、KKBOX、YouTube、LINE、Instagram、Threads、Facebook
-等圖示與名稱，僅用於連結至各平台官方頁面，商標權屬各權利人。實作說明見 `lib/connect-icons.tsx`。
+等圖示與名稱，僅用於連結至各平台官方頁面，商標權屬各權利人。收聽平台資產見 `public/brand/` 與 `lib/BRAND-ASSETS-HARD-RULES.md`；社群圖示見 `lib/connect-icons.tsx`。
 
 ## npm 依賴
 

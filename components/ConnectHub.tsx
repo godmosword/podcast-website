@@ -1,11 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import {
-  BrandSvg,
-  PLATFORM_ICON_PATHS,
-  SOCIAL_ICON_PATHS,
-} from "@/lib/connect-icons";
+import { BrandSvg, SOCIAL_ICON_PATHS } from "@/lib/connect-icons";
+import PlatformBrandMark from "@/components/PlatformBrandMark";
 import { trackPlatformClick } from "@/lib/analytics";
 import { visiblePlatforms } from "@/lib/platforms";
 import { visibleSocials } from "@/lib/social";
@@ -27,6 +24,7 @@ function IconLink({
   children,
   external = true,
   onClick,
+  unbadged = false,
 }: {
   href: string;
   label: string;
@@ -35,9 +33,16 @@ function IconLink({
   children: React.ReactNode;
   external?: boolean;
   onClick?: () => void;
+  /** 收聽平台官方徽章（不可套用圓形色底） */
+  unbadged?: boolean;
 }) {
-  const className = styles.item;
-  const badge = (
+  const className = `${styles.item}${unbadged ? ` ${styles.itemPlatform}` : ""}`;
+  const badge = unbadged ? (
+    <>
+      {children}
+      <span className={styles.label}>{label}</span>
+    </>
+  ) : (
     <>
       <span className={styles.badge} style={badgeStyle}>
         {children}
@@ -132,12 +137,10 @@ export default function ConnectHub({
                 href={p.url}
                 label={p.label}
                 ariaLabel={`在 ${p.label} 收聽`}
-                badgeStyle={{ backgroundColor: p.color }}
                 onClick={() => trackPlatformClick(p.label, "footer-connect")}
+                unbadged
               >
-                <BrandSvg className={styles.icon}>
-                  {PLATFORM_ICON_PATHS[p.icon]}
-                </BrandSvg>
+                <PlatformBrandMark icon={p.icon} label={p.label} />
               </IconLink>
             ))}
           </nav>
