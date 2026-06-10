@@ -9,17 +9,22 @@ import {
   type ReactNode,
 } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { useGameAudio } from "@/hooks/useGameAudio";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useDomJuice } from "@/hooks/useDomJuice";
-import mobileStyles from "./mobile-controls.module.css";
+import {
+  GridTouchButton,
+  touchControlStyles,
+  useBestScore,
+  useGameAudio,
+  useGameLoop,
+  useTouchControls,
+} from "@/lib/game-kit";
 import GamePixelBoard from "@/components/games/GamePixelBoard";
 import { blockDropKitColors } from "@/lib/gamekit/bridge";
 import { BLOCK_INDEX, blockUrl } from "@/lib/gamekit/procedural-sheets";
 import { reportGameSession } from "@/lib/gamekit/session";
 import GameChrome, { GameChromeToolbar } from "@/components/games/GameChrome";
 import { useGameKitSettings } from "@/hooks/useGameKitSettings";
-import { useGameInput } from "@/hooks/useGameInput";
 
 const COLS = 10;
 const ROWS = 20;
@@ -29,8 +34,6 @@ const BOARD_H = ROWS * CELL;
 const SIDE_W = 96;
 const LAYOUT_W = BOARD_W + 14 + SIDE_W;
 const LOCK_DELAY = 450;
-const BEST_KEY = "block-drop-best";
-
 type PieceType = "I" | "O" | "T" | "S" | "Z" | "J" | "L";
 type Cell = PieceType | null;
 type Status = "ready" | "playing" | "paused" | "over";
@@ -422,60 +425,12 @@ function MiniBox({ type, label }: { type: PieceType | null; label: string }) {
   );
 }
 
-function CtrlBtn({
-  label,
-  children,
-  coarse,
-  wide,
-  onDown,
-  onUp,
-}: {
-  label: string;
-  children: ReactNode;
-  coarse?: boolean;
-  wide?: boolean;
-  onDown: () => void;
-  onUp?: () => void;
-}) {
-  const extraClass = coarse
-    ? wide
-      ? mobileStyles.coarseBtnWide
-      : mobileStyles.coarseBtn
-    : "";
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      className={extraClass || undefined}
-      onPointerDown={(e) => {
-        e.preventDefault();
-        onDown();
-      }}
-      onPointerUp={onUp}
-      onPointerLeave={onUp}
-      onPointerCancel={onUp}
-      style={{
-        minWidth: coarse ? 56 : 52,
-        minHeight: coarse ? 56 : 52,
-        border: "none",
-        background: "rgba(255,255,255,.1)",
-        color: "#fff",
-        borderRadius: 14,
-        fontSize: coarse ? 26 : 22,
-        cursor: "pointer",
-        touchAction: "manipulation",
-      }}
-    >
-      {children}
-    </button>
-  );
-}
-
 export default function BlockDropGame() {
   const G = useRef<GameState>(freshGame());
   const repeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const bestRef = useRef(0);
   const reduced = useReducedMotion();
+  const { useKeyboardInput } = useTouchControls();
+  const { best, saveBest } = useBestScore("block-drop");
   const isCoarse = useCoarsePointer();
   const { kidsMode } = useGameKitSettings();
   const kidsModeRef = useRef(kidsMode);
@@ -483,7 +438,6 @@ export default function BlockDropGame() {
   const { juice, boardTransform } = useDomJuice(reduced);
 
   const [, force] = useState(0);
-  const [best, setBest] = useState(0);
   const [announce, setAnnounce] = useState("");
   const {
     ensureAudio,
@@ -494,22 +448,9 @@ export default function BlockDropGame() {
     stopBgm,
     pauseBgm,
     resumeBgm,
-  } = useGameAudio(true, "block-drop");
+  } = useGameAudio("block-drop");
 
   const repaint = useCallback(() => force((n) => n + 1), []);
-
-  useEffect(() => {
-    try {
-      const v = window.localStorage.getItem(BEST_KEY);
-      if (v) {
-        const n = parseInt(v, 10) || 0;
-        bestRef.current = n;
-        setBest(n);
-      }
-    } catch {
-      /* ignore */
-    }
-  }, []);
 
   const [blockTileUrls, setBlockTileUrls] = useState<Record<PieceType, string> | null>(
     null,
@@ -768,7 +709,7 @@ export default function BlockDropGame() {
   }, [pauseBgm, repaint, resumeBgm]);
 
   const playStatus = G.current.status;
-  useGameInput(
+  useKeyboardInput(
     (input) => {
       const g = G.current;
       if (g.status === "playing") {
@@ -788,17 +729,12 @@ export default function BlockDropGame() {
     playStatus === "playing" || playStatus === "paused",
   );
 
-  useEffect(() => {
-    let raf = 0;
-    const loop = (t: number) => {
+  useGameLoop({
+    onFrame: (dt, now) => {
       const g = G.current;
-      if (g.lastTime == null) g.lastTime = t;
-      let dt = t - g.lastTime;
-      g.lastTime = t;
-      if (dt > 100) dt = 100;
       if (g.status === "playing") {
         if (g.clearing) {
-          if (t >= g.clearUntil) finishClear(g);
+          if (now >= g.clearUntil) finishClear(g);
         } else if (g.active) {
           const slow = kidsModeRef.current ? 1.35 : 1;
           const interval = (g.softDrop ? 45 : gravityMs(g.level)) * slow;
@@ -819,23 +755,13 @@ export default function BlockDropGame() {
       }
       if (g.status === "over" && !g.metaReported) {
         g.metaReported = true;
-        if (g.score > bestRef.current) {
-          bestRef.current = g.score;
-          setBest(g.score);
-          try {
-            window.localStorage.setItem(BEST_KEY, String(g.score));
-          } catch {
-            /* ignore */
-          }
+        if (best == null || g.score > best) {
+          void saveBest(g.score);
         }
         reportGameSession({ gameId: "block-drop", score: g.score });
       }
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [repaint]);
+    },
+  });
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -961,7 +887,7 @@ export default function BlockDropGame() {
         <Stat label="分數" value={g.score} />
         <Stat label="等級" value={g.level} />
         <Stat label="行數" value={g.lines} />
-        <Stat label="最佳" value={Math.max(best, g.score)} />
+        <Stat label="最佳" value={Math.max(best ?? 0, g.score)} />
       </div>
 
       <GamePixelBoard
@@ -1152,27 +1078,27 @@ export default function BlockDropGame() {
           </div>
       </GamePixelBoard>
 
-      <div className={mobileStyles.controlGrid}>
-        <CtrlBtn
+      <div className={touchControlStyles.controlGrid}>
+        <GridTouchButton
           label="左"
           coarse={isCoarse}
           onDown={() => startRepeat(() => move(-1))}
           onUp={stopRepeat}
         >
           ⬅️
-        </CtrlBtn>
-        <CtrlBtn label="旋轉" coarse={isCoarse} onDown={() => rotate(1)}>
+        </GridTouchButton>
+        <GridTouchButton label="旋轉" coarse={isCoarse} onDown={() => rotate(1)}>
           🔄
-        </CtrlBtn>
-        <CtrlBtn
+        </GridTouchButton>
+        <GridTouchButton
           label="右"
           coarse={isCoarse}
           onDown={() => startRepeat(() => move(1))}
           onUp={stopRepeat}
         >
           ➡️
-        </CtrlBtn>
-        <CtrlBtn
+        </GridTouchButton>
+        <GridTouchButton
           label="軟降"
           coarse={isCoarse}
           onDown={() => {
@@ -1183,13 +1109,13 @@ export default function BlockDropGame() {
           }}
         >
           ⬇️
-        </CtrlBtn>
-        <CtrlBtn label="落下" coarse={isCoarse} wide onDown={hardDrop}>
+        </GridTouchButton>
+        <GridTouchButton label="落下" coarse={isCoarse} wide onDown={hardDrop}>
           ⤓ 落下
-        </CtrlBtn>
-        <CtrlBtn label="暫存" coarse={isCoarse} onDown={holdPiece}>
+        </GridTouchButton>
+        <GridTouchButton label="暫存" coarse={isCoarse} onDown={holdPiece}>
           📦
-        </CtrlBtn>
+        </GridTouchButton>
       </div>
 
       <p

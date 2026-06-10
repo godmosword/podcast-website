@@ -6,15 +6,20 @@ import {
   useRef,
   useCallback,
   type CSSProperties,
-  type ReactNode,
-  type PointerEvent,
   type RefObject,
 } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { useGameAudio } from "@/hooks/useGameAudio";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { JuiceController } from "@/lib/gamekit/juice";
-import mobileStyles from "./mobile-controls.module.css";
+import {
+  BarTouchButton,
+  touchControlStyles,
+  useBestScore,
+  useFixedGameLoop,
+  useGameAudio,
+  useTouchControls,
+  useVisibilityPause,
+} from "@/lib/game-kit";
 import PixelGameCanvas, {
   usePixelGameSurface,
 } from "@/components/games/PixelGameCanvas";
@@ -32,8 +37,6 @@ import { CAR_ADVENTURE_LEVELS } from "@/lib/games/car-adventure/levels";
 import { reportGameSession } from "@/lib/gamekit/session";
 import GameChrome, { GameChromeToolbar } from "@/components/games/GameChrome";
 import { useGameKitSettings } from "@/hooks/useGameKitSettings";
-import { useGameInput } from "@/hooks/useGameInput";
-import { useGameLoop } from "@/hooks/useGameLoop";
 
 const TILE = 36;
 const VW = 720;
@@ -53,8 +56,6 @@ const COYOTE = 0.09;
 const BUFFER = 0.12;
 const BOUNCE = 440;
 const INVULN = 1.4;
-const BEST_KEY = "car-adventure-best";
-
 type Status = "ready" | "playing" | "paused" | "won" | "over";
 interface Input {
   left: boolean;
@@ -152,7 +153,7 @@ function CarPlatformerCanvas({
     reset();
   }, [reset]);
 
-  useGameLoop(
+  useFixedGameLoop(
     {
       fixedUpdate: (dt) => {
         const g = game.current;
@@ -199,8 +200,9 @@ export default function CarPlatformer() {
   const statusRef = useRef<Status>("ready");
   const isCoarse = useCoarsePointer();
   const reducedRef = useRef(false);
-  const bestRef = useRef(0);
   const reduced = useReducedMotion();
+  const { useKeyboardInput } = useTouchControls();
+  const { best, saveBest } = useBestScore("car-adventure");
 
   const [status, setStatus] = useState<Status>("ready");
   const { kidsMode } = useGameKitSettings();
@@ -210,7 +212,6 @@ export default function CarPlatformer() {
   const levelStartLivesRef = useRef(3);
   const kidsModeRef = useRef(kidsMode);
   kidsModeRef.current = kidsMode;
-  const [best, setBest] = useState(0);
   const {
     ensureAudio,
     tone,
@@ -220,42 +221,26 @@ export default function CarPlatformer() {
     stopBgm,
     pauseBgm,
     resumeBgm,
-  } = useGameAudio(true, "car-adventure");
+  } = useGameAudio("car-adventure");
 
   useEffect(() => {
     reducedRef.current = reduced;
   }, [reduced]);
 
-  useEffect(() => {
-    try {
-      const v = window.localStorage.getItem(BEST_KEY);
-      if (v) {
-        const n = parseInt(v, 10) || 0;
-        bestRef.current = n;
-        setBest(n);
+  const setStat = useCallback(
+    (s: Status) => {
+      if (
+        (s === "won" || s === "over") &&
+        game.current &&
+        (best == null || game.current.score > best)
+      ) {
+        void saveBest(game.current.score);
       }
-    } catch {
-      /* ignore */
-    }
-  }, []);
-
-  const setStat = useCallback((s: Status) => {
-    if (
-      (s === "won" || s === "over") &&
-      game.current &&
-      game.current.score > bestRef.current
-    ) {
-      bestRef.current = game.current.score;
-      setBest(game.current.score);
-      try {
-        window.localStorage.setItem(BEST_KEY, String(game.current.score));
-      } catch {
-        /* ignore */
-      }
-    }
-    statusRef.current = s;
-    setStatus(s);
-  }, []);
+      statusRef.current = s;
+      setStatus(s);
+    },
+    [best, saveBest],
+  );
 
   const sJump = () => tone(520, 0.12, "square", 0.04);
   const sCoin = () => tone(880, 0.08, "triangle", 0.05);
@@ -363,7 +348,7 @@ export default function CarPlatformer() {
     }
   }, [setStat]);
 
-  useGameInput(
+  useKeyboardInput(
     (input) => {
       const g = game.current;
       if (!g) return;
@@ -747,18 +732,15 @@ export default function CarPlatformer() {
     else stopBgm();
   }, [status, playBgm, pauseBgm, stopBgm]);
 
-  useEffect(() => {
-    const onVis = () => {
-      if (document.hidden) {
-        pauseBgm();
-        if (statusRef.current === "playing") setStat("paused");
-      } else if (statusRef.current === "playing") {
-        resumeBgm();
-      }
-    };
-    document.addEventListener("visibilitychange", onVis);
-    return () => document.removeEventListener("visibilitychange", onVis);
-  }, [setStat, pauseBgm, resumeBgm]);
+  useVisibilityPause({
+    onHidden: () => {
+      pauseBgm();
+      if (statusRef.current === "playing") setStat("paused");
+    },
+    onVisible: () => {
+      if (statusRef.current === "playing") resumeBgm();
+    },
+  });
 
   useEffect(() => {
     const set = (k: string, v: boolean) => {
@@ -841,12 +823,12 @@ export default function CarPlatformer() {
           🏁 車車大冒險 {kidsMode ? "🧒" : ""}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {best > 0 && (
+          {(best ?? 0) > 0 && (
             <span
               style={{ fontSize: 14, fontWeight: 700, color: "#3a5a8c" }}
               aria-label={`最佳得分 ${best}`}
             >
-              最佳 ⭐ {best}
+              最佳 ⭐ {best ?? 0}
             </span>
           )}
           <GameChromeToolbar
@@ -984,26 +966,26 @@ export default function CarPlatformer() {
         )}
       </PixelGameCanvas>
 
-      <div className={mobileStyles.touchBar}>
-        <div className={mobileStyles.touchCluster}>
-          <TouchBtn
+      <div className={touchControlStyles.touchBar}>
+        <div className={touchControlStyles.touchCluster}>
+          <BarTouchButton
             label="左"
             coarse={isCoarse}
             onDown={hold("left", true)}
             onUp={hold("left", false)}
           >
             ⬅️
-          </TouchBtn>
-          <TouchBtn
+          </BarTouchButton>
+          <BarTouchButton
             label="右"
             coarse={isCoarse}
             onDown={hold("right", true)}
             onUp={hold("right", false)}
           >
             ➡️
-          </TouchBtn>
+          </BarTouchButton>
         </div>
-        <TouchBtn
+        <BarTouchButton
           label="跳"
           big
           coarse={isCoarse}
@@ -1011,7 +993,7 @@ export default function CarPlatformer() {
           onUp={hold("jump", false)}
         >
           ⬆️ 跳
-        </TouchBtn>
+        </BarTouchButton>
       </div>
 
       <p
@@ -1028,64 +1010,5 @@ export default function CarPlatformer() {
       </p>
     </div>
     </GameChrome>
-  );
-}
-
-function TouchBtn({
-  children,
-  label,
-  big,
-  coarse,
-  onDown,
-  onUp,
-}: {
-  children: ReactNode;
-  label: string;
-  big?: boolean;
-  coarse?: boolean;
-  onDown: () => void;
-  onUp: () => void;
-}) {
-  const d = (e: PointerEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    onDown();
-  };
-  const u = (e: PointerEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    onUp();
-  };
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      onPointerDown={d}
-      onPointerUp={u}
-      onPointerLeave={u}
-      onPointerCancel={u}
-      className={
-        coarse
-          ? big
-            ? mobileStyles.coarseBtnWide
-            : mobileStyles.coarseBtn
-          : undefined
-      }
-      style={{
-        border: "none",
-        background: big
-          ? "linear-gradient(180deg,#5bd0ff,#2f9fe0)"
-          : "#fff",
-        color: big ? "#06324a" : "#333",
-        borderRadius: 16,
-        minWidth: big ? (coarse ? 160 : 130) : coarse ? 72 : 64,
-        height: coarse ? 72 : 64,
-        fontSize: big ? (coarse ? 24 : 22) : coarse ? 30 : 26,
-        fontWeight: 800,
-        cursor: "pointer",
-        boxShadow: "0 4px 0 rgba(0,0,0,.2)",
-        touchAction: "none",
-      }}
-    >
-      {children}
-    </button>
   );
 }
