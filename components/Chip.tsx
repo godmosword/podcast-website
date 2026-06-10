@@ -1,3 +1,4 @@
+import type { Ref } from "react";
 import styles from "./Chip.module.css";
 
 type ChipButtonProps = {
@@ -5,7 +6,7 @@ type ChipButtonProps = {
   onClick?: () => void;
   children: React.ReactNode;
   className?: string;
-  buttonRef?: React.Ref<HTMLButtonElement>;
+  buttonRef?: Ref<HTMLButtonElement>;
 };
 
 export function ChipButton({

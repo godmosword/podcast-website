@@ -4,9 +4,11 @@ import {
   getBestScoreFromStore,
   getFavoritesFromStore,
   getProgressSync,
+  getThemeFromStore,
   loadContinueFromStore,
   migrateProgress,
   saveBestScoreInStore,
+  setThemeInStore,
   toggleFavoriteInStore,
 } from "./progress-store";
 
@@ -112,6 +114,13 @@ describe("getProgressSync", () => {
     const p = getProgressSync();
     expect(p.schemaVersion).toBe(2);
     expect(p.engagement.hotspotTaps).toBe(0);
+  });
+
+  it("defaults theme to light and persists night preference", () => {
+    expect(getThemeFromStore()).toBe("light");
+    setThemeInStore("night");
+    expect(getThemeFromStore()).toBe("night");
+    expect(getProgressSync().preferences.theme).toBe("night");
   });
 });
 
