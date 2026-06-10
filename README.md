@@ -8,7 +8,7 @@ Bonbon & 馬米親子 podcast《車車遊樂園》的官方 **看圖聽故事** 
 - **版本：** [1.3.0](./CHANGELOG.md) — 詳見 [CHANGELOG.md](./CHANGELOG.md)
 - **待辦與路線圖：** [TODOS.md](./TODOS.md)（成長 A/B + STEM 四階段）
 - **競品與設計研究：** [RESEARCH.md](./RESEARCH.md)（Hey Clay phygital、**四款 pixel 遊戲精進**、craft 等）
-- **儲存庫：** **private** — `public/stories/`、`public/characters/` 內音訊與插圖**禁止再散布**（見下方授權與免責）
+- **儲存庫：** [GitHub 公開](https://github.com/godmosword/podcast-website)（程式碼 MIT）— `public/stories/`、`public/characters/` 內音訊與插圖**禁止再散布**（見下方授權與免責）
 - **授權：** 程式碼 [MIT](./LICENSE) · 網站條文 [/legal](./app/legal/page.tsx) · 維護者全文 [DISCLAIMER.md](./DISCLAIMER.md)
 
 ## 功能概覽
@@ -17,13 +17,13 @@ Bonbon & 馬米親子 podcast《車車遊樂園》的官方 **看圖聽故事** 
 |------|------|
 | 故事牆 | 首頁網格列出全部分集；**依車車找故事**（車種 chip + `?vehicle=`）；主題見 `/topic` |
 | 看圖聽故事 | 全螢幕播放器、逐字即時字幕、可拖曳進度條、字幕字級切換 |
-| 車車遊樂園 | [`/games`](./app/games/page.tsx) — 4 款原創小遊戲（吃星星、溫柔任務、大冒險、繽紛方塊）；首頁「去遊樂園玩」入口 |
+| 車車遊樂園 | [`/games`](./app/games/page.tsx) — 4 款原創小遊戲（車車大冒險、繽紛方塊、車車卡丁車、海盜卡丁車大賽）；首頁「去遊樂園玩」入口 |
 | 主題分類 | `/topic`、`/topic/[tag]` 靜態頁（SEO） |
 | 車種分類 | `/vehicles/[vehicle]` |
 | 訂閱／追蹤 | 頁尾 `ConnectHub`（Spotify／Apple 等） |
 | RSS | [`/feed.xml`](./app/feed.xml/route.ts) podcast feed |
 | PWA | `manifest.json`、主畫面圖示、繼續收聽／收藏（localStorage） |
-| 法律與信任 | [`/legal`](./app/legal/page.tsx) 使用條款；素材 private、禁止再散布 |
+| 法律與信任 | [`/legal`](./app/legal/page.tsx) 使用條款；節目素材禁止再散布 |
 
 ## 本機開發
 

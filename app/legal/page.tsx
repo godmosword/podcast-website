@@ -39,7 +39,7 @@ export default function LegalPage() {
               <strong>未經權利人書面同意，禁止</strong>以本網站或儲存庫內之節目素材進行再製、公開傳輸、散布、販售，或暗示官方代言之商業用途。
             </li>
             <li>
-              原始碼儲存庫為<strong>私人</strong>性質；即使取得程式碼，亦<strong>不</strong>表示取得節目內容之使用授權。
+              原始碼儲存庫為<strong>公開</strong>（MIT 授權程式碼）；即使取得程式碼，亦<strong>不</strong>表示取得節目內容之使用授權。
             </li>
             <li>
               網站<strong>程式碼</strong>依 MIT 授權；<strong>節目內容不在</strong>

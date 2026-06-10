@@ -68,7 +68,9 @@ Hey Clay 是「實體玩具 + 數位引導」的 **phygital（虛實整合）** 
 
 ## 2026-06-09｜四款小遊戲精進方案（對標可市售 pixel game）
 
-涵蓋四款：① 車車吃星星（`car-star`，迷宮追逐）② 繽紛方塊（`block-drop`，落下方塊）③ 車車大冒險（`car-adventure`，橫向過關）④ 怪獸卡車的溫柔任務（`car-mission`，**三車道縱向溫柔駕駛**——非俯視角賽車；見第 4 節）。
+> **2026-06 現況：** canon 四款為 `car-adventure`、`block-drop`、`kart`、`pirate-kart`。**已移除** `car-star`、`car-mission`。下列精進方案 ❄️ FROZEN，僅供歷史對照。
+
+涵蓋四款（canon）：① 車車大冒險（`car-adventure`）② 繽紛方塊（`block-drop`）③ 車車卡丁車（`kart`）④ 海盜卡丁車大賽（`pirate-kart`）。
 
 ### 0. 市售 pixel game 品質門檻
 
@@ -91,7 +93,7 @@ Hey Clay 是「實體玩具 + 數位引導」的 **phygital（虛實整合）** 
 
 **先做這層，四款一起升級。** 九大模組：
 
-1. **`kit/renderer`**：每款固定內部解析度（迷宮 240×320、方塊 200×360、橫向 320×180、溫柔任務 320×240），offscreen → 整數倍 nearest-neighbor 放大；相機次像素取整。
+1. **`kit/renderer`**：每款固定內部解析度（方塊 200×360、橫向 320×180 等），offscreen → 整數倍 nearest-neighbor 放大；相機次像素取整。
 2. **`kit/sprite`** + **`kit/tilemap`**：sprite sheet、幀計時、autotiling。
 3. **`kit/style`**：32 色主調色盤、點陣字、共用 UI（按鈕/面板/轉場）。
 4. **`kit/audio`**：BGM 循環 + SFX + 混音器（延續現有 `useGameAudio`／`lib/sfx.ts` 精神）。
@@ -114,12 +116,10 @@ Hey Clay 是「實體玩具 + 數位引導」的 **phygital（虛實整合）** 
 
 | 遊戲 | 對標方向 | 工時 | 重點 |
 |------|----------|------|------|
-| ① 車車吃星星 | Pac-Man CE 能量感（兒童原創） | 中 | 多迷宮、4 種 AI、tileset、連段 juice |
-| ② 繽紛方塊 | Tetris Effect 音畫一體（原創） | 中 | 像素皮膚、多模式、兒童模式、消行 juice |
-| ③ 車車大冒險 | Celeste 手感 + Shovel Knight 關卡 | **大** | Tiled 關卡管線、6–10 關、檢查點、boss |
-| ④ 溫柔任務 | 兒童 lane runner／溫柔駕駛教育 | 中 | 三車道像素卡車、螢火虫動畫、任務變化 |
-
-④ **現況校正**：`CarMissionGame` 為三車道縱向、收集螢火虫、溫柔度 meter（急刹/喇叭扣分），已有 WebAudio；精進方向是 **lane-based 任務駕駛**（限時蒐集、障礙物、多任務類型），非 Micro Machines 俯視賽車。
+| ① 車車大冒險 | Celeste 手感 + Shovel Knight 關卡 | **大** | Tiled 關卡管線、6–10 關、檢查點、boss ❄️ |
+| ② 繽紛方塊 | Tetris Effect 音畫一體（原創） | 中 | 像素皮膚、多模式、兒童模式、消行 juice ❄️ |
+| ③ 車車卡丁車 | Arcade 卡丁 | 中 | 漂移、賽道、觸控 ❄️ |
+| ④ 海盜卡丁車 | 16-bit 賽車 | 中 | 關卡、道具 ❄️ |
 
 各款完整玩法／美術／元系統細節見 [TODOS — 遊樂園精進](./TODOS.md#遊樂園精進game-kit--市售-pixel-品質)。
 

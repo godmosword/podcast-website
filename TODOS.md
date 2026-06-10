@@ -6,7 +6,11 @@
 > **產品主戰場（2026-06 STEM roadmap）：** 把「音檔 + 看圖 + 字幕 + 網頁小遊戲」放大成**互動故事 × 車車 STEM 實驗室**；學齡前～低年級、開放式探索、家長信任優先。詳見下方 [**產品路線圖（互動 + STEM + 商業）**](#產品路線圖互動--stem--商業)。
 
 > 格式：每項一段，行末標 `優先序 · 工時(人工) · 依賴`。工時 S/M/L；CC+gstack 約 1/10。
+> **紀律：** 條目打 ✅ 時必須附 commit hash。
 > 來源標記：〔eng〕程式發現 · 〔ceo〕plan-ceo-review · 〔design〕plan-design-review · 〔growth〕成長共識 · 〔stem〕產品-roadmap · 〔research〕[RESEARCH.md](./RESEARCH.md)。
+>
+> **現役遊戲（canon 四款）：** `car-adventure` 車車大冒險 · `block-drop` 繽紛方塊 · `kart` 車車卡丁車 · `pirate-kart` 海盜卡丁車大賽。  
+> **已移除：** `car-star`（車車吃星星）、`car-mission`（溫柔任務）— 文件內歷史提及僅供對照。
 
 ---
 
@@ -79,7 +83,7 @@
 
 ### STEM-P2 — 車車 STEM 實驗室（2–4 個月）
 
-目標：系統性把「車」連到 STEM；**全部開放式、不計時、不排名**（現有 `car-star` 計分僅作參考，新模組預設無競賽）。
+目標：系統性把「車」連到 STEM；**全部開放式、不計時、不排名**（canon 遊戲中 block-drop／car-adventure 計分僅作參考，新模組預設無競賽）。
 
 #### 「組裝你的車」沙盒　`STEM-P2 · L · 無`　〔stem+eng〕
 拖拉輪子、車身、引擎組車，組好可動。工程／結構直覺（對標 marshmallow 橋 + Sago 機器人組裝的車車版）。`/games` hub 新入口。
@@ -88,7 +92,7 @@
 調坡度看車滑多遠／多快，玩因果與簡單物理。Canvas 或 DOM + 輕物理即可。
 
 #### 無螢幕式路徑編碼（強化 Car Mission）　`STEM-P2 · M · 無`　〔stem+eng〕
-方向箭頭排路徑讓車到終點；擴充現有 `CarMissionGame` 或獨立關卡編輯器。適齡演算法啟蒙。
+方向箭頭排路徑讓車到終點；獨立關卡編輯器（**已移除** car-mission，不擴充舊元件）。適齡演算法啟蒙。
 
 #### 分類／數數小遊戲　`STEM-P2 · M · 車種素材`　〔stem+eng〕
 依顏色、大小、車種分類；符號功能與數學啟蒙。可重用 `VehicleClayIcon`、`/vehicles` 資料。
@@ -153,13 +157,13 @@ PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
 
 **相依鏈（務必照序）：** 正式網域 → sitemap/robots + JSON-LD → 隱私頁（先於 analytics）→ analytics。
 
-**已備齊（勿重做）：** 故事牆、全螢幕播放器、每集落地頁 + **每集 OG 圖**（`lib/story-metadata.ts`）、**每集分享鈕**（`ShareButton`）、`/topic` 與車種 SEO 頁、RSS `/feed.xml`、`ageRange`、PWA／收藏／繼續收聽、ConnectHub（Spotify／Apple 優先 + 訂閱文案）、相關推薦、**`/games` 遊樂園**（車車吃星星／溫柔任務／車車大冒險／繽紛方塊）、`/legal` 與版權合規、逐字字幕管線、角色定裝照名冊、Apple 15 分鐘同步、**viewport 開放縮放**。
+**已備齊（勿重做）：** 故事牆、全螢幕播放器、每集落地頁 + **每集 OG 圖**（`lib/story-metadata.ts`）、**每集分享鈕**（`ShareButton`）、`/topic` 與車種 SEO 頁、RSS `/feed.xml`、`ageRange`、PWA／收藏／繼續收聽、ConnectHub（Spotify／Apple 優先 + 訂閱文案）、相關推薦、**`/games` 遊樂園**（車車大冒險／繽紛方塊／車車卡丁車／海盜卡丁車大賽）、`/legal` 與版權合規、逐字字幕管線、角色定裝照名冊、Apple 15 分鐘同步、**viewport 開放縮放**。
 
 **待決策（實作前定）：** ① 自訂網域最終選擇（`chechepark.tw` / `checheland.tw` / 其他）— **基建已就緒**（`NEXT_PUBLIC_SITE_URL` + `CANONICAL_SITE_URL` fallback，P0 ✅）；② analytics 工具（Vercel Analytics 省事 / Plausible 無 cookie / 不做）③ ~~縮放（鎖 vs 家長大字模式）~~ → **已決：開放縮放**（`app/layout.tsx`，P2 ✅）④ 角色圖鑑與親子提示是否現在做（需 Bonbon & 馬米 文案）⑤ **現有 4 款遊樂園遊戲與 STEM 原則** — 見下方「產品決策」⑥ **兒童拍照分享** — 是否做、如何去識別化；跨裝置圖鑑是否需帳號與家長同意（見 [RESEARCH.md](./RESEARCH.md) 風險段）。
 
 ### 產品決策：現有遊樂園 vs STEM「不計時、不競爭」
 
-現有 4 款遊戲（車車吃星星、溫柔任務、車車大冒險、繽紛方塊）含 **localStorage 最佳分／生命數** 等競賽元素，與 STEM 路線「學齡前避免計時與競爭計分」不完全一致。
+現有 4 款遊戲（車車大冒險、繽紛方塊、車車卡丁車、海盜卡丁車大賽）中，block-drop／car-adventure 含 **localStorage 最佳分／生命數** 等競賽元素，與 STEM 路線「學齡前避免計時與競爭計分」不完全一致。
 
 **建議方向（擇一或混合，實作 STEM-P2 前定案）：**
 
@@ -307,10 +311,10 @@ repo secret 存 `LINE_NOTIFY_TOKEN` 或 `DISCORD_WEBHOOK_URL`；同步偵測新�
 `lib/gamekit/` 九大模組骨架（renderer/loop/input/style/sprite/tilemap/juice/save/meta/scene/audio）、32 色盤、四款 viewport 定錨、[ART-BIBLE.md](./lib/gamekit/ART-BIBLE.md)、`PixelGameCanvas` + `usePixelRenderer`/`usePixelGameSurface`、`lib/gamekit/gamekit.test.ts`。**Phase 1 待做**：四款 canvas 遊戲遷移 pixel 管線。
 
 ### ~~Game Kit Phase 1 — 渲染管線＋設計系統套用四款~~　`P3 · L · Phase 0 ✅`　〔eng+design〕 ✅
-四款接入 Game Kit：`PixelGameCanvas`（car-mission、car-adventure）、`GamePixelBoard`（car-star、block-drop）；內部解析度定錨、整數倍放大、`lib/gamekit/bridge` 調色盤、點陣 HUD（大冒險）。
+四款接入 Game Kit：`PixelGameCanvas`（car-adventure）、`GamePixelBoard`（block-drop）；kart／pirate-kart 為 iframe／獨立頁。內部解析度定錨、整數倍放大、`lib/gamekit/bridge` 調色盤、點陣 HUD（大冒險）。
 
 ### ~~Game Kit Phase 2 — sprite sheet／tileset 佔位美術~~　`P3 · L · Phase 1 ✅`　〔eng+design〕 ✅
-程序生成 16×16 sheet（`procedural-sheets`／`assets`／`sprite-defs`／`tileset-draw`）；四款接入：car-mission 卡車＋螢火虫 `SpriteAnimator`、car-adventure 草地磚／金幣／尖刺 tile、car-star 道路 tile 背景、block-drop 七色方塊 tile。
+程序生成 16×16 sheet（`procedural-sheets`／`assets`／`sprite-defs`／`tileset-draw`）；canon 接入：car-adventure 草地磚／金幣／尖刺 tile、block-drop 七色方塊 tile。（**已移除** car-mission／car-star 專用 sheet）
 
 ### ~~Game Kit Phase 3 — chiptune BGM／SFX 混音~~　`P3 · L · Phase 2 ✅`　〔eng+design〕 ✅
 `lib/gamekit/chiptune-bgm` 四款程序生成循環 BGM；`GameKitAudioBus` music／sfx 分軌；擴充 `useGameAudio(gameId)`（`playBgm`／`pauseBgm`／`stopBgm`）；四款遊戲接入，分頁隱藏暫停 BGM。
@@ -319,7 +323,7 @@ repo secret 存 `LINE_NOTIFY_TOKEN` 或 `DISCORD_WEBHOOK_URL`；同步偵測新�
 `lib/gamekit/juice` 粒子／震動／頓幀／緩動；四款接入 juice；`useCoarsePointer`／`useSwipeGesture`／`mobile-controls` 手機大按鈕＋滑動手勢。
 
 ### ~~Game Kit Phase 5 — Tiled／JSON 關卡 loader~~　`P3 · L · Phase 4 ✅`　〔eng〕 ✅
-`adventure-level`／`tiled-loader`；car-adventure 2 關 JSON + 關卡選擇；car-star 3 迷宮選擇。
+`adventure-level`／`tiled-loader`；car-adventure 2 關 JSON + 關卡選擇。
 
 ### ~~Game Kit Phase 6 — 跨遊戲 meta~~　`P3 · L · Phase 5 ✅`　〔eng+design〕 ✅
 `session`／`garage`／`stickers`、存檔 v2（`cheche:gamekit-profile`）與舊 best 遷移；`/games` 世界地圖 hub（`GamesWorldMap`、車庫、貼紙簿）；四款 `reportGameSession`。
@@ -331,19 +335,25 @@ repo secret 存 `LINE_NOTIFY_TOKEN` 或 `DISCORD_WEBHOOK_URL`；同步偵測新�
 `ObjectPool`、`preload`／`GameLoadingGate`、`useGameLoop` 固定步進＋插值（car-adventure）、hub 預載、`/games` layout a11y。**Game Kit 八階段路線完成**。
 
 ### ~~車車卡丁車 Kart P0 — Scaffold~~　`P3 · M · 無`　〔eng〕 ✅
-`kart-game/`（Vite+TS+Three）：固定步進、kinematic 方塊車、spline 練習道、跟隨相機、HUD；`npm run build:kart` → `public/kart/`；`/games/kart` iframe 嵌入。**P1–P6 待做**：漂移調校、檢查點/AI、GLB/音效、觸控打磨、多人（選配）。
+`kart-game/`（Vite+TS+Three）：固定步進、kinematic 方塊車、spline 練習道、跟隨相機、HUD；`npm run build:kart` → `public/kart/`；`/games/kart` iframe 嵌入。
 
-### ① 車車吃星星精進　`P3 · M · Game Kit Phase 2`　〔eng+design〕
-多迷宮（3–5）、四種追逐 AI、像素 tileset、4 方向行駛幀、連段/過關 juice、三星制。對標街機能量感，兒童原創。
+### ❄️ FROZEN — 待 STEM-P1 Gate 之後｜四款 pixel 精進
 
-### ② 繽紛方塊精進　`P3 · M · Game Kit Phase 2`　〔eng+design〕
+> **玩法凍結：** 下列精進、kart P1–P6、多人功能暫不實作。canon 四款維持現況。
+
+### ① 車車吃星星精進　`已移除 · car-star`　〔eng+design〕
+（遊戲已下架；歷史規格僅供對照。）
+
+### ② 繽紛方塊精進　`P3 · M · Game Kit Phase 2`　〔eng+design〕 ❄️ FROZEN
 像素方塊皮膚、Marathon/Sprint/Ultra/**兒童模式**（慢速、不會輸）、消行音畫 juice（依音階奏音）、T-spin/combo 計分（挑戰模式）。
 
-### ③ 車車大冒險精進　`P3 · L · Game Kit + Tiled`　〔eng+design〕
-**四款最重**：Tiled 關卡管線、6–10 關+世界地圖、檢查點、多敵人類型、視差背景、boss 關；coyote/buffer 已有，加 hitstop/落地塵土。age 5–12，需兒童/挑戰雙模式。
+### ③ 車車大冒險精進　`P3 · L · Game Kit + Tiled`　〔eng+design〕 ❄️ FROZEN
+Tiled 關卡管線、6–10 關+世界地圖、檢查點、多敵人類型、視差背景、boss 關。
 
-### ④ 溫柔任務（car-mission）精進　`P3 · M · Game Kit Phase 2`　〔eng+design〕
-**類型確認**：三車道縱向溫柔駕駛（非俯視賽車）。像素卡車+螢火虫動畫、多任務類型（蒐集/限時/避障）、道路 parallax、溫柔度 UI 像素化、與 STEM 調性最合。
+### ④ 溫柔任務（car-mission）精進　`已移除 · car-mission`　〔eng+design〕
+（遊戲已下架；歷史規格僅供對照。）
+
+### kart P1–P6、多人　`❄️ FROZEN — 待 STEM-P1 Gate 之後`
 
 ### ~~遊樂園 hub 世界地圖化~~　`P3 · M · Phase 6 meta`　〔design+eng〕 ✅
 `/games` 新增 `GamesWorldMap`（星星、三星、車庫、貼紙簿、各款最佳）；保留遊戲卡片入口。
@@ -352,7 +362,7 @@ repo secret 存 `LINE_NOTIFY_TOKEN` 或 `DISCORD_WEBHOOK_URL`；同步偵測新�
 
 ## 遊樂園精進：Game Kit × 市售 pixel 品質
 
-> 完整研究與驗收表：[RESEARCH.md — 四款小遊戲精進](./RESEARCH.md#2026-06-09四款小遊戲精進方案對標可市售-pixel-game)。現況元件：`components/games/{CarStarGame,BlockDropGame,CarPlatformer,CarMissionGame}.tsx`、`GameShell`、`lib/games/catalog.ts`。
+> 完整研究與驗收表：[RESEARCH.md — 四款小遊戲精進](./RESEARCH.md#2026-06-09四款小遊戲精進方案對標可市售-pixel-game)。現況元件：`BlockDropGame`、`CarPlatformer`、`/games/kart`、`/games/pirate-kart`；目錄 `data/games.ts`。
 >
 > **與 STEM 路線關係**：精進版屬「遊樂園經典區」商業級升級；新 STEM 沙盒仍守無計時／無排行榜。每款加**兒童模式**（預設）＋可選挑戰模式，化解年齡與競賽張力。
 
@@ -378,10 +388,10 @@ repo secret 存 `LINE_NOTIFY_TOKEN` 或 `DISCORD_WEBHOOK_URL`；同步偵測新�
 
 | slug | 現況 | 內部解析度（建議） | 精進核心 |
 |------|------|-------------------|----------|
-| `car-star` | 單迷宮、canvas 形狀 | 240×320 | 多迷宮、4 AI、tileset、連段 |
-| `block-drop` | CSS 漸層方塊、無 BGM | 200×360 | 像素皮、多模式、消行 juice |
-| `car-adventure` | 1 關硬編、形狀 canvas | 320×180 | **Tiled 管線**、6–10 關、boss |
-| `car-mission` | 三車道溫柔任務、480×320 | 320×240 | 像素 lane runner、多任務 |
+| `car-adventure` | Game Kit 2 關 | 320×180 | Tiled 管線、6–10 關、boss ❄️ |
+| `block-drop` | Game Kit 方塊 | 200×360 | 多模式、消行 juice ❄️ |
+| `kart` | iframe 3D | — | P1–P6 調校 ❄️ |
+| `pirate-kart` | 16-bit canvas | — | 內容擴充 ❄️ |
 
 ### 八階段路線（相依序）
 
@@ -390,7 +400,7 @@ Phase 0 定錨 → 1 渲染+UI（起手式）→ 2 美術 → 3 音訊 → 4 jui
 → 5 內容深度 → 6 元系統/hub → 7 外框/a11y → 8 效能 QA
 ```
 
-**分款出貨建議**：Phase 0–1 四款一起做 → Phase 2–4 先做 **car-star + car-mission**（3–7 歲核心）→ 再做 block-drop → 最後 car-adventure（工時最大）。
+**分款出貨建議（歷史）：** Phase 0–8 已完成於 canon 四款；精進項 ❄️ FROZEN。
 
 ### 跨遊戲 IP（Phase 6）
 
@@ -401,7 +411,7 @@ Phase 0 定錨 → 1 渲染+UI（起手式）→ 2 美術 → 3 音訊 → 4 jui
 | 用途 | 工具 |
 |------|------|
 | 像素美術 | Aseprite；佔位 Kenney CC0 |
-| 關卡 | Tiled → JSON（大冒險、溫柔任務） |
+| 關卡 | Tiled → JSON（大冒險） |
 | SFX | jsfxr / 短 ogg |
 | BGM | BeepBox / FamiStudio |
 | 點陣字 | pixel TTF + pixelated 或 bitmap font |
@@ -566,7 +576,7 @@ T+2d    社群貼文（B 戰場）
 **Completed:** main（2026-06）
 
 ### Game Kit Phase 1（四款 pixel 管線）
-`PixelGameCanvas`／`GamePixelBoard` 套用四款；car-star `CELL=16`（240×208）、block-drop `CELL=18`、car-mission 320×240 buffer、car-adventure 320×180 縮放渲染 + 點陣 HUD。
+`PixelGameCanvas`／`GamePixelBoard` 套用 car-adventure／block-drop；kart／pirate-kart 獨立載入。
 **Completed:** main（2026-06）
 
 ### Game Kit Phase 0（`lib/gamekit` 骨架）
@@ -586,7 +596,7 @@ T+2d    社群貼文（B 戰場）
 **Completed:** main（2026-06）
 
 ### 遊樂園小遊戲 hub + 4 款原創遊戲 + 黏土風視覺
-`/games` 目錄卡（車車吃星星、怪獸卡車溫柔任務、車車大冒險橫向過關、繽紛方塊）；首頁馬卡龍「去遊樂園玩」入口；卡片黏土風 SVG 縮圖（`GameThumbArt`、`lib/games/clay-svg.ts`）。各遊戲：觸控、localStorage 最佳分、`prefers-reduced-motion`、暫停。
+`/games` 目錄卡（車車大冒險、繽紛方塊、車車卡丁車、海盜卡丁車大賽）；首頁「去遊樂園玩」入口；卡片黏土風 SVG 縮圖（`GameThumbArt`）。各遊戲：觸控、progress-store 最佳分、`prefers-reduced-motion`、暫停。
 **Completed:** main（2026-06）
 
 ### 版權合規與 `/legal`

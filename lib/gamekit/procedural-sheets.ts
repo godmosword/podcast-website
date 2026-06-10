@@ -2,11 +2,9 @@ import { MASTER_PALETTE } from "./palette";
 
 export type SheetId =
   | "tiles-common"
-  | "truck-mission"
   | "firefly"
   | "blocks-drop"
-  | "car-topdown"
-  | "star-icon";
+  | "car-topdown";
 
 const TILE = 16;
 
@@ -25,8 +23,6 @@ const C = {
   brickDark: MASTER_PALETTE[28],
   coin: MASTER_PALETTE[7],
   spike: MASTER_PALETTE[19],
-  truck: MASTER_PALETTE[9],
-  truckDark: MASTER_PALETTE[6],
   wheel: MASTER_PALETTE[18],
   glow: MASTER_PALETTE[23],
 };
@@ -82,21 +78,6 @@ function drawStarTile(ctx: CanvasRenderingContext2D, ox: number, oy: number): vo
   px(ctx, ox + 6, oy + 2, 4, 10, C.yellow);
   px(ctx, ox + 3, oy + 6, 10, 4, C.yellow);
   px(ctx, ox + 5, oy + 5, 6, 6, C.cream);
-}
-
-function drawTruckFrame(
-  ctx: CanvasRenderingContext2D,
-  ox: number,
-  oy: number,
-  bump: number,
-): void {
-  const y = oy + bump;
-  px(ctx, ox + 2, y + 6, 20, 8, C.truck);
-  px(ctx, ox + 14, y + 4, 8, 6, C.truckDark);
-  px(ctx, ox + 16, y + 5, 4, 3, C.sky);
-  px(ctx, ox + 4, y + 12, 5, 3, C.wheel);
-  px(ctx, ox + 15, y + 12, 5, 3, C.wheel);
-  px(ctx, ox + 1, y + 7, 1, 4, C.ink);
 }
 
 function drawFireflyFrame(
@@ -156,15 +137,6 @@ function buildTilesCommon(): HTMLCanvasElement {
   return c;
 }
 
-function buildTruckMission(): HTMLCanvasElement {
-  const c = sheet(48, 16);
-  const ctx = c.getContext("2d")!;
-  ctx.imageSmoothingEnabled = false;
-  drawTruckFrame(ctx, 0, 0, 0);
-  drawTruckFrame(ctx, 24, 0, 1);
-  return c;
-}
-
 function buildFirefly(): HTMLCanvasElement {
   const c = sheet(16, 8);
   const ctx = c.getContext("2d")!;
@@ -203,21 +175,11 @@ function buildCarTopdown(): HTMLCanvasElement {
   return c;
 }
 
-function buildStarIcon(): HTMLCanvasElement {
-  const c = sheet(TILE, TILE);
-  const ctx = c.getContext("2d")!;
-  ctx.imageSmoothingEnabled = false;
-  drawStarTile(ctx, 0, 0);
-  return c;
-}
-
 const BUILDERS: Record<SheetId, () => HTMLCanvasElement> = {
   "tiles-common": buildTilesCommon,
-  "truck-mission": buildTruckMission,
   firefly: buildFirefly,
   "blocks-drop": buildBlocksDrop,
   "car-topdown": buildCarTopdown,
-  "star-icon": buildStarIcon,
 };
 
 const cache = new Map<SheetId, HTMLCanvasElement>();
