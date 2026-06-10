@@ -1,0 +1,96 @@
+/* ============ 集中微動畫系統（回饋 + 極少量氛圍） ============ */
+
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes gentle-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(calc(-1 * var(--float-amp)));
+  }
+}
+
+@keyframes star-burst-particle {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--burst-x), var(--burst-y)) scale(0.4);
+  }
+}
+
+/* 進場彈入 */
+.pop-in,
+.popIn {
+  animation: pop-in var(--motion-pop) both;
+}
+
+/* 按下實體感 */
+.press-squash {
+  transition:
+    transform var(--motion-press),
+    box-shadow var(--motion-press);
+}
+
+.press-squash:active {
+  transform: scale(0.96);
+}
+
+/* 氛圍浮動（全站僅掛載 2 處：hero 場景 + 夜晚月亮） */
+.gentle-float {
+  animation: gentle-float var(--motion-float) ease-in-out infinite;
+}
+
+/* 收藏星星迸發 */
+.star-burst-wrap {
+  position: relative;
+}
+
+.star-burst-particle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  pointer-events: none;
+  font-size: 8px;
+  line-height: 1;
+  animation: star-burst-particle 0.45s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pop-in,
+  .popIn,
+  .chipPop {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .press-squash:active {
+    transform: none;
+  }
+
+  .gentle-float {
+    animation: none;
+  }
+
+  .star-burst-particle {
+    animation: none;
+    opacity: 0;
+  }
+}

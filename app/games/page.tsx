@@ -27,7 +27,7 @@ function GameCard({ game, index }: { game: GameMeta; index: number }) {
     <li className={styles.gridItem}>
       <Link
         href={game.href}
-        className={`${styles.card} popIn`}
+        className={`${styles.card} popIn press-squash`}
         aria-label={`${game.title}，${game.ageRange}，約 ${game.estMinutes} 分鐘`}
         style={{
           boxShadow: `var(--shadow-md), 0 6px 0 ${game.accent}`,

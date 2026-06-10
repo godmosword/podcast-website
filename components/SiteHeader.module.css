@@ -21,6 +21,10 @@
   line-height: 0;
 }
 
+[data-theme="night"] .scene {
+  animation: gentle-float var(--motion-float) ease-in-out infinite;
+}
+
 .heroImage {
   display: block;
   width: 100%;
@@ -51,9 +55,6 @@
   width: 48px;
   max-width: none;
   margin: 0;
-  /* 打招呼動畫：每頁左上吉祥物輕點頭揮手；reduced-motion 由 globals 全域關閉。 */
-  transform-origin: 50% 85%;
-  animation: mascot-greet 3.6s ease-in-out infinite;
   z-index: auto;
 }
 
@@ -90,10 +91,18 @@
     rgba(232, 212, 138, 0) 72%
   );
   box-shadow: 12px -6px 0 -4px rgba(240, 234, 216, 0.35);
+  animation: gentle-float var(--motion-float) ease-in-out infinite;
 }
 
 [data-theme="night"] .title {
   text-shadow: 2px 2px 0 rgba(28, 36, 64, 0.9), 3px 3px 0 var(--c-yellow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="night"] .scene,
+  [data-theme="night"] .sun {
+    animation: none;
+  }
 }
 
 .title {

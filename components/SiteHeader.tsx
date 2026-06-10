@@ -133,12 +133,12 @@ export default function SiteHeader({
         {latestStory && (
           <Link
             href={`/story/${latestStory.slug}`}
-            className={styles.primaryCta}
+            className={`${styles.primaryCta} press-squash`}
           >
             ▶ 看圖聽最新一集
           </Link>
         )}
-        <Link href="/games" className={styles.secondaryCta}>
+        <Link href="/games" className={`${styles.secondaryCta} press-squash`}>
           <span className={styles.hubIconWrap} aria-hidden>
             <PlaygroundHubBadge size={28} className={styles.hubBadge} />
           </span>

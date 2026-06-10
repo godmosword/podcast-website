@@ -19,7 +19,7 @@ export default function PlayButton({
   return (
     <Link
       href={href}
-      className={`${styles.button} ${inline ? styles.inline : ""} ${className}`.trim()}
+      className={`${styles.button} press-squash ${inline ? styles.inline : ""} ${className}`.trim()}
       style={{ backgroundColor: color }}
     >
       {children}

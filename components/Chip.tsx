@@ -20,7 +20,7 @@ export function ChipButton({
       ref={buttonRef}
       type="button"
       onClick={onClick}
-      className={`${styles.chip} ${active ? `${styles.active} ${styles.chipPop}` : ""} ${className}`.trim()}
+      className={`${styles.chip} press-squash ${active ? `${styles.active} ${styles.chipPop}` : ""} ${className}`.trim()}
       aria-pressed={active}
     >
       {children}

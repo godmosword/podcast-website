@@ -1,3 +1,5 @@
+@import "./motion.css";
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -200,17 +202,6 @@ button:focus-visible {
 }
 
 /* ============ 全域動畫（module CSS 以名稱引用） ============ */
-@keyframes pop-in {
-  0% {
-    opacity: 0;
-    transform: translateY(8px) scale(0.96);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
 @keyframes float-y {
   0%,
   100% {
@@ -296,11 +287,6 @@ button:focus-visible {
   100% {
     transform: translateX(0) rotate(0deg);
   }
-}
-
-/* 進場：依序彈入（卡片/區塊用 inline animation-delay 做 stagger） */
-.popIn {
-  animation: pop-in var(--motion-pop) both;
 }
 
 /* ============ 螢光筆色塊（副標 / 標籤 / EP / CTA 強調） ============ */
