@@ -3,7 +3,7 @@ import type { PlayerProfile } from "@/lib/gamekit/types";
 
 export const PROGRESS_STORAGE_KEY = "cheche:progress";
 export const PROGRESS_CHANGE_EVENT = "cheche:progress-change";
-export const PROGRESS_SCHEMA_VERSION = 1;
+export const PROGRESS_SCHEMA_VERSION = 2;
 
 export type CaptionSize = "sm" | "md" | "lg";
 export type GameScoreId = GameKitGameId | "kart" | "pirate-kart";
@@ -143,7 +143,11 @@ export function migrateProgress(): ProgressStore {
   const hasLegacy = Object.values(LEGACY_KEYS).some(
     (key) => localStorage.getItem(key) !== null,
   );
-  if (existing?.schemaVersion === PROGRESS_SCHEMA_VERSION && !hasLegacy) {
+  if (
+    existing &&
+    existing.schemaVersion >= PROGRESS_SCHEMA_VERSION &&
+    !hasLegacy
+  ) {
     return normalizeProgress(existing);
   }
 
@@ -217,6 +221,9 @@ export function migrateProgress(): ProgressStore {
       next.bestScores["car-adventure"] ?? next.gameProfile.bests["car-adventure"],
   };
 
+  if (!next.engagement) {
+    next.engagement = { ...DEFAULT_ENGAGEMENT };
+  }
   next.schemaVersion = PROGRESS_SCHEMA_VERSION;
   localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(next));
 

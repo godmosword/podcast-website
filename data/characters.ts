@@ -1,78 +1,94 @@
-/** 角色一級資料（圖鑑 UI 預留，本次僅資料層）。 */
+import rawCharacters from "./characters.json";
+
+/** 角色一級資料（canonical 來源：data/characters.json 六位定裝照）。 */
 export type Character = {
   id: string;
   name: string;
   vehicle: string;
   personality: string;
   appearsIn: string[];
+  ref?: string;
   unlockCondition?: string;
 };
 
-export const CHARACTERS: Character[] = [
-  {
-    id: "an-an",
-    name: "安安",
-    vehicle: "救護車",
-    personality: "勇敢、願意開口求助",
-    appearsIn: ["ambulance"],
-  },
-  {
-    id: "dong-dong",
-    name: "東東",
-    vehicle: "挖土機",
-    personality: "有點膽小但願意嘗試",
-    appearsIn: ["excavator"],
-  },
-  {
-    id: "ling-ling",
-    name: "鈴鈴",
-    vehicle: "清潔車",
-    personality: "守信用、說到做到",
-    appearsIn: ["sweeper"],
-  },
-  {
-    id: "xiao-hong",
-    name: "小紅",
-    vehicle: "賽車",
-    personality: "熱愛比賽、學會面對挫折",
-    appearsIn: ["racecar"],
-  },
-  {
-    id: "xiao-fei",
-    name: "小飛",
-    vehicle: "無人機",
-    personality: "樂於助人、遵守飛行規則",
-    appearsIn: ["drone"],
-  },
-  {
-    id: "bonbon-ev",
-    name: "Bonbon 電動車",
-    vehicle: "電動車",
-    personality: "充滿想像力與創意",
-    appearsIn: ["ev"],
-  },
-  {
-    id: "xiao-ju",
-    name: "小橘",
-    vehicle: "高鐵",
-    personality: "遇到改變不慌張、冷靜想辦法",
-    appearsIn: ["ep-7"],
-  },
-  {
-    id: "monster-truck",
-    name: "怪獸卡車",
-    vehicle: "怪獸卡車",
-    personality: "大聲勇敢但願意學習溫柔",
-    appearsIn: ["ep-8"],
-  },
-  {
-    id: "duo-duo",
-    name: "多多",
-    vehicle: "恐龍車",
-    personality: "愛吃糖、學習好習慣",
-    appearsIn: ["ep-9"],
-  },
-];
+type RawCharacter = {
+  name: string;
+  aliases?: string[];
+  vehicle: string;
+  desc: string;
+  ref: string;
+  firstSeen?: string;
+};
+
+const ID_BY_CANONICAL_NAME: Record<string, string> = {
+  鈴鈴清潔車: "ling-ling",
+  恐龍車多多: "duo-duo",
+  安安救護車: "an-an",
+  小紅賽車: "xiao-hong",
+  怪獸卡車: "monster-truck",
+  東東挖土機: "dong-dong",
+};
+
+const VEHICLE_ZH: Record<string, string> = {
+  "street sweeper": "清潔車",
+  "dinosaur car": "恐龍車",
+  ambulance: "救護車",
+  "race car": "賽車",
+  "monster truck": "怪獸卡車",
+  excavator: "挖土機",
+};
+
+/** 車種對應的手動維護集數 slug（與 firstSeen 合併）。 */
+const VEHICLE_STORY_SLUG: Record<string, string> = {
+  "street sweeper": "sweeper",
+  ambulance: "ambulance",
+  "race car": "racecar",
+  excavator: "excavator",
+};
+
+const PERSONALITY_BY_ID: Record<string, string> = {
+  "an-an": "勇敢、願意開口求助",
+  "dong-dong": "有點膽小但願意嘗試",
+  "ling-ling": "守信用、說到做到",
+  "xiao-hong": "熱愛比賽、學會面對挫折",
+  "monster-truck": "大聲勇敢但願意學習溫柔",
+  "duo-duo": "愛吃糖、學習好習慣",
+};
+
+function shortName(entry: RawCharacter, id: string): string {
+  const aliases = entry.aliases ?? [];
+  const preferred = aliases.find((a) => a.length <= 4 && !a.includes("車"));
+  if (preferred) return preferred;
+  if (id === "monster-truck") return "怪獸卡車";
+  return entry.name.replace(/車$/, "").slice(-2) || entry.name;
+}
+
+function appearsInFor(entry: RawCharacter): string[] {
+  const slugs = new Set<string>();
+  if (entry.firstSeen) slugs.add(entry.firstSeen);
+  const vehicleSlug = VEHICLE_STORY_SLUG[entry.vehicle];
+  if (vehicleSlug) slugs.add(vehicleSlug);
+  return Array.from(slugs);
+}
+
+function toCharacter(entry: RawCharacter): Character {
+  const id = ID_BY_CANONICAL_NAME[entry.name];
+  if (!id) {
+    throw new Error(`Unknown character in characters.json: ${entry.name}`);
+  }
+  return {
+    id,
+    name: shortName(entry, id),
+    vehicle: VEHICLE_ZH[entry.vehicle] ?? entry.vehicle,
+    personality: PERSONALITY_BY_ID[id] ?? "車車好朋友",
+    appearsIn: appearsInFor(entry),
+    ref: entry.ref,
+  };
+}
+
+export const CHARACTERS: Character[] = (rawCharacters as RawCharacter[]).map(
+  toCharacter,
+);
 
 const byId = new Map(CHARACTERS.map((c) => [c.id, c]));
 

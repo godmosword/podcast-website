@@ -108,7 +108,53 @@ describe("getProgressSync", () => {
     migrateProgress();
   });
 
-  it("has schemaVersion", () => {
-    expect(getProgressSync().schemaVersion).toBe(1);
+  it("has schemaVersion 2 with engagement", () => {
+    const p = getProgressSync();
+    expect(p.schemaVersion).toBe(2);
+    expect(p.engagement.hotspotTaps).toBe(0);
+  });
+});
+
+describe("progress-store v1 to v2 migration", () => {
+  beforeEach(() => {
+    vi.unstubAllGlobals();
+    mockLocalStorage();
+  });
+
+  it("upgrades v1 store with engagement defaults", () => {
+    localStorage.setItem(
+      "cheche:progress",
+      JSON.stringify({
+        schemaVersion: 1,
+        favorites: [],
+        continue: null,
+        sfxEnabled: true,
+        preferences: {
+          captionSize: "md",
+          gameKit: { kidsMode: true },
+        },
+        bestScores: {},
+        gameProfile: {
+          version: 2,
+          stars: 0,
+          unlockedVehicles: ["小黃"],
+          bests: {},
+          medals: {},
+          stickers: [],
+          gamesPlayed: {},
+        },
+        unlocks: { characters: [], vehicles: [] },
+      }),
+    );
+
+    const migrated = migrateProgress();
+    expect(migrated.schemaVersion).toBe(2);
+    expect(migrated.engagement).toEqual({
+      hotspotTaps: 0,
+      hotspotIds: {},
+      storiesCompleted: [],
+      reflectionShown: [],
+      platformClicks: {},
+    });
   });
 });
