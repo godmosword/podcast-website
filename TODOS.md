@@ -561,7 +561,7 @@ T+2d    社群貼文（B 戰場）
 
 ### 收聽平台圖示視覺統一（白底膠囊卡）
 四平台等高白底膠囊（`PLATFORM_MARK_TILE` 60px）、2×2 手機 grid；Apple `wide` 徽章隱藏外部 label；Spotify PNG 939×940 驗證 Retina 足夠；HARD-RULES Spotify 白底註記。
-**Completed:** `3051693`（2026-06）
+**Completed:** `34e0154`（2026-06）
 
 ### 首屏 CTA 層級重排 × 睡前模式 × 微動畫系統
 主 CTA「▶ 看圖聽最新一集」+ 次 CTA「去遊樂園玩」；受眾定位句上移 SiteHeader；`[data-theme="night"]` token 覆寫 + `ThemeProvider` + FOUC inline script；車種 chips 橫滑單列 + fade；`app/motion.css`（`press-squash`／`pop-in`／`star-burst`／`gentle-float`）；睡眠計時器夜晚模式一次性提示。
