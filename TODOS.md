@@ -560,7 +560,7 @@ T+2d    社群貼文（B 戰場）
 
 ### 架構重塑第一批（Feature Flags × 路由薄殼 × Home Registry）
 `lib/features.ts` 集中 flag；`data/home-sections.ts` registry 驅動首頁；pirate-kart 邏輯抽至 `lib/games/pirate-kart/*` + `PirateKartGame`；`reportGameSession` 接線；ADR `docs/adr/0001-shell-kernel-architecture.md`。
-**Completed:** `dcceca1` `e280a6d` `34afdcb`（2026-06）
+**Completed:** `dcceca1` `e280a6d` `ddeae8b`（2026-06）
 
 ### 移除故事頁插圖點按互動（tap-to-explore）
 下架插圖虛線橢圓提示層；保留 `reflectionPrompt`、完播／重訪量測。刪除對應元件、資料與 engagement 量測欄位。
