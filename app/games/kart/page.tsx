@@ -27,9 +27,9 @@ export default function KartGamePage() {
         allow="autoplay; gamepad *"
         loading="eager"
       />
+      {/* Dev: ensure `npm run build:kart` has run before deploy. */}
       <p className={styles.kartNote}>
-        3D 卡丁車以獨立模組載入；若畫面空白請重新整理，或確認已執行{" "}
-        <code>npm run build:kart</code>。
+        畫面沒出來嗎？重新整理一下試試 🛞
       </p>
     </main>
   );
