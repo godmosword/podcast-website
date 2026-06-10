@@ -6,6 +6,13 @@ import type { PlatformIcon } from "@/lib/platforms";
  */
 export const BRAND_ICON_MIN_PX = 21;
 
+/** 全站平台圖示統一外框（PlatformBrandMark）；僅允許在此調整。 */
+export const PLATFORM_MARK_TILE = {
+  widthPx: 120,
+  heightPx: 44,
+  imageMaxHeightPx: 28,
+} as const;
+
 /** 僅供文案／邊框強調；禁止作為平台圖示底色。 */
 export const BRAND_COLORS = {
   spotify: "#1DB954",
@@ -19,44 +26,31 @@ export const BRAND_COLORS = {
 
 export type PlatformMarkSpec = {
   src: string;
-  width: number;
-  height: number;
-  /** 圖示實際顯示高度（px） */
-  displayHeight: number;
-  background: "white" | "transparent";
-  wide?: boolean;
+  /** 供 next/image 佈局；顯示尺寸由 PLATFORM_MARK_TILE 統一控制 */
+  intrinsicWidth: number;
+  intrinsicHeight: number;
 };
 
 export const PLATFORM_MARKS: Record<PlatformIcon, PlatformMarkSpec> = {
   spotify: {
     src: "/brand/spotify-icon-green.png",
-    width: 40,
-    height: 40,
-    displayHeight: 32,
-    background: "white",
+    intrinsicWidth: 940,
+    intrinsicHeight: 940,
   },
   apple: {
     src: "/brand/apple-podcasts-listen-badge-zh-hant.svg",
-    width: 148,
-    height: 36,
-    displayHeight: 32,
-    background: "transparent",
-    wide: true,
+    intrinsicWidth: 165,
+    intrinsicHeight: 40,
   },
   youtube: {
     src: "/brand/youtube-icon.svg",
-    width: 46,
-    height: 32,
-    displayHeight: 28,
-    background: "white",
+    intrinsicWidth: 158,
+    intrinsicHeight: 110,
   },
   kkbox: {
     src: "/brand/kkbox-logo.svg",
-    width: 72,
-    height: 18,
-    displayHeight: 16,
-    background: "white",
-    wide: true,
+    intrinsicWidth: 786,
+    intrinsicHeight: 164,
   },
 };
 

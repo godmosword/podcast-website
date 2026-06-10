@@ -39,7 +39,7 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  width: 64px;
+  width: 120px;
   text-decoration: none;
   transition: transform var(--motion-press);
 }

@@ -1,7 +1,11 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { BRAND_COLORS, PLATFORM_MARKS } from "./brand-assets";
+import {
+  BRAND_COLORS,
+  PLATFORM_MARKS,
+  PLATFORM_MARK_TILE,
+} from "./brand-assets";
 
 const BRAND_DIR = join(process.cwd(), "public/brand");
 
@@ -36,5 +40,13 @@ describe("brand assets compliance", () => {
 
   it("spotify mark uses official png not hand-drawn path", () => {
     expect(PLATFORM_MARKS.spotify.src).toMatch(/spotify-icon-green\.png$/);
+  });
+
+  it("uses a single shared tile size for all platforms", () => {
+    expect(PLATFORM_MARK_TILE.widthPx).toBeGreaterThanOrEqual(44);
+    expect(PLATFORM_MARK_TILE.heightPx).toBeGreaterThanOrEqual(44);
+    expect(PLATFORM_MARK_TILE.imageMaxHeightPx).toBeLessThan(
+      PLATFORM_MARK_TILE.heightPx,
+    );
   });
 });

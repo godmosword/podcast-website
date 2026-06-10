@@ -46,8 +46,9 @@
 1. **禁止刪除** `lib/brand-assets.test.ts` 內合規斷言。
 2. **禁止** 在 `PlatformBrandMark` 外加 `filter`、`transform`、動畫於品牌資產。
 3. **禁止** 以 CSS `background-color: platform.color` 包住平台圖示（社群 ICON 除外，見 `SOCIAL_ICON_PATHS`）。
-4. 更換官方檔案時：**必須**同步更新 `public/brand/SOURCES.md` 與本檔查證日期。
-5. Code review 檢查：`rg "PLATFORM_ICON_PATHS|buildTruckMission|9933CC|0073E6"` 不得出現於平台 UI 路徑（測試／歷史文件除外）。
+4. **禁止** 在 `PLATFORM_MARKS` 為各平台設定不同顯示高度；統一外框僅能改 `PLATFORM_MARK_TILE`（`lib/brand-assets.ts`）與 `PlatformBrandMark.module.css` 變數。
+5. 更換官方檔案時：**必須**同步更新 `public/brand/SOURCES.md` 與本檔查證日期。
+6. Code review 檢查：`rg "PLATFORM_ICON_PATHS|buildTruckMission|9933CC|0073E6"` 不得出現於平台 UI 路徑（測試／歷史文件除外）。
 
 ## 4. 指示性使用聲明
 
