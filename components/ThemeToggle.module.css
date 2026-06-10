@@ -22,6 +22,9 @@
 }
 
 .iconOnly {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
   min-width: 44px;
   min-height: 44px;
   padding: 0;
@@ -32,25 +35,30 @@
   line-height: 1;
 }
 
-.iconOnly:hover {
+.iconOnly:hover,
+.iconOnly:active {
   box-shadow: none;
-  transform: scale(1.08);
+  transform: none;
 }
 
-.iconOnly:active {
-  transform: scale(0.94);
+.glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35em;
+  height: 1.35em;
 }
 
 .label {
   line-height: 1;
 }
 
-.toggle:active {
+.toggle:not(.iconOnly):active {
   transform: scale(0.96);
 }
 
 @media (hover: hover) {
-  .toggle:hover {
+  .toggle:not(.iconOnly):hover {
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
   }

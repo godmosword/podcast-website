@@ -25,7 +25,9 @@ export default function ThemeToggle({
       aria-label={isNight ? "切換至日間模式" : "切換至夜晚模式"}
       aria-pressed={isNight}
     >
-      <span aria-hidden>{isNight ? "☀️" : "🌙"}</span>
+      <span className={styles.glyph} aria-hidden>
+        {isNight ? "☀️" : "🌙"}
+      </span>
       {!compact && !iconOnly && (
         <span className={styles.label}>{isNight ? "日間模式" : "夜晚模式"}</span>
       )}

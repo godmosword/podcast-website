@@ -67,7 +67,7 @@ function IconLink({
   );
 }
 
-/** 頁尾訂閱與追蹤：圓形圖示合併於同一區塊。 */
+/** 頁尾收聽與訂閱追蹤：分兩區塊，圓形圖示。 */
 export default function ConnectHub({
   id = "connect",
   className,
@@ -83,46 +83,60 @@ export default function ConnectHub({
       id={id || undefined}
       className={`${styles.hub}${className ? ` ${className}` : ""}`}
     >
-      <section className={styles.block} aria-labelledby={`${id}-heading`}>
-        <h2 id={`${id}-heading`} className={styles.blockTitle}>
-          <span className={`${styles.dot} ${styles.dotPlatform}`} aria-hidden />
-          訂閱與追蹤
-        </h2>
-        {platforms.length > 0 && (
+      {platforms.length > 0 && (
+        <section className={styles.block} aria-labelledby={`${id}-listen`}>
+          <h2 id={`${id}-listen`} className={styles.blockTitle}>
+            <span
+              className={`${styles.dot} ${styles.dotPlatform}`}
+              aria-hidden
+            />
+            收聽
+          </h2>
           <p className={styles.blockBlurb}>
             訂閱後，新集會自動出現在你的 Podcast App
           </p>
-        )}
-        <nav className={styles.row} aria-label="訂閱與社群連結">
-          {platforms.map((p) => (
-            <IconLink
-              key={p.label}
-              href={p.url}
-              label={p.label}
-              ariaLabel={`在 ${p.label} 訂閱`}
-              badgeStyle={{ background: p.color }}
-              onClick={() => trackPlatformClick(p.label, "footer-connect")}
-            >
-              <BrandSvg className={styles.icon}>
-                {PLATFORM_ICON_PATHS[p.icon]}
-              </BrandSvg>
-            </IconLink>
-          ))}
-          {socials.map((s) => (
-            <IconLink
-              key={s.label}
-              href={s.url}
-              label={s.label}
-              ariaLabel={`前往 ${s.label}`}
-              badgeStyle={{ background: s.background }}
-            >
-              <BrandSvg className={styles.icon}>
-                {SOCIAL_ICON_PATHS[s.icon]}
-              </BrandSvg>
-            </IconLink>
-          ))}
-        </nav>
-      </section>
+          <nav className={styles.row} aria-label="收聽平台">
+            {platforms.map((p) => (
+              <IconLink
+                key={p.label}
+                href={p.url}
+                label={p.label}
+                ariaLabel={`在 ${p.label} 收聽`}
+                badgeStyle={{ background: p.color }}
+                onClick={() => trackPlatformClick(p.label, "footer-connect")}
+              >
+                <BrandSvg className={styles.icon}>
+                  {PLATFORM_ICON_PATHS[p.icon]}
+                </BrandSvg>
+              </IconLink>
+            ))}
+          </nav>
+        </section>
+      )}
+
+      {socials.length > 0 && (
+        <section className={styles.block} aria-labelledby={`${id}-follow`}>
+          <h2 id={`${id}-follow`} className={styles.blockTitle}>
+            <span className={`${styles.dot} ${styles.dotSocial}`} aria-hidden />
+            訂閱追蹤
+          </h2>
+          <nav className={styles.row} aria-label="社群連結">
+            {socials.map((s) => (
+              <IconLink
+                key={s.label}
+                href={s.url}
+                label={s.label}
+                ariaLabel={`前往 ${s.label}`}
+                badgeStyle={{ background: s.background }}
+              >
+                <BrandSvg className={styles.icon}>
+                  {SOCIAL_ICON_PATHS[s.icon]}
+                </BrandSvg>
+              </IconLink>
+            ))}
+          </nav>
+        </section>
+      )}
     </div>
   );
 }

@@ -1,5 +1,8 @@
 .hub {
   margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   width: 100%;
   max-width: 640px;
   margin-left: auto;
@@ -43,6 +46,10 @@
 
 .dotPlatform {
   background: var(--leaf);
+}
+
+.dotSocial {
+  background: #e6683c;
 }
 
 .row {

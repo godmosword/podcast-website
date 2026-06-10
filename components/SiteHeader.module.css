@@ -132,8 +132,10 @@
 }
 
 .taglineRow {
-  position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   max-width: 100%;
 }
 
@@ -142,22 +144,6 @@
   color: var(--ink);
   font-size: 1.08rem;
   font-weight: 700;
-}
-
-.taglineRow :global(button) {
-  position: absolute;
-  left: calc(100% + 4px);
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-@media (max-width: 380px) {
-  .taglineRow :global(button) {
-    left: auto;
-    right: -44px;
-    top: 0;
-    transform: none;
-  }
 }
 
 .audienceNote {
