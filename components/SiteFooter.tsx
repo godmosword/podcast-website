@@ -9,9 +9,14 @@ const SUPPORT_URL = "";
 
 type SiteFooterProps = {
   compact?: boolean;
+  /** 首頁訂閱區已上移時，頁尾隱藏平台列避免重複 */
+  showPlatformSubscribe?: boolean;
 };
 
-export default function SiteFooter({ compact = false }: SiteFooterProps) {
+export default function SiteFooter({
+  compact = false,
+  showPlatformSubscribe = true,
+}: SiteFooterProps) {
   return (
     <footer className={`${styles.footer} ${compact ? styles.compact : ""}`}>
       <Doodle
@@ -47,7 +52,10 @@ export default function SiteFooter({ compact = false }: SiteFooterProps) {
         適合睡前親子共讀。
       </p>
 
-      <ConnectHub />
+      <ConnectHub
+        showPlatforms={showPlatformSubscribe}
+        id={showPlatformSubscribe ? "connect" : undefined}
+      />
 
       <div className={styles.bottomBar}>
         <Link href="/about" className={styles.aboutLink}>

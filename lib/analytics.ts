@@ -5,6 +5,7 @@ export type PlatformClickSource =
   | "story-cta"
   | "story-platforms"
   | "footer-connect"
+  | "home-subscribe"
   | "subscription-cta";
 
 /** 平台外連點擊：本機 engagement + Vercel Analytics 自訂事件。 */

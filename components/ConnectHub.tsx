@@ -15,6 +15,8 @@ type Props = {
   /** 錨點 id，供關於頁等連結至頁尾 */
   id?: string;
   className?: string;
+  /** 首頁等平台區已上移時，頁尾可只顯示社群 */
+  showPlatforms?: boolean;
 };
 
 function IconLink({
@@ -69,15 +71,19 @@ function IconLink({
 /**
  * 頁尾訂閱／追蹤：社群與收聽平台分開顯示，圖示下方附平台名稱。
  */
-export default function ConnectHub({ id = "connect", className }: Props) {
+export default function ConnectHub({
+  id = "connect",
+  className,
+  showPlatforms = true,
+}: Props) {
   const socials = visibleSocials();
-  const platforms = visiblePlatforms();
+  const platforms = showPlatforms ? visiblePlatforms() : [];
 
   if (socials.length === 0 && platforms.length === 0) return null;
 
   return (
     <div
-      id={id}
+      id={id || undefined}
       className={`${styles.hub}${className ? ` ${className}` : ""}`}
     >
       {socials.length > 0 && (

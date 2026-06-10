@@ -14,18 +14,3 @@
   color: var(--ink-soft);
 }
 
-.subscribe {
-  margin: 8px 0 0;
-  text-align: center;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--ink-soft);
-}
-
-.subscribe a {
-  margin-left: 6px;
-  font-weight: 700;
-  color: var(--ink);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
