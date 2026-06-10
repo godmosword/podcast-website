@@ -10,16 +10,6 @@ function touch(): EngagementMetrics {
   return getProgressSync().engagement;
 }
 
-export function recordHotspotTap(hotspotId: string): void {
-  void updateProgress((prev) => {
-    const engagement = { ...prev.engagement };
-    engagement.hotspotTaps += 1;
-    engagement.hotspotIds[hotspotId] =
-      (engagement.hotspotIds[hotspotId] ?? 0) + 1;
-    return { engagement };
-  });
-}
-
 export function recordStoryCompleted(slug: string): void {
   void updateProgress((prev) => {
     const engagement = { ...prev.engagement };

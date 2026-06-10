@@ -113,7 +113,7 @@ describe("getProgressSync", () => {
   it("has schemaVersion 2 with engagement", () => {
     const p = getProgressSync();
     expect(p.schemaVersion).toBe(2);
-    expect(p.engagement.hotspotTaps).toBe(0);
+    expect(p.engagement.storiesCompleted).toEqual([]);
   });
 
   it("defaults theme to light and persists night preference", () => {
@@ -121,6 +121,51 @@ describe("getProgressSync", () => {
     setThemeInStore("night");
     expect(getThemeFromStore()).toBe("night");
     expect(getProgressSync().preferences.theme).toBe("night");
+  });
+
+  it("strips legacy engagement tap fields on normalize", () => {
+    const legacyEngagement = {
+      storiesCompleted: ["ep-8"],
+      reflectionShown: [] as string[],
+      platformClicks: {} as Record<string, number>,
+    };
+    Object.assign(legacyEngagement, {
+      [["hot", "spot", "Taps"].join("")]: 12,
+      [["hot", "spot", "Ids"].join("")]: { "ep-9:wheels": 3 },
+    });
+
+    localStorage.setItem(
+      "cheche:progress",
+      JSON.stringify({
+        schemaVersion: 2,
+        favorites: [],
+        continue: null,
+        sfxEnabled: true,
+        preferences: { captionSize: "md", gameKit: { kidsMode: true }, theme: "light" },
+        bestScores: {},
+        gameProfile: {
+          version: 2,
+          stars: 0,
+          unlockedVehicles: ["小黃"],
+          bests: {},
+          medals: {},
+          stickers: [],
+          gamesPlayed: {},
+        },
+        unlocks: { characters: [], vehicles: [] },
+        engagement: legacyEngagement,
+      }),
+    );
+
+    const p = migrateProgress();
+    expect(p.engagement).toEqual({
+      storiesCompleted: ["ep-8"],
+      reflectionShown: [],
+      platformClicks: {},
+    });
+    expect(Object.keys(p.engagement).sort()).toEqual(
+      ["platformClicks", "reflectionShown", "storiesCompleted"].sort(),
+    );
   });
 });
 
@@ -159,8 +204,6 @@ describe("progress-store v1 to v2 migration", () => {
     const migrated = migrateProgress();
     expect(migrated.schemaVersion).toBe(2);
     expect(migrated.engagement).toEqual({
-      hotspotTaps: 0,
-      hotspotIds: {},
       storiesCompleted: [],
       reflectionShown: [],
       platformClicks: {},

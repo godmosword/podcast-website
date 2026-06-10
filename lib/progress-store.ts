@@ -17,8 +17,6 @@ export type ContinueState = {
 };
 
 export type EngagementStore = {
-  hotspotTaps: number;
-  hotspotIds: Record<string, number>;
   storiesCompleted: string[];
   reflectionShown: string[];
   platformClicks: Record<string, number>;
@@ -45,8 +43,6 @@ export type ProgressStore = {
 };
 
 const DEFAULT_ENGAGEMENT: EngagementStore = {
-  hotspotTaps: 0,
-  hotspotIds: {},
   storiesCompleted: [],
   reflectionShown: [],
   platformClicks: {},
@@ -264,15 +260,14 @@ function normalizeProgress(raw: Partial<ProgressStore>): ProgressStore {
       ...raw.unlocks,
     },
     engagement: {
-      ...DEFAULT_ENGAGEMENT,
-      ...raw.engagement,
-      hotspotIds: { ...DEFAULT_ENGAGEMENT.hotspotIds, ...raw.engagement?.hotspotIds },
+      storiesCompleted:
+        raw.engagement?.storiesCompleted ?? DEFAULT_ENGAGEMENT.storiesCompleted,
+      reflectionShown:
+        raw.engagement?.reflectionShown ?? DEFAULT_ENGAGEMENT.reflectionShown,
       platformClicks: {
         ...DEFAULT_ENGAGEMENT.platformClicks,
         ...raw.engagement?.platformClicks,
       },
-      storiesCompleted: raw.engagement?.storiesCompleted ?? DEFAULT_ENGAGEMENT.storiesCompleted,
-      reflectionShown: raw.engagement?.reflectionShown ?? DEFAULT_ENGAGEMENT.reflectionShown,
     },
     schemaVersion: PROGRESS_SCHEMA_VERSION,
   };

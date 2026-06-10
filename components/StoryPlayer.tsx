@@ -13,9 +13,7 @@ import {
 } from "@/lib/progress-store";
 import { LIGHT_THEME, NIGHT_THEME } from "@/lib/theme";
 import { recordStoryCompleted } from "@/lib/engagement";
-import { getHotspotsForPage } from "@/lib/hotspots";
 import { playSfx, isSfxEnabled } from "@/lib/sfx";
-import HotspotLayer from "@/components/story/HotspotLayer";
 import ReflectionPrompt from "@/components/story/ReflectionPrompt";
 import SfxToggle from "./SfxToggle";
 import Wheel from "./decor/Wheel";
@@ -137,7 +135,6 @@ export default function StoryPlayer({
   const completionRecorded = useRef(false);
 
   const total = images.length;
-  const pageHotspots = getHotspotsForPage(slug, page);
   // 即時字幕軌（轉錄產生）優先；獨立於翻頁，依音檔時間顯示。
   const hasSubtitles = Array.isArray(subtitles) && subtitles.length > 0;
   const caption = hasSubtitles ? subtitles![subIndex]?.text : captions?.[page];
@@ -513,9 +510,6 @@ export default function StoryPlayer({
             onError={() => setMediaError("image")}
           />
         ))}
-        {!hasEnded && pageHotspots.length > 0 && (
-          <HotspotLayer hotspots={pageHotspots} accent={color} />
-        )}
       </div>
 
       {hasEnded && (

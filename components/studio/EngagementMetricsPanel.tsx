@@ -22,9 +22,6 @@ export default function EngagementMetricsPanel() {
   const platformEntries = Object.entries(metrics.platformClicks).sort(
     (a, b) => b[1] - a[1],
   );
-  const hotspotEntries = Object.entries(metrics.hotspotIds).sort(
-    (a, b) => b[1] - a[1],
-  );
 
   return (
     <section
@@ -35,13 +32,9 @@ export default function EngagementMetricsPanel() {
         本機互動量測
       </h2>
       <p className={styles.lead}>
-        以下數字來自此瀏覽器的 <code>localStorage</code>，供製作團隊在本機驗收熱點與轉換行為；非全站統計。
+        以下數字來自此瀏覽器的 <code>localStorage</code>，供製作團隊在本機驗收完播與轉換行為；非全站統計。
       </p>
       <dl className={styles.grid}>
-        <div className={styles.card}>
-          <dt>熱點點擊總數</dt>
-          <dd>{metrics.hotspotTaps}</dd>
-        </div>
         <div className={styles.card}>
           <dt>聽完故事集數</dt>
           <dd>{metrics.storiesCompleted.length}</dd>
@@ -57,18 +50,6 @@ export default function EngagementMetricsPanel() {
           </dd>
         </div>
       </dl>
-      {hotspotEntries.length > 0 && (
-        <details className={styles.details}>
-          <summary>熱點明細</summary>
-          <ul>
-            {hotspotEntries.map(([id, count]) => (
-              <li key={id}>
-                {id}：{count}
-              </li>
-            ))}
-          </ul>
-        </details>
-      )}
       {platformEntries.length > 0 && (
         <details className={styles.details}>
           <summary>平台點擊明細</summary>

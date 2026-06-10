@@ -113,7 +113,7 @@ export default function LegalPage() {
           <ul className={styles.list}>
             <li>
               網站可能在瀏覽器 <code>localStorage</code>{" "}
-              儲存收藏、繼續播放進度、遊戲最佳分數、熱點互動與平台連結點擊次數等偏好。這些資料<strong>留在您的裝置上</strong>，不由本網站伺服器收集個人帳號資料（本站無登入功能）。
+              儲存收藏、繼續播放進度、遊戲最佳分數、完播紀錄與平台連結點擊次數等偏好。這些資料<strong>留在您的裝置上</strong>，不由本網站伺服器收集個人帳號資料（本站無登入功能）。
             </li>
             <li>
               為了解官網導流成效，本站使用{" "}
