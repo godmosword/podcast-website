@@ -271,6 +271,39 @@ describe("adventure levels", () => {
     }
   });
 
+  it("tiledToAdventureJson 解析 breakable / ability-gate / secret", () => {
+    const tiled = {
+      width: 4,
+      height: 4,
+      tilewidth: 16,
+      tileheight: 16,
+      layers: [
+        {
+          type: "objectgroup" as const,
+          name: "objects",
+          objects: [
+            { type: "player", x: 16, y: 32, width: 16, height: 16 },
+            { type: "finish", x: 32, y: 32, width: 16, height: 32 },
+            { type: "breakable", x: 48, y: 32, width: 16, height: 16 },
+            {
+              type: "ability-gate",
+              x: 64,
+              y: 32,
+              width: 16,
+              height: 16,
+              properties: [{ name: "ability", value: "speed" }],
+            },
+            { type: "secret", x: 80, y: 32, width: 16, height: 16 },
+          ],
+        },
+      ],
+    };
+    const json = tiledToAdventureJson(tiled, { id: "abilities", name: "能力關卡" });
+    expect(json.breakable).toEqual(["3,2"]);
+    expect(json.abilityGates).toEqual([{ x: 4, y: 2, ability: "speed" }]);
+    expect(json.secrets).toEqual(["5,2"]);
+  });
+
   it("tiledToAdventureJson 解析 tilelayer 與 objects", () => {
     const tiled = {
       width: 8,

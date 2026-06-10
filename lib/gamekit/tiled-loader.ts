@@ -10,6 +10,7 @@ export type TiledObject = {
   width?: number;
   height?: number;
   visible?: boolean;
+  properties?: { name: string; value: string | number | boolean }[];
 };
 
 export type TiledTileLayer = {
@@ -87,6 +88,9 @@ export function tiledToAdventureJson(
   const spikes: string[] = [];
   const coins: [number, number][] = [];
   const enemies: { x: number; y: number; vx?: number }[] = [];
+  const breakable: string[] = [];
+  const abilityGates: { x: number; y: number; ability: string }[] = [];
+  const secrets: string[] = [];
   let start: [number, number] | null = null;
   let finish: [number, number, number?, number?] | null = null;
 
@@ -114,6 +118,16 @@ export function tiledToAdventureJson(
           coins.push([tx, ty]);
         } else if (kind === "enemy") {
           enemies.push({ x: tx, y: ty });
+        } else if (kind === "breakable") {
+          breakable.push(`${tx},${ty}`);
+        } else if (kind === "ability-gate" || kind === "ability_gate") {
+          const ability =
+            obj.properties?.find((p) => p.name === "ability")?.value?.toString() ??
+            obj.name ??
+            "breakable";
+          abilityGates.push({ x: tx, y: ty, ability });
+        } else if (kind === "secret") {
+          secrets.push(`${tx},${ty}`);
         }
       }
     }
@@ -139,6 +153,9 @@ export function tiledToAdventureJson(
     enemies,
     start,
     finish,
+    ...(breakable.length > 0 ? { breakable } : {}),
+    ...(abilityGates.length > 0 ? { abilityGates } : {}),
+    ...(secrets.length > 0 ? { secrets } : {}),
   };
 }
 
