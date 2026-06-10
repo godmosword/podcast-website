@@ -1,3 +1,4 @@
+import { createEmptyEconomy, migrateV2ToV3 } from "@/lib/gamekit/economy";
 import type { GameKitGameId } from "@/lib/gamekit/types";
 import type { PlayerProfile } from "@/lib/gamekit/types";
 
@@ -60,8 +61,9 @@ const LEGACY_KEYS = {
 } as const;
 
 const DEFAULT_GAME_PROFILE: PlayerProfile = {
-  version: 2,
+  version: 3,
   stars: 0,
+  economy: createEmptyEconomy(),
   unlockedVehicles: ["小黃"],
   bests: {},
   medals: {},
@@ -194,11 +196,10 @@ export function migrateProgress(): ProgressStore {
     localStorage.getItem(LEGACY_KEYS.gamekitProfile),
   );
   if (legacyProfile) {
-    next.gameProfile = {
+    next.gameProfile = migrateV2ToV3({
       ...DEFAULT_GAME_PROFILE,
       ...legacyProfile,
-      version: 2,
-    };
+    });
   }
 
   mergeBest(next.bestScores, "block-drop", readLegacyBest(LEGACY_KEYS.blockDropBest));
@@ -251,10 +252,10 @@ function normalizeProgress(raw: Partial<ProgressStore>): ProgressStore {
         ...raw.preferences?.gameKit,
       },
     },
-    gameProfile: {
+    gameProfile: migrateV2ToV3({
       ...DEFAULT_GAME_PROFILE,
       ...raw.gameProfile,
-    },
+    }),
     unlocks: {
       ...DEFAULT_PROGRESS.unlocks,
       ...raw.unlocks,
@@ -406,7 +407,7 @@ export function saveGameProfileToStore(profile: PlayerProfile): void {
   }
   writeProgress({
     ...current,
-    gameProfile: { ...profile, version: 2 },
+    gameProfile: migrateV2ToV3({ ...profile, version: 3 }),
     bestScores,
   });
 }
