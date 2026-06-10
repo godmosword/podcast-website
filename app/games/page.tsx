@@ -6,7 +6,7 @@ import Wheel from "@/components/decor/Wheel";
 import decor from "@/components/decor/decor.module.css";
 import GameThumbArt from "@/components/games/GameThumbArt";
 import PlaygroundHubBadge from "@/components/games/PlaygroundHubBadge";
-import { GAMES } from "@/lib/games/catalog";
+import { GAMES, gamesByAgeBand, type GameMeta } from "@/data/games";
 import { getSiteUrl } from "@/lib/site-url";
 import styles from "./page.module.css";
 
@@ -22,7 +22,65 @@ export const metadata: Metadata = {
   },
 };
 
+function GameCard({ game, index }: { game: GameMeta; index: number }) {
+  return (
+    <li className={styles.gridItem}>
+      <Link
+        href={game.href}
+        className={`${styles.card} popIn`}
+        aria-label={`${game.title}，${game.ageRange}，約 ${game.estMinutes} 分鐘`}
+        style={{
+          boxShadow: `var(--shadow-md), 0 6px 0 ${game.accent}`,
+          animationDelay: `${Math.min(index, 4) * 55}ms`,
+        }}
+      >
+        <RoughFrame
+          color={game.accent}
+          rough={index % 2 === 0 ? 1 : 2}
+          width={3}
+        />
+        <div
+          className={styles.thumb}
+          style={{
+            ["--thumb-accent" as string]: game.accent,
+          }}
+        >
+          <GameThumbArt gameId={game.slug} className={styles.thumbArt} />
+        </div>
+        <span className={styles.body}>
+          <span className={styles.meta}>
+            <span
+              className={`${styles.ageTag} marker`}
+              style={{ ["--marker-color" as string]: game.accent }}
+            >
+              {game.ageRange}
+            </span>
+            <span className={styles.duration}>⏱ 約 {game.estMinutes} 分鐘</span>
+          </span>
+          <span className={styles.cardTitle}>{game.title}</span>
+          <span className={styles.summary}>{game.desc}</span>
+          <span className={styles.footer}>
+            <span className={styles.playLabel}>開始玩</span>
+            <span
+              className={styles.arrow}
+              style={{
+                backgroundColor: `color-mix(in srgb, ${game.accent} 14%, var(--card))`,
+                color: "var(--ink)",
+              }}
+              aria-hidden
+            >
+              ▶
+            </span>
+          </span>
+        </span>
+      </Link>
+    </li>
+  );
+}
+
 export default function GamesHubPage() {
+  const challengeGames = gamesByAgeBand("challenge");
+
   return (
     <main className={styles.main} aria-label="車車遊樂園小遊戲">
       <Link href="/" className={styles.back}>
@@ -75,65 +133,36 @@ export default function GamesHubPage() {
             <Wheel size={18} color="var(--c-lilac)" />
             {GAMES.length} 款小遊戲
           </li>
-          <li className={styles.chip}>👨‍👩‍👧 5–12 歲</li>
+          <li className={styles.chip}>🧸 3–6 歲 · 🏁 6–12 歲</li>
           <li className={styles.chip}>📱 手機也能玩</li>
         </ul>
       </header>
 
-      <ul className={styles.grid}>
-        {GAMES.map((game, index) => (
-          <li key={game.id} className={styles.gridItem}>
-            <Link
-              href={game.href}
-              className={`${styles.card} popIn`}
-              aria-label={`${game.title}，${game.ageRange}`}
-              style={{
-                boxShadow: `var(--shadow-md), 0 6px 0 ${game.accent}`,
-                animationDelay: `${Math.min(index, 4) * 55}ms`,
-              }}
-            >
-              <RoughFrame
-                color={game.accent}
-                rough={index % 2 === 0 ? 1 : 2}
-                width={3}
-              />
-              <div
-                className={styles.thumb}
-                style={{
-                  ["--thumb-accent" as string]: game.accent,
-                }}
-              >
-                <GameThumbArt gameId={game.id} className={styles.thumbArt} />
-              </div>
-              <span className={styles.body}>
-                <span className={styles.meta}>
-                  <span
-                    className={`${styles.ageTag} marker`}
-                    style={{ ["--marker-color" as string]: game.accent }}
-                  >
-                    {game.ageRange}
-                  </span>
-                </span>
-                <span className={styles.cardTitle}>{game.title}</span>
-                <span className={styles.summary}>{game.desc}</span>
-                <span className={styles.footer}>
-                  <span className={styles.playLabel}>開始玩</span>
-                  <span
-                    className={styles.arrow}
-                    style={{
-                      backgroundColor: `color-mix(in srgb, ${game.accent} 14%, var(--card))`,
-                      color: "var(--ink)",
-                    }}
-                    aria-hidden
-                  >
-                    ▶
-                  </span>
-                </span>
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <section className={styles.zone} aria-labelledby="games-explore">
+        <h2 id="games-explore" className={styles.zoneTitle}>
+          🧸 3–6 歲探索區
+        </h2>
+        <div className={styles.placeholderCard}>
+          <span className={styles.placeholderEmoji} aria-hidden>
+            🛝
+          </span>
+          <p className={styles.placeholderTitle}>探索遊戲製作中</p>
+          <p className={styles.placeholderCopy}>
+            適合小小孩的溫柔小遊戲，陸續加入中
+          </p>
+        </div>
+      </section>
+
+      <section className={styles.zone} aria-labelledby="games-challenge">
+        <h2 id="games-challenge" className={styles.zoneTitle}>
+          🏁 6–12 歲挑戰區
+        </h2>
+        <ul className={styles.grid}>
+          {challengeGames.map((game, index) => (
+            <GameCard key={game.slug} game={game} index={index} />
+          ))}
+        </ul>
+      </section>
 
       <p className={styles.footerNote}>
         更多車車小遊戲陸續加入中 🎡
