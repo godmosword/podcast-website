@@ -9,13 +9,9 @@ import {
   unlockVehicle,
 } from "./save";
 import { medalFlags, medalCount } from "./meta";
+import { saveBestScoreInStore } from "@/lib/progress-store";
 
 export const GAMEKIT_PROGRESS_EVENT = "cheche:gamekit-progress";
-
-const LEGACY_BEST_KEYS: Record<GameKitGameId, string> = {
-  "car-adventure": "car-adventure-best",
-  "block-drop": "block-drop-best",
-};
 
 export type GameSessionResult = {
   gameId: GameKitGameId;
@@ -26,18 +22,6 @@ export type GameSessionResult = {
   flawless?: boolean;
   collectedAll?: boolean;
 };
-
-function syncLegacyBest(gameId: GameKitGameId, score: number): void {
-  if (typeof window === "undefined") return;
-  try {
-    const key = LEGACY_BEST_KEYS[gameId];
-    const raw = window.localStorage.getItem(key);
-    const prev = raw ? parseInt(raw, 10) : 0;
-    if (score > prev) window.localStorage.setItem(key, String(score));
-  } catch {
-    /* ignore */
-  }
-}
 
 function awardSticker(profile: PlayerProfile, stickerId: string): PlayerProfile {
   if (profile.stickers.includes(stickerId)) return profile;
@@ -74,7 +58,7 @@ function starsFromNewMedalBits(oldFlags: number, newFlags: number): number {
 export function reportGameSession(result: GameSessionResult): PlayerProfile {
   let profile = loadPlayerProfile();
   profile = recordBestScore(profile, result.gameId, result.score);
-  syncLegacyBest(result.gameId, result.score);
+  saveBestScoreInStore(result.gameId, result.score);
 
   if (!profile.gamesPlayed[result.gameId]) {
     profile = {

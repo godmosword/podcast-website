@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState, type RefObject } from "react";
+import { PROGRESS_CHANGE_EVENT } from "@/lib/progress-store";
 import {
   SFX_CHANGE_EVENT,
+  invalidateSfxCache,
   isSfxEnabled,
   playSfx,
   setSfxEnabled,
@@ -25,15 +27,18 @@ export default function SfxToggle({ className = "", audioRef }: SfxToggleProps) 
     if (el) el.muted = !enabled;
 
     const sync = () => {
+      invalidateSfxCache();
       const next = isSfxEnabled();
       setOn(next);
       const audio = audioRef?.current;
       if (audio) audio.muted = !next;
     };
     window.addEventListener(SFX_CHANGE_EVENT, sync);
+    window.addEventListener(PROGRESS_CHANGE_EVENT, sync);
     window.addEventListener("storage", sync);
     return () => {
       window.removeEventListener(SFX_CHANGE_EVENT, sync);
+      window.removeEventListener(PROGRESS_CHANGE_EVENT, sync);
       window.removeEventListener("storage", sync);
     };
   }, [audioRef]);

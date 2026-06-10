@@ -1,27 +1,20 @@
-const STORAGE_KEY = "chechecar-favorites";
+import {
+  getFavoritesFromStore,
+  isFavoriteInStore,
+  toggleFavoriteInStore,
+} from "@/lib/progress-store";
 
 export function getFavorites(): string[] {
   if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as unknown;
-    return Array.isArray(parsed) ? parsed.filter((s) => typeof s === "string") : [];
-  } catch {
-    return [];
-  }
+  return getFavoritesFromStore();
 }
 
 export function isFavorite(slug: string): boolean {
-  return getFavorites().includes(slug);
+  if (typeof window === "undefined") return false;
+  return isFavoriteInStore(slug);
 }
 
 export function toggleFavorite(slug: string): string[] {
   if (typeof window === "undefined") return [];
-  const current = getFavorites();
-  const next = current.includes(slug)
-    ? current.filter((s) => s !== slug)
-    : [...current, slug];
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-  return next;
+  return toggleFavoriteInStore(slug);
 }

@@ -1,5 +1,11 @@
 /** 遊樂園全域設定（Phase 7：兒童模式、可及性偏好）。 */
 
+import {
+  PROGRESS_CHANGE_EVENT,
+  getGameKitSettingsFromStore,
+  saveGameKitSettingsToStore,
+} from "@/lib/progress-store";
+
 export const GAMEKIT_SETTINGS_KEY = "cheche:gamekit-settings";
 export const GAMEKIT_SETTINGS_EVENT = "cheche:gamekit-settings-changed";
 
@@ -17,13 +23,10 @@ const DEFAULT_SETTINGS: GameKitSettings = {
 export function loadGameKitSettings(): GameKitSettings {
   if (typeof window === "undefined") return { ...DEFAULT_SETTINGS };
   try {
-    const raw = localStorage.getItem(GAMEKIT_SETTINGS_KEY);
-    if (!raw) return { ...DEFAULT_SETTINGS };
-    const parsed = JSON.parse(raw) as Partial<GameKitSettings>;
+    const stored = getGameKitSettingsFromStore();
     return {
       ...DEFAULT_SETTINGS,
-      ...parsed,
-      version: 1,
+      kidsMode: stored.kidsMode,
     };
   } catch {
     return { ...DEFAULT_SETTINGS };
@@ -32,11 +35,9 @@ export function loadGameKitSettings(): GameKitSettings {
 
 export function saveGameKitSettings(settings: GameKitSettings): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(
-    GAMEKIT_SETTINGS_KEY,
-    JSON.stringify({ ...settings, version: 1 }),
-  );
+  saveGameKitSettingsToStore({ kidsMode: settings.kidsMode });
   window.dispatchEvent(new CustomEvent(GAMEKIT_SETTINGS_EVENT, { detail: settings }));
+  window.dispatchEvent(new CustomEvent(PROGRESS_CHANGE_EVENT));
 }
 
 export function setKidsMode(enabled: boolean): GameKitSettings {

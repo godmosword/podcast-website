@@ -3,9 +3,13 @@
  * 完全貼合「音檔不外送、零金鑰」精神。預設開，提供靜音切換。
  */
 
+import {
+  isSfxEnabledInStore,
+  setSfxEnabledInStore,
+} from "@/lib/progress-store";
+
 export type SfxKind = "tap" | "flip" | "collect";
 
-const STORAGE_KEY = "cc:sfx";
 export const SFX_CHANGE_EVENT = "cc:sfx-change";
 
 type WebkitWindow = Window & {
@@ -20,7 +24,7 @@ export function isSfxEnabled(): boolean {
   if (typeof window === "undefined") return false;
   if (enabledCache !== null) return enabledCache;
   try {
-    enabledCache = window.localStorage.getItem(STORAGE_KEY) !== "off";
+    enabledCache = isSfxEnabledInStore();
   } catch {
     enabledCache = true;
   }
@@ -31,7 +35,7 @@ export function isSfxEnabled(): boolean {
 export function setSfxEnabled(on: boolean): void {
   enabledCache = on;
   try {
-    window.localStorage.setItem(STORAGE_KEY, on ? "on" : "off");
+    setSfxEnabledInStore(on);
   } catch {
     // localStorage 不可用時僅本次有效。
   }
@@ -87,4 +91,9 @@ export function playSfx(kind: SfxKind): void {
   osc.connect(gain).connect(c.destination);
   osc.start(now);
   osc.stop(now + tone.dur + 0.02);
+}
+
+/** 外部 store 更新時重置快取。 */
+export function invalidateSfxCache(): void {
+  enabledCache = null;
 }

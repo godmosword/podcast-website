@@ -3,6 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { clearContinue, loadContinue, saveContinue } from "@/lib/continue-playback";
+import {
+  getCaptionSizeFromStore,
+  setCaptionSizeInStore,
+  type CaptionSize,
+} from "@/lib/progress-store";
 import { playSfx, isSfxEnabled } from "@/lib/sfx";
 import SfxToggle from "./SfxToggle";
 import Wheel from "./decor/Wheel";
@@ -50,10 +55,8 @@ function isEditableKeyboardTarget(target: EventTarget | null): boolean {
   );
 }
 
-// 字幕字級偏好（跨集保留於 localStorage）。
+// 字幕字級偏好（跨集保留於 progress-store）。
 const CAPTION_SIZES = ["sm", "md", "lg"] as const;
-type CaptionSize = (typeof CAPTION_SIZES)[number];
-const CAPTION_SIZE_KEY = "cc:caption-size";
 const CAPTION_SIZE_LABEL: Record<CaptionSize, string> = {
   sm: "小",
   md: "中",
@@ -135,10 +138,10 @@ export default function StoryPlayer({
   // 還原字幕字級偏好（SSR 初值固定 md，掛載後才讀，避免 hydration mismatch）。
   useEffect(() => {
     try {
-      const saved = window.localStorage.getItem(CAPTION_SIZE_KEY);
+      const saved = getCaptionSizeFromStore();
       if (isCaptionSize(saved)) setCaptionSize(saved);
     } catch {
-      // localStorage 不可用（隱私模式等）時維持預設。
+      // store 不可用時維持預設。
     }
   }, []);
 
@@ -147,9 +150,9 @@ export default function StoryPlayer({
       const idx = CAPTION_SIZES.indexOf(cur);
       const next = CAPTION_SIZES[(idx + 1) % CAPTION_SIZES.length];
       try {
-        window.localStorage.setItem(CAPTION_SIZE_KEY, next);
+        setCaptionSizeInStore(next);
       } catch {
-        // 寫入失敗（隱私模式）時不阻斷切換，僅本次有效。
+        // 寫入失敗時不阻斷切換，僅本次有效。
       }
       return next;
     });

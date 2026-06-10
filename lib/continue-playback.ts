@@ -1,30 +1,23 @@
-const STORAGE_KEY = "chechecar-continue";
+import type { ContinueState } from "@/lib/progress-store";
+import {
+  clearContinueInStore,
+  loadContinueFromStore,
+  saveContinueInStore,
+} from "@/lib/progress-store";
 
-export type ContinueState = {
-  slug: string;
-  page: number;
-  time: number;
-  updatedAt: number;
-};
+export type { ContinueState };
 
 export function saveContinue(state: Omit<ContinueState, "updatedAt">): void {
   if (typeof window === "undefined") return;
-  const payload: ContinueState = { ...state, updatedAt: Date.now() };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  saveContinueInStore(state);
 }
 
 export function loadContinue(): ContinueState | null {
   if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as ContinueState;
-  } catch {
-    return null;
-  }
+  return loadContinueFromStore();
 }
 
 export function clearContinue(): void {
   if (typeof window === "undefined") return;
-  localStorage.removeItem(STORAGE_KEY);
+  clearContinueInStore();
 }

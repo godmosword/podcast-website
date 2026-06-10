@@ -1,13 +1,11 @@
 import type { GameKitGameId, PlayerProfile } from "./types";
 import { vehiclesUnlockedAt } from "./garage";
+import {
+  loadGameProfileFromStore,
+  saveGameProfileToStore,
+} from "@/lib/progress-store";
 
-const SAVE_KEY = "cheche:gamekit-profile";
 const SAVE_VERSION = 2;
-
-const LEGACY_BEST_KEYS: Record<GameKitGameId, string> = {
-  "car-adventure": "car-adventure-best",
-  "block-drop": "block-drop-best",
-};
 
 const DEFAULT_PROFILE: PlayerProfile = {
   version: SAVE_VERSION,
@@ -19,33 +17,12 @@ const DEFAULT_PROFILE: PlayerProfile = {
   gamesPlayed: {},
 };
 
-function importLegacyBests(): Partial<Record<GameKitGameId, number>> {
-  if (typeof window === "undefined") return {};
-  const bests: Partial<Record<GameKitGameId, number>> = {};
-  for (const [gameId, key] of Object.entries(LEGACY_BEST_KEYS) as [
-    GameKitGameId,
-    string,
-  ][]) {
-    try {
-      const raw = window.localStorage.getItem(key);
-      if (raw) {
-        const n = parseInt(raw, 10);
-        if (Number.isFinite(n) && n > 0) bests[gameId] = n;
-      }
-    } catch {
-      /* ignore */
-    }
-  }
-  return bests;
-}
-
 function migrateV1(parsed: Partial<PlayerProfile>): PlayerProfile {
-  const legacyBests = importLegacyBests();
   return {
     ...DEFAULT_PROFILE,
     stars: parsed.stars ?? 0,
     unlockedVehicles: parsed.unlockedVehicles ?? ["小黃"],
-    bests: { ...legacyBests, ...parsed.bests },
+    bests: parsed.bests ?? {},
     medals: parsed.medals ?? {},
     stickers: parsed.stickers ?? [],
     gamesPlayed: parsed.gamesPlayed ?? {},
@@ -56,17 +33,13 @@ function migrateV1(parsed: Partial<PlayerProfile>): PlayerProfile {
 export function loadPlayerProfile(): PlayerProfile {
   if (typeof window === "undefined") return { ...DEFAULT_PROFILE };
   try {
-    const raw = localStorage.getItem(SAVE_KEY);
-    if (!raw) {
-      const withLegacy = migrateV1({});
-      savePlayerProfile(withLegacy);
-      return withLegacy;
+    const profile = loadGameProfileFromStore();
+    if (profile.version !== SAVE_VERSION) {
+      const migrated = migrateV1(profile);
+      savePlayerProfile(migrated);
+      return migrated;
     }
-    const parsed = JSON.parse(raw) as PlayerProfile;
-    if (parsed.version !== SAVE_VERSION) {
-      return migrateV1(parsed);
-    }
-    return { ...DEFAULT_PROFILE, ...parsed };
+    return { ...DEFAULT_PROFILE, ...profile };
   } catch {
     return { ...DEFAULT_PROFILE };
   }
@@ -74,10 +47,7 @@ export function loadPlayerProfile(): PlayerProfile {
 
 export function savePlayerProfile(profile: PlayerProfile): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(
-    SAVE_KEY,
-    JSON.stringify({ ...profile, version: SAVE_VERSION }),
-  );
+  saveGameProfileToStore({ ...profile, version: SAVE_VERSION });
 }
 
 export function recordBestScore(
@@ -128,18 +98,7 @@ export function unlockVehicle(profile: PlayerProfile, vehicleId: string): Player
   };
 }
 
-/** 合併舊版各遊戲 best 分數到 profile（首次載入 hub 時）。 */
+/** 合併舊版各遊戲 best 分數到 profile（遷移已由 progress-store 處理，保留 API）。 */
 export function syncLegacyScores(profile: PlayerProfile): PlayerProfile {
-  const legacy = importLegacyBests();
-  let next = { ...profile };
-  for (const [gameId, score] of Object.entries(legacy) as [
-    GameKitGameId,
-    number,
-  ][]) {
-    next = recordBestScore(next, gameId, score);
-  }
-  if (JSON.stringify(next.bests) !== JSON.stringify(profile.bests)) {
-    savePlayerProfile(next);
-  }
-  return next;
+  return profile;
 }
