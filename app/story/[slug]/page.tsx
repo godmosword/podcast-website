@@ -8,7 +8,6 @@ import { storyDetailMetadata } from "@/lib/story-metadata";
 import { storyCoverPath } from "@/lib/story-utils";
 import FavoriteButton from "@/components/FavoriteButton";
 import JsonLd from "@/components/JsonLd";
-import PlatformLinks from "@/components/PlatformLinks";
 import PlayButton from "@/components/PlayButton";
 import ShareButton from "@/components/ShareButton";
 import RelatedStories from "@/components/RelatedStories";
@@ -119,8 +118,6 @@ export default async function StoryDetailPage({
           />
         )}
 
-        <PlatformLinks accent={story.color} />
-
         {nextStory && (
           <p className={styles.nextHint}>
             聽完這集可以接著聽{" "}
@@ -133,7 +130,7 @@ export default async function StoryDetailPage({
         <RelatedStories stories={related} />
       </article>
 
-      <SiteFooter compact />
+      <SiteFooter compact showPlatformSubscribe={false} />
     </main>
   );
 }
