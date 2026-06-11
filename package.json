@@ -13,7 +13,9 @@
     "font:subset": "python3 scripts/subset_font.py",
     "sync:apple": "tsx scripts/sync-apple-podcast.ts",
     "transcribe": "tsx scripts/transcribe.ts",
-    "illustrate": "tsx --env-file-if-exists=.env.local scripts/illustrate.ts"
+    "illustrate": "tsx --env-file-if-exists=.env.local scripts/illustrate.ts",
+    "verify:episodes": "tsx scripts/verify-episodes.ts",
+    "backfill:captions": "tsx scripts/backfill-scene-captions.ts"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

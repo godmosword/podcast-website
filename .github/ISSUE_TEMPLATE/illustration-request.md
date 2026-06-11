@@ -20,5 +20,6 @@ body:
         - label: npm run illustrate -- ep-N --segment-only
         - label: npm run illustrate -- ep-N
         - label: 審 public/.illustrate-staging/ep-N/contact.html
-        - label: npm run illustrate -- ep-N --approve
+        - label: npm run illustrate -- ep-N --approve（pageCount／captionTimes／captions）
+        - label: npm run verify:episodes（對照 ep-9／ep-10，見 docs/EPISODE-WORKFLOW.md）
         - label: npm run sync:apple && npm run build → commit push

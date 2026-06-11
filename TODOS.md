@@ -480,10 +480,11 @@ Phase 0 定錨 → 1 渲染+UI（起手式）→ 2 美術 → 3 音訊 → 4 jui
 | 22 | `npm run illustrate -- ep-N` | staging 圖 + `contact.html` |
 | 23 | 審圖 | 逐幕檢查走樣／角色 |
 | 24 | `--scene N`／`--char 名` | 單張重抽（可選） |
-| 25 | `npm run illustrate -- ep-N --approve` | `02.jpg`～`NN.jpg` + `pageCount` + `captionTimes` |
-| 26 | `npm run sync:apple && npm run build` | overrides 併入 synced |
-| 27 | Commit + push | 含 `public/stories/`、`defaults`、`characters`、`scenes` |
-| 28 | 關 Issue／清佇列 | 標記生圖完成 |
+| 25 | `npm run illustrate -- ep-N --approve` | `02.jpg`～`NN.jpg` + `pageCount` + `captionTimes` + `captions` |
+| 26 | `npm run verify:episodes` | 對照 ep-9／ep-10 標準（見 [docs/EPISODE-WORKFLOW.md](./docs/EPISODE-WORKFLOW.md)） |
+| 27 | `npm run sync:apple && npm run build` | overrides 併入 synced |
+| 28 | Commit + push | 含 `public/stories/`、`defaults`、`characters`、`scenes` |
+| 29 | 關 Issue／清佇列 | 標記生圖完成 |
 
 詳見 [README — 每集劇情插圖自動生成](./README.md#每集劇情插圖自動生成npm-run-illustrate)。
 
@@ -491,9 +492,9 @@ Phase 0 定錨 → 1 渲染+UI（起手式）→ 2 美術 → 3 音訊 → 4 jui
 
 | # | 項目 |
 |---|------|
-| 29 | Threads／IG 貼文（單集 URL + OG） |
-| 30 | 平台訂閱提醒 |
-| 31 | 家長向新集說明（見 P2「新集通知路徑」） |
+| 30 | Threads／IG 貼文（單集 URL + OG） |
+| 31 | 平台訂閱提醒 |
+| 32 | 家長向新集說明（見 P2「新集通知路徑」） |
 
 ### 端到端時序（一集新故事）
 

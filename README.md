@@ -298,7 +298,9 @@ npm run transcribe -- --convert --all  # 只對既有側車檔重跑簡轉繁/�
 
 > ⚠️ 這是專案**唯一需要外部付費 API 的功能**，需 `OPENAI_API_KEY`。送出的是**已公開的劇本文字**（由本機字幕來，非音檔，仍守「音檔不外送」）。**本機手動執行、人工審圖後才上線；CI 不放此 key、不生圖。**
 
-**資料流：** `data/subtitles/<slug>.json`（whisper 本機已產）→ 切場景 `data/scenes/<slug>.json` → 生圖到暫存 `public/.illustrate-staging/<slug>/`（gitignore）→ 人工審 `contact.html` → `--approve` 進 `public/stories/<slug>/NN.jpg` 並寫 `overrides.<slug>` 的 `pageCount`/`captionTimes`。
+**標準範本：** [ep-9、ep-10](./docs/EPISODE-WORKFLOW.md)（全幕插圖 + 幕級 `captions`）。EP2–8 與日後新集須同一 workflow；驗證：`npm run verify:episodes`。
+
+**資料流：** `data/subtitles/<slug>.json`（whisper 本機已產）→ 切場景 `data/scenes/<slug>.json` → 生圖到暫存 `public/.illustrate-staging/<slug>/`（gitignore）→ 人工審 `contact.html` → `--approve` 進 `public/stories/<slug>/NN.jpg` 並寫 `pageCount`／`captionTimes`／`captions`（overrides + synced；手動集另同步 `data/stories.ts`）。
 
 **`public/stories/<slug>/` 資產規範**（資料夾內不放 README，規則集中於本節）：
 
@@ -316,9 +318,10 @@ open public/.illustrate-staging/ep-9/contact.html   # 逐幕檢查走樣／不�
 # 3) 壞幕單張重抽
 OPENAI_API_KEY=sk-... npm run illustrate -- ep-9 --scene 4
 
-# 4) 全部 OK → 上線（複製進 public + 寫 pageCount/captionTimes）
+# 4) 全部 OK → 上線（複製進 public + 寫 pageCount/captionTimes/captions）
 npm run illustrate -- ep-9 --approve
-npm run sync:apple && npm run build      # overrides 併入 apple-synced.json
+npm run verify:episodes                  # 對照 ep-9／ep-10 標準
+npm run sync:apple && npm run build
 ```
 
 | 旗標 | 作用 |

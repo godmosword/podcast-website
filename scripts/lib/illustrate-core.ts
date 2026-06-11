@@ -2,7 +2,7 @@
 // 車車遊樂園 — 每集劇情插圖生成核心
 // ============================================================
 // 由字幕側車檔（data/subtitles/<slug>.json）切場景 → 每幕生黏土風插圖
-// → 暫存 + contact sheet 人工審 → --approve 進 public/ 並寫 pageCount/captionTimes。
+// → 暫存 + contact sheet 人工審 → --approve 進 public/ 並寫 pageCount/captionTimes/captions。
 //
 // 角色一致：data/characters.json 為跨集角色名冊；每個角色有 canonical 定裝照
 // public/characters/<name>.jpg。生圖時把該幕出場角色的定裝照當參考圖，跨集維持形象。
@@ -711,7 +711,85 @@ function registerCharacters(slug: string, newCharacters: NewCharacter[]): string
   return registered;
 }
 
-// ── 接線：pageCount / captionTimes ───────────────────────
+/** 依 scenes + subtitles 重建幕級 captions 並寫入 overrides／synced（對齊 ep-9／ep-10 標準）。 */
+export function syncSceneCaptionsToMetadata(slug: string): {
+  pageCount: number;
+  captions: string[];
+} {
+  const scenesFile = readScenesFile(slug);
+  const scenes = scenesFile.scenes;
+  const subs = readSubtitlesForSlug(slug);
+  const captions = buildSceneCaptions(scenes, subs);
+  const captionTimes = scenes.map((s) => s.start);
+  writeWiring(slug, scenes.length, captionTimes, captions);
+  return { pageCount: scenes.length, captions };
+}
+
+const STORIES_TS_PATH = join(ROOT, "data", "stories.ts");
+
+function escapeTsString(s: string): string {
+  return s.replace(/\\/g, "\\\\").replace(/"/g, "\\\"");
+}
+
+function formatCaptionTimesBlock(captionTimes: number[]): string {
+  const inner = captionTimes
+    .map((t) => (Number.isInteger(t) ? String(t) : t))
+    .join(",\n      ");
+  return `captionTimes: [\n      ${inner},\n    ]`;
+}
+
+function formatCaptionsBlock(captions: string[]): string {
+  const lines = captions.map((c) => `      "${escapeTsString(c)}",`);
+  return `captions: [\n${lines.join("\n")}\n    ]`;
+}
+
+/** 手動集（data/stories.ts）同步 pageCount／captionTimes／captions。 */
+function patchManualStoryInStoriesTs(
+  slug: string,
+  pageCount: number,
+  captionTimes: number[],
+  captions: string[],
+): boolean {
+  if (!existsSync(STORIES_TS_PATH)) return false;
+  let src = readFileSync(STORIES_TS_PATH, "utf8");
+  const needle = `slug: "${slug}"`;
+  if (!src.includes(needle)) return false;
+
+  const slugIdx = src.indexOf(needle);
+  const rest = src.slice(slugIdx + needle.length);
+  const nextSlugRel = rest.search(/\n\s+slug: "/);
+  const blockEnd =
+    nextSlugRel >= 0 ? slugIdx + needle.length + nextSlugRel : src.length;
+  let block = src.slice(slugIdx, blockEnd);
+
+  block = block.replace(/pageCount: \d+,/, `pageCount: ${pageCount},`);
+
+  const timesBlock = formatCaptionTimesBlock(captionTimes);
+  if (/captionTimes:\s*\[/.test(block)) {
+    block = block.replace(/captionTimes:\s*\[[\s\S]*?\],/, `${timesBlock},`);
+  } else {
+    block = block.replace(
+      /pageCount: \d+,/,
+      `pageCount: ${pageCount},\n    ${timesBlock},`,
+    );
+  }
+
+  const capsBlock = formatCaptionsBlock(captions);
+  if (/captions:\s*\[/.test(block)) {
+    block = block.replace(/captions:\s*\[[\s\S]*?\],/, `${capsBlock},`);
+  } else {
+    block = block.replace(
+      /captionTimes:\s*\[[\s\S]*?\],/,
+      (m) => `${m}\n    ${capsBlock},`,
+    );
+  }
+
+  src = src.slice(0, slugIdx) + block + src.slice(blockEnd);
+  writeFileSync(STORIES_TS_PATH, src, "utf8");
+  return true;
+}
+
+// ── 接線：pageCount / captionTimes / captions ───────────
 function materializeIntoSynced(
   slug: string,
   pageCount: number,
@@ -748,12 +826,19 @@ function writeWiring(
     };
     writeFileSync(DEFAULTS_PATH, `${JSON.stringify(defaults, null, 2)}\n`, "utf8");
     materializeIntoSynced(slug, pageCount, captionTimes, captions);
+    const patchedTs = patchManualStoryInStoriesTs(
+      slug,
+      pageCount,
+      captionTimes,
+      captions,
+    );
     console.log(
       `  overrides.${slug} 已寫入；content.ts 執行時會合併 pageCount/captionTimes/captions。`,
     );
-    console.log(
-      `  建議同步更新 data/stories.ts 該集 pageCount/captions（測試與可讀性）。`,
-    );
+    if (patchedTs) {
+      console.log(`  data/stories.ts 已同步 ${slug}（手動集）。`);
+    }
+    console.log(`  驗證：npm run verify:episodes`);
     return "overrides";
   }
   console.log(

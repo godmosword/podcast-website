@@ -67,8 +67,8 @@ type ManualStoryOverride = Partial<
   >
 >;
 
-/** 手動集：illustrate --approve 寫入 overrides，執行時與 stories.ts 合併（與 sync 腳本邏輯對齊）。 */
-function applyManualOverrides(raw: ManualStory): ManualStory {
+/** illustrate --approve 寫入 overrides；執行時與 stories.ts／apple-synced 合併（與 sync 腳本邏輯對齊）。 */
+function applyStoryOverrides(raw: RawStory): RawStory {
   const overrides = appleSyncDefaults.overrides as
     | Record<string, ManualStoryOverride>
     | undefined;
@@ -90,7 +90,7 @@ function applyManualOverrides(raw: ManualStory): ManualStory {
 }
 
 function enrichStory(raw: RawStory): Story {
-  const merged = applyManualOverrides(raw);
+  const merged = applyStoryOverrides(raw);
   const characters = getCharactersForStory(merged.slug);
   const reflectionPrompt =
     merged.reflectionPrompt ?? getReflectionPrompt(merged.slug);

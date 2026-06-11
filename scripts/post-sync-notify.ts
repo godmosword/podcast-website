@@ -79,7 +79,8 @@ export function buildCommitMessage(report: SyncRunReport): string {
       lines.push(`  3. npm run illustrate -- ${slug}`);
       lines.push(`  4. 審 public/.illustrate-staging/${slug}/contact.html`);
       lines.push(`  5. npm run illustrate -- ${slug} --approve`);
-      lines.push(`  6. npm run sync:apple && npm run build → commit push`);
+      lines.push(`  6. npm run verify:episodes  # 對照 ep-9／ep-10 標準`);
+      lines.push(`  7. npm run sync:apple && npm run build → commit push`);
     }
   }
 
@@ -118,11 +119,12 @@ export function buildIssueBody(slug: string, report: SyncRunReport): string {
 - [ ] \`npm run illustrate -- ${slug} --segment-only\`
 - [ ] \`npm run illustrate -- ${slug}\`（需 \`OPENAI_API_KEY\`）
 - [ ] 審 \`public/.illustrate-staging/${slug}/contact.html\`
-- [ ] \`npm run illustrate -- ${slug} --approve\`
+- [ ] \`npm run illustrate -- ${slug} --approve\`（含 pageCount／captionTimes／captions）
+- [ ] \`npm run verify:episodes\`（標準範本 ep-9／ep-10，見 docs/EPISODE-WORKFLOW.md）
 - [ ] \`npm run sync:apple && npm run build\` → commit push
 - [ ] 關閉本 Issue
 
-> 生圖在本機執行；CI 不放 OpenAI key、不自動 approve。
+> 生圖在本機執行；CI 不放 OpenAI key、不自動 approve。全幕 workflow 必與 ep-9／ep-10 一致。
 `;
 }
 
