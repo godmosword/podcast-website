@@ -1,15 +1,15 @@
 {
   "slug": "ep-10",
   "audioDuration": 395,
-  "model": "gpt-4o",
-  "generatedAt": "2026-06-11T11:39:09.255Z",
+  "model": "semantic-15-20s",
+  "generatedAt": "2026-06-11T12:20:00.000Z",
   "scenes": [
     {
       "index": 1,
       "start": 0,
       "end": 45.1,
-      "summary": "介紹端午節故事",
-      "prompt": "Bonbon and Mami discuss the Dragon Boat Festival and its traditions, setting a curious and educational tone.",
+      "summary": "主持人聊端午節與故事預告",
+      "prompt": "Warm podcast intro mood, hosts chatting about Dragon Boat Festival traditions before the story begins, cozy studio feeling",
       "characters": [],
       "keepCover": true
     },
@@ -17,102 +17,154 @@
       "index": 2,
       "start": 45.1,
       "end": 64.5,
-      "summary": "小紅賽車聞到香味",
-      "prompt": "Little Red Race Car smells a delicious aroma in the air and wonders what it is, feeling hungry and curious.",
-      "characters": [
-        "小紅賽車"
-      ]
+      "summary": "遊樂園飄來粽子香",
+      "prompt": "Little red race car sniffing a delicious aroma drifting through a colorful clay amusement park, curious hungry mood",
+      "characters": ["小紅賽車"]
     },
     {
       "index": 3,
       "start": 64.5,
-      "end": 125.8,
-      "summary": "香香餐車登場",
-      "prompt": "A cute pink food truck named Xiang Xiang enters the park, adorned with green zongzi decorations, spreading a delightful aroma.",
-      "characters": [
-        "小紅賽車",
-        "香香餐車"
-      ]
+      "end": 83.9,
+      "summary": "粉紅香香餐車進場",
+      "prompt": "A cute round pink food truck rolling into the car playground with shiny windows and a friendly smile, festive arrival mood",
+      "characters": ["小紅賽車", "香香餐車"]
     },
     {
       "index": 4,
-      "start": 125.8,
-      "end": 151.6,
-      "summary": "香香餐車登場",
-      "prompt": "A cute pink food truck named Xiang Xiang enters the park, adorned with green zongzi decorations, spreading a delightful aroma.",
-      "characters": [
-        "小紅賽車",
-        "香香餐車"
-      ]
+      "start": 83.9,
+      "end": 103.8,
+      "summary": "頭上綁著可愛粽子",
+      "prompt": "Close view of the pink food truck wearing two green zongzi like cute hair clips, leaf-wrapped triangles swaying gently, playful detail mood",
+      "characters": ["香香餐車"]
     },
     {
       "index": 5,
-      "start": 151.6,
-      "end": 214.1,
-      "summary": "香香分享端午故事",
-      "prompt": "Xiang Xiang the food truck shares the story of Qu Yuan and the origins of the Dragon Boat Festival with Little Red Race Car.",
-      "characters": [
-        "小紅賽車",
-        "香香餐車"
-      ]
+      "start": 103.8,
+      "end": 125.8,
+      "summary": "香香自我介紹",
+      "prompt": "The pink food truck smiling at the little red race car beside a string of tasty zongzi, friendly introduction mood",
+      "characters": ["香香餐車", "小紅賽車"]
     },
     {
       "index": 6,
-      "start": 214.1,
-      "end": 239.1,
-      "summary": "香香分享端午故事",
-      "prompt": "Xiang Xiang the food truck shares the story of Qu Yuan and the origins of the Dragon Boat Festival with Little Red Race Car.",
-      "characters": [
-        "小紅賽車",
-        "香香餐車"
-      ]
+      "start": 125.8,
+      "end": 148.6,
+      "summary": "端午節擺攤分享粽子",
+      "prompt": "The pink food truck serving festival zongzi at a cheerful stall in the amusement park, sweet and savory treats on display, welcoming mood",
+      "characters": ["香香餐車", "小紅賽車"]
     },
     {
       "index": 7,
-      "start": 239.1,
-      "end": 292.9,
-      "summary": "小紅賽車想吃粽子",
-      "prompt": "Little Red Race Car eagerly wants to eat a zongzi and learns about waiting in line politely.",
-      "characters": [
-        "小紅賽車",
-        "香香餐車",
-        "東東挖土機"
-      ]
+      "start": 148.6,
+      "end": 166.8,
+      "summary": "為什麼要吃粽子",
+      "prompt": "Little red race car asking curiously while the pink food truck opens its window under a shady tree, gentle question mood",
+      "characters": ["香香餐車", "小紅賽車"]
     },
     {
       "index": 8,
-      "start": 292.9,
-      "end": 353.4,
-      "summary": "大家分享粽子",
-      "prompt": "Everyone in the park enjoys eating the zongzi under the shade of a tree, feeling warm and grateful.",
-      "characters": [
-        "小紅賽車",
-        "香香餐車",
-        "東東挖土機"
-      ]
+      "start": 166.8,
+      "end": 187.6,
+      "summary": "屈原關心百姓",
+      "prompt": "Soft storytelling scene by the riverside, the pink food truck narrating a caring scholar named Qu Yuan who loved his country, calm educational mood",
+      "characters": ["香香餐車", "小紅賽車"]
     },
     {
       "index": 9,
-      "start": 353.4,
+      "start": 187.6,
+      "end": 207,
+      "summary": "百姓划舟丟米飯",
+      "prompt": "Simple clay boats on gentle river water, people searching and offering leaf-wrapped rice to the water, respectful remembrance mood, toddler-safe",
+      "characters": ["香香餐車", "小紅賽車"]
+    },
+    {
+      "index": 10,
+      "start": 207,
+      "end": 224.4,
+      "summary": "划龍舟與粽子的由來",
+      "prompt": "Little red race car having an aha moment connecting dragon boat racing and zongzi to the old story, bright understanding mood",
+      "characters": ["香香餐車", "小紅賽車"]
+    },
+    {
+      "index": 11,
+      "start": 224.4,
+      "end": 246.9,
+      "summary": "想念與感謝",
+      "prompt": "The pink food truck explaining that zongzi also means remembering gratitude and thanks, warm heartfelt mood",
+      "characters": ["香香餐車", "小紅賽車"]
+    },
+    {
+      "index": 12,
+      "start": 246.9,
+      "end": 268.1,
+      "summary": "好想吃但要排隊",
+      "prompt": "Little red race car eager for hot zongzi but stopping itself to wait in line politely, gentle self-control mood",
+      "characters": ["香香餐車", "小紅賽車"]
+    },
+    {
+      "index": 13,
+      "start": 268.1,
+      "end": 285.6,
+      "summary": "排到東東後面",
+      "prompt": "Little red race car queuing behind a yellow excavator, both smiling patiently at the pink food truck stall, polite friendship mood",
+      "characters": ["香香餐車", "小紅賽車", "東東挖土機"]
+    },
+    {
+      "index": 14,
+      "start": 285.6,
+      "end": 302.5,
+      "summary": "點一顆粽子",
+      "prompt": "Little red race car politely asking for one zongzi with a thankful smile, the pink food truck handing it over warmly, courteous exchange mood",
+      "characters": ["香香餐車", "小紅賽車", "東東挖土機"]
+    },
+    {
+      "index": 15,
+      "start": 302.5,
+      "end": 320,
+      "summary": "樹蔭下打開粽葉",
+      "prompt": "Friends under a shady tree unwrapping steaming zongzi together, fragrant steam rising, cozy sharing mood",
+      "characters": ["香香餐車", "小紅賽車", "東東挖土機"]
+    },
+    {
+      "index": 16,
+      "start": 320,
+      "end": 335,
+      "summary": "粽子裡有故事",
+      "prompt": "Little red race car tasting zongzi while the yellow excavator nods, realizing food can carry memory and care, tender mood",
+      "characters": ["香香餐車", "小紅賽車", "東東挖土機"]
+    },
+    {
+      "index": 17,
+      "start": 335,
+      "end": 357.2,
+      "summary": "一起看向遠方",
+      "prompt": "Little red race car, yellow excavator, and pink food truck looking peacefully toward the horizon together after eating, grateful friendship mood",
+      "characters": ["香香餐車", "小紅賽車", "東東挖土機"]
+    },
+    {
+      "index": 18,
+      "start": 357.2,
+      "end": 372.6,
+      "summary": "認識端午節故事",
+      "prompt": "Happy vehicles in the amusement park reflecting on learning the Dragon Boat Festival story while enjoying zongzi, satisfied mood",
+      "characters": ["香香餐車", "小紅賽車", "東東挖土機"]
+    },
+    {
+      "index": 19,
+      "start": 372.6,
+      "end": 389.2,
+      "summary": "想念感謝與祝福",
+      "prompt": "Gentle closing scene with zongzi and soft festival decorations, feeling of thanks, remembrance, and wishes for health and peace",
+      "characters": ["香香餐車", "小紅賽車", "東東挖土機"]
+    },
+    {
+      "index": 20,
+      "start": 389.2,
       "end": 395,
-      "summary": "大家分享粽子",
-      "prompt": "Everyone in the park enjoys eating the zongzi under the shade of a tree, feeling warm and grateful.",
-      "characters": [
-        "小紅賽車",
-        "香香餐車",
-        "東東挖土機"
-      ]
+      "summary": "下次再見",
+      "prompt": "Cheerful farewell at the car playground entrance, friends waving goodbye after a warm festival day, cozy ending mood",
+      "characters": ["香香餐車", "小紅賽車", "東東挖土機"]
     }
   ],
-  "newCharacters": [
-    {
-      "name": "香香餐車",
-      "aliases": [
-        "香香",
-        "餐車"
-      ],
-      "vehicle": "food truck",
-      "desc": "A cute claymation pink food truck with a round body, shiny windows, smiling eyes, and green zongzi decorations on top."
-    }
-  ]
+  "newCharacters": []
 }

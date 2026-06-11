@@ -107,11 +107,12 @@ export function stagingPortraitPath(slug: string, name: string): string {
   return join(stagingDirForSlug(slug), `_char-${safeName(name)}.jpg`);
 }
 
-// ── 場景長度目標（秒）─────────────────────────────────────
-const TARGET_MIN = 30;
-const TARGET_MAX = 60;
-const HARD_MIN = 25;
-const HARD_MAX = 75;
+// ── 場景長度目標（秒，對齊 ep-9 manual-semantic-15-20s）────────
+const TARGET_MIN = 15;
+const TARGET_MAX = 20;
+const HARD_MIN = 12;
+const HARD_MAX = 28;
+const INTRO_MAX = 50;
 
 // ── 黏土風格 prompt（萃取自 DESIGN.md）──────────────────────
 export const CLAY_STYLE_PREFIX =
@@ -160,7 +161,7 @@ function charByName(chars: Character[]): Map<string, Character> {
   return new Map(chars.map((c) => [c.name, c]));
 }
 
-// ── 後處理：把場景夾在 25–75 秒、邊界落在句界 ──────────────────
+// ── 後處理：把場景夾在 12–28 秒（開場可至 INTRO_MAX）、邊界落在句界 ──
 interface RawScene {
   startIdx: number;
   start: number;
@@ -195,11 +196,11 @@ function buildScenes(
     };
   });
 
-  // 併入過短場景（往前一幕合併，角色取聯集）
+  // 併入過短場景（單幕 < HARD_MIN 秒則併入上一幕，角色取聯集）
   const merged: RawScene[] = [];
   for (const sc of raw) {
     const prev = merged[merged.length - 1];
-    if (prev && sc.end - prev.start < HARD_MIN) {
+    if (prev && sc.end - sc.start < HARD_MIN) {
       prev.end = sc.end;
       prev.characters = [...new Set([...prev.characters, ...sc.characters])];
     } else {
@@ -330,7 +331,10 @@ export async function segmentByOpenAI(
   const lines = subs.map((s, i) => `${i}\t${s.t}\t${s.text}`).join("\n");
   const system =
     "You segment a children's audio story transcript into visual scenes for a picture book, and track recurring characters. " +
-    "Each scene spans roughly 30-60 seconds and breaks on plot beats (new place, action, or emotion). " +
+    "Use dense picture-book pacing like episode ep-9 (about 15-20 seconds per scene after the intro). " +
+    "Break on every clear plot beat (new place, action, emotion, or story beat)—prefer more scenes rather than fewer. " +
+    `Scene 1 may span host banter until the in-story narrative begins (up to ~${INTRO_MAX}s). ` +
+    "All later scenes should aim for roughly 15-20 seconds each. " +
     "You are given a KNOWN CHARACTER ROSTER (canonical names + aliases). " +
     "Return JSON {scenes:[{startIndex, summary, prompt, characters}], newCharacters:[{name, aliases, vehicle, desc}]}. " +
     "startIndex = index of the FIRST transcript line of the scene (strictly increasing; first scene MUST be 0). " +

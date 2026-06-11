@@ -75,7 +75,7 @@ async function segment(
   writeScenesFile({
     slug,
     audioDuration: duration,
-    model: deterministic ? "deterministic" : (process.env.OPENAI_TEXT_MODEL ?? "gpt-4o"),
+    model: deterministic ? "deterministic-15-20s" : "semantic-15-20s",
     generatedAt: new Date().toISOString(),
     scenes: out.scenes,
     newCharacters: out.newCharacters,
