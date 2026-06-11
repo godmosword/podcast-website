@@ -13,7 +13,7 @@
 //
 // 用法：
 //   npm run transcribe -- ev                  # 單集
-//   npm run transcribe -- ev drone ep-7       # 多集
+//   npm run transcribe -- ep-1 ep-2 ep-7     # 多集
 //   npm run transcribe -- --all               # 全部 public/stories/* 有 audio.mp3 的集
 //   WHISPER_MODEL=models/ggml-small.bin npm run transcribe -- ev
 //

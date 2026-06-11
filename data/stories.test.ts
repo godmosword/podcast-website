@@ -14,7 +14,11 @@ import { manualStories } from "./stories";
 
 describe("getStory", () => {
   it("依 slug 找到故事", () => {
-    expect(getStory("ambulance")?.title).toContain("救護車");
+    expect(getStory("ep-6")?.title).toContain("救護車");
+  });
+
+  it("舊主題 slug 仍可解析", () => {
+    expect(getStory("ambulance")?.slug).toBe("ep-6");
   });
 
   it("未知 slug 回傳 undefined", () => {
@@ -52,12 +56,12 @@ describe("allVehicles / allTags", () => {
 
 describe("getRelated", () => {
   it("排除自己", () => {
-    const related = getRelated("ambulance");
-    expect(related.every((s) => s.slug !== "ambulance")).toBe(true);
+    const related = getRelated("ep-6");
+    expect(related.every((s) => s.slug !== "ep-6")).toBe(true);
   });
 
   it("優先回傳同標籤或同車種", () => {
-    const related = getRelated("ambulance", 1);
+    const related = getRelated("ep-6", 1);
     expect(related.length).toBe(1);
   });
 
@@ -68,12 +72,12 @@ describe("getRelated", () => {
 
 describe("getNextStory", () => {
   it("回傳下一集（較早 ep）", () => {
-    const next = getNextStory("ambulance");
-    expect(next?.slug).toBe("excavator");
+    const next = getNextStory("ep-6");
+    expect(next?.slug).toBe("ep-5");
   });
 
   it("最舊一集無下一集", () => {
-    expect(getNextStory("ev")).toBeUndefined();
+    expect(getNextStory("ep-1")).toBeUndefined();
   });
 });
 
@@ -104,5 +108,18 @@ describe("pageCount", () => {
 
   it("手動維護的集數仍為 6 頁插畫", () => {
     expect(manualStories.every((s) => s.pageCount === 6)).toBe(true);
+  });
+});
+
+describe("slug convention", () => {
+  it("手動維護集數使用 ep-N slug", () => {
+    expect(manualStories.map((s) => s.slug)).toEqual([
+      "ep-6",
+      "ep-5",
+      "ep-4",
+      "ep-3",
+      "ep-2",
+      "ep-1",
+    ]);
   });
 });

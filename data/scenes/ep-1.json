@@ -1,0 +1,191 @@
+{
+  "slug": "ep-1",
+  "audioDuration": 395,
+  "model": "semantic-15-20s",
+  "generatedAt": "2026-06-11T14:39:14.408Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 0,
+      "end": 23,
+      "summary": "故事開場與介紹",
+      "prompt": "Bonbon and Mami introduce the story with excitement about a magical future electric car.",
+      "characters": []
+    },
+    {
+      "index": 2,
+      "start": 23,
+      "end": 49.5,
+      "summary": "蹦蹦準備去動物園",
+      "prompt": "Bong Bong, a little boy with a yellow backpack, excitedly announces his trip to the zoo.",
+      "characters": []
+    },
+    {
+      "index": 3,
+      "start": 49.5,
+      "end": 71.2,
+      "summary": "未來電動車出現",
+      "prompt": "A shiny futuristic electric car arrives at Bong Bong's door, with doors opening like wings.",
+      "characters": []
+    },
+    {
+      "index": 4,
+      "start": 71.2,
+      "end": 92.6,
+      "summary": "沃特介紹自己",
+      "prompt": "Watt, a round little robot, politely introduces himself to Bong Bong as his assistant.",
+      "characters": []
+    },
+    {
+      "index": 5,
+      "start": 92.6,
+      "end": 109.6,
+      "summary": "車內的驚喜",
+      "prompt": "Bong Bong enters the car, surprised by the lack of a steering wheel and the presence of colorful buttons and soft sofas.",
+      "characters": []
+    },
+    {
+      "index": 6,
+      "start": 109.6,
+      "end": 127,
+      "summary": "自動駕駛啟動",
+      "prompt": "Watt presses a green button, and the car smoothly starts in self-driving mode.",
+      "characters": []
+    },
+    {
+      "index": 7,
+      "start": 127,
+      "end": 147.1,
+      "summary": "車內變成理髮廳",
+      "prompt": "The car transforms into a beautiful hair salon with two nimble arms cutting Bong Bong's hair.",
+      "characters": []
+    },
+    {
+      "index": 8,
+      "start": 147.1,
+      "end": 163.5,
+      "summary": "車內變成理髮廳",
+      "prompt": "The car transforms into a beautiful hair salon with two nimble arms cutting Bong Bong's hair.",
+      "characters": []
+    },
+    {
+      "index": 9,
+      "start": 163.5,
+      "end": 183.8,
+      "summary": "蹦蹦的可愛反應",
+      "prompt": "Bong Bong makes a funny face in the mirror, feeling happy after his haircut.",
+      "characters": []
+    },
+    {
+      "index": 10,
+      "start": 183.8,
+      "end": 193.1,
+      "summary": "蹦蹦的可愛反應",
+      "prompt": "Bong Bong makes a funny face in the mirror, feeling happy after his haircut.",
+      "characters": []
+    },
+    {
+      "index": 11,
+      "start": 193.1,
+      "end": 215.2,
+      "summary": "車內變成泡泡浴",
+      "prompt": "The car transforms into a bubble bath, filling with strawberry-scented bubbles.",
+      "characters": []
+    },
+    {
+      "index": 12,
+      "start": 215.2,
+      "end": 227.8,
+      "summary": "車內變成泡泡浴",
+      "prompt": "The car transforms into a bubble bath, filling with strawberry-scented bubbles.",
+      "characters": []
+    },
+    {
+      "index": 13,
+      "start": 227.8,
+      "end": 248.4,
+      "summary": "沃特提供毛巾",
+      "prompt": "Watt offers Bong Bong a towel to dry off after his delightful bubble bath.",
+      "characters": []
+    },
+    {
+      "index": 14,
+      "start": 248.4,
+      "end": 259.5,
+      "summary": "沃特提供毛巾",
+      "prompt": "Watt offers Bong Bong a towel to dry off after his delightful bubble bath.",
+      "characters": []
+    },
+    {
+      "index": 15,
+      "start": 259.5,
+      "end": 276.6,
+      "summary": "接近動物園",
+      "prompt": "Bong Bong looks out the window, realizing they're almost at the zoo.",
+      "characters": []
+    },
+    {
+      "index": 16,
+      "start": 276.6,
+      "end": 298.5,
+      "summary": "蹦蹦想做更多事",
+      "prompt": "Bong Bong asks Watt what else he can do, leading to a fun dance session.",
+      "characters": []
+    },
+    {
+      "index": 17,
+      "start": 298.5,
+      "end": 319.9,
+      "summary": "蹦蹦想做更多事",
+      "prompt": "Bong Bong asks Watt what else he can do, leading to a fun dance session.",
+      "characters": []
+    },
+    {
+      "index": 18,
+      "start": 319.9,
+      "end": 347.5,
+      "summary": "蹦蹦想做更多事",
+      "prompt": "Bong Bong asks Watt what else he can do, leading to a fun dance session.",
+      "characters": []
+    },
+    {
+      "index": 19,
+      "start": 347.5,
+      "end": 366.7,
+      "summary": "感謝沃特",
+      "prompt": "Bong Bong thanks Watt for making the car ride enjoyable before heading to the zoo.",
+      "characters": []
+    },
+    {
+      "index": 20,
+      "start": 366.7,
+      "end": 387,
+      "summary": "故事結束",
+      "prompt": "Bonbon and Mami wrap up the story, discussing its uniqueness and encouraging imagination.",
+      "characters": []
+    },
+    {
+      "index": 21,
+      "start": 387,
+      "end": 395,
+      "summary": "故事結束",
+      "prompt": "Bonbon and Mami wrap up the story, discussing its uniqueness and encouraging imagination.",
+      "characters": []
+    }
+  ],
+  "newCharacters": [
+    {
+      "name": "沃特",
+      "aliases": [
+        "小竹手沃特",
+        "小機器人沃特"
+      ],
+      "desc": "A small, round robot with a polite demeanor, capable of various tasks inside the futuristic car."
+    },
+    {
+      "name": "蹦蹦",
+      "aliases": [],
+      "desc": "A little boy with a yellow backpack, full of excitement and curiosity."
+    }
+  ]
+}

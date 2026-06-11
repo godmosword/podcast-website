@@ -7,7 +7,7 @@
 //   - 01.jpg ~ NN.jpg  看圖翻頁用的插畫（pageCount 需與檔案數一致）
 //
 // 資料來源：
-//   - manualStories：下方手動維護（既有 6 集，完整插畫）
+//   - manualStories：下方手動維護（EP1–6，slug 為 ep-N）
 //   - apple-synced.json：npm run sync:apple 從 Apple Podcast 追加（MVP 單圖）
 //
 // 查詢 API 請使用 data/content.ts（getStories / getAllContent）。
@@ -39,7 +39,7 @@ export type ManualStory = {
 /** 手動維護的故事（sync 腳本不會修改此陣列）。 */
 export const manualStories: ManualStory[] = [
   {
-    slug: "ambulance",
+    slug: "ep-6",
     ep: 6,
     title: "安安救護車｜勇敢說出我需要幫忙",
     date: "2026-05-28",
@@ -62,7 +62,7 @@ export const manualStories: ManualStory[] = [
     ],
   },
   {
-    slug: "excavator",
+    slug: "ep-5",
     ep: 5,
     title: "東東挖土機的勇氣任務",
     date: "2026-05-26",
@@ -85,7 +85,7 @@ export const manualStories: ManualStory[] = [
     ],
   },
   {
-    slug: "sweeper",
+    slug: "ep-4",
     ep: 4,
     title: "守信用的鈴鈴清潔車",
     date: "2026-05-20",
@@ -109,7 +109,7 @@ export const manualStories: ManualStory[] = [
     ],
   },
   {
-    slug: "racecar",
+    slug: "ep-3",
     ep: 3,
     title: "小紅賽車不是第一名也沒關係",
     date: "2026-05-18",
@@ -133,7 +133,7 @@ export const manualStories: ManualStory[] = [
     ],
   },
   {
-    slug: "drone",
+    slug: "ep-2",
     ep: 2,
     title: "小小無人機出任務",
     date: "2026-05-13",
@@ -157,7 +157,7 @@ export const manualStories: ManualStory[] = [
     ],
   },
   {
-    slug: "ev",
+    slug: "ep-1",
     ep: 1,
     title: "神奇的未來電動車",
     date: "2026-05-04",

@@ -1,3 +1,4 @@
+import { canonicalStorySlug } from "@/lib/story-slug-aliases";
 import rawCharacters from "./characters.json";
 
 /** 角色一級資料（canonical 來源：data/characters.json 六位定裝照）。 */
@@ -42,10 +43,10 @@ const VEHICLE_ZH: Record<string, string> = {
 
 /** 車種對應的手動維護集數 slug（與 firstSeen 合併）。 */
 const VEHICLE_STORY_SLUG: Record<string, string> = {
-  "street sweeper": "sweeper",
-  ambulance: "ambulance",
-  "race car": "racecar",
-  excavator: "excavator",
+  "street sweeper": "ep-4",
+  ambulance: "ep-6",
+  "race car": "ep-3",
+  excavator: "ep-5",
 };
 
 const PERSONALITY_BY_ID: Record<string, string> = {
@@ -100,5 +101,6 @@ export function getCharacter(id: string): Character | undefined {
 }
 
 export function getCharactersForStory(slug: string): Character[] {
-  return CHARACTERS.filter((c) => c.appearsIn.includes(slug));
+  const canonical = canonicalStorySlug(slug);
+  return CHARACTERS.filter((c) => c.appearsIn.includes(canonical));
 }

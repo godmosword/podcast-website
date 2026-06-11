@@ -2,6 +2,7 @@ import appleSynced from "./apple-synced.json";
 import { getCharactersForStory } from "./characters";
 import { getReflectionPrompt } from "./reflection-prompts";
 import { manualStories, type ManualStory } from "./stories";
+import { canonicalStorySlug } from "@/lib/story-slug-aliases";
 import { storyCoverPath } from "@/lib/story-utils";
 
 export type ContentBase = {
@@ -85,12 +86,14 @@ export function getStories(): Story[] {
 export const stories = storyList;
 
 export function getStory(slug: string): Story | undefined {
-  return storyList.find((story) => story.slug === slug);
+  const canonical = canonicalStorySlug(slug);
+  return storyList.find((story) => story.slug === canonical);
 }
 
 export function getNextStory(slug: string): Story | undefined {
+  const canonical = canonicalStorySlug(slug);
   const sorted = storiesByNewest();
-  const idx = sorted.findIndex((s) => s.slug === slug);
+  const idx = sorted.findIndex((s) => s.slug === canonical);
   if (idx < 0 || idx >= sorted.length - 1) return undefined;
   return sorted[idx + 1];
 }
@@ -126,10 +129,11 @@ export function getRelated(slug: string, limit = 3): Story[] {
   const current = getStory(slug);
   if (!current) return [];
 
+  const canonical = canonicalStorySlug(slug);
   const currentTags = new Set(current.tags ?? []);
 
   return storyList
-    .filter((s) => s.slug !== slug)
+    .filter((s) => s.slug !== canonical)
     .map((s) => {
       const sharedTags = (s.tags ?? []).filter((t) => currentTags.has(t)).length;
       const sameVehicle = s.vehicle === current.vehicle ? 1 : 0;

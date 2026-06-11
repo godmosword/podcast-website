@@ -17,27 +17,27 @@ export const REFLECTION_PROMPTS: Record<
     child: "如果計畫突然改變，你會先做什麼？",
     parentFollowUp: "分享自己遇到延誤時的冷靜步驟，鼓勵孩子說出可控制的選項。",
   },
-  ambulance: {
+  "ep-6": {
     child: "什麼時候你會願意開口說「我需要幫忙」？",
     parentFollowUp: "肯定求助是勇敢，討論家中可以找誰幫忙。",
   },
-  excavator: {
+  "ep-5": {
     child: "東東一鏟一鏟往前，你遇過什麼事要慢慢完成？",
     parentFollowUp: "把「害怕但願意試」連結到孩子正在學的新技能。",
   },
-  sweeper: {
+  "ep-4": {
     child: "鈴鈴答應的事，你覺得守信用是什麼意思？",
     parentFollowUp: "舉一個家庭裡說到做到的小例子，讓孩子說說自己的承諾。",
   },
-  racecar: {
+  "ep-3": {
     child: "不是第一名時，心情會怎樣？你會怎麼讓自己好一點？",
     parentFollowUp: "不否定難過，一起想整理心情的方法（深呼吸、休息、再試一次）。",
   },
-  drone: {
+  "ep-2": {
     child: "小飛幫忙找兔子時，遵守了哪些安全規則？",
     parentFollowUp: "連結公園或戶外活動的安全約定，請孩子舉一個要遵守的規則。",
   },
-  ev: {
+  "ep-1": {
     child: "如果你可以設計一台未來電動車，它會做什麼事？",
     parentFollowUp: "鼓勵天馬行空，再問「這個設計要幫誰解決什麼問題」。",
   },

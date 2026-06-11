@@ -285,7 +285,10 @@ const SegmentSchema = z.object({
       z.object({
         name: z.string().min(1),
         aliases: z.array(z.string()).default([]),
-        vehicle: z.string().optional(),
+        vehicle: z
+          .string()
+          .nullish()
+          .transform((v) => v ?? undefined),
         desc: z.string().min(1),
       }),
     )

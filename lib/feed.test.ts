@@ -9,7 +9,7 @@ describe("buildRssFeed", () => {
     expect(xml).toContain("<channel>");
     expect(xml).toContain("車車遊樂園");
     expect(xml).toContain("<enclosure");
-    expect(xml).toContain("/story/ambulance");
+    expect(xml).toContain("/story/ep-6");
     expect(xml).toContain("audio/mpeg");
   });
 });

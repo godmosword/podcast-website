@@ -53,8 +53,8 @@ describe("progress-store migration", () => {
 
     migrateProgress();
 
-    expect(getFavoritesFromStore()).toEqual(["ambulance"]);
-    expect(loadContinueFromStore()?.slug).toBe("ev");
+    expect(getFavoritesFromStore()).toEqual(["ep-6"]);
+    expect(loadContinueFromStore()?.slug).toBe("ep-1");
     expect(localStorage.getItem("chechecar-favorites")).toBeNull();
     expect(localStorage.getItem("chechecar-continue")).toBeNull();
     expect(localStorage.getItem("cheche:progress")).toBeTruthy();
@@ -83,9 +83,9 @@ describe("progress-store migration", () => {
 
   it("toggleFavorite updates store", () => {
     migrateProgress();
-    const next = toggleFavoriteInStore("drone");
-    expect(next).toEqual(["drone"]);
-    expect(getFavoritesFromStore()).toEqual(["drone"]);
+    const next = toggleFavoriteInStore("ep-2");
+    expect(next).toEqual(["ep-2"]);
+    expect(getFavoritesFromStore()).toEqual(["ep-2"]);
   });
 
   it("saveBestScore only increases", () => {

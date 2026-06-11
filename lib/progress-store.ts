@@ -1,6 +1,7 @@
 import { createEmptyEconomy, migrateV2ToV3 } from "@/lib/gamekit/economy";
 import type { GameKitGameId } from "@/lib/gamekit/types";
 import type { PlayerProfile } from "@/lib/gamekit/types";
+import { canonicalStorySlug } from "@/lib/story-slug-aliases";
 import { normalizeThemeMode, type ThemeMode } from "@/lib/theme";
 
 export const PROGRESS_STORAGE_KEY = "cheche:progress";
@@ -244,10 +245,29 @@ export function migrateProgress(): ProgressStore {
   return next;
 }
 
+function migrateStorySlug(slug: string): string {
+  return canonicalStorySlug(slug);
+}
+
 function normalizeProgress(raw: Partial<ProgressStore>): ProgressStore {
+  const favorites = (raw.favorites ?? DEFAULT_PROGRESS.favorites).map(
+    migrateStorySlug,
+  );
+  const continueState = raw.continue?.slug
+    ? { ...raw.continue, slug: migrateStorySlug(raw.continue.slug) }
+    : (raw.continue ?? null);
+  const storiesCompleted = (raw.engagement?.storiesCompleted ?? []).map(
+    migrateStorySlug,
+  );
+  const reflectionShown = (raw.engagement?.reflectionShown ?? []).map(
+    migrateStorySlug,
+  );
+
   return {
     ...DEFAULT_PROGRESS,
     ...raw,
+    favorites,
+    continue: continueState,
     preferences: {
       ...DEFAULT_PROGRESS.preferences,
       ...raw.preferences,
@@ -266,10 +286,8 @@ function normalizeProgress(raw: Partial<ProgressStore>): ProgressStore {
       ...raw.unlocks,
     },
     engagement: {
-      storiesCompleted:
-        raw.engagement?.storiesCompleted ?? DEFAULT_ENGAGEMENT.storiesCompleted,
-      reflectionShown:
-        raw.engagement?.reflectionShown ?? DEFAULT_ENGAGEMENT.reflectionShown,
+      storiesCompleted,
+      reflectionShown,
       platformClicks: {
         ...DEFAULT_ENGAGEMENT.platformClicks,
         ...raw.engagement?.platformClicks,

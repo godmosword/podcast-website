@@ -18,7 +18,7 @@ describe("storyShareUrl", () => {
   });
 
   it("組出單集絕對網址", () => {
-    expect(storyShareUrl("ev")).toBe("https://example.com/story/ev");
+    expect(storyShareUrl("ep-1")).toBe("https://example.com/story/ep-1");
   });
 });
 
@@ -38,12 +38,12 @@ describe("storyLineShareText", () => {
     const text = storyLineShareText({
       ep: 3,
       title: "小紅賽車",
-      slug: "racecar",
+      slug: "ep-3",
       summary: "一起比賽吧！",
     });
     expect(text).toContain("EP 3 小紅賽車");
     expect(text).toContain("一起比賽吧！");
-    expect(text).toContain("https://example.com/story/racecar");
+    expect(text).toContain("https://example.com/story/ep-3");
   });
 
   it("無大綱時用預設句", () => {
