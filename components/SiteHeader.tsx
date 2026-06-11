@@ -1,6 +1,5 @@
 import Link from "next/link";
 import HeaderThemeToggle from "@/components/HeaderThemeToggle";
-import HomeHeroMobile from "@/components/HomeHeroMobile";
 import Doodle from "@/components/decor/Doodle";
 import decor from "@/components/decor/decor.module.css";
 import styles from "./SiteHeader.module.css";
@@ -66,22 +65,16 @@ export default function SiteHeader({ variant = "full" }: SiteHeaderProps) {
   return (
     <header className={styles.header}>
       <div className={styles.scene}>
-        <div className={styles.sceneMobile}>
-          <HomeHeroMobile />
-        </div>
-        <picture className={styles.sceneDesktop}>
-          <source media="(min-width: 640px)" srcSet={HERO_IMAGE} />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/mascot.png"
-            alt="車車遊樂園：卡通車車在遊樂園裡開心玩耍的黏土風格插畫"
-            className={styles.heroImage}
-            width={1024}
-            height={1024}
-            fetchPriority="high"
-            decoding="async"
-          />
-        </picture>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={HERO_IMAGE}
+          alt="車車遊樂園：卡通車車在遊樂園裡開心玩耍的黏土風格插畫"
+          className={styles.heroImage}
+          width={1024}
+          height={1024}
+          fetchPriority="high"
+          decoding="async"
+        />
       </div>
 
       <div className={styles.titleWrap}>

@@ -1,4 +1,4 @@
-const CACHE_NAME = "chechecar-v2";
+const CACHE_NAME = "chechecar-v3";
 const SHELL = [
   "/",
   "/manifest.json",
