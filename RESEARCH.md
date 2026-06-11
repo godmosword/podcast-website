@@ -244,3 +244,288 @@ Aseprite、Kenney CC0 佔位、Tiled → JSON、jsfxr/sfxr、BeepBox/FamiStudio 
 - [ ] reduced-motion＋色盲友善＋難度
 - [ ] 預載＋零 console 錯誤；Lighthouse a11y ≥95
 
+---
+
+## 2026-06-11｜前端吸引力功能 Cursor-Ready Prompts（FE-01〜FE-09）
+
+> 適用 repo：Next.js 15（App Router、SSG）、TypeScript、`components/games/`、`app/games/[slug]/page.tsx`、`hooks/useReducedMotion.ts`、progress store。
+> TODOS 紀律：每個 prompt 完成後必須更新 `TODOS.md`，標註對應 commit hash，格式：`- [x] FE-XX <任務名> (commit: <hash>)`。
+> 通用約束（每個 prompt 都適用）：
+> - 全部元件 SSR-safe，`window` / `AudioContext` / 感應器 API 一律在 `useEffect` 或動態 import 內存取。
+> - 一律尊重 `useReducedMotion`：reduced motion 時動畫改為淡入淡出或直接靜止。
+> - 觸控目標最小 64×64px。
+> - 不引入第三方追蹤、不開外部連結（兒童安全紅線）。
+> - 新增字串集中於既有 i18n / 文案常數檔，全部 zh-TW。
+
+### FE-01 主角車車角色 IP 系統（最高優先）
+
+```
+你是車車遊樂園的資深前端工程師。請建立「主角車車」吉祥物系統,作為全站情感連結核心。
+
+## 目標
+建立一個可復用的 <Mascot /> 元件系統,讓主角車車出現在首頁、故事頁、遊戲結算頁,具備表情、idle 動畫與語音問候。
+
+## 範圍
+1. `components/mascot/Mascot.tsx`
+   - Props: `expression: 'happy' | 'excited' | 'sleepy' | 'thinking' | 'cheering'`、`size: 'sm' | 'md' | 'lg'`、`animated?: boolean`
+   - 以 inline SVG 實作(不用點陣圖),車身、車窗眼睛、輪子分層,方便逐層動畫。
+2. Idle 動畫(CSS keyframes 或 Framer Motion 皆可,但全站擇一,沿用 repo 現有方案):
+   - 每 4–6 秒隨機眨眼(車窗眼睛)
+   - 車身輕微上下浮動(±3px,2.5s ease-in-out 循環)
+   - 被點擊時:squash & stretch(scaleY 0.85 → 1.05 → 1)+ 喇叭音效 hook(音效播放接 FE-02 的 useSfx,若 FE-02 未完成先留 TODO stub)
+3. `components/mascot/MascotGreeting.tsx`
+   - 依時段顯示問候氣泡(早安/午安/晚安 + 隨機鼓勵語,文案至少 8 句,存於常數檔)
+   - 氣泡出現動畫:scale + fade,300ms
+4. `lib/mascot/expressions.ts`:表情與場景對應表(首頁=happy、遊戲勝利=cheering、睡前模式=sleepy 等),供其他功能查表使用。
+
+## 非範圍
+- 不做語音合成,問候僅文字氣泡。
+- 不做多角色,只做一台主角車。
+
+## 驗收標準
+- [ ] 首頁渲染 Mascot,idle 動畫運作,點擊有 squash & stretch。
+- [ ] `prefers-reduced-motion` 時所有動畫停止,僅保留靜態表情切換。
+- [ ] SSG build 通過,無 hydration warning。
+- [ ] 5 種表情皆有 Storybook story 或 `/dev/mascot` 預覽頁(擇一,依 repo 慣例)。
+- [ ] Lighthouse a11y:SVG 有 role="img" 與 aria-label="車車"。
+- [ ] TODOS.md 更新並附 commit hash。
+```
+
+### FE-02 全站音效與微互動回饋系統
+
+```
+你是車車遊樂園的資深前端工程師。請建立全站統一的音效與微互動系統。對學齡前使用者,點擊音效是核心 UX 而非裝飾。
+
+## 目標
+一個 `useSfx` hook + `<TactileButton />` 元件,讓全站按鈕都有「按下會彈 + 有聲音」的一致回饋。
+
+## 範圍
+1. `hooks/useSfx.ts`
+   - 以 Web Audio API 實作(單一 AudioContext,lazy init 於首次使用者互動,符合 autoplay policy)
+   - 音效集:`tap`(短促 pop)、`success`(上行三音)、`error`(柔和低音,不刺耳)、`collect`(叮)、`horn`(喇叭,給 Mascot)
+   - 音效以程式合成(OscillatorNode + GainNode envelope)為預設,避免載入音檔;預留 `audioSpriteUrl` 選項供日後換真實音檔。
+   - 全域靜音開關,狀態存 progress store,家長設定頁可關閉。
+2. `components/ui/TactileButton.tsx`
+   - 按下:scale 0.92 + 觸覺回饋(`navigator.vibrate?.(10)`,feature-detect)
+   - 放開:彈回 overshoot(scale 1.04 → 1)
+   - 自動播 `tap` 音效;`sfx` prop 可覆寫或設 null 關閉
+   - 最小尺寸 64×64px,focus-visible 有明顯外框(沿用 contrast tokens)
+3. 替換現有四個遊戲(car-adventure、block-drop、kart、pirate-kart)入口按鈕與返回按鈕為 TactileButton,行為不變。
+
+## 驗收標準
+- [ ] iOS Safari 實機(或模擬)首次點擊即有聲音,無 autoplay 報錯。
+- [ ] 靜音開關生效且跨頁面持久化。
+- [ ] reduced motion 時按鈕不縮放,僅透明度回饋;音效不受影響。
+- [ ] 四個遊戲入口按鈕已替換,既有 E2E / 手動流程不壞。
+- [ ] SSG build 通過,AudioContext 不在 server 端建立。
+- [ ] TODOS.md 更新並附 commit hash。
+```
+
+### FE-03 場景式首頁「遊樂園地圖」
+
+```
+你是車車遊樂園的資深前端工程師。請把首頁從列表式改為「遊樂園地圖」場景式導航:孩子用逛的方式探索內容。
+
+## 目標
+一張可水平/輕微縱向平移的 SVG 遊樂園場景,故事區、遊戲區、圖鑑車庫是地圖上的建築物,點擊建築進入對應頁面。
+
+## 範圍
+1. `components/home/ParkMap.tsx`
+   - 一張 viewBox 約 1600×900 的分層 SVG 場景:天空(漸層+雲)、遠景山丘、四棟建築(故事屋、遊戲場、車庫圖鑑、設定小屋)
+   - 建築 = 巨大可點擊熱區(整棟建築都是按鈕,不是小 icon),hover/按下有 scale + 發光
+   - Mascot(FE-01)停在地圖入口處,有 MascotGreeting 氣泡
+2. 平移互動:
+   - 手機:單指拖曳平移,慣性滑動(可用 CSS scroll-snap 容器包 SVG,或 pointer events 手寫,選實作簡單者)
+   - 桌機:左右箭頭按鈕 + 拖曳
+   - 邊界 clamp,不可滑出場景
+3. 視差:雲與遠景山丘以 0.3–0.5 倍速跟隨平移(transform,GPU-friendly,不觸發 layout)
+4. 漸進增強:無 JS / reduced-motion 時退化為靜態整張地圖縮放置中,四個建築仍可點。
+5. 路由不變:建築連到既有 `/stories`、`/games`、圖鑑頁(FE-04 完成前先連 progress 頁)、家長設定(需通過 FE-06 家長閘門)。
+
+## 非範圍
+- 不做日夜循環(留給 FE-07 睡前模式)。
+- 不做地圖內小遊戲。
+
+## 驗收標準
+- [ ] 375px 寬手機可流暢拖曳,無水平捲軸外漏(body 不滾動)。
+- [ ] 四個建築鍵盤可聚焦(tabindex 順序合理)、Enter 可進入,各有 aria-label。
+- [ ] 視差僅用 transform,Chrome DevTools Performance 無 layout thrash。
+- [ ] reduced motion / 無 JS 退化版可用。
+- [ ] LCP < 2s(SVG inline 或 priority 載入,無大型點陣圖)。
+- [ ] TODOS.md 更新並附 commit hash。
+```
+
+### FE-04 車庫圖鑑：進度收集可視化
+
+```
+你是車車遊樂園的資深前端工程師。請把抽象進度改為具象收集:「車庫裡的車變多了」。
+
+## 目標
+一個 `/garage` 圖鑑頁:孩子完成故事/遊戲里程碑會解鎖新車車,陳列在車庫裡。
+
+## 範圍
+1. 資料層:`lib/garage/collection.ts`
+   - 定義 12 台可收集車車(id、名稱、SVG 元件、解鎖條件),解鎖條件對接既有 progress store 事件(例:聽完 3 集故事、kart 完成一局、連續 3 天造訪)
+   - 解鎖判定為純函式 `getUnlocked(progress): CarId[]`,可單元測試
+2. `app/garage/page.tsx` + `components/garage/GarageGrid.tsx`
+   - 已解鎖:彩色車車 + 名稱;未解鎖:剪影 + 「?」,點擊剪影顯示解鎖提示(「再聽 2 個故事就能遇見它!」,提示文案由條件自動生成)
+   - 新解鎖瞬間:`<UnlockCelebration />` 全螢幕慶祝(車車開進車庫動畫 + 彩帶 + FE-02 `collect` 音效),celebration 已看過的旗標存 progress store,不重複播
+3. 入口:ParkMap 車庫建築(FE-03)上顯示徽章「已收集 n/12」。
+
+## 驗收標準
+- [ ] `getUnlocked` 有單元測試覆蓋全部 12 條件(含邊界)。
+- [ ] 解鎖狀態重新整理後持久(沿用 progress store 既有持久化方式)。
+- [ ] 慶祝動畫只播一次;reduced motion 時改為靜態恭喜卡。
+- [ ] 未解鎖提示不出現負面字眼(無「失敗」「還差很多」)。
+- [ ] SSG build 通過。
+- [ ] TODOS.md 更新並附 commit hash。
+```
+
+### FE-05 家長儀表板
+
+```
+你是車車遊樂園的資深前端工程師。請建立家長儀表板,把孩子的使用轉成家長能看懂的「成長證據」,並展示 SEL 主題覆蓋(本站差異化重點)。
+
+## 目標
+`/parents/dashboard` 頁面,位於家長閘門(FE-06)之後,呈現本週使用摘要與 SEL 主題覆蓋。
+
+## 範圍
+1. 資料聚合:`lib/parents/weeklyStats.ts`
+   - 從 progress store 既有事件推導:本週聽過的故事(標題清單)、遊戲次數與總時長、連續使用天數、圖鑑收集進度
+   - SEL 主題覆蓋:每集故事 metadata 需有 `selThemes: string[]`(情緒認知、同理心、合作、堅持、自我調節…);若現有故事 metadata 缺此欄位,先補 schema 與至少現有全部故事的標註(內容用合理推測值並在 PR 描述列出待人工確認清單)
+2. UI:`components/parents/`
+   - 風格切換:家長區用沉穩配色(沿用 contrast tokens 的中性色階),不用兒童區的高飽和
+   - 區塊:本週摘要卡、SEL 主題覆蓋(以雷達圖或標籤雲擇一,純 SVG 自繪,不引入 chart 函式庫)、最近聽的故事清單、收集進度
+   - 設定區:音效開關(FE-02)、睡前模式時段(FE-07 預留)、每日時間上限(本期僅存值,強制執行留 TODO)
+3. 空狀態:資料不足一週時顯示友善引導,不顯示空圖表。
+
+## 驗收標準
+- [ ] 所有統計為純函式 + 單元測試,無時區 bug(以使用者本地時區計週,週一起算)。
+- [ ] 不向任何外部服務送資料(全部本地計算)。
+- [ ] SEL 覆蓋圖在零資料、單一主題、全主題三種狀態都正常。
+- [ ] 手機 375px 寬排版不破。
+- [ ] TODOS.md 更新並附 commit hash。
+```
+
+### FE-06 家長閘門（Parental Gate）
+
+```
+你是車車遊樂園的資深前端工程師。請實作家長閘門,阻擋兒童誤入設定/家長區,並作為對家長的信任展示。
+
+## 目標
+可復用 `<ParentalGate />`,包住 `/parents/*` 與設定頁。
+
+## 範圍
+1. `components/parents/ParentalGate.tsx`
+   - 驗證方式:隨機兩位數加法(如「23 + 45 = ?」),數字鍵盤輸入;答錯換題,連錯 3 次冷卻 30 秒
+   - 通過後 sessionStorage 記 15 分鐘有效,期間免再驗
+   - 文案明確告知孩子「這裡是爸爸媽媽的區域」+ Mascot sleepy 表情
+2. 路由整合:`app/parents/layout.tsx` 以 client gate 包裹;直接輸入網址也會被擋。
+3. 信任文案區塊:閘門頁下方加「我們的承諾」三條(無廣告、無外部連結、不收集個資),家長看得到。
+
+## 驗收標準
+- [ ] 兒童區任何路徑點不進家長區而不經閘門(含深層連結)。
+- [ ] 冷卻機制生效,重新整理不可繞過(冷卻截止時間存 sessionStorage)。
+- [ ] 數字鍵盤可鍵盤操作、可觸控,目標 ≥64px。
+- [ ] 15 分鐘時效正確,過期重新驗證。
+- [ ] TODOS.md 更新並附 commit hash。
+```
+
+### FE-07 睡前模式（Bedtime Mode）
+
+```
+你是車車遊樂園的資深前端工程師。請實作睡前模式:晚上自動切換為暗色舒緩介面與舒緩內容優先。
+
+## 目標
+依家長設定時段(預設 19:30–06:30)全站進入睡前狀態。
+
+## 範圍
+1. `hooks/useBedtimeMode.ts`
+   - 讀取家長設定時段(FE-05 設定區的值;無設定用預設),回傳 `{ isBedtime, minutesToBedtime }`
+   - 純 client 判定,SSR 一律回傳非睡前,client mount 後校正(避免 hydration mismatch,以 CSS class 切換而非條件渲染整頁)
+2. 視覺:`data-bedtime="true"` 掛在 <html>,以 CSS variables 覆寫:
+   - 背景轉深藍夜空、降低全站飽和度與亮度(沿用 token 系統新增 bedtime 變體)
+   - ParkMap 天空轉夜景(星星 + 月亮,雲變深色),Mascot 自動切 sleepy 表情(FE-01 對應表)
+3. 行為:
+   - 故事列表優先排序「舒緩」標籤內容(故事 metadata 加 `mood: 'energetic' | 'calm'`)
+   - FE-02 音效全域音量降至 40%
+   - 睡前 15 分鐘:畫面角落出現月亮提示「車車要睡覺囉」
+4. 家長可在儀表板關閉此功能。
+
+## 驗收標準
+- [ ] 跨午夜時段(19:30–06:30)判定正確,含 23:59→00:00 邊界單元測試。
+- [ ] 無 hydration warning(SSR/CSR 一致策略驗證)。
+- [ ] 暗色變體通過對比度檢查(文字 ≥ 4.5:1)。
+- [ ] 關閉功能後立即還原,無需重新整理。
+- [ ] TODOS.md 更新並附 commit hash。
+```
+
+### FE-08 PWA 離線快取
+
+```
+你是車車遊樂園的資深前端工程師。請加上 PWA 離線能力:家長常在車上、飛機上給孩子使用。
+
+## 目標
+安裝到主畫面後,已造訪過的頁面、已聽過的故事音檔可離線使用。
+
+## 範圍
+1. PWA 基礎:`manifest.webmanifest`(名稱、theme color、maskable icons 192/512,用 Mascot SVG 轉出)、`app/` metadata 掛接。
+2. Service Worker(用 Serwist 或 next-pwa,選與 Next.js 15 App Router 相容度最佳者,在 PR 說明選型理由):
+   - App shell + 靜態資產:stale-while-revalidate
+   - 故事音檔:CacheFirst + 明確上限(最多 20 集或 200MB,LRU 淘汰)
+   - 離線 fallback 頁:Mascot thinking 表情 +「沒有網路也可以玩已下載的內容」+ 列出可離線項目
+3. UI:故事卡片顯示「可離線」徽章;家長儀表板顯示快取用量與「清除下載」按鈕。
+4. 更新策略:新版部署後 SW skipWaiting + 提示重新整理(避免孩子卡舊版)。
+
+## 驗收標準
+- [ ] Lighthouse PWA installable 通過。
+- [ ] 飛航模式下:已造訪首頁/已聽故事可正常開啟播放;未快取頁顯示 fallback。
+- [ ] 快取上限與淘汰可驗證(DevTools 手動驗證步驟寫進 PR)。
+- [ ] SW 不快取家長儀表板統計(避免陳舊資料)。
+- [ ] TODOS.md 更新並附 commit hash。
+```
+
+### FE-09 多模態互動小工具（進階，選做）
+
+```
+你是車車遊樂園的資深前端工程師。請建立多模態互動 hooks,供故事熱點(STEM-P1)與遊戲使用。
+
+## 目標
+三個漸進增強的互動 hooks,全部 feature-detect、全部有觸控 fallback。
+
+## 範圍
+1. `hooks/useBlowDetection.ts`(吹氣):
+   - getUserMedia 麥克風 → AnalyserNode 偵測持續低頻能量尖峰
+   - 需家長閘門後的設定頁明確開啟才啟用(預設關閉,麥克風權限敏感);未開啟時 fallback = 快速連點
+2. `hooks/useShake.ts`(搖晃):DeviceMotion,iOS 需 permission request 流程;fallback = 長按
+3. `hooks/useScribble.ts`(塗鴉):pointer events 畫布軌跡,回傳覆蓋率 %,給「擦亮車車」類互動
+4. Demo:`/dev/interactions` 內部頁,三個 hook 各一個示範(吹熄蠟燭、搖蘋果樹、擦亮車車),接 FE-02 音效。
+
+## 驗收標準
+- [ ] 三個 hook 在不支援的環境(桌機無麥克風、無陀螺儀)自動走 fallback,功能等價。
+- [ ] 麥克風串流在元件 unmount 時確實釋放(無紅點殘留)。
+- [ ] 不錄音、不上傳任何音訊資料(僅本地能量分析),在程式註解與 PR 明示。
+- [ ] SSG build 通過,所有感應器 API 僅 client 端。
+- [ ] TODOS.md 更新並附 commit hash。
+```
+
+### 建議實作順序與依賴
+
+```
+FE-01 Mascot ──┬──> FE-03 ParkMap ──> FE-07 睡前模式(夜景)
+FE-02 音效  ──┘         │
+                        └──> FE-04 車庫圖鑑
+FE-06 家長閘門 ──> FE-05 家長儀表板 ──> FE-07 / FE-08 設定整合
+FE-09 多模態(獨立,接 STEM-P1)
+```
+
+| 順位 | 任務 | 理由 |
+|---|---|---|
+| 1 | FE-01 + FE-02 | 孩子留存的根本，且是其他任務的依賴 |
+| 2 | FE-06 | 小而快，FE-05 的前置 |
+| 3 | FE-03 | 首頁改版，體驗躍升最大 |
+| 4 | FE-04 | 回訪鉤子 |
+| 5 | FE-05 | 家長轉換（WAF 北極星） |
+| 6 | FE-07 → FE-08 | 加分項 |
+| 7 | FE-09 | 選做，配合 STEM-P1 排程 |
+
