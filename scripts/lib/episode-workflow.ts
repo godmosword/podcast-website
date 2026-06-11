@@ -4,14 +4,23 @@
 // MVP（pageCount=1）→ 校對字幕 → illustrate 全流程 → approve → verify → push
 // ============================================================
 
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Story } from "../../data/content";
-import { ROOT, STORIES_DIR, subtitleSidecarPath } from "./transcribe-core";
+import { STORIES_DIR, subtitleSidecarPath } from "./transcribe-core";
 import { scenesSidecarPath } from "./illustrate-core";
 
 /** 已完成的黃金範本集（文件／測試對照用）。 */
 export const REFERENCE_ILLUSTRATED_SLUGS = ["ep-9", "ep-10"] as const;
+
+/** 已知的舊式多頁 placeholder 集（僅這些允許 legacy warn，其他多頁集缺 scenes 一律 error）。 */
+export const LEGACY_PLACEHOLDER_SLUGS = [
+  "ep-2",
+  "ep-3",
+  "ep-4",
+  "ep-5",
+  "ep-6",
+] as const;
 
 export type WorkflowIssueLevel = "error" | "warn";
 
@@ -20,6 +29,14 @@ export type WorkflowIssue = {
   level: WorkflowIssueLevel;
   code: string;
   message: string;
+};
+
+/** 檔案系統探針——測試時可注入 mock，不必依賴真實集數狀態。 */
+export type WorkflowProbes = {
+  hasSubtitles: (slug: string) => boolean;
+  hasScenes: (slug: string) => boolean;
+  imageCount: (slug: string) => number;
+  sceneCount: (slug: string) => number;
 };
 
 export function illustrationJpgCount(slug: string): number {
@@ -36,22 +53,41 @@ export function hasScenesSidecar(slug: string): boolean {
   return existsSync(scenesSidecarPath(slug));
 }
 
+/** scenes 側車的幕數；檔案缺失或格式不符回傳 0。 */
+export function scenesSidecarCount(slug: string): number {
+  const p = scenesSidecarPath(slug);
+  if (!existsSync(p)) return 0;
+  try {
+    const parsed: unknown = JSON.parse(readFileSync(p, "utf8"));
+    if (
+      typeof parsed === "object" &&
+      parsed !== null &&
+      Array.isArray((parsed as { scenes?: unknown }).scenes)
+    ) {
+      return (parsed as { scenes: unknown[] }).scenes.length;
+    }
+    return 0;
+  } catch {
+    return 0;
+  }
+}
+
+export const defaultWorkflowProbes: WorkflowProbes = {
+  hasSubtitles: hasSubtitlesSidecar,
+  hasScenes: hasScenesSidecar,
+  imageCount: illustrationJpgCount,
+  sceneCount: scenesSidecarCount,
+};
+
 /** pageCount>1 的繪本版必備條件（對齊 ep-9／ep-10）。 */
-export function verifyIllustratedEpisode(story: Story): WorkflowIssue[] {
+export function verifyIllustratedEpisode(
+  story: Story,
+  probes: WorkflowProbes = defaultWorkflowProbes,
+): WorkflowIssue[] {
   const { slug, pageCount } = story;
   const issues: WorkflowIssue[] = [];
 
-  if (pageCount <= 1) {
-    issues.push({
-      slug,
-      level: "warn",
-      code: "mvp-only",
-      message: "仍為 MVP 單圖（pageCount=1），需跑 illustrate 全流程",
-    });
-    return issues;
-  }
-
-  if (!hasSubtitlesSidecar(slug)) {
+  if (!probes.hasSubtitles(slug)) {
     issues.push({
       slug,
       level: "error",
@@ -60,16 +96,26 @@ export function verifyIllustratedEpisode(story: Story): WorkflowIssue[] {
     });
   }
 
-  if (!hasScenesSidecar(slug)) {
+  if (!probes.hasScenes(slug)) {
     issues.push({
       slug,
       level: "error",
       code: "missing-scenes",
       message: "缺 data/scenes/<slug>.json",
     });
+  } else {
+    const scenes = probes.sceneCount(slug);
+    if (scenes !== pageCount) {
+      issues.push({
+        slug,
+        level: "error",
+        code: "scene-count",
+        message: `scenes 幕數 ${scenes} ≠ pageCount ${pageCount}`,
+      });
+    }
   }
 
-  const images = illustrationJpgCount(slug);
+  const images = probes.imageCount(slug);
   if (images !== pageCount) {
     issues.push({
       slug,
@@ -102,14 +148,17 @@ export function verifyIllustratedEpisode(story: Story): WorkflowIssue[] {
   return issues;
 }
 
-/** MVP 單圖集最低條件（GHA 同步後）。 */
-export function verifyMvpEpisode(story: Story): WorkflowIssue[] {
+/** MVP 單圖集（GHA 同步後）：最低條件 + 永遠標出「待生圖」狀態，不靜默。 */
+export function verifyMvpEpisode(
+  story: Story,
+  probes: WorkflowProbes = defaultWorkflowProbes,
+): WorkflowIssue[] {
   const { slug } = story;
   const issues: WorkflowIssue[] = [];
 
   if (story.pageCount !== 1) return issues;
 
-  if (!hasSubtitlesSidecar(slug)) {
+  if (!probes.hasSubtitles(slug)) {
     issues.push({
       slug,
       level: "warn",
@@ -118,7 +167,7 @@ export function verifyMvpEpisode(story: Story): WorkflowIssue[] {
     });
   }
 
-  if (illustrationJpgCount(slug) < 1) {
+  if (probes.imageCount(slug) < 1) {
     issues.push({
       slug,
       level: "error",
@@ -127,14 +176,37 @@ export function verifyMvpEpisode(story: Story): WorkflowIssue[] {
     });
   }
 
+  if (probes.hasScenes(slug)) {
+    issues.push({
+      slug,
+      level: "warn",
+      code: "illustrate-incomplete",
+      message: `已切 ${probes.sceneCount(slug)} 幕場景但 pageCount=1：illustrate 未生圖或未 --approve（檢查 public/.illustrate-staging/<slug>/ 與 public/stories/<slug>/）`,
+    });
+  } else {
+    issues.push({
+      slug,
+      level: "warn",
+      code: "illustrate-pending",
+      message: "MVP 單圖，待跑 illustrate 全流程（對齊 ep-9／ep-10）",
+    });
+  }
+
   return issues;
 }
 
-export function verifyStoryWorkflow(story: Story): WorkflowIssue[] {
+/** 單一狀態路由：MVP → legacy allowlist → 全幕標準檢查。 */
+export function verifyStoryWorkflow(
+  story: Story,
+  probes: WorkflowProbes = defaultWorkflowProbes,
+): WorkflowIssue[] {
   if (story.pageCount <= 1) {
-    return verifyMvpEpisode(story);
+    return verifyMvpEpisode(story, probes);
   }
-  if (!hasScenesSidecar(story.slug)) {
+  if (
+    !probes.hasScenes(story.slug) &&
+    (LEGACY_PLACEHOLDER_SLUGS as readonly string[]).includes(story.slug)
+  ) {
     return [
       {
         slug: story.slug,
@@ -144,7 +216,7 @@ export function verifyStoryWorkflow(story: Story): WorkflowIssue[] {
       },
     ];
   }
-  return verifyIllustratedEpisode(story);
+  return verifyIllustratedEpisode(story, probes);
 }
 
 export function formatWorkflowReport(issues: WorkflowIssue[]): string {

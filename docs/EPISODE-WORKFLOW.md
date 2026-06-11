@@ -61,12 +61,23 @@ git push
 ## 驗證
 
 ```bash
-npm run verify:episodes
+npm run verify:episodes              # error 才 exit 1，warn 列出待辦
+npm run verify:episodes -- --strict  # warn 也視為失敗（approve 前最後把關）
+npm run check                        # test + verify + build，與 CI 同一套
 ```
 
-- **全幕集**（`pageCount > 1`）：插圖數、scenes、subtitles、`captionTimes`、`captions` 必須一致。
-- **MVP**（`pageCount = 1`）：至少 `01.jpg` + 字幕側車；待跑 illustrate。
-- **Legacy**（ep-2–6 現為 6 頁 placeholder、無 scenes）：`verify:episodes` 會報錯，需依本 workflow 重做。
+- **全幕集**（`pageCount > 1`）：插圖數、scenes 幕數、subtitles、`captionTimes`、`captions` 必須與 `pageCount` 一致，否則 **error**。
+- **MVP**（`pageCount = 1`）：至少 `01.jpg` + 字幕側車；一律列 **warn**（`illustrate-pending`，或已切場景未 approve 的 `illustrate-incomplete`），不會靜默通過。
+- **Legacy**（ep-2–6 allowlist，6 頁 placeholder、無 scenes）：列 **warn**（`legacy-placeholder`），需依本 workflow 重做。allowlist 以外的多頁集缺 scenes 一律 **error**。
+
+### CI 行為（每次 sync 一致）
+
+GHA `sync-apple-podcast.yml` 在 `npm run sync:apple` 後**一律**跑 `npm run verify:episodes`：
+
+| 結果 | 影響 |
+|------|------|
+| error | 擋下 commit/push，sync 失敗 |
+| warn | 不擋 sync；寫入 Actions Job Summary，待生圖集數每次可見 |
 
 ## 與舊流程的差異
 

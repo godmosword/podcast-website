@@ -12,6 +12,8 @@ import {
 } from "./lib/episode-workflow";
 
 function main(): void {
+  // --strict：warn 也視為失敗（本機 illustrate --approve 前的最後把關用）。
+  const strict = process.argv.includes("--strict");
   const stories = getStories();
   const allIssues: WorkflowIssue[] = [];
 
@@ -43,9 +45,13 @@ function main(): void {
   }
 
   const errors = allIssues.filter((i) => i.level === "error");
+  const warns = allIssues.filter((i) => i.level === "warn");
   const refErrors = refIssues.length;
 
-  if (errors.length > 0 || refErrors > 0) {
+  if (errors.length > 0 || refErrors > 0 || (strict && warns.length > 0)) {
+    if (strict && warns.length > 0) {
+      console.log("\n--strict：警告視為失敗");
+    }
     process.exit(1);
   }
 }

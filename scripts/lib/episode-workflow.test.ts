@@ -1,10 +1,29 @@
 import { describe, expect, it } from "vitest";
 import { getStory } from "../../data/content";
+import type { Story } from "../../data/content";
 import {
+  LEGACY_PLACEHOLDER_SLUGS,
   REFERENCE_ILLUSTRATED_SLUGS,
   verifyIllustratedEpisode,
   verifyStoryWorkflow,
+  type WorkflowProbes,
 } from "./episode-workflow";
+
+function mockStory(overrides: Partial<Story>): Story {
+  const base = getStory("ep-9");
+  if (!base) throw new Error("範本 ep-9 不在目錄中");
+  return { ...base, ...overrides };
+}
+
+function mockProbes(overrides: Partial<WorkflowProbes>): WorkflowProbes {
+  return {
+    hasSubtitles: () => true,
+    hasScenes: () => false,
+    imageCount: () => 1,
+    sceneCount: () => 0,
+    ...overrides,
+  };
+}
 
 describe("REFERENCE_ILLUSTRATED_SLUGS", () => {
   it("範本為 ep-9 與 ep-10", () => {
@@ -36,15 +55,85 @@ describe("ep-1 已升級為全幕標準", () => {
   });
 });
 
-describe("MVP 與 legacy", () => {
-  it("ep-7 為 MVP（pageCount=1、無全幕 error）", () => {
-    const story = getStory("ep-7");
-    expect(story?.pageCount).toBe(1);
-    const issues = verifyStoryWorkflow(story!);
+describe("MVP 集（pageCount=1）不靜默通過", () => {
+  it("無 scenes → warn illustrate-pending", () => {
+    const story = mockStory({ slug: "ep-x", pageCount: 1 });
+    const issues = verifyStoryWorkflow(story, mockProbes({}));
+    expect(issues.some((i) => i.code === "illustrate-pending")).toBe(true);
     expect(issues.filter((i) => i.level === "error")).toEqual([]);
   });
 
-  it("ep-2 為 legacy 6 頁 placeholder（警告、待重做 illustrate）", () => {
+  it("已切場景但未 approve → warn illustrate-incomplete", () => {
+    const story = mockStory({ slug: "ep-x", pageCount: 1 });
+    const issues = verifyStoryWorkflow(
+      story,
+      mockProbes({ hasScenes: () => true, sceneCount: () => 15 }),
+    );
+    expect(issues.some((i) => i.code === "illustrate-incomplete")).toBe(true);
+    expect(issues.some((i) => i.code === "illustrate-pending")).toBe(false);
+    expect(issues.filter((i) => i.level === "error")).toEqual([]);
+  });
+
+  it("缺封面 → error mvp-missing-cover", () => {
+    const story = mockStory({ slug: "ep-x", pageCount: 1 });
+    const issues = verifyStoryWorkflow(
+      story,
+      mockProbes({ imageCount: () => 0 }),
+    );
+    expect(issues.some((i) => i.code === "mvp-missing-cover")).toBe(true);
+  });
+});
+
+describe("legacy allowlist 與多頁缺 scenes", () => {
+  it("allowlist 內（ep-2..6）→ warn legacy-placeholder", () => {
+    for (const slug of LEGACY_PLACEHOLDER_SLUGS) {
+      const story = mockStory({ slug, pageCount: 6 });
+      const issues = verifyStoryWorkflow(story, mockProbes({}));
+      expect(issues).toEqual([
+        expect.objectContaining({ code: "legacy-placeholder", level: "warn" }),
+      ]);
+    }
+  });
+
+  it("allowlist 外多頁缺 scenes → error missing-scenes", () => {
+    const story = mockStory({ slug: "ep-x", pageCount: 6 });
+    const issues = verifyStoryWorkflow(story, mockProbes({}));
+    expect(
+      issues.some((i) => i.code === "missing-scenes" && i.level === "error"),
+    ).toBe(true);
+  });
+});
+
+describe("全幕標準檢查（mock probes）", () => {
+  it("scenes 幕數 ≠ pageCount → error scene-count", () => {
+    const story = mockStory({ slug: "ep-x", pageCount: 20 });
+    const issues = verifyIllustratedEpisode(
+      story,
+      mockProbes({
+        hasScenes: () => true,
+        sceneCount: () => 21,
+        imageCount: () => 20,
+      }),
+    );
+    expect(issues.some((i) => i.code === "scene-count")).toBe(true);
+  });
+
+  it("插圖張數 ≠ pageCount → error image-count", () => {
+    const story = mockStory({ slug: "ep-x", pageCount: 20 });
+    const issues = verifyIllustratedEpisode(
+      story,
+      mockProbes({
+        hasScenes: () => true,
+        sceneCount: () => 20,
+        imageCount: () => 19,
+      }),
+    );
+    expect(issues.some((i) => i.code === "image-count")).toBe(true);
+  });
+});
+
+describe("真實 repo 狀態（僅黃金範本與 legacy 對照）", () => {
+  it("ep-2 為 legacy placeholder（警告、無 error）", () => {
     const story = getStory("ep-2");
     expect(story?.pageCount).toBe(6);
     const issues = verifyStoryWorkflow(story!);

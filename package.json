@@ -15,6 +15,7 @@
     "transcribe": "tsx scripts/transcribe.ts",
     "illustrate": "tsx --env-file-if-exists=.env.local scripts/illustrate.ts",
     "verify:episodes": "tsx scripts/verify-episodes.ts",
+    "check": "npm test && npm run verify:episodes && npm run build",
     "backfill:captions": "tsx scripts/backfill-scene-captions.ts"
   },
   "dependencies": {

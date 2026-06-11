@@ -56,6 +56,13 @@ jobs:
         run: npm run sync:apple
       # sync 內建：轉錄新集 → 字幕再處理（簡轉繁 + 過濾）→ 寫 sync-run-report.json
 
+      # 每次 sync 後一律驗證 workflow 框架條件（pageCount／captionTimes／captions／插圖數），
+      # error 會擋下 push；warn（待生圖、legacy）寫進 Job Summary 讓待辦持續可見。
+      - name: Verify episode workflow (ep-9/ep-10 standard)
+        run: |
+          set -o pipefail
+          npm run verify:episodes 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+
       # RSS 與 repo 完全一致時 sync 不動任何檔案，可早退、不浪費 CI 跑 test+build。
       - name: Detect changes
         id: changes
