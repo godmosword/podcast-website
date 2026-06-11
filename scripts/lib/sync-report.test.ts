@@ -22,10 +22,11 @@ describe("post-sync-notify", () => {
     expect(msg).toContain("草稿，請校對");
   });
 
-  it("Issue body 含 checklist", () => {
+  it("Issue body 含 checklist 與故事連結", () => {
     const body = buildIssueBody("ep-10", sampleReport);
     expect(body).toContain("## 新集待生圖：ep-10");
     expect(body).toContain("--approve");
     expect(body).toContain("contact.html");
+    expect(body).toContain("/story/ep-10");
   });
 });

@@ -1,25 +1,31 @@
 #!/usr/bin/env npx tsx
 /**
  * GHA 同步後：依 sync report 產生多行 commit 訊息，並為新 ep-N 開 illustrate Issue。
+ * 手機推播：維護者安裝 GitHub App，開 Issue 時 assign／@mention 即會收到通知。
  *
  * 環境變數：
- *   SYNC_REPORT_PATH      — sync-apple-podcast 寫入的 JSON（必填）
- *   SYNC_COMMIT_MSG_PATH  — 輸出 commit 訊息檔（預設 ./sync-commit-msg.txt）
- *   CREATE_ISSUES         — "1" 時用 gh 開 Issue（GHA 內設）
- *   GITHUB_REPOSITORY     — owner/repo（gh 自動帶入）
+ *   SYNC_REPORT_PATH         — sync-apple-podcast 寫入的 JSON
+ *   SYNC_COMMIT_MSG_PATH     — 輸出 commit 訊息檔
+ *   CREATE_ISSUES            — "1" 時用 gh 開 Issue
+ *   GITHUB_ISSUE_ASSIGNEES   — 指派對象（逗號分隔 GitHub username）
+ *   GITHUB_ISSUE_MENTIONS    — Issue 開頭 @mention（例 @user1 @user2）
  */
 import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
-import {
-  sendMobileNotifications,
-  type IssueLinks,
-} from "./lib/sync-notify-channels";
 import type { SyncRunReport } from "./lib/sync-report";
 
 function subtitleLine(slug: string, report: SyncRunReport): string {
   if (report.subtitlesCreated.includes(slug)) return "字幕：已轉錄（草稿，請校對）";
   if (report.subtitlesMissing.includes(slug)) return "字幕：缺側車檔";
   return "字幕：已有側車檔";
+}
+
+function siteBase(): string {
+  return (
+    process.env.NOTIFY_SITE_URL?.trim() ||
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+    "https://podcast-website-mu.vercel.app"
+  ).replace(/\/+$/, "");
 }
 
 export function buildCommitMessage(report: SyncRunReport): string {
@@ -84,12 +90,19 @@ export function buildCommitMessage(report: SyncRunReport): string {
   return `${lines.join("\n").trimEnd()}\n`;
 }
 
+function issueNotifyPreamble(): string {
+  const mentions = process.env.GITHUB_ISSUE_MENTIONS?.trim();
+  if (!mentions) return "";
+  return `${mentions}\n\n> 📱 已 @mention；請確認 GitHub App 已開啟 Issue 通知。\n\n`;
+}
+
 export function buildIssueBody(slug: string, report: SyncRunReport): string {
   const ep = report.newEpisodes.find((e) => e.slug === slug);
   const title = ep?.title ?? slug;
   const runAt = report.runAt;
+  const storyUrl = `${siteBase()}/story/${slug}`;
 
-  return `## 新集待生圖：${slug}
+  return `${issueNotifyPreamble()}## 新集待生圖：${slug}
 
 - **標題**：${title}
 - **同步時間**：${runAt}
@@ -99,7 +112,7 @@ export function buildIssueBody(slug: string, report: SyncRunReport): string {
 
 ### Checklist
 
-- [ ] 抽查站上 [/story/${slug}](https://podcast-website-mu.vercel.app/story/${slug}) 能播、封面正確
+- [ ] 抽查站上 [${slug}](${storyUrl}) 能播、封面正確
 - [ ] 校對 \`data/subtitles/${slug}.json\`（Bonbon／馬米等人名）
 - [ ] 確認車種／標籤（必要時 \`data/apple-sync.defaults.json\` overrides）
 - [ ] \`npm run illustrate -- ${slug} --segment-only\`
@@ -115,6 +128,12 @@ export function buildIssueBody(slug: string, report: SyncRunReport): string {
 
 function gh(args: string[]): string {
   return execFileSync("gh", args, { encoding: "utf8" }).trim();
+}
+
+function assigneeArgs(): string[] {
+  const raw = process.env.GITHUB_ISSUE_ASSIGNEES?.trim();
+  if (!raw) return [];
+  return ["--assignee", raw];
 }
 
 function findOpenIssueUrl(slug: string): string | null {
@@ -150,29 +169,28 @@ function createIllustrateIssue(
 
   const title = `[illustrate] 新集待生圖：${slug}`;
   const body = buildIssueBody(slug, report);
+  const baseArgs = ["issue", "create", "--title", title, "--body", body];
 
   try {
-    const url = gh([
-      "issue",
-      "create",
-      "--title",
-      title,
-      "--body",
-      body,
-      "--label",
-      "illustration",
-    ]);
+    const url = gh([...baseArgs, "--label", "illustration", ...assigneeArgs()]);
     console.log(`已開 Issue：${url}`);
     return url;
   } catch (err) {
     console.warn(`帶 label 開 Issue 失敗，重試不帶 label（${(err as Error).message}）`);
-    const url = gh(["issue", "create", "--title", title, "--body", body]);
-    console.log(`已開 Issue：${url}`);
-    return url;
+    try {
+      const url = gh([...baseArgs, ...assigneeArgs()]);
+      console.log(`已開 Issue：${url}`);
+      return url;
+    } catch (err2) {
+      console.warn(`指派失敗，改不帶 assignee（${(err2 as Error).message}）`);
+      const url = gh(baseArgs);
+      console.log(`已開 Issue：${url}`);
+      return url;
+    }
   }
 }
 
-async function main(): Promise<void> {
+function main(): void {
   const reportPath = process.env.SYNC_REPORT_PATH;
   const commitMsgPath = process.env.SYNC_COMMIT_MSG_PATH ?? "sync-commit-msg.txt";
 
@@ -187,21 +205,22 @@ async function main(): Promise<void> {
   writeFileSync(commitMsgPath, commitMsg, "utf8");
   console.log(`Commit 訊息已寫入 ${commitMsgPath}`);
 
-  const issueLinks: IssueLinks = {};
-
-  if (process.env.CREATE_ISSUES === "1" && report.illustratePending.length > 0) {
-    for (const slug of report.illustratePending) {
-      const url = createIllustrateIssue(slug, report);
-      if (url) issueLinks[slug] = url;
-    }
-  } else if (process.env.CREATE_ISSUES !== "1") {
+  if (process.env.CREATE_ISSUES !== "1") {
     console.log("CREATE_ISSUES≠1，略過開 Issue。");
+    return;
   }
 
-  await sendMobileNotifications(report, issueLinks);
+  if (report.illustratePending.length === 0) {
+    console.log("無新 ep-N，略過開 Issue。");
+    return;
+  }
+
+  for (const slug of report.illustratePending) {
+    createIllustrateIssue(slug, report);
+  }
 }
 
 const entry = process.argv[1]?.replace(/\\/g, "/") ?? "";
 if (entry.endsWith("post-sync-notify.ts")) {
-  void main();
+  main();
 }
