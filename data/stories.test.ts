@@ -1,3 +1,5 @@
+import { existsSync, readdirSync } from "fs";
+import { join } from "path";
 import { describe, expect, it } from "vitest";
 import {
   allTags,
@@ -101,13 +103,39 @@ describe("getStoriesByTag", () => {
   });
 });
 
+function storyIllustrationCount(slug: string): number {
+  const dir = join(process.cwd(), "public/stories", slug);
+  if (!existsSync(dir)) return 0;
+  return readdirSync(dir).filter((f) => /^\d+\.jpg$/.test(f)).length;
+}
+
 describe("pageCount", () => {
   it("每集 pageCount 至少為 1", () => {
     expect(stories.every((s) => s.pageCount >= 1)).toBe(true);
   });
 
-  it("手動維護的集數仍為 6 頁插畫", () => {
-    expect(manualStories.every((s) => s.pageCount === 6)).toBe(true);
+  it("EP1 生圖後為 21 頁（overrides 與 public 一致）", () => {
+    const ep1 = getStory("ep-1");
+    expect(ep1?.pageCount).toBe(21);
+    expect(ep1?.captionTimes?.length).toBe(21);
+    expect(storyIllustrationCount("ep-1")).toBe(21);
+  });
+
+  it("pageCount 與 public/stories 插圖檔數一致", () => {
+    for (const story of stories) {
+      const count = storyIllustrationCount(story.slug);
+      if (count > 0) {
+        expect(story.pageCount).toBe(count);
+      }
+    }
+  });
+
+  it("手動維護 EP2–6 仍為 6 頁 placeholder", () => {
+    const manualEp26 = manualStories.filter((s) => s.ep >= 2 && s.ep <= 6);
+    expect(manualEp26.every((s) => s.pageCount === 6)).toBe(true);
+    for (const s of manualEp26) {
+      expect(storyIllustrationCount(s.slug)).toBe(6);
+    }
   });
 });
 

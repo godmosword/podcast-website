@@ -18,8 +18,13 @@ describe("getCharactersForStory", () => {
     expect(ids).toContain("ling-ling");
   });
 
-  it("EP1–2 無登記角色", () => {
-    expect(getCharactersForStory("ep-1")).toEqual([]);
+  it("ep-1 含沃特與蹦蹦", () => {
+    const ids = getCharactersForStory("ep-1").map((c) => c.id);
+    expect(ids).toContain("watt");
+    expect(ids).toContain("bong-bong");
+  });
+
+  it("ep-2 尚無登記角色", () => {
     expect(getCharactersForStory("ep-2")).toEqual([]);
   });
 });

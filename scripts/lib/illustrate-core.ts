@@ -713,6 +713,12 @@ function writeWiring(
     };
     writeFileSync(DEFAULTS_PATH, `${JSON.stringify(defaults, null, 2)}\n`, "utf8");
     materializeIntoSynced(slug, pageCount, captionTimes);
+    console.log(
+      `  overrides.${slug} 已寫入；content.ts 執行時會合併 pageCount/captionTimes。`,
+    );
+    console.log(
+      `  建議同步更新 data/stories.ts 該集 pageCount（測試與可讀性）。`,
+    );
     return "overrides";
   }
   console.log(

@@ -29,6 +29,8 @@ const ID_BY_CANONICAL_NAME: Record<string, string> = {
   怪獸卡車: "monster-truck",
   東東挖土機: "dong-dong",
   香香餐車: "xiang-xiang",
+  沃特: "watt",
+  蹦蹦: "bong-bong",
 };
 
 const VEHICLE_ZH: Record<string, string> = {
@@ -39,6 +41,8 @@ const VEHICLE_ZH: Record<string, string> = {
   "monster truck": "怪獸卡車",
   excavator: "挖土機",
   "food truck": "餐車",
+  robot: "小機器人",
+  child: "小朋友",
 };
 
 /** 車種對應的手動維護集數 slug（與 firstSeen 合併）。 */
@@ -57,6 +61,8 @@ const PERSONALITY_BY_ID: Record<string, string> = {
   "monster-truck": "大聲勇敢但願意學習溫柔",
   "duo-duo": "愛吃糖、學習好習慣",
   "xiang-xiang": "溫柔分享、把故事和祝福送給大家",
+  watt: "客氣有禮、車內小幫手",
+  "bong-bong": "充滿好奇心與活力",
 };
 
 function shortName(entry: RawCharacter, id: string): string {

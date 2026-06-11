@@ -1,3 +1,4 @@
+import appleSyncDefaults from "./apple-sync.defaults.json";
 import appleSynced from "./apple-synced.json";
 import { getCharactersForStory } from "./characters";
 import { getReflectionPrompt } from "./reflection-prompts";
@@ -52,12 +53,49 @@ export type Content = Story | Craft | Printable;
 
 type RawStory = ManualStory;
 
-function enrichStory(raw: RawStory): Story {
-  const characters = getCharactersForStory(raw.slug);
-  const reflectionPrompt =
-    raw.reflectionPrompt ?? getReflectionPrompt(raw.slug);
+type ManualStoryOverride = Partial<
+  Pick<
+    ManualStory,
+    | "pageCount"
+    | "captionTimes"
+    | "captions"
+    | "vehicle"
+    | "emoji"
+    | "tags"
+    | "summary"
+    | "duration"
+  >
+>;
+
+/** 手動集：illustrate --approve 寫入 overrides，執行時與 stories.ts 合併（與 sync 腳本邏輯對齊）。 */
+function applyManualOverrides(raw: ManualStory): ManualStory {
+  const overrides = appleSyncDefaults.overrides as
+    | Record<string, ManualStoryOverride>
+    | undefined;
+  const override = overrides?.[raw.slug];
+  if (!override) return raw;
   return {
     ...raw,
+    ...(override.vehicle !== undefined ? { vehicle: override.vehicle } : {}),
+    ...(override.emoji !== undefined ? { emoji: override.emoji } : {}),
+    ...(override.tags !== undefined ? { tags: override.tags } : {}),
+    ...(override.summary !== undefined ? { summary: override.summary } : {}),
+    ...(override.captions !== undefined ? { captions: override.captions } : {}),
+    ...(override.captionTimes !== undefined
+      ? { captionTimes: override.captionTimes }
+      : {}),
+    ...(override.duration !== undefined ? { duration: override.duration } : {}),
+    ...(override.pageCount !== undefined ? { pageCount: override.pageCount } : {}),
+  };
+}
+
+function enrichStory(raw: RawStory): Story {
+  const merged = applyManualOverrides(raw);
+  const characters = getCharactersForStory(merged.slug);
+  const reflectionPrompt =
+    merged.reflectionPrompt ?? getReflectionPrompt(merged.slug);
+  return {
+    ...merged,
     kind: "story",
     characterIds: characters.map((c) => c.id),
     reflectionPrompt,

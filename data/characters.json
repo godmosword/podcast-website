@@ -79,5 +79,24 @@
     "desc": "A cute claymation pink food truck with a round body, shiny windows, smiling eyes, and green zongzi decorations on top.",
     "ref": "characters/香香餐車.jpg",
     "firstSeen": "ep-10"
+  },
+  {
+    "name": "沃特",
+    "aliases": [
+      "小竹手沃特",
+      "小機器人沃特"
+    ],
+    "vehicle": "robot",
+    "desc": "A small, round robot with a polite demeanor, capable of various tasks inside the futuristic car.",
+    "ref": "characters/沃特.jpg",
+    "firstSeen": "ep-1"
+  },
+  {
+    "name": "蹦蹦",
+    "aliases": [],
+    "vehicle": "child",
+    "desc": "A little boy with a yellow backpack, full of excitement and curiosity.",
+    "ref": "characters/蹦蹦.jpg",
+    "firstSeen": "ep-1"
   }
 ]
