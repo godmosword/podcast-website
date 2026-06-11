@@ -7,8 +7,8 @@
  *   SYNC_REPORT_PATH         — sync-apple-podcast 寫入的 JSON
  *   SYNC_COMMIT_MSG_PATH     — 輸出 commit 訊息檔
  *   CREATE_ISSUES            — "1" 時用 gh 開 Issue
- *   GITHUB_ISSUE_ASSIGNEES   — 指派對象（逗號分隔 GitHub username）
- *   GITHUB_ISSUE_MENTIONS    — Issue 開頭 @mention（例 @user1 @user2）
+ *   SYNC_ISSUE_ASSIGNEES     — 指派對象（逗號分隔 GitHub username；Secret 名稱不可 GITHUB_ 開頭）
+ *   SYNC_ISSUE_MENTIONS      — Issue 開頭 @mention（例 @user1 @user2）
  */
 import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
@@ -91,7 +91,7 @@ export function buildCommitMessage(report: SyncRunReport): string {
 }
 
 function issueNotifyPreamble(): string {
-  const mentions = process.env.GITHUB_ISSUE_MENTIONS?.trim();
+  const mentions = process.env.SYNC_ISSUE_MENTIONS?.trim();
   if (!mentions) return "";
   return `${mentions}\n\n> 📱 已 @mention；請確認 GitHub App 已開啟 Issue 通知。\n\n`;
 }
@@ -131,7 +131,7 @@ function gh(args: string[]): string {
 }
 
 function assigneeArgs(): string[] {
-  const raw = process.env.GITHUB_ISSUE_ASSIGNEES?.trim();
+  const raw = process.env.SYNC_ISSUE_ASSIGNEES?.trim();
   if (!raw) return [];
   return ["--assignee", raw];
 }

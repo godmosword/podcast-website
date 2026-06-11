@@ -82,8 +82,8 @@ jobs:
           CREATE_ISSUES: "1"
           GH_TOKEN: ${{ github.token }}
           # 手機推播：維護者安裝 GitHub App，以下 assign／@mention 會觸發通知
-          GITHUB_ISSUE_ASSIGNEES: ${{ secrets.GITHUB_ISSUE_ASSIGNEES }}
-          GITHUB_ISSUE_MENTIONS: ${{ secrets.GITHUB_ISSUE_MENTIONS }}
+          SYNC_ISSUE_ASSIGNEES: ${{ secrets.SYNC_ISSUE_ASSIGNEES }}
+          SYNC_ISSUE_MENTIONS: ${{ secrets.SYNC_ISSUE_MENTIONS }}
           NOTIFY_SITE_URL: ${{ secrets.NOTIFY_SITE_URL }}
         run: npx tsx scripts/post-sync-notify.ts
 
