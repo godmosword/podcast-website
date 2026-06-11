@@ -18,7 +18,7 @@
 
 import { existsSync } from "node:fs";
 import { relative } from "node:path";
-import { getStory } from "../data/stories";
+import { getStory } from "../data/content";
 import { ROOT } from "./lib/transcribe-core";
 import {
   approve,

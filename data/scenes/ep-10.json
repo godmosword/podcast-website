@@ -1,0 +1,118 @@
+{
+  "slug": "ep-10",
+  "audioDuration": 395,
+  "model": "gpt-4o",
+  "generatedAt": "2026-06-11T11:39:09.255Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 0,
+      "end": 45.1,
+      "summary": "介紹端午節故事",
+      "prompt": "Bonbon and Mami discuss the Dragon Boat Festival and its traditions, setting a curious and educational tone.",
+      "characters": [],
+      "keepCover": true
+    },
+    {
+      "index": 2,
+      "start": 45.1,
+      "end": 64.5,
+      "summary": "小紅賽車聞到香味",
+      "prompt": "Little Red Race Car smells a delicious aroma in the air and wonders what it is, feeling hungry and curious.",
+      "characters": [
+        "小紅賽車"
+      ]
+    },
+    {
+      "index": 3,
+      "start": 64.5,
+      "end": 125.8,
+      "summary": "香香餐車登場",
+      "prompt": "A cute pink food truck named Xiang Xiang enters the park, adorned with green zongzi decorations, spreading a delightful aroma.",
+      "characters": [
+        "小紅賽車",
+        "香香餐車"
+      ]
+    },
+    {
+      "index": 4,
+      "start": 125.8,
+      "end": 151.6,
+      "summary": "香香餐車登場",
+      "prompt": "A cute pink food truck named Xiang Xiang enters the park, adorned with green zongzi decorations, spreading a delightful aroma.",
+      "characters": [
+        "小紅賽車",
+        "香香餐車"
+      ]
+    },
+    {
+      "index": 5,
+      "start": 151.6,
+      "end": 214.1,
+      "summary": "香香分享端午故事",
+      "prompt": "Xiang Xiang the food truck shares the story of Qu Yuan and the origins of the Dragon Boat Festival with Little Red Race Car.",
+      "characters": [
+        "小紅賽車",
+        "香香餐車"
+      ]
+    },
+    {
+      "index": 6,
+      "start": 214.1,
+      "end": 239.1,
+      "summary": "香香分享端午故事",
+      "prompt": "Xiang Xiang the food truck shares the story of Qu Yuan and the origins of the Dragon Boat Festival with Little Red Race Car.",
+      "characters": [
+        "小紅賽車",
+        "香香餐車"
+      ]
+    },
+    {
+      "index": 7,
+      "start": 239.1,
+      "end": 292.9,
+      "summary": "小紅賽車想吃粽子",
+      "prompt": "Little Red Race Car eagerly wants to eat a zongzi and learns about waiting in line politely.",
+      "characters": [
+        "小紅賽車",
+        "香香餐車",
+        "東東挖土機"
+      ]
+    },
+    {
+      "index": 8,
+      "start": 292.9,
+      "end": 353.4,
+      "summary": "大家分享粽子",
+      "prompt": "Everyone in the park enjoys eating the zongzi under the shade of a tree, feeling warm and grateful.",
+      "characters": [
+        "小紅賽車",
+        "香香餐車",
+        "東東挖土機"
+      ]
+    },
+    {
+      "index": 9,
+      "start": 353.4,
+      "end": 395,
+      "summary": "大家分享粽子",
+      "prompt": "Everyone in the park enjoys eating the zongzi under the shade of a tree, feeling warm and grateful.",
+      "characters": [
+        "小紅賽車",
+        "香香餐車",
+        "東東挖土機"
+      ]
+    }
+  ],
+  "newCharacters": [
+    {
+      "name": "香香餐車",
+      "aliases": [
+        "香香",
+        "餐車"
+      ],
+      "vehicle": "food truck",
+      "desc": "A cute claymation pink food truck with a round body, shiny windows, smiling eyes, and green zongzi decorations on top."
+    }
+  ]
+}

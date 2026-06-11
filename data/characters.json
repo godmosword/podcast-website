@@ -1,7 +1,12 @@
 [
   {
     "name": "鈴鈴清潔車",
-    "aliases": ["玲玲清潔車", "玲玲", "鈴鈴", "清潔車"],
+    "aliases": [
+      "玲玲清潔車",
+      "玲玲",
+      "鈴鈴",
+      "清潔車"
+    ],
     "vehicle": "street sweeper",
     "desc": "a cute claymation street-sweeper truck, cream/off-white cab with a bright green lower body, an orange light-bar sign on the roof, two big round yellow spinning brushes at the front bottom, big friendly round eyes and a cheerful smile",
     "ref": "characters/鈴鈴清潔車.jpg",
@@ -9,7 +14,11 @@
   },
   {
     "name": "恐龍車多多",
-    "aliases": ["多多", "恐龍車", "恐龍多多"],
+    "aliases": [
+      "多多",
+      "恐龍車",
+      "恐龍多多"
+    ],
     "vehicle": "dinosaur car",
     "desc": "a cute claymation green dinosaur car, a small green car body with a friendly T-rex head, orange spikes along its back, big round cartoon eyes, wide happy mouth showing rows of teeth, four black wheels only — no arms, no hands, no limbs",
     "ref": "characters/恐龍車多多.jpg",
@@ -17,30 +26,55 @@
   },
   {
     "name": "安安救護車",
-    "aliases": ["安安", "救護車"],
+    "aliases": [
+      "安安",
+      "救護車"
+    ],
     "vehicle": "ambulance",
     "desc": "a cute claymation cream-white ambulance van with a red cross on the side, a red light-bar on the roof, a red side stripe, yellow round headlights, big friendly eyes and a gentle smile",
     "ref": "characters/安安救護車.jpg"
   },
   {
     "name": "小紅賽車",
-    "aliases": ["小紅", "賽車", "紅賽車"],
+    "aliases": [
+      "小紅",
+      "賽車",
+      "紅賽車"
+    ],
     "vehicle": "race car",
     "desc": "a cute claymation bright red race car with the number 2 in a white circle, a white racing stripe down the middle, blue and yellow accents, big round eyes and a cheerful smile",
     "ref": "characters/小紅賽車.jpg"
   },
   {
     "name": "怪獸卡車",
-    "aliases": ["怪獸車", "Monster Truck", "怪獸卡車 Monster Truck"],
+    "aliases": [
+      "怪獸車",
+      "Monster Truck",
+      "怪獸卡車 Monster Truck"
+    ],
     "vehicle": "monster truck",
     "desc": "a cute claymation yellow monster truck pickup with huge chunky black off-road tyres, a row of yellow lights on the roof, big round eyes and a friendly grin",
     "ref": "characters/怪獸卡車.jpg"
   },
   {
     "name": "東東挖土機",
-    "aliases": ["東東", "挖土機"],
+    "aliases": [
+      "東東",
+      "挖土機"
+    ],
     "vehicle": "excavator",
     "desc": "a cute claymation yellow excavator on black tracks with a digging arm and bucket, big round eyes, rosy cheeks and a happy smile",
     "ref": "characters/東東挖土機.jpg"
+  },
+  {
+    "name": "香香餐車",
+    "aliases": [
+      "香香",
+      "餐車"
+    ],
+    "vehicle": "food truck",
+    "desc": "A cute claymation pink food truck with a round body, shiny windows, smiling eyes, and green zongzi decorations on top.",
+    "ref": "characters/香香餐車.jpg",
+    "firstSeen": "ep-10"
   }
 ]
