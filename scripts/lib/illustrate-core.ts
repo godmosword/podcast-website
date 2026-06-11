@@ -237,7 +237,37 @@ function sceneDialogue(subs: Subtitle[], start: number, end: number): string {
   return subs
     .filter((s) => s.t >= start && s.t < end)
     .map((s) => s.text)
-    .join(" ");
+    .join(" ")
+    .trim();
+}
+
+export function readSubtitlesForSlug(slug: string): Subtitle[] | null {
+  const path = subtitleSidecarPath(slug);
+  if (!existsSync(path)) return null;
+  try {
+    const data = JSON.parse(readFileSync(path, "utf8"));
+    if (!Array.isArray(data)) return null;
+    return data.filter(
+      (s): s is Subtitle =>
+        typeof s?.t === "number" && typeof s?.text === "string",
+    );
+  } catch {
+    return null;
+  }
+}
+
+/** 每幕字幕：優先合併該時間段的轉錄句，否則用場景 summary。 */
+export function buildSceneCaptions(
+  scenes: Scene[],
+  subs: Subtitle[] | null,
+): string[] {
+  return scenes.map((sc) => {
+    if (subs?.length) {
+      const dlg = sceneDialogue(subs, sc.start, sc.end);
+      if (dlg) return dlg;
+    }
+    return sc.summary;
+  });
 }
 
 // ── ① 切場景：純時間（keyless 後備，無角色辨識）──────────────
@@ -649,7 +679,8 @@ export function approve(slug: string): ApproveResult {
   }
 
   const captionTimes = scenes.map((s) => s.start);
-  const wiredVia = writeWiring(slug, scenes.length, captionTimes);
+  const captions = buildSceneCaptions(scenes, readSubtitlesForSlug(slug));
+  const wiredVia = writeWiring(slug, scenes.length, captionTimes, captions);
   return { copied: scenes.length, registered, publicDir: pub, captionTimes, wiredVia };
 }
 
@@ -685,6 +716,7 @@ function materializeIntoSynced(
   slug: string,
   pageCount: number,
   captionTimes: number[],
+  captions: string[],
 ): boolean {
   if (!existsSync(SYNCED_PATH)) return false;
   const synced = JSON.parse(readFileSync(SYNCED_PATH, "utf8")) as Record<string, unknown>[];
@@ -692,6 +724,7 @@ function materializeIntoSynced(
   if (!entry) return false;
   entry.pageCount = pageCount;
   entry.captionTimes = captionTimes;
+  entry.captions = captions;
   writeFileSync(SYNCED_PATH, `${JSON.stringify(synced, null, 2)}\n`, "utf8");
   return true;
 }
@@ -700,6 +733,7 @@ function writeWiring(
   slug: string,
   pageCount: number,
   captionTimes: number[],
+  captions: string[],
 ): "overrides" | "manual-instructions" {
   if (/^ep-\d+$/.test(slug)) {
     const defaults = JSON.parse(readFileSync(DEFAULTS_PATH, "utf8")) as {
@@ -710,21 +744,23 @@ function writeWiring(
       ...defaults.overrides[slug],
       pageCount,
       captionTimes,
+      captions,
     };
     writeFileSync(DEFAULTS_PATH, `${JSON.stringify(defaults, null, 2)}\n`, "utf8");
-    materializeIntoSynced(slug, pageCount, captionTimes);
+    materializeIntoSynced(slug, pageCount, captionTimes, captions);
     console.log(
-      `  overrides.${slug} 已寫入；content.ts 執行時會合併 pageCount/captionTimes。`,
+      `  overrides.${slug} 已寫入；content.ts 執行時會合併 pageCount/captionTimes/captions。`,
     );
     console.log(
-      `  建議同步更新 data/stories.ts 該集 pageCount（測試與可讀性）。`,
+      `  建議同步更新 data/stories.ts 該集 pageCount/captions（測試與可讀性）。`,
     );
     return "overrides";
   }
   console.log(
     `\n手動集 ${slug}：請在 data/stories.ts 的該集物件設\n` +
       `  pageCount: ${pageCount},\n` +
-      `  captionTimes: ${JSON.stringify(captionTimes)},\n`,
+      `  captionTimes: ${JSON.stringify(captionTimes)},\n` +
+      `  captions: ${JSON.stringify(captions)},\n`,
   );
   return "manual-instructions";
 }

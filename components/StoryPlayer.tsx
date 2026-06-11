@@ -136,12 +136,17 @@ export default function StoryPlayer({
   const completionRecorded = useRef(false);
 
   const total = images.length;
-  // 即時字幕軌（轉錄產生）優先；獨立於翻頁，依音檔時間顯示。
   const hasSubtitles = Array.isArray(subtitles) && subtitles.length > 0;
-  const caption = hasSubtitles ? subtitles![subIndex]?.text : captions?.[page];
-  // 舊式：captionTimes 與頁數對得上時，精準秒數換頁；否則時長平均切換。
   const hasCueTimes =
     Array.isArray(captionTimes) && captionTimes.length === total;
+  // 全幕插圖集（EP-9/10 模式）：captions 與頁數對齊時，每幕顯示該段台詞。
+  const sceneCaptions =
+    Array.isArray(captions) && captions.length === total && hasCueTimes;
+  const caption = sceneCaptions
+    ? captions![page]
+    : hasSubtitles
+      ? subtitles![subIndex]?.text
+      : captions?.[page];
 
   // 字幕對時模式：播放頁網址帶 ?cue=1 時啟用（純客戶端偵測，頁面維持 SSG）。
   useEffect(() => {

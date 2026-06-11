@@ -118,6 +118,7 @@ describe("pageCount", () => {
     const ep1 = getStory("ep-1");
     expect(ep1?.pageCount).toBe(21);
     expect(ep1?.captionTimes?.length).toBe(21);
+    expect(ep1?.captions?.length).toBe(21);
     expect(storyIllustrationCount("ep-1")).toBe(21);
   });
 
