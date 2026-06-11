@@ -120,7 +120,7 @@ export default function StoryPlayer({
   const [bedtimeRemaining, setBedtimeRemaining] = useState<number | null>(null);
   const [showTimer, setShowTimer] = useState(false);
   const [showNightPrompt, setShowNightPrompt] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const { theme, setMode } = useTheme();
   const [cueMode, setCueMode] = useState(false);
   const [cueMarks, setCueMarks] = useState<number[]>([]);
   const [cueCopied, setCueCopied] = useState(false);
@@ -651,7 +651,7 @@ export default function StoryPlayer({
                     type="button"
                     className={styles.nightPromptYes}
                     onClick={() => {
-                      setTheme(NIGHT_THEME);
+                      setMode(NIGHT_THEME);
                       setNightPromptDismissedInStore(true);
                       setShowNightPrompt(false);
                     }}

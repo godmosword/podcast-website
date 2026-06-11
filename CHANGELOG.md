@@ -6,6 +6,7 @@
 
 ### Added
 
+- **主題跟隨系統**：日間／夜晚切換新增「跟隨系統」選項；首次造訪預設與瀏覽器或手機 `prefers-color-scheme` 同步；`ThemeProvider` 監聽系統配色變更；FOUC 防閃 inline script 同步支援
 - **海盜卡丁車大賽（`/games/pirate-kart`）**：16-bit 像素 top-down 海盜賽車；`Kart` 類別、橢圓賽道碰撞、3 AI、圈數＋寶藏計分、Shift 張帆加速、空白鍵大砲；開始／結束畫面
 - **車車卡丁車（kart-game P1–P6）**：漂移手感調校、檢查點／圈速 HUD／小地圖、3 AI＋倒數＋結算、Web Audio BGM/SFX、標題／車庫／獎牌存檔、觸控／手把／reduced-motion、載入畫面與粒子池；`net/Net.ts` 多人 stub
 - **車車卡丁車（kart-game P0）**：獨立 Vite+Three.js 專案、arcade kinematic 方塊車＋spline 練習道、嵌入 `/games/kart`（iframe → `public/kart/`）

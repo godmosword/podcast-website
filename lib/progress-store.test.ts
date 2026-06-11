@@ -116,11 +116,13 @@ describe("getProgressSync", () => {
     expect(p.engagement.storiesCompleted).toEqual([]);
   });
 
-  it("defaults theme to light and persists night preference", () => {
-    expect(getThemeFromStore()).toBe("light");
+  it("defaults theme to system and persists mode preference", () => {
+    expect(getThemeFromStore()).toBe("system");
     setThemeInStore("night");
     expect(getThemeFromStore()).toBe("night");
     expect(getProgressSync().preferences.theme).toBe("night");
+    setThemeInStore("system");
+    expect(getThemeFromStore()).toBe("system");
   });
 
   it("strips legacy engagement tap fields on normalize", () => {

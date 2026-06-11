@@ -12,9 +12,12 @@ import {
 import { FEATURES } from "@/lib/features";
 import {
   applyThemeToDocument,
+  cycleThemeMode,
   LIGHT_THEME,
-  NIGHT_THEME,
-  readThemeFromDocument,
+  resolveThemeFromMode,
+  subscribeToSystemColorScheme,
+  SYSTEM_THEME_MODE,
+  type ThemeMode,
   type ThemePreference,
 } from "@/lib/theme";
 import {
@@ -23,8 +26,16 @@ import {
 } from "@/lib/progress-store";
 
 type ThemeContextValue = {
+  /** Stored preference — may be system. */
+  mode: ThemeMode;
+  /** Resolved theme currently applied to the document. */
   theme: ThemePreference;
+  setMode: (mode: ThemeMode) => void;
+  /** Force a fixed light/night preference (clears system follow). */
   setTheme: (theme: ThemePreference) => void;
+  /** Cycle system → light → night. */
+  cycleMode: () => void;
+  /** @deprecated Use cycleMode — kept for existing toggle callers. */
   toggleTheme: () => void;
 };
 
@@ -40,38 +51,66 @@ export function ThemeProvider({
   children,
   nightModeEnabled = FEATURES.nightMode,
 }: ThemeProviderProps) {
+  const [mode, setModeState] = useState<ThemeMode>(SYSTEM_THEME_MODE);
   const [theme, setThemeState] = useState<ThemePreference>(LIGHT_THEME);
 
-  useEffect(() => {
-    if (!nightModeEnabled) {
-      setThemeState(LIGHT_THEME);
-      applyThemeToDocument(LIGHT_THEME);
-      return;
-    }
-    const stored = getThemeFromStore();
-    setThemeState(stored);
-    applyThemeToDocument(stored);
-  }, [nightModeEnabled]);
-
-  const setTheme = useCallback(
-    (next: ThemePreference) => {
-      const resolved = nightModeEnabled ? next : LIGHT_THEME;
+  const applyMode = useCallback(
+    (nextMode: ThemeMode) => {
+      const resolved = nightModeEnabled
+        ? resolveThemeFromMode(nextMode)
+        : LIGHT_THEME;
+      setModeState(nightModeEnabled ? nextMode : SYSTEM_THEME_MODE);
       setThemeState(resolved);
       applyThemeToDocument(resolved);
-      if (nightModeEnabled) setThemeInStore(resolved);
+      if (nightModeEnabled) setThemeInStore(nextMode);
     },
     [nightModeEnabled],
   );
 
-  const toggleTheme = useCallback(() => {
+  useEffect(() => {
+    if (!nightModeEnabled) {
+      setModeState(SYSTEM_THEME_MODE);
+      setThemeState(LIGHT_THEME);
+      applyThemeToDocument(LIGHT_THEME);
+      return;
+    }
+
+    const stored = getThemeFromStore();
+    applyMode(stored);
+  }, [nightModeEnabled, applyMode]);
+
+  useEffect(() => {
+    if (!nightModeEnabled || mode !== SYSTEM_THEME_MODE) return;
+    return subscribeToSystemColorScheme((resolved) => {
+      setThemeState(resolved);
+      applyThemeToDocument(resolved);
+    });
+  }, [nightModeEnabled, mode]);
+
+  const setMode = useCallback(
+    (next: ThemeMode) => {
+      applyMode(next);
+    },
+    [applyMode],
+  );
+
+  const setTheme = useCallback(
+    (next: ThemePreference) => {
+      applyMode(next);
+    },
+    [applyMode],
+  );
+
+  const cycleMode = useCallback(() => {
     if (!nightModeEnabled) return;
-    const current = readThemeFromDocument();
-    setTheme(current === NIGHT_THEME ? LIGHT_THEME : NIGHT_THEME);
-  }, [nightModeEnabled, setTheme]);
+    setMode(cycleThemeMode(mode));
+  }, [nightModeEnabled, mode, setMode]);
+
+  const toggleTheme = cycleMode;
 
   const value = useMemo(
-    () => ({ theme, setTheme, toggleTheme }),
-    [theme, setTheme, toggleTheme],
+    () => ({ mode, theme, setMode, setTheme, cycleMode, toggleTheme }),
+    [mode, theme, setMode, setTheme, cycleMode, toggleTheme],
   );
 
   return (

@@ -548,7 +548,7 @@ T+2d    社群貼文（B 戰場）
 | 著色頁／活動單 PDF | **已納入 STEM-P3 列印物**；P1–P2 前先拉高單集分享與互動留存 |
 | 部落格長文 SEO | 初期單集頁 + 平台關鍵字效益較直接 |
 | 網站內 RSS 播放器 | 訂閱導向 Spotify／Apple 即可 |
-| ~~睡前模式／季節主題皮~~ | **已完成夜晚模式**（見 Completed）；季節主題皮仍延後 |
+| ~~睡前模式／季節主題皮~~ | **已完成夜晚模式＋跟隨系統**（見 Completed）；季節主題皮仍延後 |
 | 全站 redesign／換字體 | 現有手繪風格已具辨識度 |
 | 首頁 3 欄 icon 功能介紹 | 違反 AI slop 黑名單，與品牌不符 |
 | iOS sticky 篩選列復活 | 除非有 fixed 複製列方案且通過 iOS 26 實機 |
@@ -557,6 +557,10 @@ T+2d    社群貼文（B 戰場）
 ---
 
 ## Completed
+
+### 主題跟隨系統（日間／夜晚／系統同步）
+`ThemeMode` 新增 `system`；預設改為跟隨 `prefers-color-scheme`；`THEME_INIT_SCRIPT` FOUC 防閃同步支援；`ThemeProvider` 監聽系統配色變更；首頁標語旁圖示循環系統→日間→夜晚；睡眠定時器夜晚提示改為固定 `night` 偏好。
+**Completed:** main（2026-06）
 
 ### 遊戲地基工程（星星帳本 × 能力表 × 結算插槽 × Kart 橋接）
 `economy` 帳本 v3、`VEHICLE_ABILITIES` + Tiled `breakable`/`ability-gate`/`secret`、`GameResultActions` + `goodnightButton`（預設關）、Kart `postMessage` 橋接；玩家可見行為零變更。ADR `docs/adr/0002-star-economy-ledger.md`。

@@ -41,6 +41,39 @@
   transform: none;
 }
 
+.group {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+}
+
+.segment {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 44px;
+  min-height: 36px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: background var(--motion-press), color var(--motion-press);
+}
+
+.segmentActive {
+  background: var(--accent-soft, color-mix(in srgb, var(--accent) 18%, transparent));
+  color: var(--accent);
+}
+
 .glyph {
   display: inline-flex;
   align-items: center;
@@ -53,7 +86,8 @@
   line-height: 1;
 }
 
-.toggle:not(.iconOnly):active {
+.toggle:not(.iconOnly):active,
+.segment:active {
   transform: scale(0.96);
 }
 
@@ -62,12 +96,19 @@
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
   }
+
+  .segment:not(.segmentActive):hover {
+    background: color-mix(in srgb, var(--ink) 6%, transparent);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .toggle,
   .toggle:hover,
-  .toggle:active {
+  .toggle:active,
+  .segment,
+  .segment:hover,
+  .segment:active {
     transform: none;
     transition: none;
   }

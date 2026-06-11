@@ -1,13 +1,14 @@
 import { createEmptyEconomy, migrateV2ToV3 } from "@/lib/gamekit/economy";
 import type { GameKitGameId } from "@/lib/gamekit/types";
 import type { PlayerProfile } from "@/lib/gamekit/types";
+import { normalizeThemeMode, type ThemeMode } from "@/lib/theme";
 
 export const PROGRESS_STORAGE_KEY = "cheche:progress";
 export const PROGRESS_CHANGE_EVENT = "cheche:progress-change";
 export const PROGRESS_SCHEMA_VERSION = 2;
 
 export type CaptionSize = "sm" | "md" | "lg";
-export type ThemePreference = "light" | "night";
+export type ThemePreference = ThemeMode;
 export type GameScoreId = GameKitGameId | "kart" | "pirate-kart";
 
 export type ContinueState = {
@@ -79,7 +80,7 @@ export const DEFAULT_PROGRESS: ProgressStore = {
   preferences: {
     captionSize: "md",
     gameKit: { kidsMode: true },
-    theme: "light",
+    theme: "system",
     nightPromptDismissed: false,
   },
   bestScores: {},
@@ -250,6 +251,7 @@ function normalizeProgress(raw: Partial<ProgressStore>): ProgressStore {
     preferences: {
       ...DEFAULT_PROGRESS.preferences,
       ...raw.preferences,
+      theme: normalizeThemeMode(raw.preferences?.theme),
       gameKit: {
         ...DEFAULT_PROGRESS.preferences.gameKit,
         ...raw.preferences?.gameKit,
@@ -431,7 +433,7 @@ export function saveGameKitSettingsToStore(settings: { kidsMode: boolean }): voi
 }
 
 export function getThemeFromStore(): ThemePreference {
-  return readProgress().preferences.theme ?? "light";
+  return normalizeThemeMode(readProgress().preferences.theme);
 }
 
 export function setThemeInStore(theme: ThemePreference): void {
