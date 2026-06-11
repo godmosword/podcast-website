@@ -560,7 +560,7 @@ T+2d    社群貼文（B 戰場）
 
 ### 主題跟隨系統（日間／夜晚／系統同步）
 `ThemeMode` 新增 `system`；預設改為跟隨 `prefers-color-scheme`；`THEME_INIT_SCRIPT` FOUC 防閃同步支援；`ThemeProvider` 監聽系統配色變更；首頁標語旁圖示循環系統→日間→夜晚；睡眠定時器夜晚提示改為固定 `night` 偏好。
-**Completed:** main（2026-06）
+**Completed:** `cf50631`（2026-06）
 
 ### 遊戲地基工程（星星帳本 × 能力表 × 結算插槽 × Kart 橋接）
 `economy` 帳本 v3、`VEHICLE_ABILITIES` + Tiled `breakable`/`ability-gate`/`secret`、`GameResultActions` + `goodnightButton`（預設關）、Kart `postMessage` 橋接；玩家可見行為零變更。ADR `docs/adr/0002-star-economy-ledger.md`。
