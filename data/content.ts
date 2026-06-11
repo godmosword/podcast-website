@@ -1,5 +1,6 @@
 import appleSyncDefaults from "./apple-sync.defaults.json";
 import appleSynced from "./apple-synced.json";
+import { episodeColorForSlug } from "./episode-colors";
 import { getCharactersForStory } from "./characters";
 import { getReflectionPrompt } from "./reflection-prompts";
 import { manualStories, type ManualStory } from "./stories";
@@ -97,6 +98,7 @@ function enrichStory(raw: RawStory): Story {
   return {
     ...merged,
     kind: "story",
+    color: episodeColorForSlug(merged.slug),
     characterIds: characters.map((c) => c.id),
     reflectionPrompt,
   };

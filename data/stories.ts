@@ -164,7 +164,7 @@ export const manualStories: ManualStory[] = [
     duration: "6:37",
     vehicle: "電動車",
     emoji: "🚗",
-    color: "#7048e8",
+    color: "#0ea5e9",
     audio: "audio.mp3",
     pageCount: 21,
     summary:

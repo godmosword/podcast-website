@@ -8,6 +8,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { episodeColorForSlug } from "../data/episode-colors";
 import type { Story } from "../data/stories";
 import { manualStories } from "../data/stories";
 import { lookupFeedUrl } from "../lib/podcast-apple";
@@ -136,7 +137,7 @@ function applyDefaults(
     ...base,
     vehicle: override.vehicle ?? defaults.vehicle,
     emoji: override.emoji ?? defaults.emoji,
-    color: override.color ?? defaults.color,
+    color: override.color ?? episodeColorForSlug(base.slug),
     tags: override.tags ?? defaults.tags,
     ...(override.summary !== undefined ? { summary: override.summary } : {}),
     ...(override.captions !== undefined ? { captions: override.captions } : {}),
@@ -200,7 +201,7 @@ function rssToStory(
     duration: item.duration ?? undefined,
     vehicle: defaults.vehicle,
     emoji: defaults.emoji,
-    color: defaults.color,
+    color: episodeColorForSlug(slug),
     audio: "audio.mp3",
     pageCount: defaults.pageCount ?? APPLE_SYNC_PAGE_COUNT,
     summary,

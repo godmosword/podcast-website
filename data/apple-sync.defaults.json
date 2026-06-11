@@ -8,6 +8,7 @@
     "ep-7": {
       "vehicle": "高鐵",
       "emoji": "🚄",
+      "color": "#f76707",
       "tags": [
         "冷靜",
         "解決問題",
@@ -15,6 +16,7 @@
       ]
     },
     "ep-9": {
+      "color": "#37b24d",
       "pageCount": 21,
       "captionTimes": [
         0,
@@ -64,6 +66,7 @@
       ]
     },
     "ep-10": {
+      "color": "#d6336c",
       "pageCount": 20,
       "captionTimes": [
         0,
@@ -111,6 +114,7 @@
       ]
     },
     "ep-1": {
+      "color": "#0ea5e9",
       "pageCount": 21,
       "captionTimes": [
         0,
