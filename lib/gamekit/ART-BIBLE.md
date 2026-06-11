@@ -55,7 +55,7 @@
 ## 資產流程
 
 1. **佔位**：Kenney CC0 tileset / sprite。
-2. **原創**：Aseprite → PNG sprite sheet → `public/games/<id>/`。
+2. **原創**：Aseprite → PNG sprite sheet → `public/games/<id>/`（目前 `public/games/` 已退役清空：現行四款全用程序生成 sprite（`lib/gamekit/procedural-sheets`），日後若回到真 PNG 資產再重建此目錄）。
 3. **關卡**：Tiled → JSON（`car-adventure` 優先）。
 
 ## 技術錨點

@@ -300,6 +300,11 @@ npm run transcribe -- --convert --all  # 只對既有側車檔重跑簡轉繁/�
 
 **資料流：** `data/subtitles/<slug>.json`（whisper 本機已產）→ 切場景 `data/scenes/<slug>.json` → 生圖到暫存 `public/.illustrate-staging/<slug>/`（gitignore）→ 人工審 `contact.html` → `--approve` 進 `public/stories/<slug>/NN.jpg` 並寫 `overrides.<slug>` 的 `pageCount`/`captionTimes`。
 
+**`public/stories/<slug>/` 資產規範**（資料夾內不放 README，規則集中於本節）：
+
+- 插畫檔名 `01.jpg`、`02.jpg`…（兩位補零、小寫 `.jpg`），張數必須等於該集 `pageCount`（手動集在 `data/stories.ts`，生圖集在 overrides）；音檔固定叫 `audio.mp3`。
+- **暫存清理規則**：某集 `--approve` 且 `public/stories/<slug>/` 已 commit 後，`public/.illustrate-staging/<slug>/` 即可整夾刪除（草稿與 contact sheet 無保留價值）；進行中或尚未 commit 的集數先留著。
+
 ```bash
 # 1) 切場景（可先 --segment-only --deterministic 免 key 看切分節奏）
 OPENAI_API_KEY=sk-... npm run illustrate -- ep-9 --segment-only

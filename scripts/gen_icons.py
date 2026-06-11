@@ -23,7 +23,6 @@ OUTPUTS = {
     "apple-touch-icon-180.png": 180,
     "apple-touch-icon-192.png": 192,
     "apple-touch-icon-512.png": 512,
-    "apple-touch-icon-1024.png": 1024,
 }
 
 

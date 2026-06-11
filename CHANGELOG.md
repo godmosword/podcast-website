@@ -33,6 +33,10 @@
 - 單集頁：收藏改 SVG 愛心圖示，與分享列（複製連結／LINE）同排對齊
 - ep-9 第 6 幕重抽為 鈴鈴清潔車＋恐龍車多多 同框（牙齒保健建議），以兩張定裝照當參考圖；封面 `01.jpg` 維持 Apple 原圖、`pageCount`／`captionTimes` 不變
 
+### Removed
+
+- **`public/` 清理**：移除已退役「車車吃星星」遺留素材 `public/games/cars/*.svg`（6 檔）、未被引用的 `apple-touch-icon-1024.png`（`gen_icons.py` 同步移除該尺寸）、`public/stories/ep-1〜6/README.txt` 佔位說明（規範改集中於 README「每集劇情插圖自動生成」一節）
+
 ## [1.3.0] - 2026-06-06
 
 ### Added
