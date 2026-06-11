@@ -10,6 +10,10 @@
  */
 import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
+import {
+  sendMobileNotifications,
+  type IssueLinks,
+} from "./lib/sync-notify-channels";
 import type { SyncRunReport } from "./lib/sync-report";
 
 function subtitleLine(slug: string, report: SyncRunReport): string {
@@ -113,7 +117,7 @@ function gh(args: string[]): string {
   return execFileSync("gh", args, { encoding: "utf8" }).trim();
 }
 
-function issueExists(slug: string): boolean {
+function findOpenIssueUrl(slug: string): string | null {
   try {
     const out = gh([
       "issue",
@@ -123,21 +127,25 @@ function issueExists(slug: string): boolean {
       "--state",
       "open",
       "--json",
-      "number",
+      "url",
       "--limit",
       "1",
     ]);
-    const parsed = JSON.parse(out) as unknown[];
-    return parsed.length > 0;
+    const parsed = JSON.parse(out) as Array<{ url?: string }>;
+    return parsed[0]?.url ?? null;
   } catch {
-    return false;
+    return null;
   }
 }
 
-function createIllustrateIssue(slug: string, report: SyncRunReport): void {
-  if (issueExists(slug)) {
-    console.log(`Issue 已存在，略過：${slug}`);
-    return;
+function createIllustrateIssue(
+  slug: string,
+  report: SyncRunReport,
+): string | null {
+  const existing = findOpenIssueUrl(slug);
+  if (existing) {
+    console.log(`Issue 已存在，略過：${slug} → ${existing}`);
+    return existing;
   }
 
   const title = `[illustrate] 新集待生圖：${slug}`;
@@ -155,15 +163,16 @@ function createIllustrateIssue(slug: string, report: SyncRunReport): void {
       "illustration",
     ]);
     console.log(`已開 Issue：${url}`);
+    return url;
   } catch (err) {
-    // 標籤尚未建立時，不帶 label 重試
     console.warn(`帶 label 開 Issue 失敗，重試不帶 label（${(err as Error).message}）`);
     const url = gh(["issue", "create", "--title", title, "--body", body]);
     console.log(`已開 Issue：${url}`);
+    return url;
   }
 }
 
-function main(): void {
+async function main(): Promise<void> {
   const reportPath = process.env.SYNC_REPORT_PATH;
   const commitMsgPath = process.env.SYNC_COMMIT_MSG_PATH ?? "sync-commit-msg.txt";
 
@@ -178,22 +187,21 @@ function main(): void {
   writeFileSync(commitMsgPath, commitMsg, "utf8");
   console.log(`Commit 訊息已寫入 ${commitMsgPath}`);
 
-  if (process.env.CREATE_ISSUES !== "1") {
+  const issueLinks: IssueLinks = {};
+
+  if (process.env.CREATE_ISSUES === "1" && report.illustratePending.length > 0) {
+    for (const slug of report.illustratePending) {
+      const url = createIllustrateIssue(slug, report);
+      if (url) issueLinks[slug] = url;
+    }
+  } else if (process.env.CREATE_ISSUES !== "1") {
     console.log("CREATE_ISSUES≠1，略過開 Issue。");
-    return;
   }
 
-  if (report.illustratePending.length === 0) {
-    console.log("無新 ep-N，略過開 Issue。");
-    return;
-  }
-
-  for (const slug of report.illustratePending) {
-    createIllustrateIssue(slug, report);
-  }
+  await sendMobileNotifications(report, issueLinks);
 }
 
 const entry = process.argv[1]?.replace(/\\/g, "/") ?? "";
 if (entry.endsWith("post-sync-notify.ts")) {
-  main();
+  void main();
 }

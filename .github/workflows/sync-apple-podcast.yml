@@ -76,11 +76,24 @@ jobs:
         if: steps.changes.outputs.changed == 'true'
         run: npm run build
 
-      - name: Prepare commit message and illustration issues
+      - name: Prepare commit message, issues, and mobile notify
         if: steps.changes.outputs.changed == 'true'
         env:
           CREATE_ISSUES: "1"
           GH_TOKEN: ${{ github.token }}
+          # LINE Messaging API（選填，見 .env.example）
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_PUSH_TO: ${{ secrets.LINE_PUSH_TO }}
+          # Email：Resend 或 SMTP 二擇一（選填）
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          NOTIFY_EMAIL_FROM: ${{ secrets.NOTIFY_EMAIL_FROM }}
+          NOTIFY_EMAIL_TO: ${{ secrets.NOTIFY_EMAIL_TO }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_SECURE: ${{ secrets.SMTP_SECURE }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          NOTIFY_SITE_URL: ${{ secrets.NOTIFY_SITE_URL }}
         run: npx tsx scripts/post-sync-notify.ts
 
       - name: Commit and push
