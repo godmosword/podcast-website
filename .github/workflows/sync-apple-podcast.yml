@@ -19,12 +19,16 @@ concurrency:
 
 permissions:
   contents: write
+  issues: write
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     # 首次需下載 ~3GB 模型 + 編譯 whisper + 轉錄，預留較長時間。
     timeout-minutes: 180
+    env:
+      SYNC_REPORT_PATH: ${{ runner.temp }}/sync-run-report.json
+      SYNC_COMMIT_MSG_PATH: ${{ runner.temp }}/sync-commit-msg.txt
     steps:
       - uses: actions/checkout@v4
 
@@ -50,7 +54,7 @@ jobs:
 
       - name: Sync episodes from Apple Podcast
         run: npm run sync:apple
-      # sync 內建：轉錄新集 → 字幕再處理（簡轉繁 + 過濾）→ 才進 test/build/deploy
+      # sync 內建：轉錄新集 → 字幕再處理（簡轉繁 + 過濾）→ 寫 sync-run-report.json
 
       # RSS 與 repo 完全一致時 sync 不動任何檔案，可早退、不浪費 CI 跑 test+build。
       - name: Detect changes
@@ -72,6 +76,17 @@ jobs:
         if: steps.changes.outputs.changed == 'true'
         run: npm run build
 
+      - name: Prepare commit message and GitHub Issues
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          CREATE_ISSUES: "1"
+          GH_TOKEN: ${{ github.token }}
+          # 手機推播：維護者安裝 GitHub App，以下 assign／@mention 會觸發通知
+          SYNC_ISSUE_ASSIGNEES: ${{ secrets.SYNC_ISSUE_ASSIGNEES }}
+          SYNC_ISSUE_MENTIONS: ${{ secrets.SYNC_ISSUE_MENTIONS }}
+          NOTIFY_SITE_URL: ${{ secrets.NOTIFY_SITE_URL }}
+        run: npx tsx scripts/post-sync-notify.ts
+
       - name: Commit and push
         if: steps.changes.outputs.changed == 'true'
         run: |
@@ -82,5 +97,5 @@ jobs:
             echo "No staged changes to commit."
             exit 0
           fi
-          git commit -m "chore: sync Apple Podcast from RSS"
+          git commit -F "$SYNC_COMMIT_MSG_PATH"
           git push

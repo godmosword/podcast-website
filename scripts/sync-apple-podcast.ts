@@ -24,6 +24,12 @@ import {
   type RssEpisode,
 } from "./lib/apple-rss";
 import {
+  createEmptyReport,
+  isIllustrateSlug,
+  writeSyncReport,
+  type SyncRunReport,
+} from "./lib/sync-report";
+import {
   hasSubtitleSidecar,
   listSidecarSlugs,
   listSlugsMissingSubtitles,
@@ -64,6 +70,15 @@ type SyncDefaults = {
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
 const force = args.includes("--force");
+const SYNC_REPORT_PATH = process.env.SYNC_REPORT_PATH;
+const report: SyncRunReport = createEmptyReport(dryRun);
+
+async function finishSync(): Promise<void> {
+  report.illustratePending = report.newEpisodes
+    .map((e) => e.slug)
+    .filter(isIllustrateSlug);
+  await writeSyncReport(report, SYNC_REPORT_PATH);
+}
 
 async function readJson<T>(filePath: string, fallback: T): Promise<T> {
   try {
@@ -237,6 +252,9 @@ function maybeTranscribe(slug: string, audioPath: string): void {
     console.log("  字幕：轉錄中（本機 whisper）…");
     const { count, file } = transcribeToSidecar(slug, audioPath);
     console.log(`  字幕：${count} 句 → ${path.relative(ROOT, file)}（草稿，請校對）`);
+    if (!report.subtitlesCreated.includes(slug)) {
+      report.subtitlesCreated.push(slug);
+    }
   } catch (err) {
     console.warn(`  字幕：轉錄失敗，略過（${(err as Error).message}）`);
   }
@@ -519,6 +537,7 @@ async function main(): Promise<void> {
 
   const guidBySlug = state.guidBySlug ?? {};
   const metadataResult = updateSyncedMetadata(synced, rssItems, defaults, guidBySlug);
+  report.metadataUpdated = metadataResult.updatedSlugs;
   if (metadataResult.updatedSlugs.length > 0) {
     console.log(
       `Metadata update: ${metadataResult.updatedSlugs.join(", ")}`,
@@ -585,6 +604,7 @@ async function main(): Promise<void> {
     defaults,
   );
   const hasTagBackfill = tagBackfill.updatedSlugs.length > 0;
+  report.tagBackfill = tagBackfill.updatedSlugs;
   if (hasTagBackfill) {
     console.log(`Tags backfill: ${tagBackfill.updatedSlugs.join(", ")}`);
   }
@@ -594,11 +614,18 @@ async function main(): Promise<void> {
     defaults,
   );
   const hasVehicleBackfill = vehicleBackfill.updatedSlugs.length > 0;
+  report.vehicleBackfill = vehicleBackfill.updatedSlugs;
   if (hasVehicleBackfill) {
     console.log(`Vehicle backfill: ${vehicleBackfill.updatedSlugs.join(", ")}`);
   }
 
   const nextSyncedCatalog = vehicleBackfill.stories.sort((a, b) => b.ep - a.ep);
+
+  report.newEpisodes = added.map((s) => ({
+    slug: s.slug,
+    ep: s.ep,
+    title: s.title,
+  }));
 
   if (dryRun) {
     if (hasNewEpisodes) {
@@ -614,6 +641,7 @@ async function main(): Promise<void> {
     ) {
       console.log("[dry-run] No new episodes or metadata changes.");
     }
+    await finishSync();
     return;
   }
 
@@ -645,6 +673,10 @@ async function main(): Promise<void> {
     }
     backfillMissingSubtitles(finalCatalog);
     relocalizeCatalogSubtitles(finalCatalog);
+    report.subtitlesMissing = listSlugsMissingSubtitles(
+      finalCatalog.map((s) => s.slug),
+    );
+    await finishSync();
     return;
   }
 
@@ -679,6 +711,10 @@ async function main(): Promise<void> {
 
   backfillMissingSubtitles(finalCatalog);
   relocalizeCatalogSubtitles(finalCatalog);
+  report.subtitlesMissing = listSlugsMissingSubtitles(
+    finalCatalog.map((s) => s.slug),
+  );
+  await finishSync();
 }
 
 main().catch((err) => {
