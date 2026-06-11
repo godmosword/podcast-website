@@ -24,7 +24,7 @@ import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import {
   ROOT,
-  SUBTITLES_DIR,
+  listSidecarSlugs,
   relocalizeSidecar,
   transcribeToSidecar,
   whisperAvailable,
@@ -44,17 +44,9 @@ function allSlugsWithAudio(): string[] {
     .sort();
 }
 
-function allSidecarSlugs(): string[] {
-  if (!existsSync(SUBTITLES_DIR)) return [];
-  return readdirSync(SUBTITLES_DIR)
-    .filter((f) => f.endsWith(".json"))
-    .map((f) => f.replace(/\.json$/, ""))
-    .sort();
-}
-
 function runConvert(args: string[]): void {
   const slugs = args.includes("--all")
-    ? allSidecarSlugs()
+    ? listSidecarSlugs()
     : args.filter((a) => !a.startsWith("--"));
   if (slugs.length === 0) fail("用法：npm run transcribe -- --convert <slug...|--all>");
   for (const slug of slugs) {

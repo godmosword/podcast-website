@@ -50,6 +50,7 @@ jobs:
 
       - name: Sync episodes from Apple Podcast
         run: npm run sync:apple
+      # sync 內建：轉錄新集 → 字幕再處理（簡轉繁 + 過濾）→ 才進 test/build/deploy
 
       # RSS 與 repo 完全一致時 sync 不動任何檔案，可早退、不浪費 CI 跑 test+build。
       - name: Detect changes

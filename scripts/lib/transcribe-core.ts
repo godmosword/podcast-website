@@ -110,6 +110,36 @@ export function relocalizeSidecar(slug: string): { count: number; file: string }
   return { count: cleaned.length, file };
 }
 
+/** 列出已有側車檔的 slug（可選限定候選清單）。 */
+export function listSidecarSlugs(candidates?: string[]): string[] {
+  const pool =
+    candidates ??
+    (existsSync(SUBTITLES_DIR)
+      ? readdirSync(SUBTITLES_DIR)
+          .filter((f) => f.endsWith(".json"))
+          .map((f) => f.replace(/\.json$/, ""))
+      : []);
+  return pool.filter((slug) => hasSubtitleSidecar(slug)).sort();
+}
+
+/** 批次重新本地化側車檔（簡轉繁 + 幻覺過濾 + 人名修正），不重跑 Whisper。 */
+export function relocalizeSidecars(
+  slugs: string[],
+): { ok: number; failed: string[] } {
+  let ok = 0;
+  const failed: string[] = [];
+  for (const slug of slugs) {
+    if (!hasSubtitleSidecar(slug)) continue;
+    try {
+      relocalizeSidecar(slug);
+      ok += 1;
+    } catch {
+      failed.push(slug);
+    }
+  }
+  return { ok, failed };
+}
+
 function commandAvailable(cmd: string): boolean {
   if (cmd.includes("/")) return existsSync(cmd);
   try {

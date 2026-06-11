@@ -25,7 +25,9 @@ import {
 } from "./lib/apple-rss";
 import {
   hasSubtitleSidecar,
+  listSidecarSlugs,
   listSlugsMissingSubtitles,
+  relocalizeSidecars,
   transcribeToSidecar,
   whisperAvailable,
 } from "./lib/transcribe-core";
@@ -258,6 +260,24 @@ function backfillMissingSubtitles(catalog: Story[]): void {
   for (const slug of missing) {
     const audioPath = path.join(PATHS.storiesPublic, slug, "audio.mp3");
     maybeTranscribe(slug, audioPath);
+  }
+}
+
+/**
+ * 轉錄後再跑一次字幕清理（簡轉繁 + 幻覺過濾 + 人名修正），
+ * 確保 deploy 前側車檔與最新邏輯一致；不重跑 Whisper。
+ */
+function relocalizeCatalogSubtitles(catalog: Story[]): void {
+  if (dryRun) return;
+
+  const slugs = listSidecarSlugs(catalog.map((s) => s.slug));
+  if (slugs.length === 0) return;
+
+  console.log(`字幕再處理：簡轉繁 + 過濾（${slugs.length} 集）…`);
+  const { ok, failed } = relocalizeSidecars(slugs);
+  console.log(`字幕再處理：完成 ${ok}/${slugs.length} 集`);
+  if (failed.length > 0) {
+    console.warn(`字幕再處理：略過 ${failed.join(", ")}`);
   }
 }
 
@@ -624,6 +644,7 @@ async function main(): Promise<void> {
       });
     }
     backfillMissingSubtitles(finalCatalog);
+    relocalizeCatalogSubtitles(finalCatalog);
     return;
   }
 
@@ -657,6 +678,7 @@ async function main(): Promise<void> {
   }
 
   backfillMissingSubtitles(finalCatalog);
+  relocalizeCatalogSubtitles(finalCatalog);
 }
 
 main().catch((err) => {
