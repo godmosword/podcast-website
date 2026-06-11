@@ -10,7 +10,8 @@
       "end": 23,
       "summary": "故事開場與介紹",
       "prompt": "Bonbon and Mami introduce the story with excitement about a magical future electric car.",
-      "characters": []
+      "characters": [],
+      "keepCover": true
     },
     {
       "index": 2,

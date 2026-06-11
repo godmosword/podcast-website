@@ -256,17 +256,19 @@ export function readSubtitlesForSlug(slug: string): Subtitle[] | null {
   }
 }
 
-/** 每幕字幕：優先合併該時間段的轉錄句，否則用場景 summary。 */
+/** 每幕字幕（無側車檔時的 fallback）：場景 summary，避免整段合併台詞過長。 */
 export function buildSceneCaptions(
   scenes: Scene[],
   subs: Subtitle[] | null,
 ): string[] {
   return scenes.map((sc) => {
+    const summary = sc.summary?.trim();
+    if (summary) return summary;
     if (subs?.length) {
       const dlg = sceneDialogue(subs, sc.start, sc.end);
       if (dlg) return dlg;
     }
-    return sc.summary;
+    return "";
   });
 }
 

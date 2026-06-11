@@ -139,13 +139,16 @@ export default function StoryPlayer({
   const hasSubtitles = Array.isArray(subtitles) && subtitles.length > 0;
   const hasCueTimes =
     Array.isArray(captionTimes) && captionTimes.length === total;
-  // 全幕插圖集（EP-9/10 模式）：captions 與頁數對齊時，每幕顯示該段台詞。
+  // 有側車字幕時逐句顯示；無字幕時用 captions（每幕一句摘要）＋ captionTimes 換頁。
   const sceneCaptions =
-    Array.isArray(captions) && captions.length === total && hasCueTimes;
-  const caption = sceneCaptions
-    ? captions![page]
-    : hasSubtitles
-      ? subtitles![subIndex]?.text
+    !hasSubtitles &&
+    Array.isArray(captions) &&
+    captions.length === total &&
+    hasCueTimes;
+  const caption = hasSubtitles
+    ? subtitles![subIndex]?.text
+    : sceneCaptions
+      ? captions![page]
       : captions?.[page];
 
   // 字幕對時模式：播放頁網址帶 ?cue=1 時啟用（純客戶端偵測，頁面維持 SSG）。
