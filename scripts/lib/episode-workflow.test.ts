@@ -133,8 +133,8 @@ describe("全幕標準檢查（mock probes）", () => {
 });
 
 describe("真實 repo 狀態（僅黃金範本與 legacy 對照）", () => {
-  it("ep-2 為 legacy placeholder（警告、無 error）", () => {
-    const story = getStory("ep-2");
+  it("ep-6 為 legacy placeholder（警告、無 error）", () => {
+    const story = getStory("ep-6");
     expect(story?.pageCount).toBe(6);
     const issues = verifyStoryWorkflow(story!);
     expect(issues.some((i) => i.code === "legacy-placeholder")).toBe(true);

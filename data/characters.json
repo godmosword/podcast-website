@@ -84,11 +84,24 @@
     "name": "東東挖土機",
     "aliases": [
       "東東",
+      "咚咚",
       "挖土機"
     ],
     "vehicle": "excavator",
     "desc": "a cute claymation yellow excavator on black tracks with a digging arm and bucket, big round eyes, rosy cheeks and a happy smile",
     "ref": "characters/東東挖土機.jpg",
+    "firstSeen": "ep-5"
+  },
+  {
+    "name": "吊車老爺爺",
+    "aliases": [
+      "吊車",
+      "老爺爺",
+      "吊車老爺"
+    ],
+    "vehicle": "crane truck",
+    "desc": "a wise cute claymation orange crane truck with a long extending boom arm, grey hook at the end, cream cab windows, kind gentle eyes and a warm grandfather smile",
+    "ref": "characters/吊車老爺爺.jpg",
     "firstSeen": "ep-5"
   },
   {

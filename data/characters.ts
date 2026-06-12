@@ -30,6 +30,7 @@ const ID_BY_CANONICAL_NAME: Record<string, string> = {
   黃色計程車: "huang-ji-cheng",
   怪獸卡車: "monster-truck",
   東東挖土機: "dong-dong",
+  吊車老爺爺: "diao-che",
   香香餐車: "xiang-xiang",
   沃特: "watt",
   蹦蹦: "bong-bong",
@@ -45,6 +46,7 @@ const VEHICLE_ZH: Record<string, string> = {
   taxi: "計程車",
   "monster truck": "怪獸卡車",
   excavator: "挖土機",
+  "crane truck": "吊車",
   "food truck": "餐車",
   robot: "小機器人",
   child: "小朋友",
@@ -62,6 +64,7 @@ const VEHICLE_STORY_SLUG: Record<string, string> = {
 const PERSONALITY_BY_ID: Record<string, string> = {
   "an-an": "勇敢、願意開口求助",
   "dong-dong": "有點膽小但願意嘗試",
+  "diao-che": "溫柔鼓勵、教東東一小步一小步來",
   "ling-ling": "守信用、說到做到",
   "xiao-hong": "熱愛比賽、學會面對挫折",
   "lan-ba-shi": "溫柔安慰、鼓勵朋友完成比賽",

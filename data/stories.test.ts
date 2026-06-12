@@ -131,11 +131,14 @@ describe("pageCount", () => {
     }
   });
 
-  it("手動維護 EP2–6 仍為 6 頁 placeholder", () => {
+  it("手動維護 EP2–6 的 pageCount 與幕級字幕長度一致", () => {
     const manualEp26 = manualStories.filter((s) => s.ep >= 2 && s.ep <= 6);
-    expect(manualEp26.every((s) => s.pageCount === 6)).toBe(true);
     for (const s of manualEp26) {
-      expect(storyIllustrationCount(s.slug)).toBe(6);
+      expect(storyIllustrationCount(s.slug)).toBe(s.pageCount);
+      expect(s.captions?.length).toBe(s.pageCount);
+      if (s.captionTimes) {
+        expect(s.captionTimes.length).toBe(s.pageCount);
+      }
     }
   });
 });
