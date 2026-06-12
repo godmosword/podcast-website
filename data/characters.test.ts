@@ -28,4 +28,11 @@ describe("getCharactersForStory", () => {
     const ids = getCharactersForStory("ep-2").map((c) => c.id);
     expect(ids).toContain("xiao-fei");
   });
+
+  it("ep-3 含小紅、藍色小巴士、黃色計程車", () => {
+    const ids = getCharactersForStory("ep-3").map((c) => c.id);
+    expect(ids).toContain("xiao-hong");
+    expect(ids).toContain("lan-ba-shi");
+    expect(ids).toContain("huang-ji-cheng");
+  });
 });

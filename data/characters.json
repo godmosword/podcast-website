@@ -48,6 +48,28 @@
     "firstSeen": "ep-3"
   },
   {
+    "name": "藍色小巴士",
+    "aliases": [
+      "藍色的小巴士",
+      "小巴士"
+    ],
+    "vehicle": "minibus",
+    "desc": "a cute claymation friendly sky-blue minibus with a rounded boxy body, cream lower trim, yellow round headlights, a small side door, big warm eyes and a gentle caring smile",
+    "ref": "characters/藍色小巴士.jpg",
+    "firstSeen": "ep-3"
+  },
+  {
+    "name": "黃色計程車",
+    "aliases": [
+      "黃色的計程車",
+      "計程車"
+    ],
+    "vehicle": "taxi",
+    "desc": "a cute claymation bright yellow taxi cab with a black-and-white checker stripe along the side, a small taxi sign on the roof, round headlights, big cheerful eyes and a happy smile",
+    "ref": "characters/黃色計程車.jpg",
+    "firstSeen": "ep-3"
+  },
+  {
     "name": "怪獸卡車",
     "aliases": [
       "怪獸車",

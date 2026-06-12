@@ -1,0 +1,198 @@
+{
+  "slug": "ep-3",
+  "audioDuration": 346,
+  "model": "semantic-15-20s",
+  "generatedAt": "2026-06-12T14:30:00.000Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 0,
+      "end": 20,
+      "summary": "主持人介紹賽車故事",
+      "prompt": "Warm podcast intro at the car amusement park on a sunny day, hosts Bonbon and Mami introducing today's race story, cheerful anticipation mood",
+      "characters": [],
+      "keepCover": true
+    },
+    {
+      "index": 2,
+      "start": 20,
+      "end": 42.4,
+      "summary": "車車遊樂園比賽日",
+      "prompt": "Colorful clay car amusement park race day, various friendly vehicles gathered including a blue minibus, yellow taxi, tow truck and ambulance in the background, festive mood",
+      "characters": ["小紅賽車", "藍色小巴士", "黃色計程車"],
+      "refPages": [1],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 3,
+      "start": 42.4,
+      "end": 58.4,
+      "summary": "小紅熱身期待比賽",
+      "prompt": "The little red race car number 2 spinning tires while warming up, excited confident smile, race track energy, other cars nearby",
+      "characters": ["小紅賽車"],
+      "refPages": [2],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 4,
+      "start": 58.4,
+      "end": 78.6,
+      "summary": "車車集合起跑線",
+      "prompt": "All race cars lined up at the starting grid, referee raising a flag, loudspeaker announcement mood, everyone ready to start",
+      "characters": ["小紅賽車", "藍色小巴士", "黃色計程車"],
+      "refPages": [3],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 5,
+      "start": 78.6,
+      "end": 99.7,
+      "summary": "三二一開跑",
+      "prompt": "Race starts with a burst of speed, the red race car zooming ahead at the front of the pack, dynamic motion blur mood",
+      "characters": ["小紅賽車", "黃色計程車", "藍色小巴士"],
+      "refPages": [4],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 6,
+      "start": 99.7,
+      "end": 116.1,
+      "summary": "小紅領先得意",
+      "prompt": "The red race car leading the race proudly, happy triumphant expression shouting that it will be number one, bright sunny track",
+      "characters": ["小紅賽車"],
+      "refPages": [5],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 7,
+      "start": 116.1,
+      "end": 136.5,
+      "summary": "水坑打滑停下",
+      "prompt": "The red race car sees a small puddle ahead, tries to turn too fast without slowing, tires skid and the car stops with a surprised worried face",
+      "characters": ["小紅賽車"],
+      "refPages": [6],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 8,
+      "start": 136.5,
+      "end": 146.3,
+      "summary": "藍色小巴士過來",
+      "prompt": "The stopped red race car on the track while a friendly sky-blue minibus drives over gently, caring helpful mood",
+      "characters": ["小紅賽車", "藍色小巴士"],
+      "refPages": [7],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 9,
+      "start": 146.3,
+      "end": 168.8,
+      "summary": "小紅快哭了",
+      "prompt": "The blue minibus asks if the red race car is okay; the red race car looks upset almost crying, saying it wanted to be first but now will lose",
+      "characters": ["小紅賽車", "藍色小巴士"],
+      "refPages": [8],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 10,
+      "start": 168.8,
+      "end": 189.9,
+      "summary": "小巴士安慰小紅",
+      "prompt": "The blue minibus gently comforts the red race car, explaining that trying your best matters more than winning first place, warm supportive mood",
+      "characters": ["小紅賽車", "藍色小巴士"],
+      "refPages": [9],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 11,
+      "start": 189.9,
+      "end": 213.2,
+      "summary": "深呼吸重新出發",
+      "prompt": "The red race car takes a big deep breath in and out, wipes tears, then says it will finish the race, determined hopeful mood",
+      "characters": ["小紅賽車"],
+      "refPages": [10],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 12,
+      "start": 213.2,
+      "end": 223.3,
+      "summary": "小心通過水坑",
+      "prompt": "The red race car drives carefully around the puddle, slow gentle turn, focused calm expression instead of rushing for first place",
+      "characters": ["小紅賽車"],
+      "refPages": [11],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 13,
+      "start": 223.3,
+      "end": 250.5,
+      "summary": "黃色計程車得第一",
+      "prompt": "Finish line scene, referee waving flag announcing the yellow taxi won first place, red race car arrives at the finish looking a bit disappointed",
+      "characters": ["小紅賽車", "黃色計程車"],
+      "refPages": [12],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 14,
+      "start": 250.5,
+      "end": 271.5,
+      "summary": "貨車教練鼓勵",
+      "prompt": "A friendly clay coach truck rolls up beside the sad red race car, praising its sportsmanship for calming down and continuing the race",
+      "characters": ["小紅賽車"],
+      "refPages": [13],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 15,
+      "start": 271.5,
+      "end": 279.4,
+      "summary": "哭出來也沒關係",
+      "prompt": "The coach truck gently tells the red race car it is okay to cry and that the coach will stay nearby until it feels better, tender comforting mood",
+      "characters": ["小紅賽車"],
+      "refPages": [14],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 16,
+      "start": 279.4,
+      "end": 301.2,
+      "summary": "恭喜計程車得獎",
+      "prompt": "The red race car drives over to the yellow taxi smiling warmly, congratulating it on winning first place, friendly gracious mood",
+      "characters": ["小紅賽車", "黃色計程車"],
+      "refPages": [15],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 17,
+      "start": 301.2,
+      "end": 309.2,
+      "summary": "小紅笑著說會再練",
+      "prompt": "The red race car laughs happily telling everyone it will keep practicing and get better, cheerful optimistic group mood with the yellow taxi nearby",
+      "characters": ["小紅賽車", "黃色計程車"],
+      "refPages": [16],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 18,
+      "start": 309.2,
+      "end": 329.2,
+      "summary": "不是第一名也沒關係",
+      "prompt": "Cozy story wrap-up at the amusement park, gentle teaching mood about trying hard and being brave even when you are not number one",
+      "characters": ["小紅賽車"],
+      "refPages": [17],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 19,
+      "start": 329.2,
+      "end": 346,
+      "summary": "下次再見拜拜",
+      "prompt": "Cheerful podcast outro wave goodbye at the car amusement park, warm farewell mood inviting kids back next time",
+      "characters": [],
+      "refPages": [18],
+      "refPageHint": "Match the same clay car amusement park style and lighting palette from the reference; only change composition for a cozy farewell scene."
+    }
+  ],
+  "newCharacters": []
+}
