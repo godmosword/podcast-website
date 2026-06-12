@@ -42,6 +42,70 @@ describe("game logic regressions", () => {
     expect(game).toContain("switchToRelaxedAndRestart");
   });
 
+  it("繽紛卡丁車 Host 驗證來源並走 gamekit 回報，含載入降級", () => {
+    const host = source("components/games/CandyKartIframeHost.tsx");
+
+    expect(host).toContain("event.origin !== window.location.origin");
+    expect(host).toContain("isCandyKartFinishMessage");
+    expect(host).toContain("candyKartSessionFromFinish");
+    expect(host).toContain("reportGameSession");
+    expect(host).toContain("LOAD_TIMEOUT_MS");
+  });
+
+  it("繽紛卡丁車保留觸控方向與漂移控制", () => {
+    const hud = source("candy-kart-game/scripts/hud.gd");
+    const main = source("candy-kart-game/scripts/main.gd");
+
+    expect(hud).toContain("DisplayServer.is_touchscreen_available()");
+    expect(hud).toContain("_build_touch(root)");
+    expect(hud).toContain("touch_left = true");
+    expect(hud).toContain("touch_right = true");
+    expect(hud).toContain("touch_drift = true");
+    expect(main).toContain("hud.touch_left");
+    expect(main).toContain("hud.touch_right");
+    expect(main).toContain("hud.touch_drift");
+  });
+
+  it("繽紛卡丁車保留音訊解鎖與 AI rubber-banding", () => {
+    const main = source("candy-kart-game/scripts/main.gd");
+    const race = source("candy-kart-game/scripts/race.gd");
+
+    expect(main).toContain("_audio_unlocked");
+    expect(main).toContain("sfx.unlock()");
+    expect(race).toContain("var rubber := 1.0");
+    expect(race).toContain("player.progress - kart.progress");
+    expect(race).toContain("clampf(1.0 + gap / 600.0 * 0.22, 0.82, 1.2)");
+    expect(race).toContain("kart.step(delta, running, rubber)");
+  });
+
+  it("繽紛卡丁車 Godot 端保留 6 條主題賽道", () => {
+    const trackData = source("candy-kart-game/scripts/track_data.gd");
+
+    for (const id of [
+      "macaron-meadow",
+      "candy-beach",
+      "jelly-forest",
+      "icecream-peak",
+      "choco-volcano",
+      "rainbow-skyway",
+    ]) {
+      expect(trackData).toContain(`"id": "${id}"`);
+    }
+    expect(trackData).toContain("static func track_count() -> int:");
+    expect(trackData).toContain("\"par_ms\"");
+  });
+
+  it("繽紛卡丁車保留大獎賽積分與糖果盃結算", () => {
+    const main = source("candy-kart-game/scripts/main.gd");
+
+    expect(main).toContain("const GP_POINTS := [10, 8, 6, 5, 4, 3, 2, 1]");
+    expect(main).toContain("func _start_grand_prix() -> void:");
+    expect(main).toContain("func _apply_gp_points(result: Dictionary) -> void:");
+    expect(main).toContain("func _show_gp_final() -> void:");
+    expect(main).toContain("繽紛糖果盃 冠軍！");
+    expect(main).toContain("class CupIcon:");
+  });
+
   it("繽紛樂園使用黏土馬卡龍風格、大按鈕與消排慶祝效果", () => {
     const game = source("components/games/BlockDropGame.tsx");
 

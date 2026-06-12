@@ -27,7 +27,11 @@ export type GameSessionResult = {
 };
 
 function isGameKitGameId(gameId: GameScoreId): gameId is GameKitGameId {
-  return gameId === "block-drop" || gameId === "car-adventure";
+  return (
+    gameId === "block-drop" ||
+    gameId === "car-adventure" ||
+    gameId === "candy-kart"
+  );
 }
 
 function awardSticker(profile: PlayerProfile, stickerId: string): PlayerProfile {

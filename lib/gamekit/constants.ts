@@ -20,6 +20,8 @@ export const MAX_PIXEL_SCALE = 4;
 export const GAME_VIEWPORTS: Record<GameKitGameId, ViewportSize> = {
   "block-drop": { width: 200, height: 360 },
   "car-adventure": { width: 320, height: 180 },
+  // candy-kart 為 Godot iframe 遊戲，解析度由遊戲端自管；此值僅供型別完整
+  "candy-kart": { width: 320, height: 180 },
 };
 
 export function viewportFor(gameId: GameKitGameId): ViewportSize {

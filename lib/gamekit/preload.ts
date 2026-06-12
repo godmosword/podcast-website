@@ -5,6 +5,8 @@ import { getGameSheet, type SheetId } from "./procedural-sheets";
 export const GAME_PRELOAD_SHEETS: Record<GameKitGameId, SheetId[]> = {
   "car-adventure": ["tiles-common"],
   "block-drop": ["blocks-drop"],
+  // candy-kart 資產由 Godot iframe 自載，無程序生成 sheet
+  "candy-kart": [],
 };
 
 const warmed = new Set<string>();

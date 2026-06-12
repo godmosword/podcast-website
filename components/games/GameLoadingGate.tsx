@@ -9,6 +9,7 @@ import styles from "./GameLoadingGate.module.css";
 const LABELS: Record<GameKitGameId, string> = {
   "car-adventure": "車車大冒險",
   "block-drop": "繽紛方塊",
+  "candy-kart": "繽紛卡丁車",
 };
 
 type GameLoadingGateProps = {

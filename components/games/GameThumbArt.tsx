@@ -298,6 +298,148 @@ export default function GameThumbArt({ gameId, className, style }: Props) {
         </svg>
       );
 
+    case "candy-kart":
+      return (
+        <svg {...common}>
+          <ClayScene
+            uid={uid}
+            bg={
+              <>
+                <ClayGrad
+                  id={clayIds(uid, "sky")}
+                  light="#fff3f9"
+                  mid="#ffe4f0"
+                  dark="#f7c8de"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "road")}
+                  light="#ffe9d6"
+                  mid="#ffd9b8"
+                  dark="#eebd92"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "stripe")}
+                  light="#fff"
+                  mid="#fff4fa"
+                  dark="#ffd9ea"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "hill")}
+                  light="#cdf3dd"
+                  mid="#b9f3db"
+                  dark="#8fd9b6"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "kart")}
+                  light="#ffc8dc"
+                  mid="#ffb4cf"
+                  dark="#e8789c"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "rival")}
+                  light="#cfe2ff"
+                  mid="#9dbbff"
+                  dark="#7591e0"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "star")}
+                  light="#fff3b8"
+                  mid="#ffe889"
+                  dark="#f0b429"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "win")}
+                  light="#ffffff"
+                  mid="#ecf7ff"
+                  dark="#bde7ff"
+                />
+              </>
+            }
+          >
+            <rect width="120" height="90" rx="12" fill={`url(#${clayIds(uid, "sky")})`} />
+            <ClayBlob
+              x={-6}
+              y={34}
+              w={56}
+              h={26}
+              r={13}
+              gradId={clayIds(uid, "hill")}
+              shadowId={sh}
+              highlight={false}
+            />
+            <ClayBlob
+              x={76}
+              y={30}
+              w={52}
+              h={30}
+              r={15}
+              gradId={clayIds(uid, "hill")}
+              shadowId={sh}
+              highlight={false}
+            />
+            <ClayBlob
+              x={0}
+              y={52}
+              w={120}
+              h={38}
+              r={10}
+              gradId={clayIds(uid, "road")}
+              shadowId={sh}
+              highlight={false}
+            />
+            <ClayBlob
+              x={8}
+              y={68}
+              w={14}
+              h={4}
+              r={2}
+              gradId={clayIds(uid, "stripe")}
+              shadowId={sh}
+              highlight={false}
+            />
+            <ClayBlob
+              x={50}
+              y={68}
+              w={14}
+              h={4}
+              r={2}
+              gradId={clayIds(uid, "stripe")}
+              shadowId={sh}
+              highlight={false}
+            />
+            <ClayBlob
+              x={94}
+              y={68}
+              w={14}
+              h={4}
+              r={2}
+              gradId={clayIds(uid, "stripe")}
+              shadowId={sh}
+              highlight={false}
+            />
+            <ClayCircle cx={28} cy={26} r={6} gradId={clayIds(uid, "star")} shadowId={sh} />
+            <ClayCircle cx={96} cy={18} r={4.5} gradId={clayIds(uid, "star")} shadowId={sh} />
+            <ClayCar
+              x={64}
+              y={42}
+              bodyGrad={clayIds(uid, "rival")}
+              roofGrad={clayIds(uid, "rival")}
+              windowGrad={clayIds(uid, "win")}
+              shadowId={sh}
+              scale={0.78}
+            />
+            <ClayCar
+              x={26}
+              y={48}
+              bodyGrad={clayIds(uid, "kart")}
+              roofGrad={clayIds(uid, "kart")}
+              windowGrad={clayIds(uid, "win")}
+              shadowId={sh}
+            />
+          </ClayScene>
+        </svg>
+      );
+
     default:
       return (
         <svg {...common}>

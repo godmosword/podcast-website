@@ -42,3 +42,9 @@ next-env.d.ts
 
 # kart-game build 產物（由 `npm run build:kart` 重建，勿入庫；本機開 /games/kart 前需先跑該指令）
 /public/kart/
+
+# Godot editor/cache state（專案源碼在 candy-kart-game/，cache 由 Godot 重建）
+/candy-kart-game/.godot/
+
+# 本機 Candy Kart 臨時驗證腳本（正式覆蓋已在 e2e/smoke.spec.ts）
+/ck-verify.mjs

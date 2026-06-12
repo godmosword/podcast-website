@@ -67,6 +67,23 @@ export const BGM_THEMES: Record<GameKitGameId, BgmTheme> = {
       [C3, C3, G3, G3, E3, E3, A3, A3, D3, D3, A3, A3, E3, E3, B3, B3],
     ],
   },
+  // candy-kart BGM 由 Godot 端播放；此主題僅供型別完整與大廳預覽
+  "candy-kart": {
+    bpm: 132,
+    stepsPerBeat: 4,
+    melodyWave: "square",
+    bassWave: "triangle",
+    melodyVol: 0.08,
+    bassVol: 0.06,
+    melody: [
+      [C5, E5, G5, E5, A5, G5, E5, C5, D5, E5, D5, C5, B4, C5, D5, R],
+      [E5, G5, A5, G5, C5, D5, E5, G5, A5, G5, E5, D5, C5, R, G4, C5],
+    ],
+    bass: [
+      [C3, R, G3, C3, A3, R, E3, A3, D3, R, A3, D3, G3, R, D3, G3],
+      [C3, C3, G3, G3, A3, A3, E3, E3, D3, D3, G3, G3, C3, R, C3, R],
+    ],
+  },
 };
 
 export function validateBgmTheme(theme: BgmTheme): boolean {

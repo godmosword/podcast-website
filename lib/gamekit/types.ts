@@ -1,7 +1,7 @@
 import type { GameScoreId } from "@/lib/progress-store";
 
 /** Game Kit 內的識別字（對齊 `lib/games/catalog.ts` id）。 */
-export type GameKitGameId = "block-drop" | "car-adventure";
+export type GameKitGameId = "block-drop" | "car-adventure" | "candy-kart";
 
 export type ViewportSize = {
   width: number;
