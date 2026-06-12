@@ -30,13 +30,15 @@ export function useGameInput(
 
     let raf = 0;
     const tick = () => {
-      input.clearFrame();
       input.poll();
       onFrameRef.current({
         isHeld: (a) => input.isHeld(a),
         wasPressed: (a) => input.wasPressed(a),
         wasReleased: (a) => input.wasReleased(a),
       });
+      // 事件（keydown/inject）在兩幀之間累積，必須先讓回呼讀到再清除，
+      // 否則鍵盤的 wasPressed 永遠不會成立。
+      input.clearFrame();
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);

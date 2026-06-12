@@ -18,6 +18,7 @@ import {
   useGameAudio,
   useGameLoop,
   useTouchControls,
+  useVisibilityPause,
 } from "@/lib/game-kit";
 import GamePixelBoard from "@/components/games/GamePixelBoard";
 import { blockDropKitColors } from "@/lib/gamekit/bridge";
@@ -35,6 +36,8 @@ const BOARD_H = ROWS * CELL;
 const SIDE_W = 96;
 const LAYOUT_W = BOARD_W + 14 + SIDE_W;
 const LOCK_DELAY = 450;
+const DAS_DELAY = 170;
+const DAS_REPEAT = 50;
 type PieceType = "I" | "O" | "T" | "S" | "Z" | "J" | "L";
 type Cell = PieceType | null;
 type Status = "ready" | "playing" | "paused" | "over";
@@ -429,6 +432,8 @@ function MiniBox({ type, label }: { type: PieceType | null; label: string }) {
 export default function BlockDropGame() {
   const G = useRef<GameState>(freshGame());
   const repeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const dasRef = useRef({ dir: 0, nextAt: 0 });
+  const touchSoftDropRef = useRef(false);
   const reduced = useReducedMotion();
   const { useKeyboardInput } = useTouchControls();
   const { best, saveBest } = useBestScore("block-drop");
@@ -718,11 +723,31 @@ export default function BlockDropGame() {
           togglePause();
           return;
         }
-        if (input.wasPressed("move-left")) move(-1);
-        if (input.wasPressed("move-right")) move(1);
+        const now = performance.now();
+        const das = dasRef.current;
+        if (input.wasPressed("move-left")) {
+          move(-1);
+          das.dir = -1;
+          das.nextAt = now + DAS_DELAY;
+        }
+        if (input.wasPressed("move-right")) {
+          move(1);
+          das.dir = 1;
+          das.nextAt = now + DAS_DELAY;
+        }
+        if (das.dir !== 0) {
+          if (!input.isHeld(das.dir < 0 ? "move-left" : "move-right")) {
+            das.dir = 0;
+          } else {
+            while (now >= das.nextAt) {
+              move(das.dir);
+              das.nextAt += DAS_REPEAT;
+            }
+          }
+        }
         if (input.wasPressed("move-up")) rotate(1);
         if (input.wasPressed("action")) hardDrop();
-        g.softDrop = input.isHeld("move-down");
+        g.softDrop = input.isHeld("move-down") || touchSoftDropRef.current;
       } else if (g.status === "paused" && input.wasPressed("pause")) {
         togglePause();
       }
@@ -794,8 +819,20 @@ export default function BlockDropGame() {
   };
 
   const stopRepeat = () => {
-    if (repeatRef.current) clearInterval(repeatRef.current);
+    if (repeatRef.current) {
+      clearInterval(repeatRef.current);
+      repeatRef.current = null;
+    }
   };
+
+  useEffect(() => stopRepeat, []);
+
+  useVisibilityPause({
+    onHidden: () => {
+      if (G.current.status === "playing") togglePause();
+    },
+    onVisible: () => {},
+  });
 
   const g = G.current;
   const view = g.board.map((row) => row.slice());
@@ -1105,9 +1142,11 @@ export default function BlockDropGame() {
           label="軟降"
           coarse={isCoarse}
           onDown={() => {
+            touchSoftDropRef.current = true;
             G.current.softDrop = true;
           }}
           onUp={() => {
+            touchSoftDropRef.current = false;
             G.current.softDrop = false;
           }}
         >
