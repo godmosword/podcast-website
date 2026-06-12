@@ -34,6 +34,8 @@ const CELL = 18;
 const BOARD_W = COLS * CELL;
 const BOARD_H = ROWS * CELL;
 const MAX_BOARD_W = 396;
+const WIDE_MAX_BOARD_W = 460;
+const WIDE_SIDE_W = 150;
 const LOCK_DELAY = 450;
 const DAS_DELAY = 170;
 const DAS_REPEAT = 50;
@@ -440,6 +442,16 @@ export default function BlockDropGame() {
     );
   }, []);
 
+  // ── 寬螢幕（iPad／桌機）：三欄一頁式排版，免捲動、免虛擬按鍵 ──
+  const [wide, setWide] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 700px) and (min-height: 500px)");
+    const apply = () => setWide(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
   // ── 手機優先：棋盤填滿卡片寬度，連續縮放（DOM 方塊非像素畫，免整數倍）──
   const boardWrapRef = useRef<HTMLDivElement | null>(null);
   const [boardScale, setBoardScale] = useState(1.6);
@@ -452,8 +464,11 @@ export default function BlockDropGame() {
     const apply = () => {
       const w = el.clientWidth;
       if (w <= 0) return;
-      // 直向手機：別讓棋盤高度超過視窗（扣掉資訊列與標題），玩到底部不用捲動
-      const maxH = Math.max(420, (window.innerHeight || 800) - 250);
+      // 棋盤高度不超過視窗（扣掉標題列與提示），整頁玩到底不用捲動；
+      // 寬版沒有底部按鍵列，可以分到更多高度
+      const maxH = wide
+        ? Math.max(300, (window.innerHeight || 800) - 210)
+        : Math.max(420, (window.innerHeight || 800) - 250);
       setBoardScale(Math.min(w / BOARD_W, maxH / BOARD_H));
     };
     apply();
@@ -464,7 +479,7 @@ export default function BlockDropGame() {
       ro.disconnect();
       window.removeEventListener("resize", apply);
     };
-  }, []);
+  }, [wide]);
 
   // ── 浮動回饋文字（消行／連擊／升級）──
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -538,6 +553,7 @@ export default function BlockDropGame() {
     g.metaReported = false;
     playBgm();
     g.dirty = true;
+    addToast("🧒 方塊太多了，幫你清掉一些！", true);
     setAnnounce("方塊太多了，幫你清掉一些，繼續玩！");
   };
 
@@ -1001,6 +1017,64 @@ export default function BlockDropGame() {
   const font = "var(--font-sans, 'PingFang TC','Microsoft JhengHei',system-ui,sans-serif)";
   const boardDisplayH = Math.round(BOARD_H * boardScale);
 
+  const holdButton = (cell: number) => (
+    <button
+      type="button"
+      onClick={holdPiece}
+      aria-label="暫存方塊"
+      style={{
+        ...panelStyle,
+        border: "none",
+        cursor: "pointer",
+        fontFamily: font,
+        opacity: g.status === "playing" && !g.canHold ? 0.45 : 1,
+      }}
+    >
+      <div style={{ ...panelLabel, marginBottom: 5 }}>暫存 📦</div>
+      <PiecePreview type={g.hold} cell={cell} />
+    </button>
+  );
+
+  const nextPanel = (firstCell: number, restCell: number) => (
+    <div style={panelStyle}>
+      <div style={{ ...panelLabel, marginBottom: 5 }}>下一個</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+        {g.bag.slice(0, 3).map((t, i) => (
+          <PiecePreview key={i} type={t} cell={i === 0 ? firstCell : restCell} />
+        ))}
+      </div>
+    </div>
+  );
+
+  const scorePanel = (
+    <div
+      style={{
+        ...panelStyle,
+        flex: wide ? undefined : 1,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 2,
+        padding: wide ? "10px 8px" : panelStyle.padding,
+      }}
+    >
+      <div style={panelLabel}>分數</div>
+      <div style={{ color: "#fff", fontSize: wide ? 30 : 26, fontWeight: 800, lineHeight: 1.1 }}>
+        {g.score}
+      </div>
+      {g.combo >= 2 && g.status === "playing" ? (
+        <div style={{ color: "#ffd23f", fontSize: 12, fontWeight: 800 }}>
+          🔥 連擊 ×{g.combo}
+        </div>
+      ) : (
+        <div style={{ color: "#8b9bbd", fontSize: 11, fontWeight: 700 }}>
+          Lv {g.level} · {g.lines} 行 · 最佳 {Math.max(best ?? 0, g.score)}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <GameChrome
       canPause={g.status === "playing" || g.status === "paused"}
@@ -1014,9 +1088,9 @@ export default function BlockDropGame() {
       style={{
         fontFamily: font,
         background: "linear-gradient(160deg,#161a26,#0e1119)",
-        padding: "14px 14px 18px",
+        padding: wide ? "16px 18px 18px" : "14px 14px 18px",
         borderRadius: 24,
-        maxWidth: 440,
+        maxWidth: wide ? WIDE_MAX_BOARD_W + (WIDE_SIDE_W + 14) * 2 + 36 : 440,
         margin: "0 auto",
         boxShadow: "0 22px 46px rgba(0,0,0,.4)",
         userSelect: "none",
@@ -1054,77 +1128,71 @@ export default function BlockDropGame() {
         />
       </div>
 
-      {/* 手機優先：HOLD／分數／NEXT 集中在棋盤上方一列，棋盤可吃滿寬度 */}
-      <div
-        style={{
-          display: "flex",
-          gap: 8,
-          marginBottom: 10,
-          alignItems: "stretch",
-        }}
-      >
-        <button
-          type="button"
-          onClick={holdPiece}
-          aria-label="暫存方塊"
-          style={{
-            ...panelStyle,
-            border: "none",
-            cursor: "pointer",
-            fontFamily: font,
-            opacity: g.status === "playing" && !g.canHold ? 0.45 : 1,
-          }}
-        >
-          <div style={{ ...panelLabel, marginBottom: 5 }}>暫存 📦</div>
-          <PiecePreview type={g.hold} cell={13} />
-        </button>
-
+      {/* 手機：HOLD／分數／NEXT 集中在棋盤上方一列，棋盤可吃滿寬度 */}
+      {!wide && (
         <div
           style={{
-            ...panelStyle,
-            flex: 1,
             display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 2,
+            gap: 8,
+            marginBottom: 10,
+            alignItems: "stretch",
           }}
         >
-          <div style={panelLabel}>分數</div>
-          <div style={{ color: "#fff", fontSize: 26, fontWeight: 800, lineHeight: 1.1 }}>
-            {g.score}
-          </div>
-          {g.combo >= 2 && g.status === "playing" ? (
-            <div style={{ color: "#ffd23f", fontSize: 12, fontWeight: 800 }}>
-              🔥 連擊 ×{g.combo}
-            </div>
-          ) : (
-            <div style={{ color: "#8b9bbd", fontSize: 11, fontWeight: 700 }}>
-              Lv {g.level} · {g.lines} 行 · 最佳 {Math.max(best ?? 0, g.score)}
-            </div>
-          )}
+          {holdButton(13)}
+          {scorePanel}
+          {nextPanel(11, 8)}
         </div>
+      )}
 
-        <div style={panelStyle}>
-          <div style={{ ...panelLabel, marginBottom: 5 }}>下一個</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-            {g.bag.slice(0, 3).map((t, i) => (
-              <PiecePreview key={i} type={t} cell={i === 0 ? 11 : 8} />
-            ))}
+      {/* 寬螢幕（iPad）：左欄資訊、中間棋盤、右欄預覽，一頁呈現 */}
+      <div
+        style={
+          wide
+            ? {
+                display: "flex",
+                gap: 14,
+                alignItems: "flex-start",
+                justifyContent: "center",
+              }
+            : undefined
+        }
+      >
+        {wide && (
+          <div
+            style={{
+              width: WIDE_SIDE_W,
+              flexShrink: 0,
+              display: "flex",
+              flexDirection: "column",
+              gap: 10,
+            }}
+          >
+            {scorePanel}
+            {holdButton(18)}
           </div>
-        </div>
-      </div>
+        )}
 
       <div
         ref={boardWrapRef}
         style={{
-          position: "relative",
           width: "100%",
-          maxWidth: MAX_BOARD_W,
+          maxWidth: wide ? WIDE_MAX_BOARD_W : MAX_BOARD_W,
+          flex: wide ? 1 : undefined,
+          minWidth: 0,
           height: boardDisplayH,
           margin: "0 auto",
         }}
       >
+       {/* 內層與縮放後的棋盤同寬：遮罩、手勢層、提示都貼齊棋盤本體 */}
+       <div
+        style={{
+          position: "relative",
+          width: Math.round(BOARD_W * boardScale),
+          maxWidth: "100%",
+          height: "100%",
+          margin: "0 auto",
+        }}
+       >
         <div
           style={{
             position: "absolute",
@@ -1339,49 +1407,68 @@ export default function BlockDropGame() {
             )}
           </div>
         )}
+       </div>
       </div>
 
-      <div className={touchControlStyles.controlGrid}>
-        <GridTouchButton
-          label="左"
-          coarse={isCoarse}
-          onDown={() => startRepeat(() => move(-1))}
-          onUp={stopRepeat}
-        >
-          ⬅️
-        </GridTouchButton>
-        <GridTouchButton label="旋轉" coarse={isCoarse} onDown={() => rotate(1)}>
-          🔄
-        </GridTouchButton>
-        <GridTouchButton
-          label="右"
-          coarse={isCoarse}
-          onDown={() => startRepeat(() => move(1))}
-          onUp={stopRepeat}
-        >
-          ➡️
-        </GridTouchButton>
-        <GridTouchButton
-          label="軟降"
-          coarse={isCoarse}
-          onDown={() => {
-            touchSoftDropRef.current = true;
-            G.current.softDrop = true;
-          }}
-          onUp={() => {
-            touchSoftDropRef.current = false;
-            G.current.softDrop = false;
-          }}
-        >
-          ⬇️
-        </GridTouchButton>
-        <GridTouchButton label="落下" coarse={isCoarse} wide onDown={hardDrop}>
-          ⤓ 落下
-        </GridTouchButton>
-        <GridTouchButton label="暫存" coarse={isCoarse} onDown={holdPiece}>
-          📦
-        </GridTouchButton>
+        {wide && (
+          <div
+            style={{
+              width: WIDE_SIDE_W,
+              flexShrink: 0,
+              display: "flex",
+              flexDirection: "column",
+              gap: 10,
+            }}
+          >
+            {nextPanel(16, 12)}
+          </div>
+        )}
       </div>
+
+      {/* 手機才需要虛擬按鍵；寬螢幕用棋盤手勢或鍵盤即可，一頁放得下 */}
+      {!wide && (
+        <div className={touchControlStyles.controlGrid}>
+          <GridTouchButton
+            label="左"
+            coarse={isCoarse}
+            onDown={() => startRepeat(() => move(-1))}
+            onUp={stopRepeat}
+          >
+            ⬅️
+          </GridTouchButton>
+          <GridTouchButton label="旋轉" coarse={isCoarse} onDown={() => rotate(1)}>
+            🔄
+          </GridTouchButton>
+          <GridTouchButton
+            label="右"
+            coarse={isCoarse}
+            onDown={() => startRepeat(() => move(1))}
+            onUp={stopRepeat}
+          >
+            ➡️
+          </GridTouchButton>
+          <GridTouchButton
+            label="軟降"
+            coarse={isCoarse}
+            onDown={() => {
+              touchSoftDropRef.current = true;
+              G.current.softDrop = true;
+            }}
+            onUp={() => {
+              touchSoftDropRef.current = false;
+              G.current.softDrop = false;
+            }}
+          >
+            ⬇️
+          </GridTouchButton>
+          <GridTouchButton label="落下" coarse={isCoarse} wide onDown={hardDrop}>
+            ⤓ 落下
+          </GridTouchButton>
+          <GridTouchButton label="暫存" coarse={isCoarse} onDown={holdPiece}>
+            📦
+          </GridTouchButton>
+        </div>
+      )}
 
       <p
         style={{
