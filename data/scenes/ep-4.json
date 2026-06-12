@@ -1,0 +1,148 @@
+{
+  "slug": "ep-4",
+  "audioDuration": 253,
+  "model": "semantic-15-20s",
+  "generatedAt": "2026-06-12T15:00:00.000Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 0,
+      "end": 21.9,
+      "summary": "介紹鈴鈴清潔車",
+      "prompt": "Warm podcast intro at the car amusement park, hosts introducing Lingling the special street sweeper who wakes everyone each morning, cheerful cozy mood",
+      "characters": [],
+      "keepCover": true
+    },
+    {
+      "index": 2,
+      "start": 21.9,
+      "end": 44.1,
+      "summary": "廣場播放早安音樂",
+      "prompt": "Lingling the street sweeper arrives at the sunny town square playing gentle cute morning music from her speaker, happy wake-up mood",
+      "characters": ["鈴鈴清潔車"],
+      "refPages": [1],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 3,
+      "start": 44.1,
+      "end": 67.9,
+      "summary": "小紅與安安起床",
+      "prompt": "Little red race car jumps up hearing the music, An An ambulance neatly prepares the first-aid kit, both smiling gratefully toward Lingling in the square",
+      "characters": ["鈴鈴清潔車", "小紅賽車", "安安救護車"],
+      "refPages": [2],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 4,
+      "start": 67.9,
+      "end": 85.9,
+      "summary": "鈴鈴答應守信用",
+      "prompt": "Lingling pats her door seriously promising to wake everyone on time every morning, then cut to a rainy night with raindrops on her windows and speaker",
+      "characters": ["鈴鈴清潔車"],
+      "refPages": [3],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 5,
+      "start": 85.9,
+      "end": 106.3,
+      "summary": "喇叭壞了著急",
+      "prompt": "Next morning Lingling tries to play wake-up music but her speaker makes no sound, worried anxious face wondering what to do",
+      "characters": ["鈴鈴清潔車"],
+      "refPages": [4],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 6,
+      "start": 106.3,
+      "end": 116.8,
+      "summary": "仍決定出發提醒",
+      "prompt": "Lingling thinks friends may oversleep and be late, so she rolls out of the garage anyway spinning her wheels with determined effort",
+      "characters": ["鈴鈴清潔車"],
+      "refPages": [5],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 7,
+      "start": 116.8,
+      "end": 137.3,
+      "summary": "車燈叫醒小紅",
+      "prompt": "Lingling drives to little red race car's home and flashes headlights blink blink because music will not work, sleepy red car rubs eyes and says hi",
+      "characters": ["鈴鈴清潔車", "小紅賽車"],
+      "refPages": [6],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 8,
+      "start": 137.3,
+      "end": 152.3,
+      "summary": "小紅聽見承諾",
+      "prompt": "Lingling quietly tells little red race car the speaker is broken but she still came to keep her promise to wake everyone, touching sincere mood",
+      "characters": ["鈴鈴清潔車", "小紅賽車"],
+      "refPages": [7],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 9,
+      "start": 152.3,
+      "end": 174.1,
+      "summary": "雨刷叫醒安安",
+      "prompt": "Lingling drives to An An ambulance's home and wiggles wipers back and forth, An An wakes up moved and praises Lingling for remembering the promise",
+      "characters": ["鈴鈴清潔車", "安安救護車"],
+      "refPages": [8],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 10,
+      "start": 174.1,
+      "end": 184.4,
+      "summary": "一起去維修廠",
+      "prompt": "All vehicle friends awake on time, everyone escorts Lingling together to the repair shop in the amusement park, supportive group mood",
+      "characters": ["鈴鈴清潔車", "小紅賽車", "安安救護車"],
+      "refPages": [9],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 11,
+      "start": 184.4,
+      "end": 201,
+      "summary": "喇叭只是進水",
+      "prompt": "Friendly repair uncle checks Lingling and explains the speaker just got wet and will recover after rest, Lingling looks embarrassed and relieved",
+      "characters": ["鈴鈴清潔車", "小紅賽車", "安安救護車"],
+      "refPages": [10],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 12,
+      "start": 201,
+      "end": 217.2,
+      "summary": "小紅稱讚守信用",
+      "prompt": "Little red race car praises Lingling for keeping her word, Lingling smiles happily as her speaker works again playing a tiny cheerful note",
+      "characters": ["鈴鈴清潔車", "小紅賽車"],
+      "refPages": [11],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 13,
+      "start": 217.2,
+      "end": 238,
+      "summary": "大家更信任鈴鈴",
+      "prompt": "From that day everyone trusts Lingling more because she always does what she promises, warm group scene with Lingling, little red and An An together",
+      "characters": ["鈴鈴清潔車", "小紅賽車", "安安救護車"],
+      "refPages": [12],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 14,
+      "start": 238,
+      "end": 253,
+      "summary": "守信用結語拜拜",
+      "prompt": "Cozy story wrap-up teaching kids to keep promises so friends trust you, cheerful podcast goodbye at the car amusement park",
+      "characters": [],
+      "refPages": [13],
+      "refPageHint": "Match the same clay car amusement park style and lighting palette from the reference; only change composition for a cozy farewell scene."
+    }
+  ],
+  "newCharacters": []
+}
