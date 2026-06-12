@@ -22,6 +22,7 @@ import {
 import { blockDropKitColors } from "@/lib/gamekit/bridge";
 import { BLOCK_INDEX, blockUrl } from "@/lib/gamekit/procedural-sheets";
 import { reportGameSession } from "@/lib/gamekit/session";
+import type { BlockDropDifficulty } from "@/lib/gamekit/settings";
 import GameChrome, { GameChromeToolbar } from "@/components/games/GameChrome";
 import { GameResultActions } from "@/components/games/GameResultActions";
 import { useGameKitSettings } from "@/hooks/useGameKitSettings";
@@ -40,6 +41,44 @@ const DAS_REPEAT = 50;
 type PieceType = "I" | "O" | "T" | "S" | "Z" | "J" | "L";
 type Cell = PieceType | null;
 type Status = "ready" | "playing" | "paused" | "over";
+type OverReason = "topout" | null;
+
+const DIFFICULTY_CONFIG: Record<
+  BlockDropDifficulty,
+  {
+    label: string;
+    badge: string;
+    gravityScale: number;
+    lockDelayMs: number;
+    scoreMultiplier: number;
+    rescueLimit: number;
+  }
+> = {
+  relaxed: {
+    label: "輕鬆",
+    badge: "救援一次",
+    gravityScale: 1.35,
+    lockDelayMs: 620,
+    scoreMultiplier: 1,
+    rescueLimit: 1,
+  },
+  standard: {
+    label: "標準",
+    badge: "經典節奏",
+    gravityScale: 1,
+    lockDelayMs: LOCK_DELAY,
+    scoreMultiplier: 1,
+    rescueLimit: 0,
+  },
+  challenge: {
+    label: "挑戰",
+    badge: "高分倍率",
+    gravityScale: 0.82,
+    lockDelayMs: 360,
+    scoreMultiplier: 1.35,
+    rescueLimit: 0,
+  },
+};
 
 interface Piece {
   type: PieceType;
@@ -67,6 +106,8 @@ interface GameState {
   clearing: boolean;
   clearRows: number[];
   clearUntil: number;
+  rescues: number;
+  overReason: OverReason;
   lastTime: number | null;
   dirty: boolean;
   metaReported: boolean;
@@ -303,6 +344,8 @@ function freshGame(): GameState {
     clearing: false,
     clearRows: [],
     clearUntil: 0,
+    rescues: 0,
+    overReason: null,
     lastTime: null,
     dirty: true,
     metaReported: false,
@@ -342,6 +385,20 @@ function primaryBtn(font: string): CSSProperties {
     borderRadius: 14,
     cursor: "pointer",
     boxShadow: "0 5px 0 #b97600",
+    fontFamily: font,
+  };
+}
+
+function secondaryBtn(font: string): CSSProperties {
+  return {
+    border: "1px solid rgba(255,255,255,.22)",
+    background: "rgba(255,255,255,.08)",
+    color: "#eaf0ff",
+    fontWeight: 800,
+    fontSize: 15,
+    padding: "10px 18px",
+    borderRadius: 12,
+    cursor: "pointer",
     fontFamily: font,
   };
 }
@@ -406,9 +463,16 @@ export default function BlockDropGame() {
   const { useKeyboardInput } = useTouchControls();
   const { best, saveBest } = useBestScore("block-drop");
   const isCoarse = useCoarsePointer();
-  const { kidsMode } = useGameKitSettings();
-  const kidsModeRef = useRef(kidsMode);
-  kidsModeRef.current = kidsMode;
+  const {
+    kidsMode,
+    blockDropDifficulty,
+    blockDropSpecialMode,
+    setBlockDropDifficulty,
+  } = useGameKitSettings();
+  const difficultyRef = useRef(blockDropDifficulty);
+  difficultyRef.current = blockDropDifficulty;
+  const specialModeRef = useRef(blockDropSpecialMode);
+  specialModeRef.current = blockDropSpecialMode;
   const { juice, boardTransform } = useDomJuice(reduced);
 
   const [, force] = useState(0);
@@ -515,6 +579,13 @@ export default function BlockDropGame() {
       setTimeout(() => tone(f, 0.22, "sawtooth", 0.06), i * 160),
     );
 
+  const difficultyConfig = () => DIFFICULTY_CONFIG[difficultyRef.current];
+
+  const scoreValue = (base: number) =>
+    Math.round(base * difficultyConfig().scoreMultiplier);
+
+  const shouldRescue = (g: GameState) => g.rescues < difficultyConfig().rescueLimit;
+
   const refill = (g: GameState) => {
     if (g.bag.length <= 7) {
       const b = [...TYPES];
@@ -545,18 +616,25 @@ export default function BlockDropGame() {
       g.active.y = 0;
       g.active.x = 3;
     }
+    g.rescues += 1;
     g.status = "playing";
+    g.overReason = null;
     g.metaReported = false;
     playBgm();
     g.dirty = true;
-    addToast("🧒 方塊太多了，幫你清掉一些！", true);
-    setAnnounce("方塊太多了，幫你清掉一些，繼續玩！");
+    addToast("救援啟動，清出空間！", true);
+    setAnnounce("方塊快到頂了，已幫你清出空間，繼續玩！");
   };
 
-  const gameOver = (g: GameState) => {
+  const gameOver = (g: GameState, reason: OverReason = null) => {
     g.status = "over";
+    g.overReason = reason;
     newBestRef.current = g.score > 0 && g.score > (best ?? 0);
-    setAnnounce(`遊戲結束，得分 ${g.score}`);
+    setAnnounce(
+      reason === "topout"
+        ? `方塊堆到頂了，得分 ${g.score}`
+        : `遊戲結束，得分 ${g.score}`,
+    );
     sOver();
     stopBgm();
     g.dirty = true;
@@ -571,8 +649,8 @@ export default function BlockDropGame() {
     g.lockTimer = 0;
     g.resets = 0;
     if (!valid(g.active, g.board)) {
-      if (kidsModeRef.current) forgiveStack(g);
-      else gameOver(g);
+      if (shouldRescue(g)) forgiveStack(g);
+      else gameOver(g, "topout");
     } else {
       updateGrounded(g);
     }
@@ -585,18 +663,26 @@ export default function BlockDropGame() {
     g.board = nb;
     const n = g.clearRows.length;
     g.lines += n;
-    g.score += LINE_SCORE[n] * g.level;
-    addToast(`${CLEAR_LABEL[n]} +${LINE_SCORE[n] * g.level}`, n >= 4);
+    const lineScore = scoreValue(LINE_SCORE[n] * g.level);
+    g.score += lineScore;
+    addToast(`${CLEAR_LABEL[n]} +${lineScore}`, n >= 4);
     g.combo += 1;
     if (g.combo >= 2) {
-      const bonus = 50 * (g.combo - 1) * g.level;
+      const bonus = scoreValue(50 * (g.combo - 1) * g.level);
       g.score += bonus;
       addToast(`🔥 連擊 ×${g.combo} +${bonus}`);
     }
+    const specialMode = specialModeRef.current;
+    if (specialMode === "rainbow" && g.combo >= 2) {
+      const rainbow = scoreValue(120 * g.combo * n);
+      g.score += rainbow;
+      addToast(`彩虹消除 +${rainbow}`, true);
+      if (!reduced) juice.shake.trigger(0.16, 4);
+    }
     if (g.board.every((row) => row.every((c) => !c))) {
-      const bonus = 1000 * g.level;
+      const bonus = scoreValue(1000 * g.level);
       g.score += bonus;
-      addToast(`🌈 全部清光 +${bonus}`, true);
+      addToast(`全部清光 +${bonus}`, true);
       if (!reduced) juice.shake.trigger(0.2, 5);
     }
     const lv = Math.floor(g.lines / 10) + 1;
@@ -615,11 +701,11 @@ export default function BlockDropGame() {
     if (!g.active) return;
     dragRef.current = null;
     if (SHAPES[g.active.type][g.active.rot].some(([, r]) => g.active!.y + r < 0)) {
-      if (kidsModeRef.current) {
+      if (shouldRescue(g)) {
         forgiveStack(g);
         return;
       }
-      gameOver(g);
+      gameOver(g, "topout");
       return;
     }
     g.board = merge(g.active, g.board);
@@ -700,7 +786,7 @@ export default function BlockDropGame() {
       g.active = { ...g.active, y: g.active.y + 1 };
       n++;
     }
-    g.score += n * 2;
+    g.score += scoreValue(n * 2);
     if (n > 0 && !reduced) juice.shake.trigger(0.07, 1.5);
     lockPiece(g);
     repaint();
@@ -719,8 +805,8 @@ export default function BlockDropGame() {
       g.hold = cur;
       g.active = { type: h, rot: 0, x: 3, y: 0 };
       if (!valid(g.active, g.board)) {
-        if (kidsModeRef.current) forgiveStack(g);
-        else gameOver(g);
+        if (shouldRescue(g)) forgiveStack(g);
+        else gameOver(g, "topout");
       } else {
         updateGrounded(g);
       }
@@ -808,8 +894,8 @@ export default function BlockDropGame() {
         if (g.clearing) {
           if (now >= g.clearUntil) finishClear(g);
         } else if (g.active) {
-          const slow = kidsModeRef.current ? 1.35 : 1;
-          const interval = (g.softDrop ? 45 : gravityMs(g.level)) * slow;
+          const config = difficultyConfig();
+          const interval = (g.softDrop ? 45 : gravityMs(g.level)) * config.gravityScale;
           g.dropAcc += dt;
           while (!g.clearing && g.dropAcc >= interval) {
             g.dropAcc -= interval;
@@ -817,7 +903,7 @@ export default function BlockDropGame() {
           }
           if (g.grounded) {
             g.lockTimer += dt;
-            if (g.lockTimer >= LOCK_DELAY) lockPiece(g);
+            if (g.lockTimer >= config.lockDelayMs) lockPiece(g);
           }
         }
         if (g.dirty) {
@@ -997,6 +1083,15 @@ export default function BlockDropGame() {
 
   const font = "var(--font-sans, 'PingFang TC','Microsoft JhengHei',system-ui,sans-serif)";
   const boardDisplayH = Math.round(BOARD_H * boardScale);
+  const currentDifficulty = DIFFICULTY_CONFIG[blockDropDifficulty];
+  const specialMode = blockDropSpecialMode;
+  const topOut = g.status === "over" && g.overReason === "topout";
+
+  const switchToRelaxedAndRestart = () => {
+    difficultyRef.current = "relaxed";
+    setBlockDropDifficulty("relaxed");
+    begin();
+  };
 
   const holdButton = (cell: number) => (
     <button
@@ -1056,9 +1151,12 @@ export default function BlockDropGame() {
         </div>
       ) : (
         <div style={{ color: "#8b9bbd", fontSize: 11, fontWeight: 700 }}>
-          Lv {g.level} · {g.lines} 行 · 最佳 {Math.max(best ?? 0, g.score)}
+          Lv {g.level} · {g.lines} 行 · {currentDifficulty.label}
         </div>
       )}
+      <div style={{ color: "#64748f", fontSize: 10, fontWeight: 800 }}>
+        最佳 {Math.max(best ?? 0, g.score)}
+      </div>
     </div>
   );
 
@@ -1074,12 +1172,15 @@ export default function BlockDropGame() {
     <div
       style={{
         fontFamily: font,
-        background: "linear-gradient(160deg,#161a26,#0e1119)",
+        background:
+          "radial-gradient(circle at 28% 0%,rgba(70,170,255,.22),transparent 32%), linear-gradient(160deg,#181c29,#0b0f18 78%)",
         padding: wide ? "16px 18px 18px" : "12px 14px 12px",
-        borderRadius: 24,
+        borderRadius: 22,
         maxWidth: wide ? WIDE_MAX_BOARD_W + (WIDE_SIDE_W + 14) * 2 + 36 : 440,
         margin: "0 auto",
-        boxShadow: "0 22px 46px rgba(0,0,0,.4)",
+        border: "1px solid rgba(255,255,255,.12)",
+        boxShadow:
+          "0 22px 46px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.08)",
         userSelect: "none",
       }}
     >
@@ -1102,15 +1203,53 @@ export default function BlockDropGame() {
           marginBottom: 10,
         }}
       >
-        <div
-          style={{
-            fontSize: wide ? 20 : 16,
-            fontWeight: 800,
-            color: "#eaf0ff",
-            whiteSpace: "nowrap",
-          }}
-        >
-          🧩 繽紛方塊 {kidsMode ? "🧒" : ""}
+        <div>
+          <div
+            style={{
+              fontSize: wide ? 20 : 16,
+              fontWeight: 800,
+              color: "#eaf0ff",
+              whiteSpace: "nowrap",
+            }}
+          >
+            🧩 繽紛方塊 {kidsMode ? "🧒" : ""}
+          </div>
+          <div
+            style={{
+              display: "flex",
+              gap: 6,
+              marginTop: 5,
+              flexWrap: "wrap",
+            }}
+          >
+            <span
+              style={{
+                color: "#dce7ff",
+                background: "rgba(255,255,255,.09)",
+                border: "1px solid rgba(255,255,255,.13)",
+                borderRadius: 999,
+                padding: "3px 8px",
+                fontSize: 11,
+                fontWeight: 800,
+              }}
+            >
+              {currentDifficulty.label} · {currentDifficulty.badge}
+            </span>
+            {specialMode === "rainbow" && (
+              <span
+                style={{
+                  color: "#221500",
+                  background: "linear-gradient(90deg,#ffef6b,#71f7ff,#f4a7ff)",
+                  borderRadius: 999,
+                  padding: "3px 8px",
+                  fontSize: 11,
+                  fontWeight: 900,
+                }}
+              >
+                彩虹消除
+              </span>
+            )}
+          </div>
         </div>
         <GameChromeToolbar
           canPause={g.status === "playing" || g.status === "paused"}
@@ -1187,10 +1326,10 @@ export default function BlockDropGame() {
           margin: "0 auto",
         }}
        >
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
+         <div
+           style={{
+             position: "absolute",
+             top: 0,
             left: "50%",
             marginLeft: -(BOARD_W * boardScale) / 2,
             width: BOARD_W,
@@ -1256,7 +1395,39 @@ export default function BlockDropGame() {
                 )}
               </div>
             );
-          })}
+             })}
+         </div>
+
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            top: Math.max(0, Math.round(CELL * 4 * boardScale) - 2),
+            zIndex: 2,
+            height: 2,
+            background:
+              "linear-gradient(90deg,transparent,rgba(255,210,63,.85),transparent)",
+            boxShadow: "0 0 10px rgba(255,210,63,.34)",
+            pointerEvents: "none",
+          }}
+        />
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            top: 7,
+            left: 8,
+            zIndex: 2,
+            color: "rgba(255,210,63,.78)",
+            fontSize: 10,
+            fontWeight: 900,
+            letterSpacing: 0,
+            pointerEvents: "none",
+          }}
+        >
+          危險區
         </div>
 
         {g.status === "playing" && (
@@ -1339,14 +1510,18 @@ export default function BlockDropGame() {
             </div>
             <div style={{ fontSize: 22, fontWeight: 800 }}>
               {g.status === "over"
-                ? "遊戲結束"
+                ? topOut
+                  ? "方塊堆到頂了"
+                  : "遊戲結束"
                 : g.status === "paused"
                   ? "暫停中"
                   : "繽紛方塊"}
             </div>
             {g.status === "over" && (
-              <div style={{ fontSize: 15, color: "#cdd7ee" }}>
-                分數 {g.score}
+              <div style={{ fontSize: 15, color: "#cdd7ee", lineHeight: 1.65 }}>
+                {topOut ? "可以重新開始，或換輕鬆模式先練手感。" : "這局結算完成。"}
+                <br />
+                分數 {g.score} · {currentDifficulty.label}
                 {newBestRef.current && (
                   <span
                     style={{
@@ -1369,6 +1544,17 @@ export default function BlockDropGame() {
                   textAlign: "left",
                 }}
               >
+                <div
+                  style={{
+                    marginBottom: 6,
+                    color: "#ffd23f",
+                    fontWeight: 900,
+                    textAlign: "center",
+                  }}
+                >
+                  {currentDifficulty.label}
+                  {specialMode === "rainbow" ? " · 彩虹消除" : " · 經典模式"}
+                </div>
                 {isCoarse ? (
                   <>
                     👆 點一下棋盤＝旋轉
@@ -1393,6 +1579,17 @@ export default function BlockDropGame() {
                 onReplay={begin}
                 replayLabel={g.status === "over" ? "再玩一次 🔁" : "開始 ▶"}
                 replayStyle={primaryBtn(font)}
+                extraActions={
+                  topOut && blockDropDifficulty !== "relaxed" ? (
+                    <button
+                      type="button"
+                      onClick={switchToRelaxedAndRestart}
+                      style={secondaryBtn(font)}
+                    >
+                      換輕鬆模式
+                    </button>
+                  ) : null
+                }
               />
             ) : (
               <button type="button" onClick={togglePause} style={primaryBtn(font)}>

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   GAME_VIEWPORTS,
   computeIntegerScale,
@@ -42,7 +42,14 @@ import {
 } from "@/lib/gamekit/save";
 import { GARAGE_VEHICLES, vehiclesUnlockedAt } from "@/lib/gamekit/garage";
 import { reportGameSession, gameMedalStars } from "@/lib/gamekit/session";
-import { loadGameKitSettings, setKidsMode } from "@/lib/gamekit/settings";
+import {
+  BLOCK_DROP_DIFFICULTIES,
+  BLOCK_DROP_SPECIAL_MODES,
+  loadGameKitSettings,
+  setBlockDropDifficulty,
+  setBlockDropSpecialMode,
+  setKidsMode,
+} from "@/lib/gamekit/settings";
 import { ObjectPool } from "@/lib/gamekit/pool";
 import { GAME_PRELOAD_SHEETS } from "@/lib/gamekit/preload";
 import { GameLoop } from "@/lib/gamekit/loop";
@@ -181,6 +188,29 @@ describe("GameLoop", () => {
 });
 
 describe("settings", () => {
+  beforeEach(() => {
+    const store = new Map<string, string>();
+    vi.stubGlobal("window", {
+      dispatchEvent: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    });
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => store.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        store.set(key, value);
+      },
+      removeItem: (key: string) => {
+        store.delete(key);
+      },
+      clear: () => store.clear(),
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it("預設開啟兒童模式", () => {
     expect(loadGameKitSettings().kidsMode).toBe(true);
   });
@@ -189,6 +219,34 @@ describe("settings", () => {
     const off = setKidsMode(false);
     expect(off.kidsMode).toBe(false);
     setKidsMode(true);
+  });
+
+  it("繽紛方塊預設使用輕鬆難度與經典模式", () => {
+    const settings = loadGameKitSettings();
+
+    expect(BLOCK_DROP_DIFFICULTIES.map((d) => d.id)).toEqual([
+      "relaxed",
+      "standard",
+      "challenge",
+    ]);
+    expect(BLOCK_DROP_SPECIAL_MODES.map((m) => m.id)).toEqual([
+      "classic",
+      "rainbow",
+    ]);
+    expect(settings.blockDropDifficulty).toBe("relaxed");
+    expect(settings.blockDropSpecialMode).toBe("classic");
+  });
+
+  it("繽紛方塊難度與特殊模式可儲存", () => {
+    const hard = setBlockDropDifficulty("challenge");
+    expect(hard.blockDropDifficulty).toBe("challenge");
+
+    const rainbow = setBlockDropSpecialMode("rainbow");
+    expect(rainbow.blockDropDifficulty).toBe("challenge");
+    expect(rainbow.blockDropSpecialMode).toBe("rainbow");
+
+    setBlockDropDifficulty("relaxed");
+    setBlockDropSpecialMode("classic");
   });
 });
 

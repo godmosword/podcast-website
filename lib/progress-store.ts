@@ -11,6 +11,14 @@ export const PROGRESS_SCHEMA_VERSION = 2;
 export type CaptionSize = "sm" | "md" | "lg";
 export type ThemePreference = ThemeMode;
 export type GameScoreId = GameKitGameId | "kart" | "pirate-kart";
+export type BlockDropDifficultyPreference = "relaxed" | "standard" | "challenge";
+export type BlockDropSpecialModePreference = "classic" | "rainbow";
+
+export type GameKitPreferenceStore = {
+  kidsMode: boolean;
+  blockDropDifficulty: BlockDropDifficultyPreference;
+  blockDropSpecialMode: BlockDropSpecialModePreference;
+};
 
 export type ContinueState = {
   slug: string;
@@ -32,7 +40,7 @@ export type ProgressStore = {
   sfxEnabled: boolean;
   preferences: {
     captionSize: CaptionSize;
-    gameKit: { kidsMode: boolean };
+    gameKit: GameKitPreferenceStore;
     theme: ThemePreference;
     nightPromptDismissed?: boolean;
   };
@@ -80,7 +88,11 @@ export const DEFAULT_PROGRESS: ProgressStore = {
   sfxEnabled: true,
   preferences: {
     captionSize: "md",
-    gameKit: { kidsMode: true },
+    gameKit: {
+      kidsMode: true,
+      blockDropDifficulty: "relaxed",
+      blockDropSpecialMode: "classic",
+    },
     theme: "system",
     nightPromptDismissed: false,
   },
@@ -139,6 +151,31 @@ function mergeBest(
   if (score <= 0) return;
   const prev = target[gameId] ?? 0;
   if (score > prev) target[gameId] = score;
+}
+
+function normalizeBlockDropDifficulty(
+  value: unknown,
+): BlockDropDifficultyPreference {
+  return value === "standard" || value === "challenge" ? value : "relaxed";
+}
+
+function normalizeBlockDropSpecialMode(
+  value: unknown,
+): BlockDropSpecialModePreference {
+  return value === "rainbow" ? "rainbow" : "classic";
+}
+
+function normalizeGameKitPreferences(
+  value: Partial<GameKitPreferenceStore> | undefined,
+): GameKitPreferenceStore {
+  return {
+    kidsMode:
+      typeof value?.kidsMode === "boolean"
+        ? value.kidsMode
+        : DEFAULT_PROGRESS.preferences.gameKit.kidsMode,
+    blockDropDifficulty: normalizeBlockDropDifficulty(value?.blockDropDifficulty),
+    blockDropSpecialMode: normalizeBlockDropSpecialMode(value?.blockDropSpecialMode),
+  };
 }
 
 /** 一次性將散落 localStorage keys 搬遷至統一 schema。 */
@@ -272,10 +309,7 @@ function normalizeProgress(raw: Partial<ProgressStore>): ProgressStore {
       ...DEFAULT_PROGRESS.preferences,
       ...raw.preferences,
       theme: normalizeThemeMode(raw.preferences?.theme),
-      gameKit: {
-        ...DEFAULT_PROGRESS.preferences.gameKit,
-        ...raw.preferences?.gameKit,
-      },
+      gameKit: normalizeGameKitPreferences(raw.preferences?.gameKit),
     },
     gameProfile: migrateV2ToV3({
       ...DEFAULT_GAME_PROFILE,
@@ -435,17 +469,22 @@ export function saveGameProfileToStore(profile: PlayerProfile): void {
   });
 }
 
-export function getGameKitSettingsFromStore(): { kidsMode: boolean } {
+export function getGameKitSettingsFromStore(): GameKitPreferenceStore {
   return readProgress().preferences.gameKit;
 }
 
-export function saveGameKitSettingsToStore(settings: { kidsMode: boolean }): void {
+export function saveGameKitSettingsToStore(
+  settings: Partial<GameKitPreferenceStore>,
+): void {
   const current = readProgress();
   writeProgress({
     ...current,
     preferences: {
       ...current.preferences,
-      gameKit: settings,
+      gameKit: normalizeGameKitPreferences({
+        ...current.preferences.gameKit,
+        ...settings,
+      }),
     },
   });
 }

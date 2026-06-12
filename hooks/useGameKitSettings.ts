@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
+  type BlockDropDifficulty,
+  type BlockDropSpecialMode,
   GAMEKIT_SETTINGS_EVENT,
   loadGameKitSettings,
   saveGameKitSettings,
@@ -27,6 +29,18 @@ export function useGameKitSettings() {
     [update],
   );
 
+  const setBlockDropDifficulty = useCallback(
+    (difficulty: BlockDropDifficulty) =>
+      update({ blockDropDifficulty: difficulty }),
+    [update],
+  );
+
+  const setBlockDropSpecialMode = useCallback(
+    (specialMode: BlockDropSpecialMode) =>
+      update({ blockDropSpecialMode: specialMode }),
+    [update],
+  );
+
   useEffect(() => {
     refresh();
     const onChange = () => refresh();
@@ -41,8 +55,12 @@ export function useGameKitSettings() {
   return {
     settings,
     kidsMode: settings?.kidsMode ?? true,
+    blockDropDifficulty: settings?.blockDropDifficulty ?? "relaxed",
+    blockDropSpecialMode: settings?.blockDropSpecialMode ?? "classic",
     refresh,
     update,
     setKidsMode,
+    setBlockDropDifficulty,
+    setBlockDropSpecialMode,
   };
 }

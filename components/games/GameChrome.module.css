@@ -131,6 +131,58 @@
   flex-shrink: 0;
 }
 
+.settingBlock {
+  padding: 0.8rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
+}
+
+.settingHeading strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.settingHeading small {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(4.5rem, 1fr));
+  gap: 0.35rem;
+  margin-top: 0.65rem;
+  padding: 0.25rem;
+  border-radius: 0.85rem;
+  background: color-mix(in srgb, var(--ink) 7%, var(--card));
+}
+
+.segmentBtn {
+  min-height: 44px;
+  border: 1px solid transparent;
+  border-radius: 0.65rem;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.segmentBtn[data-active="true"] {
+  background: var(--card);
+  border-color: color-mix(in srgb, var(--c-sky) 45%, transparent);
+  box-shadow: var(--shadow-sm);
+  color: var(--ink);
+}
+
+.segmentBtn:focus-visible {
+  outline: 3px solid var(--c-sky);
+  outline-offset: 2px;
+}
+
 .settingNote {
   margin: 0.85rem 0 1rem;
   font-size: 0.78rem;

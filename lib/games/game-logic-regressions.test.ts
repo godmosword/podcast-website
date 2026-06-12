@@ -32,4 +32,13 @@ describe("game logic regressions", () => {
     expect(game).toContain('if (k === "z" || k === "Z") rotate(-1);');
     expect(game).toContain('else if (k === "c" || k === "C" || k === "Shift") holdPiece();');
   });
+
+  it("繽紛方塊提供難度、彩虹模式與到頂重新開始引導", () => {
+    const game = source("components/games/BlockDropGame.tsx");
+
+    expect(game).toContain("DIFFICULTY_CONFIG");
+    expect(game).toContain("specialMode === \"rainbow\"");
+    expect(game).toContain("方塊堆到頂了");
+    expect(game).toContain("換輕鬆模式");
+  });
 });

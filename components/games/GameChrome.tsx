@@ -11,6 +11,10 @@ import {
   type ReactNode,
 } from "react";
 import { useGameKitSettings } from "@/hooks/useGameKitSettings";
+import {
+  BLOCK_DROP_DIFFICULTIES,
+  BLOCK_DROP_SPECIAL_MODES,
+} from "@/lib/gamekit/settings";
 import styles from "./GameChrome.module.css";
 
 type ChromeContextValue = {
@@ -104,7 +108,14 @@ function SettingsDialog({
   open: boolean;
   onClose: () => void;
 }) {
-  const { kidsMode, setKidsMode } = useGameKitSettings();
+  const {
+    kidsMode,
+    blockDropDifficulty,
+    blockDropSpecialMode,
+    setKidsMode,
+    setBlockDropDifficulty,
+    setBlockDropSpecialMode,
+  } = useGameKitSettings();
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
 
@@ -150,6 +161,48 @@ function SettingsDialog({
             className={styles.checkbox}
           />
         </label>
+        <div className={styles.settingBlock}>
+          <div className={styles.settingHeading}>
+            <strong>繽紛方塊難度</strong>
+            <small>會調整落下速度、鎖定時間與結算加分。</small>
+          </div>
+          <div className={styles.segmented} role="radiogroup" aria-label="繽紛方塊難度">
+            {BLOCK_DROP_DIFFICULTIES.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                className={styles.segmentBtn}
+                aria-pressed={blockDropDifficulty === option.id}
+                data-active={blockDropDifficulty === option.id}
+                onClick={() => setBlockDropDifficulty(option.id)}
+                title={option.hint}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className={styles.settingBlock}>
+          <div className={styles.settingHeading}>
+            <strong>特殊模式</strong>
+            <small>彩虹消除會在連續消行時給額外回饋。</small>
+          </div>
+          <div className={styles.segmented} role="radiogroup" aria-label="繽紛方塊特殊模式">
+            {BLOCK_DROP_SPECIAL_MODES.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                className={styles.segmentBtn}
+                aria-pressed={blockDropSpecialMode === option.id}
+                data-active={blockDropSpecialMode === option.id}
+                onClick={() => setBlockDropSpecialMode(option.id)}
+                title={option.hint}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
         <p className={styles.settingNote}>
           鍵盤：方向鍵／WASD 操作 · P 或 Esc 暫停 · 手把 D-pad／搖桿亦可操作（若瀏覽器支援）。
         </p>
