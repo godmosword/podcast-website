@@ -13,8 +13,6 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useDomJuice } from "@/hooks/useDomJuice";
 import {
-  GridTouchButton,
-  touchControlStyles,
   useBestScore,
   useGameAudio,
   useGameLoop,
@@ -403,9 +401,7 @@ type Toast = { id: number; text: string; big: boolean };
 
 export default function BlockDropGame() {
   const G = useRef<GameState>(freshGame());
-  const repeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const dasRef = useRef({ dir: 0, nextAt: 0 });
-  const touchSoftDropRef = useRef(false);
   const reduced = useReducedMotion();
   const { useKeyboardInput } = useTouchControls();
   const { best, saveBest } = useBestScore("block-drop");
@@ -464,11 +460,11 @@ export default function BlockDropGame() {
     const apply = () => {
       const w = el.clientWidth;
       if (w <= 0) return;
-      // 棋盤高度不超過視窗（扣掉標題列與提示），整頁玩到底不用捲動；
-      // 寬版沒有底部按鍵列，可以分到更多高度
-      const maxH = wide
-        ? Math.max(300, (window.innerHeight || 800) - 210)
-        : Math.max(420, (window.innerHeight || 800) - 250);
+      // 用棋盤頂端的實際位置動態計算可用高度（下方保留提示行＋卡片內距），
+      // 整頁呈現、玩到底不用捲動
+      const top = el.getBoundingClientRect().top + window.scrollY;
+      const reserve = wide ? 50 : 44;
+      const maxH = Math.max(300, (window.innerHeight || 800) - top - reserve);
       setBoardScale(Math.min(w / BOARD_W, maxH / BOARD_H));
     };
     apply();
@@ -797,7 +793,7 @@ export default function BlockDropGame() {
         }
         if (input.wasPressed("move-up")) rotate(1);
         if (input.wasPressed("action")) hardDrop();
-        g.softDrop = input.isHeld("move-down") || touchSoftDropRef.current;
+        g.softDrop = input.isHeld("move-down");
       } else if (g.status === "paused" && input.wasPressed("pause")) {
         togglePause();
       }
@@ -861,21 +857,6 @@ export default function BlockDropGame() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [begin, togglePause]);
-
-  const startRepeat = (fn: () => void) => {
-    fn();
-    if (repeatRef.current) clearInterval(repeatRef.current);
-    repeatRef.current = setInterval(fn, 110);
-  };
-
-  const stopRepeat = () => {
-    if (repeatRef.current) {
-      clearInterval(repeatRef.current);
-      repeatRef.current = null;
-    }
-  };
-
-  useEffect(() => stopRepeat, []);
 
   useVisibilityPause({
     onHidden: () => {
@@ -1035,11 +1016,17 @@ export default function BlockDropGame() {
     </button>
   );
 
+  // 固定三格高度（空位用透明占位）：待機／遊玩中版面高度一致，棋盤不會被擠到破版
+  const nextQueue: (PieceType | null)[] = [
+    g.bag[0] ?? null,
+    g.bag[1] ?? null,
+    g.bag[2] ?? null,
+  ];
   const nextPanel = (firstCell: number, restCell: number) => (
     <div style={panelStyle}>
       <div style={{ ...panelLabel, marginBottom: 5 }}>下一個</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-        {g.bag.slice(0, 3).map((t, i) => (
+        {nextQueue.map((t, i) => (
           <PiecePreview key={i} type={t} cell={i === 0 ? firstCell : restCell} />
         ))}
       </div>
@@ -1088,7 +1075,7 @@ export default function BlockDropGame() {
       style={{
         fontFamily: font,
         background: "linear-gradient(160deg,#161a26,#0e1119)",
-        padding: wide ? "16px 18px 18px" : "14px 14px 18px",
+        padding: wide ? "16px 18px 18px" : "12px 14px 12px",
         borderRadius: 24,
         maxWidth: wide ? WIDE_MAX_BOARD_W + (WIDE_SIDE_W + 14) * 2 + 36 : 440,
         margin: "0 auto",
@@ -1115,7 +1102,14 @@ export default function BlockDropGame() {
           marginBottom: 10,
         }}
       >
-        <div style={{ fontSize: 20, fontWeight: 800, color: "#eaf0ff" }}>
+        <div
+          style={{
+            fontSize: wide ? 20 : 16,
+            fontWeight: 800,
+            color: "#eaf0ff",
+            whiteSpace: "nowrap",
+          }}
+        >
           🧩 繽紛方塊 {kidsMode ? "🧒" : ""}
         </div>
         <GameChromeToolbar
@@ -1425,62 +1419,20 @@ export default function BlockDropGame() {
         )}
       </div>
 
-      {/* 手機才需要虛擬按鍵；寬螢幕用棋盤手勢或鍵盤即可，一頁放得下 */}
-      {!wide && (
-        <div className={touchControlStyles.controlGrid}>
-          <GridTouchButton
-            label="左"
-            coarse={isCoarse}
-            onDown={() => startRepeat(() => move(-1))}
-            onUp={stopRepeat}
-          >
-            ⬅️
-          </GridTouchButton>
-          <GridTouchButton label="旋轉" coarse={isCoarse} onDown={() => rotate(1)}>
-            🔄
-          </GridTouchButton>
-          <GridTouchButton
-            label="右"
-            coarse={isCoarse}
-            onDown={() => startRepeat(() => move(1))}
-            onUp={stopRepeat}
-          >
-            ➡️
-          </GridTouchButton>
-          <GridTouchButton
-            label="軟降"
-            coarse={isCoarse}
-            onDown={() => {
-              touchSoftDropRef.current = true;
-              G.current.softDrop = true;
-            }}
-            onUp={() => {
-              touchSoftDropRef.current = false;
-              G.current.softDrop = false;
-            }}
-          >
-            ⬇️
-          </GridTouchButton>
-          <GridTouchButton label="落下" coarse={isCoarse} wide onDown={hardDrop}>
-            ⤓ 落下
-          </GridTouchButton>
-          <GridTouchButton label="暫存" coarse={isCoarse} onDown={holdPiece}>
-            📦
-          </GridTouchButton>
-        </div>
-      )}
-
       <p
         style={{
           textAlign: "center",
           color: "#7e8db0",
-          fontSize: 13,
-          marginTop: 12,
+          fontSize: 12,
+          marginTop: 10,
+          marginBottom: 0,
         }}
       >
         {isCoarse
-          ? "👆 點棋盤旋轉 · ↔️ 拖曳移動 · ⬇️ 下滑落下 · ⬆️ 上滑暫存"
-          : "← → 移動 · ↑/X 旋轉 · Z 反轉 · ↓ 軟降 · 空白鍵落下 · C 暫存 · P 暫停"}
+          ? "👆 點旋轉 · ↔️ 拖移動 · ⬇️ 滑落下 · ⬆️ 滑暫存"
+          : wide
+            ? "← → 移動 · ↑/X 旋轉 · Z 反轉 · ↓ 軟降 · 空白鍵落下 · C 暫存 · P 暫停"
+            : "← → 移動 · ↑ 旋轉 · ↓ 軟降 · 空白鍵落下 · C 暫存"}
       </p>
     </div>
     </GameChrome>
