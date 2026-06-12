@@ -35,6 +35,7 @@ import {
   segmentByOpenAI,
   segmentDeterministic,
   stagingPortraitPath,
+  syncCoverPagePortrait,
   writeScenesFile,
   writeStagingImage,
   writeStagingPortrait,
@@ -61,6 +62,10 @@ function descMap(newCharacters: NewCharacter[]): Map<string, string> {
   for (const c of readCharacters()) m.set(c.name, c.desc);
   for (const c of newCharacters) m.set(c.name, c.desc);
   return m;
+}
+
+function newCharMap(newCharacters: NewCharacter[]): Map<string, NewCharacter> {
+  return new Map(newCharacters.map((c) => [c.name, c]));
 }
 
 async function segment(
@@ -94,6 +99,11 @@ async function ensurePortraits(slug: string, newCharacters: NewCharacter[]): Pro
   const registered = new Set(readCharacters().map((c) => c.name));
   for (const nc of newCharacters) {
     if (registered.has(nc.name)) continue; // 已有 canonical 定裝照
+    if (nc.coverPage) {
+      const p = syncCoverPagePortrait(slug, nc);
+      if (p) process.stderr.write(`  定裝照 ${nc.name}（封面 #${nc.coverPage}）→ ${rel(p)}\n`);
+      continue;
+    }
     if (existsSync(stagingPortraitPath(slug, nc.name))) continue;
     process.stderr.write(`  定裝照 ${nc.name}…`);
     const buf = await generateCharacterPortrait(nc);
@@ -109,6 +119,7 @@ async function generateAll(
 ): Promise<void> {
   await ensurePortraits(slug, newCharacters);
   const descs = descMap(newCharacters);
+  const ncMap = newCharMap(newCharacters);
   for (const sc of scenes) {
     if (sc.keepCover) {
       process.stderr.write(`  保留封面 #${sc.index}/${scenes.length}…`);
@@ -116,7 +127,7 @@ async function generateAll(
       process.stderr.write(` → ${rel(p)}\n`);
       continue;
     }
-    const { paths, descs: cdescs } = resolveSceneRefs(slug, sc, descs);
+    const { paths, descs: cdescs } = resolveSceneRefs(slug, sc, descs, ncMap);
     process.stderr.write(`  生圖 #${sc.index}/${scenes.length}（${sc.characters.join("、") || "封面參考"}）…`);
     const buf = await generateSceneImage(sc, paths, cdescs);
     const p = writeStagingImage(slug, sc.index, buf);
@@ -138,7 +149,12 @@ async function regenScene(slug: string, sceneNo: number): Promise<void> {
   const sc = file.scenes.find((s) => s.index === sceneNo);
   if (!sc) fail(`場景檔沒有第 ${sceneNo} 幕（共 ${file.scenes.length} 幕）`);
   if (sc.keepCover) fail(`第 ${sceneNo} 幕標記 keepCover，不可重抽；請改場景檔或 public 封面`);
-  const { paths, descs } = resolveSceneRefs(slug, sc!, descMap(file.newCharacters));
+  const { paths, descs } = resolveSceneRefs(
+    slug,
+    sc!,
+    descMap(file.newCharacters),
+    newCharMap(file.newCharacters),
+  );
   const buf = await generateSceneImage(sc!, paths, descs);
   const p = writeStagingImage(slug, sc!.index, buf);
   buildContactSheet(slug, file.scenes, file.newCharacters);
@@ -150,8 +166,15 @@ async function regenChar(slug: string, name: string): Promise<void> {
   file.newCharacters ??= [];
   const nc = file.newCharacters.find((c) => c.name === name);
   if (!nc) fail(`場景檔的新角色沒有「${name}」（有：${file.newCharacters.map((c) => c.name).join("、") || "無"}）`);
-  const buf = await generateCharacterPortrait(nc!);
-  const p = writeStagingPortrait(slug, name, buf);
+  let p: string;
+  if (nc!.coverPage) {
+    const synced = syncCoverPagePortrait(slug, nc!);
+    if (!synced) fail(`封面 #${nc!.coverPage} 不存在，無法同步定裝照「${name}」`);
+    p = synced;
+  } else {
+    const buf = await generateCharacterPortrait(nc!);
+    p = writeStagingPortrait(slug, name, buf);
+  }
   buildContactSheet(slug, file.scenes, file.newCharacters);
   console.log(`✓ ${slug}：重抽定裝照「${name}」→ ${rel(p)}`);
 }

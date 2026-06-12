@@ -98,5 +98,15 @@
     "desc": "A little boy with a yellow backpack, full of excitement and curiosity.",
     "ref": "characters/蹦蹦.jpg",
     "firstSeen": "ep-1"
+  },
+  {
+    "name": "小飛",
+    "aliases": [
+      "無人機"
+    ],
+    "vehicle": "drone",
+    "desc": "a cute claymation personified drone named Xiao Fei, cream off-white rounded square clay body, yellow lightning bolt on forehead, big glossy black eyes, pink cheek blush, wide happy smile, black camera lens on lower face, two small green LED lights, four gray arms with spinning propellers, no legs",
+    "ref": "characters/小飛.jpg",
+    "firstSeen": "ep-2"
   }
 ]

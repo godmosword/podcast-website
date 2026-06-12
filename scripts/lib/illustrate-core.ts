@@ -43,6 +43,8 @@ export interface Scene {
   keepCover?: boolean;
   /** 生圖時額外附上已發佈的 NN.jpg 當視覺參考（連戲用，如 #21 參考 #20） */
   refPages?: number[];
+  /** refPages 存在時的連戲提示；未設則用通用文案 */
+  refPageHint?: string;
 }
 
 export interface NewCharacter {
@@ -50,6 +52,8 @@ export interface NewCharacter {
   aliases: string[]; // whisper 可能的誤聽（朵朵…）
   vehicle?: string;
   desc: string; // 英文外觀描述，給生圖穩定形象
+  /** 定裝照直接用該集已發佈頁（如 Apple 封面 01），不走 AI 生定裝 */
+  coverPage?: number;
 }
 
 export interface ScenesFile {
@@ -469,7 +473,7 @@ export async function generateSceneImage(
     descs.length > 0 ? ` Keep these characters exactly on-model: ${descs.join("; ")}.` : "";
   const refPageLine =
     (scene.refPages?.length ?? 0) > 0
-      ? " Match the protagonist's open-mouth laugh, mouth shape, pure white teeth, and exact body silhouette (including no arms or hands if the reference has none) exactly from the provided story-panel reference image(s); only change lighting and background as described."
+      ? ` ${scene.refPageHint ?? "Match every on-model character's exact colors, proportions, face, and body silhouette from the provided reference image(s); only change pose, composition, lighting and background as described."}`
       : "";
   const prompt = `${CLAY_STYLE_PREFIX}Scene: ${scene.prompt}.${refPageLine}${charLine} ${CLAY_NEGATIVE}`;
 
@@ -531,18 +535,27 @@ export function writeStagingPortrait(slug: string, name: string, buf: Buffer): s
  * - 本集新角色（暫存有定裝照）→ 用暫存圖
  * - 都沒有 → 退回該集封面 01.jpg
  */
+function episodePagePath(slug: string, page: number): string {
+  return join(publicDirForSlug(slug), `${pad2(page)}.jpg`);
+}
+
 export function resolveSceneRefs(
   slug: string,
   scene: Scene,
   descByName: Map<string, string>,
+  newCharByName?: Map<string, NewCharacter>,
 ): { paths: string[]; descs: string[] } {
   const registry = charByName(readCharacters());
   const paths: string[] = [];
   const descs: string[] = [];
   for (const name of scene.characters ?? []) {
     const reg = registry.get(name);
+    const nc = newCharByName?.get(name);
     if (reg?.ref) {
       const fp = characterRefFsPath(name);
+      if (existsSync(fp)) paths.push(fp);
+    } else if (nc?.coverPage) {
+      const fp = episodePagePath(slug, nc.coverPage);
       if (existsSync(fp)) paths.push(fp);
     } else {
       const sp = stagingPortraitPath(slug, name);
@@ -556,10 +569,21 @@ export function resolveSceneRefs(
     if (existsSync(cover)) paths.push(cover);
   }
   for (const page of scene.refPages ?? []) {
-    const fp = join(publicDirForSlug(slug), `${pad2(page)}.jpg`);
-    if (existsSync(fp)) paths.push(fp);
+    const fp = episodePagePath(slug, page);
+    if (existsSync(fp) && !paths.includes(fp)) paths.push(fp);
   }
   return { paths, descs };
+}
+
+/** 新角色 coverPage 定裝：複製該集已發佈頁到暫存定裝照（供 contact sheet）。 */
+export function syncCoverPagePortrait(slug: string, nc: NewCharacter): string | null {
+  if (!nc.coverPage) return null;
+  const src = episodePagePath(slug, nc.coverPage);
+  if (!existsSync(src)) return null;
+  mkdirSync(stagingDirForSlug(slug), { recursive: true });
+  const dest = stagingPortraitPath(slug, nc.name);
+  copyFileSync(src, dest);
+  return dest;
 }
 
 // ── ③ contact sheet ─────────────────────────────────────
@@ -696,7 +720,9 @@ function registerCharacters(slug: string, newCharacters: NewCharacter[]): string
 
   for (const nc of newCharacters) {
     if (existing.has(nc.name)) continue; // 已登記，保留原定裝照
-    const portrait = stagingPortraitPath(slug, nc.name);
+    const portrait = nc.coverPage
+      ? episodePagePath(slug, nc.coverPage)
+      : stagingPortraitPath(slug, nc.name);
     if (!existsSync(portrait)) continue; // 沒生定裝照就跳過（可 --char 補）
     copyFileSync(portrait, characterRefFsPath(nc.name));
     chars.push({

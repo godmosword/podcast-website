@@ -1,0 +1,245 @@
+{
+  "slug": "ep-2",
+  "audioDuration": 451,
+  "model": "semantic-15-20s",
+  "generatedAt": "2026-06-12T11:13:26.430Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 0,
+      "end": 23.8,
+      "summary": "故事開場與介紹",
+      "prompt": "The hosts Bonbon and Mami introduce the story about a little drone on a mission, setting a cheerful and anticipatory mood.",
+      "characters": []
+    },
+    {
+      "index": 2,
+      "start": 23.8,
+      "end": 40.7,
+      "summary": "蹦蹦與媽媽在公園",
+      "prompt": "Bong Bong and his mother arrive at a sunny park filled with slides, sandpits, and children playing.",
+      "characters": ["蹦蹦"]
+    },
+    {
+      "index": 3,
+      "start": 40.7,
+      "end": 57.7,
+      "summary": "發現無人機",
+      "prompt": "Bong Bong hears a buzzing sound and points at a small drone hovering in the sky, mistaking it for a big bee.",
+      "characters": ["蹦蹦", "小飛"],
+      "refPages": [1],
+      "refPageHint": "Match the drone Xiao Fei exactly from the podcast cover reference: same cream clay square body, yellow lightning bolt on forehead, black camera lens, green LED lights, four spinning propellers, and the same friendly face; only change pose, camera angle, scene composition and background."
+    },
+    {
+      "index": 4,
+      "start": 57.7,
+      "end": 79.5,
+      "summary": "無人機小飛降落",
+      "prompt": "The friendly drone Xiao Fei slowly descends and lands on a safe open patch of grass in the park.",
+      "characters": ["蹦蹦", "小飛"],
+      "refPages": [1],
+      "refPageHint": "Match the drone Xiao Fei exactly from the podcast cover reference: same cream clay square body, yellow lightning bolt on forehead, black camera lens, green LED lights, four spinning propellers, and the same friendly face; only change pose, camera angle, scene composition and background."
+    },
+    {
+      "index": 5,
+      "start": 79.5,
+      "end": 100.4,
+      "summary": "小飛自我介紹",
+      "prompt": "Xiao Fei blinks its lights and introduces itself, explaining it can be remote-controlled or fly a preset route.",
+      "characters": ["蹦蹦", "小飛"],
+      "refPages": [1],
+      "refPageHint": "Match the drone Xiao Fei exactly from the podcast cover reference: same cream clay square body, yellow lightning bolt on forehead, black camera lens, green LED lights, four spinning propellers, and the same friendly face; only change pose, camera angle, scene composition and background."
+    },
+    {
+      "index": 6,
+      "start": 100.4,
+      "end": 122.6,
+      "summary": "飛行安全規則",
+      "prompt": "Xiao Fei explains safe flying rules while Bong Bong and his mother listen and nod seriously.",
+      "characters": ["蹦蹦", "小飛"],
+      "refPages": [1],
+      "refPageHint": "Match the drone Xiao Fei exactly from the podcast cover reference: same cream clay square body, yellow lightning bolt on forehead, black camera lens, green LED lights, four spinning propellers, and the same friendly face; only change pose, camera angle, scene composition and background."
+    },
+    {
+      "index": 7,
+      "start": 122.6,
+      "end": 130.9,
+      "summary": "遵守規則很重要",
+      "prompt": "Mother reminds everyone that drones must follow rules; Bong Bong agrees that Xiao Fei is cool and polite.",
+      "characters": ["蹦蹦", "小飛"],
+      "refPages": [1],
+      "refPageHint": "Match the drone Xiao Fei exactly from the podcast cover reference: same cream clay square body, yellow lightning bolt on forehead, black camera lens, green LED lights, four spinning propellers, and the same friendly face; only change pose, camera angle, scene composition and background."
+    },
+    {
+      "index": 8,
+      "start": 130.9,
+      "end": 151.6,
+      "summary": "小女孩哭泣",
+      "prompt": "A little girl sits on a park bench crying because she lost her favorite toy rabbit.",
+      "characters": ["蹦蹦"]
+    },
+    {
+      "index": 9,
+      "start": 151.6,
+      "end": 166.8,
+      "summary": "到處都找不到兔子",
+      "prompt": "Bong Bong tries to help search the big park with grass, bushes, sandpit and benches but cannot find the rabbit.",
+      "characters": ["蹦蹦"]
+    },
+    {
+      "index": 10,
+      "start": 166.8,
+      "end": 187.5,
+      "summary": "小飛願意幫忙",
+      "prompt": "Xiao Fei flashes its lights and offers to look from a safe height above the park.",
+      "characters": ["蹦蹦", "小飛"],
+      "refPages": [1],
+      "refPageHint": "Match the drone Xiao Fei exactly from the podcast cover reference: same cream clay square body, yellow lightning bolt on forehead, black camera lens, green LED lights, four spinning propellers, and the same friendly face; only change pose, camera angle, scene composition and background."
+    },
+    {
+      "index": 11,
+      "start": 187.5,
+      "end": 208.9,
+      "summary": "小飛升空搜尋",
+      "prompt": "Xiao Fei rises slowly into the sky while Bong Bong and mother watch from a safe spot below.",
+      "characters": ["蹦蹦", "小飛"],
+      "refPages": [1],
+      "refPageHint": "Match the drone Xiao Fei exactly from the podcast cover reference: same cream clay square body, yellow lightning bolt on forehead, black camera lens, green LED lights, four spinning propellers, and the same friendly face; only change pose, camera angle, scene composition and background."
+    },
+    {
+      "index": 12,
+      "start": 208.9,
+      "end": 220.2,
+      "summary": "從空中俯瞰公園",
+      "prompt": "View from above as Xiao Fei scans the park like a big map, checking left and right carefully.",
+      "characters": ["蹦蹦", "小飛"],
+      "refPages": [1],
+      "refPageHint": "Match the drone Xiao Fei exactly from the podcast cover reference: same cream clay square body, yellow lightning bolt on forehead, black camera lens, green LED lights, four spinning propellers, and the same friendly face; only change pose, camera angle, scene composition and background."
+    },
+    {
+      "index": 13,
+      "start": 220.2,
+      "end": 238.7,
+      "summary": "發現小兔子",
+      "prompt": "Xiao Fei hovers beside a big tree and spots a white long-eared rabbit on the grass behind it.",
+      "characters": ["蹦蹦", "小飛"],
+      "refPages": [1],
+      "refPageHint": "Match the drone Xiao Fei exactly from the podcast cover reference: same cream clay square body, yellow lightning bolt on forehead, black camera lens, green LED lights, four spinning propellers, and the same friendly face; only change pose, camera angle, scene composition and background."
+    },
+    {
+      "index": 14,
+      "start": 238.7,
+      "end": 259.1,
+      "summary": "找到小兔子",
+      "prompt": "Bong Bong and his mother run over and pick up the leaf-stained toy rabbit to return to the girl.",
+      "characters": ["蹦蹦", "小飛"],
+      "refPages": [1],
+      "refPageHint": "Match the drone Xiao Fei exactly from the podcast cover reference: same cream clay square body, yellow lightning bolt on forehead, black camera lens, green LED lights, four spinning propellers, and the same friendly face; only change pose, camera angle, scene composition and background."
+    },
+    {
+      "index": 15,
+      "start": 259.1,
+      "end": 267,
+      "summary": "謝謝小飛",
+      "prompt": "The happy little girl thanks Bong Bong and Xiao Fei for finding her rabbit.",
+      "characters": ["蹦蹦", "小飛"],
+      "refPages": [1],
+      "refPageHint": "Match the drone Xiao Fei exactly from the podcast cover reference: same cream clay square body, yellow lightning bolt on forehead, black camera lens, green LED lights, four spinning propellers, and the same friendly face; only change pose, camera angle, scene composition and background."
+    },
+    {
+      "index": 16,
+      "start": 267,
+      "end": 288.1,
+      "summary": "小飛需要充電",
+      "prompt": "Xiao Fei explains it must return to recharge when its battery gets low.",
+      "characters": ["蹦蹦", "小飛"],
+      "refPages": [1],
+      "refPageHint": "Match the drone Xiao Fei exactly from the podcast cover reference: same cream clay square body, yellow lightning bolt on forehead, black camera lens, green LED lights, four spinning propellers, and the same friendly face; only change pose, camera angle, scene composition and background."
+    },
+    {
+      "index": 17,
+      "start": 288.1,
+      "end": 315.5,
+      "summary": "小飛道別",
+      "prompt": "Xiao Fei says the mission is complete and flies away blinking goodbye lights as Bong Bong waves.",
+      "characters": ["蹦蹦", "小飛"],
+      "refPages": [1],
+      "refPageHint": "Match the drone Xiao Fei exactly from the podcast cover reference: same cream clay square body, yellow lightning bolt on forehead, black camera lens, green LED lights, four spinning propellers, and the same friendly face; only change pose, camera angle, scene composition and background."
+    },
+    {
+      "index": 18,
+      "start": 315.5,
+      "end": 336.5,
+      "summary": "蹦蹦回想小飛",
+      "prompt": "At home that night Bong Bong lies in bed thinking about Xiao Fei flying in the sky.",
+      "characters": ["蹦蹦", "小飛"],
+      "refPages": [1],
+      "refPageHint": "Match the drone Xiao Fei exactly from the podcast cover reference: same cream clay square body, yellow lightning bolt on forehead, black camera lens, green LED lights, four spinning propellers, and the same friendly face; only change pose, camera angle, scene composition and background."
+    },
+    {
+      "index": 19,
+      "start": 336.5,
+      "end": 357.4,
+      "summary": "無人機也能幫助人",
+      "prompt": "Bong Bong softly realizes a drone is not just a flying machine but can help people too.",
+      "characters": ["蹦蹦", "小飛"],
+      "refPages": [1],
+      "refPageHint": "Match the drone Xiao Fei exactly from the podcast cover reference: same cream clay square body, yellow lightning bolt on forehead, black camera lens, green LED lights, four spinning propellers, and the same friendly face; only change pose, camera angle, scene composition and background."
+    },
+    {
+      "index": 20,
+      "start": 357.4,
+      "end": 378,
+      "summary": "媽媽的 bedtime 話",
+      "prompt": "Mother gently pats Bong Bong's head and says good tools used well can do warm helpful things.",
+      "characters": ["蹦蹦"]
+    },
+    {
+      "index": 21,
+      "start": 378,
+      "end": 398.2,
+      "summary": "夢見小飛",
+      "prompt": "Bong Bong closes his eyes and dreams of riding a big friendly drone flying over the park.",
+      "characters": ["蹦蹦", "小飛"],
+      "refPages": [1],
+      "refPageHint": "Match the drone Xiao Fei exactly from the podcast cover reference: same cream clay square body, yellow lightning bolt on forehead, black camera lens, green LED lights, four spinning propellers, and the same friendly face; only change pose, camera angle, scene composition and background."
+    },
+    {
+      "index": 22,
+      "start": 398.2,
+      "end": 419.4,
+      "summary": "無人機小知識",
+      "prompt": "Cozy educational wrap-up mood about what drones can do: photos, videos, farming, delivery, toddler-safe.",
+      "characters": ["小飛"],
+      "refPages": [1],
+      "refPageHint": "Match the drone Xiao Fei exactly from the podcast cover reference: same cream clay square body, yellow lightning bolt on forehead, black camera lens, green LED lights, four spinning propellers, and the same friendly face; only change pose, camera angle, scene composition and background."
+    },
+    {
+      "index": 23,
+      "start": 419.4,
+      "end": 440.9,
+      "summary": "安全使用無人機",
+      "prompt": "Reminder scene about flying safely and never near airports, warm teaching mood.",
+      "characters": ["小飛"],
+      "refPages": [1],
+      "refPageHint": "Match the drone Xiao Fei exactly from the podcast cover reference: same cream clay square body, yellow lightning bolt on forehead, black camera lens, green LED lights, four spinning propellers, and the same friendly face; only change pose, camera angle, scene composition and background."
+    },
+    {
+      "index": 24,
+      "start": 440.9,
+      "end": 451,
+      "summary": "故事結束說拜拜",
+      "prompt": "Cheerful podcast outro wave goodbye mood, hosts closing the drone story episode.",
+      "characters": []
+    }
+  ],
+  "newCharacters": [
+    {
+      "name": "小飛",
+      "aliases": ["無人機"],
+      "vehicle": "drone",
+      "coverPage": 1,
+      "desc": "a cute claymation personified drone named Xiao Fei, cream off-white rounded square clay body, yellow lightning bolt on forehead, big glossy black eyes, pink cheek blush, wide happy smile, black camera lens on lower face, two small green LED lights, four gray arms with spinning propellers, no legs"
+    }
+  ]
+}

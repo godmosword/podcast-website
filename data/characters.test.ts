@@ -24,7 +24,8 @@ describe("getCharactersForStory", () => {
     expect(ids).toContain("bong-bong");
   });
 
-  it("ep-2 尚無登記角色", () => {
-    expect(getCharactersForStory("ep-2")).toEqual([]);
+  it("ep-2 含小飛", () => {
+    const ids = getCharactersForStory("ep-2").map((c) => c.id);
+    expect(ids).toContain("xiao-fei");
   });
 });
