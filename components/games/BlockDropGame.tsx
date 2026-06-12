@@ -6,6 +6,7 @@ import {
   useRef,
   useCallback,
   type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -20,7 +21,6 @@ import {
   useTouchControls,
   useVisibilityPause,
 } from "@/lib/game-kit";
-import GamePixelBoard from "@/components/games/GamePixelBoard";
 import { blockDropKitColors } from "@/lib/gamekit/bridge";
 import { BLOCK_INDEX, blockUrl } from "@/lib/gamekit/procedural-sheets";
 import { reportGameSession } from "@/lib/gamekit/session";
@@ -33,8 +33,7 @@ const ROWS = 20;
 const CELL = 18;
 const BOARD_W = COLS * CELL;
 const BOARD_H = ROWS * CELL;
-const SIDE_W = 96;
-const LAYOUT_W = BOARD_W + 14 + SIDE_W;
+const MAX_BOARD_W = 396;
 const LOCK_DELAY = 450;
 const DAS_DELAY = 170;
 const DAS_REPEAT = 50;
@@ -58,6 +57,7 @@ interface GameState {
   score: number;
   level: number;
   lines: number;
+  combo: number;
   status: Status;
   grounded: boolean;
   lockTimer: number;
@@ -74,6 +74,7 @@ interface GameState {
 
 const TYPES: PieceType[] = ["I", "O", "T", "S", "Z", "J", "L"];
 const LINE_SCORE = [0, 100, 300, 500, 800];
+const CLEAR_LABEL = ["", "好耶 ✨", "雙倍消除 ✨", "三倍消除 🎉", "繽紛全消 🌈"];
 const KIT_BLOCK = blockDropKitColors();
 const COLORS: Record<PieceType, string> = {
   I: KIT_BLOCK.I,
@@ -292,6 +293,7 @@ function freshGame(): GameState {
     score: 0,
     level: 1,
     lines: 0,
+    combo: 0,
     status: "ready",
     grounded: false,
     lockTimer: 0,
@@ -329,17 +331,6 @@ function merge(p: Piece, board: Cell[][]): Cell[][] {
 
 const gravityMs = (level: number) => Math.max(70, 800 - (level - 1) * 70);
 
-const iconBtn: CSSProperties = {
-  border: "none",
-  background: "rgba(255,255,255,.1)",
-  color: "#fff",
-  borderRadius: 11,
-  width: 38,
-  height: 38,
-  fontSize: 16,
-  cursor: "pointer",
-};
-
 function primaryBtn(font: string): CSSProperties {
   return {
     border: "none",
@@ -355,79 +346,58 @@ function primaryBtn(font: string): CSSProperties {
   };
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+const panelStyle: CSSProperties = {
+  background: "rgba(255,255,255,.07)",
+  borderRadius: 12,
+  padding: "6px 8px",
+  textAlign: "center",
+};
+
+const panelLabel: CSSProperties = {
+  color: "#9fb0d0",
+  fontSize: 11,
+  fontWeight: 800,
+};
+
+/** 4×2 迷你方塊預覽（HOLD / NEXT 用，純色塊即可辨識形狀）。 */
+function PiecePreview({ type, cell }: { type: PieceType | null; cell: number }) {
   return (
     <div
       style={{
-        flex: "1 1 70px",
-        background: "rgba(255,255,255,.06)",
-        borderRadius: 12,
-        padding: "8px 6px",
-        textAlign: "center",
+        display: "grid",
+        gridTemplateColumns: `repeat(4, ${cell}px)`,
+        gridTemplateRows: `repeat(2, ${cell}px)`,
+        gap: 2,
+        justifyContent: "center",
       }}
     >
-      <div style={{ color: "#8b9bbd", fontSize: 11, fontWeight: 700 }}>{label}</div>
-      <div style={{ color: "#fff", fontSize: 18, fontWeight: 800 }}>{value}</div>
+      {Array.from({ length: 8 }).map((_, i) => {
+        const c = i % 4;
+        const r = Math.floor(i / 4);
+        const on = type && SHAPES[type][0].some(([cc, rr]) => cc === c && rr === r);
+        return (
+          <div
+            key={i}
+            style={
+              on
+                ? {
+                    width: "100%",
+                    height: "100%",
+                    background: COLORS[type as PieceType],
+                    borderRadius: Math.max(2, cell / 3),
+                    boxShadow:
+                      "inset 1px 1px 0 rgba(255,255,255,.4), inset -1px -1px 0 rgba(0,0,0,.28)",
+                  }
+                : { background: "transparent" }
+            }
+          />
+        );
+      })}
     </div>
   );
 }
 
-function MiniBox({ type, label }: { type: PieceType | null; label: string }) {
-  return (
-    <div
-      style={{
-        background: "rgba(255,255,255,.07)",
-        borderRadius: 12,
-        padding: 8,
-        textAlign: "center",
-      }}
-    >
-      <div
-        style={{
-          color: "#9fb0d0",
-          fontSize: 12,
-          fontWeight: 800,
-          marginBottom: 5,
-        }}
-      >
-        {label}
-      </div>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, 15px)",
-          gridTemplateRows: "repeat(2, 15px)",
-          gap: 2,
-          justifyContent: "center",
-        }}
-      >
-        {Array.from({ length: 8 }).map((_, i) => {
-          const c = i % 4;
-          const r = Math.floor(i / 4);
-          const on =
-            type && SHAPES[type][0].some(([cc, rr]) => cc === c && rr === r);
-          return (
-            <div
-              key={i}
-              style={
-                on
-                  ? {
-                      width: "100%",
-                      height: "100%",
-                      background: COLORS[type as PieceType],
-                      borderRadius: 5,
-                      boxShadow:
-                        "inset 2px 2px 0 rgba(255,255,255,.4), inset -2px -2px 0 rgba(0,0,0,.28)",
-                    }
-                  : { background: "transparent" }
-              }
-            />
-          );
-        })}
-      </div>
-    </div>
-  );
-}
+type Toast = { id: number; text: string; big: boolean };
 
 export default function BlockDropGame() {
   const G = useRef<GameState>(freshGame());
@@ -469,6 +439,54 @@ export default function BlockDropGame() {
       ) as Record<PieceType, string>,
     );
   }, []);
+
+  // ── 手機優先：棋盤填滿卡片寬度，連續縮放（DOM 方塊非像素畫，免整數倍）──
+  const boardWrapRef = useRef<HTMLDivElement | null>(null);
+  const [boardScale, setBoardScale] = useState(1.6);
+  const boardScaleRef = useRef(boardScale);
+  boardScaleRef.current = boardScale;
+
+  useEffect(() => {
+    const el = boardWrapRef.current;
+    if (!el) return;
+    const apply = () => {
+      const w = el.clientWidth;
+      if (w <= 0) return;
+      // 直向手機：別讓棋盤高度超過視窗（扣掉資訊列與標題），玩到底部不用捲動
+      const maxH = Math.max(420, (window.innerHeight || 800) - 250);
+      setBoardScale(Math.min(w / BOARD_W, maxH / BOARD_H));
+    };
+    apply();
+    const ro = new ResizeObserver(apply);
+    ro.observe(el);
+    window.addEventListener("resize", apply);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", apply);
+    };
+  }, []);
+
+  // ── 浮動回饋文字（消行／連擊／升級）──
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const toastId = useRef(0);
+  const toastTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const addToast = useCallback((text: string, big = false) => {
+    const id = ++toastId.current;
+    setToasts((list) => [...list.slice(-3), { id, text, big }]);
+    toastTimers.current.push(
+      setTimeout(() => {
+        setToasts((list) => list.filter((t) => t.id !== id));
+      }, 1000),
+    );
+  }, []);
+  useEffect(
+    () => () => {
+      toastTimers.current.forEach(clearTimeout);
+    },
+    [],
+  );
+
+  const newBestRef = useRef(false);
 
   const sMove = () => tone(220, 0.03, "square", 0.025);
   const sRotate = () => tone(420, 0.04, "square", 0.03);
@@ -523,6 +541,15 @@ export default function BlockDropGame() {
     setAnnounce("方塊太多了，幫你清掉一些，繼續玩！");
   };
 
+  const gameOver = (g: GameState) => {
+    g.status = "over";
+    newBestRef.current = g.score > 0 && g.score > (best ?? 0);
+    setAnnounce(`遊戲結束，得分 ${g.score}`);
+    sOver();
+    stopBgm();
+    g.dirty = true;
+  };
+
   const spawnNext = (g: GameState) => {
     refill(g);
     const type = g.bag.shift()!;
@@ -533,12 +560,7 @@ export default function BlockDropGame() {
     g.resets = 0;
     if (!valid(g.active, g.board)) {
       if (kidsModeRef.current) forgiveStack(g);
-      else {
-        g.status = "over";
-        setAnnounce(`遊戲結束，得分 ${g.score}`);
-        sOver();
-        stopBgm();
-      }
+      else gameOver(g);
     } else {
       updateGrounded(g);
     }
@@ -552,9 +574,23 @@ export default function BlockDropGame() {
     const n = g.clearRows.length;
     g.lines += n;
     g.score += LINE_SCORE[n] * g.level;
+    addToast(`${CLEAR_LABEL[n]} +${LINE_SCORE[n] * g.level}`, n >= 4);
+    g.combo += 1;
+    if (g.combo >= 2) {
+      const bonus = 50 * (g.combo - 1) * g.level;
+      g.score += bonus;
+      addToast(`🔥 連擊 ×${g.combo} +${bonus}`);
+    }
+    if (g.board.every((row) => row.every((c) => !c))) {
+      const bonus = 1000 * g.level;
+      g.score += bonus;
+      addToast(`🌈 全部清光 +${bonus}`, true);
+      if (!reduced) juice.shake.trigger(0.2, 5);
+    }
     const lv = Math.floor(g.lines / 10) + 1;
     if (lv > g.level) {
       g.level = lv;
+      addToast(`⭐ 升級！Lv ${lv}`, true);
       sLevel();
     }
     g.clearing = false;
@@ -565,16 +601,13 @@ export default function BlockDropGame() {
 
   const lockPiece = (g: GameState) => {
     if (!g.active) return;
+    dragRef.current = null;
     if (SHAPES[g.active.type][g.active.rot].some(([, r]) => g.active!.y + r < 0)) {
       if (kidsModeRef.current) {
         forgiveStack(g);
         return;
       }
-      g.status = "over";
-      setAnnounce(`遊戲結束，得分 ${g.score}`);
-      sOver();
-      stopBgm();
-      g.dirty = true;
+      gameOver(g);
       return;
     }
     g.board = merge(g.active, g.board);
@@ -590,6 +623,7 @@ export default function BlockDropGame() {
       sLine(full.length);
       if (!reduced) juice.shake.trigger(0.12, 2 + full.length);
     } else {
+      g.combo = 0;
       spawnNext(g);
     }
     g.dirty = true;
@@ -609,18 +643,18 @@ export default function BlockDropGame() {
     }
   };
 
-  const move = (dx: number) => {
+  const move = (dx: number): boolean => {
     const g = G.current;
-    if (g.status !== "playing" || g.clearing || !g.active) return;
+    if (g.status !== "playing" || g.clearing || !g.active) return false;
     const np = { ...g.active, x: g.active.x + dx };
-    if (valid(np, g.board)) {
-      g.active = np;
-      updateGrounded(g);
-      resetLock(g);
-      sMove();
-      g.dirty = true;
-      repaint();
-    }
+    if (!valid(np, g.board)) return false;
+    g.active = np;
+    updateGrounded(g);
+    resetLock(g);
+    sMove();
+    g.dirty = true;
+    repaint();
+    return true;
   };
 
   const rotate = (dir: number) => {
@@ -655,6 +689,7 @@ export default function BlockDropGame() {
       n++;
     }
     g.score += n * 2;
+    if (n > 0 && !reduced) juice.shake.trigger(0.07, 1.5);
     lockPiece(g);
     repaint();
   };
@@ -662,6 +697,7 @@ export default function BlockDropGame() {
   const holdPiece = () => {
     const g = G.current;
     if (g.status !== "playing" || g.clearing || !g.active || !g.canHold) return;
+    dragRef.current = null;
     const cur = g.active.type;
     if (g.hold == null) {
       g.hold = cur;
@@ -672,11 +708,7 @@ export default function BlockDropGame() {
       g.active = { type: h, rot: 0, x: 3, y: 0 };
       if (!valid(g.active, g.board)) {
         if (kidsModeRef.current) forgiveStack(g);
-        else {
-          g.status = "over";
-          sOver();
-          stopBgm();
-        }
+        else gameOver(g);
       } else {
         updateGrounded(g);
       }
@@ -692,10 +724,12 @@ export default function BlockDropGame() {
     playBgm();
     const g = freshGame();
     g.status = "playing";
+    newBestRef.current = false;
     refill(g);
     spawnNext(g);
     g.lastTime = null;
     G.current = g;
+    setToasts([]);
     repaint();
   }, [ensureAudio, playBgm, repaint]);
 
@@ -801,8 +835,8 @@ export default function BlockDropGame() {
         return;
       }
       if (g.status !== "playing") return;
-      if (k === "x" || k === "X") rotate(1);
-      else if (k === "z" || k === "Z") rotate(-1);
+      if (k === "z" || k === "Z") rotate(-1);
+      else if (k === "x" || k === "X") rotate(1);
       else if (k === "c" || k === "C" || k === "Shift") holdPiece();
     };
     window.addEventListener("keydown", onKey);
@@ -833,6 +867,98 @@ export default function BlockDropGame() {
     },
     onVisible: () => {},
   });
+
+  // ── 棋盤手勢：左右拖曳移動、點一下旋轉、快速下滑硬降、上滑暫存 ──
+  const dragRef = useRef<{
+    pid: number;
+    x0: number;
+    y0: number;
+    t0: number;
+    startCol: number;
+    dropped: number;
+    moved: boolean;
+  } | null>(null);
+
+  const dragSoftStep = (): boolean => {
+    const g = G.current;
+    if (g.status !== "playing" || g.clearing || !g.active) return false;
+    const np = { ...g.active, y: g.active.y + 1 };
+    if (!valid(np, g.board)) return false;
+    g.active = np;
+    g.score += 1;
+    g.dropAcc = 0;
+    updateGrounded(g);
+    g.dirty = true;
+    repaint();
+    return true;
+  };
+
+  const onBoardPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const g = G.current;
+    if (g.status !== "playing" || !g.active) return;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // 部分環境（合成事件）不支援 capture，手勢仍可運作
+    }
+    dragRef.current = {
+      pid: e.pointerId,
+      x0: e.clientX,
+      y0: e.clientY,
+      t0: performance.now(),
+      startCol: g.active.x,
+      dropped: 0,
+      moved: false,
+    };
+  };
+
+  const onBoardPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const d = dragRef.current;
+    if (!d || d.pid !== e.pointerId) return;
+    const g = G.current;
+    if (g.status !== "playing" || g.clearing || !g.active) return;
+    const px = CELL * boardScaleRef.current;
+    const dx = e.clientX - d.x0;
+    const dy = e.clientY - d.y0;
+    const targetCol = d.startCol + Math.round(dx / px);
+    let guard = COLS * 2;
+    while (g.active && g.active.x !== targetCol && guard-- > 0) {
+      if (!move(g.active.x < targetCol ? 1 : -1)) break;
+    }
+    const wantDrop = Math.floor(dy / px);
+    while (d.dropped < wantDrop) {
+      d.dropped++;
+      if (!dragSoftStep()) break;
+    }
+    if (Math.hypot(dx, dy) > 10) d.moved = true;
+  };
+
+  const onBoardPointerUp = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const d = dragRef.current;
+    if (!d || d.pid !== e.pointerId) return;
+    dragRef.current = null;
+    const g = G.current;
+    if (g.status !== "playing") return;
+    const dt = Math.max(1, performance.now() - d.t0);
+    const dx = e.clientX - d.x0;
+    const dy = e.clientY - d.y0;
+    const px = CELL * boardScaleRef.current;
+    if (!d.moved && dt < 350) {
+      rotate(1);
+      return;
+    }
+    if (dy < -px && Math.abs(dy) > Math.abs(dx)) {
+      holdPiece();
+      return;
+    }
+    if (dy > px * 2 && dy / dt > 0.45 && Math.abs(dy) > Math.abs(dx) * 1.4) {
+      hardDrop();
+    }
+  };
+
+  const onBoardPointerCancel = () => {
+    dragRef.current = null;
+  };
 
   const g = G.current;
   const view = g.board.map((row) => row.slice());
@@ -873,6 +999,7 @@ export default function BlockDropGame() {
   };
 
   const font = "var(--font-sans, 'PingFang TC','Microsoft JhengHei',system-ui,sans-serif)";
+  const boardDisplayH = Math.round(BOARD_H * boardScale);
 
   return (
     <GameChrome
@@ -887,9 +1014,9 @@ export default function BlockDropGame() {
       style={{
         fontFamily: font,
         background: "linear-gradient(160deg,#161a26,#0e1119)",
-        padding: "18px 16px 22px",
+        padding: "14px 14px 18px",
         borderRadius: 24,
-        maxWidth: 520,
+        maxWidth: 440,
         margin: "0 auto",
         boxShadow: "0 22px 46px rgba(0,0,0,.4)",
         userSelect: "none",
@@ -898,6 +1025,12 @@ export default function BlockDropGame() {
       <style>{`
         @keyframes lineFlash { 0%,100%{opacity:1} 50%{opacity:.25} }
         @keyframes popIn { 0%{transform:scale(.7);opacity:0} 100%{transform:scale(1);opacity:1} }
+        @keyframes toastUp {
+          0% { transform: translateY(10px) scale(.85); opacity: 0 }
+          15% { transform: none; opacity: 1 }
+          72% { transform: none; opacity: 1 }
+          100% { transform: translateY(-16px); opacity: 0 }
+        }
       `}</style>
 
       <div
@@ -905,10 +1038,10 @@ export default function BlockDropGame() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: 12,
+          marginBottom: 10,
         }}
       >
-        <div style={{ fontSize: 24, fontWeight: 800, color: "#eaf0ff" }}>
+        <div style={{ fontSize: 20, fontWeight: 800, color: "#eaf0ff" }}>
           🧩 繽紛方塊 {kidsMode ? "🧒" : ""}
         </div>
         <GameChromeToolbar
@@ -921,202 +1054,292 @@ export default function BlockDropGame() {
         />
       </div>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 14, flexWrap: "wrap" }}>
-        <Stat label="分數" value={g.score} />
-        <Stat label="等級" value={g.level} />
-        <Stat label="行數" value={g.lines} />
-        <Stat label="最佳" value={Math.max(best ?? 0, g.score)} />
+      {/* 手機優先：HOLD／分數／NEXT 集中在棋盤上方一列，棋盤可吃滿寬度 */}
+      <div
+        style={{
+          display: "flex",
+          gap: 8,
+          marginBottom: 10,
+          alignItems: "stretch",
+        }}
+      >
+        <button
+          type="button"
+          onClick={holdPiece}
+          aria-label="暫存方塊"
+          style={{
+            ...panelStyle,
+            border: "none",
+            cursor: "pointer",
+            fontFamily: font,
+            opacity: g.status === "playing" && !g.canHold ? 0.45 : 1,
+          }}
+        >
+          <div style={{ ...panelLabel, marginBottom: 5 }}>暫存 📦</div>
+          <PiecePreview type={g.hold} cell={13} />
+        </button>
+
+        <div
+          style={{
+            ...panelStyle,
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 2,
+          }}
+        >
+          <div style={panelLabel}>分數</div>
+          <div style={{ color: "#fff", fontSize: 26, fontWeight: 800, lineHeight: 1.1 }}>
+            {g.score}
+          </div>
+          {g.combo >= 2 && g.status === "playing" ? (
+            <div style={{ color: "#ffd23f", fontSize: 12, fontWeight: 800 }}>
+              🔥 連擊 ×{g.combo}
+            </div>
+          ) : (
+            <div style={{ color: "#8b9bbd", fontSize: 11, fontWeight: 700 }}>
+              Lv {g.level} · {g.lines} 行 · 最佳 {Math.max(best ?? 0, g.score)}
+            </div>
+          )}
+        </div>
+
+        <div style={panelStyle}>
+          <div style={{ ...panelLabel, marginBottom: 5 }}>下一個</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+            {g.bag.slice(0, 3).map((t, i) => (
+              <PiecePreview key={i} type={t} cell={i === 0 ? 11 : 8} />
+            ))}
+          </div>
+        </div>
       </div>
 
-      <GamePixelBoard
-        gameId="block-drop"
-        nativeWidth={LAYOUT_W}
-        nativeHeight={BOARD_H}
+      <div
+        ref={boardWrapRef}
+        style={{
+          position: "relative",
+          width: "100%",
+          maxWidth: MAX_BOARD_W,
+          height: boardDisplayH,
+          margin: "0 auto",
+        }}
       >
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: "50%",
+            marginLeft: -(BOARD_W * boardScale) / 2,
+            width: BOARD_W,
+            height: BOARD_H,
+            transform: `${boardTransform ?? ""} scale(${boardScale})`.trim(),
+            transformOrigin: "top left",
+            background: KIT_BLOCK.well,
+            borderRadius: 4,
+            boxShadow: `inset 0 0 0 2px ${KIT_BLOCK.wellBorder}`,
+            display: "grid",
+            gridTemplateColumns: `repeat(${COLS}, ${CELL}px)`,
+            gridTemplateRows: `repeat(${ROWS}, ${CELL}px)`,
+            overflow: "hidden",
+          }}
+        >
+          {Array.from({ length: ROWS * COLS }).map((_, idx) => {
+            const x = idx % COLS;
+            const y = Math.floor(idx / COLS);
+            const isClearing = clearSet.has(y);
+            let cell: ReactNode = null;
+            if (activeSet.has(idx) && g.active) {
+              cell = <div style={blockStyle(g.active.type, true)} />;
+            } else if (view[y][x]) {
+              cell = <div style={blockStyle(view[y][x] as PieceType)} />;
+            } else if (ghostSet.has(idx)) {
+              cell = (
+                <div
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: 5,
+                    border: "2px solid rgba(255,255,255,.22)",
+                    boxSizing: "border-box",
+                  }}
+                />
+              );
+            }
+            return (
+              <div
+                key={idx}
+                style={{
+                  width: CELL,
+                  height: CELL,
+                  padding: 1,
+                  boxSizing: "border-box",
+                  background: "rgba(255,255,255,.015)",
+                  boxShadow: "inset 0 0 0 0.5px rgba(255,255,255,.03)",
+                  animation:
+                    isClearing && !reduced ? "lineFlash .26s linear" : "none",
+                }}
+              >
+                {isClearing ? (
+                  <div
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      background: "#fff",
+                      borderRadius: 5,
+                    }}
+                  />
+                ) : (
+                  cell
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {g.status === "playing" && (
+          <div
+            aria-hidden
+            data-testid="board-gesture"
+            onPointerDown={onBoardPointerDown}
+            onPointerMove={onBoardPointerMove}
+            onPointerUp={onBoardPointerUp}
+            onPointerCancel={onBoardPointerCancel}
+            style={{
+              position: "absolute",
+              inset: 0,
+              zIndex: 3,
+              touchAction: "none",
+              WebkitTapHighlightColor: "transparent",
+            }}
+          />
+        )}
+
+        <div
+          style={{
+            position: "absolute",
+            top: 10,
+            left: 0,
+            right: 0,
+            zIndex: 4,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 6,
+            pointerEvents: "none",
+          }}
+        >
+          {toasts.map((t) => (
+            <div
+              key={t.id}
+              style={{
+                background: "rgba(8,11,20,.82)",
+                color: t.big ? "#ffd23f" : "#eaf0ff",
+                fontSize: t.big ? 18 : 14,
+                fontWeight: 800,
+                padding: "6px 16px",
+                borderRadius: 999,
+                whiteSpace: "nowrap",
+                animation: reduced ? "none" : "toastUp 1s ease-out forwards",
+              }}
+            >
+              {t.text}
+            </div>
+          ))}
+        </div>
+
+        {g.status !== "playing" && (
           <div
             style={{
-              width: LAYOUT_W,
-              height: BOARD_H,
+              position: "absolute",
+              inset: 0,
+              zIndex: 5,
+              background: "rgba(8,11,20,.82)",
+              backdropFilter: "blur(2px)",
+              borderRadius: 4,
               display: "flex",
-              gap: 14,
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 12,
+              color: "#fff",
+              textAlign: "center",
+              padding: 16,
             }}
           >
             <div
               style={{
-                position: "relative",
-                width: BOARD_W,
-                height: BOARD_H,
-                transform: boardTransform,
-                background: KIT_BLOCK.well,
-                borderRadius: 4,
-                boxShadow: `inset 0 0 0 2px ${KIT_BLOCK.wellBorder}`,
-                display: "grid",
-                gridTemplateColumns: `repeat(${COLS}, ${CELL}px)`,
-                gridTemplateRows: `repeat(${ROWS}, ${CELL}px)`,
-                overflow: "hidden",
+                fontSize: 40,
+                animation: reduced ? "none" : "popIn .35s ease-out",
               }}
             >
-              {Array.from({ length: ROWS * COLS }).map((_, idx) => {
-                const x = idx % COLS;
-                const y = Math.floor(idx / COLS);
-                const isClearing = clearSet.has(y);
-                let cell: ReactNode = null;
-                if (activeSet.has(idx) && g.active) {
-                  cell = <div style={blockStyle(g.active.type, true)} />;
-                } else if (view[y][x]) {
-                  cell = <div style={blockStyle(view[y][x] as PieceType)} />;
-                } else if (ghostSet.has(idx)) {
-                  cell = (
-                    <div
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        borderRadius: 5,
-                        border: "2px solid rgba(255,255,255,.22)",
-                        boxSizing: "border-box",
-                      }}
-                    />
-                  );
-                }
-                return (
-                  <div
-                    key={idx}
-                    style={{
-                      width: CELL,
-                      height: CELL,
-                      padding: 1,
-                      boxSizing: "border-box",
-                      background: "rgba(255,255,255,.015)",
-                      boxShadow: "inset 0 0 0 0.5px rgba(255,255,255,.03)",
-                      animation:
-                        isClearing && !reduced ? "lineFlash .26s linear" : "none",
-                    }}
-                  >
-                    {isClearing ? (
-                      <div
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          background: "#fff",
-                          borderRadius: 5,
-                        }}
-                      />
-                    ) : (
-                      cell
-                    )}
-                  </div>
-                );
-              })}
-
-              {g.status !== "playing" && (
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    background: "rgba(8,11,20,.82)",
-                    backdropFilter: "blur(2px)",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 12,
-                    color: "#fff",
-                    textAlign: "center",
-                    padding: 16,
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 40,
-                      animation: reduced ? "none" : "popIn .35s ease-out",
-                    }}
-                  >
-                    {g.status === "over" ? "💥" : g.status === "paused" ? "⏸" : "🧩"}
-                  </div>
-                  <div style={{ fontSize: 20, fontWeight: 800 }}>
-                    {g.status === "over"
-                      ? "遊戲結束"
-                      : g.status === "paused"
-                        ? "暫停中"
-                        : "繽紛方塊"}
-                  </div>
-                  {g.status === "over" && (
-                    <div style={{ fontSize: 15, color: "#cdd7ee" }}>分數 {g.score}</div>
-                  )}
-                  {g.status !== "paused" ? (
-                    <GameResultActions
-                      onReplay={begin}
-                      replayLabel={g.status === "over" ? "再玩一次 🔁" : "開始 ▶"}
-                      replayStyle={primaryBtn(font)}
-                    />
-                  ) : (
-                    <button type="button" onClick={togglePause} style={primaryBtn(font)}>
-                      繼續 ▶
-                    </button>
-                  )}
-                </div>
-              )}
+              {g.status === "over" ? "💥" : g.status === "paused" ? "⏸" : "🧩"}
             </div>
-
-            <div
-              style={{
-                width: SIDE_W,
-                display: "flex",
-                flexDirection: "column",
-                gap: 10,
-              }}
-            >
-              <MiniBox type={g.hold} label="HOLD" />
+            <div style={{ fontSize: 22, fontWeight: 800 }}>
+              {g.status === "over"
+                ? "遊戲結束"
+                : g.status === "paused"
+                  ? "暫停中"
+                  : "繽紛方塊"}
+            </div>
+            {g.status === "over" && (
+              <div style={{ fontSize: 15, color: "#cdd7ee" }}>
+                分數 {g.score}
+                {newBestRef.current && (
+                  <span
+                    style={{
+                      marginLeft: 8,
+                      color: "#ffd23f",
+                      fontWeight: 800,
+                    }}
+                  >
+                    🏆 新紀錄！
+                  </span>
+                )}
+              </div>
+            )}
+            {g.status === "ready" && (
               <div
                 style={{
-                  background: "rgba(255,255,255,.07)",
-                  borderRadius: 12,
-                  padding: 8,
+                  fontSize: 14,
+                  color: "#cdd7ee",
+                  lineHeight: 1.8,
+                  textAlign: "left",
                 }}
               >
-                <div
-                  style={{
-                    color: "#9fb0d0",
-                    fontSize: 12,
-                    fontWeight: 800,
-                    marginBottom: 6,
-                    textAlign: "center",
-                  }}
-                >
-                  NEXT
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {g.bag.slice(0, 3).map((t, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "repeat(4, 14px)",
-                        gridTemplateRows: "repeat(2, 14px)",
-                        gap: 2,
-                        justifyContent: "center",
-                      }}
-                    >
-                      {Array.from({ length: 8 }).map((_, k) => {
-                        const c = k % 4;
-                        const r = Math.floor(k / 4);
-                        const on = SHAPES[t][0].some(([cc, rr]) => cc === c && rr === r);
-                        return (
-                          <div
-                            key={k}
-                            style={
-                              on ? blockStyle(t) : { background: "transparent" }
-                            }
-                          />
-                        );
-                      })}
-                    </div>
-                  ))}
-                </div>
+                {isCoarse ? (
+                  <>
+                    👆 點一下棋盤＝旋轉
+                    <br />
+                    ↔️ 左右拖曳＝移動
+                    <br />
+                    ⬇️ 快速下滑＝直接落下
+                    <br />
+                    ⬆️ 上滑＝暫存方塊
+                  </>
+                ) : (
+                  <>
+                    ← → 移動 · ↑ 旋轉
+                    <br />
+                    ↓ 軟降 · 空白鍵直接落下
+                  </>
+                )}
               </div>
-            </div>
+            )}
+            {g.status !== "paused" ? (
+              <GameResultActions
+                onReplay={begin}
+                replayLabel={g.status === "over" ? "再玩一次 🔁" : "開始 ▶"}
+                replayStyle={primaryBtn(font)}
+              />
+            ) : (
+              <button type="button" onClick={togglePause} style={primaryBtn(font)}>
+                繼續 ▶
+              </button>
+            )}
           </div>
-      </GamePixelBoard>
+        )}
+      </div>
 
       <div className={touchControlStyles.controlGrid}>
         <GridTouchButton
@@ -1169,8 +1392,8 @@ export default function BlockDropGame() {
         }}
       >
         {isCoarse
-          ? "大按鈕操作 · 按住左右可連續移動"
-          : "← → 移動 · ↑ 旋轉 · ↓ 軟降 · 空白鍵落下 · P 暫停 · 手把支援"}
+          ? "👆 點棋盤旋轉 · ↔️ 拖曳移動 · ⬇️ 下滑落下 · ⬆️ 上滑暫存"
+          : "← → 移動 · ↑/X 旋轉 · Z 反轉 · ↓ 軟降 · 空白鍵落下 · C 暫存 · P 暫停"}
       </p>
     </div>
     </GameChrome>
