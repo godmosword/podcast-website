@@ -39,7 +39,7 @@ describe("game logic regressions", () => {
     expect(game).toContain("DIFFICULTY_CONFIG");
     expect(game).toContain("specialMode === \"rainbow\"");
     expect(game).toContain("方塊堆到頂了");
-    expect(game).toContain("換輕鬆模式");
+    expect(game).toContain("switchToRelaxedAndRestart");
   });
 
   it("繽紛樂園使用黏土馬卡龍風格、大按鈕與消排慶祝效果", () => {

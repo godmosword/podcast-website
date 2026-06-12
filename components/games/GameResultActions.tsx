@@ -5,7 +5,7 @@ import { FEATURES } from "@/lib/features";
 
 export type GameResultActionsProps = {
   onReplay: () => void;
-  replayLabel: string;
+  replayLabel: ReactNode;
   replayStyle?: CSSProperties;
   replayClassName?: string;
   onGoodnight?: () => void;

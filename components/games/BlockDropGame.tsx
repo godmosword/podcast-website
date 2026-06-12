@@ -24,6 +24,26 @@ import type { BlockDropDifficulty } from "@/lib/gamekit/settings";
 import GameChrome, { GameChromeToolbar } from "@/components/games/GameChrome";
 import { GameResultActions } from "@/components/games/GameResultActions";
 import { useGameKitSettings } from "@/hooks/useGameKitSettings";
+import {
+  IconBox,
+  IconCandy,
+  IconFlame,
+  IconKid,
+  IconNext,
+  IconPauseGlyph,
+  IconPlay,
+  IconRainbow,
+  IconReplay,
+  IconSpaceKey,
+  IconSparkle,
+  IconSprout,
+  IconStar,
+  IconSwipeDown,
+  IconSwipeLR,
+  IconSwipeUp,
+  IconTap,
+  IconTrophy,
+} from "@/components/games/ClayIcons";
 
 const COLS = 10;
 const ROWS = 20;
@@ -45,7 +65,6 @@ const DIFFICULTY_CONFIG: Record<
   BlockDropDifficulty,
   {
     label: string;
-    badge: string;
     gravityScale: number;
     lockDelayMs: number;
     scoreMultiplier: number;
@@ -54,7 +73,6 @@ const DIFFICULTY_CONFIG: Record<
 > = {
   relaxed: {
     label: "輕鬆",
-    badge: "救援一次",
     gravityScale: 1.35,
     lockDelayMs: 620,
     scoreMultiplier: 1,
@@ -62,7 +80,6 @@ const DIFFICULTY_CONFIG: Record<
   },
   standard: {
     label: "標準",
-    badge: "經典節奏",
     gravityScale: 1,
     lockDelayMs: LOCK_DELAY,
     scoreMultiplier: 1,
@@ -70,13 +87,22 @@ const DIFFICULTY_CONFIG: Record<
   },
   challenge: {
     label: "挑戰",
-    badge: "高分倍率",
     gravityScale: 0.82,
     lockDelayMs: 360,
     scoreMultiplier: 1.35,
     rescueLimit: 0,
   },
 };
+const DIFFICULTY_ICON: Record<BlockDropDifficulty, ReactNode> = {
+  relaxed: <IconSprout size={14} />,
+  standard: <IconStar size={14} />,
+  challenge: <IconFlame size={14} />,
+};
+const DIFFICULTY_ORDER: BlockDropDifficulty[] = [
+  "relaxed",
+  "standard",
+  "challenge",
+];
 
 interface Piece {
   type: PieceType;
@@ -437,6 +463,51 @@ const panelLabel: CSSProperties = {
   fontWeight: 900,
 };
 
+const hintChip: CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 4,
+  background: "rgba(255,255,255,.82)",
+  border: "1px solid rgba(255,255,255,.95)",
+  borderRadius: 999,
+  padding: "5px 12px",
+  fontSize: 14,
+  fontWeight: 900,
+  color: MACARON_THEME.ink,
+  boxShadow: "0 4px 10px rgba(126,96,112,.12)",
+  whiteSpace: "nowrap",
+};
+
+type HintItem = { key: string; icon: ReactNode; label: string };
+
+/** 操作提示：圖示膠囊列，取代整句文字說明。 */
+function HintChips({ items, small }: { items: HintItem[]; small?: boolean }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        gap: 6,
+        justifyContent: "center",
+        flexWrap: "wrap",
+      }}
+    >
+      {items.map((item) => (
+        <span
+          key={item.key}
+          style={
+            small
+              ? { ...hintChip, fontSize: 12, padding: "3px 10px", gap: 5 }
+              : { ...hintChip, gap: 6 }
+          }
+        >
+          {item.icon}
+          {item.label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 /** 4×2 迷你方塊預覽（HOLD / NEXT 用，純色塊即可辨識形狀）。 */
 function PiecePreview({ type, cell }: { type: PieceType | null; cell: number }) {
   return (
@@ -474,6 +545,23 @@ function PiecePreview({ type, cell }: { type: PieceType | null; cell: number }) 
     </div>
   );
 }
+
+const TOUCH_HINTS: HintItem[] = [
+  { key: "tap", icon: <IconTap size={15} />, label: "轉" },
+  { key: "drag", icon: <IconSwipeLR size={15} />, label: "移" },
+  { key: "down", icon: <IconSwipeDown size={15} />, label: "落" },
+];
+const TOUCH_HOLD_HINT: HintItem = {
+  key: "up",
+  icon: <IconSwipeUp size={15} />,
+  label: "存",
+};
+const KEY_HINTS: HintItem[] = [
+  { key: "move", icon: null, label: "← → 移" },
+  { key: "rotate", icon: null, label: "↑ 轉" },
+  { key: "drop", icon: <IconSpaceKey size={16} />, label: "落" },
+];
+const KEY_HOLD_HINT: HintItem = { key: "hold", icon: null, label: "C 存" };
 
 type Toast = { id: number; text: string; big: boolean };
 type ClearFx = {
@@ -595,6 +683,34 @@ export default function BlockDropGame() {
   );
 
   const newBestRef = useRef(false);
+
+  // ── 落地擠壓（squash）：剛鎖定的格子做一拍 Q 彈動畫 ──
+  const lockFxRef = useRef<{ cells: Set<number>; until: number }>({
+    cells: new Set(),
+    until: 0,
+  });
+  const lockFxTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (lockFxTimer.current) clearTimeout(lockFxTimer.current);
+    },
+    [],
+  );
+  const triggerLockSquash = (piece: Piece) => {
+    if (reduced) return;
+    const cells = new Set<number>();
+    for (const [c, r] of SHAPES[piece.type][piece.rot]) {
+      const x = piece.x + c;
+      const y = piece.y + r;
+      if (y >= 0) cells.add(y * COLS + x);
+    }
+    lockFxRef.current = { cells, until: performance.now() + 240 };
+    if (lockFxTimer.current) clearTimeout(lockFxTimer.current);
+    lockFxTimer.current = setTimeout(() => {
+      lockFxRef.current = { cells: new Set(), until: 0 };
+      repaint();
+    }, 260);
+  };
 
   const sMove = () => tone(220, 0.03, "square", 0.025);
   const sRotate = () => tone(420, 0.04, "square", 0.03);
@@ -723,7 +839,7 @@ export default function BlockDropGame() {
     const lv = Math.floor(g.lines / 10) + 1;
     if (lv > g.level) {
       g.level = lv;
-      addToast(`⭐ 升級！Lv ${lv}`, true);
+      addToast(`升級 Lv ${lv}！`, true);
       sLevel();
     }
     g.clearing = false;
@@ -743,6 +859,7 @@ export default function BlockDropGame() {
       gameOver(g, "topout");
       return;
     }
+    triggerLockSquash(g.active);
     g.board = merge(g.active, g.board);
     sLock();
     const full: number[] = [];
@@ -1124,6 +1241,13 @@ export default function BlockDropGame() {
     begin();
   };
 
+  const inRound = g.status === "playing" || g.status === "paused";
+  const cycleDifficulty = () => {
+    if (inRound) return;
+    const i = DIFFICULTY_ORDER.indexOf(blockDropDifficulty);
+    setBlockDropDifficulty(DIFFICULTY_ORDER[(i + 1) % DIFFICULTY_ORDER.length]);
+  };
+
   const holdButton = (cell: number) => (
     <button
       type="button"
@@ -1137,7 +1261,9 @@ export default function BlockDropGame() {
         opacity: g.status === "playing" && !g.canHold ? 0.45 : 1,
       }}
     >
-      <div style={{ ...panelLabel, marginBottom: 5 }}>暫存 📦</div>
+      <div aria-hidden style={{ ...panelLabel, marginBottom: 5 }}>
+        <IconBox size={15} color={MACARON_THEME.inkSoft} />
+      </div>
       <PiecePreview type={g.hold} cell={cell} />
     </button>
   );
@@ -1149,8 +1275,10 @@ export default function BlockDropGame() {
     g.bag[2] ?? null,
   ];
   const nextPanel = (firstCell: number, restCell: number) => (
-    <div style={panelStyle}>
-      <div style={{ ...panelLabel, marginBottom: 5 }}>下一個</div>
+    <div style={panelStyle} role="img" aria-label="下一個方塊預覽">
+      <div aria-hidden style={{ ...panelLabel, marginBottom: 5 }}>
+        <IconNext size={15} color={MACARON_THEME.inkSoft} />
+      </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
         {nextQueue.map((t, i) => (
           <PiecePreview key={i} type={t} cell={i === 0 ? firstCell : restCell} />
@@ -1172,8 +1300,8 @@ export default function BlockDropGame() {
         padding: wide ? "10px 8px" : panelStyle.padding,
       }}
     >
-      <div style={panelLabel}>分數</div>
       <div
+        aria-label={`分數 ${g.score}`}
         style={{
           color: MACARON_THEME.ink,
           fontSize: desktop ? 32 : wide ? 29 : 27,
@@ -1184,16 +1312,35 @@ export default function BlockDropGame() {
         {g.score}
       </div>
       {g.combo >= 2 && g.status === "playing" ? (
-        <div style={{ color: "#d95f87", fontSize: 12, fontWeight: 900 }}>
-          連擊 ×{g.combo}
+        <div
+          style={{
+            color: "#d95f87",
+            fontSize: 12,
+            fontWeight: 900,
+            display: "flex",
+            alignItems: "center",
+            gap: 3,
+          }}
+        >
+          <IconFlame size={13} /> ×{g.combo}
         </div>
       ) : (
         <div style={{ color: MACARON_THEME.inkSoft, fontSize: 11, fontWeight: 800 }}>
-          Lv {g.level} · {g.lines} 行 · {currentDifficulty.label}
+          Lv {g.level}
         </div>
       )}
-      <div style={{ color: "#a4869c", fontSize: 10, fontWeight: 800 }}>
-        最佳 {Math.max(best ?? 0, g.score)}
+      <div
+        aria-label={`最佳分數 ${Math.max(best ?? 0, g.score)}`}
+        style={{
+          color: "#a4869c",
+          fontSize: 11,
+          fontWeight: 800,
+          display: "flex",
+          alignItems: "center",
+          gap: 3,
+        }}
+      >
+        <IconTrophy size={12} /> {Math.max(best ?? 0, g.score)}
       </div>
     </div>
   );
@@ -1228,6 +1375,12 @@ export default function BlockDropGame() {
     >
       <style>{`
         @keyframes lineFlash { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.42;transform:scale(1.08)} }
+        @keyframes blockSquash {
+          0% { transform: scale(1) }
+          35% { transform: scale(1.16, .7) }
+          70% { transform: scale(.94, 1.08) }
+          100% { transform: scale(1) }
+        }
         @keyframes popIn { 0%{transform:scale(.72);opacity:0} 100%{transform:scale(1);opacity:1} }
         @keyframes toastUp {
           0% { transform: translateY(10px) scale(.85); opacity: 0 }
@@ -1265,7 +1418,8 @@ export default function BlockDropGame() {
               whiteSpace: "nowrap",
             }}
           >
-            繽紛樂園 {kidsMode ? "🧒" : ""}
+            繽紛方塊{" "}
+            {kidsMode && <IconKid size={wide ? 19 : 16} style={{ verticalAlign: "-0.12em" }} />}
           </div>
           <div
             style={{
@@ -1275,33 +1429,46 @@ export default function BlockDropGame() {
               flexWrap: "wrap",
             }}
           >
-            <span
+            <button
+              type="button"
+              onClick={cycleDifficulty}
+              aria-label={`難度 ${currentDifficulty.label}，點一下切換`}
+              disabled={inRound}
               style={{
                 color: MACARON_THEME.ink,
                 background: "rgba(255,255,255,.68)",
                 border: "1px solid rgba(255,255,255,.9)",
                 borderRadius: 999,
-                padding: "4px 9px",
-                fontSize: 11,
+                padding: "4px 11px",
+                fontSize: 12,
                 fontWeight: 900,
                 boxShadow: "0 4px 10px rgba(126,96,112,.1)",
+                cursor: inRound ? "default" : "pointer",
+                opacity: inRound ? 0.55 : 1,
+                fontFamily: font,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 4,
               }}
             >
-              {currentDifficulty.label} · {currentDifficulty.badge}
-            </span>
+              {DIFFICULTY_ICON[blockDropDifficulty]} {currentDifficulty.label}
+            </button>
             {specialMode === "rainbow" && (
               <span
+                role="img"
+                aria-label="彩虹消除模式"
                 style={{
-                  color: "#221500",
                   background: "linear-gradient(90deg,#ffe889,#b9f3db,#d8c7ff)",
                   borderRadius: 999,
                   padding: "4px 9px",
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: 900,
                   boxShadow: "0 4px 10px rgba(126,96,112,.1)",
+                  display: "inline-flex",
+                  alignItems: "center",
                 }}
               >
-                彩虹
+                <IconRainbow size={16} />
               </span>
             )}
           </div>
@@ -1410,15 +1577,32 @@ export default function BlockDropGame() {
             if (activeSet.has(idx) && g.active) {
               cell = <div style={blockStyle(g.active.type, true)} />;
             } else if (view[y][x]) {
-              cell = <div style={blockStyle(view[y][x] as PieceType)} />;
-            } else if (ghostSet.has(idx)) {
+              const squashing =
+                lockFxRef.current.cells.has(idx) &&
+                performance.now() < lockFxRef.current.until;
+              cell = (
+                <div
+                  style={
+                    squashing
+                      ? {
+                          ...blockStyle(view[y][x] as PieceType),
+                          animation: "blockSquash .24s ease-out",
+                          transformOrigin: "50% 100%",
+                        }
+                      : blockStyle(view[y][x] as PieceType)
+                  }
+                />
+              );
+            } else if (ghostSet.has(idx) && g.active) {
+              const ghostColor = COLORS[g.active.type];
               cell = (
                 <div
                   style={{
                     width: "100%",
                     height: "100%",
-                    borderRadius: 5,
-                    border: "2px solid rgba(255,255,255,.22)",
+                    borderRadius: 6,
+                    border: `2px dashed color-mix(in srgb, ${ghostColor} 70%, #8f6f86)`,
+                    background: `color-mix(in srgb, ${ghostColor} 22%, transparent)`,
                     boxSizing: "border-box",
                   }}
                 />
@@ -1474,23 +1658,6 @@ export default function BlockDropGame() {
             pointerEvents: "none",
           }}
         />
-        <div
-          aria-hidden
-          style={{
-            position: "absolute",
-            top: 7,
-            left: 8,
-            zIndex: 2,
-            color: "rgba(217,95,135,.74)",
-            fontSize: 10,
-            fontWeight: 900,
-            letterSpacing: 0,
-            pointerEvents: "none",
-          }}
-        >
-          滿滿區
-        </div>
-
         {g.status === "playing" && (
           <div
             aria-hidden
@@ -1620,11 +1787,17 @@ export default function BlockDropGame() {
           >
             <div
               style={{
-                fontSize: 40,
+                lineHeight: 0,
                 animation: reduced ? "none" : "popIn .35s ease-out",
               }}
-           >
-              {g.status === "over" ? "✨" : g.status === "paused" ? "⏸" : "🍬"}
+            >
+              {g.status === "over" ? (
+                <IconSparkle size={48} />
+              ) : g.status === "paused" ? (
+                <IconPauseGlyph size={44} color={MACARON_THEME.inkSoft} />
+              ) : (
+                <IconCandy size={48} />
+              )}
             </div>
             <div style={{ fontSize: 22, fontWeight: 900 }}>
               {g.status === "over"
@@ -1636,80 +1809,84 @@ export default function BlockDropGame() {
                   : "繽紛方塊"}
             </div>
             {g.status === "over" && (
-              <div style={{ fontSize: 15, color: MACARON_THEME.inkSoft, lineHeight: 1.55 }}>
-                {topOut ? "再試一次，或換輕鬆。" : "這局完成！"}
-                <br />
-                分數 {g.score} · {currentDifficulty.label}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  fontSize: 22,
+                  fontWeight: 900,
+                  color: MACARON_THEME.ink,
+                }}
+              >
+                <IconStar size={22} /> {g.score}
                 {newBestRef.current && (
                   <span
                     style={{
-                      marginLeft: 8,
                       color: "#d95f87",
-                      fontWeight: 800,
+                      fontSize: 15,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
                     }}
                   >
-                    🏆 新紀錄！
+                    <IconTrophy size={16} /> 新紀錄！
                   </span>
                 )}
               </div>
             )}
             {g.status === "ready" && (
-              <div
-                style={{
-                  fontSize: 14,
-                  color: "#cdd7ee",
-                  lineHeight: 1.8,
-                  textAlign: "left",
-                }}
-              >
-                <div
-                  style={{
-                    marginBottom: 6,
-                    color: "#d95f87",
-                    fontWeight: 900,
-                    textAlign: "center",
-                  }}
-                >
-                  {currentDifficulty.label}
-                  {specialMode === "rainbow" ? " · 彩虹消除" : " · 經典模式"}
-                </div>
-                {isCoarse ? (
-                  <>
-                    👆 點＝轉
-                    <br />
-                    ↔️ 拖＝移
-                    <br />
-                    ⬇️ 滑＝落
-                  </>
-                ) : (
-                  <>
-                    ← → 移 · ↑ 轉
-                    <br />
-                    ↓ 降 · 空白鍵落
-                  </>
-                )}
-              </div>
+              <HintChips items={isCoarse ? TOUCH_HINTS : KEY_HINTS} />
             )}
             {g.status !== "paused" ? (
               <GameResultActions
                 onReplay={begin}
-                replayLabel={g.status === "over" ? "再玩一次 🔁" : "開始 ▶"}
-                replayStyle={primaryBtn(font)}
+                replayLabel={
+                  g.status === "over" ? (
+                    <>
+                      <IconReplay size={19} /> 再玩
+                    </>
+                  ) : (
+                    <>
+                      <IconPlay size={19} /> 開始
+                    </>
+                  )
+                }
+                replayStyle={{
+                  ...primaryBtn(font),
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
                 extraActions={
                   topOut && blockDropDifficulty !== "relaxed" ? (
                     <button
                       type="button"
                       onClick={switchToRelaxedAndRestart}
-                      style={secondaryBtn(font)}
+                      style={{
+                        ...secondaryBtn(font),
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                      }}
                     >
-                      換輕鬆模式
+                      <IconSprout size={16} /> 換輕鬆
                     </button>
                   ) : null
                 }
               />
             ) : (
-              <button type="button" onClick={togglePause} style={primaryBtn(font)}>
-                繼續
+              <button
+                type="button"
+                onClick={togglePause}
+                style={{
+                  ...primaryBtn(font),
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                <IconPlay size={19} /> 繼續
               </button>
             )}
           </div>
@@ -1732,22 +1909,18 @@ export default function BlockDropGame() {
         )}
       </div>
 
-      <p
-        style={{
-          textAlign: "center",
-          color: MACARON_THEME.inkSoft,
-          fontSize: 12,
-          fontWeight: 800,
-          marginTop: 9,
-          marginBottom: 0,
-        }}
-      >
-        {isCoarse
-          ? "點轉 · 拖移 · 下滑落 · 上滑存"
-          : wide
-            ? "← → 移 · ↑ 轉 · 空白鍵落 · C 存"
-            : "← → 移 · ↑ 轉 · 空白鍵落"}
-      </p>
+      <div style={{ marginTop: 9 }}>
+        <HintChips
+          small
+          items={
+            isCoarse
+              ? [...TOUCH_HINTS, TOUCH_HOLD_HINT]
+              : wide
+                ? [...KEY_HINTS, KEY_HOLD_HINT]
+                : KEY_HINTS
+          }
+        />
+      </div>
     </div>
     </GameChrome>
   );
