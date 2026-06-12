@@ -19,8 +19,6 @@ import {
   useTouchControls,
   useVisibilityPause,
 } from "@/lib/game-kit";
-import { blockDropKitColors } from "@/lib/gamekit/bridge";
-import { BLOCK_INDEX, blockUrl } from "@/lib/gamekit/procedural-sheets";
 import { reportGameSession } from "@/lib/gamekit/session";
 import type { BlockDropDifficulty } from "@/lib/gamekit/settings";
 import GameChrome, { GameChromeToolbar } from "@/components/games/GameChrome";
@@ -115,16 +113,32 @@ interface GameState {
 
 const TYPES: PieceType[] = ["I", "O", "T", "S", "Z", "J", "L"];
 const LINE_SCORE = [0, 100, 300, 500, 800];
-const CLEAR_LABEL = ["", "好耶 ✨", "雙倍消除 ✨", "三倍消除 🎉", "繽紛全消 🌈"];
-const KIT_BLOCK = blockDropKitColors();
+const CLEAR_LABEL = ["", "好耶", "太棒了", "漂亮", "彩虹全消"];
+const MACARON_THEME = {
+  shell: "#fff7ed",
+  shellDeep: "#ffe9d6",
+  ink: "#5d4a67",
+  inkSoft: "#8c7896",
+  mint: "#b9f3db",
+  peach: "#ffc4a8",
+  lemon: "#ffe889",
+  lavender: "#d8c7ff",
+  sky: "#bde7ff",
+  berry: "#ffb4cf",
+  board: "#fffaf2",
+  boardLine: "rgba(117,88,119,.08)",
+};
+const CLAY_BLOCK_COLORS: Record<PieceType, string> = {
+  I: "#8ddff0",
+  O: "#ffe16f",
+  T: "#c9b4ff",
+  S: "#9de7b8",
+  Z: "#ff9fb7",
+  J: "#9dbbff",
+  L: "#ffc28a",
+};
 const COLORS: Record<PieceType, string> = {
-  I: KIT_BLOCK.I,
-  O: KIT_BLOCK.O,
-  T: KIT_BLOCK.T,
-  S: KIT_BLOCK.S,
-  Z: KIT_BLOCK.Z,
-  J: KIT_BLOCK.J,
-  L: KIT_BLOCK.L,
+  ...CLAY_BLOCK_COLORS,
 };
 const SHAPES: Record<PieceType, [number, number][][]> = {
   I: [
@@ -377,43 +391,50 @@ const gravityMs = (level: number) => Math.max(70, 800 - (level - 1) * 70);
 function primaryBtn(font: string): CSSProperties {
   return {
     border: "none",
-    background: "linear-gradient(180deg,#ffd23f,#ffa600)",
-    color: "#4a2c00",
-    fontWeight: 800,
-    fontSize: 18,
-    padding: "11px 26px",
-    borderRadius: 14,
+    minHeight: 56,
+    background: `linear-gradient(180deg,${MACARON_THEME.lemon},#ffbd6f)`,
+    color: "#614018",
+    fontWeight: 900,
+    fontSize: 19,
+    padding: "13px 30px",
+    borderRadius: 999,
     cursor: "pointer",
-    boxShadow: "0 5px 0 #b97600",
+    boxShadow:
+      "0 8px 0 rgba(203,128,52,.42), 0 16px 24px rgba(164,103,61,.18), inset 0 2px 0 rgba(255,255,255,.72)",
     fontFamily: font,
   };
 }
 
 function secondaryBtn(font: string): CSSProperties {
   return {
-    border: "1px solid rgba(255,255,255,.22)",
-    background: "rgba(255,255,255,.08)",
-    color: "#eaf0ff",
+    border: "2px solid rgba(93,74,103,.12)",
+    minHeight: 52,
+    background: "rgba(255,255,255,.72)",
+    color: MACARON_THEME.ink,
     fontWeight: 800,
     fontSize: 15,
-    padding: "10px 18px",
-    borderRadius: 12,
+    padding: "10px 20px",
+    borderRadius: 999,
     cursor: "pointer",
     fontFamily: font,
   };
 }
 
 const panelStyle: CSSProperties = {
-  background: "rgba(255,255,255,.07)",
-  borderRadius: 12,
-  padding: "6px 8px",
+  background:
+    "linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,246,238,.82))",
+  border: "1px solid rgba(255,255,255,.9)",
+  borderRadius: 18,
+  padding: "8px 10px",
   textAlign: "center",
+  boxShadow:
+    "0 8px 18px rgba(158,118,122,.12), inset 0 1px 0 rgba(255,255,255,.85)",
 };
 
 const panelLabel: CSSProperties = {
-  color: "#9fb0d0",
+  color: MACARON_THEME.inkSoft,
   fontSize: 11,
-  fontWeight: 800,
+  fontWeight: 900,
 };
 
 /** 4×2 迷你方塊預覽（HOLD / NEXT 用，純色塊即可辨識形狀）。 */
@@ -441,9 +462,9 @@ function PiecePreview({ type, cell }: { type: PieceType | null; cell: number }) 
                     width: "100%",
                     height: "100%",
                     background: COLORS[type as PieceType],
-                    borderRadius: Math.max(2, cell / 3),
+                    borderRadius: Math.max(5, cell / 2.8),
                     boxShadow:
-                      "inset 1px 1px 0 rgba(255,255,255,.4), inset -1px -1px 0 rgba(0,0,0,.28)",
+                      "inset 2px 2px 0 rgba(255,255,255,.62), inset -2px -2px 0 rgba(111,72,86,.16), 0 3px 6px rgba(117,88,119,.16)",
                   }
                 : { background: "transparent" }
             }
@@ -455,6 +476,11 @@ function PiecePreview({ type, cell }: { type: PieceType | null; cell: number }) 
 }
 
 type Toast = { id: number; text: string; big: boolean };
+type ClearFx = {
+  id: number;
+  text: string;
+  kind: "spark" | "wave" | "confetti";
+};
 
 export default function BlockDropGame() {
   const G = useRef<GameState>(freshGame());
@@ -490,27 +516,22 @@ export default function BlockDropGame() {
 
   const repaint = useCallback(() => force((n) => n + 1), []);
 
-  const [blockTileUrls, setBlockTileUrls] = useState<Record<PieceType, string> | null>(
-    null,
+  // ── 手機 / iPad / 桌機三段版面，同步玩法但微調資訊密度 ──
+  const [layoutMode, setLayoutMode] = useState<"mobile" | "tablet" | "desktop">(
+    "mobile",
   );
-
   useEffect(() => {
-    setBlockTileUrls(
-      Object.fromEntries(
-        TYPES.map((t) => [t, blockUrl(BLOCK_INDEX[t])]),
-      ) as Record<PieceType, string>,
-    );
-  }, []);
-
-  // ── 寬螢幕（iPad／桌機）：三欄一頁式排版，免捲動、免虛擬按鍵 ──
-  const [wide, setWide] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 700px) and (min-height: 500px)");
-    const apply = () => setWide(mq.matches);
+    const apply = () => {
+      const w = window.innerWidth || 390;
+      const h = window.innerHeight || 844;
+      setLayoutMode(w >= 980 && h >= 620 ? "desktop" : w >= 700 ? "tablet" : "mobile");
+    };
     apply();
-    mq.addEventListener("change", apply);
-    return () => mq.removeEventListener("change", apply);
+    window.addEventListener("resize", apply);
+    return () => window.removeEventListener("resize", apply);
   }, []);
+  const wide = layoutMode !== "mobile";
+  const desktop = layoutMode === "desktop";
 
   // ── 手機優先：棋盤填滿卡片寬度，連續縮放（DOM 方塊非像素畫，免整數倍）──
   const boardWrapRef = useRef<HTMLDivElement | null>(null);
@@ -527,7 +548,7 @@ export default function BlockDropGame() {
       // 用棋盤頂端的實際位置動態計算可用高度（下方保留提示行＋卡片內距），
       // 整頁呈現、玩到底不用捲動
       const top = el.getBoundingClientRect().top + window.scrollY;
-      const reserve = wide ? 50 : 44;
+      const reserve = wide ? 42 : 34;
       const maxH = Math.max(300, (window.innerHeight || 800) - top - reserve);
       setBoardScale(Math.min(w / BOARD_W, maxH / BOARD_H));
     };
@@ -543,8 +564,10 @@ export default function BlockDropGame() {
 
   // ── 浮動回饋文字（消行／連擊／升級）──
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [clearFx, setClearFx] = useState<ClearFx | null>(null);
   const toastId = useRef(0);
   const toastTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const clearFxTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const addToast = useCallback((text: string, big = false) => {
     const id = ++toastId.current;
     setToasts((list) => [...list.slice(-3), { id, text, big }]);
@@ -554,9 +577,19 @@ export default function BlockDropGame() {
       }, 1000),
     );
   }, []);
+  const celebrateClear = useCallback((lines: number, combo: number) => {
+    const id = performance.now();
+    const kind: ClearFx["kind"] =
+      lines >= 3 ? "confetti" : lines === 2 ? "wave" : "spark";
+    const text = lines >= 3 ? "太棒了！" : lines === 2 ? "好厲害！" : "好耶！";
+    setClearFx({ id, text, kind });
+    if (clearFxTimer.current) clearTimeout(clearFxTimer.current);
+    clearFxTimer.current = setTimeout(() => setClearFx(null), combo >= 2 ? 950 : 760);
+  }, []);
   useEffect(
     () => () => {
       toastTimers.current.forEach(clearTimeout);
+      if (clearFxTimer.current) clearTimeout(clearFxTimer.current);
     },
     [],
   );
@@ -667,16 +700,18 @@ export default function BlockDropGame() {
     g.score += lineScore;
     addToast(`${CLEAR_LABEL[n]} +${lineScore}`, n >= 4);
     g.combo += 1;
+    celebrateClear(n, g.combo);
     if (g.combo >= 2) {
       const bonus = scoreValue(50 * (g.combo - 1) * g.level);
       g.score += bonus;
-      addToast(`🔥 連擊 ×${g.combo} +${bonus}`);
+      addToast(`連擊 ×${g.combo} +${bonus}`);
     }
     const specialMode = specialModeRef.current;
     if (specialMode === "rainbow" && g.combo >= 2) {
       const rainbow = scoreValue(120 * g.combo * n);
       g.score += rainbow;
       addToast(`彩虹消除 +${rainbow}`, true);
+      setClearFx({ id: performance.now(), text: "太棒了！", kind: "confetti" });
       if (!reduced) juice.shake.trigger(0.16, 4);
     }
     if (g.board.every((row) => row.every((c) => !c))) {
@@ -1068,16 +1103,12 @@ export default function BlockDropGame() {
     glow?: boolean,
   ): CSSProperties => {
     const color = COLORS[type];
-    const tile = blockTileUrls?.[type];
     return {
       width: "100%",
       height: "100%",
-      background: tile ? undefined : color,
-      backgroundImage: tile ? `url(${tile})` : undefined,
-      backgroundSize: "cover",
-      imageRendering: "pixelated",
-      borderRadius: 2,
-      boxShadow: `inset 1px 1px 0 rgba(255,255,255,.35), inset -1px -1px 0 rgba(0,0,0,.35)${glow ? `, 0 0 6px ${color}` : ""}`,
+      background: `radial-gradient(circle at 28% 22%, rgba(255,255,255,.72), transparent 28%), linear-gradient(145deg, ${color}, color-mix(in srgb, ${color} 72%, #8f6f86))`,
+      borderRadius: 7,
+      boxShadow: `inset 2px 2px 0 rgba(255,255,255,.56), inset -2px -3px 0 rgba(102,74,91,.18), 0 2px 5px rgba(121,83,99,.18)${glow ? `, 0 0 10px ${color}` : ""}`,
     };
   };
 
@@ -1142,19 +1173,26 @@ export default function BlockDropGame() {
       }}
     >
       <div style={panelLabel}>分數</div>
-      <div style={{ color: "#fff", fontSize: wide ? 30 : 26, fontWeight: 800, lineHeight: 1.1 }}>
+      <div
+        style={{
+          color: MACARON_THEME.ink,
+          fontSize: desktop ? 32 : wide ? 29 : 27,
+          fontWeight: 900,
+          lineHeight: 1.1,
+        }}
+      >
         {g.score}
       </div>
       {g.combo >= 2 && g.status === "playing" ? (
-        <div style={{ color: "#ffd23f", fontSize: 12, fontWeight: 800 }}>
-          🔥 連擊 ×{g.combo}
+        <div style={{ color: "#d95f87", fontSize: 12, fontWeight: 900 }}>
+          連擊 ×{g.combo}
         </div>
       ) : (
-        <div style={{ color: "#8b9bbd", fontSize: 11, fontWeight: 700 }}>
+        <div style={{ color: MACARON_THEME.inkSoft, fontSize: 11, fontWeight: 800 }}>
           Lv {g.level} · {g.lines} 行 · {currentDifficulty.label}
         </div>
       )}
-      <div style={{ color: "#64748f", fontSize: 10, fontWeight: 800 }}>
+      <div style={{ color: "#a4869c", fontSize: 10, fontWeight: 800 }}>
         最佳 {Math.max(best ?? 0, g.score)}
       </div>
     </div>
@@ -1170,28 +1208,43 @@ export default function BlockDropGame() {
       announce={announce}
     >
     <div
+      data-layout={layoutMode}
+      data-theme="macaron-clay"
       style={{
         fontFamily: font,
         background:
-          "radial-gradient(circle at 28% 0%,rgba(70,170,255,.22),transparent 32%), linear-gradient(160deg,#181c29,#0b0f18 78%)",
-        padding: wide ? "16px 18px 18px" : "12px 14px 12px",
-        borderRadius: 22,
-        maxWidth: wide ? WIDE_MAX_BOARD_W + (WIDE_SIDE_W + 14) * 2 + 36 : 440,
+          "linear-gradient(160deg,#fff9ee 0%,#f3fbff 52%,#fff0f7 100%)",
+        padding: wide ? "18px 20px 18px" : "14px 14px 14px",
+        borderRadius: 28,
+        maxWidth: wide
+          ? WIDE_MAX_BOARD_W + (WIDE_SIDE_W + 14) * 2 + (desktop ? 56 : 32)
+          : 440,
         margin: "0 auto",
-        border: "1px solid rgba(255,255,255,.12)",
+        border: "2px solid rgba(255,255,255,.92)",
         boxShadow:
-          "0 22px 46px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.08)",
+          "0 20px 42px rgba(144,116,128,.2), inset 0 2px 0 rgba(255,255,255,.95), inset 0 -8px 18px rgba(255,198,214,.18)",
         userSelect: "none",
       }}
     >
       <style>{`
-        @keyframes lineFlash { 0%,100%{opacity:1} 50%{opacity:.25} }
-        @keyframes popIn { 0%{transform:scale(.7);opacity:0} 100%{transform:scale(1);opacity:1} }
+        @keyframes lineFlash { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.42;transform:scale(1.08)} }
+        @keyframes popIn { 0%{transform:scale(.72);opacity:0} 100%{transform:scale(1);opacity:1} }
         @keyframes toastUp {
           0% { transform: translateY(10px) scale(.85); opacity: 0 }
           15% { transform: none; opacity: 1 }
           72% { transform: none; opacity: 1 }
           100% { transform: translateY(-16px); opacity: 0 }
+        }
+        @keyframes clearBurst {
+          0% { transform: translate(-50%,-50%) scale(.72); opacity: 0 }
+          18% { transform: translate(-50%,-50%) scale(1.08); opacity: 1 }
+          72% { transform: translate(-50%,-55%) scale(1); opacity: 1 }
+          100% { transform: translate(-50%,-72%) scale(.94); opacity: 0 }
+        }
+        @keyframes candyPop {
+          0% { transform: translateY(10px) scale(.5); opacity: 0 }
+          22% { opacity: 1 }
+          100% { transform: translateY(-42px) scale(1.08); opacity: 0 }
         }
       `}</style>
 
@@ -1208,11 +1261,11 @@ export default function BlockDropGame() {
             style={{
               fontSize: wide ? 20 : 16,
               fontWeight: 800,
-              color: "#eaf0ff",
+              color: MACARON_THEME.ink,
               whiteSpace: "nowrap",
             }}
           >
-            🧩 繽紛方塊 {kidsMode ? "🧒" : ""}
+            繽紛樂園 {kidsMode ? "🧒" : ""}
           </div>
           <div
             style={{
@@ -1224,13 +1277,14 @@ export default function BlockDropGame() {
           >
             <span
               style={{
-                color: "#dce7ff",
-                background: "rgba(255,255,255,.09)",
-                border: "1px solid rgba(255,255,255,.13)",
+                color: MACARON_THEME.ink,
+                background: "rgba(255,255,255,.68)",
+                border: "1px solid rgba(255,255,255,.9)",
                 borderRadius: 999,
-                padding: "3px 8px",
+                padding: "4px 9px",
                 fontSize: 11,
-                fontWeight: 800,
+                fontWeight: 900,
+                boxShadow: "0 4px 10px rgba(126,96,112,.1)",
               }}
             >
               {currentDifficulty.label} · {currentDifficulty.badge}
@@ -1239,14 +1293,15 @@ export default function BlockDropGame() {
               <span
                 style={{
                   color: "#221500",
-                  background: "linear-gradient(90deg,#ffef6b,#71f7ff,#f4a7ff)",
+                  background: "linear-gradient(90deg,#ffe889,#b9f3db,#d8c7ff)",
                   borderRadius: 999,
-                  padding: "3px 8px",
+                  padding: "4px 9px",
                   fontSize: 11,
                   fontWeight: 900,
+                  boxShadow: "0 4px 10px rgba(126,96,112,.1)",
                 }}
               >
-                彩虹消除
+                彩虹
               </span>
             )}
           </div>
@@ -1309,7 +1364,7 @@ export default function BlockDropGame() {
         ref={boardWrapRef}
         style={{
           width: "100%",
-          maxWidth: wide ? WIDE_MAX_BOARD_W : MAX_BOARD_W,
+          maxWidth: wide ? (desktop ? WIDE_MAX_BOARD_W : 420) : MAX_BOARD_W,
           flex: wide ? 1 : undefined,
           minWidth: 0,
           height: boardDisplayH,
@@ -1336,9 +1391,11 @@ export default function BlockDropGame() {
             height: BOARD_H,
             transform: `${boardTransform ?? ""} scale(${boardScale})`.trim(),
             transformOrigin: "top left",
-            background: KIT_BLOCK.well,
-            borderRadius: 4,
-            boxShadow: `inset 0 0 0 2px ${KIT_BLOCK.wellBorder}`,
+            background:
+              "linear-gradient(180deg,rgba(255,255,255,.96),rgba(255,250,242,.92))",
+            borderRadius: 16,
+            boxShadow:
+              "inset 0 0 0 3px rgba(255,255,255,.95), inset 0 -10px 20px rgba(255,204,217,.18), 0 16px 28px rgba(146,106,121,.2)",
             display: "grid",
             gridTemplateColumns: `repeat(${COLS}, ${CELL}px)`,
             gridTemplateRows: `repeat(${ROWS}, ${CELL}px)`,
@@ -1375,8 +1432,11 @@ export default function BlockDropGame() {
                   height: CELL,
                   padding: 1,
                   boxSizing: "border-box",
-                  background: "rgba(255,255,255,.015)",
-                  boxShadow: "inset 0 0 0 0.5px rgba(255,255,255,.03)",
+                  background:
+                    (x + y) % 2 === 0
+                      ? "rgba(255,221,230,.18)"
+                      : "rgba(191,237,255,.14)",
+                  boxShadow: `inset 0 0 0 0.5px ${MACARON_THEME.boardLine}`,
                   animation:
                     isClearing && !reduced ? "lineFlash .26s linear" : "none",
                 }}
@@ -1386,8 +1446,9 @@ export default function BlockDropGame() {
                     style={{
                       width: "100%",
                       height: "100%",
-                      background: "#fff",
-                      borderRadius: 5,
+                      background: "linear-gradient(135deg,#fff,#ffe889,#b9f3db)",
+                      borderRadius: 8,
+                      boxShadow: "0 0 10px rgba(255,210,111,.45)",
                     }}
                   />
                 ) : (
@@ -1408,8 +1469,8 @@ export default function BlockDropGame() {
             zIndex: 2,
             height: 2,
             background:
-              "linear-gradient(90deg,transparent,rgba(255,210,63,.85),transparent)",
-            boxShadow: "0 0 10px rgba(255,210,63,.34)",
+              "linear-gradient(90deg,transparent,rgba(255,159,183,.85),transparent)",
+            boxShadow: "0 0 10px rgba(255,159,183,.34)",
             pointerEvents: "none",
           }}
         />
@@ -1420,14 +1481,14 @@ export default function BlockDropGame() {
             top: 7,
             left: 8,
             zIndex: 2,
-            color: "rgba(255,210,63,.78)",
+            color: "rgba(217,95,135,.74)",
             fontSize: 10,
             fontWeight: 900,
             letterSpacing: 0,
             pointerEvents: "none",
           }}
         >
-          危險區
+          滿滿區
         </div>
 
         {g.status === "playing" && (
@@ -1448,10 +1509,10 @@ export default function BlockDropGame() {
           />
         )}
 
-        <div
-          style={{
-            position: "absolute",
-            top: 10,
+         <div
+           style={{
+             position: "absolute",
+             top: 10,
             left: 0,
             right: 0,
             zIndex: 4,
@@ -1459,19 +1520,73 @@ export default function BlockDropGame() {
             flexDirection: "column",
             alignItems: "center",
             gap: 6,
-            pointerEvents: "none",
-          }}
-        >
+             pointerEvents: "none",
+           }}
+         >
+          {clearFx && (
+            <div
+              key={clearFx.id}
+              aria-hidden
+              style={{
+                position: "absolute",
+                left: "50%",
+                top: "42%",
+                transform: "translate(-50%,-50%)",
+                minWidth: 150,
+                padding: "12px 22px",
+                borderRadius: 999,
+                color: MACARON_THEME.ink,
+                background:
+                  clearFx.kind === "confetti"
+                    ? "linear-gradient(90deg,#ffe889,#b9f3db,#d8c7ff,#ffb4cf)"
+                    : "rgba(255,255,255,.88)",
+                border: "2px solid rgba(255,255,255,.95)",
+                boxShadow:
+                  "0 12px 26px rgba(146,106,121,.2), inset 0 2px 0 rgba(255,255,255,.78)",
+                fontSize: 24,
+                fontWeight: 900,
+                textAlign: "center",
+                animation: reduced ? "none" : "clearBurst .82s ease-out forwards",
+              }}
+            >
+              {clearFx.text}
+              {Array.from({ length: clearFx.kind === "confetti" ? 14 : 8 }).map((_, i) => (
+                <span
+                  key={i}
+                  style={{
+                    position: "absolute",
+                    left: `${8 + ((i * 23) % 84)}%`,
+                    top: `${clearFx.kind === "wave" ? 68 : 38 + ((i * 17) % 24)}%`,
+                    width: clearFx.kind === "wave" ? 18 : 9,
+                    height: clearFx.kind === "wave" ? 5 : 9,
+                    borderRadius: clearFx.kind === "spark" ? 2 : 4,
+                    background:
+                      [
+                        MACARON_THEME.lemon,
+                        MACARON_THEME.mint,
+                        MACARON_THEME.sky,
+                        MACARON_THEME.berry,
+                        MACARON_THEME.lavender,
+                      ][i % 5],
+                    transform: `rotate(${i * 31}deg)`,
+                    animation: reduced ? "none" : `candyPop .72s ease-out ${i * 0.025}s forwards`,
+                  }}
+                />
+              ))}
+            </div>
+          )}
           {toasts.map((t) => (
             <div
               key={t.id}
               style={{
-                background: "rgba(8,11,20,.82)",
-                color: t.big ? "#ffd23f" : "#eaf0ff",
+                background: "rgba(255,255,255,.88)",
+                color: t.big ? "#d95f87" : MACARON_THEME.ink,
                 fontSize: t.big ? 18 : 14,
-                fontWeight: 800,
-                padding: "6px 16px",
+                fontWeight: 900,
+                padding: "7px 16px",
                 borderRadius: 999,
+                border: "1px solid rgba(255,255,255,.95)",
+                boxShadow: "0 8px 18px rgba(146,106,121,.16)",
                 whiteSpace: "nowrap",
                 animation: reduced ? "none" : "toastUp 1s ease-out forwards",
               }}
@@ -1481,34 +1596,37 @@ export default function BlockDropGame() {
           ))}
         </div>
 
-        {g.status !== "playing" && (
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              zIndex: 5,
-              background: "rgba(8,11,20,.82)",
-              backdropFilter: "blur(2px)",
-              borderRadius: 4,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 12,
-              color: "#fff",
-              textAlign: "center",
-              padding: 16,
-            }}
+         {g.status !== "playing" && (
+           <div
+             style={{
+               position: "absolute",
+               inset: 0,
+               zIndex: 5,
+               background:
+                 g.status === "paused"
+                   ? "rgba(255,250,242,.76)"
+                   : "rgba(255,250,242,.9)",
+               backdropFilter: "blur(3px)",
+               borderRadius: 16,
+               display: "flex",
+               flexDirection: "column",
+               alignItems: "center",
+               justifyContent: "center",
+               gap: g.status === "paused" ? 10 : 12,
+               color: MACARON_THEME.ink,
+               textAlign: "center",
+               padding: 16,
+             }}
           >
             <div
               style={{
                 fontSize: 40,
                 animation: reduced ? "none" : "popIn .35s ease-out",
               }}
-            >
-              {g.status === "over" ? "💥" : g.status === "paused" ? "⏸" : "🧩"}
+           >
+              {g.status === "over" ? "✨" : g.status === "paused" ? "⏸" : "🍬"}
             </div>
-            <div style={{ fontSize: 22, fontWeight: 800 }}>
+            <div style={{ fontSize: 22, fontWeight: 900 }}>
               {g.status === "over"
                 ? topOut
                   ? "方塊堆到頂了"
@@ -1518,15 +1636,15 @@ export default function BlockDropGame() {
                   : "繽紛方塊"}
             </div>
             {g.status === "over" && (
-              <div style={{ fontSize: 15, color: "#cdd7ee", lineHeight: 1.65 }}>
-                {topOut ? "可以重新開始，或換輕鬆模式先練手感。" : "這局結算完成。"}
+              <div style={{ fontSize: 15, color: MACARON_THEME.inkSoft, lineHeight: 1.55 }}>
+                {topOut ? "再試一次，或換輕鬆。" : "這局完成！"}
                 <br />
                 分數 {g.score} · {currentDifficulty.label}
                 {newBestRef.current && (
                   <span
                     style={{
                       marginLeft: 8,
-                      color: "#ffd23f",
+                      color: "#d95f87",
                       fontWeight: 800,
                     }}
                   >
@@ -1547,7 +1665,7 @@ export default function BlockDropGame() {
                 <div
                   style={{
                     marginBottom: 6,
-                    color: "#ffd23f",
+                    color: "#d95f87",
                     fontWeight: 900,
                     textAlign: "center",
                   }}
@@ -1557,19 +1675,17 @@ export default function BlockDropGame() {
                 </div>
                 {isCoarse ? (
                   <>
-                    👆 點一下棋盤＝旋轉
+                    👆 點＝轉
                     <br />
-                    ↔️ 左右拖曳＝移動
+                    ↔️ 拖＝移
                     <br />
-                    ⬇️ 快速下滑＝直接落下
-                    <br />
-                    ⬆️ 上滑＝暫存方塊
+                    ⬇️ 滑＝落
                   </>
                 ) : (
                   <>
-                    ← → 移動 · ↑ 旋轉
+                    ← → 移 · ↑ 轉
                     <br />
-                    ↓ 軟降 · 空白鍵直接落下
+                    ↓ 降 · 空白鍵落
                   </>
                 )}
               </div>
@@ -1593,7 +1709,7 @@ export default function BlockDropGame() {
               />
             ) : (
               <button type="button" onClick={togglePause} style={primaryBtn(font)}>
-                繼續 ▶
+                繼續
               </button>
             )}
           </div>
@@ -1619,17 +1735,18 @@ export default function BlockDropGame() {
       <p
         style={{
           textAlign: "center",
-          color: "#7e8db0",
+          color: MACARON_THEME.inkSoft,
           fontSize: 12,
-          marginTop: 10,
+          fontWeight: 800,
+          marginTop: 9,
           marginBottom: 0,
         }}
       >
         {isCoarse
-          ? "👆 點旋轉 · ↔️ 拖移動 · ⬇️ 滑落下 · ⬆️ 滑暫存"
+          ? "點轉 · 拖移 · 下滑落 · 上滑存"
           : wide
-            ? "← → 移動 · ↑/X 旋轉 · Z 反轉 · ↓ 軟降 · 空白鍵落下 · C 暫存 · P 暫停"
-            : "← → 移動 · ↑ 旋轉 · ↓ 軟降 · 空白鍵落下 · C 暫存"}
+            ? "← → 移 · ↑ 轉 · 空白鍵落 · C 存"
+            : "← → 移 · ↑ 轉 · 空白鍵落"}
       </p>
     </div>
     </GameChrome>

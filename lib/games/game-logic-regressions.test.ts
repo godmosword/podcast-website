@@ -41,4 +41,27 @@ describe("game logic regressions", () => {
     expect(game).toContain("方塊堆到頂了");
     expect(game).toContain("換輕鬆模式");
   });
+
+  it("繽紛樂園使用黏土馬卡龍風格、大按鈕與消排慶祝效果", () => {
+    const game = source("components/games/BlockDropGame.tsx");
+
+    expect(game).toContain("CLAY_BLOCK_COLORS");
+    expect(game).toContain("macaron");
+    expect(game).toContain("clearFx");
+    expect(game).toContain("太棒了");
+    expect(game).toContain("minHeight: 56");
+  });
+
+  it("遊戲頁保留頂部安全距離與較大的返回鍵點擊區", () => {
+    const shell = source("components/games/GamePageShell.module.css");
+
+    expect(shell).toContain("padding-top: clamp(2.25rem");
+    expect(shell).toContain("min-height: 52px");
+  });
+
+  it("GameChrome 不再於暫停時跳出全螢幕選單", () => {
+    const chrome = source("components/games/GameChrome.tsx");
+
+    expect(chrome).not.toContain("<PauseOverlay");
+  });
 });

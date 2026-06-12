@@ -214,74 +214,9 @@ function SettingsDialog({
   );
 }
 
-function PauseOverlay({
-  open,
-  onResume,
-  onRestart,
-  onOpenSettings,
-}: {
-  open: boolean;
-  onResume: () => void;
-  onRestart?: () => void;
-  onOpenSettings: () => void;
-}) {
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const titleId = useId();
-
-  useEffect(() => {
-    if (!open) return;
-    dialogRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" || e.key === "p" || e.key === "P") onResume();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onResume]);
-
-  if (!open) return null;
-
-  return (
-    <div className={styles.overlay} role="presentation">
-      <div
-        ref={dialogRef}
-        className={styles.dialog}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        tabIndex={-1}
-      >
-        <h2 id={titleId} className={styles.dialogTitle}>
-          暫停中
-        </h2>
-        <div className={styles.dialogActions}>
-          <button type="button" className={styles.primaryBtn} onClick={onResume}>
-            繼續玩 ▶
-          </button>
-          {onRestart && (
-            <button type="button" className={styles.secondaryBtn} onClick={onRestart}>
-              重新開始
-            </button>
-          )}
-          <button type="button" className={styles.secondaryBtn} onClick={onOpenSettings}>
-            設定 ⚙️
-          </button>
-          <Link href="/games" className={styles.secondaryBtn}>
-            回遊樂園 🎡
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/** 遊戲外框：暫停選單、設定對話框、即時播報（Phase 7）。 */
+/** 遊戲外框：設定對話框、即時播報（Phase 7）。 */
 export default function GameChrome({
   children,
-  canPause = false,
-  paused = false,
-  onPause,
-  onResume,
-  onRestart,
   announce,
   className,
 }: GameChromeProps) {
@@ -294,15 +229,6 @@ export default function GameChrome({
           {announce ?? ""}
         </div>
         {children}
-        <PauseOverlay
-          open={Boolean(paused && canPause)}
-          onResume={() => onResume?.()}
-          onRestart={onRestart}
-          onOpenSettings={() => {
-            onResume?.();
-            setSettingsOpen(true);
-          }}
-        />
         <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       </div>
     </ChromeContext.Provider>

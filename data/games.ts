@@ -30,8 +30,8 @@ export const GAMES: GameMeta[] = [
   },
   {
     slug: "block-drop",
-    title: "繽紛方塊",
-    desc: "排滿整行就消除，挑戰最高分。",
+    title: "繽紛樂園",
+    desc: "黏土糖果風落下方塊，排滿整行就消除。",
     href: "/games/block-drop",
     emoji: "🧩",
     accent: "var(--c-pink)",

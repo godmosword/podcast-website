@@ -5,7 +5,7 @@
 .toolbar {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex-shrink: 0;
 }
 
@@ -13,13 +13,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
-  padding: 0 10px;
-  border: 2px solid color-mix(in srgb, var(--ink) 12%, transparent);
-  border-radius: 12px;
+  min-width: 52px;
+  min-height: 52px;
+  padding: 0 12px;
+  border: 2px solid color-mix(in srgb, var(--ink) 9%, transparent);
+  border-radius: 16px;
   background: var(--card);
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   line-height: 1;
   text-decoration: none;
   color: inherit;
@@ -160,7 +160,7 @@
 }
 
 .segmentBtn {
-  min-height: 44px;
+  min-height: 52px;
   border: 1px solid transparent;
   border-radius: 0.65rem;
   background: transparent;
