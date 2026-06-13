@@ -49,14 +49,14 @@
   position: relative;
   flex: 0 0 72px;
   width: 72px;
-  height: 54px;
+  height: 72px;
   border-radius: 10px;
   border: 2px solid;
   overflow: hidden;
 }
 
 .cover {
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .meta {
