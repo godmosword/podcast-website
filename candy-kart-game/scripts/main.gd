@@ -21,6 +21,7 @@ var _audio_unlocked := false
 
 func _ready() -> void:
 	_load_theme_font()
+	_setup_ui_scale()
 	sfx = Sfx.new()
 	sfx.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(sfx)
@@ -297,6 +298,19 @@ func _show_gp_final() -> void:
 		gp_mode = false
 		_show_track_select()
 	))
+
+## 響應式 UI：依視窗實際像素（含手機高 DPR）調整整體 UI 縮放，
+## 桌機／平板／手機都拿到可讀的圖示與文字大小。
+func _setup_ui_scale() -> void:
+	_update_ui_scale()
+	get_window().size_changed.connect(_update_ui_scale)
+
+func _update_ui_scale() -> void:
+	var win := get_window()
+	var s := Vector2(win.size)
+	# 設計基準：寬 820 / 高 620；取較小者避免 HUD 橫向溢出
+	var factor := minf(s.x / 820.0, s.y / 620.0)
+	win.content_scale_factor = clampf(factor, 1.0, 3.0)
 
 func _load_theme_font() -> void:
 	# 子集化的 Noto Sans TC（僅遊戲用字）。預設 theme 自帶字型，

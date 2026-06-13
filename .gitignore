@@ -40,9 +40,6 @@ next-env.d.ts
 # AI 插圖暫存（人工審圖前的草稿，勿入庫）
 /public/.illustrate-staging/
 
-# kart-game build 產物（由 `npm run build:kart` 重建，勿入庫；本機開 /games/kart 前需先跑該指令）
-/public/kart/
-
 # Godot editor/cache state（專案源碼在 candy-kart-game/，cache 由 Godot 重建）
 /candy-kart-game/.godot/
 

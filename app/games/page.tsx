@@ -13,11 +13,11 @@ import styles from "./page.module.css";
 export const metadata: Metadata = {
   title: "車車遊樂園",
   description:
-    "和故事裡的車車朋友一起玩小遊戲：闖關、方塊、卡丁車與海盜賽車，適合 5–12 歲親子。",
+    "和故事裡的車車朋友一起玩小遊戲：闖關、方塊、糖果卡丁車，適合 5–12 歲親子。",
   openGraph: {
     title: "車車遊樂園 · 小遊戲",
     description:
-      "車車大冒險、繽紛方塊、車車卡丁車、海盜卡丁車大賽——親子小遊戲一站玩。",
+      "車車大冒險、繽紛方塊、繽紛卡丁車——親子小遊戲一站玩。",
     url: `${getSiteUrl()}/games`,
   },
 };

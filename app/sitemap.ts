@@ -39,13 +39,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
     },
     {
-      url: `${baseUrl}/games/kart`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/games/pirate-kart`,
+      url: `${baseUrl}/games/candy-kart`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.6,

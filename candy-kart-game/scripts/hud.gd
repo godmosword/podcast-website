@@ -70,7 +70,7 @@ func _build() -> void:
 	top.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(top)
 
-	var pos_chip := make_chip("1", 30)
+	var pos_chip := make_chip("1", 38)
 	pos_label = pos_chip["label"]
 	top.add_child(pos_chip["panel"])
 
@@ -84,10 +84,10 @@ func _build() -> void:
 	var star_row := HBoxContainer.new()
 	star_row.add_theme_constant_override("separation", 6)
 	var star_icon := StarIcon.new()
-	star_icon.custom_minimum_size = Vector2(26, 26)
+	star_icon.custom_minimum_size = Vector2(34, 34)
 	star_label = Label.new()
 	star_label.text = "0/7"
-	star_label.add_theme_font_size_override("font_size", 24)
+	star_label.add_theme_font_size_override("font_size", 30)
 	star_label.add_theme_color_override("font_color", INK)
 	star_row.add_child(star_icon)
 	star_row.add_child(star_label)
@@ -99,18 +99,18 @@ func _build() -> void:
 	spacer2.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	top.add_child(spacer2)
 
-	var lap_chip := make_chip("1/3 圈", 24)
+	var lap_chip := make_chip("1/3 圈", 30)
 	lap_label = lap_chip["label"]
 	top.add_child(lap_chip["panel"])
 
 	var pause_btn := IconButton.new()
 	pause_btn.icon_type = "pause"
-	pause_btn.custom_minimum_size = Vector2(56, 56)
+	pause_btn.custom_minimum_size = Vector2(68, 68)
 	pause_btn.pressed.connect(func() -> void: pause_requested.emit())
 	top.add_child(pause_btn)
 
 	count_label = Label.new()
-	count_label.add_theme_font_size_override("font_size", 110)
+	count_label.add_theme_font_size_override("font_size", 128)
 	count_label.add_theme_color_override("font_color", PINK)
 	count_label.add_theme_constant_override("outline_size", 14)
 	count_label.add_theme_color_override("font_outline_color", Color(1, 1, 1))
@@ -125,10 +125,10 @@ func _build() -> void:
 func _build_touch(root: Control) -> void:
 	var left_btn := IconButton.new()
 	left_btn.icon_type = "left"
-	left_btn.custom_minimum_size = Vector2(96, 96)
+	left_btn.custom_minimum_size = Vector2(120, 120)
 	left_btn.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	left_btn.position = Vector2(24, -130)
-	left_btn.offset_top = -130
+	left_btn.position = Vector2(24, -160)
+	left_btn.offset_top = -160
 	left_btn.offset_left = 24
 	left_btn.button_down.connect(func() -> void: touch_left = true)
 	left_btn.button_up.connect(func() -> void: touch_left = false)
@@ -136,20 +136,20 @@ func _build_touch(root: Control) -> void:
 
 	var right_btn := IconButton.new()
 	right_btn.icon_type = "right"
-	right_btn.custom_minimum_size = Vector2(96, 96)
+	right_btn.custom_minimum_size = Vector2(120, 120)
 	right_btn.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	right_btn.offset_top = -130
-	right_btn.offset_left = 140
+	right_btn.offset_top = -160
+	right_btn.offset_left = 168
 	right_btn.button_down.connect(func() -> void: touch_right = true)
 	right_btn.button_up.connect(func() -> void: touch_right = false)
 	root.add_child(right_btn)
 
 	var drift_btn := IconButton.new()
 	drift_btn.icon_type = "drift"
-	drift_btn.custom_minimum_size = Vector2(110, 110)
+	drift_btn.custom_minimum_size = Vector2(136, 136)
 	drift_btn.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	drift_btn.offset_top = -144
-	drift_btn.offset_left = -150
+	drift_btn.offset_top = -176
+	drift_btn.offset_left = -184
 	drift_btn.button_down.connect(func() -> void: touch_drift = true)
 	drift_btn.button_up.connect(func() -> void: touch_drift = false)
 	root.add_child(drift_btn)

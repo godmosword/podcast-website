@@ -11,7 +11,6 @@ export default defineConfig({
       "**/e2e/**",
       "**/.cache/**",
       "**/models/**",
-      "**/kart-game/**",
     ],
   },
   resolve: {

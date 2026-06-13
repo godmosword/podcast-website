@@ -10,7 +10,7 @@ export const PROGRESS_SCHEMA_VERSION = 2;
 
 export type CaptionSize = "sm" | "md" | "lg";
 export type ThemePreference = ThemeMode;
-export type GameScoreId = GameKitGameId | "kart" | "pirate-kart";
+export type GameScoreId = GameKitGameId;
 export type BlockDropDifficultyPreference = "relaxed" | "standard" | "challenge";
 export type BlockDropSpecialModePreference = "classic" | "rainbow";
 
