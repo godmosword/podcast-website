@@ -89,5 +89,6 @@ GHA `sync-apple-podcast.yml` 在 `npm run sync:apple` 後**一律**跑 `npm run 
 
 ## 相關文件
 
+- [AGENT-WORKFLOW.md](./AGENT-WORKFLOW.md) — 全專案 Agent 編排（`/agent-plan` 規劃審核、`/agent-action` 分模型實作）
 - [README — illustrate](./README.md#每集劇情插圖自動生成npm-run-illustrate)
 - [TODOS — Phase 3 生圖管線](./TODOS.md)
