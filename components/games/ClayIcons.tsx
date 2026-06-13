@@ -124,7 +124,36 @@ export function IconRainbow({ size, style }: IconProps) {
   );
 }
 
-/** 點一下（手指漣漪） */
+/** 旋轉（圓角方塊 + 弧形箭頭，明確表示轉向） */
+export function IconRotate({ size, color = "currentColor", style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <rect x="7.5" y="9" width="9" height="9" rx="2.2" {...stroke(color)} />
+      <path d="M17.2 6.8h3v3" {...stroke(color)} />
+      <path d="M17.2 6.8a7.2 7.2 0 1 0 2.2 5.6" {...stroke(color)} />
+    </Svg>
+  );
+}
+
+/** 左移 */
+export function IconChevronLeft({ size, color = "currentColor", style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <path d="M14.5 6.5 8.5 12l6 5.5" {...stroke(color)} />
+    </Svg>
+  );
+}
+
+/** 右移 */
+export function IconChevronRight({ size, color = "currentColor", style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <path d="M9.5 6.5 15.5 12l-6 5.5" {...stroke(color)} />
+    </Svg>
+  );
+}
+
+/** 點一下（手指漣漪）— 僅供非遊戲操作提示沿用 */
 export function IconTap({ size, color = "currentColor", style }: IconProps) {
   return (
     <Svg size={size} style={style}>

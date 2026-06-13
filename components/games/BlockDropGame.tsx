@@ -27,6 +27,8 @@ import { useGameKitSettings } from "@/hooks/useGameKitSettings";
 import {
   IconBox,
   IconCandy,
+  IconChevronLeft,
+  IconChevronRight,
   IconFlame,
   IconKid,
   IconNext,
@@ -34,14 +36,13 @@ import {
   IconPlay,
   IconRainbow,
   IconReplay,
+  IconRotate,
   IconSpaceKey,
   IconSparkle,
   IconSprout,
   IconStar,
   IconSwipeDown,
-  IconSwipeLR,
   IconSwipeUp,
-  IconTap,
   IconTrophy,
 } from "@/components/games/ClayIcons";
 
@@ -53,7 +54,65 @@ const BOARD_H = ROWS * CELL;
 const MAX_BOARD_W = 396;
 const WIDE_MAX_BOARD_W = 460;
 const WIDE_SIDE_W = 150;
-const TOUCH_SIDE_W = 76;
+
+type LayoutMode = "mobile" | "tablet" | "desktop";
+
+type TouchPadMetrics = {
+  colW: number;
+  btn: number;
+  icon: number;
+  gap: number;
+};
+
+type LayoutMetrics = {
+  shellPad: string;
+  shellMaxW: number;
+  sideColW: number;
+  boardMaxW: number | undefined;
+  playGap: number;
+  titleSize: number;
+  touch: TouchPadMetrics | null;
+  hud: { hold: number; nextFirst: number; nextRest: number };
+};
+
+function getLayoutMetrics(mode: LayoutMode, isCoarse: boolean): LayoutMetrics {
+  switch (mode) {
+    case "mobile":
+      return {
+        shellPad: "12px 12px",
+        shellMaxW: isCoarse ? MAX_BOARD_W + 92 : MAX_BOARD_W + 28,
+        sideColW: 0,
+        boardMaxW: undefined,
+        playGap: 8,
+        titleSize: 16,
+        touch: isCoarse ? { colW: 72, btn: 52, icon: 22, gap: 7 } : null,
+        hud: { hold: 12, nextFirst: 10, nextRest: 7 },
+      };
+    case "tablet":
+      return {
+        shellPad: "16px 18px",
+        shellMaxW: WIDE_MAX_BOARD_W + WIDE_SIDE_W * 2 + 56,
+        sideColW: WIDE_SIDE_W,
+        boardMaxW: 400,
+        playGap: 12,
+        titleSize: 18,
+        touch: isCoarse ? { colW: 76, btn: 56, icon: 23, gap: 8 } : null,
+        hud: { hold: 16, nextFirst: 13, nextRest: 9 },
+      };
+    case "desktop":
+      return {
+        shellPad: "18px 22px",
+        shellMaxW: WIDE_MAX_BOARD_W + WIDE_SIDE_W * 2 + 80,
+        sideColW: WIDE_SIDE_W + 4,
+        boardMaxW: WIDE_MAX_BOARD_W,
+        playGap: 14,
+        titleSize: 20,
+        touch: isCoarse ? { colW: 80, btn: 58, icon: 24, gap: 9 } : null,
+        hud: { hold: 18, nextFirst: 16, nextRest: 11 },
+      };
+  }
+}
+
 const LOCK_DELAY = 450;
 const DAS_DELAY = 170;
 const DAS_REPEAT = 50;
@@ -479,6 +538,100 @@ const hintChip: CSSProperties = {
   whiteSpace: "nowrap",
 };
 
+function touchPadButton(metrics: TouchPadMetrics, full = true): CSSProperties {
+  return {
+    ...hintChip,
+    borderRadius: 18,
+    minHeight: metrics.btn,
+    height: metrics.btn,
+    minWidth: full ? undefined : metrics.btn,
+    width: full ? "100%" : undefined,
+    flex: full ? undefined : 1,
+    justifyContent: "center",
+    padding: 0,
+    boxShadow: "0 6px 14px rgba(126,96,112,.16)",
+    touchAction: "manipulation",
+    cursor: "pointer",
+  };
+}
+
+/** 棋盤右側觸控鍵：旋轉、左右移、落下、暫存。 */
+function TouchControlPad({
+  metrics,
+  onRotate,
+  onMoveLeftDown,
+  onMoveRightDown,
+  onMoveStop,
+  onDrop,
+  onHold,
+}: {
+  metrics: TouchPadMetrics;
+  onRotate: () => void;
+  onMoveLeftDown: () => void;
+  onMoveRightDown: () => void;
+  onMoveStop: () => void;
+  onDrop: () => void;
+  onHold: () => void;
+}) {
+  const full = touchPadButton(metrics);
+  const half = touchPadButton(metrics, false);
+  const { icon, gap, colW } = metrics;
+  return (
+    <div
+      data-testid="touch-control-pad"
+      style={{
+        width: colW,
+        flexShrink: 0,
+        display: "flex",
+        flexDirection: "column",
+        gap,
+        alignSelf: "stretch",
+        justifyContent: "center",
+      }}
+    >
+      <button type="button" aria-label="旋轉" style={full} onClick={onRotate}>
+        <IconRotate size={icon} />
+      </button>
+      <div style={{ display: "flex", gap }}>
+        <button
+          type="button"
+          aria-label="左移"
+          style={half}
+          onPointerDown={(e) => {
+            e.preventDefault();
+            onMoveLeftDown();
+          }}
+          onPointerUp={onMoveStop}
+          onPointerLeave={onMoveStop}
+          onPointerCancel={onMoveStop}
+        >
+          <IconChevronLeft size={icon} />
+        </button>
+        <button
+          type="button"
+          aria-label="右移"
+          style={half}
+          onPointerDown={(e) => {
+            e.preventDefault();
+            onMoveRightDown();
+          }}
+          onPointerUp={onMoveStop}
+          onPointerLeave={onMoveStop}
+          onPointerCancel={onMoveStop}
+        >
+          <IconChevronRight size={icon} />
+        </button>
+      </div>
+      <button type="button" aria-label="落下" style={full} onClick={onDrop}>
+        <IconSwipeDown size={icon} />
+      </button>
+      <button type="button" aria-label="暫存" style={full} onClick={onHold}>
+        <IconSwipeUp size={icon} />
+      </button>
+    </div>
+  );
+}
+
 type HintItem = {
   key: string;
   icon: ReactNode;
@@ -532,7 +685,7 @@ function HintChips({
         gap: isSide ? 10 : 6,
         justifyContent: "center",
         flexWrap: layout === "column" ? "nowrap" : "wrap",
-        width: layout === "column" ? TOUCH_SIDE_W : undefined,
+        width: layout === "column" ? 72 : undefined,
         flexShrink: 0,
         alignSelf: layout === "column" ? "stretch" : undefined,
       }}
@@ -643,17 +796,19 @@ function PiecePreview({ type, cell }: { type: PieceType | null; cell: number }) 
 }
 
 const TOUCH_HINTS: HintItem[] = [
-  { key: "tap", icon: <IconTap size={15} />, label: "轉" },
-  { key: "drag", icon: <IconSwipeLR size={15} />, label: "移" },
+  { key: "rotate", icon: <IconRotate size={15} />, label: "轉" },
+  { key: "left", icon: <IconChevronLeft size={15} />, label: "左" },
+  { key: "right", icon: <IconChevronRight size={15} />, label: "右" },
   { key: "down", icon: <IconSwipeDown size={15} />, label: "落" },
 ];
 const TOUCH_HOLD_HINT: HintItem = {
-  key: "up",
+  key: "hold",
   icon: <IconSwipeUp size={15} />,
   label: "存",
 };
 const KEY_HINTS: HintItem[] = [
-  { key: "move", icon: null, label: "← → 移" },
+  { key: "left", icon: null, label: "← 左" },
+  { key: "right", icon: null, label: "→ 右" },
   { key: "rotate", icon: null, label: "↑ 轉" },
   { key: "drop", icon: <IconSpaceKey size={16} />, label: "落" },
 ];
@@ -715,7 +870,6 @@ export default function BlockDropGame() {
     return () => window.removeEventListener("resize", apply);
   }, []);
   const wide = layoutMode !== "mobile";
-  const desktop = layoutMode === "desktop";
 
   // ── 手機優先：棋盤填滿卡片寬度，連續縮放（DOM 方塊非像素畫，免整數倍）──
   const boardWrapRef = useRef<HTMLDivElement | null>(null);
@@ -732,7 +886,8 @@ export default function BlockDropGame() {
       // 用棋盤頂端的實際位置動態計算可用高度（下方保留提示行＋卡片內距），
       // 整頁呈現、玩到底不用捲動
       const top = el.getBoundingClientRect().top + window.scrollY;
-      const reserve = wide ? 42 : isCoarse ? 22 : 34;
+      const reserve =
+        layoutMode === "desktop" ? 48 : layoutMode === "tablet" ? 40 : isCoarse ? 20 : 32;
       const maxH = Math.max(300, (window.innerHeight || 800) - top - reserve);
       setBoardScale(Math.min(w / BOARD_W, maxH / BOARD_H));
     };
@@ -744,7 +899,7 @@ export default function BlockDropGame() {
       ro.disconnect();
       window.removeEventListener("resize", apply);
     };
-  }, [wide, isCoarse]);
+  }, [wide, isCoarse, layoutMode]);
 
   // ── 浮動回饋文字（消行／連擊／升級）──
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -1361,42 +1516,20 @@ export default function BlockDropGame() {
   };
 
   const touchHintItems: HintItem[] = [...TOUCH_HINTS, TOUCH_HOLD_HINT];
-  const buildTouchControls = (iconSize: number): HintItem[] => [
-    { key: "tap", icon: <IconTap size={iconSize} />, label: "轉", onPress: () => rotate(1) },
-    {
-      key: "drag",
-      icon: <IconSwipeLR size={iconSize} />,
-      label: "移",
-      onPointerDown: (e) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        const dx = e.clientX < rect.left + rect.width / 2 ? -1 : 1;
-        startMoveRepeat(dx);
-      },
-      onPointerUp: stopMoveRepeat,
-    },
-    {
-      key: "down",
-      icon: <IconSwipeDown size={iconSize} />,
-      label: "落",
-      onPress: () => hardDrop(),
-    },
-    {
-      key: "up",
-      icon: <IconSwipeUp size={iconSize} />,
-      label: "存",
-      onPress: () => holdPiece(),
-    },
-  ];
-  const touchSideControlItems = buildTouchControls(24);
+  const layout = getLayoutMetrics(layoutMode, isCoarse);
+  const showTouchPad = isCoarse && inRound && layout.touch != null;
 
-  const touchSideControls = (
-    <HintChips
-      layout="column"
-      size="side"
-      iconOnly
-      items={touchSideControlItems}
+  const touchPad = layout.touch ? (
+    <TouchControlPad
+      metrics={layout.touch}
+      onRotate={() => rotate(1)}
+      onMoveLeftDown={() => startMoveRepeat(-1)}
+      onMoveRightDown={() => startMoveRepeat(1)}
+      onMoveStop={stopMoveRepeat}
+      onDrop={hardDrop}
+      onHold={holdPiece}
     />
-  );
+  ) : null;
 
   const holdButton = (cell: number) => (
     <button
@@ -1457,7 +1590,7 @@ export default function BlockDropGame() {
         aria-label={`分數 ${g.score}`}
         style={{
           color: MACARON_THEME.ink,
-          fontSize: desktop ? 32 : wide ? 29 : 27,
+          fontSize: layoutMode === "desktop" ? 32 : layoutMode === "tablet" ? 28 : 26,
           fontWeight: 900,
           lineHeight: 1.1,
         }}
@@ -1515,13 +1648,9 @@ export default function BlockDropGame() {
         fontFamily: font,
         background:
           "linear-gradient(160deg,#fff9ee 0%,#f3fbff 52%,#fff0f7 100%)",
-        padding: wide ? "18px 20px 18px" : "14px 14px 14px",
+        padding: layout.shellPad,
         borderRadius: 28,
-        maxWidth: wide
-          ? WIDE_MAX_BOARD_W + (WIDE_SIDE_W + 14) * 2 + (desktop ? 56 : 32)
-          : isCoarse
-            ? MAX_BOARD_W + TOUCH_SIDE_W + 12
-            : MAX_BOARD_W,
+        maxWidth: layout.shellMaxW,
         margin: "0 auto",
         border: "2px solid rgba(255,255,255,.92)",
         boxShadow:
@@ -1568,7 +1697,7 @@ export default function BlockDropGame() {
         <div>
           <div
             style={{
-              fontSize: wide ? 20 : 16,
+              fontSize: layout.titleSize,
               fontWeight: 800,
               color: MACARON_THEME.ink,
               whiteSpace: "nowrap",
@@ -1649,9 +1778,9 @@ export default function BlockDropGame() {
             alignItems: "stretch",
           }}
         >
-          {holdButton(13)}
+          {holdButton(layout.hud.hold)}
           {scorePanel}
-          {nextPanel(11, 8)}
+          {nextPanel(layout.hud.nextFirst, layout.hud.nextRest)}
         </div>
       )}
 
@@ -1659,7 +1788,7 @@ export default function BlockDropGame() {
       <div
         style={{
           display: "flex",
-          gap: wide ? 14 : 8,
+          gap: layout.playGap,
           alignItems: "flex-start",
           justifyContent: "center",
         }}
@@ -1667,7 +1796,7 @@ export default function BlockDropGame() {
         {wide && (
           <div
             style={{
-              width: WIDE_SIDE_W,
+              width: layout.sideColW,
               flexShrink: 0,
               display: "flex",
               flexDirection: "column",
@@ -1675,7 +1804,7 @@ export default function BlockDropGame() {
             }}
           >
             {scorePanel}
-            {holdButton(18)}
+            {holdButton(layout.hud.hold)}
           </div>
         )}
 
@@ -1684,7 +1813,7 @@ export default function BlockDropGame() {
         style={{
           flex: 1,
           minWidth: 0,
-          maxWidth: wide ? (desktop ? WIDE_MAX_BOARD_W : 420) : undefined,
+          maxWidth: layout.boardMaxW,
           height: boardDisplayH,
           margin: wide ? "0 auto" : 0,
         }}
@@ -2051,19 +2180,19 @@ export default function BlockDropGame() {
         {wide && (
           <div
             style={{
-              width: WIDE_SIDE_W,
+              width: layout.sideColW,
               flexShrink: 0,
               display: "flex",
               flexDirection: "column",
               gap: 10,
             }}
           >
-            {nextPanel(16, 12)}
-            {isCoarse && inRound && touchSideControls}
+            {nextPanel(layout.hud.nextFirst, layout.hud.nextRest)}
+            {showTouchPad && touchPad}
           </div>
         )}
 
-        {!wide && isCoarse && inRound && touchSideControls}
+        {!wide && showTouchPad && touchPad}
       </div>
 
       {!isCoarse && (
