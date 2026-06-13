@@ -11,6 +11,8 @@ static func make_clay_material() -> StandardMaterial3D:
 	mat.vertex_color_use_as_albedo = true
 	mat.roughness = 0.85
 	mat.metallic = 0.0
+	# 程序生成的路面/起跑線/加速帶三角形繞向不保證一致，關閉背面剔除
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	return mat
 
 static func solid_material(color: Color, emissive := 0.0) -> StandardMaterial3D:

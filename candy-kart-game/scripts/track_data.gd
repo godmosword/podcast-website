@@ -33,8 +33,8 @@ const TRACKS := [
 		"id": "candy-beach",
 		"name": "糖果海灘",
 		"laps": 3,
-		"par_ms": 235000,
-		"scale": 0.95,
+		"par_ms": 245000,
+		"scale": 0.86,
 		"points": [
 			Vector2(0, 0), Vector2(160, -70), Vector2(330, -60), Vector2(430, 30),
 			Vector2(420, 150), Vector2(300, 200), Vector2(250, 290), Vector2(330, 370),
@@ -58,7 +58,7 @@ const TRACKS := [
 		"name": "果凍森林",
 		"laps": 3,
 		"par_ms": 245000,
-		"scale": 1.0,
+		"scale": 0.95,
 		"points": [
 			Vector2(0, 0), Vector2(120, -60), Vector2(240, -20), Vector2(330, -90),
 			Vector2(450, -60), Vector2(520, 40), Vector2(470, 140), Vector2(540, 240),
@@ -82,7 +82,7 @@ const TRACKS := [
 		"name": "冰淇淋雪山",
 		"laps": 3,
 		"par_ms": 255000,
-		"scale": 1.0,
+		"scale": 0.75,
 		"points": [
 			Vector2(0, 0), Vector2(200, -40), Vector2(400, -30), Vector2(480, 60),
 			Vector2(400, 140), Vector2(200, 130), Vector2(100, 200), Vector2(200, 280),
@@ -105,8 +105,8 @@ const TRACKS := [
 		"id": "choco-volcano",
 		"name": "巧克力火山",
 		"laps": 3,
-		"par_ms": 265000,
-		"scale": 1.0,
+		"par_ms": 250000,
+		"scale": 0.85,
 		"points": [
 			Vector2(0, 0), Vector2(140, -50), Vector2(260, -10), Vector2(380, -60),
 			Vector2(480, 20), Vector2(440, 120), Vector2(320, 150), Vector2(360, 250),
@@ -129,8 +129,8 @@ const TRACKS := [
 		"id": "rainbow-skyway",
 		"name": "彩虹天空道",
 		"laps": 3,
-		"par_ms": 275000,
-		"scale": 1.0,
+		"par_ms": 250000,
+		"scale": 0.78,
 		"points": [
 			Vector2(0, 0), Vector2(260, -80), Vector2(520, -60), Vector2(680, 80),
 			Vector2(700, 280), Vector2(560, 420), Vector2(380, 400), Vector2(300, 330),

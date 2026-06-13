@@ -26,11 +26,11 @@ export type CandyKartTrack = {
 
 export const CANDY_KART_TRACKS: CandyKartTrack[] = [
   { id: "macaron-meadow", levelIndex: 0, name: "馬卡龍草原", laps: 3, parTimeMs: 225_000, starsTotal: 7 },
-  { id: "candy-beach", levelIndex: 1, name: "糖果海灘", laps: 3, parTimeMs: 235_000, starsTotal: 7 },
+  { id: "candy-beach", levelIndex: 1, name: "糖果海灘", laps: 3, parTimeMs: 245_000, starsTotal: 7 },
   { id: "jelly-forest", levelIndex: 2, name: "果凍森林", laps: 3, parTimeMs: 245_000, starsTotal: 7 },
   { id: "icecream-peak", levelIndex: 3, name: "冰淇淋雪山", laps: 3, parTimeMs: 255_000, starsTotal: 7 },
-  { id: "choco-volcano", levelIndex: 4, name: "巧克力火山", laps: 3, parTimeMs: 265_000, starsTotal: 7 },
-  { id: "rainbow-skyway", levelIndex: 5, name: "彩虹天空道", laps: 3, parTimeMs: 275_000, starsTotal: 7 },
+  { id: "choco-volcano", levelIndex: 4, name: "巧克力火山", laps: 3, parTimeMs: 250_000, starsTotal: 7 },
+  { id: "rainbow-skyway", levelIndex: 5, name: "彩虹天空道", laps: 3, parTimeMs: 250_000, starsTotal: 7 },
 ];
 
 export function candyKartTrackById(id: string): CandyKartTrack | null {
