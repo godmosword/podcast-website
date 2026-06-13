@@ -8,7 +8,7 @@
       "清潔車"
     ],
     "vehicle": "street sweeper",
-    "desc": "a cute claymation street-sweeper truck, cream/off-white cab with a bright green lower body, an orange light-bar sign on the roof, two big round yellow spinning brushes at the front bottom, big friendly round eyes and a cheerful smile",
+    "desc": "a cute claymation street-sweeper truck, cream/off-white cab with a bright green lower body, an orange light-bar on the roof, a black cube wake-up speaker with one large circular driver sitting on a small pink rectangular base mounted on the roof behind the light bar, two big round yellow spinning brushes at the front bottom, big friendly round eyes and a cheerful smile",
     "ref": "characters/鈴鈴清潔車.jpg",
     "firstSeen": "ep-9"
   },
@@ -105,6 +105,17 @@
     "firstSeen": "ep-5"
   },
   {
+    "name": "小橘高鐵",
+    "aliases": [
+      "小橘",
+      "高鐵"
+    ],
+    "vehicle": "high speed rail",
+    "desc": "a cute claymation cream-white Taiwan HSR bullet train with long multi-carriage body on rails, sleek aerodynamic nose with friendly face (big round eyes, pink cheeks, gentle smile), bold orange stripe along the side, dark grey lower body, absolutely NO arms NO hands NO limbs",
+    "ref": "characters/小橘高鐵.jpg",
+    "firstSeen": "ep-7"
+  },
+  {
     "name": "三輪車",
     "aliases": [
       "三輪"
@@ -153,5 +164,15 @@
     "desc": "a cute claymation personified drone named Xiao Fei, cream off-white rounded square clay body, yellow lightning bolt on forehead, big glossy black eyes, pink cheek blush, wide happy smile, black camera lens on lower face, two small green LED lights, four gray arms with spinning propellers, no legs",
     "ref": "characters/小飛.jpg",
     "firstSeen": "ep-2"
+  },
+  {
+    "name": "小南",
+    "aliases": [
+      "小南捷運"
+    ],
+    "vehicle": "MRT train",
+    "desc": "a cute claymation Taipei MRT train with a sleek silver-white body, blue and green stripes along the side, big round friendly eyes, pink cheeks and a warm welcoming smile",
+    "ref": "characters/小南.jpg",
+    "firstSeen": "ep-7"
   }
 ]

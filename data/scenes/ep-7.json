@@ -1,0 +1,165 @@
+{
+  "slug": "ep-7",
+  "audioDuration": 294,
+  "model": "semantic-15-20s",
+  "generatedAt": "2026-06-13T01:53:05.320Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 0,
+      "end": 20.2,
+      "summary": "主持人介紹小橘高鐵",
+      "prompt": "Warm podcast intro at the clay car amusement park, hosts Bonbon and Mami introducing today's hero Xiao Ju the orange high-speed train, cheerful welcoming mood",
+      "characters": [],
+      "keepCover": true
+    },
+    {
+      "index": 2,
+      "start": 20.2,
+      "end": 40.9,
+      "summary": "聊聊高鐵與延遲事件",
+      "prompt": "Bonbon and Mami chatting about what makes high-speed trains special — fast speed and cute door chimes — Mami mentions a recent delay experience, cozy conversation mood",
+      "characters": ["蹦蹦", "馬米"],
+      "refPages": [1],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 3,
+      "start": 40.9,
+      "end": 60.6,
+      "summary": "準備去板橋看表演",
+      "prompt": "Bonbon with a small backpack ready to leave home happily for a performance in Banqiao, Mami beside him, bright morning departure mood",
+      "characters": ["蹦蹦", "馬米"],
+      "refPages": [2],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 4,
+      "start": 60.6,
+      "end": 81.5,
+      "summary": "收到高鐵延誤簡訊",
+      "prompt": "Mami's phone buzzes with an HSR alert about signal trouble and schedule changes, she reads the message with a calm but concerned expression, Bonbon watching",
+      "characters": ["蹦蹦", "馬米"],
+      "refPages": [3],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 5,
+      "start": 81.5,
+      "end": 93,
+      "summary": "高鐵可能會晚到",
+      "prompt": "Mami explains gently that their train may be delayed and arrive later than planned, reassuring tone, Bonbon listening carefully",
+      "characters": ["蹦蹦", "馬米"],
+      "refPages": [4],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 6,
+      "start": 93,
+      "end": 110.9,
+      "summary": "蹦蹦擔心還能去板橋嗎",
+      "prompt": "Bonbon looks a little nervous holding Mami's hand, asking if they can still go to Banqiao, Mami smiles and says they will adjust the plan and head to the station first",
+      "characters": ["蹦蹦", "馬米"],
+      "refPages": [5],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 7,
+      "start": 110.9,
+      "end": 124.6,
+      "summary": "抵達高鐵車站",
+      "prompt": "Busy clay-style high-speed rail station with passengers reading boards and queuing, Bonbon and Mami arrive looking around, announcement bells ringing",
+      "characters": ["蹦蹦", "馬米"],
+      "refPages": [6],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 8,
+      "start": 124.6,
+      "end": 146.7,
+      "summary": "小橘高鐵進站說明",
+      "prompt": "Taiwan HSR station platform, Xiao Ju the cream-white bullet-nose high-speed train with bold orange side stripe and dark grey lower body glides in on rails — long multi-carriage train shape exactly like the reference, friendly face on the aerodynamic nose only, NO arms NO hands NO limbs on the train, small clay kid Bonbon and adult host Mami standing on the yellow tactile platform edge listening warmly",
+      "characters": ["小橘高鐵", "蹦蹦", "馬米"],
+      "refPages": [1, 7],
+      "refPageHint": "Match Xiao Ju HSR exact bullet-train silhouette, cream body, orange stripe and face from reference page 1; match station clay style from page 7; Bonbon and Mami are small human clay figures only — do NOT turn hosts into cars."
+    },
+    {
+      "index": 9,
+      "start": 146.7,
+      "end": 161.2,
+      "summary": "蹦蹦問怎麼去板橋",
+      "prompt": "Bonbon asks Mami how they can still reach Banqiao, Mami checks information on her phone and thinks calmly, Xiao Ju waiting kindly on the platform",
+      "characters": ["小橘高鐵", "蹦蹦", "馬米"],
+      "refPages": [8],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 10,
+      "start": 161.2,
+      "end": 182.9,
+      "summary": "改搭高鐵再轉捷運",
+      "prompt": "Mami's plan: ride Xiao Ju to Taipei Main Station then transfer to MRT for Banqiao, Bonbon and Mami hold hands boarding the orange train, hopeful teamwork mood",
+      "characters": ["小橘高鐵", "蹦蹦", "馬米"],
+      "refPages": [9],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 11,
+      "start": 182.9,
+      "end": 205.5,
+      "summary": "抵達臺北車站",
+      "prompt": "Inside the moving train then arriving at Taipei Main Station, station announcement playing, Bonbon and Mami gather their bags preparing to exit, gentle travel mood",
+      "characters": ["小橘高鐵", "蹦蹦", "馬米"],
+      "refPages": [10],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 12,
+      "start": 205.5,
+      "end": 227.8,
+      "summary": "小南捷運載去板橋",
+      "prompt": "Bonbon and Mami walk to the Bannan Line MRT platform, friendly MRT train Xiao Nan arrives with blue-green stripes and a welcoming smile, offering to take them to Banqiao",
+      "characters": ["蹦蹦", "馬米", "小南"],
+      "refPages": [11],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 13,
+      "start": 227.8,
+      "end": 244.3,
+      "summary": "順利抵達板橋",
+      "prompt": "Banqiao MRT platform, Bonbon and Mami wave happily beside friendly MRT train Xiao Nan — silver-white body with blue and green stripes, on-model from character reference, warm grateful arrival mood, only one train visible, simple clean composition",
+      "characters": ["蹦蹦", "馬米", "小南"],
+      "refPages": [12],
+      "refPageHint": "Match Bonbon (boy with yellow backpack, teal hoodie) and Mami (adult host) exactly from earlier pages; Xiao Nan MRT train on-model from character ref; human hosts must stay human — NOT car-shaped bodies."
+    },
+    {
+      "index": 14,
+      "start": 244.3,
+      "end": 266.4,
+      "summary": "遇到改變也不慌張",
+      "prompt": "Warm podcast teaching moment at the sunny clay car amusement park, host Mami kneels talking gently to Bonbon about staying calm when plans change — rain at the park or a delayed train — think of safe alternative routes, soft Ferris wheel and colorful park in background, NO personified vehicle characters in foreground, cozy educational mood",
+      "characters": ["蹦蹦", "馬米"],
+      "refPages": [2, 6],
+      "refPageHint": "Match Bonbon and Mami human clay designs from reference pages; same amusement-park palette as page 2; only the two human hosts in focus — no car-body hybrids, no extra mascot cars."
+    },
+    {
+      "index": 15,
+      "start": 266.4,
+      "end": 294,
+      "summary": "故事結尾道別",
+      "prompt": "Cheerful podcast closing at the sunny clay car amusement park, Bonbon and Mami wave goodbye together inviting children to visit again next time, Ferris wheel and roller coaster softly in background, warm friendly ending, only two human hosts visible",
+      "characters": ["蹦蹦", "馬米"],
+      "refPages": [2],
+      "refPageHint": "Match Bonbon and Mami exactly from reference — human clay boy with yellow backpack and adult host; same park style as page 2; NO personified cars with human hair or arms, NO car-body hybrids."
+    }
+  ],
+  "newCharacters": [
+    {
+      "name": "小南",
+      "aliases": ["小南捷運"],
+      "vehicle": "MRT train",
+      "desc": "a cute claymation Taipei MRT train with a sleek silver-white body, blue and green stripes along the side, big round friendly eyes, pink cheeks and a warm welcoming smile"
+    }
+  ]
+}

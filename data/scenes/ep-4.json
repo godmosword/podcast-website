@@ -18,10 +18,10 @@
       "start": 21.9,
       "end": 44.1,
       "summary": "廣場播放早安音樂",
-      "prompt": "Lingling the street sweeper arrives at the sunny town square playing gentle cute morning music from her speaker, happy wake-up mood",
+      "prompt": "Lingling the street sweeper arrives at the sunny town square playing gentle cute morning music from her roof-mounted wake-up speaker — a black cube speaker with one large circular driver on a small pink rectangular base, orange light bar on cab roof, colorful musical notes floating, happy wake-up mood",
       "characters": ["鈴鈴清潔車"],
-      "refPages": [1],
-      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+      "refPages": [1, 11],
+      "refPageHint": "Match Lingling's exact black cube wake-up speaker on pink base from reference page 11 (NOT teal boombox, NOT rounded blue speaker); same clay park style from page 1; only change composition and action."
     },
     {
       "index": 3,
@@ -48,10 +48,10 @@
       "start": 85.9,
       "end": 106.3,
       "summary": "喇叭壞了著急",
-      "prompt": "Next morning Lingling tries to play wake-up music but her speaker makes no sound, worried anxious face wondering what to do",
+      "prompt": "Next morning Lingling tries to play wake-up music but her roof-mounted black cube wake-up speaker on pink base makes no sound — same speaker design as always, just silent with no musical notes, worried anxious face wondering what to do",
       "characters": ["鈴鈴清潔車"],
-      "refPages": [4],
-      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+      "refPages": [4, 11],
+      "refPageHint": "Match Lingling's exact black cube wake-up speaker on pink base from reference page 11 — speaker stays mounted on roof (NOT a separate boombox on the ground); same truck design from page 4; only change mood to worried and silent."
     },
     {
       "index": 6,
