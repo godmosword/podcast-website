@@ -1,0 +1,298 @@
+{
+  "slug": "ep-6",
+  "audioDuration": 341,
+  "model": "semantic-15-20s",
+  "generatedAt": "2026-06-13T00:14:29.241Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 0,
+      "end": 23.2,
+      "summary": "介紹安安救護車",
+      "prompt": "Warm podcast intro at the car amusement park on a sunny day, hosts Bonbon and Mami introducing An An the cream-white ambulance with red cross and bright lights, cheerful welcoming mood",
+      "characters": [],
+      "keepCover": true
+    },
+    {
+      "index": 2,
+      "start": 23.2,
+      "end": 32.9,
+      "summary": "安安救護車的特徵",
+      "prompt": "Close-up on An An the cream-white ambulance showing its red cross, red light-bar and bright headlights, friendly eyes, sunny car amusement park background, clay style",
+      "characters": [
+        "安安救護車"
+      ],
+      "refPages": [
+        1
+      ],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 3,
+      "start": 32.9,
+      "end": 50.9,
+      "summary": "陽光明媚的遊樂園",
+      "prompt": "Sunny day at the colorful clay car amusement park, little red race car practicing turns, blue minibus carrying small passengers in circles, Dong Dong the excavator organizing the sandbox, everyone playing happily",
+      "characters": [
+        "小紅賽車",
+        "藍色小巴士",
+        "東東挖土機"
+      ],
+      "refPages": [
+        2
+      ],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 4,
+      "start": 50.9,
+      "end": 64.9,
+      "summary": "緊急廣播",
+      "prompt": "Emergency broadcast voice in the park: a small three-wheeled tricycle is stuck in the mud at the hillside garden, urgent but calm announcement mood",
+      "characters": [
+        "三輪車"
+      ],
+      "refPages": [
+        3
+      ],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 5,
+      "start": 64.9,
+      "end": 78.9,
+      "summary": "安安出發救援",
+      "prompt": "An An turns on flashing lights and drives determinedly out of the park toward the hillside garden to help the stuck tricycle, action and helpful mood",
+      "characters": [
+        "安安救護車",
+        "三輪車"
+      ],
+      "refPages": [
+        4
+      ],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 6,
+      "start": 78.9,
+      "end": 93.3,
+      "summary": "三輪車被困",
+      "prompt": "An An arrives at the muddy hillside garden and sees the small tricycle with its wheel deeply stuck, unable to move, the tricycle looks scared and worried",
+      "characters": [
+        "安安救護車",
+        "三輪車"
+      ],
+      "refPages": [
+        5
+      ],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 7,
+      "start": 93.3,
+      "end": 115.4,
+      "summary": "安安嘗試救援",
+      "prompt": "An An gently reassures the scared tricycle and pulls with a small rope, but the tricycle does not budge in the thick mud, effort scene",
+      "characters": [
+        "安安救護車",
+        "三輪車"
+      ],
+      "refPages": [
+        6
+      ],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 8,
+      "start": 115.4,
+      "end": 122.9,
+      "summary": "再次用力拉",
+      "prompt": "An An tries pulling harder with the rope, says 嘿 咻, but the tricycle remains stuck, mud is too sticky, An An is starting to get anxious",
+      "characters": [
+        "安安救護車",
+        "三輪車"
+      ],
+      "refPages": [
+        7
+      ],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 9,
+      "start": 122.9,
+      "end": 145.3,
+      "summary": "安安感到焦急",
+      "prompt": "An An feels anxious and self-doubting, thinking it should complete the rescue alone or others will think it is not capable, close emotional moment",
+      "characters": [
+        "安安救護車"
+      ],
+      "refPages": [
+        8
+      ],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 10,
+      "start": 145.3,
+      "end": 153.3,
+      "summary": "三輪車關心",
+      "prompt": "The stuck tricycle asks An An if it is okay, An An stops, takes a deep breath and looks at the wet mud and the scared tricycle",
+      "characters": [
+        "安安救護車"
+      ],
+      "refPages": [
+        9
+      ],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 11,
+      "start": 153.3,
+      "end": 173.9,
+      "summary": "安安冷靜求助",
+      "prompt": "An An realizes that helping is not about doing everything alone but staying calm and getting the rescue done, picks up the radio to call for help",
+      "characters": [
+        "安安救護車",
+        "三輪車"
+      ],
+      "refPages": [
+        10
+      ],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 12,
+      "start": 173.9,
+      "end": 188.9,
+      "summary": "呼叫東東支援",
+      "prompt": "An An on the radio: Dong Dong the excavator, this is An An ambulance, a small tricycle is stuck in mud, I cannot pull it out alone, need your help",
+      "characters": [
+        "安安救護車",
+        "東東挖土機"
+      ],
+      "refPages": [
+        11
+      ],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 13,
+      "start": 188.9,
+      "end": 211.3,
+      "summary": "東東來挖泥",
+      "prompt": "Dong Dong arrives with its big bucket and starts digging away the mud around the tricycle, An An is relieved",
+      "characters": [
+        "安安救護車",
+        "東東挖土機",
+        "藍色小巴士"
+      ],
+      "refPages": [
+        12
+      ],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 14,
+      "start": 211.3,
+      "end": 229.4,
+      "summary": "藍色小巴士與小紅協助",
+      "prompt": "Blue minibus arrives to block and guide other vehicles away from the rescue area, little red race car helps direct traffic, teamwork scene",
+      "characters": [
+        "安安救護車",
+        "東東挖土機",
+        "藍色小巴士",
+        "小紅賽車"
+      ],
+      "refPages": [
+        13
+      ],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 15,
+      "start": 229.4,
+      "end": 242,
+      "summary": "大家合作救出",
+      "prompt": "Together: Dong Dong clears the mud, An An pulls with the rope, red race car and blue minibus protect the area, one two three heave, the tricycle wheel finally comes free",
+      "characters": [
+        "安安救護車",
+        "東東挖土機",
+        "藍色小巴士",
+        "小紅賽車",
+        "三輪車"
+      ],
+      "refPages": [
+        14
+      ],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 16,
+      "start": 242,
+      "end": 269.4,
+      "summary": "成功與感謝",
+      "prompt": "The tricycle is out and happily thanks everyone, An An lets out a big sigh of relief, warm grateful mood in the garden",
+      "characters": [
+        "安安救護車",
+        "東東挖土機"
+      ],
+      "refPages": [
+        15
+      ],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 17,
+      "start": 269.4,
+      "end": 292,
+      "summary": "安安的領悟",
+      "prompt": "An An reflects: at first I thought I had to do the whole task alone to be brave, but asking for help when needed is even more important",
+      "characters": [
+        "安安救護車"
+      ],
+      "refPages": [
+        16
+      ],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 18,
+      "start": 292,
+      "end": 304.7,
+      "summary": "園長表揚",
+      "prompt": "Back at the sunny car amusement park square, the director announces over the speaker that An An did great by knowing to call friends and working as a team to bring the tricycle home safely",
+      "characters": [
+        "安安救護車"
+      ],
+      "refPages": [
+        17
+      ],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 19,
+      "start": 304.7,
+      "end": 327.3,
+      "summary": "鼓勵小朋友求助",
+      "prompt": "An An shares the lesson with children: when you cannot do it alone, bravely say I need help, it does not mean you are not strong, it means you know how to protect yourself and others",
+      "characters": [],
+      "refPages": [
+        18
+      ],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    },
+    {
+      "index": 20,
+      "start": 327.3,
+      "end": 341,
+      "summary": "溫暖結語拜拜",
+      "prompt": "Cheerful closing at the car amusement park, hosts Bonbon and Mami say goodbye and invite everyone to come play again next time, warm friendly ending",
+      "characters": [],
+      "refPages": [
+        19
+      ],
+      "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
+    }
+  ],
+  "newCharacters": []
+}

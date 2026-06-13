@@ -105,6 +105,16 @@
     "firstSeen": "ep-5"
   },
   {
+    "name": "三輪車",
+    "aliases": [
+      "三輪"
+    ],
+    "vehicle": "tricycle",
+    "desc": "a cute claymation small three-wheeled tricycle with a front cargo basket, colorful body, big round friendly eyes and a smile, personified as a little delivery trike",
+    "ref": "characters/三輪車.jpg",
+    "firstSeen": "ep-6"
+  },
+  {
     "name": "香香餐車",
     "aliases": [
       "香香",
