@@ -478,10 +478,46 @@ const hintChip: CSSProperties = {
   whiteSpace: "nowrap",
 };
 
-type HintItem = { key: string; icon: ReactNode; label: string };
+type HintItem = {
+  key: string;
+  icon: ReactNode;
+  label: string;
+  onPress?: () => void;
+  onPointerDown?: (e: ReactPointerEvent<HTMLButtonElement>) => void;
+  onPointerUp?: () => void;
+};
 
-/** 操作提示：圖示膠囊列，取代整句文字說明。 */
-function HintChips({ items, small }: { items: HintItem[]; small?: boolean }) {
+function PanelTitle({ icon, text }: { icon: ReactNode; text: string }) {
+  return (
+    <div
+      aria-hidden
+      style={{
+        ...panelLabel,
+        marginBottom: 5,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 4,
+      }}
+    >
+      {icon}
+      <span>{text}</span>
+    </div>
+  );
+}
+
+/** 操作提示／觸控虛擬鍵：iconOnly 時僅顯示圖示，aria-label 保留語意。 */
+function HintChips({
+  items,
+  small,
+  iconOnly,
+  disabled,
+}: {
+  items: HintItem[];
+  small?: boolean;
+  iconOnly?: boolean;
+  disabled?: boolean;
+}) {
   return (
     <div
       style={{
@@ -491,19 +527,58 @@ function HintChips({ items, small }: { items: HintItem[]; small?: boolean }) {
         flexWrap: "wrap",
       }}
     >
-      {items.map((item) => (
-        <span
-          key={item.key}
-          style={
-            small
-              ? { ...hintChip, fontSize: 12, padding: "3px 10px", gap: 5 }
-              : { ...hintChip, gap: 6 }
-          }
-        >
-          {item.icon}
-          {item.label}
-        </span>
-      ))}
+      {items.map((item) => {
+        const chipStyle: CSSProperties = small
+          ? {
+              ...hintChip,
+              fontSize: 12,
+              padding: iconOnly ? "7px 12px" : "3px 10px",
+              gap: 5,
+            }
+          : { ...hintChip, gap: 6, padding: iconOnly ? "8px 14px" : hintChip.padding };
+
+        const content = iconOnly ? item.icon : (
+          <>
+            {item.icon}
+            {item.label}
+          </>
+        );
+
+        const interactive = item.onPress || item.onPointerDown;
+        if (interactive) {
+          return (
+            <button
+              key={item.key}
+              type="button"
+              aria-label={item.label}
+              disabled={disabled}
+              onClick={item.onPress}
+              onPointerDown={item.onPointerDown}
+              onPointerUp={item.onPointerUp}
+              onPointerLeave={item.onPointerUp}
+              onPointerCancel={item.onPointerUp}
+              style={{
+                ...chipStyle,
+                cursor: disabled ? "default" : "pointer",
+                opacity: disabled ? 0.45 : 1,
+                touchAction: "manipulation",
+              }}
+            >
+              {content}
+            </button>
+          );
+        }
+
+        return (
+          <span
+            key={item.key}
+            style={chipStyle}
+            aria-label={iconOnly ? item.label : undefined}
+          >
+            {content}
+          </span>
+        );
+      })}
     </div>
   );
 }
@@ -1113,6 +1188,16 @@ export default function BlockDropGame() {
     dropped: number;
     moved: boolean;
   } | null>(null);
+  const moveRepeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const stopMoveRepeat = useCallback(() => {
+    if (moveRepeatRef.current) {
+      clearInterval(moveRepeatRef.current);
+      moveRepeatRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => () => stopMoveRepeat(), [stopMoveRepeat]);
 
   const dragSoftStep = (): boolean => {
     const g = G.current;
@@ -1248,6 +1333,30 @@ export default function BlockDropGame() {
     setBlockDropDifficulty(DIFFICULTY_ORDER[(i + 1) % DIFFICULTY_ORDER.length]);
   };
 
+  const startMoveRepeat = (dx: number) => {
+    stopMoveRepeat();
+    move(dx);
+    moveRepeatRef.current = setInterval(() => move(dx), 90);
+  };
+
+  const touchHintItems: HintItem[] = [...TOUCH_HINTS, TOUCH_HOLD_HINT];
+  const touchControlItems: HintItem[] = [
+    { key: "tap", icon: <IconTap size={15} />, label: "轉", onPress: () => rotate(1) },
+    {
+      key: "drag",
+      icon: <IconSwipeLR size={15} />,
+      label: "移",
+      onPointerDown: (e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const dx = e.clientX < rect.left + rect.width / 2 ? -1 : 1;
+        startMoveRepeat(dx);
+      },
+      onPointerUp: stopMoveRepeat,
+    },
+    { key: "down", icon: <IconSwipeDown size={15} />, label: "落", onPress: () => hardDrop() },
+    { key: "up", icon: <IconSwipeUp size={15} />, label: "存", onPress: () => holdPiece() },
+  ];
+
   const holdButton = (cell: number) => (
     <button
       type="button"
@@ -1261,9 +1370,10 @@ export default function BlockDropGame() {
         opacity: g.status === "playing" && !g.canHold ? 0.45 : 1,
       }}
     >
-      <div aria-hidden style={{ ...panelLabel, marginBottom: 5 }}>
-        <IconBox size={15} color={MACARON_THEME.inkSoft} />
-      </div>
+      <PanelTitle
+        icon={<IconBox size={15} color={MACARON_THEME.inkSoft} />}
+        text="暫存"
+      />
       <PiecePreview type={g.hold} cell={cell} />
     </button>
   );
@@ -1276,9 +1386,10 @@ export default function BlockDropGame() {
   ];
   const nextPanel = (firstCell: number, restCell: number) => (
     <div style={panelStyle} role="img" aria-label="下一個方塊預覽">
-      <div aria-hidden style={{ ...panelLabel, marginBottom: 5 }}>
-        <IconNext size={15} color={MACARON_THEME.inkSoft} />
-      </div>
+      <PanelTitle
+        icon={<IconNext size={15} color={MACARON_THEME.inkSoft} />}
+        text="下一個"
+      />
       <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
         {nextQueue.map((t, i) => (
           <PiecePreview key={i} type={t} cell={i === 0 ? firstCell : restCell} />
@@ -1300,6 +1411,7 @@ export default function BlockDropGame() {
         padding: wide ? "10px 8px" : panelStyle.padding,
       }}
     >
+      <div style={{ ...panelLabel, marginBottom: 2 }}>分數</div>
       <div
         aria-label={`分數 ${g.score}`}
         style={{
@@ -1340,6 +1452,7 @@ export default function BlockDropGame() {
           gap: 3,
         }}
       >
+        <span>最佳</span>
         <IconTrophy size={12} /> {Math.max(best ?? 0, g.score)}
       </div>
     </div>
@@ -1836,7 +1949,10 @@ export default function BlockDropGame() {
               </div>
             )}
             {g.status === "ready" && (
-              <HintChips items={isCoarse ? TOUCH_HINTS : KEY_HINTS} />
+              <HintChips
+                items={isCoarse ? touchHintItems : KEY_HINTS}
+                iconOnly={isCoarse}
+              />
             )}
             {g.status !== "paused" ? (
               <GameResultActions
@@ -1912,9 +2028,13 @@ export default function BlockDropGame() {
       <div style={{ marginTop: 9 }}>
         <HintChips
           small
+          iconOnly={isCoarse}
+          disabled={isCoarse && !inRound}
           items={
             isCoarse
-              ? [...TOUCH_HINTS, TOUCH_HOLD_HINT]
+              ? inRound
+                ? touchControlItems
+                : touchHintItems
               : wide
                 ? [...KEY_HINTS, KEY_HOLD_HINT]
                 : KEY_HINTS
