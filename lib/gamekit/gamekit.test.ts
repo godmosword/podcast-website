@@ -60,7 +60,7 @@ describe("gamekit constants", () => {
     for (const [id, vp] of Object.entries(GAME_VIEWPORTS)) {
       expect(vp.width).toBeGreaterThan(0);
       expect(vp.height).toBeGreaterThan(0);
-      expect(id).toMatch(/^car-adventure$|^block-drop$|^candy-kart$/);
+      expect(id).toMatch(/^car-adventure$|^block-drop$|^candy-kart$|^candy-match$/);
     }
   });
 });

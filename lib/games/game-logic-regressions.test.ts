@@ -6,6 +6,19 @@ function source(path: string): string {
 }
 
 describe("game logic regressions", () => {
+  it("繽紛消消樂走 gamekit 回報、無失敗用語、有自動提示與溫柔重試", () => {
+    const game = source("components/games/CandyMatchGame.tsx");
+
+    expect(game).toContain("reportGameSession");
+    expect(game).toContain('gameId: "candy-match"');
+    expect(game).toContain("HINT_IDLE_MS");
+    expect(game).toContain("我們再試一次！");
+    // 兒童友善：不出現失敗／Game Over 字眼
+    expect(game).not.toContain("失敗");
+    expect(game).not.toContain("Game Over");
+    expect(game).not.toContain("你輸了");
+  });
+
   it("車車大冒險兒童模式第一關用當局起始生命判定 flawless", () => {
     const game = source("components/games/CarPlatformer.tsx");
 

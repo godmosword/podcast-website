@@ -16,6 +16,19 @@ export type GameMeta = {
 
 export const GAMES: GameMeta[] = [
   {
+    slug: "candy-match",
+    title: "繽紛消消樂",
+    desc: "小朋友的第一款消除遊戲：找一找、排一排、消一消，完成繽紛任務！",
+    href: "/games/candy-match",
+    emoji: "🍭",
+    accent: "var(--c-pink)",
+    ageBand: "explore",
+    ageRange: "3–7 歲",
+    estMinutes: 5,
+    hasScore: false,
+    hasTimer: false,
+  },
+  {
     slug: "car-adventure",
     title: "車車大冒險",
     desc: "橫向跑跳過關：吃金幣、踩搗蛋車、躲尖刺、衝向終點旗。",

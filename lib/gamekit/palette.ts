@@ -46,6 +46,7 @@ export const GAME_PALETTE_INDICES: Record<GameKitGameId, number[]> = {
   "block-drop": [1, 6, 7, 9, 12, 15, 22, 23],
   "car-adventure": [0, 13, 14, 15, 24, 25, 26, 30],
   "candy-kart": [7, 8, 9, 11, 16, 17, 22, 27],
+  "candy-match": [5, 7, 9, 11, 17, 22, 26, 27],
 };
 
 export function colorsForGame(gameId: GameKitGameId): PaletteColor[] {

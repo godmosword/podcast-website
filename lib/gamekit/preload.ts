@@ -7,6 +7,8 @@ export const GAME_PRELOAD_SHEETS: Record<GameKitGameId, SheetId[]> = {
   "block-drop": ["blocks-drop"],
   // candy-kart 資產由 Godot iframe 自載，無程序生成 sheet
   "candy-kart": [],
+  // candy-match 全 SVG/DOM 繪製，無程序生成 sheet
+  "candy-match": [],
 };
 
 const warmed = new Set<string>();

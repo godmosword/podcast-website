@@ -10,6 +10,7 @@ const LABELS: Record<GameKitGameId, string> = {
   "car-adventure": "車車大冒險",
   "block-drop": "繽紛方塊",
   "candy-kart": "繽紛卡丁車",
+  "candy-match": "繽紛消消樂",
 };
 
 type GameLoadingGateProps = {

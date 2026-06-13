@@ -298,6 +298,93 @@ export default function GameThumbArt({ gameId, className, style }: Props) {
         </svg>
       );
 
+    case "candy-match":
+      return (
+        <svg {...common}>
+          <ClayScene
+            uid={uid}
+            bg={
+              <>
+                <ClayGrad
+                  id={clayIds(uid, "bg")}
+                  light="#fff5fa"
+                  mid="#ffeaf3"
+                  dark="#fbd7e7"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "tile1")}
+                  light="#ffc8dc"
+                  mid="#ffb4cf"
+                  dark="#e8789c"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "tile2")}
+                  light="#fff3b8"
+                  mid="#ffe16f"
+                  dark="#e0b13d"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "tile3")}
+                  light="#cfeefe"
+                  mid="#8ddff0"
+                  dark="#4fb3d4"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "tile4")}
+                  light="#cdf3dd"
+                  mid="#9de7b8"
+                  dark="#5fbf85"
+                />
+                <ClayGrad
+                  id={clayIds(uid, "tile5")}
+                  light="#e4d6ff"
+                  mid="#c9a8ff"
+                  dark="#8f6ad4"
+                />
+              </>
+            }
+          >
+            <rect width="120" height="90" rx="12" fill={`url(#${clayIds(uid, "bg")})`} />
+            {(
+              [
+                // 3x3 消除盤，中央列三連（粉紅）
+                ["tile2", 24, 12], ["tile3", 52, 12], ["tile5", 80, 12],
+                ["tile1", 24, 38], ["tile1", 52, 38], ["tile1", 80, 38],
+                ["tile4", 24, 64], ["tile2", 52, 64], ["tile3", 80, 64],
+              ] as const
+            ).map(([grad, x, y], i) => (
+              <ClayBlob
+                key={i}
+                x={x}
+                y={y}
+                w={22}
+                h={22}
+                r={7}
+                gradId={clayIds(uid, grad)}
+                shadowId={sh}
+              />
+            ))}
+            {/* 中央三連的閃亮 */}
+            <ClayCircle cx={36} cy={36} r={3} gradId={clayIds(uid, "tile2")} shadowId={sh} />
+            <ClayCircle cx={94} cy={34} r={2.6} gradId={clayIds(uid, "tile2")} shadowId={sh} />
+            {/* 三連格上的笑臉 */}
+            {[35, 63, 91].map((cx) => (
+              <g key={cx}>
+                <circle cx={cx - 4} cy={47} r={1.6} fill="#4a3a52" />
+                <circle cx={cx + 4} cy={47} r={1.6} fill="#4a3a52" />
+                <path
+                  d={`M${cx - 3.5} 51c2.2 1.8 4.8 1.8 7 0`}
+                  stroke="#4a3a52"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  fill="none"
+                />
+              </g>
+            ))}
+          </ClayScene>
+        </svg>
+      );
+
     case "candy-kart":
       return (
         <svg {...common}>

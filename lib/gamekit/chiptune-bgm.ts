@@ -84,6 +84,23 @@ export const BGM_THEMES: Record<GameKitGameId, BgmTheme> = {
       [C3, C3, G3, G3, A3, A3, E3, E3, D3, D3, G3, G3, C3, R, C3, R],
     ],
   },
+  // 繽紛消消樂：放慢、輕柔（3–7 歲療癒節奏）
+  "candy-match": {
+    bpm: 92,
+    stepsPerBeat: 4,
+    melodyWave: "triangle",
+    bassWave: "triangle",
+    melodyVol: 0.07,
+    bassVol: 0.05,
+    melody: [
+      [C5, R, E5, R, G5, R, E5, R, D5, R, C5, R, D5, E5, D5, R],
+      [E5, R, G5, R, A5, R, G5, R, E5, R, D5, R, C5, R, R, R],
+    ],
+    bass: [
+      [C3, R, R, R, G3, R, R, R, A3, R, R, R, G3, R, R, R],
+      [C3, R, R, R, E3, R, R, R, D3, R, R, R, G3, R, R, R],
+    ],
+  },
 };
 
 export function validateBgmTheme(theme: BgmTheme): boolean {
