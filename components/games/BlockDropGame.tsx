@@ -53,6 +53,7 @@ const BOARD_H = ROWS * CELL;
 const MAX_BOARD_W = 396;
 const WIDE_MAX_BOARD_W = 460;
 const WIDE_SIDE_W = 150;
+const TOUCH_SIDE_W = 76;
 const LOCK_DELAY = 450;
 const DAS_DELAY = 170;
 const DAS_REPEAT = 50;
@@ -512,30 +513,50 @@ function HintChips({
   small,
   iconOnly,
   disabled,
+  layout = "row",
+  size = "chip",
 }: {
   items: HintItem[];
   small?: boolean;
   iconOnly?: boolean;
   disabled?: boolean;
+  layout?: "row" | "column";
+  size?: "chip" | "side";
 }) {
+  const isSide = size === "side";
   return (
     <div
       style={{
         display: "flex",
-        gap: 6,
+        flexDirection: layout === "column" ? "column" : "row",
+        gap: isSide ? 10 : 6,
         justifyContent: "center",
-        flexWrap: "wrap",
+        flexWrap: layout === "column" ? "nowrap" : "wrap",
+        width: layout === "column" ? TOUCH_SIDE_W : undefined,
+        flexShrink: 0,
+        alignSelf: layout === "column" ? "stretch" : undefined,
       }}
     >
       {items.map((item) => {
-        const chipStyle: CSSProperties = small
+        const chipStyle: CSSProperties = isSide
           ? {
               ...hintChip,
-              fontSize: 12,
-              padding: iconOnly ? "7px 12px" : "3px 10px",
-              gap: 5,
+              borderRadius: 20,
+              minWidth: 68,
+              minHeight: 68,
+              width: "100%",
+              justifyContent: "center",
+              padding: 16,
+              boxShadow: "0 6px 14px rgba(126,96,112,.16)",
             }
-          : { ...hintChip, gap: 6, padding: iconOnly ? "8px 14px" : hintChip.padding };
+          : small
+            ? {
+                ...hintChip,
+                fontSize: 12,
+                padding: iconOnly ? "7px 12px" : "3px 10px",
+                gap: 5,
+              }
+            : { ...hintChip, gap: 6, padding: iconOnly ? "8px 14px" : hintChip.padding };
 
         const content = iconOnly ? item.icon : (
           <>
@@ -711,7 +732,7 @@ export default function BlockDropGame() {
       // 用棋盤頂端的實際位置動態計算可用高度（下方保留提示行＋卡片內距），
       // 整頁呈現、玩到底不用捲動
       const top = el.getBoundingClientRect().top + window.scrollY;
-      const reserve = wide ? 42 : 34;
+      const reserve = wide ? 42 : isCoarse ? 22 : 34;
       const maxH = Math.max(300, (window.innerHeight || 800) - top - reserve);
       setBoardScale(Math.min(w / BOARD_W, maxH / BOARD_H));
     };
@@ -723,7 +744,7 @@ export default function BlockDropGame() {
       ro.disconnect();
       window.removeEventListener("resize", apply);
     };
-  }, [wide]);
+  }, [wide, isCoarse]);
 
   // ── 浮動回饋文字（消行／連擊／升級）──
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -1340,11 +1361,11 @@ export default function BlockDropGame() {
   };
 
   const touchHintItems: HintItem[] = [...TOUCH_HINTS, TOUCH_HOLD_HINT];
-  const touchControlItems: HintItem[] = [
-    { key: "tap", icon: <IconTap size={15} />, label: "轉", onPress: () => rotate(1) },
+  const buildTouchControls = (iconSize: number): HintItem[] => [
+    { key: "tap", icon: <IconTap size={iconSize} />, label: "轉", onPress: () => rotate(1) },
     {
       key: "drag",
-      icon: <IconSwipeLR size={15} />,
+      icon: <IconSwipeLR size={iconSize} />,
       label: "移",
       onPointerDown: (e) => {
         const rect = e.currentTarget.getBoundingClientRect();
@@ -1353,9 +1374,29 @@ export default function BlockDropGame() {
       },
       onPointerUp: stopMoveRepeat,
     },
-    { key: "down", icon: <IconSwipeDown size={15} />, label: "落", onPress: () => hardDrop() },
-    { key: "up", icon: <IconSwipeUp size={15} />, label: "存", onPress: () => holdPiece() },
+    {
+      key: "down",
+      icon: <IconSwipeDown size={iconSize} />,
+      label: "落",
+      onPress: () => hardDrop(),
+    },
+    {
+      key: "up",
+      icon: <IconSwipeUp size={iconSize} />,
+      label: "存",
+      onPress: () => holdPiece(),
+    },
   ];
+  const touchSideControlItems = buildTouchControls(24);
+
+  const touchSideControls = (
+    <HintChips
+      layout="column"
+      size="side"
+      iconOnly
+      items={touchSideControlItems}
+    />
+  );
 
   const holdButton = (cell: number) => (
     <button
@@ -1478,7 +1519,9 @@ export default function BlockDropGame() {
         borderRadius: 28,
         maxWidth: wide
           ? WIDE_MAX_BOARD_W + (WIDE_SIDE_W + 14) * 2 + (desktop ? 56 : 32)
-          : 440,
+          : isCoarse
+            ? MAX_BOARD_W + TOUCH_SIDE_W + 12
+            : MAX_BOARD_W,
         margin: "0 auto",
         border: "2px solid rgba(255,255,255,.92)",
         boxShadow:
@@ -1612,18 +1655,14 @@ export default function BlockDropGame() {
         </div>
       )}
 
-      {/* 寬螢幕（iPad）：左欄資訊、中間棋盤、右欄預覽，一頁呈現 */}
+      {/* 寬螢幕（iPad）：左欄資訊、中間棋盤、右欄預覽＋觸控鍵 */}
       <div
-        style={
-          wide
-            ? {
-                display: "flex",
-                gap: 14,
-                alignItems: "flex-start",
-                justifyContent: "center",
-              }
-            : undefined
-        }
+        style={{
+          display: "flex",
+          gap: wide ? 14 : 8,
+          alignItems: "flex-start",
+          justifyContent: "center",
+        }}
       >
         {wide && (
           <div
@@ -1643,12 +1682,11 @@ export default function BlockDropGame() {
       <div
         ref={boardWrapRef}
         style={{
-          width: "100%",
-          maxWidth: wide ? (desktop ? WIDE_MAX_BOARD_W : 420) : MAX_BOARD_W,
-          flex: wide ? 1 : undefined,
+          flex: 1,
           minWidth: 0,
+          maxWidth: wide ? (desktop ? WIDE_MAX_BOARD_W : 420) : undefined,
           height: boardDisplayH,
-          margin: "0 auto",
+          margin: wide ? "0 auto" : 0,
         }}
       >
        {/* 內層與縮放後的棋盤同寬：遮罩、手勢層、提示都貼齊棋盤本體 */}
@@ -2021,26 +2059,21 @@ export default function BlockDropGame() {
             }}
           >
             {nextPanel(16, 12)}
+            {isCoarse && inRound && touchSideControls}
           </div>
         )}
+
+        {!wide && isCoarse && inRound && touchSideControls}
       </div>
 
-      <div style={{ marginTop: 9 }}>
-        <HintChips
-          small
-          iconOnly={isCoarse}
-          disabled={isCoarse && !inRound}
-          items={
-            isCoarse
-              ? inRound
-                ? touchControlItems
-                : touchHintItems
-              : wide
-                ? [...KEY_HINTS, KEY_HOLD_HINT]
-                : KEY_HINTS
-          }
-        />
-      </div>
+      {!isCoarse && (
+        <div style={{ marginTop: 9 }}>
+          <HintChips
+            small
+            items={wide ? [...KEY_HINTS, KEY_HOLD_HINT] : KEY_HINTS}
+          />
+        </div>
+      )}
     </div>
     </GameChrome>
   );
