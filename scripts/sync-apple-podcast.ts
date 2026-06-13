@@ -4,6 +4,8 @@
  * - 新集：下載音檔／封面並追加至 apple-synced.json
  * - 既有集：比對 RSS 更新 title / date / duration / summary 等 metadata
  * 用法：npm run sync:apple [-- --dry-run] [-- --force]
+ *       npm run sync:apple -- --refresh-cover[=ep-11[,ep-12]]
+ *         （重抓既有集數封面：Apple 端事後換圖時用）
  */
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -71,6 +73,34 @@ type SyncDefaults = {
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
 const force = args.includes("--force");
+
+/**
+ * 重抓既有集數封面：Apple 端事後換圖時用。一般同步只在「新集數」下載封面，
+ * 既有集數即使 Apple 換了首圖也不會更新——此模式從 RSS imageUrl 重新下載覆蓋。
+ *   --refresh-cover              重抓所有 RSS 有提供封面的集數
+ *   --refresh-cover=ep-11        只重抓指定集數（可逗號分隔多個）
+ *   --refresh-cover ep-11,ep-12  同上（值放後一個參數）
+ */
+function parseRefreshCover(): { enabled: boolean; slugs: string[] } {
+  const flagIdx = args.findIndex(
+    (a) => a === "--refresh-cover" || a.startsWith("--refresh-cover="),
+  );
+  if (flagIdx === -1) return { enabled: false, slugs: [] };
+  const inline = args[flagIdx].includes("=")
+    ? args[flagIdx].slice(args[flagIdx].indexOf("=") + 1)
+    : "";
+  const next =
+    !inline && args[flagIdx + 1] && !args[flagIdx + 1].startsWith("--")
+      ? args[flagIdx + 1]
+      : "";
+  const slugs = (inline || next)
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return { enabled: true, slugs };
+}
+
+const refreshCover = parseRefreshCover();
 const SYNC_REPORT_PATH = process.env.SYNC_REPORT_PATH;
 const report: SyncRunReport = createEmptyReport(dryRun);
 
@@ -507,6 +537,60 @@ function reconcileSeenGuids(
   return [...seen];
 }
 
+/**
+ * 重抓既有集數封面：對每個目標集數從 RSS imageUrl 重新下載覆蓋 01.jpg。
+ * 不動 metadata、不挑新集，是專注的單一操作。
+ */
+async function refreshCovers(
+  catalog: Story[],
+  rssItems: RssEpisode[],
+  guidBySlug: Record<string, string>,
+  filterSlugs: string[],
+): Promise<void> {
+  const filter = new Set(filterSlugs);
+  const targets = catalog.filter((s) => filter.size === 0 || filter.has(s.slug));
+
+  if (filter.size > 0) {
+    const known = new Set(catalog.map((s) => s.slug));
+    for (const slug of filterSlugs) {
+      if (!known.has(slug)) console.warn(`Skip ${slug}: 不在 catalog 中`);
+    }
+  }
+  if (targets.length === 0) {
+    console.warn("沒有符合的集數可重抓封面。");
+    return;
+  }
+
+  let updated = 0;
+  for (const story of targets) {
+    const item = findRssItemForStory(story, rssItems, guidBySlug);
+    if (!item) {
+      console.warn(`Skip ${story.slug}: RSS 找不到對應集數`);
+      continue;
+    }
+    if (!item.imageUrl) {
+      console.warn(`Skip ${story.slug}: RSS 無封面 imageUrl`);
+      continue;
+    }
+    const imagePath = path.join(PATHS.storiesPublic, story.slug, "01.jpg");
+    if (dryRun) {
+      console.log(`[dry-run] ${story.slug} ← ${item.imageUrl}`);
+      updated += 1;
+      continue;
+    }
+    await fs.mkdir(path.dirname(imagePath), { recursive: true });
+    console.log(`Refresh cover ${story.slug} ← ${item.imageUrl}`);
+    await downloadFile(item.imageUrl, imagePath);
+    updated += 1;
+  }
+  console.log(
+    `封面重抓完成：${updated}/${targets.length} 集${dryRun ? "（dry-run）" : ""}。`,
+  );
+  if (updated > 0 && !dryRun) {
+    console.log("提醒：檔名固定為 01.jpg，部署後若仍見舊圖請強制重新整理／清 CDN 快取。");
+  }
+}
+
 async function main(): Promise<void> {
   console.log(dryRun ? "[dry-run] Apple Podcast sync" : "Apple Podcast sync");
 
@@ -537,6 +621,14 @@ async function main(): Promise<void> {
   console.log(`RSS items: ${rssItems.length}`);
 
   const guidBySlug = state.guidBySlug ?? {};
+
+  // --refresh-cover：只重抓既有集數封面，不跑新集／metadata 同步
+  if (refreshCover.enabled) {
+    await refreshCovers(catalog, rssItems, guidBySlug, refreshCover.slugs);
+    await finishSync();
+    return;
+  }
+
   const metadataResult = updateSyncedMetadata(synced, rssItems, defaults, guidBySlug);
   report.metadataUpdated = metadataResult.updatedSlugs;
   if (metadataResult.updatedSlugs.length > 0) {
