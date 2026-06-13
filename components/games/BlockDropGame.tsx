@@ -79,14 +79,14 @@ function getLayoutMetrics(mode: LayoutMode, isCoarse: boolean): LayoutMetrics {
   switch (mode) {
     case "mobile":
       return {
-        shellPad: "12px 12px",
-        shellMaxW: isCoarse ? MAX_BOARD_W + 92 : MAX_BOARD_W + 28,
+        shellPad: "10px 10px",
+        shellMaxW: 420,
         sideColW: 0,
         boardMaxW: undefined,
-        playGap: 8,
-        titleSize: 16,
-        touch: isCoarse ? { colW: 72, btn: 52, icon: 22, gap: 7 } : null,
-        hud: { hold: 12, nextFirst: 10, nextRest: 7 },
+        playGap: 6,
+        titleSize: 15,
+        touch: isCoarse ? { colW: 64, btn: 46, icon: 20, gap: 6 } : null,
+        hud: { hold: 12, nextFirst: 9, nextRest: 6 },
       };
     case "tablet":
       return {
@@ -538,18 +538,18 @@ const hintChip: CSSProperties = {
   whiteSpace: "nowrap",
 };
 
-function touchPadButton(metrics: TouchPadMetrics, full = true): CSSProperties {
+function touchPadButton(metrics: TouchPadMetrics, variant: "full" | "half" = "full"): CSSProperties {
   return {
     ...hintChip,
-    borderRadius: 18,
+    borderRadius: 16,
     minHeight: metrics.btn,
     height: metrics.btn,
-    minWidth: full ? undefined : metrics.btn,
-    width: full ? "100%" : undefined,
-    flex: full ? undefined : 1,
+    width: variant === "full" ? "100%" : undefined,
+    flex: variant === "half" ? "1 1 0" : undefined,
+    minWidth: variant === "half" ? 0 : undefined,
     justifyContent: "center",
     padding: 0,
-    boxShadow: "0 6px 14px rgba(126,96,112,.16)",
+    boxShadow: "0 4px 12px rgba(126,96,112,.14)",
     touchAction: "manipulation",
     cursor: "pointer",
   };
@@ -558,6 +558,8 @@ function touchPadButton(metrics: TouchPadMetrics, full = true): CSSProperties {
 /** 棋盤右側觸控鍵：旋轉、左右移、落下、暫存。 */
 function TouchControlPad({
   metrics,
+  holdType,
+  canHold,
   onRotate,
   onMoveLeftDown,
   onMoveRightDown,
@@ -566,6 +568,8 @@ function TouchControlPad({
   onHold,
 }: {
   metrics: TouchPadMetrics;
+  holdType: PieceType | null;
+  canHold: boolean;
   onRotate: () => void;
   onMoveLeftDown: () => void;
   onMoveRightDown: () => void;
@@ -574,25 +578,28 @@ function TouchControlPad({
   onHold: () => void;
 }) {
   const full = touchPadButton(metrics);
-  const half = touchPadButton(metrics, false);
+  const half = touchPadButton(metrics, "half");
   const { icon, gap, colW } = metrics;
+  const holdCell = Math.max(7, Math.floor(metrics.btn / 5.5));
   return (
     <div
       data-testid="touch-control-pad"
       style={{
         width: colW,
+        maxWidth: colW,
         flexShrink: 0,
         display: "flex",
         flexDirection: "column",
         gap,
         alignSelf: "stretch",
         justifyContent: "center",
+        overflow: "hidden",
       }}
     >
       <button type="button" aria-label="旋轉" style={full} onClick={onRotate}>
         <IconRotate size={icon} />
       </button>
-      <div style={{ display: "flex", gap }}>
+      <div style={{ display: "flex", gap, minWidth: 0 }}>
         <button
           type="button"
           aria-label="左移"
@@ -625,8 +632,17 @@ function TouchControlPad({
       <button type="button" aria-label="落下" style={full} onClick={onDrop}>
         <IconSwipeDown size={icon} />
       </button>
-      <button type="button" aria-label="暫存" style={full} onClick={onHold}>
-        <IconSwipeUp size={icon} />
+      <button
+        type="button"
+        aria-label="暫存"
+        style={{ ...full, opacity: canHold ? 1 : 0.45 }}
+        onClick={onHold}
+      >
+        {holdType ? (
+          <PiecePreview type={holdType} cell={holdCell} />
+        ) : (
+          <IconBox size={icon} color={MACARON_THEME.inkSoft} />
+        )}
       </button>
     </div>
   );
@@ -1522,6 +1538,8 @@ export default function BlockDropGame() {
   const touchPad = layout.touch ? (
     <TouchControlPad
       metrics={layout.touch}
+      holdType={g.hold}
+      canHold={g.status === "playing" && g.canHold}
       onRotate={() => rotate(1)}
       onMoveLeftDown={() => startMoveRepeat(-1)}
       onMoveRightDown={() => startMoveRepeat(1)}
@@ -1558,14 +1576,21 @@ export default function BlockDropGame() {
     g.bag[1] ?? null,
     g.bag[2] ?? null,
   ];
-  const nextPanel = (firstCell: number, restCell: number) => (
-    <div style={panelStyle} role="img" aria-label="下一個方塊預覽">
+  const nextPanel = (firstCell: number, restCell: number, compact = false) => (
+    <div
+      style={{
+        ...panelStyle,
+        flexShrink: compact ? 0 : undefined,
+      }}
+      role="img"
+      aria-label="下一個方塊預覽"
+    >
       <PanelTitle
         icon={<IconNext size={15} color={MACARON_THEME.inkSoft} />}
         text="下一個"
       />
-      <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-        {nextQueue.map((t, i) => (
+      <div style={{ display: "flex", flexDirection: "column", gap: compact ? 3 : 5 }}>
+        {(compact ? nextQueue.slice(0, 1) : nextQueue).map((t, i) => (
           <PiecePreview key={i} type={t} cell={i === 0 ? firstCell : restCell} />
         ))}
       </div>
@@ -1582,7 +1607,8 @@ export default function BlockDropGame() {
         alignItems: "center",
         justifyContent: "center",
         gap: 2,
-        padding: wide ? "10px 8px" : panelStyle.padding,
+        padding: wide ? "10px 8px" : "8px 6px",
+        minWidth: 0,
       }}
     >
       <div style={{ ...panelLabel, marginBottom: 2 }}>分數</div>
@@ -1590,7 +1616,7 @@ export default function BlockDropGame() {
         aria-label={`分數 ${g.score}`}
         style={{
           color: MACARON_THEME.ink,
-          fontSize: layoutMode === "desktop" ? 32 : layoutMode === "tablet" ? 28 : 26,
+          fontSize: layoutMode === "desktop" ? 32 : layoutMode === "tablet" ? 28 : 24,
           fontWeight: 900,
           lineHeight: 1.1,
         }}
@@ -1650,7 +1676,10 @@ export default function BlockDropGame() {
           "linear-gradient(160deg,#fff9ee 0%,#f3fbff 52%,#fff0f7 100%)",
         padding: layout.shellPad,
         borderRadius: 28,
+        width: "100%",
         maxWidth: layout.shellMaxW,
+        boxSizing: "border-box",
+        overflow: "hidden",
         margin: "0 auto",
         border: "2px solid rgba(255,255,255,.92)",
         boxShadow:
@@ -1768,29 +1797,32 @@ export default function BlockDropGame() {
         />
       </div>
 
-      {/* 手機：HOLD／分數／NEXT 集中在棋盤上方一列，棋盤可吃滿寬度 */}
+      {/* 手機：分數＋下一個（觸控暫存改在右側操作鍵） */}
       {!wide && (
         <div
           style={{
             display: "flex",
             gap: 8,
-            marginBottom: 10,
+            marginBottom: 8,
             alignItems: "stretch",
           }}
         >
-          {holdButton(layout.hud.hold)}
-          {scorePanel}
-          {nextPanel(layout.hud.nextFirst, layout.hud.nextRest)}
+          {!isCoarse && holdButton(layout.hud.hold)}
+          <div style={{ flex: 1, minWidth: 0 }}>{scorePanel}</div>
+          {nextPanel(layout.hud.nextFirst, layout.hud.nextRest, isCoarse)}
         </div>
       )}
 
-      {/* 寬螢幕（iPad）：左欄資訊、中間棋盤、右欄預覽＋觸控鍵 */}
+      {/* 寬螢幕（iPad／桌機）：左欄資訊、中間棋盤、右欄預覽＋觸控鍵 */}
       <div
         style={{
           display: "flex",
           gap: layout.playGap,
           alignItems: "flex-start",
           justifyContent: "center",
+          width: "100%",
+          minWidth: 0,
+          overflow: "hidden",
         }}
       >
         {wide && (
