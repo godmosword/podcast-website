@@ -32,6 +32,7 @@ import {
   writeSyncReport,
   type SyncRunReport,
 } from "./lib/sync-report";
+import { downloadAndSaveCover } from "./lib/cover-image";
 import {
   hasSubtitleSidecar,
   listSidecarSlugs,
@@ -77,6 +78,7 @@ const force = args.includes("--force");
 /**
  * 重抓既有集數封面：Apple 端事後換圖時用。一般同步只在「新集數」下載封面，
  * 既有集數即使 Apple 換了首圖也不會更新——此模式從 RSS imageUrl 重新下載覆蓋。
+ * 封面會以 fit:contain 縮放至 1400²，完整保留不被裁切。
  *   --refresh-cover              重抓所有 RSS 有提供封面的集數
  *   --refresh-cover=ep-11        只重抓指定集數（可逗號分隔多個）
  *   --refresh-cover ep-11,ep-12  同上（值放後一個參數）
@@ -580,7 +582,7 @@ async function refreshCovers(
     }
     await fs.mkdir(path.dirname(imagePath), { recursive: true });
     console.log(`Refresh cover ${story.slug} ← ${item.imageUrl}`);
-    await downloadFile(item.imageUrl, imagePath);
+    await downloadAndSaveCover(item.imageUrl, imagePath);
     updated += 1;
   }
   console.log(
@@ -676,7 +678,7 @@ async function main(): Promise<void> {
 
     if (item.imageUrl) {
       console.log(`  Download cover…`);
-      await downloadFile(item.imageUrl, imagePath);
+      await downloadAndSaveCover(item.imageUrl, imagePath);
     } else {
       console.warn(`  No cover image for ${slug}; create 01.jpg manually.`);
     }

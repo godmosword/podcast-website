@@ -227,14 +227,24 @@ function buildScenes(
     split.push({ ...sc, start: segStart, end: sc.end });
   }
 
-  return split.map((sc, i) => ({
-    index: i + 1,
-    start: Math.round(sc.start * 10) / 10,
-    end: Math.round(sc.end * 10) / 10,
-    summary: sc.summary,
-    prompt: sc.prompt,
-    characters: sc.characters,
-  }));
+  return ensureFirstSceneKeepsCover(
+    split.map((sc, i) => ({
+      index: i + 1,
+      start: Math.round(sc.start * 10) / 10,
+      end: Math.round(sc.end * 10) / 10,
+      summary: sc.summary,
+      prompt: sc.prompt,
+      characters: sc.characters,
+    })),
+  );
+}
+
+/** 第一幕固定保留 Apple 封面 01.jpg，全幕生圖時不覆寫。 */
+export function ensureFirstSceneKeepsCover(scenes: Scene[]): Scene[] {
+  if (scenes.length === 0) return scenes;
+  const [first, ...rest] = scenes;
+  if (first.index !== 1) return scenes;
+  return [{ ...first, keepCover: true }, ...rest];
 }
 
 function sceneDialogue(subs: Subtitle[], start: number, end: number): string {
