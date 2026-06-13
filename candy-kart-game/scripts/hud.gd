@@ -1,7 +1,6 @@
 class_name Hud
 extends CanvasLayer
-## 賽事 HUD：名次／圈數／星星／倒數＋觸控按鈕＋暫停選單。
-## 圖示全用 _draw 自繪向量（不依賴 emoji 字型），延續「少字多圖示」。
+## 賽事 HUD：名次／圈數／星星／倒數＋觸控按鈕＋速度／漂移／Boost 回饋＋暫停選單。
 
 signal pause_requested
 signal resume_requested
@@ -12,6 +11,10 @@ const INK := Color8(93, 74, 103)
 const INK_SOFT := Color8(140, 120, 150)
 const PINK := Color8(255, 159, 183)
 const LEMON := Color8(255, 232, 137)
+const MINT := Color8(157, 231, 184)
+const SKY := Color8(141, 223, 240)
+
+static var _hint_shown_session := false
 
 var pos_label: Label
 var lap_label: Label
@@ -19,11 +22,14 @@ var star_label: Label
 var count_label: Label
 var pause_panel: PanelContainer
 var _touch := false
+var _meters: Control
+var _hint_panel: PanelContainer
 
 # 觸控輸入狀態（由 race 讀取）
 var touch_left := false
 var touch_right := false
 var touch_drift := false
+var touch_brake := false
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -118,31 +124,51 @@ func _build() -> void:
 	count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	root.add_child(count_label)
 
+	_meters = Control.new()
+	_meters.set_script(load("res://scripts/hud_meters.gd"))
+	_meters.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	_meters.offset_left = 16
+	_meters.offset_right = -16
+	_meters.offset_bottom = -196 if _touch else -24
+	_meters.offset_top = -248 if _touch else -72
+	_meters.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(_meters)
+
 	if _touch:
 		_build_touch(root)
 	_build_pause(root)
+	_build_control_hint(root)
 
 func _build_touch(root: Control) -> void:
 	var left_btn := IconButton.new()
 	left_btn.icon_type = "left"
-	left_btn.custom_minimum_size = Vector2(120, 120)
+	left_btn.custom_minimum_size = Vector2(112, 112)
 	left_btn.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	left_btn.position = Vector2(24, -160)
-	left_btn.offset_top = -160
-	left_btn.offset_left = 24
+	left_btn.offset_top = -168
+	left_btn.offset_left = 20
 	left_btn.button_down.connect(func() -> void: touch_left = true)
 	left_btn.button_up.connect(func() -> void: touch_left = false)
 	root.add_child(left_btn)
 
 	var right_btn := IconButton.new()
 	right_btn.icon_type = "right"
-	right_btn.custom_minimum_size = Vector2(120, 120)
+	right_btn.custom_minimum_size = Vector2(112, 112)
 	right_btn.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	right_btn.offset_top = -160
-	right_btn.offset_left = 168
+	right_btn.offset_top = -168
+	right_btn.offset_left = 148
 	right_btn.button_down.connect(func() -> void: touch_right = true)
 	right_btn.button_up.connect(func() -> void: touch_right = false)
 	root.add_child(right_btn)
+
+	var brake_btn := IconButton.new()
+	brake_btn.icon_type = "brake"
+	brake_btn.custom_minimum_size = Vector2(240, 88)
+	brake_btn.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	brake_btn.offset_top = -88
+	brake_btn.offset_left = 20
+	brake_btn.button_down.connect(func() -> void: touch_brake = true)
+	brake_btn.button_up.connect(func() -> void: touch_brake = false)
+	root.add_child(brake_btn)
 
 	var drift_btn := IconButton.new()
 	drift_btn.icon_type = "drift"
@@ -153,6 +179,45 @@ func _build_touch(root: Control) -> void:
 	drift_btn.button_down.connect(func() -> void: touch_drift = true)
 	drift_btn.button_up.connect(func() -> void: touch_drift = false)
 	root.add_child(drift_btn)
+
+func _build_control_hint(root: Control) -> void:
+	if _hint_shown_session:
+		return
+	_hint_shown_session = true
+	_hint_panel = PanelContainer.new()
+	_hint_panel.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	_hint_panel.offset_left = 24
+	_hint_panel.offset_right = -24
+	_hint_panel.offset_bottom = -280 if _touch else -96
+	_hint_panel.offset_top = -360 if _touch else -176
+	var sb := chip_style(Color(1, 1, 1, 0.94), 22.0)
+	sb.content_margin_left = 20.0
+	sb.content_margin_right = 20.0
+	sb.content_margin_top = 14.0
+	sb.content_margin_bottom = 14.0
+	_hint_panel.add_theme_stylebox_override("panel", sb)
+	root.add_child(_hint_panel)
+
+	var lbl := Label.new()
+	if _touch:
+		lbl.text = "◀ ▶ 轉向　煞車減速　右下漂移蓄力"
+	else:
+		lbl.text = "← → 轉向　↓ 煞車　空白漂移蓄力"
+	lbl.add_theme_font_size_override("font_size", 20)
+	lbl.add_theme_color_override("font_color", INK)
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_hint_panel.add_child(lbl)
+
+	var dismiss := get_tree().create_timer(7.0)
+	dismiss.timeout.connect(func() -> void:
+		if is_instance_valid(_hint_panel):
+			_hint_panel.queue_free()
+	)
+	_hint_panel.gui_input.connect(func(ev: InputEvent) -> void:
+		if ev is InputEventScreenTouch or ev is InputEventMouseButton:
+			_hint_panel.queue_free()
+	)
 
 func _build_pause(root: Control) -> void:
 	pause_panel = PanelContainer.new()
@@ -201,6 +266,10 @@ func update_state(pos: int, lap: int, laps: int, stars: int, stars_total: int) -
 	lap_label.text = "%d/%d 圈" % [mini(lap, laps), laps]
 	star_label.text = "%d/%d" % [stars, stars_total]
 
+func update_player_meters(speed_ratio: float, drift_ratio: float, boost_active: bool) -> void:
+	if _meters and _meters.has_method("set_values"):
+		_meters.set_values(speed_ratio, drift_ratio, boost_active)
+
 func show_countdown(n: int) -> void:
 	if n > 0:
 		count_label.text = str(n)
@@ -213,7 +282,6 @@ func show_countdown(n: int) -> void:
 		count_label.text = ""
 
 
-## 自繪向量圖示按鈕（左右箭頭、漂移、暫停）。
 class IconButton:
 	extends Button
 	var icon_type := "left"
@@ -239,8 +307,11 @@ class IconButton:
 					c + Vector2(r * 0.42, 0), c + Vector2(-r * 0.26, -r * 0.42),
 					c + Vector2(-r * 0.26, r * 0.42),
 				]), ink)
+			"brake":
+				var bw := r * 0.55
+				draw_rect(Rect2(c + Vector2(-bw, -bw * 0.35), Vector2(bw * 2, bw * 0.7)), ink)
+				draw_string(ThemeDB.fallback_font, c + Vector2(-bw * 0.7, bw * 0.35), "停", HORIZONTAL_ALIGNMENT_LEFT, -1, int(r * 0.9), Color8(255, 255, 255))
 			"drift":
-				# 弧形箭頭（甩尾）
 				draw_arc(c, r * 0.5, PI * 0.2, PI * 1.5, 24, ink, r * 0.18)
 				var tip := c + Vector2(cos(PI * 1.5), sin(PI * 1.5)) * r * 0.5
 				draw_colored_polygon(PackedVector2Array([
@@ -254,7 +325,6 @@ class IconButton:
 				draw_rect(Rect2(c + Vector2(w * 0.6, -h), Vector2(w * 1.6, h * 2)), ink)
 
 
-## 自繪五角星 icon。
 class StarIcon:
 	extends Control
 	func _draw() -> void:

@@ -28,6 +28,10 @@ const TRACKS := [
 			[0.08, -4.0], [0.22, 3.5], [0.36, 0.0], [0.5, -3.5],
 			[0.64, 4.0], [0.78, -2.0], [0.92, 2.5],
 		],
+		"landmark": "lollipop_tower",
+		"landmark_frac": 0.38,
+		"backdrop_hills": true,
+		"prop_density": 1.25,
 	},
 	{
 		"id": "candy-beach",
@@ -52,6 +56,10 @@ const TRACKS := [
 			[0.1, 3.0], [0.24, -3.5], [0.4, 2.0], [0.52, -4.0],
 			[0.66, 0.0], [0.8, 3.5], [0.93, -2.5],
 		],
+		"landmark": "sandcastle",
+		"landmark_frac": 0.42,
+		"backdrop_hills": true,
+		"prop_density": 1.2,
 	},
 	{
 		"id": "jelly-forest",
@@ -76,6 +84,10 @@ const TRACKS := [
 			[0.07, 0.0], [0.2, 3.5], [0.34, -3.0], [0.49, 4.0],
 			[0.63, -4.0], [0.77, 2.0], [0.9, -2.0],
 		],
+		"landmark": "jelly_tree",
+		"landmark_frac": 0.35,
+		"backdrop_hills": true,
+		"prop_density": 1.3,
 	},
 	{
 		"id": "icecream-peak",
@@ -100,6 +112,10 @@ const TRACKS := [
 			[0.09, -3.0], [0.23, 3.0], [0.38, -4.0], [0.5, 2.5],
 			[0.65, -2.5], [0.79, 4.0], [0.92, 0.0],
 		],
+		"landmark": "ice_mountain",
+		"landmark_frac": 0.5,
+		"backdrop_hills": true,
+		"prop_density": 1.15,
 	},
 	{
 		"id": "choco-volcano",
@@ -124,6 +140,10 @@ const TRACKS := [
 			[0.06, 2.0], [0.21, -3.5], [0.35, 3.5], [0.48, 0.0],
 			[0.62, -4.0], [0.78, 3.0], [0.91, -2.5],
 		],
+		"landmark": "volcano",
+		"landmark_frac": 0.45,
+		"backdrop_hills": true,
+		"prop_density": 1.2,
 	},
 	{
 		"id": "rainbow-skyway",
@@ -150,6 +170,10 @@ const TRACKS := [
 			[0.1, 0.0], [0.25, -3.5], [0.4, 3.5], [0.55, -2.0],
 			[0.68, 2.0], [0.82, -4.0], [0.95, 4.0],
 		],
+		"landmark": "rainbow_arch",
+		"landmark_frac": 0.28,
+		"backdrop_hills": true,
+		"prop_density": 1.25,
 	},
 ]
 

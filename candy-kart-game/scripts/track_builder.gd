@@ -31,10 +31,14 @@ static func build_world(track: Dictionary, curve: Curve3D) -> Node3D:
 	root.name = "TrackWorld"
 	_add_environment(root, track)
 	_add_ground(root, track)
+	if track.get("backdrop_hills", false):
+		_add_backdrop_hills(root, track, curve)
 	_add_road(root, track, curve)
 	_add_start_line(root, curve)
 	_add_barriers(root, track, curve)
 	_add_props(root, track, curve)
+	if track.has("landmark"):
+		_add_landmark(root, track, curve)
 	_add_boost_pads(root, track, curve)
 	return root
 
@@ -172,10 +176,161 @@ static func _add_barriers(root: Node3D, track: Dictionary, curve: Curve3D) -> vo
 	inst.material_override = mat
 	root.add_child(inst)
 
+static func _add_backdrop_hills(root: Node3D, track: Dictionary, curve: Curve3D) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(track["id"]) + 9001
+	var colors: Array = track["prop_colors"]
+	var hill_count := 5
+	for i in hill_count:
+		var off := float(i) / float(hill_count) * curve.get_baked_length()
+		var pos := curve.sample_baked(off, true)
+		var ahead := curve.sample_baked(fmod(off + 1.0, curve.get_baked_length()), true)
+		var tangent := (ahead - pos).normalized()
+		var side := Vector3(-tangent.z, 0.0, tangent.x)
+		var lat := rng.randf_range(55.0, 95.0) * (1.0 if i % 2 == 0 else -1.0)
+		var base := pos + side * lat
+		var scale := rng.randf_range(18.0, 32.0)
+		var hill := SphereMesh.new()
+		hill.radius = scale * 0.5
+		hill.height = scale * 0.35
+		var inst := MeshInstance3D.new()
+		inst.mesh = hill
+		var color: Color = colors[i % colors.size()]
+		inst.material_override = solid_material(color.lightened(rng.randf_range(0.05, 0.2)))
+		inst.position = base + Vector3(0, scale * 0.12, 0)
+		inst.scale = Vector3(1.6, 0.55, 1.4)
+		root.add_child(inst)
+
+static func _add_landmark(root: Node3D, track: Dictionary, curve: Curve3D) -> void:
+	var length := curve.get_baked_length()
+	var frac: float = track.get("landmark_frac", 0.4)
+	var off := frac * length
+	var pos := curve.sample_baked(off, true)
+	var ahead := curve.sample_baked(fmod(off + 1.0, length), true)
+	var tangent := (ahead - pos).normalized()
+	var side := Vector3(-tangent.z, 0.0, tangent.x)
+	var base := pos + side * 42.0
+	var landmark := Node3D.new()
+	landmark.name = "Landmark"
+	landmark.position = base
+	match track["landmark"]:
+		"lollipop_tower":
+			for tier in 3:
+				var ball := SphereMesh.new()
+				ball.radius = 4.5 - tier * 0.8
+				ball.height = 9.0 - tier * 1.6
+				var inst := MeshInstance3D.new()
+				inst.mesh = ball
+				var cols: Array = track["prop_colors"]
+				inst.material_override = solid_material(cols[tier % cols.size()])
+				inst.position = Vector3(0, 6.0 + tier * 5.5, 0)
+				landmark.add_child(inst)
+			var stick := CylinderMesh.new()
+			stick.top_radius = 1.2
+			stick.bottom_radius = 1.4
+			stick.height = 14.0
+			var stick_inst := MeshInstance3D.new()
+			stick_inst.mesh = stick
+			stick_inst.material_override = solid_material(Color(1, 0.98, 0.94))
+			stick_inst.position = Vector3(0, 7.0, 0)
+			landmark.add_child(stick_inst)
+		"sandcastle":
+			for bx in [-3.5, 0.0, 3.5]:
+				var tower := BoxMesh.new()
+				tower.size = Vector3(5.0, 8.0 + absf(bx), 5.0)
+				var inst := MeshInstance3D.new()
+				inst.mesh = tower
+				inst.material_override = solid_material(Color8(255, 232, 178))
+				inst.position = Vector3(bx, 4.0, 0)
+				landmark.add_child(inst)
+			var wall := BoxMesh.new()
+			wall.size = Vector3(14.0, 3.5, 6.0)
+			var wall_inst := MeshInstance3D.new()
+			wall_inst.mesh = wall
+			wall_inst.material_override = solid_material(Color8(255, 226, 196))
+			wall_inst.position = Vector3(0, 1.8, 2.5)
+			landmark.add_child(wall_inst)
+		"jelly_tree":
+			var trunk := CylinderMesh.new()
+			trunk.top_radius = 1.8
+			trunk.bottom_radius = 2.4
+			trunk.height = 10.0
+			var trunk_inst := MeshInstance3D.new()
+			trunk_inst.mesh = trunk
+			trunk_inst.material_override = solid_material(Color8(157, 231, 184).darkened(0.15))
+			trunk_inst.position = Vector3(0, 5.0, 0)
+			landmark.add_child(trunk_inst)
+			for layer in 3:
+				var canopy := SphereMesh.new()
+				canopy.radius = 5.5 - layer * 0.6
+				canopy.height = 8.0
+				var inst := MeshInstance3D.new()
+				inst.mesh = canopy
+				var cols: Array = track["prop_colors"]
+				inst.material_override = solid_material(cols[layer % cols.size()])
+				inst.position = Vector3(0, 12.0 + layer * 3.5, 0)
+				landmark.add_child(inst)
+		"ice_mountain":
+			for peak in 3:
+				var cone := SphereMesh.new()
+				cone.radius = 6.0 - peak * 1.2
+				cone.height = 12.0 - peak * 2.0
+				var inst := MeshInstance3D.new()
+				inst.mesh = cone
+				inst.material_override = solid_material(Color8(248, 252, 255) if peak < 2 else Color8(255, 180, 207))
+				inst.position = Vector3(peak * 2.5 - 2.5, 6.0 + peak * 4.0, 0)
+				inst.scale = Vector3(1.0, 1.4, 1.0)
+				landmark.add_child(inst)
+		"volcano":
+			var cone := SphereMesh.new()
+			cone.radius = 10.0
+			cone.height = 16.0
+			var body := MeshInstance3D.new()
+			body.mesh = cone
+			body.material_override = solid_material(Color8(122, 82, 48))
+			body.position = Vector3(0, 8.0, 0)
+			body.scale = Vector3(1.2, 1.5, 1.2)
+			landmark.add_child(body)
+			var lava := SphereMesh.new()
+			lava.radius = 3.5
+			lava.height = 2.0
+			var lava_inst := MeshInstance3D.new()
+			lava_inst.mesh = lava
+			lava_inst.material_override = solid_material(Color8(255, 196, 168), 0.6)
+			lava_inst.position = Vector3(0, 15.5, 0)
+			landmark.add_child(lava_inst)
+		"rainbow_arch":
+			var arch_colors := [
+				Color8(255, 159, 183), Color8(255, 232, 137), Color8(157, 231, 184),
+				Color8(141, 223, 240), Color8(201, 180, 255),
+			]
+			for band in arch_colors.size():
+				var torus := TorusMesh.new()
+				torus.inner_radius = 14.0 - band * 1.1
+				torus.outer_radius = 15.2 - band * 1.1
+				var inst := MeshInstance3D.new()
+				inst.mesh = torus
+				inst.material_override = solid_material(arch_colors[band])
+				inst.rotation_degrees = Vector3(90, 0, 0)
+				inst.position = Vector3(0, 14.0 - band * 0.8, 0)
+				landmark.add_child(inst)
+		_:
+			var ball := SphereMesh.new()
+			ball.radius = 6.0
+			ball.height = 12.0
+			var inst := MeshInstance3D.new()
+			inst.mesh = ball
+			inst.material_override = solid_material(track["road"])
+			inst.position = Vector3(0, 6.0, 0)
+			landmark.add_child(inst)
+	root.add_child(landmark)
+
 static func _add_props(root: Node3D, track: Dictionary, curve: Curve3D) -> void:
 	var length := curve.get_baked_length()
 	var colors: Array = track["prop_colors"]
-	var count := int(length / PROP_STEP)
+	var density: float = track.get("prop_density", 1.0)
+	var step := PROP_STEP / clampf(density, 0.85, 1.6)
+	var count := int(length / step)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(track["id"])
 
@@ -223,7 +378,7 @@ static func _add_props(root: Node3D, track: Dictionary, curve: Curve3D) -> void:
 	stick_mm.instance_count = count
 
 	for i in count:
-		var off := float(i) * PROP_STEP + rng.randf_range(-6.0, 6.0)
+		var off := float(i) * step + rng.randf_range(-6.0, 6.0)
 		off = fposmod(off, length)
 		var pos := curve.sample_baked(off, true)
 		var ahead := curve.sample_baked(fmod(off + 1.0, length), true)

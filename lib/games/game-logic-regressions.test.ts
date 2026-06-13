@@ -57,7 +57,7 @@ describe("game logic regressions", () => {
     expect(host).toContain("LOAD_TIMEOUT_MS");
   });
 
-  it("繽紛卡丁車保留觸控方向與漂移控制", () => {
+  it("繽紛卡丁車保留觸控方向、漂移與煞車控制", () => {
     const hud = source("candy-kart-game/scripts/hud.gd");
     const main = source("candy-kart-game/scripts/main.gd");
 
@@ -66,9 +66,13 @@ describe("game logic regressions", () => {
     expect(hud).toContain("touch_left = true");
     expect(hud).toContain("touch_right = true");
     expect(hud).toContain("touch_drift = true");
+    expect(hud).toContain("touch_brake = true");
+    expect(hud).toContain("update_player_meters");
     expect(main).toContain("hud.touch_left");
     expect(main).toContain("hud.touch_right");
     expect(main).toContain("hud.touch_drift");
+    expect(main).toContain("hud.touch_brake");
+    expect(main).toContain("hud.update_player_meters");
   });
 
   it("繽紛卡丁車保留音訊解鎖與 AI rubber-banding", () => {

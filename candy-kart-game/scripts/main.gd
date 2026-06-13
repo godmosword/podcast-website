@@ -173,7 +173,13 @@ func _process(_delta: float) -> void:
 		if hud.touch_right:
 			race.player.input_steer += 1.0
 		race.player.input_drift = Input.is_action_pressed("drift") or hud.touch_drift
-		race.player.input_brake = Input.is_action_pressed("brake")
+		race.player.input_brake = Input.is_action_pressed("brake") or hud.touch_brake
+		var p := race.player
+		hud.update_player_meters(
+			p.speed / Kart.MAX_SPEED,
+			p.drift_charge / Kart.DRIFT_CHARGE_TIME,
+			p.boost_t > 0.05,
+		)
 	if Input.is_action_just_pressed("pause") and race and not get_tree().paused:
 		_on_pause()
 	elif Input.is_action_just_pressed("pause") and get_tree().paused:

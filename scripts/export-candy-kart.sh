@@ -33,8 +33,24 @@ case "$VERSION" in
 esac
 
 mkdir -p "$OUT_DIR"
-echo "==> headless smoke test"
-"$GODOT_BIN" --headless --path "$PROJECT_DIR" -- --smoke 2>&1 | grep SMOKE_RESULT
+echo "==> headless smoke test（約 6–10 秒，請稍候）"
+SMOKE_LOG="$(mktemp)"
+set +e
+"$GODOT_BIN" --headless --path "$PROJECT_DIR" -- --smoke >"$SMOKE_LOG" 2>&1
+SMOKE_CODE=$?
+set -e
+cat "$SMOKE_LOG"
+if ! grep -q SMOKE_RESULT "$SMOKE_LOG"; then
+  echo "smoke test 失敗（exit $SMOKE_CODE，未看到 SMOKE_RESULT）" >&2
+  rm -f "$SMOKE_LOG"
+  exit 1
+fi
+grep SMOKE_RESULT "$SMOKE_LOG"
+rm -f "$SMOKE_LOG"
+if [ "$SMOKE_CODE" -ne 0 ]; then
+  echo "smoke test 回報失敗（exit $SMOKE_CODE）" >&2
+  exit "$SMOKE_CODE"
+fi
 echo "==> export Web -> $OUT_DIR"
 "$GODOT_BIN" --headless --path "$PROJECT_DIR" --export-release "Web" >/dev/null
 ls -la "$OUT_DIR"
