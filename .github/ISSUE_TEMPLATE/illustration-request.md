@@ -15,7 +15,7 @@ body:
       label: Checklist
       options:
         - label: 抽查站上 /story/ep-N 能播、封面正確
-        - label: 校對 data/subtitles/ep-N.json（Bonbon／馬米等人名）
+        - label: npm run proofread:subtitles -- ep-N [--fix] → 人工修 → --mark（docs/SUBTITLE-PROOFREAD.md）
         - label: 確認車種／標籤（必要時 apple-sync.defaults.json overrides）
         - label: npm run illustrate -- ep-N --segment-only
         - label: npm run illustrate -- ep-N

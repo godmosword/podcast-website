@@ -74,7 +74,7 @@ export function buildCommitMessage(report: SyncRunReport): string {
     lines.push("## 生圖待辦（本機 + OPENAI_API_KEY，審圖後 --approve）");
     for (const slug of report.illustratePending) {
       lines.push(`- ${slug}:`);
-      lines.push(`  1. 校對 data/subtitles/${slug}.json`);
+      lines.push(`  1. npm run proofread:subtitles -- ${slug} [--fix] → 人工修 → --mark`);
       lines.push(`  2. npm run illustrate -- ${slug} --segment-only`);
       lines.push(`  3. npm run illustrate -- ${slug}`);
       lines.push(`  4. 審 public/.illustrate-staging/${slug}/contact.html`);
@@ -114,7 +114,7 @@ export function buildIssueBody(slug: string, report: SyncRunReport): string {
 ### Checklist
 
 - [ ] 抽查站上 [${slug}](${storyUrl}) 能播、封面正確
-- [ ] 校對 \`data/subtitles/${slug}.json\`（Bonbon／馬米等人名）
+- [ ] \`npm run proofread:subtitles -- ${slug} [--fix]\` → 人工修 JSON → \`--mark\`（[SUBTITLE-PROOFREAD.md](docs/SUBTITLE-PROOFREAD.md)）
 - [ ] 確認車種／標籤（必要時 \`data/apple-sync.defaults.json\` overrides）
 - [ ] \`npm run illustrate -- ${slug} --segment-only\`
 - [ ] \`npm run illustrate -- ${slug}\`（需 \`OPENAI_API_KEY\`）

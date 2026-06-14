@@ -38,6 +38,9 @@ const ID_BY_CANONICAL_NAME: Record<string, string> = {
   沃特: "watt",
   蹦蹦: "bong-bong",
   小飛: "xiao-fei",
+  高高摩天輪: "gao-gao",
+  小柔露營車: "xiao-rou",
+  小衝賽車: "xiao-chong",
 };
 
 const VEHICLE_ZH: Record<string, string> = {
@@ -48,6 +51,7 @@ const VEHICLE_ZH: Record<string, string> = {
   minibus: "小巴士",
   taxi: "計程車",
   "monster truck": "怪獸卡車",
+  萌萌: "怪獸卡車",
   excavator: "挖土機",
   "crane truck": "吊車",
   tricycle: "三輪車",
@@ -57,6 +61,8 @@ const VEHICLE_ZH: Record<string, string> = {
   drone: "無人機",
   "high speed rail": "高鐵",
   "MRT train": "捷運",
+  "ferris wheel": "摩天輪",
+  "camper van": "露營車",
 };
 
 /** 車種對應的手動維護集數 slug（與 firstSeen 合併）。 */
@@ -66,6 +72,9 @@ const VEHICLE_STORY_SLUG: Record<string, string> = {
   "race car": "ep-3",
   excavator: "ep-5",
   "high speed rail": "ep-7",
+  "monster truck": "ep-8",
+  "ferris wheel": "ep-11",
+  "camper van": "ep-11",
 };
 
 const PERSONALITY_BY_ID: Record<string, string> = {
@@ -85,6 +94,9 @@ const PERSONALITY_BY_ID: Record<string, string> = {
   "xiao-fei": "樂於助人、遵守飛行安全規則",
   "xiao-ju-hsr": "溫柔說明狀況、把安全放在第一位",
   "xiao-nan": "可靠載送、溫暖陪伴轉乘",
+  "gao-gao": "溫柔慢轉、帶大家看風景",
+  "xiao-rou": "需要安靜與安慰、溫柔貼心",
+  "xiao-chong": "愛速度、說話直接",
 };
 
 function shortName(entry: RawCharacter, id: string): string {

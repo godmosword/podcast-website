@@ -545,8 +545,13 @@ export function writeStagingPortrait(slug: string, name: string, buf: Buffer): s
  * - 本集新角色（暫存有定裝照）→ 用暫存圖
  * - 都沒有 → 退回該集封面 01.jpg
  */
+/** 已發佈頁；生圖進行中時 fallback 到 staging 同幕（連戲 refPages）。 */
 function episodePagePath(slug: string, page: number): string {
-  return join(publicDirForSlug(slug), `${pad2(page)}.jpg`);
+  const pub = join(publicDirForSlug(slug), `${pad2(page)}.jpg`);
+  if (existsSync(pub)) return pub;
+  const staging = join(stagingDirForSlug(slug), `${pad2(page)}.jpg`);
+  if (existsSync(staging)) return staging;
+  return pub;
 }
 
 export function resolveSceneRefs(

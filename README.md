@@ -279,7 +279,14 @@ npm run transcribe -- --convert --all  # 只對既有側車檔重跑簡轉繁/�
 
 **新集自動上字幕：** `npm run sync:apple` 下載新集音檔後，**本機若有 whisper-cli + 模型會自動轉錄**並寫側車檔；缺工具/模型（如一般 CI）或設 `SKIP_TRANSCRIBE=1` 會自動跳過、不中斷同步。CI 要自動上字幕，需在 workflow 安裝 `whisper-cpp` 並快取模型。
 
-**草稿必校對（兒童產品上架前）：**
+**草稿必校對（兒童產品、illustrate 前必做）：** 見 [docs/SUBTITLE-PROOFREAD.md](./docs/SUBTITLE-PROOFREAD.md)
+
+```bash
+npm run proofread:subtitles -- ep-N          # lint
+npm run proofread:subtitles -- ep-N --fix    # 自動修正 Bonbon／馬米等
+# 人工編輯 data/subtitles/ep-N.json
+npm run proofread:subtitles -- ep-N --mark   # 通過後標記（illustrate 閘門）
+```
 
 - Whisper 在音樂/靜音段常加**假字幕鳴謝**（如「字幕:XXX」「請訂閱…」）；腳本已自動過濾常見幻覺，仍建議抽查。
 - 輸出為**逐字稿**（語氣詞、口語）；**品牌/人名仍會誤聽**（Bonbon→寶寶、馬米→媽咪，Whisper 無從得知），直接編輯側車 JSON 修正即可。
@@ -300,7 +307,7 @@ npm run transcribe -- --convert --all  # 只對既有側車檔重跑簡轉繁/�
 
 **標準範本：** [ep-9、ep-10](./docs/EPISODE-WORKFLOW.md)（全幕插圖 + 幕級 `captions`）。EP2–8 與日後新集須同一 workflow；驗證：`npm run verify:episodes`。
 
-**資料流：** `data/subtitles/<slug>.json`（whisper 本機已產）→ 切場景 `data/scenes/<slug>.json` → 生圖到暫存 `public/.illustrate-staging/<slug>/`（gitignore）→ 人工審 `contact.html` → `--approve` 進 `public/stories/<slug>/NN.jpg` 並寫 `pageCount`／`captionTimes`／`captions`（overrides + synced；手動集另同步 `data/stories.ts`）。
+**資料流：** `npm run transcribe` → **`npm run proofread:subtitles -- <slug> --mark`**（見 [SUBTITLE-PROOFREAD.md](./docs/SUBTITLE-PROOFREAD.md)）→ 切場景 `data/scenes/<slug>.json` → …
 
 **`public/stories/<slug>/` 資產規範**（資料夾內不放 README，規則集中於本節）：
 

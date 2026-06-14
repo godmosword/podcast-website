@@ -9,6 +9,7 @@ import { join } from "node:path";
 import type { Story } from "../../data/content";
 import { STORIES_DIR, subtitleSidecarPath } from "./transcribe-core";
 import { scenesSidecarPath } from "./illustrate-core";
+import { verifySubtitleProofread } from "./subtitle-proofread";
 
 /** 已完成的黃金範本集（文件／測試對照用）。 */
 export const REFERENCE_ILLUSTRATED_SLUGS = ["ep-9", "ep-10"] as const;
@@ -192,6 +193,11 @@ export function verifyMvpEpisode(
     });
   }
 
+  const proofreadWarn = verifySubtitleProofread(slug, probes.hasScenes(slug));
+  if (proofreadWarn) {
+    issues.push({ slug, ...proofreadWarn });
+  }
+
   return issues;
 }
 
@@ -236,12 +242,13 @@ export function formatWorkflowReport(issues: WorkflowIssue[]): string {
 }
 
 export const ILLUSTRATE_WORKFLOW_STEPS = [
-  "校對 data/subtitles/<slug>.json（Bonbon／馬米等人名）",
+  "npm run transcribe -- <slug>  # 若 sync 未轉錄",
+  "npm run proofread:subtitles -- <slug> [--fix] → 人工修 JSON → --mark  # 見 docs/SUBTITLE-PROOFREAD.md",
   "npm run illustrate -- <slug> --segment-only  # 審 data/scenes/<slug>.json",
   "npm run illustrate -- <slug>                 # 生圖 → staging + contact.html",
   "審 public/.illustrate-staging/<slug>/contact.html",
   "npm run illustrate -- <slug> --approve       # public + pageCount/captionTimes/captions",
   "npm run verify:episodes                      # 對照 ep-9／ep-10 標準",
   "npm run sync:apple && npm run build",
-  "commit：public/stories/、scenes/、subtitles/、synced/defaults、characters",
+  "commit：public/stories/、scenes/、subtitles/、subtitles/_proofread/、synced/defaults、characters",
 ] as const;

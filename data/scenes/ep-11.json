@@ -1,154 +1,158 @@
 {
   "slug": "ep-11",
   "audioDuration": 350,
-  "model": "semantic-15-20s",
-  "generatedAt": "2026-06-11T14:25:34.886Z",
+  "model": "manual-semantic-15-20s",
+  "generatedAt": "2026-06-14T01:00:00.000Z",
   "scenes": [
     {
       "index": 1,
       "start": 0,
       "end": 23.8,
       "summary": "故事介紹與引入",
-      "prompt": "Bonbon and Mami chat with children about feeling disliked and introduce the story of the Ferris wheel named 高高.",
-      "characters": []
+      "prompt": "Warm podcast intro at the colorful clay car amusement park, hosts Bonbon and Mami chatting with children about feeling disliked, gentle empathetic mood before the Ferris wheel story",
+      "characters": [],
+      "keepCover": true
     },
     {
       "index": 2,
       "start": 23.8,
       "end": 51.4,
-      "summary": "故事介紹與引入",
-      "prompt": "Bonbon and Mami chat with children about feeling disliked and introduce the story of the Ferris wheel named 高高.",
-      "characters": []
+      "summary": "被討厭的心酸（podcast 對話）",
+      "prompt": "Podcast empathy scene: adult host Mami and boy Bonbon with yellow backpack talking warmly with one small child on a park bench about heartache when friends say I hate you, gentle hugging mood, soft pastel park background with faceless trees only, absolutely NO personified cars or vehicles with faces",
+      "characters": ["蹦蹦"],
+      "refPages": [12],
+      "refPageHint": "Match Bonbon (蹦蹦 ref) and Mami adult human host exactly like scene 12 — two humans plus one child only. NO purple car, NO pink bear car, NO Ferris wheel, NO race car, NO vehicles with faces."
     },
     {
       "index": 3,
       "start": 51.4,
       "end": 75.7,
       "summary": "高高的日常",
-      "prompt": "高高, the Ferris wheel, smiling as it slowly rotates, showing people the view from the sky.",
-      "characters": []
+      "prompt": "Gaogao the clay Ferris wheel smiling warmly as it slowly rotates at the amusement park, colorful empty heart gondolas lifting toward soft blue daytime sky, cheerful peaceful mood, bright lights on, NO other personified car characters in frame",
+      "characters": ["高高摩天輪"],
+      "refPages": [],
+      "refPageHint": "PRIMARY: match 高高摩天輪 character reference portrait exactly. ONLY Gaogao has a face (hub). NO other personified cars in foreground — especially NO green dinosaur car on the left. Background rides faceless or omitted. NO duplicate faces on any vehicle."
     },
     {
       "index": 4,
       "start": 75.7,
       "end": 101.3,
-      "summary": "小蔥的抱怨",
-      "prompt": "小蔥, a yellow菜車, impatiently honking at 高高, expressing dislike for the slow ride.",
-      "characters": []
+      "summary": "小衝的抱怨",
+      "prompt": "Xiaochong the bright yellow clay race car honking impatiently beside Gaogao the Ferris wheel at the same amusement park, annoyed pouty face, speed lines vs slow rotation, comedic contrast, still daytime",
+      "characters": ["小衝賽車", "高高摩天輪"],
+      "refPages": [1, 3],
+      "refPageHint": "PRIMARY: match 小衝賽車 and 高高摩天輪 reference portraits exactly. Scene 3 ref keeps Gaogao happy lit state. Same clay style."
     },
     {
       "index": 5,
       "start": 101.3,
       "end": 123.6,
-      "summary": "高高的傷心",
-      "prompt": "高高 feeling sad and dimming its lights after hearing 小蔥's harsh words.",
-      "characters": []
+      "summary": "高高的傷心（燈暗）",
+      "prompt": "Same Gaogao Ferris wheel right after Xiaochong drove away, ALL colorful rim bulbs completely OFF with zero glow, drooping gondolas, sad teary hub face looking down, overcast late-afternoon grey-pink sky, lonely heartbreak moment, NO other mascot cars",
+      "characters": ["高高摩天輪"],
+      "refPages": [4],
+      "refPageHint": "PRIMARY: Gaogao from scene 4 but EVERY bulb dark and unlit — no colored lights anywhere. Sad hub face only. NO green dinosaur car, NO duplicate faces."
     },
     {
       "index": 6,
       "start": 123.6,
       "end": 144.6,
-      "summary": "高高的傷心",
-      "prompt": "高高 feeling sad and dimming its lights after hearing 小蔥's harsh words.",
-      "characters": []
+      "summary": "高高想停下來",
+      "prompt": "Gaogao Ferris wheel nearly stopped, slumped and still in the same park corner, still dim unlit bulbs, lonely quiet mood, ONLY Gaogao visible as personified vehicle, NO green car on the side",
+      "characters": ["高高摩天輪"],
+      "refPages": [5],
+      "refPageHint": "PRIMARY: match scene 5 dim sad Gaogao exactly; same unlit bulbs. ONLY Gaogao hub has ONE face. NO foreground mascot cars, NO green dinosaur car, NO duplicate faces."
     },
     {
       "index": 7,
       "start": 144.6,
       "end": 172.5,
-      "summary": "小柔的安慰",
-      "prompt": "小柔, a small pink露營車, enters 高高's cabin, seeking a calm ride to recover from a roller coaster.",
-      "characters": []
+      "summary": "小柔登場求助",
+      "prompt": "Xiaorou the small pink clay camper van wobbling unsteadily on the ground toward dim sad Gaogao, dizzy shaky tires and woozy spiral eyes after riding roller coaster, pleading gently please let me rest, twilight park, Gaogao still fully unlit and sad like scene 6",
+      "characters": ["小柔露營車", "高高摩天輪"],
+      "refPages": [6],
+      "refPageHint": "PRIMARY: match 小柔露營車 portrait — dizzy wobbly tired expression. Gaogao MUST stay dim unlit sad exactly like scene 6 — NOT bright, NOT smiling wide. Xiaorou on ground only, not yet in gondola. NO duplicate faces."
     },
     {
       "index": 8,
       "start": 172.5,
       "end": 193,
-      "summary": "小柔的讚美",
-      "prompt": "小柔 enjoying the gentle breeze on 高高, explaining why the slow ride is comforting.",
-      "characters": []
+      "summary": "小柔享受慢轉",
+      "prompt": "Xiaorou pink camper van resting inside a Gaogao gondola mid-rotation, eyes closed enjoying cool breeze, Gaogao slowly turning with tentative hopeful hub expression, soft warm sunset light, same park",
+      "characters": ["小柔露營車", "高高摩天輪"],
+      "refPages": [1, 7],
+      "refPageHint": "PRIMARY: same Xiaorou and Gaogao designs from portraits and scene 7; gondola ride begins, sunset continuity. Same clay style."
     },
     {
       "index": 9,
       "start": 193,
       "end": 215.8,
-      "summary": "小柔的讚美",
-      "prompt": "小柔 enjoying the gentle breeze on 高高, explaining why the slow ride is comforting.",
-      "characters": []
+      "summary": "小柔稱讚慢是超能力",
+      "prompt": "Xiaorou smiling peacefully in the gondola higher in the sky, praising Gaogao's slow rotation, sparkling breeze and distant park view below, warm uplifting sunset, continuous ride from scene 8",
+      "characters": ["小柔露營車", "高高摩天輪"],
+      "refPages": [1, 8],
+      "refPageHint": "PRIMARY: match scene 8 gondola composition and character portraits; slightly higher rotation angle. Same clay style."
     },
     {
       "index": 10,
       "start": 215.8,
       "end": 236.9,
-      "summary": "高高的領悟",
-      "prompt": "高高 brightening up as it realizes its slow pace is a superpower for some.",
-      "characters": []
+      "summary": "高高領悟",
+      "prompt": "Turnaround moment: Gaogao Ferris wheel hub eyes suddenly brightening with joy, colorful bulbs relighting one by one from fully dark, magical gentle sparkles, Xiaorou pink camper van ONLY inside one gondola above — NOT on the ground, golden hour sunset, emotional epiphany",
+      "characters": ["高高摩天輪", "小柔露營車"],
+      "refPages": [5, 9],
+      "refPageHint": "PRIMARY: Gaogao transitions from scene 5 fully dark to relighting — show bulbs turning ON. Xiaorou ONLY in gondola like scene 9, never on ground. Match portraits. Each vehicle ONE face."
     },
     {
       "index": 11,
       "start": 236.9,
       "end": 264.6,
-      "summary": "高高的領悟",
-      "prompt": "高高 brightening up as it realizes its slow pace is a superpower for some.",
-      "characters": []
+      "summary": "高高不再難過",
+      "prompt": "Gaogao Ferris wheel rotating happily again at full brightness, Xiaorou pink camper van ONLY inside one gondola high above — NOT on the ground, NO second camper anywhere, confident warm Gaogao hub smile, peaceful inclusive amusement park, golden hour continuity from scene 10",
+      "characters": ["高高摩天輪", "小柔露營車"],
+      "refPages": [10],
+      "refPageHint": "PRIMARY: Xiaorou appears ONLY ONCE inside a single gondola — never on the ground. Match scene 10 relit happy Gaogao and Xiaorou from portraits. Each vehicle exactly ONE face."
     },
     {
       "index": 12,
       "start": 264.6,
       "end": 286.1,
       "summary": "故事教訓",
-      "prompt": "Narrator explaining the moral about self-worth and perspective to children.",
-      "characters": []
+      "prompt": "Soft storybook moment at the amusement park at dusk, Bonbon and Mami speaking kindly to children about self-worth, Gaogao softly lit in far background, warm magic sparkles, NO foreground mascot cars",
+      "characters": ["蹦蹦", "高高摩天輪"],
+      "refPages": [2, 11],
+      "refPageHint": "Bonbon from 蹦蹦 ref and scene 2; Mami adult human host — each exactly ONE face, NO duplicate features, NO car-body hybrids. Gaogao distant background like scene 11. NO green dinosaur car in foreground."
     },
     {
       "index": 13,
       "start": 286.1,
       "end": 304.6,
-      "summary": "故事教訓",
-      "prompt": "Narrator explaining the moral about self-worth and perspective to children.",
-      "characters": []
+      "summary": "記得高高的超能力",
+      "prompt": "Cozy closing lesson scene, small cheerful Gaogao icon and pastel hearts over the car amusement park, gentle nightfall mood",
+      "characters": ["高高摩天輪"],
+      "refPages": [1, 11],
+      "refPageHint": "Gaogao icon matches portrait exactly. Same clay style."
     },
     {
       "index": 14,
       "start": 304.6,
       "end": 326.8,
-      "summary": "結尾對話",
-      "prompt": "Bonbon and Mami discuss personal feelings about Ferris wheels and roller coasters.",
-      "characters": []
+      "summary": "結尾對話（雲霄飛車）",
+      "prompt": "Bonbon and Mami chatting with a child about fear of fast roller coasters versus liking slow Ferris wheels, playful honest mood at podcast studio corner with amusement park props, only two human hosts visible",
+      "characters": ["蹦蹦"],
+      "refPages": [2],
+      "refPageHint": "Match Bonbon from 蹦蹦 ref and Mami from scene 2 — both human clay figures with exactly ONE face each, NO duplicate facial features, NO car-shaped bodies, NO personified vehicle characters in foreground."
     },
     {
       "index": 15,
       "start": 326.8,
       "end": 350,
-      "summary": "結尾對話",
-      "prompt": "Bonbon and Mami discuss personal feelings about Ferris wheels and roller coasters.",
-      "characters": []
+      "summary": "結尾道別",
+      "prompt": "Cheerful goodbye wave from Bonbon and Mami, small clay Ferris wheel and yellow race car toys as props in background, inviting kids back to the car amusement park, only two human hosts in foreground",
+      "characters": ["蹦蹦"],
+      "refPages": [2],
+      "refPageHint": "Match Bonbon from 蹦蹦 ref and Mami from scene 2 — human clay boy with yellow backpack and adult host, each exactly ONE face, NO duplicate features, NO car-body hybrids. Background toys are faceless props only."
     }
   ],
-  "newCharacters": [
-    {
-      "name": "小蔥",
-      "aliases": [
-        "黃色菜車"
-      ],
-      "vehicle": "菜車",
-      "desc": "a small yellow car with a sleek design, known for its love of speed and impatience."
-    },
-    {
-      "name": "小柔",
-      "aliases": [
-        "粉紅露營車"
-      ],
-      "vehicle": "露營車",
-      "desc": "a small pink camper van with a gentle demeanor, seeking calm and comfort."
-    },
-    {
-      "name": "高高",
-      "aliases": [
-        "摩天輪"
-      ],
-      "vehicle": "摩天輪",
-      "desc": "a tall Ferris wheel with colorful lights, known for its slow, gentle rotation and friendly smile."
-    }
-  ]
+  "newCharacters": []
 }

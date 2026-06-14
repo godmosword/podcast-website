@@ -17,6 +17,7 @@
 // ============================================================
 
 import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { relative } from "node:path";
 import { getStory } from "../data/content";
 import { ROOT } from "./lib/transcribe-core";
@@ -34,6 +35,7 @@ import {
   scenesSidecarPath,
   segmentByOpenAI,
   segmentDeterministic,
+  stagingDirForSlug,
   stagingPortraitPath,
   syncCoverPagePortrait,
   writeScenesFile,
@@ -43,6 +45,7 @@ import {
   type Scene,
   type StoryMeta,
 } from "./lib/illustrate-core";
+import { assertSubtitleProofread } from "./lib/subtitle-proofread";
 
 function fail(msg: string): never {
   console.error(`✗ ${msg}`);
@@ -127,6 +130,11 @@ async function generateAll(
       process.stderr.write(` → ${rel(p)}\n`);
       continue;
     }
+    const staged = join(stagingDirForSlug(slug), `${String(sc.index).padStart(2, "0")}.jpg`);
+    if (existsSync(staged)) {
+      process.stderr.write(`  略過 #${sc.index}/${scenes.length}（staging 已有）→ ${rel(staged)}\n`);
+      continue;
+    }
     const { paths, descs: cdescs } = resolveSceneRefs(slug, sc, descs, ncMap);
     process.stderr.write(`  生圖 #${sc.index}/${scenes.length}（${sc.characters.join("、") || "封面參考"}）…`);
     const buf = await generateSceneImage(sc, paths, cdescs);
@@ -204,6 +212,7 @@ async function main(): Promise<void> {
   for (const slug of realSlugs) {
     try {
       if (doApprove) {
+        assertSubtitleProofread(slug, "approve");
         const r = approve(slug);
         console.log(`✓ ${slug}：${r.copied} 張進 ${rel(r.publicDir)}`);
         if (r.registered.length) console.log(`  登記新角色：${r.registered.join("、")}`);
@@ -221,6 +230,7 @@ async function main(): Promise<void> {
         await regenScene(slug, sceneNo);
         continue;
       }
+      assertSubtitleProofread(slug, "illustrate");
       let out: { scenes: Scene[]; newCharacters: NewCharacter[] };
       if (fromScenes) {
         const file = readScenesFile(slug);

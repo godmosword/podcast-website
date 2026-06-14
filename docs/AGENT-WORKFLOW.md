@@ -252,11 +252,12 @@ git add data/subtitles/<slug>.json data/scenes/<slug>.json \
 
 ## Domain：Episode 對照
 
-完整步驟：[EPISODE-WORKFLOW.md](./EPISODE-WORKFLOW.md)。
+完整步驟：[EPISODE-WORKFLOW.md](./EPISODE-WORKFLOW.md)、字幕校對：[SUBTITLE-PROOFREAD.md](./SUBTITLE-PROOFREAD.md)。
 
 | 步驟 | Domain | `/agent-plan` 寫入 DAG | `/agent-action` 路由 |
 |------|--------|------------------------|----------------------|
-| 1 | 校對字幕 | ✅ | Sonnet 4.6 |
+| 0 | transcribe（若缺側車） | ✅ | Grok Build / shell |
+| 1 | 字幕校對 + `--mark` | ✅ | Sonnet 4.6 |
 | 2 | characters + 定裝 | ✅ | Sonnet 4.6；生圖 Leader 決策 |
 | 3 | segment + 編輯 scenes | ✅ | Sonnet 4.6 |
 | 4 | 生圖 + approve | ✅（標高成本） | Grok Build；Leader 審圖 |

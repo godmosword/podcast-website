@@ -468,7 +468,7 @@ Phase 0 定錨 → 1 渲染+UI（起手式）→ 2 美術 → 3 音訊 → 4 jui
 |---|------|------|
 | 16 | 收到通知（Issue／LINE） | 維護者 |
 | 17 | 抽查站上 MVP | `/story/ep-N` 能播、封面正確 |
-| 18 | 校對字幕 | Bonbon／馬米（見 P2「字幕人名校對」） |
+| 18 | 字幕校對 + `--mark` | `npm run proofread:subtitles -- ep-N`（[SUBTITLE-PROOFREAD.md](./docs/SUBTITLE-PROOFREAD.md)） |
 | 19 | 確認車種／標籤 | `apple-sync.defaults.json` overrides |
 | 20 | （可選）`npm run font:subset` | 新摘要有生僻字時 |
 
@@ -525,7 +525,7 @@ T+2d    社群貼文（B 戰場）
 - 狀態：MVP 已上線（pageCount=1），待多頁插圖
 
 ### Checklist
-- [ ] 校對 data/subtitles/ep-N.json
+- [ ] `npm run proofread:subtitles -- ep-N [--fix]` → 人工修 → `--mark`
 - [ ] npm run illustrate -- ep-N --segment-only
 - [ ] OPENAI_API_KEY=... npm run illustrate -- ep-N
 - [ ] 審 public/.illustrate-staging/ep-N/contact.html

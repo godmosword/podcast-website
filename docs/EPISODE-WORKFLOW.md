@@ -16,6 +16,7 @@
 | 產物 | 路徑 |
 |------|------|
 | 字幕側車 | `data/subtitles/<slug>.json` |
+| 字幕校對標記 | `data/subtitles/_proofread/<slug>.json`（`--mark` 後） |
 | 場景切分 | `data/scenes/<slug>.json` |
 | 插圖 | `public/stories/<slug>/01.jpg` … `NN.jpg`（張數 = `pageCount`） |
 | Metadata | `pageCount`、`captionTimes[]`、`captions[]`（長度皆 = 幕數） |
@@ -30,10 +31,13 @@ Metadata 寫入位置：
 ## 標準步驟
 
 ```bash
-# 0. GHA 或本機 sync 後為 MVP（pageCount=1、01.jpg、字幕草稿）
+# 0. GHA 或本機 sync 後為 MVP（pageCount=1、01.jpg、Whisper **草稿**字幕）
 
-# 1. 校對字幕
-#    編輯 data/subtitles/<slug>.json（Bonbon／馬米等人名）
+# 1. 字幕校對（**illustrate 前必做**，見 docs/SUBTITLE-PROOFREAD.md）
+npm run proofread:subtitles -- <slug>          # lint
+npm run proofread:subtitles -- <slug> --fix    # 自動修正品牌名
+#    人工編輯 data/subtitles/<slug>.json
+npm run proofread:subtitles -- <slug> --mark   # 通過後標記（illustrate 閘門）
 
 # 2. 切場景（可先審、不生圖）
 npm run illustrate -- <slug> --segment-only
@@ -52,8 +56,8 @@ npm run verify:episodes
 
 # 6. 建置與推送
 npm run sync:apple && npm run build
-git add public/stories/ data/scenes/ data/subtitles/ data/apple-synced.json \
-  data/apple-sync.defaults.json data/stories.ts data/characters.json
+git add public/stories/ data/scenes/ data/subtitles/ data/subtitles/_proofread/ \
+  data/apple-synced.json data/apple-sync.defaults.json data/stories.ts data/characters.json
 git commit -m "feat(stories): illustrate <slug> full scenes"
 git push
 ```
@@ -89,6 +93,7 @@ GHA `sync-apple-podcast.yml` 在 `npm run sync:apple` 後**一律**跑 `npm run 
 
 ## 相關文件
 
+- [SUBTITLE-PROOFREAD.md](./SUBTITLE-PROOFREAD.md) — Whisper 草稿校對清單與 `--mark` 閘門
 - [AGENT-WORKFLOW.md](./AGENT-WORKFLOW.md) — 全專案 Agent 編排（`/agent-plan` 規劃審核、`/agent-action` 分模型實作）
 - [README — illustrate](./README.md#每集劇情插圖自動生成npm-run-illustrate)
 - [TODOS — Phase 3 生圖管線](./TODOS.md)

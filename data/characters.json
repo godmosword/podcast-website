@@ -73,12 +73,15 @@
     "name": "怪獸卡車",
     "aliases": [
       "怪獸車",
+      "萌萌",
       "Monster Truck",
+      "Monster Truck 萌萌",
       "怪獸卡車 Monster Truck"
     ],
     "vehicle": "monster truck",
-    "desc": "a cute claymation yellow monster truck pickup with huge chunky black off-road tyres, a row of yellow lights on the roof, big round eyes and a friendly grin",
-    "ref": "characters/怪獸卡車.jpg"
+    "desc": "a cute claymation bright yellow monster truck pickup named Mengmeng (萌萌) with huge chunky black off-road tyres with yellow rims, yellow coil-spring suspension, a black roof bar with four round yellow spotlights, light-blue windshield with big friendly round eyes and a small smile on the bumper, grey textured grille, black roll bar in the truck bed, soft hand-sculpted clay texture",
+    "ref": "characters/怪獸卡車.jpg",
+    "firstSeen": "ep-8"
   },
   {
     "name": "東東挖土機",
@@ -174,5 +177,38 @@
     "desc": "a cute claymation Taipei MRT train with a sleek silver-white body, blue and green stripes along the side, big round friendly eyes, pink cheeks and a warm welcoming smile",
     "ref": "characters/小南.jpg",
     "firstSeen": "ep-7"
+  },
+  {
+    "name": "高高摩天輪",
+    "aliases": [
+      "高高",
+      "摩天輪"
+    ],
+    "vehicle": "ferris wheel",
+    "desc": "a cute claymation Ferris wheel named Gaogao (高高) with yellow-and-blue frame, a friendly yellow circular hub face with big round eyes pink cheeks and a warm smile, eight colorful round gondolas (pink orange yellow green light blue dark blue purple) each with a tiny heart, a string of colorful bulbs along the rim, pink-purple base platform with yellow star emblem, soft hand-sculpted clay texture",
+    "ref": "characters/高高摩天輪.jpg",
+    "firstSeen": "ep-11"
+  },
+  {
+    "name": "小柔露營車",
+    "aliases": [
+      "小柔",
+      "粉紅露營車"
+    ],
+    "vehicle": "camper van",
+    "desc": "a cute claymation small pink camper van named Xiaorou (小柔) with a rounded cozy body, cream-tinted windows, a tiny striped awning, gentle big round eyes with rosy cheeks and a soft warm smile, compact and calm feminine energy",
+    "ref": "characters/小柔露營車.jpg",
+    "firstSeen": "ep-11"
+  },
+  {
+    "name": "小衝賽車",
+    "aliases": [
+      "小衝",
+      "黃色賽車"
+    ],
+    "vehicle": "race car",
+    "desc": "a cute claymation bright yellow race car named Xiaochong (小衝) with two bold black racing stripes on the hood, black tinted windows, a small rear spoiler, black wheels, impatient energetic eyes and a pouty speedy expression, sleek and distinct from red race car number 2",
+    "ref": "characters/小衝賽車.jpg",
+    "firstSeen": "ep-11"
   }
 ]

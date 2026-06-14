@@ -19,12 +19,13 @@ describe("post-sync-notify", () => {
     const msg = buildCommitMessage(sampleReport);
     expect(msg).toContain("ep-10");
     expect(msg).toContain("npm run illustrate -- ep-10");
-    expect(msg).toContain("草稿，請校對");
+    expect(msg).toContain("proofread:subtitles");
   });
 
   it("Issue body 含 checklist 與故事連結", () => {
     const body = buildIssueBody("ep-10", sampleReport);
     expect(body).toContain("## 新集待生圖：ep-10");
+    expect(body).toContain("proofread:subtitles");
     expect(body).toContain("--approve");
     expect(body).toContain("contact.html");
     expect(body).toContain("/story/ep-10");

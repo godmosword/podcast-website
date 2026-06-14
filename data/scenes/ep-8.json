@@ -1,0 +1,136 @@
+{
+  "slug": "ep-8",
+  "audioDuration": 284,
+  "model": "manual-semantic-15-20s",
+  "generatedAt": "2026-06-13T11:30:00.000Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 0,
+      "end": 20,
+      "summary": "主持人介紹 Monster Truck 萌萌",
+      "prompt": "Warm podcast intro at the colorful clay car amusement park, hosts Bonbon and Mami introducing today's hero, cheerful welcoming mood before the story begins",
+      "characters": [],
+      "keepCover": true
+    },
+    {
+      "index": 2,
+      "start": 20,
+      "end": 39.7,
+      "summary": "萌萌登場：愛泥巴與帥氣聲音",
+      "prompt": "The bright yellow clay monster truck Mengmeng zooming happily through muddy clay puddles at the car amusement park, huge black tyres with yellow rims splashing soft mud, proud energetic mood with a tiny sound-wave swirl showing her loud engine",
+      "characters": ["怪獸卡車"],
+      "refPages": [1],
+      "refPageHint": "Match the EXACT bright yellow monster truck Mengmeng from the podcast cover reference: blue windshield face, yellow coil springs, black chunky tyres with yellow rims, four yellow roof spotlights, grey grille, black roll bar. Same clay style; only change action and composition."
+    },
+    {
+      "index": 3,
+      "start": 39.7,
+      "end": 61.6,
+      "summary": "特別任務：到月光森林",
+      "prompt": "Evening at the car amusement park, a cute clay loudspeaker broadcasting a mission, the bright yellow clay monster truck Mengmeng revving excitedly with sparkling eyes, moon rising in pastel sky",
+      "characters": ["怪獸卡車"],
+      "refPages": [1],
+      "refPageHint": "Match the EXACT bright yellow monster truck Mengmeng from the podcast cover reference: blue windshield face, yellow coil springs, black chunky tyres with yellow rims, four yellow roof spotlights, grey grille, black roll bar. Same clay style; only change action and composition."
+    },
+    {
+      "index": 4,
+      "start": 61.6,
+      "end": 87.5,
+      "summary": "任務是安靜地前進",
+      "prompt": "The bright yellow clay monster truck Mengmeng frozen in surprise, mouth open mid-roar, then puzzled as the broadcast asks for quiet driving, comedic contrast between big tyres and gentle mission, soft lilac evening light",
+      "characters": ["怪獸卡車"],
+      "refPages": [1],
+      "refPageHint": "Match the EXACT bright yellow monster truck Mengmeng from the podcast cover reference: blue windshield face, yellow coil springs, black chunky tyres with yellow rims, four yellow roof spotlights, grey grille, black roll bar. Same clay style; only change action and composition."
+    },
+    {
+      "index": 5,
+      "start": 87.5,
+      "end": 110.6,
+      "summary": "月光森林與螢火蟲",
+      "prompt": "Magical Moonlight Forest at night, tiny glowing fireflies floating between clay trees and soft moss, gentle fairy lights guiding a path, peaceful mysterious mood, no vehicles in foreground",
+      "characters": []
+    },
+    {
+      "index": 6,
+      "start": 110.6,
+      "end": 129.6,
+      "summary": "萌萌輕輕開進森林",
+      "prompt": "The bright yellow clay monster truck Mengmeng creeping very slowly into the Moonlight Forest entrance, tyres barely turning, shy whisper pose, fireflies watching from leaves, hushed gentle mood",
+      "characters": ["怪獸卡車"],
+      "refPages": [1],
+      "refPageHint": "Match the EXACT bright yellow monster truck Mengmeng from the podcast cover reference: blue windshield face, yellow coil springs, black chunky tyres with yellow rims, four yellow roof spotlights, grey grille, black roll bar. Same clay style; only change action and composition."
+    },
+    {
+      "index": 7,
+      "start": 129.6,
+      "end": 143.1,
+      "summary": "壓到乾樹枝，螢火蟲躲起來",
+      "prompt": "The bright yellow clay monster truck Mengmeng wincing as a dry twig snaps under a huge tyre, fireflies darting into hiding, forest lights fading to darkness, startled but not scary mood",
+      "characters": ["怪獸卡車"],
+      "refPages": [1],
+      "refPageHint": "Match the EXACT bright yellow monster truck Mengmeng from the podcast cover reference: blue windshield face, yellow coil springs, black chunky tyres with yellow rims, four yellow roof spotlights, grey grille, black roll bar. Same clay style; only change action and composition."
+    },
+    {
+      "index": 8,
+      "start": 143.1,
+      "end": 163.5,
+      "summary": "輕聲說對不起",
+      "prompt": "Close view of the bright yellow clay monster truck Mengmeng with remorseful gentle expression, whispering a tiny sorry, dark Moonlight Forest with a few hidden firefly lights",
+      "characters": ["怪獸卡車"],
+      "refPages": [1],
+      "refPageHint": "Match the EXACT bright yellow monster truck Mengmeng from the podcast cover reference: blue windshield face, yellow coil springs, black chunky tyres with yellow rims, four yellow roof spotlights, grey grille, black roll bar. Same clay style; only change action and composition."
+    },
+    {
+      "index": 9,
+      "start": 163.5,
+      "end": 184,
+      "summary": "練習繞過石頭與枯葉",
+      "prompt": "Nighttime in the Moonlight Forest: deep blue starry sky with soft moon glow, fireflies twinkling among clay trees. The bright yellow clay monster truck Mengmeng carefully steering around small stones and dry leaves on a moonlit forest path, slow careful driving, hushed calm mood, clearly night not daytime",
+      "characters": ["怪獸卡車"],
+      "refPages": [1, 8],
+      "refPageHint": "Match the EXACT bright yellow monster truck Mengmeng from the first reference (podcast cover). Match the dark nighttime Moonlight Forest lighting, moon and firefly glow from the second reference. Keep truck design identical; only change pose and steering action."
+    },
+    {
+      "index": 10,
+      "start": 184,
+      "end": 208.9,
+      "summary": "螢火蟲重新亮起森林",
+      "prompt": "The bright yellow clay monster truck Mengmeng gliding slowly past a tiny puddle without splashing, fireflies emerging one by two by three from leaves, Moonlight Forest glowing warm again, hopeful magical mood",
+      "characters": ["怪獸卡車"],
+      "refPages": [1],
+      "refPageHint": "Match the EXACT bright yellow monster truck Mengmeng from the podcast cover reference: blue windshield face, yellow coil springs, black chunky tyres with yellow rims, four yellow roof spotlights, grey grille, black roll bar. Same clay style; only change action and composition."
+    },
+    {
+      "index": 11,
+      "start": 208.9,
+      "end": 236.3,
+      "summary": "小兔子小貓咪找到回家的路",
+      "prompt": "A tiny clay rabbit and kitten following firefly lights along a forest trail, the bright yellow clay monster truck Mengmeng watching proudly from the side, heartwarming reunion mood",
+      "characters": ["怪獸卡車"],
+      "refPages": [1],
+      "refPageHint": "Match the EXACT bright yellow monster truck Mengmeng from the podcast cover reference: blue windshield face, yellow coil springs, black chunky tyres with yellow rims, four yellow roof spotlights, grey grille, black roll bar. Same clay style; only change action and composition."
+    },
+    {
+      "index": 12,
+      "start": 236.3,
+      "end": 256.3,
+      "summary": "車車小任務：勇敢又溫柔",
+      "prompt": "The bright yellow clay monster truck Mengmeng smiling shyly under moonlight, fireflies swirling like stars around her, proud gentle hero mood, soft lilac and mint palette",
+      "characters": ["怪獸卡車"],
+      "refPages": [1],
+      "refPageHint": "Match the EXACT bright yellow monster truck Mengmeng from the podcast cover reference: blue windshield face, yellow coil springs, black chunky tyres with yellow rims, four yellow roof spotlights, grey grille, black roll bar. Same clay style; only change action and composition."
+    },
+    {
+      "index": 13,
+      "start": 256.3,
+      "end": 284,
+      "summary": "結尾閒聊與拜拜",
+      "prompt": "Cozy closing chat at the car amusement park under soft night lights, the bright yellow clay monster truck Mengmeng doing a gentle slow spin demonstration, warm farewell mood",
+      "characters": ["怪獸卡車"],
+      "refPages": [1],
+      "refPageHint": "Match the EXACT bright yellow monster truck Mengmeng from the podcast cover reference: blue windshield face, yellow coil springs, black chunky tyres with yellow rims, four yellow roof spotlights, grey grille, black roll bar. Same clay style; only change action and composition."
+    }
+  ],
+  "newCharacters": []
+}
