@@ -11,6 +11,7 @@ export const EPISODE_COLORS: Record<string, string> = {
   "ep-9": "#37b24d",
   "ep-10": "#d6336c",
   "ep-11": "#748ffc",
+  "ep-12": "#339af0",
 };
 
 export const DEFAULT_EPISODE_COLOR = "#7048e8";
