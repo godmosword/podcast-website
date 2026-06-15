@@ -1,0 +1,166 @@
+{
+  "slug": "ep-12",
+  "audioDuration": 330,
+  "model": "manual-semantic-15-20s",
+  "generatedAt": "2026-06-15T13:00:00.000Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 0,
+      "end": 60,
+      "summary": "警察節開場（保留首圖）",
+      "prompt": "Police Day opening at the colorful clay car amusement park, thank-you cards hanging, festive bunting, police car Liangliang and sky-blue minibus on the road with a baby on a bench — match podcast cover composition exactly",
+      "characters": ["亮亮警車", "藍色小巴士"],
+      "keepCover": true
+    },
+    {
+      "index": 2,
+      "start": 60,
+      "end": 84.8,
+      "summary": "感謝卡與亮亮介紹",
+      "prompt": "Car amusement park decorated for Police Day June 15, many handmade thank-you cards on strings, police car Liangliang parked proudly near the entrance arch, red-blue lights on roof, cheerful daytime mood",
+      "characters": ["亮亮警車"],
+      "refPages": [1],
+      "refPageHint": "PRIMARY: match 亮亮警車 from cover page 1 exactly — dark navy-white police car, yellow star, plate 110, red-blue light bar. Same clay park style as cover."
+    },
+    {
+      "index": 3,
+      "start": 84.8,
+      "end": 102.1,
+      "summary": "亮亮語錄與緊急求助",
+      "prompt": "Liangliang police car speaking calmly with steady expression, red-blue roof lights ready, then sudden worried call — sky-blue minibus Xiaolan rushing in from background, urgent but hopeful mood, same park",
+      "characters": ["亮亮警車", "藍色小巴士"],
+      "refPages": [1, 2],
+      "refPageHint": "PRIMARY: Liangliang and blue minibus match portraits and scene 2. Liangliang calm leader pose. Minibus worried caring face. Each vehicle ONE face only."
+    },
+    {
+      "index": 4,
+      "start": 102.1,
+      "end": 131.9,
+      "summary": "產婦危急、救護車不在",
+      "prompt": "Emergency at the park: sky-blue minibus with a pregnant human mother passenger looking pained inside, minibus pleading to Liangliang police car, crowd of faceless clay cars worried, ambulance not available, tense afternoon light",
+      "characters": ["亮亮警車", "藍色小巴士"],
+      "refPages": [3],
+      "refPageHint": "PRIMARY: same Liangliang and blue minibus designs. Mother is human clay figure inside minibus window — NOT a car face. NO duplicate vehicle faces. Tension not comedy."
+    },
+    {
+      "index": 5,
+      "start": 131.9,
+      "end": 149.9,
+      "summary": "小紅要快、亮亮開道",
+      "prompt": "Red race car Xiaohong revving impatiently wanting to speed to hospital, Liangliang police car blocking firmly in front with calm serious expression, teaching stay calm when urgent, dynamic composition, same park road",
+      "characters": ["亮亮警車", "小紅賽車", "藍色小巴士"],
+      "refPages": [4],
+      "refPageHint": "PRIMARY: Liangliang from portrait; Xiaohong red race car number 2 from 小紅賽車 ref; blue minibus worried in background. Liangliang blocking Xiaohong — leadership moment."
+    },
+    {
+      "index": 6,
+      "start": 149.9,
+      "end": 176,
+      "summary": "跟車規則與點頭",
+      "prompt": "Liangliang giving escort rules to blue minibus — follow behind, no overtaking, no sudden turns — minibus nodding seriously, police car authoritative but kind, road ready to depart",
+      "characters": ["亮亮警車", "藍色小巴士"],
+      "refPages": [5],
+      "refPageHint": "PRIMARY: match scene 5 character designs. Liangliang gesturing instruction; minibus nodding. Same vehicles ONE face each."
+    },
+    {
+      "index": 7,
+      "start": 176,
+      "end": 198.5,
+      "summary": "安慰媽媽、警示燈、出發",
+      "prompt": "Emergency convoy departing the amusement park road: Liangliang police car in front with red-blue roof lights brightly ON, sky-blue minibus directly behind showing its complete friendly windshield face (both eyes and smile fully visible), red race car far in background at the park gate waving — NO human passengers visible, NO faces blocked by windows, side view three-quarter convoy lineup, cheerful urgent departure mood",
+      "characters": ["亮亮警車", "藍色小巴士", "小紅賽車"],
+      "refPages": [6],
+      "refPageHint": "PRIMARY: blue minibus MUST have COMPLETE face on windshield — two round eyes and smile, never cut off or replaced by a human. NO pregnant woman, NO human sitting in windshield. Liangliang front with lights ON. Xiaohong tiny at distant gate only. Match 藍色小巴士 and 亮亮警車 portrait designs exactly. Each vehicle exactly ONE face."
+    },
+    {
+      "index": 8,
+      "start": 198.5,
+      "end": 221.8,
+      "summary": "大路口、擴音提醒",
+      "prompt": "Busy clay city intersection, many faceless cars blocking the road, Liangliang police car leading with lights flashing using roof speaker to ask drivers to move aside, blue minibus following closely behind, urgent but orderly",
+      "characters": ["亮亮警車", "藍色小巴士"],
+      "refPages": [7],
+      "refPageHint": "PRIMARY: convoy continuity from scene 7 — Liangliang front lights ON, minibus directly behind. Urban intersection NOT amusement park. Background cars faceless, no duplicate mascot faces."
+    },
+    {
+      "index": 9,
+      "start": 221.8,
+      "end": 236.2,
+      "summary": "讓路、安全抵達",
+      "prompt": "Cars slowly pulling aside creating a clear lane, Liangliang police car carefully watching traffic lights and corners while leading minibus through the opened path, cooperative community moment, soft hopeful lighting",
+      "characters": ["亮亮警車", "藍色小巴士"],
+      "refPages": [8],
+      "refPageHint": "PRIMARY: same convoy from scene 8, now with empty center lane. Liangliang cautious driving pose. Minibus still following. Lights still ON."
+    },
+    {
+      "index": 10,
+      "start": 236.2,
+      "end": 257.2,
+      "summary": "到達醫院、道謝",
+      "prompt": "Hospital entrance with clay doctors and nurses ready with stretcher, Liangliang and blue minibus arriving safely, minibus exhaling relief thanking Liangliang, warm rescue success moment, hospital building soft pastel",
+      "characters": ["亮亮警車", "藍色小巴士"],
+      "refPages": [9],
+      "refPageHint": "PRIMARY: convoy arrives — Liangliang and minibus stop at hospital drop-off. Human medical staff only, NO car faces on humans. Match vehicle designs from prior scenes."
+    },
+    {
+      "index": 11,
+      "start": 257.2,
+      "end": 275.9,
+      "summary": "亮亮任務、寶寶出生",
+      "prompt": "Liangliang police car smiling modestly saying protecting everyone is my job, then cut to happy news — newborn baby clay figure crying loudly in hospital, everyone smiling with joy, golden warm light",
+      "characters": ["亮亮警車"],
+      "refPages": [10],
+      "refPageHint": "PRIMARY: Liangliang proud gentle smile at hospital. Baby is human newborn NOT Bonbon. Can split feeling: left Liangliang, right hospital window with baby — same clay style."
+    },
+    {
+      "index": 12,
+      "start": 275.9,
+      "end": 294.8,
+      "summary": "車車小任務、萌萌答讓路",
+      "prompt": "Back at the amusement park, podcast lesson moment — yellow monster truck Mengmeng thinking, question about yielding to emergency vehicles, playful educational mood, Liangliang small icon or toy prop nearby",
+      "characters": ["怪獸卡車", "亮亮警車"],
+      "refPages": [1, 11],
+      "refPageHint": "Mengmeng from 怪獸卡車 ref — yellow monster truck ONE face. Liangliang as small reference or distant prop matching portrait. NO human hosts required."
+    },
+    {
+      "index": 13,
+      "start": 294.8,
+      "end": 306.1,
+      "summary": "讓路也是幫忙",
+      "prompt": "Friendly lesson illustration: faceless clay cars parked safely at the side of the road making space, emergency vehicle silhouette with lights in distance, text-friendly clear composition, warm teaching tone",
+      "characters": ["亮亮警車"],
+      "refPages": [12],
+      "refPageHint": "Liangliang demonstrating pull-over safely at roadside OR leading small diagram scene. Match portrait colors. Educational not chaotic."
+    },
+    {
+      "index": 14,
+      "start": 306.1,
+      "end": 317.6,
+      "summary": "警察節感恩",
+      "prompt": "Police Day gratitude scene at the park, thank-you cards and hearts floating, Liangliang police car center with lights softly glowing, respectful thankful mood toward police officers",
+      "characters": ["亮亮警車"],
+      "refPages": [2],
+      "refPageHint": "PRIMARY: Liangliang match portrait and scene 2 festive cards. Warm grateful atmosphere."
+    },
+    {
+      "index": 15,
+      "start": 317.6,
+      "end": 330,
+      "summary": "結尾道別",
+      "prompt": "Cheerful goodbye at the clay car amusement park, Liangliang and blue minibus waving together inviting kids back next mission, sunset soft light, bunting and ferris wheel background, happy closing",
+      "characters": ["亮亮警車", "藍色小巴士"],
+      "refPages": [1, 14],
+      "refPageHint": "PRIMARY: Liangliang and blue minibus match cover and prior scenes — friendly wave goodbye. Each ONE face. Same clay park as page 1."
+    }
+  ],
+  "newCharacters": [
+    {
+      "name": "亮亮警車",
+      "aliases": ["亮亮"],
+      "vehicle": "police car",
+      "coverPage": 1,
+      "desc": "a cute claymation police car named Liangliang (亮亮), compact rounded dark navy-blue and white body, windshield forms friendly big round eyes and small curved smile, red-blue light bar on roof, white doors with bold yellow six-pointed police star, gray front bumper with white license plate reading 110, small black side mirrors, soft hand-sculpted clay texture, distinct from sky-blue minibus"
+    }
+  ]
+}

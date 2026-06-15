@@ -47,7 +47,7 @@ const PROOFREAD_DIR = join(ROOT, "data", "subtitles", "_proofread");
 const BRAND_REPLACEMENTS: Array<{ pattern: RegExp; replacement: string }> = [
   { pattern: /Bon\s*Bon/gi, replacement: "Bonbon" },
   { pattern: /bonbon/g, replacement: "Bonbon" },
-  { pattern: /寶寶/g, replacement: "Bonbon" },
+  { pattern: /(?<![小])寶寶/g, replacement: "Bonbon" },
   { pattern: /宝贝/g, replacement: "Bonbon" },
   { pattern: /媽咪/g, replacement: "馬米" },
   { pattern: /妈咪/g, replacement: "馬米" },
@@ -184,7 +184,7 @@ function lintSegment(
     }
   }
 
-  if (/寶寶|媽咪|宝贝|妈咪|Bon\s+Bon/i.test(text)) {
+  if (/(?<![小])寶寶|媽咪|宝贝|妈咪|Bon\s+Bon/i.test(text)) {
     issues.push({
       index,
       t,

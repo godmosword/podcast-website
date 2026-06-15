@@ -51,11 +51,12 @@
     "name": "藍色小巴士",
     "aliases": [
       "藍色的小巴士",
-      "小巴士"
+      "小巴士",
+      "小藍巴士"
     ],
     "vehicle": "minibus",
     "desc": "a cute claymation friendly sky-blue minibus with a rounded boxy body, cream lower trim, yellow round headlights, a small side door, big warm eyes and a gentle caring smile",
-    "ref": "characters/藍色小巴士.jpg",
+    "ref": "characters/小藍巴士.jpg",
     "firstSeen": "ep-3"
   },
   {
@@ -210,5 +211,15 @@
     "desc": "a cute claymation bright yellow race car named Xiaochong (小衝) with two bold black racing stripes on the hood, black tinted windows, a small rear spoiler, black wheels, impatient energetic eyes and a pouty speedy expression, sleek and distinct from red race car number 2",
     "ref": "characters/小衝賽車.jpg",
     "firstSeen": "ep-11"
+  },
+  {
+    "name": "亮亮警車",
+    "aliases": [
+      "亮亮"
+    ],
+    "vehicle": "police car",
+    "desc": "a cute claymation police car named Liangliang (亮亮), compact rounded dark navy-blue and white body, windshield forms friendly big round eyes and small curved smile, red-blue light bar on roof, white doors with bold yellow six-pointed police star, gray front bumper with white license plate reading 110, small black side mirrors, soft hand-sculpted clay texture, distinct from sky-blue minibus",
+    "ref": "characters/亮亮警車.jpg",
+    "firstSeen": "ep-12"
   }
 ]
