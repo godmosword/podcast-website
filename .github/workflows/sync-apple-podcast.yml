@@ -26,11 +26,14 @@ jobs:
     runs-on: ubuntu-latest
     # 首次需下載 ~3GB 模型 + 編譯 whisper + 轉錄，預留較長時間。
     timeout-minutes: 180
-    env:
-      SYNC_REPORT_PATH: ${{ runner.temp }}/sync-run-report.json
-      SYNC_COMMIT_MSG_PATH: ${{ runner.temp }}/sync-commit-msg.txt
     steps:
       - uses: actions/checkout@v4
+
+      # job-level env 不可用 runner context；改用 runner 內建 $RUNNER_TEMP 寫入 GITHUB_ENV
+      - name: Set sync report paths
+        run: |
+          echo "SYNC_REPORT_PATH=$RUNNER_TEMP/sync-run-report.json" >> "$GITHUB_ENV"
+          echo "SYNC_COMMIT_MSG_PATH=$RUNNER_TEMP/sync-commit-msg.txt" >> "$GITHUB_ENV"
 
       - uses: actions/setup-node@v4
         with:

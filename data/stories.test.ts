@@ -95,7 +95,7 @@ describe("getStoriesByTag", () => {
   it("依主題標籤篩選", () => {
     const list = getStoriesByTag("合作");
     expect(list.every((s) => (s.tags ?? []).includes("合作"))).toBe(true);
-    expect(list.length).toBe(2);
+    expect(list.length).toBe(3);
   });
 
   it("未知標籤回傳空陣列", () => {

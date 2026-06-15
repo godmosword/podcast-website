@@ -10,6 +10,8 @@ export const MAX_INFERRED_TAGS = 3;
 const VEHICLE_FROM_TEXT: [RegExp, string][] = [
   [/怪獸卡車|Monster Truck/i, "怪獸卡車"],
   [/恐龍車/, "恐龍車"],
+  [/警車/, "警車"],
+  [/巴士/, "巴士"],
   [/救護車/, "救護車"],
   [/挖土機/, "挖土機"],
   [/清潔車/, "清潔車"],
@@ -22,6 +24,8 @@ const VEHICLE_FROM_TEXT: [RegExp, string][] = [
 const VEHICLE_EMOJI: Record<string, string> = {
   怪獸卡車: "🚚",
   恐龍車: "🦕",
+  警車: "🚓",
+  巴士: "🚌",
   救護車: "🚑",
   挖土機: "🚜",
   清潔車: "🚛",
@@ -76,6 +80,12 @@ function inferVehicleFromText(
   keywords: string[] = [],
 ): string | null {
   const subtitle = subtitleFromTitle(title);
+  const titlePart = title.slice(0, title.indexOf("｜") >= 0 ? title.indexOf("｜") : title.length);
+  // 標題／關鍵字優先，避免摘要尾段玩笑（如「救護車、警車傻傻分不清楚」）誤判車種
+  const primaryBlob = [titlePart, subtitle, keywords.join(" ")].filter(Boolean).join(" ");
+  for (const [pattern, vehicle] of VEHICLE_FROM_TEXT) {
+    if (pattern.test(primaryBlob)) return vehicle;
+  }
   const textBlob = [title, subtitle, summary ?? "", keywords.join(" ")]
     .filter(Boolean)
     .join(" ");
