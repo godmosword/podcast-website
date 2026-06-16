@@ -8,12 +8,14 @@ import type { Story } from "@/data/content";
 import { ChipButton } from "./Chip";
 import StoryCard from "./StoryCard";
 import VehicleClayIcon from "./VehicleClayIcon";
+import { filterStoriesForVehicle } from "./story-filtering";
 import { playSfx } from "@/lib/sfx";
 import styles from "./StoryFilter.module.css";
 
 type StoryFilterProps = {
   stories: Story[];
   vehicles: string[];
+  featuredStorySlug?: string | null;
   /** 由 server 從 URL searchParams 傳入，確保首屏 HTML 含完整列表 */
   initialVehicle?: string | null;
 };
@@ -21,6 +23,7 @@ type StoryFilterProps = {
 export default function StoryFilter({
   stories,
   vehicles,
+  featuredStorySlug = null,
   initialVehicle = null,
 }: StoryFilterProps) {
   const router = useRouter();
@@ -77,10 +80,8 @@ export default function StoryFilter({
   }
 
   const filtered = useMemo(() => {
-    return stories.filter(
-      (s) => vehicle === null || s.vehicle === vehicle,
-    );
-  }, [stories, vehicle]);
+    return filterStoriesForVehicle(stories, vehicle, featuredStorySlug);
+  }, [featuredStorySlug, stories, vehicle]);
 
   const hasFilter = Boolean(vehicle);
 

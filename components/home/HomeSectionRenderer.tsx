@@ -15,6 +15,7 @@ import StoryFilter from "@/components/StoryFilter";
 export type HomeSectionProps = {
   latest: Story | undefined;
   listStories: Story[];
+  featuredStorySlug: string | null;
   vehicles: string[];
   initialVehicle: string | null;
 };
@@ -36,6 +37,7 @@ function renderSection(id: HomeSectionId, props: HomeSectionProps) {
         <StoryFilter
           stories={props.listStories}
           vehicles={props.vehicles}
+          featuredStorySlug={props.featuredStorySlug}
           initialVehicle={props.initialVehicle}
         />
       );

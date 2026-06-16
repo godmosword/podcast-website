@@ -19,14 +19,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   const stories = storiesByNewest();
   const latest = stories[0];
-  // 最新集已在 LatestHero 展示，列表排除以避免重複
-  const listStories = latest
-    ? stories.filter((s) => s.slug !== latest.slug)
-    : stories;
 
   const sectionProps: HomeSectionProps = {
     latest,
-    listStories,
+    listStories: stories,
+    featuredStorySlug: latest?.slug ?? null,
     vehicles,
     initialVehicle,
   };
