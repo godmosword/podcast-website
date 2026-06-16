@@ -44,6 +44,7 @@ function IconLink({
       <span className={styles.label}>{label}</span>
     </>
   );
+  const opensNewTab = external && !href.startsWith("mailto:");
 
   if (!external) {
     return (
@@ -56,8 +57,7 @@ function IconLink({
   return (
     <a
       href={href}
-      target="_blank"
-      rel="noopener noreferrer"
+      {...(opensNewTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       className={styles.item}
       aria-label={ariaLabel}
       onClick={onClick}
@@ -126,7 +126,11 @@ export default function ConnectHub({
                 key={s.label}
                 href={s.url}
                 label={s.label}
-                ariaLabel={`前往 ${s.label}`}
+                ariaLabel={
+                  s.url.startsWith("mailto:")
+                    ? `寄信到 ${s.url.replace(/^mailto:/, "")}`
+                    : `前往 ${s.label}`
+                }
                 badgeStyle={{ background: s.background }}
               >
                 <BrandSvg className={styles.icon}>

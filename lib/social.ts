@@ -8,7 +8,7 @@ import { BRAND_COLORS } from "@/lib/connect-icons";
 // ============================================================
 
 /** 圖示識別字，對應 lib/connect-icons.tsx 內的 SVG。 */
-export type SocialIcon = "instagram" | "threads" | "facebook";
+export type SocialIcon = "instagram" | "threads" | "facebook" | "email";
 
 export type Social = {
   /** 顯示名稱（也作為 aria-label） */
@@ -41,6 +41,12 @@ const SOCIALS: Social[] = [
     url: "https://www.facebook.com/profile.php?id=61590533437349",
     background: BRAND_COLORS.facebook,
     icon: "facebook",
+  },
+  {
+    label: "Email",
+    url: "mailto:bonboncarstory@gmail.com",
+    background: "linear-gradient(135deg, var(--c-sky), var(--c-mint))",
+    icon: "email",
   },
 ];
 
