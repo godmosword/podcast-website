@@ -77,7 +77,7 @@ export default function SiteHeader({ variant = "full" }: SiteHeaderProps) {
 
       <h1 className="sr-only">車車遊樂園</h1>
       <div className={styles.lede}>
-        <p className={styles.audiencePill}>
+        <p className={`${styles.audienceText} marker marker-mint`}>
           給 3-7 歲孩子，適合看圖聽故事
         </p>
         <HeaderThemeToggle />
