@@ -1,7 +1,5 @@
 import Link from "next/link";
 import HeaderThemeToggle from "@/components/HeaderThemeToggle";
-import Doodle from "@/components/decor/Doodle";
-import decor from "@/components/decor/decor.module.css";
 import styles from "./SiteHeader.module.css";
 
 /** 首頁 Hero 主視覺（車車遊樂園黏土風格場景圖） */
@@ -77,55 +75,12 @@ export default function SiteHeader({ variant = "full" }: SiteHeaderProps) {
         />
       </div>
 
-      <div className={styles.titleWrap}>
-        <span className={styles.sun} aria-hidden />
-        <Doodle
-          kind="squiggle"
-          size={44}
-          color="var(--c-pink)"
-          className={`${decor.doodle} ${decor.doodleTL} ${decor.tiltA}`}
-          style={{ left: "-42px", top: "2px" }}
-        />
-        <Doodle
-          kind="burst"
-          size={32}
-          color="var(--c-sky)"
-          className={`${decor.doodle} ${decor.doodleTR} ${decor.tiltB}`}
-          style={{ right: "-40px", top: "-6px" }}
-        />
-        <h1 className={styles.title}>車車遊樂園</h1>
-        <Doodle
-          kind="dots"
-          size={30}
-          color="var(--c-mint)"
-          className={`${decor.doodle} ${decor.doodleBR}`}
-          style={{ right: "-34px", bottom: "-6px" }}
-        />
-        <Doodle
-          kind="loop"
-          size={30}
-          color="var(--c-yellow)"
-          className={`${decor.doodle} ${decor.doodleBL} ${decor.tiltC}`}
-          style={{ left: "-38px", bottom: "-8px" }}
-        />
-        <Doodle
-          kind="zigzag"
-          size={34}
-          color="var(--c-lilac)"
-          className={`${decor.doodle} ${decor.tiltB}`}
-          style={{ left: "50%", top: "-22px", transform: "translateX(-50%)" }}
-        />
-      </div>
+      <h1 className="sr-only">車車遊樂園</h1>
       <div className={styles.lede}>
-        <div className={styles.taglineRow}>
-          <p className={styles.tagline}>
-            <span className="marker marker-mint">用車車故事陪伴孩子成長</span>
-          </p>
-          <HeaderThemeToggle />
-        </div>
-        <p className={styles.audienceNote}>
-          給 3–7 歲孩子與家長 · 每集 5–10 分鐘，適合睡前看圖聽故事
+        <p className={styles.audiencePill}>
+          給 3-7 歲孩子，適合看圖聽故事
         </p>
+        <HeaderThemeToggle />
       </div>
 
       {actions.length > 0 && (

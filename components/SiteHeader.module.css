@@ -12,7 +12,7 @@
   position: relative;
   width: 100%;
   max-width: 420px;
-  margin: 0 auto 14px;
+  margin: 0 auto 16px;
   border-radius: var(--radius-xl);
   overflow: hidden;
   box-shadow: var(--shadow-md), var(--gloss);
@@ -35,10 +35,6 @@
 }
 
 @media (max-height: 700px), (max-width: 390px) {
-  .title {
-    font-size: 2rem;
-  }
-
   .header {
     margin-bottom: 16px;
   }
@@ -52,49 +48,8 @@
   z-index: auto;
 }
 
-/* ---- 標題 ---- */
-.titleWrap {
-  position: relative;
-  display: inline-block;
-}
-
-.sun {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 84px;
-  height: 84px;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 212, 59, 0.55),
-    rgba(255, 212, 59, 0) 70%
-  );
-  z-index: -1;
-}
-
-[data-theme="night"] .sun {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle at 35% 35%,
-    rgba(240, 234, 216, 0.95) 0%,
-    rgba(232, 212, 138, 0.85) 28%,
-    rgba(232, 212, 138, 0) 72%
-  );
-  box-shadow: 12px -6px 0 -4px rgba(240, 234, 216, 0.35);
-  animation: gentle-float var(--motion-float) ease-in-out infinite;
-}
-
-[data-theme="night"] .title {
-  text-shadow: 2px 2px 0 rgba(28, 36, 64, 0.9), 3px 3px 0 var(--c-yellow);
-}
-
 @media (prefers-reduced-motion: reduce) {
-  [data-theme="night"] .scene,
-  [data-theme="night"] .sun {
+  [data-theme="night"] .scene {
     animation: none;
   }
 }
@@ -120,32 +75,28 @@
   text-shadow: none;
 }
 
-/* ---- 三行 tagline ---- */
 .lede {
-  margin: 12px 0 0;
-}
-
-.taglineRow {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 8px;
   max-width: 100%;
+  margin: 0 auto;
 }
 
-.tagline {
+.audiencePill {
   margin: 0;
-  color: var(--ink);
-  font-size: 1.08rem;
-  font-weight: 700;
-}
-
-.audienceNote {
-  margin: 8px 0 0;
-  color: var(--ink-soft);
-  font-size: 0.88rem;
-  font-weight: 600;
-  line-height: 1.45;
+  max-width: min(100%, 580px);
+  padding: 9px 18px 10px;
+  border-radius: 12px;
+  color: #188fe0;
+  background: #ffbc37;
+  border: 2px solid #f2a91d;
+  box-shadow: 0 3px 0 rgba(185, 111, 0, 0.22);
+  font-size: 1.18rem;
+  font-weight: 800;
+  line-height: 1.35;
+  text-align: center;
 }
 
 /* ---- 圓鈕：合作聯繫 / 許願投稿 / 留言給我 ---- */
@@ -154,7 +105,7 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: clamp(8px, 2.5vw, 12px);
-  margin: 16px 0 0;
+  margin: 18px 0 0;
 }
 
 .actionBtn {
@@ -211,4 +162,15 @@
 
 .link:hover {
   text-decoration: underline;
+}
+
+@media (max-width: 390px) {
+  .lede {
+    gap: 6px;
+  }
+
+  .audiencePill {
+    padding: 8px 12px 9px;
+    font-size: 1rem;
+  }
 }
