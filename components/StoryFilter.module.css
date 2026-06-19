@@ -51,6 +51,96 @@
   text-decoration: none;
 }
 
+.searchWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 14px;
+  font-size: 1rem;
+  pointer-events: none;
+  line-height: 1;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 11px 40px 11px 40px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--bg-dot);
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  box-shadow: var(--shadow-sm);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color var(--motion-press), box-shadow var(--motion-press);
+}
+
+.searchInput::placeholder {
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.searchInput:focus-visible {
+  border-color: var(--ink);
+  box-shadow: var(--shadow-sm), 0 0 0 3px var(--bg-dot);
+}
+
+/* 隱藏瀏覽器原生搜尋清除鈕，改用自訂 ✕ */
+.searchInput::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.searchClear {
+  position: absolute;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .searchClear:hover {
+    color: var(--ink);
+  }
+}
+
+.moreChip {
+  flex: 0 0 auto;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--bg-dot);
+  border: 1.5px dashed var(--line);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .moreChip:hover {
+    color: var(--ink);
+    transform: translateY(-1px);
+  }
+}
+
 .chipScrollWrap {
   position: relative;
   margin: 0 -2px;

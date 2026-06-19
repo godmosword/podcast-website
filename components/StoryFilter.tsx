@@ -8,7 +8,7 @@ import type { Story } from "@/data/content";
 import { ChipButton } from "./Chip";
 import StoryCard from "./StoryCard";
 import VehicleClayIcon from "./VehicleClayIcon";
-import { filterStoriesForVehicle } from "./story-filtering";
+import { searchStories, getVisibleVehicles } from "./story-filtering";
 import { playSfx } from "@/lib/sfx";
 import styles from "./StoryFilter.module.css";
 
@@ -20,6 +20,8 @@ type StoryFilterProps = {
   initialVehicle?: string | null;
 };
 
+const CHIP_ROW_ID = "vehicle-chip-row";
+
 export default function StoryFilter({
   stories,
   vehicles,
@@ -28,9 +30,19 @@ export default function StoryFilter({
 }: StoryFilterProps) {
   const router = useRouter();
   const [vehicle, setVehicle] = useState<string | null>(initialVehicle);
+  const [inputValue, setInputValue] = useState("");
+  const [committedQuery, setCommittedQuery] = useState("");
+  const [expanded, setExpanded] = useState(false);
+  const isComposingRef = useRef(false);
   const chipRowRef = useRef<HTMLDivElement>(null);
   const [chipRowScrollable, setChipRowScrollable] = useState(false);
   const chipRefs = useRef(new Map<string, HTMLButtonElement>());
+
+  const visibleVehicles = useMemo(
+    () => getVisibleVehicles(vehicles, vehicle, expanded),
+    [vehicles, vehicle, expanded],
+  );
+  const hasHiddenVehicles = visibleVehicles.length < vehicles.length;
 
   const updateChipScrollable = useCallback(() => {
     const el = chipRowRef.current;
@@ -53,7 +65,7 @@ export default function StoryFilter({
       ro.disconnect();
       window.removeEventListener("resize", updateChipScrollable);
     };
-  }, [vehicles, updateChipScrollable]);
+  }, [visibleVehicles, expanded, updateChipScrollable]);
 
   useEffect(() => {
     const key = vehicle ?? "__all__";
@@ -79,14 +91,38 @@ export default function StoryFilter({
     router.replace(qs ? `/?${qs}` : "/", { scroll: false });
   }
 
-  const filtered = useMemo(() => {
-    return filterStoriesForVehicle(stories, vehicle, featuredStorySlug);
-  }, [featuredStorySlug, stories, vehicle]);
+  function handleSearchChange(value: string) {
+    setInputValue(value);
+    // 中文 IME 組字期間先不套用，避免逐字閃爍；compositionEnd 再提交
+    if (!isComposingRef.current) setCommittedQuery(value);
+  }
 
-  const hasFilter = Boolean(vehicle);
+  function clearSearch() {
+    setInputValue("");
+    setCommittedQuery("");
+  }
+
+  function resetFilters() {
+    playSfx("tap");
+    clearSearch();
+    setVehicle(null);
+    router.replace("/", { scroll: false });
+  }
+
+  const filtered = useMemo(
+    () =>
+      searchStories(stories, {
+        query: committedQuery,
+        vehicle,
+        featuredStorySlug,
+      }),
+    [stories, committedQuery, vehicle, featuredStorySlug],
+  );
+
+  const hasFilter = Boolean(vehicle) || committedQuery.trim().length > 0;
 
   return (
-    <section className={styles.section} aria-label="依車車找故事">
+    <section className={styles.section} aria-label="找車車">
       <div className={styles.filterBar}>
         <div className={styles.filterHead}>
           <div className={styles.filterTitleBlock}>
@@ -97,11 +133,47 @@ export default function StoryFilter({
           </Link>
         </div>
 
+        <div className={styles.searchWrap} role="search">
+          <span className={styles.searchIcon} aria-hidden>
+            🔍
+          </span>
+          <input
+            type="search"
+            inputMode="search"
+            className={styles.searchInput}
+            value={inputValue}
+            placeholder="找故事、找車車…"
+            aria-label="搜尋故事"
+            onChange={(e) => handleSearchChange(e.target.value)}
+            onCompositionStart={() => {
+              isComposingRef.current = true;
+            }}
+            onCompositionEnd={(e) => {
+              isComposingRef.current = false;
+              setCommittedQuery(e.currentTarget.value);
+            }}
+          />
+          {inputValue.length > 0 && (
+            <button
+              type="button"
+              className={styles.searchClear}
+              onClick={clearSearch}
+              aria-label="清除搜尋"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
         <div
           className={styles.chipScrollWrap}
           data-scrollable={chipRowScrollable ? "true" : "false"}
         >
-          <div ref={chipRowRef} className={styles.vehicleChipRow}>
+          <div
+            ref={chipRowRef}
+            id={CHIP_ROW_ID}
+            className={styles.vehicleChipRow}
+          >
             <ChipButton
               active={vehicle === null}
               buttonRef={registerChipRef("__all__")}
@@ -109,7 +181,7 @@ export default function StoryFilter({
             >
               全部
             </ChipButton>
-            {vehicles.map((v) => (
+            {visibleVehicles.map((v) => (
               <ChipButton
                 key={v}
                 className={styles.chipWithIcon}
@@ -121,6 +193,28 @@ export default function StoryFilter({
                 {v}
               </ChipButton>
             ))}
+            {hasHiddenVehicles && !expanded && (
+              <button
+                type="button"
+                className={styles.moreChip}
+                aria-expanded={false}
+                aria-controls={CHIP_ROW_ID}
+                onClick={() => setExpanded(true)}
+              >
+                更多 ▾
+              </button>
+            )}
+            {expanded && vehicles.length > getVisibleVehicles(vehicles, vehicle, false).length && (
+              <button
+                type="button"
+                className={styles.moreChip}
+                aria-expanded
+                aria-controls={CHIP_ROW_ID}
+                onClick={() => setExpanded(false)}
+              >
+                收合 ▴
+              </button>
+            )}
           </div>
         </div>
 
@@ -129,7 +223,7 @@ export default function StoryFilter({
           {hasFilter && (
             <button
               className={styles.clear}
-              onClick={() => updateVehicle(null)}
+              onClick={resetFilters}
               type="button"
             >
               清除
@@ -147,7 +241,7 @@ export default function StoryFilter({
           ))}
         </ul>
       ) : (
-        <p className={styles.empty}>沒有這種車車的故事，試試其他車車吧 🚗</p>
+        <p className={styles.empty}>找不到，換個關鍵字或車車試試 🚗</p>
       )}
     </section>
   );

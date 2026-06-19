@@ -10,10 +10,9 @@ describe("home-sections", () => {
     return import("./home-sections");
   }
 
-  it("預設順序與現況首頁一致（不含 starter / subscribeBand）", async () => {
+  it("預設順序與現況首頁一致（不含 continue / starter / subscribeBand）", async () => {
     const { activeHomeSectionIds } = await load();
     expect(activeHomeSectionIds()).toEqual([
-      "continue",
       "latestHero",
       "favorites",
       "storyFilter",

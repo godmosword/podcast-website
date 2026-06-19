@@ -9,16 +9,18 @@ vi.mock("@/components/HeaderThemeToggle", () => ({
 }));
 
 describe("SiteHeader", () => {
-  test("uses the simplified audience message on the home hero", async () => {
+  test("renders a clean home hero without the audience badge", async () => {
     const { default: SiteHeader } = await import("./SiteHeader");
 
     const html = renderToStaticMarkup(<SiteHeader />);
 
-    expect(html).toContain("給 3-7 歲孩子，適合看圖聽故事");
-    expect(html).toContain("marker marker-mint");
+    // 年齡徽章已移除，讓首屏更乾淨
+    expect(html).not.toContain("給 3-7 歲孩子，適合看圖聽故事");
+    expect(html).not.toContain("marker marker-mint");
     expect(html).not.toContain("audiencePill");
     expect(html).not.toContain("用車車故事陪伴孩子成長");
-    expect(html).not.toContain("給 3–7 歲孩子與家長");
+    // 仍保留無障礙標題與主題切換鈕
     expect(html).toContain('class="sr-only"');
+    expect(html).toContain("切換主題");
   });
 });
