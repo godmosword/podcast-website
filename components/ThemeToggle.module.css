@@ -86,6 +86,22 @@
   line-height: 1;
 }
 
+/* 純文字段控（日／夜／系統），疊在 hero 圖上需要較高可讀性 */
+.groupText {
+  gap: 2px;
+  padding: 3px;
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.segmentText {
+  min-width: 0;
+  min-height: 32px;
+  padding: 5px 11px;
+  font-size: 0.82rem;
+}
+
 .toggle:not(.iconOnly):active,
 .segment:active {
   transform: scale(0.96);

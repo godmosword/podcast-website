@@ -73,12 +73,12 @@ export default function SiteHeader({ variant = "full" }: SiteHeaderProps) {
           fetchPriority="high"
           decoding="async"
         />
+        <div className={styles.themeOverlay}>
+          <HeaderThemeToggle />
+        </div>
       </div>
 
       <h1 className="sr-only">車車遊樂園</h1>
-      <div className={styles.lede}>
-        <HeaderThemeToggle />
-      </div>
 
       {actions.length > 0 && (
         <nav className={styles.actions} aria-label="聯絡與互動">
