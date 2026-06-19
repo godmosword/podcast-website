@@ -18,9 +18,10 @@
 
 .filterHead {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 10px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .filterTitleBlock {
@@ -38,7 +39,7 @@
 }
 
 .topicLink {
-  align-self: flex-start;
+  flex: none;
   font-size: 0.8rem;
   font-weight: 700;
   color: var(--ink);
@@ -51,145 +52,43 @@
   text-decoration: none;
 }
 
-.searchWrap {
+.selectWrap {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.searchIcon {
+/* 自訂下拉箭頭 */
+.selectWrap::after {
+  content: "▾";
   position: absolute;
-  left: 14px;
-  font-size: 1rem;
+  right: 16px;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
   pointer-events: none;
-  line-height: 1;
 }
 
-.searchInput {
+.vehicleSelect {
   width: 100%;
-  padding: 11px 40px 11px 40px;
+  padding: 12px 40px 12px 16px;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--ink);
   background: var(--bg-dot);
   border: 1.5px solid var(--line);
   border-radius: 999px;
   box-shadow: var(--shadow-sm);
+  cursor: pointer;
   outline: none;
   -webkit-appearance: none;
+  -moz-appearance: none;
   appearance: none;
   transition: border-color var(--motion-press), box-shadow var(--motion-press);
 }
 
-.searchInput::placeholder {
-  color: var(--ink-soft);
-  font-weight: 600;
-}
-
-.searchInput:focus-visible {
+.vehicleSelect:focus-visible {
   border-color: var(--ink);
   box-shadow: var(--shadow-sm), 0 0 0 3px var(--bg-dot);
-}
-
-/* 隱藏瀏覽器原生搜尋清除鈕，改用自訂 ✕ */
-.searchInput::-webkit-search-cancel-button {
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-.searchClear {
-  position: absolute;
-  right: 8px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: none;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--ink-soft);
-  font-size: 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-@media (hover: hover) {
-  .searchClear:hover {
-    color: var(--ink);
-  }
-}
-
-.moreChip {
-  flex: 0 0 auto;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--ink-soft);
-  padding: 7px 14px;
-  border-radius: 999px;
-  background: var(--bg-dot);
-  border: 1.5px dashed var(--line);
-  box-shadow: var(--shadow-sm);
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-@media (hover: hover) {
-  .moreChip:hover {
-    color: var(--ink);
-    transform: translateY(-1px);
-  }
-}
-
-.chipScrollWrap {
-  position: relative;
-  margin: 0 -2px;
-}
-
-.chipScrollWrap[data-scrollable="true"]::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 36px;
-  pointer-events: none;
-  background: linear-gradient(to left, var(--card) 20%, transparent);
-  border-radius: 0 12px 12px 0;
-}
-
-.vehicleChipRow {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 8px;
-  overflow-x: auto;
-  scroll-snap-type: x proximity;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  padding: 4px 2px;
-}
-
-.vehicleChipRow::-webkit-scrollbar {
-  display: none;
-}
-
-.vehicleChipRow > button {
-  flex: 0 0 auto;
-  scroll-snap-align: start;
-}
-
-@media (min-width: 768px) {
-  .chipScrollWrap:not([data-scrollable="true"]) .vehicleChipRow {
-    justify-content: center;
-    flex-wrap: wrap;
-    overflow-x: visible;
-  }
-}
-
-.chipWithIcon {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
 }
 
 .count {
@@ -212,20 +111,6 @@
   color: var(--ink-soft);
   text-decoration: underline;
   text-underline-offset: 2px;
-}
-
-@media (min-width: 480px) {
-  .filterHead {
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-  }
-
-  .topicLink {
-    align-self: flex-start;
-    flex: none;
-  }
 }
 
 @media (min-width: 640px) {
