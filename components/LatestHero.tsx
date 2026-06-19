@@ -24,7 +24,7 @@ export default function LatestHero({ story }: LatestHeroProps) {
     >
       <RoughFrame color={story.color} rough={2} width={4} />
       <div className={styles.topRow}>
-        <Ribbon color={story.color}>✨ 最新一集 EP {story.ep}</Ribbon>
+        <Ribbon color={story.color}>NEW · EP {story.ep}</Ribbon>
       </div>
 
       <div className={styles.coverWrap}>
