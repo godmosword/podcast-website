@@ -75,13 +75,13 @@
   text-shadow: none;
 }
 
-/* 主題切換：疊在 hero 圖右上角 */
-.themeOverlay {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 2;
-  line-height: normal;
+/* 主題切換：放在 hero 圖下方、靠右對齊 hero 欄寬 */
+.themeRow {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  max-width: 420px;
+  margin: -4px auto 0;
 }
 
 /* ---- 圓鈕：合作聯繫 / 許願投稿 / 留言給我 ---- */
@@ -150,8 +150,7 @@
 }
 
 @media (max-width: 390px) {
-  .themeOverlay {
-    top: 8px;
-    right: 8px;
+  .themeRow {
+    max-width: 100%;
   }
 }

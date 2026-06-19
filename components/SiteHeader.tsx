@@ -73,9 +73,10 @@ export default function SiteHeader({ variant = "full" }: SiteHeaderProps) {
           fetchPriority="high"
           decoding="async"
         />
-        <div className={styles.themeOverlay}>
-          <HeaderThemeToggle />
-        </div>
+      </div>
+
+      <div className={styles.themeRow}>
+        <HeaderThemeToggle />
       </div>
 
       <h1 className="sr-only">車車遊樂園</h1>
