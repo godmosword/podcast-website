@@ -10,6 +10,7 @@ Bonbon & 馬米親子 podcast《車車遊樂園》的官方 **看圖聽故事** 
 - **競品與設計研究：** [RESEARCH.md](./RESEARCH.md)（Hey Clay phygital、**四款 pixel 遊戲精進**、craft 等）
 - **儲存庫：** [GitHub 公開](https://github.com/godmosword/podcast-website)（程式碼 MIT）— `public/stories/`、`public/characters/` 內音訊與插圖**禁止再散布**（見下方授權與免責）
 - **授權：** 程式碼 [MIT](./LICENSE) · 網站條文 [/legal](./app/legal/page.tsx) · 維護者全文 [DISCLAIMER.md](./DISCLAIMER.md)
+- **Agent 編排：** [docs/AGENT-WORKFLOW.md](./docs/AGENT-WORKFLOW.md) · Domain：[docs/AGENT-DOMAIN.md](./docs/AGENT-DOMAIN.md)
 
 ## 功能概覽
 
