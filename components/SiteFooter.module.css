@@ -96,6 +96,16 @@
   margin-top: 20px;
 }
 
+/* 關於我們 ＋ 主題切換並排一列 */
+.aboutRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 2px;
+}
+
 .aboutLink {
   font-size: 0.9rem;
   font-weight: 700;

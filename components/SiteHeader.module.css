@@ -75,15 +75,6 @@
   text-shadow: none;
 }
 
-/* 主題切換：放在 hero 圖下方、靠右對齊 hero 欄寬 */
-.themeRow {
-  display: flex;
-  justify-content: flex-end;
-  width: 100%;
-  max-width: 420px;
-  margin: -4px auto 0;
-}
-
 /* ---- 圓鈕：合作聯繫 / 許願投稿 / 留言給我 ---- */
 .actions {
   display: flex;
@@ -149,8 +140,3 @@
   text-decoration: underline;
 }
 
-@media (max-width: 390px) {
-  .themeRow {
-    max-width: 100%;
-  }
-}

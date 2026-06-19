@@ -1,5 +1,4 @@
 import Link from "next/link";
-import HeaderThemeToggle from "@/components/HeaderThemeToggle";
 import styles from "./SiteHeader.module.css";
 
 /** 首頁 Hero 主視覺（車車遊樂園黏土風格場景圖） */
@@ -73,10 +72,6 @@ export default function SiteHeader({ variant = "full" }: SiteHeaderProps) {
           fetchPriority="high"
           decoding="async"
         />
-      </div>
-
-      <div className={styles.themeRow}>
-        <HeaderThemeToggle />
       </div>
 
       <h1 className="sr-only">車車遊樂園</h1>

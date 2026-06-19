@@ -86,20 +86,35 @@
   line-height: 1;
 }
 
-/* 純文字段控（日／夜／系統），疊在 hero 圖上需要較高可讀性 */
+/* 純文字段控（日／夜／系統）：頁尾膠囊風格，與「關於我們」鈕呼應 */
 .groupText {
-  gap: 2px;
-  padding: 3px;
-  background: color-mix(in srgb, var(--card) 88%, transparent);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  gap: 3px;
+  padding: 4px;
+  background: linear-gradient(180deg, var(--card-2), var(--card));
+  border: 1.5px solid var(--line);
+  box-shadow: var(--shadow-sm);
 }
 
 .segmentText {
   min-width: 0;
-  min-height: 32px;
-  padding: 5px 11px;
+  min-height: 34px;
+  padding: 6px 14px;
   font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+
+/* 選中段：實心膠囊，清楚標示目前模式 */
+.groupText .segmentActive {
+  background: var(--ink);
+  color: var(--chip-active-fg, #fff);
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+@media (hover: hover) {
+  .groupText .segment:not(.segmentActive):hover {
+    background: color-mix(in srgb, var(--ink) 8%, transparent);
+    color: var(--ink);
+  }
 }
 
 .toggle:not(.iconOnly):active,
