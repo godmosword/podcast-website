@@ -52,45 +52,6 @@
   text-decoration: none;
 }
 
-.selectWrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-/* 自訂下拉箭頭 */
-.selectWrap::after {
-  content: "▾";
-  position: absolute;
-  right: 16px;
-  font-size: 0.9rem;
-  color: var(--ink-soft);
-  pointer-events: none;
-}
-
-.vehicleSelect {
-  width: 100%;
-  padding: 12px 40px 12px 16px;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--ink);
-  background: var(--bg-dot);
-  border: 1.5px solid var(--line);
-  border-radius: 999px;
-  box-shadow: var(--shadow-sm);
-  cursor: pointer;
-  outline: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  transition: border-color var(--motion-press), box-shadow var(--motion-press);
-}
-
-.vehicleSelect:focus-visible {
-  border-color: var(--ink);
-  box-shadow: var(--shadow-sm), 0 0 0 3px var(--bg-dot);
-}
-
 .count {
   display: flex;
   align-items: center;

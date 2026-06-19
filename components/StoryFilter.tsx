@@ -5,6 +5,7 @@ import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { Story } from "@/data/content";
 import StoryCard from "./StoryCard";
+import VehicleSelect from "./VehicleSelect";
 import { filterStoriesForVehicle } from "./story-filtering";
 import { playSfx } from "@/lib/sfx";
 import styles from "./StoryFilter.module.css";
@@ -58,21 +59,11 @@ export default function StoryFilter({
           </Link>
         </div>
 
-        <div className={styles.selectWrap}>
-          <select
-            className={styles.vehicleSelect}
-            aria-label="選擇車車"
-            value={vehicle ?? ""}
-            onChange={(e) => updateVehicle(e.target.value || null)}
-          >
-            <option value="">全部車車</option>
-            {vehicles.map((v) => (
-              <option key={v} value={v}>
-                {v}
-              </option>
-            ))}
-          </select>
-        </div>
+        <VehicleSelect
+          vehicles={vehicles}
+          value={vehicle}
+          onChange={updateVehicle}
+        />
 
         <p className={styles.count}>
           {filtered.length} 則故事
