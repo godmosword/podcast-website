@@ -1,7 +1,7 @@
 import { canonicalStorySlug } from "@/lib/story-slug-aliases";
 import rawCharacters from "./characters.json";
 
-/** 角色一級資料（canonical 來源：data/characters.json 六位定裝照）。 */
+/** 角色一級資料（canonical 來源：data/characters.json）。 */
 export type Character = {
   id: string;
   name: string;
@@ -36,12 +36,14 @@ const ID_BY_CANONICAL_NAME: Record<string, string> = {
   三輪車: "san-lun-che",
   香香餐車: "xiang-xiang",
   沃特: "watt",
-  蹦蹦: "bong-bong",
+  Bonbon: "bong-bong",
+  馬米: "mami",
   小飛: "xiao-fei",
   高高摩天輪: "gao-gao",
   小柔露營車: "xiao-rou",
   小衝賽車: "xiao-chong",
   亮亮警車: "liang-liang",
+  阿酷鑽地車: "a-ku",
 };
 
 const VEHICLE_ZH: Record<string, string> = {
@@ -54,11 +56,13 @@ const VEHICLE_ZH: Record<string, string> = {
   "monster truck": "怪獸卡車",
   萌萌: "怪獸卡車",
   excavator: "挖土機",
+  "drill excavator": "鑽地車",
   "crane truck": "吊車",
   tricycle: "三輪車",
   "food truck": "餐車",
   robot: "小機器人",
   child: "小朋友",
+  host: "主持人",
   drone: "無人機",
   "high speed rail": "高鐵",
   "MRT train": "捷運",
@@ -94,6 +98,7 @@ const PERSONALITY_BY_ID: Record<string, string> = {
   "xiang-xiang": "溫柔分享、把故事和祝福送給大家",
   watt: "客氣有禮、車內小幫手",
   "bong-bong": "充滿好奇心與活力",
+  mami: "溫暖引導、和小朋友聊天",
   "xiao-fei": "樂於助人、遵守飛行安全規則",
   "xiao-ju-hsr": "溫柔說明狀況、把安全放在第一位",
   "xiao-nan": "可靠載送、溫暖陪伴轉乘",
@@ -101,6 +106,7 @@ const PERSONALITY_BY_ID: Record<string, string> = {
   "xiao-rou": "需要安靜與安慰、溫柔貼心",
   "xiao-chong": "愛速度、說話直接",
   "liang-liang": "冷靜穩重、守護大家安全",
+  "a-ku": "外表酷酷、專心工作、其實溫柔體貼",
 };
 
 function shortName(entry: RawCharacter, id: string): string {

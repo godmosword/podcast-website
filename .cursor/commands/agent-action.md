@@ -25,11 +25,13 @@
 
 依 Plan 的 **L0–L3** 與 AGENT-WORKFLOW 路由表，用 **Task** 派子 agent（**不要**用 `codex exec`／`claude -p` 子 process 做實作委派——子 process 無 Cursor 工具鏈）。
 
+**Composer 節流：** Leader **不**做多檔／單檔實作；實作一律 Task 派 Sonnet／Opus／shell。Leader 僅：派工、整合、&lt;10 行微調、git。
+
 | 級別 | 判準 | Cursor 派工 |
 |------|------|-------------|
-| L3 架構／高風險 | 跨模組 | Leader 或 Task + `architect` / Opus slug |
-| L2 多檔實作 | 模式固定 | Task + `claude-4.6-sonnet-medium-thinking` 或 `composer-2.5-fast` |
-| L1 單檔 | 範圍明確 | Task `explore` 後 Leader，或 Sonnet slug |
+| L3 架構／高風險 | 跨模組、Protected paths | Task + Opus slug，或 Leader（僅 Domain 要求路徑） |
+| L2 多檔實作 | 模式固定 | Task + `claude-4.6-sonnet-medium-thinking`（**預設**；勿用 Composer） |
+| L1 單檔 | 範圍明確 | Task `explore`（`grok-4.3`）→ Task + Sonnet slug 實作 |
 | L0 命令 | lint／test／腳本 | Task `shell` 或 `grok-build-0.1` |
 
 **禁止：**

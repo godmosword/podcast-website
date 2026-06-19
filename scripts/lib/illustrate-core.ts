@@ -162,7 +162,12 @@ function writeCharacters(chars: Character[]): void {
   writeFileSync(CHARACTERS_PATH, `${JSON.stringify(chars, null, 2)}\n`, "utf8");
 }
 function charByName(chars: Character[]): Map<string, Character> {
-  return new Map(chars.map((c) => [c.name, c]));
+  const m = new Map<string, Character>();
+  for (const c of chars) {
+    m.set(c.name, c);
+    for (const alias of c.aliases ?? []) m.set(alias, c);
+  }
+  return m;
 }
 
 // ── 後處理：把場景夾在 12–28 秒（開場可至 INTRO_MAX）、邊界落在句界 ──

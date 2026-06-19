@@ -14,10 +14,17 @@
 - 讀 [`docs/AGENT-DOMAIN.md`](../../docs/AGENT-DOMAIN.md)（Bootstrap 表、紅線、驗證矩陣）
 - 依 Domain「依任務加讀」表補充 context
 
-### 1. Leader 撰寫 Draft Plan
+### 1. Draft Plan（Leader 骨架 + Task 填細節）
 
-- 使用 AGENT-WORKFLOW 的 **Plan 模板**（Goal、Scope、Task DAG、Files、Verification、Model routing、Risks）
-- 每個子任務標註 **L0–L3** 與建議 **model slug**
+**Composer 節流：** Leader 只寫 **Goal、Scope／Out of scope、Risks 骨架**；其餘派 Task，避免 Composer 長篇規劃。
+
+| 區塊 | 誰寫 | model slug |
+|------|------|------------|
+| Goal、Scope、Risks 骨架 | Leader | （當前 session） |
+| Task DAG、Files、Verification、Model routing | Task | `gpt-5.5-medium` |
+| 每個子任務 L0–L3 + slug | Task（同上） | 預設 L2→Sonnet、L1→Sonnet、L0→shell |
+
+- 使用 AGENT-WORKFLOW 的 **Plan 模板**合併成 Draft Plan
 - **Plan 產物：**
   - **Cursor Plan mode**：CreatePlan 產出的 plan 檔（優先）
   - **否則**：寫入 `/tmp/agent-plan-<unix_ts>.md`（`date +%s`）

@@ -1,0 +1,188 @@
+{
+  "slug": "ep-13",
+  "audioDuration": 386,
+  "model": "manual-semantic-15-20s",
+  "generatedAt": "2026-06-19T13:40:00.000Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 0,
+      "end": 19.3,
+      "summary": "開場與香香餐車進園（保留首圖）",
+      "prompt": "Sunny morning at the clay car amusement park, pink donut food truck Xiangxiang and yellow drill excavator Aku on cobblestone near ferris wheel and roller coaster — match podcast cover composition exactly, donut sign 12:00, Xiangxiang cheerful kawaii face, Aku stern cool face with spiral drill bit and pink donut on hook",
+      "characters": ["香香餐車", "阿酷鑽地車"],
+      "keepCover": true
+    },
+    {
+      "index": 2,
+      "start": 19.3,
+      "end": 40.5,
+      "summary": "12點開賣、小車車排隊",
+      "prompt": "Pink donut food truck Xiangxiang parked with open side window showing shelves of pink strawberry, chocolate and rainbow sprinkle donuts, chalkboard sign reads noon sale, line of cute faceless clay cars queuing happily, festive amusement park background",
+      "characters": ["香香餐車"],
+      "refPages": [1],
+      "refPageHint": "PRIMARY: Xiangxiang pink donut truck match cover page 1 exactly — kawaii face, donut sign on roof, NOT zongzi. Queue of small clay cars only, each ONE face if named."
+    },
+    {
+      "index": 3,
+      "start": 40.5,
+      "end": 57.8,
+      "summary": "水管被石頭卡住",
+      "prompt": "Inside food truck kitchen area, Xiangxiang worried at empty faucet with no water, cross-section hint of underground pipe blocked by gray stone, anxious expression, donut prep bowls waiting, tense but child-safe mood",
+      "characters": ["香香餐車"],
+      "refPages": [2],
+      "refPageHint": "PRIMARY: same Xiangxiang design from scene 2. Show worry not horror. Pipe problem clear for kids."
+    },
+    {
+      "index": 4,
+      "start": 57.8,
+      "end": 74.9,
+      "summary": "請阿酷來幫忙",
+      "prompt": "Xiangxiang thinking then deciding to call Aku drill excavator for help, small thought bubble or phone gesture, other clay cars nearby looking nervous already, park setting",
+      "characters": ["香香餐車"],
+      "refPages": [3],
+      "refPageHint": "PRIMARY: Xiangxiang match prior scenes. Background cars faceless or tiny — focus on her decision moment."
+    },
+    {
+      "index": 5,
+      "start": 74.9,
+      "end": 98.2,
+      "summary": "小車車害怕阿酷",
+      "prompt": "Flashback-style illustration of Aku drill excavator looking intimidating — huge dark spiral drill bit, thick black tracks, stern thick eyebrows, rarely smiling, loud rumble motion lines — small clay cars shivering and hiding, teaching why they feel scared",
+      "characters": ["阿酷鑽地車"],
+      "refPages": [1],
+      "refPageHint": "PRIMARY: Aku match 阿酷鑽地車 portrait and cover — yellow body, black drill, cool serious face, pink donut on side hook. NO friendly smile here. Each vehicle ONE face."
+    },
+    {
+      "index": 6,
+      "start": 98.2,
+      "end": 114.6,
+      "summary": "阿酷抵達、車車躲藏",
+      "prompt": "Aku drill excavator arriving with dust rumble in distance, small clay cars hiding behind pink Xiangxiang food truck peeking out scared, Aku approaching calmly, dramatic but gentle children's book composition",
+      "characters": ["香香餐車", "阿酷鑽地車"],
+      "refPages": [5],
+      "refPageHint": "PRIMARY: Aku and Xiangxiang both match portraits. Cars hiding behind Xiangxiang — only two hero vehicles with faces. Aku still cool-faced not angry."
+    },
+    {
+      "index": 7,
+      "start": 114.6,
+      "end": 132.8,
+      "summary": "阿酷禮貌提醒站遠",
+      "prompt": "Aku stopped, speaking politely with low gentle posture, one drill arm raised in courteous gesture, warning cars to stand back before loud drilling, Xiangxiang listening relieved, small cars stepping back safely",
+      "characters": ["香香餐車", "阿酷鑽地車"],
+      "refPages": [6],
+      "refPageHint": "PRIMARY: Aku expression softer but still cool — kind eyes not scary. Match portrait drill and colors. Xiangxiang same pink donut truck."
+    },
+    {
+      "index": 8,
+      "start": 132.8,
+      "end": 162.7,
+      "summary": "鑽地修水管",
+      "prompt": "Aku carefully drilling ground with spiral bit, earth vibrating, dirt clumps flying safely away from onlookers, focused concentrated expression watching the ground, underground stone being pushed aside, careful precise work",
+      "characters": ["阿酷鑽地車"],
+      "refPages": [7],
+      "refPageHint": "PRIMARY: Aku match portrait — yellow drill excavator, black spiral bit, tracks, stern focus face. Action dynamic but not violent. NO duplicate faces."
+    },
+    {
+      "index": 9,
+      "start": 162.7,
+      "end": 178.6,
+      "summary": "水通了、阿酷不可怕",
+      "prompt": "Water gushing happily from repaired pipe into Xiangxiang's kitchen hose, Aku stepping back proud but humble, small clay cars smiling in surprise realizing Aku is helpful not scary, sparkles and relief mood",
+      "characters": ["香香餐車", "阿酷鑽地車"],
+      "refPages": [8],
+      "refPageHint": "PRIMARY: Aku slightly softer proud expression, still same design. Xiangxiang celebrating water. Background cars amazed."
+    },
+    {
+      "index": 10,
+      "start": 178.6,
+      "end": 199.6,
+      "summary": "攪拌機壞了",
+      "prompt": "Xiangxiang mixing bowl with flour milk eggs ready, broken mixer sparking or slumped sadly, Xiangxiang distressed, waiting cars drooping disappointed, donut dream in jeopardy",
+      "characters": ["香香餐車"],
+      "refPages": [9],
+      "refPageHint": "PRIMARY: Xiangxiang same pink truck interior/kitchen view. Broken mixer obvious. Sad but cute not tragic."
+    },
+    {
+      "index": 11,
+      "start": 199.6,
+      "end": 219.8,
+      "summary": "阿酷自告奮勇幫攪拌",
+      "prompt": "Aku rolling forward kindly offering to help, speech gesture explaining his drill can spin like a mixer and he loves baking desserts in spare time, Xiangxiang and crowd eyes widening in surprise",
+      "characters": ["香香餐車", "阿酷鑽地車"],
+      "refPages": [10],
+      "refPageHint": "PRIMARY: Aku warm gentle eyes while still cool design — character turnaround moment. Xiangxiang hopeful. Match both portraits."
+    },
+    {
+      "index": 12,
+      "start": 219.8,
+      "end": 251.1,
+      "summary": "鑽頭變攪拌棒、慢慢攪",
+      "prompt": "Aku transformed attachment — large drill bit becomes small whisk spinning gently in soft pink donut batter bowl inside truck, Aku speaking softly teaching slow mixing for fluffy dough, magical but believable clay style",
+      "characters": ["香香餐車", "阿酷鑽地車"],
+      "refPages": [11],
+      "refPageHint": "PRIMARY: Aku arm with whisk attachment NOT drilling dirt — soft batter splashes. Gentle face teaching. Xiangxiang watching amazed. Same yellow Aku colors."
+    },
+    {
+      "index": 13,
+      "start": 251.1,
+      "end": 275.7,
+      "summary": "甜甜圈出爐",
+      "prompt": "Hot fresh donuts on display tray — pink strawberry, chocolate glaze, rainbow sprinkle donuts steaming, Xiangxiang presenting proudly at noon, clock showing 12:00, warm golden light",
+      "characters": ["香香餐車"],
+      "refPages": [12],
+      "refPageHint": "PRIMARY: Xiangxiang happy proud face. Donuts colorful and appetizing clay style. Match truck design from prior scenes."
+    },
+    {
+      "index": 14,
+      "start": 275.7,
+      "end": 287.9,
+      "summary": "排隊買甜甜圈",
+      "prompt": "Neat single-file queue of cute clay cars at Xiangxiang donut window, orderly happy waiting, Xiangxiang serving through window, park festive background",
+      "characters": ["香香餐車"],
+      "refPages": [13],
+      "refPageHint": "PRIMARY: Xiangxiang serving window scene. Queue cars faceless or one-face each. Cheerful orderly composition."
+    },
+    {
+      "index": 15,
+      "start": 287.9,
+      "end": 313.3,
+      "summary": "好吃！不能只看外表",
+      "prompt": "Clay cars happily eating donuts with crumbs, Aku standing nearby looking cool but holding a tiny donut proudly, amazed expressions saying donuts taste amazing, warm lesson mood about gentle heart inside tough look",
+      "characters": ["香香餐車", "阿酷鑽地車"],
+      "refPages": [14],
+      "refPageHint": "PRIMARY: Aku cool exterior but soft body language holding donut. Xiangxiang smiling. Match both portrait designs exactly. Each hero ONE face."
+    },
+    {
+      "index": 16,
+      "start": 313.3,
+      "end": 342.7,
+      "summary": "馬米與小朋友對話",
+      "prompt": "Clay podcast studio like ep-11: host Mami (馬米) warmly talking to children about not judging people by appearance after Aku's story, Bonbon (阿蹦) sitting beside her nodding, round wooden table with microphones, pink mug, ferris wheel and roller coaster playset background, gentle teaching mood",
+      "characters": ["Bonbon", "馬米", "香香餐車", "阿酷鑽地車"],
+      "refPages": [11, 14],
+      "refPageHint": "PRIMARY: Bonbon and Mami MUST match their canonical host portraits exactly — Bonbon teal hoodie yellow backpack red shoes; Mami pink top coral skirt long wavy brown hair. Story heroes smaller in background mural or shelf toys: pink donut Xiangxiang truck and yellow Aku drill excavator. NO random humanoid blobs. NO zongzi. Hosts are HUMAN clay children/adult, not cars."
+    },
+    {
+      "index": 17,
+      "start": 342.7,
+      "end": 366.8,
+      "summary": "揮手認識新朋友",
+      "prompt": "Split composition: foreground small cute clay car bravely waving hello to a new cool-looking truck friend in sunny park; background inset or beside them Aku drill excavator with rare gentle subtle smile as positive role model; Bonbon and Mami hosts at table edge encouraging kids, heart and donut motif soft",
+      "characters": ["Bonbon", "馬米", "阿酷鑽地車"],
+      "refPages": [16],
+      "refPageHint": "PRIMARY: Bonbon and Mami match host portraits if visible. Aku match 阿酷鑽地車 portrait — yellow drill excavator cool face with gentle smile hint. Small waving car is faceless/simple ONE face only. Friendship lesson hopeful tone. NO food truck required this scene."
+    },
+    {
+      "index": 18,
+      "start": 366.8,
+      "end": 386,
+      "summary": "結尾道別",
+      "prompt": "Cheerful closing at clay car amusement park: hosts Bonbon and Mami waving goodbye together with story friends pink donut Xiangxiang truck and yellow Aku drill excavator, ferris wheel roller coaster sunset, inviting kids back to chechecar park next time",
+      "characters": ["Bonbon", "馬米", "香香餐車", "阿酷鑽地車"],
+      "refPages": [1, 15],
+      "refPageHint": "PRIMARY: Bonbon and Mami human hosts match portraits — center or front waving. Xiangxiang and Aku match cover page 1 and scene 15 designs. Four characters clear lineup. Each vehicle ONE face. Human hosts NOT transformed into cars. Warm sunset goodbye."
+    }
+  ],
+  "newCharacters": []
+}

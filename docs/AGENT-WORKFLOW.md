@@ -99,7 +99,7 @@
 ### 步驟
 
 1. **Bootstrap**（[`AGENT-DOMAIN.md`](AGENT-DOMAIN.md)）
-2. **Leader 撰寫 Draft Plan**（見 [Plan 模板](#plan-模板)）
+2. **Draft Plan** — Leader 寫 Goal／Scope 骨架 → Task **GPT 5.5** 填 Task DAG、Files、Verification、Model routing（見 [Plan 模板](#plan-模板)）
 3. **並行 Review（必做，各一輪）**
    - **架構／紅線**：Task `architect` 或 `code-reviewer`（`readonly: true`）— 範圍、架構、Domain 紅線、過度工程
    - **工程**：Task + `gpt-5.5-medium` 或 codex — 可執行性、驗證命令、漏檔、測試
@@ -155,11 +155,11 @@ Task 的 `model` **只能**用 Cursor 允許的 slug：
 
 | UI / 口語 | slug | 主要用途 |
 |-----------|------|----------|
-| Composer 2.5 | `composer-2.5-fast` | Leader、Plan、整合 |
+| Composer 2.5 | `composer-2.5-fast` | **僅** Leader 編排、整合、git、&lt;10 行微調（**節流**） |
 | Opus 4.8 Thinking Medium | `claude-opus-4-8-thinking-medium` | Plan 架構審、L3 |
-| GPT 5.5 Medium | `gpt-5.5-medium` | Plan 工程審、TS/React diff review |
-| Sonnet 4.6 Thinking Medium | `claude-4.6-sonnet-medium-thinking` | L2、文案 |
-| Grok 4.3 | `grok-4.3` | explore |
+| GPT 5.5 Medium | `gpt-5.5-medium` | Plan 細節草稿、工程審、TS/React diff review |
+| Sonnet 4.6 Thinking Medium | `claude-4.6-sonnet-medium-thinking` | **L1／L2 實作預設**、中文文案 |
+| Grok 4.3 | `grok-4.3` | explore（只讀） |
 | Grok Build 0.1 | `grok-build-0.1` | shell、批次命令 |
 | Fable 5 | `claude-fable-5-thinking-medium` | 備選 Plan 第三意見 |
 
@@ -171,23 +171,25 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 
 | 級別 | 特徵 | `/agent-action` |
 |------|------|-----------------|
-| **L3** | 跨模組、schema、高風險 | Leader 或 Opus 4.8 |
-| **L2** | 多檔、模式固定 | Sonnet 4.6 或 Composer |
-| **L1** | 單檔 routine | explore 後 Leader 改 |
+| **L3** | 跨模組、schema、高風險 | Opus 4.8；Protected paths 才 Leader |
+| **L2** | 多檔、模式固定 | **Sonnet 4.6**（Task 派工） |
+| **L1** | 單檔 routine | explore → **Sonnet 4.6**（Task 派工） |
 | **L0** | 純命令 | `shell` 或 Grok Build |
 
 ### 任務類型路由
 
 | 任務類型 | 首選 |
 |----------|------|
-| Plan 撰寫 | Leader |
+| Plan 骨架（Goal／Scope） | Leader（Composer） |
+| Plan 細節（DAG／Files／Verify） | Task + GPT 5.5 |
 | Plan 架構審 | `architect` readonly 或 Opus |
 | Plan 工程審 | GPT 5.5 / codex |
-| 探索 codebase | Task `explore` |
-| 高風險核心路徑 | Leader 或 Opus；跑 Domain 對應 gate |
-| 前端／UI | Sonnet 4.6 或 Composer；跑 lint + e2e（若 Domain 有） |
+| 探索 codebase | Task `explore`（Grok 4.3） |
+| L1／L2 實作 | Task + Sonnet 4.6 |
+| 高風險核心路徑 | Opus 或 Leader（Domain Protected paths） |
+| 前端／UI | Sonnet 4.6；跑 lint + e2e（若 Domain 有） |
 | verify / CI 命令 | `shell` |
-| git commit | **Leader only** |
+| 整合 diff、git commit | **Leader only**（Composer） |
 
 ---
 
@@ -297,3 +299,4 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 | 日期 | 說明 |
 |------|------|
 | 2026-06-16 | 可攜 Meta 初版（Domain 外置至 AGENT-DOMAIN.md） |
+| 2026-06-19 | Composer 2.5 節流：Leader 僅編排／整合；Plan 細節→GPT 5.5；L1/L2 實作→Sonnet |

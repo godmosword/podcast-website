@@ -136,7 +136,7 @@
       "餐車"
     ],
     "vehicle": "food truck",
-    "desc": "A cute claymation pink food truck with a round body, shiny windows, smiling eyes, and green zongzi decorations on top.",
+    "desc": "a cute claymation pink food truck named Xiangxiang with kawaii round face, big sparkling eyes, open side window selling donuts (strawberry pink, chocolate, rainbow sprinkle), roof sign with donut icons, soft hand-sculpted clay texture",
     "ref": "characters/香香餐車.jpg",
     "firstSeen": "ep-10"
   },
@@ -152,12 +152,29 @@
     "firstSeen": "ep-1"
   },
   {
-    "name": "蹦蹦",
-    "aliases": [],
+    "name": "Bonbon",
+    "aliases": [
+      "阿蹦",
+      "蹦蹦",
+      "Bon Bon",
+      "宝宝"
+    ],
     "vehicle": "child",
-    "desc": "A little boy with a yellow backpack, full of excitement and curiosity.",
-    "ref": "characters/蹦蹦.jpg",
+    "desc": "a cute claymation boy host named Bonbon (阿蹦), thick messy brown clay hair, big cheerful dark eyes with rosy cheeks, light teal long-sleeve hoodie, navy blue shorts, bright red sneakers with white laces and white socks, bright yellow backpack, energetic curious open smile, soft hand-sculpted clay texture",
+    "ref": "characters/Bonbon.jpg",
     "firstSeen": "ep-1"
+  },
+  {
+    "name": "馬米",
+    "aliases": [
+      "媽咪",
+      "马米",
+      "Mami"
+    ],
+    "vehicle": "host",
+    "desc": "a cute claymation adult woman host named Mami (馬米), long voluminous wavy dark brown hair, warm friendly smile with big dark eyes, light pink long-sleeve top, coral pink knee-length skirt, pink high-heeled pumps, small pink stud earrings, gentle welcoming host energy, soft hand-sculpted clay texture",
+    "ref": "characters/馬米.jpg",
+    "firstSeen": "ep-11"
   },
   {
     "name": "小飛",
@@ -221,5 +238,19 @@
     "desc": "a cute claymation police car named Liangliang (亮亮), compact rounded dark navy-blue and white body, windshield forms friendly big round eyes and small curved smile, red-blue light bar on roof, white doors with bold yellow six-pointed police star, gray front bumper with white license plate reading 110, small black side mirrors, soft hand-sculpted clay texture, distinct from sky-blue minibus",
     "ref": "characters/亮亮警車.jpg",
     "firstSeen": "ep-12"
+  },
+  {
+    "name": "阿酷鑽地車",
+    "aliases": [
+      "阿酷",
+      "鑽地車",
+      "鑽地機",
+      "專遞車",
+      "磚地車"
+    ],
+    "vehicle": "drill excavator",
+    "desc": "a cute claymation yellow drill excavator named Aku (阿酷) on black crawler tracks, hydraulic arm with a large dark spiral drill bit instead of a bucket, stern cool expression with thick black eyebrows and focused round eyes (rarely smiling), a small pink frosted donut hanging from a side hook, soft hand-sculpted clay texture, distinct from cheerful yellow bucket excavator Dongdong (東東挖土機)",
+    "ref": "characters/阿酷鑽地車.jpg",
+    "firstSeen": "ep-13"
   }
 ]
