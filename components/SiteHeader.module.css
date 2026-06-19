@@ -84,15 +84,6 @@
   margin: 0 auto;
 }
 
-.audienceText {
-  margin: 0;
-  max-width: min(100%, 580px);
-  font-size: 1.12rem;
-  font-weight: 800;
-  line-height: 1.45;
-  text-align: center;
-}
-
 /* ---- 圓鈕：合作聯繫 / 許願投稿 / 留言給我 ---- */
 .actions {
   display: flex;
@@ -161,9 +152,5 @@
 @media (max-width: 390px) {
   .lede {
     gap: 6px;
-  }
-
-  .audienceText {
-    font-size: 1rem;
   }
 }

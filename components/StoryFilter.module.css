@@ -37,14 +37,6 @@
   color: var(--ink);
 }
 
-.filterHint {
-  margin: 6px 0 0;
-  font-size: 0.84rem;
-  font-weight: 600;
-  line-height: 1.45;
-  color: var(--ink-soft);
-}
-
 .topicLink {
   align-self: flex-start;
   font-size: 0.8rem;

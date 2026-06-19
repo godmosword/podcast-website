@@ -90,11 +90,10 @@ export default function StoryFilter({
       <div className={styles.filterBar}>
         <div className={styles.filterHead}>
           <div className={styles.filterTitleBlock}>
-            <h2 className={styles.filterSectionTitle}>依車車找故事</h2>
-            <p className={styles.filterHint}>點車車，下面故事會變喔</p>
+            <h2 className={styles.filterSectionTitle}>找車車</h2>
           </div>
           <Link href="/topic" className={styles.topicLink}>
-            依主題找 →
+            找主題
           </Link>
         </div>
 

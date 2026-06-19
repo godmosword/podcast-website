@@ -16,7 +16,7 @@ export type HomeSectionDef = {
 
 /** 順序即首頁渲染順序（SiteHeader / SiteFooter 不在此列）。 */
 export const HOME_SECTIONS: HomeSectionDef[] = [
-  { id: "continue", enabled: true },
+  { id: "continue", enabled: false },
   { id: "latestHero", enabled: true },
   { id: "starter", enabled: false },
   { id: "subscribeBand", enabled: false },

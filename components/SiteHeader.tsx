@@ -66,10 +66,10 @@ export default function SiteHeader({ variant = "full" }: SiteHeaderProps) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={HERO_IMAGE}
-          alt="車車遊樂園：卡通車車在遊樂園裡開心玩耍的黏土風格插畫"
+          alt="陪孩子，成長的路上：卡通車車在遊樂園裡開心玩耍的黏土風格插畫"
           className={styles.heroImage}
-          width={1024}
-          height={1024}
+          width={1135}
+          height={1386}
           fetchPriority="high"
           decoding="async"
         />
@@ -77,9 +77,6 @@ export default function SiteHeader({ variant = "full" }: SiteHeaderProps) {
 
       <h1 className="sr-only">車車遊樂園</h1>
       <div className={styles.lede}>
-        <p className={`${styles.audienceText} marker marker-mint`}>
-          給 3-7 歲孩子，適合看圖聽故事
-        </p>
         <HeaderThemeToggle />
       </div>
 
