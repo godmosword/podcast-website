@@ -1,82 +1,112 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { Story } from "@/data/content";
 import StoryCard from "./StoryCard";
 import VehicleSelect from "./VehicleSelect";
-import { filterStoriesForVehicle } from "./story-filtering";
+import TopicSelect from "./TopicSelect";
+import { filterStories } from "./story-filtering";
 import { playSfx } from "@/lib/sfx";
 import styles from "./StoryFilter.module.css";
 
 type StoryFilterProps = {
   stories: Story[];
   vehicles: string[];
+  tags: string[];
   featuredStorySlug?: string | null;
-  /** 由 server 從 URL searchParams 傳入，確保首屏 HTML 含完整列表 */
   initialVehicle?: string | null;
+  initialTag?: string | null;
 };
 
 export default function StoryFilter({
   stories,
   vehicles,
+  tags,
   featuredStorySlug = null,
   initialVehicle = null,
+  initialTag = null,
 }: StoryFilterProps) {
   const router = useRouter();
   const [vehicle, setVehicle] = useState<string | null>(initialVehicle);
+  const [tag, setTag] = useState<string | null>(initialTag);
 
   useEffect(() => {
     setVehicle(initialVehicle);
   }, [initialVehicle]);
 
-  function updateVehicle(nextVehicle: string | null) {
-    playSfx("tap");
-    setVehicle(nextVehicle);
+  useEffect(() => {
+    setTag(initialTag);
+  }, [initialTag]);
+
+  function pushFilters(nextVehicle: string | null, nextTag: string | null) {
     const params = new URLSearchParams();
     if (nextVehicle) params.set("vehicle", nextVehicle);
+    if (nextTag) params.set("tag", nextTag);
     const qs = params.toString();
     router.replace(qs ? `/?${qs}` : "/", { scroll: false });
   }
 
+  function updateVehicle(nextVehicle: string | null) {
+    setVehicle(nextVehicle);
+    pushFilters(nextVehicle, tag);
+  }
+
+  function updateTag(nextTag: string | null) {
+    setTag(nextTag);
+    pushFilters(vehicle, nextTag);
+  }
+
+  function clearFilters() {
+    playSfx("tap");
+    setVehicle(null);
+    setTag(null);
+    router.replace("/", { scroll: false });
+  }
+
   const filtered = useMemo(
-    () => filterStoriesForVehicle(stories, vehicle, featuredStorySlug),
-    [stories, vehicle, featuredStorySlug],
+    () => filterStories(stories, { vehicle, tag, featuredStorySlug }),
+    [stories, vehicle, tag, featuredStorySlug],
   );
 
-  const hasFilter = Boolean(vehicle);
+  const hasFilter = Boolean(vehicle || tag);
 
   return (
-    <section className={styles.section} aria-label="找車車">
+    <section className={styles.section} aria-label="找故事">
       <div className={styles.filterBar}>
-        <div className={styles.filterHead}>
-          <div className={styles.filterTitleBlock}>
-            <h2 className={styles.filterSectionTitle}>找車車</h2>
+        <h2 className={styles.filterTitle}>找故事</h2>
+
+        <div className={styles.filterGrid}>
+          <div className={styles.filterField}>
+            <span className={styles.fieldLabel} id="filter-vehicle-label">
+              車車
+            </span>
+            <VehicleSelect
+              vehicles={vehicles}
+              value={vehicle}
+              onChange={updateVehicle}
+            />
           </div>
-          <Link href="/topic" className={styles.topicLink}>
-            找主題
-          </Link>
+          <div className={styles.filterField}>
+            <span className={styles.fieldLabel} id="filter-topic-label">
+              主題
+            </span>
+            <TopicSelect tags={tags} value={tag} onChange={updateTag} />
+          </div>
         </div>
 
-        <VehicleSelect
-          vehicles={vehicles}
-          value={vehicle}
-          onChange={updateVehicle}
-        />
-
-        <p className={styles.count}>
-          {filtered.length} 則故事
+        <div className={styles.footer}>
+          <p className={styles.count}>{filtered.length} 則故事</p>
           {hasFilter && (
             <button
               className={styles.clear}
-              onClick={() => updateVehicle(null)}
+              onClick={clearFilters}
               type="button"
             >
-              清除
+              清除篩選
             </button>
           )}
-        </p>
+        </div>
       </div>
 
       {filtered.length > 0 ? (
@@ -88,7 +118,9 @@ export default function StoryFilter({
           ))}
         </ul>
       ) : (
-        <p className={styles.empty}>沒有這種車車的故事，試試其他車車吧 🚗</p>
+        <p className={styles.empty}>
+          沒有符合的故事，試試其他車車或主題吧 🚗
+        </p>
       )}
     </section>
   );

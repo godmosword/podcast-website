@@ -1,84 +1,76 @@
-/* ============ 車種篩選區 ============ */
 .section {
   margin-top: 4px;
 }
 
 .filterBar {
-  position: static;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  margin: 0 0 20px;
-  padding: 16px 14px 14px;
-  border-radius: var(--radius-xl);
-  background: var(--card);
-  border: 1.5px solid var(--line);
-  box-shadow: var(--shadow-sm);
-}
-
-.filterHead {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
   gap: 12px;
+  margin: 0 0 18px;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--card);
+  border: 1px solid var(--line);
 }
 
-.filterTitleBlock {
-  min-width: 0;
-}
-
-.filterSectionTitle {
+.filterTitle {
   margin: 0;
   font-family: var(--font-marker), var(--font-baloo), var(--font-huninn),
     "PingFang TC", "Microsoft JhengHei", sans-serif;
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   color: var(--ink);
 }
 
-.topicLink {
-  flex: none;
-  font-size: 0.8rem;
+.filterGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.filterField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.fieldLabel {
+  font-size: 0.72rem;
   font-weight: 700;
-  color: var(--ink);
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: var(--bg-dot);
-  border: 1.5px solid var(--line);
-  box-shadow: var(--shadow-sm);
-  white-space: nowrap;
-  text-decoration: none;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
 }
 
 .count {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
   margin: 0;
-  padding-top: 12px;
-  border-top: 1px solid var(--line);
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--ink-soft);
 }
 
 .clear {
-  margin-left: auto;
+  flex: none;
+  padding: 0;
+  border: none;
+  background: none;
   font-size: 0.78rem;
   font-weight: 700;
-  color: var(--ink-soft);
+  color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 2px;
-}
-
-@media (min-width: 640px) {
-  .filterBar {
-    padding: 18px 16px 16px;
-    background: linear-gradient(180deg, var(--card-2), var(--card));
-  }
+  cursor: pointer;
 }
 
 .list {
@@ -95,4 +87,10 @@
   color: var(--ink-soft);
   font-weight: 600;
   padding: 32px 0;
+}
+
+@media (max-width: 380px) {
+  .filterGrid {
+    grid-template-columns: 1fr;
+  }
 }

@@ -1,4 +1,4 @@
-import { allVehicles, storiesByNewest } from "@/data/content";
+import { allTags, allVehicles, storiesByNewest } from "@/data/content";
 import { HomeSectionList } from "@/components/home/HomeSectionRenderer";
 import type { HomeSectionProps } from "@/components/home/HomeSectionRenderer";
 import JsonLd from "@/components/JsonLd";
@@ -8,14 +8,16 @@ import { podcastSeriesJsonLd } from "@/lib/json-ld";
 import styles from "./page.module.css";
 
 type HomePageProps = {
-  searchParams: Promise<{ vehicle?: string }>;
+  searchParams: Promise<{ vehicle?: string; tag?: string }>;
 };
 
 export default async function HomePage({ searchParams }: HomePageProps) {
-  const { vehicle: vehicleParam } = await searchParams;
+  const { vehicle: vehicleParam, tag: tagParam } = await searchParams;
   const vehicles = allVehicles();
+  const tags = allTags();
   const initialVehicle =
     vehicleParam && vehicles.includes(vehicleParam) ? vehicleParam : null;
+  const initialTag = tagParam && tags.includes(tagParam) ? tagParam : null;
 
   const stories = storiesByNewest();
   const latest = stories[0];
@@ -25,7 +27,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     listStories: stories,
     featuredStorySlug: latest?.slug ?? null,
     vehicles,
+    tags,
     initialVehicle,
+    initialTag,
   };
 
   return (

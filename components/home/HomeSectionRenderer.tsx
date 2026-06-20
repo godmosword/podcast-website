@@ -17,7 +17,9 @@ export type HomeSectionProps = {
   listStories: Story[];
   featuredStorySlug: string | null;
   vehicles: string[];
+  tags: string[];
   initialVehicle: string | null;
+  initialTag: string | null;
 };
 
 function renderSection(id: HomeSectionId, props: HomeSectionProps) {
@@ -37,8 +39,10 @@ function renderSection(id: HomeSectionId, props: HomeSectionProps) {
         <StoryFilter
           stories={props.listStories}
           vehicles={props.vehicles}
+          tags={props.tags}
           featuredStorySlug={props.featuredStorySlug}
           initialVehicle={props.initialVehicle}
+          initialTag={props.initialTag}
         />
       );
     default:
