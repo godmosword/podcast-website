@@ -16,6 +16,8 @@ type FilterSelectProps = {
   onChange: (value: string) => void;
   ariaLabel: string;
   listLabel: string;
+  /** 圖示自帶底色（如 TopicIcon）時略過灰底 iconSlot */
+  bareIcon?: boolean;
 };
 
 /** 共用下拉選單（車種／主題等篩選）。 */
@@ -25,6 +27,7 @@ export default function FilterSelect({
   onChange,
   ariaLabel,
   listLabel,
+  bareIcon = false,
 }: FilterSelectProps) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -81,6 +84,21 @@ export default function FilterSelect({
     }
   }
 
+  function renderIcon(icon: ReactNode) {
+    if (bareIcon) {
+      return (
+        <span className={styles.iconBare} aria-hidden>
+          {icon}
+        </span>
+      );
+    }
+    return (
+      <span className={styles.iconSlot} aria-hidden>
+        {icon}
+      </span>
+    );
+  }
+
   return (
     <div className={styles.wrap} ref={wrapRef}>
       <button
@@ -92,11 +110,7 @@ export default function FilterSelect({
         onClick={() => setOpen((o) => !o)}
       >
         <span className={styles.triggerInner}>
-          {current.icon != null && (
-            <span className={styles.iconSlot} aria-hidden>
-              {current.icon}
-            </span>
-          )}
+          {current.icon != null && renderIcon(current.icon)}
           <span className={styles.triggerLabel}>{current.label}</span>
         </span>
         <span className={styles.arrow} aria-hidden>
@@ -125,11 +139,7 @@ export default function FilterSelect({
                 className={`${styles.option} ${active ? styles.optionActive : ""}`}
                 onClick={() => select(opt.value)}
               >
-                {opt.icon != null && (
-                  <span className={styles.iconSlot} aria-hidden>
-                    {opt.icon}
-                  </span>
-                )}
+                {opt.icon != null && renderIcon(opt.icon)}
                 <span className={styles.optionLabel}>{opt.label}</span>
                 {active && (
                   <span className={styles.check} aria-hidden>

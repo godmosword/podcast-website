@@ -1,22 +1,10 @@
 "use client";
 
 import FilterSelect, { type FilterSelectOption } from "./FilterSelect";
+import TopicIcon from "./TopicIcon";
 
 export const ALL_TOPICS_VALUE = "__all__";
 const ALL_LABEL = "全部主題";
-
-const TOPIC_ICONS: Record<string, string> = {
-  勇氣: "💪",
-  成長: "🌱",
-  安全: "🛡️",
-  合作: "🤝",
-  情緒: "💛",
-  守信用: "⭐",
-};
-
-function topicIcon(tag: string): string {
-  return TOPIC_ICONS[tag] ?? "🏷️";
-}
 
 type TopicSelectProps = {
   tags: string[];
@@ -31,12 +19,12 @@ export default function TopicSelect({ tags, value, onChange }: TopicSelectProps)
     {
       value: ALL_TOPICS_VALUE,
       label: ALL_LABEL,
-      icon: <span aria-hidden>🏷️</span>,
+      icon: <TopicIcon tag={null} />,
     },
     ...tags.map((tag) => ({
       value: tag,
       label: tag,
-      icon: <span aria-hidden>{topicIcon(tag)}</span>,
+      icon: <TopicIcon tag={tag} />,
     })),
   ];
 
@@ -47,6 +35,7 @@ export default function TopicSelect({ tags, value, onChange }: TopicSelectProps)
       onChange={(key) => onChange(key === ALL_TOPICS_VALUE ? null : key)}
       ariaLabel="選擇主題"
       listLabel="主題"
+      bareIcon
     />
   );
 }

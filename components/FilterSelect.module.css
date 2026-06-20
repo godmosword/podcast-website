@@ -64,6 +64,11 @@
   flex: none;
 }
 
+.iconBare {
+  display: inline-flex;
+  flex: none;
+}
+
 .panel {
   position: absolute;
   top: calc(100% + 4px);
