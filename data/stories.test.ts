@@ -87,7 +87,10 @@ describe("getStoriesByVehicle", () => {
   it("依車種篩選", () => {
     const list = getStoriesByVehicle("救護車");
     expect(list.every((s) => s.vehicle === "救護車")).toBe(true);
-    expect(list.length).toBe(1);
+    // 數量由資料推導，避免新增集數時破壞同步 CI
+    const expected = stories.filter((s) => s.vehicle === "救護車").length;
+    expect(list.length).toBe(expected);
+    expect(list.length).toBeGreaterThan(0);
   });
 });
 
@@ -95,7 +98,10 @@ describe("getStoriesByTag", () => {
   it("依主題標籤篩選", () => {
     const list = getStoriesByTag("合作");
     expect(list.every((s) => (s.tags ?? []).includes("合作"))).toBe(true);
-    expect(list.length).toBe(3);
+    // 數量由資料推導，避免新增帶「合作」標籤的集數時破壞同步 CI
+    const expected = stories.filter((s) => (s.tags ?? []).includes("合作")).length;
+    expect(list.length).toBe(expected);
+    expect(list.length).toBeGreaterThan(0);
   });
 
   it("未知標籤回傳空陣列", () => {
