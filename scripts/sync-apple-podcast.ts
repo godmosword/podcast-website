@@ -32,6 +32,11 @@ import {
   writeSyncReport,
   type SyncRunReport,
 } from "./lib/sync-report";
+import {
+  findCatalogEpByTitle,
+  normalizeTitle,
+  titleStem,
+} from "./lib/episode-match";
 import { downloadAndSaveCover } from "./lib/cover-image";
 import {
   hasSubtitleSidecar,
@@ -137,27 +142,6 @@ function existingSlugs(synced: Story[]): Set<string> {
   const slugs = new Set<string>();
   for (const s of [...manualStories, ...synced]) slugs.add(s.slug);
   return slugs;
-}
-
-function normalizeTitle(title: string): string {
-  return title.trim().replace(/\s+/g, " ");
-}
-
-/** SoundOn 標題常為「主標｜副標」，副標變更時仍能以主標對到 RSS。 */
-function titleStem(title: string): string {
-  const normalized = normalizeTitle(title);
-  const pipe = normalized.indexOf("｜");
-  if (pipe >= 0) return normalized.slice(0, pipe).trim();
-  const asciiPipe = normalized.indexOf("|");
-  if (asciiPipe >= 0) return normalized.slice(0, asciiPipe).trim();
-  return normalized;
-}
-
-/** SoundOn 等 feed 常無 itunes:episode，改以標題對照既有目錄。 */
-function findCatalogEpByTitle(title: string, catalog: Story[]): number | null {
-  const key = normalizeTitle(title);
-  const hit = catalog.find((s) => normalizeTitle(s.title) === key);
-  return hit?.ep ?? null;
 }
 
 function applyDefaults(

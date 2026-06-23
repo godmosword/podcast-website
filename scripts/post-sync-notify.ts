@@ -10,7 +10,6 @@
  *   SYNC_ISSUE_ASSIGNEES     — 指派對象（逗號分隔 GitHub username；Secret 名稱不可 GITHUB_ 開頭）
  *   SYNC_ISSUE_MENTIONS      — Issue 開頭 @mention（例 @user1 @user2）
  */
-import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import type { SyncRunReport } from "./lib/sync-report";
 
@@ -128,70 +127,6 @@ export function buildIssueBody(slug: string, report: SyncRunReport): string {
 `;
 }
 
-function gh(args: string[]): string {
-  return execFileSync("gh", args, { encoding: "utf8" }).trim();
-}
-
-function assigneeArgs(): string[] {
-  const raw = process.env.SYNC_ISSUE_ASSIGNEES?.trim();
-  if (!raw) return [];
-  return ["--assignee", raw];
-}
-
-function findOpenIssueUrl(slug: string): string | null {
-  try {
-    const out = gh([
-      "issue",
-      "list",
-      "--search",
-      `in:title ${slug} 待生圖`,
-      "--state",
-      "open",
-      "--json",
-      "url",
-      "--limit",
-      "1",
-    ]);
-    const parsed = JSON.parse(out) as Array<{ url?: string }>;
-    return parsed[0]?.url ?? null;
-  } catch {
-    return null;
-  }
-}
-
-function createIllustrateIssue(
-  slug: string,
-  report: SyncRunReport,
-): string | null {
-  const existing = findOpenIssueUrl(slug);
-  if (existing) {
-    console.log(`Issue 已存在，略過：${slug} → ${existing}`);
-    return existing;
-  }
-
-  const title = `[illustrate] 新集待生圖：${slug}`;
-  const body = buildIssueBody(slug, report);
-  const baseArgs = ["issue", "create", "--title", title, "--body", body];
-
-  try {
-    const url = gh([...baseArgs, "--label", "illustration", ...assigneeArgs()]);
-    console.log(`已開 Issue：${url}`);
-    return url;
-  } catch (err) {
-    console.warn(`帶 label 開 Issue 失敗，重試不帶 label（${(err as Error).message}）`);
-    try {
-      const url = gh([...baseArgs, ...assigneeArgs()]);
-      console.log(`已開 Issue：${url}`);
-      return url;
-    } catch (err2) {
-      console.warn(`指派失敗，改不帶 assignee（${(err2 as Error).message}）`);
-      const url = gh(baseArgs);
-      console.log(`已開 Issue：${url}`);
-      return url;
-    }
-  }
-}
-
 function main(): void {
   const reportPath = process.env.SYNC_REPORT_PATH;
   const commitMsgPath = process.env.SYNC_COMMIT_MSG_PATH ?? "sync-commit-msg.txt";
@@ -203,23 +138,10 @@ function main(): void {
   }
 
   const report = JSON.parse(readFileSync(reportPath, "utf8")) as SyncRunReport;
-  const commitMsg = buildCommitMessage(report);
-  writeFileSync(commitMsgPath, commitMsg, "utf8");
+  writeFileSync(commitMsgPath, buildCommitMessage(report), "utf8");
   console.log(`Commit 訊息已寫入 ${commitMsgPath}`);
-
-  if (process.env.CREATE_ISSUES !== "1") {
-    console.log("CREATE_ISSUES≠1，略過開 Issue。");
-    return;
-  }
-
-  if (report.illustratePending.length === 0) {
-    console.log("無新 ep-N，略過開 Issue。");
-    return;
-  }
-
-  for (const slug of report.illustratePending) {
-    createIllustrateIssue(slug, report);
-  }
+  // 開 Issue／上站通知改由 push 後的 scripts/sync-alert.ts notify-live 處理，
+  // 避免在 push 失敗時誤報「已上站」。
 }
 
 const entry = process.argv[1]?.replace(/\\/g, "/") ?? "";

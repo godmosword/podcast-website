@@ -1,0 +1,39 @@
+name: Sync Watchdog
+
+# 獨立看門狗：驗證「RSS 最新一集是否已上站」，是 sync workflow 整個壞掉時的最後防線。
+# 輕量（不跑 whisper／build），秒級完成。
+on:
+  # 可靠定時：外部排程打 repository_dispatch；GitHub schedule 為後備。
+  repository_dispatch:
+    types: [watchdog-now]
+  schedule:
+    - cron: "17 * * * *" # 每小時一次（錯開整點，避開高峰）
+  workflow_dispatch:
+
+concurrency:
+  group: sync-watchdog
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+
+jobs:
+  watchdog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: Check RSS freshness vs site
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STALE_HOURS: "3"
+          SYNC_ISSUE_ASSIGNEES: ${{ secrets.SYNC_ISSUE_ASSIGNEES }}
+          SYNC_ISSUE_MENTIONS: ${{ secrets.SYNC_ISSUE_MENTIONS }}
+        run: npx tsx scripts/check-sync-fresh.ts
