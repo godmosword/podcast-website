@@ -2,19 +2,43 @@ import { test, expect } from "@playwright/test";
 
 test.describe.configure({ mode: "serial" });
 
-test("首頁 → 詳情 → 播放頁 smoke", async ({ page }) => {
+test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "車車遊樂園" })).toBeVisible();
+  // 品牌在 sticky 頂欄、選單鍵可用
+  await expect(page.getByRole("link", { name: /車車遊樂園/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: "開啟選單" })).toBeVisible();
+  // 第一段（車車故事）標題與 CTA、以及四段標題都存在
+  await expect(page.getByRole("heading", { name: /車車故事/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: "全部故事 →" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /數綿羊/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /捏黏土/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /衛教宣導/ })).toBeVisible();
+  // 往下箭頭錨點存在
+  await expect(
+    page.getByRole("link", { name: "捲動到下一個專區" }).first(),
+  ).toBeVisible();
+});
 
-  const firstStory = page.getByRole("link").filter({ hasText: "EP" }).first();
+test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: /車車故事/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /衛教宣導/ })).toBeVisible();
+});
+
+test("全部故事頁 → 詳情 → 播放頁 smoke", async ({ page }) => {
+  await page.goto("/stories");
+  await expect(page.getByRole("heading", { name: "找故事" })).toBeVisible();
+
+  const firstStory = page.locator('main a[href^="/story/"]').first();
   await expect(firstStory).toBeVisible();
   const firstStoryHref = await firstStory.getAttribute("href");
-  expect(firstStoryHref).toBeTruthy();
+  expect(firstStoryHref).toMatch(/^\/story\//);
   await page.goto(firstStoryHref!);
 
-  await expect(page.getByRole("link", { name: "▶ 開始看故事" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /開始看故事/ })).toBeVisible();
   const playHref = await page
-    .getByRole("link", { name: "▶ 開始看故事" })
+    .getByRole("link", { name: /開始看故事/ })
     .getAttribute("href");
   expect(playHref).toBeTruthy();
   await page.goto(playHref!);
@@ -45,7 +69,7 @@ test("節目數據中心 /studio", async ({ page }) => {
 });
 
 test("首頁 Hero 不含節目數據入口", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/stories");
   const header = page.locator("header");
   await expect(header.getByRole("link", { name: "節目數據" })).toHaveCount(0);
 });

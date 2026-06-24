@@ -1,43 +1,22 @@
-import { allTags, allVehicles, storiesByNewest } from "@/data/content";
-import { HomeSectionList } from "@/components/home/HomeSectionRenderer";
-import type { HomeSectionProps } from "@/components/home/HomeSectionRenderer";
-import JsonLd from "@/components/JsonLd";
-import SiteHeader from "@/components/SiteHeader";
-import SiteFooter from "@/components/SiteFooter";
-import { podcastSeriesJsonLd } from "@/lib/json-ld";
+import type { Metadata } from "next";
+import LandingHub from "@/components/landing/LandingHub";
 import styles from "./page.module.css";
 
-type HomePageProps = {
-  searchParams: Promise<{ vehicle?: string; tag?: string }>;
+export const metadata: Metadata = {
+  title: "車車遊樂園 · 親子故事與手作",
+  description:
+    "Storyline 式親子內容入口：車車故事、睡前數綿羊、捏黏土手作、衛教宣導，適合 3–7 歲親子共讀。",
+  openGraph: {
+    title: "車車遊樂園",
+    description:
+      "車車故事、睡前收聽、捏黏土與衛教宣導 — 給 3–7 歲的看圖聽故事小天地。",
+  },
 };
 
-export default async function HomePage({ searchParams }: HomePageProps) {
-  const { vehicle: vehicleParam, tag: tagParam } = await searchParams;
-  const vehicles = allVehicles();
-  const tags = allTags();
-  const initialVehicle =
-    vehicleParam && vehicles.includes(vehicleParam) ? vehicleParam : null;
-  const initialTag = tagParam && tags.includes(tagParam) ? tagParam : null;
-
-  const stories = storiesByNewest();
-  const latest = stories[0];
-
-  const sectionProps: HomeSectionProps = {
-    latest,
-    listStories: stories,
-    featuredStorySlug: latest?.slug ?? null,
-    vehicles,
-    tags,
-    initialVehicle,
-    initialTag,
-  };
-
+export default function HomePage() {
   return (
     <main className={styles.main}>
-      <JsonLd data={podcastSeriesJsonLd()} />
-      <SiteHeader />
-      <HomeSectionList props={sectionProps} />
-      <SiteFooter layout="home" />
+      <LandingHub />
     </main>
   );
 }

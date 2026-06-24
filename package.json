@@ -16,7 +16,8 @@
     "verify:episodes": "tsx scripts/verify-episodes.ts",
     "proofread:subtitles": "tsx scripts/proofread-subtitles.ts",
     "check": "npm test && npm run verify:episodes && npm run build",
-    "backfill:captions": "tsx scripts/backfill-scene-captions.ts"
+    "backfill:captions": "tsx scripts/backfill-scene-captions.ts",
+    "generate:landing-art": "tsx --env-file-if-exists=.env.local scripts/generate-landing-art.ts"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

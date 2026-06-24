@@ -68,6 +68,13 @@
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
 
+  /* Landing Hub（Storyline 式頂欄） */
+  --landing-brand: #e87722;
+  --landing-brand-ink: #ffffff;
+  /* sticky 頂欄高度：按鈕 44 + 上下 padding 20 + 瀏海安全區 */
+  --nav-h: calc(64px + var(--safe-top));
+  --landing-heading: #2a9d8f;
+
   /* 語意輔助（light 預設） */
   --mix-base: #ffffff;
   --illus-warm: none;
@@ -119,6 +126,10 @@
   --focus-ring: var(--c-yellow);
   --chip-active-fg: #1c2440;
   --float-amp: 2px;
+
+  --landing-brand: #d96a1a;
+  --landing-brand-ink: #fff8f0;
+  --landing-heading: #5da8a1;
 }
 
 [data-theme="night"] .site-backdrop {

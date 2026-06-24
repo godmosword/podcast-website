@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { Story } from "@/data/content";
 import StoryCard from "./StoryCard";
 import VehicleSelect from "./VehicleSelect";
@@ -28,6 +28,8 @@ export default function StoryFilter({
   initialTag = null,
 }: StoryFilterProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const filterBase = pathname === "/stories" ? "/stories" : "/";
   const [vehicle, setVehicle] = useState<string | null>(initialVehicle);
   const [tag, setTag] = useState<string | null>(initialTag);
 
@@ -44,7 +46,7 @@ export default function StoryFilter({
     if (nextVehicle) params.set("vehicle", nextVehicle);
     if (nextTag) params.set("tag", nextTag);
     const qs = params.toString();
-    router.replace(qs ? `/?${qs}` : "/", { scroll: false });
+    router.replace(qs ? `${filterBase}?${qs}` : filterBase, { scroll: false });
   }
 
   function updateVehicle(nextVehicle: string | null) {
@@ -61,7 +63,7 @@ export default function StoryFilter({
     playSfx("tap");
     setVehicle(null);
     setTag(null);
-    router.replace("/", { scroll: false });
+    router.replace(filterBase, { scroll: false });
   }
 
   const filtered = useMemo(

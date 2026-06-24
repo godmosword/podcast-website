@@ -54,7 +54,7 @@ export default async function StoryDetailPage({
   return (
     <main className={styles.main}>
       <JsonLd data={podcastEpisodeJsonLd(story)} />
-      <Link href="/" className={styles.back}>
+      <Link href="/stories" className={styles.back}>
         ← 回故事屋
       </Link>
 

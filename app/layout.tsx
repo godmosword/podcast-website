@@ -3,6 +3,7 @@ import { Baloo_2, Gochi_Hand } from "next/font/google";
 import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/react";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import SiteNavBar from "@/components/landing/SiteNavBar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { FEATURES } from "@/lib/features";
 import SvgDefs from "@/components/decor/SvgDefs";
@@ -108,6 +109,7 @@ export default function RootLayout({
         <ThemeProvider nightModeEnabled={FEATURES.nightMode}>
           <div className="site-backdrop" aria-hidden />
           <SvgDefs />
+          <SiteNavBar />
           <div className="site-root">{children}</div>
           <ServiceWorkerRegister />
           <Analytics />

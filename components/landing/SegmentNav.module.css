@@ -1,0 +1,70 @@
+.nav {
+  position: fixed;
+  right: clamp(8px, 2vw, 18px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 30;
+  pointer-events: auto;
+}
+
+/* 手機螢幕窄，進度點容易擋到內容/CTA → 隱藏，改靠面板的往下箭頭瀏覽 */
+@media (max-width: 600px) {
+  .nav {
+    display: none;
+  }
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.dot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  text-decoration: none;
+}
+
+.dot::after {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 28%, transparent);
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 20%, transparent);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.active.dot::after {
+  background: var(--landing-brand, #e87722);
+  transform: scale(1.35);
+}
+
+.dotLabel {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+
+.dot:hover .dotLabel,
+.dot:focus-visible .dotLabel {
+  opacity: 1;
+  transform: translateX(0);
+}

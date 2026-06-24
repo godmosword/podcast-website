@@ -1,0 +1,6 @@
+.main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: calc(24px + var(--safe-top)) calc(20px + var(--safe-right))
+    calc(40px + var(--safe-bottom)) calc(20px + var(--safe-left));
+}
