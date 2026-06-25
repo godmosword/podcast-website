@@ -352,3 +352,10 @@ button:focus-visible {
     scroll-behavior: auto !important;
   }
 }
+
+/* Landing 首頁：鎖定文件捲動，由內層容器負責 snap */
+html:has([data-landing-root]),
+html:has([data-landing-root]) body {
+  overflow: hidden;
+  height: 100%;
+}

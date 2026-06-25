@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <main className={styles.main}>
+    <main className={styles.main} data-landing-root>
       <LandingHub />
     </main>
   );

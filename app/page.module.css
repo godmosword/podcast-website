@@ -1,21 +1,6 @@
 .main {
   width: 100%;
-}
-
-/*
- * 全文件 scroll-snap：只在 landing 出現時生效（:has），不影響 /stories /story 等路由。
- * scroll container 是 document（html），sticky 頂欄在其上 → 用 scroll-padding-top 讓
- * 每段標題不被頂欄遮住。reduced-motion 時關掉 snap 與 smooth（見下方 media query）。
- */
-:global(html):has(.main) {
-  scroll-snap-type: y proximity;
-  scroll-padding-top: var(--nav-h);
-  scroll-behavior: smooth;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :global(html):has(.main) {
-    scroll-snap-type: none;
-    scroll-behavior: auto;
-  }
+  --landing-pane-h: calc(100dvh - var(--nav-h));
+  height: var(--landing-pane-h);
+  overflow: hidden;
 }

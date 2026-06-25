@@ -1,14 +1,15 @@
 .panel {
   position: relative;
-  /* 扣掉 sticky 頂欄高度，避免第一屏被頂欄吃掉一截 */
-  min-height: calc(100svh - var(--nav-h));
+  height: var(--landing-pane-h, calc(100dvh - var(--nav-h)));
+  min-height: var(--landing-pane-h, calc(100dvh - var(--nav-h)));
   scroll-snap-align: start;
-  scroll-margin-top: var(--nav-h);
+  scroll-snap-stop: always;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   overflow: hidden;
   isolation: isolate;
+  flex: none;
 }
 
 .bg,
@@ -126,6 +127,31 @@
 @media (prefers-reduced-motion: reduce) {
   .next {
     animation: none;
+  }
+}
+
+@media (max-width: 1024px) {
+  .panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -3;
+    background: linear-gradient(165deg, var(--sky-2), var(--c-lilac));
+  }
+
+  .bg {
+    object-fit: contain;
+    object-position: center center;
+  }
+
+  .scrim {
+    background: linear-gradient(
+      to top,
+      rgba(20, 16, 12, 0.78) 0%,
+      rgba(20, 16, 12, 0.48) 28%,
+      rgba(20, 16, 12, 0.12) 56%,
+      rgba(20, 16, 12, 0) 100%
+    );
   }
 }
 

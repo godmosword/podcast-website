@@ -6,7 +6,10 @@ export type PlatformClickSource =
   | "story-platforms"
   | "footer-connect"
   | "home-subscribe"
-  | "subscription-cta";
+  | "subscription-cta"
+  | "nav-bar"
+  | "nav-dropdown"
+  | "nav-menu";
 
 /** 平台外連點擊：本機 engagement + Vercel Analytics 自訂事件。 */
 export function trackPlatformClick(

@@ -1,10 +1,12 @@
 import SiteFooter from "@/components/SiteFooter";
 import JsonLd from "@/components/JsonLd";
+import LandingScrollView from "@/components/landing/LandingScrollView";
 import LandingSegment from "@/components/landing/LandingSegment";
 import SegmentNav from "@/components/landing/SegmentNav";
 import { resolveLandingSegments } from "@/lib/landing-query";
 import { podcastSeriesJsonLd } from "@/lib/json-ld";
-import styles from "./LandingHub.module.css";
+import hubStyles from "./LandingHub.module.css";
+import scrollStyles from "./LandingScrollView.module.css";
 
 export default function LandingHub() {
   const segments = resolveLandingSegments();
@@ -16,20 +18,22 @@ export default function LandingHub() {
   return (
     <>
       <JsonLd data={podcastSeriesJsonLd()} />
-      <SegmentNav items={navItems} />
+      <LandingScrollView className={scrollStyles.root}>
+        <SegmentNav items={navItems} />
 
-      {segments.map((segment, index) => (
-        <LandingSegment
-          key={segment.id}
-          segment={segment}
-          index={index}
-          nextAnchorId={segments[index + 1]?.anchorId ?? null}
-        />
-      ))}
+        {segments.map((segment, index) => (
+          <LandingSegment
+            key={segment.id}
+            segment={segment}
+            index={index}
+            nextAnchorId={segments[index + 1]?.anchorId ?? null}
+          />
+        ))}
 
-      <div className={styles.footer}>
-        <SiteFooter layout="home" />
-      </div>
+        <div className={hubStyles.footer}>
+          <SiteFooter layout="home" />
+        </div>
+      </LandingScrollView>
     </>
   );
 }

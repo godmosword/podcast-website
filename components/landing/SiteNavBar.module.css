@@ -42,38 +42,9 @@
   flex-shrink: 0;
 }
 
-.subscribe {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 40px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--landing-brand-ink, #fff) 18%, transparent);
-  color: inherit;
-  font-weight: 700;
-  font-size: 0.78rem;
-  text-decoration: none;
-  border: 2px solid color-mix(in srgb, var(--landing-brand-ink, #fff) 35%, transparent);
-  white-space: nowrap;
-}
-
-@media (min-width: 520px) {
-  .subscribe {
-    min-height: 44px;
-    padding: 8px 12px;
-    font-size: 0.85rem;
-  }
-}
-
 @media (max-width: 360px) {
   .brandText {
     font-size: 0.95rem;
-  }
-
-  .subscribe {
-    padding: 6px 8px;
-    font-size: 0.72rem;
   }
 }
 

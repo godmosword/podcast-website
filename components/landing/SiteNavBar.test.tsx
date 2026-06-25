@@ -5,10 +5,11 @@ import { describe, expect, test, vi } from "vitest";
 vi.stubGlobal("React", React);
 
 describe("SiteNavBar", () => {
-  test("renders brand and menu button", async () => {
+  test("renders brand, subscribe control, and menu button", async () => {
     const { default: SiteNavBar } = await import("./SiteNavBar");
     const html = renderToStaticMarkup(<SiteNavBar />);
     expect(html).toContain("車車遊樂園");
+    expect(html).toContain("訂閱收聽");
     expect(html).toContain("開啟選單");
   });
 });

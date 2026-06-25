@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import type { ResolvedLandingSegment } from "@/lib/landing-query";
+import { useLandingScroll } from "./LandingScrollContext";
 import styles from "./LandingSegment.module.css";
 
 type LandingSegmentProps = {
@@ -14,7 +17,18 @@ export default function LandingSegment({
   index,
   nextAnchorId,
 }: LandingSegmentProps) {
+  const landingScroll = useLandingScroll();
   const eager = index === 0;
+
+  function goToNext(e: React.MouseEvent<HTMLAnchorElement>) {
+    if (!nextAnchorId) return;
+    e.preventDefault();
+    if (landingScroll) {
+      landingScroll.scrollToSegment(nextAnchorId);
+      return;
+    }
+    document.getElementById(nextAnchorId)?.scrollIntoView({ block: "start" });
+  }
 
   return (
     <section
@@ -60,6 +74,7 @@ export default function LandingSegment({
           href={`#${nextAnchorId}`}
           className={styles.next}
           aria-label="捲動到下一個專區"
+          onClick={goToNext}
         >
           <span aria-hidden>⌄</span>
         </a>

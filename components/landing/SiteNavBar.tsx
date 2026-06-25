@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useEffect, useId, useState } from "react";
 import ThemeModeSwitch from "@/components/ThemeModeSwitch";
+import SubscribeMenu from "@/components/landing/SubscribeMenu";
 import { visibleSocials } from "@/lib/social";
-import { visiblePlatforms } from "@/lib/platforms";
 import styles from "./SiteNavBar.module.css";
 
 function navItems() {
@@ -29,7 +29,6 @@ export default function SiteNavBar() {
   const menuId = useId();
   const [open, setOpen] = useState(false);
   const items = navItems();
-  const subscribe = visiblePlatforms()[0];
 
   useEffect(() => {
     if (!open) return;
@@ -50,16 +49,7 @@ export default function SiteNavBar() {
         </Link>
 
         <div className={styles.actions}>
-          {subscribe ? (
-            <a
-              href={subscribe.url}
-              className={styles.subscribe}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              訂閱收聽
-            </a>
-          ) : null}
+          <SubscribeMenu />
 
           <button
             type="button"
@@ -77,19 +67,7 @@ export default function SiteNavBar() {
       {open ? (
         <nav id={menuId} className={styles.panel} aria-label="網站選單">
           <ul className={styles.list}>
-            {subscribe ? (
-              <li>
-                <a
-                  href={subscribe.url}
-                  className={styles.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setOpen(false)}
-                >
-                  訂閱收聽
-                </a>
-              </li>
-            ) : null}
+            <SubscribeMenu variant="menu" onNavigate={() => setOpen(false)} />
             {items.map((item) => (
               <li key={item.label}>
                 <Link
