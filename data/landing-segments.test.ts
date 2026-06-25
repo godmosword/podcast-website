@@ -34,7 +34,7 @@ describe("landing-segments", () => {
     expect(new Set(anchors).size).toBe(anchors.length);
   });
 
-  it("每段 heroImage 指向 /landing 且實檔存在", () => {
+  it("每段 heroImage 指向 /landing 且橫版實檔存在", () => {
     for (const seg of LANDING_SEGMENTS) {
       expect(seg.heroImage).toBe(`/landing/segment-${seg.id}.jpg`);
       const fsPath = join(process.cwd(), "public", seg.heroImage);
@@ -46,6 +46,14 @@ describe("landing-segments", () => {
       const portraitPath = join(process.cwd(), "public", seg.heroImagePortrait);
       expect(existsSync(portraitPath), `缺直版 placeholder：${seg.heroImagePortrait}`).toBe(
         true,
+      );
+    }
+  });
+
+  it("每段 heroImagePortrait 指向 /landing 直版路徑", () => {
+    for (const seg of LANDING_SEGMENTS) {
+      expect(seg.heroImagePortrait).toBe(
+        `/landing/segment-${seg.id}-portrait.jpg`,
       );
     }
   });

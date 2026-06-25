@@ -121,7 +121,7 @@ Bonbon & 馬米親子 podcast「看圖聽故事」網站的視覺與互動規範
 
 ### Landing Hub（`/`）
 
-Storyline 式**全螢幕分段捲動**：每段一張滿版黏土 hero（`public/landing/segment-{id}.jpg`），大圖主導 + 底部漸層遮罩 + 左下標題／副標／CTA。
+Storyline 式**全螢幕分段捲動**：每段一張滿版黏土 hero（桌面 `segment-{id}.jpg` 16:9；行動 ≤768px `segment-{id}-portrait.jpg` 9:16），大圖主導 + 底部漸層遮罩 + 左下標題／副標／CTA。
 
 1. **SiteNavBar**（全站橘色頂欄 + 漢堡選單 + 訂閱 CTA）
 2. 四段 **LandingSegment** 全螢幕面板（資料：`data/landing-segments.ts`）：車車故事／睡前數綿羊／捏黏土／衛教宣導
@@ -137,4 +137,4 @@ Hero 圖走 `images.edit` + `public/characters/` 定裝照參考圖，與單集�
 3. **FavoritesSection** 精選
 4. **StoryFilter** 找故事（車種／主題篩選）
 
-Landing segment hero 生圖：`npm run generate:landing-art -- --dry-run`（見 README）。
+Landing segment hero 生圖：`npm run generate:landing-art -- --dry-run`（橫版）；直版 `--portrait`；approve 後覆蓋 `public/landing/`。

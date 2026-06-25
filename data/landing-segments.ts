@@ -8,9 +8,9 @@ export type LandingSegmentDef = {
   anchorId: string;
   title: string;
   subtitle: string;
-  /** hero 橫幅；approve 後改為 /landing/segment-{id}.jpg */
+  /** 橫版 hero（桌面）；approve 後為 /landing/segment-{id}.jpg */
   heroImage: string;
-  /** 手機直版 art direction（≤768px）；placeholder，之後可替換正式直版圖 */
+  /** 直版 hero（行動 ≤768px）；approve 後為 /landing/segment-{id}-portrait.jpg */
   heroImagePortrait: string;
   cta: {
     label: string;
