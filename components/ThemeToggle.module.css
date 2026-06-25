@@ -97,10 +97,23 @@
 
 .segmentText {
   min-width: 0;
-  min-height: 34px;
-  padding: 6px 14px;
+  min-height: 44px;
+  padding: 8px 14px;
   font-size: 0.82rem;
   color: var(--ink-soft);
+}
+
+@media (max-width: 400px) {
+  .groupText {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .segmentText {
+    flex: 1 1 0;
+    padding: 8px 10px;
+    font-size: 0.78rem;
+  }
 }
 
 /* 選中段：實心膠囊，清楚標示目前模式 */

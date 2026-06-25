@@ -286,7 +286,8 @@
   right: 0;
   z-index: 5;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   gap: 8px;
   padding: calc(10px + var(--safe-top)) calc(12px + var(--safe-right)) 20px
     calc(12px + var(--safe-left));
@@ -295,6 +296,23 @@
     rgba(0, 0, 0, 0.45),
     rgba(0, 0, 0, 0)
   );
+  pointer-events: none;
+}
+
+.topBarHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  pointer-events: none;
+}
+
+.topBarTools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 6px;
   pointer-events: none;
 }
 
@@ -708,6 +726,30 @@
     --controls-height: 142px;
   }
 
+  .topBar {
+    gap: 6px;
+    padding-bottom: 14px;
+  }
+
+  .topBarTools {
+    gap: 5px;
+  }
+
+  .topTitle {
+    font-size: 0.95rem;
+  }
+
+  .subtitlesLabel {
+    display: none;
+  }
+
+  .subtitlesBtn,
+  .subtitlesBtnOn {
+    width: 44px;
+    min-width: 44px;
+    padding: 0;
+  }
+
   .controls {
     padding-top: 16px;
   }
@@ -719,6 +761,13 @@
 
   .transport {
     gap: 10px;
+  }
+}
+
+@media (max-width: 380px) {
+  .timerBtn {
+    font-size: 0.8rem;
+    padding: 8px 10px;
   }
 }
 

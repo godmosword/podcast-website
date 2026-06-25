@@ -137,3 +137,24 @@
 .footerGrid .tags {
   flex: 1 1 auto;
 }
+
+@media (max-width: 480px) {
+  .card {
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .thumbWrap {
+    width: 80px;
+    height: 80px;
+  }
+
+  .title {
+    font-size: 1.1rem;
+  }
+
+  .summary {
+    font-size: 0.86rem;
+    -webkit-line-clamp: 3;
+  }
+}

@@ -77,6 +77,19 @@ export default function SiteNavBar() {
       {open ? (
         <nav id={menuId} className={styles.panel} aria-label="網站選單">
           <ul className={styles.list}>
+            {subscribe ? (
+              <li>
+                <a
+                  href={subscribe.url}
+                  className={styles.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setOpen(false)}
+                >
+                  訂閱收聽
+                </a>
+              </li>
+            ) : null}
             {items.map((item) => (
               <li key={item.label}>
                 <Link

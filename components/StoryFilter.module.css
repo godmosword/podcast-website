@@ -89,8 +89,20 @@
   padding: 32px 0;
 }
 
-@media (max-width: 380px) {
+@media (max-width: 480px) {
   .filterGrid {
     grid-template-columns: 1fr;
+  }
+
+  .footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 380px) {
+  .filterBar {
+    padding: 12px;
   }
 }

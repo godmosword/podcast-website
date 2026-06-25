@@ -34,6 +34,20 @@
   box-shadow: none;
 }
 
+@media (max-width: 480px) {
+  .banner {
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 16px;
+    font-size: 0.95rem;
+  }
+
+  .banner::before {
+    width: 36px;
+    height: 36px;
+  }
+}
+
 @media (hover: hover) {
   .banner:hover {
     transform: translateY(-2px);

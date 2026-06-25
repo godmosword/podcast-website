@@ -51,13 +51,13 @@ export default function AboutPage() {
       <section className={styles.section}>
         <h2 className={styles.heading}>用車種找故事</h2>
         <p className={styles.text}>
-          點選車種會回到首頁並自動篩選，不必另外記不同頁面。
+          點選車種會前往故事列表並自動篩選。
         </p>
         <ul className={styles.chipList}>
           {vehicles.map((v) => (
             <li key={v}>
               <Link
-                href={`/?vehicle=${encodeURIComponent(v)}`}
+                href={`/stories?vehicle=${encodeURIComponent(v)}`}
                 className={styles.chip}
               >
                 <VehicleClayIcon vehicle={v} size={28} />

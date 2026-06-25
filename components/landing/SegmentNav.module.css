@@ -7,9 +7,41 @@
   pointer-events: auto;
 }
 
-/* 手機螢幕窄，進度點容易擋到內容/CTA → 隱藏，改靠面板的往下箭頭瀏覽 */
+/* 手機：改為底部橫向進度點，不擋住 CTA */
 @media (max-width: 600px) {
   .nav {
+    top: auto;
+    right: auto;
+    left: 50%;
+    bottom: calc(12px + var(--safe-bottom));
+    transform: translateX(-50%);
+  }
+
+  .list {
+    grid-auto-flow: column;
+    gap: 10px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.32);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .dot {
+    width: 12px;
+    height: 12px;
+    justify-content: center;
+  }
+
+  .dot::after {
+    width: 10px;
+    height: 10px;
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  .dotLabel {
     display: none;
   }
 }

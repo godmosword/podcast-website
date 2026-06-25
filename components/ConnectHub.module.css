@@ -106,6 +106,34 @@
   transform: translateY(1px) scale(0.96);
 }
 
+@media (max-width: 480px) {
+  .hub {
+    gap: 12px;
+  }
+
+  .block {
+    padding: 14px 14px 16px;
+  }
+
+  .row {
+    gap: 12px 10px;
+  }
+
+  .item {
+    width: 80px;
+    gap: 8px;
+  }
+
+  .badge {
+    width: 52px;
+    height: 52px;
+  }
+
+  .label {
+    font-size: 0.75rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .item,
   .item:hover,
