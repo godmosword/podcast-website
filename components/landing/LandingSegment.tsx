@@ -30,27 +30,47 @@ export default function LandingSegment({
     document.getElementById(nextAnchorId)?.scrollIntoView({ block: "start" });
   }
 
+  const imageProps = {
+    src: segment.heroImage!,
+    loading: (eager ? "eager" : "lazy") as "eager" | "lazy",
+    fetchPriority: (eager ? "high" : "low") as "high" | "low",
+    decoding: "async" as const,
+  };
+
   return (
     <section
       id={segment.anchorId}
       className={styles.panel}
       aria-labelledby={`${segment.anchorId}-title`}
     >
-      {segment.heroImage ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={segment.heroImage}
-          alt=""
-          aria-hidden
-          className={styles.bg}
-          loading={eager ? "eager" : "lazy"}
-          fetchPriority={eager ? "high" : "low"}
-          decoding="async"
-        />
-      ) : (
-        <div className={styles.bgFallback} aria-hidden />
-      )}
-      <div className={styles.scrim} aria-hidden />
+      <div className={styles.visual} aria-hidden={!!segment.heroImage}>
+        {segment.heroImage ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              {...imageProps}
+              alt=""
+              className={styles.bgBlur}
+              aria-hidden
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img {...imageProps} alt="" className={styles.bg} aria-hidden />
+          </>
+        ) : (
+          <div className={styles.bgFallback} />
+        )}
+        <div className={styles.scrim} />
+        {nextAnchorId ? (
+          <a
+            href={`#${nextAnchorId}`}
+            className={styles.next}
+            aria-label="捲動到下一個專區"
+            onClick={goToNext}
+          >
+            <span aria-hidden>⌄</span>
+          </a>
+        ) : null}
+      </div>
 
       <div className={styles.content}>
         <p className={styles.eyebrow}>{`0${index + 1}`}</p>
@@ -68,17 +88,6 @@ export default function LandingSegment({
           {segment.cta.label} →
         </Link>
       </div>
-
-      {nextAnchorId ? (
-        <a
-          href={`#${nextAnchorId}`}
-          className={styles.next}
-          aria-label="捲動到下一個專區"
-          onClick={goToNext}
-        >
-          <span aria-hidden>⌄</span>
-        </a>
-      ) : null}
     </section>
   );
 }

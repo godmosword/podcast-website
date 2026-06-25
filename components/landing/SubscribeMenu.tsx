@@ -6,16 +6,7 @@ import { trackPlatformClick } from "@/lib/analytics";
 import { visiblePlatforms } from "@/lib/platforms";
 import styles from "./SubscribeMenu.module.css";
 
-type SubscribeMenuProps = {
-  /** 漢堡選單內的直向列表樣式 */
-  variant?: "bar" | "menu";
-  onNavigate?: () => void;
-};
-
-export default function SubscribeMenu({
-  variant = "bar",
-  onNavigate,
-}: SubscribeMenuProps) {
+export default function SubscribeMenu() {
   const menuId = useId();
   const wrapRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -38,40 +29,6 @@ export default function SubscribeMenu({
   }, [open]);
 
   if (platforms.length === 0) return null;
-
-  if (variant === "menu") {
-    return (
-      <li className={styles.menuSection}>
-        <span className={styles.menuHeading}>收聽平台</span>
-        <ul className={styles.menuList}>
-          {platforms.map((platform) => (
-            <li key={platform.label}>
-              <a
-                href={platform.url}
-                className={styles.menuLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => {
-                  trackPlatformClick(platform.label, "nav-menu");
-                  onNavigate?.();
-                }}
-              >
-                <span
-                  className={styles.menuBadge}
-                  style={{ background: platform.color }}
-                >
-                  <BrandSvg className={styles.menuIcon}>
-                    {PLATFORM_ICON_PATHS[platform.icon]}
-                  </BrandSvg>
-                </span>
-                {platform.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </li>
-    );
-  }
 
   if (platforms.length === 1) {
     const platform = platforms[0]!;

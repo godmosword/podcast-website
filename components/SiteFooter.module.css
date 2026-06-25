@@ -12,17 +12,17 @@
 }
 
 .home {
-  margin-top: 12px;
-  padding-top: 12px;
+  margin-top: 0;
+  padding-top: 8px;
   border-top: none;
 }
 
 .home::before {
   content: "";
   display: block;
-  width: min(72%, 280px);
+  width: min(60%, 220px);
   height: 2px;
-  margin: 0 auto 16px;
+  margin: 0 auto 12px;
   border-radius: 999px;
   background: linear-gradient(
     90deg,
@@ -30,6 +30,21 @@
     var(--bg-dot),
     transparent
   );
+}
+
+.home .parentNote {
+  margin-bottom: 14px;
+  font-size: 0.84rem;
+}
+
+.home .footerConnect {
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.home .bottomBar {
+  margin-top: 12px;
+  gap: 8px;
 }
 
 .parentNote {

@@ -79,60 +79,6 @@
   min-width: 0;
 }
 
-.menuSection {
-  margin-top: 4px;
-  padding-top: 8px;
-  border-top: 1px solid color-mix(in srgb, var(--landing-brand-ink, #fff) 22%, transparent);
-}
-
-.menuHeading {
-  display: block;
-  padding: 4px 12px 8px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  opacity: 0.85;
-}
-
-.menuList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 2px;
-}
-
-.menuLink {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: var(--radius-sm);
-  color: inherit;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.menuLink:hover,
-.menuLink:focus-visible {
-  background: color-mix(in srgb, var(--landing-brand-ink, #fff) 14%, transparent);
-}
-
-.menuBadge {
-  flex: none;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  color: #fff;
-}
-
-.menuIcon {
-  width: 16px;
-  height: 16px;
-}
-
 @media (min-width: 520px) {
   .trigger {
     min-height: 44px;

@@ -67,7 +67,6 @@ export default function SiteNavBar() {
       {open ? (
         <nav id={menuId} className={styles.panel} aria-label="網站選單">
           <ul className={styles.list}>
-            <SubscribeMenu variant="menu" onNavigate={() => setOpen(false)} />
             {items.map((item) => (
               <li key={item.label}>
                 <Link
