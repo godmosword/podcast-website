@@ -47,7 +47,7 @@
   margin: 0 auto;
   padding: 0
     calc(clamp(20px, 5vw, 56px) + var(--safe-right))
-    clamp(40px, 9vh, 96px)
+    clamp(28px, 5vh, 72px)
     calc(clamp(20px, 5vw, 56px) + var(--safe-left));
   color: #fff;
 }
@@ -131,25 +131,17 @@
 }
 
 @media (max-width: 1024px) {
-  .panel::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -3;
-    background: linear-gradient(165deg, var(--sky-2), var(--c-lilac));
-  }
-
   .bg {
-    object-fit: contain;
-    object-position: center center;
+    object-fit: cover;
+    object-position: center 32%;
   }
 
   .scrim {
     background: linear-gradient(
       to top,
-      rgba(20, 16, 12, 0.78) 0%,
-      rgba(20, 16, 12, 0.48) 28%,
-      rgba(20, 16, 12, 0.12) 56%,
+      rgba(20, 16, 12, 0.82) 0%,
+      rgba(20, 16, 12, 0.5) 24%,
+      rgba(20, 16, 12, 0.1) 52%,
       rgba(20, 16, 12, 0) 100%
     );
   }
@@ -157,10 +149,10 @@
 
 @media (max-width: 600px) {
   .next {
-    bottom: calc(52px + var(--safe-bottom));
+    bottom: calc(40px + var(--safe-bottom));
   }
 
   .content {
-    padding-bottom: calc(72px + var(--safe-bottom));
+    padding-bottom: calc(44px + var(--safe-bottom));
   }
 }

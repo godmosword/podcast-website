@@ -11,6 +11,27 @@
   padding-top: 16px;
 }
 
+.home {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: none;
+}
+
+.home::before {
+  content: "";
+  display: block;
+  width: min(72%, 280px);
+  height: 2px;
+  margin: 0 auto 16px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--bg-dot),
+    transparent
+  );
+}
+
 .parentNote {
   margin: 0 auto 20px;
   max-width: 460px;

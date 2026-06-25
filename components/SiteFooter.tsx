@@ -26,7 +26,11 @@ export default function SiteFooter({
   const showPlatforms = isHome || showPlatformSubscribe;
 
   return (
-    <footer className={`${styles.footer} ${compact ? styles.compact : ""}`}>
+    <footer
+      className={`${styles.footer} ${compact ? styles.compact : ""} ${
+        isHome ? styles.home : ""
+      }`}
+    >
       <Doodle
         kind="squiggle"
         size={36}

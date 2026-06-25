@@ -1,7 +1,12 @@
-/* footer 不參與 scroll-snap，放在最後一段之後，置中收尾 */
+/* footer 不參與 scroll-snap，與最後一段銜接、減少底部空洞感 */
 .footer {
   width: 100%;
   max-width: 960px;
   margin: 0 auto;
-  padding: 0 clamp(16px, 4vw, 32px) calc(24px + var(--safe-bottom));
+  padding: 8px clamp(16px, 4vw, 32px) calc(12px + var(--safe-bottom));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg) 0%, transparent) 0%,
+    var(--bg) 28px
+  );
 }

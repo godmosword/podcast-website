@@ -1,6 +1,6 @@
 .main {
   width: 100%;
-  --landing-pane-h: calc(100dvh - var(--nav-h));
+  --landing-pane-h: calc(100svh - var(--nav-h));
   height: var(--landing-pane-h);
   overflow: hidden;
 }
