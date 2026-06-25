@@ -61,17 +61,18 @@ export default function LandingSegment({
           <div className={styles.bgFallback} />
         )}
         <div className={styles.scrim} />
-        {nextAnchorId ? (
-          <a
-            href={`#${nextAnchorId}`}
-            className={styles.next}
-            aria-label="捲動到下一個專區"
-            onClick={goToNext}
-          >
-            <span aria-hidden>⌄</span>
-          </a>
-        ) : null}
       </div>
+
+      {nextAnchorId ? (
+        <a
+          href={`#${nextAnchorId}`}
+          className={styles.next}
+          aria-label="捲動到下一個專區"
+          onClick={goToNext}
+        >
+          <span aria-hidden>⌄</span>
+        </a>
+      ) : null}
 
       <div className={styles.content}>
         <p className={styles.eyebrow}>{`0${index + 1}`}</p>

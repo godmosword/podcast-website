@@ -22,14 +22,19 @@ export default function LandingScrollView({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scrollToSegment = useCallback((anchorId: string) => {
+    const root = scrollRef.current;
     const el = document.getElementById(anchorId);
-    if (!el) return;
+    if (!root || !el) return;
     const reduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
-    el.scrollIntoView({
+    const targetTop =
+      el.getBoundingClientRect().top -
+      root.getBoundingClientRect().top +
+      root.scrollTop;
+    root.scrollTo({
+      top: targetTop,
       behavior: reduced ? "auto" : "smooth",
-      block: "start",
     });
   }, []);
 
