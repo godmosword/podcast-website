@@ -50,7 +50,7 @@ function Svg({ size = "100%", style, children }: ArtProps & { children: React.Re
 }
 
 /** 小紅賽車（莓紅，頭頂賽車尾翼） */
-export function PieceXiaoHong(props: ArtProps) {
+function PieceXiaoHong(props: ArtProps) {
   return (
     <Svg {...props}>
       <path d="M14 14l3-6h14l3 6" fill="#ff5c86" stroke="#e04568" strokeWidth="2" strokeLinejoin="round" />
@@ -61,7 +61,7 @@ export function PieceXiaoHong(props: ArtProps) {
 }
 
 /** 黃色計程車（檸檬黃，車頂 TAXI 燈） */
-export function PieceTaxi(props: ArtProps) {
+function PieceTaxi(props: ArtProps) {
   return (
     <Svg {...props}>
       <rect x="17" y="7" width="14" height="7" rx="3.5" fill="#fff" stroke="#d9a514" strokeWidth="2" />
@@ -72,7 +72,7 @@ export function PieceTaxi(props: ArtProps) {
 }
 
 /** 藍色小巴士（天空藍，高車頂雙窗） */
-export function PieceBus(props: ArtProps) {
+function PieceBus(props: ArtProps) {
   return (
     <Svg {...props}>
       <rect x="9" y="6" width="30" height="12" rx="5" fill="#6fc3f0" stroke="#3f93c4" strokeWidth="2" />
@@ -84,7 +84,7 @@ export function PieceBus(props: ArtProps) {
 }
 
 /** 鈴鈴清潔車（薄荷綠，頭頂掃把＋泡泡） */
-export function PieceLingLing(props: ArtProps) {
+function PieceLingLing(props: ArtProps) {
   return (
     <Svg {...props}>
       <rect x="22.6" y="5" width="2.8" height="9" rx="1.4" fill="#caa06a" />
@@ -97,7 +97,7 @@ export function PieceLingLing(props: ArtProps) {
 }
 
 /** 恐龍車多多（薰衣草紫，頭頂三根恐龍角板） */
-export function PieceDuoDuo(props: ArtProps) {
+function PieceDuoDuo(props: ArtProps) {
   return (
     <Svg {...props}>
       <path d="M12 14l4-7 4 7" fill="#b18ef5" stroke="#8f6ad4" strokeWidth="1.6" strokeLinejoin="round" />

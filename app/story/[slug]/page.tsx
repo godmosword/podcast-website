@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getStory, getRelated, getNextStory, stories } from "@/data/content";
+import { getStory, getRelated, getNextStory, getStories } from "@/data/content";
 import { podcastEpisodeJsonLd } from "@/lib/json-ld";
 import { lineShareUrl, storyLineShareText, storyShareUrl } from "@/lib/share-story";
 import { storyDetailMetadata } from "@/lib/story-metadata";
@@ -12,7 +12,6 @@ import PlayButton from "@/components/PlayButton";
 import ShareButton from "@/components/ShareButton";
 import RelatedStories from "@/components/RelatedStories";
 import ReflectionPrompt from "@/components/story/ReflectionPrompt";
-import { FEATURES } from "@/lib/features";
 import SubscriptionCTA from "@/components/SubscriptionCTA";
 import SiteFooter from "@/components/SiteFooter";
 import StoryImage from "@/components/StoryImage";
@@ -20,7 +19,7 @@ import StoryMeta, { StoryTags } from "@/components/StoryMeta";
 import styles from "./page.module.css";
 
 export function generateStaticParams() {
-  return stories.map((story) => ({ slug: story.slug }));
+  return getStories().map((story) => ({ slug: story.slug }));
 }
 
 export async function generateMetadata({
@@ -109,7 +108,7 @@ export default async function StoryDetailPage({
           </section>
         )}
 
-        {FEATURES.reflectionPrompt && story.reflectionPrompt && (
+        {story.reflectionPrompt && (
           <ReflectionPrompt
             slug={story.slug}
             child={story.reflectionPrompt.child}

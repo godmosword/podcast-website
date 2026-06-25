@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { isGameAssetsReady, preloadGameAssets } from "@/lib/gamekit/preload";
+import {
+  isGameAssetsReady,
+  preloadGameAssets,
+} from "@/lib/gamekit/runtime/preload";
 import type { GameKitGameId } from "@/lib/gamekit/types";
 
 export function useGameAssetPreload(gameId: GameKitGameId) {

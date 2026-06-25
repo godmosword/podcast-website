@@ -3,7 +3,7 @@
 import VehicleClayIcon from "./VehicleClayIcon";
 import FilterSelect, { type FilterSelectOption } from "./FilterSelect";
 
-export const ALL_VEHICLES_VALUE = "__all__";
+const ALL_VEHICLES_VALUE = "__all__";
 const ALL_LABEL = "全部車車";
 
 type VehicleSelectProps = {

@@ -12,11 +12,14 @@ import GameChrome, { GameChromeToolbar } from "@/components/games/GameChrome";
 import { CandyMatchBoard } from "@/components/games/CandyMatchBoard";
 import { DirtOverlay, PieceArt, PieceGift } from "@/components/games/CandyMatchPieceArt";
 import { IconReplay, IconSparkle, IconStar, IconTrophy } from "@/components/games/ClayIcons";
-import { useGameAudio } from "@/lib/game-kit";
+import { useGameAudio } from "@/lib/gamekit/react/useGameAudio";
 import { useGameKitSettings } from "@/hooks/useGameKitSettings";
-import { loadPlayerProfile } from "@/lib/gamekit/save";
-import { medalCount } from "@/lib/gamekit/meta";
-import { GAMEKIT_PROGRESS_EVENT, reportGameSession } from "@/lib/gamekit/session";
+import { loadPlayerProfile } from "@/lib/gamekit/progress/save";
+import { medalCount } from "@/lib/gamekit/progress/meta";
+import {
+  GAMEKIT_PROGRESS_EVENT,
+  reportGameSession,
+} from "@/lib/gamekit/progress/session";
 import {
   applyGravity,
   areAdjacent,

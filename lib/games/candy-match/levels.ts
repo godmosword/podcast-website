@@ -9,8 +9,6 @@ export const CANDY_MATCH_PIECES = [
   { id: "duo-duo", name: "多多", color: "#c9a8ff" },
 ] as const;
 
-export type CandyMatchPieceId = (typeof CANDY_MATCH_PIECES)[number]["id"];
-
 export type CandyMatchTask =
   | { kind: "clear-any"; count: number }
   | { kind: "collect"; piece: number; count: number }

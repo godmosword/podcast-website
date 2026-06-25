@@ -7,7 +7,7 @@ import { manualStories, type ManualStory } from "./stories";
 import { canonicalStorySlug } from "@/lib/story-slug-aliases";
 import { storyCoverPath } from "@/lib/story-utils";
 
-export type ContentBase = {
+type ContentBase = {
   slug: string;
   title: string;
   date: string;
@@ -35,22 +35,6 @@ export type Story = ContentBase & {
     parentFollowUp: string;
   };
 };
-
-export type CraftStep = { image: string; voiceLine: string };
-
-export type Craft = ContentBase & {
-  kind: "craft";
-  steps: CraftStep[];
-  materials?: string[];
-};
-
-export type Printable = ContentBase & {
-  kind: "printable";
-  pdfUrl: string;
-  pageCount?: number;
-};
-
-export type Content = Story | Craft | Printable;
 
 type RawStory = ManualStory;
 
@@ -113,17 +97,9 @@ const storyList: Story[] = sortByEp([
   ...(appleSynced as RawStory[]).map(enrichStory),
 ]);
 
-/** 所有內容聯集（目前僅故事；craft / printable 預留）。 */
-export function getAllContent(): Content[] {
-  return storyList;
-}
-
 export function getStories(): Story[] {
   return storyList;
 }
-
-/** @deprecated 請改用 getStories() */
-export const stories = storyList;
 
 export function getStory(slug: string): Story | undefined {
   const canonical = canonicalStorySlug(slug);

@@ -95,14 +95,16 @@ Landing Hero 由 `scripts/generate-landing-art.ts` 產生到 `public/.landing-st
 - `candy-match`：`components/games/CandyMatchGame.tsx`
 - `candy-kart`：`components/games/CandyKartIframeHost.tsx` 載入 `public/candy-kart/` 的 Godot Web export
 
-`components/games/GamePageShell.tsx` 提供遊戲頁共同的可及性、返回導覽與資產預載。遊戲 metadata 由 `data/games.ts` 提供，`lib/games/catalog.ts` 保留舊 `id` 欄位的相容層。
+`components/games/GamePageShell.tsx` 提供遊戲頁共同的可及性、返回導覽與資產預載。遊戲 metadata 的唯一來源是 `data/games.ts`。
 
-目前存在兩個名稱相近、責任不同的共用層：
+Game Kit 已收斂為單一、無 barrel 的明確分層：
 
-- `lib/game-kit/`：React hooks 與 UI 整合，例如 game loop、音效、最佳分數、觸控控制與可見性暫停。
-- `lib/gamekit/`：引擎層工具，例如型別、palette、renderer、存檔、經濟、能力、場景、iframe bridge 與 session 回報。
+- `lib/gamekit/react/`：React hooks、音效橋接、最佳分數、觸控控制與可見性暫停。
+- `lib/gamekit/runtime/`：固定步進 loop、輸入、像素渲染、調色盤、音訊與程序圖塊。
+- `lib/gamekit/progress/`：存檔 migration、設定、獎牌、車庫與 session 回報。
+- `lib/gamekit/games/`：大冒險關卡契約與 Candy Kart iframe bridge。
 
-React 遊戲直接從 `lib/game-kit/index.ts` 使用 hooks；底層引擎能力從 `lib/gamekit/index.ts` 或明確子模組匯入。Godot iframe 完成比賽後，`CandyKartIframeHost` 驗證同源訊息，再經 `lib/gamekit/iframe-bridge.ts` 與 `session.ts` 寫入統一進度。
+所有消費端直接匯入 leaf module。Godot iframe 完成比賽後，`CandyKartIframeHost` 驗證同源訊息，再經 `games/candy-kart-bridge.ts` 與 `progress/session.ts` 寫入既有進度 schema。
 
 ## Automation and verification
 
@@ -126,6 +128,10 @@ React 遊戲直接從 `lib/game-kit/index.ts` 使用 hooks；底層引擎能力�
 
 已移除的孤立模組：
 
+- `lib/game-kit/` 整個舊 React adapter 樹
+- `lib/gamekit/index.ts` barrel
+- 未出貨的 Game Kit state machine、scene、pool、abilities、tilemap、Tiled loader 與 sprite scaffolding
+- 停用的首頁 Continue/Starter 區塊與 Studio 假資料統計
 - `components/games/GamePixelBoard.tsx`
 - `components/games/GamePixelBoard.module.css`
 - `components/games/GameShell.tsx`
@@ -167,7 +173,6 @@ React 遊戲直接從 `lib/game-kit/index.ts` 使用 hooks；底層引擎能力�
 ## Remaining maintenance risks
 
 - `components/games/BlockDropGame.tsx` 超過 2,000 行，`CarPlatformer.tsx`、`StoryPlayer.tsx` 與 `CandyMatchGame.tsx` 也偏大；後續修改容易產生跨責任回歸，但本次不做無關重構。
-- `lib/game-kit/` 與 `lib/gamekit/` 名稱只差連字號，責任雖不同但容易誤匯入；未來若整併，應獨立規劃並以遊戲回歸測試保護。
 - `tsconfig.json` 尚未預設啟用 `noUnusedLocals` / `noUnusedParameters`，dead declarations 目前不會在一般 build 中阻擋。
 - Next.js metadata routes 與 GitHub Actions 腳本屬隱式入口；未來執行 automated dead-code 工具時，必須持續維護 entry-point allowlist。
 - 本地 backup/cursor 分支不是 worktree metadata，但仍占用 Git refs；應由維護者確認內容已備份或整合後再刪除。

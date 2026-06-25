@@ -1,8 +1,9 @@
 "use client";
 
 import type { CSSProperties, ReactNode } from "react";
-import type { GameKitGameId } from "@/lib/gamekit";
-import { colorsForGame, viewportFor } from "@/lib/gamekit";
+import type { GameKitGameId } from "@/lib/gamekit/types";
+import { viewportFor } from "@/lib/gamekit/runtime/constants";
+import { colorsForGame } from "@/lib/gamekit/runtime/palette";
 import {
   PixelGameSurfaceContext,
   usePixelGameSurface,

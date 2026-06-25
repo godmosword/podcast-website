@@ -252,7 +252,11 @@ scripts/
   subset_font.py 等     字型子集、圖示產生器
 lib/
   platforms.ts          收聽平台連結
-  gamekit/              四款小遊戲共用 Game Kit（像素渲染、loop、輸入等；見 ART-BIBLE.md）
+  gamekit/
+    react/              React hooks 與觸控控制
+    runtime/            渲染、loop、輸入、音訊與程序圖塊
+    progress/           存檔、設定、獎牌與跨遊戲進度
+    games/              大冒險關卡與 Candy Kart bridge
   social.ts             社群連結
   feed.ts               RSS 產生
   site-url.ts           站點絕對網址

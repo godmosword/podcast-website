@@ -19,12 +19,3 @@ export function filterStories(
     return true;
   });
 }
-
-/** @deprecated 使用 filterStories */
-export function filterStoriesForVehicle(
-  stories: Story[],
-  vehicle: string | null,
-  featuredStorySlug?: string | null,
-): Story[] {
-  return filterStories(stories, { vehicle, tag: null, featuredStorySlug });
-}

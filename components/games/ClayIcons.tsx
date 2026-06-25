@@ -153,28 +153,6 @@ export function IconChevronRight({ size, color = "currentColor", style }: IconPr
   );
 }
 
-/** 點一下（手指漣漪）— 僅供非遊戲操作提示沿用 */
-export function IconTap({ size, color = "currentColor", style }: IconProps) {
-  return (
-    <Svg size={size} style={style}>
-      <circle cx="12" cy="14.5" r="3" fill={color} />
-      <path d="M7.5 9.5a6 6 0 0 1 9 0" {...stroke(color)} />
-      <path d="M4.8 6.8a9.5 9.5 0 0 1 14.4 0" {...stroke(color)} />
-    </Svg>
-  );
-}
-
-/** 左右拖曳 */
-export function IconSwipeLR({ size, color = "currentColor", style }: IconProps) {
-  return (
-    <Svg size={size} style={style}>
-      <path d="M4.5 12h15" {...stroke(color)} />
-      <path d="M8 8l-4 4 4 4" {...stroke(color)} />
-      <path d="M16 8l4 4-4 4" {...stroke(color)} />
-    </Svg>
-  );
-}
-
 /** 下滑 */
 export function IconSwipeDown({ size, color = "currentColor", style }: IconProps) {
   return (

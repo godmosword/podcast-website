@@ -6,7 +6,7 @@ import Wheel from "@/components/decor/Wheel";
 import decor from "@/components/decor/decor.module.css";
 import GameThumbArt from "@/components/games/GameThumbArt";
 import PlaygroundHubBadge from "@/components/games/PlaygroundHubBadge";
-import { GAMES, gamesByAgeBand, type GameMeta } from "@/data/games";
+import { GAMES, type GameMeta } from "@/data/games";
 import { getSiteUrl } from "@/lib/site-url";
 import styles from "./page.module.css";
 
@@ -79,8 +79,6 @@ function GameCard({ game, index }: { game: GameMeta; index: number }) {
 }
 
 export default function GamesHubPage() {
-  const challengeGames = gamesByAgeBand("challenge");
-
   return (
     <main className={styles.main} aria-label="車車遊樂園小遊戲">
       <Link href="/" className={styles.back}>
@@ -138,35 +136,18 @@ export default function GamesHubPage() {
         </ul>
       </header>
 
-      <section className={styles.zone} aria-labelledby="games-explore">
-        <h2 id="games-explore" className={styles.zoneTitle}>
-          🧸 3–6 歲探索區
-        </h2>
-        <div className={styles.placeholderCard}>
-          <span className={styles.placeholderEmoji} aria-hidden>
-            🛝
-          </span>
-          <p className={styles.placeholderTitle}>探索遊戲製作中</p>
-          <p className={styles.placeholderCopy}>
-            適合小小孩的溫柔小遊戲，陸續加入中
-          </p>
-        </div>
-      </section>
-
-      <section className={styles.zone} aria-labelledby="games-challenge">
-        <h2 id="games-challenge" className={styles.zoneTitle}>
-          🏁 6–12 歲挑戰區
+      <section className={styles.zone} aria-labelledby="games-available">
+        <h2 id="games-available" className={styles.zoneTitle}>
+          現在就能玩
         </h2>
         <ul className={styles.grid}>
-          {challengeGames.map((game, index) => (
+          {GAMES.map((game, index) => (
             <GameCard key={game.slug} game={game} index={index} />
           ))}
         </ul>
       </section>
 
-      <p className={styles.footerNote}>
-        更多車車小遊戲陸續加入中 🎡
-      </p>
+      <p className={styles.footerNote}>挑一款喜歡的車車遊戲開始玩 🎡</p>
     </main>
   );
 }

@@ -3,7 +3,7 @@
 import FilterSelect, { type FilterSelectOption } from "./FilterSelect";
 import TopicIcon from "./TopicIcon";
 
-export const ALL_TOPICS_VALUE = "__all__";
+const ALL_TOPICS_VALUE = "__all__";
 const ALL_LABEL = "全部主題";
 
 type TopicSelectProps = {

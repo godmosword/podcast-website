@@ -81,9 +81,9 @@ export interface StoryMeta {
 }
 
 // ── 路徑 ────────────────────────────────────────────────
-export const SCENES_DIR = join(ROOT, "data", "scenes");
-export const STAGING_DIR = join(ROOT, "public", ".illustrate-staging");
-export const CHARACTERS_DIR = join(ROOT, "public", "characters");
+const SCENES_DIR = join(ROOT, "data", "scenes");
+const STAGING_DIR = join(ROOT, "public", ".illustrate-staging");
+const CHARACTERS_DIR = join(ROOT, "public", "characters");
 const CHARACTERS_PATH = join(ROOT, "data", "characters.json");
 const DEFAULTS_PATH = join(ROOT, "data", "apple-sync.defaults.json");
 const SYNCED_PATH = join(ROOT, "data", "apple-synced.json");
@@ -94,7 +94,7 @@ export function scenesSidecarPath(slug: string): string {
 export function stagingDirForSlug(slug: string): string {
   return join(STAGING_DIR, slug);
 }
-export function publicDirForSlug(slug: string): string {
+function publicDirForSlug(slug: string): string {
   return join(STORIES_DIR, slug);
 }
 function pad2(n: number): string {
@@ -245,7 +245,7 @@ function buildScenes(
 }
 
 /** 第一幕固定保留 Apple 封面 01.jpg，全幕生圖時不覆寫。 */
-export function ensureFirstSceneKeepsCover(scenes: Scene[]): Scene[] {
+function ensureFirstSceneKeepsCover(scenes: Scene[]): Scene[] {
   if (scenes.length === 0) return scenes;
   const [first, ...rest] = scenes;
   if (first.index !== 1) return scenes;
@@ -260,7 +260,7 @@ function sceneDialogue(subs: Subtitle[], start: number, end: number): string {
     .trim();
 }
 
-export function readSubtitlesForSlug(slug: string): Subtitle[] | null {
+function readSubtitlesForSlug(slug: string): Subtitle[] | null {
   const path = subtitleSidecarPath(slug);
   if (!existsSync(path)) return null;
   try {
@@ -276,7 +276,7 @@ export function readSubtitlesForSlug(slug: string): Subtitle[] | null {
 }
 
 /** 每幕字幕（無側車檔時的 fallback）：場景 summary，避免整段合併台詞過長。 */
-export function buildSceneCaptions(
+function buildSceneCaptions(
   scenes: Scene[],
   subs: Subtitle[] | null,
 ): string[] {
@@ -346,7 +346,7 @@ const SegmentSchema = z.object({
     .default([]),
 });
 
-export function getTextModel(): string {
+function getTextModel(): string {
   return process.env.OPENAI_TEXT_MODEL ?? "gpt-4o";
 }
 export function getImageModel(): string {

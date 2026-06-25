@@ -1,4 +1,7 @@
-import { createEmptyEconomy, migrateV2ToV3 } from "@/lib/gamekit/economy";
+import {
+  createEmptyEconomy,
+  migrateV2ToV3,
+} from "@/lib/gamekit/progress/economy";
 import type { GameKitGameId } from "@/lib/gamekit/types";
 import type { PlayerProfile } from "@/lib/gamekit/types";
 import { canonicalStorySlug } from "@/lib/story-slug-aliases";
@@ -6,7 +9,7 @@ import { normalizeThemeMode, type ThemeMode } from "@/lib/theme";
 
 export const PROGRESS_STORAGE_KEY = "cheche:progress";
 export const PROGRESS_CHANGE_EVENT = "cheche:progress-change";
-export const PROGRESS_SCHEMA_VERSION = 2;
+const PROGRESS_SCHEMA_VERSION = 2;
 
 export type CaptionSize = "sm" | "md" | "lg";
 export type ThemePreference = ThemeMode;
@@ -27,7 +30,7 @@ export type ContinueState = {
   updatedAt: number;
 };
 
-export type EngagementStore = {
+type EngagementStore = {
   storiesCompleted: string[];
   reflectionShown: string[];
   platformClicks: Record<string, number>;
@@ -350,13 +353,6 @@ export async function getProgress(): Promise<ProgressStore> {
 
 export function getProgressSync(): ProgressStore {
   return readProgress();
-}
-
-export async function setProgress(
-  patch: Partial<ProgressStore>,
-): Promise<ProgressStore> {
-  const current = readProgress();
-  return writeProgress({ ...current, ...patch });
 }
 
 export async function updateProgress(

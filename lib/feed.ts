@@ -4,7 +4,7 @@ import { storyDescription } from "@/lib/story-metadata";
 import { getSiteUrl } from "@/lib/site-url";
 import { storyAudioPath, storyCoverPath } from "@/lib/story-utils";
 
-export const SITE_RSS_PATH = "/feed.xml";
+const SITE_RSS_PATH = "/feed.xml";
 
 export function siteRssUrl(): string {
   return `${getSiteUrl()}${SITE_RSS_PATH}`;

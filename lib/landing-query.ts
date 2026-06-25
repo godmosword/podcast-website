@@ -10,8 +10,8 @@ import {
   LANDING_SEGMENTS,
 } from "@/data/landing-segments";
 
-export type LandingStoryItem = { kind: "story"; story: Story };
-export type LandingExternalItem = {
+type LandingStoryItem = { kind: "story"; story: Story };
+type LandingExternalItem = {
   kind: "external";
   title: string;
   subtitle?: string;
@@ -19,7 +19,7 @@ export type LandingExternalItem = {
   image: string;
   external: boolean;
 };
-export type LandingGameItem = {
+type LandingGameItem = {
   kind: "game";
   title: string;
   subtitle: string;
@@ -27,7 +27,7 @@ export type LandingGameItem = {
   image: string;
 };
 
-export type LandingCarouselItem =
+type LandingCarouselItem =
   | LandingStoryItem
   | LandingExternalItem
   | LandingGameItem;

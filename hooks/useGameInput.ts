@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { InputManager } from "@/lib/gamekit/input";
+import { InputManager } from "@/lib/gamekit/runtime/input";
 import type { GameAction } from "@/lib/gamekit/types";
 
 export type GameInputSnapshot = {

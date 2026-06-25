@@ -1,4 +1,4 @@
-import type { AdventureLevelJson } from "@/lib/gamekit/adventure-level";
+import type { AdventureLevelJson } from "@/lib/gamekit/games/adventure-level";
 
 /**
  * 共用關卡建造器。所有地面缺口維持 3 格（與第 1 關相同、已驗證可跳過），
@@ -55,7 +55,7 @@ function levelBuilder() {
 }
 
 /** 關卡 1：草原出發（入門，原硬編關卡）。 */
-export function buildLevel01Json(): AdventureLevelJson {
+function buildLevel01Json(): AdventureLevelJson {
   const b = levelBuilder();
   b.ground(0, 13);
   b.ground(17, 29);
@@ -94,7 +94,7 @@ export function buildLevel01Json(): AdventureLevelJson {
 }
 
 /** 關卡 2：彩虹捷徑（補足長度與難度，使其高於第 1 關）。 */
-export function buildLevel02Json(): AdventureLevelJson {
+function buildLevel02Json(): AdventureLevelJson {
   const b = levelBuilder();
   b.ground(0, 13);
   b.ground(17, 30);
@@ -130,7 +130,7 @@ export function buildLevel02Json(): AdventureLevelJson {
 }
 
 /** 關卡 3：高低起伏（更多平台與尖刺）。 */
-export function buildLevel03Json(): AdventureLevelJson {
+function buildLevel03Json(): AdventureLevelJson {
   const b = levelBuilder();
   b.ground(0, 12);
   b.ground(16, 28);
@@ -172,7 +172,7 @@ export function buildLevel03Json(): AdventureLevelJson {
 }
 
 /** 關卡 4：尖刺迷宮（尖刺密度提高）。 */
-export function buildLevel04Json(): AdventureLevelJson {
+function buildLevel04Json(): AdventureLevelJson {
   const b = levelBuilder();
   b.ground(0, 12);
   b.ground(16, 26);
@@ -220,7 +220,7 @@ export function buildLevel04Json(): AdventureLevelJson {
 }
 
 /** 關卡 5：空中走廊（長度與敵人再升級）。 */
-export function buildLevel05Json(): AdventureLevelJson {
+function buildLevel05Json(): AdventureLevelJson {
   const b = levelBuilder();
   b.ground(0, 12);
   b.ground(16, 26);
@@ -274,7 +274,7 @@ export function buildLevel05Json(): AdventureLevelJson {
 }
 
 /** 關卡 6：終極大冒險（最長、最多障礙的收尾關）。 */
-export function buildLevel06Json(): AdventureLevelJson {
+function buildLevel06Json(): AdventureLevelJson {
   const b = levelBuilder();
   b.ground(0, 12);
   b.ground(16, 26);

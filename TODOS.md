@@ -195,7 +195,7 @@ Vercel 設 `NEXT_PUBLIC_SITE_URL=https://正式網域`。OG／Twitter／RSS／si
 更新 `DESIGN.md`：`--ink-soft` → `#7a7268`、背景改 `.site-backdrop` + `.site-root`、StoryFilter 塗鴉現況。**待補：** viewport 段落改為「已開放縮放」（實作見 `app/layout.tsx`）。設計文件漂移時改版易回到舊 token。實作見 `app/globals.css`。
 
 ### ~~首屏價值主張與資訊架構精簡~~　`P0 · S–M · 無`　〔design+ceo〕 ✅
-新訪客需 3 秒內懂「這不是一般 podcast 嵌入頁，是互動繪本」。**已做：** 標頭三行 tagline + 合作/許願/留言圓鈕（見 Completed）。**剩餘：** 檢視區塊順序（Header → ContinueBanner → LatestHero → FavoritesSection → StoryFilter），避免「最新集」與列表長期重複同一集；副標清楚傳達「給誰聽、睡前幾分鐘」。
+新訪客需 3 秒內懂「這不是一般 podcast 嵌入頁，是互動繪本」。**已做：** 標頭三行 tagline + 合作/許願/留言圓鈕（見 Completed）。**剩餘：** 檢視區塊順序（Header → LatestHero → FavoritesSection → StoryFilter），避免「最新集」與列表長期重複同一集；副標清楚傳達「給誰聽、睡前幾分鐘」。
 
 ---
 
@@ -220,7 +220,7 @@ Vercel 設 `NEXT_PUBLIC_SITE_URL=https://正式網域`。OG／Twitter／RSS／si
 首頁加「第一次來？從這三集開始」精選區（`data/stories.ts` 標 `featured` 或手動 slug 列表）；最新集 Hero 旁補「本週更新」節奏文案。降低新聽眾選擇成本、建立訂閱期待。
 
 ### 首頁／篩選空狀態插畫化　`P1 · M · 素材`　〔design〕
-為「載入中／篩選無結果／尚無收藏／尚無繼續收聽」設計吉祥物 + 一句話 + 明確下一步（換車種、聽最新一集）。純文字空狀態在兒童產品像工程預設。`app/page.tsx`、`StoryFilter`、`FavoritesSection`、`ContinueBanner`。
+為「載入中／篩選無結果／尚無收藏」設計吉祥物 + 一句話 + 明確下一步（換車種、聽最新一集）。純文字空狀態在兒童產品像工程預設。`app/page.tsx`、`StoryFilter`、`FavoritesSection`。
 
 ### 首頁錨點導覽（取代手機 sticky 篩選）　`P1 · S–M · 無`　〔design〕
 長列表加頁內錨點／捷徑列（最新｜全部故事｜依車車）。iOS 上 StoryFilter 已改 `position: static` 避免合成破圖，犧牲吸頂；錨點補「找得到篩選」而不復活 sticky。集數 >15 優先度提高。
@@ -306,32 +306,16 @@ repo secret 存 `LINE_NOTIFY_TOKEN` 或 `DISCORD_WEBHOOK_URL`；同步偵測新�
 ### 生圖佇列 `data/illustration-queue.json`　`P3 · S · 通知基建`　〔eng+ops〕
 `sync-apple-podcast.ts` 新集寫入 `{ slug, ep, syncedAt, subtitleReady, status: awaiting-illustrate }`；`illustrate --approve` 改 `approved` 或移除。Issue／webhook／未來 Studio 儀表板共用單一真相來源。
 
-### ~~Game Kit Phase 0 — 方向與技術定錨~~　`P3 · M · 無`　〔eng+design+research〕 ✅
-`lib/gamekit/` 九大模組骨架（renderer/loop/input/style/sprite/tilemap/juice/save/meta/scene/audio）、32 色盤、四款 viewport 定錨、[ART-BIBLE.md](./lib/gamekit/ART-BIBLE.md)、`PixelGameCanvas` + `usePixelRenderer`/`usePixelGameSurface`、`lib/gamekit/gamekit.test.ts`。**Phase 1 待做**：四款 canvas 遊戲遷移 pixel 管線。
+### Game Kit 歷史路線（Phase 0–8） ✅
 
-### ~~Game Kit Phase 1 — 渲染管線＋設計系統套用四款~~　`P3 · L · Phase 0 ✅`　〔eng+design〕 ✅
-四款接入 Game Kit：`PixelGameCanvas`（car-adventure）、`GamePixelBoard`（block-drop）；kart／pirate-kart 為 iframe／獨立頁。內部解析度定錨、整數倍放大、`lib/gamekit/bridge` 調色盤、點陣 HUD（大冒險）。
+Phase 0–8 的探索已完成並在 2026-06-25 收斂。現行架構只保留四款已出貨遊戲真正使用的能力：
 
-### ~~Game Kit Phase 2 — sprite sheet／tileset 佔位美術~~　`P3 · L · Phase 1 ✅`　〔eng+design〕 ✅
-程序生成 16×16 sheet（`procedural-sheets`／`assets`／`sprite-defs`／`tileset-draw`）；canon 接入：car-adventure 草地磚／金幣／尖刺 tile、block-drop 七色方塊 tile。（**已移除** car-mission／car-star 專用 sheet）
+- `lib/gamekit/react/`：React hooks 與觸控控制
+- `lib/gamekit/runtime/`：loop、輸入、渲染、音訊、juice、程序圖塊
+- `lib/gamekit/progress/`：設定、存檔 migration、獎牌與 session
+- `lib/gamekit/games/`：大冒險關卡與 Candy Kart bridge
 
-### ~~Game Kit Phase 3 — chiptune BGM／SFX 混音~~　`P3 · L · Phase 2 ✅`　〔eng+design〕 ✅
-`lib/gamekit/chiptune-bgm` 四款程序生成循環 BGM；`GameKitAudioBus` music／sfx 分軌；擴充 `useGameAudio(gameId)`（`playBgm`／`pauseBgm`／`stopBgm`）；四款遊戲接入，分頁隱藏暫停 BGM。
-
-### ~~Game Kit Phase 4 — juice＋手機操控~~　`P3 · L · Phase 3 ✅`　〔eng+design〕 ✅
-`lib/gamekit/juice` 粒子／震動／頓幀／緩動；四款接入 juice；`useCoarsePointer`／`useSwipeGesture`／`mobile-controls` 手機大按鈕＋滑動手勢。
-
-### ~~Game Kit Phase 5 — Tiled／JSON 關卡 loader~~　`P3 · L · Phase 4 ✅`　〔eng〕 ✅
-`adventure-level`／`tiled-loader`；car-adventure 2 關 JSON + 關卡選擇。
-
-### ~~Game Kit Phase 6 — 跨遊戲 meta~~　`P3 · L · Phase 5 ✅`　〔eng+design〕 ✅
-`session`／`garage`／`stickers`、存檔 v2（`cheche:gamekit-profile`）與舊 best 遷移；`/games` 世界地圖 hub（`GamesWorldMap`、車庫、貼紙簿）；四款 `reportGameSession`。
-
-### ~~Game Kit Phase 7 — 外框／a11y／兒童模式~~　`P3 · L · Phase 6 ✅`　〔eng+design〕 ✅
-`GameChrome`（暫停選單、設定、工具列）、`GamePageShell`（跳過連結、回遊樂園）、`useGameInput` Gamepad、`settings` 兒童模式預設；四款接入。**Phase 8 待做**：效能 QA。
-
-### ~~Game Kit Phase 8 — 效能 QA~~　`P3 · L · Phase 7 ✅`　〔eng〕 ✅
-`ObjectPool`、`preload`／`GameLoadingGate`、`useGameLoop` 固定步進＋插值（car-adventure）、hub 預載、`/games` layout a11y。**Game Kit 八階段路線完成**。
+舊 Phase scaffolding（state machine、scene、pool、abilities、tilemap、Tiled loader、sprite adapter）已移除。歷史變更見 [CHANGELOG.md](./CHANGELOG.md)，現行規範見 [ART-BIBLE.md](./lib/gamekit/ART-BIBLE.md)。
 
 ### ~~車車卡丁車 Kart P0 — Scaffold~~　`P3 · M · 無`　〔eng〕 ✅
 `kart-game/`（Vite+TS+Three）：固定步進、kinematic 方塊車、spline 練習道、跟隨相機、HUD；`npm run build:kart` → `public/kart/`；`/games/kart` iframe 嵌入。
@@ -369,37 +353,23 @@ Tiled 關卡管線、6–10 關+世界地圖、檢查點、多敵人類型、視
 
 像素完美 60fps · 統一調色盤/點陣字 · 多態精靈 · BGM+SFX+混音 · juice · 完整外框 · 三星/解鎖/存檔 · 鍵盤+觸控+手把 · a11y · 工程品質（固定步進/池/預載）。
 
-### Game Kit 九大模組（`lib/gamekit/`）
+### Game Kit 現行四層（`lib/gamekit/`）
 
-| 模組 | 職責 |
+| 目錄 | 職責 |
 |------|------|
-| `renderer` | 固定內部解析度、整數倍放大 |
-| `sprite` + `tilemap` | 動畫、autotiling |
-| `style` | 32 色盤、點陣字、共用 UI |
-| `audio` | BGM/SFX/混音 |
-| `juice` | 粒子、震動、頓幀、tween |
-| `save` + `meta` | 存檔、星星經濟、成就 |
-| `input` | 鍵盤/觸控/Gamepad |
-| `scene` | title→play→result |
-| `loop` | 固定步進 + 插值 |
+| `react/` | hooks、觸控控制、最佳分數、可見性暫停 |
+| `runtime/` | 固定步進、輸入、像素渲染、音訊、juice、圖塊 |
+| `progress/` | 存檔、設定、獎牌、車庫、session |
+| `games/` | 遊戲專屬關卡與 iframe bridge |
 
 ### 四款對照（slug → 精進重點）
 
 | slug | 現況 | 內部解析度（建議） | 精進核心 |
 |------|------|-------------------|----------|
-| `car-adventure` | Game Kit 2 關 | 320×180 | Tiled 管線、6–10 關、boss ❄️ |
+| `car-adventure` | Game Kit 6 關 | 320×180 | 關卡內容、boss ❄️ |
 | `block-drop` | Game Kit 方塊 | 200×360 | 多模式、消行 juice ❄️ |
-| `kart` | iframe 3D | — | P1–P6 調校 ❄️ |
-| `pirate-kart` | 16-bit canvas | — | 內容擴充 ❄️ |
-
-### 八階段路線（相依序）
-
-```
-Phase 0 定錨 → 1 渲染+UI（起手式）→ 2 美術 → 3 音訊 → 4 juice
-→ 5 內容深度 → 6 元系統/hub → 7 外框/a11y → 8 效能 QA
-```
-
-**分款出貨建議（歷史）：** Phase 0–8 已完成於 canon 四款；精進項 ❄️ FROZEN。
+| `candy-match` | DOM/SVG 消除 | — | 關卡內容與任務變化 ❄️ |
+| `candy-kart` | Godot iframe | — | 操控與賽道調校 ❄️ |
 
 ### 跨遊戲 IP（Phase 6）
 
@@ -563,12 +533,12 @@ T+2d    社群貼文（B 戰場）
 `ThemeMode` 新增 `system`；預設改為跟隨 `prefers-color-scheme`；`THEME_INIT_SCRIPT` FOUC 防閃同步支援；`ThemeProvider` 監聽系統配色變更；首頁標語旁圖示循環系統→日間→夜晚；睡眠定時器夜晚提示改為固定 `night` 偏好。
 **Completed:** `cf50631`（2026-06）
 
-### 遊戲地基工程（星星帳本 × 能力表 × 結算插槽 × Kart 橋接）
-`economy` 帳本 v3、`VEHICLE_ABILITIES` + Tiled `breakable`/`ability-gate`/`secret`、`GameResultActions` + `goodnightButton`（預設關）、Kart `postMessage` 橋接；玩家可見行為零變更。ADR `docs/adr/0002-star-economy-ledger.md`。
+### 遊戲地基工程（星星帳本 × 結算插槽 × Kart 橋接）
+`economy` 帳本 v3、`GameResultActions` 與 Kart `postMessage` 橋接。未出貨的能力表、Tiled gate 與 goodnight flag 已在 2026-06-25 清除。ADR `docs/adr/0002-star-economy-ledger.md`。
 **Completed:** `3be429e` `8893952` `48643d6` `a606c89`（2026-06）
 
-### 架構重塑第一批（Feature Flags × 路由薄殼 × Home Registry）
-`lib/features.ts` 集中 flag；`data/home-sections.ts` registry 驅動首頁；pirate-kart 邏輯抽至 `lib/games/pirate-kart/*` + `PirateKartGame`；`reportGameSession` 接線；ADR `docs/adr/0001-shell-kernel-architecture.md`。
+### 架構重塑第一批（路由薄殼 × Home Registry）
+`data/home-sections.ts` registry 驅動首頁；遊戲邏輯與 `reportGameSession` 接線。未啟用的 feature flag framework 已在 2026-06-25 清除；ADR `docs/adr/0001-shell-kernel-architecture.md`。
 **Completed:** `dcceca1` `e280a6d` `ddeae8b`（2026-06）
 
 ### 移除故事頁插圖點按互動（tap-to-explore）
@@ -583,28 +553,8 @@ T+2d    社群貼文（B 戰場）
 主 CTA「▶ 看圖聽最新一集」+ 次 CTA「去遊樂園玩」；受眾定位句上移 SiteHeader；`[data-theme="night"]` token 覆寫 + `ThemeProvider` + FOUC inline script；車種 chips 橫滑單列 + fade；`app/motion.css`（`press-squash`／`pop-in`／`star-burst`／`gentle-float`）；睡眠計時器夜晚模式一次性提示。
 **Completed:** `c9fb4ab` `f89fbdd` `f273298` `1d53115` `e69c00d` `66cb4b7`（2026-06）
 
-### Game Kit Phase 5（Tiled／JSON 關卡 loader）
-`adventure-level`／`tiled-loader`；car-adventure 2 關 + 選關；car-star 3 迷宮。
-**Completed:** main（2026-06）
-
-### Game Kit Phase 4（juice＋手機操控）
-四款 juice（粒子／震動／頓幀）；`useSwipeGesture` 滑動換道／方向；粗指標大按鈕與 safe-area。
-**Completed:** main（2026-06）
-
-### Game Kit Phase 3（chiptune BGM／混音）
-四款程序生成循環 BGM、`GameKitAudioBus` 分軌、`useGameAudio` 擴充；block-drop／car-adventure 統一 hook；分頁隱藏暫停。
-**Completed:** main（2026-06）
-
-### Game Kit Phase 2（sprite sheet／tileset 佔位）
-`lib/gamekit/procedural-sheets` 程序生成 tile／卡車／螢火虫／方塊 sheet；`createKitSprite`／`drawKitTile`／`tileset-draw`；四款遊戲取代純色塊繪製。
-**Completed:** main（2026-06）
-
-### Game Kit Phase 1（四款 pixel 管線）
-`PixelGameCanvas`／`GamePixelBoard` 套用 car-adventure／block-drop；kart／pirate-kart 獨立載入。
-**Completed:** main（2026-06）
-
-### Game Kit Phase 0（`lib/gamekit` 骨架）
-九大模組、32 色主調色盤、四款 viewport 定錨、`PixelRenderer` 整數放大、`GameLoop` 固定步進、`InputManager`、`ART-BIBLE.md`、`PixelGameCanvas`／`usePixelGameSurface`、Vitest 單元測試。
+### Game Kit Phase 0–8 歷史
+完成像素渲染、固定步進、輸入、音訊、juice、進度與遊戲外框探索。2026-06-25 依正式使用情況收斂為 `react/`、`runtime/`、`progress/`、`games/` 四層，刪除未出貨 scaffolding；詳見 CHANGELOG 與 `lib/gamekit/ART-BIBLE.md`。
 **Completed:** main（2026-06）
 
 ### 每集分享鈕 + ConnectHub 訂閱優化

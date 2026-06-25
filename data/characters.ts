@@ -140,15 +140,9 @@ function toCharacter(entry: RawCharacter): Character {
   };
 }
 
-export const CHARACTERS: Character[] = (rawCharacters as RawCharacter[]).map(
+const CHARACTERS: Character[] = (rawCharacters as RawCharacter[]).map(
   toCharacter,
 );
-
-const byId = new Map(CHARACTERS.map((c) => [c.id, c]));
-
-export function getCharacter(id: string): Character | undefined {
-  return byId.get(id);
-}
 
 export function getCharactersForStory(slug: string): Character[] {
   const canonical = canonicalStorySlug(slug);

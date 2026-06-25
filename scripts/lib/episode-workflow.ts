@@ -23,7 +23,7 @@ export const LEGACY_PLACEHOLDER_SLUGS = [
   "ep-6",
 ] as const;
 
-export type WorkflowIssueLevel = "error" | "warn";
+type WorkflowIssueLevel = "error" | "warn";
 
 export type WorkflowIssue = {
   slug: string;
@@ -40,22 +40,22 @@ export type WorkflowProbes = {
   sceneCount: (slug: string) => number;
 };
 
-export function illustrationJpgCount(slug: string): number {
+function illustrationJpgCount(slug: string): number {
   const dir = join(STORIES_DIR, slug);
   if (!existsSync(dir)) return 0;
   return readdirSync(dir).filter((f) => /^\d+\.jpg$/.test(f)).length;
 }
 
-export function hasSubtitlesSidecar(slug: string): boolean {
+function hasSubtitlesSidecar(slug: string): boolean {
   return existsSync(subtitleSidecarPath(slug));
 }
 
-export function hasScenesSidecar(slug: string): boolean {
+function hasScenesSidecar(slug: string): boolean {
   return existsSync(scenesSidecarPath(slug));
 }
 
 /** scenes 側車的幕數；檔案缺失或格式不符回傳 0。 */
-export function scenesSidecarCount(slug: string): number {
+function scenesSidecarCount(slug: string): number {
   const p = scenesSidecarPath(slug);
   if (!existsSync(p)) return 0;
   try {
@@ -73,7 +73,7 @@ export function scenesSidecarCount(slug: string): number {
   }
 }
 
-export const defaultWorkflowProbes: WorkflowProbes = {
+const defaultWorkflowProbes: WorkflowProbes = {
   hasSubtitles: hasSubtitlesSidecar,
   hasScenes: hasScenesSidecar,
   imageCount: illustrationJpgCount,
@@ -150,7 +150,7 @@ export function verifyIllustratedEpisode(
 }
 
 /** MVP 單圖集（GHA 同步後）：最低條件 + 永遠標出「待生圖」狀態，不靜默。 */
-export function verifyMvpEpisode(
+function verifyMvpEpisode(
   story: Story,
   probes: WorkflowProbes = defaultWorkflowProbes,
 ): WorkflowIssue[] {
@@ -240,15 +240,3 @@ export function formatWorkflowReport(issues: WorkflowIssue[]): string {
   lines.push(`錯誤 ${errors.length}、警告 ${warns.length}`);
   return lines.join("\n");
 }
-
-export const ILLUSTRATE_WORKFLOW_STEPS = [
-  "npm run transcribe -- <slug>  # 若 sync 未轉錄",
-  "npm run proofread:subtitles -- <slug> [--fix] → 人工修 JSON → --mark  # 見 docs/SUBTITLE-PROOFREAD.md",
-  "npm run illustrate -- <slug> --segment-only  # 審 data/scenes/<slug>.json",
-  "npm run illustrate -- <slug>                 # 生圖 → staging + contact.html",
-  "審 public/.illustrate-staging/<slug>/contact.html",
-  "npm run illustrate -- <slug> --approve       # public + pageCount/captionTimes/captions",
-  "npm run verify:episodes                      # 對照 ep-9／ep-10 標準",
-  "npm run sync:apple && npm run build",
-  "commit：public/stories/、scenes/、subtitles/、subtitles/_proofread/、synced/defaults、characters",
-] as const;

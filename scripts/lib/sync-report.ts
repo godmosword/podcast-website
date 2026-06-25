@@ -1,8 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 
-export type SubtitleStatus = "created" | "exists" | "missing";
-
 export type SyncRunReport = {
   runAt: string;
   dryRun: boolean;

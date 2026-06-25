@@ -10,12 +10,12 @@ export const THEME_ATTRIBUTE = "data-theme";
 export const NIGHT_THEME: ThemePreference = "night";
 export const LIGHT_THEME: ThemePreference = "light";
 export const SYSTEM_THEME_MODE: ThemeMode = "system";
-export const NIGHT_THEME_COLOR = "#1c2440";
-export const LIGHT_THEME_COLOR = "#ffffff";
+const NIGHT_THEME_COLOR = "#1c2440";
+const LIGHT_THEME_COLOR = "#ffffff";
 
 const DARK_SCHEME_QUERY = "(prefers-color-scheme: dark)";
 
-export function prefersDarkColorScheme(): boolean {
+function prefersDarkColorScheme(): boolean {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
     return false;
   }
@@ -33,11 +33,11 @@ export function resolveThemeFromMode(mode: ThemeMode): ThemePreference {
 /** Blocking inline script — runs before paint to avoid FOUC. */
 export const THEME_INIT_SCRIPT = `(function(){try{var r=localStorage.getItem("${PROGRESS_STORAGE_KEY}");var m="system";if(r){var p=JSON.parse(r);m=(p.preferences&&p.preferences.theme)||"system";}var dark=false;if(m==="night"){dark=true;}else if(m==="system"){dark=window.matchMedia&&window.matchMedia("${DARK_SCHEME_QUERY}").matches;}if(dark){document.documentElement.setAttribute("${THEME_ATTRIBUTE}","night");}}catch(e){}})();`;
 
-export function isThemeMode(value: unknown): value is ThemeMode {
+function isThemeMode(value: unknown): value is ThemeMode {
   return value === "light" || value === "night" || value === SYSTEM_THEME_MODE;
 }
 
-export function isThemePreference(value: unknown): value is ThemePreference {
+function isThemePreference(value: unknown): value is ThemePreference {
   return value === "light" || value === "night";
 }
 
@@ -66,14 +66,7 @@ export function applyThemeToDocument(theme: ThemePreference): void {
   updateThemeColorMeta(theme);
 }
 
-export function readThemeFromDocument(): ThemePreference {
-  if (typeof document === "undefined") return LIGHT_THEME;
-  return document.documentElement.getAttribute(THEME_ATTRIBUTE) === NIGHT_THEME
-    ? NIGHT_THEME
-    : LIGHT_THEME;
-}
-
-export function updateThemeColorMeta(theme: ThemePreference): void {
+function updateThemeColorMeta(theme: ThemePreference): void {
   if (typeof document === "undefined") return;
   const color = theme === NIGHT_THEME ? NIGHT_THEME_COLOR : LIGHT_THEME_COLOR;
   let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');

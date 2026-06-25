@@ -12,15 +12,13 @@ import {
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useDomJuice } from "@/hooks/useDomJuice";
-import {
-  useBestScore,
-  useGameAudio,
-  useGameLoop,
-  useTouchControls,
-  useVisibilityPause,
-} from "@/lib/game-kit";
-import { reportGameSession } from "@/lib/gamekit/session";
-import type { BlockDropDifficulty } from "@/lib/gamekit/settings";
+import { useBestScore } from "@/lib/gamekit/react/useBestScore";
+import { useGameAudio } from "@/lib/gamekit/react/useGameAudio";
+import { useGameLoop } from "@/lib/gamekit/react/useGameLoop";
+import { useTouchControls } from "@/lib/gamekit/react/useTouchControls";
+import { useVisibilityPause } from "@/lib/gamekit/react/useVisibilityPause";
+import { reportGameSession } from "@/lib/gamekit/progress/session";
+import type { BlockDropDifficulty } from "@/lib/gamekit/progress/settings";
 import GameChrome, { GameChromeToolbar } from "@/components/games/GameChrome";
 import { GameResultActions } from "@/components/games/GameResultActions";
 import { useGameKitSettings } from "@/hooks/useGameKitSettings";

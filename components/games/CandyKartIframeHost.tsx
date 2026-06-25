@@ -5,8 +5,8 @@ import {
   candyKartSessionFromFinish,
   isCandyKartFinishMessage,
   isCandyKartReadyMessage,
-} from "@/lib/gamekit/iframe-bridge";
-import { reportGameSession } from "@/lib/gamekit/session";
+} from "@/lib/gamekit/games/candy-kart-bridge";
+import { reportGameSession } from "@/lib/gamekit/progress/session";
 import { IconReplay } from "@/components/games/ClayIcons";
 import styles from "./CandyKartIframeHost.module.css";
 

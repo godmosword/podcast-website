@@ -10,32 +10,32 @@ import {
 } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
-import { JuiceController } from "@/lib/gamekit/juice";
+import { JuiceController } from "@/lib/gamekit/runtime/juice";
 import {
   BarTouchButton,
   touchControlStyles,
-  useBestScore,
-  useFixedGameLoop,
-  useGameAudio,
-  useTouchControls,
-  useVisibilityPause,
-} from "@/lib/game-kit";
+} from "@/lib/gamekit/react/TouchControls";
+import { useBestScore } from "@/lib/gamekit/react/useBestScore";
+import { useFixedGameLoop } from "@/lib/gamekit/react/useFixedGameLoop";
+import { useGameAudio } from "@/lib/gamekit/react/useGameAudio";
+import { useTouchControls } from "@/lib/gamekit/react/useTouchControls";
+import { useVisibilityPause } from "@/lib/gamekit/react/useVisibilityPause";
 import PixelGameCanvas, {
   usePixelGameSurface,
 } from "@/components/games/PixelGameCanvas";
 import { GameResultActions } from "@/components/games/GameResultActions";
-import { drawPixelText } from "@/lib/gamekit/style";
+import { drawPixelText } from "@/lib/gamekit/runtime/style";
 import {
   drawAdventureCoin,
   drawAdventureGroundTile,
   drawAdventureSpike,
-} from "@/lib/gamekit/tileset-draw";
+} from "@/lib/gamekit/runtime/tileset-draw";
 import {
   levelFromJson,
   type AdventureLevel,
-} from "@/lib/gamekit/adventure-level";
+} from "@/lib/gamekit/games/adventure-level";
 import { CAR_ADVENTURE_LEVELS } from "@/lib/games/car-adventure/levels";
-import { reportGameSession } from "@/lib/gamekit/session";
+import { reportGameSession } from "@/lib/gamekit/progress/session";
 import GameChrome, { GameChromeToolbar } from "@/components/games/GameChrome";
 import { useGameKitSettings } from "@/hooks/useGameKitSettings";
 

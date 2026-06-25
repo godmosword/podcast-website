@@ -4,7 +4,7 @@
  * parTimeMs（時間達標）與 starsTotal 供父頁計算三星獎牌。
  */
 
-export type CandyKartTrackId =
+type CandyKartTrackId =
   | "macaron-meadow"
   | "candy-beach"
   | "jelly-forest"
@@ -38,7 +38,7 @@ export function candyKartTrackById(id: string): CandyKartTrack | null {
 }
 
 /** 大獎賽積分（名次 1–8）。 */
-export const CANDY_KART_GRAND_PRIX_POINTS = [10, 8, 6, 5, 4, 3, 2, 1] as const;
+const CANDY_KART_GRAND_PRIX_POINTS = [10, 8, 6, 5, 4, 3, 2, 1] as const;
 
 export function grandPrixPointsForPosition(playerPos: number): number {
   if (!Number.isInteger(playerPos) || playerPos < 1) return 0;

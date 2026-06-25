@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getStory, getNextStory, stories } from "@/data/content";
+import { getStory, getNextStory, getStories } from "@/data/content";
 import { storyPlayMetadata } from "@/lib/story-metadata";
 import { getSubtitles } from "@/lib/subtitles";
 import { pad2, storyAudioPath, storyCoverPath } from "@/lib/story-utils";
 import StoryPlayer from "@/components/StoryPlayer";
-import { FEATURES } from "@/lib/features";
 
 export function generateStaticParams() {
-  return stories.map((story) => ({ slug: story.slug }));
+  return getStories().map((story) => ({ slug: story.slug }));
 }
 
 export async function generateMetadata({
@@ -66,9 +65,7 @@ export default async function StoryPlayPage({
       backHref={`/story/${story.slug}`}
       nextStorySlug={nextStory?.slug}
       nextStoryTitle={nextStory?.title}
-      reflectionPrompt={
-        FEATURES.reflectionPrompt ? story.reflectionPrompt : undefined
-      }
+      reflectionPrompt={story.reflectionPrompt}
     />
   );
 }

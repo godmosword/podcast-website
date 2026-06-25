@@ -1,4 +1,4 @@
-export type AgeBand = "explore" | "challenge";
+type AgeBand = "explore" | "challenge";
 
 export type GameMeta = {
   slug: string;
@@ -68,7 +68,3 @@ export const GAMES: GameMeta[] = [
     hasTimer: true,
   },
 ];
-
-export function gamesByAgeBand(band: AgeBand): GameMeta[] {
-  return GAMES.filter((g) => g.ageBand === band);
-}

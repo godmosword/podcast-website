@@ -7,11 +7,9 @@ import {
   useEffect,
   useRef,
 } from "react";
-import {
-  PixelRenderer,
-  viewportFor,
-  type GameKitGameId,
-} from "@/lib/gamekit";
+import type { GameKitGameId } from "@/lib/gamekit/types";
+import { viewportFor } from "@/lib/gamekit/runtime/constants";
+import { PixelRenderer } from "@/lib/gamekit/runtime/renderer";
 
 export type UsePixelRendererOptions = {
   background?: string;

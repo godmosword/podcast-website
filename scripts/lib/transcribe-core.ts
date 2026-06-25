@@ -26,10 +26,10 @@ type Subtitle = { t: number; text: string };
 const toTraditional = OpenCC.Converter({ from: "cn", to: "twp" });
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
-export const SUBTITLES_DIR = join(ROOT, "data", "subtitles");
+const SUBTITLES_DIR = join(ROOT, "data", "subtitles");
 export const STORIES_DIR = join(ROOT, "public", "stories");
 
-export function audioPathForSlug(slug: string): string {
+function audioPathForSlug(slug: string): string {
   return join(STORIES_DIR, slug, "audio.mp3");
 }
 

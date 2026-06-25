@@ -1,7 +1,6 @@
 import { describe, expect, test } from "vitest";
 import sitemap from "@/app/sitemap";
 import { GAMES } from "@/data/games";
-import { GAMES as CATALOG_GAMES } from "@/lib/games/catalog";
 
 describe("games catalog", () => {
   test("each game has ageBand and estMinutes", () => {
@@ -11,13 +10,9 @@ describe("games catalog", () => {
     }
   });
 
-  test("catalog re-exports slug as id", () => {
-    expect(CATALOG_GAMES.every((g) => g.id === g.slug)).toBe(true);
-  });
-
   test("does not list retired car-star or car-mission games", () => {
-    const ids = CATALOG_GAMES.map((game) => game.id);
-    const hrefs = CATALOG_GAMES.map((game) => game.href);
+    const ids = GAMES.map((game) => game.slug);
+    const hrefs = GAMES.map((game) => game.href);
 
     expect(ids).not.toContain("car-star");
     expect(ids).not.toContain("car-mission");

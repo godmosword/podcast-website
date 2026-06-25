@@ -1,6 +1,6 @@
-# Game Kit 美術聖經（Phase 0）
+# Game Kit 美術聖經
 
-> 遊樂園 Game Kit 共用視覺規範。完整 roadmap 見 [RESEARCH.md](../RESEARCH.md)、[TODOS.md](../../TODOS.md)。
+> 遊樂園 Game Kit 共用視覺規範。現行程式分為 `react/`、`runtime/`、`progress/`、`games/` 四層。
 
 ## 渲染
 
@@ -15,7 +15,7 @@
 
 ## 調色盤
 
-- **主盤**：32 色（`lib/gamekit/palette.ts` → `MASTER_PALETTE`）。
+- **主盤**：32 色（`lib/gamekit/runtime/palette.ts` → `MASTER_PALETTE`）。
 - **光源**：左上高光、右下陰影；描邊 `#34302b` 1px（內部解析度）。
 - **各款子集**：同檔 `GAME_PALETTE_INDICES`；不另起第二套 hex。
 
@@ -40,7 +40,7 @@
 - 轉場：wipe 或 fade（≤300ms；`prefers-reduced-motion` 改 instant）。
 - 禁止：emoji 當遊戲內主要 sprite（hub 卡片除外）。
 
-## 音訊（Phase 3）
+## 音訊
 
 - BGM：chiptune 循環 ogg，每款 1 主題 + 可選緊張層。
 - SFX：短促；沿用 WebAudio 合成或 jsfxr 匯出。
@@ -55,10 +55,10 @@
 ## 資產流程
 
 1. **佔位**：Kenney CC0 tileset / sprite。
-2. **原創**：Aseprite → PNG sprite sheet → `public/games/<id>/`（目前 `public/games/` 已退役清空：現行四款全用程序生成 sprite（`lib/gamekit/procedural-sheets`），日後若回到真 PNG 資產再重建此目錄）。
-3. **關卡**：Tiled → JSON（`car-adventure` 優先）。
+2. **原創**：Aseprite → PNG sprite sheet → `public/games/<id>/`。現行 Canvas 遊戲使用 `lib/gamekit/runtime/procedural-sheets.ts` 的程序圖塊。
+3. **關卡**：`lib/gamekit/games/adventure-level.ts` 的直接 JSON 契約。
 
 ## 技術錨點
 
 - 程式入口：`lib/gamekit/`、`hooks/usePixelRenderer.ts`、`components/games/PixelGameCanvas.tsx`。
-- **不引入 Phaser**（Phase 0 決策：純 Canvas + 自建 kit；可選 kontra.js 底層）。
+- **不引入 Phaser**：維持純 Canvas + 自建 kit。

@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import type { GameKitGameId } from "@/lib/gamekit/types";
 import { useGameAssetPreload } from "@/hooks/useGameAssetPreload";
-import { GAMES } from "@/lib/games/catalog";
+import { GAMES } from "@/data/games";
 import styles from "./GameLoadingGate.module.css";
 
 const LABELS: Record<GameKitGameId, string> = {
@@ -20,7 +20,10 @@ type GameLoadingGateProps = {
 
 export function GameLoadingGate({ gameId, children }: GameLoadingGateProps) {
   const { ready } = useGameAssetPreload(gameId);
-  const title = LABELS[gameId] ?? GAMES.find((g) => g.id === gameId)?.title ?? "小遊戲";
+  const title =
+    LABELS[gameId] ??
+    GAMES.find((game) => game.slug === gameId)?.title ??
+    "小遊戲";
 
   if (!ready) {
     return (

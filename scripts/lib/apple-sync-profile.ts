@@ -4,7 +4,7 @@ import type { Story } from "../../data/stories";
 export const APPLE_SYNC_PAGE_COUNT = 1;
 
 /** 每集最多自動標幾個主題 tag（與手動集數一致）。 */
-export const MAX_INFERRED_TAGS = 3;
+const MAX_INFERRED_TAGS = 3;
 
 /** 標題／摘要／關鍵字 → 車種（無 overrides 時使用，避免新集一律變「其他」）。 */
 const VEHICLE_FROM_TEXT: [RegExp, string][] = [

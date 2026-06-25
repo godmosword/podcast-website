@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { allTags, allVehicles, stories } from "@/data/content";
+import { allTags, allVehicles, getStories } from "@/data/content";
 import { getSiteUrl } from "@/lib/site-url";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -64,7 +64,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  const storyPages: MetadataRoute.Sitemap = stories.map((story) => ({
+  const storyPages: MetadataRoute.Sitemap = getStories().map((story) => ({
     url: `${baseUrl}/story/${story.slug}`,
     lastModified: new Date(`${story.date}T12:00:00+08:00`),
     changeFrequency: "monthly" as const,

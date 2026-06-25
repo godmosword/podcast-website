@@ -23,8 +23,6 @@ export type GameAction =
   | "confirm"
   | "cancel";
 
-export type GameSceneId = "title" | "menu" | "play" | "pause" | "result";
-
 export type StarLedgerEntry = {
   id: string;
   amount: number;

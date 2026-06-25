@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getStory, stories } from "@/data/content";
+import { getStories, getStory } from "@/data/content";
 import { getFavorites } from "@/lib/favorites";
 import StoryCard from "./StoryCard";
 import styles from "./FavoritesSection.module.css";
@@ -30,7 +30,7 @@ export default function FavoritesSection() {
         ))}
       </ul>
       <p className={styles.hint}>
-        在故事頁點「加入最愛」即可收藏。共 {stories.length} 則故事可探索。
+        在故事頁點「加入最愛」即可收藏。共 {getStories().length} 則故事可探索。
       </p>
     </section>
   );

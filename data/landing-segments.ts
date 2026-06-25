@@ -69,12 +69,6 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
   },
 ];
 
-export function getLandingSegmentById(
-  id: LandingSegmentId,
-): LandingSegmentDef | undefined {
-  return LANDING_SEGMENTS.find((s) => s.id === id);
-}
-
 /** 捏黏土 segment 外連卡片（URL 可後續替換為專屬影片）。 */
 export const LANDING_CLAY_EXTERNAL = {
   title: "跟 Bonbon & 馬米捏車車",

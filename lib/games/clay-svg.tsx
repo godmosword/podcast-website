@@ -109,7 +109,7 @@ type ClayWheelProps = {
   shadowId: string;
 };
 
-export function ClayWheel({ cx, cy, r = 5.5, shadowId }: ClayWheelProps) {
+function ClayWheel({ cx, cy, r = 5.5, shadowId }: ClayWheelProps) {
   return (
     <g filter={`url(#${shadowId})`}>
       <circle cx={cx} cy={cy} r={r} fill="#3a3632" />
@@ -148,25 +148,6 @@ export function ClayCar({
       <ellipse cx="33" cy="18" rx="3" ry="2.5" fill="#fff8dc" opacity="0.85" />
       <ClayWheel cx={9} cy={28} shadowId={shadowId} />
       <ClayWheel cx={29} cy={28} shadowId={shadowId} />
-    </g>
-  );
-}
-
-type ClayStarProps = {
-  cx: number;
-  cy: number;
-  size: number;
-  gradId: string;
-  shadowId: string;
-};
-
-export function ClayStar({ cx, cy, size, gradId, shadowId }: ClayStarProps) {
-  const s = size;
-  const path = `M${cx} ${cy - s} L${cx + s * 0.28} ${cy - s * 0.28} L${cx + s} ${cy - s * 0.22} L${cx + s * 0.42} ${cy + s * 0.12} L${cx + s * 0.62} ${cy + s} L${cx} ${cy + s * 0.52} L${cx - s * 0.62} ${cy + s} L${cx - s * 0.42} ${cy + s * 0.12} L${cx - s} ${cy - s * 0.22} L${cx - s * 0.28} ${cy - s * 0.28} Z`;
-  return (
-    <g filter={`url(#${shadowId})`}>
-      <path d={path} fill={`url(#${gradId})`} />
-      <circle cx={cx - s * 0.15} cy={cy - s * 0.2} r={s * 0.12} fill="#fff" opacity="0.45" />
     </g>
   );
 }

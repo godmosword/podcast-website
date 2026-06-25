@@ -8,7 +8,7 @@ import {
   loadGameKitSettings,
   saveGameKitSettings,
   type GameKitSettings,
-} from "@/lib/gamekit/settings";
+} from "@/lib/gamekit/progress/settings";
 
 export function useGameKitSettings() {
   const [settings, setSettings] = useState<GameKitSettings | null>(null);

@@ -14,7 +14,7 @@ export const EPISODE_COLORS: Record<string, string> = {
   "ep-12": "#339af0",
 };
 
-export const DEFAULT_EPISODE_COLOR = "#7048e8";
+const DEFAULT_EPISODE_COLOR = "#7048e8";
 
 export function episodeColorForSlug(slug: string): string {
   return EPISODE_COLORS[slug] ?? DEFAULT_EPISODE_COLOR;

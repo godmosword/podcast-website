@@ -1,6 +1,6 @@
 import { useId } from "react";
 import type { CSSProperties } from "react";
-import type { GameCatalogEntry } from "@/lib/games/catalog";
+import type { GameMeta } from "@/data/games";
 import {
   ClayBlob,
   ClayCar,
@@ -11,7 +11,7 @@ import {
 } from "@/lib/games/clay-svg";
 
 type Props = {
-  gameId: GameCatalogEntry["id"];
+  gameId: GameMeta["slug"];
   className?: string;
   style?: CSSProperties;
 };

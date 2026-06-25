@@ -6,10 +6,10 @@ import {
   allVehicles,
   getNextStory,
   getRelated,
+  getStories,
   getStoriesByTag,
   getStoriesByVehicle,
   getStory,
-  stories,
   storiesByNewest,
 } from "./content";
 import { manualStories } from "./stories";
@@ -37,6 +37,7 @@ describe("storiesByNewest", () => {
   });
 
   it("不修改原陣列", () => {
+    const stories = getStories();
     const before = stories.map((s) => s.slug);
     storiesByNewest();
     expect(stories.map((s) => s.slug)).toEqual(before);
@@ -85,6 +86,7 @@ describe("getNextStory", () => {
 
 describe("getStoriesByVehicle", () => {
   it("依車種篩選", () => {
+    const stories = getStories();
     const list = getStoriesByVehicle("救護車");
     expect(list.every((s) => s.vehicle === "救護車")).toBe(true);
     // 數量由資料推導，避免新增集數時破壞同步 CI
@@ -96,6 +98,7 @@ describe("getStoriesByVehicle", () => {
 
 describe("getStoriesByTag", () => {
   it("依主題標籤篩選", () => {
+    const stories = getStories();
     const list = getStoriesByTag("合作");
     expect(list.every((s) => (s.tags ?? []).includes("合作"))).toBe(true);
     // 數量由資料推導，避免新增帶「合作」標籤的集數時破壞同步 CI
@@ -117,6 +120,7 @@ function storyIllustrationCount(slug: string): number {
 
 describe("pageCount", () => {
   it("每集 pageCount 至少為 1", () => {
+    const stories = getStories();
     expect(stories.every((s) => s.pageCount >= 1)).toBe(true);
   });
 
@@ -129,6 +133,7 @@ describe("pageCount", () => {
   });
 
   it("pageCount 與 public/stories 插圖檔數一致", () => {
+    const stories = getStories();
     for (const story of stories) {
       const count = storyIllustrationCount(story.slug);
       if (count > 0) {

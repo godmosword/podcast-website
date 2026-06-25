@@ -1,5 +1,5 @@
 /** 各集親子反思提問（無標準答案，供詳情頁與播放結束畫面）。 */
-export const REFLECTION_PROMPTS: Record<
+const REFLECTION_PROMPTS: Record<
   string,
   { child: string; parentFollowUp: string }
 > = {

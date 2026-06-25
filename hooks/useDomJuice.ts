@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { JuiceController } from "@/lib/gamekit/juice";
+import { JuiceController } from "@/lib/gamekit/runtime/juice";
 
 /** DOM 棋盤遊戲用：螢幕震動（CSS transform），無 canvas 粒子。 */
 export function useDomJuice(reduced: boolean) {

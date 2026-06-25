@@ -14,7 +14,7 @@ import { useGameKitSettings } from "@/hooks/useGameKitSettings";
 import {
   BLOCK_DROP_DIFFICULTIES,
   BLOCK_DROP_SPECIAL_MODES,
-} from "@/lib/gamekit/settings";
+} from "@/lib/gamekit/progress/settings";
 import styles from "./GameChrome.module.css";
 
 type ChromeContextValue = {
@@ -25,7 +25,7 @@ const ChromeContext = createContext<ChromeContextValue>({
   openSettings: () => {},
 });
 
-export function useOpenGameSettings(): () => void {
+function useOpenGameSettings(): () => void {
   return useContext(ChromeContext).openSettings;
 }
 

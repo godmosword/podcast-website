@@ -16,7 +16,7 @@ import {
 
 export type SubtitleSegment = { t: number; text: string };
 
-export type ProofreadIssue = {
+type ProofreadIssue = {
   index: number;
   t: number;
   text: string;
@@ -33,7 +33,7 @@ export type ProofreadReport = {
   autoFixCount: number;
 };
 
-export type ProofreadMarker = {
+type ProofreadMarker = {
   slug: string;
   proofreadAt: string;
   segmentCount: number;
@@ -93,15 +93,15 @@ const HOMOPHONE_LINT: Array<{ pattern: RegExp; code: string; message: string }> 
     { pattern: /他太擠了/, code: "homophone-hurry", message: "「太擠了」可能是「太急了」" },
   ];
 
-export function proofreadMarkerPath(slug: string): string {
+function proofreadMarkerPath(slug: string): string {
   return join(PROOFREAD_DIR, `${slug}.json`);
 }
 
-export function hasProofreadMarker(slug: string): boolean {
+function hasProofreadMarker(slug: string): boolean {
   return existsSync(proofreadMarkerPath(slug));
 }
 
-export function readProofreadMarker(slug: string): ProofreadMarker | null {
+function readProofreadMarker(slug: string): ProofreadMarker | null {
   const p = proofreadMarkerPath(slug);
   if (!existsSync(p)) return null;
   try {

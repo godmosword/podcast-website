@@ -1,47 +1,49 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   GAME_VIEWPORTS,
-  computeIntegerScale,
-  medalCount,
-  medalFlags,
-  snapPixel,
+  FIXED_DT,
+} from "@/lib/gamekit/runtime/constants";
+import {
   colorsForGame,
-  canvasPaletteFromKit,
-  blockDropKitColors,
-  TILE_INDEX,
+  snapPixel,
+} from "@/lib/gamekit/runtime/palette";
+import { computeIntegerScale } from "@/lib/gamekit/runtime/renderer";
+import {
   BLOCK_INDEX,
+  TILE_INDEX,
   TILE_SIZE,
-} from "@/lib/gamekit";
+} from "@/lib/gamekit/runtime/procedural-sheets";
+import { medalCount, medalFlags } from "@/lib/gamekit/progress/meta";
 import {
   BGM_THEMES,
   validateBgmTheme,
-} from "@/lib/gamekit/chiptune-bgm";
+} from "@/lib/gamekit/runtime/chiptune-bgm";
 import {
   DEFAULT_MUSIC_VOLUME,
   DEFAULT_SFX_VOLUME,
-} from "@/lib/gamekit/audio";
+} from "@/lib/gamekit/runtime/audio";
 import {
   easeOutQuad,
   easeOutCubic,
   tweenToward,
   JuiceController,
-} from "@/lib/gamekit/juice";
-import { levelFromJson } from "@/lib/gamekit/adventure-level";
-import {
-  isTiledMapJson,
-  normalizeAdventureLevelJson,
-  tiledToAdventureJson,
-} from "@/lib/gamekit/tiled-loader";
+} from "@/lib/gamekit/runtime/juice";
+import { levelFromJson } from "@/lib/gamekit/games/adventure-level";
 import { CAR_ADVENTURE_LEVELS } from "@/lib/games/car-adventure/levels";
-import { emptyTilemap } from "@/lib/gamekit/tilemap";
 import {
   recordBestScore,
   loadPlayerProfile,
   recordMedal,
   addStars,
-} from "@/lib/gamekit/save";
-import { GARAGE_VEHICLES, vehiclesUnlockedAt } from "@/lib/gamekit/garage";
-import { reportGameSession, gameMedalStars } from "@/lib/gamekit/session";
+} from "@/lib/gamekit/progress/save";
+import {
+  GARAGE_VEHICLES,
+  vehiclesUnlockedAt,
+} from "@/lib/gamekit/progress/garage";
+import {
+  reportGameSession,
+  gameMedalStars,
+} from "@/lib/gamekit/progress/session";
 import {
   BLOCK_DROP_DIFFICULTIES,
   BLOCK_DROP_SPECIAL_MODES,
@@ -49,11 +51,9 @@ import {
   setBlockDropDifficulty,
   setBlockDropSpecialMode,
   setKidsMode,
-} from "@/lib/gamekit/settings";
-import { ObjectPool } from "@/lib/gamekit/pool";
-import { GAME_PRELOAD_SHEETS } from "@/lib/gamekit/preload";
-import { GameLoop } from "@/lib/gamekit/loop";
-import { FIXED_DT } from "@/lib/gamekit/constants";
+} from "@/lib/gamekit/progress/settings";
+import { GAME_PRELOAD_SHEETS } from "@/lib/gamekit/runtime/preload";
+import { GameLoop } from "@/lib/gamekit/runtime/loop";
 
 describe("gamekit constants", () => {
   it("Game Kit viewport 為正整數", () => {
@@ -145,24 +145,6 @@ describe("garage", () => {
     expect(vehiclesUnlockedAt(0)).toEqual(["小黃"]);
     expect(vehiclesUnlockedAt(3)).toContain("怪獸卡車");
     expect(GARAGE_VEHICLES.length).toBe(5);
-  });
-});
-
-describe("ObjectPool", () => {
-  it("acquire/release 重用物件", () => {
-    const pool = new ObjectPool(
-      () => ({ n: 0 }),
-      (o) => {
-        o.n = 0;
-      },
-      2,
-    );
-    const a = pool.acquire();
-    a.n = 5;
-    pool.release(a);
-    const b = pool.acquire();
-    expect(b.n).toBe(0);
-    expect(pool.size).toBeGreaterThanOrEqual(1);
   });
 });
 
@@ -268,28 +250,6 @@ describe("session", () => {
   });
 });
 
-describe("bridge", () => {
-  it("canvasPaletteFromKit 回傳 hex 色", () => {
-    const p = canvasPaletteFromKit("car-adventure");
-    expect(p.road).toMatch(/^#/);
-    expect(p.truck).toMatch(/^#/);
-  });
-
-  it("blockDropKitColors 含七種方塊", () => {
-    const c = blockDropKitColors();
-    expect(c.I).toMatch(/^#/);
-    expect(c.well).toMatch(/^#/);
-  });
-});
-
-describe("tilemap stub", () => {
-  it("emptyTilemap 可建立 walkable 查詢", () => {
-    const map = emptyTilemap(4, 4);
-    expect(map.width).toBe(4);
-    expect(map.isWalkable(0, 0)).toBe(false);
-  });
-});
-
 describe("procedural sheets index", () => {
   it("TILE_INDEX 與 BLOCK_INDEX 對齊七種方塊", () => {
     expect(TILE_SIZE).toBe(16);
@@ -328,72 +288,6 @@ describe("adventure levels", () => {
     }
   });
 
-  it("tiledToAdventureJson 解析 breakable / ability-gate / secret", () => {
-    const tiled = {
-      width: 4,
-      height: 4,
-      tilewidth: 16,
-      tileheight: 16,
-      layers: [
-        {
-          type: "objectgroup" as const,
-          name: "objects",
-          objects: [
-            { type: "player", x: 16, y: 32, width: 16, height: 16 },
-            { type: "finish", x: 32, y: 32, width: 16, height: 32 },
-            { type: "breakable", x: 48, y: 32, width: 16, height: 16 },
-            {
-              type: "ability-gate",
-              x: 64,
-              y: 32,
-              width: 16,
-              height: 16,
-              properties: [{ name: "ability", value: "speed" }],
-            },
-            { type: "secret", x: 80, y: 32, width: 16, height: 16 },
-          ],
-        },
-      ],
-    };
-    const json = tiledToAdventureJson(tiled, { id: "abilities", name: "能力關卡" });
-    expect(json.breakable).toEqual(["3,2"]);
-    expect(json.abilityGates).toEqual([{ x: 4, y: 2, ability: "speed" }]);
-    expect(json.secrets).toEqual(["5,2"]);
-  });
-
-  it("tiledToAdventureJson 解析 tilelayer 與 objects", () => {
-    const tiled = {
-      width: 8,
-      height: 6,
-      tilewidth: 36,
-      tileheight: 36,
-      layers: [
-        {
-          type: "tilelayer" as const,
-          name: "solid",
-          width: 8,
-          height: 6,
-          data: [0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        },
-        {
-          type: "objectgroup" as const,
-          name: "objects",
-          objects: [
-            { type: "player", x: 36, y: 144, width: 36, height: 36 },
-            { type: "coin", x: 108, y: 108, width: 16, height: 16 },
-            { type: "finish", x: 252, y: 108, width: 36, height: 72 },
-          ],
-        },
-      ],
-    };
-    expect(isTiledMapJson(tiled)).toBe(true);
-    const json = tiledToAdventureJson(tiled, { id: "test", name: "測試" });
-    expect(json.solid.length).toBeGreaterThan(0);
-    expect(json.coins).toHaveLength(1);
-    expect(json.start).toEqual([1, 4]);
-    const lv = levelFromJson(normalizeAdventureLevelJson(json));
-    expect(lv.coins).toHaveLength(1);
-  });
 });
 
 describe("chiptune BGM", () => {

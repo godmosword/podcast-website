@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Story } from "@/data/content";
-import { filterStories, filterStoriesForVehicle } from "./story-filtering";
+import { filterStories } from "./story-filtering";
 
 function story(
   slug: string,
@@ -61,23 +61,5 @@ describe("filterStories", () => {
         featuredStorySlug: "ep-12",
       }).map((s) => s.slug),
     ).toEqual(["ep-12"]);
-  });
-});
-
-describe("filterStoriesForVehicle", () => {
-  const stories = [
-    story("ep-12", "警車"),
-    story("ep-11", "賽車"),
-    story("ep-10", "其他"),
-  ];
-
-  it("hides the featured latest story when no vehicle is selected", () => {
-    expect(filterStoriesForVehicle(stories, null, "ep-12").map((s) => s.slug))
-      .toEqual(["ep-11", "ep-10"]);
-  });
-
-  it("keeps the featured latest story when its vehicle is selected", () => {
-    expect(filterStoriesForVehicle(stories, "警車", "ep-12").map((s) => s.slug))
-      .toEqual(["ep-12"]);
   });
 });
