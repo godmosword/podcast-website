@@ -17,12 +17,6 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await expect(
     page.getByRole("link", { name: "捲動到下一個專區" }).first(),
   ).toBeVisible();
-
-  // 小車車彩蛋：覆蓋層存在但不攔截操作、不入無障礙樹（隨機出現故不斷言車身可見）
-  const mascot = page.getByTestId("landing-car-mascot");
-  await expect(mascot).toHaveCount(1);
-  await expect(mascot).toHaveAttribute("aria-hidden", "true");
-  await expect(mascot).toHaveCSS("pointer-events", "none");
 });
 
 test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {

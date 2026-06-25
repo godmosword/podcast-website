@@ -1,6 +1,5 @@
 import SiteFooter from "@/components/SiteFooter";
 import JsonLd from "@/components/JsonLd";
-import LandingCarMascot from "@/components/landing/LandingCarMascot";
 import LandingScrollView from "@/components/landing/LandingScrollView";
 import LandingSegment from "@/components/landing/LandingSegment";
 import SegmentNav from "@/components/landing/SegmentNav";
@@ -35,7 +34,6 @@ export default function LandingHub() {
           <SiteFooter layout="home" />
         </div>
       </LandingScrollView>
-      <LandingCarMascot />
     </>
   );
 }
