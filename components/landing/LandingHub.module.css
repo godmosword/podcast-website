@@ -1,8 +1,13 @@
-/* footer 不參與 scroll-snap，緊接最後一段 */
+/* 最後一段 hero → 頁尾：深色漸層銜接，避免白縫 */
 .footer {
   width: 100%;
   max-width: 960px;
   margin: 0 auto;
   padding: 0 clamp(16px, 4vw, 32px) calc(4px + var(--safe-bottom));
-  background: var(--bg);
+  background: linear-gradient(
+    180deg,
+    #14100c 0%,
+    color-mix(in srgb, #14100c 40%, var(--bg)) 36px,
+    var(--bg) 72px
+  );
 }

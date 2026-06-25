@@ -10,6 +10,8 @@ export type LandingSegmentDef = {
   subtitle: string;
   /** hero 橫幅；approve 後改為 /landing/segment-{id}.jpg */
   heroImage: string;
+  /** 手機直版 art direction（≤768px）；placeholder，之後可替換正式直版圖 */
+  heroImagePortrait: string;
   cta: {
     label: string;
     href: string;
@@ -31,6 +33,7 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
     title: "車車故事 · 適合 3–7 歲",
     subtitle: "看圖聽故事，每天一個車車冒險",
     heroImage: "/landing/segment-stories.jpg",
+    heroImagePortrait: "/landing/segment-stories-portrait.jpg",
     cta: { label: "全部故事", href: "/stories" },
   },
   {
@@ -39,6 +42,7 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
     title: "數綿羊 · 睡前收聽讓孩子好睡",
     subtitle: "溫柔語調，適合睡前親子共聽",
     heroImage: "/landing/segment-bedtime.jpg",
+    heroImagePortrait: "/landing/segment-bedtime-portrait.jpg",
     cta: { label: "睡前故事", href: "/topic/睡前" },
   },
   {
@@ -47,6 +51,7 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
     title: "捏黏土 · 多玩 30 分鐘練精細動作",
     subtitle: "跟著影片動手做，離開螢幕也開心",
     heroImage: "/landing/segment-clay.jpg",
+    heroImagePortrait: "/landing/segment-clay-portrait.jpg",
     cta: {
       label: "YouTube 捏黏土",
       href: "https://www.youtube.com/playlist?list=PLVbyl20K8lOeuJ2ky6dEsmpew7xAxZDhF",
@@ -59,6 +64,7 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
     title: "衛教宣導 · 陪伴孩子重點宣導",
     subtitle: "刷牙、交通安全與生活好習慣",
     heroImage: "/landing/segment-health.jpg",
+    heroImagePortrait: "/landing/segment-health-portrait.jpg",
     cta: { label: "安全與習慣", href: "/topic/安全" },
   },
 ];

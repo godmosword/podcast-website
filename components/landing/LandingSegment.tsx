@@ -30,11 +30,13 @@ export default function LandingSegment({
     document.getElementById(nextAnchorId)?.scrollIntoView({ block: "start" });
   }
 
-  const imageProps = {
-    src: segment.heroImage!,
+  const imgProps = {
+    alt: "",
+    "aria-hidden": true as const,
     loading: (eager ? "eager" : "lazy") as "eager" | "lazy",
     fetchPriority: (eager ? "high" : "low") as "high" | "low",
     decoding: "async" as const,
+    className: styles.bg,
   };
 
   return (
@@ -45,17 +47,16 @@ export default function LandingSegment({
     >
       <div className={styles.visual} aria-hidden={!!segment.heroImage}>
         {segment.heroImage ? (
-          <>
+          <picture className={styles.picture}>
+            {segment.heroImagePortrait ? (
+              <source
+                media="(max-width: 768px)"
+                srcSet={segment.heroImagePortrait}
+              />
+            ) : null}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              {...imageProps}
-              alt=""
-              className={styles.bgBlur}
-              aria-hidden
-            />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img {...imageProps} alt="" className={styles.bg} aria-hidden />
-          </>
+            <img {...imgProps} src={segment.heroImage} />
+          </picture>
         ) : (
           <div className={styles.bgFallback} />
         )}

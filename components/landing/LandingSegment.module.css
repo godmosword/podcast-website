@@ -10,14 +10,23 @@
   overflow: hidden;
   isolation: isolate;
   flex: none;
+  background: #14100c;
 }
 
-/* ---- 主視覺區（桌機：全幅底圖；手機/平板：上圖區） ---- */
 .visual {
   position: absolute;
   inset: 0;
   z-index: 0;
   overflow: hidden;
+}
+
+.picture {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
 }
 
 .bg,
@@ -27,11 +36,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 40%;
-}
-
-.bgBlur {
-  display: none;
+  object-position: center;
 }
 
 .bgFallback {
@@ -45,9 +50,9 @@
   pointer-events: none;
   background: linear-gradient(
     to top,
-    rgba(20, 16, 12, 0.72) 0%,
-    rgba(20, 16, 12, 0.42) 32%,
-    rgba(20, 16, 12, 0.06) 64%,
+    rgba(20, 16, 12, 0.78) 0%,
+    rgba(20, 16, 12, 0.45) 34%,
+    rgba(20, 16, 12, 0.08) 62%,
     rgba(20, 16, 12, 0) 100%
   );
 }
@@ -60,7 +65,7 @@
   margin: 0 auto;
   padding: 0
     calc(clamp(20px, 5vw, 56px) + var(--safe-right))
-    clamp(28px, 5vh, 72px)
+    clamp(24px, 4.5vh, 72px)
     calc(clamp(20px, 5vw, 56px) + var(--safe-left));
   color: #fff;
 }
@@ -143,85 +148,12 @@
   }
 }
 
-/* 手機 / 平板：上圖（完整顯示）+ 下文（實心底），無留白、不放大裁切 */
-@media (max-width: 1024px) {
-  .panel {
-    justify-content: flex-start;
-    gap: 0;
-  }
-
-  .visual {
-    position: relative;
-    flex: 1 1 auto;
-    min-height: 0;
-    inset: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #14100c;
-  }
-
-  .bgBlur {
-    display: block;
-    position: absolute;
-    inset: -12%;
-    width: 124%;
-    height: 124%;
-    object-fit: cover;
-    object-position: center center;
-    filter: blur(28px) brightness(0.5) saturate(1.1);
-    transform: scale(1.08);
-  }
-
-  .bg {
-    position: relative;
-    inset: auto;
-    z-index: 1;
-    width: auto;
-    height: auto;
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    object-position: center center;
-  }
-
-  .scrim {
-    display: none;
-  }
-
+@media (max-width: 768px) {
   .content {
-    flex: 0 0 auto;
-    margin-top: 0;
-    padding-top: 14px;
-    padding-bottom: calc(12px + var(--safe-bottom));
-    background: linear-gradient(
-      180deg,
-      rgba(20, 16, 12, 0.97) 0%,
-      rgba(20, 16, 12, 0.92) 100%
-    );
-  }
-
-  .title,
-  .subtitle {
-    text-shadow: none;
+    padding-bottom: calc(22px + var(--safe-bottom));
   }
 
   .next {
-    bottom: 10px;
-  }
-}
-
-@media (max-width: 600px) {
-  .content {
-    padding-top: 12px;
-    padding-bottom: calc(34px + var(--safe-bottom));
-  }
-
-  .subtitle {
-    margin-bottom: 14px;
-  }
-
-  .next {
-    bottom: 8px;
+    bottom: calc(36px + var(--safe-bottom));
   }
 }

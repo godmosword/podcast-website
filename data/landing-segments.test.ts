@@ -39,6 +39,14 @@ describe("landing-segments", () => {
       expect(seg.heroImage).toBe(`/landing/segment-${seg.id}.jpg`);
       const fsPath = join(process.cwd(), "public", seg.heroImage);
       expect(existsSync(fsPath), `缺圖：${seg.heroImage}`).toBe(true);
+
+      expect(seg.heroImagePortrait).toBe(
+        `/landing/segment-${seg.id}-portrait.jpg`,
+      );
+      const portraitPath = join(process.cwd(), "public", seg.heroImagePortrait);
+      expect(existsSync(portraitPath), `缺直版 placeholder：${seg.heroImagePortrait}`).toBe(
+        true,
+      );
     }
   });
 
