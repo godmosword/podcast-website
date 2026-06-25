@@ -252,7 +252,6 @@ describe("settings", () => {
 
 describe("session", () => {
   it("reportGameSession 通關發星與貼紙", () => {
-    const base = loadPlayerProfile();
     const cleared = reportGameSession({
       gameId: "car-adventure",
       score: 500,

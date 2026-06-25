@@ -78,15 +78,6 @@ interface Player {
   jumpCut: boolean;
   invuln: number;
 }
-interface Enemy {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  vx: number;
-  dir: number;
-  alive: boolean;
-}
 interface GameState {
   lv: AdventureLevel;
   levelIndex: number;

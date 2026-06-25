@@ -51,7 +51,6 @@ const ROWS = 20;
 const CELL = 18;
 const BOARD_W = COLS * CELL;
 const BOARD_H = ROWS * CELL;
-const MAX_BOARD_W = 396;
 const WIDE_MAX_BOARD_W = 460;
 const WIDE_SIDE_W = 150;
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, type RefObject } from "react";
+import { createContext, useContext } from "react";
 
 type LandingScrollContextValue = {
   scrollRootRef: React.RefObject<HTMLDivElement | null>;
