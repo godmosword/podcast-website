@@ -30,8 +30,8 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
   {
     id: "stories",
     anchorId: "segment-stories",
-    title: "車車故事 · 適合 3–7 歲",
-    subtitle: "看圖聽故事，每天一個車車冒險",
+    title: "車車與遊樂園的故事",
+    subtitle: "陪孩子成長的路上，適合 3–7 歲孩子聆聽",
     heroImage: "/landing/segment-stories.jpg",
     heroImagePortrait: "/landing/segment-stories-portrait.jpg",
     cta: { label: "全部故事", href: "/stories" },
