@@ -79,7 +79,7 @@ const LANDING_ART_SPECS: LandingArtSpec[] = [
     landscape: {
       file: "segment-bedtime.jpg",
       scene:
-        "Cozy night scene with the provided blue minibus parked calmly on a soft green hill; crescent moon and stars; three sleeping fluffy clay sheep nearby; sleepy, calm, low-light palette; leave clean negative space in the upper area for a title overlay. " +
+        "Wide cozy night scene matching the portrait bedtime art direction: the provided blue minibus parked on a soft green hill, viewed from a slight front angle facing camera; deep blue-violet night sky with a crescent moon and tiny scattered stars (no fluffy clouds); two or three fluffy white clay sheep sleeping peacefully near the bus wheels on the grass; calm sleepy mood, low saturated night palette with soft moonlight on the hilltop; wide 16:9 composition with the bus and sheep grouped in the center-right, moon and stars in the upper-left, leave clean negative space in the upper-left sky for a title overlay. " +
         VEHICLE_FACE_RULE,
     },
     portrait: {
