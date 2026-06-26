@@ -264,5 +264,41 @@
     "desc": "a cute claymation little red car named Dudu (嘟嘟), a plain glossy red rounded car body with a light-blue rounded windshield, small yellow round headlights, four black wheels with cream hubcaps, big round expressive googly eyes and a cheerful smile, soft hand-sculpted clay texture, no racing number and no stripes — distinct from the numbered race car 小紅賽車, very expressive and emotive (happy, starry-eyed, surprised, grumpy, laughing, waving)",
     "ref": "characters/嘟嘟小紅車.jpg",
     "firstSeen": "landing"
+  },
+  {
+    "name": "消防車圈圈",
+    "aliases": [
+      "圈圈",
+      "哥哥圈圈",
+      "雙胞胎消防車圈圈"
+    ],
+    "vehicle": "fire engine",
+    "desc": "a cute claymation bright red twin fire engine named Quanquan (圈圈), identical to Diandian except labeled 圈圈 on the cab, light-blue windshield with big friendly eyes and smile, grey badge with flame icon on forehead, yellow emergency lights on roof, grey extendable ladder and yellow water cannon, large water tank, long hose, soft hand-sculpted clay texture",
+    "ref": "characters/消防車圈圈.jpg",
+    "firstSeen": "ep-14"
+  },
+  {
+    "name": "消防車點點",
+    "aliases": [
+      "點點",
+      "弟弟點點",
+      "雙胞胎消防車點點"
+    ],
+    "vehicle": "fire engine",
+    "desc": "a cute claymation bright red twin fire engine named Diandian (點點), identical to Quanquan except labeled 點點 on the cab, light-blue windshield with big friendly eyes and smile, grey badge with flame icon on forehead, yellow emergency lights on roof, grey extendable ladder and yellow water cannon, large water tank, long hose, soft hand-sculpted clay texture",
+    "ref": "characters/消防車點點.jpg",
+    "firstSeen": "ep-14"
+  },
+  {
+    "name": "老爺爺爆米花餐車",
+    "aliases": [
+      "爆米花餐車",
+      "爆米花老爺爺",
+      "老爺爺餐車"
+    ],
+    "vehicle": "food truck",
+    "desc": "a cute claymation vintage popcorn food truck with a friendly grandfather vendor, striped awning, popcorn machine on the side, warm cream and red clay colors, soft hand-sculpted clay texture",
+    "ref": "characters/老爺爺爆米花餐車.jpg",
+    "firstSeen": "ep-14"
   }
 ]
