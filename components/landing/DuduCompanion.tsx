@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLandingScroll } from "./LandingScrollContext";
 import {
   DUDU_EMOTIONS,
   DUDU_EMOTION_LABEL,
   type DuduEmotion,
   emotionSrc,
-  nextTapEmotion,
+  nextEmotion,
 } from "./dudu-emotions";
 import styles from "./DuduCompanion.module.css";
 
@@ -22,20 +22,25 @@ type DuduCompanionProps = {
   footerId?: string;
 };
 
-const REACTION_MS = 1600;
-
 /**
  * 角落表情夥伴：固定在右下角，捲動到不同 segment 時切換表情，
- * 點一下會播放彩蛋表情。整體 pointer-events 關閉、只有車身可點，不擋閱讀。
+ * 點一下循環全部六款表情。整體 pointer-events 關閉、只有車身可點，不擋閱讀。
  */
 export default function DuduCompanion({ items, footerId }: DuduCompanionProps) {
   const landingScroll = useLandingScroll();
   const [baseEmotion, setBaseEmotion] = useState<DuduEmotion>(
     items[0]?.emotion ?? "happy",
   );
-  const [reaction, setReaction] = useState<DuduEmotion | null>(null);
+  const [tapEmotion, setTapEmotion] = useState<DuduEmotion | null>(null);
   const [atFooter, setAtFooter] = useState(false);
-  const reactionTimer = useRef<number | null>(null);
+
+  // 預載全部 sprite，點擊切換時不會閃白。
+  useEffect(() => {
+    DUDU_EMOTIONS.forEach((emotion) => {
+      const img = new window.Image();
+      img.src = emotionSrc(emotion);
+    });
+  }, []);
 
   useEffect(() => {
     if (items.length === 0) return;
@@ -53,7 +58,10 @@ export default function DuduCompanion({ items, footerId }: DuduCompanionProps) {
           .filter((e) => e.isIntersecting)
           .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
         const emotion = visible ? emotionByAnchor.get(visible.target.id) : undefined;
-        if (emotion) setBaseEmotion(emotion);
+        if (emotion) {
+          setBaseEmotion(emotion);
+          setTapEmotion(null); // 換段時回到該段表情
+        }
       },
       { root, rootMargin: "-40% 0px -40% 0px", threshold: [0, 0.5, 1] },
     );
@@ -74,22 +82,12 @@ export default function DuduCompanion({ items, footerId }: DuduCompanionProps) {
     };
   }, [items, footerId, landingScroll]);
 
-  useEffect(
-    () => () => {
-      if (reactionTimer.current) window.clearTimeout(reactionTimer.current);
-    },
-    [],
-  );
-
   if (items.length === 0) return null;
 
-  const shown = reaction ?? baseEmotion;
+  const shown = tapEmotion ?? baseEmotion;
 
   function handleTap() {
-    const next = nextTapEmotion(reaction);
-    setReaction(next);
-    if (reactionTimer.current) window.clearTimeout(reactionTimer.current);
-    reactionTimer.current = window.setTimeout(() => setReaction(null), REACTION_MS);
+    setTapEmotion((prev) => nextEmotion(prev ?? baseEmotion));
   }
 
   return (
@@ -104,19 +102,15 @@ export default function DuduCompanion({ items, footerId }: DuduCompanionProps) {
         tabIndex={-1}
         aria-label={`嘟嘟小紅車：${DUDU_EMOTION_LABEL[shown]}`}
       >
-        {DUDU_EMOTIONS.map((emotion) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={emotion}
-            src={emotionSrc(emotion)}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            className={`${styles.sprite} ${
-              emotion === shown ? styles.spriteActive : ""
-            }`}
-          />
-        ))}
+        {/* key 強制換圖，單張切換避免交叉淡化殘影 */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          key={shown}
+          src={emotionSrc(shown)}
+          alt=""
+          decoding="async"
+          className={styles.sprite}
+        />
       </button>
     </div>
   );

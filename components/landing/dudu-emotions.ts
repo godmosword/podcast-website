@@ -37,14 +37,10 @@ export const DUDU_EMOTION_BY_SEGMENT: Record<LandingSegmentId, DuduEmotion> = {
   health: "surprised",
 };
 
-/** 點一下時依序播放的彩蛋表情（用到剩下兩款）。 */
-export const DUDU_TAP_SEQUENCE: readonly DuduEmotion[] = ["bye", "angry"] as const;
-
-/** 取得下一個彩蛋表情；null 表示尚未播放過。 */
-export function nextTapEmotion(current: DuduEmotion | null): DuduEmotion {
-  if (current === null) return DUDU_TAP_SEQUENCE[0];
-  const idx = DUDU_TAP_SEQUENCE.indexOf(current);
-  return DUDU_TAP_SEQUENCE[(idx + 1) % DUDU_TAP_SEQUENCE.length];
+/** 點一下時切到下一個表情，循環走完全部六款。 */
+export function nextEmotion(current: DuduEmotion): DuduEmotion {
+  const idx = DUDU_EMOTIONS.indexOf(current);
+  return DUDU_EMOTIONS[(idx + 1) % DUDU_EMOTIONS.length];
 }
 
 export function emotionSrc(emotion: DuduEmotion): string {
