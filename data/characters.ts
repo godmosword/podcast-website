@@ -44,6 +44,7 @@ const ID_BY_CANONICAL_NAME: Record<string, string> = {
   小衝賽車: "xiao-chong",
   亮亮警車: "liang-liang",
   阿酷鑽地車: "a-ku",
+  嘟嘟小紅車: "dudu",
 };
 
 const VEHICLE_ZH: Record<string, string> = {
@@ -69,6 +70,7 @@ const VEHICLE_ZH: Record<string, string> = {
   "ferris wheel": "摩天輪",
   "camper van": "露營車",
   "police car": "警車",
+  car: "小汽車",
 };
 
 /** 車種對應的手動維護集數 slug（與 firstSeen 合併）。 */
@@ -107,6 +109,7 @@ const PERSONALITY_BY_ID: Record<string, string> = {
   "xiao-chong": "愛速度、說話直接",
   "liang-liang": "冷靜穩重、守護大家安全",
   "a-ku": "外表酷酷、專心工作、其實溫柔體貼",
+  dudu: "表情超豐富、活潑愛打招呼",
 };
 
 function shortName(entry: RawCharacter, id: string): string {

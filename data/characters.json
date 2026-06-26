@@ -252,5 +252,17 @@
     "desc": "a cute claymation yellow drill excavator named Aku (阿酷) on black crawler tracks, hydraulic arm with a large dark spiral drill bit instead of a bucket, stern cool expression with thick black eyebrows and focused round eyes (rarely smiling), a small pink frosted donut hanging from a side hook, soft hand-sculpted clay texture, distinct from cheerful yellow bucket excavator Dongdong (東東挖土機)",
     "ref": "characters/阿酷鑽地車.jpg",
     "firstSeen": "ep-13"
+  },
+  {
+    "name": "嘟嘟小紅車",
+    "aliases": [
+      "嘟嘟",
+      "小紅車",
+      "嘟嘟車"
+    ],
+    "vehicle": "car",
+    "desc": "a cute claymation little red car named Dudu (嘟嘟), a plain glossy red rounded car body with a light-blue rounded windshield, small yellow round headlights, four black wheels with cream hubcaps, big round expressive googly eyes and a cheerful smile, soft hand-sculpted clay texture, no racing number and no stripes — distinct from the numbered race car 小紅賽車, very expressive and emotive (happy, starry-eyed, surprised, grumpy, laughing, waving)",
+    "ref": "characters/嘟嘟小紅車.jpg",
+    "firstSeen": "landing"
   }
 ]

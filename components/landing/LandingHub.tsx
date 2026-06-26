@@ -3,6 +3,8 @@ import JsonLd from "@/components/JsonLd";
 import LandingScrollView from "@/components/landing/LandingScrollView";
 import LandingSegment from "@/components/landing/LandingSegment";
 import SegmentNav from "@/components/landing/SegmentNav";
+import DuduCompanion from "@/components/landing/DuduCompanion";
+import { DUDU_EMOTION_BY_SEGMENT } from "@/components/landing/dudu-emotions";
 import { resolveLandingSegments } from "@/lib/landing-query";
 import { podcastSeriesJsonLd } from "@/lib/json-ld";
 import hubStyles from "./LandingHub.module.css";
@@ -13,6 +15,10 @@ export default function LandingHub() {
   const navItems = segments.map((s) => ({
     anchorId: s.anchorId,
     label: s.cta.label,
+  }));
+  const duduItems = segments.map((s) => ({
+    anchorId: s.anchorId,
+    emotion: DUDU_EMOTION_BY_SEGMENT[s.id],
   }));
 
   return (
@@ -30,9 +36,11 @@ export default function LandingHub() {
           />
         ))}
 
-        <div className={hubStyles.footer}>
+        <div id="landing-foot" className={hubStyles.footer}>
           <SiteFooter layout="home" />
         </div>
+
+        <DuduCompanion items={duduItems} footerId="landing-foot" />
       </LandingScrollView>
     </>
   );

@@ -1,0 +1,80 @@
+.root {
+  position: fixed;
+  right: clamp(10px, 2.5vw, 26px);
+  bottom: calc(clamp(12px, 3vh, 28px) + var(--safe-bottom, 0px));
+  z-index: 25;
+  pointer-events: none;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.hidden {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+.car {
+  pointer-events: auto;
+  position: relative;
+  display: block;
+  width: clamp(80px, 11vw, 118px);
+  height: clamp(72px, 10vw, 106px);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.28));
+  animation: duduBob 3.2s ease-in-out infinite;
+}
+
+.car:active {
+  transform: scale(0.94);
+}
+
+.sprite {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+.spriteActive {
+  opacity: 1;
+}
+
+@keyframes duduBob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(1deg);
+  }
+}
+
+@media (max-width: 600px) {
+  .root {
+    right: 8px;
+  }
+
+  .car {
+    width: 64px;
+    height: 58px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .car {
+    animation: none;
+  }
+
+  .sprite {
+    transition: none;
+  }
+}
