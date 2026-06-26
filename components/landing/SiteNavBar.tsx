@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import ThemeModeSwitch from "@/components/ThemeModeSwitch";
 import SubscribeMenu from "@/components/landing/SubscribeMenu";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { visibleSocials } from "@/lib/social";
 import styles from "./SiteNavBar.module.css";
 
@@ -14,8 +15,11 @@ function navItems() {
     "mailto:bonboncarstory@gmail.com";
   const contactExternal = /^https?:/i.test(contact);
 
+  // 全站一致的次級導覽：每頁都能直達主要分區（故事 / 主題 / 遊樂園 / 關於）。
   const items: { label: string; href: string; external?: boolean }[] = [
     { label: "全部故事", href: "/stories" },
+    { label: "主題分類", href: "/topic" },
+    { label: "遊樂園", href: "/games" },
     { label: "關於我們", href: "/about" },
   ];
   if (threads?.url) {
@@ -28,7 +32,10 @@ function navItems() {
 export default function SiteNavBar() {
   const menuId = useId();
   const [open, setOpen] = useState(false);
+  const panelRef = useRef<HTMLElement>(null);
   const items = navItems();
+
+  useFocusTrap(open, panelRef);
 
   useEffect(() => {
     if (!open) return;
@@ -65,7 +72,12 @@ export default function SiteNavBar() {
       </div>
 
       {open ? (
-        <nav id={menuId} className={styles.panel} aria-label="網站選單">
+        <nav
+          id={menuId}
+          ref={panelRef}
+          className={styles.panel}
+          aria-label="網站選單"
+        >
           <ul className={styles.list}>
             {items.map((item) => (
               <li key={item.label}>

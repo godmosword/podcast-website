@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { clearContinue, loadContinue, saveContinue } from "@/lib/continue-playback";
 import { useTheme } from "@/components/ThemeProvider";
@@ -14,8 +15,14 @@ import {
 import { LIGHT_THEME, NIGHT_THEME } from "@/lib/theme";
 import { recordStoryCompleted } from "@/lib/engagement";
 import { playSfx, isSfxEnabled } from "@/lib/sfx";
-import ReflectionPrompt from "@/components/story/ReflectionPrompt";
 import SfxToggle from "./SfxToggle";
+
+// 結尾才出現的反思卡 / 僅 ?cue=1 的對時面板：動態載入，縮小播放器主 chunk。
+const ReflectionPrompt = dynamic(
+  () => import("@/components/story/ReflectionPrompt"),
+  { ssr: false },
+);
+const StoryCuePanel = dynamic(() => import("./StoryCuePanel"), { ssr: false });
 import Wheel from "./decor/Wheel";
 import Sparkle from "./decor/Sparkle";
 import {
@@ -30,7 +37,7 @@ import {
 import decor from "./decor/decor.module.css";
 import styles from "./StoryPlayer.module.css";
 
-type StoryPlayerProps = {
+export type StoryPlayerProps = {
   slug: string;
   title: string;
   color: string;
@@ -504,20 +511,27 @@ export default function StoryPlayer({
             />
           </div>
         )}
-        {images.map((src, i) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={i}
-            src={src}
-            alt={`${title} 第 ${i + 1} 頁`}
-            aria-hidden={i !== page}
-            className={styles.image}
-            style={{ opacity: i === page && !hasEnded ? 1 : 0 }}
-            draggable={false}
-            onLoad={() => i === 0 && setIsLoading(false)}
-            onError={() => setMediaError("image")}
-          />
-        ))}
+        {images.map((src, i) => {
+          // 只掛載目前頁與左右相鄰頁，避免多頁故事一次塞入並下載全部插圖。
+          // 翻頁多為循序，相鄰預掛載即可保留淡入淡出；遠距跳頁時靠 loading 骨架過渡。
+          if (Math.abs(i - page) > 1) return null;
+          return (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={i}
+              src={src}
+              alt={`${title} 第 ${i + 1} 頁`}
+              aria-hidden={i !== page}
+              className={styles.image}
+              style={{ opacity: i === page && !hasEnded ? 1 : 0 }}
+              draggable={false}
+              loading={i === page ? "eager" : "lazy"}
+              decoding="async"
+              onLoad={() => i === page && setIsLoading(false)}
+              onError={() => setMediaError("image")}
+            />
+          );
+        })}
       </div>
 
       {hasEnded && (
@@ -707,36 +721,17 @@ export default function StoryPlayer({
       )}
 
       {cueMode && !hasEnded && (
-        <div className={styles.cuePanel} role="region" aria-label="字幕對時模式">
-          <div className={styles.cueHead}>
-            <span className={styles.cueNow}>{cueNow.toFixed(1)}s</span>
-            <span className={styles.cueCount}>
-              已記 {cueMarks.length}/{captions?.length ?? total} 句
-            </span>
-          </div>
-          <button
-            type="button"
-            className={styles.cueMark}
-            style={{ backgroundColor: color }}
-            onClick={markCue}
-          >
-            ⏱ 記下這一句（第 {cueMarks.length + 1} 句）
-          </button>
-          <code className={styles.cueOut}>
-            captionTimes: [{cueMarks.join(", ")}],
-          </code>
-          <div className={styles.cueBtns}>
-            <button type="button" onClick={undoCue} disabled={cueMarks.length === 0}>
-              復原
-            </button>
-            <button type="button" onClick={resetCue} disabled={cueMarks.length === 0}>
-              清除
-            </button>
-            <button type="button" onClick={copyCue} disabled={cueMarks.length === 0}>
-              {cueCopied ? "已複製 ✓" : "複製"}
-            </button>
-          </div>
-        </div>
+        <StoryCuePanel
+          color={color}
+          cueNow={cueNow}
+          cueMarks={cueMarks}
+          captionCount={captions?.length ?? total}
+          cueCopied={cueCopied}
+          onMark={markCue}
+          onUndo={undoCue}
+          onReset={resetCue}
+          onCopy={copyCue}
+        />
       )}
 
       {subtitlesOn && caption && !hasEnded && (

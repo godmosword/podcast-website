@@ -29,8 +29,8 @@
   }
 
   .dot {
-    width: 12px;
-    height: 12px;
+    width: 24px;
+    height: 24px;
     justify-content: center;
   }
 
@@ -59,8 +59,9 @@
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-  width: 16px;
-  height: 16px;
+  /* 視覺上的點為 ::after（12px），但點擊/觸控區擴大到 24px 以符合 WCAG 2.5.8 最小目標 */
+  width: 24px;
+  height: 24px;
   border-radius: 999px;
   text-decoration: none;
 }

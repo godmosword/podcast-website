@@ -52,7 +52,15 @@ export default function LandingScrollView({
         scrollToSegment,
       }}
     >
-      <div ref={scrollRef} className={className}>
+      {/* 首頁鎖定文件捲動，改由此容器負責 snap；tabIndex 讓鍵盤使用者
+          可聚焦並用方向鍵/PageUp-Down 捲動，作為 SegmentNav 之外的退路。 */}
+      <div
+        ref={scrollRef}
+        className={className}
+        tabIndex={0}
+        role="region"
+        aria-label="主題專區，可用方向鍵捲動瀏覽"
+      >
         {children}
       </div>
     </LandingScrollContext.Provider>

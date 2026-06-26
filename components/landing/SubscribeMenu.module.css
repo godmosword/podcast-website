@@ -7,10 +7,11 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  min-height: 40px;
+  min-height: 44px;
   padding: 6px 10px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--landing-brand-ink, #fff) 18%, transparent);
+  /* 比頂欄略深的橘底，讓白字維持 ≥4.5:1（半透明白會變淺，對比不足） */
+  background: color-mix(in srgb, #000 14%, var(--landing-brand));
   color: inherit;
   font-weight: 700;
   font-size: 0.78rem;

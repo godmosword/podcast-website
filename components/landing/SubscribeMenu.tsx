@@ -3,14 +3,18 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { BrandSvg, PLATFORM_ICON_PATHS } from "@/lib/connect-icons";
 import { trackPlatformClick } from "@/lib/analytics";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { visiblePlatforms } from "@/lib/platforms";
 import styles from "./SubscribeMenu.module.css";
 
 export default function SubscribeMenu() {
   const menuId = useId();
   const wrapRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLUListElement>(null);
   const [open, setOpen] = useState(false);
   const platforms = visiblePlatforms();
+
+  useFocusTrap(open, dropdownRef);
 
   useEffect(() => {
     if (!open) return;
@@ -61,7 +65,7 @@ export default function SubscribeMenu() {
         </span>
       </button>
       {open ? (
-        <ul id={menuId} className={styles.dropdown} role="menu">
+        <ul id={menuId} ref={dropdownRef} className={styles.dropdown} role="menu">
           {platforms.map((platform) => (
             <li key={platform.label} role="none">
               <a

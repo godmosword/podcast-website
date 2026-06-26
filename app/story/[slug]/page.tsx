@@ -81,6 +81,7 @@ export default async function StoryDetailPage({
             href={`/story/${story.slug}/play`}
             color={story.color}
             className={styles.playMain}
+            label={`開始看故事：${story.title}`}
           />
           <SubscriptionCTA accent={story.color} />
           <ShareButton

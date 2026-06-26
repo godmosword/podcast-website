@@ -8,6 +8,12 @@
   -webkit-overflow-scrolling: touch;
 }
 
+/* 鍵盤聚焦捲動區時給出可見指示（內縮避免被內容裁切） */
+.root:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: -3px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .root {
     scroll-snap-type: none;

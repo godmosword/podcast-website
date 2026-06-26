@@ -104,10 +104,15 @@ export default function RootLayout({
       </head>
       <body>
         <ThemeProvider>
+          <a href="#main-content" className="skip-link">
+            跳到主內容
+          </a>
           <div className="site-backdrop" aria-hidden />
           <SvgDefs />
           <SiteNavBar />
-          <div className="site-root">{children}</div>
+          <div id="main-content" tabIndex={-1} className="site-root">
+            {children}
+          </div>
           <ServiceWorkerRegister />
           <Analytics />
         </ThemeProvider>

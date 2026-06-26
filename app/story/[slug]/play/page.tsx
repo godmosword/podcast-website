@@ -4,7 +4,7 @@ import { getStory, getNextStory, getStories } from "@/data/content";
 import { storyPlayMetadata } from "@/lib/story-metadata";
 import { getSubtitles } from "@/lib/subtitles";
 import { pad2, storyAudioPath, storyCoverPath } from "@/lib/story-utils";
-import StoryPlayer from "@/components/StoryPlayer";
+import StoryPlayer from "@/components/StoryPlayerClient";
 
 export function generateStaticParams() {
   return getStories().map((story) => ({ slug: story.slug }));

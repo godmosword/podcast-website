@@ -12,6 +12,29 @@
   border: 0;
 }
 
+/* 全站「跳到主內容」連結：平時隱藏，鍵盤 Tab 聚焦時出現 */
+.skip-link {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  z-index: 999;
+  transform: translate(-50%, -150%);
+  padding: 0.7rem 1.1rem;
+  background: var(--card);
+  color: var(--ink);
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  text-decoration: none;
+  transition: transform 0.15s ease;
+}
+
+.skip-link:focus-visible {
+  transform: translate(-50%, calc(var(--safe-top) + 0.5rem));
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
 :root {
   /* 多彩粉嫩配色（純白底） */
   --bg: #ffffff;
@@ -69,7 +92,8 @@
   --safe-right: env(safe-area-inset-right, 0px);
 
   /* Landing Hub（Storyline 式頂欄） */
-  --landing-brand: #e87722;
+  /* 品牌橘加深至對白字 ≥4.5:1（WCAG AA）；原 #e87722 對白僅 2.96。 */
+  --landing-brand: #b3560f;
   --landing-brand-ink: #ffffff;
   /* sticky 頂欄高度：按鈕 44 + 上下 padding 20 + 瀏海安全區 */
   --nav-h: calc(64px + var(--safe-top));
@@ -81,6 +105,9 @@
   --focus-ring: var(--ink);
   --chip-active-fg: #ffffff;
   --float-amp: 4px;
+  /* 螢光筆色塊上的文字：底色恆為淺色（黃/粉/薄荷…），文字需恆深，
+     不可隨夜晚模式變淺，否則淺字壓淺底會讀不到（WCAG 對比）。 */
+  --marker-ink: #34302b;
 }
 
 /* ============ 夜晚模式（睡前） ============ */
@@ -127,7 +154,7 @@
   --chip-active-fg: #1c2440;
   --float-amp: 2px;
 
-  --landing-brand: #d96a1a;
+  --landing-brand: #b3560f;
   --landing-brand-ink: #fff8f0;
   --landing-heading: #5da8a1;
 }
@@ -177,6 +204,11 @@ body {
   position: relative;
   z-index: 1;
   min-height: 100%;
+}
+
+/* skip link 目標為容器，程式化聚焦時不顯示外框 */
+.site-root:focus {
+  outline: none;
 }
 
 /* 固定柔光層（獨立節點，避免 body::before + sticky 在 iOS 上合成白塊） */
@@ -306,7 +338,7 @@ button:focus-visible {
   position: relative;
   display: inline-block;
   padding: 0.06em 0.45em;
-  color: var(--ink);
+  color: var(--marker-ink);
   isolation: isolate;
 }
 

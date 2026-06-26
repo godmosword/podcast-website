@@ -33,8 +33,9 @@
 }
 
 .line {
+  /* 邊框維持 LINE 品牌綠；文字加深至對白底 ≥4.5:1（原 #06c755 僅 2.25） */
   border-color: #06c755;
-  color: #06c755;
+  color: #047a34;
 }
 
 .btn:active {
