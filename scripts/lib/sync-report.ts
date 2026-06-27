@@ -14,6 +14,12 @@ export type SyncRunReport = {
   subtitlesMissing: string[];
   /** 新集 slug（ep-N），供開 illustrate Issue */
   illustratePending: string[];
+  /** 本輪新增至 data/browse-index.json 的車種 */
+  browseIndexVehicles: string[];
+  /** 本輪新增至 data/browse-index.json 的主題 */
+  browseIndexTopics: string[];
+  /** emoji 依索引校正 */
+  emojiSync: string[];
 };
 
 export function createEmptyReport(dryRun: boolean): SyncRunReport {
@@ -27,6 +33,9 @@ export function createEmptyReport(dryRun: boolean): SyncRunReport {
     subtitlesCreated: [],
     subtitlesMissing: [],
     illustratePending: [],
+    browseIndexVehicles: [],
+    browseIndexTopics: [],
+    emojiSync: [],
   };
 }
 

@@ -6,6 +6,9 @@
   --seek-thumb: 18px;
   --seek-hit: 28px;
   --transport-gap: 14px;
+  --top-tool-size: 48px;
+  --top-tool-gap: 8px;
+  --top-tool-font: 0.92rem;
   position: fixed;
   inset: 0;
   background: #000;
@@ -28,6 +31,9 @@
     --seek-thumb: 20px;
     --seek-hit: 30px;
     --transport-gap: 18px;
+    --top-tool-size: 52px;
+    --top-tool-gap: 10px;
+    --top-tool-font: 0.96rem;
   }
 }
 
@@ -286,10 +292,9 @@
   right: 0;
   z-index: 5;
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 8px;
-  padding: calc(10px + var(--safe-top)) calc(12px + var(--safe-right)) 20px
+  align-items: center;
+  gap: var(--top-tool-gap);
+  padding: calc(10px + var(--safe-top)) calc(12px + var(--safe-right)) 16px
     calc(12px + var(--safe-left));
   background: linear-gradient(
     to bottom,
@@ -299,21 +304,18 @@
   pointer-events: none;
 }
 
-.topBarHead {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  pointer-events: none;
-}
-
 .topBarTools {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex: 0 0 auto;
+  gap: var(--top-tool-gap);
   pointer-events: none;
+}
+
+.topBarTools svg {
+  width: 24px;
+  height: 24px;
 }
 
 .glassPill {
@@ -322,13 +324,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  min-width: 44px;
-  min-height: 44px;
-  padding: 8px 12px;
+  gap: 5px;
+  min-width: var(--top-tool-size);
+  min-height: var(--top-tool-size);
+  padding: 0 14px;
   border-radius: 999px;
   color: #fff;
-  font-size: 0.88rem;
+  font-size: var(--top-tool-font);
   font-weight: 600;
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
@@ -347,19 +349,22 @@
 
 .closeBtn {
   composes: glassPill;
-  width: 44px;
-  min-width: 44px;
+  flex: 0 0 auto;
+  width: var(--top-tool-size);
+  min-width: var(--top-tool-size);
   padding: 0;
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   font-weight: 700;
 }
 
 .topTitle {
   flex: 1 1 auto;
   min-width: 0;
+  margin: 0;
   color: #fff;
-  font-size: 1.05rem;
+  font-size: clamp(0.98rem, 0.9rem + 0.6vw, 1.12rem);
   font-weight: 700;
+  line-height: var(--top-tool-size);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -376,14 +381,14 @@
 }
 
 .subtitlesLabel {
-  font-size: 0.82rem;
+  font-size: 0.88rem;
   font-weight: 700;
 }
 
 .sfxBtn {
   composes: glassPill;
-  width: 44px;
-  min-width: 44px;
+  width: var(--top-tool-size);
+  min-width: var(--top-tool-size);
   padding: 0;
 }
 
@@ -393,19 +398,21 @@
   align-items: flex-end;
   justify-content: center;
   gap: 0;
-  padding: 8px 11px 9px;
+  width: var(--top-tool-size);
+  min-width: var(--top-tool-size);
+  padding: 0 12px 2px;
   line-height: 1;
   font-weight: 800;
   letter-spacing: -0.05em;
 }
 
 .aaSmall {
-  font-size: 0.62rem;
+  font-size: 0.72rem;
   line-height: 1;
 }
 
 .aaLarge {
-  font-size: 0.98rem;
+  font-size: 1.12rem;
   line-height: 1;
   transform: translateY(-1px);
 }
@@ -724,30 +731,12 @@
 @media (max-width: 640px) {
   .player {
     --controls-height: 142px;
+    --top-tool-size: 46px;
+    --top-tool-gap: 7px;
   }
 
   .topBar {
-    gap: 6px;
     padding-bottom: 14px;
-  }
-
-  .topBarTools {
-    gap: 5px;
-  }
-
-  .topTitle {
-    font-size: 0.95rem;
-  }
-
-  .subtitlesLabel {
-    display: none;
-  }
-
-  .subtitlesBtn,
-  .subtitlesBtnOn {
-    width: 44px;
-    min-width: 44px;
-    padding: 0;
   }
 
   .controls {
@@ -765,16 +754,32 @@
 }
 
 @media (max-width: 380px) {
+  .player {
+    --top-tool-size: 44px;
+    --top-tool-gap: 6px;
+    --top-tool-font: 0.86rem;
+  }
+
+  .subtitlesLabel {
+    display: none;
+  }
+
+  .subtitlesBtn,
+  .subtitlesBtnOn {
+    width: var(--top-tool-size);
+    min-width: var(--top-tool-size);
+    padding: 0;
+  }
+
   .timerBtn {
-    font-size: 0.8rem;
-    padding: 8px 10px;
+    padding: 0 10px;
   }
 }
 
 /* ---- 字幕對時模式（authoring，?cue=1）---- */
 .cuePanel {
   position: fixed;
-  top: 64px;
+  top: calc(var(--top-tool-size) + var(--safe-top) + 18px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 6;

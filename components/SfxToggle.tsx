@@ -61,7 +61,7 @@ export default function SfxToggle({ className = "", audioRef }: SfxToggleProps) 
       aria-label={on ? "關閉聲音" : "開啟聲音"}
       title={on ? "聲音：開" : "聲音：關"}
     >
-      {on ? <VolumeOnIcon size={22} /> : <VolumeOffIcon size={22} />}
+      {on ? <VolumeOnIcon size={24} /> : <VolumeOffIcon size={24} />}
     </button>
   );
 }

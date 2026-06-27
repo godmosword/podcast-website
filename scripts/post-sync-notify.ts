@@ -57,6 +57,22 @@ export function buildCommitMessage(report: SyncRunReport): string {
     lines.push("");
   }
 
+  if (report.browseIndexVehicles.length > 0 || report.browseIndexTopics.length > 0) {
+    lines.push("## 找車車／主題索引");
+    if (report.browseIndexVehicles.length > 0) {
+      lines.push(`- 新車種：${report.browseIndexVehicles.join(", ")}（已寫入 data/browse-index.json + emoji）`);
+    }
+    if (report.browseIndexTopics.length > 0) {
+      lines.push(`- 新主題：${report.browseIndexTopics.join(", ")}（已寫入 data/browse-index.json + 圖示 symbol）`);
+    }
+    lines.push("");
+  }
+
+  if (report.emojiSync.length > 0) {
+    lines.push(`## Emoji 校正：${report.emojiSync.join(", ")}`);
+    lines.push("");
+  }
+
   if (report.subtitlesCreated.length > 0) {
     lines.push(`## 本輪新轉錄字幕：${report.subtitlesCreated.join(", ")}`);
     lines.push("（草稿；請校對 Bonbon／馬米等人名）");
@@ -114,7 +130,7 @@ export function buildIssueBody(slug: string, report: SyncRunReport): string {
 
 - [ ] 抽查站上 [${slug}](${storyUrl}) 能播、封面正確
 - [ ] \`npm run proofread:subtitles -- ${slug} [--fix]\` → 人工修 JSON → \`--mark\`（[SUBTITLE-PROOFREAD.md](docs/SUBTITLE-PROOFREAD.md)）
-- [ ] 確認車種／標籤（必要時 \`data/apple-sync.defaults.json\` overrides）
+- [ ] 確認車種／標籤（必要時 \`data/apple-sync.defaults.json\` overrides；sync 會自動更新 \`data/browse-index.json\`）
 - [ ] \`npm run illustrate -- ${slug} --segment-only\`
 - [ ] \`npm run illustrate -- ${slug}\`（需 \`OPENAI_API_KEY\`）
 - [ ] 審 \`public/.illustrate-staging/${slug}/contact.html\`

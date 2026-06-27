@@ -329,7 +329,7 @@ export const manualStories: ManualStory[] = [
     date: "2026-05-04",
     duration: "6:37",
     vehicle: "電動車",
-    emoji: "🚗",
+    emoji: "🔋",
     color: "#0ea5e9",
     audio: "audio.mp3",
     pageCount: 21,

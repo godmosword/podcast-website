@@ -39,6 +39,12 @@ import {
 } from "./lib/episode-match";
 import { downloadAndSaveCover } from "./lib/cover-image";
 import {
+  applyVehicleEmojis,
+  invalidateBrowseIndexCache,
+  reconcileBrowseIndex,
+  writeBrowseIndex,
+} from "./lib/browse-index";
+import {
   hasSubtitleSidecar,
   listSidecarSlugs,
   listSlugsMissingSubtitles,
@@ -436,6 +442,24 @@ function backfillMissingVehicles(
   return { stories, updatedSlugs };
 }
 
+/** 依目錄補齊找車車索引，並讓後續車種推斷讀到新 patterns。 */
+function syncBrowseIndex(
+  catalog: Story[],
+  dryRun: boolean,
+): { addedVehicles: string[]; addedTopics: string[] } {
+  const { addedVehicles, addedTopics, index } = reconcileBrowseIndex(catalog);
+  if (addedVehicles.length > 0 || addedTopics.length > 0) {
+    console.log(
+      `Browse index: +vehicles [${addedVehicles.join(", ")}] +topics [${addedTopics.join(", ")}]`,
+    );
+    if (!dryRun) {
+      writeBrowseIndex(index);
+      invalidateBrowseIndexCache();
+    }
+  }
+  return { addedVehicles, addedTopics };
+}
+
 type MetadataUpdateResult = {
   stories: Story[];
   updatedSlugs: string[];
@@ -688,6 +712,11 @@ async function main(): Promise<void> {
     console.log(`Tags backfill: ${tagBackfill.updatedSlugs.join(", ")}`);
   }
 
+  const catalogForIndex = [...manualStories, ...tagBackfill.stories, ...added];
+  const browseAdded = syncBrowseIndex(catalogForIndex, dryRun);
+  report.browseIndexVehicles = browseAdded.addedVehicles;
+  report.browseIndexTopics = browseAdded.addedTopics;
+
   const vehicleBackfill = backfillMissingVehicles(
     [...tagBackfill.stories, ...added],
     defaults,
@@ -698,7 +727,17 @@ async function main(): Promise<void> {
     console.log(`Vehicle backfill: ${vehicleBackfill.updatedSlugs.join(", ")}`);
   }
 
-  const nextSyncedCatalog = vehicleBackfill.stories.sort((a, b) => b.ep - a.ep);
+  const emojiSync = applyVehicleEmojis(vehicleBackfill.stories);
+  report.emojiSync = emojiSync.updatedSlugs;
+  if (emojiSync.updatedSlugs.length > 0) {
+    console.log(`Emoji sync: ${emojiSync.updatedSlugs.join(", ")}`);
+  }
+
+  const nextSyncedCatalog = emojiSync.stories.sort((a, b) => b.ep - a.ep);
+
+  const hasBrowseIndexChanges =
+    browseAdded.addedVehicles.length > 0 || browseAdded.addedTopics.length > 0;
+  const hasEmojiSync = emojiSync.updatedSlugs.length > 0;
 
   report.newEpisodes = added.map((s) => ({
     slug: s.slug,
@@ -716,7 +755,9 @@ async function main(): Promise<void> {
       !hasMetadataChanges &&
       !hasNewEpisodes &&
       !hasTagBackfill &&
-      !hasVehicleBackfill
+      !hasVehicleBackfill &&
+      !hasBrowseIndexChanges &&
+      !hasEmojiSync
     ) {
       console.log("[dry-run] No new episodes or metadata changes.");
     }
@@ -730,7 +771,9 @@ async function main(): Promise<void> {
     !hasMetadataChanges &&
     !hasNewEpisodes &&
     !hasTagBackfill &&
-    !hasVehicleBackfill
+    !hasVehicleBackfill &&
+    !hasBrowseIndexChanges &&
+    !hasEmojiSync
   ) {
     console.log("No new episodes or metadata changes.");
     const nextSeen = reconcileSeenGuids(rssItems, state, catalog, eps);
@@ -762,7 +805,7 @@ async function main(): Promise<void> {
   if (
     !hasMetadataChanges &&
     !hasNewEpisodes &&
-    (hasTagBackfill || hasVehicleBackfill)
+    (hasTagBackfill || hasVehicleBackfill || hasBrowseIndexChanges || hasEmojiSync)
   ) {
     console.log("No RSS metadata changes; applying profile backfill only.");
   }

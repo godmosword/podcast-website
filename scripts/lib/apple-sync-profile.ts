@@ -1,40 +1,15 @@
 import type { Story } from "../../data/stories";
+import {
+  emojiForVehicle,
+  readBrowseIndex,
+  vehicleMatchRules,
+} from "./browse-index";
 
 /** 與官網目前 Apple 新集上架框架一致（單圖 MVP + 首頁/內頁 UI 慣例）。 */
 export const APPLE_SYNC_PAGE_COUNT = 1;
 
 /** 每集最多自動標幾個主題 tag（與手動集數一致）。 */
 const MAX_INFERRED_TAGS = 3;
-
-/** 標題／摘要／關鍵字 → 車種（無 overrides 時使用，避免新集一律變「其他」）。 */
-const VEHICLE_FROM_TEXT: [RegExp, string][] = [
-  [/怪獸卡車|Monster Truck/i, "怪獸卡車"],
-  [/恐龍車/, "恐龍車"],
-  [/警車/, "警車"],
-  [/巴士/, "巴士"],
-  [/救護車/, "救護車"],
-  [/挖土機/, "挖土機"],
-  [/清潔車/, "清潔車"],
-  [/賽車/, "賽車"],
-  [/無人機/, "無人機"],
-  [/電動車/, "電動車"],
-  [/高鐵/, "高鐵"],
-];
-
-const VEHICLE_EMOJI: Record<string, string> = {
-  怪獸卡車: "🚚",
-  恐龍車: "🦕",
-  警車: "🚓",
-  巴士: "🚌",
-  救護車: "🚑",
-  挖土機: "🚜",
-  清潔車: "🚛",
-  賽車: "🏎️",
-  無人機: "🛸",
-  電動車: "🔋",
-  高鐵: "🚄",
-  其他: "🚗",
-};
 
 /** RSS itunes:keywords → 站內主題 tag（對齊 /topic 教育向分類，略過泛用行銷字）。 */
 const KEYWORD_TO_TAG: [RegExp, string][] = [
@@ -83,20 +58,20 @@ function inferVehicleFromText(
   const titlePart = title.slice(0, title.indexOf("｜") >= 0 ? title.indexOf("｜") : title.length);
   // 標題／關鍵字優先，避免摘要尾段玩笑（如「救護車、警車傻傻分不清楚」）誤判車種
   const primaryBlob = [titlePart, subtitle, keywords.join(" ")].filter(Boolean).join(" ");
-  for (const [pattern, vehicle] of VEHICLE_FROM_TEXT) {
+  for (const [pattern, vehicle] of vehicleMatchRules()) {
     if (pattern.test(primaryBlob)) return vehicle;
   }
   const textBlob = [title, subtitle, summary ?? "", keywords.join(" ")]
     .filter(Boolean)
     .join(" ");
-  for (const [pattern, vehicle] of VEHICLE_FROM_TEXT) {
+  for (const [pattern, vehicle] of vehicleMatchRules()) {
     if (pattern.test(textBlob)) return vehicle;
   }
   return null;
 }
 
-function emojiForVehicle(vehicle: string): string {
-  return VEHICLE_EMOJI[vehicle] ?? VEHICLE_EMOJI["其他"];
+function emojiForInferredVehicle(vehicle: string): string {
+  return emojiForVehicle(vehicle, readBrowseIndex());
 }
 
 function subtitleFromTitle(title: string): string {
@@ -172,7 +147,7 @@ export function applyVehicleInference(
   return {
     ...story,
     vehicle: inferred,
-    emoji: emojiForVehicle(inferred),
+    emoji: emojiForInferredVehicle(inferred),
   };
 }
 

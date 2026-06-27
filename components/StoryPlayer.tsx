@@ -606,12 +606,10 @@ export default function StoryPlayer({
 
       {!hasEnded && (
         <div className={styles.topBar}>
-          <div className={styles.topBarHead}>
-            <Link href={backHref} className={styles.closeBtn} aria-label="關閉">
-              ✕
-            </Link>
-            <span className={styles.topTitle}>{title}</span>
-          </div>
+          <Link href={backHref} className={styles.closeBtn} aria-label="關閉">
+            ✕
+          </Link>
+          <h1 className={styles.topTitle}>{title}</h1>
           <div className={styles.topBarTools}>
           <div className={styles.timerWrap} ref={timerWrapRef}>
             <button
@@ -713,7 +711,7 @@ export default function StoryPlayer({
             aria-label={subtitlesOn ? "字幕：開" : "字幕：關"}
             type="button"
           >
-            <CaptionsIcon size={18} />
+            <CaptionsIcon size={22} />
             <span className={styles.subtitlesLabel}>字幕</span>
           </button>
           </div>

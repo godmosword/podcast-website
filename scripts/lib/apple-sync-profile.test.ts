@@ -79,6 +79,16 @@ describe("inferVehicle", () => {
       ),
     ).toBe("警車");
   });
+
+  it("EP14：消防車（標題）", () => {
+    expect(
+      inferVehicle(
+        "雙胞胎消防車合作任務｜手足一起長大",
+        "圈圈和點點是雙胞胎消防車。",
+        [],
+      ),
+    ).toBe("消防車");
+  });
 });
 
 describe("applyVehicleInference", () => {

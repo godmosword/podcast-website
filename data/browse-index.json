@@ -1,0 +1,96 @@
+{
+  "vehicles": {
+    "怪獸卡車": {
+      "emoji": "🚚",
+      "patterns": ["怪獸卡車", "Monster Truck"]
+    },
+    "恐龍車": {
+      "emoji": "🦕",
+      "patterns": ["恐龍車"]
+    },
+    "警車": {
+      "emoji": "🚓",
+      "patterns": ["警車"]
+    },
+    "消防車": {
+      "emoji": "🚒",
+      "patterns": ["消防車"]
+    },
+    "巴士": {
+      "emoji": "🚌",
+      "patterns": ["巴士", "公車"]
+    },
+    "救護車": {
+      "emoji": "🚑",
+      "patterns": ["救護車"]
+    },
+    "挖土機": {
+      "emoji": "🚜",
+      "patterns": ["挖土機", "鏟土機"]
+    },
+    "清潔車": {
+      "emoji": "🚛",
+      "patterns": ["清潔車", "垃圾車"]
+    },
+    "賽車": {
+      "emoji": "🏎️",
+      "patterns": ["賽車", "跑車"]
+    },
+    "無人機": {
+      "emoji": "🛸",
+      "patterns": ["無人機", "空拍"]
+    },
+    "電動車": {
+      "emoji": "🔋",
+      "patterns": ["電動車", "電動"]
+    },
+    "高鐵": {
+      "emoji": "🚄",
+      "patterns": ["高鐵", "列車"]
+    },
+    "計程車": {
+      "emoji": "🚕",
+      "patterns": ["計程車", "小黃"]
+    },
+    "餐車": {
+      "emoji": "🍿",
+      "patterns": ["餐車", "小吃車", "爆米花"]
+    },
+    "吊車": {
+      "emoji": "🏗️",
+      "patterns": ["吊車", "起重"]
+    },
+    "捷運": {
+      "emoji": "🚇",
+      "patterns": ["捷運", "MRT", "地鐵"]
+    },
+    "消毒車": {
+      "emoji": "🧴",
+      "patterns": ["消毒車", "消毒"]
+    },
+    "其他": {
+      "emoji": "🚗",
+      "patterns": []
+    }
+  },
+  "topics": {
+    "勇氣": { "symbol": "star" },
+    "勇敢": { "symbol": "star" },
+    "成長": { "symbol": "sprout" },
+    "安全": { "symbol": "shield" },
+    "合作": { "symbol": "link" },
+    "情緒": { "symbol": "heart" },
+    "守信用": { "symbol": "check" },
+    "好習慣": { "symbol": "habit" },
+    "冷靜": { "symbol": "calm" },
+    "助人": { "symbol": "help" },
+    "求助": { "symbol": "ask" },
+    "負責": { "symbol": "flag" },
+    "接受失敗": { "symbol": "retry" },
+    "創意": { "symbol": "spark" },
+    "想像力": { "symbol": "dream" },
+    "解決問題": { "symbol": "puzzle" },
+    "手足": { "symbol": "link" },
+    "睡前": { "symbol": "calm" }
+  }
+}

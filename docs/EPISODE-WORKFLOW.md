@@ -53,6 +53,7 @@ npm run illustrate -- <slug> --approve
 
 # 5. 驗證（對照 ep-9／ep-10）
 npm run verify:episodes
+npm run verify:browse-index
 
 # 6. 建置與推送
 npm run sync:apple && npm run build
@@ -67,6 +68,7 @@ git push
 ```bash
 npm run verify:episodes              # error 才 exit 1，warn 列出待辦
 npm run verify:episodes -- --strict  # warn 也視為失敗（approve 前最後把關）
+npm run verify:browse-index          # 找車車／主題索引與目錄一致（warn 不擋 CI）
 npm run check                        # test + verify + build，與 CI 同一套
 ```
 

@@ -1,3 +1,5 @@
+import browseIndex from "@/data/browse-index.json";
+
 export type TopicSymbol =
   | "all"
   | "star"
@@ -23,24 +25,9 @@ export type TopicVisual = {
   fg: string;
 };
 
-const TAG_SYMBOL: Record<string, TopicSymbol> = {
-  勇氣: "star",
-  勇敢: "star",
-  成長: "sprout",
-  安全: "shield",
-  合作: "link",
-  情緒: "heart",
-  守信用: "check",
-  好習慣: "habit",
-  冷靜: "calm",
-  助人: "help",
-  求助: "ask",
-  負責: "flag",
-  接受失敗: "retry",
-  創意: "spark",
-  想像力: "dream",
-  解決問題: "puzzle",
-};
+const TAG_SYMBOL: Record<string, TopicSymbol> = Object.fromEntries(
+  Object.entries(browseIndex.topics).map(([tag, entry]) => [tag, entry.symbol]),
+) as Record<string, TopicSymbol>;
 
 const PALETTE: Record<
   TopicSymbol,

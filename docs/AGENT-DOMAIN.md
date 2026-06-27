@@ -65,6 +65,7 @@
 | **全 repo 預設** | `npm test` |
 | **Lint** | `npm run lint` |
 | **故事／插圖／字幕／metadata** | `npm run verify:episodes` |
+| **找車車／主題索引** | `npm run verify:browse-index` |
 | **approve 前最後把關** | `npm run verify:episodes -- --strict` |
 | **上線前完整檢查** | `npm run check`（test + verify + build，與 CI 同一套） |
 | **新增中文文案** | `npm run font:subset`（需 `/tmp/huninn.ttf`） |

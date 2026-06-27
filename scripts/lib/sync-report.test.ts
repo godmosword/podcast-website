@@ -12,6 +12,9 @@ const sampleReport: SyncRunReport = {
   subtitlesCreated: ["ep-10"],
   subtitlesMissing: [],
   illustratePending: ["ep-10"],
+  browseIndexVehicles: [],
+  browseIndexTopics: [],
+  emojiSync: [],
 };
 
 describe("post-sync-notify", () => {

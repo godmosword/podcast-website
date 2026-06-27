@@ -423,12 +423,13 @@ Tiled 關卡管線、6–10 關+世界地圖、檢查點、多敵人類型、視
 | 9 | 寫入 metadata | `data/apple-synced.json` | `pageCount: 1` |
 | 10 | 更新狀態 | `data/apple-sync-state.json` | guid 對照 |
 | 11 | 車種／標籤推斷 | vehicle、tags | 關鍵字或「其他」 |
+| 11b | **找車車索引** | `data/browse-index.json` | 新車種 emoji、新主題 symbol；`npm run verify:browse-index` |
 | 12 | 字幕 backfill | 缺字幕的舊集補轉 | 同 run 內 |
 | 13 | `npm test` + `npm run build` | — | 有變更才跑 |
 | 14 | Commit + push `main` | Vercel 部署 MVP | 見下方 commit 範圍 |
 | 15 | **生圖通知** | Issue／webhook | **待實作**（見 P2 條目） |
 
-**GHA 目前 `git add` 範圍：** `data/apple-synced.json`、`data/apple-sync-state.json`、`public/stories/`、`data/subtitles/`。
+**GHA 目前 `git add` 範圍：** `data/apple-synced.json`、`data/apple-sync-state.json`、`data/browse-index.json`、`public/stories/`、`data/subtitles/`。
 
 **GHA 不會碰：** `public/.illustrate-staging/`、`data/apple-sync.defaults.json`（approve 寫入 overrides）、`data/characters.json`、`data/scenes/` — 生圖產物需**人工 commit**。
 
@@ -439,7 +440,7 @@ Tiled 關卡管線、6–10 關+世界地圖、檢查點、多敵人類型、視
 | 16 | 收到通知（Issue／LINE） | 維護者 |
 | 17 | 抽查站上 MVP | `/story/ep-N` 能播、封面正確 |
 | 18 | 字幕校對 + `--mark` | `npm run proofread:subtitles -- ep-N`（[SUBTITLE-PROOFREAD.md](./docs/SUBTITLE-PROOFREAD.md)） |
-| 19 | 確認車種／標籤 | `apple-sync.defaults.json` overrides |
+| 19 | 確認車種／標籤 | `apple-sync.defaults.json` overrides；必要時手動補 `data/browse-index.json` patterns |
 | 20 | （可選）`npm run font:subset` | 新摘要有生僻字時 |
 
 ### Phase 3 — 生圖管線（本機，需 `OPENAI_API_KEY`）
