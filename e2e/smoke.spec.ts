@@ -61,6 +61,20 @@ test("關於頁面", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "關於車車遊樂園" })).toBeVisible();
 });
 
+test("車車宇宙樂園地圖 smoke", async ({ page }) => {
+  await page.goto("/adventures");
+  await expect(
+    page.getByRole("region", { name: "車車宇宙樂園地圖" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /車車樂園，開放中/ }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: /車車樂園，開放中/ }).click();
+  await expect(page.getByRole("dialog")).toBeVisible({ timeout: 2_000 });
+  await expect(page.getByRole("heading", { name: "車車樂園" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "車車樂園入口" })).toBeVisible();
+});
+
 test("節目數據中心 /studio", async ({ page }) => {
   await page.goto("/studio");
   await expect(page.getByRole("heading", { name: "節目數據中心" })).toBeVisible();

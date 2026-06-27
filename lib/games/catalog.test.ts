@@ -26,4 +26,9 @@ describe("games catalog", () => {
     expect(urls.some((url) => url.endsWith("/games/car-star"))).toBe(false);
     expect(urls.some((url) => url.endsWith("/games/car-mission"))).toBe(false);
   });
+
+  test("includes universe map route in sitemap", () => {
+    const urls = sitemap().map((entry) => entry.url);
+    expect(urls.some((url) => url.endsWith("/adventures"))).toBe(true);
+  });
 });

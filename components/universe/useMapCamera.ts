@@ -186,6 +186,8 @@ export function useMapCamera(): MapCamera {
 
   const onPointerDown = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
+      // 島嶼 button 自行處理 click；勿 capture，否則 pointer 事件到不了 button。
+      if ((e.target as Element).closest("button")) return;
       e.currentTarget.setPointerCapture?.(e.pointerId);
       pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
       if (pointersRef.current.size === 2) prevPinchRef.current = null;

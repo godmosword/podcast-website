@@ -284,9 +284,16 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 - [x] `components/universe/MapControls.tsx` + `.module.css` — 回大門 / 縮放 +-
 - [x] `components/universe/ZoneSheet.tsx` + `.module.css` — carPark 入口清單 / stub 敬請期待（mailto 通知 R0 stub）
 - [x] `app/adventures/page.tsx` — 新路由 + metadata + sr-only 島嶼清單
-- [x] verify：`npm run test`（244）+ `npm run build` 綠燈；`git diff` 確認 landing 未動
+- [x] verify：`npm run test`（244）+ `npm run build` 綠燈；`git diff` 確認 landing 未動 — `ee04e3f` · a11y/timer cleanup `acff285`
 
-**changelog：** R0 樂園地圖系統 + zones 資料模型上線於 `/adventures`（資料驅動四島、Bézier 跨海橋、手刻 pan/zoom/fly-to、ZoneSheet stub）；car-park 子連結衍生自 `LANDING_SEGMENTS` 單一資料源。
+**R0 ship（可發現性）：**
+
+- [x] `app/sitemap.ts` — `/adventures` 納入站點地圖
+- [x] `SiteNavBar` — 選單「宇宙地圖」入口
+- [x] `e2e/smoke.spec.ts` — 地圖渲染 + 點島開 sheet smoke
+- [x] `lib/games/catalog.test.ts` — sitemap 含 `/adventures`
+
+**changelog：** R0 樂園地圖系統 + zones 資料模型上線於 `/adventures`（資料驅動四島、Bézier 跨海橋、手刻 pan/zoom/fly-to、ZoneSheet stub）；car-park 子連結衍生自 `LANDING_SEGMENTS` 單一資料源。R0 ship：`ee04e3f` · a11y `acff285` · 可發現性 + 點島修復 `1ded54c`。
 
 ---
 
