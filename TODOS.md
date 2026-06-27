@@ -293,7 +293,7 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 - [x] `e2e/smoke.spec.ts` — 地圖渲染 + 點島開 sheet smoke
 - [x] `lib/games/catalog.test.ts` — sitemap 含 `/adventures`
 
-**changelog：** R0 樂園地圖系統 + zones 資料模型上線於 `/adventures`（資料驅動四島、Bézier 跨海橋、手刻 pan/zoom/fly-to、ZoneSheet stub）；car-park 子連結衍生自 `LANDING_SEGMENTS` 單一資料源。R0 ship：`ee04e3f` · a11y `acff285` · 可發現性 + 點島修復 `1ded54c`。
+**changelog：** R0 樂園地圖系統 + zones 資料模型上線於 `/adventures`（資料驅動四島、Bézier 跨海橋、手刻 pan/zoom/fly-to、ZoneSheet stub）；car-park 子連結衍生自 `LANDING_SEGMENTS` 單一資料源。R0 ship：`ee04e3f` · a11y `acff285` · 可發現性 + 點島修復 `a676713`。
 
 ---
 
