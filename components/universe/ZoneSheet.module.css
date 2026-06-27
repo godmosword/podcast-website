@@ -1,0 +1,187 @@
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(3px);
+}
+
+.sheet {
+  position: relative;
+  width: min(100%, 30rem);
+  margin: 0 12px calc(12px + var(--safe-bottom));
+  padding: 1.2rem 1.3rem 1.4rem;
+  border-radius: var(--radius-lg) var(--radius-lg) var(--radius-md)
+    var(--radius-md);
+  background: var(--card);
+  box-shadow: var(--shadow-md), 0 8px 0 color-mix(in srgb, var(--ink) 8%, transparent);
+  animation: sheet-rise 0.28s var(--ease-spring) both;
+}
+
+@keyframes sheet-rise {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet {
+    animation: none;
+  }
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--ink) 7%, var(--card));
+  color: var(--ink);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.close:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 0.6rem;
+  padding-right: 44px;
+}
+
+.landmark {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  font-size: 32px;
+  line-height: 1;
+  flex-shrink: 0;
+  background: radial-gradient(circle at 35% 30%, #fbe9c8, #e9c98f);
+  border-radius: 50% 48% 52% 46%;
+}
+
+.title {
+  margin: 0 0 4px;
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.pill {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 2px 10px;
+  border-radius: 999px;
+}
+
+.teaser {
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.links {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+}
+
+.linkBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  color: var(--landing-brand-ink);
+  background: color-mix(in srgb, var(--landing-brand) 24%, var(--card));
+  border: 2px solid color-mix(in srgb, var(--landing-brand) 45%, transparent);
+}
+
+.linkBtn:hover {
+  background: color-mix(in srgb, var(--landing-brand) 34%, var(--card));
+}
+
+.linkBtn:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.stub {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.progress {
+  position: relative;
+  height: 28px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 10%, var(--card));
+  overflow: hidden;
+}
+
+.progressBar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, var(--c-mint), var(--c-yellow));
+  border-radius: 999px;
+}
+
+.progressLabel {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 100%;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--marker-ink);
+}
+
+.voteNote {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+}
+
+.notifyBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0.65rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-weight: 800;
+  text-decoration: none;
+  color: var(--landing-brand-ink);
+  background: var(--landing-brand);
+  box-shadow: var(--shadow-sm);
+}
+
+.notifyBtn:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}

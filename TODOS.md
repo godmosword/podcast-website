@@ -270,6 +270,26 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 
 ---
 
+## 車車宇宙樂園地圖（R0）　`feature · M · /adventures`　〔eng+design〕
+
+> 鳥瞰群島園區地圖：資料驅動 zones、跨海橋、pan/zoom/fly-to 鏡頭、點島開內容或敬請期待 sheet。R0 用 emoji/形狀佔位，精緻美術留 R1。獨立路由 `/adventures`，**不動** `app/page.tsx` 與 `components/landing/*`。
+
+- [x] `data/universe-zones.ts` — zones 資料模型（4 島）+ `ZONE_STATUS_META`（單一來源）
+- [x] `data/universe-zones.test.ts` — id 唯一／座標範圍／open 島可達／building 進度／subSegmentIds 合法／bridgeFrom 存在
+- [x] `lib/universe-map.ts` — `resolveUniverseMap()`（島 px、Bézier 橋、viewBox）+ `getCarParkLinks()`（衍生自 `LANDING_SEGMENTS`）
+- [x] `lib/universe-map.test.ts` — 三橋／path 起始／viewBox 涵蓋／dashed 規則／car-park 連結一致
+- [x] `components/universe/useMapCamera.ts` — Pointer Events pan/pinch/wheel、clamp、flyTo、reduced-motion 瞬跳
+- [x] `components/universe/UniverseMap.tsx` + `.module.css` — 可拖曳縮放舞台（SVG 海/沙/草固定淺色 + 橋）
+- [x] `components/universe/ZoneIsland.tsx` + `.module.css` — HTML button 佔位島（landmark + 名稱 + 狀態 pill）
+- [x] `components/universe/MapControls.tsx` + `.module.css` — 回大門 / 縮放 +-
+- [x] `components/universe/ZoneSheet.tsx` + `.module.css` — carPark 入口清單 / stub 敬請期待（mailto 通知 R0 stub）
+- [x] `app/adventures/page.tsx` — 新路由 + metadata + sr-only 島嶼清單
+- [x] verify：`npm run test`（244）+ `npm run build` 綠燈；`git diff` 確認 landing 未動
+
+**changelog：** R0 樂園地圖系統 + zones 資料模型上線於 `/adventures`（資料驅動四島、Bézier 跨海橋、手刻 pan/zoom/fly-to、ZoneSheet stub）；car-park 子連結衍生自 `LANDING_SEGMENTS` 單一資料源。
+
+---
+
 ## P3 — 可靠 / 工程 / 可選
 
 ### 錯誤／上線監控　`P3 · S · 無`　〔ceo〕

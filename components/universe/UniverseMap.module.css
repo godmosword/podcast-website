@@ -1,0 +1,41 @@
+.map {
+  position: relative;
+  width: 100%;
+  /* 扣掉全站頂欄高度，填滿可視高度 */
+  height: calc(100dvh - var(--nav-h));
+  min-height: 420px;
+  overflow: hidden;
+  /* 海平面底色（固定淺色，作為 overscroll 露出的邊框色） */
+  background: #bfe2f7;
+}
+
+.viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.viewport:active {
+  cursor: grabbing;
+}
+
+.stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.scene {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  /* 島嶼 button 疊在 svg 之上 */
+  pointer-events: none;
+}

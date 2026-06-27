@@ -6,6 +6,7 @@
 
 ### Added
 
+- **車車宇宙樂園地圖（R0）`/adventures`**：鳥瞰群島園區地圖骨架——資料驅動 `zones`（`data/universe-zones.ts`）、跨海 Bézier 橋與 viewBox resolver（`lib/universe-map.ts`）、手刻 Pointer Events `pan/zoom/pinch/fly-to` 鏡頭（`useMapCamera`，無第三方手勢庫）、點島 fly-to 放大後開內容或「敬請期待」底部 sheet（`ZoneSheet` R0 stub）。R0 用 emoji／黏土塊佔位，海/沙/草為固定淺色（不隨日夜反轉）；每島為真正 `<button>` 含 `aria-label`、鍵盤 Enter 觸發、`prefers-reduced-motion` 瞬跳，並輸出 sr-only 島嶼清單供報讀器／SEO。車車樂園子連結衍生自 `LANDING_SEGMENTS`（單一資料源）。**不動** `app/page.tsx` 與 `components/landing/*`
 - **Storyline 式 Landing Hub**：`/` 為四段 segment 入口（車車故事／睡前數綿羊／捏黏土／衛教宣導）；現 podcast 主頁搬至 **`/stories`**
 - **主題跟隨系統**：日間／夜晚切換新增「跟隨系統」選項；首次造訪預設與瀏覽器或手機 `prefers-color-scheme` 同步；`ThemeProvider` 監聽系統配色變更；FOUC 防閃 inline script 同步支援
 - **海盜卡丁車大賽（`/games/pirate-kart`）**：16-bit 像素 top-down 海盜賽車；`Kart` 類別、橢圓賽道碰撞、3 AI、圈數＋寶藏計分、Shift 張帆加速、空白鍵大砲；開始／結束畫面

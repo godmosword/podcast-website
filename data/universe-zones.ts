@@ -1,0 +1,84 @@
+/** 車車宇宙：園區（島）資料模型。地圖即路線圖。 */
+import { LANDING_SEGMENT_IDS, type LandingSegmentId } from "@/data/landing-segments";
+
+/** 虛擬地圖座標空間（解析度無關，resolver 再換算成像素）。 */
+export const MAP_STAGE = { width: 1000, height: 720 } as const;
+
+export type ZoneId = "car-park" | "dino" | "rescue" | "ocean";
+
+/** open=開放 / building=建造中 / coming=即將登場 / planned=規劃中（海上霧區） */
+export type ZoneStatus = "open" | "building" | "coming" | "planned";
+
+export type ZoneCoord = { x: number; y: number }; // 0..MAP_STAGE.width / height
+
+export type ZoneDef = {
+  id: ZoneId;
+  name: string; // 車車樂園
+  shortName?: string;
+  status: ZoneStatus;
+  coord: ZoneCoord; // 島中心
+  /** R0 佔位：emoji 或形狀關鍵字；art tile 路徑預留，後續換精緻黏土圖 */
+  landmark: string; // "🎡" / "🦕" ...（R0 佔位）
+  artTile?: string; // 之後 /adventures/zones/{id}.png
+  teaser: string; // 卡片副標
+  buildProgress?: number; // status=building 時 0..100
+  /** 連到哪一座島的橋來源（resolver 用來生成橋路徑） */
+  bridgeFrom?: ZoneId;
+  /** open 島才需要：點擊後導向。可為內部路由或外連。 */
+  route?: { href: string; external?: boolean };
+  /** 僅 car-park：子設施＝既有四段 segment（單一資料源，勿重刻 href） */
+  subSegmentIds?: LandingSegmentId[];
+};
+
+export const ZONE_IDS: ZoneId[] = ["car-park", "dino", "rescue", "ocean"];
+
+export const ZONES: ZoneDef[] = [
+  {
+    id: "car-park",
+    name: "車車樂園",
+    status: "open",
+    coord: { x: 500, y: 400 },
+    landmark: "🎡",
+    teaser: "故事 · 睡前 · 黏土 · 安全",
+    subSegmentIds: [...LANDING_SEGMENT_IDS], // 子連結由 LANDING_SEGMENTS 衍生
+  },
+  {
+    id: "dino",
+    name: "恐龍島",
+    status: "building",
+    coord: { x: 210, y: 280 },
+    landmark: "🦕",
+    buildProgress: 60,
+    teaser: "恐龍園區探險故事",
+    bridgeFrom: "car-park",
+  },
+  {
+    id: "rescue",
+    name: "英雄救援隊",
+    status: "coming",
+    coord: { x: 820, y: 270 },
+    landmark: "🚓",
+    teaser: "冒險救援故事（波力路線）",
+    bridgeFrom: "car-park",
+  },
+  {
+    id: "ocean",
+    name: "未來園區",
+    status: "planned",
+    coord: { x: 820, y: 560 },
+    landmark: "🌊",
+    teaser: "海洋？太空？之後開放投票",
+    bridgeFrom: "car-park",
+  },
+];
+
+/** 狀態 → pill 文案/配色（單一來源，元件勿各自硬刻） */
+export const ZONE_STATUS_META: Record<
+  ZoneStatus,
+  { label: string; pillBg: string; pillInk: string; clickable: boolean }
+> = {
+  open: { label: "開放中", pillBg: "#bfe3c4", pillInk: "#14532d", clickable: true },
+  building: { label: "建造中", pillBg: "#f5e0a6", pillInk: "#6b4e09", clickable: true },
+  coming: { label: "即將登場", pillBg: "#cfe6f5", pillInk: "#14455f", clickable: true },
+  planned: { label: "規劃中", pillBg: "#e2dcef", pillInk: "#41356b", clickable: true },
+};
