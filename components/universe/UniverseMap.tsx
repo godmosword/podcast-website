@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { MAP_STAGE, type ZoneDef } from "@/data/universe-zones";
 import { resolveUniverseMap } from "@/lib/universe-map";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -47,6 +47,12 @@ export default function UniverseMap() {
     },
     [camera, reduced],
   );
+
+  useEffect(() => {
+    return () => {
+      if (openTimerRef.current) clearTimeout(openTimerRef.current);
+    };
+  }, []);
 
   const transform = `translate(${camera.tx}px, ${camera.ty}px) scale(${camera.scale})`;
 

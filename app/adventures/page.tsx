@@ -39,8 +39,11 @@ export default function AdventuresPage() {
                   <ul>
                     {carParkLinks.map((link) => (
                       <li key={link.href}>
+                        {/* tabIndex -1：鍵盤使用者改用地圖上可見的島嶼 button；
+                            此處純供報讀器瀏覽模式與爬蟲，避免 Tab 落在不可見元素 */}
                         <a
                           href={link.href}
+                          tabIndex={-1}
                           {...(link.external
                             ? { target: "_blank", rel: "noopener noreferrer" }
                             : {})}
@@ -55,6 +58,7 @@ export default function AdventuresPage() {
                     href={`mailto:${NOTIFY_EMAIL}?subject=${encodeURIComponent(
                       `通知我-${zone.name}`,
                     )}`}
+                    tabIndex={-1}
                   >
                     通知我「{zone.name}」開幕
                   </a>
