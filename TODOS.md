@@ -324,6 +324,21 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 
 ---
 
+## 車車宇宙樂園地圖（Art Bible v1）　`feature · S · /adventures`　〔eng+design〕
+
+> 把各自獨立產出的島統一成同一世界：相機／光／材質／色票／比例定死，並建立 R1→整島 diorama 的資產對接契約。本階段純文件 + 資料層契約，**不生美術資產、不改視覺**。
+
+- [x] `docs/UNIVERSE-ART-BIBLE.md` — 相機正交俯角 50°、左上暖光右下陰影、霧面黏土、環境色票、小紅賽車比例尺、狀態變體、AI／Blender 管線、交付檢查表（D1 路徑採 `/adventures/zones/`）
+- [x] `lib/universe/zone-art-tile.ts` — `ZoneArtTile` 契約（`mode: landmark|island`、`anchor`、`stageSize`）+ `ZONE_ART_TILES` 預設全島 landmark（D2，不改視覺）
+- [x] `lib/universe/zone-art-tile.test.ts` — 契約測試（src 對齊路徑、現況 landmark/center、island 必附 stageSize）
+- [x] verify：`npm run test` + `npm run build`；`git diff` 確認 landing/page 未動
+
+**待後續（未做）：** 生成 car-park hero 整島 PNG（黃金樣本）→ 切該島 `mode: "island"` → `ZoneIsland`/`UniverseMap` 對 island 模式調整錨點（沙岸底中心）、stageSize 與關閉 SVG 沙草、改 `next/image` @2x/@3x。色票若要回頭對齊 SVG fallback 為獨立小任務（見 Art Bible §4 D3）。
+
+**changelog：** Art Bible v1 + tile 詮釋資料契約（待補 commit hash）。
+
+---
+
 ## P3 — 可靠 / 工程 / 可選
 
 ### 錯誤／上線監控　`P3 · S · 無`　〔ceo〕
