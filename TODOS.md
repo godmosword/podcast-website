@@ -307,7 +307,7 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 - [x] `ZoneLandmarkArt.test.ts` + `universe-zones` terrain 測試
 - [x] verify：`npm run test`（247）+ `npm run build` + e2e 車車宇宙 smoke
 
-**changelog：** R1 黏土 SVG 地標取代 emoji；各島 `ZONE_TERRAIN` 底座配色（待 commit hash）。
+**changelog：** R1 黏土 SVG 地標取代 emoji；各島 `ZONE_TERRAIN` 底座配色 `62f9b35`。
 
 ---
 
