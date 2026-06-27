@@ -4,6 +4,7 @@ import {
   MAP_STAGE,
   ZONE_IDS,
   ZONE_STATUS_META,
+  ZONE_TERRAIN,
   ZONES,
   type ZoneId,
 } from "./universe-zones";
@@ -64,5 +65,12 @@ describe("universe-zones", () => {
       "open",
       "planned",
     ]);
+  });
+
+  it("ZONE_TERRAIN 涵蓋全部 ZoneId", () => {
+    for (const id of ZONE_IDS) {
+      expect(ZONE_TERRAIN[id]?.sand).toBeTruthy();
+      expect(ZONE_TERRAIN[id]?.grass).toBeTruthy();
+    }
   });
 });

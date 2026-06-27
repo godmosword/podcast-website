@@ -297,6 +297,20 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 
 ---
 
+## 車車宇宙樂園地圖（R1）　`feature · M · /adventures`　〔eng+design〕
+
+> R0 emoji 佔位 → 黏土風 SVG 地標 + 各島底座配色。仍不動 `app/page.tsx` 與 `components/landing/*`。
+
+- [x] `ZoneLandmarkArt.tsx` — 四島黏土 SVG（摩天輪／恐龍／救援車／海浪火箭）
+- [x] `ZoneIsland` + `ZoneSheet` — 接入 SVG 地標
+- [x] `ZONE_TERRAIN` — 各島沙／草底座色（UniverseMap SVG）
+- [x] `ZoneLandmarkArt.test.ts` + `universe-zones` terrain 測試
+- [x] verify：`npm run test`（247）+ `npm run build` + e2e 車車宇宙 smoke
+
+**changelog：** R1 黏土 SVG 地標取代 emoji；各島 `ZONE_TERRAIN` 底座配色（待 commit hash）。
+
+---
+
 ## P3 — 可靠 / 工程 / 可選
 
 ### 錯誤／上線監控　`P3 · S · 無`　〔ceo〕

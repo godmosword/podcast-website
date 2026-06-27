@@ -17,9 +17,10 @@ export type ZoneDef = {
   shortName?: string;
   status: ZoneStatus;
   coord: ZoneCoord; // 島中心
-  /** R0 佔位：emoji 或形狀關鍵字；art tile 路徑預留，後續換精緻黏土圖 */
-  landmark: string; // "🎡" / "🦕" ...（R0 佔位）
-  artTile?: string; // 之後 /adventures/zones/{id}.png
+  /** R0 emoji 摘要（資料／fallback）；R1 地圖顯示用 `ZoneLandmarkArt` */
+  landmark: string; // "🎡" / "🦕" ...
+  /** 可選靜態 tile（`/adventures/zones/{id}.png`）；未設則用 inline SVG */
+  artTile?: string;
   teaser: string; // 卡片副標
   buildProgress?: number; // status=building 時 0..100
   /** 連到哪一座島的橋來源（resolver 用來生成橋路徑） */
@@ -31,6 +32,14 @@ export type ZoneDef = {
 };
 
 export const ZONE_IDS: ZoneId[] = ["car-park", "dino", "rescue", "ocean"];
+
+/** 各島 SVG 底座配色（固定淺色，不隨日夜反轉） */
+export const ZONE_TERRAIN: Record<ZoneId, { sand: string; grass: string }> = {
+  "car-park": { sand: "#f3e3bd", grass: "#dcefc4" },
+  dino: { sand: "#f0e0b8", grass: "#d4efc0" },
+  rescue: { sand: "#f2e4c8", grass: "#cfe8dc" },
+  ocean: { sand: "#ebe4d4", grass: "#d0e4f5" },
+};
 
 export const ZONES: ZoneDef[] = [
   {

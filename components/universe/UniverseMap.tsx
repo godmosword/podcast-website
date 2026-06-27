@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MAP_STAGE, type ZoneDef } from "@/data/universe-zones";
+import { MAP_STAGE, ZONE_TERRAIN, type ZoneDef } from "@/data/universe-zones";
 import { resolveUniverseMap } from "@/lib/universe-map";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import MapControls from "./MapControls";
@@ -95,12 +95,15 @@ export default function UniverseMap() {
             </g>
 
             {/* 沙洲 + 草地（每島底座，固定淺色） */}
-            {zones.map((zone) => (
+            {zones.map((zone) => {
+              const terrain = ZONE_TERRAIN[zone.id];
+              return (
               <g key={`land-${zone.id}`}>
-                <ellipse cx={zone.px.x} cy={zone.px.y + 18} rx="118" ry="84" fill="#f3e3bd" />
-                <ellipse cx={zone.px.x} cy={zone.px.y + 6} rx="92" ry="62" fill="#dcefc4" />
+                <ellipse cx={zone.px.x} cy={zone.px.y + 18} rx="118" ry="84" fill={terrain.sand} />
+                <ellipse cx={zone.px.x} cy={zone.px.y + 6} rx="92" ry="62" fill={terrain.grass} />
               </g>
-            ))}
+              );
+            })}
 
             {/* 橋：實心棧道 / 虛線未開通 */}
             {bridges.map((bridge) => (
