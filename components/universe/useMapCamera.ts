@@ -144,7 +144,8 @@ export function useMapCamera(): MapCamera {
     const measure = () => {
       const rect = viewportEl.getBoundingClientRect();
       sizeRef.current = { w: rect.width, h: rect.height };
-      if (!initializedRef.current && rect.width > 0 && rect.height > 0) {
+      if (rect.width === 0 || rect.height === 0) return;
+      if (!initializedRef.current) {
         initializedRef.current = true;
         const ns = clampScale(
           Math.min(rect.width / MAP_STAGE.width, rect.height / MAP_STAGE.height) *
@@ -157,6 +158,9 @@ export function useMapCamera(): MapCamera {
             ty: rect.height / 2 - CAR_PARK.y * ns,
           }),
         );
+      } else {
+        // resize（旋轉／視窗縮放）後依新尺寸重新 clamp，避免舞台卡在偏移位置。
+        setCam((c) => clampCam(c));
       }
     };
     measure();

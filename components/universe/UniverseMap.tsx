@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { MAP_STAGE, ZONE_TERRAIN, type ZoneDef } from "@/data/universe-zones";
 import { resolveUniverseMap } from "@/lib/universe-map";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -18,6 +19,7 @@ export default function UniverseMap() {
   const { zones, bridges, viewBox } = resolveUniverseMap();
   const camera = useMapCamera();
   const reduced = useReducedMotion();
+  const router = useRouter();
   const [activeZone, setActiveZone] = useState<ZoneDef | null>(null);
   const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -32,7 +34,8 @@ export default function UniverseMap() {
           if (zone.route.external) {
             window.open(zone.route.href, "_blank", "noopener,noreferrer");
           } else {
-            window.location.href = zone.route.href;
+            // 內部路由走 App Router，保留 prefetch / scroll restore。
+            router.push(zone.route.href);
           }
           return;
         }
@@ -46,7 +49,7 @@ export default function UniverseMap() {
         openTimerRef.current = setTimeout(reveal, FLY_DURATION_MS);
       }
     },
-    [camera, reduced],
+    [camera, reduced, router],
   );
 
   useEffect(() => {

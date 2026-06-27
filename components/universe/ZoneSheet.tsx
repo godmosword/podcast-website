@@ -3,11 +3,10 @@
 import { useEffect, useId, useRef } from "react";
 import { ZONE_STATUS_META, type ZoneDef } from "@/data/universe-zones";
 import { getCarParkLinks } from "@/lib/universe-map";
+import { notifyMailto } from "@/lib/contact";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import ZoneLandmark from "./ZoneLandmark";
 import styles from "./ZoneSheet.module.css";
-
-const NOTIFY_EMAIL = "bonboncarstory@gmail.com";
 
 type ZoneSheetProps = {
   zone: ZoneDef | null;
@@ -35,9 +34,7 @@ export default function ZoneSheet({ zone, onClose }: ZoneSheetProps) {
   const meta = ZONE_STATUS_META[zone.status];
   const isCarPark = (zone.subSegmentIds?.length ?? 0) > 0;
   const carParkLinks = isCarPark ? getCarParkLinks() : [];
-  const notifyHref = `mailto:${NOTIFY_EMAIL}?subject=${encodeURIComponent(
-    `通知我-${zone.name}`,
-  )}`;
+  const notifyHref = notifyMailto(zone.name);
 
   return (
     <div className={styles.overlay} role="presentation" onClick={onClose}>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import UniverseMap from "@/components/universe/UniverseMap";
 import { ZONE_STATUS_META, ZONES } from "@/data/universe-zones";
 import { getCarParkLinks } from "@/lib/universe-map";
+import { notifyMailto } from "@/lib/contact";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
@@ -14,8 +15,6 @@ export const metadata: Metadata = {
     url: `${getSiteUrl()}/adventures`,
   },
 };
-
-const NOTIFY_EMAIL = "bonboncarstory@gmail.com";
 
 export default function AdventuresPage() {
   const carParkLinks = getCarParkLinks();
@@ -54,12 +53,7 @@ export default function AdventuresPage() {
                     ))}
                   </ul>
                 ) : (
-                  <a
-                    href={`mailto:${NOTIFY_EMAIL}?subject=${encodeURIComponent(
-                      `通知我-${zone.name}`,
-                    )}`}
-                    tabIndex={-1}
-                  >
+                  <a href={notifyMailto(zone.name)} tabIndex={-1}>
                     通知我「{zone.name}」開幕
                   </a>
                 )}
