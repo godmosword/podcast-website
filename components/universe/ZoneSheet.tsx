@@ -4,7 +4,7 @@ import { useEffect, useId, useRef } from "react";
 import { ZONE_STATUS_META, type ZoneDef } from "@/data/universe-zones";
 import { getCarParkLinks } from "@/lib/universe-map";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
-import ZoneLandmarkArt from "./ZoneLandmarkArt";
+import ZoneLandmark from "./ZoneLandmark";
 import styles from "./ZoneSheet.module.css";
 
 const NOTIFY_EMAIL = "bonboncarstory@gmail.com";
@@ -60,7 +60,7 @@ export default function ZoneSheet({ zone, onClose }: ZoneSheetProps) {
 
         <div className={styles.header}>
           <span className={styles.landmark} aria-hidden="true">
-            <ZoneLandmarkArt zoneId={zone.id} status={zone.status} />
+            <ZoneLandmark zoneId={zone.id} status={zone.status} artTile={zone.artTile} />
           </span>
           <div>
             <h2 id={titleId} className={styles.title}>

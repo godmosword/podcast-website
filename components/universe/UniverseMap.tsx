@@ -5,6 +5,7 @@ import { MAP_STAGE, ZONE_TERRAIN, type ZoneDef } from "@/data/universe-zones";
 import { resolveUniverseMap } from "@/lib/universe-map";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import MapControls from "./MapControls";
+import UniverseMapParallax from "./UniverseMapParallax";
 import ZoneIsland from "./ZoneIsland";
 import ZoneSheet from "./ZoneSheet";
 import { FLY_DURATION_MS, useMapCamera } from "./useMapCamera";
@@ -66,6 +67,13 @@ export default function UniverseMap() {
         onPointerUp={camera.bind.onPointerUp}
         onPointerCancel={camera.bind.onPointerCancel}
       >
+        <UniverseMapParallax
+          tx={camera.tx}
+          ty={camera.ty}
+          scale={camera.scale}
+          isAnimating={camera.isAnimating}
+          reduced={reduced}
+        />
         <div
           className={styles.stage}
           style={{

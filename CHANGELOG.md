@@ -8,6 +8,7 @@
 
 - **車車宇宙樂園地圖（R0）`/adventures`**：鳥瞰群島園區地圖骨架——資料驅動 `zones`（`data/universe-zones.ts`）、跨海 Bézier 橋與 viewBox resolver（`lib/universe-map.ts`）、手刻 Pointer Events `pan/zoom/pinch/fly-to` 鏡頭（`useMapCamera`，無第三方手勢庫）、點島 fly-to 放大後開內容或「敬請期待」底部 sheet（`ZoneSheet` R0 stub）。R0 用 emoji／黏土塊佔位，海/沙/草為固定淺色（不隨日夜反轉）；每島為真正 `<button>` 含 `aria-label`、鍵盤 Enter 觸發、`prefers-reduced-motion` 瞬跳，並輸出 sr-only 島嶼清單供報讀器／SEO。車車樂園子連結衍生自 `LANDING_SEGMENTS`（單一資料源）。全站選單「宇宙地圖」入口 + `sitemap.xml` 收錄。**不動** `app/page.tsx` 與 `components/landing/*`
 - **車車宇宙樂園地圖（R1）**：`ZoneLandmarkArt` 黏土風 SVG 地標取代 emoji（四島：摩天輪／恐龍／救援車／海浪＋火箭）；`ZONE_TERRAIN` 各島沙洲／草地配色；`ZoneIsland`／`ZoneSheet` 接入
+- **車車宇宙樂園地圖（R2）**：`/adventures` OG 分享圖；`public/adventures/zones/*.svg` 靜態 artTile + `ZoneLandmark` fallback；`UniverseMapParallax` 視差雲層
 
 ### Fixed
 

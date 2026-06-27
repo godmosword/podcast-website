@@ -2,7 +2,7 @@
 
 import { ZONE_STATUS_META, type ZoneDef } from "@/data/universe-zones";
 import type { ResolvedZone } from "@/lib/universe-map";
-import ZoneLandmarkArt from "./ZoneLandmarkArt";
+import ZoneLandmark from "./ZoneLandmark";
 import styles from "./ZoneIsland.module.css";
 
 type ZoneIslandProps = {
@@ -23,7 +23,7 @@ export default function ZoneIsland({ zone, onActivate }: ZoneIslandProps) {
       onClick={() => onActivate(zone)}
     >
       <span className={styles.landmark} aria-hidden="true">
-        <ZoneLandmarkArt zoneId={zone.id} status={zone.status} />
+        <ZoneLandmark zoneId={zone.id} status={zone.status} artTile={zone.artTile} />
       </span>
       <span className={styles.name}>{zone.name}</span>
       <span

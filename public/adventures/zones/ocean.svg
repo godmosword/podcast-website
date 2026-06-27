@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="oc-wave1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#a8e0ff"/>
+      <stop offset="100%" stop-color="#4098d0"/>
+    </linearGradient>
+    <linearGradient id="oc-wave2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#88d0ff"/>
+      <stop offset="100%" stop-color="#3890c8"/>
+    </linearGradient>
+    <linearGradient id="oc-rocket" x1="0%" y1="0%" x2="85%" y2="100%">
+      <stop offset="0%" stop-color="#f0e8ff"/>
+      <stop offset="100%" stop-color="#b8a0d8"/>
+    </linearGradient>
+  </defs>
+  <rect width="96" height="96" fill="#d0e8ff" rx="12"/>
+  <path d="M0 58 Q16 48 32 58 T64 58 T96 58 L96 96 L0 96 Z" fill="url(#oc-wave1)"/>
+  <path d="M0 68 Q20 58 40 68 T80 68 T96 68 L96 96 L0 96 Z" fill="url(#oc-wave2)" opacity="0.85"/>
+  <rect x="38" y="18" width="20" height="36" rx="10" fill="url(#oc-rocket)"/>
+  <circle cx="48" cy="16" r="8" fill="#ff8fab"/>
+  <polygon points="48,8 42,18 54,18" fill="#ff8fab"/>
+  <circle cx="22" cy="22" r="3" fill="#ffe878"/>
+  <circle cx="72" cy="16" r="2.5" fill="#ffe878"/>
+  <circle cx="64" cy="32" r="2" fill="#ffe878"/>
+</svg>

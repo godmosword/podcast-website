@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="cp-sky" x1="0%" y1="0%" x2="85%" y2="100%">
+      <stop offset="0%" stop-color="#dff4ff"/>
+      <stop offset="100%" stop-color="#8eccef"/>
+    </linearGradient>
+    <linearGradient id="cp-wheel" x1="0%" y1="0%" x2="85%" y2="100%">
+      <stop offset="0%" stop-color="#ffe08a"/>
+      <stop offset="100%" stop-color="#e8a820"/>
+    </linearGradient>
+    <linearGradient id="cp-cabin" x1="0%" y1="0%" x2="85%" y2="100%">
+      <stop offset="0%" stop-color="#ffb8c8"/>
+      <stop offset="100%" stop-color="#e86a8a"/>
+    </linearGradient>
+  </defs>
+  <rect width="96" height="96" fill="url(#cp-sky)" rx="12"/>
+  <ellipse cx="48" cy="78" rx="36" ry="10" fill="#e8c890" opacity="0.7"/>
+  <circle cx="48" cy="42" r="28" fill="url(#cp-wheel)"/>
+  <circle cx="48" cy="18" r="7" fill="url(#cp-cabin)"/>
+  <circle cx="72" cy="42" r="7" fill="#7ec8f0"/>
+  <circle cx="48" cy="66" r="7" fill="#98d878"/>
+  <circle cx="24" cy="42" r="7" fill="url(#cp-cabin)"/>
+  <line x1="48" y1="42" x2="48" y2="18" stroke="#f0dcc0" stroke-width="3" stroke-linecap="round"/>
+  <line x1="48" y1="42" x2="72" y2="42" stroke="#f0dcc0" stroke-width="3" stroke-linecap="round"/>
+  <line x1="48" y1="42" x2="24" y2="42" stroke="#f0dcc0" stroke-width="3" stroke-linecap="round"/>
+  <line x1="48" y1="42" x2="48" y2="66" stroke="#f0dcc0" stroke-width="3" stroke-linecap="round"/>
+</svg>

@@ -73,4 +73,10 @@ describe("universe-zones", () => {
       expect(ZONE_TERRAIN[id]?.grass).toBeTruthy();
     }
   });
+
+  it("每島皆有 artTile 靜態路徑", () => {
+    for (const zone of ZONES) {
+      expect(zone.artTile).toMatch(/^\/adventures\/zones\/[\w-]+\.svg$/);
+    }
+  });
 });

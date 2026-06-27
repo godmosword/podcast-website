@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="rs-body" x1="0%" y1="0%" x2="85%" y2="100%">
+      <stop offset="0%" stop-color="#ff9a9a"/>
+      <stop offset="100%" stop-color="#e04545"/>
+    </linearGradient>
+    <linearGradient id="rs-roof" x1="0%" y1="0%" x2="85%" y2="100%">
+      <stop offset="0%" stop-color="#6ab0ff"/>
+      <stop offset="100%" stop-color="#2568b0"/>
+    </linearGradient>
+  </defs>
+  <rect width="96" height="96" fill="#e8f4ff" rx="12"/>
+  <ellipse cx="48" cy="82" rx="40" ry="9" fill="#d0c8b8" opacity="0.7"/>
+  <rect x="26" y="50" width="51" height="19" rx="8" fill="url(#rs-body)"/>
+  <rect x="36" y="40" width="24" height="16" rx="6" fill="url(#rs-roof)"/>
+  <rect x="40" y="43" width="14" height="9" rx="3" fill="#b8e0ff"/>
+  <circle cx="34" cy="69" r="7" fill="#3a3632"/>
+  <circle cx="54" cy="69" r="7" fill="#3a3632"/>
+  <circle cx="58" cy="28" r="6" fill="#ffd23f"/>
+  <circle cx="66" cy="28" r="6" fill="#ff6b6b"/>
+</svg>

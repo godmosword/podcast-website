@@ -40,10 +40,12 @@
   box-shadow: var(--shadow-md);
 }
 
-.landmark svg {
+.landmark svg,
+.landmark img {
   width: 100%;
   height: 100%;
   display: block;
+  object-fit: contain;
 }
 
 .island[data-status="building"] .landmark {

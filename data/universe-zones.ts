@@ -1,5 +1,6 @@
 /** 車車宇宙：園區（島）資料模型。地圖即路線圖。 */
 import { LANDING_SEGMENT_IDS, type LandingSegmentId } from "@/data/landing-segments";
+import { zoneArtTilePath } from "@/lib/universe/zone-art-tile";
 
 /** 虛擬地圖座標空間（解析度無關，resolver 再換算成像素）。 */
 export const MAP_STAGE = { width: 1000, height: 720 } as const;
@@ -48,6 +49,7 @@ export const ZONES: ZoneDef[] = [
     status: "open",
     coord: { x: 500, y: 400 },
     landmark: "🎡",
+    artTile: zoneArtTilePath("car-park"),
     teaser: "故事 · 睡前 · 黏土 · 安全",
     subSegmentIds: [...LANDING_SEGMENT_IDS], // 子連結由 LANDING_SEGMENTS 衍生
   },
@@ -57,6 +59,7 @@ export const ZONES: ZoneDef[] = [
     status: "building",
     coord: { x: 210, y: 280 },
     landmark: "🦕",
+    artTile: zoneArtTilePath("dino"),
     buildProgress: 60,
     teaser: "恐龍園區探險故事",
     bridgeFrom: "car-park",
@@ -67,6 +70,7 @@ export const ZONES: ZoneDef[] = [
     status: "coming",
     coord: { x: 820, y: 270 },
     landmark: "🚓",
+    artTile: zoneArtTilePath("rescue"),
     teaser: "冒險救援故事（波力路線）",
     bridgeFrom: "car-park",
   },
@@ -76,6 +80,7 @@ export const ZONES: ZoneDef[] = [
     status: "planned",
     coord: { x: 820, y: 560 },
     landmark: "🌊",
+    artTile: zoneArtTilePath("ocean"),
     teaser: "海洋？太空？之後開放投票",
     bridgeFrom: "car-park",
   },
