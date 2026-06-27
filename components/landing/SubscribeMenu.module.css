@@ -8,15 +8,16 @@
   justify-content: center;
   gap: 4px;
   min-height: 44px;
-  padding: 6px 10px;
+  padding: 6px 12px;
   border-radius: 999px;
-  /* 比頂欄略深的橘底，讓白字維持 ≥4.5:1（半透明白會變淺，對比不足） */
-  background: color-mix(in srgb, #000 14%, var(--landing-brand));
-  color: inherit;
-  font-weight: 700;
+  /* 品牌橘實心 CTA，與 hero「全部故事」同色系；深咖字維持 ≥6:1 對比，於木質頂欄上清楚跳出 */
+  background: var(--landing-brand, #ff8c2b);
+  color: var(--landing-brand-ink, #3a2410);
+  font-weight: 800;
   font-size: 0.78rem;
   text-decoration: none;
-  border: 2px solid color-mix(in srgb, var(--landing-brand-ink, #fff) 35%, transparent);
+  border: 2px solid color-mix(in srgb, #000 18%, var(--landing-brand));
+  box-shadow: 0 2px 0 rgba(46, 28, 12, 0.32);
   white-space: nowrap;
   cursor: pointer;
 }
