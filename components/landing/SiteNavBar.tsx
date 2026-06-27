@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import ThemeModeSwitch from "@/components/ThemeModeSwitch";
 import SubscribeMenu from "@/components/landing/SubscribeMenu";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { isStoryPlayRoute } from "@/lib/is-story-play-route";
 import { visibleSocials } from "@/lib/social";
 import styles from "./SiteNavBar.module.css";
 
@@ -30,6 +32,8 @@ function navItems() {
 }
 
 export default function SiteNavBar() {
+  const pathname = usePathname();
+  const playMode = isStoryPlayRoute(pathname);
   const menuId = useId();
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLElement>(null);
@@ -47,7 +51,10 @@ export default function SiteNavBar() {
   }, [open]);
 
   return (
-    <header className={styles.bar}>
+    <header
+      className={`${styles.bar} ${playMode ? styles.playMode : ""}`}
+      data-play-mode={playMode ? "true" : undefined}
+    >
       <div className={styles.inner}>
         <Link href="/" className={styles.brand}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -56,7 +63,7 @@ export default function SiteNavBar() {
         </Link>
 
         <div className={styles.actions}>
-          <SubscribeMenu />
+          <SubscribeMenu compact={playMode} />
 
           <button
             type="button"

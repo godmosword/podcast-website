@@ -1,0 +1,188 @@
+{
+  "slug": "ep-14",
+  "audioDuration": 523,
+  "model": "manual-semantic-15-20s",
+  "generatedAt": "2026-06-26T14:25:00.000Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 60,
+      "end": 96.2,
+      "summary": "消防演練廣場與爆米花餐車（保留首圖）",
+      "prompt": "Sunny clay car amusement park plaza with colorful bunting, many small faceless clay cars gathering for fire drill, twin red fire engines Quanquan and Diandian front and center matching podcast cover — labeled 圈圈 and 點點 on cabs, cream popcorn food truck with striped awning and friendly grandfather vendor making popcorn in corner, warm festive mood",
+      "characters": ["消防車圈圈", "消防車點點", "老爺爺爆米花餐車"],
+      "keepCover": true
+    },
+    {
+      "index": 2,
+      "start": 96.2,
+      "end": 114,
+      "summary": "雙胞胎消防車在吵架",
+      "prompt": "Other side of plaza, twin red fire engines Quanquan and Diandian facing away from each other arguing with angry puffed cheeks, speech tension lines, parked apart, popcorn smell wafting from distance, child-safe comedy not scary",
+      "characters": ["消防車圈圈", "消防車點點"],
+      "refPages": [1],
+      "refPageHint": "PRIMARY: Both twins match cover page 1 and 消防車圈圈/消防車點點 portraits exactly — identical red bodies, 圈圈 and 點點 labels on cab, yellow lights, grey ladder. Each twin ONE face only. NO third fire truck."
+    },
+    {
+      "index": 3,
+      "start": 114,
+      "end": 136.6,
+      "summary": "介紹圈圈與點點",
+      "prompt": "Presentation moment: identical bright red twin fire engines Quanquan (哥哥圈圈) and Diandian (弟弟點點) side by side showing matching water tank, long hose, flashing yellow emergency lights, proud then Quanquan starting to look worried",
+      "characters": ["消防車圈圈", "消防車點點"],
+      "refPages": [1],
+      "refPageHint": "PRIMARY: Match portraits — same design both twins, labels 圈圈/點點 readable. Show they look identical. Quanquan slightly sadder eyes by end."
+    },
+    {
+      "index": 4,
+      "start": 136.6,
+      "end": 166.4,
+      "summary": "圈圈心裡酸酸",
+      "prompt": "Quanquan fire engine alone looking envious and sad while thought bubble shows crowd praising both twins equally, Diandian in background unaware, muted colors on Quanquan mood",
+      "characters": ["消防車圈圈", "消防車點點"],
+      "refPages": [3],
+      "refPageHint": "PRIMARY: Quanquan match 消防車圈圈 portrait. Diandian smaller in back match 消防車點點. Focus Quanquan's lonely feeling. Each ONE face."
+    },
+    {
+      "index": 5,
+      "start": 166.4,
+      "end": 198.9,
+      "summary": "兄弟互相比賽",
+      "prompt": "Quanquan and Diandian competing — spraying water jets at different angles, honking loud sirens, racing tires, fighting over same parking spot, comic rivalry energy in plaza",
+      "characters": ["消防車圈圈", "消防車點點"],
+      "refPages": [4],
+      "refPageHint": "PRIMARY: Both twins match prior scenes. Water spray playful not dangerous. Distinct 圈圈 vs 點點 labels visible."
+    },
+    {
+      "index": 6,
+      "start": 198.9,
+      "end": 235.2,
+      "summary": "鈴鈴溫柔勸導",
+      "prompt": "Cream-green street sweeper Lingling (鈴鈴清潔車) gently talking to upset Quanquan and stubborn Diandian, warm caring expression, twins listening half-heartedly, soft afternoon light",
+      "characters": ["鈴鈴清潔車", "消防車圈圈", "消防車點點"],
+      "refPages": [5],
+      "refPageHint": "PRIMARY: 鈴鈴清潔車 match portrait exactly — cream cab green body orange light bar yellow brushes. Twins match prior pages. Lingling calm mentor tone."
+    },
+    {
+      "index": 7,
+      "start": 235.2,
+      "end": 261.5,
+      "summary": "爆米花餐車冒煙失火",
+      "prompt": "Sudden emergency: cream-red popcorn food truck with grandfather vendor panicking as black smoke and small orange flames appear from popcorn machine area, NOT horror — cartoon safe fire under truck, alarm mood",
+      "characters": ["老爺爺爆米花餐車"],
+      "refPages": [1],
+      "refPageHint": "PRIMARY: Match 老爺爺爆米花餐車 portrait — striped awning, grandfather with grey mustache, popcorn machine. Smoke and tiny flames under truck only. Child-safe."
+    },
+    {
+      "index": 8,
+      "start": 261.5,
+      "end": 288.7,
+      "summary": "看見火苗，圈圈轉念",
+      "prompt": "Quanquan and Diandian seeing real flames, both nervous wide eyes, then Quanquan looking at scared Diandian and realizing brother needs him too, emotional turning point",
+      "characters": ["消防車圈圈", "消防車點點", "老爺爺爆米花餐車"],
+      "refPages": [7],
+      "refPageHint": "PRIMARY: Twins match portraits with worried expressions. Popcorn truck with smoke in background match scene 7. Focus emotional connection between brothers."
+    },
+    {
+      "index": 9,
+      "start": 288.7,
+      "end": 314.2,
+      "summary": "兄弟一起出動救援",
+      "prompt": "Quanquan activating yellow emergency lights leading, Diandian nodding firmly, both twin fire engines driving toward smoking popcorn food truck together, heroic teamwork beginning",
+      "characters": ["消防車圈圈", "消防車點點", "老爺爺爆米花餐車"],
+      "refPages": [8],
+      "refPageHint": "PRIMARY: Twins side by side match portraits. Popcorn truck ahead with smoke. Lights ON. Cooperation mood."
+    },
+    {
+      "index": 10,
+      "start": 314.2,
+      "end": 336.1,
+      "summary": "水柱沒對準火苗",
+      "prompt": "Quanquan spraying water too far left, Diandian spraying too far right, small fire still burning under popcorn truck, both frustrated, jets missing target clearly shown for kids",
+      "characters": ["消防車圈圈", "消防車點點", "老爺爺爆米花餐車"],
+      "refPages": [9],
+      "refPageHint": "PRIMARY: Twins match portraits. Show LEFT and RIGHT mis-aimed water arcs. Fire under truck center. Each twin ONE face."
+    },
+    {
+      "index": 11,
+      "start": 336.1,
+      "end": 356.3,
+      "summary": "數到三一起對準",
+      "prompt": "Quanquan calmly gesturing count one-two-three, Diandian trusting and aiming together, both twins preparing synchronized water attack toward fire under truck",
+      "characters": ["消防車圈圈", "消防車點點"],
+      "refPages": [10],
+      "refPageHint": "PRIMARY: Quanquan leader pose, Diandian listening. Match twin designs exactly. Tension before success."
+    },
+    {
+      "index": 12,
+      "start": 356.3,
+      "end": 376.4,
+      "summary": "雙胞胎龍捲大水滅火",
+      "prompt": "Epic child-safe moment: Quanquan and Diandian merging two water streams into one big swirling twin tornado splash extinguishing flames under popcorn truck, sparkles and steam, triumphant teamwork",
+      "characters": ["消防車圈圈", "消防車點點", "老爺爺爆米花餐車"],
+      "refPages": [11],
+      "refPageHint": "PRIMARY: Twins match portraits spraying merged water tornado. Fire going out. Popcorn truck safe. Celebratory dynamic composition."
+    },
+    {
+      "index": 13,
+      "start": 376.4,
+      "end": 400.5,
+      "summary": "老爺爺感謝兄弟",
+      "prompt": "Grateful grandfather popcorn vendor leaning from food truck window thanking Quanquan and Diandian, twins modest and happy, smoke cleared, warm golden light",
+      "characters": ["老爺爺爆米花餐車", "消防車圈圈", "消防車點點"],
+      "refPages": [12],
+      "refPageHint": "PRIMARY: Popcorn truck and grandfather match portrait. Twins match prior pages soot-free. Gratitude scene."
+    },
+    {
+      "index": 14,
+      "start": 400.5,
+      "end": 419.2,
+      "summary": "鈴鈴稱讚，兄弟相視而笑",
+      "prompt": "Lingling street sweeper arriving praising twins, Quanquan and Diandian looking at each other nodding then laughing together, friendship restored, park peaceful again",
+      "characters": ["鈴鈴清潔車", "消防車圈圈", "消防車點點"],
+      "refPages": [6, 13],
+      "refPageHint": "PRIMARY: 鈴鈴清潔車 match portrait. Twins happy matching scene 12 designs. Joyful group moment."
+    },
+    {
+      "index": 15,
+      "start": 419.2,
+      "end": 439.9,
+      "summary": "常常一起練習",
+      "prompt": "Montage: Quanquan and Diandian practicing together on sunny days, synchronized one-two-three twin water drill in empty plaza, getting stronger as a team",
+      "characters": ["消防車圈圈", "消防車點點"],
+      "refPages": [12],
+      "refPageHint": "PRIMARY: Both twins match portraits in practice pose. Same merged water stream motif smaller scale. Growth montage feel."
+    },
+    {
+      "index": 16,
+      "start": 439.9,
+      "end": 483,
+      "summary": "馬米與小朋友對話（手足合作）",
+      "prompt": "Clay podcast studio: host Mami (馬米) warmly talking to children about siblings arguing and learning to cooperate, Bonbon beside her nodding, small toy models of red twin fire engines on table, ferris wheel background, gentle teaching mood",
+      "characters": ["Bonbon", "馬米", "消防車圈圈", "消防車點點"],
+      "refPages": [1, 14],
+      "refPageHint": "PRIMARY: Bonbon teal hoodie yellow backpack; Mami pink top coral skirt — match host portraits exactly. Twin fire engine toys on table match page 1 cover design. Hosts are HUMAN clay, not cars."
+    },
+    {
+      "index": 17,
+      "start": 483,
+      "end": 495.3,
+      "summary": "你還是一樣很重要",
+      "prompt": "Warm close-up composition: Mami reassuring children that older siblings are still loved, Bonbon gentle smile, soft heart motif, twin fire engine stickers on notebook showing teamwork symbol",
+      "characters": ["Bonbon", "馬米"],
+      "refPages": [16],
+      "refPageHint": "PRIMARY: Bonbon and Mami match host portraits from scene 16. Emotional reassurance tone. NO random characters."
+    },
+    {
+      "index": 18,
+      "start": 495.3,
+      "end": 523,
+      "summary": "結尾道別",
+      "prompt": "Cheerful closing at clay car amusement park: hosts Bonbon and Mami waving goodbye with story friends red twin fire engines Quanquan and Diandian and popcorn food truck, ferris wheel sunset, inviting kids back next week",
+      "characters": ["Bonbon", "馬米", "消防車圈圈", "消防車點點", "老爺爺爆米花餐車"],
+      "refPages": [1, 15],
+      "refPageHint": "PRIMARY: Bonbon and Mami human hosts center waving. Twins and popcorn truck match page 1 and scene 15. Each vehicle ONE face. Warm sunset goodbye."
+    }
+  ],
+  "newCharacters": []
+}

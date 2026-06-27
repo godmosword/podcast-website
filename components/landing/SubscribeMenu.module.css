@@ -94,3 +94,10 @@
     font-size: 0.72rem;
   }
 }
+
+.triggerCompact {
+  min-height: clamp(36px, 10vw, 44px);
+  padding: 5px clamp(6px, 2.2vw, 10px);
+  font-size: clamp(0.68rem, 2.8vw, 0.78rem);
+  border-width: 1.5px;
+}

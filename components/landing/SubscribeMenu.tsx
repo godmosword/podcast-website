@@ -7,7 +7,12 @@ import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { visiblePlatforms } from "@/lib/platforms";
 import styles from "./SubscribeMenu.module.css";
 
-export default function SubscribeMenu() {
+type SubscribeMenuProps = {
+  /** 播放器全螢幕模式：縮小按鈕、縮短文案，避免遮到播放器控制列。 */
+  compact?: boolean;
+};
+
+export default function SubscribeMenu({ compact = false }: SubscribeMenuProps) {
   const menuId = useId();
   const wrapRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLUListElement>(null);
@@ -34,17 +39,22 @@ export default function SubscribeMenu() {
 
   if (platforms.length === 0) return null;
 
+  const triggerClass = compact
+    ? `${styles.trigger} ${styles.triggerCompact}`
+    : styles.trigger;
+  const triggerLabel = compact ? "訂閱" : "訂閱收聽";
+
   if (platforms.length === 1) {
     const platform = platforms[0]!;
     return (
       <a
         href={platform.url}
-        className={styles.trigger}
+        className={triggerClass}
         target="_blank"
         rel="noopener noreferrer"
         onClick={() => trackPlatformClick(platform.label, "nav-bar")}
       >
-        訂閱收聽
+        {triggerLabel}
       </a>
     );
   }
@@ -53,13 +63,13 @@ export default function SubscribeMenu() {
     <div className={styles.wrap} ref={wrapRef}>
       <button
         type="button"
-        className={styles.trigger}
+        className={triggerClass}
         aria-expanded={open}
         aria-controls={menuId}
         aria-haspopup="menu"
         onClick={() => setOpen((v) => !v)}
       >
-        訂閱收聽
+        {triggerLabel}
         <span className={styles.chevron} aria-hidden>
           ▾
         </span>

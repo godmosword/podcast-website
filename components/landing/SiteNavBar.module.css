@@ -16,6 +16,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  container-type: inline-size;
+  container-name: nav-inner;
 }
 
 .brand {
@@ -46,6 +48,57 @@
   .brandText {
     font-size: 0.95rem;
   }
+}
+
+@container nav-inner (max-width: 300px) {
+  .brandText {
+    display: none;
+  }
+}
+
+/* 全螢幕播放器：透明浮層、僅保留右上角操作，左側留給 ✕ 回上頁 */
+.playMode {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.playMode .inner {
+  justify-content: flex-end;
+  gap: clamp(4px, 1.4vw, 8px);
+  padding-top: calc(8px + var(--safe-top));
+  padding-bottom: 6px;
+  /* 左側預留播放器關閉鈕（44px + 間距 + safe area） */
+  padding-left: calc(56px + var(--safe-left));
+}
+
+.playMode .brand {
+  display: none;
+}
+
+.playMode .actions {
+  pointer-events: auto;
+  flex-shrink: 1;
+  min-width: 0;
+  flex-wrap: nowrap;
+}
+
+.playMode .menuBtn {
+  width: clamp(36px, 10vw, 44px);
+  height: clamp(36px, 10vw, 44px);
+  border-width: 1.5px;
+}
+
+.playMode .menuIcon {
+  width: clamp(14px, 4vw, 18px);
+}
+
+.playMode .panel {
+  pointer-events: auto;
 }
 
 .menuBtn {
