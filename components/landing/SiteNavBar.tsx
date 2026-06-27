@@ -50,11 +50,10 @@ export default function SiteNavBar() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
+  if (playMode) return null;
+
   return (
-    <header
-      className={`${styles.bar} ${playMode ? styles.playMode : ""}`}
-      data-play-mode={playMode ? "true" : undefined}
-    >
+    <header className={styles.bar}>
       <div className={styles.inner}>
         <Link href="/" className={styles.brand}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -63,7 +62,7 @@ export default function SiteNavBar() {
         </Link>
 
         <div className={styles.actions}>
-          <SubscribeMenu compact={playMode} />
+          <SubscribeMenu />
 
           <button
             type="button"
