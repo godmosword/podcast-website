@@ -16,10 +16,12 @@ Bonbon & 馬米親子 podcast《車車遊樂園》的官方 **看圖聽故事** 
 
 | 功能 | 說明 |
 |------|------|
-| 故事牆 | 首頁網格列出全部分集；**依車車找故事**（車種 chip + `?vehicle=`）；主題見 `/topic` |
+| Landing Hub | [`/`](./app/page.tsx) Storyline 式四段入口（故事／睡前／黏土／衛教）；scroll-snap 全屏 hero、頂欄訂閱、段內 CTA；頁尾為獨立 snap pane |
+| 故事牆 | [`/stories`](./app/stories/page.tsx) 網格列出全部分集；**依車車找故事**（車種 chip + `?vehicle=`）；主題見 `/topic` |
+| 車車宇宙地圖 | [`/adventures`](./app/adventures/page.tsx) 鳥瞰群島園區地圖（pan/zoom、點島 fly-to） |
 | 看圖聽故事 | 全螢幕播放器、逐字即時字幕、可拖曳進度條、字幕字級切換 |
-| 主題模式 | 日間／夜晚／**跟隨系統**（預設與裝置 `prefers-color-scheme` 同步）；首頁標語旁可循環切換 |
-| 車車遊樂園 | [`/games`](./app/games/page.tsx) — 4 款原創小遊戲（車車大冒險、繽紛方塊、車車卡丁車、海盜卡丁車大賽）；首頁「去遊樂園玩」入口 |
+| 主題模式 | 日間／夜晚／**跟隨系統**（預設與裝置 `prefers-color-scheme` 同步）；頂欄選單內可切換（Landing 頂欄固定陽光色） |
+| 車車遊樂園 | [`/games`](./app/games/page.tsx) — 4 款原創小遊戲（車車大冒險、繽紛方塊、車車卡丁車、海盜卡丁車大賽）；Landing 段內 CTA 入口 |
 | 主題分類 | `/topic`、`/topic/[tag]` 靜態頁（SEO） |
 | 車種分類 | `/vehicles/[vehicle]` |
 | 訂閱／追蹤 | 頁尾 `ConnectHub`（Spotify／Apple 等） |
@@ -150,7 +152,7 @@ npm run build
 - 資料：`data/apple-synced.json`，`pageCount: 1`（單圖 MVP 播放器）
 - 摘要：自動去除 SoundOn 託管尾註；內頁只顯示 EP + **時長**（不寫入 `ageRange`）
 - 車種：標題含關鍵字時自動推斷（如「高鐵」→ 高鐵）；否則預設「其他」，可於 `overrides` 手動指定
-- 首頁：進入故事列表、車種 chip 篩選、卡片無封面角標 emoji
+- 首頁：Landing Hub 四段 scroll-snap；故事列表見 **`/stories`**（車種 chip 篩選、卡片無封面角標 emoji）
 - CI：通過 `npm test` 與 `npm run build` 後 commit push `main`
 
 **本機預覽（不寫檔）：**
@@ -226,7 +228,9 @@ npm test && npm run build
 
 ```
 app/
-  page.tsx              首頁（Hero、篩選、故事牆）
+  page.tsx              首頁 Landing Hub（四段 scroll-snap hero）
+  stories/page.tsx      故事牆（車種 chip 篩選）
+  adventures/page.tsx   車車宇宙樂園地圖
   feed.xml/route.ts     RSS podcast feed
   topic/                主題標籤索引與分類頁
   vehicles/[vehicle]/   車種分類頁
@@ -235,8 +239,9 @@ app/
   about/                關於我們
   fonts/                自託管中文字型子集（huninn woff2）
 components/
+  landing/              Landing Hub（Segment、頂欄、scroll-snap、嘟嘟夥伴）
   ConnectHub.tsx        頁尾追蹤／訂閱圖示區
-  StoryFilter.tsx       首頁車種 chip 篩選
+  StoryFilter.tsx       故事牆車種 chip 篩選
   VehicleClayIcon.tsx   車種 chip 黏土封面縮圖
   StoryWall.tsx         故事網格
   StoryMeta.tsx         內頁 EP + 時長
@@ -414,7 +419,8 @@ npm run font:subset
 - **裝飾：** `components/decor/`（SVG）
 - **佔位插圖：** `scripts/gen_placeholders.py`
 - **PWA / 吉祥物：** `scripts/gen_icons.py`
-- **首頁 Hero：** `public/hero-home.jpg`
+- **Landing Hub hero：** `public/landing/segment-*.jpg`（橫版）與 `*-portrait.jpg`（行動 ≤768px）
+- **其他 Hero / 佔位：** `public/hero-home.jpg` 等
 
 動效尊重 `prefers-reduced-motion: reduce`（`app/globals.css`）。
 

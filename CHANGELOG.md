@@ -17,8 +17,8 @@
 
 ### Changed
 
-- **Landing 陽光色系 + 引導按鈕 + 頁尾捲動 + 手機底部排版**：新增 landing 專用色票（`--landing-nav-*` / `--landing-cta-*`，不改全站 `--landing-brand-ink`）。`SiteNavBar` top bar 改日出琥珀漸層（`#ffc857→#ff9f1c`）+ 白字 + 暖色投影，固定不隨 night 反轉。`SubscribeMenu` 訂閱改反白 pill（白底橘字）；hero CTA 改橘黃漸層 + 白字 + 暖 glow；`.next` 改半透明白底 + 琥珀 chevron。`LandingHub` footer 包成全屏 snap pane（`#landing-foot`），最後段 `.next` 可捲至頁尾不再彈回。手機 ≤768px：隱藏 `.next`、CTA 全寬、進度膠囊/嘟嘟分層重排。**不動** hero raster
-- **Landing page 去暗沉 + top bar 奶油/木質調**（純 CSS）：`LandingSegment` scrim 改「底部保護式」漸層（底端 ~0.46 守白字 WCAG 對比、向上快速透明讓亮圖露出）並強化標題/副標/eyebrow `text-shadow`；`.panel` 載入底色與 `LandingHub` footer 漸層由硬編碼深咖 `#2c2018` 改跟隨主題 `var(--bg)`；`SegmentNav` 手機進度膠囊由黑色半透明改暖色玻璃；`.next` 下滑箭頭改暖色半透明＋毛玻璃。`SiteNavBar` top bar 改木質調深棕漸層（`#7a5230→#674327`）＋奶油字（`#f7ecd6`）＋頂部高光與投影，與明亮 hero 拉出辨識度；選單/按鈕/hover 改用 `currentColor` 自適應，固定不隨日夜反轉。`訂閱收聽`（SubscribeMenu）與 hero `全部故事` CTA 統一為品牌橘實心 pill（`var(--landing-brand)` 底＋`--landing-brand-ink` 深咖字＋暖色硬陰影），維持 AA 對比與整體設計色調一致。**不動**全站主題 token 與 hero raster
+- **Landing 陽光色系 + 引導按鈕 + 頁尾捲動 + 手機底部排版**（`d6c726f`）：新增 landing 專用色票（`--landing-nav-*` / `--landing-cta-*`，不改全站 `--landing-brand-ink`）。`SiteNavBar` top bar 改日出琥珀漸層（`#ffc857→#ff9f1c`）+ 白字 + 暖色投影，固定不隨 night 反轉。`SubscribeMenu` 訂閱改反白 pill（白底橘字）；hero CTA 改橘黃漸層 + 白字 + 暖 glow；`.next` 改半透明白底 + 琥珀 chevron。`LandingHub` footer 包成全屏 snap pane（`#landing-foot`），最後段 `.next` 可捲至頁尾不再彈回。手機 ≤768px：隱藏 `.next`、CTA 全寬、進度膠囊/嘟嘟分層重排。**不動** hero raster
+- **Landing page 去暗沉 + top bar 迭代**（`eeeed4f` `7e42ee5`，top bar/CTA 後續由 `d6c726f` 陽光版取代）：scrim 改底部保護式漸層 + 強化 text-shadow；`.panel`/footer 深咖改 `var(--bg)`；手機進度膠囊改暖色玻璃。中間版 top bar 曾試奶油／木質調 + 品牌橘 CTA。**不動**全站主題 token 與 hero raster
 
 ### Fixed
 
