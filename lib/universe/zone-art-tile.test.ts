@@ -7,9 +7,9 @@ import {
 } from "./zone-art-tile";
 
 describe("zoneArtTilePath", () => {
-  it("每座島有對應靜態 tile 路徑", () => {
+  it("每座島有對應整島 PNG 路徑（R1 黏土 diorama）", () => {
     for (const id of ZONE_IDS) {
-      expect(zoneArtTilePath(id)).toBe(`/adventures/zones/${id}.svg`);
+      expect(zoneArtTilePath(id)).toBe(`/adventures/zones/${id}.png`);
     }
   });
 
@@ -29,21 +29,26 @@ describe("ZONE_ART_TILES 詮釋資料契約", () => {
     }
   });
 
-  it("R1 現況：全島 landmark／center（不改視覺）", () => {
+  it("R1：四島皆 island／sand-bottom-center（整島黏土）", () => {
     for (const id of ZONE_IDS) {
       const tile = ZONE_ART_TILES[id];
-      expect(tile.mode, id).toBe("landmark");
-      expect(tile.anchor, id).toBe("center");
+      expect(tile.mode, id).toBe("island");
+      expect(tile.anchor, id).toBe("sand-bottom-center");
     }
   });
 
-  it("island 模式必附 stageSize（landmark 不需）", () => {
+  it("island 模式必附 stageSize 與 anchorUV", () => {
     for (const id of ZONE_IDS) {
       const tile = ZONE_ART_TILES[id];
       if (tile.mode === "island") {
-        // union 收斂後 stageSize 為必填，無需 non-null assertion
         expect(tile.stageSize.w, id).toBeGreaterThan(0);
         expect(tile.stageSize.h, id).toBeGreaterThan(0);
+        expect(tile.anchorUV.length, id).toBe(2);
+        const [u, v] = tile.anchorUV;
+        expect(u, id).toBeGreaterThan(0);
+        expect(u, id).toBeLessThanOrEqual(1);
+        expect(v, id).toBeGreaterThan(0);
+        expect(v, id).toBeLessThanOrEqual(1);
       }
     }
   });

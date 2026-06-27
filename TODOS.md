@@ -334,7 +334,27 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 - [x] `UniverseMapParallax.tsx` — 雲朵主體加實＋多顆小橢圓蓬鬆化；遠景丘陵略降避免髒斑
 - [x] verify：`npm test` + `npm run build` + `npx tsc --noEmit`；場景色日夜皆不反轉；資料層／互動／tile 未動
 
-**changelog：** R0.5 去貼紙化 + 黏土光影（待補 commit hash）。
+**changelog：** R0.5 去貼紙化 + 黏土光影 `5d433d2`。
+
+---
+
+## 車車宇宙樂園地圖（R1 起手式：car-park 黃金樣本）　`asset · M · /adventures`　〔design〕
+
+> 對照美術聖經 §7 產出 hero 島整島 diorama 真 RGBA 樣本，鎖定後當其餘三島 style reference；本輪純資產，未接程式。
+
+- [x] 產圖：AI claymation diorama（magenta 純色平背，便於乾淨 chroma-key）
+- [x] 去背：PIL chroma-key + despill → 真 alpha（`hasAlpha: yes`，去 rembg 吃陰影風險）
+- [x] 排版：trim → `anchorUV [0.5,0.84]`（沙岸底中心）→ 264:260 圖框 box → 後製右下接地陰影(#6b5a48)
+- [x] 輸出三階：`car-park.png` 264×260 / `@2x` 528×520 / `@3x` 792×780（master 5× 先大後縮 LANCZOS）
+- [x] §7 八項全過；alpha 健檢（transparent/opaque/semi 合理、核心無非預期破洞）
+- [x] sidecar `car-park.tile.json` 鎖 stageSize/anchorUV/pipeline；實機疊圖預覽驗證通過（截圖）
+- [x] **美術聖經 v2**：鎖 car-park 為最高權威；相機改 3/4 高視角輕透視、燈光改柔和均勻光（取代 v1 正交50°/硬光長投影）；prompt/檢查表/Blender 全面對齊黃金樣本
+- [x] 其餘三島（dino/rescue/ocean）以 car-park.png 為 reference + v2 prompt + 洋紅底產圖，同一 PIL 管線出三階；§7 並排檢查 + alpha 健檢通過
+- [x] **R1 接線**：`zoneArtTilePath()→.png`、四島 `ZONE_ART_TILES` 改 island + `anchorUV`、`ZoneIsland` island 模式（anchorUV 對齊/stageSize 鋪島/木牌+pill/hover）、`UniverseMap` 跳過 island 島 SVG 沙草；契約測試同步更新
+- [x] 驗證：`tsc`/`vitest 258`/`build` 全綠；實機桌機+手機截圖四島黏土一致
+- [ ] （未來）逐島 building/coming/planned 狀態美術 overlay（v2 §6）；主島 idle 動態（摩天輪轉/車車跑）
+
+**changelog：** car-park 黃金樣本 + Art Bible v2 + R1 四島整島黏土化（待補 commit hash）。
 
 ---
 

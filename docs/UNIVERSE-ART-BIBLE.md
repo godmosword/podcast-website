@@ -1,40 +1,56 @@
-# 車車宇宙 · 樂園地圖 美術聖經（Art Bible）v1
+# 車車宇宙 · 樂園地圖 美術聖經（Art Bible）v2
 
 > 唯一目的：**讓各自獨立產出的「島」（不論誰畫、AI 生、還是 Blender 算）看起來像同一個世界。**
-> 剪貼感幾乎都來自三件事不一致：**相機角度、陰影方向、材質光澤**。把這份數值定死，再開始量產資產。
+> 剪貼感幾乎都來自三件事不一致：**相機角度、光線、材質光澤**。把這份數值定死，再開始量產資產。
 >
 > 對接對象：`data/universe-zones.ts`（`MAP_STAGE` 1000×720、`ZoneId`、`ZoneStatus`、`ZONE_TERRAIN`）、`components/universe/ZoneIsland.tsx`、`components/universe/ZoneLandmark.tsx`、`lib/universe/zone-art-tile.ts`。
 >
-> 版本：v1（2026-06）。改規格時更新版本號並記 CHANGELOG。
+> 版本：**v2（2026-06-27）**。
+> **v1→v2：鎖定 car-park 黃金樣本為全宇宙標準。** 相機由「正交 50°」改為繼承黃金樣本的「3/4 高視角＋輕透視」；燈光由「左上硬主光＋右下長投影」改為「柔和均勻光＋短柔接地陰影」。其餘材質／品牌色／狀態變體／程式契約沿用 v1。
+
+---
+
+## ★ 黃金樣本（最高權威，先看這個）
+- **標準檔：`public/adventures/zones/car-park.png`**（已核准 2026-06-27）。
+- **本聖經所有文字規格都是在描述這張圖。任何描述與這張衝突時，以圖為準。**
+- 量產其餘三島（dino／rescue／ocean）時：**以這張當 image／style reference、沿用同一 seed 家族**，只換「中央地標＋點綴色」，其餘（沙岸＋綠草頂＋相機＋光＋材質）必須完全相同。
+- 判斷新島合不合格的唯一方法：**和 car-park.png 並排比對**，四項（角度／光／材質／色）一致才算過。
+
+> **實測補註（以圖為準）：** `car-park.png` 去背 trim 後外框 ≈ **228×253（比例 ~0.90，近正方）**，非 3:2 橫幅——因摩天輪佔上半使整體偏方。§5 的 `stageSize` 一律以此實測比例為準，避免 R1 渲染變形。
 
 ---
 
 ## 0. 世界觀一句話
 一片淺海上的**黏土群島**：每座島是一個主題園區，跨海棧道相連；世界從「車車樂園」往外一座一座長出來。整體像一張**會呼吸的定格動畫立體地圖**——手捏質感、暖色童書調、迷你模型尺度。
 
----
-
-## 1. 相機與投影（第一一致性槓桿，零妥協）
-- **投影：正交（orthographic）。** 不可有透視收斂——島與島之間不能各有滅點。
-- **俯角：自水平面起算 50°**（等於離天頂 40°）。看得到島頂、也露出一點點正面。
-- **方位：相機正面朝向觀者，旋轉 0°。** 所有島用同一台相機，不可單獨轉向。
-- **規則：** 任何新島若俯角／投影對不上 → 直接退件重做，不要事後 P。
+> **立體書（pop-up book）效果是刻意的：** 島是低角度 3/4 立體 diorama，海／橋／底座是近俯視平面。立體島站在俯視海面上會像翻開的立體繪本——這很可愛，靠「接地陰影＋泡沫圈」（前端 R0.5 已加）把「浮在水上」賣出來即可，別讓島去配合海的平面視角。
 
 ---
 
-## 2. 燈光（陰影方向＝一致性鐵律）
-| 角色 | 方向 | 強度／色溫 | 備註 |
-|---|---|---|---|
-| 主光 Key | 左上（約 10–11 點鐘），仰角 ~55° | 暖，5200K，柔邊 | 決定高光與投影 |
-| 補光 Fill | 右下對側，天空反彈 | 冷藍，~30% | 壓暗部、給空氣感 |
-| 環境 AO | 縫隙、接地處 | 柔和、淺 | 增加黏土厚實感 |
-| 接地陰影 | **一律落向右下** | 暖灰 `#6b5a48` @ ~25% 不透明、短而柔 | 落在海／沙上 |
-
-> **鐵律：所有島的陰影都往右下。** 拿到任何資產第一件事就是看陰影方向。
+## 1. 相機與視角（第一一致性槓桿，零妥協）— v2 已改
+- **視角：高角度 3/4 立體 diorama（isometric 玩具視角）。** 離水平面約 **30–35°**（看得到島頂，也露出不少地標正面）。
+- **輕微透視（非嚴格正交）：** 允許很小幅度的近大遠小，如黃金樣本；不要做成扁平正交，也不要強烈廣角透視。
+- **方位：島大致正面朝向觀者**（入口拱門／前緣在下方靠近鏡頭，地標在後方中央）。所有島用**同一台相機、同一方位**，不可單獨轉向。
+- **規則：** 任何新島角度對不上黃金樣本 → 直接退件重做，不要事後 P。
 
 ---
 
-## 3. 黏土材質
+## 2. 燈光（v2 已改：柔和均勻，不是硬方向光）
+黃金樣本是**柔和均勻的漫射光**，低對比、無長硬投影。照這個來：
+
+| 角色 | 設定 | 備註 |
+|---|---|---|
+| 主光 | 柔和、大面積、略偏上方 | **弱方向性**；不要 10 點鐘硬主光 |
+| 環境光／補光 | 高、均勻、暖白 | 讓暗部仍明亮通透（童書調） |
+| AO | 縫隙、接地處淺淺一圈 | 增加黏土厚實感 |
+| 接地陰影 | **短、柔、低對比**，落在物件正下方略偏前 | 不是長而硬的方向影 |
+
+> **鐵律（v2）：全部島維持同一套柔和均勻光、低對比。** 任何島若突然出現硬方向主光或長投影＝一眼出戲，退件。
+> **與前端 R0.5 的關係：** 整島貼到海面上的「接地陰影」（`UniverseMap` SVG 那層）保持**柔、短、低對比**即可，方向不必死守右下；重點是低對比的「浮在水上」感，與島內部的均勻光不衝突（兩者是不同陰影：島內元件 vs 整島貼海）。
+
+---
+
+## 3. 黏土材質（v1 沿用，與黃金樣本相符）
 - **霧面油土／聚合黏土**：高粗糙度、**無玻璃／金屬光澤**、無銳利反光，只能有極微弱的大面積柔光。
 - **手捏邊**：所有邊角圓潤帶微倒角，半徑一致。
 - **指紋與工具壓痕**：表面有細微指腹／壓棒紋理、零星小坑與棉絮感。
@@ -46,46 +62,48 @@
 
 ## 4. 配色
 
-**環境色（全圖共用，固定淺色、日夜皆不反轉）——未來 PNG 資產的色票真相**
+**環境／地形色（以黃金樣本為準，約值；未來 PNG 資產的色票真相）**
 
-| 用途 | Hex |
-|---|---|
-| 海（淺／中／深） | `#cfe8f3` / `#bfe0ef` / `#a7d2e8` |
-| 沙岸 | `#ecdcae` |
-| 草地（亮／中／暗） | `#d3e9a8` / `#c6e09a` / `#aacd83` |
-| 背景／天紙 | `#f4ecd9` |
-| 接地陰影 | `#6b5a48` |
+| 用途 | Hex（約） | 來源 |
+|---|---|---|
+| 海（淺／中／深） | `#cfe8f3` / `#bfe0ef` / `#a7d2e8` | SVG 海面（不在 PNG 內） |
+| 島緣奶油沙 | `#ead7ac` | 取樣自黃金樣本 |
+| 草地（亮／中／暗） | `#c4e59a` / `#a0c96a` / `#7fae54` | 取樣自黃金樣本 |
+| 步道 | `#d7c596` | 取樣自黃金樣本 |
+| 池塘水 | `#a9d8ee` | 取樣自黃金樣本 |
+| 接地陰影 | `#6b5a48` @ 低不透明、柔 | — |
 
-> **與現況關係（D3）：** 上表為**未來整島 PNG 資產**的權威色票。目前 `/adventures` 的 SVG fallback（`ZONE_TERRAIN` 與 `UniverseMap` 海色 `#cfeaff`）已 ship 並測試通過，**本版不回頭改色**；待整島 PNG 導入時，前端海／沙／草改吃本表。若日後要讓 SVG fallback 對齊本表，列為獨立小任務。
+> **island PNG 內的沙／草／步道色，以黃金樣本為唯一真相**（上表為近似量測值）。SVG fallback（`ZONE_TERRAIN`、海 `#cfeaff`）已 ship 並測試通過，本版不回頭改；整島 PNG 導入時，前端該島改吃 PNG，海面維持 SVG。
 
-**各園區主色（沿用網站品牌 token，讓地圖與站內一致；每島一個主導色＝視覺分區）**
+**各園區主色（沿用網站品牌 token，每島一個主導色＝視覺分區）**
 
 | Zone | 主色 | 點綴 |
 |---|---|---|
-| car-park 車車樂園 | 品牌橘 `#ff8c2b` | 多彩設施 `#f7a8c4` / `#ffd866` / `#b7df9b` / `#8fcde8` |
+| car-park 車車樂園 | 品牌橘 `#ff8c2b` | 多彩設施 `#f7a8c4` / `#ffd866` / `#b7df9b` / `#8fcde8` / `#c5b3e6` |
 | dino 恐龍島 | 叢林綠 `#8fc04f` | 火山岩 `#9a8d6e`、岩漿 `#e0573a` |
 | rescue 英雄救援隊 | 警示紅 `#e0573a` + 制服藍 `#5b9fc4` | 米白建築 |
 | ocean 未來園區 | 湖水 `#79c8c1` | 霧 `#d6e6ee`、薰衣草告示 `#c5b3e6` |
 
-**材質明度規則**：給 3–7 歲，整體明亮、中高明度；**避免純螢光／高飽和**，維持粉彩童書調。
+**材質明度規則**：給 3–7 歲，整體明亮、中高明度；**避免純螢光／高飽和**，維持粉彩童書調（黃金樣本即標準）。
 
 ---
 
-## 5. 比例與版位（接 R0 座標系）
+## 5. 比例與版位（接 R0 座標系）— v2 微調
 - 座標空間＝ `MAP_STAGE` **1000 × 720**（解析度無關）。
-- **人物比例尺＝小紅賽車**：車身約 **34 × 16** stage 單位。所有島的設施都以「相對於小紅賽車」的大小來畫。
-- **標準島**沙岸外輪廓 ≈ **230 × 170**；**主島（car-park）** ≈ **300 × 220**；地標（摩天輪）高 ≈ 90 單位。
-- **錨點＝沙岸底部中心**（島與海的接觸中點）。此錨點對應 `zone.coord`；陰影不可改變錨點。
-- **輸出規格**：透明 PNG（RGBA）。標準島基準畫布 460×360px @2x（即 1×＝230×180），四周預留 ~40px 給陰影；另出 @3x。所有島**同一 stage-units/px**、同一台相機。
+- **人物比例尺＝小紅賽車**（黃金樣本內的那台紅車）：所有島的設施都以「相對於小紅車」的大小來畫，跨島一致。
+- **car-park 黃金樣本是橫幅（約 3:2）**，非正方。標準島沙岸外輪廓亦偏橫幅；地標（摩天輪）高度約佔畫面上半。
+- **`stageSize` 量法：** 對 PNG **去背 trim 後**量外框寬高比，換算成 stage 單位填入 `IslandTile.stageSize`（car-park 約 `{ w: 300, h: 200 }`，以實際 trim 為準）。
+- **錨點＝沙岸底部中心**（島與海接觸的最前緣中點）。此錨點對應 `zone.coord`；陰影含在 padding 內、不可推移錨點。
+- **輸出**：透明 PNG（RGBA）。主檔建議長邊 ≥ 1500px（足夠 @最大縮放×3 DPR），長寬比＝trim 後比例避免變形；交 `next/image` 產 @2x/@3x。
 
-> **與現況關係（D2）：** 目前 `ZoneLandmark` 把 `artTile` 當 **小地標 icon**（~96×96，錨點＝島中心）疊在 `UniverseMap` 畫的沙／草橢圓上。本表描述的是**未來整島 diorama**（沙＋草＋地標烤進一張、錨點＝沙岸底中心）。兩者切換點由 `lib/universe/zone-art-tile.ts` 的 `ZoneArtTile.mode`（`landmark` | `island`）決定，見第 10 節。**「整島換皮」不是純換檔，需同步調整渲染與錨點。**
+> **與現況關係（D2）：** 目前 `ZoneLandmark` 把 `artTile` 當**小地標 icon**（~96px、錨點＝島中心）疊在 `UniverseMap` 的 SVG 沙／草橢圓上。本表描述的是**整島 diorama**（沙＋草＋地標一張、錨點＝沙岸底中心）。切換點由 `lib/universe/zone-art-tile.ts` 的 `mode`（`landmark`｜`island`）決定，見第 10 節。**整島換皮不是純換檔，需同步調整渲染與錨點。**
 
 ---
 
 ## 6. 狀態變體美術（對應 `ZoneStatus`）
 | 狀態 | 美術做法 |
 |---|---|
-| `open` 開放 | 完整、飽和、設施「亮燈」、可加 mascot 或微動態點綴 |
+| `open` 開放 | 完整、飽和、設施「亮燈」、可加 mascot 或微動態點綴（如黃金樣本） |
 | `building` 建造中 | **open 島底 ＋ 可拆卸 overlay**（吊車／鷹架／橘色圍籬／土堆／工程錐）；部分結構是未烤的灰白黏土。overlay 獨立成一張可重用 |
 | `coming` 即將登場 | 島已成形但「沉睡」：彩度 −15%、設施未亮燈、罩極淡晨霧。可由 open 圖後製 |
 | `planned` 規劃中 | **還不是島**：海上一塊霧色未成形黏土地基／藍圖，插一支「?」告示牌浮標。最省美術 |
@@ -94,44 +112,46 @@
 
 ---
 
-## 7. 每張資產交付前的一致性檢查表
-- [ ] 相機：正交、俯角 50°、方位 0°
-- [ ] 陰影：落向右下、柔、暖灰 ~25%
+## 7. 每張資產交付前的一致性檢查表（v2）
+- [ ] **與 `car-park.png` 並排**：角度、光、材質、色四項一致
+- [ ] 視角：高 3/4、離水平 ~30–35°、輕微透視（非扁平正交、非廣角）
+- [ ] 光：柔和均勻、低對比；**無硬方向主光、無長硬投影**；接地陰影短而柔
 - [ ] 材質：霧面黏土、無光澤、手捏圓邊、有指紋紋理
-- [ ] 配色：在第 4 節範圍內，無螢光／過飽和
-- [ ] 尺度：以小紅賽車比例尺檢查，跨島一致
-- [ ] 錨點：沙岸底部中心；陰影含在 padding 內，未推移錨點
-- [ ] 輸出：透明 PNG、@2x 與 @3x、畫布尺寸符規格
-- [ ] 檔名／狀態變體齊全（見第 11 節）
+- [ ] 配色：在第 4 節範圍內，主導色正確，無螢光／過飽和
+- [ ] 尺度：以小紅車比例尺檢查，跨島一致
+- [ ] 主地標：縮小後仍讀得出（細節如睡蓮屬加分，可糊）
+- [ ] 錨點：沙岸底部中心；陰影含在 padding 內
+- [ ] 輸出：透明 PNG、長邊 ≥1500px、長寬比＝trim 後比例
 
 ---
 
-## 8. 生產管線 A — AI 生圖（最快取得首批資產）
-> prompt 用**英文**（影像模型對英文較穩）。流程：固定 base style block ＋ 每島 subject ＋ 固定 negative。
+## 8. 生產管線 A — AI 生圖（v2：已對齊黃金樣本）
+> prompt 用**英文**。流程：固定 base style block ＋ 每島 subject ＋ 固定 negative。**生新島時務必把 `car-park.png` 當 image/style reference 並沿用 seed 家族。**
 
 **Base style（每張都附在最後）**
 ```
 claymation diorama, handmade matte polymer clay, soft rounded pressed edges,
-subtle thumbprint texture, miniature theme-park island on shallow water,
-orthographic bird's-eye view tilted 50 degrees, no perspective distortion,
-soft warm key light from upper-left, gentle cool sky fill, soft contact shadow
-falling to lower-right, pastel storybook palette, bright and friendly for kids,
-no gloss, no reflections, stop-motion model aesthetic, isolated on transparent
-background, centered, single object
+subtle thumbprint texture, miniature theme-park island on a clay base,
+high three-quarter isometric toy view, about 30 degrees elevation, gentle slight
+perspective, soft even diffuse lighting, low contrast, short soft contact shadow,
+pastel storybook palette, bright and friendly for kids, no gloss, no reflections,
+stop-motion model aesthetic, isolated on transparent background, centered,
+single object
 ```
 
 **Negative（每張都加）**
 ```
-glossy, plastic shine, harsh shadows, perspective, photographic realism, text,
+glossy, plastic shine, harsh shadows, hard directional light, long cast shadow,
+strong perspective, flat orthographic, top-down, photographic realism, text,
 letters, watermark, neon colors, oversaturated, sharp hard edges, cluttered,
-multiple objects, drop shadow box
+multiple objects, picture frame, drop shadow box, branded characters
 ```
 
 **各島 subject（接在 base 前）**
-- **car-park 車車樂園**：`a small round island theme park with a clay ferris wheel, a striped entrance arch gate, tiny toy cars on winding sandy paths, a couple of rounded trees, dominant warm orange with pastel pink/yellow/mint accents,`
-- **dino 恐龍島**：`a small jungle island with a clay volcano and lava glow, ferns and rounded trees, one friendly chubby cartoon dinosaur, green and earthy clay tones,`
-- **rescue 英雄救援隊**：`a small town island with a clay fire station, a watchtower with a tiny flag, two generic rounded rescue trucks, red and blue accents,`
-- **ocean 未來園區（planned）**：`an undeveloped misty clay land plot floating on calm water, a blueprint signpost with a question mark buoy, foggy muted teal and lavender tones, unfinished,`
+- **car-park 車車樂園（＝黃金樣本，已定）**：`a small clay island amusement park with a pastel clay ferris wheel (orange frame, cabins in pink, lavender, yellow, mint, sky blue), a striped orange entrance arch, winding sandy paths, a small pond with lily pads, rounded clay trees, colorful flag bunting on little posts, and one small red toy car as the mascot,`
+- **dino 恐龍島**：`a small clay jungle island with a clay volcano and soft lava glow, ferns and rounded trees, one friendly chubby cartoon dinosaur as the centerpiece, same sandy shore and green grass base, green and earthy accents,`
+- **rescue 英雄救援隊**：`a small clay town island with a clay fire station and a watchtower with a tiny flag, two generic rounded rescue trucks, same sandy shore and green grass base, red and blue accents,`
+- **ocean 未來園區（planned）**：`an undeveloped misty clay land plot on the same sandy base, a blueprint signpost with a question-mark buoy, foggy muted teal and lavender, unfinished, sleepy,`
 
 **建造中 overlay（獨立可重用）**
 ```
@@ -139,14 +159,14 @@ isolated clay construction kit: a tiny crane, scaffolding, an orange safety
 fence, dirt mounds and traffic cones, matte clay, [Base style], transparent background
 ```
 
-> 工作流：先用 base + 一個 subject 生 6–8 張選風格 → 鎖定一張當「黃金樣本」→ 後續所有島都對齊它（必要時 image-to-image／參考圖）。
+> 工作流：car-park 已鎖。生其餘島時 → 餵 `car-park.png` 當 reference ＋固定 base/negative ＋換 subject → 每島生 6–8 張 → 用第 7 節檢查表並排 car-park 挑選。
 
 ---
 
-## 9. 生產管線 B — Blender 黏土渲染（最一致、可任意解析度重算）
-**相機**：Orthographic；`Rotation X = 50°`、`Z = 0°`；固定 Ortho Scale。**一個 .blend 一台相機，所有島共用。**
+## 9. 生產管線 B — Blender 黏土渲染（v2：相機／光已對齊黃金樣本）
+**相機**：高 3/4 玩具視角，俯角離水平約 30–35°（Blender `Rotation X ≈ 58–60°`、`Z = 0°`）；**用 Perspective＋長焦（如 85–135mm）做出黃金樣本那種輕透視**，而非嚴格 Ortho。一個 .blend 一台相機，所有島共用。
 
-**燈光**：Sun（主光）方位左上、仰角 ~55°、暖色、柔陰影；Area（補光）對側、冷藍、低強度；World 環境光低 + 開 AO。**太陽角度固定後不再動。**
+**燈光**：**柔和均勻**為主——大面積柔光／HDRI 環境光、低對比、暗部仍明亮；**不要強方向 Sun**。接地陰影短而柔（軟陰影＋AO）。光一旦定好不再動。
 
 **黏土 Shader（Principled BSDF）**
 - Base Color：園區主色（第 4 節）
@@ -155,40 +175,37 @@ fence, dirt mounds and traffic cones, matte clay, [Base style], transparent back
 - Bump：接 Noise/Voronoi（小尺度）做指紋／壓痕
 - 圓邊：Bevel modifier 或 shader Bevel，半徑一致
 
-**渲染／輸出**：Film → Transparent 開；Eevee（快）或 Cycles（細）皆可，務必柔陰影 + AO；每個 tier 固定解析度；輸出 PNG RGBA；框取讓**錨點＝沙岸底部中心**置於畫布固定位置。新園區＝換模型、相機燈光不動。
+**渲染／輸出**：Film → Transparent 開；Cycles（細）或 Eevee（快）＋柔陰影＋AO；輸出 PNG RGBA；框取讓**錨點＝沙岸底部中心**置於畫布固定位置。新園區＝換模型、相機燈光不動。
 
 ---
 
-## 10. 與程式對接（現況契約）
-- 資產路徑（**D1：採 `/adventures/`，與路由一致**）：
+## 10. 與程式對接（現況契約，v1 沿用）
+- 資產路徑（**採 `/adventures/`，與路由一致**）：
   - `public/adventures/zones/{zoneId}.{svg|png}`（對應 `ZoneArtTile.src`）
   - `public/adventures/zones/{zoneId}-building.png`（建造中 overlay 合成版，選用）
   - `public/adventures/overlays/construction.png`（共用 overlay，選用）
-- **tile 詮釋資料契約**（`lib/universe/zone-art-tile.ts`）：
+- **tile 詮釋資料契約**（`lib/universe/zone-art-tile.ts`，discriminated union）：
   ```ts
   type ZoneArtMode = "landmark" | "island";
   type ZoneTileAnchor = "center" | "sand-bottom-center";
-  type ZoneArtTile = {
-    src: string;                       // 圖檔路徑
-    mode: ZoneArtMode;                 // R1 現況皆 "landmark"
-    anchor: ZoneTileAnchor;            // landmark→center；island→sand-bottom-center
-    stageSize?: { w: number; h: number }; // island 模式必填：tile 在 stage 座標的固有尺寸
-  };
+  // landmark：以島中心對齊 coord；island：以沙岸底中心對齊 coord，必填 stageSize
   ```
-  - 現況四島皆 `mode: "landmark"`、`anchor: "center"`，渲染行為與 R2 完全一致。
-  - 未來某島升級整島 diorama：改該島 `mode: "island"` + `anchor: "sand-bottom-center"` + `stageSize`，並由 `ZoneIsland`/`UniverseMap` 對 `island` 模式：①以 stageSize 鋪滿該島、②錨點移到沙岸底中心、③**在 `components/universe/UniverseMap.tsx` 條件關閉該島的兩層 SVG 沙／草橢圓**（與整島圖直接耦合，不關會疊圖）、④渲染從現在的 `<img>` 96px 容器改走 `next/image`（評估尺寸／priority／hit area／name+pill 位置）出 @2x/@3x。
+  - 現況四島皆 `mode: "landmark"`、`anchor: "center"`。
+  - **car-park 整島升級**：改 `mode: "island"` + `anchor: "sand-bottom-center"` + `stageSize`（trim 後量；約 `{ w: 300, h: 200 }`），並由 `ZoneIsland`/`UniverseMap` 對 `island` 模式：①以 stageSize 鋪該島、②錨點移到沙岸底中心、③**在 `UniverseMap.tsx` 條件關閉該島兩層 SVG 沙／草橢圓**（不關會疊圖）、④渲染從 `<img>` 96px 容器改走 `next/image`（評估尺寸／priority／hit area／name+pill 位置）。
   - **副檔名切換**：整島 PNG 就緒時改 `zoneArtTilePath()` 回傳 `.png`（見該函式 JSDoc）。
-- **逐島升級**：先做 car-park（hero 島）精緻整島版，其餘維持 landmark，逐島切換。
+- **逐島升級**：先做 car-park（已備黃金樣本），其餘維持 landmark，逐島切換。
+
+> **R1 接線補註（來自 v1.1 規劃審查，HIGH）：** island 模式渲染須以**錨點在圖內的相對位置 `anchorUV`** 對齊 `zone.coord`，而非「圖底中心」，否則島會上移約 16%。car-park 黃金樣本的 `anchorUV=(0.50, 0.84)` 已記於 sidecar `public/adventures/zones/car-park.tile.json`；R1 時於 `ZoneArtTile` 補 `anchorUV?: [number, number]` 欄位。
 
 ---
 
 ## 11. 命名與版本
-- 島：`zones/{id}.png`（或 `@2x`/`@3x` 後綴交給 `next/image` 處理）
-- 狀態變體：`zones/{id}-{status}.png`（building/coming…）
+- 島：`zones/{id}.png`（@2x/@3x 交 `next/image`）
+- 狀態變體：`zones/{id}-{status}.png`
 - 共用件：`overlays/construction.png`、`overlays/fog.png`
-- 黃金樣本與 .blend 收進 repo 或設計庫，附 `art-bible` 版本號；改規格時更新本檔 vN 並記 CHANGELOG。
+- **黃金樣本 `car-park.png`（含原始生圖 seed／參數）收進 repo 或設計庫**；改規格時更新本檔 vN 並記 CHANGELOG。
 
 ---
 
 ### TL;DR 給美術／AI 的一句話
-> 霧面手捏黏土、暖光從左上、陰影落右下、正交俯角 50°、粉彩童書色、迷你模型尺度——**每座島都這樣，世界才會是同一個世界。**
+> 霧面手捏黏土、柔和均勻光、短柔接地陰影、**3/4 高視角輕透視**、粉彩童書色、迷你模型尺度——**而且每座島都對齊 `car-park.png` 黃金樣本，世界才會是同一個世界。**

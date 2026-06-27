@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { MAP_STAGE, ZONE_TERRAIN, type ZoneDef } from "@/data/universe-zones";
 import { resolveUniverseMap } from "@/lib/universe-map";
+import { getZoneArtTile } from "@/lib/universe/zone-art-tile";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import MapControls from "./MapControls";
 import UniverseMapParallax from "./UniverseMapParallax";
@@ -121,6 +122,8 @@ export default function UniverseMap() {
 
             {/* 沙洲 + 草地（每島底座，固定淺色） */}
             {zones.map((zone) => {
+              // island 模式：整島 PNG 已含沙草與接地陰影，跳過 SVG 底座避免疊圖
+              if (getZoneArtTile(zone.id).mode === "island") return null;
               const terrain = ZONE_TERRAIN[zone.id];
               return (
               <g key={`land-${zone.id}`}>

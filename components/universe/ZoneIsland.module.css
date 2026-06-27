@@ -1,3 +1,47 @@
+/* ── island 模式（整島黏土 diorama PNG） ───────────────── */
+.islandTile {
+  position: absolute;
+  transform-origin: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--ink);
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tileImg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  transition: transform 0.15s ease;
+}
+
+.islandTile:hover .tileImg {
+  transform: scale(1.04);
+}
+
+.islandTile:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 4px;
+  border-radius: 18px;
+}
+
+/* 名稱木牌 + 狀態 pill：定位在圖內沙岸底中心（錨點）下方 */
+.tileLabel {
+  position: absolute;
+  transform: translate(-50%, 6px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  pointer-events: none;
+}
+
 .island {
   position: absolute;
   /* px 為島中心：以 transform 置中 */

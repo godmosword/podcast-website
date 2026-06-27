@@ -1,0 +1,20 @@
+{
+  "id": "car-park",
+  "artBibleVersion": "v2",
+  "kind": "golden-sample",
+  "approved": "2026-06-27",
+  "mode": "island",
+  "anchor": "sand-bottom-center",
+  "anchorUV": [0.5, 0.84],
+  "stageSize": { "w": 264, "h": 260 },
+  "trimmedBox": { "w": 228, "h": 253, "ratio": 0.901 },
+  "stageSizeSemantics": "圖框 box（含地標 headroom + 接地陰影 bleed）；實測 trim 228×253（比例~0.90 近正方，非聖經文字估的 3:2/300×200，以圖為準）。R1 渲染須用此比例避免變形",
+  "intrinsicPx": { "x1": [264, 260], "x2": [528, 520], "x3": [792, 780] },
+  "files": {
+    "x1": "car-park.png",
+    "x2": "car-park@2x.png",
+    "x3": "car-park@3x.png"
+  },
+  "pipeline": "AI claymation diorama (magenta chroma-key) → PIL chroma-key 去背 + despill → anchorUV 排版 → PIL 後製右下接地陰影(#6b5a48) → LANCZOS 三階",
+  "r1Wiring": "接線時於 lib/universe/zone-art-tile.ts 的 ZoneArtTile 補 anchorUV 欄位，UniverseMap island 模式以 anchorUV 對齊 zone.coord，並關閉該島 SVG 沙草橢圓、改 next/image。本檔僅鎖定數值，未動程式。"
+}

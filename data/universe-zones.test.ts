@@ -74,9 +74,9 @@ describe("universe-zones", () => {
     }
   });
 
-  it("每島皆有 artTile 靜態路徑", () => {
+  it("每島皆有 artTile 靜態路徑（R1：整島黏土 PNG）", () => {
     for (const zone of ZONES) {
-      expect(zone.artTile).toMatch(/^\/adventures\/zones\/[\w-]+\.svg$/);
+      expect(zone.artTile).toMatch(/^\/adventures\/zones\/[\w-]+\.png$/);
     }
   });
 });
