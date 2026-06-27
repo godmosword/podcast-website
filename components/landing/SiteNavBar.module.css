@@ -2,9 +2,11 @@
   position: sticky;
   top: 0;
   z-index: 40;
-  background: var(--landing-brand, #e87722);
-  color: var(--landing-brand-ink, #fff);
-  box-shadow: 0 2px 0 color-mix(in srgb, var(--ink) 12%, transparent);
+  /* 奶油／木質調：暖色印刷地圖風，固定淺色不隨日夜反轉 */
+  background: linear-gradient(180deg, #f6ecd4 0%, #ecdcb6 100%);
+  color: #5a3f28;
+  box-shadow: 0 2px 0 rgba(90, 63, 40, 0.16);
+  border-bottom: 1px solid rgba(90, 63, 40, 0.14);
 }
 
 .inner {
@@ -59,9 +61,9 @@
 .menuBtn {
   width: 44px;
   height: 44px;
-  border: 2px solid color-mix(in srgb, var(--landing-brand-ink, #fff) 35%, transparent);
+  border: 2px solid color-mix(in srgb, currentColor 28%, transparent);
   border-radius: 10px;
-  background: color-mix(in srgb, var(--landing-brand-ink, #fff) 12%, transparent);
+  background: color-mix(in srgb, currentColor 8%, transparent);
   cursor: pointer;
 }
 
@@ -98,7 +100,7 @@
 }
 
 .link:hover {
-  background: color-mix(in srgb, var(--landing-brand-ink, #fff) 14%, transparent);
+  background: color-mix(in srgb, currentColor 12%, transparent);
 }
 
 .themeRow {
@@ -109,7 +111,7 @@
   padding: 12px;
   margin-top: 8px;
   border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--landing-brand-ink, #fff) 12%, transparent);
+  background: color-mix(in srgb, currentColor 8%, transparent);
 }
 
 .themeLabel {

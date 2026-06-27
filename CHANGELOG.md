@@ -15,6 +15,10 @@
 - **樂園地圖美術聖經 v2**：鎖定 `car-park.png` 為全宇宙最高權威黃金樣本（「任何描述與圖衝突時以圖為準」）。相機由「正交 50°」改「3/4 高視角 ~30–35°＋輕透視」；燈光由「左上硬主光＋右下長投影」改「柔和均勻光＋短柔接地陰影」。base/negative prompt、檢查表、Blender 相機/光全面對齊黃金樣本；材質／品牌色／狀態變體／程式契約沿用 v1
 - **樂園地圖美術聖經（Art Bible v1）**：新增 `docs/UNIVERSE-ART-BIBLE.md`（相機正交俯角 50°、左上暖光／右下陰影、霧面黏土材質、環境色票、小紅賽車比例尺、狀態變體、AI／Blender 生產管線、交付檢查表）讓各自產出的島維持同一世界感；`lib/universe/zone-art-tile.ts` 新增 `ZoneArtTile` 詮釋資料契約（`mode: landmark|island`、`anchor`、`stageSize`），現況全島 `landmark`／`center` **不改視覺**，為未來整島 diorama 預留切換點
 
+### Changed
+
+- **Landing page 去暗沉 + top bar 奶油/木質調**（純 CSS）：`LandingSegment` scrim 改「底部保護式」漸層（底端 ~0.46 守白字 WCAG 對比、向上快速透明讓亮圖露出）並強化標題/副標/eyebrow `text-shadow`；`.panel` 載入底色與 `LandingHub` footer 漸層由硬編碼深咖 `#2c2018` 改跟隨主題 `var(--bg)`；`SegmentNav` 手機進度膠囊由黑色半透明改暖色玻璃；`.next` 下滑箭頭改暖色半透明＋毛玻璃。`SiteNavBar` top bar 由品牌橘改奶油漸層（`#f6ecd4→#ecdcb6`）＋木棕字（`#5a3f28`），選單/按鈕/hover 改用 `currentColor` 自適應，固定淺色不隨日夜反轉。**不動**全站主題 token 與 hero raster
+
 ### Fixed
 
 - **車車宇宙地圖 a11y**：sr-only 島嶼清單連結加 `tabIndex={-1}`，鍵盤 Tab 改走可見島嶼 button；`UniverseMap` unmount 時清除 fly-to 後開 sheet 的 `setTimeout`，避免卸載後 setState

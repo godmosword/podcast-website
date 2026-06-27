@@ -633,6 +633,10 @@ T+2d    社群貼文（B 戰場）
 
 ## Completed
 
+### Landing 去暗沉 + top bar 奶油/木質調
+純 CSS 去暗沉：scrim 改底部保護式漸層（守白字 WCAG）＋強化 text-shadow；`.panel`/footer 深咖硬編碼改 `var(--bg)`；手機進度膠囊與 `.next` 箭頭改暖色玻璃；`SiteNavBar` top bar 品牌橘改奶油漸層＋木棕字（currentColor 自適應）。不動主題 token 與 hero。
+**Completed:** main（2026-06，待 commit hash）
+
 ### Landing 配色調亮
 Landing 配色調亮（陽光暖橘 + 淺暖罩），保留日夜主題與 AA。
 **Completed:** main（2026-06）
