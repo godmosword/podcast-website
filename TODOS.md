@@ -324,6 +324,20 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 
 ---
 
+## 車車宇宙樂園地圖（R0.5 去貼紙化 + 黏土光影）　`style · S · /adventures`　〔design+eng〕
+
+> 純 code 視覺升級，不動 raster／資料層／互動：把「白框 app icon 浮在扁平橢圓」拉到「地標站在島上、有黏土光影」。地標圖維持 placeholder（整島 tile 留 R1）。
+
+- [x] `ZoneIsland.module.css` — 移除 4px 白框，改柔和黏土底座（上緣高光／下緣內陰影／接地投影）+ 地標 drop-shadow；名稱改木牌風（固定色）
+- [x] `UniverseMap.tsx` — `<defs>` 海漸層／黏土光影／模糊 filter；海底 rect 改 `url(#seaGrad)`；每島五層（接地投影＋泡沫圈＋沙＋草＋黏土光影覆蓋）
+- [x] `MapControls.tsx` + `.module.css` — reset 由 🏠 emoji 改自繪 SVG home icon（aria-label 不變）；`.btn svg { display:block }`
+- [x] `UniverseMapParallax.tsx` — 雲朵主體加實＋多顆小橢圓蓬鬆化；遠景丘陵略降避免髒斑
+- [x] verify：`npm test` + `npm run build` + `npx tsc --noEmit`；場景色日夜皆不反轉；資料層／互動／tile 未動
+
+**changelog：** R0.5 去貼紙化 + 黏土光影（待補 commit hash）。
+
+---
+
 ## 車車宇宙樂園地圖（Art Bible v1）　`feature · S · /adventures`　〔eng+design〕
 
 > 把各自獨立產出的島統一成同一世界：相機／光／材質／色票／比例定死，並建立 R1→整島 diorama 的資產對接契約。本階段純文件 + 資料層契約，**不生美術資產、不改視覺**。

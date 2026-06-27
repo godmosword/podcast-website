@@ -96,8 +96,22 @@ export default function UniverseMap() {
             aria-hidden="true"
             focusable="false"
           >
+            <defs>
+              <linearGradient id="seaGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stopColor="#d6efff" />
+                <stop offset="1" stopColor="#bce0f4" />
+              </linearGradient>
+              <radialGradient id="clayShade" cx="38%" cy="30%" r="75%">
+                <stop offset="0" stopColor="#ffffff" stopOpacity="0.32" />
+                <stop offset="0.55" stopColor="#ffffff" stopOpacity="0" />
+                <stop offset="1" stopColor="#6b4a1e" stopOpacity="0.16" />
+              </radialGradient>
+              <filter id="islandShadow" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="7" />
+              </filter>
+            </defs>
             {/* 海：印刷地圖固定淺色，不隨日夜反轉 */}
-            <rect x="0" y="0" width={MAP_STAGE.width} height={MAP_STAGE.height} fill="#cfeaff" />
+            <rect x="0" y="0" width={MAP_STAGE.width} height={MAP_STAGE.height} fill="url(#seaGrad)" />
             {/* 浪紋裝飾 */}
             <g stroke="#b4ddf5" strokeWidth="3" fill="none" opacity="0.7">
               <path d="M 60 140 q 20 -12 40 0 t 40 0" />
@@ -110,8 +124,32 @@ export default function UniverseMap() {
               const terrain = ZONE_TERRAIN[zone.id];
               return (
               <g key={`land-${zone.id}`}>
+                {/* 接地投影：偏右下、模糊 */}
+                <ellipse
+                  cx={zone.px.x + 14}
+                  cy={zone.px.y + 34}
+                  rx="120"
+                  ry="80"
+                  fill="#244a2e"
+                  opacity="0.16"
+                  filter="url(#islandShadow)"
+                />
+                {/* 泡沫圈 */}
+                <ellipse
+                  cx={zone.px.x}
+                  cy={zone.px.y + 18}
+                  rx="126"
+                  ry="90"
+                  fill="none"
+                  stroke="#eaf7fc"
+                  strokeWidth="5"
+                  opacity="0.8"
+                />
+                {/* 沙 + 草（維持 ZONE_TERRAIN 色） */}
                 <ellipse cx={zone.px.x} cy={zone.px.y + 18} rx="118" ry="84" fill={terrain.sand} />
                 <ellipse cx={zone.px.x} cy={zone.px.y + 6} rx="92" ry="62" fill={terrain.grass} />
+                {/* 黏土圓潤光影覆蓋 */}
+                <ellipse cx={zone.px.x} cy={zone.px.y + 18} rx="118" ry="84" fill="url(#clayShade)" />
               </g>
               );
             })}
