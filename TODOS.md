@@ -320,7 +320,7 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 - [x] `UniverseMapParallax` 遠景雲／丘陵視差（reduced-motion 同步鏡頭）
 - [x] verify：`npm run test`（255）+ `npm run build` + e2e 車車宇宙 smoke
 
-**changelog：** R2 OG 分享圖 + 靜態 artTile + 視差雲層（待 commit hash）。
+**changelog：** R2 OG 分享圖 + 靜態 artTile + 視差雲層 `869436c`。
 
 ---
 
