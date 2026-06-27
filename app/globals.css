@@ -92,9 +92,9 @@
   --safe-right: env(safe-area-inset-right, 0px);
 
   /* Landing Hub（Storyline 式頂欄） */
-  /* 品牌橘加深至對白字 ≥4.5:1（WCAG AA）；原 #e87722 對白僅 2.96。 */
-  --landing-brand: #b3560f;
-  --landing-brand-ink: #ffffff;
+  /* 陽光橘 + 深咖字：對比 6.3:1（WCAG AA）。亮且不刺眼，同時供頂欄與 CTA 鈕共用。 */
+  --landing-brand: #ff8c2b;
+  --landing-brand-ink: #3a2410;
   /* sticky 頂欄高度：按鈕 44 + 上下 padding 20 + 瀏海安全區 */
   --nav-h: calc(64px + var(--safe-top));
   --landing-heading: #2a9d8f;
@@ -154,8 +154,8 @@
   --chip-active-fg: #1c2440;
   --float-amp: 2px;
 
-  --landing-brand: #b3560f;
-  --landing-brand-ink: #fff8f0;
+  --landing-brand: #d9701a;
+  --landing-brand-ink: #2a1808;
   --landing-heading: #5da8a1;
 }
 

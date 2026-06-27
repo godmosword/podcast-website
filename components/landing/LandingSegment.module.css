@@ -10,7 +10,7 @@
   overflow: hidden;
   isolation: isolate;
   flex: none;
-  background: #14100c;
+  background: #2c2018;
 }
 
 .visual {
@@ -50,10 +50,10 @@
   pointer-events: none;
   background: linear-gradient(
     to top,
-    rgba(20, 16, 12, 0.78) 0%,
-    rgba(20, 16, 12, 0.45) 34%,
-    rgba(20, 16, 12, 0.08) 62%,
-    rgba(20, 16, 12, 0) 100%
+    rgba(45, 22, 8, 0.55) 0%,
+    rgba(60, 30, 12, 0.24) 38%,
+    rgba(255, 180, 90, 0.04) 64%,
+    rgba(255, 180, 90, 0) 100%
   );
 }
 

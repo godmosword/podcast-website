@@ -530,6 +530,10 @@ T+2d    社群貼文（B 戰場）
 
 ## Completed
 
+### Landing 配色調亮
+Landing 配色調亮（陽光暖橘 + 淺暖罩），保留日夜主題與 AA。
+**Completed:** main（2026-06）
+
 ### 主題跟隨系統（日間／夜晚／系統同步）
 `ThemeMode` 新增 `system`；預設改為跟隨 `prefers-color-scheme`；`THEME_INIT_SCRIPT` FOUC 防閃同步支援；`ThemeProvider` 監聽系統配色變更；首頁標語旁圖示循環系統→日間→夜晚；睡眠定時器夜晚提示改為固定 `night` 偏好。
 **Completed:** `cf50631`（2026-06）
