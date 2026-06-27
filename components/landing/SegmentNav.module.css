@@ -13,7 +13,7 @@
     top: auto;
     right: auto;
     left: 50%;
-    bottom: calc(8px + var(--safe-bottom));
+    bottom: calc(12px + var(--safe-bottom));
     transform: translateX(-50%);
   }
 
@@ -80,7 +80,7 @@
 }
 
 .active.dot::after {
-  background: var(--landing-brand, #e87722);
+  background: var(--landing-nav-to, #ff9f1c);
   transform: scale(1.35);
 }
 

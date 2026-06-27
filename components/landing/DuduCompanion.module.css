@@ -65,6 +65,7 @@
 @media (max-width: 600px) {
   .root {
     right: 8px;
+    bottom: calc(64px + var(--safe-bottom, 0px));
   }
 
   .car {

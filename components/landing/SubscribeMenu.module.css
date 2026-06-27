@@ -10,14 +10,14 @@
   min-height: 44px;
   padding: 6px 12px;
   border-radius: 999px;
-  /* 品牌橘實心 CTA，與 hero「全部故事」同色系；深咖字維持 ≥6:1 對比，於木質頂欄上清楚跳出 */
-  background: var(--landing-brand, #ff8c2b);
-  color: var(--landing-brand-ink, #3a2410);
+  /* 反白 pill：在陽光頂欄上最清楚 */
+  background: var(--landing-nav-cta-bg, #ffffff);
+  color: var(--landing-nav-cta-fg, #e86a00);
   font-weight: 800;
   font-size: 0.78rem;
   text-decoration: none;
-  border: 2px solid color-mix(in srgb, #000 18%, var(--landing-brand));
-  box-shadow: 0 2px 0 rgba(46, 28, 12, 0.32);
+  border: 2px solid rgba(255, 255, 255, 0.65);
+  box-shadow: 0 2px 0 rgba(255, 140, 0, 0.28);
   white-space: nowrap;
   cursor: pointer;
 }

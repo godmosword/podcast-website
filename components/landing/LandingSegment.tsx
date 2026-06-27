@@ -8,9 +8,11 @@ import styles from "./LandingSegment.module.css";
 type LandingSegmentProps = {
   segment: ResolvedLandingSegment;
   index: number;
-  /** 下一段錨點；最後一段為 null（不顯示往下箭頭）。 */
+  /** 下一段錨點；最後一段指向 landing-foot（頁尾 snap pane）。 */
   nextAnchorId: string | null;
 };
+
+const FOOTER_ANCHOR = "landing-foot";
 
 export default function LandingSegment({
   segment,
@@ -67,7 +69,11 @@ export default function LandingSegment({
         <a
           href={`#${nextAnchorId}`}
           className={styles.next}
-          aria-label="捲動到下一個專區"
+          aria-label={
+            nextAnchorId === FOOTER_ANCHOR
+              ? "捲動到頁尾"
+              : "捲動到下一個專區"
+          }
           onClick={goToNext}
         >
           <span aria-hidden>⌄</span>

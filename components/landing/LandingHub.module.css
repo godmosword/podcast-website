@@ -1,4 +1,16 @@
-/* 最後一段 hero → 頁尾：跟隨主題的淺色漸層銜接，避免深咖暗縫 */
+/* Footer snap pane：最後一段 hero 下捲可穩定停駐，不再彈回 */
+.footerPane {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  min-height: var(--landing-pane-h, calc(100svh - var(--nav-h)));
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  flex: none;
+  background: var(--bg);
+}
+
+/* 最後一段 hero → 頁尾：跟隨主題的淺色漸層銜接 */
 .footer {
   width: 100%;
   max-width: 960px;

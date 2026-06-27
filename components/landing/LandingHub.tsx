@@ -10,6 +10,8 @@ import { podcastSeriesJsonLd } from "@/lib/json-ld";
 import hubStyles from "./LandingHub.module.css";
 import scrollStyles from "./LandingScrollView.module.css";
 
+const FOOTER_ANCHOR = "landing-foot";
+
 export default function LandingHub() {
   const segments = resolveLandingSegments();
   const navItems = segments.map((s) => ({
@@ -32,15 +34,20 @@ export default function LandingHub() {
             key={segment.id}
             segment={segment}
             index={index}
-            nextAnchorId={segments[index + 1]?.anchorId ?? null}
+            nextAnchorId={
+              segments[index + 1]?.anchorId ??
+              (index === segments.length - 1 ? FOOTER_ANCHOR : null)
+            }
           />
         ))}
 
-        <div id="landing-foot" className={hubStyles.footer}>
-          <SiteFooter layout="home" />
-        </div>
+        <section id={FOOTER_ANCHOR} className={hubStyles.footerPane}>
+          <div className={hubStyles.footer}>
+            <SiteFooter layout="home" />
+          </div>
+        </section>
 
-        <DuduCompanion items={duduItems} footerId="landing-foot" />
+        <DuduCompanion items={duduItems} footerId={FOOTER_ANCHOR} />
       </LandingScrollView>
     </>
   );

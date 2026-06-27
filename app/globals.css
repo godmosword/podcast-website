@@ -99,6 +99,18 @@
   --nav-h: calc(64px + var(--safe-top));
   --landing-heading: #2a9d8f;
 
+  /* Landing 陽光色票（nav / CTA 分離；固定不隨 night 反轉，見 SiteNavBar） */
+  --landing-nav-from: #ffc857;
+  --landing-nav-to: #ff9f1c;
+  --landing-nav-ink: #ffffff;
+  --landing-nav-border: rgba(255, 255, 255, 0.35);
+  --landing-cta-from: #ff9500;
+  --landing-cta-to: #ff7a00;
+  --landing-cta-fg: #ffffff;
+  --landing-cta-shadow: rgba(255, 120, 0, 0.45);
+  --landing-nav-cta-bg: #ffffff;
+  --landing-nav-cta-fg: #e86a00;
+
   /* 語意輔助（light 預設） */
   --mix-base: #ffffff;
   --illus-warm: none;
