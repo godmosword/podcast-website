@@ -633,6 +633,9 @@ T+2d    社群貼文（B 戰場）
 
 ## Completed
 
+### R-anim 1.5b：漫遊小車 2.5D 島上步道（P0）
+`IslandRoamerLayer` 掛 `ZoneIsland`；`CAR_PARK_WALKWAY_PATH`；`useRoamerSim`；移除海面 `CharacterRoamerLayer`。
+
 ### R-anim 1.5 漫遊者 PNG 資產（小紅賽車 + 恐龍車多多）
 `generate-roamer-assets.ts`（magenta chroma-key + sharp 後製）；`public/adventures/roamers/*.png`；`MAP_ROAMERS` enabled（duo-duo `startOffset:0.5`）。
 **Completed:** `e471694`（2026-06-28）

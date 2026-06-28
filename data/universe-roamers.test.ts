@@ -14,9 +14,20 @@ describe("universe-roamers", () => {
     }
   });
 
-  it("route.d 以 M 開頭", () => {
+  it("每個 roamer 有 zoneId 且與 route 一致", () => {
+    const routeById = new Map(ROAMER_ROUTES.map((r) => [r.id, r]));
+    for (const roamer of MAP_ROAMERS) {
+      expect(roamer.zoneId, roamer.id).toBeTruthy();
+      const route = routeById.get(roamer.routeId);
+      expect(route, roamer.routeId).toBeDefined();
+      expect(roamer.zoneId).toBe(route!.zoneId);
+    }
+  });
+
+  it("route.tilePath 以 M 開頭", () => {
     for (const route of ROAMER_ROUTES) {
-      expect(route.d.trim().startsWith("M")).toBe(true);
+      expect(route.tilePath.trim().startsWith("M")).toBe(true);
+      expect(route.kind).toBe("island");
     }
   });
 

@@ -7,8 +7,7 @@
  * enabled 預設 false：資產未齊時 production 不渲染。dev 用 ?devMotion=1 驗證。
  */
 import type { ZoneId } from "@/data/universe-zones";
-
-export type MotionType = "spin" | "sway" | "bob" | "sweep" | "path" | "sprite";
+import { CAR_PARK_WALKWAY_PATH } from "@/data/universe-roamers";
 
 type MotionPartBase = {
   name: string;
@@ -54,8 +53,9 @@ export type MotionPart =
     });
 
 /** car-park 步道 path（tile 本地座標 264×260，產零件時一併量出） */
-const CAR_PARK_MASCOT_PATH =
-  "M 72 188 Q 132 172 192 178 T 252 188";
+const CAR_PARK_MASCOT_PATH = CAR_PARK_WALKWAY_PATH;
+
+export type MotionType = "spin" | "sway" | "bob" | "sweep" | "path" | "sprite";
 
 export const ZONE_MOTION: Partial<Record<ZoneId, MotionPart[]>> = {
   "car-park": [

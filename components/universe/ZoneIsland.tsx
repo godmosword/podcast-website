@@ -3,6 +3,7 @@
 import { ZONE_STATUS_META, type ZoneDef, type ZoneStatus } from "@/data/universe-zones";
 import type { ResolvedZone } from "@/lib/universe-map";
 import { getZoneArtTile } from "@/lib/universe/zone-art-tile";
+import IslandRoamerLayer from "./IslandRoamerLayer";
 import ZoneLandmark from "./ZoneLandmark";
 import ZoneMotionLayer from "./ZoneMotionLayer";
 import StatusOverlay from "./StatusOverlay";
@@ -61,6 +62,14 @@ export default function ZoneIsland({
             style={{ transformOrigin: `${ax * 100}% ${ay * 100}%` }}
             draggable={false}
             decoding="async"
+          />
+          <IslandRoamerLayer
+            zoneId={zone.id}
+            tileW={tile.stageSize.w}
+            tileH={tile.stageSize.h}
+            reduced={reduced}
+            paused={paused}
+            night={night}
           />
           <StatusOverlay status={effectiveStatus} paused={paused} transition={transition} />
           <ZoneMotionLayer

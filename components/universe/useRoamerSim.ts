@@ -1,42 +1,28 @@
-"use client";
+import { useEffect, useRef, type RefObject } from "react";
+import type { Roamer, RoamerRoute } from "@/data/universe-roamers";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  MAP_ROAMERS,
-  ROAMER_ROUTES,
-  isDevRoamersQuery,
-  shouldRenderRoamer,
-  type Roamer,
-} from "@/data/universe-roamers";
-import styles from "./CharacterRoamerLayer.module.css";
-
-type Props = {
-  reduced: boolean;
-  paused: boolean;
-  night: boolean;
-};
-
-type RouteMeta = {
+export type RouteMeta = {
   el: SVGPathElement;
   length: number;
   pingpong: boolean;
 };
 
-type RoamerSim = {
+export type RoamerSim = {
   roamer: Roamer;
   distance: number;
   direction: 1 | -1;
   route: RouteMeta;
+  phase: number;
 };
 
 const LOOK_AHEAD = 2;
 const MAX_DT_MS = 50;
 
-function buildRouteMap(): Map<string, RouteMeta> {
+export function buildRouteMap(routes: RoamerRoute[]): Map<string, RouteMeta> {
   const map = new Map<string, RouteMeta>();
-  for (const route of ROAMER_ROUTES) {
+  for (const route of routes) {
     const el = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    el.setAttribute("d", route.d);
+    el.setAttribute("d", route.tilePath);
     map.set(route.id, {
       el,
       length: el.getTotalLength(),
@@ -46,7 +32,13 @@ function buildRouteMap(): Map<string, RouteMeta> {
   return map;
 }
 
-function samplePoint(sim: RoamerSim): { x: number; y: number; flip: number } {
+export function sampleTilePoint(sim: RoamerSim): {
+  x: number;
+  y: number;
+  flip: number;
+  bob: number;
+  now: number;
+} {
   const { distance, direction, route } = sim;
   const length = route.length;
   const dist = Math.max(0, Math.min(length, distance));
@@ -54,37 +46,67 @@ function samplePoint(sim: RoamerSim): { x: number; y: number; flip: number } {
   const P2 = route.el.getPointAtLength(
     Math.max(0, Math.min(length, dist + direction * LOOK_AHEAD)),
   );
-  // 素材朝左；往右行進時水平翻轉（不用 offset-rotate，保持直立）
   const flip = P2.x >= P.x ? -1 : 1;
-  return { x: P.x, y: P.y, flip };
+  const now = performance.now();
+  const bob = Math.sin(now * 0.004 + sim.phase) * 1.2;
+  return { x: P.x, y: P.y, flip, bob, now };
 }
 
-function applyTransform(el: HTMLElement, x: number, y: number, flip: number) {
-  el.style.transform = `translate(${x}px, ${y}px) translate(-50%, -100%) scaleX(${flip})`;
+export type TileTransform = {
+  leftPct: number;
+  topPct: number;
+  flip: number;
+  bobPx: number;
+};
+
+export function toTileTransform(
+  point: { x: number; y: number; flip: number; bob: number },
+  tileW: number,
+  tileH: number,
+): TileTransform {
+  return {
+    leftPct: (point.x / tileW) * 100,
+    topPct: (point.y / tileH) * 100,
+    flip: point.flip,
+    bobPx: point.bob,
+  };
 }
 
-export default function CharacterRoamerLayer({ reduced, paused, night }: Props) {
-  const [devRoamers, setDevRoamers] = useState(false);
-  const layerRef = useRef<HTMLDivElement>(null);
+export function applyTileTransform(el: HTMLElement, t: TileTransform) {
+  el.style.left = `${t.leftPct}%`;
+  el.style.top = `${t.topPct}%`;
+  el.style.transform = `translate(-50%, -100%) translateY(${t.bobPx}px) scaleX(${t.flip})`;
+}
+
+type UseRoamerSimOptions = {
+  roamers: Roamer[];
+  routes: RoamerRoute[];
+  tileW: number;
+  tileH: number;
+  layerRef: RefObject<HTMLDivElement | null>;
+  reduced: boolean;
+  paused: boolean;
+};
+
+export function useRoamerSim({
+  roamers,
+  routes,
+  tileW,
+  tileH,
+  layerRef,
+  reduced,
+  paused,
+}: UseRoamerSimOptions) {
   const routeMapRef = useRef<Map<string, RouteMeta> | null>(null);
   const simsRef = useRef<RoamerSim[]>([]);
   const rafRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number | null>(null);
 
-  const visible = useMemo(
-    () => MAP_ROAMERS.filter((r) => shouldRenderRoamer(r, devRoamers)),
-    [devRoamers],
-  );
-
   useEffect(() => {
-    setDevRoamers(isDevRoamersQuery());
-  }, []);
+    if (roamers.length === 0) return;
 
-  useEffect(() => {
-    if (visible.length === 0) return;
-
-    routeMapRef.current = buildRouteMap();
-    simsRef.current = visible.map((roamer) => {
+    routeMapRef.current = buildRouteMap(routes);
+    simsRef.current = roamers.map((roamer, i) => {
       const route = routeMapRef.current!.get(roamer.routeId);
       if (!route) throw new Error(`roamer ${roamer.id} 缺少 route ${roamer.routeId}`);
       return {
@@ -92,6 +114,7 @@ export default function CharacterRoamerLayer({ reduced, paused, night }: Props) 
         distance: (roamer.startOffset ?? 0) * route.length,
         direction: 1 as const,
         route,
+        phase: i * 1.7,
       };
     });
 
@@ -101,13 +124,12 @@ export default function CharacterRoamerLayer({ reduced, paused, night }: Props) 
     for (const sim of simsRef.current) {
       const el = layer.querySelector<HTMLElement>(`[data-roamer-id="${sim.roamer.id}"]`);
       if (!el) continue;
-      const { x, y, flip } = samplePoint(sim);
-      applyTransform(el, x, y, flip);
+      applyTileTransform(el, toTileTransform(sampleTilePoint(sim), tileW, tileH));
     }
-  }, [visible]);
+  }, [roamers, routes, tileW, tileH, layerRef]);
 
   useEffect(() => {
-    if (visible.length === 0 || reduced) return;
+    if (roamers.length === 0 || reduced) return;
 
     const tick = (now: number) => {
       if (!paused) {
@@ -139,8 +161,10 @@ export default function CharacterRoamerLayer({ reduced, paused, night }: Props) 
                 `[data-roamer-id="${roamer.id}"]`,
               );
               if (el) {
-                const { x, y, flip } = samplePoint(sim);
-                applyTransform(el, x, y, flip);
+                applyTileTransform(
+                  el,
+                  toTileTransform(sampleTilePoint(sim), tileW, tileH),
+                );
               }
             }
           }
@@ -158,41 +182,5 @@ export default function CharacterRoamerLayer({ reduced, paused, night }: Props) 
       rafRef.current = null;
       lastTimeRef.current = null;
     };
-  }, [visible, reduced, paused]);
-
-  if (visible.length === 0) return null;
-
-  return (
-    <div ref={layerRef} className={styles.layer} aria-hidden="true">
-      {visible.map((roamer) => {
-        const usePlaceholder = devRoamers && !roamer.enabled;
-        const src = night && roamer.srcNight ? roamer.srcNight : roamer.src;
-
-        return (
-          <div
-            key={roamer.id}
-            data-roamer-id={roamer.id}
-            className={styles.roamer}
-          >
-            {usePlaceholder ? (
-              <div className={styles.placeholder}>
-                <div className={styles.placeholderBody} />
-                <span className={styles.placeholderWheel} />
-                <span className={styles.placeholderWheel} />
-              </div>
-            ) : (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={src}
-                alt=""
-                className={styles.img}
-                draggable={false}
-                decoding="async"
-              />
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
+  }, [roamers, reduced, paused, tileW, tileH, layerRef]);
 }
