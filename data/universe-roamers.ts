@@ -39,8 +39,17 @@ export const MAP_ROAMERS: Roamer[] = [
     routeId: "carpark-loop",
     speed: 42,
     src: "/adventures/roamers/xiao-hong.png",
-    enabled: false,
+    enabled: true,
     startOffset: 0,
+  },
+  {
+    id: "roam-duoduo",
+    characterId: "duo-duo",
+    routeId: "carpark-loop",
+    speed: 38,
+    src: "/adventures/roamers/duo-duo.png",
+    enabled: true,
+    startOffset: 0.5,
   },
 ];
 
