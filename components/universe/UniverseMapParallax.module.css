@@ -12,8 +12,30 @@
   display: block;
 }
 
+.cloud {
+  animation: drift var(--dur, 60s) ease-in-out infinite alternate;
+  animation-delay: var(--delay, 0s);
+}
+
+.paused .cloud {
+  animation-play-state: paused;
+}
+
+@keyframes drift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(40px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .layer {
     will-change: auto;
+  }
+
+  .cloud {
+    animation: none;
   }
 }

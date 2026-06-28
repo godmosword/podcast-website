@@ -1,0 +1,64 @@
+.decor {
+  pointer-events: none;
+}
+
+.item {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.itemBob {
+  animation: decorBob var(--period, 3s) ease-in-out infinite alternate;
+  animation-delay: var(--delay, 0s);
+}
+
+.itemPath {
+  animation: decorPath var(--period, 9s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.itemDrift {
+  animation: decorDrift var(--period, 60s) ease-in-out infinite alternate;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes decorBob {
+  from {
+    transform: translateY(calc(var(--amp, 4px) * -1));
+  }
+  to {
+    transform: translateY(var(--amp, 4px));
+  }
+}
+
+@keyframes decorPath {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(var(--travel, 120px));
+  }
+}
+
+@keyframes decorDrift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(24px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .itemBob,
+  .itemPath,
+  .itemDrift {
+    animation: none;
+  }
+}
+
+.paused .itemBob,
+.paused .itemPath,
+.paused .itemDrift {
+  animation-play-state: paused;
+}

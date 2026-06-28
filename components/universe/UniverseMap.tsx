@@ -6,6 +6,7 @@ import { MAP_STAGE, ZONE_TERRAIN, type ZoneDef } from "@/data/universe-zones";
 import { resolveUniverseMap } from "@/lib/universe-map";
 import { getZoneArtTile } from "@/lib/universe/zone-art-tile";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { MapDecorBirds, MapDecorNearWater } from "./MapDecorLayer";
 import MapControls from "./MapControls";
 import UniverseMapParallax from "./UniverseMapParallax";
 import ZoneIsland from "./ZoneIsland";
@@ -21,8 +22,30 @@ export default function UniverseMap() {
   const camera = useMapCamera();
   const reduced = useReducedMotion();
   const router = useRouter();
+  const sectionRef = useRef<HTMLElement>(null);
+  const [tabHidden, setTabHidden] = useState(false);
+  const [mapInView, setMapInView] = useState(true);
+  const paused = tabHidden || !mapInView;
   const [activeZone, setActiveZone] = useState<ZoneDef | null>(null);
   const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const onVisibility = () => setTabHidden(document.hidden);
+    onVisibility();
+    document.addEventListener("visibilitychange", onVisibility);
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setMapInView(entry?.isIntersecting ?? false),
+      { threshold: 0 },
+    );
+    const section = sectionRef.current;
+    if (section) observer.observe(section);
+
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      observer.disconnect();
+    };
+  }, []);
 
   const handleActivate = useCallback(
     (zone: ZoneDef) => {
@@ -60,9 +83,10 @@ export default function UniverseMap() {
   }, []);
 
   const transform = `translate(${camera.tx}px, ${camera.ty}px) scale(${camera.scale})`;
+  const sceneClass = [styles.scene, paused ? styles.paused : ""].filter(Boolean).join(" ");
 
   return (
-    <section className={styles.map} aria-label="車車宇宙樂園地圖">
+    <section ref={sectionRef} className={styles.map} aria-label="車車宇宙樂園地圖">
       <div
         className={styles.viewport}
         ref={camera.bind.ref}
@@ -77,6 +101,7 @@ export default function UniverseMap() {
           scale={camera.scale}
           isAnimating={camera.isAnimating}
           reduced={reduced}
+          paused={paused}
         />
         <div
           className={styles.stage}
@@ -90,7 +115,7 @@ export default function UniverseMap() {
           }}
         >
           <svg
-            className={styles.scene}
+            className={sceneClass}
             viewBox={viewBox}
             width={MAP_STAGE.width}
             height={MAP_STAGE.height}
@@ -114,7 +139,7 @@ export default function UniverseMap() {
             {/* 海：印刷地圖固定淺色，不隨日夜反轉 */}
             <rect x="0" y="0" width={MAP_STAGE.width} height={MAP_STAGE.height} fill="url(#seaGrad)" />
             {/* 浪紋裝飾 */}
-            <g stroke="#b4ddf5" strokeWidth="3" fill="none" opacity="0.7">
+            <g className={styles.waveGroup} stroke="#b4ddf5" strokeWidth="3" fill="none" opacity="0.7">
               <path d="M 60 140 q 20 -12 40 0 t 40 0" />
               <path d="M 640 620 q 20 -12 40 0 t 40 0" />
               <path d="M 120 600 q 20 -12 40 0 t 40 0" />
@@ -157,6 +182,21 @@ export default function UniverseMap() {
               );
             })}
 
+            {/* island 模式：自繪泡沫圈（對齊 coord + 18，與 R0.5 沙岸底一致） */}
+            {zones.map((zone) => {
+              if (getZoneArtTile(zone.id).mode !== "island") return null;
+              return (
+                <ellipse
+                  key={`foam-${zone.id}`}
+                  className={styles.foamRing}
+                  cx={zone.px.x}
+                  cy={zone.px.y + 18}
+                  rx="126"
+                  ry="90"
+                />
+              );
+            })}
+
             {/* 橋：實心棧道 / 虛線未開通 */}
             {bridges.map((bridge) => (
               <path
@@ -167,9 +207,13 @@ export default function UniverseMap() {
                 strokeWidth="12"
                 strokeLinecap="round"
                 strokeDasharray={bridge.dashed ? "4 22" : undefined}
+                className={bridge.dashed ? styles.dashedBridge : undefined}
                 opacity={bridge.dashed ? 0.7 : 0.95}
               />
             ))}
+
+            <MapDecorNearWater reduced={reduced} paused={paused} />
+            <MapDecorBirds reduced={reduced} paused={paused} />
           </svg>
 
           {zones.map((zone) => (

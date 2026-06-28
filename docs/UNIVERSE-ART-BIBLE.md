@@ -1,11 +1,12 @@
-# 車車宇宙 · 樂園地圖 美術聖經（Art Bible）v2
+# 車車宇宙 · 樂園地圖 美術聖經（Art Bible）v3
 
 > 唯一目的：**讓各自獨立產出的「島」（不論誰畫、AI 生、還是 Blender 算）看起來像同一個世界。**
 > 剪貼感幾乎都來自三件事不一致：**相機角度、光線、材質光澤**。把這份數值定死，再開始量產資產。
 >
 > 對接對象：`data/universe-zones.ts`（`MAP_STAGE` 1000×720、`ZoneId`、`ZoneStatus`、`ZONE_TERRAIN`）、`components/universe/ZoneIsland.tsx`、`components/universe/ZoneLandmark.tsx`、`lib/universe/zone-art-tile.ts`。
 >
-> 版本：**v2（2026-06-27）**。
+> 版本：**v3（2026-06-27）**。
+> **v2→v3：新增 §12 動畫綁定規格（motionParts／sprite／日夜態），讓靜態黏土資產可動而不需重畫整張。** 相機／光／材質沿用 v2。
 > **v1→v2：鎖定 car-park 黃金樣本為全宇宙標準。** 相機由「正交 50°」改為繼承黃金樣本的「3/4 高視角＋輕透視」；燈光由「左上硬主光＋右下長投影」改為「柔和均勻光＋短柔接地陰影」。其餘材質／品牌色／狀態變體／程式契約沿用 v1。
 
 ---
@@ -201,9 +202,65 @@ fence, dirt mounds and traffic cones, matte clay, [Base style], transparent back
 
 ## 11. 命名與版本
 - 島：`zones/{id}.png`（@2x/@3x 交 `next/image`）
+- 可動部位：`zones/{id}.{part}.png`（如 `car-park.wheel.png`，與 base 同畫布同錨點；見 §12.6）
 - 狀態變體：`zones/{id}-{status}.png`
 - 共用件：`overlays/construction.png`、`overlays/fog.png`
 - **黃金樣本 `car-park.png`（含原始生圖 seed／參數）收進 repo 或設計庫**；改規格時更新本檔 vN 並記 CHANGELOG。
+
+---
+
+## 12. 動畫綁定規格（Rigging & Motion）— v3 新增
+> 單張死 tile 動不了。要讓島會動，**產島時就把「會動的部位」輸出成獨立透明圖層、並標好軸心**；前端再用 transform 驅動，島底完全不動。
+
+### 12.1 可動部位 motionParts
+- 每座有動態的島，除了 `base`（靜止島底）外，把可動部位各自輸出成**獨立透明 PNG**，與 base **同畫布、同錨點、1:1 疊放**，且用**同一台相機／光／材質**（§1–3）渲染，才能無縫合成。
+- **鐵律：base 不可包含可動部位**（否則會疊影）。
+- car-park 範例拆法：
+  - `base`（島底＋步道＋池塘＋樹＝靜止）
+  - `wheel`（摩天輪，spin，軸心＝輪轂）
+  - `flags`（彩旗串，sway）
+  - `mascot-car`（小紅車，path，沿步道行進）
+- **軸心標記**：spin／sweep 類，要記下旋轉中心在該部位圖內的歸一化座標（如輪轂在 50%, 46%），前端繞它旋轉。
+
+### 12.2 轉不出來的動作 → sprite 循環
+- 走路的恐龍、冒泡岩漿等無法用單一 transform 模擬者，用 Blender **只動該部位、固定相機／光**批次出 12–24 幀透明循環（sprite sheet 或 APNG/animated WebP），可無縫 loop。少量精用。
+
+### 12.3 動作語彙與預設（讓四島像同一個世界）
+| 動作 | 預設 | 用於 |
+|---|---|---|
+| spin | 8–12s/圈、等速 | 摩天輪 |
+| sway | ±3–6°、3–4s ease-in-out | 旗、樹 |
+| bob | ±2–4px、3s | 浮標、船 |
+| drift | 線性、長週期 | 雲、魚 |
+| sweep | ±角度、4s | 燈塔光 |
+> 一律**輕柔**（幼兒、低干擾）。
+
+### 12.4 靜止即英雄姿
+- 每個可動部位的**靜止幀（resting pose）必須單獨看也好看**——因為 `prefers-reduced-motion` 時就停在這一幀。設計時以靜止姿為主視覺。
+
+### 12.5 日夜態（選用）
+- 可動部位可附 `srcNight`（夜晚版：船艙／窗戶／摩天輪點燈發光），配合網站日夜主題切換。
+
+### 12.6 交付清單與命名
+- `zones/{id}.png`（base）、`zones/{id}.{part}.png`（如 `car-park.wheel.png`、`car-park.flags.png`），同畫布同錨點。
+- 隨附一份部位描述（餵前端 R-anim 1），型別如下：
+```ts
+type MotionType = "spin" | "sway" | "bob" | "drift" | "sweep" | "sprite";
+type MotionPart = {
+  name: string;                 // "wheel" | "flags" | "mascot-car"
+  src: string;                  // 與 base 同畫布、同錨點
+  srcNight?: string;
+  pivot?: { x: number; y: number };   // 0..1，spin/sweep 用
+  motion: MotionType;
+  periodMs?: number;            // 一圈/一循環
+  amplitudeDeg?: number;        // sway/sweep
+  amplitudePx?: number;         // bob
+  sprite?: { frames: number; fps: number }; // motion==="sprite"
+};
+```
+
+### 12.7 與程式對接
+- base 走 §10 的 `island` tile 契約；motionParts 由 R-anim 1 的渲染器讀上表、用 CSS/WAAPI 驅動，全部受 reduced-motion 控管。產島時把零件＋此描述一起交付即可。
 
 ---
 

@@ -633,6 +633,10 @@ T+2d    社群貼文（B 戰場）
 
 ## Completed
 
+### R-anim 0：地圖環境動畫層 + MAP_DECOR
+純 CSS 環境動態（雲／浪／泡沫／虛線橋／decor）；`MAP_DECOR` 資料層；美術聖經 §12 v3 動畫綁定規格。
+**Completed:** `8bdfc02`（2026-06-28）
+
 ### SEO 進階三刀（VTT + RSS 標籤 + self canonical）
 逐字稿 helper／VTT route／故事頁可索引逐字稿；RSS podcast namespace + transcript + owner/guid；主要頁 self canonical；JSON-LD `timeRequired`。
 **Completed:** `029b7e6`（2026-06-28）
