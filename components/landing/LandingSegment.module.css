@@ -108,14 +108,13 @@
     var(--landing-cta-from, #ff9500) 0%,
     var(--landing-cta-to, #ff7a00) 100%
   );
-  color: var(--landing-cta-fg, #ffffff);
+  color: var(--landing-cta-fg, #7a4012);
   font-weight: 800;
   font-size: 1rem;
   text-decoration: none;
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  box-shadow: 0 4px 0 var(--landing-cta-shadow, rgba(255, 120, 0, 0.45)),
-    0 8px 20px rgba(255, 130, 0, 0.28);
-  text-shadow: 0 1px 1px rgba(140, 60, 0, 0.35);
+  border: 2px solid rgba(180, 120, 60, 0.32);
+  box-shadow: 0 4px 0 var(--landing-cta-shadow, rgba(180, 110, 50, 0.32)),
+    0 8px 18px rgba(120, 80, 40, 0.18);
 }
 
 .cta:active {
@@ -134,13 +133,13 @@
   width: 44px;
   height: 44px;
   border-radius: 999px;
-  color: var(--landing-nav-to, #ff9f1c);
+  color: var(--landing-nav-cta-fg, #8b4510);
   font-size: 1.6rem;
   line-height: 1;
   text-decoration: none;
   background: rgba(255, 255, 255, 0.88);
   border: 2px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 0 4px 14px rgba(255, 140, 0, 0.28);
+  box-shadow: 0 4px 14px rgba(120, 80, 40, 0.22);
   animation: nudge 1.8s ease-in-out infinite;
   pointer-events: auto;
 }

@@ -80,7 +80,7 @@
 }
 
 .active.dot::after {
-  background: var(--landing-nav-to, #ff9f1c);
+  background: var(--landing-brand, #ff8c2b);
   transform: scale(1.35);
 }
 

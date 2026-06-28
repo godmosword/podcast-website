@@ -99,17 +99,17 @@
   --nav-h: calc(64px + var(--safe-top));
   --landing-heading: #2a9d8f;
 
-  /* Landing nav 與 segment CTA（全部故事／睡前故事）同色漸層；字色白 */
+  /* Landing nav 與 segment CTA（全部故事／睡前故事）統一淡蜜桃橘；字暖深棕（非黑） */
   --landing-nav-from: var(--landing-cta-from);
   --landing-nav-to: var(--landing-cta-to);
   --landing-nav-ink: var(--landing-cta-fg);
-  --landing-nav-border: rgba(255, 255, 255, 0.35);
-  --landing-cta-from: #ff9500;
-  --landing-cta-to: #ff7a00;
-  --landing-cta-fg: #ffffff;
-  --landing-cta-shadow: rgba(255, 120, 0, 0.45);
-  --landing-nav-cta-bg: #ffffff;
-  --landing-nav-cta-fg: #e86a00;
+  --landing-nav-border: rgba(180, 120, 60, 0.22);
+  --landing-cta-from: #ffe7cf;
+  --landing-cta-to: #ffd5a8;
+  --landing-cta-fg: #7a4012;
+  --landing-cta-shadow: rgba(180, 110, 50, 0.32);
+  --landing-nav-cta-bg: #fff8f2;
+  --landing-nav-cta-fg: #8b4510;
 
   /* 語意輔助（light 預設） */
   --mix-base: #ffffff;
