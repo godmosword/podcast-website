@@ -1,0 +1,38 @@
+---
+description: 車車故事 podcast 網站 — 技術慣例、工作流、品質閘門（alwaysApply）
+alwaysApply: true
+---
+
+# 車車故事 Podcast 網站
+
+## 技術與慣例
+
+- Next.js 15 App Router、TypeScript strict（禁止 any）、CSS Modules（無 Tailwind）、Vercel。
+- 註解與使用者文案一律 zh-TW（繁中）。
+- 架構分層：`data/*.ts`（型別＋常數＋同名 `*.test.ts`）→ `lib/*-query.ts`（resolver）→ `components/<area>/*.tsx` + 同名 `.module.css`。新功能照這個長法。
+
+## 工作流（每個任務都遵守）
+
+- **先計畫後動手**：先輸出實作計畫＋將異動的檔案清單，等我確認再改 code。
+- 完成後更新 `TODOS.md`，並用 conventional commit 訊息提交。
+- **不要自動 push**，停在可檢視的 commit。
+- 一次只做一個任務範圍，不要順手改無關的東西。
+
+## 品質閘門（完成前必跑、必須全綠）
+
+- `npm test`、`npm run build`、`npx tsc --noEmit`
+- 受影響的既有測試要一起更新；新邏輯要補 vitest。
+
+## 動畫／效能
+
+- 動畫只用 transform / opacity（含 stroke-dashoffset / offset-distance），不得觸發 layout。
+- 一律受 `prefers-reduced-motion` 控管；分頁隱藏或元素捲出視窗時暫停。
+
+## 無障礙
+
+- 互動元素用真正的 `<button>` / `<a>` + `aria-label`；純裝飾 SVG 標 `aria-hidden`。
+
+## 未經同意不要動
+
+- 日／夜主題系統、`useMapCamera` / `ZoneSheet` 互動邏輯、zone-art-tile 契約、zones 座標。
+- 地圖場景色是「印刷地圖」固定淺色，日夜兩態都不反轉。
