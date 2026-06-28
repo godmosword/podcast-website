@@ -35,4 +35,14 @@ describe("getCharactersForStory", () => {
     expect(ids).toContain("lan-ba-shi");
     expect(ids).toContain("huang-ji-cheng");
   });
+
+  it("ep-15 含多多、噴噴、玲玲、咚咚、小紅、髒髒小怪獸", () => {
+    const ids = getCharactersForStory("ep-15").map((c) => c.id);
+    expect(ids).toContain("duo-duo");
+    expect(ids).toContain("pen-pen");
+    expect(ids).toContain("ling-ling");
+    expect(ids).toContain("dong-dong");
+    expect(ids).toContain("xiao-hong");
+    expect(ids).toContain("dirty-germs");
+  });
 });

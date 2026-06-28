@@ -19,6 +19,8 @@ type RawCharacter = {
   desc: string;
   ref: string;
   firstSeen?: string;
+  /** 除 firstSeen／車種預設集外，另出現的 slug */
+  alsoIn?: string[];
 };
 
 const ID_BY_CANONICAL_NAME: Record<string, string> = {
@@ -48,6 +50,8 @@ const ID_BY_CANONICAL_NAME: Record<string, string> = {
   消防車圈圈: "quan-quan",
   消防車點點: "dian-dian",
   老爺爺爆米花餐車: "popcorn-truck",
+  消毒車噴噴: "pen-pen",
+  髒髒小怪獸: "dirty-germs",
 };
 
 const VEHICLE_ZH: Record<string, string> = {
@@ -75,6 +79,8 @@ const VEHICLE_ZH: Record<string, string> = {
   "police car": "警車",
   car: "小汽車",
   "fire engine": "消防車",
+  "spray truck": "消毒車",
+  creature: "小怪獸",
 };
 
 /** 車種對應的手動維護集數 slug（與 firstSeen 合併）。 */
@@ -117,6 +123,8 @@ const PERSONALITY_BY_ID: Record<string, string> = {
   "quan-quan": "有點好強、後來學會和弟弟合作",
   "dian-dian": "不服輸、需要哥哥一起完成任務",
   "popcorn-truck": "親切分享、偶爾需要救援",
+  "pen-pen": "驕傲愛逞強、後來學會酒精不能取代洗手",
+  "dirty-germs": "調皮躲藏、怕肥皂和清水",
 };
 
 function shortName(entry: RawCharacter, id: string): string {
@@ -130,6 +138,7 @@ function shortName(entry: RawCharacter, id: string): string {
 function appearsInFor(entry: RawCharacter): string[] {
   const slugs = new Set<string>();
   if (entry.firstSeen) slugs.add(entry.firstSeen);
+  for (const slug of entry.alsoIn ?? []) slugs.add(slug);
   const vehicleSlug = VEHICLE_STORY_SLUG[entry.vehicle];
   if (vehicleSlug) slugs.add(vehicleSlug);
   return Array.from(slugs);

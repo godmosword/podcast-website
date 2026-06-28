@@ -1,0 +1,189 @@
+{
+  "slug": "ep-15",
+  "audioDuration": 475,
+  "model": "manual-semantic-15-20s",
+  "generatedAt": "2026-06-27T14:35:00.000Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 60,
+      "end": 68.4,
+      "summary": "主持人開場預告（保留首圖）",
+      "prompt": "Clay podcast studio: hosts Bonbon and Mami warmly introduce today's story about defeating dirty germ monsters and washing hands, small toy green dinosaur car and white spray truck on table, ferris wheel background, playful teaching mood",
+      "characters": ["Bonbon", "馬米"],
+      "keepCover": true,
+      "refPageHint": "Cover page 1 shows green dinosaur car Duoduo washing hands at sink — keep as published cover; hosts are HUMAN clay not cars."
+    },
+    {
+      "index": 2,
+      "start": 68.4,
+      "end": 91.2,
+      "summary": "彩虹廣場準備吃點心",
+      "prompt": "Sunny Rainbow Plaza in clay car amusement park, green dinosaur car Duoduo and many small colorful faceless clay vehicles gathered around picnic tables with rice balls, fruit slices and cold juice, festive snack time mood",
+      "characters": ["恐龍車多多"],
+      "refPages": [1],
+      "refPageHint": "PRIMARY: 恐龍車多多 match cover page 1 and portrait — green dinosaur car with orange back plates, friendly eyes. Background cars faceless and smaller."
+    },
+    {
+      "index": 3,
+      "start": 91.2,
+      "end": 114.2,
+      "summary": "消毒車噴噴登場",
+      "prompt": "White disinfectant spray truck Penpen arriving at Rainbow Plaza with psssh sound effect lines, large silver spray tank on flatbed, glossy shiny cream-white cab, proud confident smirk, other vehicles turning to look",
+      "characters": ["消毒車噴噴", "恐龍車多多"],
+      "refPages": [2],
+      "refPageHint": "PRIMARY: 消毒車噴噴 match portrait exactly — cream-white cab, silver tank with orange hazard stripes, spray mist. Duoduo smaller in background match page 2."
+    },
+    {
+      "index": 4,
+      "start": 114.2,
+      "end": 135.1,
+      "summary": "噴噴得意吹噓並對桌子噴",
+      "prompt": "Penpen spray truck boasting while driving, then spraying fine mist around snack table confidently claiming all germs will run away, Duoduo watching with wide impressed eyes",
+      "characters": ["消毒車噴噴", "恐龍車多多"],
+      "refPages": [3],
+      "refPageHint": "PRIMARY: Penpen match portrait spraying toward table. Duoduo match 恐龍車多多 portrait. Each vehicle ONE face only."
+    },
+    {
+      "index": 5,
+      "start": 135.1,
+      "end": 162.7,
+      "summary": "多多問能不能不洗手",
+      "prompt": "Duoduo dinosaur car asking eagerly if they can eat snacks now without washing hands, Penpen puffing chest proudly saying of course with me here no dirty monsters to fear, vehicles reaching toward rice balls",
+      "characters": ["恐龍車多多", "消毒車噴噴"],
+      "refPages": [4],
+      "refPageHint": "PRIMARY: Duoduo excited eyes match portrait. Penpen proud pose match portrait. Snack table visible."
+    },
+    {
+      "index": 6,
+      "start": 162.7,
+      "end": 183,
+      "summary": "髒髒小怪獸突然現身",
+      "prompt": "Sudden surprise: gray-black fuzzy germ monster blobs popping out giggling hehehe from Duoduo tire tread, orange excavator Dongdong shovel edge, and red race car Xiao Hong door handle, vehicles jumping shocked",
+      "characters": ["髒髒小怪獸", "恐龍車多多", "東東挖土機", "小紅賽車"],
+      "refPages": [5],
+      "refPageHint": "PRIMARY: Germ monsters match 髒髒小怪獸 portrait — fuzzy gray-black round blobs with mischievous grins, NO wheels. Duoduo, 東東挖土機, 小紅賽車 match portraits. Each vehicle ONE face."
+    },
+    {
+      "index": 7,
+      "start": 183,
+      "end": 194.8,
+      "summary": "噴噴不敢相信",
+      "prompt": "Penpen spray truck stunned and denying I just sprayed, germ monsters wriggling and smirking on vehicles, disbelief and comedy tension",
+      "characters": ["消毒車噴噴", "髒髒小怪獸"],
+      "refPages": [6],
+      "refPageHint": "PRIMARY: Penpen shocked expression match portrait. Germ blobs match scene 6 design. Child-safe not scary."
+    },
+    {
+      "index": 8,
+      "start": 194.8,
+      "end": 218.5,
+      "summary": "小怪獸挑釁會傳染",
+      "prompt": "Germ monsters taunting playfully, explaining they spread easily and love hiding on touched toys, floors, bathroom door handles and after nose-picking little hands, wriggling proudly",
+      "characters": ["髒髒小怪獸"],
+      "refPages": [6],
+      "refPageHint": "PRIMARY: Germ monsters match 髒髒小怪獸 portrait in group of 3-5. Mischievous not horror. Show hiding spots as small vignettes around them."
+    },
+    {
+      "index": 9,
+      "start": 218.5,
+      "end": 250.3,
+      "summary": "噴噴臉紅，玲玲清潔車登場",
+      "prompt": "Penpen face blushing red with frustration about alcohol not working, then cream-green street sweeper Lingling arriving gently, calm mentor energy, germ monsters still lurking nearby",
+      "characters": ["消毒車噴噴", "鈴鈴清潔車", "髒髒小怪獸"],
+      "refPages": [7],
+      "refPageHint": "PRIMARY: Penpen embarrassed blush match portrait. 鈴鈴清潔車 match portrait — cream cab green body yellow brushes. Germs smaller in background."
+    },
+    {
+      "index": 10,
+      "start": 250.3,
+      "end": 276.5,
+      "summary": "玲玲說明酒精與洗手分工",
+      "prompt": "Lingling street sweeper gently explaining to Penpen that alcohol disinfects tables and toys well but some germs hide in palms, backs of hands and between fingers and need soap and water, Penpen listening thoughtfully",
+      "characters": ["鈴鈴清潔車", "消毒車噴噴"],
+      "refPages": [9],
+      "refPageHint": "PRIMARY: 鈴鈴清潔車 warm teaching pose match portrait. Penpen attentive match portrait. Soft educational mood."
+    },
+    {
+      "index": 11,
+      "start": 276.5,
+      "end": 297.9,
+      "summary": "大家到洗手台沾濕搓肥皂",
+      "prompt": "Vehicles following Lingling to a kid-height clay sink station, Duoduo and Penpen wetting small wheel-hands or brushes under faucet, white soap bubbles forming, Lingling demonstrating scrub motion",
+      "characters": ["鈴鈴清潔車", "恐龍車多多", "消毒車噴噴"],
+      "refPages": [1, 10],
+      "refPageHint": "PRIMARY: Match cover page 1 sink scene style — Duoduo at beige sink with soap bubbles. Lingling and Penpen same sink area. Each ONE face."
+    },
+    {
+      "index": 12,
+      "start": 297.9,
+      "end": 321.4,
+      "summary": "數到二十認真搓手",
+      "prompt": "Close cheerful scene at sink: Duoduo scrubbing with lots of soap bubbles counting one-two-three on fingers, Lingling nodding, musical note bubbles suggesting sing-a-song while washing twenty seconds",
+      "characters": ["恐龍車多多", "鈴鈴清潔車", "髒髒小怪獸"],
+      "refPages": [11],
+      "refPageHint": "PRIMARY: Duoduo match page 11 and cover. Germ monsters panicking in soap bubbles about to wash away. Fun counting mood."
+    },
+    {
+      "index": 13,
+      "start": 321.4,
+      "end": 349,
+      "summary": "小怪獸被沖走，安心吃點心",
+      "prompt": "Rushing water swirling germ monsters down drain crying too slippery we cannot hold on, then clean shiny hands and wheels, happy vehicles finally eating rice balls and fruit safely at Rainbow Plaza table",
+      "characters": ["髒髒小怪獸", "恐龍車多多", "鈴鈴清潔車"],
+      "refPages": [12],
+      "refPageHint": "PRIMARY: Germs washing away in water stream match prior design. Then clean Duoduo eating snacks match page 2 plaza. Triumphant gentle mood."
+    },
+    {
+      "index": 14,
+      "start": 349,
+      "end": 369.2,
+      "summary": "噴噴低頭反思",
+      "prompt": "Penpen spray truck lowering head shyly admitting alcohol cannot defeat all hiding germ monsters, soap handwashing is needed for the tricky ones, humble learning moment with Lingling beside",
+      "characters": ["消毒車噴噴", "鈴鈴清潔車"],
+      "refPages": [9],
+      "refPageHint": "PRIMARY: Penpen modest downcast eyes match portrait. Lingling supportive smile match portrait."
+    },
+    {
+      "index": 15,
+      "start": 369.2,
+      "end": 389.5,
+      "summary": "酒精與肥皂一起合作",
+      "prompt": "Lingling explaining Penpen can still spray tables door handles and toys while she reminds everyone to wash with soap, Penpen nodding happily, teamwork handshake energy between two vehicles",
+      "characters": ["鈴鈴清潔車", "消毒車噴噴"],
+      "refPages": [14],
+      "refPageHint": "PRIMARY: Both match portraits. Penpen happy nod. Cooperation not competition."
+    },
+    {
+      "index": 16,
+      "start": 389.5,
+      "end": 416.4,
+      "summary": "遊樂園新規則：記得洗手",
+      "prompt": "Sunny montage at amusement park signboard showing new rules: wash before eating, after bathroom, after playing toys, after sneezing and wiping nose, Duoduo Penpen and Lingling posing proudly together",
+      "characters": ["鈴鈴清潔車", "恐龍車多多", "消毒車噴噴"],
+      "refPages": [13, 15],
+      "refPageHint": "PRIMARY: All three match portraits from prior pages. Rule sign uses simple icons not long text. Warm community mood."
+    },
+    {
+      "index": 17,
+      "start": 416.4,
+      "end": 459.3,
+      "summary": "主持人教小朋友洗手",
+      "prompt": "Clay podcast studio: Mami and Bonbon teaching children that alcohol helps when no sink but soap and water is most important, count to twenty or sing a song while scrubbing, small sink prop on table",
+      "characters": ["Bonbon", "馬米"],
+      "refPages": [1],
+      "refPageHint": "PRIMARY: Bonbon teal hoodie yellow backpack; Mami pink top coral skirt — match host portraits exactly. HUMAN hosts not cars."
+    },
+    {
+      "index": 18,
+      "start": 459.3,
+      "end": 475,
+      "summary": "結尾道別",
+      "prompt": "Cheerful closing at clay car amusement park: Bonbon and Mami waving goodbye with story friends Duoduo Lingling and Penpen in background, ferris wheel sunset, inviting kids back next time",
+      "characters": ["Bonbon", "馬米", "恐龍車多多", "鈴鈴清潔車", "消毒車噴噴"],
+      "refPages": [16, 1],
+      "refPageHint": "PRIMARY: Human hosts center waving match portraits. Story vehicles smaller behind match page 16 designs. Each vehicle ONE face. Warm goodbye."
+    }
+  ],
+  "newCharacters": []
+}

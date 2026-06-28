@@ -10,19 +10,26 @@
     "vehicle": "street sweeper",
     "desc": "a cute claymation street-sweeper truck, cream/off-white cab with a bright green lower body, an orange light-bar on the roof, a black cube wake-up speaker with one large circular driver sitting on a small pink rectangular base mounted on the roof behind the light bar, two big round yellow spinning brushes at the front bottom, big friendly round eyes and a cheerful smile",
     "ref": "characters/鈴鈴清潔車.jpg",
-    "firstSeen": "ep-9"
+    "firstSeen": "ep-9",
+    "alsoIn": [
+      "ep-15"
+    ]
   },
   {
     "name": "恐龍車多多",
     "aliases": [
       "多多",
       "恐龍車",
-      "恐龍多多"
+      "恐龍多多",
+      "恐龍車多多"
     ],
     "vehicle": "dinosaur car",
     "desc": "a cute claymation green dinosaur car, a small green car body with a friendly T-rex head, orange spikes along its back, big round cartoon eyes, wide happy mouth showing rows of teeth, four black wheels only — no arms, no hands, no limbs",
     "ref": "characters/恐龍車多多.jpg",
-    "firstSeen": "ep-9"
+    "firstSeen": "ep-9",
+    "alsoIn": [
+      "ep-15"
+    ]
   },
   {
     "name": "安安救護車",
@@ -45,7 +52,10 @@
     "vehicle": "race car",
     "desc": "a cute claymation bright red race car with the number 2 in a white circle, a white racing stripe down the middle, blue and yellow accents, big round eyes and a cheerful smile",
     "ref": "characters/小紅賽車.jpg",
-    "firstSeen": "ep-3"
+    "firstSeen": "ep-3",
+    "alsoIn": [
+      "ep-15"
+    ]
   },
   {
     "name": "藍色小巴士",
@@ -94,7 +104,10 @@
     "vehicle": "excavator",
     "desc": "a cute claymation yellow excavator on black tracks with a digging arm and bucket, big round eyes, rosy cheeks and a happy smile",
     "ref": "characters/東東挖土機.jpg",
-    "firstSeen": "ep-5"
+    "firstSeen": "ep-5",
+    "alsoIn": [
+      "ep-15"
+    ]
   },
   {
     "name": "吊車老爺爺",
@@ -300,5 +313,29 @@
     "desc": "a cute claymation vintage popcorn food truck with a friendly grandfather vendor, striped awning, popcorn machine on the side, warm cream and red clay colors, soft hand-sculpted clay texture",
     "ref": "characters/老爺爺爆米花餐車.jpg",
     "firstSeen": "ep-14"
+  },
+  {
+    "name": "消毒車噴噴",
+    "aliases": [
+      "噴噴",
+      "消毒車",
+      "消毒車噴噴"
+    ],
+    "vehicle": "spray truck",
+    "desc": "a cute claymation white disinfectant spray truck named Penpen (噴噴), compact cream-white cab with a glossy shiny finish, light-blue windshield with proud round eyes and a confident smirk, a large cylindrical silver spray tank mounted on the flatbed with orange hazard stripes, a hose nozzle spraying a fine mist, small black wheels with cream hubcaps, soft hand-sculpted clay texture, distinct from street sweeper Lingling and cream ambulance An-An",
+    "ref": "characters/消毒車噴噴.jpg",
+    "firstSeen": "ep-15"
+  },
+  {
+    "name": "髒髒小怪獸",
+    "aliases": [
+      "髒髒小怪獸們",
+      "小怪獸",
+      "髒髒的小怪獸"
+    ],
+    "vehicle": "creature",
+    "desc": "cute claymation germ monster blobs, small fuzzy gray-black round bodies with mischievous grins, tiny spike hairs, no wheels or vehicles, appear in groups of three to five hiding on tire treads door handles and children's hands, soft hand-sculpted clay texture",
+    "ref": "characters/髒髒小怪獸.jpg",
+    "firstSeen": "ep-15"
   }
 ]
