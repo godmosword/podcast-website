@@ -17,6 +17,7 @@
 
 ### Changed
 
+- **Landing top bar 對齊 CTA 橘色**：nav 漸層改引用 `--landing-cta-*`（與「全部故事／睡前故事」同色），字色維持白；Subscribe pill 改反白
 - **Landing top bar 淡橘色調**：`--landing-nav-*` 改蜜桃漸層（`#fff0e0→#ffd9b8`）+ 暖深咖字（`#4a3020`），柔化 shadow／邊框；`SubscribeMenu` pill 改淡 peach 底 + 暖描邊。段內 CTA 維持飽和橘。**不動** hero raster
 - **Landing 陽光色系 + 引導按鈕 + 頁尾捲動 + 手機底部排版**（`d6c726f`）：新增 landing 專用色票（`--landing-nav-*` / `--landing-cta-*`，不改全站 `--landing-brand-ink`）。`SiteNavBar` top bar 改日出琥珀漸層（`#ffc857→#ff9f1c`）+ 白字 + 暖色投影，固定不隨 night 反轉。`SubscribeMenu` 訂閱改反白 pill（白底橘字）；hero CTA 改橘黃漸層 + 白字 + 暖 glow；`.next` 改半透明白底 + 琥珀 chevron。`LandingHub` footer 包成全屏 snap pane（`#landing-foot`），最後段 `.next` 可捲至頁尾不再彈回。手機 ≤768px：隱藏 `.next`、CTA 全寬、進度膠囊/嘟嘟分層重排。**不動** hero raster
 - **Landing page 去暗沉 + top bar 迭代**（`eeeed4f` `7e42ee5`，top bar/CTA 後續由 `d6c726f` 陽光版取代）：scrim 改底部保護式漸層 + 強化 text-shadow；`.panel`/footer 深咖改 `var(--bg)`；手機進度膠囊改暖色玻璃。中間版 top bar 曾試奶油／木質調 + 品牌橘 CTA。**不動**全站主題 token 與 hero raster
