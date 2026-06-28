@@ -633,6 +633,14 @@ T+2d    社群貼文（B 戰場）
 
 ## Completed
 
+### R-anim 1：island tile 渲染器 + motionParts
+`ZONE_MOTION` 資料模型、`ZoneMotionPart`/`ZoneMotionLayer` 零件動畫管線；`reduced`/`paused` 串接；enabled 預設關（資產到位再開）。
+**Completed:** `c1ff134`（2026-06-28）
+
+### R-anim 2：狀態轉場 + 日夜態
+`useZoneTransition`、`StatusOverlay`、`SkyBodies`；螢火 decor；海/雲日夜色調；dev `?devStatus` / `?devMotion=1`。
+**Completed:** `91859ef`（2026-06-28）
+
 ### R-anim 0：地圖環境動畫層 + MAP_DECOR
 純 CSS 環境動態（雲／浪／泡沫／虛線橋／decor）；`MAP_DECOR` 資料層；美術聖經 §12 v3 動畫綁定規格。
 **Completed:** `8bdfc02`（2026-06-28）

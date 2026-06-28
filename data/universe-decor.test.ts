@@ -23,4 +23,13 @@ describe("universe-decor", () => {
       }
     }
   });
+
+  it("firefly 為 nightOnly 且 movingOnly", () => {
+    const flies = MAP_DECOR.filter((d) => d.kind === "firefly");
+    expect(flies.length).toBeGreaterThan(0);
+    for (const fly of flies) {
+      expect(fly.nightOnly).toBe(true);
+      expect(fly.movingOnly).toBe(true);
+    }
+  });
 });

@@ -1,0 +1,77 @@
+.bodies {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.sun,
+.moon {
+  position: absolute;
+  top: 36px;
+  right: 72px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  transition: opacity 600ms ease, transform 600ms ease;
+}
+
+.sun {
+  background: radial-gradient(circle at 35% 35%, #fff8dc, #ffd166 55%, #ffb347);
+  box-shadow: 0 0 28px rgba(255, 200, 80, 0.45);
+  opacity: 1;
+}
+
+.moon {
+  background: radial-gradient(circle at 38% 38%, #f5f7ff, #d8e0f0 70%, #b8c4dc);
+  box-shadow: 0 0 18px rgba(200, 210, 255, 0.35);
+  opacity: 0;
+  transform: scale(0.92);
+}
+
+.night .sun {
+  opacity: 0;
+  transform: scale(0.92);
+}
+
+.night .moon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.stars {
+  opacity: 0;
+  transition: opacity 600ms ease;
+}
+
+.night .stars {
+  opacity: 1;
+}
+
+.star {
+  fill: #fff;
+  opacity: 0.55;
+}
+
+.starTwinkle {
+  animation: starTwinkle 3s ease-in-out infinite alternate;
+}
+
+@keyframes starTwinkle {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 0.75;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .starTwinkle {
+    animation: none;
+  }
+}
+
+[data-paused] .starTwinkle {
+  animation-play-state: paused;
+}

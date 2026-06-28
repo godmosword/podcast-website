@@ -1,11 +1,18 @@
 import type { CSSProperties } from "react";
-import { MAP_DECOR, type DecorItem } from "@/data/universe-decor";
+import type { ThemePreference } from "@/lib/theme";
+import { MAP_DECOR, type DecorItem, type DecorKind } from "@/data/universe-decor";
 import styles from "./MapDecorLayer.module.css";
 
 type Props = {
   reduced: boolean;
   paused: boolean;
+  daylight: ThemePreference;
 };
+
+function isVisibleDecor(item: DecorItem, daylight: ThemePreference): boolean {
+  if (item.nightOnly && daylight !== "night") return false;
+  return true;
+}
 
 function motionClass(item: DecorItem, reduced: boolean): string | undefined {
   if (reduced) return undefined;
@@ -77,6 +84,11 @@ function Bird({ size }: { size: number }) {
   );
 }
 
+function Firefly({ size }: { size: number }) {
+  const r = Math.max(2, 3 * size);
+  return <circle cx={0} cy={0} r={r} fill="#ffe566" opacity={0.85} />;
+}
+
 function DecorShape({ item }: { item: DecorItem }) {
   switch (item.kind) {
     case "sailboat":
@@ -87,6 +99,8 @@ function DecorShape({ item }: { item: DecorItem }) {
       return <Fish size={item.size} />;
     case "bird":
       return <Bird size={item.size} />;
+    case "firefly":
+      return <Firefly size={item.size} />;
   }
 }
 
@@ -105,9 +119,15 @@ function DecorItemGroup({ item, reduced }: { item: DecorItem; reduced: boolean }
   );
 }
 
+function filterDecor(daylight: ThemePreference, kinds: DecorKind[]): DecorItem[] {
+  return MAP_DECOR.filter(
+    (d) => kinds.includes(d.kind) && isVisibleDecor(d, daylight),
+  );
+}
+
 /** 近水裝飾（帆船、浮標、魚）；回傳 SVG `<g>`，插入 scene 內橋之後。 */
-export function MapDecorNearWater({ reduced, paused }: Props) {
-  const items = MAP_DECOR.filter((d) => d.kind !== "bird");
+export function MapDecorNearWater({ reduced, paused, daylight }: Props) {
+  const items = filterDecor(daylight, ["sailboat", "buoy", "fish"]);
   const rootClass = [styles.decor, paused ? styles.paused : ""].filter(Boolean).join(" ");
   return (
     <g className={rootClass} aria-hidden="true">
@@ -118,9 +138,9 @@ export function MapDecorNearWater({ reduced, paused }: Props) {
   );
 }
 
-/** 鳥層（paint order 最高）；回傳 SVG `<g>`，排 scene 最後。 */
-export function MapDecorBirds({ reduced, paused }: Props) {
-  const items = MAP_DECOR.filter((d) => d.kind === "bird");
+/** 鳥 + 夜間螢火；paint order 最高。 */
+export function MapDecorBirds({ reduced, paused, daylight }: Props) {
+  const items = filterDecor(daylight, ["bird", "firefly"]);
   const rootClass = [styles.decor, paused ? styles.paused : ""].filter(Boolean).join(" ");
   return (
     <g className={rootClass} aria-hidden="true">

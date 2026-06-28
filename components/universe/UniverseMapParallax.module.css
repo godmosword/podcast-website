@@ -39,3 +39,13 @@
     animation: none;
   }
 }
+
+.night .hill {
+  fill: #7a9aaa;
+  opacity: 0.32;
+}
+
+.night .cloud {
+  fill: #c5d4ea;
+  opacity: 0.45;
+}

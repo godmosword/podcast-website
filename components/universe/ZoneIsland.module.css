@@ -11,6 +11,73 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+.tileStack {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.islandTile[data-transition="building-to-open"] .tileStack {
+  animation: islandRise 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.islandTile[data-transition="planned-to-building"] .tileStack {
+  animation: islandReveal 650ms ease-out;
+}
+
+@keyframes islandRise {
+  from {
+    transform: translateY(8px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes islandReveal {
+  from {
+    opacity: 0.4;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.islandTile[data-status="coming"] .tileImg {
+  filter: saturate(0.85);
+}
+
+:global(html[data-theme="night"]) .islandTile .tileImg {
+  filter: brightness(0.93);
+  transition: filter 600ms ease;
+}
+
+.islandTile[data-transition="building-to-open"] .tileImg {
+  animation: islandLightUp 700ms ease;
+}
+
+@keyframes islandLightUp {
+  0% {
+    filter: brightness(0.95);
+  }
+  45% {
+    filter: brightness(1.08);
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .islandTile[data-transition="building-to-open"] .tileStack,
+  .islandTile[data-transition="planned-to-building"] .tileStack,
+  .islandTile[data-transition="building-to-open"] .tileImg {
+    animation: none;
+  }
+}
+
 .tileImg {
   display: block;
   width: 100%;

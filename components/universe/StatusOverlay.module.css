@@ -1,0 +1,111 @@
+.overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+/* building：吊車 + 鷹架感 */
+.building {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 220, 120, 0.12) 0%,
+    transparent 45%
+  );
+}
+
+.crane {
+  position: absolute;
+  top: 6%;
+  right: 12%;
+  width: 28%;
+  height: 22%;
+  transform-origin: 80% 90%;
+  animation: craneSway 4s ease-in-out infinite alternate;
+}
+
+.craneArm {
+  position: absolute;
+  inset: 0;
+  border-top: 4px solid #8a7355;
+  border-right: 4px solid #8a7355;
+  border-radius: 2px;
+  opacity: 0.75;
+}
+
+.scaffold {
+  position: absolute;
+  bottom: 18%;
+  left: 10%;
+  right: 10%;
+  height: 28%;
+  border: 3px dashed rgba(120, 90, 50, 0.45);
+  border-radius: 6px;
+  opacity: 0.7;
+}
+
+.dust {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 40% 60%, rgba(180, 150, 90, 0.08), transparent 55%);
+  animation: dustPulse 3.5s ease-in-out infinite alternate;
+}
+
+/* coming：沉睡降彩 + 晨霧 */
+.coming {
+  backdrop-filter: saturate(0.85);
+}
+
+.comingFog {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(220, 235, 250, 0.35) 0%,
+    rgba(240, 248, 255, 0.2) 60%,
+    transparent 100%
+  );
+  opacity: 0.85;
+}
+
+@keyframes craneSway {
+  from {
+    transform: rotate(-3deg);
+  }
+  to {
+    transform: rotate(3deg);
+  }
+}
+
+@keyframes dustPulse {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 0.85;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crane,
+  .dust {
+    animation: none;
+  }
+}
+
+[data-paused] .crane,
+[data-paused] .dust {
+  animation-play-state: paused;
+}
+
+.overlayExit {
+  animation: overlayFadeDown 700ms ease forwards;
+}
+
+@keyframes overlayFadeDown {
+  to {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}

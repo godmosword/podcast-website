@@ -1,6 +1,8 @@
 import type { CSSProperties } from "react";
 import { MAP_STAGE } from "@/data/universe-zones";
+import type { ThemePreference } from "@/lib/theme";
 import { FLY_DURATION_MS } from "./useMapCamera";
+import SkyBodies from "./SkyBodies";
 import styles from "./UniverseMapParallax.module.css";
 
 /** 視差係數：背景層跟隨鏡頭位移的比例（越小越「遠」）。 */
@@ -36,9 +38,10 @@ type Props = {
   isAnimating: boolean;
   reduced: boolean;
   paused: boolean;
+  daylight: ThemePreference;
 };
 
-/** R2：遠景雲層 + 丘陵，以較慢速率跟隨 pan/zoom。 */
+/** R2：遠景雲層 + 丘陵 + 太陽月亮，以較慢速率跟隨 pan/zoom。 */
 export default function UniverseMapParallax({
   tx,
   ty,
@@ -46,11 +49,19 @@ export default function UniverseMapParallax({
   isAnimating,
   reduced,
   paused,
+  daylight,
 }: Props) {
   const factor = reduced ? 1 : PARALLAX;
   const pScale = reduced ? scale : 1 + (scale - 1) * 0.18;
   const transform = `translate(${tx * factor}px, ${ty * factor}px) scale(${pScale})`;
-  const layerClass = [styles.layer, paused ? styles.paused : ""].filter(Boolean).join(" ");
+  const isNight = daylight === "night";
+  const layerClass = [
+    styles.layer,
+    isNight ? styles.night : "",
+    paused ? styles.paused : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div
@@ -65,6 +76,7 @@ export default function UniverseMapParallax({
           : "none",
       }}
     >
+      <SkyBodies daylight={daylight} reduced={reduced} paused={paused} />
       <svg
         className={styles.svg}
         viewBox={`0 0 ${MAP_STAGE.width} ${MAP_STAGE.height}`}
@@ -72,12 +84,11 @@ export default function UniverseMapParallax({
         height={MAP_STAGE.height}
         focusable="false"
       >
-        {/* 遠景丘陵（略降避免變成髒斑） */}
-        <ellipse cx="180" cy="120" rx="200" ry="48" fill="#b8dcc8" opacity="0.42" />
-        <ellipse cx="780" cy="100" rx="240" ry="52" fill="#a8d4c0" opacity="0.38" />
-        <ellipse cx="520" cy="640" rx="280" ry="44" fill="#c8e0d0" opacity="0.34" />
+        {/* 遠景丘陵 */}
+        <ellipse className={styles.hill} cx="180" cy="120" rx="200" ry="48" fill="#b8dcc8" opacity="0.42" />
+        <ellipse className={styles.hill} cx="780" cy="100" rx="240" ry="52" fill="#a8d4c0" opacity="0.38" />
+        <ellipse className={styles.hill} cx="520" cy="640" rx="280" ry="44" fill="#c8e0d0" opacity="0.34" />
 
-        {/* 雲朵（主體較實 + 多顆小橢圓做蓬鬆輪廓） */}
         {CLOUDS.map((cloud, i) => (
           <g
             key={i}
