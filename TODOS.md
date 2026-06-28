@@ -635,7 +635,7 @@ T+2d    社群貼文（B 戰場）
 
 ### SEO 進階三刀（VTT + RSS 標籤 + self canonical）
 逐字稿 helper／VTT route／故事頁可索引逐字稿；RSS podcast namespace + transcript + owner/guid；主要頁 self canonical；JSON-LD `timeRequired`。
-**Completed:** （本批 `feat(seo)` commit，2026-06-28）
+**Completed:** `029b7e6`（2026-06-28）
 
 ### Landing 陽光色系 + 引導按鈕 + 頁尾捲動 + 手機排版
 landing 專用色票（nav/CTA 分離）；top bar 日出琥珀漸層 + 白字；訂閱反白 pill；hero CTA 橘黃漸層白字；footer 全屏 snap pane + 最後段 next；手機隱藏 .next、CTA 全寬、嘟嘟/進度點分層。
