@@ -633,6 +633,10 @@ T+2d    社群貼文（B 戰場）
 
 ## Completed
 
+### R-anim 1.5：角色漫遊（Q版黏土小車沿道路跑）
+`ROAMER_ROUTES`/`MAP_ROAMERS`；`CharacterRoamerLayer` rAF 路徑取樣（直立+scaleX 翻轉）；`?devRoamers=1` 佔位。
+**Completed:** `79f8706`（2026-06-28）
+
 ### R-anim 1：island tile 渲染器 + motionParts
 `ZONE_MOTION` 資料模型、`ZoneMotionPart`/`ZoneMotionLayer` 零件動畫管線；`reduced`/`paused` 串接；enabled 預設關（資產到位再開）。
 **Completed:** `c1ff134`（2026-06-28）
