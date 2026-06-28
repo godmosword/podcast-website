@@ -17,6 +17,7 @@
 
 ### Changed
 
+- **Landing 手機／平板 CTA 縮小並對齊小紅車**：≤768px 改 auto 寬靠左、縮 padding／字級；≤600px 再縮一級，`content` 底距對齊 `DuduCompanion` 水平線，避開底部進度列
 - **Landing nav 與 CTA 統一淡蜜桃橘**：top bar 與「全部故事／睡前故事」CTA 一起改淡蜜桃漸層（`#ffe7cf→#ffd5a8`）+ 暖深棕字（`#7a4012`，非黑）；`.next` 箭頭與 Subscribe pill 改暖深棕、進度小圓點改品牌橘 `#ff8c2b`（淡色在白底會消失）
 - **Landing top bar 對齊 CTA 橘色**：nav 漸層改引用 `--landing-cta-*`（與「全部故事／睡前故事」同色），字色維持白；Subscribe pill 改反白
 - **Landing top bar 淡橘色調**：`--landing-nav-*` 改蜜桃漸層（`#fff0e0→#ffd9b8`）+ 暖深咖字（`#4a3020`），柔化 shadow／邊框；`SubscribeMenu` pill 改淡 peach 底 + 暖描邊。段內 CTA 維持飽和橘。**不動** hero raster

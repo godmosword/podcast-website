@@ -165,18 +165,32 @@
     object-position: center 35%;
   }
 
+  /* 平板：CTA 縮小、靠左，底邊與右下小紅車同一水平線 */
   .content {
-    padding-bottom: calc(88px + var(--safe-bottom));
+    padding-bottom: calc(48px + var(--safe-bottom));
   }
 
   .cta {
-    width: 100%;
-    max-width: 20rem;
-    justify-content: center;
+    width: auto;
+    max-width: none;
+    padding: 10px 18px;
+    font-size: 0.9rem;
   }
 
   /* 手機用 SegmentNav 跳段，隱藏浮動箭頭避免底部打架 */
   .next {
     display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  /* 手機：小紅車在 bottom 64px，CTA 對齊其高度、再縮小一點 */
+  .content {
+    padding-bottom: calc(74px + var(--safe-bottom));
+  }
+
+  .cta {
+    padding: 9px 16px;
+    font-size: 0.86rem;
   }
 }
