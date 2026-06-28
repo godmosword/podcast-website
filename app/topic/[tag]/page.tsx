@@ -20,6 +20,7 @@ export async function generateMetadata({
   return {
     title: `${tag}主題故事`,
     description: `車車遊樂園所有「${tag}」主題的親子故事，適合家長依成長主題挑選收聽。`,
+    alternates: { canonical: `/topic/${encodeURIComponent(tag)}` },
   };
 }
 

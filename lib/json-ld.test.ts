@@ -35,7 +35,33 @@ describe("podcastEpisodeJsonLd", () => {
       "@type": "PodcastSeries",
       name: "車車遊樂園",
     });
+    expect(data).not.toHaveProperty("transcript");
 
+    vi.unstubAllEnvs();
+  });
+
+  it("duration 可解析時加 timeRequired", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
+    const story = { ...storiesByNewest()[0], duration: "12:34" };
+    const data = podcastEpisodeJsonLd(story);
+    expect(data.timeRequired).toBe("PT12M34S");
+    expect(data).not.toHaveProperty("transcript");
+    vi.unstubAllEnvs();
+  });
+
+  it("duration H:MM:SS 轉 timeRequired", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
+    const story = { ...storiesByNewest()[0], duration: "1:02:03" };
+    const data = podcastEpisodeJsonLd(story);
+    expect(data.timeRequired).toBe("PT1H2M3S");
+    vi.unstubAllEnvs();
+  });
+
+  it("無效 duration 略過 timeRequired", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
+    const story = { ...storiesByNewest()[0], duration: "bad" };
+    const data = podcastEpisodeJsonLd(story);
+    expect(data).not.toHaveProperty("timeRequired");
     vi.unstubAllEnvs();
   });
 });

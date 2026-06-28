@@ -129,3 +129,52 @@
   color: var(--ink-soft);
   line-height: 1.5;
 }
+
+.transcript {
+  margin-top: 28px;
+  padding: 16px 18px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, var(--card-2), var(--card));
+  border: 1.5px solid var(--line);
+  box-shadow: var(--shadow-sm);
+}
+
+.transcript summary {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+  list-style: none;
+}
+
+.transcript summary::-webkit-details-marker {
+  display: none;
+}
+
+.transcript summary::before {
+  content: "▸ ";
+  display: inline-block;
+  transition: transform 0.15s ease;
+}
+
+.transcript details[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.transcript summary:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.lines {
+  margin: 12px 0 0;
+  padding-left: 1.25rem;
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: var(--ink);
+}
+
+.lines li + li {
+  margin-top: 0.35rem;
+}

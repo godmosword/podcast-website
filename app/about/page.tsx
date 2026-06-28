@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: "關於我們",
   description:
     "車車遊樂園是 Bonbon & 馬米的親子 podcast 看圖聽故事網站，適合睡前親子共讀。",
+  alternates: { canonical: "/about" },
 };
 
 export default function AboutPage() {

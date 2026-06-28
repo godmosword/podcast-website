@@ -11,6 +11,39 @@ function absoluteUrl(path: string): string {
   return `${getSiteUrl()}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
+/** 將 RSS duration（MM:SS 或 H:MM:SS）轉 ISO 8601 duration；無法解析則 null */
+function durationToIso8601(duration: string): string | null {
+  const parts = duration.trim().split(":").map((p) => Number(p));
+  if (parts.some((n) => !Number.isFinite(n) || !Number.isInteger(n) || n < 0)) {
+    return null;
+  }
+
+  let h = 0;
+  let m = 0;
+  let s = 0;
+
+  if (parts.length === 2) {
+    [m, s] = parts;
+  } else if (parts.length === 3) {
+    [h, m, s] = parts;
+  } else {
+    return null;
+  }
+
+  if (s > 59 || m > 59) return null;
+
+  const total = h * 3600 + m * 60 + s;
+  if (total <= 0) return null;
+
+  const chunks: string[] = ["PT"];
+  if (h > 0) chunks.push(`${h}H`);
+  if (m > 0) chunks.push(`${m}M`);
+  if (s > 0) chunks.push(`${s}S`);
+  if (chunks.length === 1) return null;
+
+  return chunks.join("");
+}
+
 /** 首頁 PodcastSeries 結構化資料（對齊 /feed.xml） */
 export function podcastSeriesJsonLd(): Record<string, unknown> {
   const siteUrl = getSiteUrl();
@@ -37,6 +70,7 @@ export function podcastEpisodeJsonLd(story: Story): Record<string, unknown> {
   const pageUrl = `${siteUrl}/story/${story.slug}`;
   const coverUrl = absoluteUrl(storyCoverPath(story.slug));
   const audioUrl = absoluteUrl(storyAudioPath(story.slug, story.audio));
+  const timeRequired = story.duration ? durationToIso8601(story.duration) : null;
 
   return {
     "@context": "https://schema.org",
@@ -48,6 +82,7 @@ export function podcastEpisodeJsonLd(story: Story): Record<string, unknown> {
     episodeNumber: story.ep,
     image: coverUrl,
     inLanguage: "zh-TW",
+    ...(timeRequired ? { timeRequired } : {}),
     associatedMedia: {
       "@type": "MediaObject",
       contentUrl: audioUrl,

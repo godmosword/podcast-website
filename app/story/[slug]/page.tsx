@@ -6,6 +6,7 @@ import { podcastEpisodeJsonLd } from "@/lib/json-ld";
 import { lineShareUrl, storyLineShareText, storyShareUrl } from "@/lib/share-story";
 import { storyDetailMetadata } from "@/lib/story-metadata";
 import { storyCoverPath } from "@/lib/story-utils";
+import { hasTranscript } from "@/lib/transcript";
 import FavoriteButton from "@/components/FavoriteButton";
 import JsonLd from "@/components/JsonLd";
 import PlayButton from "@/components/PlayButton";
@@ -116,6 +117,19 @@ export default async function StoryDetailPage({
             parentFollowUp={story.reflectionPrompt.parentFollowUp}
             accent={story.color}
           />
+        )}
+
+        {hasTranscript(story) && (
+          <section className={styles.transcript} aria-labelledby="transcript-heading">
+            <details>
+              <summary id="transcript-heading">逐字稿</summary>
+              <ol className={styles.lines}>
+                {(story.captions ?? []).map((line, i) => (
+                  <li key={i}>{line}</li>
+                ))}
+              </ol>
+            </details>
+          </section>
         )}
 
         {nextStory && (

@@ -20,6 +20,7 @@ export async function generateMetadata({
   return {
     title: `${name}故事`,
     description: `車車遊樂園所有${name}相關的親子故事。`,
+    alternates: { canonical: `/vehicles/${encodeURIComponent(name)}` },
   };
 }
 

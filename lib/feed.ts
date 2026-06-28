@@ -1,8 +1,15 @@
 import type { Story } from "@/data/content";
-import { CHANNEL_DESCRIPTION, CHANNEL_TITLE } from "@/lib/feed-constants";
+import {
+  CHANNEL_DESCRIPTION,
+  CHANNEL_OWNER_EMAIL,
+  CHANNEL_OWNER_NAME,
+  CHANNEL_PODCAST_GUID,
+  CHANNEL_TITLE,
+} from "@/lib/feed-constants";
 import { storyDescription } from "@/lib/story-metadata";
 import { getSiteUrl } from "@/lib/site-url";
 import { storyAudioPath, storyCoverPath } from "@/lib/story-utils";
+import { hasVtt } from "@/lib/transcript";
 
 const SITE_RSS_PATH = "/feed.xml";
 
@@ -43,6 +50,9 @@ export function buildRssFeed(stories: Story[]): string {
       const durationTag = story.duration
         ? `\n      <itunes:duration>${escapeXml(story.duration)}</itunes:duration>`
         : "";
+      const transcriptTag = hasVtt(story)
+        ? `\n      <podcast:transcript url="${escapeXml(`${siteUrl}/story/${story.slug}/transcript.vtt`)}" type="text/vtt" language="zh-TW"/>`
+        : "";
 
       return `    <item>
       <title>${escapeXml(story.title)}</title>
@@ -54,13 +64,14 @@ export function buildRssFeed(stories: Story[]): string {
       <itunes:title>${escapeXml(story.title)}</itunes:title>
       <itunes:summary>${cdata(description)}</itunes:summary>
       <itunes:image href="${escapeXml(coverUrl)}"/>
-      <itunes:episode>${story.ep}</itunes:episode>${durationTag}
+      <itunes:episode>${story.ep}</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>${durationTag}${transcriptTag}
     </item>`;
     })
     .join("\n");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:podcast="https://podcastindex.org/namespace/1.0">
   <channel>
     <title>${escapeXml(CHANNEL_TITLE)}</title>
     <link>${escapeXml(siteUrl)}</link>
@@ -79,6 +90,12 @@ export function buildRssFeed(stories: Story[]): string {
     <itunes:author>Bonbon &amp; 馬米</itunes:author>
     <itunes:explicit>false</itunes:explicit>
     <itunes:category text="Kids &amp; Family"/>
+    <itunes:type>episodic</itunes:type>
+    <itunes:owner>
+      <itunes:name>${escapeXml(CHANNEL_OWNER_NAME)}</itunes:name>
+      <itunes:email>${escapeXml(CHANNEL_OWNER_EMAIL)}</itunes:email>
+    </itunes:owner>
+    <podcast:guid>${escapeXml(CHANNEL_PODCAST_GUID)}</podcast:guid>
 ${items}
   </channel>
 </rss>`;

@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   title: "全部故事",
   description:
     "車車遊樂園全部故事：看圖聽故事、睡前親子共讀，訂閱 Spotify 或 Apple Podcast 新集自動更新。",
+  alternates: { canonical: "/stories" },
 };
 
 type StoriesPageProps = {

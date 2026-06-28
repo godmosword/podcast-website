@@ -28,6 +28,7 @@ export function storyDetailMetadata(story: Story): Metadata {
   return {
     title: story.title,
     description,
+    alternates: { canonical: `/story/${story.slug}` },
     openGraph: {
       title: story.title,
       description,
