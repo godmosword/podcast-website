@@ -1,0 +1,154 @@
+.part {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.placeholder {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  mix-blend-mode: multiply;
+}
+
+.placeholderWheel {
+  left: 38%;
+  top: 8%;
+  width: 28%;
+  height: 38%;
+  border-radius: 50%;
+  background: #ff6b6b;
+}
+
+.placeholderFlags {
+  left: 55%;
+  top: 18%;
+  width: 22%;
+  height: 12%;
+  border-radius: 4px;
+  background: #ffd166;
+}
+
+.placeholderCar {
+  left: 20%;
+  top: 62%;
+  width: 18%;
+  height: 10%;
+  border-radius: 6px;
+  background: #ef476f;
+}
+
+.spin {
+  animation: motionSpin var(--period, 11s) linear infinite;
+  animation-delay: var(--delay, 0s);
+  transform-origin: var(--pivot-x, 50%) var(--pivot-y, 50%);
+}
+
+.sway {
+  animation: motionSway var(--period, 3.6s) ease-in-out infinite alternate;
+  animation-delay: var(--delay, 0s);
+  transform-origin: var(--pivot-x, 50%) var(--pivot-y, 85%);
+}
+
+.sweep {
+  animation: motionSweep var(--period, 4s) ease-in-out infinite alternate;
+  animation-delay: var(--delay, 0s);
+  transform-origin: var(--pivot-x, 50%) var(--pivot-y, 50%);
+}
+
+.bob {
+  animation: motionBob var(--period, 3s) ease-in-out infinite alternate;
+  animation-delay: var(--delay, 0s);
+}
+
+.path {
+  offset-path: path(var(--path-d));
+  offset-distance: 0%;
+  offset-rotate: auto;
+  inset: auto;
+  width: 12%;
+  height: 8%;
+  animation: motionTravel var(--period, 16s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.sprite {
+  background-repeat: no-repeat;
+  background-size: calc(var(--frames, 12) * 100%) 100%;
+  animation: motionSprite var(--sprite-period, 1s) steps(var(--frames, 12)) infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes motionSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes motionSway {
+  from {
+    transform: rotate(calc(var(--amp-deg, 4deg) * -1));
+  }
+  to {
+    transform: rotate(var(--amp-deg, 4deg));
+  }
+}
+
+@keyframes motionSweep {
+  from {
+    transform: rotate(calc(var(--amp-deg, 20deg) * -1));
+  }
+  to {
+    transform: rotate(var(--amp-deg, 20deg));
+  }
+}
+
+@keyframes motionBob {
+  from {
+    transform: translateY(calc(var(--amp-px, 4px) * -1));
+  }
+  to {
+    transform: translateY(var(--amp-px, 4px));
+  }
+}
+
+@keyframes motionTravel {
+  to {
+    offset-distance: 100%;
+  }
+}
+
+@keyframes motionSprite {
+  to {
+    background-position: 100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spin,
+  .sway,
+  .sweep,
+  .bob,
+  .path,
+  .sprite {
+    animation: none;
+  }
+
+  .path {
+    offset-distance: 0%;
+  }
+}
+
+[data-paused] .spin,
+[data-paused] .sway,
+[data-paused] .sweep,
+[data-paused] .bob,
+[data-paused] .path,
+[data-paused] .sprite {
+  animation-play-state: paused;
+}
