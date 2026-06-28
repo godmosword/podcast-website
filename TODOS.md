@@ -635,7 +635,7 @@ T+2d    社群貼文（B 戰場）
 
 ### R-anim 1.5 漫遊者 PNG 資產（小紅賽車 + 恐龍車多多）
 `generate-roamer-assets.ts`（magenta chroma-key + sharp 後製）；`public/adventures/roamers/*.png`；`MAP_ROAMERS` enabled（duo-duo `startOffset:0.5`）。
-**Completed:** `eb0521a`（2026-06-28）
+**Completed:** `e471694`（2026-06-28）
 
 ### R-anim 1.5：角色漫遊（Q版黏土小車沿道路跑）
 `ROAMER_ROUTES`/`MAP_ROAMERS`；`CharacterRoamerLayer` rAF 路徑取樣（直立+scaleX 翻轉）；`?devRoamers=1` 佔位。
