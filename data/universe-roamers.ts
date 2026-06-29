@@ -9,6 +9,14 @@ import type { ZoneId } from "@/data/universe-zones";
 export const CAR_PARK_WALKWAY_PATH =
   "M 72 196 C 56 150 92 110 130 104 C 158 100 184 132 188 172 C 188 202 116 212 72 196 Z";
 
+/** 恐龍島步道：閉合迴圈，後段繞行火山後方（觸發遮擋）。tile 264×260 本地座標。 */
+export const DINO_WALKWAY_PATH =
+  "M 78 196 C 60 152 96 114 132 108 C 166 102 188 134 188 170 C 188 200 120 212 78 196 Z";
+
+/** 英雄救援隊步道：閉合迴圈，後段繞行消防局後方。tile 264×260 本地座標。 */
+export const RESCUE_WALKWAY_PATH =
+  "M 80 198 C 64 158 98 122 134 116 C 168 110 190 142 190 176 C 190 204 122 214 80 198 Z";
+
 export type RoamerRoute = {
   id: string;
   kind: "island";
@@ -54,6 +62,18 @@ export const ROAMER_ROUTES: RoamerRoute[] = [
     zoneId: "car-park",
     tilePath: CAR_PARK_WALKWAY_PATH,
   },
+  {
+    id: "dino-walkway",
+    kind: "island",
+    zoneId: "dino",
+    tilePath: DINO_WALKWAY_PATH,
+  },
+  {
+    id: "rescue-walkway",
+    kind: "island",
+    zoneId: "rescue",
+    tilePath: RESCUE_WALKWAY_PATH,
+  },
 ];
 
 export const MAP_ROAMERS: Roamer[] = [
@@ -77,6 +97,44 @@ export const MAP_ROAMERS: Roamer[] = [
     enabled: true,
     startOffset: 0.5,
   },
+  // 恐龍島（building）：阿酷鑽地車 + 怪獸卡車。enabled=false，待 generate:roamer-assets 產圖後開。
+  {
+    id: "roam-aku",
+    characterId: "a-ku",
+    zoneId: "dino",
+    routeId: "dino-walkway",
+    speed: 26,
+    src: "/adventures/roamers/a-ku.png",
+    startOffset: 0,
+  },
+  {
+    id: "roam-monster",
+    characterId: "monster-truck",
+    zoneId: "dino",
+    routeId: "dino-walkway",
+    speed: 22,
+    src: "/adventures/roamers/monster-truck.png",
+    startOffset: 0.5,
+  },
+  // 英雄救援隊（coming）：亮亮警車 + 消防車點點。enabled=false，待產圖後開。
+  {
+    id: "roam-liangliang",
+    characterId: "liang-liang",
+    zoneId: "rescue",
+    routeId: "rescue-walkway",
+    speed: 27,
+    src: "/adventures/roamers/liang-liang.png",
+    startOffset: 0,
+  },
+  {
+    id: "roam-diandian",
+    characterId: "dian-dian",
+    zoneId: "rescue",
+    routeId: "rescue-walkway",
+    speed: 23,
+    src: "/adventures/roamers/dian-dian.png",
+    startOffset: 0.55,
+  },
 ];
 
 /** 整島地標的深度遮擋設定（單張 tile 用同圖 clip-path 複製疊在 roamer 上方）。 */
@@ -93,9 +151,15 @@ export type ZoneOccluder = {
   baselineY: number;
 };
 
-/** 各島地標遮擋（目前僅 car-park 摩天輪）。未列出的島不做遮擋。 */
+/**
+ * 各島地標遮擋。clipPath 露出地標剪影、baselineY 為地標接地線（tile 本地 y px）。
+ * 與島 art tile 同畫框（264×260），故百分比通用。未列出的島不做遮擋。
+ */
 export const ZONE_OCCLUDERS: Partial<Record<ZoneId, ZoneOccluder>> = {
-  "car-park": { clipPath: "ellipse(20% 27% at 52% 26%)", baselineY: 134 },
+  "car-park": { clipPath: "ellipse(20% 27% at 52% 26%)", baselineY: 134 }, // 摩天輪
+  dino: { clipPath: "ellipse(21% 27% at 50% 26%)", baselineY: 128 }, // 火山
+  rescue: { clipPath: "ellipse(23% 29% at 52% 30%)", baselineY: 140 }, // 消防局
+  ocean: { clipPath: "ellipse(17% 27% at 48% 28%)", baselineY: 132 }, // 火箭
 };
 
 /** 取得 roamer 的 sprite 集（未設 sprites 時由單張 src 衍生）。 */

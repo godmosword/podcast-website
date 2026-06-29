@@ -57,6 +57,46 @@ type RoamerSpec = {
   rear: ViewPrompt;
 };
 
+// ── 共用風格（黃金樣本對齊）：給後加入的島用 builder 組裝，省去重複長字串 ──
+const CLAY_STYLE =
+  "Handmade matte polymer clay, soft rounded pressed edges, subtle thumbprint texture, no gloss. " +
+  "Soft even diffuse lighting, low contrast, short soft contact shadow. Pastel storybook palette, " +
+  "bright and friendly for kids. Stop-motion / claymation aesthetic. Isolated on a transparent " +
+  "background, single object, centered.";
+const POSE_FRONT =
+  "Shown in a three-quarter side view facing screen-left in a gentle driving pose, upright and level " +
+  "on flat ground, viewed from a slight high angle about 30 degrees to match a tabletop diorama. ";
+const POSE_REAR =
+  "Shown from a three-quarter REAR view from behind, driving away from the camera toward screen-left, " +
+  "clearly showing the back of the vehicle and its two rear wheels; the face is turned away and not " +
+  "visible. Upright and level on flat ground, viewed from a slight high angle about 30 degrees to " +
+  "match a tabletop diorama. ";
+const NEG_BASE =
+  "tilted, leaning, motion blur, perspective distortion, flat orthographic side profile, top-down, " +
+  "glossy, plastic shine, hard directional shadow, long cast shadow, photorealistic, extra text, words, " +
+  "watermark, neon, oversaturated, sharp hard edges, branded character, copyrighted character, " +
+  "multiple vehicles, cluttered";
+
+/** 組一張 spec：identityFront/Rear 是車身描述，姿勢＋風格＋負面詞由共用常數補齊。 */
+function clayRoamerSpec(
+  id: string,
+  characterName: string,
+  identityFront: string,
+  identityRear: string,
+  extraNeg = "",
+): RoamerSpec {
+  const neg = extraNeg ? `${extraNeg}, ${NEG_BASE}` : NEG_BASE;
+  return {
+    id,
+    characterName,
+    front: { positive: `${identityFront} ${POSE_FRONT}${CLAY_STYLE}`, negative: neg },
+    rear: {
+      positive: `${identityRear} ${POSE_REAR}${CLAY_STYLE}`,
+      negative: `front face visible, eyes facing camera, ${neg}`,
+    },
+  };
+}
+
 const ROAMER_SPECS: RoamerSpec[] = [
   {
     id: "xiao-hong",
@@ -149,6 +189,46 @@ const ROAMER_SPECS: RoamerSpec[] = [
         "multiple cars, cluttered",
     },
   },
+  // ── 恐龍島（火山） ──
+  clayRoamerSpec(
+    "a-ku",
+    "阿酷鑽地車",
+    "A cute super-deformed chibi clay toy drilling car, short chunky stubby proportions, a rounded " +
+      "chubby body, small chunky tread wheels with all four wheels clearly visible. It is an earthy " +
+      "orange and grey drilling vehicle with a big spiral cone drill bit at the front and a friendly " +
+      "face with two big round eyes and a cheerful smile.",
+    "A cute super-deformed chibi clay toy drilling car, earthy orange and grey, with a big spiral cone " +
+      "drill bit at the front and small chunky tread wheels.",
+    "person, human, robot arms, legs, limbs",
+  ),
+  clayRoamerSpec(
+    "monster-truck",
+    "怪獸卡車",
+    "A cute super-deformed chibi clay toy monster truck, short chunky stubby proportions, a rounded " +
+      "chubby body, oversized chunky knobby tires and tall suspension, a bold blue and green body, and " +
+      "a friendly face with two big round eyes and a cheerful smile.",
+    "A cute super-deformed chibi clay toy monster truck with oversized chunky knobby rear tires, tall " +
+      "suspension and a bold blue and green body.",
+  ),
+  // ── 英雄救援隊（消防局） ──
+  clayRoamerSpec(
+    "liang-liang",
+    "亮亮警車",
+    "A cute super-deformed chibi clay toy police car, short chunky stubby proportions, a rounded chubby " +
+      "body, small chunky wheels with all four wheels clearly visible, a white and blue body with a small " +
+      "light bar on the roof, and a friendly face with two big round eyes and a cheerful smile.",
+    "A cute super-deformed chibi clay toy police car, white and blue body with a small light bar on the " +
+      "roof and small chunky rear wheels.",
+  ),
+  clayRoamerSpec(
+    "dian-dian",
+    "消防車點點",
+    "A cute super-deformed chibi clay toy fire engine, short chunky stubby proportions, a rounded chubby " +
+      "body, small chunky wheels with all four wheels clearly visible, a bright red body with yellow trim " +
+      "and a small ladder on top, and a friendly face with two big round eyes and a cheerful smile.",
+    "A cute super-deformed chibi clay toy fire engine, bright red body with yellow trim and a small ladder " +
+      "on top, small chunky rear wheels.",
+  ),
 ];
 
 function usage(): never {
