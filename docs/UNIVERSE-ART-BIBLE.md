@@ -262,6 +262,17 @@ type MotionPart = {
 ### 12.7 與程式對接
 - base 走 §10 的 `island` tile 契約；motionParts 由 R-anim 1 的渲染器讀上表、用 CSS/WAAPI 驅動，全部受 reduced-motion 控管。產島時把零件＋此描述一起交付即可。
 
+### 12.8 漫遊小車＝2.5D unit（R-anim 3 新增）
+
+島上漫遊小車不是貼紙，是**會面向行進方向的 2.5D unit**。資料層 `data/universe-roamers.ts`、引擎 `components/universe/useRoamerSim.ts`。
+
+- **4 向 sprite：** 每角色生 **2 張面朝畫面左**的視圖 → `{id}.png`（¾ 前視、車頭朝觀者）、`{id}.rear.png`（¾ 後視、車尾朝觀者）。左右向由前端 `scaleX(-1)` 鏡像，共 4 朝向。`RoamerSprites` 契約；rear 未到位時回退 front（不渲染破圖）。
+- **生圖管線：** `npm run generate:roamer-assets`（front + rear 兩視圖）。模型回傳近白底而非約定 magenta 時，postProcess 以**邊界 flood 去背保險絲**（`scripts/lib/roamer-alpha.ts`）救回；既有資產用 `npm run fix:roamer-alpha` 就地修補（保留牙齒／眼白等內部白）。
+- **朝向選擇（遲滯）：** 依 path 切線 `hx/hy` 選 front/rear 與左右鏡像，零附近維持原朝向避免抖動。
+- **接地：** 陰影是**獨立地面橢圓**（不隨 bob 浮動，只隨 hop 微縮），維持 §2「短柔接地陰影」；sprite 本身只留極淡形狀陰影。
+- **景深：** tile 內越上（遠）越小、越下（近）越大；過彎輕微 bank。
+- **深度遮擋：** `ZONE_OCCLUDERS` 用**同一張 tile 的 clip-path 複製**露出地標剪影、疊在 roamer 上方（z-index = `baselineY`）。roamer `z-index = groundY`：groundY < baselineY（在地標後方）即落到剪影下被擋住，呈現立體書式「鑽到地標後方」。新島若要遮擋，量好地標剪影 `clipPath` 與接地基線 `baselineY` 即可，**無需另畫前景圖**。
+
 ---
 
 ### TL;DR 給美術／AI 的一句話

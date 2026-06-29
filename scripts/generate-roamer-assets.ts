@@ -26,6 +26,7 @@ import {
   readCharacters,
 } from "./lib/illustrate-core";
 import { ROOT } from "./lib/transcribe-core";
+import { removeBorderBackground } from "./lib/roamer-alpha";
 
 const STAGING = join(ROOT, "public/.roamer-staging");
 const OUT_DIR = join(ROOT, "public/adventures/roamers");
@@ -38,57 +39,115 @@ const REF_PREFIX =
   "Match the character's face, colors, and clay style from the reference portrait exactly. " +
   "Repose into a map-roamer asset only — do not change identity. ";
 
+/** 4 向 sprite 的兩張生成視圖（左右由前端 scaleX 鏡像，不另生）。 */
+type RoamerView = "front" | "rear";
+const VIEWS: RoamerView[] = ["front", "rear"];
+
+/** 輸出檔名：front → `{id}.png`、rear → `{id}.rear.png`（對齊 `RoamerSprites`）。 */
+function viewFileName(id: string, view: RoamerView): string {
+  return view === "front" ? `${id}.png` : `${id}.rear.png`;
+}
+
+type ViewPrompt = { positive: string; negative: string };
+
 type RoamerSpec = {
   id: string;
   characterName: string;
-  positive: string;
-  negative: string;
+  front: ViewPrompt;
+  rear: ViewPrompt;
 };
 
 const ROAMER_SPECS: RoamerSpec[] = [
   {
     id: "xiao-hong",
     characterName: "小紅賽車",
-    positive:
-      "A cute super-deformed chibi clay toy race car, short chunky stubby proportions, a " +
-      "rounded chubby body, small chunky wheels with all four wheels clearly visible and " +
-      "separable. The car is a bright red race car with the number 2 inside a white circle " +
-      "on the side, a white racing stripe down the middle, blue and yellow accents, and a " +
-      "friendly face with two big round eyes and a cheerful smile on the front. Shown in a " +
-      "three-quarter side view facing screen-left in a gentle driving pose, upright and level " +
-      "on flat ground, viewed from a slight high angle about 30 degrees to match a tabletop " +
-      "diorama. Handmade matte polymer clay, soft rounded pressed edges, subtle thumbprint " +
-      "texture, no gloss. Soft even diffuse lighting, low contrast, short soft contact shadow. " +
-      "Pastel storybook palette, bright and friendly for kids. Stop-motion / claymation " +
-      "aesthetic. Isolated on a transparent background, single object, centered.",
-    negative:
-      "tilted, leaning, motion blur, perspective distortion, flat orthographic side profile, " +
-      "top-down, glossy, plastic shine, hard directional shadow, long cast shadow, " +
-      "photorealistic, extra text, words, watermark, neon, oversaturated, sharp hard edges, " +
-      "Pixar Cars, Lightning McQueen, branded character, copyrighted character, multiple cars, cluttered",
+    front: {
+      positive:
+        "A cute super-deformed chibi clay toy race car, short chunky stubby proportions, a " +
+        "rounded chubby body, small chunky wheels with all four wheels clearly visible and " +
+        "separable. The car is a bright red race car with the number 2 inside a white circle " +
+        "on the side, a white racing stripe down the middle, blue and yellow accents, and a " +
+        "friendly face with two big round eyes and a cheerful smile on the front. Shown in a " +
+        "three-quarter side view facing screen-left in a gentle driving pose, upright and level " +
+        "on flat ground, viewed from a slight high angle about 30 degrees to match a tabletop " +
+        "diorama. Handmade matte polymer clay, soft rounded pressed edges, subtle thumbprint " +
+        "texture, no gloss. Soft even diffuse lighting, low contrast, short soft contact shadow. " +
+        "Pastel storybook palette, bright and friendly for kids. Stop-motion / claymation " +
+        "aesthetic. Isolated on a transparent background, single object, centered.",
+      negative:
+        "tilted, leaning, motion blur, perspective distortion, flat orthographic side profile, " +
+        "top-down, glossy, plastic shine, hard directional shadow, long cast shadow, " +
+        "photorealistic, extra text, words, watermark, neon, oversaturated, sharp hard edges, " +
+        "Pixar Cars, Lightning McQueen, branded character, copyrighted character, multiple cars, cluttered",
+    },
+    rear: {
+      positive:
+        "A cute super-deformed chibi clay toy race car, short chunky stubby proportions, a " +
+        "rounded chubby body, small chunky wheels. The car is a bright red race car with a white " +
+        "racing stripe down the middle and blue and yellow accents, the number 2 inside a white " +
+        "circle on the side. Shown from a three-quarter REAR view from behind, the car driving " +
+        "away from the camera toward screen-left, clearly showing the back of the car, its two " +
+        "rear wheels and a small rounded rear bumper; the face is turned away and not visible. " +
+        "Upright and level on flat ground, viewed from a slight high angle about 30 degrees to " +
+        "match a tabletop diorama. Handmade matte polymer clay, soft rounded pressed edges, " +
+        "subtle thumbprint texture, no gloss. Soft even diffuse lighting, low contrast, short " +
+        "soft contact shadow. Pastel storybook palette, bright and friendly for kids. " +
+        "Stop-motion / claymation aesthetic. Isolated on a transparent background, single " +
+        "object, centered.",
+      negative:
+        "front face visible, eyes facing camera, smile facing camera, tilted, leaning, motion " +
+        "blur, perspective distortion, flat orthographic side profile, top-down, glossy, plastic " +
+        "shine, hard directional shadow, long cast shadow, photorealistic, extra text, words, " +
+        "watermark, neon, oversaturated, sharp hard edges, Pixar Cars, Lightning McQueen, " +
+        "branded character, copyrighted character, multiple cars, cluttered",
+    },
   },
   {
     id: "duo-duo",
     characterName: "恐龍車多多",
-    positive:
-      "A cute super-deformed chibi clay toy car, short chunky stubby proportions, a rounded " +
-      "chubby body, small chunky wheels with all four wheels clearly visible and separable. " +
-      "The car is a small green dinosaur car: a chubby green car body with a friendly cartoon " +
-      "T-rex head at the front, orange spikes running along its back, big round cartoon eyes, " +
-      "and a wide happy mouth showing rows of teeth. It has four black wheels only — no arms, " +
-      "no hands, no legs, no limbs. Shown in a three-quarter side view facing screen-left in a " +
-      "gentle driving pose, upright and level on flat ground, viewed from a slight high angle " +
-      "about 30 degrees to match a tabletop diorama. Handmade matte polymer clay, soft rounded " +
-      "pressed edges, subtle thumbprint texture, no gloss. Soft even diffuse lighting, low " +
-      "contrast, short soft contact shadow. Pastel storybook palette, bright and friendly for " +
-      "kids. Stop-motion / claymation aesthetic. Isolated on a transparent background, single " +
-      "object, centered.",
-    negative:
-      "arms, hands, legs, limbs, standing dinosaur, walking pose, tilted, leaning, motion blur, " +
-      "perspective distortion, flat orthographic side, top-down, glossy, plastic shine, hard " +
-      "directional shadow, long cast shadow, photorealistic, text, letters, numbers, watermark, " +
-      "neon, oversaturated, sharp hard edges, branded character, copyrighted character, " +
-      "multiple cars, cluttered",
+    front: {
+      positive:
+        "A cute super-deformed chibi clay toy car, short chunky stubby proportions, a rounded " +
+        "chubby body, small chunky wheels with all four wheels clearly visible and separable. " +
+        "The car is a small green dinosaur car: a chubby green car body with a friendly cartoon " +
+        "T-rex head at the front, orange spikes running along its back, big round cartoon eyes, " +
+        "and a wide happy mouth showing rows of teeth. It has four black wheels only — no arms, " +
+        "no hands, no legs, no limbs. Shown in a three-quarter side view facing screen-left in a " +
+        "gentle driving pose, upright and level on flat ground, viewed from a slight high angle " +
+        "about 30 degrees to match a tabletop diorama. Handmade matte polymer clay, soft rounded " +
+        "pressed edges, subtle thumbprint texture, no gloss. Soft even diffuse lighting, low " +
+        "contrast, short soft contact shadow. Pastel storybook palette, bright and friendly for " +
+        "kids. Stop-motion / claymation aesthetic. Isolated on a transparent background, single " +
+        "object, centered.",
+      negative:
+        "arms, hands, legs, limbs, standing dinosaur, walking pose, tilted, leaning, motion blur, " +
+        "perspective distortion, flat orthographic side, top-down, glossy, plastic shine, hard " +
+        "directional shadow, long cast shadow, photorealistic, text, letters, numbers, watermark, " +
+        "neon, oversaturated, sharp hard edges, branded character, copyrighted character, " +
+        "multiple cars, cluttered",
+    },
+    rear: {
+      positive:
+        "A cute super-deformed chibi clay toy car, short chunky stubby proportions, a rounded " +
+        "chubby body, small chunky wheels. A small green dinosaur car: a chubby green car body " +
+        "with orange spikes running down the middle of its back and a short tail, four black " +
+        "wheels only — no arms, no hands, no legs, no limbs. Shown from a three-quarter REAR view " +
+        "from behind, the car driving away from the camera toward screen-left, clearly showing " +
+        "the spiked green back, the tail and its two rear wheels; the T-rex head is at the far " +
+        "front turned away and barely visible. Upright and level on flat ground, viewed from a " +
+        "slight high angle about 30 degrees to match a tabletop diorama. Handmade matte polymer " +
+        "clay, soft rounded pressed edges, subtle thumbprint texture, no gloss. Soft even diffuse " +
+        "lighting, low contrast, short soft contact shadow. Pastel storybook palette, bright and " +
+        "friendly for kids. Stop-motion / claymation aesthetic. Isolated on a transparent " +
+        "background, single object, centered.",
+      negative:
+        "T-rex face facing camera, eyes facing camera, mouth and teeth facing camera, arms, " +
+        "hands, legs, limbs, standing dinosaur, walking pose, tilted, leaning, motion blur, " +
+        "perspective distortion, flat orthographic side, top-down, glossy, plastic shine, hard " +
+        "directional shadow, long cast shadow, photorealistic, text, letters, numbers, watermark, " +
+        "neon, oversaturated, sharp hard edges, branded character, copyrighted character, " +
+        "multiple cars, cluttered",
+    },
   },
 ];
 
@@ -116,11 +175,12 @@ function requireApiKey(): void {
   }
 }
 
-function buildPrompt(spec: RoamerSpec, magentaBg: boolean): string {
+function buildPrompt(spec: RoamerSpec, view: RoamerView, magentaBg: boolean): string {
   const bg = magentaBg
     ? "Solid flat magenta #FF00FF background only. "
     : "";
-  return `${REF_PREFIX}${bg}${spec.positive} Avoid: ${spec.negative}`;
+  const v = spec[view];
+  return `${REF_PREFIX}${bg}${v.positive} Avoid: ${v.negative}`;
 }
 
 function resolveRef(characterName: string): string {
@@ -226,6 +286,10 @@ async function postProcessRoamer(buf: Buffer): Promise<Buffer> {
   if (!(await hasCleanAlpha(working))) {
     working = await chromaKeyToAlpha(working);
   }
+  if (!(await hasCleanAlpha(working))) {
+    // 模型回傳近白底而非約定 magenta：邊界 flood 去背保險絲（保留內部白）。
+    working = (await removeBorderBackground(working)).png;
+  }
 
   const trimmed = await sharp(working).trim({ threshold: 10 }).png().toBuffer();
   const meta = await sharp(trimmed).metadata();
@@ -295,24 +359,24 @@ async function callImageEdit(refPath: string, prompt: string): Promise<Buffer> {
   }
 }
 
-async function generateOne(spec: RoamerSpec): Promise<Buffer> {
+async function generateOne(spec: RoamerSpec, view: RoamerView): Promise<Buffer> {
   const refPath = resolveRef(spec.characterName);
   console.log(`  定裝照 ${refPath.replace(ROOT + "/", "")}`);
 
   // gpt-image-2 edit 不支援 transparent background → magenta 平背 + chroma-key
-  const raw = await callImageEdit(refPath, buildPrompt(spec, true));
+  const raw = await callImageEdit(refPath, buildPrompt(spec, view, true));
   const keyed = await chromaKeyToAlpha(raw);
   return postProcessRoamer(keyed);
 }
 
 async function writeContactSheet(): Promise<string> {
-  const files = ROAMER_SPECS.map((s) => `${s.id}.png`).filter((f) =>
-    existsSync(join(STAGING, f)),
-  );
+  const files = ROAMER_SPECS.flatMap((s) =>
+    VIEWS.map((v) => viewFileName(s.id, v)),
+  ).filter((f) => existsSync(join(STAGING, f)));
   if (files.length === 0) throw new Error("staging 無 PNG 可審");
 
   const tile = 340;
-  const cols = Math.min(2, files.length);
+  const cols = Math.min(VIEWS.length, files.length);
   const rows = Math.ceil(files.length / cols);
   const checker = await sharp({
     create: {
@@ -357,18 +421,22 @@ async function writeContactSheet(): Promise<string> {
 
 async function verifyAssets(dir: string): Promise<void> {
   for (const spec of ROAMER_SPECS) {
-    const p = join(dir, `${spec.id}.png`);
-    if (!existsSync(p)) {
-      console.log(`✗ ${spec.id}: 檔案不存在`);
-      continue;
+    for (const view of VIEWS) {
+      const name = viewFileName(spec.id, view);
+      const p = join(dir, name);
+      if (!existsSync(p)) {
+        // rear 為可選資產：缺席只提醒、不算失敗（前端 rear 回退 front）。
+        console.log(`${view === "rear" ? "·" : "✗"} ${name}: 檔案不存在`);
+        continue;
+      }
+      const meta = await sharp(p).metadata();
+      const long = Math.max(meta.width ?? 0, meta.height ?? 0);
+      const okAlpha = meta.hasAlpha === true;
+      const okSize = long >= 650 && long <= 750;
+      console.log(
+        `${okAlpha && okSize ? "✓" : "⚠"} ${name}: ${meta.width}×${meta.height}, alpha=${meta.hasAlpha}, long=${long}`,
+      );
     }
-    const meta = await sharp(p).metadata();
-    const long = Math.max(meta.width ?? 0, meta.height ?? 0);
-    const okAlpha = meta.hasAlpha === true;
-    const okSize = long >= 650 && long <= 750;
-    console.log(
-      `${okAlpha && okSize ? "✓" : "⚠"} ${spec.id}: ${meta.width}×${meta.height}, alpha=${meta.hasAlpha}, long=${long}`,
-    );
   }
 }
 
@@ -394,10 +462,12 @@ async function runGenerate(onlyIds: string[] | null): Promise<void> {
   }
 
   for (const spec of specs) {
-    const out = join(STAGING, `${spec.id}.png`);
-    console.log(`生圖 ${spec.id}（${spec.characterName}）→ ${out}`);
-    const buf = await generateOne(spec);
-    writeFileSync(out, buf);
+    for (const view of VIEWS) {
+      const out = join(STAGING, viewFileName(spec.id, view));
+      console.log(`生圖 ${spec.id}（${spec.characterName}）${view} → ${out}`);
+      const buf = await generateOne(spec, view);
+      writeFileSync(out, buf);
+    }
     await verifyAssets(STAGING);
   }
 
@@ -411,14 +481,16 @@ function runDryRun(onlyIds: string[] | null): void {
     ? ROAMER_SPECS.filter((s) => onlyIds.includes(s.id))
     : [...ROAMER_SPECS];
   for (const spec of specs) {
-    console.log(`\n## ${spec.id} → ${spec.id}.png`);
-    console.log(`角色：${spec.characterName}`);
+    console.log(`\n## ${spec.id}（${spec.characterName}）`);
     try {
       console.log(`定裝照：${resolveRef(spec.characterName).replace(ROOT + "/", "")}`);
     } catch (err) {
       console.log(`⚠ ${(err as Error).message}`);
     }
-    console.log(buildPrompt(spec, false));
+    for (const view of VIEWS) {
+      console.log(`\n— ${view} → ${viewFileName(spec.id, view)}`);
+      console.log(buildPrompt(spec, view, false));
+    }
   }
 }
 
@@ -426,20 +498,24 @@ function runApprove(): void {
   if (!existsSync(STAGING)) {
     throw new Error("找不到 staging。請先生圖再 --approve。");
   }
+  // front 必備；rear 可選（缺席則前端 rear 回退 front）。
   const missing = ROAMER_SPECS.filter(
-    (s) => !existsSync(join(STAGING, `${s.id}.png`)),
+    (s) => !existsSync(join(STAGING, viewFileName(s.id, "front"))),
   );
   if (missing.length > 0) {
     throw new Error(
-      `staging 缺 ${missing.map((s) => s.id).join(", ")}。請先完成生圖。`,
+      `staging 缺 front：${missing.map((s) => s.id).join(", ")}。請先完成生圖。`,
     );
   }
   mkdirSync(OUT_DIR, { recursive: true });
   for (const spec of ROAMER_SPECS) {
-    const src = join(STAGING, `${spec.id}.png`);
-    const dest = join(OUT_DIR, `${spec.id}.png`);
-    copyFileSync(src, dest);
-    console.log(`approve ${dest.replace(ROOT + "/", "")}`);
+    for (const view of VIEWS) {
+      const name = viewFileName(spec.id, view);
+      const src = join(STAGING, name);
+      if (!existsSync(src)) continue;
+      copyFileSync(src, join(OUT_DIR, name));
+      console.log(`approve ${join(OUT_DIR, name).replace(ROOT + "/", "")}`);
+    }
   }
 }
 
