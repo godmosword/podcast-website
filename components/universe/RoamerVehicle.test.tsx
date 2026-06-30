@@ -1,52 +1,43 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import type { Roamer } from "@/data/universe-roamers";
 import RoamerVehicle from "./RoamerVehicle";
+import type { Roamer } from "@/data/universe-roamers";
 
 vi.stubGlobal("React", React);
 
 const baseRoamer: Roamer = {
-  id: "test-roamer",
-  characterId: "test",
+  id: "roam-test",
+  characterId: "xiao-hong",
   routeId: "map-sea-orbit",
-  speed: 10,
-  src: "/front.png",
-  sprites: {
-    front: "/front.png",
-    rear: "/rear.png",
-  },
+  speed: 30,
+  src: "/adventures/roamers/xiao-hong.png",
+  enabled: true,
 };
 
 describe("RoamerVehicle", () => {
-  it("renders map roamers with the same 2.5D body/shadow hooks as island roamers", () => {
+  it("front 輸出 picture + webp source", () => {
     const html = renderToStaticMarkup(
-      <RoamerVehicle
-        roamer={baseRoamer}
-        usePlaceholder={false}
-        night={false}
-        sizeKind="map"
-      />,
+      <RoamerVehicle roamer={baseRoamer} usePlaceholder={false} night={false} sizeKind="map" />,
     );
-
-    expect(html).toContain('data-roamer-id="test-roamer"');
-    expect(html).toContain("data-roamer-shadow");
-    expect(html).toContain('data-roamer-body="test-roamer"');
-    expect(html).toContain("/front.png");
-    expect(html).toContain("/rear.png");
+    expect(html).toContain("<picture>");
+    expect(html).toContain('type="image/webp"');
+    expect(html).toContain("/adventures/roamers/xiao-hong.webp");
+    expect(html).toContain("/adventures/roamers/xiao-hong.png");
   });
 
-  it("falls back to the front sprite when no rear view exists", () => {
+  it("rear sprite 帶 fetchpriority=low", () => {
+    const roamer: Roamer = {
+      ...baseRoamer,
+      sprites: {
+        front: "/adventures/roamers/a-ku.png",
+        rear: "/adventures/roamers/a-ku.rear.png",
+      },
+    };
     const html = renderToStaticMarkup(
-      <RoamerVehicle
-        roamer={{ ...baseRoamer, sprites: undefined }}
-        usePlaceholder={false}
-        night={false}
-        sizeKind="map"
-      />,
+      <RoamerVehicle roamer={roamer} usePlaceholder={false} night={false} sizeKind="island" />,
     );
-
-    expect(html).toContain("/front.png");
-    expect(html).not.toContain("/rear.png");
+    expect(html).toContain("/adventures/roamers/a-ku.rear.webp");
+    expect(html).toMatch(/fetchpriority="low"/i);
   });
 });

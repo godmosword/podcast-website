@@ -2,8 +2,11 @@ import type { Metadata } from "next";
 import UniverseMap from "@/components/universe/UniverseMap";
 import { ZONE_STATUS_META, ZONES } from "@/data/universe-zones";
 import { getCarParkLinks } from "@/lib/universe-map";
+import { getZoneArtSrcSet } from "@/lib/universe/zone-art-src";
 import { notifyMailto } from "@/lib/contact";
 import { getSiteUrl } from "@/lib/site-url";
+
+const carParkTilePreload = getZoneArtSrcSet("car-park");
 
 export const metadata: Metadata = {
   title: "車車宇宙 · 樂園地圖",
@@ -22,6 +25,13 @@ export default function AdventuresPage() {
 
   return (
     <main>
+      <link
+        rel="preload"
+        as="image"
+        href={carParkTilePreload.src}
+        imageSrcSet={carParkTilePreload.srcSet}
+        imageSizes={carParkTilePreload.sizes}
+      />
       <h1 className="sr-only">車車宇宙樂園地圖</h1>
 
       <UniverseMap />

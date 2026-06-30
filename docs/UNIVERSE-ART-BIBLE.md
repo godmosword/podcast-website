@@ -194,7 +194,8 @@ fence, dirt mounds and traffic cones, matte clay, [Base style], transparent back
   ```
   - 現況四島皆 `mode: "island"`、`anchor: "sand-bottom-center"`、`stageSize: { w: 264, h: 260 }`、`anchorUV: [0.5, 0.84]`。
   - `ZoneIsland` 以 `anchorUV` 對齊 `zone.coord`，`UniverseMap` 對 island 島跳過 SVG 沙／草橢圓，避免整島 PNG 和 fallback 底座疊圖。
-  - **副檔名現況**：`zoneArtTilePath()` 已回傳 `.png`；同名 `.svg` 僅保留作 fallback / 歷史資產。
+  - **副檔名現況**：`zoneArtTilePath()` 回傳 `.png`（1x fallback）；`getZoneArtSrcSet()` 組 width-descriptor srcset 接 `@2x/@3x`（SSG 無 Image Optimizer，不用 `next/image`）。同名 `.svg` 僅保留作 fallback / 歷史資產。
+- **漫遊者交付**：`public/adventures/roamers/{id}.png` + 同名 `.webp`（`npm run optimize:roamer-assets`）；前端 `<picture>` WebP 優先、PNG fallback；rear `fetchPriority="low"`。
 - **新島升級規則**：先建立同畫框 PNG + sidecar 數值，再登錄 `ZONE_ART_TILES`；不要回到 landmark/center 的舊契約。
 
 > **R1 接線補註（來自 v1.1 規劃審查，HIGH）：** island 模式渲染須以**錨點在圖內的相對位置 `anchorUV`** 對齊 `zone.coord`，而非「圖底中心」，否則島會上移約 16%。car-park 黃金樣本的 `anchorUV=(0.50, 0.84)` 已記於 sidecar `public/adventures/zones/car-park.tile.json`；R1 時於 `ZoneArtTile` 補 `anchorUV?: [number, number]` 欄位。
@@ -202,7 +203,8 @@ fence, dirt mounds and traffic cones, matte clay, [Base style], transparent back
 ---
 
 ## 11. 命名與版本
-- 島：`zones/{id}.png`（@2x/@3x 交 `next/image`）
+- 島：`zones/{id}.png`（@2x/@3x 經 `getZoneArtSrcSet` + `<img srcSet>`）
+- 漫遊者：`roamers/{id}.png` + `{id}.webp`（rear：`{id}.rear.png` / `.rear.webp`）
 - 可動部位：`zones/{id}.{part}.png`（如 `car-park.wheel.png`，與 base 同畫布同錨點；見 §12.6）
 - 狀態變體：`zones/{id}-{status}.png`
 - 共用件：`overlays/construction.png`、`overlays/fog.png`

@@ -222,6 +222,7 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
               reduced={reduced}
               paused={paused}
               night={daylight === "night"}
+              mapScale={camera.scale}
               devStatusOverride={devStatusOverrides[zone.id]}
             />
           ))}

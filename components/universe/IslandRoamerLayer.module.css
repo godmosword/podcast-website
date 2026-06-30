@@ -45,6 +45,12 @@
   will-change: transform;
 }
 
+.body picture {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
 .sprite {
   position: absolute;
   inset: 0;

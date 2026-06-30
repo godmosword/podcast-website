@@ -5,6 +5,7 @@ import {
   roamerSpriteSrc,
   type Roamer,
 } from "@/data/universe-roamers";
+import RoamerSpritePicture from "./RoamerSpritePicture";
 import styles from "./RoamerVehicle.module.css";
 
 type Props = {
@@ -35,22 +36,15 @@ export default function RoamerVehicle({
           <span className={styles.placeholder} />
         ) : (
           <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={roamerSpriteSrc(roamer, "front", night)}
-              alt=""
+            <RoamerSpritePicture
+              pngSrc={roamerSpriteSrc(roamer, "front", night)}
               className={`${styles.img} ${styles.imgFront}`}
-              draggable={false}
-              decoding="async"
             />
             {hasRear && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={roamerSpriteSrc(roamer, "rear", night)}
-                alt=""
+              <RoamerSpritePicture
+                pngSrc={roamerSpriteSrc(roamer, "rear", night)}
                 className={`${styles.img} ${styles.imgRear}`}
-                draggable={false}
-                decoding="async"
+                fetchPriority="low"
               />
             )}
           </>

@@ -42,6 +42,12 @@
   pointer-events: none;
 }
 
+.body picture {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
 .img {
   position: absolute;
   inset: 0;

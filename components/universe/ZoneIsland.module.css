@@ -17,6 +17,39 @@
   height: 100%;
 }
 
+.tileArt {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.tilePlaceholder {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.tileImgPending {
+  opacity: 0;
+}
+
+.tileImgLoaded {
+  opacity: 1;
+  transition: opacity 280ms ease;
+}
+
+.tileArt .tileImg {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tileImgLoaded {
+    transition: none;
+  }
+}
+
 .islandTile[data-transition="building-to-open"] .tileStack {
   animation: islandRise 700ms cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -98,10 +131,9 @@
   border-radius: 18px;
 }
 
-/* 名稱木牌 + 狀態 pill：定位在圖內沙岸底中心（錨點）下方 */
+/* 名稱木牌 + 狀態 pill：定位在圖內沙岸底中心（錨點）下方；scale 由 inline 反縮放 */
 .tileLabel {
   position: absolute;
-  transform: translate(-50%, 6px);
   display: flex;
   flex-direction: column;
   align-items: center;

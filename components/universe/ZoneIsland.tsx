@@ -3,12 +3,13 @@
 import { ZONE_STATUS_META, type ZoneDef, type ZoneStatus } from "@/data/universe-zones";
 import { mapDepthZ } from "@/lib/universe-depth";
 import type { ResolvedZone } from "@/lib/universe-map";
-import { getZoneArtTile } from "@/lib/universe/zone-art-tile";
+import { getZoneArtTile, getZoneArtSrcSet } from "@/lib/universe/zone-art-tile";
 import IslandRoamerLayer from "./IslandRoamerLayer";
 import ZoneLandmark from "./ZoneLandmark";
 import ZoneMotionLayer from "./ZoneMotionLayer";
 import StatusOverlay from "./StatusOverlay";
 import { useZoneTransition } from "./useZoneTransition";
+import ZoneIslandTileArt from "./ZoneIslandTileArt";
 import styles from "./ZoneIsland.module.css";
 
 type ZoneIslandProps = {
@@ -17,6 +18,8 @@ type ZoneIslandProps = {
   reduced?: boolean;
   paused?: boolean;
   night?: boolean;
+  /** 地圖鏡頭縮放（標籤反縮放用） */
+  mapScale?: number;
   /** dev-only：?devStatus=car-park:building */
   devStatusOverride?: ZoneStatus;
 };
@@ -27,6 +30,7 @@ export default function ZoneIsland({
   reduced = false,
   paused = false,
   night = false,
+  mapScale = 1,
   devStatusOverride,
 }: ZoneIslandProps) {
   const effectiveStatus = devStatusOverride ?? zone.status;
@@ -36,6 +40,7 @@ export default function ZoneIsland({
 
   if (tile.mode === "island") {
     const [ax, ay] = tile.anchorUV;
+    const artSrc = getZoneArtSrcSet(zone.id);
     return (
       <>
         <button
@@ -56,15 +61,11 @@ export default function ZoneIsland({
           onAnimationEnd={onTransitionEnd}
         >
           <div className={styles.tileStack}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={tile.src}
-              alt=""
-              aria-hidden="true"
-              className={styles.tileImg}
-              style={{ transformOrigin: `${ax * 100}% ${ay * 100}%` }}
-              draggable={false}
-              decoding="async"
+            <ZoneIslandTileArt
+              zoneId={zone.id}
+              artSrc={artSrc}
+              anchorUV={[ax, ay]}
+              reduced={reduced}
             />
             <IslandRoamerLayer
               zoneId={zone.id}
@@ -89,6 +90,8 @@ export default function ZoneIsland({
             left: `${zone.px.x}px`,
             top: `${zone.px.y}px`,
             zIndex: mapDepthZ(zone.depthY, "label"),
+            transform: `translate(-50%, 6px) scale(${1 / mapScale})`,
+            transformOrigin: "50% 0",
           }}
           aria-hidden="true"
         >

@@ -367,7 +367,7 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 - [x] `lib/universe/zone-art-tile.test.ts` — 契約測試（src 對齊路徑、現況 landmark/center、island 必附 stageSize）
 - [x] verify：`npm run test` + `npm run build`；`git diff` 確認 landing/page 未動
 
-**待後續（未做）：** 生成 car-park hero 整島 PNG（黃金樣本）→ 切該島 `mode: "island"` → `ZoneIsland`/`UniverseMap` 對 island 模式調整錨點（沙岸底中心）、stageSize 與關閉 SVG 沙草、改 `next/image` @2x/@3x。色票若要回頭對齊 SVG fallback 為獨立小任務（見 Art Bible §4 D3）。
+**待後續（未做）：** ~~改 `next/image` @2x/@3x~~（已完成：`getZoneArtSrcSet`）。色票若要回頭對齊 SVG fallback 為獨立小任務（見 Art Bible §4 D3）。
 
 **changelog：** Art Bible v1 + tile 詮釋資料契約（待補 commit hash）。
 
@@ -632,6 +632,12 @@ T+2d    社群貼文（B 戰場）
 ---
 
 ## Completed
+
+### 樂園地圖 P1 載入體驗（佔位 + 標籤 + preload）
+`ZoneIslandTileArt` 沙草佔位；`tileLabel` 反縮放；`/adventures` preload car-park。
+
+### 樂園地圖 P0 資產交付（srcset + roamer WebP）
+島 `@2x/@3x` srcset；`optimize:roamer-assets`；`<picture>` WebP。
 
 ### R-anim 1.5c：漫遊車 map 層級 + 接地影
 `MapRoamerLayer`／`RoamerVehicle` 獨立影；y-sort；小紅／多多改走 `map-sea-orbit`（car-park 島不再疊漫遊車）。

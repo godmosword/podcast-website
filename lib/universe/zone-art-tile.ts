@@ -35,8 +35,7 @@ export type ZoneArtTile = LandmarkTile | IslandTile;
  * 各島 art tile 路徑（對應 `ZoneDef.artTile`）。
  *
  * R1（v2 黃金樣本落地）：四島皆已產出整島 diorama PNG（黏土風），故回傳 `.png`，
- * 交由前端 `next/image`-風格 `<img>` 依 stageSize×鏡頭縮放渲染。@2x/@3x 同名後綴檔
- * 已備於 `/public/adventures/zones/`。SVG 小地標保留為歷史 fallback。
+ * 交由前端 `<img srcSet>` 依 DPR 選 @2x/@3x（見 `getZoneArtSrcSet`）。SVG 小地標保留為歷史 fallback。
  */
 export function zoneArtTilePath(id: ZoneId): string {
   return `/adventures/zones/${id}.png`;
@@ -62,3 +61,5 @@ export const ZONE_ART_TILES: Record<ZoneId, ZoneArtTile> = {
 export function getZoneArtTile(id: ZoneId): ZoneArtTile {
   return ZONE_ART_TILES[id];
 }
+
+export { getZoneArtSrcSet, ZONE_ART_SRC_MAX_SCALE, ZONE_ART_TILE_WIDTH } from "@/lib/universe/zone-art-src";

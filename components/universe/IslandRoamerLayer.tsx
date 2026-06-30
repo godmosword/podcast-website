@@ -12,8 +12,9 @@ import {
   roamerSpriteSrc,
   shouldRenderRoamer,
 } from "@/data/universe-roamers";
-import { getZoneArtTile } from "@/lib/universe/zone-art-tile";
+import { getZoneArtSrcSet } from "@/lib/universe/zone-art-tile";
 import { useRoamerSim } from "./useRoamerSim";
+import RoamerSpritePicture from "./RoamerSpritePicture";
 import styles from "./IslandRoamerLayer.module.css";
 
 type Props = {
@@ -59,7 +60,7 @@ export default function IslandRoamerLayer({
   );
 
   const occluder = ZONE_OCCLUDERS[zoneId];
-  const tile = getZoneArtTile(zoneId);
+  const artSrc = getZoneArtSrcSet(zoneId);
 
   useRoamerSim({
     roamers: visible,
@@ -103,22 +104,15 @@ export default function IslandRoamerLayer({
                 <div className={styles.placeholder} />
               ) : (
                 <>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={roamerSpriteSrc(roamer, "front", night)}
-                    alt=""
+                  <RoamerSpritePicture
+                    pngSrc={roamerSpriteSrc(roamer, "front", night)}
                     className={`${styles.sprite} ${styles.spriteFront}`}
-                    draggable={false}
-                    decoding="async"
                   />
                   {hasRear && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={roamerSpriteSrc(roamer, "rear", night)}
-                      alt=""
+                    <RoamerSpritePicture
+                      pngSrc={roamerSpriteSrc(roamer, "rear", night)}
                       className={`${styles.sprite} ${styles.spriteRear}`}
-                      draggable={false}
-                      decoding="async"
+                      fetchPriority="low"
                     />
                   )}
                 </>
@@ -131,7 +125,9 @@ export default function IslandRoamerLayer({
       {occluder && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={tile.src}
+          src={artSrc.src}
+          srcSet={artSrc.srcSet}
+          sizes={artSrc.sizes}
           alt=""
           aria-hidden="true"
           className={styles.occluder}

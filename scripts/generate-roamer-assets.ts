@@ -27,6 +27,7 @@ import {
 } from "./lib/illustrate-core";
 import { ROOT } from "./lib/transcribe-core";
 import { removeBorderBackground } from "./lib/roamer-alpha";
+import { pngBufferToWebp, pngPathToWebpPath } from "./lib/roamer-webp";
 
 const STAGING = join(ROOT, "public/.roamer-staging");
 const OUT_DIR = join(ROOT, "public/adventures/roamers");
@@ -479,6 +480,12 @@ async function postProcessRoamer(buf: Buffer): Promise<Buffer> {
   return out;
 }
 
+async function writePngWithWebp(pngPath: string, buf: Buffer): Promise<void> {
+  writeFileSync(pngPath, buf);
+  const webp = await pngBufferToWebp(buf);
+  writeFileSync(pngPathToWebpPath(pngPath), webp);
+}
+
 async function callImageEdit(refPath: string, prompt: string): Promise<Buffer> {
   requireApiKey();
   const { default: OpenAI, toFile } = await import("openai");
@@ -614,7 +621,7 @@ async function runGenerate(onlyIds: string[] | null): Promise<void> {
       const out = join(STAGING, viewFileName(spec.id, view));
       console.log(`生圖 ${spec.id}（${spec.characterName}）${view} → ${out}`);
       const buf = await generateOne(spec, view);
-      writeFileSync(out, buf);
+      await writePngWithWebp(out, buf);
     }
     await verifyAssets(STAGING);
   }
@@ -663,6 +670,12 @@ function runApprove(): void {
       if (!existsSync(src)) continue;
       copyFileSync(src, join(OUT_DIR, name));
       console.log(`approve ${join(OUT_DIR, name).replace(ROOT + "/", "")}`);
+      const webpSrc = pngPathToWebpPath(src);
+      if (existsSync(webpSrc)) {
+        const webpName = pngPathToWebpPath(name);
+        copyFileSync(webpSrc, join(OUT_DIR, webpName));
+        console.log(`approve ${join(OUT_DIR, webpName).replace(ROOT + "/", "")}`);
+      }
     }
   }
 }
