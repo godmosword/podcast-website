@@ -24,9 +24,11 @@ describe("universe-roamers", () => {
     }
   });
 
-  it("現役 enabled roamers 走 map 路線", () => {
+  it("小紅／多多 enabled 走 map 路線", () => {
     const routeById = new Map(ROAMER_ROUTES.map((r) => [r.id, r]));
-    for (const roamer of MAP_ROAMERS.filter((r) => r.enabled)) {
+    for (const roamer of MAP_ROAMERS.filter(
+      (r) => r.enabled && (r.id === "roam-xiaohong" || r.id === "roam-duoduo"),
+    )) {
       const route = routeById.get(roamer.routeId);
       expect(route, roamer.routeId).toBeDefined();
       expect(route!.kind).toBe("map");
@@ -99,10 +101,17 @@ describe("roamer sprites（4 向）", () => {
     expect(roamerSpriteSrc(r, "front", false)).toBe("/a/f.png");
   });
 
-  it("MAP_ROAMERS 現役資產 rear 尚未到位（回退 front，不渲染破圖）", () => {
-    for (const roamer of MAP_ROAMERS) {
+  it("小紅／多多 rear 尚未到位（回退 front）；恐龍島車已有 rear", () => {
+    const mapCars = MAP_ROAMERS.filter(
+      (r) => r.id === "roam-xiaohong" || r.id === "roam-duoduo",
+    );
+    for (const roamer of mapCars) {
       expect(roamerHasRear(roamer)).toBe(false);
     }
+    expect(roamerHasRear(MAP_ROAMERS.find((r) => r.id === "roam-aku")!)).toBe(true);
+    expect(roamerHasRear(MAP_ROAMERS.find((r) => r.id === "roam-monster")!)).toBe(
+      true,
+    );
   });
 });
 

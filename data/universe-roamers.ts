@@ -141,7 +141,7 @@ export const MAP_ROAMERS: Roamer[] = [
     enabled: true,
     startOffset: 0.5,
   },
-  // 恐龍島（building）：阿酷鑽地車 + 怪獸卡車。enabled=false，待 generate:roamer-assets 產圖後開。
+  // 恐龍島（building）：阿酷鑽地車 + 怪獸卡車
   {
     id: "roam-aku",
     characterId: "a-ku",
@@ -149,6 +149,11 @@ export const MAP_ROAMERS: Roamer[] = [
     routeId: "dino-walkway",
     speed: 26,
     src: "/adventures/roamers/a-ku.png",
+    sprites: {
+      front: "/adventures/roamers/a-ku.png",
+      rear: "/adventures/roamers/a-ku.rear.png",
+    },
+    enabled: true,
     startOffset: 0,
   },
   {
@@ -158,6 +163,11 @@ export const MAP_ROAMERS: Roamer[] = [
     routeId: "dino-walkway",
     speed: 22,
     src: "/adventures/roamers/monster-truck.png",
+    sprites: {
+      front: "/adventures/roamers/monster-truck.png",
+      rear: "/adventures/roamers/monster-truck.rear.png",
+    },
+    enabled: true,
     startOffset: 0.5,
   },
   // 英雄救援隊（coming）：亮亮警車 + 消防車點點。enabled=false，待產圖後開。

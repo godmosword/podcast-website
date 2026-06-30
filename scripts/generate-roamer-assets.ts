@@ -72,10 +72,11 @@ const POSE_REAR =
   "visible. Upright and level on flat ground, viewed from a slight high angle about 30 degrees to " +
   "match a tabletop diorama. ";
 const NEG_BASE =
-  "tilted, leaning, motion blur, perspective distortion, flat orthographic side profile, top-down, " +
-  "glossy, plastic shine, hard directional shadow, long cast shadow, photorealistic, extra text, words, " +
-  "watermark, neon, oversaturated, sharp hard edges, branded character, copyrighted character, " +
-  "multiple vehicles, cluttered";
+  "transparency checkerboard, checkered background, fake transparency, black border frame, " +
+  "vignette, tilted, leaning, motion blur, perspective distortion, flat orthographic side profile, " +
+  "top-down, glossy, plastic shine, hard directional shadow, long cast shadow, photorealistic, " +
+  "extra text, words, watermark, neon, oversaturated, sharp hard edges, branded character, " +
+  "copyrighted character, multiple vehicles, cluttered";
 
 /** 組一張 spec：identityFront/Rear 是車身描述，姿勢＋風格＋負面詞由共用常數補齊。 */
 function clayRoamerSpec(
@@ -190,26 +191,93 @@ const ROAMER_SPECS: RoamerSpec[] = [
     },
   },
   // ── 恐龍島（火山） ──
-  clayRoamerSpec(
-    "a-ku",
-    "阿酷鑽地車",
-    "A cute super-deformed chibi clay toy drilling car, short chunky stubby proportions, a rounded " +
-      "chubby body, small chunky tread wheels with all four wheels clearly visible. It is an earthy " +
-      "orange and grey drilling vehicle with a big spiral cone drill bit at the front and a friendly " +
-      "face with two big round eyes and a cheerful smile.",
-    "A cute super-deformed chibi clay toy drilling car, earthy orange and grey, with a big spiral cone " +
-      "drill bit at the front and small chunky tread wheels.",
-    "person, human, robot arms, legs, limbs",
-  ),
-  clayRoamerSpec(
-    "monster-truck",
-    "怪獸卡車",
-    "A cute super-deformed chibi clay toy monster truck, short chunky stubby proportions, a rounded " +
-      "chubby body, oversized chunky knobby tires and tall suspension, a bold blue and green body, and " +
-      "a friendly face with two big round eyes and a cheerful smile.",
-    "A cute super-deformed chibi clay toy monster truck with oversized chunky knobby rear tires, tall " +
-      "suspension and a bold blue and green body.",
-  ),
+  {
+    id: "a-ku",
+    characterName: "阿酷鑽地車",
+    front: {
+      positive:
+        "A cute super-deformed chibi claymation drill excavator named Aku, short chunky stubby " +
+        "proportions, a bright yellow body on black rubber crawler tracks (no wheels), a hydraulic " +
+        "arm at the front ending in a large dark spiral drill bit instead of a bucket. A stern cool " +
+        "expression with thick black eyebrows and focused round eyes, rarely smiling. A small pink " +
+        "frosted donut hangs from a little side hook. Shown in a three-quarter side view facing " +
+        "screen-left, upright and level, with the crawler tracks flat on the ground and the track " +
+        "contact line at the very bottom edge, viewed from a slight high angle about 30 degrees. " +
+        "Handmade matte polymer clay, soft rounded pressed edges, subtle thumbprint texture, no " +
+        "gloss. Soft even diffuse lighting, low contrast. On a plain solid flat magenta background, " +
+        "evenly lit, no pattern. Stop-motion / claymation aesthetic, single object, centered.",
+      negative:
+        "bucket, smiling broadly, wheels instead of tracks, person, human, robot arms, legs, limbs, " +
+        "transparency checkerboard, checkered background, fake transparency, black border frame, " +
+        "vignette, tilted, leaning, motion blur, perspective distortion, top-down, glossy, plastic " +
+        "shine, hard directional shadow, long cast shadow, photorealistic, text, watermark, neon, " +
+        "oversaturated, sharp hard edges, multiple vehicles, cluttered, branded character, " +
+        "copyrighted character",
+    },
+    rear: {
+      positive:
+        "A cute super-deformed chibi claymation drill excavator named Aku, short chunky stubby " +
+        "proportions, bright yellow body on black rubber crawler tracks (no wheels), hydraulic arm " +
+        "and large dark spiral drill bit visible from behind. Shown from a three-quarter REAR view " +
+        "from behind, driving away toward screen-left, clearly showing the back of the excavator " +
+        "body, rear crawler tracks and engine housing; the stern face is turned away and not visible. " +
+        "A small pink frosted donut still hangs from a little side hook. Upright and level with " +
+        "crawler tracks flat on the ground and track contact at the very bottom edge, slight high " +
+        "angle about 30 degrees. Handmade matte polymer clay, soft rounded pressed edges, subtle " +
+        "thumbprint texture, no gloss. Soft even diffuse lighting, low contrast. On a plain solid " +
+        "flat magenta background, evenly lit, no pattern. Stop-motion / claymation aesthetic, single " +
+        "object, centered.",
+      negative:
+        "front face visible, eyes facing camera, smiling broadly, bucket, wheels instead of tracks, " +
+        "person, human, robot arms, legs, limbs, transparency checkerboard, checkered background, " +
+        "fake transparency, black border frame, vignette, tilted, leaning, motion blur, perspective " +
+        "distortion, top-down, glossy, plastic shine, hard directional shadow, long cast shadow, " +
+        "photorealistic, text, watermark, neon, oversaturated, sharp hard edges, multiple vehicles, " +
+        "cluttered, branded character, copyrighted character",
+    },
+  },
+  {
+    id: "monster-truck",
+    characterName: "怪獸卡車",
+    front: {
+      positive:
+        "A cute super-deformed chibi claymation monster truck pickup named Mengmeng, short chunky " +
+        "stubby proportions, a bright yellow body with huge chunky black off-road tyres on yellow " +
+        "rims, yellow coil-spring suspension, a black roof bar carrying four round yellow spotlights, " +
+        "a light-blue windshield with two big friendly round eyes and a small smile on the bumper, a " +
+        "grey textured grille, and a black roll bar in the truck bed. Shown in a three-quarter side " +
+        "view facing screen-left, upright and level, with the big tyres on the ground and the tyre " +
+        "contact line at the very bottom edge, viewed from a slight high angle about 30 degrees. " +
+        "Handmade matte polymer clay, soft rounded pressed edges, subtle thumbprint texture, no " +
+        "gloss. Soft even diffuse lighting, low contrast. On a plain solid flat magenta background, " +
+        "evenly lit, no pattern. Stop-motion / claymation aesthetic, single object, centered.",
+      negative:
+        "transparency checkerboard, checkered background, fake transparency, black border frame, " +
+        "vignette, tilted, leaning, motion blur, perspective distortion, top-down, glossy, plastic " +
+        "shine, hard directional shadow, long cast shadow, photorealistic, text, watermark, neon, " +
+        "oversaturated, sharp hard edges, multiple vehicles, cluttered, branded character, " +
+        "copyrighted character",
+    },
+    rear: {
+      positive:
+        "A cute super-deformed chibi claymation monster truck pickup named Mengmeng, short chunky " +
+        "stubby proportions, bright yellow body with huge chunky black off-road rear tyres on yellow " +
+        "rims, yellow coil-spring suspension, black roof bar with four round yellow spotlights, and a " +
+        "black roll bar in the truck bed. Shown from a three-quarter REAR view from behind, driving " +
+        "away toward screen-left, clearly showing the back of the truck, rear tyres and tailgate; the " +
+        "friendly windshield face is turned away and not visible. Upright and level with tyres on the " +
+        "ground and tyre contact at the very bottom edge, slight high angle about 30 degrees. Handmade " +
+        "matte polymer clay, soft rounded pressed edges, subtle thumbprint texture, no gloss. Soft even " +
+        "diffuse lighting, low contrast. On a plain solid flat magenta background, evenly lit, no " +
+        "pattern. Stop-motion / claymation aesthetic, single object, centered.",
+      negative:
+        "front face visible, eyes facing camera, smile facing camera, transparency checkerboard, " +
+        "checkered background, fake transparency, black border frame, vignette, tilted, leaning, " +
+        "motion blur, perspective distortion, top-down, glossy, plastic shine, hard directional shadow, " +
+        "long cast shadow, photorealistic, text, watermark, neon, oversaturated, sharp hard edges, " +
+        "multiple vehicles, cluttered, branded character, copyrighted character",
+    },
+  },
   // ── 英雄救援隊（消防局） ──
   clayRoamerSpec(
     "liang-liang",
