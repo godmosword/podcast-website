@@ -2,53 +2,72 @@
   position: absolute;
   top: 0;
   left: 0;
+  transform: translate(-50%, -100%);
   pointer-events: none;
   will-change: left, top, z-index;
 }
 
 .mapSize {
-  /* 高度相對 stage（720px）；寬度由 img 比例決定 */
-  height: 5.6%;
+  width: 5.6%;
+  aspect-ratio: 1.25;
 }
 
 .islandSize {
-  height: 14%;
+  width: 14%;
+  aspect-ratio: 1.25;
 }
 
 .shadow {
   position: absolute;
   left: 50%;
-  bottom: 0;
-  width: 70%;
-  height: 22%;
-  transform: translateX(-50%);
+  bottom: 2%;
+  width: 64%;
+  height: 16%;
+  transform: translateX(-50%) scale(1);
+  transform-origin: center;
   border-radius: 50%;
-  background: rgba(60, 50, 40, 0.28);
-  filter: blur(2px);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(72, 58, 44, 0.42) 0%,
+    rgba(72, 58, 44, 0.28) 45%,
+    rgba(72, 58, 44, 0) 72%
+  );
   pointer-events: none;
 }
 
 .body {
   position: absolute;
-  left: 50%;
-  bottom: 0;
-  height: 100%;
-  width: auto;
-  transform-origin: bottom center;
+  inset: 0;
+  transform-origin: 50% 92%;
   pointer-events: none;
 }
 
 .img {
+  position: absolute;
+  inset: 0;
   display: block;
+  width: 100%;
   height: 100%;
-  width: auto;
+  object-fit: contain;
   user-select: none;
+  filter: drop-shadow(0 1px 1px rgba(107, 90, 72, 0.22));
+}
+
+.imgRear {
+  opacity: 0;
+}
+
+.body[data-dir="rear"] .imgFront {
+  opacity: 0;
+}
+
+.body[data-dir="rear"] .imgRear {
+  opacity: 1;
 }
 
 .placeholder {
-  display: block;
-  height: 100%;
-  width: 2.5em;
+  position: absolute;
+  inset: 12% 6%;
   border-radius: 6px;
   background: rgba(239, 71, 111, 0.55);
 }

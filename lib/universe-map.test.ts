@@ -29,6 +29,24 @@ describe("resolveUniverseMap", () => {
     }
   });
 
+  it("每座島解析出 tileBox 與 depthY，供 2.5D 舞台排序", () => {
+    const carPark = map.zones.find((z) => z.id === "car-park")!;
+    expect(carPark.tileBox).toEqual({ left: 368, top: 181.6, w: 264, h: 260 });
+    expect(carPark.depthY).toBe(carPark.px.y);
+  });
+
+  it("bridge 連到島緣 landing points，不再穿進島中心", () => {
+    for (const bridge of map.bridges) {
+      const from = map.zones.find((z) => z.id === bridge.from)!;
+      const to = map.zones.find((z) => z.id === bridge.to)!;
+      expect(bridge.fromPort).not.toEqual(from.px);
+      expect(bridge.toPort).not.toEqual(to.px);
+      expect(bridge.depthY).toBe(Math.max(bridge.fromPort.y, bridge.toPort.y));
+      expect(bridge.d).toContain(`${bridge.fromPort.x}`);
+      expect(bridge.d).toContain(`${bridge.toPort.x}`);
+    }
+  });
+
   it("dashed 旗標符合 coming/planned", () => {
     const dino = map.bridges.find((b) => b.to === "dino")!;
     const rescue = map.bridges.find((b) => b.to === "rescue")!;

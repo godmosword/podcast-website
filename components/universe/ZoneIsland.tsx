@@ -1,6 +1,7 @@
 "use client";
 
 import { ZONE_STATUS_META, type ZoneDef, type ZoneStatus } from "@/data/universe-zones";
+import { mapDepthZ } from "@/lib/universe-depth";
 import type { ResolvedZone } from "@/lib/universe-map";
 import { getZoneArtTile } from "@/lib/universe/zone-art-tile";
 import IslandRoamerLayer from "./IslandRoamerLayer";
@@ -36,52 +37,60 @@ export default function ZoneIsland({
   if (tile.mode === "island") {
     const [ax, ay] = tile.anchorUV;
     return (
-      <button
-        type="button"
-        className={styles.islandTile}
-        style={{
-          left: `${zone.px.x}px`,
-          top: `${zone.px.y}px`,
-          width: `${tile.stageSize.w}px`,
-          height: `${tile.stageSize.h}px`,
-          transform: `translate(${-ax * 100}%, ${-ay * 100}%)`,
-        }}
-        data-status={effectiveStatus}
-        data-transition={transition ?? undefined}
-        aria-label={`${zone.name}，${meta.label}`}
-        onClick={() => onActivate(zone)}
-        onAnimationEnd={onTransitionEnd}
-      >
-        <div className={styles.tileStack}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={tile.src}
-            alt=""
-            aria-hidden="true"
-            className={styles.tileImg}
-            style={{ transformOrigin: `${ax * 100}% ${ay * 100}%` }}
-            draggable={false}
-            decoding="async"
-          />
-          <IslandRoamerLayer
-            zoneId={zone.id}
-            tileW={tile.stageSize.w}
-            tileH={tile.stageSize.h}
-            reduced={reduced}
-            paused={paused}
-            night={night}
-          />
-          <StatusOverlay status={effectiveStatus} paused={paused} transition={transition} />
-          <ZoneMotionLayer
-            zoneId={zone.id}
-            reduced={reduced}
-            paused={paused}
-            night={night}
-          />
-        </div>
+      <>
+        <button
+          type="button"
+          className={styles.islandTile}
+          style={{
+            left: `${zone.px.x}px`,
+            top: `${zone.px.y}px`,
+            width: `${tile.stageSize.w}px`,
+            height: `${tile.stageSize.h}px`,
+            transform: `translate(${-ax * 100}%, ${-ay * 100}%)`,
+            zIndex: mapDepthZ(zone.depthY, "island"),
+          }}
+          data-status={effectiveStatus}
+          data-transition={transition ?? undefined}
+          aria-label={`${zone.name}，${meta.label}`}
+          onClick={() => onActivate(zone)}
+          onAnimationEnd={onTransitionEnd}
+        >
+          <div className={styles.tileStack}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={tile.src}
+              alt=""
+              aria-hidden="true"
+              className={styles.tileImg}
+              style={{ transformOrigin: `${ax * 100}% ${ay * 100}%` }}
+              draggable={false}
+              decoding="async"
+            />
+            <IslandRoamerLayer
+              zoneId={zone.id}
+              tileW={tile.stageSize.w}
+              tileH={tile.stageSize.h}
+              reduced={reduced}
+              paused={paused}
+              night={night}
+            />
+            <StatusOverlay status={effectiveStatus} paused={paused} transition={transition} />
+            <ZoneMotionLayer
+              zoneId={zone.id}
+              reduced={reduced}
+              paused={paused}
+              night={night}
+            />
+          </div>
+        </button>
         <span
           className={styles.tileLabel}
-          style={{ left: `${ax * 100}%`, top: `${ay * 100}%` }}
+          style={{
+            left: `${zone.px.x}px`,
+            top: `${zone.px.y}px`,
+            zIndex: mapDepthZ(zone.depthY, "label"),
+          }}
+          aria-hidden="true"
         >
           <span className={styles.name}>{zone.name}</span>
           <span
@@ -91,7 +100,7 @@ export default function ZoneIsland({
             {meta.label}
           </span>
         </span>
-      </button>
+      </>
     );
   }
 
@@ -99,7 +108,11 @@ export default function ZoneIsland({
     <button
       type="button"
       className={styles.island}
-      style={{ left: `${zone.px.x}px`, top: `${zone.px.y}px` }}
+      style={{
+        left: `${zone.px.x}px`,
+        top: `${zone.px.y}px`,
+        zIndex: mapDepthZ(zone.depthY, "island"),
+      }}
       data-status={effectiveStatus}
       aria-label={`${zone.name}，${meta.label}`}
       onClick={() => onActivate(zone)}

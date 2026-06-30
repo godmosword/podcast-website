@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { pickDir, pickFlip } from "./useRoamerSim";
+import type { Roamer } from "@/data/universe-roamers";
+import { MAP_STAGE } from "@/data/universe-zones";
+import { computeFrame, pickDir, pickFlip, type RoamerSim } from "./useRoamerSim";
 
 describe("pickFlip（左右朝向遲滯）", () => {
   it("明顯左移用基準圖（face-left，flip=1）", () => {
@@ -28,5 +30,41 @@ describe("pickDir（前後朝向遲滯）", () => {
   it("垂直分量近零時維持原朝向", () => {
     expect(pickDir(0.3, "rear")).toBe("rear");
     expect(pickDir(-0.3, "front")).toBe("front");
+  });
+});
+
+describe("computeFrame（map 層 2.5D frame）", () => {
+  it("computes direction, shadow and depth scale in stage coordinates", () => {
+    const roamer: Roamer = {
+      id: "map-roamer",
+      characterId: "test",
+      routeId: "map-test",
+      speed: 10,
+      src: "/front.png",
+    };
+    const sim: RoamerSim = {
+      roamer,
+      distance: 200,
+      direction: 1,
+      route: {
+        length: 400,
+        pingpong: false,
+        el: {
+          getPointAtLength: (d: number) => ({ x: 500, y: d }),
+        } as SVGPathElement,
+      },
+      phase: 0,
+      flip: 1,
+      dir: "rear",
+      angle: 0,
+      bankDeg: 0,
+    };
+
+    const frame = computeFrame(sim, MAP_STAGE.width, MAP_STAGE.height, 16, 1000);
+
+    expect(frame.dir).toBe("front");
+    expect(frame.depthScale).toBeGreaterThan(0.9);
+    expect(frame.shadowScale).toBeGreaterThan(0);
+    expect(frame.z).toBe(200);
   });
 });

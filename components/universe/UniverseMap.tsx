@@ -6,9 +6,11 @@ import { MAP_STAGE, ZONE_TERRAIN, type ZoneDef, type ZoneId, type ZoneStatus } f
 import { resolveUniverseMap } from "@/lib/universe-map";
 import { getZoneArtTile } from "@/lib/universe/zone-art-tile";
 import { parseDevStatusOverrides } from "@/lib/universe/dev-map-flags";
+import { mapDepthZ } from "@/lib/universe-depth";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useTheme } from "@/components/ThemeProvider";
 import { MapDecorBirds, MapDecorNearWater } from "./MapDecorLayer";
+import MapBridgeLayer from "./MapBridgeLayer";
 import MapRoamerLayer from "./MapRoamerLayer";
 import MapControls from "./MapControls";
 import UniverseMapParallax from "./UniverseMapParallax";
@@ -130,6 +132,7 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
             viewBox={viewBox}
             width={MAP_STAGE.width}
             height={MAP_STAGE.height}
+            style={{ zIndex: mapDepthZ(0, "sea") }}
             aria-hidden="true"
             focusable="false"
           >
@@ -199,23 +202,11 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
               );
             })}
 
-            {bridges.map((bridge) => (
-              <path
-                key={bridge.id}
-                d={bridge.d}
-                fill="none"
-                stroke="#c8a979"
-                strokeWidth="12"
-                strokeLinecap="round"
-                strokeDasharray={bridge.dashed ? "4 22" : undefined}
-                className={bridge.dashed ? styles.dashedBridge : undefined}
-                opacity={bridge.dashed ? 0.7 : 0.95}
-              />
-            ))}
-
             <MapDecorNearWater reduced={reduced} paused={paused} daylight={daylight} />
             <MapDecorBirds reduced={reduced} paused={paused} daylight={daylight} />
           </svg>
+
+          <MapBridgeLayer bridges={bridges} viewBox={viewBox} paused={paused} />
 
           <MapRoamerLayer
             reduced={reduced}

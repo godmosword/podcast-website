@@ -5,7 +5,6 @@
   height: 720px;
   pointer-events: none;
   overflow: visible;
-  z-index: 3;
 }
 
 .devPath {

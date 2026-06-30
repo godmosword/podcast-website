@@ -1,11 +1,12 @@
-# 車車宇宙 · 樂園地圖 美術聖經（Art Bible）v3
+# 車車宇宙 · 樂園地圖 美術聖經（Art Bible）v4
 
 > 唯一目的：**讓各自獨立產出的「島」（不論誰畫、AI 生、還是 Blender 算）看起來像同一個世界。**
 > 剪貼感幾乎都來自三件事不一致：**相機角度、光線、材質光澤**。把這份數值定死，再開始量產資產。
 >
 > 對接對象：`data/universe-zones.ts`（`MAP_STAGE` 1000×720、`ZoneId`、`ZoneStatus`、`ZONE_TERRAIN`）、`components/universe/ZoneIsland.tsx`、`components/universe/ZoneLandmark.tsx`、`lib/universe/zone-art-tile.ts`。
 >
-> 版本：**v3（2026-06-27）**。
+> 版本：**v4（2026-06-30）**。
+> **v3→v4：同步程式現況「四島皆為 island PNG」；新增 §13 共享 2.5D 深度舞台規格（`mapDepthZ`、bridge landing ports、map roamer 與 island 共用 body/shadow frame）。**
 > **v2→v3：新增 §12 動畫綁定規格（motionParts／sprite／日夜態），讓靜態黏土資產可動而不需重畫整張。** 相機／光／材質沿用 v2。
 > **v1→v2：鎖定 car-park 黃金樣本為全宇宙標準。** 相機由「正交 50°」改為繼承黃金樣本的「3/4 高視角＋輕透視」；燈光由「左上硬主光＋右下長投影」改為「柔和均勻光＋短柔接地陰影」。其餘材質／品牌色／狀態變體／程式契約沿用 v1。
 
@@ -92,12 +93,12 @@
 ## 5. 比例與版位（接 R0 座標系）— v2 微調
 - 座標空間＝ `MAP_STAGE` **1000 × 720**（解析度無關）。
 - **人物比例尺＝小紅賽車**（黃金樣本內的那台紅車）：所有島的設施都以「相對於小紅車」的大小來畫，跨島一致。
-- **car-park 黃金樣本是橫幅（約 3:2）**，非正方。標準島沙岸外輪廓亦偏橫幅；地標（摩天輪）高度約佔畫面上半。
+- **car-park 黃金樣本實測近正方（trim 約 228×253，比例 ~0.90）**，非早期估算的 3:2 橫幅。四島統一使用 `stageSize 264×260` 的同畫框 PNG。
 - **`stageSize` 量法：** 對 PNG **去背 trim 後**量外框寬高比，換算成 stage 單位填入 `IslandTile.stageSize`（car-park 約 `{ w: 300, h: 200 }`，以實際 trim 為準）。
 - **錨點＝沙岸底部中心**（島與海接觸的最前緣中點）。此錨點對應 `zone.coord`；陰影含在 padding 內、不可推移錨點。
 - **輸出**：透明 PNG（RGBA）。主檔建議長邊 ≥ 1500px（足夠 @最大縮放×3 DPR），長寬比＝trim 後比例避免變形；交 `next/image` 產 @2x/@3x。
 
-> **與現況關係（D2）：** 目前 `ZoneLandmark` 把 `artTile` 當**小地標 icon**（~96px、錨點＝島中心）疊在 `UniverseMap` 的 SVG 沙／草橢圓上。本表描述的是**整島 diorama**（沙＋草＋地標一張、錨點＝沙岸底中心）。切換點由 `lib/universe/zone-art-tile.ts` 的 `mode`（`landmark`｜`island`）決定，見第 10 節。**整島換皮不是純換檔，需同步調整渲染與錨點。**
+> **與現況關係（v4）：** 四島皆已切到 **整島 diorama PNG**（沙＋草＋地標一張、錨點＝沙岸底中心）。`landmark` 模式僅保留作歷史 fallback；新島預設走 `island` tile 契約。
 
 ---
 
@@ -191,10 +192,10 @@ fence, dirt mounds and traffic cones, matte clay, [Base style], transparent back
   type ZoneTileAnchor = "center" | "sand-bottom-center";
   // landmark：以島中心對齊 coord；island：以沙岸底中心對齊 coord，必填 stageSize
   ```
-  - 現況四島皆 `mode: "landmark"`、`anchor: "center"`。
-  - **car-park 整島升級**：改 `mode: "island"` + `anchor: "sand-bottom-center"` + `stageSize`（trim 後量；約 `{ w: 300, h: 200 }`），並由 `ZoneIsland`/`UniverseMap` 對 `island` 模式：①以 stageSize 鋪該島、②錨點移到沙岸底中心、③**在 `UniverseMap.tsx` 條件關閉該島兩層 SVG 沙／草橢圓**（不關會疊圖）、④渲染從 `<img>` 96px 容器改走 `next/image`（評估尺寸／priority／hit area／name+pill 位置）。
-  - **副檔名切換**：整島 PNG 就緒時改 `zoneArtTilePath()` 回傳 `.png`（見該函式 JSDoc）。
-- **逐島升級**：先做 car-park（已備黃金樣本），其餘維持 landmark，逐島切換。
+  - 現況四島皆 `mode: "island"`、`anchor: "sand-bottom-center"`、`stageSize: { w: 264, h: 260 }`、`anchorUV: [0.5, 0.84]`。
+  - `ZoneIsland` 以 `anchorUV` 對齊 `zone.coord`，`UniverseMap` 對 island 島跳過 SVG 沙／草橢圓，避免整島 PNG 和 fallback 底座疊圖。
+  - **副檔名現況**：`zoneArtTilePath()` 已回傳 `.png`；同名 `.svg` 僅保留作 fallback / 歷史資產。
+- **新島升級規則**：先建立同畫框 PNG + sidecar 數值，再登錄 `ZONE_ART_TILES`；不要回到 landmark/center 的舊契約。
 
 > **R1 接線補註（來自 v1.1 規劃審查，HIGH）：** island 模式渲染須以**錨點在圖內的相對位置 `anchorUV`** 對齊 `zone.coord`，而非「圖底中心」，否則島會上移約 16%。car-park 黃金樣本的 `anchorUV=(0.50, 0.84)` 已記於 sidecar `public/adventures/zones/car-park.tile.json`；R1 時於 `ZoneArtTile` 補 `anchorUV?: [number, number]` 欄位。
 
@@ -272,6 +273,16 @@ type MotionPart = {
 - **接地：** 陰影是**獨立地面橢圓**（不隨 bob 浮動，只隨 hop 微縮），維持 §2「短柔接地陰影」；sprite 本身只留極淡形狀陰影。
 - **景深：** tile 內越上（遠）越小、越下（近）越大；過彎輕微 bank。
 - **深度遮擋：** `ZONE_OCCLUDERS` 用**同一張 tile 的 clip-path 複製**露出地標剪影、疊在 roamer 上方（z-index = `baselineY`）。roamer `z-index = groundY`：groundY < baselineY（在地標後方）即落到剪影下被擋住，呈現立體書式「鑽到地標後方」。新島若要遮擋，量好地標剪影 `clipPath` 與接地基線 `baselineY` 即可，**無需另畫前景圖**。
+
+## 13. 共享 2.5D 深度舞台（v4）
+
+地圖層不再只靠 DOM 順序疊放；舞台內的實體物件共用 `y → z-index` 規則：
+
+- **核心規則：** `mapDepthZ(y, band)` 由 stage y 決定前後，y 越大越靠近觀者；`band` 只處理同一條地面線上的 tie-break（bridge < island < roamer）。`label` 是 UI band，永遠高於實體世界，確保島名與狀態 pill 可讀。
+- **島：** `resolveUniverseMap()` 對每座島輸出 `tileBox` 與 `depthY`。island PNG 的 `depthY` 即 `zone.coord.y`（沙岸底中心），`ZoneIsland` body 使用 `island` band，label 使用 `label` band。
+- **橋：** bridge 不再從島中心畫到島中心，而是由 resolver 算出 `fromPort` / `toPort`，落在沙岸附近；每座橋獨立成一個 SVG layer，使用 `bridge` band 排序。
+- **漫遊車：** map-level roamer 與 island roamer 共用 `computeFrame()` / `applyFrame()` 的 body、shadow、front/rear、depthScale 與 bank 邏輯；map 層只把 frame 的 `groundY` 轉成 `mapDepthZ(groundY, "roamer")`。
+- **海面與裝飾：** sea SVG 是底層；水面裝飾仍屬海面視覺，不應蓋過島與車。若未來要讓船或魚穿過橋前後，需把該 decor 拆成獨立 DOM/SVG layer 並套 `waterDecor` band。
 
 ---
 

@@ -41,6 +41,15 @@
   pointer-events: none;
 }
 
+.bridgeSvg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  pointer-events: none;
+  overflow: visible;
+}
+
 .waveGroup {
   animation: waveBob 4s ease-in-out infinite alternate;
 }
@@ -160,4 +169,3 @@
 :global(html[data-theme="night"]) .moonGlint {
   opacity: 0.55;
 }
-

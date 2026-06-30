@@ -1,6 +1,7 @@
 import { useEffect, useRef, type RefObject } from "react";
 import type { Roamer, RoamerDir, RoamerRoute } from "@/data/universe-roamers";
 import { getRoutePathD } from "@/data/universe-roamers";
+import { mapDepthZ } from "@/lib/universe-depth";
 
 export type RouteMeta = {
   el: SVGPathElement;
@@ -161,62 +162,18 @@ export function applyFrame(node: HTMLElement, frame: RoamerFrame): void {
   }
 }
 
-export type MapPlacement = {
-  x: number;
-  y: number;
-  flip: number;
-  zIndex: number;
-};
-
-function sampleMapPoint(sim: RoamerSim): { x: number; y: number; flip: number } {
-  const { distance, direction, route } = sim;
-  const length = route.length;
-  const dist = clamp(distance, 0, length);
-  const P = route.el.getPointAtLength(dist);
-  const P2 = route.el.getPointAtLength(
-    clamp(dist + direction * HEADING_LOOK_AHEAD, 0, length),
-  );
-  const hx = (P2.x - P.x) * direction;
-  sim.flip = pickFlip(hx, sim.flip);
-  return { x: P.x, y: P.y, flip: sim.flip };
-}
-
-function applyMapPlacement(
-  root: HTMLElement,
-  body: HTMLElement,
-  placement: MapPlacement,
+function applyMapFrame(
+  layer: HTMLElement,
+  sim: RoamerSim,
+  stageW: number,
+  stageH: number,
+  dtMs: number,
+  now: number,
 ) {
-  root.style.left = `${placement.x}px`;
-  root.style.top = `${placement.y}px`;
-  root.style.zIndex = String(placement.zIndex);
-  root.style.transform = "translate(-50%, -100%)";
-  body.style.transform = `translateX(-50%) scaleX(${placement.flip})`;
-}
-
-function queryMapRoamerParts(layer: HTMLElement, roamerId: string) {
-  const root = layer.querySelector<HTMLElement>(`[data-roamer-id="${roamerId}"]`);
-  if (!root) return null;
-  const body = root.querySelector<HTMLElement>(`[data-roamer-body="${roamerId}"]`);
-  if (!body) return null;
-  return { root, body };
-}
-
-function applyAllMapPlacements(layer: HTMLElement, sims: RoamerSim[]) {
-  const placements = sims.map((sim) => {
-    const point = sampleMapPoint(sim);
-    return { sim, ...point, sortY: point.y };
-  });
-  placements.sort((a, b) => a.sortY - b.sortY);
-  placements.forEach((p, i) => {
-    const parts = queryMapRoamerParts(layer, p.sim.roamer.id);
-    if (!parts) return;
-    applyMapPlacement(parts.root, parts.body, {
-      x: p.x,
-      y: p.y,
-      flip: p.flip,
-      zIndex: i + 1,
-    });
-  });
+  const el = layer.querySelector<HTMLElement>(`[data-roamer-id="${sim.roamer.id}"]`);
+  if (!el) return;
+  const frame = computeFrame(sim, stageW, stageH, dtMs, now);
+  applyFrame(el, { ...frame, z: mapDepthZ(frame.groundY, "roamer") });
 }
 
 type UseRoamerSimOptions = {
@@ -272,7 +229,9 @@ export function useRoamerSim({
         applyFrame(el, computeFrame(sim, space.tileW, space.tileH, 16, now));
       }
     } else {
-      applyAllMapPlacements(layer, simsRef.current);
+      for (const sim of simsRef.current) {
+        applyMapFrame(layer, sim, space.stageW, space.stageH, 16, now);
+      }
     }
   }, [roamers, routes, space, layerRef]);
 
@@ -314,7 +273,9 @@ export function useRoamerSim({
                 if (el) applyFrame(el, computeFrame(sim, space.tileW, space.tileH, dt, now));
               }
             } else {
-              applyAllMapPlacements(layer, simsRef.current);
+              for (const sim of simsRef.current) {
+                applyMapFrame(layer, sim, space.stageW, space.stageH, dt, now);
+              }
             }
           }
         }

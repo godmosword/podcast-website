@@ -82,13 +82,12 @@ export default function MapRoamerLayer({ reduced, paused, night }: Props) {
 
       {visible.map((roamer) => {
         const usePlaceholder = devRoamers && !roamer.enabled;
-        const src = night && roamer.srcNight ? roamer.srcNight : roamer.src;
         return (
           <RoamerVehicle
             key={roamer.id}
             roamer={roamer}
             usePlaceholder={usePlaceholder}
-            src={src}
+            night={night}
             sizeKind="map"
           />
         );
