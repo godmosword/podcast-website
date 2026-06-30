@@ -633,6 +633,9 @@ T+2d    社群貼文（B 戰場）
 
 ## Completed
 
+### R-anim 1.5c：漫遊車 map 層級 + 接地影
+`MapRoamerLayer`／`RoamerVehicle` 獨立影；y-sort；小紅／多多改走 `map-sea-orbit`（car-park 島不再疊漫遊車）。
+
 ### R-anim 3：漫遊小車 → 2.5D 多方向 unit + 深度遮擋
 平面 PNG＋scaleX 鏡像 → **面向行進方向的 2.5D unit**。`useRoamerSim` 依 path 切線選 **4 向 sprite**（front/rear × 左右鏡像，遲滯防抖）；**獨立接地陰影**（不隨 bob 浮動、只隨 hop 微縮）；景深縮放 + 過彎 bank；`ZONE_OCCLUDERS` 用同圖 clip-path 露出地標剪影、依 `groundY` vs `baselineY` 做 z-index **深度遮擋**（車鑽到摩天輪後方被擋）。`CAR_PARK_WALKWAY_PATH` 改閉合迴圈、後段繞行地標後方。`RoamerSprites` 契約（rear 回退 front）；`generate-roamer-assets.ts` 擴充 front+rear 雙視圖。
 **修補既有資產白底 bug：** 兩台 roamer PNG 殘留不透明近白底（magenta chroma-key 漏抓）→ 新增 `scripts/lib/roamer-alpha.ts` 邊界 flood 去背（保留牙齒／眼白等內部白）、`npm run fix:roamer-alpha` 就地修補、並接入生成管線 postProcess 作保險絲。

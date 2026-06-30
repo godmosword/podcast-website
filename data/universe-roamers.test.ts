@@ -3,6 +3,7 @@ import {
   MAP_ROAMERS,
   ROAMER_ROUTES,
   ZONE_OCCLUDERS,
+  getRoutePathD,
   resolveRoamerSprites,
   roamerHasRear,
   roamerSpriteSrc,
@@ -23,21 +24,25 @@ describe("universe-roamers", () => {
     }
   });
 
-  it("每個 roamer 有 zoneId 且與 route 一致", () => {
+  it("現役 enabled roamers 走 map 路線", () => {
     const routeById = new Map(ROAMER_ROUTES.map((r) => [r.id, r]));
-    for (const roamer of MAP_ROAMERS) {
-      expect(roamer.zoneId, roamer.id).toBeTruthy();
+    for (const roamer of MAP_ROAMERS.filter((r) => r.enabled)) {
       const route = routeById.get(roamer.routeId);
       expect(route, roamer.routeId).toBeDefined();
-      expect(roamer.zoneId).toBe(route!.zoneId);
+      expect(route!.kind).toBe("map");
     }
   });
 
-  it("route.tilePath 以 M 開頭", () => {
+  it("每條 route path 以 M 開頭", () => {
     for (const route of ROAMER_ROUTES) {
-      expect(route.tilePath.trim().startsWith("M")).toBe(true);
-      expect(route.kind).toBe("island");
+      expect(getRoutePathD(route).trim().startsWith("M")).toBe(true);
     }
+  });
+
+  it("含 map-sea-orbit 與至少一條開放橋", () => {
+    const mapRoutes = ROAMER_ROUTES.filter((r) => r.kind === "map");
+    expect(mapRoutes.some((r) => r.id === "map-sea-orbit")).toBe(true);
+    expect(mapRoutes.some((r) => r.id.startsWith("map-bridge-"))).toBe(true);
   });
 
   it("speed > 0", () => {
@@ -111,7 +116,9 @@ describe("ZONE_OCCLUDERS", () => {
   });
 
   it("car-park 步道為閉合迴圈（含 Z），後段繞過遮擋基線後方", () => {
-    const route = ROAMER_ROUTES.find((r) => r.zoneId === "car-park")!;
+    const route = ROAMER_ROUTES.find(
+      (r) => r.kind === "island" && r.zoneId === "car-park",
+    )!;
     expect(route.tilePath.trim().endsWith("Z")).toBe(true);
     expect(route.pingpong).toBeFalsy();
   });

@@ -6,6 +6,7 @@
 
 ### Added
 
+- **漫遊小車 map 層級路線 + 接地影（R-anim 1.5c）**：`MapRoamerLayer` 海面環道／開放橋 stage path；獨立接地橢圓影（不翻轉）；y-sort；停用島內 `IslandRoamerLayer`（消除 car-park 重複車）
 - **漫遊小車 2.5D 島上步道（R-anim 1.5b P0）**：小車改渲染於 `ZoneIsland` 內 `IslandRoamerLayer`（tile 14% + 接地陰影）；路徑接 `CAR_PARK_WALKWAY_PATH` 島內步道；`roamer-coords` 座標換算；移除全地圖 `CharacterRoamerLayer` 海面環線
 - **樂園地圖漫遊者 PNG 資產（R-anim 1.5 資產）**：`public/adventures/roamers/xiao-hong.png`、`duo-duo.png`（gpt-image-2 edit + 定裝照 reference、magenta chroma-key、sharp 後製 ~728px RGBA、底中心錨點）；生圖腳本 `scripts/generate-roamer-assets.ts`（staging → contact sheet → `--approve`）；`MAP_ROAMERS` 啟用小紅＋多多（`car-park-walkway`、`startOffset` 0／0.5）
 - **SEO 進階三刀**：逐字稿 VTT route（`/story/[slug]/transcript.vtt`）+ 故事頁 SSR 可索引 `<details>` 逐字稿；RSS 補 Podcasting 2.0（`podcast:transcript`、`podcast:guid`、`itunes:type`、`itunes:owner`、`itunes:episodeType`）；主要索引頁與故事詳情頁補自我 canonical；Episode JSON-LD 可解析 duration 時加 `timeRequired`（不加非標準 transcript）

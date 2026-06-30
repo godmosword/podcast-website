@@ -1,0 +1,25 @@
+.layer {
+  position: absolute;
+  inset: 0;
+  width: 1000px;
+  height: 720px;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 3;
+}
+
+.devPath {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.devPathLine {
+  fill: none;
+  stroke: rgba(239, 71, 111, 0.55);
+  stroke-width: 2;
+  stroke-dasharray: 4 3;
+}

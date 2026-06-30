@@ -9,6 +9,7 @@ import { parseDevStatusOverrides } from "@/lib/universe/dev-map-flags";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useTheme } from "@/components/ThemeProvider";
 import { MapDecorBirds, MapDecorNearWater } from "./MapDecorLayer";
+import MapRoamerLayer from "./MapRoamerLayer";
 import MapControls from "./MapControls";
 import UniverseMapParallax from "./UniverseMapParallax";
 import ZoneIsland from "./ZoneIsland";
@@ -215,6 +216,12 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
             <MapDecorNearWater reduced={reduced} paused={paused} daylight={daylight} />
             <MapDecorBirds reduced={reduced} paused={paused} daylight={daylight} />
           </svg>
+
+          <MapRoamerLayer
+            reduced={reduced}
+            paused={paused}
+            night={daylight === "night"}
+          />
 
           {zones.map((zone) => (
             <ZoneIsland

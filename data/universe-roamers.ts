@@ -1,10 +1,12 @@
 import type { ZoneId } from "@/data/universe-zones";
+import { resolveUniverseMap } from "@/lib/universe-map";
 
 /**
  * car-park 島內步道（tile 264×260 本地座標）。
  *
  * 環狀路線：前緣草地起步 → 後段繞到摩天輪後方（觸發深度遮擋，見 `ZONE_OCCLUDERS`）
  * → 右側折返 → 回前緣。閉合 `Z`，roamer 連續繞圈，每圈鑽過摩天輪後方一次。
+ * 小紅／多多已改走 map 層級路線；保留供 dev／未來島內啟用。
  */
 export const CAR_PARK_WALKWAY_PATH =
   "M 72 196 C 56 150 92 110 130 104 C 158 100 184 132 188 172 C 188 202 116 212 72 196 Z";
@@ -17,15 +19,41 @@ export const DINO_WALKWAY_PATH =
 export const RESCUE_WALKWAY_PATH =
   "M 80 198 C 64 158 98 122 134 116 C 168 110 190 142 190 176 C 190 204 122 214 80 198 Z";
 
-export type RoamerRoute = {
+/**
+ * 海面環道（stage 座標）：繞 car-park 外海、接 car-park→dino 開放橋。
+ * y 略低於橋面，讓車貼海／橋視覺。
+ */
+export const MAP_SEA_ORBIT_PATH =
+  "M 420 455 Q 500 418 580 455 Q 650 490 580 520 Q 500 548 420 520 Q 350 488 420 455";
+
+export type IslandRoamerRoute = {
   id: string;
   kind: "island";
   zoneId: ZoneId;
-  /** SVG path，tile 本地座標（0..stageSize） */
   tilePath: string;
-  /** true=到底回頭；預設 false=循環回起點 */
   pingpong?: boolean;
 };
+
+export type MapRoamerRoute = {
+  id: string;
+  kind: "map";
+  /** SVG path，stage 座標（0..MAP_STAGE） */
+  d: string;
+  pingpong?: boolean;
+};
+
+export type RoamerRoute = IslandRoamerRoute | MapRoamerRoute;
+
+export function getRoutePathD(route: RoamerRoute): string {
+  return route.kind === "island" ? route.tilePath : route.d;
+}
+
+/** 開放（非虛線）橋 path，供測試／dev 對照 */
+export function getOpenBridgePaths(): string[] {
+  return resolveUniverseMap()
+    .bridges.filter((b) => !b.dashed)
+    .map((b) => b.d);
+}
 
 /** 4 向 sprite：front/rear 兩張面朝畫面左的視圖，左右用 scaleX 鏡像 → 4 個朝向。 */
 export type RoamerDir = "front" | "rear";
@@ -42,9 +70,10 @@ export type RoamerSprites = {
 export type Roamer = {
   id: string;
   characterId: string;
-  zoneId: ZoneId;
+  /** 島內漫遊必填；map 層級路線可省略 */
+  zoneId?: ZoneId;
   routeId: string;
-  /** tile 本地 px/s（path 長度比例） */
+  /** path 取樣 px/s（tile 或 stage 依 route kind） */
   speed: number;
   /** 多方向 sprite（4 向＝front/rear × 左右鏡像）。未設則由 src 衍生（向後相容）。 */
   sprites?: RoamerSprites;
@@ -54,6 +83,17 @@ export type Roamer = {
   enabled?: boolean;
   startOffset?: number;
 };
+
+function buildBridgeRoutes(): MapRoamerRoute[] {
+  return resolveUniverseMap()
+    .bridges.filter((b) => !b.dashed)
+    .map((b) => ({
+      id: `map-bridge-${b.id}`,
+      kind: "map" as const,
+      d: b.d,
+      pingpong: true,
+    }));
+}
 
 export const ROAMER_ROUTES: RoamerRoute[] = [
   {
@@ -74,15 +114,20 @@ export const ROAMER_ROUTES: RoamerRoute[] = [
     zoneId: "rescue",
     tilePath: RESCUE_WALKWAY_PATH,
   },
+  {
+    id: "map-sea-orbit",
+    kind: "map",
+    d: MAP_SEA_ORBIT_PATH,
+  },
+  ...buildBridgeRoutes(),
 ];
 
 export const MAP_ROAMERS: Roamer[] = [
   {
     id: "roam-xiaohong",
     characterId: "xiao-hong",
-    zoneId: "car-park",
-    routeId: "car-park-walkway",
-    speed: 28,
+    routeId: "map-sea-orbit",
+    speed: 38,
     src: "/adventures/roamers/xiao-hong.png",
     enabled: true,
     startOffset: 0,
@@ -90,9 +135,8 @@ export const MAP_ROAMERS: Roamer[] = [
   {
     id: "roam-duoduo",
     characterId: "duo-duo",
-    zoneId: "car-park",
-    routeId: "car-park-walkway",
-    speed: 24,
+    routeId: "map-sea-orbit",
+    speed: 34,
     src: "/adventures/roamers/duo-duo.png",
     enabled: true,
     startOffset: 0.5,

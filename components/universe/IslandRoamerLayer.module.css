@@ -52,11 +52,9 @@
   height: 100%;
   object-fit: contain;
   user-select: none;
-  /* 接地陰影改由 .shadow 負責，sprite 只留極淡形狀陰影。 */
   filter: drop-shadow(0 1px 1px rgba(107, 90, 72, 0.22));
 }
 
-/* 4 向：依車身 data-dir 顯示 front / rear，其一缺席則只渲染 front。 */
 .spriteRear {
   opacity: 0;
 }
@@ -76,7 +74,6 @@
   background: #ef476f88;
 }
 
-/* 深度遮擋：同圖 clip-path 複製，露出地標剪影；engine 不碰它（z-index 來自 inline baselineY）。 */
 .occluder {
   position: absolute;
   inset: 0;

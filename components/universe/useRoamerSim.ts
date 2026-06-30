@@ -1,5 +1,6 @@
 import { useEffect, useRef, type RefObject } from "react";
 import type { Roamer, RoamerDir, RoamerRoute } from "@/data/universe-roamers";
+import { getRoutePathD } from "@/data/universe-roamers";
 
 export type RouteMeta = {
   el: SVGPathElement;
@@ -34,7 +35,7 @@ const DEPTH_MAX = 1.08;
 const BANK_GAIN = 0.55;
 const MAX_BANK = 5;
 const BANK_SMOOTH = 0.15;
-/** bob 上下浮動。 */
+/** 島內 bob 上下浮動。map 層關閉。 */
 const BOB_AMP = 2.2;
 const BOB_FREQ = 0.005;
 
@@ -42,11 +43,15 @@ function clamp(v: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, v));
 }
 
+export type CoordSpace =
+  | { kind: "tile"; tileW: number; tileH: number }
+  | { kind: "map"; stageW: number; stageH: number };
+
 export function buildRouteMap(routes: RoamerRoute[]): Map<string, RouteMeta> {
   const map = new Map<string, RouteMeta>();
   for (const route of routes) {
     const el = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    el.setAttribute("d", route.tilePath);
+    el.setAttribute("d", getRoutePathD(route));
     map.set(route.id, {
       el,
       length: el.getTotalLength(),
@@ -107,7 +112,6 @@ export function computeFrame(
   sim.flip = pickFlip(hx, sim.flip);
   sim.dir = pickDir(hy, sim.dir);
 
-  // 過彎 bank：估 heading 角速度，低通平滑。
   const angle = Math.atan2(hy, hx);
   let dAng = angle - sim.angle;
   while (dAng > Math.PI) dAng -= 2 * Math.PI;
@@ -118,7 +122,7 @@ export function computeFrame(
   sim.bankDeg += (targetBank - sim.bankDeg) * BANK_SMOOTH;
 
   const bob = Math.sin(now * BOB_FREQ + sim.phase) * BOB_AMP;
-  const hop = Math.max(0, -bob); // bob<0 = 騰空
+  const hop = Math.max(0, -bob);
   const depthScale = DEPTH_MIN + (DEPTH_MAX - DEPTH_MIN) * clamp(P.y / tileH, 0, 1);
 
   return {
@@ -157,11 +161,68 @@ export function applyFrame(node: HTMLElement, frame: RoamerFrame): void {
   }
 }
 
+export type MapPlacement = {
+  x: number;
+  y: number;
+  flip: number;
+  zIndex: number;
+};
+
+function sampleMapPoint(sim: RoamerSim): { x: number; y: number; flip: number } {
+  const { distance, direction, route } = sim;
+  const length = route.length;
+  const dist = clamp(distance, 0, length);
+  const P = route.el.getPointAtLength(dist);
+  const P2 = route.el.getPointAtLength(
+    clamp(dist + direction * HEADING_LOOK_AHEAD, 0, length),
+  );
+  const hx = (P2.x - P.x) * direction;
+  sim.flip = pickFlip(hx, sim.flip);
+  return { x: P.x, y: P.y, flip: sim.flip };
+}
+
+function applyMapPlacement(
+  root: HTMLElement,
+  body: HTMLElement,
+  placement: MapPlacement,
+) {
+  root.style.left = `${placement.x}px`;
+  root.style.top = `${placement.y}px`;
+  root.style.zIndex = String(placement.zIndex);
+  root.style.transform = "translate(-50%, -100%)";
+  body.style.transform = `translateX(-50%) scaleX(${placement.flip})`;
+}
+
+function queryMapRoamerParts(layer: HTMLElement, roamerId: string) {
+  const root = layer.querySelector<HTMLElement>(`[data-roamer-id="${roamerId}"]`);
+  if (!root) return null;
+  const body = root.querySelector<HTMLElement>(`[data-roamer-body="${roamerId}"]`);
+  if (!body) return null;
+  return { root, body };
+}
+
+function applyAllMapPlacements(layer: HTMLElement, sims: RoamerSim[]) {
+  const placements = sims.map((sim) => {
+    const point = sampleMapPoint(sim);
+    return { sim, ...point, sortY: point.y };
+  });
+  placements.sort((a, b) => a.sortY - b.sortY);
+  placements.forEach((p, i) => {
+    const parts = queryMapRoamerParts(layer, p.sim.roamer.id);
+    if (!parts) return;
+    applyMapPlacement(parts.root, parts.body, {
+      x: p.x,
+      y: p.y,
+      flip: p.flip,
+      zIndex: i + 1,
+    });
+  });
+}
+
 type UseRoamerSimOptions = {
   roamers: Roamer[];
   routes: RoamerRoute[];
-  tileW: number;
-  tileH: number;
+  space: CoordSpace;
   layerRef: RefObject<HTMLDivElement | null>;
   reduced: boolean;
   paused: boolean;
@@ -170,8 +231,7 @@ type UseRoamerSimOptions = {
 export function useRoamerSim({
   roamers,
   routes,
-  tileW,
-  tileH,
+  space,
   layerRef,
   reduced,
   paused,
@@ -205,12 +265,16 @@ export function useRoamerSim({
     if (!layer) return;
 
     const now = performance.now();
-    for (const sim of simsRef.current) {
-      const el = layer.querySelector<HTMLElement>(`[data-roamer-id="${sim.roamer.id}"]`);
-      if (!el) continue;
-      applyFrame(el, computeFrame(sim, tileW, tileH, 16, now));
+    if (space.kind === "tile") {
+      for (const sim of simsRef.current) {
+        const el = layer.querySelector<HTMLElement>(`[data-roamer-id="${sim.roamer.id}"]`);
+        if (!el) continue;
+        applyFrame(el, computeFrame(sim, space.tileW, space.tileH, 16, now));
+      }
+    } else {
+      applyAllMapPlacements(layer, simsRef.current);
     }
-  }, [roamers, routes, tileW, tileH, layerRef]);
+  }, [roamers, routes, space, layerRef]);
 
   useEffect(() => {
     if (roamers.length === 0 || reduced) return;
@@ -223,28 +287,34 @@ export function useRoamerSim({
 
         if (dt > 0) {
           const layer = layerRef.current;
-          for (const sim of simsRef.current) {
-            const { roamer, route } = sim;
-            let dist = sim.distance + roamer.speed * (dt / 1000) * sim.direction;
+          if (layer) {
+            for (const sim of simsRef.current) {
+              const { roamer, route } = sim;
+              let dist = sim.distance + roamer.speed * (dt / 1000) * sim.direction;
 
-            if (route.pingpong) {
-              if (dist >= route.length) {
-                dist = route.length;
-                sim.direction = -1;
-              } else if (dist <= 0) {
-                dist = 0;
-                sim.direction = 1;
+              if (route.pingpong) {
+                if (dist >= route.length) {
+                  dist = route.length;
+                  sim.direction = -1;
+                } else if (dist <= 0) {
+                  dist = 0;
+                  sim.direction = 1;
+                }
+              } else {
+                dist = ((dist % route.length) + route.length) % route.length;
+              }
+              sim.distance = dist;
+            }
+
+            if (space.kind === "tile") {
+              for (const sim of simsRef.current) {
+                const el = layer.querySelector<HTMLElement>(
+                  `[data-roamer-id="${sim.roamer.id}"]`,
+                );
+                if (el) applyFrame(el, computeFrame(sim, space.tileW, space.tileH, dt, now));
               }
             } else {
-              dist = ((dist % route.length) + route.length) % route.length;
-            }
-            sim.distance = dist;
-
-            if (layer) {
-              const el = layer.querySelector<HTMLElement>(
-                `[data-roamer-id="${roamer.id}"]`,
-              );
-              if (el) applyFrame(el, computeFrame(sim, tileW, tileH, dt, now));
+              applyAllMapPlacements(layer, simsRef.current);
             }
           }
         }
@@ -261,5 +331,5 @@ export function useRoamerSim({
       rafRef.current = null;
       lastTimeRef.current = null;
     };
-  }, [roamers, reduced, paused, tileW, tileH, layerRef]);
+  }, [roamers, reduced, paused, space, layerRef]);
 }

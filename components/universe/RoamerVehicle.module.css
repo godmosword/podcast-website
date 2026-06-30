@@ -1,0 +1,60 @@
+.roamer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  will-change: left, top, z-index;
+}
+
+.mapSize {
+  /* 高度相對 stage（720px）；寬度由 img 比例決定 */
+  height: 5.6%;
+}
+
+.islandSize {
+  height: 14%;
+}
+
+.shadow {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 70%;
+  height: 22%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: rgba(60, 50, 40, 0.28);
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.body {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  height: 100%;
+  width: auto;
+  transform-origin: bottom center;
+  pointer-events: none;
+}
+
+.img {
+  display: block;
+  height: 100%;
+  width: auto;
+  user-select: none;
+}
+
+.placeholder {
+  display: block;
+  height: 100%;
+  width: 2.5em;
+  border-radius: 6px;
+  background: rgba(239, 71, 111, 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roamer {
+    will-change: auto;
+  }
+}

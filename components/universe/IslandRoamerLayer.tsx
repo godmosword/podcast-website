@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useRef, useState, useEffect } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ZoneId } from "@/data/universe-zones";
 import {
   MAP_ROAMERS,
   ROAMER_ROUTES,
   ZONE_OCCLUDERS,
+  getRoutePathD,
   isDevRoamersQuery,
   roamerHasRear,
   roamerSpriteSrc,
@@ -52,14 +53,18 @@ export default function IslandRoamerLayer({
     [zoneId, devRoamers],
   );
 
+  const space = useMemo(
+    () => ({ kind: "tile" as const, tileW, tileH }),
+    [tileW, tileH],
+  );
+
   const occluder = ZONE_OCCLUDERS[zoneId];
   const tile = getZoneArtTile(zoneId);
 
   useRoamerSim({
     roamers: visible,
     routes,
-    tileW,
-    tileH,
+    space,
     layerRef,
     reduced,
     paused,
@@ -78,7 +83,7 @@ export default function IslandRoamerLayer({
             preserveAspectRatio="none"
             aria-hidden="true"
           >
-            <path className={styles.devPathLine} d={route.tilePath} />
+            <path className={styles.devPathLine} d={getRoutePathD(route)} />
           </svg>
         ))}
 
@@ -123,8 +128,6 @@ export default function IslandRoamerLayer({
         );
       })}
 
-      {/* 深度遮擋：同一張 tile 用 clip-path 露出地標剪影、疊在 roamer 上方。
-          z-index = baselineY，groundY 較小（在地標後方）的 roamer 會落到其下被擋住。 */}
       {occluder && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
