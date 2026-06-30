@@ -118,7 +118,9 @@ describe("ZONE_OCCLUDERS", () => {
   it("car-park 步道為閉合迴圈（含 Z），後段繞過遮擋基線後方", () => {
     const route = ROAMER_ROUTES.find(
       (r) => r.kind === "island" && r.zoneId === "car-park",
-    )!;
+    );
+    expect(route?.kind).toBe("island");
+    if (route?.kind !== "island") return;
     expect(route.tilePath.trim().endsWith("Z")).toBe(true);
     expect(route.pingpong).toBeFalsy();
   });
