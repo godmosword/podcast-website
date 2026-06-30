@@ -19,8 +19,17 @@ function zoneArtTilePathAtDensity(id: ZoneId, density: 1 | 2 | 3): string {
   return base.replace(/\.png$/, `@${density}x.png`);
 }
 
+/** 依鏡頭縮放估算 tile 顯示寬（對齊 `useMapCamera` MIN/MAX）。 */
+export function getZoneArtSizes(mapScale: number = ZONE_ART_SRC_MAX_SCALE): string {
+  const clamped = Math.max(0.6, Math.min(ZONE_ART_SRC_MAX_SCALE, mapScale));
+  return `${Math.ceil(ZONE_ART_TILE_WIDTH * clamped)}px`;
+}
+
 /** 組 island tile 的 width-descriptor srcset（1x/2x/3x 檔已備於 public）。 */
-export function getZoneArtSrcSet(id: ZoneId): ZoneArtSrcSet {
+export function getZoneArtSrcSet(
+  id: ZoneId,
+  mapScale: number = ZONE_ART_SRC_MAX_SCALE,
+): ZoneArtSrcSet {
   const w = ZONE_ART_TILE_WIDTH;
   const src = zoneArtTilePathAtDensity(id, 1);
   const srcSet = [
@@ -28,6 +37,5 @@ export function getZoneArtSrcSet(id: ZoneId): ZoneArtSrcSet {
     `${zoneArtTilePathAtDensity(id, 2)} ${w * 2}w`,
     `${zoneArtTilePathAtDensity(id, 3)} ${w * 3}w`,
   ].join(", ");
-  const sizes = `${Math.ceil(w * ZONE_ART_SRC_MAX_SCALE)}px`;
-  return { src, srcSet, sizes };
+  return { src, srcSet, sizes: getZoneArtSizes(mapScale) };
 }

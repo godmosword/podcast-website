@@ -62,4 +62,4 @@ export function getZoneArtTile(id: ZoneId): ZoneArtTile {
   return ZONE_ART_TILES[id];
 }
 
-export { getZoneArtSrcSet, ZONE_ART_SRC_MAX_SCALE, ZONE_ART_TILE_WIDTH } from "@/lib/universe/zone-art-src";
+export { getZoneArtSrcSet, getZoneArtSizes, ZONE_ART_SRC_MAX_SCALE, ZONE_ART_TILE_WIDTH } from "@/lib/universe/zone-art-src";

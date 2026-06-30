@@ -21,6 +21,7 @@ type Props = {
   zoneId: ZoneId;
   tileW: number;
   tileH: number;
+  mapScale: number;
   reduced: boolean;
   paused: boolean;
   night: boolean;
@@ -30,6 +31,7 @@ export default function IslandRoamerLayer({
   zoneId,
   tileW,
   tileH,
+  mapScale,
   reduced,
   paused,
   night,
@@ -60,7 +62,7 @@ export default function IslandRoamerLayer({
   );
 
   const occluder = ZONE_OCCLUDERS[zoneId];
-  const artSrc = getZoneArtSrcSet(zoneId);
+  const artSrc = getZoneArtSrcSet(zoneId, mapScale);
 
   useRoamerSim({
     roamers: visible,

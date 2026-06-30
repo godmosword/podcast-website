@@ -40,7 +40,7 @@ export default function ZoneIsland({
 
   if (tile.mode === "island") {
     const [ax, ay] = tile.anchorUV;
-    const artSrc = getZoneArtSrcSet(zone.id);
+    const artSrc = getZoneArtSrcSet(zone.id, mapScale);
     return (
       <>
         <button
@@ -71,6 +71,7 @@ export default function ZoneIsland({
               zoneId={zone.id}
               tileW={tile.stageSize.w}
               tileH={tile.stageSize.h}
+              mapScale={mapScale}
               reduced={reduced}
               paused={paused}
               night={night}

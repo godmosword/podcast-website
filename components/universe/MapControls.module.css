@@ -43,3 +43,18 @@
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
+
+@media (max-width: 480px) {
+  .controls {
+    right: calc(8px + var(--safe-right));
+    bottom: calc(8px + var(--safe-bottom));
+    gap: 6px;
+  }
+
+  .btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    font-size: 1.25rem;
+  }
+}

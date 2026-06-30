@@ -238,4 +238,13 @@
   .name {
     font-size: 14px;
   }
+
+  /* island tile 木牌：縮小鏡頭時反縮放仍可能偏小，略放大字級 */
+  .tileLabel .name {
+    font-size: 15px;
+  }
+
+  .tileLabel .pill {
+    font-size: 11px;
+  }
 }

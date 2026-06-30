@@ -634,10 +634,13 @@ T+2d    社群貼文（B 戰場）
 ## Completed
 
 ### 樂園地圖 P1 載入體驗（佔位 + 標籤 + preload）
-`ZoneIslandTileArt` 沙草佔位；`tileLabel` 反縮放；`/adventures` preload car-park。
+`ZoneIslandTileArt` 沙草佔位；`tileLabel` 反縮放；`/adventures` preload car-park。`ff762a0`
 
 ### 樂園地圖 P0 資產交付（srcset + roamer WebP）
-島 `@2x/@3x` srcset；`optimize:roamer-assets`；`<picture>` WebP。
+島 `@2x/@3x` srcset；`optimize:roamer-assets`；`<picture>` WebP。`ff762a0`
+
+### 樂園地圖 P2 收尾（動態 sizes + 資產驗證 + 行動 RWD）
+`getZoneArtSizes(mapScale)` 減少縮小鏡頭時 @3x overfetch；`npm run verify:zone-art` 四島 1x/@2x/@3x 齊備；行動版 tileLabel／MapControls／map min-height 可讀性微調。
 
 ### R-anim 1.5c：漫遊車 map 層級 + 接地影
 `MapRoamerLayer`／`RoamerVehicle` 獨立影；y-sort；小紅／多多改走 `map-sea-orbit`（car-park 島不再疊漫遊車）。
