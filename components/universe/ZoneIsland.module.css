@@ -44,9 +44,57 @@
   z-index: 1;
 }
 
+/* 開放主島：海面柔光暈 + 輕待機浮動，凸顯為第一視覺焦點（不動地理座標） */
+.islandTile[data-status="open"]::before {
+  content: "";
+  position: absolute;
+  inset: -16%;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at 50% 55%,
+    rgba(255, 241, 194, 0.6) 0%,
+    rgba(255, 236, 178, 0.26) 38%,
+    transparent 68%
+  );
+  pointer-events: none;
+  animation: openGlow 4s ease-in-out infinite alternate;
+}
+
+.islandTile[data-status="open"]:not([data-transition]) .tileStack {
+  animation: islandFloat 3.6s ease-in-out infinite;
+}
+
+@keyframes islandFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes openGlow {
+  from {
+    opacity: 0.72;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .tileImgLoaded {
     transition: none;
+  }
+
+  .islandTile[data-status="open"]:not([data-transition]) .tileStack {
+    animation: none;
+  }
+
+  .islandTile[data-status="open"]::before {
+    animation: none;
+    opacity: 0.9;
   }
 }
 
