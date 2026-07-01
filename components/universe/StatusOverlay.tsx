@@ -21,9 +21,6 @@ export default function StatusOverlay({ status, paused, transition }: Props) {
         data-paused={paused || undefined}
         aria-hidden="true"
       >
-        <div className={styles.crane}>
-          <div className={styles.craneArm} />
-        </div>
         <div className={styles.scaffold} />
         <div className={styles.dust} />
       </div>

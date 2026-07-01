@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { MAP_STAGE, ZONES, type ZoneCoord } from "@/data/universe-zones";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
-const MIN_SCALE = 0.6;
+const MIN_SCALE = 0.34;
 const MAX_SCALE = 2.4;
 /** 允許少量 overscroll，讓拖曳手感不死板。 */
 const OVERSCROLL = 48;
