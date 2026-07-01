@@ -26,13 +26,16 @@ export default function ZoneIslandTileArt({
 
   return (
     <div className={styles.tileArt}>
-      <div
-        className={styles.tilePlaceholder}
-        aria-hidden="true"
-        style={{
-          background: `radial-gradient(ellipse 88% 68% at 50% 74%, ${terrain.grass} 0%, ${terrain.sand} 72%)`,
-        }}
-      />
+      {/* 沙草佔位只在圖載入前顯示；載入後移除，否則會從去背島圖的透明區漏出矩形色塊。 */}
+      {!showImg && (
+        <div
+          className={styles.tilePlaceholder}
+          aria-hidden="true"
+          style={{
+            background: `radial-gradient(ellipse 88% 68% at 50% 74%, ${terrain.grass} 0%, ${terrain.sand} 72%)`,
+          }}
+        />
+      )}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={artSrc.src}
