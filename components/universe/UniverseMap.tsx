@@ -7,6 +7,7 @@ import { resolveUniverseMap } from "@/lib/universe-map";
 import { getZoneArtTile } from "@/lib/universe/zone-art-tile";
 import { parseDevStatusOverrides } from "@/lib/universe/dev-map-flags";
 import { mapDepthZ } from "@/lib/universe-depth";
+import { seaTexturePath } from "@/lib/universe/map-art-src";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useTheme } from "@/components/ThemeProvider";
 import { MapDecorBirds, MapDecorNearWater } from "./MapDecorLayer";
@@ -21,6 +22,9 @@ import styles from "./UniverseMap.module.css";
 
 /** 點島後放大到的目標倍率。 */
 const FOCUS_SCALE = 1.6;
+
+/** 黏土海面貼圖平鋪尺寸（stage 單位）；無縫 tile 見 Art Bible §14。 */
+const SEA_TILE = 300;
 
 type MapContentProps = {
   devStatusOverrides: Partial<Record<ZoneId, ZoneStatus>>;
@@ -137,10 +141,37 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
             focusable="false"
           >
             <defs>
-              <linearGradient id="seaGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stopColor="#d6efff" />
-                <stop offset="1" stopColor="#bce0f4" />
-              </linearGradient>
+              {/* v5：黏土海面貼圖（無縫平鋪），取代 seaGrad 漸層。 */}
+              <pattern
+                id="seaTile"
+                patternUnits="userSpaceOnUse"
+                width={SEA_TILE}
+                height={SEA_TILE}
+              >
+                <image
+                  href={seaTexturePath(false)}
+                  x="0"
+                  y="0"
+                  width={SEA_TILE}
+                  height={SEA_TILE}
+                  preserveAspectRatio="xMidYMid slice"
+                />
+              </pattern>
+              <pattern
+                id="seaTileNight"
+                patternUnits="userSpaceOnUse"
+                width={SEA_TILE}
+                height={SEA_TILE}
+              >
+                <image
+                  href={seaTexturePath(true)}
+                  x="0"
+                  y="0"
+                  width={SEA_TILE}
+                  height={SEA_TILE}
+                  preserveAspectRatio="xMidYMid slice"
+                />
+              </pattern>
               <radialGradient id="clayShade" cx="38%" cy="30%" r="75%">
                 <stop offset="0" stopColor="#ffffff" stopOpacity="0.32" />
                 <stop offset="0.55" stopColor="#ffffff" stopOpacity="0" />
@@ -150,12 +181,18 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
                 <feGaussianBlur stdDeviation="7" />
               </filter>
             </defs>
-            <rect x="0" y="0" width={MAP_STAGE.width} height={MAP_STAGE.height} fill="url(#seaGrad)" />
-            <g className={styles.waveGroup} stroke="#b4ddf5" strokeWidth="3" fill="none" opacity="0.7">
-              <path d="M 60 140 q 20 -12 40 0 t 40 0" />
-              <path d="M 640 620 q 20 -12 40 0 t 40 0" />
-              <path d="M 120 600 q 20 -12 40 0 t 40 0" />
-            </g>
+            {/* 海面基色（貼圖載入前 / overscroll 露出時的底） */}
+            <rect x="0" y="0" width={MAP_STAGE.width} height={MAP_STAGE.height} fill="#bfe0ef" />
+            <rect x="0" y="0" width={MAP_STAGE.width} height={MAP_STAGE.height} fill="url(#seaTile)" />
+            <rect
+              x="0"
+              y="0"
+              width={MAP_STAGE.width}
+              height={MAP_STAGE.height}
+              fill="url(#seaTileNight)"
+              className={styles.seaNightTile}
+              style={{ opacity: daylight === "night" ? 1 : 0 }}
+            />
 
             {zones.map((zone) => {
               if (getZoneArtTile(zone.id).mode === "island") return null;
@@ -188,16 +225,19 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
               );
             })}
 
+            {/* v5：島底單一短柔接地陰影（取代白硬 foam 環，見 Art Bible §0/§2）。 */}
             {zones.map((zone) => {
               if (getZoneArtTile(zone.id).mode !== "island") return null;
               return (
                 <ellipse
-                  key={`foam-${zone.id}`}
-                  className={styles.foamRing}
+                  key={`contact-${zone.id}`}
                   cx={zone.px.x}
-                  cy={zone.px.y + 18}
-                  rx="126"
-                  ry="90"
+                  cy={zone.px.y + 30}
+                  rx="112"
+                  ry="34"
+                  fill="#6b5a48"
+                  opacity="0.18"
+                  filter="url(#islandShadow)"
                 />
               );
             })}

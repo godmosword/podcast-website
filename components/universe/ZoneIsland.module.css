@@ -28,6 +28,18 @@
   inset: 0;
   pointer-events: none;
   z-index: 0;
+  transition: opacity 280ms ease;
+}
+
+/* PNG 載入後隱藏骨架，避免透明島四周露出矩形沙色底（clay 海上尤其明顯）。 */
+.tilePlaceholderHidden {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tilePlaceholder {
+    transition: none;
+  }
 }
 
 .tileImgPending {
@@ -126,8 +138,10 @@
   }
 }
 
+/* coming「即將登場」沉睡態：降彩＋微亮＋低對比＝晨霧感，且因作用在透明 PNG
+   上只影響島本體、不會在四周 clay 海露出方框（取代原矩形 fog overlay）。 */
 .islandTile[data-status="coming"] .tileImg {
-  filter: saturate(0.85);
+  filter: saturate(0.68) brightness(1.05) contrast(0.95);
 }
 
 :global(html[data-theme="night"]) .islandTile .tileImg {

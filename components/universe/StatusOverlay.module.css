@@ -6,31 +6,10 @@
   overflow: hidden;
 }
 
-/* building：吊車 + 鷹架感。暖光改為以島為中心的徑向暈（邊緣透明），
-   避免整個 tile box 的線性漸層漏到去背島圖外緣、在海上留下矩形。 */
+/* building：只留貼島的柔性塵霧，不用矩形黃罩/虛線框/抽象吊車 L，
+   避免在透明島四周的 clay 海上露出方框；「建造中」由木牌 pill 傳達（與 coming 一致）。 */
 .building {
-  background: radial-gradient(
-    ellipse 70% 50% at 50% 60%,
-    rgba(255, 220, 120, 0.16) 0%,
-    transparent 70%
-  );
-}
-
-/* 施工平台：落在島身、內填淡施工斜紋（不再是漂浮空框） */
-.scaffold {
-  position: absolute;
-  bottom: 20%;
-  left: 18%;
-  right: 18%;
-  height: 22%;
-  border: 3px dashed rgba(120, 90, 50, 0.42);
-  border-radius: 6px;
-  background: repeating-linear-gradient(
-    45deg,
-    rgba(245, 197, 66, 0.12) 0 8px,
-    rgba(120, 90, 50, 0.06) 8px 16px
-  );
-  opacity: 0.75;
+  background: none;
 }
 
 .dust {
@@ -40,22 +19,8 @@
   animation: dustPulse 3.5s ease-in-out infinite alternate;
 }
 
-/* coming：沉睡降彩 + 晨霧 */
-.coming {
-  backdrop-filter: saturate(0.85);
-}
-
-.comingFog {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(220, 235, 250, 0.35) 0%,
-    rgba(240, 248, 255, 0.2) 60%,
-    transparent 100%
-  );
-  opacity: 0.85;
-}
+/* coming「即將登場」沉睡態改由島圖 filter 表現（見 ZoneIsland.module.css），
+   不再用矩形 backdrop/fog，避免 clay 海上露出方框。 */
 
 @keyframes dustPulse {
   from {

@@ -21,19 +21,12 @@ export default function StatusOverlay({ status, paused, transition }: Props) {
         data-paused={paused || undefined}
         aria-hidden="true"
       >
-        <div className={styles.scaffold} />
         <div className={styles.dust} />
       </div>
     );
   }
 
-  if (status === "coming") {
-    return (
-      <div className={`${styles.overlay} ${styles.coming}`} aria-hidden="true">
-        <div className={styles.comingFog} />
-      </div>
-    );
-  }
-
+  // coming：沉睡感由島圖 filter 表現（見 ZoneIsland.module.css），
+  // 不再用矩形 fog/backdrop overlay，避免在透明島四周的 clay 海上露出方框。
   return null;
 }

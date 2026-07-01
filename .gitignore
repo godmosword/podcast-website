@@ -46,6 +46,9 @@ next-env.d.ts
 # 漫遊者小車生圖暫存（人工審圖前的草稿，勿入庫）
 /public/.roamer-staging/
 
+# 地圖海/天生圖暫存（人工審圖前的草稿，勿入庫）
+/public/.map-staging/
+
 # Godot editor/cache state（專案源碼在 candy-kart-game/，cache 由 Godot 重建）
 /candy-kart-game/.godot/
 

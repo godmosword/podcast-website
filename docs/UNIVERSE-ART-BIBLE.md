@@ -1,11 +1,12 @@
-# 車車宇宙 · 樂園地圖 美術聖經（Art Bible）v4
+# 車車宇宙 · 樂園地圖 美術聖經（Art Bible）v5
 
 > 唯一目的：**讓各自獨立產出的「島」（不論誰畫、AI 生、還是 Blender 算）看起來像同一個世界。**
 > 剪貼感幾乎都來自三件事不一致：**相機角度、光線、材質光澤**。把這份數值定死，再開始量產資產。
 >
-> 對接對象：`data/universe-zones.ts`（`MAP_STAGE` 1000×720、`ZoneId`、`ZoneStatus`、`ZONE_TERRAIN`）、`components/universe/ZoneIsland.tsx`、`components/universe/ZoneLandmark.tsx`、`lib/universe/zone-art-tile.ts`。
+> 對接對象：`data/universe-zones.ts`（`MAP_STAGE` 1000×720、`ZoneId`、`ZoneStatus`、`ZONE_TERRAIN`）、`components/universe/ZoneIsland.tsx`、`components/universe/ZoneLandmark.tsx`、`lib/universe/zone-art-tile.ts`、`lib/universe/map-art-src.ts`。
 >
-> 版本：**v4（2026-06-30）**。
+> 版本：**v5（2026-07-01）**。
+> **v4→v5：全面黏土世界。海面與天空（雲、遠景島、日月）不再是平面 SVG，改為與島同管線的黏土 PNG 素材（`public/adventures/map/`）；新增 §14 海／天黏土化規格。島底接地由「雙重（PNG 烘焙陰影＋白硬 foam 環）」統一為「單一短柔接地陰影」。§0、§4 隨之改寫。**
 > **v3→v4：同步程式現況「四島皆為 island PNG」；新增 §13 共享 2.5D 深度舞台規格（`mapDepthZ`、bridge landing ports、map roamer 與 island 共用 body/shadow frame）。**
 > **v2→v3：新增 §12 動畫綁定規格（motionParts／sprite／日夜態），讓靜態黏土資產可動而不需重畫整張。** 相機／光／材質沿用 v2。
 > **v1→v2：鎖定 car-park 黃金樣本為全宇宙標準。** 相機由「正交 50°」改為繼承黃金樣本的「3/4 高視角＋輕透視」；燈光由「左上硬主光＋右下長投影」改為「柔和均勻光＋短柔接地陰影」。其餘材質／品牌色／狀態變體／程式契約沿用 v1。
@@ -25,7 +26,9 @@
 ## 0. 世界觀一句話
 一片淺海上的**黏土群島**：每座島是一個主題園區，跨海棧道相連；世界從「車車樂園」往外一座一座長出來。整體像一張**會呼吸的定格動畫立體地圖**——手捏質感、暖色童書調、迷你模型尺度。
 
-> **立體書（pop-up book）效果是刻意的：** 島是低角度 3/4 立體 diorama，海／橋／底座是近俯視平面。立體島站在俯視海面上會像翻開的立體繪本——這很可愛，靠「接地陰影＋泡沫圈」（前端 R0.5 已加）把「浮在水上」賣出來即可，別讓島去配合海的平面視角。
+> **全面黏土世界（v5 定調）：** 島是低角度 3/4 立體 diorama，海／天則是**近俯視的黏土平面**——但**同樣是黏土材質**（霧面、手捏波紋、柔光、無光澤），不是向量漸層。海與島的視角可以不同（島立體、海俯視），這種立體書式的錯落很可愛可保留；**但材質、色溫、光的柔度必須同一個世界**。目標是：把海面貼圖與島並排看，看不出是兩支不同筆做的。
+>
+> **接地（v5 統一）：** 島「坐進水裡」用**單一短柔接地陰影**賣（聖經 §2），**不再疊白硬泡沫環**——PNG 島已自帶烘焙接地陰影，前端只補一層低對比柔影統一光向，避免雙重接地的剪貼感。
 
 ---
 
@@ -68,14 +71,16 @@
 
 | 用途 | Hex（約） | 來源 |
 |---|---|---|
-| 海（淺／中／深） | `#cfe8f3` / `#bfe0ef` / `#a7d2e8` | SVG 海面（不在 PNG 內） |
+| 海（淺／中／深） | `#cfe8f3` / `#bfe0ef` / `#a7d2e8` | **黏土海面 `map/sea.png`（v5）**；色票即此三段 |
+| 海（夜） | 深藍紫低飽和 | `map/sea-night.png`（對應 `data-theme="night"`） |
 | 島緣奶油沙 | `#ead7ac` | 取樣自黃金樣本 |
 | 草地（亮／中／暗） | `#c4e59a` / `#a0c96a` / `#7fae54` | 取樣自黃金樣本 |
 | 步道 | `#d7c596` | 取樣自黃金樣本 |
 | 池塘水 | `#a9d8ee` | 取樣自黃金樣本 |
 | 接地陰影 | `#6b5a48` @ 低不透明、柔 | — |
 
-> **island PNG 內的沙／草／步道色，以黃金樣本為唯一真相**（上表為近似量測值）。SVG fallback（`ZONE_TERRAIN`、海 `#cfeaff`）已 ship 並測試通過，本版不回頭改；整島 PNG 導入時，前端該島改吃 PNG，海面維持 SVG。
+> **island PNG 內的沙／草／步道色，以黃金樣本為唯一真相**（上表為近似量測值）。
+> **v5：海面改吃黏土 PNG `map/sea.png`**（見 §14），原 SVG `seaGrad` 漸層退役；`ZONE_TERRAIN` SVG fallback 僅保留給未升級為 island 模式的假想 zone，現況四島皆 island、不觸發。
 
 **各園區主色（沿用網站品牌 token，每島一個主導色＝視覺分區）**
 
@@ -288,5 +293,47 @@ type MotionPart = {
 
 ---
 
+## 14. 海面與天空黏土化（v5 新增）
+
+> 島已達標，但過去承載島的海／天是平面向量（`seaGrad` 漸層、白橢圓雲、半透明橢圓遠山），與黏土島並排會剪貼出戲。v5 把它們全部升級為**與島同管線的黏土 PNG 素材**。
+
+### 14.1 素材清單與契約（`public/adventures/map/`）
+| id | 檔案 | 底 | 視角 | 用途 |
+|---|---|---|---|---|
+| `sea` | `sea.png`(+`@2x`) | 實底 | 近俯視、**無縫可平鋪** | 舞台海面（取代 `seaGrad`） |
+| `sea-night` | `sea-night.png`(+`@2x`) | 實底 | 同上，深藍紫低飽和 | 夜間海面（`data-theme="night"`） |
+| `cloud-a/b/c` | `cloud-*.png` | 透明 RGBA | 遠景、無投影盒 | 視差雲層（取代向量橢圓雲） |
+| `far-island-a/b` | `far-island-*.png`(+`@2x`) | 透明 RGBA | 地平線遠景剪影、去飽和柔邊 | 遠景丘陵/遠島（取代向量 hill） |
+| `sun` / `moon`（選用） | `sun.png` / `moon.png` | 透明 RGBA | 霧面黏土日月 | `SkyBodies`（選用升級） |
+
+- 路徑集中於 `lib/universe/map-art-src.ts`（比照 `lib/universe/zone-art-src.ts`），前端不散寫字串。
+- 海面／遠島需 `@2x`（跟隨 pan/zoom 放大）；雲可只 1x。
+
+### 14.2 材質一致性（與島同世界）
+- **鐵律同 §8：生任何 map 素材都餵 `car-park.png` 當 image/style reference**，共用 `CLAY_STYLE_PREFIX` + `CLAY_NEGATIVE`。
+- 海面例外於「島相機」：海是**近俯視平面**（非 3/4），但材質光/色溫必須同島。base block 覆寫視角為 top-down、其餘沿用。
+- 海面**必須無縫可平鋪**（水平＋垂直邊接得起來），否則大 stage 會露接縫。
+- 雲／遠島維持黏土霧面、圓潤邊、無光澤、**遠景去飽和**（比島低 15–25%）。
+
+### 14.3 生產管線
+- 腳本 `scripts/generate-map-art.ts`：`--dry-run` / `--only <id>` / `--approve` / `--night`（day/night 變體集切換，比照 landing 的 `--portrait`）。
+- 流程：生圖 → 審 `public/.map-staging/contact-sheet.jpg` → `--approve` 覆蓋 `public/adventures/map/`。
+- 驗證：`scripts/verify-map-art.ts` 檢查必要素材與 `@2x` 齊備。
+
+### 14.4 前端接線與深度
+- 海面走 `sea` band（`mapDepthZ(0,"sea")`），為最底層；雲／遠島在 `UniverseMapParallax`（視差係數 `0.38`）。
+- 島接地：**單一短柔接地陰影**（§2、§0 v5），移除白硬 foam 環。
+- 日夜：海面 day/night 兩張交叉淡入；reduced-motion 時雲 drift 停於好看靜止幀。
+
+### 14.5 一致性檢查表（每張 map 素材交付前）
+- [ ] 與 `car-park.png` 並排：**材質、色溫、光的柔度**同一世界（視角海面可俯視）
+- [ ] 霧面黏土、無光澤、手捏圓邊/波紋壓痕
+- [ ] 海面上下左右**無縫平鋪**、無明顯接縫
+- [ ] 遠景（雲/遠島）去飽和、柔邊，不搶島
+- [ ] 透明底素材為乾淨 RGBA，無白邊殘留
+- [ ] 海面/遠島 `@2x` 已生、尺寸對齊契約
+
+---
+
 ### TL;DR 給美術／AI 的一句話
-> 霧面手捏黏土、柔和均勻光、短柔接地陰影、**3/4 高視角輕透視**、粉彩童書色、迷你模型尺度——**而且每座島都對齊 `car-park.png` 黃金樣本，世界才會是同一個世界。**
+> 霧面手捏黏土、柔和均勻光、短柔接地陰影、**3/4 高視角輕透視**、粉彩童書色、迷你模型尺度——**島、海、天都對齊 `car-park.png` 黃金樣本，整個世界（含海與天）才會是同一支筆捏出來的。**

@@ -12,12 +12,13 @@
   display: block;
 }
 
-.cloud {
+.cloudImg {
+  transform-box: fill-box;
   animation: drift var(--dur, 60s) ease-in-out infinite alternate;
   animation-delay: var(--delay, 0s);
 }
 
-.paused .cloud {
+.paused .cloudImg {
   animation-play-state: paused;
 }
 
@@ -35,17 +36,17 @@
     will-change: auto;
   }
 
-  .cloud {
+  .cloudImg {
     animation: none;
   }
 }
 
-.night .hill {
-  fill: #7a9aaa;
-  opacity: 0.32;
+/* 夜間：黏土素材以濾鏡壓暗降飽和（<image> 不吃 fill）。 */
+.night .hillImg {
+  filter: brightness(0.6) saturate(0.7);
 }
 
-.night .cloud {
-  fill: #c5d4ea;
-  opacity: 0.45;
+.night .cloudImg {
+  filter: brightness(0.75) saturate(0.6);
+  opacity: 0.55 !important;
 }

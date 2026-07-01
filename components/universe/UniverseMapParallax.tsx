@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import { MAP_STAGE } from "@/data/universe-zones";
 import type { ThemePreference } from "@/lib/theme";
+import { cloudPath, farIslandSrcSet } from "@/lib/universe/map-art-src";
 import { FLY_DURATION_MS } from "./useMapCamera";
 import SkyBodies from "./SkyBodies";
 import styles from "./UniverseMapParallax.module.css";
@@ -8,27 +9,20 @@ import styles from "./UniverseMapParallax.module.css";
 /** 視差係數：背景層跟隨鏡頭位移的比例（越小越「遠」）。 */
 const PARALLAX = 0.38;
 
+/** v5：黏土雲團（透明 PNG），沿用 drift 動畫。cx/cy＝中心、w＝寬（stage 單位）。 */
 const CLOUDS = [
-  { dur: "58s", delay: "0s", ellipses: [
-    { cx: 120, cy: 88, rx: 52, ry: 22 }, { cx: 155, cy: 82, rx: 38, ry: 18 },
-    { cx: 90, cy: 82, rx: 32, ry: 16 }, { cx: 138, cy: 94, rx: 28, ry: 13 },
-  ], opacity: 0.85 },
-  { dur: "72s", delay: "4s", ellipses: [
-    { cx: 420, cy: 56, rx: 64, ry: 26 }, { cx: 468, cy: 50, rx: 44, ry: 20 },
-    { cx: 378, cy: 50, rx: 36, ry: 18 }, { cx: 440, cy: 64, rx: 34, ry: 15 },
-  ], opacity: 0.8 },
-  { dur: "64s", delay: "8s", ellipses: [
-    { cx: 860, cy: 72, rx: 58, ry: 24 }, { cx: 905, cy: 66, rx: 40, ry: 18 },
-    { cx: 820, cy: 66, rx: 34, ry: 16 }, { cx: 876, cy: 80, rx: 30, ry: 14 },
-  ], opacity: 0.82 },
-  { dur: "50s", delay: "2s", ellipses: [
-    { cx: 680, cy: 180, rx: 48, ry: 20 }, { cx: 715, cy: 175, rx: 34, ry: 16 },
-    { cx: 654, cy: 186, rx: 26, ry: 12 },
-  ], opacity: 0.7 },
-  { dur: "68s", delay: "6s", ellipses: [
-    { cx: 240, cy: 520, rx: 70, ry: 28 }, { cx: 290, cy: 512, rx: 48, ry: 22 },
-    { cx: 208, cy: 528, rx: 34, ry: 15 },
-  ], opacity: 0.62 },
+  { id: "cloud-a", cx: 120, cy: 88, w: 150, dur: "58s", delay: "0s", opacity: 0.9 },
+  { id: "cloud-b", cx: 420, cy: 56, w: 190, dur: "72s", delay: "4s", opacity: 0.85 },
+  { id: "cloud-c", cx: 860, cy: 72, w: 150, dur: "64s", delay: "8s", opacity: 0.88 },
+  { id: "cloud-a", cx: 680, cy: 180, w: 120, dur: "50s", delay: "2s", opacity: 0.78 },
+  { id: "cloud-b", cx: 240, cy: 520, w: 200, dur: "68s", delay: "6s", opacity: 0.7 },
+] as const;
+
+/** v5：地平線遠景黏土島剪影（透明 PNG），取代向量丘陵。 */
+const FAR_ISLANDS = [
+  { id: "far-island-a", cx: 180, cy: 130, w: 400, opacity: 0.5 },
+  { id: "far-island-b", cx: 780, cy: 110, w: 480, opacity: 0.46 },
+  { id: "far-island-a", cx: 520, cy: 648, w: 560, opacity: 0.42 },
 ] as const;
 
 type Props = {
@@ -84,29 +78,47 @@ export default function UniverseMapParallax({
         height={MAP_STAGE.height}
         focusable="false"
       >
-        {/* 遠景丘陵 */}
-        <ellipse className={styles.hill} cx="180" cy="120" rx="200" ry="48" fill="#b8dcc8" opacity="0.42" />
-        <ellipse className={styles.hill} cx="780" cy="100" rx="240" ry="52" fill="#a8d4c0" opacity="0.38" />
-        <ellipse className={styles.hill} cx="520" cy="640" rx="280" ry="44" fill="#c8e0d0" opacity="0.34" />
+        {/* 遠景黏土島剪影（ridge 底緣對齊 cy） */}
+        {FAR_ISLANDS.map((hill, i) => {
+          const h = hill.w * 0.42;
+          return (
+            <image
+              key={`hill-${i}`}
+              className={styles.hillImg}
+              href={farIslandSrcSet(hill.id).src}
+              x={hill.cx - hill.w / 2}
+              y={hill.cy - h}
+              width={hill.w}
+              height={h}
+              opacity={hill.opacity}
+              preserveAspectRatio="xMidYMax meet"
+            />
+          );
+        })}
 
-        {CLOUDS.map((cloud, i) => (
-          <g
-            key={i}
-            className={styles.cloud}
-            fill="#fff"
-            opacity={cloud.opacity}
-            style={
-              {
-                "--dur": cloud.dur,
-                "--delay": cloud.delay,
-              } as CSSProperties
-            }
-          >
-            {cloud.ellipses.map((e, j) => (
-              <ellipse key={j} cx={e.cx} cy={e.cy} rx={e.rx} ry={e.ry} />
-            ))}
-          </g>
-        ))}
+        {/* 黏土雲團（drift 慢飄） */}
+        {CLOUDS.map((cloud, i) => {
+          const h = cloud.w * 0.6;
+          return (
+            <image
+              key={`cloud-${i}`}
+              className={styles.cloudImg}
+              href={cloudPath(cloud.id)}
+              x={cloud.cx - cloud.w / 2}
+              y={cloud.cy - h / 2}
+              width={cloud.w}
+              height={h}
+              opacity={cloud.opacity}
+              preserveAspectRatio="xMidYMid meet"
+              style={
+                {
+                  "--dur": cloud.dur,
+                  "--delay": cloud.delay,
+                } as CSSProperties
+              }
+            />
+          );
+        })}
       </svg>
     </div>
   );
