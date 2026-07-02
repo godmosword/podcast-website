@@ -56,4 +56,12 @@ describe("getCharactersForStory", () => {
     expect(ids).toContain("xiao-hong");
     expect(ids).toContain("dirty-germs");
   });
+
+  it("ep-16 含噗噗豬、海龜老師暖暖、安安、小紅", () => {
+    const ids = getCharactersForStory("ep-16").map((c) => c.id);
+    expect(ids).toContain("pu-pu-pig");
+    expect(ids).toContain("nuan-nuan-turtle");
+    expect(ids).toContain("an-an");
+    expect(ids).toContain("xiao-hong");
+  });
 });

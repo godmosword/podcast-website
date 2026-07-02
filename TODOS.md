@@ -684,6 +684,9 @@ T+2d    社群貼文（B 戰場）
 
 ## Completed
 
+### ep-16 字幕校對（proofread --mark）
+Whisper 草稿人工校對：`撲撲豬`→`噗噗豬`、`救護車安安`→`安安救護車`、`安安就護車廳了`→`安安救護車呢`、`會淹水`→`會溺水`（開場玩水安全說明）；179 句 `--mark` 完成，illustrate 閘門已解。待 commit。
+
 ### 樂園地圖 P1 載入體驗（佔位 + 標籤 + preload）
 `ZoneIslandTileArt` 沙草佔位；`tileLabel` 反縮放；`/adventures` preload car-park。`ff762a0`
 

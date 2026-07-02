@@ -52,6 +52,8 @@ const ID_BY_CANONICAL_NAME: Record<string, string> = {
   老爺爺爆米花餐車: "popcorn-truck",
   消毒車噴噴: "pen-pen",
   髒髒小怪獸: "dirty-germs",
+  噗噗豬: "pu-pu-pig",
+  海龜老師暖暖: "nuan-nuan-turtle",
 };
 
 const VEHICLE_ZH: Record<string, string> = {
@@ -81,6 +83,8 @@ const VEHICLE_ZH: Record<string, string> = {
   "fire engine": "消防車",
   "spray truck": "消毒車",
   creature: "小怪獸",
+  "tour car": "遊園車",
+  "sea turtle": "海龜",
 };
 
 /** 車種對應的手動維護集數 slug（與 firstSeen 合併）。 */
@@ -125,6 +129,8 @@ const PERSONALITY_BY_ID: Record<string, string> = {
   "popcorn-truck": "親切分享、偶爾需要救援",
   "pen-pen": "驕傲愛逞強、後來學會酒精不能取代洗手",
   "dirty-germs": "調皮躲藏、怕肥皂和清水",
+  "pu-pu-pig": "歡樂開朗、愛帶大家認識新地方",
+  "nuan-nuan-turtle": "溫柔耐心、教小朋友慢慢認識新朋友",
 };
 
 function shortName(entry: RawCharacter, id: string): string {
