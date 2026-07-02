@@ -1,0 +1,189 @@
+{
+  "slug": "ep-16",
+  "audioDuration": 479,
+  "model": "manual-semantic-15-20s",
+  "generatedAt": "2026-07-02T13:30:00.000Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 30,
+      "end": 67.4,
+      "summary": "主持人開場（保留首圖）",
+      "prompt": "Clay podcast studio: hosts Bonbon and Mami chat warmly about visiting a shallow kids water park and safety tips before today's story, small sky-blue pig tour car toy on table, summer playful mood",
+      "characters": ["Bonbon", "馬米"],
+      "keepCover": true,
+      "refPageHint": "Cover page 1 shows 噗噗豬 sky-blue pig tour car at water park — keep as published cover. Hosts are HUMAN clay not cars."
+    },
+    {
+      "index": 2,
+      "start": 67.4,
+      "end": 88.2,
+      "summary": "夏季水樂園開幕排隊",
+      "prompt": "Hot sunny Rainbow Plaza beside new summer water park entrance, festive opening balloons and banners, many small colorful faceless clay vehicles lining up excitedly, red race car Xiao Hong at front craning to see",
+      "characters": ["小紅賽車"],
+      "refPages": [1],
+      "refPageHint": "PRIMARY: 小紅賽車 match portrait — bright red race car number 2 white stripe. Background cars faceless smaller. Water park gate visible ahead."
+    },
+    {
+      "index": 3,
+      "start": 88.2,
+      "end": 102.6,
+      "summary": "小紅興奮、安安害羞",
+      "prompt": "Split mood at queue: Xiao Hong race car bouncing with joy loving new places and new friends, while cream-white An-An ambulance waits shyly in corner quietly, contrast between outgoing and introverted",
+      "characters": ["小紅賽車", "安安救護車"],
+      "refPages": [2],
+      "refPageHint": "PRIMARY: Both match portraits exactly — 小紅賽車 energetic eyes; 安安救護車 gentle shy eyes red cross. Each vehicle ONE face only."
+    },
+    {
+      "index": 4,
+      "start": 102.6,
+      "end": 128.8,
+      "summary": "安安心想、大門開啟",
+      "prompt": "An-An ambulance alone in corner thinking worriedly how to play if I do not know everyone, then grand water park gates slowly opening with sparkle and mist, anticipation moment",
+      "characters": ["安安救護車"],
+      "refPages": [3],
+      "refPageHint": "PRIMARY: 安安救護車 match portrait — shy thoughtful expression. Gates colorful clay water park entrance. No other named characters yet."
+    },
+    {
+      "index": 5,
+      "start": 128.8,
+      "end": 160.5,
+      "summary": "噗噗豬噴水登場",
+      "prompt": "Round sky-blue pig-themed tour car Pupu Pig rolling out from opened water park gate, pink snout and floppy pig ears, roof water cannon spraying psssh psssh arcs, pink tail splashing, joyful entrance",
+      "characters": ["噗噗豬"],
+      "refPages": [1],
+      "refPageHint": "PRIMARY: 噗噗豬 match cover page 1 and portrait exactly — sky-blue body pink snout pig ears water cannon life ring. ONE face on windshield."
+    },
+    {
+      "index": 6,
+      "start": 160.5,
+      "end": 200.7,
+      "summary": "噗噗豬導覽員自我介紹",
+      "prompt": "Pupu Pig tour car grinning and gesturing proudly as cheerful water park guide who always appears first at new openings, playful comic pose welcoming friends, water droplets sparkling around",
+      "characters": ["噗噗豬"],
+      "refPages": [5],
+      "refPageHint": "PRIMARY: 噗噗豬 match portrait and page 5 design — same blue pig car proportions and pink features. Fun not mean-spirited."
+    },
+    {
+      "index": 7,
+      "start": 200.7,
+      "end": 230.1,
+      "summary": "海龜老師暖暖滑來",
+      "prompt": "Gentle anthropomorphic sea turtle teacher Nuannuan gliding out from under big blue beach umbrella, then stepping onto teal skateboard with white stripes, waving flipper warmly, water park pool behind",
+      "characters": ["海龜老師暖暖"],
+      "refPages": [1],
+      "refPageHint": "PRIMARY: 海龜老師暖暖 match portrait exactly — beige turtle pink bow polka dots pink-orange shell on teal skateboard. NOT a car. ONE turtle face."
+    },
+    {
+      "index": 8,
+      "start": 230.1,
+      "end": 267.7,
+      "summary": "暖暖：新環境很正常",
+      "prompt": "Nuannuan turtle teacher on skateboard speaking gently to two small clay cars at eye level in a teaching circle, reassuring that new places feel unfamiliar at first, calm water park background",
+      "characters": ["海龜老師暖暖", "小紅賽車", "安安救護車"],
+      "refPages": [7, 3],
+      "refPageHint": "CRITICAL SCALE: 海龜老師暖暖 standing on skateboard must be the SAME height as 小紅賽車 and 安安救護車 — turtle body about one car-length tall, NOT human-sized, NOT giant. Match portrait design (pink bow, teal skateboard) but shrink to vehicle scale. 小紅賽車 and 安安救護車 match portraits at normal Cheche Car Park vehicle size. Three characters in one row, equal scale, turtle NOT inside a vehicle. Each ONE face."
+    },
+    {
+      "index": 9,
+      "start": 267.7,
+      "end": 297.7,
+      "summary": "認識新朋友三步骤",
+      "prompt": "Educational friendly montage with Nuannuan showing three simple steps: first look around for a friend, second say hello my name is, third ask can I play with you, soft icons not long text, vehicles trying each step",
+      "characters": ["海龜老師暖暖"],
+      "refPages": [8],
+      "refPageHint": "PRIMARY: 海龜老師暖暖 match portrait teaching pose. Three simple pictogram panels beside her. Child-safe warm colors."
+    },
+    {
+      "index": 10,
+      "start": 297.7,
+      "end": 318.6,
+      "summary": "安安跟噗噗豬說你好",
+      "prompt": "Shy An-An ambulance slowly rolling beside Pupu Pig and quietly saying hello my name is An-An, small brave smile, Pupu Pig turning happily to listen, gentle first-contact moment",
+      "characters": ["安安救護車", "噗噗豬"],
+      "refPages": [9],
+      "refPageHint": "PRIMARY: 安安救護車 shy but brave match portrait. 噗噗豬 welcoming match portrait. Close two-shot composition. Each ONE face."
+    },
+    {
+      "index": 11,
+      "start": 318.6,
+      "end": 341.1,
+      "summary": "安安笑了：慢慢靠近也可以",
+      "prompt": "Pupu Pig cheering welcome An-An, An-An ambulance smiling softly realizing new friends do not need loud voices or instant closeness, just hi and a slow friendly approach, warm relief",
+      "characters": ["安安救護車", "噗噗豬"],
+      "refPages": [10],
+      "refPageHint": "PRIMARY: Both match page 10 designs. An-An gentle smile. Pupu Pig supportive not overwhelming."
+    },
+    {
+      "index": 12,
+      "start": 341.1,
+      "end": 352.3,
+      "summary": "小紅邀請一起參觀",
+      "prompt": "Xiao Hong race car excitedly inviting everyone let's tour the water park together and play, arms-equivalent wheel gesture, Pupu Pig and An-An turning toward adventure",
+      "characters": ["小紅賽車", "噗噗豬", "安安救護車"],
+      "refPages": [11],
+      "refPageHint": "PRIMARY: 小紅賽車 enthusiastic match portrait. 噗噗豬 and 安安救護車 match prior pages. Group energy building."
+    },
+    {
+      "index": 13,
+      "start": 352.3,
+      "end": 374.4,
+      "summary": "噗噗豬帶路出發",
+      "prompt": "Pupu Pig leading the way into water park, Xiao Hong following happily, An-An ambulance joining slowly, Nuannuan turtle gliding on skateboard beside them like a caring teacher escort",
+      "characters": ["噗噗豬", "小紅賽車", "安安救護車", "海龜老師暖暖"],
+      "refPages": [12],
+      "refPageHint": "PRIMARY: All four match portraits and prior page designs. Nuannuan on skateboard not in car. Pupu Pig in front. Each ONE face."
+    },
+    {
+      "index": 14,
+      "start": 374.4,
+      "end": 397.5,
+      "summary": "彩虹滑水道與飄飄河",
+      "prompt": "Water park wonder tour: rainbow slide, bubble fountain spraying, comfy cool lazy river ahead, group looking amazed, splashing water and bobbling bubble effects, summer joy",
+      "characters": ["噗噗豬", "小紅賽車", "安安救護車", "海龜老師暖暖"],
+      "refPages": [13],
+      "refPageHint": "PRIMARY: Same four characters match page 13. Wide establishing shot of attractions. Characters smaller in foreground pointing."
+    },
+    {
+      "index": 15,
+      "start": 397.5,
+      "end": 411.1,
+      "summary": "水上樂園正式開幕",
+      "prompt": "Celebration splash finale inside water park: water whooshing, bubbles popping, confetti-like droplets, all four friends together as Cheche Car Park summer water park officially opens, triumphant cheerful mood",
+      "characters": ["噗噗豬", "小紅賽車", "安安救護車", "海龜老師暖暖"],
+      "refPages": [14],
+      "refPageHint": "PRIMARY: All four match established designs from pages 12-14. Festive splash effects. Child-safe celebration."
+    },
+    {
+      "index": 16,
+      "start": 411.1,
+      "end": 437.1,
+      "summary": "主持人故事重點",
+      "prompt": "Clay podcast studio: Mami and Bonbon summarizing story lesson — at new water park, new school, new class or summer camp, you can look around, say hello my name is, and ask can I play together",
+      "characters": ["Bonbon", "馬米"],
+      "refPages": [1],
+      "refPageHint": "PRIMARY: Human hosts Bonbon teal hoodie and Mami pink outfit match host portraits exactly. Small 噗噗豬 toy on table optional."
+    },
+    {
+      "index": 17,
+      "start": 437.1,
+      "end": 460.6,
+      "summary": "小朋友一起練習",
+      "prompt": "Hosts encouraging listening children to practice introducing themselves and asking to play, warm interactive studio with speech bubble space for kid names, gentle participatory mood",
+      "characters": ["Bonbon", "馬米"],
+      "refPages": [16],
+      "refPageHint": "PRIMARY: Hosts match portraits. Encouraging smiles. No text in image."
+    },
+    {
+      "index": 18,
+      "start": 460.6,
+      "end": 479,
+      "summary": "結尾道別預告下集",
+      "prompt": "Cheerful closing: Bonbon and Mami waving goodbye, story friends Pupu Pig An-An Xiao Hong and Nuannuan turtle in water park background, teasing next episode mysterious water park story, sunset warmth",
+      "characters": ["Bonbon", "馬米", "噗噗豬", "安安救護車", "小紅賽車", "海龜老師暖暖"],
+      "refPages": [15, 1],
+      "refPageHint": "PRIMARY: Human hosts center match portraits. Story characters smaller background match page 15 designs. Nuannuan on skateboard. Each vehicle ONE face. Warm goodbye."
+    }
+  ],
+  "newCharacters": []
+}
