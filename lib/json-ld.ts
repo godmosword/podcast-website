@@ -27,22 +27,28 @@ function durationToIso8601(duration: string): string | null {
     return null;
   }
 
-  let h = 0;
-  let m = 0;
-  let s = 0;
+  let hInput = 0;
+  let mInput = 0;
+  let sInput = 0;
 
   if (parts.length === 2) {
-    [m, s] = parts;
+    // MM:SS —— 分鐘可超過 59（例如 90:00），僅秒需 < 60
+    [mInput, sInput] = parts;
+    if (sInput > 59) return null;
   } else if (parts.length === 3) {
-    [h, m, s] = parts;
+    [hInput, mInput, sInput] = parts;
+    if (sInput > 59 || mInput > 59) return null;
   } else {
     return null;
   }
 
-  if (s > 59 || m > 59) return null;
-
-  const total = h * 3600 + m * 60 + s;
+  const total = hInput * 3600 + mInput * 60 + sInput;
   if (total <= 0) return null;
+
+  // 正規化為 H/M/S，避免 MM:SS 溢位造成非標準輸出
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
 
   const chunks: string[] = ["PT"];
   if (h > 0) chunks.push(`${h}H`);
@@ -117,6 +123,7 @@ export function podcastEpisodeJsonLd(story: Story): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
     "@type": "PodcastEpisode",
+    "@id": `${pageUrl}#episode`,
     name: story.title,
     description: storyDescription(story),
     url: pageUrl,
@@ -125,6 +132,8 @@ export function podcastEpisodeJsonLd(story: Story): Record<string, unknown> {
     episodeNumber: story.ep,
     image: coverUrl,
     inLanguage: LANGUAGE,
+    author: AUTHORS.map((name) => ({ "@type": "Person", name })),
+    publisher: { "@id": `${siteUrl}/#organization` },
     ...(timeRequired ? { duration: timeRequired, timeRequired } : {}),
     associatedMedia: {
       "@type": "MediaObject",

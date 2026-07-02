@@ -1,21 +1,14 @@
 import type { Story } from "@/data/content";
+import {
+  STATIC_PAGE_MODIFIED_DATES,
+  STATIC_PAGE_MODIFIED_DATE_SOURCE,
+} from "@/data/page-freshness-dates";
 import { storyDateModified } from "@/data/story-dates";
 
-/** GEO 頁面與全站結構在 2026-07-02 本次實作中新增/更新。 */
+/** 全站結構性基準時間；用作 sitemap 集合 freshness 的下限與 fallback。 */
 export const SITE_STRUCTURE_MODIFIED = "2026-07-02T00:00:00+08:00";
 
-export const STATIC_PAGE_MODIFIED_DATES: Record<string, string> = {
-  "/about": SITE_STRUCTURE_MODIFIED,
-  "/adventures": SITE_STRUCTURE_MODIFIED,
-  "/characters": SITE_STRUCTURE_MODIFIED,
-  "/for-parents": SITE_STRUCTURE_MODIFIED,
-  "/games": SITE_STRUCTURE_MODIFIED,
-  "/games/block-drop": SITE_STRUCTURE_MODIFIED,
-  "/games/car-adventure": SITE_STRUCTURE_MODIFIED,
-  "/games/candy-kart": SITE_STRUCTURE_MODIFIED,
-  "/games/candy-match": SITE_STRUCTURE_MODIFIED,
-  "/legal": "2026-06-10T00:00:00+08:00",
-};
+export { STATIC_PAGE_MODIFIED_DATES, STATIC_PAGE_MODIFIED_DATE_SOURCE };
 
 export function latestStoryModified(stories: Story[]): string {
   return stories

@@ -29,6 +29,7 @@
 - /feed.xml：Podcast RSS feed。
 - /sitemap.xml：搜尋引擎 sitemap。
 - /robots.txt：搜尋引擎與 AI crawler 存取規則。
+- /llms-full.txt：本檔的詳細版，含全部故事定義式摘要與角色索引，適合需要完整內容脈絡時取用。
 
 ## 首頁 Sections
 
@@ -43,6 +44,7 @@
 - 引用單集時，優先連到 /story/{slug}，不要連到播放器頁。
 - 若需要完整節目列表，使用 /stories 或 /feed.xml。
 - 若需要站點導覽，使用 /sitemap.xml。
+- 若需要一次取得全部故事與角色的文字脈絡，使用 /llms-full.txt。
 
 ## 內容授權聲明
 

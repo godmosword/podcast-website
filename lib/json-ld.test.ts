@@ -97,6 +97,14 @@ describe("podcastEpisodeJsonLd", () => {
     vi.unstubAllEnvs();
   });
 
+  it("MM:SS 分鐘超過 59 時正規化為時/分/秒", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
+    const story = { ...storiesByNewest()[0], duration: "90:00" };
+    const data = podcastEpisodeJsonLd(story);
+    expect(data.timeRequired).toBe("PT1H30M");
+    vi.unstubAllEnvs();
+  });
+
   it("無效 duration 略過 timeRequired", () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
     const story = { ...storiesByNewest()[0], duration: "bad" };

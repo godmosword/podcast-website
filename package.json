@@ -26,6 +26,7 @@
     "generate:landing-art": "tsx --env-file-if-exists=.env.local scripts/generate-landing-art.ts",
     "generate:roamer-assets": "tsx --env-file-if-exists=.env.local scripts/generate-roamer-assets.ts",
     "generate:llms-full": "tsx scripts/generate-llms-full.ts",
+    "generate:page-freshness": "tsx scripts/generate-page-freshness.ts",
     "optimize:roamer-assets": "tsx scripts/optimize-roamer-assets.ts",
     "fix:roamer-alpha": "tsx scripts/fix-roamer-alpha.ts"
   },

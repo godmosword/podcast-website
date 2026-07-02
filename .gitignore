@@ -54,3 +54,6 @@ next-env.d.ts
 
 # 本機 Candy Kart 臨時驗證腳本（正式覆蓋已在 e2e/smoke.spec.ts）
 /ck-verify.mjs
+
+# 由 prebuild（generate:llms-full）產生，隨每次建置重新產生，不進版控
+/public/llms-full.txt

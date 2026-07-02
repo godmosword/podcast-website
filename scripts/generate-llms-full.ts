@@ -46,8 +46,23 @@ function characterLine(character: RawCharacter, siteUrl: string): string {
   return `- ${character.name}：原創 Q 版黏土車車角色，${appearanceText}。角色頁：${siteUrl}/characters`;
 }
 
+/**
+ * 於 CI／Vercel 建置時，禁止把 localhost 網址寫進要上線的產物。
+ * 本機開發建置（無 CI/VERCEL）僅警告，不阻斷。
+ */
+function assertProductionSiteUrl(siteUrl: string): void {
+  if (!/^https?:\/\/localhost/.test(siteUrl)) return;
+
+  const message = `generate-llms-full: siteUrl 解析為 ${siteUrl}，llms-full.txt 會含 localhost 連結。請設定 NEXT_PUBLIC_SITE_URL。`;
+  if (process.env.CI || process.env.VERCEL) {
+    throw new Error(message);
+  }
+  console.warn(`[warn] ${message}`);
+}
+
 export function buildLlmsFullText(options: BuildOptions = {}): string {
   const siteUrl = normalizeSiteUrl(options.siteUrl ?? getSiteUrl());
+  assertProductionSiteUrl(siteUrl);
   const generatedAt = options.generatedAt ?? new Date().toISOString();
   const stories = getStories();
   const characters = rawCharacters as RawCharacter[];
