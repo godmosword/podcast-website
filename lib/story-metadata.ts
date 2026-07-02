@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { Story } from "@/data/content";
+import { storyDateModified } from "@/data/story-dates";
 import { DEFAULT_OG_IMAGE } from "@/lib/site-url";
 import { storyDefinitionSummary } from "@/lib/story-geo";
 import { storyCoverPath } from "@/lib/story-utils";
@@ -22,11 +23,16 @@ function storyOgImagePath(story: Story): string {
 export function storyDetailMetadata(story: Story): Metadata {
   const description = storyDescription(story);
   const imagePath = storyOgImagePath(story);
+  const modified = storyDateModified(story);
 
   return {
     title: story.title,
     description,
     alternates: { canonical: `/story/${story.slug}` },
+    other: {
+      dateModified: modified,
+      "article:modified_time": modified,
+    },
     openGraph: {
       title: story.title,
       description,

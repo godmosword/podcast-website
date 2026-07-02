@@ -7,6 +7,7 @@ import JsonLd from "@/components/JsonLd";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import { characterCreativeWorkJsonLd } from "@/lib/json-ld";
+import { STATIC_PAGE_MODIFIED_DATES } from "@/lib/page-freshness";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
   description:
     "車車遊樂園原創角色圖鑑：認識 Bonbon、馬米和每一台車車朋友，查看角色個性與出場故事。",
   alternates: { canonical: "/characters" },
+  other: { dateModified: STATIC_PAGE_MODIFIED_DATES["/characters"] },
   openGraph: {
     title: "角色圖鑑 · 車車遊樂園",
     description:

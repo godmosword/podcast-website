@@ -10,6 +10,7 @@ import {
   representativeParentStories,
 } from "@/lib/for-parents";
 import { faqPageJsonLd } from "@/lib/json-ld";
+import { STATIC_PAGE_MODIFIED_DATES } from "@/lib/page-freshness";
 import { storyCoverPath } from "@/lib/story-utils";
 import styles from "./page.module.css";
 
@@ -18,6 +19,7 @@ export const metadata: Metadata = {
   description:
     "整理車車遊樂園適合家長搜尋的重點：中文車車 podcast、適合年齡、故事主題、陪聽方法與代表性集數。",
   alternates: { canonical: "/for-parents" },
+  other: { dateModified: STATIC_PAGE_MODIFIED_DATES["/for-parents"] },
   openGraph: {
     title: "給家長的中文車車 Podcast 指南 · 車車遊樂園",
     description:

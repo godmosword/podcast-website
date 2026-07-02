@@ -3,6 +3,7 @@ import type { Story } from "@/data/content";
 import { storyDateModified } from "@/data/story-dates";
 import { CHANNEL_DESCRIPTION, CHANNEL_TITLE } from "@/lib/feed-constants";
 import { siteRssUrl } from "@/lib/feed";
+import { STATIC_PAGE_MODIFIED_DATES } from "@/lib/page-freshness";
 import { getSiteUrl } from "@/lib/site-url";
 import { storyDescription } from "@/lib/story-metadata";
 import { storyAudioPath, storyCoverPath } from "@/lib/story-utils";
@@ -167,6 +168,7 @@ export function characterCreativeWorkJsonLd(
     description:
       "車車遊樂園的原創車車角色名冊，整理角色個性、車種與出場故事。",
     url: `${siteUrl}/characters`,
+    dateModified: STATIC_PAGE_MODIFIED_DATES["/characters"],
     inLanguage: LANGUAGE,
     isPartOf: {
       "@type": "PodcastSeries",

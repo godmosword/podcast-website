@@ -1,92 +1,115 @@
 import type { MetadataRoute } from "next";
 import { allTags, allVehicles, getStories } from "@/data/content";
+import { storyDateModified } from "@/data/story-dates";
+import {
+  collectionModifiedDate,
+  STATIC_PAGE_MODIFIED_DATES,
+} from "@/lib/page-freshness";
 import { getSiteUrl } from "@/lib/site-url";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = getSiteUrl();
-  const now = new Date();
+  const stories = getStories();
+  const collectionModified = collectionModifiedDate(stories);
 
   const staticPages: MetadataRoute.Sitemap = [
-    { url: baseUrl, lastModified: now, changeFrequency: "weekly", priority: 1 },
+    {
+      url: baseUrl,
+      lastModified: collectionModified,
+      changeFrequency: "weekly",
+      priority: 1,
+    },
     {
       url: `${baseUrl}/stories`,
-      lastModified: now,
+      lastModified: collectionModified,
       changeFrequency: "weekly",
       priority: 0.95,
     },
     {
       url: `${baseUrl}/topic`,
-      lastModified: now,
+      lastModified: collectionModified,
       changeFrequency: "weekly",
       priority: 0.7,
     },
     {
+      url: `${baseUrl}/for-parents`,
+      lastModified: STATIC_PAGE_MODIFIED_DATES["/for-parents"],
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/characters`,
+      lastModified: STATIC_PAGE_MODIFIED_DATES["/characters"],
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
       url: `${baseUrl}/about`,
-      lastModified: now,
+      lastModified: STATIC_PAGE_MODIFIED_DATES["/about"],
       changeFrequency: "monthly",
       priority: 0.6,
     },
     {
       url: `${baseUrl}/adventures`,
-      lastModified: now,
+      lastModified: STATIC_PAGE_MODIFIED_DATES["/adventures"],
       changeFrequency: "monthly",
       priority: 0.65,
     },
     {
       url: `${baseUrl}/games`,
-      lastModified: now,
+      lastModified: STATIC_PAGE_MODIFIED_DATES["/games"],
       changeFrequency: "monthly",
       priority: 0.6,
     },
     {
       url: `${baseUrl}/games/block-drop`,
-      lastModified: now,
+      lastModified: STATIC_PAGE_MODIFIED_DATES["/games/block-drop"],
       changeFrequency: "monthly",
       priority: 0.6,
     },
     {
       url: `${baseUrl}/games/car-adventure`,
-      lastModified: now,
+      lastModified: STATIC_PAGE_MODIFIED_DATES["/games/car-adventure"],
       changeFrequency: "monthly",
       priority: 0.6,
     },
     {
       url: `${baseUrl}/games/candy-kart`,
-      lastModified: now,
+      lastModified: STATIC_PAGE_MODIFIED_DATES["/games/candy-kart"],
       changeFrequency: "monthly",
       priority: 0.6,
     },
     {
       url: `${baseUrl}/games/candy-match`,
-      lastModified: now,
+      lastModified: STATIC_PAGE_MODIFIED_DATES["/games/candy-match"],
       changeFrequency: "monthly",
       priority: 0.6,
     },
     {
       url: `${baseUrl}/legal`,
-      lastModified: now,
+      lastModified: STATIC_PAGE_MODIFIED_DATES["/legal"],
       changeFrequency: "yearly",
       priority: 0.3,
     },
   ];
 
-  const storyPages: MetadataRoute.Sitemap = getStories().map((story) => ({
+  const storyPages: MetadataRoute.Sitemap = stories.map((story) => ({
     url: `${baseUrl}/story/${story.slug}`,
-    lastModified: new Date(`${story.date}T12:00:00+08:00`),
+    lastModified: storyDateModified(story),
     changeFrequency: "monthly" as const,
     priority: 0.8,
   }));
 
   const topicPages: MetadataRoute.Sitemap = allTags().map((tag) => ({
     url: `${baseUrl}/topic/${encodeURIComponent(tag)}`,
-    lastModified: now,
+    lastModified: collectionModified,
     changeFrequency: "monthly" as const,
     priority: 0.6,
   }));
 
   const vehiclePages: MetadataRoute.Sitemap = allVehicles().map((vehicle) => ({
     url: `${baseUrl}/vehicles/${encodeURIComponent(vehicle)}`,
-    lastModified: now,
+    lastModified: collectionModified,
     changeFrequency: "monthly" as const,
     priority: 0.6,
   }));
