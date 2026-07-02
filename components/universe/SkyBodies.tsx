@@ -1,4 +1,5 @@
 import type { ThemePreference } from "@/lib/theme";
+import { moonPath, sunPath } from "@/lib/universe/map-art-src";
 import styles from "./SkyBodies.module.css";
 
 const STARS = [
@@ -25,8 +26,9 @@ export default function SkyBodies({ daylight, reduced, paused }: Props) {
       data-paused={paused || undefined}
       aria-hidden="true"
     >
-      <div className={styles.sun} />
-      <div className={styles.moon} />
+      {/* v5：黏土日月 PNG（§14），取代向量漸層圓。 */}
+      <img className={styles.sun} src={sunPath()} alt="" draggable={false} />
+      <img className={styles.moon} src={moonPath()} alt="" draggable={false} />
       <svg className={styles.stars} viewBox="0 0 1000 720" width="100%" height="100%">
         {STARS.map((s, i) => (
           <circle

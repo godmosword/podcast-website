@@ -24,6 +24,7 @@
 
 ### Changed
 
+- **宇宙地圖 v5 收尾（黏土世界一致性）**：`SkyBodies` 日月改接黏土 PNG（`map/sun.png`／`moon.png`，取代向量漸層圓）；移除 `moonGlint` 螢幕空間向量月光線、夜間色溫罩減半（海面夜色改由 `sea-night.png` 貼圖本身承擔，罩層僅統一島嶼色溫，避免雙重夜化壓灰黏土紋理）；夜海貼圖惰性載入（日間不再下載 `sea-night.png`，首次切夜後掛載並保留 600ms crossfade）；視差遠島撤出舞台底部（§13 深度文法：y 越大越近，遠景剪影僅保留地平線帶）
 - **Landing 手機／平板 CTA 縮小並對齊小紅車**：≤768px 改 auto 寬靠左、縮 padding／字級；≤600px 再縮一級，`content` 底距對齊 `DuduCompanion` 水平線，避開底部進度列
 - **Landing nav 與 CTA 統一淡蜜桃橘**：top bar 與「全部故事／睡前故事」CTA 一起改淡蜜桃漸層（`#ffe7cf→#ffd5a8`）+ 暖深棕字（`#7a4012`，非黑）；`.next` 箭頭與 Subscribe pill 改暖深棕、進度小圓點改品牌橘 `#ff8c2b`（淡色在白底會消失）
 - **Landing top bar 對齊 CTA 橘色**：nav 漸層改引用 `--landing-cta-*`（與「全部故事／睡前故事」同色），字色維持白；Subscribe pill 改反白
@@ -33,6 +34,7 @@
 
 ### Fixed
 
+- **車車宇宙地圖外連開窗**：外連島（`route.external`）的 `window.open` 移回使用者手勢同步呼叫棧——原本放在 fly-to 後的 `setTimeout` 內，Safari／iOS 彈窗攔截會靜默擋掉；並在拖曳打斷 fly-to 時取消尚未觸發的開 sheet／導航 timer，避免鏡頭被使用者接管後地圖仍自行開面板
 - **車車宇宙地圖 a11y**：sr-only 島嶼清單連結加 `tabIndex={-1}`，鍵盤 Tab 改走可見島嶼 button；`UniverseMap` unmount 時清除 fly-to 後開 sheet 的 `setTimeout`，避免卸載後 setState
 - **車車宇宙地圖 pan 手勢**：`useMapCamera` 在島嶼 `<button>` 上不 capture pointer，修復點島無法開 sheet 的問題
 - **Storyline 式 Landing Hub**：`/` 為四段 segment 入口（車車故事／睡前數綿羊／捏黏土／衛教宣導）；現 podcast 主頁搬至 **`/stories`**

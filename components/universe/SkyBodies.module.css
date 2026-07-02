@@ -10,21 +10,19 @@
   position: absolute;
   top: 36px;
   right: 72px;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
   transition: opacity 600ms ease, transform 600ms ease;
 }
 
 .sun {
-  background: radial-gradient(circle at 35% 35%, #fff8dc, #ffd166 55%, #ffb347);
-  box-shadow: 0 0 28px rgba(255, 200, 80, 0.45);
+  filter: drop-shadow(0 0 14px rgba(255, 200, 80, 0.45));
   opacity: 1;
 }
 
 .moon {
-  background: radial-gradient(circle at 38% 38%, #f5f7ff, #d8e0f0 70%, #b8c4dc);
-  box-shadow: 0 0 18px rgba(200, 210, 255, 0.35);
+  filter: drop-shadow(0 0 10px rgba(200, 210, 255, 0.4));
   opacity: 0;
   transform: scale(0.92);
 }

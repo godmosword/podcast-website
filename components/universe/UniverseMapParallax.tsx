@@ -18,11 +18,13 @@ const CLOUDS = [
   { id: "cloud-b", cx: 240, cy: 520, w: 200, dur: "68s", delay: "6s", opacity: 0.7 },
 ] as const;
 
-/** v5：地平線遠景黏土島剪影（透明 PNG），取代向量丘陵。 */
+/** v5：地平線遠景黏土島剪影（透明 PNG），取代向量丘陵。
+ *  §13 深度文法：y 越大越近，遠景剪影只能落在地平線帶（cy ≲ 200），
+ *  放到舞台底部會與慢速視差產生「近處卻遠移」的矛盾。 */
 const FAR_ISLANDS = [
   { id: "far-island-a", cx: 180, cy: 130, w: 400, opacity: 0.5 },
   { id: "far-island-b", cx: 780, cy: 110, w: 480, opacity: 0.46 },
-  { id: "far-island-a", cx: 520, cy: 648, w: 560, opacity: 0.42 },
+  { id: "far-island-a", cx: 500, cy: 150, w: 300, opacity: 0.38 },
 ] as const;
 
 type Props = {

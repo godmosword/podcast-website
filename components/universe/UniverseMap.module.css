@@ -78,7 +78,8 @@
   }
 }
 
-/* 夜間海面色調（疊在固定基調上，童書感深藍而非 app 深色） */
+/* 夜間色溫罩：海面夜色由 sea-night.png 貼圖本身承擔（v5 §14），
+   此罩僅微調島嶼／漫遊車色溫使其融入夜景，強度須低於貼圖夜色。 */
 .nightSeaOverlay {
   position: absolute;
   inset: 0;
@@ -86,9 +87,9 @@
   z-index: 2;
   background: linear-gradient(
     180deg,
-    rgba(30, 55, 95, 0.08) 0%,
-    rgba(25, 50, 90, 0.22) 55%,
-    rgba(20, 45, 85, 0.28) 100%
+    rgba(30, 55, 95, 0.04) 0%,
+    rgba(25, 50, 90, 0.1) 55%,
+    rgba(20, 45, 85, 0.14) 100%
   );
   opacity: 0;
   transition: opacity 600ms ease;
@@ -96,31 +97,6 @@
 
 :global(html[data-theme="night"]) .nightSeaOverlay {
   opacity: 1;
-}
-
-/* 月光反光細條 */
-.moonGlint {
-  position: absolute;
-  left: 12%;
-  right: 18%;
-  top: 38%;
-  height: 3px;
-  pointer-events: none;
-  z-index: 2;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(220, 235, 255, 0.35) 40%,
-    rgba(220, 235, 255, 0.5) 50%,
-    rgba(220, 235, 255, 0.35) 60%,
-    transparent
-  );
-  opacity: 0;
-  transition: opacity 600ms ease;
-}
-
-:global(html[data-theme="night"]) .moonGlint {
-  opacity: 0.55;
 }
 
 @media (max-width: 480px) {

@@ -354,6 +354,17 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 - [x] 驗證：`tsc`/`vitest 258`/`build` 全綠；實機桌機+手機截圖四島黏土一致
 - [ ] （未來）逐島 building/coming/planned 狀態美術 overlay（v2 §6）；主島 idle 動態（摩天輪轉/車車跑）
 
+---
+
+## 車車宇宙樂園地圖（v5 收尾：資產待產）　`asset · M · /adventures`　〔design〕
+
+> 2026-07 設計審查結論：工程管線與接點已就緒，剩以下資產需生圖管線（`OPENAI_API_KEY`）產出後點亮。程式端 v5 收尾（黏土日月接線／去向量月光線／夜罩弱化／夜海惰性載入／視差遠島撤出底部／外連開窗修復）已完成。
+
+- [ ] **car-park motionParts 零件 PNG**（最高優先）：`car-park.wheel.png`（摩天輪，pivot 輪轂）+ `car-park.flags.png`（彩旗）——§12.1 鐵律：base 已烘焙可動部位，**base 必須一併重出**否則疊影；到位後 `ZONE_MOTION` 對應零件改 `enabled: true`
+- [ ] **海面 `sea@2x.png` / `sea-night@2x.png`**（§14.1 規格要求）：到位後海面改 CSS `image-set()` 平鋪（SVG `<pattern><image>` 吃不了 srcset），順帶天然懶載
+- [ ] **漫遊車 rear 視圖**：`xiao-hong.rear.png`、`duo-duo.rear.png`（`npm run generate:roamer-assets`），到位後 `MAP_ROAMERS` 補 `sprites:{front,rear}`
+- [ ] **planned 狀態美術**（ocean 島）：霧色未成形地基 + 「?」告示浮標（v2 §6），取代純降彩度
+
 **changelog：** car-park 黃金樣本 + Art Bible v2 + R1 四島整島黏土化（待補 commit hash）。
 
 ---

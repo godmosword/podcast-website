@@ -42,6 +42,13 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
   const paused = tabHidden || !mapInView;
   const [activeZone, setActiveZone] = useState<ZoneDef | null>(null);
   const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 夜海貼圖惰性載入：首次切到夜晚才掛 pattern，日間不下載 sea-night.png；
+  // 掛上後保持常駐，讓日夜切換仍有 600ms crossfade。
+  const [nightSeaMounted, setNightSeaMounted] = useState(false);
+
+  useEffect(() => {
+    if (daylight === "night") setNightSeaMounted(true);
+  }, [daylight]);
 
   useEffect(() => {
     const onVisibility = () => setTabHidden(document.hidden);
@@ -63,17 +70,22 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
 
   const handleActivate = useCallback(
     (zone: ZoneDef) => {
+      const directRoute =
+        zone.route && zone.status === "open" && !zone.subSegmentIds?.length;
+
+      // 外連必須留在使用者手勢的同步呼叫棧內開窗；
+      // 放進 setTimeout 會被 Safari／iOS 彈窗攔截靜默擋掉。
+      if (directRoute && zone.route?.external) {
+        window.open(zone.route.href, "_blank", "noopener,noreferrer");
+        return;
+      }
+
       camera.flyTo(zone.coord, FOCUS_SCALE);
 
       const reveal = () => {
-        const directRoute =
-          zone.route && zone.status === "open" && !zone.subSegmentIds?.length;
+        openTimerRef.current = null;
         if (directRoute && zone.route) {
-          if (zone.route.external) {
-            window.open(zone.route.href, "_blank", "noopener,noreferrer");
-          } else {
-            router.push(zone.route.href);
-          }
+          router.push(zone.route.href);
           return;
         }
         setActiveZone(zone);
@@ -89,6 +101,14 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
     [camera, reduced, router],
   );
 
+  /** 使用者拖曳打斷 fly-to 時，取消尚未觸發的開 sheet／導航。 */
+  const cancelPendingReveal = useCallback(() => {
+    if (openTimerRef.current) {
+      clearTimeout(openTimerRef.current);
+      openTimerRef.current = null;
+    }
+  }, []);
+
   useEffect(() => {
     return () => {
       if (openTimerRef.current) clearTimeout(openTimerRef.current);
@@ -101,12 +121,15 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
   return (
     <section ref={sectionRef} className={styles.map} aria-label="車車宇宙樂園地圖">
       <div className={styles.nightSeaOverlay} aria-hidden="true" />
-      <div className={styles.moonGlint} aria-hidden="true" />
 
       <div
         className={styles.viewport}
         ref={camera.bind.ref}
-        onPointerDown={camera.bind.onPointerDown}
+        onPointerDown={(e) => {
+          // 島嶼 button 的 pointerdown 交給 activate 流程自行接手（會重設 timer）
+          if (!(e.target as Element).closest("button")) cancelPendingReveal();
+          camera.bind.onPointerDown(e);
+        }}
         onPointerMove={camera.bind.onPointerMove}
         onPointerUp={camera.bind.onPointerUp}
         onPointerCancel={camera.bind.onPointerCancel}
@@ -157,21 +180,23 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
                   preserveAspectRatio="xMidYMid slice"
                 />
               </pattern>
-              <pattern
-                id="seaTileNight"
-                patternUnits="userSpaceOnUse"
-                width={SEA_TILE}
-                height={SEA_TILE}
-              >
-                <image
-                  href={seaTexturePath(true)}
-                  x="0"
-                  y="0"
+              {nightSeaMounted && (
+                <pattern
+                  id="seaTileNight"
+                  patternUnits="userSpaceOnUse"
                   width={SEA_TILE}
                   height={SEA_TILE}
-                  preserveAspectRatio="xMidYMid slice"
-                />
-              </pattern>
+                >
+                  <image
+                    href={seaTexturePath(true)}
+                    x="0"
+                    y="0"
+                    width={SEA_TILE}
+                    height={SEA_TILE}
+                    preserveAspectRatio="xMidYMid slice"
+                  />
+                </pattern>
+              )}
               <radialGradient id="clayShade" cx="38%" cy="30%" r="75%">
                 <stop offset="0" stopColor="#ffffff" stopOpacity="0.32" />
                 <stop offset="0.55" stopColor="#ffffff" stopOpacity="0" />
@@ -184,15 +209,17 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
             {/* 海面基色（貼圖載入前 / overscroll 露出時的底） */}
             <rect x="0" y="0" width={MAP_STAGE.width} height={MAP_STAGE.height} fill="#bfe0ef" />
             <rect x="0" y="0" width={MAP_STAGE.width} height={MAP_STAGE.height} fill="url(#seaTile)" />
-            <rect
-              x="0"
-              y="0"
-              width={MAP_STAGE.width}
-              height={MAP_STAGE.height}
-              fill="url(#seaTileNight)"
-              className={styles.seaNightTile}
-              style={{ opacity: daylight === "night" ? 1 : 0 }}
-            />
+            {nightSeaMounted && (
+              <rect
+                x="0"
+                y="0"
+                width={MAP_STAGE.width}
+                height={MAP_STAGE.height}
+                fill="url(#seaTileNight)"
+                className={styles.seaNightTile}
+                style={{ opacity: daylight === "night" ? 1 : 0 }}
+              />
+            )}
 
             {zones.map((zone) => {
               if (getZoneArtTile(zone.id).mode === "island") return null;
