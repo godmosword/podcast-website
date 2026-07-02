@@ -46,6 +46,13 @@
 - `/llms-full.txt` 是否包含全部 16 集摘要索引：若採用，內容需從 `storiesByNewest()` 產生/同步，避免手寫漂移。
 - `/for-parents` 的更新頻率、適合年齡、代表集數等文案：先以資料層數字生成並標 `[待確認]`，人工審稿後再移除標記。
 
+### GEO llms 收尾（2026-07-02）
+
+| Task | 狀態 | 主要產出 | 驗證 | Commit hash |
+|------|------|----------|------|-------------|
+| llms.txt 補路由 | 完成 | `public/llms.txt` 主要路由地圖補 `/for-parents`、`/characters` 兩行 | `git diff -- public/llms.txt` 確認只新增指定兩行 | `cfd1c5f` |
+| llms-full.txt 自動產生 | 完成 | 新增 `scripts/generate-llms-full.ts`、`scripts/generate-llms-full.test.ts`、`public/llms-full.txt`，並接入 `prebuild` | `npm run generate:llms-full` passed；`npm run build` passed；`npx tsc --noEmit` passed；`npm test` passed | `581b8aa` |
+
 ## 產品路線圖（互動 + STEM + 商業）
 
 > 依據：兒童數位產品研究共識（Thinkrolls／DragonBox／Khan Kids／Sago Mini 等）、台灣市場（《顛覆！故事 STEAM》、Firstory 付費成長、叮噹家族 VIP 月 99／年 999）、競品拆解（[RESEARCH.md — Hey Clay](./RESEARCH.md#2026-06-09hey-clay-app-架構拆解與適用性評估)）、以及本站現況（Next.js SSG、逐字字幕、4 款小遊戲、private 素材庫）。
