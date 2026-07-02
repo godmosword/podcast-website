@@ -1,4 +1,6 @@
+import type { Character } from "@/data/characters";
 import type { Story } from "@/data/content";
+import { storyDateModified } from "@/data/story-dates";
 import { CHANNEL_DESCRIPTION, CHANNEL_TITLE } from "@/lib/feed-constants";
 import { siteRssUrl } from "@/lib/feed";
 import { getSiteUrl } from "@/lib/site-url";
@@ -6,6 +8,12 @@ import { storyDescription } from "@/lib/story-metadata";
 import { storyAudioPath, storyCoverPath } from "@/lib/story-utils";
 
 const AUTHORS = ["Bonbon", "馬米"];
+const LANGUAGE = "zh-Hant";
+
+export type FaqItem = {
+  question: string;
+  answer: string;
+};
 
 function absoluteUrl(path: string): string {
   return `${getSiteUrl()}${path.startsWith("/") ? path : `/${path}`}`;
@@ -44,6 +52,34 @@ function durationToIso8601(duration: string): string | null {
   return chunks.join("");
 }
 
+export function siteIdentityJsonLd(): Record<string, unknown> {
+  const siteUrl = getSiteUrl();
+  const organizationId = `${siteUrl}/#organization`;
+  const websiteId = `${siteUrl}/#website`;
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": organizationId,
+        name: CHANNEL_TITLE,
+        url: siteUrl,
+        logo: absoluteUrl("/icon-512.png"),
+      },
+      {
+        "@type": "WebSite",
+        "@id": websiteId,
+        name: CHANNEL_TITLE,
+        description: CHANNEL_DESCRIPTION,
+        url: siteUrl,
+        inLanguage: LANGUAGE,
+        publisher: { "@id": organizationId },
+      },
+    ],
+  };
+}
+
 /** 首頁 PodcastSeries 結構化資料（對齊 /feed.xml） */
 export function podcastSeriesJsonLd(): Record<string, unknown> {
   const siteUrl = getSiteUrl();
@@ -51,16 +87,21 @@ export function podcastSeriesJsonLd(): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
     "@type": "PodcastSeries",
+    "@id": `${siteUrl}/#podcast-series`,
     name: CHANNEL_TITLE,
     description: CHANNEL_DESCRIPTION,
     url: siteUrl,
     webFeed: siteRssUrl(),
     image: absoluteUrl("/mascot.png"),
-    inLanguage: "zh-TW",
+    inLanguage: LANGUAGE,
+    genre: "兒童",
     author: AUTHORS.map((name) => ({
       "@type": "Person",
       name,
     })),
+    publisher: {
+      "@id": `${siteUrl}/#organization`,
+    },
   };
 }
 
@@ -79,10 +120,11 @@ export function podcastEpisodeJsonLd(story: Story): Record<string, unknown> {
     description: storyDescription(story),
     url: pageUrl,
     datePublished: story.date,
+    dateModified: storyDateModified(story),
     episodeNumber: story.ep,
     image: coverUrl,
-    inLanguage: "zh-TW",
-    ...(timeRequired ? { timeRequired } : {}),
+    inLanguage: LANGUAGE,
+    ...(timeRequired ? { duration: timeRequired, timeRequired } : {}),
     associatedMedia: {
       "@type": "MediaObject",
       contentUrl: audioUrl,
@@ -90,8 +132,54 @@ export function podcastEpisodeJsonLd(story: Story): Record<string, unknown> {
     },
     partOfSeries: {
       "@type": "PodcastSeries",
+      "@id": `${siteUrl}/#podcast-series`,
       name: CHANNEL_TITLE,
       url: siteUrl,
     },
+  };
+}
+
+export function faqPageJsonLd(faqs: FaqItem[]): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  };
+}
+
+export function characterCreativeWorkJsonLd(
+  characters: Character[],
+): Record<string, unknown> {
+  const siteUrl = getSiteUrl();
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "CreativeWork",
+    "@id": `${siteUrl}/characters#creative-work`,
+    name: "車車遊樂園原創角色",
+    description:
+      "車車遊樂園的原創車車角色名冊，整理角色個性、車種與出場故事。",
+    url: `${siteUrl}/characters`,
+    inLanguage: LANGUAGE,
+    isPartOf: {
+      "@type": "PodcastSeries",
+      "@id": `${siteUrl}/#podcast-series`,
+      name: CHANNEL_TITLE,
+    },
+    character: characters.map((character) => ({
+      "@type": "Person",
+      "@id": `${siteUrl}/characters#${character.id}`,
+      name: character.name,
+      description: `${character.vehicle}角色，${character.personality}`,
+      url: `${siteUrl}/characters#${character.id}`,
+      ...(character.ref ? { image: absoluteUrl(`/${character.ref}`) } : {}),
+    })),
   };
 }

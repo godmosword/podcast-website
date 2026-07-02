@@ -1,5 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { getCharactersForStory } from "./characters";
+import { getCharacters, getCharactersForStory } from "./characters";
+
+describe("getCharacters", () => {
+  it("回傳完整角色清單給角色頁與 JSON-LD 使用", () => {
+    const characters = getCharacters();
+    expect(characters.length).toBeGreaterThanOrEqual(20);
+    expect(characters.map((c) => c.id)).toContain("an-an");
+    expect(characters.every((c) => c.name && c.vehicle && c.personality)).toBe(
+      true,
+    );
+  });
+});
 
 describe("getCharactersForStory", () => {
   it("maps ep-6 to an-an", () => {

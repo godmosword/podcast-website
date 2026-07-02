@@ -163,6 +163,10 @@ const CHARACTERS: Character[] = (rawCharacters as RawCharacter[]).map(
   toCharacter,
 );
 
+export function getCharacters(): Character[] {
+  return CHARACTERS;
+}
+
 export function getCharactersForStory(slug: string): Character[] {
   const canonical = canonicalStorySlug(slug);
   return CHARACTERS.filter((c) => c.appearsIn.includes(canonical));
