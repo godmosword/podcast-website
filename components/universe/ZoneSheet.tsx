@@ -4,6 +4,7 @@ import { useEffect, useId, useRef } from "react";
 import { ZONE_STATUS_META, type ZoneDef } from "@/data/universe-zones";
 import { getCarParkLinks } from "@/lib/universe-map";
 import { notifyMailto } from "@/lib/contact";
+import { trackUniverseSheetLink, trackUniverseWishSubmit } from "@/lib/analytics";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import ZoneLandmark from "./ZoneLandmark";
 import ZoneWishForm from "./ZoneWishForm";
@@ -82,6 +83,7 @@ export default function ZoneSheet({ zone, onClose }: ZoneSheetProps) {
                 key={link.href}
                 className={styles.linkBtn}
                 href={link.href}
+                onClick={() => trackUniverseSheetLink(zone.id, link.href)}
                 {...(link.external
                   ? { target: "_blank", rel: "noopener noreferrer" }
                   : {})}
@@ -117,7 +119,11 @@ export default function ZoneSheet({ zone, onClose }: ZoneSheetProps) {
               <p className={styles.voteNote}>之後開放投票，由你決定下一站。</p>
             ) : null}
 
-            <ZoneWishForm zoneId={zone.id} fallbackHref={notifyHref} />
+            <ZoneWishForm
+              zoneId={zone.id}
+              fallbackHref={notifyHref}
+              onSubmitSuccess={(hasEmail) => trackUniverseWishSubmit(zone.id, hasEmail)}
+            />
           </div>
         )}
       </div>

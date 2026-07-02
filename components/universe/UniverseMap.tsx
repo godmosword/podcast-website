@@ -6,10 +6,15 @@ import { MAP_STAGE, ZONE_TERRAIN, type ZoneDef, type ZoneId, type ZoneStatus } f
 import { resolveUniverseMap } from "@/lib/universe-map";
 import { getZoneArtTile } from "@/lib/universe/zone-art-tile";
 import { parseDevStatusOverrides } from "@/lib/universe/dev-map-flags";
+import { parseZoneDeepLink } from "@/lib/universe/zone-deep-link";
 import { mapDepthZ } from "@/lib/universe-depth";
 import { seaTexturePath } from "@/lib/universe/map-art-src";
 import { resolveTextureHref } from "@/lib/universe/png-to-webp";
 import { playSfx } from "@/lib/sfx";
+import {
+  trackUniverseDayNightToggle,
+  trackUniverseZoneTap,
+} from "@/lib/analytics";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useWebpSupported } from "@/hooks/useWebpSupported";
 import { useTheme } from "@/components/ThemeProvider";
@@ -32,9 +37,11 @@ const SEA_TILE = 300;
 
 type MapContentProps = {
   devStatusOverrides: Partial<Record<ZoneId, ZoneStatus>>;
+  zoneQuery: string | null;
+  syncZoneQuery: (zoneId: ZoneId | null) => void;
 };
 
-function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
+function UniverseMapContent({ devStatusOverrides, zoneQuery, syncZoneQuery }: MapContentProps) {
   const { zones, bridges, viewBox } = resolveUniverseMap();
   const camera = useMapCamera();
   const reduced = useReducedMotion();
@@ -47,14 +54,44 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
   const paused = tabHidden || !mapInView;
   const [activeZone, setActiveZone] = useState<ZoneDef | null>(null);
   const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const deepLinkHandledRef = useRef(false);
   // 夜海貼圖惰性載入：首次切到夜晚才掛 pattern，日間不下載 sea-night.png；
   // 掛上後保持常駐，讓日夜切換仍有 600ms crossfade。
   const [nightSeaMounted, setNightSeaMounted] = useState(false);
   const seaDayHref = resolveTextureHref(seaTexturePath(false), webpSupported);
   const seaNightHref = resolveTextureHref(seaTexturePath(true), webpSupported);
+  const daylightTrackedRef = useRef(false);
 
   useEffect(() => {
     if (daylight === "night") setNightSeaMounted(true);
+  }, [daylight]);
+
+  const closeSheet = useCallback(() => {
+    setActiveZone(null);
+    syncZoneQuery(null);
+  }, [syncZoneQuery]);
+
+  useEffect(() => {
+    if (deepLinkHandledRef.current) return;
+    const zone = parseZoneDeepLink(zoneQuery);
+    if (!zone) return;
+    deepLinkHandledRef.current = true;
+
+    camera.flyTo(zone.coord, FOCUS_SCALE);
+    const reveal = () => setActiveZone(zone);
+    if (reduced) {
+      reveal();
+    } else {
+      openTimerRef.current = setTimeout(reveal, FLY_DURATION_MS);
+    }
+  }, [camera, reduced, zoneQuery]);
+
+  useEffect(() => {
+    if (!daylightTrackedRef.current) {
+      daylightTrackedRef.current = true;
+      return;
+    }
+    trackUniverseDayNightToggle(daylight);
   }, [daylight]);
 
   useEffect(() => {
@@ -77,6 +114,8 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
 
   const handleActivate = useCallback(
     (zone: ZoneDef) => {
+      trackUniverseZoneTap(zone.id, zone.status);
+
       // 開放島慶祝音；鎖島 tap 音在 ZoneIsland 播放
       if (zone.status === "open") {
         playSfx("collect");
@@ -101,6 +140,7 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
           return;
         }
         setActiveZone(zone);
+        syncZoneQuery(zone.id);
       };
 
       if (openTimerRef.current) clearTimeout(openTimerRef.current);
@@ -110,7 +150,7 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
         openTimerRef.current = setTimeout(reveal, FLY_DURATION_MS);
       }
     },
-    [camera, reduced, router],
+    [camera, reduced, router, syncZoneQuery],
   );
 
   /** 使用者拖曳打斷 fly-to 時，取消尚未觸發的開 sheet／導航。 */
@@ -348,23 +388,50 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
         }}
       />
 
-      <ZoneSheet zone={activeZone} onClose={() => setActiveZone(null)} />
+      <ZoneSheet zone={activeZone} onClose={closeSheet} />
     </section>
   );
 }
 
 function UniverseMapWithDevFlags() {
   const params = useSearchParams();
+  const router = useRouter();
   const devStatusOverrides =
     process.env.NODE_ENV !== "production"
       ? parseDevStatusOverrides(`?${params.toString()}`)
       : {};
-  return <UniverseMapContent devStatusOverrides={devStatusOverrides} />;
+
+  const syncZoneQuery = useCallback(
+    (zoneId: ZoneId | null) => {
+      const next = new URLSearchParams(params.toString());
+      if (zoneId) next.set("zone", zoneId);
+      else next.delete("zone");
+      const q = next.toString();
+      router.replace(q ? `/adventures?${q}` : "/adventures", { scroll: false });
+    },
+    [params, router],
+  );
+
+  return (
+    <UniverseMapContent
+      devStatusOverrides={devStatusOverrides}
+      zoneQuery={params.get("zone")}
+      syncZoneQuery={syncZoneQuery}
+    />
+  );
 }
 
 export default function UniverseMap() {
   return (
-    <Suspense fallback={<UniverseMapContent devStatusOverrides={{}} />}>
+    <Suspense
+      fallback={
+        <UniverseMapContent
+          devStatusOverrides={{}}
+          zoneQuery={null}
+          syncZoneQuery={() => undefined}
+        />
+      }
+    >
       <UniverseMapWithDevFlags />
     </Suspense>
   );

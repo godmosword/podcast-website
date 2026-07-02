@@ -38,3 +38,47 @@ describe("trackPlatformClick", () => {
     });
   });
 });
+
+describe("universe analytics", () => {
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    const { track } = await import("@vercel/analytics");
+    vi.mocked(track).mockClear();
+  });
+
+  it("trackUniverseZoneTap 不含 PII", async () => {
+    const { track } = await import("@vercel/analytics");
+    const { trackUniverseZoneTap } = await import("./analytics");
+
+    trackUniverseZoneTap("dino", "building");
+
+    expect(track).toHaveBeenCalledWith("universe_zone_tap", {
+      zoneId: "dino",
+      status: "building",
+    });
+    const payload = vi.mocked(track).mock.calls[0]?.[1];
+    expect(payload).not.toHaveProperty("email");
+    expect(payload).not.toHaveProperty("nickname");
+  });
+
+  it("trackUniverseWishSubmit 只送 hasEmail 布林", async () => {
+    const { track } = await import("@vercel/analytics");
+    const { trackUniverseWishSubmit } = await import("./analytics");
+
+    trackUniverseWishSubmit("ocean", true);
+
+    expect(track).toHaveBeenCalledWith("universe_wish_submit", {
+      zoneId: "ocean",
+      hasEmail: true,
+    });
+  });
+
+  it("trackUniverseDayNightToggle 送 to 主題", async () => {
+    const { track } = await import("@vercel/analytics");
+    const { trackUniverseDayNightToggle } = await import("./analytics");
+
+    trackUniverseDayNightToggle("night");
+
+    expect(track).toHaveBeenCalledWith("universe_daynight_toggle", { to: "night" });
+  });
+});
