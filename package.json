@@ -32,6 +32,7 @@
     "fix:roamer-alpha": "tsx scripts/fix-roamer-alpha.ts"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "@vercel/analytics": "^2.0.1",
     "next": "^15.1.0",
     "openai": "^6.42.0",

@@ -6,6 +6,7 @@ import { getCarParkLinks } from "@/lib/universe-map";
 import { notifyMailto } from "@/lib/contact";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import ZoneLandmark from "./ZoneLandmark";
+import ZoneWishForm from "./ZoneWishForm";
 import styles from "./ZoneSheet.module.css";
 
 type ZoneSheetProps = {
@@ -116,9 +117,7 @@ export default function ZoneSheet({ zone, onClose }: ZoneSheetProps) {
               <p className={styles.voteNote}>之後開放投票，由你決定下一站。</p>
             ) : null}
 
-            <a className={styles.notifyBtn} href={notifyHref}>
-              🔔 通知我開幕
-            </a>
+            <ZoneWishForm zoneId={zone.id} fallbackHref={notifyHref} />
           </div>
         )}
       </div>
