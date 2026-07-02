@@ -689,6 +689,39 @@ T+2d    社群貼文（B 戰場）
 
 ---
 
+## 車車宇宙樂園地圖改善（資產／互動／許願／埋點）　`feature · M · /adventures`　〔eng+design〕
+
+> **Gate：** 已核可並完成實作（2026-07-02）。
+
+| Task | 狀態 | 主要產出 | Commit hash |
+|------|------|----------|-------------|
+| task-1 資產減重 WebP | 完成 | `optimize:adventures`、島 tile `<picture>`、SVG 海面 WebP 偵測 | `a527411` |
+| task-2 鎖島微互動 | 完成 | 果凍晃動 + `playSfx(tap)` + 狀態泡泡 | `9eab5fd` |
+| task-3 許願表單 + API | 完成 | `POST /api/zone-wish`、Neon schema、`ZoneWishForm` | `8a490c7` |
+| task-4 埋點 | 完成 | `universe_zone_tap` 等四事件 | `5673f19` |
+| task-5 深連結 | 完成 | `/adventures?zone=dino` + `router.replace` | `5673f19` |
+| task-6 收尾 | 完成 | 本段 + 首屏傳輸對照 | `d54453d` |
+
+### 首屏傳輸量（spec 定義：car-park@DPR + sea + 遠景 1x + map roamers）
+
+| 資產 | PNG（改前） | WebP（改後） |
+|------|------------|-------------|
+| sea | 1952 KB | 56 KB |
+| car-park@2x | 287 KB | 46 KB |
+| far-island-a + b（1x） | 212 KB | 19 KB |
+| xiao-hong + duo-duo | 67 KB | 67 KB（已有） |
+| **合計** | **~2518 KB** | **~188 KB** |
+
+### Vercel 後台 env
+
+| 變數 | 用途 |
+|------|------|
+| `DATABASE_URL` | Neon Postgres（未設時許願表單降級 mailto） |
+
+Migration：`scripts/migrations/001_zone_wishes.sql`
+
+---
+
 ## Completed
 
 ### ep-16 字幕校對（proofread --mark）
