@@ -20,6 +20,7 @@ function navItems() {
   // 全站一致的次級導覽：每頁都能直達主要分區（故事 / 主題 / 宇宙地圖 / 遊樂園 / 關於）。
   const items: { label: string; href: string; external?: boolean }[] = [
     { label: "全部故事", href: "/stories" },
+    { label: "家長指南", href: "/for-parents" },
     { label: "主題分類", href: "/topic" },
     { label: "宇宙地圖", href: "/adventures" },
     { label: "遊樂園", href: "/games" },
