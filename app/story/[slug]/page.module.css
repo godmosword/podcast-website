@@ -42,7 +42,7 @@
   font-size: 1.8rem;
   font-weight: 700;
   letter-spacing: 0.01em;
-  margin: 12px 0 0;
+  margin: 0;
   color: var(--ink);
 }
 
@@ -73,13 +73,19 @@
   margin: 24px 0 8px;
 }
 
-.summarySection {
-  margin-top: 28px;
+.introSection,
+.contentSection {
+  margin-top: 24px;
   padding: 16px 18px;
-  border-left: 5px solid; /* 顏色由 inline style 指定 */
-  border-radius: var(--radius-md);
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
   background: linear-gradient(180deg, var(--card-2), var(--card));
   box-shadow: var(--shadow-sm);
+  text-align: left;
+}
+
+.introSection {
+  border-left: 5px solid var(--sun);
 }
 
 .sectionHeading {
@@ -89,11 +95,19 @@
   color: var(--ink);
 }
 
-.summary {
+.definition {
   margin: 0;
+  font-size: 1.04rem;
+  font-weight: 700;
+  line-height: 1.85;
+  color: var(--ink);
+}
+
+.summary {
+  margin: 10px 0 0;
   font-size: 1rem;
   line-height: 1.75;
-  color: var(--ink);
+  color: var(--ink-soft);
 }
 
 @media (max-width: 640px) {
@@ -110,7 +124,8 @@
     margin-bottom: 14px;
   }
 
-  .summarySection {
+  .introSection,
+  .contentSection {
     margin-top: 22px;
     padding: 14px 16px;
   }
@@ -130,45 +145,8 @@
   line-height: 1.5;
 }
 
-.transcript {
-  margin-top: 28px;
-  padding: 16px 18px;
-  border-radius: var(--radius-md);
-  background: linear-gradient(180deg, var(--card-2), var(--card));
-  border: 1.5px solid var(--line);
-  box-shadow: var(--shadow-sm);
-}
-
-.transcript summary {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--ink);
-  cursor: pointer;
-  list-style: none;
-}
-
-.transcript summary::-webkit-details-marker {
-  display: none;
-}
-
-.transcript summary::before {
-  content: "▸ ";
-  display: inline-block;
-  transition: transform 0.15s ease;
-}
-
-.transcript details[open] summary::before {
-  transform: rotate(90deg);
-}
-
-.transcript summary:focus-visible {
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
 .lines {
-  margin: 12px 0 0;
+  margin: 0;
   padding-left: 1.25rem;
   font-size: 0.95rem;
   line-height: 1.75;
@@ -177,4 +155,56 @@
 
 .lines li + li {
   margin-top: 0.35rem;
+}
+
+.characterList,
+.promptList {
+  margin: 0;
+  padding-left: 1.15rem;
+  color: var(--ink);
+  font-size: 0.98rem;
+  line-height: 1.75;
+}
+
+.characterItem + .characterItem,
+.promptList li + li {
+  margin-top: 0.45rem;
+}
+
+.characterItem a,
+.inlineLink {
+  color: var(--accent);
+  font-weight: 800;
+  text-decoration-thickness: 0.12em;
+  text-underline-offset: 0.18em;
+}
+
+.characterItem span {
+  display: block;
+  margin-top: 2px;
+  color: var(--ink-soft);
+}
+
+.inlineLink {
+  display: inline-block;
+  margin-top: 12px;
+}
+
+.faqList {
+  display: grid;
+  gap: 14px;
+}
+
+.faqItem h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.02rem;
+  line-height: 1.45;
+}
+
+.faqItem p {
+  margin: 6px 0 0;
+  color: var(--ink-soft);
+  font-size: 0.96rem;
+  line-height: 1.75;
 }

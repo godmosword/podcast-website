@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
 import type { Story } from "@/data/content";
 import { DEFAULT_OG_IMAGE } from "@/lib/site-url";
+import { storyDefinitionSummary } from "@/lib/story-geo";
 import { storyCoverPath } from "@/lib/story-utils";
 
 const SITE_NAME = "車車遊樂園";
 
 export function storyDescription(story: Story): string {
-  return (
-    story.summary ??
-    `${story.title} — ${SITE_NAME}親子 podcast，適合睡前看圖聽故事。`
-  );
+  return storyDefinitionSummary(story);
 }
 
 /** 故事分享圖：有插圖用封面，否則全站預設 mascot */

@@ -1,12 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getCharactersForStory } from "@/data/characters";
 import { getStory, getRelated, getNextStory, getStories } from "@/data/content";
-import { podcastEpisodeJsonLd } from "@/lib/json-ld";
+import { faqPageJsonLd, podcastEpisodeJsonLd } from "@/lib/json-ld";
 import { lineShareUrl, storyLineShareText, storyShareUrl } from "@/lib/share-story";
+import {
+  storyDefinitionSummary,
+  storyFaqs,
+  storyOutlineItems,
+  storyParentExtension,
+  storyPlainSummary,
+} from "@/lib/story-geo";
 import { storyDetailMetadata } from "@/lib/story-metadata";
 import { storyCoverPath } from "@/lib/story-utils";
-import { hasTranscript } from "@/lib/transcript";
 import FavoriteButton from "@/components/FavoriteButton";
 import JsonLd from "@/components/JsonLd";
 import PlayButton from "@/components/PlayButton";
@@ -50,16 +57,36 @@ export default async function StoryDetailPage({
 
   const related = getRelated(slug, 3);
   const nextStory = getNextStory(slug);
+  const definitionSummary = storyDefinitionSummary(story);
+  const plainSummary = storyPlainSummary(story);
+  const outlineItems = storyOutlineItems(story);
+  const characters = getCharactersForStory(story.slug);
+  const parentExtension = storyParentExtension(story);
+  const faqs = storyFaqs(story);
 
   return (
     <main className={styles.main}>
       <JsonLd data={podcastEpisodeJsonLd(story)} />
+      <JsonLd data={faqPageJsonLd(faqs)} />
       <Link href="/stories" className={styles.back}>
         ← 回故事屋
       </Link>
 
       <article>
         <div className={styles.hero}>
+          <h1 className={styles.title}>{story.title}</h1>
+
+          <section
+            className={styles.introSection}
+            aria-labelledby="story-intro-heading"
+          >
+            <h2 id="story-intro-heading" className={styles.sectionHeading}>
+              本集介紹
+            </h2>
+            <p className={styles.definition}>{definitionSummary}</p>
+            {plainSummary && <p className={styles.summary}>{plainSummary}</p>}
+          </section>
+
           <div className={styles.coverWrap} style={{ borderColor: story.color }}>
             <StoryImage
               src={storyCoverPath(story.slug)}
@@ -71,8 +98,6 @@ export default async function StoryDetailPage({
           </div>
 
           <StoryMeta story={story} showTags={false} />
-
-          <h1 className={styles.title}>{story.title}</h1>
 
           <StoryTags story={story} />
         </div>
@@ -100,15 +125,47 @@ export default async function StoryDetailPage({
           />
         </div>
 
-        {story.summary && (
-          <section
-            className={styles.summarySection}
-            style={{ borderLeftColor: story.color }}
-          >
-            <h2 className={styles.sectionHeading}>故事大綱</h2>
-            <p className={styles.summary}>{story.summary}</p>
-          </section>
-        )}
+        <section className={styles.contentSection} aria-labelledby="outline-heading">
+          <h2 id="outline-heading" className={styles.sectionHeading}>
+            逐字稿與詳細大綱
+          </h2>
+          <ol className={styles.lines}>
+            {outlineItems.map((line, i) => (
+              <li key={`${story.slug}-outline-${i}`}>{line}</li>
+            ))}
+          </ol>
+        </section>
+
+        <section
+          className={styles.contentSection}
+          aria-labelledby="characters-heading"
+        >
+          <h2 id="characters-heading" className={styles.sectionHeading}>
+            出場角色
+          </h2>
+          {characters.length > 0 ? (
+            <ul className={styles.characterList}>
+              {characters.map((character) => (
+                <li key={character.id} className={styles.characterItem}>
+                  <Link href={`/characters#${character.id}`}>
+                    {character.name}
+                  </Link>
+                  <span>
+                    {character.vehicle}，{character.personality}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className={styles.summary}>
+              這一集以故事情境為主，聽完可以回到角色圖鑑認識更多車車朋友。
+            </p>
+          )}
+
+          <Link href="/characters" className={styles.inlineLink}>
+            看全部角色圖鑑
+          </Link>
+        </section>
 
         {story.reflectionPrompt && (
           <ReflectionPrompt
@@ -119,18 +176,30 @@ export default async function StoryDetailPage({
           />
         )}
 
-        {hasTranscript(story) && (
-          <section className={styles.transcript} aria-labelledby="transcript-heading">
-            <details>
-              <summary id="transcript-heading">逐字稿</summary>
-              <ol className={styles.lines}>
-                {(story.captions ?? []).map((line, i) => (
-                  <li key={i}>{line}</li>
-                ))}
-              </ol>
-            </details>
-          </section>
-        )}
+        <section className={styles.contentSection} aria-labelledby="parent-heading">
+          <h2 id="parent-heading" className={styles.sectionHeading}>
+            {parentExtension.heading}
+          </h2>
+          <ul className={styles.promptList}>
+            {parentExtension.prompts.map((prompt, i) => (
+              <li key={`${story.slug}-prompt-${i}`}>{prompt}</li>
+            ))}
+          </ul>
+        </section>
+
+        <section className={styles.contentSection} aria-labelledby="faq-heading">
+          <h2 id="faq-heading" className={styles.sectionHeading}>
+            常見問題
+          </h2>
+          <div className={styles.faqList}>
+            {faqs.map((faq, i) => (
+              <section key={`${story.slug}-faq-${i}`} className={styles.faqItem}>
+                <h3>{faq.question}</h3>
+                <p>{faq.answer}</p>
+              </section>
+            ))}
+          </div>
+        </section>
 
         {nextStory && (
           <p className={styles.nextHint}>
