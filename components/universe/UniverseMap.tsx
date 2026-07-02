@@ -8,6 +8,7 @@ import { getZoneArtTile } from "@/lib/universe/zone-art-tile";
 import { parseDevStatusOverrides } from "@/lib/universe/dev-map-flags";
 import { mapDepthZ } from "@/lib/universe-depth";
 import { seaTexturePath } from "@/lib/universe/map-art-src";
+import { playSfx } from "@/lib/sfx";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useTheme } from "@/components/ThemeProvider";
 import { MapDecorBirds, MapDecorNearWater } from "./MapDecorLayer";
@@ -70,6 +71,9 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
 
   const handleActivate = useCallback(
     (zone: ZoneDef) => {
+      // 慶祝音（尊重 SfxToggle 靜音偏好；reduced-motion 保留音效、只關動畫）
+      playSfx("collect");
+
       const directRoute =
         zone.route && zone.status === "open" && !zone.subSegmentIds?.length;
 
@@ -206,15 +210,17 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
                 <feGaussianBlur stdDeviation="7" />
               </filter>
             </defs>
-            {/* 海面基色（貼圖載入前 / overscroll 露出時的底） */}
-            <rect x="0" y="0" width={MAP_STAGE.width} height={MAP_STAGE.height} fill="#bfe0ef" />
-            <rect x="0" y="0" width={MAP_STAGE.width} height={MAP_STAGE.height} fill="url(#seaTile)" />
+            {/* 海面基色（貼圖載入前 / overscroll 露出時的底）；rx 圓角讓世界
+                在退遠鏡頭下讀作「漂在天空上的立體模型板」而非硬切矩形 */}
+            <rect x="0" y="0" width={MAP_STAGE.width} height={MAP_STAGE.height} rx="28" fill="#bfe0ef" />
+            <rect x="0" y="0" width={MAP_STAGE.width} height={MAP_STAGE.height} rx="28" fill="url(#seaTile)" />
             {nightSeaMounted && (
               <rect
                 x="0"
                 y="0"
                 width={MAP_STAGE.width}
                 height={MAP_STAGE.height}
+                rx="28"
                 fill="url(#seaTileNight)"
                 className={styles.seaNightTile}
                 style={{ opacity: daylight === "night" ? 1 : 0 }}
@@ -296,10 +302,40 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
         </div>
       </div>
 
+      {/* 樂園招牌：地圖作為「紀念品海報」的標題花字 + 羅盤（裝飾，語意標題在頁面 sr-only h1） */}
+      <div className={styles.titleSign} aria-hidden="true">
+        <svg
+          className={styles.compass}
+          viewBox="0 0 44 44"
+          width="40"
+          height="40"
+          focusable="false"
+        >
+          <circle cx="22" cy="22" r="20" fill="#f7ead0" stroke="#a5773c" strokeWidth="2.5" />
+          <circle cx="22" cy="22" r="15" fill="none" stroke="#dcbf86" strokeWidth="1" />
+          <text x="22" y="10.5" textAnchor="middle" fontSize="7" fontWeight="800" fill="#8a6438">
+            N
+          </text>
+          <polygon points="22,8 26,22 22,26 18,22" fill="#ff8c2b" />
+          <polygon points="22,36 18,22 22,26 26,22" fill="#caa063" />
+          <circle cx="22" cy="22" r="2.6" fill="#8a6438" />
+        </svg>
+        <span className={styles.titleText}>車車宇宙樂園</span>
+      </div>
+
       <MapControls
-        onReset={camera.reset}
-        onZoomIn={() => camera.zoomBy(0.25)}
-        onZoomOut={() => camera.zoomBy(-0.2)}
+        onReset={() => {
+          playSfx("tap");
+          camera.reset();
+        }}
+        onZoomIn={() => {
+          playSfx("tap");
+          camera.zoomBy(0.25);
+        }}
+        onZoomOut={() => {
+          playSfx("tap");
+          camera.zoomBy(-0.2);
+        }}
       />
 
       <ZoneSheet zone={activeZone} onClose={() => setActiveZone(null)} />

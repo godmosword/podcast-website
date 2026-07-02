@@ -2,14 +2,15 @@ import type { ZoneId } from "@/data/universe-zones";
 import { resolveUniverseMap } from "@/lib/universe-map";
 
 /**
- * car-park 島內步道（tile 264×260 本地座標）。
+ * car-park 島內步道（tile 330×325 hero box 本地座標；weenie 放大 1.25×，
+ * 原 264×260 座標已同步縮放）。
  *
  * 環狀路線：前緣草地起步 → 後段繞到摩天輪後方（觸發深度遮擋，見 `ZONE_OCCLUDERS`）
  * → 右側折返 → 回前緣。閉合 `Z`，roamer 連續繞圈，每圈鑽過摩天輪後方一次。
  * 小紅／多多已改走 map 層級路線；保留供 dev／未來島內啟用。
  */
 export const CAR_PARK_WALKWAY_PATH =
-  "M 72 196 C 56 150 92 110 130 104 C 158 100 184 132 188 172 C 188 202 116 212 72 196 Z";
+  "M 90 245 C 70 187.5 115 137.5 162.5 130 C 197.5 125 230 165 235 215 C 235 252.5 145 265 90 245 Z";
 
 /** 恐龍島步道：閉合迴圈，後段繞行火山後方（觸發遮擋）。tile 264×260 本地座標。 */
 export const DINO_WALKWAY_PATH =
@@ -207,10 +208,11 @@ export type ZoneOccluder = {
 
 /**
  * 各島地標遮擋。clipPath 露出地標剪影、baselineY 為地標接地線（tile 本地 y px）。
- * 與島 art tile 同畫框（264×260），故百分比通用。未列出的島不做遮擋。
+ * clipPath 為 tile box 百分比、跨尺寸通用；baselineY 為該島 box 的絕對 px——
+ * car-park 為 hero box 330×325（weenie 1.25×），其餘三島 264×260。
  */
 export const ZONE_OCCLUDERS: Partial<Record<ZoneId, ZoneOccluder>> = {
-  "car-park": { clipPath: "ellipse(20% 27% at 52% 26%)", baselineY: 134 }, // 摩天輪
+  "car-park": { clipPath: "ellipse(20% 27% at 52% 26%)", baselineY: 168 }, // 摩天輪（134×1.25）
   dino: { clipPath: "ellipse(21% 27% at 50% 26%)", baselineY: 128 }, // 火山
   rescue: { clipPath: "ellipse(23% 29% at 52% 30%)", baselineY: 140 }, // 消防局
   ocean: { clipPath: "ellipse(17% 27% at 48% 28%)", baselineY: 132 }, // 火箭

@@ -99,8 +99,58 @@
   opacity: 1;
 }
 
+/* ── 樂園招牌（標題花字 + 羅盤）：木牌質感沿用島名牌語彙，固定色不隨日夜反轉 ── */
+.titleSign {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+  transform: rotate(-2deg);
+}
+
+.titleText {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  white-space: nowrap;
+  color: #fff6e6;
+  background: linear-gradient(#caa063, #a5773c);
+  border: 2px solid #8a6438;
+  border-radius: 12px;
+  padding: 6px 18px;
+  box-shadow:
+    0 3px 7px rgba(60, 40, 20, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.compass {
+  display: block;
+  filter: drop-shadow(0 2px 3px rgba(60, 40, 20, 0.3));
+}
+
 @media (max-width: 480px) {
   .map {
     min-height: 360px;
+  }
+
+  .titleSign {
+    top: 10px;
+    left: 10px;
+    gap: 7px;
+  }
+
+  .titleText {
+    font-size: 15px;
+    letter-spacing: 1px;
+    padding: 4px 12px;
+  }
+
+  .compass {
+    width: 30px;
+    height: 30px;
   }
 }

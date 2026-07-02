@@ -31,7 +31,8 @@ describe("resolveUniverseMap", () => {
 
   it("每座島解析出 tileBox 與 depthY，供 2.5D 舞台排序", () => {
     const carPark = map.zones.find((z) => z.id === "car-park")!;
-    expect(carPark.tileBox).toEqual({ left: 368, top: 181.6, w: 264, h: 260 });
+    // car-park 為 weenie hero box（264×260 × 1.25 = 330×325）
+    expect(carPark.tileBox).toEqual({ left: 335, top: 127, w: 330, h: 325 });
     expect(carPark.depthY).toBe(carPark.px.y);
   });
 

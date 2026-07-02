@@ -10,6 +10,12 @@ const MAX_SCALE = 2.4;
 const OVERSCROLL = 48;
 /** fly-to 過場時間（毫秒），與 CSS transition 對齊。 */
 export const FLY_DURATION_MS = 600;
+/** 預設鏡頭比 fit 再退一點，讓視差天空層（雲／遠島）從世界邊緣探出來。 */
+const FIT_MARGIN = 0.88;
+/** 進場降落動畫：起始鏡頭相對 fit 的倍率（從高空俯瞰整個群島再飛向主島）。 */
+const ENTRY_START_FACTOR = 0.55;
+/** 每個分頁 session 只播一次進場動畫，回訪不重播。 */
+const ENTRY_PLAYED_KEY = "cc-universe-entry-played";
 
 type Camera = { scale: number; tx: number; ty: number };
 
@@ -122,7 +128,7 @@ export function useMapCamera(): MapCamera {
     const { w, h } = sizeRef.current;
     if (w === 0 || h === 0) return 1;
     return clampScale(
-      Math.min(w / MAP_STAGE.width, h / MAP_STAGE.height) * 0.96,
+      Math.min(w / MAP_STAGE.width, h / MAP_STAGE.height) * FIT_MARGIN,
     );
   }, []);
 
@@ -149,15 +155,42 @@ export function useMapCamera(): MapCamera {
         initializedRef.current = true;
         const ns = clampScale(
           Math.min(rect.width / MAP_STAGE.width, rect.height / MAP_STAGE.height) *
-            0.96,
+            FIT_MARGIN,
         );
-        setCam(
-          clampCam({
-            scale: ns,
-            tx: rect.width / 2 - CAR_PARK.x * ns,
-            ty: rect.height / 2 - CAR_PARK.y * ns,
-          }),
-        );
+
+        // 進場降落：首次進園從高空俯瞰整個群島，再飛向主島（每 session 一次）。
+        let playEntry = false;
+        if (!reduced) {
+          try {
+            playEntry = !sessionStorage.getItem(ENTRY_PLAYED_KEY);
+            if (playEntry) sessionStorage.setItem(ENTRY_PLAYED_KEY, "1");
+          } catch {
+            playEntry = false;
+          }
+        }
+
+        if (playEntry) {
+          const es = clampScale(ns * ENTRY_START_FACTOR);
+          setCam(
+            clampCam({
+              scale: es,
+              tx: rect.width / 2 - CAR_PARK.x * es,
+              ty: rect.height / 2 - CAR_PARK.y * es,
+            }),
+          );
+          // 兩幀後起飛：確保起始鏡頭先完成 paint，transition 才有起點。
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => flyTo(CAR_PARK, ns));
+          });
+        } else {
+          setCam(
+            clampCam({
+              scale: ns,
+              tx: rect.width / 2 - CAR_PARK.x * ns,
+              ty: rect.height / 2 - CAR_PARK.y * ns,
+            }),
+          );
+        }
       } else {
         // resize（旋轉／視窗縮放）後依新尺寸重新 clamp，避免舞台卡在偏移位置。
         setCam((c) => clampCam(c));
@@ -167,7 +200,7 @@ export function useMapCamera(): MapCamera {
     const ro = new ResizeObserver(measure);
     ro.observe(viewportEl);
     return () => ro.disconnect();
-  }, [viewportEl, clampCam]);
+  }, [viewportEl, clampCam, flyTo, reduced]);
 
   // wheel 需非 passive 才能 preventDefault。
   useEffect(() => {

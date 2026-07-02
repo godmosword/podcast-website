@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { ZONE_STATUS_META, type ZoneDef, type ZoneStatus } from "@/data/universe-zones";
 import { mapDepthZ } from "@/lib/universe-depth";
 import type { ResolvedZone } from "@/lib/universe-map";
@@ -11,6 +12,19 @@ import StatusOverlay from "./StatusOverlay";
 import { useZoneTransition } from "./useZoneTransition";
 import ZoneIslandTileArt from "./ZoneIslandTileArt";
 import styles from "./ZoneIsland.module.css";
+
+/** 點島慶祝的星星迸發（重用 app/motion.css 的 star-burst-particle）；色票取各園區點綴色。 */
+const BURST_PARTICLES = [
+  { x: "-46px", y: "-62px", symbol: "✦", color: "#ffb03a" },
+  { x: "44px", y: "-56px", symbol: "✧", color: "#ff8c2b" },
+  { x: "-64px", y: "-8px", symbol: "✦", color: "#f7a8c4" },
+  { x: "62px", y: "-14px", symbol: "✦", color: "#8fcde8" },
+  { x: "-24px", y: "-84px", symbol: "✧", color: "#ffd866" },
+  { x: "26px", y: "-88px", symbol: "✦", color: "#c5b3e6" },
+] as const;
+
+/** 慶祝動畫長度（毫秒），與 CSS islandBounce／star-burst-particle 對齊。 */
+const CELEBRATE_MS = 640;
 
 type ZoneIslandProps = {
   zone: ResolvedZone;
@@ -38,6 +52,25 @@ export default function ZoneIsland({
   const tile = getZoneArtTile(zone.id);
   const { transition, onTransitionEnd } = useZoneTransition(effectiveStatus, reduced);
 
+  // 點島慶祝：squash 彈跳 + 星星迸發。burst 作 key 讓連點能重播。
+  const [burst, setBurst] = useState(0);
+  const burstTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleActivate = () => {
+    if (!reduced) {
+      setBurst((n) => n + 1);
+      if (burstTimerRef.current) clearTimeout(burstTimerRef.current);
+      burstTimerRef.current = setTimeout(() => setBurst(0), CELEBRATE_MS);
+    }
+    onActivate(zone);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (burstTimerRef.current) clearTimeout(burstTimerRef.current);
+    };
+  }, []);
+
   if (tile.mode === "island") {
     const [ax, ay] = tile.anchorUV;
     const artSrc = getZoneArtSrcSet(zone.id, mapScale);
@@ -56,8 +89,9 @@ export default function ZoneIsland({
           }}
           data-status={effectiveStatus}
           data-transition={transition ?? undefined}
+          data-celebrate={burst > 0 || undefined}
           aria-label={`${zone.name}，${meta.label}`}
-          onClick={() => onActivate(zone)}
+          onClick={handleActivate}
           onAnimationEnd={onTransitionEnd}
         >
           <div className={styles.tileStack}>
@@ -83,6 +117,26 @@ export default function ZoneIsland({
               paused={paused}
               night={night}
             />
+            {burst > 0 && (
+              <span className={styles.burstLayer} aria-hidden="true">
+                {BURST_PARTICLES.map((p, i) => (
+                  <span
+                    key={`${burst}-${i}`}
+                    className="star-burst-particle"
+                    style={
+                      {
+                        "--burst-x": p.x,
+                        "--burst-y": p.y,
+                        color: p.color,
+                        fontSize: 15,
+                      } as CSSProperties
+                    }
+                  >
+                    {p.symbol}
+                  </span>
+                ))}
+              </span>
+            )}
           </div>
         </button>
         <span
@@ -119,7 +173,7 @@ export default function ZoneIsland({
       }}
       data-status={effectiveStatus}
       aria-label={`${zone.name}，${meta.label}`}
-      onClick={() => onActivate(zone)}
+      onClick={handleActivate}
     >
       <span className={styles.landmark} aria-hidden="true">
         <ZoneLandmark zoneId={zone.id} status={effectiveStatus} artTile={zone.artTile} />

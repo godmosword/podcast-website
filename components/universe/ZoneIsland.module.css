@@ -291,6 +291,46 @@
   line-height: 1.4;
 }
 
+/* ── 點島慶祝：squash & stretch 彈跳 + 星星迸發 ─────────────
+   選擇器帶 [data-status] 湊足與待機浮動（islandFloat）相同 specificity，
+   後宣告者勝，慶祝期間暫時蓋過浮動。原點在沙岸錨點，島「坐著」彈。 */
+.islandTile[data-status][data-celebrate] .tileStack {
+  animation: islandBounce 520ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: 50% 84%;
+}
+
+@keyframes islandBounce {
+  0% {
+    transform: scale(1, 1);
+  }
+  30% {
+    transform: scale(1.07, 0.91);
+  }
+  62% {
+    transform: scale(0.97, 1.05);
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}
+
+/* 迸發層：定位在島地標視覺中心，粒子由 motion.css star-burst-particle 驅動 */
+.burstLayer {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .islandTile[data-status][data-celebrate] .tileStack {
+    animation: none;
+  }
+}
+
 @media (max-width: 480px) {
   .landmark {
     width: 76px;

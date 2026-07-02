@@ -6,6 +6,7 @@
 
 ### Added
 
+- **樂園地圖 R-joy 1（歡樂感基建，純程式）**：① car-park 主島放大 1.25× 成 weenie 視覺磁鐵（迪士尼城堡手法；tile-local 步道／遮擋基線同步縮放）② 首次進園「高空降落」動畫（sessionStorage 每 session 一次、reduced-motion 直接定位）③ 點島慶祝：squash & stretch 彈跳＋六色星星迸發（重用 `star-burst-particle`）＋ `playSfx("collect")` 慶祝音（尊重 SfxToggle 與 reduced-motion 只關動畫保留音效）④ 縮放控制鈕接 `tap` 音 ⑤ 地圖左上角「車車宇宙樂園」木牌招牌＋黏土羅盤（裝飾性，語意標題仍為 sr-only h1）⑥ 預設鏡頭 fit 係數 0.96→0.88，視差天空（雲／遠島）從世界邊緣探出；海面舞台加 rx 圓角，退遠讀作漂在天空上的立體模型板
 - **樂園地圖 P1 載入體驗**：島 tile 沙草佔位 + 淡入；標籤反相機縮放；car-park tile preload
 - **樂園地圖 P0 資產交付**：島 tile 接 `@2x/@3x` srcset（`getZoneArtSrcSet`）；漫遊者 PNG→WebP + `<picture>`；rear `fetchPriority="low"`
 - **樂園地圖 P2 收尾**：`getZoneArtSizes(mapScale)` 動態 `sizes`；`verify:zone-art` 四島 PNG 三階齊備；行動版標籤／縮放控制可讀性

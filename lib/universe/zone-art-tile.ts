@@ -46,13 +46,24 @@ const ISLAND_STAGE_SIZE = { w: 264, h: 260 } as const;
 const ISLAND_ANCHOR_UV: [number, number] = [0.5, 0.84];
 
 /**
+ * Weenie（視覺磁鐵）：主題樂園地圖的中央地標原則——car-park 是全園核心，
+ * 放大一級作為視線錨點與羅盤（迪士尼城堡手法）。只放大 stage 呈現尺寸，
+ * 不動地理座標與錨點；PNG 有 @2x/@3x 餘裕，放大不糊。
+ */
+const HERO_SCALE = 1.25;
+const HERO_STAGE_SIZE = {
+  w: Math.round(ISLAND_STAGE_SIZE.w * HERO_SCALE),
+  h: Math.round(ISLAND_STAGE_SIZE.h * HERO_SCALE),
+} as const;
+
+/**
  * 各島 tile 詮釋資料（單一資料源）。
  * R1：四島皆 `island` 模式（整島黏土 diorama）。`ZoneIsland` 以 anchorUV 對齊 coord、
  * 以 stageSize 鋪該島；`UniverseMap.tsx` 對 island 島**跳過 SVG 沙／草橢圓**（整島圖已含
  * 沙草與接地陰影，不關會疊圖）。
  */
 export const ZONE_ART_TILES: Record<ZoneId, ZoneArtTile> = {
-  "car-park": { src: zoneArtTilePath("car-park"), mode: "island", anchor: "sand-bottom-center", stageSize: ISLAND_STAGE_SIZE, anchorUV: ISLAND_ANCHOR_UV },
+  "car-park": { src: zoneArtTilePath("car-park"), mode: "island", anchor: "sand-bottom-center", stageSize: HERO_STAGE_SIZE, anchorUV: ISLAND_ANCHOR_UV },
   dino: { src: zoneArtTilePath("dino"), mode: "island", anchor: "sand-bottom-center", stageSize: ISLAND_STAGE_SIZE, anchorUV: ISLAND_ANCHOR_UV },
   rescue: { src: zoneArtTilePath("rescue"), mode: "island", anchor: "sand-bottom-center", stageSize: ISLAND_STAGE_SIZE, anchorUV: ISLAND_ANCHOR_UV },
   ocean: { src: zoneArtTilePath("ocean"), mode: "island", anchor: "sand-bottom-center", stageSize: ISLAND_STAGE_SIZE, anchorUV: ISLAND_ANCHOR_UV },
