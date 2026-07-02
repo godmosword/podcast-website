@@ -14,6 +14,7 @@ import {
 } from "@/data/universe-roamers";
 import { getZoneArtSrcSet } from "@/lib/universe/zone-art-tile";
 import { useRoamerSim } from "./useRoamerSim";
+import ArtSrcPicture from "./ArtSrcPicture";
 import RoamerSpritePicture from "./RoamerSpritePicture";
 import styles from "./IslandRoamerLayer.module.css";
 
@@ -125,17 +126,10 @@ export default function IslandRoamerLayer({
       })}
 
       {occluder && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={artSrc.src}
-          srcSet={artSrc.srcSet}
-          sizes={artSrc.sizes}
-          alt=""
-          aria-hidden="true"
+        <ArtSrcPicture
+          artSrc={artSrc}
           className={styles.occluder}
           style={{ clipPath: occluder.clipPath, zIndex: occluder.baselineY }}
-          draggable={false}
-          decoding="async"
         />
       )}
     </div>

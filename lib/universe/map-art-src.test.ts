@@ -28,12 +28,15 @@ describe("cloudPath", () => {
 });
 
 describe("farIslandSrcSet", () => {
-  it("遠島含 1x/2x width descriptor", () => {
+  it("遠島含 1x/2x width descriptor 與 WebP", () => {
     for (const id of FAR_ISLAND_IDS) {
-      const { src, srcSet } = farIslandSrcSet(id);
+      const { src, srcSet, webpSrc, webpSrcSet } = farIslandSrcSet(id);
       expect(src).toBe(`/adventures/map/${id}.png`);
+      expect(webpSrc).toBe(`/adventures/map/${id}.webp`);
       expect(srcSet).toContain(`${id}.png ${FAR_ISLAND_WIDTH}w`);
       expect(srcSet).toContain(`${id}@2x.png ${FAR_ISLAND_WIDTH * 2}w`);
+      expect(webpSrcSet).toContain(`${id}.webp ${FAR_ISLAND_WIDTH}w`);
+      expect(webpSrcSet).toContain(`${id}@2x.webp ${FAR_ISLAND_WIDTH * 2}w`);
     }
   });
 });

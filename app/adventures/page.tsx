@@ -28,6 +28,14 @@ export default function AdventuresPage() {
       <link
         rel="preload"
         as="image"
+        type="image/webp"
+        href={carParkTilePreload.webpSrc}
+        imageSrcSet={carParkTilePreload.webpSrcSet}
+        imageSizes={carParkTilePreload.sizes}
+      />
+      <link
+        rel="preload"
+        as="image"
         href={carParkTilePreload.src}
         imageSrcSet={carParkTilePreload.srcSet}
         imageSizes={carParkTilePreload.sizes}

@@ -28,6 +28,7 @@
     "generate:llms-full": "tsx scripts/generate-llms-full.ts",
     "generate:page-freshness": "tsx scripts/generate-page-freshness.ts",
     "optimize:roamer-assets": "tsx scripts/optimize-roamer-assets.ts",
+    "optimize:adventures": "tsx scripts/optimize-adventure-assets.ts",
     "fix:roamer-alpha": "tsx scripts/fix-roamer-alpha.ts"
   },
   "dependencies": {

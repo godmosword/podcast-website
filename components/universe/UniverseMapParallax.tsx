@@ -2,6 +2,8 @@ import type { CSSProperties } from "react";
 import { MAP_STAGE } from "@/data/universe-zones";
 import type { ThemePreference } from "@/lib/theme";
 import { cloudPath, farIslandSrcSet } from "@/lib/universe/map-art-src";
+import { resolveTextureHref } from "@/lib/universe/png-to-webp";
+import { useWebpSupported } from "@/hooks/useWebpSupported";
 import { FLY_DURATION_MS } from "./useMapCamera";
 import SkyBodies from "./SkyBodies";
 import styles from "./UniverseMapParallax.module.css";
@@ -47,6 +49,7 @@ export default function UniverseMapParallax({
   paused,
   daylight,
 }: Props) {
+  const webpSupported = useWebpSupported();
   const factor = reduced ? 1 : PARALLAX;
   const pScale = reduced ? scale : 1 + (scale - 1) * 0.18;
   const transform = `translate(${tx * factor}px, ${ty * factor}px) scale(${pScale})`;
@@ -87,7 +90,7 @@ export default function UniverseMapParallax({
             <image
               key={`hill-${i}`}
               className={styles.hillImg}
-              href={farIslandSrcSet(hill.id).src}
+              href={resolveTextureHref(farIslandSrcSet(hill.id).src, webpSupported)}
               x={hill.cx - hill.w / 2}
               y={hill.cy - h}
               width={hill.w}
@@ -105,7 +108,7 @@ export default function UniverseMapParallax({
             <image
               key={`cloud-${i}`}
               className={styles.cloudImg}
-              href={cloudPath(cloud.id)}
+              href={resolveTextureHref(cloudPath(cloud.id), webpSupported)}
               x={cloud.cx - cloud.w / 2}
               y={cloud.cy - h / 2}
               width={cloud.w}

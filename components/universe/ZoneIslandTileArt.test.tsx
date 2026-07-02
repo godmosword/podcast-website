@@ -13,7 +13,8 @@ describe("ZoneIslandTileArt", () => {
       <ZoneIslandTileArt zoneId="car-park" artSrc={artSrc} anchorUV={[0.5, 0.84]} />,
     );
     expect(html).toContain("tilePlaceholder");
-    expect(html).toContain('srcSet="');
+    expect(html).toContain('type="image/webp"');
+    expect(html).toContain("car-park@2x.webp");
     expect(html).toContain("car-park@2x.png");
   });
 });

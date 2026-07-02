@@ -10,11 +10,15 @@ import {
 describe("getZoneArtSrcSet", () => {
   it("四島皆有 1x/2x/3x width descriptor", () => {
     for (const id of ZONE_IDS) {
-      const { src, srcSet, sizes } = getZoneArtSrcSet(id);
+      const { src, srcSet, webpSrc, webpSrcSet, sizes } = getZoneArtSrcSet(id);
       expect(src).toBe(`/adventures/zones/${id}.png`);
+      expect(webpSrc).toBe(`/adventures/zones/${id}.webp`);
       expect(srcSet).toContain(`${id}.png ${ZONE_ART_TILE_WIDTH}w`);
       expect(srcSet).toContain(`${id}@2x.png ${ZONE_ART_TILE_WIDTH * 2}w`);
       expect(srcSet).toContain(`${id}@3x.png ${ZONE_ART_TILE_WIDTH * 3}w`);
+      expect(webpSrcSet).toContain(`${id}.webp ${ZONE_ART_TILE_WIDTH}w`);
+      expect(webpSrcSet).toContain(`${id}@2x.webp ${ZONE_ART_TILE_WIDTH * 2}w`);
+      expect(webpSrcSet).toContain(`${id}@3x.webp ${ZONE_ART_TILE_WIDTH * 3}w`);
       expect(sizes).toBe(getZoneArtSizes(ZONE_ART_SRC_MAX_SCALE));
     }
   });

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ZONE_TERRAIN, type ZoneId } from "@/data/universe-zones";
 import type { ZoneArtSrcSet } from "@/lib/universe/zone-art-src";
+import ArtSrcPicture from "./ArtSrcPicture";
 import styles from "./ZoneIsland.module.css";
 
 type Props = {
@@ -12,7 +13,7 @@ type Props = {
   reduced?: boolean;
 };
 
-/** 島 tile：沙草色佔位 + PNG 載入後淡入（A2）。 */
+/** 島 tile：沙草色佔位 + PNG/WebP 載入後淡入（A2）。 */
 export default function ZoneIslandTileArt({
   zoneId,
   artSrc,
@@ -33,17 +34,10 @@ export default function ZoneIslandTileArt({
           background: `radial-gradient(ellipse 82% 62% at 50% 72%, ${terrain.grass} 0%, ${terrain.sand} 58%, transparent 74%)`,
         }}
       />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={artSrc.src}
-        srcSet={artSrc.srcSet}
-        sizes={artSrc.sizes}
-        alt=""
-        aria-hidden="true"
+      <ArtSrcPicture
+        artSrc={artSrc}
         className={`${styles.tileImg} ${showImg ? styles.tileImgLoaded : styles.tileImgPending}`}
         style={{ transformOrigin: `${ax * 100}% ${ay * 100}%` }}
-        draggable={false}
-        decoding="async"
         onLoad={() => setLoaded(true)}
       />
     </div>

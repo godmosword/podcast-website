@@ -1,4 +1,5 @@
 import type { ZoneId } from "@/data/universe-zones";
+import { pngToWebp } from "@/lib/universe/png-to-webp";
 import { zoneArtTilePath } from "@/lib/universe/zone-art-tile";
 
 /** 對齊 `useMapCamera` MAX_SCALE；供 srcset sizes 估算最大顯示寬。 */
@@ -8,8 +9,11 @@ export const ZONE_ART_SRC_MAX_SCALE = 2.4;
 export const ZONE_ART_TILE_WIDTH = 264;
 
 export type ZoneArtSrcSet = {
+  /** PNG fallback */
   src: string;
   srcSet: string;
+  webpSrc: string;
+  webpSrcSet: string;
   sizes: string;
 };
 
@@ -31,11 +35,20 @@ export function getZoneArtSrcSet(
   mapScale: number = ZONE_ART_SRC_MAX_SCALE,
 ): ZoneArtSrcSet {
   const w = ZONE_ART_TILE_WIDTH;
-  const src = zoneArtTilePathAtDensity(id, 1);
-  const srcSet = [
-    `${zoneArtTilePathAtDensity(id, 1)} ${w}w`,
-    `${zoneArtTilePathAtDensity(id, 2)} ${w * 2}w`,
-    `${zoneArtTilePathAtDensity(id, 3)} ${w * 3}w`,
+  const png1 = zoneArtTilePathAtDensity(id, 1);
+  const png2 = zoneArtTilePathAtDensity(id, 2);
+  const png3 = zoneArtTilePathAtDensity(id, 3);
+  const srcSet = [`${png1} ${w}w`, `${png2} ${w * 2}w`, `${png3} ${w * 3}w`].join(", ");
+  const webpSrcSet = [
+    `${pngToWebp(png1)} ${w}w`,
+    `${pngToWebp(png2)} ${w * 2}w`,
+    `${pngToWebp(png3)} ${w * 3}w`,
   ].join(", ");
-  return { src, srcSet, sizes: getZoneArtSizes(mapScale) };
+  return {
+    src: png1,
+    srcSet,
+    webpSrc: pngToWebp(png1),
+    webpSrcSet,
+    sizes: getZoneArtSizes(mapScale),
+  };
 }

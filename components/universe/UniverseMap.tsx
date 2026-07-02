@@ -8,8 +8,10 @@ import { getZoneArtTile } from "@/lib/universe/zone-art-tile";
 import { parseDevStatusOverrides } from "@/lib/universe/dev-map-flags";
 import { mapDepthZ } from "@/lib/universe-depth";
 import { seaTexturePath } from "@/lib/universe/map-art-src";
+import { resolveTextureHref } from "@/lib/universe/png-to-webp";
 import { playSfx } from "@/lib/sfx";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useWebpSupported } from "@/hooks/useWebpSupported";
 import { useTheme } from "@/components/ThemeProvider";
 import { MapDecorBirds, MapDecorNearWater } from "./MapDecorLayer";
 import MapBridgeLayer from "./MapBridgeLayer";
@@ -36,6 +38,7 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
   const { zones, bridges, viewBox } = resolveUniverseMap();
   const camera = useMapCamera();
   const reduced = useReducedMotion();
+  const webpSupported = useWebpSupported();
   const { theme: daylight } = useTheme();
   const router = useRouter();
   const sectionRef = useRef<HTMLElement>(null);
@@ -47,6 +50,8 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
   // 夜海貼圖惰性載入：首次切到夜晚才掛 pattern，日間不下載 sea-night.png；
   // 掛上後保持常駐，讓日夜切換仍有 600ms crossfade。
   const [nightSeaMounted, setNightSeaMounted] = useState(false);
+  const seaDayHref = resolveTextureHref(seaTexturePath(false), webpSupported);
+  const seaNightHref = resolveTextureHref(seaTexturePath(true), webpSupported);
 
   useEffect(() => {
     if (daylight === "night") setNightSeaMounted(true);
@@ -177,7 +182,7 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
                 height={SEA_TILE}
               >
                 <image
-                  href={seaTexturePath(false)}
+                  href={seaDayHref}
                   x="0"
                   y="0"
                   width={SEA_TILE}
@@ -193,7 +198,7 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
                   height={SEA_TILE}
                 >
                   <image
-                    href={seaTexturePath(true)}
+                    href={seaNightHref}
                     x="0"
                     y="0"
                     width={SEA_TILE}

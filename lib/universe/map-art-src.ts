@@ -4,11 +4,16 @@
  * 集中管理避免字串散落於元件。
  */
 
+import { pngToWebp } from "@/lib/universe/png-to-webp";
+
 const MAP_ART_BASE = "/adventures/map";
 
 export type MapArtSrcSet = {
+  /** PNG fallback */
   src: string;
   srcSet: string;
+  webpSrc: string;
+  webpSrcSet: string;
 };
 
 function mapArtPath(file: string): string {
@@ -20,12 +25,21 @@ export function seaTexturePath(night: boolean = false): string {
   return mapArtPath(night ? "sea-night.png" : "sea.png");
 }
 
+/** 海面 WebP 路徑。 */
+export function seaTextureWebpPath(night: boolean = false): string {
+  return pngToWebp(seaTexturePath(night));
+}
+
 /** 視差雲層檔名（透明 RGBA，僅 1x）。 */
 export const CLOUD_IDS = ["cloud-a", "cloud-b", "cloud-c"] as const;
 export type CloudId = (typeof CLOUD_IDS)[number];
 
 export function cloudPath(id: CloudId): string {
   return mapArtPath(`${id}.png`);
+}
+
+export function cloudWebpPath(id: CloudId): string {
+  return pngToWebp(cloudPath(id));
 }
 
 /** 地平線遠景剪影（透明 RGBA，含 @2x）。 */
@@ -37,11 +51,14 @@ export const FAR_ISLAND_WIDTH = 384;
 
 export function farIslandSrcSet(id: FarIslandId): MapArtSrcSet {
   const src = mapArtPath(`${id}.png`);
-  const srcSet = [
-    `${src} ${FAR_ISLAND_WIDTH}w`,
-    `${mapArtPath(`${id}@2x.png`)} ${FAR_ISLAND_WIDTH * 2}w`,
+  const src2x = mapArtPath(`${id}@2x.png`);
+  const srcSet = [`${src} ${FAR_ISLAND_WIDTH}w`, `${src2x} ${FAR_ISLAND_WIDTH * 2}w`].join(", ");
+  const webpSrc = pngToWebp(src);
+  const webpSrcSet = [
+    `${webpSrc} ${FAR_ISLAND_WIDTH}w`,
+    `${pngToWebp(src2x)} ${FAR_ISLAND_WIDTH * 2}w`,
   ].join(", ");
-  return { src, srcSet };
+  return { src, srcSet, webpSrc, webpSrcSet };
 }
 
 /** 黏土日月（透明 RGBA，選用）。 */
@@ -49,6 +66,14 @@ export function sunPath(): string {
   return mapArtPath("sun.png");
 }
 
+export function sunWebpPath(): string {
+  return pngToWebp(sunPath());
+}
+
 export function moonPath(): string {
   return mapArtPath("moon.png");
+}
+
+export function moonWebpPath(): string {
+  return pngToWebp(moonPath());
 }
