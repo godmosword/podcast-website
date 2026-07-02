@@ -81,11 +81,12 @@ export default function LandingSegment({
       ) : null}
 
       <div className={styles.content}>
-        <p className={styles.eyebrow}>{`0${index + 1}`}</p>
-        <h2 id={`${segment.anchorId}-title`} className={styles.title}>
-          {segment.title}
-        </h2>
-        <p className={styles.subtitle}>{segment.subtitle}</p>
+        <div className={styles.headline}>
+          <span className={styles.index} aria-hidden="true">{`0${index + 1}`}</span>
+          <h2 id={`${segment.anchorId}-title`} className={styles.title}>
+            {segment.title}
+          </h2>
+        </div>
         <Link
           href={segment.cta.href}
           className={styles.cta}

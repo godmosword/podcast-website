@@ -68,33 +68,36 @@
   margin: 0 auto;
   padding: 0
     calc(clamp(20px, 5vw, 56px) + var(--safe-right))
-    clamp(24px, 4.5vh, 72px)
+    clamp(20px, 3.5vh, 56px)
     calc(clamp(20px, 5vw, 56px) + var(--safe-left));
   color: #fff;
 }
 
-.eyebrow {
-  margin: 0 0 6px;
+.headline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35em 0.55em;
+  margin: 0 0 clamp(16px, 2.8vh, 24px);
+}
+
+.index {
+  flex: none;
   font-family: var(--font-marker), var(--font-huninn), sans-serif;
-  font-size: 1.1rem;
-  letter-spacing: 0.08em;
-  opacity: 0.9;
+  font-size: clamp(1.25rem, 3.8vw, 1.85rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  opacity: 0.92;
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.46), 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 .title {
-  margin: 0 0 10px;
-  font-size: clamp(1.7rem, 5.5vw, 3rem);
-  line-height: 1.12;
+  margin: 0;
+  flex: 1 1 10ch;
+  font-size: clamp(1.35rem, 4.4vw, 2.35rem);
+  line-height: 1.18;
   text-shadow: 0 2px 14px rgba(0, 0, 0, 0.46), 0 1px 2px rgba(0, 0, 0, 0.42);
-}
-
-.subtitle {
-  margin: 0 0 18px;
-  font-size: clamp(1rem, 2.4vw, 1.25rem);
-  line-height: 1.5;
-  max-width: 36ch;
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.46), 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 .cta {
@@ -167,7 +170,15 @@
 
   /* 平板：CTA 縮小、靠左，底邊與右下小紅車同一水平線 */
   .content {
-    padding-bottom: calc(48px + var(--safe-bottom));
+    padding-bottom: calc(40px + var(--safe-bottom));
+  }
+
+  .headline {
+    margin-bottom: 14px;
+  }
+
+  .title {
+    font-size: clamp(1.22rem, 4.8vw, 1.65rem);
   }
 
   .cta {
@@ -186,7 +197,15 @@
 @media (max-width: 600px) {
   /* 手機：小紅車在 bottom 64px，CTA 對齊其高度、再縮小一點 */
   .content {
-    padding-bottom: calc(74px + var(--safe-bottom));
+    padding-bottom: calc(66px + var(--safe-bottom));
+  }
+
+  .index {
+    font-size: 1.15rem;
+  }
+
+  .title {
+    font-size: clamp(1.12rem, 5.2vw, 1.45rem);
   }
 
   .cta {

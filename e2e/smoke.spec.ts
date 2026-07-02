@@ -12,7 +12,7 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await expect(page.getByRole("link", { name: "全部故事 →" })).toBeVisible();
   await expect(page.getByRole("heading", { name: /數綿羊/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: /捏黏土/ })).toBeVisible();
-  await expect(page.getByRole("heading", { name: /衛教宣導/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /陪孩子建立好習慣/ })).toBeVisible();
   // 往下箭頭錨點存在
   await expect(
     page.getByRole("link", { name: "捲動到下一個專區" }).first(),
@@ -23,7 +23,7 @@ test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /車車與遊樂園的故事/ })).toBeVisible();
-  await expect(page.getByRole("heading", { name: /衛教宣導/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /陪孩子建立好習慣/ })).toBeVisible();
 });
 
 test("全部故事頁 → 詳情 → 播放頁 smoke", async ({ page }) => {
