@@ -25,16 +25,47 @@ export default function MapBridgeLayer({ bridges, viewBox, paused }: Props) {
           aria-hidden="true"
           focusable="false"
         >
-          <path
-            d={bridge.d}
-            fill="none"
-            stroke="#c8a979"
-            strokeWidth="12"
-            strokeLinecap="round"
-            strokeDasharray={bridge.dashed ? "4 22" : undefined}
-            className={bridge.dashed ? styles.dashedBridge : undefined}
-            opacity={bridge.dashed ? 0.7 : 0.95}
-          />
+          {bridge.dashed ? (
+            <path
+              d={bridge.d}
+              fill="none"
+              stroke="#c8a979"
+              strokeWidth="12"
+              strokeLinecap="round"
+              strokeDasharray="4 22"
+              className={styles.dashedBridge}
+              opacity={0.7}
+            />
+          ) : (
+            // 開放橋＝黏土棧道：深木底描邊 + 淺木面 + 板縫節奏（R-joy 2）
+            <>
+              <path
+                d={bridge.d}
+                fill="none"
+                stroke="#8a6438"
+                strokeWidth="16"
+                strokeLinecap="round"
+                opacity={0.55}
+              />
+              <path
+                d={bridge.d}
+                fill="none"
+                stroke="#d9b98a"
+                strokeWidth="12"
+                strokeLinecap="round"
+                opacity={0.95}
+              />
+              <path
+                d={bridge.d}
+                fill="none"
+                stroke="#c8a26e"
+                strokeWidth="12"
+                strokeLinecap="butt"
+                strokeDasharray="3 11"
+                opacity={0.7}
+              />
+            </>
+          )}
         </svg>
       ))}
     </>

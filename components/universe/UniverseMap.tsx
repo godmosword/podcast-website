@@ -15,6 +15,7 @@ import { MapDecorBirds, MapDecorNearWater } from "./MapDecorLayer";
 import MapBridgeLayer from "./MapBridgeLayer";
 import MapRoamerLayer from "./MapRoamerLayer";
 import MapControls from "./MapControls";
+import NightFireworks from "./NightFireworks";
 import UniverseMapParallax from "./UniverseMapParallax";
 import ZoneIsland from "./ZoneIsland";
 import ZoneSheet from "./ZoneSheet";
@@ -280,6 +281,8 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
           </svg>
 
           <MapBridgeLayer bridges={bridges} viewBox={viewBox} paused={paused} />
+
+          <NightFireworks daylight={daylight} reduced={reduced} paused={paused} />
 
           <MapRoamerLayer
             reduced={reduced}

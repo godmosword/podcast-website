@@ -5,8 +5,14 @@
   height: calc(100dvh - var(--nav-h));
   min-height: 420px;
   overflow: hidden;
-  /* 海平面底色（固定淺色，作為 overscroll 露出的邊框色） */
+  /* 舞台外的天空底色（overscroll / 圓角舞台外露出） */
   background: #bfe2f7;
+  transition: background-color 600ms ease;
+}
+
+/* 夜間天空：與 sea-night 同族的深藍，避免暗世界漂在日間天空上 */
+:global(html[data-theme="night"]) .map {
+  background: #33456e;
 }
 
 .viewport {

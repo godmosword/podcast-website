@@ -6,6 +6,7 @@
 
 ### Added
 
+- **樂園地圖 R-joy 2/3（密度＋夜間巡遊，純程式部分）**：R-joy 2——`MAP_DECOR` 海面密度包 11 件（帆船×2／浮標×3／魚×2／候鳥×2／螢火×2，密度由 car-park 向外遞減、避開島與標籤帶）；開放橋升級黏土棧道（深木底＋淺木面＋板縫節奏三層描邊）。R-joy 3——`NightFireworks` 夜間煙火（三發交錯 CSS 光效粒子、深度落在摩天輪後方綻放、reduced-motion 不渲染、paused 停格）；開放島夜間點燈（不隨夜色調暗＋海面光暈轉暖金）。黏土 PNG 類（渡輪／鯨魚／srcNight 島／煙火 sprite）仍列資產待產
 - **樂園地圖 R-joy 1（歡樂感基建，純程式）**：① car-park 主島放大 1.25× 成 weenie 視覺磁鐵（迪士尼城堡手法；tile-local 步道／遮擋基線同步縮放）② 首次進園「高空降落」動畫（sessionStorage 每 session 一次、reduced-motion 直接定位）③ 點島慶祝：squash & stretch 彈跳＋六色星星迸發（重用 `star-burst-particle`）＋ `playSfx("collect")` 慶祝音（尊重 SfxToggle 與 reduced-motion 只關動畫保留音效）④ 縮放控制鈕接 `tap` 音 ⑤ 地圖左上角「車車宇宙樂園」木牌招牌＋黏土羅盤（裝飾性，語意標題仍為 sr-only h1）⑥ 預設鏡頭 fit 係數 0.96→0.88，視差天空（雲／遠島）從世界邊緣探出；海面舞台加 rx 圓角，退遠讀作漂在天空上的立體模型板
 - **樂園地圖 P1 載入體驗**：島 tile 沙草佔位 + 淡入；標籤反相機縮放；car-park tile preload
 - **樂園地圖 P0 資產交付**：島 tile 接 `@2x/@3x` srcset（`getZoneArtSrcSet`）；漫遊者 PNG→WebP + `<picture>`；rear `fetchPriority="low"`

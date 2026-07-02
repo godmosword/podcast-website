@@ -149,6 +149,20 @@
   transition: filter 600ms ease;
 }
 
+/* R-joy 3 夜間點燈：開放島不隨夜色調暗、海面光暈轉暖金——樂園晚上是亮著燈的 */
+:global(html[data-theme="night"]) .islandTile[data-status="open"] .tileImg {
+  filter: brightness(1.02);
+}
+
+:global(html[data-theme="night"]) .islandTile[data-status="open"]::before {
+  background: radial-gradient(
+    ellipse at 50% 55%,
+    rgba(255, 214, 140, 0.5) 0%,
+    rgba(255, 200, 110, 0.22) 40%,
+    transparent 68%
+  );
+}
+
 .islandTile[data-transition="building-to-open"] .tileImg {
   animation: islandLightUp 700ms ease;
 }

@@ -1,0 +1,59 @@
+.layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.burst {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.particle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: 0 0 8px var(--c);
+  opacity: 0;
+  animation: fireworkPop var(--period) linear infinite;
+  animation-delay: var(--delay);
+}
+
+.paused .particle {
+  animation-play-state: paused;
+}
+
+/* 一次綻放約佔週期的 16%（~1.2s），其餘時間熄滅；結尾粒子微墜（+8px）收尾。 */
+@keyframes fireworkPop {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.4);
+  }
+  2% {
+    opacity: 1;
+  }
+  10% {
+    opacity: 0.95;
+    transform: translate(var(--fx), var(--fy)) scale(1);
+  }
+  16% {
+    opacity: 0;
+    transform: translate(calc(var(--fx) * 1.15), calc(var(--fy) * 1.15 + 8px)) scale(0.35);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .particle {
+    animation: none;
+    opacity: 0;
+  }
+}

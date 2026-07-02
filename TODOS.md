@@ -365,12 +365,13 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 - [ ] **漫遊車 rear 視圖**：`xiao-hong.rear.png`、`duo-duo.rear.png`（`npm run generate:roamer-assets`），到位後 `MAP_ROAMERS` 補 `sprites:{front,rear}`
 - [ ] **planned 狀態美術**（ocean 島）：霧色未成形地基 + 「?」告示浮標（v2 §6），取代純降彩度
 
-## 車車宇宙樂園地圖（R-joy 2/3：迪士尼樂園感，資產待產）　`asset · M · /adventures`　〔design〕
+## 車車宇宙樂園地圖（R-joy 2/3：迪士尼樂園感）　`asset · M · /adventures`　〔design〕
 
-> R-joy 1（純程式：weenie 主島放大、進場降落、點島慶祝+音效、招牌羅盤、鏡頭露天空、舞台圓角）已完成。後兩輪需生圖管線。
+> R-joy 1（純程式：weenie 主島放大、進場降落、點島慶祝+音效、招牌羅盤、鏡頭露天空、舞台圓角）已完成。
+> R-joy 2/3 **純程式部分已完成**：`MAP_DECOR` 密度包 11 件（帆船/浮標/魚/鳥/螢火）、開放橋黏土棧道三層描邊、`NightFireworks` 夜間煙火光效、開放島夜間點燈。剩餘為生圖管線資產：
 
-- [ ] **R-joy 2 海面密度包**：黏土填充件（帆船／鯨魚噴水／浮標／燈塔小嶼／漂浮氣球）走 `MAP_DECOR` 資料層 + §12.3 動作語彙（bob/drift）；島際渡輪走 `MAP_ROAMERS` stage path；橋面黏土棧道貼圖＋彩旗。紀律：密度由 car-park 向外遞減、填充件不可互動、手機減半
-- [ ] **R-joy 3 夜間巡遊**：四島 `srcNight` 點燈版（§12.5 契約已備）；主島上空黏土煙火 sprite 循環（§12.2，12–24 幀）；月光波紋烘進 `sea-night.png`
+- [ ] **R-joy 2 資產**：黏土填充 PNG（鯨魚噴水／燈塔小嶼／漂浮氣球）取代或補充 SVG decor；島際渡輪 roamer（走 `MAP_ROAMERS` stage path，需新角色 sprite）；橋面彩旗串
+- [ ] **R-joy 3 資產**：四島 `srcNight` 點燈版（§12.5 契約已備）；黏土煙火 sprite 循環（§12.2，12–24 幀，取代 CSS 光效粒子）；月光波紋烘進 `sea-night.png`
 
 **changelog：** car-park 黃金樣本 + Art Bible v2 + R1 四島整島黏土化（待補 commit hash）。
 
