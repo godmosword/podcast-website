@@ -14,6 +14,38 @@
 
 ---
 
+## GEO 實作計畫（待確認）
+
+> **Gate：** 本段經人工確認後才開始改 code。每個 Task 完成後單獨 commit，訊息格式固定為 `geo: task-N <描述>`，並把 commit hash 回填到本段。
+> **紅線：** 不動宇宙地圖 canvas / animation / sprite 系統、不動 Q 版黏土角色 sprite 載入邏輯、不改名或刪除既有 URL、不修改音檔託管與 podcast RSS 既有產生邏輯、不升降 package 既有依賴版本。
+> **目前資料基準（2026-07-02 本機掃描）：** `storiesByNewest()` 16 集、最新 `ep-16`（2026-06-30）、`allVehicles()` 13 種、`data/characters.json` 28 個角色。對外文案中的數字仍需人工審稿確認。
+
+| Task | 狀態 | 主要產出 | 預計影響檔案 | 驗證 | Commit hash |
+|------|------|----------|--------------|------|-------------|
+| GEO-0 audit | 完成，待 hash 回填 | 產出 `docs/geo-audit.md`，列「現況 → 問題 → 對應 Task」 | Create: `docs/geo-audit.md`; Modify: `TODOS.md` | `git diff --name-only` 只含 docs/TODOS；人工確認 audit 覆蓋 robots、Vercel/middleware、SSR/SSG、metadata、sitemap；`npm test` / `npm run build` passed | 待回填 |
+| GEO-1 crawler-access | 待確認 | AI crawler allowlist + `llms.txt`；視資料完整度決定是否加 `llms-full.txt` | Modify: `app/robots.ts`; Create: `public/llms.txt`; Optional create: `public/llms-full.txt`; Test: `lib/robots`/route smoke 視實作補 | local `curl /robots.txt`、`curl /llms.txt` 200；確認既有 sitemap 與 allow 規則保留 | 未開始 |
+| GEO-2 structured-data | 待確認 | Organization/WebSite、PodcastSeries、PodcastEpisode `dateModified`、FAQPage、角色頁 CreativeWork/Person JSON-LD | Modify: `components/JsonLd.tsx`, `lib/json-ld.ts`, `lib/json-ld.test.ts`, `app/layout.tsx`, `app/stories/page.tsx`, `app/story/[slug]/page.tsx`, `data/content.ts`, `data/characters.ts`; Create: `app/characters/page.tsx`, `app/characters/page.module.css`;可能新增 `lib/episode-dates.ts` | `npm test -- lib/json-ld.test.ts`；schema.org validator / Rich Results Test 人工抽測；JSON-LD 由資料層產生 | 未開始 |
+| GEO-3 episode-ssr | 待確認 | 單集頁 answer-first 摘要、可見 SSR 大綱/逐字稿、清楚 H1/H2/H3、每集 FAQ | Modify: `app/story/[slug]/page.tsx`, `app/story/[slug]/page.module.css`, `data/content.ts`, `data/stories.ts`, `data/apple-synced.json` 只在需補真實欄位且經確認時； Test: story metadata/transcript tests | `curl` 原始 HTML 可見摘要與大綱/逐字稿；Lighthouse SEO 抽測 >= 95；`npm run verify:episodes` | 未開始 |
+| GEO-4 for-parents | 待確認 | 新增 `/for-parents` SSG landing，問句 H2 + answer-first + FAQPage schema，數字標 `[待確認]` 供審稿 | Create: `app/for-parents/page.tsx`, `app/for-parents/page.module.css`; Modify: `lib/json-ld.ts`, `lib/json-ld.test.ts`, `app/sitemap.ts`, 可能 `components/landing/SiteNavBar.tsx` | `curl /for-parents` 原始 HTML 可見問答；FAQPage schema validator；文案人工審稿 | 未開始 |
+| GEO-5 sitemap-freshness | 待確認 | sitemap 涵蓋新增頁與所有單集；`lastModified` 與 metadata/JSON-LD 日期一致；可行時補 headers | Modify: `app/sitemap.ts`, `lib/story-metadata.ts`, `lib/json-ld.ts`; Optional create: `app/story/[slug]/route-metadata` 不改 RSS route；Test: sitemap/date consistency | sitemap XML 驗證；抽 3 頁比對 sitemap `lastmod`、metadata、JSON-LD `dateModified` | 未開始 |
+| GEO-6 docs-wrap | 待確認 | 完成 hash 回填與上線後人工檢查清單 | Modify: `TODOS.md`; Create: `docs/geo-checklist.md`; Optional modify: `CHANGELOG.md`（若按 Domain docs sync） | `npm run build`、`npx tsc --noEmit`、`npm test`；檢查每個 Task hash 已回填 | 未開始 |
+
+### GEO Task DAG
+
+1. `GEO-0 audit` 先行，確認不碰紅線且列出差距。
+2. `GEO-1 crawler-access` 與 `GEO-2 structured-data` 可在 audit 後分開做，但 `GEO-2` 的 `dateModified` 欄位若缺真實來源，需先建立資料策略。
+3. `GEO-3 episode-ssr` 依賴 `GEO-2` 的 FAQ/episode schema helper 與真實日期策略。
+4. `GEO-4 for-parents` 依賴 `GEO-3` 的代表性單集連結與資料統計。
+5. `GEO-5 sitemap-freshness` 依賴新增頁與日期欄位完成。
+6. `GEO-6 docs-wrap` 最後收尾，回填 hash 與人工上線檢查。
+
+### GEO 待決策
+
+- `/characters` 是否作為新增公開角色介紹頁：目前 repo 沒有此路由；Task 2 建議新增 SSG 頁並只讀 `data/characters.ts`，不動 sprite 載入邏輯。
+- `dateModified` 真實來源：目前故事資料只有 `date`；建議新增人工維護欄位或從既有 sync 狀態中找到可證明的更新時間。找不到真實來源時，不輸出假 `dateModified`，先回報。
+- `/llms-full.txt` 是否包含全部 16 集摘要索引：若採用，內容需從 `storiesByNewest()` 產生/同步，避免手寫漂移。
+- `/for-parents` 的更新頻率、適合年齡、代表集數等文案：先以資料層數字生成並標 `[待確認]`，人工審稿後再移除標記。
+
 ## 產品路線圖（互動 + STEM + 商業）
 
 > 依據：兒童數位產品研究共識（Thinkrolls／DragonBox／Khan Kids／Sago Mini 等）、台灣市場（《顛覆！故事 STEAM》、Firstory 付費成長、叮噹家族 VIP 月 99／年 999）、競品拆解（[RESEARCH.md — Hey Clay](./RESEARCH.md#2026-06-09hey-clay-app-架構拆解與適用性評估)）、以及本站現況（Next.js SSG、逐字字幕、4 款小遊戲、private 素材庫）。
