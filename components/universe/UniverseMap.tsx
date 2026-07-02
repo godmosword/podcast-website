@@ -77,8 +77,10 @@ function UniverseMapContent({ devStatusOverrides }: MapContentProps) {
 
   const handleActivate = useCallback(
     (zone: ZoneDef) => {
-      // 慶祝音（尊重 SfxToggle 靜音偏好；reduced-motion 保留音效、只關動畫）
-      playSfx("collect");
+      // 開放島慶祝音；鎖島 tap 音在 ZoneIsland 播放
+      if (zone.status === "open") {
+        playSfx("collect");
+      }
 
       const directRoute =
         zone.route && zone.status === "open" && !zone.subSegmentIds?.length;

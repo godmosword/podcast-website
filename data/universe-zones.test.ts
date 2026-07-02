@@ -67,6 +67,13 @@ describe("universe-zones", () => {
     ]);
   });
 
+  it("未開放狀態有 tapBubble 文案", () => {
+    expect(ZONE_STATUS_META.building.tapBubble).toBe("還在蓋喔！");
+    expect(ZONE_STATUS_META.coming.tapBubble).toBe("快要開幕囉！");
+    expect(ZONE_STATUS_META.planned.tapBubble).toBe("先許願吧！");
+    expect(ZONE_STATUS_META.open.tapBubble).toBeUndefined();
+  });
+
   it("ZONE_TERRAIN 涵蓋全部 ZoneId", () => {
     for (const id of ZONE_IDS) {
       expect(ZONE_TERRAIN[id]?.sand).toBeTruthy();

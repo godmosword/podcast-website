@@ -5,7 +5,9 @@ import { ZONE_STATUS_META, type ZoneDef, type ZoneStatus } from "@/data/universe
 import { mapDepthZ } from "@/lib/universe-depth";
 import type { ResolvedZone } from "@/lib/universe-map";
 import { getZoneArtTile, getZoneArtSrcSet } from "@/lib/universe/zone-art-tile";
+import { playSfx } from "@/lib/sfx";
 import IslandRoamerLayer from "./IslandRoamerLayer";
+import LockedIslandBubble from "./LockedIslandBubble";
 import ZoneLandmark from "./ZoneLandmark";
 import ZoneMotionLayer from "./ZoneMotionLayer";
 import StatusOverlay from "./StatusOverlay";
@@ -25,6 +27,9 @@ const BURST_PARTICLES = [
 
 /** 慶祝動畫長度（毫秒），與 CSS islandBounce／star-burst-particle 對齊。 */
 const CELEBRATE_MS = 640;
+
+/** 鎖島對話泡泡顯示時間（毫秒）。 */
+const BUBBLE_MS = 1500;
 
 type ZoneIslandProps = {
   zone: ResolvedZone;
@@ -49,18 +54,38 @@ export default function ZoneIsland({
 }: ZoneIslandProps) {
   const effectiveStatus = devStatusOverride ?? zone.status;
   const meta = ZONE_STATUS_META[effectiveStatus];
+  const isOpen = effectiveStatus === "open";
   const tile = getZoneArtTile(zone.id);
   const { transition, onTransitionEnd } = useZoneTransition(effectiveStatus, reduced);
 
   // 點島慶祝：squash 彈跳 + 星星迸發。burst 作 key 讓連點能重播。
   const [burst, setBurst] = useState(0);
   const burstTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 鎖島：果凍晃動 + 對話泡泡
+  const [jelly, setJelly] = useState(0);
+  const [bubble, setBubble] = useState<{ key: number; message: string } | null>(null);
+  const bubbleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleActivate = () => {
-    if (!reduced) {
-      setBurst((n) => n + 1);
-      if (burstTimerRef.current) clearTimeout(burstTimerRef.current);
-      burstTimerRef.current = setTimeout(() => setBurst(0), CELEBRATE_MS);
+    if (isOpen) {
+      if (!reduced) {
+        setBurst((n) => n + 1);
+        if (burstTimerRef.current) clearTimeout(burstTimerRef.current);
+        burstTimerRef.current = setTimeout(() => setBurst(0), CELEBRATE_MS);
+      }
+    } else {
+      playSfx("tap");
+      if (meta.tapBubble) {
+        if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current);
+        setBubble((prev) => ({
+          key: (prev?.key ?? 0) + 1,
+          message: meta.tapBubble!,
+        }));
+        bubbleTimerRef.current = setTimeout(() => setBubble(null), BUBBLE_MS);
+      }
+      if (!reduced) {
+        setJelly((n) => n + 1);
+      }
     }
     onActivate(zone);
   };
@@ -68,6 +93,7 @@ export default function ZoneIsland({
   useEffect(() => {
     return () => {
       if (burstTimerRef.current) clearTimeout(burstTimerRef.current);
+      if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current);
     };
   }, []);
 
@@ -89,7 +115,8 @@ export default function ZoneIsland({
           }}
           data-status={effectiveStatus}
           data-transition={transition ?? undefined}
-          data-celebrate={burst > 0 || undefined}
+          data-celebrate={isOpen && burst > 0 ? true : undefined}
+          data-jelly={!isOpen && jelly > 0 ? jelly : undefined}
           aria-label={`${zone.name}，${meta.label}`}
           onClick={handleActivate}
           onAnimationEnd={onTransitionEnd}
@@ -117,7 +144,7 @@ export default function ZoneIsland({
               paused={paused}
               night={night}
             />
-            {burst > 0 && (
+            {burst > 0 && isOpen && (
               <span className={styles.burstLayer} aria-hidden="true">
                 {BURST_PARTICLES.map((p, i) => (
                   <span
@@ -137,6 +164,13 @@ export default function ZoneIsland({
                 ))}
               </span>
             )}
+            {bubble && meta.tapBubble ? (
+              <LockedIslandBubble
+                message={bubble.message}
+                bubbleKey={bubble.key}
+                reduced={reduced}
+              />
+            ) : null}
           </div>
         </button>
         <span

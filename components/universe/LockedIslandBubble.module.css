@@ -1,0 +1,63 @@
+.bubble {
+  position: absolute;
+  left: 50%;
+  top: 8%;
+  transform: translateX(-50%);
+  z-index: 4;
+  pointer-events: none;
+  padding: 6px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 2px solid rgba(107, 78, 30, 0.18);
+  box-shadow: 0 4px 14px rgba(36, 74, 46, 0.14);
+  font-size: 13px;
+  font-weight: 800;
+  color: #3d3428;
+  white-space: nowrap;
+  animation: bubblePop 1.5s ease forwards;
+}
+
+.bubbleReduced {
+  animation: none;
+  opacity: 1;
+}
+
+@keyframes bubblePop {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(6px) scale(0.88);
+  }
+  12% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+  72% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-4px) scale(0.96);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bubble:not(.bubbleReduced) {
+    animation: bubbleFadeOnly 1.5s ease forwards;
+  }
+}
+
+@keyframes bubbleFadeOnly {
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

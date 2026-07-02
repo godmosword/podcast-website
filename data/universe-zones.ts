@@ -89,10 +89,35 @@ export const ZONES: ZoneDef[] = [
 /** 狀態 → pill 文案/配色（單一來源，元件勿各自硬刻） */
 export const ZONE_STATUS_META: Record<
   ZoneStatus,
-  { label: string; pillBg: string; pillInk: string; clickable: boolean }
+  {
+    label: string;
+    pillBg: string;
+    pillInk: string;
+    clickable: boolean;
+    /** 點擊未開放島時的短暫對話泡泡文案 */
+    tapBubble?: string;
+  }
 > = {
   open: { label: "開放中", pillBg: "#bfe3c4", pillInk: "#14532d", clickable: true },
-  building: { label: "建造中", pillBg: "#f5e0a6", pillInk: "#6b4e09", clickable: true },
-  coming: { label: "即將登場", pillBg: "#cfe6f5", pillInk: "#14455f", clickable: true },
-  planned: { label: "規劃中", pillBg: "#e2dcef", pillInk: "#41356b", clickable: true },
+  building: {
+    label: "建造中",
+    pillBg: "#f5e0a6",
+    pillInk: "#6b4e09",
+    clickable: true,
+    tapBubble: "還在蓋喔！",
+  },
+  coming: {
+    label: "即將登場",
+    pillBg: "#cfe6f5",
+    pillInk: "#14455f",
+    clickable: true,
+    tapBubble: "快要開幕囉！",
+  },
+  planned: {
+    label: "規劃中",
+    pillBg: "#e2dcef",
+    pillInk: "#41356b",
+    clickable: true,
+    tapBubble: "先許願吧！",
+  },
 };
