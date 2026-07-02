@@ -724,6 +724,9 @@ Migration：`scripts/migrations/001_zone_wishes.sql`
 
 ## Completed
 
+### 修復 sync workflow build 失敗（NEXT_PUBLIC_SITE_URL）
+`41af68c` 新增的 `generate-llms-full` 防呆在 CI 上因無 Vercel env 使 siteUrl fallback 成 localhost 而 throw，導致 `Sync Apple Podcast` 的 Production build 失敗（run 28602134470）。修法：workflow build 步驟明確設 `NEXT_PUBLIC_SITE_URL=https://podcast-website-mu.vercel.app`。
+
 ### ep-16 字幕校對（proofread --mark）
 Whisper 草稿人工校對：`撲撲豬`→`噗噗豬`、`救護車安安`→`安安救護車`、`安安就護車廳了`→`安安救護車呢`、`會淹水`→`會溺水`（開場玩水安全說明）；179 句 `--mark` 完成，illustrate 閘門已解。待 commit。
 
