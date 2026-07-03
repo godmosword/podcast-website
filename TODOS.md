@@ -81,6 +81,33 @@
 
 ---
 
+## 設計審查 deferred 發現（2026-07-03 /design-review）
+
+> 完整報告：`~/.gstack/projects/godmosword-podcast-website/designs/design-audit-20260703/`。
+> 已修：F1 小衝破圖 `c23e4b5` · F2 landing 主標斷行 `e49cdf9` · F4a 全域 focus ring token 化 `dc0e5d2`。
+> 以下為**未修（deferred）**條目；宇宙地圖三項因當時另一 session 正在改 `components/universe/*`（map-camera-utils／forest 島）而暫緩，動工前先確認該批改動已落地。
+
+### 宇宙地圖 zone sheet 主 CTA 層級　`design · S · universe 改動落地`　〔design〕
+車車樂園 sheet 四顆入口按鈕視覺權重相同，違反 one-primary-CTA；「全部故事」應改實色主按鈕（沿 landing CTA 橘），其餘維持次要。`components/universe/ZoneSheet*`。
+
+### 宇宙地圖 focus 外框形狀　`design · S · universe 改動落地`　〔design+a11y〕
+島嶼 button 的 `:focus-visible` 是貼齊整個不規則島的巨大圓角矩形（Escape 關 sheet 後特別明顯，像破圖）；sheet 開啟自動聚焦關閉鈕也出現粗黑框。改：focus 樣式套在路標 label 或柔和 box-shadow ring；sheet 初始焦點移到 dialog 容器（`tabindex="-1"`）。保留可見 focus，只改形狀。
+
+### 手機版地圖初始構圖 letterbox　`design · M · universe 改動落地`　〔design〕
+375px 下海面世界僅鋪滿中段 ~1/3，上下平色藍 + 漂浮視差雲/丘，接縫明顯；桌面舞台左右也有硬邊。方向：初始鏡頭改 cover 高度的最小縮放，或海面紋理鋪滿 stage（可與 v5 sea@2x 資產一併）。**注意：** 未提交的 `lib/universe/map-camera-utils.ts` 疑似已在處理此題，先對齊再動工。
+
+### Landing 無 `<h1>`　`design · S · 無`　〔seo+a11y〕
+首頁 headings 從 h2 開始（四段 segment 標題）；第一段標題可升級 h1 或另加 sr-only h1。`components/landing/LandingSegment.tsx`。
+
+### 小項（polish）
+- 鎖定島 sheet「🔔」emoji 圖示與全站 SVG 語彙不一致，改 inline SVG 鈴鐺。〔design〕
+- 單集頁車種 chip 顯示「其他」= 資料 fallback 外洩到 UI；無車種時隱藏 chip。〔content+eng〕
+- footer「節目數據」「使用條款」觸控高度 20px（<44px）。〔a11y〕
+- landing hero jpg（~300KB/張）可轉 WebP 降首屏灰底時間（手機冷載入 ~3s 才出圖，圖已是 eager+fetchpriority=high，剩資產重量）。〔perf〕
+- `app/characters/page.module.css` 自成一套 slate/teal 色系（13 個硬編 hex、無 token、不支援夜間模式），與 DESIGN.md 色票脫鉤；建議改 `var(--token, #fallback)` 慣例（參照 `components/landing/*`）。〔design+eng〕
+
+---
+
 ## 產品路線圖（互動 + STEM + 商業）
 
 > 依據：兒童數位產品研究共識（Thinkrolls／DragonBox／Khan Kids／Sago Mini 等）、台灣市場（《顛覆！故事 STEAM》、Firstory 付費成長、叮噹家族 VIP 月 99／年 999）、競品拆解（[RESEARCH.md — Hey Clay](./RESEARCH.md#2026-06-09hey-clay-app-架構拆解與適用性評估)）、以及本站現況（Next.js SSG、逐字字幕、4 款小遊戲、private 素材庫）。
