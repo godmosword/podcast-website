@@ -40,7 +40,7 @@ export const STORY_MODIFIED_DATE_SOURCE: Record<string, string> = {
   "ep-14": "55bbff6 public/stories/ep-14 + data/scenes/subtitles",
   "ep-15": "6df1adb public/stories/ep-15 + data/scenes/subtitles",
   "ep-16": "3fbf4fd public/stories/ep-16 + data/scenes/subtitles",
-  "ep-17": "ac89fe6 public/stories/ep-17 + data/scenes/subtitles",
+  "ep-17": "229668e public/stories/ep-17 + data/scenes/subtitles",
 };
 
 export function storyDateModified(story: StoryDateInput): string {
