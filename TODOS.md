@@ -53,6 +53,34 @@
 | llms.txt 補路由 | 完成 | `public/llms.txt` 主要路由地圖補 `/for-parents`、`/characters` 兩行 | `git diff -- public/llms.txt` 確認只新增指定兩行 | `cfd1c5f` |
 | llms-full.txt 自動產生 | 完成 | 新增 `scripts/generate-llms-full.ts`、`scripts/generate-llms-full.test.ts`、`public/llms-full.txt`，並接入 `prebuild` | `npm run generate:llms-full` passed；`npm run build` passed；`npx tsc --noEmit` passed；`npm test` passed | `581b8aa` |
 
+## 名單收集 × 內容再利用（2026-07-03 品牌盤點）
+
+> **Gate：** 本段經人工確認後才開始改 code。每個 Task 完成後單獨 commit，訊息格式 `brand: task-N <描述>`，hash 回填本段。
+> **背景：** 品牌盤點結論——最大缺口是「自有名單」（聽眾全在第三方平台）與「內容只用一次」。完整計劃見 plan 檔（podcaster-humble-yeti）。
+> **與既有條目關係：** LIST-2 取代「延後」表的「Email 電子報」條目（僅收名單、不寄信，ESP 之後再議）；REUSE-2 與 P2「家長共讀指引（`parentGuide`）」為**同一任務**（勿另建 `parentNote`）；逐字稿可索引已完成（`029b7e6`），REUSE-2 不重做。
+> **紅線：** 不動宇宙地圖與 landing 動畫系統、不改既有 URL、不升降依賴版本。
+
+| Task | 狀態 | 主要產出 | 預計影響檔案 | 驗證 | Commit hash |
+|------|------|----------|--------------|------|-------------|
+| LIST-1 LINE OA CTA | 待確認 | env-gated LINE 加好友 CTA（`NEXT_PUBLIC_LINE_OA_URL` 未設即隱藏，沿用 `visibleSocials()` 空字串隱藏模式）；掛頁尾／單集頁 `SubscriptionCTA` 旁／landing／`/subscribe` | Modify: `lib/social.ts`（`SocialIcon` 加 `"line"`）、`lib/connect-icons.tsx`、`components/SiteFooter.tsx`、`app/story/[slug]/page.tsx`; Create: `components/LineCTA.tsx` | 設/不設 env 切換顯隱；`npm test` + `npm run build` | — |
+| LIST-2 新集通知 email 訂閱 | 待確認 | 複製 zone-wish 技術棧（zod + rate limit + Neon + DB 未設降級）；`subscribers` 表 `lower(email)` unique + `ON CONFLICT DO NOTHING`（冪等、防枚舉）；簡單收集 + 隱私說明（「僅用於新集數通知」），不做 double opt-in | Create: `scripts/migrations/002_subscribers.sql`、`lib/subscribe-schema.ts`、`lib/subscribe-db.ts`、`app/api/subscribe/route.ts`、`components/SubscribeForm.tsx`、`app/subscribe/page.tsx`（範本：`app/api/zone-wish/route.ts`、`ZoneWishForm.tsx`） | curl：無 `DATABASE_URL` 降級、POST 201、重複 email 201、429 rate limit；`npm test` + `npm run build` | — |
+| LIST-3 分析事件 | 待確認 | `trackSubscribeSubmit(source)`、`trackLineCtaClick(source)`，走 `safeTrack`、無 PII（比照 `trackUniverseWishSubmit`） | Modify: `lib/analytics.ts` | 本機點擊確認事件發送 | — |
+| REUSE-1 校對字幕採用檢查 | 待確認 | 確認 backfill 管線優先讀 `data/subtitles/_proofread/`；若否修正並對 ep-11~17 重跑 `npm run backfill:captions`；跑 `npm run verify:episodes` | Modify（視檢查結果）: `scripts/lib/illustrate-core.ts`; Data: `data/apple-synced.json` | `verify:episodes` 全過；抽查 ep-16 captions 用校對版文字 | — |
+| REUSE-2 家長共讀指引呈現（= P2 `parentGuide`） | 待確認 | `Story` 加選填 `parentGuide` 欄位 + `ShowNotes` 區塊（「這集可以聊什麼」+ 延伸提問／小活動）；SEO 可爬 zh-Hant 內文 | Modify: `data/content.ts`、`app/story/[slug]/page.tsx`; Create: `components/story/ShowNotes.tsx` | view-source 確認 SSR 文字；`npm test` + `npm run build` | — |
+| REUSE-3 短影音素材匯出工具 | 待確認 | 本機 CLI `npm run export:video -- <slug>`：讀 `data/scenes/<slug>.json` start/end，ffmpeg 切場景音訊、配對 `public/stories/<slug>/NN.jpg` + 字幕片段，選配 1080x1920 靜圖 mp4；輸出 `export/video/<slug>/` + `manifest.json`（gitignore，不自動發文） | Create: `scripts/export-video-assets.ts`; Modify: `package.json`、`.gitignore` | `export:video -- ep-12` 抽查場景音訊長度與 manifest 對應 | — |
+
+### 待使用者提供（不擋開發）
+
+- LINE 官方帳號加好友網址 → Vercel env `NEXT_PUBLIC_LINE_OA_URL`（需先自行建立 LINE OA）
+- `DATABASE_URL` 沿用 zone-wish 既有 Neon，同庫加表即可
+
+### Task DAG
+
+1. LIST-1／LIST-2 可並行；LIST-3 依賴前兩者的元件掛點。
+2. REUSE-1 獨立先行（資料正確性）；REUSE-2 依賴 `parentGuide` 文案（Bonbon & 馬米）；REUSE-3 完全獨立。
+
+---
+
 ## 產品路線圖（互動 + STEM + 商業）
 
 > 依據：兒童數位產品研究共識（Thinkrolls／DragonBox／Khan Kids／Sago Mini 等）、台灣市場（《顛覆！故事 STEAM》、Firstory 付費成長、叮噹家族 VIP 月 99／年 999）、競品拆解（[RESEARCH.md — Hey Clay](./RESEARCH.md#2026-06-09hey-clay-app-架構拆解與適用性評估)）、以及本站現況（Next.js SSG、逐字字幕、4 款小遊戲、private 素材庫）。
@@ -677,7 +705,7 @@ T+2d    社群貼文（B 戰場）
 
 | 項目 | 原因 |
 |------|------|
-| Email 電子報 / 會員 | 平台 App 已有新集通知；先用 Threads 導流；**正式會員制見 STEM-P4** |
+| ~~Email 電子報~~ / 會員 | **名單收集已升級為主動任務**（見 [名單收集 × 內容再利用](#名單收集--內容再利用2026-07-03-品牌盤點) LIST-2：僅收名單不寄信）；**正式會員制見 STEM-P4** |
 | 著色頁／活動單 PDF | **已納入 STEM-P3 列印物**；P1–P2 前先拉高單集分享與互動留存 |
 | 部落格長文 SEO | 初期單集頁 + 平台關鍵字效益較直接 |
 | 網站內 RSS 播放器 | 訂閱導向 Spotify／Apple 即可 |
