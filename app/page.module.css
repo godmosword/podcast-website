@@ -1,6 +1,14 @@
 .main {
   width: 100%;
   --landing-pane-h: calc(100svh - var(--nav-h));
+  --landing-mobile-nav-h: 0px;
   height: var(--landing-pane-h);
   overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .main {
+    /* 28px 指示列 + safe area，供 segment／Dudu 對齊 */
+    --landing-mobile-nav-h: calc(28px + var(--safe-bottom));
+  }
 }

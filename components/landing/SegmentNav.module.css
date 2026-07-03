@@ -75,7 +75,7 @@
   transform: translateX(0);
 }
 
-/* 平板／手機：貼底細條，指示器置中 */
+/* 平板／手機：實底貼齊螢幕底緣（含 safe area） */
 @media (max-width: 768px) {
   .nav {
     top: auto;
@@ -84,6 +84,9 @@
     bottom: 0;
     transform: none;
     width: 100%;
+    padding-bottom: var(--safe-bottom);
+    background: rgba(38, 20, 8, 0.86);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .list {
@@ -93,13 +96,13 @@
     align-items: center;
     gap: 14px;
     width: 100%;
-    min-height: 26px;
-    padding: 3px 16px calc(10px + var(--safe-bottom));
-    border-radius: 0;
-    background: rgba(38, 20, 8, 0.78);
+    height: 28px;
+    min-height: 0;
+    padding: 0 12px;
+    background: transparent;
     border: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 -4px 16px rgba(24, 12, 4, 0.12);
+    box-shadow: none;
+    border-radius: 0;
   }
 
   .dot {

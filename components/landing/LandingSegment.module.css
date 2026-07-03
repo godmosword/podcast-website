@@ -203,7 +203,7 @@
   }
 
   .content {
-    padding-bottom: calc(38px + var(--safe-bottom));
+    padding-bottom: calc(var(--landing-mobile-nav-h) + 6px);
   }
 }
 
@@ -214,7 +214,7 @@
     align-items: end;
     column-gap: 4px;
     row-gap: 12px;
-    padding-bottom: calc(38px + var(--safe-bottom));
+    padding-bottom: calc(var(--landing-mobile-nav-h) + 6px);
   }
 
   .headline {
