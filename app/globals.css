@@ -178,11 +178,6 @@
     radial-gradient(120% 80% at 8% 104%, rgba(232, 194, 90, 0.06), transparent 58%);
 }
 
-[data-theme="night"] a:focus-visible,
-[data-theme="night"] button:focus-visible {
-  outline-color: var(--focus-ring);
-}
-
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -252,7 +247,7 @@ button {
 
 a:focus-visible,
 button:focus-visible {
-  outline: 3px solid var(--ink);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
