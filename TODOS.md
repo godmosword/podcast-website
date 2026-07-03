@@ -84,8 +84,11 @@
 ## 設計審查 deferred 發現（2026-07-03 /design-review）
 
 > 完整報告：`~/.gstack/projects/godmosword-podcast-website/designs/design-audit-20260703/`。
-> 已修：F1 小衝破圖 `3a3d582` · F2 landing 主標斷行 `cfbfebf` · F4a 全域 focus ring token 化 `d27ecf5`。
-> 以下為**未修（deferred）**條目；宇宙地圖三項因當時另一 session 正在改 `components/universe/*`（map-camera-utils／forest 島）而暫緩，動工前先確認該批改動已落地。
+> 已修：F1 小衝破圖 `3a3d582` · F2 landing 主標斷行 `cfbfebf`（斷行策略修正 `30e8300`：主標整句一行、其餘標題於「·」後斷）· F4a 全域 focus ring token 化 `d27ecf5`。
+> **2026-07-04 更新：** Map v6（`4f496c9`，forest 島＋click-to-zoom＋新 bottom sheet＋海天融接）已落地，下列宇宙地圖三項的「universe 改動落地」前置已解除，但需**對照 v6 重新驗證**是否仍成立（sheet 流程與縮放行為已改）。
+
+### 森林小島底部洋紅色暈圈（v6 資產 bug）　`asset · S · 無`　〔design〕
+正式站 `/adventures` 森林小島底緣有一圈 magenta 殘留（生圖 chroma-key 去背不完全，烘進 `public/adventures/zones/forest*.png/webp`）。修法可循 `scripts/lib/roamer-alpha.ts` 邊界 flood 去背前例，或重跑 `scripts/generate-forest-zone-art.ts` 後製。
 
 ### 宇宙地圖 zone sheet 主 CTA 層級　`design · S · universe 改動落地`　〔design〕
 車車樂園 sheet 四顆入口按鈕視覺權重相同，違反 one-primary-CTA；「全部故事」應改實色主按鈕（沿 landing CTA 橘），其餘維持次要。`components/universe/ZoneSheet*`。
