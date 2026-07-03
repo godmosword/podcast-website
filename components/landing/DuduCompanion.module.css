@@ -64,8 +64,8 @@
 
 @media (max-width: 600px) {
   .root {
-    right: 10px;
-    /* 與 CTA 同列，在底部 nav pill 上方 */
+    right: calc(clamp(20px, 5vw, 56px) + var(--safe-right));
+    /* 與 CTA 同列（content grid 右欄） */
     bottom: calc(56px + var(--safe-bottom, 0px));
   }
 

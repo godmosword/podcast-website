@@ -75,14 +75,14 @@
   transform: translateX(0);
 }
 
-/* 手機：底部橫向膠囊列，與 CTA／Dudu 分層 */
+/* 手機：底部左側膠囊列，與內容左緣對齊 */
 @media (max-width: 600px) {
   .nav {
     top: auto;
     right: auto;
-    left: 50%;
+    left: calc(clamp(20px, 5vw, 56px) + var(--safe-left));
     bottom: calc(10px + var(--safe-bottom));
-    transform: translateX(-50%);
+    transform: none;
   }
 
   .list {
@@ -91,13 +91,13 @@
     gap: 8px;
     padding: 5px 10px;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--landing-cta-from, #ffe7cf) 72%, rgba(255, 255, 255, 0.55));
-    border: 1px solid rgba(255, 255, 255, 0.62);
-    box-shadow:
-      0 4px 0 rgba(180, 110, 50, 0.12),
-      0 8px 20px rgba(48, 28, 12, 0.12);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: linear-gradient(
+      180deg,
+      var(--landing-cta-from, #ffe7cf) 0%,
+      var(--landing-cta-to, #ffd5a8) 100%
+    );
+    border: 2px solid rgba(180, 120, 60, 0.28);
+    box-shadow: 0 3px 0 rgba(180, 110, 50, 0.12);
   }
 
   .dot {

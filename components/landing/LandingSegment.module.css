@@ -12,6 +12,7 @@
   flex: none;
   /* 載入態/段間保底色：跟隨主題，避免硬編碼深咖暗縫 */
   background: var(--bg);
+  --landing-gutter: clamp(20px, 5vw, 56px);
   --landing-bottom-ui-h: 0px;
 }
 
@@ -53,11 +54,10 @@
   /* 僅底部文字區保護：底端維持 ~0.46 守白字對比，向上快速透明讓亮圖露出 */
   background: linear-gradient(
     to top,
-    rgba(38, 20, 8, 0.46) 0%,
-    rgba(38, 20, 8, 0.34) 22%,
-    rgba(38, 20, 8, 0.16) 42%,
-    rgba(38, 20, 8, 0.04) 62%,
-    rgba(38, 20, 8, 0) 78%
+    rgba(38, 20, 8, 0.5) 0%,
+    rgba(38, 20, 8, 0.36) 24%,
+    rgba(38, 20, 8, 0.14) 46%,
+    rgba(38, 20, 8, 0) 72%
   );
 }
 
@@ -65,33 +65,13 @@
   position: relative;
   z-index: 2;
   width: 100%;
-  max-width: 680px;
-  margin: 0;
-  padding: clamp(16px, 2.5vh, 28px)
-    calc(clamp(20px, 5vw, 56px) + var(--safe-right))
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0
+    calc(var(--landing-gutter) + var(--safe-right))
     calc(clamp(20px, 3.5vh, 56px) + var(--landing-bottom-ui-h))
-    calc(clamp(20px, 5vw, 56px) + var(--safe-left));
+    calc(var(--landing-gutter) + var(--safe-left));
   color: #fff;
-}
-
-/* 底部文字區玻璃底：讓標題／CTA 成為一個視覺區塊 */
-.content::before {
-  content: "";
-  position: absolute;
-  inset: -4px -8px -8px -8px;
-  border-radius: clamp(16px, 3vw, 22px);
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.14) 0%,
-    rgba(255, 255, 255, 0.05) 55%,
-    rgba(255, 255, 255, 0.02) 100%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 8px 28px rgba(24, 12, 4, 0.14);
-  z-index: -1;
-  pointer-events: none;
 }
 
 .headline {
@@ -100,7 +80,7 @@
   align-items: flex-start;
   gap: 0.28em;
   margin: 0 0 clamp(14px, 2.4vh, 20px);
-  max-width: 22ch;
+  max-width: min(22ch, 100%);
 }
 
 .index {
@@ -110,7 +90,7 @@
   font-weight: 800;
   letter-spacing: 0.14em;
   line-height: 1;
-  opacity: 0.82;
+  opacity: 0.88;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.42);
 }
 
@@ -159,13 +139,15 @@
   border-radius: 999px;
   color: var(--landing-nav-cta-fg, #8b4510);
   text-decoration: none;
-  background: color-mix(in srgb, var(--landing-cta-from, #ffe7cf) 82%, rgba(255, 255, 255, 0.9));
-  border: 1.5px solid rgba(255, 255, 255, 0.72);
+  background: linear-gradient(
+    180deg,
+    var(--landing-cta-from, #ffe7cf) 0%,
+    var(--landing-cta-to, #ffd5a8) 100%
+  );
+  border: 2px solid rgba(180, 120, 60, 0.28);
   box-shadow:
     0 3px 0 rgba(180, 110, 50, 0.14),
     0 6px 16px rgba(48, 28, 12, 0.16);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   animation: nudge 1.8s ease-in-out infinite;
   pointer-events: auto;
 }
@@ -201,13 +183,9 @@
     object-position: center 35%;
   }
 
-  .content {
-    max-width: min(520px, 100%);
-  }
-
   .headline {
     margin-bottom: 12px;
-    max-width: 18ch;
+    max-width: min(18ch, calc(100% - 72px));
   }
 
   .title {
@@ -227,13 +205,28 @@
 
 @media (max-width: 600px) {
   .panel {
-    /* 預留底部 nav pill（~38px + 間距） */
-    --landing-bottom-ui-h: 56px;
+    --landing-bottom-ui-h: 0px;
   }
 
-  .content::before {
-    inset: -2px -6px -6px -6px;
-    border-radius: 16px;
+  .content {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 68px;
+    align-items: end;
+    column-gap: 4px;
+    row-gap: 12px;
+    /* 56px = nav pill 區（10px 底距 + ~38px 高 + 8px 間隙） */
+    padding-bottom: calc(56px + var(--safe-bottom));
+  }
+
+  .headline {
+    grid-column: 1 / -1;
+    margin-bottom: 0;
+  }
+
+  .cta {
+    grid-column: 1;
+    justify-self: start;
+    align-self: end;
   }
 
   .index {
