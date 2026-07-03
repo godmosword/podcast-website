@@ -203,7 +203,7 @@
   }
 
   .content {
-    padding-bottom: calc(44px + var(--safe-bottom));
+    padding-bottom: calc(38px + var(--safe-bottom));
   }
 }
 
@@ -214,8 +214,7 @@
     align-items: end;
     column-gap: 4px;
     row-gap: 12px;
-    /* 32px 細條 + 12px 間隙 */
-    padding-bottom: calc(44px + var(--safe-bottom));
+    padding-bottom: calc(38px + var(--safe-bottom));
   }
 
   .headline {

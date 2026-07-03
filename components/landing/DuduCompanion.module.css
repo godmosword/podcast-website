@@ -65,7 +65,7 @@
 @media (max-width: 768px) {
   .root {
     right: calc(clamp(20px, 5vw, 56px) + var(--safe-right));
-    bottom: calc(44px + var(--safe-bottom, 0px));
+    bottom: calc(38px + var(--safe-bottom, 0px));
   }
 }
 

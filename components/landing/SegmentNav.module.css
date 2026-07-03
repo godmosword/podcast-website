@@ -93,8 +93,8 @@
     align-items: center;
     gap: 14px;
     width: 100%;
-    min-height: 32px;
-    padding: 6px 16px calc(6px + var(--safe-bottom));
+    min-height: 26px;
+    padding: 3px 16px calc(10px + var(--safe-bottom));
     border-radius: 0;
     background: rgba(38, 20, 8, 0.78);
     border: none;
