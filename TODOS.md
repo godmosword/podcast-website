@@ -18,7 +18,7 @@
 
 > **Gate：** 本段經人工確認後才開始改 code。每個 Task 完成後單獨 commit，訊息格式固定為 `geo: task-N <描述>`，並把 commit hash 回填到本段。
 > **紅線：** 不動宇宙地圖 canvas / animation / sprite 系統、不動 Q 版黏土角色 sprite 載入邏輯、不改名或刪除既有 URL、不修改音檔託管與 podcast RSS 既有產生邏輯、不升降 package 既有依賴版本。
-> **目前資料基準（2026-07-02 本機掃描）：** `storiesByNewest()` 16 集、最新 `ep-16`（2026-06-30）、`allVehicles()` 13 種、`data/characters.json` 28 個角色。對外文案中的數字仍需人工審稿確認。
+> **目前資料基準（2026-07-03 本機掃描）：** `storiesByNewest()` 17 集、最新 `ep-17`（2026-07-02）、`allVehicles()` 13 種、`data/characters.json` 28 個角色。對外文案中的數字仍需人工審稿確認。
 
 | Task | 狀態 | 主要產出 | 預計影響檔案 | 驗證 | Commit hash |
 |------|------|----------|--------------|------|-------------|
