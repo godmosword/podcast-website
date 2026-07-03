@@ -197,25 +197,25 @@
     font-size: 0.9rem;
   }
 
-  /* 平板／手機用 SegmentNav，隱藏向下箭頭避免雙指示器 */
+  /* 平板／手機用 SegmentNav 貼底細條，隱藏向下箭頭 */
   .next {
     display: none;
+  }
+
+  .content {
+    padding-bottom: calc(44px + var(--safe-bottom));
   }
 }
 
 @media (max-width: 600px) {
-  .panel {
-    --landing-bottom-ui-h: 0px;
-  }
-
   .content {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 68px;
     align-items: end;
     column-gap: 4px;
     row-gap: 12px;
-    /* 56px = nav pill 區（10px 底距 + ~38px 高 + 8px 間隙） */
-    padding-bottom: calc(56px + var(--safe-bottom));
+    /* 32px 細條 + 12px 間隙 */
+    padding-bottom: calc(44px + var(--safe-bottom));
   }
 
   .headline {

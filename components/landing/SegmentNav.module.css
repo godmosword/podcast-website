@@ -75,29 +75,31 @@
   transform: translateX(0);
 }
 
-/* 手機：底部左側膠囊列，與內容左緣對齊 */
-@media (max-width: 600px) {
+/* 平板／手機：貼底細條，指示器置中 */
+@media (max-width: 768px) {
   .nav {
     top: auto;
-    right: auto;
-    left: calc(clamp(20px, 5vw, 56px) + var(--safe-left));
-    bottom: calc(10px + var(--safe-bottom));
+    right: 0;
+    left: 0;
+    bottom: 0;
     transform: none;
+    width: 100%;
   }
 
   .list {
-    grid-auto-flow: column;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
     align-items: center;
-    gap: 8px;
-    padding: 5px 10px;
-    border-radius: 999px;
-    background: linear-gradient(
-      180deg,
-      var(--landing-cta-from, #ffe7cf) 0%,
-      var(--landing-cta-to, #ffd5a8) 100%
-    );
-    border: 2px solid rgba(180, 120, 60, 0.28);
-    box-shadow: 0 3px 0 rgba(180, 110, 50, 0.12);
+    gap: 14px;
+    width: 100%;
+    min-height: 32px;
+    padding: 6px 16px calc(6px + var(--safe-bottom));
+    border-radius: 0;
+    background: rgba(38, 20, 8, 0.78);
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 -4px 16px rgba(24, 12, 4, 0.12);
   }
 
   .dot {
@@ -107,14 +109,15 @@
   }
 
   .dot::after {
-    background: rgba(122, 64, 18, 0.28);
-    border-color: rgba(255, 255, 255, 0.55);
+    background: rgba(255, 255, 255, 0.32);
+    border-color: rgba(255, 255, 255, 0.45);
     box-shadow: none;
   }
 
   .active.dot::after {
     background: var(--landing-brand, #ff8c2b);
     border-color: rgba(255, 255, 255, 0.88);
+    box-shadow: 0 0 8px rgba(255, 140, 43, 0.45);
   }
 
   .dotLabel {
