@@ -43,7 +43,7 @@
 
 - `/characters` 是否作為新增公開角色介紹頁：目前 repo 沒有此路由；Task 2 建議新增 SSG 頁並只讀 `data/characters.ts`，不動 sprite 載入邏輯。
 - `dateModified` 真實來源：目前故事資料只有 `date`；建議新增人工維護欄位或從既有 sync 狀態中找到可證明的更新時間。找不到真實來源時，不輸出假 `dateModified`，先回報。
-- `/llms-full.txt` 是否包含全部 16 集摘要索引：若採用，內容需從 `storiesByNewest()` 產生/同步，避免手寫漂移。
+- `/llms-full.txt` 是否包含全部 17 集摘要索引：若採用，內容需從 `storiesByNewest()` 產生/同步，避免手寫漂移。
 - `/for-parents` 的更新頻率、適合年齡、代表集數等文案：先以資料層數字生成並標 `[待確認]`，人工審稿後再移除標記。
 
 ### GEO llms 收尾（2026-07-02）
