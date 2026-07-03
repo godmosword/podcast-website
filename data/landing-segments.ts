@@ -30,7 +30,7 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
   {
     id: "stories",
     anchorId: "segment-stories",
-    title: "車車與\n遊樂園的故事",
+    title: "車車與遊樂園的故事",
     heroImage: "/landing/segment-stories.jpg",
     heroImagePortrait: "/landing/segment-stories-portrait.jpg",
     cta: { label: "全部故事", href: "/stories" },
@@ -38,7 +38,7 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
   {
     id: "bedtime",
     anchorId: "segment-bedtime",
-    title: "數綿羊 · 睡前收聽讓孩子好睡",
+    title: "數綿羊 ·\n睡前收聽讓孩子好睡",
     heroImage: "/landing/segment-bedtime.jpg",
     heroImagePortrait: "/landing/segment-bedtime-portrait.jpg",
     cta: { label: "睡前故事", href: "/topic/睡前" },
@@ -46,7 +46,7 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
   {
     id: "clay",
     anchorId: "segment-clay",
-    title: "捏黏土 · 練習精細動作",
+    title: "捏黏土 ·\n練習精細動作",
     heroImage: "/landing/segment-clay.jpg",
     heroImagePortrait: "/landing/segment-clay-portrait.jpg",
     cta: {

@@ -80,8 +80,8 @@
   align-items: flex-start;
   gap: 0.28em;
   margin: 0 0 clamp(14px, 2.4vh, 20px);
-  /* em 基準：ch 以拉丁「0」字寬計算，對 CJK 標題不可靠（22ch 僅 ~205px，容不下 6 字一行） */
-  max-width: min(16em, 100%);
+  /* 斷行由 title 資料的 \n 控制（.title 為 pre-line），容器不設窄限寬避免 CJK 逐字折行 */
+  max-width: 100%;
 }
 
 .index {
@@ -188,7 +188,8 @@
 
   .headline {
     margin-bottom: 12px;
-    max-width: min(18ch, calc(100% - 72px));
+    /* 預留右側 Dudu 夥伴空間；斷行同樣由資料 \n 控制 */
+    max-width: calc(100% - 72px);
   }
 
   .title {
