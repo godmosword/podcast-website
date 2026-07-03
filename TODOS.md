@@ -724,6 +724,12 @@ Migration：`scripts/migrations/001_zone_wishes.sql`
 
 ## Completed
 
+### ep-17 Apple RSS 同步（Issue #34）　`834b609`
+看門狗告警「RSS 有新集未上站」：`sync-apple-podcast` 先前因 CI build 缺 `NEXT_PUBLIC_SITE_URL` 失敗（`cb56f91` 已修）。手動 sync 上架 **ep-17**（噗噗豬好害怕怎麼辦｜漂漂河裡的神祕聲音，MVP `pageCount: 1`）。後續：`npm run illustrate -- ep-17`。
+
+### sync workflow 契約測試（防再發）
+`scripts/lib/sync-workflow-contract.test.ts` 鎖定 sync／watchdog workflow 必備步驟與 `NEXT_PUBLIC_SITE_URL`；改 build／site-url／llms 管線時必跑。教訓：非同步功能（如 `generate-llms-full` 防呆）不得假設 Vercel env，CI 無 env 時會 fallback localhost 而阻斷 sync push。
+
 ### 修復 sync workflow build 失敗（NEXT_PUBLIC_SITE_URL）
 `41af68c` 新增的 `generate-llms-full` 防呆在 CI 上因無 Vercel env 使 siteUrl fallback 成 localhost 而 throw，導致 `Sync Apple Podcast` 的 Production build 失敗（run 28602134470）。修法：workflow build 步驟明確設 `NEXT_PUBLIC_SITE_URL=https://podcast-website-mu.vercel.app`。
 

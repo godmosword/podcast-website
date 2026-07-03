@@ -84,6 +84,7 @@
 |------------|------|
 | `scripts/illustrate.ts`、`scripts/lib/illustrate-core.ts` | Leader 或 Opus；生圖前確認 `--mark`、成本 |
 | `data/apple-synced.json`、`data/apple-sync.defaults.json`、`data/stories.ts` | 改 metadata 必跑 `verify:episodes` |
+| `.github/workflows/sync-apple-podcast.yml`、`.github/workflows/sync-watchdog.yml` | **禁止非同步任務改動**；契約見 `scripts/lib/sync-workflow-contract.test.ts` |
 | `data/subtitles/`、`data/scenes/`、`data/characters.json` | 中文校對／切場景 → Sonnet 4.6，**不要** Grok |
 | `public/stories/`、`public/characters/` | 素材上線須人工審圖；禁止自動 bulk approve |
 | `app/legal/`、`DISCLAIMER.md` | Leader；法律文案不可 LLM 臆造 |
