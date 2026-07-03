@@ -28,7 +28,7 @@ function main(): void {
     }
   }
   if (ok) {
-    console.log(`✓ 四島 zone art 1x/@2x/@3x 齊備（${ZONE_IDS.length * 3} 檔）`);
+    console.log(`✓ 五島 zone art 1x/@2x/@3x 齊備（${ZONE_IDS.length * 3} 檔）`);
   } else {
     process.exit(1);
   }

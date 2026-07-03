@@ -5,7 +5,7 @@ import { zoneArtTilePath } from "@/lib/universe/zone-art-tile";
 /** 虛擬地圖座標空間（解析度無關，resolver 再換算成像素）。 */
 export const MAP_STAGE = { width: 1000, height: 720 } as const;
 
-export type ZoneId = "car-park" | "dino" | "rescue" | "ocean";
+export type ZoneId = "car-park" | "dino" | "rescue" | "ocean" | "forest";
 
 /** open=開放 / building=建造中 / coming=即將登場 / planned=規劃中（海上霧區） */
 export type ZoneStatus = "open" | "building" | "coming" | "planned";
@@ -32,7 +32,7 @@ export type ZoneDef = {
   subSegmentIds?: LandingSegmentId[];
 };
 
-export const ZONE_IDS: ZoneId[] = ["car-park", "dino", "rescue", "ocean"];
+export const ZONE_IDS: ZoneId[] = ["car-park", "dino", "rescue", "ocean", "forest"];
 
 /** 各島 SVG 底座配色（固定淺色，不隨日夜反轉） */
 export const ZONE_TERRAIN: Record<ZoneId, { sand: string; grass: string }> = {
@@ -40,6 +40,7 @@ export const ZONE_TERRAIN: Record<ZoneId, { sand: string; grass: string }> = {
   dino: { sand: "#f0e0b8", grass: "#d4efc0" },
   rescue: { sand: "#f2e4c8", grass: "#cfe8dc" },
   ocean: { sand: "#ebe4d4", grass: "#d0e4f5" },
+  forest: { sand: "#ede0c4", grass: "#b8dfa8" },
 };
 
 export const ZONES: ZoneDef[] = [
@@ -82,6 +83,17 @@ export const ZONES: ZoneDef[] = [
     landmark: "🌊",
     artTile: zoneArtTilePath("ocean"),
     teaser: "海洋？太空？之後開放投票",
+    bridgeFrom: "car-park",
+  },
+  {
+    id: "forest",
+    name: "森林小島",
+    status: "building",
+    coord: { x: 210, y: 560 },
+    landmark: "🌲",
+    artTile: zoneArtTilePath("forest"),
+    buildProgress: 45,
+    teaser: "樹林裡的小探險，敬請期待",
     bridgeFrom: "car-park",
   },
 ];

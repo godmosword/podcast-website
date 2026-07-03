@@ -14,6 +14,7 @@ describe("ZoneIsland", () => {
       <ZoneIsland
         zone={zone}
         onActivate={() => undefined}
+        onWish={() => undefined}
         reduced
         paused={false}
         night={false}
@@ -30,6 +31,7 @@ describe("ZoneIsland", () => {
       <ZoneIsland
         zone={zone}
         onActivate={() => undefined}
+        onWish={() => undefined}
         mapScale={2}
         reduced
         paused={false}

@@ -9,7 +9,7 @@ import SkyBodies from "./SkyBodies";
 import styles from "./UniverseMapParallax.module.css";
 
 /** 視差係數：背景層跟隨鏡頭位移的比例（越小越「遠」）。 */
-const PARALLAX = 0.38;
+const PARALLAX = 0.48;
 
 /** v5：黏土雲團（透明 PNG），沿用 drift 動畫。cx/cy＝中心、w＝寬（stage 單位）。 */
 const CLOUDS = [
@@ -24,9 +24,9 @@ const CLOUDS = [
  *  §13 深度文法：y 越大越近，遠景剪影只能落在地平線帶（cy ≲ 200），
  *  放到舞台底部會與慢速視差產生「近處卻遠移」的矛盾。 */
 const FAR_ISLANDS = [
-  { id: "far-island-a", cx: 180, cy: 130, w: 400, opacity: 0.5 },
-  { id: "far-island-b", cx: 780, cy: 110, w: 480, opacity: 0.46 },
-  { id: "far-island-a", cx: 500, cy: 150, w: 300, opacity: 0.38 },
+  { id: "far-island-a", cx: 180, cy: 105, w: 400, opacity: 0.5 },
+  { id: "far-island-b", cx: 780, cy: 95, w: 480, opacity: 0.46 },
+  { id: "far-island-a", cx: 500, cy: 118, w: 300, opacity: 0.38 },
 ] as const;
 
 type Props = {

@@ -7,7 +7,6 @@ import type { ResolvedZone } from "@/lib/universe-map";
 import { getZoneArtTile, getZoneArtSrcSet } from "@/lib/universe/zone-art-tile";
 import { playSfx } from "@/lib/sfx";
 import IslandRoamerLayer from "./IslandRoamerLayer";
-import LockedIslandBubble from "./LockedIslandBubble";
 import ZoneLandmark from "./ZoneLandmark";
 import ZoneMotionLayer from "./ZoneMotionLayer";
 import StatusOverlay from "./StatusOverlay";
@@ -28,12 +27,14 @@ const BURST_PARTICLES = [
 /** 慶祝動畫長度（毫秒），與 CSS islandBounce／star-burst-particle 對齊。 */
 const CELEBRATE_MS = 640;
 
-/** 鎖島對話泡泡顯示時間（毫秒）。 */
-const BUBBLE_MS = 1500;
-
 type ZoneIslandProps = {
   zone: ResolvedZone;
+  /** 開放島點擊（fly-to／開 dock）。 */
   onActivate: (zone: ZoneDef) => void;
+  /** 鎖島「許願」按鈕：開啟 bottom dock。 */
+  onWish: (zone: ZoneDef) => void;
+  /** 鎖島本體點擊：僅回饋，不開 sheet。 */
+  onLockedTap?: (zone: ZoneDef) => void;
   reduced?: boolean;
   paused?: boolean;
   night?: boolean;
@@ -46,6 +47,8 @@ type ZoneIslandProps = {
 export default function ZoneIsland({
   zone,
   onActivate,
+  onWish,
+  onLockedTap,
   reduced = false,
   paused = false,
   night = false,
@@ -58,13 +61,9 @@ export default function ZoneIsland({
   const tile = getZoneArtTile(zone.id);
   const { transition, onTransitionEnd } = useZoneTransition(effectiveStatus, reduced);
 
-  // 點島慶祝：squash 彈跳 + 星星迸發。burst 作 key 讓連點能重播。
   const [burst, setBurst] = useState(0);
   const burstTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // 鎖島：果凍晃動 + 對話泡泡
   const [jelly, setJelly] = useState(0);
-  const [bubble, setBubble] = useState<{ key: number; message: string } | null>(null);
-  const bubbleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleActivate = () => {
     if (isOpen) {
@@ -73,27 +72,20 @@ export default function ZoneIsland({
         if (burstTimerRef.current) clearTimeout(burstTimerRef.current);
         burstTimerRef.current = setTimeout(() => setBurst(0), CELEBRATE_MS);
       }
-    } else {
-      playSfx("tap");
-      if (meta.tapBubble) {
-        if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current);
-        setBubble((prev) => ({
-          key: (prev?.key ?? 0) + 1,
-          message: meta.tapBubble!,
-        }));
-        bubbleTimerRef.current = setTimeout(() => setBubble(null), BUBBLE_MS);
-      }
-      if (!reduced) {
-        setJelly((n) => n + 1);
-      }
+      onActivate(zone);
+      return;
     }
-    onActivate(zone);
+
+    playSfx("tap");
+    if (!reduced) {
+      setJelly((n) => n + 1);
+    }
+    onLockedTap?.(zone);
   };
 
   useEffect(() => {
     return () => {
       if (burstTimerRef.current) clearTimeout(burstTimerRef.current);
-      if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current);
     };
   }, []);
 
@@ -164,12 +156,19 @@ export default function ZoneIsland({
                 ))}
               </span>
             )}
-            {bubble && meta.tapBubble ? (
-              <LockedIslandBubble
-                message={bubble.message}
-                bubbleKey={bubble.key}
-                reduced={reduced}
-              />
+            {!isOpen ? (
+              <button
+                type="button"
+                className={styles.wishBtn}
+                aria-label={`${zone.name}許願`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  playSfx("tap");
+                  onWish(zone);
+                }}
+              >
+                許願
+              </button>
             ) : null}
           </div>
         </button>

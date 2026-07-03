@@ -391,4 +391,34 @@
   .tileLabel .pill {
     font-size: 11px;
   }
+
+  .wishBtn {
+    font-size: 11px;
+    min-height: 28px;
+    padding: 2px 10px;
+  }
+}
+
+/* 鎖島許願：常駐小 pill，點擊才開 dock（不彈 speech bubble） */
+.wishBtn {
+  position: absolute;
+  left: 50%;
+  bottom: 2%;
+  transform: translateX(-50%);
+  z-index: 4;
+  min-height: 30px;
+  padding: 3px 12px;
+  border: 1px solid #8a6438;
+  border-radius: 999px;
+  background: linear-gradient(#fdf0c4, #e8c878);
+  color: #5c4018;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(60, 40, 20, 0.25);
+}
+
+.wishBtn:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
 }

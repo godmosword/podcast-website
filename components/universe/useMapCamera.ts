@@ -2,6 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { MAP_STAGE, ZONES, type ZoneCoord } from "@/data/universe-zones";
+import {
+  CLICK_ZOOM_IN_FACTOR,
+  CLICK_ZOOM_OUT_FACTOR,
+  pointerTravelExceeded,
+  wheelZoomFactor,
+} from "@/lib/universe/map-camera-utils";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const MIN_SCALE = 0.34;
@@ -18,6 +24,19 @@ const ENTRY_START_FACTOR = 0.55;
 const ENTRY_PLAYED_KEY = "cc-universe-entry-played";
 
 type Camera = { scale: number; tx: number; ty: number };
+
+type PointerSession = {
+  startX: number;
+  startY: number;
+  button: number;
+  pointerType: string;
+  dragged: boolean;
+};
+
+export type FlyToOptions = {
+  /** 視窗像素：正值把舞台往下推（島在畫面上移，留給底部 dock）。 */
+  viewportOffsetY?: number;
+};
 
 const CAR_PARK =
   ZONES.find((z) => z.id === "car-park")?.coord ?? { x: 500, y: 400 };
@@ -36,6 +55,7 @@ export type MapCameraBind = {
   onPointerMove: (e: React.PointerEvent<HTMLDivElement>) => void;
   onPointerUp: (e: React.PointerEvent<HTMLDivElement>) => void;
   onPointerCancel: (e: React.PointerEvent<HTMLDivElement>) => void;
+  onContextMenu: (e: React.MouseEvent<HTMLDivElement>) => void;
 };
 
 export type MapCamera = {
@@ -44,7 +64,7 @@ export type MapCamera = {
   ty: number;
   isAnimating: boolean;
   bind: MapCameraBind;
-  flyTo: (coord: ZoneCoord, targetScale?: number) => void;
+  flyTo: (coord: ZoneCoord, targetScale?: number, options?: FlyToOptions) => void;
   reset: () => void;
   zoomBy: (delta: number) => void;
 };
@@ -58,6 +78,7 @@ export function useMapCamera(): MapCamera {
   const sizeRef = useRef({ w: 0, h: 0 });
   const initializedRef = useRef(false);
   const pointersRef = useRef(new Map<number, { x: number; y: number }>());
+  const sessionsRef = useRef(new Map<number, PointerSession>());
   const prevPinchRef = useRef<{ dist: number } | null>(null);
   const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -104,13 +125,14 @@ export function useMapCamera(): MapCamera {
   );
 
   const flyTo = useCallback(
-    (coord: ZoneCoord, targetScale?: number) => {
+    (coord: ZoneCoord, targetScale?: number, options?: FlyToOptions) => {
       setCam((c) => {
         const { w, h } = sizeRef.current;
         if (w === 0 || h === 0) return c;
         const ns = clampScale(targetScale ?? c.scale);
+        const offsetY = options?.viewportOffsetY ?? 0;
         const tx = w / 2 - coord.x * ns;
-        const ty = h / 2 - coord.y * ns;
+        const ty = h / 2 - coord.y * ns + offsetY;
         return clampCam({ scale: ns, tx, ty });
       });
       if (reduced) return;
@@ -178,7 +200,6 @@ export function useMapCamera(): MapCamera {
               ty: rect.height / 2 - CAR_PARK.y * es,
             }),
           );
-          // 兩幀後起飛：確保起始鏡頭先完成 paint，transition 才有起點。
           requestAnimationFrame(() => {
             requestAnimationFrame(() => flyTo(CAR_PARK, ns));
           });
@@ -192,7 +213,6 @@ export function useMapCamera(): MapCamera {
           );
         }
       } else {
-        // resize（旋轉／視窗縮放）後依新尺寸重新 clamp，避免舞台卡在偏移位置。
         setCam((c) => clampCam(c));
       }
     };
@@ -208,8 +228,11 @@ export function useMapCamera(): MapCamera {
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       const rect = viewportEl.getBoundingClientRect();
-      const factor = e.deltaY < 0 ? 1.1 : 1 / 1.1;
-      zoomAt(factor, e.clientX - rect.left, e.clientY - rect.top);
+      zoomAt(
+        wheelZoomFactor(e.deltaY),
+        e.clientX - rect.left,
+        e.clientY - rect.top,
+      );
     };
     viewportEl.addEventListener("wheel", onWheel, { passive: false });
     return () => viewportEl.removeEventListener("wheel", onWheel);
@@ -223,17 +246,42 @@ export function useMapCamera(): MapCamera {
 
   const onPointerDown = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
-      // 島嶼 button 自行處理 click；勿 capture，否則 pointer 事件到不了 button。
       if ((e.target as Element).closest("button")) return;
-      e.currentTarget.setPointerCapture?.(e.pointerId);
-      pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
-      if (pointersRef.current.size === 2) prevPinchRef.current = null;
+
+      if (e.pointerType === "mouse" && e.button === 2) {
+        e.preventDefault();
+      }
+
+      sessionsRef.current.set(e.pointerId, {
+        startX: e.clientX,
+        startY: e.clientY,
+        button: e.button,
+        pointerType: e.pointerType,
+        dragged: false,
+      });
+
+      const panEligible =
+        e.pointerType !== "mouse" || e.button === 0;
+      if (panEligible) {
+        e.currentTarget.setPointerCapture?.(e.pointerId);
+        pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (pointersRef.current.size === 2) prevPinchRef.current = null;
+      }
     },
     [],
   );
 
   const onPointerMove = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
+      const session = sessionsRef.current.get(e.pointerId);
+      if (session && !session.dragged) {
+        const dx = e.clientX - session.startX;
+        const dy = e.clientY - session.startY;
+        if (pointerTravelExceeded(dx, dy)) {
+          session.dragged = true;
+        }
+      }
+
       const pointers = pointersRef.current;
       const prev = pointers.get(e.pointerId);
       if (!prev) return;
@@ -260,9 +308,34 @@ export function useMapCamera(): MapCamera {
     [panBy, zoomAt],
   );
 
-  const endPointer = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    pointersRef.current.delete(e.pointerId);
-    if (pointersRef.current.size < 2) prevPinchRef.current = null;
+  const endPointer = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      const session = sessionsRef.current.get(e.pointerId);
+      sessionsRef.current.delete(e.pointerId);
+      pointersRef.current.delete(e.pointerId);
+      if (pointersRef.current.size < 2) prevPinchRef.current = null;
+
+      if (
+        session &&
+        !session.dragged &&
+        session.pointerType === "mouse" &&
+        pointersRef.current.size === 0
+      ) {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const fx = e.clientX - rect.left;
+        const fy = e.clientY - rect.top;
+        if (session.button === 0) {
+          zoomAt(CLICK_ZOOM_IN_FACTOR, fx, fy);
+        } else if (session.button === 2) {
+          zoomAt(CLICK_ZOOM_OUT_FACTOR, fx, fy);
+        }
+      }
+    },
+    [zoomAt],
+  );
+
+  const onContextMenu = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
   }, []);
 
   return {
@@ -276,6 +349,7 @@ export function useMapCamera(): MapCamera {
       onPointerMove,
       onPointerUp: endPointer,
       onPointerCancel: endPointer,
+      onContextMenu,
     },
     flyTo,
     reset,

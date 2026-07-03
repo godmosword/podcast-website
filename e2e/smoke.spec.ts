@@ -70,6 +70,7 @@ test("車車宇宙樂園地圖 smoke", async ({ page }) => {
     page.getByRole("button", { name: /車車樂園，開放中/ }),
   ).toBeVisible();
   await page.getByRole("button", { name: /車車樂園，開放中/ }).click();
+  await page.getByRole("button", { name: /車車樂園，開放中/ }).click();
   await expect(page.getByRole("dialog")).toBeVisible({ timeout: 2_000 });
   await expect(page.getByRole("heading", { name: "車車樂園" })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "車車樂園入口" })).toBeVisible();

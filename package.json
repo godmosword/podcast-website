@@ -22,6 +22,7 @@
     "check": "npm test && npm run verify:episodes && npm run verify:zone-art && npm run verify:map-art && npm run build",
     "backfill:captions": "tsx scripts/backfill-scene-captions.ts",
     "generate:map-art": "tsx --env-file-if-exists=.env.local scripts/generate-map-art.ts",
+    "generate:forest-zone": "tsx --env-file-if-exists=.env.local scripts/generate-forest-zone-art.ts",
     "fix:map-art": "tsx scripts/fix-map-art.ts",
     "generate:landing-art": "tsx --env-file-if-exists=.env.local scripts/generate-landing-art.ts",
     "generate:roamer-assets": "tsx --env-file-if-exists=.env.local scripts/generate-roamer-assets.ts",

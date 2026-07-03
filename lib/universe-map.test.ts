@@ -9,7 +9,7 @@ describe("resolveUniverseMap", () => {
   it("每個有 bridgeFrom 的 zone 都產出一條 bridge", () => {
     const expected = ZONES.filter((z) => z.bridgeFrom).length;
     expect(map.bridges.length).toBe(expected);
-    expect(expected).toBe(3);
+    expect(expected).toBe(4);
   });
 
   it("bridge.d 非空且以 M 開頭（合法 path 起始）", () => {
@@ -52,7 +52,9 @@ describe("resolveUniverseMap", () => {
     const dino = map.bridges.find((b) => b.to === "dino")!;
     const rescue = map.bridges.find((b) => b.to === "rescue")!;
     const ocean = map.bridges.find((b) => b.to === "ocean")!;
+    const forest = map.bridges.find((b) => b.to === "forest")!;
     expect(dino.dashed).toBe(false); // building → 實心
+    expect(forest.dashed).toBe(false); // building → 實心
     expect(rescue.dashed).toBe(true); // coming → 虛線
     expect(ocean.dashed).toBe(true); // planned → 虛線
   });

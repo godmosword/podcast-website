@@ -32,6 +32,9 @@ import styles from "./UniverseMap.module.css";
 /** 點島後放大到的目標倍率。 */
 const FOCUS_SCALE = 1.6;
 
+/** bottom dock 開啟時，fly-to 把島往上留出的視窗像素。 */
+const FOCUS_DOCK_OFFSET_Y = 96;
+
 /** 黏土海面貼圖平鋪尺寸（stage 單位）；無縫 tile 見 Art Bible §14。 */
 const SEA_TILE = 300;
 
@@ -55,6 +58,8 @@ function UniverseMapContent({ devStatusOverrides, zoneQuery, syncZoneQuery }: Ma
   const [activeZone, setActiveZone] = useState<ZoneDef | null>(null);
   const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const deepLinkHandledRef = useRef(false);
+  /** 開放島：第一次點只 fly-to，第二次才開 dock。 */
+  const focusedOpenZoneRef = useRef<ZoneId | null>(null);
   // 夜海貼圖惰性載入：首次切到夜晚才掛 pattern，日間不下載 sea-night.png；
   // 掛上後保持常駐，讓日夜切換仍有 600ms crossfade。
   const [nightSeaMounted, setNightSeaMounted] = useState(false);
@@ -69,7 +74,31 @@ function UniverseMapContent({ devStatusOverrides, zoneQuery, syncZoneQuery }: Ma
   const closeSheet = useCallback(() => {
     setActiveZone(null);
     syncZoneQuery(null);
+    focusedOpenZoneRef.current = null;
   }, [syncZoneQuery]);
+
+  const revealSheet = useCallback(
+    (zone: ZoneDef) => {
+      openTimerRef.current = null;
+      setActiveZone(zone);
+      syncZoneQuery(zone.id);
+    },
+    [syncZoneQuery],
+  );
+
+  const openSheetWithFly = useCallback(
+    (zone: ZoneDef) => {
+      camera.flyTo(zone.coord, FOCUS_SCALE, { viewportOffsetY: FOCUS_DOCK_OFFSET_Y });
+
+      if (openTimerRef.current) clearTimeout(openTimerRef.current);
+      if (reduced) {
+        revealSheet(zone);
+      } else {
+        openTimerRef.current = setTimeout(() => revealSheet(zone), FLY_DURATION_MS);
+      }
+    },
+    [camera, reduced, revealSheet],
+  );
 
   useEffect(() => {
     if (deepLinkHandledRef.current) return;
@@ -77,7 +106,7 @@ function UniverseMapContent({ devStatusOverrides, zoneQuery, syncZoneQuery }: Ma
     if (!zone) return;
     deepLinkHandledRef.current = true;
 
-    camera.flyTo(zone.coord, FOCUS_SCALE);
+    camera.flyTo(zone.coord, FOCUS_SCALE, { viewportOffsetY: FOCUS_DOCK_OFFSET_Y });
     const reveal = () => setActiveZone(zone);
     if (reduced) {
       reveal();
@@ -112,45 +141,59 @@ function UniverseMapContent({ devStatusOverrides, zoneQuery, syncZoneQuery }: Ma
     };
   }, []);
 
+  const handleLockedTap = useCallback((zone: ZoneDef) => {
+    trackUniverseZoneTap(zone.id, zone.status);
+  }, []);
+
+  const handleWish = useCallback(
+    (zone: ZoneDef) => {
+      trackUniverseZoneTap(zone.id, zone.status);
+      openSheetWithFly(zone);
+    },
+    [openSheetWithFly],
+  );
+
   const handleActivate = useCallback(
     (zone: ZoneDef) => {
       trackUniverseZoneTap(zone.id, zone.status);
 
-      // 開放島慶祝音；鎖島 tap 音在 ZoneIsland 播放
-      if (zone.status === "open") {
-        playSfx("collect");
+      if (zone.status !== "open") {
+        return;
       }
+
+      playSfx("collect");
 
       const directRoute =
         zone.route && zone.status === "open" && !zone.subSegmentIds?.length;
 
-      // 外連必須留在使用者手勢的同步呼叫棧內開窗；
-      // 放進 setTimeout 會被 Safari／iOS 彈窗攔截靜默擋掉。
       if (directRoute && zone.route?.external) {
         window.open(zone.route.href, "_blank", "noopener,noreferrer");
         return;
       }
 
+      if (directRoute && zone.route) {
+        router.push(zone.route.href);
+        return;
+      }
+
+      const alreadyFocused = focusedOpenZoneRef.current === zone.id;
+
+      if (alreadyFocused) {
+        openSheetWithFly(zone);
+        return;
+      }
+
+      focusedOpenZoneRef.current = zone.id;
+      if (activeZone?.id === zone.id) {
+        closeSheet();
+      }
+
       camera.flyTo(zone.coord, FOCUS_SCALE);
 
-      const reveal = () => {
-        openTimerRef.current = null;
-        if (directRoute && zone.route) {
-          router.push(zone.route.href);
-          return;
-        }
-        setActiveZone(zone);
-        syncZoneQuery(zone.id);
-      };
-
       if (openTimerRef.current) clearTimeout(openTimerRef.current);
-      if (reduced) {
-        reveal();
-      } else {
-        openTimerRef.current = setTimeout(reveal, FLY_DURATION_MS);
-      }
+      openTimerRef.current = null;
     },
-    [camera, reduced, router, syncZoneQuery],
+    [activeZone?.id, camera, closeSheet, openSheetWithFly, router],
   );
 
   /** 使用者拖曳打斷 fly-to 時，取消尚未觸發的開 sheet／導航。 */
@@ -178,13 +221,13 @@ function UniverseMapContent({ devStatusOverrides, zoneQuery, syncZoneQuery }: Ma
         className={styles.viewport}
         ref={camera.bind.ref}
         onPointerDown={(e) => {
-          // 島嶼 button 的 pointerdown 交給 activate 流程自行接手（會重設 timer）
           if (!(e.target as Element).closest("button")) cancelPendingReveal();
           camera.bind.onPointerDown(e);
         }}
         onPointerMove={camera.bind.onPointerMove}
         onPointerUp={camera.bind.onPointerUp}
         onPointerCancel={camera.bind.onPointerCancel}
+        onContextMenu={camera.bind.onContextMenu}
       >
         <UniverseMapParallax
           tx={camera.tx}
@@ -254,21 +297,34 @@ function UniverseMapContent({ devStatusOverrides, zoneQuery, syncZoneQuery }: Ma
                 <stop offset="0.55" stopColor="#ffffff" stopOpacity="0" />
                 <stop offset="1" stopColor="#6b4a1e" stopOpacity="0.16" />
               </radialGradient>
+              <linearGradient id="seaHazeTop" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stopColor="#cfe8f3" stopOpacity="0.92" />
+                <stop offset="0.55" stopColor="#cfe8f3" stopOpacity="0.35" />
+                <stop offset="1" stopColor="#cfe8f3" stopOpacity="0" />
+              </linearGradient>
               <filter id="islandShadow" x="-30%" y="-30%" width="160%" height="160%">
                 <feGaussianBlur stdDeviation="7" />
               </filter>
             </defs>
             {/* 海面基色（貼圖載入前 / overscroll 露出時的底）；rx 圓角讓世界
                 在退遠鏡頭下讀作「漂在天空上的立體模型板」而非硬切矩形 */}
-            <rect x="0" y="0" width={MAP_STAGE.width} height={MAP_STAGE.height} rx="28" fill="#bfe0ef" />
-            <rect x="0" y="0" width={MAP_STAGE.width} height={MAP_STAGE.height} rx="28" fill="url(#seaTile)" />
+            <rect x="0" y="0" width={MAP_STAGE.width} height={MAP_STAGE.height} rx="40" fill="#bfe0ef" />
+            <rect x="0" y="0" width={MAP_STAGE.width} height={MAP_STAGE.height} rx="40" fill="url(#seaTile)" />
+            <rect
+              x="0"
+              y="0"
+              width={MAP_STAGE.width}
+              height={110}
+              fill="url(#seaHazeTop)"
+              pointerEvents="none"
+            />
             {nightSeaMounted && (
               <rect
                 x="0"
                 y="0"
                 width={MAP_STAGE.width}
                 height={MAP_STAGE.height}
-                rx="28"
+                rx="40"
                 fill="url(#seaTileNight)"
                 className={styles.seaNightTile}
                 style={{ opacity: daylight === "night" ? 1 : 0 }}
@@ -342,6 +398,8 @@ function UniverseMapContent({ devStatusOverrides, zoneQuery, syncZoneQuery }: Ma
               key={zone.id}
               zone={zone}
               onActivate={handleActivate}
+              onWish={handleWish}
+              onLockedTap={handleLockedTap}
               reduced={reduced}
               paused={paused}
               night={daylight === "night"}

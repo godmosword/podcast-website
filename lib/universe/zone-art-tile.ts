@@ -67,6 +67,7 @@ export const ZONE_ART_TILES: Record<ZoneId, ZoneArtTile> = {
   dino: { src: zoneArtTilePath("dino"), mode: "island", anchor: "sand-bottom-center", stageSize: ISLAND_STAGE_SIZE, anchorUV: ISLAND_ANCHOR_UV },
   rescue: { src: zoneArtTilePath("rescue"), mode: "island", anchor: "sand-bottom-center", stageSize: ISLAND_STAGE_SIZE, anchorUV: ISLAND_ANCHOR_UV },
   ocean: { src: zoneArtTilePath("ocean"), mode: "island", anchor: "sand-bottom-center", stageSize: ISLAND_STAGE_SIZE, anchorUV: ISLAND_ANCHOR_UV },
+  forest: { src: zoneArtTilePath("forest"), mode: "island", anchor: "sand-bottom-center", stageSize: ISLAND_STAGE_SIZE, anchorUV: ISLAND_ANCHOR_UV },
 };
 
 export function getZoneArtTile(id: ZoneId): ZoneArtTile {

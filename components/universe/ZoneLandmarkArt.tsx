@@ -189,5 +189,36 @@ export default function ZoneLandmarkArt({ zoneId, status = "open", className }: 
           </ClayScene>
         </svg>
       );
+
+    case "forest":
+      return (
+        <svg {...svgProps}>
+          <ClayScene
+            uid={uid}
+            bg={
+              <>
+                <ClayGrad id={clayIds(uid, "trunk")} light="#c8a070" mid="#a5773c" dark="#7a5528" />
+                <ClayGrad id={clayIds(uid, "leaf")} light="#b8e878" mid="#7fae54" dark="#5a8838" />
+                <ClayGrad id={clayIds(uid, "cap")} light="#ffb8c8" mid="#ff8fab" dark="#e86a8a" />
+                <ClayGrad id={clayIds(uid, "ground")} light="#e8d8a8" mid="#d0b878" dark="#b09858" />
+              </>
+            }
+          >
+            <ClayBlob x={6} y={72} w={84} h={14} r={7} gradId={clayIds(uid, "ground")} shadowId={sh} />
+            <ClayBlob x={42} y={38} w={12} h={34} r={5} gradId={clayIds(uid, "trunk")} shadowId={sh} />
+            <ClayCircle cx={48} cy={32} r={22} gradId={clayIds(uid, "leaf")} shadowId={sh} />
+            <ClayCircle cx={38} cy={38} r={14} gradId={clayIds(uid, "leaf")} shadowId={sh} />
+            <ClayCircle cx={58} cy={38} r={14} gradId={clayIds(uid, "leaf")} shadowId={sh} />
+            <ClayCircle cx={28} cy={62} r={7} gradId={clayIds(uid, "cap")} shadowId={sh} />
+            <ClayBlob x={24} y={58} w={8} h={5} r={2} gradId={clayIds(uid, "cap")} shadowId={sh} />
+            {status === "building" ? (
+              <g opacity={0.85}>
+                <ClayBlob x={62} y={8} w={8} h={28} r={3} gradId={clayIds(uid, "trunk")} shadowId={sh} />
+                <rect x={58} y={12} width={16} height={4} rx={2} fill="#f0c040" />
+              </g>
+            ) : null}
+          </ClayScene>
+        </svg>
+      );
   }
 }
