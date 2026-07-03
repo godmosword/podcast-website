@@ -6,6 +6,7 @@ export type LandingSegmentDef = {
   id: LandingSegmentId;
   /** section 錨點 */
   anchorId: string;
+  /** 標題；可含 `\n` 手動斷行（CJK 逐字斷行會拆散「遊樂園」等詞，斷行點由資料控制）。 */
   title: string;
   /** 橫版 hero（桌面）；approve 後為 /landing/segment-{id}.jpg */
   heroImage: string;
@@ -29,7 +30,7 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
   {
     id: "stories",
     anchorId: "segment-stories",
-    title: "車車與遊樂園的故事",
+    title: "車車與\n遊樂園的故事",
     heroImage: "/landing/segment-stories.jpg",
     heroImagePortrait: "/landing/segment-stories-portrait.jpg",
     cta: { label: "全部故事", href: "/stories" },

@@ -80,7 +80,8 @@
   align-items: flex-start;
   gap: 0.28em;
   margin: 0 0 clamp(14px, 2.4vh, 20px);
-  max-width: min(22ch, 100%);
+  /* em 基準：ch 以拉丁「0」字寬計算，對 CJK 標題不可靠（22ch 僅 ~205px，容不下 6 字一行） */
+  max-width: min(16em, 100%);
 }
 
 .index {
@@ -98,6 +99,8 @@
   margin: 0;
   font-size: clamp(1.35rem, 4.4vw, 2.35rem);
   line-height: 1.2;
+  /* 標題資料可帶 \n 控制斷行；CJK 逐字斷行會拆散「遊樂園」等詞 */
+  white-space: pre-line;
   text-shadow: 0 2px 14px rgba(0, 0, 0, 0.46), 0 1px 2px rgba(0, 0, 0, 0.42);
 }
 

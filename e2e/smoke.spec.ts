@@ -8,7 +8,7 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await expect(page.getByRole("link", { name: /車車遊樂園/ })).toBeVisible();
   await expect(page.getByRole("button", { name: "開啟選單" })).toBeVisible();
   // 第一段（車車故事）標題與 CTA、以及四段標題都存在
-  await expect(page.getByRole("heading", { name: /車車與遊樂園的故事/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /車車與\s?遊樂園的故事/ })).toBeVisible();
   await expect(page.getByRole("link", { name: "全部故事 →" })).toBeVisible();
   await expect(page.getByRole("heading", { name: /數綿羊/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: /捏黏土/ })).toBeVisible();
@@ -22,7 +22,7 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
 test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /車車與遊樂園的故事/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /車車與\s?遊樂園的故事/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: /陪孩子建立好習慣/ })).toBeVisible();
 });
 
