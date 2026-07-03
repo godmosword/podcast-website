@@ -84,7 +84,7 @@
 ## 設計審查 deferred 發現（2026-07-03 /design-review）
 
 > 完整報告：`~/.gstack/projects/godmosword-podcast-website/designs/design-audit-20260703/`。
-> 已修：F1 小衝破圖 `c23e4b5` · F2 landing 主標斷行 `e49cdf9` · F4a 全域 focus ring token 化 `dc0e5d2`。
+> 已修：F1 小衝破圖 `3a3d582` · F2 landing 主標斷行 `cfbfebf` · F4a 全域 focus ring token 化 `d27ecf5`。
 > 以下為**未修（deferred）**條目；宇宙地圖三項因當時另一 session 正在改 `components/universe/*`（map-camera-utils／forest 島）而暫緩，動工前先確認該批改動已落地。
 
 ### 宇宙地圖 zone sheet 主 CTA 層級　`design · S · universe 改動落地`　〔design〕
