@@ -1,0 +1,169 @@
+{
+  "slug": "ep-17",
+  "audioDuration": 435,
+  "model": "manual-semantic-15-20s",
+  "generatedAt": "2026-07-03T12:50:00.000Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 90,
+      "end": 106.2,
+      "summary": "封面：夏日飄飄河",
+      "prompt": "Hot sunny Cheche water park lazy river opening: sparkling blue water splashes, white bubbles floating up, summer heat haze, sky-blue pig tour car Pupu Pig on cover mood — curious slightly worried but playful, clay water park atmosphere",
+      "characters": ["噗噗豬"],
+      "keepCover": true,
+      "refPageHint": "Cover page 1 shows worried 噗噗豬 sky-blue pig car among bubbles — keep as published cover. Match portrait exactly: pink snout pig ears water cannon life ring."
+    },
+    {
+      "index": 2,
+      "start": 106.2,
+      "end": 124.5,
+      "summary": "多多飄飄河出發",
+      "prompt": "Green dinosaur car Duo Duo sitting happily inside a bright green inflatable swim ring on gentle lazy river, water rocking softly, joyful yahoo expression, blue sparkly river water, relaxed summer fun",
+      "characters": ["恐龍車多多"],
+      "refPages": [1],
+      "refPageHint": "PRIMARY: 恐龍車多多 match portrait — green T-rex head car orange spikes in GREEN ring float. ONE face on windshield. Lazy river current gentle."
+    },
+    {
+      "index": 3,
+      "start": 124.5,
+      "end": 145.3,
+      "summary": "噗噗豬加入一起飄",
+      "prompt": "Sky-blue Pupu Pig tour car splashing up beside Duo Duo green ring, pig snout grinning bragging coolest car arriving, Duo Duo nodding yes you can join, two friends meeting on lazy river",
+      "characters": ["噗噗豬", "恐龍車多多"],
+      "refPages": [2],
+      "refPageHint": "PRIMARY: 噗噗豬 match portrait and cover design. 恐龍車多多 match page 2 green ring. Each ONE face. Pupu Pig in own colorful ring nearby."
+    },
+    {
+      "index": 4,
+      "start": 145.3,
+      "end": 177.2,
+      "summary": "兩車悠閒飄流",
+      "prompt": "Wide lazy river scene: Duo Duo and Pupu Pig drifting side by side in swim rings, blue water, rainbow-colored rings on riverbanks, white bubbles rising in breeze, cool wind, almost sleepy peaceful mood",
+      "characters": ["恐龍車多多", "噗噗豬"],
+      "refPages": [3],
+      "refPageHint": "PRIMARY: Both match prior page designs. Slow current. Calm before scare."
+    },
+    {
+      "index": 5,
+      "start": 188.2,
+      "end": 213.2,
+      "summary": "奇怪聲音？泡泡怪？",
+      "prompt": "Sudden tension: strange rumbling sound from riverbank, Duo Duo eyes wide asking did you hear, Pupu Pig stopping sniffing with pig snout raised nervous, imagining snoring bubble monster, ripples on water",
+      "characters": ["恐龍車多多", "噗噗豬"],
+      "refPages": [4],
+      "refPageHint": "PRIMARY: Both match portraits. Worried expressions not horror. Sound suggested by wavy lines from off-screen fountain."
+    },
+    {
+      "index": 6,
+      "start": 218.2,
+      "end": 242.2,
+      "summary": "兩車害怕縮在泳圈",
+      "prompt": "Scared moment: Duo Duo shrinking nervously inside green ring, Pupu Pig panicking shouting don't let bubble monster eat me, both small in floats, louder mysterious sound waves, child-safe fear not gore",
+      "characters": ["恐龍車多多", "噗噗豬"],
+      "refPages": [5],
+      "refPageHint": "PRIMARY: Both match page 4-5 designs. Cute scared faces. Rings as safe cocoons."
+    },
+    {
+      "index": 7,
+      "start": 246.2,
+      "end": 266.2,
+      "summary": "暖暖老師游來關心",
+      "prompt": "Gentle sea turtle teacher Nuannuan swimming over through lazy river water, warm smile asking why stopped here, Duo Duo and Pupu Pig explaining scary sound like bubble monster, they feel afraid",
+      "characters": ["海龜老師暖暖", "恐龍車多多", "噗噗豬"],
+      "refPages": [1],
+      "refPageHint": "CRITICAL SCALE: 海龜老師暖暖 match portrait — beige turtle pink bow shell, SAME height as vehicle characters beside rings, NOT giant. Swimming gently. Each ONE face."
+    },
+    {
+      "index": 8,
+      "start": 269.2,
+      "end": 281.2,
+      "summary": "先停下來看清楚",
+      "prompt": "Nuannuan turtle speaking softly without laughing: when a little scared we can stop and look clearly, let's find the answer together, calming flipper gesture, Duo Duo and Pupu listening trustingly",
+      "characters": ["海龜老師暖暖", "恐龍車多多", "噗噗豬"],
+      "refPages": [7],
+      "refPageHint": "PRIMARY: 海龜老師暖暖 warm teacher pose. Vehicles in rings listening."
+    },
+    {
+      "index": 9,
+      "start": 281.2,
+      "end": 296.2,
+      "summary": "暖暖帶路探查",
+      "prompt": "Pupu Pig hiding behind swim ring peeking saying teacher go in front please, Nuannuan nodding and leading slowly at front, Duo Duo and Pupu following behind in lazy river, brave little expedition",
+      "characters": ["海龜老師暖暖", "恐龍車多多", "噗噗豬"],
+      "refPages": [8],
+      "refPageHint": "PRIMARY: Nuannuan leading. Pupu partly hidden cute comedy."
+    },
+    {
+      "index": 10,
+      "start": 296.2,
+      "end": 309.2,
+      "summary": "四處查看無怪物",
+      "prompt": "Investigation on lazy river: looking at water surface no monster, scanning both banks no giant footprints, listening toward sound source, detective teamwork",
+      "characters": ["海龜老師暖暖", "恐龍車多多", "噗噗豬"],
+      "refPages": [9],
+      "refPageHint": "PRIMARY: Three characters match prior pages. Wide investigative composition."
+    },
+    {
+      "index": 11,
+      "start": 309.2,
+      "end": 326.2,
+      "summary": "泡泡噴泉嚇一跳",
+      "prompt": "Approaching colorful bubble fountain machine on river edge, suddenly one HUGE bubble pops out loudly, Duo Duo and Pupu Pig startled drifting backward in rings comedic jump-scare, Nuannuan steady beside them",
+      "characters": ["海龜老師暖暖", "恐龍車多多", "噗噗豬"],
+      "refPages": [10],
+      "refPageHint": "PRIMARY: Bubble fountain clay machine. Big bubble mid-pop. Scared but funny."
+    },
+    {
+      "index": 12,
+      "start": 328.2,
+      "end": 346.2,
+      "summary": "原來是葉片卡住",
+      "prompt": "Nuannuan examining bubble machine explaining not a monster just stuck bubble maker, pointing at small leaf jammed inside, inviting Duo Duo and Pupu to look, revelation moment",
+      "characters": ["海龜老師暖暖", "恐龍車多多", "噗噗豬"],
+      "refPages": [11],
+      "refPageHint": "PRIMARY: Nuannuan flipper pointing at leaf in fountain."
+    },
+    {
+      "index": 13,
+      "start": 346.2,
+      "end": 358.2,
+      "summary": "飄飄河又亮晶晶",
+      "prompt": "Nuannuan gently removing leaf, machine releasing pretty small bubbles again, lazy river sparkling blue, strange sound gone, peaceful relief",
+      "characters": ["海龜老師暖暖", "恐龍車多多", "噗噗豬"],
+      "refPages": [12],
+      "refPageHint": "PRIMARY: Sparkling water restored. Small gentle bubbles."
+    },
+    {
+      "index": 14,
+      "start": 361.2,
+      "end": 376.2,
+      "summary": "噗噗豬承認害怕又變勇敢",
+      "prompt": "Duo Duo saying oh I see, Pupu Pig admitting was a little scared but now brave again, proudly coolest Pupu Pig, friends smiling in rings on calm river",
+      "characters": ["恐龍車多多", "噗噗豬"],
+      "refPages": [13],
+      "refPageHint": "PRIMARY: 噗噗豬 proud cute pose. 恐龍車多多 relieved smile."
+    },
+    {
+      "index": 15,
+      "start": 381.2,
+      "end": 414.2,
+      "summary": "故事重點：別自己嚇自己",
+      "prompt": "Gentle lesson on lazy river: when afraid stop think look clearly, ask friends teacher or parents, mysterious sounds often not what we imagined, all three friends safe and happy together",
+      "characters": ["海龜老師暖暖", "恐龍車多多", "噗噗豬"],
+      "refPages": [14],
+      "refPageHint": "PRIMARY: Group shot all three. Warm moral illustration. No scary elements."
+    },
+    {
+      "index": 16,
+      "start": 419.2,
+      "end": 435,
+      "summary": "結尾道別",
+      "prompt": "Cheerful closing: Bonbon and Mami in clay podcast studio waving goodbye, lazy river mural with Duo Duo Pupu Pig and Nuannuan in background, teasing next adventure, sunset warmth",
+      "characters": ["Bonbon", "馬米", "恐龍車多多", "噗噗豬", "海龜老師暖暖"],
+      "refPages": [15, 1],
+      "refPageHint": "PRIMARY: Hosts Bonbon and Mami match portraits. Story characters smaller background. Warm goodbye."
+    }
+  ],
+  "newCharacters": []
+}

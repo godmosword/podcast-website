@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { getCharacters } from "@/data/characters";
 import { storiesByNewest } from "@/data/content";
+import { storyDateModified } from "@/data/story-dates";
 import {
   characterCreativeWorkJsonLd,
   faqPageJsonLd,
@@ -64,7 +65,7 @@ describe("podcastEpisodeJsonLd", () => {
     expect(data.name).toBe(story.title);
     expect(data.url).toBe(`https://example.com/story/${story.slug}`);
     expect(data.episodeNumber).toBe(story.ep);
-    expect(data.dateModified).toBe("2026-07-02T00:00:00+08:00");
+    expect(data.dateModified).toBe(storyDateModified(story));
     expect(data.inLanguage).toBe("zh-Hant");
     expect(data.associatedMedia).toMatchObject({
       "@type": "MediaObject",
