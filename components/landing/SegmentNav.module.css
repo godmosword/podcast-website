@@ -7,53 +7,12 @@
   pointer-events: auto;
 }
 
-/* 手機：改為底部橫向進度點，不擋住 CTA */
-@media (max-width: 600px) {
-  .nav {
-    top: auto;
-    right: auto;
-    left: 50%;
-    bottom: calc(12px + var(--safe-bottom));
-    transform: translateX(-50%);
-  }
-
-  .list {
-    grid-auto-flow: column;
-    gap: 10px;
-    padding: 6px 12px;
-    border-radius: 999px;
-    /* 暖色玻璃（跟隨主題），取代黑色半透明 */
-    background: color-mix(in srgb, var(--bg) 58%, rgba(72, 42, 18, 0.24));
-    border: 1px solid rgba(255, 255, 255, 0.48);
-    box-shadow: 0 8px 24px rgba(48, 28, 12, 0.14);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-  }
-
-  .dot {
-    width: 24px;
-    height: 24px;
-    justify-content: center;
-  }
-
-  .dot::after {
-    width: 10px;
-    height: 10px;
-    border-color: transparent;
-    box-shadow: none;
-  }
-
-  .dotLabel {
-    display: none;
-  }
-}
-
 .list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 12px;
+  gap: 14px;
 }
 
 .dot {
@@ -61,27 +20,39 @@
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-  /* 視覺上的點為 ::after（12px），但點擊/觸控區擴大到 24px 以符合 WCAG 2.5.8 最小目標 */
-  width: 24px;
-  height: 24px;
+  /* 觸控區 28px；視覺指示為 ::after 膠囊 */
+  width: 28px;
+  height: 28px;
   border-radius: 999px;
   text-decoration: none;
 }
 
 .dot::after {
   content: "";
-  width: 12px;
-  height: 12px;
+  display: block;
+  width: 8px;
+  height: 8px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--ink) 28%, transparent);
-  border: 2px solid var(--bg);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 20%, transparent);
-  transition: background 0.2s ease, transform 0.2s ease;
+  background: rgba(255, 255, 255, 0.42);
+  border: 1.5px solid rgba(255, 255, 255, 0.72);
+  box-shadow: 0 1px 4px rgba(38, 20, 8, 0.18);
+  transition:
+    width 0.28s var(--ease-spring, cubic-bezier(0.34, 1.4, 0.64, 1)),
+    height 0.28s var(--ease-spring, cubic-bezier(0.34, 1.4, 0.64, 1)),
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
 }
 
 .active.dot::after {
+  width: 22px;
+  height: 8px;
   background: var(--landing-brand, #ff8c2b);
-  transform: scale(1.35);
+  border-color: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 0 0 1px rgba(255, 140, 43, 0.35),
+    0 2px 8px rgba(255, 120, 20, 0.38);
 }
 
 .dotLabel {
@@ -102,4 +73,57 @@
 .dot:focus-visible .dotLabel {
   opacity: 1;
   transform: translateX(0);
+}
+
+/* 手機：底部橫向膠囊列，與 CTA／Dudu 分層 */
+@media (max-width: 600px) {
+  .nav {
+    top: auto;
+    right: auto;
+    left: 50%;
+    bottom: calc(10px + var(--safe-bottom));
+    transform: translateX(-50%);
+  }
+
+  .list {
+    grid-auto-flow: column;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--landing-cta-from, #ffe7cf) 72%, rgba(255, 255, 255, 0.55));
+    border: 1px solid rgba(255, 255, 255, 0.62);
+    box-shadow:
+      0 4px 0 rgba(180, 110, 50, 0.12),
+      0 8px 20px rgba(48, 28, 12, 0.12);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .dot {
+    width: 28px;
+    height: 28px;
+    justify-content: center;
+  }
+
+  .dot::after {
+    background: rgba(122, 64, 18, 0.28);
+    border-color: rgba(255, 255, 255, 0.55);
+    box-shadow: none;
+  }
+
+  .active.dot::after {
+    background: var(--landing-brand, #ff8c2b);
+    border-color: rgba(255, 255, 255, 0.88);
+  }
+
+  .dotLabel {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot::after {
+    transition: none;
+  }
 }

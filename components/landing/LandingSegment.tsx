@@ -76,7 +76,7 @@ export default function LandingSegment({
           }
           onClick={goToNext}
         >
-          <span aria-hidden>⌄</span>
+          <span className={styles.nextChevron} aria-hidden />
         </a>
       ) : null}
 

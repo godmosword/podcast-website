@@ -782,6 +782,9 @@ Whisper 草稿人工校對：`撲撲豬`→`噗噗豬`、`救護車安安`→`�
 逐字稿 helper／VTT route／故事頁可索引逐字稿；RSS podcast namespace + transcript + owner/guid；主要頁 self canonical；JSON-LD `timeRequired`。
 **Completed:** `029b7e6`（2026-06-28）
 
+### Landing segment 排版 + 膠囊 Nav（2026-07-03）　`e7b6287`
+標題改 eyebrow 堆疊、內容區玻璃底、底部 UI 分層（CTA／Dudu／nav pill）；SegmentNav 改膠囊指示條 + 蜜桃玻璃 pill；`.next` 改 chevron 玻璃鈕、768px 以下隱藏。
+
 ### Landing 陽光色系 + 引導按鈕 + 頁尾捲動 + 手機排版
 landing 專用色票（nav/CTA 分離）；top bar 日出琥珀漸層 + 白字；訂閱反白 pill；hero CTA 橘黃漸層白字；footer 全屏 snap pane + 最後段 next；手機隱藏 .next、CTA 全寬、嘟嘟/進度點分層。
 **Completed:** `d6c726f`（2026-06）

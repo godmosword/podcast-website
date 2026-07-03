@@ -12,6 +12,7 @@
   flex: none;
   /* 載入態/段間保底色：跟隨主題，避免硬編碼深咖暗縫 */
   background: var(--bg);
+  --landing-bottom-ui-h: 0px;
 }
 
 .visual {
@@ -64,39 +65,59 @@
   position: relative;
   z-index: 2;
   width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0
+  max-width: 680px;
+  margin: 0;
+  padding: clamp(16px, 2.5vh, 28px)
     calc(clamp(20px, 5vw, 56px) + var(--safe-right))
-    clamp(20px, 3.5vh, 56px)
+    calc(clamp(20px, 3.5vh, 56px) + var(--landing-bottom-ui-h))
     calc(clamp(20px, 5vw, 56px) + var(--safe-left));
   color: #fff;
 }
 
+/* 底部文字區玻璃底：讓標題／CTA 成為一個視覺區塊 */
+.content::before {
+  content: "";
+  position: absolute;
+  inset: -4px -8px -8px -8px;
+  border-radius: clamp(16px, 3vw, 22px);
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.14) 0%,
+    rgba(255, 255, 255, 0.05) 55%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 28px rgba(24, 12, 4, 0.14);
+  z-index: -1;
+  pointer-events: none;
+}
+
 .headline {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.35em 0.55em;
-  margin: 0 0 clamp(16px, 2.8vh, 24px);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.28em;
+  margin: 0 0 clamp(14px, 2.4vh, 20px);
+  max-width: 22ch;
 }
 
 .index {
   flex: none;
   font-family: var(--font-marker), var(--font-huninn), sans-serif;
-  font-size: clamp(1.25rem, 3.8vw, 1.85rem);
+  font-size: clamp(0.92rem, 2.6vw, 1.1rem);
   font-weight: 800;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.14em;
   line-height: 1;
-  opacity: 0.92;
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.46), 0 1px 2px rgba(0, 0, 0, 0.4);
+  opacity: 0.82;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.42);
 }
 
 .title {
   margin: 0;
-  flex: 1 1 10ch;
   font-size: clamp(1.35rem, 4.4vw, 2.35rem);
-  line-height: 1.18;
+  line-height: 1.2;
   text-shadow: 0 2px 14px rgba(0, 0, 0, 0.46), 0 1px 2px rgba(0, 0, 0, 0.42);
 }
 
@@ -128,23 +149,35 @@
 .next {
   position: absolute;
   left: 50%;
-  bottom: clamp(10px, 2.5vh, 20px);
+  bottom: clamp(14px, 2.8vh, 24px);
   transform: translateX(-50%);
   z-index: 3;
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border-radius: 999px;
   color: var(--landing-nav-cta-fg, #8b4510);
-  font-size: 1.6rem;
-  line-height: 1;
   text-decoration: none;
-  background: rgba(255, 255, 255, 0.88);
-  border: 2px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 0 4px 14px rgba(120, 80, 40, 0.22);
+  background: color-mix(in srgb, var(--landing-cta-from, #ffe7cf) 82%, rgba(255, 255, 255, 0.9));
+  border: 1.5px solid rgba(255, 255, 255, 0.72);
+  box-shadow:
+    0 3px 0 rgba(180, 110, 50, 0.14),
+    0 6px 16px rgba(48, 28, 12, 0.16);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   animation: nudge 1.8s ease-in-out infinite;
   pointer-events: auto;
+}
+
+.nextChevron {
+  display: block;
+  width: 10px;
+  height: 10px;
+  margin-top: -3px;
+  border-right: 2.5px solid currentColor;
+  border-bottom: 2.5px solid currentColor;
+  transform: rotate(45deg);
 }
 
 @keyframes nudge {
@@ -168,13 +201,13 @@
     object-position: center 35%;
   }
 
-  /* 平板：CTA 縮小、靠左，底邊與右下小紅車同一水平線 */
   .content {
-    padding-bottom: calc(40px + var(--safe-bottom));
+    max-width: min(520px, 100%);
   }
 
   .headline {
-    margin-bottom: 14px;
+    margin-bottom: 12px;
+    max-width: 18ch;
   }
 
   .title {
@@ -182,26 +215,30 @@
   }
 
   .cta {
-    width: auto;
-    max-width: none;
     padding: 10px 18px;
     font-size: 0.9rem;
   }
 
-  /* 手機用 SegmentNav 跳段，隱藏浮動箭頭避免底部打架 */
+  /* 平板／手機用 SegmentNav，隱藏向下箭頭避免雙指示器 */
   .next {
     display: none;
   }
 }
 
 @media (max-width: 600px) {
-  /* 手機：小紅車在 bottom 64px，CTA 對齊其高度、再縮小一點 */
-  .content {
-    padding-bottom: calc(66px + var(--safe-bottom));
+  .panel {
+    /* 預留底部 nav pill（~38px + 間距） */
+    --landing-bottom-ui-h: 56px;
+  }
+
+  .content::before {
+    inset: -2px -6px -6px -6px;
+    border-radius: 16px;
   }
 
   .index {
-    font-size: 1.15rem;
+    font-size: 0.88rem;
+    letter-spacing: 0.12em;
   }
 
   .title {

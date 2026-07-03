@@ -64,13 +64,14 @@
 
 @media (max-width: 600px) {
   .root {
-    right: 8px;
-    bottom: calc(64px + var(--safe-bottom, 0px));
+    right: 10px;
+    /* 與 CTA 同列，在底部 nav pill 上方 */
+    bottom: calc(56px + var(--safe-bottom, 0px));
   }
 
   .car {
-    width: 64px;
-    height: 58px;
+    width: 60px;
+    height: 54px;
   }
 }
 
