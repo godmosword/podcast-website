@@ -5,19 +5,17 @@ import { MAP_STAGE, ZONES, type ZoneCoord } from "@/data/universe-zones";
 import {
   CLICK_ZOOM_IN_FACTOR,
   CLICK_ZOOM_OUT_FACTOR,
+  clampScale,
+  fitScaleFor,
   pointerTravelExceeded,
   wheelZoomFactor,
 } from "@/lib/universe/map-camera-utils";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
-const MIN_SCALE = 0.34;
-const MAX_SCALE = 2.4;
 /** 允許少量 overscroll，讓拖曳手感不死板。 */
 const OVERSCROLL = 48;
 /** fly-to 過場時間（毫秒），與 CSS transition 對齊。 */
 export const FLY_DURATION_MS = 600;
-/** 預設鏡頭比 fit 再退一點，讓視差天空層（雲／遠島）從世界邊緣探出來。 */
-const FIT_MARGIN = 0.88;
 /** 進場降落動畫：起始鏡頭相對 fit 的倍率（從高空俯瞰整個群島再飛向主島）。 */
 const ENTRY_START_FACTOR = 0.55;
 /** 每個分頁 session 只播一次進場動畫，回訪不重播。 */
@@ -43,10 +41,6 @@ const CAR_PARK =
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
-}
-
-function clampScale(scale: number): number {
-  return clamp(scale, MIN_SCALE, MAX_SCALE);
 }
 
 export type MapCameraBind = {
@@ -148,10 +142,7 @@ export function useMapCamera(): MapCamera {
 
   const fitScale = useCallback((): number => {
     const { w, h } = sizeRef.current;
-    if (w === 0 || h === 0) return 1;
-    return clampScale(
-      Math.min(w / MAP_STAGE.width, h / MAP_STAGE.height) * FIT_MARGIN,
-    );
+    return fitScaleFor(w, h);
   }, []);
 
   const reset = useCallback(() => {
@@ -175,10 +166,7 @@ export function useMapCamera(): MapCamera {
       if (rect.width === 0 || rect.height === 0) return;
       if (!initializedRef.current) {
         initializedRef.current = true;
-        const ns = clampScale(
-          Math.min(rect.width / MAP_STAGE.width, rect.height / MAP_STAGE.height) *
-            FIT_MARGIN,
-        );
+        const ns = fitScaleFor(rect.width, rect.height);
 
         // 進場降落：首次進園從高空俯瞰整個群島，再飛向主島（每 session 一次）。
         let playEntry = false;
