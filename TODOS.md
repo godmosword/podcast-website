@@ -81,6 +81,21 @@
 
 ---
 
+## 週報 W27 提案（2026-07-04，詳見 [proposals/2026-W27.md](./proposals/2026-W27.md)）
+
+> 首份週報產出，訊號驅動（/for-parents 實測、heuristics 掃描、TODOS 停滯項）。決策記錄請填 proposals 檔底部。
+
+### W27-1 清除 /for-parents 全部「[待確認]」佔位文案　`content · S · 無`　〔review+geo〕
+正式站 HTML 實測渲染 20+ 個「[待確認：17 集]」等字樣給家長。集數/角色數/車種數本就來自資料層（`lib/for-parents.ts:28-68`），移除包裝直出；「約 3–7 歲」「每 15 分鐘」兩個人工欄位定稿後寫死。驗收：prod grep「待確認」=0、數字與 `storiesByNewest()` 一致、FAQPage Rich Results 無 error。
+
+### W27-2 許願表單補隱私說明句 + footer 觸控目標　`trust · S · 無`　〔review+a11y〕
+`ZoneWishForm` 收 email 與自由文字卻無隱私句（`d9524c3` 剛擴充 story 投稿，風險放大）：送出鈕下加家長向說明、message placeholder 提示勿含個資；順帶 footer「節目數據」「使用條款」padding 補到 ≥44px（收斂「小項 polish」同條目）。不動 API/schema。
+
+### W27-3 森林小島 magenta 暈圈修復　`asset · S · 無`　〔review+design〕
+= 下方既有條目「森林小島底部洋紅色暈圈」，W27 週報將其提升優先。
+
+---
+
 ## 設計審查 deferred 發現（2026-07-03 /design-review）
 
 > 完整報告：`~/.gstack/projects/godmosword-podcast-website/designs/design-audit-20260703/`。

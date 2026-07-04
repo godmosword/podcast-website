@@ -7,6 +7,7 @@ Bonbon & 馬米親子 podcast《車車遊樂園》的官方 **看圖聽故事** 
 - **正式站（範例）：** [https://podcast-website-mu.vercel.app](https://podcast-website-mu.vercel.app)
 - **版本：** [1.3.0](./CHANGELOG.md) — 詳見 [CHANGELOG.md](./CHANGELOG.md)
 - **待辦與路線圖：** [TODOS.md](./TODOS.md)（成長 A/B + STEM 四階段）
+- **每週設計評審：** [proposals/](./proposals/)（訊號驅動的迭代提案週報，決策記錄 ✅/❌/⏸ 留檔）
 - **競品與設計研究：** [RESEARCH.md](./RESEARCH.md)（Hey Clay phygital、**四款 pixel 遊戲精進**、craft 等）
 - **儲存庫：** [GitHub 公開](https://github.com/godmosword/podcast-website)（程式碼 MIT）— `public/stories/`、`public/characters/` 內音訊與插圖**禁止再散布**（見下方授權與免責）
 - **授權：** 程式碼 [MIT](./LICENSE) · 網站條文 [/legal](./app/legal/page.tsx) · 維護者全文 [DISCLAIMER.md](./DISCLAIMER.md)
@@ -18,7 +19,7 @@ Bonbon & 馬米親子 podcast《車車遊樂園》的官方 **看圖聽故事** 
 |------|------|
 | Landing Hub | [`/`](./app/page.tsx) Storyline 式四段入口（故事／睡前／黏土／衛教）；scroll-snap 全屏 hero、頂欄訂閱、段內 CTA；頁尾為獨立 snap pane |
 | 故事牆 | [`/stories`](./app/stories/page.tsx) 網格列出全部分集；**依車車找故事**（車種 chip + `?vehicle=`）；主題見 `/topic` |
-| 車車宇宙地圖 | [`/adventures`](./app/adventures/page.tsx) 鳥瞰群島園區地圖（pan/zoom、點島 fly-to） |
+| 車車宇宙地圖 | [`/adventures`](./app/adventures/page.tsx) 鳥瞰群島園區地圖——五島滿版海洋、pan/zoom/click-to-zoom、點島 fly-to 開 dock（含該島故事清單）、鎖定島許願投稿（想聽的車車故事）、日夜天象 |
 | 看圖聽故事 | 全螢幕播放器、逐字即時字幕、可拖曳進度條、字幕字級切換 |
 | 主題模式 | 日間／夜晚／**跟隨系統**（預設與裝置 `prefers-color-scheme` 同步）；頂欄選單內可切換（Landing 頂欄固定陽光色） |
 | 車車遊樂園 | [`/games`](./app/games/page.tsx) — 4 款原創小遊戲（車車大冒險、繽紛方塊、車車卡丁車、海盜卡丁車大賽）；Landing 段內 CTA 入口 |

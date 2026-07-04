@@ -6,6 +6,9 @@
 
 ### Added
 
+- **每週設計評審流程（`proposals/`）**：訊號驅動的迭代提案週報——讀取許願/analytics/repo/趨勢四類訊號 + 幼兒 UX／家長信任／效能／品牌 heuristics 掃描，產出 3 個附驗收標準的排序提案；決策記錄（✅/❌/⏸）留檔避免重複提案。首份 `proposals/2026-W27.md`
+- **注意力鉤子三件套**：① `familyActivity` 親子延伸活動三通路輸出（episode 頁／RSS／GEO）② 故事許願類型——`zone_wishes` 擴充 `category`（feature/story）+ `message`（≤200 字，story 必填）與表單 segmented control，analytics `wish_submitted` 僅送 category 無 PII ③ 集數×樂園地圖互連（`ZoneBadge` + zone sheet 故事清單 + RSS）
+- **樂園地圖 v6**：左下「森林小島」第五島（黏土樹屋+木架整島 tile）、桌面 click-to-zoom（左鍵放大/右鍵縮小）、開放島兩段式互動（首次點 fly-to、再點開 bottom dock）、海天融接修正
 - **樂園地圖 R-joy 2/3（密度＋夜間巡遊，純程式部分）**：R-joy 2——`MAP_DECOR` 海面密度包 11 件（帆船×2／浮標×3／魚×2／候鳥×2／螢火×2，密度由 car-park 向外遞減、避開島與標籤帶）；開放橋升級黏土棧道（深木底＋淺木面＋板縫節奏三層描邊）。R-joy 3——`NightFireworks` 夜間煙火（三發交錯 CSS 光效粒子、深度落在摩天輪後方綻放、reduced-motion 不渲染、paused 停格）；開放島夜間點燈（不隨夜色調暗＋海面光暈轉暖金）。黏土 PNG 類（渡輪／鯨魚／srcNight 島／煙火 sprite）仍列資產待產
 - **樂園地圖 R-joy 1（歡樂感基建，純程式）**：① car-park 主島放大 1.25× 成 weenie 視覺磁鐵（迪士尼城堡手法；tile-local 步道／遮擋基線同步縮放）② 首次進園「高空降落」動畫（sessionStorage 每 session 一次、reduced-motion 直接定位）③ 點島慶祝：squash & stretch 彈跳＋六色星星迸發（重用 `star-burst-particle`）＋ `playSfx("collect")` 慶祝音（尊重 SfxToggle 與 reduced-motion 只關動畫保留音效）④ 縮放控制鈕接 `tap` 音 ⑤ 地圖左上角「車車宇宙樂園」木牌招牌＋黏土羅盤（裝飾性，語意標題仍為 sr-only h1）⑥ 預設鏡頭 fit 係數 0.96→0.88，視差天空（雲／遠島）從世界邊緣探出；海面舞台加 rx 圓角，退遠讀作漂在天空上的立體模型板
 - **樂園地圖 P1 載入體驗**：島 tile 沙草佔位 + 淡入；標籤反相機縮放；car-park tile preload
@@ -26,6 +29,8 @@
 
 ### Changed
 
+- **樂園地圖海洋滿版（map-fullbleed）**：海面貼圖鋪滿整個視窗——三個 sea rect 以 `SEA_BLEED=7200` 外擴（MIN_SCALE × 5120px 螢幕仍蓋滿，附推導與 guard 測試）、移除 rx=40 舞台圓角與 `seaHazeTop` 頂部霧帶（滿版後成為橫貫接縫）；視差層改造——刪遠島剪影（無地平線後語意消失）、雲改島群上方近景雲影（視差 0.48→1.15）、日月星改 screen-space 固定天象層（z:3）；相機 fit 行為不變（`fitScaleFor` 抽純函式 + 邊界測試，收斂兩處重複計算）。解決手機 375px letterbox 與桌面舞台硬邊
+- **Landing 主標斷行策略**：標題斷行改由資料層 `\n` 控制（`.title` pre-line），主標「車車與遊樂園的故事」整句一行、「數綿羊」「捏黏土」兩段於「·」後斷行；移除以 `ch` 單位限寬造成的 CJK 逐字拆行（22ch 對中文僅 ~205px）
 - **宇宙地圖 v5 收尾（黏土世界一致性）**：`SkyBodies` 日月改接黏土 PNG（`map/sun.png`／`moon.png`，取代向量漸層圓）；移除 `moonGlint` 螢幕空間向量月光線、夜間色溫罩減半（海面夜色改由 `sea-night.png` 貼圖本身承擔，罩層僅統一島嶼色溫，避免雙重夜化壓灰黏土紋理）；夜海貼圖惰性載入（日間不再下載 `sea-night.png`，首次切夜後掛載並保留 600ms crossfade）；視差遠島撤出舞台底部（§13 深度文法：y 越大越近，遠景剪影僅保留地平線帶）
 - **Landing 手機／平板 CTA 縮小並對齊小紅車**：≤768px 改 auto 寬靠左、縮 padding／字級；≤600px 再縮一級，`content` 底距對齊 `DuduCompanion` 水平線，避開底部進度列
 - **Landing nav 與 CTA 統一淡蜜桃橘**：top bar 與「全部故事／睡前故事」CTA 一起改淡蜜桃漸層（`#ffe7cf→#ffd5a8`）+ 暖深棕字（`#7a4012`，非黑）；`.next` 箭頭與 Subscribe pill 改暖深棕、進度小圓點改品牌橘 `#ff8c2b`（淡色在白底會消失）
@@ -36,6 +41,8 @@
 
 ### Fixed
 
+- **/characters「小衝」production 破圖**：git 追蹤 `.JPG` 大寫副檔名但程式引用 `.jpg`，本機檔案系統不分大小寫看不出、Vercel 上 404——git 改名修正
+- **全域 focus ring token 化**：`a/button:focus-visible` 由硬編 `var(--ink)` 改 `var(--focus-ring)`，夜間補丁移除（行為不變：日=ink、夜=c-yellow）
 - **車車宇宙地圖外連開窗**：外連島（`route.external`）的 `window.open` 移回使用者手勢同步呼叫棧——原本放在 fly-to 後的 `setTimeout` 內，Safari／iOS 彈窗攔截會靜默擋掉；並在拖曳打斷 fly-to 時取消尚未觸發的開 sheet／導航 timer，避免鏡頭被使用者接管後地圖仍自行開面板
 - **車車宇宙地圖 a11y**：sr-only 島嶼清單連結加 `tabIndex={-1}`，鍵盤 Tab 改走可見島嶼 button；`UniverseMap` unmount 時清除 fly-to 後開 sheet 的 `setTimeout`，避免卸載後 setState
 - **車車宇宙地圖 pan 手勢**：`useMapCamera` 在島嶼 `<button>` 上不 capture pointer，修復點島無法開 sheet 的問題
