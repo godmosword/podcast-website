@@ -183,6 +183,55 @@
   color: var(--ink-soft);
 }
 
+.stories {
+  margin: 0 0 1rem;
+}
+
+.storiesHeading {
+  margin: 0 0 0.45rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.storyList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.storyLink {
+  display: block;
+  padding: 0.45rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--landing-brand) 14%, var(--card));
+  border: 2px solid color-mix(in srgb, var(--landing-brand) 28%, transparent);
+}
+
+.storyLink:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.storiesMore {
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--landing-brand-ink);
+}
+
+.storiesMore:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
 .notifyBtn {
   display: flex;
   align-items: center;

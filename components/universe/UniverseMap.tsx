@@ -7,6 +7,7 @@ import { resolveUniverseMap } from "@/lib/universe-map";
 import { getZoneArtTile } from "@/lib/universe/zone-art-tile";
 import { parseDevStatusOverrides } from "@/lib/universe/dev-map-flags";
 import { parseZoneDeepLink } from "@/lib/universe/zone-deep-link";
+import type { ZoneStoriesBundle } from "@/lib/story-zone-query";
 import { mapDepthZ } from "@/lib/universe-depth";
 import { seaTexturePath } from "@/lib/universe/map-art-src";
 import { SEA_BLEED } from "@/lib/universe/map-camera-utils";
@@ -44,9 +45,15 @@ type MapContentProps = {
   devStatusOverrides: Partial<Record<ZoneId, ZoneStatus>>;
   zoneQuery: string | null;
   syncZoneQuery: (zoneId: ZoneId | null) => void;
+  zoneStoryPreviewsMap: Record<ZoneId, ZoneStoriesBundle>;
 };
 
-function UniverseMapContent({ devStatusOverrides, zoneQuery, syncZoneQuery }: MapContentProps) {
+function UniverseMapContent({
+  devStatusOverrides,
+  zoneQuery,
+  syncZoneQuery,
+  zoneStoryPreviewsMap,
+}: MapContentProps) {
   const { zones, bridges, viewBox } = resolveUniverseMap();
   const camera = useMapCamera();
   const reduced = useReducedMotion();
@@ -454,12 +461,22 @@ function UniverseMapContent({ devStatusOverrides, zoneQuery, syncZoneQuery }: Ma
         }}
       />
 
-      <ZoneSheet zone={activeZone} onClose={closeSheet} />
+      <ZoneSheet
+        zone={activeZone}
+        onClose={closeSheet}
+        zoneStories={
+          activeZone ? (zoneStoryPreviewsMap[activeZone.id] ?? null) : null
+        }
+      />
     </section>
   );
 }
 
-function UniverseMapWithDevFlags() {
+function UniverseMapWithDevFlags({
+  zoneStoryPreviewsMap,
+}: {
+  zoneStoryPreviewsMap: Record<ZoneId, ZoneStoriesBundle>;
+}) {
   const params = useSearchParams();
   const router = useRouter();
   const devStatusOverrides =
@@ -483,11 +500,16 @@ function UniverseMapWithDevFlags() {
       devStatusOverrides={devStatusOverrides}
       zoneQuery={params.get("zone")}
       syncZoneQuery={syncZoneQuery}
+      zoneStoryPreviewsMap={zoneStoryPreviewsMap}
     />
   );
 }
 
-export default function UniverseMap() {
+export default function UniverseMap({
+  zoneStoryPreviewsMap = {} as Record<ZoneId, ZoneStoriesBundle>,
+}: {
+  zoneStoryPreviewsMap?: Record<ZoneId, ZoneStoriesBundle>;
+}) {
   return (
     <Suspense
       fallback={
@@ -495,10 +517,11 @@ export default function UniverseMap() {
           devStatusOverrides={{}}
           zoneQuery={null}
           syncZoneQuery={() => undefined}
+          zoneStoryPreviewsMap={zoneStoryPreviewsMap}
         />
       }
     >
-      <UniverseMapWithDevFlags />
+      <UniverseMapWithDevFlags zoneStoryPreviewsMap={zoneStoryPreviewsMap} />
     </Suspense>
   );
 }

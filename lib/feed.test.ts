@@ -87,6 +87,32 @@ describe("buildRssFeed", () => {
     expect(xml).not.toContain("聽完聊一聊");
   });
 
+  it("有 zoneId 的集數 description 附樂園地圖深連結", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
+    const withZone = storyFixture({
+      slug: "ep-test-zone",
+      ep: 95,
+      title: "地圖測試",
+      zoneId: "car-park",
+    });
+    const xml = buildRssFeed([withZone]);
+    expect(xml).toContain(
+      "📍 在樂園地圖上看：https://example.com/adventures?zone=car-park",
+    );
+    vi.unstubAllEnvs();
+  });
+
+  it("無 zoneId 的集數 description 無地圖深連結", () => {
+    const without = storyFixture({
+      slug: "ep-test-no-zone",
+      ep: 94,
+      title: "無地圖測試",
+      zoneId: undefined,
+    });
+    const xml = buildRssFeed([without]);
+    expect(xml).not.toContain("/adventures?zone=");
+  });
+
   it("captions 與 captionTimes 不一致時不輸出 transcript", () => {
     const mismatch = storyFixture({
       slug: "ep-test-mismatch",

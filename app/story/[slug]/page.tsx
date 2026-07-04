@@ -21,6 +21,7 @@ import PlayButton from "@/components/PlayButton";
 import ShareButton from "@/components/ShareButton";
 import RelatedStories from "@/components/RelatedStories";
 import FamilyActivityCard from "@/components/story/FamilyActivityCard";
+import ZoneBadge from "@/components/story/ZoneBadge";
 import ReflectionPrompt from "@/components/story/ReflectionPrompt";
 import SubscriptionCTA from "@/components/SubscriptionCTA";
 import SiteFooter from "@/components/SiteFooter";
@@ -103,6 +104,8 @@ export default async function StoryDetailPage({
           </div>
 
           <StoryMeta story={story} showTags={false} />
+
+          {story.zoneId ? <ZoneBadge zoneId={story.zoneId} /> : null}
 
           <StoryTags story={story} />
         </div>

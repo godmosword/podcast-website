@@ -1,5 +1,6 @@
 import type { Story } from "@/data/content";
 import type { FaqItem } from "@/lib/json-ld";
+import { getSiteUrl } from "@/lib/site-url";
 
 const DEFAULT_AGE_RANGE = "約 3–7 歲";
 const SOCIAL_COPY_PATTERN = /(👶|🚗|希望大家|也可許願|留言告訴我們|IG|threads|FB).*/i;
@@ -124,6 +125,12 @@ export function familyActivityShowNote(story: Story): string | null {
     lines.push(`延伸小活動：${fa.activity}`);
   }
   return lines.join("\n");
+}
+
+/** RSS show notes 末段的樂園地圖深連結；無 zoneId 回傳 null。 */
+export function storyZoneMapShowNote(story: Story): string | null {
+  if (!story.zoneId) return null;
+  return `📍 在樂園地圖上看：${getSiteUrl()}/adventures?zone=${story.zoneId}`;
 }
 
 /** 併入 FAQPage JSON-LD 的親子延伸 Q&A；無 familyActivity 回傳 null。 */

@@ -6,7 +6,7 @@ import {
   CHANNEL_PODCAST_GUID,
   CHANNEL_TITLE,
 } from "@/lib/feed-constants";
-import { familyActivityShowNote } from "@/lib/story-geo";
+import { familyActivityShowNote, storyZoneMapShowNote } from "@/lib/story-geo";
 import { storyDescription } from "@/lib/story-metadata";
 import { getSiteUrl } from "@/lib/site-url";
 import { storyAudioPath, storyCoverPath } from "@/lib/story-utils";
@@ -36,6 +36,16 @@ function cdata(text: string): string {
   return `<![CDATA[${text.replace(/]]>/g, "]]]]><![CDATA[>")}]]>`;
 }
 
+/** 組裝 item description：定義式摘要 + 選填 familyActivity + 選填地圖深連結。 */
+function buildItemDescription(story: Story): string {
+  const parts = [storyDescription(story)];
+  const familyNote = familyActivityShowNote(story);
+  if (familyNote) parts.push(familyNote);
+  const zoneNote = storyZoneMapShowNote(story);
+  if (zoneNote) parts.push(zoneNote);
+  return parts.join("\n\n");
+}
+
 /** 依故事資料產生 RSS 2.0（含 podcast enclosure 與 iTunes 延伸欄位）。 */
 export function buildRssFeed(stories: Story[]): string {
   const siteUrl = getSiteUrl();
@@ -47,10 +57,7 @@ export function buildRssFeed(stories: Story[]): string {
       const pageUrl = `${siteUrl}/story/${story.slug}`;
       const coverUrl = `${siteUrl}${storyCoverPath(story.slug)}`;
       const audioUrl = `${siteUrl}${storyAudioPath(story.slug, story.audio)}`;
-      const familyNote = familyActivityShowNote(story);
-      const description = familyNote
-        ? `${storyDescription(story)}\n\n${familyNote}`
-        : storyDescription(story);
+      const description = buildItemDescription(story);
       const durationTag = story.duration
         ? `\n      <itunes:duration>${escapeXml(story.duration)}</itunes:duration>`
         : "";

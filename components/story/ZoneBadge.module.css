@@ -1,0 +1,23 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  margin: 0.5rem 0 0;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--landing-brand-ink);
+  background: color-mix(in srgb, var(--landing-brand) 22%, var(--card));
+  border: 2px solid color-mix(in srgb, var(--landing-brand) 40%, transparent);
+}
+
+.badge:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.badge:hover {
+  background: color-mix(in srgb, var(--landing-brand) 32%, var(--card));
+}

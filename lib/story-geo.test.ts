@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { getStories, getStory, storiesByNewest } from "@/data/content";
 import {
   familyActivityFaq,
@@ -7,6 +7,7 @@ import {
   storyFaqs,
   storyOutlineItems,
   storyParentExtension,
+  storyZoneMapShowNote,
 } from "./story-geo";
 
 describe("storyDefinitionSummary", () => {
@@ -83,5 +84,21 @@ describe("familyActivity 輸出 helpers", () => {
     expect(story).toBeDefined();
     expect(familyActivityShowNote(story!)).toBeNull();
     expect(familyActivityFaq(story!)).toBeNull();
+  });
+
+  it("有 zoneId 的集數產生地圖 show note", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
+    const story = getStory("ep-1");
+    expect(story?.zoneId).toBe("car-park");
+    expect(storyZoneMapShowNote(story!)).toBe(
+      "📍 在樂園地圖上看：https://example.com/adventures?zone=car-park",
+    );
+    vi.unstubAllEnvs();
+  });
+
+  it("無 zoneId 的集數 storyZoneMapShowNote 回傳 null", () => {
+    const story = getStories().find((s) => !s.zoneId);
+    expect(story).toBeDefined();
+    expect(storyZoneMapShowNote(story!)).toBeNull();
   });
 });

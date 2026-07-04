@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import UniverseMap from "@/components/universe/UniverseMap";
 import { ZONE_STATUS_META, ZONES } from "@/data/universe-zones";
 import { getCarParkLinks } from "@/lib/universe-map";
+import { buildZoneStoryPreviewsMap } from "@/lib/story-zone-query";
 import { getZoneArtSrcSet } from "@/lib/universe/zone-art-src";
 import { notifyMailto } from "@/lib/contact";
 import { getSiteUrl } from "@/lib/site-url";
@@ -22,6 +23,7 @@ export const metadata: Metadata = {
 
 export default function AdventuresPage() {
   const carParkLinks = getCarParkLinks();
+  const zoneStoryPreviewsMap = buildZoneStoryPreviewsMap();
 
   return (
     <main>
@@ -42,7 +44,7 @@ export default function AdventuresPage() {
       />
       <h1 className="sr-only">車車宇宙樂園地圖</h1>
 
-      <UniverseMap />
+      <UniverseMap zoneStoryPreviewsMap={zoneStoryPreviewsMap} />
 
       {/* 無障礙 / SEO fallback：SVG 對爬蟲不透明，提供純文字島嶼清單 */}
       <nav className="sr-only" aria-label="島嶼清單">
