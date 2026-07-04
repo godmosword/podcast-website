@@ -790,8 +790,8 @@ Migration：`scripts/migrations/001_zone_wishes.sql`
 | Task | 狀態 | 主要產出 | 驗證 | Commit hash |
 |------|------|----------|------|-------------|
 | HOOKS-1 familyActivity 三通路 | 完成 | `data/family-activities.ts` sidecar、`FamilyActivityCard`、RSS／FAQPage JSON-LD／llms-full 附加 | `npm test` + `npm run build` 全綠 | `ef1795e` |
-| HOOKS-2 故事許願類型 | 完成 | `002_zone_wishes_category_message.sql`、表單 segmented control、`wish_submitted` 事件 | migration 冪等；無 DB 降級 | `HOOKS2_HASH` |
-| HOOKS-3 集數↔地圖互連 | 完成 | `data/story-zones.ts`、`getStoriesByZone`、`ZoneBadge`、ZoneSheet 故事清單、RSS 地圖深連結 | 雙向連結；首屏 bundle 不增重 | `HOOKS3_HASH` |
+| HOOKS-2 故事許願類型 | 完成 | `002_zone_wishes_category_message.sql`、表單 segmented control、`wish_submitted` 事件 | migration 冪等；無 DB 降級 | `d9524c3` |
+| HOOKS-3 集數↔地圖互連 | 完成 | `data/story-zones.ts`、`getStoriesByZone`、`ZoneBadge`、ZoneSheet 故事清單、RSS 地圖深連結 | 雙向連結；首屏 bundle 不增重 | `2893e96` |
 
 ### 手動步驟（HOOKS-2 上線後）
 
