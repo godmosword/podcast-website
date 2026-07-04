@@ -1,5 +1,6 @@
 import { track } from "@vercel/analytics";
 import type { ZoneId, ZoneStatus } from "@/data/universe-zones";
+import type { WishCategory } from "@/lib/zone-wish-schema";
 import type { ThemePreference } from "@/lib/theme";
 import { recordPlatformClick } from "@/lib/engagement";
 
@@ -48,4 +49,9 @@ export function trackUniverseDayNightToggle(to: ThemePreference): void {
 /** 樂園地圖：許願表單送出（只送 hasEmail 布林）。 */
 export function trackUniverseWishSubmit(zoneId: ZoneId, hasEmail: boolean): void {
   safeTrack("universe_wish_submit", { zoneId, hasEmail });
+}
+
+/** 許願表單送出（只送 category，不含內容文字與 PII）。 */
+export function trackWishSubmitted(category: WishCategory): void {
+  safeTrack("wish_submitted", { category });
 }

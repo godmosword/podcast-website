@@ -4,7 +4,12 @@ import { useEffect, useId, useRef } from "react";
 import { ZONE_STATUS_META, type ZoneDef } from "@/data/universe-zones";
 import { getCarParkLinks } from "@/lib/universe-map";
 import { notifyMailto } from "@/lib/contact";
-import { trackUniverseSheetLink, trackUniverseWishSubmit } from "@/lib/analytics";
+import {
+  trackUniverseSheetLink,
+  trackUniverseWishSubmit,
+  trackWishSubmitted,
+} from "@/lib/analytics";
+import type { ZoneStoriesBundle } from "@/lib/story-zone-query";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import ZoneLandmark from "./ZoneLandmark";
 import ZoneWishForm from "./ZoneWishForm";
@@ -13,9 +18,10 @@ import styles from "./ZoneSheet.module.css";
 type ZoneSheetProps = {
   zone: ZoneDef | null;
   onClose: () => void;
+  zoneStories?: ZoneStoriesBundle | null;
 };
 
-export default function ZoneSheet({ zone, onClose }: ZoneSheetProps) {
+export default function ZoneSheet({ zone, onClose, zoneStories }: ZoneSheetProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const open = zone !== null;
@@ -76,6 +82,39 @@ export default function ZoneSheet({ zone, onClose }: ZoneSheetProps) {
 
         <p className={styles.teaser}>{zone.teaser}</p>
 
+        {zone.status === "open" && zoneStories && zoneStories.total > 0 ? (
+          <section className={styles.stories} aria-labelledby={`${titleId}-stories`}>
+            <h3 id={`${titleId}-stories`} className={styles.storiesHeading}>
+              這座島的故事
+            </h3>
+            <ul className={styles.storyList}>
+              {zoneStories.previews.map((story) => (
+                <li key={story.slug}>
+                  <a
+                    className={styles.storyLink}
+                    href={`/story/${story.slug}`}
+                    onClick={() =>
+                      trackUniverseSheetLink(zone.id, `/story/${story.slug}`)
+                    }
+                  >
+                    <span aria-hidden="true">{story.emoji} </span>
+                    EP {story.ep} {story.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+            {zoneStories.total > zoneStories.previews.length ? (
+              <a
+                className={styles.storiesMore}
+                href="/stories"
+                onClick={() => trackUniverseSheetLink(zone.id, "/stories")}
+              >
+                更多故事（共 {zoneStories.total} 集）
+              </a>
+            ) : null}
+          </section>
+        ) : null}
+
         {isCarPark ? (
           <nav className={styles.links} aria-label={`${zone.name}入口`}>
             {carParkLinks.map((link) => (
@@ -122,7 +161,12 @@ export default function ZoneSheet({ zone, onClose }: ZoneSheetProps) {
             <ZoneWishForm
               zoneId={zone.id}
               fallbackHref={notifyHref}
-              onSubmitSuccess={(hasEmail) => trackUniverseWishSubmit(zone.id, hasEmail)}
+              onSubmitSuccess={({ hasEmail, category }) => {
+                trackWishSubmitted(category);
+                if (category === "feature") {
+                  trackUniverseWishSubmit(zone.id, hasEmail);
+                }
+              }}
             />
           </div>
         )}

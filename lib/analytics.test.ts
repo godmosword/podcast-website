@@ -73,6 +73,19 @@ describe("universe analytics", () => {
     });
   });
 
+  it("trackWishSubmitted 只送 category，不含 PII", async () => {
+    const { track } = await import("@vercel/analytics");
+    const { trackWishSubmitted } = await import("./analytics");
+
+    trackWishSubmitted("story");
+
+    expect(track).toHaveBeenCalledWith("wish_submitted", { category: "story" });
+    const payload = vi.mocked(track).mock.calls[0]?.[1];
+    expect(payload).not.toHaveProperty("message");
+    expect(payload).not.toHaveProperty("email");
+    expect(payload).not.toHaveProperty("nickname");
+  });
+
   it("trackUniverseDayNightToggle 送 to 主題", async () => {
     const { track } = await import("@vercel/analytics");
     const { trackUniverseDayNightToggle } = await import("./analytics");

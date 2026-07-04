@@ -45,6 +45,8 @@ export async function POST(request: Request): Promise<NextResponse> {
   try {
     await insertZoneWish({
       zoneId: parsed.data.zoneId,
+      category: parsed.data.category,
+      message: parsed.data.message ?? null,
       email: parsed.data.email ?? null,
       nickname: parsed.data.nickname ?? null,
       userAgent: request.headers.get("user-agent"),
