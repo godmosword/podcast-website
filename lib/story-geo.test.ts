@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { getStories, storiesByNewest } from "@/data/content";
+import { getStories, getStory, storiesByNewest } from "@/data/content";
 import {
+  familyActivityFaq,
+  familyActivityShowNote,
   storyDefinitionSummary,
   storyFaqs,
   storyOutlineItems,
@@ -58,5 +60,28 @@ describe("storyFaqs", () => {
     expect(faqs.length).toBeLessThanOrEqual(3);
     expect(faqs[0].question).toContain("適合");
     expect(faqs.every((faq) => faq.question && faq.answer)).toBe(true);
+  });
+});
+
+describe("familyActivity 輸出 helpers", () => {
+  it("有 familyActivity 的集數產生 show note 與 FAQ", () => {
+    const story = getStory("ep-5");
+    expect(story?.familyActivity).toBeDefined();
+
+    const note = familyActivityShowNote(story!);
+    expect(note).toContain("🏡 聽完聊一聊：");
+    expect(note).toContain(story!.familyActivity!.question);
+    expect(note).toContain("延伸小活動：");
+
+    const faq = familyActivityFaq(story!);
+    expect(faq?.question).toContain("聊什麼");
+    expect(faq?.answer).toContain(story!.familyActivity!.question);
+  });
+
+  it("無 familyActivity 的集數回傳 null", () => {
+    const story = getStories().find((s) => !s.familyActivity);
+    expect(story).toBeDefined();
+    expect(familyActivityShowNote(story!)).toBeNull();
+    expect(familyActivityFaq(story!)).toBeNull();
   });
 });

@@ -115,6 +115,33 @@ export function storyParentExtension(story: Story): {
   };
 }
 
+/** RSS show notes 末段的「聽完聊一聊」文字；無 familyActivity 回傳 null。 */
+export function familyActivityShowNote(story: Story): string | null {
+  const fa = story.familyActivity;
+  if (!fa) return null;
+  const lines = [`🏡 聽完聊一聊：${fa.question}`];
+  if (fa.activity) {
+    lines.push(`延伸小活動：${fa.activity}`);
+  }
+  return lines.join("\n");
+}
+
+/** 併入 FAQPage JSON-LD 的親子延伸 Q&A；無 familyActivity 回傳 null。 */
+export function familyActivityFaq(story: Story): FaqItem | null {
+  const fa = story.familyActivity;
+  if (!fa) return null;
+  const answerParts = [
+    `聽完《${coreTitle(story)}》後，可以和孩子聊聊：「${fa.question}」`,
+  ];
+  if (fa.activity) {
+    answerParts.push(`也可以一起做延伸小活動：${fa.activity}`);
+  }
+  return {
+    question: "聽完這一集可以和孩子聊什麼？",
+    answer: answerParts.join(""),
+  };
+}
+
 export function storyFaqs(story: Story): FaqItem[] {
   return [
     {

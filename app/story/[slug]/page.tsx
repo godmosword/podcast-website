@@ -6,6 +6,7 @@ import { getStory, getRelated, getNextStory, getStories } from "@/data/content";
 import { faqPageJsonLd, podcastEpisodeJsonLd } from "@/lib/json-ld";
 import { lineShareUrl, storyLineShareText, storyShareUrl } from "@/lib/share-story";
 import {
+  familyActivityFaq,
   storyDefinitionSummary,
   storyFaqs,
   storyOutlineItems,
@@ -19,6 +20,7 @@ import JsonLd from "@/components/JsonLd";
 import PlayButton from "@/components/PlayButton";
 import ShareButton from "@/components/ShareButton";
 import RelatedStories from "@/components/RelatedStories";
+import FamilyActivityCard from "@/components/story/FamilyActivityCard";
 import ReflectionPrompt from "@/components/story/ReflectionPrompt";
 import SubscriptionCTA from "@/components/SubscriptionCTA";
 import SiteFooter from "@/components/SiteFooter";
@@ -63,11 +65,14 @@ export default async function StoryDetailPage({
   const characters = getCharactersForStory(story.slug);
   const parentExtension = storyParentExtension(story);
   const faqs = storyFaqs(story);
+  // GEO：familyActivity 以 Q&A 形式併入 FAQPage JSON-LD（頁面可見文字由卡片提供）
+  const activityFaq = familyActivityFaq(story);
+  const jsonLdFaqs = activityFaq ? [...faqs, activityFaq] : faqs;
 
   return (
     <main className={styles.main}>
       <JsonLd data={podcastEpisodeJsonLd(story)} />
-      <JsonLd data={faqPageJsonLd(faqs)} />
+      <JsonLd data={faqPageJsonLd(jsonLdFaqs)} />
       <Link href="/stories" className={styles.back}>
         ← 回故事屋
       </Link>
@@ -124,6 +129,14 @@ export default async function StoryDetailPage({
             className={styles.shareRow}
           />
         </div>
+
+        {story.familyActivity && (
+          <FamilyActivityCard
+            slug={story.slug}
+            familyActivity={story.familyActivity}
+            accent={story.color}
+          />
+        )}
 
         <section className={styles.contentSection} aria-labelledby="outline-heading">
           <h2 id="outline-heading" className={styles.sectionHeading}>

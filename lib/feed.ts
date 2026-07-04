@@ -6,6 +6,7 @@ import {
   CHANNEL_PODCAST_GUID,
   CHANNEL_TITLE,
 } from "@/lib/feed-constants";
+import { familyActivityShowNote } from "@/lib/story-geo";
 import { storyDescription } from "@/lib/story-metadata";
 import { getSiteUrl } from "@/lib/site-url";
 import { storyAudioPath, storyCoverPath } from "@/lib/story-utils";
@@ -46,7 +47,10 @@ export function buildRssFeed(stories: Story[]): string {
       const pageUrl = `${siteUrl}/story/${story.slug}`;
       const coverUrl = `${siteUrl}${storyCoverPath(story.slug)}`;
       const audioUrl = `${siteUrl}${storyAudioPath(story.slug, story.audio)}`;
-      const description = storyDescription(story);
+      const familyNote = familyActivityShowNote(story);
+      const description = familyNote
+        ? `${storyDescription(story)}\n\n${familyNote}`
+        : storyDescription(story);
       const durationTag = story.duration
         ? `\n      <itunes:duration>${escapeXml(story.duration)}</itunes:duration>`
         : "";

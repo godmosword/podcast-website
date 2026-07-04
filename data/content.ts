@@ -2,6 +2,7 @@ import appleSyncDefaults from "./apple-sync.defaults.json";
 import appleSynced from "./apple-synced.json";
 import { episodeColorForSlug } from "./episode-colors";
 import { getCharactersForStory } from "./characters";
+import { getFamilyActivity, type FamilyActivity } from "./family-activities";
 import { getReflectionPrompt } from "./reflection-prompts";
 import { manualStories, type ManualStory } from "./stories";
 import { canonicalStorySlug } from "@/lib/story-slug-aliases";
@@ -34,6 +35,8 @@ export type Story = ContentBase & {
     child: string;
     parentFollowUp: string;
   };
+  /** 聽完聊一聊：親子延伸活動（sidecar，見 data/family-activities.ts） */
+  familyActivity?: FamilyActivity;
 };
 
 type RawStory = ManualStory;
@@ -79,12 +82,14 @@ function enrichStory(raw: RawStory): Story {
   const characters = getCharactersForStory(merged.slug);
   const reflectionPrompt =
     merged.reflectionPrompt ?? getReflectionPrompt(merged.slug);
+  const familyActivity = getFamilyActivity(merged.slug);
   return {
     ...merged,
     kind: "story",
     color: episodeColorForSlug(merged.slug),
     characterIds: characters.map((c) => c.id),
     reflectionPrompt,
+    ...(familyActivity ? { familyActivity } : {}),
   };
 }
 

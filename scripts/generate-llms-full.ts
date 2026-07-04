@@ -73,6 +73,9 @@ export function buildLlmsFullText(options: BuildOptions = {}): string {
         `### 第 ${story.ep} 集：${story.title}`,
         "",
         storyDefinitionSummary(story),
+        ...(story.familyActivity
+          ? ["", `🏡 聽完聊一聊：${story.familyActivity.question}`]
+          : []),
         "",
         `- 頁面 URL：${siteUrl}/story/${story.slug}`,
         ...(story.tags?.length ? [`- 主題標籤：${story.tags.join("、")}`] : []),

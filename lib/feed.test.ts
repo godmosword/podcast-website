@@ -59,6 +59,34 @@ describe("buildRssFeed", () => {
     vi.unstubAllEnvs();
   });
 
+  it("有 familyActivity 的集數 description 附「聽完聊一聊」", () => {
+    const withActivity = storyFixture({
+      slug: "ep-test-activity",
+      ep: 97,
+      title: "活動測試",
+      familyActivity: {
+        question: "你看過挖土機嗎？",
+        activity: "一起數數看今天遇到幾台車。",
+      },
+    });
+    const xml = buildRssFeed([withActivity]);
+    expect(xml).toContain("🏡 聽完聊一聊：你看過挖土機嗎？");
+    expect(xml).toContain("延伸小活動：一起數數看今天遇到幾台車。");
+    // 不得破壞既有 Podcasting 2.0 標籤
+    expect(xml).toContain("<itunes:episodeType>full</itunes:episodeType>");
+  });
+
+  it("無 familyActivity 的集數 description 無「聽完聊一聊」痕跡", () => {
+    const without = storyFixture({
+      slug: "ep-test-no-activity",
+      ep: 96,
+      title: "無活動測試",
+      familyActivity: undefined,
+    });
+    const xml = buildRssFeed([without]);
+    expect(xml).not.toContain("聽完聊一聊");
+  });
+
   it("captions 與 captionTimes 不一致時不輸出 transcript", () => {
     const mismatch = storyFixture({
       slug: "ep-test-mismatch",

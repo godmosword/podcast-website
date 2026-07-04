@@ -32,6 +32,24 @@ describe("buildLlmsFullText", () => {
     expect(block).not.toContain("undefined");
   });
 
+  it("有 familyActivity 的集數摘要後附「聽完聊一聊」，其他集數無痕跡", () => {
+    const text = buildLlmsFullText({
+      siteUrl: "https://example.com",
+      generatedAt: "2026-07-02T00:00:00.000Z",
+    });
+
+    const withActivity = getStories().filter((s) => s.familyActivity);
+    expect(withActivity.length).toBeGreaterThanOrEqual(2);
+    for (const story of withActivity) {
+      expect(text).toContain(
+        `🏡 聽完聊一聊：${story.familyActivity!.question}`,
+      );
+    }
+
+    const occurrences = text.match(/🏡 聽完聊一聊：/g) ?? [];
+    expect(occurrences).toHaveLength(withActivity.length);
+  });
+
   it("角色索引非空且連到 /characters", () => {
     const text = buildLlmsFullText({
       siteUrl: "https://example.com",
