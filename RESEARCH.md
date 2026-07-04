@@ -153,6 +153,14 @@ Pilot 刻意選與故事強綁定的角色，以放大「不公平優勢 ②」�
 
 涵蓋四款（canon）：① 車車大冒險（`car-adventure`）② 繽紛方塊（`block-drop`）③ 車車卡丁車（`kart`）④ 海盜卡丁車大賽（`pirate-kart`）。
 
+### 2026-07-04｜TODO 歸檔補記
+
+TODO 主檔只保留「❄️ FROZEN — 待 STEM-P1 Gate 之後｜四款 pixel 精進」的執行狀態；市售級品質門檻、Game Kit 四層、資產工具與驗收表集中保存在本研究段。現況元件對照：`BlockDropGame`、`CarPlatformer`、`/games/kart`、`/games/pirate-kart`；資料目錄為 `data/games.ts`。
+
+**與 STEM 路線關係：** 精進版屬「遊樂園經典區」商業級升級；新 STEM 沙盒仍守無計時、無排行榜。若日後解凍，每款預設採兒童模式，挑戰模式需明確可選。
+
+**目前 Game Kit 四層：** `lib/gamekit/react/`（hooks、觸控、暫停）、`lib/gamekit/runtime/`（loop、輸入、像素渲染、音訊、juice）、`lib/gamekit/progress/`（存檔、設定、獎牌、session）、`lib/gamekit/games/`（遊戲專屬關卡與 iframe bridge）。
+
 ### 0. 市售 pixel game 品質門檻
 
 把「原型」和「能上架賣（Steam/itch/行動/精緻網頁）」分開的，不是某個玩法，而是這條品質基準線。任一款要稱得上市售級，須全數達成：
@@ -528,4 +536,3 @@ FE-09 多模態(獨立,接 STEM-P1)
 | 5 | FE-05 | 家長轉換（WAF 北極星） |
 | 6 | FE-07 → FE-08 | 加分項 |
 | 7 | FE-09 | 選做，配合 STEM-P1 排程 |
-

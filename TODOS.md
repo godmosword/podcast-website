@@ -14,9 +14,9 @@
 
 ---
 
-## GEO 實作計畫（待確認）
+## GEO 實作計畫（已完成，封存）
 
-> **Gate：** 本段經人工確認後才開始改 code。每個 Task 完成後單獨 commit，訊息格式固定為 `geo: task-N <描述>`，並把 commit hash 回填到本段。
+> **Gate：** 已核可並完成實作。每個 Task 完成後單獨 commit，訊息格式固定為 `geo: task-N <描述>`，commit hash 已回填。
 > **紅線：** 不動宇宙地圖 canvas / animation / sprite 系統、不動 Q 版黏土角色 sprite 載入邏輯、不改名或刪除既有 URL、不修改音檔託管與 podcast RSS 既有產生邏輯、不升降 package 既有依賴版本。
 > **目前資料基準（2026-07-03 本機掃描）：** `storiesByNewest()` 17 集、最新 `ep-17`（2026-07-02）、`allVehicles()` 13 種、`data/characters.json` 28 個角色。對外文案中的數字仍需人工審稿確認。
 
@@ -39,12 +39,12 @@
 5. `GEO-5 sitemap-freshness` 依賴新增頁與日期欄位完成。
 6. `GEO-6 docs-wrap` 最後收尾，回填 hash 與人工上線檢查。
 
-### GEO 待決策
+### GEO 已結案紀錄
 
-- `/characters` 是否作為新增公開角色介紹頁：目前 repo 沒有此路由；Task 2 建議新增 SSG 頁並只讀 `data/characters.ts`，不動 sprite 載入邏輯。
-- `dateModified` 真實來源：目前故事資料只有 `date`；建議新增人工維護欄位或從既有 sync 狀態中找到可證明的更新時間。找不到真實來源時，不輸出假 `dateModified`，先回報。
-- `/llms-full.txt` 是否包含全部 17 集摘要索引：若採用，內容需從 `storiesByNewest()` 產生/同步，避免手寫漂移。
-- `/for-parents` 的更新頻率、適合年齡、代表集數等文案：先以資料層數字生成並標 `[待確認]`，人工審稿後再移除標記。
+- `/characters` 已於 GEO-2 上線為 SSG 公開角色頁（`f3687e0`），只讀 `data/characters.ts`／`data/characters.json`。
+- `dateModified` 已由 `data/story-dates.ts` 與 `data/page-freshness-dates.ts` 維護，並在 sitemap／metadata／JSON-LD 對齊（`f3687e0`、`6d1e8b1`）。
+- `/llms-full.txt` 已改自動產生並接入 `prebuild`（`581b8aa`），避免手寫漂移。
+- `/for-parents` 的 `[待確認]` 佔位已升為 W27-1，本週清除，不再留在 GEO 決策池。
 
 ### GEO llms 收尾（2026-07-02）
 
@@ -62,12 +62,12 @@
 
 | Task | 狀態 | 主要產出 | 預計影響檔案 | 驗證 | Commit hash |
 |------|------|----------|--------------|------|-------------|
-| LIST-1 LINE OA CTA | 待確認 | env-gated LINE 加好友 CTA（`NEXT_PUBLIC_LINE_OA_URL` 未設即隱藏，沿用 `visibleSocials()` 空字串隱藏模式）；掛頁尾／單集頁 `SubscriptionCTA` 旁／landing／`/subscribe` | Modify: `lib/social.ts`（`SocialIcon` 加 `"line"`）、`lib/connect-icons.tsx`、`components/SiteFooter.tsx`、`app/story/[slug]/page.tsx`; Create: `components/LineCTA.tsx` | 設/不設 env 切換顯隱；`npm test` + `npm run build` | — |
-| LIST-2 新集通知 email 訂閱 | 待確認 | 複製 zone-wish 技術棧（zod + rate limit + Neon + DB 未設降級）；`subscribers` 表 `lower(email)` unique + `ON CONFLICT DO NOTHING`（冪等、防枚舉）；簡單收集 + 隱私說明（「僅用於新集數通知」），不做 double opt-in | Create: `scripts/migrations/002_subscribers.sql`、`lib/subscribe-schema.ts`、`lib/subscribe-db.ts`、`app/api/subscribe/route.ts`、`components/SubscribeForm.tsx`、`app/subscribe/page.tsx`（範本：`app/api/zone-wish/route.ts`、`ZoneWishForm.tsx`） | curl：無 `DATABASE_URL` 降級、POST 201、重複 email 201、429 rate limit；`npm test` + `npm run build` | — |
-| LIST-3 分析事件 | 待確認 | `trackSubscribeSubmit(source)`、`trackLineCtaClick(source)`，走 `safeTrack`、無 PII（比照 `trackUniverseWishSubmit`） | Modify: `lib/analytics.ts` | 本機點擊確認事件發送 | — |
-| REUSE-1 校對字幕採用檢查 | 待確認 | 確認 backfill 管線優先讀 `data/subtitles/_proofread/`；若否修正並對 ep-11~17 重跑 `npm run backfill:captions`；跑 `npm run verify:episodes` | Modify（視檢查結果）: `scripts/lib/illustrate-core.ts`; Data: `data/apple-synced.json` | `verify:episodes` 全過；抽查 ep-16 captions 用校對版文字 | — |
-| REUSE-2 家長共讀指引呈現（= P2 `parentGuide`） | 待確認 | `Story` 加選填 `parentGuide` 欄位 + `ShowNotes` 區塊（「這集可以聊什麼」+ 延伸提問／小活動）；SEO 可爬 zh-Hant 內文 | Modify: `data/content.ts`、`app/story/[slug]/page.tsx`; Create: `components/story/ShowNotes.tsx` | view-source 確認 SSR 文字；`npm test` + `npm run build` | — |
-| REUSE-3 短影音素材匯出工具 | 待確認 | 本機 CLI `npm run export:video -- <slug>`：讀 `data/scenes/<slug>.json` start/end，ffmpeg 切場景音訊、配對 `public/stories/<slug>/NN.jpg` + 字幕片段，選配 1080x1920 靜圖 mp4；輸出 `export/video/<slug>/` + `manifest.json`（gitignore，不自動發文） | Create: `scripts/export-video-assets.ts`; Modify: `package.json`、`.gitignore` | `export:video -- ep-12` 抽查場景音訊長度與 manifest 對應 | — |
+| LIST-1 LINE OA CTA | BLOCKED：等 LINE OA | env-gated LINE 加好友 CTA（`NEXT_PUBLIC_LINE_OA_URL` 未設即隱藏，沿用 `visibleSocials()` 空字串隱藏模式）；掛頁尾／單集頁 `SubscriptionCTA` 旁／landing／`/subscribe` | Modify: `lib/social.ts`（`SocialIcon` 加 `"line"`）、`lib/connect-icons.tsx`、`components/SiteFooter.tsx`、`app/story/[slug]/page.tsx`; Create: `components/LineCTA.tsx` | 設/不設 env 切換顯隱；`npm test` + `npm run build` | — |
+| LIST-2 新集通知 email 訂閱 | 可開工：隱私 gate 已解 | 複製 zone-wish 技術棧（zod + rate limit + Neon + DB 未設降級）；`subscribers` 表 `lower(email)` unique + `ON CONFLICT DO NOTHING`（冪等、防枚舉）；簡單收集 + 隱私說明（「僅用於新集數通知」），不做 double opt-in；`/legal#privacy` 已涵蓋 analytics／localStorage（`a844f20`），實作時同步掛 privacy link | Create: `scripts/migrations/002_subscribers.sql`、`lib/subscribe-schema.ts`、`lib/subscribe-db.ts`、`app/api/subscribe/route.ts`、`components/SubscribeForm.tsx`、`app/subscribe/page.tsx`（範本：`app/api/zone-wish/route.ts`、`ZoneWishForm.tsx`） | curl：無 `DATABASE_URL` 降級、POST 201、重複 email 201、429 rate limit；`npm test` + `npm run build` | — |
+| LIST-3 分析事件 | 待 LIST-1/2 掛點 | `trackSubscribeSubmit(source)`、`trackLineCtaClick(source)`，走 `safeTrack`、無 PII（比照 `trackUniverseWishSubmit`） | Modify: `lib/analytics.ts` | 本機點擊確認事件發送 | — |
+| REUSE-1 校對字幕採用檢查 | 可開工 | 確認 backfill 管線優先讀 `data/subtitles/_proofread/`；若否修正並對 ep-11~17 重跑 `npm run backfill:captions`；跑 `npm run verify:episodes` | Modify（視檢查結果）: `scripts/lib/illustrate-core.ts`; Data: `data/apple-synced.json` | `verify:episodes` 全過；抽查 ep-16 captions 用校對版文字 | — |
+| REUSE-2 家長共讀指引呈現（= P2 `parentGuide`） | BLOCKED：等邊界定義 | `Story` 加選填 `parentGuide` 欄位 + `ShowNotes` 區塊（「這集可以聊什麼」+ 延伸提問／小活動）；SEO 可爬 zh-Hant 內文；先釐清與已上線 `familyActivity` 的欄位邊界 | Modify: `data/content.ts`、`app/story/[slug]/page.tsx`; Create: `components/story/ShowNotes.tsx` | view-source 確認 SSR 文字；`npm test` + `npm run build` | — |
+| REUSE-3 短影音素材匯出工具 | 可開工 | 本機 CLI `npm run export:video -- <slug>`：讀 `data/scenes/<slug>.json` start/end，ffmpeg 切場景音訊、配對 `public/stories/<slug>/NN.jpg` + 字幕片段，選配 1080x1920 靜圖 mp4；輸出 `export/video/<slug>/` + `manifest.json`（gitignore，不自動發文） | Create: `scripts/export-video-assets.ts`; Modify: `package.json`、`.gitignore` | `export:video -- ep-12` 抽查場景音訊長度與 manifest 對應 | — |
 
 ### 待使用者提供（不擋開發）
 
@@ -76,8 +76,10 @@
 
 ### Task DAG
 
-1. LIST-1／LIST-2 可並行；LIST-3 依賴前兩者的元件掛點。
-2. REUSE-1 獨立先行（資料正確性）；REUSE-2 依賴 `parentGuide` 文案（Bonbon & 馬米）；REUSE-3 完全獨立。
+1. 先開 REUSE-1／REUSE-3；兩者不依賴使用者資料或對外 CTA。
+2. LIST-2 原本等隱私頁；本機驗證 `/legal#privacy` 已由 `a844f20` 上線，改為可開工，但表單旁仍須放明確隱私句與 privacy link。
+3. LIST-1 等 LINE OA URL；LIST-3 等 LIST-1／LIST-2 的實際掛點。
+4. REUSE-2 先完成 `familyActivity`／`parentGuide` 邊界定義，避免與 HOOKS-1 重疊。
 
 ---
 
@@ -93,6 +95,24 @@
 
 ### W27-3 森林小島 magenta 暈圈修復　`asset · S · 無`　〔review+design〕
 = 下方既有條目「森林小島底部洋紅色暈圈」，W27 週報將其提升優先。
+
+---
+
+## 成長量測缺口（2026-07-04）
+
+> 這四條補齊「官網事件」與「平台實際成長」之間的量測橋，避免只看站內點擊自嗨。
+
+### 平台後台基線記錄　`growth-measurement · S · 無`　〔growth〕
+每週固定記錄 Spotify for Podcasters、Apple Podcasts Connect、YouTube、SoundOn 後台基線：訂閱／追蹤、播放、完播、來源（可得則填）、截圖或 CSV 存 `docs/metrics/`（不 commit 個資）。先有 2026-W27 baseline，後續 CTA／UTM 改動才有比較基準。
+
+### UTM 歸因規格　`growth-measurement · S · 平台外連`　〔growth+eng〕
+為 Spotify／Apple／KKBOX／YouTube 外連定義 `utm_source=cheche_web`、`utm_medium=story_page|footer|subscribe_cta|social`、`utm_campaign=<slug|site>`；先決定是否所有平台保留 UTM，再實作於 `lib/platforms.ts`／`TrackedPlatformLink`。不得把 email 或孩子資料放進 UTM。
+
+### SoundOn show notes 回鏈　`growth · S · sync 管線`　〔growth+ops〕
+SoundOn 單集 show notes 應回鏈官網單集 URL（含可分享摘要與看圖體驗），形成「平台 → 官網 → 訂閱/互動」閉環。先定 SOP：新集上架時手填或用 sync Issue checklist 提醒；不直接讓官網寫回 SoundOn。
+
+### `familyActivity` / `parentGuide` 邊界定義　`content-architecture · S · 無`　〔stem+growth〕
+已上線的 `familyActivity` 是單集短 Q&A／RSS show note／FAQPage；待建的 `parentGuide` 應定位為較完整的家長共讀指引。開 REUSE-2 前先寫清欄位責任、呈現位置、是否進 RSS／JSON-LD，避免同一段親子提示被兩套資料重複維護。
 
 ---
 
@@ -168,11 +188,11 @@
 
 ### 本季 Top 5（2026-06 執行優先序）
 
-1. **STEM-P1** 每集結尾開放提問（`reflectionPrompt`）
+1. **STEM-P1** 每集結尾開放提問內容回填（`reflectionPrompt`，框架已上線）
 2. **Growth-P1** 單集頁訂閱 CTA 上移（主按鈕下方）
 3. **Growth-P1** 首頁可見訂閱入口（Header／Hero → `#connect`）
-4. **Growth-P2** 隱私政策頁（analytics 前置）
-5. **STEM-P1** 完播／重訪本機量測驗證
+4. **Growth-P2** W27 信任收尾（`/for-parents` 佔位清除、許願表單隱私句）
+5. **STEM-P1** 完播／重訪量測口徑驗證（本機紀錄已上線，需對外事件定義）
 
 > 分享鈕、平台排序、訂閱文案、viewport 縮放、sitemap 擴充等已上線，見 Completed；不再佔 Top 5 名額。
 
@@ -185,13 +205,13 @@
 #### ~~故事頁點按熱點（tap-to-explore）~~　`STEM-P1 · M · 插畫座標`　〔stem+eng〕 — **已移除（2026-06）**：虛線提示體驗不佳，待重新設計後再評估。`0d77d7f`
 
 #### 每集結尾開放式「小提問」　`STEM-P1 · S · 文案`　〔stem+content〕
-詳情或播放結束畫面加一句不計分提問（例：「你覺得消防車為什麼是紅色的？」）。`data/stories.ts` 加 `reflectionPrompt`；無標準答案。依據：STEM 核心是發問與學習主導權。
+**框架與 UI 已上線**（`ReflectionPrompt`、故事詳情頁與播放結束畫面；`10746b5`）。`data/reflection-prompts.ts` 目前覆蓋 ep-1～ep-9；收尾工作是回填 ep-10～ep-17，保持「無標準答案、親子延伸一句」格式。依據：STEM 核心是發問與學習主導權。
 
 #### 互動正向回饋（音效／星星動畫）　`STEM-P1 · S · 收藏／提問`　〔stem+eng〕
 收藏等互動：溫和音效 + 小星星動畫（重用 `lib/sfx.ts`）。`prefers-reduced-motion` 可關動畫保留音效。
 
 #### 互動留存簡易量測（本機 + 可選 analytics）　`STEM-P1 · S · reflection 上線`　〔stem+ceo〕
-先記錄：同集重訪、完播次數（localStorage 或日後 analytics）；確認互動是否提升回訪再談收費。
+本機 `progress-store` 已記錄 `storiesCompleted`、`reflectionShown`、平台點擊次數，Studio 可讀同裝置摘要（`10746b5`、`a844f20`）。收尾工作是定義「完播」對外 analytics 事件口徑（觸發時機、重播是否計次、是否只記 slug），再決定是否送 Vercel custom event；不得送孩子個資。
 
 ---
 
@@ -265,15 +285,15 @@ PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
 |----|------|------|
 | **P0** 地基 + 第一印象 | 看起來完整、被搜尋到 | 首頁渲染修復 · 正式網域 · sitemap/robots（含 `/games`、`/legal`）· JSON-LD · DESIGN.md 同步 · 首屏精簡 |
 | **P1** 訂閱轉換 + 分享 | 「沒看到訂閱」消失、可被轉發 | 單集訂閱 CTA 上移 · 首頁訂閱入口 · ~~ConnectHub 文案/排序~~ · ~~每集分享鈕~~ · 試聽橋接 · 入門三集 · 空狀態 · 錨點導覽 |
-| **P2** 信任/合規 + 內容 | 兒童產品權重、內容變深 | 隱私頁 → analytics · **同步→生圖通知** · 主持人信任區 · 真實插畫 · 家長共讀指引（`parentGuide`）· 新集通知說明 · 主題頁 SEO · 音檔壓縮 · ~~縮放~~/觸控/塗鴉 |
-| **P3** 可靠/工程/可選 | 不掛、可回歸、加分 | 監控 · SW · E2E · ESLint · **Game Kit 0–1** · 四款 pixel 精進 · 角色圖鑑 · 大圖單欄 |
+| **P2** 信任/合規 + 內容 | 兒童產品權重、內容變深 | ~~隱私專章 + analytics~~ · 主持人信任區 · 真實插畫 · 家長共讀指引（`parentGuide`）· 新集通知說明 · 主題頁 SEO · 音檔壓縮 · ~~縮放~~/觸控/塗鴉 |
+| **P3** 可靠/工程/可選 | 不掛、可回歸、加分 | 監控 · E2E · ESLint · 生圖佇列 · 車車圖鑑養成 |
 | **STEM-P1→P4** 互動×STEM×商業 | 差異化與變現 | 見上表；**當務之急：結尾提問 + 完播量測** |
 
-**相依鏈（務必照序）：** 正式網域 → sitemap/robots + JSON-LD → 隱私頁（先於 analytics）→ analytics。
+**相依鏈（現況修正）：** 正式網域 → sitemap/robots + JSON-LD 已完成；analytics 與 `/legal#privacy` 已上線（`a844f20`）。後續蒐集 email（LIST-2／許願表單）必須在表單旁補清楚隱私句與用途說明。
 
-**已備齊（勿重做）：** 故事牆、全螢幕播放器、每集落地頁 + **每集 OG 圖**（`lib/story-metadata.ts`）、**每集分享鈕**（`ShareButton`）、`/topic` 與車種 SEO 頁、RSS `/feed.xml`、`ageRange`、PWA／收藏／繼續收聽、ConnectHub（Spotify／Apple 優先 + 訂閱文案）、相關推薦、**`/games` 遊樂園**（車車大冒險／繽紛方塊／車車卡丁車／海盜卡丁車大賽）、`/legal` 與版權合規、逐字字幕管線、角色定裝照名冊、Apple 15 分鐘同步、**viewport 開放縮放**。
+**已備齊（勿重做）：** 故事牆、全螢幕播放器、每集落地頁 + **每集 OG 圖**（`lib/story-metadata.ts`）、**每集分享鈕**（`ShareButton`）、`/topic` 與車種 SEO 頁、RSS `/feed.xml`、`ageRange`、PWA／收藏／繼續收聽、ConnectHub（Spotify／Apple 優先 + 訂閱文案）、相關推薦、**`/games` 遊樂園**（車車大冒險／繽紛方塊／車車卡丁車／海盜卡丁車大賽）、`/legal#privacy` 與版權合規、Vercel Analytics + 平台點擊事件、逐字字幕管線、角色定裝照名冊、`/characters` 公開角色頁、Apple 15 分鐘同步 + GitHub Issue 通知、**viewport 開放縮放**。
 
-**待決策（實作前定）：** ① 自訂網域最終選擇（`chechepark.tw` / `checheland.tw` / 其他）— **基建已就緒**（`NEXT_PUBLIC_SITE_URL` + `CANONICAL_SITE_URL` fallback，P0 ✅）；② analytics 工具（Vercel Analytics 省事 / Plausible 無 cookie / 不做）③ ~~縮放（鎖 vs 家長大字模式）~~ → **已決：開放縮放**（`app/layout.tsx`，P2 ✅）④ 角色圖鑑與親子提示是否現在做（需 Bonbon & 馬米 文案）⑤ **現有 4 款遊樂園遊戲與 STEM 原則** — 見下方「產品決策」⑥ **兒童拍照分享** — 是否做、如何去識別化；跨裝置圖鑑是否需帳號與家長同意（見 [RESEARCH.md](./RESEARCH.md) 風險段）。
+**待決策（實作前定）：** ① 自訂網域最終選擇（`chechepark.tw` / `checheland.tw` / 其他）— **基建已就緒**（`NEXT_PUBLIC_SITE_URL` + `CANONICAL_SITE_URL` fallback，P0 ✅）；② `parentGuide` 與已上線 `familyActivity` 的邊界；③ ~~縮放（鎖 vs 家長大字模式）~~ → **已決：開放縮放**（`app/layout.tsx`，P2 ✅）；④ **現有 4 款遊樂園遊戲與 STEM 原則** — 見下方「產品決策」；⑤ **兒童拍照分享** — 是否做、如何去識別化；跨裝置圖鑑是否需帳號與家長同意（見 [RESEARCH.md](./RESEARCH.md) 風險段）。
 
 ### 產品決策：現有遊樂園 vs STEM「不計時、不競爭」
 
@@ -287,7 +307,7 @@ PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
 | **B. 漸進淡化** | 保留 best 分顯示但移除生命／Game Over 壓力；大冒險改為無限續關或探索模式 |
 | **C. 雙模式** | 每款加「輕鬆玩」（無分數）／「挑戰玩」（可選，預設輕鬆） |
 
-**新遊戲預設：** 無計時、無排行榜、可隨時離開（見 STEM-P2 設計紀律）。舊遊戲是否改版依上表決策後排入 P2 或 P3。**市售 pixel 精進**（Game Kit、三星、高分）見 [遊樂園精進](#遊樂園精進game-kit--市售-pixel-品質)——建議以**兒童模式預設**保留 STEM 調性。
+**新遊戲預設：** 無計時、無排行榜、可隨時離開（見 STEM-P2 設計紀律）。舊遊戲是否改版依上表決策後排入 P2 或 P3。**市售 pixel 精進**（Game Kit、三星、高分）已移至 [RESEARCH.md — 四款小遊戲精進](./RESEARCH.md#2026-06-09四款小遊戲精進方案對標可市售-pixel-game)，待 STEM-P1 gate 後再解凍。
 
 ---
 
@@ -307,7 +327,7 @@ Vercel 設 `NEXT_PUBLIC_SITE_URL=https://正式網域`。OG／Twitter／RSS／si
 首頁輸出 `PodcastSeries`、單集頁輸出 `PodcastEpisode`（schema.org `<script type="application/ld+json">`），欄位對應標題／日期／音檔 URL／封面，對齊 `/feed.xml`。協助 Google 理解節目與單集（豐富摘要）。建議抽 `lib/json-ld.ts` 集中產生。
 
 ### ~~同步 DESIGN.md 與實作~~　`P0 · S · 無`　〔design〕 ✅
-更新 `DESIGN.md`：`--ink-soft` → `#7a7268`、背景改 `.site-backdrop` + `.site-root`、StoryFilter 塗鴉現況。**待補：** viewport 段落改為「已開放縮放」（實作見 `app/layout.tsx`）。設計文件漂移時改版易回到舊 token。實作見 `app/globals.css`。
+更新 `DESIGN.md`：`--ink-soft` → `#7a7268`、背景改 `.site-backdrop` + `.site-root`、StoryFilter 塗鴉現況，且 viewport 段落已同步為「允許使用者縮放」（實作見 `app/layout.tsx`）。設計文件漂移時改版易回到舊 token。實作見 `app/globals.css`。
 
 ### ~~首屏價值主張與資訊架構精簡~~　`P0 · S–M · 無`　〔design+ceo〕 ✅
 新訪客需 3 秒內懂「這不是一般 podcast 嵌入頁，是互動繪本」。**已做：** 標頭三行 tagline + 合作/許願/留言圓鈕（見 Completed）。**剩餘：** 檢視區塊順序（Header → LatestHero → FavoritesSection → StoryFilter），避免「最新集」與列表長期重複同一集；副標清楚傳達「給誰聽、睡前幾分鐘」。
@@ -347,11 +367,12 @@ Vercel 設 `NEXT_PUBLIC_SITE_URL=https://正式網域`。OG／Twitter／RSS／si
 
 ## P2 — 信任/合規 + 內容深化
 
-### 隱私政策頁（analytics 前置）　`P2 · S · analytics 決策`　〔ceo〕
-新增 `/privacy`（或擴充 `/legal` + 隱私段）：說明是否收集資料、localStorage 用途、analytics 方案、家長聯絡。**兒童產品一旦加 analytics，個資合規（COPPA/GDPR-K）即法律問題**，順序上必須先於量測。footer 加連結。**`/legal` 已上線，可在此基礎擴充隱私專章。**
+### ~~隱私專章 + analytics 基礎事件~~　`P2 · S · 無`　〔ceo〕 ✅
+`/legal#privacy` 已說明 localStorage、完播紀錄、平台點擊、Vercel Web Analytics 與第三方平台外連；`app/layout.tsx` 已掛 `<Analytics />`，平台外連走 `TrackedPlatformLink` + `trackPlatformClick`。`a844f20`
+**剩餘 W27 信任收尾：** 許願表單送出鈕旁補「僅用於回覆／通知，不給孩子填個資」等家長向短句；LIST-2 email 訂閱實作時同步連回 `/legal#privacy`。若仍要獨立 `/privacy` 路由，可做成指向 `/legal#privacy` 的薄頁或 redirect。
 
-### Analytics：平台點擊分析　`P2 · S–M · 隱私頁`　〔ceo+growth〕
-追蹤「哪集詳情頁 → 點了哪個收聽平台」（`ConnectHub`／`PlatformLinks` 外連加事件，必要時 UTM），對照 Spotify／Apple 後台完聽率與訂閱來源。下一集選題依數據而非猜測。無 cookie 方案優先（隱私）。
+### Analytics 後續：UTM + 平台後台對照　`P2 · S–M · 量測基線`　〔ceo+growth〕
+站內平台點擊事件已上線（`a844f20`）；下一步不是再加一套 analytics，而是補 UTM 規格、平台後台基線記錄與週報對照。見上方「成長量測缺口」。
 
 ### 主持人信任區（Bonbon & 馬米）　`P2 · S · 照片+文案`　〔growth〕
 關於頁或首頁下半加主持人小卡：照片、各一句話、節目理念（為什麼做親子車車故事）。熱門節目靠人格溫度；B 置頂貼可連同一區。家長會問「誰做的、適合我家孩子嗎」。`app/about/page.tsx`。
@@ -375,7 +396,7 @@ EP1–7 已用 `large-v3` 轉錄 + 自動簡轉繁（`data/subtitles/*.json`）�
 ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–10MB，總 50MB+）。睡前=手機弱網，載入慢。指令見 README；壓後本機聽確認音質再覆蓋。
 
 ### ~~家長放大閱讀（viewport 縮放）~~　`P2 · S · 產品決策`　〔design〕 ✅
-**已決並實作：** `app/layout.tsx` 移除 `maximumScale`／`userScalable: false`，開放 pinch-zoom，家長共讀可放大文字／插圖（WCAG 1.4.4）。**剩餘（可選）：** 實機驗證 3–5 歲誤觸縮放是否影響操作；若困擾再評估「大字模式」而非重新鎖縮放。`DESIGN.md` viewport 段落待同步為「已開放縮放」。
+**已決並實作：** `app/layout.tsx` 移除 `maximumScale`／`userScalable: false`，開放 pinch-zoom，家長共讀可放大文字／插圖（WCAG 1.4.4）；`DESIGN.md` 已同步 viewport 原則。**剩餘（可選）：** 實機驗證 3–5 歲誤觸縮放是否影響操作；若困擾再評估「大字模式」而非重新鎖縮放。
 
 ### 篩選 chip 觸控與鍵盤順序　`P2 · S · 無`　〔design〕
 實機確認車種 chip 觸控區 ≥ 44×44px；Tab 順序：主 CTA → chip 列 → 第一張故事卡。兒童/家長多觸控，鍵盤使用者需可「選車種 → 開第一集」。`StoryFilter` 已用 `<button>`，`globals.css` 有 `:focus-visible`。
@@ -471,24 +492,26 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 
 ---
 
-## 車車宇宙樂園地圖（v5 收尾：資產待產）　`asset · M · /adventures`　〔design〕
+## ❄️ FROZEN — 車車宇宙樂園地圖（v5 收尾：資產待產）　`asset · M · /adventures`　〔design〕
 
 > 2026-07 設計審查結論：工程管線與接點已就緒，剩以下資產需生圖管線（`OPENAI_API_KEY`）產出後點亮。程式端 v5 收尾（黏土日月接線／去向量月光線／夜罩弱化／夜海惰性載入／視差遠島撤出底部／外連開窗修復）已完成。
+> **凍結決策（2026-07-04）：** 地圖美術長尾全部等 STEM-P1 gate 後再解凍；本週只保留 W27-3 森林小島 magenta 暈圈修復。
 
-- [ ] **car-park motionParts 零件 PNG**（最高優先）：`car-park.wheel.png`（摩天輪，pivot 輪轂）+ `car-park.flags.png`（彩旗）——§12.1 鐵律：base 已烘焙可動部位，**base 必須一併重出**否則疊影；到位後 `ZONE_MOTION` 對應零件改 `enabled: true`
-- [ ] **海面 `sea@2x.png` / `sea-night@2x.png`**（§14.1 規格要求）：到位後海面改 CSS `image-set()` 平鋪（SVG `<pattern><image>` 吃不了 srcset），順帶天然懶載
-- [ ] **漫遊車 rear 視圖**：`xiao-hong.rear.png`、`duo-duo.rear.png`（`npm run generate:roamer-assets`），到位後 `MAP_ROAMERS` 補 `sprites:{front,rear}`
-- [ ] **planned 狀態美術**（ocean 島）：霧色未成形地基 + 「?」告示浮標（v2 §6），取代純降彩度
+- [ ] ❄️ **car-park motionParts 零件 PNG**：`car-park.wheel.png`（摩天輪，pivot 輪轂）+ `car-park.flags.png`（彩旗）——§12.1 鐵律：base 已烘焙可動部位，**base 必須一併重出**否則疊影；到位後 `ZONE_MOTION` 對應零件改 `enabled: true`
+- [ ] ❄️ **海面 `sea@2x.png` / `sea-night@2x.png`**（§14.1 規格要求）：到位後海面改 CSS `image-set()` 平鋪（SVG `<pattern><image>` 吃不了 srcset），順帶天然懶載
+- [ ] ❄️ **漫遊車 rear 視圖**：`xiao-hong.rear.png`、`duo-duo.rear.png`（`npm run generate:roamer-assets`），到位後 `MAP_ROAMERS` 補 `sprites:{front,rear}`
+- [ ] ❄️ **planned 狀態美術**（ocean 島）：霧色未成形地基 + 「?」告示浮標（v2 §6），取代純降彩度
 
-## 車車宇宙樂園地圖（R-joy 2/3：迪士尼樂園感）　`asset · M · /adventures`　〔design〕
+## ❄️ FROZEN — 車車宇宙樂園地圖（R-joy 2/3：迪士尼樂園感）　`asset · M · /adventures`　〔design〕
 
 > R-joy 1（純程式：weenie 主島放大、進場降落、點島慶祝+音效、招牌羅盤、鏡頭露天空、舞台圓角）已完成。
 > R-joy 2/3 **純程式部分已完成**：`MAP_DECOR` 密度包 11 件（帆船/浮標/魚/鳥/螢火）、開放橋黏土棧道三層描邊、`NightFireworks` 夜間煙火光效、開放島夜間點燈。剩餘為生圖管線資產：
+> **凍結決策（2026-07-04）：** 等 STEM-P1 gate 後再重開。
 
-- [ ] **R-joy 2 資產**：黏土填充 PNG（鯨魚噴水／燈塔小嶼／漂浮氣球）取代或補充 SVG decor；島際渡輪 roamer（走 `MAP_ROAMERS` stage path，需新角色 sprite）；橋面彩旗串
-- [ ] **R-joy 3 資產**：四島 `srcNight` 點燈版（§12.5 契約已備）；黏土煙火 sprite 循環（§12.2，12–24 幀，取代 CSS 光效粒子）；月光波紋烘進 `sea-night.png`
+- [ ] ❄️ **R-joy 2 資產**：黏土填充 PNG（鯨魚噴水／燈塔小嶼／漂浮氣球）取代或補充 SVG decor；島際渡輪 roamer（走 `MAP_ROAMERS` stage path，需新角色 sprite）；橋面彩旗串
+- [ ] ❄️ **R-joy 3 資產**：四島 `srcNight` 點燈版（§12.5 契約已備）；黏土煙火 sprite 循環（§12.2，12–24 幀，取代 CSS 光效粒子）；月光波紋烘進 `sea-night.png`
 
-**changelog：** car-park 黃金樣本 + Art Bible v2 + R1 四島整島黏土化（待補 commit hash）。
+**changelog：** car-park 黃金樣本 + Art Bible v2 + R1 四島整島黏土化 `045f457`。
 
 ---
 
@@ -503,7 +526,7 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 
 **待後續（未做）：** ~~改 `next/image` @2x/@3x~~（已完成：`getZoneArtSrcSet`）。色票若要回頭對齊 SVG fallback 為獨立小任務（見 Art Bible §4 D3）。
 
-**changelog：** Art Bible v1 + tile 詮釋資料契約（待補 commit hash）。
+**changelog：** Art Bible v1 + tile 詮釋資料契約 `506b04a`。
 
 ---
 
@@ -512,33 +535,23 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 ### 錯誤／上線監控　`P3 · S · 無`　〔ceo〕
 接輕量 client error 上報（Sentry free / Vercel）+ uptime（UptimeRobot），至少涵蓋首頁與一個播放頁。站掛了、播放器某機型崩了要有人知道。純 SSG，client error 為主要風險（播放器、iOS 合成破圖回歸）。
 
-### Service Worker 離線快取　`P3 · M · 無`　〔eng〕
-為 PWA 加 SW，快取已播放過的音檔與插圖。已有 `manifest.json` 但無離線能力；睡前弱網常見。評估 `next-pwa` 或自寫最小 SW；注意 MP3 快取容量與更新策略。
-
 ### Playwright E2E smoke　`P3 · M · 無`　〔eng〕
 首頁 → 詳情 → 播放頁 smoke test。目前只有單元測試，路由與播放器需回歸保護。播放在 headless 跳過實際 decode，至少驗證渲染與連結。`e2e/` 已設定。
 
 ### ESLint CI 設定　`P3 · S · 無`　〔eng〕
 `next lint` 改非互動設定（`eslint.config.mjs` + `@next/eslint-plugin-next`）以接 CI。目前會跳首次設定精靈，無法在 CI 用。
 
-### 車車角色圖鑑（新頁 `/characters`）　`P3 · M · 角色文案`　〔ceo+research〕
-用既有資料做角色小圖鑑（安安救護車、東東挖土機、鈴鈴清潔車、小紅賽車、小飛無人機、未來電動車…，角色名已在標題）：黏土縮圖 + 一句個性 + 連到該集；**疊加完成度解鎖**（未聽／未完成 craft 的車灰階或問號，見 STEM-P3 車庫養成）。新 SEO 落地頁 + 「找下一集」入口。重用 `VehicleClayIcon`、`getVehicleCoverPath()`、`allVehicles()`、`getStoriesByVehicle()`，仿 `/topic` 結構。
-**素材進度：** 已有 6 位 canonical 定裝照於 `public/characters/`（安安救護車／小紅賽車／怪獸卡車／東東挖土機／鈴鈴清潔車／恐龍車多多），登記於 `data/characters.json`（含別名／車種／英文外觀）——可直接當圖鑑縮圖與內部跨集一致來源；剩「一句個性」中文文案待 Bonbon & 馬米。
-
-### 首頁列表「大圖單欄」模式（可選）　`P3 · M · 年齡定位`　〔design〕
-若主攻 3–5 歲，評估故事牆改大封面單欄卡（少文字、大圖磚）或僅窄螢幕啟用。對標 YouTube Kids；現左圖右文在 5+ 較合適。需使用者研究，非必做。`StoryCard`。
+### 車車圖鑑養成（疊加於已上線 `/characters`）　`P3 · M · craft / 進度規格`　〔ceo+research+stem〕
+`/characters` SEO 角色頁與 JSON-LD 已上線（`f3687e0`），角色資料讀 `data/characters.json`，故事頁也已可連到角色錨點。不要再另開「新頁 `/characters`」任務；剩餘產品工作併入 STEM-P3 車庫養成：聽完／完成 craft 後以 localStorage 解鎖角色或車款、補一句中文個性文案、決定灰階/問號/貼紙呈現。
 
 ### 成長與商業（依階段）　`P3 · L · 營運階段`　〔growth〕
 逐步把官網從「連結集合」變「成長與變現中樞」：贊助 landing、周邊／活動、多語等。親子 IP 可先不做電商。**訂閱與 freemium 細節見 STEM-P4，勿在 P1 互動驗證前上付費牆。**
 
-### 同步後生圖通知（GitHub Issue）　`P2 · S · 新集偵測`　〔eng+ops〕
-**缺口：** GHA 同步新集後只 push MVP（`pageCount: 1`），無人被告知要跑 `npm run illustrate`。在 [`.github/workflows/sync-apple-podcast.yml`](.github/workflows/sync-apple-podcast.yml) 偵測新 `ep-N` 後，用 `gh issue create` 開單（標籤 `illustration` + `sync`），內附 checklist：校對字幕 → segment → 生圖 → 審 `contact.html` → `--approve` → push。Issue 範本見下方 [營運管線](#營運管線soundon--apple-同步--生圖)。
+### ~~同步後生圖通知（GitHub Issue）~~　`P2 · S · 新集偵測`　〔eng+ops〕 ✅
+GHA 同步新集並 push 成功後，`scripts/sync-alert.ts notify-live` 會開 `[illustrate] 新集待生圖：ep-N` Issue（標籤 `illustration`，可 assign／@mention 觸發 GitHub App 手機通知）；失敗與 RSS stale 也走 GitHub Issue 告警。`113680a`
 
-### 同步 commit 訊息帶生圖提示　`P2 · S · 無`　〔eng+ops〕
-GHA commit 由 `chore: sync Apple Podcast from RSS` 改為多行 body，列出本輪新 slug、`data/subtitles/<slug>.json` 狀態、下一行指令 `npm run illustrate -- ep-N`。零依賴、與 Issue 並行。
-
-### 生圖完成推播（LINE Notify／Discord）　`P2 · S · Issue 上線`　〔eng+ops〕
-repo secret 存 `LINE_NOTIFY_TOKEN` 或 `DISCORD_WEBHOOK_URL`；同步偵測新集後 POST 簡訊（slug、MVP 已上線、待生圖指令、Issue 連結）。給 Bonbon／馬米手機即時提醒；第二期加在 Issue 之後。
+### ~~同步 commit 訊息帶生圖提示~~　`P2 · S · 無`　〔eng+ops〕 ✅
+GHA commit body 已由 `scripts/post-sync-notify.ts` 產生，列出本輪新 slug、字幕狀態、`npm run illustrate -- ep-N` 與完整生圖 checklist。`95ba69a`
 
 ### 生圖佇列 `data/illustration-queue.json`　`P3 · S · 通知基建`　〔eng+ops〕
 `sync-apple-podcast.ts` 新集寫入 `{ slug, ep, syncedAt, subtitleReady, status: awaiting-illustrate }`；`illustrate --approve` 改 `approved` 或移除。Issue／webhook／未來 Studio 儀表板共用單一真相來源。
@@ -580,59 +593,6 @@ Tiled 關卡管線、6–10 關+世界地圖、檢查點、多敵人類型、視
 
 ---
 
-## 遊樂園精進：Game Kit × 市售 pixel 品質
-
-> 完整研究與驗收表：[RESEARCH.md — 四款小遊戲精進](./RESEARCH.md#2026-06-09四款小遊戲精進方案對標可市售-pixel-game)。現況元件：`BlockDropGame`、`CarPlatformer`、`/games/kart`、`/games/pirate-kart`；目錄 `data/games.ts`。
->
-> **與 STEM 路線關係**：精進版屬「遊樂園經典區」商業級升級；新 STEM 沙盒仍守無計時／無排行榜。每款加**兒童模式**（預設）＋可選挑戰模式，化解年齡與競賽張力。
-
-### 市售級品質門檻（十項，每款必達）
-
-像素完美 60fps · 統一調色盤/點陣字 · 多態精靈 · BGM+SFX+混音 · juice · 完整外框 · 三星/解鎖/存檔 · 鍵盤+觸控+手把 · a11y · 工程品質（固定步進/池/預載）。
-
-### Game Kit 現行四層（`lib/gamekit/`）
-
-| 目錄 | 職責 |
-|------|------|
-| `react/` | hooks、觸控控制、最佳分數、可見性暫停 |
-| `runtime/` | 固定步進、輸入、像素渲染、音訊、juice、圖塊 |
-| `progress/` | 存檔、設定、獎牌、車庫、session |
-| `games/` | 遊戲專屬關卡與 iframe bridge |
-
-### 四款對照（slug → 精進重點）
-
-| slug | 現況 | 內部解析度（建議） | 精進核心 |
-|------|------|-------------------|----------|
-| `car-adventure` | Game Kit 6 關 | 320×180 | 關卡內容、boss ❄️ |
-| `block-drop` | Game Kit 方塊 | 200×360 | 多模式、消行 juice ❄️ |
-| `candy-match` | DOM/SVG 消除 | — | 關卡內容與任務變化 ❄️ |
-| `candy-kart` | Godot iframe | — | 操控與賽道調校 ❄️ |
-
-### 跨遊戲 IP（Phase 6）
-
-共用像素卡司 · 跨遊戲星星→車庫解鎖 · `/games` 世界地圖 · podcast 貼紙簿（聽集+玩遊戲）。
-
-### 資產與工具
-
-| 用途 | 工具 |
-|------|------|
-| 像素美術 | Aseprite；佔位 Kenney CC0 |
-| 關卡 | Tiled → JSON（大冒險） |
-| SFX | jsfxr / 短 ogg |
-| BGM | BeepBox / FamiStudio |
-| 點陣字 | pixel TTF + pixelated 或 bitmap font |
-| 可選底層 | kontra.js |
-
-### 瓶頸（誠實）
-
-美術人力是市售與否最大門檻；CC0 先跑通管線。四款全商業級 = 數月工程，**勿一次開太大**。
-
-### 市售驗收 checklist（每款發版前）
-
-見 [RESEARCH §7](./RESEARCH.md#7-市售級驗收檢查表每款) 十項全勾。
-
----
-
 ## 營運管線：SoundOn／Apple 同步 × 生圖
 
 > **關係：** SoundOn 上架 → Apple Podcast RSS（SoundOn 託管 feed）→ `npm run sync:apple`（GHA 每 15 分或手動）→ 站上 **MVP**（單封面）→ **人工**生圖 → 完整繪本版。官網與 SoundOn **不直連**；只讀 Apple 公開 RSS。詳見 [README — Apple Podcast 自動同步](./README.md#apple-podcast-自動同步)。
@@ -666,7 +626,7 @@ Tiled 關卡管線、6–10 關+世界地圖、檢查點、多敵人類型、視
 | 12c | **字幕自動 `--fix`** | 本輪新集／新轉錄 `ep-N` 品牌名修正 | 不 `--mark`；report 寫入 `proofreadAutoFixed` |
 | 13 | `npm test` + `npm run build` | — | 有變更才跑 |
 | 14 | Commit + push `main` | Vercel 部署 MVP | 見下方 commit 範圍 |
-| 15 | **生圖通知** | Issue／webhook | **待實作**（見 P2 條目） |
+| 15 | **生圖通知** | GitHub Issue | 已實作：push 成功後開 `[illustrate]` Issue（`113680a`） |
 
 **GHA 目前 `git add` 範圍：** `data/apple-synced.json`、`data/apple-sync-state.json`、`data/browse-index.json`、`public/stories/`、`data/subtitles/`。
 
@@ -676,7 +636,7 @@ Tiled 關卡管線、6–10 關+世界地圖、檢查點、多敵人類型、視
 
 | # | 項目 | 負責 |
 |---|------|------|
-| 16 | 收到通知（Issue／LINE） | 維護者 |
+| 16 | 收到 GitHub Issue 通知 | 維護者 |
 | 17 | 抽查站上 MVP | `/story/ep-N` 能播、封面正確 |
 | 18 | 最終校稿 + `--mark` | GHA 已跑 `--fix`；人工抽查後 `npm run proofread:subtitles -- ep-N --mark`（[SUBTITLE-PROOFREAD.md](./docs/SUBTITLE-PROOFREAD.md)） |
 | 19 | 確認車種／標籤 | `apple-sync.defaults.json` overrides；必要時手動補 `data/browse-index.json` patterns |
@@ -712,7 +672,7 @@ Tiled 關卡管線、6–10 關+世界地圖、檢查點、多敵人類型、視
 T+0     SoundOn 上架
 T+15m   外部 cron → GHA sync
 T+20m   ep-N MVP 上線（1 封面 + 字幕草稿 + GHA 自動 --fix）
-T+20m   【待建】Issue + LINE：「請生圖 ep-N」
+T+20m   GitHub Issue：「請生圖 ep-N」
 T+1d    最終校稿 → --mark → illustrate → 審圖 → approve
 T+1d    push 完整繪本版
 T+2d    社群貼文（B 戰場）
@@ -722,9 +682,10 @@ T+2d    社群貼文（B 戰場）
 
 | 期 | 方案 | 說明 |
 |----|------|------|
-| **一期** | D commit 訊息強化 + A GitHub Issue | 零／低依賴，可追蹤 checklist |
-| **二期** | B LINE／Discord webhook | 手機即時推播 |
-| **三期** | C `illustration-queue.json` + Studio 顯示 | 機器可讀佇列 |
+| **一期** | D commit 訊息強化 + A GitHub Issue | 已實作，零／低依賴，可追蹤 checklist |
+| **二期** | C `illustration-queue.json` + Studio 顯示 | 機器可讀佇列 |
+
+**已砍：** 外部 webhook 即時推播。LINE 舊推播服務已於 2025-03-31 終止；現行 GitHub Issue + GitHub App 手機通知已足夠，不再新增 secret 或 webhook 維護面。
 
 **GitHub Issue 範本（一期）：**
 
@@ -760,9 +721,12 @@ T+2d    社群貼文（B 戰場）
 | 著色頁／活動單 PDF | **已納入 STEM-P3 列印物**；P1–P2 前先拉高單集分享與互動留存 |
 | 部落格長文 SEO | 初期單集頁 + 平台關鍵字效益較直接 |
 | 網站內 RSS 播放器 | 訂閱導向 Spotify／Apple 即可 |
+| Service Worker 離線快取 | 弱網需求成立但 MP3 快取容量／更新策略風險高；P1–P2 先做信任、訂閱與量測 |
 | ~~睡前模式／季節主題皮~~ | **已完成夜晚模式＋跟隨系統**（見 Completed）；季節主題皮仍延後 |
 | 全站 redesign／換字體 | 現有手繪風格已具辨識度 |
 | 首頁 3 欄 icon 功能介紹 | 違反 AI slop 黑名單，與品牌不符 |
+| 首頁列表「大圖單欄」模式 | 需先確認主攻 3–5 歲與實際瀏覽行為；現左圖右文在 5+ 較合適，非本季主戰場 |
+| 四款 pixel 精進 | 已移至 [RESEARCH.md — 四款小遊戲精進](./RESEARCH.md#2026-06-09四款小遊戲精進方案對標可市售-pixel-game)；玩法與美術升級全部 ❄️ FROZEN，待 STEM-P1 gate 後再排 |
 | iOS sticky 篩選列復活 | 除非有 fixed 複製列方案且通過 iOS 26 實機 |
 | 兒童照片上傳／分享手作作品 | COPPA／兒童隱私風險高；見 [RESEARCH.md](./RESEARCH.md) 待確認；可先只做本機「完成」勾選不傳圖 |
 
@@ -818,165 +782,6 @@ Migration：`scripts/migrations/001_zone_wishes.sql`
 
 ---
 
+## Completed（已歸檔）
 
-## Completed
-
-### GHA 同步自動 proofread --fix　`95ba69a`
-`sync-apple-podcast` 在 `relocalizeSidecars` 後對本輪新集／新轉錄字幕跑 `applySafeAutoFixes`；`SyncRunReport` 新增 `proofreadAutoFixed`／`proofreadPendingLint`；commit 訊息與 `[illustrate]` Issue checklist 改為「GHA 已 --fix → 人工最終校稿 → `--mark`」。CI 不自動 `--mark`。
-
-### ep-17 Apple RSS 同步（Issue #34）　`834b609`
-看門狗告警「RSS 有新集未上站」：`sync-apple-podcast` 先前因 CI build 缺 `NEXT_PUBLIC_SITE_URL` 失敗（`cb56f91` 已修）。手動 sync 上架 **ep-17**（噗噗豬好害怕怎麼辦｜漂漂河裡的神祕聲音，MVP `pageCount: 1`）。後續：`npm run illustrate -- ep-17`。
-
-### sync workflow 契約測試（防再發）
-`scripts/lib/sync-workflow-contract.test.ts` 鎖定 sync／watchdog workflow 必備步驟與 `NEXT_PUBLIC_SITE_URL`；改 build／site-url／llms 管線時必跑。教訓：非同步功能（如 `generate-llms-full` 防呆）不得假設 Vercel env，CI 無 env 時會 fallback localhost 而阻斷 sync push。
-
-### 修復 sync workflow build 失敗（NEXT_PUBLIC_SITE_URL）
-`41af68c` 新增的 `generate-llms-full` 防呆在 CI 上因無 Vercel env 使 siteUrl fallback 成 localhost 而 throw，導致 `Sync Apple Podcast` 的 Production build 失敗（run 28602134470）。修法：workflow build 步驟明確設 `NEXT_PUBLIC_SITE_URL=https://podcast-website-mu.vercel.app`。
-
-### ep-16 字幕校對（proofread --mark）
-Whisper 草稿人工校對：`撲撲豬`→`噗噗豬`、`救護車安安`→`安安救護車`、`安安就護車廳了`→`安安救護車呢`、`會淹水`→`會溺水`（開場玩水安全說明）；179 句 `--mark` 完成，illustrate 閘門已解。待 commit。
-
-### 樂園地圖 P1 載入體驗（佔位 + 標籤 + preload）
-`ZoneIslandTileArt` 沙草佔位；`tileLabel` 反縮放；`/adventures` preload car-park。`ff762a0`
-
-### 樂園地圖 P0 資產交付（srcset + roamer WebP）
-島 `@2x/@3x` srcset；`optimize:roamer-assets`；`<picture>` WebP。`ff762a0`
-
-### 樂園地圖 P2 收尾（動態 sizes + 資產驗證 + 行動 RWD）
-`getZoneArtSizes(mapScale)` 減少縮小鏡頭時 @3x overfetch；`npm run verify:zone-art` 四島 1x/@2x/@3x 齊備；行動版 tileLabel／MapControls／map min-height 可讀性微調。
-
-### R-anim 1.5c：漫遊車 map 層級 + 接地影
-`MapRoamerLayer`／`RoamerVehicle` 獨立影；y-sort；小紅／多多改走 `map-sea-orbit`（car-park 島不再疊漫遊車）。
-
-### R-anim 3：漫遊小車 → 2.5D 多方向 unit + 深度遮擋
-平面 PNG＋scaleX 鏡像 → **面向行進方向的 2.5D unit**。`useRoamerSim` 依 path 切線選 **4 向 sprite**（front/rear × 左右鏡像，遲滯防抖）；**獨立接地陰影**（不隨 bob 浮動、只隨 hop 微縮）；景深縮放 + 過彎 bank；`ZONE_OCCLUDERS` 用同圖 clip-path 露出地標剪影、依 `groundY` vs `baselineY` 做 z-index **深度遮擋**（車鑽到摩天輪後方被擋）。`CAR_PARK_WALKWAY_PATH` 改閉合迴圈、後段繞行地標後方。`RoamerSprites` 契約（rear 回退 front）；`generate-roamer-assets.ts` 擴充 front+rear 雙視圖。
-**修補既有資產白底 bug：** 兩台 roamer PNG 殘留不透明近白底（magenta chroma-key 漏抓）→ 新增 `scripts/lib/roamer-alpha.ts` 邊界 flood 去背（保留牙齒／眼白等內部白）、`npm run fix:roamer-alpha` 就地修補、並接入生成管線 postProcess 作保險絲。
-**驗證：** `npm test`（322）+ `npm run build`；Playwright 截圖確認去背乾淨、4 向鏡像、接地陰影、摩天輪後方遮擋（roamer z<baseline 時被剪影擋住）。
-**待後續：** rear 視圖 PNG 尚需 `npm run generate:roamer-assets` 產出（需 OPENAI_API_KEY）；到位後於 `MAP_ROAMERS` 補 `sprites:{front,rear}` 即點亮真正背面視圖。
-
-### R-anim 1.5b：漫遊小車 2.5D 島上步道（P0）
-`IslandRoamerLayer` 掛 `ZoneIsland`；`CAR_PARK_WALKWAY_PATH`；`useRoamerSim`；移除海面 `CharacterRoamerLayer`。
-**Completed:** `d89e360`（2026-06-28）
-
-### R-anim 1.5 漫遊者 PNG 資產（小紅賽車 + 恐龍車多多）
-`generate-roamer-assets.ts`（magenta chroma-key + sharp 後製）；`public/adventures/roamers/*.png`；`MAP_ROAMERS` enabled（duo-duo `startOffset:0.5`）。
-**Completed:** `e471694`（2026-06-28）
-
-### R-anim 1.5：角色漫遊（Q版黏土小車沿道路跑）
-`ROAMER_ROUTES`/`MAP_ROAMERS`；`CharacterRoamerLayer` rAF 路徑取樣（直立+scaleX 翻轉）；`?devRoamers=1` 佔位。
-**Completed:** `79f8706`（2026-06-28）
-
-### R-anim 1：island tile 渲染器 + motionParts
-`ZONE_MOTION` 資料模型、`ZoneMotionPart`/`ZoneMotionLayer` 零件動畫管線；`reduced`/`paused` 串接；enabled 預設關（資產到位再開）。
-**Completed:** `c1ff134`（2026-06-28）
-
-### R-anim 2：狀態轉場 + 日夜態
-`useZoneTransition`、`StatusOverlay`、`SkyBodies`；螢火 decor；海/雲日夜色調；dev `?devStatus` / `?devMotion=1`。
-**Completed:** `91859ef`（2026-06-28）
-
-### R-anim 0：地圖環境動畫層 + MAP_DECOR
-純 CSS 環境動態（雲／浪／泡沫／虛線橋／decor）；`MAP_DECOR` 資料層；美術聖經 §12 v3 動畫綁定規格。
-**Completed:** `8bdfc02`（2026-06-28）
-
-### SEO 進階三刀（VTT + RSS 標籤 + self canonical）
-逐字稿 helper／VTT route／故事頁可索引逐字稿；RSS podcast namespace + transcript + owner/guid；主要頁 self canonical；JSON-LD `timeRequired`。
-**Completed:** `029b7e6`（2026-06-28）
-
-### Landing segment 排版 + 膠囊 Nav（2026-07-03）　`e7b6287`
-標題改 eyebrow 堆疊、內容區玻璃底、底部 UI 分層（CTA／Dudu／nav pill）；SegmentNav 改膠囊指示條 + 蜜桃玻璃 pill；`.next` 改 chevron 玻璃鈕、768px 以下隱藏。
-
-### Landing 陽光色系 + 引導按鈕 + 頁尾捲動 + 手機排版
-landing 專用色票（nav/CTA 分離）；top bar 日出琥珀漸層 + 白字；訂閱反白 pill；hero CTA 橘黃漸層白字；footer 全屏 snap pane + 最後段 next；手機隱藏 .next、CTA 全寬、嘟嘟/進度點分層。
-**Completed:** `d6c726f`（2026-06）
-
-### Landing 去暗沉 + top bar 迭代（奶油→木質，後由陽光版取代）
-純 CSS 去暗沉：scrim 底部保護式漸層 + text-shadow；`.panel`/footer 改 `var(--bg)`；手機暖色玻璃進度膠囊；top bar 曾試奶油／木質調 + 統一品牌橘 CTA。
-**Completed:** `eeeed4f` `7e42ee5`（2026-06）
-
-### Landing 配色調亮
-Landing 配色調亮（陽光暖橘 + 淺暖罩），保留日夜主題與 AA。
-**Completed:** main（2026-06）
-
-### 主題跟隨系統（日間／夜晚／系統同步）
-`ThemeMode` 新增 `system`；預設改為跟隨 `prefers-color-scheme`；`THEME_INIT_SCRIPT` FOUC 防閃同步支援；`ThemeProvider` 監聽系統配色變更；首頁標語旁圖示循環系統→日間→夜晚；睡眠定時器夜晚提示改為固定 `night` 偏好。
-**Completed:** `cf50631`（2026-06）
-
-### 遊戲地基工程（星星帳本 × 結算插槽 × Kart 橋接）
-`economy` 帳本 v3、`GameResultActions` 與 Kart `postMessage` 橋接。未出貨的能力表、Tiled gate 與 goodnight flag 已在 2026-06-25 清除。ADR `docs/adr/0002-star-economy-ledger.md`。
-**Completed:** `3be429e` `8893952` `48643d6` `a606c89`（2026-06）
-
-### 架構重塑第一批（路由薄殼 × Home Registry）
-`data/home-sections.ts` registry 驅動首頁；遊戲邏輯與 `reportGameSession` 接線。未啟用的 feature flag framework 已在 2026-06-25 清除；ADR `docs/adr/0001-shell-kernel-architecture.md`。
-**Completed:** `dcceca1` `e280a6d` `ddeae8b`（2026-06）
-
-### 移除故事頁插圖點按互動（tap-to-explore）
-下架插圖虛線橢圓提示層；保留 `reflectionPrompt`、完播／重訪量測。刪除對應元件、資料與 engagement 量測欄位。
-**Completed:** `0d77d7f`（2026-06）
-
-### 收聽平台圖示視覺統一（白底膠囊卡）
-四平台等高白底膠囊（`PLATFORM_MARK_TILE` 60px）、2×2 手機 grid；Apple `wide` 徽章隱藏外部 label；Spotify PNG 939×940 驗證 Retina 足夠；HARD-RULES Spotify 白底註記。
-**Completed:** `34e0154`（2026-06）
-
-### 首屏 CTA 層級重排 × 睡前模式 × 微動畫系統
-主 CTA「▶ 看圖聽最新一集」+ 次 CTA「去遊樂園玩」；受眾定位句上移 SiteHeader；`[data-theme="night"]` token 覆寫 + `ThemeProvider` + FOUC inline script；車種 chips 橫滑單列 + fade；`app/motion.css`（`press-squash`／`pop-in`／`star-burst`／`gentle-float`）；睡眠計時器夜晚模式一次性提示。
-**Completed:** `c9fb4ab` `f89fbdd` `f273298` `1d53115` `e69c00d` `66cb4b7`（2026-06）
-
-### Game Kit Phase 0–8 歷史
-完成像素渲染、固定步進、輸入、音訊、juice、進度與遊戲外框探索。2026-06-25 依正式使用情況收斂為 `react/`、`runtime/`、`progress/`、`games/` 四層，刪除未出貨 scaffolding；詳見 CHANGELOG 與 `lib/gamekit/ART-BIBLE.md`。
-**Completed:** main（2026-06）
-
-### 每集分享鈕 + ConnectHub 訂閱優化
-單集頁 `ShareButton`（複製連結、LINE）；收藏鈕可同排 `leading`。ConnectHub「訂閱後，新集會自動出現在你的 Podcast App」；`lib/platforms.ts` Spotify／Apple 優先排序。
-**Completed:** main（2026-06）
-
-### Viewport 開放縮放
-`app/layout.tsx` 移除鎖縮放，家長可 pinch-zoom 放大共讀內容。
-**Completed:** main（2026-06）
-
-### Sitemap 擴充（遊樂園 + 法律頁）
-`app/sitemap.ts` 含 `/games`、各遊戲子頁、`/legal`。
-**Completed:** main（2026-06）
-
-### 遊樂園小遊戲 hub + 4 款原創遊戲 + 黏土風視覺
-`/games` 目錄卡（車車大冒險、繽紛方塊、車車卡丁車、海盜卡丁車大賽）；首頁「去遊樂園玩」入口；卡片黏土風 SVG 縮圖（`GameThumbArt`）。各遊戲：觸控、progress-store 最佳分、`prefers-reduced-motion`、暫停。
-**Completed:** main（2026-06）
-
-### 版權合規與 `/legal`
-私人 repo 說明、禁止再散布、第三方商標指示性使用、字型 OFL、`THIRD_PARTY_NOTICES.md`、頁尾法律連結。
-**Completed:** main（2026-06）
-
-### 產品路線圖文件（互動故事 × 車車 STEM × 商業）
-`TODOS.md` 新增 STEM-P1～P4 四階段、三原則、台灣市場定位與一頁總表；README／CHANGELOG 同步。
-**Completed:** main（2026-06）
-
-### 逐字即時字幕框架 + EP1–7 自動上字幕（本機 whisper.cpp）
-字幕從翻頁解耦：存側車檔 `data/subtitles/<slug>.json`（`lib/subtitles.ts` 載入、播放器依音檔時間顯示、獨立翻頁；無側車則回退舊邏輯）。轉錄核心 `scripts/lib/transcribe-core.ts`（ffmpeg→whisper.cpp、**自動簡轉繁 OpenCC**、濾幻覺鳴謝），CLI `npm run transcribe -- <slug...|--all|--convert>`。Apple 同步下載新集後自動轉錄（有 whisper 才跑，CI/缺模型自動跳過，`SKIP_TRANSCRIBE=1` 可關）。EP1–7 已用 `large-v3` 產繁中字幕（人名校對見 P2）。音檔不外送、零金鑰；`models/` gitignore。
-**Completed:** main（2026-06）
-
-### 即時字幕機制 + 字幕對時模式（頁綁定 captionTimes，舊式）
-`Story` 加選填 `captionTimes`（每句起始秒數）；播放器有提供時精準換句（插圖同步），未提供回退時長平均切換。`?cue=1` 對時模式邊聽邊記秒數。後續已由「逐字即時字幕框架 + 側車 JSON」取代為主路徑；`captionTimes` 仍向下相容。檔案：`data/stories.ts`、`components/StoryPlayer.tsx`、`app/story/[slug]/play/page.tsx`。
-**Completed:** main（2026-06）
-
-### 首頁標頭：三行 tagline + 合作/許願/留言 圓鈕
-標頭單行副標 → 三行 tagline（用車車故事陪伴孩子成長／融合生活中事件及發揮想像出發／一起探險、學習、勇敢闖關！）；新增三顆圓鈕（連結由 `SiteHeader.tsx` 頂部 `ACTIONS` 陣列維護），維持手繪黏土風與 WCAG 對比；重生中文字型子集含新字。
-**Completed:** main @ a8adef8、57433c4（2026-06）
-
-### 頁尾與關於頁資訊架構重整
-ConnectHub 分「追蹤我們／訂閱收聽」、圖示下顯示名稱；移除 SoundOn／RSS；關於頁車種 chip 用對應 emoji；減少重複訂閱區塊。
-**Completed:** main @ b46379e 起
-
-### 營運就緒：SEO、測試、文件（CEO 審核 B 方案 P1）
-每集 SEO metadata、音檔 preload 策略、播放器錯誤提示、README SOP、Vitest 單元測試。新增 `lib/story-metadata.ts`、`lib/story-utils.ts`、`data/stories.test.ts`、`README.md`。
-**Completed:** v1.1.0（2026-06-01）
-
-### 主題標籤篩選與 SEO 分類頁
-首頁主題 chip client 篩選、`/topic` 索引與 `/topic/[tag]` 靜態頁。
-**Completed:** main @ 4d89422 起
-
-### RSS Feed 與 ageRange
-`/feed.xml` podcast RSS、`layout` alternates、ConnectHub／PlatformLinks RSS；故事 `ageRange` 與卡片／詳情顯示。
-**Completed:** main @ 640ce5f 起
-
-### ConnectHub 頁尾訂閱／追蹤區
-圖示卡片式「追蹤我們」「訂閱收聽」分區，取代文字 pill 連結列。
-**Completed:** main @ 0b7b0f2 起
+完整歷史完成項已移至 [docs/archive/TODOS-completed-2026-07-04.md](./docs/archive/TODOS-completed-2026-07-04.md)。TODO 主檔只保留現役優先序、凍結項與營運管線；新增完成事項請附 commit hash 後再決定是否留在主檔或歸檔。
