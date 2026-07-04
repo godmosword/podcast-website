@@ -5,7 +5,8 @@
   transform-origin: 0 0;
   pointer-events: none;
   will-change: transform;
-  z-index: 0;
+  /* 近景雲影：與 .stage 同 z、DOM 排在其後 ⇒ 蓋在島群上、仍在 nightSeaOverlay(z:2) 之下 */
+  z-index: 1;
 }
 
 .svg {
@@ -42,10 +43,6 @@
 }
 
 /* 夜間：黏土素材以濾鏡壓暗降飽和（<image> 不吃 fill）。 */
-.night .hillImg {
-  filter: brightness(0.6) saturate(0.7);
-}
-
 .night .cloudImg {
   filter: brightness(0.75) saturate(0.6);
   opacity: 0.55 !important;

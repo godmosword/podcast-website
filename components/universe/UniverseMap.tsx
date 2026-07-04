@@ -24,6 +24,7 @@ import MapBridgeLayer from "./MapBridgeLayer";
 import MapRoamerLayer from "./MapRoamerLayer";
 import MapControls from "./MapControls";
 import NightFireworks from "./NightFireworks";
+import SkyBodies from "./SkyBodies";
 import UniverseMapParallax from "./UniverseMapParallax";
 import ZoneIsland from "./ZoneIsland";
 import ZoneSheet from "./ZoneSheet";
@@ -230,15 +231,6 @@ function UniverseMapContent({ devStatusOverrides, zoneQuery, syncZoneQuery }: Ma
         onPointerCancel={camera.bind.onPointerCancel}
         onContextMenu={camera.bind.onContextMenu}
       >
-        <UniverseMapParallax
-          tx={camera.tx}
-          ty={camera.ty}
-          scale={camera.scale}
-          isAnimating={camera.isAnimating}
-          reduced={reduced}
-          paused={paused}
-          daylight={daylight}
-        />
         <div
           className={styles.stage}
           style={{
@@ -420,7 +412,21 @@ function UniverseMapContent({ devStatusOverrides, zoneQuery, syncZoneQuery }: Ma
             />
           ))}
         </div>
+
+        {/* 近景雲影：DOM 排在 stage 之後（同 z:1），飄在島群上方 */}
+        <UniverseMapParallax
+          tx={camera.tx}
+          ty={camera.ty}
+          scale={camera.scale}
+          isAnimating={camera.isAnimating}
+          reduced={reduced}
+          paused={paused}
+          daylight={daylight}
+        />
       </div>
+
+      {/* 日月星：海洋滿版後改為 screen-space 固定天象裝飾（不隨鏡頭移動） */}
+      <SkyBodies daylight={daylight} reduced={reduced} paused={paused} />
 
       {/* 樂園招牌：地圖作為「紀念品海報」的標題花字 + 羅盤（裝飾，語意標題在頁面 sr-only h1） */}
       <div className={styles.titleSign} aria-hidden="true">
