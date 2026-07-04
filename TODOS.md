@@ -821,7 +821,7 @@ Migration：`scripts/migrations/001_zone_wishes.sql`
 
 ## Completed
 
-### GHA 同步自動 proofread --fix
+### GHA 同步自動 proofread --fix　`95ba69a`
 `sync-apple-podcast` 在 `relocalizeSidecars` 後對本輪新集／新轉錄字幕跑 `applySafeAutoFixes`；`SyncRunReport` 新增 `proofreadAutoFixed`／`proofreadPendingLint`；commit 訊息與 `[illustrate]` Issue checklist 改為「GHA 已 --fix → 人工最終校稿 → `--mark`」。CI 不自動 `--mark`。
 
 ### ep-17 Apple RSS 同步（Issue #34）　`834b609`
