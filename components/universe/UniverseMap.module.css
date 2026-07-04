@@ -38,6 +38,14 @@
   z-index: 1;
 }
 
+/* screen-space 天象層（日月星）：蓋在滿版海與夜幕之上、招牌與控制鈕之下 */
+.skyLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
 .scene {
   position: absolute;
   top: 0;

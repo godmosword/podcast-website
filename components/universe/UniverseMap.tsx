@@ -290,11 +290,6 @@ function UniverseMapContent({ devStatusOverrides, zoneQuery, syncZoneQuery }: Ma
                 <stop offset="0.55" stopColor="#ffffff" stopOpacity="0" />
                 <stop offset="1" stopColor="#6b4a1e" stopOpacity="0.16" />
               </radialGradient>
-              <linearGradient id="seaHazeTop" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stopColor="#cfe8f3" stopOpacity="0.92" />
-                <stop offset="0.55" stopColor="#cfe8f3" stopOpacity="0.35" />
-                <stop offset="1" stopColor="#cfe8f3" stopOpacity="0" />
-              </linearGradient>
               <filter id="islandShadow" x="-30%" y="-30%" width="160%" height="160%">
                 <feGaussianBlur stdDeviation="7" />
               </filter>
@@ -314,14 +309,6 @@ function UniverseMapContent({ devStatusOverrides, zoneQuery, syncZoneQuery }: Ma
               width={MAP_STAGE.width + SEA_BLEED * 2}
               height={MAP_STAGE.height + SEA_BLEED * 2}
               fill="url(#seaTile)"
-            />
-            <rect
-              x={-SEA_BLEED}
-              y="0"
-              width={MAP_STAGE.width + SEA_BLEED * 2}
-              height={110}
-              fill="url(#seaHazeTop)"
-              pointerEvents="none"
             />
             {nightSeaMounted && (
               <rect
@@ -425,8 +412,11 @@ function UniverseMapContent({ devStatusOverrides, zoneQuery, syncZoneQuery }: Ma
         />
       </div>
 
-      {/* 日月星：海洋滿版後改為 screen-space 固定天象裝飾（不隨鏡頭移動） */}
-      <SkyBodies daylight={daylight} reduced={reduced} paused={paused} />
+      {/* 日月星：海洋滿版後改為 screen-space 固定天象裝飾（不隨鏡頭移動）；
+          z:3 高於滿版海(stage z:1)與夜幕(z:2)，天象才不會被海面蓋掉 */}
+      <div className={styles.skyLayer} aria-hidden="true">
+        <SkyBodies daylight={daylight} reduced={reduced} paused={paused} />
+      </div>
 
       {/* 樂園招牌：地圖作為「紀念品海報」的標題花字 + 羅盤（裝飾，語意標題在頁面 sr-only h1） */}
       <div className={styles.titleSign} aria-hidden="true">
