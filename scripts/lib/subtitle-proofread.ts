@@ -208,6 +208,34 @@ export function lintSubtitles(slug: string, segments?: SubtitleSegment[]): Proof
 }
 
 /** 僅套用高信心自動修正（品牌名、空白）。 */
+export type AutoProofreadFixResult = {
+  slug: string;
+  fixCount: number;
+  pendingLint: number;
+};
+
+/** 對單集字幕跑 --fix（寫回側車檔）並 lint；供 sync 與 CLI 共用。 */
+export function autoProofreadFixSlug(slug: string): AutoProofreadFixResult {
+  const segments = readSubtitleSegments(slug);
+  const { segments: fixed, fixCount } = applySafeAutoFixes(segments);
+  const toLint = fixCount > 0 ? fixed : segments;
+  if (fixCount > 0) {
+    writeSubtitleSegments(slug, fixed);
+  }
+  const lint = lintSubtitles(slug, toLint);
+  return { slug, fixCount, pendingLint: lint.issues.length };
+}
+
+/** 批次自動 --fix（略過無側車檔的 slug）。 */
+export function autoProofreadFixSlugs(slugs: string[]): AutoProofreadFixResult[] {
+  const results: AutoProofreadFixResult[] = [];
+  for (const slug of slugs) {
+    if (!existsSync(subtitleSidecarPath(slug))) continue;
+    results.push(autoProofreadFixSlug(slug));
+  }
+  return results;
+}
+
 export function applySafeAutoFixes(segments: SubtitleSegment[]): {
   segments: SubtitleSegment[];
   fixCount: number;

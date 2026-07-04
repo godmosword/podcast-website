@@ -10,6 +10,10 @@ export type SyncRunReport = {
   vehicleBackfill: string[];
   /** 本輪 Whisper 新產生的側車檔 */
   subtitlesCreated: string[];
+  /** 同步內自動 proofread --fix：slug → 修正處數 */
+  proofreadAutoFixed: Record<string, number>;
+  /** 自動 fix 後仍待人工 lint：slug → 待修項數 */
+  proofreadPendingLint: Record<string, number>;
   /** 目錄內有音檔但缺側車檔（同步結束時） */
   subtitlesMissing: string[];
   /** 新集 slug（ep-N），供開 illustrate Issue */
@@ -31,6 +35,8 @@ export function createEmptyReport(dryRun: boolean): SyncRunReport {
     tagBackfill: [],
     vehicleBackfill: [],
     subtitlesCreated: [],
+    proofreadAutoFixed: {},
+    proofreadPendingLint: {},
     subtitlesMissing: [],
     illustratePending: [],
     browseIndexVehicles: [],

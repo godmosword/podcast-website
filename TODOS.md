@@ -662,6 +662,8 @@ Tiled 關卡管線、6–10 關+世界地圖、檢查點、多敵人類型、視
 | 11 | 車種／標籤推斷 | vehicle、tags | 關鍵字或「其他」 |
 | 11b | **找車車索引** | `data/browse-index.json` | 新車種 emoji、新主題 symbol；`npm run verify:browse-index` |
 | 12 | 字幕 backfill | 缺字幕的舊集補轉 | 同 run 內 |
+| 12b | 簡轉繁 + 幻覺過濾 | `relocalizeSidecars` | 同 run 內 |
+| 12c | **字幕自動 `--fix`** | 本輪新集／新轉錄 `ep-N` 品牌名修正 | 不 `--mark`；report 寫入 `proofreadAutoFixed` |
 | 13 | `npm test` + `npm run build` | — | 有變更才跑 |
 | 14 | Commit + push `main` | Vercel 部署 MVP | 見下方 commit 範圍 |
 | 15 | **生圖通知** | Issue／webhook | **待實作**（見 P2 條目） |
@@ -676,7 +678,7 @@ Tiled 關卡管線、6–10 關+世界地圖、檢查點、多敵人類型、視
 |---|------|------|
 | 16 | 收到通知（Issue／LINE） | 維護者 |
 | 17 | 抽查站上 MVP | `/story/ep-N` 能播、封面正確 |
-| 18 | 字幕校對 + `--mark` | `npm run proofread:subtitles -- ep-N`（[SUBTITLE-PROOFREAD.md](./docs/SUBTITLE-PROOFREAD.md)） |
+| 18 | 最終校稿 + `--mark` | GHA 已跑 `--fix`；人工抽查後 `npm run proofread:subtitles -- ep-N --mark`（[SUBTITLE-PROOFREAD.md](./docs/SUBTITLE-PROOFREAD.md)） |
 | 19 | 確認車種／標籤 | `apple-sync.defaults.json` overrides；必要時手動補 `data/browse-index.json` patterns |
 | 20 | （可選）`npm run font:subset` | 新摘要有生僻字時 |
 
@@ -709,9 +711,9 @@ Tiled 關卡管線、6–10 關+世界地圖、檢查點、多敵人類型、視
 ```
 T+0     SoundOn 上架
 T+15m   外部 cron → GHA sync
-T+20m   ep-N MVP 上線（1 封面 + 字幕草稿）
+T+20m   ep-N MVP 上線（1 封面 + 字幕草稿 + GHA 自動 --fix）
 T+20m   【待建】Issue + LINE：「請生圖 ep-N」
-T+1d    校對字幕 → illustrate → 審圖 → approve
+T+1d    最終校稿 → --mark → illustrate → 審圖 → approve
 T+1d    push 完整繪本版
 T+2d    社群貼文（B 戰場）
 ```
@@ -733,7 +735,8 @@ T+2d    社群貼文（B 戰場）
 - 狀態：MVP 已上線（pageCount=1），待多頁插圖
 
 ### Checklist
-- [ ] `npm run proofread:subtitles -- ep-N [--fix]` → 人工修 → `--mark`
+- [x] GHA 已自動 proofread --fix（Bonbon／馬米等品牌名）
+- [ ] 最終校稿 `data/subtitles/ep-N.json` → `npm run proofread:subtitles -- ep-N --mark`
 - [ ] npm run illustrate -- ep-N --segment-only
 - [ ] OPENAI_API_KEY=... npm run illustrate -- ep-N
 - [ ] 審 public/.illustrate-staging/ep-N/contact.html
@@ -817,6 +820,9 @@ Migration：`scripts/migrations/001_zone_wishes.sql`
 
 
 ## Completed
+
+### GHA 同步自動 proofread --fix
+`sync-apple-podcast` 在 `relocalizeSidecars` 後對本輪新集／新轉錄字幕跑 `applySafeAutoFixes`；`SyncRunReport` 新增 `proofreadAutoFixed`／`proofreadPendingLint`；commit 訊息與 `[illustrate]` Issue checklist 改為「GHA 已 --fix → 人工最終校稿 → `--mark`」。CI 不自動 `--mark`。
 
 ### ep-17 Apple RSS 同步（Issue #34）　`834b609`
 看門狗告警「RSS 有新集未上站」：`sync-apple-podcast` 先前因 CI build 缺 `NEXT_PUBLIC_SITE_URL` 失敗（`cb56f91` 已修）。手動 sync 上架 **ep-17**（噗噗豬好害怕怎麼辦｜漂漂河裡的神祕聲音，MVP `pageCount: 1`）。後續：`npm run illustrate -- ep-17`。

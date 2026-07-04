@@ -10,6 +10,8 @@ const sampleReport: SyncRunReport = {
   tagBackfill: [],
   vehicleBackfill: [],
   subtitlesCreated: ["ep-10"],
+  proofreadAutoFixed: { "ep-10": 3 },
+  proofreadPendingLint: { "ep-10": 2 },
   subtitlesMissing: [],
   illustratePending: ["ep-10"],
   browseIndexVehicles: [],
@@ -23,12 +25,17 @@ describe("post-sync-notify", () => {
     expect(msg).toContain("ep-10");
     expect(msg).toContain("npm run illustrate -- ep-10");
     expect(msg).toContain("proofread:subtitles");
+    expect(msg).toContain("GHA 已自動 --fix");
+    expect(msg).toContain("字幕自動校稿");
   });
 
   it("Issue body 含 checklist 與故事連結", () => {
     const body = buildIssueBody("ep-10", sampleReport);
     expect(body).toContain("## 新集待生圖：ep-10");
     expect(body).toContain("proofread:subtitles");
+    expect(body).toContain("--mark");
+    expect(body).toContain("GHA 已自動 proofread --fix");
+    expect(body).toContain("修正 lint 待辦 2 項");
     expect(body).toContain("--approve");
     expect(body).toContain("contact.html");
     expect(body).toContain("/story/ep-10");

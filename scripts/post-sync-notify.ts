@@ -14,9 +14,44 @@ import { readFileSync, writeFileSync } from "node:fs";
 import type { SyncRunReport } from "./lib/sync-report";
 
 function subtitleLine(slug: string, report: SyncRunReport): string {
-  if (report.subtitlesCreated.includes(slug)) return "字幕：已轉錄（草稿，請校對）";
   if (report.subtitlesMissing.includes(slug)) return "字幕：缺側車檔";
-  return "字幕：已有側車檔";
+
+  const parts: string[] = [];
+  if (report.subtitlesCreated.includes(slug)) {
+    parts.push("已轉錄（草稿）");
+  } else {
+    parts.push("已有側車檔");
+  }
+
+  const autoFixed = report.proofreadAutoFixed[slug];
+  const pending = report.proofreadPendingLint[slug];
+  if (autoFixed !== undefined) {
+    if (autoFixed > 0) {
+      parts.push(`GHA 已自動 --fix（${autoFixed} 處）`);
+    } else {
+      parts.push("GHA 已跑 --fix");
+    }
+  }
+  if (pending !== undefined) {
+    if (pending > 0) {
+      parts.push(`仍待人工 ${pending} 項`);
+    } else {
+      parts.push("lint 通過，請最終抽查後 --mark");
+    }
+  } else if (report.subtitlesCreated.includes(slug)) {
+    parts.push("請校對");
+  }
+
+  return `字幕：${parts.join("；")}`;
+}
+
+function proofreadFixNote(slug: string, report: SyncRunReport): string {
+  const fixCount = report.proofreadAutoFixed[slug];
+  if (fixCount === undefined) return "GHA 已自動 proofread --fix（Bonbon／馬米等品牌名）";
+  if (fixCount > 0) {
+    return `GHA 已自動 proofread --fix（Bonbon／馬米等品牌名，修正 ${fixCount} 處）`;
+  }
+  return "GHA 已自動 proofread --fix（Bonbon／馬米等品牌名，無需修正）";
 }
 
 function siteBase(): string {
@@ -75,7 +110,20 @@ export function buildCommitMessage(report: SyncRunReport): string {
 
   if (report.subtitlesCreated.length > 0) {
     lines.push(`## 本輪新轉錄字幕：${report.subtitlesCreated.join(", ")}`);
-    lines.push("（草稿；請校對 Bonbon／馬米等人名）");
+    lines.push("（GHA 已自動 --fix 品牌名；請最終校稿後 --mark）");
+    lines.push("");
+  }
+
+  const proofreadSlugs = Object.keys(report.proofreadAutoFixed);
+  if (proofreadSlugs.length > 0) {
+    lines.push("## 字幕自動校稿（GHA --fix）");
+    for (const slug of proofreadSlugs) {
+      const fixCount = report.proofreadAutoFixed[slug] ?? 0;
+      const pending = report.proofreadPendingLint[slug] ?? 0;
+      lines.push(
+        `- ${slug}：修正 ${fixCount} 處；仍待人工 ${pending} 項`,
+      );
+    }
     lines.push("");
   }
 
@@ -89,7 +137,9 @@ export function buildCommitMessage(report: SyncRunReport): string {
     lines.push("## 生圖待辦（本機 + OPENAI_API_KEY，審圖後 --approve）");
     for (const slug of report.illustratePending) {
       lines.push(`- ${slug}:`);
-      lines.push(`  1. npm run proofread:subtitles -- ${slug} [--fix] → 人工修 → --mark`);
+      lines.push(
+        `  1. 最終校稿 data/subtitles/${slug}.json（GHA 已自動 --fix）→ npm run proofread:subtitles -- ${slug} --mark`,
+      );
       lines.push(`  2. npm run illustrate -- ${slug} --segment-only`);
       lines.push(`  3. npm run illustrate -- ${slug}`);
       lines.push(`  4. 審 public/.illustrate-staging/${slug}/contact.html`);
@@ -118,6 +168,8 @@ export function buildIssueBody(slug: string, report: SyncRunReport): string {
   const runAt = report.runAt;
   const storyUrl = `${siteBase()}/story/${slug}`;
 
+  const pendingLint = report.proofreadPendingLint[slug];
+
   return `${issueNotifyPreamble()}## 新集待生圖：${slug}
 
 - **標題**：${title}
@@ -129,7 +181,8 @@ export function buildIssueBody(slug: string, report: SyncRunReport): string {
 ### Checklist
 
 - [ ] 抽查站上 [${slug}](${storyUrl}) 能播、封面正確
-- [ ] \`npm run proofread:subtitles -- ${slug} [--fix]\` → 人工修 JSON → \`--mark\`（[SUBTITLE-PROOFREAD.md](docs/SUBTITLE-PROOFREAD.md)）
+- [x] ${proofreadFixNote(slug, report)}
+- [ ] 最終校稿 \`data/subtitles/${slug}.json\` → \`npm run proofread:subtitles -- ${slug} --mark\`（[SUBTITLE-PROOFREAD.md](docs/SUBTITLE-PROOFREAD.md)）${pendingLint !== undefined && pendingLint > 0 ? `\n- [ ] 修正 lint 待辦 ${pendingLint} 項（\`npm run proofread:subtitles -- ${slug}\` 查看）` : ""}
 - [ ] 確認車種／標籤（必要時 \`data/apple-sync.defaults.json\` overrides；sync 會自動更新 \`data/browse-index.json\`）
 - [ ] \`npm run illustrate -- ${slug} --segment-only\`
 - [ ] \`npm run illustrate -- ${slug}\`（需 \`OPENAI_API_KEY\`）

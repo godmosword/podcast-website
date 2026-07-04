@@ -52,6 +52,7 @@ import {
   transcribeToSidecar,
   whisperAvailable,
 } from "./lib/transcribe-core";
+import { autoProofreadFixSlug } from "./lib/subtitle-proofread";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const MAX_NEW_PER_RUN = 3;
@@ -319,6 +320,38 @@ function relocalizeCatalogSubtitles(catalog: Story[]): void {
   console.log(`字幕再處理：完成 ${ok}/${slugs.length} 集`);
   if (failed.length > 0) {
     console.warn(`字幕再處理：略過 ${failed.join(", ")}`);
+  }
+}
+
+/** 本輪新轉錄／新集字幕：GHA 內自動 proofread --fix（不 --mark）。 */
+function autoProofreadSyncedSubtitles(): void {
+  if (dryRun) return;
+
+  const targets = [
+    ...new Set([
+      ...report.subtitlesCreated,
+      ...report.newEpisodes.map((e) => e.slug),
+    ]),
+  ]
+    .filter(isIllustrateSlug)
+    .filter(hasSubtitleSidecar);
+
+  if (targets.length === 0) return;
+
+  console.log(`字幕自動校稿 --fix（${targets.length} 集）…`);
+  for (const slug of targets) {
+    const result = autoProofreadFixSlug(slug);
+    report.proofreadAutoFixed[slug] = result.fixCount;
+    report.proofreadPendingLint[slug] = result.pendingLint;
+    if (result.fixCount > 0) {
+      console.log(
+        `  ${slug}：自動修正 ${result.fixCount} 處；仍待人工 ${result.pendingLint} 項`,
+      );
+    } else if (result.pendingLint > 0) {
+      console.log(`  ${slug}：無需自動修正；仍待人工 ${result.pendingLint} 項`);
+    } else {
+      console.log(`  ${slug}：lint 通過（請最終抽查後 --mark）`);
+    }
   }
 }
 
@@ -795,6 +828,7 @@ async function main(): Promise<void> {
     }
     backfillMissingSubtitles(finalCatalog);
     relocalizeCatalogSubtitles(finalCatalog);
+    autoProofreadSyncedSubtitles();
     report.subtitlesMissing = listSlugsMissingSubtitles(
       finalCatalog.map((s) => s.slug),
     );
@@ -833,6 +867,7 @@ async function main(): Promise<void> {
 
   backfillMissingSubtitles(finalCatalog);
   relocalizeCatalogSubtitles(finalCatalog);
+  autoProofreadSyncedSubtitles();
   report.subtitlesMissing = listSlugsMissingSubtitles(
     finalCatalog.map((s) => s.slug),
   );

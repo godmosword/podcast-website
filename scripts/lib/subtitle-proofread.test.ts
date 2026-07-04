@@ -40,3 +40,17 @@ describe("lintSubtitles", () => {
     expect(report.issues).toEqual([]);
   });
 });
+
+describe("autoProofreadFix 流程", () => {
+  it("fix 品牌名後仍保留待人工 lint", () => {
+    const segments: SubtitleSegment[] = [
+      { t: 0, text: "嗨 我是 寶寶" },
+      { t: 5, text: "小蔥喜歡吃雞" },
+    ];
+    const { segments: fixed, fixCount } = applySafeAutoFixes(segments);
+    expect(fixCount).toBeGreaterThanOrEqual(1);
+    expect(fixed[0].text).toContain("Bonbon");
+    const lint = lintSubtitles("ep-test", fixed);
+    expect(lint.issues.length).toBeGreaterThan(0);
+  });
+});
