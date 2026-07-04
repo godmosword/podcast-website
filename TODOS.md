@@ -96,8 +96,11 @@
 ### 宇宙地圖 focus 外框形狀　`design · S · universe 改動落地`　〔design+a11y〕
 島嶼 button 的 `:focus-visible` 是貼齊整個不規則島的巨大圓角矩形（Escape 關 sheet 後特別明顯，像破圖）；sheet 開啟自動聚焦關閉鈕也出現粗黑框。改：focus 樣式套在路標 label 或柔和 box-shadow ring；sheet 初始焦點移到 dialog 容器（`tabindex="-1"`）。保留可見 focus，只改形狀。
 
-### 手機版地圖初始構圖 letterbox　`design · M · universe 改動落地`　〔design〕
-375px 下海面世界僅鋪滿中段 ~1/3，上下平色藍 + 漂浮視差雲/丘，接縫明顯；桌面舞台左右也有硬邊。方向：初始鏡頭改 cover 高度的最小縮放，或海面紋理鋪滿 stage（可與 v5 sea@2x 資產一併）。**注意：** 未提交的 `lib/universe/map-camera-utils.ts` 疑似已在處理此題，先對齊再動工。
+### ~~手機版地圖初始構圖 letterbox／舞台硬邊~~　`design · M`　〔design〕 ✅
+**已由「海洋滿版」（map-fullbleed task-1~4）解決**：sea rect 以 SEA_BLEED=7200 外擴滿版、移除 rx=40 圓角與 seaHazeTop 接縫；視差層改近景頂層雲（刪遠島剪影）、日月改 screen-space 固定天象（z:3）。相機 fit 行為不變（fitScaleFor 抽純函式+測試）。驗證：{375/1280}×{日/夜}×{fit/MIN_SCALE/pan} 截圖矩陣、prod-mode deep link + e2e 10/10。`8ea28eb` `3b13a55` `b83e48d` `71f0f28`
+
+### 宇宙地圖 dev 模式兩個既有問題（v6，非 map-fullbleed 引入）　`bug · S · 無`　〔eng〕
+① console error「button cannot contain a nested button」×2（正式站同樣出現，hydration 風險；疑 ZoneIsland button 內含許願 button）。② dev 模式 `?zone=` deep link 不開 sheet（production build 正常；baseline bff71ed 同樣重現，疑 StrictMode 雙效應與 openTimer 互動）。
 
 ### Landing 無 `<h1>`　`design · S · 無`　〔seo+a11y〕
 首頁 headings 從 h2 開始（四段 segment 標題）；第一段標題可升級 h1 或另加 sr-only h1。`components/landing/LandingSegment.tsx`。
