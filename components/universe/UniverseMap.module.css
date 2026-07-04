@@ -5,7 +5,7 @@
   height: calc(100dvh - var(--nav-h));
   min-height: 420px;
   overflow: hidden;
-  /* 舞台外的天空底色（overscroll / 圓角舞台外露出）— 對齊 sea tile 基色 */
+  /* 海面貼圖載入前的 fallback 底色 — 對齊 sea tile 基色（海已滿版外擴，正常不外露） */
   background: #bfe0ef;
   transition: background-color 600ms ease;
 }
@@ -45,6 +45,8 @@
   display: block;
   /* 島嶼 button 疊在 svg 之上 */
   pointer-events: none;
+  /* 海面滿版：sea rect 以 SEA_BLEED 外擴超出 viewBox，不得被 svg 裁掉 */
+  overflow: visible;
 }
 
 .bridgeSvg {

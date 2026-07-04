@@ -9,6 +9,7 @@ import { parseDevStatusOverrides } from "@/lib/universe/dev-map-flags";
 import { parseZoneDeepLink } from "@/lib/universe/zone-deep-link";
 import { mapDepthZ } from "@/lib/universe-depth";
 import { seaTexturePath } from "@/lib/universe/map-art-src";
+import { SEA_BLEED } from "@/lib/universe/map-camera-utils";
 import { resolveTextureHref } from "@/lib/universe/png-to-webp";
 import { playSfx } from "@/lib/sfx";
 import {
@@ -306,25 +307,36 @@ function UniverseMapContent({ devStatusOverrides, zoneQuery, syncZoneQuery }: Ma
                 <feGaussianBlur stdDeviation="7" />
               </filter>
             </defs>
-            {/* 海面基色（貼圖載入前 / overscroll 露出時的底）；rx 圓角讓世界
-                在退遠鏡頭下讀作「漂在天空上的立體模型板」而非硬切矩形 */}
-            <rect x="0" y="0" width={MAP_STAGE.width} height={MAP_STAGE.height} rx="40" fill="#bfe0ef" />
-            <rect x="0" y="0" width={MAP_STAGE.width} height={MAP_STAGE.height} rx="40" fill="url(#seaTile)" />
+            {/* 海面滿版：rect 以 SEA_BLEED 外擴到遠超視窗，任何鏡頭都不露底
+                （pattern 為 userSpaceOnUse，貼圖無縫延續；.scene 需 overflow: visible） */}
             <rect
-              x="0"
+              x={-SEA_BLEED}
+              y={-SEA_BLEED}
+              width={MAP_STAGE.width + SEA_BLEED * 2}
+              height={MAP_STAGE.height + SEA_BLEED * 2}
+              fill="#bfe0ef"
+            />
+            <rect
+              x={-SEA_BLEED}
+              y={-SEA_BLEED}
+              width={MAP_STAGE.width + SEA_BLEED * 2}
+              height={MAP_STAGE.height + SEA_BLEED * 2}
+              fill="url(#seaTile)"
+            />
+            <rect
+              x={-SEA_BLEED}
               y="0"
-              width={MAP_STAGE.width}
+              width={MAP_STAGE.width + SEA_BLEED * 2}
               height={110}
               fill="url(#seaHazeTop)"
               pointerEvents="none"
             />
             {nightSeaMounted && (
               <rect
-                x="0"
-                y="0"
-                width={MAP_STAGE.width}
-                height={MAP_STAGE.height}
-                rx="40"
+                x={-SEA_BLEED}
+                y={-SEA_BLEED}
+                width={MAP_STAGE.width + SEA_BLEED * 2}
+                height={MAP_STAGE.height + SEA_BLEED * 2}
                 fill="url(#seaTileNight)"
                 className={styles.seaNightTile}
                 style={{ opacity: daylight === "night" ? 1 : 0 }}

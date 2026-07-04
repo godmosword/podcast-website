@@ -22,6 +22,15 @@ export function fitScaleFor(w: number, h: number): number {
   );
 }
 
+/**
+ * 海面滿版外擴量（stage 座標單位）。
+ * 需求：任何相機狀態下海面貼圖都要蓋滿視窗。worst case = MIN_SCALE 0.34 ×
+ * 5120px 寬螢幕 ⇒ 單側需 (5120/0.34 − MAP_STAGE.width)/2 ≈ 7030；取 7200 兩軸共用。
+ * 貼圖 pattern 為 userSpaceOnUse，外擴 rect 貼圖無縫延續；raster 以可視區裁切，
+ * rect 幾何大小近乎免費。
+ */
+export const SEA_BLEED = 7200;
+
 /** 點擊縮放：位移低於此值視為 tap（非拖曳）。 */
 export const TAP_DRAG_THRESHOLD_PX = 6;
 

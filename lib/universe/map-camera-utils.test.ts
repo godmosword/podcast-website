@@ -6,6 +6,7 @@ import {
   FIT_MARGIN,
   MAX_SCALE,
   MIN_SCALE,
+  SEA_BLEED,
   clampScale,
   fitScaleFor,
   pointerTravelExceeded,
@@ -46,6 +47,15 @@ describe("map-camera-utils", () => {
       (1440 / MAP_STAGE.height) * FIT_MARGIN,
       6,
     );
+  });
+
+  it("SEA_BLEED 外擴後，MIN_SCALE 下海面仍蓋滿 5120×2880 視窗", () => {
+    expect((MAP_STAGE.width + SEA_BLEED * 2) * MIN_SCALE).toBeGreaterThanOrEqual(
+      5120,
+    );
+    expect(
+      (MAP_STAGE.height + SEA_BLEED * 2) * MIN_SCALE,
+    ).toBeGreaterThanOrEqual(2880);
   });
 
   it("fitScaleFor 邊界：0 尺寸回 1、極端尺寸夾 clamp", () => {
