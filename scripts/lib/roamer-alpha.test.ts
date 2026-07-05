@@ -43,6 +43,39 @@ describe("floodBorderBackground", () => {
     expect(removed[10 * W + 10]).toBe(0);
   });
 
+  it("自訂 isBg predicate：移除邊界相連 magenta 環，保留內部彩色與內部 magenta", () => {
+    const c = 4;
+    const data = new Uint8Array(W * H * c);
+    const set = (x: number, y: number, r: number, g: number, b: number, a: number) => {
+      const i = (y * W + x) * c;
+      data[i] = r;
+      data[i + 1] = g;
+      data[i + 2] = b;
+      data[i + 3] = a;
+    };
+    // 全圖透明 rim（flood 可穿越）
+    // 中央綠色方塊，外圈一層 magenta fringe（貼著透明 rim）
+    for (let y = 5; y < 15; y++) {
+      for (let x = 5; x < 15; x++) set(x, y, 230, 60, 220, 255); // magenta 環
+    }
+    for (let y = 6; y < 14; y++) {
+      for (let x = 6; x < 14; x++) set(x, y, 60, 180, 60, 255); // 綠色本體
+    }
+    // 本體內一點 magenta（合法粉紫內容，被綠包圍 → 應保留）
+    set(10, 10, 230, 60, 220, 255);
+
+    const isMagenta = (r: number, g: number, b: number) => r - g > 60 && b - g > 60;
+    const { removed } = floodBorderBackground(data, W, H, 4, isMagenta);
+    // fringe 環（透過透明 rim 與邊界連通）被標記
+    expect(removed[5 * W + 5]).toBe(1);
+    expect(removed[14 * W + 10]).toBe(1);
+    // 綠色本體與內部 magenta 保留
+    expect(removed[7 * W + 7]).toBe(0);
+    expect(removed[10 * W + 10]).toBe(0);
+    // 近白預設判定不受影響：透明 rim 不算 removed
+    expect(removed[0]).toBe(0);
+  });
+
   it("applyBackgroundRemoval 把背景設透明、保留內部像素不透明", () => {
     const data = makeImage(W, H);
     const { removed } = floodBorderBackground(data, W, H, 4);

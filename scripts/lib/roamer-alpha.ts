@@ -21,12 +21,19 @@ function isBgLike(r: number, g: number, b: number): boolean {
 
 export type FloodResult = { removed: Uint8Array; bgPct: number };
 
-/** 從四邊 flood-fill（可穿越已透明 rim）標記與邊界相連的背景像素。 */
+/** 背景像素判定函式（RGB → 是否為背景）。 */
+export type BgPredicate = (r: number, g: number, b: number) => boolean;
+
+/**
+ * 從四邊 flood-fill（可穿越已透明 rim）標記與邊界相連的背景像素。
+ * @param isBg 自訂背景判定；預設近白／淺灰（roamer 用），forest magenta 殘留等場景可換 predicate。
+ */
 export function floodBorderBackground(
   data: Buffer | Uint8Array,
   w: number,
   h: number,
   c: number,
+  isBg: BgPredicate = isBgLike,
 ): FloodResult {
   const removed = new Uint8Array(w * h);
   const seen = new Uint8Array(w * h);
@@ -37,7 +44,7 @@ export function floodBorderBackground(
     if (seen[p]) return;
     const i = p * c;
     const transparent = data[i + 3]! < 16;
-    const bg = isBgLike(data[i]!, data[i + 1]!, data[i + 2]!);
+    const bg = isBg(data[i]!, data[i + 1]!, data[i + 2]!);
     if (!transparent && !bg) return;
     seen[p] = 1;
     if (bg) removed[p] = 1;
