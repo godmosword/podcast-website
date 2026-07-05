@@ -201,10 +201,21 @@
   transform: scale(1.04);
 }
 
+/* focus ring：改為貼合島形的橢圓雙環（實線＋柔光），取代貼齊整個 tile 的巨大矩形
+   outline；畫在 .tileStack::after 上以跟隨 float／jelly 動畫。 */
 .islandTile:focus-visible {
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 4px;
-  border-radius: 18px;
+  outline: none;
+}
+
+.islandTile:focus-visible .tileStack::after {
+  content: "";
+  position: absolute;
+  inset: 10% 12% 16%;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 3px var(--focus-ring),
+    0 0 0 6px color-mix(in srgb, var(--focus-ring) 30%, transparent);
+  pointer-events: none;
 }
 
 /* 名稱木牌 + 狀態 pill：定位在圖內沙岸底中心（錨點）下方；scale 由 inline 反縮放 */
