@@ -38,6 +38,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.85,
     },
     {
+      url: `${baseUrl}/for-parents/dashboard`,
+      lastModified: STATIC_PAGE_MODIFIED_DATES["/for-parents"],
+      changeFrequency: "monthly",
+      priority: 0.75,
+    },
+    {
       url: `${baseUrl}/characters`,
       lastModified: STATIC_PAGE_MODIFIED_DATES["/characters"],
       changeFrequency: "monthly",

@@ -93,6 +93,16 @@ export default function ForParentsPage() {
         <p>{faqs[3].answer}</p>
       </section>
 
+      <section className={styles.answerSection} aria-labelledby="dashboard-heading">
+        <h2 id="dashboard-heading">這台裝置上的親子進度</h2>
+        <p>
+          查看小遊戲探索、最近收聽與推薦共讀故事。所有資料只留在您的瀏覽器，不會上傳到伺服器。
+        </p>
+        <Link href="/for-parents/dashboard" className={styles.dashboardLink}>
+          開啟家庭儀表板 →
+        </Link>
+      </section>
+
       <section className={styles.storySection} aria-labelledby="episodes-heading">
         <h2 id="episodes-heading">可以先從哪幾集開始？</h2>
         <p>

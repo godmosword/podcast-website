@@ -103,6 +103,8 @@ test("繽紛卡丁車 debugFinish 會透過 Godot iframe 更新進度", async ({
   test.setTimeout(60_000);
   await page.goto("/games/candy-kart?debugFinish=macaron-meadow");
   await expect(page.getByRole("link", { name: "← 回遊樂園" })).toBeVisible();
+  await expect(page.locator("iframe[title='繽紛卡丁車遊戲']")).toHaveCount(0);
+  await page.getByRole("button", { name: "出發！開始遊戲" }).click();
   await expect(page.locator("iframe[title='繽紛卡丁車遊戲']")).toHaveAttribute(
     "src",
     "/candy-kart/index.html?debugFinish=macaron-meadow",
@@ -122,6 +124,29 @@ test("繽紛卡丁車 debugFinish 會透過 Godot iframe 更新進度", async ({
       { timeout: 30_000 },
     )
     .toBe(true);
+});
+
+test("車車大冒險頁面可載入", async ({ page }) => {
+  await page.goto("/games/car-adventure");
+  await expect(page.getByRole("link", { name: "← 回遊樂園" })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /開始冒險/ }),
+  ).toBeVisible({ timeout: 15_000 });
+});
+
+test("繽紛樂園（Block Drop）頁面可載入", async ({ page }) => {
+  await page.goto("/games/block-drop");
+  await expect(page.getByRole("link", { name: "← 回遊樂園" })).toBeVisible();
+  await expect(page.getByLabel(/^分數 /)).toBeVisible({ timeout: 15_000 });
+});
+
+test("家庭儀表板頁面可載入", async ({ page }) => {
+  await page.goto("/for-parents/dashboard");
+  const main = page.getByRole("main");
+  await expect(main.getByRole("heading", { name: "家庭儀表板" })).toBeVisible();
+  await expect(main.getByRole("heading", { name: "小遊戲探索摘要" })).toBeVisible();
+  await expect(main.getByRole("heading", { name: "推薦共讀故事" })).toBeVisible();
+  await expect(main.getByLabel("家長安心資訊")).toBeVisible();
 });
 
 test("繽紛消消樂：標題 → 地圖 → 第 1 關棋盤", async ({ page }) => {
