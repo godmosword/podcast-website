@@ -70,7 +70,7 @@ export/video/ep-9/
 
 1. **換圖**：`data/scenes/<slug>.json` 每幕 `start`/`end` → `public/stories/<slug>/NN.jpg`；最後一幕補齊至音檔結尾
 2. **音長**：`scenes.audioDuration` → ffprobe `audio.mp3` → 最後一句字幕 `t + 3`
-3. **字幕**：逐句 ASS，置底白字 + 黑邊；字型依字幕 charset 子集 `jf-openhuninn`
+3. **字幕**：逐句 ASS，置底白字 + 黑邊；字型依字幕 charset 子集 `jf-openhuninn-2.1`
 4. **ffmpeg**：多圖 concat + `ass` filter → H.264 + AAC
 
 ## YouTube Studio 上架（手動）
@@ -91,7 +91,7 @@ export/video/ep-9/
 | 找不到 huninn | 執行上方 curl，或 `export HUNINN_TTF=/path/to.ttf` |
 | `subtitles filter` 不存在 | `brew install ffmpeg-full`（一般 `ffmpeg` 不含 libass） |
 | `fontTools.subset` 找不到 | 改用 `brew install fonttools`（腳本會呼叫 `pyftsubset`） |
-| 字幕方塊／缺字 | 確認 ASS 字型名 `jf-openhuninn` 與子集 TTF；重跑 export |
+| 字幕方塊／缺字 | 確認 ASS 字型名 `jf-openhuninn-2.1` 與子集 TTF 一致；重跑 export |
 | 缺插圖 | `npm run illustrate -- ep-N --approve` |
 | 畫面比音短 | 已自動補最後一幕；若仍異常，檢查 `scenes` 的 `audioDuration` |
 

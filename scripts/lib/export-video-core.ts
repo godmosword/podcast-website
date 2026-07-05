@@ -14,7 +14,7 @@ import { STORIES_DIR } from "./transcribe-core";
 const EXPORT_VIDEO_WIDTH = 1920;
 const EXPORT_VIDEO_HEIGHT = 1080;
 const DEFAULT_HUNINN_TTF = "/tmp/huninn.ttf";
-const HUNINN_FONT_NAME = "jf-openhuninn";
+const HUNINN_FONT_NAME = "jf-openhuninn-2.1";
 
 export type SceneClip = {
   index: number;
