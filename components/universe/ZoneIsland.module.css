@@ -399,6 +399,12 @@
   }
 }
 
+/* 鎖島許願層：鏡像 islandTile 的 stage 定位（button 不可巢狀 button），僅 pill 可點 */
+.wishLayer {
+  position: absolute;
+  pointer-events: none;
+}
+
 /* 鎖島許願：常駐小 pill，點擊才開 dock（不彈 speech bubble） */
 .wishBtn {
   position: absolute;
@@ -406,6 +412,7 @@
   bottom: 2%;
   transform: translateX(-50%);
   z-index: 4;
+  pointer-events: auto;
   min-height: 30px;
   padding: 3px 12px;
   border: 1px solid #8a6438;

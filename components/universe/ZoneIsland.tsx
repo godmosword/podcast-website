@@ -156,22 +156,35 @@ export default function ZoneIsland({
                 ))}
               </span>
             )}
-            {!isOpen ? (
-              <button
-                type="button"
-                className={styles.wishBtn}
-                aria-label={`${zone.name}看看`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  playSfx("tap");
-                  onWish(zone);
-                }}
-              >
-                看看
-              </button>
-            ) : null}
           </div>
         </button>
+        {/* 鎖島「看看」按鈕：button 不可巢狀 button（hydration #418），改為兄弟層鏡像 tile 定位 */}
+        {!isOpen ? (
+          <span
+            className={styles.wishLayer}
+            style={{
+              left: `${zone.px.x}px`,
+              top: `${zone.px.y}px`,
+              width: `${tile.stageSize.w}px`,
+              height: `${tile.stageSize.h}px`,
+              transform: `translate(${-ax * 100}%, ${-ay * 100}%)`,
+              zIndex: mapDepthZ(zone.depthY, "label"),
+            }}
+          >
+            <button
+              type="button"
+              className={styles.wishBtn}
+              aria-label={`${zone.name}看看`}
+              onClick={(e) => {
+                e.stopPropagation();
+                playSfx("tap");
+                onWish(zone);
+              }}
+            >
+              看看
+            </button>
+          </span>
+        ) : null}
         <span
           className={styles.tileLabel}
           style={{
