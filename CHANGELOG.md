@@ -41,6 +41,7 @@
 
 ### Fixed
 
+- **樂園地圖 iOS Safari 反覆崩潰（OOM）**：海面貼圖改 screen-space CSS 平鋪（viewport 大小 div 以 `background-position/size` 跟隨鏡頭），移除 stage 內 `SEA_BLEED=7200` 外擴的三個 15400×15120 pattern rect——該 rect 在 `will-change: transform` 合成層 + `overflow: visible` 下把 GPU backing store 撐到視窗數十倍大，iPhone 3× DPR 直接記憶體爆掉、頁面「重複發生問題」。夜海惰性載入與 600ms 日夜 crossfade 行為不變
 - **/characters「小衝」production 破圖**：git 追蹤 `.JPG` 大寫副檔名但程式引用 `.jpg`，本機檔案系統不分大小寫看不出、Vercel 上 404——git 改名修正
 - **全域 focus ring token 化**：`a/button:focus-visible` 由硬編 `var(--ink)` 改 `var(--focus-ring)`，夜間補丁移除（行為不變：日=ink、夜=c-yellow）
 - **車車宇宙地圖外連開窗**：外連島（`route.external`）的 `window.open` 移回使用者手勢同步呼叫棧——原本放在 fly-to 後的 `setTimeout` 內，Safari／iOS 彈窗攔截會靜默擋掉；並在拖曳打斷 fly-to 時取消尚未觸發的開 sheet／導航 timer，避免鏡頭被使用者接管後地圖仍自行開面板

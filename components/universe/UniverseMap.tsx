@@ -10,7 +10,6 @@ import { parseZoneDeepLink } from "@/lib/universe/zone-deep-link";
 import type { ZoneStoriesBundle } from "@/lib/story-zone-query";
 import { mapDepthZ } from "@/lib/universe-depth";
 import { seaTexturePath } from "@/lib/universe/map-art-src";
-import { SEA_BLEED } from "@/lib/universe/map-camera-utils";
 import { resolveTextureHref } from "@/lib/universe/png-to-webp";
 import { playSfx } from "@/lib/sfx";
 import {
@@ -222,6 +221,20 @@ function UniverseMapContent({
   const transform = `translate(${camera.tx}px, ${camera.ty}px) scale(${camera.scale})`;
   const sceneClass = [styles.scene, paused ? styles.paused : ""].filter(Boolean).join(" ");
 
+  // 海面貼圖：screen-space CSS 平鋪，不放進被 transform 的 stage。
+  // 舊做法（stage 內 SEA_BLEED 外擴 15400×15120 的 pattern rect）會把 will-change:
+  // transform 的合成層撐到視窗的數十倍大，iOS Safari 3× DPR 下 GPU 記憶體爆掉、
+  // WebContent 反覆 crash（「重複發生問題」）。改為 viewport 大小的 div 以
+  // background-position/size 跟隨鏡頭，tile 網格錨點與 stage 原點對齊，視覺等價。
+  const seaFlyTransition = camera.isAnimating
+    ? `background-position ${FLY_DURATION_MS}ms cubic-bezier(0.22, 1, 0.36, 1), ` +
+      `background-size ${FLY_DURATION_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`
+    : null;
+  const seaCameraStyle = {
+    backgroundSize: `${SEA_TILE * camera.scale}px ${SEA_TILE * camera.scale}px`,
+    backgroundPosition: `${camera.tx}px ${camera.ty}px`,
+  } as const;
+
   return (
     <section ref={sectionRef} className={styles.map} aria-label="車車宇宙樂園地圖">
       <div className={styles.nightSeaOverlay} aria-hidden="true" />
@@ -238,6 +251,31 @@ function UniverseMapContent({
         onPointerCancel={camera.bind.onPointerCancel}
         onContextMenu={camera.bind.onContextMenu}
       >
+        {/* v5：黏土海面貼圖（無縫平鋪）。screen-space 滿版，天生蓋滿任何鏡頭。 */}
+        <div
+          className={styles.seaFill}
+          aria-hidden="true"
+          style={{
+            ...seaCameraStyle,
+            backgroundImage: `url(${seaDayHref})`,
+            transition: seaFlyTransition ?? "none",
+          }}
+        />
+        {nightSeaMounted && (
+          <div
+            className={styles.seaFill}
+            aria-hidden="true"
+            style={{
+              ...seaCameraStyle,
+              backgroundImage: `url(${seaNightHref})`,
+              opacity: daylight === "night" ? 1 : 0,
+              transition: [seaFlyTransition, "opacity 600ms ease"]
+                .filter(Boolean)
+                .join(", "),
+            }}
+          />
+        )}
+
         <div
           className={styles.stage}
           style={{
@@ -259,39 +297,6 @@ function UniverseMapContent({
             focusable="false"
           >
             <defs>
-              {/* v5：黏土海面貼圖（無縫平鋪），取代 seaGrad 漸層。 */}
-              <pattern
-                id="seaTile"
-                patternUnits="userSpaceOnUse"
-                width={SEA_TILE}
-                height={SEA_TILE}
-              >
-                <image
-                  href={seaDayHref}
-                  x="0"
-                  y="0"
-                  width={SEA_TILE}
-                  height={SEA_TILE}
-                  preserveAspectRatio="xMidYMid slice"
-                />
-              </pattern>
-              {nightSeaMounted && (
-                <pattern
-                  id="seaTileNight"
-                  patternUnits="userSpaceOnUse"
-                  width={SEA_TILE}
-                  height={SEA_TILE}
-                >
-                  <image
-                    href={seaNightHref}
-                    x="0"
-                    y="0"
-                    width={SEA_TILE}
-                    height={SEA_TILE}
-                    preserveAspectRatio="xMidYMid slice"
-                  />
-                </pattern>
-              )}
               <radialGradient id="clayShade" cx="38%" cy="30%" r="75%">
                 <stop offset="0" stopColor="#ffffff" stopOpacity="0.32" />
                 <stop offset="0.55" stopColor="#ffffff" stopOpacity="0" />
@@ -301,34 +306,6 @@ function UniverseMapContent({
                 <feGaussianBlur stdDeviation="7" />
               </filter>
             </defs>
-            {/* 海面滿版：rect 以 SEA_BLEED 外擴到遠超視窗，任何鏡頭都不露底
-                （pattern 為 userSpaceOnUse，貼圖無縫延續；.scene 需 overflow: visible） */}
-            <rect
-              x={-SEA_BLEED}
-              y={-SEA_BLEED}
-              width={MAP_STAGE.width + SEA_BLEED * 2}
-              height={MAP_STAGE.height + SEA_BLEED * 2}
-              fill="#bfe0ef"
-            />
-            <rect
-              x={-SEA_BLEED}
-              y={-SEA_BLEED}
-              width={MAP_STAGE.width + SEA_BLEED * 2}
-              height={MAP_STAGE.height + SEA_BLEED * 2}
-              fill="url(#seaTile)"
-            />
-            {nightSeaMounted && (
-              <rect
-                x={-SEA_BLEED}
-                y={-SEA_BLEED}
-                width={MAP_STAGE.width + SEA_BLEED * 2}
-                height={MAP_STAGE.height + SEA_BLEED * 2}
-                fill="url(#seaTileNight)"
-                className={styles.seaNightTile}
-                style={{ opacity: daylight === "night" ? 1 : 0 }}
-              />
-            )}
-
             {zones.map((zone) => {
               if (getZoneArtTile(zone.id).mode === "island") return null;
               const terrain = ZONE_TERRAIN[zone.id];

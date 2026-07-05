@@ -38,6 +38,16 @@
   z-index: 1;
 }
 
+/* v5：黏土海面貼圖（無縫平鋪）。screen-space 滿版 div，以 background-position/size
+   跟隨鏡頭（見 UniverseMap.tsx seaCameraStyle）；不得放回 transform 的 stage 內 —
+   外擴 rect 會把合成層撐到視窗數十倍大，iOS Safari 會 OOM crash。 */
+.seaFill {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-repeat: repeat;
+}
+
 /* screen-space 天象層（日月星）：蓋在滿版海與夜幕之上、招牌與控制鈕之下 */
 .skyLayer {
   position: absolute;
@@ -53,7 +63,7 @@
   display: block;
   /* 島嶼 button 疊在 svg 之上 */
   pointer-events: none;
-  /* 海面滿版：sea rect 以 SEA_BLEED 外擴超出 viewBox，不得被 svg 裁掉 */
+  /* 島影 blur 略超出 viewBox，不裁掉（海面已改 screen-space .seaFill，無大幅外擴） */
   overflow: visible;
 }
 
@@ -64,11 +74,6 @@
   display: block;
   pointer-events: none;
   overflow: visible;
-}
-
-/* v5：黏土夜間海面貼圖，隨日夜主題交叉淡入。 */
-.seaNightTile {
-  transition: opacity 600ms ease;
 }
 
 .dashedBridge {
