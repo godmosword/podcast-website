@@ -16,6 +16,7 @@ import { LIGHT_THEME, NIGHT_THEME } from "@/lib/theme";
 import { recordStoryCompleted } from "@/lib/engagement";
 import { playSfx, isSfxEnabled } from "@/lib/sfx";
 import SfxToggle from "./SfxToggle";
+import StoryEndScreen from "./StoryEndScreen";
 
 // 結尾才出現的反思卡 / 僅 ?cue=1 的對時面板：動態載入，縮小播放器主 chunk。
 const ReflectionPrompt = dynamic(
@@ -24,7 +25,6 @@ const ReflectionPrompt = dynamic(
 );
 const StoryCuePanel = dynamic(() => import("./StoryCuePanel"), { ssr: false });
 import Wheel from "./decor/Wheel";
-import Sparkle from "./decor/Sparkle";
 import {
   CaptionsIcon,
   RepeatIcon,
@@ -538,48 +538,17 @@ export default function StoryPlayer({
       </div>
 
       {hasEnded && (
-        <div className={styles.endScreen}>
-          <Sparkle
-            className={`${styles.endSparkle} ${styles.endSparkle1} ${decor.sparkleAnim}`}
-            size={26}
-          />
-          <Sparkle
-            className={`${styles.endSparkle} ${styles.endSparkle2} ${decor.sparkleAnim}`}
-            size={18}
-          />
-          <p className={styles.endTitle}>故事聽完囉 🌙</p>
-          <p className={styles.endSubtitle}>{title}</p>
-          {reflectionPrompt && (
-            <ReflectionPrompt
-              slug={slug}
-              child={reflectionPrompt.child}
-              parentFollowUp={reflectionPrompt.parentFollowUp}
-              accent={color}
-              compact
-            />
-          )}
-          <div className={styles.endActions}>
-            <button
-              type="button"
-              className={styles.endBtn}
-              style={{ backgroundColor: color }}
-              onClick={replay}
-            >
-              再聽一次
-            </button>
-            <Link href={backHref} className={styles.endBtnSecondary}>
-              回故事屋
-            </Link>
-            {nextStorySlug && nextStoryTitle && (
-              <Link
-                href={`/story/${nextStorySlug}/play`}
-                className={styles.endBtnSecondary}
-              >
-                下一集：{nextStoryTitle}
-              </Link>
-            )}
-          </div>
-        </div>
+        <StoryEndScreen
+          slug={slug}
+          title={title}
+          color={color}
+          backHref={backHref}
+          nextStorySlug={nextStorySlug}
+          nextStoryTitle={nextStoryTitle}
+          reflectionPrompt={reflectionPrompt}
+          ReflectionComponent={ReflectionPrompt}
+          onReplay={replay}
+        />
       )}
 
       {(mediaError || playBlocked) && !hasEnded && (

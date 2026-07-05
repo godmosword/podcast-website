@@ -17,6 +17,7 @@ import { storyDetailMetadata } from "@/lib/story-metadata";
 import { storyCoverPath } from "@/lib/story-utils";
 import FavoriteButton from "@/components/FavoriteButton";
 import JsonLd from "@/components/JsonLd";
+import ParentTrustStrip from "@/components/ParentTrustStrip";
 import PlayButton from "@/components/PlayButton";
 import ShareButton from "@/components/ShareButton";
 import RelatedStories from "@/components/RelatedStories";
@@ -132,6 +133,8 @@ export default async function StoryDetailPage({
             className={styles.shareRow}
           />
         </div>
+
+        <ParentTrustStrip className={styles.trustStrip} />
 
         {story.familyActivity && (
           <FamilyActivityCard

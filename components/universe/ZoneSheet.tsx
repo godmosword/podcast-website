@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { ZONE_STATUS_META, type ZoneDef } from "@/data/universe-zones";
 import { getCarParkLinks } from "@/lib/universe-map";
 import { notifyMailto } from "@/lib/contact";
@@ -11,6 +11,7 @@ import {
 } from "@/lib/analytics";
 import type { ZoneStoriesBundle } from "@/lib/story-zone-query";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import ParentTrustStrip from "@/components/ParentTrustStrip";
 import ZoneLandmark from "./ZoneLandmark";
 import ZoneWishForm from "./ZoneWishForm";
 import styles from "./ZoneSheet.module.css";
@@ -24,9 +25,14 @@ type ZoneSheetProps = {
 export default function ZoneSheet({ zone, onClose, zoneStories }: ZoneSheetProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
+  const [wishOpen, setWishOpen] = useState(false);
   const open = zone !== null;
 
   useFocusTrap(open, panelRef);
+
+  useEffect(() => {
+    setWishOpen(false);
+  }, [zone?.id]);
 
   useEffect(() => {
     if (!open) return;
@@ -43,6 +49,7 @@ export default function ZoneSheet({ zone, onClose, zoneStories }: ZoneSheetProps
   const isCarPark = (zone.subSegmentIds?.length ?? 0) > 0;
   const carParkLinks = isCarPark ? getCarParkLinks() : [];
   const notifyHref = notifyMailto(zone.name);
+  const wishPanelId = `${titleId}-wish`;
 
   return (
     <div className={styles.overlay} role="presentation" onClick={onClose}>
@@ -134,6 +141,8 @@ export default function ZoneSheet({ zone, onClose, zoneStories }: ZoneSheetProps
           </nav>
         ) : (
           <div className={styles.stub}>
+            <p className={styles.exploreNote}>{zone.exploreNote ?? zone.teaser}</p>
+
             {zone.status === "building" &&
             typeof zone.buildProgress === "number" ? (
               <div
@@ -155,19 +164,58 @@ export default function ZoneSheet({ zone, onClose, zoneStories }: ZoneSheetProps
             ) : null}
 
             {zone.status === "planned" ? (
-              <p className={styles.voteNote}>之後開放投票，由你決定下一站。</p>
+              <p className={styles.voteNote}>
+                這座島還在收集想法，不需要完成任務，也不急著做決定。
+              </p>
             ) : null}
 
-            <ZoneWishForm
-              zoneId={zone.id}
-              fallbackHref={notifyHref}
-              onSubmitSuccess={({ hasEmail, category }) => {
-                trackWishSubmitted(category);
-                if (category === "feature") {
-                  trackUniverseWishSubmit(zone.id, hasEmail);
-                }
-              }}
-            />
+            {zone.softLinks && zone.softLinks.length > 0 ? (
+              <nav className={styles.softLinks} aria-label={`${zone.name}可以先逛`}>
+                {zone.softLinks.map((link) => (
+                  <a
+                    key={link.href}
+                    className={styles.softLink}
+                    href={link.href}
+                    onClick={() => trackUniverseSheetLink(zone.id, link.href)}
+                    {...(link.external
+                      ? { target: "_blank", rel: "noopener noreferrer" }
+                      : {})}
+                  >
+                    {link.label}
+                    {link.external ? <span aria-hidden="true"> ↗</span> : null}
+                  </a>
+                ))}
+              </nav>
+            ) : null}
+
+            <ParentTrustStrip variant="compact" />
+
+            <div className={styles.wishDisclosure}>
+              <button
+                type="button"
+                className={styles.wishToggle}
+                aria-expanded={wishOpen}
+                aria-controls={wishPanelId}
+                onClick={() => setWishOpen((value) => !value)}
+              >
+                想留一句話
+              </button>
+
+              {wishOpen ? (
+                <div id={wishPanelId} className={styles.wishPanel}>
+                  <ZoneWishForm
+                    zoneId={zone.id}
+                    fallbackHref={notifyHref}
+                    onSubmitSuccess={({ hasEmail, category }) => {
+                      trackWishSubmitted(category);
+                      if (category === "feature") {
+                        trackUniverseWishSubmit(zone.id, hasEmail);
+                      }
+                    }}
+                  />
+                </div>
+              ) : null}
+            </div>
           </div>
         )}
       </div>

@@ -67,6 +67,16 @@ test("車車宇宙樂園地圖 smoke", async ({ page }) => {
     page.getByRole("region", { name: "車車宇宙樂園地圖" }),
   ).toBeVisible();
   await expect(
+    page.getByRole("button", { name: /恐龍島看看/ }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: /恐龍島看看/ }).click();
+  await expect(page.getByRole("dialog")).toBeVisible({ timeout: 2_000 });
+  await expect(page.getByText("恐龍島還在蓋")).toBeVisible();
+  await expect(page.getByText("想留一句話")).toBeVisible();
+  await expect(page.getByPlaceholder("暱稱或 Email")).toHaveCount(0);
+  await page.getByRole("button", { name: "關閉" }).click();
+
+  await expect(
     page.getByRole("button", { name: /車車樂園，開放中/ }),
   ).toBeVisible();
   await page.getByRole("button", { name: /車車樂園，開放中/ }).click();

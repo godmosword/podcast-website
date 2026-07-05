@@ -69,6 +69,10 @@
   margin-top: 0;
 }
 
+.trustStrip {
+  margin: 0 0 10px;
+}
+
 .playWrap {
   margin: 24px 0 8px;
 }

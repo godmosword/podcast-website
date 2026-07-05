@@ -31,7 +31,7 @@ type ZoneIslandProps = {
   zone: ResolvedZone;
   /** 開放島點擊（fly-to／開 dock）。 */
   onActivate: (zone: ZoneDef) => void;
-  /** 鎖島「許願」按鈕：開啟 bottom dock。 */
+  /** 鎖島探索按鈕：開啟 bottom dock。 */
   onWish: (zone: ZoneDef) => void;
   /** 鎖島本體點擊：僅回饋，不開 sheet。 */
   onLockedTap?: (zone: ZoneDef) => void;
@@ -160,14 +160,14 @@ export default function ZoneIsland({
               <button
                 type="button"
                 className={styles.wishBtn}
-                aria-label={`${zone.name}許願`}
+                aria-label={`${zone.name}看看`}
                 onClick={(e) => {
                   e.stopPropagation();
                   playSfx("tap");
                   onWish(zone);
                 }}
               >
-                許願
+                看看
               </button>
             ) : null}
           </div>
