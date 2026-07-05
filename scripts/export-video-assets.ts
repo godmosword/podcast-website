@@ -28,9 +28,12 @@ import {
   collectSubtitleCharset,
   type ExportManifest,
   exportVideoMode,
+  ffmpegFullInstallHint,
+  ffmpegSupportsSubtitlesBurnIn,
   huninnDownloadHint,
   huninnTtfPath,
   resolveAudioDuration,
+  resolveFfmpegBinary,
   resolveSceneClips,
   subtitlesToAss,
 } from "./lib/export-video-core";
@@ -144,8 +147,18 @@ function main(): void {
     process.exit(1);
   }
 
-  if (!commandAvailable("ffmpeg")) {
-    console.error("找不到 ffmpeg；請 brew install ffmpeg");
+  if (!commandAvailable("ffmpeg") && !existsSync(resolveFfmpegBinary())) {
+    console.error("找不到 ffmpeg；請 brew install ffmpeg-full（含 libass 字幕 burn-in）");
+    process.exit(1);
+  }
+
+  const ffmpegBin = resolveFfmpegBinary();
+  if (!ffmpegSupportsSubtitlesBurnIn(ffmpegBin)) {
+    console.error(
+      `目前 ffmpeg 不支援 subtitles filter（無 libass），無法 burn-in 字幕。\n` +
+        `  ${ffmpegFullInstallHint()}\n` +
+        `  或 export FFMPEG=/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg`,
+    );
     process.exit(1);
   }
 
@@ -207,9 +220,11 @@ function main(): void {
   const outDir = join(EXPORT_ROOT, slug);
   const workDir = join(outDir, "_work");
   const assPath = join(workDir, `${slug}.ass`);
-  const fontOut = join(workDir, "huninn-video.ttf");
+  const assFile = `${slug}.ass`;
+  const fontsSubDir = join(workDir, "fonts");
+  const fontOut = join(fontsSubDir, "huninn-video.ttf");
   const charsetFile = join(workDir, "charset.txt");
-  const fontsDir = workDir;
+  const fontsDir = "fonts";
   const outputFile = `${slug}.mp4`;
   const outputPath = join(outDir, outputFile);
 
@@ -230,7 +245,7 @@ function main(): void {
     clips,
     audioPath,
     outputPath,
-    assPath,
+    assFile,
     fontsDir,
   });
 
@@ -242,6 +257,7 @@ function main(): void {
   }
 
   mkdirSync(workDir, { recursive: true });
+  mkdirSync(fontsSubDir, { recursive: true });
   writeFileSync(assPath, ass, "utf8");
 
   console.log(`字型子集：${fontOut}`);
@@ -253,7 +269,7 @@ function main(): void {
   );
 
   console.log(`合成 ${clips.length} 幕 → ${outputPath}（${audioDuration}s）…`);
-  const result = spawnSync("ffmpeg", plan.args, { stdio: "inherit" });
+  const result = spawnSync(ffmpegBin, plan.args, { stdio: "inherit", cwd: workDir });
   if (result.status !== 0) {
     console.error("ffmpeg 失敗");
     process.exit(result.status ?? 1);

@@ -4,6 +4,7 @@
 // 換圖：data/scenes/<slug>.json；字幕：data/subtitles/<slug>.json（逐句 burn-in）
 // ============================================================
 
+import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import type { Subtitle } from "./illustrate-core";
@@ -192,12 +193,12 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
   return `${lines.join("\n")}\n`;
 }
 
-/** ffmpeg ass filter 路徑跳脫（macOS／Linux）。 */
-function escapeAssFilterPath(filePath: string): string {
+/** ffmpeg ass filter 路徑跳脫（filter_complex 內 `:` `,` `\` 需跳脫，勿加引號）。 */
+export function escapeAssFilterPath(filePath: string): string {
   return filePath
     .replace(/\\/g, "\\\\")
     .replace(/:/g, "\\:")
-    .replace(/'/g, "'\\''");
+    .replace(/,/g, "\\,");
 }
 
 export type FfmpegPlan = {
@@ -209,7 +210,7 @@ export type FfmpegPlan = {
 /** 組裝 ffmpeg filter_complex：多圖 concat + ass burn-in。 */
 export function buildFfmpegFilterComplex(
   clipCount: number,
-  assPath: string,
+  assFile: string,
   fontsDir: string,
 ): string {
   const parts: string[] = [];
@@ -217,10 +218,9 @@ export function buildFfmpegFilterComplex(
     parts.push(`[${i}:v]${SCALE_PAD_FILTER}[v${i}]`);
   }
   const concatInputs = Array.from({ length: clipCount }, (_, i) => `[v${i}]`).join("");
-  const assEsc = escapeAssFilterPath(assPath);
-  const fontsEsc = escapeAssFilterPath(fontsDir);
   parts.push(`${concatInputs}concat=n=${clipCount}:v=1:a=0[vcat]`);
-  parts.push(`[vcat]ass='${assEsc}':fontsdir='${fontsEsc}'[vout]`);
+  // subtitles filter（需 libass，Homebrew 用 ffmpeg-full）
+  parts.push(`[vcat]subtitles=${assFile}:fontsdir=${fontsDir}[vout]`);
   return parts.join(";");
 }
 
@@ -229,11 +229,13 @@ export function buildFfmpegPlan(params: {
   clips: SceneClip[];
   audioPath: string;
   outputPath: string;
-  assPath: string;
+  /** ASS 檔名（相對 ffmpeg cwd，例 ep-9.ass） */
+  assFile: string;
+  /** 字型目錄（相對 ffmpeg cwd，通常 "."） */
   fontsDir: string;
 }): FfmpegPlan {
-  const { clips, audioPath, outputPath, assPath, fontsDir } = params;
-  const filterComplex = buildFfmpegFilterComplex(clips.length, assPath, fontsDir);
+  const { clips, audioPath, outputPath, assFile, fontsDir } = params;
+  const filterComplex = buildFfmpegFilterComplex(clips.length, assFile, fontsDir);
 
   const args: string[] = ["-y"];
   for (const clip of clips) {
@@ -275,4 +277,30 @@ export function huninnDownloadHint(): string {
   return (
     "curl -sL https://github.com/justfont/open-huninn-font/releases/download/v2.1/jf-openhuninn-2.1.ttf -o /tmp/huninn.ttf"
   );
+}
+
+const FFMPEG_FULL_MAC = "/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg";
+
+/** 解析 ffmpeg 路徑：FFMPEG env → ffmpeg-full（libass）→ PATH。 */
+export function resolveFfmpegBinary(): string {
+  const fromEnv = process.env.FFMPEG?.trim();
+  if (fromEnv) return fromEnv;
+  if (existsSync(FFMPEG_FULL_MAC)) return FFMPEG_FULL_MAC;
+  return "ffmpeg";
+}
+
+/** 是否支援 subtitles burn-in（libass）。 */
+export function ffmpegSupportsSubtitlesBurnIn(ffmpegBin: string): boolean {
+  try {
+    execFileSync(ffmpegBin, ["-h", "filter=subtitles"], {
+      stdio: "ignore",
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function ffmpegFullInstallHint(): string {
+  return "brew install ffmpeg-full   # 含 libass，才能 burn-in 字幕";
 }

@@ -124,9 +124,9 @@ describe("collectSubtitleCharset", () => {
 });
 
 describe("buildFfmpegFilterComplex", () => {
-  it("含 concat 與 ass", () => {
-    const fc = buildFfmpegFilterComplex(2, "/tmp/s.ass", "/tmp/fonts");
+  it("含 concat 與 subtitles", () => {
+    const fc = buildFfmpegFilterComplex(2, "ep-9.ass", "fonts");
     expect(fc).toContain("concat=n=2");
-    expect(fc).toContain("ass=");
+    expect(fc).toContain("subtitles=ep-9.ass:fontsdir=fonts");
   });
 });
