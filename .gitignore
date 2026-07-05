@@ -58,3 +58,6 @@ next-env.d.ts
 
 # 由 prebuild（generate:llms-full）產生，隨每次建置重新產生，不進版控
 /public/llms-full.txt
+
+# YouTube 影片匯出產物（本機 CLI，勿入庫）
+/export/video/

@@ -31,7 +31,8 @@
     "generate:page-freshness": "tsx scripts/generate-page-freshness.ts",
     "optimize:roamer-assets": "tsx scripts/optimize-roamer-assets.ts",
     "optimize:adventures": "tsx scripts/optimize-adventure-assets.ts",
-    "fix:roamer-alpha": "tsx scripts/fix-roamer-alpha.ts"
+    "fix:roamer-alpha": "tsx scripts/fix-roamer-alpha.ts",
+    "export:video": "tsx scripts/export-video-assets.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

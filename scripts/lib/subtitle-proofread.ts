@@ -101,6 +101,11 @@ function hasProofreadMarker(slug: string): boolean {
   return existsSync(proofreadMarkerPath(slug));
 }
 
+/** 匯出影片／illustrate 閘門：是否已完成 proofread --mark。 */
+export function isSubtitleProofreadMarked(slug: string): boolean {
+  return hasProofreadMarker(slug);
+}
+
 function readProofreadMarker(slug: string): ProofreadMarker | null {
   const p = proofreadMarkerPath(slug);
   if (!existsSync(p)) return null;

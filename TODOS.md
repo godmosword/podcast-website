@@ -67,7 +67,7 @@
 | LIST-3 分析事件 | 待 LIST-1/2 掛點 | `trackSubscribeSubmit(source)`、`trackLineCtaClick(source)`，走 `safeTrack`、無 PII（比照 `trackUniverseWishSubmit`） | Modify: `lib/analytics.ts` | 本機點擊確認事件發送 | — |
 | REUSE-1 校對字幕採用檢查 | 可開工 | 確認 backfill 管線優先讀 `data/subtitles/_proofread/`；若否修正並對 ep-11~17 重跑 `npm run backfill:captions`；跑 `npm run verify:episodes` | Modify（視檢查結果）: `scripts/lib/illustrate-core.ts`; Data: `data/apple-synced.json` | `verify:episodes` 全過；抽查 ep-16 captions 用校對版文字 | — |
 | REUSE-2 家長共讀指引呈現（= P2 `parentGuide`） | BLOCKED：等邊界定義 | `Story` 加選填 `parentGuide` 欄位 + `ShowNotes` 區塊（「這集可以聊什麼」+ 延伸提問／小活動）；SEO 可爬 zh-Hant 內文；先釐清與已上線 `familyActivity` 的欄位邊界 | Modify: `data/content.ts`、`app/story/[slug]/page.tsx`; Create: `components/story/ShowNotes.tsx` | view-source 確認 SSR 文字；`npm test` + `npm run build` | — |
-| REUSE-3 短影音素材匯出工具 | 可開工 | 本機 CLI `npm run export:video -- <slug>`：讀 `data/scenes/<slug>.json` start/end，ffmpeg 切場景音訊、配對 `public/stories/<slug>/NN.jpg` + 字幕片段，選配 1080x1920 靜圖 mp4；輸出 `export/video/<slug>/` + `manifest.json`（gitignore，不自動發文） | Create: `scripts/export-video-assets.ts`; Modify: `package.json`、`.gitignore` | `export:video -- ep-12` 抽查場景音訊長度與 manifest 對應 | — |
+| REUSE-3 YouTube 整集影片匯出 | 完成 | 本機 CLI `npm run export:video -- <slug>`：1920×1080 整集 mp4；`data/scenes` 換頁 + `data/subtitles` 原始逐句 ASS burn-in；`export/video/<slug>/` + manifest（gitignore）；9:16 Shorts 留二期 | Create: `scripts/lib/export-video-core.ts`、`scripts/export-video-assets.ts`、`docs/VIDEO-EXPORT.md`; Modify: `package.json`、`.gitignore` | `export:video -- ep-9 --dry-run`；`npm test -- export-video-core` | — |
 
 ### 待使用者提供（不擋開發）
 
@@ -76,7 +76,7 @@
 
 ### Task DAG
 
-1. 先開 REUSE-1／REUSE-3；兩者不依賴使用者資料或對外 CTA。
+1. REUSE-3 已完成（整集 16:9）；REUSE-1 仍待確認。
 2. LIST-2 原本等隱私頁；本機驗證 `/legal#privacy` 已由 `a844f20` 上線，改為可開工，但表單旁仍須放明確隱私句與 privacy link。
 3. LIST-1 等 LINE OA URL；LIST-3 等 LIST-1／LIST-2 的實際掛點。
 4. REUSE-2 先完成 `familyActivity`／`parentGuide` 邊界定義，避免與 HOOKS-1 重疊。
@@ -662,6 +662,7 @@ Tiled 關卡管線、6–10 關+世界地圖、檢查點、多敵人類型、視
 
 | # | 項目 |
 |---|------|
+| 29b | **YouTube 整集 mp4** | `npm run export:video -- ep-N` → Studio 手動上傳（[VIDEO-EXPORT.md](./docs/VIDEO-EXPORT.md)） |
 | 30 | Threads／IG 貼文（單集 URL + OG） |
 | 31 | 平台訂閱提醒 |
 | 32 | 家長向新集說明（見 P2「新集通知路徑」） |

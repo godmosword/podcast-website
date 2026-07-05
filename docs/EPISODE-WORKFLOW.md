@@ -61,6 +61,11 @@ git add public/stories/ data/scenes/ data/subtitles/ data/subtitles/_proofread/ 
   data/apple-synced.json data/apple-sync.defaults.json data/stories.ts data/characters.json
 git commit -m "feat(stories): illustrate <slug> full scenes"
 git push
+
+# 7. （可選）匯出 YouTube 整集影片
+npm run export:video -- <slug>
+#    → export/video/<slug>/<slug>.mp4（原始逐句字幕 burn-in）
+#    見 docs/VIDEO-EXPORT.md
 ```
 
 ## 驗證
@@ -95,6 +100,7 @@ GHA `sync-apple-podcast.yml` 在 `npm run sync:apple` 後**一律**跑 `npm run 
 
 ## 相關文件
 
+- [VIDEO-EXPORT.md](./VIDEO-EXPORT.md) — YouTube 整集 mp4 匯出（原始字幕 burn-in）
 - [SUBTITLE-PROOFREAD.md](./SUBTITLE-PROOFREAD.md) — Whisper 草稿校對清單與 `--mark` 閘門
 - [AGENT-WORKFLOW.md](./AGENT-WORKFLOW.md) — Meta 編排（`/agent-plan`、`/agent-action`）
 - [AGENT-DOMAIN.md](./AGENT-DOMAIN.md) — 本專案 Bootstrap、紅線、驗證矩陣
