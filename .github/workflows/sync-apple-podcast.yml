@@ -111,6 +111,16 @@ jobs:
             exit 0
           fi
           git commit -F "$SYNC_COMMIT_MSG_PATH"
+          # main 在本 run 期間可能被人為 push 推進（sync 跑 2 分鐘以上就有機率撞上），
+          # 直接 push 會被 non-fast-forward 拒絕 → 誤發「同步失敗」告警（見 issue #36）。
+          # sync 只動 data/ 與 public/stories/，與人為 commit 幾乎不重疊，rebase 重試即可。
+          for attempt in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            echo "push 被拒（remote 有新 commit），rebase 後重試（$attempt/3）"
+            git pull --rebase origin main
+          done
           git push
 
       # ---- 通知（push 後才送，避免 push 失敗誤報「已上站」）----
