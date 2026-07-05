@@ -5,7 +5,7 @@
 // ============================================================
 
 import { execFileSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Subtitle } from "./illustrate-core";
 import type { ScenesFile } from "./illustrate-core";
@@ -276,6 +276,42 @@ export function huninnTtfPath(): string {
 export function huninnDownloadHint(): string {
   return (
     "curl -sL https://github.com/justfont/open-huninn-font/releases/download/v2.1/jf-openhuninn-2.1.ttf -o /tmp/huninn.ttf"
+  );
+}
+
+/** pyftsubset 路徑：PYFTSUBSET env → Homebrew → PATH。 */
+export function resolvePyftsubsetBinary(): string {
+  const fromEnv = process.env.PYFTSUBSET?.trim();
+  if (fromEnv) return fromEnv;
+  const brewPath = "/opt/homebrew/bin/pyftsubset";
+  if (existsSync(brewPath)) return brewPath;
+  return "pyftsubset";
+}
+
+export function pyftsubsetInstallHint(): string {
+  return "brew install fonttools   # 提供 pyftsubset CLI";
+}
+
+/** 依字幕 charset 子集 huninn TTF（供 ffmpeg ass burn-in）。 */
+export function subsetHuninnForSubtitles(
+  sourceTtf: string,
+  subtitlesText: string,
+  outputTtf: string,
+  charsetFile: string,
+): void {
+  writeFileSync(charsetFile, subtitlesText, "utf8");
+  const pyftsubset = resolvePyftsubsetBinary();
+  execFileSync(
+    pyftsubset,
+    [
+      sourceTtf,
+      `--text-file=${charsetFile}`,
+      `--output-file=${outputTtf}`,
+      "--layout-features=kern,liga,calt,palt",
+      "--no-hinting",
+      "--notdef-outline",
+    ],
+    { stdio: "inherit" },
   );
 }
 

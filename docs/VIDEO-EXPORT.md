@@ -33,7 +33,7 @@ YouTube 影片字幕應與站上播放器看到的**逐句**內容一致，而�
 2. **字幕校稿**：`npm run proofread:subtitles -- ep-N --mark`（未 mark 時 CLI 會擋，可用 `--force` 略過）
 3. **本機工具**：
    - **ffmpeg**（含 **libass**）：Homebrew 請用 `brew install ffmpeg-full`（一般 `ffmpeg` 公式不含 subtitles filter）
-   - [fonttools](https://github.com/fonttools/fonttools)（`pip install fonttools`，供字幕用字子集）
+   - **fonttools**：`brew install fonttools`（提供 `pyftsubset` CLI；**不是** `python3 -m fontTools`）
    - **huninn TTF**：`HUNINN_TTF` 或預設 `/tmp/huninn.ttf`
 
 ```bash
@@ -90,7 +90,7 @@ export/video/ep-9/
 |------|------|
 | 找不到 huninn | 執行上方 curl，或 `export HUNINN_TTF=/path/to.ttf` |
 | `subtitles filter` 不存在 | `brew install ffmpeg-full`（一般 `ffmpeg` 不含 libass） |
-| `fontTools.subset` 失敗 | `pip install fonttools` |
+| `fontTools.subset` 找不到 | 改用 `brew install fonttools`（腳本會呼叫 `pyftsubset`） |
 | 字幕方塊／缺字 | 確認 ASS 字型名 `jf-openhuninn` 與子集 TTF；重跑 export |
 | 缺插圖 | `npm run illustrate -- ep-N --approve` |
 | 畫面比音短 | 已自動補最後一幕；若仍異常，檢查 `scenes` 的 `audioDuration` |

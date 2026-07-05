@@ -34,8 +34,11 @@ import {
   huninnTtfPath,
   resolveAudioDuration,
   resolveFfmpegBinary,
+  resolvePyftsubsetBinary,
   resolveSceneClips,
+  subsetHuninnForSubtitles,
   subtitlesToAss,
+  pyftsubsetInstallHint,
 } from "./lib/export-video-core";
 import { isSubtitleProofreadMarked } from "./lib/subtitle-proofread";
 import { ROOT, STORIES_DIR } from "./lib/transcribe-core";
@@ -82,31 +85,6 @@ function probeAudioDuration(audioPath: string): number | null {
   } catch {
     return null;
   }
-}
-
-/** 依字幕 charset 子集 huninn TTF（供 ffmpeg ass burn-in）。 */
-function subsetHuninnForSubtitles(
-  sourceTtf: string,
-  subtitlesText: string,
-  outputTtf: string,
-  charsetFile: string,
-): void {
-  writeFileSync(charsetFile, subtitlesText, "utf8");
-  execFileSync(
-    "python3",
-    [
-      "-m",
-      "fontTools.subset",
-      sourceTtf,
-      `--text-file=${charsetFile}`,
-      `--output-file=${outputTtf}`,
-      "--layout-features=kern,liga,calt,palt",
-      "--no-hinting",
-      "--name-IDs=",
-      "--notdef-outline",
-    ],
-    { stdio: "inherit" },
-  );
 }
 
 function assertExportProofread(slug: string, force: boolean): void {
@@ -166,6 +144,13 @@ function main(): void {
   if (!dryRun && !existsSync(huninnSrc)) {
     console.error(`找不到 huninn 字型 ${huninnSrc}`);
     console.error(`下載：${huninnDownloadHint()}`);
+    process.exit(1);
+  }
+
+  if (!dryRun && !commandAvailable(resolvePyftsubsetBinary())) {
+    console.error("找不到 pyftsubset（字型子集工具）");
+    console.error(`  ${pyftsubsetInstallHint()}`);
+    console.error("  或 python3 -m pip install fonttools 後設 PYFTSUBSET=python3 -m pyftsubset");
     process.exit(1);
   }
 
