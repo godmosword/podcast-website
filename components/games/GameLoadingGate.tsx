@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import type { GameKitGameId } from "@/lib/gamekit/types";
 import { useGameAssetPreload } from "@/hooks/useGameAssetPreload";
 import { GAMES } from "@/data/games";
+import { GameLoadOverlay } from "@/components/games/GameLoadOverlay";
 import styles from "./GameLoadingGate.module.css";
 
 const LABELS: Record<GameKitGameId, string> = {
@@ -16,10 +17,18 @@ const LABELS: Record<GameKitGameId, string> = {
 type GameLoadingGateProps = {
   gameId: GameKitGameId;
   children: ReactNode;
+  /** 按需預載 sheet；Godot WASM 請在 CandyKartIframeHost 處理 */
+  manualStart?: boolean;
 };
 
-export function GameLoadingGate({ gameId, children }: GameLoadingGateProps) {
-  const { ready } = useGameAssetPreload(gameId);
+export function GameLoadingGate({
+  gameId,
+  children,
+  manualStart = false,
+}: GameLoadingGateProps) {
+  const { ready, phase, start, retry } = useGameAssetPreload(gameId, {
+    manualStart,
+  });
   const title =
     LABELS[gameId] ??
     GAMES.find((game) => game.slug === gameId)?.title ??
@@ -27,16 +36,23 @@ export function GameLoadingGate({ gameId, children }: GameLoadingGateProps) {
 
   if (!ready) {
     return (
-      <div
-        className={styles.wrap}
-        role="status"
-        aria-live="polite"
-        aria-busy="true"
-        aria-label={`正在載入${title}`}
-      >
-        <div className={styles.spinner} aria-hidden />
-        <p className={styles.text}>正在準備 {title}…</p>
-        <p className={styles.hint}>載入像素圖與音效，請稍候</p>
+      <div className={styles.wrap}>
+        <GameLoadOverlay
+          phase={phase}
+          title={
+            phase === "idle"
+              ? `準備 ${title}`
+              : `正在載入${title}…`
+          }
+          hint={
+            phase === "idle"
+              ? "點下方按鈕開始載入像素圖與音效"
+              : "載入像素圖與音效，請稍候"
+          }
+          onStart={manualStart ? start : undefined}
+          onRetry={retry}
+          staticLayout
+        />
       </div>
     );
   }

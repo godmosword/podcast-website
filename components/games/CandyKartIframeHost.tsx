@@ -1,16 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import {
   candyKartSessionFromFinish,
   isCandyKartFinishMessage,
   isCandyKartReadyMessage,
 } from "@/lib/gamekit/games/candy-kart-bridge";
 import { reportGameSession } from "@/lib/gamekit/progress/session";
-import { IconReplay } from "@/components/games/ClayIcons";
+import {
+  readGodotLoaderError,
+  readGodotLoaderProgress,
+} from "@/lib/gamekit/react/game-load";
+import { useGameLoadGate } from "@/lib/gamekit/react/useGameLoadGate";
+import { GameLoadOverlay } from "@/components/games/GameLoadOverlay";
 import styles from "./CandyKartIframeHost.module.css";
 
-const LOAD_TIMEOUT_MS = 30_000;
+const LOAD_TIMEOUT_MS = 45_000;
+const GODOT_PROGRESS_POLL_MS = 150;
 
 type CandyKartIframeHostProps = {
   src: string;
@@ -18,13 +24,11 @@ type CandyKartIframeHostProps = {
   className?: string;
 };
 
-type LoadState = "loading" | "ready" | "timeout";
-
 /**
  * 繽紛卡丁車（Godot Web export）iframe 宿主：
- * - 監聽 race-finish → 換算分數/三星 → reportGameSession()
- * - Godot wasm 首載慢：loading 畫面 + 逾時提示 + 重新載入按鈕
- * - 收到遊戲端 ready 訊息（或 iframe load 後援）即關閉 loading
+ * - 按需載入：進頁不拉 WASM，點「開始遊戲」才掛 iframe
+ * - 輪詢 Godot #status-progress 顯示載入百分比
+ * - race-finish → gamekit reportGameSession；ready 訊息關閉 overlay
  */
 export function CandyKartIframeHost({
   src,
@@ -32,83 +36,116 @@ export function CandyKartIframeHost({
   className,
 }: CandyKartIframeHostProps) {
   const reportedRef = useRef<string | null>(null);
-  const [loadState, setLoadState] = useState<LoadState>("loading");
-  const [reloadKey, setReloadKey] = useState(0);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const iframeLoadedRef = useRef(false);
 
-  const onMessage = useCallback((event: MessageEvent) => {
-    if (event.origin !== window.location.origin) return;
-    if (isCandyKartReadyMessage(event.data)) {
-      setLoadState("ready");
-      return;
-    }
-    if (!isCandyKartFinishMessage(event.data)) return;
+  const {
+    phase,
+    progress,
+    setProgress,
+    start,
+    retry,
+    attempt,
+    markReady,
+    markReadyIfLoading,
+    markError,
+  } = useGameLoadGate({
+    manualStart: true,
+    loadTimeoutMs: LOAD_TIMEOUT_MS,
+  });
 
-    const key = `${event.data.trackId}:${event.data.totalMs}:${event.data.playerPos}`;
-    if (reportedRef.current === key) return;
-    reportedRef.current = key;
+  const onMessage = useCallback(
+    (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
+      if (isCandyKartReadyMessage(event.data)) {
+        markReady();
+        return;
+      }
+      if (!isCandyKartFinishMessage(event.data)) return;
 
-    reportGameSession(candyKartSessionFromFinish(event.data));
-  }, []);
+      const key = `${event.data.trackId}:${event.data.totalMs}:${event.data.playerPos}`;
+      if (reportedRef.current === key) return;
+      reportedRef.current = key;
+
+      reportGameSession(candyKartSessionFromFinish(event.data));
+    },
+    [markReady],
+  );
 
   useEffect(() => {
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
   }, [onMessage]);
 
-  useEffect(() => {
-    if (loadState !== "loading") return;
-    const timer = setTimeout(() => {
-      setLoadState((s) => (s === "loading" ? "timeout" : s));
-    }, LOAD_TIMEOUT_MS);
-    return () => clearTimeout(timer);
-  }, [loadState, reloadKey]);
-
-  const reload = () => {
+  const handleRetry = () => {
     reportedRef.current = null;
     iframeLoadedRef.current = false;
-    setLoadState("loading");
-    setReloadKey((k) => k + 1);
+    retry();
   };
 
-  // 後援：Godot 端尚未實作 ready 訊息時，iframe onLoad 後短暫緩衝即視為就緒
   const onIframeLoad = () => {
     if (iframeLoadedRef.current) return;
     iframeLoadedRef.current = true;
+    // 後援：Godot 端尚未送 ready 時，iframe load 後短暫緩衝即視為就緒
     setTimeout(() => {
-      setLoadState((s) => (s === "loading" ? "ready" : s));
+      markReadyIfLoading();
     }, 1_500);
   };
 
+  // 輪詢 Godot 內建 progress bar（同源 iframe）
+  useEffect(() => {
+    if (phase !== "loading") return;
+    const poll = () => {
+      const doc = iframeRef.current?.contentDocument;
+      const pct = readGodotLoaderProgress(doc);
+      if (pct != null) setProgress(pct);
+      const err = readGodotLoaderError(doc);
+      if (err) markError();
+    };
+    poll();
+    const timer = window.setInterval(poll, GODOT_PROGRESS_POLL_MS);
+    return () => window.clearInterval(timer);
+  }, [phase, attempt, markError, setProgress]);
+
+  const shouldMountIframe = phase !== "idle";
+
   return (
     <div className={`${styles.wrap}${className ? ` ${className}` : ""}`}>
-      <iframe
-        key={reloadKey}
-        title={title}
-        src={src}
-        className={styles.frame}
-        allow="autoplay; gamepad *"
-        loading="eager"
-        onLoad={onIframeLoad}
-      />
-      {loadState !== "ready" && (
-        <div className={styles.overlay} role="status">
-          {loadState === "loading" ? (
-            <>
-              <div className={styles.spinner} aria-hidden />
-              <p className={styles.overlayText}>賽道準備中…</p>
-              <p className={styles.overlayHint}>第一次載入比較久，等一下下 🍬</p>
-            </>
-          ) : (
-            <>
-              <p className={styles.overlayText}>載入花太久了</p>
-              <button type="button" className={styles.reloadBtn} onClick={reload}>
-                <IconReplay size={18} /> 再試一次
-              </button>
-            </>
-          )}
-        </div>
+      {shouldMountIframe ? (
+        <iframe
+          key={attempt}
+          ref={iframeRef}
+          title={title}
+          src={src}
+          className={styles.frame}
+          allow="autoplay; gamepad *"
+          loading="lazy"
+          onLoad={onIframeLoad}
+        />
+      ) : (
+        <div className={styles.framePlaceholder} aria-hidden />
       )}
+      <GameLoadOverlay
+        phase={phase}
+        title={
+          phase === "idle"
+            ? "繽紛卡丁車"
+            : phase === "loading"
+              ? "賽道準備中…"
+              : "繽紛卡丁車"
+        }
+        hint={
+          phase === "idle"
+            ? "第一次載入約需 30 秒，點下方按鈕再開始下載"
+            : phase === "loading"
+              ? "正在載入賽道與引擎，等一下下 🍬"
+              : undefined
+        }
+        progress={phase === "loading" ? progress : null}
+        onStart={start}
+        onRetry={handleRetry}
+        startLabel="出發！開始遊戲"
+      />
     </div>
   );
 }

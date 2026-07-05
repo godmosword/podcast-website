@@ -1,30 +1,51 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   isGameAssetsReady,
   preloadGameAssets,
 } from "@/lib/gamekit/runtime/preload";
 import type { GameKitGameId } from "@/lib/gamekit/types";
+import type { GameLoadPhase } from "@/lib/gamekit/react/game-load";
+import { useGameLoadGate } from "@/lib/gamekit/react/useGameLoadGate";
 
-export function useGameAssetPreload(gameId: GameKitGameId) {
-  // SSR 一律 false，ready 只在 effect 內翻轉——
-  // 避免「客戶端首次 render 已 ready、伺服器端 false」的 hydration mismatch
-  const [ready, setReady] = useState(false);
+type UseGameAssetPreloadOptions = {
+  /** true：等使用者點「開始」才預載程序生成 sheet（canvas 遊戲可選） */
+  manualStart?: boolean;
+};
+
+/**
+ * 預載 GameKit 程序生成 sheet；candy-kart 無 sheet，由 iframe 宿主自行控管。
+ */
+export function useGameAssetPreload(
+  gameId: GameKitGameId,
+  options: UseGameAssetPreloadOptions = {},
+) {
+  const manualStart = options.manualStart ?? false;
+  const gate = useGameLoadGate({ manualStart, loadTimeoutMs: 15_000 });
 
   useEffect(() => {
+    if (gate.phase !== "loading") return;
     let cancelled = false;
     if (isGameAssetsReady(gameId)) {
-      setReady(true);
+      gate.markReady();
       return;
     }
     preloadGameAssets(gameId).then(() => {
-      if (!cancelled) setReady(true);
+      if (!cancelled) gate.markReady();
     });
     return () => {
       cancelled = true;
     };
-  }, [gameId]);
+  }, [gameId, gate.phase, gate.attempt, gate.markReady]);
 
-  return { ready };
+  const ready = gate.phase === "ready";
+
+  return {
+    ready,
+    phase: gate.phase as GameLoadPhase,
+    progress: gate.progress,
+    start: gate.start,
+    retry: gate.retry,
+  };
 }

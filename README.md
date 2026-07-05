@@ -22,7 +22,7 @@ Bonbon & 馬米親子 podcast《車車遊樂園》的官方 **看圖聽故事** 
 | 車車宇宙地圖 | [`/adventures`](./app/adventures/page.tsx) 鳥瞰群島園區地圖——五島滿版海洋、pan/zoom/click-to-zoom、點島 fly-to 開 dock（含該島故事清單）、鎖定島許願投稿（想聽的車車故事）、日夜天象 |
 | 看圖聽故事 | 全螢幕播放器、逐字即時字幕、可拖曳進度條、字幕字級切換 |
 | 主題模式 | 日間／夜晚／**跟隨系統**（預設與裝置 `prefers-color-scheme` 同步）；頂欄選單內可切換（Landing 頂欄固定陽光色） |
-| 車車遊樂園 | [`/games`](./app/games/page.tsx) — 4 款可玩小遊戲：Car Adventure、Block Drop（繽紛樂園）、Candy Match、Candy Kart；Landing 段內 CTA 入口 |
+| 車車遊樂園 | [`/games`](./app/games/page.tsx) — 4 款可玩小遊戲：Car Adventure、Block Drop（繽紛樂園）、Candy Match、Candy Kart；canvas 遊戲自動預載 sheet，**Candy Kart（Godot ~35MB WASM）進頁按需載入**，見 [GAME-PERFORMANCE.md](./docs/GAME-PERFORMANCE.md) |
 | 主題分類 | `/topic`、`/topic/[tag]` 靜態頁（SEO） |
 | 車種分類 | `/vehicles/[vehicle]` |
 | 訂閱／追蹤 | 頁尾 `ConnectHub`（Spotify／Apple 等） |
@@ -260,6 +260,7 @@ scripts/
 docs/
   GAMEKIT-ARCHITECTURE.md  GameKit 分層、import policy 與新增遊戲指南
   GAMEKIT-ART-BIBLE.md     GameKit 視覺方向
+  GAME-PERFORMANCE.md      遊戲載入策略（Candy Kart 按需 WASM 等）
 lib/
   platforms.ts          收聽平台連結
   gamekit/

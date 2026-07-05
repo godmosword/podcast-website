@@ -47,14 +47,15 @@ describe("game logic regressions", () => {
     expect(game).toContain("switchToRelaxedAndRestart");
   });
 
-  it("繽紛卡丁車 Host 驗證來源並走 gamekit 回報，含載入降級", () => {
+  it("繽紛卡丁車 Host 驗證來源並走 gamekit 回報，含按需載入", () => {
     const host = source("components/games/CandyKartIframeHost.tsx");
 
     expect(host).toContain("event.origin !== window.location.origin");
     expect(host).toContain("isCandyKartFinishMessage");
     expect(host).toContain("candyKartSessionFromFinish");
     expect(host).toContain("reportGameSession");
-    expect(host).toContain("LOAD_TIMEOUT_MS");
+    expect(host).toContain("manualStart: true");
+    expect(host).toContain("readGodotLoaderProgress");
   });
 
   it("繽紛卡丁車保留觸控方向、漂移與煞車控制", () => {
