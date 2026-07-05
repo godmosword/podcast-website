@@ -1,10 +1,11 @@
+/* engine 每幀寫 transform（translate3d 定位 + translate(-50%,-100%) 對齊），不動 left/top。 */
 .roamer {
   position: absolute;
   top: 0;
   left: 0;
   transform: translate(-50%, -100%);
   pointer-events: none;
-  will-change: left, top, z-index;
+  will-change: transform, z-index;
 }
 
 .mapSize {

@@ -77,11 +77,9 @@ export function pickDir(hy: number, current: RoamerDir): RoamerDir {
 }
 
 export type RoamerFrame = {
-  /** tile 本地像素：地面接觸點（陰影、z-index 用）。 */
+  /** tile 本地像素：地面接觸點（定位、陰影、z-index 用）。 */
   groundX: number;
   groundY: number;
-  leftPct: number;
-  topPct: number;
   flip: 1 | -1;
   dir: RoamerDir;
   bobPx: number;
@@ -129,8 +127,6 @@ export function computeFrame(
   return {
     groundX: P.x,
     groundY: P.y,
-    leftPct: (P.x / tileW) * 100,
-    topPct: (P.y / tileH) * 100,
     flip: sim.flip,
     dir: sim.dir,
     bobPx: bob,
@@ -142,38 +138,54 @@ export function computeFrame(
   };
 }
 
-function applyFrame(node: HTMLElement, frame: RoamerFrame): void {
-  node.style.left = `${frame.leftPct}%`;
-  node.style.top = `${frame.topPct}%`;
-  node.style.zIndex = String(frame.z);
+/** 每 roamer 的 DOM 節點快取（effect 建立一次），避免每幀 querySelector。 */
+type RoamerNodes = {
+  node: HTMLElement;
+  body: HTMLElement | null;
+  shadow: HTMLElement | null;
+  lastZ: number | null;
+  lastDir: RoamerDir | null;
+};
 
-  const body = node.querySelector<HTMLElement>("[data-roamer-body]");
-  if (body) {
-    body.style.transform =
-      `translateY(${frame.bobPx}px) rotate(${frame.bankDeg}deg) ` +
-      `scale(${frame.depthScale}) scaleX(${frame.flip})`;
-    body.dataset.dir = frame.dir;
+function buildNodeMap(layer: HTMLElement): Map<string, RoamerNodes> {
+  const map = new Map<string, RoamerNodes>();
+  for (const node of layer.querySelectorAll<HTMLElement>("[data-roamer-id]")) {
+    const id = node.dataset.roamerId;
+    if (!id) continue;
+    map.set(id, {
+      node,
+      body: node.querySelector<HTMLElement>("[data-roamer-body]"),
+      shadow: node.querySelector<HTMLElement>("[data-roamer-shadow]"),
+      lastZ: null,
+      lastDir: null,
+    });
   }
-
-  const shadow = node.querySelector<HTMLElement>("[data-roamer-shadow]");
-  if (shadow) {
-    shadow.style.transform = `translateX(-50%) scale(${frame.shadowScale})`;
-    shadow.style.opacity = String(frame.shadowOpacity);
-  }
+  return map;
 }
 
-function applyMapFrame(
-  layer: HTMLElement,
-  sim: RoamerSim,
-  stageW: number,
-  stageH: number,
-  dtMs: number,
-  now: number,
-) {
-  const el = layer.querySelector<HTMLElement>(`[data-roamer-id="${sim.roamer.id}"]`);
-  if (!el) return;
-  const frame = computeFrame(sim, stageW, stageH, dtMs, now);
-  applyFrame(el, { ...frame, z: mapDepthZ(frame.groundY, "roamer") });
+/** 定位改用 transform（合成層，不觸發 reflow）；z-index／data-dir 僅在變化時寫。 */
+function applyFrame(nodes: RoamerNodes, frame: RoamerFrame): void {
+  nodes.node.style.transform =
+    `translate3d(${frame.groundX}px, ${frame.groundY}px, 0) translate(-50%, -100%)`;
+  if (nodes.lastZ !== frame.z) {
+    nodes.node.style.zIndex = String(frame.z);
+    nodes.lastZ = frame.z;
+  }
+
+  if (nodes.body) {
+    nodes.body.style.transform =
+      `translateY(${frame.bobPx}px) rotate(${frame.bankDeg}deg) ` +
+      `scale(${frame.depthScale}) scaleX(${frame.flip})`;
+    if (nodes.lastDir !== frame.dir) {
+      nodes.body.dataset.dir = frame.dir;
+      nodes.lastDir = frame.dir;
+    }
+  }
+
+  if (nodes.shadow) {
+    nodes.shadow.style.transform = `translateX(-50%) scale(${frame.shadowScale})`;
+    nodes.shadow.style.opacity = String(frame.shadowOpacity);
+  }
 }
 
 type UseRoamerSimOptions = {
@@ -185,6 +197,23 @@ type UseRoamerSimOptions = {
   paused: boolean;
 };
 
+/** 依座標空間計算 frame（map 層 z 改用全圖深度）並套用到快取節點。 */
+function applySim(
+  nodes: RoamerNodes,
+  sim: RoamerSim,
+  space: CoordSpace,
+  dtMs: number,
+  now: number,
+): void {
+  const w = space.kind === "tile" ? space.tileW : space.stageW;
+  const h = space.kind === "tile" ? space.tileH : space.stageH;
+  const frame = computeFrame(sim, w, h, dtMs, now);
+  applyFrame(
+    nodes,
+    space.kind === "map" ? { ...frame, z: mapDepthZ(frame.groundY, "roamer") } : frame,
+  );
+}
+
 export function useRoamerSim({
   roamers,
   routes,
@@ -195,6 +224,7 @@ export function useRoamerSim({
 }: UseRoamerSimOptions) {
   const routeMapRef = useRef<Map<string, RouteMeta> | null>(null);
   const simsRef = useRef<RoamerSim[]>([]);
+  const nodesRef = useRef<Map<string, RoamerNodes>>(new Map());
   const rafRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number | null>(null);
 
@@ -221,17 +251,11 @@ export function useRoamerSim({
     const layer = layerRef.current;
     if (!layer) return;
 
+    nodesRef.current = buildNodeMap(layer);
     const now = performance.now();
-    if (space.kind === "tile") {
-      for (const sim of simsRef.current) {
-        const el = layer.querySelector<HTMLElement>(`[data-roamer-id="${sim.roamer.id}"]`);
-        if (!el) continue;
-        applyFrame(el, computeFrame(sim, space.tileW, space.tileH, 16, now));
-      }
-    } else {
-      for (const sim of simsRef.current) {
-        applyMapFrame(layer, sim, space.stageW, space.stageH, 16, now);
-      }
+    for (const sim of simsRef.current) {
+      const nodes = nodesRef.current.get(sim.roamer.id);
+      if (nodes) applySim(nodes, sim, space, 16, now);
     }
   }, [roamers, routes, space, layerRef]);
 
@@ -244,39 +268,26 @@ export function useRoamerSim({
         const dt = Math.min(now - last, MAX_DT_MS);
         lastTimeRef.current = now;
 
-        if (dt > 0) {
-          const layer = layerRef.current;
-          if (layer) {
-            for (const sim of simsRef.current) {
-              const { roamer, route } = sim;
-              let dist = sim.distance + roamer.speed * (dt / 1000) * sim.direction;
+        if (dt > 0 && layerRef.current) {
+          for (const sim of simsRef.current) {
+            const { roamer, route } = sim;
+            let dist = sim.distance + roamer.speed * (dt / 1000) * sim.direction;
 
-              if (route.pingpong) {
-                if (dist >= route.length) {
-                  dist = route.length;
-                  sim.direction = -1;
-                } else if (dist <= 0) {
-                  dist = 0;
-                  sim.direction = 1;
-                }
-              } else {
-                dist = ((dist % route.length) + route.length) % route.length;
-              }
-              sim.distance = dist;
-            }
-
-            if (space.kind === "tile") {
-              for (const sim of simsRef.current) {
-                const el = layer.querySelector<HTMLElement>(
-                  `[data-roamer-id="${sim.roamer.id}"]`,
-                );
-                if (el) applyFrame(el, computeFrame(sim, space.tileW, space.tileH, dt, now));
+            if (route.pingpong) {
+              if (dist >= route.length) {
+                dist = route.length;
+                sim.direction = -1;
+              } else if (dist <= 0) {
+                dist = 0;
+                sim.direction = 1;
               }
             } else {
-              for (const sim of simsRef.current) {
-                applyMapFrame(layer, sim, space.stageW, space.stageH, dt, now);
-              }
+              dist = ((dist % route.length) + route.length) % route.length;
             }
+            sim.distance = dist;
+
+            const nodes = nodesRef.current.get(sim.roamer.id);
+            if (nodes) applySim(nodes, sim, space, dt, now);
           }
         }
       } else {

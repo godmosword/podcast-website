@@ -6,15 +6,18 @@
   z-index: 2;
 }
 
-/* roamer 節點：bottom-center 對齊地面接觸點（engine 設 left/top/z-index）。 */
+/* roamer 節點：bottom-center 對齊地面接觸點。engine 每幀寫 transform
+   （translate3d 定位 + translate(-50%,-100%) 對齊），不動 left/top 避免 reflow。 */
 .roamer {
   position: absolute;
+  left: 0;
+  top: 0;
   width: 15%;
   aspect-ratio: 1.25;
   height: auto;
   transform: translate(-50%, -100%);
   pointer-events: none;
-  will-change: left, top, z-index;
+  will-change: transform, z-index;
 }
 
 /* 接地陰影：獨立於車身，不隨 bob 浮動；engine 只縮放它（hop 起伏感）。 */
