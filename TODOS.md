@@ -94,7 +94,7 @@
 `ZoneWishForm` 收 email 與自由文字卻無隱私句（`d9524c3` 剛擴充 story 投稿，風險放大）：送出鈕下加家長向說明、message placeholder 提示勿含個資；順帶 footer「節目數據」「使用條款」padding 補到 ≥44px（收斂「小項 polish」同條目）。不動 API/schema。
 
 ### ~~W27-3 森林小島 magenta 暈圈修復~~　`asset · S · 無`　〔review+design〕 ✅
-= 下方既有條目「森林小島底部洋紅色暈圈」，W27 週報將其提升優先。`16e5349` `a706842`
+= 下方既有條目「森林小島底部洋紅色暈圈」，W27 週報將其提升優先。`c33ebb3` `ea49200`
 
 ---
 
@@ -123,26 +123,26 @@ SoundOn 單集 show notes 應回鏈官網單集 URL（含可分享摘要與看�
 > **2026-07-04 更新：** Map v6（`4f496c9`，forest 島＋click-to-zoom＋新 bottom sheet＋海天融接）已落地，下列宇宙地圖三項的「universe 改動落地」前置已解除，但需**對照 v6 重新驗證**是否仍成立（sheet 流程與縮放行為已改）。
 
 ### ~~森林小島底部洋紅色暈圈（v6 資產 bug）~~　`asset · S · 無`　〔design〕 ✅
-正式站 `/adventures` 森林小島底緣有一圈 magenta 殘留（生圖 chroma-key 去背不完全，烘進 `public/adventures/zones/forest*.png/webp`）。**已修**：`npm run fix:forest-zone`（boundary flood magenta predicate + despill，重產 webp），`verify:zone-art` 加 fringe=0 迴歸斷言。`16e5349` `a706842`
+正式站 `/adventures` 森林小島底緣有一圈 magenta 殘留（生圖 chroma-key 去背不完全，烘進 `public/adventures/zones/forest*.png/webp`）。**已修**：`npm run fix:forest-zone`（boundary flood magenta predicate + despill，重產 webp），`verify:zone-art` 加 fringe=0 迴歸斷言。`c33ebb3` `ea49200`
 
 ### ~~宇宙地圖 zone sheet 主 CTA 層級~~　`design · S · universe 改動落地`　〔design〕 ✅
-車車樂園 sheet 四顆入口按鈕視覺權重相同，違反 one-primary-CTA；「全部故事」改 landing CTA 橘實色主按鈕、grid 整行置頂，其餘維持次要。日夜驗證。`5b65a0d`
+車車樂園 sheet 四顆入口按鈕視覺權重相同，違反 one-primary-CTA；「全部故事」改 landing CTA 橘實色主按鈕、grid 整行置頂，其餘維持次要。日夜驗證。`99e5379`
 
 ### 宇宙地圖 focus 外框形狀　`design · S · universe 改動落地`　〔design+a11y〕
 島嶼 button 的 `:focus-visible` 是貼齊整個不規則島的巨大圓角矩形（Escape 關 sheet 後特別明顯，像破圖）；sheet 開啟自動聚焦關閉鈕也出現粗黑框。改：focus 樣式套在路標 label 或柔和 box-shadow ring；sheet 初始焦點移到 dialog 容器（`tabindex="-1"`）。保留可見 focus，只改形狀。
-**部分完成**：島嶼 focus ring 已改 `tileStack::after` 橢圓雙環（日 `--ink`／夜 `--c-yellow`，跟隨 float/jelly）`29fa67a`。**剩餘**：sheet 初始焦點移到 dialog 容器（tabindex=-1）。
+**部分完成**：島嶼 focus ring 已改 `tileStack::after` 橢圓雙環（日 `--ink`／夜 `--c-yellow`，跟隨 float/jelly）`5574636`。**剩餘**：sheet 初始焦點移到 dialog 容器（tabindex=-1）。
 
 ### ~~手機版地圖初始構圖 letterbox／舞台硬邊~~　`design · M`　〔design〕 ✅
 **已由「海洋滿版」（map-fullbleed task-1~4）解決**：sea rect 以 SEA_BLEED=7200 外擴滿版、移除 rx=40 圓角與 seaHazeTop 接縫；視差層改近景頂層雲（刪遠島剪影）、日月改 screen-space 固定天象（z:3）。相機 fit 行為不變（fitScaleFor 抽純函式+測試）。驗證：{375/1280}×{日/夜}×{fit/MIN_SCALE/pan} 截圖矩陣、prod-mode deep link + e2e 10/10。`8ea28eb` `3b13a55` `b83e48d` `71f0f28`
 
 ### 宇宙地圖 dev 模式兩個既有問題（v6，非 map-fullbleed 引入）　`bug · S · 無`　〔eng〕
-① ~~console error「button cannot contain a nested button」×2~~ ✅ **已修**：確認即 hydration #418 根因（正式站可重現、本地 prod build 修後 console 乾淨）；許願 button 改兄弟 wishLayer 鏡像 tile 定位。`ce333c9`。② dev 模式 `?zone=` deep link 不開 sheet（production build 正常；baseline bff71ed 同樣重現，疑 StrictMode 雙效應與 openTimer 互動）——仍開放。
+① ~~console error「button cannot contain a nested button」×2~~ ✅ **已修**：確認即 hydration #418 根因（正式站可重現、本地 prod build 修後 console 乾淨）；許願 button 改兄弟 wishLayer 鏡像 tile 定位。`6c54c93`。② dev 模式 `?zone=` deep link 不開 sheet（production build 正常；baseline bff71ed 同樣重現，疑 StrictMode 雙效應與 openTimer 互動）——仍開放。
 
 ### Landing 無 `<h1>`　`design · S · 無`　〔seo+a11y〕
 首頁 headings 從 h2 開始（四段 segment 標題）；第一段標題可升級 h1 或另加 sr-only h1。`components/landing/LandingSegment.tsx`。
 
 ### 小項（polish）
-- ~~鎖定島 sheet「🔔」emoji 圖示與全站 SVG 語彙不一致，改 inline SVG 鈴鐺。~~〔design〕 ✅ `1f26327`
+- ~~鎖定島 sheet「🔔」emoji 圖示與全站 SVG 語彙不一致，改 inline SVG 鈴鐺。~~〔design〕 ✅ `4350ce2`
 - 單集頁車種 chip 顯示「其他」= 資料 fallback 外洩到 UI；無車種時隱藏 chip。〔content+eng〕
 - footer「節目數據」「使用條款」觸控高度 20px（<44px）。〔a11y〕
 - landing hero jpg（~300KB/張）可轉 WebP 降首屏灰底時間（手機冷載入 ~3s 才出圖，圖已是 eager+fetchpriority=high，剩資產重量）。〔perf〕
