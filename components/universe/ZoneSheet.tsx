@@ -127,7 +127,7 @@ export default function ZoneSheet({ zone, onClose, zoneStories }: ZoneSheetProps
             {carParkLinks.map((link) => (
               <a
                 key={link.href}
-                className={styles.linkBtn}
+                className={link.href === "/stories" ? styles.linkBtnPrimary : styles.linkBtn}
                 href={link.href}
                 onClick={() => trackUniverseSheetLink(zone.id, link.href)}
                 {...(link.external

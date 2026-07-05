@@ -146,6 +146,44 @@
   outline-offset: 2px;
 }
 
+/* 主 CTA「全部故事」：沿用 landing CTA 橘色漸層，整行置頂（其餘三顆為次要） */
+.linkBtnPrimary {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-weight: 800;
+  text-align: center;
+  text-decoration: none;
+  color: var(--landing-cta-fg, #7a4012);
+  background: linear-gradient(
+    180deg,
+    var(--landing-cta-from, #ff9500) 0%,
+    var(--landing-cta-to, #ff7a00) 100%
+  );
+  border: 2px solid rgba(180, 120, 60, 0.32);
+  box-shadow: 0 4px 0 var(--landing-cta-shadow, rgba(180, 110, 50, 0.32)),
+    0 8px 18px rgba(120, 80, 40, 0.18);
+}
+
+.linkBtnPrimary:hover {
+  filter: brightness(1.05);
+}
+
+.linkBtnPrimary:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+.linkBtnPrimary:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
 .stub {
   display: flex;
   flex-direction: column;
