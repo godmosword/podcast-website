@@ -5,14 +5,14 @@ import {
 } from "@/lib/games/candy-kart/tracks";
 
 /** Kart 榜單分數：時間越短分數越高。 */
-export function kartScoreFromTotalMs(totalMs: number): number {
+function kartScoreFromTotalMs(totalMs: number): number {
   if (!Number.isFinite(totalMs) || totalMs <= 0) return 0;
   return Math.floor(1_000_000 / totalMs);
 }
 
 // ── 繽紛卡丁車（Candy Kart / Godot）協定 ──
 
-export const CANDY_KART_MESSAGE_SOURCE = "cheche-candy-kart" as const;
+const CANDY_KART_MESSAGE_SOURCE = "cheche-candy-kart" as const;
 
 /** Godot 端載入完成（父頁據此關閉 loading 畫面）。 */
 export type CandyKartReadyMessage = {

@@ -5,7 +5,6 @@ import {
   saveGameProfileToStore,
 } from "@/lib/progress-store";
 import {
-  applyGrantStars,
   createEmptyEconomy,
   migrateV2ToV3,
 } from "./economy";
@@ -93,19 +92,6 @@ export function recordMedal(
     ...profile,
     medals: { ...profile.medals, [gameId]: arr },
   };
-}
-
-export function addStars(profile: PlayerProfile, amount: number): PlayerProfile {
-  if (amount <= 0) return profile;
-  return applyGrantStars(profile, {
-    id: `legacy:add:${getLifetimeStars(profile)}:${amount}`,
-    amount,
-    source: "legacy:addStars",
-  });
-}
-
-function getLifetimeStars(profile: PlayerProfile): number {
-  return profile.economy?.lifetimeStars ?? profile.stars ?? 0;
 }
 
 export function unlockVehicle(profile: PlayerProfile, vehicleId: string): PlayerProfile {

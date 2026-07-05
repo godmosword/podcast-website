@@ -72,25 +72,3 @@ export function saveGameKitSettings(settings: GameKitSettings): void {
   window.dispatchEvent(new CustomEvent(GAMEKIT_SETTINGS_EVENT, { detail: settings }));
   window.dispatchEvent(new CustomEvent(PROGRESS_CHANGE_EVENT));
 }
-
-export function setKidsMode(enabled: boolean): GameKitSettings {
-  const next = { ...loadGameKitSettings(), kidsMode: enabled };
-  saveGameKitSettings(next);
-  return next;
-}
-
-export function setBlockDropDifficulty(
-  difficulty: BlockDropDifficulty,
-): GameKitSettings {
-  const next = { ...loadGameKitSettings(), blockDropDifficulty: difficulty };
-  saveGameKitSettings(next);
-  return next;
-}
-
-export function setBlockDropSpecialMode(
-  specialMode: BlockDropSpecialMode,
-): GameKitSettings {
-  const next = { ...loadGameKitSettings(), blockDropSpecialMode: specialMode };
-  saveGameKitSettings(next);
-  return next;
-}

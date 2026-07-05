@@ -8,7 +8,7 @@ Bonbon & 馬米親子 podcast《車車遊樂園》的官方 **看圖聽故事** 
 - **版本：** [1.3.0](./CHANGELOG.md) — 詳見 [CHANGELOG.md](./CHANGELOG.md)
 - **待辦與路線圖：** [TODOS.md](./TODOS.md)（成長 A/B + STEM 四階段）
 - **每週設計評審：** [proposals/](./proposals/)（訊號驅動的迭代提案週報，決策記錄 ✅/❌/⏸ 留檔）
-- **競品與設計研究：** [RESEARCH.md](./RESEARCH.md)（Hey Clay phygital、**四款 pixel 遊戲精進**、craft 等）
+- **競品與設計研究：** [RESEARCH.md](./RESEARCH.md)（Open-Web Episode Hub、YouTube 上架 SOP、低壓親子體驗原則）
 - **儲存庫：** [GitHub 公開](https://github.com/godmosword/podcast-website)（程式碼 MIT）— `public/stories/`、`public/characters/` 內音訊與插圖**禁止再散布**（見下方授權與免責）
 - **授權：** 程式碼 [MIT](./LICENSE) · 網站條文 [/legal](./app/legal/page.tsx) · 維護者全文 [DISCLAIMER.md](./DISCLAIMER.md)
 - **Agent 編排：** [docs/AGENT-WORKFLOW.md](./docs/AGENT-WORKFLOW.md) · Domain：[docs/AGENT-DOMAIN.md](./docs/AGENT-DOMAIN.md)
@@ -22,7 +22,7 @@ Bonbon & 馬米親子 podcast《車車遊樂園》的官方 **看圖聽故事** 
 | 車車宇宙地圖 | [`/adventures`](./app/adventures/page.tsx) 鳥瞰群島園區地圖——五島滿版海洋、pan/zoom/click-to-zoom、點島 fly-to 開 dock（含該島故事清單）、鎖定島許願投稿（想聽的車車故事）、日夜天象 |
 | 看圖聽故事 | 全螢幕播放器、逐字即時字幕、可拖曳進度條、字幕字級切換 |
 | 主題模式 | 日間／夜晚／**跟隨系統**（預設與裝置 `prefers-color-scheme` 同步）；頂欄選單內可切換（Landing 頂欄固定陽光色） |
-| 車車遊樂園 | [`/games`](./app/games/page.tsx) — 4 款原創小遊戲（車車大冒險、繽紛方塊、車車卡丁車、海盜卡丁車大賽）；Landing 段內 CTA 入口 |
+| 車車遊樂園 | [`/games`](./app/games/page.tsx) — 4 款可玩小遊戲：Car Adventure、Block Drop（繽紛樂園）、Candy Match、Candy Kart；Landing 段內 CTA 入口 |
 | 主題分類 | `/topic`、`/topic/[tag]` 靜態頁（SEO） |
 | 車種分類 | `/vehicles/[vehicle]` |
 | 訂閱／追蹤 | 頁尾 `ConnectHub`（Spotify／Apple 等） |
@@ -133,9 +133,9 @@ npm run build
 |------|------|
 | `app/studio/page.tsx` | 節目數據中心頁面 |
 | `lib/studio/platforms.ts` | 各平台**後台** URL（含 SoundOn，不進公開 ConnectHub） |
-| `data/studio-metrics.json` | API 指標快照（初期為空，結構見 `lib/studio/types.ts`） |
+| `components/studio/EngagementMetricsPanel.tsx` | 僅讀此瀏覽器 localStorage 的互動驗收數據 |
 
-**第二期（規劃）：** `scripts/sync-studio-metrics.ts` 從各平台 API 寫入 `studio-metrics.json`，卡片上的播放／聽眾等數字會自動顯示。目前請用各平台「開啟後台」捷徑查看完整報表。
+Studio 不保留未實作 API 指標或 placeholder metrics；跨平台完整報表請用各平台「開啟後台」捷徑查看。
 
 ## Apple Podcast 自動同步
 
@@ -248,7 +248,8 @@ components/
   StoryMeta.tsx         內頁 EP + 時長
   decor/                SVG 裝飾
 data/
-  stories.ts            手動集 + apple-synced 合併
+  content.ts            Story 查詢 API；合併手動集、Apple 同步與 sidecar 資料
+  stories.ts            手動維護故事原始資料
   apple-synced.json     GHA／sync 腳本寫入的新集
   apple-sync.defaults.json
 scripts/
@@ -256,6 +257,9 @@ scripts/
   lib/apple-rss.ts      RSS 解析與摘要清理
   lib/apple-sync-profile.ts
   subset_font.py 等     字型子集、圖示產生器
+docs/
+  GAMEKIT-ARCHITECTURE.md  GameKit 分層、import policy 與新增遊戲指南
+  GAMEKIT-ART-BIBLE.md     GameKit 視覺方向
 lib/
   platforms.ts          收聽平台連結
   gamekit/
@@ -263,6 +267,7 @@ lib/
     runtime/            渲染、loop、輸入、音訊與程序圖塊
     progress/           存檔、設定、獎牌與跨遊戲進度
     games/              大冒險關卡與 Candy Kart bridge
+    types.ts            四款遊戲與進度資料型別；root 只放跨層型別
   social.ts             社群連結
   feed.ts               RSS 產生
   site-url.ts           站點絕對網址

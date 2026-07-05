@@ -206,13 +206,3 @@ export const TILE_INDEX = {
   star: 4,
   spike: 5,
 } as const;
-
-export const BLOCK_INDEX: Record<string, number> = {
-  I: 0,
-  O: 1,
-  T: 2,
-  S: 3,
-  Z: 4,
-  J: 5,
-  L: 6,
-};

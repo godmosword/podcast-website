@@ -2,7 +2,7 @@ import { MAX_PIXEL_SCALE } from "./constants";
 import { snapPixel } from "./palette";
 import type { ViewportSize } from "../types";
 
-export type IntegerScaleResult = {
+type IntegerScaleResult = {
   scale: number;
   displayWidth: number;
   displayHeight: number;
@@ -14,7 +14,7 @@ export type IntegerScaleResult = {
  * 計算最近鄰整數放大倍率，使 viewport 置中且 letterbox。
  * 純函式，可單元測試。
  */
-export function computeIntegerScale(
+function computeIntegerScale(
   viewport: ViewportSize,
   containerWidth: number,
   containerHeight: number,

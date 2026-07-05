@@ -10,7 +10,7 @@
 //   - manualStories：下方手動維護（EP1–6，slug 為 ep-N）
 //   - apple-synced.json：npm run sync:apple 從 Apple Podcast 追加（MVP 單圖）
 //
-// 查詢 API 請使用 data/content.ts（getStories / getAllContent）。
+// 查詢 API 請使用 data/content.ts（getStories / getStory / storiesByNewest）。
 // ============================================================
 
 /** 手動維護的故事原始資料（不含 kind；由 content.ts 補齊）。 */

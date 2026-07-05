@@ -1,7 +1,7 @@
 # Repository Audit
 
-掃描日期：2026-06-25
-基準：`main` at `24ef43c`
+掃描日期：2026-07-05
+基準：`origin/main` at `2355a44`
 
 本報告整理目前程式庫的執行邏輯、內容自動化入口與本次 dead-code 清理證據。清理原則是只移除「沒有執行入口且沒有任何外部引用」或由 TypeScript 編譯器直接確認未使用的程式，不改變網站可見行為。
 
@@ -103,6 +103,7 @@ Game Kit 已收斂為單一、無 barrel 的明確分層：
 - `lib/gamekit/runtime/`：固定步進 loop、輸入、像素渲染、調色盤、音訊與程序圖塊。
 - `lib/gamekit/progress/`：存檔 migration、設定、獎牌、車庫與 session 回報。
 - `lib/gamekit/games/`：大冒險關卡契約與 Candy Kart iframe bridge。
+- `docs/GAMEKIT-ARCHITECTURE.md`：GameKit 分層、import policy、新遊戲擴充流程與四款遊戲對照。
 
 所有消費端直接匯入 leaf module。Godot iframe 完成比賽後，`CandyKartIframeHost` 驗證同源訊息，再經 `games/candy-kart-bridge.ts` 與 `progress/session.ts` 寫入既有進度 schema。
 
@@ -116,6 +117,7 @@ Game Kit 已收斂為單一、無 barrel 的明確分層：
 - `npm run check`：依序執行 unit tests、episode verifier、production build。
 - `npm run test:e2e`：Playwright 以 production build 啟動 Chromium smoke tests。
 - `npx tsc --noEmit --noUnusedLocals --noUnusedParameters`：本次掃描額外使用的嚴格未使用宣告檢查。
+- `npx knip --production --reporter compact`：搭配 `knip.json`，只忽略已分類的 CLI scripts、framework/runtime entrypoints 與非本輪 subsystem export false positives。
 
 ## Dead-code evidence and removals
 
@@ -144,13 +146,15 @@ Game Kit 已收斂為單一、無 barrel 的明確分層：
 - `hooks/useProgress.ts`
 - `hooks/useSwipeGesture.ts`
 
-已移除的未使用宣告：
+已移除的未使用宣告與 test-only API surface：
 
 - `components/games/BlockDropGame.tsx`：`MAX_BOARD_W`
 - `components/games/CarPlatformer.tsx`：`Enemy`
 - `components/landing/LandingScrollContext.tsx`：`RefObject` import
-- `lib/gamekit/chiptune-bgm.ts`：`C4`、`D4`、`E4`
-- `lib/gamekit/gamekit.test.ts`：session test 內未使用的 `base`
+- `lib/gamekit/runtime/chiptune-bgm.ts`：`C4`、`D4`、`E4`
+- `lib/gamekit/gamekit.test.ts`：已拆到 `runtime/`、`progress/`、`games/` 對應邊界測試。
+- `lib/gamekit/*`：移除無 production consumer 的 exported constants、setter shortcuts、legacy spend/add-stars helpers 與測試專用 exports；保留內部實作與四款遊戲正式入口。
+- `data/content.ts`：泛用 `ContentBase` 收斂為 `StoryBase`，不恢復 `Craft`／`Printable`／`Content` 預留模型。
 
 保留的隱式入口包括 `app/games/**/opengraph-image.tsx`、`app/robots.ts`、`app/sitemap.ts`、`scripts/check-sync-fresh.ts` 與 `scripts/sync-alert.ts`。
 
@@ -172,7 +176,8 @@ Game Kit 已收斂為單一、無 barrel 的明確分層：
 
 ## Remaining maintenance risks
 
-- `components/games/BlockDropGame.tsx` 超過 2,000 行，`CarPlatformer.tsx`、`StoryPlayer.tsx` 與 `CandyMatchGame.tsx` 也偏大；後續修改容易產生跨責任回歸，但本次不做無關重構。
-- `tsconfig.json` 尚未預設啟用 `noUnusedLocals` / `noUnusedParameters`，dead declarations 目前不會在一般 build 中阻擋。
+- `components/games/BlockDropGame.tsx`、`CarPlatformer.tsx`、`StoryPlayer.tsx` 與 `CandyMatchGame.tsx` 仍偏大；後續修改需靠 focused tests 防止跨責任回歸。
+- `tsconfig.json` 尚未預設啟用 `noUnusedLocals` / `noUnusedParameters`，因此 consolidation 驗證需額外執行 strict unused check。
+- `npx knip --production` 會把 CLI scripts、Next.js convention entries、runtime static assets 與部分測試輔助 export 列為候選；刪除前仍需以 npm scripts、GitHub Actions、Next.js convention 與 `rg` 交叉確認。
 - Next.js metadata routes 與 GitHub Actions 腳本屬隱式入口；未來執行 automated dead-code 工具時，必須持續維護 entry-point allowlist。
 - 本地 backup/cursor 分支不是 worktree metadata，但仍占用 Git refs；應由維護者確認內容已備份或整合後再刪除。

@@ -10,7 +10,7 @@ import { canonicalStorySlug } from "@/lib/story-slug-aliases";
 import { storyCoverPath } from "@/lib/story-utils";
 import type { ZoneId } from "./universe-zones";
 
-type ContentBase = {
+type StoryBase = {
   slug: string;
   title: string;
   date: string;
@@ -20,7 +20,7 @@ type ContentBase = {
   color?: string;
 };
 
-export type Story = ContentBase & {
+export type Story = StoryBase & {
   kind: "story";
   emoji: string;
   color: string;

@@ -1,8 +1,8 @@
 import type { Economy, PlayerProfile, StarLedgerEntry } from "../types";
 import { vehiclesUnlockedAt } from "./garage";
 
-export const LEDGER_MAX = 200;
-export const MIGRATED_V2_LEDGER_ID = "system:migrated-v2";
+const LEDGER_MAX = 200;
+const MIGRATED_V2_LEDGER_ID = "system:migrated-v2";
 
 export type StarLedgerInput = {
   id: string;
@@ -10,10 +10,6 @@ export type StarLedgerInput = {
   source: string;
   at?: string;
 };
-
-export type SpendResult =
-  | { ok: true; profile: PlayerProfile }
-  | { ok: false; profile: PlayerProfile };
 
 export function createEmptyEconomy(): Economy {
   return { lifetimeStars: 0, balance: 0, ledger: [] };
@@ -130,34 +126,4 @@ export function applyGrantStars(
   };
 
   return syncGarageUnlocks(withEconomy(profile, nextEconomy));
-}
-
-export function applySpendStars(
-  profile: PlayerProfile,
-  entry: StarLedgerInput,
-): SpendResult {
-  const amount = entry.amount;
-  if (amount >= 0) return { ok: false, profile };
-
-  const economy = getEconomyFromProfile(profile);
-  if (economy.ledger.some((e) => e.id === entry.id)) {
-    return { ok: true, profile };
-  }
-
-  const spend = Math.abs(amount);
-  if (economy.balance < spend) {
-    return { ok: false, profile };
-  }
-
-  const at = entry.at ?? new Date().toISOString();
-  const nextEconomy: Economy = {
-    lifetimeStars: economy.lifetimeStars,
-    balance: economy.balance - spend,
-    ledger: trimLedger([
-      ...economy.ledger,
-      { id: entry.id, amount, source: entry.source, at },
-    ]),
-  };
-
-  return { ok: true, profile: withEconomy(profile, nextEconomy) };
 }

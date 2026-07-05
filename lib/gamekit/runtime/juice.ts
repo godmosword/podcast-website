@@ -158,23 +158,3 @@ export class JuiceController {
     this.particles.burst(x, y, count, { color, size });
   }
 }
-
-/** 緩動：0→1 */
-export function easeOutQuad(t: number): number {
-  return 1 - (1 - t) * (1 - t);
-}
-
-export function easeOutCubic(t: number): number {
-  return 1 - (1 - t) ** 3;
-}
-
-/** 指數趨近 target（用於 UI 縮放、鏡頭等）。 */
-export function tweenToward(
-  current: number,
-  target: number,
-  speed: number,
-  dt: number,
-): number {
-  const t = 1 - Math.exp(-speed * dt);
-  return current + (target - current) * t;
-}

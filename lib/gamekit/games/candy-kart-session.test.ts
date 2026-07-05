@@ -1,10 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  CANDY_KART_MESSAGE_SOURCE,
   candyKartSessionFromFinish,
   isCandyKartFinishMessage,
   isCandyKartReadyMessage,
-  kartScoreFromTotalMs,
   type CandyKartFinishMessage,
 } from "./candy-kart-bridge";
 import {
@@ -15,7 +13,7 @@ import {
 import { reportGameSession } from "../progress/session";
 
 const validFinish: CandyKartFinishMessage = {
-  source: CANDY_KART_MESSAGE_SOURCE,
+  source: "cheche-candy-kart",
   type: "race-finish",
   trackId: "macaron-meadow",
   playerPos: 1,
@@ -56,7 +54,7 @@ describe("candy-kart iframe bridge", () => {
   it("驗證 ready 訊息", () => {
     expect(
       isCandyKartReadyMessage({
-        source: CANDY_KART_MESSAGE_SOURCE,
+        source: "cheche-candy-kart",
         type: "ready",
       }),
     ).toBe(true);
@@ -71,7 +69,7 @@ describe("candy-kart 三星／分數映射", () => {
   it("冠軍＋時間達標＋收齊星星 → 三星全亮", () => {
     const result = candyKartSessionFromFinish(validFinish);
     expect(result.gameId).toBe("candy-kart");
-    expect(result.score).toBe(kartScoreFromTotalMs(200_000));
+    expect(result.score).toBe(5);
     expect(result.levelIndex).toBe(0);
     expect(result.cleared).toBe(true);
     expect(result.flawless).toBe(true);
@@ -164,7 +162,7 @@ describe("candy-kart gamekit 閉環", () => {
 
   it("reportGameSession 寫入 candy-kart 最佳分數與三星獎牌", () => {
     const profile = reportGameSession(candyKartSessionFromFinish(validFinish));
-    expect(profile.bests["candy-kart"]).toBe(kartScoreFromTotalMs(200_000));
+    expect(profile.bests["candy-kart"]).toBe(5);
     expect(profile.gamesPlayed["candy-kart"]).toBe(true);
     expect(profile.medals["candy-kart"]?.[0]).toBe(7); // 三星 bit flags
   });

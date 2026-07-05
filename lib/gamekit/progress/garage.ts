@@ -1,12 +1,12 @@
 /** 車庫解鎖：累積星星數解鎖故事車車朋友。 */
-export type GarageVehicle = {
+type GarageVehicle = {
   id: string;
   name: string;
   emoji: string;
   starsRequired: number;
 };
 
-export const GARAGE_VEHICLES: GarageVehicle[] = [
+const GARAGE_VEHICLES: GarageVehicle[] = [
   { id: "小黃", name: "小黃", emoji: "🚗", starsRequired: 0 },
   { id: "怪獸卡車", name: "怪獸卡車", emoji: "🚚", starsRequired: 3 },
   { id: "小紅賽車", name: "小紅賽車", emoji: "🏎️", starsRequired: 6 },

@@ -14,8 +14,8 @@ export type AudioBusConfig = {
   muted: boolean;
 };
 
-export const DEFAULT_MUSIC_VOLUME = 0.28;
-export const DEFAULT_SFX_VOLUME = 0.85;
+const DEFAULT_MUSIC_VOLUME = 0.28;
+const DEFAULT_SFX_VOLUME = 0.85;
 
 export type AudioBusNodes = {
   master: GainNode;

@@ -565,7 +565,7 @@ Phase 0–8 的探索已完成並在 2026-06-25 收斂。現行架構只保留�
 - `lib/gamekit/progress/`：設定、存檔 migration、獎牌與 session
 - `lib/gamekit/games/`：大冒險關卡與 Candy Kart bridge
 
-舊 Phase scaffolding（state machine、scene、pool、abilities、tilemap、Tiled loader、sprite adapter）已移除。歷史變更見 [CHANGELOG.md](./CHANGELOG.md)，現行規範見 [ART-BIBLE.md](./lib/gamekit/ART-BIBLE.md)。
+舊 Phase scaffolding（state machine、scene、pool、abilities、tilemap、Tiled loader、sprite adapter）已移除。歷史變更見 [CHANGELOG.md](./CHANGELOG.md)，現行規範見 [GAMEKIT-ART-BIBLE.md](./docs/GAMEKIT-ART-BIBLE.md)。
 
 ### ~~車車卡丁車 Kart P0 — Scaffold~~　`P3 · M · 無`　〔eng〕 ✅
 `kart-game/`（Vite+TS+Three）：固定步進、kinematic 方塊車、spline 練習道、跟隨相機、HUD；`npm run build:kart` → `public/kart/`；`/games/kart` iframe 嵌入。

@@ -49,30 +49,15 @@
 - **車車宇宙地圖 pan 手勢**：`useMapCamera` 在島嶼 `<button>` 上不 capture pointer，修復點島無法開 sheet 的問題
 - **Storyline 式 Landing Hub**：`/` 為四段 segment 入口（車車故事／睡前數綿羊／捏黏土／衛教宣導）；現 podcast 主頁搬至 **`/stories`**
 - **主題跟隨系統**：日間／夜晚切換新增「跟隨系統」選項；首次造訪預設與瀏覽器或手機 `prefers-color-scheme` 同步；`ThemeProvider` 監聽系統配色變更；FOUC 防閃 inline script 同步支援
-- **海盜卡丁車大賽（`/games/pirate-kart`）**：16-bit 像素 top-down 海盜賽車；`Kart` 類別、橢圓賽道碰撞、3 AI、圈數＋寶藏計分、Shift 張帆加速、空白鍵大砲；開始／結束畫面
-- **車車卡丁車（kart-game P1–P6）**：漂移手感調校、檢查點／圈速 HUD／小地圖、3 AI＋倒數＋結算、Web Audio BGM/SFX、標題／車庫／獎牌存檔、觸控／手把／reduced-motion、載入畫面與粒子池；`net/Net.ts` 多人 stub
-- **車車卡丁車（kart-game P0）**：獨立 Vite+Three.js 專案、arcade kinematic 方塊車＋spline 練習道、嵌入 `/games/kart`（iframe → `public/kart/`）
-- **Game Kit Phase 8**：`ObjectPool`、`preload` 資產暖機、`GameLoadingGate`、`useGameLoop` 固定步進＋渲染插值（car-adventure）；`/games` hub 預載；a11y layout
-- **Game Kit Phase 7**：`GameChrome` 暫停／設定外框、`GamePageShell`（跳過連結、a11y）、`useGameInput` Gamepad、`useGameKitSettings` 兒童模式（預設開啟）；四款接入
-- **Game Kit Phase 6**：跨遊戲 meta（`session`／`garage`／`stickers`、存檔 v2 與舊 best 遷移）；`/games` 世界地圖進度（`GamesWorldMap`、車庫、貼紙簿）；四款遊戲通關／結束時 `reportGameSession`
-- **Game Kit Phase 5**：`adventure-level`／`tiled-loader`（Tiled JSON → 關卡）；car-adventure 2 關可選；car-star 3 座迷宮可選
-- **Game Kit Phase 4**：juice 工具組（粒子／震動／頓幀／緩動）接入四款遊戲；手機操控優化（`useCoarsePointer`、`useSwipeGesture`、大按鈕、滑動手勢、safe-area）
-- **Game Kit Phase 3**：四款程序生成 chiptune 循環 BGM（`chiptune-bgm`）、`GameKitAudioBus` music/sfx 分軌混音、擴充 `useGameAudio(gameId)`；四款遊戲接入 BGM 與分頁暫停
-- **Game Kit Phase 2**：程序生成 sprite sheet／tileset（`procedural-sheets`、`assets`、`sprite-defs`、`tileset-draw`）；car-mission 卡車＋螢火虫動畫、car-adventure 地形／金幣／尖刺 tile、car-star 道路 tile 背景、block-drop 七色方塊 tile 皮膚
 - **營運管線文件**：`TODOS.md` 新增 SoundOn／Apple 同步四階段工作流、生圖通知方案（Issue／webhook／佇列）與 P2–P3 實作條目
-- **Game Kit Phase 1**：四款遊戲接入 `PixelGameCanvas`／`GamePixelBoard`、統一調色盤 bridge、整數倍像素放大；car-star／block-drop 格子縮放對齊 viewport
-- **Game Kit Phase 0**：`lib/gamekit/` 九大模組骨架、`PixelRenderer`／`GameLoop`／`InputManager`、`ART-BIBLE.md`、`PixelGameCanvas` + hook、單元測試
-- **遊樂園 pixel 精進方案**：`RESEARCH.md` + `TODOS.md` 新增 Game Kit 八階段路線、四款對標與驗收表；校正 `car-mission` 為三車道溫柔任務（非俯視賽車）
-- **競品研究筆記**：`RESEARCH.md` 收錄 Hey Clay App 架構拆解（phygital、分步教學、收藏解鎖）與車車遊樂園適用性評分；`TODOS.md` 同步 `craft` 手作教學、車庫圖鑑養成、phygital 第四原則與拍照分享待決策
-- **產品路線圖（互動故事 × 車車 STEM × 商業）**：`TODOS.md` 新增 STEM-P1～P4 四階段（互動提問、STEM 實驗室、家長端、freemium 訂閱）、三項設計原則、台灣市場定位與一頁總表；README 同步產品定位與遊樂園功能
-- **車車遊樂園 `/games`**：4 款原創小遊戲（車車吃星星、怪獸卡車溫柔任務、車車大冒險、繽紛方塊）；黏土風 SVG 縮圖、首頁馬卡龍入口
 - **版權合規**：`/legal`、字型 OFL、`THIRD_PARTY_NOTICES.md`、品牌圖示指示性使用、禁止素材再散布說明
 - **角色名冊擴充至 6 位定裝照**：`public/characters/` 新增 安安救護車／小紅賽車／怪獸卡車／東東挖土機，連同 鈴鈴清潔車／恐龍車多多 全數登記進 `data/characters.json`（含別名、車種、英文外觀描述）。外部準備的圖統一正規化為 **1400×1400 JPEG、小寫 `.jpg`**，檔名對齊 `safeName()`（去空白與符號、保留中日韓字與英數，如「怪獸卡車 Monster Truck」→ `怪獸卡車.jpg`，英文入 `aliases`）
 - README「每集劇情插圖」新增兩個實戰流程：**手動補定裝照**（自繪／外部生圖時的放圖＋正規化＋登記步驟）與**重抽單幕並指定角色（保留 Apple 封面）**——透過單張複製而非 `--approve`，避免覆蓋 Apple 原封面與重寫接線
 
 ### Changed
 
-- **Repository consolidation**：Game Kit 收斂為 `react/`、`runtime/`、`progress/`、`games/` 四層，全面使用 leaf imports；四款遊戲路由與既有進度 storage schema 保持相容
+- **Repository consolidation**：Game Kit 收斂為 `react/`、`runtime/`、`progress/`、`games/` 四層，根目錄只保留跨層型別並全面使用 leaf imports；移除無 production consumer 的 GameKit test-only exports，新增 `docs/GAMEKIT-ARCHITECTURE.md` 記錄邊界、import policy 與新遊戲擴充注意事項；四款遊戲路由與既有進度 storage schema 保持相容
+- **文件現況化**：README、DESIGN、Repository Audit 改寫為現行四款遊戲、Studio local metrics、Story-only content API 與 GameKit import policy。
 - 單集頁：收藏改 SVG 愛心圖示，與分享列（複製連結／LINE）同排對齊
 - ep-9 第 6 幕重抽為 鈴鈴清潔車＋恐龍車多多 同框（牙齒保健建議），以兩張定裝照當參考圖；封面 `01.jpg` 維持 Apple 原圖、`pageCount`／`captionTimes` 不變
 

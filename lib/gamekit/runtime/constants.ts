@@ -15,7 +15,7 @@ export const MAX_FRAME_STEPS = 8;
 export const MAX_PIXEL_SCALE = 4;
 
 /** 各款 Game Kit 遊戲固定內部解析度。 */
-export const GAME_VIEWPORTS: Record<GameKitGameId, ViewportSize> = {
+const GAME_VIEWPORTS: Record<GameKitGameId, ViewportSize> = {
   "block-drop": { width: 200, height: 360 },
   "car-adventure": { width: 320, height: 180 },
   // candy-kart 為 Godot iframe 遊戲，解析度由遊戲端自管；此值僅供型別完整

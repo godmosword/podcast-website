@@ -106,12 +106,3 @@ export function reportGameSession(result: GameSessionResult): PlayerProfile {
   }
   return profile;
 }
-
-export function gameMedalStars(
-  profile: PlayerProfile,
-  gameId: GameKitGameId,
-): number {
-  const flags = profile.medals[gameId];
-  if (!flags) return 0;
-  return flags.reduce((n, f) => n + medalCount(f), 0);
-}

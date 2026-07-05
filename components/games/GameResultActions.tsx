@@ -7,7 +7,7 @@ export type GameResultActionsProps = {
   replayLabel: ReactNode;
   replayStyle?: CSSProperties;
   replayClassName?: string;
-  /** 額外按鈕（例如海盜卡丁車「回主選單」） */
+  /** 額外按鈕（例如 iframe 遊戲的「回主選單」）。 */
   extraActions?: ReactNode;
   className?: string;
 };

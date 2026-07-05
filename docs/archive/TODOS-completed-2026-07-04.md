@@ -105,7 +105,7 @@ Landing 配色調亮（陽光暖橘 + 淺暖罩），保留日夜主題與 AA。
 **Completed:** `c9fb4ab` `f89fbdd` `f273298` `1d53115` `e69c00d` `66cb4b7`（2026-06）
 
 ### Game Kit Phase 0–8 歷史
-完成像素渲染、固定步進、輸入、音訊、juice、進度與遊戲外框探索。2026-06-25 依正式使用情況收斂為 `react/`、`runtime/`、`progress/`、`games/` 四層，刪除未出貨 scaffolding；詳見 CHANGELOG 與 `lib/gamekit/ART-BIBLE.md`。
+完成像素渲染、固定步進、輸入、音訊、juice、進度與遊戲外框探索。2026-06-25 依正式使用情況收斂為 `react/`、`runtime/`、`progress/`、`games/` 四層，刪除未出貨 scaffolding；詳見 CHANGELOG 與 `docs/GAMEKIT-ART-BIBLE.md`。
 **Completed:** main（2026-06）
 
 ### 每集分享鈕 + ConnectHub 訂閱優化

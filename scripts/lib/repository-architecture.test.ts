@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { join } from "node:path";
+import { join, relative } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const ROOT = process.cwd();
@@ -15,22 +15,16 @@ function walk(path: string): string[] {
   });
 }
 
+function sourceFiles(): string[] {
+  return ["app", "components", "hooks", "lib", "data", "scripts"]
+    .flatMap((dir) => walk(join(ROOT, dir)))
+    .filter((path) => /\.(ts|tsx)$/.test(path))
+    .filter((path) => !path.endsWith("scripts/lib/repository-architecture.test.ts"));
+}
+
 describe("repository architecture", () => {
   it("does not keep retired product feature symbols", () => {
-    const files = [
-      "app/layout.tsx",
-      "app/story/[slug]/page.tsx",
-      "app/story/[slug]/play/page.tsx",
-      "components/StoryPlayer.tsx",
-      "components/ThemeProvider.tsx",
-      "components/ThemeModeSwitch.tsx",
-      "components/story-filtering.ts",
-      "components/games/GameResultActions.tsx",
-      "components/home/HomeSectionRenderer.tsx",
-      "data/content.ts",
-      "data/home-sections.ts",
-    ];
-    const combined = files.filter(existsSync).map(source).join("\n");
+    const combined = sourceFiles().map((path) => readFileSync(path, "utf8")).join("\n");
 
     for (const retired of [
       "FEATURES.",
@@ -38,6 +32,8 @@ describe("repository architecture", () => {
       "CraftStep",
       "Printable",
       "getAllContent",
+      "type Content =",
+      "interface Content",
       "filterStoriesForVehicle",
       "toggleTheme",
       "subscribeBand",
@@ -69,13 +65,34 @@ describe("repository architecture", () => {
     expect(existsSync(join(ROOT, "lib/game-kit"))).toBe(false);
     expect(existsSync(join(ROOT, "lib/gamekit/index.ts"))).toBe(false);
 
-    const sources = ["app", "components", "hooks", "lib", "data", "scripts"]
-      .flatMap((dir) => walk(join(ROOT, dir)))
-      .filter((path) => /\.(ts|tsx)$/.test(path))
-      .map((path) => readFileSync(path, "utf8"))
-      .join("\n");
+    const gamekitRootEntries = readdirSync(join(ROOT, "lib/gamekit"), {
+      withFileTypes: true,
+    });
+    const rootGamekitFiles = gamekitRootEntries
+      .filter((entry) => entry.isFile())
+      .map((entry) => entry.name)
+      .sort();
+    const allowedRootFiles = new Set(["iframe-bridge.ts", "types.ts"]);
+    expect(rootGamekitFiles.every((file) => allowedRootFiles.has(file))).toBe(true);
+    expect(rootGamekitFiles).toContain("types.ts");
+
+    const rootGamekitDirs = gamekitRootEntries
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .sort();
+    expect(rootGamekitDirs).toEqual(["games", "progress", "react", "runtime"]);
+
+    const sources = sourceFiles().map((path) => readFileSync(path, "utf8")).join("\n");
 
     expect(sources).not.toMatch(/@\/lib\/game-kit(?:["'/])/);
     expect(sources).not.toMatch(/from\s+["']@\/lib\/gamekit["']/);
+
+    const gamekitSources = walk(join(ROOT, "lib/gamekit"))
+      .filter((path) => /\.(ts|tsx)$/.test(path))
+      .filter((path) => !path.endsWith(".test.ts"))
+      .map((path) => [relative(ROOT, path), readFileSync(path, "utf8")] as const);
+    for (const [path, text] of gamekitSources) {
+      expect(text, path).not.toMatch(/export\s+\*\s+from/);
+    }
   });
 });

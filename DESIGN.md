@@ -103,6 +103,8 @@ Bonbon & 馬米親子 podcast「看圖聽故事」網站的視覺與互動規範
 | `StoryMeta` | EP / 時長（標註） / 車種 chip |
 | `StoryPlayer` | 全螢幕黑底、字幕底板、底部控制列 |
 | `SiteFooter` | 家長說明 + 平台連結 |
+| `GamePageShell` | 四款遊戲共同外框，負責返回導覽、可及性與資產預載 |
+| `GameChrome` | 遊戲內暫停、音效與設定對話框 |
 
 ## 播放器狀態
 
@@ -110,6 +112,14 @@ Bonbon & 馬米親子 podcast「看圖聽故事」網站的視覺與互動規範
 2. **手動翻頁**：關閉跟讀後，左右 tap zone + swipe
 3. **播放完成**：再聽一次 / 回故事屋 / 下一集
 4. **載入中**：封面 skeleton 脈動
+
+## 遊戲架構規範
+
+- `/games` 只呈現四款可玩遊戲：Car Adventure、Block Drop（繽紛樂園）、Candy Match、Candy Kart；不放「製作中」或未承諾 placeholder。
+- Game Kit 只保留單一 `lib/gamekit/` 樹，分為 `react/`、`runtime/`、`progress/`、`games/` 與 `types.ts`。
+- Consumer 必須匯入明確 leaf path，例如 `@/lib/gamekit/react/useGameAudio`；不使用 `@/lib/gamekit` 根目錄或 barrel。
+- 詳細邊界、import policy 與新增遊戲流程見 [GAMEKIT-ARCHITECTURE.md](./docs/GAMEKIT-ARCHITECTURE.md)。
+- 遊戲進度、最佳分數、獎牌、星星、貼紙與 Candy Kart iframe bridge schema 屬相容性契約，不因 UI 或文件整理而變更。
 
 ## 新增故事檢查清單
 

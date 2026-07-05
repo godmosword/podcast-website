@@ -31,7 +31,7 @@ const A5 = 880;
 const R = 0;
 
 /** Game Kit 遊戲的程序生成 chiptune 主題（Phase 3 佔位，日後可換 BeepBox 匯出）。 */
-export const BGM_THEMES: Record<GameKitGameId, BgmTheme> = {
+const BGM_THEMES: Record<GameKitGameId, BgmTheme> = {
   "car-adventure": {
     bpm: 108,
     stepsPerBeat: 4,
@@ -100,7 +100,7 @@ export const BGM_THEMES: Record<GameKitGameId, BgmTheme> = {
   },
 };
 
-export function validateBgmTheme(theme: BgmTheme): boolean {
+function validateBgmTheme(theme: BgmTheme): boolean {
   if (theme.bpm <= 0 || theme.stepsPerBeat <= 0) return false;
   if (theme.melody.length === 0 || theme.bass.length === 0) return false;
   const len = theme.melody[0].length;
