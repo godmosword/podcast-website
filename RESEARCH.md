@@ -1,12 +1,87 @@
 # RESEARCH — 競品與設計研究筆記
 
-本文件收錄影響「車車遊樂園」產品方向的外部研究與競品拆解，供 roadmap 決策參考。對應待辦見 [TODOS.md](./TODOS.md)。
+本文件收錄影響「車車遊樂園」產品方向的外部研究與競品拆解，供產品判斷參考。對應待辦見 [TODOS.md](./TODOS.md)。
+
+---
+
+## 2026-07-05｜熱門 podcast 平台網站對標與本站開發方向
+
+來源：Apple Podcasts 官網／Apple Podcasts for Creators／Spotify for Creators support／Pocket Casts Blog／YouTube Blog／Podcast.co／Podbean
+關聯：單集頁 GEO、逐字稿／章節、YouTube 上架 SOP、低壓互動原則
+
+### 對標樣本與核心訊號
+
+| 平台 / 類型 | 觀察到的主打能力 | 對本站的啟發 |
+|---|---|---|
+| **Apple Podcasts** | 官網主軸是「listen / watch / read」：video、transcripts、章節探索、點文字跳播、播放速度與 Enhance Dialogue、訂閱與跨裝置／車載情境。來源：[Apple Podcasts](https://www.apple.com/apple-podcasts/)、[Transcripts on Apple Podcasts](https://podcasters.apple.com/support/5316-transcripts-on-apple-podcasts) | podcast 平台正在把音訊變成「可閱讀、可搜尋、可跳轉」的內容資產。本站已有 VTT/RSS transcript 與故事大綱，下一步應補公開逐字稿頁、章節深連結、片段分享。 |
+| **Spotify** | 支援自動逐字稿；聽眾可在 Now Playing 與 episode pages 看 transcript。Chapters 可讓聽眾從特定段落開始，也能由 transcript 產生。來源：[Managing episode transcripts](https://support.spotify.com/us/creators/article/managing-episode-transcripts-on-spotify/)、[Episode chapters](https://support.spotify.com/us/creators/article/episode-chapters/) | transcript + chapter 是平台級基本盤。本站應補公開但低調的逐字稿頁與章節深連結；互動仍維持 optional、parent-gated、低壓。 |
+| **Pocket Casts** | Web Player 開放給所有人免登入播放；登入後才解鎖跨裝置播放進度、queue、subscriptions/preferences。也強調 open access、播放控制與使用者自主管理。來源：[Pocket Casts Web Player](https://blog.pocketcasts.com/2025/03/11/webplayer/) | 本站不必搶做通用播放器；應保留免登入、直接可用。若做續播／收藏，先走本機 localStorage；跨裝置同步需等家長資料策略成熟後再評估。 |
+| **YouTube Podcasts / Creator guidance** | YouTube 將 podcast 視為長內容支柱，建議用縮圖、chapters、詳細描述、搜尋關鍵字與「shoulder content」拆出短內容。來源：[YouTube Blog podcast content strategy](https://blog.youtube/creator-and-artist-stories/the-definitive-guide-to-creating-engaging-podcast-content/) | 既有 `export:video` 已完成整集匯出；研究結論降級為上架 SOP 補強：description、章節 timestamps、縮圖規格、官網回鏈。 |
+| **Podcast.co / Podbean（hosting/growth 工具）** | Podcast.co 把 podcast pages、web players、transcripts、video soundbites、analytics 放在「growth-focused tools」。Podbean 主打分發到 Apple/Spotify、podcast website、AI show notes / chapter markers / transcripts、IAB analytics、跨平台統計與 audiograms。來源：[Podcast.co product](https://www.podcast.co/product)、[Podbean](https://www.podbean.com/) | 成長工具的共識是「分發 + 可嵌入頁 + transcript + soundbite + analytics」。本輪只採納 transcript / chapter / YouTube 上架 SOP，其他營運漏斗不列近期開發方向。 |
+
+### 本站現況對照
+
+已具備：
+
+- `StoryPlayer` 看圖聽故事、字幕、睡前 timer、localStorage 續播。
+- 單集頁有 answer-first 摘要、大綱、角色、FAQ、平台 CTA、分享鈕。
+- RSS 已輸出 `podcast:transcript` VTT；`/story/[slug]/transcript.vtt` 可供平台讀取。
+- `/topic`、`/vehicles`、`/characters`、`/stories` 提供基本發現入口。
+- `export:video` 可產生 16:9 整集影片；Studio 有平台後台捷徑與站內 platform click 事件。
+
+主要缺口：
+
+- **逐字稿仍是機器／平台可讀，不是家長與搜尋引擎友善的公開內容頁。**
+- **章節與片段不可分享**：無 `#t=` 或 chapter anchor，也沒有「從這裡開始聽」的單集頁深連結。
+- **YouTube 上架 SOP 可補強**：有 video export，但 description、章節、縮圖規格、官網回鏈仍需固定模板。
+- **互動需要克制**：平台社群互動不適合直接搬到孩子端；本站只保留低壓、可選、家長安心的互動原則。
+
+### 開發方向建議
+
+#### 1. Open-Web Episode Hub（唯一 P0）
+
+把單集頁做成比平台頁更適合搜尋、分享與家長決策的公開 hub：
+
+- 每集新增獨立逐字稿頁 `/story/[slug]/transcript`，單集頁只放低調入口，不讓長篇文字影響觀感。
+- 保留 VTT 供 RSS／平台使用；公開頁需標示字幕為親子共讀輔助，不保證逐字完全一致。
+- 從 `captionTimes` / subtitles 產生章節錨點：`/story/ep-17?t=123` 或 `#chapter-03`，支援「從這裡開始聽」。
+- 在章節／逐字稿旁提供輕量分享：複製段落連結、LINE 分享該段摘要。
+
+#### 2. YouTube 整集上架 SOP 補強
+
+既有 `export:video` 已能產生 16:9 整集影片；本研究只保留 SOP 補強：
+
+- 由匯出 manifest 或輔助腳本產生可貼到 YouTube Studio 的 description 模板。
+- description 包含官網單集頁、Apple／Spotify／YouTube playlist 連結、AI 插圖與兒童向設定提醒。
+- 產生章節 timestamps 與短標題，供 YouTube description 使用。
+- 補縮圖規格：可沿用 `01.jpg` 或另做 16:9 模板；不新增獨立短影音方向。
+
+#### 3. Child-Native / Low-Pressure 產品原則
+
+此段不是開發項，而是後續功能去留的判斷基準：
+
+- 主要體驗維持看圖聽故事、逐頁字幕、免登入、低壓結尾、家長安心條。
+- 互動都應可選，不打斷收聽、不要求孩子回答、不製造連續壓力。
+- 開放式探索優先於關卡式任務；不把分數、排名、倒數計時放進學齡前主流程。
+- 官網定位是每集可分享落地頁 + 訂閱轉換中心 + 看圖差異化體驗；平台播放仍導向 Spotify / Apple / YouTube。
+
+### 建議優先序
+
+| 優先 | 方向 | 原因 | 依賴 |
+|---|---|---|---|
+| P0 | Open-Web Episode Hub | 最貼近現有資料與 SEO/GEO；能立刻放大單集頁價值 | captions/subtitles、story metadata |
+| P1 | YouTube 整集上架 SOP 補強 | 不重做 `export:video`，只補營運可直接使用的描述、章節與縮圖規格 | VIDEO-EXPORT、字幕、故事 metadata |
+| 原則 | Child-Native / Low-Pressure | 作為功能去留準則，不列為獨立開發項 | DESIGN.md、家長信任決策 |
+
+### 收斂後結論
+
+本輪只保留一個近期產品開發主線：**Open-Web Episode Hub**。YouTube 只做既有整集匯出 workflow 的 SOP 補強；其他構想移出近期開發方向，避免分散 podcast 官網主戰場。
 
 ---
 
 ## 2026-06-09｜Hey Clay App 架構拆解與適用性評估
 
-來源：Hey Clay 官網 / Apple App Store / Fat Brain Toys / 零售頁  
+來源：Hey Clay 官網 / Apple App Store / Fat Brain Toys / 零售頁
 關聯：phygital 內容類型、收藏養成、付費解鎖、線下手作引導
 
 ### Hey Clay 的架構本質
@@ -15,7 +90,7 @@ Hey Clay 是「實體玩具 + 數位引導」的 **phygital（虛實整合）** 
 
 1. **內容單元 = 一個角色 = 一組分步教學**。每個角色（小豬、馬、車）內含分步式 3D 互動教學，一次一個簡單形狀地引導捏塑。本質是「結構化的步驟序列資料」。
 2. **內容解鎖機制（商業核心）**：買實體盒子 → 拿到一組 code → 在 App 輸入/掃描解鎖該套組；想要其他套組角色，透過 App 內購取得。
-3. **輔助黏著功能**：5 個小遊戲、拍照分享作品、無第三方廣告。
+3. **輔助黏著功能**：5 個小遊戲、作品展示、無第三方廣告。
 4. **設計哲學**：把專業技能（球體、圓柱、五官、紋理）拆成幼兒能完成的微步驟，保證做得出成果，孩子在不知不覺中學會真技巧。
 
 > 關鍵洞察：Hey Clay 的 App 不是內容本身，而是「引導孩子完成線下實體創作的數位說明書 + 解鎖收銀台」。真正的創作（捏塑）發生在螢幕外。
@@ -34,50 +109,51 @@ Hey Clay 是「實體玩具 + 數位引導」的 **phygital（虛實整合）** 
 - Hey Clay 把「複雜創作」拆成「保證成功的微步驟序列」，與我們現有架構高度契合：
   - 現有 `Story` 型別已有 `captions[]` + `captionTimes[]`，即「分步時間序列」資料結構。
   - Hey Clay 的分步教學本質相同：`steps[]`，每步一張圖/動畫 + 一句引導。
-- **結論：可用同一套資料模式新增「車車 DIY 手作教學」內容類型**（如何用色紙摺救護車、怎麼畫消防車），每步一張示意圖 + 一句語音引導，複用現有翻頁播放器 + 字幕同步機制，架構成本近乎為零。
+- **結論：同一套資料模式理論上可支援「車車 DIY 手作教學」內容類型**（如何用色紙摺救護車、怎麼畫消防車），每步一張示意圖 + 一句語音引導，複用現有翻頁播放器 + 字幕同步機制。本輪僅保留為研究洞察，不列近期開發方向。
 
 **第三層：phygital 哲學 → 最大啟發**
 
 - Hey Clay 用 App 當工具引導孩子「離開螢幕去動手做」，螢幕是手段非目的。
 - 家長最怕螢幕時間、最愛「螢幕引導孩子動手做」——這是強力賣點，也呼應開放式、動手做的 STEM 最有效之研究。
-- 車車版循環：聽垃圾車故事（線上）→ App 引導用回收物做一台垃圾車（線下）→ 拍照上傳進車庫圖鑑。這是純 podcast 競品（叮噹、信誼）做不到的差異化。
+- 車車版循環可作為遠期靈感：聽垃圾車故事（線上）→ 家中用回收物做一台垃圾車（線下）→ 家長自行保存作品。這是純 podcast 競品（叮噹、信誼）做不到的差異化。
 
 ### 適用性評分
 
 | Hey Clay 元素 | 適用度 | 怎麼用 |
 |---|---|---|
 | 分步引導序列資料結構 | ★★★★★ | 複用 captions/翻頁架構做「車車 DIY 教學」 |
-| 收藏 / 圖鑑養成 | ★★★★☆ | 「車車圖鑑」靠收聽/完成解鎖，驅動回訪 |
-| phygital 線下創作引導 | ★★★★☆ | 螢幕引導 → 動手做 → 拍照回傳，反螢幕時間賣點 |
-| code 解鎖收銀台 | ★★☆☆☆ | 無實體商品，改成「完成度/會員解鎖」 |
-| 拍照分享 | ★★★☆☆ | 可做，但兒童照片上傳的隱私合規要謹慎 |
+| 收藏 / 圖鑑養成 | ★★☆☆☆ | 僅作遠期參考；近期不把孩子端進度做成主飛輪 |
+| phygital 線下創作引導 | ★★★★☆ | 螢幕引導 → 動手做，反螢幕時間賣點 |
+| code 解鎖收銀台 | ★☆☆☆☆ | 不採用；僅作商業模式反例 |
+| 作品展示 | ★☆☆☆☆ | 只作研究參考；近期不做站內作品提交或社群展示 |
 
-### 行動建議（優先）
+### 保留為研究洞察
 
-用現有「翻頁 + 字幕同步」架構，新增 `craft`（車車手作教學）內容類型：
+現有「翻頁 + 字幕同步」架構理論上可承接分步手作教學，但本輪不把 `craft` 列為近期開發方向：
 
-- 與現有 `Story` 型別並存，複用 `StoryPlayer` 的翻頁與語音引導，幾乎不動核心播放器。
-- 把產品從「聽故事網站」升級為「引導孩子動手做的 phygital 平台」。
+- 可保留「一步一動作」「自定節奏」「材料低門檻」作為日後設計參考。
+- 不新增 `craft` 型別、不做完成獎勵、不做站內作品提交。
+- 官網近期主線仍是單集公開內容 hub 與平台訂閱轉換。
 
 ### 風險 / 待確認
 
-- 兒童照片上傳（拍照分享）涉隱私合規，需評估是否做、如何去識別化。
-- 目前收藏/進度用 localStorage，若圖鑑要跨裝置，需處理兒童資料蒐集與同意。
+- 若日後導入任何個資、帳號、作品提交或跨裝置同步，需先完成家長同意、資料最小化與刪除流程設計。
+- 手作教學若重新啟動，需先驗證插畫產能與家長實際使用意願。
 
 ---
 
 ## 2026-06-11｜逐步共作模式 — LEGO 說明書 × Hey Clay 的共同機制與本站轉譯
 
-來源：延展 [2026-06-09 Hey Clay 架構拆解](#2026-06-09hey-clay-app-架構拆解與適用性評估)；LEGO 官方建築／Creator 系列說明書設計慣例；幼兒工作記憶與執行功能研究（3–7 歲單步負荷顯著低於多步串聯）  
-關聯：STEM-P2 `craft` 內容類型、[TODOS — 車車 DIY](./TODOS.md#車車-diy手作教學craft-內容類型)、[ADR-0002 星星經濟帳本](./docs/adr/0002-star-economy-ledger.md)
+來源：延展 [2026-06-09 Hey Clay 架構拆解](#2026-06-09hey-clay-app-架構拆解與適用性評估)；LEGO 官方建築／Creator 系列說明書設計慣例；幼兒工作記憶與執行功能研究（3–7 歲單步負荷顯著低於多步串聯）
+關聯：`StoryPlayer`（翻頁／字幕同步）、`captions[]`／`captionTimes[]`、低壓自定節奏、線下動手做研究
 
-> **與 Hey Clay 研究的關係：** [2026-06-09 節](#2026-06-09hey-clay-app-架構拆解與適用性評估)已論證「分步 `steps[]` + phygital 引導」與本站 `StoryPlayer` 架構契合、以及 code 解鎖需改為完成度解鎖。本節不再重述商業改造，而聚焦 **「為什麼分步有效」** 的共通認知機制，並轉譯為 `craft` player 可驗收的設計規格與 pilot 計畫。
+> **與 Hey Clay 研究的關係：** [2026-06-09 節](#2026-06-09hey-clay-app-架構拆解與適用性評估)已整理「分步 `steps[]` + phygital 引導」與本站 `StoryPlayer` 架構的相容性。本節不再延伸商業改造或近期開發，而聚焦 **「為什麼分步有效」** 的共通認知機制，作為日後判斷是否重啟手作方向的產品原則。
 
 ### 核心洞察：同一套「拆步引擎」
 
 LEGO 紙本說明書與 Hey Clay 的 3D 分步教學，表面媒材不同（靜態圖 vs 動畫、積木 vs 黏土），**本質相同**：把孩子一個人做不出來的成品，拆成一串「這一步你一定做得到」的微動作；每完成一步就給一次可感知的進展感，而非等到最後才驗收成敗。
 
-這與 [Hey Clay 第二層結論](#對車車遊樂園的適用性分三層)（複雜創作 → 保證成功的微步驟序列）一致，但 LEGO 額外證明了一點：**即使沒有 App、沒有訂閱，只要拆步夠細，純說明書也能撐起數十年的產品飛輪。** 本站 craft 的任務不是發明新教法，而是把這套已被驗證的「拆步引擎」接到既有故事 IP 與播放架構上。
+這與 [Hey Clay 第二層結論](#對車車遊樂園的適用性分三層)（複雜創作 → 保證成功的微步驟序列）一致，但 LEGO 額外證明了一點：**即使沒有 App、沒有訂閱，只要拆步夠細，純說明書也能撐起長期使用。** 對本站來說，重點不是立刻做手作內容，而是保留「拆步夠細、孩子自己掌控節奏」這個研究洞察。
 
 ### 四條有效機制（3–7 歲認知依據）
 
@@ -90,176 +166,25 @@ LEGO 紙本說明書與 Hey Clay 的 3D 分步教學，表面媒材不同（靜�
 
 Hey Clay 的 3D 旋轉與 LEGO 的零件袋編號，都是為 ②③ 服務的實作變體；craft 不必複製 3D，但必須保留 **「只看差異、自己翻頁」** 這兩項核心。
 
-### 本站的兩個不公平優勢
+### 對本站的研究轉譯
 
-在 [Hey Clay 分步引導評分 ★★★★★](#適用性評分) 的基礎上，車車遊樂園還有兩項對手難以複製的結構優勢：
+本段只保留認知與設計原則，不列近期開發任務：
 
-1. **StoryPlayer 翻頁 + 語音 + 字幕同步，原生就是 self-paced 教學播放器。** 同一套 `captions[]`／`captionTimes[]` 時間軸可驅動故事與 craft，無需另建教學 App。語音引導讓 **識字前的孩子可獨立跟做**，降低「家長必須在旁朗讀說明書」的門檻——這是 LEGO 紙本與多數 DIY 影片的共同痛點。
-2. **敘事動機：** 孩子捏／摺的是 **剛聽完故事的角色**（例如 EP-9 的恐龍車多多），不是無名黏土球或通用積木模型。動機來自「我想擁有故事裡那台車」，而非「完成第 7 號套組」。這與 podcast 每集更新節奏天然對齊，形成 [Hey Clay 尚未具備的內容飛輪](#與-hey-clay-的差異化)（見下表）。
-
-### Craft player 設計規格（機制 → 實作對應）
-
-| 機制 | 實作對應 |
-|------|----------|
-| **步驟顆粒度** | 每步 **一動詞**（摺／貼／剪／翻）；全篇 **8–12 步**。語音每步 **一句話**，可單步重播（複用 StoryPlayer 逐句字幕）。 |
-| **差異高亮** | 生圖管線規格：**上一步成品半透明底圖 + 本步新增部位實色高亮**（對齊 LEGO「只標新增零件」）。避免每步全圖重畫造成找差異負擔。 |
-| **自查點** | 每 **3–4 步** 插入一頁「看起來像這樣了嗎？」（無對錯評分，僅自我對照）。**進度寫入 progress store**，可中斷續做（延續 [Hey Clay 風險節](#風險--待確認) 的 localStorage 策略，暫不做跨裝置兒童帳號）。 |
-| **完成儀式** | 最後一步後：`grantStars`（`source: "craft:{slug}"`，冪等帳目，見 ADR-0002）+ 解鎖該集 **角色貼紙**。不依賴拍照上傳——[隱私決策仍待定](#風險--待確認)，先以「我完成了」按鈕 + 家長可選見證即可。 |
-| **材料頁置首** | 第 0 頁給 **家長**：材料清單、安全提示、預估時間。**限家用材料**（色紙／紙箱／剪刀／白膠），與 Hey Clay **專用黏土 + 實體盒** 的門檻刻意相反，呼應 [phygital 第三層哲學](#對車車遊樂園的適用性分三層)「螢幕引導、家裡就能做」。 |
-
-### 與 Hey Clay 的差異化
-
-| 維度 | Hey Clay | 車車遊樂園 craft |
-|------|----------|------------------|
-| **內容飛輪** | 一盒一組角色，買完即靜態；新內容靠持續出盒 + App 內購 | **訂閱 podcast + 每集可掛新 craft**；聽完即想做，更新節奏與故事同步 |
-| **材料門檻** | 專用黏土、品牌模具感強；未買盒則教學無意義 | **零專用材料**；家裡色紙紙箱即可開工 |
-| **變現位置** | 實體盒 + App 內 code／IAP 解鎖角色 | **訂閱解鎖進階 craft／圖鑑**（完成度驅動，見 STEM-P4）；數位進度綁收聽與手作完成 |
-| **周邊實體** | 商業核心 | **R4 後可選**：訂閱者黏土包等周邊，非 MVP 必要；避免回到 Hey Clay 材料鎖定 |
-
-周邊黏土包若要做，定位是 **加值禮品** 而非解鎖前提，以免複製對手的材料門檻。
-
-### Pilot 計畫：EP-9 恐龍車多多色紙摺紙
-
-**目標：** 用一集跑通 **Craft 型別 → 步驟播放 → 完成給星** 全鏈，驗證設計規格而非一次量產內容庫。
-
-| 項目 | 內容 |
-|------|------|
-| **題材** | EP-9 恐龍車多多 — 色紙摺紙（材料：色紙、白膠、安全剪刀） |
-| **技術鏈** | `craft` 資料型別 → StoryPlayer 翻頁播放 → 完成觸發 `grantStars`（`craft:ep-9`）+ 貼紙 |
-| **實測訊號 1 — 卡步** | 哪一步停留最久／回上一頁最多次？→ 調整顆粒度（是否需再拆步） |
-| **實測訊號 2 — 動機** | 完成後是否 **主動要求做第二台**（同集或他集）？→ 驗證敘事動機是否成立 |
-| **通過標準** | 兩訊號達可接受閾值（團隊定性 + 簡易本機事件）→ 才進入 STEM-P2 量產排程 |
-
-Pilot 刻意選與故事強綁定的角色，以放大「不公平優勢 ②」；不通過則先改步驟與插畫，不擴充型別系統。
-
-### 關聯條目
-
-| 文件 | 條目 |
-|------|------|
-| [TODOS.md](./TODOS.md) | [STEM-P2 — 車車 DIY（`craft` 內容類型）](./TODOS.md#車車-diy手作教學craft-內容類型)、[Phygital 故事延伸](./TODOS.md#phygital-故事延伸聽完--線下手作)、[STEM-P3 車車圖鑑養成](./TODOS.md#車車圖鑑養成完成度解鎖) |
-| [docs/adr/0002-star-economy-ledger.md](./docs/adr/0002-star-economy-ledger.md) | craft 完成儀式的 `grantStars` 冪等帳目（`source: "craft:{slug}"`） |
-
-### 風險 / 待確認
-
-- 差異高亮插畫需建立 **生圖／後製 SOP**，否則美術產能成瓶頸（Pilot 先用手繪或模板驗證流程）。
-- 「看起來像這樣了嗎？」自查頁若設計成評分，會違反 STEM 不計分原則；維持 **自我對照、無對錯**。
-- 完成儀式暫不做拍照；若日後加分享，須先解決 [2026-06-09 隱私待確認](#風險--待確認) 事項。
+- **StoryPlayer 翻頁 + 語音 + 字幕同步** 與 self-paced 教學邏輯相容；若未來重啟手作方向，可沿用「逐步、可暫停、可回看」的互動節奏。
+- **敘事動機** 是本站潛在優勢：孩子做的是剛聽過的角色，而不是無名模型；但是否產品化需另行驗證。
+- **步驟顆粒度** 應維持每步一個動作，避免 3–7 歲工作記憶超載。
+- **差異高亮** 比完整重畫更適合前閱讀期孩子：只標示「相對上一步新增了什麼」。
+- **自查點** 應是「看起來像這樣了嗎？」的自我對照，不做評分。
+- **材料低門檻** 是必要條件：如果未來做手作，應以家用材料為主，避免形成專用材料依賴。
 
 ---
 
-## 2026-06-09｜四款小遊戲精進方案（對標可市售 pixel game）
-
-> **2026-06 現況：** canon 四款為 `car-adventure`、`block-drop`、`kart`、`pirate-kart`。**已移除** `car-star`、`car-mission`。下列精進方案 ❄️ FROZEN，僅供歷史對照。
-
-涵蓋四款（canon）：① 車車大冒險（`car-adventure`）② 繽紛方塊（`block-drop`）③ 車車卡丁車（`kart`）④ 海盜卡丁車大賽（`pirate-kart`）。
-
-### 2026-07-04｜TODO 歸檔補記
-
-TODO 主檔只保留「❄️ FROZEN — 待 STEM-P1 Gate 之後｜四款 pixel 精進」的執行狀態；市售級品質門檻、Game Kit 四層、資產工具與驗收表集中保存在本研究段。現況元件對照：`BlockDropGame`、`CarPlatformer`、`/games/kart`、`/games/pirate-kart`；資料目錄為 `data/games.ts`。
-
-**與 STEM 路線關係：** 精進版屬「遊樂園經典區」商業級升級；新 STEM 沙盒仍守無計時、無排行榜。若日後解凍，每款預設採兒童模式，挑戰模式需明確可選。
-
-**目前 Game Kit 四層：** `lib/gamekit/react/`（hooks、觸控、暫停）、`lib/gamekit/runtime/`（loop、輸入、像素渲染、音訊、juice）、`lib/gamekit/progress/`（存檔、設定、獎牌、session）、`lib/gamekit/games/`（遊戲專屬關卡與 iframe bridge）。
-
-### 0. 市售 pixel game 品質門檻
-
-把「原型」和「能上架賣（Steam/itch/行動/精緻網頁）」分開的，不是某個玩法，而是這條品質基準線。任一款要稱得上市售級，須全數達成：
-
-- **像素完美渲染**：固定低內部解析度 → 最近鄰整數倍放大（`image-rendering: pixelated`），60fps 鎖定。
-- **一致美術語言**：單一主調色盤、統一描邊與光源方向、統一點陣字（HUD/選單）。
-- **精靈動畫**：角色至少有 待機/移動/動作(跳或攻擊)/受傷 多態；物件（金幣、旗子、敵人）會動。
-- **音樂＋音效＋混音**：每款有循環 BGM、關鍵動作有 SFX、有音量/靜音設定（含自動播放政策處理）。
-- **打擊感（juice）**：關鍵動作有粒子、畫面震動、頓幀、緩動、squash & stretch、彈出數字。
-- **完整外框**：標題畫面、暫停選單、設定、存檔、勝負流程、轉場。
-- **元系統**：高分/獎牌（三星制）、解鎖、進度保存、成就。
-- **多輸入**：鍵盤＋觸控＋手把（Gamepad API）。
-- **可及性與在地化**：reduced-motion、色盲友善配色、難度調節、zh-TW 現行 / en 可擴充。
-- **工程品質**：固定時間步進＋插值、物件池（無 GC 卡頓）、資產預載＋載入畫面、Lighthouse 無障礙 ≥95、零 console 錯誤。
-
-> 現況四款大多停在「形狀／emoji／canvas 畫圖＋inline style」階段，玩法骨架可用，但上面這條線幾乎都還沒跨。與 STEM「不計時不競爭」的張力見 [TODOS — 產品決策](./TODOS.md#產品決策現有遊樂園-vs-stem不計時不競爭)；精進版可採**雙模式**（兒童／挑戰）分層。
-
-### 1. 最高槓桿：共用基底「車車故事屋 Game Kit」（`lib/gamekit`）
-
-**先做這層，四款一起升級。** 九大模組：
-
-1. **`kit/renderer`**：每款固定內部解析度（方塊 200×360、橫向 320×180 等），offscreen → 整數倍 nearest-neighbor 放大；相機次像素取整。
-2. **`kit/sprite`** + **`kit/tilemap`**：sprite sheet、幀計時、autotiling。
-3. **`kit/style`**：32 色主調色盤、點陣字、共用 UI（按鈕/面板/轉場）。
-4. **`kit/audio`**：BGM 循環 + SFX + 混音器（延續現有 `useGameAudio`／`lib/sfx.ts` 精神）。
-5. **`kit/juice`**：粒子池、screen shake、hitstop、tween、squash&stretch、彈字。
-6. **`kit/save` + `kit/meta`**：localStorage 玩家檔、高分/三星/跨遊戲星星經濟。
-7. **`kit/input`**：鍵盤／觸控／手把 → 統一 action。
-8. **`kit/scene`**：title → menu → play → pause → result。
-9. **`kit/loop`**：固定時間步進（1/120s）＋渲染插值。
-
-**技術取捨**：純 Canvas + 自建 kit（可控）；可選 **kontra.js**（~12kb）當底層；大型才考慮 Phaser。
-
-### 2. 跨遊戲 IP 黏合
-
-- 共用車輛角色卡司（小黃＋警車／貨車／賽車／巴士…），四款同一批像素精靈。
-- 共用星星經濟 →「車庫」解鎖跨遊戲被動。
-- `/games` 改主機選單／世界地圖風（星數、最佳、解鎖進度）。
-- 與 podcast 綁定貼紙簿（聽集＋玩遊戲蒐集）。
-
-### 3. 各款精進摘要
-
-| 遊戲 | 對標方向 | 工時 | 重點 |
-|------|----------|------|------|
-| ① 車車大冒險 | Celeste 手感 + Shovel Knight 關卡 | **大** | Tiled 關卡管線、6–10 關、檢查點、boss ❄️ |
-| ② 繽紛方塊 | Tetris Effect 音畫一體（原創） | 中 | 像素皮膚、多模式、兒童模式、消行 juice ❄️ |
-| ③ 車車卡丁車 | Arcade 卡丁 | 中 | 漂移、賽道、觸控 ❄️ |
-| ④ 海盜卡丁車 | 16-bit 賽車 | 中 | 關卡、道具 ❄️ |
-
-各款完整玩法／美術／元系統細節見 [TODOS — 遊樂園精進](./TODOS.md#遊樂園精進game-kit--市售-pixel-品質)。
-
-### 4. 八階段路線圖（相依序）
-
-| Phase | 主題 | ROI |
-|-------|------|-----|
-| 0 | 方向定錨：解析度、調色盤、kit vs kontra | 基礎 |
-| 1 | 渲染管線＋設計系統全面套用 | **視覺最高** |
-| 2 | 各款 sprite/tileset/動畫 | 美術瓶頸 |
-| 3 | BGM + SFX + 混音 | 聽感 |
-| 4 | juice 工具組套用 | 手感 |
-| 5 | 內容深度（關卡/模式/Tiled） | 可玩性 |
-| 6 | 元系統（存檔/星星/hub/貼紙） | 留存 |
-| 7 | 外框（標題/設定/手把/a11y） | 完整度 |
-| 8 | 效能 QA（固定步進/池/預載） | 穩定 |
-
-**起手式**：Phase 0 + 1 — 四款同時「像素＋統一字體＋調色盤」。
-
-### 5. 資產與工具
-
-Aseprite、Kenney CC0 佔位、Tiled → JSON、jsfxr/sfxr、BeepBox/FamiStudio BGM、pixel TTF 或 bitmap font。
-
-### 6. 瓶頸與取捨
-
-- **美術**是最大門檻 → 先用 CC0 跑通管線再換原創。
-- **年齡衝突**：大冒險/方塊偏大齡 → 兒童模式、不會輸。
-- **範疇**：四款全商業級 = 數月；分款分階段出貨。
-- **IP**：對標標題僅作品質參考，全程原創。
-
-### 7. 市售級驗收檢查表（每款）
-
-- [ ] 60fps、像素完美整數放大
-- [ ] 統一調色盤＋點陣字＋UI
-- [ ] 角色與物件多態精靈
-- [ ] BGM＋SFX＋音量/靜音
-- [ ] 粒子/震動/頓幀
-- [ ] 標題/暫停/設定/存檔/勝負/轉場
-- [ ] 三星＋解鎖＋進度保存
-- [ ] 鍵盤＋觸控＋手把
-- [ ] reduced-motion＋色盲友善＋難度
-- [ ] 預載＋零 console 錯誤；Lighthouse a11y ≥95
-
----
-
-## 2026-06-11｜前端吸引力功能 Cursor-Ready Prompts（FE-01〜FE-09）
+## 2026-06-11｜前端吸引力功能 Cursor-Ready Prompts（FE-01〜FE-08）
 
 > 適用 repo：Next.js 15（App Router、SSG）、TypeScript、`components/games/`、`app/games/[slug]/page.tsx`、`hooks/useReducedMotion.ts`、progress store。
 > TODOS 紀律：每個 prompt 完成後必須更新 `TODOS.md`，標註對應 commit hash，格式：`- [x] FE-XX <任務名> (commit: <hash>)`。
 > 通用約束（每個 prompt 都適用）：
-> - 全部元件 SSR-safe，`window` / `AudioContext` / 感應器 API 一律在 `useEffect` 或動態 import 內存取。
+> - 全部元件 SSR-safe，`window` / `AudioContext` 一律在 `useEffect` 或動態 import 內存取。
 > - 一律尊重 `useReducedMotion`：reduced motion 時動畫改為淡入淡出或直接靜止。
 > - 觸控目標最小 64×64px。
 > - 不引入第三方追蹤、不開外部連結（兒童安全紅線）。
@@ -493,30 +418,6 @@ Aseprite、Kenney CC0 佔位、Tiled → JSON、jsfxr/sfxr、BeepBox/FamiStudio 
 - [ ] TODOS.md 更新並附 commit hash。
 ```
 
-### FE-09 多模態互動小工具（進階，選做）
-
-```
-你是車車遊樂園的資深前端工程師。請建立多模態互動 hooks,供故事熱點(STEM-P1)與遊戲使用。
-
-## 目標
-三個漸進增強的互動 hooks,全部 feature-detect、全部有觸控 fallback。
-
-## 範圍
-1. `hooks/useBlowDetection.ts`(吹氣):
-   - getUserMedia 麥克風 → AnalyserNode 偵測持續低頻能量尖峰
-   - 需家長閘門後的設定頁明確開啟才啟用(預設關閉,麥克風權限敏感);未開啟時 fallback = 快速連點
-2. `hooks/useShake.ts`(搖晃):DeviceMotion,iOS 需 permission request 流程;fallback = 長按
-3. `hooks/useScribble.ts`(塗鴉):pointer events 畫布軌跡,回傳覆蓋率 %,給「擦亮車車」類互動
-4. Demo:`/dev/interactions` 內部頁,三個 hook 各一個示範(吹熄蠟燭、搖蘋果樹、擦亮車車),接 FE-02 音效。
-
-## 驗收標準
-- [ ] 三個 hook 在不支援的環境(桌機無麥克風、無陀螺儀)自動走 fallback,功能等價。
-- [ ] 麥克風串流在元件 unmount 時確實釋放(無紅點殘留)。
-- [ ] 不錄音、不上傳任何音訊資料(僅本地能量分析),在程式註解與 PR 明示。
-- [ ] SSG build 通過,所有感應器 API 僅 client 端。
-- [ ] TODOS.md 更新並附 commit hash。
-```
-
 ### 建議實作順序與依賴
 
 ```
@@ -524,7 +425,6 @@ FE-01 Mascot ──┬──> FE-03 ParkMap ──> FE-07 睡前模式(夜景)
 FE-02 音效  ──┘         │
                         └──> FE-04 車庫圖鑑
 FE-06 家長閘門 ──> FE-05 家長儀表板 ──> FE-07 / FE-08 設定整合
-FE-09 多模態(獨立,接 STEM-P1)
 ```
 
 | 順位 | 任務 | 理由 |
@@ -535,4 +435,3 @@ FE-09 多模態(獨立,接 STEM-P1)
 | 4 | FE-04 | 回訪鉤子 |
 | 5 | FE-05 | 家長轉換（WAF 北極星） |
 | 6 | FE-07 → FE-08 | 加分項 |
-| 7 | FE-09 | 選做，配合 STEM-P1 排程 |
