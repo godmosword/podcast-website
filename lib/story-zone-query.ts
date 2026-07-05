@@ -3,7 +3,7 @@ import { getStories, type Story } from "@/data/content";
 import { ZONE_IDS, type ZoneId } from "@/data/universe-zones";
 
 /** 地圖 sheet 用的輕量故事預覽（server 預先序列化，避免 client 拉整包 content）。 */
-export type ZoneStoryPreview = {
+type ZoneStoryPreview = {
   slug: string;
   ep: number;
   title: string;

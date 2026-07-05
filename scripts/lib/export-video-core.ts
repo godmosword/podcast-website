@@ -10,10 +10,10 @@ import type { Subtitle } from "./illustrate-core";
 import type { ScenesFile } from "./illustrate-core";
 import { STORIES_DIR } from "./transcribe-core";
 
-export const EXPORT_VIDEO_WIDTH = 1920;
-export const EXPORT_VIDEO_HEIGHT = 1080;
-export const DEFAULT_HUNINN_TTF = "/tmp/huninn.ttf";
-export const HUNINN_FONT_NAME = "jf-openhuninn";
+const EXPORT_VIDEO_WIDTH = 1920;
+const EXPORT_VIDEO_HEIGHT = 1080;
+const DEFAULT_HUNINN_TTF = "/tmp/huninn.ttf";
+const HUNINN_FONT_NAME = "jf-openhuninn";
 
 export type SceneClip = {
   index: number;
@@ -193,7 +193,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 }
 
 /** ffmpeg ass filter 路徑跳脫（macOS／Linux）。 */
-export function escapeAssFilterPath(filePath: string): string {
+function escapeAssFilterPath(filePath: string): string {
   return filePath
     .replace(/\\/g, "\\\\")
     .replace(/:/g, "\\:")

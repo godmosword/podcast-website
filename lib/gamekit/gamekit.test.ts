@@ -172,12 +172,7 @@ describe("GameLoop", () => {
 describe("settings", () => {
   beforeEach(() => {
     const store = new Map<string, string>();
-    vi.stubGlobal("window", {
-      dispatchEvent: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    });
-    vi.stubGlobal("localStorage", {
+    const localStorageMock = {
       getItem: (key: string) => store.get(key) ?? null,
       setItem: (key: string, value: string) => {
         store.set(key, value);
@@ -186,7 +181,14 @@ describe("settings", () => {
         store.delete(key);
       },
       clear: () => store.clear(),
+    };
+    vi.stubGlobal("window", {
+      dispatchEvent: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      localStorage: localStorageMock,
     });
+    vi.stubGlobal("localStorage", localStorageMock);
   });
 
   afterEach(() => {

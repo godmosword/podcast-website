@@ -32,7 +32,7 @@ export function fitScaleFor(w: number, h: number): number {
 export const SEA_BLEED = 7200;
 
 /** 點擊縮放：位移低於此值視為 tap（非拖曳）。 */
-export const TAP_DRAG_THRESHOLD_PX = 6;
+const TAP_DRAG_THRESHOLD_PX = 6;
 
 export const CLICK_ZOOM_IN_FACTOR = 1.15;
 

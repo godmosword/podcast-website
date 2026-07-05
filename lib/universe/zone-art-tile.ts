@@ -4,12 +4,6 @@
  */
 import type { ZoneId } from "@/data/universe-zones";
 
-/** landmark＝小地標 icon（R1 現況）；island＝整島 diorama（未來，需改錨點與渲染）。 */
-export type ZoneArtMode = "landmark" | "island";
-
-/** landmark→以島中心對齊 coord；island→以沙岸底部中心對齊 coord。 */
-export type ZoneTileAnchor = "center" | "sand-bottom-center";
-
 /** 小地標 icon（現況）：固定以島中心對齊 coord，疊在 UniverseMap 的 SVG 沙草橢圓上。 */
 type LandmarkTile = {
   src: string;
@@ -74,4 +68,4 @@ export function getZoneArtTile(id: ZoneId): ZoneArtTile {
   return ZONE_ART_TILES[id];
 }
 
-export { getZoneArtSrcSet, getZoneArtSizes, ZONE_ART_SRC_MAX_SCALE, ZONE_ART_TILE_WIDTH } from "@/lib/universe/zone-art-src";
+export { getZoneArtSrcSet } from "@/lib/universe/zone-art-src";

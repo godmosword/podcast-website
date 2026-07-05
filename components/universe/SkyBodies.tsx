@@ -29,12 +29,10 @@ export default function SkyBodies({ daylight, reduced, paused }: Props) {
       {/* v5：黏土日月 PNG/WebP（§14），取代向量漸層圓。 */}
       <picture>
         <source type="image/webp" srcSet={sunWebpPath()} />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={styles.sun} src={sunPath()} alt="" draggable={false} />
       </picture>
       <picture>
         <source type="image/webp" srcSet={moonWebpPath()} />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={styles.moon} src={moonPath()} alt="" draggable={false} />
       </picture>
       <svg className={styles.stars} viewBox="0 0 1000 720" width="100%" height="100%">

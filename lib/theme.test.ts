@@ -83,7 +83,6 @@ describe("theme init script runtime", () => {
       removeEventListener: () => {},
     });
 
-    // eslint-disable-next-line no-new-func
     const run = new Function(
       "localStorage",
       "document",

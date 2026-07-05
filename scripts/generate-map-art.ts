@@ -18,7 +18,6 @@ import {
   copyFileSync,
   existsSync,
   mkdirSync,
-  readdirSync,
   readFileSync,
   writeFileSync,
 } from "node:fs";
@@ -31,9 +30,6 @@ const STAGING = join(ROOT, "public/.map-staging");
 const OUT_DIR = join(ROOT, "public/adventures/map");
 /** 黃金樣本：所有 map 素材的 style reference（Art Bible §8 鐵律）。 */
 const GOLDEN_REF = join(ROOT, "public/adventures/zones/car-park.png");
-
-/** 透明素材的平背色（chroma-key 目標）：洋紅，與白雲/淺色黏土對比最大。 */
-const CHROMA = { r: 255, g: 0, b: 255 } as const;
 
 type ApiSize = "1024x1024" | "1536x1024" | "1024x1536";
 

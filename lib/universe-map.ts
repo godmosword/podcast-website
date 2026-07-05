@@ -8,9 +8,9 @@ import {
 } from "@/data/universe-zones";
 import { getZoneArtTile } from "@/lib/universe/zone-art-tile";
 
-export type StagePoint = { x: number; y: number };
+type StagePoint = { x: number; y: number };
 
-export type TileBox = {
+type TileBox = {
   left: number;
   top: number;
   w: number;

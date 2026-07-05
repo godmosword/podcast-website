@@ -1,7 +1,6 @@
 import { MAP_STAGE } from "@/data/universe-zones";
 
 export type DecorKind = "bird" | "sailboat" | "fish" | "buoy" | "firefly";
-export type DecorMotion = "drift" | "bob" | "path";
 
 type DecorBase = {
   id: string;

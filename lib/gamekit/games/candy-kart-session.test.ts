@@ -48,7 +48,8 @@ describe("candy-kart iframe bridge", () => {
     expect(
       isCandyKartFinishMessage({ ...validFinish, starsCollected: -2 }),
     ).toBe(false);
-    const { starsTotal: _omit, ...missing } = validFinish;
+    const { starsTotal: omittedStarsTotal, ...missing } = validFinish;
+    expect(omittedStarsTotal).toBe(validFinish.starsTotal);
     expect(isCandyKartFinishMessage(missing)).toBe(false);
   });
 

@@ -7,8 +7,6 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { getStory } from "../../data/content";
-import { readCharacters } from "./illustrate-core";
 import {
   ROOT,
   subtitleSidecarPath,
@@ -143,31 +141,7 @@ export function readSubtitleSegments(slug: string): SubtitleSegment[] {
   return raw as SubtitleSegment[];
 }
 
-/** 載入該集 canonical 角色名（供日後擴充比對）。 */
-function episodeCharacterHints(_slug: string): {
-  canonicalNames: string[];
-} {
-  const story = getStory(_slug);
-  const canonicalNames: string[] = [];
-
-  if (story?.vehicle && story.vehicle !== "其他") {
-    canonicalNames.push(story.vehicle);
-  }
-
-  for (const c of readCharacters()) {
-    if (c.firstSeen === _slug) {
-      canonicalNames.push(c.name, ...c.aliases);
-    }
-  }
-
-  return { canonicalNames: [...new Set(canonicalNames)] };
-}
-
-function lintSegment(
-  seg: SubtitleSegment,
-  index: number,
-  _hints: ReturnType<typeof episodeCharacterHints>,
-): ProofreadIssue[] {
+function lintSegment(seg: SubtitleSegment, index: number): ProofreadIssue[] {
   const issues: ProofreadIssue[] = [];
   const { text, t } = seg;
 
@@ -204,10 +178,9 @@ function lintSegment(
 
 export function lintSubtitles(slug: string, segments?: SubtitleSegment[]): ProofreadReport {
   const subs = segments ?? readSubtitleSegments(slug);
-  const hints = episodeCharacterHints(slug);
   const issues: ProofreadIssue[] = [];
   subs.forEach((seg, index) => {
-    issues.push(...lintSegment(seg, index, hints));
+    issues.push(...lintSegment(seg, index));
   });
   return { slug, segmentCount: subs.length, issues, autoFixCount: 0 };
 }
@@ -229,16 +202,6 @@ export function autoProofreadFixSlug(slug: string): AutoProofreadFixResult {
   }
   const lint = lintSubtitles(slug, toLint);
   return { slug, fixCount, pendingLint: lint.issues.length };
-}
-
-/** 批次自動 --fix（略過無側車檔的 slug）。 */
-export function autoProofreadFixSlugs(slugs: string[]): AutoProofreadFixResult[] {
-  const results: AutoProofreadFixResult[] = [];
-  for (const slug of slugs) {
-    if (!existsSync(subtitleSidecarPath(slug))) continue;
-    results.push(autoProofreadFixSlug(slug));
-  }
-  return results;
 }
 
 export function applySafeAutoFixes(segments: SubtitleSegment[]): {

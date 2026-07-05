@@ -24,7 +24,6 @@ export default function ArtSrcPicture({
   return (
     <picture>
       <source type="image/webp" srcSet={artSrc.webpSrcSet} sizes={artSrc.sizes} />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={artSrc.src}
         srcSet={artSrc.srcSet}

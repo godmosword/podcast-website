@@ -25,21 +25,12 @@ export function seaTexturePath(night: boolean = false): string {
   return mapArtPath(night ? "sea-night.png" : "sea.png");
 }
 
-/** 海面 WebP 路徑。 */
-export function seaTextureWebpPath(night: boolean = false): string {
-  return pngToWebp(seaTexturePath(night));
-}
-
 /** 視差雲層檔名（透明 RGBA，僅 1x）。 */
 export const CLOUD_IDS = ["cloud-a", "cloud-b", "cloud-c"] as const;
 export type CloudId = (typeof CLOUD_IDS)[number];
 
 export function cloudPath(id: CloudId): string {
   return mapArtPath(`${id}.png`);
-}
-
-export function cloudWebpPath(id: CloudId): string {
-  return pngToWebp(cloudPath(id));
 }
 
 /** 地平線遠景剪影（透明 RGBA，含 @2x）。 */

@@ -42,6 +42,7 @@ export function usePixelRenderer(
   const displayRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<PixelRenderer | null>(null);
   const viewport = viewportFor(gameId);
+  const { width: viewportWidth, height: viewportHeight } = viewport;
 
   const present = useCallback(() => {
     const container = containerRef.current;
@@ -54,7 +55,7 @@ export function usePixelRenderer(
 
   useEffect(() => {
     const renderer = new PixelRenderer({
-      viewport,
+      viewport: { width: viewportWidth, height: viewportHeight },
       background: options.background,
       maxScale: options.maxScale,
     });
@@ -73,7 +74,7 @@ export function usePixelRenderer(
     const ro = new ResizeObserver(() => present());
     ro.observe(container);
     return () => ro.disconnect();
-  }, [gameId, options.background, options.maxScale, present, viewport.height, viewport.width]);
+  }, [gameId, options.background, options.maxScale, present, viewportHeight, viewportWidth]);
 
   return {
     containerRef,

@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import sharp from "sharp";
 
-export const ROAMER_WEBP_QUALITY = 82;
+const ROAMER_WEBP_QUALITY = 82;
 
 export function pngPathToWebpPath(pngPath: string): string {
   return pngPath.replace(/\.png$/i, ".webp");

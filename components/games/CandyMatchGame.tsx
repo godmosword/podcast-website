@@ -335,12 +335,12 @@ export default function CandyMatchGame() {
     [armIdleHint, tone],
   );
 
-  const shakePair = (a: number, b: number) => {
+  const shakePair = useCallback((a: number, b: number) => {
     setShaking(new Set([a, b]));
     tone(180, 0.1, "triangle", 0.05);
     setMessage(pick(CHEER_INVALID));
     setTimeout(() => setShaking(new Set()), 320);
-  };
+  }, [tone]);
 
   const attemptSwap = useCallback(
     (a: number, b: number) => {
@@ -375,10 +375,10 @@ export default function CandyMatchGame() {
         shakePair(a, b);
       }
     },
-    [armIdleHint, ensureAudio, runResolve, tone],
+    [armIdleHint, ensureAudio, runResolve, shakePair, tone],
   );
 
-  const useProp = useCallback(
+  const activateProp = useCallback(
     (kind: PropKind, target: number) => {
       const b0 = boardRef.current;
       if (!b0 || processingRef.current) return;
@@ -414,7 +414,7 @@ export default function CandyMatchGame() {
       ensureAudio();
       armIdleHint();
       if (propMode) {
-        useProp(propMode, i);
+        activateProp(propMode, i);
         return;
       }
       const b0 = boardRef.current;
@@ -431,7 +431,7 @@ export default function CandyMatchGame() {
         tone(520, 0.04, "square", 0.03);
       }
     },
-    [armIdleHint, attemptSwap, ensureAudio, propMode, selected, tone, useProp],
+    [activateProp, armIdleHint, attemptSwap, ensureAudio, propMode, selected, tone],
   );
 
   const manualHint = useCallback(() => {

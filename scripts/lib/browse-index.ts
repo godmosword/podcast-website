@@ -5,14 +5,14 @@ import type { Story } from "../../data/stories";
 import type { TopicSymbol } from "../../lib/topic-visuals";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-export const BROWSE_INDEX_PATH = path.join(ROOT, "data/browse-index.json");
+const BROWSE_INDEX_PATH = path.join(ROOT, "data/browse-index.json");
 
 export type VehicleIndexEntry = {
   emoji: string;
   patterns: string[];
 };
 
-export type TopicIndexEntry = {
+type TopicIndexEntry = {
   symbol: TopicSymbol;
 };
 
@@ -107,10 +107,6 @@ export function emojiForVehicle(vehicle: string, index = readBrowseIndex()): str
   return index.vehicles[vehicle]?.emoji ?? index.vehicles["其他"]?.emoji ?? "🚗";
 }
 
-export function topicSymbolFor(tag: string, index = readBrowseIndex()): TopicSymbol | undefined {
-  return index.topics[tag]?.symbol;
-}
-
 function hashTag(tag: string): number {
   let h = 0;
   for (let i = 0; i < tag.length; i++) h = (h * 31 + tag.charCodeAt(i)) >>> 0;
@@ -126,7 +122,7 @@ export function suggestVehicleEntry(vehicle: string): VehicleIndexEntry {
   return { emoji: "🚗", patterns: [vehicle] };
 }
 
-export function suggestTopicEntry(tag: string): TopicIndexEntry {
+function suggestTopicEntry(tag: string): TopicIndexEntry {
   for (const [pattern, symbol] of TOPIC_SYMBOL_HINTS) {
     if (pattern.test(tag)) return { symbol };
   }

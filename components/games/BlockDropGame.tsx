@@ -1233,7 +1233,7 @@ export default function BlockDropGame() {
     repaint();
   };
 
-  const begin = useCallback(() => {
+  const begin = () => {
     ensureAudio();
     playBgm();
     const g = freshGame();
@@ -1245,7 +1245,7 @@ export default function BlockDropGame() {
     G.current = g;
     setToasts([]);
     repaint();
-  }, [ensureAudio, playBgm, repaint]);
+  };
 
   const togglePause = useCallback(() => {
     const g = G.current;

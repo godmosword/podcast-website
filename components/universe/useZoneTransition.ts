@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { ZoneStatus } from "@/data/universe-zones";
 
-export const ZONE_TRANSITION_MS = 700;
+const ZONE_TRANSITION_MS = 700;
 
 function usePrevious<T>(value: T): T | undefined {
   const ref = useRef<T | undefined>(undefined);

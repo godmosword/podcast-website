@@ -31,7 +31,7 @@ type PointerSession = {
   dragged: boolean;
 };
 
-export type FlyToOptions = {
+type FlyToOptions = {
   /** 視窗像素：正值把舞台往下推（島在畫面上移，留給底部 dock）。 */
   viewportOffsetY?: number;
 };
@@ -43,7 +43,7 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
-export type MapCameraBind = {
+type MapCameraBind = {
   ref: (el: HTMLDivElement | null) => void;
   onPointerDown: (e: React.PointerEvent<HTMLDivElement>) => void;
   onPointerMove: (e: React.PointerEvent<HTMLDivElement>) => void;

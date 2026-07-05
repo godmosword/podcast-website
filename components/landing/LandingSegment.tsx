@@ -56,8 +56,15 @@ export default function LandingSegment({
                 srcSet={segment.heroImagePortrait}
               />
             ) : null}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img {...imgProps} src={segment.heroImage} />
+            <img
+              src={segment.heroImage}
+              alt=""
+              aria-hidden="true"
+              loading={imgProps.loading}
+              fetchPriority={imgProps.fetchPriority}
+              decoding={imgProps.decoding}
+              className={imgProps.className}
+            />
           </picture>
         ) : (
           <div className={styles.bgFallback} />

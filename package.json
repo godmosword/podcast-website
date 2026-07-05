@@ -7,7 +7,7 @@
     "prebuild": "npm run generate:llms-full",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint . --max-warnings=0",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "font:subset": "python3 scripts/subset_font.py",
@@ -24,6 +24,7 @@
     "generate:map-art": "tsx --env-file-if-exists=.env.local scripts/generate-map-art.ts",
     "generate:forest-zone": "tsx --env-file-if-exists=.env.local scripts/generate-forest-zone-art.ts",
     "fix:map-art": "tsx scripts/fix-map-art.ts",
+    "generate:character-portraits": "tsx --env-file-if-exists=.env.local scripts/generate-character-portraits.ts",
     "generate:landing-art": "tsx --env-file-if-exists=.env.local scripts/generate-landing-art.ts",
     "generate:roamer-assets": "tsx --env-file-if-exists=.env.local scripts/generate-roamer-assets.ts",
     "generate:llms-full": "tsx scripts/generate-llms-full.ts",
@@ -46,11 +47,13 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
+    "@eslint/eslintrc": "^3.3.5",
     "@playwright/test": "^1.52.0",
     "@types/node": "^22.10.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "axe-core": "^4.12.1",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^15.5.18",
     "fast-xml-parser": "^5.2.5",
     "opencc-js": "^1.3.1",
     "tsx": "^4.20.3",
@@ -65,9 +68,13 @@
     ],
     "ignoreBinaries": [
       "ffmpeg",
+      "ffprobe",
       "gh",
       "python3",
       "which"
+    ],
+    "ignoreDependencies": [
+      "eslint-config-next"
     ]
   }
 }

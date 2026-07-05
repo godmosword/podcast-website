@@ -44,11 +44,11 @@ function clamp(v: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, v));
 }
 
-export type CoordSpace =
+type CoordSpace =
   | { kind: "tile"; tileW: number; tileH: number }
   | { kind: "map"; stageW: number; stageH: number };
 
-export function buildRouteMap(routes: RoamerRoute[]): Map<string, RouteMeta> {
+function buildRouteMap(routes: RoamerRoute[]): Map<string, RouteMeta> {
   const map = new Map<string, RouteMeta>();
   for (const route of routes) {
     const el = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -142,7 +142,7 @@ export function computeFrame(
   };
 }
 
-export function applyFrame(node: HTMLElement, frame: RoamerFrame): void {
+function applyFrame(node: HTMLElement, frame: RoamerFrame): void {
   node.style.left = `${frame.leftPct}%`;
   node.style.top = `${frame.topPct}%`;
   node.style.zIndex = String(frame.z);

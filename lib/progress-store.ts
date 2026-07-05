@@ -111,10 +111,12 @@ export const DEFAULT_PROGRESS: ProgressStore = {
 const listeners = new Set<() => void>();
 
 function isClient(): boolean {
-  return (
-    typeof localStorage !== "undefined" &&
-    typeof localStorage.getItem === "function"
-  );
+  if (typeof window === "undefined") return false;
+  try {
+    return typeof window.localStorage?.getItem === "function";
+  } catch {
+    return false;
+  }
 }
 
 function emitChange(): void {

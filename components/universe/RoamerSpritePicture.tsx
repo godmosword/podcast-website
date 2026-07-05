@@ -19,7 +19,6 @@ export default function RoamerSpritePicture({
   return (
     <picture>
       <source type="image/webp" srcSet={webpSrc} />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={pngSrc}
         alt=""

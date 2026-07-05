@@ -11,7 +11,7 @@ import {
 } from "./dudu-emotions";
 import styles from "./DuduCompanion.module.css";
 
-export type DuduCompanionItem = {
+type DuduCompanionItem = {
   anchorId: string;
   emotion: DuduEmotion;
 };

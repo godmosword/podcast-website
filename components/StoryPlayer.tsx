@@ -135,7 +135,10 @@ export default function StoryPlayer({
   const [captionSize, setCaptionSize] = useState<CaptionSize>("md");
 
   const audioRef = useRef<HTMLAudioElement>(null);
-  const transportRef = useRef({ togglePlay: () => {}, skip: (_delta: number) => {} });
+  const transportRef = useRef<{
+    togglePlay: () => void;
+    skip: (delta: number) => void;
+  }>({ togglePlay: () => {}, skip: () => {} });
   const touchStartX = useRef<number | null>(null);
   const bedtimeEndRef = useRef<number | null>(null);
   const timerWrapRef = useRef<HTMLDivElement>(null);

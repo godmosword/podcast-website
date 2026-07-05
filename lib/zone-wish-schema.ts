@@ -3,7 +3,7 @@ import { ZONE_IDS, type ZoneId } from "@/data/universe-zones";
 
 const zoneIdSchema = z.enum(ZONE_IDS as [ZoneId, ...ZoneId[]]);
 
-export const WISH_CATEGORIES = ["feature", "story"] as const;
+const WISH_CATEGORIES = ["feature", "story"] as const;
 export type WishCategory = (typeof WISH_CATEGORIES)[number];
 
 /** 從單一輸入框判斷是 email 或暱稱。 */
@@ -57,5 +57,3 @@ export const zoneWishBodySchema = z
       });
     }
   });
-
-export type ZoneWishBody = z.infer<typeof zoneWishBodySchema>;

@@ -13,21 +13,21 @@ export const CAR_PARK_WALKWAY_PATH =
   "M 90 245 C 70 187.5 115 137.5 162.5 130 C 197.5 125 230 165 235 215 C 235 252.5 145 265 90 245 Z";
 
 /** 恐龍島步道：閉合迴圈，後段繞行火山後方（觸發遮擋）。tile 264×260 本地座標。 */
-export const DINO_WALKWAY_PATH =
+const DINO_WALKWAY_PATH =
   "M 78 196 C 60 152 96 114 132 108 C 166 102 188 134 188 170 C 188 200 120 212 78 196 Z";
 
 /** 英雄救援隊步道：閉合迴圈，後段繞行消防局後方。tile 264×260 本地座標。 */
-export const RESCUE_WALKWAY_PATH =
+const RESCUE_WALKWAY_PATH =
   "M 80 198 C 64 158 98 122 134 116 C 168 110 190 142 190 176 C 190 204 122 214 80 198 Z";
 
 /**
  * 海面環道（stage 座標）：繞 car-park 外海、接 car-park→dino 開放橋。
  * y 略低於橋面，讓車貼海／橋視覺。
  */
-export const MAP_SEA_ORBIT_PATH =
+const MAP_SEA_ORBIT_PATH =
   "M 420 455 Q 500 418 580 455 Q 650 490 580 520 Q 500 548 420 520 Q 350 488 420 455";
 
-export type IslandRoamerRoute = {
+type IslandRoamerRoute = {
   id: string;
   kind: "island";
   zoneId: ZoneId;
@@ -35,7 +35,7 @@ export type IslandRoamerRoute = {
   pingpong?: boolean;
 };
 
-export type MapRoamerRoute = {
+type MapRoamerRoute = {
   id: string;
   kind: "map";
   /** SVG path，stage 座標（0..MAP_STAGE） */
@@ -47,13 +47,6 @@ export type RoamerRoute = IslandRoamerRoute | MapRoamerRoute;
 
 export function getRoutePathD(route: RoamerRoute): string {
   return route.kind === "island" ? route.tilePath : route.d;
-}
-
-/** 開放（非虛線）橋 path，供測試／dev 對照 */
-export function getOpenBridgePaths(): string[] {
-  return resolveUniverseMap()
-    .bridges.filter((b) => !b.dashed)
-    .map((b) => b.d);
 }
 
 /** 4 向 sprite：front/rear 兩張面朝畫面左的視圖，左右用 scaleX 鏡像 → 4 個朝向。 */

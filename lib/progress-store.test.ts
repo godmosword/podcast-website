@@ -14,12 +14,7 @@ import {
 
 function mockLocalStorage() {
   const store = new Map<string, string>();
-  vi.stubGlobal("window", {
-    dispatchEvent: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-  });
-  vi.stubGlobal("localStorage", {
+  const localStorageMock = {
     getItem: (key: string) => store.get(key) ?? null,
     setItem: (key: string, value: string) => {
       store.set(key, value);
@@ -28,7 +23,14 @@ function mockLocalStorage() {
       store.delete(key);
     },
     clear: () => store.clear(),
+  };
+  vi.stubGlobal("window", {
+    dispatchEvent: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    localStorage: localStorageMock,
   });
+  vi.stubGlobal("localStorage", localStorageMock);
   return store;
 }
 
@@ -100,6 +102,30 @@ describe("progress-store migration", () => {
     const { getProgress } = await import("./progress-store");
     const p = await getProgress();
     expect(p.favorites).toEqual(DEFAULT_PROGRESS.favorites);
+  });
+
+  it("does not touch Node localStorage accessor on server", () => {
+    vi.unstubAllGlobals();
+    const originalLocalStorage = Object.getOwnPropertyDescriptor(
+      globalThis,
+      "localStorage",
+    );
+    Object.defineProperty(globalThis, "localStorage", {
+      configurable: true,
+      get() {
+        throw new Error("server localStorage accessor was touched");
+      },
+    });
+
+    try {
+      expect(getProgressSync().favorites).toEqual(DEFAULT_PROGRESS.favorites);
+    } finally {
+      if (originalLocalStorage) {
+        Object.defineProperty(globalThis, "localStorage", originalLocalStorage);
+      } else {
+        Reflect.deleteProperty(globalThis, "localStorage");
+      }
+    }
   });
 });
 

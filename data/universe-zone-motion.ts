@@ -55,8 +55,6 @@ export type MotionPart =
 /** car-park 步道 path（tile 本地座標 264×260，產零件時一併量出） */
 const CAR_PARK_MASCOT_PATH = CAR_PARK_WALKWAY_PATH;
 
-export type MotionType = "spin" | "sway" | "bob" | "sweep" | "path" | "sprite";
-
 export const ZONE_MOTION: Partial<Record<ZoneId, MotionPart[]>> = {
   "car-park": [
     {
