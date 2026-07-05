@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
+import { CONTACT_EMAIL } from "@/lib/contact";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
@@ -18,7 +19,7 @@ export default function LegalPage() {
         </Link>
 
         <h1 className={styles.title}>使用條款與免責聲明</h1>
-        <p className={styles.updated}>最後更新：2026-06-10</p>
+        <p className={styles.updated}>最後更新：2026-07-05</p>
 
         <section className={styles.section} id="nature">
           <h2 className={styles.heading}>網站性質</h2>
@@ -32,8 +33,12 @@ export default function LegalPage() {
           <h2 className={styles.heading}>版權與節目內容</h2>
           <ul className={styles.list}>
             <li>
-              節目音檔、插圖、封面、吉祥物、標題與相關文案，其著作權與商標權屬
+              節目音檔、插圖、封面、吉祥物、原創角色（如鈴鈴清潔車、恐龍車多多、亮亮警車等）、標題與相關文案，其著作權與商標權屬
               <strong> Bonbon &amp; 馬米</strong> 或原權利人所有（除非頁面另有標示）。
+            </li>
+            <li>
+              「<strong>車車遊樂園</strong>」與「<strong>看圖聽故事</strong>」為 Bonbon &amp;
+              馬米之品牌名稱，以未註冊商標（™）主張權利；未經書面同意不得使用於相同或近似之節目、商品或服務。
             </li>
             <li>
               <strong>未經權利人書面同意，禁止</strong>以本網站或儲存庫內之節目素材進行再製、公開傳輸、散布、販售，或暗示官方代言之商業用途。
@@ -109,11 +114,29 @@ export default function LegalPage() {
         </section>
 
         <section className={styles.section} id="privacy">
-          <h2 className={styles.heading}>本機資料與隱私</h2>
+          <h2 className={styles.heading}>資料收集與隱私</h2>
           <ul className={styles.list}>
             <li>
               網站可能在瀏覽器 <code>localStorage</code>{" "}
-              儲存收藏、繼續播放進度、遊戲最佳分數、完播紀錄與平台連結點擊次數等偏好。這些資料<strong>留在您的裝置上</strong>，不由本網站伺服器收集個人帳號資料（本站無登入功能）。
+              儲存收藏、繼續播放進度、遊戲最佳分數、完播紀錄與平台連結點擊次數等偏好。這些資料<strong>留在您的裝置上</strong>；本站無登入功能，不建立使用者帳號。
+            </li>
+            <li>
+              <strong>許願／開幕通知表單</strong>：若您使用樂園地圖的許願表單，本站會收集您填寫的
+              Email 或暱稱、許願留言內容，以及瀏覽器
+              user-agent，儲存於本站資料庫。這些資料<strong>僅用於</strong>
+              園區開幕通知與需求統計，<strong>不</strong>與第三方分享、
+              <strong>不</strong>用於行銷。表單須由<strong>家長或照顧者</strong>
+              填寫並勾選同意後才會送出；未勾選同意者不予收件。
+            </li>
+            <li>
+              <strong>保留與刪除</strong>：許願資料保留至通知目的完成（對應園區上線後 90
+              天內刪除）。家長可隨時來信{" "}
+              <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>{" "}
+              要求查詢、更正或刪除所提供的資料，我們將於收到請求後 30 天內處理。
+            </li>
+            <li>
+              <strong>IP 位址</strong>：送出表單時，本站僅將您的 IP
+              位址用於防濫用之速率限制，<strong>不儲存</strong>於資料庫。
             </li>
             <li>
               為了解官網導流成效，本站使用{" "}
@@ -145,8 +168,9 @@ export default function LegalPage() {
         <section className={styles.section} id="contact">
           <h2 className={styles.heading}>聯絡</h2>
           <p className={styles.text}>
-            若您為權利人，認為本網站內容有侵權或需更正之處，請透過節目官方社群或 podcast 平台與
-            Bonbon &amp; 馬米聯繫。
+            若您為權利人，認為本網站內容有侵權或需更正之處；或您為家長，欲查詢、更正或刪除孩子相關資料，請來信{" "}
+            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+            ，或透過節目官方社群或 podcast 平台與 Bonbon &amp; 馬米聯繫。
           </p>
         </section>
       </main>

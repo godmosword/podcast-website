@@ -20,6 +20,8 @@ export const zoneWishBodySchema = z
   .object({
     zoneId: zoneIdSchema,
     category: z.enum(WISH_CATEGORIES).default("feature"),
+    // 兒童個資保護：須由家長／照顧者勾選同意才收件（COPPA / 個資法）。
+    parentConsent: z.literal(true, { error: "請由家長或照顧者勾選同意" }),
     message: z.string().trim().max(200, "許願內容太長").optional().or(z.literal("")),
     email: z
       .string()

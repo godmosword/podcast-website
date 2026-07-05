@@ -72,7 +72,7 @@ export const ZONES: ZoneDef[] = [
     coord: { x: 820, y: 270 },
     landmark: "🚓",
     artTile: zoneArtTilePath("rescue"),
-    teaser: "冒險救援故事（波力路線）",
+    teaser: "冒險救援故事（救援小隊出動）",
     bridgeFrom: "car-park",
   },
   {

@@ -16,10 +16,10 @@ describe("parseWishContact", () => {
 describe("zoneWishBodySchema", () => {
   it("島嶼許願（feature）接受暱稱或 email", () => {
     expect(
-      zoneWishBodySchema.safeParse({ zoneId: "dino", nickname: "阿寶" }).success,
+      zoneWishBodySchema.safeParse({ zoneId: "dino", nickname: "阿寶", parentConsent: true }).success,
     ).toBe(true);
     expect(
-      zoneWishBodySchema.safeParse({ zoneId: "dino", email: "a@b.co" }).success,
+      zoneWishBodySchema.safeParse({ zoneId: "dino", email: "a@b.co", parentConsent: true }).success,
     ).toBe(true);
   });
 
@@ -29,6 +29,7 @@ describe("zoneWishBodySchema", () => {
         zoneId: "dino",
         category: "story",
         message: "垃圾車半夜去哪裡？",
+        parentConsent: true,
       }).success,
     ).toBe(true);
     expect(
@@ -37,6 +38,7 @@ describe("zoneWishBodySchema", () => {
         category: "story",
         message: "想聽消防車",
         nickname: "小車",
+        parentConsent: true,
       }).success,
     ).toBe(true);
   });
@@ -47,7 +49,24 @@ describe("zoneWishBodySchema", () => {
 
   it("story 拒絕空 message", () => {
     expect(
-      zoneWishBodySchema.safeParse({ zoneId: "dino", category: "story" }).success,
+      zoneWishBodySchema.safeParse({
+        zoneId: "dino",
+        category: "story",
+        parentConsent: true,
+      }).success,
+    ).toBe(false);
+  });
+
+  it("未勾家長同意即拒收（兒童個資保護）", () => {
+    expect(
+      zoneWishBodySchema.safeParse({ zoneId: "dino", nickname: "阿寶" }).success,
+    ).toBe(false);
+    expect(
+      zoneWishBodySchema.safeParse({
+        zoneId: "dino",
+        nickname: "阿寶",
+        parentConsent: false,
+      }).success,
     ).toBe(false);
   });
 

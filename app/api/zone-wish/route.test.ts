@@ -54,6 +54,7 @@ describe("/api/zone-wish", () => {
           category: "feature",
           nickname: "星星",
           email: "a@b.co",
+          parentConsent: true,
         }),
       }),
     );
@@ -85,6 +86,7 @@ describe("/api/zone-wish", () => {
           zoneId: "dino",
           category: "story",
           message: "垃圾車半夜去哪裡？",
+          parentConsent: true,
         }),
       }),
     );
@@ -109,6 +111,21 @@ describe("/api/zone-wish", () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ zoneId: "dino" }),
+      }),
+    );
+
+    expect(res.status).toBe(400);
+  });
+
+  it("未勾家長同意回 400（兒童個資保護）", async () => {
+    const { isZoneWishDbConfigured } = await import("@/lib/zone-wish-db");
+    vi.mocked(isZoneWishDbConfigured).mockReturnValue(true);
+
+    const res = await POST(
+      new Request("http://localhost/api/zone-wish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ zoneId: "dino", nickname: "小車" }),
       }),
     );
 

@@ -96,8 +96,9 @@ export default function SiteFooter({
         <Link href="/legal" className={styles.legalLink}>
           使用條款與免責聲明
         </Link>
-        <p className={styles.copyright}>© 車車遊樂園 · Bonbon &amp; 馬米</p>
+        <p className={styles.copyright}>© 車車遊樂園™ · Bonbon &amp; 馬米</p>
         <p className={styles.redistribution}>
+          「車車遊樂園」「看圖聽故事」為 Bonbon &amp; 馬米之品牌名稱。
           節目音訊、插圖與字幕僅供個人收聽；未經書面同意禁止轉載、下載或散布。
         </p>
       </div>

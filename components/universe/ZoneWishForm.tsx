@@ -17,10 +17,12 @@ type FormState = "loading" | "form" | "success" | "error" | "mailto";
 export default function ZoneWishForm({ zoneId, fallbackHref, onSubmitSuccess }: Props) {
   const contactId = useId();
   const messageId = useId();
+  const consentId = useId();
   const [state, setState] = useState<FormState>("loading");
   const [category, setCategory] = useState<WishCategory>("feature");
   const [contact, setContact] = useState("");
   const [message, setMessage] = useState("");
+  const [parentConsent, setParentConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -50,6 +52,7 @@ export default function ZoneWishForm({ zoneId, fallbackHref, onSubmitSuccess }: 
     const parsed = parseWishContact(contact);
     const trimmedMessage = message.trim();
 
+    if (!parentConsent) return;
     if (category === "feature" && !parsed.email && !parsed.nickname) return;
     if (category === "story" && !trimmedMessage) return;
 
@@ -63,6 +66,7 @@ export default function ZoneWishForm({ zoneId, fallbackHref, onSubmitSuccess }: 
         body: JSON.stringify({
           zoneId,
           category,
+          parentConsent,
           ...(category === "story" ? { message: trimmedMessage } : {}),
           ...parsed,
         }),
@@ -185,13 +189,36 @@ export default function ZoneWishForm({ zoneId, fallbackHref, onSubmitSuccess }: 
         </>
       )}
 
-      <button className={styles.submit} type="submit" disabled={submitting}>
+      <label className={styles.consent} htmlFor={consentId}>
+        <input
+          id={consentId}
+          className={styles.consentCheckbox}
+          type="checkbox"
+          checked={parentConsent}
+          onChange={(e) => setParentConsent(e.target.checked)}
+          disabled={submitting}
+          required
+        />
+        <span>我是家長／照顧者，同意提供以上資料以接收開幕通知與需求統計</span>
+      </label>
+
+      <button
+        className={styles.submit}
+        type="submit"
+        disabled={submitting || !parentConsent}
+      >
         {submitting
           ? "送出中…"
           : isStory
             ? "送出故事許願"
             : "🔔 通知我開幕"}
       </button>
+      <p className={styles.privacyNote}>
+        資料如何使用與刪除，請見{" "}
+        <a className={styles.fallbackLink} href="/legal#privacy">
+          隱私說明
+        </a>
+      </p>
       {state === "error" ? (
         <p className={styles.error} role="alert">
           送出失敗，請再試一次；或改用{" "}

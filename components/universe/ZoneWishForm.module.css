@@ -93,6 +93,36 @@
   color: var(--ink-soft);
 }
 
+.consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.consentCheckbox {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  accent-color: var(--landing-brand);
+  cursor: pointer;
+}
+
+.consentCheckbox:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.privacyNote {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
 .srOnly {
   position: absolute;
   width: 1px;
