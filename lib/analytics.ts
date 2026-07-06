@@ -3,6 +3,7 @@ import type { ZoneId, ZoneStatus } from "@/data/universe-zones";
 import type { WishCategory } from "@/lib/zone-wish-schema";
 import type { ThemePreference } from "@/lib/theme";
 import { recordPlatformClick, recordStoryCompleted } from "@/lib/engagement";
+import type { ReturnVisitBucket } from "@/lib/return-visit";
 
 export type PlatformClickSource =
   | "story-cta"
@@ -41,6 +42,14 @@ export function trackPlatformClick(
 export function trackStoryCompleted(slug: string): void {
   recordStoryCompleted(slug);
   safeTrack("story_completed", { slug });
+}
+
+/**
+ * 回訪（STEM-P1）：只送天數區間 bucket（見 lib/return-visit.ts 口徑），
+ * 無時間戳、無識別碼、無孩子個資。
+ */
+export function trackReturnVisit(daysSince: ReturnVisitBucket): void {
+  safeTrack("return_visit", { daysSince });
 }
 
 /** 樂園地圖：點擊島嶼。 */

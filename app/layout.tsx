@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/react";
 import JsonLd from "@/components/JsonLd";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import ReturnVisitPing from "@/components/ReturnVisitPing";
 import SiteNavBar from "@/components/landing/SiteNavBar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import SvgDefs from "@/components/decor/SvgDefs";
@@ -117,6 +118,7 @@ export default function RootLayout({
             {children}
           </div>
           <ServiceWorkerRegister />
+          <ReturnVisitPing />
           <Analytics />
         </ThemeProvider>
       </body>
