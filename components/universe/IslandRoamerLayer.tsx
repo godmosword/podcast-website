@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ZoneId } from "@/data/universe-zones";
 import {
   MAP_ROAMERS,
@@ -8,14 +8,16 @@ import {
   ZONE_OCCLUDERS,
   getRoutePathD,
   isDevRoamersQuery,
-  roamerHasRear,
-  roamerSpriteSrc,
+  roamerGreeting,
   shouldRenderRoamer,
+  type Roamer,
 } from "@/data/universe-roamers";
 import { getZoneArtSrcSet } from "@/lib/universe/zone-art-tile";
+import { trackUniverseRoamerTap } from "@/lib/analytics";
+import { playSfx } from "@/lib/sfx";
 import { useRoamerSim } from "./useRoamerSim";
 import ArtSrcPicture from "./ArtSrcPicture";
-import RoamerSpritePicture from "./RoamerSpritePicture";
+import RoamerVehicle, { type RoamerGreetingState } from "./RoamerVehicle";
 import styles from "./IslandRoamerLayer.module.css";
 
 type Props = {
@@ -38,7 +40,11 @@ export default function IslandRoamerLayer({
   night,
 }: Props) {
   const [devRoamers, setDevRoamers] = useState(false);
+  const [greeting, setGreeting] =
+    useState<(RoamerGreetingState & { id: string }) | null>(null);
   const layerRef = useRef<HTMLDivElement>(null);
+  const greetingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const greetingKeyRef = useRef(0);
 
   useEffect(() => {
     setDevRoamers(isDevRoamersQuery());
@@ -65,7 +71,7 @@ export default function IslandRoamerLayer({
   const occluder = ZONE_OCCLUDERS[zoneId];
   const artSrc = getZoneArtSrcSet(zoneId, mapScale);
 
-  useRoamerSim({
+  const { pauseRoamer } = useRoamerSim({
     roamers: visible,
     routes,
     space,
@@ -73,6 +79,29 @@ export default function IslandRoamerLayer({
     reduced,
     paused,
   });
+
+  useEffect(() => {
+    return () => {
+      if (greetingTimerRef.current) clearTimeout(greetingTimerRef.current);
+    };
+  }, []);
+
+  const handleRoamerTap = useCallback(
+    (roamer: Roamer) => {
+      pauseRoamer(roamer.id, 1400);
+      playSfx("horn");
+      trackUniverseRoamerTap(roamer.characterId);
+      greetingKeyRef.current += 1;
+      setGreeting({
+        id: roamer.id,
+        message: roamerGreeting(roamer.characterId),
+        key: greetingKeyRef.current,
+      });
+      if (greetingTimerRef.current) clearTimeout(greetingTimerRef.current);
+      greetingTimerRef.current = setTimeout(() => setGreeting(null), 1500);
+    },
+    [pauseRoamer],
+  );
 
   if (visible.length === 0 && !(devRoamers && routes.length > 0)) return null;
 
@@ -93,35 +122,18 @@ export default function IslandRoamerLayer({
 
       {visible.map((roamer) => {
         const usePlaceholder = devRoamers && !roamer.enabled;
-        const hasRear = roamerHasRear(roamer);
 
         return (
-          <div
+          <RoamerVehicle
             key={roamer.id}
-            data-roamer-id={roamer.id}
-            className={styles.roamer}
-          >
-            <div data-roamer-shadow className={styles.shadow} />
-            <div data-roamer-body data-dir="front" className={styles.body}>
-              {usePlaceholder ? (
-                <div className={styles.placeholder} />
-              ) : (
-                <>
-                  <RoamerSpritePicture
-                    pngSrc={roamerSpriteSrc(roamer, "front", night)}
-                    className={`${styles.sprite} ${styles.spriteFront}`}
-                  />
-                  {hasRear && (
-                    <RoamerSpritePicture
-                      pngSrc={roamerSpriteSrc(roamer, "rear", night)}
-                      className={`${styles.sprite} ${styles.spriteRear}`}
-                      fetchPriority="low"
-                    />
-                  )}
-                </>
-              )}
-            </div>
-          </div>
+            roamer={roamer}
+            usePlaceholder={usePlaceholder}
+            night={night}
+            sizeKind="island"
+            onTap={handleRoamerTap}
+            greeting={greeting?.id === roamer.id ? greeting : null}
+            reduced={reduced}
+          />
         );
       })}
 

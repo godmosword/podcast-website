@@ -1,4 +1,5 @@
 import type { ZoneId } from "@/data/universe-zones";
+import { getCharacterName } from "@/data/characters";
 import { resolveUniverseMap } from "@/lib/universe-map";
 
 /**
@@ -245,4 +246,9 @@ export function isDevRoamersQuery(): boolean {
   if (process.env.NODE_ENV === "production") return false;
   if (typeof window === "undefined") return false;
   return new URLSearchParams(window.location.search).get("devRoamers") === "1";
+}
+
+export function roamerGreeting(characterId: string): string {
+  const name = getCharacterName(characterId);
+  return name ? `嗨！我是${name}！` : "嗨！";
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getCharacters, getCharactersForStory } from "./characters";
+import { getCharacterName, getCharacters, getCharactersForStory } from "./characters";
 
 describe("getCharacters", () => {
   it("回傳完整角色清單給角色頁與 JSON-LD 使用", () => {
@@ -63,5 +63,16 @@ describe("getCharactersForStory", () => {
     expect(ids).toContain("nuan-nuan-turtle");
     expect(ids).toContain("an-an");
     expect(ids).toContain("xiao-hong");
+  });
+});
+
+describe("getCharacterName", () => {
+  it("回傳角色正式名稱供 roamer 打招呼使用", () => {
+    expect(getCharacterName("xiao-hong")).toBe("小紅賽車");
+    expect(getCharacterName("a-ku")).toBe("阿酷鑽地車");
+  });
+
+  it("查無角色時回傳 null", () => {
+    expect(getCharacterName("not-real")).toBeNull();
   });
 });

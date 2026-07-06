@@ -40,4 +40,20 @@ describe("RoamerVehicle", () => {
     expect(html).toContain("/adventures/roamers/a-ku.rear.webp");
     expect(html).toMatch(/fetchpriority="low"/i);
   });
+
+  it("帶 greeting 時輸出問候泡泡與 data-greet", () => {
+    const html = renderToStaticMarkup(
+      <RoamerVehicle
+        roamer={baseRoamer}
+        usePlaceholder={false}
+        night={false}
+        sizeKind="map"
+        greeting={{ message: "嗨！我是小紅賽車！", key: 1 }}
+        reduced={false}
+      />,
+    );
+
+    expect(html).toContain('data-greet="true"');
+    expect(html).toContain("嗨！我是小紅賽車！");
+  });
 });

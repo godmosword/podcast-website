@@ -62,6 +62,11 @@ export function trackUniverseSheetLink(zoneId: ZoneId, href: string): void {
   safeTrack("universe_sheet_link", { zoneId, href });
 }
 
+/** 樂園地圖：點擊漫遊車車打招呼（只送角色 id，不含 PII）。 */
+export function trackUniverseRoamerTap(characterId: string): void {
+  safeTrack("universe_roamer_tap", { characterId });
+}
+
 /** 樂園地圖：日夜切換（只送目標主題，不含 PII）。 */
 export function trackUniverseDayNightToggle(to: ThemePreference): void {
   safeTrack("universe_daynight_toggle", { to });

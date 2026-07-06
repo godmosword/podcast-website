@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { Roamer } from "@/data/universe-roamers";
 import { MAP_STAGE } from "@/data/universe-zones";
-import { computeFrame, pickDir, pickFlip, type RoamerSim } from "./useRoamerSim";
+import {
+  advanceDistance,
+  computeFrame,
+  pickDir,
+  pickFlip,
+  type RoamerSim,
+} from "./useRoamerSim";
 
 describe("pickFlip（左右朝向遲滯）", () => {
   it("明顯左移用基準圖（face-left，flip=1）", () => {
@@ -58,6 +64,7 @@ describe("computeFrame（map 層 2.5D frame）", () => {
       dir: "rear",
       angle: 0,
       bankDeg: 0,
+      pausedUntil: 0,
     };
 
     const frame = computeFrame(sim, MAP_STAGE.width, MAP_STAGE.height, 16, 1000);
@@ -66,5 +73,53 @@ describe("computeFrame（map 層 2.5D frame）", () => {
     expect(frame.depthScale).toBeGreaterThan(0.9);
     expect(frame.shadowScale).toBeGreaterThan(0);
     expect(frame.z).toBe(200);
+  });
+});
+
+describe("advanceDistance", () => {
+  function simFor(route: { length: number; pingpong: boolean }): RoamerSim {
+    return {
+      roamer: {
+        id: "r",
+        characterId: "xiao-hong",
+        routeId: "route",
+        speed: 10,
+        src: "/r.png",
+      },
+      distance: 95,
+      direction: 1,
+      route: {
+        ...route,
+        el: {
+          getPointAtLength: (d: number) => ({ x: d, y: d }),
+        } as SVGPathElement,
+      },
+      phase: 0,
+      flip: 1,
+      dir: "front",
+      angle: 0,
+      bankDeg: 0,
+      pausedUntil: 0,
+    };
+  }
+
+  it("wrap route 超過終點後從頭接續", () => {
+    const sim = simFor({ length: 100, pingpong: false });
+    advanceDistance(sim, 1000, 0);
+    expect(sim.distance).toBe(5);
+  });
+
+  it("pingpong route 到終點後反向", () => {
+    const sim = simFor({ length: 100, pingpong: true });
+    advanceDistance(sim, 1000, 0);
+    expect(sim.distance).toBe(100);
+    expect(sim.direction).toBe(-1);
+  });
+
+  it("暫停期間不前進", () => {
+    const sim = simFor({ length: 100, pingpong: false });
+    sim.pausedUntil = 2000;
+    advanceDistance(sim, 1000, 1000);
+    expect(sim.distance).toBe(95);
   });
 });

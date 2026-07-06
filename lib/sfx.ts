@@ -8,7 +8,7 @@ import {
   setSfxEnabledInStore,
 } from "@/lib/progress-store";
 
-export type SfxKind = "tap" | "flip" | "collect";
+export type SfxKind = "tap" | "flip" | "collect" | "horn";
 
 export const SFX_CHANGE_EVENT = "cc:sfx-change";
 
@@ -64,6 +64,7 @@ const TONES: Record<SfxKind, Tone> = {
   tap: { freq: 660, type: "sine", dur: 0.09, gain: 0.12 },
   flip: { freq: 520, type: "triangle", dur: 0.12, gain: 0.1, slideTo: 760 },
   collect: { freq: 720, type: "sine", dur: 0.2, gain: 0.14, slideTo: 1080 },
+  horn: { freq: 523, type: "triangle", dur: 0.16, gain: 0.12, slideTo: 659 },
 };
 
 /** 播放一個短音；未啟用或環境不支援時靜默 no-op。 */

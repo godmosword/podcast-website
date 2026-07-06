@@ -1,4 +1,4 @@
-import { useEffect, useRef, type RefObject } from "react";
+import { useCallback, useEffect, useRef, type RefObject } from "react";
 import type { Roamer, RoamerDir, RoamerRoute } from "@/data/universe-roamers";
 import { getRoutePathD } from "@/data/universe-roamers";
 import { mapDepthZ } from "@/lib/universe-depth";
@@ -21,6 +21,7 @@ export type RoamerSim = {
   /** 上一幀 heading 角（rad），用來估角速度做過彎 bank。 */
   angle: number;
   bankDeg: number;
+  pausedUntil: number;
 };
 
 /** heading 取樣前瞻距離（px）：比動畫位移大，讓朝向穩定。 */
@@ -138,6 +139,26 @@ export function computeFrame(
   };
 }
 
+export function advanceDistance(sim: RoamerSim, dtMs: number, now: number): void {
+  if (now < sim.pausedUntil) return;
+
+  const { roamer, route } = sim;
+  let dist = sim.distance + roamer.speed * (dtMs / 1000) * sim.direction;
+
+  if (route.pingpong) {
+    if (dist >= route.length) {
+      dist = route.length;
+      sim.direction = -1;
+    } else if (dist <= 0) {
+      dist = 0;
+      sim.direction = 1;
+    }
+  } else {
+    dist = ((dist % route.length) + route.length) % route.length;
+  }
+  sim.distance = dist;
+}
+
 /** 每 roamer 的 DOM 節點快取（effect 建立一次），避免每幀 querySelector。 */
 type RoamerNodes = {
   node: HTMLElement;
@@ -245,6 +266,7 @@ export function useRoamerSim({
         dir: "front" as RoamerDir,
         angle: 0,
         bankDeg: 0,
+        pausedUntil: 0,
       };
     });
 
@@ -270,21 +292,7 @@ export function useRoamerSim({
 
         if (dt > 0 && layerRef.current) {
           for (const sim of simsRef.current) {
-            const { roamer, route } = sim;
-            let dist = sim.distance + roamer.speed * (dt / 1000) * sim.direction;
-
-            if (route.pingpong) {
-              if (dist >= route.length) {
-                dist = route.length;
-                sim.direction = -1;
-              } else if (dist <= 0) {
-                dist = 0;
-                sim.direction = 1;
-              }
-            } else {
-              dist = ((dist % route.length) + route.length) % route.length;
-            }
-            sim.distance = dist;
+            advanceDistance(sim, dt, now);
 
             const nodes = nodesRef.current.get(sim.roamer.id);
             if (nodes) applySim(nodes, sim, space, dt, now);
@@ -304,4 +312,15 @@ export function useRoamerSim({
       lastTimeRef.current = null;
     };
   }, [roamers, reduced, paused, space, layerRef]);
+
+  const pauseRoamer = useCallback((id: string, ms: number) => {
+    const now = performance.now();
+    for (const sim of simsRef.current) {
+      if (sim.roamer.id === id) {
+        sim.pausedUntil = Math.max(sim.pausedUntil, now + ms);
+      }
+    }
+  }, []);
+
+  return { pauseRoamer };
 }

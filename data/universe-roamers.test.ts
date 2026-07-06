@@ -6,6 +6,7 @@ import {
   getRoutePathD,
   resolveRoamerSprites,
   roamerHasRear,
+  roamerGreeting,
   roamerSpriteSrc,
   type Roamer,
 } from "./universe-roamers";
@@ -60,6 +61,16 @@ describe("universe-roamers", () => {
         expect(roamer.startOffset).toBeLessThanOrEqual(1);
       }
     }
+  });
+});
+
+describe("roamerGreeting", () => {
+  it("用角色正式名稱產生問候", () => {
+    expect(roamerGreeting("xiao-hong")).toBe("嗨！我是小紅賽車！");
+  });
+
+  it("查無角色時回退短問候", () => {
+    expect(roamerGreeting("not-real")).toBe("嗨！");
   });
 });
 

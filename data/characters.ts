@@ -169,6 +169,13 @@ const CHARACTERS: Character[] = (rawCharacters as RawCharacter[]).map(
   toCharacter,
 );
 
+const CHARACTER_NAME_BY_ID = new Map(
+  (rawCharacters as RawCharacter[]).map((entry) => [
+    ID_BY_CANONICAL_NAME[entry.name],
+    entry.name,
+  ]),
+);
+
 export function getCharacters(): Character[] {
   return CHARACTERS;
 }
@@ -176,4 +183,8 @@ export function getCharacters(): Character[] {
 export function getCharactersForStory(slug: string): Character[] {
   const canonical = canonicalStorySlug(slug);
   return CHARACTERS.filter((c) => c.appearsIn.includes(canonical));
+}
+
+export function getCharacterName(id: string): string | null {
+  return CHARACTER_NAME_BY_ID.get(id) ?? null;
 }

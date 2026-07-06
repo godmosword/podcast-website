@@ -1,15 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MAP_STAGE } from "@/data/universe-zones";
 import {
   MAP_ROAMERS,
   ROAMER_ROUTES,
   getRoutePathD,
   isDevRoamersQuery,
+  roamerGreeting,
   shouldRenderRoamer,
+  type Roamer,
 } from "@/data/universe-roamers";
+import { trackUniverseRoamerTap } from "@/lib/analytics";
+import { playSfx } from "@/lib/sfx";
 import RoamerVehicle from "./RoamerVehicle";
+import type { RoamerGreetingState } from "./RoamerVehicle";
 import { useRoamerSim } from "./useRoamerSim";
 import styles from "./MapRoamerLayer.module.css";
 
@@ -21,7 +26,11 @@ type Props = {
 
 export default function MapRoamerLayer({ reduced, paused, night }: Props) {
   const [devRoamers, setDevRoamers] = useState(false);
+  const [greeting, setGreeting] =
+    useState<(RoamerGreetingState & { id: string }) | null>(null);
   const layerRef = useRef<HTMLDivElement>(null);
+  const greetingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const greetingKeyRef = useRef(0);
 
   useEffect(() => {
     setDevRoamers(isDevRoamersQuery());
@@ -51,7 +60,7 @@ export default function MapRoamerLayer({ reduced, paused, night }: Props) {
     [],
   );
 
-  useRoamerSim({
+  const { pauseRoamer } = useRoamerSim({
     roamers: visible,
     routes,
     space,
@@ -59,6 +68,29 @@ export default function MapRoamerLayer({ reduced, paused, night }: Props) {
     reduced,
     paused,
   });
+
+  useEffect(() => {
+    return () => {
+      if (greetingTimerRef.current) clearTimeout(greetingTimerRef.current);
+    };
+  }, []);
+
+  const handleRoamerTap = useCallback(
+    (roamer: Roamer) => {
+      pauseRoamer(roamer.id, 1400);
+      playSfx("horn");
+      trackUniverseRoamerTap(roamer.characterId);
+      greetingKeyRef.current += 1;
+      setGreeting({
+        id: roamer.id,
+        message: roamerGreeting(roamer.characterId),
+        key: greetingKeyRef.current,
+      });
+      if (greetingTimerRef.current) clearTimeout(greetingTimerRef.current);
+      greetingTimerRef.current = setTimeout(() => setGreeting(null), 1500);
+    },
+    [pauseRoamer],
+  );
 
   if (visible.length === 0 && !(devRoamers && routes.length > 0)) return null;
 
@@ -89,6 +121,9 @@ export default function MapRoamerLayer({ reduced, paused, night }: Props) {
             usePlaceholder={usePlaceholder}
             night={night}
             sizeKind="map"
+            onTap={handleRoamerTap}
+            greeting={greeting?.id === roamer.id ? greeting : null}
+            reduced={reduced}
           />
         );
       })}
