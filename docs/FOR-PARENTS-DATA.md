@@ -27,7 +27,7 @@
 
 | 來源 | 說明 |
 |------|------|
-| `data/reflection-prompts.ts` | ep-1～ep-9：`child` + `parentFollowUp` |
+| `data/reflection-prompts.ts` | 全部集數（ep-1～ep-17）：`child` + `parentFollowUp` |
 | `components/story/ReflectionPrompt.tsx` | 故事詳情／播放結束顯示 |
 
 ## 其他家長相關
