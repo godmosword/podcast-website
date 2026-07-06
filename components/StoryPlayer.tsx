@@ -13,7 +13,7 @@ import {
   type CaptionSize,
 } from "@/lib/progress-store";
 import { LIGHT_THEME, NIGHT_THEME } from "@/lib/theme";
-import { recordStoryCompleted } from "@/lib/engagement";
+import { trackStoryCompleted } from "@/lib/analytics";
 import { playSfx, isSfxEnabled } from "@/lib/sfx";
 import SfxToggle from "./SfxToggle";
 import StoryEndScreen from "./StoryEndScreen";
@@ -411,7 +411,8 @@ export default function StoryPlayer({
     if (!hasEnded) return;
     if (completionRecorded.current) return;
     completionRecorded.current = true;
-    recordStoryCompleted(slug);
+    // 完播口徑見 lib/analytics.ts trackStoryCompleted JSDoc（本機去重＋對外每次完播計一次）
+    trackStoryCompleted(slug);
   }, [hasEnded, slug]);
 
   // 鍵盤：空白鍵播放/暫停，左右方向鍵 ±10 秒（與控制列一致）。

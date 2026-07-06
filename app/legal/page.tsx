@@ -143,7 +143,7 @@ export default function LegalPage() {
               <a href="https://vercel.com/docs/analytics">
                 Vercel Web Analytics
               </a>
-              收集<strong>匿名</strong>的頁面瀏覽與自訂事件（例如「點了哪個收聽平台」）。我們<strong>不</strong>
+              收集<strong>匿名</strong>的頁面瀏覽與自訂事件（例如「點了哪個收聽平台」「聽完了哪一集」「隔了幾天回來」——只記集數編號與天數區間）。我們<strong>不</strong>
               收集孩子姓名、年齡或其他可識別個人身分的欄位；亦不在播放器內嵌入第三方廣告追蹤。
             </li>
             <li>

@@ -2,7 +2,7 @@ import { track } from "@vercel/analytics";
 import type { ZoneId, ZoneStatus } from "@/data/universe-zones";
 import type { WishCategory } from "@/lib/zone-wish-schema";
 import type { ThemePreference } from "@/lib/theme";
-import { recordPlatformClick } from "@/lib/engagement";
+import { recordPlatformClick, recordStoryCompleted } from "@/lib/engagement";
 
 export type PlatformClickSource =
   | "story-cta"
@@ -29,6 +29,18 @@ export function trackPlatformClick(
 ): void {
   recordPlatformClick(platform);
   safeTrack("platform_click", { platform, source });
+}
+
+/**
+ * 完播（STEM-P1 對外事件口徑，single source of truth）：
+ * - 觸發：native audio `ended` 且非 repeat（StoryPlayer 播放結束 effect，與本機紀錄同一觸發點）。
+ * - 計次：每次完整播放送一次事件（含 replay 後再聽完，量測重聽價值）；
+ *   本機 `engagement.storiesCompleted` 維持 unique-slug 去重（地圖星章／家長儀表板不變）。
+ * - Payload：只送 `{ slug }`——無時間戳、無播放進度、無孩子個資。
+ */
+export function trackStoryCompleted(slug: string): void {
+  recordStoryCompleted(slug);
+  safeTrack("story_completed", { slug });
 }
 
 /** 樂園地圖：點擊島嶼。 */

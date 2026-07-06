@@ -30,6 +30,15 @@
 | `data/reflection-prompts.ts` | 全部集數（ep-1～ep-17）：`child` + `parentFollowUp` |
 | `components/story/ReflectionPrompt.tsx` | 故事詳情／播放結束顯示 |
 
+## 對外 analytics 事件（匿名，Vercel Web Analytics）
+
+> 口徑 single source of truth：`lib/analytics.ts` 各 track 函式 JSDoc。全部 PII-free。
+
+| 事件 | Payload | 口徑 |
+|------|---------|------|
+| `story_completed` | `{ slug }` | native `ended` 且非 repeat 觸發；每次完整播放計一次（含重聽）；本機 `storiesCompleted` 維持去重 |
+| `return_visit` | `{ daysSince }` | 距上次造訪 ≥6h 才送；只送天數區間（same-day/1d/2-3d/4-7d/8-30d/30d+），無原始時間戳；每 session 最多一次（本機 key：`cheche:last-visit-at`） |
+
 ## 其他家長相關
 
 | 功能 | 位置 |

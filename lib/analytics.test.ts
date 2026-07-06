@@ -39,6 +39,55 @@ describe("trackPlatformClick", () => {
   });
 });
 
+describe("trackStoryCompleted（完播口徑）", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.unstubAllGlobals();
+    const store = new Map<string, string>();
+    vi.stubGlobal("window", {
+      dispatchEvent: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    });
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => store.get(key) ?? null,
+      setItem: (key: string, value: string) => store.set(key, value),
+      removeItem: (key: string) => store.delete(key),
+      clear: () => store.clear(),
+    });
+  });
+
+  it("每次完播送事件；本機 storiesCompleted 去重只記一次", async () => {
+    const { track } = await import("@vercel/analytics");
+    vi.mocked(track).mockClear();
+    const { migrateProgress, getProgressSync } = await import("./progress-store");
+    const { trackStoryCompleted } = await import("./analytics");
+
+    migrateProgress();
+    trackStoryCompleted("ep-3");
+    trackStoryCompleted("ep-3"); // replay 後再聽完
+
+    expect(track).toHaveBeenCalledTimes(2);
+    expect(track).toHaveBeenCalledWith("story_completed", { slug: "ep-3" });
+    expect(
+      getProgressSync().engagement.storiesCompleted.filter((s) => s === "ep-3"),
+    ).toHaveLength(1);
+  });
+
+  it("payload 只含 slug，無時間戳與 PII", async () => {
+    const { track } = await import("@vercel/analytics");
+    vi.mocked(track).mockClear();
+    const { migrateProgress } = await import("./progress-store");
+    const { trackStoryCompleted } = await import("./analytics");
+
+    migrateProgress();
+    trackStoryCompleted("ep-1");
+
+    const payload = vi.mocked(track).mock.calls[0]?.[1];
+    expect(Object.keys(payload ?? {})).toEqual(["slug"]);
+  });
+});
+
 describe("universe analytics", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
