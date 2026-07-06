@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { HeartIcon } from "@/components/decor/PlayerIcon";
 import { isFavorite, toggleFavorite } from "@/lib/favorites";
+import { playSfx } from "@/lib/sfx";
 import styles from "./FavoriteButton.module.css";
 
 type FavoriteButtonProps = {
@@ -43,6 +44,9 @@ export default function FavoriteButton({ slug }: FavoriteButtonProps) {
     setActive(nextActive);
 
     if (!wasActive && nextActive) {
+      // 正向回饋（STEM-P1）：溫和 collect 音在 reduced-motion 下保留（只關動畫）；
+      // 取消收藏不出聲（低壓）。sfx 開關由 lib/sfx isSfxEnabled 內建處理。
+      playSfx("collect");
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (!reduced) {
         const burst = createBurstParticles();
