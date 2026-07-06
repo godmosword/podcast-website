@@ -190,11 +190,13 @@ SoundOn 單集 show notes 應回鏈官網單集 URL（含可分享摘要與看�
 
 ### 本季 Top 5（2026-06 執行優先序）
 
-1. **STEM-P1** 每集結尾開放提問內容回填（`reflectionPrompt`，框架已上線）
+1. ~~**STEM-P1** 每集結尾開放提問內容回填~~ ✅ `6ed7758`（全集覆蓋）
 2. **Growth-P1** 單集頁訂閱 CTA 上移（主按鈕下方）
 3. **Growth-P1** 首頁可見訂閱入口（Header／Hero → `#connect`）
 4. **Growth-P2** W27 信任收尾（`/for-parents` 佔位清除、許願表單隱私句）
-5. **STEM-P1** 完播／重訪量測口徑驗證（本機紀錄已上線，需對外事件定義）
+5. ~~**STEM-P1** 完播／重訪量測口徑驗證~~ ✅ `d2ac15c` `9bba1dd`（story_completed＋return_visit，口徑見 lib/analytics.ts）
+
+> **STEM-P1 全數完成（2026-07-06）→ gate 解鎖**：凍結中的地圖美術長尾與遊戲 polish 可依數據擇機重開（建議先看兩週 story_completed／return_visit 基線再決定）。
 
 > 分享鈕、平台排序、訂閱文案、viewport 縮放、sitemap 擴充等已上線，見 Completed；不再佔 Top 5 名額。
 
@@ -206,14 +208,15 @@ SoundOn 單集 show notes 應回鏈官網單集 URL（含可分享摘要與看�
 
 #### ~~故事頁點按熱點（tap-to-explore）~~　`STEM-P1 · M · 插畫座標`　〔stem+eng〕 — **已移除（2026-06）**：虛線提示體驗不佳，待重新設計後再評估。`0d77d7f`
 
-#### 每集結尾開放式「小提問」　`STEM-P1 · S · 文案`　〔stem+content〕
-**框架與 UI 已上線**（`ReflectionPrompt`、故事詳情頁與播放結束畫面；`10746b5`）。`data/reflection-prompts.ts` 目前覆蓋 ep-1～ep-9；收尾工作是回填 ep-10～ep-17，保持「無標準答案、親子延伸一句」格式。依據：STEM 核心是發問與學習主導權。
+#### ~~每集結尾開放式「小提問」~~　`STEM-P1 · S · 文案`　〔stem+content〕 ✅
+框架與 UI（`ReflectionPrompt`、詳情頁＋播放結束畫面）`10746b5`；ep-10～ep-17 文案回填完成（無標準答案＋親子延伸一句，角色名對 apple-synced summary 核實），`data/reflection-prompts.ts` 全集覆蓋＋測試。`6ed7758`
 
-#### 互動正向回饋（音效／星星動畫）　`STEM-P1 · S · 收藏／提問`　〔stem+eng〕
-收藏等互動：溫和音效 + 小星星動畫（重用 `lib/sfx.ts`）。`prefers-reduced-motion` 可關動畫保留音效。
+#### ~~互動正向回饋（音效／星星動畫）~~　`STEM-P1 · S · 收藏／提問`　〔stem+eng〕 ✅
+收藏：星星動畫既有，補 `playSfx("collect")` 溫和音（reduced-motion 關動畫保留音效；取消收藏不出聲）。`f107a42`
 
-#### 互動留存簡易量測（本機 + 可選 analytics）　`STEM-P1 · S · reflection 上線`　〔stem+ceo〕
-本機 `progress-store` 已記錄 `storiesCompleted`、`reflectionShown`、平台點擊次數，Studio 可讀同裝置摘要（`10746b5`、`a844f20`）。收尾工作是定義「完播」對外 analytics 事件口徑（觸發時機、重播是否計次、是否只記 slug），再決定是否送 Vercel custom event；不得送孩子個資。
+#### ~~互動留存簡易量測（本機 + 可選 analytics）~~　`STEM-P1 · S · reflection 上線`　〔stem+ceo〕 ✅
+本機紀錄 `10746b5` `a844f20`。**完播口徑已定案**（single source of truth：`lib/analytics.ts` `trackStoryCompleted` JSDoc）：native `ended` 且非 repeat 觸發；對外每次完整播放計一次（含重聽）、本機維持 unique 去重；payload 只送 `{ slug }`。`story_completed` 事件 `d2ac15c` `5e2db59`；`return_visit` 回訪訊號（≥6h、只送天數 bucket、每 session 一次；FE-04 minimal）`9bba1dd`。legal 與 `docs/FOR-PARENTS-DATA.md` 已同步揭露。
+**量測品質備註**：`reflectionShown` 於 `ReflectionPrompt` mount 即記錄，而詳情頁無條件渲染 → 訊號≈pageview；後續可加 `source: "detail"|"end-screen"` 只記 end-screen 展開。
 
 ---
 
