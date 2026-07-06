@@ -429,7 +429,7 @@
 
   .wishBtn {
     font-size: 11px;
-    min-height: 28px;
+    min-height: 26px;
     padding: 2px 10px;
   }
 }
@@ -476,8 +476,8 @@
    tileLabel 為 pointer-events:none，僅此鈕可點。 */
 .wishBtn {
   pointer-events: auto;
-  min-height: 30px;
-  padding: 3px 12px;
+  min-height: 26px;
+  padding: 2px 10px;
   border: 1px solid #8a6438;
   border-radius: 999px;
   background: linear-gradient(#fdf0c4, #e8c878);

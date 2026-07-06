@@ -99,6 +99,7 @@ export default function ZoneIsland({
     const [ax, ay] = tile.anchorUV;
     const artSrc = getZoneArtSrcSet(zone.id, mapScale);
     const nightArtSrc = getZoneNightArtSrcSet(zone.id, mapScale);
+    const labelOffsetY = mapScale < 0.5 ? -140 : 6;
     return (
       <>
         <button
@@ -173,7 +174,7 @@ export default function ZoneIsland({
           </div>
         </button>
         {/* 木牌欄：島名＋狀態 pill（裝飾，島 button 已含同名 aria-label）＋鎖島「看看」按鈕。
-            看看鈕併入木牌欄免費繼承 1/mapScale 反縮放與 label 層 z-index，
+            看看鈕併入 pillRow，免費繼承 1/mapScale 反縮放與 label 層 z-index，
             且仍是島 button 的兄弟節點（button 不可巢狀 button，hydration #418）。 */}
         <span
           className={styles.tileLabel}
@@ -181,40 +182,41 @@ export default function ZoneIsland({
             left: `${zone.px.x}px`,
             top: `${zone.px.y}px`,
             zIndex: mapDepthZ(zone.depthY, "label"),
-            transform: `translate(-50%, 6px) scale(${1 / mapScale})`,
+            transform: `translate(-50%, ${labelOffsetY}px) scale(${1 / mapScale})`,
             transformOrigin: "50% 0",
           }}
         >
           <span className={styles.name} aria-hidden="true">
             {zone.name}
           </span>
-          <span className={styles.pillRow} aria-hidden="true">
+          <span className={styles.pillRow}>
             <span
               className={styles.pill}
+              aria-hidden="true"
               style={{ background: meta.pillBg, color: meta.pillInk }}
             >
               {meta.label}
             </span>
             {hasProgress ? (
-              <span className={styles.progressChip}>
+              <span className={styles.progressChip} aria-hidden="true">
                 ⭐ {progress!.completed}/{progress!.total}
               </span>
             ) : null}
+            {!isOpen ? (
+              <button
+                type="button"
+                className={styles.wishBtn}
+                aria-label={`${zone.name}看看`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  playSfx("tap");
+                  onWish(zone);
+                }}
+              >
+                看看
+              </button>
+            ) : null}
           </span>
-          {!isOpen ? (
-            <button
-              type="button"
-              className={styles.wishBtn}
-              aria-label={`${zone.name}看看`}
-              onClick={(e) => {
-                e.stopPropagation();
-                playSfx("tap");
-                onWish(zone);
-              }}
-            >
-              看看
-            </button>
-          ) : null}
         </span>
       </>
     );
