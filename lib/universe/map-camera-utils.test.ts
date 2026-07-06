@@ -6,6 +6,7 @@ import {
   FIT_MARGIN,
   MAX_SCALE,
   MIN_SCALE,
+  clampCamera,
   clampScale,
   fitScaleFor,
   pointerTravelExceeded,
@@ -53,5 +54,49 @@ describe("map-camera-utils", () => {
     expect(fitScaleFor(1280, 0)).toBe(1);
     expect(fitScaleFor(100, 100)).toBe(MIN_SCALE);
     expect(fitScaleFor(100000, 100000)).toBe(MAX_SCALE);
+  });
+
+  it("clampCamera 在舞台放得下時置中", () => {
+    expect(clampCamera({ scale: 1, tx: 999, ty: -999 }, 1280, 900)).toEqual({
+      scale: 1,
+      tx: (1280 - MAP_STAGE.width) / 2,
+      ty: (900 - MAP_STAGE.height) / 2,
+    });
+  });
+
+  it("clampCamera 允許放大後的角落島置中", () => {
+    const scale = 1.6;
+    const viewport = { w: 375, h: 667 };
+    const dino = { x: 210, y: 260 };
+
+    expect(
+      clampCamera(
+        {
+          scale,
+          tx: viewport.w / 2 - dino.x * scale,
+          ty: viewport.h / 2 - dino.y * scale,
+        },
+        viewport.w,
+        viewport.h,
+      ),
+    ).toEqual({
+      scale,
+      tx: viewport.w / 2 - dino.x * scale,
+      ty: viewport.h / 2 - dino.y * scale,
+    });
+  });
+
+  it("clampCamera 夾住超出可置中範圍的平移", () => {
+    const scale = 1.6;
+    expect(clampCamera({ scale, tx: 9999, ty: 9999 }, 375, 667)).toEqual({
+      scale,
+      tx: 375 / 2,
+      ty: 667 / 2,
+    });
+    expect(clampCamera({ scale, tx: -9999, ty: -9999 }, 375, 667)).toEqual({
+      scale,
+      tx: 375 / 2 - MAP_STAGE.width * scale,
+      ty: 667 / 2 - MAP_STAGE.height * scale,
+    });
   });
 });

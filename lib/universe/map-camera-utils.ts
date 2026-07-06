@@ -22,6 +22,34 @@ export function fitScaleFor(w: number, h: number): number {
   );
 }
 
+type Camera = { scale: number; tx: number; ty: number };
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
+
+/**
+ * 夾住鏡頭平移。
+ * 舞台放得下時置中；放不下時允許任一舞台點移到 viewport 中心。
+ */
+export function clampCamera(next: Camera, viewportW: number, viewportH: number): Camera {
+  if (viewportW === 0 || viewportH === 0) return next;
+
+  const stageW = MAP_STAGE.width * next.scale;
+  const stageH = MAP_STAGE.height * next.scale;
+
+  const tx =
+    stageW <= viewportW
+      ? (viewportW - stageW) / 2
+      : clamp(next.tx, viewportW / 2 - stageW, viewportW / 2);
+  const ty =
+    stageH <= viewportH
+      ? (viewportH - stageH) / 2
+      : clamp(next.ty, viewportH / 2 - stageH, viewportH / 2);
+
+  return { scale: next.scale, tx, ty };
+}
+
 /** 點擊縮放：位移低於此值視為 tap（非拖曳）。 */
 const TAP_DRAG_THRESHOLD_PX = 6;
 

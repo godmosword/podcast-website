@@ -156,9 +156,13 @@ function UniverseMapContent({
     };
   }, []);
 
-  const handleLockedTap = useCallback((zone: ZoneDef) => {
-    trackUniverseZoneTap(zone.id, zone.status);
-  }, []);
+  const handleLockedTap = useCallback(
+    (zone: ZoneDef) => {
+      trackUniverseZoneTap(zone.id, zone.status);
+      camera.flyTo(zone.coord, FOCUS_SCALE);
+    },
+    [camera],
+  );
 
   const handleWish = useCallback(
     (zone: ZoneDef) => {

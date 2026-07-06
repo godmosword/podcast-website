@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MAP_STAGE, ZONES, type ZoneCoord } from "@/data/universe-zones";
+import { ZONES, type ZoneCoord } from "@/data/universe-zones";
 import {
   CLICK_ZOOM_IN_FACTOR,
   CLICK_ZOOM_OUT_FACTOR,
+  clampCamera,
   clampScale,
   fitScaleFor,
   pointerTravelExceeded,
@@ -12,8 +13,6 @@ import {
 } from "@/lib/universe/map-camera-utils";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
-/** 允許少量 overscroll，讓拖曳手感不死板。 */
-const OVERSCROLL = 48;
 /** fly-to 過場時間（毫秒），與 CSS transition 對齊。 */
 export const FLY_DURATION_MS = 600;
 /** 進場降落動畫：起始鏡頭相對 fit 的倍率（從高空俯瞰整個群島再飛向主島）。 */
@@ -38,10 +37,6 @@ type FlyToOptions = {
 
 const CAR_PARK =
   ZONES.find((z) => z.id === "car-park")?.coord ?? { x: 500, y: 400 };
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
-}
 
 type MapCameraBind = {
   ref: (el: HTMLDivElement | null) => void;
@@ -78,24 +73,7 @@ export function useMapCamera(): MapCamera {
 
   const clampCam = useCallback((next: Camera): Camera => {
     const { w, h } = sizeRef.current;
-    if (w === 0 || h === 0) return next;
-    const stageW = MAP_STAGE.width * next.scale;
-    const stageH = MAP_STAGE.height * next.scale;
-
-    let tx = next.tx;
-    let ty = next.ty;
-
-    if (stageW + OVERSCROLL * 2 <= w) {
-      tx = (w - stageW) / 2;
-    } else {
-      tx = clamp(tx, w - stageW - OVERSCROLL, OVERSCROLL);
-    }
-    if (stageH + OVERSCROLL * 2 <= h) {
-      ty = (h - stageH) / 2;
-    } else {
-      ty = clamp(ty, h - stageH - OVERSCROLL, OVERSCROLL);
-    }
-    return { scale: next.scale, tx, ty };
+    return clampCamera(next, w, h);
   }, []);
 
   const zoomAt = useCallback(
