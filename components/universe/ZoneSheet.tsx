@@ -28,7 +28,7 @@ export default function ZoneSheet({ zone, onClose, zoneStories }: ZoneSheetProps
   const [wishOpen, setWishOpen] = useState(false);
   const open = zone !== null;
 
-  useFocusTrap(open, panelRef);
+  useFocusTrap(open, panelRef, { initialFocus: "container" });
 
   useEffect(() => {
     setWishOpen(false);
@@ -59,6 +59,7 @@ export default function ZoneSheet({ zone, onClose, zoneStories }: ZoneSheetProps
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
         <button

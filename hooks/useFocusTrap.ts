@@ -9,6 +9,15 @@ const FOCUSABLE_SELECTOR = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(",");
 
+type FocusTrapOptions = {
+  /**
+   * 初始焦點落點："first"（預設）聚焦第一個可聚焦元素；
+   * "container" 聚焦容器本身（容器需自帶 tabIndex={-1}）——
+   * dialog/sheet 用，避免開啟瞬間關閉鈕出現 focus ring。
+   */
+  initialFocus?: "container" | "first";
+};
+
 /**
  * 當 active 時，把鍵盤焦點移入 container 並以 Tab 環繞其中；
  * 關閉（active 轉 false 或卸載）時把焦點還給開啟前的元素。
@@ -17,6 +26,7 @@ const FOCUSABLE_SELECTOR = [
 export function useFocusTrap(
   active: boolean,
   containerRef: RefObject<HTMLElement | null>,
+  { initialFocus = "first" }: FocusTrapOptions = {},
 ) {
   useEffect(() => {
     if (!active) return;
@@ -30,7 +40,11 @@ export function useFocusTrap(
         container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
       ).filter((el) => el.offsetParent !== null || el === document.activeElement);
 
-    focusables()[0]?.focus();
+    if (initialFocus === "container") {
+      container.focus();
+    } else {
+      focusables()[0]?.focus();
+    }
 
     function onKeyDown(e: KeyboardEvent) {
       if (e.key !== "Tab") return;
@@ -57,5 +71,5 @@ export function useFocusTrap(
       document.removeEventListener("keydown", onKeyDown);
       previouslyFocused?.focus?.();
     };
-  }, [active, containerRef]);
+  }, [active, containerRef, initialFocus]);
 }

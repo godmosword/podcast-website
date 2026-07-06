@@ -20,4 +20,14 @@ describe("ZoneSheet", () => {
     expect(html).not.toContain("暱稱或 Email");
     expect(html).not.toContain("之後開放投票");
   });
+
+  it("dialog 容器帶 tabindex=-1 供初始焦點（避免開啟瞬間 ✕ 出現 focus ring）", () => {
+    const zone = ZONES.find((item) => item.id === "dino")!;
+    const html = renderToStaticMarkup(
+      <ZoneSheet zone={zone} onClose={() => undefined} />,
+    );
+
+    expect(html).toContain('role="dialog"');
+    expect(html).toContain('tabindex="-1"');
+  });
 });

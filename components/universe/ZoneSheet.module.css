@@ -31,6 +31,11 @@
   animation: sheet-rise 0.28s var(--ease-spring) both;
 }
 
+/* 初始焦點落在容器本身（tabIndex=-1 程式聚焦），不畫 ring；Tab 後 ✕ 仍有可見 ring */
+.sheet:focus {
+  outline: none;
+}
+
 @keyframes sheet-rise {
   from {
     transform: translateY(24px);

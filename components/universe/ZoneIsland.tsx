@@ -158,19 +158,30 @@ export default function ZoneIsland({
             )}
           </div>
         </button>
-        {/* 鎖島「看看」按鈕：button 不可巢狀 button（hydration #418），改為兄弟層鏡像 tile 定位 */}
-        {!isOpen ? (
+        {/* 木牌欄：島名＋狀態 pill（裝飾，島 button 已含同名 aria-label）＋鎖島「看看」按鈕。
+            看看鈕併入木牌欄免費繼承 1/mapScale 反縮放與 label 層 z-index，
+            且仍是島 button 的兄弟節點（button 不可巢狀 button，hydration #418）。 */}
+        <span
+          className={styles.tileLabel}
+          style={{
+            left: `${zone.px.x}px`,
+            top: `${zone.px.y}px`,
+            zIndex: mapDepthZ(zone.depthY, "label"),
+            transform: `translate(-50%, 6px) scale(${1 / mapScale})`,
+            transformOrigin: "50% 0",
+          }}
+        >
+          <span className={styles.name} aria-hidden="true">
+            {zone.name}
+          </span>
           <span
-            className={styles.wishLayer}
-            style={{
-              left: `${zone.px.x}px`,
-              top: `${zone.px.y}px`,
-              width: `${tile.stageSize.w}px`,
-              height: `${tile.stageSize.h}px`,
-              transform: `translate(${-ax * 100}%, ${-ay * 100}%)`,
-              zIndex: mapDepthZ(zone.depthY, "label"),
-            }}
+            className={styles.pill}
+            style={{ background: meta.pillBg, color: meta.pillInk }}
+            aria-hidden="true"
           >
+            {meta.label}
+          </span>
+          {!isOpen ? (
             <button
               type="button"
               className={styles.wishBtn}
@@ -183,26 +194,7 @@ export default function ZoneIsland({
             >
               看看
             </button>
-          </span>
-        ) : null}
-        <span
-          className={styles.tileLabel}
-          style={{
-            left: `${zone.px.x}px`,
-            top: `${zone.px.y}px`,
-            zIndex: mapDepthZ(zone.depthY, "label"),
-            transform: `translate(-50%, 6px) scale(${1 / mapScale})`,
-            transformOrigin: "50% 0",
-          }}
-          aria-hidden="true"
-        >
-          <span className={styles.name}>{zone.name}</span>
-          <span
-            className={styles.pill}
-            style={{ background: meta.pillBg, color: meta.pillInk }}
-          >
-            {meta.label}
-          </span>
+          ) : null}
         </span>
       </>
     );
