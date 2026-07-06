@@ -11,8 +11,8 @@ describe("story-zone-query", () => {
     expect(carPark.some((s) => s.slug === "ep-3")).toBe(true);
 
     const rescue = getStoriesByZone("rescue");
-    expect(rescue).toHaveLength(1);
-    expect(rescue[0]?.slug).toBe("ep-6");
+    expect(rescue.every((s) => s.zoneId === "rescue")).toBe(true);
+    expect(rescue.some((s) => s.slug === "ep-6")).toBe(true);
   });
 
   it("buildZoneStoryPreviewsMap 每 zone 最多 3 筆預覽", () => {
@@ -26,6 +26,8 @@ describe("story-zone-query", () => {
 
   it("示範集數 zoneId 可反查", () => {
     expect(getStory("ep-6")?.zoneId).toBe("rescue");
-    expect(getStoriesByZone("rescue")[0]?.title).toContain("救護車");
+    expect(
+      getStoriesByZone("rescue").some((s) => s.title.includes("救護車")),
+    ).toBe(true);
   });
 });

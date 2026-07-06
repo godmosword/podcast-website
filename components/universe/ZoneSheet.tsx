@@ -90,10 +90,10 @@ export default function ZoneSheet({ zone, onClose, zoneStories }: ZoneSheetProps
 
         <p className={styles.teaser}>{zone.teaser}</p>
 
-        {zone.status === "open" && zoneStories && zoneStories.total > 0 ? (
+        {zoneStories && zoneStories.total > 0 ? (
           <section className={styles.stories} aria-labelledby={`${titleId}-stories`}>
             <h3 id={`${titleId}-stories`} className={styles.storiesHeading}>
-              這座島的故事
+              {zone.status === "open" ? "這座島的故事" : "這座島已經有的故事"}
             </h3>
             <ul className={styles.storyList}>
               {zoneStories.previews.map((story) => (

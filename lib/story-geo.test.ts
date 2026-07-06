@@ -97,8 +97,9 @@ describe("familyActivity 輸出 helpers", () => {
   });
 
   it("無 zoneId 的集數 storyZoneMapShowNote 回傳 null", () => {
-    const story = getStories().find((s) => !s.zoneId);
-    expect(story).toBeDefined();
-    expect(storyZoneMapShowNote(story!)).toBeNull();
+    // back catalog 已全數對映，改用合成無 zoneId 故事驗證降級路徑
+    const base = getStories()[0]!;
+    const story = { ...base, zoneId: undefined };
+    expect(storyZoneMapShowNote(story)).toBeNull();
   });
 });
