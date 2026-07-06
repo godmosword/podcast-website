@@ -247,7 +247,7 @@ SoundOn 單集 show notes 應回鏈官網單集 URL（含可分享摘要與看�
 
 #### 車車圖鑑養成（完成度解鎖）　`STEM-P3 · M · /characters 頁`　〔stem+research〕
 聽完一集／完成對應 `craft` → 解鎖該集車進「車庫圖鑑」（localStorage 進度）。純數位版取代 Hey Clay 實體 code：用**完成度解鎖**驅動回訪；進階車款預留**會員解鎖**（STEM-P4）。與下方 `/characters` 角色圖鑑頁合併規劃。
-**地圖進度中樞軌道已鋪（2026-07-06）**：17 集全數對映 zone（`data/story-zones.ts` `00feab9`）＋`useZoneProgress` hook（讀 `storiesCompleted`、訂閱即時更新，`ba7fd7e`）。可見層（島嶼星章 `⭐ n/N`＋glow、sheet 已聽打勾）等 **STEM-P1 完播口徑**定案後上——口徑變動被 `recordStoryCompleted` 單點隔離，地圖程式不用改。
+**地圖進度中樞已上線（2026-07-06）**：17 集全數對映 zone（`data/story-zones.ts` `00feab9`）＋`useZoneProgress`/`useCompletedSlugs` hook（`ba7fd7e`）＋**可見層**（島嶼木牌 `⭐ n/N` 星章＋淡暖光暈＋sheet 已聽打星，`cbbe28d`）。「聽完」口徑由 `recordStoryCompleted` 單點定義——STEM-P1 完播口徑定案後只動寫入端，地圖不用改。圖鑑本體（車款解鎖 UI）仍待 P3。
 
 #### 家長簡易儀表板　`STEM-P3 · M · localStorage 或帳號決策`　〔stem+design〕
 用星星／笑臉呈現「聽了哪幾集、玩了什麼、解鎖了幾台車」，不做成績單。可先讀現有收藏／繼續播放／遊戲 best 分／圖鑑解鎖（localStorage）。
