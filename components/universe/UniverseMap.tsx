@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MAP_STAGE, ZONE_TERRAIN, type ZoneDef, type ZoneId, type ZoneStatus } from "@/data/universe-zones";
 import { resolveUniverseMap } from "@/lib/universe-map";
@@ -18,6 +18,7 @@ import {
 } from "@/lib/analytics";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useWebpSupported } from "@/hooks/useWebpSupported";
+import { computeZoneProgress, useCompletedSlugs } from "@/hooks/useZoneProgress";
 import { useTheme } from "@/components/ThemeProvider";
 import { MapDecorBirds, MapDecorNearWater } from "./MapDecorLayer";
 import MapBridgeLayer from "./MapBridgeLayer";
@@ -54,6 +55,12 @@ function UniverseMapContent({
   zoneStoryPreviewsMap,
 }: MapContentProps) {
   const { zones, bridges, viewBox } = resolveUniverseMap();
+  // 進度中樞：孩子聽完的集數（localStorage，mount 後才讀）→ 各島星章與 sheet 打勾
+  const completedSlugs = useCompletedSlugs();
+  const zoneProgress = useMemo(
+    () => computeZoneProgress(zoneStoryPreviewsMap, completedSlugs),
+    [zoneStoryPreviewsMap, completedSlugs],
+  );
   const camera = useMapCamera();
   const reduced = useReducedMotion();
   const webpSupported = useWebpSupported();
@@ -380,6 +387,7 @@ function UniverseMapContent({
               night={daylight === "night"}
               mapScale={camera.scale}
               devStatusOverride={devStatusOverrides[zone.id]}
+              progress={zoneProgress[zone.id] ?? null}
             />
           ))}
         </div>
@@ -444,6 +452,7 @@ function UniverseMapContent({
         zoneStories={
           activeZone ? (zoneStoryPreviewsMap[activeZone.id] ?? null) : null
         }
+        completedSlugs={completedSlugs}
       />
     </section>
   );

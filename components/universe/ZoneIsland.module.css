@@ -434,6 +434,44 @@
   }
 }
 
+/* 狀態 pill＋進度星章同一行，避免鎖島木牌欄疊四行壓到下方島 */
+.pillRow {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* 進度星章：孩子在該島聽完 n 集（⭐ n/N），與狀態 pill 同行。
+   金黃暖色與 wishBtn 同語彙但更輕（無邊框陰影），不與 CTA 搶眼。 */
+.progressChip {
+  min-height: 20px;
+  padding: 1px 9px;
+  border-radius: 999px;
+  background: rgba(255, 233, 179, 0.92);
+  color: #7a5410;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+/* 進度 glow：有進度的島在海面多一圈很淡的暖光（沿用開放島光暈語彙，
+   畫在 tileStack::before、藏在島圖 z:1 之下，不影響鎖island 狀態濾鏡）。 */
+.islandTile[data-progress] .tileStack::before {
+  content: "";
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at 50% 62%,
+    rgba(255, 214, 140, 0.3) 0%,
+    rgba(255, 214, 140, 0.12) 48%,
+    transparent 72%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
 /* 鎖島許願：常駐小 pill，木牌欄第三行（島名 → 狀態 → 看看），點擊才開 dock。
    tileLabel 為 pointer-events:none，僅此鈕可點。 */
 .wishBtn {

@@ -20,9 +20,16 @@ type ZoneSheetProps = {
   zone: ZoneDef | null;
   onClose: () => void;
   zoneStories?: ZoneStoriesBundle | null;
+  /** 進度中樞：孩子已聽完的集數 slug（列表打星用）。 */
+  completedSlugs?: ReadonlySet<string>;
 };
 
-export default function ZoneSheet({ zone, onClose, zoneStories }: ZoneSheetProps) {
+export default function ZoneSheet({
+  zone,
+  onClose,
+  zoneStories,
+  completedSlugs,
+}: ZoneSheetProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const [wishOpen, setWishOpen] = useState(false);
@@ -107,6 +114,15 @@ export default function ZoneSheet({ zone, onClose, zoneStories }: ZoneSheetProps
                   >
                     <span aria-hidden="true">{story.emoji} </span>
                     EP {story.ep} {story.title}
+                    {completedSlugs?.has(story.slug) ? (
+                      <span
+                        className={styles.storyDone}
+                        role="img"
+                        aria-label="已聽完"
+                      >
+                        ⭐
+                      </span>
+                    ) : null}
                   </a>
                 </li>
               ))}

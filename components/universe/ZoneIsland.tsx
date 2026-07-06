@@ -13,6 +13,7 @@ import ZoneMotionLayer from "./ZoneMotionLayer";
 import StatusOverlay from "./StatusOverlay";
 import { useZoneTransition } from "./useZoneTransition";
 import ZoneIslandTileArt from "./ZoneIslandTileArt";
+import type { ZoneProgress } from "@/hooks/useZoneProgress";
 import styles from "./ZoneIsland.module.css";
 
 /** 點島慶祝的星星迸發（重用 app/motion.css 的 star-burst-particle）；色票取各園區點綴色。 */
@@ -43,6 +44,8 @@ type ZoneIslandProps = {
   mapScale?: number;
   /** dev-only：?devStatus=car-park:building */
   devStatusOverride?: ZoneStatus;
+  /** 進度中樞：該島「已聽完／總集數」（無進度或零進度時不顯示星章）。 */
+  progress?: ZoneProgress | null;
 };
 
 export default function ZoneIsland({
@@ -55,10 +58,12 @@ export default function ZoneIsland({
   night = false,
   mapScale = 1,
   devStatusOverride,
+  progress = null,
 }: ZoneIslandProps) {
   const effectiveStatus = devStatusOverride ?? zone.status;
   const meta = ZONE_STATUS_META[effectiveStatus];
   const isOpen = effectiveStatus === "open";
+  const hasProgress = (progress?.completed ?? 0) > 0;
   const tile = getZoneArtTile(zone.id);
   const { transition, onTransitionEnd } = useZoneTransition(effectiveStatus, reduced);
 
@@ -111,7 +116,12 @@ export default function ZoneIsland({
           data-transition={transition ?? undefined}
           data-celebrate={isOpen && burst > 0 ? true : undefined}
           data-jelly={!isOpen && jelly > 0 ? jelly : undefined}
-          aria-label={`${zone.name}，${meta.label}`}
+          data-progress={hasProgress ? true : undefined}
+          aria-label={
+            hasProgress
+              ? `${zone.name}，${meta.label}，已聽完 ${progress!.completed} 集`
+              : `${zone.name}，${meta.label}`
+          }
           onClick={handleActivate}
           onAnimationEnd={onTransitionEnd}
         >
@@ -178,12 +188,18 @@ export default function ZoneIsland({
           <span className={styles.name} aria-hidden="true">
             {zone.name}
           </span>
-          <span
-            className={styles.pill}
-            style={{ background: meta.pillBg, color: meta.pillInk }}
-            aria-hidden="true"
-          >
-            {meta.label}
+          <span className={styles.pillRow} aria-hidden="true">
+            <span
+              className={styles.pill}
+              style={{ background: meta.pillBg, color: meta.pillInk }}
+            >
+              {meta.label}
+            </span>
+            {hasProgress ? (
+              <span className={styles.progressChip}>
+                ⭐ {progress!.completed}/{progress!.total}
+              </span>
+            ) : null}
           </span>
           {!isOpen ? (
             <button

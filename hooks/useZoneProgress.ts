@@ -17,9 +17,12 @@ export type ZoneProgressMap = Partial<Record<ZoneId, ZoneProgress>>;
 /** 純函式：由完成清單與各島 slugs 算島嶼進度（供 hook 與測試共用）。 */
 export function computeZoneProgress(
   zoneStoriesMap: Partial<Record<ZoneId, Pick<ZoneStoriesBundle, "slugs">>>,
-  storiesCompleted: readonly string[],
+  storiesCompleted: Iterable<string>,
 ): ZoneProgressMap {
-  const completedSet = new Set(storiesCompleted);
+  const completedSet =
+    storiesCompleted instanceof Set
+      ? (storiesCompleted as ReadonlySet<string>)
+      : new Set(storiesCompleted);
   const result: ZoneProgressMap = {};
   for (const [zoneId, bundle] of Object.entries(zoneStoriesMap)) {
     if (!bundle) continue;
@@ -32,15 +35,13 @@ export function computeZoneProgress(
 }
 
 /**
- * 地圖進度中樞鋪軌：各島「已聽完／總集數」。
- * - SSG/hydration 安全：首次 render 一律回傳零進度，mount 後才讀 localStorage。
+ * 已聽完集數 slug 集合（sheet 打勾等 slug 級顯示用）。
+ * - SSG/hydration 安全：首次 render 一律空集合，mount 後才讀 localStorage。
  * - 訂閱 progress-store 變更（同分頁事件＋跨分頁 storage），聽完即時反映。
  * - 「聽完」口徑由 progress-store 的 recordStoryCompleted 單點定義；
  *   STEM-P1 完播口徑定案後只動寫入端，本 hook 與地圖不用改。
  */
-export function useZoneProgress(
-  zoneStoriesMap: Partial<Record<ZoneId, Pick<ZoneStoriesBundle, "slugs">>>,
-): ZoneProgressMap {
+export function useCompletedSlugs(): ReadonlySet<string> {
   const [completed, setCompleted] = useState<readonly string[]>([]);
 
   useEffect(() => {
@@ -50,8 +51,16 @@ export function useZoneProgress(
     return subscribeProgress(read);
   }, []);
 
+  return useMemo(() => new Set(completed), [completed]);
+}
+
+/** 地圖進度中樞：各島「已聽完／總集數」（見 useCompletedSlugs 的口徑與安全性說明）。 */
+export function useZoneProgress(
+  zoneStoriesMap: Partial<Record<ZoneId, Pick<ZoneStoriesBundle, "slugs">>>,
+): ZoneProgressMap {
+  const completedSlugs = useCompletedSlugs();
   return useMemo(
-    () => computeZoneProgress(zoneStoriesMap, completed),
-    [zoneStoriesMap, completed],
+    () => computeZoneProgress(zoneStoriesMap, completedSlugs),
+    [zoneStoriesMap, completedSlugs],
   );
 }

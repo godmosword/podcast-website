@@ -336,6 +336,12 @@
   border: 2px solid color-mix(in srgb, var(--landing-brand) 28%, transparent);
 }
 
+/* 已聽完標記：列表尾端小星，與島嶼星章同語彙 */
+.storyDone {
+  margin-left: 6px;
+  font-size: 0.85em;
+}
+
 .storyLink:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
