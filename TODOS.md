@@ -128,9 +128,8 @@ SoundOn 單集 show notes 應回鏈官網單集 URL（含可分享摘要與看�
 ### ~~宇宙地圖 zone sheet 主 CTA 層級~~　`design · S · universe 改動落地`　〔design〕 ✅
 車車樂園 sheet 四顆入口按鈕視覺權重相同，違反 one-primary-CTA；「全部故事」改 landing CTA 橘實色主按鈕、grid 整行置頂，其餘維持次要。日夜驗證。`99e5379`
 
-### 宇宙地圖 focus 外框形狀　`design · S · universe 改動落地`　〔design+a11y〕
-島嶼 button 的 `:focus-visible` 是貼齊整個不規則島的巨大圓角矩形（Escape 關 sheet 後特別明顯，像破圖）；sheet 開啟自動聚焦關閉鈕也出現粗黑框。改：focus 樣式套在路標 label 或柔和 box-shadow ring；sheet 初始焦點移到 dialog 容器（`tabindex="-1"`）。保留可見 focus，只改形狀。
-**部分完成**：島嶼 focus ring 已改 `tileStack::after` 橢圓雙環（日 `--ink`／夜 `--c-yellow`，跟隨 float/jelly）`5574636`。**剩餘**：sheet 初始焦點移到 dialog 容器（tabindex=-1）。
+### ~~宇宙地圖 focus 外框形狀~~　`design · S · universe 改動落地`　〔design+a11y〕 ✅
+島嶼 focus ring 改 `tileStack::after` 橢圓雙環（日 `--ink`／夜 `--c-yellow`，跟隨 float/jelly）`5574636`；sheet 初始焦點移到 dialog 容器（`useFocusTrap` 加 `initialFocus: "container"` 選項＋panel `tabIndex=-1`），開啟瞬間 ✕ 不再閃粗黑框 `8f35732`。
 
 ### ~~手機版地圖初始構圖 letterbox／舞台硬邊~~　`design · M`　〔design〕 ✅
 **已由「海洋滿版」（map-fullbleed task-1~4）解決**：sea rect 以 SEA_BLEED=7200 外擴滿版、移除 rx=40 圓角與 seaHazeTop 接縫；視差層改近景頂層雲（刪遠島剪影）、日月改 screen-space 固定天象（z:3）。相機 fit 行為不變（fitScaleFor 抽純函式+測試）。驗證：{375/1280}×{日/夜}×{fit/MIN_SCALE/pan} 截圖矩陣、prod-mode deep link + e2e 10/10。`8ea28eb` `3b13a55` `b83e48d` `71f0f28`
@@ -143,6 +142,8 @@ SoundOn 單集 show notes 應回鏈官網單集 URL（含可分享摘要與看�
 
 ### 小項（polish）
 - ~~鎖定島 sheet「🔔」emoji 圖示與全站 SVG 語彙不一致，改 inline SVG 鈴鐺。~~〔design〕 ✅ `4350ce2`
+- ~~鎖島「看看」pill 預設縮放下被島名木牌完全遮住（功能隱形，正式站既有）；併入木牌欄第三行（島名→狀態→看看），繼承反縮放與 label 層深。~~〔design〕 ✅ `8f35732`
+- StatusOverlay 對 planned/coming 維持現狀裁決：coming 用島體濾鏡、planned 留白皆正確，方形 overlay 會在透明島邊對海面露框；planned 專屬美術（霧基＋「?」浮標）仍屬凍結資產項。〔design〕（已裁決不做 CSS 折衷）
 - 單集頁車種 chip 顯示「其他」= 資料 fallback 外洩到 UI；無車種時隱藏 chip。〔content+eng〕
 - footer「節目數據」「使用條款」觸控高度 20px（<44px）。〔a11y〕
 - landing hero jpg（~300KB/張）可轉 WebP 降首屏灰底時間（手機冷載入 ~3s 才出圖，圖已是 eager+fetchpriority=high，剩資產重量）。〔perf〕
@@ -246,6 +247,7 @@ SoundOn 單集 show notes 應回鏈官網單集 URL（含可分享摘要與看�
 
 #### 車車圖鑑養成（完成度解鎖）　`STEM-P3 · M · /characters 頁`　〔stem+research〕
 聽完一集／完成對應 `craft` → 解鎖該集車進「車庫圖鑑」（localStorage 進度）。純數位版取代 Hey Clay 實體 code：用**完成度解鎖**驅動回訪；進階車款預留**會員解鎖**（STEM-P4）。與下方 `/characters` 角色圖鑑頁合併規劃。
+**地圖進度中樞軌道已鋪（2026-07-06）**：17 集全數對映 zone（`data/story-zones.ts` `00feab9`）＋`useZoneProgress` hook（讀 `storiesCompleted`、訂閱即時更新，`ba7fd7e`）。可見層（島嶼星章 `⭐ n/N`＋glow、sheet 已聽打勾）等 **STEM-P1 完播口徑**定案後上——口徑變動被 `recordStoryCompleted` 單點隔離，地圖程式不用改。
 
 #### 家長簡易儀表板　`STEM-P3 · M · localStorage 或帳號決策`　〔stem+design〕
 用星星／笑臉呈現「聽了哪幾集、玩了什麼、解鎖了幾台車」，不做成績單。可先讀現有收藏／繼續播放／遊戲 best 分／圖鑑解鎖（localStorage）。
@@ -510,7 +512,7 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 > **凍結決策（2026-07-04）：** 等 STEM-P1 gate 後再重開。
 
 - [ ] ❄️ **R-joy 2 資產**：黏土填充 PNG（鯨魚噴水／燈塔小嶼／漂浮氣球）取代或補充 SVG decor；島際渡輪 roamer（走 `MAP_ROAMERS` stage path，需新角色 sprite）；橋面彩旗串
-- [ ] ❄️ **R-joy 3 資產**：四島 `srcNight` 點燈版（§12.5 契約已備）；黏土煙火 sprite 循環（§12.2，12–24 幀，取代 CSS 光效粒子）；月光波紋烘進 `sea-night.png`
+- [ ] ❄️ **R-joy 3 資產**：四島 `srcNight` 點燈版（§12.5 契約已備；**程式路徑已接線** `b64f223`：`ZONE_ART_TILES.hasNightArt` flag＋`zones/{id}.night.png` srcset＋tile crossfade lazy mount，資產落地後翻該島 flag 即點亮）；黏土煙火 sprite 循環（§12.2，12–24 幀，取代 CSS 光效粒子）；月光波紋烘進 `sea-night.png`
 
 **changelog：** car-park 黃金樣本 + Art Bible v2 + R1 四島整島黏土化 `045f457`。
 
