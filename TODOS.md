@@ -137,6 +137,20 @@ SoundOn 單集 show notes 應回鏈官網單集 URL（含可分享摘要與看�
 ### 宇宙地圖 dev 模式兩個既有問題（v6，非 map-fullbleed 引入）　`bug · S · 無`　〔eng〕
 ① ~~console error「button cannot contain a nested button」×2~~ ✅ **已修**：確認即 hydration #418 根因（正式站可重現、本地 prod build 修後 console 乾淨）；許願 button 改兄弟 wishLayer 鏡像 tile 定位。`6c54c93`。② dev 模式 `?zone=` deep link 不開 sheet（production build 正常；baseline bff71ed 同樣重現，疑 StrictMode 雙效應與 openTimer 互動）——仍開放。
 
+### 宇宙地圖 UX 修正（2026-07-06）
+
+> **Gate：** 依 Claude plan `podcast-lucky-marshmallow` 執行。每項完成後單獨 commit，最後回填 commit hash；收尾需跑 Playwright 375/1280 × 日/夜矩陣並 push main。
+> **Commit 切分：** `fix(map): avoid island labels overlapping southern islands` → `feat(map): center islands when focusing map camera` → `refactor(map): simplify map zoom controls` → `feat(map): let roamers greet on tap` → `docs(map): record universe map ux completion`。
+> **介面變動記錄：** `useMapCamera` 加 `canZoomIn`／`canZoomOut`／`panBy` 並移除 click-zoom/context-menu bind；`MapControls` 加可選 disabled props；roamer render 加 tap/greeting props；`trackUniverseRoamerTap(characterId)`、`SfxKind="horn"`、`getCharacterName(id)`。
+
+| Task | 狀態 | 主要產出 | 預計影響檔案 | 驗證 | Commit hash |
+|------|------|----------|--------------|------|-------------|
+| MAP-UX-1 Label 避讓南島 | 完成 | 鎖島「看看」併入 `.pillRow` 第三個 child、修正 `.pillRow`/pill/chip aria、縮短 wish pill 高度；dino/rescue 座標北移；手機 fit 低縮放 label lift，label 不再壓 forest/ocean | Modify: `components/universe/ZoneIsland.tsx`, `components/universe/ZoneIsland.module.css`, `data/universe-zones.ts`; Test: `components/universe/ZoneIsland.test.tsx` | `npm test` passed；`npm run build` passed；`npm run test:e2e` passed，Playwright 375/1280 × 日/夜確認 dino/rescue label 底距南島非透明圖頂 ≥16px | `7a6c6c2` |
+| MAP-UX-2 點島置中 | 完成 | 抽 `clampCamera` 純函式，放寬 clamp 讓角落島可置中；鎖島 tap 也 fly-to 但維持 jelly/bubble、不開 sheet | Modify: `lib/universe/map-camera-utils.ts`, `components/universe/useMapCamera.ts`, `components/universe/UniverseMap.tsx`; Test: `lib/universe/map-camera-utils.test.ts` | `npm test` passed；`npm run build` passed；`npm run test:e2e` passed；`clampCamera` fit/zoom/bounds 單元測試覆蓋 | `8d2a7cc` |
+| MAP-UX-3 縮放重整 | 完成 | 移除滑鼠左鍵放大/右鍵縮小與右鍵選單劫持；`＋/－` 到 min/max 時 disabled；viewport 支援鍵盤 `+/-` 與方向鍵平移 | Modify: `components/universe/useMapCamera.ts`, `components/universe/UniverseMap.tsx`, `components/universe/MapControls.tsx`, `components/universe/MapControls.module.css`, `lib/universe/map-camera-utils.ts`; Test: `components/universe/MapControls.test.tsx`, `lib/universe/map-camera-utils.test.ts` | `npm test` passed；`npm run build` passed；`npm run test:e2e` passed，Playwright 驗證 disabled attr、鍵盤 transform 變化、點空白海不改 scale | `3d1f84b` |
+| MAP-UX-4 Roamer 點擊打招呼 | 完成 | 車車可點擊暫停並打招呼：名字泡泡、sprite 彈跳、喇叭音效、analytics；島內 roamer 點擊 `stopPropagation`，不觸發島 fly/sheet | Modify: `components/universe/MapRoamerLayer.tsx`, `components/universe/IslandRoamerLayer.tsx`, `components/universe/RoamerVehicle.tsx`, `components/universe/useRoamerSim.ts`, `data/universe-roamers.ts`, `data/characters.ts`, `lib/sfx.ts`, `lib/analytics.ts`; Create: `components/universe/RoamerGreeting.tsx`, `components/universe/RoamerGreeting.module.css`; Test: `components/universe/RoamerVehicle.test.tsx`, `components/universe/useRoamerSim.test.ts`, `data/universe-roamers.test.ts`, `data/characters.test.ts` | `npm test` passed；`npm run build` passed；`npm run test:e2e` passed，Playwright click `roam-xiaohong` 顯示「嗨！我是小紅賽車！」，click `roam-aku` 不開島 sheet | `58edb1b` |
+| MAP-UX-5 全域驗證與收尾 | 完成 | 新增 `e2e/universe-map.spec.ts`，覆蓋 375/1280 × 日/夜、label clearance、zoom disabled、鍵盤、空白海 click、roamer greeting；跑完整驗證；回填本段 commit hash；分 commit 後 push main | Modify: `e2e/universe-map.spec.ts`, `TODOS.md` | `npm test` passed（103 files / 477 tests）；`npm run build` passed；`npm run test:e2e` passed（25 tests） | 待回填 |
+
 ### Landing 無 `<h1>`　`design · S · 無`　〔seo+a11y〕
 首頁 headings 從 h2 開始（四段 segment 標題）；第一段標題可升級 h1 或另加 sr-only h1。`components/landing/LandingSegment.tsx`。
 
