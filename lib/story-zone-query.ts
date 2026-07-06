@@ -13,6 +13,8 @@ type ZoneStoryPreview = {
 export type ZoneStoriesBundle = {
   previews: ZoneStoryPreview[];
   total: number;
+  /** 該島全部集數 slug（client 端與 storiesCompleted 交集算島嶼進度；只是字串，payload 極小）。 */
+  slugs: string[];
 };
 
 const PREVIEW_LIMIT = 3;
@@ -38,6 +40,7 @@ export function buildZoneStoryPreviewsMap(): Record<ZoneId, ZoneStoriesBundle> {
     map[zoneId] = {
       previews: stories.slice(0, PREVIEW_LIMIT).map(toPreview),
       total: stories.length,
+      slugs: stories.map((story) => story.slug),
     };
   }
   return map;
