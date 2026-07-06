@@ -3,12 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ZONES, type ZoneCoord } from "@/data/universe-zones";
 import {
-  CLICK_ZOOM_IN_FACTOR,
-  CLICK_ZOOM_OUT_FACTOR,
+  MAX_SCALE,
+  MIN_SCALE,
   clampCamera,
   clampScale,
   fitScaleFor,
-  pointerTravelExceeded,
   wheelZoomFactor,
 } from "@/lib/universe/map-camera-utils";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -19,16 +18,9 @@ export const FLY_DURATION_MS = 600;
 const ENTRY_START_FACTOR = 0.55;
 /** 每個分頁 session 只播一次進場動畫，回訪不重播。 */
 const ENTRY_PLAYED_KEY = "cc-universe-entry-played";
+const ZOOM_EPS = 0.0001;
 
 type Camera = { scale: number; tx: number; ty: number };
-
-type PointerSession = {
-  startX: number;
-  startY: number;
-  button: number;
-  pointerType: string;
-  dragged: boolean;
-};
 
 type FlyToOptions = {
   /** 視窗像素：正值把舞台往下推（島在畫面上移，留給底部 dock）。 */
@@ -44,7 +36,6 @@ type MapCameraBind = {
   onPointerMove: (e: React.PointerEvent<HTMLDivElement>) => void;
   onPointerUp: (e: React.PointerEvent<HTMLDivElement>) => void;
   onPointerCancel: (e: React.PointerEvent<HTMLDivElement>) => void;
-  onContextMenu: (e: React.MouseEvent<HTMLDivElement>) => void;
 };
 
 export type MapCamera = {
@@ -52,10 +43,13 @@ export type MapCamera = {
   tx: number;
   ty: number;
   isAnimating: boolean;
+  canZoomIn: boolean;
+  canZoomOut: boolean;
   bind: MapCameraBind;
   flyTo: (coord: ZoneCoord, targetScale?: number, options?: FlyToOptions) => void;
   reset: () => void;
   zoomBy: (delta: number) => void;
+  panBy: (dx: number, dy: number) => void;
 };
 
 export function useMapCamera(): MapCamera {
@@ -67,7 +61,6 @@ export function useMapCamera(): MapCamera {
   const sizeRef = useRef({ w: 0, h: 0 });
   const initializedRef = useRef(false);
   const pointersRef = useRef(new Map<number, { x: number; y: number }>());
-  const sessionsRef = useRef(new Map<number, PointerSession>());
   const prevPinchRef = useRef<{ dist: number } | null>(null);
   const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -214,18 +207,6 @@ export function useMapCamera(): MapCamera {
     (e: React.PointerEvent<HTMLDivElement>) => {
       if ((e.target as Element).closest("button")) return;
 
-      if (e.pointerType === "mouse" && e.button === 2) {
-        e.preventDefault();
-      }
-
-      sessionsRef.current.set(e.pointerId, {
-        startX: e.clientX,
-        startY: e.clientY,
-        button: e.button,
-        pointerType: e.pointerType,
-        dragged: false,
-      });
-
       const panEligible =
         e.pointerType !== "mouse" || e.button === 0;
       if (panEligible) {
@@ -239,15 +220,6 @@ export function useMapCamera(): MapCamera {
 
   const onPointerMove = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
-      const session = sessionsRef.current.get(e.pointerId);
-      if (session && !session.dragged) {
-        const dx = e.clientX - session.startX;
-        const dy = e.clientY - session.startY;
-        if (pointerTravelExceeded(dx, dy)) {
-          session.dragged = true;
-        }
-      }
-
       const pointers = pointersRef.current;
       const prev = pointers.get(e.pointerId);
       if (!prev) return;
@@ -276,49 +248,29 @@ export function useMapCamera(): MapCamera {
 
   const endPointer = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
-      const session = sessionsRef.current.get(e.pointerId);
-      sessionsRef.current.delete(e.pointerId);
       pointersRef.current.delete(e.pointerId);
       if (pointersRef.current.size < 2) prevPinchRef.current = null;
-
-      if (
-        session &&
-        !session.dragged &&
-        session.pointerType === "mouse" &&
-        pointersRef.current.size === 0
-      ) {
-        const rect = e.currentTarget.getBoundingClientRect();
-        const fx = e.clientX - rect.left;
-        const fy = e.clientY - rect.top;
-        if (session.button === 0) {
-          zoomAt(CLICK_ZOOM_IN_FACTOR, fx, fy);
-        } else if (session.button === 2) {
-          zoomAt(CLICK_ZOOM_OUT_FACTOR, fx, fy);
-        }
-      }
     },
-    [zoomAt],
+    [],
   );
-
-  const onContextMenu = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    e.preventDefault();
-  }, []);
 
   return {
     scale: cam.scale,
     tx: cam.tx,
     ty: cam.ty,
     isAnimating: animating,
+    canZoomIn: cam.scale < MAX_SCALE - ZOOM_EPS,
+    canZoomOut: cam.scale > MIN_SCALE + ZOOM_EPS,
     bind: {
       ref: setViewportEl,
       onPointerDown,
       onPointerMove,
       onPointerUp: endPointer,
       onPointerCancel: endPointer,
-      onContextMenu,
     },
     flyTo,
     reset,
     zoomBy,
+    panBy,
   };
 }

@@ -6,12 +6,16 @@ type MapControlsProps = {
   onReset: () => void;
   onZoomIn: () => void;
   onZoomOut: () => void;
+  canZoomIn?: boolean;
+  canZoomOut?: boolean;
 };
 
 export default function MapControls({
   onReset,
   onZoomIn,
   onZoomOut,
+  canZoomIn = true,
+  canZoomOut = true,
 }: MapControlsProps) {
   return (
     <div className={styles.controls} role="group" aria-label="地圖控制">
@@ -59,6 +63,7 @@ export default function MapControls({
         className={styles.btn}
         onClick={onZoomIn}
         aria-label="放大地圖"
+        disabled={!canZoomIn}
       >
         ＋
       </button>
@@ -67,6 +72,7 @@ export default function MapControls({
         className={styles.btn}
         onClick={onZoomOut}
         aria-label="縮小地圖"
+        disabled={!canZoomOut}
       >
         －
       </button>

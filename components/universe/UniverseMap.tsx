@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MAP_STAGE, ZONE_TERRAIN, type ZoneDef, type ZoneId, type ZoneStatus } from "@/data/universe-zones";
 import { resolveUniverseMap } from "@/lib/universe-map";
@@ -223,6 +223,40 @@ function UniverseMapContent({
     }
   }, []);
 
+  const handleMapKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLDivElement>) => {
+      switch (e.key) {
+        case "+":
+        case "=":
+          e.preventDefault();
+          camera.zoomBy(0.25);
+          break;
+        case "-":
+        case "_":
+          e.preventDefault();
+          camera.zoomBy(-0.2);
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          camera.panBy(0, 80);
+          break;
+        case "ArrowDown":
+          e.preventDefault();
+          camera.panBy(0, -80);
+          break;
+        case "ArrowLeft":
+          e.preventDefault();
+          camera.panBy(80, 0);
+          break;
+        case "ArrowRight":
+          e.preventDefault();
+          camera.panBy(-80, 0);
+          break;
+      }
+    },
+    [camera],
+  );
+
   useEffect(() => {
     return () => {
       if (openTimerRef.current) clearTimeout(openTimerRef.current);
@@ -253,6 +287,10 @@ function UniverseMapContent({
       <div
         className={styles.viewport}
         ref={camera.bind.ref}
+        tabIndex={0}
+        role="application"
+        aria-label="車車樂園互動地圖：方向鍵移動，加減鍵縮放"
+        onKeyDown={handleMapKeyDown}
         onPointerDown={(e) => {
           if (!(e.target as Element).closest("button")) cancelPendingReveal();
           camera.bind.onPointerDown(e);
@@ -260,7 +298,6 @@ function UniverseMapContent({
         onPointerMove={camera.bind.onPointerMove}
         onPointerUp={camera.bind.onPointerUp}
         onPointerCancel={camera.bind.onPointerCancel}
-        onContextMenu={camera.bind.onContextMenu}
       >
         {/* v5：黏土海面貼圖（無縫平鋪）。screen-space 滿版，天生蓋滿任何鏡頭。 */}
         <div
@@ -448,6 +485,8 @@ function UniverseMapContent({
           playSfx("tap");
           camera.zoomBy(-0.2);
         }}
+        canZoomIn={camera.canZoomIn}
+        canZoomOut={camera.canZoomOut}
       />
 
       <ZoneSheet

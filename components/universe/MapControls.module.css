@@ -37,6 +37,17 @@
   box-shadow: 0 4px 0 #dcbb87, 0 7px 10px rgba(120, 90, 40, 0.2);
 }
 
+.btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.btn:disabled:hover,
+.btn:disabled:active {
+  transform: none;
+  box-shadow: 0 3px 0 #dcbb87, 0 5px 8px rgba(120, 90, 40, 0.18);
+}
+
 .btn:active {
   transform: translateY(3px);
   box-shadow: 0 0 0 #dcbb87, 0 2px 4px rgba(120, 90, 40, 0.18);

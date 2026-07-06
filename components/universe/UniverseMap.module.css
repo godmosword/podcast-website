@@ -29,6 +29,11 @@
   cursor: grabbing;
 }
 
+.viewport:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: -6px;
+}
+
 .stage {
   position: absolute;
   top: 0;
