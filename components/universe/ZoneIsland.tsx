@@ -5,6 +5,7 @@ import { ZONE_STATUS_META, type ZoneDef, type ZoneStatus } from "@/data/universe
 import { mapDepthZ } from "@/lib/universe-depth";
 import type { ResolvedZone } from "@/lib/universe-map";
 import { getZoneArtTile, getZoneArtSrcSet } from "@/lib/universe/zone-art-tile";
+import { getZoneNightArtSrcSet } from "@/lib/universe/zone-art-src";
 import { playSfx } from "@/lib/sfx";
 import IslandRoamerLayer from "./IslandRoamerLayer";
 import ZoneLandmark from "./ZoneLandmark";
@@ -92,6 +93,7 @@ export default function ZoneIsland({
   if (tile.mode === "island") {
     const [ax, ay] = tile.anchorUV;
     const artSrc = getZoneArtSrcSet(zone.id, mapScale);
+    const nightArtSrc = getZoneNightArtSrcSet(zone.id, mapScale);
     return (
       <>
         <button
@@ -119,6 +121,8 @@ export default function ZoneIsland({
               artSrc={artSrc}
               anchorUV={[ax, ay]}
               reduced={reduced}
+              nightArtSrc={nightArtSrc}
+              night={night}
             />
             <IslandRoamerLayer
               zoneId={zone.id}

@@ -3,8 +3,10 @@ import { ZONE_IDS } from "@/data/universe-zones";
 import {
   ZONE_ART_SRC_MAX_SCALE,
   ZONE_ART_TILE_WIDTH,
+  buildZoneArtSrcSet,
   getZoneArtSizes,
   getZoneArtSrcSet,
+  getZoneNightArtSrcSet,
 } from "./zone-art-src";
 
 describe("getZoneArtSrcSet", () => {
@@ -27,6 +29,24 @@ describe("getZoneArtSrcSet", () => {
     const zoomedOut = getZoneArtSrcSet("car-park", 1);
     const zoomedIn = getZoneArtSrcSet("car-park", 2.4);
     expect(parseInt(zoomedOut.sizes, 10)).toBeLessThan(parseInt(zoomedIn.sizes, 10));
+  });
+});
+
+describe("getZoneNightArtSrcSet", () => {
+  it("hasNightArt 未備（現況所有島）回傳 null，夜間沿用日圖零 404", () => {
+    for (const id of ZONE_IDS) {
+      expect(getZoneNightArtSrcSet(id)).toBeNull();
+    }
+  });
+
+  it("night 變體組 .night 系列路徑（§12.6 點號慣例；資產解凍後翻 hasNightArt 即點亮）", () => {
+    const night = buildZoneArtSrcSet("dino", ZONE_ART_SRC_MAX_SCALE, "night");
+    expect(night.src).toBe("/adventures/zones/dino.night.png");
+    expect(night.webpSrc).toBe("/adventures/zones/dino.night.webp");
+    expect(night.srcSet).toContain(`dino.night@2x.png ${ZONE_ART_TILE_WIDTH * 2}w`);
+    expect(night.webpSrcSet).toContain(
+      `dino.night@3x.webp ${ZONE_ART_TILE_WIDTH * 3}w`,
+    );
   });
 });
 

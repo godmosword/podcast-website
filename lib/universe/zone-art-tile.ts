@@ -20,6 +20,11 @@ type IslandTile = {
   stageSize: { w: number; h: number };
   /** 沙岸底中心在圖內相對位置 [u,v]，用來對齊 zone.coord（避免以圖底中心對齊導致島上移）。 */
   anchorUV: [number, number];
+  /**
+   * R-joy 3 夜間點燈版是否已備（`zones/{id}.night.png` + @2x/@3x + webp，§12.5/§12.6）。
+   * 資產解凍落地後把該島翻 true 即點亮；false/缺省＝夜間沿用日圖（現行濾鏡調暗）。
+   */
+  hasNightArt?: boolean;
 };
 
 /** discriminated union：island 模式編譯期即強制帶 anchor + stageSize，無需 any／鬆散 optional。 */

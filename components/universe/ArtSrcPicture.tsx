@@ -8,6 +8,7 @@ type Props = {
   className?: string;
   style?: CSSProperties;
   onLoad?: () => void;
+  onError?: () => void;
   draggable?: boolean;
   decoding?: "async" | "auto" | "sync";
 };
@@ -18,6 +19,7 @@ export default function ArtSrcPicture({
   className,
   style,
   onLoad,
+  onError,
   draggable = false,
   decoding = "async",
 }: Props) {
@@ -35,6 +37,7 @@ export default function ArtSrcPicture({
         draggable={draggable}
         decoding={decoding}
         onLoad={onLoad}
+        onError={onError}
       />
     </picture>
   );
