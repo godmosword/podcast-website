@@ -211,17 +211,18 @@ npm test && npm run build
 
 ### 同步通知與告警（免人工檢查）
 
-同步狀態**只用 GitHub Issue** 通知（搭配 GitHub App 手機推播），不需任何新 secret：
+同步 Issue 只保留**需要人工動作**的事項（搭配 GitHub App 手機推播），不需任何新 secret：
 
 | 情況 | 行為 | Issue label |
 |------|------|-------------|
-| 同步 workflow 失敗（任一步，含 deps 安裝前的早期失敗） | 開/補單一「⚠️ Apple 同步失敗」Issue（含 run URL、commit、時間），assign＋@mention | `sync-alert` + `sync-job-failure` |
-| 失敗後恢復成功 | 自動關閉上述失敗 Issue | — |
 | 同步到新集並 push 成功 | 開「待生圖」Issue（push 後才送，避免 push 失敗誤報上站） | `illustration` |
 | RSS 有新集但超過 `STALE_HOURS`（預設 3h）仍未上站 | 看門狗開/補「⚠️ RSS 有新集未上站」Issue | `sync-alert` + `sync-stale-rss` |
+| 單次 workflow／test／build 失敗 | 不開 Issue；錯誤細節留在 GitHub Actions logs / summary | — |
 
-- **失敗告警**：[`sync-apple-podcast.yml`](.github/workflows/sync-apple-podcast.yml) 的 `if: failure()` 步驟用 `actions/github-script` 直接開單（不依賴 npm/tsx，涵蓋早期失敗）。同類只開一張單、其後補 comment，避免每 15 分鐘洗版。
+- **Issue 紅線**：單次 workflow／test／build 失敗不寫 GitHub Issue，避免把 raw error 或暫時性 CI 狀態推到 Issue；請到 Actions run log 追錯。
+- **新集待辦去重**：[`scripts/sync-alert.ts`](scripts/sync-alert.ts) 以精確標題比對 open Issue；就算舊 Issue 缺 `illustration` label，也只補標、不重複開單。
 - **看門狗**：[`sync-watchdog.yml`](.github/workflows/sync-watchdog.yml) 每小時獨立比對「RSS 最新集 vs 站上狀態」（[`scripts/check-sync-fresh.ts`](scripts/check-sync-fresh.ts)），是 sync workflow 整個壞掉時的最後防線；偵測到 sync 正在跑／排隊時靜默，避免長轉錄期間誤報。建議同樣掛外部 `repository_dispatch`（type `watchdog-now`）確保準時。
+- **舊告警收尾**：sync 成功時仍 best-effort 關閉既有 `sync-job-failure` 舊 Issue；不再建立新的同步失敗 Issue。
 - **可選環境變數**：`SYNC_ISSUE_ASSIGNEES`（逗號分隔 username）、`SYNC_ISSUE_MENTIONS`（Issue 開頭 @mention）、`NOTIFY_SITE_URL`、看門狗 `STALE_HOURS`。
 - 所有告警腳本為 best-effort：找不到 `gh`／secret 缺失一律忽略、永遠 exit 0，不遮蔽原始失敗。
 

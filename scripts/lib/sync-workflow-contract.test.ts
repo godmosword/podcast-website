@@ -35,6 +35,16 @@ describe("sync workflow contract", () => {
     expect(buildBlock).toContain(CANONICAL_SITE_URL);
   });
 
+  it("sync workflow 不得把單次 workflow 失敗升級成 GitHub Issue", () => {
+    const yaml = readWorkflow("sync-apple-podcast.yml");
+
+    expect(yaml).not.toContain("if: failure()");
+    expect(yaml).not.toContain("actions/github-script");
+    expect(yaml).not.toContain("github.rest.issues.create");
+    expect(yaml).not.toContain("sync-alert.ts failure");
+    expect(yaml).not.toContain("Apple 同步失敗");
+  });
+
   it("sync-watchdog.yml 必須保留 RSS 新鮮度檢查", () => {
     const yaml = readWorkflow("sync-watchdog.yml");
 

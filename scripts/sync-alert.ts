@@ -1,12 +1,12 @@
 #!/usr/bin/env npx tsx
 /**
- * 同步告警（只用 GitHub Issue）。集中所有 Issue 互動，供：
+ * 同步告警（只用 GitHub Issue）。集中 Issue 互動，供：
  *   - sync workflow：push 後 `notify-live`（新集上站＋開 illustrate Issue）、
- *     成功 `resolve --kind=sync-job-failure`（關閉失敗單）。
+ *     成功 `resolve --kind=sync-job-failure`（關閉舊版失敗單）。
  *   - watchdog：以 import 方式呼叫 openOrCommentIssue / resolveIssue。
  *
- * 去重靠固定 label：`sync-alert` + 分類 label（`sync-job-failure` | `sync-stale-rss`）。
- * 失敗每 15 分鐘觸發 → 同類只開一張單，其後 comment，恢復後自動關閉。
+ * 紅線：單次 workflow/test/build 失敗不開 GitHub Issue；錯誤細節留在 Actions logs。
+ * Issue 只保留人工動作：待生圖與 RSS stale。
  *
  * 全程 best-effort：找不到 gh / Issue / secret 一律吞掉，永遠 exit 0，不遮蔽原始失敗。
  *
@@ -22,6 +22,14 @@ import type { SyncRunReport } from "./lib/sync-report";
 import { buildIssueBody } from "./post-sync-notify";
 
 export type AlertKind = "sync-job-failure" | "sync-stale-rss";
+export type GhRunner = (args: string[]) => string;
+export type SyncAlertDeps = {
+  gh?: GhRunner;
+  env?: NodeJS.ProcessEnv;
+  log?: (message: string) => void;
+  warn?: (message: string) => void;
+  readFile?: (filePath: string) => string;
+};
 
 const BASE_LABEL = "sync-alert";
 const DRY_RUN = process.env.SYNC_ALERT_DRY_RUN === "1";
@@ -39,10 +47,27 @@ function gh(args: string[]): string {
   return execFileSync("gh", args, { encoding: "utf8" }).trim();
 }
 
+function callGh(args: string[], deps: SyncAlertDeps = {}): string {
+  return (deps.gh ?? gh)(args);
+}
+
+function log(deps: SyncAlertDeps, message: string): void {
+  (deps.log ?? console.log)(message);
+}
+
+function warn(deps: SyncAlertDeps, message: string): void {
+  (deps.warn ?? console.warn)(message);
+}
+
 /** 確保 label 存在（已存在則忽略）。 */
-function ensureLabel(name: string, color: string, description: string): void {
+function ensureLabel(
+  name: string,
+  color: string,
+  description: string,
+  deps: SyncAlertDeps = {},
+): void {
   try {
-    gh([
+    callGh([
       "label",
       "create",
       name,
@@ -51,14 +76,14 @@ function ensureLabel(name: string, color: string, description: string): void {
       "--description",
       description,
       "--force",
-    ]);
+    ], deps);
   } catch {
     /* label 已存在或無權限：去重改以 list 過濾，仍可運作 */
   }
 }
 
-function assigneeArgs(): string[] {
-  const raw = process.env.SYNC_ISSUE_ASSIGNEES?.trim();
+function assigneeArgs(env: NodeJS.ProcessEnv = process.env): string[] {
+  const raw = env.SYNC_ISSUE_ASSIGNEES?.trim();
   if (!raw) return [];
   return raw
     .split(",")
@@ -67,14 +92,17 @@ function assigneeArgs(): string[] {
     .flatMap((user) => ["--assignee", user]);
 }
 
-function mentionPreamble(): string {
-  const mentions = process.env.SYNC_ISSUE_MENTIONS?.trim();
+function mentionPreamble(env: NodeJS.ProcessEnv = process.env): string {
+  const mentions = env.SYNC_ISSUE_MENTIONS?.trim();
   return mentions ? `${mentions}\n\n` : "";
 }
 
-function findOpenIssueNumber(kind: AlertKind): number | null {
+function findOpenIssueNumber(
+  kind: AlertKind,
+  deps: SyncAlertDeps = {},
+): number | null {
   try {
-    const out = gh([
+    const out = callGh([
       "issue",
       "list",
       "--state",
@@ -87,7 +115,7 @@ function findOpenIssueNumber(kind: AlertKind): number | null {
       "number",
       "--limit",
       "1",
-    ]);
+    ], deps);
     const parsed = JSON.parse(out || "[]") as Array<{ number?: number }>;
     return parsed[0]?.number ?? null;
   } catch {
@@ -96,25 +124,29 @@ function findOpenIssueNumber(kind: AlertKind): number | null {
 }
 
 /** 開單或補 comment（同類去重）。 */
-export function openOrCommentIssue(opts: {
-  kind: AlertKind;
-  title: string;
-  body: string;
-}): void {
+export function openOrCommentIssue(
+  opts: {
+    kind: AlertKind;
+    title: string;
+    body: string;
+  },
+  deps: SyncAlertDeps = {},
+): void {
   const { kind, title, body } = opts;
+  const env = deps.env ?? process.env;
   try {
-    const existing = findOpenIssueNumber(kind);
+    const existing = findOpenIssueNumber(kind, deps);
     if (existing != null) {
-      gh(["issue", "comment", String(existing), "--body", body]);
-      console.log(`已補 comment 至 #${existing}（${kind}）`);
+      callGh(["issue", "comment", String(existing), "--body", body], deps);
+      log(deps, `已補 comment 至 #${existing}（${kind}）`);
       return;
     }
     const meta = KIND_META[kind];
-    ensureLabel(BASE_LABEL, "5319e7", "同步告警");
-    ensureLabel(kind, meta.color, meta.description);
-    const fullBody = `${mentionPreamble()}${body}`;
+    ensureLabel(BASE_LABEL, "5319e7", "同步告警", deps);
+    ensureLabel(kind, meta.color, meta.description, deps);
+    const fullBody = `${mentionPreamble(env)}${body}`;
     try {
-      const url = gh([
+      const url = callGh([
         "issue",
         "create",
         "--title",
@@ -125,84 +157,131 @@ export function openOrCommentIssue(opts: {
         BASE_LABEL,
         "--label",
         kind,
-        ...assigneeArgs(),
-      ]);
-      console.log(`已開 Issue：${url}`);
+        ...assigneeArgs(env),
+      ], deps);
+      log(deps, `已開 Issue：${url}`);
     } catch {
       // label/assignee 失敗時，退而不帶它們仍要開單（去重會降級但通知不漏）
-      const url = gh(["issue", "create", "--title", title, "--body", fullBody]);
-      console.log(`已開 Issue（無 label）：${url}`);
+      const url = callGh(["issue", "create", "--title", title, "--body", fullBody], deps);
+      log(deps, `已開 Issue（無 label）：${url}`);
     }
   } catch (err) {
-    console.warn(`openOrCommentIssue 失敗（忽略）：${(err as Error).message}`);
+    warn(deps, `openOrCommentIssue 失敗（忽略）：${(err as Error).message}`);
   }
 }
 
 /** 同類失敗單若開啟中 → 補「已恢復」comment 並關閉。 */
-export function resolveIssue(opts: { kind: AlertKind; comment: string }): void {
+export function resolveIssue(
+  opts: { kind: AlertKind; comment: string },
+  deps: SyncAlertDeps = {},
+): void {
   try {
-    const existing = findOpenIssueNumber(opts.kind);
+    const existing = findOpenIssueNumber(opts.kind, deps);
     if (existing == null) return;
-    gh(["issue", "comment", String(existing), "--body", opts.comment]);
-    gh(["issue", "close", String(existing)]);
-    console.log(`已關閉 #${existing}（${opts.kind}）`);
+    callGh(["issue", "comment", String(existing), "--body", opts.comment], deps);
+    callGh(["issue", "close", String(existing)], deps);
+    log(deps, `已關閉 #${existing}（${opts.kind}）`);
   } catch (err) {
-    console.warn(`resolveIssue 失敗（忽略）：${(err as Error).message}`);
+    warn(deps, `resolveIssue 失敗（忽略）：${(err as Error).message}`);
   }
 }
 
-function runUrl(): string {
-  const server = process.env.GITHUB_SERVER_URL ?? "https://github.com";
-  const repo = process.env.GITHUB_REPOSITORY ?? "";
-  const runId = process.env.GITHUB_RUN_ID ?? "";
+function runUrl(env: NodeJS.ProcessEnv = process.env): string {
+  const server = env.GITHUB_SERVER_URL ?? "https://github.com";
+  const repo = env.GITHUB_REPOSITORY ?? "";
+  const runId = env.GITHUB_RUN_ID ?? "";
   return repo && runId ? `${server}/${repo}/actions/runs/${runId}` : "(本機)";
 }
 
-/** push 成功後：為新 ep-N 開 illustrate Issue（沿用 post-sync-notify 的內文）。 */
-function notifyLive(): void {
-  const reportPath = process.env.SYNC_REPORT_PATH;
-  if (!reportPath) {
-    console.log("SYNC_REPORT_PATH 未設，略過 notify-live。");
-    return;
-  }
-  let report: SyncRunReport;
+type GhIssue = {
+  number?: number;
+  title?: string;
+  url?: string;
+  labels?: Array<{ name?: string }>;
+};
+
+function hasLabel(issue: GhIssue, label: string): boolean {
+  return (issue.labels ?? []).some((l) => l.name === label);
+}
+
+function findOpenIllustrationIssue(
+  title: string,
+  slug: string,
+  deps: SyncAlertDeps,
+): GhIssue | null {
   try {
-    report = JSON.parse(readFileSync(reportPath, "utf8")) as SyncRunReport;
+    const out = callGh([
+      "issue",
+      "list",
+      "--search",
+      `in:title ${slug} 待生圖`,
+      "--state",
+      "open",
+      "--json",
+      "number,title,url,labels",
+      "--limit",
+      "20",
+    ], deps);
+    const parsed = JSON.parse(out || "[]") as GhIssue[];
+    const exact = parsed
+      .filter((issue) => issue.title === title)
+      .sort(
+        (a, b) =>
+          (a.number ?? Number.MAX_SAFE_INTEGER) -
+          (b.number ?? Number.MAX_SAFE_INTEGER),
+      );
+    return exact[0] ?? null;
   } catch {
-    console.log("讀不到 sync report，略過 notify-live。");
-    return;
+    return null;
   }
+}
+
+function labelIllustrationIssueIfMissing(
+  issue: GhIssue,
+  deps: SyncAlertDeps,
+): void {
+  if (issue.number == null || hasLabel(issue, "illustration")) return;
+  try {
+    ensureLabel("illustration", "0e8a16", "新集待生圖", deps);
+    callGh([
+      "issue",
+      "edit",
+      String(issue.number),
+      "--add-label",
+      "illustration",
+    ], deps);
+  } catch (err) {
+    warn(
+      deps,
+      `illustration label 補標失敗（忽略）：${(err as Error).message}`,
+    );
+  }
+}
+
+export function notifyLiveFromReport(
+  report: SyncRunReport,
+  deps: SyncAlertDeps = {},
+): void {
   if (report.illustratePending.length === 0) {
-    console.log("無新 ep-N，略過 notify-live。");
+    log(deps, "無新 ep-N，略過 notify-live。");
     return;
   }
+
+  const env = deps.env ?? process.env;
   for (const slug of report.illustratePending) {
     const title = `[illustrate] 新集待生圖：${slug}`;
-    try {
-      const existing = gh([
-        "issue",
-        "list",
-        "--search",
-        `in:title ${slug} 待生圖`,
-        "--state",
-        "open",
-        "--json",
-        "url",
-        "--limit",
-        "1",
-      ]);
-      const parsed = JSON.parse(existing || "[]") as Array<{ url?: string }>;
-      if (parsed[0]?.url) {
-        console.log(`Issue 已存在，略過：${slug} → ${parsed[0].url}`);
-        continue;
-      }
-    } catch {
-      /* 查詢失敗就照常嘗試開單 */
+    const existing = findOpenIllustrationIssue(title, slug, deps);
+    if (existing) {
+      labelIllustrationIssueIfMissing(existing, deps);
+      const target = existing.url ?? `#${existing.number ?? slug}`;
+      log(deps, `Issue 已存在，略過：${slug} → ${target}`);
+      continue;
     }
+
     const body = buildIssueBody(slug, report);
     try {
-      ensureLabel("illustration", "0e8a16", "新集待生圖");
-      const url = gh([
+      ensureLabel("illustration", "0e8a16", "新集待生圖", deps);
+      const url = callGh([
         "issue",
         "create",
         "--title",
@@ -211,42 +290,67 @@ function notifyLive(): void {
         body,
         "--label",
         "illustration",
-        ...assigneeArgs(),
-      ]);
-      console.log(`已開 Issue：${url} ✅ ${slug} 已上站`);
+        ...assigneeArgs(env),
+      ], deps);
+      log(deps, `已開 Issue：${url} ✅ ${slug} 已上站`);
     } catch {
-      const url = gh(["issue", "create", "--title", title, "--body", body]);
-      console.log(`已開 Issue（無 label）：${url}`);
+      const url = callGh(["issue", "create", "--title", title, "--body", body], deps);
+      log(deps, `已開 Issue（無 label）：${url}`);
     }
+  }
+}
+
+/** push 成功後：為新 ep-N 開 illustrate Issue（沿用 post-sync-notify 的內文）。 */
+function notifyLive(deps: SyncAlertDeps = {}): void {
+  const env = deps.env ?? process.env;
+  const reportPath = env.SYNC_REPORT_PATH;
+  if (!reportPath) {
+    log(deps, "SYNC_REPORT_PATH 未設，略過 notify-live。");
+    return;
+  }
+  let report: SyncRunReport;
+  try {
+    const read =
+      deps.readFile ?? ((filePath: string) => readFileSync(filePath, "utf8"));
+    report = JSON.parse(read(reportPath)) as SyncRunReport;
+  } catch {
+    log(deps, "讀不到 sync report，略過 notify-live。");
+    return;
+  }
+  notifyLiveFromReport(report, deps);
+}
+
+export function runSyncAlertMode(
+  mode: string | undefined,
+  rest: string[],
+  deps: SyncAlertDeps = {},
+): void {
+  const kindArg = rest
+    .find((a) => a.startsWith("--kind="))
+    ?.split("=")[1] as AlertKind | undefined;
+  const env = deps.env ?? process.env;
+
+  switch (mode) {
+    case "notify-live":
+      notifyLive(deps);
+      break;
+    case "resolve":
+      resolveIssue({
+        kind: kindArg ?? "sync-job-failure",
+        comment: `✅ 同步已恢復正常。\n\n- Run：${runUrl(env)}`,
+      }, deps);
+      break;
+    case "failure":
+      log(deps, "單次 workflow 失敗不開 Issue；請查看 GitHub Actions logs。");
+      break;
+    default:
+      console.error(`未知模式：${mode}（notify-live | resolve | failure）`);
   }
 }
 
 function main(): void {
   const [mode, ...rest] = process.argv.slice(2);
-  const kindArg = rest
-    .find((a) => a.startsWith("--kind="))
-    ?.split("=")[1] as AlertKind | undefined;
-
-  switch (mode) {
-    case "notify-live":
-      notifyLive();
-      break;
-    case "resolve":
-      resolveIssue({
-        kind: kindArg ?? "sync-job-failure",
-        comment: `✅ 同步已恢復正常。\n\n- Run：${runUrl()}`,
-      });
-      break;
-    case "failure":
-      openOrCommentIssue({
-        kind: kindArg ?? "sync-job-failure",
-        title: "⚠️ Apple 同步失敗",
-        body: `同步 workflow 失敗。\n\n- Run：${runUrl()}\n- 時間：${new Date().toISOString()}`,
-      });
-      break;
-    default:
-      console.error(`未知模式：${mode}（notify-live | resolve | failure）`);
-  }
+  runSyncAlertMode(mode, rest);
 }
 
 const entry = process.argv[1]?.replace(/\\/g, "/") ?? "";
