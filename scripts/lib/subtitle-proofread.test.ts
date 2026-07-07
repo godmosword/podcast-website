@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   applySafeAutoFixes,
   lintSubtitles,
+  verifySubtitleProofread,
   type SubtitleSegment,
 } from "./subtitle-proofread";
 
@@ -38,6 +39,22 @@ describe("lintSubtitles", () => {
     ];
     const report = lintSubtitles("ep-test", segments);
     expect(report.issues).toEqual([]);
+  });
+});
+
+describe("verifySubtitleProofread", () => {
+  it("全幕集（pageCount>1）不 warn，且不拋 ReferenceError", () => {
+    // ep-10 有字幕側車、無 --mark，但已全幕上線 → 應略過
+    expect(() => verifySubtitleProofread("ep-10", false)).not.toThrow();
+    expect(verifySubtitleProofread("ep-10", false)).toBeNull();
+  });
+
+  it("已 mark 的集略過", () => {
+    expect(verifySubtitleProofread("ep-11", false)).toBeNull();
+  });
+
+  it("無側車檔略過", () => {
+    expect(verifySubtitleProofread("ep-999", false)).toBeNull();
   });
 });
 
