@@ -42,7 +42,7 @@ export const STORY_MODIFIED_DATE_SOURCE: Record<string, string> = {
   "ep-15": "6df1adb public/stories/ep-15 + data/scenes/subtitles",
   "ep-16": "3fbf4fd public/stories/ep-16 + data/scenes/subtitles",
   "ep-17": "229668e public/stories/ep-17 + data/scenes/subtitles",
-  "ep-18": "sync Apple RSS MVP（audio + cover）",
+  "ep-18": "aaafa19 public/stories/ep-18 MVP sync",
 };
 
 export function storyDateModified(story: StoryDateInput): string {
