@@ -28,6 +28,7 @@ const STORY_ZONES: Record<string, ZoneId> = {
   "ep-15": "dino", // 恐龍車多多洗手故事
   "ep-16": "ocean", // 噗噗豬來介紹水上樂園
   "ep-17": "ocean", // 漂漂河裡的神祕聲音
+  "ep-18": "ocean", // 水上樂園練習說再見
 };
 
 export function getStoryZoneId(slug: string): ZoneId | undefined {

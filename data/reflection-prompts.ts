@@ -3,6 +3,11 @@ const REFLECTION_PROMPTS: Record<
   string,
   { child: string; parentFollowUp: string }
 > = {
+  "ep-18": {
+    child: "小紅賽車捨不得離開水上樂園。你玩得很開心卻要回家時，心裡會想什麼？",
+    parentFollowUp:
+      "接住捨不得的感覺，一起練習和喜歡的事說再見，可以約定「最後一次」當小儀式。",
+  },
   "ep-17": {
     child: "噗噗豬聽到怪聲音好害怕。你害怕的時候，身體會有什麼感覺？",
     parentFollowUp:
