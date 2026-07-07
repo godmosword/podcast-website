@@ -726,6 +726,13 @@ T+2d    社群貼文（B 戰場）
 - [ ] npm run sync:apple && npm run build → commit push
 ```
 
+### ep-18 上架進度（2026-07-07）
+
+| 步驟 | 狀態 | 備註 |
+|------|------|------|
+| 字幕校對 + `--mark` | ✅ | 189 句；噗噗豬／飄飄河／靛紫／鞦韆；刪除 Whisper 幻覺段；補收尾反思台詞 → `f526b14` |
+| `illustrate --segment-only` → 生圖 → `--approve` | 待做 | MVP `pageCount=1` 已上線 |
+
 ### 現況缺口（勿忘）
 
 - 同步與 `illustrate` **完全脫鉤**；腳本僅 log「請視需要補 overrides」。
