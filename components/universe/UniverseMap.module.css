@@ -81,8 +81,48 @@
   overflow: visible;
 }
 
+/* ── 橋梁 hover 微互動（黏土棧道被「摸到」的回應） ─────────────
+   光影語彙對齊 Art Bible §2：暖金光暈（#ffe9b3 家族）、柔和低對比，
+   不用 blur filter——寬圓頭低透明描邊本身就讀作柔光，最省 GPU。 */
+.bridgeHit {
+  pointer-events: stroke;
+  cursor: grab;
+}
+
+.bridgeGlow {
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.bridgePlank {
+  transition: stroke 160ms ease;
+}
+
+@media (hover: hover) {
+  .bridgeSvg:hover .bridgeGlow {
+    opacity: 0.45;
+  }
+
+  .bridgeSvg:hover .bridgePlank {
+    stroke: #ecd0a5;
+  }
+
+  .bridgeSvg:hover .dashedBridge {
+    opacity: 0.95;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bridgeGlow,
+  .bridgePlank,
+  .dashedBridge {
+    transition: none;
+  }
+}
+
 .dashedBridge {
   animation: dashFlow 1.2s linear infinite;
+  transition: opacity 160ms ease;
 }
 
 .paused .dashedBridge {

@@ -39,6 +39,15 @@ export default function MapBridgeLayer({ bridges, viewBox, paused }: Props) {
           ) : (
             // 開放橋＝黏土棧道：深木底描邊 + 淺木面 + 板縫節奏（R-joy 2）
             <>
+              {/* hover 暖光暈：寬圓頭低透明描邊，opacity 由 CSS hover 驅動（免 blur filter） */}
+              <path
+                d={bridge.d}
+                fill="none"
+                stroke="#ffe9b3"
+                strokeWidth="28"
+                strokeLinecap="round"
+                className={styles.bridgeGlow}
+              />
               <path
                 d={bridge.d}
                 fill="none"
@@ -53,6 +62,7 @@ export default function MapBridgeLayer({ bridges, viewBox, paused }: Props) {
                 stroke="#d9b98a"
                 strokeWidth="12"
                 strokeLinecap="round"
+                className={styles.bridgePlank}
                 opacity={0.95}
               />
               <path
@@ -66,6 +76,16 @@ export default function MapBridgeLayer({ bridges, viewBox, paused }: Props) {
               />
             </>
           )}
+          {/* hover 命中層：寬透明描邊承接滑鼠；svg 本身維持 pointer-events:none，
+              事件照常冒泡給 viewport，pan/zoom 不受影響 */}
+          <path
+            d={bridge.d}
+            fill="none"
+            stroke="transparent"
+            strokeWidth="34"
+            strokeLinecap="round"
+            className={styles.bridgeHit}
+          />
         </svg>
       ))}
     </>
