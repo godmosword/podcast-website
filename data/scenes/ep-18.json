@@ -1,0 +1,189 @@
+{
+  "slug": "ep-18",
+  "audioDuration": 477,
+  "model": "manual-semantic-15-20s",
+  "generatedAt": "2026-07-07T15:25:00.000Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 0,
+      "end": 60,
+      "summary": "主持人開場（保留首圖）",
+      "prompt": "Clay podcast studio: Bonbon and Mami chat warmly about visiting Taipei Water Museum shallow kids water park, Bonbon loved the slide and did not want to leave at closing, playful teasing mood before today's story about saying goodbye",
+      "characters": ["Bonbon", "馬米"],
+      "keepCover": true,
+      "refPageHint": "Cover page 1 shows water park mood — keep as published cover if present. Hosts are HUMAN clay not cars. Bonbon teal hoodie yellow backpack; Mami orange headphones white tee — match portraits exactly."
+    },
+    {
+      "index": 2,
+      "start": 65.6,
+      "end": 92.5,
+      "summary": "彩虹滑水道開場",
+      "prompt": "Hot sunny Cheche water park poolside: tall rainbow waterslide with red orange yellow green blue indigo violet stripes beside sparkling pool, warm sun and shiny splashes, inviting summer opening mood, no characters yet wide establishing",
+      "characters": [],
+      "refPages": [1],
+      "refPageHint": "Wide establishing only. Rainbow slide must match ep-16 page 14 style — curved colorful clay slide beside blue pool. No vehicles in frame."
+    },
+    {
+      "index": 3,
+      "start": 92.5,
+      "end": 119.9,
+      "summary": "小紅賽車玩滑水道",
+      "prompt": "Bright red race car Xiao Hong in swim ring whooshing down rainbow waterslide, huge joyful splash at bottom, headlights sparkling laughing loudly, first thrilling ride energy",
+      "characters": ["小紅賽車"],
+      "refPages": [2],
+      "refPageHint": "PRIMARY: 小紅賽車 match portrait — bright red race car number 2 white stripe in colorful swim ring. ONE face on windshield. Big splash child-safe."
+    },
+    {
+      "index": 4,
+      "start": 119.9,
+      "end": 147,
+      "summary": "噗噗豬加入玩好多趟",
+      "prompt": "Sky-blue Pupu Pig tour car floating over in swim ring beside Xiao Hong, pig snout grinning coolest car arriving, both playing again and again on rainbow slide, headlights twinkling with laughter",
+      "characters": ["小紅賽車", "噗噗豬"],
+      "refPages": [3],
+      "refPageHint": "PRIMARY: 噗噗豬 match portrait and ep-16 cover — sky-blue body pink snout pig ears water cannon life ring polka dots. 小紅賽車 match page 3. Each ONE face. Playful not chaotic."
+    },
+    {
+      "index": 5,
+      "start": 147,
+      "end": 174.4,
+      "summary": "打烊廣播響起",
+      "prompt": "Water park PA speaker broadcasting gentle closing announcement, small clay vehicles in background grabbing towels and returning floats, clock showing thirty minutes until five o'clock close, calm urgency not panic",
+      "characters": ["小紅賽車"],
+      "refPages": [4],
+      "refPageHint": "PRIMARY: 小紅賽車 still near slide base match page 4. Speaker icon or park megaphone. Background faceless cars packing up."
+    },
+    {
+      "index": 6,
+      "start": 174.4,
+      "end": 193.9,
+      "summary": "小紅捨不得不動",
+      "prompt": "Contrast scene: other vehicles leaving with towels and bags while Xiao Hong race car frozen still in front of rainbow slide not moving, lonely longing posture, slide towering behind",
+      "characters": ["小紅賽車"],
+      "refPages": [5],
+      "refPageHint": "PRIMARY: 小紅賽車 match portrait — wistful sad-not-angry expression. Others smaller background leaving. Emotional focus on Xiao Hong."
+    },
+    {
+      "index": 7,
+      "start": 193.9,
+      "end": 218,
+      "summary": "暖暖老師游來關心",
+      "prompt": "Gentle sea turtle teacher Nuannuan swimming through pool water toward Xiao Hong, warm questioning smile, Xiao Hong nodding I love it and do not want it to end, slightly wistful not tantrum",
+      "characters": ["小紅賽車", "海龜老師暖暖"],
+      "refPages": [6],
+      "refPageHint": "CRITICAL SCALE: 海龜老師暖暖 match portrait — beige turtle pink bow on teal skateboard OR swimming with flippers, SAME height as 小紅賽車, NOT giant human-sized. 小紅賽車 match page 6. Each ONE face."
+    },
+    {
+      "index": 8,
+      "start": 218,
+      "end": 252.5,
+      "summary": "約定最後一趟好好說再見",
+      "prompt": "Exactly ONE sea turtle teacher Nuannuan on teal skateboard kneeling beside red race car Xiao Hong at eye level, gently explaining one last ride then goodbye tasks, Xiao Hong asking please one more time, teacher checking watch and nodding yes — two characters only in frame",
+      "characters": ["小紅賽車", "海龜老師暖暖"],
+      "refPages": [7],
+      "refPageHint": "CRITICAL: Exactly ONE 海龜老師暖暖 — beige turtle pink bow on teal skateboard, vehicle-scale SAME height as 小紅賽車, NO duplicate turtle, NO twin, NO second turtle in background. 小紅賽車 match page 7 portrait number 2. Only two characters in scene. Warm teaching moment not scolding."
+    },
+    {
+      "index": 9,
+      "start": 252.5,
+      "end": 272.8,
+      "summary": "噗噗豬也答應最後一飄",
+      "prompt": "Pupu Pig raising wheel-hand promising one last float then stop being sleepy pig in lazy river, everyone laughing warmly together, group support moment beside pool",
+      "characters": ["小紅賽車", "噗噗豬", "海龜老師暖暖"],
+      "refPages": [8],
+      "refPageHint": "PRIMARY: 噗噗豬 comic proud pose match portrait. 小紅賽車 and 海龜老師暖暖 match prior pages. Lighthearted group laugh."
+    },
+    {
+      "index": 10,
+      "start": 272.8,
+      "end": 294.3,
+      "summary": "最後一趟出發",
+      "prompt": "Xiao Hong at top of rainbow slide taking deep breath, speaking softly today is the last time, then zooming down final ride with whoosh, bittersweet excitement",
+      "characters": ["小紅賽車"],
+      "refPages": [9],
+      "refPageHint": "PRIMARY: 小紅賽車 match portrait — determined gentle brave face at slide top then mid-slide joy. ONE face."
+    },
+    {
+      "index": 11,
+      "start": 294.3,
+      "end": 312.4,
+      "summary": "最後滑下來好舒服",
+      "prompt": "Xiao Hong landing in pool after final slide exhaling slowly with satisfied smile, saying so comfortable and so fun, peaceful release after last ride",
+      "characters": ["小紅賽車"],
+      "refPages": [10],
+      "refPageHint": "PRIMARY: 小紅賽車 match page 10 in swim ring at pool bottom. Calm happy relief expression."
+    },
+    {
+      "index": 12,
+      "start": 312.4,
+      "end": 337.8,
+      "summary": "謝謝滑水道還泳圈",
+      "prompt": "Xiao Hong parked before rainbow slide saying thank you for playing with me today, hugging swim ring and placing it back on rack patting it goodbye, Pupu Pig also returning float nearby, gratitude ritual",
+      "characters": ["小紅賽車", "噗噗豬"],
+      "refPages": [11],
+      "refPageHint": "PRIMARY: 小紅賽車 tender grateful expression match portrait. 噗噗豬 match portrait returning own ring. Slide in background. Each ONE face."
+    },
+    {
+      "index": 13,
+      "start": 337.8,
+      "end": 358.5,
+      "summary": "門口輕聲說拜拜",
+      "prompt": "At water park exit gate Xiao Hong looking back at rainbow slide still wanting more but calmly whispering bye bye see you again, no crying tantrum, gentle brave goodbye",
+      "characters": ["小紅賽車"],
+      "refPages": [12],
+      "refPageHint": "PRIMARY: 小紅賽車 match portrait — soft wistful smile not meltdown. Slide visible through gate. Child-safe emotional regulation."
+    },
+    {
+      "index": 14,
+      "start": 358.5,
+      "end": 384.4,
+      "summary": "可以說捨不得再慢慢再見",
+      "prompt": "Quiet reflective moment: Xiao Hong understanding it is okay to feel unwilling to leave, can speak feelings and agree on last time then say goodbye slowly, small inner peace glow",
+      "characters": ["小紅賽車"],
+      "refPages": [13],
+      "refPageHint": "PRIMARY: 小紅賽車 match page 13 design — calm centered composition. Warm lesson illustration without text."
+    },
+    {
+      "index": 15,
+      "start": 384.4,
+      "end": 398,
+      "summary": "噗噗豬哈欠飄飄河玩笑",
+      "prompt": "Pupu Pig big comedic yawn beside lazy river, playful aside about comfy lazy river and maybe sleeping on it next time, bridge from story to host reflection, summer water park background",
+      "characters": ["噗噗豬"],
+      "refPages": [4],
+      "refPageHint": "PRIMARY: 噗噗豬 match portrait — big cute yawn pig snout. Lazy river blue water match ep-17 style. Light comedy beat."
+    },
+    {
+      "index": 16,
+      "start": 398,
+      "end": 440.5,
+      "summary": "主持人故事重點",
+      "prompt": "Clay podcast studio: Bonbon and Mami asking listening kids if they ever loved a park or playground and hated leaving, validating feelings and practicing goodbye when time is up, warm participatory mood",
+      "characters": ["Bonbon", "馬米"],
+      "refPages": [1],
+      "refPageHint": "PRIMARY: Human hosts Bonbon and Mami match portraits exactly. Optional small 小紅賽車 toy on table. Encouraging not lecturing."
+    },
+    {
+      "index": 17,
+      "start": 440.5,
+      "end": 462.2,
+      "summary": "約定最後一次小儀式",
+      "prompt": "Hosts demonstrating practical goodbye rituals with parents: one more slide then bye to park, or one more swing counting twenty seconds, happy ending to happy day",
+      "characters": ["Bonbon", "馬米"],
+      "refPages": [16],
+      "refPageHint": "PRIMARY: Hosts match page 16. Simple pictogram of slide and swing optional. No long text in image."
+    },
+    {
+      "index": 18,
+      "start": 462.2,
+      "end": 477,
+      "summary": "結尾道別",
+      "prompt": "Cheerful closing: Bonbon and Mami waving goodbye, water park mural with Xiao Hong Pupu Pig and Nuannuan turtle in background, teasing next fun story, sunset warmth",
+      "characters": ["Bonbon", "馬米", "小紅賽車", "噗噗豬", "海龜老師暖暖"],
+      "refPages": [15, 1],
+      "refPageHint": "PRIMARY: Human hosts center match portraits. Story characters smaller background match pages 12-15 designs. Nuannuan turtle vehicle-scale. Each vehicle ONE face. Warm goodbye."
+    }
+  ],
+  "newCharacters": []
+}
