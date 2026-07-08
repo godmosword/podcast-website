@@ -4,6 +4,7 @@ import type { Story } from "../../data/content";
 import {
   LEGACY_PLACEHOLDER_SLUGS,
   REFERENCE_ILLUSTRATED_SLUGS,
+  buildWorkflowJsonReport,
   verifyIllustratedEpisode,
   verifyStoryWorkflow,
   type WorkflowProbes,
@@ -21,6 +22,7 @@ function mockProbes(overrides: Partial<WorkflowProbes>): WorkflowProbes {
     hasScenes: () => false,
     imageCount: () => 1,
     sceneCount: () => 0,
+    hasProofreadMarker: () => true,
     ...overrides,
   };
 }
@@ -138,5 +140,121 @@ describe("真實 repo 狀態（僅黃金範本與 legacy 對照）", () => {
     expect(story?.pageCount).toBe(20);
     const issues = verifyStoryWorkflow(story!);
     expect(issues.filter((i) => i.level === "error")).toEqual([]);
+  });
+});
+
+describe("JSON workflow report", () => {
+  it("輸出 evaluator 可讀的聚合狀態、checks、normalized issue codes", () => {
+    const story = mockStory({
+      slug: "ep-json",
+      pageCount: 3,
+      captions: ["第一幕"],
+      captionTimes: [0, 12, 24],
+    });
+    const probes = mockProbes({
+      hasScenes: () => true,
+      sceneCount: () => 2,
+      imageCount: () => 1,
+      hasProofreadMarker: () => false,
+    });
+    const issues = verifyStoryWorkflow(story, probes);
+
+    const report = buildWorkflowJsonReport([story], issues, {
+      probes,
+      timestamp: "2026-07-08T21:00:00.000Z",
+    });
+
+    expect(report).toMatchObject({
+      slug: "all",
+      timestamp: "2026-07-08T21:00:00.000Z",
+      strict: false,
+      passed: false,
+      strict_passed: false,
+      summary: "有 3 個 error，0 個 warning",
+      checks: {
+        total_episodes: 1,
+        total_errors: 3,
+        total_warnings: 0,
+        reference_standard: {
+          slugs: ["ep-9", "ep-10"],
+          passed: true,
+        },
+      },
+      episodes: [
+        {
+          slug: "ep-json",
+          passed: false,
+          strict_passed: false,
+          checks: {
+            subtitle_exists: true,
+            subtitle_marked: false,
+            scenes_exists: true,
+            scenes_count: 2,
+            illustrations_count: 1,
+            pagecount_alignment: {
+              expected: 3,
+              actual: 1,
+              matched: false,
+            },
+            scenes_alignment: {
+              expected: 3,
+              actual: 2,
+              matched: false,
+            },
+            captions_alignment: false,
+            caption_times_alignment: true,
+            matches_reference_standard: false,
+          },
+        },
+      ],
+    });
+    expect(report.errors.map((i) => i.code)).toEqual([
+      "SCENE_COUNT",
+      "IMAGE_COUNT",
+      "CAPTIONS",
+    ]);
+    expect(report.errors[0].details).toMatchObject({
+      slug: "ep-json",
+      expected: 3,
+      actual: 2,
+    });
+    expect(report.recommendations).toContain(
+      "補齊 public/stories/ep-json/ 的 illustration",
+    );
+  });
+
+  it("strict mode 會讓 warning-only episode 的 strict_passed 為 false", () => {
+    const story = mockStory({ slug: "ep-2", pageCount: 6 });
+    const probes = mockProbes({ hasScenes: () => false });
+    const issues = verifyStoryWorkflow(story, probes);
+
+    const report = buildWorkflowJsonReport([story], issues, {
+      probes,
+      strict: true,
+      timestamp: "2026-07-08T21:00:00.000Z",
+    });
+
+    expect(report).toMatchObject({
+      strict: true,
+      passed: true,
+      strict_passed: false,
+      summary: "有 0 個 error，1 個 warning",
+      warnings: [
+        {
+          code: "LEGACY_PLACEHOLDER",
+          message: "舊式 6 頁 placeholder，需依 ep-9／ep-10 workflow 重做 illustrate",
+        },
+      ],
+      episodes: [
+        {
+          slug: "ep-2",
+          passed: true,
+          strict_passed: false,
+        },
+      ],
+    });
+    expect(report.recommendations).toContain(
+      "執行 npm run illustrate -- ep-2 --segment-only",
+    );
   });
 });

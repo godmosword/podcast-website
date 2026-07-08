@@ -9,7 +9,10 @@ import { join } from "node:path";
 import type { Story } from "../../data/content";
 import { STORIES_DIR, subtitleSidecarPath } from "./transcribe-core";
 import { scenesSidecarPath } from "./illustrate-core";
-import { verifySubtitleProofread } from "./subtitle-proofread";
+import {
+  isSubtitleProofreadMarked,
+  verifySubtitleProofread,
+} from "./subtitle-proofread";
 
 /** 已完成的黃金範本集（文件／測試對照用）。 */
 export const REFERENCE_ILLUSTRATED_SLUGS = ["ep-9", "ep-10"] as const;
@@ -38,6 +41,7 @@ export type WorkflowProbes = {
   hasScenes: (slug: string) => boolean;
   imageCount: (slug: string) => number;
   sceneCount: (slug: string) => number;
+  hasProofreadMarker: (slug: string) => boolean;
 };
 
 function illustrationJpgCount(slug: string): number {
@@ -78,6 +82,76 @@ const defaultWorkflowProbes: WorkflowProbes = {
   hasScenes: hasScenesSidecar,
   imageCount: illustrationJpgCount,
   sceneCount: scenesSidecarCount,
+  hasProofreadMarker: isSubtitleProofreadMarked,
+};
+
+export type WorkflowJsonIssue = {
+  code: string;
+  message: string;
+  details: Record<string, unknown>;
+};
+
+export type WorkflowEpisodeChecks = {
+  subtitle_exists: boolean;
+  subtitle_marked: boolean;
+  scenes_exists: boolean;
+  scenes_count: number;
+  illustrations_count: number;
+  pagecount_alignment: {
+    expected: number;
+    actual: number;
+    matched: boolean;
+  };
+  scenes_alignment: {
+    expected: number;
+    actual: number;
+    matched: boolean;
+  };
+  captions_alignment: boolean;
+  caption_times_alignment: boolean;
+  matches_reference_standard: boolean;
+};
+
+export type WorkflowEpisodeJsonReport = {
+  slug: string;
+  timestamp: string;
+  passed: boolean;
+  strict_passed: boolean;
+  summary: string;
+  errors: WorkflowJsonIssue[];
+  warnings: WorkflowJsonIssue[];
+  checks: WorkflowEpisodeChecks;
+  recommendations: string[];
+};
+
+export type WorkflowJsonReport = {
+  slug: "all";
+  timestamp: string;
+  strict: boolean;
+  passed: boolean;
+  strict_passed: boolean;
+  summary: string;
+  errors: WorkflowJsonIssue[];
+  warnings: WorkflowJsonIssue[];
+  checks: {
+    total_episodes: number;
+    total_errors: number;
+    total_warnings: number;
+    reference_standard: {
+      slugs: string[];
+      passed: boolean;
+      errors: WorkflowJsonIssue[];
+    };
+  };
+  recommendations: string[];
+  episodes: WorkflowEpisodeJsonReport[];
+};
+
+type BuildWorkflowJsonReportOptions = {
+  strict?: boolean;
+  timestamp?: string;
+  probes?: WorkflowProbes;
+  referenceIssues?: WorkflowIssue[];
 };
 
 /** pageCount>1 的繪本版必備條件（對齊 ep-9／ep-10）。 */
@@ -239,4 +313,238 @@ export function formatWorkflowReport(issues: WorkflowIssue[]): string {
   lines.push("");
   lines.push(`錯誤 ${errors.length}、警告 ${warns.length}`);
   return lines.join("\n");
+}
+
+function normalizeIssueCode(code: string): string {
+  return code
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function summarizeIssues(errors: number, warnings: number): string {
+  return `有 ${errors} 個 error，${warnings} 個 warning`;
+}
+
+function uniqueIssues(issues: WorkflowIssue[]): WorkflowIssue[] {
+  const seen = new Set<string>();
+  const unique: WorkflowIssue[] = [];
+  for (const issue of issues) {
+    const key = `${issue.slug}\u0000${issue.level}\u0000${issue.code}\u0000${issue.message}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(issue);
+  }
+  return unique;
+}
+
+function issueDetails(
+  issue: WorkflowIssue,
+  storiesBySlug: Map<string, Story>,
+  probes: WorkflowProbes,
+): Record<string, unknown> {
+  const story = storiesBySlug.get(issue.slug);
+  const details: Record<string, unknown> = {
+    slug: issue.slug,
+    level: issue.level,
+    source_code: issue.code,
+  };
+
+  if (!story) return details;
+
+  details.pageCount = story.pageCount;
+
+  switch (issue.code) {
+    case "missing-subtitles":
+    case "mvp-missing-subtitles":
+      details.path = `data/subtitles/${issue.slug}.json`;
+      break;
+    case "missing-scenes":
+      details.path = `data/scenes/${issue.slug}.json`;
+      break;
+    case "scene-count":
+      details.expected = story.pageCount;
+      details.actual = probes.sceneCount(issue.slug);
+      details.path = `data/scenes/${issue.slug}.json`;
+      break;
+    case "image-count":
+      details.expected = story.pageCount;
+      details.actual = probes.imageCount(issue.slug);
+      details.path = `public/stories/${issue.slug}/`;
+      break;
+    case "caption-times":
+      details.expected = story.pageCount;
+      details.actual = story.captionTimes?.length ?? 0;
+      details.field = "captionTimes";
+      break;
+    case "captions":
+      details.expected = story.pageCount;
+      details.actual = story.captions?.length ?? 0;
+      details.field = "captions";
+      break;
+    case "mvp-missing-cover":
+      details.path = `public/stories/${issue.slug}/01.jpg`;
+      break;
+    case "illustrate-incomplete":
+      details.expected = story.pageCount;
+      details.actual = probes.sceneCount(issue.slug);
+      details.path = `data/scenes/${issue.slug}.json`;
+      break;
+    case "legacy-placeholder":
+      details.reference_slugs = [...REFERENCE_ILLUSTRATED_SLUGS];
+      break;
+  }
+
+  return details;
+}
+
+function toJsonIssue(
+  issue: WorkflowIssue,
+  storiesBySlug: Map<string, Story>,
+  probes: WorkflowProbes,
+): WorkflowJsonIssue {
+  return {
+    code: normalizeIssueCode(issue.code),
+    message: issue.message,
+    details: issueDetails(issue, storiesBySlug, probes),
+  };
+}
+
+function recommendationsForIssue(issue: WorkflowIssue): string[] {
+  switch (issue.code) {
+    case "missing-subtitles":
+    case "mvp-missing-subtitles":
+      return [`執行 npm run transcribe -- ${issue.slug}`];
+    case "subtitle-unproofread":
+      return [`執行 npm run proofread:subtitles -- ${issue.slug} --mark`];
+    case "missing-scenes":
+    case "scene-count":
+    case "illustrate-pending":
+    case "illustrate-incomplete":
+    case "legacy-placeholder":
+      return [`執行 npm run illustrate -- ${issue.slug} --segment-only`];
+    case "image-count":
+    case "mvp-missing-cover":
+      return [`補齊 public/stories/${issue.slug}/ 的 illustration`];
+    case "caption-times":
+    case "captions":
+      return [
+        `重新 npm run illustrate -- ${issue.slug} --approve 以回寫 captions/captionTimes`,
+      ];
+    case "missing-story":
+      return ["檢查 REFERENCE_ILLUSTRATED_SLUGS 與 data/content.ts"];
+    default:
+      return [];
+  }
+}
+
+function buildRecommendations(issues: WorkflowIssue[]): string[] {
+  return Array.from(new Set(issues.flatMap(recommendationsForIssue)));
+}
+
+function buildEpisodeChecks(
+  story: Story,
+  probes: WorkflowProbes,
+  hasErrors: boolean,
+): WorkflowEpisodeChecks {
+  const subtitles = probes.hasSubtitles(story.slug);
+  const scenes = probes.hasScenes(story.slug);
+  const sceneCount = scenes ? probes.sceneCount(story.slug) : 0;
+  const images = probes.imageCount(story.slug);
+  const captionsLength = story.captions?.length ?? 0;
+  const captionTimesLength = story.captionTimes?.length ?? 0;
+
+  return {
+    subtitle_exists: subtitles,
+    subtitle_marked: probes.hasProofreadMarker(story.slug),
+    scenes_exists: scenes,
+    scenes_count: sceneCount,
+    illustrations_count: images,
+    pagecount_alignment: {
+      expected: story.pageCount,
+      actual: images,
+      matched: images === story.pageCount,
+    },
+    scenes_alignment: {
+      expected: story.pageCount,
+      actual: sceneCount,
+      matched: scenes && sceneCount === story.pageCount,
+    },
+    captions_alignment: captionsLength === story.pageCount,
+    caption_times_alignment: captionTimesLength === story.pageCount,
+    matches_reference_standard: story.pageCount > 1 && !hasErrors,
+  };
+}
+
+function buildEpisodeJsonReport(
+  story: Story,
+  issues: WorkflowIssue[],
+  timestamp: string,
+  probes: WorkflowProbes,
+): WorkflowEpisodeJsonReport {
+  const storiesBySlug = new Map([[story.slug, story]]);
+  const errors = issues.filter((i) => i.level === "error");
+  const warnings = issues.filter((i) => i.level === "warn");
+
+  return {
+    slug: story.slug,
+    timestamp,
+    passed: errors.length === 0,
+    strict_passed: errors.length === 0 && warnings.length === 0,
+    summary: summarizeIssues(errors.length, warnings.length),
+    errors: errors.map((i) => toJsonIssue(i, storiesBySlug, probes)),
+    warnings: warnings.map((i) => toJsonIssue(i, storiesBySlug, probes)),
+    checks: buildEpisodeChecks(story, probes, errors.length > 0),
+    recommendations: buildRecommendations(issues),
+  };
+}
+
+export function buildWorkflowJsonReport(
+  stories: Story[],
+  issues: WorkflowIssue[],
+  options: BuildWorkflowJsonReportOptions = {},
+): WorkflowJsonReport {
+  const timestamp = options.timestamp ?? new Date().toISOString();
+  const strict = options.strict ?? false;
+  const probes = options.probes ?? defaultWorkflowProbes;
+  const storiesBySlug = new Map(stories.map((story) => [story.slug, story]));
+  const referenceIssues = options.referenceIssues ?? [];
+  const aggregateIssues = uniqueIssues([...issues, ...referenceIssues]);
+  const errors = aggregateIssues.filter((i) => i.level === "error");
+  const warnings = aggregateIssues.filter((i) => i.level === "warn");
+  const referenceErrors = uniqueIssues(referenceIssues).filter(
+    (i) => i.level === "error",
+  );
+  const episodes = stories.map((story) =>
+    buildEpisodeJsonReport(
+      story,
+      issues.filter((i) => i.slug === story.slug),
+      timestamp,
+      probes,
+    ),
+  );
+
+  return {
+    slug: "all",
+    timestamp,
+    strict,
+    passed: errors.length === 0,
+    strict_passed: errors.length === 0 && warnings.length === 0,
+    summary: summarizeIssues(errors.length, warnings.length),
+    errors: errors.map((i) => toJsonIssue(i, storiesBySlug, probes)),
+    warnings: warnings.map((i) => toJsonIssue(i, storiesBySlug, probes)),
+    checks: {
+      total_episodes: stories.length,
+      total_errors: errors.length,
+      total_warnings: warnings.length,
+      reference_standard: {
+        slugs: [...REFERENCE_ILLUSTRATED_SLUGS],
+        passed: referenceErrors.length === 0,
+        errors: referenceErrors.map((i) => toJsonIssue(i, storiesBySlug, probes)),
+      },
+    },
+    recommendations: buildRecommendations(aggregateIssues),
+    episodes,
+  };
 }

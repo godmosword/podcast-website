@@ -5,6 +5,7 @@
 
 import { getStories } from "../data/content";
 import {
+  buildWorkflowJsonReport,
   formatWorkflowReport,
   REFERENCE_ILLUSTRATED_SLUGS,
   verifyStoryWorkflow,
@@ -14,6 +15,8 @@ import {
 function main(): void {
   // --strict：warn 也視為失敗（本機 illustrate --approve 前的最後把關用）。
   const strict = process.argv.includes("--strict");
+  const json =
+    process.argv.includes("--json") || process.env.npm_config_json === "true";
   const stories = getStories();
   const allIssues: WorkflowIssue[] = [];
 
@@ -36,12 +39,21 @@ function main(): void {
     return verifyStoryWorkflow(story).filter((i) => i.level === "error");
   });
 
-  console.log("=== 車車遊樂園 · 單集 workflow 驗證（範本 ep-9／ep-10）===\n");
-  console.log(formatWorkflowReport(allIssues));
+  const report = buildWorkflowJsonReport(stories, allIssues, {
+    strict,
+    referenceIssues: refIssues,
+  });
 
-  if (refIssues.length > 0) {
-    console.log("\n範本集必須零錯誤：");
-    console.log(formatWorkflowReport(refIssues));
+  if (json) {
+    console.log(JSON.stringify(report, null, 2));
+  } else {
+    console.log("=== 車車遊樂園 · 單集 workflow 驗證（範本 ep-9／ep-10）===\n");
+    console.log(formatWorkflowReport(allIssues));
+
+    if (refIssues.length > 0) {
+      console.log("\n範本集必須零錯誤：");
+      console.log(formatWorkflowReport(refIssues));
+    }
   }
 
   const errors = allIssues.filter((i) => i.level === "error");
@@ -49,7 +61,7 @@ function main(): void {
   const refErrors = refIssues.length;
 
   if (errors.length > 0 || refErrors > 0 || (strict && warns.length > 0)) {
-    if (strict && warns.length > 0) {
+    if (!json && strict && warns.length > 0) {
       console.log("\n--strict：警告視為失敗");
     }
     process.exit(1);

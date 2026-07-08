@@ -73,6 +73,8 @@ npm run export:video -- <slug>
 ```bash
 npm run verify:episodes              # error 才 exit 1，warn 列出待辦
 npm run verify:episodes -- --strict  # warn 也視為失敗（approve 前最後把關）
+npm run --silent verify:episodes -- --json  # 給 agent/evaluator 的純 JSON report
+npm run --silent verify:episodes -- --json --strict  # 純 JSON，且 warn 也影響 exit code
 npm run verify:browse-index          # 找車車／主題索引與目錄一致（warn 不擋 CI）
 npm run check                        # test + verify + build，與 CI 同一套
 ```
