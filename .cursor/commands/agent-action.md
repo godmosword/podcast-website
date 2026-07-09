@@ -41,7 +41,7 @@
 |------|------|-------------|
 | Opus 4.8 | 高風險 diff 審、架構第二意見 | Task `code-reviewer`（readonly）+ `claude-opus-4-8-thinking-medium` |
 | GPT 5.5 | TS/React diff 審、工程第二意見 | Task（readonly）+ `gpt-5.5-medium` |
-| Grok 4.5 | 對抗審：找 diff 的 edge case | Task（readonly）+ `grok-4.5`；slug 不可用 → 缺席 |
+| Grok 4.5 | 對抗審：找 diff 的 edge case | Task（readonly）+ `grok-4.5`；slug 不可用 → 缺席（見 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md) § Cursor Task） |
 | Composer 2.5 | 快速 sanity check | Leader 自審（當前 session） |
 
 **禁止：**
@@ -69,7 +69,7 @@
 ### 5. Diff 委員審（分級、readonly）
 
 - 一般：GPT 5.5（Task + `gpt-5.5-medium`）；Python → `python-reviewer`；TS/JS → `typescript-reviewer`
-- L3／觸紅線：加 Opus 4.8（Task `code-reviewer` + Opus slug）與 Grok 4.5 對抗審
+- L3／觸紅線：加 Opus 4.8（Task `code-reviewer` + Opus slug）與 Grok 4.5 對抗審；Grok 缺席 → 摘要標「對抗審缺席／對抗性降級」
 - 呼叫失敗 → 追加 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md)，分配表註明缺席
 
 ### 6. 文件同步

@@ -108,13 +108,17 @@
      - **Grok 4.5** 對抗審：找 plan 漏洞、edge case、失敗模式（不審中文文案品質）
      - **Composer 2.5** 快速可行性審（Cursor＝Leader 自審；Claude Code＝`cursor-agent` CLI）
    - **Fable 5**（`claude-fable-5-thinking-medium`）：**備選** — 僅委員衝突或邊界模糊時
-4. **Leader 綜合** → **Approved Plan** → 提示 **`/agent-action`**（至少一位非 leader 委員成功審過才可標 Approved；全滅 → 回報使用者）
+   - **成本降級（預設仍跑上列分級）**：僅當任務為**純文件／命令檔對齊**、不碰 Protected paths、無 schema／發佈路徑變更時，可按 **L1/L2 雙審**處理，不必強拉 Grok／Composer 四員；觸紅線、Protected paths、跨模組契約仍維持四員全上
+4. **Leader 綜合** → **Approved Plan** → 提示 **`/agent-action`**
+   - **至少一位非 leader 委員**（Opus 或 GPT）成功審過才可標 Approved；全滅 → 回報使用者
+   - **Cursor 的 Composer 可行性審＝Leader 自審**，不計入「非 leader 委員」
+   - **L3 若 Grok 對抗審缺席**：Opus 或 GPT 仍有一人成功即可 Approved，但摘要表必須標 **「對抗審缺席／對抗性降級」**
 
 Plan 若弱化 Domain 紅線 → 審稿標 **CRITICAL**。
 
 ### 審稿缺席
 
-子 agent 失敗 → 摘要表註明缺席；Leader 仍須保留 Domain 驗證矩陣中的必要項。
+子 agent 失敗 → 摘要表註明缺席；Leader 仍須保留 Domain 驗證矩陣中的必要項。Cursor Task slug 失敗協議見 [`AGENT-FAILURES.md`](AGENT-FAILURES.md) § 探活（無 CLI 探活時，第一次拒收即記案例並標缺席）。
 
 ---
 
@@ -133,7 +137,7 @@ Plan 若弱化 Domain 紅線 → 審稿標 **CRITICAL**。
 2. **Cursor Task 派工**（見 [複雜度分級](#複雜度分級-l0l3)）
 3. Leader **整合**（最小 diff；**禁止**多 agent 同檔）
 4. **Verify**（[`AGENT-DOMAIN.md`](AGENT-DOMAIN.md) § 驗證矩陣）
-5. 整合後 **code-reviewer**／語言 reviewer（依變更語言）
+5. **分級 diff 委員審**（readonly）：一般 GPT 5.5（Task + `gpt-5.5-medium`；Python → `python-reviewer`；TS/JS → `typescript-reviewer`）；L3／觸紅線加 Opus 4.8 與 Grok 4.5 對抗審。細節以 [`.cursor/commands/agent-action.md`](../.cursor/commands/agent-action.md)／[`.claude/commands/agent-action.md`](../.claude/commands/agent-action.md) 為準
 6. 可見行為變更 → Domain § Docs sync
 7. **Ship**（僅使用者要求）：只 stage 相關檔；預設不 commit/push
 
@@ -154,7 +158,7 @@ Plan 若弱化 Domain 紅線 → 審稿標 **CRITICAL**。
 | **Opus 4.8 架構審** | Agent tool `architect` + `model: "opus"` | Task `architect`（readonly）+ `claude-opus-4-8-thinking-medium` |
 | **GPT 5.5 工程審** | `codex exec -m gpt-5.5 -c model_reasoning_effort="high"` | Task + `gpt-5.5-medium` |
 | **Grok 4.5 對抗審（L3）** | `grok -p "<prompt>" -m grok-4.5 --effort medium` | Task（readonly）+ `grok-4.5`（slug 不可用 → 缺席） |
-| **Composer 2.5 可行性審（L3）** | `cursor-agent -p --model composer-2.5-fast --mode plan` | Leader 自審（當前 session 即 Composer） |
+| **Composer 2.5 可行性審（L3）** | `cursor-agent -p --model composer-2.5-fast --mode plan` | Leader 自審（當前 session 即 Composer；**不計入**非 leader 委員） |
 | **L3 實作** | Leader 親自 | Task + Opus slug，Protected paths 才 Leader |
 | **L2 實作** | Agent tool `model: "sonnet"` | Task + `claude-4.6-sonnet-medium-thinking` |
 | **L1 實作** | Agent tool `model: "haiku"`；<10 行 Leader | Task `explore` → Sonnet slug；<10 行 Leader |
@@ -323,3 +327,4 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 | 2026-06-19 | Composer 2.5 節流：Leader 僅編排／整合；Plan 細節→GPT 5.5；L1/L2 實作→Sonnet |
 | 2026-07-09 | 新增 Claude Code 委員會版命令（`.claude/commands/`）與 `AGENT-FAILURES.md` 失敗案例簿 |
 | 2026-07-09 | Cursor 版命令對齊委員會工作流（分級雙審／四員全上、FAILURES 協議）；新增兩環境對標表、Grok 4.5 slug |
+| 2026-07-09 | 縫隙補強：Meta `/agent-action` 分級 diff 審、Composer 自審門檻、Grok 缺席降級標記、純文件可降級雙審、Cursor Task 失敗協議 |

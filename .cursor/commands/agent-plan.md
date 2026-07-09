@@ -45,8 +45,10 @@ typo 級小事不進本命令——直接做即可。
 
 | 委員 | 角度 | Cursor 派工 |
 |------|------|-------------|
-| **Grok 4.5** | 對抗審：找 plan 漏洞、edge case、失敗模式 | Task（`readonly: true`）+ `grok-4.5`；slug 不可用 → **缺席**（依 Meta「slug 不可替換」規則，勿降級改用其他模型頂替對抗審） |
-| **Composer 2.5** | 快速可行性／實作成本 | **Leader 自審**（當前 session 即 Composer，不另派工） |
+| **Grok 4.5** | 對抗審：找 plan 漏洞、edge case、失敗模式 | Task（`readonly: true`）+ `grok-4.5`；slug 不可用 → **缺席**（見 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md) § Cursor Task；勿降級改用其他模型頂替對抗審） |
+| **Composer 2.5** | 快速可行性／實作成本 | **Leader 自審**（當前 session 即 Composer，不另派工；**不計入**非 leader 委員） |
+
+**成本降級：** 純文件／命令檔對齊、不碰 Protected paths、無 schema／發佈路徑變更 → 可按 L1/L2 雙審，不必強拉 Grok／Composer 四員（見 Meta § 委員會審查）。
 
 **審查紅線：**
 
@@ -71,7 +73,8 @@ typo 級小事不進本命令——直接做即可。
 ### 4. 缺席規則
 
 - 委員失敗 → 摘要表註明缺席，照常定稿；Leader **不可省略** Domain 驗證矩陣中的必要項
-- **至少一位非 leader 委員成功審過**才可標 Approved；全滅 → 回報使用者，不自行定稿
+- **至少一位非 leader 委員**（Opus 或 GPT）成功審過才可標 Approved；**Composer 自審不計入**；全滅 → 回報使用者，不自行定稿
+- **L3 若 Grok 對抗審缺席**：Opus 或 GPT 仍有一人成功即可 Approved，但摘要表必須標 **「對抗審缺席／對抗性降級」**
 
 ### 5. CRITICAL 與 Plan mode
 

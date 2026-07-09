@@ -16,7 +16,7 @@ alwaysApply: false
 | 指令 | 做什麼 | 不做什麼 |
 |------|--------|----------|
 | **`/agent-plan`** | Leader 寫 Plan → **分級委員會審核**（L1/L2：Opus 4.8 + GPT 5.5 雙審；L3／紅線：加 Grok 4.5 對抗審 + Composer 可行性審） → Approved Plan | 預設不實作、不 commit |
-| **`/agent-action`** | 讀 Approved Plan → **Task 派工** → 整合 → Verify →（可選）Ship；顧問一律 readonly | 不重做完整 Plan（blocked 除外） |
+| **`/agent-action`** | 讀 Approved Plan → **Task 派工** → 整合 → Verify → **分級 diff 委員審** →（可選）Ship；顧問一律 readonly | 不重做完整 Plan（blocked 除外） |
 
 ## 紅線
 
@@ -38,7 +38,7 @@ alwaysApply: false
 | Plan 細節草稿 | `gpt-5.5-medium` | Task DAG、Files、Verification、Model routing |
 | Plan 架構審 / L3 | `claude-opus-4-8-thinking-medium` | 或 `architect` readonly |
 | Plan 工程審 / diff review | `gpt-5.5-medium` | |
-| Plan／diff 對抗審（L3） | `grok-4.5` | readonly；不審中文；slug 不可用 → 缺席勿頂替 |
+| Plan／diff 對抗審（L3） | `grok-4.5` | readonly；不審中文；slug 不可用 → 缺席勿頂替（見 FAILURES § Cursor Task） |
 | L2 多檔實作 | `claude-4.6-sonnet-medium-thinking` | **預設**；中文文案一律 Sonnet；勿用 Composer |
 | L1 單檔實作 | `claude-4.6-sonnet-medium-thinking` | explore 定位後派 Sonnet |
 | explore | `grok-4.3` | 只讀探索 |
@@ -64,3 +64,9 @@ A/B/C 格式 — 見 `review-user-choice.mdc`（若有）
 ## 跳過 `/agent-plan`
 
 單檔小改、一條命令、使用者說「直接做」→ 可只 `/agent-action`。
+
+## 委員會門檻（精簡）
+
+- **Composer 可行性審（Cursor）**＝Leader 自審，不計入「至少一位非 leader 委員」
+- **Grok 缺席**：可 Approved（Opus／GPT 仍有一人成功），摘要標「對抗審缺席／對抗性降級」
+- **純文件／無 Protected paths**：可按 L1/L2 雙審，不必四員全上（見 Meta）

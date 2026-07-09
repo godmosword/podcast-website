@@ -33,7 +33,7 @@ $ARGUMENTS
 |------|------|----------|
 | Opus 4.8 | 高風險 diff 審、架構第二意見 | Agent tool `subagent_type: code-reviewer` + `model: "opus"` |
 | GPT 5.5 | TS/React diff 審、工程第二意見 | `codex exec -m gpt-5.5 -c model_reasoning_effort="high" "<prompt + diff>"` |
-| Grok 4.5 | 對抗審：找 diff 的 edge case | `grok models` 探活 → `grok -p "<prompt>" -m grok-4.5 --effort medium`（prompt 緊跟 `-p`） |
+| Grok 4.5 | 對抗審：找 diff 的 edge case | `grok models` 探活 → `grok -p "<prompt>" -m grok-4.5 --effort medium`（prompt 緊跟 `-p`）；不可用 → 缺席（見 `docs/AGENT-FAILURES.md`） |
 | Composer 2.5 | 快速 sanity check | `cursor-agent -p --model composer-2.5-fast --mode ask "<prompt>"` |
 
 **執行紅線：**
@@ -62,7 +62,7 @@ $ARGUMENTS
 ## 5. Diff 委員審（分級、唯讀）
 
 - 一般：GPT 5.5（codex exec 審 diff）
-- L3／觸紅線：加 Opus 4.8（Agent tool code-reviewer + opus）與 Grok 4.5 對抗審
+- L3／觸紅線：加 Opus 4.8（Agent tool code-reviewer + opus）與 Grok 4.5 對抗審；Grok 缺席 → 摘要標「對抗審缺席／對抗性降級」
 - 呼叫失敗 → 追加 `docs/AGENT-FAILURES.md`，摘要表註明缺席
 
 ## 6. Docs sync（可見行為變更時）

@@ -41,8 +41,10 @@ typo 級小事不進本命令（AGENT-DOMAIN 反模式：每個 typo 都雙審�
 
 | 委員 | 角度 | 呼叫方式 |
 |------|------|----------|
-| **Grok 4.5** | 對抗審：找 plan 漏洞、edge case、失敗模式 | 先 `grok models` 探活；可用才 `grok -p "<對抗審 prompt + plan 全文>" -m grok-4.5 --effort medium`（prompt 緊跟 `-p`） |
+| **Grok 4.5** | 對抗審：找 plan 漏洞、edge case、失敗模式 | 先 `grok models` 探活；可用才 `grok -p "<對抗審 prompt + plan 全文>" -m grok-4.5 --effort medium`（prompt 緊跟 `-p`）；不可用 → 缺席勿頂替（見 `docs/AGENT-FAILURES.md`） |
 | **Composer 2.5** | 快速可行性／實作成本 | `cursor-agent -p --model composer-2.5-fast --mode plan "<可行性審 prompt + plan 全文>"` |
+
+**成本降級：** 純文件／命令檔對齊、不碰 Protected paths、無 schema／發佈路徑變更 → 可按 L1/L2 雙審，不必強拉 Grok／Composer 四員（見 Meta § 委員會審查）。
 
 **審查紅線：**
 - 外部 CLI 一律唯讀（codex 只 `exec` 審文字、cursor 用 `--mode plan`/`--mode ask`、grok 用 `-p` 單輪）；不得讓它們改 repo 檔案
@@ -64,7 +66,8 @@ typo 級小事不進本命令（AGENT-DOMAIN 反模式：每個 typo 都雙審�
 ## 4. 缺席規則
 
 - 委員缺席 → 摘要表註明，照常定稿；Domain 驗證矩陣必要項**不可省**
-- **至少一位非 leader 委員成功審過**才可標 Approved；全滅 → 回報使用者，不自行定稿
+- **至少一位非 leader 委員**（Opus 或 GPT；Claude Code 的 Composer 經 `cursor-agent` 可計入）成功審過才可標 Approved；全滅 → 回報使用者，不自行定稿
+- **L3 若 Grok 對抗審缺席**：Opus 或 GPT 仍有一人成功即可 Approved，但摘要表必須標 **「對抗審缺席／對抗性降級」**
 
 ## 禁止
 
