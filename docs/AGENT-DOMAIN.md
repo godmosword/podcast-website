@@ -27,6 +27,8 @@
 | 3 | [`CHANGELOG.md`](../CHANGELOG.md) | 已 ship 事實 |
 | 4 | [`DISCLAIMER.md`](../DISCLAIMER.md) | 內容版權、兒童產品、素材禁止散布 |
 
+呼叫任何外部 model（委員審／Task 派工）前，另讀 [`AGENT-FAILURES.md`](AGENT-FAILURES.md)（探活協議＋缺席判定）。
+
 ### 依任務加讀
 
 | 任務類型 | 加讀 |
@@ -134,3 +136,4 @@
 | 日期 | 說明 |
 |------|------|
 | 2026-06-19 | 初版 Domain sheet（bootstrap 後填寫） |
+| 2026-07-09 | Bootstrap 掛接 `AGENT-FAILURES.md`（model-call 探活＋缺席判定） |

@@ -7,7 +7,7 @@
 
 | 指令 | 用途 |
 |------|------|
-| **`/agent-plan`** | 規劃 + **架構／工程雙審**（預設不實作） |
+| **`/agent-plan`** | 規劃 + **分級委員會審核**（L1/L2 雙審；L3 四員全上。預設不實作） |
 | **`/agent-action`** | 依 Approved Plan **Task 派工** + Verify +（可選）Ship |
 
 **啟用範圍：** 只有打出上述指令時才進入 Agent Orchestration 模式。一般 chat 不會自動拆任務、派子 agent。
@@ -19,7 +19,7 @@
 | 情境 | 用哪個 |
 |------|--------|
 | 大 feature、要自動多輪 plan 審核 | `/autoplan`（gstack skill） |
-| 自訂 Plan + 雙審 + 可控切片 | **`/agent-plan`** |
+| 自訂 Plan + 委員會審 + 可控切片 | **`/agent-plan`** |
 | 已有 Approved Plan 要落地 | **`/agent-action`** |
 | bump VERSION + CHANGELOG + push main | `/ship`（gstack skill） |
 
@@ -73,7 +73,7 @@
 | 階段 | 指令 | Leader | 子 agent |
 |------|------|--------|----------|
 | 規劃 | `/agent-plan` | 當前 session 主模型 | — |
-| 審核 | `/agent-plan` | — | 架構 readonly + 工程並行 |
+| 審核 | `/agent-plan` | — | 分級委員會（L1/L2：Opus+GPT 雙審；L3：加 Grok+Composer） |
 | 實作 | `/agent-action` | Leader 拆任務 | Cursor **Task** + model slug |
 | 驗證 | `/agent-action` | Leader 整合後 | `shell`；必要時 reviewer |
 | 交付 | `/agent-action` | Leader | commit/push **僅使用者明確要求** |
@@ -100,11 +100,15 @@
 
 1. **Bootstrap**（[`AGENT-DOMAIN.md`](AGENT-DOMAIN.md)）
 2. **Draft Plan** — Leader 寫 Goal／Scope 骨架 → Task **GPT 5.5** 填 Task DAG、Files、Verification、Model routing（見 [Plan 模板](#plan-模板)）
-3. **並行 Review（必做，各一輪）**
-   - **架構／紅線**：Task `architect` 或 `code-reviewer`（`readonly: true`）— 範圍、架構、Domain 紅線、過度工程
-   - **工程**：Task + `gpt-5.5-medium` 或 codex — 可執行性、驗證命令、漏檔、測試
-   - **Fable 5**（`claude-fable-5-thinking-medium`）：**備選** — 僅兩路衝突或邊界模糊時
-4. **Leader 綜合** → **Approved Plan** → 提示 **`/agent-action`**
+3. **委員會審查（分級，必做，全部唯讀）** — 呼叫前依 [`AGENT-FAILURES.md`](AGENT-FAILURES.md) 探活；失敗即記錄＋標缺席
+   - **L1／L2 雙審**：
+     - **Opus 4.8** 架構／紅線審：Task `architect` 或 `code-reviewer`（`readonly: true`）— 範圍、架構、Domain 紅線、過度工程
+     - **GPT 5.5** 工程審：Task + `gpt-5.5-medium` 或 codex — 可執行性、驗證命令、漏檔、測試
+   - **L3／觸紅線／Protected paths 四員全上**，追加：
+     - **Grok 4.5** 對抗審：找 plan 漏洞、edge case、失敗模式（不審中文文案品質）
+     - **Composer 2.5** 快速可行性審（Cursor＝Leader 自審；Claude Code＝`cursor-agent` CLI）
+   - **Fable 5**（`claude-fable-5-thinking-medium`）：**備選** — 僅委員衝突或邊界模糊時
+4. **Leader 綜合** → **Approved Plan** → 提示 **`/agent-action`**（至少一位非 leader 委員成功審過才可標 Approved；全滅 → 回報使用者）
 
 Plan 若弱化 Domain 紅線 → 審稿標 **CRITICAL**。
 
@@ -140,12 +144,23 @@ Plan 若弱化 Domain 紅線 → 審稿標 **CRITICAL**。
 - 改動 &lt;10 行且無架構影響 → Leader 直接做
 - 遵守 Domain § **Protected paths / models**（若有）
 
-### Cursor vs Claude Code 委派
+### Cursor vs Claude Code 對標表
 
-| 環境 | 實作委派 |
-|------|----------|
-| **Cursor** | **Task** 子 agent（`explore`、`generalPurpose`、`shell`、reviewer 等） |
-| **Claude Code** | Plan 審可用 codex；實作以 Leader 為主，**勿**指望子 process 直接改 IDE 工作區 |
+兩環境同一套工作流（分級委員會＋行動小組＋失敗案例簿），只有「怎麼呼叫模型」不同：
+
+| 角色 | Claude Code（[`.claude/commands/`](../.claude/commands/agent-plan.md)） | Cursor（[`.cursor/commands/`](../.cursor/commands/agent-plan.md)） |
+|------|------|------|
+| **Leader** | 當前 session（含 Draft Plan 全文） | Composer 2.5（節流：只寫骨架，細節派 GPT 5.5） |
+| **Opus 4.8 架構審** | Agent tool `architect` + `model: "opus"` | Task `architect`（readonly）+ `claude-opus-4-8-thinking-medium` |
+| **GPT 5.5 工程審** | `codex exec -m gpt-5.5 -c model_reasoning_effort="high"` | Task + `gpt-5.5-medium` |
+| **Grok 4.5 對抗審（L3）** | `grok -p "<prompt>" -m grok-4.5 --effort medium` | Task（readonly）+ `grok-4.5`（slug 不可用 → 缺席） |
+| **Composer 2.5 可行性審（L3）** | `cursor-agent -p --model composer-2.5-fast --mode plan` | Leader 自審（當前 session 即 Composer） |
+| **L3 實作** | Leader 親自 | Task + Opus slug，Protected paths 才 Leader |
+| **L2 實作** | Agent tool `model: "sonnet"` | Task + `claude-4.6-sonnet-medium-thinking` |
+| **L1 實作** | Agent tool `model: "haiku"`；<10 行 Leader | Task `explore` → Sonnet slug；<10 行 Leader |
+| **L0 命令** | Bash | Task `shell` 或 `grok-build-0.1` |
+| **改檔權** | 只有 Leader／Sonnet／Haiku 子 agent；外部 CLI 一律唯讀顧問 | 只有實作 Task；顧問一律 `readonly: true` |
+| **失敗記錄** | 兩邊共用 [`AGENT-FAILURES.md`](AGENT-FAILURES.md)：Bootstrap 必讀、call fail 必追加、30 天連續 2+ fail → 標缺席 | 同左 |
 
 ---
 
@@ -159,11 +174,13 @@ Task 的 `model` **只能**用 Cursor 允許的 slug：
 | Opus 4.8 Thinking Medium | `claude-opus-4-8-thinking-medium` | Plan 架構審、L3 |
 | GPT 5.5 Medium | `gpt-5.5-medium` | Plan 細節草稿、工程審、TS/React diff review |
 | Sonnet 4.6 Thinking Medium | `claude-4.6-sonnet-medium-thinking` | **L1／L2 實作預設**、中文文案 |
+| Grok 4.5 | `grok-4.5` | Plan／diff **對抗審**（唯讀；slug 不可用 → 缺席，勿頂替）；Claude Code 用 `grok -p "<prompt>" -m grok-4.5 --effort medium` |
 | Grok 4.3 | `grok-4.3` | explore（只讀） |
 | Grok Build 0.1 | `grok-build-0.1` | shell、批次命令 |
 | Fable 5 | `claude-fable-5-thinking-medium` | 備選 Plan 第三意見 |
 
 slug 不可用時：**不要**替換；Leader 代做並告知使用者。
+**例外——對抗審（Grok 4.5）**：Leader 不代做、其他模型不頂替，直接標**缺席**（對抗審的價值在異質模型視角，同家模型頂替會失去意義）。
 
 ---
 
@@ -182,8 +199,9 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 |----------|------|
 | Plan 骨架（Goal／Scope） | Leader（Composer） |
 | Plan 細節（DAG／Files／Verify） | Task + GPT 5.5 |
-| Plan 架構審 | `architect` readonly 或 Opus |
+| Plan 架構審 | Opus 4.8（`architect` readonly） |
 | Plan 工程審 | GPT 5.5 / codex |
+| Plan／diff 對抗審（L3） | Grok 4.5（readonly；不審中文） |
 | 探索 codebase | Task `explore`（Grok 4.3） |
 | L1／L2 實作 | Task + Sonnet 4.6 |
 | 高風險核心路徑 | Opus 或 Leader（Domain Protected paths） |
@@ -289,8 +307,11 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 
 - [`.cursor/commands/agent-plan.md`](../.cursor/commands/agent-plan.md)
 - [`.cursor/commands/agent-action.md`](../.cursor/commands/agent-action.md)
+- [`.claude/commands/agent-plan.md`](../.claude/commands/agent-plan.md)（Claude Code 委員會版）
+- [`.claude/commands/agent-action.md`](../.claude/commands/agent-action.md)（Claude Code 行動小組版）
 - [`.cursor/rules/agent-orchestration.mdc`](../.cursor/rules/agent-orchestration.mdc)
 - [`AGENT-DOMAIN.md`](AGENT-DOMAIN.md)
+- [`AGENT-FAILURES.md`](AGENT-FAILURES.md)（model-call 失敗案例簿）
 
 ---
 
@@ -300,3 +321,5 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 |------|------|
 | 2026-06-16 | 可攜 Meta 初版（Domain 外置至 AGENT-DOMAIN.md） |
 | 2026-06-19 | Composer 2.5 節流：Leader 僅編排／整合；Plan 細節→GPT 5.5；L1/L2 實作→Sonnet |
+| 2026-07-09 | 新增 Claude Code 委員會版命令（`.claude/commands/`）與 `AGENT-FAILURES.md` 失敗案例簿 |
+| 2026-07-09 | Cursor 版命令對齊委員會工作流（分級雙審／四員全上、FAILURES 協議）；新增兩環境對標表、Grok 4.5 slug |

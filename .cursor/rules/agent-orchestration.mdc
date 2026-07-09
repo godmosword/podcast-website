@@ -9,13 +9,14 @@ alwaysApply: false
 
 - Meta：[`docs/AGENT-WORKFLOW.md`](../../docs/AGENT-WORKFLOW.md)
 - Domain：[`docs/AGENT-DOMAIN.md`](../../docs/AGENT-DOMAIN.md)
+- 失敗案例簿：[`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md)（Bootstrap 必讀；委員／Task 呼叫失敗必追加；30 天連續 2+ fail → 標缺席）
 
 ## 入口指令
 
 | 指令 | 做什麼 | 不做什麼 |
 |------|--------|----------|
-| **`/agent-plan`** | Leader 寫 Plan → **架構 + 工程並行審核** → Approved Plan | 預設不實作、不 commit |
-| **`/agent-action`** | 讀 Approved Plan → **Task 派工** → 整合 → Verify →（可選）Ship | 不重做完整 Plan（blocked 除外） |
+| **`/agent-plan`** | Leader 寫 Plan → **分級委員會審核**（L1/L2：Opus 4.8 + GPT 5.5 雙審；L3／紅線：加 Grok 4.5 對抗審 + Composer 可行性審） → Approved Plan | 預設不實作、不 commit |
+| **`/agent-action`** | 讀 Approved Plan → **Task 派工** → 整合 → Verify →（可選）Ship；顧問一律 readonly | 不重做完整 Plan（blocked 除外） |
 
 ## 紅線
 
@@ -37,7 +38,8 @@ alwaysApply: false
 | Plan 細節草稿 | `gpt-5.5-medium` | Task DAG、Files、Verification、Model routing |
 | Plan 架構審 / L3 | `claude-opus-4-8-thinking-medium` | 或 `architect` readonly |
 | Plan 工程審 / diff review | `gpt-5.5-medium` | |
-| L2 多檔實作 | `claude-4.6-sonnet-medium-thinking` | **預設**；勿用 Composer |
+| Plan／diff 對抗審（L3） | `grok-4.5` | readonly；不審中文；slug 不可用 → 缺席勿頂替 |
+| L2 多檔實作 | `claude-4.6-sonnet-medium-thinking` | **預設**；中文文案一律 Sonnet；勿用 Composer |
 | L1 單檔實作 | `claude-4.6-sonnet-medium-thinking` | explore 定位後派 Sonnet |
 | explore | `grok-4.3` | 只讀探索 |
 | shell / 批次 | `grok-build-0.1` | lint／test／verify |
