@@ -212,6 +212,10 @@ SoundOn 單集 show notes 應回鏈官網單集 URL（含可分享摘要與看�
 
 > **STEM-P1 全數完成（2026-07-06）→ gate 解鎖**：凍結中的地圖美術長尾與遊戲 polish 可依數據擇機重開（建議先看兩週 story_completed／return_visit 基線再決定）。
 
+> **地圖進化方向決策（2026-07-09，委員會 plan `61d098b` 後）**：
+> ① **T3b camera 視覺更新外置**（zoom 期間重渲染隔離）——**先量測再定**：需低階裝置實測佐證（pinch zoom 期間 render 計數／FPS 有痛點）才開工；平移已由 memo 化解決（`61d098b`）。
+> ② **D4 五島夜間美術**（`hasNightArt` 管線已 wired、零資產）——**等數據解凍**：看兩週 story_completed／return_visit 基線；重開時屬重啟凍結日夜美術決策，須另行同意＋定解凍門檻（比較基準與最低樣本數），走 generate-map-art 管線（Leader/Opus、人工審圖、成本確認）。
+
 > 分享鈕、平台排序、訂閱文案、viewport 縮放、sitemap 擴充等已上線，見 Completed；不再佔 Top 5 名額。
 
 ---
