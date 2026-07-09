@@ -241,7 +241,9 @@ function UniverseMapContent({
       const alreadyFocused = focusedOpenZoneRef.current === zone.id;
 
       if (alreadyFocused) {
-        openSheetWithFly(zone);
+        // 第二次點擊：第一次已用與 sheet 相同的 dock-offset 構圖置中，
+        // 直接開 dock、不再 fly，避免鏡頭二次上跳。
+        revealSheet(zone);
         return;
       }
 
@@ -250,20 +252,29 @@ function UniverseMapContent({
         closeSheet();
       }
 
-      cameraFlyTo(zone.coord, FOCUS_SCALE);
+      // 第一次點擊：置中並套用與 sheet 開啟時相同的 dock offset 構圖，
+      // 這樣第二次開 sheet 不會再位移（兩段式構圖一致）。
+      cameraFlyTo(zone.coord, FOCUS_SCALE, { viewportOffsetY: FOCUS_DOCK_OFFSET_Y });
 
       if (openTimerRef.current) clearTimeout(openTimerRef.current);
       openTimerRef.current = null;
     },
-    [activeZone?.id, cameraFlyTo, closeSheet, openSheetWithFly, router],
+    [activeZone?.id, cameraFlyTo, closeSheet, revealSheet, router],
   );
 
-  /** 使用者拖曳打斷 fly-to 時，取消尚未觸發的開 sheet／導航。 */
+  /** 使用者拖曳打斷 fly-to 時，取消尚未觸發的開 sheet／導航，並清除「已聚焦」門閂，
+   *  避免 pan／zoom 後第二次點島仍直接開 dock、卻已不在 dock-offset 構圖。 */
   const cancelPendingReveal = useCallback(() => {
     if (openTimerRef.current) {
       clearTimeout(openTimerRef.current);
       openTimerRef.current = null;
     }
+    focusedOpenZoneRef.current = null;
+  }, []);
+
+  /** 使用者主動改鏡頭（縮放／重置／方向鍵平移）時，同樣清掉聚焦門閂。 */
+  const clearOpenFocus = useCallback(() => {
+    focusedOpenZoneRef.current = null;
   }, []);
 
   const handleMapKeyDown = useCallback(
@@ -272,32 +283,39 @@ function UniverseMapContent({
         case "+":
         case "=":
           e.preventDefault();
-          camera.zoomBy(0.25);
+          clearOpenFocus();
+          // 與控制列同一步進：放大略大、縮小略溫和，避免一次跳太兇
+          camera.zoomBy(0.32);
           break;
         case "-":
         case "_":
           e.preventDefault();
-          camera.zoomBy(-0.2);
+          clearOpenFocus();
+          camera.zoomBy(-0.24);
           break;
         case "ArrowUp":
           e.preventDefault();
+          clearOpenFocus();
           camera.panBy(0, 80);
           break;
         case "ArrowDown":
           e.preventDefault();
+          clearOpenFocus();
           camera.panBy(0, -80);
           break;
         case "ArrowLeft":
           e.preventDefault();
+          clearOpenFocus();
           camera.panBy(80, 0);
           break;
         case "ArrowRight":
           e.preventDefault();
+          clearOpenFocus();
           camera.panBy(-80, 0);
           break;
       }
     },
-    [camera],
+    [camera, clearOpenFocus],
   );
 
   useEffect(() => {
@@ -332,7 +350,7 @@ function UniverseMapContent({
         ref={camera.bind.ref}
         tabIndex={0}
         role="application"
-        aria-label="車車樂園互動地圖：方向鍵移動，加減鍵縮放"
+        aria-label="車車樂園互動地圖：方向鍵平移，加減鍵或右下角按鈕縮放"
         onKeyDown={handleMapKeyDown}
         onPointerDown={(e) => {
           if (!(e.target as Element).closest("button")) cancelPendingReveal();
@@ -518,15 +536,18 @@ function UniverseMapContent({
       <MapControls
         onReset={() => {
           playSfx("tap");
+          clearOpenFocus();
           camera.reset();
         }}
         onZoomIn={() => {
           playSfx("tap");
-          camera.zoomBy(0.25);
+          clearOpenFocus();
+          camera.zoomBy(0.32);
         }}
         onZoomOut={() => {
           playSfx("tap");
-          camera.zoomBy(-0.2);
+          clearOpenFocus();
+          camera.zoomBy(-0.24);
         }}
         canZoomIn={camera.canZoomIn}
         canZoomOut={camera.canZoomOut}

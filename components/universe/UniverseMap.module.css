@@ -20,9 +20,11 @@
   inset: 0;
   overflow: hidden;
   cursor: grab;
+  /* 自製 pan／pinch：禁止瀏覽器預設手勢搶控制，保留平滑拖曳 */
   touch-action: none;
   -webkit-user-select: none;
   user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .viewport:active {

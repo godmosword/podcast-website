@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **樂園地圖遨遊手感（升級宇宙樂園 P1）**：開放島兩段式構圖一致——第一次點擊即套用與 sheet 相同的 dock offset 置中，第二次只開 dock 不再 fly（消除鏡頭上跳）；右下 `＋/－` 加大 hit area／步進並釐清 aria（方向鍵維持平移）；地圖層少字化（島名略放大、狀態 pill 降權、「看看」改圖示鈕，a11y／E2E 選取字串不變）。平移核心未重寫（仍待量測）。新增 `docs/UNIVERSE-PROGRESSION-CONCEPT.md` 層次升級設計概念（本輪不實作養成）。
+
 ### Fixed
 
 - **樂園地圖深連結修復三合一**：① `?zone=` deep link 在 dev（StrictMode 雙效應）下 sheet 永不開——門閂改條件式 cleanup 釋放，query 清空即重置（同一 mount 內第二次深連結可再開）② 深連結鏡頭實際飛抵目標島——原本 `flyTo` 在 viewport 未量測（0×0）時靜默 no-op，鏡頭停在車庫 fit；改以 camera ready gate 等量測後再飛 ③ 深連結入場預寫 entry key 跳過進場降落動畫，避免與目標島 fly-to 互搶鏡頭。深連結開 sheet 改走 `revealSheet`（與點擊語意等價：URL 同步＋二次點擊 dock 行為一致）。新增 StrictMode 元件測試（jsdom + fake timers，RED 驗證）與 4 條 deep-link E2E（含 stage transform 斷言）

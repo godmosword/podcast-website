@@ -30,6 +30,52 @@ async function stageTransform(page: Page) {
   });
 }
 
+type StageTransform = {
+  tx: number;
+  ty: number;
+  scale: number;
+};
+
+function parseStageTransform(transform: string): StageTransform {
+  const match = transform.match(
+    /translate\(([-\d.]+)px, ([-\d.]+)px\) scale\(([-\d.]+)\)/,
+  );
+  if (!match) throw new Error(`stage transform has unexpected shape: ${transform}`);
+  return {
+    tx: Number(match[1]),
+    ty: Number(match[2]),
+    scale: Number(match[3]),
+  };
+}
+
+async function stageTransformParts(page: Page) {
+  return parseStageTransform(await stageTransform(page));
+}
+
+function expectTransformClose(actual: StageTransform, expected: StageTransform) {
+  expect(actual.tx).toBeCloseTo(expected.tx, 5);
+  expect(actual.ty).toBeCloseTo(expected.ty, 5);
+  expect(actual.scale).toBeCloseTo(expected.scale, 5);
+}
+
+async function waitForStableStageTransform(page: Page) {
+  let previous = await stageTransformParts(page);
+  await expect
+    .poll(async () => {
+      await page.waitForTimeout(50);
+      const current = await stageTransformParts(page);
+      const maxDelta = Math.max(
+        Math.abs(current.tx - previous.tx),
+        Math.abs(current.ty - previous.ty),
+        Math.abs(current.scale - previous.scale),
+      );
+      previous = current;
+      return maxDelta;
+    })
+    .toBeLessThan(0.001);
+  return previous;
+}
+
 async function labelBottom(locator: Locator) {
   return locator.evaluate((el) => {
     const label = el.closest('span[class*="tileLabel"]');
@@ -116,8 +162,8 @@ test.describe("車車宇宙樂園地圖 UX", () => {
 
   test("縮放按鈕 disabled、鍵盤、空白海點擊不會 click-zoom", async ({ page }) => {
     await openMap(page, "light");
-    const zoomIn = page.getByRole("button", { name: "放大地圖" });
-    const zoomOut = page.getByRole("button", { name: "縮小地圖" });
+    const zoomIn = page.getByRole("button", { name: /放大地圖/ });
+    const zoomOut = page.getByRole("button", { name: /縮小地圖/ });
     const viewport = page.getByRole("application", { name: /車車樂園互動地圖/ });
 
     for (let i = 0; i < 24 && (await zoomIn.isEnabled()); i += 1) {
@@ -147,6 +193,25 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     await page.mouse.click(point.x, point.y);
     await page.waitForTimeout(150);
     expect(scaleFromTransform(await stageTransform(page))).toBeCloseTo(beforeClickScale, 5);
+  });
+
+  test("開放車車樂園第一次點擊只聚焦，第二次才開 sheet 且不二次 fly", async ({ page }) => {
+    await openMap(page, "light");
+    const carPark = page.getByRole("button", { name: /車車樂園，開放中/ });
+    const dialog = page.getByRole("dialog");
+
+    await carPark.click();
+    await expect(dialog).toHaveCount(0);
+    await expect
+      .poll(async () => (await stageTransformParts(page)).scale)
+      .toBeCloseTo(1.6, 1);
+    await expect(dialog).toHaveCount(0);
+    const afterFirstClick = await waitForStableStageTransform(page);
+
+    await carPark.click();
+    await expect(dialog).toBeVisible({ timeout: 3000 });
+    await expect(dialog).toContainText("車車樂園");
+    expectTransformClose(await stageTransformParts(page), afterFirstClick);
   });
 
   test("deep link ?zone=dino 開 sheet，關閉後移除 query（與點擊語意等價）", async ({ page }) => {

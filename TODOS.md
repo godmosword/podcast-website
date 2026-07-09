@@ -151,6 +151,20 @@ SoundOn 單集 show notes 應回鏈官網單集 URL（含可分享摘要與看�
 | MAP-UX-4 Roamer 點擊打招呼 | 完成 | 車車可點擊暫停並打招呼：名字泡泡、sprite 彈跳、喇叭音效、analytics；島內 roamer 點擊 `stopPropagation`，不觸發島 fly/sheet | Modify: `components/universe/MapRoamerLayer.tsx`, `components/universe/IslandRoamerLayer.tsx`, `components/universe/RoamerVehicle.tsx`, `components/universe/useRoamerSim.ts`, `data/universe-roamers.ts`, `data/characters.ts`, `lib/sfx.ts`, `lib/analytics.ts`; Create: `components/universe/RoamerGreeting.tsx`, `components/universe/RoamerGreeting.module.css`; Test: `components/universe/RoamerVehicle.test.tsx`, `components/universe/useRoamerSim.test.ts`, `data/universe-roamers.test.ts`, `data/characters.test.ts` | `npm test` passed；`npm run build` passed；`npm run test:e2e` passed，Playwright click `roam-xiaohong` 顯示「嗨！我是小紅賽車！」，click `roam-aku` 不開島 sheet | `58edb1b` |
 | MAP-UX-5 全域驗證與收尾 | 完成 | 新增 `e2e/universe-map.spec.ts`，覆蓋 375/1280 × 日/夜、label clearance、zoom disabled、鍵盤、空白海 click、roamer greeting；跑完整驗證；回填本段 commit hash；分 commit 後 push main | Modify: `e2e/universe-map.spec.ts`, `TODOS.md` | `npm test` passed（103 files / 477 tests）；`npm run build` passed；`npm run test:e2e` passed（25 tests） | `c874ee9` |
 
+### 宇宙地圖遨遊升級（2026-07-09，plan `/tmp/agent-plan-1783596255.md`）
+
+> 決策：A① 強化 `＋/－`（方向鍵維持 pan）｜B 兩段式＋構圖一致｜C 未來園區改名未定 → 跳過｜D 層次升級僅設計文件。  
+> **未做**：重寫 `useMapCamera` 平移核心（C2／T3b 先量測）；ocean 顯示名（等產品定稿）。
+
+| Task | 狀態 | 摘要 | 驗證 |
+|------|------|------|------|
+| MAP-ROAM-1 點島構圖一致 | 完成（待 commit） | 第一次點開放島即套 dock offset；第二次只 `revealSheet` 不再 fly；pan／zoom／reset 清聚焦門閂 | unit + e2e 兩段式 |
+| MAP-ROAM-2 縮放控制列 | 完成（待 commit） | 步進 0.32／-0.24；手機／平板加大 hit area；aria 釐清 | MapControls + e2e zoom |
+| MAP-ROAM-3 少字童趣 UI | 完成（待 commit） | 島名略放大、pill 降權、「看看」圖示化；守 label 淨空 ≥16px | ZoneIsland + e2e clearance |
+| MAP-ROAM-4 層次升級概念 | 完成（待 commit） | `docs/UNIVERSE-PROGRESSION-CONCEPT.md` | 文件審 |
+| MAP-ROAM-5 平移核心 | 延後 | 僅 CSS／tap-highlight 微調；真不順另案量測 | — |
+
+
 ### Landing 無 `<h1>`　`design · S · 無`　〔seo+a11y〕
 首頁 headings 從 h2 開始（四段 segment 標題）；第一段標題可升級 h1 或另加 sr-only h1。`components/landing/LandingSegment.tsx`。
 

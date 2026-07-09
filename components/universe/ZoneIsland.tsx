@@ -226,7 +226,10 @@ function ZoneIsland({
                   onWish(zone);
                 }}
               >
-                看看
+                {/* 圖示化「看看」：可讀名稱靠 aria-label，視覺只留偷看眼睛，降低常駐文字重量 */}
+                <span className={styles.wishIcon} aria-hidden="true">
+                  👀
+                </span>
               </button>
             ) : null}
           </span>

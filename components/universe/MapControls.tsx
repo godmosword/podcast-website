@@ -62,7 +62,7 @@ export default function MapControls({
         type="button"
         className={styles.btn}
         onClick={onZoomIn}
-        aria-label="放大地圖"
+        aria-label="放大地圖（右下角加號）"
         disabled={!canZoomIn}
       >
         ＋
@@ -71,7 +71,7 @@ export default function MapControls({
         type="button"
         className={styles.btn}
         onClick={onZoomOut}
-        aria-label="縮小地圖"
+        aria-label="縮小地圖（右下角減號）"
         disabled={!canZoomOut}
       >
         －

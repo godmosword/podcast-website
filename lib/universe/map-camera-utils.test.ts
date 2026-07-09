@@ -72,6 +72,27 @@ describe("map-camera-utils", () => {
     });
   });
 
+  it("clampCamera 於 FOCUS_SCALE 保留 dock offset（舞台大於視窗時不吃掉 viewportOffsetY）", () => {
+    // T6 點島置中一致化：第一次點擊 fly-to 帶 dock offset，第二次開 sheet 不再位移。
+    // 前提是 clampCamera 在舞台大於視窗（此處 1000×720 × 1.6 = 1600×1152）時，
+    // 不會把 flyTo 算出的含 offset ty 夾回置中。tested viewports 375/1280 皆成立。
+    const scale = 1.6;
+    const offsetY = 96;
+    const dino = { x: 210, y: 260 };
+    for (const viewport of [
+      { w: 375, h: 667 },
+      { w: 1280, h: 800 },
+    ]) {
+      const tx = viewport.w / 2 - dino.x * scale;
+      const ty = viewport.h / 2 - dino.y * scale + offsetY;
+      expect(clampCamera({ scale, tx, ty }, viewport.w, viewport.h)).toEqual({
+        scale,
+        tx,
+        ty,
+      });
+    }
+  });
+
   it("clampCamera 夾住超出可置中範圍的平移", () => {
     const scale = 1.6;
     expect(clampCamera({ scale, tx: 9999, ty: 9999 }, 375, 667)).toEqual({

@@ -17,7 +17,7 @@ describe("MapControls", () => {
       />,
     );
 
-    expect(html).toContain('aria-label="放大地圖" disabled=""');
-    expect(html).toContain('aria-label="縮小地圖" disabled=""');
+    expect(html).toContain('aria-label="放大地圖（右下角加號）" disabled=""');
+    expect(html).toContain('aria-label="縮小地圖（右下角減號）" disabled=""');
   });
 });

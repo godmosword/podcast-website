@@ -12,14 +12,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   border: 2px solid #e7d3ad;
-  border-radius: 16px;
+  border-radius: 18px;
   /* 奶油／木質暖底，呼應全站手繪黏土風與木牌名牌，不用扁平白卡 */
   background: linear-gradient(#fffaf1, #fff2dc);
   color: #7a5a2e;
-  font-size: 1.4rem;
+  font-size: 1.55rem;
   font-weight: 800;
   line-height: 1;
   cursor: pointer;
@@ -60,15 +60,31 @@
 
 @media (max-width: 480px) {
   .controls {
-    right: calc(8px + var(--safe-right));
-    bottom: calc(8px + var(--safe-bottom));
-    gap: 6px;
+    right: calc(10px + var(--safe-right));
+    bottom: calc(10px + var(--safe-bottom));
+    gap: 8px;
   }
 
   .btn {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
-    font-size: 1.25rem;
+    /* 手機／小平板：加大 hit area，方便小朋友按 */
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    font-size: 1.45rem;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 1024px) {
+  .controls {
+    right: calc(14px + var(--safe-right));
+    bottom: calc(14px + var(--safe-bottom));
+    gap: 10px;
+  }
+
+  .btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 18px;
+    font-size: 1.6rem;
   }
 }

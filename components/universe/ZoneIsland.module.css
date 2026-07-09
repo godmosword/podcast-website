@@ -296,7 +296,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: 3px;
   pointer-events: none;
 }
 
@@ -404,12 +404,14 @@
   opacity: 0.92;
 }
 
+/* 童趣大字島名：少字地圖的視覺主角；字級略放大但不擠壓南北島 label 淨空 */
 .name {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 800;
+  letter-spacing: 0.15px;
   white-space: nowrap;
   padding: 3px 12px;
-  border-radius: 7px;
+  border-radius: 8px;
   /* 木牌風：固定色，不隨日夜反轉 */
   color: #fff6e6;
   background: linear-gradient(#caa063, #a5773c);
@@ -417,12 +419,14 @@
   box-shadow: 0 2px 4px rgba(60, 40, 20, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
+/* 狀態 pill：僅裝飾（島 button 已含同義 aria-label），降低視覺重量讓島名／看看圖示當主角 */
 .pill {
-  font-size: 12px;
-  font-weight: 800;
-  padding: 2px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 8px;
   border-radius: 999px;
   line-height: 1.4;
+  opacity: 0.85;
 }
 
 /* ── 點島慶祝：squash & stretch 彈跳 + 星星迸發 ─────────────
@@ -544,19 +548,23 @@
     font-size: 14px;
   }
 
-  /* island tile 木牌：縮小鏡頭時反縮放仍可能偏小，略放大字級 */
+  /* island tile 木牌：縮小鏡頭時反縮放仍可能偏小，略放大字級（守 label 淨空 ≥16px） */
   .tileLabel .name {
     font-size: 15px;
   }
 
   .tileLabel .pill {
-    font-size: 11px;
+    font-size: 9px;
   }
 
   .wishBtn {
-    font-size: 11px;
-    min-height: 26px;
-    padding: 2px 10px;
+    width: 24px;
+    height: 24px;
+    min-height: 24px;
+  }
+
+  .wishIcon {
+    font-size: 12px;
   }
 }
 
@@ -598,20 +606,26 @@
   z-index: 0;
 }
 
-/* 鎖島許願：常駐小 pill，木牌欄第三行（島名 → 狀態 → 看看），點擊才開 dock。
-   tileLabel 為 pointer-events:none，僅此鈕可點。 */
+/* 鎖島許願：圖示化小圓鈕（偷看眼睛），木牌欄第三格（島名 → 狀態 → 看看），點擊才開 dock。
+   可讀名稱在 aria-label；圖示化降低常駐文字重量。tileLabel 為 pointer-events:none，僅此鈕可點。 */
 .wishBtn {
   pointer-events: auto;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
   min-height: 26px;
-  padding: 2px 10px;
+  padding: 0;
   border: 1px solid #8a6438;
   border-radius: 999px;
   background: linear-gradient(#fdf0c4, #e8c878);
-  color: #5c4018;
-  font-size: 12px;
-  font-weight: 800;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(60, 40, 20, 0.25);
+}
+
+.wishIcon {
+  font-size: 13px;
+  line-height: 1;
 }
 
 .wishBtn:focus-visible {
