@@ -16,8 +16,8 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 export const FLY_DURATION_MS = 600;
 /** 進場降落動畫：起始鏡頭相對 fit 的倍率（從高空俯瞰整個群島再飛向主島）。 */
 const ENTRY_START_FACTOR = 0.55;
-/** 每個分頁 session 只播一次進場動畫，回訪不重播。 */
-const ENTRY_PLAYED_KEY = "cc-universe-entry-played";
+/** 每個分頁 session 只播一次進場動畫，回訪不重播；深連結入場會預寫此 key 跳過進場（見 UniverseMap）。 */
+export const ENTRY_PLAYED_KEY = "cc-universe-entry-played";
 const ZOOM_EPS = 0.0001;
 
 type Camera = { scale: number; tx: number; ty: number };

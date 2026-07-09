@@ -303,11 +303,12 @@ type MotionPart = {
 | `sea` | `sea.png`(+`@2x`) | 實底 | 近俯視、**無縫可平鋪** | 舞台海面（取代 `seaGrad`） |
 | `sea-night` | `sea-night.png`(+`@2x`) | 實底 | 同上，深藍紫低飽和 | 夜間海面（`data-theme="night"`） |
 | `cloud-a/b/c` | `cloud-*.png` | 透明 RGBA | 遠景、無投影盒 | 視差雲層（取代向量橢圓雲） |
-| `far-island-a/b` | `far-island-*.png`(+`@2x`) | 透明 RGBA | 地平線遠景剪影、去飽和柔邊 | 遠景丘陵/遠島（取代向量 hill） |
 | `sun` / `moon`（選用） | `sun.png` / `moon.png` | 透明 RGBA | 霧面黏土日月 | `SkyBodies`（選用升級） |
 
+> `far-island-a/b`（地平線遠景剪影，曾含 `@2x`）已於 2026-07 移除：parallax 層改以前景雲承載景深，遠島剪影與海面滿版視覺衝突。移除範圍見 `lib/universe/map-art-src.ts`、`scripts/generate-map-art.ts`、`scripts/verify-map-art.ts`、`scripts/fix-map-art.ts`；`UniverseMapParallax.test.tsx` 保留「不再輸出 far-island」的防護測試。
+
 - 路徑集中於 `lib/universe/map-art-src.ts`（比照 `lib/universe/zone-art-src.ts`），前端不散寫字串。
-- 海面／遠島需 `@2x`（跟隨 pan/zoom 放大）；雲可只 1x。
+- 海面需 `@2x`（跟隨 pan/zoom 放大）；雲可只 1x。
 
 ### 14.2 材質一致性（與島同世界）
 - **鐵律同 §8：生任何 map 素材都餵 `car-park.png` 當 image/style reference**，共用 `CLAY_STYLE_PREFIX` + `CLAY_NEGATIVE`。

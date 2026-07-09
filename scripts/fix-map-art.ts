@@ -20,10 +20,6 @@ const TRANSPARENT_FILES = [
   "cloud-a.png",
   "cloud-b.png",
   "cloud-c.png",
-  "far-island-a.png",
-  "far-island-a@2x.png",
-  "far-island-b.png",
-  "far-island-b@2x.png",
   "sun.png",
   "moon.png",
 ];

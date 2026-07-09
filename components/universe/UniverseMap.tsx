@@ -6,7 +6,7 @@ import { MAP_STAGE, ZONE_TERRAIN, type ZoneDef, type ZoneId, type ZoneStatus } f
 import { resolveUniverseMap } from "@/lib/universe-map";
 import { getZoneArtTile } from "@/lib/universe/zone-art-tile";
 import { parseDevStatusOverrides } from "@/lib/universe/dev-map-flags";
-import { parseZoneDeepLink } from "@/lib/universe/zone-deep-link";
+import { parseZoneDeepLink, parseZoneDeepLinkFromSearch } from "@/lib/universe/zone-deep-link";
 import type { ZoneStoriesBundle } from "@/lib/story-zone-query";
 import { mapDepthZ } from "@/lib/universe-depth";
 import { seaTexturePath } from "@/lib/universe/map-art-src";
@@ -29,7 +29,7 @@ import SkyBodies from "./SkyBodies";
 import UniverseMapParallax from "./UniverseMapParallax";
 import ZoneIsland from "./ZoneIsland";
 import ZoneSheet from "./ZoneSheet";
-import { FLY_DURATION_MS, useMapCamera } from "./useMapCamera";
+import { ENTRY_PLAYED_KEY, FLY_DURATION_MS, useMapCamera } from "./useMapCamera";
 import styles from "./UniverseMap.module.css";
 
 /** 點島後放大到的目標倍率。 */
@@ -54,14 +54,32 @@ function UniverseMapContent({
   syncZoneQuery,
   zoneStoryPreviewsMap,
 }: MapContentProps) {
-  const { zones, bridges, viewBox } = resolveUniverseMap();
+  // useMemo 錨定引用：resolveUniverseMap 每次呼叫都產新 zone 物件，
+  // 不錨定的話 memo(ZoneIsland) 會被每 tick 全新的 zone prop 擊穿。
+  const { zones, bridges, viewBox } = useMemo(() => resolveUniverseMap(), []);
   // 進度中樞：孩子聽完的集數（localStorage，mount 後才讀）→ 各島星章與 sheet 打勾
   const completedSlugs = useCompletedSlugs();
   const zoneProgress = useMemo(
     () => computeZoneProgress(zoneStoryPreviewsMap, completedSlugs),
     [zoneStoryPreviewsMap, completedSlugs],
   );
+  // 深連結入場：預寫 entry key 跳過進場降落動畫，避免與 flyTo 目標島互搶鏡頭
+  // （兩者共用 FLY_DURATION_MS 時序）。必須在 useMapCamera 首次量測 effect 讀取
+  // sessionStorage 之前寫入，故放 useState 初始化器（render 期一次、StrictMode 幂等）。
+  useState(() => {
+    if (typeof window === "undefined") return;
+    if (!parseZoneDeepLinkFromSearch(window.location.search)) return;
+    try {
+      sessionStorage.setItem(ENTRY_PLAYED_KEY, "1");
+    } catch {
+      // sessionStorage 不可用時退回原行為（進場動畫照播，deep link 仍會開 sheet）
+    }
+  });
   const camera = useMapCamera();
+  // 穩定的 flyTo 引用（useCallback，不隨 pointer-move 每 tick 重建的 camera 物件
+  // 一起變動）；供下方多個 callback 當依賴，避免每次平移都重建它們並連鎖重渲染
+  // ZoneIsland（ZoneIsland 已 memo）。deep-link effect 沿用同一個解構值。
+  const { flyTo: cameraFlyTo } = camera;
   const reduced = useReducedMotion();
   const webpSupported = useWebpSupported();
   const { theme: daylight } = useTheme();
@@ -103,7 +121,7 @@ function UniverseMapContent({
 
   const openSheetWithFly = useCallback(
     (zone: ZoneDef) => {
-      camera.flyTo(zone.coord, FOCUS_SCALE, { viewportOffsetY: FOCUS_DOCK_OFFSET_Y });
+      cameraFlyTo(zone.coord, FOCUS_SCALE, { viewportOffsetY: FOCUS_DOCK_OFFSET_Y });
 
       if (openTimerRef.current) clearTimeout(openTimerRef.current);
       if (reduced) {
@@ -112,23 +130,48 @@ function UniverseMapContent({
         openTimerRef.current = setTimeout(() => revealSheet(zone), FLY_DURATION_MS);
       }
     },
-    [camera, reduced, revealSheet],
+    [cameraFlyTo, reduced, revealSheet],
   );
 
+  // 深連結開 sheet：與點擊開 dock 語意等價（走 revealSheet + focusedOpenZoneRef），
+  // 且 StrictMode 安全——模擬卸載的 cleanup 若發現 sheet 尚未開，會釋放門閂讓
+  // 重跑的 effect 重新排程（修 dev 下 sheet 永不開的問題，TODOS「?zone= dev」項）。
+  // 依賴用穩定的 camera.flyTo（useCallback，於上方解構為 cameraFlyTo），不用每
+  // tick 重建的 camera 物件。
+  // camera 完成首次量測前（sizeRef 0×0）flyTo 會 no-op：以「已離開初始姿態」
+  // 判定 ready，未 ready 不設門閂，等量測 setCam 的 commit 觸發本 effect 重跑再飛。
+  const cameraInitialized =
+    camera.scale !== 1 || camera.tx !== 0 || camera.ty !== 0;
   useEffect(() => {
-    if (deepLinkHandledRef.current) return;
     const zone = parseZoneDeepLink(zoneQuery);
-    if (!zone) return;
+    if (!zone) {
+      // query 清空（如關閉 sheet）即重置門閂：同一 mount 內第二次深連結
+      //（瀏覽器返回、站內連結）才能再開。
+      deepLinkHandledRef.current = false;
+      return;
+    }
+    if (!cameraInitialized) return;
+    if (deepLinkHandledRef.current) return;
     deepLinkHandledRef.current = true;
 
-    camera.flyTo(zone.coord, FOCUS_SCALE, { viewportOffsetY: FOCUS_DOCK_OFFSET_Y });
-    const reveal = () => setActiveZone(zone);
+    cameraFlyTo(zone.coord, FOCUS_SCALE, { viewportOffsetY: FOCUS_DOCK_OFFSET_Y });
+    focusedOpenZoneRef.current = zone.id;
     if (reduced) {
-      reveal();
-    } else {
-      openTimerRef.current = setTimeout(reveal, FLY_DURATION_MS);
+      revealSheet(zone);
+      return;
     }
-  }, [camera, reduced, zoneQuery]);
+    const timer = setTimeout(() => revealSheet(zone), FLY_DURATION_MS);
+    openTimerRef.current = timer;
+    return () => {
+      // 只在「本 effect 排的 timer 仍掛著」時重置門閂；使用者拖曳取消
+      //（cancelPendingReveal 已把 openTimerRef 清成 null）則維持已處理，不重排。
+      if (openTimerRef.current === timer) {
+        clearTimeout(timer);
+        openTimerRef.current = null;
+        deepLinkHandledRef.current = false;
+      }
+    };
+  }, [cameraFlyTo, cameraInitialized, reduced, revealSheet, zoneQuery]);
 
   useEffect(() => {
     if (!daylightTrackedRef.current) {
@@ -159,9 +202,9 @@ function UniverseMapContent({
   const handleLockedTap = useCallback(
     (zone: ZoneDef) => {
       trackUniverseZoneTap(zone.id, zone.status);
-      camera.flyTo(zone.coord, FOCUS_SCALE);
+      cameraFlyTo(zone.coord, FOCUS_SCALE);
     },
-    [camera],
+    [cameraFlyTo],
   );
 
   const handleWish = useCallback(
@@ -207,12 +250,12 @@ function UniverseMapContent({
         closeSheet();
       }
 
-      camera.flyTo(zone.coord, FOCUS_SCALE);
+      cameraFlyTo(zone.coord, FOCUS_SCALE);
 
       if (openTimerRef.current) clearTimeout(openTimerRef.current);
       openTimerRef.current = null;
     },
-    [activeZone?.id, camera, closeSheet, openSheetWithFly, router],
+    [activeZone?.id, cameraFlyTo, closeSheet, openSheetWithFly, router],
   );
 
   /** 使用者拖曳打斷 fly-to 時，取消尚未觸發的開 sheet／導航。 */

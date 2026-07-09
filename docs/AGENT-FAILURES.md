@@ -46,4 +46,6 @@
 |------|------------|---------------------------------------------|------|
 | 2026-07-09 | `grok models` / grok-4.5 | `You are not authenticated` | 同日稍後探活已登入、單輪呼叫成功 → 已解除 |
 | 2026-07-09 | `codex exec` / gpt-5.5 | spawn ENOENT：`@openai/codex-darwin-arm64` vendor binary 遺失（npm wrapper 在但原生執行檔不在；exit code 仍為 0，須看 stderr 判斷） | 同日 `npm i -g @openai/codex` 重裝後探活回 OK → 已解除 |
+| 2026-07-09 | `grok -p` / grok-4.5 | 預設 plan 模式下只輸出一行開場白即結束（exit 0，無審查內容）；另 `--disallowed-tools` 移除 read 工具會使 agent 建構失敗 | 加 **`--no-plan --max-turns 6`** 重試成功 → 已解除；對抗審呼叫一律帶 `--no-plan` |
+| 2026-07-09 | `cursor-agent -p --mode plan` / composer-2.5-fast | `--mode plan` 配 `-p` 輸出為空（exit 0） | 改 **`--mode ask`** 重試成功 → 已解除；headless 審查一律用 `--mode ask` |
 | — | Task `model=grok-4.5`（Cursor） | slug 不可用或 Task 拒收（待首次 L3 驗證） | 對抗審缺席；勿用 grok-4.3 頂替；見 AGENT-WORKFLOW § 對抗審例外 |

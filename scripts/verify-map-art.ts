@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 /**
  * 驗證宇宙地圖「海／天」黏土素材齊備（Art Bible §14）。
- * 海面／遠島需含 @2x；雲／日月僅 1x。
+ * 海面需含 @2x；雲／日月僅 1x。
  *
  *   npm run verify:map-art
  */
@@ -19,8 +19,6 @@ const REQUIRED: Record<string, boolean> = {
   "cloud-a.png": false,
   "cloud-b.png": false,
   "cloud-c.png": false,
-  "far-island-a.png": true,
-  "far-island-b.png": true,
   "sun.png": false,
   "moon.png": false,
 };

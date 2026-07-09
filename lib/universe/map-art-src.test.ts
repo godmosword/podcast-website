@@ -1,14 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  CLOUD_IDS,
-  FAR_ISLAND_IDS,
-  FAR_ISLAND_WIDTH,
-  cloudPath,
-  farIslandSrcSet,
-  moonPath,
-  seaTexturePath,
-  sunPath,
-} from "./map-art-src";
+import { CLOUD_IDS, cloudPath, moonPath, seaTexturePath, sunPath } from "./map-art-src";
 
 describe("seaTexturePath", () => {
   it("日/夜對應不同海面素材", () => {
@@ -23,20 +14,6 @@ describe("cloudPath", () => {
     expect(CLOUD_IDS).toHaveLength(3);
     for (const id of CLOUD_IDS) {
       expect(cloudPath(id)).toBe(`/adventures/map/${id}.png`);
-    }
-  });
-});
-
-describe("farIslandSrcSet", () => {
-  it("遠島含 1x/2x width descriptor 與 WebP", () => {
-    for (const id of FAR_ISLAND_IDS) {
-      const { src, srcSet, webpSrc, webpSrcSet } = farIslandSrcSet(id);
-      expect(src).toBe(`/adventures/map/${id}.png`);
-      expect(webpSrc).toBe(`/adventures/map/${id}.webp`);
-      expect(srcSet).toContain(`${id}.png ${FAR_ISLAND_WIDTH}w`);
-      expect(srcSet).toContain(`${id}@2x.png ${FAR_ISLAND_WIDTH * 2}w`);
-      expect(webpSrcSet).toContain(`${id}.webp ${FAR_ISLAND_WIDTH}w`);
-      expect(webpSrcSet).toContain(`${id}@2x.webp ${FAR_ISLAND_WIDTH * 2}w`);
     }
   });
 });

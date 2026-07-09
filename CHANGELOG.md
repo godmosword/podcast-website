@@ -4,6 +4,18 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- **樂園地圖深連結修復三合一**：① `?zone=` deep link 在 dev（StrictMode 雙效應）下 sheet 永不開——門閂改條件式 cleanup 釋放，query 清空即重置（同一 mount 內第二次深連結可再開）② 深連結鏡頭實際飛抵目標島——原本 `flyTo` 在 viewport 未量測（0×0）時靜默 no-op，鏡頭停在車庫 fit；改以 camera ready gate 等量測後再飛 ③ 深連結入場預寫 entry key 跳過進場降落動畫，避免與目標島 fly-to 互搶鏡頭。深連結開 sheet 改走 `revealSheet`（與點擊語意等價：URL 同步＋二次點擊 dock 行為一致）。新增 StrictMode 元件測試（jsdom + fake timers，RED 驗證）與 4 條 deep-link E2E（含 stage transform 斷言）
+
+### Changed
+
+- **樂園地圖平移效能**：`ZoneIsland` memo 化＋callbacks 依賴改穩定 `camera.flyTo`＋`resolveUniverseMap()` useMemo 錨定引用——拖曳平移期間島嶼子樹不再每 tick 重渲染（zoom 期間重渲染屬預期，階段二另議）；島圖 srcset `sizes` 以 0.25 級距 bucket 化（純網路策略，不影響視覺）
+
+### Removed
+
+- **far-island 遠景剪影遺孤資產**：parallax 改前景雲後 runtime 已不引用，刪除 `public/adventures/map/far-island-*`（8 檔約 2.75MB）並同步六處契約（`verify-map-art`、`map-art-src`+test、generate/fix 腳本、Art Bible）
+
 ### Added
 
 - **每週設計評審流程（`proposals/`）**：訊號驅動的迭代提案週報——讀取許願/analytics/repo/趨勢四類訊號 + 幼兒 UX／家長信任／效能／品牌 heuristics 掃描，產出 3 個附驗收標準的排序提案；決策記錄（✅/❌/⏸）留檔避免重複提案。首份 `proposals/2026-W27.md`

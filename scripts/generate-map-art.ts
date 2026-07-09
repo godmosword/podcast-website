@@ -138,32 +138,6 @@ const SPECS: MapArtSpec[] = [
       DECOR_BASE,
   },
   {
-    id: "far-island-a",
-    file: "far-island-a.png",
-    kind: "transparent",
-    set: "day",
-    apiSize: "1536x1024",
-    outLong: 768,
-    needs2x: true,
-    scene:
-      "A faraway low clay hill silhouette on the horizon, desaturated soft green, " +
-      "gentle rounded ridge, hazy distant look, no detail. " +
-      DECOR_BASE,
-  },
-  {
-    id: "far-island-b",
-    file: "far-island-b.png",
-    kind: "transparent",
-    set: "day",
-    apiSize: "1536x1024",
-    outLong: 768,
-    needs2x: true,
-    scene:
-      "A faraway pair of low clay hills on the horizon, desaturated soft teal-green, " +
-      "gentle rounded ridges, hazy distant look, no detail. " +
-      DECOR_BASE,
-  },
-  {
     id: "sun",
     file: "sun.png",
     kind: "transparent",
@@ -195,7 +169,7 @@ function usage(): never {
   generate-map-art.ts [--approve] [--night]
 
   海面：sea.png / sea-night.png（實底，無縫平鋪）
-  天空：cloud-a/b/c.png、far-island-a/b.png、sun.png、moon.png（透明 RGBA）
+  天空：cloud-a/b/c.png、sun.png、moon.png（透明 RGBA）
 
 環境: .env.local 的 OPENAI_API_KEY（與 npm run illustrate 相同）
 流程: 生圖 → 審 staging contact sheet → --approve`);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { memo, useEffect, useRef, useState, type CSSProperties } from "react";
 import { ZONE_STATUS_META, type ZoneDef, type ZoneStatus } from "@/data/universe-zones";
 import { mapDepthZ } from "@/lib/universe-depth";
 import type { ResolvedZone } from "@/lib/universe-map";
@@ -29,6 +29,18 @@ const BURST_PARTICLES = [
 /** 慶祝動畫長度（毫秒），與 CSS islandBounce／star-burst-particle 對齊。 */
 const CELEBRATE_MS = 640;
 
+/**
+ * srcset `sizes` 用的縮放級距（0.25 一階）。連續 zoom 時 mapScale 逐 tick 變動，
+ * 若每 tick 都重算 sizes 字串，瀏覽器會頻繁重新評估圖片候選來源；量化成離散級距降低
+ * 抖動，純屬圖片載入的網路策略調整。label 反縮放（`scale(1/mapScale)`）仍吃連續值，
+ * 視覺不受影響。
+ */
+const SIZES_SCALE_BUCKET = 0.25;
+
+function bucketSizesScale(mapScale: number): number {
+  return Math.round(mapScale / SIZES_SCALE_BUCKET) * SIZES_SCALE_BUCKET;
+}
+
 type ZoneIslandProps = {
   zone: ResolvedZone;
   /** 開放島點擊（fly-to／開 dock）。 */
@@ -48,7 +60,7 @@ type ZoneIslandProps = {
   progress?: ZoneProgress | null;
 };
 
-export default function ZoneIsland({
+function ZoneIsland({
   zone,
   onActivate,
   onWish,
@@ -97,8 +109,9 @@ export default function ZoneIsland({
 
   if (tile.mode === "island") {
     const [ax, ay] = tile.anchorUV;
-    const artSrc = getZoneArtSrcSet(zone.id, mapScale);
-    const nightArtSrc = getZoneNightArtSrcSet(zone.id, mapScale);
+    const sizesScale = bucketSizesScale(mapScale);
+    const artSrc = getZoneArtSrcSet(zone.id, sizesScale);
+    const nightArtSrc = getZoneNightArtSrcSet(zone.id, sizesScale);
     const labelOffsetY = mapScale < 0.5 ? -140 : 6;
     return (
       <>
@@ -248,3 +261,9 @@ export default function ZoneIsland({
     </button>
   );
 }
+
+// 地圖平移期間 UniverseMapContent 每 pointer-move 都會重渲染（camera tx/ty 變動），
+// 但個別島的 props（zone/callbacks/mapScale 等）在平移中維持不變（callbacks 已在
+// UniverseMap.tsx 改用穩定的 cameraFlyTo）；memo 化讓純平移時每座島跳過重渲染。
+// zoom 導致 mapScale 改變仍會重渲染，屬階段二範圍。
+export default memo(ZoneIsland);
