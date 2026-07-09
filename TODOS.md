@@ -135,7 +135,7 @@ SoundOn 單集 show notes 應回鏈官網單集 URL（含可分享摘要與看�
 **已由「海洋滿版」（map-fullbleed task-1~4）解決**：sea rect 以 SEA_BLEED=7200 外擴滿版、移除 rx=40 圓角與 seaHazeTop 接縫；視差層改近景頂層雲（刪遠島剪影）、日月改 screen-space 固定天象（z:3）。相機 fit 行為不變（fitScaleFor 抽純函式+測試）。驗證：{375/1280}×{日/夜}×{fit/MIN_SCALE/pan} 截圖矩陣、prod-mode deep link + e2e 10/10。`8ea28eb` `3b13a55` `b83e48d` `71f0f28`
 
 ### 宇宙地圖 dev 模式兩個既有問題（v6，非 map-fullbleed 引入）　`bug · S · 無`　〔eng〕
-① ~~console error「button cannot contain a nested button」×2~~ ✅ **已修**：確認即 hydration #418 根因（正式站可重現、本地 prod build 修後 console 乾淨）；許願 button 改兄弟 wishLayer 鏡像 tile 定位。`6c54c93`。② ~~dev 模式 `?zone=` deep link 不開 sheet（疑 StrictMode 雙效應與 openTimer 互動）~~ ✅ **已修**：根因為 StrictMode 模擬卸載 cleanup 清 timer 但門閂已鎖；改條件式 cleanup 釋放門閂＋query 清空重置。連帶修復鏡頭未飛抵目標島（viewport 未量測時 flyTo 靜默 no-op，prod 也中）與進場動畫互搶競態。StrictMode 元件測試＋4 條 E2E 鎖定。（commit hash 待本批 commit 後補）
+① ~~console error「button cannot contain a nested button」×2~~ ✅ **已修**：確認即 hydration #418 根因（正式站可重現、本地 prod build 修後 console 乾淨）；許願 button 改兄弟 wishLayer 鏡像 tile 定位。`6c54c93`。② ~~dev 模式 `?zone=` deep link 不開 sheet（疑 StrictMode 雙效應與 openTimer 互動）~~ ✅ **已修**：根因為 StrictMode 模擬卸載 cleanup 清 timer 但門閂已鎖；改條件式 cleanup 釋放門閂＋query 清空重置。連帶修復鏡頭未飛抵目標島（viewport 未量測時 flyTo 靜默 no-op，prod 也中）與進場動畫互搶競態。StrictMode 元件測試＋4 條 E2E 鎖定。`61d098b`
 
 ### 宇宙地圖 UX 修正（2026-07-06）
 
