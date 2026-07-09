@@ -1,5 +1,5 @@
 ---
-description: 依 Approved Plan 實作＋驗證（podcast-website）；改檔只走 leader／Sonnet／Haiku，外部四模型（Opus 4.8/GPT 5.5/Grok 4.5/Composer 2.5）任唯讀顧問。
+description: 依 Approved Plan 實作＋驗證（podcast-website）；改檔只走 leader／Sonnet／Haiku，外部模型任唯讀顧問；小 diff 可跳過 diff 審。
 ---
 
 # Agent Action（podcast-website 行動小組版）
@@ -12,9 +12,10 @@ $ARGUMENTS
 
 同 [`agent-plan.md`](agent-plan.md) §0：讀 [`docs/AGENT-DOMAIN.md`](../../docs/AGENT-DOMAIN.md)（紅線、驗證矩陣、Protected paths）、[`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md)（失敗案例＋探活協議）、依任務加讀表。
 
-## 1. 載入 Approved Plan
+## 1. 載入 Approved Plan（或 Domain SOP）
 
 `/tmp/agent-plan-*.md`（取最新）或使用者貼上；無 plan → 簡短列出缺什麼，建議 `/agent-plan`。
+**內容管線例外：** 字幕／scenes／illustrate（SOP 內）可無 Plan，依 Domain § 內容管線與 [`EPISODE-WORKFLOW.md`](../../docs/EPISODE-WORKFLOW.md) 直做。
 
 ## 2. 分級執行
 
@@ -24,16 +25,16 @@ $ARGUMENTS
 |------|------|--------|
 | **L3** | Protected paths、跨模組、schema | **Leader 親自**（`scripts/illustrate*`、sync workflows、`app/legal/` 依 Domain 只能 leader／Opus） |
 | **L2** | 多檔、模式固定 | Agent tool `model: "sonnet"`（**中文文案一律 Sonnet**） |
-| **L1** | 單檔 routine | Agent tool `model: "haiku"`（機械性）；<10 行 → leader 直接做 |
+| **L1** | 單檔 routine | 路徑已知 → Sonnet 或 Haiku；路徑不明可先探索；&lt;10 行 → leader 直接做 |
 | **L0** | 純命令 | Bash |
 
-**行動小組（外部顧問，全部唯讀）**：卡關要第二意見、或實作後 diff 審查時呼叫；先依 FAILURES 探活，失敗即記錄＋標缺席。
+**行動小組（外部顧問，全部唯讀）**：卡關要第二意見、或實作後需 diff 審查時呼叫；先依 FAILURES 探活，失敗即記錄＋標缺席。
 
 | 顧問 | 用途 | 呼叫方式 |
 |------|------|----------|
 | Opus 4.8 | 高風險 diff 審、架構第二意見 | Agent tool `subagent_type: code-reviewer` + `model: "opus"` |
 | GPT 5.5 | TS/React diff 審、工程第二意見 | `codex exec -m gpt-5.5 -c model_reasoning_effort="high" "<prompt + diff>"` |
-| Grok 4.5 | 對抗審：找 diff 的 edge case | `grok models` 探活 → `grok -p "<prompt>" -m grok-4.5 --effort medium`（prompt 緊跟 `-p`）；不可用 → 缺席（見 `docs/AGENT-FAILURES.md`） |
+| Grok 4.5 | 對抗審：找 diff 的 edge case | `grok models` 探活 → `grok -p "<prompt>" -m grok-4.5 --effort medium`；不可用 → 缺席（見 `docs/AGENT-FAILURES.md`） |
 | Composer 2.5 | 快速 sanity check | `cursor-agent -p --model composer-2.5-fast --mode ask "<prompt>"` |
 
 **執行紅線：**
@@ -59,10 +60,11 @@ $ARGUMENTS
 
 **未全綠不得宣稱完成**；回報逐項對照。委員缺席不可省驗證矩陣。
 
-## 5. Diff 委員審（分級、唯讀）
+## 5. Diff 委員審（分級、唯讀，可跳過）
 
-- 一般：GPT 5.5（codex exec 審 diff）
-- L3／觸紅線：加 Opus 4.8（Agent tool code-reviewer + opus）與 Grok 4.5 對抗審；Grok 缺席 → 摘要標「對抗審缺席／對抗性降級」
+- **可跳過**：已有 Approved Plan、diff 約 &lt;80 行、未碰 Protected paths／紅線 → 只跑 Verify
+- **一般**：GPT 5.5（codex exec 審 diff）
+- **L3／觸紅線／Protected**：加 Opus 4.8（Agent tool code-reviewer + opus）與 Grok 4.5 對抗審；Grok 缺席 → 摘要標「對抗審缺席／對抗性降級」
 - 呼叫失敗 → 追加 `docs/AGENT-FAILURES.md`，摘要表註明缺席
 
 ## 6. Docs sync（可見行為變更時）
@@ -82,7 +84,7 @@ $ARGUMENTS
 
 ## 禁止
 
-- 無 Plan 擅自擴大 scope
+- 無 Plan 擅自擴大 scope（內容管線 SOP 內除外）
 - 跳過 Verify 宣稱完成
 
 ## 輸出語言

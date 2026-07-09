@@ -7,7 +7,7 @@
 
 | 指令 | 用途 |
 |------|------|
-| **`/agent-plan`** | 規劃 + **分級委員會審核**（L1/L2 雙審；L3 四員全上。預設不實作） |
+| **`/agent-plan`** | 規劃 + **分級委員會審核**（預設 GPT 單審；Opus／Grok 觸發制。預設不實作） |
 | **`/agent-action`** | 依 Approved Plan **Task 派工** + Verify +（可選）Ship |
 
 **啟用範圍：** 只有打出上述指令時才進入 Agent Orchestration 模式。一般 chat 不會自動拆任務、派子 agent。
@@ -73,7 +73,7 @@
 | 階段 | 指令 | Leader | 子 agent |
 |------|------|--------|----------|
 | 規劃 | `/agent-plan` | 當前 session 主模型 | — |
-| 審核 | `/agent-plan` | — | 分級委員會（L1/L2：Opus+GPT 雙審；L3：加 Grok+Composer） |
+| 審核 | `/agent-plan` | — | 分級委員會（預設 GPT 單審；觸發才 +Opus；L3＝三員對抗組 + Leader 自審） |
 | 實作 | `/agent-action` | Leader 拆任務 | Cursor **Task** + model slug |
 | 驗證 | `/agent-action` | Leader 整合後 | `shell`；必要時 reviewer |
 | 交付 | `/agent-action` | Leader | commit/push **僅使用者明確要求** |
@@ -101,16 +101,18 @@
 1. **Bootstrap**（[`AGENT-DOMAIN.md`](AGENT-DOMAIN.md)）
 2. **Draft Plan** — Leader 寫 Goal／Scope 骨架 → Task **GPT 5.5** 填 Task DAG、Files、Verification、Model routing（見 [Plan 模板](#plan-模板)）
 3. **委員會審查（分級，必做，全部唯讀）** — 呼叫前依 [`AGENT-FAILURES.md`](AGENT-FAILURES.md) 探活；失敗即記錄＋標缺席
-   - **L1／L2 雙審**：
-     - **Opus 4.8** 架構／紅線審：Task `architect` 或 `code-reviewer`（`readonly: true`）— 範圍、架構、Domain 紅線、過度工程
-     - **GPT 5.5** 工程審：Task + `gpt-5.5-medium` 或 codex — 可執行性、驗證命令、漏檔、測試
-   - **L3／觸紅線／Protected paths 四員全上**，追加：
+   - **預設（一般 L1／L2）：GPT 5.5 單審** — Task + `gpt-5.5-medium` 或 codex — 可執行性、驗證命令、漏檔、測試
+   - **加 Opus 4.8（觸發制，非預設）** — 跨模組、新架構、觸 Domain 紅線、Protected paths、或 GPT 標 CRITICAL／範圍不清：Task `architect` 或 `code-reviewer`（`readonly: true`）
+   - **L3／Protected paths／跨模組契約：三員對抗組 + Leader 自審**（舊稱「四員」易誤解；Composer 自審不另計費也不計非 leader）：
+     - **Opus 4.8** 架構／紅線審
+     - **GPT 5.5** 工程審
      - **Grok 4.5** 對抗審：找 plan 漏洞、edge case、失敗模式（不審中文文案品質）
-     - **Composer 2.5** 快速可行性審（Cursor＝Leader 自審；Claude Code＝`cursor-agent` CLI）
+     - **Composer 2.5** 可行性審（Cursor＝Leader 自審；Claude Code＝`cursor-agent` CLI）
    - **Fable 5**（`claude-fable-5-thinking-medium`）：**備選** — 僅委員衝突或邊界模糊時
-   - **成本降級（預設仍跑上列分級）**：僅當任務為**純文件／命令檔對齊**、不碰 Protected paths、無 schema／發佈路徑變更時，可按 **L1/L2 雙審**處理，不必強拉 Grok／Composer 四員；觸紅線、Protected paths、跨模組契約仍維持四員全上
+   - **內容管線跳過委員會**（字幕校對、scenes、illustrate SOP 內出圖）：有 [`EPISODE-WORKFLOW.md`](EPISODE-WORKFLOW.md)／Domain 紅線即可直做或只 `/agent-action`；靠 `--mark`、人工審圖、`verify:episodes`，**不要**為 SOP 內單集流程開 `/agent-plan`
+   - **純文件／命令檔對齊**（不碰 Protected paths、無 schema／發佈路徑變更）：Leader 自審即可，或 GPT 單審；不必 Opus／Grok
 4. **Leader 綜合** → **Approved Plan** → 提示 **`/agent-action`**
-   - **至少一位非 leader 委員**（Opus 或 GPT）成功審過才可標 Approved；全滅 → 回報使用者
+   - **至少一位非 leader 委員**（預設路徑＝GPT；觸發／L3 時＝Opus 或 GPT）成功審過才可標 Approved；全滅 → 回報使用者
    - **Cursor 的 Composer 可行性審＝Leader 自審**，不計入「非 leader 委員」
    - **L3 若 Grok 對抗審缺席**：Opus 或 GPT 仍有一人成功即可 Approved，但摘要表必須標 **「對抗審缺席／對抗性降級」**
 
@@ -137,7 +139,10 @@ Plan 若弱化 Domain 紅線 → 審稿標 **CRITICAL**。
 2. **Cursor Task 派工**（見 [複雜度分級](#複雜度分級-l0l3)）
 3. Leader **整合**（最小 diff；**禁止**多 agent 同檔）
 4. **Verify**（[`AGENT-DOMAIN.md`](AGENT-DOMAIN.md) § 驗證矩陣）
-5. **分級 diff 委員審**（readonly）：一般 GPT 5.5（Task + `gpt-5.5-medium`；Python → `python-reviewer`；TS/JS → `typescript-reviewer`）；L3／觸紅線加 Opus 4.8 與 Grok 4.5 對抗審。細節以 [`.cursor/commands/agent-action.md`](../.cursor/commands/agent-action.md)／[`.claude/commands/agent-action.md`](../.claude/commands/agent-action.md) 為準
+5. **分級 diff 委員審**（readonly，可跳過）：
+   - **可跳過**：已有 Approved Plan、diff 小（約 &lt;80 行）、未碰 Protected paths／紅線 → 只跑 Verify 即可
+   - **一般**：GPT 5.5（Task + `gpt-5.5-medium`；Python → `python-reviewer`；TS/JS → `typescript-reviewer`）
+   - **L3／觸紅線／Protected**：加 Opus 4.8 與 Grok 4.5 對抗審。細節以 [`.cursor/commands/agent-action.md`](../.cursor/commands/agent-action.md)／[`.claude/commands/agent-action.md`](../.claude/commands/agent-action.md) 為準
 6. 可見行為變更 → Domain § Docs sync
 7. **Ship**（僅使用者要求）：只 stage 相關檔；預設不 commit/push
 
@@ -146,6 +151,8 @@ Plan 若弱化 Domain 紅線 → 審稿標 **CRITICAL**。
 - ✅ 可並行：不同檔案／目錄
 - ❌ 禁止：多 agent 同時改同一檔
 - 改動 &lt;10 行且無架構影響 → Leader 直接做
+- **L1 路徑已知** → 直接 Sonnet，**不必**先 explore
+- **L1 路徑不明** → Task `explore`（`grok-4.3`）再 Sonnet
 - 遵守 Domain § **Protected paths / models**（若有）
 
 ### Cursor vs Claude Code 對標表
@@ -161,7 +168,7 @@ Plan 若弱化 Domain 紅線 → 審稿標 **CRITICAL**。
 | **Composer 2.5 可行性審（L3）** | `cursor-agent -p --model composer-2.5-fast --mode plan` | Leader 自審（當前 session 即 Composer；**不計入**非 leader 委員） |
 | **L3 實作** | Leader 親自 | Task + Opus slug，Protected paths 才 Leader |
 | **L2 實作** | Agent tool `model: "sonnet"` | Task + `claude-4.6-sonnet-medium-thinking` |
-| **L1 實作** | Agent tool `model: "haiku"`；<10 行 Leader | Task `explore` → Sonnet slug；<10 行 Leader |
+| **L1 實作** | Agent tool `model: "haiku"`；<10 行 Leader | 路徑已知 → Sonnet；路徑不明 → explore → Sonnet；<10 行 Leader |
 | **L0 命令** | Bash | Task `shell` 或 `grok-build-0.1` |
 | **改檔權** | 只有 Leader／Sonnet／Haiku 子 agent；外部 CLI 一律唯讀顧問 | 只有實作 Task；顧問一律 `readonly: true` |
 | **失敗記錄** | 兩邊共用 [`AGENT-FAILURES.md`](AGENT-FAILURES.md)：Bootstrap 必讀、call fail 必追加、30 天連續 2+ fail → 標缺席 | 同左 |
@@ -194,7 +201,7 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 |------|------|-----------------|
 | **L3** | 跨模組、schema、高風險 | Opus 4.8；Protected paths 才 Leader |
 | **L2** | 多檔、模式固定 | **Sonnet 4.6**（Task 派工） |
-| **L1** | 單檔 routine | explore → **Sonnet 4.6**（Task 派工） |
+| **L1** | 單檔 routine | 路徑已知 → **Sonnet 4.6**；不明才 explore → Sonnet |
 | **L0** | 純命令 | `shell` 或 Grok Build |
 
 ### 任務類型路由
@@ -203,15 +210,27 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 |----------|------|
 | Plan 骨架（Goal／Scope） | Leader（Composer） |
 | Plan 細節（DAG／Files／Verify） | Task + GPT 5.5 |
-| Plan 架構審 | Opus 4.8（`architect` readonly） |
-| Plan 工程審 | GPT 5.5 / codex |
+| Plan 工程審（**預設**） | GPT 5.5 / codex |
+| Plan 架構審（**觸發制**） | Opus 4.8（`architect` readonly）— 跨模組／紅線／Protected／範圍不清 |
 | Plan／diff 對抗審（L3） | Grok 4.5（readonly；不審中文） |
-| 探索 codebase | Task `explore`（Grok 4.3） |
+| 字幕／scenes／illustrate（SOP 內） | **跳過 `/agent-plan`**；直做或 `/agent-action` + Domain verify |
+| 純 docs／命令對齊 | Leader 自審或 GPT 單審；不開 Opus／Grok |
+| 探索 codebase（路徑不明） | Task `explore`（Grok 4.3） |
 | L1／L2 實作 | Task + Sonnet 4.6 |
 | 高風險核心路徑 | Opus 或 Leader（Domain Protected paths） |
 | 前端／UI | Sonnet 4.6；跑 lint + e2e（若 Domain 有） |
 | verify / CI 命令 | `shell` |
 | 整合 diff、git commit | **Leader only**（Composer） |
+
+### 成本速查（相對「建議路徑」）
+
+| 路徑 | 何時用 | 相對成本 |
+|------|--------|----------|
+| 內容 SOP 直做 + verify | 字幕／出圖／scenes | **~0.3x** |
+| 預設：GPT 單審 + Sonnet +（可選）GPT diff | 一般 L1／L2 | **1.0x** |
+| 觸發：+Opus | 跨模組／紅線／範圍不清 | **~1.4x** |
+| L3：三員對抗組 + Leader 自審 | Protected／schema／跨模組契約 | **~2.0–2.5x** |
+| 每次都硬開舊「四員」 | **禁止當預設** | 浪費 |
 
 ---
 
@@ -302,6 +321,9 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 | 多 agent 改同一檔 | 衝突 |
 | `git add -A` | 混 WIP |
 | 跳過 Domain 驗證矩陣 | 回歸 |
+| 一般 L1／L2 預設 Opus+GPT 雙審 | 成本偏高；改 GPT 單審，Opus 觸發制 |
+| 每次硬開舊「四員」當預設 | 浪費；L3／Protected 才上三員對抗組 |
+| SOP 內字幕／出圖硬開 `/agent-plan` | 應走內容管線 + verify |
 
 專案特有反模式見 [`AGENT-DOMAIN.md`](AGENT-DOMAIN.md)。
 
@@ -328,3 +350,4 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 | 2026-07-09 | 新增 Claude Code 委員會版命令（`.claude/commands/`）與 `AGENT-FAILURES.md` 失敗案例簿 |
 | 2026-07-09 | Cursor 版命令對齊委員會工作流（分級雙審／四員全上、FAILURES 協議）；新增兩環境對標表、Grok 4.5 slug |
 | 2026-07-09 | 縫隙補強：Meta `/agent-action` 分級 diff 審、Composer 自審門檻、Grok 缺席降級標記、純文件可降級雙審、Cursor Task 失敗協議 |
+| 2026-07-09 | 成本優化：預設 GPT 單審、Opus／Grok 觸發制、內容管線跳過委員會、L1 已知路徑免 explore、小 diff 可跳過 action diff 審；L3 改稱三員對抗組 + Leader 自審 |

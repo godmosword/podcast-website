@@ -43,6 +43,20 @@
 
 ---
 
+## 內容管線（跳過委員會）
+
+以下任務**預設不進** `/agent-plan` 委員會；直做或只 `/agent-action`，靠 Domain 紅線 + 驗證矩陣把關：
+
+| 任務 | 必守 | 必驗 |
+|------|------|------|
+| 字幕校對 | [`SUBTITLE-PROOFREAD.md`](SUBTITLE-PROOFREAD.md)；`--mark` 後才可 illustrate | 人工校對品質 |
+| 切場景／scenes | 對齊 ep-9／ep-10 全幕契約；中文 → Sonnet | `verify:episodes` |
+| illustrate 出圖（SOP 內） | 未 `--mark` 不得生圖；暫存 → 人工審 contact → 才 `--approve` | `verify:episodes`；strict 於 approve 前 |
+
+仍須開 `/agent-plan` 的例外：改 `scripts/illustrate*`、改 sync workflow、改全幕契約／schema、或跨模組發佈路徑。
+
+---
+
 ## 紅線（Plan 違反 → CRITICAL）
 
 | 紅線 | 說明 |
@@ -127,7 +141,9 @@
 | `--approve` 覆蓋 Apple 封面 `01.jpg` | 破壞 RSS 同步封面 |
 | CI 放 `OPENAI_API_KEY` 自動生圖 | 成本失控、無人工審圖 |
 | MVP（`pageCount=1`）靜默當完成 | `verify:episodes` 會列 warn，須依 EPISODE-WORKFLOW 升級 |
-| 每個 typo 都跑 `/agent-plan` 雙審 | 太慢 |
+| 每個 typo 都跑 `/agent-plan` 雙審 | 太慢；typo 直接做 |
+| SOP 內單集字幕／出圖硬開完整委員會 | 成本浪費；應走內容管線 + verify |
+| 一般 L1／L2 預設 Opus+GPT 雙審 | 已改為 GPT 單審；Opus 觸發制 |
 
 ---
 
@@ -137,3 +153,4 @@
 |------|------|
 | 2026-06-19 | 初版 Domain sheet（bootstrap 後填寫） |
 | 2026-07-09 | Bootstrap 掛接 `AGENT-FAILURES.md`（model-call 探活＋缺席判定） |
+| 2026-07-09 | 內容管線跳過委員會；反模式補「SOP 內出圖硬開委員會」「預設雙審」 |

@@ -10,7 +10,8 @@
 ## 前置條件
 
 - 已有 **Approved Plan**（來自 `/agent-plan`、Cursor plan 檔、`/tmp/agent-plan-*.md`，或使用者貼上的計畫）
-- 若無計畫，先簡短列出缺什麼，建議 `/agent-plan`
+- **內容管線例外：** 字幕／scenes／illustrate（SOP 內）可無 Plan，依 Domain § 內容管線直做
+- 其他任務若無計畫，先簡短列出缺什麼，建議 `/agent-plan`
 
 ## 你要做的事
 
@@ -18,9 +19,10 @@
 
 同 [`agent-plan.md`](agent-plan.md) §0（含讀 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md)）；可見行為變更完成前依 Domain § Docs sync。
 
-### 1. Leader 讀 Approved Plan
+### 1. Leader 讀 Approved Plan（或 Domain SOP）
 
-- 確認 Task DAG、依賴、Model routing 表
+- 有 Plan：確認 Task DAG、依賴、Model routing 表
+- 內容管線：對照 [`docs/EPISODE-WORKFLOW.md`](../../docs/EPISODE-WORKFLOW.md) 與 Domain 紅線
 
 ### 2. 拆任務並派工（Cursor Task）
 
@@ -32,7 +34,7 @@
 |------|------|-------------|
 | L3 架構／高風險 | 跨模組、Protected paths | Task + `claude-opus-4-8-thinking-medium`，或 Leader（僅 Domain 要求路徑） |
 | L2 多檔實作 | 模式固定 | Task + `claude-4.6-sonnet-medium-thinking`（**預設**；中文文案一律 Sonnet；勿用 Composer） |
-| L1 單檔 | 範圍明確 | Task `explore`（`grok-4.3`）→ Task + Sonnet slug 實作 |
+| L1 單檔 | 範圍明確 | **路徑已知** → Task + Sonnet；**路徑不明** → Task `explore`（`grok-4.3`）→ Sonnet |
 | L0 命令 | lint／test／腳本 | Task `shell` 或 `grok-build-0.1` |
 
 **行動小組（顧問，全部 `readonly: true`）**：卡關要第二意見時派——
@@ -66,10 +68,11 @@
 
 未全綠不得宣稱完成；回報逐項對照。**委員／子 agent 缺席不可省驗證矩陣。**
 
-### 5. Diff 委員審（分級、readonly）
+### 5. Diff 委員審（分級、readonly，可跳過）
 
-- 一般：GPT 5.5（Task + `gpt-5.5-medium`）；Python → `python-reviewer`；TS/JS → `typescript-reviewer`
-- L3／觸紅線：加 Opus 4.8（Task `code-reviewer` + Opus slug）與 Grok 4.5 對抗審；Grok 缺席 → 摘要標「對抗審缺席／對抗性降級」
+- **可跳過**：已有 Approved Plan、diff 約 &lt;80 行、未碰 Protected paths／紅線 → 只跑 Verify
+- **一般**：GPT 5.5（Task + `gpt-5.5-medium`）；Python → `python-reviewer`；TS/JS → `typescript-reviewer`
+- **L3／觸紅線／Protected**：加 Opus 4.8（Task `code-reviewer` + Opus slug）與 Grok 4.5 對抗審；Grok 缺席 → 摘要標「對抗審缺席／對抗性降級」
 - 呼叫失敗 → 追加 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md)，分配表註明缺席
 
 ### 6. 文件同步
@@ -93,7 +96,7 @@ Task 失敗 → 追加 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md)�
 
 ## 禁止
 
-- 不要無 Plan 擅自擴大 scope
+- 不要無 Plan 擅自擴大 scope（內容管線 SOP 內除外）
 - 不要跳過 Verify 就宣稱完成
 
 ## 輸出語言
