@@ -5,7 +5,7 @@
  * - dino：恐龍車與恐龍島選角（阿酷、怪獸卡車為 dino 島 roamer）。
  * - rescue：救援任務向（消防／警車／救護／出任務）。
  * - forest：森林工程與自然向（森林島美術＝大樹＋木架工程）。
- * - ocean：水上／未來向（未來園區 teaser「海洋？太空？」）。
+ * - ocean：水上／未來向（未來夢想島 teaser「海洋？太空？」）。
  * 建造中／即將登場島的故事會在鎖島 sheet 顯示「這座島已經有的故事」。
  */
 import type { ZoneId } from "./universe-zones";

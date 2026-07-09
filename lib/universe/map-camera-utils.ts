@@ -56,3 +56,48 @@ export function wheelZoomFactor(deltaY: number): number {
   const factor = Math.exp(-clamped * 0.002);
   return Math.min(Math.max(factor, 0.92), 1.08);
 }
+
+/** 拖曳判定門檻（像素）：指標移動未超過此距離視為點擊、不啟動平移。 */
+export const DRAG_SLOP_PX = 8;
+
+/** 判斷指標位移是否已越過拖曳門檻（用平方比較避免開根號）。 */
+export function exceedsDragSlop(
+  dx: number,
+  dy: number,
+  slop: number = DRAG_SLOP_PX,
+): boolean {
+  return dx * dx + dy * dy >= slop * slop;
+}
+
+/** 慣性甩動的起始最低速度（px/ms）；放手時低於此不觸發慣性。 */
+export const MIN_FLING_SPEED = 0.05;
+
+/** 慣性停止速度（px/ms）；衰減到此以下即停止動畫。 */
+export const INERTIA_STOP_SPEED = 0.008;
+
+/** 慣性衰減時間常數（ms）：速度每經過此毫秒數衰減為 1/e，數值越大滑得越遠。 */
+export const INERTIA_DECAY_TAU = 325;
+
+/** 速度取樣的指數平滑係數（0–1，越大越偏向最新的瞬時速度）。 */
+export const VELOCITY_BLEND_ALPHA = 0.4;
+
+/** 放手前的靜止判定（ms）：距最後一次移動超過此時間視為停住，不甩動。 */
+export const VELOCITY_IDLE_RESET_MS = 80;
+
+/** 依經過時間對速度做指數衰減（時間無關於幀率，長短幀一致）。 */
+export function decayVelocity(
+  v: number,
+  dtMs: number,
+  tau: number = INERTIA_DECAY_TAU,
+): number {
+  return v * Math.exp(-dtMs / tau);
+}
+
+/** 指數平滑混合速度取樣：回傳 prev 與 instant 的加權值（alpha 偏向 instant）。 */
+export function blendVelocity(
+  prev: number,
+  instant: number,
+  alpha: number = VELOCITY_BLEND_ALPHA,
+): number {
+  return prev * (1 - alpha) + instant * alpha;
+}

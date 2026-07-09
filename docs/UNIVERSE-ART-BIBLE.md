@@ -89,7 +89,7 @@
 | car-park 車車樂園 | 品牌橘 `#ff8c2b` | 多彩設施 `#f7a8c4` / `#ffd866` / `#b7df9b` / `#8fcde8` / `#c5b3e6` |
 | dino 恐龍島 | 叢林綠 `#8fc04f` | 火山岩 `#9a8d6e`、岩漿 `#e0573a` |
 | rescue 英雄救援隊 | 警示紅 `#e0573a` + 制服藍 `#5b9fc4` | 米白建築 |
-| ocean 未來園區 | 湖水 `#79c8c1` | 霧 `#d6e6ee`、薰衣草告示 `#c5b3e6` |
+| ocean 未來夢想島 | 湖水 `#79c8c1` | 霧 `#d6e6ee`、薰衣草告示 `#c5b3e6` |
 
 **材質明度規則**：給 3–7 歲，整體明亮、中高明度；**避免純螢光／高飽和**，維持粉彩童書調（黃金樣本即標準）。
 
@@ -158,7 +158,7 @@ multiple objects, picture frame, drop shadow box, branded characters
 - **car-park 車車樂園（＝黃金樣本，已定）**：`a small clay island amusement park with a pastel clay ferris wheel (orange frame, cabins in pink, lavender, yellow, mint, sky blue), a striped orange entrance arch, winding sandy paths, a small pond with lily pads, rounded clay trees, colorful flag bunting on little posts, and one small red toy car as the mascot,`
 - **dino 恐龍島**：`a small clay jungle island with a clay volcano and soft lava glow, ferns and rounded trees, one friendly chubby cartoon dinosaur as the centerpiece, same sandy shore and green grass base, green and earthy accents,`
 - **rescue 英雄救援隊**：`a small clay town island with a clay fire station and a watchtower with a tiny flag, two generic rounded rescue trucks, same sandy shore and green grass base, red and blue accents,`
-- **ocean 未來園區（planned）**：`an undeveloped misty clay land plot on the same sandy base, a blueprint signpost with a question-mark buoy, foggy muted teal and lavender, unfinished, sleepy,`
+- **ocean 未來夢想島（planned）**：`an undeveloped misty clay land plot on the same sandy base, a blueprint signpost with a question-mark buoy, foggy muted teal and lavender, unfinished, sleepy,`
 
 **建造中 overlay（獨立可重用）**
 ```

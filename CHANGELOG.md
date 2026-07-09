@@ -6,6 +6,11 @@
 
 ### Changed
 
+- **未來園區更名為「未來夢想島」**：僅改顯示名／文案（`id: ocean`、deep link、資產路徑不變）。
+- **樂園地圖拖曳核心重寫**：pointer pan 加拖曳門檻（slop）、rAF 批次平移、放手慣性（`prefers-reduced-motion` 關閉慣性）；公開 `MapCamera` API 不變。
+
+### Changed
+
 - **樂園地圖遨遊手感（升級宇宙樂園 P1）**：開放島兩段式構圖一致——第一次點擊即套用與 sheet 相同的 dock offset 置中，第二次只開 dock 不再 fly（消除鏡頭上跳）；右下 `＋/－` 加大 hit area／步進並釐清 aria（方向鍵維持平移）；地圖層少字化（島名略放大、狀態 pill 降權、「看看」改圖示鈕，a11y／E2E 選取字串不變）。平移核心未重寫（仍待量測）。新增 `docs/UNIVERSE-PROGRESSION-CONCEPT.md` 層次升級設計概念（本輪不實作養成）。
 
 ### Fixed

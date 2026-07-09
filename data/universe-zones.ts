@@ -91,13 +91,13 @@ export const ZONES: ZoneDef[] = [
   },
   {
     id: "ocean",
-    name: "未來園區",
+    name: "未來夢想島",
     status: "planned",
     coord: { x: 820, y: 560 },
     landmark: "🌊",
     artTile: zoneArtTilePath("ocean"),
     teaser: "海洋？太空？慢慢蒐集想法",
-    exploreNote: "這片園區還在規劃，我們先把想法收好，不急著做選擇。",
+    exploreNote: "這座島還在規劃，我們先把想法收好，不急著做選擇。",
     softLinks: [
       { label: "先聽一集故事", href: "/stories" },
       { label: "回車車樂園", href: "/" },

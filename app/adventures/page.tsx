@@ -12,7 +12,7 @@ const carParkTilePreload = getZoneArtSrcSet("car-park");
 export const metadata: Metadata = {
   title: "車車宇宙 · 樂園地圖",
   description:
-    "鳥瞰車車宇宙群島：車車樂園、恐龍島、英雄救援隊與未來園區。點島出發聽故事、玩黏土，更多園區陸續登場。",
+    "鳥瞰車車宇宙群島：車車樂園、恐龍島、英雄救援隊與未來夢想島。點島出發聽故事、玩黏土，更多島嶼陸續登場。",
   alternates: { canonical: "/adventures" },
   openGraph: {
     title: "車車宇宙 · 樂園地圖",

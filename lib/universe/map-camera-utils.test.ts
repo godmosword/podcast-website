@@ -1,11 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { MAP_STAGE } from "@/data/universe-zones";
 import {
+  DRAG_SLOP_PX,
   FIT_MARGIN,
+  INERTIA_DECAY_TAU,
   MAX_SCALE,
   MIN_SCALE,
+  blendVelocity,
   clampCamera,
   clampScale,
+  decayVelocity,
+  exceedsDragSlop,
   fitScaleFor,
   wheelZoomFactor,
 } from "./map-camera-utils";
@@ -105,5 +110,38 @@ describe("map-camera-utils", () => {
       tx: 375 / 2 - MAP_STAGE.width * scale,
       ty: 667 / 2 - MAP_STAGE.height * scale,
     });
+  });
+
+  it("exceedsDragSlop：門檻內不算拖曳、門檻外才算（含斜向）", () => {
+    expect(exceedsDragSlop(0, 0)).toBe(false);
+    expect(exceedsDragSlop(DRAG_SLOP_PX - 1, 0)).toBe(false);
+    expect(exceedsDragSlop(0, DRAG_SLOP_PX - 1)).toBe(false);
+    // 剛好等於門檻即成立（>=）
+    expect(exceedsDragSlop(DRAG_SLOP_PX, 0)).toBe(true);
+    // 斜向：3-4-5，slop=4 時位移 5 應越過
+    expect(exceedsDragSlop(3, 4, 4)).toBe(true);
+    expect(exceedsDragSlop(3, 2, 4)).toBe(false);
+  });
+
+  it("decayVelocity：指數衰減、時間越長越慢、經過 TAU 約為 1/e", () => {
+    const v = 1;
+    expect(decayVelocity(v, 0)).toBe(1);
+    expect(decayVelocity(v, INERTIA_DECAY_TAU)).toBeCloseTo(Math.exp(-1), 6);
+    // 單調遞減
+    expect(decayVelocity(v, 50)).toBeGreaterThan(decayVelocity(v, 100));
+    // 保留方向（負速度仍為負）
+    expect(decayVelocity(-2, 100)).toBeLessThan(0);
+  });
+
+  it("decayVelocity：時間無關於幀率——兩段 8ms 等同一段 16ms", () => {
+    const oneStep = decayVelocity(1, 16);
+    const twoSteps = decayVelocity(decayVelocity(1, 8), 8);
+    expect(twoSteps).toBeCloseTo(oneStep, 12);
+  });
+
+  it("blendVelocity：alpha=0 取舊值、alpha=1 取新值、中間為加權", () => {
+    expect(blendVelocity(2, 8, 0)).toBe(2);
+    expect(blendVelocity(2, 8, 1)).toBe(8);
+    expect(blendVelocity(2, 8, 0.5)).toBeCloseTo(5, 6);
   });
 });

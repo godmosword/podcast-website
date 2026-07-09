@@ -148,7 +148,7 @@ test.describe("車車宇宙樂園地圖 UX", () => {
         const dinoWatch = page.getByRole("button", { name: /恐龍島看看/ });
         const forestIsland = page.getByRole("button", { name: /森林小島，建造中/ });
         const rescueWatch = page.getByRole("button", { name: /英雄救援隊看看/ });
-        const oceanIsland = page.getByRole("button", { name: /未來園區，規劃中/ });
+        const oceanIsland = page.getByRole("button", { name: /未來夢想島，規劃中/ });
 
         expect(
           (await visibleImageTop(forestIsland)) - (await labelBottom(dinoWatch)),

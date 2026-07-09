@@ -3,10 +3,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ZONES, type ZoneCoord } from "@/data/universe-zones";
 import {
+  INERTIA_STOP_SPEED,
   MAX_SCALE,
+  MIN_FLING_SPEED,
   MIN_SCALE,
+  VELOCITY_IDLE_RESET_MS,
+  blendVelocity,
   clampCamera,
   clampScale,
+  decayVelocity,
+  exceedsDragSlop,
   fitScaleFor,
   wheelZoomFactor,
 } from "@/lib/universe/map-camera-utils";
@@ -64,6 +70,33 @@ export function useMapCamera(): MapCamera {
   const prevPinchRef = useRef<{ dist: number } | null>(null);
   const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // 單指拖曳狀態：dragging 為 false 時仍在門檻內（等同點擊候選），越過 slop 才平移。
+  const dragRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    lastX: number;
+    lastY: number;
+    dragging: boolean;
+  } | null>(null);
+
+  // rAF 批次平移：把同一幀內多次 pointermove 的增量累積，一幀只 setCam 一次。
+  const pendingPanRef = useRef({ dx: 0, dy: 0 });
+  const panRafRef = useRef<number | null>(null);
+
+  // 速度取樣與慣性：velocityRef 為放手前的平滑速度（px/ms），供 startInertia 甩動。
+  const velocityRef = useRef({ vx: 0, vy: 0 });
+  const lastSampleRef = useRef<{ x: number; y: number; t: number } | null>(null);
+  const inertiaRafRef = useRef<number | null>(null);
+
+  // 取消進行中的慣性動畫（放手甩動、或任何主動改鏡頭時呼叫）。
+  const stopInertia = useCallback(() => {
+    if (inertiaRafRef.current != null) {
+      cancelAnimationFrame(inertiaRafRef.current);
+      inertiaRafRef.current = null;
+    }
+  }, []);
+
   const clampCam = useCallback((next: Camera): Camera => {
     const { w, h } = sizeRef.current;
     return clampCamera(next, w, h);
@@ -71,6 +104,7 @@ export function useMapCamera(): MapCamera {
 
   const zoomAt = useCallback(
     (factor: number, focusX: number, focusY: number) => {
+      stopInertia();
       setCam((c) => {
         const ns = clampScale(c.scale * factor);
         const realFactor = ns / c.scale;
@@ -79,7 +113,7 @@ export function useMapCamera(): MapCamera {
         return clampCam({ scale: ns, tx, ty });
       });
     },
-    [clampCam],
+    [clampCam, stopInertia],
   );
 
   const panBy = useCallback(
@@ -89,8 +123,53 @@ export function useMapCamera(): MapCamera {
     [clampCam],
   );
 
+  // 把本幀累積的平移增量沖出（一幀一次 setCam），並清空待處理值。
+  const flushPan = useCallback(() => {
+    panRafRef.current = null;
+    const { dx, dy } = pendingPanRef.current;
+    pendingPanRef.current = { dx: 0, dy: 0 };
+    if (dx === 0 && dy === 0) return;
+    panBy(dx, dy);
+  }, [panBy]);
+
+  // 累積平移增量，並在尚未排程時排一幀 rAF（rAF 批次，避免每次 pointermove 都 setState）。
+  const schedulePan = useCallback(
+    (dx: number, dy: number) => {
+      pendingPanRef.current.dx += dx;
+      pendingPanRef.current.dy += dy;
+      if (panRafRef.current == null) {
+        panRafRef.current = requestAnimationFrame(flushPan);
+      }
+    },
+    [flushPan],
+  );
+
+  // 放手後的慣性甩動：以放手前速度為初速，逐幀依經過時間指數衰減，低於停止速度即結束。
+  const startInertia = useCallback(() => {
+    if (reduced) return;
+    let vx = velocityRef.current.vx;
+    let vy = velocityRef.current.vy;
+    if (Math.hypot(vx, vy) < MIN_FLING_SPEED) return;
+    let lastT = performance.now();
+    const step = (now: number) => {
+      // 夾住長幀（分頁切回／掉幀）避免一次跳一大段。
+      const dt = Math.min(now - lastT, 32);
+      lastT = now;
+      panBy(vx * dt, vy * dt);
+      vx = decayVelocity(vx, dt);
+      vy = decayVelocity(vy, dt);
+      if (Math.hypot(vx, vy) < INERTIA_STOP_SPEED) {
+        inertiaRafRef.current = null;
+        return;
+      }
+      inertiaRafRef.current = requestAnimationFrame(step);
+    };
+    inertiaRafRef.current = requestAnimationFrame(step);
+  }, [panBy, reduced]);
+
   const flyTo = useCallback(
     (coord: ZoneCoord, targetScale?: number, options?: FlyToOptions) => {
+      stopInertia();
       setCam((c) => {
         const { w, h } = sizeRef.current;
         if (w === 0 || h === 0) return c;
@@ -108,7 +187,7 @@ export function useMapCamera(): MapCamera {
         FLY_DURATION_MS,
       );
     },
-    [clampCam, reduced],
+    [clampCam, reduced, stopInertia],
   );
 
   const fitScale = useCallback((): number => {
@@ -200,6 +279,9 @@ export function useMapCamera(): MapCamera {
   useEffect(() => {
     return () => {
       if (animTimerRef.current) clearTimeout(animTimerRef.current);
+      if (panRafRef.current != null) cancelAnimationFrame(panRafRef.current);
+      if (inertiaRafRef.current != null)
+        cancelAnimationFrame(inertiaRafRef.current);
     };
   }, []);
 
@@ -207,25 +289,45 @@ export function useMapCamera(): MapCamera {
     (e: React.PointerEvent<HTMLDivElement>) => {
       if ((e.target as Element).closest("button")) return;
 
-      const panEligible =
-        e.pointerType !== "mouse" || e.button === 0;
-      if (panEligible) {
-        e.currentTarget.setPointerCapture?.(e.pointerId);
-        pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
-        if (pointersRef.current.size === 2) prevPinchRef.current = null;
+      // 任何新的指標接觸都先中止慣性甩動（可立即抓住畫面）。
+      stopInertia();
+
+      const panEligible = e.pointerType !== "mouse" || e.button === 0;
+      if (!panEligible) return;
+
+      e.currentTarget.setPointerCapture?.(e.pointerId);
+      pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+      if (pointersRef.current.size >= 2) {
+        // 進入雙指 pinch：放棄單指拖曳候選，重置 pinch 基準。
+        dragRef.current = null;
+        prevPinchRef.current = null;
+        return;
       }
+
+      // 單指：先進「點擊候選」狀態，越過 slop 才真正平移。
+      dragRef.current = {
+        pointerId: e.pointerId,
+        startX: e.clientX,
+        startY: e.clientY,
+        lastX: e.clientX,
+        lastY: e.clientY,
+        dragging: false,
+      };
+      velocityRef.current = { vx: 0, vy: 0 };
+      lastSampleRef.current = { x: e.clientX, y: e.clientY, t: performance.now() };
     },
-    [],
+    [stopInertia],
   );
 
   const onPointerMove = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
       const pointers = pointersRef.current;
-      const prev = pointers.get(e.pointerId);
-      if (!prev) return;
+      if (!pointers.has(e.pointerId)) return;
       const cur = { x: e.clientX, y: e.clientY };
       pointers.set(e.pointerId, cur);
 
+      // 雙指 pinch 縮放：沿用原本以雙指距離比值 zoomAt 的邏輯（不走 rAF 批次）。
       if (pointers.size >= 2) {
         const pts = [...pointers.values()];
         const a = pts[0]!;
@@ -239,19 +341,84 @@ export function useMapCamera(): MapCamera {
           zoomAt(dist / pp.dist, midX, midY);
         }
         prevPinchRef.current = { dist };
-      } else {
-        panBy(cur.x - prev.x, cur.y - prev.y);
+        return;
       }
+
+      const drag = dragRef.current;
+      if (!drag || drag.pointerId !== e.pointerId) return;
+
+      // 尚未越過 slop：只累積判定、不平移，避免點島／點海的微幅抖動被當拖曳。
+      if (!drag.dragging) {
+        if (!exceedsDragSlop(cur.x - drag.startX, cur.y - drag.startY)) return;
+        drag.dragging = true;
+        // 越過門檻的當下把基準點與速度取樣重置到目前位置，
+        // 避免把門檻內的位移一次補回造成畫面跳一下。
+        drag.lastX = cur.x;
+        drag.lastY = cur.y;
+        lastSampleRef.current = { x: cur.x, y: cur.y, t: performance.now() };
+        return;
+      }
+
+      const dx = cur.x - drag.lastX;
+      const dy = cur.y - drag.lastY;
+      drag.lastX = cur.x;
+      drag.lastY = cur.y;
+      schedulePan(dx, dy);
+
+      // 更新平滑速度（px/ms），供放手後的慣性使用。
+      const now = performance.now();
+      const sample = lastSampleRef.current;
+      if (sample) {
+        const dt = now - sample.t;
+        if (dt > 0) {
+          velocityRef.current = {
+            vx: blendVelocity(velocityRef.current.vx, (cur.x - sample.x) / dt),
+            vy: blendVelocity(velocityRef.current.vy, (cur.y - sample.y) / dt),
+          };
+        }
+      }
+      lastSampleRef.current = { x: cur.x, y: cur.y, t: now };
     },
-    [panBy, zoomAt],
+    [schedulePan, zoomAt],
   );
 
   const endPointer = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
+    (e: React.PointerEvent<HTMLDivElement>, allowInertia: boolean) => {
       pointersRef.current.delete(e.pointerId);
       if (pointersRef.current.size < 2) prevPinchRef.current = null;
+
+      const drag = dragRef.current;
+      if (!drag || drag.pointerId !== e.pointerId) return;
+      const wasDragging = drag.dragging;
+      dragRef.current = null;
+
+      // 先把本幀待處理的平移同步沖出，確保放手時位置與慣性初值銜接、不掉一格。
+      if (panRafRef.current != null) {
+        cancelAnimationFrame(panRafRef.current);
+        panRafRef.current = null;
+        flushPan();
+      }
+
+      // 只有真的拖曳過、且放手前仍在移動（非停住）才啟動慣性。
+      if (allowInertia && wasDragging) {
+        const idle = performance.now() - (lastSampleRef.current?.t ?? 0);
+        if (idle <= VELOCITY_IDLE_RESET_MS) startInertia();
+      }
+      velocityRef.current = { vx: 0, vy: 0 };
+      lastSampleRef.current = null;
     },
-    [],
+    [flushPan, startInertia],
+  );
+
+  const onPointerUp = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => endPointer(e, true),
+    [endPointer],
+  );
+
+  // pointercancel（瀏覽器接管手勢等）：結束拖曳但不甩動，避免非預期慣性。
+  const onPointerCancel = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => endPointer(e, false),
+    [endPointer],
   );
 
   return {
@@ -265,8 +432,8 @@ export function useMapCamera(): MapCamera {
       ref: setViewportEl,
       onPointerDown,
       onPointerMove,
-      onPointerUp: endPointer,
-      onPointerCancel: endPointer,
+      onPointerUp,
+      onPointerCancel,
     },
     flyTo,
     reset,
