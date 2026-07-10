@@ -61,10 +61,10 @@
 
 | Task | 狀態 | 主要產出 | 預計影響檔案 | 驗證 | Commit hash |
 |------|------|----------|--------------|------|-------------|
-| GEO-P1 單集頁瘦身 | 完成 | 首屏只留定義式摘要；精簡 3 點大綱 + 完整大綱／VTT 收合；角色一行摘要 + 收合；家長延伸收合並連 `/for-parents`；FAQ 可見 1 題其餘收合；JSON-LD FAQ 維持完整 | Modify: `app/story/[slug]/page.tsx`, `page.module.css`, `lib/story-geo.ts`, `lib/story-geo.test.ts` | `npm test` + `npm run build` + `npx tsc --noEmit` passed | `58ffb8e` |
-| GEO-P2 離頁匯流 | 完成 | llms-full 每集加大綱要點與 VTT 連結；單集 metadata `alternates.types.text/vtt`；主題／車種頁短導言 + FAQPage JSON-LD | Modify: `scripts/generate-llms-full.ts`, `lib/story-metadata.ts`, `app/topic/[tag]/page.tsx`, `app/vehicles/[vehicle]/page.tsx`; Create: `lib/topic-geo.ts`, `lib/vehicle-geo.ts` + tests | `npm test` + `npm run build` + `npx tsc --noEmit` passed | `58ffb8e` |
-| GEO-P3 欄位契約 | 完成 | `docs/GEO-CONTENT-CONTRACT.md`；`lib/geo-content-contract.ts` 通路常數與重複文案檢查 + 測試 | Create: `docs/GEO-CONTENT-CONTRACT.md`, `lib/geo-content-contract.ts`, `lib/geo-content-contract.test.ts`; Modify: `data/content.ts`（JSDoc 連結） | `npm test -- lib/geo-content-contract.test.ts` passed | `58ffb8e` |
-| GEO-P4 量測 | 完成 | `docs/geo-checklist.md` 補 llms-full、主題／車種 schema、單集預設可見字數、`<details>` 收合檢查 | Modify: `docs/geo-checklist.md` | 人工清單可執行 | `58ffb8e` |
+| GEO-P1 單集頁瘦身 | 完成 | 首屏只留定義式摘要；精簡 3 點大綱 + 完整大綱／VTT 收合；角色一行摘要 + 收合；家長延伸收合並連 `/for-parents`；FAQ 可見 1 題其餘收合；JSON-LD FAQ 維持完整 | Modify: `app/story/[slug]/page.tsx`, `page.module.css`, `lib/story-geo.ts`, `lib/story-geo.test.ts` | `npm test` + `npm run build` + `npx tsc --noEmit` passed | `a34f5fe` |
+| GEO-P2 離頁匯流 | 完成 | llms-full 每集加大綱要點與 VTT 連結；單集 metadata `alternates.types.text/vtt`；主題／車種頁短導言 + FAQPage JSON-LD | Modify: `scripts/generate-llms-full.ts`, `lib/story-metadata.ts`, `app/topic/[tag]/page.tsx`, `app/vehicles/[vehicle]/page.tsx`; Create: `lib/topic-geo.ts`, `lib/vehicle-geo.ts` + tests | `npm test` + `npm run build` + `npx tsc --noEmit` passed | `a34f5fe` |
+| GEO-P3 欄位契約 | 完成 | `docs/GEO-CONTENT-CONTRACT.md`；`lib/geo-content-contract.ts` 通路常數與重複文案檢查 + 測試 | Create: `docs/GEO-CONTENT-CONTRACT.md`, `lib/geo-content-contract.ts`, `lib/geo-content-contract.test.ts`; Modify: `data/content.ts`（JSDoc 連結） | `npm test -- lib/geo-content-contract.test.ts` passed | `a34f5fe` |
+| GEO-P4 量測 | 完成 | `docs/geo-checklist.md` 補 llms-full、主題／車種 schema、單集預設可見字數、`<details>` 收合檢查 | Modify: `docs/geo-checklist.md` | 人工清單可執行 | `a34f5fe` |
 
 ## 名單收集 × 內容再利用（2026-07-03 品牌盤點）
 
