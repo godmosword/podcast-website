@@ -52,11 +52,11 @@
 - 不進 RSS show notes
 - 不與 `familyActivity.question` 逐字相同（見 `lib/geo-content-contract.ts` 迴歸測試）
 
-## `parentGuide`（REUSE-2 待實作）
+## `parentGuide`（REUSE-2 已上線）
 
 **定位：** 較完整的家長共讀指引（對標 Circle Round show notes），供想深挖的家長閱讀。
 
-**建議型別（實作前不寫入 `Story`，先放 sidecar）：**
+**資料來源：** `data/parent-guides.ts` sidecar，於 `data/content.ts` `enrichStory()` 合併。
 
 ```ts
 type ParentGuide = {
@@ -78,7 +78,7 @@ type ParentGuide = {
 | 可見性 | 常駐小卡片 | 收合區 |
 | 重複規則 | 若兩者並存，`familyActivity.question` 不得與 `parentGuide.summary`／`prompts` 任一逐字相同 |
 
-**REUSE-2 開工條件：** 本文件發布 + `lib/geo-content-contract.test.ts` 全綠。
+**REUSE-2 開工條件：** 本文件 + `components/story/ShowNotes.tsx` 已上線；新增集數請補 sidecar 並跑 `data/parent-guides.test.ts`。
 
 ## 程式錨點
 

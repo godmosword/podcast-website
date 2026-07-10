@@ -66,6 +66,16 @@
 | GEO-P3 欄位契約 | 完成 | `docs/GEO-CONTENT-CONTRACT.md`；`lib/geo-content-contract.ts` 通路常數與重複文案檢查 + 測試 | Create: `docs/GEO-CONTENT-CONTRACT.md`, `lib/geo-content-contract.ts`, `lib/geo-content-contract.test.ts`; Modify: `data/content.ts`（JSDoc 連結） | `npm test -- lib/geo-content-contract.test.ts` passed | `a34f5fe` |
 | GEO-P4 量測 | 完成 | `docs/geo-checklist.md` 補 llms-full、主題／車種 schema、單集預設可見字數、`<details>` 收合檢查 | Modify: `docs/geo-checklist.md` | 人工清單可執行 | `a34f5fe` |
 
+### GEO 收尾（2026-07-10）
+
+| Task | 狀態 | 主要產出 | 驗證 | Commit hash |
+|------|------|----------|------|-------------|
+| W27-1 for-parents 佔位清除 | 完成（待 commit） | 資料層直出數字、定稿年齡與同步文案 | `lib/for-parents.test.ts` | — |
+| geo-audit 快照 | 完成（待 commit） | `docs/geo-audit.md` 頂部 2026-07-10 摘要 | — | — |
+| GEO baseline | 完成（待 commit） | `docs/metrics/GEO-baseline-2026-07-10.md` | 本機 test/build/verify | — |
+| REUSE-2 parentGuide | 完成（待 commit） | sidecar + ShowNotes | `data/parent-guides.test.ts` | — |
+| SEO polish | 完成（待 commit） | `/legal`、`/topic` canonical；全集 ageRange 預設 | `npm test` | — |
+
 ## 名單收集 × 內容再利用（2026-07-03 品牌盤點）
 
 > **Gate：** 本段經人工確認後才開始改 code。每個 Task 完成後單獨 commit，訊息格式 `brand: task-N <描述>`，hash 回填本段。
@@ -78,8 +88,8 @@
 | LIST-1 LINE OA CTA | BLOCKED：等 LINE OA | env-gated LINE 加好友 CTA（`NEXT_PUBLIC_LINE_OA_URL` 未設即隱藏，沿用 `visibleSocials()` 空字串隱藏模式）；掛頁尾／單集頁 `SubscriptionCTA` 旁／landing／`/subscribe` | Modify: `lib/social.ts`（`SocialIcon` 加 `"line"`）、`lib/connect-icons.tsx`、`components/SiteFooter.tsx`、`app/story/[slug]/page.tsx`; Create: `components/LineCTA.tsx` | 設/不設 env 切換顯隱；`npm test` + `npm run build` | — |
 | LIST-2 新集通知 email 訂閱 | 可開工：隱私 gate 已解 | 複製 zone-wish 技術棧（zod + rate limit + Neon + DB 未設降級）；`subscribers` 表 `lower(email)` unique + `ON CONFLICT DO NOTHING`（冪等、防枚舉）；簡單收集 + 隱私說明（「僅用於新集數通知」），不做 double opt-in；`/legal#privacy` 已涵蓋 analytics／localStorage（`a844f20`），實作時同步掛 privacy link | Create: `scripts/migrations/002_subscribers.sql`、`lib/subscribe-schema.ts`、`lib/subscribe-db.ts`、`app/api/subscribe/route.ts`、`components/SubscribeForm.tsx`、`app/subscribe/page.tsx`（範本：`app/api/zone-wish/route.ts`、`ZoneWishForm.tsx`） | curl：無 `DATABASE_URL` 降級、POST 201、重複 email 201、429 rate limit；`npm test` + `npm run build` | — |
 | LIST-3 分析事件 | 待 LIST-1/2 掛點 | `trackSubscribeSubmit(source)`、`trackLineCtaClick(source)`，走 `safeTrack`、無 PII（比照 `trackUniverseWishSubmit`） | Modify: `lib/analytics.ts` | 本機點擊確認事件發送 | — |
-| REUSE-1 校對字幕採用檢查 | 可開工 | 確認 backfill 管線優先讀 `data/subtitles/_proofread/`；若否修正並對 ep-11~17 重跑 `npm run backfill:captions`；跑 `npm run verify:episodes` | Modify（視檢查結果）: `scripts/lib/illustrate-core.ts`; Data: `data/apple-synced.json` | `verify:episodes` 全過；抽查 ep-16 captions 用校對版文字 | — |
-| REUSE-2 家長共讀指引呈現（= P2 `parentGuide`） | 可開工：契約已定 | `Story` 加選填 `parentGuide` 欄位 + `ShowNotes` 區塊（「這集可以聊什麼」+ 延伸提問／小活動）；預設收合；遵守 `docs/GEO-CONTENT-CONTRACT.md` | Modify: `data/content.ts`、`app/story/[slug]/page.tsx`; Create: `components/story/ShowNotes.tsx` | `lib/geo-content-contract.test.ts` + view-source SSR；`npm test` + `npm run build` | — |
+| REUSE-1 校對字幕採用檢查 | 完成 | 確認字幕正文在 `data/subtitles/<slug>.json`、校對標記在 `_proofread/`；`verify:episodes` 全過 | `npm run verify:episodes` passed；見 `docs/metrics/GEO-baseline-2026-07-10.md` | — |
+| REUSE-2 家長共讀指引呈現（= P2 `parentGuide`） | 完成（待 commit） | `data/parent-guides.ts` + `ShowNotes` 收合區（ep-1、ep-5 試點）；`enrichStory` 合併 | `data/parent-guides.test.ts` + `npm test` + `npm run build` | — |
 | REUSE-3 YouTube 整集影片匯出 | 完成 `d9a00fd`（fix 至 `1365fc2`） | 本機 CLI `npm run export:video -- <slug>`：1920×1080 整集 mp4；`data/scenes` 換頁 + `data/subtitles` 原始逐句 ASS burn-in（`jf-openhuninn-2.1`）；`export/video/<slug>/` + manifest（gitignore）；9:16 Shorts 留二期 | Create: `scripts/lib/export-video-core.ts`、`scripts/export-video-assets.ts`、`docs/VIDEO-EXPORT.md`; Modify: `package.json`、`.gitignore` | `export:video -- ep-17`（ep-17 7:15 mp4 驗證）；`npm test -- export-video-core` | `1365fc2` |
 
 ### 待使用者提供（不擋開發）
@@ -100,8 +110,8 @@
 
 > 首份週報產出，訊號驅動（/for-parents 實測、heuristics 掃描、TODOS 停滯項）。決策記錄請填 proposals 檔底部。
 
-### W27-1 清除 /for-parents 全部「[待確認]」佔位文案　`content · S · 無`　〔review+geo〕
-正式站 HTML 實測渲染 20+ 個「[待確認：17 集]」等字樣給家長。集數/角色數/車種數本就來自資料層（`lib/for-parents.ts:28-68`），移除包裝直出；「約 3–7 歲」「每 15 分鐘」兩個人工欄位定稿後寫死。驗收：prod grep「待確認」=0、數字與 `storiesByNewest()` 一致、FAQPage Rich Results 無 error。
+### W27-1 清除 /for-parents 全部「[待確認]」佔位文案　`content · S · 無`　〔review+geo〕 ✅
+集數／角色／車種直出資料層；適合年齡「約 3–7 歲」、同步「每 15 分鐘檢查 Apple Podcast RSS」定稿。驗收：`lib/for-parents.test.ts` 無「待確認」；部署後 prod grep=0。
 
 ### W27-2 許願表單補隱私說明句 + footer 觸控目標　`trust · S · 無`　〔review+a11y〕
 `ZoneWishForm` 收 email 與自由文字卻無隱私句（`d9524c3` 剛擴充 story 投稿，風險放大）：送出鈕下加家長向說明、message placeholder 提示勿含個資；順帶 footer「節目數據」「使用條款」padding 補到 ≥44px（收斂「小項 polish」同條目）。不動 API/schema。

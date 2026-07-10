@@ -50,7 +50,7 @@
 
 ## 尚未有、P3 後續可接
 
-- 每集 `parentGuide`（REUSE-2，BLOCKED）
+- 每集 `parentGuide`（REUSE-2，`data/parent-guides.ts` + `ShowNotes` 收合區）
 - 跨裝置帳號同步
 - 遊戲 session 時間戳（無法做真「本週」統計，目前用累積摘要）
 - 家長閘門（STEM-P3 付費前算術題）

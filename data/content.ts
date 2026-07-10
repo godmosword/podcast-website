@@ -3,12 +3,16 @@ import appleSynced from "./apple-synced.json";
 import { episodeColorForSlug } from "./episode-colors";
 import { getCharactersForStory } from "./characters";
 import { getFamilyActivity, type FamilyActivity } from "./family-activities";
+import type { ParentGuide } from "@/lib/geo-content-contract";
+import { getParentGuide } from "./parent-guides";
 import { getReflectionPrompt } from "./reflection-prompts";
 import { getStoryZoneId } from "./story-zones";
 import { manualStories, type ManualStory } from "./stories";
 import { canonicalStorySlug } from "@/lib/story-slug-aliases";
 import { storyCoverPath } from "@/lib/story-utils";
 import type { ZoneId } from "./universe-zones";
+
+const DEFAULT_STORY_AGE_RANGE = "約 3–7 歲";
 
 type StoryBase = {
   slug: string;
@@ -40,6 +44,8 @@ export type Story = StoryBase & {
   };
   /** 聽完聊一聊：親子延伸活動（sidecar，見 data/family-activities.ts；通路契約見 docs/GEO-CONTENT-CONTRACT.md） */
   familyActivity?: FamilyActivity;
+  /** 家長共讀指引（sidecar，見 data/parent-guides.ts；預設收合 ShowNotes） */
+  parentGuide?: ParentGuide;
   /** 故事發生的樂園地圖 zone（sidecar，見 data/story-zones.ts） */
   zoneId?: ZoneId;
 };
@@ -88,14 +94,17 @@ function enrichStory(raw: RawStory): Story {
   const reflectionPrompt =
     merged.reflectionPrompt ?? getReflectionPrompt(merged.slug);
   const familyActivity = getFamilyActivity(merged.slug);
+  const parentGuide = getParentGuide(merged.slug);
   const zoneId = getStoryZoneId(merged.slug);
   return {
     ...merged,
     kind: "story",
     color: episodeColorForSlug(merged.slug),
+    ageRange: merged.ageRange ?? DEFAULT_STORY_AGE_RANGE,
     characterIds: characters.map((c) => c.id),
     reflectionPrompt,
     ...(familyActivity ? { familyActivity } : {}),
+    ...(parentGuide ? { parentGuide } : {}),
     ...(zoneId ? { zoneId } : {}),
   };
 }

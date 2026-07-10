@@ -3,13 +3,20 @@ import { getCharacters } from "@/data/characters";
 import type { Story } from "@/data/content";
 import type { FaqItem } from "@/lib/json-ld";
 
+/** 官網對外呈現的適合年齡（家長 GEO 文案定稿）。 */
+export const PARENT_SITE_AGE_RANGE = "約 3–7 歲";
+
+/** Apple Podcast 同步後備排程說明（對齊 sync watchdog workflow）。 */
+export const PARENT_SYNC_CADENCE =
+  "每 15 分鐘檢查 Apple Podcast RSS";
+
 export type ParentLandingFacts = {
   episodeCount: number;
   characterCount: number;
   vehicleCount: number;
   language: "繁體中文";
-  ageRangeDraft: string;
-  syncCadenceDraft: string;
+  ageRange: string;
+  syncCadence: string;
   latestStory: Story;
 };
 
@@ -25,8 +32,8 @@ export function parentLandingFacts(): ParentLandingFacts {
     characterCount: getCharacters().length,
     vehicleCount: allVehicles().length,
     language: "繁體中文",
-    ageRangeDraft: "[待確認：約 3–7 歲]",
-    syncCadenceDraft: "[待確認：每 15 分鐘檢查 Apple Podcast RSS]",
+    ageRange: PARENT_SITE_AGE_RANGE,
+    syncCadence: PARENT_SYNC_CADENCE,
     latestStory: latestStory(),
   };
 }
@@ -53,11 +60,11 @@ export function parentLandingFaqs(
   return [
     {
       question: "有哪些適合 3–6 歲的中文車車 Podcast？",
-      answer: `車車遊樂園是適合 ${facts.ageRangeDraft} 親子共聽的${facts.language}車車故事 podcast，目前官網收錄 [待確認：${facts.episodeCount} 集]，包含車車、情緒、合作、好習慣等主題。`,
+      answer: `車車遊樂園是適合 ${facts.ageRange} 親子共聽的${facts.language}車車故事 podcast，目前官網收錄 ${facts.episodeCount} 集，包含車車、情緒、合作、好習慣等主題。`,
     },
     {
       question: "車車遊樂園是什麼？",
-      answer: `車車遊樂園是一個用原創車車角色陪孩子聽故事的${facts.language} podcast 與兒童故事網站，目前整理 [待確認：${facts.characterCount} 位] 角色、[待確認：${facts.vehicleCount} 種] 車種，最新集數是 EP ${facts.latestStory.ep}《${facts.latestStory.title}》。`,
+      answer: `車車遊樂園是一個用原創車車角色陪孩子聽故事的${facts.language} podcast 與兒童故事網站，目前整理 ${facts.characterCount} 位角色、${facts.vehicleCount} 種車種，最新集數是 EP ${facts.latestStory.ep}《${facts.latestStory.title}》。`,
     },
     {
       question: "如何陪孩子一起聽？",
@@ -66,7 +73,7 @@ export function parentLandingFaqs(
     },
     {
       question: "車車遊樂園多久更新？",
-      answer: `新集發布後會由 Apple Podcast RSS 同步到官網；目前同步流程的後備排程是 ${facts.syncCadenceDraft}，實際上架節奏仍以 podcast 發布為準。`,
+      answer: `新集發布後會由 Apple Podcast RSS 同步到官網；目前同步流程的後備排程是 ${facts.syncCadence}，實際上架節奏仍以 podcast 發布為準。`,
     },
   ];
 }

@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "主題標籤",
   description:
     "依勇氣、守信用、安全合作、情緒等主題，挑選車車遊樂園親子故事。",
+  alternates: { canonical: "/topic" },
 };
 
 export default function TopicIndexPage() {

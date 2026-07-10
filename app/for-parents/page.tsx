@@ -53,7 +53,7 @@ export default function ForParentsPage() {
         <dl className={styles.facts}>
           <div>
             <dt>目前集數</dt>
-            <dd>[待確認：{facts.episodeCount} 集]</dd>
+            <dd>{facts.episodeCount} 集</dd>
           </div>
           <div>
             <dt>語言</dt>
@@ -61,11 +61,11 @@ export default function ForParentsPage() {
           </div>
           <div>
             <dt>適合年齡</dt>
-            <dd>{facts.ageRangeDraft}</dd>
+            <dd>{facts.ageRange}</dd>
           </div>
           <div>
             <dt>同步檢查</dt>
-            <dd>{facts.syncCadenceDraft}</dd>
+            <dd>{facts.syncCadence}</dd>
           </div>
         </dl>
       </section>

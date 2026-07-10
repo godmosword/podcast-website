@@ -24,6 +24,7 @@ import PlayButton from "@/components/PlayButton";
 import ShareButton from "@/components/ShareButton";
 import RelatedStories from "@/components/RelatedStories";
 import FamilyActivityCard from "@/components/story/FamilyActivityCard";
+import ShowNotes from "@/components/story/ShowNotes";
 import ZoneBadge from "@/components/story/ZoneBadge";
 import ReflectionPrompt from "@/components/story/ReflectionPrompt";
 import SubscriptionCTA from "@/components/SubscriptionCTA";
@@ -147,6 +148,10 @@ export default async function StoryDetailPage({
             familyActivity={story.familyActivity}
             accent={story.color}
           />
+        )}
+
+        {story.parentGuide && (
+          <ShowNotes slug={story.slug} parentGuide={story.parentGuide} />
         )}
 
         <section className={styles.contentSection} aria-labelledby="outline-heading">

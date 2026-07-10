@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "使用條款與免責聲明",
   description:
     "車車遊樂園官方網站的版權說明、節目內容使用限制、第三方服務與字型授權。",
+  alternates: { canonical: "/legal" },
 };
 
 export default function LegalPage() {

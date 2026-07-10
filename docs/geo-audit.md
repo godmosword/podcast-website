@@ -1,4 +1,27 @@
-# GEO 現況稽核
+# GEO 現況稽核 — 2026-07-10 快照
+
+> 本段為 **post GEO phase-2** 更新；下方 2026-07-02 全文保留作歷史對照。  
+> 驗證：`npm test`、`npm run build`、production baseline 見 `docs/metrics/GEO-baseline-2026-07-10.md`。
+
+## 摘要（2026-07-10）
+
+| 類別 | 狀態 |
+|------|------|
+| AI crawler | ✅ `robots.ts` 檢索型 allow、訓練型 disallow |
+| llms.txt / llms-full | ✅ prebuild 自動產生 |
+| Schema | ✅ Organization/WebSite、PodcastEpisode、FAQPage、角色頁 |
+| 單集頁 | ✅ 低干擾可見層 + `<details>` + 完整 JSON-LD |
+| `/for-parents` | ✅ 無 `[待確認]`（W27-1） |
+| 主題／車種聚合 | ✅ 短導言 + FAQPage JSON-LD |
+| `parentGuide` | ✅ sidecar + ShowNotes（ep-1、ep-5 試點） |
+| `ageRange` | ✅ `enrichStory` 預設「約 3–7 歲」 |
+| 人工 baseline | ⏳ AI prompt 實測待營運填寫 |
+
+**故事基準：** `getStories().length` 以 build 時資料層為準（≥17 集）。
+
+---
+
+# GEO 現況稽核（2026-07-02 歷史）
 
 日期：2026-07-02  
 範圍：Next.js App Router source、build route output、robots/sitemap metadata routes、repo 內 Vercel / middleware 設定。  

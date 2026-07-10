@@ -21,4 +21,10 @@ describe("story content", () => {
     const sorted = storiesByNewest();
     expect(sorted[0].ep).toBeGreaterThanOrEqual(sorted[1]?.ep ?? 0);
   });
+
+  it("每集 enrich 後皆有 ageRange", () => {
+    for (const story of getStories()) {
+      expect(story.ageRange, story.slug).toBeTruthy();
+    }
+  });
 });

@@ -15,11 +15,13 @@ describe("parentLandingFacts", () => {
     expect(facts.characterCount).toBe(getCharacters().length);
     expect(facts.latestStory.slug).toBe(getStories().sort((a, b) => b.ep - a.ep)[0].slug);
     expect(facts.language).toBe("繁體中文");
+    expect(facts.ageRange).toBe("約 3–7 歲");
+    expect(facts.syncCadence).toContain("15 分鐘");
   });
 });
 
 describe("parentLandingFaqs", () => {
-  it("包含家長常問的目標查詢與待確認數字", () => {
+  it("包含家長常問的目標查詢與資料層直出數字", () => {
     const facts = parentLandingFacts();
     const faqs = parentLandingFaqs(facts);
 
@@ -31,8 +33,11 @@ describe("parentLandingFaqs", () => {
         "如何陪孩子一起聽？",
       ]),
     );
-    expect(faqs[0].answer).toContain(`[待確認：${facts.episodeCount} 集]`);
-    expect(faqs[0].answer).toContain("[待確認：約 3–7 歲]");
+    expect(faqs[0].answer).toContain(`${facts.episodeCount} 集`);
+    expect(faqs[0].answer).toContain("約 3–7 歲");
+    expect(faqs[0].answer).not.toContain("待確認");
+    expect(faqs[1].answer).toContain(`${facts.characterCount} 位角色`);
+    expect(faqs[1].answer).not.toContain("待確認");
   });
 });
 
