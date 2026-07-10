@@ -4,10 +4,6 @@ import { describe, expect, it } from "vitest";
 
 const ROOT = process.cwd();
 
-function source(path: string): string {
-  return readFileSync(join(ROOT, path), "utf8");
-}
-
 function walk(path: string): string[] {
   return readdirSync(path, { withFileTypes: true }).flatMap((entry) => {
     const child = join(path, entry.name);

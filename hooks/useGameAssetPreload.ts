@@ -24,20 +24,22 @@ export function useGameAssetPreload(
   const manualStart = options.manualStart ?? false;
   const gate = useGameLoadGate({ manualStart, loadTimeoutMs: 15_000 });
 
+  const { phase: gatePhase, attempt: gateAttempt, markReady } = gate;
+
   useEffect(() => {
-    if (gate.phase !== "loading") return;
+    if (gatePhase !== "loading") return;
     let cancelled = false;
     if (isGameAssetsReady(gameId)) {
-      gate.markReady();
+      markReady();
       return;
     }
     preloadGameAssets(gameId).then(() => {
-      if (!cancelled) gate.markReady();
+      if (!cancelled) markReady();
     });
     return () => {
       cancelled = true;
     };
-  }, [gameId, gate.phase, gate.attempt, gate.markReady]);
+  }, [gameId, gatePhase, gateAttempt, markReady]);
 
   const ready = gate.phase === "ready";
 
