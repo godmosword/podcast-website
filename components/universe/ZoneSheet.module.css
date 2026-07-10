@@ -265,6 +265,21 @@
   outline-offset: 2px;
 }
 
+/* 「給爸爸媽媽」外層 disclosure：收合家長內容（安心資訊 + 許願），孩子首屏不看到 */
+.parentDisclosure {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.parentPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  border-top: 1.5px solid var(--line);
+  padding-top: 0.65rem;
+}
+
 .wishDisclosure {
   display: flex;
   flex-direction: column;
@@ -321,30 +336,67 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.5rem;
 }
 
-.storyLink {
-  display: block;
-  padding: 0.45rem 0.65rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.9rem;
-  font-weight: 700;
+/* 大圖卡：emoji 當視覺主體，整卡可點，觸控高度 >=64px */
+.storyCard {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 64px;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius-md);
   text-decoration: none;
   color: var(--ink);
   background: color-mix(in srgb, var(--landing-brand) 14%, var(--card));
   border: 2px solid color-mix(in srgb, var(--landing-brand) 28%, transparent);
 }
 
-/* 已聽完標記：列表尾端小星，與島嶼星章同語彙 */
-.storyDone {
-  margin-left: 6px;
-  font-size: 0.85em;
+.storyCard:hover {
+  background: color-mix(in srgb, var(--landing-brand) 22%, var(--card));
 }
 
-.storyLink:focus-visible {
+.storyCard:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+.storyCardEmoji {
+  flex-shrink: 0;
+  width: 2.6rem;
+  font-size: 2.1rem;
+  line-height: 1;
+  text-align: center;
+}
+
+.storyCardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.storyCardEp {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--landing-brand-ink);
+}
+
+.storyCardTitle {
+  font-size: 0.92rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 已聽完標記：卡片右側大星，與島嶼星章同語彙 */
+.storyCardDone {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 1.3rem;
 }
 
 .storiesMore {

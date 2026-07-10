@@ -33,12 +33,14 @@ export default function ZoneSheet({
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const [wishOpen, setWishOpen] = useState(false);
+  const [parentOpen, setParentOpen] = useState(false);
   const open = zone !== null;
 
   useFocusTrap(open, panelRef, { initialFocus: "container" });
 
   useEffect(() => {
     setWishOpen(false);
+    setParentOpen(false);
   }, [zone?.id]);
 
   useEffect(() => {
@@ -55,8 +57,11 @@ export default function ZoneSheet({
   const meta = ZONE_STATUS_META[zone.status];
   const isCarPark = (zone.subSegmentIds?.length ?? 0) > 0;
   const carParkLinks = isCarPark ? getCarParkLinks() : [];
+  const primaryCarParkLinks = carParkLinks.filter((link) => link.href === "/stories");
+  const secondaryCarParkLinks = carParkLinks.filter((link) => link.href !== "/stories");
   const notifyHref = notifyMailto(zone.name);
   const wishPanelId = `${titleId}-wish`;
+  const parentPanelId = `${titleId}-parent`;
 
   return (
     <div className={styles.overlay} role="presentation" onClick={onClose}>
@@ -106,17 +111,22 @@ export default function ZoneSheet({
               {zoneStories.previews.map((story) => (
                 <li key={story.slug}>
                   <a
-                    className={styles.storyLink}
+                    className={styles.storyCard}
                     href={`/story/${story.slug}`}
                     onClick={() =>
                       trackUniverseSheetLink(zone.id, `/story/${story.slug}`)
                     }
                   >
-                    <span aria-hidden="true">{story.emoji} </span>
-                    EP {story.ep} {story.title}
+                    <span className={styles.storyCardEmoji} aria-hidden="true">
+                      {story.emoji}
+                    </span>
+                    <span className={styles.storyCardBody}>
+                      <span className={styles.storyCardEp}>EP {story.ep}</span>
+                      <span className={styles.storyCardTitle}>{story.title}</span>
+                    </span>
                     {completedSlugs?.has(story.slug) ? (
                       <span
-                        className={styles.storyDone}
+                        className={styles.storyCardDone}
                         role="img"
                         aria-label="已聽完"
                       >
@@ -140,22 +150,62 @@ export default function ZoneSheet({
         ) : null}
 
         {isCarPark ? (
-          <nav className={styles.links} aria-label={`${zone.name}入口`}>
-            {carParkLinks.map((link) => (
-              <a
-                key={link.href}
-                className={link.href === "/stories" ? styles.linkBtnPrimary : styles.linkBtn}
-                href={link.href}
-                onClick={() => trackUniverseSheetLink(zone.id, link.href)}
-                {...(link.external
-                  ? { target: "_blank", rel: "noopener noreferrer" }
-                  : {})}
-              >
-                {link.label}
-                {link.external ? <span aria-hidden="true"> ↗</span> : null}
-              </a>
-            ))}
-          </nav>
+          <>
+            <nav className={styles.links} aria-label={`${zone.name}入口`}>
+              {primaryCarParkLinks.map((link) => (
+                <a
+                  key={link.href}
+                  className={styles.linkBtnPrimary}
+                  href={link.href}
+                  onClick={() => trackUniverseSheetLink(zone.id, link.href)}
+                  {...(link.external
+                    ? { target: "_blank", rel: "noopener noreferrer" }
+                    : {})}
+                >
+                  {link.label}
+                  {link.external ? <span aria-hidden="true"> ↗</span> : null}
+                </a>
+              ))}
+            </nav>
+
+            {secondaryCarParkLinks.length > 0 ? (
+              <div className={styles.parentDisclosure}>
+                <button
+                  type="button"
+                  className={styles.wishToggle}
+                  aria-expanded={parentOpen}
+                  {...(parentOpen ? { "aria-controls": parentPanelId } : {})}
+                  onClick={() => setParentOpen((value) => !value)}
+                >
+                  給爸爸媽媽
+                </button>
+
+                {parentOpen ? (
+                  <div id={parentPanelId} className={styles.parentPanel}>
+                    <nav
+                      className={styles.links}
+                      aria-label={`${zone.name}更多入口`}
+                    >
+                      {secondaryCarParkLinks.map((link) => (
+                        <a
+                          key={link.href}
+                          className={styles.linkBtn}
+                          href={link.href}
+                          onClick={() => trackUniverseSheetLink(zone.id, link.href)}
+                          {...(link.external
+                            ? { target: "_blank", rel: "noopener noreferrer" }
+                            : {})}
+                        >
+                          {link.label}
+                          {link.external ? <span aria-hidden="true"> ↗</span> : null}
+                        </a>
+                      ))}
+                    </nav>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+          </>
         ) : (
           <div className={styles.stub}>
             <p className={styles.exploreNote}>{zone.exploreNote ?? zone.teaser}</p>
@@ -205,31 +255,47 @@ export default function ZoneSheet({
               </nav>
             ) : null}
 
-            <ParentTrustStrip variant="compact" />
-
-            <div className={styles.wishDisclosure}>
+            <div className={styles.parentDisclosure}>
               <button
                 type="button"
                 className={styles.wishToggle}
-                aria-expanded={wishOpen}
-                aria-controls={wishPanelId}
-                onClick={() => setWishOpen((value) => !value)}
+                aria-expanded={parentOpen}
+                {...(parentOpen ? { "aria-controls": parentPanelId } : {})}
+                onClick={() => setParentOpen((value) => !value)}
               >
-                想留一句話
+                給爸爸媽媽
               </button>
 
-              {wishOpen ? (
-                <div id={wishPanelId} className={styles.wishPanel}>
-                  <ZoneWishForm
-                    zoneId={zone.id}
-                    fallbackHref={notifyHref}
-                    onSubmitSuccess={({ hasEmail, category }) => {
-                      trackWishSubmitted(category);
-                      if (category === "feature") {
-                        trackUniverseWishSubmit(zone.id, hasEmail);
-                      }
-                    }}
-                  />
+              {parentOpen ? (
+                <div id={parentPanelId} className={styles.parentPanel}>
+                  <ParentTrustStrip variant="compact" />
+
+                  <div className={styles.wishDisclosure}>
+                    <button
+                      type="button"
+                      className={styles.wishToggle}
+                      aria-expanded={wishOpen}
+                      {...(wishOpen ? { "aria-controls": wishPanelId } : {})}
+                      onClick={() => setWishOpen((value) => !value)}
+                    >
+                      想留一句話
+                    </button>
+
+                    {wishOpen ? (
+                      <div id={wishPanelId} className={styles.wishPanel}>
+                        <ZoneWishForm
+                          zoneId={zone.id}
+                          fallbackHref={notifyHref}
+                          onSubmitSuccess={({ hasEmail, category }) => {
+                            trackWishSubmitted(category);
+                            if (category === "feature") {
+                              trackUniverseWishSubmit(zone.id, hasEmail);
+                            }
+                          }}
+                        />
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
               ) : null}
             </div>
