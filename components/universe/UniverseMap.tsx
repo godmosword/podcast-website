@@ -4,6 +4,10 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type Keybo
 import { useRouter, useSearchParams } from "next/navigation";
 import { MAP_STAGE, ZONE_TERRAIN, type ZoneDef, type ZoneId, type ZoneStatus } from "@/data/universe-zones";
 import { resolveUniverseMap } from "@/lib/universe-map";
+import {
+  RECENTER_IDLE_MS,
+  anyPointVisible,
+} from "@/lib/universe/map-camera-utils";
 import { getZoneArtTile } from "@/lib/universe/zone-art-tile";
 import { parseDevStatusOverrides } from "@/lib/universe/dev-map-flags";
 import { parseZoneDeepLink, parseZoneDeepLinkFromSearch } from "@/lib/universe/zone-deep-link";
@@ -40,6 +44,24 @@ const FOCUS_DOCK_OFFSET_Y = 96;
 
 /** 黏土海面貼圖平鋪尺寸（stage 單位）；無縫 tile 見 Art Bible §14。 */
 const SEA_TILE = 300;
+
+/** 首訪「點點看」引導：每個分頁 session 只出現一次（T5）。 */
+const TAP_HINT_KEY = "cc-universe-tap-hint-shown";
+
+/** 引導泡泡自動收合時間（毫秒）。 */
+const TAP_HINT_TTL_MS = 8000;
+
+/**
+ * 地圖互動狀態機（單一事實來源）：
+ * idle（漫遊）→ flying（fly-to 中、sheet 已排程）→ sheet（介紹開啟）。
+ * 取代舊的三個命令式門閂（focusedOpenZoneRef／openTimerRef／deepLinkHandledRef）——
+ * 點島、深連結、拖曳取消全部走同一個模型，孩子看到的規則只有一條：
+ * 「點任何島 → 飛過去 → 打開介紹」。
+ */
+type MapInteraction =
+  | { phase: "idle" }
+  | { phase: "flying"; zone: ZoneDef }
+  | { phase: "sheet"; zone: ZoneDef };
 
 type MapContentProps = {
   devStatusOverrides: Partial<Record<ZoneId, ZoneStatus>>;
@@ -88,11 +110,37 @@ function UniverseMapContent({
   const [tabHidden, setTabHidden] = useState(false);
   const [mapInView, setMapInView] = useState(true);
   const paused = tabHidden || !mapInView;
-  const [activeZone, setActiveZone] = useState<ZoneDef | null>(null);
-  const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const deepLinkHandledRef = useRef(false);
-  /** 開放島：第一次點只 fly-to，第二次才開 dock。 */
-  const focusedOpenZoneRef = useRef<ZoneId | null>(null);
+  const [interaction, setInteraction] = useState<MapInteraction>({ phase: "idle" });
+  // 供事件回呼／effect 讀「當下」狀態而不把 interaction 加進依賴（避免關 sheet
+  // 時 deep-link effect 因狀態變動重跑、拿著尚未清掉的 query 又把 sheet 開回來）。
+  const interactionRef = useRef(interaction);
+  interactionRef.current = interaction;
+  const activeZone = interaction.phase === "sheet" ? interaction.zone : null;
+  /** 迷路自救：viewport 元素引用（量測可見性用；camera.bind.ref 之外的旁支引用）。 */
+  const viewportElRef = useRef<HTMLDivElement | null>(null);
+  // 首訪一次性「戳我」引導（T5）：指向開放主島；deep link 入場不顯示。
+  const [tapHintVisible, setTapHintVisible] = useState(false);
+  const carParkZone = useMemo(
+    () => zones.find((zone) => zone.id === "car-park") ?? null,
+    [zones],
+  );
+
+  useEffect(() => {
+    if (parseZoneDeepLinkFromSearch(window.location.search)) return;
+    try {
+      if (sessionStorage.getItem(TAP_HINT_KEY)) return;
+      sessionStorage.setItem(TAP_HINT_KEY, "1");
+    } catch {
+      return;
+    }
+    setTapHintVisible(true);
+  }, []);
+
+  useEffect(() => {
+    if (!tapHintVisible) return;
+    const timer = setTimeout(() => setTapHintVisible(false), TAP_HINT_TTL_MS);
+    return () => clearTimeout(timer);
+  }, [tapHintVisible]);
   // 夜海貼圖惰性載入：首次切到夜晚才掛 pattern，日間不下載 sea-night.png；
   // 掛上後保持常駐，讓日夜切換仍有 600ms crossfade。
   const [nightSeaMounted, setNightSeaMounted] = useState(false);
@@ -105,73 +153,56 @@ function UniverseMapContent({
   }, [daylight]);
 
   const closeSheet = useCallback(() => {
-    setActiveZone(null);
+    setInteraction({ phase: "idle" });
     syncZoneQuery(null);
-    focusedOpenZoneRef.current = null;
   }, [syncZoneQuery]);
 
   const revealSheet = useCallback(
     (zone: ZoneDef) => {
-      openTimerRef.current = null;
-      setActiveZone(zone);
+      setInteraction({ phase: "sheet", zone });
       syncZoneQuery(zone.id);
     },
     [syncZoneQuery],
   );
 
-  const openSheetWithFly = useCallback(
+  /** 單一開島入口：fly-to 並進入 flying（reduced-motion 直接開 sheet）。 */
+  const openZone = useCallback(
     (zone: ZoneDef) => {
       cameraFlyTo(zone.coord, FOCUS_SCALE, { viewportOffsetY: FOCUS_DOCK_OFFSET_Y });
-
-      if (openTimerRef.current) clearTimeout(openTimerRef.current);
       if (reduced) {
         revealSheet(zone);
       } else {
-        openTimerRef.current = setTimeout(() => revealSheet(zone), FLY_DURATION_MS);
+        setInteraction({ phase: "flying", zone });
       }
     },
     [cameraFlyTo, reduced, revealSheet],
   );
 
-  // 深連結開 sheet：與點擊開 dock 語意等價（走 revealSheet + focusedOpenZoneRef），
-  // 且 StrictMode 安全——模擬卸載的 cleanup 若發現 sheet 尚未開，會釋放門閂讓
-  // 重跑的 effect 重新排程（修 dev 下 sheet 永不開的問題，TODOS「?zone= dev」項）。
-  // 依賴用穩定的 camera.flyTo（useCallback，於上方解構為 cameraFlyTo），不用每
-  // tick 重建的 camera 物件。
+  // flying → sheet 的排程走 effect：StrictMode 模擬卸載會 cleanup 再重排（幂等），
+  // 使用者拖曳把狀態切回 idle 時 cleanup 自動取消，無需手動管 timer ref。
+  useEffect(() => {
+    if (interaction.phase !== "flying") return;
+    const zone = interaction.zone;
+    const timer = setTimeout(() => revealSheet(zone), FLY_DURATION_MS);
+    return () => clearTimeout(timer);
+  }, [interaction, revealSheet]);
+
+  // 深連結開 sheet：與點島同一條狀態機路徑（openZone）。
+  // 依賴不含 interaction——關 sheet 時 query 尚未（非同步 router.replace）清掉，
+  // 若依賴狀態會立刻重跑把 sheet 開回來；改由 interactionRef 讀當下值。
   // camera 完成首次量測前（sizeRef 0×0）flyTo 會 no-op：以「已離開初始姿態」
-  // 判定 ready，未 ready 不設門閂，等量測 setCam 的 commit 觸發本 effect 重跑再飛。
+  // 判定 ready，未 ready 先不開，等量測 setCam 的 commit 觸發本 effect 重跑再飛。
   const cameraInitialized =
     camera.scale !== 1 || camera.tx !== 0 || camera.ty !== 0;
   useEffect(() => {
     const zone = parseZoneDeepLink(zoneQuery);
-    if (!zone) {
-      // query 清空（如關閉 sheet）即重置門閂：同一 mount 內第二次深連結
-      //（瀏覽器返回、站內連結）才能再開。
-      deepLinkHandledRef.current = false;
-      return;
-    }
+    if (!zone) return;
     if (!cameraInitialized) return;
-    if (deepLinkHandledRef.current) return;
-    deepLinkHandledRef.current = true;
-
-    cameraFlyTo(zone.coord, FOCUS_SCALE, { viewportOffsetY: FOCUS_DOCK_OFFSET_Y });
-    focusedOpenZoneRef.current = zone.id;
-    if (reduced) {
-      revealSheet(zone);
-      return;
-    }
-    const timer = setTimeout(() => revealSheet(zone), FLY_DURATION_MS);
-    openTimerRef.current = timer;
-    return () => {
-      // 只在「本 effect 排的 timer 仍掛著」時重置門閂；使用者拖曳取消
-      //（cancelPendingReveal 已把 openTimerRef 清成 null）則維持已處理，不重排。
-      if (openTimerRef.current === timer) {
-        clearTimeout(timer);
-        openTimerRef.current = null;
-        deepLinkHandledRef.current = false;
-      }
-    };
-  }, [cameraFlyTo, cameraInitialized, reduced, revealSheet, zoneQuery]);
+    const current = interactionRef.current;
+    // 已在飛往／已開同一座島 → 冪等跳過（StrictMode 雙跑、sheet 開啟後 query 回寫）。
+    if (current.phase !== "idle" && current.zone.id === zone.id) return;
+    openZone(zone);
+  }, [cameraInitialized, openZone, zoneQuery]);
 
   useEffect(() => {
     if (!daylightTrackedRef.current) {
@@ -199,83 +230,77 @@ function UniverseMapContent({
     };
   }, []);
 
-  const handleLockedTap = useCallback(
-    (zone: ZoneDef) => {
-      trackUniverseZoneTap(zone.id, zone.status);
-      cameraFlyTo(zone.coord, FOCUS_SCALE);
-    },
-    [cameraFlyTo],
-  );
-
-  const handleWish = useCallback(
-    (zone: ZoneDef) => {
-      trackUniverseZoneTap(zone.id, zone.status);
-      openSheetWithFly(zone);
-    },
-    [openSheetWithFly],
-  );
-
+  /** 統一點擊語意（Q5）：點任何島（含鎖島本體）→ fly-to＋開介紹 sheet。 */
   const handleActivate = useCallback(
     (zone: ZoneDef) => {
+      setTapHintVisible(false);
       trackUniverseZoneTap(zone.id, zone.status);
 
-      if (zone.status !== "open") {
-        return;
+      if (zone.status === "open") {
+        playSfx("collect");
+
+        const directRoute = zone.route && !zone.subSegmentIds?.length;
+
+        if (directRoute && zone.route?.external) {
+          window.open(zone.route.href, "_blank", "noopener,noreferrer");
+          return;
+        }
+
+        if (directRoute && zone.route) {
+          router.push(zone.route.href);
+          return;
+        }
       }
 
-      playSfx("collect");
-
-      const directRoute =
-        zone.route && zone.status === "open" && !zone.subSegmentIds?.length;
-
-      if (directRoute && zone.route?.external) {
-        window.open(zone.route.href, "_blank", "noopener,noreferrer");
-        return;
-      }
-
-      if (directRoute && zone.route) {
-        router.push(zone.route.href);
-        return;
-      }
-
-      const alreadyFocused = focusedOpenZoneRef.current === zone.id;
-
-      if (alreadyFocused) {
-        // 第二次點擊：第一次已用與 sheet 相同的 dock-offset 構圖置中，
-        // 直接開 dock、不再 fly，避免鏡頭二次上跳。
+      // 連點加速：已在飛往同島途中再點一次 → 立即開 sheet，不重排 600ms。
+      const current = interactionRef.current;
+      if (current.phase === "flying" && current.zone.id === zone.id) {
         revealSheet(zone);
         return;
       }
 
-      focusedOpenZoneRef.current = zone.id;
-      if (activeZone?.id === zone.id) {
-        closeSheet();
-      }
-
-      // 第一次點擊：置中並套用與 sheet 開啟時相同的 dock offset 構圖，
-      // 這樣第二次開 sheet 不會再位移（兩段式構圖一致）。
-      cameraFlyTo(zone.coord, FOCUS_SCALE, { viewportOffsetY: FOCUS_DOCK_OFFSET_Y });
-
-      if (openTimerRef.current) clearTimeout(openTimerRef.current);
-      openTimerRef.current = null;
+      openZone(zone);
     },
-    [activeZone?.id, cameraFlyTo, closeSheet, revealSheet, router],
+    [openZone, revealSheet, router],
   );
 
-  /** 使用者拖曳打斷 fly-to 時，取消尚未觸發的開 sheet／導航，並清除「已聚焦」門閂，
-   *  避免 pan／zoom 後第二次點島仍直接開 dock、卻已不在 dock-offset 構圖。 */
+  /** 使用者拖曳打斷 fly-to、或主動改鏡頭（縮放／重置／方向鍵）時，取消尚未開啟的 sheet。 */
   const cancelPendingReveal = useCallback(() => {
-    if (openTimerRef.current) {
-      clearTimeout(openTimerRef.current);
-      openTimerRef.current = null;
+    if (interactionRef.current.phase === "flying") {
+      setInteraction({ phase: "idle" });
     }
-    focusedOpenZoneRef.current = null;
   }, []);
 
-  /** 使用者主動改鏡頭（縮放／重置／方向鍵平移）時，同樣清掉聚焦門閂。 */
-  const clearOpenFocus = useCallback(() => {
-    focusedOpenZoneRef.current = null;
-  }, []);
+  // wheel／觸控板縮放走 useMapCamera 內部監聽（非 React 事件），這裡補一個
+  // 平行監聽讓「主動改鏡頭 → 取消尚未開啟的 sheet」語意涵蓋滾輪（diff 審 HIGH）。
+  useEffect(() => {
+    const el = viewportElRef.current;
+    if (!el) return;
+    const onWheel = () => cancelPendingReveal();
+    el.addEventListener("wheel", onWheel, { passive: true });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [cancelPendingReveal]);
+
+  // 迷路自救（A′ 馴化鏡頭）：鏡頭靜止 RECENTER_IDLE_MS 後，若所有島心都在視窗外
+  //（孩子把地圖拖到只剩海），自動飛回樂園（camera.reset）。拖曳／慣性期間
+  // tx/ty 持續變動會不斷順延；fly-to 動畫中不檢查。
+  const { reset: cameraReset } = camera;
+  useEffect(() => {
+    if (camera.isAnimating) return;
+    const timer = setTimeout(() => {
+      const el = viewportElRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+      if (interactionRef.current.phase !== "idle") return;
+      const cam = { scale: camera.scale, tx: camera.tx, ty: camera.ty };
+      const coords = zones.map((zone) => zone.coord);
+      if (!anyPointVisible(cam, rect.width, rect.height, coords)) {
+        cameraReset();
+      }
+    }, RECENTER_IDLE_MS);
+    return () => clearTimeout(timer);
+  }, [camera.isAnimating, camera.scale, camera.tx, camera.ty, cameraReset, zones]);
 
   const handleMapKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
@@ -283,46 +308,40 @@ function UniverseMapContent({
         case "+":
         case "=":
           e.preventDefault();
-          clearOpenFocus();
+          cancelPendingReveal();
           // 與控制列同一步進：放大略大、縮小略溫和，避免一次跳太兇
           camera.zoomBy(0.32);
           break;
         case "-":
         case "_":
           e.preventDefault();
-          clearOpenFocus();
+          cancelPendingReveal();
           camera.zoomBy(-0.24);
           break;
         case "ArrowUp":
           e.preventDefault();
-          clearOpenFocus();
+          cancelPendingReveal();
           camera.panBy(0, 80);
           break;
         case "ArrowDown":
           e.preventDefault();
-          clearOpenFocus();
+          cancelPendingReveal();
           camera.panBy(0, -80);
           break;
         case "ArrowLeft":
           e.preventDefault();
-          clearOpenFocus();
+          cancelPendingReveal();
           camera.panBy(80, 0);
           break;
         case "ArrowRight":
           e.preventDefault();
-          clearOpenFocus();
+          cancelPendingReveal();
           camera.panBy(-80, 0);
           break;
       }
     },
-    [camera, clearOpenFocus],
+    [camera, cancelPendingReveal],
   );
-
-  useEffect(() => {
-    return () => {
-      if (openTimerRef.current) clearTimeout(openTimerRef.current);
-    };
-  }, []);
 
   const transform = `translate(${camera.tx}px, ${camera.ty}px) scale(${camera.scale})`;
   const sceneClass = [styles.scene, paused ? styles.paused : ""].filter(Boolean).join(" ");
@@ -347,7 +366,10 @@ function UniverseMapContent({
 
       <div
         className={styles.viewport}
-        ref={camera.bind.ref}
+        ref={(el: HTMLDivElement | null) => {
+          viewportElRef.current = el;
+          camera.bind.ref(el);
+        }}
         tabIndex={0}
         role="application"
         aria-label="車車樂園互動地圖：方向鍵平移，加減鍵或右下角按鈕縮放"
@@ -482,8 +504,6 @@ function UniverseMapContent({
               key={zone.id}
               zone={zone}
               onActivate={handleActivate}
-              onWish={handleWish}
-              onLockedTap={handleLockedTap}
               reduced={reduced}
               paused={paused}
               night={daylight === "night"}
@@ -492,6 +512,21 @@ function UniverseMapContent({
               progress={zoneProgress[zone.id] ?? null}
             />
           ))}
+
+          {/* 首訪引導泡泡：指向開放主島，點任何島或逾時即收（純裝飾，aria-hidden） */}
+          {tapHintVisible && carParkZone ? (
+            <span
+              className={styles.tapHint}
+              aria-hidden="true"
+              style={{
+                left: `${carParkZone.px.x}px`,
+                top: `${carParkZone.px.y - 118}px`,
+                transform: `translate(-50%, -100%) scale(${1 / camera.scale})`,
+              }}
+            >
+              <span className={styles.tapHintFinger}>👆</span> 點點看！
+            </span>
+          ) : null}
         </div>
 
         {/* 近景雲影：DOM 排在 stage 之後（同 z:1），飄在島群上方 */}
@@ -536,17 +571,17 @@ function UniverseMapContent({
       <MapControls
         onReset={() => {
           playSfx("tap");
-          clearOpenFocus();
+          cancelPendingReveal();
           camera.reset();
         }}
         onZoomIn={() => {
           playSfx("tap");
-          clearOpenFocus();
+          cancelPendingReveal();
           camera.zoomBy(0.32);
         }}
         onZoomOut={() => {
           playSfx("tap");
-          clearOpenFocus();
+          cancelPendingReveal();
           camera.zoomBy(-0.24);
         }}
         canZoomIn={camera.canZoomIn}

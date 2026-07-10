@@ -14,7 +14,6 @@ describe("ZoneIsland", () => {
       <ZoneIsland
         zone={zone}
         onActivate={() => undefined}
-        onWish={() => undefined}
         reduced
         paused={false}
         night={false}
@@ -31,7 +30,6 @@ describe("ZoneIsland", () => {
       <ZoneIsland
         zone={zone}
         onActivate={() => undefined}
-        onWish={() => undefined}
         mapScale={2}
         reduced
         paused={false}
@@ -45,38 +43,45 @@ describe("ZoneIsland", () => {
     expect(html).toContain("scale(0.5)");
   });
 
-  it("鎖島看看鈕併入 pillRow 且 pillRow 不 aria-hidden", () => {
+  it("統一點擊語意：鎖島不再有獨立看看鈕，pill 帶學齡前語意 icon", () => {
     const zone = resolveUniverseMap().zones.find((z) => z.id === "dino")!;
     const html = renderToStaticMarkup(
       <ZoneIsland
         zone={zone}
         onActivate={() => undefined}
-        onWish={() => undefined}
         reduced
         paused={false}
         night={false}
       />,
     );
 
-    const pillRow = html.match(/(<span class="[^"]*pillRow[^"]*"[^>]*>)(.*?)<\/span><\/span>/);
-    expect(pillRow?.[1]).not.toContain("aria-hidden");
-    expect(pillRow?.[2]).toContain("建造中");
-    expect(pillRow?.[2]).toContain("看看");
+    expect(html).not.toContain("看看");
+    expect(html).toContain("🚧 建造中");
   });
 
-  it("開放島不顯示看看鈕", () => {
-    const zone = resolveUniverseMap().zones.find((z) => z.id === "car-park")!;
-    const html = renderToStaticMarkup(
+  it("開放島顯示「可以進去玩」氣球訊號，鎖島不顯示", () => {
+    const zones = resolveUniverseMap().zones;
+    const openHtml = renderToStaticMarkup(
       <ZoneIsland
-        zone={zone}
+        zone={zones.find((z) => z.id === "car-park")!}
         onActivate={() => undefined}
-        onWish={() => undefined}
+        reduced
+        paused={false}
+        night={false}
+      />,
+    );
+    const lockedHtml = renderToStaticMarkup(
+      <ZoneIsland
+        zone={zones.find((z) => z.id === "dino")!}
+        onActivate={() => undefined}
         reduced
         paused={false}
         night={false}
       />,
     );
 
-    expect(html).not.toContain("車車樂園看看");
+    expect(openHtml).toContain("🎈");
+    expect(openHtml).toContain("🎉 開放中");
+    expect(lockedHtml).not.toContain("🎈");
   });
 });

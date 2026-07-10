@@ -43,12 +43,8 @@ function bucketSizesScale(mapScale: number): number {
 
 type ZoneIslandProps = {
   zone: ResolvedZone;
-  /** 開放島點擊（fly-to／開 dock）。 */
+  /** 統一點擊語意：點任何島（開放或鎖島本體）→ fly-to＋開介紹 sheet。 */
   onActivate: (zone: ZoneDef) => void;
-  /** 鎖島探索按鈕：開啟 bottom dock。 */
-  onWish: (zone: ZoneDef) => void;
-  /** 鎖島本體點擊：僅回饋，不開 sheet。 */
-  onLockedTap?: (zone: ZoneDef) => void;
   reduced?: boolean;
   paused?: boolean;
   night?: boolean;
@@ -63,8 +59,6 @@ type ZoneIslandProps = {
 function ZoneIsland({
   zone,
   onActivate,
-  onWish,
-  onLockedTap,
   reduced = false,
   paused = false,
   night = false,
@@ -90,15 +84,14 @@ function ZoneIsland({
         if (burstTimerRef.current) clearTimeout(burstTimerRef.current);
         burstTimerRef.current = setTimeout(() => setBurst(0), CELEBRATE_MS);
       }
-      onActivate(zone);
-      return;
+    } else {
+      // 鎖島保留果凍晃動＋輕音效回饋；sheet 由 onActivate 統一開啟。
+      playSfx("tap");
+      if (!reduced) {
+        setJelly((n) => n + 1);
+      }
     }
-
-    playSfx("tap");
-    if (!reduced) {
-      setJelly((n) => n + 1);
-    }
-    onLockedTap?.(zone);
+    onActivate(zone);
   };
 
   useEffect(() => {
@@ -186,9 +179,8 @@ function ZoneIsland({
             )}
           </div>
         </button>
-        {/* 木牌欄：島名＋狀態 pill（裝飾，島 button 已含同名 aria-label）＋鎖島「看看」按鈕。
-            看看鈕併入 pillRow，免費繼承 1/mapScale 反縮放與 label 層 z-index，
-            且仍是島 button 的兄弟節點（button 不可巢狀 button，hydration #418）。 */}
+        {/* 木牌欄：島名＋狀態 pill（裝飾，島 button 已含同名 aria-label）。
+            點島（含鎖島）一律由島 button 本體開 sheet，木牌欄純展示。 */}
         <span
           className={styles.tileLabel}
           style={{
@@ -200,6 +192,11 @@ function ZoneIsland({
           }}
         >
           <span className={styles.name} aria-hidden="true">
+            {isOpen ? (
+              <span className={styles.openBeacon} aria-hidden="true">
+                🎈
+              </span>
+            ) : null}
             {zone.name}
           </span>
           <span className={styles.pillRow}>
@@ -208,29 +205,12 @@ function ZoneIsland({
               aria-hidden="true"
               style={{ background: meta.pillBg, color: meta.pillInk }}
             >
-              {meta.label}
+              {meta.icon} {meta.label}
             </span>
             {hasProgress ? (
               <span className={styles.progressChip} aria-hidden="true">
                 ⭐ {progress!.completed}/{progress!.total}
               </span>
-            ) : null}
-            {!isOpen ? (
-              <button
-                type="button"
-                className={styles.wishBtn}
-                aria-label={`${zone.name}看看`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  playSfx("tap");
-                  onWish(zone);
-                }}
-              >
-                {/* 圖示化「看看」：可讀名稱靠 aria-label，視覺只留偷看眼睛，降低常駐文字重量 */}
-                <span className={styles.wishIcon} aria-hidden="true">
-                  👀
-                </span>
-              </button>
             ) : null}
           </span>
         </span>
@@ -259,7 +239,7 @@ function ZoneIsland({
         className={styles.pill}
         style={{ background: meta.pillBg, color: meta.pillInk }}
       >
-        {meta.label}
+        {meta.icon} {meta.label}
       </span>
     </button>
   );

@@ -66,20 +66,22 @@ test("車車宇宙樂園地圖 smoke", async ({ page }) => {
   await expect(
     page.getByRole("region", { name: "車車宇宙樂園地圖" }),
   ).toBeVisible();
+  // 統一點擊語意：點鎖島本體一次即開介紹 sheet
   await expect(
-    page.getByRole("button", { name: /恐龍島看看/ }),
+    page.getByRole("button", { name: /恐龍島，建造中/ }),
   ).toBeVisible();
-  await page.getByRole("button", { name: /恐龍島看看/ }).click();
+  await page.getByRole("button", { name: /恐龍島，建造中/ }).click();
   await expect(page.getByRole("dialog")).toBeVisible({ timeout: 2_000 });
   await expect(page.getByText("恐龍島還在蓋")).toBeVisible();
-  await expect(page.getByText("想留一句話")).toBeVisible();
+  // 家長內容收進「給爸爸媽媽」disclosure，孩子首屏不見許願表單
+  await expect(page.getByRole("button", { name: "給爸爸媽媽" })).toBeVisible();
+  await expect(page.getByText("想留一句話")).toHaveCount(0);
   await expect(page.getByPlaceholder("暱稱或 Email")).toHaveCount(0);
   await page.getByRole("button", { name: "關閉" }).click();
 
   await expect(
     page.getByRole("button", { name: /車車樂園，開放中/ }),
   ).toBeVisible();
-  await page.getByRole("button", { name: /車車樂園，開放中/ }).click();
   await page.getByRole("button", { name: /車車樂園，開放中/ }).click();
   await expect(page.getByRole("dialog")).toBeVisible({ timeout: 2_000 });
   await expect(page.getByRole("heading", { name: "車車樂園" })).toBeVisible();

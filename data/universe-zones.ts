@@ -122,11 +122,15 @@ export const ZONES: ZoneDef[] = [
   },
 ];
 
-/** 狀態 → pill 文案/配色（單一來源，元件勿各自硬刻） */
+/** 狀態 → pill 文案/配色（單一來源，元件勿各自硬刻）。
+ *  icon 為純呈現欄位（學齡前不識字，pill 文字前綴語意 emoji）；
+ *  不動 zone 幾何 schema（id／coord／artTile）。 */
 export const ZONE_STATUS_META: Record<
   ZoneStatus,
   {
     label: string;
+    /** 學齡前語意 icon：開放🎉／施工🚧／禮物🎁／想想💭 */
+    icon: string;
     pillBg: string;
     pillInk: string;
     clickable: boolean;
@@ -134,9 +138,16 @@ export const ZONE_STATUS_META: Record<
     tapBubble?: string;
   }
 > = {
-  open: { label: "開放中", pillBg: "#bfe3c4", pillInk: "#14532d", clickable: true },
+  open: {
+    label: "開放中",
+    icon: "🎉",
+    pillBg: "#bfe3c4",
+    pillInk: "#14532d",
+    clickable: true,
+  },
   building: {
     label: "建造中",
+    icon: "🚧",
     pillBg: "#f5e0a6",
     pillInk: "#6b4e09",
     clickable: true,
@@ -144,6 +155,7 @@ export const ZONE_STATUS_META: Record<
   },
   coming: {
     label: "即將登場",
+    icon: "🎁",
     pillBg: "#cfe6f5",
     pillInk: "#14455f",
     clickable: true,
@@ -151,6 +163,7 @@ export const ZONE_STATUS_META: Record<
   },
   planned: {
     label: "規劃中",
+    icon: "💭",
     pillBg: "#e2dcef",
     pillInk: "#41356b",
     clickable: true,

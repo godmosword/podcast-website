@@ -32,6 +32,23 @@
   display: block;
 }
 
+/* 回樂園：icon＋文字直排，寬度隨文字自然放大（維持 56px 高的黏土鈕語彙）。 */
+.homeBtn {
+  flex-direction: column;
+  gap: 2px;
+  width: auto;
+  min-width: 56px;
+  padding: 6px 10px;
+  align-self: flex-end;
+}
+
+.homeLabel {
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 0 #dcbb87, 0 7px 10px rgba(120, 90, 40, 0.2);

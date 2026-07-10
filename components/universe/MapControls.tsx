@@ -19,11 +19,13 @@ export default function MapControls({
 }: MapControlsProps) {
   return (
     <div className={styles.controls} role="group" aria-label="地圖控制">
+      {/* 回樂園：帶文字的自救鈕（T4）——羅盤／房子 icon 對幼兒太抽象，
+          文字＋房子並列；迷路自動回中（UniverseMap）之外的手動出口。 */}
       <button
         type="button"
-        className={styles.btn}
+        className={`${styles.btn} ${styles.homeBtn}`}
         onClick={onReset}
-        aria-label="回大門（置中車車樂園）"
+        aria-label="回樂園（置中車車樂園）"
       >
         <svg
           viewBox="0 0 24 24"
@@ -57,6 +59,7 @@ export default function MapControls({
             strokeLinejoin="round"
           />
         </svg>
+        <span className={styles.homeLabel}>回樂園</span>
       </button>
       <button
         type="button"

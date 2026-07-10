@@ -222,3 +222,45 @@
     height: 30px;
   }
 }
+
+/* ── 首訪「點點看」引導泡泡（T5）：session 一次、點島或逾時即收 ────────── */
+.tapHint {
+  position: absolute;
+  z-index: 9000;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #fff8ea;
+  border: 2px solid #f0b64e;
+  color: #7a5410;
+  font-size: 15px;
+  font-weight: 800;
+  white-space: nowrap;
+  box-shadow: 0 4px 10px rgba(120, 90, 40, 0.25);
+  pointer-events: none;
+  transform-origin: 50% 100%;
+}
+
+.tapHintFinger {
+  display: inline-block;
+  font-size: 17px;
+  animation: tapHintPoke 1.1s ease-in-out infinite;
+}
+
+@keyframes tapHintPoke {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tapHintFinger {
+    animation: none;
+  }
+}

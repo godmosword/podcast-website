@@ -6,6 +6,8 @@ import {
   INERTIA_DECAY_TAU,
   MAX_SCALE,
   MIN_SCALE,
+  RECENTER_VISIBLE_MARGIN_PX,
+  anyPointVisible,
   blendVelocity,
   clampCamera,
   clampScale,
@@ -143,5 +145,39 @@ describe("map-camera-utils", () => {
     expect(blendVelocity(2, 8, 0)).toBe(2);
     expect(blendVelocity(2, 8, 1)).toBe(8);
     expect(blendVelocity(2, 8, 0.5)).toBeCloseTo(5, 6);
+  });
+
+  it("anyPointVisible：島心在視窗內（含 margin）為 true", () => {
+    const cam = { scale: 1, tx: 0, ty: 0 };
+    expect(anyPointVisible(cam, 1280, 800, [{ x: 500, y: 400 }])).toBe(true);
+    // margin 內：略超出右緣但在寬容範圍
+    expect(
+      anyPointVisible(cam, 1280, 800, [
+        { x: 1280 + RECENTER_VISIBLE_MARGIN_PX - 1, y: 400 },
+      ]),
+    ).toBe(true);
+  });
+
+  it("anyPointVisible：全部島心離場為 false（迷路自救觸發條件）", () => {
+    // MAX_SCALE=2、桌機 1280×800：舞台右上角海域（tx=-1360, ty=400）所有島心皆出視窗
+    const cam = { scale: 2, tx: -1360, ty: 400 };
+    const coords = [
+      { x: 500, y: 400 },
+      { x: 210, y: 260 },
+      { x: 820, y: 250 },
+      { x: 820, y: 560 },
+      { x: 210, y: 560 },
+    ];
+    expect(anyPointVisible(cam, 1280, 800, coords)).toBe(false);
+    // 只要任一島心回到視窗即 true
+    expect(
+      anyPointVisible(cam, 1280, 800, [...coords, { x: 800, y: 100 }]),
+    ).toBe(true);
+  });
+
+  it("anyPointVisible：viewport 未量測（0 尺寸）時視為可見，不誤觸自救", () => {
+    expect(anyPointVisible({ scale: 1, tx: 0, ty: 0 }, 0, 0, [{ x: 99999, y: 99999 }])).toBe(
+      true,
+    );
   });
 });

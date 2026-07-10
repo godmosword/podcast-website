@@ -3,8 +3,9 @@ import { MAP_STAGE } from "@/data/universe-zones";
 /** 鏡頭縮放下限（zoom-out 到底）。 */
 export const MIN_SCALE = 0.34;
 
-/** 鏡頭縮放上限（zoom-in 到底）。 */
-export const MAX_SCALE = 2.4;
+/** 鏡頭縮放上限（zoom-in 到底）。2.4→2.0：幼兒 zoom 過近後整片海找不到島，
+ *  收斂上限讓「最放大」仍看得到至少一座島的機率大增（A′ 馴化鏡頭）。 */
+export const MAX_SCALE = 2.0;
 
 /** 預設鏡頭比 fit 再退一點，讓島群不貼視窗邊、保留拖曳呼吸感。 */
 export const FIT_MARGIN = 0.88;
@@ -48,6 +49,36 @@ export function clampCamera(next: Camera, viewportW: number, viewportH: number):
       : clamp(next.ty, viewportH / 2 - stageH, viewportH / 2);
 
   return { scale: next.scale, tx, ty };
+}
+
+/** 迷路判定的視窗外緣寬容（螢幕 px）：島心離視窗邊在此距離內仍算「看得到」。 */
+export const RECENTER_VISIBLE_MARGIN_PX = 40;
+
+/** 鏡頭靜止多久後檢查迷路（ms）：拖曳／慣性期間值持續變動會一直順延。 */
+export const RECENTER_IDLE_MS = 700;
+
+/**
+ * 迷路自救判定：目前鏡頭下是否至少有一個座標點（島心）落在視窗（含 margin）內。
+ * 全部落在視窗外＝孩子把地圖拖到只剩海，該自動飛回樂園。
+ */
+export function anyPointVisible(
+  cam: Camera,
+  viewportW: number,
+  viewportH: number,
+  points: readonly { x: number; y: number }[],
+  margin: number = RECENTER_VISIBLE_MARGIN_PX,
+): boolean {
+  if (viewportW === 0 || viewportH === 0) return true;
+  return points.some((p) => {
+    const sx = p.x * cam.scale + cam.tx;
+    const sy = p.y * cam.scale + cam.ty;
+    return (
+      sx >= -margin &&
+      sx <= viewportW + margin &&
+      sy >= -margin &&
+      sy <= viewportH + margin
+    );
+  });
 }
 
 /** 依 wheel deltaY 計算平滑縮放倍率（clamped）。 */

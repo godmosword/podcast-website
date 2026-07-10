@@ -557,15 +557,6 @@
     font-size: 9px;
   }
 
-  .wishBtn {
-    width: 24px;
-    height: 24px;
-    min-height: 24px;
-  }
-
-  .wishIcon {
-    font-size: 12px;
-  }
 }
 
 /* 狀態 pill＋進度星章同一行，避免鎖島木牌欄疊四行壓到下方島 */
@@ -606,29 +597,28 @@
   z-index: 0;
 }
 
-/* 鎖島許願：圖示化小圓鈕（偷看眼睛），木牌欄第三格（島名 → 狀態 → 看看），點擊才開 dock。
-   可讀名稱在 aria-label；圖示化降低常駐文字重量。tileLabel 為 pointer-events:none，僅此鈕可點。 */
-.wishBtn {
-  pointer-events: auto;
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  min-height: 26px;
-  padding: 0;
-  border: 1px solid #8a6438;
-  border-radius: 999px;
-  background: linear-gradient(#fdf0c4, #e8c878);
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(60, 40, 20, 0.25);
-}
-
-.wishIcon {
+/* 開放島「可以進去玩」訊號（T5，無文字語意）：木牌名前的小氣球輕輕上下飄，
+   與待機浮動同語彙但更小幅；reduced-motion 時靜態。 */
+.openBeacon {
+  display: inline-block;
+  margin-right: 3px;
   font-size: 13px;
   line-height: 1;
+  animation: beaconBob 2.2s ease-in-out infinite;
 }
 
-.wishBtn:focus-visible {
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 2px;
+@keyframes beaconBob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .openBeacon {
+    animation: none;
+  }
 }

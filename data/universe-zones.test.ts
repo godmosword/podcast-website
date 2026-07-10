@@ -67,6 +67,12 @@ describe("universe-zones", () => {
     ]);
   });
 
+  it("每種狀態都有學齡前語意 icon（純呈現欄位）", () => {
+    for (const meta of Object.values(ZONE_STATUS_META)) {
+      expect(meta.icon).toBeTruthy();
+    }
+  });
+
   it("未開放狀態有 tapBubble 文案", () => {
     expect(ZONE_STATUS_META.building.tapBubble).toBe("還在蓋喔！");
     expect(ZONE_STATUS_META.coming.tapBubble).toBe("快要開幕囉！");

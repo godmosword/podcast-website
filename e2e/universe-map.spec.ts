@@ -58,24 +58,6 @@ function expectTransformClose(actual: StageTransform, expected: StageTransform) 
   expect(actual.scale).toBeCloseTo(expected.scale, 5);
 }
 
-async function waitForStableStageTransform(page: Page) {
-  let previous = await stageTransformParts(page);
-  await expect
-    .poll(async () => {
-      await page.waitForTimeout(50);
-      const current = await stageTransformParts(page);
-      const maxDelta = Math.max(
-        Math.abs(current.tx - previous.tx),
-        Math.abs(current.ty - previous.ty),
-        Math.abs(current.scale - previous.scale),
-      );
-      previous = current;
-      return maxDelta;
-    })
-    .toBeLessThan(0.001);
-  return previous;
-}
-
 async function labelBottom(locator: Locator) {
   return locator.evaluate((el) => {
     const label = el.closest('span[class*="tileLabel"]');
@@ -145,16 +127,20 @@ test.describe("車車宇宙樂園地圖 UX", () => {
           await expect(page.locator("html")).toHaveAttribute("data-theme", "night");
         }
 
-        const dinoWatch = page.getByRole("button", { name: /恐龍島看看/ });
+        const dinoLabel = page
+          .locator('span[class*="tileLabel"]')
+          .filter({ hasText: "恐龍島" });
         const forestIsland = page.getByRole("button", { name: /森林小島，建造中/ });
-        const rescueWatch = page.getByRole("button", { name: /英雄救援隊看看/ });
+        const rescueLabel = page
+          .locator('span[class*="tileLabel"]')
+          .filter({ hasText: "英雄救援隊" });
         const oceanIsland = page.getByRole("button", { name: /未來夢想島，規劃中/ });
 
         expect(
-          (await visibleImageTop(forestIsland)) - (await labelBottom(dinoWatch)),
+          (await visibleImageTop(forestIsland)) - (await labelBottom(dinoLabel)),
         ).toBeGreaterThanOrEqual(16);
         expect(
-          (await visibleImageTop(oceanIsland)) - (await labelBottom(rescueWatch)),
+          (await visibleImageTop(oceanIsland)) - (await labelBottom(rescueLabel)),
         ).toBeGreaterThanOrEqual(16);
       });
     }
@@ -195,23 +181,55 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     expect(scaleFromTransform(await stageTransform(page))).toBeCloseTo(beforeClickScale, 5);
   });
 
-  test("開放車車樂園第一次點擊只聚焦，第二次才開 sheet 且不二次 fly", async ({ page }) => {
+  test("開放車車樂園一次點擊即飛抵並開 sheet（單段式）", async ({ page }) => {
     await openMap(page, "light");
     const carPark = page.getByRole("button", { name: /車車樂園，開放中/ });
     const dialog = page.getByRole("dialog");
 
     await carPark.click();
-    await expect(dialog).toHaveCount(0);
     await expect
       .poll(async () => (await stageTransformParts(page)).scale)
       .toBeCloseTo(1.6, 1);
-    await expect(dialog).toHaveCount(0);
-    const afterFirstClick = await waitForStableStageTransform(page);
-
-    await carPark.click();
     await expect(dialog).toBeVisible({ timeout: 3000 });
     await expect(dialog).toContainText("車車樂園");
-    expectTransformClose(await stageTransformParts(page), afterFirstClick);
+    // sheet 開啟時鏡頭已停在 dock-offset 構圖，不再位移
+    const opened = await stageTransformParts(page);
+    await page.waitForTimeout(250);
+    expectTransformClose(await stageTransformParts(page), opened);
+  });
+
+  test("鎖島本體一次點擊也開介紹 sheet（統一點擊語意）", async ({ page }) => {
+    await openMap(page, "light");
+    await page.getByRole("button", { name: /恐龍島，建造中/ }).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible({ timeout: 3000 });
+    await expect(dialog).toContainText("恐龍島還在蓋");
+  });
+
+  test("把地圖拖到只剩海，鏡頭自動飛回樂園（迷路自救）", async ({ page }) => {
+    await openMap(page, "light");
+    const viewport = page.getByRole("application", { name: /車車樂園互動地圖/ });
+    const zoomIn = page.getByRole("button", { name: /放大地圖/ });
+
+    for (let i = 0; i < 24 && (await zoomIn.isEnabled()); i += 1) {
+      await zoomIn.click();
+    }
+    await viewport.focus();
+    for (let i = 0; i < 16; i += 1) {
+      await page.keyboard.press("ArrowRight");
+    }
+    for (let i = 0; i < 12; i += 1) {
+      await page.keyboard.press("ArrowUp");
+    }
+
+    // 鏡頭靜止（RECENTER_IDLE_MS）後自動 reset：scale 回到 fit（遠小於 MAX_SCALE）
+    await expect
+      .poll(async () => (await stageTransformParts(page)).scale, { timeout: 8000 })
+      .toBeLessThan(1);
+    // 而且車車樂園真的回到可視區（不只縮小，還要回中）
+    await expect(
+      page.getByRole("button", { name: /車車樂園，開放中/ }),
+    ).toBeInViewport();
   });
 
   test("deep link ?zone=dino 開 sheet，關閉後移除 query（與點擊語意等價）", async ({ page }) => {
