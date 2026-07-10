@@ -74,3 +74,7 @@ A/B/C 格式 — 見 `review-user-choice.mdc`（若有）
 - **Grok 缺席**：可 Approved（Opus／GPT 仍有一人成功），摘要標「對抗審缺席／對抗性降級」
 - **小 diff**（約 &lt;80 行、無 Protected）：action 可跳過 diff 委員審，只跑 Verify
 - **純文件／無 Protected paths**：Leader 自審或 GPT 單審即可
+
+## 收尾輸出（必附）
+
+`/agent-plan` 與 `/agent-action` 完成時，Leader **必須**附 **Agent 執行分配表**：各 agent／委員做了什麼 + `model slug` + 狀態（`完成`／`缺席`／`跳過` 等）。執行期從派工起維護；詳見 [`docs/AGENT-WORKFLOW.md`](../../docs/AGENT-WORKFLOW.md) § 收尾輸出。

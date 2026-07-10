@@ -15,6 +15,8 @@
 
 ## 你要做的事
 
+**執行期追蹤：** 從讀 Plan 起維護 **Agent 執行分配表**（見 §10）。每派 Task／顧問審／Verify／Ship，記下：任務 ID、`subagent_type`、`model slug`、做了什麼、產出、狀態。Leader 親手改檔也須入表。
+
 ### 0. Bootstrap
 
 同 [`agent-plan.md`](agent-plan.md) §0（含讀 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md)）；可見行為變更完成前依 Domain § Docs sync。
@@ -93,6 +95,20 @@
 ### 9. 委派缺席
 
 Task 失敗 → 追加 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md)；Leader 接手，分配表註明，不中斷流程。
+
+### 10. 最終輸出：Agent 執行分配表（必附）
+
+收尾回覆**必須**附此表（繁中；slug 保留英文）。須涵蓋：實作 Task、Leader 整合、Verify、diff 委員審（或標跳過）、Ship（若有）。
+
+| # | 任務 ID | subagent_type | model slug | 做了什麼 | 產出（檔案／命令結果） | 狀態 |
+|---|---------|---------------|------------|----------|------------------------|------|
+| 0 | Leader | — | `composer-2.5-fast` | 讀 Plan、派工、整合 diff | 合併後變更摘要 | 完成 |
+| 1 | T1 | `generalPurpose` | `claude-4.6-sonnet-medium-thinking` | （依 Plan 填寫） | `path/to/file` | 完成／缺席 |
+| 2 | Verify | `shell` | `grok-build-0.1` | `npm test` 等 | 逐項對照結果 | 完成 |
+| 3 | diff 審 | `typescript-reviewer` | `gpt-5.5-medium` | 審 diff | 無 CRITICAL／意見摘要 | 完成／跳過／缺席 |
+| 4 | Ship | — | `composer-2.5-fast` | commit／push | commit hash | 完成／未執行 |
+
+**狀態欄：** `完成`｜`跳過`（如小 diff 免 diff 審）｜`缺席`｜`對抗審缺席／對抗性降級`｜`未執行`（Ship 僅在使用者要求時）。
 
 ## 禁止
 

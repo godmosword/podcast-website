@@ -10,6 +10,8 @@ typo 級小事不進本命令——直接做即可。
 
 ## 你要做的事
 
+**執行期追蹤：** 從 Bootstrap 起維護 **Agent 執行分配表**（見 §7）。每派一次 Task／委員審，記下：角色、執行方式、`subagent_type`（若有）、`model slug`、做了什麼、狀態。未派工的列省略；缺席必寫。
+
 ### 0. Bootstrap
 
 - 讀 [`docs/AGENT-WORKFLOW.md`](../../docs/AGENT-WORKFLOW.md)（Meta：委員會分工、對標表）
@@ -100,6 +102,21 @@ typo 級小事不進本命令——直接做即可。
 - **CRITICAL**：若有 `review-user-choice.mdc`，用 **A/B/C**；僅 **A** 才改檔
 - **Cursor Plan mode**：以系統 plan confirm 為準
 - 非 Plan mode：全程自主，**不要**逐步詢問批准（CRITICAL 除外）
+
+### 7. 最終輸出：Agent 執行分配表（必附）
+
+收尾回覆**必須**附此表（繁中；slug 保留英文）。與 §4「委員摘要表」分工：§4 記**意見與採納**；本表記**誰跑、用什麼 model、實際產出**（稽核／成本）。
+
+| # | 角色 | 執行方式 | subagent_type | model slug | 做了什麼 | 產出 | 狀態 |
+|---|------|----------|---------------|------------|----------|------|------|
+| 0 | Leader | 當前 session | — | `composer-2.5-fast` | 寫 Goal／Scope／Risks 骨架、綜合委員意見 | Approved Plan | 完成 |
+| 1 | Plan 細節 | Task | `generalPurpose` | `gpt-5.5-medium` | 填 Task DAG、Files、Verification、Model routing | plan 區塊 | 完成／未派 |
+| 2 | GPT 5.5 工程審 | Task（readonly） | `generalPurpose` | `gpt-5.5-medium` | 審可行性、驗證命令、漏檔 | 審查意見 | 完成／缺席 |
+| 3 | Opus 4.8 架構審 | Task（readonly） | `architect` | `claude-opus-4-8-thinking-medium` | 審架構／紅線 | 審查意見 | 完成／未派／缺席 |
+| 4 | Grok 4.5 對抗審 | Task（readonly） | `generalPurpose` | `grok-4.5` | 找 plan 漏洞、edge case | 審查意見 | 完成／未派／缺席 |
+| 5 | Composer 可行性審 | Leader 自審 | — | `composer-2.5-fast` | L3 可行性／成本 | 自審結論 | 完成／未派 |
+
+**狀態欄：** `完成`｜`未派`｜`缺席`｜`對抗審缺席／對抗性降級`（L3 Grok 缺席時）。L3 Grok 缺席且仍 Approved → 表內與 §4 皆須標降級。
 
 ## 禁止
 

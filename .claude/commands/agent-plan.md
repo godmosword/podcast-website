@@ -11,6 +11,8 @@ $ARGUMENTS
 本指令**只規劃、不實作、不 commit**。實作請接 `/agent-action`。
 typo 級小事不進本命令（AGENT-DOMAIN 反模式）——直接做即可。
 
+**執行期追蹤：** 從 Bootstrap 起維護 **Agent 執行分配表**（見 §6）。每派委員／寫 Draft，記下：角色、執行方式、`subagent_type`（若有）、`model slug`、做了什麼、狀態。未派工的列省略；缺席必寫。
+
 ## 0. Bootstrap（必讀，不複製、只引用）
 
 1. [`docs/AGENT-DOMAIN.md`](../../docs/AGENT-DOMAIN.md) — 紅線、驗證矩陣、Protected paths（**唯一 source of truth**）
@@ -87,6 +89,20 @@ typo 級小事不進本命令（AGENT-DOMAIN 反模式）——直接做即可�
 - 委員缺席 → 摘要表註明，照常定稿；Domain 驗證矩陣必要項**不可省**
 - **至少一位非 leader 委員**（預設＝GPT；觸發／L3＝Opus 或 GPT；Claude Code 的 Composer 經 `cursor-agent` 可計入）成功審過才可標 Approved；全滅 → 回報使用者，不自行定稿
 - **L3 若 Grok 對抗審缺席**：Opus 或 GPT 仍有一人成功即可 Approved，但摘要表必須標 **「對抗審缺席／對抗性降級」**
+
+## 6. 最終輸出：Agent 執行分配表（必附）
+
+收尾回覆**必須**附此表（繁中；slug 保留英文）。與 §4「委員摘要表」分工：§4 記**意見與採納**；本表記**誰跑、用什麼 model、實際產出**。
+
+| # | 角色 | 執行方式 | subagent_type | model slug | 做了什麼 | 產出 | 狀態 |
+|---|------|----------|---------------|------------|----------|------|------|
+| 0 | Leader | 當前 session（Claude） | — | （leader model） | 撰寫完整 Draft Plan、綜合委員意見 | `/tmp/agent-plan-<ts>.md` | 完成 |
+| 1 | GPT 5.5 工程審 | `codex exec` | — | `gpt-5.5` | 審可行性、驗證命令、漏檔 | 審查意見 | 完成／缺席 |
+| 2 | Opus 4.8 架構審 | Agent tool（readonly） | `architect` | `opus` | 審架構／紅線 | 審查意見 | 完成／未派／缺席 |
+| 3 | Grok 4.5 對抗審 | `grok -p` | — | `grok-4.5` | 找 plan 漏洞、edge case | 審查意見 | 完成／未派／缺席 |
+| 4 | Composer 2.5 可行性審 | `cursor-agent` | — | `composer-2.5-fast` | L3 可行性／成本 | 審查意見 | 完成／未派／缺席 |
+
+**狀態欄：** `完成`｜`未派`｜`缺席`｜`對抗審缺席／對抗性降級`。
 
 ## 禁止
 

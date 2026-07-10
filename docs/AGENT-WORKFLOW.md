@@ -115,6 +115,7 @@
    - **至少一位非 leader 委員**（預設路徑＝GPT；觸發／L3 時＝Opus 或 GPT）成功審過才可標 Approved；全滅 → 回報使用者
    - **Cursor 的 Composer 可行性審＝Leader 自審**，不計入「非 leader 委員」
    - **L3 若 Grok 對抗審缺席**：Opus 或 GPT 仍有一人成功即可 Approved，但摘要表必須標 **「對抗審缺席／對抗性降級」**
+5. **收尾輸出** → 必附 **Agent 執行分配表**（見 [收尾輸出：Agent 執行分配表](#收尾輸出agent-執行分配表)）
 
 Plan 若弱化 Domain 紅線 → 審稿標 **CRITICAL**。
 
@@ -145,6 +146,7 @@ Plan 若弱化 Domain 紅線 → 審稿標 **CRITICAL**。
    - **L3／觸紅線／Protected**：加 Opus 4.8 與 Grok 4.5 對抗審。細節以 [`.cursor/commands/agent-action.md`](../.cursor/commands/agent-action.md)／[`.claude/commands/agent-action.md`](../.claude/commands/agent-action.md) 為準
 6. 可見行為變更 → Domain § Docs sync
 7. **Ship**（僅使用者要求）：只 stage 相關檔；預設不 commit/push
+8. **收尾輸出** → 必附 **Agent 執行分配表**（見 [收尾輸出：Agent 執行分配表](#收尾輸出agent-執行分配表)）
 
 ### 派工規則
 
@@ -299,6 +301,32 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 
 ---
 
+## 收尾輸出：Agent 執行分配表
+
+`/agent-plan` 與 `/agent-action` **收尾回覆必附**（Leader 從派工起即維護；未派工的列省略；缺席必寫）。
+
+與 Plan 模板內 **Review summary**（委員意見／採納）分工：Review summary 偏決策；分配表偏**稽核／成本**——誰跑、用什麼 model、實際產出。
+
+### `/agent-plan` 表欄位
+
+| # | 角色 | 執行方式 | subagent_type | model slug | 做了什麼 | 產出 | 狀態 |
+
+涵蓋：Leader（骨架／綜合）、Plan 細節草稿（Cursor＝GPT Task；Claude Code＝Leader 全文）、各委員（GPT／Opus／Grok／Composer）。
+
+### `/agent-action` 表欄位
+
+| # | 任務 ID | subagent_type | model slug | 做了什麼 | 產出（檔案／命令結果） | 狀態 |
+
+涵蓋：實作 Task（L0–L3）、Leader 整合／微調、Verify、diff 委員審（或標 `跳過`）、Ship（若有）。
+
+### 狀態欄慣例
+
+`完成`｜`未派`｜`跳過`｜`缺席`｜`對抗審缺席／對抗性降級`｜`未執行`（Ship 僅在使用者要求時）
+
+指令檔範本見 [`.cursor/commands/agent-plan.md`](../.cursor/commands/agent-plan.md) §7、[`.cursor/commands/agent-action.md`](../.cursor/commands/agent-action.md) §10，及 [`.claude/commands/`](../.claude/commands/) 對應章節。
+
+---
+
 ## Ship 政策（預設 Meta）
 
 | 情境 | 行為 |
@@ -351,3 +379,4 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 | 2026-07-09 | Cursor 版命令對齊委員會工作流（分級雙審／四員全上、FAILURES 協議）；新增兩環境對標表、Grok 4.5 slug |
 | 2026-07-09 | 縫隙補強：Meta `/agent-action` 分級 diff 審、Composer 自審門檻、Grok 缺席降級標記、純文件可降級雙審、Cursor Task 失敗協議 |
 | 2026-07-09 | 成本優化：預設 GPT 單審、Opus／Grok 觸發制、內容管線跳過委員會、L1 已知路徑免 explore、小 diff 可跳過 action diff 審；L3 改稱三員對抗組 + Leader 自審 |
+| 2026-07-10 | 收尾必附 Agent 執行分配表（各 agent 做了什麼 + model slug）；指令檔 §7／§10 與本節對齊 |

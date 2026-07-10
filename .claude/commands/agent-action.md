@@ -8,6 +8,8 @@ description: 依 Approved Plan 實作＋驗證（podcast-website）；改檔只�
 
 $ARGUMENTS
 
+**執行期追蹤：** 從讀 Plan 起維護 **Agent 執行分配表**（見 §9）。每派子 agent／顧問審／Verify／Ship，記下：任務 ID、`subagent_type`、`model slug`、做了什麼、產出、狀態。Leader 親手改檔也須入表。
+
 ## 0. Bootstrap
 
 同 [`agent-plan.md`](agent-plan.md) §0：讀 [`docs/AGENT-DOMAIN.md`](../../docs/AGENT-DOMAIN.md)（紅線、驗證矩陣、Protected paths）、[`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md)（失敗案例＋探活協議）、依任務加讀表。
@@ -81,6 +83,20 @@ $ARGUMENTS
 ## 8. CRITICAL
 
 `CRITICAL-n` + Fix + A/B/C；**僅 A** 改檔。
+
+## 9. 最終輸出：Agent 執行分配表（必附）
+
+收尾回覆**必須**附此表（繁中；slug 保留英文）。須涵蓋：實作子 agent、Leader 整合、Verify、diff 委員審（或標跳過）、Ship（若有）。
+
+| # | 任務 ID | subagent_type | model slug | 做了什麼 | 產出（檔案／命令結果） | 狀態 |
+|---|---------|---------------|------------|----------|------------------------|------|
+| 0 | Leader | — | （leader model） | 讀 Plan、派工、整合 diff | 合併後變更摘要 | 完成 |
+| 1 | T1 | （Agent tool type） | `sonnet`／`haiku` | （依 Plan 填寫） | `path/to/file` | 完成／缺席 |
+| 2 | Verify | Bash | — | `npm test` 等 | 逐項對照結果 | 完成 |
+| 3 | diff 審 | `code-reviewer` | `opus`／`gpt-5.5`／`grok-4.5` | 審 diff | 無 CRITICAL／意見摘要 | 完成／跳過／缺席 |
+| 4 | Ship | — | （leader model） | commit／push | commit hash | 完成／未執行 |
+
+**狀態欄：** `完成`｜`跳過`｜`缺席`｜`對抗審缺席／對抗性降級`｜`未執行`。
 
 ## 禁止
 
