@@ -114,10 +114,56 @@
 集數／角色／車種直出資料層；適合年齡「約 3–7 歲」、同步「每 15 分鐘檢查 Apple Podcast RSS」定稿。驗收：`lib/for-parents.test.ts` 無「待確認」；部署後 prod grep=0。
 
 ### W27-2 許願表單補隱私說明句 + footer 觸控目標　`trust · S · 無`　〔review+a11y〕
-`ZoneWishForm` 收 email 與自由文字卻無隱私句（`d9524c3` 剛擴充 story 投稿，風險放大）：送出鈕下加家長向說明、message placeholder 提示勿含個資；順帶 footer「節目數據」「使用條款」padding 補到 ≥44px（收斂「小項 polish」同條目）。不動 API/schema。
+**併入 [兒童 UX 稽核 UX-P0-2／UX-P0-3](#兒童-ux-與親子互動稽核2026-07-11)**（2026-07-11 `/agent-plan`）。原述：`ZoneWishForm` 送出鈕下加家長向隱私句；footer「節目數據」「使用條款」≥44px。不動 API/schema。
 
 ### ~~W27-3 森林小島 magenta 暈圈修復~~　`asset · S · 無`　〔review+design〕 ✅
 = 下方既有條目「森林小島底部洋紅色暈圈」，W27 週報將其提升優先。`c33ebb3` `ea49200`
+
+---
+
+## 兒童 UX 與親子互動稽核（2026-07-11）
+
+> **Gate：** `/agent-plan` 稽核；Approved Plan：[`/tmp/agent-plan-1783699379.md`](/tmp/agent-plan-1783699379.md)。**紅線：** 不更動主架構與版面（Landing scroll-snap、地圖骨架、故事詳情 grid、路由、zone 座標／art-tile 契約）。
+> **總判斷：** 兒童主路徑 **B+**、親子互動 **B**、家長信任 **A-**。播放／地圖 disclosure／`kidsMode` 已達基線；缺口為 **信任 polish + 觸控補強 + 共讀內容覆蓋**（不需架構手術）。
+> **與既有條目：** W27-2 → UX-P0-2／UX-P0-3；STEM-P3 家長閘門 → UX-P0-1；STEM-P3 共讀指引擴充 → UX-P1-3（REUSE-2 試點已完成）；footer 觸控（小項 polish）→ UX-P0-2。
+
+### 稽核結論（保留，實作時勿改壞）
+
+- **StoryPlayer**：主控制 60–68px、字幕三檔、睡前定時、結尾反思需點「想聊一下」才展開
+- **ZoneSheet**：許願／信任收「給爸爸媽媽」；故事卡 ≥64px
+- **遊戲**：繽紛消消樂 `explore` 無分數計時；GameKit `kidsMode` 預設 true
+- **刻意不做：** 獨立逐字稿頁（新頁型）、故事詳情大改版面、tap-to-explore（已移除）
+
+| ID | 優先 | 狀態 | 摘要 | 主要檔案 | 驗證 |
+|----|------|------|------|----------|------|
+| UX-P0-1 | P0 | 待做 | **家長閘門**：進 `/for-parents/dashboard`（或切兒童模式）前簡單算術題；session 通過後放行 | 新 `ParentGate.tsx`；`dashboard/page.tsx` | 手動 375px；`npm test` |
+| UX-P0-2 | P0 | 待做 | **Footer 觸控 ≥44px**（= W27-2 後半） | `SiteFooter.module.css` | `getBoundingClientRect().height ≥ 44` |
+| UX-P0-3 | P0 | 待做 | **許願隱私一句話**（= W27-2 前半）：送出鈕下 inline 說明、message placeholder 勿含個資 | `ZoneWishForm.tsx` | 截圖＋vitest |
+| UX-P0-4 | P0 | 待做 | **Challenge 遊戲家長提示**：列表卡加「建議 6 歲以上／家長陪同」（預設僅文案，不隱藏入口） | `app/games/page.tsx` 或 `data/games.ts` | `npm test` + build |
+| UX-P1-1 | P1 | 待做 | **補齊 &lt;44px 按鈕**（只改 CSS）：ZoneSheet 關閉／wishToggle、StoryPlayer 定時選單、Landing 向下箭頭 | 各 `*.module.css` | 手動＋e2e |
+| UX-P1-2 | P1 | 待做 | **詳情頁反思收合**：比照 `StoryEndScreen`，家長句不預設露出 | `app/story/[slug]/page.tsx`、`ReflectionPrompt.tsx` | `npm test` |
+| UX-P1-3 | P1 | 待做 | **共讀 sidecar 擴至全集**：`parent-guides`／`family-activities` 從 ep-1/ep-5 擴充（內容營運，可分批） | `data/parent-guides.ts`、`data/family-activities.ts` | 同名 `*.test.ts` |
+| UX-P1-4 | P1 | 待做 | **播放進度條拇指加大**（CSS 變數，不動控制列 layout） | `StoryPlayer.module.css` | 手動播放頁 |
+| UX-P1-5 | P1 | 待做 | **e2e 兒童 UX 回歸**：a11y 補 `/adventures`、`/for-parents`、播放頁；觸控高度 assertion | `e2e/a11y.spec.ts`、`e2e/smoke.spec.ts` | `npm run test:e2e` |
+| UX-P2-1 | P2 | 待做 | 方塊／卡丁車接 `kidsMode` 或標「挑戰模式」 | `BlockDropGame.tsx`、遊戲 hub | test + 手動 |
+| UX-P2-2 | P2 | 待做 | 儀表板「最佳分數」改低壓文案（「探索紀錄」等） | `ParentDashboard.tsx` | 手動 |
+| UX-P2-3 | P2 | 待做 | 遊戲頁年齡標示一致（metadata vs chip） | `app/games/page.tsx` | build |
+| UX-P2-4 | P2 | 待做 | Dudu 鍵盤可及（內層 `tabIndex={0}`） | `DuduCompanion.tsx` | a11y |
+| UX-P2-5 | P2 | 待做 | `reflectionShown` 加 `source: detail \| end-screen` 精準量測 | `progress-store.ts`、`ReflectionPrompt.tsx` | test |
+
+### Task DAG（建議 `/agent-action` 順序）
+
+1. **UX-P0-2 + UX-P0-3**（W27-2，最小 diff）→ **UX-P1-5**（e2e 鎖回歸）
+2. **UX-P0-1** 可並行（新元件，需使用者決策：是否含 GameKit 兒童模式開關）
+3. **UX-P1-1、P1-2、P1-4** CSS／元件微調
+4. **UX-P1-3** 內容分批，不擋工程項
+5. **UX-P2-\*** 擇機
+
+### 待使用者決策（實作前）
+
+1. **家長閘門範圍**：僅 dashboard，或含 GameKit「兒童模式」開關？
+2. **UX-P1-3 節奏**：一次寫完全集，或每週 3 集？
+3. **UX-P0-4**：僅文案提示 vs 對幼兒隱藏 challenge 入口（後者觸及顯示邏輯，預設**僅文案**）
 
 ---
 
@@ -210,7 +256,7 @@ SoundOn 單集 show notes 應回鏈官網單集 URL（含可分享摘要與看�
 - ~~鎖島「看看」pill 預設縮放下被島名木牌完全遮住（功能隱形，正式站既有）；併入木牌欄第三行（島名→狀態→看看），繼承反縮放與 label 層深。~~〔design〕 ✅ `8f35732`
 - StatusOverlay 對 planned/coming 維持現狀裁決：coming 用島體濾鏡、planned 留白皆正確，方形 overlay 會在透明島邊對海面露框；planned 專屬美術（霧基＋「?」浮標）仍屬凍結資產項。〔design〕（已裁決不做 CSS 折衷）
 - 單集頁車種 chip 顯示「其他」= 資料 fallback 外洩到 UI；無車種時隱藏 chip。〔content+eng〕
-- footer「節目數據」「使用條款」觸控高度 20px（<44px）。〔a11y〕
+- footer「節目數據」「使用條款」觸控高度 20px（<44px）→ 見 [UX-P0-2](#兒童-ux-與親子互動稽核2026-07-11)。〔a11y〕
 - landing hero jpg（~300KB/張）可轉 WebP 降首屏灰底時間（手機冷載入 ~3s 才出圖，圖已是 eager+fetchpriority=high，剩資產重量）。〔perf〕
 - `app/characters/page.module.css` 自成一套 slate/teal 色系（13 個硬編 hex、無 token、不支援夜間模式），與 DESIGN.md 色票脫鉤；建議改 `var(--token, #fallback)` 慣例（參照 `components/landing/*`）。〔design+eng〕
 
@@ -258,7 +304,7 @@ SoundOn 單集 show notes 應回鏈官網單集 URL（含可分享摘要與看�
 1. ~~**STEM-P1** 每集結尾開放提問內容回填~~ ✅ `6ed7758`（全集覆蓋）
 2. **Growth-P1** 單集頁訂閱 CTA 上移（主按鈕下方）
 3. **Growth-P1** 首頁可見訂閱入口（Header／Hero → `#connect`）
-4. **Growth-P2** W27 信任收尾（`/for-parents` 佔位清除、許願表單隱私句）
+4. **Growth-P2** W27 信任收尾（`/for-parents` 佔位 ✅ `dbfe7b3`；許願隱私＋footer 觸控 → [UX-P0-2／UX-P0-3](#兒童-ux-與親子互動稽核2026-07-11)）
 5. ~~**STEM-P1** 完播／重訪量測口徑驗證~~ ✅ `d2ac15c` `9bba1dd`（story_completed＋return_visit，口徑見 lib/analytics.ts）
 
 > **STEM-P1 全數完成（2026-07-06）→ gate 解鎖**：凍結中的地圖美術長尾與遊戲 polish 可依數據擇機重開（建議先看兩週 story_completed／return_visit 基線再決定）。
@@ -322,13 +368,13 @@ SoundOn 單集 show notes 應回鏈官網單集 URL（含可分享摘要與看�
 **地圖進度中樞已上線（2026-07-06）**：17 集全數對映 zone（`data/story-zones.ts` `00feab9`）＋`useZoneProgress`/`useCompletedSlugs` hook（`ba7fd7e`）＋**可見層**（島嶼木牌 `⭐ n/N` 星章＋淡暖光暈＋sheet 已聽打星，`cbbe28d`）。「聽完」口徑由 `recordStoryCompleted` 單點定義——STEM-P1 完播口徑定案後只動寫入端，地圖不用改。圖鑑本體（車款解鎖 UI）仍待 P3。
 
 #### 家長簡易儀表板　`STEM-P3 · M · localStorage 或帳號決策`　〔stem+design〕
-用星星／笑臉呈現「聽了哪幾集、玩了什麼、解鎖了幾台車」，不做成績單。可先讀現有收藏／繼續播放／遊戲 best 分／圖鑑解鎖（localStorage）。
+用星星／笑臉呈現「聽了哪幾集、玩了什麼、解鎖了幾台車」，不做成績單。可先讀現有收藏／繼續播放／遊戲 best 分／圖鑑解鎖（localStorage）。**MVP 已上線**（`/for-parents/dashboard`）；文案 polish 見 [UX-P2-2](#兒童-ux-與親子互動稽核2026-07-11)。
 
 #### 家長閘門（parent gate）　`STEM-P3 · S · 付費／設定頁`　〔stem+eng〕
-設定、未來付費頁前簡單算術題，防孩子誤觸（對齊 Sago Mini）。
+設定、未來付費頁前簡單算術題，防孩子誤觸（對齊 Sago Mini）。**實作任務：** [UX-P0-1](#兒童-ux-與親子互動稽核2026-07-11)（2026-07-11 稽核具體化：先擋 `/for-parents/dashboard`）。
 
 #### 每集「家長共讀指引」　`STEM-P3 · S · P2 parentGuide 上線`　〔stem+content〕
-**依賴 P2 合併欄位 `parentGuide`**（見 Growth-P2 同名任務）。P3 階段僅評估：是否在儀表板摘要顯示、是否連結列印物；不再另建 `parentNote`。
+**依賴 P2 合併欄位 `parentGuide`**（見 Growth-P2 同名任務）。REUSE-2 試點（ep-1/ep-5 + ShowNotes）已完成 `dbfe7b3`；**擴充全集：** [UX-P1-3](#兒童-ux-與親子互動稽核2026-07-11)。P3 階段另評估儀表板摘要、列印物連結。
 
 #### 可下載列印物（著色、剪貼、迷宮）　`STEM-P3 · M · 插畫素材`　〔stem+growth〕
 PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
@@ -444,7 +490,7 @@ Vercel 設 `NEXT_PUBLIC_SITE_URL=https://正式網域`。OG／Twitter／RSS／si
 
 ### ~~隱私專章 + analytics 基礎事件~~　`P2 · S · 無`　〔ceo〕 ✅
 `/legal#privacy` 已說明 localStorage、完播紀錄、平台點擊、Vercel Web Analytics 與第三方平台外連；`app/layout.tsx` 已掛 `<Analytics />`，平台外連走 `TrackedPlatformLink` + `trackPlatformClick`。`a844f20`
-**剩餘 W27 信任收尾：** 許願表單送出鈕旁補「僅用於回覆／通知，不給孩子填個資」等家長向短句；LIST-2 email 訂閱實作時同步連回 `/legal#privacy`。若仍要獨立 `/privacy` 路由，可做成指向 `/legal#privacy` 的薄頁或 redirect。
+**剩餘 W27 信任收尾：** 見 [UX-P0-2／UX-P0-3](#兒童-ux-與親子互動稽核2026-07-11)；LIST-2 email 訂閱實作時同步連回 `/legal#privacy`。若仍要獨立 `/privacy` 路由，可做成指向 `/legal#privacy` 的薄頁或 redirect。
 
 ### Analytics 後續：UTM + 平台後台對照　`P2 · S–M · 量測基線`　〔ceo+growth〕
 站內平台點擊事件已上線（`a844f20`）；下一步不是再加一套 analytics，而是補 UTM 規格、平台後台基線記錄與週報對照。見上方「成長量測缺口」。
