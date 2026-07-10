@@ -6,6 +6,14 @@
 
 ### Changed
 
+- **宇宙地圖兒童易用性重構（`/agent-plan` 1783686748 委員會核准，Q3=A′／Q5 統一／Q7 翻 Decision D）**：
+  - **單段式點島＋互動狀態機**：點任何島（含建造中／規劃中鎖島本體）一次即飛抵並開介紹 sheet；鎖島小 👀「看看」鈕移除；飛行途中再點同島立即開（連點加速）。內部以單一 `MapInteraction` 狀態機（idle→flying→sheet）取代三個命令式 ref 門閂，deep link／拖曳取消／StrictMode 走同一模型（推翻 2026-07-09「兩段式」決策，使用者明示同意）。
+  - **鏡頭馴化（A′）**：`MAX_SCALE` 2.4→2.0；新增迷路自救——鏡頭靜止 700ms 後若所有島心都在視窗外（拖到只剩海）自動飛回樂園（`anyPointVisible` helper＋單元測試＋E2E）。
+  - **ZoneSheet 兒童分流**：故事清單改大圖卡（emoji 主體＋EP 大字＋⭐，整卡可點 ≥56px）；許願表單、ParentTrustStrip 與 car-park 次要入口收進「給爸爸媽媽」disclosure，孩子首屏只見故事與主入口。
+  - **無文字語意層（推翻 UNIVERSE-PROGRESSION-CONCEPT Decision D）**：狀態 pill 前綴語意 icon（🎉🚧🎁💭）、開放島木牌加飄動氣球🎈、首訪一次性「👆 點點看！」引導泡泡（session 一次、點島或 8 秒即收；deep link 入場不顯示）。
+  - **「回樂園」自救鈕**：右下羅盤 icon 鈕改為房子 icon＋「回樂園」文字直排。
+  - 動畫僅 transform/opacity、受 `prefers-reduced-motion` 控管；zone id／座標／art-tile 契約、`recordStoryCompleted` 完播口徑不變。E2E 更新：單段式／鎖島統一語意／迷路自救三條新測試，label 淨空改鎖木牌欄定位。
+
 - **未來園區更名為「未來夢想島」**：僅改顯示名／文案（`id: ocean`、deep link、資產路徑不變）。
 - **樂園地圖拖曳核心重寫**：pointer pan 加拖曳門檻（slop）、rAF 批次平移、放手慣性（`prefers-reduced-motion` 關閉慣性）；公開 `MapCamera` API 不變。
 

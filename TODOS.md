@@ -187,6 +187,20 @@ SoundOn 單集 show notes 應回鏈官網單集 URL（含可分享摘要與看�
 | MAP-ROAM-4 層次升級概念 | 完成（待 commit） | `docs/UNIVERSE-PROGRESSION-CONCEPT.md` | 文件審 |
 | MAP-ROAM-5 平移核心 | 完成（待 commit） | slop／rAF 批次／inertia（reduced-motion 關慣性） | unit + e2e |
 
+### 宇宙地圖兒童易用性重構（2026-07-10，plan `/tmp/agent-plan-1783686748.md`）
+
+> 決策：Q3=**A′ 單段式＋馴化鏡頭**（翻 07-09 兩段式，明示同意）｜Q5=統一點擊語意（移除 👀）｜Q7=同意翻 Decision D 做無文字語意｜Q4=語音 T6 延後成獨立 ticket。
+> 委員會：GPT 5.5 工程審＋Opus 4.8 架構審（Conditional Approve 條件全數整合）；diff 審 GPT 5.5。
+
+| Task | 狀態 | 摘要 | 驗證 | Commit hash |
+|------|------|------|------|-------------|
+| T1+T2 單段式＋狀態機＋e2e | 完成 | `MapInteraction` 狀態機（idle→flying→sheet）取代三 ref 門閂；點任何島（含鎖島）一次開 sheet；連點加速；deep link 同路徑；移除 👀 | `npm test` 517、deeplink StrictMode 測試、e2e 單段式＋鎖島＋deep link 4 條 | `a2b63fe` |
+| T-CAM 鏡頭馴化（A′） | 完成 | `MAX_SCALE` 2.4→2.0；`anyPointVisible`＋靜止 700ms 島群全離場自動回樂園 | unit 3 條＋e2e 迷路自救 | `a2b63fe` |
+| T3 ZoneSheet 兒童分流 | 完成 | 故事大圖卡（≥56px 整卡可點）；許願＋trust strip＋car-park 次要入口收進「給爸爸媽媽」disclosure | ZoneSheet 測試 5 條＋smoke | `29b6d0a` |
+| T4 回樂園自救鈕 | 完成 | reset 鈕改房子 icon＋「回樂園」文字 | MapControls 測試＋e2e | `a2b63fe` |
+| T5 無文字語意層（翻 Decision D） | 完成 | pill icon 🎉🚧🎁💭、開放島氣球🎈、首訪「👆點點看！」（session 一次） | ZoneIsland／universe-zones 測試 | `a2b63fe` |
+| T6 聽覺語言（點島唸島名） | **延後**（獨立 ticket） | 需錄音資產＋預設開關＋家長授權決策 | — | — |
+
 
 ### Landing 無 `<h1>`　`design · S · 無`　〔seo+a11y〕
 首頁 headings 從 h2 開始（四段 segment 標題）；第一段標題可升級 h1 或另加 sr-only h1。`components/landing/LandingSegment.tsx`。
