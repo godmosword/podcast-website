@@ -1,34 +1,59 @@
 # 車車遊樂園
 
-Bonbon & 馬米親子 podcast《車車遊樂園》的官方 **看圖聽故事** 網站。Next.js 15 全靜態（SSG），零後端。
+Bonbon & 馬米親子 podcast《車車遊樂園》的官方 **看圖聽故事** 網站。
 
-面向 **學齡前～低年級** 親子：每集音檔 + 黏土風插圖翻頁 + 逐字字幕 + **網頁小遊戲**（純 podcast 做不到的互動層）。產品路線見 [TODOS.md — 產品路線圖](./TODOS.md#產品路線圖互動--stem--商業)（互動故事 → 車車 STEM 實驗室 → 家長端 → 訂閱）。
+面向 **學齡前～低年級** 親子：每集音檔 + 黏土風插圖翻頁 + 逐字字幕 + **網頁小遊戲**（純 podcast 做不到的互動層）。產品路線見 [TODOS.md — 產品路線圖](./TODOS.md#產品路線圖互動--stem--商業)。
 
-- **正式站（範例）：** [https://podcast-website-mu.vercel.app](https://podcast-website-mu.vercel.app)
-- **版本：** [1.3.0](./CHANGELOG.md) — 詳見 [CHANGELOG.md](./CHANGELOG.md)
-- **待辦與路線圖：** [TODOS.md](./TODOS.md)（成長 A/B + STEM 四階段）
-- **每週設計評審：** [proposals/](./proposals/)（訊號驅動的迭代提案週報，決策記錄 ✅/❌/⏸ 留檔）
-- **競品與設計研究：** [RESEARCH.md](./RESEARCH.md)（Open-Web Episode Hub、YouTube 上架 SOP、低壓親子體驗原則）
-- **儲存庫：** [GitHub 公開](https://github.com/godmosword/podcast-website)（程式碼 MIT）— `public/stories/`、`public/characters/` 內音訊與插圖**禁止再散布**（見下方授權與免責）
-- **授權：** 程式碼 [MIT](./LICENSE) · 網站條文 [/legal](./app/legal/page.tsx) · 維護者全文 [DISCLAIMER.md](./DISCLAIMER.md)
-- **Agent 編排：** [docs/AGENT-WORKFLOW.md](./docs/AGENT-WORKFLOW.md) · Domain：[docs/AGENT-DOMAIN.md](./docs/AGENT-DOMAIN.md)
+| | |
+|---|---|
+| **正式站** | [podcast-website-mu.vercel.app](https://podcast-website-mu.vercel.app) |
+| **版本** | [1.3.0](./CHANGELOG.md) |
+| **待辦** | [TODOS.md](./TODOS.md) |
+| **設計** | [DESIGN.md](./DESIGN.md) · [RESEARCH.md](./RESEARCH.md) |
+| **儲存庫** | [GitHub](https://github.com/godmosword/podcast-website)（程式碼 MIT） |
+| **授權** | [MIT](./LICENSE) · [/legal](./app/legal/page.tsx) · [DISCLAIMER.md](./DISCLAIMER.md) |
+
+> `public/stories/`、`public/characters/` 內音訊與插圖**禁止再散布**（見授權與免責）。
+
+## 技術棧
+
+- **Next.js 15** App Router、**TypeScript strict**、**CSS Modules**（無 Tailwind）
+- 以 **SSG 預渲染** 為主；少數 **Route Handler**（許願 API，可選 Neon Postgres）
+- **Vitest** 單元測試 + **Playwright** E2E
+- 部署：**Vercel**（`@vercel/analytics`）
 
 ## 功能概覽
 
-| 功能 | 說明 |
-|------|------|
-| Landing Hub | [`/`](./app/page.tsx) Storyline 式四段入口（故事／睡前／黏土／衛教）；scroll-snap 全屏 hero、頂欄訂閱、段內 CTA；頁尾為獨立 snap pane |
-| 故事牆 | [`/stories`](./app/stories/page.tsx) 網格列出全部分集；**依車車找故事**（車種 chip + `?vehicle=`）；主題見 `/topic` |
-| 車車宇宙地圖 | [`/adventures`](./app/adventures/page.tsx) 鳥瞰群島園區地圖——五島滿版海洋、pan/zoom/click-to-zoom、點島 fly-to 開 dock（含該島故事清單）、鎖定島許願投稿（想聽的車車故事）、日夜天象 |
-| 看圖聽故事 | 全螢幕播放器、逐字即時字幕、可拖曳進度條、字幕字級切換 |
-| 主題模式 | 日間／夜晚／**跟隨系統**（預設與裝置 `prefers-color-scheme` 同步）；頂欄選單內可切換（Landing 頂欄固定陽光色） |
-| 車車遊樂園 | [`/games`](./app/games/page.tsx) — 4 款可玩小遊戲：Car Adventure、Block Drop（繽紛樂園）、Candy Match、Candy Kart；canvas 遊戲自動預載 sheet，**Candy Kart（Godot ~35MB WASM）進頁按需載入**，見 [GAME-PERFORMANCE.md](./docs/GAME-PERFORMANCE.md) |
-| 主題分類 | `/topic`、`/topic/[tag]` 靜態頁（SEO） |
-| 車種分類 | `/vehicles/[vehicle]` |
-| 訂閱／追蹤 | 頁尾 `ConnectHub`（Spotify／Apple 等） |
-| RSS | [`/feed.xml`](./app/feed.xml/route.ts) podcast feed |
-| PWA | `manifest.json`、主畫面圖示、繼續收聽／收藏（localStorage） |
-| 法律與信任 | [`/legal`](./app/legal/page.tsx) 使用條款；節目素材禁止再散布 |
+| 區塊 | 路由 | 說明 |
+|------|------|------|
+| Landing Hub | `/` | Storyline 式四段 scroll-snap 入口（故事／睡前／黏土／衛教） |
+| 故事牆 | `/stories` | 最新集 Hero、收藏區、車種／主題篩選（`?vehicle=`、`?tag=`） |
+| 故事詳情 | `/story/[slug]` | SEO 落地頁、分享、收藏、ShowNotes、親子延伸、完播反思、地圖島徽章 |
+| 播放器 | `/story/[slug]/play` | 全螢幕翻頁、逐字字幕、進度條、字幕字級 |
+| 逐字稿 | `/story/[slug]/transcript.vtt` | WebVTT 端點（無障礙／GEO） |
+| 主題 | `/topic`、`/topic/[tag]` | 主題索引與分類頁（SSG + FAQ schema） |
+| 車種 | `/vehicles/[vehicle]` | 車種分類頁（SSG + GEO FAQ） |
+| 宇宙地圖 | `/adventures` | 五島滿版海洋、pan/zoom/fly-to、ZoneSheet、漫遊 NPC、鎖島許願（`?zone=` deep link） |
+| 角色圖鑑 | `/characters` | `data/characters.json` 定裝照與出場故事 |
+| 家長指南 | `/for-parents` | answer-first FAQ、代表性集數（GEO／STEM-P3） |
+| 家庭儀表板 | `/for-parents/dashboard` | 本機 localStorage 收聽／遊戲摘要（不上傳） |
+| 小遊戲 | `/games` | 四款 hub；canvas 遊戲預載 sheet，**Candy Kart（Godot WASM ~35MB）進頁按需載入** |
+| 節目數據 | `/studio` | 製作團隊專用（`noindex`、不在 sitemap） |
+| 關於／法律 | `/about`、`/legal` | 關於我們、使用條款 |
+| RSS | `/feed.xml` | Podcast feed（含 Podcasting 2.0 擴充） |
+| PWA | `manifest.json`、`sw.js` | 主畫面圖示；收藏、繼續收聽、遊戲進度、主題偏好（`cheche:progress` localStorage） |
+| GEO | `public/llms.txt`、`llms-full.txt` | AI 引用語料（build 前 `prebuild` 自動生成 `llms-full`）；`robots.ts` 分流檢索／訓練爬蟲 |
+
+### 四款小遊戲（`data/games.ts`）
+
+| 路由 | 名稱 | 備註 |
+|------|------|------|
+| `/games/car-adventure` | 車車大冒險 | canvas 橫向跑跳 |
+| `/games/block-drop` | 繽紛樂園 | 落下方塊消除 |
+| `/games/candy-match` | 繽紛消消樂 | 關卡地圖 + 消除棋盤 |
+| `/games/candy-kart` | 繽紛卡丁車 | Godot HTML5 iframe，見 [GAME-PERFORMANCE.md](./docs/GAME-PERFORMANCE.md) |
+
+GameKit 跨遊戲進度（星星、獎牌、車庫）見 [GAMEKIT-ARCHITECTURE.md](./docs/GAMEKIT-ARCHITECTURE.md)。
 
 ## 本機開發
 
@@ -41,417 +66,286 @@ npm run dev
 
 ## 指令
 
+### 日常
+
 | 指令 | 用途 |
 |------|------|
 | `npm run dev` | 開發伺服器 |
-| `npm run build` | 正式建置（SSG） |
+| `npm run build` | 正式建置（`prebuild` 自動跑 `generate:llms-full`） |
 | `npm run start` | 執行建置結果 |
+| `npm run lint` | ESLint（零 warnings） |
 | `npm test` | Vitest 單元測試 |
-| `npm run test:e2e` | Playwright E2E（若有設定） |
-| `npm run font:subset` | 重新子集化中文字型（新增文案後執行） |
+| `npm run test:e2e` | Playwright E2E（需先 build） |
+| `npm run check` | 品質閘門：test + verify:episodes + verify:zone-art + verify:map-art + build |
+| `npm run font:subset` | 重新子集化中文字型（新增文案後） |
+
+### 內容管線
+
+| 指令 | 用途 |
+|------|------|
 | `npm run sync:apple` | 從 Apple Podcast RSS 同步新集（見下方） |
+| `npm run transcribe` | whisper.cpp 本機轉錄字幕 → `data/subtitles/<slug>.json` |
+| `npm run proofread:subtitles` | 字幕 lint／fix／`--mark`（illustrate 前必做） |
+| `npm run illustrate` | OpenAI 切場景 + 生圖（需 `OPENAI_API_KEY`，CI 不生圖） |
+| `npm run verify:episodes` | 對照 ep-9／ep-10 標準驗證集數接線 |
+| `npm run verify:browse-index` | 驗證 `browse-index.json` 與故事資料一致 |
+| `npm run export:video` | 整集 16:9 mp4 匯出（YouTube），見 [VIDEO-EXPORT.md](./docs/VIDEO-EXPORT.md) |
 
-## 部署
+### 地圖／資產（維護者）
 
-適合 Vercel、Netlify 等靜態/Edge 平台。建置後頁面預渲染，無伺服器需求。
+| 指令 | 用途 |
+|------|------|
+| `npm run verify:zone-art` / `verify:map-art` | 驗證島嶼／地圖美術資產契約 |
+| `npm run generate:map-art` / `generate:forest-zone` | AI 生地圖／森林島美術 |
+| `npm run generate:roamer-assets` | 漫遊 NPC 精靈 |
+| `npm run generate:llms-full` | 手動重生 `public/llms-full.txt` |
+| `npm run migrate` | 執行 DB migration（`scripts/migrations/`） |
 
-**正式環境請設定：**
+## Agent 編排（維護者）
+
+本 repo 用 **Meta + Domain** 兩層規範 AI agent 分工。一般 chat **不會**自動派子 agent；只有打出 slash command 才進入編排模式。
+
+| 指令 | 用途 | 指令檔 |
+|------|------|--------|
+| `/agent-plan` | 規劃 + 分級委員會審核 → **Approved Plan**（預設不實作） | [`.cursor/commands/agent-plan.md`](./.cursor/commands/agent-plan.md) · [`.claude/commands/agent-plan.md`](./.claude/commands/agent-plan.md) |
+| `/agent-action` | 依 Plan **Task 派工** → 整合 → Verify →（可選）Ship | [`.cursor/commands/agent-action.md`](./.cursor/commands/agent-action.md) · [`.claude/commands/agent-action.md`](./.claude/commands/agent-action.md) |
+
+**收尾必附 [Agent 執行分配表](docs/AGENT-WORKFLOW.md#收尾輸出agent-執行分配表)：** 各 agent 做了什麼 + `model slug` + 狀態。
+
+| 文件 | 內容 |
+|------|------|
+| [docs/AGENT-WORKFLOW.md](./docs/AGENT-WORKFLOW.md) | Meta：模型分工、L0–L3、Plan 模板 |
+| [docs/AGENT-DOMAIN.md](./docs/AGENT-DOMAIN.md) | Domain：紅線、驗證矩陣、Protected paths |
+| [docs/AGENT-FAILURES.md](./docs/AGENT-FAILURES.md) | 模型呼叫失敗案例簿 |
+
+## 部署與環境變數
+
+適合 Vercel、Netlify 等靜態/Edge 平台。
+
+**Production 請設定：**
 
 ```bash
 NEXT_PUBLIC_SITE_URL=https://你的網域
 ```
 
-用於 Open Graph、Twitter 卡片、RSS 與站內絕對連結。**Production 請務必設 `NEXT_PUBLIC_SITE_URL`**；未設時 production 會 fallback 到 canonical 網域（`lib/site-url.ts` 的 `CANONICAL_SITE_URL`）而非每次部署的臨時 Vercel 網域，preview／本機才用 `VERCEL_URL`／`localhost`。
+用於 Open Graph、RSS、canonical 與站內絕對連結。未設時 production fallback 到 `lib/site-url.ts` 的 `CANONICAL_SITE_URL`。
+
+| 變數 | 用途 |
+|------|------|
+| `NEXT_PUBLIC_SITE_URL` | 站點 canonical URL（**必填於 production**） |
+| `DATABASE_URL` | 樂園許願 API（Neon）；未設則表單降級 mailto |
+| `OPENAI_API_KEY` | 僅本機 `illustrate`／地圖資產生成；**CI 不放** |
+| `SYNC_ISSUE_*` | GHA 同步後 GitHub Issue 通知（見 `.env.example`） |
+
+完整說明見 [`.env.example`](./.env.example)。
 
 ## 新增一集故事（SOP）
 
-> **SoundOn 新集：** 多數情況由 [Apple Podcast 自動同步](#apple-podcast-自動同步) 每日上架（`ep-N` slug、`pageCount: 1`）。以下為**手動**在 `manualStories` 新增完整繪本或多圖體驗時使用。
+> **SoundOn 新集：** 多數由 [Apple Podcast 自動同步](#apple-podcast-自動同步) 每日上架（`ep-N` slug、`pageCount: 1`）。以下為**手動**在 `manualStories` 新增完整繪本時使用。
 
-1. **建立資料夾**  
-   `public/stories/<slug>/`  
-   - `slug` 用英文小寫，與網址一致（例：`firetruck`）
-
-2. **放入檔案**
-   - `audio.mp3` — 該集音檔（建議 mono 128kbps，單檔 < 5MB）
-   - `01.jpg` — 封面/第一頁插圖（若有更多頁：`02.jpg`、`03.jpg`…）
-
-3. **編輯 `data/stories.ts`** — 在 `manualStories` 陣列加一筆：
-
-```ts
-{
-  slug: "firetruck",
-  ep: 7,                    // 比現有最大值 +1
-  title: "標題",
-  date: "2026-06-01",       // ISO 日期
-  duration: "5:30",         // 選填
-  vehicle: "消防車",
-  emoji: "🚒",
-  color: "#e03131",
-  audio: "audio.mp3",
-  pageCount: 6,             // 與 01.jpg～NN.jpg 張數一致
-  summary: "一句話大綱",
-  ageRange: "3–7 歲",       // 選填；內頁目前不顯示年齡，僅資料用
-  tags: ["勇敢", "合作"],
-  captions: [               // 選填：字幕跟讀，每句一行
-    "第一句…",
-    "第二句…",
-  ],
-},
-```
-
-4. **重生中文字型子集**（若新增了標題/大綱/字幕等新文字）
-
-```bash
-npm run font:subset   # 需要 /tmp/huninn.ttf，見「字型維護」
-```
-
-5. **驗證**
-
-```bash
-npm test
-npm run build
-```
-
-6. **部署** — push 後 CI/平台自動建置即可。
+1. **建立資料夾** `public/stories/<slug>/`（slug 英文小寫，與網址一致）
+2. **放入** `audio.mp3`、`01.jpg`（多頁：`02.jpg`…）
+3. **編輯** `data/stories.ts` — 在 `manualStories` 加一筆（`pageCount` 與插圖張數一致）
+4. **字型** — 有新中文 → `npm run font:subset`
+5. **驗證** — `npm test && npm run build`
+6. **部署** — push 後 CI 自動建置
 
 ### 檢查清單
 
-- [ ] `slug` 與 `public/stories/<slug>/` 資料夾名稱一致
-- [ ] `01.jpg` 存在且可在本機開啟
-- [ ] `audio.mp3` 可在播放器播放
+- [ ] `slug` 與資料夾名稱一致
+- [ ] `audio.mp3` 可播放、`01.jpg` 存在
 - [ ] `ep` 為目前最大集數 + 1
 - [ ] `pageCount` 與插圖張數一致
-- [ ] 詳情頁分享預覽正常（title / 描述 / 封面圖）
-- [ ] 若有新中文字 → 已重跑 `npm run font:subset`
-- [ ] `/feed.xml` 含新集（建置後抽查）
+- [ ] 分享預覽正常（title／描述／封面）
+- [ ] `/feed.xml` 含新集
 
 ## 節目數據中心（`/studio`）
 
-製作團隊專用頁面，**不在首頁 Hero 曝光**；頁尾有極小字連結「節目數據」可進入，或直接書籤 `/studio`。頁面設 `noindex`，且不在 `sitemap.xml`。
+製作團隊專用，**不在首頁曝光**；頁尾極小字「節目數據」或書籤 `/studio`。`noindex`，不在 sitemap。
 
 | 檔案 | 用途 |
 |------|------|
-| `app/studio/page.tsx` | 節目數據中心頁面 |
-| `lib/studio/platforms.ts` | 各平台**後台** URL（含 SoundOn，不進公開 ConnectHub） |
-| `components/studio/EngagementMetricsPanel.tsx` | 僅讀此瀏覽器 localStorage 的互動驗收數據 |
-
-Studio 不保留未實作 API 指標或 placeholder metrics；跨平台完整報表請用各平台「開啟後台」捷徑查看。
+| `app/studio/page.tsx` | 節目數據中心 |
+| `lib/studio/platforms.ts` | 各平台後台 URL（含 SoundOn，不進公開 ConnectHub） |
+| `components/studio/EngagementMetricsPanel.tsx` | 本機 localStorage 互動驗收 |
 
 ## Apple Podcast 自動同步
 
-官網與 SoundOn **不會**自動連動；此管線只讀 **Apple Podcast** 公開 RSS（透過 iTunes Lookup，無需 API key）。
+官網與 SoundOn **不會**自動連動；管線只讀 **Apple Podcast** 公開 RSS（iTunes Lookup，無需 API key）。
 
 | 檔案 | 用途 |
 |------|------|
-| `data/apple-synced.json` | 由 sync 腳本追加的新集 metadata |
-| `data/apple-sync-state.json` | 已處理的 RSS `guid` |
-| `data/apple-sync.defaults.json` | 新集預設與上架框架；`overrides.<slug>` 可覆寫單集 |
+| `data/apple-synced.json` | sync 腳本追加的新集 metadata |
+| `data/apple-sync-state.json` | 已處理 RSS `guid` |
+| `data/apple-sync.defaults.json` | 新集預設；`overrides.<slug>` 可覆寫單集 |
+| `data/browse-index.json` | 車種／主題關鍵字推斷（CI 會 commit） |
 
-**每日 GHA 新集上架框架（與官網現行版面一致）：**
+**每日 GHA 上架框架：**
 
 - 資產：`public/stories/ep-N/audio.mp3` + Apple 封面 `01.jpg`
-- 資料：`data/apple-synced.json`，`pageCount: 1`（單圖 MVP 播放器）
-- 摘要：自動去除 SoundOn 託管尾註；內頁只顯示 EP + **時長**（不寫入 `ageRange`）
-- 車種：標題含關鍵字時自動推斷（如「高鐵」→ 高鐵）；否則預設「其他」，可於 `overrides` 手動指定
-- 首頁：Landing Hub 四段 scroll-snap；故事列表見 **`/stories`**（車種 chip 篩選、卡片無封面角標 emoji）
-- CI：通過 `npm test` 與 `npm run build` 後 commit push `main`
-
-**本機預覽（不寫檔）：**
+- 資料：`pageCount: 1`（單圖 MVP）；摘要自動去 SoundOn 尾註
+- CI：**安裝 whisper-cpp + 快取 large-v3**，同步後自動轉錄 → `data/subtitles/`
+- 通過 `verify:episodes`、`verify:browse-index`、`npm test`、`npm run build` 後 commit push `main`
 
 ```bash
-npm run sync:apple -- --dry-run
+npm run sync:apple -- --dry-run   # 預覽不寫檔
+npm run sync:apple                # 實際同步
 ```
 
-**實際同步：**
+**Workflow：** [`.github/workflows/sync-apple-podcast.yml`](.github/workflows/sync-apple-podcast.yml)（`repository_dispatch` 準時觸發 + cron 後備）、[`.github/workflows/sync-watchdog.yml`](.github/workflows/sync-watchdog.yml)（RSS 逾時告警）。
 
-```bash
-npm run sync:apple
-npm test && npm run build
-```
+> GitHub 內建 `schedule` 為 best-effort，常延遲。要準時請用外部 cron 打 `repository_dispatch`（`sync-now`／`watchdog-now`），設定見下方舊版說明或 workflow 註解。
 
-**GitHub Actions：** [`.github/workflows/sync-apple-podcast.yml`](.github/workflows/sync-apple-podcast.yml)（feed 來源即 SoundOn 官方 RSS）。同步腳本會**追加新集**並**更新已同步集數的 title / date / duration / summary**；僅在 RSS 與 repo 完全一致時早退（`git status` 乾淨）。有變更時通過測試與 build 後 **commit 並 push 到 `main`**。`concurrency` 鎖避免交疊。三個觸發來源：
-
-| 來源 | 準時性 | 用途 |
-|------|--------|------|
-| `repository_dispatch`（外部排程打 API） | ✅ 準時 | 主要、可靠的定時觸發（見下方設定） |
-| `schedule`（GitHub 內建 cron `*/15`） | ⚠️ best-effort，常延遲數小時甚至跳過 | 後備，幾小時內會補到 |
-| `workflow_dispatch`（Actions 頁 Run workflow） | ✅ 即時 | 上架後想立刻上站時手動按 |
-
-> ⚠️ **GitHub 內建 `schedule` 不可靠**：官方為 best-effort，高負載時延遲數小時或整次跳過、不補跑（本 repo 實測 `0 1` 的 cron 常跑在 05:00 左右）。要真正準時，請設定下方外部排程。
-
-#### 外部排程觸發（可靠定時，免費）
-
-讓外部 cron 服務定時打 GitHub API 觸發 workflow，繞過內建 schedule 的不可靠：
-
-1. **建 token**：GitHub → Settings → Developer settings → **Fine-grained personal access tokens** → 只授權本 repo、權限 **Contents: Read and write**（`repository_dispatch` 端點所需），複製 token。
-2. **註冊免費 cron**（如 [cron-job.org](https://cron-job.org)）→ 新增 job：
-   - **URL**：`https://api.github.com/repos/godmosword/podcast-website/dispatches`
-   - **Method**：`POST`
-   - **Headers**：`Authorization: Bearer <你的 token>`、`Accept: application/vnd.github+json`
-   - **Body**：`{"event_type":"sync-now"}`
-   - **間隔**：每 15 分（或你要的頻率）
-3. 本機驗證指令（把 `<TOKEN>` 換掉跑一次，應觸發一次 sync）：
-   ```bash
-   curl -X POST \
-     -H "Authorization: Bearer <TOKEN>" \
-     -H "Accept: application/vnd.github+json" \
-     https://api.github.com/repos/godmosword/podcast-website/dispatches \
-     -d '{"event_type":"sync-now"}'
-   ```
-
-> token 是密鑰：只放進 cron 服務的 request header，**不要 commit 進 repo**。權限只給單一 repo + Contents，外洩風險最小。
-
-若 repo 有 branch protection，需允許 `github-actions[bot]` 寫入。
-
-新集 slug 規則：`ep-<集數>`（例：`ep-7`）。同步後若要完整看圖體驗：
-
-1. 在 `public/stories/<slug>/` 補 `02.jpg`～`06.jpg`，並在 `data/apple-synced.json`（或 `apple-sync.defaults.json` 的 `overrides`）改 `pageCount` 與 `captions`
-2. 有新中文文案時執行 `npm run font:subset`
-3. push 後 Vercel 自動部署，抽查 `/feed.xml` 與播放器
-
-### 同步通知與告警（免人工檢查）
-
-同步 Issue 只保留**需要人工動作**的事項（搭配 GitHub App 手機推播），不需任何新 secret：
+### 同步通知
 
 | 情況 | 行為 | Issue label |
 |------|------|-------------|
-| 同步到新集並 push 成功 | 開「待生圖」Issue（push 後才送，避免 push 失敗誤報上站） | `illustration` |
-| RSS 有新集但超過 `STALE_HOURS`（預設 3h）仍未上站 | 看門狗開/補「⚠️ RSS 有新集未上站」Issue | `sync-alert` + `sync-stale-rss` |
-| 單次 workflow／test／build 失敗 | 不開 Issue；錯誤細節留在 GitHub Actions logs / summary | — |
-
-- **Issue 紅線**：單次 workflow／test／build 失敗不寫 GitHub Issue，避免把 raw error 或暫時性 CI 狀態推到 Issue；請到 Actions run log 追錯。
-- **新集待辦去重**：[`scripts/sync-alert.ts`](scripts/sync-alert.ts) 以精確標題比對 open Issue；就算舊 Issue 缺 `illustration` label，也只補標、不重複開單。
-- **看門狗**：[`sync-watchdog.yml`](.github/workflows/sync-watchdog.yml) 每小時獨立比對「RSS 最新集 vs 站上狀態」（[`scripts/check-sync-fresh.ts`](scripts/check-sync-fresh.ts)），是 sync workflow 整個壞掉時的最後防線；偵測到 sync 正在跑／排隊時靜默，避免長轉錄期間誤報。建議同樣掛外部 `repository_dispatch`（type `watchdog-now`）確保準時。
-- **舊告警收尾**：sync 成功時仍 best-effort 關閉既有 `sync-job-failure` 舊 Issue；不再建立新的同步失敗 Issue。
-- **可選環境變數**：`SYNC_ISSUE_ASSIGNEES`（逗號分隔 username）、`SYNC_ISSUE_MENTIONS`（Issue 開頭 @mention）、`NOTIFY_SITE_URL`、看門狗 `STALE_HOURS`。
-- 所有告警腳本為 best-effort：找不到 `gh`／secret 缺失一律忽略、永遠 exit 0，不遮蔽原始失敗。
+| 新集 push 成功 | 開「待生圖」Issue | `illustration` |
+| RSS 有新集但逾時未上站 | 看門狗開告警 Issue | `sync-alert` |
+| 單次 CI 失敗 | 細節在 Actions logs，不開 Issue | — |
 
 ## 專案結構
 
 ```
 app/
-  page.tsx              首頁 Landing Hub（四段 scroll-snap hero）
-  stories/page.tsx      故事牆（車種 chip 篩選）
-  adventures/page.tsx   車車宇宙樂園地圖
-  feed.xml/route.ts     RSS podcast feed
-  topic/                主題標籤索引與分類頁
-  vehicles/[vehicle]/   車種分類頁
-  story/[slug]/         故事詳情（SEO metadata）
-  story/[slug]/play/    全螢幕播放器
-  about/                關於我們
-  fonts/                自託管中文字型子集（huninn woff2）
+  page.tsx                    Landing Hub（四段 scroll-snap）
+  stories/page.tsx            故事牆
+  story/[slug]/               故事詳情 + play 播放器 + transcript.vtt
+  adventures/page.tsx         車車宇宙地圖
+  characters/page.tsx         角色圖鑑
+  for-parents/                家長指南 + dashboard
+  games/                      四款小遊戲
+  topic/、vehicles/           主題／車種索引
+  studio/、about/、legal/     數據中心、關於、條款
+  api/zone-wish/              許願 API（可選 Neon）
+  feed.xml/、robots.ts、sitemap.ts
 components/
-  landing/              Landing Hub（Segment、頂欄、scroll-snap、嘟嘟夥伴）
-  ConnectHub.tsx        頁尾追蹤／訂閱圖示區
-  StoryFilter.tsx       故事牆車種 chip 篩選
-  VehicleClayIcon.tsx   車種 chip 黏土封面縮圖
-  StoryWall.tsx         故事網格
-  StoryMeta.tsx         內頁 EP + 時長
-  decor/                SVG 裝飾
+  landing/                    Landing Hub、頂欄、嘟嘟吉祥物
+  universe/                   地圖、島嶼、ZoneSheet、漫遊者
+  games/                      遊戲 shell、canvas、Candy Kart iframe
+  story/                      ShowNotes、反思提問、親子延伸、島徽章
+  home/                       /stories 區塊渲染
+  studio/、for-parents/、decor/
 data/
-  content.ts            Story 查詢 API；合併手動集、Apple 同步與 sidecar 資料
-  stories.ts            手動維護故事原始資料
-  apple-synced.json     GHA／sync 腳本寫入的新集
-  apple-sync.defaults.json
-scripts/
-  sync-apple-podcast.ts Apple RSS 同步
-  lib/apple-rss.ts      RSS 解析與摘要清理
-  lib/apple-sync-profile.ts
-  subset_font.py 等     字型子集、圖示產生器
-docs/
-  GAMEKIT-ARCHITECTURE.md  GameKit 分層、import policy 與新增遊戲指南
-  GAMEKIT-ART-BIBLE.md     GameKit 視覺方向
-  GAME-PERFORMANCE.md      遊戲載入策略（Candy Kart 按需 WASM 等）
+  content.ts                  Story 查詢 API（合併手動 + Apple + sidecar）
+  stories.ts                  手動維護集（完整繪本）
+  apple-synced.json           GHA 同步集
+  characters.json、scenes/、subtitles/
+  universe-zones.ts 等        地圖五島、漫遊、故事↔島對應
+  reflection-prompts.ts、family-activities.ts、parent-guides.ts
+hooks/                        遊戲、地圖、無障礙、家長儀表板 hooks
 lib/
-  platforms.ts          收聽平台連結
-  gamekit/
-    react/              React hooks 與觸控控制
-    runtime/            渲染、loop、輸入、音訊與程序圖塊
-    progress/           存檔、設定、獎牌與跨遊戲進度
-    games/              大冒險關卡與 Candy Kart bridge
-    types.ts            四款遊戲與進度資料型別；root 只放跨層型別
-  social.ts             社群連結
-  feed.ts               RSS 產生
-  site-url.ts           站點絕對網址
-  story-metadata.ts     每集 SEO
-public/stories/         每集音檔與插圖（含 `ep-N/` 同步目錄）
+  gamekit/                    遊戲 runtime、進度、React hooks
+  universe/                   地圖美術、deep link、OG
+  story-geo.ts、for-parents.ts  GEO／家長端 resolver
+  progress-store.ts           localStorage 收藏、繼續收聽、遊戲進度
+  zone-wish-*.ts              許願 schema／DB／rate limit
+scripts/
+  sync-apple-podcast.ts       Apple RSS 同步
+  transcribe.ts、illustrate.ts
+  generate-llms-full.ts       GEO llms-full 生成
+  verify-*.ts                 集數／索引／地圖資產驗證
+  lib/                        apple-rss、illustrate-core、subtitle-proofread 等
+docs/                         見下方「文件索引」
+public/
+  stories/<slug>/             每集音檔與插圖
+  adventures/                 地圖／島嶼／漫遊者資產
+  characters/、landing/、candy-kart/
+  llms.txt、llms-full.txt
+candy-kart-game/              Godot 原始專案（匯出到 public/candy-kart/）
+.cursor/、.claude/             Agent slash commands 與規則
 ```
 
-## 音檔體積建議
+架構分層慣例：`data/*.ts`（型別＋常數＋`*.test.ts`）→ `lib/*-query.ts`（resolver）→ `components/<area>/` + CSS Modules。
 
-目前每集 MP3 約 4–7MB。若要優化行動載入：
+## 自動字幕（`npm run transcribe`）
 
-```bash
-# 需安裝 ffmpeg
-ffmpeg -i audio.mp3 -codec:a libmp3lame -b:a 128k -ac 1 audio-optimized.mp3
-```
-
-播放器使用 `preload="metadata"`，進入播放頁才開始載入完整音檔。
-
-## 自動字幕：逐字即時字幕（`npm run transcribe`）
-
-每集的即時字幕存在**側車檔** `data/subtitles/<slug>.json`（`[{ "t": 秒數, "text": "…" }]`），由音檔**本機轉錄**（whisper.cpp）產生，音檔不外送、免費、零金鑰。轉錄時**自動簡轉繁**（OpenCC `cn→twp`，台灣用語）並過濾常見幻覺鳴謝。播放器**有側車檔就自動套用**（依音檔時間顯示字幕，獨立於翻頁）；沒有則回退舊的 `captions`/`captionTimes` 邏輯。
-
-**一次性安裝：**
+逐字字幕在側車檔 `data/subtitles/<slug>.json`，由 **whisper.cpp 本機轉錄**（音檔不外送）。播放器有側車檔即自動套用；否則回退 `captions`／`captionTimes`。
 
 ```bash
-brew install whisper-cpp          # 提供 whisper-cli（已驗證 1.8.x）
-mkdir -p models
-# 繁中品質建議 large-v3（約 3GB）；要快可先用 small（約 465MB）
-curl -L -o models/ggml-large-v3.bin \
+brew install whisper-cpp
+mkdir -p models && curl -L -o models/ggml-large-v3.bin \
   https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3.bin
+
+npm run transcribe -- ep-7          # 指定集
+npm run transcribe -- --all         # 全部有 audio.mp3 的集
 ```
 
-**產生字幕（寫入 `data/subtitles/<slug>.json`）：**
+**草稿必校對**（illustrate 前必做）：[docs/SUBTITLE-PROOFREAD.md](./docs/SUBTITLE-PROOFREAD.md)
 
 ```bash
-npm run transcribe -- ev drone ep-7    # 指定數集
-npm run transcribe -- --all            # 全部 public/stories/* 有 audio.mp3 的集
-WHISPER_MODEL=models/ggml-small.bin npm run transcribe -- ev   # 指定模型
-npm run transcribe -- --convert --all  # 只對既有側車檔重跑簡轉繁/過濾（不跑 Whisper）
+npm run proofread:subtitles -- ep-N --mark
 ```
 
-**新集自動上字幕：** `npm run sync:apple` 下載新集音檔後，**本機若有 whisper-cli + 模型會自動轉錄**並寫側車檔；缺工具/模型（如一般 CI）或設 `SKIP_TRANSCRIBE=1` 會自動跳過、不中斷同步。CI 要自動上字幕，需在 workflow 安裝 `whisper-cpp` 並快取模型。
+GHA 同步 workflow 已內建 whisper；本機缺工具或 `SKIP_TRANSCRIBE=1` 會跳過、不中斷。
 
-**草稿必校對（兒童產品、illustrate 前必做）：** 見 [docs/SUBTITLE-PROOFREAD.md](./docs/SUBTITLE-PROOFREAD.md)
+## 每集劇情插圖（`npm run illustrate`）
 
-```bash
-npm run proofread:subtitles -- ep-N          # lint
-npm run proofread:subtitles -- ep-N --fix    # 自動修正 Bonbon／馬米等
-# 人工編輯 data/subtitles/ep-N.json
-npm run proofread:subtitles -- ep-N --mark   # 通過後標記（illustrate 閘門）
-```
+讓 `pageCount:1` 的集數依台詞自動產生黏土風插圖系列。播放器依 `captionTimes` + `pageCount` 換圖，**不改播放器**。
 
-- Whisper 在音樂/靜音段常加**假字幕鳴謝**（如「字幕:XXX」「請訂閱…」）；腳本已自動過濾常見幻覺，仍建議抽查。
-- 輸出為**逐字稿**（語氣詞、口語）；**品牌/人名仍會誤聽**（Bonbon→寶寶、馬米→媽咪，Whisper 無從得知），直接編輯側車 JSON 修正即可。
-- 簡轉繁已自動（OpenCC）；偶有未涵蓋詞仍需抽查。
-- `small` 模型誤字較多；目前 EP1–7 用 `large-v3`（繁中較準，建議正式用）。
+> 唯一需 **OpenAI API** 的付費功能；**本機手動、人工審圖後才上線**。
 
-> 模型檔放 `models/`（已 gitignore，勿入庫）。側車檔 `data/subtitles/*.json` 會入庫（即字幕內容）。
-
-### 舊式：頁綁定字幕（captionTimes，`?cue=1`）
-
-沒有側車字幕時，播放器用 `data/stories.ts` 的 `captions`（每頁一句）；可加 `captionTimes`（每句起始秒數）讓它精準換句，否則時長平均切換。手動對時：開播放頁加 `?cue=1` 進入「字幕對時模式」，邊聽邊點記下秒數再複製貼回。一旦該集有側車字幕，會優先用側車字幕。
-
-## 每集劇情插圖自動生成（`npm run illustrate`）
-
-讓只有單封面的集數（`ep-N`，`pageCount:1`）依台詞自動產生**一系列黏土風插圖**，播放時隨音檔時間切換（對齊 **ep-9**：開場可至約 50 秒，進入正片後**每 15–20 秒一張**，依劇情轉折切密）。播放器既有的「依時間換圖」邏輯（`captionTimes` + `pageCount`）直接套用，**不改播放器**。
-
-> ⚠️ 這是專案**唯一需要外部付費 API 的功能**，需 `OPENAI_API_KEY`。送出的是**已公開的劇本文字**（由本機字幕來，非音檔，仍守「音檔不外送」）。**本機手動執行、人工審圖後才上線；CI 不放此 key、不生圖。**
-
-**標準範本：** [ep-9、ep-10](./docs/EPISODE-WORKFLOW.md)（全幕插圖 + 幕級 `captions`）。EP2–8 與日後新集須同一 workflow；驗證：`npm run verify:episodes`。
-
-**資料流：** `npm run transcribe` → **`npm run proofread:subtitles -- <slug> --mark`**（見 [SUBTITLE-PROOFREAD.md](./docs/SUBTITLE-PROOFREAD.md)）→ 切場景 `data/scenes/<slug>.json` → …
-
-**`public/stories/<slug>/` 資產規範**（資料夾內不放 README，規則集中於本節）：
-
-- 插畫檔名 `01.jpg`、`02.jpg`…（兩位補零、小寫 `.jpg`），張數必須等於該集 `pageCount`（手動集在 `data/stories.ts`，生圖集在 overrides）；音檔固定叫 `audio.mp3`。
-- **暫存清理規則**：某集 `--approve` 且 `public/stories/<slug>/` 已 commit 後，`public/.illustrate-staging/<slug>/` 即可整夾刪除（草稿與 contact sheet 無保留價值）；進行中或尚未 commit 的集數先留著。
+**標準範本：** [ep-9、ep-10](./docs/EPISODE-WORKFLOW.md)。驗證：`npm run verify:episodes`。
 
 ```bash
-# 1) 切場景（可先 --segment-only --deterministic 免 key 看切分節奏）
-OPENAI_API_KEY=sk-... npm run illustrate -- ep-9 --segment-only
-
-# 2) 生圖到暫存 + contact sheet（停在這審圖）
-OPENAI_API_KEY=sk-... npm run illustrate -- ep-9
-open public/.illustrate-staging/ep-9/contact.html   # 逐幕檢查走樣／不適／文字
-
-# 3) 壞幕單張重抽
-OPENAI_API_KEY=sk-... npm run illustrate -- ep-9 --scene 4
-
-# 4) 全部 OK → 上線（複製進 public + 寫 pageCount/captionTimes/captions）
-npm run illustrate -- ep-9 --approve
-npm run verify:episodes                  # 對照 ep-9／ep-10 標準
-npm run sync:apple && npm run build
+OPENAI_API_KEY=sk-... npm run illustrate -- ep-9 --segment-only  # 只切場景
+OPENAI_API_KEY=sk-... npm run illustrate -- ep-9                 # 生圖到暫存
+open public/.illustrate-staging/ep-9/contact.html                  # 審圖
+npm run illustrate -- ep-9 --approve                               # 上線
 ```
 
 | 旗標 | 作用 |
 |------|------|
-| `--segment-only` | 只產 `data/scenes/<slug>.json`，不生圖（便宜，先審切分） |
-| `--deterministic` | 本機切場景（不呼叫文字模型，免 key；切分較不貼劇情，當後備/測試用） |
-| `--scene N` | 重抽第 N 幕（暫存），不用整集重生 |
+| `--segment-only` | 只產 `data/scenes/<slug>.json` |
+| `--scene N` | 重抽第 N 幕 |
 | `--approve` | 暫存 → `public/` + 寫接線 |
 
-**風格一致性**：每幕以該集既有 `01.jpg` 當**參考圖**（OpenAI image edit）+ 固定黏土風前綴（`CLAY_STYLE_PREFIX`，萃取自 DESIGN.md），讓材質／配色／主角車跨幕一致。
+角色名冊 `data/characters.json`、定裝照 `public/characters/`、跨集一致性見 README 舊節或 [EPISODE-WORKFLOW.md](./docs/EPISODE-WORKFLOW.md)。
 
-**跨集角色一致**：名冊 `data/characters.json`（每角色 `name`／`aliases`(誤聽別名)／`vehicle`／`desc`(英文外觀)／`ref`(定裝照)）。切場景時文字模型**從台詞認出每幕出場角色**並標 `characters`；生圖時把該幕角色的**定裝照**（`public/characters/<名>.jpg`）當參考圖（可多張同框），跨集維持同一形象。**新角色首次登場自動生定裝照**進暫存，contact sheet 有「新角色」區，`--approve` 後存進名冊成 canonical（之後各集引用）。定裝照不好用 `--char 名字` 重抽。已登記角色不會被覆寫。
+## 字型維護
 
-### 手動補定裝照（自己畫／外部生圖時）
-
-不想讓管線自動生定裝照、想用自己準備的圖時：
-
-1. 把圖放進 `public/characters/`，正規化成 **1400×1400 JPEG、小寫 `.jpg`**（對齊既有資產）：
-   ```bash
-   npx tsx -e 'import sharp from "sharp";import{readFileSync,unlinkSync}from"node:fs";
-   (async()=>{const s="public/characters/原檔.JPG";const b=readFileSync(s);unlinkSync(s);
-   await sharp(b).resize(1400,1400,{fit:"cover"}).jpeg({quality:90}).toFile("public/characters/角色名.jpg");})()'
-   ```
-2. **檔名要等於 `safeName(角色名)`**：去掉空白與符號、保留中日韓字與英數（例：「怪獸卡車 Monster Truck」→ 角色名取 `怪獸卡車`、英文放 `aliases`）。
-3. 在 `data/characters.json` 加一筆 `{ name, aliases, vehicle, desc(英文外觀), ref:"characters/<名>.jpg" }`。`aliases` 放台詞可能的誤聽／別稱，讓切場景時認得出。
-
-### 重抽單幕並指定角色（保留 Apple 封面）
-
-這次 ep-9 #6 的流程——把某幕換成指定角色、**但封面 `01.jpg` 要保留 Apple 原圖**時，**不要用 `--approve`**（它會把暫存全 8 張連封面一起蓋進 `public/`）：
-
-```bash
-# 1) 在 data/scenes/<slug>.json 的該幕加 "characters": ["角色A","角色B"]（名字需與名冊 name 一致）
-# 2) 用定裝照當參考重抽該幕到暫存
-npm run illustrate -- ep-9 --scene 6
-open public/.illustrate-staging/ep-9/06.jpg          # 審圖
-# 3) 滿意後「只」單張複製進 public（不動 01.jpg、不重寫接線）
-cp public/.illustrate-staging/ep-9/06.jpg public/stories/ep-9/06.jpg
-```
-
-`pageCount`／`captionTimes` 不變時無需 `sync:apple`／改 overrides；直接 commit 該張圖即可。
-
-**model id**：預設 `OPENAI_TEXT_MODEL=gpt-4o`、`OPENAI_IMAGE_MODEL=gpt-image-2`；圖像模型若當下不可用，設 `OPENAI_IMAGE_MODEL=gpt-image-1`（程式不改）。
-
-**手動集**（ambulance/ev 等已有手繪 6 頁）：`--approve` 會印出要手填到 `data/stories.ts` 的 `pageCount`/`captionTimes`（不自動改 TS）。
-
-## 字型維護（圓體中文）
-
-中文用自託管的 **jf-open 粉圓（huninn）** 子集（`app/fonts/huninn-subset.woff2`，約 100KB）。拉丁與數字由 Baloo 2 提供。
-
-**新增/修改文案後**，若出現先前沒用過的中文字，需重生子集：
+中文用自託管 **jf-open 粉圓（huninn）** 子集（`app/fonts/huninn-subset.woff2`）。新增文案後：
 
 ```bash
 curl -sL https://github.com/justfont/open-huninn-font/releases/download/v2.1/jf-openhuninn-2.1.ttf -o /tmp/huninn.ttf
 npm run font:subset
-# commit app/fonts/huninn-subset.woff2
 ```
-
-子集腳本：`scripts/subset_font.py`（需 `fonttools`、`brotli`）。
-
-## 視覺素材
-
-- **裝飾：** `components/decor/`（SVG）
-- **佔位插圖：** `scripts/gen_placeholders.py`
-- **PWA / 吉祥物：** `scripts/gen_icons.py`
-- **Landing Hub hero：** `public/landing/segment-*.jpg`（橫版）與 `*-portrait.jpg`（行動 ≤768px）
-- **其他 Hero / 佔位：** `public/hero-home.jpg` 等
-
-動效尊重 `prefers-reduced-motion: reduce`（`app/globals.css`）。
 
 ## 產品路線（摘要）
 
-完整條目與工時見 [TODOS.md](./TODOS.md#產品路線圖互動--stem--商業)。
+| 階段 | 重點 |
+|------|------|
+| STEM-P1 互動故事 | 完播反思提問、重訪量測（**當務之急**） |
+| STEM-P2 實驗室 | 組裝車、斜坡物理、開放式探索 |
+| STEM-P3 家長端 | `/for-parents`、家庭儀表板、共讀指引 |
+| STEM-P4 商業化 | freemium + 家長訂閱 |
 
-| 階段 | 重點 | 下一步 |
-|------|------|--------|
-| STEM-P1 互動故事 | 結尾開放提問（reflectionPrompt）、完播／重訪量測 | **當務之急** — 驗證互動留存 |
-| STEM-P2 實驗室 | 組裝車、斜坡物理、路徑編碼、分類數數 | 開放式、不計時 |
-| STEM-P3 家長端 | 簡易儀表板、家長閘門、共讀指引、列印物 | 信任與轉換 |
-| STEM-P4 商業化 | freemium + 家長訂閱（對標月 99／年 999） | 留存跑通後再上 |
+原則：**玩不像作業** · **幼兒不競賽計時** · **家長信任與透明付費**。完整條目見 [TODOS.md](./TODOS.md)。
 
-設計原則：**玩不像作業** · **幼兒不競賽計時** · **家長信任與透明付費**。
+## 文件索引
+
+| 文件 | 說明 |
+|------|------|
+| [EPISODE-WORKFLOW.md](./docs/EPISODE-WORKFLOW.md) | 單集全幕插圖標準流程 |
+| [SUBTITLE-PROOFREAD.md](./docs/SUBTITLE-PROOFREAD.md) | 字幕校對 SOP |
+| [VIDEO-EXPORT.md](./docs/VIDEO-EXPORT.md) | YouTube 整集影片匯出 |
+| [GAMEKIT-ARCHITECTURE.md](./docs/GAMEKIT-ARCHITECTURE.md) | GameKit 分層與新增遊戲 |
+| [GAME-PERFORMANCE.md](./docs/GAME-PERFORMANCE.md) | 遊戲載入策略 |
+| [UNIVERSE-ART-BIBLE.md](./docs/UNIVERSE-ART-BIBLE.md) | 樂園地圖美術聖經 |
+| [FOR-PARENTS-DATA.md](./docs/FOR-PARENTS-DATA.md) | 家長端資料盤點 |
+| [GEO-CONTENT-CONTRACT.md](./docs/GEO-CONTENT-CONTRACT.md) | GEO 內容欄位契約 |
+| [geo-checklist.md](./docs/geo-checklist.md) | GEO 上線後人工檢查 |
+| [AGENT-WORKFLOW.md](./docs/AGENT-WORKFLOW.md) | Agent 編排 Meta |
+| [AGENT-DOMAIN.md](./docs/AGENT-DOMAIN.md) | Agent Domain 紅線 |
+| [proposals/](./proposals/) | 每週設計評審週報 |
 
 ## 授權與免責
 
 | 文件 | 說明 |
 |------|------|
-| [LICENSE](./LICENSE) | 網站**程式碼** MIT 授權 |
-| [DISCLAIMER.md](./DISCLAIMER.md) | 節目內容版權、禁止散布、字幕說明、建議年齡、第三方連結、免責條款 |
-| [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) | 字型（含 [OFL-huninn.txt](./app/fonts/OFL-huninn.txt)）與商標指示性使用摘要 |
-| [/legal](./app/legal/page.tsx) | 對外網站使用條款與免責聲明頁 |
+| [LICENSE](./LICENSE) | 網站**程式碼** MIT |
+| [DISCLAIMER.md](./DISCLAIMER.md) | 節目內容版權、禁止散布、建議年齡 |
+| [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) | 字型與商標摘要 |
+| [/legal](./app/legal/page.tsx) | 對外使用條款 |
 
-Podcast 音檔、插圖、字幕與品牌內容屬 Bonbon & 馬米；**未經書面同意禁止轉載、下載或散布**。AI 插圖須人工審圖後才 `--approve` 上線（見 `scripts/lib/illustrate-core.ts`）。
+Podcast 音檔、插圖、字幕與品牌內容屬 Bonbon & 馬米；**未經書面同意禁止轉載、下載或散布**。AI 插圖須人工審圖後才 `--approve` 上線。
