@@ -33,11 +33,12 @@ export type Story = StoryBase & {
   captions?: string[];
   captionTimes?: number[];
   characterIds?: string[];
+  /** 播放結束互動反思（sidecar，見 data/reflection-prompts.ts；不進 FAQ／RSS，契約見 docs/GEO-CONTENT-CONTRACT.md） */
   reflectionPrompt?: {
     child: string;
     parentFollowUp: string;
   };
-  /** 聽完聊一聊：親子延伸活動（sidecar，見 data/family-activities.ts） */
+  /** 聽完聊一聊：親子延伸活動（sidecar，見 data/family-activities.ts；通路契約見 docs/GEO-CONTENT-CONTRACT.md） */
   familyActivity?: FamilyActivity;
   /** 故事發生的樂園地圖 zone（sidecar，見 data/story-zones.ts） */
   zoneId?: ZoneId;

@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { storiesByNewest } from "@/data/content";
+import { getStories, storiesByNewest } from "@/data/content";
 import { metadata as aboutMetadata } from "@/app/about/page";
 import { metadata as adventuresMetadata } from "@/app/adventures/page";
 import { metadata as storiesMetadata } from "@/app/stories/page";
 import { generateMetadata as generateTopicMetadata } from "@/app/topic/[tag]/page";
 import { generateMetadata as generateVehicleMetadata } from "@/app/vehicles/[vehicle]/page";
+import { hasVtt } from "@/lib/transcript";
 import { storyDetailMetadata, storyPlayMetadata } from "./story-metadata";
 
 describe("storyDetailMetadata", () => {
@@ -12,6 +13,15 @@ describe("storyDetailMetadata", () => {
     const story = storiesByNewest()[0];
     const meta = storyDetailMetadata(story);
     expect(meta.alternates?.canonical).toBe(`/story/${story.slug}`);
+  });
+
+  it("有 VTT 的集數 alternates 含 text/vtt", () => {
+    const story = getStories().find((item) => hasVtt(item));
+    expect(story).toBeDefined();
+
+    const meta = storyDetailMetadata(story!);
+    const types = meta.alternates?.types as Record<string, string> | undefined;
+    expect(types?.["text/vtt"]).toBe(`/story/${story!.slug}/transcript.vtt`);
   });
 });
 

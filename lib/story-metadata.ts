@@ -4,6 +4,7 @@ import { storyDateModified } from "@/data/story-dates";
 import { DEFAULT_OG_IMAGE } from "@/lib/site-url";
 import { storyDefinitionSummary } from "@/lib/story-geo";
 import { storyCoverPath } from "@/lib/story-utils";
+import { hasVtt } from "@/lib/transcript";
 
 const SITE_NAME = "車車遊樂園";
 
@@ -25,10 +26,17 @@ export function storyDetailMetadata(story: Story): Metadata {
   const imagePath = storyOgImagePath(story);
   const modified = storyDateModified(story);
 
+  const transcriptPath = hasVtt(story)
+    ? `/story/${story.slug}/transcript.vtt`
+    : undefined;
+
   return {
     title: story.title,
     description,
-    alternates: { canonical: `/story/${story.slug}` },
+    alternates: {
+      canonical: `/story/${story.slug}`,
+      ...(transcriptPath ? { types: { "text/vtt": transcriptPath } } : {}),
+    },
     other: {
       dateModified: modified,
       "article:modified_time": modified,

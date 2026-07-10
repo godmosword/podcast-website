@@ -64,4 +64,23 @@ describe("buildLlmsFullText", () => {
     expect(characterLines[0]).toContain("https://example.com/characters");
     expect(characterLines.join("\n")).not.toContain("undefined");
   });
+
+  it("每集區塊含大綱要點，有 VTT 的集數附逐字稿連結", () => {
+    const text = buildLlmsFullText({
+      siteUrl: "https://example.com",
+      generatedAt: "2026-07-02T00:00:00.000Z",
+    });
+
+    expect(text).toContain("大綱要點：");
+
+    const firstStory = getStories()[0];
+    const blockStart = text.indexOf(`### 第 ${firstStory.ep} 集：${firstStory.title}`);
+    const nextBlock = text.indexOf("### 第 ", blockStart + 1);
+    const block =
+      nextBlock > blockStart
+        ? text.slice(blockStart, nextBlock)
+        : text.slice(blockStart);
+
+    expect(block).toMatch(/- .+/);
+  });
 });

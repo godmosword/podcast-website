@@ -1,3 +1,4 @@
+import type { Character } from "@/data/characters";
 import type { Story } from "@/data/content";
 import type { FaqItem } from "@/lib/json-ld";
 import { getSiteUrl } from "@/lib/site-url";
@@ -94,6 +95,29 @@ export function storyOutlineItems(story: Story): string[] {
   }
 
   return items;
+}
+
+/** 單集頁預設可見的精簡大綱（完整版留在收合區或機器語料）。 */
+export function storyOutlinePreviewItems(
+  story: Story,
+  maxItems = 3,
+): string[] {
+  return storyOutlineItems(story).slice(0, maxItems);
+}
+
+/** 出場角色一行摘要，供收合區 summary 與預覽使用。 */
+export function storyCharactersTeaser(characters: Character[]): string {
+  if (characters.length === 0) {
+    return "這一集以故事情境為主，聽完可以回到角色圖鑑認識更多車車朋友。";
+  }
+
+  const names = characters.slice(0, 3).map((character) => character.name);
+  const nameText = names.join("、");
+  if (characters.length <= 3) {
+    return `本集出場：${nameText}`;
+  }
+
+  return `本集出場：${nameText} 等 ${characters.length} 位車車朋友`;
 }
 
 export function storyParentExtension(story: Story): {

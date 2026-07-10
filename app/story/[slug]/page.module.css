@@ -212,3 +212,53 @@
   font-size: 0.96rem;
   line-height: 1.75;
 }
+
+.teaser {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+
+.expandable,
+.expandableSection {
+  margin-top: 12px;
+}
+
+.expandable > summary,
+.expandableSummary {
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--accent);
+  list-style: none;
+}
+
+.expandable > summary::-webkit-details-marker,
+.expandableSummary::-webkit-details-marker {
+  display: none;
+}
+
+.expandable > summary::before,
+.expandableSummary::before {
+  content: "▸ ";
+}
+
+.expandable[open] > summary::before,
+.expandableSection[open] .expandableSummary::before {
+  content: "▾ ";
+}
+
+.expandableSection {
+  margin-top: 24px;
+  padding: 16px 18px;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  background: linear-gradient(180deg, var(--card-2), var(--card));
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+}
+
+.expandableBody {
+  margin-top: 10px;
+}

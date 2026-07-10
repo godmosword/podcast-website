@@ -7,13 +7,15 @@ import { faqPageJsonLd, podcastEpisodeJsonLd } from "@/lib/json-ld";
 import { lineShareUrl, storyLineShareText, storyShareUrl } from "@/lib/share-story";
 import {
   familyActivityFaq,
+  storyCharactersTeaser,
   storyDefinitionSummary,
   storyFaqs,
   storyOutlineItems,
+  storyOutlinePreviewItems,
   storyParentExtension,
-  storyPlainSummary,
 } from "@/lib/story-geo";
 import { storyDetailMetadata } from "@/lib/story-metadata";
+import { hasVtt } from "@/lib/transcript";
 import { storyCoverPath } from "@/lib/story-utils";
 import FavoriteButton from "@/components/FavoriteButton";
 import JsonLd from "@/components/JsonLd";
@@ -62,11 +64,15 @@ export default async function StoryDetailPage({
   const related = getRelated(slug, 3);
   const nextStory = getNextStory(slug);
   const definitionSummary = storyDefinitionSummary(story);
-  const plainSummary = storyPlainSummary(story);
+  const outlinePreviewItems = storyOutlinePreviewItems(story);
   const outlineItems = storyOutlineItems(story);
+  const hasFullOutline = outlineItems.length > outlinePreviewItems.length;
   const characters = getCharactersForStory(story.slug);
+  const charactersTeaser = storyCharactersTeaser(characters);
   const parentExtension = storyParentExtension(story);
   const faqs = storyFaqs(story);
+  const [primaryFaq, ...moreFaqs] = faqs;
+  const storyHasVtt = hasVtt(story);
   // GEO：familyActivity 以 Q&A 形式併入 FAQPage JSON-LD（頁面可見文字由卡片提供）
   const activityFaq = familyActivityFaq(story);
   const jsonLdFaqs = activityFaq ? [...faqs, activityFaq] : faqs;
@@ -91,7 +97,6 @@ export default async function StoryDetailPage({
               本集介紹
             </h2>
             <p className={styles.definition}>{definitionSummary}</p>
-            {plainSummary && <p className={styles.summary}>{plainSummary}</p>}
           </section>
 
           <div className={styles.coverWrap} style={{ borderColor: story.color }}>
@@ -146,13 +151,31 @@ export default async function StoryDetailPage({
 
         <section className={styles.contentSection} aria-labelledby="outline-heading">
           <h2 id="outline-heading" className={styles.sectionHeading}>
-            逐字稿與詳細大綱
+            故事大綱
           </h2>
           <ol className={styles.lines}>
-            {outlineItems.map((line, i) => (
-              <li key={`${story.slug}-outline-${i}`}>{line}</li>
+            {outlinePreviewItems.map((line, i) => (
+              <li key={`${story.slug}-outline-preview-${i}`}>{line}</li>
             ))}
           </ol>
+          {(hasFullOutline || storyHasVtt) && (
+            <details className={styles.expandable}>
+              <summary>看完整逐字稿與詳細大綱</summary>
+              <ol className={styles.lines}>
+                {outlineItems.map((line, i) => (
+                  <li key={`${story.slug}-outline-${i}`}>{line}</li>
+                ))}
+              </ol>
+              {storyHasVtt && (
+                <Link
+                  href={`/story/${story.slug}/transcript.vtt`}
+                  className={styles.inlineLink}
+                >
+                  下載完整逐字稿（WebVTT）
+                </Link>
+              )}
+            </details>
+          )}
         </section>
 
         <section
@@ -162,25 +185,24 @@ export default async function StoryDetailPage({
           <h2 id="characters-heading" className={styles.sectionHeading}>
             出場角色
           </h2>
-          {characters.length > 0 ? (
-            <ul className={styles.characterList}>
-              {characters.map((character) => (
-                <li key={character.id} className={styles.characterItem}>
-                  <Link href={`/characters#${character.id}`}>
-                    {character.name}
-                  </Link>
-                  <span>
-                    {character.vehicle}，{character.personality}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className={styles.summary}>
-              這一集以故事情境為主，聽完可以回到角色圖鑑認識更多車車朋友。
-            </p>
+          <p className={styles.teaser}>{charactersTeaser}</p>
+          {characters.length > 0 && (
+            <details className={styles.expandable}>
+              <summary>看出場角色介紹</summary>
+              <ul className={styles.characterList}>
+                {characters.map((character) => (
+                  <li key={character.id} className={styles.characterItem}>
+                    <Link href={`/characters#${character.id}`}>
+                      {character.name}
+                    </Link>
+                    <span>
+                      {character.vehicle}，{character.personality}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </details>
           )}
-
           <Link href="/characters" className={styles.inlineLink}>
             看全部角色圖鑑
           </Link>
@@ -195,29 +217,43 @@ export default async function StoryDetailPage({
           />
         )}
 
-        <section className={styles.contentSection} aria-labelledby="parent-heading">
-          <h2 id="parent-heading" className={styles.sectionHeading}>
+        <details className={styles.expandableSection}>
+          <summary className={styles.expandableSummary}>
             {parentExtension.heading}
-          </h2>
-          <ul className={styles.promptList}>
-            {parentExtension.prompts.map((prompt, i) => (
-              <li key={`${story.slug}-prompt-${i}`}>{prompt}</li>
-            ))}
-          </ul>
-        </section>
+          </summary>
+          <div className={styles.expandableBody}>
+            <ul className={styles.promptList}>
+              {parentExtension.prompts.map((prompt, i) => (
+                <li key={`${story.slug}-prompt-${i}`}>{prompt}</li>
+              ))}
+            </ul>
+            <Link href="/for-parents" className={styles.inlineLink}>
+              家長搜尋指南
+            </Link>
+          </div>
+        </details>
 
         <section className={styles.contentSection} aria-labelledby="faq-heading">
           <h2 id="faq-heading" className={styles.sectionHeading}>
             常見問題
           </h2>
-          <div className={styles.faqList}>
-            {faqs.map((faq, i) => (
-              <section key={`${story.slug}-faq-${i}`} className={styles.faqItem}>
-                <h3>{faq.question}</h3>
-                <p>{faq.answer}</p>
-              </section>
-            ))}
-          </div>
+          <section className={styles.faqItem}>
+            <h3>{primaryFaq.question}</h3>
+            <p>{primaryFaq.answer}</p>
+          </section>
+          {moreFaqs.length > 0 && (
+            <details className={styles.expandable}>
+              <summary>還有其他 {moreFaqs.length} 個常見問題</summary>
+              <div className={styles.faqList}>
+                {moreFaqs.map((faq, i) => (
+                  <section key={`${story.slug}-faq-${i}`} className={styles.faqItem}>
+                    <h3>{faq.question}</h3>
+                    <p>{faq.answer}</p>
+                  </section>
+                ))}
+              </div>
+            </details>
+          )}
         </section>
 
         {nextStory && (

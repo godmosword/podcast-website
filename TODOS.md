@@ -53,6 +53,19 @@
 | llms.txt 補路由 | 完成 | `public/llms.txt` 主要路由地圖補 `/for-parents`、`/characters` 兩行 | `git diff -- public/llms.txt` 確認只新增指定兩行 | `cfd1c5f` |
 | llms-full.txt 自動產生 | 完成 | 新增 `scripts/generate-llms-full.ts`、`scripts/generate-llms-full.test.ts`、`public/llms-full.txt`，並接入 `prebuild` | `npm run generate:llms-full` passed；`npm run build` passed；`npx tsc --noEmit` passed；`npm test` passed | `581b8aa` |
 
+---
+
+## GEO 第二階段（低干擾閱讀）
+
+> **策略：** 可見層短、機器層全（JSON-LD／llms-full／VTT）、展開層選用 `<details>`。Approved Plan：`/tmp/agent-plan-1783669925.md`。
+
+| Task | 狀態 | 主要產出 | 預計影響檔案 | 驗證 | Commit hash |
+|------|------|----------|--------------|------|-------------|
+| GEO-P1 單集頁瘦身 | 完成 | 首屏只留定義式摘要；精簡 3 點大綱 + 完整大綱／VTT 收合；角色一行摘要 + 收合；家長延伸收合並連 `/for-parents`；FAQ 可見 1 題其餘收合；JSON-LD FAQ 維持完整 | Modify: `app/story/[slug]/page.tsx`, `page.module.css`, `lib/story-geo.ts`, `lib/story-geo.test.ts` | `npm test` + `npm run build` + `npx tsc --noEmit` passed | `58ffb8e` |
+| GEO-P2 離頁匯流 | 完成 | llms-full 每集加大綱要點與 VTT 連結；單集 metadata `alternates.types.text/vtt`；主題／車種頁短導言 + FAQPage JSON-LD | Modify: `scripts/generate-llms-full.ts`, `lib/story-metadata.ts`, `app/topic/[tag]/page.tsx`, `app/vehicles/[vehicle]/page.tsx`; Create: `lib/topic-geo.ts`, `lib/vehicle-geo.ts` + tests | `npm test` + `npm run build` + `npx tsc --noEmit` passed | `58ffb8e` |
+| GEO-P3 欄位契約 | 完成 | `docs/GEO-CONTENT-CONTRACT.md`；`lib/geo-content-contract.ts` 通路常數與重複文案檢查 + 測試 | Create: `docs/GEO-CONTENT-CONTRACT.md`, `lib/geo-content-contract.ts`, `lib/geo-content-contract.test.ts`; Modify: `data/content.ts`（JSDoc 連結） | `npm test -- lib/geo-content-contract.test.ts` passed | `58ffb8e` |
+| GEO-P4 量測 | 完成 | `docs/geo-checklist.md` 補 llms-full、主題／車種 schema、單集預設可見字數、`<details>` 收合檢查 | Modify: `docs/geo-checklist.md` | 人工清單可執行 | `58ffb8e` |
+
 ## 名單收集 × 內容再利用（2026-07-03 品牌盤點）
 
 > **Gate：** 本段經人工確認後才開始改 code。每個 Task 完成後單獨 commit，訊息格式 `brand: task-N <描述>`，hash 回填本段。
@@ -66,7 +79,7 @@
 | LIST-2 新集通知 email 訂閱 | 可開工：隱私 gate 已解 | 複製 zone-wish 技術棧（zod + rate limit + Neon + DB 未設降級）；`subscribers` 表 `lower(email)` unique + `ON CONFLICT DO NOTHING`（冪等、防枚舉）；簡單收集 + 隱私說明（「僅用於新集數通知」），不做 double opt-in；`/legal#privacy` 已涵蓋 analytics／localStorage（`a844f20`），實作時同步掛 privacy link | Create: `scripts/migrations/002_subscribers.sql`、`lib/subscribe-schema.ts`、`lib/subscribe-db.ts`、`app/api/subscribe/route.ts`、`components/SubscribeForm.tsx`、`app/subscribe/page.tsx`（範本：`app/api/zone-wish/route.ts`、`ZoneWishForm.tsx`） | curl：無 `DATABASE_URL` 降級、POST 201、重複 email 201、429 rate limit；`npm test` + `npm run build` | — |
 | LIST-3 分析事件 | 待 LIST-1/2 掛點 | `trackSubscribeSubmit(source)`、`trackLineCtaClick(source)`，走 `safeTrack`、無 PII（比照 `trackUniverseWishSubmit`） | Modify: `lib/analytics.ts` | 本機點擊確認事件發送 | — |
 | REUSE-1 校對字幕採用檢查 | 可開工 | 確認 backfill 管線優先讀 `data/subtitles/_proofread/`；若否修正並對 ep-11~17 重跑 `npm run backfill:captions`；跑 `npm run verify:episodes` | Modify（視檢查結果）: `scripts/lib/illustrate-core.ts`; Data: `data/apple-synced.json` | `verify:episodes` 全過；抽查 ep-16 captions 用校對版文字 | — |
-| REUSE-2 家長共讀指引呈現（= P2 `parentGuide`） | BLOCKED：等邊界定義 | `Story` 加選填 `parentGuide` 欄位 + `ShowNotes` 區塊（「這集可以聊什麼」+ 延伸提問／小活動）；SEO 可爬 zh-Hant 內文；先釐清與已上線 `familyActivity` 的欄位邊界 | Modify: `data/content.ts`、`app/story/[slug]/page.tsx`; Create: `components/story/ShowNotes.tsx` | view-source 確認 SSR 文字；`npm test` + `npm run build` | — |
+| REUSE-2 家長共讀指引呈現（= P2 `parentGuide`） | 可開工：契約已定 | `Story` 加選填 `parentGuide` 欄位 + `ShowNotes` 區塊（「這集可以聊什麼」+ 延伸提問／小活動）；預設收合；遵守 `docs/GEO-CONTENT-CONTRACT.md` | Modify: `data/content.ts`、`app/story/[slug]/page.tsx`; Create: `components/story/ShowNotes.tsx` | `lib/geo-content-contract.test.ts` + view-source SSR；`npm test` + `npm run build` | — |
 | REUSE-3 YouTube 整集影片匯出 | 完成 `d9a00fd`（fix 至 `1365fc2`） | 本機 CLI `npm run export:video -- <slug>`：1920×1080 整集 mp4；`data/scenes` 換頁 + `data/subtitles` 原始逐句 ASS burn-in（`jf-openhuninn-2.1`）；`export/video/<slug>/` + manifest（gitignore）；9:16 Shorts 留二期 | Create: `scripts/lib/export-video-core.ts`、`scripts/export-video-assets.ts`、`docs/VIDEO-EXPORT.md`; Modify: `package.json`、`.gitignore` | `export:video -- ep-17`（ep-17 7:15 mp4 驗證）；`npm test -- export-video-core` | `1365fc2` |
 
 ### 待使用者提供（不擋開發）
@@ -111,8 +124,8 @@
 ### SoundOn show notes 回鏈　`growth · S · sync 管線`　〔growth+ops〕
 SoundOn 單集 show notes 應回鏈官網單集 URL（含可分享摘要與看圖體驗），形成「平台 → 官網 → 訂閱/互動」閉環。先定 SOP：新集上架時手填或用 sync Issue checklist 提醒；不直接讓官網寫回 SoundOn。
 
-### `familyActivity` / `parentGuide` 邊界定義　`content-architecture · S · 無`　〔stem+growth〕
-已上線的 `familyActivity` 是單集短 Q&A／RSS show note／FAQPage；待建的 `parentGuide` 應定位為較完整的家長共讀指引。開 REUSE-2 前先寫清欄位責任、呈現位置、是否進 RSS／JSON-LD，避免同一段親子提示被兩套資料重複維護。
+### ~~`familyActivity` / `parentGuide` 邊界定義~~　`content-architecture · S · 無`　〔stem+growth〕 ✅
+契約見 `docs/GEO-CONTENT-CONTRACT.md`（GEO-P3）；REUSE-2 可開工。
 
 ---
 

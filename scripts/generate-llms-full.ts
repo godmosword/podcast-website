@@ -4,7 +4,11 @@ import { fileURLToPath } from "node:url";
 import rawCharacters from "../data/characters.json";
 import { getStories } from "../data/content";
 import { getSiteUrl } from "../lib/site-url";
-import { storyDefinitionSummary } from "../lib/story-geo";
+import {
+  storyDefinitionSummary,
+  storyOutlinePreviewItems,
+} from "../lib/story-geo";
+import { hasVtt } from "../lib/transcript";
 
 type RawCharacter = {
   name: string;
@@ -69,15 +73,24 @@ export function buildLlmsFullText(options: BuildOptions = {}): string {
 
   const storySections = stories
     .map((story) => {
+      const outlineBullets = storyOutlinePreviewItems(story).map(
+        (line) => `- ${line}`,
+      );
       const lines = [
         `### 第 ${story.ep} 集：${story.title}`,
         "",
         storyDefinitionSummary(story),
+        "",
+        "大綱要點：",
+        ...outlineBullets,
         ...(story.familyActivity
           ? ["", `🏡 聽完聊一聊：${story.familyActivity.question}`]
           : []),
         "",
         `- 頁面 URL：${siteUrl}/story/${story.slug}`,
+        ...(hasVtt(story)
+          ? [`- 逐字稿（WebVTT）：${siteUrl}/story/${story.slug}/transcript.vtt`]
+          : []),
         ...(story.tags?.length ? [`- 主題標籤：${story.tags.join("、")}`] : []),
         ...(story.vehicle ? [`- 車種：${story.vehicle}`] : []),
         `- 發布日期：${story.date}`,

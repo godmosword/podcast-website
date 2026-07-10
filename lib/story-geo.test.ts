@@ -1,11 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 import { getStories, getStory, storiesByNewest } from "@/data/content";
+import { getCharactersForStory } from "@/data/characters";
 import {
   familyActivityFaq,
   familyActivityShowNote,
+  storyCharactersTeaser,
   storyDefinitionSummary,
   storyFaqs,
   storyOutlineItems,
+  storyOutlinePreviewItems,
   storyParentExtension,
   storyZoneMapShowNote,
 } from "./story-geo";
@@ -39,6 +42,28 @@ describe("storyOutlineItems", () => {
         true,
       );
     }
+  });
+});
+
+describe("storyOutlinePreviewItems", () => {
+  it("預設只取前三點精簡大綱", () => {
+    for (const story of getStories()) {
+      const preview = storyOutlinePreviewItems(story);
+      const full = storyOutlineItems(story);
+
+      expect(preview.length, story.slug).toBeLessThanOrEqual(3);
+      expect(preview, story.slug).toEqual(full.slice(0, preview.length));
+    }
+  });
+});
+
+describe("storyCharactersTeaser", () => {
+  it("有角色時產生一行摘要", () => {
+    const story = storiesByNewest()[0];
+    const teaser = storyCharactersTeaser(getCharactersForStory(story.slug));
+
+    expect(teaser.length).toBeGreaterThan(0);
+    expect(teaser).toMatch(/本集出場：|故事情境為主/);
   });
 });
 
