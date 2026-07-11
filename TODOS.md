@@ -239,7 +239,7 @@ SoundOn 單集 show notes 加官網單集 URL（可選 UTM），閉環 B 戰場�
 #### D3 Night 主題全站打磨　`design · M · 無`　〔design〕待實作
 「僅 4 檔完整元件級 night」**屬實**（globals／SiteHeader／UniverseMap／ZoneIsland），但 **≠ 覆蓋率**：`[data-theme="night"]` token 已讓部分頁自動適配；真正缺口是 **hardcoded 亮色**（`characters`、`for-parents` 等，見 `app/characters/page.module.css`）。驗收：**hardcoded-color audit** + 對比度抽查；補 stories／詳情／footer／games hub 暖燈卡片。地圖海圖仍固定淺色不反轉。與設計待辦 characters 硬編 hex 同批。
 
-#### D13 字幕閱讀排版（剩餘）　`ux · S–M · 無`　〔ux+content〕**實作完成（待 commit）**
+#### D13 字幕閱讀排版（剩餘）　`ux · S–M · 無`　〔ux+content〕 ✅ `d42fae1`
 **已有（勿重做）：** 三段 `captionSize`、對比遮罩（`.caption` blur 底）、行高／字級階梯、句級 `{t,text}` 切換（`data/subtitles/*.json`）。
 **本輪 ✅：** `lib/subtitle-cue.ts` 前／當前／後一句 + `StoryCaptionStack` cue 過渡；即時字幕軌與翻頁 `captions`／`captionTimes` 對齊（`resolveCaptionStackState`）。`prefers-reduced-motion` 關閉動畫。
 **另開 spike（非本輪 M）：** 逐字卡拉 OK——需 word-level timestamps／VTT 擴充，工作量 **L**，單獨 ticket。
