@@ -24,7 +24,8 @@ export function buildCelebrationIframeMessage(
 }
 
 export function celebrationEventFromKartFinish(
-  _msg: CandyKartFinishMessage,
+  msg: CandyKartFinishMessage,
 ): CelebrationEventId {
+  void msg; // 參數維持 adapter 契約（呼叫端型別檢查）；事件目前恆為完賽
   return "game_race_finish";
 }

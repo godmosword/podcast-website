@@ -66,7 +66,6 @@ export default function SiteHeader({ variant = "full" }: SiteHeaderProps) {
         <picture>
           <source type="image/avif" srcSet={HERO_PATHS.avif} />
           <source type="image/webp" srcSet={HERO_PATHS.webp} />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={HERO_PATHS.jpg}
             alt="陪孩子，成長的路上：卡通車車在遊樂園裡開心玩耍的黏土風格插畫"

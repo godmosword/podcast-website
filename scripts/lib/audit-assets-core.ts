@@ -43,7 +43,6 @@ export const STAGING_DIRS = [
 ] as const;
 
 const IMAGE_EXT = /\.(jpe?g|png|webp|gif|svg|avif)$/i;
-const STORY_PAGE_JPG = /^\d+\.jpg$/i;
 
 const SOURCE_SCAN_DIRS = ["app", "components", "data", "lib", "scripts"] as const;
 
