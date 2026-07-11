@@ -121,7 +121,7 @@
 
 ### Task DAG（建議 `/agent-action` 順序）
 
-1. ~~**UX-P0-2 + UX-P0-3**~~ ✅ `964f418`（W27-2）→ ~~**MAP-UX-P1a/b/c／P2a**~~ ✅ `8056a3a` → **UX-P1-5**（全站 e2e）
+1. ~~**UX-P0-2 + UX-P0-3**~~ ✅ `964f418`（W27-2）→ ~~**MAP-UX-P1a/b/c／P2a**~~ ✅ `80457c4` → **UX-P1-5**（全站 e2e）
 2. **UX-P0-1** 可並行（新元件，需使用者決策：是否含 GameKit 兒童模式開關）
 3. **UX-P1-1**（ZoneSheet 部分併入 MAP-UX-P1a）、P1-2、P1-4 CSS／元件微調
 4. **UX-P1-3** 內容分批，不擋工程項
@@ -133,11 +133,11 @@
 
 | ID | 優先 | 狀態 | 摘要 | 主要檔案 | 驗證 |
 |----|------|------|------|----------|------|
-| MAP-UX-P1a | P1 | ✅ `8056a3a` | close／wishToggle ≥44px | `ZoneSheet.module.css` | CSS 契約測 + e2e |
-| MAP-UX-P1b | P1 | ✅ `8056a3a` | sheet 開時 overlay 擋地圖手勢 + `min(72vh,34rem)` | `ZoneSheet.module.css` | e2e 拖曳／backdrop |
-| MAP-UX-P1c | P1 | ✅ `8056a3a` | a11y `/adventures` + 開 sheet axe + 觸控 assertion | `e2e/a11y.spec.ts`、`e2e/universe-map.spec.ts` | `test:e2e` 24 綠 |
-| MAP-UX-P2a | P2 | ✅ `8056a3a` | reduced-motion 點島即開 sheet | `e2e/universe-map.spec.ts` | `test:e2e` |
-| MAP-ROAM-doc | ops | ✅ `8056a3a` | archive「待 commit」→ `3166cc5`／`503ad8b` 對帳 | `docs/archive/…` | 文件 only |
+| MAP-UX-P1a | P1 | ✅ `80457c4` | close／wishToggle ≥44px | `ZoneSheet.module.css` | CSS 契約測 + e2e |
+| MAP-UX-P1b | P1 | ✅ `80457c4` | sheet 開時 overlay 擋地圖手勢 + `min(72vh,34rem)` | `ZoneSheet.module.css` | e2e 拖曳／backdrop |
+| MAP-UX-P1c | P1 | ✅ `80457c4` | a11y `/adventures` + 開 sheet axe + 觸控 assertion | `e2e/a11y.spec.ts`、`e2e/universe-map.spec.ts` | `test:e2e` 24 綠 |
+| MAP-UX-P2a | P2 | ✅ `80457c4` | reduced-motion 點島即開 sheet | `e2e/universe-map.spec.ts` | `test:e2e` |
+| MAP-ROAM-doc | ops | ✅ `80457c4` | archive「待 commit」→ `3166cc5`／`503ad8b` 對帳 | `docs/archive/…` | 文件 only |
 
 ### 待使用者決策（實作前）
 
