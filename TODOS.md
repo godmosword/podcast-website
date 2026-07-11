@@ -257,8 +257,8 @@
 #### D10 圖鑑「已認識」狀態　`ux · S · D3`　〔ux+design〕 ✅ `3ac73a3`
 **落地：** `lib/character-recognition.ts`（`storiesCompleted` ∩ `appearsIn` 或 `unlocks.characters`）；`hooks/useRecognizedCharacters.ts`（SSR 空集合 → mount 讀 store）；`CharacterCatalogGrid`／`CharacterCard` 統一定裝照相框＋已認識／待認識貼紙、`aria-label` 含狀態。3D tilt 仍列 **L4 D10-tilt**。
 
-#### D4 View Transitions（spike）　`ux · S(spike) 可能升至 M · D2`　〔eng+ux〕 ✅ `3ac73a3`＋`42a9d38`（e2e 導覽；手動 morph 矩陣待勾）
-**落地：** `experimental.viewTransition`（Next 15.5.20+）+ `StoryCoverMorph`（`unstable_ViewTransition`）故事卡封面↔詳情 hero；`sharedCoverMorph` 防同頁重複 slug；`app/view-transitions.css` + reduced-motion。手動矩陣見 `docs/D4-VIEW-TRANSITIONS-SPIKE.md`。未啟用 `Link transitionTypes`（待 Next 16+ 評估）。
+#### D4 View Transitions（spike）　`ux · S(spike) 可能升至 M · D2`　〔eng+ux〕 ✅ `3ac73a3`＋`42a9d38`；**驗收矩陣 #1–#7 全過**（2026-07-11）
+**落地：** `experimental.viewTransition`（Next 15.5.20+）+ `StoryCoverMorph`（`unstable_ViewTransition`）故事卡封面↔詳情 hero；`sharedCoverMorph` 防同頁重複 slug；`app/view-transitions.css` + reduced-motion。驗收紀錄見 `docs/D4-VIEW-TRANSITIONS-SPIKE.md`（Chromium＋WebKit＋Firefox；#7 揪出並修復 `theme.ts ↔ progress-store.ts` 循環相依 TDZ → 抽 `lib/progress-keys.ts`）。未啟用 `Link transitionTypes`（待 Next 16+ 評估）；iOS 真機滑動返回目視留日常觀察。**已達擴大門檻**。
 
 #### D5 Scroll-driven 進場（CSS-only）　`ux · S · D2`　〔ux〕 ✅ `bed866e`
 **落地：** `app/scroll-driven.css`（`@supports (animation-timeline: view())` 才啟用 `.scrollEnter`；預設靜態可見）；`StoryCard`／games hub 改 scroll 進場並關閉支援內 `popIn` 雙跳；`LandingSegment` 標題／CTA 錯落 `scrollEnterStagger1–3`；`prefers-reduced-motion` 關閉。
