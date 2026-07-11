@@ -19,7 +19,6 @@ type LandingSegmentProps = {
 
 const FOOTER_ANCHOR = "landing-foot";
 /** 首頁頁尾 ConnectHub 錨點（Growth-P1b） */
-const CONNECT_ANCHOR = "connect";
 
 export default function LandingSegment({
   segment,
@@ -41,15 +40,6 @@ export default function LandingSegment({
       return;
     }
     document.getElementById(nextAnchorId)?.scrollIntoView({ block: "start" });
-  }
-
-  function goToConnect(e: React.MouseEvent<HTMLAnchorElement>) {
-    e.preventDefault();
-    if (landingScroll) {
-      landingScroll.scrollToSegment(CONNECT_ANCHOR);
-      return;
-    }
-    document.getElementById(CONNECT_ANCHOR)?.scrollIntoView({ block: "start" });
   }
 
   const imgProps = {
@@ -134,11 +124,6 @@ export default function LandingSegment({
           >
             {segment.title}
           </h2>
-          {segment.subtitle ? (
-            <p className={`${styles.subtitle} scrollEnter scrollEnterStagger2`}>
-              {segment.subtitle}
-            </p>
-          ) : null}
         </div>
         <div className={`${styles.ctaRow} scrollEnter scrollEnterStagger3`}>
           {segment.play ? (
@@ -166,15 +151,6 @@ export default function LandingSegment({
               " →"
             )}
           </Link>
-          {index === 0 ? (
-            <a
-              href={`#${CONNECT_ANCHOR}`}
-              className={styles.textLink}
-              onClick={goToConnect}
-            >
-              訂閱收聽
-            </a>
-          ) : null}
         </div>
       </div>
     </section>

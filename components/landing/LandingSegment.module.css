@@ -200,28 +200,6 @@
   margin-left: 2px;
 }
 
-/* 降權文字連結（01 的訂閱收聽：讓位給播放主鈕） */
-.textLink {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 10px 8px;
-  color: #fff;
-  font-weight: 800;
-  font-size: 0.92rem;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
-}
-
-.subtitle {
-  margin: 0;
-  font-size: clamp(0.88rem, 2.2vw, 1.02rem);
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.94);
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
-}
-
 .next {
   position: absolute;
   left: 50%;
