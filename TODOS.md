@@ -184,69 +184,116 @@ SoundOn 單集 show notes 加官網單集 URL（可選 UTM），閉環 B 戰場�
 - StatusOverlay 對 planned/coming 維持現狀裁決：coming 用島體濾鏡、planned 留白皆正確，方形 overlay 會在透明島邊對海面露框；planned 專屬美術（霧基＋「?」浮標）仍屬凍結資產項。〔design〕（已裁決不做 CSS 折衷）
 - 單集頁車種 chip 顯示「其他」= 資料 fallback 外洩到 UI；無車種時隱藏 chip。〔content+eng〕
 - ~~footer「節目數據」「使用條款」觸控高度 20px（<44px）~~ ✅ `964f418`（UX-P0-2）。〔a11y〕
-- landing hero jpg（~300KB/張）可轉 WebP 降首屏灰底時間（手機冷載入 ~3s 才出圖，圖已是 eager+fetchpriority=high，剩資產重量）。〔perf〕
+- landing hero jpg（~300KB/張）可轉 WebP 降首屏灰底時間（首頁 LCP 為 `segment-stories*`，見 [D1](#d1-圖像管線現代化修正版雙軌-lcp)）。〔perf〕
 - `app/characters/page.module.css` 自成一套 slate/teal 色系（13 個硬編 hex、無 token、不支援夜間模式），與 DESIGN.md 色票脫鉤；建議改 `var(--token, #fallback)` 慣例（參照 `components/landing/*`）。〔design+eng〕
 
 
 ---
 
-## 視覺化升級（2026-07-11 方向研究，待逐項審閱）
+## 視覺化升級（2026-07-11 審核通過）
 
-> 來源：`/agent-plan` 視覺升級委員會（leader + Codex gpt-5.5 工程審，無 CRITICAL）。**全部項目狀態＝待審閱**——經使用者逐項審閱通過後才排入現役隊列；通過項目逐項以 `/agent-action D<n>` 實作。完整計劃（含審查整合表）見 plan 檔（agile-stirring-kernighan）。
-> 分層：L0 治理地基 → L1 效能地基 → L2 體驗 → L3 亮點；L0/L1 建議對應 P1、L2 對應 P2、L3 對應 P3。通用驗證矩陣：lint + vitest + build + e2e（axe 零新增）+（D2 落地後）`test:visual` diff；新動效一律加語意 `prefers-reduced-motion`。
+> 來源：`/agent-plan` 視覺升級委員會（leader + Codex gpt-5.5 工程審）→ **2026-07-11 使用者＋程式庫對帳審核通過**（Conditional Approve）。完整初稿見 plan 檔（agile-stirring-kernighan）。
+> **與現役隊列關係：** 本段為**並行軌 B（視覺）**，不取代檔首信任／成長 Top 5（並行軌 A）。交集：D14↔UX-P1-1 觸控、D9↔UX-P2-4 Dudu 鍵盤。
+> **分層：** L0 治理地基 → L1 核心體驗地基 → L2 高價值體驗 → L3 系統化回饋 → L4 品牌亮點（對應工程 P1→P3）。
+> **建議執行順序：** D0 → D2（smoke baseline 先）→ 修正版 D1 → D13 剩餘 → D3 → D14 → D6 ∥ D12 → L2 其餘 → L3 → L4。
+> **驗證矩陣：** `npm test` + `npm run build` + `test:e2e`（axe 零新增 critical/serious）+（D2 落地後）`test:visual` diff；視覺類不進 `npm run check`。新動效僅 transform/opacity（含 stroke-dashoffset），一律 `prefers-reduced-motion` + visibility pause。
+> **紅線：** 宇宙地圖場景固定淺色、不反轉海圖／島 tile；不動 `useMapCamera`／ZoneSheet 核心、landing scroll-snap 骨架；D12 不碰播放／地圖 runtime（OG 動態 route 或 build-time 產圖除外）。
+
+### 狀態圖例
+
+| 標記 | 意義 |
+|------|------|
+| 待實作 | 審核通過，可 `/agent-action D<n>` |
+| 部分完成 | 既有能力已具備，本項只補缺口 |
+| spike | 驗證通過才擴大 |
+
+---
 
 ### L0 治理地基
 
-#### D0 資產治理　`eng · S · 無`　〔perf+ops〕待審閱
-asset inventory script（`scripts/audit-assets.ts`）：分「路由實際引用 vs staging/未引用」（`.illustrate-staging` 等排除）、單檔大小上限、新增大 jpg 警示。先量再改（上線 jpg 實為 ~319 張非 621）。
+#### D0 資產治理　`eng · S · 無`　〔perf+ops〕待實作
+`scripts/audit-assets.ts`：**四類 taxonomy**——(1) 部署資產（git tracked）(2) staging／gitignore（如 `.illustrate-staging`）(3) 動態推導引用（`storyCoverPath`、`getZoneArtSrcSet` 等）(4) 孤兒資產。不可只 grep 靜態字串路徑。
+**基線數字（2026-07-11 量測）：** tracked JPG **358**（其中故事插圖 **319**）；ignored staging **262**。單檔大小上限 + PR 新增大 jpg 警示。先量再改。
 
-#### D2 視覺回歸安全網　`eng · M · 無`　〔eng+design〕待審閱
-Playwright `toHaveScreenshot`：8 主頁 × 390/1280 × light/night；前置：字型固定、動畫 freeze、localStorage 固定、等 image decode、寬鬆 `maxDiffPixelRatio`。不進 `npm run check`，但視覺類 agent-action 必跑回貼 diff。字型渲染穩定性併入。`e2e/visual.spec.ts` + playwright 新 project。
+#### D2 視覺回歸安全網　`eng · M · 無`　〔eng+design〕待實作　**L0 優先**
+現況：`playwright.config.ts` 僅 **Desktop Chromium**（無 mobile project）。目標：`e2e/visual.spec.ts` + `toHaveScreenshot`——8 主頁 × 390/1280 × light/night ＝ **32 組**完整矩陣。
+**分階：** Phase A **smoke baseline**（4–6 條黃金路徑，先上）；Phase B 擴完整 32 組。前置：字型固定、動畫 freeze、localStorage／theme 固定、等 image decode、寬鬆 `maxDiffPixelRatio`；字型渲染穩定性併入。不進 CI gate；視覺類 agent-action **必跑**回貼 diff。
 
-### L1 效能地基
+---
 
-#### D1 圖像管線現代化（三軌）　`perf · M · D0`　〔perf〕待審閱
-(a) `next.config.ts` `images.formats` AVIF/WebP + sizes 階梯（Vercel runtime）；(b) `hero-home.jpg`（~396KB LCP）與 landing `<picture>` 資產預生成次世代格式；(c) `StoryImage` blur-up LQIP（僅首屏/封面）。Lighthouse mobile LCP before/after 記錄。與設計待辦「landing hero jpg 轉 WebP」小項合併執行。
+### L1 核心體驗地基
 
-#### D3 Night 主題全站打磨　`design · M · 無`　〔design〕待審閱
-元件級 dark 樣式從 4 檔（globals/SiteHeader/UniverseMap/ZoneIsland）補齊 stories／story 詳情／footer／for-parents／games hub；暖燈卡片、星點背景、`--illus-warm` 調校。睡前是天然場景，night 不該次等。與設計待辦「characters 頁 13 個硬編 hex 無夜間模式」小項同批處理。
+> 原名「效能地基」不準確：本層含夜間、字幕、圖示，非純 perf。
 
-#### D13 字幕/故事閱讀排版系統　`ux · M · 無`　〔ux+content〕待審閱
-播放器字幕字級階梯、行長上限、對比/背景遮罩、目前句卡拉OK式高亮、翻頁字幕過渡。疊加在既有 `captionSize`/雙軌字幕架構上；親子共聽核心可讀性，工程審評為影響最直接。`StoryPlayer` + `lib/subtitles`。
+#### D1 圖像管線現代化（修正版・雙軌 LCP）　`perf · M · D0`　〔perf〕待實作
+**雙軌 LCP（勿再把 `hero-home.jpg` 當首頁 LCP）：**
+- **(a) 首頁 `/`：** `segment-stories*.jpg`／portrait，原生 `<picture>`（`LandingSegment`），**不受** `next/image` 管線；須 **預生成** WebP/AVIF 或替換資產＋`sizes`（與設計待辦「landing hero jpg」同批）。
+- **(b) 內頁 header：** `SiteHeader` 的 `hero-home.jpg`（`/stories`、`/for-parents` 等）— 次世代格式 + 尺寸優化。
+- **(c) Next `Image` 路徑：** `next.config.ts` 補 `images.formats`（Next 預設已有 WebP，**實際新增主為 AVIF**）+ `StoryImage` **自行生成** `blurDataURL`（動態字串 src 無內建 LQIP）。Lighthouse mobile LCP before/after 記錄。
 
-#### D14 圖示與控制一致性稽核　`design · S · 無`　〔design+a11y〕待審閱
-全站文字箭頭/自製 glyph（StoryCard `▶` 等）統一為 `PlayerIcon` 式線性 SVG；hover/active/focus 三態齊備；觸控目標複核。
+#### D14 圖示與控制一致性　`design · S–M · 無`　〔design+a11y〕待實作
+先建 **Icon／IconButton API**（hover/active/focus 三態 + 觸控 ≥44px 複核），再替換導航／操作 glyph。**不**機械替換所有 Unicode：鍵盤提示 `←` `→`、童趣 emoji 保留。StoryCard `▶` 等優先換線性 SVG。
 
-### L2 體驗
+#### D3 Night 主題全站打磨　`design · M · 無`　〔design〕待實作
+「僅 4 檔完整元件級 night」**屬實**（globals／SiteHeader／UniverseMap／ZoneIsland），但 **≠ 覆蓋率**：`[data-theme="night"]` token 已讓部分頁自動適配；真正缺口是 **hardcoded 亮色**（`characters`、`for-parents` 等，見 `app/characters/page.module.css`）。驗收：**hardcoded-color audit** + 對比度抽查；補 stories／詳情／footer／games hub 暖燈卡片。地圖海圖仍固定淺色不反轉。與設計待辦 characters 硬編 hex 同批。
 
-#### D4 View Transitions 頁面轉場（spike）　`ux · S(spike) · D2`　〔eng+ux〕待審閱
-Next 官方 experimental `viewTransition` 只做一組：故事卡封面→詳情頁共享元素轉場；驗證 back/forward、scroll restoration、focus、語意 reduced-motion、Safari/Firefox 退化，通過才擴大。不直接採 `next-view-transitions` 套件。
+#### D13 字幕閱讀排版（剩餘）　`ux · S–M · 無`　〔ux+content〕**部分完成**
+**已有（勿重做）：** 三段 `captionSize`、對比遮罩（`.caption` blur 底）、行高／字級階梯、句級 `{t,text}` 切換（`data/subtitles/*.json`）。
+**本輪（待實作）：** 前／當前／後一句排版焦點 + cue 切換過渡 + 與翻頁字幕對齊（`StoryPlayer`）。
+**另開 spike（非本輪 M）：** 逐字卡拉 OK——需 word-level timestamps／VTT 擴充，工作量 **L**，單獨 ticket。
 
-#### D5 Scroll-driven 進場動畫（CSS-only）　`ux · S · D2`　〔ux〕待審閱
-`animation-timeline: view()` + `@supports`：stories 卡片捲入 pop、landing 標題錯落浮現。須先調和既有 `popIn` delay（StoryCard.tsx:31）避免疊加彈跳。
+---
 
-#### D6 播放器沉浸升級　`ux · M · D13`　〔ux〕待審閱
-(a) ambient backdrop 先複用 `story.color` 柔和漸層取代純黑底（不擴 schema；實測不足才做建置期 palette extraction）；(b) 插畫 Ken Burns 極慢微縮放；(c) 與 D13 整合。播放器狀態契約不動。
+### L2 高價值體驗
 
-#### D12 分享卡（OG image）升級　`growth · S · 無`　〔design+growth〕待審閱
-故事 OG：黏土相框 + 角色 + EP 大字 + 品牌條（satori/ImageResponse 層，不碰站內 runtime）。工程審建議提前——風險小、產出立即可見，利 Threads/IG 導流第一眼質感。
+#### D6 播放器沉浸升級　`ux · M · D2+D13`　〔ux〕待實作
+(a) `story.color` ambient 漸層取代純黑底（不擴 schema）；(b) Ken Burns **僅播放中**、pause／背景分頁停止、reduced-motion 關閉；夜間模式振幅／亮度再降；(c) 與 D13 整合。播放器狀態契約不動。
 
-#### D8 統一慶祝回饋系統　`ux · M · 無`　〔ux〕待審閱
-`star-burst` 擴展為 `<Celebration kind="stars|confetti|balloons">`：完播、遊戲獎章、圖鑑解鎖、地圖開幕共用；頻率節流＋同時事件合併（兒童注意力保護）；純 CSS 粒子、事件觸發制。
+#### D12 分享卡（OG image）升級　`growth · S · 無`　〔design+growth〕待實作
+現況：`story-metadata.ts` 直接用故事封面。目標：黏土相框 + 角色 + EP 大字 + 品牌條（`ImageResponse`／satori 或 build-time）。**不碰**播放／地圖 runtime；會新增 **OG image route** 或 build 產圖。驗收：1200×630、中文字型、LINE/Threads/Facebook debugger + 分享點擊事件。可與 D6 **並行**。
 
-### L3 亮點
+#### D10 圖鑑「已認識」狀態　`ux · S · D3`　〔ux+design〕待實作
+`progress-store` 已有 `storiesCompleted`／`unlocks.characters`。**本輪只做**貼紙式已認識／待認識（SSR 預設待認識、hydration 漸進）。定裝照相框統一。3D tilt 移至 **L4**。
 
-#### D7 手繪體驗深化　`design · M · D2`　〔design〕待審閱
-Doodle 進場 `stroke-dasharray` 描邊繪出（首屏一次）；SVG 描邊動畫僅限 logo/固定短標語；RoughFrame hover 切換 `#rough-1/2/3` 濾鏡「重畫」抖動。
+#### D4 View Transitions（spike）　`ux · S(spike) 可能升至 M · D2`　〔eng+ux〕spike
+Next experimental `viewTransition`：**一組**故事卡封面→詳情共享元素。必測：back navigation、圖未載入、重複卡片、focus、reduced-motion、Safari/Firefox 退化。通過才擴大。不採 `next-view-transitions` 套件。
 
-#### D9 嘟嘟吉祥物微互動系統　`brand · M · 無`　〔brand+ux〕待審閱
-先抽象既有 mascot 資產路徑（404 已有 mascot 圖，避免平行 API）：`<DuduMoment mood=...>` 統一吃 `landing/mascot/dudu-*.webp`；擴至 404 迷路、載入開車經過、完播開心跳、收藏角落偷看。
+#### D5 Scroll-driven 進場（CSS-only）　`ux · S · D2`　〔ux〕待實作
+`animation-timeline: view()` **僅在 `@supports` 內**啟用；預設靜態可見（勿留 `opacity:0`）。調和既有 `StoryCard` `.popIn`（L31）避免雙重彈跳。limited availability 漸進增強。
 
-#### D10 角色圖鑑收集冊化　`ux · M · D3`　〔ux+design〕待審閱
-卡片 3D tilt + 光澤、「已認識/待認識」狀態（讀 localStorage 完播；SSR 預設待認識、hydration 漸進增強防跳動）、定裝照黏土相框統一。
+---
 
-#### D11 時間感知首頁（降風險版）　`brand · S · D3`　〔brand〕待審閱
-CSS 夜色疊加優先於換整張 hero（避免 SSG hydration 閃爍/LCP 重載）：19:00 後或 night 主題時 hero 疊漸層夜色 + moon 資產重用；換資產版另評。
+### L3 系統化回饋
+
+#### D8 慶祝回饋（縮小範圍）　`ux · M · 無`　〔ux〕待實作
+Web 已有 `star-burst` + reduced-motion（`motion.css`）。**勿**假設 React／Canvas／Godot iframe 共用單一 `<Celebration>`。改為共用 **事件語意 + 強度檔 + 冷卻／合併規則**（兒童注意力保護），各 runtime **adapter** 呈現（DOM CSS／canvas／iframe postMessage）。
+
+#### D9 嘟嘟微互動（重構）　`brand · S–M · 無`　〔brand+ux〕待實作
+**非新建：** `DuduCompanion` 已有六表情、IO、預載。抽出 **sprite／emotion primitive** + 情境 **wrapper**（`<DuduMoment>`）；擴 404／載入／完播／收藏等。**綁定 UX-P2-4** 鍵盤可及，勿先擴互動再補 a11y。
+
+---
+
+### L4 品牌亮點
+
+#### D11 時間感知首頁　`brand · S · D3+D2`　〔brand〕待實作
+**規則：** 自動夜色窗 **19:00–06:00**；使用者選 **light** 偏好優先於時間。CSS 疊層夜色 + 重用 moon 資產（**不換**整張 hero，避免 LCP／hydration 閃爍）。時間判斷沿用 **`THEME_INIT_SCRIPT`**（`app/layout.tsx` pre-paint），勿僅 client hydration。
+
+#### D7 手繪體驗深化　`design · M · D2`　〔design〕待實作
+`Doodle`（SVG path）適合 `stroke-dasharray` 描邊進場（首屏一次）。`RoughFrame` 為 HTML border + SVG turbulence **filter**——做 **filter variant 切換**，勿宣稱 path redraw。SVG 字動畫僅限 logo／短標語。
+
+#### D10 圖鑑 3D tilt（可選 polish）　`ux · S · D10 貼紙上線後`　〔ux〕擇機
+手機價值低；列為可選。依賴 D10 貼紙狀態已穩定。
+
+---
+
+### 執行順序（審核定稿）
+
+```
+D0 → D2-A(smoke) → D1 → D13-剩餘 → D3 → D14 → D6 ∥ D12
+  → D10-貼紙 → D4(spike) → D5 → D8 → D9 → D11 → D7 → D10-tilt?
+```
+
+通過單項後以 `/agent-action D<n>` 實作；完成附 commit hash 回填本段。
 
 ---
 
