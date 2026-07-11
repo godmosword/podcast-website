@@ -18,6 +18,7 @@ import { playSfx, isSfxEnabled } from "@/lib/sfx";
 import SfxToggle from "./SfxToggle";
 import StoryEndScreen from "./StoryEndScreen";
 import StoryCaptionStack from "./StoryCaptionStack";
+import Icon from "./ui/Icon";
 import {
   activeCueIndex,
   captionWindow,
@@ -592,7 +593,7 @@ export default function StoryPlayer({
       {!hasEnded && (
         <div className={styles.topBar}>
           <Link href={backHref} className={styles.closeBtn} aria-label="關閉">
-            ✕
+            <Icon name="close" size={20} />
           </Link>
           <h1 className={styles.topTitle}>{title}</h1>
           <div className={styles.topBarTools}>
@@ -604,8 +605,10 @@ export default function StoryPlayer({
               aria-label="睡前定時"
               aria-expanded={showTimer}
             >
-              ⏱
-              {bedtimeRemaining !== null ? ` ${formatBedtime(bedtimeRemaining)}` : ""}
+              <Icon name="timer" size={18} />
+              {bedtimeRemaining !== null ? (
+                <span>{` ${formatBedtime(bedtimeRemaining)}`}</span>
+              ) : null}
             </button>
             {showTimer && (
               <div className={styles.timerMenu} role="menu">

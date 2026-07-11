@@ -20,6 +20,7 @@
     "verify:zone-art": "tsx scripts/verify-zone-art.ts",
     "verify:map-art": "tsx scripts/verify-map-art.ts",
     "audit:assets": "tsx scripts/audit-assets.ts",
+    "audit:colors": "tsx scripts/audit-colors.ts",
     "proofread:subtitles": "tsx scripts/proofread-subtitles.ts",
     "check": "npm test && npm run verify:episodes && npm run verify:zone-art && npm run verify:map-art && npm run build",
     "backfill:captions": "tsx scripts/backfill-scene-captions.ts",

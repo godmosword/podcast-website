@@ -117,6 +117,27 @@
   --landing-nav-cta-bg: #fff8f2;
   --landing-nav-cta-fg: #8b4510;
 
+  /* 頁級暖色曲面（characters／家長頁／footer CTA 共用） */
+  --page-warm-from: color-mix(in srgb, var(--c-yellow) 14%, var(--bg));
+  --page-warm-mid: color-mix(in srgb, var(--c-sky) 12%, var(--bg));
+  --page-warm-to: color-mix(in srgb, var(--c-yellow) 6%, var(--bg));
+  --warm-surface: color-mix(in srgb, var(--mix-base) 92%, var(--c-sky) 8%);
+  --warm-surface-2: color-mix(in srgb, var(--c-teal) 10%, var(--card));
+  --warm-accent: var(--landing-heading);
+  --warm-highlight: color-mix(in srgb, var(--c-pink) 70%, var(--ink));
+  --warm-chip-bg: color-mix(in srgb, var(--c-teal) 12%, var(--mix-base));
+  --warm-chip-hover: color-mix(in srgb, var(--c-teal) 22%, var(--mix-base));
+  --warm-heading: color-mix(in srgb, var(--c-sky) 35%, var(--ink));
+  --warm-portrait-bg: color-mix(in srgb, var(--c-teal) 14%, var(--mix-base));
+  --warm-cover-bg: color-mix(in srgb, var(--c-sky) 16%, var(--mix-base));
+  --support-from: #f0744a;
+  --support-to: #e4572e;
+  --support-fg: #ffffff;
+  --cta-warm-from: #ffe889;
+  --cta-warm-to: #ffbd6f;
+  --cta-warm-fg: #614018;
+  --warm-card-glow: none;
+
   /* 語意輔助（light 預設） */
   --mix-base: #ffffff;
   --illus-warm: none;
@@ -175,6 +196,27 @@
   --landing-brand: #d9701a;
   --landing-brand-ink: #2a1808;
   --landing-heading: #5da8a1;
+
+  --page-warm-from: color-mix(in srgb, var(--c-yellow) 8%, var(--bg));
+  --page-warm-mid: color-mix(in srgb, var(--c-teal) 10%, var(--bg));
+  --page-warm-to: color-mix(in srgb, var(--c-yellow) 4%, var(--bg-2));
+  --warm-surface: color-mix(in srgb, var(--card) 88%, var(--c-yellow) 12%);
+  --warm-surface-2: color-mix(in srgb, var(--c-teal) 14%, var(--card));
+  --warm-accent: var(--c-teal);
+  --warm-highlight: var(--c-pink);
+  --warm-chip-bg: color-mix(in srgb, var(--c-teal) 18%, var(--card));
+  --warm-chip-hover: color-mix(in srgb, var(--c-teal) 28%, var(--card-2));
+  --warm-heading: color-mix(in srgb, var(--c-sky) 40%, var(--ink));
+  --warm-portrait-bg: color-mix(in srgb, var(--c-teal) 16%, var(--card));
+  --warm-cover-bg: color-mix(in srgb, var(--c-sky) 14%, var(--card));
+  --support-from: color-mix(in srgb, var(--landing-brand) 82%, #c43d1a);
+  --support-to: color-mix(in srgb, var(--landing-brand) 68%, #9a2e12);
+  --support-fg: var(--landing-brand-ink);
+  --cta-warm-from: color-mix(in srgb, var(--c-yellow) 55%, var(--card-2));
+  --cta-warm-to: color-mix(in srgb, var(--landing-brand) 45%, var(--card));
+  --cta-warm-fg: var(--landing-brand-ink);
+  --warm-card-glow: 0 0 0 1px color-mix(in srgb, var(--c-yellow) 14%, transparent),
+    0 12px 32px color-mix(in srgb, var(--c-yellow) 8%, transparent);
 }
 
 [data-theme="night"] .site-backdrop {

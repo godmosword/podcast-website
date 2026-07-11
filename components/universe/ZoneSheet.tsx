@@ -12,6 +12,7 @@ import {
 import type { ZoneStoriesBundle } from "@/lib/story-zone-query";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import ParentTrustStrip from "@/components/ParentTrustStrip";
+import IconButton from "@/components/ui/IconButton";
 import ZoneLandmark from "./ZoneLandmark";
 import ZoneWishForm from "./ZoneWishForm";
 import styles from "./ZoneSheet.module.css";
@@ -74,14 +75,15 @@ export default function ZoneSheet({
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
-        <button
+        <IconButton
           type="button"
           className={styles.close}
+          variant="soft"
+          icon="close"
+          iconSize={20}
           onClick={onClose}
           aria-label="關閉"
-        >
-          ✕
-        </button>
+        />
 
         <div className={styles.header}>
           <span className={styles.landmark} aria-hidden="true">

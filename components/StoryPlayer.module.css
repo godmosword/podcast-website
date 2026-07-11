@@ -377,8 +377,6 @@
   width: var(--top-tool-size);
   min-width: var(--top-tool-size);
   padding: 0;
-  font-size: 1.25rem;
-  font-weight: 700;
 }
 
 .topTitle {

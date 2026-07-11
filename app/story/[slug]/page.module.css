@@ -92,6 +92,17 @@
   text-align: left;
 }
 
+:global([data-theme="night"]) .introSection,
+:global([data-theme="night"]) .contentSection {
+  border-color: color-mix(in srgb, var(--c-yellow) 22%, var(--line));
+  box-shadow: var(--shadow-sm), var(--warm-card-glow);
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--c-yellow) 8%, var(--card-2)),
+    var(--card)
+  );
+}
+
 .introSection {
   border-left: 5px solid var(--sun);
 }
@@ -261,6 +272,16 @@
   background: linear-gradient(180deg, var(--card-2), var(--card));
   box-shadow: var(--shadow-sm);
   text-align: left;
+}
+
+:global([data-theme="night"]) .expandableSection {
+  border-color: color-mix(in srgb, var(--c-yellow) 22%, var(--line));
+  box-shadow: var(--shadow-sm), var(--warm-card-glow);
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--c-yellow) 8%, var(--card-2)),
+    var(--card)
+  );
 }
 
 .expandableBody {

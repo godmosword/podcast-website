@@ -1,0 +1,56 @@
+.root {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    transform var(--motion-press),
+    background var(--motion-press),
+    box-shadow var(--motion-press);
+}
+
+.root:active {
+  transform: translateY(2px) scale(0.96);
+}
+
+@media (hover: hover) {
+  .root:hover {
+    background: color-mix(in srgb, var(--ink) 7%, var(--card));
+  }
+}
+
+.root:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.soft {
+  background: color-mix(in srgb, var(--ink) 7%, var(--card));
+}
+
+@media (hover: hover) {
+  .soft:hover {
+    background: color-mix(in srgb, var(--ink) 12%, var(--card));
+  }
+}
+
+.compact {
+  min-width: 36px;
+  min-height: 36px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root,
+  .root:active {
+    transition: none;
+    transform: none;
+  }
+}

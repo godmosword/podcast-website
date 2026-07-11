@@ -3,6 +3,19 @@
   margin: 0 auto;
   padding: calc(24px + var(--safe-top)) calc(20px + var(--safe-right))
     calc(40px + var(--safe-bottom)) calc(20px + var(--safe-left));
+  background: linear-gradient(
+    180deg,
+    var(--page-warm-from) 0%,
+    transparent 28%
+  );
+}
+
+:global([data-theme="night"]) .main {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--c-yellow) 6%, var(--bg)) 0%,
+    transparent 32%
+  );
 }
 
 @media (max-width: 480px) {

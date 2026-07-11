@@ -39,10 +39,22 @@
   inset: 0;
   background: radial-gradient(
     circle at 18% 12%,
-    rgba(255, 216, 102, 0.35),
+    color-mix(in srgb, var(--c-yellow) 35%, transparent),
     transparent 42%
   );
   pointer-events: none;
+}
+
+:global([data-theme="night"]) .hero {
+  box-shadow: var(--shadow-md), var(--gloss), var(--warm-card-glow);
+}
+
+:global([data-theme="night"]) .hero::before {
+  background: radial-gradient(
+    circle at 18% 12%,
+    color-mix(in srgb, var(--c-yellow) 22%, transparent),
+    transparent 48%
+  );
 }
 
 .heroBadge {
@@ -72,7 +84,7 @@
   color: var(--ink);
   margin: 0 0 8px;
   line-height: 1.15;
-  text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.85);
+  text-shadow: 2px 2px 0 color-mix(in srgb, var(--mix-base) 85%, transparent);
 }
 
 .subtitle {
@@ -107,7 +119,7 @@
   font-size: 0.78rem;
   font-weight: 700;
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.82);
+  background: color-mix(in srgb, var(--mix-base) 82%, transparent);
   border: 1.5px solid var(--line);
   box-shadow: var(--shadow-sm);
 }
@@ -155,6 +167,11 @@
   transition: transform var(--motion-press), box-shadow var(--motion-press);
 }
 
+:global([data-theme="night"]) .card {
+  border: 1.5px solid color-mix(in srgb, var(--c-yellow) 18%, var(--line));
+  box-shadow: var(--shadow-sm), var(--warm-card-glow);
+}
+
 .card:active {
   transform: translateY(4px);
   box-shadow: none !important;
@@ -185,7 +202,7 @@
   overflow: hidden;
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--thumb-accent, var(--c-sky)) 8%, #fff),
+    color-mix(in srgb, var(--thumb-accent, var(--c-sky)) 8%, var(--mix-base)),
     color-mix(in srgb, var(--thumb-accent, var(--c-sky)) 18%, var(--card))
   );
 }

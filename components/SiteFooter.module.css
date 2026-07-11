@@ -32,6 +32,15 @@
   );
 }
 
+:global([data-theme="night"]) .home::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--c-yellow) 40%, var(--bg-dot)),
+    transparent
+  );
+}
+
 .home .parentNote {
   margin-bottom: 14px;
   font-size: 0.84rem;
@@ -224,8 +233,8 @@
   margin-top: 18px;
   font-size: 0.95rem;
   font-weight: 700;
-  color: #fff;
-  background: linear-gradient(180deg, #f0744a, #e4572e);
+  color: var(--support-fg);
+  background: linear-gradient(180deg, var(--support-from), var(--support-to));
   padding: 11px 22px;
   border-radius: 999px;
   box-shadow: var(--shadow-md), var(--gloss);

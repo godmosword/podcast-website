@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import ThemeModeSwitch from "@/components/ThemeModeSwitch";
 import SubscribeMenu from "@/components/landing/SubscribeMenu";
+import Icon from "@/components/ui/Icon";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { isStoryPlayRoute } from "@/lib/is-story-play-route";
 import { visibleSocials } from "@/lib/social";
@@ -74,7 +75,7 @@ export default function SiteNavBar() {
             aria-label={open ? "關閉選單" : "開啟選單"}
             onClick={() => setOpen((v) => !v)}
           >
-            <span className={styles.menuIcon} aria-hidden />
+            <Icon name={open ? "menu-close" : "menu"} size={20} />
           </button>
         </div>
       </div>

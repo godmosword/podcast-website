@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Icon from "@/components/ui/Icon";
 import styles from "./PlayButton.module.css";
 
 type PlayButtonProps = {
@@ -7,14 +8,14 @@ type PlayButtonProps = {
   children?: React.ReactNode;
   inline?: boolean;
   className?: string;
-  /** 螢幕閱讀器用的明確標籤（覆寫含 ▶ 符號的可見文字）。 */
+  /** 螢幕閱讀器用的明確標籤（覆寫可見文字）。 */
   label?: string;
 };
 
 export default function PlayButton({
   href,
   color,
-  children = "▶ 開始看故事",
+  children,
   inline = false,
   className = "",
   label,
@@ -26,7 +27,12 @@ export default function PlayButton({
       className={`${styles.button} press-squash ${inline ? styles.inline : ""} ${className}`.trim()}
       style={{ backgroundColor: color }}
     >
-      {children}
+      {children ?? (
+        <>
+          <Icon name="play" size={18} />
+          <span>開始看故事</span>
+        </>
+      )}
     </Link>
   );
 }

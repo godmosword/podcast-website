@@ -15,6 +15,7 @@ import {
   BLOCK_DROP_DIFFICULTIES,
   BLOCK_DROP_SPECIAL_MODES,
 } from "@/lib/gamekit/progress/settings";
+import Icon from "@/components/ui/Icon";
 import styles from "./GameChrome.module.css";
 
 type ChromeContextValue = {
@@ -74,7 +75,7 @@ export function GameChromeToolbar({
           onClick={togglePause}
           aria-label={paused ? "繼續遊戲" : "暫停遊戲"}
         >
-          {paused ? "▶" : "⏸"}
+          <Icon name={paused ? "play" : "pause"} size={22} />
         </button>
       )}
       {onToggleSound && (
@@ -85,7 +86,7 @@ export function GameChromeToolbar({
           aria-label={soundOn ? "關閉音效" : "開啟音效"}
           aria-pressed={soundOn}
         >
-          {soundOn ? "🔊" : "🔇"}
+          <Icon name={soundOn ? "volume-on" : "volume-off"} size={22} />
         </button>
       )}
       <button
@@ -95,7 +96,7 @@ export function GameChromeToolbar({
         aria-label="遊戲設定"
         aria-haspopup="dialog"
       >
-        ⚙️
+        <Icon name="settings" size={22} />
       </button>
     </div>
   );

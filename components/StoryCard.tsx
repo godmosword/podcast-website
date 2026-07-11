@@ -5,6 +5,7 @@ import StoryImage from "./StoryImage";
 import { TagChip } from "./Chip";
 import StoryAge from "./StoryAge";
 import RoughFrame from "./decor/RoughFrame";
+import Icon from "./ui/Icon";
 import styles from "./StoryCard.module.css";
 
 type StoryCardProps = {
@@ -83,7 +84,7 @@ export default function StoryCard({
             style={{ backgroundColor: `${story.color}1f`, color: story.color }}
             aria-hidden
           >
-            ▶
+            <Icon name="play" size={12} />
           </span>
         </span>
       </span>

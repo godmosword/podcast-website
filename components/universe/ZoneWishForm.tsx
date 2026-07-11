@@ -4,6 +4,7 @@ import { useEffect, useId, useState, type FormEvent } from "react";
 import type { ZoneId } from "@/data/universe-zones";
 import type { WishCategory } from "@/lib/zone-wish-schema";
 import { parseWishContact } from "@/lib/zone-wish-schema";
+import Icon from "@/components/ui/Icon";
 import styles from "./ZoneWishForm.module.css";
 
 type Props = {
@@ -13,22 +14,6 @@ type Props = {
 };
 
 type FormState = "loading" | "form" | "success" | "error" | "mailto";
-
-/** 鈴鐺 icon（取代 🔔 emoji）：1em + currentColor 隨按鈕字級與墨色。 */
-function BellIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      width="1em"
-      height="1em"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      style={{ verticalAlign: "-0.125em" }}
-    >
-      <path d="M12 2a1.5 1.5 0 0 1 1.5 1.5v.58A6.5 6.5 0 0 1 18.5 10.5v3.9l1.35 2.43a1 1 0 0 1-.87 1.49H5.02a1 1 0 0 1-.87-1.49L5.5 14.4v-3.9a6.5 6.5 0 0 1 5-6.32V3.5A1.5 1.5 0 0 1 12 2Zm-2.45 17.32h4.9a2.45 2.45 0 0 1-4.9 0Z" />
-    </svg>
-  );
-}
 
 export default function ZoneWishForm({ zoneId, fallbackHref, onSubmitSuccess }: Props) {
   const contactId = useId();
@@ -114,7 +99,7 @@ export default function ZoneWishForm({ zoneId, fallbackHref, onSubmitSuccess }: 
   if (state === "mailto") {
     return (
       <a className={styles.notifyBtn} href={fallbackHref}>
-        <BellIcon /> 通知我開幕
+        <Icon name="bell" size={16} /> 通知我開幕
       </a>
     );
   }
@@ -229,7 +214,7 @@ export default function ZoneWishForm({ zoneId, fallbackHref, onSubmitSuccess }: 
           "送出故事許願"
         ) : (
           <>
-            <BellIcon /> 通知我開幕
+            <Icon name="bell" size={16} /> 通知我開幕
           </>
         )}
       </button>

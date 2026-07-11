@@ -6,6 +6,7 @@ import Wheel from "@/components/decor/Wheel";
 import decor from "@/components/decor/decor.module.css";
 import GameThumbArt from "@/components/games/GameThumbArt";
 import PlaygroundHubBadge from "@/components/games/PlaygroundHubBadge";
+import Icon from "@/components/ui/Icon";
 import { GAMES, gameParentTip, type GameMeta } from "@/data/games";
 import { getSiteUrl } from "@/lib/site-url";
 import styles from "./page.module.css";
@@ -77,7 +78,7 @@ function GameCard({ game, index }: { game: GameMeta; index: number }) {
               }}
               aria-hidden
             >
-              ▶
+              <Icon name="play" size={12} />
             </span>
           </span>
         </span>

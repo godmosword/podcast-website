@@ -1,8 +1,13 @@
 .main {
   min-height: 100vh;
   padding: 18px clamp(16px, 4vw, 48px) 48px;
-  background: linear-gradient(180deg, #fff9eb 0%, #f5fbff 52%, #fffdf7 100%);
-  color: #243039;
+  background: linear-gradient(
+    180deg,
+    var(--page-warm-from) 0%,
+    var(--page-warm-mid) 52%,
+    var(--page-warm-to) 100%
+  );
+  color: var(--ink);
 }
 
 .hero {
@@ -12,14 +17,14 @@
 
 .eyebrow {
   margin: 0 0 8px;
-  color: #0f766e;
+  color: var(--warm-accent);
   font-size: 0.95rem;
   font-weight: 800;
 }
 
 .title {
   margin: 0;
-  color: #1f2a34;
+  color: var(--ink);
   font-size: 4rem;
   line-height: 0.95;
 }
@@ -27,7 +32,7 @@
 .intro {
   max-width: 720px;
   margin: 18px 0 0;
-  color: #475569;
+  color: var(--ink-soft);
   font-size: 1.05rem;
   line-height: 1.8;
 }
@@ -42,16 +47,16 @@
 
 .card {
   overflow: hidden;
-  border: 2px solid rgba(36, 48, 57, 0.08);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 12px 28px rgba(22, 78, 99, 0.12);
+  border: 2px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--warm-surface);
+  box-shadow: var(--shadow-sm), var(--warm-card-glow);
 }
 
 .portraitWrap {
   position: relative;
   aspect-ratio: 1;
-  background: #e8f6f4;
+  background: var(--warm-portrait-bg);
 }
 
 .portrait {
@@ -64,14 +69,14 @@
 
 .cardTitle {
   margin: 0;
-  color: #172554;
+  color: var(--warm-heading);
   font-size: 1.35rem;
   line-height: 1.2;
 }
 
 .vehicle {
   margin: 6px 0 0;
-  color: #be123c;
+  color: var(--warm-highlight);
   font-size: 0.95rem;
   font-weight: 800;
 }
@@ -79,7 +84,7 @@
 .personality {
   min-height: 3.4em;
   margin: 10px 0 0;
-  color: #475569;
+  color: var(--ink-soft);
   font-size: 0.96rem;
   line-height: 1.7;
 }
@@ -95,11 +100,11 @@
   display: inline-flex;
   min-height: 32px;
   align-items: center;
-  border: 1px solid rgba(15, 118, 110, 0.28);
-  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--warm-accent) 28%, var(--line));
+  border-radius: var(--radius-sm);
   padding: 4px 10px;
-  background: #f0fdfa;
-  color: #0f766e;
+  background: var(--warm-chip-bg);
+  color: var(--warm-accent);
   font-size: 0.86rem;
   font-weight: 800;
   text-decoration: none;
@@ -107,8 +112,8 @@
 
 .storyLink:focus-visible,
 .storyLink:hover {
-  border-color: #0f766e;
-  background: #ccfbf1;
+  border-color: var(--warm-accent);
+  background: var(--warm-chip-hover);
 }
 
 @media (max-width: 620px) {
