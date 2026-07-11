@@ -30,13 +30,13 @@
 
 依 Plan 的 **L0–L3** 與 AGENT-WORKFLOW 路由表，用 **Task** 派子 agent（**不要**用 `codex exec`／`claude -p` 子 process 做實作委派——子 process 無 Cursor 工具鏈）。
 
-**Composer 節流：** Leader **不**做多檔／單檔實作；實作一律 Task 派 Sonnet／Opus／shell。Leader 僅：派工、整合、&lt;10 行微調、git。
+**Composer 節流：** Leader **不**做多檔／單檔實作；實作一律 Task 派 Grok 4.5 Fast Medium／Opus／shell。Leader 僅：派工、整合、&lt;10 行微調、git。
 
 | 級別 | 判準 | Cursor 派工 |
 |------|------|-------------|
 | L3 架構／高風險 | 跨模組、Protected paths | Task + `claude-opus-4-8-thinking-medium`，或 Leader（僅 Domain 要求路徑） |
-| L2 多檔實作 | 模式固定 | Task + `claude-4.6-sonnet-medium-thinking`（**預設**；中文文案一律 Sonnet；勿用 Composer） |
-| L1 單檔 | 範圍明確 | **路徑已知** → Task + Sonnet；**路徑不明** → Task `explore`（`grok-4.3`）→ Sonnet |
+| L2 多檔實作 | 模式固定 | Task + `grok-4.5-fast-medium`（**預設**；Domain 內容管線仍 Sonnet；勿用 Composer） |
+| L1 單檔 | 範圍明確 | **路徑已知** → Task + Grok 4.5 Fast Medium；**路徑不明** → Task `explore`（`grok-4.3`）→ Grok |
 | L0 命令 | lint／test／腳本 | Task `shell` 或 `grok-build-0.1` |
 
 **行動小組（顧問，全部 `readonly: true`）**：卡關要第二意見時派——
@@ -103,7 +103,7 @@ Task 失敗 → 追加 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md)�
 | # | 任務 ID | subagent_type | model slug | 做了什麼 | 產出（檔案／命令結果） | 狀態 |
 |---|---------|---------------|------------|----------|------------------------|------|
 | 0 | Leader | — | `composer-2.5-fast` | 讀 Plan、派工、整合 diff | 合併後變更摘要 | 完成 |
-| 1 | T1 | `generalPurpose` | `claude-4.6-sonnet-medium-thinking` | （依 Plan 填寫） | `path/to/file` | 完成／缺席 |
+| 1 | T1 | `generalPurpose` | `grok-4.5-fast-medium` | （依 Plan 填寫） | `path/to/file` | 完成／缺席 |
 | 2 | Verify | `shell` | `grok-build-0.1` | `npm test` 等 | 逐項對照結果 | 完成 |
 | 3 | GPT diff 審 | `typescript-reviewer` | `gpt-5.6-sol-medium` | 審 diff 工程面 | 意見摘要 | 完成／跳過／缺席 |
 | 4 | Opus 設計審 | `architect` | `claude-opus-4-8-thinking-medium` | 審 UX／設計／a11y 視覺 | 審查意見 | 完成／跳過／缺席 |

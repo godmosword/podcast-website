@@ -38,7 +38,7 @@
 | CI 放 `OPENAI_API_KEY` 自動生圖 | 成本失控、無人工審圖；CI 永不持有生圖 key |
 | Grok CLI 曾探到未登入（同日稍後已登入） | 呼叫前先 `grok models` 探活；未登入 → 缺席並提醒使用者 `grok login` |
 | Grok `-p` 語法：`grok -p -m grok-4.5-fast "<prompt>"` 會報 `a value is required for '--single <PROMPT>'` | prompt 必須緊跟 `-p`：`grok -p "<prompt>" -m grok-4.5-fast --effort medium --no-plan` |
-| Cursor Task `grok-4.5-fast-medium` slug 不可用或拒收 | 對抗審標缺席；**勿**用 `grok-4.3` 頂替；分配表仍須列出 Grok 列 |
+| Cursor Task `grok-4.5-fast-medium` slug 不可用或拒收 | **對抗審**：標缺席；**勿**用 `grok-4.3` 頂替；分配表仍須列出 Grok 列。**L1／L2 實作**：Leader 接手，分配表註明缺席 |
 | `codex exec` 在 Cursor shell 掛起於 `Reading additional input from stdin...` | 命令尾加 **`</dev/null`** 關閉 stdin |
 
 ## 案例紀錄（依時間追加）
@@ -49,5 +49,5 @@
 | 2026-07-09 | `codex exec` / gpt-5.5 | spawn ENOENT：`@openai/codex-darwin-arm64` vendor binary 遺失（npm wrapper 在但原生執行檔不在；exit code 仍為 0，須看 stderr 判斷） | 同日 `npm i -g @openai/codex` 重裝後探活回 OK → 已解除 |
 | 2026-07-09 | `grok -p` / grok-4.5 | 預設 plan 模式下只輸出一行開場白即結束（exit 0，無審查內容）；另 `--disallowed-tools` 移除 read 工具會使 agent 建構失敗 | 加 **`--no-plan --max-turns 6`** 重試成功 → 已解除；對抗審呼叫一律帶 `--no-plan` |
 | 2026-07-09 | `cursor-agent -p --mode plan` / composer-2.5-fast | `--mode plan` 配 `-p` 輸出為空（exit 0） | 改 **`--mode ask`** 重試成功 → 已解除；headless 審查一律用 `--mode ask` |
-| — | Task `model=grok-4.5-fast-medium`（Cursor） | slug 不可用或 Task 拒收（待驗證） | 對抗審缺席；分配表仍列 Grok 行；勿用 grok-4.3 頂替 |
+| — | Task `model=grok-4.5-fast-medium`（Cursor） | slug 不可用或 Task 拒收（待驗證） | 對抗審缺席；L1／L2 實作由 Leader 接手；分配表仍列 Grok 行；勿用 grok-4.3 頂替 |
 | 2026-07-11 | `codex exec` / gpt-5.6 | Cursor shell 未關 stdin → 逾時掛起（`Reading additional input from stdin...`） | 加 **`</dev/null`** 重試成功 → 已解除 |

@@ -38,7 +38,7 @@ typo 級小事不進本命令——直接做即可。
 |------|------|------------|
 | Goal、Scope、Risks 骨架 | Leader | （當前 session） |
 | Task DAG、Files、Verification、Model routing | Task | `gpt-5.6-sol-medium` |
-| 每個子任務 L0–L3 + slug | Task（同上） | 預設 L2→Sonnet、L1→Sonnet、L0→shell |
+| 每個子任務 L0–L3 + slug | Task（同上） | 預設 L2→Grok 4.5 Fast Medium、L1→Grok、L0→shell |
 
 - 使用 AGENT-WORKFLOW 的 **Plan 模板**合併成 Draft Plan
 - **Plan 產物：** Cursor Plan 檔，或 `/tmp/agent-plan-<unix_ts>.md`（`date +%s`）

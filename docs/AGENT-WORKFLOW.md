@@ -151,8 +151,8 @@ Plan 若弱化 Domain 紅線 → 審稿標 **CRITICAL**。
 - ✅ 可並行：不同檔案／目錄
 - ❌ 禁止：多 agent 同時改同一檔
 - 改動 &lt;10 行且無架構影響 → Leader 直接做
-- **L1 路徑已知** → 直接 Sonnet，**不必**先 explore
-- **L1 路徑不明** → Task `explore`（`grok-4.3`）再 Sonnet
+- **L1 路徑已知** → 直接 **Grok 4.5 Fast Medium**，**不必**先 explore
+- **L1 路徑不明** → Task `explore`（`grok-4.3`）再 **Grok 4.5 Fast Medium**
 - 遵守 Domain § **Protected paths / models**（若有）
 
 ### Cursor vs Claude Code 對標表
@@ -167,8 +167,8 @@ Plan 若弱化 Domain 紅線 → 審稿標 **CRITICAL**。
 | **Grok 4.5 Fast Medium 對抗審** | `grok -p "<prompt>" -m grok-4.5-fast --effort medium --no-plan` | Task（readonly）+ `grok-4.5-fast-medium`（**每輪 plan 必派**；slug 不可用 → 缺席） |
 | **Composer 2.5 可行性審（L3）** | `cursor-agent -p --model composer-2.5-fast --mode plan` | Leader 自審（當前 session 即 Composer；**不計入**非 leader 委員） |
 | **L3 實作** | Leader 親自 | Task + Opus slug，Protected paths 才 Leader |
-| **L2 實作** | Agent tool `model: "sonnet"` | Task + `claude-4.6-sonnet-medium-thinking` |
-| **L1 實作** | Agent tool `model: "haiku"`；<10 行 Leader | 路徑已知 → Sonnet；路徑不明 → explore → Sonnet；<10 行 Leader |
+| **L2 實作** | Agent tool `model: "sonnet"` | Task + `grok-4.5-fast-medium` |
+| **L1 實作** | Agent tool `model: "haiku"`；<10 行 Leader | 路徑已知 → Grok 4.5 Fast Medium；路徑不明 → explore → Grok；<10 行 Leader |
 | **L0 命令** | Bash | Task `shell` 或 `grok-build-0.1` |
 | **改檔權** | 只有 Leader／Sonnet／Haiku 子 agent；外部 CLI 一律唯讀顧問 | 只有實作 Task；顧問一律 `readonly: true` |
 | **失敗記錄** | 兩邊共用 [`AGENT-FAILURES.md`](AGENT-FAILURES.md)：Bootstrap 必讀、call fail 必追加、30 天連續 2+ fail → 標缺席 | 同左 |
@@ -184,14 +184,15 @@ Task 的 `model` **只能**用 Cursor 允許的 slug：
 | Composer 2.5 | `composer-2.5-fast` | **僅** Leader 編排、整合、git、&lt;10 行微調（**節流**） |
 | Opus 4.8 Thinking Medium | `claude-opus-4-8-thinking-medium` | Plan／diff **設計審**（UX、`DESIGN.md`、兒童體驗、a11y 視覺；**每輪 plan 必派**） |
 | GPT 5.6 Sol Medium | `gpt-5.6-sol-medium` | Plan 細節草稿、工程審、TS/React diff review |
-| Sonnet 4.6 Thinking Medium | `claude-4.6-sonnet-medium-thinking` | **L1／L2 實作預設**、中文文案 |
-| Grok 4.5 Fast Medium | `grok-4.5-fast-medium` | Plan／diff **對抗審**（唯讀；**每輪 plan 必派**；slug 不可用 → 缺席，勿頂替）；Claude Code 用 `grok -p "<prompt>" -m grok-4.5-fast --effort medium --no-plan` |
+| Sonnet 4.6 Thinking Medium | `claude-4.6-sonnet-medium-thinking` | 內容管線中文校對（見 Domain Protected paths）；備選實作 |
+| Grok 4.5 Fast Medium | `grok-4.5-fast-medium` | **L1／L2 實作預設**；Plan／diff **對抗審**（唯讀；**每輪 plan 必派**；slug 不可用 → 缺席，勿頂替）；Claude Code 用 `grok -p "<prompt>" -m grok-4.5-fast --effort medium --no-plan` |
 | Grok 4.3 | `grok-4.3` | explore（只讀） |
 | Grok Build 0.1 | `grok-build-0.1` | shell、批次命令 |
 | Fable 5 | `claude-fable-5-thinking-medium` | 備選 Plan 第三意見 |
 
 slug 不可用時：**不要**替換；Leader 代做並告知使用者。
-**例外——對抗審（Grok 4.5 Fast Medium）**：Leader 不代做、其他模型不頂替；缺席標記但仍須出現在**固定分配表**。
+**例外——對抗審（Grok 4.5 Fast Medium，readonly）**：Leader 不代做、其他模型不頂替；缺席標記但仍須出現在**固定分配表**。
+**L1／L2 實作（Grok 4.5 Fast Medium）**：slug 拒收 → Leader 接手實作，分配表註明缺席。
 
 ---
 
@@ -200,8 +201,8 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 | 級別 | 特徵 | `/agent-action` |
 |------|------|-----------------|
 | **L3** | 跨模組、schema、高風險 | Opus 4.8；Protected paths 才 Leader |
-| **L2** | 多檔、模式固定 | **Sonnet 4.6**（Task 派工） |
-| **L1** | 單檔 routine | 路徑已知 → **Sonnet 4.6**；不明才 explore → Sonnet |
+| **L2** | 多檔、模式固定 | **Grok 4.5 Fast Medium**（Task 派工） |
+| **L1** | 單檔 routine | 路徑已知 → **Grok 4.5 Fast Medium**；不明才 explore → Grok |
 | **L0** | 純命令 | `shell` 或 Grok Build |
 
 ### 任務類型路由
@@ -216,9 +217,9 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 | 字幕／scenes／illustrate（SOP 內） | **跳過 `/agent-plan`**；直做或 `/agent-action` + Domain verify |
 | 純 docs／命令對齊 | Leader 自審或 GPT；分配表 Grok 列仍須列出 |
 | 探索 codebase（路徑不明） | Task `explore`（Grok 4.3） |
-| L1／L2 實作 | Task + Sonnet 4.6 |
+| L1／L2 實作 | Task + Grok 4.5 Fast Medium |
 | 高風險核心路徑 | Opus 或 Leader（Domain Protected paths） |
-| 前端／UI | Sonnet 4.6；跑 lint + e2e（若 Domain 有） |
+| 前端／UI | Grok 4.5 Fast Medium；跑 lint + e2e（若 Domain 有） |
 | verify / CI 命令 | `shell` |
 | 整合 diff、git commit | **Leader only**（Composer） |
 
@@ -227,7 +228,7 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 | 路徑 | 何時用 | 相對成本 |
 |------|--------|----------|
 | 內容 SOP 直做 + verify | 字幕／出圖／scenes | **~0.3x** |
-| 預設：GPT + Grok + Opus 設計三審 + Sonnet | 一般 L1／L2 plan | **1.0x** |
+| 預設：GPT + Grok + Opus 設計三審 + Grok 實作 | 一般 L1／L2 plan | **1.0x** |
 | L3：三審 + Leader 自審 | Protected／schema／跨模組契約 | **~2.0–2.5x** |
 | 每次都硬開舊「四員」 | **禁止當預設** | 浪費 |
 
@@ -244,7 +245,7 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 - Out: ...
 
 ## Task DAG
-- [ ] T1（L2, claude-4.6-sonnet-medium-thinking）— 依賴：無 — 可並行：T2
+- [ ] T1（L2, grok-4.5-fast-medium）— 依賴：無 — 可並行：T2
 - [ ] T2（L0, shell）— 依賴：T1
 
 ## Files likely touched
@@ -382,3 +383,4 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 | 2026-07-11 | Opus 4.8 設計審加入固定三審（`DESIGN.md`、兒童 UX、a11y 視覺）；取代 Opus 觸發制架構審 |
 | 2026-07-11 | 模型升級：GPT 5.6 Sol Medium、Grok 4.5 Fast Medium；預設改固定雙審；分配表固定全表、Grok 禁止跳過；codex 須 `</dev/null` |
 | 2026-07-10 | 收尾必附 Agent 執行分配表（各 agent 做了什麼 + model slug）；指令檔 §7／§10 與本節對齊 |
+| 2026-07-11 | L1／L2 實作預設改為 Grok 4.5 Fast Medium（Sonnet 保留給 Domain 內容管線） |
