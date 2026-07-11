@@ -143,7 +143,7 @@
 | MVP（`pageCount=1`）靜默當完成 | `verify:episodes` 會列 warn，須依 EPISODE-WORKFLOW 升級 |
 | 每個 typo 都跑 `/agent-plan` 雙審 | 太慢；typo 直接做 |
 | SOP 內單集字幕／出圖硬開完整委員會 | 成本浪費；應走內容管線 + verify |
-| 一般 L1／L2 預設 Opus+GPT 雙審 | 已改為 GPT 單審；Opus 觸發制 |
+| 一般 L1／L2 預設 Opus+GPT 雙審 | 已改為 **GPT + Grok + Opus 設計固定三審** |
 
 ---
 

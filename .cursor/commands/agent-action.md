@@ -43,7 +43,7 @@
 
 | 顧問 | 用途 | Cursor 派工 |
 |------|------|-------------|
-| Opus 4.8 | 高風險 diff 審、架構第二意見 | Task `code-reviewer`（readonly）+ `claude-opus-4-8-thinking-medium` |
+| Opus 4.8 設計審 | UX／CSS Modules／兒童觸控／a11y 視覺 | Task `architect`（readonly）+ `claude-opus-4-8-thinking-medium` |
 | GPT 5.6 Sol | TS/React diff 審、工程第二意見 | Task（readonly）+ `gpt-5.6-sol-medium` |
 | Grok 4.5 Fast Medium | 對抗審：找 diff 的 edge case | Task（readonly）+ `grok-4.5-fast-medium`；slug 不可用 → 缺席（見 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md) § Cursor Task） |
 | Composer 2.5 | 快速 sanity check | Leader 自審（當前 session） |
@@ -73,8 +73,8 @@
 ### 5. Diff 委員審（分級、readonly，可跳過）
 
 - **可跳過**：已有 Approved Plan、diff 約 &lt;80 行、未碰 Protected paths／紅線 → 只跑 Verify
-- **一般**：GPT 5.6 Sol（Task + `gpt-5.6-sol-medium`）；Python → `python-reviewer`；TS/JS → `typescript-reviewer`
-- **L3／觸紅線／Protected**：加 Opus 4.8 與 Grok 4.5 Fast Medium 對抗審；Grok 缺席 → 摘要標「對抗審缺席／對抗性降級」
+- **一般**：GPT 5.6 Sol + Opus 4.8 設計審（Task）；Python → `python-reviewer`；TS/JS → `typescript-reviewer`
+- **L3／觸紅線／Protected**：再加 Grok 4.5 Fast Medium 對抗審
 - 呼叫失敗 → 追加 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md)，分配表註明缺席
 
 ### 6. 文件同步
@@ -105,9 +105,10 @@ Task 失敗 → 追加 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md)�
 | 0 | Leader | — | `composer-2.5-fast` | 讀 Plan、派工、整合 diff | 合併後變更摘要 | 完成 |
 | 1 | T1 | `generalPurpose` | `claude-4.6-sonnet-medium-thinking` | （依 Plan 填寫） | `path/to/file` | 完成／缺席 |
 | 2 | Verify | `shell` | `grok-build-0.1` | `npm test` 等 | 逐項對照結果 | 完成 |
-| 3 | GPT diff 審 | `typescript-reviewer` | `gpt-5.6-sol-medium` | 審 diff | 無 CRITICAL／意見摘要 | 完成／跳過／缺席 |
-| 4 | Grok 對抗審 | `generalPurpose` | `grok-4.5-fast-medium` | 找 edge case | 審查意見 | 完成／跳過／缺席 |
-| 5 | Ship | — | `composer-2.5-fast` | commit／push | commit hash | 完成／未執行 |
+| 3 | GPT diff 審 | `typescript-reviewer` | `gpt-5.6-sol-medium` | 審 diff 工程面 | 意見摘要 | 完成／跳過／缺席 |
+| 4 | Opus 設計審 | `architect` | `claude-opus-4-8-thinking-medium` | 審 UX／設計／a11y 視覺 | 審查意見 | 完成／跳過／缺席 |
+| 5 | Grok 對抗審 | `generalPurpose` | `grok-4.5-fast-medium` | 找 edge case | 審查意見 | 完成／跳過／缺席 |
+| 6 | Ship | — | `composer-2.5-fast` | commit／push | commit hash | 完成／未執行 |
 
 **狀態欄：** `完成`｜`跳過`（如小 diff 免 diff 審）｜`缺席`｜`對抗審缺席／對抗性降級`｜`未執行`（Ship 僅在使用者要求時）。
 
