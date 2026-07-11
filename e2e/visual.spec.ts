@@ -31,6 +31,12 @@ const VIEWPORTS: Record<
 };
 
 const THEMES: VisualTheme[] = ["light", "night"];
+const LANDING_SEGMENTS = [
+  { id: "stories", anchorId: "segment-stories" },
+  { id: "bedtime", anchorId: "segment-bedtime" },
+  { id: "clay", anchorId: "segment-clay" },
+  { id: "health", anchorId: "segment-health" },
+] as const;
 
 /** Phase A：保留 5 條黃金路徑 smoke（向後相容檔名）。 */
 const SMOKE_PAGE_IDS = new Set([
@@ -72,5 +78,31 @@ for (const pageDef of VISUAL_PAGES) {
         });
       });
     }
+  }
+}
+
+// Landing 專用全覽：四段都各自留 390/1280 × light/night baseline，
+// 避免全頁截圖只覆蓋第一個內部 scroll-snap panel。
+for (const viewportId of Object.keys(VIEWPORTS) as VisualViewportId[]) {
+  for (const theme of THEMES) {
+    const viewport = VIEWPORTS[viewportId];
+    test(`visual：Landing 四段 ${viewport.label} ${theme}`, async ({ page }) => {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      await page.goto("/");
+      await stabilizeVisualPage(page, { theme });
+
+      for (const segment of LANDING_SEGMENTS) {
+        await page.locator(`#${segment.anchorId}`).scrollIntoViewIfNeeded();
+        await page.waitForTimeout(80);
+        await expect(page).toHaveScreenshot(
+          `landing-${segment.id}-${viewport.label}-${theme}.png`,
+          {
+            fullPage: false,
+            maxDiffPixelRatio: theme === "night" ? 0.03 : 0.02,
+            animations: "disabled",
+          },
+        );
+      }
+    });
   }
 }

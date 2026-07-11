@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import Icon from "@/components/ui/Icon";
+import LandingPlayLink from "./LandingPlayLink";
 import type { ResolvedLandingSegment } from "@/lib/landing-query";
 import { landingHeroPictureSources } from "@/lib/modern-image-src";
 import { useLandingScroll } from "./LandingScrollContext";
@@ -9,6 +11,8 @@ import styles from "./LandingSegment.module.css";
 type LandingSegmentProps = {
   segment: ResolvedLandingSegment;
   index: number;
+  /** segment 總數（編號「01 / 04」用）。 */
+  total: number;
   /** 下一段錨點；最後一段指向 landing-foot（頁尾 snap pane）。 */
   nextAnchorId: string | null;
 };
@@ -20,6 +24,7 @@ const CONNECT_ANCHOR = "connect";
 export default function LandingSegment({
   segment,
   index,
+  total,
   nextAnchorId,
 }: LandingSegmentProps) {
   const landingScroll = useLandingScroll();
@@ -122,28 +127,49 @@ export default function LandingSegment({
           <span
             className={`${styles.index} scrollEnter scrollEnterStagger1`}
             aria-hidden="true"
-          >{`0${index + 1}`}</span>
+          >{`0${index + 1} / 0${total}`}</span>
           <h2
             id={`${segment.anchorId}-title`}
             className={`${styles.title} scrollEnter scrollEnterStagger2`}
           >
             {segment.title}
           </h2>
+          {segment.subtitle ? (
+            <p className={`${styles.subtitle} scrollEnter scrollEnterStagger2`}>
+              {segment.subtitle}
+            </p>
+          ) : null}
         </div>
         <div className={`${styles.ctaRow} scrollEnter scrollEnterStagger3`}>
+          {segment.play ? (
+            <LandingPlayLink
+              href={segment.play.href}
+              slug={segment.play.slug}
+              audioSrc={segment.play.audioSrc}
+              className={styles.playCta}
+            >
+              <Icon name="play" size={18} className={styles.playIcon} />
+              {segment.play.label}
+            </LandingPlayLink>
+          ) : null}
           <Link
             href={segment.cta.href}
-            className={styles.cta}
+            className={segment.play ? styles.subscribeCta : styles.cta}
             {...(segment.cta.external
               ? { target: "_blank", rel: "noopener noreferrer" }
               : {})}
           >
-            {segment.cta.label} →
+            {segment.cta.label}
+            {segment.cta.external ? (
+              <Icon name="external" size={15} className={styles.ctaIcon} />
+            ) : (
+              " →"
+            )}
           </Link>
           {index === 0 ? (
             <a
               href={`#${CONNECT_ANCHOR}`}
-              className={styles.subscribeCta}
+              className={styles.textLink}
               onClick={goToConnect}
             >
               訂閱收聽

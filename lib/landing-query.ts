@@ -1,4 +1,5 @@
 import type { Story } from "@/data/content";
+import { storyAudioPath } from "@/lib/story-utils";
 import {
   getStoriesByTag,
   storiesByNewest,
@@ -34,6 +35,8 @@ type LandingCarouselItem =
 
 export type ResolvedLandingSegment = LandingSegmentDef & {
   items: LandingCarouselItem[];
+  /** 播放直達鈕（由 playCta 解析出實際集數）。 */
+  play?: { label: string; href: string; slug: string; audioSrc: string };
 };
 
 function uniqueStories(lists: Story[][]): Story[] {
@@ -89,9 +92,34 @@ function storiesForSegment(id: LandingSegmentDef["id"]): LandingCarouselItem[] {
   }
 }
 
+function playForSegment(
+  def: LandingSegmentDef,
+): ResolvedLandingSegment["play"] {
+  if (!def.playCta) return undefined;
+  if (def.playCta === "latest") {
+    const latest = storiesByNewest()[0];
+    if (!latest) return undefined;
+    return {
+      label: `聽最新一集 EP ${latest.ep}`,
+      href: `/story/${latest.slug}/play?autoplay=1&from=landing`,
+      slug: latest.slug,
+      audioSrc: storyAudioPath(latest.slug, latest.audio),
+    };
+  }
+  // bedtime：睡前主題最新一集；無則退回全站最新
+  const story = getStoriesByTag("睡前")[0] ?? storiesByNewest()[0];
+  if (!story) return undefined;
+  return {
+    label: "播一集睡前故事",
+    href: `/story/${story.slug}/play?autoplay=1&from=landing`,
+    slug: story.slug,
+    audioSrc: storyAudioPath(story.slug, story.audio),
+  };
+}
+
 export function resolveLandingSegments(): ResolvedLandingSegment[] {
   return LANDING_SEGMENT_IDS.map((id) => {
     const def = LANDING_SEGMENTS.find((s) => s.id === id)!;
-    return { ...def, items: storiesForSegment(id) };
+    return { ...def, items: storiesForSegment(id), play: playForSegment(def) };
   });
 }

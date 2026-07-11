@@ -23,6 +23,16 @@
   );
 }
 
+/* 淺色粉彩場景：上方以藍紫入夜，底部幾乎透明，避免均勻降亮度變灰。 */
+.veilWarm {
+  background: linear-gradient(
+    180deg,
+    rgba(37, 42, 104, 0.36) 0%,
+    rgba(74, 58, 112, 0.17) 48%,
+    rgba(255, 166, 92, 0.045) 100%
+  );
+}
+
 .moon {
   position: absolute;
   top: clamp(56px, 14vh, 128px);
@@ -30,10 +40,17 @@
   width: clamp(44px, 7vw, 68px);
   height: auto;
   opacity: 0.92;
+  transition: opacity 0.5s ease;
+}
+
+/* 美術自帶月亮／室內段落：隱藏疊層月亮避免同屏雙月 */
+.moonHidden {
+  opacity: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .layer {
+  .layer,
+  .moon {
     transition: none;
   }
 }

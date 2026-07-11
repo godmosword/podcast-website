@@ -26,6 +26,16 @@ test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /陪孩子建立好習慣/ })).toBeVisible();
 });
 
+test("Landing 播放直達鈕一次點擊即開始播放", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await page.getByRole("link", { name: /聽最新一集/ }).click();
+  await expect(page).toHaveURL(/\/story\/[^/]+\/play\?autoplay=1&from=landing/);
+  await expect(
+    page.getByRole("button", { name: "暫停", exact: true }),
+  ).toBeVisible({ timeout: 10_000 });
+});
+
 test("全部故事頁 → 詳情 → 播放頁 smoke", async ({ page }) => {
   await page.goto("/stories");
   await expect(page.getByRole("heading", { name: "找故事" })).toBeVisible();

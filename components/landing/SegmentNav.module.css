@@ -5,6 +5,13 @@
   transform: translateY(-50%);
   z-index: 30;
   pointer-events: auto;
+  padding: 6px 4px;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 999px;
+  background: rgba(38, 20, 8, 0.24);
+  box-shadow: 0 4px 14px rgba(38, 20, 8, 0.16);
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
 }
 
 .list {
@@ -20,9 +27,9 @@
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-  /* 觸控區 28px；視覺指示為 ::after 膠囊 */
-  width: 28px;
-  height: 28px;
+  /* 桌面操作區高於 WCAG 2.5.8 的 24px 下限；視覺指示為 ::after 膠囊。 */
+  width: 34px;
+  height: 32px;
   border-radius: 999px;
   text-decoration: none;
 }
@@ -30,8 +37,8 @@
 .dot::after {
   content: "";
   display: block;
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.42);
   border: 1.5px solid rgba(255, 255, 255, 0.72);
@@ -46,8 +53,8 @@
 }
 
 .active.dot::after {
-  width: 22px;
-  height: 8px;
+  width: 28px;
+  height: 10px;
   background: var(--landing-brand, #ff8c2b);
   border-color: rgba(255, 255, 255, 0.92);
   box-shadow:
@@ -84,9 +91,11 @@
     bottom: 0;
     transform: none;
     width: 100%;
-    padding-bottom: var(--safe-bottom);
-    background: rgba(38, 20, 8, 0.86);
+    padding: 0 0 var(--safe-bottom);
+    border: 0;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0;
+    background: rgba(38, 20, 8, 0.86);
   }
 
   .list {

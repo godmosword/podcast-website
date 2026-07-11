@@ -51,14 +51,23 @@
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  /* 僅底部文字區保護：底端維持 ~0.46 守白字對比，向上快速透明讓亮圖露出 */
-  background: linear-gradient(
-    to top,
-    rgba(38, 20, 8, 0.5) 0%,
-    rgba(38, 20, 8, 0.36) 24%,
-    rgba(38, 20, 8, 0.14) 46%,
-    rgba(38, 20, 8, 0) 72%
-  );
+  /* 文字區保底對比：左下 radial 重點保護（標題/CTA 所在），
+     疊底部線性淡出；右側與上方維持透明讓美術呼吸。
+     淺色 hero（捏黏土/好習慣）也須達 WCAG 大字 3:1。 */
+  background:
+    radial-gradient(
+      115% 85% at 16% 100%,
+      rgba(38, 20, 8, 0.58) 0%,
+      rgba(38, 20, 8, 0.34) 38%,
+      rgba(38, 20, 8, 0) 66%
+    ),
+    linear-gradient(
+      to top,
+      rgba(38, 20, 8, 0.5) 0%,
+      rgba(38, 20, 8, 0.36) 24%,
+      rgba(38, 20, 8, 0.14) 46%,
+      rgba(38, 20, 8, 0) 72%
+    );
 }
 
 .content {
@@ -156,6 +165,61 @@
 .subscribeCta:active {
   transform: translateY(1px);
   background: rgba(255, 255, 255, 0.22);
+}
+
+/* 播放直達鈕：全段最高權重 CTA（陽光橘、含 ▶） */
+.playCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 12px 24px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffa14d 0%, var(--landing-brand, #ff8c2b) 100%);
+  color: var(--landing-brand-ink, #3a2410);
+  font-weight: 900;
+  font-size: 1.02rem;
+  text-decoration: none;
+  border: 2px solid rgba(120, 60, 10, 0.28);
+  box-shadow:
+    0 4px 0 rgba(150, 80, 20, 0.4),
+    0 10px 22px rgba(120, 70, 20, 0.28);
+}
+
+.playCta:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+.playIcon {
+  flex: none;
+}
+
+.ctaIcon {
+  flex: none;
+  margin-left: 2px;
+}
+
+/* 降權文字連結（01 的訂閱收聽：讓位給播放主鈕） */
+.textLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 8px;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.92rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+}
+
+.subtitle {
+  margin: 0;
+  font-size: clamp(0.88rem, 2.2vw, 1.02rem);
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.94);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
 }
 
 .next {

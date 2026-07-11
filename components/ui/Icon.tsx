@@ -30,6 +30,13 @@ function renderGlyph(name: IconName) {
   switch (name) {
     case "play":
       return <path d="M8 5.5v13l11-6.5z" fill="currentColor" />;
+    case "external":
+      return (
+        <>
+          <path d="M7 17 17 7" {...STROKE} />
+          <path d="M9.5 7H17v7.5" {...STROKE} />
+        </>
+      );
     case "pause":
       return (
         <>

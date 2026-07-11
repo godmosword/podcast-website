@@ -17,6 +17,14 @@ export type LandingSegmentDef = {
     href: string;
     external?: boolean;
   };
+  /** 標題下一行副標（≤18 字；僅需要說明身分的段落使用）。 */
+  subtitle?: string;
+  /** 播放直達鈕：latest＝最新一集、bedtime＝睡前主題一集（resolve 時決定目標）。 */
+  playCta?: "latest" | "bedtime";
+  /** 睡前夜色疊層在本段隱藏月亮（美術自帶月亮或室內場景）。 */
+  hideBedtimeMoon?: boolean;
+  /** 特定美術的夜色調色策略；warm-bottom 保留底部粉彩暖色。 */
+  bedtimeVeil?: "warm-bottom";
 };
 
 export const LANDING_SEGMENT_IDS: LandingSegmentId[] = [
@@ -31,9 +39,11 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
     id: "stories",
     anchorId: "segment-stories",
     title: "車車與遊樂園的故事",
+    subtitle: "3–7 歲親子 podcast · 每集約 5–10 分鐘",
     heroImage: "/landing/segment-stories.jpg",
     heroImagePortrait: "/landing/segment-stories-portrait.jpg",
     cta: { label: "全部故事", href: "/stories" },
+    playCta: "latest",
   },
   {
     id: "bedtime",
@@ -42,6 +52,8 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
     heroImage: "/landing/segment-bedtime.jpg",
     heroImagePortrait: "/landing/segment-bedtime-portrait.jpg",
     cta: { label: "睡前故事", href: "/topic/睡前" },
+    playCta: "bedtime",
+    hideBedtimeMoon: true,
   },
   {
     id: "clay",
@@ -54,6 +66,7 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
       href: "https://www.youtube.com/playlist?list=PLVbyl20K8lOeuJ2ky6dEsmpew7xAxZDhF",
       external: true,
     },
+    hideBedtimeMoon: true,
   },
   {
     id: "health",
@@ -62,6 +75,7 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
     heroImage: "/landing/segment-health.jpg",
     heroImagePortrait: "/landing/segment-health-portrait.jpg",
     cta: { label: "安全與習慣", href: "/topic/安全" },
+    bedtimeVeil: "warm-bottom",
   },
 ];
 

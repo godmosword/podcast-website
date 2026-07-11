@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { clearContinue, loadContinue, saveContinue } from "@/lib/continue-playback";
@@ -14,6 +14,7 @@ import {
 } from "@/lib/progress-store";
 import { LIGHT_THEME, NIGHT_THEME } from "@/lib/theme";
 import { trackStoryCompleted } from "@/lib/analytics";
+import { takeLandingPlayback } from "@/lib/landing-playback";
 import { playSfx, isSfxEnabled } from "@/lib/sfx";
 import SfxToggle from "./SfxToggle";
 import StoryEndScreen from "./StoryEndScreen";
@@ -63,6 +64,8 @@ export type StoryPlayerProps = {
     child: string;
     parentFollowUp: string;
   };
+  /** Landing CTA 已在同一次 click gesture 啟播；播放器掛載後接管該音訊。 */
+  adoptLandingPlayback?: boolean;
 };
 
 const SWIPE_THRESHOLD = 50;
@@ -105,6 +108,7 @@ export default function StoryPlayer({
   nextStorySlug,
   nextStoryTitle,
   reflectionPrompt,
+  adoptLandingPlayback = false,
 }: StoryPlayerProps) {
   const [page, setPage] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -132,6 +136,8 @@ export default function StoryPlayer({
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
+  const nativeAudioRef = useRef<HTMLAudioElement | null>(null);
+  const adoptedAudioRef = useRef<HTMLAudioElement | null>(null);
   const transportRef = useRef<{
     togglePlay: () => void;
     skip: (delta: number) => void;
@@ -140,6 +146,32 @@ export default function StoryPlayer({
   const bedtimeEndRef = useRef<number | null>(null);
   const timerWrapRef = useRef<HTMLDivElement>(null);
   const completionRecorded = useRef(false);
+
+  const setNativeAudioRef = useCallback((node: HTMLAudioElement | null) => {
+    nativeAudioRef.current = node;
+    if (!adoptedAudioRef.current) audioRef.current = node;
+  }, []);
+
+  // 最先執行的 effect：在其他播放器 effects 綁事件前接管 Landing 已啟播的音訊。
+  useEffect(() => {
+    if (!adoptLandingPlayback) return;
+    const adopted = takeLandingPlayback(slug);
+    if (!adopted) return;
+
+    adoptedAudioRef.current = adopted;
+    audioRef.current = adopted;
+    setIsPlaying(!adopted.paused);
+    setIsLoading(adopted.readyState < HTMLMediaElement.HAVE_FUTURE_DATA);
+    if (Number.isFinite(adopted.duration)) setDuration(adopted.duration);
+
+    return () => {
+      adopted.pause();
+      adopted.removeAttribute("src");
+      adopted.load();
+      adoptedAudioRef.current = null;
+      audioRef.current = nativeAudioRef.current;
+    };
+  }, [adoptLandingPlayback, slug]);
 
   const total = images.length;
   const hasSubtitles = Array.isArray(subtitles) && subtitles.length > 0;
@@ -541,7 +573,7 @@ export default function StoryPlayer({
       onTouchEnd={handleTouchEnd}
     >
       <audio
-        ref={audioRef}
+        ref={setNativeAudioRef}
         src={audio}
         preload="metadata"
         onError={() => setMediaError("audio")}

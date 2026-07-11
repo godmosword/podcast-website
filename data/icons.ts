@@ -11,6 +11,7 @@ export const ICON_NAMES = [
   "volume-off",
   "bell",
   "timer",
+  "external",
 ] as const;
 
 export type IconName = (typeof ICON_NAMES)[number];

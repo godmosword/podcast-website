@@ -28,7 +28,13 @@ export default function LandingHub() {
     <>
       <JsonLd data={podcastSeriesJsonLd()} />
       <LandingScrollView className={scrollStyles.root}>
-        <LandingBedtimeLayer />
+        <LandingBedtimeLayer
+          segmentEffects={segments.map((segment) => ({
+            anchorId: segment.anchorId,
+            hideMoon: Boolean(segment.hideBedtimeMoon),
+            veil: segment.bedtimeVeil,
+          }))}
+        />
         <SegmentNav items={navItems} />
 
         {segments.map((segment, index) => (
@@ -36,6 +42,7 @@ export default function LandingHub() {
             key={segment.id}
             segment={segment}
             index={index}
+            total={segments.length}
             nextAnchorId={
               segments[index + 1]?.anchorId ??
               (index === segments.length - 1 ? FOOTER_ANCHOR : null)

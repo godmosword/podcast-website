@@ -76,6 +76,7 @@ export async function stabilizeVisualPage(
   await page.locator("html").evaluate((el, themeMode: string) => {
     if (themeMode === "night") {
       el.setAttribute("data-theme", "night");
+      el.setAttribute("data-bedtime", "");
     } else {
       el.removeAttribute("data-theme");
       el.removeAttribute("data-bedtime");
