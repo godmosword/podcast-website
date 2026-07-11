@@ -1,17 +1,17 @@
 .wrap {
-  margin-top: 12px;
-  padding: 14px 16px;
+  margin-top: 0;
+  padding: 12px 14px;
   border-radius: var(--radius-md);
-  background: linear-gradient(180deg, var(--card-2), var(--card));
+  background: var(--card);
   border: 1.5px solid var(--line);
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
   text-align: center;
 }
 
 .lead {
-  margin: 0 0 12px;
-  font-size: 0.9rem;
-  font-weight: 600;
+  margin: 0 0 10px;
+  font-size: 0.86rem;
+  font-weight: 700;
   line-height: 1.5;
   color: var(--ink-soft);
 }

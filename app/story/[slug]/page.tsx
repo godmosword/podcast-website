@@ -124,7 +124,6 @@ export default async function StoryDetailPage({
             className={styles.playMain}
             label={`開始看故事：${story.title}`}
           />
-          <SubscriptionCTA accent={story.color} />
           <ShareButton
             shareUrl={storyShareUrl(story.slug)}
             lineUrl={lineShareUrl(
@@ -137,6 +136,11 @@ export default async function StoryDetailPage({
             )}
             leading={<FavoriteButton slug={story.slug} />}
             className={styles.shareRow}
+          />
+          <SubscriptionCTA
+            accent={story.color}
+            className={styles.subscribeBlock}
+            campaign={story.slug}
           />
         </div>
 
