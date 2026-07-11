@@ -755,8 +755,7 @@ export default function StoryPlayer({
             onClick={cycleCaptionSize}
             aria-label={`字幕字級：${CAPTION_SIZE_LABEL[captionSize]}（點擊切換）`}
           >
-            <span className={styles.aaSmall}>A</span>
-            <span className={styles.aaLarge}>A</span>
+            <Icon name="text-size" size={22} />
           </button>
           <button
             className={subtitlesOn ? styles.subtitlesBtnOn : styles.subtitlesBtn}

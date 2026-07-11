@@ -98,6 +98,13 @@ function renderGlyph(name: IconName) {
           <path d="M12 9.5V13l2.8 2.2M9.5 3.5h5" />
         </g>
       );
+    case "text-size":
+      return (
+        <g {...STROKE}>
+          <path d="M5 18 9 6l4 12M6.4 13.5h5.2" />
+          <path d="M16 8.5h4M18 8.5v9M16 17.5h4" />
+        </g>
+      );
     default: {
       const _exhaustive: never = name;
       return _exhaustive;

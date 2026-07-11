@@ -11,6 +11,7 @@ export const ICON_NAMES = [
   "volume-off",
   "bell",
   "timer",
+  "text-size",
   "external",
 ] as const;
 
