@@ -15,6 +15,8 @@ type Props = {
   embedded?: boolean;
   /** Analytics 來源標記 */
   source?: PlatformClickSource;
+  /** utm_campaign：單集 slug 或省略為 site */
+  campaign?: string;
 };
 
 /**
@@ -26,6 +28,7 @@ export default function PlatformLinks({
   accent,
   embedded = false,
   source = "story-platforms",
+  campaign,
 }: Props) {
   const platforms = visiblePlatforms();
   if (platforms.length === 0) return null;
@@ -38,6 +41,7 @@ export default function PlatformLinks({
             href={p.url}
             label={p.label}
             source={source}
+            campaign={campaign}
             className={styles.item}
           >
             <span

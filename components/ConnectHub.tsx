@@ -7,6 +7,7 @@ import {
   SOCIAL_ICON_PATHS,
 } from "@/lib/connect-icons";
 import { trackPlatformClick } from "@/lib/analytics";
+import { appendPlatformUtm } from "@/lib/platform-utm";
 import { visiblePlatforms } from "@/lib/platforms";
 import { visibleSocials } from "@/lib/social";
 import styles from "./ConnectHub.module.css";
@@ -99,7 +100,7 @@ export default function ConnectHub({
             {platforms.map((p) => (
               <IconLink
                 key={p.label}
-                href={p.url}
+                href={appendPlatformUtm(p.url, { source: "footer-connect" })}
                 label={p.label}
                 ariaLabel={`在 ${p.label} 收聽`}
                 badgeStyle={{ background: p.color }}

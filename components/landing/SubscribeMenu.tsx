@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { BrandSvg, PLATFORM_ICON_PATHS } from "@/lib/connect-icons";
 import { trackPlatformClick } from "@/lib/analytics";
+import { appendPlatformUtm } from "@/lib/platform-utm";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { visiblePlatforms } from "@/lib/platforms";
 import styles from "./SubscribeMenu.module.css";
@@ -38,7 +39,7 @@ export default function SubscribeMenu() {
     const platform = platforms[0]!;
     return (
       <a
-        href={platform.url}
+        href={appendPlatformUtm(platform.url, { source: "nav-bar" })}
         className={styles.trigger}
         target="_blank"
         rel="noopener noreferrer"
@@ -69,7 +70,7 @@ export default function SubscribeMenu() {
           {platforms.map((platform) => (
             <li key={platform.label} role="none">
               <a
-                href={platform.url}
+                href={appendPlatformUtm(platform.url, { source: "nav-dropdown" })}
                 className={styles.option}
                 role="menuitem"
                 target="_blank"
