@@ -243,7 +243,7 @@ Hey Clay 的 3D 旋轉與 LEGO 的零件袋編號，都是為 ②③ 服務的�
    - 放開:彈回 overshoot(scale 1.04 → 1)
    - 自動播 `tap` 音效;`sfx` prop 可覆寫或設 null 關閉
    - 最小尺寸 64×64px,focus-visible 有明顯外框(沿用 contrast tokens)
-3. 替換現有四個遊戲(car-adventure、block-drop、kart、pirate-kart)入口按鈕與返回按鈕為 TactileButton,行為不變。
+3. 替換現有四個遊戲(car-adventure、block-drop、candy-match、candy-kart)入口按鈕與返回按鈕為 TactileButton,行為不變。
 
 ## 驗收標準
 - [ ] iOS Safari 實機(或模擬)首次點擊即有聲音,無 autoplay 報錯。
@@ -298,7 +298,7 @@ Hey Clay 的 3D 旋轉與 LEGO 的零件袋編號，都是為 ②③ 服務的�
 
 ## 範圍
 1. 資料層:`lib/garage/collection.ts`
-   - 定義 12 台可收集車車(id、名稱、SVG 元件、解鎖條件),解鎖條件對接既有 progress store 事件(例:聽完 3 集故事、kart 完成一局、連續 3 天造訪)
+   - 定義 12 台可收集車車(id、名稱、SVG 元件、解鎖條件),解鎖條件對接既有 progress store 事件(例:聽完 3 集故事、candy-kart 完成一局、連續 3 天造訪)
    - 解鎖判定為純函式 `getUnlocked(progress): CarId[]`,可單元測試
 2. `app/garage/page.tsx` + `components/garage/GarageGrid.tsx`
    - 已解鎖:彩色車車 + 名稱;未解鎖:剪影 + 「?」,點擊剪影顯示解鎖提示(「再聽 2 個故事就能遇見它!」,提示文案由條件自動生成)
