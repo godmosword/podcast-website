@@ -226,7 +226,7 @@ SoundOn 單集 show notes 加官網單集 URL（可選 UTM），閉環 B 戰場�
 
 > 原名「效能地基」不準確：本層含夜間、字幕、圖示，非純 perf。
 
-#### D1 圖像管線現代化（修正版・雙軌 LCP）　`perf · M · D0`　〔perf〕**實作完成（待 commit）**
+#### D1 圖像管線現代化（修正版・雙軌 LCP）　`perf · M · D0`　〔perf〕 ✅ `d42fae1`
 **雙軌 LCP（勿再把 `hero-home.jpg` 當首頁 LCP）：**
 - **(a) 首頁 `/`：** `segment-stories*.jpg`／portrait，原生 `<picture>` + 預生成 WebP/AVIF（`LandingSegment`、`lib/modern-image-src.ts`）；`npm run optimize:lcp-images`
 - **(b) 內頁 header：** `SiteHeader` `hero-home` 同管線 `<picture>` + WebP/AVIF
