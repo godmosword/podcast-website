@@ -6,6 +6,8 @@ type RoughFrameProps = {
   color?: string;
   /** 套用哪一個全域粗糙濾鏡（SvgDefs 定義 1~3） */
   rough?: 1 | 2 | 3;
+  /** D7：輪替 #rough-1/2/3 濾鏡變體（非 path redraw） */
+  shiftFilter?: boolean;
   /** 邊框粗細（px） */
   width?: number;
   /** 圓角，預設 var(--radius-xl) */
@@ -22,20 +24,26 @@ type RoughFrameProps = {
 export default function RoughFrame({
   color = "currentColor",
   rough = 1,
+  shiftFilter = false,
   width = 3,
   radius,
   className,
   style,
 }: RoughFrameProps) {
+  const shiftClass = shiftFilter ? decor.roughShift : "";
+  const mergedClass = [decor.roughFrame, shiftClass, className]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <span
       aria-hidden
-      className={`${decor.roughFrame} ${className ?? ""}`}
+      className={mergedClass}
       style={{
         color,
         borderWidth: `${width}px`,
         borderRadius: radius ?? "var(--radius-xl)",
-        filter: `url(#rough-${rough})`,
+        filter: shiftFilter ? undefined : `url(#rough-${rough})`,
         ...style,
       }}
     />

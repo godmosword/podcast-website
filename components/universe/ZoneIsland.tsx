@@ -1,12 +1,15 @@
 "use client";
 
-import { memo, useEffect, useRef, useState, type CSSProperties } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { ZONE_STATUS_META, type ZoneDef, type ZoneStatus } from "@/data/universe-zones";
 import { mapDepthZ } from "@/lib/universe-depth";
 import type { ResolvedZone } from "@/lib/universe-map";
 import { getZoneArtTile, getZoneArtSrcSet } from "@/lib/universe/zone-art-tile";
 import { getZoneNightArtSrcSet } from "@/lib/universe/zone-art-src";
 import { playSfx } from "@/lib/sfx";
+import { requestCelebration } from "@/lib/celebration";
+import { ISLAND_BURST_PRESET, createRadialBurstParticles } from "@/lib/celebration-dom";
+import StarBurst from "@/components/celebration/StarBurst";
 import IslandRoamerLayer from "./IslandRoamerLayer";
 import ZoneLandmark from "./ZoneLandmark";
 import ZoneMotionLayer from "./ZoneMotionLayer";
@@ -16,17 +19,7 @@ import ZoneIslandTileArt from "./ZoneIslandTileArt";
 import type { ZoneProgress } from "@/hooks/useZoneProgress";
 import styles from "./ZoneIsland.module.css";
 
-/** 點島慶祝的星星迸發（重用 app/motion.css 的 star-burst-particle）；色票取各園區點綴色。 */
-const BURST_PARTICLES = [
-  { x: "-46px", y: "-62px", symbol: "✦", color: "#ffb03a" },
-  { x: "44px", y: "-56px", symbol: "✧", color: "#ff8c2b" },
-  { x: "-64px", y: "-8px", symbol: "✦", color: "#f7a8c4" },
-  { x: "62px", y: "-14px", symbol: "✦", color: "#8fcde8" },
-  { x: "-24px", y: "-84px", symbol: "✧", color: "#ffd866" },
-  { x: "26px", y: "-88px", symbol: "✦", color: "#c5b3e6" },
-] as const;
-
-/** 慶祝動畫長度（毫秒），與 CSS islandBounce／star-burst-particle 對齊。 */
+/** 點島慶祝動畫長度（毫秒），與 CSS islandBounce／star-burst-particle 對齊。 */
 const CELEBRATE_MS = 640;
 
 /**
@@ -74,12 +67,20 @@ function ZoneIsland({
   const { transition, onTransitionEnd } = useZoneTransition(effectiveStatus, reduced);
 
   const [burst, setBurst] = useState(0);
+  const [burstParticles, setBurstParticles] = useState(
+    createRadialBurstParticles({ ...ISLAND_BURST_PRESET, seed: 0 }),
+  );
   const burstTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [jelly, setJelly] = useState(0);
 
   const handleActivate = () => {
     if (isOpen) {
-      if (!reduced) {
+      const decision = requestCelebration("island_open_tap");
+      if (!reduced && decision.allowed && decision.particleCount > 0) {
+        const seed = Date.now();
+        setBurstParticles(
+          createRadialBurstParticles({ ...ISLAND_BURST_PRESET, seed }),
+        );
         setBurst((n) => n + 1);
         if (burstTimerRef.current) clearTimeout(burstTimerRef.current);
         burstTimerRef.current = setTimeout(() => setBurst(0), CELEBRATE_MS);
@@ -159,22 +160,7 @@ function ZoneIsland({
             />
             {burst > 0 && isOpen && (
               <span className={styles.burstLayer} aria-hidden="true">
-                {BURST_PARTICLES.map((p, i) => (
-                  <span
-                    key={`${burst}-${i}`}
-                    className="star-burst-particle"
-                    style={
-                      {
-                        "--burst-x": p.x,
-                        "--burst-y": p.y,
-                        color: p.color,
-                        fontSize: 15,
-                      } as CSSProperties
-                    }
-                  >
-                    {p.symbol}
-                  </span>
-                ))}
+                <StarBurst particles={burstParticles} />
               </span>
             )}
           </div>

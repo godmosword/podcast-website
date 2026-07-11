@@ -33,10 +33,9 @@ export default function StoryCard({
   return (
     <Link
       href={`/story/${story.slug}`}
-      className={`${styles.card} ${isGrid ? styles.cardGrid : ""} popIn press-squash`}
+      className={`${styles.card} ${isGrid ? styles.cardGrid : ""} scrollEnter press-squash`}
       style={{
         boxShadow: `var(--shadow-md), 0 6px 0 ${story.color}`,
-        animationDelay: `${Math.min(index, 8) * 55}ms`,
       }}
     >
       <RoughFrame color={story.color} rough={index % 2 === 0 ? 1 : 2} width={3} />

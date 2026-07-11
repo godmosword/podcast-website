@@ -4,6 +4,7 @@ import LandingScrollView from "@/components/landing/LandingScrollView";
 import LandingSegment from "@/components/landing/LandingSegment";
 import SegmentNav from "@/components/landing/SegmentNav";
 import DuduCompanion from "@/components/landing/DuduCompanion";
+import LandingBedtimeLayer from "@/components/landing/LandingBedtimeLayer";
 import { DUDU_EMOTION_BY_SEGMENT } from "@/components/landing/dudu-emotions";
 import { resolveLandingSegments } from "@/lib/landing-query";
 import { podcastSeriesJsonLd } from "@/lib/json-ld";
@@ -27,6 +28,7 @@ export default function LandingHub() {
     <>
       <JsonLd data={podcastSeriesJsonLd()} />
       <LandingScrollView className={scrollStyles.root}>
+        <LandingBedtimeLayer />
         <SegmentNav items={navItems} />
 
         {segments.map((segment, index) => (

@@ -1,3 +1,9 @@
+import {
+  BEDTIME_ATTRIBUTE,
+  BEDTIME_END_HOUR,
+  BEDTIME_START_HOUR,
+  isLocalBedtimeHour,
+} from "@/lib/bedtime";
 import { PROGRESS_STORAGE_KEY } from "@/lib/progress-store";
 
 /** Stored user preference — may follow OS/browser color scheme. */
@@ -22,16 +28,47 @@ function prefersDarkColorScheme(): boolean {
   return window.matchMedia(DARK_SCHEME_QUERY).matches;
 }
 
-export function resolveThemeFromMode(mode: ThemeMode): ThemePreference {
+export type ResolveThemeOptions = {
+  prefersDark?: boolean;
+  hour?: number;
+};
+
+export function isBedtimeActive(
+  mode: ThemeMode,
+  hour: number = new Date().getHours(),
+): boolean {
+  if (mode === LIGHT_THEME) return false;
+  return isLocalBedtimeHour(hour);
+}
+
+export function resolveThemeFromMode(
+  mode: ThemeMode,
+  options?: ResolveThemeOptions,
+): ThemePreference {
   if (mode === NIGHT_THEME) return NIGHT_THEME;
-  if (mode === SYSTEM_THEME_MODE) {
-    return prefersDarkColorScheme() ? NIGHT_THEME : LIGHT_THEME;
+  if (mode === LIGHT_THEME) return LIGHT_THEME;
+  const hour = options?.hour ?? new Date().getHours();
+  const prefersDark = options?.prefersDark ?? prefersDarkColorScheme();
+  const bedtime = isLocalBedtimeHour(hour);
+  return prefersDark || bedtime ? NIGHT_THEME : LIGHT_THEME;
+}
+
+export function applyBedtimeToDocument(active: boolean): void {
+  if (typeof document === "undefined") return;
+  const root = document.documentElement;
+  if (active) {
+    root.setAttribute(BEDTIME_ATTRIBUTE, "true");
+  } else {
+    root.removeAttribute(BEDTIME_ATTRIBUTE);
   }
-  return LIGHT_THEME;
+}
+
+export function syncBedtimeFromMode(mode: ThemeMode, hour?: number): void {
+  applyBedtimeToDocument(isBedtimeActive(mode, hour));
 }
 
 /** Blocking inline script — runs before paint to avoid FOUC. */
-export const THEME_INIT_SCRIPT = `(function(){try{var r=localStorage.getItem("${PROGRESS_STORAGE_KEY}");var m="system";if(r){var p=JSON.parse(r);m=(p.preferences&&p.preferences.theme)||"system";}var dark=false;if(m==="night"){dark=true;}else if(m==="system"){dark=window.matchMedia&&window.matchMedia("${DARK_SCHEME_QUERY}").matches;}if(dark){document.documentElement.setAttribute("${THEME_ATTRIBUTE}","night");}}catch(e){}})();`;
+export const THEME_INIT_SCRIPT = `(function(){try{var r=localStorage.getItem("${PROGRESS_STORAGE_KEY}");var m="system";if(r){var p=JSON.parse(r);m=(p.preferences&&p.preferences.theme)||"system";}var h=new Date().getHours();var bedtime=h>=${BEDTIME_START_HOUR}||h<${BEDTIME_END_HOUR};var dark=false;if(m==="night"){dark=true;}else if(m==="system"){var sys=window.matchMedia&&window.matchMedia("${DARK_SCHEME_QUERY}").matches;dark=sys||bedtime;}if(dark){document.documentElement.setAttribute("${THEME_ATTRIBUTE}","night");}if(bedtime&&m!=="light"){document.documentElement.setAttribute("${BEDTIME_ATTRIBUTE}","true");}}catch(e){}})();`;
 
 function isThemeMode(value: unknown): value is ThemeMode {
   return value === "light" || value === "night" || value === SYSTEM_THEME_MODE;

@@ -6,6 +6,12 @@ import {
   isCandyKartFinishMessage,
   isCandyKartReadyMessage,
 } from "@/lib/gamekit/games/candy-kart-bridge";
+import {
+  buildCelebrationIframeMessage,
+  celebrationEventFromKartFinish,
+} from "@/lib/celebration-iframe";
+import { requestCelebration } from "@/lib/celebration";
+import { playSfx } from "@/lib/sfx";
 import { reportGameSession } from "@/lib/gamekit/progress/session";
 import {
   readGodotLoaderError,
@@ -68,6 +74,14 @@ export function CandyKartIframeHost({
       reportedRef.current = key;
 
       reportGameSession(candyKartSessionFromFinish(event.data));
+
+      const eventId = celebrationEventFromKartFinish(event.data);
+      const decision = requestCelebration(eventId);
+      if (decision.playSfx) playSfx(decision.playSfx);
+      iframeRef.current?.contentWindow?.postMessage(
+        buildCelebrationIframeMessage(eventId, decision.intensity),
+        window.location.origin,
+      );
     },
     [markReady],
   );

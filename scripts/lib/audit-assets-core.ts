@@ -11,7 +11,7 @@ import {
   LANDING_CLAY_EXTERNAL,
   LANDING_SEGMENTS,
 } from "../../data/landing-segments";
-import { DUDU_EMOTIONS, emotionSrc } from "../../components/landing/dudu-emotions";
+import { DUDU_EMOTIONS, emotionSrc } from "../../data/dudu-emotions";
 import { MAP_ROAMERS } from "../../data/universe-roamers";
 import { ZONE_MOTION } from "../../data/universe-zone-motion";
 import { ZONE_IDS } from "../../data/universe-zones";

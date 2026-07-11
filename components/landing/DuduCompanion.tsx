@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import DuduMoment from "@/components/dudu/DuduMoment";
 import { useLandingScroll } from "./LandingScrollContext";
 import {
   DUDU_EMOTIONS,
-  DUDU_EMOTION_LABEL,
   type DuduEmotion,
-  emotionSrc,
   nextEmotion,
-} from "./dudu-emotions";
+} from "@/data/dudu-emotions";
 import styles from "./DuduCompanion.module.css";
 
 type DuduCompanionItem = {
@@ -38,7 +37,7 @@ export default function DuduCompanion({ items, footerId }: DuduCompanionProps) {
   useEffect(() => {
     DUDU_EMOTIONS.forEach((emotion) => {
       const img = new window.Image();
-      img.src = emotionSrc(emotion);
+      img.src = `/landing/mascot/dudu-${emotion}.webp`;
     });
   }, []);
 
@@ -60,7 +59,7 @@ export default function DuduCompanion({ items, footerId }: DuduCompanionProps) {
         const emotion = visible ? emotionByAnchor.get(visible.target.id) : undefined;
         if (emotion) {
           setBaseEmotion(emotion);
-          setTapEmotion(null); // 換段時回到該段表情
+          setTapEmotion(null);
         }
       },
       { root, rootMargin: "-40% 0px -40% 0px", threshold: [0, 0.5, 1] },
@@ -86,32 +85,17 @@ export default function DuduCompanion({ items, footerId }: DuduCompanionProps) {
 
   const shown = tapEmotion ?? baseEmotion;
 
-  function handleTap() {
-    setTapEmotion((prev) => nextEmotion(prev ?? baseEmotion));
-  }
-
   return (
-    <div
-      className={`${styles.root} ${atFooter ? styles.hidden : ""}`}
-      aria-hidden
-    >
-      <button
-        type="button"
-        className={styles.car}
-        onClick={handleTap}
-        tabIndex={-1}
-        aria-label={`嘟嘟小紅車：${DUDU_EMOTION_LABEL[shown]}`}
-      >
-        {/* key 強制換圖，單張切換避免交叉淡化殘影 */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          key={shown}
-          src={emotionSrc(shown)}
-          alt=""
-          decoding="async"
-          className={styles.sprite}
-        />
-      </button>
+    <div className={styles.root}>
+      <DuduMoment
+        variant="companion"
+        emotion={shown}
+        label="嘟嘟小紅車"
+        interactive
+        hidden={atFooter}
+        className={styles.companion}
+        onInteract={() => setTapEmotion((prev) => nextEmotion(prev ?? baseEmotion))}
+      />
     </div>
   );
 }

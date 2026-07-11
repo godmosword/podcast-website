@@ -33,17 +33,17 @@ function GameCard({ game, index }: { game: GameMeta; index: number }) {
     <li className={styles.gridItem}>
       <Link
         href={game.href}
-        className={`${styles.card} popIn press-squash`}
+        className={`${styles.card} scrollEnter press-squash`}
         aria-label={ariaParts.join("，")}
         style={{
           boxShadow: `var(--shadow-md), 0 6px 0 ${game.accent}`,
-          animationDelay: `${Math.min(index, 4) * 55}ms`,
         }}
       >
         <RoughFrame
           color={game.accent}
           rough={index % 2 === 0 ? 1 : 2}
           width={3}
+          shiftFilter
         />
         <div
           className={styles.thumb}
@@ -106,6 +106,7 @@ export default function GamesHubPage() {
           kind="loop"
           size={32}
           color="var(--c-pink)"
+          draw
           className={`${decor.doodle} ${decor.tiltB}`}
           style={{ right: "6%", top: "12px" }}
         />

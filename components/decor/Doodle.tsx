@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import decor from "./decor.module.css";
 
 /** 可用的手繪塗鴉造型。 */
 type DoodleKind =
@@ -13,6 +14,8 @@ type DoodleProps = {
   kind?: DoodleKind;
   size?: number;
   color?: string;
+  /** D7：描邊進場（stroke-dashoffset），首屏一次 */
+  draw?: boolean;
   className?: string;
   style?: CSSProperties;
 };
@@ -25,13 +28,17 @@ export default function Doodle({
   kind = "squiggle",
   size = 40,
   color = "currentColor",
+  draw = false,
   className,
   style,
 }: DoodleProps) {
+  const drawClass = draw ? decor.doodleDraw : "";
+  const mergedClass = [className, drawClass].filter(Boolean).join(" ");
+
   const common = {
     width: size,
     height: size,
-    className,
+    className: mergedClass,
     style,
     "aria-hidden": true,
     focusable: "false" as const,

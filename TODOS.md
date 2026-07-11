@@ -260,28 +260,28 @@ SoundOn 單集 show notes 加官網單集 URL（可選 UTM），閉環 B 戰場�
 #### D4 View Transitions（spike）　`ux · S(spike) 可能升至 M · D2`　〔eng+ux〕 ✅ `3ac73a3`（待手動驗收擴大）
 **落地：** `experimental.viewTransition`（Next 15.5.20+）+ `StoryCoverMorph`（`unstable_ViewTransition`）故事卡封面↔詳情 hero；`sharedCoverMorph` 防同頁重複 slug；`app/view-transitions.css` + reduced-motion。手動矩陣見 `docs/D4-VIEW-TRANSITIONS-SPIKE.md`。未啟用 `Link transitionTypes`（待 Next 16+ 評估）。
 
-#### D5 Scroll-driven 進場（CSS-only）　`ux · S · D2`　〔ux〕待實作
-`animation-timeline: view()` **僅在 `@supports` 內**啟用；預設靜態可見（勿留 `opacity:0`）。調和既有 `StoryCard` `.popIn`（L31）避免雙重彈跳。limited availability 漸進增強。
+#### D5 Scroll-driven 進場（CSS-only）　`ux · S · D2`　〔ux〕 ✅ 已實作（待 commit）
+**落地：** `app/scroll-driven.css`（`@supports (animation-timeline: view())` 才啟用 `.scrollEnter`；預設靜態可見）；`StoryCard`／games hub 改 scroll 進場並關閉支援內 `popIn` 雙跳；`LandingSegment` 標題／CTA 錯落 `scrollEnterStagger1–3`；`prefers-reduced-motion` 關閉。
 
 ---
 
 ### L3 系統化回饋
 
-#### D8 慶祝回饋（縮小範圍）　`ux · M · 無`　〔ux〕待實作
-Web 已有 `star-burst` + reduced-motion（`motion.css`）。**勿**假設 React／Canvas／Godot iframe 共用單一 `<Celebration>`。改為共用 **事件語意 + 強度檔 + 冷卻／合併規則**（兒童注意力保護），各 runtime **adapter** 呈現（DOM CSS／canvas／iframe postMessage）。
+#### D8 慶祝回饋（縮小範圍）　`ux · M · 無`　〔ux〕 ✅ 已實作（待 commit）
+**落地：** `data/celebration.ts` 事件語意＋強度檔；`lib/celebration.ts` 冷卻／合併／burst 預算；`StarBurst`＋`useCelebrationBurst` DOM adapter；`lib/celebration-iframe.ts` postMessage 契約。接線：FavoriteButton、ZoneIsland、CandyKart finish。
 
-#### D9 嘟嘟微互動（重構）　`brand · S–M · 無`　〔brand+ux〕待實作
-**非新建：** `DuduCompanion` 已有六表情、IO、預載。抽出 **sprite／emotion primitive** + 情境 **wrapper**（`<DuduMoment>`）；擴 404／載入／完播／收藏等。**綁定 UX-P2-4** 鍵盤可及，勿先擴互動再補 a11y。
+#### D9 嘟嘟微互動（重構）　`brand · S–M · 無`　〔brand+ux〕 ✅ 已實作（待 commit）
+**落地：** `data/dudu-emotions.ts`；`DuduSprite` primitive＋`DuduMoment` wrapper（inline／badge／companion）；`DuduCompanion` 重構（`tabIndex` 可聚焦）；擴 404、GameLoadOverlay 載入、StoryEndScreen 完播。
 
 ---
 
 ### L4 品牌亮點
 
-#### D11 時間感知首頁　`brand · S · D3+D2`　〔brand〕待實作
-**規則：** 自動夜色窗 **19:00–06:00**；使用者選 **light** 偏好優先於時間。CSS 疊層夜色 + 重用 moon 資產（**不換**整張 hero，避免 LCP／hydration 閃爍）。時間判斷沿用 **`THEME_INIT_SCRIPT`**（`app/layout.tsx` pre-paint），勿僅 client hydration。
+#### D11 時間感知首頁　`brand · S · D3+D2`　〔brand〕 ✅ 已實作（待 commit）
+**落地：** `lib/bedtime.ts`（19:00–06:00）；`THEME_INIT_SCRIPT`＋`ThemeProvider` 同步 `data-bedtime`（`light` 優先）；`LandingBedtimeLayer` CSS 疊層夜色＋重用 `moon.png`（不換 hero）。
 
-#### D7 手繪體驗深化　`design · M · D2`　〔design〕待實作
-`Doodle`（SVG path）適合 `stroke-dasharray` 描邊進場（首屏一次）。`RoughFrame` 為 HTML border + SVG turbulence **filter**——做 **filter variant 切換**，勿宣稱 path redraw。SVG 字動畫僅限 logo／短標語。
+#### D7 手繪體驗深化　`design · M · D2`　〔design〕 ✅ 已實作（待 commit）
+**落地：** `Doodle` `draw` prop（`stroke-dashoffset` 描邊進場）；`RoughFrame` `shiftFilter`（`#rough-1/2/3` 輪替）；`LatestHero`／games header 首屏 `draw`；`decor.module.css.test.ts` 契約。
 
 #### D10 圖鑑 3D tilt（可選 polish）　`ux · S · D10 貼紙上線後`　〔ux〕擇機
 手機價值低；列為可選。依賴 D10 貼紙狀態已穩定。

@@ -22,7 +22,7 @@ export default function LatestHero({ story }: LatestHeroProps) {
         boxShadow: `var(--shadow-md), 0 6px 0 ${story.color}`,
       }}
     >
-      <RoughFrame color={story.color} rough={2} width={4} />
+      <RoughFrame color={story.color} rough={2} width={4} shiftFilter />
       <div className={styles.topRow}>
         <Ribbon color={story.color}>NEW · EP {story.ep}</Ribbon>
       </div>
@@ -69,6 +69,7 @@ export default function LatestHero({ story }: LatestHeroProps) {
         kind="squiggle"
         size={34}
         color="var(--c-mint)"
+        draw
         className={`${decor.doodle} ${decor.doodleBL} ${decor.tiltA}`}
         style={{ left: "-10px", bottom: "-14px" }}
       />

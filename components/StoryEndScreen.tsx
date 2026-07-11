@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, type ComponentType } from "react";
+import { useEffect, useState, type ComponentType } from "react";
 import Link from "next/link";
+import DuduMoment from "@/components/dudu/DuduMoment";
+import { requestCelebration } from "@/lib/celebration";
 import Sparkle from "./decor/Sparkle";
 import decor from "./decor/decor.module.css";
 import styles from "./StoryPlayer.module.css";
@@ -45,11 +47,21 @@ export default function StoryEndScreen({
   onReplay,
 }: StoryEndScreenProps) {
   const [reflectionOpen, setReflectionOpen] = useState(initialReflectionOpen);
+
+  useEffect(() => {
+    requestCelebration("story_end");
+  }, []);
+
   const canOpenReflection = Boolean(reflectionPrompt && ReflectionComponent);
   const reflectionPanelId = `${slug}-quiet-reflection`;
 
   return (
     <div className={styles.endScreen}>
+      <DuduMoment
+        variant="badge"
+        emotion="star"
+        label="故事聽完了"
+      />
       <Sparkle
         className={`${styles.endSparkle} ${styles.endSparkle1} ${decor.sparkleAnim}`}
         size={26}

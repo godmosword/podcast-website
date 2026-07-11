@@ -68,9 +68,51 @@
   z-index: 1;
 }
 
+/* D7：描邊進場（僅 stroke path；fill 型如 dots/blob 不受影響） */
+.doodleDraw path {
+  --doodle-dash: 200;
+  stroke-dasharray: var(--doodle-dash);
+  stroke-dashoffset: var(--doodle-dash);
+  animation: doodle-draw 0.95s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
+}
+
+/* D7：粗糙濾鏡變體輪替 */
+.roughShift {
+  animation: rough-filter-shift 6s ease-in-out infinite;
+}
+
+@keyframes doodle-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes rough-filter-shift {
+  0%,
+  100% {
+    filter: url(#rough-1);
+  }
+  33% {
+    filter: url(#rough-2);
+  }
+  66% {
+    filter: url(#rough-3);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  /* 降低動態：濾鏡仍為靜態抖動，無需特別處理；保留結構 */
-  .roughFrame {
+  .doodleDraw path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+
+  .roughShift {
+    animation: none;
+    filter: url(#rough-1) !important;
+  }
+
+  /* 非動態 roughFrame 維持靜態邊框 */
+  .roughFrame:not(.roughShift) {
     filter: none !important;
   }
 }

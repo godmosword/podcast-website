@@ -15,6 +15,7 @@ import {
   LIGHT_THEME,
   resolveThemeFromMode,
   subscribeToSystemColorScheme,
+  syncBedtimeFromMode,
   SYSTEM_THEME_MODE,
   type ThemeMode,
   type ThemePreference,
@@ -51,6 +52,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     setModeState(nextMode);
     setThemeState(resolved);
     applyThemeToDocument(resolved);
+    syncBedtimeFromMode(nextMode);
     setThemeInStore(nextMode);
   }, []);
 
@@ -61,10 +63,25 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
   useEffect(() => {
     if (mode !== SYSTEM_THEME_MODE) return;
-    return subscribeToSystemColorScheme((resolved) => {
+    return subscribeToSystemColorScheme(() => {
+      const resolved = resolveThemeFromMode(SYSTEM_THEME_MODE);
       setThemeState(resolved);
       applyThemeToDocument(resolved);
+      syncBedtimeFromMode(SYSTEM_THEME_MODE);
     });
+  }, [mode]);
+
+  // 睡前窗跨過整點時同步 theme／疊層（light 模式不進睡前）。
+  useEffect(() => {
+    if (mode === LIGHT_THEME) return;
+    const tick = () => {
+      const resolved = resolveThemeFromMode(mode);
+      setThemeState(resolved);
+      applyThemeToDocument(resolved);
+      syncBedtimeFromMode(mode);
+    };
+    const id = window.setInterval(tick, 60_000);
+    return () => window.clearInterval(id);
   }, [mode]);
 
   const setMode = useCallback(

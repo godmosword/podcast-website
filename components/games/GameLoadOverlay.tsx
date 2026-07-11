@@ -1,6 +1,7 @@
 "use client";
 
 import type { GameLoadPhase } from "@/lib/gamekit/react/game-load";
+import DuduMoment from "@/components/dudu/DuduMoment";
 import { IconReplay } from "@/components/games/ClayIcons";
 import styles from "./GameLoadOverlay.module.css";
 
@@ -62,6 +63,7 @@ export function GameLoadOverlay({
 
       {phase === "loading" ? (
         <>
+          <DuduMoment variant="badge" emotion="star" label="遊戲載入中" />
           <div className={styles.spinner} aria-hidden />
           <p className={styles.title}>{title}</p>
           {hint ? <p className={styles.hint}>{hint}</p> : null}

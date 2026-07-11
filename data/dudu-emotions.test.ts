@@ -23,7 +23,7 @@ describe("dudu-emotions", () => {
       cur = nextEmotion(cur);
     }
     expect(new Set(seen).size).toBe(DUDU_EMOTIONS.length);
-    expect(cur).toBe(DUDU_EMOTIONS[0]); // 繞一圈回到起點
+    expect(cur).toBe(DUDU_EMOTIONS[0]);
   });
 
   it("emotionSrc 指向 webp sprite", () => {

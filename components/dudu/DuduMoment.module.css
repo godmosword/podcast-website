@@ -1,0 +1,83 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.frame {
+  position: relative;
+  display: block;
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.22));
+}
+
+.interactive {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 12px;
+}
+
+.interactive:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 4px;
+}
+
+.interactive:active {
+  transform: scale(0.94);
+}
+
+.caption {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+/* 404／內文區塊 */
+.inline .frame {
+  width: clamp(120px, 28vw, 168px);
+  height: clamp(108px, 25vw, 150px);
+}
+
+/* 完播／載入小徽章 */
+.badge {
+  margin: 0 auto 10px;
+}
+
+.badge .frame {
+  width: 72px;
+  height: 64px;
+}
+
+/* 首頁角落夥伴（定位由外層 root 負責） */
+.companion .frame {
+  width: clamp(80px, 11vw, 118px);
+  height: clamp(72px, 10vw, 106px);
+  animation: duduBob 3.2s ease-in-out infinite;
+}
+
+.hidden {
+  opacity: 0;
+  transform: translateY(14px);
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+@keyframes duduBob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(1deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .companion .frame {
+    animation: none;
+  }
+}

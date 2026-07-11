@@ -1,0 +1,53 @@
+/* D5：Scroll-driven 進場（僅 @supports 啟用；預設靜態可見） */
+
+@keyframes scroll-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 無 @supports 時維持靜態可見，不設 opacity:0 */
+.scrollEnter {
+  /* 漸進增強掛點；動畫僅在下方 @supports 內啟用 */
+}
+
+.scrollEnterStagger1 {
+  --scroll-enter-range: entry 0% cover 20%;
+}
+
+.scrollEnterStagger2 {
+  --scroll-enter-range: entry 6% cover 26%;
+}
+
+.scrollEnterStagger3 {
+  --scroll-enter-range: entry 12% cover 32%;
+}
+
+@supports (animation-timeline: view()) {
+  /* 與既有 popIn 擇一，避免雙重彈跳 */
+  .pop-in,
+  .popIn {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .scrollEnter {
+    animation: scroll-enter var(--motion-pop) both;
+    animation-timeline: view();
+    animation-range: var(--scroll-enter-range, entry 0% cover 22%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrollEnter {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}

@@ -119,12 +119,18 @@ export default function LandingSegment({
 
       <div className={styles.content}>
         <div className={styles.headline}>
-          <span className={styles.index} aria-hidden="true">{`0${index + 1}`}</span>
-          <h2 id={`${segment.anchorId}-title`} className={styles.title}>
+          <span
+            className={`${styles.index} scrollEnter scrollEnterStagger1`}
+            aria-hidden="true"
+          >{`0${index + 1}`}</span>
+          <h2
+            id={`${segment.anchorId}-title`}
+            className={`${styles.title} scrollEnter scrollEnterStagger2`}
+          >
             {segment.title}
           </h2>
         </div>
-        <div className={styles.ctaRow}>
+        <div className={`${styles.ctaRow} scrollEnter scrollEnterStagger3`}>
           <Link
             href={segment.cta.href}
             className={styles.cta}
