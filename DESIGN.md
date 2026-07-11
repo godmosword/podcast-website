@@ -85,6 +85,19 @@ Bonbon & 馬米親子 podcast「看圖聽故事」網站的視覺與互動規範
 | `--radius-lg` | 24px |
 | `--shadow-card` | `0 4px 0 var(--ink)` |
 
+## 間距
+
+Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--space-4: 16px`、`--space-6: 24px`、`--space-8: 32px`、`--space-section: 40px`、`--space-page: 20px`。
+
+密度底線（兒童向頁面取括號內較大值）：
+
+- 觸控目標 min-height ≥ 44px（48px）；調整密度時只加不減。
+- 相鄰互動元素 gap ≥ 8px（12px）；卡片 grid gap ≥ 12px。
+- section 垂直間距 mobile ≥ 24px；內文 line-height ≥ 1.5（標籤型小字豁免）。
+- 純文字段落 max-width ≤ 640px。
+- 文案密度：兒童動線頁不放超過一行的家長散文（家長說明歸戶 `/for-parents` 與 footer）；標題 ≤ 8 字、CTA ≤ 6 字。`/legal` 精簡不得刪改具法律效力語句。
+- 新宣告優先用 token；既有硬寫 px 僅在觸碰該宣告時順手換 token（±4px 內就近取整）。
+
 ## 互動
 
 - **按壓式按鈕**：`:active { transform: translateY(4px) }` 或 `scale(0.94)`，陰影消失

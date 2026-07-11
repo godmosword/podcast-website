@@ -75,7 +75,13 @@
   --shadow-md: 0 10px 24px rgba(52, 48, 43, 0.1);
   --gloss: inset 0 2px 0 rgba(255, 255, 255, 0.7);
 
-  /* 間距 */
+  /* 間距（token 階梯：只在觸碰處換用，不做全站機械替換） */
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-section: 40px;
   --space-page: 20px;
 
   /* 動效 */
