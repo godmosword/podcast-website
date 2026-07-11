@@ -310,4 +310,50 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     await page.locator('[data-roamer-id="roam-aku"]').dispatchEvent("click");
     await expect(page.getByRole("dialog")).toHaveCount(0);
   });
+
+  test("MAP-UX-P1b：sheet 開啟時拖曳 dimmed 海面不會平移地圖", async ({ page }) => {
+    await openMap(page, "light", 375, 812);
+    await page.getByRole("button", { name: /車車樂園，開放中/ }).click();
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 3000 });
+
+    const before = await stageTransformParts(page);
+    await page.mouse.move(188, 140);
+    await page.mouse.down();
+    await page.mouse.move(260, 200, { steps: 10 });
+    await page.mouse.up();
+    await page.waitForTimeout(120);
+    expectTransformClose(await stageTransformParts(page), before);
+  });
+
+  test("MAP-UX-P1b：點擊 backdrop 可關閉 sheet", async ({ page }) => {
+    await openMap(page, "light", 375, 812);
+    await page.getByRole("button", { name: /車車樂園，開放中/ }).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible({ timeout: 3000 });
+
+    await page.mouse.click(188, 140);
+    await expect(dialog).toHaveCount(0);
+  });
+
+  test("MAP-UX-P1a：關閉鈕觸控區 ≥44px", async ({ page }) => {
+    await openMap(page, "light", 375, 812);
+    await page.getByRole("button", { name: /車車樂園，開放中/ }).click();
+    const close = page.getByRole("button", { name: "關閉" });
+    await expect(close).toBeVisible({ timeout: 3000 });
+
+    const box = await close.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.height).toBeGreaterThanOrEqual(44);
+    expect(box!.width).toBeGreaterThanOrEqual(44);
+  });
+
+  test("MAP-UX-P2a：reduced-motion 點島即開 sheet", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await openMap(page, "light", 375, 812);
+    const dialog = page.getByRole("dialog");
+
+    await page.getByRole("button", { name: /車車樂園，開放中/ }).click();
+    await expect(dialog).toBeVisible({ timeout: 250 });
+    await expect(dialog).toContainText("車車樂園");
+  });
 });

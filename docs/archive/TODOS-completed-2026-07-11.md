@@ -7,17 +7,17 @@
 - Landing scroll-snap 受 `prefers-reduced-motion` 控管（見 [DESIGN.md](../DESIGN.md)）
 - Viewport 允許家長 pinch-zoom（WCAG 1.4.4），不得為 CTA 重新鎖縮放
 - 宇宙地圖場景為「印刷地圖」固定淺色，日夜兩態不反轉
-- 觸控目標兒童主路徑 ≥44px（footer 等待辦：UX-P0-2）
+- 觸控目標兒童主路徑 ≥44px（footer 已完成：UX-P0-2 `964f418`）
 - 遊戲進度／Candy Kart bridge schema 見 Game Kit 文件
 
-## 待 commit 提醒（仍屬營運債，未遺忘）
+## MAP-ROAM 已入主線（2026-07-11 文件對帳）
 
-| Task | 狀態 | 備註 |
-|------|------|------|
-| MAP-ROAM-2 縮放控制列 | 完成（待 commit） | 見下方 MAP-ROAM 段 |
-| MAP-ROAM-3 少字童趣 UI | 完成（待 commit） | 同上 |
-| MAP-ROAM-4 層次升級概念 | 完成（待 commit） | `docs/UNIVERSE-PROGRESSION-CONCEPT.md` |
-| MAP-ROAM-5 平移核心 | 完成（待 commit） | slop/rAF/inertia |
+| Task | Commit | 備註 |
+|------|--------|------|
+| MAP-ROAM-2 縮放控制列 | `3166cc5` | 步進／hit area／aria |
+| MAP-ROAM-3 少字童趣 UI | `3166cc5` | 島名／pill／「看看」圖示化 |
+| MAP-ROAM-4 層次升級概念 | `3166cc5` | `docs/UNIVERSE-PROGRESSION-CONCEPT.md` |
+| MAP-ROAM-5 平移核心 | `503ad8b` | slop／rAF／inertia |
 
 ---
 
@@ -127,13 +127,13 @@
 > 決策：A① 強化 `＋/－`（方向鍵維持 pan）｜B 兩段式＋構圖一致｜C 未來園區→**未來夢想島**（顯示名）｜D 層次升級僅設計文件。  
 > 後續：`useMapCamera` 拖曳核心已重寫（slop／rAF／inertia）；ocean `id` 不變。
 
-| Task | 狀態 | 摘要 | 驗證 |
-|------|------|------|------|
-| MAP-ROAM-1 點島構圖一致 | 完成 | 第一次點開放島即套 dock offset；第二次只 `revealSheet` 不再 fly；pan／zoom／reset 清聚焦門閂 | unit + e2e 兩段式 |
-| MAP-ROAM-2 縮放控制列 | 完成（待 commit） | 步進 0.32／-0.24；手機／平板加大 hit area；aria 釐清 | MapControls + e2e zoom |
-| MAP-ROAM-3 少字童趣 UI | 完成（待 commit） | 島名略放大、pill 降權、「看看」圖示化；守 label 淨空 ≥16px | ZoneIsland + e2e clearance |
-| MAP-ROAM-4 層次升級概念 | 完成（待 commit） | `docs/UNIVERSE-PROGRESSION-CONCEPT.md` | 文件審 |
-| MAP-ROAM-5 平移核心 | 完成（待 commit） | slop／rAF 批次／inertia（reduced-motion 關慣性） | unit + e2e |
+| Task | 狀態 | 摘要 | 驗證 | Commit hash |
+|------|------|------|------|-------------|
+| MAP-ROAM-1 點島構圖一致 | 完成 | dock offset 構圖一致（`3166cc5`）；點擊語意後改**單段式**（`a2b63fe` 取代 07-09 兩段式） | unit + e2e | `3166cc5` |
+| MAP-ROAM-2 縮放控制列 | 完成 | 步進 0.32／-0.24；手機／平板加大 hit area；aria 釐清 | MapControls + e2e zoom | `3166cc5` |
+| MAP-ROAM-3 少字童趣 UI | 完成 | 島名略放大、pill 降權、「看看」圖示化；守 label 淨空 ≥16px | ZoneIsland + e2e clearance | `3166cc5` |
+| MAP-ROAM-4 層次升級概念 | 完成 | `docs/UNIVERSE-PROGRESSION-CONCEPT.md` | 文件審 | `3166cc5` |
+| MAP-ROAM-5 平移核心 | 完成 | slop／rAF 批次／inertia（reduced-motion 關慣性） | unit + e2e | `503ad8b` |
 
 ### 宇宙地圖兒童易用性重構（2026-07-10，plan `/tmp/agent-plan-1783686748.md`）
 

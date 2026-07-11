@@ -11,6 +11,7 @@ const PAGES: { name: string; path: string }[] = [
   { name: "關於我們", path: "/about" },
   { name: "主題索引", path: "/topic" },
   { name: "遊樂園", path: "/games" },
+  { name: "宇宙地圖", path: "/adventures" },
 ];
 
 const BLOCKING_IMPACTS = new Set(["critical", "serious"]);
@@ -40,6 +41,28 @@ test("a11y：故事詳情頁無 critical/serious 違規", async ({ page }) => {
   const firstStory = page.locator('main a[href^="/story/"]').first();
   const href = await firstStory.getAttribute("href");
   await page.goto(href!);
+
+  const results = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+    .analyze();
+
+  const blocking = results.violations.filter(
+    (v) => v.impact != null && BLOCKING_IMPACTS.has(v.impact),
+  );
+
+  expect(
+    blocking,
+    blocking.map((v) => `[${v.impact}] ${v.id}: ${v.help}`).join("\n"),
+  ).toEqual([]);
+});
+
+test("a11y：宇宙地圖開 sheet 無 critical/serious 違規", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.addInitScript(() => {
+    window.sessionStorage.setItem("cc-universe-entry-played", "1");
+  });
+  await page.goto("/adventures?zone=dino");
+  await expect(page.getByRole("dialog")).toBeVisible({ timeout: 3000 });
 
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])

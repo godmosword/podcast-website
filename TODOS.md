@@ -98,7 +98,7 @@
 ### 稽核結論（保留，實作時勿改壞；對齊 [DESIGN.md](./DESIGN.md) 觸控／reduced-motion／viewport）
 
 - **StoryPlayer**：主控制 60–68px、字幕三檔、睡前定時、結尾反思需點「想聊一下」才展開
-- **ZoneSheet**：許願／信任收「給爸爸媽媽」；故事卡 ≥64px
+- **ZoneSheet**：許願／信任收「給爸爸媽媽」；故事卡 ≥64px；close／wishToggle ≥44px（MAP-UX-P1a）；sheet 開時 overlay 擋 pan（MAP-UX-P1b）
 - **遊戲**：繽紛消消樂 `explore` 無分數計時；GameKit `kidsMode` 預設 true
 - **刻意不做：** 獨立逐字稿頁（新頁型）、故事詳情大改版面、tap-to-explore（已移除）
 
@@ -108,11 +108,11 @@
 | UX-P0-2 | P0 | ✅ `964f418` | **Footer 觸控 ≥44px**（= W27-2 後半） | `SiteFooter.module.css` | CSS 契約 + 手動 |
 | UX-P0-3 | P0 | ✅ `964f418` | **許願隱私一句話**（= W27-2 前半）：送出鈕下 inline 說明、message placeholder 勿含個資 | `ZoneWishForm.tsx` | vitest |
 | UX-P0-4 | P0 | 待做 | **Challenge 遊戲家長提示**：列表卡加「建議 6 歲以上／家長陪同」（預設僅文案，不隱藏入口） | `app/games/page.tsx` 或 `data/games.ts` | `npm test` + build |
-| UX-P1-1 | P1 | 待做 | **補齊 &lt;44px 按鈕**（只改 CSS）：ZoneSheet 關閉／wishToggle、StoryPlayer 定時選單、Landing 向下箭頭 | 各 `*.module.css` | 手動＋e2e |
+| UX-P1-1 | P1 | 部分完成 | **補齊 &lt;44px 按鈕**（只改 CSS）：~~ZoneSheet 關閉／wishToggle~~ → MAP-UX-P1a；StoryPlayer 定時、Landing 箭頭待做 | 各 `*.module.css` | 手動＋e2e |
 | UX-P1-2 | P1 | 待做 | **詳情頁反思收合**：比照 `StoryEndScreen`，家長句不預設露出 | `app/story/[slug]/page.tsx`、`ReflectionPrompt.tsx` | `npm test` |
 | UX-P1-3 | P1 | 待做 | **共讀 sidecar 擴至全集**：`parent-guides`／`family-activities` 從 ep-1/ep-5 擴充（內容營運，可分批） | `data/parent-guides.ts`、`data/family-activities.ts` | 同名 `*.test.ts` |
 | UX-P1-4 | P1 | 待做 | **播放進度條拇指加大**（CSS 變數，不動控制列 layout） | `StoryPlayer.module.css` | 手動播放頁 |
-| UX-P1-5 | P1 | 待做 | **e2e 兒童 UX 回歸**：a11y 補 `/adventures`、`/for-parents`、播放頁；觸控高度 assertion | `e2e/a11y.spec.ts`、`e2e/smoke.spec.ts` | `npm run test:e2e` |
+| UX-P1-5 | P1 | 部分完成 | **e2e 兒童 UX 回歸**：`/adventures` a11y + 地圖觸控 e2e ✅（MAP-UX-P1c）；`/for-parents`、播放頁待補 | `e2e/a11y.spec.ts`、`e2e/universe-map.spec.ts` | `npm run test:e2e` |
 | UX-P2-1 | P2 | 待做 | 方塊／卡丁車接 `kidsMode` 或標「挑戰模式」 | `BlockDropGame.tsx`、遊戲 hub | test + 手動 |
 | UX-P2-2 | P2 | 待做 | 儀表板「最佳分數」改低壓文案（「探索紀錄」等） | `ParentDashboard.tsx` | 手動 |
 | UX-P2-3 | P2 | 待做 | 遊戲頁年齡標示一致（metadata vs chip） | `app/games/page.tsx` | build |
@@ -121,11 +121,23 @@
 
 ### Task DAG（建議 `/agent-action` 順序）
 
-1. ~~**UX-P0-2 + UX-P0-3**~~ ✅ `964f418`（W27-2）→ **UX-P1-5**（e2e 鎖回歸）
+1. ~~**UX-P0-2 + UX-P0-3**~~ ✅ `964f418`（W27-2）→ ~~**MAP-UX-P1a/b/c／P2a**~~ ✅ `8056a3a` → **UX-P1-5**（全站 e2e）
 2. **UX-P0-1** 可並行（新元件，需使用者決策：是否含 GameKit 兒童模式開關）
-3. **UX-P1-1、P1-2、P1-4** CSS／元件微調
+3. **UX-P1-1**（ZoneSheet 部分併入 MAP-UX-P1a）、P1-2、P1-4 CSS／元件微調
 4. **UX-P1-3** 內容分批，不擋工程項
 5. **UX-P2-\*** 擇機
+
+### 宇宙地圖 UX（2026-07-11，`/tmp/agent-plan-1783730484.md`）
+
+> 五維稽核見 [docs/UNIVERSE-MAP-UX-AUDIT-2026-07-11.md](./docs/UNIVERSE-MAP-UX-AUDIT-2026-07-11.md)。**紅線：** 不動 `useMapCamera`／`ZoneSheet` 核心、zones 座標、art-tile。
+
+| ID | 優先 | 狀態 | 摘要 | 主要檔案 | 驗證 |
+|----|------|------|------|----------|------|
+| MAP-UX-P1a | P1 | ✅ `8056a3a` | close／wishToggle ≥44px | `ZoneSheet.module.css` | CSS 契約測 + e2e |
+| MAP-UX-P1b | P1 | ✅ `8056a3a` | sheet 開時 overlay 擋地圖手勢 + `min(72vh,34rem)` | `ZoneSheet.module.css` | e2e 拖曳／backdrop |
+| MAP-UX-P1c | P1 | ✅ `8056a3a` | a11y `/adventures` + 開 sheet axe + 觸控 assertion | `e2e/a11y.spec.ts`、`e2e/universe-map.spec.ts` | `test:e2e` 24 綠 |
+| MAP-UX-P2a | P2 | ✅ `8056a3a` | reduced-motion 點島即開 sheet | `e2e/universe-map.spec.ts` | `test:e2e` |
+| MAP-ROAM-doc | ops | ✅ `8056a3a` | archive「待 commit」→ `3166cc5`／`503ad8b` 對帳 | `docs/archive/…` | 文件 only |
 
 ### 待使用者決策（實作前）
 
@@ -435,7 +447,7 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 
 ## 車車宇宙樂園地圖（已完成 → 已封存）
 
-> R0–R2、MAP-UX、遨遊升級、兒童易用性全文見 [archive](./docs/archive/TODOS-completed-2026-07-11.md)。**待 commit：** MAP-ROAM-2～5（見 archive 檔首表）。
+> R0–R2、MAP-UX、遨遊升級、兒童易用性全文見 [archive](./docs/archive/TODOS-completed-2026-07-11.md)。MAP-ROAM-2～5 已入主線（`3166cc5`、`503ad8b`）。
 
 **紅線（勿動）：** `useMapCamera`／`ZoneSheet` 核心、zones 座標、zone-art-tile 契約、地圖固定淺色場景。
 
