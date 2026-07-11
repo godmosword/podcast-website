@@ -6,6 +6,7 @@
 
 ### Added
 
+- **function 體積 gate（`verify:function-size`）**：掃描 `.next/server/app/**/*.nft.json`，任一 serverless function trace >200MB 或 public/ 進 trace >20MB 即失敗，push 前攔截依賴汙染（feed.xml 344MB 部署事故 `a3bdca7` 的預防措施）；已接入 `npm run check` 於 build 之後。
 - **新集通知 email 訂閱（LIST-2）**：`/subscribe` 靜態頁 + `SubscribeForm`；`POST /api/subscribe`（zod 驗證、家長同意、IP rate limit、Neon `subscribers` 表 `lower(email)` 冪等）；無 `DATABASE_URL` 時降級引導至 `#connect`；analytics `subscribe_submit`（僅 `source`、無 PII）。Migration：`scripts/migrations/003_subscribers.sql`。
 - **成長量測模板（Growth-Measure-1a）**：`docs/metrics/README.md` 週報欄位與 UTM 對照；本機截圖／CSV gitignore。
 - **宇宙地圖 UX 稽核與 e2e（MAP-UX-P1）**：`docs/UNIVERSE-MAP-UX-AUDIT-2026-07-11.md`；`e2e/universe-map.spec.ts` 觸控 assertion（overlay 擋 pan、backdrop 關閉、關閉鈕 ≥44px、reduced-motion 點島）；`e2e/a11y.spec.ts` 掃 `/adventures` 與開 sheet。
