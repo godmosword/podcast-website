@@ -254,10 +254,10 @@ SoundOn 單集 show notes 加官網單集 URL（可選 UTM），閉環 B 戰場�
 #### D12 分享卡（OG image）升級　`growth · S · 無`　〔design+growth〕 ✅ `76f91c1`
 **落地：** `app/story/[slug]/opengraph-image.tsx` + `lib/story-og.tsx`（1200×630、Noto Sans TC TTF、黏土相框＋EP＋角色＋品牌條）；`story-metadata` 改指向動態 OG；`trackShareClick`（copy_link／line）+ `ShareButton.storySlug`。
 
-#### D10 圖鑑「已認識」狀態　`ux · S · D3`　〔ux+design〕 ✅ 已實作（待 commit）
+#### D10 圖鑑「已認識」狀態　`ux · S · D3`　〔ux+design〕 ✅ `3ac73a3`
 **落地：** `lib/character-recognition.ts`（`storiesCompleted` ∩ `appearsIn` 或 `unlocks.characters`）；`hooks/useRecognizedCharacters.ts`（SSR 空集合 → mount 讀 store）；`CharacterCatalogGrid`／`CharacterCard` 統一定裝照相框＋已認識／待認識貼紙、`aria-label` 含狀態。3D tilt 仍列 **L4 D10-tilt**。
 
-#### D4 View Transitions（spike）　`ux · S(spike) 可能升至 M · D2`　〔eng+ux〕 ✅ spike 已接線（待手動驗收＋commit）
+#### D4 View Transitions（spike）　`ux · S(spike) 可能升至 M · D2`　〔eng+ux〕 ✅ `3ac73a3`（待手動驗收擴大）
 **落地：** `experimental.viewTransition`（Next 15.5.20+）+ `StoryCoverMorph`（`unstable_ViewTransition`）故事卡封面↔詳情 hero；`sharedCoverMorph` 防同頁重複 slug；`app/view-transitions.css` + reduced-motion。手動矩陣見 `docs/D4-VIEW-TRANSITIONS-SPIKE.md`。未啟用 `Link transitionTypes`（待 Next 16+ 評估）。
 
 #### D5 Scroll-driven 進場（CSS-only）　`ux · S · D2`　〔ux〕待實作
