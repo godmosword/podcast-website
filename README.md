@@ -18,7 +18,7 @@ Bonbon & 馬米親子 podcast《車車遊樂園》的官方 **看圖聽故事** 
 ## 技術棧
 
 - **Next.js 15** App Router、**TypeScript strict**、**CSS Modules**（無 Tailwind）
-- 以 **SSG 預渲染** 為主；少數 **Route Handler**（許願 API，可選 Neon Postgres）
+- 以 **SSG 預渲染** 為主；少數 **Route Handler**（許願／email 訂閱 API，可選 Neon Postgres）
 - **Vitest** 單元測試 + **Playwright** E2E
 - 部署：**Vercel**（`@vercel/analytics`）
 
@@ -28,9 +28,10 @@ Bonbon & 馬米親子 podcast《車車遊樂園》的官方 **看圖聽故事** 
 |------|------|------|
 | Landing Hub | `/` | Storyline 式四段 scroll-snap 入口（故事／睡前／黏土／衛教） |
 | 故事牆 | `/stories` | 最新集 Hero、收藏區、車種／主題篩選（`?vehicle=`、`?tag=`） |
-| 故事詳情 | `/story/[slug]` | SEO 落地頁、分享、收藏、ShowNotes、親子延伸、完播反思、地圖島徽章 |
+| 故事詳情 | `/story/[slug]` | SEO 落地頁、分享、收藏、訂閱收聽 CTA、ShowNotes、親子延伸、完播反思、地圖島徽章 |
 | 播放器 | `/story/[slug]/play` | 全螢幕翻頁、逐字字幕、進度條、字幕字級 |
 | 逐字稿 | `/story/[slug]/transcript.vtt` | WebVTT 端點（無障礙／GEO） |
+| 新集通知 | `/subscribe` | Email 訂閱表單（Neon；未設 DB 時引導至收聽平台） |
 | 主題 | `/topic`、`/topic/[tag]` | 主題索引與分類頁（SSG + FAQ schema） |
 | 車種 | `/vehicles/[vehicle]` | 車種分類頁（SSG + GEO FAQ） |
 | 宇宙地圖 | `/adventures` | 五島滿版海洋、pan/zoom/fly-to、ZoneSheet、漫遊 NPC、鎖島許願（`?zone=` deep link） |
@@ -133,7 +134,7 @@ NEXT_PUBLIC_SITE_URL=https://你的網域
 | 變數 | 用途 |
 |------|------|
 | `NEXT_PUBLIC_SITE_URL` | 站點 canonical URL（**必填於 production**） |
-| `DATABASE_URL` | 樂園許願 API（Neon）；未設則表單降級 mailto |
+| `DATABASE_URL` | 樂園許願 + email 訂閱 API（Neon）；未設則表單降級（許願→mailto、訂閱→`#connect`） |
 | `OPENAI_API_KEY` | 僅本機 `illustrate`／地圖資產生成；**CI 不放** |
 | `SYNC_ISSUE_*` | GHA 同步後 GitHub Issue 通知（見 `.env.example`） |
 
@@ -214,10 +215,12 @@ app/
   adventures/page.tsx         車車宇宙地圖
   characters/page.tsx         角色圖鑑
   for-parents/                家長指南 + dashboard
+  subscribe/page.tsx          新集 email 訂閱
   games/                      四款小遊戲
   topic/、vehicles/           主題／車種索引
   studio/、about/、legal/     數據中心、關於、條款
   api/zone-wish/              許願 API（可選 Neon）
+  api/subscribe/              email 訂閱 API（可選 Neon）
   feed.xml/、robots.ts、sitemap.ts
 components/
   landing/                    Landing Hub、頂欄、嘟嘟吉祥物
@@ -239,7 +242,9 @@ lib/
   universe/                   地圖美術、deep link、OG
   story-geo.ts、for-parents.ts  GEO／家長端 resolver
   progress-store.ts           localStorage 收藏、繼續收聽、遊戲進度
+  platform-utm.ts             收聽平台外連 UTM 歸因
   zone-wish-*.ts              許願 schema／DB／rate limit
+  subscribe-*.ts              訂閱 schema／DB／rate limit
 scripts/
   sync-apple-podcast.ts       Apple RSS 同步
   transcribe.ts、illustrate.ts
@@ -335,6 +340,7 @@ npm run font:subset
 | [FOR-PARENTS-DATA.md](./docs/FOR-PARENTS-DATA.md) | 家長端資料盤點 |
 | [GEO-CONTENT-CONTRACT.md](./docs/GEO-CONTENT-CONTRACT.md) | GEO 內容欄位契約 |
 | [geo-checklist.md](./docs/geo-checklist.md) | GEO 上線後人工檢查 |
+| [metrics/README.md](./docs/metrics/README.md) | 成長量測週報模板與 UTM 對照 |
 | [AGENT-WORKFLOW.md](./docs/AGENT-WORKFLOW.md) | Agent 編排 Meta |
 | [AGENT-DOMAIN.md](./docs/AGENT-DOMAIN.md) | Agent Domain 紅線 |
 | [proposals/](./proposals/) | 每週設計評審週報 |

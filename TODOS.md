@@ -16,15 +16,25 @@
 
 ## 現役隊列（2026-07-11）
 
-> 單一執行優先序；詳情連結各章。Approved Plan：`/tmp/agent-plan-1783728743.md`。
+> 單一執行優先序；詳情連結各章。Growth-P1a/b、LIST-2、MAP-UX-P1 已於本日收尾。
 
 | # | ID | 類型 | 工時 | 狀態 |
 |---|-----|------|------|------|
-| 1 | ~~[UX-P0-2 + UX-P0-3](#兒童-ux-與親子互動稽核2026-07-11)~~ | trust/a11y | S | ✅ `964f418` |
-| 2 | ~~[Growth-P1a](#growth-p1a-單集訂閱-cta-上移) 單集訂閱 CTA~~ | growth | S | ✅ `eafe30a` |
-| 3 | ~~[Growth-P1b](#growth-p1b-首頁訂閱入口) 首頁訂閱入口~~ | growth | S | ✅ `eafe30a` |
-| 4 | [Growth-Measure-1](#growth-measure-1-成長量測) | ops/growth | S | 部分完成 |
-| 5 | ~~[LIST-2](#名單收集--內容再利用2026-07-03-品牌盤點) email 訂閱~~ | growth/list | M | ✅ `6ca8263` |
+| 1 | [UX-P0-1](#兒童-ux-與親子互動稽核2026-07-11) 家長閘門 | trust | M | 待做（待決策） |
+| 2 | [UX-P1-5](#兒童-ux-與親子互動稽核2026-07-11) 全站 e2e | eng | S | 部分完成 |
+| 3 | [UX-P0-4](#兒童-ux-與親子互動稽核2026-07-11) challenge 遊戲提示 | trust | S | 待做 |
+| 4 | [Growth-Measure-1](#growth-measure-1-成長量測) SoundOn 回鏈 | ops/growth | S | 待做 |
+| 5 | [UX-P1-2](#兒童-ux-與親子互動稽核2026-07-11) 詳情頁反思收合 | ux | S | 待做 |
+
+### 本輪已完成（2026-07-11）
+
+| ID | Commit |
+|----|--------|
+| UX-P0-2／UX-P0-3 | `964f418` |
+| MAP-UX-P1a/b/c、P2a、MAP-ROAM-doc | `80457c4` |
+| Growth-P1a／P1b | `eafe30a` |
+| Growth-Measure-1a 模板、1b UTM | `6ca8263`、`797de82` |
+| LIST-2 email 訂閱 | `6ca8263` |
 
 ### 待決策隊列（不進 Top 5）
 
@@ -327,7 +337,7 @@ PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
 | 期 | 主題 | 條目 |
 |----|------|------|
 | **P0** 地基 + 第一印象 | 看起來完整、被搜尋到 | 首頁渲染修復 · 正式網域 · sitemap/robots（含 `/games`、`/legal`）· JSON-LD · DESIGN.md 同步 · 首屏精簡 |
-| **P1** 訂閱轉換 + 分享 | 「沒看到訂閱」消失、可被轉發 | Growth-P1a/b（見現役隊列）· ~~ConnectHub 文案/排序~~ · ~~每集分享鈕~~ · 試聽橋接 · 入門三集 · 空狀態 · 錨點導覽 |
+| **P1** 訂閱轉換 + 分享 | 「沒看到訂閱」消失、可被轉發 | ~~Growth-P1a/b~~ `eafe30a` · ~~ConnectHub 文案/排序~~ · ~~每集分享鈕~~ · 試聽橋接 · 入門三集 · 空狀態 · 錨點導覽 |
 | **P2** 信任/合規 + 內容 | 兒童產品權重、內容變深 | ~~隱私專章 + analytics~~ · 主持人信任區 · 真實插畫 · ~~家長共讀指引試點~~ · UX-P1-3 擴充 · 新集通知說明 · 主題頁 SEO · 音檔壓縮 · ~~縮放~~/觸控/塗鴉 |
 | **P3** 可靠/工程/可選 | 不掛、可回歸、加分 | 監控 · E2E CI · ESLint CI · 生圖佇列 · 車車圖鑑養成 |
 | **STEM-P1→P4** 互動×STEM×商業 | 差異化與變現 | 見上表；**當務之急：結尾提問 + 完播量測** |
@@ -413,7 +423,7 @@ Header 或 Hero 加明確「訂閱」按鈕連 `#connect`（或 `/subscribe`）�
 **剩餘 W27 信任收尾：** ~~許願隱私＋footer 觸控~~ ✅ `964f418`；LIST-2 email 訂閱實作時同步連回 `/legal#privacy`。
 
 ### Analytics 後續：UTM + 平台後台對照　`P2 · S–M · 量測基線`　〔ceo+growth〕
-站內平台點擊事件已上線（`a844f20`）；下一步不是再加一套 analytics，而是補 UTM 規格、平台後台基線記錄與週報對照。見 [Growth-Measure-1](#growth-measure-1-成長量測)。
+站內平台點擊事件已上線（`a844f20`）；UTM 規格與週報模板已補（`797de82`、`docs/metrics/README.md`）；待補 SoundOn show notes 回鏈與平台後台週報實記。見 [Growth-Measure-1](#growth-measure-1-成長量測)。
 
 ### 主持人信任區（Bonbon & 馬米）　`P2 · S · 照片+文案`　〔growth〕
 關於頁或首頁下半加主持人小卡：照片、各一句話、節目理念（為什麼做親子車車故事）。熱門節目靠人格溫度；B 置頂貼可連同一區。家長會問「誰做的、適合我家孩子嗎」。`app/about/page.tsx`。

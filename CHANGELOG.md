@@ -4,8 +4,17 @@
 
 ## [Unreleased]
 
+### Added
+
+- **新集通知 email 訂閱（LIST-2）**：`/subscribe` 靜態頁 + `SubscribeForm`；`POST /api/subscribe`（zod 驗證、家長同意、IP rate limit、Neon `subscribers` 表 `lower(email)` 冪等）；無 `DATABASE_URL` 時降級引導至 `#connect`；analytics `subscribe_submit`（僅 `source`、無 PII）。Migration：`scripts/migrations/003_subscribers.sql`。
+- **成長量測模板（Growth-Measure-1a）**：`docs/metrics/README.md` 週報欄位與 UTM 對照；本機截圖／CSV gitignore。
+- **宇宙地圖 UX 稽核與 e2e（MAP-UX-P1）**：`docs/UNIVERSE-MAP-UX-AUDIT-2026-07-11.md`；`e2e/universe-map.spec.ts` 觸控 assertion（overlay 擋 pan、backdrop 關閉、關閉鈕 ≥44px、reduced-motion 點島）；`e2e/a11y.spec.ts` 掃 `/adventures` 與開 sheet。
+
 ### Changed
 
+- **訂閱轉換（Growth-P1a/b）**：單集頁 CTA 順序改為播放→收藏／分享→訂閱收聽，`SubscriptionCTA` 視覺降權；首段 Landing Hero 加「訂閱收聽」幽靈鈕捲至 `#connect`（頂欄 `SubscribeMenu` 維持）。
+- **平台外連 UTM（Growth-Measure-1b）**：`lib/platform-utm.ts` 為 Spotify／Apple 等外連加 `utm_source=cheche_web`、`utm_medium=story_page|footer|subscribe_cta`、`utm_campaign=<slug|site>`；接線 `TrackedPlatformLink`、`ConnectHub`、`SubscribeMenu`；單集 `SubscriptionCTA` 帶 slug campaign。
+- **ZoneSheet 觸控與 modal（MAP-UX-P1）**：sheet 開啟時 overlay `pointer-events: auto` 擋地圖 pan；關閉鈕／wishToggle ≥44px；sheet `max-height: min(72vh, 34rem)`。
 - **宇宙地圖兒童易用性重構（`/agent-plan` 1783686748 委員會核准，Q3=A′／Q5 統一／Q7 翻 Decision D）**：
   - **單段式點島＋互動狀態機**：點任何島（含建造中／規劃中鎖島本體）一次即飛抵並開介紹 sheet；鎖島小 👀「看看」鈕移除；飛行途中再點同島立即開（連點加速）。內部以單一 `MapInteraction` 狀態機（idle→flying→sheet）取代三個命令式 ref 門閂，deep link／拖曳取消／StrictMode 走同一模型（推翻 2026-07-09「兩段式」決策，使用者明示同意）。
   - **鏡頭馴化（A′）**：`MAX_SCALE` 2.4→2.0；新增迷路自救——鏡頭靜止 700ms 後若所有島心都在視窗外（拖到只剩海）自動飛回樂園（`anyPointVisible` helper＋單元測試＋E2E）。
