@@ -29,6 +29,24 @@
 
 實作：`lib/platform-utm.ts`、`TrackedPlatformLink`。
 
+## SoundOn show notes 回鏈（Growth-Measure-1）
+
+官網→SoundOn 為單向；**回鏈在 SoundOn 後台手動貼入** show notes（sync 管線不寫入 SoundOn）。
+
+```bash
+# 產生帶 UTM 的單集 URL（貼到 SoundOn 該集 show notes 尾段）
+node -e "const { soundOnStoryBacklinkLine } = require('./lib/soundon-backlink'); console.log(soundOnStoryBacklinkLine('ep-18','集數標題'))"
+```
+
+或於程式庫：
+
+```ts
+import { soundOnStoryBacklinkLine } from "@/lib/soundon-backlink";
+soundOnStoryBacklinkLine(slug, title);
+```
+
+建議格式：`看圖聽完整故事：<標題>\n<官網 URL>`。`utm_medium=story_page`、`utm_campaign=<slug>`。
+
 ## 參考
 
 - [GEO baseline](./GEO-baseline-2026-07-10.md)

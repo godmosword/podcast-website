@@ -66,6 +66,10 @@ git push
 npm run export:video -- <slug>
 #    → export/video/<slug>/<slug>.mp4（原始逐句字幕 burn-in）
 #    見 docs/VIDEO-EXPORT.md
+
+# 8. （營運）SoundOn show notes 回鏈
+#    於 SoundOn 後台該集 show notes 尾段貼官網連結（含 UTM），見 docs/metrics/README.md
+#    lib/soundon-backlink.ts → soundOnStoryBacklinkLine(slug, title)
 ```
 
 ## 驗證

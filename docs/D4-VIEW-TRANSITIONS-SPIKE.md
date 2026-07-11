@@ -42,3 +42,30 @@
 ## 擴大門檻
 
 手動矩陣 1–7 全過 → 可評估：相關故事卡、首頁 segment、全站 back 方向語意。
+
+## 自動化補強（2026-07-11）
+
+| 類型 | 位置 | 涵蓋 |
+|------|------|------|
+| e2e 導覽 | `e2e/view-transition.spec.ts` | 列表→詳情→返回、鍵盤 Enter、reduced-motion 導覽 |
+| 手動 morph | 本文件矩陣 #1–#7 | Chrome 目視確認封面 morph；Safari／Firefox 退化 |
+
+執行：
+
+```bash
+npm run test:e2e -- e2e/view-transition.spec.ts
+```
+
+**手動驗收紀錄**（擴大前填寫）：
+
+| # | 情境 | 結果 | 備註 |
+|---|------|------|------|
+| 1 | `/stories` → 詳情 morph | ☐ | |
+| 2 | 返回 morph 反向 | ☐ | |
+| 3 | 慢網／清快取 | ☐ | |
+| 4 | 同 slug 雙卡 | ☐ | |
+| 5 | Tab Enter + focus | ☐ | e2e 已覆蓋導覽 |
+| 6 | reduced-motion | ☐ | e2e 已覆蓋導覽 |
+| 7 | Safari／Firefox | ☐ | |
+
+全勾後可開 `/agent-action` 擴大範圍（相關故事、首頁 segment 等）。

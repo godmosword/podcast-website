@@ -26,7 +26,7 @@ import RelatedStories from "@/components/RelatedStories";
 import FamilyActivityCard from "@/components/story/FamilyActivityCard";
 import ShowNotes from "@/components/story/ShowNotes";
 import ZoneBadge from "@/components/story/ZoneBadge";
-import ReflectionPrompt from "@/components/story/ReflectionPrompt";
+import StoryDetailReflection from "@/components/story/StoryDetailReflection";
 import SubscriptionCTA from "@/components/SubscriptionCTA";
 import SiteFooter from "@/components/SiteFooter";
 import StoryCoverMorph from "@/components/story/StoryCoverMorph";
@@ -222,7 +222,7 @@ export default async function StoryDetailPage({
         </section>
 
         {story.reflectionPrompt && (
-          <ReflectionPrompt
+          <StoryDetailReflection
             slug={story.slug}
             child={story.reflectionPrompt.child}
             parentFollowUp={story.reflectionPrompt.parentFollowUp}

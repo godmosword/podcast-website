@@ -1,0 +1,28 @@
+.wrap {
+  margin-top: var(--space-lg, 24px);
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius-xl);
+  background: var(--card);
+  color: var(--ink);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+
+.toggle:hover {
+  border-color: color-mix(in srgb, var(--c-sky) 40%, var(--line));
+}
+
+.toggle:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}

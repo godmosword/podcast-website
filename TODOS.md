@@ -23,8 +23,8 @@
 | 1 | [UX-P0-1](#兒童-ux-與親子互動稽核2026-07-11) 家長閘門 | trust | M | 待做（待決策） |
 | 2 | [UX-P1-5](#兒童-ux-與親子互動稽核2026-07-11) 全站 e2e | eng | S | 部分完成 |
 | 3 | [UX-P0-4](#兒童-ux-與親子互動稽核2026-07-11) challenge 遊戲提示 | trust | S | ✅ `1c1ca1b` |
-| 4 | [Growth-Measure-1](#growth-measure-1-成長量測) SoundOn 回鏈 | ops/growth | S | 待做 |
-| 5 | [UX-P1-2](#兒童-ux-與親子互動稽核2026-07-11) 詳情頁反思收合 | ux | S | 待做 |
+| 4 | [Growth-Measure-1](#growth-measure-1-成長量測) SoundOn 回鏈 | ops/growth | S | ✅ 已實作（待 commit） |
+| 5 | [UX-P1-2](#兒童-ux-與親子互動稽核2026-07-11) 詳情頁反思收合 | ux | S | ✅ 已實作（待 commit） |
 
 ### 本輪已完成（2026-07-11）
 
@@ -119,7 +119,7 @@
 | UX-P0-3 | P0 | ✅ `964f418` | **許願隱私一句話**（= W27-2 前半）：送出鈕下 inline 說明、message placeholder 勿含個資 | `ZoneWishForm.tsx` | vitest |
 | UX-P0-4 | P0 | ✅ `1c1ca1b` | **Challenge 遊戲家長提示**：列表卡加「建議 6 歲以上 · 家長陪同」（僅文案，不隱藏入口） | `data/games.ts`、`app/games/page.tsx` | `npm test` + build ✅ |
 | UX-P1-1 | P1 | 部分完成 | **補齊 &lt;44px 按鈕**（只改 CSS）：~~ZoneSheet 關閉／wishToggle~~ → MAP-UX-P1a；StoryPlayer 定時、Landing 箭頭待做 | 各 `*.module.css` | 手動＋e2e |
-| UX-P1-2 | P1 | 待做 | **詳情頁反思收合**：比照 `StoryEndScreen`，家長句不預設露出 | `app/story/[slug]/page.tsx`、`ReflectionPrompt.tsx` | `npm test` |
+| UX-P1-2 | P1 | ✅ 已實作（待 commit） | **詳情頁反思收合**：比照 `StoryEndScreen`，家長句不預設露出 | `StoryDetailReflection.tsx`、`app/story/[slug]/page.tsx` | `npm test` |
 | UX-P1-3 | P1 | 待做 | **共讀 sidecar 擴至全集**：`parent-guides`／`family-activities` 從 ep-1/ep-5 擴充（內容營運，可分批） | `data/parent-guides.ts`、`data/family-activities.ts` | 同名 `*.test.ts` |
 | UX-P1-4 | P1 | 待做 | **播放進度條拇指加大**（CSS 變數，不動控制列 layout） | `StoryPlayer.module.css` | 手動播放頁 |
 | UX-P1-5 | P1 | 部分完成 | **e2e 兒童 UX 回歸**：`/adventures` a11y + 地圖觸控 e2e ✅（MAP-UX-P1c）；`/for-parents`、播放頁待補 | `e2e/a11y.spec.ts`、`e2e/universe-map.spec.ts` | `npm run test:e2e` |
@@ -166,8 +166,8 @@
 ### Growth-Measure-1b UTM 歸因規格　`growth-measurement · S · 平台外連`　〔growth+eng〕 ✅ `797de82`
 `utm_source=cheche_web`、`utm_medium=story_page|footer|subscribe_cta|social`、`utm_campaign=<slug|site>`；實作於 `lib/platform-utm.ts`／`TrackedPlatformLink`／`ConnectHub`／`SubscribeMenu`。
 
-### SoundOn show notes 回鏈　`growth · S · sync 管線`　〔growth+ops〕
-SoundOn 單集 show notes 加官網單集 URL（可選 UTM），閉環 B 戰場導流。
+### SoundOn show notes 回鏈　`growth · S · sync 管線`　〔growth+ops〕 ✅ 已實作（待 commit）
+`lib/soundon-backlink.ts` + `docs/metrics/README.md`／`docs/EPISODE-WORKFLOW.md` 營運步驟；SoundOn 後台手動貼入（sync 管線不寫入）。
 
 ---
 
@@ -216,9 +216,9 @@ SoundOn 單集 show notes 加官網單集 URL（可選 UTM），閉環 B 戰場�
 **基線數字（2026-07-11 量測）：** tracked JPG **358**（其中故事插圖 **319**）；ignored staging **262**。單檔大小上限 + PR 新增大 jpg 警示。先量再改。
 **落地：** `npm run audit:assets`（`--strict` 阻擋超大 JPG）；核心 `scripts/lib/audit-assets-core.ts` + vitest。
 
-#### D2 視覺回歸安全網　`eng · M · 無`　〔eng+design〕**Phase A** ✅ `1c1ca1b`　**L0 優先**
+#### D2 視覺回歸安全網　`eng · M · 無`　〔eng+design〕**Phase A** ✅ `1c1ca1b`　**Phase B** ✅ 已實作（待 commit）
 現況：`playwright.config.ts` 僅 **Desktop Chromium**（無 mobile project）。目標：`e2e/visual.spec.ts` + `toHaveScreenshot`——8 主頁 × 390/1280 × light/night ＝ **32 組**完整矩陣。
-**分階：** Phase A **smoke baseline**（5 條黃金路徑 × 1280 light）✅ `e2e/visual.spec.ts` + `npm run test:visual`；Phase B 擴完整 32 組待做。前置：字型固定、動畫 freeze、localStorage／theme 固定、等 image decode、寬鬆 `maxDiffPixelRatio`；字型渲染穩定性併入。不進 CI gate；視覺類 agent-action **必跑**回貼 diff。
+**分階：** Phase A **smoke baseline**（5 條黃金路徑 × 1280 light）✅ `e2e/visual.spec.ts` + `npm run test:visual`；Phase B **32 組**（8 主頁 × 390/1280 × light/night）✅ 已實作（待 commit）。前置：字型固定、動畫 freeze、localStorage／theme 固定、等 image decode、寬鬆 `maxDiffPixelRatio`；字型渲染穩定性併入。不進 CI gate；視覺類 agent-action **必跑**回貼 diff。
 
 ---
 
@@ -257,7 +257,7 @@ SoundOn 單集 show notes 加官網單集 URL（可選 UTM），閉環 B 戰場�
 #### D10 圖鑑「已認識」狀態　`ux · S · D3`　〔ux+design〕 ✅ `3ac73a3`
 **落地：** `lib/character-recognition.ts`（`storiesCompleted` ∩ `appearsIn` 或 `unlocks.characters`）；`hooks/useRecognizedCharacters.ts`（SSR 空集合 → mount 讀 store）；`CharacterCatalogGrid`／`CharacterCard` 統一定裝照相框＋已認識／待認識貼紙、`aria-label` 含狀態。3D tilt 仍列 **L4 D10-tilt**。
 
-#### D4 View Transitions（spike）　`ux · S(spike) 可能升至 M · D2`　〔eng+ux〕 ✅ `3ac73a3`（待手動驗收擴大）
+#### D4 View Transitions（spike）　`ux · S(spike) 可能升至 M · D2`　〔eng+ux〕 ✅ `3ac73a3`（e2e 導覽已補；手動 morph 矩陣待勾）
 **落地：** `experimental.viewTransition`（Next 15.5.20+）+ `StoryCoverMorph`（`unstable_ViewTransition`）故事卡封面↔詳情 hero；`sharedCoverMorph` 防同頁重複 slug；`app/view-transitions.css` + reduced-motion。手動矩陣見 `docs/D4-VIEW-TRANSITIONS-SPIKE.md`。未啟用 `Link transitionTypes`（待 Next 16+ 評估）。
 
 #### D5 Scroll-driven 進場（CSS-only）　`ux · S · D2`　〔ux〕 ✅ `bed866e`
@@ -283,7 +283,7 @@ SoundOn 單集 show notes 加官網單集 URL（可選 UTM），閉環 B 戰場�
 #### D7 手繪體驗深化　`design · M · D2`　〔design〕 ✅ `bed866e`
 **落地：** `Doodle` `draw` prop（`stroke-dashoffset` 描邊進場）；`RoughFrame` `shiftFilter`（`#rough-1/2/3` 輪替）；`LatestHero`／games header 首屏 `draw`；`decor.module.css.test.ts` 契約。
 
-#### D10 圖鑑 3D tilt（可選 polish）　`ux · S · D10 貼紙上線後`　〔ux〕擇機
+#### D10 圖鑑 3D tilt（可選 polish）　`ux · S · D10 貼紙上線後`　〔ux〕 ✅ 已實作（待 commit）
 手機價值低；列為可選。依賴 D10 貼紙狀態已穩定。
 
 ---

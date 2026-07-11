@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Character } from "@/data/characters";
 import { getStory } from "@/data/content";
+import CharacterPortraitTilt from "./CharacterPortraitTilt";
 import styles from "./CharacterCard.module.css";
 
 type CharacterCardProps = {
@@ -25,7 +26,7 @@ export default function CharacterCard({
         <div
           className={`${styles.portraitFrame} ${recognized ? "" : styles.portraitPending}`}
         >
-          <div className={styles.portraitMat}>
+          <CharacterPortraitTilt className={styles.portraitMat}>
             <Image
               src={`/${character.ref}`}
               alt={`${character.name} 角色圖`}
@@ -33,7 +34,7 @@ export default function CharacterCard({
               sizes="(max-width: 720px) 44vw, (max-width: 1100px) 28vw, 220px"
               className={styles.portrait}
             />
-          </div>
+          </CharacterPortraitTilt>
           <span
             className={`${styles.statusSticker} ${recognized ? styles.stickerKnown : styles.stickerUnknown}`}
             aria-hidden

@@ -1,21 +1,44 @@
 import type { Page } from "@playwright/test";
 import { PROGRESS_STORAGE_KEY } from "../lib/progress-store";
 
-/** D2-A smoke：固定 light 主題、停動畫、等圖載入，降低截圖抖動。 */
-export async function stabilizeVisualPage(page: Page): Promise<void> {
-  await page.addInitScript((storageKey) => {
-    try {
-      const raw = localStorage.getItem(storageKey);
-      const parsed = raw ? (JSON.parse(raw) as { preferences?: { theme?: string } }) : {};
-      parsed.preferences = { ...parsed.preferences, theme: "light" };
-      localStorage.setItem(storageKey, JSON.stringify(parsed));
-    } catch {
-      localStorage.setItem(
-        storageKey,
-        JSON.stringify({ preferences: { theme: "light" } }),
-      );
-    }
-  }, PROGRESS_STORAGE_KEY);
+export type VisualTheme = "light" | "night";
+export type VisualViewportId = "mobile" | "desktop";
+
+type StabilizeOptions = {
+  theme?: VisualTheme;
+};
+
+/** D2：固定主題、停動畫、等圖載入，降低截圖抖動。 */
+export async function stabilizeVisualPage(
+  page: Page,
+  options: StabilizeOptions = {},
+): Promise<void> {
+  const theme = options.theme ?? "light";
+
+  await page.addInitScript(
+    ({
+      storageKey,
+      themeMode,
+    }: {
+      storageKey: string;
+      themeMode: string;
+    }) => {
+      try {
+        const raw = localStorage.getItem(storageKey);
+        const parsed = raw
+          ? (JSON.parse(raw) as { preferences?: { theme?: string } })
+          : {};
+        parsed.preferences = { ...parsed.preferences, theme: themeMode };
+        localStorage.setItem(storageKey, JSON.stringify(parsed));
+      } catch {
+        localStorage.setItem(
+          storageKey,
+          JSON.stringify({ preferences: { theme: themeMode } }),
+        );
+      }
+    },
+    { storageKey: PROGRESS_STORAGE_KEY, themeMode: theme },
+  );
 
   await page.addStyleTag({
     content: `
@@ -49,7 +72,13 @@ export async function stabilizeVisualPage(page: Page): Promise<void> {
     undefined,
     { timeout: 20_000 },
   );
-  await page.locator("html").evaluate((el) => {
-    el.removeAttribute("data-theme");
-  });
+
+  await page.locator("html").evaluate((el, themeMode: string) => {
+    if (themeMode === "night") {
+      el.setAttribute("data-theme", "night");
+    } else {
+      el.removeAttribute("data-theme");
+      el.removeAttribute("data-bedtime");
+    }
+  }, theme);
 }

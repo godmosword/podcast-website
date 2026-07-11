@@ -25,6 +25,8 @@
     inset 0 0 0 2px color-mix(in srgb, var(--mix-base) 70%, transparent),
     var(--shadow-sm);
   overflow: hidden;
+  transform-style: preserve-3d;
+  will-change: transform;
 }
 
 .cardRecognized .portraitMat {
@@ -147,5 +149,17 @@
 @media (prefers-reduced-motion: reduce) {
   .portraitPending .portraitMat {
     filter: none;
+  }
+
+  .portraitMat {
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+@media (pointer: coarse) {
+  .portraitMat {
+    transform: none !important;
+    transition: none !important;
   }
 }
