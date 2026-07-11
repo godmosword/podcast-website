@@ -20,7 +20,7 @@ export default function LegalPage() {
         </Link>
 
         <h1 className={styles.title}>使用條款與免責聲明</h1>
-        <p className={styles.updated}>最後更新：2026-07-05</p>
+        <p className={styles.updated}>最後更新：2026-07-11</p>
 
         <section className={styles.section} id="nature">
           <h2 className={styles.heading}>網站性質</h2>
@@ -45,12 +45,11 @@ export default function LegalPage() {
               <strong>未經權利人書面同意，禁止</strong>以本網站或儲存庫內之節目素材進行再製、公開傳輸、散布、販售，或暗示官方代言之商業用途。
             </li>
             <li>
-              原始碼儲存庫為<strong>公開</strong>（MIT 授權程式碼）；即使取得程式碼，亦<strong>不</strong>表示取得節目內容之使用授權。
-            </li>
-            <li>
-              網站<strong>程式碼</strong>依 MIT 授權；<strong>節目內容不在</strong>
-              該授權範圍內。維護者於私人儲存庫內另備 <code>LICENSE</code>、
-              <code>DISCLAIMER.md</code> 全文。
+              網站<strong>程式碼</strong>於公開儲存庫依 MIT 授權；
+              <strong>節目內容不在</strong>
+              該授權範圍內，即使取得程式碼，亦<strong>不</strong>
+              表示取得節目內容之使用授權。維護者於私人儲存庫內另備{" "}
+              <code>LICENSE</code>、<code>DISCLAIMER.md</code> 全文。
             </li>
           </ul>
         </section>
@@ -148,8 +147,7 @@ export default function LegalPage() {
               收集孩子姓名、年齡或其他可識別個人身分的欄位；亦不在播放器內嵌入第三方廣告追蹤。
             </li>
             <li>
-              點選 Spotify、Apple Podcasts、KKBOX、YouTube
-              等外連將離開本站，各平台依其隱私政策處理資料。家長可透過瀏覽器清除網站資料，刪除本機{" "}
+              點選收聽平台等外連將離開本站，各平台依其隱私政策處理資料。家長可透過瀏覽器清除網站資料，刪除本機{" "}
               <code>localStorage</code> 中的偏好紀錄。
             </li>
             <li>

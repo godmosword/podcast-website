@@ -43,7 +43,7 @@ export default function ForParentsPage() {
         <p className={styles.eyebrow}>家長搜尋指南</p>
         <h1 className={styles.title}>中文車車故事，陪孩子安心聽</h1>
         <p className={styles.lede}>
-          這一頁用家長會問 AI 搜尋的方式，整理車車遊樂園的適合年齡、故事內容、更新方式與代表性集數。
+          整理家長最常搜尋的問題：適合年齡、故事內容、更新方式與代表性集數。
         </p>
       </header>
 
@@ -74,7 +74,7 @@ export default function ForParentsPage() {
         <h2 id="what-heading">車車遊樂園是什麼？</h2>
         <p>{faqs[1].answer}</p>
         <p>
-          官網把每集整理成可分享的故事頁，包含封面圖、播放入口、本集介紹、詳細大綱、出場角色、家長延伸問題與常見問題。
+          官網把每集整理成可分享的故事頁：封面、播放入口、故事大綱、出場角色與家長延伸問題。
         </p>
       </section>
 

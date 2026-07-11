@@ -26,9 +26,9 @@ export default function AboutPage() {
       <section className={styles.section}>
         <h2 className={styles.heading}>這是什麼？</h2>
         <p className={styles.text}>
-          《車車遊樂園》是 Bonbon &amp; 馬米的親子 podcast
-          官方「看圖聽故事」網站。每集搭配插畫與語音，讓孩子邊看邊聽，適合
-          3–7 歲與家長一起的睡前時光，每集約 5–10 分鐘。融合生活中事件及發揮想像出發，一起探險、學習、勇敢闖關。
+          《車車遊樂園》是 Bonbon &amp; 馬米的親子 podcast「看圖聽故事」網站。
+          每集約 5–10 分鐘，插畫配語音讓孩子邊看邊聽，適合 3–7
+          歲的睡前時光。從生活出發、加點想像，一起探險、學習、勇敢闖關。
         </p>
       </section>
 
@@ -37,11 +37,11 @@ export default function AboutPage() {
         <ol className={styles.list}>
           <li>在首頁選一則車車故事</li>
           <li>點「開始看故事」進入全螢幕播放器</li>
-          <li>預設「字幕」會隨語音自動翻頁；也可關閉後手動滑動</li>
-          <li>家長可在播放器底部開啟「家長設定」：睡前定時、播放進度</li>
+          <li>字幕會隨語音自動翻頁，也可改手動滑動</li>
+          <li>播放器底部「家長設定」：睡前定時、播放進度</li>
         </ol>
         <p className={styles.text}>
-          想訂閱 podcast 或追蹤社群？請見本頁下方的
+          訂閱與社群連結見本頁下方
           <Link href="/#connect" className={styles.inlineLink}>
             追蹤與訂閱
           </Link>

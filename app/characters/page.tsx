@@ -39,7 +39,7 @@ export default function CharactersPage() {
           角色圖鑑
         </h1>
         <p className={styles.intro}>
-          這裡整理車車遊樂園的原創角色、車種、個性與出場故事，方便家長和孩子聽完故事後回來認識每位車車朋友。
+          認識車車遊樂園的原創角色：車種、個性與出場故事。
         </p>
       </section>
 

@@ -38,7 +38,7 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
   {
     id: "bedtime",
     anchorId: "segment-bedtime",
-    title: "數綿羊 ·\n睡前收聽讓孩子好睡",
+    title: "數綿羊 ·\n睡前收聽好好睡",
     heroImage: "/landing/segment-bedtime.jpg",
     heroImagePortrait: "/landing/segment-bedtime-portrait.jpg",
     cta: { label: "睡前故事", href: "/topic/睡前" },

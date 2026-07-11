@@ -60,8 +60,7 @@ export default function SiteFooter({
         style={{ right: "12%", bottom: "4px" }}
       />
       <p className={styles.parentNote}>
-        給家長：每則故事是一組圖片配一段語音，點播放鈕就能邊看邊聽，
-        適合睡前親子共讀。
+        給家長：點播放鈕，孩子邊看圖邊聽故事，適合睡前親子共讀。
       </p>
 
       <div className={styles.footerConnect}>
