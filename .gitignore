@@ -61,3 +61,8 @@ next-env.d.ts
 
 # YouTube 影片匯出產物（本機 CLI，勿入庫）
 /export/video/
+
+# 成長量測本機截圖／CSV（含個資，勿入庫）
+/docs/metrics/*.png
+/docs/metrics/*.csv
+/docs/metrics/weekly-*.md

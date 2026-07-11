@@ -1,0 +1,109 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-width: 420px;
+}
+
+.label {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.input {
+  min-height: 48px;
+  padding: 0.55rem 0.85rem;
+  border-radius: var(--radius-sm);
+  border: 2px solid color-mix(in srgb, var(--ink) 14%, var(--card));
+  font-size: 1rem;
+  color: var(--ink);
+  background: var(--card);
+}
+
+.input:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.consentCheckbox {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  flex: none;
+}
+
+.submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0.65rem 1rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  color: var(--landing-brand-ink);
+  background: var(--landing-brand);
+  box-shadow: var(--shadow-sm);
+}
+
+.submit:disabled {
+  opacity: 0.72;
+  cursor: wait;
+}
+
+.submit:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.privacyNote {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.privacyLink {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.hint,
+.unavailable,
+.success,
+.error {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.success {
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--c-mint) 18%, var(--card));
+  border: 1.5px solid color-mix(in srgb, var(--c-mint) 40%, var(--line));
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.error {
+  color: var(--c-coral, #c44);
+  font-weight: 700;
+}
+
+.unavailable a {
+  color: var(--accent);
+  font-weight: 800;
+}

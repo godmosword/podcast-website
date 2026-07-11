@@ -140,6 +140,17 @@ describe("universe analytics", () => {
     expect(payload).not.toHaveProperty("nickname");
   });
 
+  it("trackSubscribeSubmit 只送 source，不含 PII", async () => {
+    const { track } = await import("@vercel/analytics");
+    const { trackSubscribeSubmit } = await import("./analytics");
+
+    trackSubscribeSubmit("subscribe_page");
+
+    expect(track).toHaveBeenCalledWith("subscribe_submit", { source: "subscribe_page" });
+    const payload = vi.mocked(track).mock.calls[0]?.[1];
+    expect(payload).not.toHaveProperty("email");
+  });
+
   it("trackUniverseDayNightToggle 送 to 主題", async () => {
     const { track } = await import("@vercel/analytics");
     const { trackUniverseDayNightToggle } = await import("./analytics");

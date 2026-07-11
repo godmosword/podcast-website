@@ -81,3 +81,8 @@ export function trackUniverseWishSubmit(zoneId: ZoneId, hasEmail: boolean): void
 export function trackWishSubmitted(category: WishCategory): void {
   safeTrack("wish_submitted", { category });
 }
+
+/** Email 訂閱表單送出（只送 source 標記，無 PII）。 */
+export function trackSubscribeSubmit(source: string): void {
+  safeTrack("subscribe_submit", { source });
+}

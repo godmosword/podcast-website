@@ -44,6 +44,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.75,
     },
     {
+      url: `${baseUrl}/subscribe`,
+      lastModified: collectionModified,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
       url: `${baseUrl}/characters`,
       lastModified: STATIC_PAGE_MODIFIED_DATES["/characters"],
       changeFrequency: "monthly",

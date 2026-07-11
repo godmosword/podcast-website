@@ -11,6 +11,7 @@ describe("sitemap freshness", () => {
     const urls = sitemap().map((entry) => entry.url);
 
     expect(urls).toContain("https://example.com/for-parents");
+    expect(urls).toContain("https://example.com/subscribe");
     expect(urls).toContain("https://example.com/characters");
     for (const story of getStories()) {
       expect(urls).toContain(`https://example.com/story/${story.slug}`);
