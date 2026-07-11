@@ -251,7 +251,7 @@ SoundOn 單集 show notes 加官網單集 URL（可選 UTM），閉環 B 戰場�
 #### D6 播放器沉浸升級　`ux · M · D2+D13`　〔ux〕 ✅ `76f91c1`
 **落地：** `story.color` ambient 漸層底（`--ambient`）；Ken Burns 僅 `isPlaying` + 分頁可見 + 非 reduced-motion（`lib/player-stage.ts`）；夜間振幅／亮度降檔（`.playerNight`）。播放器狀態契約不動。
 
-#### D12 分享卡（OG image）升級　`growth · S · 無`　〔design+growth〕 ✅（待 commit）
+#### D12 分享卡（OG image）升級　`growth · S · 無`　〔design+growth〕 ✅ `76f91c1`
 **落地：** `app/story/[slug]/opengraph-image.tsx` + `lib/story-og.tsx`（1200×630、Noto Sans TC TTF、黏土相框＋EP＋角色＋品牌條）；`story-metadata` 改指向動態 OG；`trackShareClick`（copy_link／line）+ `ShareButton.storySlug`。
 
 #### D10 圖鑑「已認識」狀態　`ux · S · D3`　〔ux+design〕待實作
