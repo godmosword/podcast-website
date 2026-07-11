@@ -37,109 +37,12 @@
   line-height: 1.8;
 }
 
-.grid {
-  width: min(1060px, 100%);
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 14px;
-}
-
-.card {
-  overflow: hidden;
-  border: 2px solid var(--line);
-  border-radius: var(--radius-sm);
-  background: var(--warm-surface);
-  box-shadow: var(--shadow-sm), var(--warm-card-glow);
-}
-
-.portraitWrap {
-  position: relative;
-  aspect-ratio: 1;
-  background: var(--warm-portrait-bg);
-}
-
-.portrait {
-  object-fit: cover;
-}
-
-.cardBody {
-  padding: 14px;
-}
-
-.cardTitle {
-  margin: 0;
-  color: var(--warm-heading);
-  font-size: 1.35rem;
-  line-height: 1.2;
-}
-
-.vehicle {
-  margin: 6px 0 0;
-  color: var(--warm-highlight);
-  font-size: 0.95rem;
-  font-weight: 800;
-}
-
-.personality {
-  min-height: 3.4em;
-  margin: 10px 0 0;
-  color: var(--ink-soft);
-  font-size: 0.96rem;
-  line-height: 1.7;
-}
-
-.storyLinks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.storyLink {
-  display: inline-flex;
-  min-height: 32px;
-  align-items: center;
-  border: 1px solid color-mix(in srgb, var(--warm-accent) 28%, var(--line));
-  border-radius: var(--radius-sm);
-  padding: 4px 10px;
-  background: var(--warm-chip-bg);
-  color: var(--warm-accent);
-  font-size: 0.86rem;
-  font-weight: 800;
-  text-decoration: none;
-}
-
-.storyLink:focus-visible,
-.storyLink:hover {
-  border-color: var(--warm-accent);
-  background: var(--warm-chip-hover);
-}
-
 @media (max-width: 620px) {
   .main {
     padding-inline: 12px;
   }
 
-  .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-3);
-  }
-
-  .cardBody {
-    padding: 12px;
-  }
-
-  .cardTitle {
-    font-size: 1.12rem;
-  }
-
   .title {
     font-size: 2.35rem;
-  }
-
-  .personality {
-    min-height: 0;
-    font-size: 0.9rem;
   }
 }

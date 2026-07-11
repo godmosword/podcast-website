@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Story } from "@/data/content";
 import { formatDate, storyCoverPath } from "@/lib/story-utils";
+import StoryCoverMorph from "@/components/story/StoryCoverMorph";
 import StoryImage from "./StoryImage";
 import { TagChip } from "./Chip";
 import StoryAge from "./StoryAge";
@@ -16,6 +17,8 @@ type StoryCardProps = {
   variant?: "list" | "grid";
   /** 隱藏日期 / 時長 / 年齡（僅保留 EP）；首頁列表用 */
   hideMeta?: boolean;
+  /** D4：列表封面共享轉場；同頁可能重複 slug 時關閉 */
+  sharedCoverMorph?: boolean;
 };
 
 export default function StoryCard({
@@ -23,6 +26,7 @@ export default function StoryCard({
   index = 0,
   variant = "list",
   hideMeta = false,
+  sharedCoverMorph = true,
 }: StoryCardProps) {
   const isGrid = variant === "grid";
 
@@ -40,12 +44,23 @@ export default function StoryCard({
         className={`${styles.thumbWrap} ${isGrid ? styles.thumbWrapGrid : ""}`}
         style={{ backgroundColor: `${story.color}22` }}
       >
-        <StoryImage
-          src={storyCoverPath(story.slug)}
-          alt=""
-          fill
-          className={styles.thumb}
-        />
+        {sharedCoverMorph ? (
+          <StoryCoverMorph slug={story.slug}>
+            <StoryImage
+              src={storyCoverPath(story.slug)}
+              alt=""
+              fill
+              className={styles.thumb}
+            />
+          </StoryCoverMorph>
+        ) : (
+          <StoryImage
+            src={storyCoverPath(story.slug)}
+            alt=""
+            fill
+            className={styles.thumb}
+          />
+        )}
       </div>
 
       <span className={`${styles.body} ${isGrid ? styles.bodyGrid : ""}`}>

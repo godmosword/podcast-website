@@ -29,6 +29,7 @@ import ZoneBadge from "@/components/story/ZoneBadge";
 import ReflectionPrompt from "@/components/story/ReflectionPrompt";
 import SubscriptionCTA from "@/components/SubscriptionCTA";
 import SiteFooter from "@/components/SiteFooter";
+import StoryCoverMorph from "@/components/story/StoryCoverMorph";
 import StoryImage from "@/components/StoryImage";
 import StoryMeta, { StoryTags } from "@/components/StoryMeta";
 import styles from "./page.module.css";
@@ -101,13 +102,15 @@ export default async function StoryDetailPage({
           </section>
 
           <div className={styles.coverWrap} style={{ borderColor: story.color }}>
-            <StoryImage
-              src={storyCoverPath(story.slug)}
-              alt={`${story.title} 封面`}
-              fill
-              className={styles.cover}
-              priority
-            />
+            <StoryCoverMorph slug={story.slug}>
+              <StoryImage
+                src={storyCoverPath(story.slug)}
+                alt={`${story.title} 封面`}
+                fill
+                className={styles.cover}
+                priority
+              />
+            </StoryCoverMorph>
           </div>
 
           <StoryMeta story={story} showTags={false} />

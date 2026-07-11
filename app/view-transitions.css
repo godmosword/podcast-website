@@ -1,0 +1,22 @@
+/* D4 spike：故事卡封面 → 詳情 hero 共享元素 morph */
+
+@supports (view-transition-name: none) {
+  ::view-transition-group(.story-cover-morph) {
+    animation-duration: 380ms;
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  ::view-transition-old(.story-cover-morph),
+  ::view-transition-new(.story-cover-morph) {
+    mix-blend-mode: normal;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}

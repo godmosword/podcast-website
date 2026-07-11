@@ -5,6 +5,10 @@ const nextConfig: NextConfig = {
   // 全站靜態預渲染 (SSG)，零後端、零外部依賴。
   // Vercel 會自動辨識 Next.js，無需額外設定。
   reactStrictMode: true,
+  experimental: {
+    // D4 spike：故事卡封面 ↔ 詳情 hero 共享元素（見 docs/D4-VIEW-TRANSITIONS-SPIKE.md）
+    viewTransition: true,
+  },
   images: {
     // D1：Next Image 管線補 AVIF（WebP 為預設）；故事封面 blur 見 StoryImage。
     formats: ["image/avif", "image/webp"],

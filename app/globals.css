@@ -1,4 +1,5 @@
 @import "./motion.css";
+@import "./view-transitions.css";
 
 .sr-only {
   position: absolute;

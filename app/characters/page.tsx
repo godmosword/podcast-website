@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
 import { getCharacters } from "@/data/characters";
-import { getStory } from "@/data/content";
+import CharacterCatalogGrid from "@/components/characters/CharacterCatalogGrid";
 import JsonLd from "@/components/JsonLd";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
@@ -39,53 +37,11 @@ export default function CharactersPage() {
           角色圖鑑
         </h1>
         <p className={styles.intro}>
-          認識車車遊樂園的原創角色：車種、個性與出場故事。
+          認識車車遊樂園的原創角色：車種、個性與出場故事。聽完故事就會認識新朋友！
         </p>
       </section>
 
-      <section className={styles.grid} aria-label="角色清單">
-        {characters.map((character) => (
-          <article
-            key={character.id}
-            id={character.id}
-            className={styles.card}
-          >
-            {character.ref && (
-              <div className={styles.portraitWrap}>
-                <Image
-                  src={`/${character.ref}`}
-                  alt={`${character.name} 角色圖`}
-                  fill
-                  sizes="(max-width: 720px) 44vw, (max-width: 1100px) 28vw, 220px"
-                  className={styles.portrait}
-                />
-              </div>
-            )}
-            <div className={styles.cardBody}>
-              <h2 className={styles.cardTitle}>{character.name}</h2>
-              <p className={styles.vehicle}>{character.vehicle}</p>
-              <p className={styles.personality}>{character.personality}</p>
-              {character.appearsIn.length > 0 && (
-                <div className={styles.storyLinks} aria-label="出場故事">
-                  {character.appearsIn.map((slug) => {
-                    const story = getStory(slug);
-                    if (!story) return null;
-                    return (
-                      <Link
-                        key={slug}
-                        href={`/story/${story.slug}`}
-                        className={styles.storyLink}
-                      >
-                        EP {story.ep}
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </article>
-        ))}
-      </section>
+      <CharacterCatalogGrid characters={characters} />
 
       <SiteFooter compact showPlatformSubscribe={false} />
     </main>

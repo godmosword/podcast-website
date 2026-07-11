@@ -25,7 +25,7 @@ export default function FavoritesSection() {
       <ul className={styles.list}>
         {favoriteStories.map((story, i) => (
           <li key={story.slug}>
-            <StoryCard story={story} index={i} />
+            <StoryCard story={story} index={i} sharedCoverMorph={false} />
           </li>
         ))}
       </ul>
