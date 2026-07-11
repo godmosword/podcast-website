@@ -12,6 +12,7 @@
 
 ### Changed
 
+- **全站排版密度與文案精簡（/agent-plan 1783738772 委員會核准）**：`globals.css` 新增 spacing token 階梯（8/12/16/24/32/40px），DESIGN.md 回寫「間距」規範（觸控 ≥44px 只加不減、gap／行高／段寬底線、兒童頁少字原則）。文案精簡：SiteFooter 家長說明一行化、/about 介紹與使用步驟瘦身、/for-parents lede 與欄目列舉句、/characters intro（與 metadata 重複部分移除）、首頁 bedtime 標題縮至 8 字內；/legal 合併兩條重複 MIT 條目與外連重複句（法律效力語句經關鍵詞 grep guard 驗證無刪減）、bump 最後更新日。排版：/for-parents 大標行高 1→1.12、卡片間距 16→24px、StoryCard 摘要行高與 tags gap、/characters mobile 卡片 gap 10→12px。FAQ answer／StoryFilter 留白／RoughFrame padding／topic 膠囊等既定契約不動。驗證：lint + vitest 539 + build + e2e 21（含 axe）+ before/after 截圖 26×2。
 - **訂閱轉換（Growth-P1a/b）**：單集頁 CTA 順序改為播放→收藏／分享→訂閱收聽，`SubscriptionCTA` 視覺降權；首段 Landing Hero 加「訂閱收聽」幽靈鈕捲至 `#connect`（頂欄 `SubscribeMenu` 維持）。
 - **平台外連 UTM（Growth-Measure-1b）**：`lib/platform-utm.ts` 為 Spotify／Apple 等外連加 `utm_source=cheche_web`、`utm_medium=story_page|footer|subscribe_cta`、`utm_campaign=<slug|site>`；接線 `TrackedPlatformLink`、`ConnectHub`、`SubscribeMenu`；單集 `SubscriptionCTA` 帶 slug campaign。
 - **ZoneSheet 觸控與 modal（MAP-UX-P1）**：sheet 開啟時 overlay `pointer-events: auto` 擋地圖 pan；關閉鈕／wishToggle ≥44px；sheet `max-height: min(72vh, 34rem)`。
