@@ -161,22 +161,13 @@
   }
 }
 
-.studioLink {
-  font-size: 0.78rem;
-  font-weight: 500;
-  color: var(--ink-soft);
-  text-decoration: none;
-  opacity: 0.85;
-}
-
-@media (hover: hover) {
-  .studioLink:hover {
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }
-}
-
+.studioLink,
 .legalLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 14px;
   font-size: 0.78rem;
   font-weight: 500;
   color: var(--ink-soft);
@@ -184,7 +175,12 @@
   opacity: 0.9;
 }
 
+.studioLink {
+  opacity: 0.85;
+}
+
 @media (hover: hover) {
+  .studioLink:hover,
   .legalLink:hover {
     text-decoration: underline;
     text-underline-offset: 2px;

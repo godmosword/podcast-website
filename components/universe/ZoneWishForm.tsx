@@ -162,7 +162,7 @@ export default function ZoneWishForm({ zoneId, fallbackHref, onSubmitSuccess }: 
           <textarea
             id={messageId}
             className={styles.textarea}
-            placeholder="小朋友想聽什麼車車的故事呢？（例如：垃圾車半夜去哪裡？）"
+            placeholder="小朋友想聽什麼車車的故事呢？（例如：垃圾車半夜去哪裡？請勿填寫姓名、電話或地址）"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             disabled={submitting}
@@ -234,7 +234,7 @@ export default function ZoneWishForm({ zoneId, fallbackHref, onSubmitSuccess }: 
         )}
       </button>
       <p className={styles.privacyNote}>
-        資料如何使用與刪除，請見{" "}
+        留言僅用於節目製作與開幕通知，不會公開，也請不要留下孩子的個人資料。詳見{" "}
         <a className={styles.fallbackLink} href="/legal#privacy">
           隱私說明
         </a>
