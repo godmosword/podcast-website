@@ -2,11 +2,14 @@
 
 import type { ReactNode } from "react";
 import { useState } from "react";
+import { trackShareClick } from "@/lib/analytics";
 import styles from "./ShareButton.module.css";
 
 type ShareButtonProps = {
   shareUrl: string;
   lineUrl: string;
+  /** 供分享點擊事件（D12）；無 slug 則不送 analytics。 */
+  storySlug?: string;
   leading?: ReactNode;
   className?: string;
 };
@@ -54,6 +57,7 @@ function LineIcon() {
 export default function ShareButton({
   shareUrl,
   lineUrl,
+  storySlug,
   leading,
   className,
 }: ShareButtonProps) {
@@ -63,6 +67,7 @@ export default function ShareButton({
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
+      if (storySlug) trackShareClick(storySlug, "copy_link");
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
       // 剪貼簿不可用時靜默；使用者仍可長按選取。
@@ -93,6 +98,9 @@ export default function ShareButton({
         rel="noopener noreferrer"
         aria-label="以 LINE 分享"
         title="以 LINE 分享"
+        onClick={() => {
+          if (storySlug) trackShareClick(storySlug, "line");
+        }}
       >
         <span className={styles.icon}>
           <LineIcon />

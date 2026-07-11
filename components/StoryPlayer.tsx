@@ -24,6 +24,7 @@ import {
   captionWindow,
   resolveCaptionStackState,
 } from "@/lib/subtitle-cue";
+import { shouldRunKenBurns } from "@/lib/player-stage";
 
 // 結尾才出現的反思卡 / 僅 ?cue=1 的對時面板：動態載入，縮小播放器主 chunk。
 const ReflectionPrompt = dynamic(
@@ -127,6 +128,8 @@ export default function StoryPlayer({
   const [cueNow, setCueNow] = useState(0);
   const [subIndex, setSubIndex] = useState(0);
   const [captionSize, setCaptionSize] = useState<CaptionSize>("md");
+  const [pageVisible, setPageVisible] = useState(true);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const transportRef = useRef<{
@@ -189,6 +192,32 @@ export default function StoryPlayer({
       // store 不可用時維持預設。
     }
   }, []);
+
+  // D6：背景分頁隱藏時暫停 Ken Burns。
+  useEffect(() => {
+    const update = () => {
+      setPageVisible(document.visibilityState === "visible");
+    };
+    update();
+    document.addEventListener("visibilitychange", update);
+    return () => document.removeEventListener("visibilitychange", update);
+  }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setPrefersReducedMotion(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  const kenBurnsActive = shouldRunKenBurns({
+    isPlaying,
+    pageVisible,
+    hasEnded,
+    isLoading,
+    prefersReducedMotion,
+  });
 
   function cycleCaptionSize() {
     setCaptionSize((cur) => {
@@ -506,7 +535,8 @@ export default function StoryPlayer({
 
   return (
     <div
-      className={styles.player}
+      className={`${styles.player} ${theme === NIGHT_THEME ? styles.playerNight : ""}`}
+      style={{ ["--ambient" as string]: color }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
@@ -532,21 +562,26 @@ export default function StoryPlayer({
           // 只掛載目前頁與左右相鄰頁，避免多頁故事一次塞入並下載全部插圖。
           // 翻頁多為循序，相鄰預掛載即可保留淡入淡出；遠距跳頁時靠 loading 骨架過渡。
           if (Math.abs(i - page) > 1) return null;
+          const visible = i === page && !hasEnded;
           return (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <div
               key={i}
-              src={src}
-              alt={`${title} 第 ${i + 1} 頁`}
-              aria-hidden={i !== page}
-              className={styles.image}
-              style={{ opacity: i === page && !hasEnded ? 1 : 0 }}
-              draggable={false}
-              loading={i === page ? "eager" : "lazy"}
-              decoding="async"
-              onLoad={() => i === page && setIsLoading(false)}
-              onError={() => setMediaError("image")}
-            />
+              className={`${styles.imageFrame} ${kenBurnsActive && visible ? styles.imageKenBurns : ""}`}
+              style={{ opacity: visible ? 1 : 0 }}
+              aria-hidden={!visible}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={src}
+                alt={`${title} 第 ${i + 1} 頁`}
+                className={styles.image}
+                draggable={false}
+                loading={i === page ? "eager" : "lazy"}
+                decoding="async"
+                onLoad={() => i === page && setIsLoading(false)}
+                onError={() => setMediaError("image")}
+              />
+            </div>
           );
         })}
       </div>

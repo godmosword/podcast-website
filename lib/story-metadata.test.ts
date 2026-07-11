@@ -6,6 +6,7 @@ import { metadata as storiesMetadata } from "@/app/stories/page";
 import { generateMetadata as generateTopicMetadata } from "@/app/topic/[tag]/page";
 import { generateMetadata as generateVehicleMetadata } from "@/app/vehicles/[vehicle]/page";
 import { hasVtt } from "@/lib/transcript";
+import { storyOgImagePath } from "@/lib/story-og";
 import { storyDetailMetadata, storyPlayMetadata } from "./story-metadata";
 
 describe("storyDetailMetadata", () => {
@@ -22,6 +23,20 @@ describe("storyDetailMetadata", () => {
     const meta = storyDetailMetadata(story!);
     const types = meta.alternates?.types as Record<string, string> | undefined;
     expect(types?.["text/vtt"]).toBe(`/story/${story!.slug}/transcript.vtt`);
+  });
+
+  it("openGraph 指向動態 OG route", () => {
+    const story = storiesByNewest()[0];
+    const meta = storyDetailMetadata(story);
+    const images = meta.openGraph?.images;
+    const first = Array.isArray(images) ? images[0] : images;
+    const url =
+      typeof first === "string"
+        ? first
+        : first && typeof first === "object" && "url" in first
+          ? String(first.url)
+          : "";
+    expect(url).toBe(storyOgImagePath(story.slug));
   });
 });
 

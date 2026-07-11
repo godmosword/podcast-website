@@ -86,3 +86,10 @@ export function trackWishSubmitted(category: WishCategory): void {
 export function trackSubscribeSubmit(source: string): void {
   safeTrack("subscribe_submit", { source });
 }
+
+export type ShareClickChannel = "copy_link" | "line";
+
+/** 故事分享點擊（D12）：只送 slug + 管道，無 PII。 */
+export function trackShareClick(slug: string, channel: ShareClickChannel): void {
+  safeTrack("share_click", { slug, channel });
+}

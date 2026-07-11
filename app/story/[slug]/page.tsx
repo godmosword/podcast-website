@@ -125,6 +125,7 @@ export default async function StoryDetailPage({
             label={`開始看故事：${story.title}`}
           />
           <ShareButton
+            storySlug={story.slug}
             shareUrl={storyShareUrl(story.slug)}
             lineUrl={lineShareUrl(
               storyLineShareText({

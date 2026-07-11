@@ -159,4 +159,16 @@ describe("universe analytics", () => {
 
     expect(track).toHaveBeenCalledWith("universe_daynight_toggle", { to: "night" });
   });
+
+  it("trackShareClick 送 slug 與 channel", async () => {
+    const { track } = await import("@vercel/analytics");
+    const { trackShareClick } = await import("./analytics");
+
+    trackShareClick("ep-18", "line");
+
+    expect(track).toHaveBeenCalledWith("share_click", {
+      slug: "ep-18",
+      channel: "line",
+    });
+  });
 });

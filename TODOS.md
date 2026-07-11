@@ -248,11 +248,11 @@ SoundOn 單集 show notes 加官網單集 URL（可選 UTM），閉環 B 戰場�
 
 ### L2 高價值體驗
 
-#### D6 播放器沉浸升級　`ux · M · D2+D13`　〔ux〕待實作
-(a) `story.color` ambient 漸層取代純黑底（不擴 schema）；(b) Ken Burns **僅播放中**、pause／背景分頁停止、reduced-motion 關閉；夜間模式振幅／亮度再降；(c) 與 D13 整合。播放器狀態契約不動。
+#### D6 播放器沉浸升級　`ux · M · D2+D13`　〔ux〕 ✅（待 commit）
+**落地：** `story.color` ambient 漸層底（`--ambient`）；Ken Burns 僅 `isPlaying` + 分頁可見 + 非 reduced-motion（`lib/player-stage.ts`）；夜間振幅／亮度降檔（`.playerNight`）。播放器狀態契約不動。
 
-#### D12 分享卡（OG image）升級　`growth · S · 無`　〔design+growth〕待實作
-現況：`story-metadata.ts` 直接用故事封面。目標：黏土相框 + 角色 + EP 大字 + 品牌條（`ImageResponse`／satori 或 build-time）。**不碰**播放／地圖 runtime；會新增 **OG image route** 或 build 產圖。驗收：1200×630、中文字型、LINE/Threads/Facebook debugger + 分享點擊事件。可與 D6 **並行**。
+#### D12 分享卡（OG image）升級　`growth · S · 無`　〔design+growth〕 ✅（待 commit）
+**落地：** `app/story/[slug]/opengraph-image.tsx` + `lib/story-og.tsx`（1200×630、Noto Sans TC TTF、黏土相框＋EP＋角色＋品牌條）；`story-metadata` 改指向動態 OG；`trackShareClick`（copy_link／line）+ `ShareButton.storySlug`。
 
 #### D10 圖鑑「已認識」狀態　`ux · S · D3`　〔ux+design〕待實作
 `progress-store` 已有 `storiesCompleted`／`unlocks.characters`。**本輪只做**貼紙式已認識／待認識（SSR 預設待認識、hydration 漸進）。定裝照相框統一。3D tilt 移至 **L4**。

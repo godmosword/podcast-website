@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import type { Story } from "@/data/content";
 import { storyDateModified } from "@/data/story-dates";
-import { DEFAULT_OG_IMAGE } from "@/lib/site-url";
 import { storyDefinitionSummary } from "@/lib/story-geo";
-import { storyCoverPath } from "@/lib/story-utils";
+import { storyOgImagePath } from "@/lib/story-og";
 import { hasVtt } from "@/lib/transcript";
 
 const SITE_NAME = "車車遊樂園";
@@ -12,18 +11,15 @@ export function storyDescription(story: Story): string {
   return storyDefinitionSummary(story);
 }
 
-/** 故事分享圖：有插圖用封面，否則全站預設 mascot */
-function storyOgImagePath(story: Story): string {
-  if (story.pageCount > 0) {
-    return storyCoverPath(story.slug);
-  }
-  return DEFAULT_OG_IMAGE;
+/** 故事分享圖：動態 OG route（D12 黏土相框卡）。 */
+function storyOgImageUrl(story: Story): string {
+  return storyOgImagePath(story.slug);
 }
 
 /** 故事詳情頁的 SEO / 分享 metadata */
 export function storyDetailMetadata(story: Story): Metadata {
   const description = storyDescription(story);
-  const imagePath = storyOgImagePath(story);
+  const imagePath = storyOgImageUrl(story);
   const modified = storyDateModified(story);
 
   const transcriptPath = hasVtt(story)
