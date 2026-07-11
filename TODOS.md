@@ -21,10 +21,10 @@
 | # | ID | 類型 | 工時 | 狀態 |
 |---|-----|------|------|------|
 | 1 | ~~[UX-P0-2 + UX-P0-3](#兒童-ux-與親子互動稽核2026-07-11)~~ | trust/a11y | S | ✅ `964f418` |
-| 2 | [Growth-P1a](#growth-p1a-單集訂閱-cta-上移) 單集訂閱 CTA | growth | S | 待做 |
-| 3 | [Growth-P1b](#growth-p1b-首頁訂閱入口) 首頁訂閱入口 | growth | S | 待做 |
-| 4 | [Growth-Measure-1](#growth-measure-1-成長量測) | ops/growth | S | 待做 |
-| 5 | [LIST-2](#名單收集--內容再利用2026-07-03-品牌盤點) email 訂閱 | growth/list | M | 可開工 |
+| 2 | ~~[Growth-P1a](#growth-p1a-單集訂閱-cta-上移) 單集訂閱 CTA~~ | growth | S | ✅ `eafe30a` |
+| 3 | ~~[Growth-P1b](#growth-p1b-首頁訂閱入口) 首頁訂閱入口~~ | growth | S | ✅ `eafe30a` |
+| 4 | [Growth-Measure-1](#growth-measure-1-成長量測) | ops/growth | S | 部分完成 |
+| 5 | ~~[LIST-2](#名單收集--內容再利用2026-07-03-品牌盤點) email 訂閱~~ | growth/list | M | ✅ `6ca8263` |
 
 ### 待決策隊列（不進 Top 5）
 
@@ -54,8 +54,8 @@
 | Task | 狀態 | 主要產出 | 預計影響檔案 | 驗證 | Commit hash |
 |------|------|----------|--------------|------|-------------|
 | LIST-1 LINE OA CTA | BLOCKED：等 LINE OA | env-gated LINE 加好友 CTA（`NEXT_PUBLIC_LINE_OA_URL` 未設即隱藏，沿用 `visibleSocials()` 空字串隱藏模式）；掛頁尾／單集頁 `SubscriptionCTA` 旁／landing／`/subscribe` | Modify: `lib/social.ts`（`SocialIcon` 加 `"line"`）、`lib/connect-icons.tsx`、`components/SiteFooter.tsx`、`app/story/[slug]/page.tsx`; Create: `components/LineCTA.tsx` | 設/不設 env 切換顯隱；`npm test` + `npm run build` | — |
-| LIST-2 新集通知 email 訂閱 | 可開工：隱私 gate 已解 | 複製 zone-wish 技術棧（zod + rate limit + Neon + DB 未設降級）；`subscribers` 表 `lower(email)` unique + `ON CONFLICT DO NOTHING`（冪等、防枚舉）；簡單收集 + 隱私說明（「僅用於新集數通知」），不做 double opt-in；`/legal#privacy` 已涵蓋 analytics／localStorage（`a844f20`），實作時同步掛 privacy link | Create: `scripts/migrations/002_subscribers.sql`、`lib/subscribe-schema.ts`、`lib/subscribe-db.ts`、`app/api/subscribe/route.ts`、`components/SubscribeForm.tsx`、`app/subscribe/page.tsx`（範本：`app/api/zone-wish/route.ts`、`ZoneWishForm.tsx`） | curl：無 `DATABASE_URL` 降級、POST 201、重複 email 201、429 rate limit；`npm test` + `npm run build` | — |
-| LIST-3 分析事件 | 待 LIST-1/2 掛點 | `trackSubscribeSubmit(source)`、`trackLineCtaClick(source)`，走 `safeTrack`、無 PII（比照 `trackUniverseWishSubmit`） | Modify: `lib/analytics.ts` | 本機點擊確認事件發送 | — |
+| LIST-2 新集通知 email 訂閱 | ✅ `6ca8263` | 複製 zone-wish 技術棧（zod + rate limit + Neon + DB 未設降級）；`subscribers` 表 `lower(email)` unique + `ON CONFLICT DO NOTHING`（冪等、防枚舉）；簡單收集 + 隱私說明（「僅用於新集數通知」），不做 double opt-in；`/legal#privacy` 已涵蓋 analytics／localStorage（`a844f20`），實作時同步掛 privacy link | Create: `scripts/migrations/003_subscribers.sql`、`lib/subscribe-schema.ts`、`lib/subscribe-db.ts`、`app/api/subscribe/route.ts`、`components/SubscribeForm.tsx`、`app/subscribe/page.tsx`（範本：`app/api/zone-wish/route.ts`、`ZoneWishForm.tsx`） | curl：無 `DATABASE_URL` 降級、POST 201、重複 email 201、429 rate limit；`npm test` + `npm run build` | `6ca8263` |
+| LIST-3 分析事件 | 部分完成 | `trackSubscribeSubmit(source)` ✅ `6ca8263`；`trackLineCtaClick` 待 LIST-1 | Modify: `lib/analytics.ts` | 本機點擊確認事件發送 | — |
 | REUSE-1 校對字幕採用檢查 | 完成 | 確認字幕正文在 `data/subtitles/<slug>.json`、校對標記在 `_proofread/`；`verify:episodes` 全過 | `npm run verify:episodes` passed；見 `docs/metrics/GEO-baseline-2026-07-10.md` | `dbfe7b3` |
 | REUSE-2 家長共讀指引呈現（= P2 `parentGuide`） | 完成 | `data/parent-guides.ts` + `ShowNotes` 收合區（ep-1、ep-5 試點）；`enrichStory` 合併 | `data/parent-guides.test.ts` + `npm test` + `npm run build` | `dbfe7b3` |
 | REUSE-3 YouTube 整集影片匯出 | 完成 `d9a00fd`（fix 至 `1365fc2`） | 本機 CLI `npm run export:video -- <slug>`：1920×1080 整集 mp4；`data/scenes` 換頁 + `data/subtitles` 原始逐句 ASS burn-in（`jf-openhuninn-2.1`）；`export/video/<slug>/` + manifest（gitignore）；9:16 Shorts 留二期 | Create: `scripts/lib/export-video-core.ts`、`scripts/export-video-assets.ts`、`docs/VIDEO-EXPORT.md`; Modify: `package.json`、`.gitignore` | `export:video -- ep-17`（ep-17 7:15 mp4 驗證）；`npm test -- export-video-core` | `1365fc2` |
@@ -150,11 +150,11 @@
 
 > 合併原「成長量測缺口」兩條 + Analytics 後續；對齊現役隊列 #4。
 
-### Growth-Measure-1a 平台後台基線記錄　`growth-measurement · S · 無`　〔growth〕
-每週記錄 Spotify／Apple／YouTube／SoundOn 後台基線（訂閱、播放、完播、來源）；截圖或 CSV 存 `docs/metrics/`（不 commit 個資）。
+### Growth-Measure-1a 平台後台基線記錄　`growth-measurement · S · 無`　〔growth〕 ✅ `6ca8263`（模板）
+每週記錄 Spotify／Apple／YouTube／SoundOn 後台基線（訂閱、播放、完播、來源）；截圖或 CSV 存 `docs/metrics/`（不 commit 個資）。見 `docs/metrics/README.md`。
 
-### Growth-Measure-1b UTM 歸因規格　`growth-measurement · S · 平台外連`　〔growth+eng〕
-`utm_source=cheche_web`、`utm_medium=story_page|footer|subscribe_cta|social`、`utm_campaign=<slug|site>`；實作於 `lib/platforms.ts`／`TrackedPlatformLink`。
+### Growth-Measure-1b UTM 歸因規格　`growth-measurement · S · 平台外連`　〔growth+eng〕 ✅ `797de82`
+`utm_source=cheche_web`、`utm_medium=story_page|footer|subscribe_cta|social`、`utm_campaign=<slug|site>`；實作於 `lib/platform-utm.ts`／`TrackedPlatformLink`／`ConnectHub`／`SubscribeMenu`。
 
 ### SoundOn show notes 回鏈　`growth · S · sync 管線`　〔growth+ops〕
 SoundOn 單集 show notes 加官網單集 URL（可選 UTM），閉環 B 戰場導流。
@@ -384,11 +384,11 @@ Vercel 設 `NEXT_PUBLIC_SITE_URL=https://正式網域`。OG／Twitter／RSS／si
 ### ~~每集分享鈕（複製連結 / LINE）~~　`P1 · S · 網域`　〔growth〕 ✅
 單集頁 `ShareButton`：複製連結 + LINE 分享（`lib/share-story.ts` 組 URL）；可插 `leading` 放收藏鈕。OG 預覽圖已備齊（`lib/story-metadata.ts`）。B 戰場每則貼文固定連單集。
 
-### Growth-P1a 單集訂閱 CTA 上移　`P1 · S · 無`　〔design〕
+### Growth-P1a 單集訂閱 CTA 上移　`P1 · S · 無`　〔design〕 ✅ `eafe30a`
 單集頁主 CTA（收藏／分享）下方加「訂閱收聽」區塊，視覺層級低於主按鈕但高於次要連結。見現役隊列 #2。
 
-### Growth-P1b 首頁訂閱入口　`P1 · S · 無`　〔eng〕
-Header 或 Hero 加明確「訂閱」按鈕連 `#connect`（或 `/subscribe`）。見現役隊列 #3。
+### Growth-P1b 首頁訂閱入口　`P1 · S · 無`　〔eng〕 ✅ `eafe30a`
+Header 或 Hero 加明確「訂閱」按鈕連 `#connect`（或 `/subscribe`）。見現役隊列 #3。首段 Hero 加 `#connect` 捷徑；頂欄 SubscribeMenu 維持。
 
 ### 試聽片段 → 平台訂閱橋接　`P1 · M · 無`　〔growth〕
 單集頁加 30–60 秒試聽（裁切 `public/stories/<slug>/` 預覽檔或播放器限制 `currentTime`），突出 CTA 導去平台聽完整版。社群進站者先感受聲音氣質再轉換。
