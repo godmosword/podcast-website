@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { Story } from "@/data/content";
 import { storyDateModified } from "@/data/story-dates";
 import { storyDefinitionSummary } from "@/lib/story-geo";
-import { storyOgImagePath } from "@/lib/story-og";
+import { storyOgImagePath } from "@/lib/story-og-path";
 import { hasVtt } from "@/lib/transcript";
 
 const SITE_NAME = "車車遊樂園";

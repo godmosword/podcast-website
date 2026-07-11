@@ -41,10 +41,7 @@ async function loadCoverData(story: Story): Promise<string | null> {
   }
 }
 
-/** 故事詳情動態 OG 圖路徑（相對站根）。 */
-export function storyOgImagePath(slug: string): string {
-  return `/story/${slug}/opengraph-image`;
-}
+export { storyOgImagePath } from "@/lib/story-og-path";
 
 type StoryOgOptions = {
   story: Story;
