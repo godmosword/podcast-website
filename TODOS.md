@@ -233,10 +233,10 @@ SoundOn 單集 show notes 加官網單集 URL（可選 UTM），閉環 B 戰場�
 - **(c) Next `Image`：** `next.config.ts` `images.formats` AVIF；`StoryImage` + `data/story-image-blurs.json` blur-up（`npm run generate:story-blurs`）
 - ~~landing hero jpg 小項~~ 併入本項
 
-#### D14 圖示與控制一致性　`design · S–M · 無`　〔design+a11y〕 ✅（待 commit）
+#### D14 圖示與控制一致性　`design · S–M · 無`　〔design+a11y〕 ✅ `50f3885`
 **落地：** `components/ui/Icon` + `IconButton`（≥44px、hover／active／focus-visible）；`data/icons.ts` 名稱契約。替換 StoryCard／PlayButton／games hub `▶`、SiteNavBar 漢堡、ZoneSheet／StoryPlayer 關閉、GameChrome 暫停／音量／設定、ZoneWishForm 鈴鐺。保留鍵盤 `←` `→`、GameChrome 🎡 等童趣 emoji。
 
-#### D3 Night 主題全站打磨　`design · M · 無`　〔design〕 ✅（待 commit）
+#### D3 Night 主題全站打磨　`design · M · 無`　〔design〕 ✅ `50f3885`
 **落地：** `globals.css` 頁級暖色 token（`--page-warm-*`、`--warm-surface`、`--warm-card-glow` 等）；`characters`／`for-parents`／dashboard 硬編 hex 全改 token；stories／詳情／games hub 夜間暖燈卡片；`SiteFooter` support CTA token 化。`npm run audit:colors` + `scripts/lib/hardcoded-color-audit.ts`（`--strict-d3` gate D3 驗收頁）。地圖海圖仍固定淺色不反轉。
 
 #### D13 字幕閱讀排版（剩餘）　`ux · S–M · 無`　〔ux+content〕 ✅ `d42fae1`
