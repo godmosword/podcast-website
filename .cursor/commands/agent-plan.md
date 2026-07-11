@@ -10,7 +10,7 @@ typo 級小事不進本命令——直接做即可。
 
 ## 你要做的事
 
-**執行期追蹤：** 從 Bootstrap 起維護 **Agent 執行分配表**（見 §7）。每派一次 Task／委員審，記下：角色、執行方式、`subagent_type`（若有）、`model slug`、做了什麼、狀態。未派工的列省略；缺席必寫。
+**執行期追蹤：** 從 Bootstrap 起維護 **Agent 執行分配表**（見 §7）。每派一次 Task／委員審，記下：角色、執行方式、`subagent_type`（若有）、`model slug`、做了什麼、狀態。**固定全表 #0–#5 必列**；缺席必寫；**Grok 列禁止標 `跳過`**。
 
 ### 0. Bootstrap
 
@@ -25,9 +25,9 @@ typo 級小事不進本命令——直接做即可。
 |------|------|
 | typo／&lt;10 行 | **直接做**，不進本命令 |
 | 字幕／scenes／illustrate（SOP 內） | **跳過本命令**；直做或 `/agent-action` + Domain verify（見 Domain § 內容管線） |
-| 純 docs／命令對齊 | 可進本命令，但審核用 **Leader 自審或 GPT 單審** |
-| 一般 L1／L2 工程 | 本命令 + **GPT 單審** |
-| 跨模組／紅線／Protected／L3 | 本命令 + 觸發 Opus；L3 再加 Grok |
+| 純 docs／命令對齊 | 可進本命令；審核可降級 Leader 自審 + GPT，但 **§7 固定全表仍須列出 Grok 列**（未派或缺席） |
+| 一般 L1／L2 工程 | 本命令 + **GPT 5.6 Sol + Grok 4.5 Fast Medium 雙審** |
+| 跨模組／紅線／Protected／L3 | 雙審 + **觸發 Opus** |
 
 ### 2. Draft Plan（Leader 骨架 + Task 填細節）
 
@@ -36,7 +36,7 @@ typo 級小事不進本命令——直接做即可。
 | 區塊 | 誰寫 | model slug |
 |------|------|------------|
 | Goal、Scope、Risks 骨架 | Leader | （當前 session） |
-| Task DAG、Files、Verification、Model routing | Task | `gpt-5.5-medium` |
+| Task DAG、Files、Verification、Model routing | Task | `gpt-5.6-sol-medium` |
 | 每個子任務 L0–L3 + slug | Task（同上） | 預設 L2→Sonnet、L1→Sonnet、L0→shell |
 
 - 使用 AGENT-WORKFLOW 的 **Plan 模板**合併成 Draft Plan
@@ -46,11 +46,14 @@ typo 級小事不進本命令——直接做即可。
 
 ### 3. 委員會審查（分級，全部唯讀）
 
-#### 預設（一般 L1／L2）：GPT 單審
+#### 預設（一般 L1／L2）：GPT 5.6 Sol + Grok 4.5 Fast Medium 雙審
+
+**兩委員可並行派工。**
 
 | 委員 | 角度 | Cursor 派工 |
 |------|------|-------------|
-| **GPT 5.5** | 工程可行性／驗證命令／漏檔／測試 | Task + `gpt-5.5-medium` |
+| **GPT 5.6 Sol** | 工程可行性／驗證命令／漏檔／測試 | Task（`readonly: true`）+ `gpt-5.6-sol-medium` |
+| **Grok 4.5 Fast Medium** | 對抗審：漏洞、edge case、失敗模式 | Task（`readonly: true`）+ `grok-4.5-fast-medium`；slug 不可用 → **缺席**（見 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md)） |
 
 #### 加 Opus（觸發制，非預設）
 
@@ -60,16 +63,18 @@ typo 級小事不進本命令——直接做即可。
 |------|------|-------------|
 | **Opus 4.8** | 架構／紅線／過度工程 | Task `architect` 或 `code-reviewer`（`readonly: true`）+ `claude-opus-4-8-thinking-medium` |
 
-#### L3／Protected paths／跨模組契約：三員對抗組 + Leader 自審
+#### L3／Protected paths：三員 + Leader 自審
+
+在預設雙審基礎上，**再加 Opus**；Leader 自審可行性（不計入非 leader 委員）。
 
 | 委員 | 角度 | Cursor 派工 |
 |------|------|-------------|
 | **Opus 4.8** | 架構／紅線 | 同上 |
-| **GPT 5.5** | 工程審 | 同上 |
-| **Grok 4.5** | 對抗審：漏洞、edge case、失敗模式 | Task（`readonly: true`）+ `grok-4.5`；slug 不可用 → **缺席**（見 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md) § Cursor Task；勿用其他模型頂替） |
-| **Composer 2.5** | 可行性／實作成本 | **Leader 自審**（不另派工；**不計入**非 leader 委員） |
+| **GPT 5.6 Sol** | 工程審 | 同上 |
+| **Grok 4.5 Fast Medium** | 對抗審 | 同上（**必派，不可跳過**） |
+| **Composer 2.5** | 可行性／實作成本 | **Leader 自審** |
 
-**純文件／命令檔對齊：** Leader 自審或 GPT 單審即可，不必 Opus／Grok。
+**純文件／命令檔對齊：** 可降級 Leader 自審 + GPT 單審，但 **§7 表 Grok 列仍須出現**（標 `未派` 或嘗試派工後標 `缺席`）。
 
 **審查紅線：**
 
@@ -85,17 +90,17 @@ typo 級小事不進本命令——直接做即可。
 | 來源 | 關鍵意見 | 採納決定 |
 |------|----------|----------|
 | Leader（Composer 可行性審，L3） | … | — |
-| GPT 5.5 工程審 | … | 採納 / 不採納 |
+| GPT 5.6 Sol 工程審 | … | 採納 / 不採納 |
+| Grok 4.5 Fast Medium 對抗審 | …／缺席 | … |
 | Opus 4.8 架構審（觸發／L3） | …／未派 | … |
-| Grok 4.5 對抗審（L3） | …／缺席 | … |
 
 產出 **Approved Plan**（含需使用者決策項）→ 覆寫 plan 檔 → 明確寫：**下一步請用 `/agent-action`**
 
 ### 5. 缺席規則
 
 - 委員失敗 → 摘要表註明缺席，照常定稿；Leader **不可省略** Domain 驗證矩陣中的必要項
-- **至少一位非 leader 委員**（預設＝GPT；觸發／L3＝Opus 或 GPT）成功審過才可標 Approved；**Composer 自審不計入**；全滅 → 回報使用者，不自行定稿
-- **L3 若 Grok 對抗審缺席**：Opus 或 GPT 仍有一人成功即可 Approved，但摘要表必須標 **「對抗審缺席／對抗性降級」**
+- **至少一位非 leader 委員**（預設＝GPT 或 Grok 之一成功）成功審過才可標 Approved；**Composer 自審不計入**；全滅 → 回報使用者，不自行定稿
+- **Grok 對抗審缺席**：GPT 仍成功即可 Approved，但摘要表與 §7 分配表必須標 **「對抗審缺席／對抗性降級」**
 
 ### 6. CRITICAL 與 Plan mode
 
@@ -103,26 +108,27 @@ typo 級小事不進本命令——直接做即可。
 - **Cursor Plan mode**：以系統 plan confirm 為準
 - 非 Plan mode：全程自主，**不要**逐步詢問批准（CRITICAL 除外）
 
-### 7. 最終輸出：Agent 執行分配表（必附）
+### 7. 最終輸出：固定 Agent 執行分配表（必附）
 
-收尾回覆**必須**附此表（繁中；slug 保留英文）。與 §4「委員摘要表」分工：§4 記**意見與採納**；本表記**誰跑、用什麼 model、實際產出**（稽核／成本）。
+收尾回覆**必須**附此表（繁中；slug 保留英文）。**固定列出 #0–#5 全行，不得省略**；與 §4「委員摘要表」分工：§4 記**意見與採納**；本表記**誰跑、用什麼 model、實際產出**。
 
 | # | 角色 | 執行方式 | subagent_type | model slug | 做了什麼 | 產出 | 狀態 |
 |---|------|----------|---------------|------------|----------|------|------|
 | 0 | Leader | 當前 session | — | `composer-2.5-fast` | 寫 Goal／Scope／Risks 骨架、綜合委員意見 | Approved Plan | 完成 |
-| 1 | Plan 細節 | Task | `generalPurpose` | `gpt-5.5-medium` | 填 Task DAG、Files、Verification、Model routing | plan 區塊 | 完成／未派 |
-| 2 | GPT 5.5 工程審 | Task（readonly） | `generalPurpose` | `gpt-5.5-medium` | 審可行性、驗證命令、漏檔 | 審查意見 | 完成／缺席 |
-| 3 | Opus 4.8 架構審 | Task（readonly） | `architect` | `claude-opus-4-8-thinking-medium` | 審架構／紅線 | 審查意見 | 完成／未派／缺席 |
-| 4 | Grok 4.5 對抗審 | Task（readonly） | `generalPurpose` | `grok-4.5` | 找 plan 漏洞、edge case | 審查意見 | 完成／未派／缺席 |
+| 1 | Plan 細節 | Task | `generalPurpose` | `gpt-5.6-sol-medium` | 填 Task DAG、Files、Verification、Model routing | plan 區塊 | 完成／未派 |
+| 2 | GPT 5.6 Sol 工程審 | Task（readonly） | `generalPurpose` | `gpt-5.6-sol-medium` | 審可行性、驗證命令、漏檔 | 審查意見 | 完成／缺席 |
+| 3 | Grok 4.5 Fast Medium 對抗審 | Task（readonly） | `generalPurpose` | `grok-4.5-fast-medium` | 找 plan 漏洞、edge case | 審查意見 | 完成／缺席 |
+| 4 | Opus 4.8 架構審 | Task（readonly） | `architect` | `claude-opus-4-8-thinking-medium` | 審架構／紅線 | 審查意見 | 完成／未派／缺席 |
 | 5 | Composer 可行性審 | Leader 自審 | — | `composer-2.5-fast` | L3 可行性／成本 | 自審結論 | 完成／未派 |
 
-**狀態欄：** `完成`｜`未派`｜`缺席`｜`對抗審缺席／對抗性降級`（L3 Grok 缺席時）。L3 Grok 缺席且仍 Approved → 表內與 §4 皆須標降級。
+**狀態欄：** `完成`｜`未派`｜`缺席`｜`對抗審缺席／對抗性降級`。**禁止對 #3 Grok 列標 `跳過`**。Grok 缺席且仍 Approved → 表內與 §4 皆須標降級。
 
 ## 禁止
 
 - 不要 commit / push
 - 不要跳過 Review 直接實作（使用者說「直接做」除外）
 - 不要為 SOP 內單集字幕／出圖硬開完整委員會
+- 不要在收尾分配表省略 Grok 列
 
 ## 輸出語言
 

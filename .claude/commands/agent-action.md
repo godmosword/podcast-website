@@ -35,8 +35,8 @@ $ARGUMENTS
 | 顧問 | 用途 | 呼叫方式 |
 |------|------|----------|
 | Opus 4.8 | 高風險 diff 審、架構第二意見 | Agent tool `subagent_type: code-reviewer` + `model: "opus"` |
-| GPT 5.5 | TS/React diff 審、工程第二意見 | `codex exec -m gpt-5.5 -c model_reasoning_effort="high" "<prompt + diff>"` |
-| Grok 4.5 | 對抗審：找 diff 的 edge case | `grok models` 探活 → `grok -p "<prompt>" -m grok-4.5 --effort medium`；不可用 → 缺席（見 `docs/AGENT-FAILURES.md`） |
+| GPT 5.6 Sol | TS/React diff 審、工程第二意見 | `codex exec -m gpt-5.6 -c model_reasoning_effort="medium" "<prompt + diff>" </dev/null` |
+| Grok 4.5 Fast Medium | 對抗審：找 diff 的 edge case | `grok models` 探活 → `grok -p "<prompt>" -m grok-4.5-fast --effort medium --no-plan`；不可用 → 缺席 |
 | Composer 2.5 | 快速 sanity check | `cursor-agent -p --model composer-2.5-fast --mode ask "<prompt>"` |
 
 **執行紅線：**
@@ -65,8 +65,8 @@ $ARGUMENTS
 ## 5. Diff 委員審（分級、唯讀，可跳過）
 
 - **可跳過**：已有 Approved Plan、diff 約 &lt;80 行、未碰 Protected paths／紅線 → 只跑 Verify
-- **一般**：GPT 5.5（codex exec 審 diff）
-- **L3／觸紅線／Protected**：加 Opus 4.8（Agent tool code-reviewer + opus）與 Grok 4.5 對抗審；Grok 缺席 → 摘要標「對抗審缺席／對抗性降級」
+- **一般**：GPT 5.6 Sol（codex exec 審 diff）
+- **L3／觸紅線／Protected**：加 Opus 4.8 與 Grok 4.5 Fast Medium 對抗審
 - 呼叫失敗 → 追加 `docs/AGENT-FAILURES.md`，摘要表註明缺席
 
 ## 6. Docs sync（可見行為變更時）
@@ -93,8 +93,9 @@ $ARGUMENTS
 | 0 | Leader | — | （leader model） | 讀 Plan、派工、整合 diff | 合併後變更摘要 | 完成 |
 | 1 | T1 | （Agent tool type） | `sonnet`／`haiku` | （依 Plan 填寫） | `path/to/file` | 完成／缺席 |
 | 2 | Verify | Bash | — | `npm test` 等 | 逐項對照結果 | 完成 |
-| 3 | diff 審 | `code-reviewer` | `opus`／`gpt-5.5`／`grok-4.5` | 審 diff | 無 CRITICAL／意見摘要 | 完成／跳過／缺席 |
-| 4 | Ship | — | （leader model） | commit／push | commit hash | 完成／未執行 |
+| 3 | GPT diff 審 | `code-reviewer` | `gpt-5.6` | 審 diff | 無 CRITICAL／意見摘要 | 完成／跳過／缺席 |
+| 4 | Grok 對抗審 | `grok -p` | `grok-4.5-fast-medium` | 找 edge case | 審查意見 | 完成／跳過／缺席 |
+| 5 | Ship | — | （leader model） | commit／push | commit hash | 完成／未執行 |
 
 **狀態欄：** `完成`｜`跳過`｜`缺席`｜`對抗審缺席／對抗性降級`｜`未執行`。
 

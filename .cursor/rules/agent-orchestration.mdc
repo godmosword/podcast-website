@@ -15,7 +15,7 @@ alwaysApply: false
 
 | 指令 | 做什麼 | 不做什麼 |
 |------|--------|----------|
-| **`/agent-plan`** | Leader 寫 Plan → **分級委員會**（預設 GPT 單審；Opus／Grok 觸發制；L3＝三員對抗組 + Leader 自審） → Approved Plan | 預設不實作、不 commit；內容 SOP 不進委員會 |
+| **`/agent-plan`** | Leader 寫 Plan → **固定雙審**（GPT 5.6 Sol + Grok 4.5 Fast Medium；Opus 觸發制）→ Approved Plan | 預設不實作、不 commit；內容 SOP 不進委員會 |
 | **`/agent-action`** | 讀 Approved Plan（或內容 SOP）→ **Task 派工** → 整合 → Verify → **可選 diff 審** →（可選）Ship；顧問一律 readonly | 不重做完整 Plan（blocked 除外） |
 
 ## 紅線
@@ -35,10 +35,10 @@ alwaysApply: false
 | 用途 | slug | 備註 |
 |------|------|------|
 | Leader（編排／整合） | `composer-2.5-fast` | **節流**：非必要不讀大檔、不長篇推理 |
-| Plan 細節草稿 | `gpt-5.5-medium` | Task DAG、Files、Verification、Model routing |
-| Plan／diff 工程審（**預設**） | `gpt-5.5-medium` | 一般 L1／L2 單審 |
+| Plan 細節草稿 | `gpt-5.6-sol-medium` | Task DAG、Files、Verification、Model routing |
+| Plan／diff 工程審（**預設**） | `gpt-5.6-sol-medium` | 一般 L1／L2 單審；Claude Code 用 `codex exec -m gpt-5.6` |
 | Plan 架構審（**觸發制**） | `claude-opus-4-8-thinking-medium` | 跨模組／紅線／Protected／範圍不清；或 `architect` |
-| Plan／diff 對抗審（L3） | `grok-4.5` | readonly；不審中文；slug 不可用 → 缺席勿頂替（見 FAILURES § Cursor Task） |
+| Plan／diff 對抗審（**預設固定**） | `grok-4.5-fast-medium` | readonly；不審中文；**每輪 plan 必派**；slug 不可用 → 缺席勿頂替 |
 | L2 多檔實作 | `claude-4.6-sonnet-medium-thinking` | **預設**；中文文案一律 Sonnet；勿用 Composer |
 | L1 單檔實作 | `claude-4.6-sonnet-medium-thinking` | 路徑已知直接 Sonnet；不明才 explore |
 | explore | `grok-4.3` | 只讀探索（路徑不明時） |
@@ -68,13 +68,18 @@ A/B/C 格式 — 見 `review-user-choice.mdc`（若有）
 
 ## 委員會門檻（精簡）
 
-- **預設**：GPT 單審（非 Opus+GPT 雙審）
-- **Opus／Grok**：觸發制；L3／Protected 才上三員對抗組
+- **預設**：**GPT 5.6 Sol + Grok 4.5 Fast Medium 雙審**（可並行）；Opus 觸發制
+- **純文件／命令檔對齊**：仍列固定全表；可降級為 Leader 自審 + GPT 單審，但 **Grok 列必保留**（嘗試派工或標缺席，**禁止標跳過**）
 - **Composer 可行性審（Cursor）**＝Leader 自審，不計入「至少一位非 leader 委員」
-- **Grok 缺席**：可 Approved（Opus／GPT 仍有一人成功），摘要標「對抗審缺席／對抗性降級」
+- **Grok 缺席**：GPT 仍成功即可 Approved，摘要表標 **「對抗審缺席／對抗性降級」**
 - **小 diff**（約 &lt;80 行、無 Protected）：action 可跳過 diff 委員審，只跑 Verify
-- **純文件／無 Protected paths**：Leader 自審或 GPT 單審即可
+
+## 固定 Agent 執行分配表
+
+`/agent-plan` 收尾**固定列出 #0–#5 全表**（見指令檔 §7）；**不得省略 Grok 列**。狀態只用：`完成`｜`未派`｜`缺席`｜`對抗審缺席／對抗性降級` — **禁止對 Grok 標 `跳過`**。
+
+`/agent-action` 收尾固定列出 Leader、實作 Task、Verify、diff 審（含 Grok 列）、Ship 列；diff 審可標 `跳過`（小 diff 免審），但 plan 階段 Grok 不可跳過。
 
 ## 收尾輸出（必附）
 
-`/agent-plan` 與 `/agent-action` 完成時，Leader **必須**附 **Agent 執行分配表**：各 agent／委員做了什麼 + `model slug` + 狀態（`完成`／`缺席`／`跳過` 等）。執行期從派工起維護；詳見 [`docs/AGENT-WORKFLOW.md`](../../docs/AGENT-WORKFLOW.md) § 收尾輸出。
+`/agent-plan` 與 `/agent-action` 完成時，Leader **必須**附 **Agent 執行分配表**：各 agent／委員做了什麼 + `model slug` + 狀態。執行期從派工起維護；詳見 [`docs/AGENT-WORKFLOW.md`](../../docs/AGENT-WORKFLOW.md) § 收尾輸出。
