@@ -4,7 +4,7 @@ import {
   BEDTIME_START_HOUR,
   isLocalBedtimeHour,
 } from "@/lib/bedtime";
-import { PROGRESS_STORAGE_KEY } from "@/lib/progress-store";
+import { PROGRESS_STORAGE_KEY } from "@/lib/progress-keys";
 
 /** Stored user preference — may follow OS/browser color scheme. */
 export type ThemeMode = "light" | "night" | "system";

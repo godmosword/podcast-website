@@ -7,8 +7,12 @@ import type { PlayerProfile } from "@/lib/gamekit/types";
 import { canonicalStorySlug } from "@/lib/story-slug-aliases";
 import { normalizeThemeMode, type ThemeMode } from "@/lib/theme";
 
-export const PROGRESS_STORAGE_KEY = "cheche:progress";
-export const PROGRESS_CHANGE_EVENT = "cheche:progress-change";
+import {
+  PROGRESS_STORAGE_KEY,
+  PROGRESS_CHANGE_EVENT,
+} from "@/lib/progress-keys";
+
+export { PROGRESS_STORAGE_KEY, PROGRESS_CHANGE_EVENT };
 const PROGRESS_SCHEMA_VERSION = 2;
 
 export type CaptionSize = "sm" | "md" | "lg";
