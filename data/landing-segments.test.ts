@@ -47,6 +47,11 @@ describe("landing-segments", () => {
       expect(existsSync(portraitPath), `缺直版 placeholder：${seg.heroImagePortrait}`).toBe(
         true,
       );
+
+      const webpPath = fsPath.replace(/\.jpg$/i, ".webp");
+      const avifPath = fsPath.replace(/\.jpg$/i, ".avif");
+      expect(existsSync(webpPath), `缺 WebP：${webpPath}`).toBe(true);
+      expect(existsSync(avifPath), `缺 AVIF：${avifPath}`).toBe(true);
     }
   });
 

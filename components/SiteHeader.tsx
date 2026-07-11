@@ -1,8 +1,9 @@
 import Link from "next/link";
+import { modernRasterPaths } from "@/lib/modern-image-src";
 import styles from "./SiteHeader.module.css";
 
-/** 首頁 Hero 主視覺（車車遊樂園黏土風格場景圖） */
-const HERO_IMAGE = "/hero-home.jpg";
+/** 內頁 header LCP（非首頁 segment-stories*） */
+const HERO_PATHS = modernRasterPaths("/hero-home.jpg");
 
 /** 首頁次級連結：以環境變數設定，未設定則不渲染。 */
 const ACTION_DEFS = [
@@ -62,16 +63,21 @@ export default function SiteHeader({ variant = "full" }: SiteHeaderProps) {
   return (
     <header className={styles.header}>
       <div className={styles.scene}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={HERO_IMAGE}
-          alt="陪孩子，成長的路上：卡通車車在遊樂園裡開心玩耍的黏土風格插畫"
-          className={styles.heroImage}
-          width={1135}
-          height={1386}
-          fetchPriority="high"
-          decoding="async"
-        />
+        <picture>
+          <source type="image/avif" srcSet={HERO_PATHS.avif} />
+          <source type="image/webp" srcSet={HERO_PATHS.webp} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={HERO_PATHS.jpg}
+            alt="陪孩子，成長的路上：卡通車車在遊樂園裡開心玩耍的黏土風格插畫"
+            className={styles.heroImage}
+            width={1135}
+            height={1386}
+            fetchPriority="high"
+            decoding="async"
+            sizes="(max-width: 640px) 100vw, 640px"
+          />
+        </picture>
       </div>
 
       <h1 className="sr-only">車車遊樂園</h1>

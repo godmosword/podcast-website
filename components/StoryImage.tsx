@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { getStoryBlurDataUrl } from "@/lib/story-image-blur";
 
 type StoryImageProps = {
   src: string;
@@ -25,6 +26,9 @@ export default function StoryImage({
   sizes = "(max-width: 640px) 100vw, 640px",
   onError,
 }: StoryImageProps) {
+  const blurDataURL = getStoryBlurDataUrl(src);
+  const placeholder = blurDataURL ? "blur" : undefined;
+
   if (fill) {
     return (
       <Image
@@ -35,6 +39,8 @@ export default function StoryImage({
         style={style}
         priority={priority}
         sizes={sizes}
+        placeholder={placeholder}
+        blurDataURL={blurDataURL}
         onError={onError}
       />
     );
@@ -50,6 +56,8 @@ export default function StoryImage({
       style={style}
       priority={priority}
       sizes={sizes}
+      placeholder={placeholder}
+      blurDataURL={blurDataURL}
       onError={onError}
     />
   );

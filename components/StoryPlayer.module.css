@@ -553,12 +553,79 @@
 
 .captionWrap[data-size="sm"] {
   --caption-size: clamp(1rem, 0.85rem + 1.4vw, 1.6rem);
+  --caption-adjacent-size: clamp(0.78rem, 0.7rem + 0.6vw, 1rem);
 }
 .captionWrap[data-size="md"] {
   --caption-size: clamp(1.2rem, 1rem + 1.8vw, 2.1rem);
+  --caption-adjacent-size: clamp(0.88rem, 0.78rem + 0.8vw, 1.2rem);
 }
 .captionWrap[data-size="lg"] {
   --caption-size: clamp(1.55rem, 1.3rem + 2.4vw, 2.8rem);
+  --caption-adjacent-size: clamp(0.82rem, 0.72rem + 0.9vw, 1.15rem);
+}
+
+.captionStack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: min(88vw, 920px);
+  width: 100%;
+}
+
+.captionSpacer {
+  display: block;
+  min-height: 1.35em;
+}
+
+.captionAdjacent {
+  margin: 0;
+  max-width: 100%;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: var(--caption-adjacent-size, clamp(0.88rem, 0.78rem + 0.8vw, 1.2rem));
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  padding: 0.2em 0.65em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  opacity: 0.72;
+  transform: scale(0.96);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+}
+
+.captionCurrent {
+  margin: 0;
+  max-width: 100%;
+  text-align: center;
+  color: #fff;
+  font-size: var(--caption-size, 1.2rem);
+  font-weight: 800;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  padding: 0.7em 1.1em;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85), 0 0 12px rgba(0, 0, 0, 0.5);
+  animation: captionCueIn 0.28s var(--ease-out, ease-out) both;
+}
+
+@keyframes captionCueIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .caption {
@@ -612,6 +679,14 @@
 @media (prefers-reduced-motion: reduce) {
   .controlsInner {
     background: rgba(24, 24, 28, 0.88);
+  }
+
+  .captionCurrent {
+    animation: none;
+  }
+
+  .captionAdjacent {
+    transform: none;
   }
 
   .glassPill,

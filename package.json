@@ -35,6 +35,8 @@
     "generate:page-freshness": "tsx scripts/generate-page-freshness.ts",
     "optimize:roamer-assets": "tsx scripts/optimize-roamer-assets.ts",
     "optimize:adventures": "tsx scripts/optimize-adventure-assets.ts",
+    "optimize:lcp-images": "tsx scripts/optimize-lcp-images.ts",
+    "generate:story-blurs": "tsx scripts/generate-story-blurs.ts",
     "fix:roamer-alpha": "tsx scripts/fix-roamer-alpha.ts",
     "export:video": "tsx scripts/export-video-assets.ts"
   },

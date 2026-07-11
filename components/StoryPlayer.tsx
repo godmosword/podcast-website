@@ -17,6 +17,12 @@ import { trackStoryCompleted } from "@/lib/analytics";
 import { playSfx, isSfxEnabled } from "@/lib/sfx";
 import SfxToggle from "./SfxToggle";
 import StoryEndScreen from "./StoryEndScreen";
+import StoryCaptionStack from "./StoryCaptionStack";
+import {
+  activeCueIndex,
+  captionWindow,
+  resolveCaptionStackState,
+} from "@/lib/subtitle-cue";
 
 // 結尾才出現的反思卡 / 僅 ?cue=1 的對時面板：動態載入，縮小播放器主 chunk。
 const ReflectionPrompt = dynamic(
@@ -84,19 +90,6 @@ function isCaptionSize(v: unknown): v is CaptionSize {
   return typeof v === "string" && (CAPTION_SIZES as readonly string[]).includes(v);
 }
 
-/**
- * 即時字幕定位：回傳 currentTime 當下應顯示的句子索引（最後一個起始秒數 ≤ t 的句子）。
- * times 需遞增；回傳值夾在 [0, max]。
- */
-function activeCueIndex(times: number[], t: number, max: number): number {
-  let idx = 0;
-  for (let i = 0; i < times.length; i += 1) {
-    if (t >= times[i]) idx = i;
-    else break;
-  }
-  return Math.min(idx, Math.max(0, max));
-}
-
 export default function StoryPlayer({
   slug,
   title,
@@ -154,11 +147,30 @@ export default function StoryPlayer({
     Array.isArray(captions) &&
     captions.length === total &&
     hasCueTimes;
-  const caption = hasSubtitles
-    ? subtitles![subIndex]?.text
-    : sceneCaptions
-      ? captions![page]
-      : captions?.[page];
+
+  const captionStackState = resolveCaptionStackState({
+    hasSubtitles,
+    subtitles,
+    subIndex,
+    sceneCaptions,
+    captions,
+    page,
+    total,
+  });
+  const captionStackWindow = captionStackState
+    ? captionWindow(captionStackState.lines, captionStackState.activeIndex)
+    : null;
+  const captionCueKey = captionStackState
+    ? `${captionStackState.mode}-${captionStackState.activeIndex}`
+    : "none";
+
+  // 無堆疊模式時的單行 fallback（舊 captions 未對齊頁數）
+  const fallbackCaption =
+    !captionStackWindow?.current && subtitlesOn && !hasEnded
+      ? hasSubtitles
+        ? subtitles![subIndex]?.text
+        : captions?.[page]
+      : null;
 
   // 字幕對時模式：播放頁網址帶 ?cue=1 時啟用（純客戶端偵測，頁面維持 SSG）。
   useEffect(() => {
@@ -705,9 +717,17 @@ export default function StoryPlayer({
         />
       )}
 
-      {subtitlesOn && caption && !hasEnded && (
+      {subtitlesOn && captionStackWindow?.current && !hasEnded && (
+        <StoryCaptionStack
+          window={captionStackWindow}
+          size={captionSize}
+          cueKey={captionCueKey}
+        />
+      )}
+
+      {subtitlesOn && fallbackCaption && !hasEnded && (
         <div className={styles.captionWrap} data-size={captionSize}>
-          <p className={styles.caption}>{caption}</p>
+          <p className={styles.caption}>{fallbackCaption}</p>
         </div>
       )}
 

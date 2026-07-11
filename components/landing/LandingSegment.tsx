@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { ResolvedLandingSegment } from "@/lib/landing-query";
+import { landingHeroPictureSources } from "@/lib/modern-image-src";
 import { useLandingScroll } from "./LandingScrollContext";
 import styles from "./LandingSegment.module.css";
 
@@ -23,6 +24,9 @@ export default function LandingSegment({
 }: LandingSegmentProps) {
   const landingScroll = useLandingScroll();
   const eager = index === 0;
+  const heroSources = segment.heroImage
+    ? landingHeroPictureSources(segment.heroImage, segment.heroImagePortrait)
+    : null;
 
   function goToNext(e: React.MouseEvent<HTMLAnchorElement>) {
     if (!nextAnchorId) return;
@@ -59,22 +63,37 @@ export default function LandingSegment({
       aria-labelledby={`${segment.anchorId}-title`}
     >
       <div className={styles.visual} aria-hidden={!!segment.heroImage}>
-        {segment.heroImage ? (
+        {heroSources ? (
           <picture className={styles.picture}>
-            {segment.heroImagePortrait ? (
-              <source
-                media="(max-width: 768px)"
-                srcSet={segment.heroImagePortrait}
-              />
+            {heroSources.portrait ? (
+              <>
+                <source
+                  media="(max-width: 768px)"
+                  type="image/avif"
+                  srcSet={heroSources.portrait.avif}
+                />
+                <source
+                  media="(max-width: 768px)"
+                  type="image/webp"
+                  srcSet={heroSources.portrait.webp}
+                />
+                <source
+                  media="(max-width: 768px)"
+                  srcSet={heroSources.portrait.jpg}
+                />
+              </>
             ) : null}
+            <source type="image/avif" srcSet={heroSources.landscape.avif} />
+            <source type="image/webp" srcSet={heroSources.landscape.webp} />
             <img
-              src={segment.heroImage}
+              src={heroSources.landscape.jpg}
               alt=""
               aria-hidden="true"
               loading={imgProps.loading}
               fetchPriority={imgProps.fetchPriority}
               decoding={imgProps.decoding}
               className={imgProps.className}
+              sizes="100vw"
             />
           </picture>
         ) : (

@@ -184,7 +184,7 @@ SoundOn 單集 show notes 加官網單集 URL（可選 UTM），閉環 B 戰場�
 - StatusOverlay 對 planned/coming 維持現狀裁決：coming 用島體濾鏡、planned 留白皆正確，方形 overlay 會在透明島邊對海面露框；planned 專屬美術（霧基＋「?」浮標）仍屬凍結資產項。〔design〕（已裁決不做 CSS 折衷）
 - 單集頁車種 chip 顯示「其他」= 資料 fallback 外洩到 UI；無車種時隱藏 chip。〔content+eng〕
 - ~~footer「節目數據」「使用條款」觸控高度 20px（<44px）~~ ✅ `964f418`（UX-P0-2）。〔a11y〕
-- landing hero jpg（~300KB/張）可轉 WebP 降首屏灰底時間（首頁 LCP 為 `segment-stories*`，見 [D1](#d1-圖像管線現代化修正版雙軌-lcp)）。〔perf〕
+- ~~landing hero jpg（~300KB/張）可轉 WebP 降首屏灰底時間~~ ✅ 併入 D1（`optimize:lcp-images`；首頁 LCP `segment-stories*` AVIF 約 73–79KB）。〔perf〕
 - `app/characters/page.module.css` 自成一套 slate/teal 色系（13 個硬編 hex、無 token、不支援夜間模式），與 DESIGN.md 色票脫鉤；建議改 `var(--token, #fallback)` 慣例（參照 `components/landing/*`）。〔design+eng〕
 
 
@@ -226,11 +226,12 @@ SoundOn 單集 show notes 加官網單集 URL（可選 UTM），閉環 B 戰場�
 
 > 原名「效能地基」不準確：本層含夜間、字幕、圖示，非純 perf。
 
-#### D1 圖像管線現代化（修正版・雙軌 LCP）　`perf · M · D0`　〔perf〕待實作
+#### D1 圖像管線現代化（修正版・雙軌 LCP）　`perf · M · D0`　〔perf〕**實作完成（待 commit）**
 **雙軌 LCP（勿再把 `hero-home.jpg` 當首頁 LCP）：**
-- **(a) 首頁 `/`：** `segment-stories*.jpg`／portrait，原生 `<picture>`（`LandingSegment`），**不受** `next/image` 管線；須 **預生成** WebP/AVIF 或替換資產＋`sizes`（與設計待辦「landing hero jpg」同批）。
-- **(b) 內頁 header：** `SiteHeader` 的 `hero-home.jpg`（`/stories`、`/for-parents` 等）— 次世代格式 + 尺寸優化。
-- **(c) Next `Image` 路徑：** `next.config.ts` 補 `images.formats`（Next 預設已有 WebP，**實際新增主為 AVIF**）+ `StoryImage` **自行生成** `blurDataURL`（動態字串 src 無內建 LQIP）。Lighthouse mobile LCP before/after 記錄。
+- **(a) 首頁 `/`：** `segment-stories*.jpg`／portrait，原生 `<picture>` + 預生成 WebP/AVIF（`LandingSegment`、`lib/modern-image-src.ts`）；`npm run optimize:lcp-images`
+- **(b) 內頁 header：** `SiteHeader` `hero-home` 同管線 `<picture>` + WebP/AVIF
+- **(c) Next `Image`：** `next.config.ts` `images.formats` AVIF；`StoryImage` + `data/story-image-blurs.json` blur-up（`npm run generate:story-blurs`）
+- ~~landing hero jpg 小項~~ 併入本項
 
 #### D14 圖示與控制一致性　`design · S–M · 無`　〔design+a11y〕待實作
 先建 **Icon／IconButton API**（hover/active/focus 三態 + 觸控 ≥44px 複核），再替換導航／操作 glyph。**不**機械替換所有 Unicode：鍵盤提示 `←` `→`、童趣 emoji 保留。StoryCard `▶` 等優先換線性 SVG。
@@ -238,9 +239,9 @@ SoundOn 單集 show notes 加官網單集 URL（可選 UTM），閉環 B 戰場�
 #### D3 Night 主題全站打磨　`design · M · 無`　〔design〕待實作
 「僅 4 檔完整元件級 night」**屬實**（globals／SiteHeader／UniverseMap／ZoneIsland），但 **≠ 覆蓋率**：`[data-theme="night"]` token 已讓部分頁自動適配；真正缺口是 **hardcoded 亮色**（`characters`、`for-parents` 等，見 `app/characters/page.module.css`）。驗收：**hardcoded-color audit** + 對比度抽查；補 stories／詳情／footer／games hub 暖燈卡片。地圖海圖仍固定淺色不反轉。與設計待辦 characters 硬編 hex 同批。
 
-#### D13 字幕閱讀排版（剩餘）　`ux · S–M · 無`　〔ux+content〕**部分完成**
+#### D13 字幕閱讀排版（剩餘）　`ux · S–M · 無`　〔ux+content〕**實作完成（待 commit）**
 **已有（勿重做）：** 三段 `captionSize`、對比遮罩（`.caption` blur 底）、行高／字級階梯、句級 `{t,text}` 切換（`data/subtitles/*.json`）。
-**本輪（待實作）：** 前／當前／後一句排版焦點 + cue 切換過渡 + 與翻頁字幕對齊（`StoryPlayer`）。
+**本輪 ✅：** `lib/subtitle-cue.ts` 前／當前／後一句 + `StoryCaptionStack` cue 過渡；即時字幕軌與翻頁 `captions`／`captionTimes` 對齊（`resolveCaptionStackState`）。`prefers-reduced-motion` 關閉動畫。
 **另開 spike（非本輪 M）：** 逐字卡拉 OK——需 word-level timestamps／VTT 擴充，工作量 **L**，單獨 ticket。
 
 ---
