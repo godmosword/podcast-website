@@ -248,7 +248,7 @@ SoundOn 單集 show notes 加官網單集 URL（可選 UTM），閉環 B 戰場�
 
 ### L2 高價值體驗
 
-#### D6 播放器沉浸升級　`ux · M · D2+D13`　〔ux〕 ✅（待 commit）
+#### D6 播放器沉浸升級　`ux · M · D2+D13`　〔ux〕 ✅ `76f91c1`
 **落地：** `story.color` ambient 漸層底（`--ambient`）；Ken Burns 僅 `isPlaying` + 分頁可見 + 非 reduced-motion（`lib/player-stage.ts`）；夜間振幅／亮度降檔（`.playerNight`）。播放器狀態契約不動。
 
 #### D12 分享卡（OG image）升級　`growth · S · 無`　〔design+growth〕 ✅（待 commit）
