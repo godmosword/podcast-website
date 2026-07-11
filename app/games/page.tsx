@@ -6,7 +6,7 @@ import Wheel from "@/components/decor/Wheel";
 import decor from "@/components/decor/decor.module.css";
 import GameThumbArt from "@/components/games/GameThumbArt";
 import PlaygroundHubBadge from "@/components/games/PlaygroundHubBadge";
-import { GAMES, type GameMeta } from "@/data/games";
+import { GAMES, gameParentTip, type GameMeta } from "@/data/games";
 import { getSiteUrl } from "@/lib/site-url";
 import styles from "./page.module.css";
 
@@ -23,12 +23,17 @@ export const metadata: Metadata = {
 };
 
 function GameCard({ game, index }: { game: GameMeta; index: number }) {
+  const parentTip = gameParentTip(game);
+  const ariaParts = [game.title, game.ageRange, parentTip, `約 ${game.estMinutes} 分鐘`].filter(
+    Boolean,
+  );
+
   return (
     <li className={styles.gridItem}>
       <Link
         href={game.href}
         className={`${styles.card} popIn press-squash`}
-        aria-label={`${game.title}，${game.ageRange}，約 ${game.estMinutes} 分鐘`}
+        aria-label={ariaParts.join("，")}
         style={{
           boxShadow: `var(--shadow-md), 0 6px 0 ${game.accent}`,
           animationDelay: `${Math.min(index, 4) * 55}ms`,
@@ -59,6 +64,9 @@ function GameCard({ game, index }: { game: GameMeta; index: number }) {
           </span>
           <span className={styles.cardTitle}>{game.title}</span>
           <span className={styles.summary}>{game.desc}</span>
+          {parentTip ? (
+            <span className={styles.parentTip}>{parentTip}</span>
+          ) : null}
           <span className={styles.footer}>
             <span className={styles.playLabel}>開始玩</span>
             <span

@@ -242,6 +242,17 @@
   overflow: hidden;
 }
 
+.parentTip {
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--c-yellow) 22%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--c-yellow) 45%, var(--line));
+}
+
 .footer {
   margin-top: auto;
   padding-top: 6px;

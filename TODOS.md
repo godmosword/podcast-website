@@ -22,7 +22,7 @@
 |---|-----|------|------|------|
 | 1 | [UX-P0-1](#兒童-ux-與親子互動稽核2026-07-11) 家長閘門 | trust | M | 待做（待決策） |
 | 2 | [UX-P1-5](#兒童-ux-與親子互動稽核2026-07-11) 全站 e2e | eng | S | 部分完成 |
-| 3 | [UX-P0-4](#兒童-ux-與親子互動稽核2026-07-11) challenge 遊戲提示 | trust | S | 待做 |
+| 3 | [UX-P0-4](#兒童-ux-與親子互動稽核2026-07-11) challenge 遊戲提示 | trust | S | ✅ `ec2ef09` |
 | 4 | [Growth-Measure-1](#growth-measure-1-成長量測) SoundOn 回鏈 | ops/growth | S | 待做 |
 | 5 | [UX-P1-2](#兒童-ux-與親子互動稽核2026-07-11) 詳情頁反思收合 | ux | S | 待做 |
 
@@ -39,7 +39,7 @@
 ### 待決策隊列（不進 Top 5）
 
 - **UX-P0-1** 家長閘門範圍（dashboard only vs 含 GameKit）
-- **UX-P0-4** challenge 遊戲提示：僅文案 vs 隱藏入口（預設僅文案）
+- **UX-P0-4** challenge 遊戲提示：~~僅文案 vs 隱藏入口~~ → **已採僅文案**（challenge 卡顯示家長陪同提示，不隱藏入口）
 
 ### 封存索引
 
@@ -117,7 +117,7 @@
 | UX-P0-1 | P0 | 待做 | **家長閘門**：進 `/for-parents/dashboard`（或切兒童模式）前簡單算術題；session 通過後放行 | 新 `ParentGate.tsx`；`dashboard/page.tsx` | 手動 375px；`npm test` |
 | UX-P0-2 | P0 | ✅ `964f418` | **Footer 觸控 ≥44px**（= W27-2 後半） | `SiteFooter.module.css` | CSS 契約 + 手動 |
 | UX-P0-3 | P0 | ✅ `964f418` | **許願隱私一句話**（= W27-2 前半）：送出鈕下 inline 說明、message placeholder 勿含個資 | `ZoneWishForm.tsx` | vitest |
-| UX-P0-4 | P0 | 待做 | **Challenge 遊戲家長提示**：列表卡加「建議 6 歲以上／家長陪同」（預設僅文案，不隱藏入口） | `app/games/page.tsx` 或 `data/games.ts` | `npm test` + build |
+| UX-P0-4 | P0 | ✅ `ec2ef09` | **Challenge 遊戲家長提示**：列表卡加「建議 6 歲以上 · 家長陪同」（僅文案，不隱藏入口） | `data/games.ts`、`app/games/page.tsx` | `npm test` + build ✅ |
 | UX-P1-1 | P1 | 部分完成 | **補齊 &lt;44px 按鈕**（只改 CSS）：~~ZoneSheet 關閉／wishToggle~~ → MAP-UX-P1a；StoryPlayer 定時、Landing 箭頭待做 | 各 `*.module.css` | 手動＋e2e |
 | UX-P1-2 | P1 | 待做 | **詳情頁反思收合**：比照 `StoryEndScreen`，家長句不預設露出 | `app/story/[slug]/page.tsx`、`ReflectionPrompt.tsx` | `npm test` |
 | UX-P1-3 | P1 | 待做 | **共讀 sidecar 擴至全集**：`parent-guides`／`family-activities` 從 ep-1/ep-5 擴充（內容營運，可分批） | `data/parent-guides.ts`、`data/family-activities.ts` | 同名 `*.test.ts` |
@@ -153,7 +153,7 @@
 
 1. **家長閘門範圍**：僅 dashboard，或含 GameKit「兒童模式」開關？
 2. **UX-P1-3 節奏**：一次寫完全集，或每週 3 集？
-3. **UX-P0-4**：僅文案提示 vs 對幼兒隱藏 challenge 入口（後者觸及顯示邏輯，預設**僅文案**）
+3. ~~**UX-P0-4**：僅文案提示 vs 對幼兒隱藏 challenge 入口~~ → **已採僅文案**（`gameParentTip` + 列表卡）
 
 ---
 ## 成長量測（Growth-Measure-1）
@@ -211,13 +211,14 @@ SoundOn 單集 show notes 加官網單集 URL（可選 UTM），閉環 B 戰場�
 
 ### L0 治理地基
 
-#### D0 資產治理　`eng · S · 無`　〔perf+ops〕待實作
+#### D0 資產治理　`eng · S · 無`　〔perf+ops〕 ✅ `ec2ef09`
 `scripts/audit-assets.ts`：**四類 taxonomy**——(1) 部署資產（git tracked）(2) staging／gitignore（如 `.illustrate-staging`）(3) 動態推導引用（`storyCoverPath`、`getZoneArtSrcSet` 等）(4) 孤兒資產。不可只 grep 靜態字串路徑。
 **基線數字（2026-07-11 量測）：** tracked JPG **358**（其中故事插圖 **319**）；ignored staging **262**。單檔大小上限 + PR 新增大 jpg 警示。先量再改。
+**落地：** `npm run audit:assets`（`--strict` 阻擋超大 JPG）；核心 `scripts/lib/audit-assets-core.ts` + vitest。
 
-#### D2 視覺回歸安全網　`eng · M · 無`　〔eng+design〕待實作　**L0 優先**
+#### D2 視覺回歸安全網　`eng · M · 無`　〔eng+design〕**Phase A** ✅ `ec2ef09`　**L0 優先**
 現況：`playwright.config.ts` 僅 **Desktop Chromium**（無 mobile project）。目標：`e2e/visual.spec.ts` + `toHaveScreenshot`——8 主頁 × 390/1280 × light/night ＝ **32 組**完整矩陣。
-**分階：** Phase A **smoke baseline**（4–6 條黃金路徑，先上）；Phase B 擴完整 32 組。前置：字型固定、動畫 freeze、localStorage／theme 固定、等 image decode、寬鬆 `maxDiffPixelRatio`；字型渲染穩定性併入。不進 CI gate；視覺類 agent-action **必跑**回貼 diff。
+**分階：** Phase A **smoke baseline**（5 條黃金路徑 × 1280 light）✅ `e2e/visual.spec.ts` + `npm run test:visual`；Phase B 擴完整 32 組待做。前置：字型固定、動畫 freeze、localStorage／theme 固定、等 image decode、寬鬆 `maxDiffPixelRatio`；字型渲染穩定性併入。不進 CI gate；視覺類 agent-action **必跑**回貼 diff。
 
 ---
 

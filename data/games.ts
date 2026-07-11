@@ -1,5 +1,8 @@
 type AgeBand = "explore" | "challenge";
 
+/** UX-P0-4：challenge 遊戲列表卡家長提示（僅文案，不隱藏入口）。 */
+export const CHALLENGE_PARENT_TIP = "建議 6 歲以上 · 家長陪同" as const;
+
 export type GameMeta = {
   slug: string;
   title: string;
@@ -68,3 +71,8 @@ export const GAMES: GameMeta[] = [
     hasTimer: true,
   },
 ];
+
+/** challenge 遊戲回傳家長提示文案；explore 不回傳。 */
+export function gameParentTip(game: GameMeta): string | null {
+  return game.ageBand === "challenge" ? CHALLENGE_PARENT_TIP : null;
+}
