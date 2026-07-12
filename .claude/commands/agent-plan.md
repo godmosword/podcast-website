@@ -27,13 +27,16 @@ $ARGUMENTS
 | typo／&lt;10 行 | **直接做** |
 | 字幕／scenes／illustrate（SOP 內） | **跳過本命令** |
 | 純 docs／命令對齊 | 可降級；**§6 固定全表 Grok／Opus 列仍須列出** |
+| **視覺／樣式微調**（預估 diff &lt;80 行、不碰 Protected paths、不觸發 WORKFLOW UI 風險規則） | **中間級**：Codex 工程單審 + 落地後截圖目檢；Grok／Opus 標 `按級距免派`（仍須列出） |
 | 一般 L1／L2 | **固定三審**（Codex CLI 工程審 + Grok + Opus 設計） |
 
 ## 2. Draft Plan（leader 撰寫全文）
 
-依 AGENT-WORKFLOW Plan 模板寫入 `/tmp/agent-plan-<unix_ts>.md`。
+依 AGENT-WORKFLOW Plan 模板寫入 `/tmp/agent-plan-<unix_ts>.md`；**Claude Code plan mode 下**改寫入 harness 指定的 `~/.claude/plans/<name>.md`（`/agent-action` 兩處都會找）。
 
 ## 3. 委員會審查（固定三審，全部唯讀）
+
+> 模型 slug 以 [`docs/AGENT-WORKFLOW.md`](../../docs/AGENT-WORKFLOW.md) § 模型 slug 對照表為**單一來源**；下表為快照，衝突時以對照表為準。
 
 | 委員 | 角度 | 呼叫方式 |
 |------|------|----------|
@@ -53,7 +56,7 @@ $ARGUMENTS
 
 ## 5. 缺席規則
 
-至少 GPT／Grok／Opus 之一成功才可 Approved。Grok 缺席標「對抗審缺席／對抗性降級」。
+**工程審（Codex）必須成功**才可 Approved；Codex 缺席時由 Opus 或 Composer 頂工程審（見 FAILURES 案例「額度用罄」），**不得未審直接過**。Grok 缺席標「對抗審缺席／對抗性降級」；全滅 → 回報使用者。
 
 ## 6. 最終輸出：固定 Agent 執行分配表（必附）
 
@@ -65,7 +68,7 @@ $ARGUMENTS
 | 3 | Opus 4.8 設計審 | Agent tool | `architect` | `opus` | 審 UX／DESIGN.md | 審查意見 | 完成／缺席 |
 | 4 | Composer 可行性審 | `cursor-agent` | — | `composer-2.5-fast` | L3 成本 | 自審 | 完成／未派 |
 
-**#2 Grok、#3 Opus 禁止標 `跳過`。**
+**#2 Grok、#3 Opus 禁止標 `跳過`**；中間級任務標 `按級距免派`（列仍不可省略）。
 
 ## 輸出語言
 

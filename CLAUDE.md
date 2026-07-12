@@ -11,7 +11,7 @@ Bonbon & 馬米的親子 podcast「看圖聽故事」網站（Next.js App Router
 When the user's request matches an available skill, invoke it via the Skill tool. When in doubt, invoke the skill.
 
 Key routing rules:
-- 結構化規劃＋委員會審核 → invoke /agent-plan（一律用本 repo `.claude/commands` 版；user-level 同名通用版與其模板一概不用）
+- 結構化規劃＋委員會審核 → invoke /agent-plan（本 repo `.claude/commands` 版；user-level 通用版已改名 /qs-agent-plan，本專案勿用）
 - 依 Approved Plan 實作＋驗證 → invoke /agent-action（同上）
 - Product ideas/brainstorming → invoke /office-hours
 - Strategy/scope → invoke /plan-ceo-review

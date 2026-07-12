@@ -16,7 +16,7 @@ $ARGUMENTS
 
 ## 1. 載入 Approved Plan（或 Domain SOP）
 
-`/tmp/agent-plan-*.md`（取最新）或使用者貼上；無 plan → 簡短列出缺什麼，建議 `/agent-plan`。
+尋找順位：**使用者貼上的路徑／內容** → **`~/.claude/plans/`**（Claude Code plan mode 產物，取最新）→ **`/tmp/agent-plan-*.md`**（取最新）。非使用者明示的 plan，取用前先摘要向使用者確認是本次任務的 plan（防過期誤用）。無 plan → 簡短列出缺什麼，建議 `/agent-plan`。
 **內容管線例外：** 字幕／scenes／illustrate（SOP 內）可無 Plan，依 Domain § 內容管線與 [`EPISODE-WORKFLOW.md`](../../docs/EPISODE-WORKFLOW.md) 直做。
 
 ## 2. 分級執行
@@ -31,6 +31,8 @@ $ARGUMENTS
 | **L0** | 純命令 | Bash |
 
 **行動小組（外部顧問，全部唯讀）**：卡關要第二意見、或實作後需 diff 審查時呼叫；先依 FAILURES 探活，失敗即記錄＋標缺席。
+
+> 模型 slug 以 [`docs/AGENT-WORKFLOW.md`](../../docs/AGENT-WORKFLOW.md) § 模型 slug 對照表為**單一來源**；下表為快照，衝突時以對照表為準。
 
 | 顧問 | 用途 | 呼叫方式 |
 |------|------|----------|

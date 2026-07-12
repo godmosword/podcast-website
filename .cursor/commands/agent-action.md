@@ -41,6 +41,8 @@
 
 **行動小組（顧問，全部 `readonly: true`）**：卡關要第二意見時派——
 
+> 模型 slug 以 [`docs/AGENT-WORKFLOW.md`](../../docs/AGENT-WORKFLOW.md) § 模型 slug 對照表為**單一來源**；本檔 slug 為快照，衝突時以對照表為準。
+
 | 顧問 | 用途 | Cursor 派工 |
 |------|------|-------------|
 | Opus 4.8 設計審 | UX／CSS Modules／兒童觸控／a11y 視覺 | Task `architect`（readonly）+ `claude-opus-4-8-thinking-medium` |

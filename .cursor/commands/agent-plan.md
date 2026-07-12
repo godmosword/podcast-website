@@ -27,6 +27,7 @@ typo 級小事不進本命令——直接做即可。
 | typo／&lt;10 行 | **直接做**，不進本命令 |
 | 字幕／scenes／illustrate（SOP 內） | **跳過本命令**；直做或 `/agent-action` + Domain verify |
 | 純 docs／命令對齊 | 可進本命令；審核可降級 Leader + GPT，但 **§7 固定全表 Grok／Opus 列仍須列出** |
+| **視覺／樣式微調**（預估 diff &lt;80 行、不碰 Protected paths、不觸發 WORKFLOW UI 風險規則） | **中間級**：GPT 工程單審 + 落地後截圖目檢；Grok／Opus 標 `按級距免派`（仍須列出） |
 | 一般 L1／L2 工程 | 本命令 + **固定三審**（GPT + Grok + Opus 設計） |
 | 跨模組／紅線／Protected／L3 | 固定三審；Opus 設計審**加強**架構／紅線視角；Leader 自審可行性 |
 
@@ -46,6 +47,8 @@ typo 級小事不進本命令——直接做即可。
 **Plan 工程審分離（必守）：** 工程審須為**另一個** readonly Task（同 slug、不同 prompt），prompt 明寫「你未撰寫此 Plan」；須逐條反駁 Task DAG **≥3 點**並附檔名／命令證據。不可與 Plan 細節草稿共用同一 Task 或 prompt。
 
 ### 3. 委員會審查（固定三審，全部唯讀）
+
+> 模型 slug 以 [`docs/AGENT-WORKFLOW.md`](../../docs/AGENT-WORKFLOW.md) § 模型 slug 對照表為**單一來源**；本檔 slug 為快照，衝突時以對照表為準。
 
 **三委員可並行派工。**
 
@@ -78,9 +81,9 @@ typo 級小事不進本命令——直接做即可。
 
 ### 5. 缺席規則
 
-- **至少一位非 leader 委員**（GPT／Grok／Opus 之一）成功才可標 Approved；全滅 → 回報使用者
-- **Grok 缺席**：GPT 或 Opus 仍成功即可 Approved，標 **「對抗審缺席／對抗性降級」**
-- **Opus 缺席**：GPT 仍成功即可 Approved，分配表標缺席
+- **工程審（GPT）必須成功**才可標 Approved；GPT 缺席時由 Opus 頂工程審（readonly Task，工程視角 prompt），**不得未審直接過**；全滅 → 回報使用者
+- **Grok 缺席**：工程審仍成功即可 Approved，標 **「對抗審缺席／對抗性降級」**
+- **Opus 缺席**：工程審仍成功即可 Approved，分配表標缺席
 
 ### 6. CRITICAL 與 Plan mode
 
@@ -100,7 +103,7 @@ typo 級小事不進本命令——直接做即可。
 | 4 | Opus 4.8 設計審 | Task（readonly） | `architect` | `claude-opus-4-8-thinking-medium` | 審 UX／DESIGN.md／兒童體驗／a11y 視覺 | 審查意見 | 完成／缺席 |
 | 5 | Leader 可行性自審 | Leader 自審 | — | `composer-2.5-fast` | L3 成本／範圍 | 自審結論 | 完成／未派 |
 
-**狀態欄：** `完成`｜`未派`｜`缺席`｜`對抗審缺席／對抗性降級`。**#3 Grok、#4 Opus 禁止標 `跳過`**。
+**狀態欄：** `完成`｜`未派`｜`缺席`｜`對抗審缺席／對抗性降級`｜`按級距免派`（中間級視覺／樣式微調）。**#3 Grok、#4 Opus 禁止標 `跳過`**。
 
 ## 禁止
 
