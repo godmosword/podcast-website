@@ -95,7 +95,7 @@ $ARGUMENTS
 | 2 | Verify | Bash | — | `npm test` 等 | 逐項對照結果 | 完成 |
 | 3 | Codex CLI diff 審 | `code-reviewer` | `gpt-5.6`（CLI model） | 審 diff 工程面 | 意見摘要 | 完成／跳過／缺席 |
 | 4 | Opus 設計審 | `architect` | `opus` | 審 UX／設計 | 意見摘要 | 完成／跳過／缺席 |
-| 5 | Grok 對抗審 | `grok -p` | `grok-4.5-fast-medium` | 找 edge case | 審查意見 | 完成／跳過／缺席 |
+| 5 | Grok 對抗審 | `grok -p` | — | `grok-4.5-fast`（CLI） | 找 edge case | 審查意見 | 完成／跳過／缺席 |
 | 6 | Ship | — | （leader model） | commit／push | commit hash | 完成／未執行 |
 
 **狀態欄：** `完成`｜`跳過`｜`缺席`｜`對抗審缺席／對抗性降級`｜`未執行`。

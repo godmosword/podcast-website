@@ -61,7 +61,7 @@ $ARGUMENTS
 |---|------|----------|---------------|------------|----------|------|------|
 | 0 | Leader | 當前 session | — | （leader model） | Draft Plan、綜合 | plan 檔 | 完成 |
 | 1 | Codex CLI 工程審 | `codex exec` | — | `gpt-5.6`（CLI model） | 審工程面 | 審查意見 | 完成／缺席 |
-| 2 | Grok 4.5 Fast Medium 對抗審 | `grok -p` | — | `grok-4.5-fast-medium` | 找漏洞 | 審查意見 | 完成／缺席 |
+| 2 | Grok 4.5 Fast 對抗審 | `grok -p` | — | `grok-4.5-fast`（CLI） | 找漏洞 | 審查意見 | 完成／缺席 |
 | 3 | Opus 4.8 設計審 | Agent tool | `architect` | `opus` | 審 UX／DESIGN.md | 審查意見 | 完成／缺席 |
 | 4 | Composer 可行性審 | `cursor-agent` | — | `composer-2.5-fast` | L3 成本 | 自審 | 完成／未派 |
 

@@ -30,13 +30,13 @@
 
 依 Plan 的 **L0–L3** 與 AGENT-WORKFLOW 路由表，用 **Task** 派子 agent（**不要**用 `codex exec`／`claude -p` 子 process 做實作委派——子 process 無 Cursor 工具鏈）。
 
-**Composer 節流：** Leader **不**做多檔／單檔實作；實作一律 Task 派 Grok 4.5 Fast Medium／Opus／shell。Leader 僅：派工、整合、&lt;10 行微調、git。
+**Composer 節流：** Leader **不**做多檔／單檔實作；實作一律 Task 派 Grok 4.5 Fast High／Opus／shell。Leader 僅：派工、整合、&lt;10 行微調、git。
 
 | 級別 | 判準 | Cursor 派工 |
 |------|------|-------------|
 | L3 架構／高風險 | 跨模組、Protected paths | Task + `claude-opus-4-8-thinking-medium`，或 Leader（僅 Domain 要求路徑） |
-| L2 多檔實作 | 模式固定 | Task + `grok-4.5-fast-medium`（**預設**；Domain 內容管線仍 Sonnet；勿用 Composer） |
-| L1 單檔 | 範圍明確 | **路徑已知** → Task + Grok 4.5 Fast Medium；**路徑不明** → Task `explore`（`grok-4.3`）→ Grok |
+| L2 多檔實作 | 模式固定 | Task + `grok-4.5-fast-high`（**預設**；Domain 內容管線仍 Sonnet；勿用 Composer） |
+| L1 單檔 | 範圍明確 | **路徑已知** → Task + Grok 4.5 Fast High；**路徑不明** → Task `explore`（`grok-4.3`）→ Grok |
 | L0 命令 | lint／test／腳本 | Task `shell` 或 `grok-build-0.1` |
 
 **行動小組（顧問，全部 `readonly: true`）**：卡關要第二意見時派——
@@ -45,7 +45,7 @@
 |------|------|-------------|
 | Opus 4.8 設計審 | UX／CSS Modules／兒童觸控／a11y 視覺 | Task `architect`（readonly）+ `claude-opus-4-8-thinking-medium` |
 | GPT 5.6 Luna MAX fast | TS/React diff 審、工程第二意見 | Task（readonly）+ `gpt-5.6-luna-max-fast` |
-| Grok 4.5 Fast Medium | 對抗審：找 diff 的 edge case | Task（readonly）+ `grok-4.5-fast-medium`；slug 不可用 → 缺席（見 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md) § Cursor Task） |
+| Grok 4.5 Fast High | 對抗審：找 diff 的 edge case | Task（readonly）+ `grok-4.5-fast-high`；slug 不可用 → 缺席（見 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md) § Cursor Task） |
 | Composer 2.5 | 快速 sanity check | Leader 自審（當前 session） |
 
 **禁止：**
@@ -57,7 +57,7 @@
 
 改動 <10 行且無架構影響 → Leader 直接做，不派子 agent。
 
-每個子任務 prompt 必含：**Goal、Context paths、Constraints（含 Domain 紅線）、Do NOT、Verification、Deliverable**（見 AGENT-WORKFLOW 模板）。
+每個子任務 prompt 必含：**Goal、Context paths、Constraints（含 Domain 紅線）、Do NOT、Verification、Deliverable**（見 AGENT-WORKFLOW 模板）。**路徑不明、先 explore 時**，實作 Task prompt 必附 AGENT-WORKFLOW § **Handoff（explore → 實作）** 全欄。
 
 ### 3. Leader 整合
 
@@ -72,9 +72,13 @@
 
 ### 5. Diff 委員審（分級、readonly，可跳過）
 
-- **可跳過**：已有 Approved Plan、diff 約 &lt;80 行、未碰 Protected paths／紅線 → 只跑 Verify
+- **可跳過**：已有 Approved Plan、diff 約 &lt;80 行、未碰 Protected paths／紅線、**且未觸發下方 UI 風險規則** → 只跑 Verify
+- **UI 風險（Opus 設計審不可跳過）**：diff 命中以下任一 → **必派** Opus 4.8 設計審（即使 &lt;80 行）：
+  - **屬性觸發**：`min-height`、`padding`、`gap`、`animation`、`transition`、`transform`、`@media (prefers-reduced-motion)`、`z-index`
+  - **元件 allowlist**：`StoryPlayer`、`PlayButton`、`StoryCard`、`Chip`、`GamePageShell`、`LandingSegment`、`SiteNavBar`
+  - **動畫相關 TS/JS**：`useAnimation`、`requestAnimationFrame`、`@keyframes`
 - **一般**：GPT 5.6 Luna MAX fast + Opus 4.8 設計審（Task）；Python → `python-reviewer`；TS/JS → `typescript-reviewer`
-- **L3／觸紅線／Protected**：再加 Grok 4.5 Fast Medium 對抗審
+- **L3／觸紅線／Protected**：再加 Grok 4.5 Fast High 對抗審
 - 呼叫失敗 → 追加 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md)，分配表註明缺席
 
 ### 6. 文件同步
@@ -103,11 +107,11 @@ Task 失敗 → 追加 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md)�
 | # | 任務 ID | subagent_type | model slug | 做了什麼 | 產出（檔案／命令結果） | 狀態 |
 |---|---------|---------------|------------|----------|------------------------|------|
 | 0 | Leader | — | `composer-2.5-fast` | 讀 Plan、派工、整合 diff | 合併後變更摘要 | 完成 |
-| 1 | T1 | `generalPurpose` | `grok-4.5-fast-medium` | （依 Plan 填寫） | `path/to/file` | 完成／缺席 |
+| 1 | T1 | `generalPurpose` | `grok-4.5-fast-high` | （依 Plan 填寫） | `path/to/file` | 完成／缺席 |
 | 2 | Verify | `shell` | `grok-build-0.1` | `npm test` 等 | 逐項對照結果 | 完成 |
 | 3 | GPT diff 審 | `typescript-reviewer` | `gpt-5.6-luna-max-fast` | 審 diff 工程面 | 意見摘要 | 完成／跳過／缺席 |
 | 4 | Opus 設計審 | `architect` | `claude-opus-4-8-thinking-medium` | 審 UX／設計／a11y 視覺 | 審查意見 | 完成／跳過／缺席 |
-| 5 | Grok 對抗審 | `generalPurpose` | `grok-4.5-fast-medium` | 找 edge case | 審查意見 | 完成／跳過／缺席 |
+| 5 | Grok 對抗審 | `generalPurpose` | `grok-4.5-fast-high` | 找 edge case | 審查意見 | 完成／跳過／缺席 |
 | 6 | Ship | — | `composer-2.5-fast` | commit／push | commit hash | 完成／未執行 |
 
 **狀態欄：** `完成`｜`跳過`（如小 diff 免 diff 審）｜`缺席`｜`對抗審缺席／對抗性降級`｜`未執行`（Ship 僅在使用者要求時）。

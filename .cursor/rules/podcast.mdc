@@ -13,8 +13,9 @@ alwaysApply: true
 
 ## 工作流（每個任務都遵守）
 
-- **先計畫後動手**：先輸出實作計畫＋將異動的檔案清單，等我確認再改 code。
-- 完成後更新 `TODOS.md`，並用 conventional commit 訊息提交。
+- **Agent Orchestration 優先**：使用者打出 `/agent-plan` 或 `/agent-action` 時，以 [`docs/AGENT-WORKFLOW.md`](docs/AGENT-WORKFLOW.md) 與 [`.cursor/rules/agent-orchestration.mdc`](.cursor/rules/agent-orchestration.mdc) 為準；**commit／push 僅在使用者明確要求時**。
+- **先計畫後動手**（一般 chat）：先輸出實作計畫＋將異動的檔案清單，等我確認再改 code。
+- 完成後更新 `TODOS.md`；commit 用 conventional commit 訊息（**僅在使用者明確要求時**）。
 - **不要自動 push**，停在可檢視的 commit。
 - 一次只做一個任務範圍，不要順手改無關的東西。
 
