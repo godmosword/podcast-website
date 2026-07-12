@@ -104,15 +104,6 @@
   gap: 8px;
 }
 
-.searchLabel,
-.sectionTitle {
-  padding-left: 4px;
-  color: var(--ink-soft);
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-}
-
 .searchInput {
   width: 100%;
   padding: 13px 16px;
@@ -136,124 +127,61 @@
   outline-offset: 1px;
 }
 
-.mobileSection {
-  margin-top: 24px;
+.menuList {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
 }
 
-.sectionTitle {
-  margin: 0 0 12px;
+.menuGroupStart {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
 }
 
-.mobileGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.mobileCard {
+.menuLink {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-height: 52px;
-  padding: 14px;
-  border-radius: 18px;
-  color: var(--ink);
-  font-size: 0.95rem;
-  font-weight: 700;
-  text-decoration: none;
-  box-shadow: 0 3px 0 rgba(52, 48, 43, 0.08);
-  transition:
-    transform var(--motion-press),
-    filter var(--motion-press);
-}
-
-.mobileCard[data-tone="orange"] {
-  background: color-mix(in srgb, var(--c-yellow) 28%, var(--card));
-}
-
-.mobileCard[data-tone="green"] {
-  background: color-mix(in srgb, var(--c-mint) 34%, var(--card));
-}
-
-.mobileCard[data-tone="purple"] {
-  background: color-mix(in srgb, var(--c-lilac) 30%, var(--card));
-}
-
-.mobileCard[data-tone="blue"] {
-  background: color-mix(in srgb, var(--c-sky) 30%, var(--card));
-}
-
-.mobileCard:hover {
-  filter: brightness(0.98);
-  transform: translateY(-1px);
-}
-
-.mobileCard:focus-visible {
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-
-.mobileCardActive {
-  box-shadow:
-    0 0 0 2px var(--landing-brand),
-    0 3px 0 rgba(52, 48, 43, 0.08);
-}
-
-.mobileCardIcon {
-  flex: none;
-  font-size: 1.3rem;
-  line-height: 1;
-}
-
-.mobileList {
-  list-style: none;
-  margin: 0;
-  padding: 8px 0;
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--card);
-}
-
-.link {
-  display: block;
-  padding: 14px 16px;
+  gap: 12px;
+  min-height: 48px;
+  padding: 12px 4px;
   color: inherit;
   text-decoration: none;
   font-weight: 600;
   border-bottom: 1px solid var(--line);
+  border-radius: 8px;
 }
 
-.mobileList li:last-child .link {
+/* 最後一列與換組前一列不畫底線（換組列自帶 border-top，避免雙線） */
+.menuList li:last-child .menuLink,
+.menuList li:has(+ .menuGroupStart) .menuLink {
   border-bottom: none;
 }
 
-.link:hover,
-.link[aria-current="page"] {
+.menuEmoji {
+  flex: none;
+  width: 28px;
+  font-size: 1.2rem;
+  line-height: 1;
+  text-align: center;
+}
+
+.menuLink:hover,
+.menuLink[aria-current="page"] {
   background: rgba(120, 80, 40, 0.08);
 }
 
-.link:focus-visible {
+.menuLink:focus-visible {
   position: relative;
   z-index: 1;
   outline: 3px solid var(--focus-ring);
   outline-offset: -3px;
 }
 
-.themeRow {
+.themeSlot {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px;
+  justify-content: flex-end;
   margin-top: 24px;
-  border-radius: var(--radius-sm);
-  background: rgba(120, 80, 40, 0.06);
-}
-
-.themeLabel {
-  font-weight: 600;
-  font-size: 0.9rem;
 }
 
 /* ---- 桌面膠囊內嵌導覽（1c）：<920px 隱藏，走漢堡 ---- */
@@ -370,8 +298,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .moreChev,
-  .mobileCard {
+  .moreChev {
     transition: none;
   }
 }

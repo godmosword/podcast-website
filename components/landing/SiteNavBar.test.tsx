@@ -29,7 +29,7 @@ describe("SiteNavBar", () => {
     expect(html).toContain("開啟選單");
   });
 
-  test("行動版選單提供搜尋與分組探索連結", async () => {
+  test("行動版選單提供搜尋與單欄清單連結", async () => {
     const { default: SiteNavBar } = await import("./SiteNavBar");
     const { ThemeProvider } = await import("@/components/ThemeProvider");
     const view = render(
@@ -40,17 +40,22 @@ describe("SiteNavBar", () => {
     fireEvent.click(view.getByRole("button", { name: "開啟選單" }));
 
     for (const label of [
-      "搜尋故事或主題",
-      "開始探索",
       "全部故事",
       "主題分類",
+      "遊樂園",
       "宇宙地圖",
-      "給家長",
+      "家長指南",
+      "關於我們",
+      "聯絡我們",
     ]) {
       expect(view.getAllByText(label).length).toBeGreaterThan(0);
     }
     expect(view.container.querySelector('form[action="/stories"]')).toBeTruthy();
     expect(view.container.querySelector('input[name="q"]')).toBeTruthy();
+    // 搜尋標籤改為視覺隱藏但保留可及性
+    expect(view.getByLabelText("搜尋故事或主題")).toBeTruthy();
+    // 主題切換縮成圖示段控，仍具 aria-label
+    expect(view.getAllByRole("group", { name: "主題模式" }).length).toBeGreaterThan(0);
   });
 
   test("桌面膠囊內嵌四個主要導覽項與更多下拉", async () => {

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import ThemeModeSwitch from "@/components/ThemeModeSwitch";
+import ThemeToggle from "@/components/ThemeToggle";
 import SubscribeMenu from "@/components/landing/SubscribeMenu";
 import Icon from "@/components/ui/Icon";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
@@ -17,19 +18,17 @@ type NavItem = { label: string; href: string; external?: boolean };
 /** 桌面膠囊列的四個主要項；其餘進「更多」下拉（1c 設計）。 */
 const PRIMARY_LABELS = new Set(["全部故事", "主題分類", "遊樂園", "家長指南"]);
 
-const MOBILE_EXPLORATION_CARDS = [
-  { label: "全部故事", icon: "📖", tone: "orange" },
-  { label: "主題分類", icon: "🎨", tone: "green" },
-  { label: "遊樂園", icon: "🎡", tone: "purple" },
-  { label: "宇宙地圖", icon: "🗺️", tone: "blue" },
+/** 行動版單欄清單：探索 4 項在前、家長 4 項在後，emoji 當視覺錨點。 */
+const MOBILE_MENU_ROWS = [
+  { label: "全部故事", emoji: "📖" },
+  { label: "主題分類", emoji: "🎨" },
+  { label: "遊樂園", emoji: "🎡" },
+  { label: "宇宙地圖", emoji: "🗺️" },
+  { label: "家長指南", emoji: "🧭", groupStart: true },
+  { label: "育兒專欄 · Threads", emoji: "✏️" },
+  { label: "關於我們", emoji: "🚙" },
+  { label: "聯絡我們", emoji: "✉️" },
 ] as const;
-
-const MOBILE_PARENT_LABELS = new Set([
-  "家長指南",
-  "育兒專欄 · Threads",
-  "關於我們",
-  "聯絡我們",
-]);
 
 function navItems(): NavItem[] {
   const threads = visibleSocials().find((s) => s.icon === "threads");
@@ -149,14 +148,11 @@ export default function SiteNavBar() {
   const playMode = isStoryPlayRoute(pathname);
   const menuId = useId();
   const searchId = useId();
-  const exploreHeadingId = useId();
-  const parentHeadingId = useId();
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLElement>(null);
   const items = navItems();
   const primaryItems = items.filter((i) => PRIMARY_LABELS.has(i.label));
   const moreItems = items.filter((i) => !PRIMARY_LABELS.has(i.label));
-  const parentItems = items.filter((i) => MOBILE_PARENT_LABELS.has(i.label));
 
   useFocusTrap(open, panelRef);
 
@@ -232,7 +228,7 @@ export default function SiteNavBar() {
             method="get"
             onSubmit={() => setOpen(false)}
           >
-            <label className={styles.searchLabel} htmlFor={searchId}>
+            <label className="sr-only" htmlFor={searchId}>
               搜尋故事或主題
             </label>
             <input
@@ -245,61 +241,43 @@ export default function SiteNavBar() {
             />
           </form>
 
-          <section className={styles.mobileSection} aria-labelledby={exploreHeadingId}>
-            <h2 id={exploreHeadingId} className={styles.sectionTitle}>
-              開始探索
-            </h2>
-            <div className={styles.mobileGrid}>
-              {MOBILE_EXPLORATION_CARDS.map((card) => {
-                const item = items.find((candidate) => candidate.label === card.label);
-                if (!item) return null;
-                const active =
-                  pathname === item.href || pathname.startsWith(`${item.href}/`);
-                return (
+          <ul className={styles.menuList}>
+            {MOBILE_MENU_ROWS.map((row) => {
+              const item = items.find((candidate) => candidate.label === row.label);
+              if (!item) return null;
+              const active =
+                pathname === item.href || pathname.startsWith(`${item.href}/`);
+              return (
+                <li
+                  key={item.label}
+                  className={
+                    "groupStart" in row && row.groupStart
+                      ? styles.menuGroupStart
+                      : undefined
+                  }
+                >
                   <Link
-                    key={item.label}
                     href={item.href}
-                    className={`${styles.mobileCard} ${
-                      active ? styles.mobileCardActive : ""
-                    }`}
-                    data-tone={card.tone}
+                    className={styles.menuLink}
                     aria-current={active ? "page" : undefined}
-                    onClick={() => setOpen(false)}
-                  >
-                    <span className={styles.mobileCardIcon} aria-hidden>
-                      {card.icon}
-                    </span>
-                    <span>{item.label}</span>
-                  </Link>
-                );
-              })}
-            </div>
-          </section>
-
-          <section className={styles.mobileSection} aria-labelledby={parentHeadingId}>
-            <h2 id={parentHeadingId} className={styles.sectionTitle}>
-              給家長
-            </h2>
-            <ul className={styles.mobileList}>
-              {parentItems.map((item) => (
-                <li key={item.label}>
-                  <Link
-                    href={item.href}
-                    className={styles.link}
-                    aria-current={pathname === item.href ? "page" : undefined}
                     onClick={() => setOpen(false)}
                     {...externalProps(item)}
                   >
-                    {item.label}
+                    <span className={styles.menuEmoji} aria-hidden>
+                      {row.emoji}
+                    </span>
+                    <span>{item.label}</span>
+                    {item.external ? (
+                      <Icon name="external" size={13} className={styles.extIcon} />
+                    ) : null}
                   </Link>
                 </li>
-              ))}
-            </ul>
-          </section>
+              );
+            })}
+          </ul>
 
-          <div className={styles.themeRow}>
-            <span className={styles.themeLabel}>主題模式</span>
-            <ThemeModeSwitch />
+          <div className={styles.themeSlot}>
+            <ThemeToggle compact />
           </div>
         </nav>
       ) : null}
