@@ -53,6 +53,17 @@ describe("filterStories", () => {
     ).toEqual(["ep-11"]);
   });
 
+  it("filters by free-text query", () => {
+    expect(
+      filterStories(stories, {
+        vehicle: null,
+        tag: null,
+        query: "警車",
+        featuredStorySlug: "ep-12",
+      }).map((s) => s.slug),
+    ).toEqual(["ep-12"]);
+  });
+
   it("combines vehicle and tag filters", () => {
     expect(
       filterStories(stories, {

@@ -16,11 +16,15 @@ export const metadata: Metadata = {
 };
 
 type StoriesPageProps = {
-  searchParams: Promise<{ vehicle?: string; tag?: string }>;
+  searchParams: Promise<{ vehicle?: string; tag?: string; q?: string }>;
 };
 
 export default async function StoriesPage({ searchParams }: StoriesPageProps) {
-  const { vehicle: vehicleParam, tag: tagParam } = await searchParams;
+  const {
+    vehicle: vehicleParam,
+    tag: tagParam,
+    q: queryParam,
+  } = await searchParams;
   const vehicles = allVehicles();
   const tags = allTags();
   const initialVehicle =
@@ -38,6 +42,7 @@ export default async function StoriesPage({ searchParams }: StoriesPageProps) {
     tags,
     initialVehicle,
     initialTag,
+    initialQuery: queryParam ?? "",
   };
 
   return (

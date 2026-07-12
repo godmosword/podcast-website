@@ -17,6 +17,7 @@ type StoryFilterProps = {
   featuredStorySlug?: string | null;
   initialVehicle?: string | null;
   initialTag?: string | null;
+  initialQuery?: string;
 };
 
 export default function StoryFilter({
@@ -26,12 +27,14 @@ export default function StoryFilter({
   featuredStorySlug = null,
   initialVehicle = null,
   initialTag = null,
+  initialQuery = "",
 }: StoryFilterProps) {
   const router = useRouter();
   const pathname = usePathname();
   const filterBase = pathname === "/stories" ? "/stories" : "/";
   const [vehicle, setVehicle] = useState<string | null>(initialVehicle);
   const [tag, setTag] = useState<string | null>(initialTag);
+  const [query, setQuery] = useState(initialQuery);
 
   useEffect(() => {
     setVehicle(initialVehicle);
@@ -41,37 +44,47 @@ export default function StoryFilter({
     setTag(initialTag);
   }, [initialTag]);
 
-  function pushFilters(nextVehicle: string | null, nextTag: string | null) {
+  useEffect(() => {
+    setQuery(initialQuery);
+  }, [initialQuery]);
+
+  function pushFilters(
+    nextVehicle: string | null,
+    nextTag: string | null,
+    nextQuery: string,
+  ) {
     const params = new URLSearchParams();
     if (nextVehicle) params.set("vehicle", nextVehicle);
     if (nextTag) params.set("tag", nextTag);
+    if (nextQuery.trim()) params.set("q", nextQuery.trim());
     const qs = params.toString();
     router.replace(qs ? `${filterBase}?${qs}` : filterBase, { scroll: false });
   }
 
   function updateVehicle(nextVehicle: string | null) {
     setVehicle(nextVehicle);
-    pushFilters(nextVehicle, tag);
+    pushFilters(nextVehicle, tag, query);
   }
 
   function updateTag(nextTag: string | null) {
     setTag(nextTag);
-    pushFilters(vehicle, nextTag);
+    pushFilters(vehicle, nextTag, query);
   }
 
   function clearFilters() {
     playSfx("tap");
     setVehicle(null);
     setTag(null);
+    setQuery("");
     router.replace(filterBase, { scroll: false });
   }
 
   const filtered = useMemo(
-    () => filterStories(stories, { vehicle, tag, featuredStorySlug }),
-    [stories, vehicle, tag, featuredStorySlug],
+    () => filterStories(stories, { vehicle, tag, query, featuredStorySlug }),
+    [stories, vehicle, tag, query, featuredStorySlug],
   );
 
-  const hasFilter = Boolean(vehicle || tag);
+  const hasFilter = Boolean(vehicle || tag || query.trim());
 
   return (
     <section className={styles.section} aria-label="找故事">
@@ -98,6 +111,11 @@ export default function StoryFilter({
         </div>
 
         <div className={styles.footer}>
+          {query.trim() ? (
+            <p className={styles.query} title={query.trim()}>
+              搜尋「{query.trim()}」
+            </p>
+          ) : null}
           <p className={styles.count}>{filtered.length} 則故事</p>
           {hasFilter && (
             <button

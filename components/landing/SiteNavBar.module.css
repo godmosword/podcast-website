@@ -83,30 +83,161 @@
 }
 
 .panel {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 0 calc(16px + var(--safe-right)) 16px calc(16px + var(--safe-left));
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: calc(100dvh - var(--nav-h));
+  overflow-y: auto;
+  padding: 20px calc(16px + var(--safe-right))
+    calc(24px + var(--safe-bottom)) calc(16px + var(--safe-left));
+  background: var(--bg);
+  color: var(--ink);
+  border-top: 1px solid var(--line);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  box-shadow: 0 16px 28px rgba(90, 52, 23, 0.16);
 }
 
-.list {
+.searchForm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.searchLabel,
+.sectionTitle {
+  padding-left: 4px;
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 13px 16px;
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: var(--ink-soft);
+  opacity: 0.8;
+}
+
+.searchInput:focus-visible {
+  border-color: var(--landing-brand);
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.mobileSection {
+  margin-top: 24px;
+}
+
+.sectionTitle {
+  margin: 0 0 12px;
+}
+
+.mobileGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.mobileCard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 14px;
+  border-radius: 18px;
+  color: var(--ink);
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 3px 0 rgba(52, 48, 43, 0.08);
+  transition:
+    transform var(--motion-press),
+    filter var(--motion-press);
+}
+
+.mobileCard[data-tone="orange"] {
+  background: color-mix(in srgb, var(--c-yellow) 28%, var(--card));
+}
+
+.mobileCard[data-tone="green"] {
+  background: color-mix(in srgb, var(--c-mint) 34%, var(--card));
+}
+
+.mobileCard[data-tone="purple"] {
+  background: color-mix(in srgb, var(--c-lilac) 30%, var(--card));
+}
+
+.mobileCard[data-tone="blue"] {
+  background: color-mix(in srgb, var(--c-sky) 30%, var(--card));
+}
+
+.mobileCard:hover {
+  filter: brightness(0.98);
+  transform: translateY(-1px);
+}
+
+.mobileCard:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.mobileCardActive {
+  box-shadow:
+    0 0 0 2px var(--landing-brand),
+    0 3px 0 rgba(52, 48, 43, 0.08);
+}
+
+.mobileCardIcon {
+  flex: none;
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.mobileList {
   list-style: none;
   margin: 0;
   padding: 8px 0;
-  display: grid;
-  gap: 4px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--card);
 }
 
 .link {
   display: block;
-  padding: 10px 12px;
-  border-radius: var(--radius-sm);
+  padding: 14px 16px;
   color: inherit;
   text-decoration: none;
   font-weight: 600;
+  border-bottom: 1px solid var(--line);
 }
 
-.link:hover {
+.mobileList li:last-child .link {
+  border-bottom: none;
+}
+
+.link:hover,
+.link[aria-current="page"] {
   background: rgba(120, 80, 40, 0.08);
+}
+
+.link:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 3px solid var(--focus-ring);
+  outline-offset: -3px;
 }
 
 .themeRow {
@@ -115,7 +246,7 @@
   justify-content: space-between;
   gap: 12px;
   padding: 12px;
-  margin-top: 8px;
+  margin-top: 24px;
   border-radius: var(--radius-sm);
   background: rgba(120, 80, 40, 0.06);
 }
@@ -239,7 +370,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .moreChev {
+  .moreChev,
+  .mobileCard {
     transition: none;
   }
 }

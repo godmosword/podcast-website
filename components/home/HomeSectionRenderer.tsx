@@ -13,6 +13,7 @@ export type HomeSectionProps = {
   tags: string[];
   initialVehicle: string | null;
   initialTag: string | null;
+  initialQuery: string;
 };
 
 function renderSection(id: HomeSectionId, props: HomeSectionProps) {
@@ -30,6 +31,7 @@ function renderSection(id: HomeSectionId, props: HomeSectionProps) {
           featuredStorySlug={props.featuredStorySlug}
           initialVehicle={props.initialVehicle}
           initialTag={props.initialTag}
+          initialQuery={props.initialQuery}
         />
       );
     default:

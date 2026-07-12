@@ -1,5 +1,7 @@
+// @vitest-environment jsdom
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, test, vi } from "vitest";
 
 vi.stubGlobal("React", React);
@@ -25,6 +27,30 @@ describe("SiteNavBar", () => {
     expect(html).toContain("車車遊樂園");
     expect(html).toContain("訂閱收聽");
     expect(html).toContain("開啟選單");
+  });
+
+  test("行動版選單提供搜尋與分組探索連結", async () => {
+    const { default: SiteNavBar } = await import("./SiteNavBar");
+    const { ThemeProvider } = await import("@/components/ThemeProvider");
+    const view = render(
+      <ThemeProvider>
+        <SiteNavBar />
+      </ThemeProvider>,
+    );
+    fireEvent.click(view.getByRole("button", { name: "開啟選單" }));
+
+    for (const label of [
+      "搜尋故事或主題",
+      "開始探索",
+      "全部故事",
+      "主題分類",
+      "宇宙地圖",
+      "給家長",
+    ]) {
+      expect(view.getAllByText(label).length).toBeGreaterThan(0);
+    }
+    expect(view.container.querySelector('form[action="/stories"]')).toBeTruthy();
+    expect(view.container.querySelector('input[name="q"]')).toBeTruthy();
   });
 
   test("桌面膠囊內嵌四個主要導覽項與更多下拉", async () => {

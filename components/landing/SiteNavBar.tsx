@@ -17,6 +17,20 @@ type NavItem = { label: string; href: string; external?: boolean };
 /** 桌面膠囊列的四個主要項；其餘進「更多」下拉（1c 設計）。 */
 const PRIMARY_LABELS = new Set(["全部故事", "主題分類", "遊樂園", "家長指南"]);
 
+const MOBILE_EXPLORATION_CARDS = [
+  { label: "全部故事", icon: "📖", tone: "orange" },
+  { label: "主題分類", icon: "🎨", tone: "green" },
+  { label: "遊樂園", icon: "🎡", tone: "purple" },
+  { label: "宇宙地圖", icon: "🗺️", tone: "blue" },
+] as const;
+
+const MOBILE_PARENT_LABELS = new Set([
+  "家長指南",
+  "育兒專欄 · Threads",
+  "關於我們",
+  "聯絡我們",
+]);
+
 function navItems(): NavItem[] {
   const threads = visibleSocials().find((s) => s.icon === "threads");
   const contact =
@@ -134,11 +148,15 @@ export default function SiteNavBar() {
   const pathname = usePathname();
   const playMode = isStoryPlayRoute(pathname);
   const menuId = useId();
+  const searchId = useId();
+  const exploreHeadingId = useId();
+  const parentHeadingId = useId();
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLElement>(null);
   const items = navItems();
   const primaryItems = items.filter((i) => PRIMARY_LABELS.has(i.label));
   const moreItems = items.filter((i) => !PRIMARY_LABELS.has(i.label));
+  const parentItems = items.filter((i) => MOBILE_PARENT_LABELS.has(i.label));
 
   useFocusTrap(open, panelRef);
 
@@ -208,20 +226,77 @@ export default function SiteNavBar() {
           className={styles.panel}
           aria-label="網站選單"
         >
-          <ul className={styles.list}>
-            {items.map((item) => (
-              <li key={item.label}>
-                <Link
-                  href={item.href}
-                  className={styles.link}
-                  onClick={() => setOpen(false)}
-                  {...externalProps(item)}
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <form
+            className={styles.searchForm}
+            action="/stories"
+            method="get"
+            onSubmit={() => setOpen(false)}
+          >
+            <label className={styles.searchLabel} htmlFor={searchId}>
+              搜尋故事或主題
+            </label>
+            <input
+              id={searchId}
+              className={styles.searchInput}
+              name="q"
+              type="search"
+              placeholder="搜尋故事或主題..."
+              autoComplete="off"
+            />
+          </form>
+
+          <section className={styles.mobileSection} aria-labelledby={exploreHeadingId}>
+            <h2 id={exploreHeadingId} className={styles.sectionTitle}>
+              開始探索
+            </h2>
+            <div className={styles.mobileGrid}>
+              {MOBILE_EXPLORATION_CARDS.map((card) => {
+                const item = items.find((candidate) => candidate.label === card.label);
+                if (!item) return null;
+                const active =
+                  pathname === item.href || pathname.startsWith(`${item.href}/`);
+                return (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className={`${styles.mobileCard} ${
+                      active ? styles.mobileCardActive : ""
+                    }`}
+                    data-tone={card.tone}
+                    aria-current={active ? "page" : undefined}
+                    onClick={() => setOpen(false)}
+                  >
+                    <span className={styles.mobileCardIcon} aria-hidden>
+                      {card.icon}
+                    </span>
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+
+          <section className={styles.mobileSection} aria-labelledby={parentHeadingId}>
+            <h2 id={parentHeadingId} className={styles.sectionTitle}>
+              給家長
+            </h2>
+            <ul className={styles.mobileList}>
+              {parentItems.map((item) => (
+                <li key={item.label}>
+                  <Link
+                    href={item.href}
+                    className={styles.link}
+                    aria-current={pathname === item.href ? "page" : undefined}
+                    onClick={() => setOpen(false)}
+                    {...externalProps(item)}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+
           <div className={styles.themeRow}>
             <span className={styles.themeLabel}>主題模式</span>
             <ThemeModeSwitch />
