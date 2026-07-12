@@ -15,7 +15,7 @@ alwaysApply: false
 
 | 指令 | 做什麼 | 不做什麼 |
 |------|--------|----------|
-| **`/agent-plan`** | Leader 寫 Plan → **固定三審**（GPT 5.6 Sol + Grok 4.5 Fast Medium + Opus 4.8 設計審）→ Approved Plan | 預設不實作、不 commit；內容 SOP 不進委員會 |
+| **`/agent-plan`** | Leader 寫 Plan → **固定三審**（GPT 5.6 Luna MAX fast + Grok 4.5 Fast Medium + Opus 4.8 設計審）→ Approved Plan | 預設不實作、不 commit；內容 SOP 不進委員會 |
 | **`/agent-action`** | 讀 Approved Plan（或內容 SOP）→ **Task 派工** → 整合 → Verify → **可選 diff 審** →（可選）Ship；顧問一律 readonly | 不重做完整 Plan（blocked 除外） |
 
 ## 紅線
@@ -35,8 +35,8 @@ alwaysApply: false
 | 用途 | slug | 備註 |
 |------|------|------|
 | Leader（編排／整合） | `composer-2.5-fast` | **節流**：非必要不讀大檔、不長篇推理 |
-| Plan 細節草稿 | `gpt-5.6-sol-medium` | Task DAG、Files、Verification、Model routing |
-| Plan／diff 工程審（**預設固定**） | `gpt-5.6-sol-medium` | 可行性、驗證命令、漏檔；Claude Code 用 `codex exec -m gpt-5.6` |
+| Plan 細節草稿 | `gpt-5.6-luna-max-fast` | Task DAG、Files、Verification、Model routing |
+| Plan／diff 工程審（**預設固定**） | `gpt-5.6-luna-max-fast` | 可行性、驗證命令、漏檔；Claude Code 用 `codex exec -m gpt-5.6` |
 | Plan／diff **設計審**（**預設固定**） | `claude-opus-4-8-thinking-medium` | UX／`DESIGN.md`／兒童體驗／觸控／a11y 視覺；Task `architect` readonly |
 | Plan／diff 對抗審（**預設固定**） | `grok-4.5-fast-medium` | 漏洞、edge case；不審中文；**每輪必派** |
 | L2 多檔實作 | `grok-4.5-fast-medium` | **預設**；Domain 內容管線仍 Sonnet；勿用 Composer |
@@ -68,7 +68,7 @@ A/B/C 格式 — 見 `review-user-choice.mdc`（若有）
 
 ## 委員會門檻（精簡）
 
-- **預設**：**GPT 5.6 Sol + Grok 4.5 Fast Medium + Opus 4.8 設計審**（可並行）
+- **預設**：**GPT 5.6 Luna MAX fast + Grok 4.5 Fast Medium + Opus 4.8 設計審**（可並行）
 - **純文件／命令檔對齊**：可降級 Leader 自審 + GPT；**Grok／Opus 列仍須列出**（嘗試派工或標缺席，**禁止標跳過**）
 - **Composer 可行性審**＝Leader 自審，不計入非 leader 委員
 - **Grok 缺席**：GPT 或 Opus 仍成功即可 Approved，標「對抗審缺席／對抗性降級」

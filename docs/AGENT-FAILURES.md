@@ -7,7 +7,7 @@
 
 ## 讀取協議
 
-1. 呼叫任何外部 model 前先掃本檔「案例紀錄」表——Claude Code 的 CLI 呼叫（codex／grok／cursor-agent）與 **Cursor 的 Task 派工**（`gpt-5.6-sol-medium`／`grok-4.5-fast-medium` 等 slug）都算；Task 失敗同樣追加。
+1. 呼叫任何外部 model 前先掃本檔「案例紀錄」表——Claude Code 的 CLI 呼叫（codex／grok／cursor-agent）與 **Cursor 的 Task 派工**（`gpt-5.6-luna-max-fast`／`grok-4.5-fast-medium` 等 slug）都算；Task 失敗同樣追加。
 2. **缺席判定（可操作定義）**：掃「案例紀錄」表，同一**模型**（不分呼叫命令）在最近 30 天內有 **≥2 列**且**未標「已解除」** → 本次直接標「缺席」，不重試、不浪費額度。
 3. 缺席不豁免驗證：委員缺席時，[`AGENT-DOMAIN.md`](AGENT-DOMAIN.md) 驗證矩陣的必要項照跑。
 4. 失敗後追加一列到「案例紀錄」，格式見下。
@@ -18,7 +18,8 @@
 
 | 模型 | 探活 |
 |------|------|
-| GPT 5.6 Sol（codex） | `codex exec -m gpt-5.6 -c model_reasoning_effort="low" "回覆 OK" </dev/null`（spawn ENOENT → 缺席；**須加 `</dev/null`** 防 stdin 掛起） |
+| GPT 5.6 Luna MAX fast（Cursor Task） | 無 CLI 探活；第一次 Task 拒收 slug／派工失敗 → 追加案例紀錄並標缺席 |
+| GPT 5.6 Sol（codex，Claude Code CLI） | `codex exec -m gpt-5.6 -c model_reasoning_effort="low" "回覆 OK" </dev/null`（spawn ENOENT → 缺席；**須加 `</dev/null`** 防 stdin 掛起） |
 | Grok 4.5 Fast Medium（CLI） | `grok models`（出現 `You are not authenticated` → 缺席）；單輪：`grok -p "<prompt>" -m grok-4.5-fast --effort medium --no-plan` |
 | Grok 4.5 Fast Medium（Cursor Task） | **無 CLI 探活**；第一次 Task 拒收 slug／派工失敗 → 追加案例紀錄並標**對抗審缺席**，勿用 `grok-4.3` 頂替 |
 | Cursor Task（其他 slug） | 無低成本探活；第一次拒收／失敗 → 追加案例並標缺席（對抗審 slug 同上規則） |

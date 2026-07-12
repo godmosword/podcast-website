@@ -37,7 +37,7 @@ typo 級小事不進本命令——直接做即可。
 | 區塊 | 誰寫 | model slug |
 |------|------|------------|
 | Goal、Scope、Risks 骨架 | Leader | （當前 session） |
-| Task DAG、Files、Verification、Model routing | Task | `gpt-5.6-sol-medium` |
+| Task DAG、Files、Verification、Model routing | Task | `gpt-5.6-luna-max-fast` |
 | 每個子任務 L0–L3 + slug | Task（同上） | 預設 L2→Grok 4.5 Fast Medium、L1→Grok、L0→shell |
 
 - 使用 AGENT-WORKFLOW 的 **Plan 模板**合併成 Draft Plan
@@ -49,7 +49,7 @@ typo 級小事不進本命令——直接做即可。
 
 | 委員 | 角度 | Cursor 派工 |
 |------|------|-------------|
-| **GPT 5.6 Sol** | 工程可行性／驗證命令／漏檔／測試 | Task（`readonly: true`）+ `gpt-5.6-sol-medium` |
+| **GPT 5.6 Luna MAX fast** | 工程可行性／驗證命令／漏檔／測試 | Task（`readonly: true`）+ `gpt-5.6-luna-max-fast` |
 | **Grok 4.5 Fast Medium** | 對抗審：漏洞、edge case、失敗模式 | Task（`readonly: true`）+ `grok-4.5-fast-medium` |
 | **Opus 4.8 設計審** | **設計／UX**：`DESIGN.md` 對齊、兒童主路徑、親子互動、觸控 ≥44px、`prefers-reduced-motion`、資訊層級、視覺一致性；L3 時加架構／紅線 | Task `architect`（`readonly: true`）+ `claude-opus-4-8-thinking-medium`；prompt 附 `DESIGN.md` 要點 |
 
@@ -68,7 +68,7 @@ typo 級小事不進本命令——直接做即可。
 | 來源 | 關鍵意見 | 採納決定 |
 |------|----------|----------|
 | Leader（可行性自審，L3） | … | — |
-| GPT 5.6 Sol 工程審 | … | 採納 / 不採納 |
+| GPT 5.6 Luna MAX fast 工程審 | … | 採納 / 不採納 |
 | Grok 4.5 Fast Medium 對抗審 | …／缺席 | … |
 | Opus 4.8 設計審 | …／缺席 | … |
 
@@ -92,8 +92,8 @@ typo 級小事不進本命令——直接做即可。
 | # | 角色 | 執行方式 | subagent_type | model slug | 做了什麼 | 產出 | 狀態 |
 |---|------|----------|---------------|------------|----------|------|------|
 | 0 | Leader | 當前 session | — | `composer-2.5-fast` | 寫骨架、綜合委員意見 | Approved Plan | 完成 |
-| 1 | Plan 細節 | Task | `generalPurpose` | `gpt-5.6-sol-medium` | 填 DAG、Files、Verification | plan 區塊 | 完成／未派 |
-| 2 | GPT 5.6 Sol 工程審 | Task（readonly） | `generalPurpose` | `gpt-5.6-sol-medium` | 審可行性、驗證、漏檔 | 審查意見 | 完成／缺席 |
+| 1 | Plan 細節 | Task | `generalPurpose` | `gpt-5.6-luna-max-fast` | 填 DAG、Files、Verification | plan 區塊 | 完成／未派 |
+| 2 | GPT 5.6 Luna MAX fast 工程審 | Task（readonly） | `generalPurpose` | `gpt-5.6-luna-max-fast` | 審可行性、驗證、漏檔 | 審查意見 | 完成／缺席 |
 | 3 | Grok 4.5 Fast Medium 對抗審 | Task（readonly） | `generalPurpose` | `grok-4.5-fast-medium` | 找漏洞、edge case | 審查意見 | 完成／缺席 |
 | 4 | Opus 4.8 設計審 | Task（readonly） | `architect` | `claude-opus-4-8-thinking-medium` | 審 UX／DESIGN.md／兒童體驗／a11y 視覺 | 審查意見 | 完成／缺席 |
 | 5 | Leader 可行性自審 | Leader 自審 | — | `composer-2.5-fast` | L3 成本／範圍 | 自審結論 | 完成／未派 |
