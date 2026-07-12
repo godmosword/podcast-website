@@ -4,9 +4,12 @@ test.describe.configure({ mode: "serial" });
 
 test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await page.goto("/");
-  // 品牌在 sticky 頂欄、選單鍵可用
+  // 品牌在 sticky 頂欄；桌面（≥920px）走 1c 膠囊內嵌導覽，漢堡僅行動版
   await expect(page.getByRole("link", { name: /車車遊樂園/ })).toBeVisible();
-  await expect(page.getByRole("button", { name: "開啟選單" })).toBeVisible();
+  const capsuleNav = page.getByRole("navigation", { name: "主要分區" });
+  await expect(capsuleNav.getByRole("link", { name: "全部故事" })).toBeVisible();
+  await expect(capsuleNav.getByRole("button", { name: /更多/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: "開啟選單" })).toBeHidden();
   // 第一段（車車故事）標題與 CTA、以及四段標題都存在
   await expect(page.getByRole("heading", { name: /車車與\s?遊樂園的故事/ })).toBeVisible();
   await expect(page.getByRole("link", { name: "全部故事 →" })).toBeVisible();
@@ -22,6 +25,8 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
 test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
+  // 行動版維持漢堡選單
+  await expect(page.getByRole("button", { name: "開啟選單" })).toBeVisible();
   await expect(page.getByRole("heading", { name: /車車與\s?遊樂園的故事/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: /陪孩子建立好習慣/ })).toBeVisible();
 });

@@ -105,6 +105,7 @@
   --landing-brand-ink: #3a2410;
   /* sticky 頂欄高度：按鈕 44 + 上下 padding 20 + 瀏海安全區 */
   --nav-h: calc(64px + var(--safe-top));
+  /* ≥920px 改 1c 懸浮膠囊（56px 膠囊 + 10px 上緣），landing pane／地圖高度共用此值 */
   --landing-heading: #2a9d8f;
 
   /* Landing nav 與 segment CTA（全部故事／睡前故事）統一淡蜜桃橘；字暖深棕（非黑） */
@@ -226,6 +227,13 @@
     radial-gradient(110% 70% at 92% -4%, rgba(107, 168, 196, 0.08), transparent 56%),
     radial-gradient(120% 80% at 88% 102%, rgba(143, 184, 118, 0.07), transparent 60%),
     radial-gradient(120% 80% at 8% 104%, rgba(232, 194, 90, 0.06), transparent 58%);
+}
+
+/* 1c 懸浮膠囊頂欄（SiteNavBar ≥920px）：膠囊 56px + 上緣 10px */
+@media (min-width: 920px) {
+  :root {
+    --nav-h: calc(66px + var(--safe-top));
+  }
 }
 
 * {

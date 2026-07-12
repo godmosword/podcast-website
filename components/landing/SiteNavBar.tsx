@@ -11,7 +11,12 @@ import { isStoryPlayRoute } from "@/lib/is-story-play-route";
 import { visibleSocials } from "@/lib/social";
 import styles from "./SiteNavBar.module.css";
 
-function navItems() {
+type NavItem = { label: string; href: string; external?: boolean };
+
+/** 桌面膠囊列的四個主要項；其餘進「更多」下拉（1c 設計）。 */
+const PRIMARY_LABELS = new Set(["全部故事", "主題分類", "遊樂園", "家長指南"]);
+
+function navItems(): NavItem[] {
   const threads = visibleSocials().find((s) => s.icon === "threads");
   const contact =
     process.env.NEXT_PUBLIC_CONTACT_FORM_URL?.trim() ||
@@ -19,12 +24,12 @@ function navItems() {
   const contactExternal = /^https?:/i.test(contact);
 
   // 全站一致的次級導覽：每頁都能直達主要分區（故事 / 主題 / 宇宙地圖 / 遊樂園 / 關於）。
-  const items: { label: string; href: string; external?: boolean }[] = [
+  const items: NavItem[] = [
     { label: "全部故事", href: "/stories" },
-    { label: "家長指南", href: "/for-parents" },
     { label: "主題分類", href: "/topic" },
-    { label: "宇宙地圖", href: "/adventures" },
     { label: "遊樂園", href: "/games" },
+    { label: "家長指南", href: "/for-parents" },
+    { label: "宇宙地圖", href: "/adventures" },
     { label: "關於我們", href: "/about" },
   ];
   if (threads?.url) {
@@ -34,6 +39,81 @@ function navItems() {
   return items;
 }
 
+function externalProps(item: NavItem) {
+  return item.external
+    ? { target: "_blank" as const, rel: "noopener noreferrer" }
+    : {};
+}
+
+/** 桌面「更多」下拉：外部點擊與 Esc 關閉（與 SubscribeMenu 同手勢）。 */
+function MoreDropdown({
+  items,
+  pathname,
+}: {
+  items: NavItem[];
+  pathname: string;
+}) {
+  const menuId = useId();
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    function onPointerDown(e: PointerEvent) {
+      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={wrapRef} className={styles.more}>
+      <button
+        type="button"
+        className={styles.moreBtn}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls={menuId}
+        onClick={() => setOpen((v) => !v)}
+      >
+        更多
+        <Icon
+          name="chevron-right"
+          size={14}
+          className={`${styles.moreChev} ${open ? styles.moreChevOpen : ""}`}
+        />
+      </button>
+      {open ? (
+        <div id={menuId} role="menu" className={styles.dropdown}>
+          {items.map((item) => (
+            <Link
+              key={item.label}
+              role="menuitem"
+              href={item.href}
+              className={styles.dropdownLink}
+              aria-current={pathname === item.href ? "page" : undefined}
+              onClick={() => setOpen(false)}
+              {...externalProps(item)}
+            >
+              {item.label}
+              {item.external ? (
+                <Icon name="external" size={13} className={styles.extIcon} />
+              ) : null}
+            </Link>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export default function SiteNavBar() {
   const pathname = usePathname();
   const playMode = isStoryPlayRoute(pathname);
@@ -41,6 +121,8 @@ export default function SiteNavBar() {
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLElement>(null);
   const items = navItems();
+  const primaryItems = items.filter((i) => PRIMARY_LABELS.has(i.label));
+  const moreItems = items.filter((i) => !PRIMARY_LABELS.has(i.label));
 
   useFocusTrap(open, panelRef);
 
@@ -64,7 +146,30 @@ export default function SiteNavBar() {
           <span className={styles.brandText}>車車遊樂園</span>
         </Link>
 
+        {/* 桌面（≥920px）：1c 膠囊內嵌主導覽＋更多下拉 */}
+        <nav className={styles.desktopNav} aria-label="主要分區">
+          {primaryItems.map((item) => {
+            const active =
+              pathname === item.href || pathname.startsWith(`${item.href}/`);
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={`${styles.navLink} ${active ? styles.navLinkActive : ""}`}
+                aria-current={active ? "page" : undefined}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+          <MoreDropdown items={moreItems} pathname={pathname} />
+        </nav>
+
         <div className={styles.actions}>
+          <span className={styles.themeDesktop}>
+            <ThemeModeSwitch />
+          </span>
+
           <SubscribeMenu />
 
           <button
@@ -94,9 +199,7 @@ export default function SiteNavBar() {
                   href={item.href}
                   className={styles.link}
                   onClick={() => setOpen(false)}
-                  {...("external" in item && item.external
-                    ? { target: "_blank", rel: "noopener noreferrer" }
-                    : {})}
+                  {...externalProps(item)}
                 >
                   {item.label}
                 </Link>
