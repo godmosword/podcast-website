@@ -4,11 +4,24 @@ test.describe.configure({ mode: "serial" });
 
 test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await page.goto("/");
-  // 品牌在 sticky 頂欄；桌面（≥920px）走 1c 膠囊內嵌導覽，漢堡僅行動版
+  // 品牌在 sticky 頂欄；桌面（≥980px）走 1c 膠囊內嵌導覽，漢堡僅行動版
   await expect(page.getByRole("link", { name: /車車遊樂園/ })).toBeVisible();
   const capsuleNav = page.getByRole("navigation", { name: "主要分區" });
   await expect(capsuleNav.getByRole("link", { name: "全部故事" })).toBeVisible();
-  await expect(capsuleNav.getByRole("button", { name: /更多/ })).toBeVisible();
+  await expect(capsuleNav.getByRole("link", { name: "主題分類" })).toBeVisible();
+  await expect(capsuleNav.getByRole("link", { name: "遊樂園" })).toBeVisible();
+  await expect(capsuleNav.getByRole("link", { name: "宇宙地圖" })).toBeVisible();
+  await expect(capsuleNav.getByRole("link", { name: /育兒專欄/ })).toBeVisible();
+  await expect(capsuleNav.getByRole("button", { name: "家長指南" })).toBeVisible();
+  await expect(capsuleNav.getByRole("button", { name: /更多/ })).toHaveCount(0);
+
+  // 家長指南下拉：指南首頁／關於我們／聯絡我們
+  await capsuleNav.getByRole("button", { name: "家長指南" }).click();
+  const parentMenu = page.getByRole("menu");
+  await expect(parentMenu.getByRole("menuitem", { name: "指南首頁" })).toBeVisible();
+  await expect(parentMenu.getByRole("menuitem", { name: "關於我們" })).toBeVisible();
+  await expect(parentMenu.getByRole("menuitem", { name: "聯絡我們" })).toBeVisible();
+
   await expect(page.getByRole("button", { name: "開啟選單" })).toBeHidden();
   // 第一段（車車故事）標題與 CTA、以及四段標題都存在
   await expect(page.getByRole("heading", { name: /車車與\s?遊樂園的故事/ })).toBeVisible();

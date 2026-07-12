@@ -13,8 +13,9 @@
 
 ### Changed
 
-- **膠囊導覽「更多」下拉改 framer-motion 動畫**：`AnimatePresence` + `motion.div` spring 進退場（原 CSS keyframe 移除，關閉時新增退場動畫）；`useReducedMotion` 於減速偏好時進退場零動畫。新增依賴 `framer-motion@^12.42.2`，First Load JS 實測持平（shared 116→115 kB）。
-- **頂欄改 1c 懸浮膠囊導覽（桌面 ≥920px）**：`SiteNavBar` 桌面內嵌四個主要項（全部故事／主題分類／遊樂園／家長指南，含 active 態）＋「更多」下拉（宇宙地圖／育兒專欄 ↗／關於／聯絡，Esc 與外部點擊關閉）＋日/夜/系統三態常駐＋訂閱膠囊；半透明膠囊 backdrop-blur、雙層陰影。行動版維持漢堡選單不變。`--nav-h` 於 ≥920px 調為 66px+safe（landing pane／宇宙地圖高度共用）。同步：smoke 斷言分桌面/行動、SiteNavBar 測試包 ThemeProvider、視覺 baseline 36 張重生成（含補 `f47af57` hero 簡化後未更新的 stale baseline）。
+- **頂欄 IA 重整（取代「更多」下拉）**：桌面主列改為全部故事／主題分類／遊樂園／宇宙地圖／育兒專欄（統一外連文案）＋ **NavDropdown「家長指南」**（指南首頁／關於／聯絡）；移除「更多」。膠囊桌面斷點 **≥980px**（原 920）；行動漢堡依探索／家長分組。文件：`DESIGN.md` 首頁 IA。
+- **膠囊導覽「更多」下拉改 framer-motion 動畫**：`AnimatePresence` + `motion.div` spring 進退場（原 CSS keyframe 移除，關閉時新增退場動畫）；`useReducedMotion` 於減速偏好時進退場零動畫。新增依賴 `framer-motion@^12.42.2`，First Load JS 實測持平（shared 116→115 kB）。（註：下拉 trigger 已改為「家長指南」，見上條 IA。）
+- **頂欄改 1c 懸浮膠囊導覽（桌面 ≥920px）**：`SiteNavBar` 桌面內嵌四個主要項（全部故事／主題分類／遊樂園／家長指南，含 active 態）＋「更多」下拉（宇宙地圖／育兒專欄 ↗／關於／聯絡，Esc 與外部點擊關閉）＋日/夜/系統三態常駐＋訂閱膠囊；半透明膠囊 backdrop-blur、雙層陰影。行動版維持漢堡選單不變。`--nav-h` 於 ≥920px 調為 66px+safe（landing pane／宇宙地圖高度共用）。同步：smoke 斷言分桌面/行動、SiteNavBar 測試包 ThemeProvider、視覺 baseline 36 張重生成（含補 `f47af57` hero 簡化後未更新的 stale baseline）。（**已被上方「頂欄 IA 重整」取代**；斷點與主列結構以新條為準。）
 - **全站排版密度與文案精簡（/agent-plan 1783738772 委員會核准）**：`globals.css` 新增 spacing token 階梯（8/12/16/24/32/40px），DESIGN.md 回寫「間距」規範（觸控 ≥44px 只加不減、gap／行高／段寬底線、兒童頁少字原則）。文案精簡：SiteFooter 家長說明一行化、/about 介紹與使用步驟瘦身、/for-parents lede 與欄目列舉句、/characters intro（與 metadata 重複部分移除）、首頁 bedtime 標題縮至 8 字內；/legal 合併兩條重複 MIT 條目與外連重複句（法律效力語句經關鍵詞 grep guard 驗證無刪減）、bump 最後更新日。排版：/for-parents 大標行高 1→1.12、卡片間距 16→24px、StoryCard 摘要行高與 tags gap、/characters mobile 卡片 gap 10→12px。FAQ answer／StoryFilter 留白／RoughFrame padding／topic 膠囊等既定契約不動。驗證：lint + vitest 539 + build + e2e 21（含 axe）+ before/after 截圖 26×2。
 - **訂閱轉換（Growth-P1a/b）**：單集頁 CTA 順序改為播放→收藏／分享→訂閱收聽，`SubscriptionCTA` 視覺降權；首段 Landing Hero 加「訂閱收聽」幽靈鈕捲至 `#connect`（頂欄 `SubscribeMenu` 維持）。
 - **平台外連 UTM（Growth-Measure-1b）**：`lib/platform-utm.ts` 為 Spotify／Apple 等外連加 `utm_source=cheche_web`、`utm_medium=story_page|footer|subscribe_cta`、`utm_campaign=<slug|site>`；接線 `TrackedPlatformLink`、`ConnectHub`、`SubscribeMenu`；單集 `SubscriptionCTA` 帶 slug campaign。

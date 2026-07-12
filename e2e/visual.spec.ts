@@ -30,6 +30,13 @@ const VIEWPORTS: Record<
   desktop: { width: 1280, height: 720, label: "1280" },
 };
 
+/** SiteNavBar desktopNav 斷點 980：頂欄 clip 回歸（漢堡／膠囊交界）。 */
+const NAV_BREAKPOINT_VIEWPORTS = [
+  { width: 979, height: 720, label: "979" },
+  { width: 980, height: 720, label: "980" },
+  { width: 1024, height: 720, label: "1024" },
+] as const;
+
 const THEMES: VisualTheme[] = ["light", "night"];
 const LANDING_SEGMENTS = [
   { id: "stories", anchorId: "segment-stories" },
@@ -105,4 +112,24 @@ for (const viewportId of Object.keys(VIEWPORTS) as VisualViewportId[]) {
       }
     });
   }
+}
+
+// 頂欄 IA／980 斷點：只截 header，避免全頁噪音。
+for (const viewport of NAV_BREAKPOINT_VIEWPORTS) {
+  test(`visual：頂欄導覽 ${viewport.label} light`, async ({ page }) => {
+    await page.setViewportSize({
+      width: viewport.width,
+      height: viewport.height,
+    });
+    await page.goto("/");
+    await stabilizeVisualPage(page, { theme: "light" });
+    const header = page.locator("header").first();
+    await expect(header).toHaveScreenshot(
+      `site-nav-${viewport.label}-light.png`,
+      {
+        animations: "disabled",
+        maxDiffPixelRatio: 0.02,
+      },
+    );
+  });
 }
