@@ -349,4 +349,13 @@
   .panel {
     display: none;
   }
+
+  /* 首頁 hero 滿版時，透明外層不攔截 hero 頂部點擊；互動全在膠囊本體 */
+  :global(html:has([data-landing-root])) .bar {
+    pointer-events: none;
+  }
+
+  :global(html:has([data-landing-root])) .bar .inner {
+    pointer-events: auto;
+  }
 }

@@ -70,6 +70,23 @@
     );
 }
 
+/* 桌面滿版 hero：頂部極淡漸層，讓懸浮膠囊在淺色美術上仍有邊界感 */
+@media (min-width: 920px) {
+  .visual::after {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    z-index: 0; /* 在 img 之上、.scrim（z-index 1）之下 */
+    height: calc(var(--nav-h) + 48px);
+    background: linear-gradient(
+      to bottom,
+      rgba(38, 20, 8, 0.2) 0%,
+      rgba(38, 20, 8, 0) 100%
+    );
+    pointer-events: none;
+  }
+}
+
 .content {
   position: relative;
   z-index: 2;
