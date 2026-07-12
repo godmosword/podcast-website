@@ -1,0 +1,9 @@
+Noto Sans TC
+Copyright 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'.
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+This license is copied below, and is also available with a FAQ at:
+https://scripts.sil.org/OFL
+
+Source: https://fonts.google.com/noto/specimen/Noto+Sans+TC
+Bundled file: app/fonts/noto-sans-tc-og.ttf (single weight TTF for @vercel/og)

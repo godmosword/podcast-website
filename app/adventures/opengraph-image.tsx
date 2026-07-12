@@ -8,6 +8,6 @@ export const alt = "車車宇宙 · 樂園地圖";
 export const size = universeOgImageSize;
 export const contentType = universeOgContentType;
 
-export default function Image() {
+export default async function Image() {
   return createUniverseOgImage();
 }

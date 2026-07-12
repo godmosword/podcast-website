@@ -9,7 +9,7 @@ export const alt = "車車大冒險小遊戲";
 export const size = gameOgImageSize;
 export const contentType = gameOgContentType;
 
-export default function Image() {
+export default async function Image() {
   return createGameOgImage({
     title: "車車大冒險",
     emoji: "🏁",

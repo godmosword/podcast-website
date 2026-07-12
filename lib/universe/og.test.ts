@@ -12,7 +12,7 @@ describe("universe og", () => {
   });
 
   it("createUniverseOgImage returns ImageResponse", async () => {
-    const res = createUniverseOgImage();
+    const res = await createUniverseOgImage();
     expect(res).toBeTruthy();
     expect(typeof (res as Response).arrayBuffer).toBe("function");
     const buf = await (res as Response).arrayBuffer();

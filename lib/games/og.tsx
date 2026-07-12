@@ -1,4 +1,9 @@
 import { ImageResponse } from "next/og";
+import {
+  loadOgFont,
+  OG_FONT_FAMILY,
+  ogFontOptions,
+} from "@/lib/og-font";
 
 /** 與 globals.css design token 同值，供 ImageResponse 內嵌使用。 */
 export const GAME_OG_COLORS = {
@@ -20,11 +25,13 @@ type GameOgOptions = {
   accentColor?: string;
 };
 
-export function createGameOgImage({
+export async function createGameOgImage({
   title,
   emoji,
   accentColor = GAME_OG_COLORS.yellow,
 }: GameOgOptions) {
+  const fontData = await loadOgFont();
+
   return new ImageResponse(
     (
       <div
@@ -35,6 +42,7 @@ export function createGameOgImage({
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
+          fontFamily: OG_FONT_FAMILY,
           background: `linear-gradient(180deg, ${GAME_OG_COLORS.bg} 0%, ${GAME_OG_COLORS.sky}33 100%)`,
           padding: 48,
           position: "relative",
@@ -89,6 +97,6 @@ export function createGameOgImage({
         />
       </div>
     ),
-    { ...gameOgImageSize },
+    { ...gameOgImageSize, fonts: ogFontOptions(fontData) },
   );
 }

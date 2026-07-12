@@ -1,6 +1,11 @@
 import React from "react";
 import { ImageResponse } from "next/og";
 import { MAP_STAGE, ZONES, ZONE_TERRAIN } from "@/data/universe-zones";
+import {
+  loadOgFont,
+  OG_FONT_FAMILY,
+  ogFontOptions,
+} from "@/lib/og-font";
 
 export const universeOgImageSize = { width: 1200, height: 630 };
 export const universeOgContentType = "image/png";
@@ -11,7 +16,8 @@ const SEA = "#cfeaff";
 const BRIDGE = "#c8a979";
 
 /** `/adventures` 分享預覽：鳥瞰四島 + 標題。 */
-export function createUniverseOgImage() {
+export async function createUniverseOgImage() {
+  const fontData = await loadOgFont();
   const w = universeOgImageSize.width;
   const h = universeOgImageSize.height;
   const pad = 56;
@@ -28,6 +34,7 @@ export function createUniverseOgImage() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
+          fontFamily: OG_FONT_FAMILY,
           background: `linear-gradient(180deg, ${SEA} 0%, #b8e4ff 100%)`,
           padding: pad,
           position: "relative",
@@ -173,6 +180,6 @@ export function createUniverseOgImage() {
         </div>
       </div>
     ),
-    { ...universeOgImageSize },
+    { ...universeOgImageSize, fonts: ogFontOptions(fontData) },
   );
 }

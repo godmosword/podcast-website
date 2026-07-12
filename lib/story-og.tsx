@@ -4,6 +4,11 @@ import React from "react";
 import { ImageResponse } from "next/og";
 import type { Story } from "@/data/content";
 import { getCharactersForStory } from "@/data/characters";
+import {
+  loadOgFont,
+  OG_FONT_FAMILY,
+  ogFontOptions,
+} from "@/lib/og-font";
 import { storyCoverPath } from "@/lib/story-utils";
 
 export const storyOgImageSize = { width: 1200, height: 630 };
@@ -12,22 +17,6 @@ export const storyOgContentType = "image/png";
 const INK = "#34302b";
 const INK_SOFT = "#7a7268";
 const BG = "#fffdf8";
-
-/** Google Fonts TTF（@vercel/og 不支援 woff2）。 */
-const NOTO_SANS_TC_TTF =
-  "https://fonts.gstatic.com/s/notosanstc/v39/-nFuOG829Oofr2wohFbTp9ifNAn722rq0MXz76Cy_Co.ttf";
-
-let cachedFont: ArrayBuffer | null = null;
-
-async function loadOgFont(): Promise<ArrayBuffer> {
-  if (cachedFont) return cachedFont;
-  const res = await fetch(NOTO_SANS_TC_TTF);
-  if (!res.ok) {
-    throw new Error(`story og font fetch failed: ${res.status}`);
-  }
-  cachedFont = await res.arrayBuffer();
-  return cachedFont;
-}
 
 async function loadCoverData(story: Story): Promise<string | null> {
   if (story.pageCount <= 0) return null;
@@ -206,26 +195,12 @@ export async function createStoryOgImage(story: Story) {
     loadOgFont(),
     loadCoverData(story),
   ]);
-  const fontFamily = "Noto Sans TC";
 
   return new ImageResponse(
-    buildStoryOgMarkup({ story, coverSrc, fontFamily }),
+    buildStoryOgMarkup({ story, coverSrc, fontFamily: OG_FONT_FAMILY }),
     {
       ...storyOgImageSize,
-      fonts: [
-        {
-          name: fontFamily,
-          data: fontData,
-          style: "normal",
-          weight: 400,
-        },
-        {
-          name: fontFamily,
-          data: fontData,
-          style: "normal",
-          weight: 700,
-        },
-      ],
+      fonts: ogFontOptions(fontData),
     },
   );
 }
