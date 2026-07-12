@@ -154,7 +154,7 @@ export default function SiteNavBar() {
   const primaryItems = items.filter((i) => PRIMARY_LABELS.has(i.label));
   const moreItems = items.filter((i) => !PRIMARY_LABELS.has(i.label));
 
-  useFocusTrap(open, panelRef);
+  useFocusTrap(open, panelRef, { initialFocus: "container" });
 
   useEffect(() => {
     if (!open) return;
@@ -221,6 +221,7 @@ export default function SiteNavBar() {
           ref={panelRef}
           className={styles.panel}
           aria-label="網站選單"
+          tabIndex={-1}
         >
           <form
             className={styles.searchForm}
