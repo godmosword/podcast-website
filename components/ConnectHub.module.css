@@ -49,7 +49,7 @@
 }
 
 .dotSocial {
-  background: #e6683c;
+  background: var(--brand-instagram);
 }
 
 .row {
@@ -77,7 +77,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  color: #fff;
+  color: var(--on-dark);
   border: 2.5px solid var(--card);
   box-shadow: var(--shadow-sm), var(--gloss);
 }

@@ -8,8 +8,8 @@
 import { trackReturnVisit } from "@/lib/analytics";
 
 export const LAST_VISIT_KEY = "cheche:last-visit-at";
-export const RETURN_VISIT_SESSION_KEY = "cheche:return-visit-sent";
-export const RETURN_VISIT_THRESHOLD_MS = 6 * 60 * 60 * 1000;
+const RETURN_VISIT_SESSION_KEY = "cheche:return-visit-sent";
+const RETURN_VISIT_THRESHOLD_MS = 6 * 60 * 60 * 1000;
 
 export type ReturnVisitBucket =
   | "same-day"

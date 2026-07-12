@@ -5,7 +5,7 @@ import LandingSegment from "@/components/landing/LandingSegment";
 import SegmentNav from "@/components/landing/SegmentNav";
 import DuduCompanion from "@/components/landing/DuduCompanion";
 import LandingBedtimeLayer from "@/components/landing/LandingBedtimeLayer";
-import { DUDU_EMOTION_BY_SEGMENT } from "@/components/landing/dudu-emotions";
+import { DUDU_EMOTION_BY_SEGMENT } from "@/data/dudu-emotions";
 import { resolveLandingSegments } from "@/lib/landing-query";
 import { podcastSeriesJsonLd } from "@/lib/json-ld";
 import hubStyles from "./LandingHub.module.css";

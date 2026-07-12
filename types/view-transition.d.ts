@@ -11,5 +11,5 @@ declare module "react" {
     children?: ReactNode;
   }
 
-  export const unstable_ViewTransition: (props: ViewTransitionProps) => ReactNode;
+  export const ViewTransition: (props: ViewTransitionProps) => ReactNode;
 }

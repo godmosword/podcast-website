@@ -1,4 +1,4 @@
-import { unstable_ViewTransition as ViewTransition } from "react";
+import { ViewTransition } from "react";
 import type { ReactNode } from "react";
 import { storyCoverTransitionName } from "@/lib/story-cover-transition";
 import styles from "./StoryCoverMorph.module.css";

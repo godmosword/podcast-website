@@ -4,7 +4,7 @@ import { medalCount } from "@/lib/gamekit/progress/meta";
 import type { GameKitGameId } from "@/lib/gamekit/types";
 import type { ContinueState, ProgressStore } from "@/lib/progress-store";
 
-export type ParentGameRow = {
+type ParentGameRow = {
   gameId: GameKitGameId;
   title: string;
   emoji: string;

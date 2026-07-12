@@ -17,7 +17,7 @@ import styles from "./page.module.css";
 export const metadata: Metadata = {
   title: "給家長的中文車車 Podcast 指南",
   description:
-    "整理車車遊樂園適合家長搜尋的重點：中文車車 podcast、適合年齡、故事主題、陪聽方法與代表性集數。",
+    "整理車車遊樂園適合家長搜尋的重點：中文車車 Podcast、適合年齡、故事主題、陪聽方法與代表性集數。",
   alternates: { canonical: "/for-parents" },
   other: { dateModified: STATIC_PAGE_MODIFIED_DATES["/for-parents"] },
   openGraph: {
@@ -40,7 +40,7 @@ export default function ForParentsPage() {
       <SiteHeader />
 
       <header className={styles.header}>
-        <p className={styles.eyebrow}>家長搜尋指南</p>
+        <p className={styles.eyebrow}>家長指南</p>
         <h1 className={styles.title}>中文車車故事，陪孩子安心聽</h1>
         <p className={styles.lede}>
           整理家長最常搜尋的問題：適合年齡、故事內容、更新方式與代表性集數。

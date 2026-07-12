@@ -46,8 +46,8 @@ function clamp(v: number, lo: number, hi: number): number {
 }
 
 type CoordSpace =
-  | { kind: "tile"; tileW: number; tileH: number }
-  | { kind: "map"; stageW: number; stageH: number };
+  | { kind: "tile"; tileH: number }
+  | { kind: "map"; stageH: number };
 
 function buildRouteMap(routes: RoamerRoute[]): Map<string, RouteMeta> {
   const map = new Map<string, RouteMeta>();
@@ -95,8 +95,7 @@ export type RoamerFrame = {
 
 export function computeFrame(
   sim: RoamerSim,
-  tileW: number,
-  tileH: number,
+  height: number,
   dtMs: number,
   now: number,
 ): RoamerFrame {
@@ -123,7 +122,7 @@ export function computeFrame(
 
   const bob = Math.sin(now * BOB_FREQ + sim.phase) * BOB_AMP;
   const hop = Math.max(0, -bob);
-  const depthScale = DEPTH_MIN + (DEPTH_MAX - DEPTH_MIN) * clamp(P.y / tileH, 0, 1);
+  const depthScale = DEPTH_MIN + (DEPTH_MAX - DEPTH_MIN) * clamp(P.y / height, 0, 1);
 
   return {
     groundX: P.x,
@@ -226,9 +225,8 @@ function applySim(
   dtMs: number,
   now: number,
 ): void {
-  const w = space.kind === "tile" ? space.tileW : space.stageW;
-  const h = space.kind === "tile" ? space.tileH : space.stageH;
-  const frame = computeFrame(sim, w, h, dtMs, now);
+  const height = space.kind === "tile" ? space.tileH : space.stageH;
+  const frame = computeFrame(sim, height, dtMs, now);
   applyFrame(
     nodes,
     space.kind === "map" ? { ...frame, z: mapDepthZ(frame.groundY, "roamer") } : frame,

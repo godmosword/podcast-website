@@ -1,6 +1,5 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import React from "react";
 import { ImageResponse } from "next/og";
 import type { Story } from "@/data/content";
 import { getCharactersForStory } from "@/data/characters";

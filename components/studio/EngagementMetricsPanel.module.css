@@ -9,7 +9,7 @@
 
 .lead {
   margin: 0 0 1rem;
-  color: var(--text-muted, #555);
+  color: var(--ink-soft);
   font-size: 0.95rem;
   line-height: 1.5;
 }
@@ -30,7 +30,7 @@
 
 .card dt {
   font-size: 0.82rem;
-  color: var(--text-muted, #666);
+  color: var(--ink-soft);
   margin-bottom: 0.25rem;
 }
 
@@ -53,5 +53,5 @@
 .note {
   margin: 0.75rem 0 0;
   font-size: 0.88rem;
-  color: var(--text-muted, #555);
+  color: var(--ink-soft);
 }

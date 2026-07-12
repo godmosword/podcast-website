@@ -316,7 +316,7 @@
   padding-top: 0.65rem;
 }
 
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .softLinks {
     grid-template-columns: 1fr;
   }
@@ -384,6 +384,11 @@
   font-size: 1.05rem;
   font-weight: 900;
   color: var(--landing-brand-ink);
+}
+
+:global([data-theme="night"]) .storyCardEp,
+:global([data-theme="night"]) .storiesMore {
+  color: var(--ink);
 }
 
 .storyCardTitle {

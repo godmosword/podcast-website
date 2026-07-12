@@ -16,15 +16,7 @@ export const metadata: Metadata = {
   },
 };
 
-type CandyKartGamePageProps = {
-  searchParams: Promise<{ debugFinish?: string }>;
-};
-
-export default async function CandyKartGamePage({
-  searchParams,
-}: CandyKartGamePageProps) {
-  const { debugFinish } = await searchParams;
-
+export default function CandyKartGamePage() {
   return (
     <main className={styles.main} aria-label="繽紛卡丁車小遊戲">
       <Link href="/games" className={styles.back}>
@@ -32,7 +24,7 @@ export default async function CandyKartGamePage({
       </Link>
       <CandyKartIframeHost
         title="繽紛卡丁車遊戲"
-        src={candyKartIframeSrc(debugFinish)}
+        src={candyKartIframeSrc()}
         className={styles.kartFrame}
       />
       <p className={styles.kartNote}>畫面沒出來嗎？重新整理一下試試 🍬</p>

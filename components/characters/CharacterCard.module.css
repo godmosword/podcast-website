@@ -131,7 +131,7 @@
   background: var(--warm-chip-hover);
 }
 
-@media (max-width: 620px) {
+@media (max-width: 640px) {
   .cardBody {
     padding: 12px;
   }

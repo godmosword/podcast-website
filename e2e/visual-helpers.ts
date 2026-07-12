@@ -40,6 +40,10 @@ export async function stabilizeVisualPage(
     { storageKey: PROGRESS_STORAGE_KEY, themeMode: theme },
   );
 
+  // addInitScript 只會在下一次 navigation 執行；呼叫端通常已先 goto，
+  // reload 讓 ThemeProvider 在 mount 前讀到固定主題，避免當地 bedtime 污染截圖。
+  await page.reload();
+
   await page.addStyleTag({
     content: `
       *, *::before, *::after {

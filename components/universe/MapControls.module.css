@@ -14,17 +14,17 @@
   justify-content: center;
   width: 56px;
   height: 56px;
-  border: 2px solid #e7d3ad;
+  border: 2px solid color-mix(in srgb, var(--c-yellow) 55%, var(--line));
   border-radius: 18px;
   /* 奶油／木質暖底，呼應全站手繪黏土風與木牌名牌，不用扁平白卡 */
-  background: linear-gradient(#fffaf1, #fff2dc);
-  color: #7a5a2e;
+  background: linear-gradient(var(--card-2), var(--card));
+  color: var(--cta-warm-fg);
   font-size: 1.55rem;
   font-weight: 800;
   line-height: 1;
   cursor: pointer;
   /* 厚實可按下的黏土感底陰影 */
-  box-shadow: 0 3px 0 #dcbb87, 0 5px 8px rgba(120, 90, 40, 0.18);
+  box-shadow: var(--shadow-card), var(--shadow-sm);
   transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
@@ -51,7 +51,7 @@
 
 .btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 0 #dcbb87, 0 7px 10px rgba(120, 90, 40, 0.2);
+  box-shadow: var(--shadow-card), var(--shadow-md);
 }
 
 .btn:disabled {
@@ -62,12 +62,12 @@
 .btn:disabled:hover,
 .btn:disabled:active {
   transform: none;
-  box-shadow: 0 3px 0 #dcbb87, 0 5px 8px rgba(120, 90, 40, 0.18);
+  box-shadow: var(--shadow-card), var(--shadow-sm);
 }
 
 .btn:active {
   transform: translateY(3px);
-  box-shadow: 0 0 0 #dcbb87, 0 2px 4px rgba(120, 90, 40, 0.18);
+  box-shadow: none;
 }
 
 .btn:focus-visible {
@@ -91,7 +91,7 @@
   }
 }
 
-@media (min-width: 481px) and (max-width: 1024px) {
+@media (min-width: 480px) and (max-width: 767px) {
   .controls {
     right: calc(14px + var(--safe-right));
     bottom: calc(14px + var(--safe-bottom));

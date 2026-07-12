@@ -21,3 +21,7 @@
 .badge:hover {
   background: color-mix(in srgb, var(--landing-brand) 32%, var(--card));
 }
+
+:global([data-theme="night"]) .badge {
+  color: var(--ink);
+}

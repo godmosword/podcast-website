@@ -75,7 +75,7 @@ export default async function VehiclePage({
       </ul>
 
       <p className={styles.more}>
-        <Link href="/for-parents">家長搜尋指南</Link>
+        <Link href="/for-parents">家長指南</Link>
       </p>
 
       <SiteFooter />

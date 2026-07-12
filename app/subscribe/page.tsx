@@ -28,7 +28,7 @@ export default function SubscribePage() {
         <h1 className={styles.title}>訂閱新集通知</h1>
         <p className={styles.lede}>
           留下 Email，我們會在新故事上線時通知你。完整收聽仍建議在{" "}
-          <Link href="/#connect">Spotify 或 Apple Podcast</Link> 訂閱節目。
+          <Link href="/#connect">Spotify 或 Apple Podcasts</Link> 訂閱節目。
         </p>
       </header>
 

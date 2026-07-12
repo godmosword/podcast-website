@@ -18,9 +18,9 @@
 }
 
 .active {
-  border-color: #e64980;
-  color: #e64980;
-  background: linear-gradient(180deg, #fff5f8, var(--card));
+  border-color: var(--brand-favorite);
+  color: var(--brand-favorite);
+  background: linear-gradient(180deg, var(--brand-favorite-surface), var(--card));
 }
 
 @media (hover: hover) {

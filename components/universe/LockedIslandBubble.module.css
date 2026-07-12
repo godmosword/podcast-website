@@ -12,7 +12,7 @@
   box-shadow: 0 4px 14px rgba(36, 74, 46, 0.14);
   font-size: 13px;
   font-weight: 800;
-  color: #3d3428;
+  color: var(--ink);
   white-space: nowrap;
   animation: bubblePop 1.5s ease forwards;
 }

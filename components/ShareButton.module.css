@@ -33,9 +33,13 @@
 }
 
 .line {
-  /* 邊框維持 LINE 品牌綠；文字加深至對白底 ≥4.5:1（原 #06c755 僅 2.25） */
-  border-color: #06c755;
-  color: #047a34;
+  /* 邊框維持 LINE 品牌綠；文字使用足夠對比的品牌深綠。 */
+  border-color: var(--brand-line);
+  color: var(--brand-line-ink);
+}
+
+:global([data-theme="night"]) .line {
+  color: var(--night-share);
 }
 
 .btn:active {

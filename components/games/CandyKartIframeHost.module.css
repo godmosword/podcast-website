@@ -10,7 +10,7 @@
   border: none;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
-  background: #fff7ed;
+  background: var(--surface-game);
   display: block;
 }
 
@@ -19,5 +19,5 @@
   height: min(72vh, 640px);
   min-height: 360px;
   border-radius: var(--radius-lg);
-  background: #fff7ed;
+  background: var(--surface-game);
 }

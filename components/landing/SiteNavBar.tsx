@@ -109,18 +109,20 @@ function externalProps(item: NavItem) {
     : {};
 }
 
+function isInternalPathActive(pathname: string, href: string): boolean {
+  return href.startsWith("/") && (pathname === href || pathname.startsWith(`${href}/`));
+}
+
 /** 家長路徑是否應標 trigger active（聯絡為 mailto／外連，無站內 path）。 */
 function isParentPathActive(pathname: string): boolean {
   return (
-    pathname === "/for-parents" ||
-    pathname.startsWith("/for-parents/") ||
-    pathname === "/about" ||
-    pathname.startsWith("/about/")
+    isInternalPathActive(pathname, "/for-parents") ||
+    isInternalPathActive(pathname, "/about")
   );
 }
 
-/** 家長指南下拉：沿用原 MoreDropdown 手勢（button + menu、Esc／外點；不套用 focus trap）。 */
-function NavDropdown({
+/** 家長指南下拉（button + menu、Esc／外點；不套用 focus trap）。 */
+function ParentGuideDropdown({
   items,
   pathname,
 }: {
@@ -150,10 +152,10 @@ function NavDropdown({
   }, [open]);
 
   return (
-    <div ref={wrapRef} className={styles.more}>
+    <div ref={wrapRef} className={styles.parentDropdown}>
       <button
         type="button"
-        className={`${styles.moreBtn} ${triggerActive ? styles.moreBtnActive : ""}`}
+        className={`${styles.parentDropdownBtn} ${triggerActive ? styles.parentDropdownBtnActive : ""}`}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={menuId}
@@ -163,7 +165,7 @@ function NavDropdown({
         <Icon
           name="chevron-right"
           size={14}
-          className={`${styles.moreChev} ${open ? styles.moreChevOpen : ""}`}
+          className={`${styles.parentDropdownChev} ${open ? styles.parentDropdownChevOpen : ""}`}
         />
       </button>
       <AnimatePresence>
@@ -187,7 +189,7 @@ function NavDropdown({
                 role="menuitem"
                 href={item.href}
                 className={styles.dropdownLink}
-                aria-current={pathname === item.href ? "page" : undefined}
+                aria-current={isInternalPathActive(pathname, item.href) ? "page" : undefined}
                 onClick={() => setOpen(false)}
                 {...externalProps(item)}
               >
@@ -245,8 +247,7 @@ export default function SiteNavBar() {
         {/* 桌面：主列依 PRIMARY_ORDER＋家長指南下拉（無「更多」） */}
         <nav className={styles.desktopNav} aria-label="主要分區">
           {primaryItems.map((item) => {
-            const active =
-              pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const active = isInternalPathActive(pathname, item.href);
             return (
               <Link
                 key={item.id}
@@ -265,7 +266,7 @@ export default function SiteNavBar() {
               </Link>
             );
           })}
-          <NavDropdown items={parentDropdownItems} pathname={pathname} />
+          <ParentGuideDropdown items={parentDropdownItems} pathname={pathname} />
         </nav>
 
         <div className={styles.actions}>
@@ -326,8 +327,7 @@ export default function SiteNavBar() {
               // 行動：for-parents 顯示「家長指南」（桌面下拉則為「指南首頁」）
               const displayLabel =
                 row.id === "for-parents" ? "家長指南" : item.label;
-              const active =
-                pathname === item.href || pathname.startsWith(`${item.href}/`);
+              const active = isInternalPathActive(pathname, item.href);
               return (
                 <li
                   key={item.id}

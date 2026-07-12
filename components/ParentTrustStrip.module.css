@@ -21,6 +21,14 @@
   text-underline-offset: 0.18em;
 }
 
+:global([data-theme="night"]) .strip {
+  color: var(--ink);
+}
+
+:global([data-theme="night"]) .strip a {
+  color: var(--night-link);
+}
+
 .strip a:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
@@ -41,10 +49,10 @@
 }
 
 .dark a {
-  color: #fff;
+  color: var(--on-dark);
 }
 
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .strip {
     align-items: flex-start;
     flex-direction: column;

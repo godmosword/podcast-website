@@ -21,6 +21,10 @@
   /* 文字顏色由 inline style 指定 */
 }
 
+:global([data-theme="night"]) .ep {
+  color: var(--ink) !important;
+}
+
 .durationValue {
   font-weight: 700;
   color: var(--ink);

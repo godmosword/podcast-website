@@ -1,14 +1,14 @@
 // ============================================================
 // 車車遊樂園 — 故事資料
 // ============================================================
-// 內容對應 podcast《車車遊樂園》(Bonbon & 馬米) 的真實集數。
+// 內容對應 Podcast《車車遊樂園》(Bonbon & 馬米) 的真實集數。
 // 每則故事對應 public/stories/<slug>/：
 //   - audio.mp3        該集真實音檔
 //   - 01.jpg ~ NN.jpg  看圖翻頁用的插畫（pageCount 需與檔案數一致）
 //
 // 資料來源：
 //   - manualStories：下方手動維護（EP1–6，slug 為 ep-N）
-//   - apple-synced.json：npm run sync:apple 從 Apple Podcast 追加（MVP 單圖）
+//   - apple-synced.json：npm run sync:apple 從 Apple Podcasts 追加（MVP 單圖）
 //
 // 查詢 API 請使用 data/content.ts（getStories / getStory / storiesByNewest）。
 // ============================================================

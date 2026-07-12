@@ -2,10 +2,10 @@ import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import sharp from "sharp";
 
-export const LCP_WEBP_QUALITY = 82;
-export const LCP_AVIF_QUALITY = 50;
+const LCP_WEBP_QUALITY = 82;
+const LCP_AVIF_QUALITY = 50;
 
-export function jpgSiblingPaths(jpgPath: string): { webp: string; avif: string } {
+function jpgSiblingPaths(jpgPath: string): { webp: string; avif: string } {
   const base = jpgPath.replace(/\.jpe?g$/i, "");
   return { webp: `${base}.webp`, avif: `${base}.avif` };
 }

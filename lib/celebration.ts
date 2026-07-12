@@ -118,9 +118,3 @@ export function requestCelebration(event: CelebrationEventId): CelebrationDecisi
   }
   return clientScheduler.request(event);
 }
-
-/** 測試用：重置 client 單例。 */
-export function resetCelebrationScheduler(): void {
-  clientScheduler?.reset();
-  clientScheduler = null;
-}

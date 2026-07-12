@@ -13,7 +13,7 @@ type StoryCardProps = {
   story: Story;
   /** 列表索引，用於進場依序彈入 */
   index?: number;
-  /** list：橫式列表（預設）；grid：故事牆直式卡片 */
+  /** list：橫式列表（預設）；grid：直式卡片 */
   variant?: "list" | "grid";
   /** 隱藏日期 / 時長 / 年齡（僅保留 EP）；首頁列表用 */
   hideMeta?: boolean;

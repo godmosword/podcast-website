@@ -17,7 +17,7 @@
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 640px) {
   .root {
     right: calc(clamp(20px, 5vw, 56px) + var(--safe-right));
   }

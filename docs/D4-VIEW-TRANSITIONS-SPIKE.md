@@ -5,7 +5,7 @@
 ## 範圍
 
 - **一組**共享元素：`StoryCard` 縮圖 ↔ `/story/[slug]` hero 封面
-- 技術：`next.config` `experimental.viewTransition: true` + React `unstable_ViewTransition`
+- 技術：`next.config` `experimental.viewTransition: true` + React 19.3 canary `ViewTransition`
 - **不採** `next-view-transitions` 套件
 - **未做**（通過 spike 後再議）：全頁 cross-fade、`Link transitionTypes` 方向滑動（需 Next 16+ 型別）
 
@@ -34,8 +34,7 @@
 
 ## 已知限制
 
-- 需 **Next ≥ 15.5.20** 才有 `experimental.viewTransition` schema；執行期 alias 至 `react-experimental`。
-- 穩定版 `react` 型別無 `ViewTransition`；見 `types/view-transition.d.ts`。
+- 目前固定 **Next 16.2.10 + React 19.3 canary**；穩定版 React 19.2 尚未提供 `ViewTransition` runtime export，型別補充見 `types/view-transition.d.ts`。
 - `Link transitionTypes`（nav-forward／back）本 spike **未啟用**（15.5.x Link 型別未暴露）。
 - 地圖／播放器／遊戲路由未套用。
 

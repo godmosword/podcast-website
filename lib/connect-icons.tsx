@@ -1,4 +1,4 @@
-import React, { type CSSProperties, type ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import type { PlatformIcon } from "@/lib/platforms";
 import type { SocialIcon } from "@/lib/social";
 

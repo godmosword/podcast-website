@@ -117,6 +117,7 @@ const TARGET_MAX = 20;
 const HARD_MIN = 12;
 const HARD_MAX = 28;
 const INTRO_MAX = 50;
+const SEGMENT_MAX_COMPLETION_TOKENS = 4096;
 
 // ── 黏土風格 prompt（萃取自 DESIGN.md）──────────────────────
 export const CLAY_STYLE_PREFIX =
@@ -377,7 +378,7 @@ export async function segmentByOpenAI(
       ? roster
           .map(
             (c) =>
-              `- ${c.name} (aliases: ${c.aliases.join("/") || "—"}; ${c.vehicle ?? ""}): ${c.desc}`,
+              `- ${c.name} (aliases: ${c.aliases.join("/") || "—"}; vehicle: ${c.vehicle ?? "—"})`,
           )
           .join("\n")
       : "(none yet)";
@@ -411,7 +412,14 @@ export async function segmentByOpenAI(
     ],
     response_format: { type: "json_object" },
     temperature: 0.4,
+    max_completion_tokens: SEGMENT_MAX_COMPLETION_TOKENS,
   });
+
+  if (resp.usage) {
+    console.log(
+      `[token usage] model=${getTextModel()} prompt=${resp.usage.prompt_tokens} completion=${resp.usage.completion_tokens} total=${resp.usage.total_tokens}`,
+    );
+  }
 
   const content = resp.choices[0]?.message?.content ?? "{}";
   const parsed = SegmentSchema.parse(JSON.parse(content));

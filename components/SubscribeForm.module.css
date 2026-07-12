@@ -99,7 +99,7 @@
 }
 
 .error {
-  color: var(--c-coral, #c44);
+  color: var(--status-error);
   font-weight: 700;
 }
 

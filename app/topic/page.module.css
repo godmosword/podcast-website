@@ -56,7 +56,7 @@
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
     background: var(--leaf);
-    color: #fff;
-    border-color: #52b86a;
+    color: var(--on-dark);
+    border-color: var(--warm-accent);
   }
 }

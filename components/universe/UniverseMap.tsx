@@ -188,7 +188,7 @@ function UniverseMapContent({
   }, [interaction, revealSheet]);
 
   // 深連結開 sheet：與點島同一條狀態機路徑（openZone）。
-  // 依賴不含 interaction——關 sheet 時 query 尚未（非同步 router.replace）清掉，
+  // 依賴不含 interaction——關 sheet 時 query 尚未同步清掉，
   // 若依賴狀態會立刻重跑把 sheet 開回來；改由 interactionRef 讀當下值。
   // camera 完成首次量測前（sizeRef 0×0）flyTo 會 no-op：以「已離開初始姿態」
   // 判定 ready，未 ready 先不開，等量測 setCam 的 commit 觸發本 effect 重跑再飛。
@@ -606,7 +606,6 @@ function UniverseMapWithDevFlags({
   zoneStoryPreviewsMap: Record<ZoneId, ZoneStoriesBundle>;
 }) {
   const params = useSearchParams();
-  const router = useRouter();
   const devStatusOverrides =
     process.env.NODE_ENV !== "production"
       ? parseDevStatusOverrides(`?${params.toString()}`)
@@ -618,9 +617,13 @@ function UniverseMapWithDevFlags({
       if (zoneId) next.set("zone", zoneId);
       else next.delete("zone");
       const q = next.toString();
-      router.replace(q ? `/adventures?${q}` : "/adventures", { scroll: false });
+      const href = q ? `/adventures?${q}` : "/adventures";
+      // Keep the address bar synchronous with the sheet state. This also
+      // avoids a production-only delay where navigation can leave a
+      // static route's old search params visible for several seconds.
+      window.history.replaceState(null, "", href);
     },
-    [params, router],
+    [params],
   );
 
   return (

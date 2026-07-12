@@ -138,6 +138,7 @@ export default function StoryPlayer({
   const audioRef = useRef<HTMLAudioElement>(null);
   const nativeAudioRef = useRef<HTMLAudioElement | null>(null);
   const adoptedAudioRef = useRef<HTMLAudioElement | null>(null);
+  const adoptedReleaseTimerRef = useRef<number | null>(null);
   const transportRef = useRef<{
     togglePlay: () => void;
     skip: (delta: number) => void;
@@ -155,7 +156,11 @@ export default function StoryPlayer({
   // 最先執行的 effect：在其他播放器 effects 綁事件前接管 Landing 已啟播的音訊。
   useEffect(() => {
     if (!adoptLandingPlayback) return;
-    const adopted = takeLandingPlayback(slug);
+    if (adoptedReleaseTimerRef.current !== null) {
+      window.clearTimeout(adoptedReleaseTimerRef.current);
+      adoptedReleaseTimerRef.current = null;
+    }
+    const adopted = adoptedAudioRef.current ?? takeLandingPlayback(slug);
     if (!adopted) return;
 
     adoptedAudioRef.current = adopted;
@@ -165,11 +170,17 @@ export default function StoryPlayer({
     if (Number.isFinite(adopted.duration)) setDuration(adopted.duration);
 
     return () => {
-      adopted.pause();
-      adopted.removeAttribute("src");
-      adopted.load();
-      adoptedAudioRef.current = null;
-      audioRef.current = nativeAudioRef.current;
+      // React Strict Mode runs effect cleanup/setup once during development.
+      // Defer disposal so that cycle can reuse the same user-gesture audio.
+      adoptedReleaseTimerRef.current = window.setTimeout(() => {
+        if (adoptedAudioRef.current !== adopted) return;
+        adopted.pause();
+        adopted.removeAttribute("src");
+        adopted.load();
+        adoptedAudioRef.current = null;
+        audioRef.current = nativeAudioRef.current;
+        adoptedReleaseTimerRef.current = null;
+      }, 0);
     };
   }, [adoptLandingPlayback, slug]);
 

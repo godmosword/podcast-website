@@ -164,6 +164,10 @@
   line-height: 1.5;
 }
 
+:global([data-theme="night"]) .nextHint a {
+  color: var(--night-link) !important;
+}
+
 .lines {
   margin: 0;
   padding-left: 1.25rem;

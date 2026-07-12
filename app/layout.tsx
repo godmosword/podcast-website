@@ -51,7 +51,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   openGraph: {
     title: "車車遊樂園",
-    description: "每天一個車車故事，陪孩子長大。Bonbon & 馬米親子 podcast。",
+    description: "每天一個車車故事，陪孩子長大。Bonbon & 馬米親子 Podcast。",
     locale: "zh_TW",
     type: "website",
     siteName: "車車遊樂園",

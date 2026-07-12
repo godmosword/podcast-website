@@ -83,7 +83,7 @@
 | `vercel.json` | 不存在 | repo 內沒有可見的 CDN/header/firewall bot 阻擋設定；Vercel dashboard 設定不在 repo，無法由本機驗證 | GEO-0 記錄；GEO-6 上線後人工確認 |
 | `middleware.ts` / `middleware.js` | 不存在 | 沒有 middleware 層阻擋 bot | 無需修正 |
 | `next.config.ts` | 只設定 `reactStrictMode` 與 legacy story redirects | 未見 bot 阻擋；redirects 需保留既有 URL 相容 | GEO-5 檢查 sitemap/URL 不回歸 |
-| `.github/workflows/*` | Apple Podcast sync / watchdog | 無 bot blocking；不屬 CDN 層 | 無需修正 |
+| `.github/workflows/*` | Apple Podcasts sync / watchdog | 無 bot blocking；不屬 CDN 層 | 無需修正 |
 
 ## Route Rendering / Crawler Visibility
 

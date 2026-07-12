@@ -1,6 +1,6 @@
 export const CHANNEL_TITLE = "車車遊樂園";
 export const CHANNEL_DESCRIPTION =
-  "Bonbon & 馬米的親子 podcast《車車遊樂園》— 看圖聽故事，適合睡前親子共讀。";
+  "Bonbon & 馬米的親子 Podcast《車車遊樂園》— 看圖聽故事，適合睡前親子共讀。";
 
 export const CHANNEL_OWNER_NAME = "Bonbon & 馬米";
 export const CHANNEL_OWNER_EMAIL = "bonboncarstory@gmail.com";

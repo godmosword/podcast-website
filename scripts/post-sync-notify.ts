@@ -63,7 +63,7 @@ function siteBase(): string {
 }
 
 export function buildCommitMessage(report: SyncRunReport): string {
-  const lines: string[] = ["chore: sync Apple Podcast from RSS", ""];
+  const lines: string[] = ["chore: sync Apple Podcasts from RSS", ""];
 
   if (report.newEpisodes.length > 0) {
     lines.push("## 新集（MVP 已同步，pageCount=1）");
@@ -201,7 +201,7 @@ function main(): void {
   const commitMsgPath = process.env.SYNC_COMMIT_MSG_PATH ?? "sync-commit-msg.txt";
 
   if (!reportPath) {
-    writeFileSync(commitMsgPath, "chore: sync Apple Podcast from RSS\n", "utf8");
+    writeFileSync(commitMsgPath, "chore: sync Apple Podcasts from RSS\n", "utf8");
     console.log("SYNC_REPORT_PATH 未設，使用預設 commit 訊息。");
     return;
   }

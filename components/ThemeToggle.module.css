@@ -103,7 +103,7 @@
   color: var(--ink-soft);
 }
 
-@media (max-width: 400px) {
+@media (max-width: 480px) {
   .groupText {
     width: 100%;
     justify-content: center;

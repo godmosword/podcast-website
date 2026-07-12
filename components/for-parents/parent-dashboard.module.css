@@ -12,7 +12,7 @@
   gap: 16px;
 }
 
-@media (min-width: 720px) {
+@media (min-width: 768px) {
   .grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -26,7 +26,7 @@
   padding: 18px;
   border: 1.5px solid var(--line);
   border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.94);
+  background: color-mix(in srgb, var(--card) 94%, var(--mix-base));
   box-shadow: var(--shadow-sm);
 }
 
@@ -34,7 +34,7 @@
   margin: 0 0 12px;
   font-size: 1.15rem;
   font-weight: 900;
-  color: #172554;
+  color: var(--warm-heading);
 }
 
 .cardHint {
@@ -61,7 +61,7 @@
   flex: 1 1 120px;
   padding: 12px;
   border-radius: var(--radius-md);
-  background: linear-gradient(160deg, #fff9ee, #f3fbff);
+  background: linear-gradient(160deg, var(--page-warm-from), var(--page-warm-mid));
   text-align: center;
 }
 
@@ -69,7 +69,7 @@
   display: block;
   font-size: 1.5rem;
   font-weight: 900;
-  color: #0f766e;
+  color: var(--warm-accent);
 }
 
 .statLabel {
@@ -95,7 +95,7 @@
   gap: 10px;
   padding: 10px 12px;
   border-radius: var(--radius-md);
-  background: #fafcff;
+  background: var(--card-2);
   border: 1px solid color-mix(in srgb, var(--c-sky) 25%, transparent);
 }
 
@@ -138,10 +138,10 @@
 .sticker {
   padding: 6px 12px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--c-yellow) 35%, white);
+  background: color-mix(in srgb, var(--c-yellow) 35%, var(--mix-base));
   font-size: 0.82rem;
   font-weight: 800;
-  color: #614018;
+  color: var(--cta-warm-fg);
 }
 
 .storyList {
@@ -160,7 +160,7 @@
   gap: 12px;
   padding: 10px 12px;
   border-radius: var(--radius-md);
-  background: #fff;
+  background: var(--card);
   border: 1px solid var(--line);
   text-decoration: none;
   color: inherit;
@@ -175,7 +175,7 @@
   flex-shrink: 0;
   font-size: 0.78rem;
   font-weight: 800;
-  color: #0f766e;
+  color: var(--warm-accent);
 }
 
 .reason {
@@ -224,14 +224,14 @@
   height: 32px;
   border: none;
   border-radius: 999px;
-  background: #d1d5db;
+  background: color-mix(in srgb, var(--ink-soft) 45%, var(--card));
   cursor: pointer;
   flex-shrink: 0;
   transition: background 0.2s ease;
 }
 
 .toggleOn {
-  background: #0f766e;
+  background: var(--warm-accent);
 }
 
 .toggleKnob {
@@ -241,7 +241,7 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--card);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   transition: transform 0.2s ease;
 }

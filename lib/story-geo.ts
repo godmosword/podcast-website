@@ -30,10 +30,6 @@ function cleanSummary(summary?: string): string {
     .trim();
 }
 
-export function storyPlainSummary(story: Story): string {
-  return cleanSummary(story.summary);
-}
-
 function compactSummaryPoint(story: Story): string {
   const cleaned = cleanSummary(story.summary);
   if (cleaned) {

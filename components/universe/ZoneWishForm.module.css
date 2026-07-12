@@ -71,8 +71,8 @@
   border-radius: var(--radius-sm);
   font-size: 0.95rem;
   font-weight: 700;
-  color: #14532d;
-  background: color-mix(in srgb, #bfe3c4 55%, var(--card));
+  color: var(--warm-accent);
+  background: color-mix(in srgb, var(--c-mint) 55%, var(--card));
 }
 
 .error {

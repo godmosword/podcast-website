@@ -7,19 +7,18 @@ import { join, relative } from "node:path";
 const HEX_PATTERN = /#[0-9a-fA-F]{3,8}\b/g;
 
 /** 允許保留硬編色（播放器黑底、地圖海圖固定淺色等）。 */
-export const HARDCODED_COLOR_ALLOWLIST = [
+const HARDCODED_COLOR_ALLOWLIST = [
   "components/StoryPlayer.module.css",
   "components/universe/UniverseMap.module.css",
   "components/universe/ZoneIsland.module.css",
   "components/universe/ZoneSheet.module.css",
   "components/landing/LandingSegment.module.css",
-  "components/landing/LandingNavBar.module.css",
   "app/topic/page.module.css",
   "app/games/candy-kart/page.module.css",
 ] as const;
 
 /** D3 驗收頁：不得出現裸 hex（須改用 design token）。 */
-export const D3_TOKENIZED_CSS_FILES = [
+const D3_TOKENIZED_CSS_FILES = [
   "app/characters/page.module.css",
   "app/for-parents/page.module.css",
   "app/for-parents/dashboard/page.module.css",

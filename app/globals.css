@@ -59,8 +59,6 @@
   /* 場景色（裝飾用） */
   --sky: #d4ecff;
   --sky-2: #eaf6ff;
-  --cloud: #ffffff;
-  --road: #8d857b;
   --sun: #ffd866;
   --leaf: #b7df9b;
   --sky-blue: #8fcde8;
@@ -146,6 +144,20 @@
   --illus-warm: none;
   --focus-ring: var(--ink);
   --chip-active-fg: #ffffff;
+  --accent: var(--warm-accent);
+  --accent-soft: color-mix(in srgb, var(--accent) 18%, transparent);
+  --on-dark: #ffffff;
+  --brand-instagram: #e6683c;
+  --brand-favorite: #e64980;
+  --brand-favorite-surface: #fff5f8;
+  --brand-line: #06c755;
+  --brand-line-ink: #047a34;
+  --surface-game: #fff7ed;
+  --surface-game-warm: #fff9ee;
+  --surface-game-sky: #f3fbff;
+  --surface-game-pink: #fff0f7;
+  --bedtime-veil: #0c1230;
+  --status-error: #b42318;
   --float-amp: 4px;
   /* 螢光筆色塊上的文字：底色恆為淺色（黃/粉/薄荷…），文字需恆深，
      不可隨夜晚模式變淺，否則淺字壓淺底會讀不到（WCAG 對比）。 */
@@ -174,8 +186,6 @@
 
   --sky: #2a3458;
   --sky-2: #323d66;
-  --cloud: #3a4568;
-  --road: #6e685f;
   --sun: #e8d48a;
   --leaf: #8fb876;
   --sky-blue: #6ba8c4;
@@ -198,6 +208,8 @@
 
   --landing-brand: #d9701a;
   --landing-brand-ink: #2a1808;
+  --night-link: #c7b8ff;
+  --night-share: #72e2a0;
   --landing-heading: #5da8a1;
 
   --page-warm-from: color-mix(in srgb, var(--c-yellow) 8%, var(--bg));
@@ -212,6 +224,7 @@
   --warm-heading: color-mix(in srgb, var(--c-sky) 40%, var(--ink));
   --warm-portrait-bg: color-mix(in srgb, var(--c-teal) 16%, var(--card));
   --warm-cover-bg: color-mix(in srgb, var(--c-sky) 14%, var(--card));
+  --status-error: #ffb4ab;
   --support-from: color-mix(in srgb, var(--landing-brand) 82%, #c43d1a);
   --support-to: color-mix(in srgb, var(--landing-brand) 68%, #9a2e12);
   --support-fg: var(--landing-brand-ink);

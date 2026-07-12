@@ -54,9 +54,7 @@ const STATIC_PUBLIC_ASSETS = [
   "/apple-touch-icon.png",
 ] as const;
 
-export type AssetTaxonomy = "deployed" | "staging" | "dynamic" | "orphan";
-
-export type LargeFileEntry = {
+type LargeFileEntry = {
   path: string;
   bytes: number;
 };
@@ -128,7 +126,7 @@ export function listDeployedImagePaths(root: string): string[] {
 }
 
 /** staging／gitignore 目錄內圖片（存在才計）。 */
-export function listStagingImagePaths(root: string): { path: string; dir: string }[] {
+function listStagingImagePaths(root: string): { path: string; dir: string }[] {
   const results: { path: string; dir: string }[] = [];
   for (const dir of STAGING_DIRS) {
     const abs = join(root, dir);
@@ -225,7 +223,7 @@ export function collectDynamicReferencePaths(): string[] {
 }
 
 /** 掃描原始碼中的字面量 `/…圖檔` 路徑（補充動態推導未涵蓋者）。 */
-export function collectStaticSourceReferencePaths(root: string): string[] {
+function collectStaticSourceReferencePaths(root: string): string[] {
   const pattern = /["'`](\/[^"'` ]+\.(?:jpe?g|png|webp|gif|svg|avif))["'`]/gi;
   const refs = new Set<string>();
 

@@ -64,8 +64,8 @@ export default function IslandRoamerLayer({
   );
 
   const space = useMemo(
-    () => ({ kind: "tile" as const, tileW, tileH }),
-    [tileW, tileH],
+    () => ({ kind: "tile" as const, tileH }),
+    [tileH],
   );
 
   const occluder = ZONE_OCCLUDERS[zoneId];

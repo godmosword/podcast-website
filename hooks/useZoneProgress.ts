@@ -53,14 +53,3 @@ export function useCompletedSlugs(): ReadonlySet<string> {
 
   return useMemo(() => new Set(completed), [completed]);
 }
-
-/** 地圖進度中樞：各島「已聽完／總集數」（見 useCompletedSlugs 的口徑與安全性說明）。 */
-export function useZoneProgress(
-  zoneStoriesMap: Partial<Record<ZoneId, Pick<ZoneStoriesBundle, "slugs">>>,
-): ZoneProgressMap {
-  const completedSlugs = useCompletedSlugs();
-  return useMemo(
-    () => computeZoneProgress(zoneStoriesMap, completedSlugs),
-    [zoneStoriesMap, completedSlugs],
-  );
-}

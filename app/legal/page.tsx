@@ -25,7 +25,7 @@ export default function LegalPage() {
         <section className={styles.section} id="nature">
           <h2 className={styles.heading}>網站性質</h2>
           <p className={styles.text}>
-            本網站為 Bonbon &amp; 馬米親子 podcast
+            本網站為 Bonbon &amp; 馬米親子 Podcast
             《車車遊樂園》的「看圖聽故事」官方輔助網站，提供節目介紹、插圖翻頁與語音播放體驗，並導流至各收聽平台與社群帳號。
           </p>
         </section>
@@ -169,7 +169,7 @@ export default function LegalPage() {
           <p className={styles.text}>
             若您為權利人，認為本網站內容有侵權或需更正之處；或您為家長，欲查詢、更正或刪除孩子相關資料，請來信{" "}
             <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
-            ，或透過節目官方社群或 podcast 平台與 Bonbon &amp; 馬米聯繫。
+            ，或透過節目官方社群或 Podcast 平台與 Bonbon &amp; 馬米聯繫。
           </p>
         </section>
       </main>

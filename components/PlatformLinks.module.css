@@ -51,7 +51,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  color: #fff;
+  color: var(--on-dark);
   border: 2px solid var(--card);
   box-shadow: var(--shadow-sm);
 }

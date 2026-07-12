@@ -1,5 +1,5 @@
 /**
- * Apple Podcast 封面下載與正規化。
+ * Apple Podcasts 封面下載與正規化。
  * 以 fit: contain 縮放至方圖，避免裁切；與全幕生圖的 fit: cover 區分。
  */
 import fs from "node:fs/promises";

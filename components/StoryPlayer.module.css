@@ -33,7 +33,6 @@
   --glass-bg: rgba(255, 255, 255, 0.08);
   --glass-border: rgba(255, 255, 255, 0.2);
   --glass-blur: blur(18px) saturate(160%);
-  --controls-height: 154px;
 }
 
 @media (min-width: 480px) {
@@ -842,7 +841,6 @@
 
 @media (max-width: 640px) {
   .player {
-    --controls-height: 142px;
     --top-tool-size: 46px;
     --top-tool-gap: 7px;
   }
@@ -865,7 +863,7 @@
   }
 }
 
-@media (max-width: 380px) {
+@media (max-width: 480px) {
   .player {
     --top-tool-size: 44px;
     --top-tool-gap: 6px;

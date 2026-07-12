@@ -8,7 +8,7 @@ import styles from "./page.module.css";
 export const metadata: Metadata = {
   title: "關於我們",
   description:
-    "車車遊樂園是 Bonbon & 馬米的親子 podcast 看圖聽故事網站，適合睡前親子共讀。",
+    "車車遊樂園是 Bonbon & 馬米的親子 Podcast 看圖聽故事網站，適合睡前親子共讀。",
   alternates: { canonical: "/about" },
 };
 
@@ -26,7 +26,7 @@ export default function AboutPage() {
       <section className={styles.section}>
         <h2 className={styles.heading}>這是什麼？</h2>
         <p className={styles.text}>
-          《車車遊樂園》是 Bonbon &amp; 馬米的親子 podcast「看圖聽故事」網站。
+          《車車遊樂園》是 Bonbon &amp; 馬米的親子 Podcast「看圖聽故事」網站。
           每集約 5–10 分鐘，插畫配語音讓孩子邊看邊聽，適合 3–7
           歲的睡前時光。從生活出發、加點想像，一起探險、學習、勇敢闖關。
         </p>

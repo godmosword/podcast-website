@@ -1,8 +1,8 @@
 # 車車遊樂園
 
-Bonbon & 馬米親子 podcast《車車遊樂園》的官方 **看圖聽故事** 網站。
+Bonbon & 馬米親子 Podcast《車車遊樂園》的官方 **看圖聽故事** 網站。
 
-面向 **學齡前～低年級** 親子：每集音檔 + 黏土風插圖翻頁 + 逐字字幕 + **網頁小遊戲**（純 podcast 做不到的互動層）。產品路線見 [TODOS.md — 產品路線圖](./TODOS.md#產品路線圖互動--stem--商業)。
+面向 **學齡前～低年級** 親子：每集音檔 + 黏土風插圖翻頁 + 逐字字幕 + **網頁小遊戲**（純 Podcast 做不到的互動層）。產品路線見 [TODOS.md — 產品路線圖](./TODOS.md#產品路線圖互動--stem--商業)。
 
 | | |
 |---|---|
@@ -17,7 +17,7 @@ Bonbon & 馬米親子 podcast《車車遊樂園》的官方 **看圖聽故事** 
 
 ## 技術棧
 
-- **Next.js 15** App Router、**TypeScript strict**、**CSS Modules**（無 Tailwind）
+- **Next.js 16** App Router、**React 19.3 canary**（ViewTransition）、**TypeScript strict**、**CSS Modules**（無 Tailwind）
 - 以 **SSG 預渲染** 為主；少數 **Route Handler**（許願／email 訂閱 API，可選 Neon Postgres）
 - **Vitest** 單元測試 + **Playwright** E2E
 - 部署：**Vercel**（`@vercel/analytics`）
@@ -27,7 +27,7 @@ Bonbon & 馬米親子 podcast《車車遊樂園》的官方 **看圖聽故事** 
 | 區塊 | 路由 | 說明 |
 |------|------|------|
 | Landing Hub | `/` | Storyline 式四段 scroll-snap 入口（故事／睡前／黏土／衛教） |
-| 故事牆 | `/stories` | 最新集 Hero、收藏區、車種／主題篩選（`?vehicle=`、`?tag=`） |
+| 全部故事頁 | `/stories` | 最新集 Hero、收藏區、車種／主題篩選（`?vehicle=`、`?tag=`） |
 | 故事詳情 | `/story/[slug]` | SEO 落地頁、分享、收藏、訂閱收聽 CTA、ShowNotes、親子延伸、完播反思、地圖島徽章 |
 | 播放器 | `/story/[slug]/play` | 全螢幕翻頁、逐字字幕、進度條、字幕字級 |
 | 逐字稿 | `/story/[slug]/transcript.vtt` | WebVTT 端點（無障礙／GEO） |
@@ -84,7 +84,7 @@ npm run dev
 
 | 指令 | 用途 |
 |------|------|
-| `npm run sync:apple` | 從 Apple Podcast RSS 同步新集（見下方） |
+| `npm run sync:apple` | 從 Apple Podcasts RSS 同步新集（見下方） |
 | `npm run transcribe` | whisper.cpp 本機轉錄字幕 → `data/subtitles/<slug>.json` |
 | `npm run proofread:subtitles` | 字幕 lint／fix／`--mark`（illustrate 前必做） |
 | `npm run illustrate` | OpenAI 切場景 + 生圖（需 `OPENAI_API_KEY`，CI 不生圖） |
@@ -142,7 +142,7 @@ NEXT_PUBLIC_SITE_URL=https://你的網域
 
 ## 新增一集故事（SOP）
 
-> **SoundOn 新集：** 多數由 [Apple Podcast 自動同步](#apple-podcast-自動同步) 每日上架（`ep-N` slug、`pageCount: 1`）。以下為**手動**在 `manualStories` 新增完整繪本時使用。
+> **SoundOn 新集：** 多數由 [Apple Podcasts 自動同步](#apple-podcasts-自動同步) 每日上架（`ep-N` slug、`pageCount: 1`）。以下為**手動**在 `manualStories` 新增完整繪本時使用。
 
 1. **建立資料夾** `public/stories/<slug>/`（slug 英文小寫，與網址一致）
 2. **放入** `audio.mp3`、`01.jpg`（多頁：`02.jpg`…）
@@ -170,9 +170,9 @@ NEXT_PUBLIC_SITE_URL=https://你的網域
 | `lib/studio/platforms.ts` | 各平台後台 URL（含 SoundOn，不進公開 ConnectHub） |
 | `components/studio/EngagementMetricsPanel.tsx` | 本機 localStorage 互動驗收 |
 
-## Apple Podcast 自動同步
+## Apple Podcasts 自動同步
 
-官網與 SoundOn **不會**自動連動；管線只讀 **Apple Podcast** 公開 RSS（iTunes Lookup，無需 API key）。
+官網與 SoundOn **不會**自動連動；管線只讀 **Apple Podcasts** 公開 RSS（iTunes Lookup，無需 API key）。
 
 | 檔案 | 用途 |
 |------|------|
@@ -210,7 +210,7 @@ npm run sync:apple                # 實際同步
 ```
 app/
   page.tsx                    Landing Hub（四段 scroll-snap）
-  stories/page.tsx            故事牆
+  stories/page.tsx            全部故事頁
   story/[slug]/               故事詳情 + play 播放器 + transcript.vtt
   adventures/page.tsx         車車宇宙地圖
   characters/page.tsx         角色圖鑑

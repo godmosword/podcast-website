@@ -25,13 +25,10 @@ export async function generateMetadata({
 
 export default async function StoryPlayPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ autoplay?: string; from?: string }>;
 }) {
   const { slug } = await params;
-  const query = await searchParams;
   const story = getStory(slug);
 
   if (!story) {
@@ -69,7 +66,6 @@ export default async function StoryPlayPage({
       nextStorySlug={nextStory?.slug}
       nextStoryTitle={nextStory?.title}
       reflectionPrompt={story.reflectionPrompt}
-      adoptLandingPlayback={query.autoplay === "1" && query.from === "landing"}
     />
   );
 }

@@ -1,4 +1,3 @@
-import React from "react";
 import { ImageResponse } from "next/og";
 import { MAP_STAGE, ZONES, ZONE_TERRAIN } from "@/data/universe-zones";
 import {

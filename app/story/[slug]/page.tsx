@@ -241,7 +241,7 @@ export default async function StoryDetailPage({
               ))}
             </ul>
             <Link href="/for-parents" className={styles.inlineLink}>
-              家長搜尋指南
+              家長指南
             </Link>
           </div>
         </details>

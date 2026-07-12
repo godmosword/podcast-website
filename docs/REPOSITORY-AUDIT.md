@@ -7,7 +7,7 @@
 
 ## Runtime architecture
 
-專案是 Next.js 15 App Router 網站，主要採靜態預渲染：
+專案是 Next.js 16 App Router 網站，主要採靜態預渲染：
 
 - `app/layout.tsx` 掛載全站字型、主題、導覽列、SVG definitions、Service Worker 與全域 CSS。
 - `/` 由 `app/page.tsx` 與 `components/landing/` 組成全螢幕 Landing Hub。
@@ -50,12 +50,12 @@ data/apple-sync.defaults.json ─┘
 ```
 
 - `data/stories.ts` 保存手動維護故事。
-- `data/apple-synced.json` 保存 Apple Podcast 同步產生的故事 metadata。
+- `data/apple-synced.json` 保存 Apple Podcasts 同步產生的故事 metadata。
 - `data/apple-sync.defaults.json` 的 overrides 可補上完整插圖後的頁數、字幕與時間。
 - `enrichStory()` 加入 episode 顏色、角色與親子反思題。
 - `public/stories/<slug>/` 保存正式音訊與插圖；本次掃描未修改任何內容素材。
 
-Apple Podcast 自動化由 `.github/workflows/sync-apple-podcast.yml` 啟動：
+Apple Podcasts 自動化由 `.github/workflows/sync-apple-podcast.yml` 啟動：
 
 ```text
 Apple RSS

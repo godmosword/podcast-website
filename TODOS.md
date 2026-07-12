@@ -99,7 +99,7 @@
 > 首份週報產出，訊號驅動（/for-parents 實測、heuristics 掃描、TODOS 停滯項）。決策記錄請填 proposals 檔底部。
 
 ### W27-1 清除 /for-parents 全部「[待確認]」佔位文案　`content · S · 無`　〔review+geo〕 ✅ `dbfe7b3`
-集數／角色／車種直出資料層；適合年齡「約 3–7 歲」、同步「每 15 分鐘檢查 Apple Podcast RSS」定稿。驗收：`lib/for-parents.test.ts` 無「待確認」；部署後 prod grep=0。
+集數／角色／車種直出資料層；適合年齡「約 3–7 歲」、同步「每 15 分鐘檢查 Apple Podcasts RSS」定稿。驗收：`lib/for-parents.test.ts` 無「待確認」；部署後 prod grep=0。
 
 ### ~~W27-2 許願表單補隱私說明句 + footer 觸控目標~~　`trust · S · 無`　〔review+a11y〕 ✅ `964f418`
 **併入 [兒童 UX 稽核 UX-P0-2／UX-P0-3](#兒童-ux-與親子互動稽核2026-07-11)**（2026-07-11 `/agent-plan`）。`ZoneWishForm` 家長向隱私句 + 故事 placeholder；footer「節目數據」「使用條款」≥44px。
@@ -268,7 +268,7 @@
 **落地：** `lib/character-recognition.ts`（`storiesCompleted` ∩ `appearsIn` 或 `unlocks.characters`）；`hooks/useRecognizedCharacters.ts`（SSR 空集合 → mount 讀 store）；`CharacterCatalogGrid`／`CharacterCard` 統一定裝照相框＋已認識／待認識貼紙、`aria-label` 含狀態。3D tilt 仍列 **L4 D10-tilt**。
 
 #### D4 View Transitions（spike）　`ux · S(spike) 可能升至 M · D2`　〔eng+ux〕 ✅ `3ac73a3`＋`42a9d38`；**驗收矩陣 #1–#7 全過**（2026-07-11）
-**落地：** `experimental.viewTransition`（Next 15.5.20+）+ `StoryCoverMorph`（`unstable_ViewTransition`）故事卡封面↔詳情 hero；`sharedCoverMorph` 防同頁重複 slug；`app/view-transitions.css` + reduced-motion。驗收紀錄見 `docs/D4-VIEW-TRANSITIONS-SPIKE.md`（Chromium＋WebKit＋Firefox；#7 揪出並修復 `theme.ts ↔ progress-store.ts` 循環相依 TDZ → 抽 `lib/progress-keys.ts`）。未啟用 `Link transitionTypes`（待 Next 16+ 評估）；iOS 真機滑動返回目視留日常觀察。**已達擴大門檻**。
+**落地：** `experimental.viewTransition`（Next 16.2.10）+ `StoryCoverMorph`（React 19.3 canary `ViewTransition`）故事卡封面↔詳情 hero；`sharedCoverMorph` 防同頁重複 slug；`app/view-transitions.css` + reduced-motion。驗收紀錄見 `docs/D4-VIEW-TRANSITIONS-SPIKE.md`（Chromium＋WebKit＋Firefox；#7 揪出並修復 `theme.ts ↔ progress-store.ts` 循環相依 TDZ → 抽 `lib/progress-keys.ts`）。未啟用 `Link transitionTypes`；iOS 真機滑動返回目視留日常觀察。**已達擴大門檻**。
 
 #### D5 Scroll-driven 進場（CSS-only）　`ux · S · D2`　〔ux〕 ✅ `bed866e`
 **落地：** `app/scroll-driven.css`（`@supports (animation-timeline: view())` 才啟用 `.scrollEnter`；預設靜態可見）；`StoryCard`／games hub 改 scroll 進場並關閉支援內 `popIn` 雙跳；`LandingSegment` 標題／CTA 錯落 `scrollEnterStagger1–3`；`prefers-reduced-motion` 關閉。
@@ -326,7 +326,7 @@ D0 → D2-A(smoke) → D1 → D13-剩餘 → D3 → D14 → D6 ∥ D12
 |------|------|
 | 對標 | 《顛覆！故事 STEAM》已驗證「故事 + STEM」；我們用**車車**更聚焦、更有畫面 |
 | 付費範本 | 叮噹家族 VIP（月 99／年 999）：會員故事合輯、限定無廣告原創 |
-| 護城河 | **自製音檔 + 看圖翻頁 + 逐字字幕 + 網頁互動 + phygital 手作引導** — 純 podcast（叮噹、信誼）做不到；roadmap 放大「翻頁引導 → 線下動手」 |
+| 護城河 | **自製音檔 + 看圖翻頁 + 逐字字幕 + 網頁互動 + phygital 手作引導** — 純 Podcast（叮噹、信誼）做不到；roadmap 放大「翻頁引導 → 線下動手」 |
 
 ### 四階段總表（一頁摘要）
 
@@ -463,7 +463,7 @@ PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
 
 **相依鏈（現況修正）：** 正式網域 → sitemap/robots + JSON-LD 已完成；analytics 與 `/legal#privacy` 已上線（`a844f20`）。後續蒐集 email（LIST-2／許願表單）必須在表單旁補清楚隱私句與用途說明。
 
-**已備齊（勿重做）：** 故事牆、全螢幕播放器、每集落地頁 + **每集 OG 圖**（`lib/story-metadata.ts`）、**每集分享鈕**（`ShareButton`）、`/topic` 與車種 SEO 頁、RSS `/feed.xml`、`ageRange`、PWA／收藏／繼續收聽、ConnectHub（Spotify／Apple 優先 + 訂閱文案）、相關推薦、**`/games` 遊樂園**（繽紛消消樂／車車大冒險／繽紛樂園／繽紛卡丁車）、`/legal#privacy` 與版權合規、Vercel Analytics + 平台點擊事件、逐字字幕管線、角色定裝照名冊、`/characters` 公開角色頁、Apple 15 分鐘同步 + GitHub Issue 通知、**viewport 開放縮放**。
+**已備齊（勿重做）：** 全部故事頁、全螢幕播放器、每集落地頁 + **每集 OG 圖**（`lib/story-metadata.ts`）、**每集分享鈕**（`ShareButton`）、`/topic` 與車種 SEO 頁、RSS `/feed.xml`、`ageRange`、PWA／收藏／繼續收聽、ConnectHub（Spotify／Apple 優先 + 訂閱文案）、相關推薦、**`/games` 遊樂園**（繽紛消消樂／車車大冒險／繽紛樂園／繽紛卡丁車）、`/legal#privacy` 與版權合規、Vercel Analytics + 平台點擊事件、逐字字幕管線、角色定裝照名冊、`/characters` 公開角色頁、Apple 15 分鐘同步 + GitHub Issue 通知、**viewport 開放縮放**。
 
 **待決策（實作前定）：** ① 自訂網域最終選擇（`chechepark.tw` / `checheland.tw` / 其他）— **基建已就緒**（`NEXT_PUBLIC_SITE_URL` + `CANONICAL_SITE_URL` fallback，P0 ✅）；② ~~`parentGuide` 與 `familyActivity` 邊界~~ → 已決（[GEO-CONTENT-CONTRACT](./docs/GEO-CONTENT-CONTRACT.md)）；擴充見 UX-P1-3；③ ~~縮放（鎖 vs 家長大字模式）~~ → **已決：開放縮放**（`app/layout.tsx`，P2 ✅）；④ **現有 4 款遊樂園遊戲與 STEM 原則** — 見下方「產品決策」；⑤ **兒童拍照分享** — 是否做、如何去識別化；跨裝置圖鑑是否需帳號與家長同意（見 [RESEARCH.md](./RESEARCH.md) 風險段）。
 
@@ -485,7 +485,7 @@ PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
 ## P0 — 地基 + 第一印象
 
 ### ~~首頁集數列表渲染修復~~　`P0 · S · 無`　〔eng〕 ✅
-`StoryFilter` 把整段故事牆包在 `<Suspense fallback="載入故事中…">`，內層用 `useSearchParams()`，Next.js 15 中此舉使該邊界退化為 client-only → **靜態 HTML 只有最新一集 + 「載入故事中…」，列表要等 JS 才出現**。這正是「看起來很簡陋」+ 首頁 SEO 空洞的根因。
+`StoryFilter` 把整段全部故事頁包在 `<Suspense fallback="載入故事中…">`，內層用 `useSearchParams()`，Next.js 15 中此舉使該邊界退化為 client-only → **靜態 HTML 只有最新一集 + 「載入故事中…」，列表要等 JS 才出現**。這正是「看起來很簡陋」+ 首頁 SEO 空洞的根因。
 **修法：** `useState` 初值改 `null`（= server 的「全部」），`vehicleParam` 只在 `useEffect` 套用，避免 hydration mismatch；移除把列表藏在 fallback 的結構。影響檔 `components/StoryFilter.tsx`；`app/page.tsx` 已傳完整 `stories`，不動。修完「首頁載入骨架」需求基本消失。
 
 ### ~~設定正式站網域 + `NEXT_PUBLIC_SITE_URL`~~　`P0 · S · 確認網域`　〔ceo〕 ✅
@@ -501,7 +501,7 @@ Vercel 設 `NEXT_PUBLIC_SITE_URL=https://正式網域`。OG／Twitter／RSS／si
 更新 `DESIGN.md`：`--ink-soft` → `#7a7268`、背景改 `.site-backdrop` + `.site-root`、StoryFilter 塗鴉現況，且 viewport 段落已同步為「允許使用者縮放」（實作見 `app/layout.tsx`）。設計文件漂移時改版易回到舊 token。實作見 `app/globals.css`。
 
 ### ~~首屏價值主張與資訊架構精簡~~　`P0 · S–M · 無`　〔design+ceo〕 ✅
-新訪客需 3 秒內懂「這不是一般 podcast 嵌入頁，是互動繪本」。**已做：** 標頭三行 tagline + 合作/許願/留言圓鈕（見 Completed）。**剩餘：** 檢視區塊順序（Header → LatestHero → FavoritesSection → StoryFilter），避免「最新集」與列表長期重複同一集；副標清楚傳達「給誰聽、睡前幾分鐘」。
+新訪客需 3 秒內懂「這不是一般 Podcast 嵌入頁，是互動繪本」。**已做：** 標頭三行 tagline + 合作/許願/留言圓鈕（見 Completed）。**剩餘：** 檢視區塊順序（Header → LatestHero → FavoritesSection → StoryFilter），避免「最新集」與列表長期重複同一集；副標清楚傳達「給誰聽、睡前幾分鐘」。
 
 ---
 
@@ -562,7 +562,7 @@ EP1–7 已用 `large-v3` 轉錄 + 自動簡轉繁（`data/subtitles/*.json`）�
 ### SEO：主題與系列頁擴充　`P2 · S–M · 無`　〔growth〕
 延續 `/topic/[tag]`，每主題補一句家長向導語（非僅列表）、補站內連結結構。家長依「勇氣、睡前、安全」搜尋，主題頁是長尾入口。`generateStaticParams` 與 metadata 已具備。
 
-### 壓縮 podcast 音檔　`P2 · S · 無`　〔content〕
+### 壓縮 Podcast 音檔　`P2 · S · 無`　〔content〕
 ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–10MB，總 50MB+）。睡前=手機弱網，載入慢。指令見 README；壓後本機聽確認音質再覆蓋。
 
 ### ~~家長放大閱讀（viewport 縮放）~~　`P2 · S · 產品決策`　〔design〕 ✅
@@ -646,7 +646,7 @@ Tiled 關卡管線、6–10 關+世界地圖、檢查點、多敵人類型、視
 ---
 ## 營運管線：SoundOn／Apple 同步 × 生圖
 
-> **關係：** SoundOn 上架 → Apple Podcast RSS（SoundOn 託管 feed）→ `npm run sync:apple`（GHA 每 15 分或手動）→ 站上 **MVP**（單封面）→ **人工**生圖 → 完整繪本版。官網與 SoundOn **不直連**；只讀 Apple 公開 RSS。詳見 [README — Apple Podcast 自動同步](./README.md#apple-podcast-自動同步)。
+> **關係：** SoundOn 上架 → Apple Podcasts RSS（SoundOn 託管 feed）→ `npm run sync:apple`（GHA 每 15 分或手動）→ 站上 **MVP**（單封面）→ **人工**生圖 → 完整繪本版。官網與 SoundOn **不直連**；只讀 Apple 公開 RSS。詳見 [README — Apple Podcasts 自動同步](./README.md#apple-podcasts-自動同步)。
 
 ### 觸發來源
 
@@ -844,4 +844,3 @@ Migration：`scripts/migrations/001_zone_wishes.sql`
 
 - [docs/archive/TODOS-completed-2026-07-11.md](./docs/archive/TODOS-completed-2026-07-11.md)
 - [docs/archive/TODOS-completed-2026-07-04.md](./docs/archive/TODOS-completed-2026-07-04.md)
-

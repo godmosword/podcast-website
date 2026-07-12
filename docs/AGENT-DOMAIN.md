@@ -11,7 +11,7 @@
 | 欄位 | 值 |
 |------|-----|
 | **專案名稱** | 車車遊樂園（chechecar / podcast-website） |
-| **主要技術棧** | Next.js 15 SSG、React 19、TypeScript、Vitest、Playwright |
+| **主要技術棧** | Next.js 16 SSG、React 19.3 canary（ViewTransition）、TypeScript、Vitest、Playwright |
 | **回應語言** | 繁體中文 |
 
 ---

@@ -34,7 +34,7 @@ export function captionWindow(lines: readonly string[], activeIndex: number): Ca
   };
 }
 
-export type CaptionStackMode = "subtitles" | "scene" | "page";
+type CaptionStackMode = "subtitles" | "scene" | "page";
 
 export type CaptionStackState = {
   mode: CaptionStackMode;

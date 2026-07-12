@@ -67,7 +67,7 @@ describe("computeFrame（map 層 2.5D frame）", () => {
       pausedUntil: 0,
     };
 
-    const frame = computeFrame(sim, MAP_STAGE.width, MAP_STAGE.height, 16, 1000);
+    const frame = computeFrame(sim, MAP_STAGE.height, 16, 1000);
 
     expect(frame.dir).toBe("front");
     expect(frame.depthScale).toBeGreaterThan(0.9);

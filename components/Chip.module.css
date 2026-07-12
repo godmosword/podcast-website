@@ -56,3 +56,7 @@
   border: 1px solid currentColor;
   box-shadow: var(--shadow-sm);
 }
+
+:global([data-theme="night"]) .vehicle {
+  color: var(--ink) !important;
+}

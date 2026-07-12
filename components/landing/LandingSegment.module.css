@@ -299,7 +299,7 @@
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 640px) {
   .content {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 68px;

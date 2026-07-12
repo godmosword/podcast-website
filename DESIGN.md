@@ -1,13 +1,21 @@
 # 車車遊樂園 — 設計系統 v0.1
 
-Bonbon & 馬米親子 podcast「看圖聽故事」網站的視覺與互動規範。
+Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範。
 
 ## 受眾
 
 | 對象 | 需求 |
 |------|------|
 | 3–7 歲兒童 | 大觸控區、少文字、強視覺回饋、沉浸式播放 |
-| 陪同家長 | Footer 使用說明、podcast 訂閱導流、分享預覽正確 |
+| 陪同家長 | Footer 使用說明、Podcast 訂閱導流、分享預覽正確 |
+
+## 語言與命名
+
+- 品牌固定寫作「車車遊樂園」；Podcast 固定大寫 `Podcast`，平台名稱固定為「Apple Podcasts」。
+- `/stories` 的導覽名稱固定為「全部故事」；「故事屋」只用於兒童向文案或返回 CTA，不作為路由或元件名稱。
+- 「播放」指站內播放器；「收聽」指 Podcast 平台或外部連結；「遊樂園」指遊戲入口區，「遊戲」指單款作品。
+- `/for-parents` 固定稱「家長指南」；Threads 外連固定稱「育兒專欄」，兩者不互換。
+- 元件與 CSS class 使用當前產品語義，例如 `ParentGuideDropdown`；功能改名後不保留已退役的 `More*` 命名。
 
 ## 裝置
 
@@ -15,6 +23,12 @@ Bonbon & 馬米親子 podcast「看圖聽故事」網站的視覺與互動規範
 - 桌面端維持單欄，兩側留白
 - PWA：`manifest.json` + Apple Web App meta
 - Viewport 允許使用者縮放（未設 `maximum-scale` / `user-scalable=no`），方便家長放大閱讀
+
+## 響應式斷點
+
+- viewport 只使用五層：`480px`（手機／小尺寸控制）、`640px`（內容欄與手機版型）、`768px`（平板雙欄）、`920px`（Landing 桌面版）、`980px`（全站膠囊導覽）。
+- 導覽內部依父容器寬度使用 `@container nav-inner (max-width: 300px)`；元件尺寸受父容器影響時優先用 container query，不新增任意 viewport breakpoint。
+- 新頁面先用 fluid `clamp()` 與現有 token；只有整體版型切換才使用上述斷點。
 
 ## 色彩
 
@@ -28,6 +42,10 @@ Bonbon & 馬米親子 podcast「看圖聽故事」網站的視覺與互動規範
 | `--ink` | `#34302b` | 主文字（中性深灰） |
 | `--ink-soft` | `#7a7268` | 次要文字 |
 | `--card` | `#ffffff` | 卡片背景 |
+| `--accent` | `var(--warm-accent)` | 一般互動強調色；可由單集元件的區域樣式覆寫 |
+| `--accent-soft` | `color-mix(in srgb, var(--accent) 18%, transparent)` | 強調色淡底 |
+| `--on-dark` | `#ffffff` | 深色／品牌底上的文字與圖示 |
+| `--status-error` | `#b42318`（夜間 `#ffb4ab`） | 錯誤訊息 |
 
 多彩粉嫩 accent（裝飾、chip、邊框輪播）：
 
@@ -83,7 +101,8 @@ Bonbon & 馬米親子 podcast「看圖聽故事」網站的視覺與互動規範
 | `--radius-sm` | 12px |
 | `--radius-md` | 18px |
 | `--radius-lg` | 24px |
-| `--shadow-card` | `0 4px 0 var(--ink)` |
+| `--radius-xl` | 30px |
+| `--shadow-card` | `0 4px 0 rgba(52, 48, 43, 0.18)`（夜間由 token 覆寫） |
 
 ## 間距
 
@@ -101,9 +120,15 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 ## 互動
 
 - **按壓式按鈕**：`:active { transform: translateY(4px) }` 或 `scale(0.94)`，陰影消失
-- **Focus**：`:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px }`
+- **Focus**：`:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px }`；日間為主文字色，夜間為黃色。
 - **動效 token**：`--motion-press`（按鈕）、`--motion-page`（翻頁淡入）
 - **`prefers-reduced-motion: reduce`**：關閉吉祥物 bounce 等非必要動畫
+
+### 色彩分層
+
+- 全站語意色集中在 `app/globals.css`（文字、背景、互動、狀態、品牌色）。
+- 遊戲載入器、地圖木牌、播放器黑底等固定美術色可保留為 component-local／allowlist 色，不跨元件複製同一組 hex。
+- 新 CSS 不直接寫品牌色、白字或錯誤色；優先使用 `--brand-*`、`--on-dark`、`--status-*` 或既有 `--c-*` token。
 
 ## 元件規格
 
@@ -147,11 +172,11 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 Storyline 式**全螢幕分段捲動**：每段一張滿版黏土 hero（桌面 `segment-{id}.jpg` 16:9；行動 ≤768px `segment-{id}-portrait.jpg` 9:16），大圖主導 + 底部漸層遮罩 + 左下標題／副標／CTA。
 
 1. **SiteNavBar**（全站橘色頂欄 + 訂閱 CTA）
-   - **桌面（≥980px）**懸浮膠囊主列：全部故事／主題分類／遊樂園／宇宙地圖／育兒專欄（Threads 外連）＋ **NavDropdown「家長指南」**（指南首頁 `/for-parents`、關於、聯絡；Esc／外點關閉）。無「更多」下拉。主題切換與訂閱膠囊常駐。
+   - **桌面（≥980px）**懸浮膠囊主列：全部故事／主題分類／遊樂園／宇宙地圖／育兒專欄（Threads 外連）＋ **ParentGuideDropdown「家長指南」**（指南首頁 `/for-parents`、關於、聯絡；Esc／外點關閉）。無「更多」下拉。主題切換與訂閱膠囊常駐。
    - **行動（＜980px）**漢堡抽屜：單欄依 **探索**（故事／主題／遊樂園／宇宙地圖）→ **家長**（育兒專欄／家長指南／關於／聯絡）分組；含 `/stories?q=` 搜尋。
 2. 四段 **LandingSegment** 全螢幕面板（資料：`data/landing-segments.ts`）：車車故事／睡前數綿羊／捏黏土／衛教宣導
 3. **SegmentNav**（右側進度點，手機隱藏）＋ 每段往下箭頭錨點；document scroll-snap，reduced-motion 自動停用
-4. Segment 1 CTA → **`/stories`**（完整 podcast 主頁）
+4. Segment 1 CTA → **`/stories`**（完整 Podcast 主頁）
 
 Hero 圖走 `images.edit` + `public/characters/` 定裝照參考圖，與單集插畫同流程以維持 on-model。
 

@@ -38,7 +38,7 @@
 
 .brandText {
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: clamp(0.95rem, 1.8vw, 1.05rem);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -49,12 +49,6 @@
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
-}
-
-@media (max-width: 360px) {
-  .brandText {
-    font-size: 0.95rem;
-  }
 }
 
 @container nav-inner (max-width: 300px) {
@@ -201,7 +195,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  /* 920 密度：略縮 padding，觸控區仍靠 min-height／內邊距維持可點 */
+  /* 980 斷點前的密度：略縮 padding，觸控區仍靠 min-height／內邊距維持可點 */
   padding: 8px 10px;
   min-height: 44px;
   box-sizing: border-box;
@@ -227,11 +221,11 @@
   background: rgba(107, 63, 30, 0.12);
 }
 
-.more {
+.parentDropdown {
   position: relative;
 }
 
-.moreBtn {
+.parentDropdownBtn {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -250,25 +244,25 @@
   transition: background var(--motion-press);
 }
 
-.moreBtn:hover {
+.parentDropdownBtn:hover {
   background: rgba(107, 63, 30, 0.09);
 }
 
-.moreBtnActive {
+.parentDropdownBtnActive {
   background: rgba(107, 63, 30, 0.12);
 }
 
-.moreBtn:focus-visible {
+.parentDropdownBtn:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
-.moreChev {
+.parentDropdownChev {
   transform: rotate(90deg);
   transition: transform var(--motion-press);
 }
 
-.moreChevOpen {
+.parentDropdownChevOpen {
   transform: rotate(-90deg);
 }
 
@@ -316,7 +310,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .moreChev {
+  .parentDropdownChev {
     transition: none;
   }
 }

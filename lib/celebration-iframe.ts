@@ -2,7 +2,7 @@ import type { CelebrationEventId, CelebrationIntensity } from "@/data/celebratio
 import type { CandyKartFinishMessage } from "@/lib/gamekit/games/candy-kart-bridge";
 
 /** 父頁 → iframe 慶祝訊息（adapter 契約；子頁可選實作）。 */
-export const CELEBRATION_IFRAME_SOURCE = "cheche-celebration" as const;
+const CELEBRATION_IFRAME_SOURCE = "cheche-celebration" as const;
 
 export type CelebrationIframeMessage = {
   source: typeof CELEBRATION_IFRAME_SOURCE;

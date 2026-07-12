@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   candyKartSessionFromFinish,
   isCandyKartFinishMessage,
@@ -17,6 +17,7 @@ import {
   readGodotLoaderError,
   readGodotLoaderProgress,
 } from "@/lib/gamekit/react/game-load";
+import { candyKartIframeSrc } from "@/lib/games/candy-kart/iframe-src";
 import { useGameLoadGate } from "@/lib/gamekit/react/useGameLoadGate";
 import { GameLoadOverlay } from "@/components/games/GameLoadOverlay";
 import styles from "./CandyKartIframeHost.module.css";
@@ -41,6 +42,11 @@ export function CandyKartIframeHost({
   title,
   className,
 }: CandyKartIframeHostProps) {
+  const [resolvedSrc] = useState(() => {
+    if (typeof window === "undefined") return src;
+    const debugFinish = new URLSearchParams(window.location.search).get("debugFinish");
+    return candyKartIframeSrc(debugFinish ?? undefined);
+  });
   const reportedRef = useRef<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const iframeLoadedRef = useRef(false);
@@ -130,7 +136,7 @@ export function CandyKartIframeHost({
           key={attempt}
           ref={iframeRef}
           title={title}
-          src={src}
+          src={resolvedSrc}
           className={styles.frame}
           allow="autoplay; gamepad *"
           loading="lazy"

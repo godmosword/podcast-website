@@ -2,7 +2,7 @@
   margin: 1.25rem 0;
   padding: 1rem 1.1rem;
   border-radius: 14px;
-  border-left: 4px solid var(--accent, var(--c-sky));
+  border-left: 4px solid var(--accent);
   background: rgba(255, 255, 255, 0.72);
 }
 
@@ -21,7 +21,7 @@
 .parent {
   margin: 0;
   font-size: 0.92rem;
-  color: var(--text-muted, #555);
+  color: var(--ink-soft);
   line-height: 1.45;
 }
 

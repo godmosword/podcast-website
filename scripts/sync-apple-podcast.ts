@@ -1,6 +1,6 @@
 #!/usr/bin/env npx tsx
 /**
- * 從 Apple Podcast RSS 同步到 data/apple-synced.json 與 public/stories/<slug>/。
+ * 從 Apple Podcasts RSS 同步到 data/apple-synced.json 與 public/stories/<slug>/。
  * - 新集：下載音檔／封面並追加至 apple-synced.json
  * - 既有集：比對 RSS 更新 title / date / duration / summary 等 metadata
  * 用法：npm run sync:apple [-- --dry-run] [-- --force]
@@ -635,7 +635,7 @@ async function refreshCovers(
 }
 
 async function main(): Promise<void> {
-  console.log(dryRun ? "[dry-run] Apple Podcast sync" : "Apple Podcast sync");
+  console.log(dryRun ? "[dry-run] Apple Podcasts sync" : "Apple Podcasts sync");
 
   const [synced, state, defaults] = await Promise.all([
     readJson<Story[]>(PATHS.synced, []),

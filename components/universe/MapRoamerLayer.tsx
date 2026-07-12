@@ -54,7 +54,6 @@ export default function MapRoamerLayer({ reduced, paused, night }: Props) {
   const space = useMemo(
     () => ({
       kind: "map" as const,
-      stageW: MAP_STAGE.width,
       stageH: MAP_STAGE.height,
     }),
     [],
