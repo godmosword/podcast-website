@@ -23,8 +23,6 @@
 | 已有 Approved Plan 要落地 | **`/agent-action`** |
 | bump VERSION + CHANGELOG + push main | `/ship`（gstack skill） |
 
-可攜模板來源：[`templates/agent-orchestration/`](../../templates/agent-orchestration/)（Q-Silicon monorepo 內）。
-
 ---
 
 ## 兩層架構
