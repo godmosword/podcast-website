@@ -33,6 +33,7 @@
 | Deploy OG 字型 build ETIMEDOUT | `cbef737` |
 | 行動版導覽抽屜 + `/stories?q=` 搜尋 | `d28b392` |
 | Agent 工程模型路由 Luna MAX fast | `847a64a` |
+| Agent 框架改進（Grok high、契約測試） | `f31cbfe` |
 
 ### 本輪已完成（2026-07-11）
 
