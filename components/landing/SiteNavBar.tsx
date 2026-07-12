@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
@@ -56,6 +57,7 @@ function MoreDropdown({
   const menuId = useId();
   const wrapRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     if (!open) return;
@@ -90,26 +92,40 @@ function MoreDropdown({
           className={`${styles.moreChev} ${open ? styles.moreChevOpen : ""}`}
         />
       </button>
-      {open ? (
-        <div id={menuId} role="menu" className={styles.dropdown}>
-          {items.map((item) => (
-            <Link
-              key={item.label}
-              role="menuitem"
-              href={item.href}
-              className={styles.dropdownLink}
-              aria-current={pathname === item.href ? "page" : undefined}
-              onClick={() => setOpen(false)}
-              {...externalProps(item)}
-            >
-              {item.label}
-              {item.external ? (
-                <Icon name="external" size={13} className={styles.extIcon} />
-              ) : null}
-            </Link>
-          ))}
-        </div>
-      ) : null}
+      <AnimatePresence>
+        {open ? (
+          <motion.div
+            id={menuId}
+            role="menu"
+            className={styles.dropdown}
+            initial={reducedMotion ? false : { opacity: 0, y: -6, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={
+              reducedMotion
+                ? { opacity: 0, transition: { duration: 0 } }
+                : { opacity: 0, y: -4, scale: 0.98 }
+            }
+            transition={{ type: "spring", duration: 0.28, bounce: 0.2 }}
+          >
+            {items.map((item) => (
+              <Link
+                key={item.label}
+                role="menuitem"
+                href={item.href}
+                className={styles.dropdownLink}
+                aria-current={pathname === item.href ? "page" : undefined}
+                onClick={() => setOpen(false)}
+                {...externalProps(item)}
+              >
+                {item.label}
+                {item.external ? (
+                  <Icon name="external" size={13} className={styles.extIcon} />
+                ) : null}
+              </Link>
+            ))}
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }
