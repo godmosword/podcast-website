@@ -32,7 +32,7 @@
 |----|--------|
 | Deploy OG 字型 build ETIMEDOUT | `cbef737` |
 | 行動版導覽抽屜 + `/stories?q=` 搜尋 | `d28b392` |
-| 頂欄 IA（無「更多」；主列含宇宙地圖／育兒專欄；家長指南下拉；斷點 980px；docs T4） | pending |
+| 頂欄 IA（無「更多」；主列含宇宙地圖／育兒專欄；家長指南下拉；斷點 980px；docs T4） | `6922d2e` |
 | Agent 工程模型路由 Luna MAX fast | `847a64a` |
 | Agent 框架改進（Grok high、契約測試） | `f31cbfe` |
 
