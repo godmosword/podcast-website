@@ -1,5 +1,4 @@
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { readFileSync } from "node:fs";
 import { ImageResponse } from "next/og";
 import type { Story } from "@/data/content";
 import { getCharactersForStory } from "@/data/characters";
@@ -8,7 +7,6 @@ import {
   OG_FONT_FAMILY,
   ogFontOptions,
 } from "@/lib/og-font";
-import { storyCoverPath } from "@/lib/story-utils";
 
 export const storyOgImageSize = { width: 1200, height: 630 };
 export const storyOgContentType = "image/png";
@@ -17,16 +15,71 @@ const INK = "#34302b";
 const INK_SOFT = "#7a7268";
 const BG = "#fffdf8";
 
-async function loadCoverData(story: Story): Promise<string | null> {
+/**
+ * Read only the first illustration for each story through literal paths.
+ * Dynamic filesystem paths make NFT trace all of public/ into the Vercel
+ * Function, including audio and game binaries.
+ */
+const STORY_COVER_DATA: Record<string, string> = {
+  "ep-1":
+    "data:image/jpeg;base64," +
+    readFileSync("public/stories/ep-1/01.jpg").toString("base64"),
+  "ep-2":
+    "data:image/jpeg;base64," +
+    readFileSync("public/stories/ep-2/01.jpg").toString("base64"),
+  "ep-3":
+    "data:image/jpeg;base64," +
+    readFileSync("public/stories/ep-3/01.jpg").toString("base64"),
+  "ep-4":
+    "data:image/jpeg;base64," +
+    readFileSync("public/stories/ep-4/01.jpg").toString("base64"),
+  "ep-5":
+    "data:image/jpeg;base64," +
+    readFileSync("public/stories/ep-5/01.jpg").toString("base64"),
+  "ep-6":
+    "data:image/jpeg;base64," +
+    readFileSync("public/stories/ep-6/01.jpg").toString("base64"),
+  "ep-7":
+    "data:image/jpeg;base64," +
+    readFileSync("public/stories/ep-7/01.jpg").toString("base64"),
+  "ep-8":
+    "data:image/jpeg;base64," +
+    readFileSync("public/stories/ep-8/01.jpg").toString("base64"),
+  "ep-9":
+    "data:image/jpeg;base64," +
+    readFileSync("public/stories/ep-9/01.jpg").toString("base64"),
+  "ep-10":
+    "data:image/jpeg;base64," +
+    readFileSync("public/stories/ep-10/01.jpg").toString("base64"),
+  "ep-11":
+    "data:image/jpeg;base64," +
+    readFileSync("public/stories/ep-11/01.jpg").toString("base64"),
+  "ep-12":
+    "data:image/jpeg;base64," +
+    readFileSync("public/stories/ep-12/01.jpg").toString("base64"),
+  "ep-13":
+    "data:image/jpeg;base64," +
+    readFileSync("public/stories/ep-13/01.jpg").toString("base64"),
+  "ep-14":
+    "data:image/jpeg;base64," +
+    readFileSync("public/stories/ep-14/01.jpg").toString("base64"),
+  "ep-15":
+    "data:image/jpeg;base64," +
+    readFileSync("public/stories/ep-15/01.jpg").toString("base64"),
+  "ep-16":
+    "data:image/jpeg;base64," +
+    readFileSync("public/stories/ep-16/01.jpg").toString("base64"),
+  "ep-17":
+    "data:image/jpeg;base64," +
+    readFileSync("public/stories/ep-17/01.jpg").toString("base64"),
+  "ep-18":
+    "data:image/jpeg;base64," +
+    readFileSync("public/stories/ep-18/01.jpg").toString("base64"),
+};
+
+function loadCoverData(story: Story): string | null {
   if (story.pageCount <= 0) return null;
-  try {
-    const rel = storyCoverPath(story.slug).replace(/^\//, "");
-    const file = await readFile(join(process.cwd(), "public", rel));
-    const mime = rel.endsWith(".png") ? "image/png" : "image/jpeg";
-    return `data:${mime};base64,${file.toString("base64")}`;
-  } catch {
-    return null;
-  }
+  return STORY_COVER_DATA[story.slug] ?? null;
 }
 
 export { storyOgImagePath } from "@/lib/story-og-path";

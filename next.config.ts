@@ -13,6 +13,9 @@ const nextConfig: NextConfig = {
     // D1：Next Image 管線補 AVIF（WebP 為預設）；故事封面 blur 見 StoryImage。
     formats: ["image/avif", "image/webp"],
   },
+  outputFileTracingIncludes: {
+    "/story/[slug]/opengraph-image": ["./public/stories/*/01.jpg"],
+  },
   async redirects() {
     return legacyStoryRedirects();
   },
