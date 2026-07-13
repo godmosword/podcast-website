@@ -14,6 +14,14 @@ const INK_SOFT = "#7a7268";
 const SEA = "#cfeaff";
 const BRIDGE = "#c8a979";
 
+const ZONE_OG_MARKS: Record<(typeof ZONES)[number]["id"], string> = {
+  "car-park": "CAR",
+  dino: "DINO",
+  rescue: "HELP",
+  ocean: "SEA",
+  forest: "TREE",
+};
+
 /** `/adventures` 分享預覽：鳥瞰四島 + 標題。 */
 export async function createUniverseOgImage() {
   const fontData = await loadOgFont();
@@ -107,7 +115,17 @@ export async function createUniverseOgImage() {
                     top: 4 * sy,
                   }}
                 />
-                <div style={{ fontSize: 42 * sx, lineHeight: 1 }}>{zone.landmark}</div>
+                <div
+                  style={{
+                    fontSize: 24 * sx,
+                    fontWeight: 800,
+                    color: INK,
+                    lineHeight: 1,
+                    letterSpacing: 1,
+                  }}
+                >
+                  {ZONE_OG_MARKS[zone.id]}
+                </div>
                 <div
                   style={{
                     marginTop: 6 * sy,

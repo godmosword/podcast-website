@@ -12,7 +12,7 @@ export const contentType = gameOgContentType;
 export default async function Image() {
   return createGameOgImage({
     title: "繽紛方塊",
-    emoji: "🧩",
+    icon: "puzzle",
     accentColor: GAME_OG_COLORS.pink,
   });
 }

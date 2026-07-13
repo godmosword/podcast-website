@@ -108,7 +108,23 @@ function buildStoryOgMarkup({
               style={{ objectFit: "contain" }}
             />
           ) : (
-            <div style={{ fontSize: 160, lineHeight: 1 }}>{story.emoji}</div>
+            <div
+              style={{
+                width: 220,
+                height: 120,
+                borderRadius: 32,
+                background: accent,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: INK,
+                fontSize: 42,
+                fontWeight: 800,
+                letterSpacing: 2,
+              }}
+            >
+              CAR
+            </div>
           )}
         </div>
 

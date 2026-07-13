@@ -21,13 +21,82 @@ export const gameOgContentType = "image/png";
 
 type GameOgOptions = {
   title: string;
-  emoji: string;
+  icon: GameOgIcon;
   accentColor?: string;
 };
 
+export type GameOgIcon = "play" | "race" | "puzzle";
+
+/**
+ * ImageResponse 會把 emoji 轉成遠端 SVG（預設來源是 jsDelivr）。
+ * OG 圖在 build 時也會被 prerender，因此這裡只使用本地 CSS 圖示與 ASCII，
+ * 避免產生任何外部網路依賴。
+ */
+function GameOgMark({ icon, accentColor }: { icon: GameOgIcon; accentColor: string }) {
+  if (icon === "puzzle") {
+    return (
+      <div
+        style={{
+          width: 160,
+          height: 160,
+          borderRadius: 40,
+          background: accentColor,
+          display: "flex",
+          flexWrap: "wrap",
+          alignContent: "center",
+          justifyContent: "center",
+          gap: 10,
+          padding: 24,
+          marginBottom: 28,
+          boxShadow: "0 10px 0 rgba(52,48,43,0.16)",
+        }}
+      >
+        {[
+          "#fff7d6",
+          "#ffffff",
+          "#ffffff",
+          "#fff7d6",
+        ].map((color, index) => (
+          <div
+            key={index}
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 12,
+              background: color,
+            }}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        width: 160,
+        height: 160,
+        borderRadius: 999,
+        background: accentColor,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 28,
+        boxShadow: "0 10px 0 rgba(52,48,43,0.16)",
+        color: GAME_OG_COLORS.ink,
+        fontSize: icon === "play" ? 88 : 58,
+        fontWeight: 800,
+        letterSpacing: icon === "play" ? 0 : 2,
+      }}
+    >
+      {icon === "play" ? ">" : "GO"}
+    </div>
+  );
+}
+
 export async function createGameOgImage({
   title,
-  emoji,
+  icon,
   accentColor = GAME_OG_COLORS.yellow,
 }: GameOgOptions) {
   const fontData = await loadOgFont();
@@ -60,9 +129,7 @@ export async function createGameOgImage({
             opacity: 0.85,
           }}
         />
-        <div style={{ fontSize: 128, lineHeight: 1, marginBottom: 28 }}>
-          {emoji}
-        </div>
+        <GameOgMark icon={icon} accentColor={accentColor} />
         <div
           style={{
             fontSize: 56,

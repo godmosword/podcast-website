@@ -12,7 +12,7 @@ export const contentType = gameOgContentType;
 export default async function Image() {
   return createGameOgImage({
     title: "車車遊樂園",
-    emoji: "🎮",
+    icon: "play",
     accentColor: GAME_OG_COLORS.mint,
   });
 }

@@ -12,7 +12,7 @@ export const contentType = gameOgContentType;
 export default async function Image() {
   return createGameOgImage({
     title: "車車大冒險",
-    emoji: "🏁",
+    icon: "race",
     accentColor: GAME_OG_COLORS.sky,
   });
 }
