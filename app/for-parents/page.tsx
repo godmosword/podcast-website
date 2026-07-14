@@ -9,7 +9,7 @@ import {
   parentLandingFaqs,
   representativeParentStories,
 } from "@/lib/for-parents";
-import { faqPageJsonLd } from "@/lib/json-ld";
+import { breadcrumbListJsonLd, faqPageJsonLd } from "@/lib/json-ld";
 import { STATIC_PAGE_MODIFIED_DATES } from "@/lib/page-freshness";
 import { storyCoverPath } from "@/lib/story-utils";
 import styles from "./page.module.css";
@@ -37,6 +37,12 @@ export default function ForParentsPage() {
   return (
     <main className={styles.main}>
       <JsonLd data={faqPageJsonLd(faqs)} />
+      <JsonLd
+        data={breadcrumbListJsonLd([
+          { name: "車車遊樂園", url: "/" },
+          { name: "家長指南", url: "/for-parents" },
+        ])}
+      />
       <SiteHeader />
 
       <header className={styles.header}>

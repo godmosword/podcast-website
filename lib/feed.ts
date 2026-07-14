@@ -46,8 +46,18 @@ function buildItemDescription(story: Story): string {
   return parts.join("\n\n");
 }
 
+/** buildRssFeed 選填注入項。 */
+export type BuildRssFeedOptions = {
+  /** slug → enclosure length（bytes）。無對應值時 fallback 0。 */
+  audioLengthBySlug?: Record<string, number>;
+};
+
 /** 依故事資料產生 RSS 2.0（含 podcast enclosure 與 iTunes 延伸欄位）。 */
-export function buildRssFeed(stories: Story[]): string {
+export function buildRssFeed(
+  stories: Story[],
+  options: BuildRssFeedOptions = {},
+): string {
+  const { audioLengthBySlug = {} } = options;
   const siteUrl = getSiteUrl();
   const feedUrl = siteRssUrl();
   const channelImage = `${siteUrl}/mascot.png`;
@@ -57,6 +67,7 @@ export function buildRssFeed(stories: Story[]): string {
       const pageUrl = `${siteUrl}/story/${story.slug}`;
       const coverUrl = `${siteUrl}${storyCoverPath(story.slug)}`;
       const audioUrl = `${siteUrl}${storyAudioPath(story.slug, story.audio)}`;
+      const audioLength = audioLengthBySlug[story.slug] ?? 0;
       const description = buildItemDescription(story);
       const durationTag = story.duration
         ? `\n      <itunes:duration>${escapeXml(story.duration)}</itunes:duration>`
@@ -71,7 +82,7 @@ export function buildRssFeed(stories: Story[]): string {
       <guid isPermaLink="true">${escapeXml(pageUrl)}</guid>
       <pubDate>${toRssPubDate(story.date)}</pubDate>
       <description>${cdata(description)}</description>
-      <enclosure url="${escapeXml(audioUrl)}" length="0" type="audio/mpeg"/>
+      <enclosure url="${escapeXml(audioUrl)}" length="${audioLength}" type="audio/mpeg"/>
       <itunes:title>${escapeXml(story.title)}</itunes:title>
       <itunes:summary>${cdata(description)}</itunes:summary>
       <itunes:image href="${escapeXml(coverUrl)}"/>

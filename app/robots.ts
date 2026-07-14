@@ -2,14 +2,16 @@ import type { MetadataRoute } from "next";
 import { getSiteUrl } from "@/lib/site-url";
 
 /**
- * 檢索／引用型 AI 爬蟲：對應 AI 搜尋與問答的即時檢索，
- * 放行以利內容被引用（GEO）。
+ * 檢索／使用者代查型 AI 爬蟲：對應 AI 搜尋與問答的即時檢索（非訓練用途），
+ * 放行有利內容被 AI 即時引用（GEO）。
  */
 const AI_RETRIEVAL_CRAWLERS = [
   "OAI-SearchBot", // ChatGPT 搜尋檢索（與訓練用的 GPTBot 不同）
-  "ClaudeBot",
-  "Claude-Web",
+  "ChatGPT-User", // ChatGPT 使用者代查
+  "Claude-SearchBot", // Claude 搜尋檢索（與訓練用的 ClaudeBot 不同）
+  "Claude-User", // Claude 使用者代查
   "PerplexityBot",
+  "Perplexity-User", // Perplexity 使用者代查
 ] as const;
 
 /**
@@ -18,11 +20,15 @@ const AI_RETRIEVAL_CRAWLERS = [
  */
 const AI_TRAINING_CRAWLERS = [
   "GPTBot", // OpenAI 訓練
+  "ClaudeBot", // Anthropic 訓練爬蟲（2026 現行定義；Claude-SearchBot 才是搜尋檢索）
   "Google-Extended", // Gemini/Vertex 訓練
   "Applebot-Extended", // Apple 智慧訓練
   "CCBot", // Common Crawl 資料集
   "Bytespider", // ByteDance 訓練
+  "meta-externalagent", // Meta AI 訓練
 ] as const;
+
+// Claude-Web 已棄用（2026-07 移除）；若舊 UA 仍出現，落入 `*` 規則（allow）。
 
 export default function robots(): MetadataRoute.Robots {
   const baseUrl = getSiteUrl();

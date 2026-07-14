@@ -59,6 +59,11 @@ next-env.d.ts
 # 由 prebuild（generate:llms-full）產生，隨每次建置重新產生，不進版控
 /public/llms-full.txt
 
+# IndexNow key file：prebuild（generate:indexnow-key）依 INDEXNOW_KEY 產生 public/<key>.txt，
+# 僅存在於部署產物、不進版控（檔名＝key 值無法 glob）；本機驗證慣用 INDEXNOW_KEY=testkey1
+# （key 規格最少 8 字元，testkey 只有 7 字會被 generate-indexnow-key 拒絕）
+/public/testkey*.txt
+
 # YouTube 影片匯出產物（本機 CLI，勿入庫）
 /export/video/
 

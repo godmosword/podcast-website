@@ -56,3 +56,14 @@ const PLATFORMS: Platform[] = [
 export function visiblePlatforms(): Platform[] {
   return PLATFORMS.filter((p) => p.url.trim() !== "");
 }
+
+/**
+ * 各平台「節目頁」canonical 網址（供 PodcastSeries JSON-LD 的 sameAs 使用）。
+ * 去除追蹤查詢參數，只留 origin + pathname；不含空連結。
+ */
+export function platformShowUrls(): string[] {
+  return visiblePlatforms().map((p) => {
+    const url = new URL(p.url);
+    return `${url.origin}${url.pathname}`;
+  });
+}

@@ -2,13 +2,24 @@ import { describe, expect, it, vi } from "vitest";
 import { getCharacters } from "@/data/characters";
 import { storiesByNewest } from "@/data/content";
 import { storyDateModified } from "@/data/story-dates";
+import { hasVtt } from "@/lib/transcript";
 import {
+  breadcrumbListJsonLd,
   characterCreativeWorkJsonLd,
   faqPageJsonLd,
   podcastEpisodeJsonLd,
   podcastSeriesJsonLd,
   siteIdentityJsonLd,
 } from "./json-ld";
+
+/** 取出 associatedMedia 中的音檔 MediaObject（單一或陣列皆可） */
+function audioMedia(associatedMedia: unknown): unknown {
+  return Array.isArray(associatedMedia)
+    ? associatedMedia.find(
+        (m) => (m as Record<string, unknown>).encodingFormat === "audio/mpeg",
+      )
+    : associatedMedia;
+}
 
 describe("siteIdentityJsonLd", () => {
   it("產出 Organization 與 WebSite 全站身分資料", () => {
@@ -34,6 +45,11 @@ describe("siteIdentityJsonLd", () => {
       ]),
     );
 
+    const organization = (data["@graph"] as Record<string, unknown>[]).find(
+      (node) => node["@type"] === "Organization",
+    );
+    expect(organization).not.toHaveProperty("sameAs");
+
     vi.unstubAllEnvs();
   });
 });
@@ -53,6 +69,20 @@ describe("podcastSeriesJsonLd", () => {
 
     vi.unstubAllEnvs();
   });
+
+  it("sameAs 為非空的絕對節目頁 URL 陣列", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
+    const data = podcastSeriesJsonLd();
+
+    expect(Array.isArray(data.sameAs)).toBe(true);
+    const sameAs = data.sameAs as string[];
+    expect(sameAs.length).toBeGreaterThan(0);
+    for (const url of sameAs) {
+      expect(url).toMatch(/^https?:\/\//);
+    }
+
+    vi.unstubAllEnvs();
+  });
 });
 
 describe("podcastEpisodeJsonLd", () => {
@@ -67,7 +97,7 @@ describe("podcastEpisodeJsonLd", () => {
     expect(data.episodeNumber).toBe(story.ep);
     expect(data.dateModified).toBe(storyDateModified(story));
     expect(data.inLanguage).toBe("zh-Hant");
-    expect(data.associatedMedia).toMatchObject({
+    expect(audioMedia(data.associatedMedia)).toMatchObject({
       "@type": "MediaObject",
       encodingFormat: "audio/mpeg",
     });
@@ -76,6 +106,48 @@ describe("podcastEpisodeJsonLd", () => {
       name: "車車遊樂園",
     });
     expect(data).not.toHaveProperty("transcript");
+
+    vi.unstubAllEnvs();
+  });
+
+  it("有 VTT 時 associatedMedia 追加逐字稿 MediaObject", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
+    const story = {
+      ...storiesByNewest()[0],
+      slug: "ep-vtt-test",
+      captions: ["第一句", "第二句"],
+      captionTimes: [0, 2],
+    };
+    expect(hasVtt(story)).toBe(true);
+    const data = podcastEpisodeJsonLd(story);
+
+    expect(Array.isArray(data.associatedMedia)).toBe(true);
+    expect(data.associatedMedia).toContainEqual({
+      "@type": "MediaObject",
+      contentUrl: "https://example.com/story/ep-vtt-test/transcript.vtt",
+      encodingFormat: "text/vtt",
+      inLanguage: "zh-TW",
+    });
+
+    vi.unstubAllEnvs();
+  });
+
+  it("無 VTT 時 associatedMedia 只有音檔、不含逐字稿 MediaObject", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
+    const story = {
+      ...storiesByNewest()[0],
+      slug: "ep-no-vtt-test",
+      captions: undefined,
+      captionTimes: undefined,
+    };
+    expect(hasVtt(story)).toBe(false);
+    const data = podcastEpisodeJsonLd(story);
+
+    expect(Array.isArray(data.associatedMedia)).toBe(false);
+    expect(data.associatedMedia).toMatchObject({
+      "@type": "MediaObject",
+      encodingFormat: "audio/mpeg",
+    });
 
     vi.unstubAllEnvs();
   });
@@ -141,6 +213,30 @@ describe("faqPageJsonLd", () => {
         },
       },
     ]);
+  });
+});
+
+describe("breadcrumbListJsonLd", () => {
+  it("position 從 1 連續，item 為絕對 URL", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
+    const data = breadcrumbListJsonLd([
+      { name: "車車遊樂園", url: "/" },
+      { name: "全部故事", url: "/stories" },
+      { name: "EP 1 測試故事", url: "/story/ep-1" },
+    ]);
+
+    expect(data["@type"]).toBe("BreadcrumbList");
+    const items = data.itemListElement as Record<string, unknown>[];
+    expect(items).toHaveLength(3);
+    items.forEach((item, index) => {
+      expect(item.position).toBe(index + 1);
+      expect(item.item as string).toMatch(/^https:\/\/example\.com\//);
+    });
+    expect(items[0].item).toBe("https://example.com/");
+    expect(items[1].item).toBe("https://example.com/stories");
+    expect(items[2].item).toBe("https://example.com/story/ep-1");
+
+    vi.unstubAllEnvs();
   });
 });
 

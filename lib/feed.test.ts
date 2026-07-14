@@ -124,4 +124,18 @@ describe("buildRssFeed", () => {
     const xml = buildRssFeed([mismatch]);
     expect(xml).not.toContain("podcast:transcript");
   });
+
+  it("注入 audioLengthBySlug 時 enclosure length 採用注入值", () => {
+    const story = storyFixture({ slug: "ep-test-length", ep: 93, title: "長度測試" });
+    const xml = buildRssFeed([story], {
+      audioLengthBySlug: { [story.slug]: 123456 },
+    });
+    expect(xml).toContain('length="123456"');
+  });
+
+  it("未注入 audioLengthBySlug 時 enclosure length fallback 0", () => {
+    const story = storyFixture({ slug: "ep-test-length-fallback", ep: 92, title: "無長度測試" });
+    const xml = buildRssFeed([story]);
+    expect(xml).toContain('length="0"');
+  });
 });

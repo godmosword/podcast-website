@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { allVehicles, getStoriesByVehicle } from "@/data/content";
-import { faqPageJsonLd } from "@/lib/json-ld";
+import { breadcrumbListJsonLd, faqPageJsonLd } from "@/lib/json-ld";
+import { collectionModifiedDate } from "@/lib/page-freshness";
 import { vehicleDefinitionSummary, vehicleFaqs } from "@/lib/vehicle-geo";
 import JsonLd from "@/components/JsonLd";
 import SiteFooter from "@/components/SiteFooter";
@@ -30,6 +31,7 @@ export async function generateMetadata({
     title: `${name}故事`,
     description,
     alternates: { canonical: `/vehicles/${encodeURIComponent(name)}` },
+    other: { dateModified: collectionModifiedDate(stories) },
     openGraph: {
       title: `${name}故事 · 車車遊樂園`,
       description,
@@ -58,6 +60,13 @@ export default async function VehiclePage({
   return (
     <main className={styles.main}>
       <JsonLd data={faqPageJsonLd(faqs)} />
+      <JsonLd
+        data={breadcrumbListJsonLd([
+          { name: "車車遊樂園", url: "/" },
+          { name: "全部故事", url: "/stories" },
+          { name: `${vehicle}故事屋`, url: `/vehicles/${encodeURIComponent(vehicle)}` },
+        ])}
+      />
       <Link href="/" className={styles.back}>
         ← 回故事屋
       </Link>

@@ -4,9 +4,11 @@ import { storyDateModified } from "@/data/story-dates";
 import { CHANNEL_DESCRIPTION, CHANNEL_TITLE } from "@/lib/feed-constants";
 import { siteRssUrl } from "@/lib/feed";
 import { STATIC_PAGE_MODIFIED_DATES } from "@/lib/page-freshness";
+import { platformShowUrls } from "@/lib/platforms";
 import { getSiteUrl } from "@/lib/site-url";
 import { storyDescription } from "@/lib/story-metadata";
 import { storyAudioPath, storyCoverPath } from "@/lib/story-utils";
+import { hasVtt } from "@/lib/transcript";
 
 const AUTHORS = ["Bonbon", "馬米"];
 const LANGUAGE = "zh-Hant";
@@ -109,6 +111,7 @@ export function podcastSeriesJsonLd(): Record<string, unknown> {
     publisher: {
       "@id": `${siteUrl}/#organization`,
     },
+    sameAs: platformShowUrls(),
   };
 }
 
@@ -119,6 +122,14 @@ export function podcastEpisodeJsonLd(story: Story): Record<string, unknown> {
   const coverUrl = absoluteUrl(storyCoverPath(story.slug));
   const audioUrl = absoluteUrl(storyAudioPath(story.slug, story.audio));
   const timeRequired = story.duration ? durationToIso8601(story.duration) : null;
+  const transcriptMedia = hasVtt(story)
+    ? {
+        "@type": "MediaObject",
+        contentUrl: `${pageUrl}/transcript.vtt`,
+        encodingFormat: "text/vtt",
+        inLanguage: "zh-TW",
+      }
+    : null;
 
   return {
     "@context": "https://schema.org",
@@ -135,11 +146,20 @@ export function podcastEpisodeJsonLd(story: Story): Record<string, unknown> {
     author: AUTHORS.map((name) => ({ "@type": "Person", name })),
     publisher: { "@id": `${siteUrl}/#organization` },
     ...(timeRequired ? { duration: timeRequired, timeRequired } : {}),
-    associatedMedia: {
-      "@type": "MediaObject",
-      contentUrl: audioUrl,
-      encodingFormat: "audio/mpeg",
-    },
+    associatedMedia: transcriptMedia
+      ? [
+          {
+            "@type": "MediaObject",
+            contentUrl: audioUrl,
+            encodingFormat: "audio/mpeg",
+          },
+          transcriptMedia,
+        ]
+      : {
+          "@type": "MediaObject",
+          contentUrl: audioUrl,
+          encodingFormat: "audio/mpeg",
+        },
     partOfSeries: {
       "@type": "PodcastSeries",
       "@id": `${siteUrl}/#podcast-series`,
@@ -160,6 +180,29 @@ export function faqPageJsonLd(faqs: FaqItem[]): Record<string, unknown> {
         "@type": "Answer",
         text: item.answer,
       },
+    })),
+  };
+}
+
+export type BreadcrumbItem = {
+  name: string;
+  url: string;
+};
+
+/** 麵包屑結構化資料；url 一律轉為以 getSiteUrl() 起頭的絕對網址 */
+export function breadcrumbListJsonLd(
+  items: BreadcrumbItem[],
+): Record<string, unknown> {
+  const siteUrl = getSiteUrl();
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: item.url.startsWith(siteUrl) ? item.url : absoluteUrl(item.url),
     })),
   };
 }

@@ -37,6 +37,40 @@
   line-height: 1.8;
 }
 
+.faqSection {
+  width: min(1060px, 100%);
+  margin: var(--space-section) auto 0;
+  padding: clamp(20px, 4vw, 32px);
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+}
+
+.faqSection h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(1.3rem, 2.4vw, 1.6rem);
+  line-height: 1.35;
+}
+
+.faqItem {
+  max-width: 640px;
+  margin-top: var(--space-4);
+}
+
+.faqItem h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.faqItem p {
+  margin: 6px 0 0;
+  color: var(--ink-soft);
+  font-size: 0.98rem;
+  line-height: 1.7;
+}
+
 @media (max-width: 640px) {
   .main {
     padding-inline: 12px;

@@ -562,6 +562,10 @@ EP1–7 已用 `large-v3` 轉錄 + 自動簡轉繁（`data/subtitles/*.json`）�
 ### SEO：主題與系列頁擴充　`P2 · S–M · 無`　〔growth〕
 延續 `/topic/[tag]`，每主題補一句家長向導語（非僅列表）、補站內連結結構。家長依「勇氣、睡前、安全」搜尋，主題頁是長尾入口。`generateStaticParams` 與 metadata 已具備。
 
+### GEO 營運基礎（crawler 政策／IndexNow／逐字稿／verify:geo）　`P2 · M · 無`　〔eng+growth〕　commit hash 待 ship 回填
+本輪已實作：`app/robots.ts` AI 檢索型 crawler（`OAI-SearchBot`／`ChatGPT-User`／`Claude-SearchBot`／`Claude-User`／`PerplexityBot`／`Perplexity-User`）放行、訓練型（`GPTBot`／`ClaudeBot`／`Google-Extended`／`Applebot-Extended`／`CCBot`／`Bytespider`／`meta-externalagent`）拒絕；`lib/json-ld.ts` 補 `PodcastSeries.sameAs`、`breadcrumbListJsonLd`（純 JSON-LD，無可見 UI）、`PodcastEpisode.associatedMedia` 逐字稿 MediaObject；`lib/feed.ts`／`app/feed.xml/route.ts` 補 RSS enclosure length（`statSync` 本地音檔）；新增 `scripts/generate-indexnow-key.ts`（prebuild）＋ `scripts/submit-indexnow.ts`（sync 後 best-effort、fail-soft、`--dry-run`）＋ `.github/workflows/sync-apple-podcast.yml` 新步驟；新增 `scripts/verify-geo.ts`（`npm run verify:geo`，已入 `npm run check` 尾端）。完整營運手冊見 [docs/GEO.md](./docs/GEO.md)。
+**剩餘（使用者手動）：** 設定 `INDEXNOW_KEY`（GitHub Secret + Vercel env，須同值，見 docs/GEO.md §3）；Google Search Console／Bing Webmaster 提交（見 docs/GEO.md §6）；每週量測記錄（GSC／Bing Webmaster／Vercel logs／AI prompt baseline 五題，見 docs/GEO.md §5）。
+
 ### 壓縮 Podcast 音檔　`P2 · S · 無`　〔content〕
 ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–10MB，總 50MB+）。睡前=手機弱網，載入慢。指令見 README；壓後本機聽確認音質再覆蓋。
 

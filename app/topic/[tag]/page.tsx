@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { allTags, getStoriesByTag } from "@/data/content";
-import { faqPageJsonLd } from "@/lib/json-ld";
+import { breadcrumbListJsonLd, faqPageJsonLd } from "@/lib/json-ld";
+import { collectionModifiedDate } from "@/lib/page-freshness";
 import { topicDefinitionSummary, topicFaqs } from "@/lib/topic-geo";
 import JsonLd from "@/components/JsonLd";
 import SiteFooter from "@/components/SiteFooter";
@@ -30,6 +31,7 @@ export async function generateMetadata({
     title: `${tag}主題故事`,
     description,
     alternates: { canonical: `/topic/${encodeURIComponent(tag)}` },
+    other: { dateModified: collectionModifiedDate(stories) },
     openGraph: {
       title: `${tag}主題故事 · 車車遊樂園`,
       description,
@@ -58,6 +60,13 @@ export default async function TopicPage({
   return (
     <main className={styles.main}>
       <JsonLd data={faqPageJsonLd(faqs)} />
+      <JsonLd
+        data={breadcrumbListJsonLd([
+          { name: "車車遊樂園", url: "/" },
+          { name: "主題標籤", url: "/topic" },
+          { name: `${tag}主題故事`, url: `/topic/${encodeURIComponent(tag)}` },
+        ])}
+      />
       <Link href="/" className={styles.back}>
         ← 回故事屋
       </Link>

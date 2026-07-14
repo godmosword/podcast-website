@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCharactersForStory } from "@/data/characters";
 import { getStory, getRelated, getNextStory, getStories } from "@/data/content";
-import { faqPageJsonLd, podcastEpisodeJsonLd } from "@/lib/json-ld";
+import { breadcrumbListJsonLd, faqPageJsonLd, podcastEpisodeJsonLd } from "@/lib/json-ld";
 import { lineShareUrl, storyLineShareText, storyShareUrl } from "@/lib/share-story";
 import {
   familyActivityFaq,
@@ -83,6 +83,13 @@ export default async function StoryDetailPage({
     <main className={styles.main}>
       <JsonLd data={podcastEpisodeJsonLd(story)} />
       <JsonLd data={faqPageJsonLd(jsonLdFaqs)} />
+      <JsonLd
+        data={breadcrumbListJsonLd([
+          { name: "車車遊樂園", url: "/" },
+          { name: "全部故事", url: "/stories" },
+          { name: story.title, url: `/story/${story.slug}` },
+        ])}
+      />
       <Link href="/stories" className={styles.back}>
         ← 回故事屋
       </Link>

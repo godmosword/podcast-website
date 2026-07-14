@@ -53,3 +53,5 @@
 | — | Task `model=grok-4.5-fast-medium`（Cursor） | slug 不可用或 Task 拒收（待驗證） | 對抗審缺席；L1／L2 實作由 Leader 接手；分配表仍列 Grok 行；勿用 grok-4.3 頂替 |
 | 2026-07-12 | Task `model=grok-4.5-fast-medium`（Cursor） | `Invalid model selection "grok-4.5-fast-medium"`；允許清單含 `grok-4.5-fast-high` | active 路由改 `grok-4.5-fast-high`；案例保留作歷史 → **已解除** |
 | 2026-07-11 | `codex exec` / gpt-5.6 | Cursor shell 未關 stdin → 逾時掛起（`Reading additional input from stdin...`） | 加 **`</dev/null`** 重試成功 → 已解除 |
+| 2026-07-13 | `codex exec -m gpt-5.6` | HTTP 400：`The 'gpt-5.6' model is not supported when using Codex with a ChatGPT account`；預設 `gpt-5.6-luna` 回 `requires a newer version of Codex` | 改 **`-m gpt-5.5`** 審查成功；待升級 Codex CLI 後再試 gpt-5.6；建議另案更新 AGENT-WORKFLOW slug 對照表 |
+| 2026-07-13 | `grok -p -m grok-4.5-fast` | `Couldn't set model 'grok-4.5-fast': unknown model id`；`grok models` 可用清單僅 `grok-4.5`（default）、`grok-composer-2.5-fast` | 改 **`-m grok-4.5`** 對抗審成功；CLI 呼叫一律改 `grok-4.5`；建議另案更新 AGENT-WORKFLOW slug 對照表 |

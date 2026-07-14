@@ -141,3 +141,17 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: npx tsx scripts/sync-alert.ts resolve --kind=sync-job-failure
+
+      # ---- IndexNow（best-effort 通知 Bing 等支援引擎；Google 不支援，靠 sitemap）----
+      # fail-soft 由 scripts/submit-indexnow.ts 內部保證（任何錯誤 exit 0 + Job Summary 警示），
+      # 此步驟**不得**加 continue-on-error（契約見 scripts/lib/sync-workflow-contract.test.ts）。
+      # 僅 main 實送；fork 無 secrets，script 會以 no INDEXNOW_KEY 略過。
+      - name: Submit IndexNow (best-effort)
+        if: success() && steps.changes.outputs.changed == 'true' && github.ref == 'refs/heads/main'
+        env:
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+          NEXT_PUBLIC_SITE_URL: https://podcast-website-mu.vercel.app
+        run: |
+          # 等待 Vercel 部署（best-effort，不保證完成；限制見 docs/GEO.md）
+          sleep 120
+          npx tsx scripts/submit-indexnow.ts
