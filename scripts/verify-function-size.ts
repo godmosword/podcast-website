@@ -1,23 +1,19 @@
 #!/usr/bin/env tsx
-/**
- * 驗證 serverless function trace 體積不超標（Vercel 上限 250MB 未壓縮）。
- *
- * 背景：a3bdca7 前 feed.xml 因 lib/story-og 的
- * `readFile(join(process.cwd(), "public", …))` 動態路徑，被 Next output
- * file tracing 連帶打包整個 public/（341MB）→ 部署失敗。本腳本掃描
- * `.next/server/app/**\/*.nft.json`，任一 function 總體積超過門檻即失敗，
- * 在 push 前就攔下這類依賴汙染。
- *
- *   npm run build && npm run verify:function-size
- */
+// 驗證 serverless function trace 體積不超標（Vercel 上限 250MB 未壓縮）。
+// 背景：a3bdca7／2026-07 feed.xml 因動態 public 路徑被 NFT 打包超標。
+// 搭配 verify:no-public-fs（源碼紅線）雙閘。
+//
+//   npm run build && npm run verify:function-size
 
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 
 /** 低於 Vercel 250MB 上限的保守門檻；正常 function 約 1–4MB。 */
 const LIMIT_MB = 200;
-/** public/ 一旦進 trace 幾乎必為依賴汙染，門檻另計更嚴。 */
+/** public/ 一旦進 trace 幾乎必為依賴汙染；stories+candy-kart 已 >230MB。 */
 const PUBLIC_LIMIT_MB = 20;
+/** feed.xml 曾兩次踩雷，單獨再卡一層（正常應遠低於此）。 */
+const FEED_LIMIT_MB = 10;
 
 const APP_DIR = ".next/server/app";
 let traceFiles: string[] = [];
@@ -64,21 +60,25 @@ for (const trace of traceFiles) {
 
 rows.sort((a, b) => b.totalMb - a.totalMb);
 
-const offenders = rows.filter(
-  (r) => r.totalMb > LIMIT_MB || r.publicMb > PUBLIC_LIMIT_MB,
-);
+const offenders = rows.filter((r) => {
+  if (r.totalMb > LIMIT_MB || r.publicMb > PUBLIC_LIMIT_MB) return true;
+  if (r.route.includes("feed.xml") && r.totalMb > FEED_LIMIT_MB) return true;
+  return false;
+});
 
 const fmt = (r: Row) =>
   `${r.totalMb.toFixed(1)}MB（public ${r.publicMb.toFixed(1)}MB）${r.route}`;
 
 if (offenders.length > 0) {
-  console.error(`❌ ${offenders.length} 個 function trace 超標（上限 ${LIMIT_MB}MB／public ${PUBLIC_LIMIT_MB}MB）：`);
+  console.error(
+    `❌ ${offenders.length} 個 function trace 超標（上限 ${LIMIT_MB}MB／public ${PUBLIC_LIMIT_MB}MB／feed.xml ${FEED_LIMIT_MB}MB）：`,
+  );
   for (const r of offenders) console.error(`  ${fmt(r)}`);
   console.error(
     "\n常見原因：某個被 route 依賴的模組含 fs 動態路徑（如 join(process.cwd(), \"public\", …)），",
   );
   console.error(
-    "Next tracing 會保守打包整個目錄。修法參考 lib/story-og-path.ts：把純函式/常數抽到零依賴葉模組。",
+    "Next tracing 會保守打包整個目錄。修法：建置時預計算進 data/；源碼紅線見 verify:no-public-fs。",
   );
   process.exit(1);
 }

@@ -1,36 +1,14 @@
-import fs from "node:fs";
-import path from "node:path";
 import { storiesByNewest } from "@/data/content";
+import { audioLengthBySlug } from "@/data/audio-lengths";
 import { buildRssFeed } from "@/lib/feed";
-import { storyAudioPath } from "@/lib/story-utils";
 
-/** 為每集本地音檔取實際檔案大小（bytes），供 RSS enclosure length 使用；失敗則略過。 */
-function buildAudioLengthBySlug(
-  stories: ReturnType<typeof storiesByNewest>,
-): Record<string, number> {
-  const entries: [string, number][] = [];
-
-  for (const story of stories) {
-    const assetPath = storyAudioPath(story.slug, story.audio);
-    if (!assetPath.startsWith("/stories/")) continue;
-
-    try {
-      const filePath = path.join(process.cwd(), "public", assetPath);
-      const { size } = fs.statSync(filePath);
-      entries.push([story.slug, size]);
-    } catch {
-      // 檔案不存在或讀取失敗時略過，enclosure length fallback 0
-    }
-  }
-
-  return Object.fromEntries(entries);
-}
-
+/**
+ * RSS feed。enclosure length 來自建置時預計算表（data/audio-lengths.json），
+ * 禁止在此對 public/ 做 fs——會觸發 Next tracing 打包整個 public/ 導致部署超標。
+ */
 export function GET() {
   const stories = storiesByNewest();
-  const xml = buildRssFeed(stories, {
-    audioLengthBySlug: buildAudioLengthBySlug(stories),
-  });
+  const xml = buildRssFeed(stories, { audioLengthBySlug });
 
   return new Response(xml, {
     headers: {

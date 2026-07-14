@@ -24,7 +24,7 @@
 | [`app/sitemap.ts`](../app/sitemap.ts) | 全站 URL + `lastModified`，供 Google／Bing 排程重新爬取 |
 | [`public/llms.txt`](../public/llms.txt) | 站點重點、路由地圖、首頁 sections 摘要（人工維護，AI 代理快速定位用） |
 | `public/llms-full.txt` | `llms.txt` 詳細版，含全部故事定義式摘要與角色索引；**prebuild 自動產生**（`npm run generate:llms-full`），不手動編輯 |
-| [`app/feed.xml/route.ts`](../app/feed.xml/route.ts) + [`lib/feed.ts`](../lib/feed.ts) | RSS 2.0 feed；`route.ts` 以 `statSync` 讀本地音檔實際大小注入 `enclosure length`（避免 podcast 平台因缺 length 拒收/降權） |
+| [`app/feed.xml/route.ts`](../app/feed.xml/route.ts) + [`lib/feed.ts`](../lib/feed.ts) | RSS 2.0 feed；enclosure length 來自建置時 `generate:audio-lengths` → [`data/audio-lengths.json`](../data/audio-lengths.json)（禁止 route runtime 掃 `public/`，避免 NFT 打包超標） |
 | [`lib/json-ld.ts`](../lib/json-ld.ts) | 結構化資料：`podcastSeriesJsonLd`（含 `sameAs` 平台節目頁連結）、`podcastEpisodeJsonLd`（含逐字稿 `associatedMedia` MediaObject，`encodingFormat: text/vtt`）、`breadcrumbListJsonLd`（五類頁純 JSON-LD，**無可見 UI**，僅供機器解析頁面階層）、`faqPageJsonLd`、`characterCreativeWorkJsonLd` |
 | `public/story/<slug>/transcript.vtt`（經 [`lib/transcript.ts`](../lib/transcript.ts) 判定 `hasVtt`） | 逐字稿側車，供 AI 引擎直接讀取對話內容（非僅摘要） |
 | [`scripts/verify-geo.ts`](../scripts/verify-geo.ts) + `npm run verify:geo` | build 後護欄：sitemap 涵蓋度、`llms-full.txt` 新鮮度、重點頁 JSON-LD 可解析、`dateModified` 與 sitemap `lastModified` 同源、`noindex` 頁面正確性。已掛在 `npm run check` 尾端 |

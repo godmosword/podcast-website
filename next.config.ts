@@ -16,6 +16,18 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/story/[slug]/opengraph-image": ["./public/stories/*/01.jpg"],
   },
+  // 紅線保險：即便 route 誤引動態 public 路徑，feed.xml 也不該帶走大資產目錄。
+  // 正解仍是 verify:no-public-fs + generate:audio-lengths（勿依賴此排除當唯一閘門）。
+  outputFileTracingExcludes: {
+    "/feed.xml": [
+      "./public/stories/**",
+      "./public/candy-kart/**",
+      "./public/games/**",
+      "./public/adventures/**",
+      "./public/characters/**",
+      "./public/landing/**",
+    ],
+  },
   async redirects() {
     return legacyStoryRedirects();
   },

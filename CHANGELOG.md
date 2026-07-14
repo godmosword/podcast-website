@@ -9,13 +9,13 @@
 - **GEO 營運基礎（/agent-plan geo-ticklish-candy 委員會核准）**：
   - **robots AI crawler 分流修正**：檢索／使用者代查型（`OAI-SearchBot`／`ChatGPT-User`／`Claude-SearchBot`／`Claude-User`／`PerplexityBot`／`Perplexity-User`）放行；訓練型補 `ClaudeBot`（Anthropic 現行定義為訓練爬蟲）與 `meta-externalagent`；移除已棄用 `Claude-Web`。測試補 SearchBot／ClaudeBot 交叉斷言。
   - **JSON-LD 強化**：`PodcastSeries.sameAs`（平台節目頁，strip query）；`breadcrumbListJsonLd` 注入 story／topic／vehicles／characters／for-parents（純結構化資料，無可見 UI）；`PodcastEpisode.associatedMedia` 逐字稿 MediaObject（text/vtt、zh-TW，僅有 VTT 集）。
-  - **RSS enclosure length**：`buildRssFeed` 注入式 `audioLengthBySlug`（維持純函式），`feed.xml` route 對本地音檔 `statSync` 實際位元組。
+  - **RSS enclosure length**：`buildRssFeed` 注入式 `audioLengthBySlug`（維持純函式）；`generate:audio-lengths`（prebuild）寫入 `data/audio-lengths.json`，`feed.xml` 只讀該表（禁止 runtime 掃 public/）。
   - **內容層級**：topic／vehicles 頁 metadata 補 `dateModified`（與 sitemap 同源）；`/characters` 補家長 FAQ 三題（answer-first、置於角色卡之後）＋ `FAQPage` JSON-LD。
   - **IndexNow 更新迴圈**：`generate-indexnow-key`（prebuild 依 `INDEXNOW_KEY` 產 `public/<key>.txt`，正式環境格式錯誤 fail-fast）＋ `submit-indexnow`（sync push 後 best-effort 通知 Bing 等，fail-soft script 內保證、`--dry-run`）＋ sync workflow 新步驟（main-only）與契約測試。
   - **`verify:geo`**：25 條規則對 build 產物驗 sitemap 覆蓋／llms-full／JSON-LD／dateModified 一致／noindex／robots 名單／sameAs／breadcrumb／transcript／enclosure／IndexNow key；已接入 `npm run check`（build 之後）。
   - **docs/GEO.md 營運 runbook**：資產地圖、crawler 政策（每季對照官方文件）、IndexNow 設定與雙端 env 漂移風險、分引擎量測（Google=GSC／Bing=IndexNow）、AI prompt baseline、部署後煙霧測試。
 
-- **function 體積 gate（`verify:function-size`）**：掃描 `.next/server/app/**/*.nft.json`，任一 serverless function trace >200MB 或 public/ 進 trace >20MB 即失敗，push 前攔截依賴汙染（feed.xml 344MB 部署事故 `a3bdca7` 的預防措施）；已接入 `npm run check` 於 build 之後。
+- **function 體積 gate（`verify:function-size` + `verify:no-public-fs`）**：掃描 build 產物 `.nft.json`，任一 serverless function trace >200MB 或 public/ 進 trace >20MB 或 feed.xml >10MB 即失敗；另以源碼紅線禁止 `app/` 內 `join(process.cwd(), "public", …)`（feed.xml 255MB 部署事故的預防雙閘）；已接入 `npm run check`。
 - **新集通知 email 訂閱（LIST-2）**：`/subscribe` 靜態頁 + `SubscribeForm`；`POST /api/subscribe`（zod 驗證、家長同意、IP rate limit、Neon `subscribers` 表 `lower(email)` 冪等）；無 `DATABASE_URL` 時降級引導至 `#connect`；analytics `subscribe_submit`（僅 `source`、無 PII）。Migration：`scripts/migrations/003_subscribers.sql`。
 - **成長量測模板（Growth-Measure-1a）**：`docs/metrics/README.md` 週報欄位與 UTM 對照；本機截圖／CSV gitignore。
 - **宇宙地圖 UX 稽核與 e2e（MAP-UX-P1）**：`docs/UNIVERSE-MAP-UX-AUDIT-2026-07-11.md`；`e2e/universe-map.spec.ts` 觸控 assertion（overlay 擋 pan、backdrop 關閉、關閉鈕 ≥44px、reduced-motion 點島）；`e2e/a11y.spec.ts` 掃 `/adventures` 與開 sheet。
