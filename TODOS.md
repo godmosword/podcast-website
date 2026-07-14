@@ -30,7 +30,7 @@
 
 | ID | Commit |
 |----|--------|
-| fix(deploy): feed.xml 禁 runtime public fs；enclosure → prebuild audio-lengths；紅線 `verify:no-public-fs` | （待 commit） |
+| fix(deploy): feed.xml 禁 runtime public fs；enclosure → prebuild audio-lengths；紅線 `verify:no-public-fs` | `dccaf0a` |
 
 ### 本輪已完成（2026-07-12）
 
