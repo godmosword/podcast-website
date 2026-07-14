@@ -853,7 +853,8 @@ export default function CarPlatformer() {
             style={{
               position: "absolute",
               inset: 0,
-              background: "rgba(12,20,40,.74)",
+              background:
+                "linear-gradient(rgba(12,20,40,.72),rgba(12,20,40,.86)), url('/games/v2/car-adventure/cover.webp') center/cover",
               backdropFilter: "blur(2px)",
               display: "flex",
               flexDirection: "column",
@@ -882,7 +883,7 @@ export default function CarPlatformer() {
                   ? "再試一次吧"
                   : status === "paused"
                     ? "暫停中"
-                    : "車車大冒險"}
+                  : "準備出發！"}
             </div>
             {(status === "won" || status === "over") && game.current && (
               <div style={{ fontSize: 16 }}>得分 ⭐ {game.current.score}</div>
@@ -897,7 +898,7 @@ export default function CarPlatformer() {
                     lineHeight: 1.6,
                   }}
                 >
-                  方向鍵移動、上鍵/空白鍵跳；踩在搗蛋車頭上可以彈飛它，吃金幣、躲尖刺、衝向終點旗！
+                  左右移動、上鍵或空白鍵跳躍；踩搗蛋車、吃金幣、躲尖刺，衝向終點旗！
                 </div>
                 <div
                   style={{

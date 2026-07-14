@@ -33,6 +33,7 @@ export function GameLoadingGate({
     LABELS[gameId] ??
     GAMES.find((game) => game.slug === gameId)?.title ??
     "小遊戲";
+  const game = GAMES.find((item) => item.slug === gameId);
 
   if (!ready) {
     return (
@@ -52,6 +53,8 @@ export function GameLoadingGate({
           onStart={manualStart ? start : undefined}
           onRetry={retry}
           staticLayout
+          artSrc={game?.art.cover}
+          artAlt={game?.art.alt}
         />
       </div>
     );

@@ -15,12 +15,52 @@
   gap: 12px;
   text-align: center;
   padding: 24px;
+  overflow: hidden;
+  isolation: isolate;
 }
 
 .overlayStatic {
   position: static;
   min-height: 12rem;
   border-radius: var(--radius-md);
+}
+
+.art,
+.artShade {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.art {
+  object-fit: cover;
+  opacity: 0.7;
+}
+
+.artShade {
+  z-index: 1;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--mix-base) 62%, transparent),
+    color-mix(in srgb, var(--mix-base) 92%, transparent)
+  );
+}
+
+.overlay > :not(.art):not(.artShade) {
+  position: relative;
+  z-index: 2;
+}
+
+:global([data-theme="night"]) .art {
+  opacity: 0.45;
+}
+
+:global([data-theme="night"]) .artShade {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, #18203d 62%, transparent),
+    color-mix(in srgb, #18203d 94%, transparent)
+  );
 }
 
 .title {

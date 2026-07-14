@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import type { GameLoadPhase } from "@/lib/gamekit/react/game-load";
 import DuduMoment from "@/components/dudu/DuduMoment";
 import { IconReplay } from "@/components/games/ClayIcons";
@@ -16,6 +17,8 @@ type GameLoadOverlayProps = {
   startLabel?: string;
   /** true：用於 GameLoadingGate 等非 iframe 全幅區塊 */
   staticLayout?: boolean;
+  artSrc?: string;
+  artAlt?: string;
   className?: string;
 };
 
@@ -31,6 +34,8 @@ export function GameLoadOverlay({
   onRetry,
   startLabel = "開始遊戲",
   staticLayout = false,
+  artSrc,
+  artAlt = "",
   className,
 }: GameLoadOverlayProps) {
   const wrapClass = [
@@ -51,6 +56,17 @@ export function GameLoadOverlay({
       aria-busy={phase === "loading"}
       aria-label={title}
     >
+      {artSrc ? (
+        <Image
+          src={artSrc}
+          alt={artAlt}
+          fill
+          sizes="(max-width: 640px) 100vw, 720px"
+          className={styles.art}
+          aria-hidden={artAlt.length === 0}
+        />
+      ) : null}
+      <span className={styles.artShade} aria-hidden />
       {phase === "idle" && onStart ? (
         <>
           <p className={styles.title}>{title}</p>

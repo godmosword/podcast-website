@@ -1,0 +1,136 @@
+.intro {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.95fr) minmax(0, 1.05fr);
+  gap: 20px;
+  align-items: stretch;
+  margin-bottom: 20px;
+  padding: 14px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(135deg, var(--card), var(--card-2));
+  box-shadow: var(--shadow-md), var(--gloss);
+}
+
+:global([data-theme="night"]) .intro {
+  border-color: color-mix(in srgb, var(--c-yellow) 18%, var(--line));
+  box-shadow: var(--shadow-sm), var(--warm-card-glow);
+}
+
+.cover {
+  position: relative;
+  min-height: 196px;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--c-pink) 25%, var(--mix-base));
+  box-shadow: var(--gloss), inset 0 -8px 16px rgba(52, 48, 43, 0.12);
+}
+
+.cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(31, 27, 45, 0.25), transparent 60%);
+  pointer-events: none;
+}
+
+.coverImage {
+  object-fit: cover;
+}
+
+.coverLabel {
+  position: absolute;
+  z-index: 1;
+  left: 12px;
+  bottom: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(47, 41, 54, 0.68);
+  backdrop-filter: blur(8px);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding: 10px 10px 10px 2px;
+}
+
+.eyebrow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.copy h1 {
+  margin: 7px 0 6px;
+  color: var(--ink);
+  font-size: clamp(1.55rem, 3vw, 2.1rem);
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.copy p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 13px;
+}
+
+.controls span {
+  padding: 5px 9px;
+  border-radius: 8px;
+  color: var(--ink-soft);
+  background: color-mix(in srgb, var(--c-sky) 16%, var(--card));
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.moreLink {
+  align-self: flex-start;
+  min-height: 44px;
+  margin-top: 10px;
+  padding: 10px 0;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.moreLink:hover {
+  color: var(--ink);
+}
+
+.moreLink:focus-visible {
+  outline: 3px solid var(--focus-ring, var(--c-sky));
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .intro {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .cover {
+    min-height: 172px;
+  }
+
+  .copy {
+    padding: 2px 4px 4px;
+  }
+}

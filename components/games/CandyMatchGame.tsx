@@ -40,6 +40,7 @@ import {
   type CandyMatchLevel,
   type CandyMatchTask,
 } from "@/lib/games/candy-match/levels";
+import styles from "./CandyMatchGame.module.css";
 
 const INK = "#5d4a67";
 const INK_SOFT = "#8c7896";
@@ -498,7 +499,7 @@ export default function CandyMatchGame() {
 
   return (
     <GameChrome announce={announce}>
-      <div style={wrapStyle} data-screen={screen}>
+      <div style={wrapStyle} className={styles.surface} data-screen={screen}>
         <div
           style={{
             display: "flex",
@@ -507,7 +508,7 @@ export default function CandyMatchGame() {
             marginBottom: 10,
           }}
         >
-          <div style={{ fontSize: 18, fontWeight: 900, color: INK, whiteSpace: "nowrap" }}>
+          <div className={styles.gameTitle} style={{ fontSize: 18, fontWeight: 900, color: INK, whiteSpace: "nowrap" }}>
             繽紛消消樂
             {screen === "play" && (
               <span
@@ -527,7 +528,7 @@ export default function CandyMatchGame() {
         </div>
 
         {screen === "title" && (
-          <div style={{ textAlign: "center", paddingTop: 46, paddingBottom: 40 }}>
+          <div className={styles.titleScreen} style={{ textAlign: "center", paddingTop: 46, paddingBottom: 40 }}>
             <div style={{ display: "flex", justifyContent: "center", gap: 10, marginBottom: 18 }}>
               {[0, 1, 2, 3, 4].map((p) => (
                 <span key={p} style={{ width: 52, height: 52, display: "inline-block" }}>
@@ -536,10 +537,10 @@ export default function CandyMatchGame() {
               ))}
             </div>
             <h1 style={{ fontSize: 40, fontWeight: 900, color: "#d95f87", margin: "0 0 8px" }}>
-              繽紛消消樂
+              準備找糖果！
             </h1>
             <p style={{ color: INK_SOFT, fontWeight: 700, margin: "0 0 26px", fontSize: 15 }}>
-              找一找、排一排、消一消！
+              找一找、排一排、消一消，完成小任務就有星星！
             </p>
             <button type="button" style={bigBtn} onClick={() => setScreen("map")}>
               ▶ 開始
@@ -548,7 +549,7 @@ export default function CandyMatchGame() {
         )}
 
         {screen === "map" && (
-          <div style={{ paddingBottom: 12 }}>
+          <div className={styles.mapScreen} style={{ paddingBottom: 12 }}>
             <h2 style={{ textAlign: "center", color: INK, fontSize: 22, fontWeight: 900, margin: "6px 0 14px" }}>
               遊樂園地圖
             </h2>
@@ -597,6 +598,7 @@ export default function CandyMatchGame() {
           <>
             {/* 任務列 */}
             <div
+              className={styles.taskBar}
               style={{
                 display: "flex",
                 justifyContent: "center",
@@ -625,7 +627,7 @@ export default function CandyMatchGame() {
               )}
             </div>
 
-            <div style={{ display: "flex", justifyContent: "center" }}>
+            <div className={styles.boardWrap} style={{ display: "flex", justifyContent: "center" }}>
               <CandyMatchBoard
                 board={board}
                 cellPx={cellPx}
@@ -641,6 +643,7 @@ export default function CandyMatchGame() {
 
             {/* 道具列＋提示 */}
             <div
+              className={styles.actionRow}
               style={{
                 display: "flex",
                 justifyContent: "center",
@@ -687,6 +690,7 @@ export default function CandyMatchGame() {
 
             {/* 角色鼓勵氣泡 */}
             <div
+              className={styles.encouragement}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -717,6 +721,7 @@ export default function CandyMatchGame() {
             {/* 過關／再試一次 覆蓋層 */}
             {overlay && (
               <div
+                className={styles.resultOverlay}
                 style={{
                   position: "absolute",
                   inset: 0,

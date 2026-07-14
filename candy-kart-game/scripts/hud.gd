@@ -76,7 +76,7 @@ func _build() -> void:
 	top.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(top)
 
-	var pos_chip := make_chip("1", 38)
+	var pos_chip := make_chip("第 1 名", 28)
 	pos_label = pos_chip["label"]
 	top.add_child(pos_chip["panel"])
 
@@ -105,7 +105,7 @@ func _build() -> void:
 	spacer2.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	top.add_child(spacer2)
 
-	var lap_chip := make_chip("1/3 圈", 30)
+	var lap_chip := make_chip("第 1/3 圈", 26)
 	lap_label = lap_chip["label"]
 	top.add_child(lap_chip["panel"])
 
@@ -262,8 +262,8 @@ func set_paused_visible(value: bool) -> void:
 	pause_panel.visible = value
 
 func update_state(pos: int, lap: int, laps: int, stars: int, stars_total: int) -> void:
-	pos_label.text = str(pos)
-	lap_label.text = "%d/%d 圈" % [mini(lap, laps), laps]
+	pos_label.text = "第 %d 名" % pos
+	lap_label.text = "第 %d/%d 圈" % [mini(lap, laps), laps]
 	star_label.text = "%d/%d" % [stars, stars_total]
 
 func update_player_meters(speed_ratio: float, drift_ratio: float, boost_active: bool) -> void:

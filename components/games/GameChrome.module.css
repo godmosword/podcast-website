@@ -1,11 +1,12 @@
 .wrap {
   position: relative;
+  isolation: isolate;
 }
 
 .toolbar {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-shrink: 0;
 }
 
@@ -13,23 +14,33 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 52px;
-  min-height: 52px;
+  min-width: 48px;
+  min-height: 48px;
   padding: 0 12px;
-  border: 2px solid color-mix(in srgb, var(--ink) 9%, transparent);
-  border-radius: 16px;
-  background: var(--card);
+  border: 1.5px solid color-mix(in srgb, var(--ink) 12%, var(--line));
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--card) 90%, var(--c-sky));
   font-size: 1.2rem;
   line-height: 1;
   text-decoration: none;
   color: inherit;
   cursor: pointer;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--ink) 10%, transparent);
+  transition: transform var(--motion-press), box-shadow var(--motion-press), background 0.2s ease;
 }
 
 .toolBtn:hover {
   transform: translateY(-1px);
   box-shadow: var(--shadow-sm);
+}
+
+.toolBtn:active {
+  transform: translateY(3px);
+  box-shadow: none;
+}
+
+.toolBtn[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--c-yellow) 32%, var(--card));
 }
 
 .toolBtn:focus-visible {
@@ -52,8 +63,9 @@
 .dialog {
   width: min(100%, 22rem);
   padding: 1.25rem 1.35rem 1.35rem;
-  border-radius: 1.1rem;
-  background: var(--card);
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--line);
+  background: linear-gradient(160deg, var(--card), var(--card-2));
   box-shadow: var(--shadow-md), 0 8px 0 color-mix(in srgb, var(--ink) 8%, transparent);
   outline: none;
 }
@@ -76,7 +88,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
+  min-height: 48px;
   padding: 0.65rem 1rem;
   border-radius: 0.75rem;
   font-size: 0.95rem;
@@ -93,6 +105,7 @@
     color-mix(in srgb, var(--c-lilac) 70%, var(--c-sky))
   );
   color: var(--chip-active-fg);
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--c-lilac) 45%, transparent);
 }
 
 .secondaryBtn {
@@ -188,4 +201,29 @@
   font-size: 0.78rem;
   line-height: 1.45;
   color: var(--ink-soft);
+}
+
+@media (max-width: 480px) {
+  .toolbar {
+    gap: 6px;
+  }
+
+  .toolBtn {
+    min-width: 46px;
+    min-height: 46px;
+    padding-inline: 9px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toolBtn,
+  .primaryBtn,
+  .secondaryBtn {
+    transition: none;
+  }
+
+  .toolBtn:hover,
+  .toolBtn:active {
+    transform: none;
+  }
 }

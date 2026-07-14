@@ -1,11 +1,10 @@
+import Image from "next/image";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Doodle from "@/components/decor/Doodle";
 import RoughFrame from "@/components/decor/RoughFrame";
 import Wheel from "@/components/decor/Wheel";
 import decor from "@/components/decor/decor.module.css";
-import GameThumbArt from "@/components/games/GameThumbArt";
-import PlaygroundHubBadge from "@/components/games/PlaygroundHubBadge";
 import Icon from "@/components/ui/Icon";
 import { GAMES, gameParentTip, type GameMeta } from "@/data/games";
 import { getSiteUrl } from "@/lib/site-url";
@@ -14,29 +13,42 @@ import styles from "./page.module.css";
 export const metadata: Metadata = {
   title: "車車遊樂園",
   description:
-    "和故事裡的車車朋友一起玩小遊戲：闖關、方塊、糖果卡丁車，適合 5–12 歲親子。",
+    "和故事裡的車車朋友一起玩小遊戲：消消樂、跑跳、方塊與糖果卡丁車，適合 3–12 歲親子。",
   openGraph: {
     title: "車車遊樂園 · 小遊戲",
-    description:
-      "車車大冒險、繽紛方塊、繽紛卡丁車——親子小遊戲一站玩。",
+    description: "四款黏土風親子小遊戲，一起探索車車遊樂園。",
     url: `${getSiteUrl()}/games`,
   },
 };
 
+const GAME_TYPE_LABEL: Record<GameMeta["gameType"], string> = {
+  match: "找一找",
+  adventure: "跑跳闖關",
+  blocks: "堆疊挑戰",
+  racing: "賽道競速",
+};
+
 function GameCard({ game, index }: { game: GameMeta; index: number }) {
   const parentTip = gameParentTip(game);
-  const ariaParts = [game.title, game.ageRange, parentTip, `約 ${game.estMinutes} 分鐘`].filter(
-    Boolean,
-  );
+  const ariaParts = [
+    game.title,
+    GAME_TYPE_LABEL[game.gameType],
+    game.ageRange,
+    `約 ${game.estMinutes} 分鐘`,
+    ...game.controls,
+    parentTip,
+    "開始玩",
+  ].filter(Boolean);
 
   return (
-    <li className={styles.gridItem}>
+    <li className={`${styles.gridItem} ${game.featured ? styles.featuredItem : ""}`}>
       <Link
         href={game.href}
         className={`${styles.card} scrollEnter press-squash`}
         aria-label={ariaParts.join("，")}
         style={{
-          boxShadow: `var(--shadow-md), 0 6px 0 ${game.accent}`,
+          ["--card-accent" as string]: game.accent,
+          ["--card-image-position" as string]: game.art.position ?? "50% 50%",
         }}
       >
         <RoughFrame
@@ -45,13 +57,17 @@ function GameCard({ game, index }: { game: GameMeta; index: number }) {
           width={3}
           shiftFilter
         />
-        <div
-          className={styles.thumb}
-          style={{
-            ["--thumb-accent" as string]: game.accent,
-          }}
-        >
-          <GameThumbArt gameId={game.slug} className={styles.thumbArt} />
+        <div className={styles.thumb}>
+          <Image
+            src={game.art.thumbnail ?? game.art.cover}
+            alt={game.art.alt}
+            fill
+            sizes="(max-width: 640px) 92vw, 440px"
+            className={styles.thumbImage}
+            style={{ objectPosition: game.art.position ?? "50% 50%" }}
+          />
+          <span className={styles.typePill}>{GAME_TYPE_LABEL[game.gameType]}</span>
+          {game.featured ? <span className={styles.featuredPill}>第一次玩推薦</span> : null}
         </div>
         <span className={styles.body}>
           <span className={styles.meta}>
@@ -65,20 +81,16 @@ function GameCard({ game, index }: { game: GameMeta; index: number }) {
           </span>
           <span className={styles.cardTitle}>{game.title}</span>
           <span className={styles.summary}>{game.desc}</span>
-          {parentTip ? (
-            <span className={styles.parentTip}>{parentTip}</span>
-          ) : null}
+          <span className={styles.controls}>
+            {game.controls.map((control) => (
+              <span key={control}>{control}</span>
+            ))}
+          </span>
+          {parentTip ? <span className={styles.parentTip}>{parentTip}</span> : null}
           <span className={styles.footer}>
             <span className={styles.playLabel}>開始玩</span>
-            <span
-              className={styles.arrow}
-              style={{
-                backgroundColor: `color-mix(in srgb, ${game.accent} 14%, var(--card))`,
-                color: "var(--ink)",
-              }}
-              aria-hidden
-            >
-              <Icon name="play" size={12} />
+            <span className={styles.arrow} aria-hidden>
+              <Icon name="play" size={13} />
             </span>
           </span>
         </span>
@@ -87,7 +99,44 @@ function GameCard({ game, index }: { game: GameMeta; index: number }) {
   );
 }
 
+function GameSection({
+  id,
+  title,
+  hint,
+  games,
+  startIndex,
+}: {
+  id: string;
+  title: string;
+  hint: string;
+  games: GameMeta[];
+  startIndex: number;
+}) {
+  return (
+    <section className={styles.zone} aria-labelledby={id}>
+      <div className={styles.zoneHeading}>
+        <div>
+          <p className={styles.zoneKicker}>{hint}</p>
+          <h2 id={id} className={styles.zoneTitle}>
+            {title}
+          </h2>
+        </div>
+        <span className={styles.zoneCount}>{games.length} 款</span>
+      </div>
+      <ul className={styles.grid}>
+        {games.map((game, index) => (
+          <GameCard key={game.slug} game={game} index={startIndex + index} />
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 export default function GamesHubPage() {
+  const featured = GAMES.find((game) => game.featured) ?? GAMES[0];
+  const exploreGames = GAMES.filter((game) => game.ageBand === "explore");
+  const challengeGames = GAMES.filter((game) => game.ageBand === "challenge");
+
   return (
     <main className={styles.main} aria-label="車車遊樂園小遊戲">
       <Link href="/" className={styles.back}>
@@ -95,6 +144,15 @@ export default function GamesHubPage() {
       </Link>
 
       <header className={styles.hero}>
+        <Image
+          src="/games/v2/hub/hero-desktop.webp"
+          alt="黏土車車在遊樂園入口與摩天輪旁準備開始遊戲"
+          fill
+          priority
+          sizes="(max-width: 640px) 100vw, 960px"
+          className={styles.heroImage}
+        />
+        <div className={styles.heroShade} aria-hidden />
         <Doodle
           kind="burst"
           size={36}
@@ -110,11 +168,32 @@ export default function GamesHubPage() {
           className={`${decor.doodle} ${decor.tiltB}`}
           style={{ right: "6%", top: "12px" }}
         />
+        <div className={styles.heroContent}>
+          <span className={styles.eyebrow}>今天想玩哪一站？</span>
+          <h1 className={styles.title}>車車遊樂園</h1>
+          <p className={styles.subtitle}>
+            和故事裡的車車朋友一起玩，找糖果、跑跳、堆方塊、衝上賽道！
+          </p>
+          <div className={styles.heroActions}>
+            <Link href={featured.href} className={styles.primaryCta}>
+              <span aria-hidden>▶</span> 先玩繽紛消消樂
+            </Link>
+            <span className={styles.heroNote}>免下載 · 手機也能玩</span>
+          </div>
+          <ul className={styles.highlights} aria-label="遊樂園特色">
+            <li className={styles.chip}>
+              <Wheel size={18} color="var(--c-lilac)" />
+              {GAMES.length} 款遊戲
+            </li>
+            <li className={styles.chip}>🧸 3–7 歲探索</li>
+            <li className={styles.chip}>🏁 6–12 歲挑戰</li>
+          </ul>
+        </div>
         <Doodle
           kind="dots"
           size={28}
           color="var(--c-mint)"
-          className={`${decor.doodle}`}
+          className={decor.doodle}
           style={{ left: "12%", bottom: "18px" }}
         />
         <Doodle
@@ -124,40 +203,30 @@ export default function GamesHubPage() {
           className={`${decor.doodle} ${decor.tiltC}`}
           style={{ right: "10%", bottom: "14px" }}
         />
-
-        <div className={styles.heroBadge} aria-hidden>
-          <PlaygroundHubBadge size={52} />
-        </div>
-
-        <h1 className={styles.title}>車車遊樂園</h1>
-        <p className={styles.subtitle}>
-          和故事裡的車車朋友一起闖關、堆方塊、開卡丁車！
-          <br />
-          免下載、點開就能玩，最適合親子同樂。
-        </p>
-
-        <ul className={styles.highlights} aria-label="遊樂園特色">
-          <li className={styles.chip}>
-            <Wheel size={18} color="var(--c-lilac)" />
-            {GAMES.length} 款小遊戲
-          </li>
-          <li className={styles.chip}>🧸 3–6 歲 · 🏁 6–12 歲</li>
-          <li className={styles.chip}>📱 手機也能玩</li>
-        </ul>
       </header>
 
-      <section className={styles.zone} aria-labelledby="games-available">
-        <h2 id="games-available" className={styles.zoneTitle}>
-          現在就能玩
-        </h2>
-        <ul className={styles.grid}>
-          {GAMES.map((game, index) => (
-            <GameCard key={game.slug} game={game} index={index} />
-          ))}
-        </ul>
-      </section>
+      <div className={styles.sectionIntro}>
+        <span className={styles.sectionDot} aria-hidden />
+        <p>每一站都有新的小任務，挑一款就出發。</p>
+        <span className={styles.sectionDot} aria-hidden />
+      </div>
 
-      <p className={styles.footerNote}>挑一款喜歡的車車遊戲開始玩 🎡</p>
+      <GameSection
+        id="games-explore"
+        title="小小探索"
+        hint="3–7 歲 · 沒有壓力，慢慢玩"
+        games={exploreGames}
+        startIndex={0}
+      />
+      <GameSection
+        id="games-challenge"
+        title="挑戰賽道"
+        hint="6–12 歲 · 準備好再來挑戰"
+        games={challengeGames}
+        startIndex={1}
+      />
+
+      <p className={styles.footerNote}>玩完一站，還有下一站等你發現 🎡</p>
     </main>
   );
 }

@@ -1,7 +1,7 @@
 .main {
   padding: 1rem 1rem 2.5rem;
   padding-top: clamp(2.25rem, 6vh, 4rem);
-  max-width: 56rem;
+  max-width: 60rem;
   margin: 0 auto;
 }
 
@@ -47,4 +47,11 @@
   outline: 3px solid var(--c-sky);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+@media (max-width: 640px) {
+  .main {
+    padding-inline: calc(12px + var(--safe-left)) calc(12px + var(--safe-right));
+    padding-top: calc(1rem + var(--safe-top));
+  }
 }

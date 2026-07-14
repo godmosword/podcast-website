@@ -1,5 +1,14 @@
 type AgeBand = "explore" | "challenge";
 
+export type GameType = "match" | "adventure" | "blocks" | "racing";
+
+export type GameArt = {
+  cover: string;
+  thumbnail?: string;
+  position?: string;
+  alt: string;
+};
+
 /** UX-P0-4：challenge 遊戲列表卡家長提示（僅文案，不隱藏入口）。 */
 export const CHALLENGE_PARENT_TIP = "建議 6 歲以上 · 家長陪同" as const;
 
@@ -15,6 +24,10 @@ export type GameMeta = {
   estMinutes: number;
   hasScore: boolean;
   hasTimer: boolean;
+  gameType: GameType;
+  controls: readonly string[];
+  art: GameArt;
+  featured?: boolean;
 };
 
 export const GAMES: GameMeta[] = [
@@ -30,6 +43,14 @@ export const GAMES: GameMeta[] = [
     estMinutes: 5,
     hasScore: false,
     hasTimer: false,
+    gameType: "match",
+    controls: ["點兩格交換", "拖曳也可以"],
+    art: {
+      cover: "/games/v2/candy-match/cover.webp",
+      thumbnail: "/games/v2/candy-match/cover.webp",
+      alt: "粉紅黏土遊樂園裡的繽紛消消樂方塊與車車",
+    },
+    featured: true,
   },
   {
     slug: "car-adventure",
@@ -43,6 +64,13 @@ export const GAMES: GameMeta[] = [
     estMinutes: 8,
     hasScore: true,
     hasTimer: false,
+    gameType: "adventure",
+    controls: ["左右移動", "跳躍過關"],
+    art: {
+      cover: "/games/v2/car-adventure/cover.webp",
+      thumbnail: "/games/v2/car-adventure/cover.webp",
+      alt: "黃色黏土車車在遊樂園平台間跳躍並收集金幣",
+    },
   },
   {
     slug: "block-drop",
@@ -56,6 +84,13 @@ export const GAMES: GameMeta[] = [
     estMinutes: 10,
     hasScore: true,
     hasTimer: false,
+    gameType: "blocks",
+    controls: ["左右移動", "旋轉與落下"],
+    art: {
+      cover: "/games/v2/block-drop/cover.webp",
+      thumbnail: "/games/v2/block-drop/cover.webp",
+      alt: "黏土遊樂園裡的繽紛方塊正在堆疊",
+    },
   },
   {
     slug: "candy-kart",
@@ -69,6 +104,13 @@ export const GAMES: GameMeta[] = [
     estMinutes: 4,
     hasScore: true,
     hasTimer: true,
+    gameType: "racing",
+    controls: ["左右轉向", "漂移收星星"],
+    art: {
+      cover: "/games/v2/candy-kart/cover.webp",
+      thumbnail: "/games/v2/candy-kart/cover.webp",
+      alt: "粉紅黏土卡丁車在遊樂園賽道上漂移競速",
+    },
   },
 ];
 

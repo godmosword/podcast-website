@@ -1670,7 +1670,7 @@ export default function BlockDropGame() {
       style={{
         fontFamily: font,
         background:
-          "linear-gradient(160deg,#fff9ee 0%,#f3fbff 52%,#fff0f7 100%)",
+          "linear-gradient(160deg,rgba(255,249,238,.94) 0%,rgba(243,251,255,.94) 52%,rgba(255,240,247,.94) 100%), url('/games/v2/block-drop/cover.webp') center/cover",
         padding: layout.shellPad,
         borderRadius: 28,
         width: "100%",

@@ -1,0 +1,69 @@
+.surface {
+  border-color: color-mix(in srgb, var(--c-pink) 56%, #fff) !important;
+  box-shadow: 0 22px 46px rgba(144, 116, 128, 0.22), inset 0 2px 0 rgba(255, 255, 255, 0.96) !important;
+}
+
+.gameTitle {
+  letter-spacing: 0.04em;
+}
+
+.titleScreen {
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.titleScreen button,
+.mapScreen button,
+.actionRow button,
+.resultOverlay button {
+  min-height: 48px;
+}
+
+.mapScreen {
+  padding-inline: 4px;
+}
+
+.mapScreen button:hover,
+.actionRow button:hover {
+  transform: translateY(-2px);
+}
+
+.taskBar {
+  border: 1.5px solid color-mix(in srgb, var(--c-pink) 22%, transparent);
+}
+
+.boardWrap {
+  padding: 4px 0 2px;
+}
+
+.actionRow {
+  align-items: center;
+}
+
+.encouragement {
+  position: relative;
+}
+
+.resultOverlay {
+  border: 2px solid color-mix(in srgb, var(--c-yellow) 35%, #fff);
+}
+
+@media (max-width: 480px) {
+  .titleScreen {
+    min-height: 270px;
+  }
+
+  .titleScreen h1 {
+    font-size: 2.1rem !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mapScreen button:hover,
+  .actionRow button:hover {
+    transform: none;
+  }
+}

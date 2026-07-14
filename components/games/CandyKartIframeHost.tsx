@@ -165,6 +165,8 @@ export function CandyKartIframeHost({
         onStart={start}
         onRetry={handleRetry}
         startLabel="出發！開始遊戲"
+        artSrc="/games/v2/candy-kart/cover.webp"
+        artAlt="粉紅黏土卡丁車在遊樂園賽道上準備出發"
       />
     </div>
   );

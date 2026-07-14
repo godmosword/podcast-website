@@ -20,3 +20,20 @@ describe("games parent tip (UX-P0-4)", () => {
     }
   });
 });
+
+describe("games v2 presentation metadata", () => {
+  test("每款遊戲都有入口視覺、類型與操作提示", () => {
+    for (const game of GAMES) {
+      expect(["match", "adventure", "blocks", "racing"]).toContain(game.gameType);
+      expect(game.controls.length).toBeGreaterThanOrEqual(2);
+      expect(game.art.cover).toMatch(/^\/games\/v2\//);
+      expect(game.art.alt.length).toBeGreaterThan(0);
+    }
+  });
+
+  test("只有繽紛消消樂是入口主打遊戲", () => {
+    expect(GAMES.filter((game) => game.featured).map((game) => game.slug)).toEqual([
+      "candy-match",
+    ]);
+  });
+});

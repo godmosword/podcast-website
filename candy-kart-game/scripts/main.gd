@@ -73,12 +73,13 @@ func _clear_screen() -> void:
 func _show_title() -> void:
 	_teardown_race()
 	_clear_screen()
-	var root := Ui.screen_bg()
+	var root := Ui.screen_bg("res://assets/candy-kart-cover.webp")
 	ui_layer.add_child(root)
 	current_screen = root
 	var box := Ui.center_box(root)
 	box.add_child(Ui.title_label("繽紛卡丁車", 64, Ui.PINK))
 	box.add_child(Ui.title_label("漂移、收星星、拿糖果盃！", 22, Ui.INK_SOFT))
+	box.add_child(Ui.title_label("單場練習或 6 站大獎賽，準備好就出發。", 17, Ui.INK_SOFT))
 	var spacer := Control.new()
 	spacer.custom_minimum_size = Vector2(0, 10)
 	box.add_child(spacer)
@@ -89,11 +90,12 @@ func _show_title() -> void:
 
 func _show_track_select() -> void:
 	_clear_screen()
-	var root := Ui.screen_bg()
+	var root := Ui.screen_bg("res://assets/candy-kart-cover.webp")
 	ui_layer.add_child(root)
 	current_screen = root
 	var box := Ui.center_box(root)
 	box.add_child(Ui.title_label("選一條賽道", 36))
+	box.add_child(Ui.title_label("每站 3 圈，收齊彩虹星星可以拿滿三顆獎牌。", 17, Ui.INK_SOFT))
 	var grid := GridContainer.new()
 	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 16)
@@ -107,7 +109,7 @@ func _show_track_select() -> void:
 			_start_race(i)
 		))
 	box.add_child(grid)
-	var gp_btn := Ui.primary_button("大獎賽（6 站爭糖果盃）", func() -> void:
+	var gp_btn := Ui.primary_button("🏆 大獎賽（6 站爭糖果盃）", func() -> void:
 		sfx.play(sfx.snd_click)
 		_start_grand_prix()
 	, Vector2(360, 60))
@@ -227,7 +229,7 @@ func _apply_gp_points(result: Dictionary) -> void:
 
 func _show_result(result: Dictionary) -> void:
 	_clear_screen()
-	var root := Ui.screen_bg()
+	var root := Ui.screen_bg("res://assets/candy-kart-cover.webp")
 	ui_layer.add_child(root)
 	current_screen = root
 	var box := Ui.center_box(root)
@@ -276,7 +278,7 @@ func _show_result(result: Dictionary) -> void:
 func _show_gp_final() -> void:
 	_teardown_race()
 	_clear_screen()
-	var root := Ui.screen_bg()
+	var root := Ui.screen_bg("res://assets/candy-kart-cover.webp")
 	ui_layer.add_child(root)
 	current_screen = root
 	var box := Ui.center_box(root)

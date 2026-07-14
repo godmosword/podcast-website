@@ -11,7 +11,7 @@ const SKY := Color8(141, 223, 240)
 ## 全 app 共用 Theme（含 CJK 字型），由 main._load_theme_font 設定。
 static var app_theme: Theme = null
 
-static func screen_bg() -> Control:
+static func screen_bg(art_path: String = "") -> Control:
 	var root := Control.new()
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	if app_theme:
@@ -20,6 +20,15 @@ static func screen_bg() -> Control:
 	rect.set_anchors_preset(Control.PRESET_FULL_RECT)
 	rect.color = Color8(255, 247, 237)
 	root.add_child(rect)
+	if art_path != "" and ResourceLoader.exists(art_path):
+		var art := TextureRect.new()
+		art.set_anchors_preset(Control.PRESET_FULL_RECT)
+		art.texture = load(art_path)
+		art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		art.modulate = Color(1, 1, 1, 0.18)
+		art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		root.add_child(art)
 	return root
 
 static func title_label(text: String, size: int, color := INK) -> Label:
@@ -39,7 +48,8 @@ static func primary_button(text: String, fn: Callable, min_size := Vector2(260, 
 	btn.add_theme_stylebox_override("normal", Hud.chip_style(LEMON, 32.0))
 	btn.add_theme_stylebox_override("hover", Hud.chip_style(LEMON.lightened(0.12), 32.0))
 	btn.add_theme_stylebox_override("pressed", Hud.chip_style(LEMON.darkened(0.08), 32.0))
-	btn.focus_mode = Control.FOCUS_NONE
+	btn.focus_mode = Control.FOCUS_ALL
+	btn.tooltip_text = text
 	btn.pressed.connect(fn)
 	return btn
 
@@ -52,7 +62,8 @@ static func soft_button(text: String, fn: Callable, min_size := Vector2(220, 52)
 	btn.add_theme_stylebox_override("normal", Hud.chip_style(Color(1, 1, 1, 0.92), 26.0))
 	btn.add_theme_stylebox_override("hover", Hud.chip_style(Color(1, 1, 1, 1.0), 26.0))
 	btn.add_theme_stylebox_override("pressed", Hud.chip_style(Color(0.96, 0.93, 0.95), 26.0))
-	btn.focus_mode = Control.FOCUS_NONE
+	btn.focus_mode = Control.FOCUS_ALL
+	btn.tooltip_text = text
 	btn.pressed.connect(fn)
 	return btn
 
@@ -69,8 +80,8 @@ static func center_box(root: Control) -> VBoxContainer:
 ## 賽道卡片按鈕：主題色塊＋名稱。
 static func track_button(track: Dictionary, fn: Callable) -> Button:
 	var btn := Button.new()
-	btn.custom_minimum_size = Vector2(300, 86)
-	btn.focus_mode = Control.FOCUS_NONE
+	btn.custom_minimum_size = Vector2(300, 104)
+	btn.focus_mode = Control.FOCUS_ALL
 	btn.add_theme_stylebox_override("normal", Hud.chip_style(Color(1, 1, 1, 0.95), 24.0))
 	btn.add_theme_stylebox_override("hover", Hud.chip_style(Color(1, 1, 1, 1.0), 24.0))
 	btn.add_theme_stylebox_override("pressed", Hud.chip_style(Color(0.97, 0.94, 0.96), 24.0))
@@ -90,12 +101,22 @@ static func track_button(track: Dictionary, fn: Callable) -> Button:
 	swatch2.color = track["ground"]
 	swatch2.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(swatch2)
+	var info := VBoxContainer.new()
+	info.add_theme_constant_override("separation", 2)
+	info.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(info)
 	var name_label := Label.new()
 	name_label.text = track["name"]
 	name_label.add_theme_font_size_override("font_size", 24)
 	name_label.add_theme_color_override("font_color", INK)
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(name_label)
+	info.add_child(name_label)
+	var meta := Label.new()
+	meta.text = "%d 圈 · %d 顆星" % [track["laps"], track["stars"].size()]
+	meta.add_theme_font_size_override("font_size", 15)
+	meta.add_theme_color_override("font_color", INK_SOFT)
+	meta.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	info.add_child(meta)
 	btn.pressed.connect(fn)
 	return btn
 
