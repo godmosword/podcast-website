@@ -13,10 +13,10 @@ import styles from "./page.module.css";
 export const metadata: Metadata = {
   title: "車車遊樂園",
   description:
-    "和故事裡的車車朋友一起玩小遊戲：消消樂、跑跳、方塊與糖果卡丁車，適合 3–12 歲親子。",
+    "和故事裡的車車朋友一起玩小遊戲：消消樂、著色、跑跳、方塊與糖果卡丁車，適合 3–12 歲親子。",
   openGraph: {
     title: "車車遊樂園 · 小遊戲",
-    description: "四款黏土風親子小遊戲，一起探索車車遊樂園。",
+    description: "黏土風親子小遊戲與繪本著色，一起探索車車遊樂園。",
     url: `${getSiteUrl()}/games`,
   },
 };
@@ -26,6 +26,7 @@ const GAME_TYPE_LABEL: Record<GameMeta["gameType"], string> = {
   adventure: "跑跳闖關",
   blocks: "堆疊挑戰",
   racing: "賽道競速",
+  coloring: "塗顏色",
 };
 
 function GameCard({ game, index }: { game: GameMeta; index: number }) {
@@ -172,7 +173,7 @@ export default function GamesHubPage() {
           <span className={styles.eyebrow}>今天想玩哪一站？</span>
           <h1 className={styles.title}>車車遊樂園</h1>
           <p className={styles.subtitle}>
-            和故事裡的車車朋友一起玩，找糖果、跑跳、堆方塊、衝上賽道！
+            和故事裡的車車朋友一起玩，找糖果、塗顏色、跑跳、堆方塊、衝上賽道！
           </p>
           <div className={styles.heroActions}>
             <Link href={featured.href} className={styles.primaryCta}>

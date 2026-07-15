@@ -38,21 +38,22 @@ Bonbon & 馬米親子 Podcast《車車遊樂園》的官方 **看圖聽故事** 
 | 角色圖鑑 | `/characters` | `data/characters.json` 定裝照與出場故事 |
 | 家長指南 | `/for-parents` | answer-first FAQ、代表性集數（GEO／STEM-P3） |
 | 家庭儀表板 | `/for-parents/dashboard` | 本機 localStorage 收聽／遊戲摘要（不上傳） |
-| 小遊戲 | `/games` | 四款 hub；canvas 遊戲預載 sheet，**Candy Kart（Godot WASM ~35MB）進頁按需載入** |
+| 小遊戲 | `/games` | 街機四款 hub + 繪本著色；canvas 遊戲預載 sheet，**Candy Kart（Godot WASM ~35MB）進頁按需載入** |
 | 節目數據 | `/studio` | 製作團隊專用（`noindex`、不在 sitemap） |
 | 關於／法律 | `/about`、`/legal` | 關於我們、使用條款 |
 | RSS | `/feed.xml` | Podcast feed（含 Podcasting 2.0 擴充） |
 | PWA | `manifest.json`、`sw.js` | 主畫面圖示；收藏、繼續收聽、遊戲進度、主題偏好（`cheche:progress` localStorage） |
 | GEO | `public/llms.txt`、`llms-full.txt` | AI 引用語料（build 前 `prebuild` 自動生成 `llms-full`）；`robots.ts` 分流檢索／訓練爬蟲 |
 
-### 四款小遊戲（`data/games.ts`）
+### 遊樂園活動（`data/games.ts`）
 
 | 路由 | 名稱 | 備註 |
 |------|------|------|
-| `/games/car-adventure` | 車車大冒險 | canvas 橫向跑跳 |
-| `/games/block-drop` | 繽紛樂園 | 落下方塊消除 |
-| `/games/candy-match` | 繽紛消消樂 | 關卡地圖 + 消除棋盤 |
+| `/games/car-adventure` | 車車大冒險 | canvas 橫向跑跳（GameKit） |
+| `/games/block-drop` | 繽紛樂園 | 落下方塊消除（GameKit） |
+| `/games/candy-match` | 繽紛消消樂 | 關卡地圖 + 消除棋盤（GameKit） |
 | `/games/candy-kart` | 繽紛卡丁車 | Godot HTML5 iframe，見 [GAME-PERFORMANCE.md](./docs/GAME-PERFORMANCE.md) |
+| `/games/coloring-book` | 繪本著色 | 定裝／場景線稿著色（不掛 GameKit）；線稿：`npm run generate:coloring-lineart` |
 
 GameKit 跨遊戲進度（星星、獎牌、車庫）見 [GAMEKIT-ARCHITECTURE.md](./docs/GAMEKIT-ARCHITECTURE.md)。
 
@@ -90,7 +91,8 @@ npm run dev
 | `npm run illustrate` | OpenAI 切場景 + 生圖（需 `OPENAI_API_KEY`，CI 不生圖） |
 | `npm run verify:episodes` | 對照 ep-9／ep-10 標準驗證集數接線 |
 | `npm run verify:browse-index` | 驗證 `browse-index.json` 與故事資料一致 |
-| `npm run export:video` | 整集 16:9 mp4 匯出（YouTube），見 [VIDEO-EXPORT.md](./docs/VIDEO-EXPORT.md) |
+| `npm run generate:story-blurs` | 故事圖 blur placeholder |
+| `npm run generate:coloring-lineart` | 由定裝／場景 JPG 產生著色線稿 PNG |
 
 ### 地圖／資產（維護者）
 
@@ -216,7 +218,7 @@ app/
   characters/page.tsx         角色圖鑑
   for-parents/                家長指南 + dashboard
   subscribe/page.tsx          新集 email 訂閱
-  games/                      四款小遊戲
+  games/                      街機四款 + 繪本著色
   topic/、vehicles/           主題／車種索引
   studio/、about/、legal/     數據中心、關於、條款
   api/zone-wish/              許願 API（可選 Neon）

@@ -24,7 +24,9 @@ describe("games parent tip (UX-P0-4)", () => {
 describe("games v2 presentation metadata", () => {
   test("每款遊戲都有入口視覺、類型與操作提示", () => {
     for (const game of GAMES) {
-      expect(["match", "adventure", "blocks", "racing"]).toContain(game.gameType);
+      expect(["match", "adventure", "blocks", "racing", "coloring"]).toContain(
+        game.gameType,
+      );
       expect(game.controls.length).toBeGreaterThanOrEqual(2);
       expect(game.art.cover).toMatch(/^\/games\/v2\//);
       expect(game.art.alt.length).toBeGreaterThan(0);

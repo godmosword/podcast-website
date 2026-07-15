@@ -1,6 +1,6 @@
 type AgeBand = "explore" | "challenge";
 
-export type GameType = "match" | "adventure" | "blocks" | "racing";
+export type GameType = "match" | "adventure" | "blocks" | "racing" | "coloring";
 
 export type GameArt = {
   cover: string;
@@ -110,6 +110,26 @@ export const GAMES: GameMeta[] = [
       cover: "/games/v2/candy-kart/cover.webp",
       thumbnail: "/games/v2/candy-kart/cover.webp",
       alt: "粉紅黏土卡丁車在遊樂園賽道上漂移競速",
+    },
+  },
+  {
+    slug: "coloring-book",
+    title: "繪本著色",
+    desc: "選定裝人物或故事場景線稿，用蠟筆與油漆桶輕輕塗上喜歡的顏色！",
+    href: "/games/coloring-book",
+    emoji: "🖍️",
+    accent: "var(--c-sky)",
+    ageBand: "explore",
+    ageRange: "3–7 歲",
+    estMinutes: 8,
+    hasScore: false,
+    hasTimer: false,
+    gameType: "coloring",
+    controls: ["選顏色塗一塗", "油漆桶一次填滿"],
+    art: {
+      cover: "/games/v2/coloring-book/cover.webp",
+      thumbnail: "/games/v2/coloring-book/cover.webp",
+      alt: "小紅賽車定裝照，繪本著色活動封面",
     },
   },
 ];

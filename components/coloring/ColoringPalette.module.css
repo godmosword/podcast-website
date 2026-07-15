@@ -1,0 +1,41 @@
+.wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  justify-content: center;
+  padding: 0.25rem 0;
+}
+
+.swatch {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 3px solid color-mix(in srgb, #2a3a4a 18%, transparent);
+  cursor: pointer;
+  box-shadow: 0 2px 0 color-mix(in srgb, #2a3a4a 12%, transparent);
+  transition: transform 120ms ease;
+}
+
+.swatch:hover {
+  transform: scale(1.06);
+}
+
+.swatch:focus-visible {
+  outline: 3px solid #2a3a4a;
+  outline-offset: 2px;
+}
+
+.selected {
+  border-color: #2a3a4a;
+  box-shadow: 0 0 0 3px #fff, 0 0 0 5px #2a3a4a;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .swatch {
+    transition: none;
+  }
+
+  .swatch:hover {
+    transform: none;
+  }
+}

@@ -1,0 +1,49 @@
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+}
+
+.btn {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  border: 2px solid color-mix(in srgb, #2a3a4a 22%, transparent);
+  background: #fff;
+  color: #2a3a4a;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn:focus-visible {
+  outline: 3px solid #e85d4c;
+  outline-offset: 2px;
+}
+
+.active {
+  background: #2a3a4a;
+  color: #fff;
+  border-color: #2a3a4a;
+}
+
+.primary {
+  background: #e85d4c;
+  border-color: #e85d4c;
+  color: #fff;
+}

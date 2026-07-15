@@ -34,9 +34,8 @@ describe("game og", () => {
       const image = await response.arrayBuffer();
 
       expect(image.byteLength).toBeGreaterThan(0);
-      expect(
-        fetchMock.mock.calls.every(([input]) => String(input).startsWith("data:")),
-      ).toBe(true);
+      const calls = fetchMock.mock.calls as unknown as unknown[][];
+      expect(calls.every((call) => String(call[0]).startsWith("data:"))).toBe(true);
     },
   );
 });

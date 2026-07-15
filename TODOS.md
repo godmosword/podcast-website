@@ -7,9 +7,9 @@
 
 > 格式：每項一段，行末標 `優先序 · 工時(人工) · 依賴`。工時 S/M/L。
 > **紀律：** 條目打 ✅ 時必須附 commit hash。
-> **資料基準（2026-07-11）：** `storiesByNewest()` **18 集**、最新 **`ep-18`**；`data/games.ts` 四款見下表。
+> **資料基準（2026-07-11）：** `storiesByNewest()` **18 集**、最新 **`ep-18`**；`data/games.ts` 見下表。
 >
-> **現役遊戲（canon，對齊 `data/games.ts`）：** `candy-match` 繽紛消消樂 · `car-adventure` 車車大冒險 · `block-drop` 繽紛樂園 · `candy-kart` 繽紛卡丁車。
+> **現役遊戲（canon，對齊 `data/games.ts`）：** `candy-match` 繽紛消消樂 · `car-adventure` 車車大冒險 · `block-drop` 繽紛樂園 · `candy-kart` 繽紛卡丁車 · `coloring-book` 繪本著色。
 > **歷史 slug：** `kart`／`pirate-kart`／`car-star`／`car-mission` 已退役，見 [archive](./docs/archive/TODOS-completed-2026-07-11.md)。
 
 ---
@@ -30,6 +30,7 @@
 
 | ID | Commit |
 |----|--------|
+| feat(games): 線上繪本著色 MVP（`/games/coloring-book`，與 STEM-P3 PDF 分開） | `f0bab81` |
 | test(sync): catalog sidecar 紅線契約（upsert 呼叫＋git add＋完備測試對齊，#46） | `125664b` |
 | fix(sync): catalog sidecar 自動補齊，解除 ep-19+ 被 npm test 擋 push（#46） | `5f9371c` |
 
@@ -442,6 +443,7 @@ REUSE-2 試點已完成 `dbfe7b3`；**擴充全集：** [UX-P1-3](#兒童-ux-與
 
 #### 可下載列印物（著色、剪貼、迷宮）　`STEM-P3 · M · 插畫素材`　〔stem+growth〕
 PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
+**線上著色本**（`/games/coloring-book`）已另開 MVP，與本列印物分開；本條仍指 PDF／下載包。
 
 #### KidSAFE／隱私行銷賣點　`STEM-P3 · S · /legal 已有`　〔stem+ceo〕
 對外強調：無廣告、不蒐集兒童帳號、進度在裝置本機；若未來跨裝置帳號，需家長同意與最小蒐集。
@@ -798,7 +800,7 @@ T+2d    社群貼文（B 戰場）
 | 項目 | 原因 |
 |------|------|
 | ~~Email 電子報~~ / 會員 | **名單收集已升級為主動任務**（見 [名單收集 × 內容再利用](#名單收集--內容再利用2026-07-03-品牌盤點) LIST-2：僅收名單不寄信）；**正式會員制見 STEM-P4** |
-| 著色頁／活動單 PDF | **已納入 STEM-P3 列印物**；P1–P2 前先拉高單集分享與互動留存 |
+| 著色頁／活動單 PDF | **已納入 STEM-P3 列印物**；線上著色本 `/games/coloring-book` 已另開（與 PDF 分開） |
 | 部落格長文 SEO | 初期單集頁 + 平台關鍵字效益較直接 |
 | 網站內 RSS 播放器 | 訂閱導向 Spotify／Apple 即可 |
 | Service Worker 離線快取 | 弱網需求成立但 MP3 快取容量／更新策略風險高；P1–P2 先做信任、訂閱與量測 |
