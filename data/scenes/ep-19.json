@@ -1,0 +1,179 @@
+{
+  "slug": "ep-19",
+  "audioDuration": 338,
+  "model": "manual-semantic-15-20s",
+  "generatedAt": "2026-07-15T13:10:00.000Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 0,
+      "end": 29.3,
+      "summary": "主持人預告：恐龍車多多又闖禍，不能亂開車門",
+      "prompt": "Clay podcast studio: Bonbon and Mami chatting warmly, announcing today's story about Dodo the dinosaur car who gets into trouble by opening his car door carelessly, playful foreshadowing mood, cover-safe framing",
+      "characters": ["Bonbon", "馬米"],
+      "keepCover": true,
+      "refPageHint": "Cover page 1 — keep published cover if present. Hosts are HUMAN clay not cars. Bonbon teal hoodie yellow backpack; Mami orange headphones white tee — match portraits exactly."
+    },
+    {
+      "index": 2,
+      "start": 29.3,
+      "end": 57.8,
+      "summary": "陽光下車車遊樂園準備開門，小車車們排隊等進場",
+      "prompt": "Sunny clay car amusement park at opening time, birds chirping, cheerful little cars lined up neatly in a queue waiting for the gate to open, bright warm colors, wide establishing shot, no primary character close-up",
+      "characters": [],
+      "refPages": [1],
+      "refPageHint": "Wide establishing only, no vehicles from scene 1. Background little cars generic, no named characters, no faces required to match portraits."
+    },
+    {
+      "index": 3,
+      "start": 57.8,
+      "end": 83.9,
+      "summary": "爆米花老爺爺開著餐車來到彩虹廣場做爆米花",
+      "prompt": "Vintage clay popcorn food truck with a friendly grandfather vendor slowly rolling into a rainbow-colored plaza, popcorn machine popping golden kernels, striped awning fluttering, warm cream and red truck colors, cheerful morning light",
+      "characters": ["老爺爺爆米花餐車"],
+      "refPages": [2],
+      "refPageHint": "PRIMARY: 老爺爺爆米花餐車 match portrait — vintage popcorn food truck with grandfather vendor built into one vehicle, striped awning, cream/red clay colors. Exactly ONE face on the truck front. Do not draw a separate old man without a truck."
+    },
+    {
+      "index": 4,
+      "start": 83.9,
+      "end": 98.1,
+      "summary": "小車車們最愛吃爆米花，開心哼起爆米花歌等待",
+      "prompt": "Little clay cars gathered happily around the popcorn truck sniffing golden popcorn kernels, humming a cheerful popcorn song while waiting, bouncing popcorn kernels in the air, joyful anticipation mood",
+      "characters": ["老爺爺爆米花餐車"],
+      "refPages": [3],
+      "refPageHint": "PRIMARY: 老爺爺爆米花餐車 match page 3 portrait. Background little cars generic faceless silhouettes, no named characters besides the truck. Cheerful not chaotic."
+    },
+    {
+      "index": 5,
+      "start": 98.1,
+      "end": 118.3,
+      "summary": "巨響一聲！爆米花老爺爺大喊被撞到好痛",
+      "prompt": "Sudden bang at rainbow plaza: Popcorn Grandpa food truck jolts sideways from being hit, wheels on ground not flying, grandfather vendor winces shouting ouch with popcorn spilling, nearby little cars turn heads startled, child-safe cartoon shock, no blood, truck must stay road-level not leaping over cars",
+      "characters": ["老爺爺爆米花餐車"],
+      "refPages": [4],
+      "refPageHint": "PRIMARY: 老爺爺爆米花餐車 match portrait — truck stays on ground wobbling, pained wince. ONE face. No jump over cars, no gore."
+    },
+    {
+      "index": 6,
+      "start": 118.3,
+      "end": 137.1,
+      "summary": "揭密：多多完全沒注意，撞上旁邊經過的爆米花老爺車",
+      "prompt": "Simple clay bump: green dinosaur car Dodo accidentally bumps into Popcorn Grandpa food truck passing beside him, both jolted and shocked, yellow cartoon impact spark between bodies, child-safe no blood, NO car doors, NO biting mouth-attack — just a gentle body-to-body bump, four wheels no arms",
+      "characters": ["恐龍車多多", "老爺爺爆米花餐車"],
+      "refPages": [5],
+      "refPageHint": "PRIMARY: 恐龍車多多 match portrait — green dino car orange spikes, four wheels, NO arms, NO door panels. 老爺爺爆米花餐車 match portrait wobbling from bump. Each ONE face. Simple collision only."
+    },
+    {
+      "index": 7,
+      "start": 137.1,
+      "end": 153.8,
+      "summary": "多多嚇了一跳車身痛痛，老爺爺喊著自己動不了",
+      "prompt": "Aftermath: green dinosaur car Dodo frozen in shock looking sore and scared after the bump, Popcorn Grandpa food truck sitting still wincing saying he cannot move, both worried expressions, child-safe no wounds no blood, NO car doors on Dodo",
+      "characters": ["恐龍車多多", "老爺爺爆米花餐車"],
+      "refPages": [6],
+      "refPageHint": "PRIMARY: 恐龍車多多 match page 6 portrait — shocked sore face, NO arms, NO door. 老爺爺爆米花餐車 pained but calm match portrait. Each ONE face. Continuity after simple bump."
+    },
+    {
+      "index": 8,
+      "start": 153.8,
+      "end": 167.3,
+      "summary": "多多趕緊拜託旁邊小車車，快點叫救護車安安來",
+      "prompt": "Worried green dinosaur car Dodo turning toward nearby little clay cars, urgently asking them to call ambulance An-An for help, anxious pleading expression, background cars listening attentively",
+      "characters": ["恐龍車多多"],
+      "refPages": [7],
+      "refPageHint": "PRIMARY: 恐龍車多多 match portrait, NO arms/hands, urgent pleading face. Background little cars generic, no named characters. ONE face on Dodo."
+    },
+    {
+      "index": 9,
+      "start": 167.3,
+      "end": 184.7,
+      "summary": "小車車們皺眉責備多多亂開車門害老爺爺受傷",
+      "prompt": "A small group of clay cars frowning and gently scolding green dinosaur car Dodo for carelessly opening his door and hurting Popcorn Grandpa, Dodo looking down ashamed, disappointed but not cruel expressions, child-safe scolding mood",
+      "characters": ["恐龍車多多"],
+      "refPages": [8],
+      "refPageHint": "PRIMARY: 恐龍車多多 match portrait, NO arms/hands, ashamed downcast face. Background scolding cars generic faceless silhouettes, no named characters besides Dodo. Gentle scolding not aggressive."
+    },
+    {
+      "index": 10,
+      "start": 184.7,
+      "end": 197.1,
+      "summary": "多多低頭大哭，一直說對不起我不是故意的",
+      "prompt": "Close-up of green dinosaur car Dodo with head lowered, big clay tears streaming down, crying and repeating sorry I did not mean it, sad remorseful expression, soft warm lighting, child-safe emotional scene",
+      "characters": ["恐龍車多多"],
+      "refPages": [9],
+      "refPageHint": "PRIMARY: 恐龍車多多 match portrait, NO arms/hands, tearful remorseful face. ONE face, close emotional focus, no other characters needed."
+    },
+    {
+      "index": 11,
+      "start": 197.1,
+      "end": 222.7,
+      "summary": "安安救護車趕到，將老爺爺和多多一起送去醫院",
+      "prompt": "Cream-white ambulance An-An with red cross and roof light-bar leads three vehicles toward a hospital building. Popcorn truck looks sore tired NOT cheerfully selling. Green dinosaur car looks worried/sad mild injury vibe only. Calm caring escort mood, child-safe no blood",
+      "characters": ["安安救護車", "恐龍車多多", "老爺爺爆米花餐車"],
+      "refPages": [10],
+      "refPageHint": "PRIMARY: 安安救護車 match portrait cream ambulance red cross. 恐龍車多多 worried NOT happy grin, NO arms. 老爺爺爆米花餐車 tired/hurt match portrait. Each ONE face. Hospital visible ahead."
+    },
+    {
+      "index": 12,
+      "start": 222.7,
+      "end": 238.2,
+      "summary": "多多走到老爺爺床邊道歉，說自己沒看清楚就開門害他受傷",
+      "prompt": "Cozy clay hospital room: Popcorn Grandpa food truck resting as if in a bed bay looking sore but kind, green dinosaur car Dodo beside him head bowed sincerely apologizing for opening the door without looking, remorseful not cheerful, warm soft lighting, child-safe no wounds",
+      "characters": ["恐龍車多多", "老爺爺爆米花餐車"],
+      "refPages": [11],
+      "refPageHint": "PRIMARY: 恐龍車多多 apologetic sad eyes NO arms. 老爺爺爆米花餐車 match portrait in hospital rest pose, gentle despite discomfort. Each ONE face. Not a casual smiling roadside chat."
+    },
+    {
+      "index": 13,
+      "start": 238.2,
+      "end": 255,
+      "summary": "老爺爺溫柔寬恕，多多用力點頭答應不再亂開門",
+      "prompt": "Popcorn Grandpa's truck smiling warmly despite the pain, gently telling Dodo that knowing his mistake is enough and to remember for next time, green dinosaur car Dodo nodding firmly and promising never to open doors carelessly again, heartwarming forgiveness moment",
+      "characters": ["恐龍車多多", "老爺爺爆米花餐車"],
+      "refPages": [12],
+      "refPageHint": "PRIMARY: 老爺爺爆米花餐車 match page 12 — warm forgiving smile despite injury. 恐龍車多多 match portrait NO arms/hands, determined nodding pose. Each ONE face."
+    },
+    {
+      "index": 14,
+      "start": 255,
+      "end": 279.6,
+      "summary": "主持人教訓：不論在車上或家門，開門前都要請大人陪同",
+      "prompt": "Clay podcast studio: Bonbon and Mami speaking warmly to listening kids, explaining that safety comes first — whether sitting in a car or at the front door at home, never open a door carelessly, always ask an adult to be there first, encouraging teaching tone",
+      "characters": ["Bonbon", "馬米"],
+      "refPages": [13],
+      "refPageHint": "PRIMARY: Human hosts Bonbon and Mami match portraits exactly. Optional small toy dinosaur car Dodo on the table for reference. Encouraging not lecturing tone."
+    },
+    {
+      "index": 15,
+      "start": 279.6,
+      "end": 298.1,
+      "summary": "主持人解釋為什麼危險：亂開門會撞到人，自己和別人都可能受傷",
+      "prompt": "Clay podcast studio: Bonbon nodding thoughtfully as Mami asks why we should not open doors carelessly, Bonbon answering because it could bump into someone and both yourself and others could get hurt, warm interactive teaching moment",
+      "characters": ["Bonbon", "馬米"],
+      "refPages": [14],
+      "refPageHint": "PRIMARY: Human hosts match portraits exactly, same studio setting as page 14. Simple thoughtful conversation, no extra props needed."
+    },
+    {
+      "index": 16,
+      "start": 298.1,
+      "end": 323.9,
+      "summary": "Bonbon搞笑模仿爆米花老爺爺喊哎喲喂好痛，馬米笑他還敢笑",
+      "prompt": "Clay podcast studio comedy beat: Bonbon dramatically imitating Popcorn Grandpa's ouch that hurts so much voice with exaggerated funny wincing, Mami laughing and teasing him for laughing when grandpa was actually hurt, lighthearted playful mood",
+      "characters": ["Bonbon", "馬米"],
+      "refPages": [15],
+      "refPageHint": "PRIMARY: Human hosts match portraits exactly, same studio as page 15. Bonbon exaggerated comedic wince pose, Mami amused teasing expression. Purely comedic, no real injury depicted."
+    },
+    {
+      "index": 17,
+      "start": 323.9,
+      "end": 338,
+      "summary": "結尾道別，邀請小朋友下次再回車車遊樂園玩",
+      "prompt": "Clay podcast studio closing: Bonbon and Mami waving goodbye cheerfully, park mural in background showing dinosaur car Dodo and the popcorn truck now smiling and friends again, teasing about the next story, warm sunset studio glow",
+      "characters": ["Bonbon", "馬米", "恐龍車多多", "老爺爺爆米花餐車"],
+      "refPages": [16, 1],
+      "refPageHint": "PRIMARY: Human hosts center match portraits exactly. Background mural: 恐龍車多多 NO arms/hands, 老爺爺爆米花餐車 match portraits, smaller scale, happy reconciled expressions. Each character ONE face. Warm goodbye."
+    }
+  ],
+  "newCharacters": []
+}

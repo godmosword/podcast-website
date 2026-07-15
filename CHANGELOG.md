@@ -6,6 +6,8 @@
 
 ### Added
 
+- **ep-19 全幕繪本上線**：《恐龍車多多闖禍了》17 幕插圖＋幕級 captions；字幕校對 115 句並 `--mark`；場景手修定裝／劇情弧（多多無車門改單純相撞）；保留 Apple 封面 `01.jpg`。
+
 - **著色線稿品質改善（混合管線）**：
   - Phase 1 演算法去噪：`convertToLineArt` 加 `median(3)` 前濾波＋despeckle（8 鄰域小連通元件去噪，含 bbox 長邊條件防誤刪細線；在與主體外輪廓 merge 前做）；重產 character 4 頁 `line.png`（噪點連通區 17–22 → 0–2）。
   - 品質 gate：新增 `measureLineArtQuality`／`evaluateLineArtGate`（黑覆蓋率、噪點元件計數、雙峰黑白／無 alpha、外框漏色比收緊至 0.5、全 8 頁依 kind 分檔），`generate:coloring-lineart --verify` 與 assets 測試同套契約；generator 支援 `--only`／`--kind`，封面改 `--cover` 明確旗標（不再順帶重生）。

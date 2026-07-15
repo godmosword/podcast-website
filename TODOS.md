@@ -796,8 +796,8 @@ T+2d    社群貼文（B 戰場）
 
 | 步驟 | 狀態 | 備註 |
 |------|------|------|
-| 字幕校對 + `--mark` | ✅ | 115 句；重轉錄補齊 0–120s；刪幻覺／重複 4 句；口語微調；`_proofread/ep-19.json` 已 mark（待 commit） |
-| `illustrate --segment-only` → 生圖 → `--approve` | ⬜ | MVP `pageCount=1`，`verify:episodes` 列 `illustrate-pending` |
+| 字幕校對 + `--mark` | ✅ | 115 句；重轉錄補齊 0–120s；刪幻覺／重複；`_proofread/ep-19.json` |
+| `illustrate --segment-only` → 生圖 → `--approve` | ✅ | 17 幕全幕繪本；定裝手修；幕 6／7 改單純相撞（多多無車門）；`verify:episodes` 全過 |
 
 ### 現況缺口（勿忘）
 
