@@ -30,7 +30,7 @@
 
 | ID | Commit |
 |----|--------|
-| feat(games): 線上繪本著色 MVP（`/games/coloring-book`，與 STEM-P3 PDF 分開） | `f0bab81` |
+| feat(games): 線上繪本著色 MVP（`/games/coloring-book`，與 STEM-P3 PDF 分開） | `036cb4e` |
 | test(sync): catalog sidecar 紅線契約（upsert 呼叫＋git add＋完備測試對齊，#46） | `125664b` |
 | fix(sync): catalog sidecar 自動補齊，解除 ep-19+ 被 npm test 擋 push（#46） | `5f9371c` |
 
