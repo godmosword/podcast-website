@@ -84,6 +84,11 @@ const REFLECTION_PROMPTS: Record<
     child: "如果你可以設計一台未來電動車，它會做什麼事？",
     parentFollowUp: "鼓勵天馬行空，再問「這個設計要幫誰解決什麼問題」。",
   },
+  "ep-19": {
+    child: "恐龍車多多闖禍了。聽完這個故事，你心裡最先想到什麼？",
+    parentFollowUp:
+      "先接住孩子的感覺，再一起聊聊故事裡學到的一件小事，不必急著給標準答案。",
+  },
 };
 
 export function getReflectionPrompt(slug: string) {
