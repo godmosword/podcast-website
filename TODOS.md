@@ -447,7 +447,7 @@ REUSE-2 試點已完成 `dbfe7b3`；**擴充全集：** [UX-P1-3](#兒童-ux-與
 PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
 **線上著色本**（`/games/coloring-book`）已另開 MVP，與本列印物分開；本條仍指 PDF／下載包。
 線上著色本候選進化（未列管、擇機開案）：Web Share 分享成品、已完成作品畫廊、每集故事連動著色頁（lineart 管線已可批量產）、自訂色票。
-（2026-07-15）線稿品質改善混合管線已落地（commit 待補）：Phase 1 despeckle＋品質 gate 重產 character 4 頁；Phase 2 `generate:coloring-ai-lineart`（images.edit staging→人工審→`--approve` 逐頁上線）；scene 頁待 AI 版過審前維持現狀，不以演算法版充數。
+（2026-07-15）線稿品質改善混合管線已落地（`ef803c1`）：Phase 1 despeckle＋品質 gate 重產 character 4 頁；Phase 2 `generate:coloring-ai-lineart`（images.edit staging→人工審→`--approve` 逐頁上線）；scene 頁待 AI 版過審前維持現狀，不以演算法版充數。
 （2026-07-15）封面開場＋線稿閉合漏色已做；稀疏輪廓（如恐龍車多多）改由主體外輪廓 ∪ morph close 管線處理。
 
 #### KidSAFE／隱私行銷賣點　`STEM-P3 · S · /legal 已有`　〔stem+ceo〕
