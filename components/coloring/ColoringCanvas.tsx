@@ -83,6 +83,8 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
 
   const undoStackRef = useRef<UndoPatch[]>([]);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 清空／換頁時遞增，讓在飛行中的 toBlob 回呼作廢（防舊內容復活）
+  const saveSeqRef = useRef(0);
   const rafRef = useRef<number | null>(null);
 
   // 雙指縮放平移
@@ -137,8 +139,9 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
     saveTimerRef.current = setTimeout(() => {
       const paint = paintRef.current;
       if (!paint) return;
+      const seq = saveSeqRef.current;
       paint.toBlob((blob) => {
-        if (!blob) return;
+        if (!blob || seq !== saveSeqRef.current) return;
         saveColoringDraft(page.id, blob)
           .then(() => setSaveError(null))
           .catch(() => {
@@ -249,6 +252,23 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
     [tool, colorHex, brushDisplayRadius, canvasScale, stampSegment],
   );
 
+  /** 丟棄未完成筆觸（雙指手勢起手用）：還原像素、不進 undo、不存檔。 */
+  const cancelStroke = useCallback(() => {
+    if (!drawingRef.current) return;
+    drawingRef.current = false;
+    lastPtRef.current = null;
+    const base = strokeBaseRef.current;
+    const dirty = strokeDirtyRef.current;
+    const ctx = paintRef.current?.getContext("2d");
+    if (base && dirty && ctx) {
+      ctx.putImageData(base, 0, 0, dirty.x, dirty.y, dirty.width, dirty.height);
+      requestComposite();
+    }
+    strokeImgRef.current = null;
+    strokeBaseRef.current = null;
+    strokeDirtyRef.current = null;
+  }, [requestComposite]);
+
   const finishStroke = useCallback(() => {
     if (!drawingRef.current) return;
     drawingRef.current = false;
@@ -294,7 +314,7 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
   const startGestureIfTwoPointers = useCallback(() => {
     const pts = [...pointersRef.current.values()];
     if (pts.length !== 2) return;
-    finishStroke();
+    cancelStroke(); // 第一指的誤觸墨點直接還原，不 commit
     bucketStartRef.current = null;
     const stage = stageRef.current;
     if (!stage) return;
@@ -307,7 +327,7 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
       },
       startView: viewRef.current,
     };
-  }, [finishStroke]);
+  }, [cancelStroke]);
 
   const applyGesture = useCallback(() => {
     const gesture = gestureRef.current;
@@ -337,11 +357,12 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
   }, [applyView]);
 
   const moveCursorRing = useCallback(
-    (client: Point) => {
+    (client: Point, pointerType: string) => {
       const ring = cursorRef.current;
       const stage = stageRef.current;
       if (!ring || !stage) return;
-      if (tool === "bucket") {
+      // 觸控時圈被手指遮住只剩雜訊；手勢中兩指間跳動也隱藏
+      if (tool === "bucket" || pointerType === "touch" || gestureRef.current) {
         ring.style.display = "none";
         return;
       }
@@ -359,6 +380,7 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
   useEffect(() => {
     let cancelled = false;
     const pointers = pointersRef.current;
+    saveSeqRef.current += 1;
     setReady(false);
     setSaveError(null);
     undoStackRef.current = [];
@@ -466,7 +488,7 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
 
   const onPointerMove = (event: ReactPointerEvent<HTMLCanvasElement>) => {
     const client = { x: event.clientX, y: event.clientY };
-    moveCursorRing(client);
+    moveCursorRing(client, event.pointerType);
     if (!ready) return;
     if (pointersRef.current.has(event.pointerId)) {
       pointersRef.current.set(event.pointerId, client);
@@ -543,6 +565,7 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
     pushUndoPatch({ rect, pixels: cropImageDataRect(current, rect) });
     ctx.clearRect(0, 0, paint.width, paint.height);
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveSeqRef.current += 1;
     void clearColoringDraft(page.id);
     composite();
   };

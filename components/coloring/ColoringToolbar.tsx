@@ -53,7 +53,7 @@ export function ColoringToolbar({
           </button>
         ))}
       </div>
-      <div className={styles.group} aria-label="筆刷大小">
+      <div className={styles.group} role="group" aria-label="筆刷大小">
         {BRUSH_SIZES.map((size) => (
           <button
             key={size.id}
