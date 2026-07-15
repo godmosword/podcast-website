@@ -30,7 +30,7 @@
 
 | ID | Commit |
 |----|--------|
-| fix(sync): catalog sidecar 自動補齊，解除 ep-19+ 被 npm test 擋 push（#46） | `eac590d` |
+| fix(sync): catalog sidecar 自動補齊，解除 ep-19+ 被 npm test 擋 push（#46） | `5f9371c` |
 
 ### 本輪已完成（2026-07-14）
 
