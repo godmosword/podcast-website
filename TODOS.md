@@ -30,7 +30,7 @@
 
 | ID | Commit |
 |----|--------|
-| feat(games): 繪本著色封面開場＋線稿閉合重產（Track A/B） | `_pending_` |
+| feat(games): 繪本著色封面開場＋線稿閉合重產（Track A/B） | `f1eb44d` |
 | fix+feat(games): 著色本塗色不可見修正（multiply 合成）＋引擎硬化（筆觸效能／dirty-rect undo／IndexedDB 草稿）＋手機 UX（筆刷三檔／雙指縮放／游標圈／原圖換角） | `081679f` |
 | feat(games): 線上繪本著色 MVP（`/games/coloring-book`，與 STEM-P3 PDF 分開） | `036cb4e` |
 | test(sync): catalog sidecar 紅線契約（upsert 呼叫＋git add＋完備測試對齊，#46） | `125664b` |
