@@ -7,12 +7,15 @@ import styles from "./ColoringPageShell.module.css";
 type ColoringPageShellProps = {
   children: ReactNode;
   title?: string;
+  /** 封面態由 ColoringCover 承擔 h1，避免雙標題。 */
+  showTitle?: boolean;
 };
 
 /** 著色本頁輕量外框（不掛 GameKit）。 */
 export function ColoringPageShell({
   children,
   title = "繪本著色",
+  showTitle = true,
 }: ColoringPageShellProps) {
   return (
     <main className={styles.main} aria-label={title}>
@@ -22,7 +25,7 @@ export function ColoringPageShell({
       <Link href="/games" className={styles.back}>
         ← 回遊樂園
       </Link>
-      <h1 className={styles.title}>{title}</h1>
+      {showTitle ? <h1 className={styles.title}>{title}</h1> : null}
       <div id="coloring-play">{children}</div>
     </main>
   );

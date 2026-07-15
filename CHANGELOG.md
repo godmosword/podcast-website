@@ -4,8 +4,13 @@
 
 ## [Unreleased]
 
+### Added
+
+- **繪本著色封面開場（Track A）**：`/games/coloring-book` 兩段式 `cover → picker → canvas`；新增 `ColoringCover`（品牌標題、一句副標、CTA「打開著色本」、封面主視覺＋線稿塗鴉）；選圖頁改紙感繪本鋪陳並可「回封面」。
+
 ### Fixed
 
+- **著色線稿輪廓稀疏漏色（Track B）**：`convertToLineArt` 合併主體外輪廓（邊框種子色分割）＋ morph close／加粗，重產 8 頁 `line.png`；新增 `estimateBucketLeakRatio` 契約（定裝人物外框可填比上限）。
 - **線上著色本塗色不可見**：線稿 `line.png` 為不透明白底 RGB（無 alpha），`ColoringCanvas` 合成時以 source-over 疊在塗色層上方，使用者塗的顏色被白底完全遮住；改以 `multiply` 疊線稿（白底透出塗色、黑線保持黑），同時消除油漆桶填色在抗鋸齒邊緣的白縫（fill 另向暗線內滲入 2px 封縫）。
 
 ### Changed

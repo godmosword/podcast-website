@@ -30,6 +30,7 @@
 
 | ID | Commit |
 |----|--------|
+| feat(games): 繪本著色封面開場＋線稿閉合重產（Track A/B） | `f1eb44d` |
 | fix+feat(games): 著色本塗色不可見修正（multiply 合成）＋引擎硬化（筆觸效能／dirty-rect undo／IndexedDB 草稿）＋手機 UX（筆刷三檔／雙指縮放／游標圈／原圖換角） | `081679f` |
 | feat(games): 線上繪本著色 MVP（`/games/coloring-book`，與 STEM-P3 PDF 分開） | `036cb4e` |
 | test(sync): catalog sidecar 紅線契約（upsert 呼叫＋git add＋完備測試對齊，#46） | `125664b` |
@@ -446,6 +447,7 @@ REUSE-2 試點已完成 `dbfe7b3`；**擴充全集：** [UX-P1-3](#兒童-ux-與
 PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
 **線上著色本**（`/games/coloring-book`）已另開 MVP，與本列印物分開；本條仍指 PDF／下載包。
 線上著色本候選進化（未列管、擇機開案）：Web Share 分享成品、已完成作品畫廊、每集故事連動著色頁（lineart 管線已可批量產）、自訂色票。
+（2026-07-15）封面開場＋線稿閉合漏色已做；稀疏輪廓（如恐龍車多多）改由主體外輪廓 ∪ morph close 管線處理。
 
 #### KidSAFE／隱私行銷賣點　`STEM-P3 · S · /legal 已有`　〔stem+ceo〕
 對外強調：無廣告、不蒐集兒童帳號、進度在裝置本機；若未來跨裝置帳號，需家長同意與最小蒐集。

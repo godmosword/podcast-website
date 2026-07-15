@@ -9,6 +9,7 @@ import { expect, test, type Page } from "@playwright/test";
 async function openFirstColoringPage(page: Page) {
   await page.goto("/games/coloring-book");
   await page.waitForLoadState("networkidle"); // 等 hydration，點擊才有 handler
+  await page.getByRole("button", { name: "打開著色本" }).click();
   await page.getByRole("button", { name: /^著色：/ }).first().click();
   await page.waitForSelector("canvas");
   await page.waitForFunction(

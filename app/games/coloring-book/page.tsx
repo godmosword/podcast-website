@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import ColoringBook from "@/components/coloring/ColoringBook";
-import { ColoringPageShell } from "@/components/coloring/ColoringPageShell";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
@@ -15,9 +14,5 @@ export const metadata: Metadata = {
 };
 
 export default function ColoringBookPage() {
-  return (
-    <ColoringPageShell title="繪本著色">
-      <ColoringBook />
-    </ColoringPageShell>
-  );
+  return <ColoringBook />;
 }
