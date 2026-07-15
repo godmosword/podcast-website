@@ -30,7 +30,7 @@
 
 | ID | Commit |
 |----|--------|
-| feat(games): 繪本著色 hero cover 黏土世代對齊（generate:coloring-cover＋卡片層） | （見本 commit） |
+| feat(games): 繪本著色 hero cover 黏土世代對齊（generate:coloring-cover＋卡片層） | `a8451d0` |
 | feat(games): 繪本著色封面開場＋線稿閉合重產（Track A/B） | `f1eb44d` |
 | fix+feat(games): 著色本塗色不可見修正（multiply 合成）＋引擎硬化（筆觸效能／dirty-rect undo／IndexedDB 草稿）＋手機 UX（筆刷三檔／雙指縮放／游標圈／原圖換角） | `081679f` |
 | feat(games): 線上繪本著色 MVP（`/games/coloring-book`，與 STEM-P3 PDF 分開） | `036cb4e` |
