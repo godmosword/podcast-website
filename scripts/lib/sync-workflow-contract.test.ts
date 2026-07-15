@@ -20,7 +20,10 @@ describe("sync workflow contract", () => {
     expect(yaml).toContain("npm test");
     expect(yaml).toContain("npm run build");
     expect(yaml).toContain(
-      "git add data/apple-synced.json data/apple-sync-state.json data/browse-index.json public/stories/ data/subtitles/",
+      "git add data/apple-synced.json data/apple-sync-state.json data/browse-index.json public/stories/ data/subtitles/ \\",
+    );
+    expect(yaml).toContain(
+      "data/story-zones.ts data/reflection-prompts.ts data/story-dates.ts",
     );
   });
 

@@ -53,6 +53,7 @@ import {
   whisperAvailable,
 } from "./lib/transcribe-core";
 import { autoProofreadFixSlug } from "./lib/subtitle-proofread";
+import { upsertCatalogSidecars } from "./lib/sync-catalog-sidecars";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const MAX_NEW_PER_RUN = 3;
@@ -777,6 +778,24 @@ async function main(): Promise<void> {
     ep: s.ep,
     title: s.title,
   }));
+
+  // 新集進入 getStories() 後，zone／reflection／dates 完備測試會擋 push；
+  // 在此自動補齊缺 key 的 sidecar（不覆寫人工條目）。
+  if (hasNewEpisodes) {
+    const sidecarResult = upsertCatalogSidecars(
+      added.map((s) => ({
+        slug: s.slug,
+        title: s.title,
+        summary: s.summary,
+      })),
+      { root: ROOT, dryRun },
+    );
+    if (sidecarResult.updatedSlugs.length > 0) {
+      console.log(
+        `${dryRun ? "[dry-run] Would upsert catalog sidecars" : "Catalog sidecars"}: ${sidecarResult.updatedSlugs.join(", ")}`,
+      );
+    }
+  }
 
   if (dryRun) {
     if (hasNewEpisodes) {

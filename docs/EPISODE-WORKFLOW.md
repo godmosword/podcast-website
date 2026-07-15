@@ -28,10 +28,23 @@ Metadata 寫入位置：
 
 執行時由 `data/content.ts` 合併 overrides。
 
+### MVP sync 自動補齊的 catalog sidecar
+
+新集寫入後會進入 `getStories()`，下列三檔必須有該 slug，否則 GHA `npm test` 會擋下 push（見 issue #46）：
+
+| Sidecar | 路徑 | sync 行為 |
+|---------|------|-----------|
+| zone 對映 | `data/story-zones.ts` | 標題關鍵字推斷（恐龍→dino 等），缺則寫入 |
+| 反思提問 | `data/reflection-prompts.ts` | 標題推導 MVP stub（`child` 問號結尾） |
+| 修改時間 | `data/story-dates.ts` | `now` + `` `${sha7} sync Apple RSS MVP` `` |
+
+只補缺 key、不覆寫人工條目。Phase 2（校對／生圖前）請覆寫反思文案並確認 zone。
+
 ## 標準步驟
 
 ```bash
-# 0. GHA 或本機 sync 後為 MVP（pageCount=1、01.jpg、Whisper **草稿**字幕）
+# 0. GHA 或本機 sync 後為 MVP（pageCount=1、01.jpg、Whisper **草稿**字幕；
+#    並自動補 story-zones／reflection-prompts／story-dates）
 
 # 1. 字幕校對（**illustrate 前必做**，見 docs/SUBTITLE-PROOFREAD.md）
 npm run proofread:subtitles -- <slug>          # lint

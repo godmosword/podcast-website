@@ -26,6 +26,12 @@
 | 4 | [Growth-Measure-1](#growth-measure-1-成長量測) SoundOn 回鏈 | ops/growth | S | ✅ `42a9d38` |
 | 5 | [UX-P1-2](#兒童-ux-與親子互動稽核2026-07-11) 詳情頁反思收合 | ux | S | ✅ `42a9d38` |
 
+### 本輪已完成（2026-07-15）
+
+| ID | Commit |
+|----|--------|
+| fix(sync): catalog sidecar 自動補齊，解除 ep-19+ 被 npm test 擋 push（#46） | `eac590d` |
+
 ### 本輪已完成（2026-07-14）
 
 | ID | Commit |
@@ -682,6 +688,7 @@ Tiled 關卡管線、6–10 關+世界地圖、檢查點、多敵人類型、視
 | 10 | 更新狀態 | `data/apple-sync-state.json` | guid 對照 |
 | 11 | 車種／標籤推斷 | vehicle、tags | 關鍵字或「其他」 |
 | 11b | **找車車索引** | `data/browse-index.json` | 新車種 emoji、新主題 symbol；`npm run verify:browse-index` |
+| 11c | **catalog sidecar** | `story-zones`／`reflection-prompts`／`story-dates` | 缺 key 才 upsert；解除完備測試擋 push |
 | 12 | 字幕 backfill | 缺字幕的舊集補轉 | 同 run 內 |
 | 12b | 簡轉繁 + 幻覺過濾 | `relocalizeSidecars` | 同 run 內 |
 | 12c | **字幕自動 `--fix`** | 本輪新集／新轉錄 `ep-N` 品牌名修正 | 不 `--mark`；report 寫入 `proofreadAutoFixed` |
@@ -689,9 +696,11 @@ Tiled 關卡管線、6–10 關+世界地圖、檢查點、多敵人類型、視
 | 14 | Commit + push `main` | Vercel 部署 MVP | 見下方 commit 範圍 |
 | 15 | **生圖通知** | GitHub Issue | 已實作：push 成功後開 `[illustrate]` Issue（`113680a`） |
 
-**GHA 目前 `git add` 範圍：** `data/apple-synced.json`、`data/apple-sync-state.json`、`data/browse-index.json`、`public/stories/`、`data/subtitles/`。
+**GHA 目前 `git add` 範圍：** `data/apple-synced.json`、`data/apple-sync-state.json`、`data/browse-index.json`、`public/stories/`、`data/subtitles/`、`data/story-zones.ts`、`data/reflection-prompts.ts`、`data/story-dates.ts`。
 
 **GHA 不會碰：** `public/.illustrate-staging/`、`data/apple-sync.defaults.json`（approve 寫入 overrides）、`data/characters.json`、`data/scenes/` — 生圖產物需**人工 commit**。
+
+> **根因備註（#46，2026-07-15）：** 先前 sync 已成功下載／轉錄 ep-19，但 `npm test` 因缺 zone／reflection／dates 三 sidecar 失敗而永不 push。現改由 `scripts/lib/sync-catalog-sidecars.ts` 在新集寫入時自動 upsert，並納入上列 `git add`。
 
 ### Phase 2 — 同步後人工（生圖前）
 
@@ -700,6 +709,7 @@ Tiled 關卡管線、6–10 關+世界地圖、檢查點、多敵人類型、視
 | 16 | 收到 GitHub Issue 通知 | 維護者 |
 | 17 | 抽查站上 MVP | `/story/ep-N` 能播、封面正確 |
 | 18 | 最終校稿 + `--mark` | GHA 已跑 `--fix`；人工抽查後 `npm run proofread:subtitles -- ep-N --mark`（[SUBTITLE-PROOFREAD.md](./docs/SUBTITLE-PROOFREAD.md)） |
+| 18b | 覆寫反思 stub＋確認 zone | sync 寫入的 MVP stub／推斷 zone；改寫 `reflection-prompts.ts`、必要時改 `story-zones.ts` |
 | 19 | 確認車種／標籤 | `apple-sync.defaults.json` overrides；必要時手動補 `data/browse-index.json` patterns |
 | 20 | （可選）`npm run font:subset` | 新摘要有生僻字時 |
 
