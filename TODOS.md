@@ -30,6 +30,7 @@
 
 | ID | Commit |
 |----|--------|
+| test(sync): catalog sidecar 紅線契約（upsert 呼叫＋git add＋完備測試對齊，#46） | （pending） |
 | fix(sync): catalog sidecar 自動補齊，解除 ep-19+ 被 npm test 擋 push（#46） | `5f9371c` |
 
 ### 本輪已完成（2026-07-14）
