@@ -46,6 +46,7 @@
     "generate:story-blurs": "tsx scripts/generate-story-blurs.ts",
     "generate:coloring-lineart": "tsx scripts/generate-coloring-lineart.ts",
     "generate:coloring-ai-lineart": "tsx --env-file-if-exists=.env.local scripts/generate-coloring-ai-lineart.ts",
+    "generate:coloring-cover": "tsx --env-file-if-exists=.env.local scripts/generate-coloring-cover.ts",
     "fix:roamer-alpha": "tsx scripts/fix-roamer-alpha.ts",
     "export:video": "tsx scripts/export-video-assets.ts"
   },

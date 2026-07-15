@@ -6,11 +6,13 @@
 
 ### Added
 
+- **繪本著色 hero cover 黏土世代對齊**：新增 `npm run generate:coloring-cover`（staging＋manifest sha256＋人工審後 `--approve`）；封面改 1448×1086 粉嫩黏土場景（小紅＋多多圍著著色本），與街機四款同世代；移除線稿腳本舊 `--cover` 照片裁切路徑。
+
 - **ep-19 全幕繪本上線**：《恐龍車多多闖禍了》17 幕插圖＋幕級 captions；字幕校對 115 句並 `--mark`；場景手修定裝／劇情弧（多多無車門改單純相撞）；保留 Apple 封面 `01.jpg`。
 
 - **著色線稿品質改善（混合管線）**：
   - Phase 1 演算法去噪：`convertToLineArt` 加 `median(3)` 前濾波＋despeckle（8 鄰域小連通元件去噪，含 bbox 長邊條件防誤刪細線；在與主體外輪廓 merge 前做）；重產 character 4 頁 `line.png`（噪點連通區 17–22 → 0–2）。
-  - 品質 gate：新增 `measureLineArtQuality`／`evaluateLineArtGate`（黑覆蓋率、噪點元件計數、雙峰黑白／無 alpha、外框漏色比收緊至 0.5、全 8 頁依 kind 分檔），`generate:coloring-lineart --verify` 與 assets 測試同套契約；generator 支援 `--only`／`--kind`，封面改 `--cover` 明確旗標（不再順帶重生）。
+  - 品質 gate：新增 `measureLineArtQuality`／`evaluateLineArtGate`（黑覆蓋率、噪點元件計數、雙峰黑白／無 alpha、外框漏色比收緊至 0.5、全 8 頁依 kind 分檔），`generate:coloring-lineart --verify` 與 assets 測試同套契約；generator 支援 `--only`／`--kind`（封面改走 `generate:coloring-cover`）。
   - Phase 2 AI 線稿：新 `npm run generate:coloring-ai-lineart`（OpenAI images.edit＋定裝照 ref；scene 頁新增 `referencePaths` 資料契約）；產出進 `public/.coloring-staging/<run>/`（raw＋後處理＋contact sheet＋manifest），人工審後 `--approve <id>` 逐頁上線（approve 前重跑 gate＋sha256 核對）；成本硬閘每頁 2 次、單 run 16 次 API。
   - e2e 新增油漆桶防漏色測試（character＋scene 各一：點外底不得灌進主體中心）。
   - **AI 線稿全 8 頁上線**：人工審 contact sheet 通過後 `--approve` 覆蓋（噪點連通區全部 0、粗閉合輪廓、簡化背景），character 與 scene 頁全面替換演算法版。

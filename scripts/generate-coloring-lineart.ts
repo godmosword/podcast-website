@@ -6,7 +6,6 @@
  *   npm run generate:coloring-lineart -- --verify        # 只驗證現有資產
  *   npm run generate:coloring-lineart -- --only <id>     # 只重生指定頁（可逗號分隔多個）
  *   npm run generate:coloring-lineart -- --kind character # 只重生某類頁
- *   npm run generate:coloring-lineart -- --cover         # 連同封面 cover.webp 一起重生
  *
  * 注意：AI 重生頁（Phase 2 人工審過）勿用全量重跑覆蓋；用 --only／--kind 限定範圍。
  */
@@ -24,7 +23,6 @@ import {
 } from "./lib/coloring-lineart";
 
 const PUBLIC_DIR = join(ROOT, "public");
-const COVER_OUT = join(PUBLIC_DIR, "games/v2/coloring-book/cover.webp");
 const MIN_LINEART_BYTES = 2_000;
 
 async function verifyPage(
@@ -58,19 +56,8 @@ async function verifyPage(
   return true;
 }
 
-async function generateCover(): Promise<void> {
-  const source = join(PUBLIC_DIR, "characters/小紅賽車.jpg");
-  mkdirSync(dirname(COVER_OUT), { recursive: true });
-  await sharp(source)
-    .resize(800, 600, { fit: "cover", position: "attention" })
-    .webp({ quality: 82 })
-    .toFile(COVER_OUT);
-  console.log(`✓ cover → ${COVER_OUT.replace(ROOT + "/", "")}`);
-}
-
 function parseArgs(argv: readonly string[]): {
   verifyOnly: boolean;
-  cover: boolean;
   only: readonly string[];
   kind: string | null;
 } {
@@ -86,11 +73,11 @@ function parseArgs(argv: readonly string[]): {
       i += 1;
     }
   }
-  return { verifyOnly: argv.includes("--verify"), cover: argv.includes("--cover"), only, kind };
+  return { verifyOnly: argv.includes("--verify"), only, kind };
 }
 
 async function main(): Promise<void> {
-  const { verifyOnly, cover, only, kind } = parseArgs(process.argv.slice(2));
+  const { verifyOnly, only, kind } = parseArgs(process.argv.slice(2));
   const selected = COLORING_PAGES.filter(
     (page) =>
       (only.length === 0 || only.includes(page.id)) && (kind === null || page.kind === kind),
@@ -113,10 +100,6 @@ async function main(): Promise<void> {
     }
 
     if (!(await verifyPage(page.id, page.kind, out))) ok = false;
-  }
-
-  if (!verifyOnly && cover) {
-    await generateCover();
   }
 
   if (!ok) process.exit(1);

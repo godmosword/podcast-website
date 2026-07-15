@@ -129,7 +129,8 @@ export const GAMES: GameMeta[] = [
     art: {
       cover: "/games/v2/coloring-book/cover.webp",
       thumbnail: "/games/v2/coloring-book/cover.webp",
-      alt: "小紅賽車定裝照，繪本著色活動封面",
+      position: "50% 48%",
+      alt: "小紅賽車和恐龍車多多圍著翻開的著色繪本，拿蠟筆一起塗顏色",
     },
   },
 ];

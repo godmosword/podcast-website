@@ -53,6 +53,9 @@ next-env.d.ts
 # 著色 AI 線稿暫存（人工審圖前的草稿，勿入庫）
 /public/.coloring-staging/
 
+# 遊戲封面生圖暫存（人工審圖前的草稿，勿入庫）
+/public/.games-staging/
+
 # Godot editor/cache state（專案源碼在 candy-kart-game/，cache 由 Godot 重建）
 /candy-kart-game/.godot/
 

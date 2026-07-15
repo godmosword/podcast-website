@@ -34,9 +34,13 @@ describe("coloring lineart assets contract", () => {
     }
   });
 
-  test("遊樂園封面 cover.webp 存在", () => {
+  test("遊樂園封面 cover.webp 為 1448×1086 webp", async () => {
     const cover = join(PUBLIC_DIR, "games/v2/coloring-book/cover.webp");
     expect(existsSync(cover)).toBe(true);
     expect(statSync(cover).size).toBeGreaterThan(1000);
+    const meta = await sharp(cover).metadata();
+    expect(meta.format).toBe("webp");
+    expect(meta.width).toBe(1448);
+    expect(meta.height).toBe(1086);
   });
 });
