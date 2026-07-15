@@ -15,6 +15,11 @@ export type ColoringPage = {
   previewSrc: string;
   /** 場景頁對應樂園 zone。 */
   zoneId?: ZoneId;
+  /**
+   * AI 線稿重生時附的角色定裝照（相對於 public/）。
+   * scene 頁必填（維持出場角色 on-model）；character 頁的 sourcePath 本身即定裝照可省略。
+   */
+  referencePaths?: readonly string[];
 };
 
 export const COLORING_PAGES: readonly ColoringPage[] = [
@@ -58,6 +63,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
     lineArtSrc: "/coloring/scene-ep-3-05/line.png",
     previewSrc: "/stories/ep-3/05.jpg",
     zoneId: "car-park",
+    referencePaths: ["characters/小紅賽車.jpg"],
   },
   {
     id: "scene-ep-9-05",
@@ -67,6 +73,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
     lineArtSrc: "/coloring/scene-ep-9-05/line.png",
     previewSrc: "/stories/ep-9/05.jpg",
     zoneId: "dino",
+    referencePaths: ["characters/恐龍車多多.jpg"],
   },
   {
     id: "scene-ep-6-05",
@@ -76,6 +83,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
     lineArtSrc: "/coloring/scene-ep-6-05/line.png",
     previewSrc: "/stories/ep-6/05.jpg",
     zoneId: "rescue",
+    referencePaths: ["characters/安安救護車.jpg"],
   },
   {
     id: "scene-ep-16-05",
@@ -85,6 +93,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
     lineArtSrc: "/coloring/scene-ep-16-05/line.png",
     previewSrc: "/stories/ep-16/05.jpg",
     zoneId: "ocean",
+    referencePaths: ["characters/噗噗豬.jpg"],
   },
 ] as const;
 

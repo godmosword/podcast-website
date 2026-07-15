@@ -4,7 +4,7 @@ import {
   loadColoringDraft,
   saveColoringDraft,
 } from "@/lib/coloring/draft-storage";
-import { coloringDraftKey } from "@/lib/coloring/tools";
+import { coloringDraftKey, coloringDraftStorageKey } from "@/lib/coloring/tools";
 
 /** 最小 fake IndexedDB：只實作本模組用到的 open/get/put/delete。 */
 function makeFakeIndexedDb(store: Map<string, unknown>, opts?: { failPut?: boolean }) {
@@ -82,32 +82,40 @@ afterEach(() => {
 });
 
 describe("coloring draft-storage", () => {
-  test("IndexedDB 存取與清除草稿", async () => {
+  test("IndexedDB 以線稿世代 key 存取與清除草稿", async () => {
     const idbStore = new Map<string, unknown>();
     vi.stubGlobal("indexedDB", makeFakeIndexedDb(idbStore));
     stubLocalStorage(new Map());
 
     expect(await loadColoringDraft("p1")).toBeNull();
     await saveColoringDraft("p1", "data:image/png;base64,abc");
-    expect(idbStore.get("p1")).toBe("data:image/png;base64,abc");
+    expect(idbStore.get(coloringDraftStorageKey("p1"))).toBe("data:image/png;base64,abc");
     expect(await loadColoringDraft("p1")).toBe("data:image/png;base64,abc");
     await clearColoringDraft("p1");
     expect(await loadColoringDraft("p1")).toBeNull();
   });
 
-  test("舊 localStorage 草稿自動遷移進 IndexedDB 並刪除舊 key", async () => {
-    const idbStore = new Map<string, unknown>();
+  test("舊世代草稿不再讀取（線稿已重生，舊塗鴉對不上）", async () => {
+    const idbStore = new Map<string, unknown>([["p2", "data:image/png;base64,oldrev"]]);
     const legacy = new Map<string, string>([
       [coloringDraftKey("p2"), "data:image/png;base64,legacy"],
     ]);
     vi.stubGlobal("indexedDB", makeFakeIndexedDb(idbStore));
     stubLocalStorage(legacy);
 
-    expect(await loadColoringDraft("p2")).toBe("data:image/png;base64,legacy");
-    // 等待遷移完成後：IndexedDB 有、localStorage 舊 key 已刪
-    await vi.waitFor(() => {
-      expect(idbStore.get("p2")).toBe("data:image/png;base64,legacy");
-    });
+    // 舊 IDB key（無世代後綴）與舊 localStorage 皆視為不存在
+    expect(await loadColoringDraft("p2")).toBeNull();
+  });
+
+  test("清除草稿順手移除舊 localStorage key", async () => {
+    const idbStore = new Map<string, unknown>();
+    const legacy = new Map<string, string>([
+      [coloringDraftKey("p5"), "data:image/png;base64,legacy"],
+    ]);
+    vi.stubGlobal("indexedDB", makeFakeIndexedDb(idbStore));
+    stubLocalStorage(legacy);
+
+    await clearColoringDraft("p5");
     expect(legacy.size).toBe(0);
   });
 
@@ -118,13 +126,10 @@ describe("coloring draft-storage", () => {
     await expect(saveColoringDraft("p3", "data:x")).rejects.toThrow();
   });
 
-  test("無 IndexedDB 時 load 回退 localStorage、save 直接 throw", async () => {
-    const legacy = new Map<string, string>([
-      [coloringDraftKey("p4"), "data:image/png;base64,old"],
-    ]);
-    stubLocalStorage(legacy);
+  test("無 IndexedDB 時 load 回 null、save 直接 throw", async () => {
+    stubLocalStorage(new Map());
 
-    expect(await loadColoringDraft("p4")).toBe("data:image/png;base64,old");
+    expect(await loadColoringDraft("p4")).toBeNull();
     await expect(saveColoringDraft("p4", "data:x")).rejects.toThrow();
   });
 });

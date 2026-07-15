@@ -1,9 +1,11 @@
 /**
  * 著色草稿儲存：IndexedDB 存 PNG Blob（不受 localStorage ~5MB 配額限制）。
- * 舊版 localStorage data URL（coloring:v1:*）首次讀取時自動遷移。
+ * key 綁線稿世代（COLORING_LINEART_REV）：線稿重生後舊草稿自動失效，
+ * 避免舊塗鴉對不上新線稿。舊 localStorage 草稿（coloring:v1:*）屬舊線稿，
+ * 不再遷移，僅於清除時順手移除。
  * save 失敗會 throw，由 UI 顯示提示（不再靜默吞掉）。
  */
-import { coloringDraftKey } from "@/lib/coloring/tools";
+import { coloringDraftKey, coloringDraftStorageKey } from "@/lib/coloring/tools";
 
 const DB_NAME = "coloring-drafts";
 const DB_VERSION = 1;
@@ -53,44 +55,25 @@ async function withStore<T>(
   }
 }
 
-function readLegacyDraft(pageId: string): string | null {
-  try {
-    if (typeof window === "undefined" || !window.localStorage) return null;
-    return window.localStorage.getItem(coloringDraftKey(pageId));
-  } catch {
-    return null;
-  }
-}
-
 function removeLegacyDraft(pageId: string): void {
   try {
+    if (typeof window === "undefined" || !window.localStorage) return;
     window.localStorage.removeItem(coloringDraftKey(pageId));
   } catch {
     // ignore
   }
 }
 
-/** 讀取草稿；IndexedDB 沒有時回頭找舊 localStorage 並遷移（搬完刪舊 key）。 */
+/** 讀取草稿（僅當前線稿世代；舊世代草稿視為不存在）。 */
 export async function loadColoringDraft(pageId: string): Promise<ColoringDraft | null> {
-  if (!canUseIndexedDb()) return readLegacyDraft(pageId);
+  if (!canUseIndexedDb()) return null;
   try {
     const stored = await withStore<ColoringDraft | undefined>("readonly", (store) =>
-      store.get(pageId),
+      store.get(coloringDraftStorageKey(pageId)),
     );
-    if (stored != null) return stored;
-
-    const legacy = readLegacyDraft(pageId);
-    if (legacy != null) {
-      try {
-        await withStore("readwrite", (store) => store.put(legacy, pageId));
-        removeLegacyDraft(pageId);
-      } catch {
-        // 遷移失敗不影響讀取，下次再試
-      }
-    }
-    return legacy;
+    return stored ?? null;
   } catch {
-    return readLegacyDraft(pageId);
+    return null;
   }
 }
 
@@ -102,14 +85,14 @@ export async function saveColoringDraft(
   if (!canUseIndexedDb()) {
     throw new Error("此瀏覽器無法儲存草稿（indexedDB 不可用）");
   }
-  await withStore("readwrite", (store) => store.put(draft, pageId));
+  await withStore("readwrite", (store) => store.put(draft, coloringDraftStorageKey(pageId)));
 }
 
 export async function clearColoringDraft(pageId: string): Promise<void> {
   removeLegacyDraft(pageId);
   if (!canUseIndexedDb()) return;
   try {
-    await withStore("readwrite", (store) => store.delete(pageId));
+    await withStore("readwrite", (store) => store.delete(coloringDraftStorageKey(pageId)));
   } catch {
     // 清除失敗無害，忽略
   }

@@ -7,6 +7,28 @@ export const COLORING_LINEART_MAX_SIDE = 1024;
 /** 外框可填／全部可填上限（過高＝主體輪廓未與邊框隔開）。 */
 export const COLORING_BUCKET_LEAK_MAX = 0.88;
 
+/** despeckle：黑色連通區面積小於此值視為噪點候選。 */
+export const SPECKLE_MIN_AREA = 40;
+
+/** despeckle：噪點候選的 bounding box 長邊上限（防誤刪細長真線）。 */
+export const SPECKLE_MAX_DIM = 12;
+
+/** 非純黑白（luma 中間帶）像素占比上限（與 runtime LINE_LUMA_WALL 同語義的雙峰契約）。 */
+export const COLORING_MIDTONE_RATIO_MAX = 0.002;
+
+/**
+ * 依頁面種類的品質 gate。
+ * leakMax 抓「真開放輪廓」（外框灌進主體時比值趨近 1）；乾淨線稿背景開闊，
+ * 外框佔可填比 0.4–0.65 屬正常，故門檻設 0.8，另以 interiorMinRatio
+ * （主體內部可填區占全圖比下限）防「全開放／全白」假線稿。
+ */
+export const COLORING_GATES = {
+  character: { leakMax: 0.8, inkCoverageMax: 0.25, speckleCountMax: 40, interiorMinRatio: 0.05 },
+  scene: { leakMax: 0.8, inkCoverageMax: 0.4, speckleCountMax: 80, interiorMinRatio: 0.05 },
+} as const;
+
+export type ColoringGateKind = keyof typeof COLORING_GATES;
+
 /** morph close 半徑（px）：封小於約 2r 的缺口。 */
 const MORPH_CLOSE_RADIUS = 3;
 
@@ -81,6 +103,86 @@ function erodeBlack(bin: Uint8Array, width: number, height: number): Uint8Array 
       }
       out[y * width + x] = black;
     }
+  }
+  return out;
+}
+
+type InkComponent = {
+  area: number;
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+  pixels: number[];
+};
+
+/** 8 鄰域標記黑色連通區（bin：1 = 黑）。 */
+export function labelInkComponents(
+  bin: Uint8Array,
+  width: number,
+  height: number,
+): InkComponent[] {
+  const visited = new Uint8Array(bin.length);
+  const components: InkComponent[] = [];
+  const stack: number[] = [];
+
+  for (let start = 0; start < bin.length; start += 1) {
+    if (!bin[start] || visited[start]) continue;
+    visited[start] = 1;
+    stack.push(start);
+    const comp: InkComponent = {
+      area: 0,
+      minX: width,
+      minY: height,
+      maxX: 0,
+      maxY: 0,
+      pixels: [],
+    };
+    while (stack.length > 0) {
+      const idx = stack.pop()!;
+      const x = idx % width;
+      const y = (idx - x) / width;
+      comp.area += 1;
+      comp.pixels.push(idx);
+      if (x < comp.minX) comp.minX = x;
+      if (x > comp.maxX) comp.maxX = x;
+      if (y < comp.minY) comp.minY = y;
+      if (y > comp.maxY) comp.maxY = y;
+      for (let dy = -1; dy <= 1; dy += 1) {
+        for (let dx = -1; dx <= 1; dx += 1) {
+          if (dx === 0 && dy === 0) continue;
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+          const nidx = ny * width + nx;
+          if (!bin[nidx] || visited[nidx]) continue;
+          visited[nidx] = 1;
+          stack.push(nidx);
+        }
+      }
+    }
+    components.push(comp);
+  }
+  return components;
+}
+
+/**
+ * 移除小面積且短小（非細長線段）的黑色連通區；回傳新陣列不改輸入。
+ * 應在與主體外輪廓 merge **之前** 對 Laplacian edgeBin 做（輪廓天然豁免）。
+ */
+export function despeckleInk(
+  bin: Uint8Array,
+  width: number,
+  height: number,
+  minArea = SPECKLE_MIN_AREA,
+  maxDim = SPECKLE_MAX_DIM,
+): Uint8Array {
+  const out = Uint8Array.from(bin);
+  for (const comp of labelInkComponents(bin, width, height)) {
+    if (comp.area >= minArea) continue;
+    const dim = Math.max(comp.maxX - comp.minX + 1, comp.maxY - comp.minY + 1);
+    if (dim > maxDim) continue;
+    for (const idx of comp.pixels) out[idx] = 0;
   }
   return out;
 }
@@ -221,14 +323,32 @@ export async function closeAndThickenLineArt(
   return { width, height, buffer };
 }
 
+export type LineArtOptions = {
+  maxSide?: number;
+  /** sharp median 視窗（奇數）；抹平黏土顆粒質感。 */
+  medianSize?: number;
+  /** Laplacian 後二值化門檻（越高黑越少）。 */
+  edgeThreshold?: number;
+  speckleMinArea?: number;
+  speckleMaxDim?: number;
+};
+
 /**
- * 灰階 Laplacian 線稿 ∪ 主體外輪廓 → morph close → 加粗。
- * 輸出白底黑線 PNG buffer。
+ * 灰階 median → Laplacian → threshold → despeckle → ∪ 主體外輪廓 → morph close → 加粗。
+ * 輸出白底黑線 PNG buffer。管線順序固定（despeckle 在 merge outline 前，輪廓天然豁免）。
  */
 export async function convertToLineArt(
   input: Buffer | string,
-  maxSide = COLORING_LINEART_MAX_SIDE,
+  options: LineArtOptions = {},
 ): Promise<LineArtResult> {
+  const {
+    maxSide = COLORING_LINEART_MAX_SIDE,
+    medianSize = 3,
+    edgeThreshold = 200,
+    speckleMinArea = SPECKLE_MIN_AREA,
+    speckleMaxDim = SPECKLE_MAX_DIM,
+  } = options;
+
   const resized = sharp(input).rotate().resize({
     width: maxSide,
     height: maxSide,
@@ -252,6 +372,7 @@ export async function convertToLineArt(
       withoutEnlargement: true,
     })
     .greyscale()
+    .median(medianSize)
     .normalise()
     .blur(0.8)
     .convolve({
@@ -260,14 +381,15 @@ export async function convertToLineArt(
       kernel: [-1, -1, -1, -1, 8, -1, -1, -1, -1],
     })
     .negate()
-    .threshold(200)
+    .threshold(edgeThreshold)
     .raw()
     .toBuffer({ resolveWithObject: true });
 
-  const edgeBin = new Uint8Array(width * height);
-  for (let i = 0; i < edgeBin.length; i += 1) {
-    edgeBin[i] = (edges.data[i] ?? 255) < 128 ? 1 : 0;
+  const rawEdgeBin = new Uint8Array(width * height);
+  for (let i = 0; i < rawEdgeBin.length; i += 1) {
+    rawEdgeBin[i] = (edges.data[i] ?? 255) < 128 ? 1 : 0;
   }
+  const edgeBin = despeckleInk(rawEdgeBin, width, height, speckleMinArea, speckleMaxDim);
 
   const outline = subjectOutlineFromRgba(rgba.data, width, height, channels);
   const merged = new Uint8Array(width * height);
@@ -409,4 +531,169 @@ export async function estimateBucketLeakRatio(pngBuffer: Buffer): Promise<number
 
   if (fillable === 0) return 1;
   return exteriorFillable / fillable;
+}
+
+export type LineArtQuality = {
+  width: number;
+  height: number;
+  /** 無 alpha 或 alpha 全 255（runtime multiply 合成契約）。 */
+  opaque: boolean;
+  /** 黑像素占比（luma < LINE_LUMA_WALL）。 */
+  inkCoverage: number;
+  /** 非純黑白中間帶占比（luma ∈ [32, 224)；雙峰契約應 ≈ 0）。 */
+  midToneRatio: number;
+  /** 面積 < SPECKLE_MIN_AREA 的黑色連通區數（噪點指標）。 */
+  speckleCount: number;
+  /** 外框可填／全部可填（見 estimateBucketLeakRatio）。 */
+  exteriorLeakRatio: number;
+  /** 主體內部可填像素占全圖比（過低＝輪廓全開放或全白假線稿）。 */
+  interiorFillRatio: number;
+  /** 主體內部最大可填區占內部可填總量（內輪廓全開放時趨近 1；僅回報不硬擋）。 */
+  largestInteriorFillRatio: number;
+};
+
+/** 對線稿 PNG 一次量測所有品質指標（與 runtime LINE_LUMA_WALL 同語義）。 */
+export async function measureLineArtQuality(pngBuffer: Buffer): Promise<LineArtQuality> {
+  const meta = await sharp(pngBuffer).metadata();
+  const { data, info } = await sharp(pngBuffer)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const { width, height, channels } = info;
+
+  let opaque = true;
+  let ink = 0;
+  let midTone = 0;
+  const inkBin = new Uint8Array(width * height);
+  for (let idx = 0, p = 0; idx < width * height; idx += 1, p += channels) {
+    if (meta.hasAlpha && (data[p + 3] ?? 255) < 255) opaque = false;
+    const luma = lumaOf(data[p] ?? 0, data[p + 1] ?? 0, data[p + 2] ?? 0);
+    if (luma < LINE_LUMA_WALL) {
+      ink += 1;
+      inkBin[idx] = 1;
+    }
+    if (luma >= 32 && luma < 224) midTone += 1;
+  }
+
+  let speckleCount = 0;
+  for (const comp of labelInkComponents(inkBin, width, height)) {
+    if (comp.area < SPECKLE_MIN_AREA) speckleCount += 1;
+  }
+
+  const exterior = markExteriorFill(data, width, height, channels);
+  let fillable = 0;
+  let exteriorFillable = 0;
+  const interiorBin = new Uint8Array(width * height);
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      if (!isFillable(data, width, channels, x, y)) continue;
+      fillable += 1;
+      const idx = y * width + x;
+      if (exterior[idx]) exteriorFillable += 1;
+      else interiorBin[idx] = 1;
+    }
+  }
+
+  let interiorTotal = 0;
+  let interiorLargest = 0;
+  for (const comp of labelInkComponents(interiorBin, width, height)) {
+    interiorTotal += comp.area;
+    if (comp.area > interiorLargest) interiorLargest = comp.area;
+  }
+
+  const total = width * height;
+  return {
+    width,
+    height,
+    opaque,
+    inkCoverage: total === 0 ? 0 : ink / total,
+    midToneRatio: total === 0 ? 0 : midTone / total,
+    speckleCount,
+    exteriorLeakRatio: fillable === 0 ? 1 : exteriorFillable / fillable,
+    interiorFillRatio: total === 0 ? 0 : interiorTotal / total,
+    largestInteriorFillRatio: interiorTotal === 0 ? 0 : interiorLargest / interiorTotal,
+  };
+}
+
+/** AI 原稿殘灰清除門檻（luma ≥ 此值 → 白）；淺灰陰影歸白、深線歸黑。 */
+export const AI_LINE_THRESHOLD = 150;
+
+/**
+ * AI 生成原稿 → 純黑白閉合線稿：壓平透明、統一 1024 方圖（白邊 pad）、
+ * 去殘灰、morph close＋加粗。與 illustrate 的 toStandardJpeg 無關（勿混用）。
+ */
+export async function postprocessAiLineArt(raw: Buffer): Promise<Buffer> {
+  const squared = await sharp(raw)
+    .flatten({ background: "#ffffff" })
+    .removeAlpha()
+    .resize(COLORING_LINEART_MAX_SIDE, COLORING_LINEART_MAX_SIDE, {
+      fit: "contain",
+      background: "#ffffff",
+    })
+    .greyscale()
+    .threshold(AI_LINE_THRESHOLD)
+    .png()
+    .toBuffer();
+  const closed = await closeAndThickenLineArt(squared);
+  return closed.buffer;
+}
+
+export type LineArtGateResult = {
+  ok: boolean;
+  problems: string[];
+  quality: LineArtQuality;
+};
+
+/** 依頁面種類跑完整品質 gate（白底＋不透明＋雙峰＋覆蓋率＋噪點＋漏色）。 */
+export async function evaluateLineArtGate(
+  pngBuffer: Buffer,
+  kind: ColoringGateKind,
+): Promise<LineArtGateResult> {
+  const gate = COLORING_GATES[kind];
+  const problems: string[] = [];
+
+  if (!(await isMostlyWhiteBackground(pngBuffer))) problems.push("背景不夠白");
+
+  const quality = await measureLineArtQuality(pngBuffer);
+  if (
+    quality.width > COLORING_LINEART_MAX_SIDE ||
+    quality.height > COLORING_LINEART_MAX_SIDE
+  ) {
+    problems.push(`尺寸超過 ${COLORING_LINEART_MAX_SIDE}`);
+  }
+  if (!quality.opaque) problems.push("含透明像素");
+  if (quality.midToneRatio > COLORING_MIDTONE_RATIO_MAX) {
+    problems.push(
+      `中間灰帶 ${(quality.midToneRatio * 100).toFixed(2)}% 超標（非雙峰黑白）`,
+    );
+  }
+  if (quality.inkCoverage > gate.inkCoverageMax) {
+    problems.push(
+      `黑覆蓋率 ${(quality.inkCoverage * 100).toFixed(1)}% > ${gate.inkCoverageMax * 100}%`,
+    );
+  }
+  if (quality.speckleCount > gate.speckleCountMax) {
+    problems.push(`噪點連通區 ${quality.speckleCount} > ${gate.speckleCountMax}`);
+  }
+  if (quality.exteriorLeakRatio >= gate.leakMax) {
+    problems.push(
+      `外框可填比 ${quality.exteriorLeakRatio.toFixed(3)} ≥ ${gate.leakMax}（輪廓未閉合）`,
+    );
+  }
+  if (quality.interiorFillRatio < gate.interiorMinRatio) {
+    problems.push(
+      `內部可填占比 ${(quality.interiorFillRatio * 100).toFixed(1)}% < ${gate.interiorMinRatio * 100}%（輪廓全開放或近全白）`,
+    );
+  }
+
+  return { ok: problems.length === 0, problems, quality };
+}
+
+/** 摘要一行品質數據（log 用）。 */
+export function formatLineArtQuality(q: LineArtQuality): string {
+  return (
+    `ink=${(q.inkCoverage * 100).toFixed(1)}% speckles=${q.speckleCount} ` +
+    `leak=${q.exteriorLeakRatio.toFixed(3)} interiorFill=${(q.interiorFillRatio * 100).toFixed(0)}% ` +
+    `interiorMax=${q.largestInteriorFillRatio.toFixed(2)}`
+  );
 }

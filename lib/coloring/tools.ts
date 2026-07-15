@@ -58,6 +58,14 @@ export function coloringDraftKey(pageId: string): string {
   return `coloring:v1:${pageId}`;
 }
 
+/** 線稿世代；重生／替換 line.png 時 +1，讓舊草稿失效（舊塗鴉對不上新線稿）。 */
+export const COLORING_LINEART_REV = 2;
+
+/** IndexedDB 草稿 key（綁線稿世代）。 */
+export function coloringDraftStorageKey(pageId: string): string {
+  return `${pageId}@r${COLORING_LINEART_REV}`;
+}
+
 export function lumaAt(
   data: Uint8ClampedArray,
   width: number,

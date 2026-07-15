@@ -6,15 +6,19 @@ import { expect, test, type Page } from "@playwright/test";
  * 以像素驗證「塗了要看得到」。
  */
 
-async function openFirstColoringPage(page: Page) {
+async function openColoringPage(page: Page, name: RegExp) {
   await page.goto("/games/coloring-book");
   await page.waitForLoadState("networkidle"); // 等 hydration，點擊才有 handler
   await page.getByRole("button", { name: "打開著色本" }).click();
-  await page.getByRole("button", { name: /^著色：/ }).first().click();
+  await page.getByRole("button", { name }).first().click();
   await page.waitForSelector("canvas");
   await page.waitForFunction(
     () => !document.body.textContent?.includes("載入線稿中"),
   );
+}
+
+async function openFirstColoringPage(page: Page) {
+  await openColoringPage(page, /^著色：/);
 }
 
 /** 統計 display canvas 一段水平列上的紅色像素數。 */
@@ -57,6 +61,27 @@ test.describe("coloring book", () => {
 
     await page.getByRole("button", { name: "復原" }).click();
     expect(await countRedOnRow(page, 0.5, 0.62, 0.55)).toBe(0);
+  });
+
+  /** 油漆桶點外底：外框可上色，但不得灌進主體中心（輪廓閉合防漏色）。 */
+  async function bucketExteriorStaysOut(page: Page, pickerName: RegExp) {
+    await openColoringPage(page, pickerName);
+    await page.getByRole("button", { name: "油漆桶" }).click();
+
+    const box = await page.locator("canvas").boundingBox();
+    if (!box) throw new Error("canvas boundingBox 不存在");
+    // 點左上外底（避開邊界 margin），中心應保持未上色
+    await page.mouse.click(box.x + box.width * 0.04, box.y + box.height * 0.04);
+    await page.waitForTimeout(300);
+    expect(await countRedOnRow(page, 0.45, 0.55, 0.5)).toBe(0);
+  }
+
+  test("油漆桶點外底不灌進主體（character 頁）", async ({ page }) => {
+    await bucketExteriorStaysOut(page, /^著色：恐龍車多多$/);
+  });
+
+  test("油漆桶點外底不灌進主體（scene 頁）", async ({ page }) => {
+    await bucketExteriorStaysOut(page, /^著色：恐龍車多多的大黃牙$/);
   });
 
   test("工具列具備筆刷三檔與縮放還原", async ({ page }) => {
