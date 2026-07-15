@@ -4,6 +4,20 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- **線上著色本塗色不可見**：線稿 `line.png` 為不透明白底 RGB（無 alpha），`ColoringCanvas` 合成時以 source-over 疊在塗色層上方，使用者塗的顏色被白底完全遮住；改以 `multiply` 疊線稿（白底透出塗色、黑線保持黑），同時消除油漆桶填色在抗鋸齒邊緣的白縫（fill 另向暗線內滲入 2px 封縫）。
+
+### Changed
+
+- **線上著色本引擎硬化＋手機 UX（`/games/coloring-book`）**：
+  - **筆觸效能**：落筆時只做一次 `getImageData`，pointermove 以共用 buffer 蓋章＋dirty-rect `putImageData`，合成改 `requestAnimationFrame` 節流；支援 `getCoalescedEvents` 取樣，筆畫更平滑。
+  - **Undo 改 dirty-rect 補丁**：只保存筆畫觸及區塊（原本 12 份全畫布 ImageData ≈ 48MB → KB 級）。
+  - **草稿改 IndexedDB**：存 PNG Blob（不受 localStorage ~5MB 配額限制），舊 localStorage 草稿首次讀取自動遷移；儲存失敗改為畫面提示（aria-live），不再靜默吞掉。
+  - **筆刷三檔（細／中／粗）**：半徑以螢幕顯示像素為準、依畫布縮放換算，各裝置視覺粗細一致；橡皮擦同檔略粗。
+  - **雙指縮放平移**（1–4×、邊界夾限）＋工具列「縮放還原」；放大後筆刷相對更細，好塗小細節。油漆桶延至 pointerup 判定，避免雙指手勢第一指誤填。
+  - **筆刷游標圈**跟隨指標顯示當前筆刷大小；「看原圖」浮層改為可點擊在四角輪換，不再擋住塗色區。
+
 ### Added
 
 - **GEO 營運基礎（/agent-plan geo-ticklish-candy 委員會核准）**：

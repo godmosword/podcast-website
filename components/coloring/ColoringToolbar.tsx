@@ -1,17 +1,21 @@
 "use client";
 
-import type { ColoringTool } from "@/lib/coloring/tools";
+import { BRUSH_SIZES, type BrushSizeId, type ColoringTool } from "@/lib/coloring/tools";
 import styles from "./ColoringToolbar.module.css";
 
 type ColoringToolbarProps = {
   tool: ColoringTool;
   onToolChange: (tool: ColoringTool) => void;
+  brushSize: BrushSizeId;
+  onBrushSizeChange: (size: BrushSizeId) => void;
   showPreview: boolean;
   onTogglePreview: () => void;
   canUndo: boolean;
   onUndo: () => void;
   onClear: () => void;
   onDownload: () => void;
+  viewActive: boolean;
+  onResetView: () => void;
 };
 
 const TOOLS: { id: ColoringTool; label: string }[] = [
@@ -23,12 +27,16 @@ const TOOLS: { id: ColoringTool; label: string }[] = [
 export function ColoringToolbar({
   tool,
   onToolChange,
+  brushSize,
+  onBrushSizeChange,
   showPreview,
   onTogglePreview,
   canUndo,
   onUndo,
   onClear,
   onDownload,
+  viewActive,
+  onResetView,
 }: ColoringToolbarProps) {
   return (
     <div className={styles.bar} role="toolbar" aria-label="著色工具">
@@ -45,12 +53,35 @@ export function ColoringToolbar({
           </button>
         ))}
       </div>
+      <div className={styles.group} aria-label="筆刷大小">
+        {BRUSH_SIZES.map((size) => (
+          <button
+            key={size.id}
+            type="button"
+            className={`${styles.btn} ${brushSize === size.id ? styles.active : ""}`}
+            aria-pressed={brushSize === size.id}
+            aria-label={`筆刷${size.name}`}
+            disabled={tool === "bucket"}
+            onClick={() => onBrushSizeChange(size.id)}
+          >
+            {size.name}
+          </button>
+        ))}
+      </div>
       <div className={styles.group}>
         <button type="button" className={styles.btn} onClick={onUndo} disabled={!canUndo}>
           復原
         </button>
         <button type="button" className={styles.btn} onClick={onClear}>
           清空
+        </button>
+        <button
+          type="button"
+          className={styles.btn}
+          onClick={onResetView}
+          disabled={!viewActive}
+        >
+          縮放還原
         </button>
         <button
           type="button"

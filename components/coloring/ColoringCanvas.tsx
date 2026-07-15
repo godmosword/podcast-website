@@ -14,12 +14,16 @@ import {
   saveColoringDraft,
 } from "@/lib/coloring/draft-storage";
 import {
-  CRAYON_RADIUS,
-  ERASER_RADIUS,
+  BRUSH_SIZES,
+  ERASER_RADIUS_BONUS,
+  cropImageDataRect,
   floodFillPaint,
   hexToRgba,
   stampBrush,
+  unionDirtyRect,
+  type BrushSizeId,
   type ColoringTool,
+  type DirtyRect,
   type Rgba,
 } from "@/lib/coloring/tools";
 import { ColoringPalette } from "./ColoringPalette";
@@ -29,6 +33,31 @@ import styles from "./ColoringCanvas.module.css";
 const MAX_UNDO = 12;
 const TRANSPARENT: Rgba = [255, 255, 255, 0];
 const SAVE_MS = 600;
+const MIN_SCALE = 1;
+const MAX_SCALE = 4;
+/** 油漆桶：pointerup 前位移超過此值（螢幕 px）視為手勢，不填色。 */
+const BUCKET_MOVE_TOLERANCE = 10;
+
+type UndoPatch = { rect: DirtyRect; pixels: Uint8ClampedArray<ArrayBuffer> };
+type ViewState = { scale: number; tx: number; ty: number };
+type Point = { x: number; y: number };
+
+const DEFAULT_VIEW: ViewState = { scale: 1, tx: 0, ty: 0 };
+const PREVIEW_CORNERS = ["cornerBr", "cornerBl", "cornerTl", "cornerTr"] as const;
+
+function clamp(v: number, lo: number, hi: number): number {
+  return Math.min(hi, Math.max(lo, v));
+}
+
+/** 限制縮放平移，canvas 永遠鋪滿 stage（base 尺寸 = stage 尺寸）。 */
+function clampView(view: ViewState, stageW: number, stageH: number): ViewState {
+  const scale = clamp(view.scale, MIN_SCALE, MAX_SCALE);
+  return {
+    scale,
+    tx: clamp(view.tx, stageW * (1 - scale), 0),
+    ty: clamp(view.ty, stageH * (1 - scale), 0),
+  };
+}
 
 type ColoringCanvasProps = {
   page: ColoringPage;
@@ -36,20 +65,46 @@ type ColoringCanvasProps = {
 };
 
 export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
+  const stageRef = useRef<HTMLDivElement>(null);
   const displayRef = useRef<HTMLCanvasElement>(null);
+  const cursorRef = useRef<HTMLDivElement>(null);
   const paintRef = useRef<HTMLCanvasElement | null>(null);
   const lineRef = useRef<HTMLCanvasElement | null>(null);
   const lineDataRef = useRef<Uint8ClampedArray | null>(null);
+
+  // 筆觸期間共用的像素 buffer（getImageData 只在落筆時做一次）
+  const strokeImgRef = useRef<ImageData | null>(null);
+  const strokeBaseRef = useRef<ImageData | null>(null);
+  const strokeDirtyRef = useRef<DirtyRect | null>(null);
+  const strokeColorRef = useRef<Rgba>(TRANSPARENT);
+  const strokeRadiusRef = useRef(10);
   const drawingRef = useRef(false);
-  const lastPtRef = useRef<{ x: number; y: number } | null>(null);
-  const undoStackRef = useRef<ImageData[]>([]);
+  const lastPtRef = useRef<Point | null>(null);
+
+  const undoStackRef = useRef<UndoPatch[]>([]);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const rafRef = useRef<number | null>(null);
+
+  // 雙指縮放平移
+  const pointersRef = useRef<Map<number, Point>>(new Map());
+  const viewRef = useRef<ViewState>(DEFAULT_VIEW);
+  const gestureRef = useRef<{
+    startDist: number;
+    startMid: Point;
+    startView: ViewState;
+  } | null>(null);
+  const bucketStartRef = useRef<Point | null>(null);
+  const bucketMovedRef = useRef(false);
 
   const [ready, setReady] = useState(false);
   const [tool, setTool] = useState<ColoringTool>("crayon");
   const [colorHex, setColorHex] = useState("#e85d4c");
+  const [brushSize, setBrushSize] = useState<BrushSizeId>("medium");
   const [showPreview, setShowPreview] = useState(false);
+  const [previewCorner, setPreviewCorner] = useState(0);
   const [canUndo, setCanUndo] = useState(false);
+  const [viewActive, setViewActive] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const composite = useCallback(() => {
     const display = displayRef.current;
@@ -58,80 +113,257 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
     if (!display || !paint || !line) return;
     const ctx = display.getContext("2d");
     if (!ctx) return;
+    ctx.globalCompositeOperation = "source-over";
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, display.width, display.height);
     ctx.drawImage(paint, 0, 0);
+    // 線稿 PNG 為不透明白底：multiply 讓白底透出塗色、黑線保持黑
+    ctx.globalCompositeOperation = "multiply";
     ctx.drawImage(line, 0, 0);
+    ctx.globalCompositeOperation = "source-over";
   }, []);
+
+  /** 每幀最多合成一次；連續 pointermove 不再逐事件全畫布重繪。 */
+  const requestComposite = useCallback(() => {
+    if (rafRef.current != null) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      composite();
+    });
+  }, [composite]);
 
   const scheduleSave = useCallback(() => {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
       const paint = paintRef.current;
       if (!paint) return;
-      try {
-        saveColoringDraft(page.id, paint.toDataURL("image/png"));
-      } catch {
-        // ignore
-      }
+      paint.toBlob((blob) => {
+        if (!blob) return;
+        saveColoringDraft(page.id, blob)
+          .then(() => setSaveError(null))
+          .catch(() => {
+            setSaveError("草稿沒有存起來，離開頁面會消失；可用「下載」保存作品。");
+          });
+      }, "image/png");
     }, SAVE_MS);
   }, [page.id]);
 
-  const pushUndo = useCallback(() => {
-    const paint = paintRef.current;
-    if (!paint) return;
-    const ctx = paint.getContext("2d");
-    if (!ctx) return;
-    const snap = ctx.getImageData(0, 0, paint.width, paint.height);
-    undoStackRef.current.push(snap);
+  const pushUndoPatch = useCallback((patch: UndoPatch) => {
+    undoStackRef.current.push(patch);
     if (undoStackRef.current.length > MAX_UNDO) {
       undoStackRef.current.shift();
     }
     setCanUndo(true);
   }, []);
 
-  const pointerToCanvas = useCallback(
-    (event: ReactPointerEvent<HTMLCanvasElement>) => {
-      const canvas = displayRef.current;
-      if (!canvas) return { x: 0, y: 0 };
-      const rect = canvas.getBoundingClientRect();
-      const x = ((event.clientX - rect.left) / rect.width) * canvas.width;
-      const y = ((event.clientY - rect.top) / rect.height) * canvas.height;
-      return { x, y };
+  const pointerToCanvas = useCallback((client: Point): Point => {
+    const canvas = displayRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: ((client.x - rect.left) / rect.width) * canvas.width,
+      y: ((client.y - rect.top) / rect.height) * canvas.height,
+    };
+  }, []);
+
+  /** 螢幕 px → canvas px 的倍率（含 pinch 縮放；放大後筆刷更細，好塗細節）。 */
+  const canvasScale = useCallback((): number => {
+    const canvas = displayRef.current;
+    if (!canvas) return 1;
+    const rect = canvas.getBoundingClientRect();
+    return rect.width > 0 ? canvas.width / rect.width : 1;
+  }, []);
+
+  const brushDisplayRadius = useCallback(
+    (forTool: ColoringTool): number => {
+      const preset =
+        BRUSH_SIZES.find((s) => s.id === brushSize) ?? BRUSH_SIZES[1]!;
+      return forTool === "eraser"
+        ? preset.displayRadius + ERASER_RADIUS_BONUS
+        : preset.displayRadius;
     },
-    [],
+    [brushSize],
   );
 
-  const strokeBetween = useCallback(
-    (from: { x: number; y: number }, to: { x: number; y: number }, color: Rgba, radius: number) => {
+  const applyView = useCallback((next: ViewState) => {
+    const stage = stageRef.current;
+    const canvas = displayRef.current;
+    if (!stage || !canvas) return;
+    const rect = stage.getBoundingClientRect();
+    const view = clampView(next, rect.width, rect.height);
+    viewRef.current = view;
+    canvas.style.transform = `translate(${view.tx}px, ${view.ty}px) scale(${view.scale})`;
+    setViewActive(view.scale !== 1 || view.tx !== 0 || view.ty !== 0);
+  }, []);
+
+  const stampSegment = useCallback((from: Point, to: Point) => {
+    const img = strokeImgRef.current;
+    if (!img) return;
+    const radius = strokeRadiusRef.current;
+    const color = strokeColorRef.current;
+    const dist = Math.hypot(to.x - from.x, to.y - from.y);
+    const steps = Math.max(1, Math.ceil(dist / Math.max(1, radius * 0.45)));
+    let dirty: DirtyRect | null = null;
+    for (let i = 0; i <= steps; i += 1) {
+      const t = i / steps;
+      const rect = stampBrush(
+        img,
+        from.x + (to.x - from.x) * t,
+        from.y + (to.y - from.y) * t,
+        radius,
+        color,
+        lineDataRef.current ?? undefined,
+      );
+      dirty = unionDirtyRect(dirty, rect);
+    }
+    if (!dirty) return;
+    strokeDirtyRef.current = unionDirtyRect(strokeDirtyRef.current, dirty);
+    const ctx = paintRef.current?.getContext("2d");
+    if (!ctx) return;
+    ctx.putImageData(img, 0, 0, dirty.x, dirty.y, dirty.width, dirty.height);
+    requestComposite();
+  }, [requestComposite]);
+
+  const beginStroke = useCallback(
+    (pt: Point) => {
       const paint = paintRef.current;
-      if (!paint) return;
-      const ctx = paint.getContext("2d");
-      if (!ctx) return;
+      const ctx = paint?.getContext("2d");
+      if (!paint || !ctx) return;
       const img = ctx.getImageData(0, 0, paint.width, paint.height);
-      const dist = Math.hypot(to.x - from.x, to.y - from.y);
-      const steps = Math.max(1, Math.ceil(dist / (radius * 0.45)));
-      for (let i = 0; i <= steps; i += 1) {
-        const t = i / steps;
-        stampBrush(
-          img,
-          from.x + (to.x - from.x) * t,
-          from.y + (to.y - from.y) * t,
-          radius,
-          color,
-          lineDataRef.current ?? undefined,
-        );
-      }
-      ctx.putImageData(img, 0, 0);
+      strokeImgRef.current = img;
+      strokeBaseRef.current = new ImageData(
+        new Uint8ClampedArray(img.data),
+        img.width,
+        img.height,
+      );
+      strokeDirtyRef.current = null;
+      strokeColorRef.current = tool === "eraser" ? TRANSPARENT : hexToRgba(colorHex);
+      strokeRadiusRef.current = Math.max(
+        1,
+        Math.round(brushDisplayRadius(tool) * canvasScale()),
+      );
+      drawingRef.current = true;
+      lastPtRef.current = pt;
+      stampSegment(pt, pt);
     },
-    [],
+    [tool, colorHex, brushDisplayRadius, canvasScale, stampSegment],
+  );
+
+  const finishStroke = useCallback(() => {
+    if (!drawingRef.current) return;
+    drawingRef.current = false;
+    lastPtRef.current = null;
+    const base = strokeBaseRef.current;
+    const dirty = strokeDirtyRef.current;
+    if (base && dirty) {
+      pushUndoPatch({ rect: dirty, pixels: cropImageDataRect(base, dirty) });
+      scheduleSave();
+    }
+    strokeImgRef.current = null;
+    strokeBaseRef.current = null;
+    strokeDirtyRef.current = null;
+  }, [pushUndoPatch, scheduleSave]);
+
+  const runBucket = useCallback(
+    (pt: Point) => {
+      const paint = paintRef.current;
+      const ctx = paint?.getContext("2d");
+      if (!paint || !ctx) return;
+      const img = ctx.getImageData(0, 0, paint.width, paint.height);
+      const base = new ImageData(
+        new Uint8ClampedArray(img.data),
+        img.width,
+        img.height,
+      );
+      const { rect } = floodFillPaint(
+        img,
+        Math.floor(pt.x),
+        Math.floor(pt.y),
+        hexToRgba(colorHex),
+        lineDataRef.current ?? undefined,
+      );
+      if (!rect) return;
+      pushUndoPatch({ rect, pixels: cropImageDataRect(base, rect) });
+      ctx.putImageData(img, 0, 0, rect.x, rect.y, rect.width, rect.height);
+      requestComposite();
+      scheduleSave();
+    },
+    [colorHex, pushUndoPatch, requestComposite, scheduleSave],
+  );
+
+  const startGestureIfTwoPointers = useCallback(() => {
+    const pts = [...pointersRef.current.values()];
+    if (pts.length !== 2) return;
+    finishStroke();
+    bucketStartRef.current = null;
+    const stage = stageRef.current;
+    if (!stage) return;
+    const rect = stage.getBoundingClientRect();
+    gestureRef.current = {
+      startDist: Math.max(1, Math.hypot(pts[0]!.x - pts[1]!.x, pts[0]!.y - pts[1]!.y)),
+      startMid: {
+        x: (pts[0]!.x + pts[1]!.x) / 2 - rect.left,
+        y: (pts[0]!.y + pts[1]!.y) / 2 - rect.top,
+      },
+      startView: viewRef.current,
+    };
+  }, [finishStroke]);
+
+  const applyGesture = useCallback(() => {
+    const gesture = gestureRef.current;
+    const stage = stageRef.current;
+    const pts = [...pointersRef.current.values()];
+    if (!gesture || !stage || pts.length !== 2) return;
+    const rect = stage.getBoundingClientRect();
+    const dist = Math.max(1, Math.hypot(pts[0]!.x - pts[1]!.x, pts[0]!.y - pts[1]!.y));
+    const mid = {
+      x: (pts[0]!.x + pts[1]!.x) / 2 - rect.left,
+      y: (pts[0]!.y + pts[1]!.y) / 2 - rect.top,
+    };
+    const { startView } = gesture;
+    const scale = clamp(
+      startView.scale * (dist / gesture.startDist),
+      MIN_SCALE,
+      MAX_SCALE,
+    );
+    // 讓手勢起點下方的畫面點跟著中點移動
+    const anchorX = (gesture.startMid.x - startView.tx) / startView.scale;
+    const anchorY = (gesture.startMid.y - startView.ty) / startView.scale;
+    applyView({
+      scale,
+      tx: mid.x - anchorX * scale,
+      ty: mid.y - anchorY * scale,
+    });
+  }, [applyView]);
+
+  const moveCursorRing = useCallback(
+    (client: Point) => {
+      const ring = cursorRef.current;
+      const stage = stageRef.current;
+      if (!ring || !stage) return;
+      if (tool === "bucket") {
+        ring.style.display = "none";
+        return;
+      }
+      const rect = stage.getBoundingClientRect();
+      const d = brushDisplayRadius(tool) * 2;
+      ring.style.display = "block";
+      ring.style.width = `${d}px`;
+      ring.style.height = `${d}px`;
+      ring.style.left = `${client.x - rect.left}px`;
+      ring.style.top = `${client.y - rect.top}px`;
+    },
+    [tool, brushDisplayRadius],
   );
 
   useEffect(() => {
     let cancelled = false;
+    const pointers = pointersRef.current;
     setReady(false);
+    setSaveError(null);
     undoStackRef.current = [];
     setCanUndo(false);
+    applyView(DEFAULT_VIEW);
 
     const img = new Image();
     img.decoding = "async";
@@ -162,25 +394,33 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
       lineCtx.drawImage(img, 0, 0, w, h);
       lineDataRef.current = lineCtx.getImageData(0, 0, w, h).data;
 
-      const draft = loadColoringDraft(page.id);
-      if (draft) {
-        const draftImg = new Image();
-        draftImg.onload = () => {
-          if (cancelled) return;
-          paintCtx.drawImage(draftImg, 0, 0, w, h);
-          composite();
-          setReady(true);
-        };
-        draftImg.onerror = () => {
-          if (cancelled) return;
-          composite();
-          setReady(true);
-        };
-        draftImg.src = draft;
-      } else {
+      const finishLoad = () => {
+        if (cancelled) return;
         composite();
         setReady(true);
-      }
+      };
+
+      loadColoringDraft(page.id)
+        .then((draft) => {
+          if (cancelled || draft == null) {
+            finishLoad();
+            return;
+          }
+          const objectUrl =
+            typeof draft === "string" ? null : URL.createObjectURL(draft);
+          const draftImg = new Image();
+          draftImg.onload = () => {
+            if (!cancelled) paintCtx.drawImage(draftImg, 0, 0, w, h);
+            if (objectUrl) URL.revokeObjectURL(objectUrl);
+            finishLoad();
+          };
+          draftImg.onerror = () => {
+            if (objectUrl) URL.revokeObjectURL(objectUrl);
+            finishLoad();
+          };
+          draftImg.src = objectUrl ?? (draft as string);
+        })
+        .catch(finishLoad);
     };
     img.onerror = () => {
       if (!cancelled) setReady(false);
@@ -190,69 +430,105 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
     return () => {
       cancelled = true;
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+      pointers.clear();
+      gestureRef.current = null;
+      drawingRef.current = false;
     };
-  }, [page.id, page.lineArtSrc, composite]);
+  }, [page.id, page.lineArtSrc, composite, applyView]);
 
   const onPointerDown = (event: ReactPointerEvent<HTMLCanvasElement>) => {
     if (!ready) return;
-    event.currentTarget.setPointerCapture(event.pointerId);
-    const pt = pointerToCanvas(event);
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      // 合成事件（測試）無 active pointer 時忽略
+    }
+    const client = { x: event.clientX, y: event.clientY };
+    pointersRef.current.set(event.pointerId, client);
 
-    if (tool === "bucket") {
-      pushUndo();
-      const paint = paintRef.current;
-      const ctx = paint?.getContext("2d");
-      if (!paint || !ctx) return;
-      const img = ctx.getImageData(0, 0, paint.width, paint.height);
-      floodFillPaint(
-        img,
-        Math.floor(pt.x),
-        Math.floor(pt.y),
-        hexToRgba(colorHex),
-        lineDataRef.current ?? undefined,
-      );
-      ctx.putImageData(img, 0, 0);
-      composite();
-      scheduleSave();
+    if (pointersRef.current.size === 2) {
+      startGestureIfTwoPointers();
       return;
     }
+    if (pointersRef.current.size > 2 || gestureRef.current) return;
 
-    pushUndo();
-    drawingRef.current = true;
-    lastPtRef.current = pt;
-    const color = tool === "eraser" ? TRANSPARENT : hexToRgba(colorHex);
-    const radius = tool === "eraser" ? ERASER_RADIUS : CRAYON_RADIUS;
-    strokeBetween(pt, pt, color, radius);
-    composite();
+    const pt = pointerToCanvas(client);
+    if (tool === "bucket") {
+      // 延到 pointerup 才填色，避免雙指縮放的第一指誤觸
+      bucketStartRef.current = client;
+      bucketMovedRef.current = false;
+      return;
+    }
+    beginStroke(pt);
   };
 
   const onPointerMove = (event: ReactPointerEvent<HTMLCanvasElement>) => {
-    if (!drawingRef.current || !ready) return;
-    const pt = pointerToCanvas(event);
-    const last = lastPtRef.current ?? pt;
-    const color = tool === "eraser" ? TRANSPARENT : hexToRgba(colorHex);
-    const radius = tool === "eraser" ? ERASER_RADIUS : CRAYON_RADIUS;
-    strokeBetween(last, pt, color, radius);
-    lastPtRef.current = pt;
-    composite();
+    const client = { x: event.clientX, y: event.clientY };
+    moveCursorRing(client);
+    if (!ready) return;
+    if (pointersRef.current.has(event.pointerId)) {
+      pointersRef.current.set(event.pointerId, client);
+    }
+    if (gestureRef.current) {
+      applyGesture();
+      return;
+    }
+    const bucketStart = bucketStartRef.current;
+    if (bucketStart) {
+      if (
+        Math.hypot(client.x - bucketStart.x, client.y - bucketStart.y) >
+        BUCKET_MOVE_TOLERANCE
+      ) {
+        bucketMovedRef.current = true;
+      }
+      return;
+    }
+    if (!drawingRef.current) return;
+    const native = event.nativeEvent;
+    const samples =
+      typeof native.getCoalescedEvents === "function"
+        ? native.getCoalescedEvents()
+        : [native];
+    for (const sample of samples.length > 0 ? samples : [native]) {
+      const pt = pointerToCanvas({ x: sample.clientX, y: sample.clientY });
+      stampSegment(lastPtRef.current ?? pt, pt);
+      lastPtRef.current = pt;
+    }
   };
 
-  const endStroke = () => {
-    if (!drawingRef.current) return;
-    drawingRef.current = false;
-    lastPtRef.current = null;
-    scheduleSave();
+  const onPointerEnd = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+    pointersRef.current.delete(event.pointerId);
+    if (gestureRef.current && pointersRef.current.size < 2) {
+      gestureRef.current = null;
+    }
+    const bucketStart = bucketStartRef.current;
+    if (bucketStart && event.type === "pointerup" && !bucketMovedRef.current) {
+      runBucket(pointerToCanvas({ x: event.clientX, y: event.clientY }));
+    }
+    bucketStartRef.current = null;
+    finishStroke();
+  };
+
+  const hideCursorRing = () => {
+    const ring = cursorRef.current;
+    if (ring) ring.style.display = "none";
   };
 
   const handleUndo = () => {
     const paint = paintRef.current;
     const ctx = paint?.getContext("2d");
-    const snap = undoStackRef.current.pop();
-    if (!paint || !ctx || !snap) {
+    const patch = undoStackRef.current.pop();
+    if (!paint || !ctx || !patch) {
       setCanUndo(false);
       return;
     }
-    ctx.putImageData(snap, 0, 0);
+    ctx.putImageData(
+      new ImageData(patch.pixels, patch.rect.width, patch.rect.height),
+      patch.rect.x,
+      patch.rect.y,
+    );
     setCanUndo(undoStackRef.current.length > 0);
     composite();
     scheduleSave();
@@ -262,9 +538,12 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
     const paint = paintRef.current;
     const ctx = paint?.getContext("2d");
     if (!paint || !ctx) return;
-    pushUndo();
+    const rect: DirtyRect = { x: 0, y: 0, width: paint.width, height: paint.height };
+    const current = ctx.getImageData(0, 0, paint.width, paint.height);
+    pushUndoPatch({ rect, pixels: cropImageDataRect(current, rect) });
     ctx.clearRect(0, 0, paint.width, paint.height);
-    clearColoringDraft(page.id);
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    void clearColoringDraft(page.id);
     composite();
   };
 
@@ -287,7 +566,7 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
         <p className={styles.pageTitle}>{page.title}</p>
       </div>
 
-      <div className={styles.stage}>
+      <div className={styles.stage} ref={stageRef}>
         <canvas
           ref={displayRef}
           className={styles.canvas}
@@ -295,31 +574,43 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
           aria-label={`${page.title}著色畫布`}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
-          onPointerUp={endStroke}
-          onPointerCancel={endStroke}
-          onPointerLeave={endStroke}
+          onPointerUp={onPointerEnd}
+          onPointerCancel={onPointerEnd}
+          onPointerLeave={hideCursorRing}
         />
+        <div ref={cursorRef} className={styles.cursorRing} aria-hidden="true" />
         {showPreview ? (
-          // eslint-disable-next-line @next/next/no-img-element -- canvas 旁小預覽
-          <img
-            src={page.previewSrc}
-            alt={`${page.title}原圖參考`}
-            className={styles.preview}
-          />
+          <button
+            type="button"
+            className={`${styles.preview} ${styles[PREVIEW_CORNERS[previewCorner % PREVIEW_CORNERS.length]!]}`}
+            onClick={() => setPreviewCorner((c) => (c + 1) % PREVIEW_CORNERS.length)}
+            aria-label="原圖參考換角落"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element -- canvas 旁小預覽 */}
+            <img src={page.previewSrc} alt={`${page.title}原圖參考`} />
+          </button>
         ) : null}
         {!ready ? <p className={styles.loading}>載入線稿中…</p> : null}
       </div>
+
+      <p role="status" aria-live="polite" className={styles.saveNotice}>
+        {saveError}
+      </p>
 
       <ColoringPalette colorHex={colorHex} onChange={setColorHex} />
       <ColoringToolbar
         tool={tool}
         onToolChange={setTool}
+        brushSize={brushSize}
+        onBrushSizeChange={setBrushSize}
         showPreview={showPreview}
         onTogglePreview={() => setShowPreview((v) => !v)}
         canUndo={canUndo}
         onUndo={handleUndo}
         onClear={handleClear}
         onDownload={handleDownload}
+        viewActive={viewActive}
+        onResetView={() => applyView(DEFAULT_VIEW)}
       />
     </div>
   );
