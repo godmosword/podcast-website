@@ -11,6 +11,7 @@
   - 品質 gate：新增 `measureLineArtQuality`／`evaluateLineArtGate`（黑覆蓋率、噪點元件計數、雙峰黑白／無 alpha、外框漏色比收緊至 0.5、全 8 頁依 kind 分檔），`generate:coloring-lineart --verify` 與 assets 測試同套契約；generator 支援 `--only`／`--kind`，封面改 `--cover` 明確旗標（不再順帶重生）。
   - Phase 2 AI 線稿：新 `npm run generate:coloring-ai-lineart`（OpenAI images.edit＋定裝照 ref；scene 頁新增 `referencePaths` 資料契約）；產出進 `public/.coloring-staging/<run>/`（raw＋後處理＋contact sheet＋manifest），人工審後 `--approve <id>` 逐頁上線（approve 前重跑 gate＋sha256 核對）；成本硬閘每頁 2 次、單 run 16 次 API。
   - e2e 新增油漆桶防漏色測試（character＋scene 各一：點外底不得灌進主體中心）。
+  - **AI 線稿全 8 頁上線**：人工審 contact sheet 通過後 `--approve` 覆蓋（噪點連通區全部 0、粗閉合輪廓、簡化背景），character 與 scene 頁全面替換演算法版。
 
 ### Changed
 
