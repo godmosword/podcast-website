@@ -25,7 +25,7 @@ type GameOgOptions = {
   accentColor?: string;
 };
 
-export type GameOgIcon = "play" | "race" | "puzzle";
+type GameOgIcon = "play" | "race" | "puzzle";
 
 /**
  * ImageResponse 會把 emoji 轉成遠端 SVG（預設來源是 jsDelivr）。

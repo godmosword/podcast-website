@@ -35,7 +35,7 @@ may use React APIs and CSS modules.
 `lib/gamekit/runtime/`
 : Browser runtime primitives that do not depend on React components: fixed-step
 loops, input mapping, pixel renderer helpers, palettes, audio bus, chiptune BGM,
-preloading, procedural sheets, style helpers, and juice effects.
+preloading, procedural sheets, and juice effects.
 
 `lib/gamekit/progress/`
 : Persistent player data and cross-game progression: save migration, settings,
@@ -91,7 +91,7 @@ cross-game. A single-game bridge belongs in `lib/gamekit/games/`.
 
 | Game | Main Surface | GameKit Usage | External Runtime |
 | --- | --- | --- | --- |
-| Car Adventure | `components/games/car-adventure/CarAdventureGame.tsx` | `react/TouchControls`, `useFixedGameLoop`, `useGameAudio`, `useBestScore`, `useVisibilityPause`; `runtime/juice`, `style`, `tileset-draw`; `games/adventure-level`; `progress/session` | level/physics in `lib/games/car-adventure/`；選單在 canvas 外避免裁切 |
+| Car Adventure | `components/games/car-adventure/CarAdventureGame.tsx` | `react/TouchControls`, `useFixedGameLoop`, `useGameAudio`, `useBestScore`, `useVisibilityPause`; `runtime/juice`; `games/adventure-level`; `progress/session` | level/physics／clay draw in `lib/games/car-adventure/`；選單在 canvas 外避免裁切 |
 | Block Drop | `components/games/BlockDropGame.tsx` | `useGameLoop`, `useTouchControls`, `useVisibilityPause`, `useBestScore`, `useGameAudio`; `progress/settings`; `progress/session` | local component game logic |
 | Candy Match | `components/games/CandyMatchGame.tsx` | `useGameAudio`; `progress/save`, `progress/meta`, `progress/session` | engine/levels in `lib/games/candy-match/` |
 | Candy Kart | `components/games/CandyKartIframeHost.tsx` | `games/candy-kart-bridge` validates iframe messages and maps finish data to `progress/session` | Godot export in `public/candy-kart/` |

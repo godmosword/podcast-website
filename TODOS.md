@@ -30,7 +30,13 @@
 
 | ID | Commit |
 |----|--------|
+| refactor(cleanup): Wave A 代碼瘦身（刪 `GameThumbArt`／`runtime/style`／`tileset-draw`；收斂 games／car-adventure／og 內部 export；修 GAMEKIT-ARCHITECTURE） | 待 commit |
 | fix+refactor(games): 車車大冒險入口 CTA 移出 canvas 裁切＋模組拆分＋封面刷新 | `ccf0fde` |
+
+### 後續（代碼瘦身，未開工）
+
+- **Wave B（opt-in）**：`@testing-library/dom` 直接依賴、knip 設定單一來源、test seam／`TILE_*` 決策
+- **Wave C（另 `/agent-plan`）**：BackLink／遊戲 CTA 抽共用／大檔拆分；開工前先決策「找一找」vs「溫柔探索」文案
 
 ### 本輪已完成（2026-07-15）
 

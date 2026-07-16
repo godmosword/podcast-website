@@ -1,8 +1,8 @@
 type AgeBand = "explore" | "challenge";
 
-export type GameType = "match" | "adventure" | "blocks" | "racing" | "coloring";
+type GameType = "match" | "adventure" | "blocks" | "racing" | "coloring";
 
-export type GameArt = {
+type GameArt = {
   cover: string;
   thumbnail?: string;
   position?: string;
@@ -10,7 +10,7 @@ export type GameArt = {
 };
 
 /** 首玩教學示範的手勢圖示種類：對應 TutorialOverlay 內建 inline SVG。 */
-export type TutorialGesture = "tap" | "swipe" | "hold" | "arrows";
+type TutorialGesture = "tap" | "swipe" | "hold" | "arrows";
 
 /** 單步教學：一個手勢圖示 + 一句 ≤10 字說明。 */
 export type TutorialStep = {

@@ -7,8 +7,8 @@ import { CAR_ADVENTURE_LEVELS } from "@/lib/games/car-adventure/levels";
 export const TILE = 36;
 export const VW = 720;
 export const VH = 432;
-export const KIT_W = 320;
-export const KIT_H = 180;
+const KIT_W = 320;
+const KIT_H = 180;
 export const RENDER_SX = KIT_W / VW;
 export const RENDER_SY = KIT_H / VH;
 export const ROWS = 12;
@@ -31,7 +31,7 @@ export interface Input {
   jump: boolean;
 }
 
-export interface Player {
+interface Player {
   x: number;
   y: number;
   w: number;
@@ -67,7 +67,7 @@ export const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 export const approach = (v: number, target: number, amt: number) =>
   v > target ? Math.max(target, v - amt) : Math.min(target, v + amt);
 
-export function loadAdventureLevel(index: number): AdventureLevel {
+function loadAdventureLevel(index: number): AdventureLevel {
   const json =
     CAR_ADVENTURE_LEVELS[
       Math.max(0, Math.min(index, CAR_ADVENTURE_LEVELS.length - 1))
