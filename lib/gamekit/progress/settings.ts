@@ -40,6 +40,10 @@ export type GameKitSettings = {
   blockDropSpecialMode: BlockDropSpecialMode;
 };
 
+// UX-P2-1：kidsMode 預設開啟時，Block Drop 新局的預設難度需為 relaxed，
+// 故兩者預設值在此刻意保持一致。使用者一旦透過 setBlockDropDifficulty 明確
+// 選過其他難度，該選擇會持久化並在之後的每一局被沿用（不受 kidsMode 影響），
+// 詳見 lib/progress-store.ts 的 normalizeBlockDropDifficulty。
 const DEFAULT_SETTINGS: GameKitSettings = {
   version: 2,
   kidsMode: true,

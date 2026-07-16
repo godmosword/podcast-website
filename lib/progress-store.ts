@@ -162,6 +162,8 @@ function mergeBest(
   if (score > prev) target[gameId] = score;
 }
 
+// UX-P2-1：預設落在 relaxed，與 kidsMode 預設開啟互相搭配；只有使用者透過
+// 難度切換明確選過 standard／challenge 才會離開 relaxed，且該選擇會持久化。
 function normalizeBlockDropDifficulty(
   value: unknown,
 ): BlockDropDifficultyPreference {

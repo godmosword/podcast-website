@@ -19,8 +19,13 @@ import {
 } from "@/lib/gamekit/react/game-load";
 import { candyKartIframeSrc } from "@/lib/games/candy-kart/iframe-src";
 import { useGameLoadGate } from "@/lib/gamekit/react/useGameLoadGate";
+import { TutorialOverlay } from "@/lib/gamekit/react/TutorialOverlay";
 import { GameLoadOverlay } from "@/components/games/GameLoadOverlay";
+import { GAMES } from "@/data/games";
 import styles from "./CandyKartIframeHost.module.css";
+
+const CANDY_KART_META = GAMES.find((g) => g.slug === "candy-kart");
+const CANDY_KART_TUTORIAL = CANDY_KART_META?.tutorial ?? [];
 
 const LOAD_TIMEOUT_MS = 45_000;
 const GODOT_PROGRESS_POLL_MS = 150;
@@ -50,6 +55,7 @@ export function CandyKartIframeHost({
   const reportedRef = useRef<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const iframeLoadedRef = useRef(false);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const {
     phase,
@@ -165,9 +171,18 @@ export function CandyKartIframeHost({
         onStart={start}
         onRetry={handleRetry}
         startLabel="出發！開始遊戲"
+        secondaryLabel="怎麼玩？"
+        onSecondary={() => setShowTutorial(true)}
         artSrc="/games/v2/candy-kart/cover.webp"
         artAlt="粉紅黏土卡丁車在遊樂園賽道上準備出發"
       />
+      {showTutorial && (
+        <TutorialOverlay
+          title={CANDY_KART_META?.title ?? "繽紛卡丁車"}
+          steps={CANDY_KART_TUTORIAL}
+          onClose={() => setShowTutorial(false)}
+        />
+      )}
     </div>
   );
 }
