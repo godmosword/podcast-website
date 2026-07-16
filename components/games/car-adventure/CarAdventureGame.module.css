@@ -1,0 +1,46 @@
+.shell {
+  max-width: 760px;
+  margin: 0 auto;
+  font-family: var(
+    --font-sans,
+    "PingFang TC",
+    "Microsoft JhengHei",
+    system-ui,
+    sans-serif
+  );
+  user-select: none;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.heading {
+  font-size: 22px;
+  font-weight: 800;
+  color: #15428f;
+}
+
+.topActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.best {
+  font-size: 14px;
+  font-weight: 700;
+  color: #3a5a8c;
+}
+
+.help {
+  text-align: center;
+  color: #3a5a8c;
+  font-size: 13px;
+  margin-top: 10px;
+}

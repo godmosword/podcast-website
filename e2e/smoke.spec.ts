@@ -175,6 +175,17 @@ test("車車大冒險頁面可載入", async ({ page }) => {
   ).toBeVisible({ timeout: 15_000 });
 });
 
+test("車車大冒險窄螢幕可點開始冒險進入遊戲", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/games/car-adventure");
+  const start = page.getByRole("button", { name: /開始冒險/ });
+  await expect(start).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByTestId("car-adventure-menu")).toBeVisible();
+  await start.click();
+  await expect(page.getByTestId("car-adventure-menu")).toHaveCount(0);
+  await expect(page.getByRole("img", { name: "遊戲畫面" })).toBeVisible();
+});
+
 test("繽紛樂園（Block Drop）頁面可載入", async ({ page }) => {
   await page.goto("/games/block-drop");
   await expect(page.getByRole("link", { name: "← 回遊樂園" })).toBeVisible();

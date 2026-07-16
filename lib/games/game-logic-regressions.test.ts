@@ -20,11 +20,31 @@ describe("game logic regressions", () => {
   });
 
   it("車車大冒險兒童模式第一關用當局起始生命判定 flawless", () => {
-    const game = source("components/games/CarPlatformer.tsx");
+    const game = source("components/games/car-adventure/CarAdventureGame.tsx");
 
     expect(game).toContain("const startLives = kidsModeRef.current ? 5 : 3;");
-    expect(game).toContain("lives: startLives,");
+    expect(game).toContain("createGameState(idx, startLives)");
     expect(game).toContain("levelStartLivesRef.current = startLives;");
+  });
+
+  it("車車大冒險選單在 PixelGameCanvas 外，避免入口 CTA 被裁切", () => {
+    const game = source("components/games/car-adventure/CarAdventureGame.tsx");
+    const menu = source("components/games/car-adventure/CarAdventureMenu.tsx");
+    const css = source(
+      "components/games/car-adventure/CarAdventureMenu.module.css",
+    );
+
+    expect(game).toContain("<CarAdventureMenu");
+    expect(game).toContain("</PixelGameCanvas>");
+    // 選單在 canvas 關閉標籤之後
+    expect(game.indexOf("</PixelGameCanvas>")).toBeLessThan(
+      game.indexOf("<CarAdventureMenu"),
+    );
+    expect(menu).toContain("開始冒險 ▶");
+    expect(menu).toContain('data-testid="car-adventure-menu"');
+    expect(css).toContain("overflow: visible");
+    expect(css).toContain("position: sticky");
+    expect(css).toContain("min-height: 48px");
   });
 
   it("繽紛方塊鍵盤主操作只由 GameInput 統一處理一次", () => {

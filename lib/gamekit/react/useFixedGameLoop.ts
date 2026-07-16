@@ -7,7 +7,7 @@ import {
 } from "@/lib/gamekit/runtime/loop";
 
 /**
- * 固定時間步進迴圈（委派 lib/gamekit/loop），供 CarPlatformer 等 canvas 遊戲使用。
+ * 固定時間步進迴圈（委派 lib/gamekit/loop），供 CarAdventureGame 等 canvas 遊戲使用。
  */
 export function useFixedGameLoop(
   callbacks: GameLoopCallbacks,

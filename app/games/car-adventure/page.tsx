@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import CarPlatformer from "@/components/games/CarPlatformer";
+import CarAdventureGame from "@/components/games/car-adventure/CarAdventureGame";
 import { GamePageShell } from "@/components/games/GamePageShell";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default function CarAdventurePage() {
   return (
     <GamePageShell title="車車大冒險小遊戲" gameId="car-adventure">
-      <CarPlatformer />
+      <CarAdventureGame />
     </GamePageShell>
   );
 }
