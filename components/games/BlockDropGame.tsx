@@ -202,11 +202,14 @@ interface GameState {
 const TYPES: PieceType[] = ["I", "O", "T", "S", "Z", "J", "L"];
 const LINE_SCORE = [0, 100, 300, 500, 800];
 const CLEAR_LABEL = ["", "好耶", "太棒了", "漂亮", "彩虹全消"];
+// UX-T6：inkSoft／accentPink 較原始配色加深（往 ink 方向混色），
+// 讓文字／HUD 在淺色殼／面板上達 WCAG AA（4.5:1）；裝飾色（mint/peach/…）不動。
 const MACARON_THEME = {
   shell: "#fff7ed",
   shellDeep: "#ffe9d6",
   ink: "#5d4a67",
-  inkSoft: "#8c7896",
+  inkSoft: "#7c6886",
+  accentPink: "#a5567a",
   mint: "#b9f3db",
   peach: "#ffc4a8",
   lemon: "#ffe889",
@@ -228,6 +231,37 @@ const CLAY_BLOCK_COLORS: Record<PieceType, string> = {
 const COLORS: Record<PieceType, string> = {
   ...CLAY_BLOCK_COLORS,
 };
+
+// UX-T6：色盲／低對比友善的非顏色標記——七種方塊各配一個低調內嵌符號
+// （圓／方／三角／菱形／十字／半月／星），以 data-URI SVG 疊加在方塊底色
+// 上，不改動方塊本體色相。用純 CSS background-image 疊層而非額外 React
+// 節點／SVG 元素，逐 cell 成本僅多一個字串比對，盤面 200 格重繪也不會有
+// 明顯效能負擔。
+const BLOCK_SYMBOL_SHAPES: Record<PieceType, string> = {
+  I: '<circle cx="12" cy="12" r="4.4"/>',
+  O: '<rect x="7.4" y="7.4" width="9.2" height="9.2" rx="1.8"/>',
+  T: '<polygon points="12,6.8 17.2,17.2 6.8,17.2"/>',
+  S: '<polygon points="12,6.3 17.7,12 12,17.7 6.3,12"/>',
+  Z: '<path d="M9.6,6 h4.8 v3.6 h3.6 v4.8 h-3.6 v3.6 h-4.8 v-3.6 h-3.6 v-4.8 h3.6 z"/>',
+  J: '<path d="M12,6.4 A5.6,5.6 0 0 1 12,17.6 Z"/>',
+  L: '<polygon points="12,6.8 13.23,10.3 16.95,10.39 14,12.65 15.06,16.21 12,14.1 8.94,16.21 10,12.65 7.05,10.39 10.77,10.3"/>',
+};
+function makeBlockSymbolBg(type: PieceType): string {
+  const shape = BLOCK_SYMBOL_SHAPES[type];
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">` +
+    `<g fill="rgba(93,74,103,.4)" stroke="rgba(255,255,255,.55)" stroke-width="0.6">${shape}</g>` +
+    `</svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+}
+// 模組層級預先算好每種方塊的符號 data-URI，避免每次 render 重新編碼字串。
+const BLOCK_SYMBOL_BG: Record<PieceType, string> = TYPES.reduce(
+  (acc, t) => {
+    acc[t] = makeBlockSymbolBg(t);
+    return acc;
+  },
+  {} as Record<PieceType, string>,
+);
 const SHAPES: Record<PieceType, [number, number][][]> = {
   I: [
     [
@@ -799,7 +833,10 @@ function PiecePreview({ type, cell }: { type: PieceType | null; cell: number }) 
                 ? {
                     width: "100%",
                     height: "100%",
-                    background: COLORS[type as PieceType],
+                    background: `${BLOCK_SYMBOL_BG[type as PieceType]}, ${COLORS[type as PieceType]}`,
+                    backgroundSize: "42% 42%, 100% 100%",
+                    backgroundPosition: "center, 0 0",
+                    backgroundRepeat: "no-repeat, no-repeat",
                     borderRadius: Math.max(5, cell / 2.8),
                     boxShadow:
                       "inset 2px 2px 0 rgba(255,255,255,.62), inset -2px -2px 0 rgba(111,72,86,.16), 0 3px 6px rgba(117,88,119,.16)",
@@ -1506,7 +1543,10 @@ export default function BlockDropGame() {
     return {
       width: "100%",
       height: "100%",
-      background: `radial-gradient(circle at 28% 22%, rgba(255,255,255,.72), transparent 28%), linear-gradient(145deg, ${color}, color-mix(in srgb, ${color} 72%, #8f6f86))`,
+      background: `${BLOCK_SYMBOL_BG[type]}, radial-gradient(circle at 28% 22%, rgba(255,255,255,.72), transparent 28%), linear-gradient(145deg, ${color}, color-mix(in srgb, ${color} 72%, #8f6f86))`,
+      backgroundSize: "38% 38%, 100% 100%, 100% 100%",
+      backgroundPosition: "center, 0 0, 0 0",
+      backgroundRepeat: "no-repeat, no-repeat, no-repeat",
       borderRadius: 7,
       boxShadow: `inset 2px 2px 0 rgba(255,255,255,.56), inset -2px -3px 0 rgba(102,74,91,.18), 0 2px 5px rgba(121,83,99,.18)${glow ? `, 0 0 10px ${color}` : ""}`,
     };
@@ -1632,7 +1672,7 @@ export default function BlockDropGame() {
       {g.combo >= 2 && g.status === "playing" ? (
         <div
           style={{
-            color: "#d95f87",
+            color: MACARON_THEME.accentPink,
             fontSize: 12,
             fontWeight: 900,
             display: "flex",
@@ -1650,7 +1690,7 @@ export default function BlockDropGame() {
       <div
         aria-label={`最佳分數 ${Math.max(best ?? 0, g.score)}`}
         style={{
-          color: "#a4869c",
+          color: "#816882",
           fontSize: 11,
           fontWeight: 800,
           display: "flex",
@@ -2065,7 +2105,7 @@ export default function BlockDropGame() {
               key={t.id}
               style={{
                 background: "rgba(255,255,255,.88)",
-                color: t.big ? "#d95f87" : MACARON_THEME.ink,
+                color: t.big ? MACARON_THEME.accentPink : MACARON_THEME.ink,
                 fontSize: t.big ? 18 : 14,
                 fontWeight: 900,
                 padding: "7px 16px",
@@ -2141,7 +2181,7 @@ export default function BlockDropGame() {
                 {newBestRef.current && (
                   <span
                     style={{
-                      color: "#d95f87",
+                      color: MACARON_THEME.accentPink,
                       fontSize: 15,
                       display: "inline-flex",
                       alignItems: "center",

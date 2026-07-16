@@ -156,9 +156,9 @@
 | UX-P1-3 | P1 | 待做 | **共讀 sidecar 擴至全集**：`parent-guides`／`family-activities` 從 ep-1/ep-5 擴充（內容營運，可分批） | `data/parent-guides.ts`、`data/family-activities.ts` | 同名 `*.test.ts` |
 | UX-P1-4 | P1 | 待做 | **播放進度條拇指加大**（CSS 變數，不動控制列 layout） | `StoryPlayer.module.css` | 手動播放頁 |
 | UX-P1-5 | P1 | 部分完成 | **e2e 兒童 UX 回歸**：`/adventures` a11y + 地圖觸控 e2e ✅（MAP-UX-P1c）；`/for-parents`、播放頁待補 | `e2e/a11y.spec.ts`、`e2e/universe-map.spec.ts` | `npm run test:e2e` |
-| UX-P2-1 | P2 | 待做 | 方塊／卡丁車接 `kidsMode` 或標「挑戰模式」 | `BlockDropGame.tsx`、遊戲 hub | test + 手動 |
+| UX-P2-1 | P2 | ✅ `eb19c86` | 方塊／卡丁車接 `kidsMode` 或標「挑戰模式」：kidsMode 預設＝relaxed 耦合鎖定（回歸測試）；GameIntro 統一 challenge 家長提示 | `BlockDropGame.tsx`、`GameIntro.tsx`、`settings.ts` | test + 手動 |
 | UX-P2-2 | P2 | 待做 | 儀表板「最佳分數」改低壓文案（「探索紀錄」等） | `ParentDashboard.tsx` | 手動 |
-| UX-P2-3 | P2 | 待做 | 遊戲頁年齡標示一致（metadata vs chip） | `app/games/page.tsx` | build |
+| UX-P2-3 | P2 | ✅ `eb19c86` | 遊戲頁年齡標示一致（metadata vs chip）：五款稽核無矛盾；challenge 提示由 GameIntro 統一呈現 | `app/games/page.tsx` | build |
 | UX-P2-4 | P2 | 待做 | Dudu 鍵盤可及（內層 `tabIndex={0}`） | `DuduCompanion.tsx` | a11y |
 | UX-P2-5 | P2 | 待做 | `reflectionShown` 加 `source: detail \| end-screen` 精準量測 | `progress-store.ts`、`ReflectionPrompt.tsx` | test |
 
@@ -505,6 +505,8 @@ PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
 | **A. 分層** | 現有 4 款保留為「遊樂園經典區」；STEM-P2 新模組嚴守無計時／無排行榜 checklist |
 | **B. 漸進淡化** | 保留 best 分顯示但移除生命／Game Over 壓力；大冒險改為無限續關或探索模式 |
 | **C. 雙模式** | 每款加「輕鬆玩」（無分數）／「挑戰玩」（可選，預設輕鬆） |
+
+**已決策（2026-07-16，使用者拍板）：採方案 A 分層**——現有 4 款維持「遊樂園經典區」定位（保留生命制／Game Over／最佳分；大冒險不改無限續關），卡面維持 6–12 挑戰標示；配套改善走教學示範 overlay＋kidsMode 預設 relaxed（UX-P2-1）＋GameIntro 家長提示。STEM-P2 新模組仍嚴守無計時／無排行榜 checklist。
 
 **新遊戲預設：** 無計時、無排行榜、可隨時離開（見 STEM-P2 設計紀律）。舊遊戲是否改版依上表決策後排入 P2 或 P3。**市售 pixel 精進**（Game Kit、三星、高分）已移至 [RESEARCH.md — 四款小遊戲精進](./RESEARCH.md#2026-06-09四款小遊戲精進方案對標可市售-pixel-game)，待 STEM-P1 gate 後再解凍。
 
