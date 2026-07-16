@@ -16,6 +16,7 @@ import { useBestScore } from "@/lib/gamekit/react/useBestScore";
 import { useGameAudio } from "@/lib/gamekit/react/useGameAudio";
 import { useTouchControls } from "@/lib/gamekit/react/useTouchControls";
 import { useVisibilityPause } from "@/lib/gamekit/react/useVisibilityPause";
+import { TutorialOverlay } from "@/lib/gamekit/react/TutorialOverlay";
 import { JuiceController } from "@/lib/gamekit/runtime/juice";
 import { GAMES } from "@/data/games";
 import { updateAdventure } from "@/lib/games/car-adventure/physics";
@@ -27,9 +28,9 @@ import {
 } from "@/lib/games/car-adventure/types";
 import styles from "./CarAdventureGame.module.css";
 
-const COVER =
-  GAMES.find((g) => g.slug === "car-adventure")?.art.cover ??
-  "/games/v2/car-adventure/cover.webp";
+const CAR_ADVENTURE_META = GAMES.find((g) => g.slug === "car-adventure");
+const COVER = CAR_ADVENTURE_META?.art.cover ?? "/games/v2/car-adventure/cover.webp";
+const TUTORIAL_STEPS = CAR_ADVENTURE_META?.tutorial ?? [];
 
 export default function CarAdventureGame() {
   const game = useRef<GameState | null>(null);
@@ -42,6 +43,7 @@ export default function CarAdventureGame() {
   const { best, saveBest } = useBestScore("car-adventure");
 
   const [status, setStatus] = useState<Status>("ready");
+  const [showTutorial, setShowTutorial] = useState(false);
   const { kidsMode } = useGameKitSettings();
   const [levelIndex, setLevelIndex] = useState(0);
   const [announce, setAnnounce] = useState("");
@@ -308,7 +310,16 @@ export default function CarAdventureGame() {
           }}
           onStart={() => beginLevel(levelIndex)}
           onResume={togglePause}
+          onOpenTutorial={() => setShowTutorial(true)}
         />
+
+        {showTutorial && (
+          <TutorialOverlay
+            title={CAR_ADVENTURE_META?.title ?? "車車大冒險"}
+            steps={TUTORIAL_STEPS}
+            onClose={() => setShowTutorial(false)}
+          />
+        )}
 
         <div className={touchControlStyles.touchBar}>
           <div className={touchControlStyles.touchCluster}>
@@ -342,7 +353,7 @@ export default function CarAdventureGame() {
 
         <p className={styles.help}>
           {isCoarse
-            ? "按住左右移動 · 右側大按鈕跳躍 · 踩敵人頭可彈飛"
+            ? "按住按鈕移動 · 點跳躍"
             : "← → / A D 移動 · ↑ / W / 空白鍵 跳（可變高度）· 踩敵人頭可彈飛 · P 暫停 · 手把支援"}
         </p>
       </div>

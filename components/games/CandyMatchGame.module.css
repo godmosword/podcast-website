@@ -1,6 +1,52 @@
 .surface {
   border-color: color-mix(in srgb, var(--c-pink) 56%, #fff) !important;
   box-shadow: 0 22px 46px rgba(144, 116, 128, 0.22), inset 0 2px 0 rgba(255, 255, 255, 0.96) !important;
+  overflow: hidden;
+}
+
+/*
+ * 背景主題化：低調裝飾（角落柔光斑點＋頂部弱光暈），疊在每關 themeA/B 漸層上。
+ * z-index: -1 讓裝飾落在 surface 自身背景之上、但在棋盤／文字等實際內容之下，
+ * 不影響可讀性；純靜態、不加動畫。依 task 類型微調色相（clean-dirt→薄荷/藍綠，
+ * drop-item→薰衣草/天空藍，collect-multi→薰衣草/粉紅，其餘沿用預設粉／藍）。
+ */
+.surface::before,
+.surface::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.surface::before {
+  background:
+    radial-gradient(120px 120px at 94% -8%, color-mix(in srgb, var(--c-pink) 55%, transparent), transparent 70%),
+    radial-gradient(100px 100px at -8% 102%, color-mix(in srgb, var(--c-sky) 55%, transparent), transparent 70%);
+  opacity: 0.55;
+}
+
+.surface::after {
+  background: radial-gradient(180px 90px at 50% 6%, color-mix(in srgb, var(--c-yellow) 35%, transparent), transparent 75%);
+  opacity: 0.5;
+}
+
+.surface[data-task="clean-dirt"]::before {
+  background:
+    radial-gradient(120px 120px at 94% -8%, color-mix(in srgb, var(--c-mint) 55%, transparent), transparent 70%),
+    radial-gradient(100px 100px at -8% 102%, color-mix(in srgb, var(--c-teal) 55%, transparent), transparent 70%);
+}
+
+.surface[data-task="drop-item"]::before {
+  background:
+    radial-gradient(120px 120px at 94% -8%, color-mix(in srgb, var(--c-lilac) 55%, transparent), transparent 70%),
+    radial-gradient(100px 100px at -8% 102%, color-mix(in srgb, var(--c-sky) 55%, transparent), transparent 70%);
+}
+
+.surface[data-task="collect-multi"]::before {
+  background:
+    radial-gradient(120px 120px at 94% -8%, color-mix(in srgb, var(--c-lilac) 55%, transparent), transparent 70%),
+    radial-gradient(100px 100px at -8% 102%, color-mix(in srgb, var(--c-pink) 55%, transparent), transparent 70%);
 }
 
 .gameTitle {

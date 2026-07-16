@@ -13,6 +13,8 @@ import { CandyMatchBoard } from "@/components/games/CandyMatchBoard";
 import { DirtOverlay, PieceArt, PieceGift } from "@/components/games/CandyMatchPieceArt";
 import { IconReplay, IconSparkle, IconStar, IconTrophy } from "@/components/games/ClayIcons";
 import { useGameAudio } from "@/lib/gamekit/react/useGameAudio";
+import { TutorialOverlay } from "@/lib/gamekit/react/TutorialOverlay";
+import { GAMES } from "@/data/games";
 import { useGameKitSettings } from "@/hooks/useGameKitSettings";
 import { loadPlayerProfile } from "@/lib/gamekit/progress/save";
 import { medalCount } from "@/lib/gamekit/progress/meta";
@@ -41,6 +43,9 @@ import {
   type CandyMatchTask,
 } from "@/lib/games/candy-match/levels";
 import styles from "./CandyMatchGame.module.css";
+
+const CANDY_MATCH_META = GAMES.find((g) => g.slug === "candy-match");
+const CANDY_MATCH_TUTORIAL = CANDY_MATCH_META?.tutorial ?? [];
 
 const INK = "#5d4a67";
 const INK_SOFT = "#8c7896";
@@ -121,6 +126,7 @@ export default function CandyMatchGame() {
     useGameAudio("candy-match");
 
   const [screen, setScreen] = useState<Screen>("title");
+  const [showTutorial, setShowTutorial] = useState(false);
   const [levelIndex, setLevelIndex] = useState(0);
   const [level, setLevel] = useState<CandyMatchLevel>(CANDY_MATCH_LEVELS[0]);
   const [board, setBoard] = useState<BoardState | null>(null);
@@ -499,7 +505,12 @@ export default function CandyMatchGame() {
 
   return (
     <GameChrome announce={announce}>
-      <div style={wrapStyle} className={styles.surface} data-screen={screen}>
+      <div
+        style={wrapStyle}
+        className={styles.surface}
+        data-screen={screen}
+        data-task={level.task.kind}
+      >
         <div
           style={{
             display: "flex",
@@ -542,9 +553,18 @@ export default function CandyMatchGame() {
             <p style={{ color: INK_SOFT, fontWeight: 700, margin: "0 0 26px", fontSize: 15 }}>
               找一找、排一排、消一消，完成小任務就有星星！
             </p>
-            <button type="button" style={bigBtn} onClick={() => setScreen("map")}>
-              ▶ 開始
-            </button>
+            <div style={{ display: "flex", justifyContent: "center", gap: 10, flexWrap: "wrap" }}>
+              <button type="button" style={bigBtn} onClick={() => setScreen("map")}>
+                ▶ 開始
+              </button>
+              <button
+                type="button"
+                style={softBtn}
+                onClick={() => setShowTutorial(true)}
+              >
+                怎麼玩？
+              </button>
+            </div>
           </div>
         )}
 
@@ -553,6 +573,11 @@ export default function CandyMatchGame() {
             <h2 style={{ textAlign: "center", color: INK, fontSize: 22, fontWeight: 900, margin: "6px 0 14px" }}>
               遊樂園地圖
             </h2>
+            <div style={{ textAlign: "center", marginBottom: 12 }}>
+              <button type="button" style={softBtn} onClick={() => setShowTutorial(true)}>
+                怎麼玩？
+              </button>
+            </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               {CANDY_MATCH_LEVELS.map((lv, i) => {
                 const locked = i > maxCleared;
@@ -786,6 +811,13 @@ export default function CandyMatchGame() {
           </>
         )}
       </div>
+      {showTutorial && (
+        <TutorialOverlay
+          title={CANDY_MATCH_META?.title ?? "繽紛消消樂"}
+          steps={CANDY_MATCH_TUTORIAL}
+          onClose={() => setShowTutorial(false)}
+        />
+      )}
     </GameChrome>
   );
 }

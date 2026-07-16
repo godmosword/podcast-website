@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { GAMES } from "@/data/games";
+import { GAMES, gameParentTip } from "@/data/games";
 import type { GameKitGameId } from "@/lib/gamekit/types";
 import styles from "./GameIntro.module.css";
 
@@ -16,6 +16,8 @@ export function GameIntro({ gameId }: { gameId: GameKitGameId }) {
   const game = GAMES.find((item) => item.slug === gameId);
 
   if (!game) return null;
+
+  const parentTip = gameParentTip(game);
 
   return (
     <section className={styles.intro} aria-labelledby="game-page-title" data-game-id={game.slug}>
@@ -39,6 +41,7 @@ export function GameIntro({ gameId }: { gameId: GameKitGameId }) {
         </div>
         <h1 id="game-page-title">{game.title}</h1>
         <p>{game.desc}</p>
+        {parentTip ? <p className={styles.parentTip}>{parentTip}</p> : null}
         <div className={styles.controls} aria-label="操作提示">
           {game.controls.map((control) => (
             <span key={control}>{control}</span>
