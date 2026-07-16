@@ -1,5 +1,5 @@
 ---
-description: podcast-website 專用 Plan 委員會（Claude Code：Codex CLI gpt-5.6 工程審；Cursor 對標見 .cursor 版 Luna MAX fast）——只規劃、審核，不實作。
+description: podcast-website 專用 Plan 委員會（Claude Code：Codex CLI gpt-5.6-luna 工程審；Cursor 對標見 .cursor 版 Luna MAX fast）——只規劃、審核，不實作。
 ---
 
 # Agent Plan（podcast-website 委員會版）
@@ -40,8 +40,8 @@ $ARGUMENTS
 
 | 委員 | 角度 | 呼叫方式 |
 |------|------|----------|
-| **Codex CLI 工程審** | 工程可行性／驗證／漏檔 | `codex exec -m gpt-5.6 -c model_reasoning_effort="medium" "…$(cat /tmp/agent-plan-<ts>.md)" </dev/null`（**Claude Code 專用**；非 Cursor Task slug） |
-| **Grok 4.5 Fast Medium** | 對抗審 | `grok -p "<prompt + plan>" -m grok-4.5-fast --effort medium --no-plan` |
+| **Codex CLI 工程審** | 工程可行性／驗證／漏檔 | `codex exec -m gpt-5.6-luna -c model_reasoning_effort="medium" "…$(cat /tmp/agent-plan-<ts>.md)" </dev/null`（**Claude Code 專用**；非 Cursor Task slug） |
+| **Grok 4.5（CLI）** | 對抗審 | `grok -p "<prompt + plan>" -m grok-4.5 --effort medium --no-plan` |
 | **Opus 4.8 設計審** | **設計／UX**：`DESIGN.md`、兒童主路徑、觸控、a11y 視覺、動畫原則；L3 加架構／紅線 | Agent tool：`architect`（readonly）+ `model: "opus"`，prompt 附 `DESIGN.md` |
 
 ## 4. Leader 綜合
@@ -49,7 +49,7 @@ $ARGUMENTS
 | 來源 | 關鍵意見 | 採納決定 |
 |------|----------|----------|
 | Codex CLI 工程審 | … | … |
-| Grok 4.5 Fast Medium 對抗審 | …／缺席 | … |
+| Grok 4.5（CLI） 對抗審 | …／缺席 | … |
 | Opus 4.8 設計審 | …／缺席 | … |
 
 覆寫 **Approved Plan** → 提示 **`/agent-action`**
@@ -63,8 +63,8 @@ $ARGUMENTS
 | # | 角色 | 執行方式 | subagent_type | model slug | 做了什麼 | 產出 | 狀態 |
 |---|------|----------|---------------|------------|----------|------|------|
 | 0 | Leader | 當前 session | — | （leader model） | Draft Plan、綜合 | plan 檔 | 完成 |
-| 1 | Codex CLI 工程審 | `codex exec` | — | `gpt-5.6`（CLI model） | 審工程面 | 審查意見 | 完成／缺席 |
-| 2 | Grok 4.5 Fast 對抗審 | `grok -p` | — | `grok-4.5-fast`（CLI） | 找漏洞 | 審查意見 | 完成／缺席 |
+| 1 | Codex CLI 工程審 | `codex exec` | — | `gpt-5.6-luna`（CLI model） | 審工程面 | 審查意見 | 完成／缺席 |
+| 2 | Grok 4.5 Fast 對抗審 | `grok -p` | — | `grok-4.5`（CLI） | 找漏洞 | 審查意見 | 完成／缺席 |
 | 3 | Opus 4.8 設計審 | Agent tool | `architect` | `opus` | 審 UX／DESIGN.md | 審查意見 | 完成／缺席 |
 | 4 | Composer 可行性審 | `cursor-agent` | — | `composer-2.5-fast` | L3 成本 | 自審 | 完成／未派 |
 

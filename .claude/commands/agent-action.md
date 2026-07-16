@@ -37,8 +37,8 @@ $ARGUMENTS
 | 顧問 | 用途 | 呼叫方式 |
 |------|------|----------|
 | Opus 4.8 設計審 | UX／設計／a11y 視覺 | Agent tool `architect` + `model: "opus"` |
-| Codex CLI 工程審 | TS/React diff 審、工程第二意見 | `codex exec -m gpt-5.6 -c model_reasoning_effort="medium" "<prompt + diff>" </dev/null`（**Claude Code 專用**；Cursor 對標 `gpt-5.6-luna-max-fast`） |
-| Grok 4.5 Fast Medium | 對抗審：找 diff 的 edge case | `grok models` 探活 → `grok -p "<prompt>" -m grok-4.5-fast --effort medium --no-plan`；不可用 → 缺席 |
+| Codex CLI 工程審 | TS/React diff 審、工程第二意見 | `codex exec -m gpt-5.6-luna -c model_reasoning_effort="medium" "<prompt + diff>" </dev/null`（**Claude Code 專用**；Cursor 對標 `gpt-5.6-luna-max-fast`） |
+| Grok 4.5（CLI） | 對抗審：找 diff 的 edge case | `grok models` 探活 → `grok -p "<prompt>" -m grok-4.5 --effort medium --no-plan`；不可用 → 缺席 |
 | Composer 2.5 | 快速 sanity check | `cursor-agent -p --model composer-2.5-fast --mode ask "<prompt>"` |
 
 **執行紅線：**
@@ -68,7 +68,7 @@ $ARGUMENTS
 
 - **可跳過**：已有 Approved Plan、diff 約 &lt;80 行、未碰 Protected paths／紅線 → 只跑 Verify
 - **一般**：Codex CLI 工程審 + Opus 4.8 設計審
-- **L3／觸紅線／Protected**：再加 Grok 4.5 Fast Medium
+- **L3／觸紅線／Protected**：再加 Grok 4.5（CLI）
 - 呼叫失敗 → 追加 `docs/AGENT-FAILURES.md`，摘要表註明缺席
 
 ## 6. Docs sync（可見行為變更時）
@@ -95,9 +95,9 @@ $ARGUMENTS
 | 0 | Leader | — | （leader model） | 讀 Plan、派工、整合 diff | 合併後變更摘要 | 完成 |
 | 1 | T1 | （Agent tool type） | `sonnet`／`haiku` | （依 Plan 填寫） | `path/to/file` | 完成／缺席 |
 | 2 | Verify | Bash | — | `npm test` 等 | 逐項對照結果 | 完成 |
-| 3 | Codex CLI diff 審 | `code-reviewer` | `gpt-5.6`（CLI model） | 審 diff 工程面 | 意見摘要 | 完成／跳過／缺席 |
+| 3 | Codex CLI diff 審 | `code-reviewer` | `gpt-5.6-luna`（CLI model） | 審 diff 工程面 | 意見摘要 | 完成／跳過／缺席 |
 | 4 | Opus 設計審 | `architect` | `opus` | 審 UX／設計 | 意見摘要 | 完成／跳過／缺席 |
-| 5 | Grok 對抗審 | `grok -p` | — | `grok-4.5-fast`（CLI） | 找 edge case | 審查意見 | 完成／跳過／缺席 |
+| 5 | Grok 對抗審 | `grok -p` | — | `grok-4.5`（CLI） | 找 edge case | 審查意見 | 完成／跳過／缺席 |
 | 6 | Ship | — | （leader model） | commit／push | commit hash | 完成／未執行 |
 
 **狀態欄：** `完成`｜`跳過`｜`缺席`｜`對抗審缺席／對抗性降級`｜`未執行`。

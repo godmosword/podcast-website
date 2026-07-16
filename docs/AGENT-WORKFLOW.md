@@ -7,7 +7,7 @@
 
 | 指令 | 用途 |
 |------|------|
-| **`/agent-plan`** | 規劃 + **固定三審委員會**（GPT 5.6 Luna MAX fast + Grok 4.5 Fast High + Opus 4.8 設計審。預設不實作） |
+| **`/agent-plan`** | 規劃 + **固定三審委員會**（GPT 5.6 Luna MAX fast + Grok 4.5 Medium Fast + Opus 4.8 設計審。預設不實作） |
 | **`/agent-action`** | 依 Approved Plan **Task 派工** + Verify +（可選）Ship |
 
 **啟用範圍：** 只有打出上述指令時才進入 Agent Orchestration 模式。一般 chat 不會自動拆任務、派子 agent。
@@ -40,7 +40,7 @@
 
 大任務或不熟模組時 **必讀**（具體路徑見 [`AGENT-DOMAIN.md`](AGENT-DOMAIN.md) § Bootstrap）。
 
-**Cursor Task 探活（Bootstrap 加讀）：** 依 [`AGENT-FAILURES.md`](AGENT-FAILURES.md) 掃缺席表後，若本次將派 `gpt-5.6-luna-max-fast` 或 `grok-4.5-fast-high` 且該 slug 無 30 天缺席紀錄，可各派一次最小 readonly Task（prompt：`回覆 OK`）確認 slug 可用；失敗即追加案例並標缺席。**勿每次 plan/action 重複探活**——僅 Bootstrap 或缺席解除後。
+**Cursor Task 探活（Bootstrap 加讀）：** 依 [`AGENT-FAILURES.md`](AGENT-FAILURES.md) 掃缺席表後，若本次將派 `gpt-5.6-luna-max-fast` 或 `cursor-grok-4.5-medium-fast` 且該 slug 無 30 天缺席紀錄，可各派一次最小 readonly Task（prompt：`回覆 OK`）確認 slug 可用；失敗即追加案例並標缺席。**勿每次 plan/action 重複探活**——僅 Bootstrap 或缺席解除後。
 
 可見行為變更：依 Domain 的 **Docs sync** 段落更新 changelog／待辦／導航。
 
@@ -73,7 +73,7 @@
 | 階段 | 指令 | Leader | 子 agent |
 |------|------|--------|----------|
 | 規劃 | `/agent-plan` | 當前 session 主模型 | — |
-| 審核 | `/agent-plan` | — | **固定三審**（GPT 5.6 Luna MAX fast + Grok 4.5 Fast High + Opus 4.8 設計審）；L3 + Leader 自審 |
+| 審核 | `/agent-plan` | — | **固定三審**（GPT 5.6 Luna MAX fast + Grok 4.5 Medium Fast + Opus 4.8 設計審）；L3 + Leader 自審 |
 | 實作 | `/agent-action` | Leader 拆任務 | Cursor **Task** + model slug |
 | 驗證 | `/agent-action` | Leader 整合後 | `shell`；必要時 reviewer |
 | 交付 | `/agent-action` | Leader | commit/push **僅使用者明確要求** |
@@ -102,9 +102,9 @@
 2. **Draft Plan** — Leader 寫 Goal／Scope 骨架 → Task **GPT 5.6 Luna MAX fast** 填 Task DAG、Files、Verification、Model routing（見 [Plan 模板](#plan-模板)）
    - **工程審分離**：工程審為**另一個** readonly Task；prompt 明寫「你未撰寫此 Plan」；須逐條反駁 DAG **≥3 點**
 3. **委員會審查（固定三審，必做，全部唯讀）** — 呼叫前依 [`AGENT-FAILURES.md`](AGENT-FAILURES.md) 探活；失敗即記錄＋標缺席
-   - **預設（一般 L1／L2）：GPT 5.6 Luna MAX fast + Grok 4.5 Fast High + Opus 4.8 設計審** — 可並行 Task
+   - **預設（一般 L1／L2）：GPT 5.6 Luna MAX fast + Grok 4.5 Medium Fast + Opus 4.8 設計審** — 可並行 Task
      - **GPT 5.6 Luna MAX fast** 工程審：可行性、驗證命令、漏檔
-     - **Grok 4.5 Fast High** 對抗審：漏洞、edge case、失敗模式（不審中文文案）
+     - **Grok 4.5 Medium Fast** 對抗審：漏洞、edge case、失敗模式（不審中文文案）
      - **Opus 4.8 設計審**：`DESIGN.md` 對齊、兒童主路徑、親子 UX、觸控 ≥44px、`prefers-reduced-motion`、資訊層級、視覺一致性
    - **L3／Protected paths**：固定三審 + Leader 自審（Opus 設計審加強架構／紅線視角）
    - **Fable 5**（`claude-fable-5-thinking-medium`）：**備選** — 僅委員衝突或邊界模糊時
@@ -147,7 +147,7 @@ Plan 若弱化 Domain 紅線 → 審稿標 **CRITICAL**。
      - **元件 allowlist**：`StoryPlayer`、`PlayButton`、`StoryCard`、`Chip`、`GamePageShell`、`LandingSegment`、`SiteNavBar`
      - **動畫相關 TS/JS**：`useAnimation`、`requestAnimationFrame`、`@keyframes`
    - **一般**：GPT 5.6 Luna MAX fast + Opus 4.8 設計審（Task）；Python → `python-reviewer`；TS/JS → `typescript-reviewer`
-   - **L3／觸紅線／Protected**：再加 Grok 4.5 Fast High 對抗審
+   - **L3／觸紅線／Protected**：再加 Grok 4.5 Medium Fast 對抗審
 6. 可見行為變更 → Domain § Docs sync
 7. **Ship**（僅使用者要求）：只 stage 相關檔；預設不 commit/push
 8. **收尾輸出** → 必附 **Agent 執行分配表**（見 [收尾輸出：Agent 執行分配表](#收尾輸出agent-執行分配表)）
@@ -157,8 +157,8 @@ Plan 若弱化 Domain 紅線 → 審稿標 **CRITICAL**。
 - ✅ 可並行：不同檔案／目錄
 - ❌ 禁止：多 agent 同時改同一檔
 - 改動 &lt;10 行且無架構影響 → Leader 直接做
-- **L1 路徑已知** → 直接 **Grok 4.5 Fast High**，**不必**先 explore
-- **L1 路徑不明** → Task `explore`（`grok-4.3`）再 **Grok 4.5 Fast High**；實作 Task prompt **必附** [Handoff 模板](#handoffexplore--實作)
+- **L1 路徑已知** → 直接 **Grok 4.5 Medium Fast**，**不必**先 explore
+- **L1 路徑不明** → Task `explore`（`grok-4.3`）再 **Grok 4.5 Medium Fast**；實作 Task prompt **必附** [Handoff 模板](#handoffexplore--實作)
 - 遵守 Domain § **Protected paths / models**（若有）
 
 ### Cursor vs Claude Code 對標表
@@ -169,12 +169,12 @@ Plan 若弱化 Domain 紅線 → 審稿標 **CRITICAL**。
 |------|------|------|
 | **Leader** | 當前 session（含 Draft Plan 全文） | Composer 2.5（節流：只寫骨架，細節派 GPT 5.6 Luna MAX fast） |
 | **Opus 4.8 設計審** | Agent tool `architect` + `model: "opus"`（附 `DESIGN.md`） | Task `architect`（readonly）+ `claude-opus-4-8-thinking-medium` |
-| **GPT 5.6 Luna MAX fast 工程審** | `codex exec -m gpt-5.6 -c model_reasoning_effort="medium" "…" </dev/null`（**Claude Code Codex CLI**） | Task + `gpt-5.6-luna-max-fast`（**Cursor Task slug**） |
-| **Grok 4.5 Fast High 對抗審** | `grok -p "<prompt>" -m grok-4.5-fast --effort medium --no-plan` | Task（readonly）+ `grok-4.5-fast-high`（**每輪 plan 必派**；slug 不可用 → 缺席） |
+| **GPT 5.6 Luna MAX fast 工程審** | `codex exec -m gpt-5.6-luna -c model_reasoning_effort="medium" "…" </dev/null`（**Claude Code Codex CLI**；裸 `gpt-5.6` 於 ChatGPT 帳號 400，勿用） | Task + `gpt-5.6-luna-max-fast`（**Cursor Task slug**） |
+| **Grok 4.5 Medium Fast 對抗審** | `grok -p "<prompt>" -m grok-4.5 --effort medium --no-plan` | Task（readonly）+ `cursor-grok-4.5-medium-fast`（**每輪 plan 必派**；slug 不可用 → 缺席） |
 | **Composer 2.5 可行性審（L3）** | `cursor-agent -p --model composer-2.5-fast --mode plan` | Leader 自審（當前 session 即 Composer；**不計入**非 leader 委員） |
 | **L3 實作** | Leader 親自 | Task + Opus slug，Protected paths 才 Leader |
-| **L2 實作** | Agent tool `model: "sonnet"` | Task + `grok-4.5-fast-high` |
-| **L1 實作** | Agent tool `model: "haiku"`；<10 行 Leader | 路徑已知 → Grok 4.5 Fast High；路徑不明 → explore → Grok；<10 行 Leader |
+| **L2 實作** | Agent tool `model: "sonnet"` | Task + `cursor-grok-4.5-medium-fast` |
+| **L1 實作** | Agent tool `model: "haiku"`；<10 行 Leader | 路徑已知 → Grok 4.5 Medium Fast；路徑不明 → explore → Grok；<10 行 Leader |
 | **L0 命令** | Bash | Task `shell` 或 `grok-build-0.1` |
 | **改檔權** | 只有 Leader／Sonnet／Haiku 子 agent；外部 CLI 一律唯讀顧問 | 只有實作 Task；顧問一律 `readonly: true` |
 | **失敗記錄** | 兩邊共用 [`AGENT-FAILURES.md`](AGENT-FAILURES.md)：Bootstrap 必讀、call fail 必追加、30 天連續 2+ fail → 標缺席 | 同左 |
@@ -193,14 +193,14 @@ Task 的 `model` **只能**用 Cursor 允許的 slug：
 | Opus 4.8 Thinking Medium | `claude-opus-4-8-thinking-medium` | Plan／diff **設計審**（UX、`DESIGN.md`、兒童體驗、a11y 視覺；**每輪 plan 必派**） |
 | GPT 5.6 Luna MAX fast | `gpt-5.6-luna-max-fast` | Plan 細節草稿、工程審、TS/React diff review（Cursor Task） |
 | Sonnet 4.6 Thinking Medium | `claude-4.6-sonnet-medium-thinking` | 內容管線中文校對（見 Domain Protected paths）；備選實作 |
-| Grok 4.5 Fast High | `grok-4.5-fast-high` | **L1／L2 實作預設**；Plan／diff **對抗審**（唯讀；**每輪 plan 必派**；slug 不可用 → 缺席，勿頂替）；Claude Code 用 `grok -p "<prompt>" -m grok-4.5-fast --effort medium --no-plan` |
+| Grok 4.5 Medium Fast | `cursor-grok-4.5-medium-fast` | **L1／L2 實作預設**；Plan／diff **對抗審**（唯讀；**每輪 plan 必派**；slug 不可用 → 缺席，勿頂替）；Claude Code 用 `grok -p "<prompt>" -m grok-4.5 --effort medium --no-plan` |
 | Grok 4.3 | `grok-4.3` | explore（只讀） |
 | Grok Build 0.1 | `grok-build-0.1` | shell、批次命令 |
 | Fable 5 | `claude-fable-5-thinking-medium` | 備選 Plan 第三意見 |
 
 slug 不可用時：**不要**替換；Leader 代做並告知使用者。
-**例外——對抗審（Grok 4.5 Fast High，readonly）**：Leader 不代做、其他模型不頂替；缺席標記但仍須出現在**固定分配表**。
-**L1／L2 實作（Grok 4.5 Fast High）**：slug 拒收 → Leader 接手實作，分配表註明缺席。
+**例外——對抗審（Grok 4.5 Medium Fast，readonly）**：Leader 不代做、其他模型不頂替；缺席標記但仍須出現在**固定分配表**。
+**L1／L2 實作（Grok 4.5 Medium Fast）**：slug 拒收 → Leader 接手實作，分配表註明缺席。
 
 ---
 
@@ -209,8 +209,8 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 | 級別 | 特徵 | `/agent-action` |
 |------|------|-----------------|
 | **L3** | 跨模組、schema、高風險 | Opus 4.8；Protected paths 才 Leader |
-| **L2** | 多檔、模式固定 | **Grok 4.5 Fast High**（Task 派工） |
-| **L1** | 單檔 routine | 路徑已知 → **Grok 4.5 Fast High**；不明才 explore → Grok |
+| **L2** | 多檔、模式固定 | **Grok 4.5 Medium Fast**（Task 派工） |
+| **L1** | 單檔 routine | 路徑已知 → **Grok 4.5 Medium Fast**；不明才 explore → Grok |
 | **L0** | 純命令 | `shell` 或 Grok Build |
 
 ### 任務類型路由
@@ -219,15 +219,15 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 |----------|------|
 | Plan 骨架（Goal／Scope） | Leader（Composer） |
 | Plan 細節（DAG／Files／Verify） | Task + GPT 5.6 Luna MAX fast |
-| Plan 工程審（**預設固定**） | GPT 5.6 Luna MAX fast（Cursor）／Codex CLI `gpt-5.6`（Claude Code） |
+| Plan 工程審（**預設固定**） | GPT 5.6 Luna MAX fast（Cursor）／Codex CLI `gpt-5.6-luna`（Claude Code） |
 | Plan **設計審**（**預設固定**） | Opus 4.8（`architect` readonly；讀 `DESIGN.md`）— UX、兒童體驗、觸控、a11y 視覺 |
-| Plan／diff 對抗審（**預設固定**） | Grok 4.5 Fast High（readonly；不審中文；每輪必派） |
+| Plan／diff 對抗審（**預設固定**） | Grok 4.5 Medium Fast（readonly；不審中文；每輪必派） |
 | 字幕／scenes／illustrate（SOP 內） | **跳過 `/agent-plan`**；直做或 `/agent-action` + Domain verify |
 | 純 docs／命令對齊 | Leader 自審或 GPT；分配表 Grok 列仍須列出 |
 | 探索 codebase（路徑不明） | Task `explore`（Grok 4.3） |
-| L1／L2 實作 | Task + Grok 4.5 Fast High |
+| L1／L2 實作 | Task + Grok 4.5 Medium Fast |
 | 高風險核心路徑 | Opus 或 Leader（Domain Protected paths） |
-| 前端／UI | Grok 4.5 Fast High；跑 lint + e2e（若 Domain 有） |
+| 前端／UI | Grok 4.5 Medium Fast；跑 lint + e2e（若 Domain 有） |
 | verify / CI 命令 | `shell` |
 | 整合 diff、git commit | **Leader only**（Composer） |
 
@@ -253,7 +253,7 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 - Out: ...
 
 ## Task DAG
-- [ ] T1（L2, grok-4.5-fast-high）— 依賴：無 — 可並行：T2
+- [ ] T1（L2, cursor-grok-4.5-medium-fast）— 依賴：無 — 可並行：T2
 - [ ] T2（L0, shell）— 依賴：T1
 
 ## Files likely touched
@@ -335,7 +335,7 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 
 | # | 角色 | 執行方式 | subagent_type | model slug | 做了什麼 | 產出 | 狀態 |
 
-涵蓋：Leader、Plan 細節、**GPT 5.6 Luna MAX fast 工程審**、**Grok 4.5 Fast High 對抗審**、**Opus 4.8 設計審**、Leader 自審。
+涵蓋：Leader、Plan 細節、**GPT 5.6 Luna MAX fast 工程審**、**Grok 4.5 Medium Fast 對抗審**、**Opus 4.8 設計審**、Leader 自審。
 
 ### `/agent-action` 表欄位
 
@@ -409,5 +409,7 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 | 2026-07-11 | 模型升級：GPT 5.6 Sol Medium、Grok 4.5 Fast Medium；預設改固定雙審；分配表固定全表、Grok 禁止跳過；codex 須 `</dev/null` |
 | 2026-07-10 | 收尾必附 Agent 執行分配表（各 agent 做了什麼 + model slug）；指令檔 §7／§10 與本節對齊 |
 | 2026-07-11 | L1／L2 實作預設改為 Grok 4.5 Fast Medium（Sonnet 保留給 Domain 內容管線） |
-| 2026-07-12 | 框架改進：Grok Cursor slug 改 `grok-4.5-fast-high`；UI 風險觸發 Opus 設計審；explore handoff；Plan 工程審分離；`check-agent-docs-contract` 契約測試 |
+| 2026-07-12 | 框架改進：Grok Cursor slug 改 fast-high（07-16 已再淘汰，見下）；UI 風險觸發 Opus 設計審；explore handoff；Plan 工程審分離；`check-agent-docs-contract` 契約測試 |
+| 2026-07-16 | Codex CLI 升 0.144.5 解鎖 `gpt-5.6-luna`：Claude Code codex exec 路由由裸 `gpt-5.6`（ChatGPT 帳號 400）改 `gpt-5.6-luna`；契約測試同步反轉（禁裸 5.6、禁 Cursor luna-max-fast 進 codex exec） |
+| 2026-07-16 | Grok slug 對齊：Cursor Task 由 fast-high 改 **`cursor-grok-4.5-medium-fast`**（Cursor 允許清單變更，見 FAILURES 07-16）；Claude Code CLI 呼叫統一 `-m grok-4.5`（07-13 案例正式落表）；顯示名改「Grok 4.5 Medium Fast」 |
 | 2026-07-12 | 治理修正：user-level Q-Silicon 命令改名 `qs-agent-plan`／`qs-agent-action`（根除同名注入）；plan 檔順位支援 `~/.claude/plans/`；Approved 門檻改「工程審必須成功」；新增中間級（視覺／樣式 &lt;80 行工程單審，`按級距免派`）；slug 對照表定為單一來源 |
