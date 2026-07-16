@@ -89,7 +89,7 @@ export const GAMES: GameMeta[] = [
     tutorial: [
       { text: "按住按鈕左右移動", gesture: "hold" },
       { text: "點一下跳起來", gesture: "tap" },
-      { text: "衝向終點旗", gesture: "swipe" },
+      { text: "衝向終點旗", gesture: "arrows" },
     ],
   },
   {
@@ -114,7 +114,7 @@ export const GAMES: GameMeta[] = [
     tutorial: [
       { text: "左右滑動移動方塊", gesture: "swipe" },
       { text: "點一下旋轉方塊", gesture: "tap" },
-      { text: "排滿一整行就消除", gesture: "hold" },
+      { text: "往下滑快快落下", gesture: "swipe" },
     ],
   },
   {
@@ -165,7 +165,7 @@ export const GAMES: GameMeta[] = [
     tutorial: [
       { text: "點顏色選一種", gesture: "tap" },
       { text: "點線稿塗上顏色", gesture: "tap" },
-      { text: "油漆桶一次填滿", gesture: "hold" },
+      { text: "油漆桶一次填滿", gesture: "tap" },
     ],
   },
 ];

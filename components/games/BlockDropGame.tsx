@@ -210,6 +210,7 @@ const MACARON_THEME = {
   ink: "#5d4a67",
   inkSoft: "#7c6886",
   accentPink: "#a5567a",
+  bestLabel: "#816882",
   mint: "#b9f3db",
   peach: "#ffc4a8",
   lemon: "#ffe889",
@@ -1690,7 +1691,7 @@ export default function BlockDropGame() {
       <div
         aria-label={`最佳分數 ${Math.max(best ?? 0, g.score)}`}
         style={{
-          color: "#816882",
+          color: MACARON_THEME.bestLabel,
           fontSize: 11,
           fontWeight: 800,
           display: "flex",

@@ -2,7 +2,6 @@
 
 import { useEffect, useId, useRef } from "react";
 import type { TutorialStep } from "@/data/games";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
 import styles from "./tutorial-overlay.module.css";
 
 export type TutorialOverlayProps = {
@@ -60,17 +59,45 @@ function GestureDemo({ gesture }: { gesture: TutorialStep["gesture"] }) {
  * 每次進遊戲從開始畫面可再看一次。
  */
 export function TutorialOverlay({ title, steps, onClose }: TutorialOverlayProps) {
-  const reduced = useReducedMotion();
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    // 開啟時記住觸發元素（如「怎麼玩？」鈕），關閉後把 focus 還回去
+    const trigger =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      // focus trap：Tab 只在 dialog 內循環
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+      const focusables = dialog.querySelectorAll<HTMLElement>(
+        'button, [href], [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement;
+      if (e.shiftKey && (active === first || active === dialog)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener("keydown", onKeyDown);
     dialogRef.current?.focus();
-    return () => document.removeEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      trigger?.focus();
+    };
   }, [onClose]);
 
   return (
@@ -82,7 +109,6 @@ export function TutorialOverlay({ title, steps, onClose }: TutorialOverlayProps)
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        data-reduced-motion={reduced ? "true" : undefined}
       >
         <button
           type="button"
