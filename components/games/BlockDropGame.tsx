@@ -21,6 +21,8 @@ import { reportGameSession } from "@/lib/gamekit/progress/session";
 import type { BlockDropDifficulty } from "@/lib/gamekit/progress/settings";
 import GameChrome, { GameChromeToolbar } from "@/components/games/GameChrome";
 import { GameResultActions } from "@/components/games/GameResultActions";
+import { TutorialOverlay } from "@/lib/gamekit/react/TutorialOverlay";
+import { GAMES } from "@/data/games";
 import { useGameKitSettings } from "@/hooks/useGameKitSettings";
 import {
   IconBox,
@@ -43,6 +45,9 @@ import {
   IconSwipeUp,
   IconTrophy,
 } from "@/components/games/ClayIcons";
+
+const BLOCK_DROP_META = GAMES.find((g) => g.slug === "block-drop");
+const BLOCK_DROP_TUTORIAL = BLOCK_DROP_META?.tutorial ?? [];
 
 const COLS = 10;
 const ROWS = 20;
@@ -855,6 +860,7 @@ export default function BlockDropGame() {
 
   const [, force] = useState(0);
   const [announce, setAnnounce] = useState("");
+  const [showTutorial, setShowTutorial] = useState(false);
   const {
     ensureAudio,
     tone,
@@ -992,6 +998,9 @@ export default function BlockDropGame() {
       setTimeout(() => tone(f, 0.22, "sawtooth", 0.06), i * 160),
     );
 
+  // UX-P2-1：blockDropDifficulty 是持久化偏好（見 useGameKitSettings），預設值
+  // 已與 kidsMode 預設開啟同步為 relaxed；使用者明確切換過的難度會持久化並
+  // 沿用於之後每一局，此處只讀取現值，不因 kidsMode 覆寫使用者的明確選擇。
   const difficultyConfig = () => DIFFICULTY_CONFIG[difficultyRef.current];
 
   const scoreValue = (base: number) =>
@@ -2150,6 +2159,20 @@ export default function BlockDropGame() {
                 iconOnly={isCoarse}
               />
             )}
+            {g.status === "ready" && (
+              <button
+                type="button"
+                onClick={() => setShowTutorial(true)}
+                style={{
+                  ...secondaryBtn(font),
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                怎麼玩？
+              </button>
+            )}
             {g.status !== "paused" ? (
               <GameResultActions
                 onReplay={begin}
@@ -2231,6 +2254,13 @@ export default function BlockDropGame() {
             items={wide ? [...KEY_HINTS, KEY_HOLD_HINT] : KEY_HINTS}
           />
         </div>
+      )}
+      {showTutorial && (
+        <TutorialOverlay
+          title={BLOCK_DROP_META?.title ?? "繽紛樂園"}
+          steps={BLOCK_DROP_TUTORIAL}
+          onClose={() => setShowTutorial(false)}
+        />
       )}
     </div>
     </GameChrome>

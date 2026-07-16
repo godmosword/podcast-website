@@ -67,6 +67,19 @@ describe("game logic regressions", () => {
     expect(game).toContain("switchToRelaxedAndRestart");
   });
 
+  it("UX-P2-1：繽紛方塊難度預設與 kidsMode 預設同步為 relaxed，且尊重使用者明確選擇", () => {
+    const settings = source("lib/gamekit/progress/settings.ts");
+    const store = source("lib/progress-store.ts");
+
+    // kidsMode 與 blockDropDifficulty 的預設值刻意保持一致（都對應「輕鬆」情境）
+    expect(settings).toMatch(/kidsMode:\s*true/);
+    expect(settings).toMatch(/blockDropDifficulty:\s*"relaxed"/);
+    // 未明確選過時 fallback 到 relaxed；一旦選了 standard/challenge 就持久化沿用
+    expect(store).toContain(
+      'return value === "standard" || value === "challenge" ? value : "relaxed";',
+    );
+  });
+
   it("繽紛卡丁車 Host 驗證來源並走 gamekit 回報，含按需載入", () => {
     const host = source("components/games/CandyKartIframeHost.tsx");
 
