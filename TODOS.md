@@ -30,7 +30,7 @@
 
 | ID | Commit |
 |----|--------|
-| fix+refactor(games): 車車大冒險入口 CTA 移出 canvas 裁切＋模組拆分＋封面刷新 | `85f3643` |
+| fix+refactor(games): 車車大冒險入口 CTA 移出 canvas 裁切＋模組拆分＋封面刷新 | `ccf0fde` |
 
 ### 本輪已完成（2026-07-15）
 
