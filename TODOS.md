@@ -16,6 +16,8 @@
 
 ## 現役隊列（2026-07-11）
 
+> **加強優先序（2026-07-16）：** 見 [docs/STRENGTHENING-PRIORITY.md](./docs/STRENGTHENING-PRIORITY.md)（對齊本檔 UX-P0-1／UX-P1-5／LIST-2／P3，不另開任務系統）。
+>
 > 單一執行優先序；詳情連結各章。Growth-P1a/b、LIST-2、MAP-UX-P1 已於本日收尾。
 
 | # | ID | 類型 | 工時 | 狀態 |
