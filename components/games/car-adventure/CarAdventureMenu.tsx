@@ -13,6 +13,7 @@ export type CarAdventureMenuProps = {
   onSelectLevel: (index: number) => void;
   onStart: () => void;
   onResume: () => void;
+  onOpenTutorial?: () => void;
 };
 
 const TITLE: Record<Status, string> = {
@@ -42,6 +43,7 @@ export function CarAdventureMenu({
   onSelectLevel,
   onStart,
   onResume,
+  onOpenTutorial,
 }: CarAdventureMenuProps) {
   if (status === "playing") return null;
 
@@ -65,6 +67,15 @@ export function CarAdventureMenu({
           <p className={styles.hint}>
             左右移動、上鍵或空白鍵跳躍；踩搗蛋車、吃金幣、躲尖刺，衝向終點旗！
           </p>
+          {onOpenTutorial && (
+            <button
+              type="button"
+              className={styles.tutorialBtn}
+              onClick={onOpenTutorial}
+            >
+              怎麼玩？
+            </button>
+          )}
           <div className={styles.levelBlock}>
             <p className={styles.levelLabel} id="car-adventure-level-label">
               選擇關卡

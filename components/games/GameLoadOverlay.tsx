@@ -15,6 +15,9 @@ type GameLoadOverlayProps = {
   onStart?: () => void;
   onRetry?: () => void;
   startLabel?: string;
+  /** idle 階段的次要按鈕（例如「怎麼玩？」教學）。 */
+  secondaryLabel?: string;
+  onSecondary?: () => void;
   /** true：用於 GameLoadingGate 等非 iframe 全幅區塊 */
   staticLayout?: boolean;
   artSrc?: string;
@@ -33,6 +36,8 @@ export function GameLoadOverlay({
   onStart,
   onRetry,
   startLabel = "開始遊戲",
+  secondaryLabel,
+  onSecondary,
   staticLayout = false,
   artSrc,
   artAlt = "",
@@ -74,6 +79,15 @@ export function GameLoadOverlay({
           <button type="button" className={styles.startBtn} onClick={onStart}>
             {startLabel}
           </button>
+          {onSecondary && secondaryLabel ? (
+            <button
+              type="button"
+              className={styles.secondaryBtn}
+              onClick={onSecondary}
+            >
+              {secondaryLabel}
+            </button>
+          ) : null}
         </>
       ) : null}
 

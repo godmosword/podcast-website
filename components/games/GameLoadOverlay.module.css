@@ -135,6 +135,23 @@
     inset 0 2px 0 rgba(255, 255, 255, 0.72);
 }
 
+.secondaryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 2px solid color-mix(in srgb, var(--ink, #34302b) 22%, transparent);
+  min-height: 48px;
+  min-width: 120px;
+  background: transparent;
+  color: var(--ink, #34302b);
+  font-weight: 800;
+  font-size: 0.9375rem;
+  padding: 8px 22px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
 @keyframes gameLoadSpin {
   to {
     transform: rotate(360deg);

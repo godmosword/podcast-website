@@ -9,6 +9,15 @@ export type GameArt = {
   alt: string;
 };
 
+/** 首玩教學示範的手勢圖示種類：對應 TutorialOverlay 內建 inline SVG。 */
+export type TutorialGesture = "tap" | "swipe" | "hold" | "arrows";
+
+/** 單步教學：一個手勢圖示 + 一句 ≤10 字說明。 */
+export type TutorialStep = {
+  text: string;
+  gesture: TutorialGesture;
+};
+
 /** UX-P0-4：challenge 遊戲列表卡家長提示（僅文案，不隱藏入口）。 */
 export const CHALLENGE_PARENT_TIP = "建議 6 歲以上 · 家長陪同" as const;
 
@@ -28,6 +37,8 @@ export type GameMeta = {
   controls: readonly string[];
   art: GameArt;
   featured?: boolean;
+  /** 首玩教學示範 overlay 的步驟資料（2–3 步）。 */
+  tutorial: readonly TutorialStep[];
 };
 
 export const GAMES: GameMeta[] = [
@@ -51,6 +62,10 @@ export const GAMES: GameMeta[] = [
       alt: "粉紅黏土遊樂園裡的繽紛消消樂方塊與車車",
     },
     featured: true,
+    tutorial: [
+      { text: "點兩個相鄰的圖案", gesture: "tap" },
+      { text: "三個一樣就消除", gesture: "tap" },
+    ],
   },
   {
     slug: "car-adventure",
@@ -71,6 +86,11 @@ export const GAMES: GameMeta[] = [
       thumbnail: "/games/v2/car-adventure/cover.webp",
       alt: "黃色黏土車車在遊樂園平台間跳躍並收集金幣",
     },
+    tutorial: [
+      { text: "按住按鈕左右移動", gesture: "hold" },
+      { text: "點一下跳起來", gesture: "tap" },
+      { text: "衝向終點旗", gesture: "swipe" },
+    ],
   },
   {
     slug: "block-drop",
@@ -91,6 +111,11 @@ export const GAMES: GameMeta[] = [
       thumbnail: "/games/v2/block-drop/cover.webp",
       alt: "黏土遊樂園裡的繽紛方塊正在堆疊",
     },
+    tutorial: [
+      { text: "左右滑動移動方塊", gesture: "swipe" },
+      { text: "點一下旋轉方塊", gesture: "tap" },
+      { text: "排滿一整行就消除", gesture: "hold" },
+    ],
   },
   {
     slug: "candy-kart",
@@ -111,6 +136,11 @@ export const GAMES: GameMeta[] = [
       thumbnail: "/games/v2/candy-kart/cover.webp",
       alt: "粉紅黏土卡丁車在遊樂園賽道上漂移競速",
     },
+    tutorial: [
+      { text: "左右滑動轉方向", gesture: "swipe" },
+      { text: "按住加速衝刺", gesture: "hold" },
+      { text: "過彎收集星星", gesture: "tap" },
+    ],
   },
   {
     slug: "coloring-book",
@@ -132,6 +162,11 @@ export const GAMES: GameMeta[] = [
       position: "50% 48%",
       alt: "小紅賽車和恐龍車多多圍著翻開的著色繪本，拿蠟筆一起塗顏色",
     },
+    tutorial: [
+      { text: "點顏色選一種", gesture: "tap" },
+      { text: "點線稿塗上顏色", gesture: "tap" },
+      { text: "油漆桶一次填滿", gesture: "hold" },
+    ],
   },
 ];
 
