@@ -257,10 +257,6 @@
   min-width: 0;
 }
 
-.featuredItem {
-  grid-column: span 2;
-}
-
 .card {
   --card-accent: var(--c-pink);
   position: relative;
@@ -295,15 +291,11 @@
 .thumb {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 4 / 3;
   overflow: hidden;
   border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--card-accent) 22%, var(--mix-base));
   box-shadow: var(--gloss), inset 0 -6px 12px color-mix(in srgb, var(--card-accent) 16%, transparent);
-}
-
-.featuredItem .thumb {
-  aspect-ratio: 2.35 / 1;
 }
 
 .thumb::after {
@@ -511,14 +503,6 @@
   .grid {
     grid-template-columns: 1fr;
     gap: 16px;
-  }
-
-  .featuredItem {
-    grid-column: auto;
-  }
-
-  .featuredItem .thumb {
-    aspect-ratio: 4 / 3;
   }
 }
 

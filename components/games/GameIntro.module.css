@@ -141,7 +141,8 @@
   }
 
   .cover {
-    min-height: 172px;
+    aspect-ratio: 4 / 3;
+    min-height: 0;
   }
 
   .copy {

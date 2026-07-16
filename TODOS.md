@@ -161,6 +161,8 @@
 | UX-P2-3 | P2 | ✅ `eb19c86` | 遊戲頁年齡標示一致（metadata vs chip）：五款稽核無矛盾；challenge 提示由 GameIntro 統一呈現 | `app/games/page.tsx` | build |
 | UX-P2-4 | P2 | 待做 | Dudu 鍵盤可及（內層 `tabIndex={0}`） | `DuduCompanion.tsx` | a11y |
 | UX-P2-5 | P2 | 待做 | `reflectionShown` 加 `source: detail \| end-screen` 精準量測 | `progress-store.ts`、`ReflectionPrompt.tsx` | test |
+| UX-P2-6 | P2 | 待做 | **car-adventure 封面重製 4:3**：現 16:9 素材於 4:3 卡框置中裁切可用（太陽／主角車／終點旗完整），重製走生圖 SOP＋人工審圖，對齊其他四款 1448×1086 | `public/games/v2/car-adventure/cover.webp` | 人工審圖 |
+| UX-P2-7 | P2 | 待做 | **`/stories` visual baseline 既存 drift**：乾淨 main 上 `visual：全部故事 390 light` 即 fail（整頁位移，疑內容更新後未刷新；fail-fast 使其餘未跑，可能不止一頁）——目檢 diff 後刷新 baselines | `e2e/visual.spec.ts-snapshots/stories*` | `npm run test:visual` |
 
 ### Task DAG（建議 `/agent-action` 順序）
 

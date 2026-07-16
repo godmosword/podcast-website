@@ -42,7 +42,7 @@ function GameCard({ game, index }: { game: GameMeta; index: number }) {
   ].filter(Boolean);
 
   return (
-    <li className={`${styles.gridItem} ${game.featured ? styles.featuredItem : ""}`}>
+    <li className={styles.gridItem}>
       <Link
         href={game.href}
         className={`${styles.card} scrollEnter press-squash`}

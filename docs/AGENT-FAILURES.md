@@ -56,3 +56,5 @@
 | 2026-07-13 | `codex exec -m gpt-5.6` | HTTP 400：`The 'gpt-5.6' model is not supported when using Codex with a ChatGPT account`；預設 `gpt-5.6-luna` 回 `requires a newer version of Codex` | 改 **`-m gpt-5.5`** 審查成功；待升級 Codex CLI 後再試 gpt-5.6；建議另案更新 AGENT-WORKFLOW slug 對照表 |
 | 2026-07-13 | `grok -p -m grok-4.5-fast` | `Couldn't set model 'grok-4.5-fast': unknown model id`；`grok models` 可用清單僅 `grok-4.5`（default）、`grok-composer-2.5-fast` | 改 **`-m grok-4.5`** 對抗審成功；CLI 呼叫一律改 `grok-4.5`；建議另案更新 AGENT-WORKFLOW slug 對照表 |
 | 2026-07-15 | `grok -p -m grok-4.5 --no-plan`（×2，第二次加 `--max-turns 6`） | 只輸出一行開場白即結束（exit 0，無審查內容）；stderr 另有 `Failed to spawn MCP server 'ask-user-questions'` | 同日兩次失敗 → 本輪標**對抗審缺席／對抗性降級**（同日稍早 13:0x 呼叫曾成功，疑 MCP 設定漂移）；下輪呼叫前先探活並檢查 grok MCP 設定 |
+| 2026-07-16 | `grok models` / grok-4.5 | `You are not authenticated`（連同 07-15 案例，30 天內 ≥2 列未解除） | 本輪標**對抗審缺席／對抗性降級**，不重試；提醒使用者 `grok login` 後再解除 |
+| 2026-07-16 | `codex exec -m gpt-5.6` | 探活仍回 HTTP 400 `not supported when using Codex with a ChatGPT account`（同 07-13 案例） | 依既有處置改 `-m gpt-5.5` 工程審成功；gpt-5.6 於 ChatGPT 帳號持續不可用 |

@@ -25,6 +25,8 @@
 
 ### Changed
 
+- **遊樂園卡片 hero 比例統一 4:3**：`/games` 五款遊戲卡縮圖統一 `aspect-ratio: 4/3`（對齊 StoryCard 封面與素材原生比例），移除 featured 卡滿版（`span 2`）與 2.35:1／4:3 比例特例——首玩引導由 hero CTA「先玩繽紛消消樂」＋「第一次玩推薦」pill 承擔；`GameIntro` 手機 cover 同步改 4:3（桌面雙欄仍隨文字等高，刻意不鎖比例）；games visual baselines ×4 更新。car-adventure 16:9 封面於 4:3 框置中裁切（關鍵元素完整），4:3 重製列 TODOS UX-P2-6。
+
 - **kidsMode／年齡標示接線（UX-P2-1、UX-P2-3）**：鎖定 kidsMode 預設開啟＝Block Drop 新局預設 relaxed 的耦合（含回歸測試；使用者明確選過的難度持久尊重）；`GameIntro` 對 challenge 遊戲顯示與 hub 卡一致的「建議 6 歲以上 · 家長陪同」提示（補齊卡丁車頁缺口）；五款遊戲頁 metadata 年齡稽核無矛盾。消消樂背景依任務型別主題化裝飾。
 
 - **著色草稿世代**：草稿 key 綁 `COLORING_LINEART_REV`；線稿重生後舊草稿自動失效（避免舊塗鴉對不上新線稿），舊 `coloring:v1:*` localStorage 草稿不再遷移。
