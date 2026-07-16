@@ -48,7 +48,10 @@ const CANDY_MATCH_META = GAMES.find((g) => g.slug === "candy-match");
 const CANDY_MATCH_TUTORIAL = CANDY_MATCH_META?.tutorial ?? [];
 
 const INK = "#5d4a67";
-const INK_SOFT = "#8c7896";
+// UX-T6：INK_SOFT／ACCENT_PINK 較原始配色加深（往 INK 方向混色），讓文字／HUD
+// 在淺色主題背景上達 WCAG AA（4.5:1）；關卡主題色（themeA/themeB）本身不動。
+const INK_SOFT = "#7c6886";
+const ACCENT_PINK = "#a5567a";
 const HINT_IDLE_MS = 9_000;
 const PROPS_PER_LEVEL = { bubble: 2, rainbow: 1, broom: 1 };
 
@@ -547,7 +550,7 @@ export default function CandyMatchGame() {
                 </span>
               ))}
             </div>
-            <h1 style={{ fontSize: 40, fontWeight: 900, color: "#d95f87", margin: "0 0 8px" }}>
+            <h1 style={{ fontSize: 40, fontWeight: 900, color: ACCENT_PINK, margin: "0 0 8px" }}>
               準備找糖果！
             </h1>
             <p style={{ color: INK_SOFT, fontWeight: 700, margin: "0 0 26px", fontSize: 15 }}>
@@ -646,7 +649,7 @@ export default function CandyMatchGame() {
                 </span>
               ))}
               {level.moves > 0 && (
-                <span style={{ color: movesLeft <= 5 ? "#d95f87" : INK_SOFT, fontWeight: 900, fontSize: 15 }}>
+                <span style={{ color: movesLeft <= 5 ? ACCENT_PINK : INK_SOFT, fontWeight: 900, fontSize: 15 }}>
                   剩 {movesLeft} 步
                 </span>
               )}
@@ -708,7 +711,7 @@ export default function CandyMatchGame() {
               </button>
             </div>
             {propMode && (
-              <p style={{ textAlign: "center", color: "#d95f87", fontWeight: 800, fontSize: 14, margin: "8px 0 0" }}>
+              <p style={{ textAlign: "center", color: ACCENT_PINK, fontWeight: 800, fontSize: 14, margin: "8px 0 0" }}>
                 {propMode === "broom" ? "點一格，掃掉整排！" : propMode === "rainbow" ? "點一個圖案，同款全收！" : "點一個圖案，啵一聲消掉！"}
               </p>
             )}
@@ -766,7 +769,7 @@ export default function CandyMatchGame() {
                 {overlay === "win" ? (
                   <>
                     <IconSparkle size={52} />
-                    <div style={{ fontSize: 30, fontWeight: 900, color: "#d95f87" }}>
+                    <div style={{ fontSize: 30, fontWeight: 900, color: ACCENT_PINK }}>
                       {levelIndex === CANDY_MATCH_LEVELS.length - 1 ? "全部完成！🎆" : "任務完成！"}
                     </div>
                     <div style={{ display: "flex", gap: 6 }}>

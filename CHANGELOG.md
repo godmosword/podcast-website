@@ -6,6 +6,12 @@
 
 ### Added
 
+- **遊樂園教學示範 overlay**：新增 GameKit `TutorialOverlay`（手勢動畫示範 tap/swipe/hold/arrows、`prefers-reduced-motion` 降靜態圖、不落 localStorage）；`data/games.ts` 增 `tutorial` 欄位（五款各 2–3 步、每句 ≤10 字）；大冒險／方塊／消消樂／卡丁車開始畫面加「怎麼玩？」按鈕（≥48px）；大冒險觸控裝置操作提示改裝置感知短句。
+
+- **車車大冒險黏土化＋六關主題背景**：`render.ts` 全面黏土風（草皮帽地形、糖果金幣、軟糖尖刺、車臉造型對齊消消樂車車語彙、白底圓角 HUD 取代像素字；色值 JS 常數鏡射 `--c-*` token）；六關主題視差背景（草原薄荷／粉彩彩虹／海洋藍綠／森林深綠／黃昏星空／夜間嘉年華），reduced-motion 全靜止。未動共享 `lib/gamekit/runtime/`。
+
+- **繽紛樂園方塊形狀標記**：七種方塊各配內嵌符號（圓／方／三角／菱形／十字／半月／星，data-URI SVG 第三層 background），色盲與低對比環境可辨；預設恆開、無設定開關（不動 GameKitSettings schema）。
+
 - **繪本著色 hero cover 黏土世代對齊**：新增 `npm run generate:coloring-cover`（staging＋manifest sha256＋人工審後 `--approve`）；封面改 1448×1086 粉嫩黏土場景（小紅＋多多圍著著色本），與街機四款同世代；移除線稿腳本舊 `--cover` 照片裁切路徑。
 
 - **ep-19 全幕繪本上線**：《恐龍車多多闖禍了》17 幕插圖＋幕級 captions；字幕校對 115 句並 `--mark`；場景手修定裝／劇情弧（多多無車門改單純相撞）；保留 Apple 封面 `01.jpg`。
@@ -19,11 +25,15 @@
 
 ### Changed
 
+- **kidsMode／年齡標示接線（UX-P2-1、UX-P2-3）**：鎖定 kidsMode 預設開啟＝Block Drop 新局預設 relaxed 的耦合（含回歸測試；使用者明確選過的難度持久尊重）；`GameIntro` 對 challenge 遊戲顯示與 hub 卡一致的「建議 6 歲以上 · 家長陪同」提示（補齊卡丁車頁缺口）；五款遊戲頁 metadata 年齡稽核無矛盾。消消樂背景依任務型別主題化裝飾。
+
 - **著色草稿世代**：草稿 key 綁 `COLORING_LINEART_REV`；線稿重生後舊草稿自動失效（避免舊塗鴉對不上新線稿），舊 `coloring:v1:*` localStorage 草稿不再遷移。
 
 - **繪本著色封面開場（Track A）**：`/games/coloring-book` 兩段式 `cover → picker → canvas`；新增 `ColoringCover`（品牌標題、一句副標、CTA「打開著色本」、封面主視覺＋線稿塗鴉）；選圖頁改紙感繪本鋪陳並可「回封面」。
 
 ### Fixed
+
+- **遊戲文字對比達 WCAG AA**：GameChrome 淺色主題主按鈕文字對比 1.74→7.0（原本近乎不可讀）；Block Drop／Candy Match 次要文字與粉色強調往 ink 加深至 ≥4.5:1（裝飾與方塊本體色相不動，維持粉嫩品牌）。大冒險選單原本即全數通過。
 
 - **著色線稿輪廓稀疏漏色（Track B）**：`convertToLineArt` 合併主體外輪廓（邊框種子色分割）＋ morph close／加粗，重產 8 頁 `line.png`；新增 `estimateBucketLeakRatio` 契約（定裝人物外框可填比上限）。
 - **線上著色本塗色不可見**：線稿 `line.png` 為不透明白底 RGB（無 alpha），`ColoringCanvas` 合成時以 source-over 疊在塗色層上方，使用者塗的顏色被白底完全遮住；改以 `multiply` 疊線稿（白底透出塗色、黑線保持黑），同時消除油漆桶填色在抗鋸齒邊緣的白縫（fill 另向暗線內滲入 2px 封縫）。

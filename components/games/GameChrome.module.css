@@ -104,8 +104,15 @@
     var(--c-sky),
     color-mix(in srgb, var(--c-lilac) 70%, var(--c-sky))
   );
-  color: var(--chip-active-fg);
+  /* UX-T6：日間 --chip-active-fg（白）在此淺藍／淺紫漸層上僅約 1.8:1，
+     遠低於 WCAG AA；改用 --ink 取得 ~7:1。夜間漸層較深，原本的
+     --chip-active-fg（深藍 #1c2440）已達 ~5.4–5.8:1，維持不變。 */
+  color: var(--ink);
   box-shadow: 0 4px 0 color-mix(in srgb, var(--c-lilac) 45%, transparent);
+}
+
+:global([data-theme="night"]) .primaryBtn {
+  color: var(--chip-active-fg);
 }
 
 .secondaryBtn {
