@@ -30,7 +30,7 @@
 
 | ID | Commit |
 |----|--------|
-| refactor(cleanup): Wave A 代碼瘦身（刪 `GameThumbArt`／`runtime/style`／`tileset-draw`；收斂 games／car-adventure／og 內部 export；修 GAMEKIT-ARCHITECTURE） | 待 commit |
+| refactor(cleanup): Wave A 代碼瘦身（刪 `GameThumbArt`／`runtime/style`／`tileset-draw`；收斂 games／car-adventure／og 內部 export；修 GAMEKIT-ARCHITECTURE） | `c440d62` |
 | fix+refactor(games): 車車大冒險入口 CTA 移出 canvas 裁切＋模組拆分＋封面刷新 | `ccf0fde` |
 
 ### 後續（代碼瘦身，未開工）
