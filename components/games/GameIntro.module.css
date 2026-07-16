@@ -44,7 +44,7 @@
   bottom: 12px;
   padding: 6px 10px;
   border-radius: 999px;
-  color: #fff;
+  color: var(--on-dark);
   background: rgba(47, 41, 54, 0.68);
   backdrop-filter: blur(8px);
   font-size: 0.78rem;

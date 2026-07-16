@@ -216,8 +216,8 @@
   }
 
   .toolBtn {
-    min-width: 46px;
-    min-height: 46px;
+    min-width: 48px;
+    min-height: 48px;
     padding-inline: 9px;
   }
 }
