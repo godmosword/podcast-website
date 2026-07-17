@@ -7,10 +7,12 @@
 
 > 格式：每項一段，行末標 `優先序 · 工時(人工) · 依賴`。工時 S/M/L。
 > **紀律：** 條目打 ✅ 時必須附 commit hash。
-> **資料基準（2026-07-11）：** `storiesByNewest()` **18 集**、最新 **`ep-18`**；`data/games.ts` 見下表。
+> **資料基準（2026-07-17）：** `storiesByNewest()` **20 集**、最新 **`ep-20`**；`data/games.ts` 見下表。
 >
 > **現役遊戲（canon，對齊 `data/games.ts`）：** `candy-match` 繽紛消消樂 · `car-adventure` 車車大冒險 · `block-drop` 繽紛樂園 · `candy-kart` 繽紛卡丁車 · `coloring-book` 繪本著色。
 > **歷史 slug：** `kart`／`pirate-kart`／`car-star`／`car-mission` 已退役，見 [archive](./docs/archive/TODOS-completed-2026-07-11.md)。
+
+> **商業化切割（2026-07-17）：** 本輪先完成不依賴會員身份的資產、通知、量測與依賴穩定化；家長會員帳號、會員 entitlement、訂閱付款與 Stripe 明確保留在 [STEM-P4 商業化](#stem-p4--商業化) 待辦，不在本輪誤做半套付費牆。
 
 ---
 
@@ -33,6 +35,16 @@
 | ID | Commit |
 |----|--------|
 | feat(design): Apple 視覺原則升級—克制 chrome 與柔層次（DESIGN.md v0.2；Landing／stories／單集／內容頁） | `306b989` `7fd7d27` |
+
+### 本輪執行隊列（2026-07-17）
+
+| ID | 範圍 | 狀態 |
+|----|------|------|
+| ASSET-P2 | 音檔 URL 從 repo 路徑抽象成可切換的外部音檔 origin；保留本機 fallback | 本輪實作 |
+| TRUST-P2 | 新集通知 double opt-in（不等同會員登入驗證） | 本輪實作 |
+| Growth-Measure-2 | 播放開始／遊戲進入／遊戲完成事件，維持無 PII | 本輪實作 |
+| INFRA-P2 | 移除 production 對 React canary ViewTransition 的依賴，回到 stable React | 本輪實作 |
+| CONTENT-P2 | 音檔路徑、RSS、JSON-LD、Landing 與同步／驗證流程使用同一資產契約 | 本輪實作 |
 
 ### 本輪已完成（2026-07-16）
 
@@ -111,8 +123,8 @@
 | Task | 狀態 | 主要產出 | 預計影響檔案 | 驗證 | Commit hash |
 |------|------|----------|--------------|------|-------------|
 | LIST-1 LINE OA CTA | BLOCKED：等 LINE OA | env-gated LINE 加好友 CTA（`NEXT_PUBLIC_LINE_OA_URL` 未設即隱藏，沿用 `visibleSocials()` 空字串隱藏模式）；掛頁尾／單集頁 `SubscriptionCTA` 旁／landing／`/subscribe` | Modify: `lib/social.ts`（`SocialIcon` 加 `"line"`）、`lib/connect-icons.tsx`、`components/SiteFooter.tsx`、`app/story/[slug]/page.tsx`; Create: `components/LineCTA.tsx` | 設/不設 env 切換顯隱；`npm test` + `npm run build` | — |
-| LIST-2 新集通知 email 訂閱 | ✅ `6ca8263` | 複製 zone-wish 技術棧（zod + rate limit + Neon + DB 未設降級）；`subscribers` 表 `lower(email)` unique + `ON CONFLICT DO NOTHING`（冪等、防枚舉）；簡單收集 + 隱私說明（「僅用於新集數通知」），不做 double opt-in；`/legal#privacy` 已涵蓋 analytics／localStorage（`a844f20`），實作時同步掛 privacy link | Create: `scripts/migrations/003_subscribers.sql`、`lib/subscribe-schema.ts`、`lib/subscribe-db.ts`、`app/api/subscribe/route.ts`、`components/SubscribeForm.tsx`、`app/subscribe/page.tsx`（範本：`app/api/zone-wish/route.ts`、`ZoneWishForm.tsx`） | curl：無 `DATABASE_URL` 降級、POST 201、重複 email 201、429 rate limit；`npm test` + `npm run build` | `6ca8263` |
-| LIST-3 分析事件 | 部分完成 | `trackSubscribeSubmit(source)` ✅ `6ca8263`；`trackLineCtaClick` 待 LIST-1 | Modify: `lib/analytics.ts` | 本機點擊確認事件發送 | — |
+| LIST-2 新集通知 email 訂閱 | 本輪重做 | 保留 zod + rate limit + Neon + 防枚舉；新增 pending／confirmed 狀態、短效 token hash、確認頁與寄信 provider 契約；**不等同會員帳號登入** | Modify: `003/004_subscribers.sql`、`lib/subscribe-db.ts`、`app/api/subscribe/route.ts`; Create: `app/api/subscribe/confirm/route.ts`、`app/subscribe/confirmed/page.tsx`、`lib/subscribe-email.ts` | DB／provider 未設定時明確降級；token 一次性、過期失效；確認前不進可寄送名單；`npm test` + `npm run build` | 待回填 |
+| LIST-3 分析事件 | 本輪擴充 | 保留既有 `story_completed`／`return_visit`／平台／地圖／許願／訂閱／分享事件；補 `story_play_start`、`game_session_start`、`game_session_complete`，不送 PII | Modify: `lib/analytics.ts`、`StoryPlayer`、`GamePageShell`、GameKit session | 事件契約測試；payload 不含 email／兒童識別資料 | 待回填 |
 | REUSE-1 校對字幕採用檢查 | 完成 | 確認字幕正文在 `data/subtitles/<slug>.json`、校對標記在 `_proofread/`；`verify:episodes` 全過 | `npm run verify:episodes` passed；見 `docs/metrics/GEO-baseline-2026-07-10.md` | `dbfe7b3` |
 | REUSE-2 家長共讀指引呈現（= P2 `parentGuide`） | 完成 | `data/parent-guides.ts` + `ShowNotes` 收合區（ep-1、ep-5 試點）；`enrichStory` 合併 | `data/parent-guides.test.ts` + `npm test` + `npm run build` | `dbfe7b3` |
 | REUSE-3 YouTube 整集影片匯出 | 完成 `d9a00fd`（fix 至 `1365fc2`） | 本機 CLI `npm run export:video -- <slug>`：1920×1080 整集 mp4；`data/scenes` 換頁 + `data/subtitles` 原始逐句 ASS burn-in（`jf-openhuninn-2.1`）；`export/video/<slug>/` + manifest（gitignore）；9:16 Shorts 留二期 | Create: `scripts/lib/export-video-core.ts`、`scripts/export-video-assets.ts`、`docs/VIDEO-EXPORT.md`; Modify: `package.json`、`.gitignore` | `export:video -- ep-17`（ep-17 7:15 mp4 驗證）；`npm test -- export-video-core` | `1365fc2` |
@@ -125,7 +137,7 @@
 ### Task DAG
 
 1. REUSE-3 已完成（整集 16:9）；REUSE-1 仍待確認。
-2. LIST-2 原本等隱私頁；本機驗證 `/legal#privacy` 已由 `a844f20` 上線，改為可開工，但表單旁仍須放明確隱私句與 privacy link。
+2. LIST-2 原本等隱私頁；本機驗證 `/legal#privacy` 已由 `a844f20` 上線，現改為 double opt-in；表單旁仍須放明確隱私句與 privacy link，寄信 provider 需由維護者設定。
 3. LIST-1 等 LINE OA URL；LIST-3 等 LIST-1／LIST-2 的實際掛點。
 4. REUSE-2 先完成 `familyActivity`／`parentGuide` 邊界定義，避免與 HOOKS-1 重疊。
 
@@ -480,6 +492,20 @@ PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
 
 ### STEM-P4 — 商業化（5 個月後，留存與信任跑通後）
 
+> **本輪不實作：** 以下四項是會員帳號／付費範圍；先完成 ASSET-P2、TRUST-P2、Growth-Measure-2 與穩定依賴，再由家長端產品決策開工。
+
+#### AUTH-P4 家長會員帳號與跨裝置進度　`STEM-P4 · L · Neon + email provider`　〔trust+eng〕　⏸ 延後
+家長限定 magic link／session；保留 guest localStorage，登入後 merge 收藏、續播、遊戲摘要與圖鑑進度。不可要求孩子建立帳號；需補資料刪除、匯出、保留期限與家長閘門。
+
+#### ENT-P4 會員 entitlement 與私有內容　`STEM-P4 · M · AUTH-P4`　〔eng〕　⏸ 延後
+定義免費／會員／早鳥內容矩陣；以家長帳號與訂閱狀態控制私有音檔、進階互動與列印物，付費牆不得出現在孩子主流程。此條不等同本輪 ASSET-P2 的公開音檔 origin 抽離。
+
+#### BILL-P4 訂閱付款與 Stripe　`STEM-P4 · L · AUTH-P4 + ENT-P4`　〔ceo+eng〕　⏸ 延後
+待網域、付款主體、退款／取消／發票與台灣稅務流程確認後，才接 Checkout、Customer Portal、webhook 與訂閱狀態同步；不得先做只收款不授權的半成品。
+
+#### AUTH-P4 價格與內容方案驗證　`STEM-P4 · S · Growth-Measure-2`　〔growth+ceo〕　⏸ 延後
+先用播放、完播、遊戲與通知訂閱基線驗證價值，再決定月／年方案與會員內容，不把現有月 99／年 999 對標文字視為已驗證價格。
+
 #### Freemium + 家長端訂閱　`STEM-P4 · L · P3 閘門`　〔stem+ceo〕
 免費＝基本故事 + 部分互動；會員＝無廣告、限定故事、進階 STEM 實驗、列印物全解鎖。**付費牆不出現在孩子主流程。**
 
@@ -504,7 +530,7 @@ PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
 | **P3** 可靠/工程/可選 | 不掛、可回歸、加分 | 監控 · E2E CI · ESLint CI · 生圖佇列 · 車車圖鑑養成 |
 | **STEM-P1→P4** 互動×STEM×商業 | 差異化與變現 | 見上表；**當務之急：結尾提問 + 完播量測** |
 
-**相依鏈（現況修正）：** 正式網域 → sitemap/robots + JSON-LD 已完成；analytics 與 `/legal#privacy` 已上線（`a844f20`）。後續蒐集 email（LIST-2／許願表單）必須在表單旁補清楚隱私句與用途說明。
+**相依鏈（現況修正）：** 正式網域 → sitemap/robots + JSON-LD 已完成；既有 analytics 與 `/legal#privacy` 已上線（`a844f20`）。本輪先完成音檔 origin 契約、double opt-in、播放／遊戲量測與 stable React；AUTH-P4 → ENT-P4 → BILL-P4 嚴格依序，會員付費不提前混入免費流程。
 
 **已備齊（勿重做）：** 全部故事頁、全螢幕播放器、每集落地頁 + **每集 OG 圖**（`lib/story-metadata.ts`）、**每集分享鈕**（`ShareButton`）、`/topic` 與車種 SEO 頁、RSS `/feed.xml`、`ageRange`、PWA／收藏／繼續收聽、ConnectHub（Spotify／Apple 優先 + 訂閱文案）、相關推薦、**`/games` 遊樂園**（繽紛消消樂／車車大冒險／繽紛樂園／繽紛卡丁車）、`/legal#privacy` 與版權合規、Vercel Analytics + 平台點擊事件、逐字字幕管線、角色定裝照名冊、`/characters` 公開角色頁、Apple 15 分鐘同步 + GitHub Issue 通知、**viewport 開放縮放**。
 

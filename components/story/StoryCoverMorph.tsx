@@ -1,6 +1,4 @@
-import { ViewTransition } from "react";
 import type { ReactNode } from "react";
-import { storyCoverTransitionName } from "@/lib/story-cover-transition";
 import styles from "./StoryCoverMorph.module.css";
 
 type StoryCoverMorphProps = {
@@ -9,20 +7,16 @@ type StoryCoverMorphProps = {
 };
 
 /**
- * 故事封面共享元素轉場（D4 spike）。
- * 需 next.config `experimental.viewTransition: true`；不支援瀏覽器時無動畫退化。
+ * 故事封面容器。
+ * 保留穩定的 DOM 邊界，讓 CSS／瀏覽器原生導覽可漸進增強；不依賴 React Canary API。
  */
 export default function StoryCoverMorph({
   slug,
   children,
 }: StoryCoverMorphProps) {
   return (
-    <ViewTransition
-      name={storyCoverTransitionName(slug)}
-      share="story-cover-morph"
-      default="none"
-    >
-      <div className={styles.root}>{children}</div>
-    </ViewTransition>
+    <div className={styles.root} data-story-cover={slug}>
+      {children}
+    </div>
   );
 }

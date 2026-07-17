@@ -138,4 +138,16 @@ describe("buildRssFeed", () => {
     const xml = buildRssFeed([story]);
     expect(xml).toContain('length="0"');
   });
+
+  it("設定外部音檔 origin 時 RSS enclosure 使用外部 URL", () => {
+    vi.stubEnv("NEXT_PUBLIC_AUDIO_BASE_URL", "https://audio.example.com/");
+    const story = storyFixture({ slug: "ep-external-audio", ep: 91, title: "外部音檔" });
+
+    const xml = buildRssFeed([story]);
+
+    expect(xml).toContain(
+      `https://audio.example.com/stories/${story.slug}/${story.audio}`,
+    );
+    vi.unstubAllEnvs();
+  });
 });

@@ -18,6 +18,7 @@ import { useTouchControls } from "@/lib/gamekit/react/useTouchControls";
 import { useVisibilityPause } from "@/lib/gamekit/react/useVisibilityPause";
 import { TutorialOverlay } from "@/lib/gamekit/react/TutorialOverlay";
 import { JuiceController } from "@/lib/gamekit/runtime/juice";
+import { reportGameSession } from "@/lib/gamekit/progress/session";
 import { GAMES } from "@/data/games";
 import { updateAdventure } from "@/lib/games/car-adventure/physics";
 import {
@@ -36,6 +37,7 @@ export default function CarAdventureGame() {
   const game = useRef<GameState | null>(null);
   const juiceRef = useRef(new JuiceController());
   const statusRef = useRef<Status>("ready");
+  const sessionReportedRef = useRef(false);
   const isCoarse = useCoarsePointer();
   const reducedRef = useRef(false);
   const reduced = useReducedMotion();
@@ -69,12 +71,19 @@ export default function CarAdventureGame() {
 
   const setStat = useCallback(
     (s: Status) => {
-      if (
-        (s === "won" || s === "over") &&
-        game.current &&
-        (best == null || game.current.score > best)
-      ) {
-        void saveBest(game.current.score);
+      if ((s === "won" || s === "over") && game.current) {
+        if (best == null || game.current.score > best) {
+          void saveBest(game.current.score);
+        }
+        if (!sessionReportedRef.current) {
+          sessionReportedRef.current = true;
+          reportGameSession({
+            gameId: "car-adventure",
+            score: game.current.score,
+            levelIndex: levelIndexRef.current,
+            cleared: s === "won",
+          });
+        }
       }
       statusRef.current = s;
       setStatus(s);
@@ -102,6 +111,7 @@ export default function CarAdventureGame() {
 
   const beginLevel = useCallback(
     (idx: number) => {
+      sessionReportedRef.current = false;
       levelIndexRef.current = idx;
       setLevelIndex(idx);
       ensureAudio();

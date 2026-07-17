@@ -13,7 +13,7 @@ import {
   type CaptionSize,
 } from "@/lib/progress-store";
 import { LIGHT_THEME, NIGHT_THEME } from "@/lib/theme";
-import { trackStoryCompleted } from "@/lib/analytics";
+import { trackStoryCompleted, trackStoryPlayStart } from "@/lib/analytics";
 import { takeLandingPlayback } from "@/lib/landing-playback";
 import { playSfx, isSfxEnabled } from "@/lib/sfx";
 import SfxToggle from "./SfxToggle";
@@ -147,6 +147,16 @@ export default function StoryPlayer({
   const bedtimeEndRef = useRef<number | null>(null);
   const timerWrapRef = useRef<HTMLDivElement>(null);
   const completionRecorded = useRef(false);
+  const playStartRecorded = useRef(false);
+
+  const recordPlayStart = useCallback(
+    (source: "story_page" | "landing") => {
+      if (playStartRecorded.current) return;
+      playStartRecorded.current = true;
+      trackStoryPlayStart(slug, source);
+    },
+    [slug],
+  );
 
   const setNativeAudioRef = useCallback((node: HTMLAudioElement | null) => {
     nativeAudioRef.current = node;
@@ -165,6 +175,7 @@ export default function StoryPlayer({
 
     adoptedAudioRef.current = adopted;
     audioRef.current = adopted;
+    if (!adopted.paused) recordPlayStart("landing");
     setIsPlaying(!adopted.paused);
     setIsLoading(adopted.readyState < HTMLMediaElement.HAVE_FUTURE_DATA);
     if (Number.isFinite(adopted.duration)) setDuration(adopted.duration);
@@ -182,7 +193,7 @@ export default function StoryPlayer({
         adoptedReleaseTimerRef.current = null;
       }, 0);
     };
-  }, [adoptLandingPlayback, slug]);
+  }, [adoptLandingPlayback, recordPlayStart, slug]);
 
   const total = images.length;
   const hasSubtitles = Array.isArray(subtitles) && subtitles.length > 0;
@@ -360,6 +371,7 @@ export default function StoryPlayer({
     };
     const handlePause = () => setIsPlaying(false);
     const handlePlay = () => {
+      recordPlayStart(adoptLandingPlayback ? "landing" : "story_page");
       setIsPlaying(true);
       setHasEnded(false);
       setPlayBlocked(false);
@@ -411,7 +423,17 @@ export default function StoryPlayer({
       el.removeEventListener("canplay", handleCanPlay);
       el.removeEventListener("loadstart", handleLoadStart);
     };
-  }, [subtitlesOn, total, hasCueTimes, captionTimes, hasSubtitles, subtitles, repeat]);
+  }, [
+    adoptLandingPlayback,
+    captionTimes,
+    hasCueTimes,
+    hasSubtitles,
+    recordPlayStart,
+    repeat,
+    subtitles,
+    subtitlesOn,
+    total,
+  ]);
 
   useEffect(() => {
     if (bedtimeMinutes === null) {

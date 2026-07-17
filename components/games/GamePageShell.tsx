@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { GameKitGameId } from "@/lib/gamekit/types";
 import { GameLoadingGate } from "@/components/games/GameLoadingGate";
 import { GameIntro } from "@/components/games/GameIntro";
+import GameSessionTracker from "@/components/games/GameSessionTracker";
 import styles from "./GamePageShell.module.css";
 
 type GamePageShellProps = {
@@ -23,6 +24,7 @@ export function GamePageShell({ children, title, gameId, preload = true }: GameP
         ← 回遊樂園
       </Link>
       <GameIntro gameId={gameId} />
+      <GameSessionTracker gameId={gameId} />
       <div id="game-play">
         {preload ? <GameLoadingGate gameId={gameId}>{children}</GameLoadingGate> : children}
       </div>

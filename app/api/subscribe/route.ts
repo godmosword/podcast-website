@@ -1,7 +1,15 @@
 import { NextResponse } from "next/server";
-import { insertSubscriber, isSubscribeDbConfigured } from "@/lib/subscribe-db";
+import {
+  isSubscribeDbConfigured,
+  upsertPendingSubscriber,
+} from "@/lib/subscribe-db";
 import { checkSubscribeRateLimit } from "@/lib/subscribe-rate-limit";
 import { subscribeBodySchema } from "@/lib/subscribe-schema";
+import {
+  isSubscribeEmailConfigured,
+  sendSubscribeConfirmation,
+} from "@/lib/subscribe-email";
+import { createSubscribeToken } from "@/lib/subscribe-tokens";
 
 function clientIp(request: Request): string {
   const forwarded = request.headers.get("x-forwarded-for");
@@ -13,12 +21,17 @@ function clientIp(request: Request): string {
 }
 
 export async function GET(): Promise<NextResponse> {
-  return NextResponse.json({ available: isSubscribeDbConfigured() });
+  return NextResponse.json({
+    available: isSubscribeDbConfigured() && isSubscribeEmailConfigured(),
+  });
 }
 
 export async function POST(request: Request): Promise<NextResponse> {
-  if (!isSubscribeDbConfigured()) {
-    return NextResponse.json({ ok: false, reason: "db_unavailable" }, { status: 503 });
+  if (!isSubscribeDbConfigured() || !isSubscribeEmailConfigured()) {
+    return NextResponse.json(
+      { ok: false, reason: "subscribe_unavailable" },
+      { status: 503 },
+    );
   }
 
   const ip = clientIp(request);
@@ -43,15 +56,21 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
 
   try {
-    await insertSubscriber({
+    const { token, tokenHash } = createSubscribeToken();
+    const state = await upsertPendingSubscriber({
       email: parsed.data.email,
       source: parsed.data.source ?? null,
       userAgent: request.headers.get("user-agent"),
+      tokenHash,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
     });
+    if (state === "pending") {
+      await sendSubscribeConfirmation({ email: parsed.data.email, token });
+    }
   } catch {
-    return NextResponse.json({ ok: false, reason: "db_error" }, { status: 500 });
+    return NextResponse.json({ ok: false, reason: "subscribe_unavailable" }, { status: 503 });
   }
 
-  // 重複 email 亦回 201，避免枚舉。
-  return NextResponse.json({ ok: true }, { status: 201 });
+  // 確認前一律回相同結果，避免枚舉 email 是否已存在。
+  return NextResponse.json({ ok: true, requiresConfirmation: true }, { status: 202 });
 }

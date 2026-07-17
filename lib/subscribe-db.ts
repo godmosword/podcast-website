@@ -8,19 +8,60 @@ export type SubscriberInsert = {
   email: string;
   source?: string | null;
   userAgent?: string | null;
+  tokenHash: string;
+  expiresAt: Date;
 };
 
-/** 冪等寫入；重複 email 不拋錯（ON CONFLICT DO NOTHING）。 */
-export async function insertSubscriber(input: SubscriberInsert): Promise<void> {
+/**
+ * 寫入 pending 訂閱；已確認的 email 不降級回 pending，避免重複送信造成困擾。
+ */
+export async function upsertPendingSubscriber(
+  input: SubscriberInsert,
+): Promise<"pending" | "confirmed"> {
   const url = process.env.DATABASE_URL?.trim();
   if (!url) {
     throw new Error("DATABASE_URL 未設定");
   }
 
   const sql = neon(url);
-  await sql`
-    INSERT INTO subscribers (email, source, user_agent)
-    VALUES (${input.email}, ${input.source ?? null}, ${input.userAgent ?? null})
-    ON CONFLICT ((lower(email))) DO NOTHING
+  const rows = await sql`
+    INSERT INTO subscribers (
+      email, source, user_agent, status, confirmation_token_hash, confirmation_expires_at
+    )
+    VALUES (
+      ${input.email}, ${input.source ?? null}, ${input.userAgent ?? null},
+      'pending', ${input.tokenHash}, ${input.expiresAt.toISOString()}
+    )
+    ON CONFLICT ((lower(email))) DO UPDATE SET
+      source = EXCLUDED.source,
+      user_agent = EXCLUDED.user_agent,
+      status = 'pending',
+      confirmation_token_hash = EXCLUDED.confirmation_token_hash,
+      confirmation_expires_at = EXCLUDED.confirmation_expires_at,
+      confirmed_at = NULL
+    WHERE subscribers.status <> 'confirmed'
+    RETURNING status
   `;
+  // 已確認列在 conflict update 的 WHERE 被保留，避免重送確認信與競態降級。
+  return rows.length === 0 || rows[0]?.status === "confirmed"
+    ? "confirmed"
+    : "pending";
+}
+
+/** 確認 token 只可用一次，且必須尚未過期。 */
+export async function confirmSubscriber(tokenHash: string): Promise<boolean> {
+  const url = process.env.DATABASE_URL?.trim();
+  if (!url) return false;
+
+  const sql = neon(url);
+  const rows = await sql`
+    UPDATE subscribers
+    SET status = 'confirmed', confirmed_at = NOW(),
+        confirmation_token_hash = NULL, confirmation_expires_at = NULL
+    WHERE status = 'pending'
+      AND confirmation_token_hash = ${tokenHash}
+      AND confirmation_expires_at > NOW()
+    RETURNING id
+  `;
+  return rows.length > 0;
 }

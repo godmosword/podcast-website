@@ -1,5 +1,5 @@
 import type { Story } from "@/data/content";
-import { storyAudioPath } from "@/lib/story-utils";
+import { storyAudioUrl } from "@/lib/story-utils";
 import {
   getStoriesByTag,
   storiesByNewest,
@@ -103,7 +103,7 @@ function playForSegment(
       label: `聽最新一集 EP ${latest.ep}`,
       href: `/story/${latest.slug}/play?autoplay=1&from=landing`,
       slug: latest.slug,
-      audioSrc: storyAudioPath(latest.slug, latest.audio),
+      audioSrc: storyAudioUrl(latest.slug, latest.audio),
     };
   }
   // bedtime：睡前主題最新一集；無則退回全站最新
@@ -113,7 +113,7 @@ function playForSegment(
     label: "播一集睡前故事",
     href: `/story/${story.slug}/play?autoplay=1&from=landing`,
     slug: story.slug,
-    audioSrc: storyAudioPath(story.slug, story.audio),
+    audioSrc: storyAudioUrl(story.slug, story.audio),
   };
 }
 

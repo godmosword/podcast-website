@@ -56,8 +56,8 @@
     "framer-motion": "^12.42.2",
     "next": "16.2.10",
     "openai": "^6.42.0",
-    "react": "19.3.0-canary-c0c39a6b-20260709",
-    "react-dom": "19.3.0-canary-c0c39a6b-20260709",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
     "sharp": "^0.34.5",
     "zod": "^4.4.3"
   },

@@ -129,6 +129,9 @@ export default function LegalPage() {
               填寫並勾選同意後才會送出；未勾選同意者不予收件。
             </li>
             <li>
+              <strong>新集 Email 通知</strong>：訂閱時會先將 Email 暫存為待確認狀態，並寄出一次性確認連結；完成點擊後才會加入通知名單。確認連結 24 小時後失效，未確認的資料不會收到新集通知。
+            </li>
+            <li>
               <strong>保留與刪除</strong>：許願資料保留至通知目的完成（對應園區上線後 90
               天內刪除）。家長可隨時來信{" "}
               <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>{" "}

@@ -91,7 +91,7 @@ export default function SubscribeForm({ source = "subscribe_page" }: Props) {
   if (state === "success") {
     return (
       <p className={styles.success} role="status">
-        收到囉！新集上線時會寄通知給你。
+        確認信已寄出，請到信箱點擊連結；完成確認後才會收到新集通知。
       </p>
     );
   }

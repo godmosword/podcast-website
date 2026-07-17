@@ -172,3 +172,46 @@ describe("universe analytics", () => {
     });
   });
 });
+
+describe("story and game funnel analytics", () => {
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    const { track } = await import("@vercel/analytics");
+    vi.mocked(track).mockClear();
+  });
+
+  it("播放開始只送 slug 與來源", async () => {
+    const { track } = await import("@vercel/analytics");
+    const { trackStoryPlayStart } = await import("./analytics");
+
+    trackStoryPlayStart("ep-18", "landing");
+
+    expect(track).toHaveBeenCalledWith("story_play_start", {
+      slug: "ep-18",
+      source: "landing",
+    });
+  });
+
+  it("遊戲開始與結束不送分數或個資", async () => {
+    const { track } = await import("@vercel/analytics");
+    const { trackGameSessionStart, trackGameSessionComplete } = await import(
+      "./analytics"
+    );
+
+    trackGameSessionStart("car-adventure");
+    trackGameSessionComplete("car-adventure", true);
+
+    expect(track).toHaveBeenNthCalledWith(1, "game_session_start", {
+      gameId: "car-adventure",
+    });
+    expect(track).toHaveBeenNthCalledWith(2, "game_session_complete", {
+      gameId: "car-adventure",
+      cleared: true,
+    });
+    expect(
+      vi.mocked(track).mock.calls.flatMap(([, payload]) =>
+        Object.keys(payload ?? {}),
+      ),
+    ).not.toContain("score");
+  });
+});

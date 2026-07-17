@@ -1,11 +1,12 @@
 # D4 View Transitions Spike（故事卡封面 → 詳情）
 
-> 狀態：spike 已接線（2026-07-11）｜擴大前須手動驗收
+> 狀態：已回退至穩定版 fallback（2026-07-17）｜保留 DOM 契約，待 React／Next 穩定 API 再評估
 
 ## 範圍
 
 - **一組**共享元素：`StoryCard` 縮圖 ↔ `/story/[slug]` hero 封面
-- 技術：`next.config` `experimental.viewTransition: true` + React 19.3 canary `ViewTransition`
+- 原 spike 技術：`next.config` `experimental.viewTransition: true` + React 19.3 canary `ViewTransition`
+- 目前實作：React 19.2 stable 的普通容器＋CSS／瀏覽器導覽 fallback；不載入 Canary runtime API。
 - **不採** `next-view-transitions` 套件
 - **未做**（通過 spike 後再議）：全頁 cross-fade、`Link transitionTypes` 方向滑動（需 Next 16+ 型別）
 
@@ -16,7 +17,7 @@
 | `components/StoryCard.tsx` | `StoryCoverMorph` 包 `StoryImage`（`sharedCoverMorph` 可關） |
 | `app/story/[slug]/page.tsx` | 詳情 `coverWrap` 內同 slug 的 `StoryCoverMorph` |
 | `lib/story-cover-transition.ts` | `story-cover-${slug}` 命名契約 |
-| `app/view-transitions.css` | morph 時長 + `prefers-reduced-motion` 關閉 |
+| `components/story/StoryCoverMorph.tsx` | 穩定 DOM 邊界與 `data-story-cover` 契約 |
 
 ## 手動驗收矩陣
 
@@ -34,7 +35,7 @@
 
 ## 已知限制
 
-- 目前固定 **Next 16.2.10 + React 19.3 canary**；穩定版 React 19.2 尚未提供 `ViewTransition` runtime export，型別補充見 `types/view-transition.d.ts`。
+- 原驗收固定 **Next 16.2.10 + React 19.3 canary**；目前已改用 React 19.2 stable，因穩定版沒有 `ViewTransition` runtime export，移除 Canary 型別補充與實驗設定。
 - `Link transitionTypes`（nav-forward／back）本 spike **未啟用**（15.5.x Link 型別未暴露）。
 - 地圖／播放器／遊戲路由未套用。
 
@@ -55,7 +56,7 @@
 npm run test:e2e -- e2e/view-transition.spec.ts
 ```
 
-**驗收紀錄（2026-07-11，Playwright 攔截 `startViewTransition` 為客觀證據；引擎：Chromium／WebKit／Firefox headless）**：
+**歷史驗收紀錄（2026-07-11，Playwright 攔截 `startViewTransition` 為客觀證據；引擎：Chromium／WebKit／Firefox headless）**：
 
 | # | 情境 | 結果 | 備註 |
 |---|------|------|------|

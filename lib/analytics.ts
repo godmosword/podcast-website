@@ -4,6 +4,7 @@ import type { WishCategory } from "@/lib/zone-wish-schema";
 import type { ThemePreference } from "@/lib/theme";
 import { recordPlatformClick, recordStoryCompleted } from "@/lib/engagement";
 import type { ReturnVisitBucket } from "@/lib/return-visit";
+import type { GameKitGameId } from "@/lib/gamekit/types";
 
 export type PlatformClickSource =
   | "story-cta"
@@ -42,6 +43,14 @@ export function trackPlatformClick(
 export function trackStoryCompleted(slug: string): void {
   recordStoryCompleted(slug);
   safeTrack("story_completed", { slug });
+}
+
+/** 播放器第一次真正收到 play 事件；同一播放器 mount 只送一次。 */
+export function trackStoryPlayStart(
+  slug: string,
+  source: "story_page" | "landing",
+): void {
+  safeTrack("story_play_start", { slug, source });
 }
 
 /**
@@ -92,4 +101,17 @@ export type ShareClickChannel = "copy_link" | "line";
 /** 故事分享點擊（D12）：只送 slug + 管道，無 PII。 */
 export function trackShareClick(slug: string, channel: ShareClickChannel): void {
   safeTrack("share_click", { slug, channel });
+}
+
+/** 遊戲頁進入信號；完成事件由 GameKit session 結果補上。 */
+export function trackGameSessionStart(gameId: GameKitGameId): void {
+  safeTrack("game_session_start", { gameId });
+}
+
+/** 遊戲產生結果時送出；不含分數，避免把兒童表現變成個人化追蹤資料。 */
+export function trackGameSessionComplete(
+  gameId: GameKitGameId,
+  cleared: boolean,
+): void {
+  safeTrack("game_session_complete", { gameId, cleared });
 }

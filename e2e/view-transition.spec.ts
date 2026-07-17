@@ -1,8 +1,8 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * D4：View Transition spike 導覽退化／可用性（Chromium）。
- * morph 動效需人工對照 docs/D4-VIEW-TRANSITIONS-SPIKE.md 矩陣。
+ * D4：封面導覽 fallback／可用性（Chromium）。
+ * React stable 不載入 Canary ViewTransition；這裡只驗證導覽、鍵盤與 reduced-motion。
  */
 test.describe("D4 view transition navigation", () => {
   function firstStoryCard(page: import("@playwright/test").Page) {

@@ -17,7 +17,7 @@ Bonbon & 馬米親子 Podcast《車車遊樂園》的官方 **看圖聽故事** 
 
 ## 技術棧
 
-- **Next.js 16** App Router、**React 19.3 canary**（ViewTransition）、**TypeScript strict**、**CSS Modules**（無 Tailwind）
+- **Next.js 16** App Router、**React 19.2 stable**、**TypeScript strict**、**CSS Modules**（無 Tailwind）
 - 以 **SSG 預渲染** 為主；少數 **Route Handler**（許願／email 訂閱 API，可選 Neon Postgres）
 - **Vitest** 單元測試 + **Playwright** E2E
 - 部署：**Vercel**（`@vercel/analytics`）
@@ -138,7 +138,9 @@ NEXT_PUBLIC_SITE_URL=https://你的網域
 | 變數 | 用途 |
 |------|------|
 | `NEXT_PUBLIC_SITE_URL` | 站點 canonical URL（**必填於 production**） |
+| `NEXT_PUBLIC_AUDIO_BASE_URL` | 可選的公開音檔 CDN／物件儲存 origin；未設定時 fallback 至 `/stories/`。外部 origin 須支援音檔 Range request；跨網域播放請允許本站來源（會員私有音檔不在本輪） |
 | `DATABASE_URL` | 樂園許願 + email 訂閱 API（Neon）；未設則表單降級（許願→mailto、訂閱→`#connect`） |
+| `RESEND_API_KEY` / `SUBSCRIBE_FROM_EMAIL` | 新集通知 double opt-in 寄信；任一未設時訂閱 API 安全降級為不可用 |
 | `OPENAI_API_KEY` | 僅本機 `illustrate`／地圖資產生成；**CI 不放** |
 | `SYNC_ISSUE_*` | GHA 同步後 GitHub Issue 通知（見 `.env.example`） |
 
@@ -148,8 +150,8 @@ NEXT_PUBLIC_SITE_URL=https://你的網域
 
 > **SoundOn 新集：** 多數由 [Apple Podcasts 自動同步](#apple-podcasts-自動同步) 每日上架（`ep-N` slug、`pageCount: 1`）。以下為**手動**在 `manualStories` 新增完整繪本時使用。
 
-1. **建立資料夾** `public/stories/<slug>/`（slug 英文小寫，與網址一致）
-2. **放入** `audio.mp3`、`01.jpg`（多頁：`02.jpg`…）
+1. **建立資料夾** `public/stories/<slug>/`（slug 英文小寫，與網址一致；現階段同步／轉錄仍以此為 staging source）
+2. **放入** `audio.mp3`、`01.jpg`（多頁：`02.jpg`…）；公開音檔上線後可由 `NEXT_PUBLIC_AUDIO_BASE_URL` 將瀏覽器／RSS 指向外部 origin
 3. **編輯** `data/stories.ts` — 在 `manualStories` 加一筆（`pageCount` 與插圖張數一致）
 4. **字型** — 有新中文 → `npm run font:subset`
 5. **驗證** — `npm test && npm run build`

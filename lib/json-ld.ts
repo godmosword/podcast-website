@@ -7,7 +7,7 @@ import { STATIC_PAGE_MODIFIED_DATES } from "@/lib/page-freshness";
 import { platformShowUrls } from "@/lib/platforms";
 import { getSiteUrl } from "@/lib/site-url";
 import { storyDescription } from "@/lib/story-metadata";
-import { storyAudioPath, storyCoverPath } from "@/lib/story-utils";
+import { storyAudioUrl, storyCoverPath } from "@/lib/story-utils";
 import { hasVtt } from "@/lib/transcript";
 
 const AUTHORS = ["Bonbon", "馬米"];
@@ -19,6 +19,7 @@ export type FaqItem = {
 };
 
 function absoluteUrl(path: string): string {
+  if (/^https?:\/\//.test(path)) return path;
   return `${getSiteUrl()}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
@@ -120,7 +121,7 @@ export function podcastEpisodeJsonLd(story: Story): Record<string, unknown> {
   const siteUrl = getSiteUrl();
   const pageUrl = `${siteUrl}/story/${story.slug}`;
   const coverUrl = absoluteUrl(storyCoverPath(story.slug));
-  const audioUrl = absoluteUrl(storyAudioPath(story.slug, story.audio));
+  const audioUrl = absoluteUrl(storyAudioUrl(story.slug, story.audio));
   const timeRequired = story.duration ? durationToIso8601(story.duration) : null;
   const transcriptMedia = hasVtt(story)
     ? {

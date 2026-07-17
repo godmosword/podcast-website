@@ -11,6 +11,7 @@ import {
 } from "./save";
 import { medalFlags, medalCount } from "./meta";
 import { saveBestScoreInStore } from "@/lib/progress-store";
+import { trackGameSessionComplete } from "@/lib/analytics";
 
 import { GAMEKIT_PROGRESS_EVENT } from "../runtime/constants";
 
@@ -100,6 +101,7 @@ export function reportGameSession(result: GameSessionResult): PlayerProfile {
 
   savePlayerProfile(profile);
   if (typeof window !== "undefined") {
+    trackGameSessionComplete(result.gameId, Boolean(result.cleared));
     window.dispatchEvent(
       new CustomEvent(GAMEKIT_PROGRESS_EVENT, { detail: profile }),
     );

@@ -9,7 +9,7 @@ import {
 import { familyActivityShowNote, storyZoneMapShowNote } from "@/lib/story-geo";
 import { storyDescription } from "@/lib/story-metadata";
 import { getSiteUrl } from "@/lib/site-url";
-import { storyAudioPath, storyCoverPath } from "@/lib/story-utils";
+import { storyAudioUrl, storyCoverPath } from "@/lib/story-utils";
 import { hasVtt } from "@/lib/transcript";
 
 const SITE_RSS_PATH = "/feed.xml";
@@ -66,7 +66,10 @@ export function buildRssFeed(
     .map((story) => {
       const pageUrl = `${siteUrl}/story/${story.slug}`;
       const coverUrl = `${siteUrl}${storyCoverPath(story.slug)}`;
-      const audioUrl = `${siteUrl}${storyAudioPath(story.slug, story.audio)}`;
+      const rawAudioUrl = storyAudioUrl(story.slug, story.audio);
+      const audioUrl = rawAudioUrl.startsWith("http")
+        ? rawAudioUrl
+        : `${siteUrl}${rawAudioUrl}`;
       const audioLength = audioLengthBySlug[story.slug] ?? 0;
       const description = buildItemDescription(story);
       const durationTag = story.duration

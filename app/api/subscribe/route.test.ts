@@ -3,17 +3,33 @@ import { GET, POST } from "./route";
 
 vi.mock("@/lib/subscribe-db", () => ({
   isSubscribeDbConfigured: vi.fn(),
-  insertSubscriber: vi.fn(),
+  upsertPendingSubscriber: vi.fn(),
+}));
+
+vi.mock("@/lib/subscribe-email", () => ({
+  isSubscribeEmailConfigured: vi.fn(),
+  sendSubscribeConfirmation: vi.fn(),
+}));
+
+vi.mock("@/lib/subscribe-tokens", () => ({
+  createSubscribeToken: vi.fn(() => ({ token: "raw-token", tokenHash: "token-hash" })),
 }));
 
 describe("/api/subscribe", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
+    const { isSubscribeEmailConfigured, sendSubscribeConfirmation } = await import(
+      "@/lib/subscribe-email"
+    );
+    vi.mocked(isSubscribeEmailConfigured).mockReturnValue(true);
+    vi.mocked(sendSubscribeConfirmation).mockResolvedValue(undefined);
+    const { upsertPendingSubscriber } = await import("@/lib/subscribe-db");
+    vi.mocked(upsertPendingSubscriber).mockResolvedValue("pending");
     const { resetSubscribeRateLimits } = await import("@/lib/subscribe-rate-limit");
     resetSubscribeRateLimits();
   });
 
-  it("GET 回報 DB 是否可用", async () => {
+  it("GET 回報 DB 與確認信服務是否可用", async () => {
     const { isSubscribeDbConfigured } = await import("@/lib/subscribe-db");
     vi.mocked(isSubscribeDbConfigured).mockReturnValue(true);
 
@@ -22,7 +38,7 @@ describe("/api/subscribe", () => {
     await expect(res.json()).resolves.toEqual({ available: true });
   });
 
-  it("無 DATABASE_URL 時 POST 回 503", async () => {
+  it("無必要服務設定時 POST 回 503", async () => {
     const { isSubscribeDbConfigured } = await import("@/lib/subscribe-db");
     vi.mocked(isSubscribeDbConfigured).mockReturnValue(false);
 
@@ -40,12 +56,13 @@ describe("/api/subscribe", () => {
     expect(res.status).toBe(503);
   });
 
-  it("有效 payload 寫入 DB 回 201", async () => {
-    const { isSubscribeDbConfigured, insertSubscriber } = await import(
+  it("有效 payload 寫入 pending 並寄確認信回 202", async () => {
+    const { isSubscribeDbConfigured, upsertPendingSubscriber } = await import(
       "@/lib/subscribe-db"
     );
+    const { sendSubscribeConfirmation } = await import("@/lib/subscribe-email");
     vi.mocked(isSubscribeDbConfigured).mockReturnValue(true);
-    vi.mocked(insertSubscriber).mockResolvedValue(undefined);
+    vi.mocked(upsertPendingSubscriber).mockResolvedValue("pending");
 
     const res = await POST(
       new Request("http://localhost/api/subscribe", {
@@ -62,20 +79,26 @@ describe("/api/subscribe", () => {
       }),
     );
 
-    expect(res.status).toBe(201);
-    expect(insertSubscriber).toHaveBeenCalledWith({
+    expect(res.status).toBe(202);
+    expect(upsertPendingSubscriber).toHaveBeenCalledWith({
       email: "parent@example.com",
       source: "subscribe_page",
       userAgent: null,
+      tokenHash: "token-hash",
+      expiresAt: expect.any(Date),
+    });
+    expect(sendSubscribeConfirmation).toHaveBeenCalledWith({
+      email: "parent@example.com",
+      token: "raw-token",
     });
   });
 
-  it("重複 email 仍回 201（冪等）", async () => {
-    const { isSubscribeDbConfigured, insertSubscriber } = await import(
+  it("重複 email 仍回 202（冪等）", async () => {
+    const { isSubscribeDbConfigured, upsertPendingSubscriber } = await import(
       "@/lib/subscribe-db"
     );
     vi.mocked(isSubscribeDbConfigured).mockReturnValue(true);
-    vi.mocked(insertSubscriber).mockResolvedValue(undefined);
+    vi.mocked(upsertPendingSubscriber).mockResolvedValue("pending");
 
     const makeReq = () =>
       new Request("http://localhost/api/subscribe", {
@@ -92,8 +115,31 @@ describe("/api/subscribe", () => {
 
     const first = await POST(makeReq());
     const second = await POST(makeReq());
-    expect(first.status).toBe(201);
-    expect(second.status).toBe(201);
+    expect(first.status).toBe(202);
+    expect(second.status).toBe(202);
+  });
+
+  it("已確認 email 不重寄確認信", async () => {
+    const { isSubscribeDbConfigured, upsertPendingSubscriber } = await import(
+      "@/lib/subscribe-db"
+    );
+    const { sendSubscribeConfirmation } = await import("@/lib/subscribe-email");
+    vi.mocked(isSubscribeDbConfigured).mockReturnValue(true);
+    vi.mocked(upsertPendingSubscriber).mockResolvedValue("confirmed");
+
+    const res = await POST(
+      new Request("http://localhost/api/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: "confirmed@example.com",
+          parentConsent: true,
+        }),
+      }),
+    );
+
+    expect(res.status).toBe(202);
+    expect(sendSubscribeConfirmation).not.toHaveBeenCalled();
   });
 
   it("超過 rate limit 回 429", async () => {
@@ -120,7 +166,7 @@ describe("/api/subscribe", () => {
           }),
         }),
       );
-      expect(res.status).toBe(201);
+      expect(res.status).toBe(202);
     }
 
     const blocked = await POST(

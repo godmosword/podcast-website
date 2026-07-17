@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getStory, getNextStory, getStories } from "@/data/content";
 import { storyPlayMetadata } from "@/lib/story-metadata";
 import { getSubtitles } from "@/lib/subtitles";
-import { pad2, storyAudioPath, storyCoverPath } from "@/lib/story-utils";
+import { pad2, storyAudioUrl, storyCoverPath } from "@/lib/story-utils";
 import StoryPlayer from "@/components/StoryPlayerClient";
 
 export function generateStaticParams() {
@@ -58,7 +58,7 @@ export default async function StoryPlayPage({
       title={story.title}
       color={story.color}
       images={images}
-      audio={storyAudioPath(story.slug, story.audio)}
+      audio={storyAudioUrl(story.slug, story.audio)}
       captions={story.captions}
       captionTimes={story.captionTimes}
       subtitles={subtitles ?? undefined}

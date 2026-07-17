@@ -16,7 +16,7 @@ type StoryCardProps = {
   variant?: "list" | "grid";
   /** 隱藏日期 / 時長 / 年齡（僅保留 EP）；首頁列表用 */
   hideMeta?: boolean;
-  /** D4：列表封面共享轉場；同頁可能重複 slug 時關閉 */
+  /** D4 fallback：列表封面 DOM 標記；同頁可能重複 slug 時關閉 */
   sharedCoverMorph?: boolean;
 };
 
