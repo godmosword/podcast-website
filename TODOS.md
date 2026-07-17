@@ -40,11 +40,11 @@
 
 | ID | 範圍 | 狀態 |
 |----|------|------|
-| ASSET-P2 | 音檔 URL 從 repo 路徑抽象成可切換的外部音檔 origin；保留本機 fallback | 本輪實作 |
-| TRUST-P2 | 新集通知 double opt-in（不等同會員登入驗證） | 本輪實作 |
-| Growth-Measure-2 | 播放開始／遊戲進入／遊戲完成事件，維持無 PII | 本輪實作 |
-| INFRA-P2 | 移除 production 對 React canary ViewTransition 的依賴，回到 stable React | 本輪實作 |
-| CONTENT-P2 | 音檔路徑、RSS、JSON-LD、Landing 與同步／驗證流程使用同一資產契約 | 本輪實作 |
+| ASSET-P2 | 音檔 URL 從 repo 路徑抽象成可切換的外部音檔 origin；保留本機 fallback | ✅ `25be373` |
+| TRUST-P2 | 新集通知 double opt-in（不等同會員登入驗證） | ✅ `25be373` |
+| Growth-Measure-2 | 播放開始／遊戲進入／遊戲完成事件，維持無 PII | ✅ `25be373` |
+| INFRA-P2 | 移除 production 對 React canary ViewTransition 的依賴，回到 stable React | ✅ `25be373` |
+| CONTENT-P2 | 音檔路徑、RSS、JSON-LD、Landing 與同步／驗證流程使用同一資產契約 | ✅ `25be373` |
 
 ### 本輪已完成（2026-07-16）
 
@@ -123,8 +123,8 @@
 | Task | 狀態 | 主要產出 | 預計影響檔案 | 驗證 | Commit hash |
 |------|------|----------|--------------|------|-------------|
 | LIST-1 LINE OA CTA | BLOCKED：等 LINE OA | env-gated LINE 加好友 CTA（`NEXT_PUBLIC_LINE_OA_URL` 未設即隱藏，沿用 `visibleSocials()` 空字串隱藏模式）；掛頁尾／單集頁 `SubscriptionCTA` 旁／landing／`/subscribe` | Modify: `lib/social.ts`（`SocialIcon` 加 `"line"`）、`lib/connect-icons.tsx`、`components/SiteFooter.tsx`、`app/story/[slug]/page.tsx`; Create: `components/LineCTA.tsx` | 設/不設 env 切換顯隱；`npm test` + `npm run build` | — |
-| LIST-2 新集通知 email 訂閱 | 本輪重做 | 保留 zod + rate limit + Neon + 防枚舉；新增 pending／confirmed 狀態、短效 token hash、確認頁與寄信 provider 契約；**不等同會員帳號登入** | Modify: `003/004_subscribers.sql`、`lib/subscribe-db.ts`、`app/api/subscribe/route.ts`; Create: `app/api/subscribe/confirm/route.ts`、`app/subscribe/confirmed/page.tsx`、`lib/subscribe-email.ts` | DB／provider 未設定時明確降級；token 一次性、過期失效；確認前不進可寄送名單；`npm test` + `npm run build` | 待回填 |
-| LIST-3 分析事件 | 本輪擴充 | 保留既有 `story_completed`／`return_visit`／平台／地圖／許願／訂閱／分享事件；補 `story_play_start`、`game_session_start`、`game_session_complete`，不送 PII | Modify: `lib/analytics.ts`、`StoryPlayer`、`GamePageShell`、GameKit session | 事件契約測試；payload 不含 email／兒童識別資料 | 待回填 |
+| LIST-2 新集通知 email 訂閱 | ✅ `25be373` | 保留 zod + rate limit + Neon + 防枚舉；新增 pending／confirmed 狀態、短效 token hash、確認頁與寄信 provider 契約；**不等同會員帳號登入** | Modify: `003/004_subscribers.sql`、`lib/subscribe-db.ts`、`app/api/subscribe/route.ts`; Create: `app/api/subscribe/confirm/route.ts`、`app/subscribe/confirmed/page.tsx`、`lib/subscribe-email.ts` | DB／provider 未設定時明確降級；token 一次性、過期失效；確認前不進可寄送名單；`npm test` + `npm run build` | `25be373` |
+| LIST-3 分析事件 | ✅ `25be373` | 保留既有 `story_completed`／`return_visit`／平台／地圖／許願／訂閱／分享事件；補 `story_play_start`、`game_session_start`、`game_session_complete`，不送 PII | Modify: `lib/analytics.ts`、`StoryPlayer`、`GamePageShell`、GameKit session | 事件契約測試；payload 不含 email／兒童識別資料 | `25be373` |
 | REUSE-1 校對字幕採用檢查 | 完成 | 確認字幕正文在 `data/subtitles/<slug>.json`、校對標記在 `_proofread/`；`verify:episodes` 全過 | `npm run verify:episodes` passed；見 `docs/metrics/GEO-baseline-2026-07-10.md` | `dbfe7b3` |
 | REUSE-2 家長共讀指引呈現（= P2 `parentGuide`） | 完成 | `data/parent-guides.ts` + `ShowNotes` 收合區（ep-1、ep-5 試點）；`enrichStory` 合併 | `data/parent-guides.test.ts` + `npm test` + `npm run build` | `dbfe7b3` |
 | REUSE-3 YouTube 整集影片匯出 | 完成 `d9a00fd`（fix 至 `1365fc2`） | 本機 CLI `npm run export:video -- <slug>`：1920×1080 整集 mp4；`data/scenes` 換頁 + `data/subtitles` 原始逐句 ASS burn-in（`jf-openhuninn-2.1`）；`export/video/<slug>/` + manifest（gitignore）；9:16 Shorts 留二期 | Create: `scripts/lib/export-video-core.ts`、`scripts/export-video-assets.ts`、`docs/VIDEO-EXPORT.md`; Modify: `package.json`、`.gitignore` | `export:video -- ep-17`（ep-17 7:15 mp4 驗證）；`npm test -- export-video-core` | `1365fc2` |
