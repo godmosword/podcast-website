@@ -14,22 +14,23 @@
   /* 疊在 inline backgroundColor 之上的光澤層 */
   background-image: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.22),
-    rgba(0, 0, 0, 0.12)
+    rgba(255, 255, 255, 0.18),
+    rgba(0, 0, 0, 0.08)
   );
-  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.16), var(--shadow-md), var(--gloss);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
-  transition: transform var(--motion-press), box-shadow var(--motion-press);
+  box-shadow: var(--shadow-md), var(--gloss);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.14);
+  transition: transform var(--motion-press), box-shadow var(--motion-press),
+    opacity var(--motion-press);
 }
 
 .button:active {
-  transform: translateY(5px);
-  box-shadow: var(--gloss);
+  transform: scale(0.98);
+  opacity: 0.94;
 }
 
 @media (hover: hover) {
   .button:hover {
-    transform: translateY(-2px);
+    box-shadow: var(--shadow-card), var(--shadow-md);
   }
 }
 

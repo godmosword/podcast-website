@@ -31,33 +31,20 @@ export default function SiteFooter({
         isHome ? styles.home : ""
       }`}
     >
-      <Doodle
-        kind="squiggle"
-        size={36}
-        color="var(--c-pink)"
-        className={`${decor.doodle} ${decor.tiltA}`}
-        style={{ left: "6px", top: "10px" }}
-      />
+      {/* 克制點綴：Footer 最多 2 個極淡塗鴉 */}
       <Doodle
         kind="dots"
-        size={30}
+        size={26}
         color="var(--c-sky)"
         className={`${decor.doodle}`}
-        style={{ right: "8px", top: "8px" }}
-      />
-      <Doodle
-        kind="burst"
-        size={30}
-        color="var(--c-mint)"
-        className={`${decor.doodle} ${decor.tiltB}`}
-        style={{ left: "12%", bottom: "6px" }}
+        style={{ right: "10px", top: "12px", opacity: 0.45 }}
       />
       <Doodle
         kind="loop"
-        size={32}
+        size={28}
         color="var(--c-yellow)"
-        className={`${decor.doodle} ${decor.tiltC}`}
-        style={{ right: "12%", bottom: "4px" }}
+        className={`${decor.doodle}`}
+        style={{ left: "10px", bottom: "8px", opacity: 0.4 }}
       />
       <p className={styles.parentNote}>
         給家長：點播放鈕，孩子邊看圖邊聽故事，適合睡前親子共讀。

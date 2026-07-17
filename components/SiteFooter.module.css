@@ -1,8 +1,8 @@
 .footer {
   position: relative;
   margin-top: var(--space-section);
-  padding-top: var(--space-6);
-  border-top: 2px dashed var(--bg-dot);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--hairline);
   text-align: center;
 }
 

@@ -46,7 +46,8 @@
   --ink-soft: #7a7268;
   --card: #ffffff;
   --card-2: #fcfdff;
-  --line: rgba(0, 0, 0, 0.08);
+  --hairline: rgba(0, 0, 0, 0.08);
+  --line: var(--hairline);
 
   /* 多彩粉嫩 accent（裝飾、chip、邊框輪播） */
   --c-pink: #f7a8c4;
@@ -63,17 +64,20 @@
   --leaf: #b7df9b;
   --sky-blue: #8fcde8;
 
-  /* 圓角 */
-  --radius-sm: 12px;
-  --radius-md: 18px;
-  --radius-lg: 24px;
-  --radius-xl: 30px;
+  /* 圓角（連續圓角感，對齊 Apple 式產品曲面） */
+  --radius-sm: 14px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+  --radius-xl: 32px;
 
-  /* 陰影 */
-  --shadow-card: 0 4px 0 rgba(52, 48, 43, 0.18); /* 實體按鈕感（柔化） */
-  --shadow-sm: 0 2px 6px rgba(52, 48, 43, 0.07);
-  --shadow-md: 0 10px 24px rgba(52, 48, 43, 0.1);
-  --gloss: inset 0 2px 0 rgba(255, 255, 255, 0.7);
+  /* 陰影與表面（柔層次；取代厚底影實體鈕） */
+  --shadow-card: 0 1px 2px rgba(52, 48, 43, 0.04),
+    0 8px 24px rgba(52, 48, 43, 0.08);
+  --shadow-sm: 0 2px 8px rgba(52, 48, 43, 0.06);
+  --shadow-md: 0 12px 32px rgba(52, 48, 43, 0.1);
+  --gloss: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  --surface-elevated: var(--card);
+  --surface-glass: color-mix(in srgb, var(--card) 78%, transparent);
 
   /* 間距（token 階梯：只在觸碰處換用，不做全站機械替換） */
   --space-2: 8px;
@@ -175,7 +179,8 @@
   --ink-soft: #a9a28e;
   --card: #273052;
   --card-2: #2c365c;
-  --line: rgba(255, 255, 255, 0.1);
+  --hairline: rgba(255, 255, 255, 0.1);
+  --line: var(--hairline);
 
   --c-pink: #d4899f;
   --c-yellow: #e8c25a;
@@ -190,10 +195,12 @@
   --leaf: #8fb876;
   --sky-blue: #6ba8c4;
 
-  --shadow-card: 0 4px 0 rgba(0, 0, 0, 0.45);
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
-  --shadow-md: 0 10px 28px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.2), 0 10px 28px rgba(0, 0, 0, 0.35);
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.28);
+  --shadow-md: 0 14px 36px rgba(0, 0, 0, 0.4);
   --gloss: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --surface-elevated: var(--card);
+  --surface-glass: color-mix(in srgb, var(--card) 72%, transparent);
 
   --motion-press: 0.18s ease;
   --motion-page: 0.6s ease;
@@ -236,10 +243,10 @@
 }
 
 [data-theme="night"] .site-backdrop {
-  background-image: radial-gradient(110% 70% at 12% -8%, rgba(212, 137, 159, 0.08), transparent 58%),
-    radial-gradient(110% 70% at 92% -4%, rgba(107, 168, 196, 0.08), transparent 56%),
-    radial-gradient(120% 80% at 88% 102%, rgba(143, 184, 118, 0.07), transparent 60%),
-    radial-gradient(120% 80% at 8% 104%, rgba(232, 194, 90, 0.06), transparent 58%);
+  background-image: radial-gradient(110% 70% at 12% -8%, rgba(212, 137, 159, 0.05), transparent 58%),
+    radial-gradient(110% 70% at 92% -4%, rgba(107, 168, 196, 0.05), transparent 56%),
+    radial-gradient(120% 80% at 88% 102%, rgba(143, 184, 118, 0.04), transparent 60%),
+    radial-gradient(120% 80% at 8% 104%, rgba(232, 194, 90, 0.04), transparent 58%);
 }
 
 /* 1c 懸浮膠囊頂欄（SiteNavBar ≥980px）：膠囊 56px + 上緣 10px */
@@ -295,10 +302,11 @@ body {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background-image: radial-gradient(110% 70% at 12% -8%, rgba(247, 168, 196, 0.16), transparent 58%),
-    radial-gradient(110% 70% at 92% -4%, rgba(143, 205, 232, 0.16), transparent 56%),
-    radial-gradient(120% 80% at 88% 102%, rgba(183, 223, 155, 0.14), transparent 60%),
-    radial-gradient(120% 80% at 8% 104%, rgba(255, 216, 102, 0.12), transparent 58%);
+  /* 克制柔光：降飽和，接近 Apple 大氣留白仍帶品牌溫度 */
+  background-image: radial-gradient(110% 70% at 12% -8%, rgba(247, 168, 196, 0.09), transparent 58%),
+    radial-gradient(110% 70% at 92% -4%, rgba(143, 205, 232, 0.09), transparent 56%),
+    radial-gradient(120% 80% at 88% 102%, rgba(183, 223, 155, 0.07), transparent 60%),
+    radial-gradient(120% 80% at 8% 104%, rgba(255, 216, 102, 0.06), transparent 58%);
   background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%;
   background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
   background-position: 0 0, 0 0, 0 0, 0 0;
@@ -426,10 +434,9 @@ button:focus-visible {
   inset: 0;
   z-index: -1;
   background: var(--marker-color, var(--c-yellow));
-  border-radius: 7px 11px 6px 10px;
-  transform: rotate(-1.4deg);
-  filter: url(#rough-3);
-  opacity: 0.85;
+  /* 克制標籤底：圓角 pill、無粗糙濾鏡／歪斜 */
+  border-radius: 999px;
+  opacity: 0.55;
 }
 
 .marker-pink::before {
@@ -443,12 +450,6 @@ button:focus-visible {
 }
 .marker-lilac::before {
   background: var(--c-lilac);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .marker::before {
-    filter: none;
-  }
 }
 
 /* ============ 無障礙：減少動態時關閉所有動畫/位移 ============ */

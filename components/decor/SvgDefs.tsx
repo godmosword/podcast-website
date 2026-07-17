@@ -1,6 +1,6 @@
 /**
  * 全域 SVG 濾鏡定義（手繪粗糙邊）。
- * 於 layout.tsx 掛載一次，供 RoughFrame / .marker 以 filter: url(#rough-N) 引用。
+ * 於 layout.tsx 掛載一次，供 RoughFrame 等例外頁面以 filter: url(#rough-N) 引用。
  * 不可見（width/height 0），純定義用途。
  */
 export default function SvgDefs() {
