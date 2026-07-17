@@ -620,8 +620,8 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 ### 篩選 chip 觸控與鍵盤順序　`P2 · S · 無`　〔design〕
 實機確認車種 chip 觸控區 ≥ 44×44px；Tab 順序：主 CTA → chip 列 → 第一張故事卡。兒童/家長多觸控，鍵盤使用者需可「選車種 → 開第一集」。`StoryFilter` 已用 `<button>`，`globals.css` 有 `:focus-visible`。
 
-### StoryFilter 區塊塗鴉一致性　`P2 · S · DESIGN.md`　〔design〕
-決定「依車車找故事」區補 1–2 個 `Doodle`（與 Header 呼應）或刻意留白，寫入 DESIGN.md 並實作一致。中段全無裝飾時，全站上下塗鴉多、中間素，像兩套設計拼貼。
+### ~~StoryFilter 區塊塗鴉一致性~~　`P2 · S · DESIGN.md`　〔design〕 ✅ `306b989`
+**裁決：刻意留白。** DESIGN.md v0.2 改為插畫主導＋克制 chrome；StoryFilter／LatestHero／StoryCard 無 Doodle；Footer ≤2 極淡點綴。不再補中段塗鴉。
 
 ## 車車宇宙樂園地圖（已完成 → 已封存）
 
@@ -842,7 +842,7 @@ T+2d    社群貼文（B 戰場）
 | 網站內 RSS 播放器 | 訂閱導向 Spotify／Apple 即可 |
 | Service Worker 離線快取 | 弱網需求成立但 MP3 快取容量／更新策略風險高；P1–P2 先做信任、訂閱與量測 |
 | ~~睡前模式／季節主題皮~~ | **已完成夜晚模式＋跟隨系統**（見 Completed）；季節主題皮仍延後 |
-| 全站 redesign／換字體 | 現有手繪風格已具辨識度 |
+| 全站 redesign／換字體 | 字型維持 Baloo＋huninn；chrome 已依 Apple 原則升級（2026-07-17），不做 SF Pro／成人產品換皮 |
 | 首頁 3 欄 icon 功能介紹 | 違反 AI slop 黑名單，與品牌不符 |
 | 首頁列表「大圖單欄」模式 | 需先確認主攻 3–5 歲與實際瀏覽行為；現左圖右文在 5+ 較合適，非本季主戰場 |
 | 四款 pixel 精進 | 已移至 [RESEARCH.md — 四款小遊戲精進](./RESEARCH.md#2026-06-09四款小遊戲精進方案對標可市售-pixel-game)；玩法與美術升級全部 ❄️ FROZEN，待 STEM-P1 gate 後再排 |
