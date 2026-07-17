@@ -28,6 +28,12 @@
 | 4 | [Growth-Measure-1](#growth-measure-1-成長量測) SoundOn 回鏈 | ops/growth | S | ✅ `42a9d38` |
 | 5 | [UX-P1-2](#兒童-ux-與親子互動稽核2026-07-11) 詳情頁反思收合 | ux | S | ✅ `42a9d38` |
 
+### 本輪已完成（2026-07-17）
+
+| ID | Commit |
+|----|--------|
+| feat(design): Apple 視覺原則升級—克制 chrome 與柔層次（DESIGN.md v0.2；Landing／stories／單集／內容頁） | `306b989` `7fd7d27` |
+
 ### 本輪已完成（2026-07-16）
 
 | ID | Commit |
