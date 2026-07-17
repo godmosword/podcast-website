@@ -35,7 +35,7 @@
 | ID | Commit |
 |----|--------|
 | feat(design): Apple 視覺原則升級—克制 chrome 與柔層次（DESIGN.md v0.2；Landing／stories／單集／內容頁） | `306b989` `7fd7d27` |
-| fix(agent): 專案層禁用 AskQuestion／AUQ（hook + alwaysApply 規則，防阻塞卡住） | （待 commit） |
+| fix(agent): 專案層禁用 AskQuestion／AUQ（hook + alwaysApply 規則，防阻塞卡住） | `ceeddc0` |
 
 ### 本輪執行隊列（2026-07-17）
 
