@@ -32,6 +32,7 @@
 
 | 案例 | 教訓 → 紅線 |
 |------|-------------|
+| Grok／Agent 呼叫 AskQuestion／AUQ（`ask_user_questions`）阻塞乾等 | **本專案禁用 AUQ**；選項用聊天文字 A/B/C；機械閘門 `.cursor/hooks/block-auq.mjs`（見 `no-ask-user-questions.mdc`） |
 | Grok 做中文校對，專名／語氣錯誤率高 | **Grok 永不碰** `data/subtitles/`、`data/scenes/`、中文文案（同 AGENT-DOMAIN 反模式） |
 | Codex 共用 ChatGPT 額度用罄，審查中斷 | 走缺席分支，改 Composer／Opus 頂審；**不得**降級成「未審直接過」 |
 | `git add -A` 混入無關 WIP | 只 stage 本次相關檔（AGENT-DOMAIN 紅線） |
@@ -46,6 +47,7 @@
 
 | 日期 | 命令／模型 | 症狀（exit code／timeout／額度／輸出品質） | 處置 |
 |------|------------|---------------------------------------------|------|
+| 2026-07-17 | Cursor Agent + MCP `user-ask-user-questions`／`ask_user_questions`（Grok 4.5 session） | 預設 blocking AUQ 乾等 UI～145s；使用者中斷；整輪看似卡住 | 專案禁 AUQ：`.cursor/rules/no-ask-user-questions.mdc` + `.cursor/hooks.json`（`beforeMCPExecution`／`preToolUse` → `block-auq.mjs`）；選項改聊天文字 → **已緩解（專案層）**；使用者可另在 Cursor Settings 關閉該 MCP |
 | 2026-07-09 | `grok models` / grok-4.5 | `You are not authenticated` | 同日稍後探活已登入、單輪呼叫成功 → 已解除 |
 | 2026-07-09 | `codex exec` / gpt-5.5 | spawn ENOENT：`@openai/codex-darwin-arm64` vendor binary 遺失（npm wrapper 在但原生執行檔不在；exit code 仍為 0，須看 stderr 判斷） | 同日 `npm i -g @openai/codex` 重裝後探活回 OK → 已解除 |
 | 2026-07-09 | `grok -p` / grok-4.5 | 預設 plan 模式下只輸出一行開場白即結束（exit 0，無審查內容）；另 `--disallowed-tools` 移除 read 工具會使 agent 建構失敗 | 加 **`--no-plan --max-turns 6`** 重試成功 → 已解除；對抗審呼叫一律帶 `--no-plan` |

@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeMCPExecution": [
+      {
+        "command": ".cursor/hooks/block-auq.mjs",
+        "failClosed": true
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": ".cursor/hooks/block-auq.mjs",
+        "matcher": "AskQuestion|CallMcpTool",
+        "failClosed": true
+      }
+    ]
+  }
+}

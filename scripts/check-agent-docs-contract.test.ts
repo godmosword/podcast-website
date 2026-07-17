@@ -99,4 +99,29 @@ describe("agent docs routing contract", () => {
     expect(probeSection).toContain("-m grok-4.5 ");
     expect(probeSection).not.toContain("-m grok-4.5-fast");
   });
+
+  it("禁用 AUQ：規則、hook、podcast 與 FAILURES 對齊", () => {
+    const rule = readRepoFile(".cursor/rules/no-ask-user-questions.mdc");
+    expect(rule).toContain("alwaysApply: true");
+    expect(rule).toContain("ask_user_questions");
+    expect(rule).toContain("AskQuestion");
+
+    const hooks = readRepoFile(".cursor/hooks.json");
+    expect(hooks).toContain("beforeMCPExecution");
+    expect(hooks).toContain("preToolUse");
+    expect(hooks).toContain(".cursor/hooks/block-auq.mjs");
+    expect(hooks).toContain("failClosed");
+
+    const podcast = readRepoFile(PODCAST_RULE);
+    expect(podcast).toContain("禁止 AskQuestion／AUQ");
+    expect(podcast).toContain("no-ask-user-questions.mdc");
+
+    const failures = readRepoFile(FAILURES);
+    expect(failures).toContain("block-auq.mjs");
+    expect(failures).toContain("ask_user_questions");
+
+    const domain = readRepoFile("docs/AGENT-DOMAIN.md");
+    expect(domain).toContain("AskQuestion／AUQ");
+  });
 });
+

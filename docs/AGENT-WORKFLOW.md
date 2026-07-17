@@ -56,6 +56,8 @@
 
 格式：`CRITICAL-n` + Fix +「請回覆 **CRITICAL-n 選 A / B / C**」
 
+**禁止**用 `AskQuestion`／AUQ MCP 收集選項（會阻塞卡住；見 [`.cursor/rules/no-ask-user-questions.mdc`](../.cursor/rules/no-ask-user-questions.mdc)）。一律聊天文字選項。
+
 （若 repo 有 `.cursor/rules/review-user-choice.mdc`，與其對齊。）
 
 ---
@@ -413,3 +415,4 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 | 2026-07-16 | Codex CLI 升 0.144.5 解鎖 `gpt-5.6-luna`：Claude Code codex exec 路由由裸 `gpt-5.6`（ChatGPT 帳號 400）改 `gpt-5.6-luna`；契約測試同步反轉（禁裸 5.6、禁 Cursor luna-max-fast 進 codex exec） |
 | 2026-07-16 | Grok slug 對齊：Cursor Task 由 fast-high 改 **`cursor-grok-4.5-medium-fast`**（Cursor 允許清單變更，見 FAILURES 07-16）；Claude Code CLI 呼叫統一 `-m grok-4.5`（07-13 案例正式落表）；顯示名改「Grok 4.5 Medium Fast」 |
 | 2026-07-12 | 治理修正：user-level Q-Silicon 命令改名 `qs-agent-plan`／`qs-agent-action`（根除同名注入）；plan 檔順位支援 `~/.claude/plans/`；Approved 門檻改「工程審必須成功」；新增中間級（視覺／樣式 &lt;80 行工程單審，`按級距免派`）；slug 對照表定為單一來源 |
+| 2026-07-17 | CRITICAL 互動禁止 AUQ／AskQuestion；改聊天文字 A/B/C（對齊 `no-ask-user-questions.mdc` + `block-auq` hook） |
