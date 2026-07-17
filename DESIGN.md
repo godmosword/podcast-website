@@ -1,6 +1,24 @@
-# 車車遊樂園 — 設計系統 v0.1
+# 車車遊樂園 — 設計系統 v0.2
 
 Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範。
+
+## 視覺方針（v0.2：插畫主導＋克制 chrome）
+
+保留黏土插畫與粉嫩品牌色，chrome 依 **Apple Human Interface Guidelines** 升級為清晰、讓位、有深度的產品介面——童趣靠插畫與色彩，不靠麥克筆描邊或密集塗鴉堆可愛。
+
+| 原則 | 落地 |
+|------|------|
+| Clarity（清晰） | 字階分明、對比足夠、裝飾不搶內容 |
+| Deference（讓位） | UI 退讓給黏土插畫／故事封面 |
+| Depth（深度） | 柔陰影、半透明層、`--hairline`；不用厚塗鴉框 |
+| Consistency（一致） | 導覽、卡片、CTA、內容頁同一節奏 |
+| Feedback（回饋） | 輕 `scale(0.98)`／opacity；取消歪斜 rotate 與厚底影下沉 |
+| Aesthetic Integrity | 童趣靠插畫與色彩，不靠麥克筆描邊 |
+| Content over chrome | 卡片／篩選無 RoughFrame；Header／Footer 塗鴉 ≤2；`.marker` 僅少數標籤 |
+| Motion with purpose | 僅 transform／opacity；一律 `prefers-reduced-motion` |
+| Accessibility | 觸控 ≥44px、`:focus-visible`；不改 ThemeProvider API |
+
+**不做：** 換成 SF Pro、全站暗黑產品風、改地圖／播放器黑底／遊戲畫布、改 Apple sync workflow。
 
 ## 受眾
 
@@ -42,6 +60,9 @@ Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範
 | `--ink` | `#34302b` | 主文字（中性深灰） |
 | `--ink-soft` | `#7a7268` | 次要文字 |
 | `--card` | `#ffffff` | 卡片背景 |
+| `--surface-elevated` | `var(--card)` | 抬升表面（卡片／區塊） |
+| `--surface-glass` | 半透明 card mix | 導覽／次 CTA 玻璃層 |
+| `--hairline` | `rgba(0,0,0,0.08)`（夜間白 10%） | 細分隔線；`--line` 別名之 |
 | `--accent` | `var(--warm-accent)` | 一般互動強調色；可由單集元件的區域樣式覆寫 |
 | `--accent-soft` | `color-mix(in srgb, var(--accent) 18%, transparent)` | 強調色淡底 |
 | `--on-dark` | `#ffffff` | 深色／品牌底上的文字與圖示 |
@@ -58,51 +79,46 @@ Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範
 | `--c-teal` | `#79c8c1` |
 | `--c-lilac` | `#c5b3e6` |
 
-頁面背景為純白（`--bg`），四角極淡多彩柔光由獨立節點 `.site-backdrop`（`position: fixed`）繪製，內容包在 `.site-root` 內；**不在 `body::before` 上畫 gradient**，避免 iOS Safari 上 sticky／合成層白塊跑版。實作見 `app/globals.css`、`app/layout.tsx`。
-每則故事另有 `story.color`（hex），用於邊框、陰影、CTA、播放鈕。
+頁面背景為純白（`--bg`），四角極淡多彩柔光由獨立節點 `.site-backdrop`（`position: fixed`）繪製，內容包在 `.site-root` 內；**不在 `body::before` 上畫 gradient**，避免 iOS Safari 上 sticky／合成層白塊跑版。柔光飽和度刻意偏低。實作見 `app/globals.css`、`app/layout.tsx`。
+每則故事另有 `story.color`（hex），用於極淡色邊、CTA、播放鈕。
 
-## 手繪塗鴉裝飾（v2：全力塗鴉框）
+## 裝飾（v0.2：克制留白）
 
-整體手法升級為「手繪不規則外框 + 高密度塗鴉 + 螢光筆色塊 + 仿麥克筆標題」，貼近參考圖的全手繪塗鴉氛圍。
+插畫與封面是視覺主角；裝飾預設關閉，僅在品牌點綴處極少量使用。
 
-### 全域 SVG 粗糙濾鏡
-- `components/decor/SvgDefs.tsx`：定義 `#rough-1/2/3` 三組 `feTurbulence + feDisplacementMap`（抖動量遞增），於 `app/layout.tsx <body>` 掛載一次。
-- 供 RoughFrame 外框與 `.marker` 螢光筆色塊以 `filter: url(#rough-N)` 引用，讓直線/色塊邊緣產生手繪抖動。
+### 全域 SVG 粗糙濾鏡（保留供遊戲等例外）
+- `components/decor/SvgDefs.tsx`：定義 `#rough-1/2/3`，於 `app/layout.tsx <body>` 掛載一次。
+- 收聽／內容動線的 StoryCard、LatestHero **不再**使用 RoughFrame。
 
-### 手繪不規則外框 RoughFrame
-- `components/decor/RoughFrame.tsx`：絕對定位 `inset:0` 覆蓋父層（父層需 `position: relative`），`border` + `filter: url(#rough-N)`，顏色吃 `story.color` 或 accent。
-- 已取代乾淨實線邊框：StoryCard（list/grid）、LatestHero。對應 padding 補回原邊框寬度。
-- topic 索引頁的標籤膠囊維持乾淨邊框（數量多，避免逐顆濾鏡的 GPU 成本與可讀性損失）。
+### RoughFrame
+- 元件仍保留於 `components/decor/RoughFrame.tsx`，供 `/games` 等非本方針範圍頁面使用。
+- 核心收聽動線改為 elevated surface + `--hairline`／極淡 `story.color` 邊。
 
 ### 塗鴉散布
-- `components/decor/Doodle.tsx`：inline SVG 塗鴉（`squiggle` / `loop` / `dots` / `burst` / `blob` / `zigzag`），`aria-hidden`，顏色吃 accent token。
-- 定位 class 於 `components/decor/decor.module.css`（`.doodle` + `.doodleTL/TR/BL/BR` + `.tiltA/B/C`）。
-- 已接入：SiteHeader 標題四周（5 個）、LatestHero（3 個）、SiteFooter（4 個），混色 pink/yellow/mint/sky/lilac。尊重 `prefers-reduced-motion`。
-- **StoryFilter 區塊目前刻意留白**（無 Doodle），避免中段裝飾過密；若補 1–2 個塗鴉須與 Header 呼應並回寫本文件（見 TODOS P2）。
+- `components/decor/Doodle.tsx` 仍可用；**上限**：SiteHeader／SiteFooter 合計各 ≤2 極淡點綴；LatestHero／StoryCard／StoryFilter **無** Doodle。
+- 尊重 `prefers-reduced-motion`。
 
-### 螢光筆色塊 `.marker`
-- 定義於 `app/globals.css`：文字壓在手繪螢光筆色塊上（`::before` 上色 + 微旋轉 + `filter: url(#rough-3)`）。
-- 變體：`.marker-pink/sky/mint/lilac`，或以 inline `--marker-color` 帶入 `story.color`。
-- 已套用：SiteHeader 副標、StoryFilter `groupLabel`/`topicLabel`、StoryCard EP、LatestHero CTA。
+### 標籤底 `.marker`
+- 定義於 `app/globals.css`：柔和 pill 底色（無粗糙濾鏡、無歪斜）；僅用於少數標籤（如 StoryCard EP）。
+- 變體：`.marker-pink/sky/mint/lilac`，或以 inline `--marker-color`。
 
 ## 字型
 
 - **Baloo 2**（Google Fonts，`next/font`）— 拉丁/數字內文
 - **jf-open 粉圓 huninn**（`next/font/local`，子集化）— 中文字
-- **Gochi Hand**（Google Fonts，`--font-marker`）— 手繪麥克筆風，僅含拉丁/數字；用於標題拉丁字符與英文標誌，中文回退 huninn。
+- **Gochi Hand**（Google Fonts，`--font-marker`）— 可點綴拉丁標誌；標題以字重／字級建立層次，**不再**使用 `-webkit-text-stroke` 仿麥克筆描邊。
 - Fallback：`PingFang TC`、`Microsoft JhengHei`、`Noto Sans TC`
 - 標題 1.8–2.3rem / 內文 1rem / 播放器字幕 1.15rem
-- **仿麥克筆標題**：中文標題（SiteHeader `.title`、topic 標題）以 `-webkit-text-stroke` + 偏移色塊陰影模擬手寫粗描邊（中文無現成麥克筆字型）。
 
 ## 圓角與陰影
 
 | Token | 值 |
 |-------|-----|
-| `--radius-sm` | 12px |
-| `--radius-md` | 18px |
-| `--radius-lg` | 24px |
-| `--radius-xl` | 30px |
-| `--shadow-card` | `0 4px 0 rgba(52, 48, 43, 0.18)`（夜間由 token 覆寫） |
+| `--radius-sm` | 14px |
+| `--radius-md` | 20px |
+| `--radius-lg` | 28px |
+| `--radius-xl` | 32px |
+| `--shadow-card` | 柔多層陰影（夜間由 token 覆寫；非厚底影） |
 
 ## 間距
 
@@ -119,9 +135,9 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 
 ## 互動
 
-- **按壓式按鈕**：`:active { transform: translateY(4px) }` 或 `scale(0.94)`，陰影消失
+- **按壓回饋**：`:active { transform: scale(0.98) }` 或微降 opacity；避免厚底影下沉與 hover 歪斜 rotate
 - **Focus**：`:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px }`；日間為主文字色，夜間為黃色。
-- **動效 token**：`--motion-press`（按鈕）、`--motion-page`（翻頁淡入）
+- **動效 token**：`--motion-press`（按鈕）、`--motion-page`（翻頁淡入）；另見全域 `.press-squash`
 - **`prefers-reduced-motion: reduce`**：關閉吉祥物 bounce 等非必要動畫
 
 ### 色彩分層
@@ -135,7 +151,7 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 | 元件 | 說明 |
 |------|------|
 | `SiteHeader` | 吉祥物 + 標題（首頁完整版 / 內頁精簡版） |
-| `StoryCard` | 封面 4:3、EP meta、主題色邊框 + 6px 底陰影 |
+| `StoryCard` | 封面、EP meta、elevated surface + 極淡主題色邊／柔陰影 |
 | `Chip` | 篩選與標籤 pill，`aria-pressed` |
 | `PlayButton` | 全寬 CTA，主題色底 |
 | `StoryMeta` | EP / 時長（標註） / 車種 chip |

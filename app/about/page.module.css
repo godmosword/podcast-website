@@ -14,13 +14,14 @@
 }
 
 .title {
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin: 0 0 24px;
+  font-size: 1.85rem;
+  font-weight: 800;
+  margin: 0 0 var(--space-8);
+  line-height: 1.2;
 }
 
 .section {
-  margin-bottom: 28px;
+  margin-bottom: var(--space-8);
 }
 
 .heading {
@@ -74,15 +75,16 @@
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
+  min-height: 44px;
   border-radius: 999px;
   font-weight: 700;
   font-size: 0.9rem;
   color: var(--ink);
-  background: linear-gradient(180deg, var(--card-2), var(--card));
-  border: 1.5px solid var(--line);
+  background: var(--surface-elevated);
+  border: 1px solid var(--hairline);
   box-shadow: var(--shadow-sm);
   text-decoration: none;
-  transition: transform var(--motion-press);
+  transition: transform var(--motion-press), opacity var(--motion-press);
 }
 
 .chipCount {
@@ -93,8 +95,13 @@
 
 @media (hover: hover) {
   .chip:hover {
-    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
   }
+}
+
+.chip:active {
+  transform: scale(0.98);
+  opacity: 0.92;
 }
 
 @media (max-width: 480px) {

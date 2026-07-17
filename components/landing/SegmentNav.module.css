@@ -23,10 +23,9 @@
   top: 22px;
   bottom: 22px;
   right: 16px;
-  width: 2px;
+  width: 1px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.42);
-  box-shadow: 0 1px 5px rgba(38, 20, 8, 0.28);
+  background: rgba(255, 255, 255, 0.28);
 }
 
 .dot {
@@ -46,29 +45,25 @@
 .dot::after {
   content: "";
   display: block;
-  width: 9px;
-  height: 9px;
+  width: 7px;
+  height: 7px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 2px solid rgba(80, 45, 20, 0.48);
-  box-shadow: 0 1px 5px rgba(38, 20, 8, 0.34);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   transition:
-    width 0.28s var(--ease-spring, cubic-bezier(0.34, 1.4, 0.64, 1)),
-    height 0.28s var(--ease-spring, cubic-bezier(0.34, 1.4, 0.64, 1)),
+    width 0.28s ease,
+    height 0.28s ease,
     background 0.2s ease,
     border-color 0.2s ease,
-    box-shadow 0.2s ease,
     opacity 0.2s ease;
 }
 
 .active.dot::after {
-  width: 13px;
-  height: 13px;
+  width: 10px;
+  height: 10px;
   background: var(--landing-brand, #ff8c2b);
-  border-color: rgba(255, 255, 255, 0.96);
-  box-shadow:
-    0 0 0 3px rgba(255, 140, 43, 0.3),
-    0 2px 8px rgba(255, 120, 20, 0.38);
+  border-color: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 0 2px rgba(255, 140, 43, 0.22);
 }
 
 .dotLabel {

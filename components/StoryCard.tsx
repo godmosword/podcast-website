@@ -5,7 +5,6 @@ import StoryCoverMorph from "@/components/story/StoryCoverMorph";
 import StoryImage from "./StoryImage";
 import { TagChip } from "./Chip";
 import StoryAge from "./StoryAge";
-import RoughFrame from "./decor/RoughFrame";
 import Icon from "./ui/Icon";
 import styles from "./StoryCard.module.css";
 
@@ -23,7 +22,7 @@ type StoryCardProps = {
 
 export default function StoryCard({
   story,
-  index = 0,
+  index: _index = 0,
   variant = "list",
   hideMeta = false,
   sharedCoverMorph = true,
@@ -35,10 +34,10 @@ export default function StoryCard({
       href={`/story/${story.slug}`}
       className={`${styles.card} ${isGrid ? styles.cardGrid : ""} scrollEnter press-squash`}
       style={{
-        boxShadow: `var(--shadow-md), 0 6px 0 ${story.color}`,
+        borderColor: `${story.color}28`,
+        boxShadow: `var(--shadow-card), 0 0 0 1px ${story.color}12`,
       }}
     >
-      <RoughFrame color={story.color} rough={index % 2 === 0 ? 1 : 2} width={3} />
       <div
         className={`${styles.thumbWrap} ${isGrid ? styles.thumbWrapGrid : ""}`}
         style={{ backgroundColor: `${story.color}22` }}

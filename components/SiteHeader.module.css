@@ -15,8 +15,8 @@
   margin: 0 auto 16px;
   border-radius: var(--radius-xl);
   overflow: hidden;
-  box-shadow: var(--shadow-md), var(--gloss);
-  border: 1px solid var(--line);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--hairline);
   background: var(--sky);
   line-height: 0;
 }
@@ -69,24 +69,21 @@
 }
 
 .title {
-  /* 拉丁/數字優先吃手繪字型；中文回退 huninn */
-  font-family: var(--font-marker), var(--font-baloo), var(--font-huninn),
-    "PingFang TC", "Microsoft JhengHei", sans-serif;
+  font-family: var(--font-baloo), var(--font-huninn), "PingFang TC",
+    "Microsoft JhengHei", sans-serif;
   font-size: 2.3rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  font-weight: 800;
+  letter-spacing: 0.01em;
   margin: 0;
-  /* 仿麥克筆粗描邊：細描邊 + 雙層偏移陰影 */
-  -webkit-text-stroke: 1px var(--ink);
-  text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.9), 3px 3px 0 var(--c-yellow);
+  color: var(--ink);
+  line-height: 1.15;
 }
 
 .titleCompact {
   font-size: 1.3rem;
   margin: 0;
   letter-spacing: 0;
-  -webkit-text-stroke: 0;
-  text-shadow: none;
+  font-weight: 700;
 }
 
 /* ---- 圓鈕：合作聯繫 / 許願投稿 / 留言給我 ---- */
@@ -111,23 +108,24 @@
   font-size: 1rem;
   line-height: 1.2;
   text-decoration: none;
-  /* 柔色膠囊：彩底 + 同色邊框 + 一點柔陰影，明顯但不立體不商業。 */
-  background: color-mix(in srgb, var(--btn) 30%, var(--mix-base));
-  border: 2px solid color-mix(in srgb, var(--btn) 62%, var(--mix-base));
-  box-shadow: 0 2px 5px rgba(52, 48, 43, 0.1);
-  transition: transform 0.14s ease, background 0.14s ease, box-shadow 0.14s ease;
+  /* 柔色膠囊：細邊 + 柔陰影 */
+  background: color-mix(in srgb, var(--btn) 28%, var(--mix-base));
+  border: 1px solid color-mix(in srgb, var(--btn) 45%, var(--mix-base));
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--motion-press), background var(--motion-press),
+    box-shadow var(--motion-press), opacity var(--motion-press);
 }
 
 @media (hover: hover) {
   .actionBtn:hover {
-    transform: translateY(-2px);
-    background: color-mix(in srgb, var(--btn) 42%, var(--mix-base));
-    box-shadow: 0 5px 10px rgba(52, 48, 43, 0.16);
+    background: color-mix(in srgb, var(--btn) 38%, var(--mix-base));
+    box-shadow: var(--shadow-md);
   }
 }
 
 .actionBtn:active {
-  transform: translateY(1px);
+  transform: scale(0.98);
+  opacity: 0.92;
 }
 
 @media (prefers-reduced-motion: reduce) {

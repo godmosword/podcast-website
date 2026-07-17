@@ -25,8 +25,9 @@
 .title {
   margin: 0;
   color: var(--ink);
-  font-size: 4rem;
-  line-height: 0.95;
+  font-size: clamp(2.4rem, 7vw, 3.6rem);
+  font-weight: 800;
+  line-height: 1.05;
 }
 
 .intro {
@@ -41,8 +42,10 @@
   width: min(1060px, 100%);
   margin: var(--space-section) auto 0;
   padding: clamp(20px, 4vw, 32px);
-  border-radius: var(--radius-sm);
-  background: var(--bg-2);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--hairline);
+  background: var(--surface-elevated);
+  box-shadow: var(--shadow-sm);
 }
 
 .faqSection h2 {

@@ -4,8 +4,6 @@ import { storyCoverPath } from "@/lib/story-utils";
 import StoryImage from "./StoryImage";
 import Ribbon from "./decor/Ribbon";
 import Sparkle from "./decor/Sparkle";
-import Doodle from "./decor/Doodle";
-import RoughFrame from "./decor/RoughFrame";
 import decor from "./decor/decor.module.css";
 import styles from "./LatestHero.module.css";
 
@@ -19,10 +17,10 @@ export default function LatestHero({ story }: LatestHeroProps) {
       href={`/story/${story.slug}`}
       className={styles.hero}
       style={{
-        boxShadow: `var(--shadow-md), 0 6px 0 ${story.color}`,
+        borderColor: `${story.color}33`,
+        boxShadow: `var(--shadow-card), 0 0 0 1px ${story.color}14`,
       }}
     >
-      <RoughFrame color={story.color} rough={2} width={4} shiftFilter />
       <div className={styles.topRow}>
         <Ribbon color={story.color}>NEW · EP {story.ep}</Ribbon>
       </div>
@@ -46,33 +44,14 @@ export default function LatestHero({ story }: LatestHeroProps) {
         <span className={styles.summary}>{story.summary}</span>
       )}
       <span
-        className={`${styles.cta} marker`}
-        style={{ ["--marker-color" as string]: story.color }}
+        className={styles.cta}
+        style={{
+          backgroundColor: `${story.color}22`,
+          color: story.color,
+        }}
       >
         立即看故事 →
       </span>
-
-      <Doodle
-        kind="loop"
-        size={40}
-        color="var(--c-yellow)"
-        className={`${decor.doodle} ${decor.doodleBR} ${decor.tiltC}`}
-      />
-      <Doodle
-        kind="dots"
-        size={28}
-        color="var(--c-pink)"
-        className={`${decor.doodle} ${decor.doodleTR}`}
-        style={{ top: "-12px", right: "-8px" }}
-      />
-      <Doodle
-        kind="squiggle"
-        size={34}
-        color="var(--c-mint)"
-        draw
-        className={`${decor.doodle} ${decor.doodleBL} ${decor.tiltA}`}
-        style={{ left: "-10px", bottom: "-14px" }}
-      />
     </Link>
   );
 }

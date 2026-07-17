@@ -14,17 +14,17 @@
 }
 
 .title {
-  font-family: var(--font-marker), var(--font-baloo), var(--font-huninn),
-    "PingFang TC", "Microsoft JhengHei", sans-serif;
-  font-size: 1.8rem;
-  font-weight: 700;
+  font-family: var(--font-baloo), var(--font-huninn), "PingFang TC",
+    "Microsoft JhengHei", sans-serif;
+  font-size: 1.85rem;
+  font-weight: 800;
   margin: 0 0 6px;
-  -webkit-text-stroke: 0.6px var(--ink);
-  text-shadow: 2px 2px 0 var(--c-yellow);
+  line-height: 1.2;
+  color: var(--ink);
 }
 
 .subtitle {
-  margin: 0 0 20px;
+  margin: 0 0 var(--space-8);
   color: var(--ink-soft);
   font-weight: 600;
 }
@@ -39,24 +39,30 @@
 }
 
 .tagLink {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   font-size: 0.9rem;
   font-weight: 700;
   color: var(--ink);
   padding: 10px 18px;
   border-radius: 999px;
-  background: var(--card);
-  border: 1.5px solid var(--line);
+  background: var(--surface-elevated);
+  border: 1px solid var(--hairline);
   box-shadow: var(--shadow-sm);
-  transition: transform var(--motion-press), box-shadow var(--motion-press);
+  transition: transform var(--motion-press), box-shadow var(--motion-press),
+    background var(--motion-press), opacity var(--motion-press);
 }
 
 @media (hover: hover) {
   .tagLink:hover {
-    transform: translateY(-1px);
     box-shadow: var(--shadow-md);
-    background: var(--leaf);
-    color: var(--on-dark);
-    border-color: var(--warm-accent);
+    background: color-mix(in srgb, var(--c-mint) 28%, var(--surface-elevated));
+    border-color: color-mix(in srgb, var(--warm-accent) 35%, var(--hairline));
   }
+}
+
+.tagLink:active {
+  transform: scale(0.98);
+  opacity: 0.92;
 }

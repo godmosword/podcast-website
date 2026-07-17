@@ -1,39 +1,42 @@
 .hero {
   position: relative;
   display: block;
-  margin-bottom: 22px;
-  padding: 20px; /* 原 16 + 補回原 4px 邊框空間 */
+  margin-bottom: var(--space-6);
+  padding: var(--space-6);
   border-radius: var(--radius-xl);
-  background: linear-gradient(180deg, var(--card-2), var(--card));
+  background: var(--surface-elevated);
+  border: 1px solid var(--hairline);
   color: inherit;
-  transition: transform var(--motion-press), box-shadow var(--motion-press);
+  transition: transform var(--motion-press), box-shadow var(--motion-press),
+    opacity var(--motion-press);
 }
 
 .hero:active {
-  transform: translateY(4px);
-  box-shadow: none !important;
+  transform: scale(0.98);
+  opacity: 0.96;
 }
 
 @media (hover: hover) {
   .hero:hover {
-    transform: translateY(-3px);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
   }
 }
 
 .topRow {
   display: flex;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
 }
 
 .coverWrap {
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
-  margin-bottom: 14px;
+  margin-bottom: var(--space-4);
   border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: var(--gloss);
+  box-shadow: var(--shadow-sm);
 }
 
 .cover {
@@ -54,6 +57,7 @@
   font-weight: 700;
   margin-bottom: 6px;
   color: var(--ink);
+  line-height: 1.25;
 }
 
 .summary {
@@ -63,10 +67,19 @@
   color: var(--ink-soft);
 }
 
+.cta {
+  display: inline-flex;
+  margin-top: var(--space-4);
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
 @media (max-width: 480px) {
   .hero {
-    padding: 16px;
-    margin-bottom: 18px;
+    padding: var(--space-4);
+    margin-bottom: var(--space-4);
   }
 
   .title {
@@ -78,9 +91,8 @@
   }
 }
 
-.cta {
-  display: inline-block;
-  margin-top: 12px;
-  font-size: 0.95rem;
-  font-weight: 700;
+@media (prefers-reduced-motion: reduce) {
+  .hero:hover {
+    transform: none;
+  }
 }

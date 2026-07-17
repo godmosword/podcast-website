@@ -3,22 +3,24 @@
   font-weight: 600;
   color: var(--ink);
   padding: 7px 14px;
+  min-height: 44px;
   border-radius: 999px;
-  background: var(--card);
-  border: 1.5px solid var(--line);
-  box-shadow: var(--shadow-sm);
-  transition: transform var(--motion-press), box-shadow var(--motion-press),
-    background var(--motion-press);
+  background: var(--surface-elevated);
+  border: 1px solid var(--hairline);
+  box-shadow: none;
+  transition: transform var(--motion-press), background var(--motion-press),
+    border-color var(--motion-press), opacity var(--motion-press);
 }
 
 @media (hover: hover) {
   .chip:hover {
-    transform: translateY(-1px);
+    background: var(--bg-2);
   }
 }
 
 .chip:active {
-  transform: scale(0.95);
+  transform: scale(0.98);
+  opacity: 0.92;
 }
 
 .active {
