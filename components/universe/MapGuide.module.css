@@ -1,0 +1,138 @@
+.guide {
+  position: absolute;
+  top: 16px;
+  right: calc(16px + var(--safe-right));
+  z-index: 4;
+  width: min(236px, calc(100% - 32px));
+  padding: 12px 14px 11px;
+  border: 2px solid rgba(167, 120, 61, 0.42);
+  border-radius: 18px;
+  color: #684b24;
+  background: rgba(255, 249, 234, 0.92);
+  box-shadow: 0 5px 0 rgba(123, 83, 35, 0.16), 0 10px 22px rgba(52, 73, 92, 0.16);
+  pointer-events: none;
+}
+
+.headingRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.heading {
+  font-size: 15px;
+  letter-spacing: 0.04em;
+}
+
+.openCount {
+  color: #835a23;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.instruction {
+  margin: 5px 0 9px;
+  color: #755a38;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.legendItem span:nth-child(2) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.legendItem b {
+  margin-left: auto;
+  min-width: 17px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  color: #684b24;
+  background: rgba(221, 190, 131, 0.44);
+  text-align: center;
+}
+
+.gestureHint {
+  margin: 10px 0 0;
+  color: #8a6a43;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.gestureHint span {
+  margin-right: 3px;
+}
+
+.gestureHint span:nth-of-type(2) {
+  margin: 0 5px;
+}
+
+:global(html[data-theme="night"]) .guide {
+  border-color: rgba(234, 198, 125, 0.42);
+  color: #fff2d2;
+  background: rgba(48, 65, 91, 0.9);
+  box-shadow: 0 5px 0 rgba(10, 26, 50, 0.25), 0 10px 22px rgba(10, 26, 50, 0.24);
+}
+
+:global(html[data-theme="night"]) .openCount,
+:global(html[data-theme="night"]) .instruction,
+:global(html[data-theme="night"]) .gestureHint {
+  color: #f3d89c;
+}
+
+:global(html[data-theme="night"]) .legendItem b {
+  color: #fff2d2;
+  background: rgba(226, 191, 120, 0.24);
+}
+
+@media (max-width: 480px) {
+  .guide {
+    top: 56px;
+    right: calc(10px + var(--safe-right));
+    left: calc(10px + var(--safe-left));
+    width: auto;
+    padding: 8px 11px;
+    border-radius: 14px;
+  }
+
+  .heading {
+    font-size: 13px;
+  }
+
+  .openCount {
+    font-size: 10px;
+  }
+
+  .instruction {
+    margin: 2px 0 0;
+    font-size: 12px;
+  }
+
+  .legend,
+  .gestureHint {
+    display: none;
+  }
+}

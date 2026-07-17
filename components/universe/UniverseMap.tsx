@@ -26,6 +26,7 @@ import { computeZoneProgress, useCompletedSlugs } from "@/hooks/useZoneProgress"
 import { useTheme } from "@/components/ThemeProvider";
 import { MapDecorBirds, MapDecorNearWater } from "./MapDecorLayer";
 import MapBridgeLayer from "./MapBridgeLayer";
+import MapGuide from "./MapGuide";
 import MapRoamerLayer from "./MapRoamerLayer";
 import MapControls from "./MapControls";
 import NightFireworks from "./NightFireworks";
@@ -373,6 +374,7 @@ function UniverseMapContent({
         tabIndex={0}
         role="application"
         aria-label="車車樂園互動地圖：方向鍵平移，加減鍵或右下角按鈕縮放"
+        aria-describedby="universe-map-guide"
         onKeyDown={handleMapKeyDown}
         onPointerDown={(e) => {
           if (!(e.target as Element).closest("button")) cancelPendingReveal();
@@ -540,6 +542,8 @@ function UniverseMapContent({
           daylight={daylight}
         />
       </div>
+
+      <MapGuide zones={zones} />
 
       {/* 日月星：海洋滿版後改為 screen-space 固定天象裝飾（不隨鏡頭移動）；
           z:3 高於滿版海(stage z:1)與夜幕(z:2)，天象才不會被海面蓋掉 */}

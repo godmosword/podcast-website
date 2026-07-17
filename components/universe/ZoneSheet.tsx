@@ -63,6 +63,7 @@ export default function ZoneSheet({
   const notifyHref = notifyMailto(zone.name);
   const wishPanelId = `${titleId}-wish`;
   const parentPanelId = `${titleId}-parent`;
+  const hasStories = (zoneStories?.total ?? 0) > 0;
 
   return (
     <div className={styles.overlay} role="presentation" onClick={onClose}>
@@ -103,6 +104,15 @@ export default function ZoneSheet({
         </div>
 
         <p className={styles.teaser}>{zone.teaser}</p>
+
+        <p className={styles.actionHint}>
+          <span aria-hidden="true">{zone.status === "open" ? "👆" : meta.icon}</span>{" "}
+          {zone.status === "open"
+            ? hasStories
+              ? "點一個故事，馬上開始聽"
+              : "一起探索這座島吧"
+            : meta.tapBubble ?? "這座島正在準備中，先來看看吧"}
+        </p>
 
         {zoneStories && zoneStories.total > 0 ? (
           <section className={styles.stories} aria-labelledby={`${titleId}-stories`}>
