@@ -50,6 +50,8 @@ interface Player {
 export interface GameState {
   lv: AdventureLevel;
   levelIndex: number;
+  /** 兒童模式：加寬跳躍容錯，讓第一次玩也能掌握節奏。 */
+  assist: boolean;
   player: Player;
   cam: number;
   score: number;
@@ -79,11 +81,13 @@ function loadAdventureLevel(index: number): AdventureLevel {
 export function createGameState(
   idx: number,
   startLives: number,
+  assist = false,
 ): GameState {
   const lv = loadAdventureLevel(idx);
   return {
     lv,
     levelIndex: idx,
+    assist,
     player: {
       x: lv.start.x,
       y: lv.start.y,

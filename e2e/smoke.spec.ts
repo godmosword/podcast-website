@@ -190,6 +190,7 @@ test("繽紛樂園（Block Drop）頁面可載入", async ({ page }) => {
   await page.goto("/games/block-drop");
   await expect(page.getByRole("link", { name: "← 回遊樂園" })).toBeVisible();
   await expect(page.getByLabel(/^分數 /)).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole("progressbar")).toBeVisible();
 });
 
 test("家庭儀表板頁面可載入", async ({ page }) => {
@@ -208,6 +209,7 @@ test("繽紛消消樂：標題 → 地圖 → 第 1 關棋盤", async ({ page })
   await expect(page.getByText("遊樂園地圖")).toBeVisible();
   await page.getByRole("button", { name: /第 1 關/ }).click();
   await expect(page.getByTestId("candy-match-board")).toBeVisible();
+  await expect(page.getByRole("progressbar", { name: "任務完成度" })).toBeVisible();
   // 任務列與道具列存在
   await expect(page.getByText(/泡泡/)).toBeVisible();
   await expect(page.getByRole("button", { name: /提示/ })).toBeVisible();

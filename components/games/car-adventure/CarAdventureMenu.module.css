@@ -51,6 +51,14 @@
   color: #cdd9f0;
 }
 
+.assistNote {
+  margin: -0.2rem 0 0;
+  color: #ffe08a;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-align: center;
+}
+
 .tutorialBtn {
   align-self: center;
   min-height: 48px;
@@ -92,6 +100,14 @@
   overflow-y: auto;
   padding: 0.15rem;
   -webkit-overflow-scrolling: touch;
+}
+
+.levelHint {
+  margin: 0;
+  color: #d8e4ff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.45;
 }
 
 .chip {

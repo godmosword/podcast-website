@@ -506,6 +506,15 @@ export default function CandyMatchGame() {
     gap: 6,
   };
 
+  const currentGoals = taskGoals(level.task, progress);
+  const goalProgress = currentGoals.length
+    ? Math.min(
+        1,
+        currentGoals.reduce((sum, goal) => sum + Math.min(goal.got, goal.need), 0) /
+          currentGoals.reduce((sum, goal) => sum + goal.need, 0),
+      )
+    : 0;
+
   return (
     <GameChrome announce={announce}>
       <div
@@ -624,15 +633,13 @@ export default function CandyMatchGame() {
 
         {screen === "play" && board && (
           <>
-            {/* 任務列 */}
+            {/* 任務列：目標、進度與剩餘步數放在同一個視覺群組，孩子不用猜「現在要做什麼」。 */}
             <div
               className={styles.taskBar}
+              aria-label="本關任務進度"
               style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: 12,
-                flexWrap: "wrap",
+                display: "grid",
+                gap: 7,
                 background: "rgba(255,255,255,.82)",
                 borderRadius: 18,
                 padding: "8px 14px",
@@ -640,19 +647,27 @@ export default function CandyMatchGame() {
                 boxShadow: "0 6px 14px rgba(150,110,130,.12)",
               }}
             >
-              {taskGoals(level.task, progress).map((g, i) => (
-                <span
-                  key={i}
-                  style={{ display: "inline-flex", alignItems: "center", gap: 5, fontWeight: 900, color: INK, fontSize: 17 }}
-                >
-                  {g.icon} {Math.min(g.got, g.need)}/{g.need}
-                </span>
-              ))}
-              {level.moves > 0 && (
-                <span style={{ color: movesLeft <= 5 ? ACCENT_PINK : INK_SOFT, fontWeight: 900, fontSize: 15 }}>
-                  剩 {movesLeft} 步
-                </span>
-              )}
+              <div className={styles.taskHeading}>
+                <span className={styles.taskKicker}>第 {levelIndex + 1}/{CANDY_MATCH_LEVELS.length} 關 · {level.name}</span>
+                <strong>{taskIntro(level.task)}</strong>
+                {level.moves > 0 ? (
+                  <span className={movesLeft <= 5 ? styles.movesWarning : styles.movesLabel}>
+                    還有 {movesLeft} 步
+                  </span>
+                ) : (
+                  <span className={styles.movesLabel}>慢慢找，沒有時間限制</span>
+                )}
+              </div>
+              <div className={styles.taskProgressTrack} role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(goalProgress * 100)} aria-label="任務完成度">
+                <span className={styles.taskProgressFill} style={{ width: `${Math.max(5, goalProgress * 100)}%` }} />
+              </div>
+              <div className={styles.taskGoals}>
+                {currentGoals.map((g, i) => (
+                  <span key={i} className={styles.taskGoal}>
+                    {g.icon} {Math.min(g.got, g.need)}/{g.need}
+                  </span>
+                ))}
+              </div>
             </div>
 
             <div className={styles.boardWrap} style={{ display: "flex", justifyContent: "center" }}>

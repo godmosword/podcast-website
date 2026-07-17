@@ -2,6 +2,7 @@
 
 import { useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { DROP_ITEM, type BoardState } from "@/lib/games/candy-match/engine";
+import { CANDY_MATCH_PIECES } from "@/lib/games/candy-match/levels";
 import { DirtOverlay, PieceArt, PieceGift } from "@/components/games/CandyMatchPieceArt";
 
 /**
@@ -94,6 +95,11 @@ export function CandyMatchBoard({
         const isHint = hintSet.has(i);
         const isPopping = popping.has(i);
         const isShaking = shaking.has(i);
+        const pieceName = v === DROP_ITEM
+          ? "禮物盒"
+          : v >= 0
+            ? CANDY_MATCH_PIECES[v]?.name ?? "圖案"
+            : "空格";
         const cellStyle: CSSProperties = {
           position: "relative",
           width: cellPx,
@@ -125,7 +131,9 @@ export function CandyMatchBoard({
           <button
             key={i}
             type="button"
-            aria-label={`格子 ${(i % cols) + 1}-${Math.floor(i / cols) + 1}`}
+            aria-label={`第 ${Math.floor(i / cols) + 1} 列第 ${(i % cols) + 1} 格，${pieceName}`}
+            aria-pressed={isSelected}
+            data-selected={isSelected ? "true" : undefined}
             style={cellStyle}
             onPointerDown={onPointerDown(i)}
             onPointerMove={onPointerMove}

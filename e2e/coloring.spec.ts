@@ -86,6 +86,7 @@ test.describe("coloring book", () => {
 
   test("工具列具備筆刷三檔與縮放還原", async ({ page }) => {
     await openFirstColoringPage(page);
+    await expect(page.getByText(/先選顏色，再用蠟筆/)).toBeVisible();
     for (const name of ["筆刷細", "筆刷中", "筆刷粗"]) {
       await expect(page.getByRole("button", { name })).toBeVisible();
     }

@@ -1558,6 +1558,7 @@ export default function BlockDropGame() {
   const currentDifficulty = DIFFICULTY_CONFIG[blockDropDifficulty];
   const specialMode = blockDropSpecialMode;
   const topOut = g.status === "over" && g.overReason === "topout";
+  const linesInLevel = g.lines % 10;
 
   const switchToRelaxedAndRestart = () => {
     difficultyRef.current = "relaxed";
@@ -1701,6 +1702,51 @@ export default function BlockDropGame() {
       >
         <span>最佳</span>
         <IconTrophy size={12} /> {Math.max(best ?? 0, g.score)}
+      </div>
+      <div
+        style={{
+          width: "100%",
+          marginTop: 5,
+          display: "grid",
+          gap: 3,
+        }}
+        aria-label={`升級進度 ${linesInLevel}/10 行`}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            color: MACARON_THEME.inkSoft,
+            fontSize: 10,
+            fontWeight: 800,
+          }}
+        >
+          <span>升級進度</span>
+          <span>{linesInLevel}/10 行</span>
+        </div>
+        <div
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={10}
+          aria-valuenow={linesInLevel}
+          style={{
+            height: 6,
+            overflow: "hidden",
+            borderRadius: 999,
+            background: "rgba(216,199,255,.46)",
+          }}
+        >
+          <span
+            style={{
+              display: "block",
+              width: `${Math.max(4, linesInLevel * 10)}%`,
+              height: "100%",
+              borderRadius: "inherit",
+              background: "linear-gradient(90deg,#b9f3db,#8ddff0,#c9b4ff)",
+              transition: "width .2s ease",
+            }}
+          />
+        </div>
       </div>
     </div>
   );

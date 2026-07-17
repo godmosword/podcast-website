@@ -93,7 +93,7 @@ function die(g: GameState, fx: PhysicsCallbacks): void {
   p.y = g.lv.start.y;
   p.vx = 0;
   p.vy = 0;
-  p.invuln = INVULN;
+  p.invuln = INVULN + (g.assist ? 0.8 : 0);
   g.cam = 0;
 }
 
@@ -105,6 +105,8 @@ export function updateAdventure(
 ): void {
   const p = g.player;
   const inp = g.input;
+  const coyoteWindow = g.assist ? 0.15 : COYOTE;
+  const jumpBuffer = g.assist ? 0.18 : BUFFER;
   if (inp.left && !inp.right) {
     p.vx = Math.max(-MAXVX, p.vx - MOVE * dt);
     p.facing = -1;
@@ -116,7 +118,7 @@ export function updateAdventure(
   p.jumpBuf -= dt;
   p.coyote -= dt;
   if (inp.jump && !p.jumpHeld) {
-    p.jumpBuf = BUFFER;
+    p.jumpBuf = jumpBuffer;
     p.jumpHeld = true;
   }
   if (!inp.jump) {
@@ -127,7 +129,7 @@ export function updateAdventure(
     p.jumpHeld = false;
   }
   if (p.jumpBuf > 0 && (p.onGround || p.coyote > 0)) {
-    p.vy = -JUMP;
+    p.vy = -(g.assist ? JUMP * 1.08 : JUMP);
     p.onGround = false;
     p.coyote = 0;
     p.jumpBuf = 0;
@@ -141,7 +143,7 @@ export function updateAdventure(
   p.y += p.vy * dt;
   p.onGround = false;
   collide(g, "y");
-  if (p.onGround) p.coyote = COYOTE;
+  if (p.onGround) p.coyote = coyoteWindow;
   if (p.invuln > 0) p.invuln -= dt;
 
   const box = { l: p.x, r: p.x + p.w, t: p.y, b: p.y + p.h };

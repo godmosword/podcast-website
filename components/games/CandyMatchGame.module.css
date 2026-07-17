@@ -81,6 +81,69 @@
   border: 1.5px solid color-mix(in srgb, var(--c-pink) 22%, transparent);
 }
 
+.taskHeading {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 10px;
+  align-items: baseline;
+  color: #5d4a67;
+}
+
+.taskHeading strong {
+  grid-column: 1 / -1;
+  font-size: 1rem;
+}
+
+.taskKicker,
+.movesLabel,
+.movesWarning {
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.taskKicker,
+.movesLabel {
+  color: #7c6886;
+}
+
+.movesWarning {
+  color: #a5567a;
+}
+
+.taskProgressTrack {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--c-lilac) 28%, white);
+}
+
+.taskProgressFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--c-mint), var(--c-sky), var(--c-pink));
+  transition: width 220ms ease;
+}
+
+.taskGoals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.taskGoal {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 30px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: #5d4a67;
+  background: color-mix(in srgb, var(--c-yellow) 24%, white);
+  font-size: 0.87rem;
+  font-weight: 900;
+}
+
 .boardWrap {
   padding: 4px 0 2px;
 }
@@ -111,5 +174,9 @@
   .mapScreen button:hover,
   .actionRow button:hover {
     transform: none;
+  }
+
+  .taskProgressFill {
+    transition: none;
   }
 }

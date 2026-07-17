@@ -44,6 +44,19 @@ describe("car-adventure physics", () => {
     expect(g.player.vy).toBeLessThan(0);
   });
 
+  it("兒童模式提供更寬鬆的跳躍高度", () => {
+    const normal = createGameState(0, 3, false);
+    const assisted = createGameState(0, 5, true);
+    normal.player.onGround = true;
+    assisted.player.onGround = true;
+    normal.input.jump = true;
+    assisted.input.jump = true;
+    updateAdventure(normal, 1 / 60, makeFx());
+    updateAdventure(assisted, 1 / 60, makeFx());
+    expect(assisted.player.vy).toBeLessThan(normal.player.vy);
+    expect(assisted.assist).toBe(true);
+  });
+
   it("掉出世界底部會扣命並觸發 onHurt", () => {
     const g = createGameState(0, 3);
     g.player.y = g.lv.worldH + 200;

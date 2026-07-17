@@ -9,6 +9,7 @@ export type CarAdventureMenuProps = {
   status: Status;
   levelIndex: number;
   score: number | null;
+  kidsMode?: boolean;
   coverSrc: string;
   onSelectLevel: (index: number) => void;
   onStart: () => void;
@@ -39,6 +40,7 @@ export function CarAdventureMenu({
   status,
   levelIndex,
   score,
+  kidsMode = false,
   coverSrc,
   onSelectLevel,
   onStart,
@@ -66,6 +68,9 @@ export function CarAdventureMenu({
         <>
           <p className={styles.hint}>
             左右移動、上鍵或空白鍵跳躍；踩搗蛋車、吃金幣、躲尖刺，衝向終點旗！
+          </p>
+          <p className={styles.assistNote}>
+            {kidsMode ? "🧒 兒童模式：5 顆愛心，跳躍判定更寬鬆" : "每關約 1–2 分鐘，失敗後可以立刻再試一次"}
           </p>
           {onOpenTutorial && (
             <button
@@ -106,6 +111,16 @@ export function CarAdventureMenu({
                 );
               })}
             </div>
+            <p className={styles.levelHint} aria-live="polite">
+              {[
+                "先熟悉左右移動與跳躍",
+                "加入平台與短缺口",
+                "開始練習高低跳躍",
+                "尖刺與敵人變多，記得慢慢來",
+                "黃昏賽道：連續跳躍挑戰",
+                "最後一站，收集金幣再衝刺",
+              ][levelIndex]}
+            </p>
           </div>
         </>
       )}

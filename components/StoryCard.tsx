@@ -22,17 +22,18 @@ type StoryCardProps = {
 
 export default function StoryCard({
   story,
-  index: _index = 0,
+  index = 0,
   variant = "list",
   hideMeta = false,
   sharedCoverMorph = true,
 }: StoryCardProps) {
   const isGrid = variant === "grid";
+  const staggerClass = `scrollEnterStagger${(index % 3) + 1}`;
 
   return (
     <Link
       href={`/story/${story.slug}`}
-      className={`${styles.card} ${isGrid ? styles.cardGrid : ""} scrollEnter press-squash`}
+      className={`${styles.card} ${isGrid ? styles.cardGrid : ""} scrollEnter ${staggerClass} press-squash`}
       style={{
         borderColor: `${story.color}28`,
         boxShadow: `var(--shadow-card), 0 0 0 1px ${story.color}12`,

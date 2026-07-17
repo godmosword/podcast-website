@@ -213,6 +213,20 @@ describe("關卡資料", () => {
     expect(lv.moves).toBe(0);
   });
 
+  it("兒童模式降低任務量且不會製造無法完成的清潔任務", () => {
+    const clean = kidsModeLevel(CANDY_MATCH_LEVELS[4]);
+    const parade = kidsModeLevel(CANDY_MATCH_LEVELS[8]);
+    expect(clean.dirtCount).toBe(3);
+    expect(clean.task.kind).toBe("clean-dirt");
+    if (clean.task.kind === "clean-dirt") {
+      expect(clean.task.count).toBeLessThanOrEqual(clean.dirtCount ?? 0);
+    }
+    expect(parade.task.kind).toBe("collect-multi");
+    if (parade.task.kind === "collect-multi") {
+      expect(parade.task.targets.every((target) => target.count <= 4)).toBe(true);
+    }
+  });
+
   it("任務型涵蓋三種＋教學/慶祝關", () => {
     const kinds = new Set(CANDY_MATCH_LEVELS.map((lv) => lv.task.kind));
     expect(kinds.has("collect")).toBe(true);

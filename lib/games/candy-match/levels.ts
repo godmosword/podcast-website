@@ -171,11 +171,40 @@ export const CANDY_MATCH_LEVELS: CandyMatchLevel[] = [
 
 /** 兒童模式（3–4 歲）覆寫：5x5、最多 4 種圖案、不限步數。 */
 export function kidsModeLevel(level: CandyMatchLevel): CandyMatchLevel {
+  const gentlerCount = (count: number) => Math.max(1, Math.ceil(count * 0.75));
+  const task: CandyMatchTask = (() => {
+    switch (level.task.kind) {
+      case "clear-any":
+      case "collect":
+      case "drop-item":
+        return { ...level.task, count: gentlerCount(level.task.count) };
+      case "clean-dirt":
+        return {
+          ...level.task,
+          count: Math.min(
+            gentlerCount(level.task.count),
+            Math.max(1, Math.min(level.dirtCount ?? level.task.count, 3)),
+          ),
+        };
+      case "collect-multi":
+        return {
+          ...level.task,
+          targets: level.task.targets.map((target) => ({
+            ...target,
+            count: gentlerCount(target.count),
+          })),
+        };
+    }
+  })();
+
   return {
     ...level,
     cols: 5,
     rows: 5,
     pieceKinds: Math.min(level.pieceKinds, 4),
     moves: 0,
+    task,
+    dirtCount: Math.min(level.dirtCount ?? 0, 3),
+    dropCount: Math.min(level.dropCount ?? 0, 1),
   };
 }

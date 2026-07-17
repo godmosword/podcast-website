@@ -47,6 +47,10 @@ export function GameIntro({ gameId }: { gameId: GameKitGameId }) {
             <span key={control}>{control}</span>
           ))}
         </div>
+        <div className={styles.playFacts} aria-label="遊玩條件">
+          <span>{game.hasTimer ? "⏱ 有計時挑戰" : "🌿 沒有時間壓力"}</span>
+          <span>{game.hasScore ? "⭐ 有分數回饋" : "🎨 自由完成"}</span>
+        </div>
         <Link href="/games" className={styles.moreLink}>
           看其他遊戲 <span aria-hidden>→</span>
         </Link>

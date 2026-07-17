@@ -96,7 +96,7 @@ export default function CarAdventureGame() {
 
   const reset = useCallback((idx = levelIndexRef.current) => {
     const startLives = kidsModeRef.current ? 5 : 3;
-    game.current = createGameState(idx, startLives);
+    game.current = createGameState(idx, startLives, kidsModeRef.current);
     levelStartLivesRef.current = startLives;
   }, []);
 
@@ -303,6 +303,7 @@ export default function CarAdventureGame() {
           status={status}
           levelIndex={levelIndex}
           score={game.current?.score ?? null}
+          kidsMode={kidsMode}
           coverSrc={COVER}
           onSelectLevel={(i) => {
             levelIndexRef.current = i;

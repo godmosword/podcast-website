@@ -510,5 +510,22 @@ export function drawAdventureHud(
     ctx.fillText(entry.text, 6 + 26, y + panelH / 2 + 0.5);
     y += panelH + gapY;
   }
+
+  // 小型關卡進度條：讓孩子知道終點在哪裡，降低「還要走多久」的不確定感。
+  const finish = g.lv.finish;
+  const span = Math.max(1, finish.x - g.lv.start.x);
+  const progress = Math.max(0, Math.min(1, (g.player.x - g.lv.start.x) / span));
+  const barX = 6;
+  const barY = 166;
+  const barW = 142;
+  ctx.fillStyle = CLAY.hudPanel;
+  rr(ctx, barX, barY, barW, 8, 4);
+  ctx.fill();
+  ctx.fillStyle = CLAY.yellow;
+  rr(ctx, barX + 2, barY + 2, Math.max(4, (barW - 4) * progress), 4, 2);
+  ctx.fill();
+  ctx.fillStyle = CLAY.ink;
+  ctx.font = '700 9px "jf-open 粉圓", "Baloo 2", "PingFang TC", system-ui, sans-serif';
+  ctx.fillText(`${Math.round(progress * 100)}% 到終點`, barX + barW + 6, barY + 4.5);
   ctx.restore();
 }

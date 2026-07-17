@@ -23,7 +23,7 @@ describe("game logic regressions", () => {
     const game = source("components/games/car-adventure/CarAdventureGame.tsx");
 
     expect(game).toContain("const startLives = kidsModeRef.current ? 5 : 3;");
-    expect(game).toContain("createGameState(idx, startLives)");
+    expect(game).toContain("createGameState(idx, startLives, kidsModeRef.current)");
     expect(game).toContain("levelStartLivesRef.current = startLives;");
   });
 

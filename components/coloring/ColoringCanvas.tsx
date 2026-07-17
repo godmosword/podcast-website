@@ -589,6 +589,10 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
         <p className={styles.pageTitle}>{page.title}</p>
       </div>
 
+      <p className={styles.guide}>
+        先選顏色，再用蠟筆塗一塗；想填滿一大片就用油漆桶。兩指可以放大找細節！
+      </p>
+
       <div className={styles.stage} ref={stageRef}>
         <canvas
           ref={displayRef}
