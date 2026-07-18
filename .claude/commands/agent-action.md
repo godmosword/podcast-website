@@ -1,10 +1,10 @@
 ---
-description: 依 Approved Plan 實作＋驗證（podcast-website）；改檔只走 leader／Sonnet／Haiku，外部模型任唯讀顧問；小 diff 可跳過 diff 審。
+description: 依 Approved Plan 實作＋驗證（podcast-website）；Leader＝Fable 5→Opus fallback；L1／L2 對齊 Grok 4.5 High Fast；外部顧問唯讀；小 diff 可跳過 diff 審。
 ---
 
 # Agent Action（podcast-website 行動小組版）
 
-你（Claude，**leader**）主持這次執行。任務或 plan 路徑：
+你扮演 **Leader（Claude Code：Fable 5 Thinking Medium 優先；不可用時 Opus 4.8 Thinking Medium）** 主持這次執行。任務或 plan 路徑：
 
 $ARGUMENTS
 
@@ -21,13 +21,13 @@ $ARGUMENTS
 
 ## 2. 分級執行
 
-**改檔只有三條路：leader、Sonnet 子 agent、Haiku 子 agent。**
+**改檔路徑（對齊 Claude Code group）：**
 
 | 級別 | 判準 | 執行者 |
 |------|------|--------|
 | **L3** | Protected paths、跨模組、schema | **Leader 親自**（`scripts/illustrate*`、sync workflows、`app/legal/` 依 Domain 只能 leader／Opus） |
-| **L2** | 多檔、模式固定 | Agent tool `model: "sonnet"`（**中文文案一律 Sonnet**） |
-| **L1** | 單檔 routine | 路徑已知 → Sonnet 或 Haiku；路徑不明可先探索；&lt;10 行 → leader 直接做 |
+| **L2** | 多檔、模式固定 | **Grok 4.5 High Fast**：`cursor-agent -p --model cursor-grok-4.5-high-fast --mode ask` 出 patch → **Leader 落檔**；**中文文案一律 Sonnet** Agent tool |
+| **L1** | 單檔 routine | 同 L2（Grok patch＋Leader 落檔）；中文 → Sonnet；&lt;10 行 → leader 直接做 |
 | **L0** | 純命令 | Bash |
 
 **行動小組（外部顧問，全部唯讀）**：卡關要第二意見、或實作後需 diff 審查時呼叫；先依 FAILURES 探活，失敗即記錄＋標缺席。
@@ -38,12 +38,11 @@ $ARGUMENTS
 |------|------|----------|
 | Opus 4.8 設計審 | UX／設計／a11y 視覺 | Agent tool `architect` + `model: "opus"` |
 | Codex CLI 工程審 | TS/React diff 審、工程第二意見 | `codex exec -m gpt-5.6-luna -c model_reasoning_effort="medium" "<prompt + diff>" </dev/null`（**Claude Code 專用**；Cursor 對標 `gpt-5.6-luna-max-fast`） |
-| Grok 4.5（CLI） | 對抗審：找 diff 的 edge case | `grok models` 探活 → `grok -p "<prompt>" -m grok-4.5 --effort medium --no-plan`；不可用 → 缺席 |
-| Composer 2.5 | 快速 sanity check | `cursor-agent -p --model composer-2.5-fast --mode ask "<prompt>"` |
+| Grok 4.5 High Fast 對抗審 | 對抗審：找 diff 的 edge case | `cursor-agent -p --model cursor-grok-4.5-high-fast --mode ask "<prompt>"`；slug 拒收 → 備援 `grok -p "<prompt>" -m grok-4.5 --effort high --no-plan`（見 FAILURES 探活）；兩路皆不可用 → 缺席 |
 
 **執行紅線：**
-- 禁止用 `codex exec`／`grok`／`cursor-agent` 直接改 repo 檔案——顧問只出建議 patch，由 leader 落檔
-- Grok 不碰中文（校對、文案、字幕）
+- 禁止用 `codex exec`／`grok`／`cursor-agent` **直接**改 repo 檔案——顧問／Grok 實作建議只出 patch，由 leader 落檔
+- 中文校對、字幕、scenes → **Sonnet**（Domain Protected）
 - Haiku 等小模型不碰 Domain **Protected paths**
 - 禁止多執行路徑同時改同一檔
 - 每個子 agent prompt 必含：Goal、Context paths、Constraints（含 Domain 紅線）、Do NOT、Verification、Deliverable
@@ -68,7 +67,7 @@ $ARGUMENTS
 
 - **可跳過**：已有 Approved Plan、diff 約 &lt;80 行、未碰 Protected paths／紅線 → 只跑 Verify
 - **一般**：Codex CLI 工程審 + Opus 4.8 設計審
-- **L3／觸紅線／Protected**：再加 Grok 4.5（CLI）
+- **L3／觸紅線／Protected**：再加 Grok 4.5 High Fast 對抗審
 - 呼叫失敗 → 追加 `docs/AGENT-FAILURES.md`，摘要表註明缺席
 
 ## 6. Docs sync（可見行為變更時）
@@ -92,13 +91,13 @@ $ARGUMENTS
 
 | # | 任務 ID | subagent_type | model slug | 做了什麼 | 產出（檔案／命令結果） | 狀態 |
 |---|---------|---------------|------------|----------|------------------------|------|
-| 0 | Leader | — | （leader model） | 讀 Plan、派工、整合 diff | 合併後變更摘要 | 完成 |
-| 1 | T1 | （Agent tool type） | `sonnet`／`haiku` | （依 Plan 填寫） | `path/to/file` | 完成／缺席 |
+| 0 | Leader | — | `claude-fable-5-thinking-medium`（→ `claude-opus-4-8-thinking-medium`） | 讀 Plan、派工、整合 diff | 合併後變更摘要 | 完成 |
+| 1 | T1 | Grok／Sonnet | `cursor-grok-4.5-high-fast`／`sonnet` | （依 Plan 填寫；中文用 sonnet） | `path/to/file` | 完成／缺席 |
 | 2 | Verify | Bash | — | `npm test` 等 | 逐項對照結果 | 完成 |
 | 3 | Codex CLI diff 審 | `code-reviewer` | `gpt-5.6-luna`（CLI model） | 審 diff 工程面 | 意見摘要 | 完成／跳過／缺席 |
 | 4 | Opus 設計審 | `architect` | `opus` | 審 UX／設計 | 意見摘要 | 完成／跳過／缺席 |
-| 5 | Grok 對抗審 | `grok -p` | — | `grok-4.5`（CLI） | 找 edge case | 審查意見 | 完成／跳過／缺席 |
-| 6 | Ship | — | （leader model） | commit／push | commit hash | 完成／未執行 |
+| 5 | Grok 對抗審 | `cursor-agent` | `cursor-grok-4.5-high-fast` | 找 edge case | 審查意見 | 完成／跳過／缺席 |
+| 6 | Ship | — | Leader：`claude-fable-5-thinking-medium`（→ `claude-opus-4-8-thinking-medium`） | commit／push | commit hash | 完成／未執行 |
 
 **狀態欄：** `完成`｜`跳過`｜`缺席`｜`對抗審缺席／對抗性降級`｜`未執行`。
 

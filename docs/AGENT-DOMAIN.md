@@ -145,7 +145,7 @@
 | MVP（`pageCount=1`）靜默當完成 | `verify:episodes` 會列 warn，須依 EPISODE-WORKFLOW 升級 |
 | 每個 typo 都跑 `/agent-plan` 雙審 | 太慢；typo 直接做 |
 | SOP 內單集字幕／出圖硬開完整委員會 | 成本浪費；應走內容管線 + verify |
-| 一般 L1／L2 預設 Opus+GPT 雙審 | 已改為 **GPT + Grok + Opus 設計固定三審** |
+| 一般 L1／L2 預設 Opus+GPT 雙審 | 已改為 **GPT + Composer 對抗審 + Opus 設計固定三審**；Leader＝Grok High Fast；L1／L2 實作＝Composer |
 | 小型視覺／樣式微調硬開固定三審 | 成本浪費；&lt;80 行、不碰 Protected、不觸發 UI 風險規則 → **中間級**工程單審 + 截圖目檢（見 agent-plan §1、WORKFLOW） |
 | 呼叫 AskQuestion／AUQ MCP | 預設 blocking 乾等 UI，整輪卡住（Grok 尤甚）；改聊天文字 A/B/C；hook 見 `.cursor/hooks/block-auq.mjs` |
 

@@ -7,7 +7,7 @@
 
 ## 讀取協議
 
-1. 呼叫任何外部 model 前先掃本檔「案例紀錄」表——Claude Code 的 CLI 呼叫（codex／grok／cursor-agent）與 **Cursor 的 Task 派工**（`gpt-5.6-luna-max-fast`／`cursor-grok-4.5-medium-fast` 等 slug）都算；Task 失敗同樣追加。
+1. 呼叫任何外部 model 前先掃本檔「案例紀錄」表——Claude Code 的 CLI 呼叫（codex／grok／cursor-agent）與 **Cursor 的 Task 派工**（`gpt-5.6-luna-max-fast`／`composer-2.5-fast`／`cursor-grok-4.5-high-fast` 等 slug）都算；Task 失敗同樣追加。
 2. **缺席判定（可操作定義）**：掃「案例紀錄」表，同一**模型**（不分呼叫命令）在最近 30 天內有 **≥2 列**且**未標「已解除」** → 本次直接標「缺席」，不重試、不浪費額度。
 3. 缺席不豁免驗證：委員缺席時，[`AGENT-DOMAIN.md`](AGENT-DOMAIN.md) 驗證矩陣的必要項照跑。
 4. 失敗後追加一列到「案例紀錄」，格式見下。
@@ -21,9 +21,10 @@
 | GPT 5.6 Luna MAX fast（Cursor Task） | 無 CLI 探活；Bootstrap 可派最小 readonly Task（`回覆 OK`）；拒收 slug／派工失敗 → 追加案例紀錄並標缺席 |
 | GPT 5.6 Luna（codex，Claude Code CLI） | `codex exec -m gpt-5.6-luna -c model_reasoning_effort="low" "回覆 OK" </dev/null`（spawn ENOENT → 缺席；**須加 `</dev/null`** 防 stdin 掛起；裸 `gpt-5.6` 於 ChatGPT 帳號 400，勿用） |
 | Grok 4.5（CLI，Claude Code） | `grok models`（出現 `You are not authenticated` → 缺席）；單輪：`grok -p "<prompt>" -m grok-4.5 --effort medium --no-plan` |
-| Grok 4.5 Medium Fast（Cursor Task，`cursor-grok-4.5-medium-fast`） | 無 CLI 探活；Bootstrap 可派最小 readonly Task（`回覆 OK`）；拒收 slug → 追加案例並標**對抗審缺席**（L1／L2 實作 → Leader 接手），勿用 `grok-4.3` 頂替 |
+| Grok 4.5 High Fast（Cursor Task／Cursor Leader，`cursor-grok-4.5-high-fast`） | 無 CLI 探活；Bootstrap 可派最小 readonly Task（`回覆 OK`）；拒收 slug → Cursor Leader session 改由使用者切換模型或標缺席，勿用 `grok-4.3` 頂替 |
+| Grok 4.5 High Fast（**Claude Code 對抗審／L1／L2**，`cursor-agent`） | 主路徑：`cursor-agent -p --model cursor-grok-4.5-high-fast --mode ask "回覆 OK"`（看輸出內容，非 exit code）。**slug 被 cursor-agent 拒收 → 備援** `grok -p "回覆 OK" -m grok-4.5 --effort high --no-plan`（grok CLI 允許清單僅 `grok-4.5`，不吃 `-fast` 變體，見 07-13 案例）。兩路皆失敗 → 對抗審標**對抗審缺席**；L1／L2 實作 → Leader 接手 |
+| Composer 2.5（Cursor Task：對抗審／L1／L2，`composer-2.5-fast`） | Bootstrap 可派最小 readonly Task（`回覆 OK`）；CLI：`cursor-agent -p --model composer-2.5-fast --mode ask "回覆 OK"`；拒收 → 對抗審標**對抗審缺席**（L1／L2 實作 → Leader 接手） |
 | Cursor Task（其他 slug） | 無低成本探活；第一次拒收／失敗 → 追加案例並標缺席（對抗審 slug 同上規則） |
-| Composer 2.5（cursor） | `cursor-agent -p --model composer-2.5-fast --mode ask "回覆 OK"` |
 | Opus 4.8／Sonnet／Haiku | Claude Code Agent tool，不需探活 |
 
 ---
@@ -41,6 +42,7 @@
 | Grok CLI 曾探到未登入（同日稍後已登入） | 呼叫前先 `grok models` 探活；未登入 → 缺席並提醒使用者 `grok login` |
 | Grok `-p` 語法：`grok -p -m grok-4.5-fast "<prompt>"` 會報 `a value is required for '--single <PROMPT>'` | prompt 必須緊跟 `-p`：`grok -p "<prompt>" -m grok-4.5-fast --effort medium --no-plan` |
 | Cursor Task `grok-4.5-fast-medium` slug 不可用或拒收 | **已淘汰**：Cursor 改 `grok-4.5-fast-high`；舊 slug 勿再寫入 active 路由 |
+| Claude Code 端以 `cursor-agent --model cursor-grok-4.5-high-fast` 呼叫 Grok（對抗審／L1L2）為 2026-07-18 分家後新路由 | **2026-07-18 實測成功、已解除**：slug 被 cursor-agent 接受且正常出審查 → cursor-agent 為主路徑；`grok -p ... -m grok-4.5` 僅作 slug 拒收時備援（勿寫 `-m grok-4.5-fast`） |
 | `codex exec` 在 Cursor shell 掛起於 `Reading additional input from stdin...` | 命令尾加 **`</dev/null`** 關閉 stdin |
 
 ## 案例紀錄（依時間追加）

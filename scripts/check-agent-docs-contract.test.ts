@@ -20,21 +20,26 @@ const FAILURES = "docs/AGENT-FAILURES.md";
 const PODCAST_RULE = ".cursor/rules/podcast.mdc";
 
 describe("agent docs routing contract", () => {
-  it("Cursor active 路由使用 gpt-5.6-luna-max-fast 與 cursor-grok-4.5-medium-fast", () => {
+  it("Cursor active 路由使用 Luna、Grok High Fast Leader、Composer 對抗審／L1L2", () => {
     for (const file of CURSOR_ACTIVE_FILES) {
       const text = readRepoFile(file);
       expect(text, `${file} 須含 Luna slug`).toContain("gpt-5.6-luna-max-fast");
-      expect(text, `${file} 須含 Grok Medium Fast slug`).toContain(
+      expect(text, `${file} 須含 Grok High Fast Leader slug`).toContain(
+        "cursor-grok-4.5-high-fast",
+      );
+      expect(text, `${file} 須含 Composer slug`).toContain("composer-2.5-fast");
+      expect(text, `${file} 不得再以 medium-fast 當 active Grok 路由`).not.toContain(
         "cursor-grok-4.5-medium-fast",
       );
     }
 
     const workflow = readRepoFile(CURSOR_META);
     expect(workflow).toContain("gpt-5.6-luna-max-fast");
-    expect(workflow).toContain("cursor-grok-4.5-medium-fast");
+    expect(workflow).toContain("cursor-grok-4.5-high-fast");
+    expect(workflow).toContain("composer-2.5-fast");
   });
 
-  it("active 路由不得使用已淘汰的 Grok slug（fast-medium／fast-high）", () => {
+  it("active 路由不得使用已淘汰的 Grok slug（fast-medium／fast-high 裸名）", () => {
     for (const file of [...CURSOR_ACTIVE_FILES, CURSOR_META]) {
       const text = readRepoFile(file);
       expect(text, `${file} 不得含 medium slug`).not.toContain(
@@ -87,17 +92,20 @@ describe("agent docs routing contract", () => {
     expect(plan).toContain("≥3 點");
   });
 
-  it("AGENT-FAILURES 探活表使用 cursor-grok-4.5-medium-fast 與 CLI grok-4.5", () => {
+  it("AGENT-FAILURES 探活表使用 cursor-grok-4.5-high-fast 與 composer-2.5-fast", () => {
     const failures = readRepoFile(FAILURES);
     const probeSection =
       failures.match(/## 探活命令[\s\S]*?(?=## 已知案例)/)?.[0] ?? "";
     expect(probeSection.length).toBeGreaterThan(0);
-    expect(probeSection).toContain("cursor-grok-4.5-medium-fast");
+    expect(probeSection).toContain("cursor-grok-4.5-high-fast");
+    expect(probeSection).toContain("composer-2.5-fast");
+    expect(probeSection).not.toContain("cursor-grok-4.5-medium-fast");
     expect(probeSection).not.toContain("grok-4.5-fast-medium");
     expect(probeSection).not.toContain("grok-4.5-fast-high");
-    // Claude Code CLI 呼叫一律 -m grok-4.5（grok-4.5-fast 為無效 model id，見 07-13 案例）
-    expect(probeSection).toContain("-m grok-4.5 ");
-    expect(probeSection).not.toContain("-m grok-4.5-fast");
+    // Claude Code CLI 若仍列 grok models 探活：一律 -m grok-4.5（grok-4.5-fast 為無效 model id）
+    if (probeSection.includes("-m grok-4.5")) {
+      expect(probeSection).not.toContain("-m grok-4.5-fast");
+    }
   });
 
   it("禁用 AUQ：規則、hook、podcast 與 FAILURES 對齊", () => {
@@ -124,4 +132,3 @@ describe("agent docs routing contract", () => {
     expect(domain).toContain("AskQuestion／AUQ");
   });
 });
-

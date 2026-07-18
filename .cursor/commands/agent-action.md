@@ -30,13 +30,13 @@
 
 依 Plan 的 **L0–L3** 與 AGENT-WORKFLOW 路由表，用 **Task** 派子 agent（**不要**用 `codex exec`／`claude -p` 子 process 做實作委派——子 process 無 Cursor 工具鏈）。
 
-**Composer 節流：** Leader **不**做多檔／單檔實作；實作一律 Task 派 Grok 4.5 Medium Fast／Opus／shell。Leader 僅：派工、整合、&lt;10 行微調、git。
+**Leader 節流：** Leader（**Grok 4.5 High Fast**／`cursor-grok-4.5-high-fast`）**不**做多檔／單檔實作；實作一律 Task 派 **Composer 2.5**／Opus／shell。Leader 僅：派工、整合、&lt;10 行微調、git（中文 Protected 仍派 Sonnet）。
 
 | 級別 | 判準 | Cursor 派工 |
 |------|------|-------------|
 | L3 架構／高風險 | 跨模組、Protected paths | Task + `claude-opus-4-8-thinking-medium`，或 Leader（僅 Domain 要求路徑） |
-| L2 多檔實作 | 模式固定 | Task + `cursor-grok-4.5-medium-fast`（**預設**；Domain 內容管線仍 Sonnet；勿用 Composer） |
-| L1 單檔 | 範圍明確 | **路徑已知** → Task + Grok 4.5 Medium Fast；**路徑不明** → Task `explore`（`grok-4.3`）→ Grok |
+| L2 多檔實作 | 模式固定 | Task + `composer-2.5-fast`（**預設**；Domain 內容管線仍 Sonnet） |
+| L1 單檔 | 範圍明確 | **路徑已知** → Task + `composer-2.5-fast`；**路徑不明** → Task `explore`（`grok-4.3`）→ Composer |
 | L0 命令 | lint／test／腳本 | Task `shell` 或 `grok-build-0.1` |
 
 **行動小組（顧問，全部 `readonly: true`）**：卡關要第二意見時派——
@@ -47,13 +47,12 @@
 |------|------|-------------|
 | Opus 4.8 設計審 | UX／CSS Modules／兒童觸控／a11y 視覺 | Task `architect`（readonly）+ `claude-opus-4-8-thinking-medium` |
 | GPT 5.6 Luna MAX fast | TS/React diff 審、工程第二意見 | Task（readonly）+ `gpt-5.6-luna-max-fast` |
-| Grok 4.5 Medium Fast | 對抗審：找 diff 的 edge case | Task（readonly）+ `cursor-grok-4.5-medium-fast`；slug 不可用 → 缺席（見 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md) § Cursor Task） |
-| Composer 2.5 | 快速 sanity check | Leader 自審（當前 session） |
+| Composer 2.5 對抗審 | 對抗審：找 diff 的 edge case | Task（readonly）+ `composer-2.5-fast`；slug 不可用 → 缺席（見 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md) § Cursor Task） |
 
 **禁止：**
 
 - 多 agent **同時改同一檔**
-- 違反 Domain § **Protected paths / models**（Grok 不碰中文；explore／shell／廉價模型不碰 Protected paths）
+- 違反 Domain § **Protected paths / models**（中文 → Sonnet；explore／shell／廉價模型不碰 Protected paths）
 - **gpt-5.4** 作為固定路由（已淘汰）
 - 顧問（readonly Task）產出的建議 patch 由實作路徑落檔，顧問本身不改檔
 
@@ -80,7 +79,7 @@
   - **元件 allowlist**：`StoryPlayer`、`PlayButton`、`StoryCard`、`Chip`、`GamePageShell`、`LandingSegment`、`SiteNavBar`
   - **動畫相關 TS/JS**：`useAnimation`、`requestAnimationFrame`、`@keyframes`
 - **一般**：GPT 5.6 Luna MAX fast + Opus 4.8 設計審（Task）；Python → `python-reviewer`；TS/JS → `typescript-reviewer`
-- **L3／觸紅線／Protected**：再加 Grok 4.5 Medium Fast 對抗審
+- **L3／觸紅線／Protected**：再加 Composer 2.5 對抗審
 - 呼叫失敗 → 追加 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md)，分配表註明缺席
 
 ### 6. 文件同步
@@ -104,17 +103,17 @@ Task 失敗 → 追加 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md)�
 
 ### 10. 最終輸出：Agent 執行分配表（必附）
 
-收尾回覆**必須**附此表（繁中；slug 保留英文）。**固定列出** Leader、實作 Task、Verify、diff 審（含 Grok 列）、Ship。
+收尾回覆**必須**附此表（繁中；slug 保留英文）。**固定列出** Leader、實作 Task、Verify、diff 審（含 Composer 對抗審列）、Ship。
 
 | # | 任務 ID | subagent_type | model slug | 做了什麼 | 產出（檔案／命令結果） | 狀態 |
 |---|---------|---------------|------------|----------|------------------------|------|
-| 0 | Leader | — | `composer-2.5-fast` | 讀 Plan、派工、整合 diff | 合併後變更摘要 | 完成 |
-| 1 | T1 | `generalPurpose` | `cursor-grok-4.5-medium-fast` | （依 Plan 填寫） | `path/to/file` | 完成／缺席 |
+| 0 | Leader | — | `cursor-grok-4.5-high-fast` | 讀 Plan、派工、整合 diff | 合併後變更摘要 | 完成 |
+| 1 | T1 | `generalPurpose` | `composer-2.5-fast` | （依 Plan 填寫） | `path/to/file` | 完成／缺席 |
 | 2 | Verify | `shell` | `grok-build-0.1` | `npm test` 等 | 逐項對照結果 | 完成 |
 | 3 | GPT diff 審 | `typescript-reviewer` | `gpt-5.6-luna-max-fast` | 審 diff 工程面 | 意見摘要 | 完成／跳過／缺席 |
 | 4 | Opus 設計審 | `architect` | `claude-opus-4-8-thinking-medium` | 審 UX／設計／a11y 視覺 | 審查意見 | 完成／跳過／缺席 |
-| 5 | Grok 對抗審 | `generalPurpose` | `cursor-grok-4.5-medium-fast` | 找 edge case | 審查意見 | 完成／跳過／缺席 |
-| 6 | Ship | — | `composer-2.5-fast` | commit／push | commit hash | 完成／未執行 |
+| 5 | Composer 對抗審 | `generalPurpose` | `composer-2.5-fast` | 找 edge case | 審查意見 | 完成／跳過／缺席 |
+| 6 | Ship | — | `cursor-grok-4.5-high-fast` | commit／push | commit hash | 完成／未執行 |
 
 **狀態欄：** `完成`｜`跳過`（如小 diff 免 diff 審）｜`缺席`｜`對抗審缺席／對抗性降級`｜`未執行`（Ship 僅在使用者要求時）。
 
