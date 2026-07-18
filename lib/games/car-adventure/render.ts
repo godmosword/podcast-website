@@ -28,6 +28,8 @@ const CLAY = {
   spike: "#f27ba0",
   cloud: "rgba(255,255,255,.9)",
   hudPanel: "rgba(255,255,255,.82)",
+  brick: "#e8b06a",
+  brickSeam: "rgba(120,80,40,.5)",
 } as const;
 
 function rr(
@@ -113,6 +115,8 @@ interface WorldTheme {
   far: string;
   /** 近景丘色。 */
   hill: string;
+  /** 天空日照／月光柔暈色（靜態柔光，加大氣層次）。 */
+  glow: string;
 }
 
 /**
@@ -128,6 +132,7 @@ const WORLD_THEMES: WorldTheme[] = [
     decoKind: "cloud",
     far: "#d7efe0",
     hill: CLAY.mint,
+    glow: "rgba(255,244,198,.55)",
   },
   // level-02 彩虹捷徑：粉彩彩虹（粉／薰衣草天空）
   {
@@ -137,6 +142,7 @@ const WORLD_THEMES: WorldTheme[] = [
     decoKind: "cloud",
     far: "#f3d9f7",
     hill: CLAY.lilac,
+    glow: "rgba(255,255,255,.62)",
   },
   // level-03 高低起伏：海洋藍綠
   {
@@ -146,6 +152,7 @@ const WORLD_THEMES: WorldTheme[] = [
     decoKind: "wave",
     far: "#bfe9df",
     hill: CLAY.teal,
+    glow: "rgba(255,250,214,.5)",
   },
   // level-04 尖刺迷宮：森林深綠
   {
@@ -155,6 +162,7 @@ const WORLD_THEMES: WorldTheme[] = [
     decoKind: "tree",
     far: "#79b563",
     hill: "#5a9a52",
+    glow: "rgba(255,247,205,.45)",
   },
   // level-05 空中走廊：黃昏 lilac/pink 星空
   {
@@ -164,6 +172,7 @@ const WORLD_THEMES: WorldTheme[] = [
     decoKind: "star",
     far: "#a68fd6",
     hill: CLAY.lilac,
+    glow: "rgba(255,206,158,.5)",
   },
   // level-06 終極大冒險：夜間嘉年華（收尾關，更深的紫夜）
   {
@@ -173,6 +182,7 @@ const WORLD_THEMES: WorldTheme[] = [
     decoKind: "star",
     far: "#6b57a0",
     hill: "#7a5aa6",
+    glow: "rgba(216,222,255,.42)",
   },
 ];
 
@@ -188,6 +198,14 @@ function drawClayGroundTile(
   ctx.fillRect(sx, sy, tilePx, tilePx);
   ctx.fillStyle = CLAY.soilEdge;
   ctx.fillRect(sx, sy + tilePx - 3, tilePx, 3);
+  // 黏土斑點紋理：兩顆深沙色小點，位置依 tile 座標決定（穩定、不閃爍）。
+  ctx.fillStyle = "rgba(200,150,90,.28)";
+  const d0 = (Math.abs(Math.round(sx)) % 5) + 4;
+  const d1 = (Math.abs(Math.round(sy)) % 4) + 3;
+  ctx.beginPath();
+  ctx.arc(sx + d0 + 2, sy + tilePx * 0.5, 1.4, 0, Math.PI * 2);
+  ctx.arc(sx + tilePx - d1 - 2, sy + tilePx * 0.72, 1.2, 0, Math.PI * 2);
+  ctx.fill();
   if (hasGrassTop) {
     const capH = Math.round(tilePx * 0.38);
     ctx.fillStyle = CLAY.mint;
@@ -200,7 +218,62 @@ function drawClayGroundTile(
     ctx.fillStyle = "rgba(255,255,255,.35)";
     rr(ctx, sx + 4, sy + 1, tilePx * 0.4, 3, 2);
     ctx.fill();
+    // 草叢：草帽上冒出的圓潤小草葉，加地表細節與景深。
+    ctx.fillStyle = CLAY.grassEdge;
+    for (const gx of [sx + 8, sx + tilePx - 10]) {
+      ctx.beginPath();
+      ctx.moveTo(gx, sy - 1);
+      ctx.quadraticCurveTo(gx + 2, sy - 8, gx + 5, sy - 2);
+      ctx.quadraticCurveTo(gx + 2, sy - 4, gx, sy - 1);
+      ctx.fill();
+    }
   }
+}
+
+/** 可破壞磚：焦糖磚身＋十字磚縫＋高光（與地形土塊區隔，一眼可辨可撞）。 */
+function drawBreakableTile(
+  ctx: CanvasRenderingContext2D,
+  sx: number,
+  sy: number,
+  tilePx: number,
+): void {
+  ctx.fillStyle = CLAY.brick;
+  rr(ctx, sx + 1, sy + 1, tilePx - 2, tilePx - 2, 6);
+  ctx.fill();
+  ctx.strokeStyle = CLAY.brickSeam;
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(sx + tilePx / 2, sy + 4);
+  ctx.lineTo(sx + tilePx / 2, sy + tilePx - 4);
+  ctx.moveTo(sx + 5, sy + tilePx / 2);
+  ctx.lineTo(sx + tilePx - 5, sy + tilePx / 2);
+  ctx.stroke();
+  ctx.fillStyle = "rgba(255,255,255,.4)";
+  rr(ctx, sx + 4, sy + 3, tilePx * 0.35, 3, 2);
+  ctx.fill();
+}
+
+/** 移動平台：薰衣草黏土板＋柔影＋頂面高光（一眼可辨為可站/會動）。 */
+function drawMovingPlatform(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+): void {
+  ctx.fillStyle = "rgba(52,48,43,.14)";
+  ctx.beginPath();
+  ctx.ellipse(x + w / 2, y + h + 3, w / 2, 3, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = CLAY.lilac;
+  rr(ctx, x, y, w, h, 7);
+  ctx.fill();
+  ctx.fillStyle = "rgba(255,255,255,.4)";
+  rr(ctx, x + 4, y + 2, w - 8, 3, 2);
+  ctx.fill();
+  ctx.fillStyle = "rgba(120,90,160,.5)";
+  rr(ctx, x, y + h - 3, w, 3, 2);
+  ctx.fill();
 }
 
 /** 糖果金幣：奶油黃圓餅＋光點。 */
@@ -331,6 +404,50 @@ function drawCar(
   ctx.restore();
 }
 
+/** 飄浮尖刺球（floater）：紅球＋尖刺光環＋皺眉，一眼可辨為危險、不可踩。 */
+function drawFloater(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+): void {
+  const cx = x + w / 2;
+  const cy = y + h / 2;
+  const r = Math.min(w, h) / 2 + 2;
+  ctx.fillStyle = CLAY.spike;
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+    ctx.lineTo(
+      cx + Math.cos(a + 0.28) * (r - 6),
+      cy + Math.sin(a + 0.28) * (r - 6),
+    );
+    ctx.lineTo(
+      cx + Math.cos(a - 0.28) * (r - 6),
+      cy + Math.sin(a - 0.28) * (r - 6),
+    );
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.fillStyle = "#ff6b6b";
+  ctx.beginPath();
+  ctx.arc(cx, cy, r - 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = CLAY.ink;
+  ctx.beginPath();
+  ctx.arc(cx - 4, cy - 2, 1.8, 0, Math.PI * 2);
+  ctx.arc(cx + 4, cy - 2, 1.8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = CLAY.ink;
+  ctx.lineWidth = 1.3;
+  ctx.beginPath();
+  ctx.moveTo(cx - 4, cy + 5);
+  ctx.lineTo(cx + 4, cy + 5);
+  ctx.stroke();
+}
+
 /** 終點旗：圓潤木牌桿＋波浪格紋旗。 */
 function drawFinishFlag(
   ctx: CanvasRenderingContext2D,
@@ -368,6 +485,14 @@ export function renderAdventureWorld(
   sky.addColorStop(1, theme.skyBottom);
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, VW, VH);
+  // 日照／月光柔暈：靜態 radial，藏在天空右上，加大氣層次（無視差、不隨關卡動）。
+  const glowX = VW * 0.78;
+  const glowY = 74;
+  const glow = ctx.createRadialGradient(glowX, glowY, 6, glowX, glowY, 120);
+  glow.addColorStop(0, theme.glow);
+  glow.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, VW, VH * 0.6);
   // 遠景點綴層（雲／星星／樹／浪花），視差 0.2；reduced 時靜止。
   ctx.fillStyle = theme.decoColor;
   for (let i = 0; i < 8; i++) {
@@ -416,9 +541,19 @@ export function renderAdventureWorld(
       );
     }
 
+  for (const key of g.lv.breakable) {
+    if (g.broken.has(key)) continue;
+    const [tx, ty] = key.split(",").map(Number);
+    drawBreakableTile(ctx, tx * TILE - cam, ty * TILE, TILE);
+  }
+
   for (const key of g.lv.spikes) {
     const [tx, ty] = key.split(",").map(Number);
     drawClaySpike(ctx, tx * TILE - cam, ty * TILE, TILE);
+  }
+
+  for (const pf of g.lv.movingPlatforms) {
+    drawMovingPlatform(ctx, pf.x - cam, pf.y, pf.w, pf.h);
   }
 
   for (const c of g.lv.coins) {
@@ -429,19 +564,17 @@ export function renderAdventureWorld(
   const f = g.lv.finish;
   drawFinishFlag(ctx, f.x - cam, f.y, f.h);
 
-  for (const e of g.lv.enemies)
-    if (e.alive)
-      drawCar(
-        ctx,
-        e.x - cam,
-        e.y,
-        e.w,
-        e.h,
-        CLAY.pink,
-        "#e087aa",
-        e.dir,
-        "grumpy",
-      );
+  for (const e of g.lv.enemies) {
+    if (!e.alive) continue;
+    if (e.kind === "floater") {
+      drawFloater(ctx, e.x - cam, e.y, e.w, e.h);
+    } else if (e.kind === "hopper") {
+      // 彈跳車：青綠車身與粉色巡邏車區隔（皆可踩）。
+      drawCar(ctx, e.x - cam, e.y, e.w, e.h, CLAY.teal, "#4f9e97", e.dir, "grumpy");
+    } else {
+      drawCar(ctx, e.x - cam, e.y, e.w, e.h, CLAY.pink, "#e087aa", e.dir, "grumpy");
+    }
+  }
 
   const p = g.player;
   const drawX = lerp(g.prevPlayer.x, p.x, g.renderAlpha);

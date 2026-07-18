@@ -62,6 +62,8 @@ export interface GameState {
   finishCleared: boolean;
   prevPlayer: { x: number; y: number };
   renderAlpha: number;
+  /** 本關已撞碎的可破壞磚 tile key（每關 reset 清空；不改 lv 資料）。 */
+  broken: Set<string>;
 }
 
 export const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -112,6 +114,7 @@ export function createGameState(
     finishCleared: false,
     prevPlayer: { x: lv.start.x, y: lv.start.y },
     renderAlpha: 1,
+    broken: new Set(),
   };
 }
 
@@ -141,4 +144,5 @@ export function applyAdvanceLevel(g: GameState, next: number): void {
   g.finishCleared = false;
   g.prevPlayer = { x: lv.start.x, y: lv.start.y };
   g.renderAlpha = 1;
+  g.broken = new Set();
 }

@@ -1,4 +1,7 @@
-import type { AdventureLevelJson } from "@/lib/gamekit/games/adventure-level";
+import type {
+  AdventureEnemyKind,
+  AdventureLevelJson,
+} from "@/lib/gamekit/games/adventure-level";
 
 /**
  * 共用關卡建造器。所有地面缺口維持 3 格（與第 1 關相同、已驗證可跳過），
@@ -8,7 +11,10 @@ function levelBuilder() {
   const solid: string[] = [];
   const spikes: string[] = [];
   const coins: [number, number][] = [];
-  const enemies: { x: number; y: number }[] = [];
+  const enemies: { x: number; y: number; kind?: AdventureEnemyKind }[] = [];
+  const breakableTiles: string[] = [];
+  const movingPlatforms: NonNullable<AdventureLevelJson["movingPlatforms"]> =
+    [];
 
   return {
     ground(a: number, b: number, baseRow = 10): void {
@@ -28,8 +34,18 @@ function levelBuilder() {
     spike(x: number, y: number): void {
       spikes.push(`${x},${y}`);
     },
-    enemy(x: number, y: number): void {
-      enemies.push({ x, y });
+    enemy(x: number, y: number, kind?: AdventureEnemyKind): void {
+      enemies.push(kind ? { x, y, kind } : { x, y });
+    },
+    breakable(x: number, y: number): void {
+      breakableTiles.push(`${x},${y}`);
+    },
+    movingPlatform(
+      x: number,
+      y: number,
+      opts: { w?: number; axis?: "x" | "y"; range?: number; speed?: number } = {},
+    ): void {
+      movingPlatforms.push({ x, y, ...opts });
     },
     done(
       meta: Pick<AdventureLevelJson, "id" | "name" | "cols"> & {
@@ -49,6 +65,8 @@ function levelBuilder() {
         enemies,
         start: meta.start,
         finish: meta.finish,
+        ...(breakableTiles.length ? { breakable: breakableTiles } : {}),
+        ...(movingPlatforms.length ? { movingPlatforms } : {}),
       };
     },
   };
@@ -114,6 +132,11 @@ function buildLevel02Json(): AdventureLevelJson {
   b.coinRow(60, 64, 5);
   b.coinRow(88, 92, 4);
   b.coinRow(108, 112, 6);
+  // 可破壞磚示範：撞碎頭頂磚才拿得到上方藏起來的金幣。
+  b.breakable(28, 7);
+  b.breakable(29, 7);
+  b.coin(28, 5);
+  b.coin(29, 5);
   b.spike(70, 9);
   b.spike(71, 9);
   b.enemy(24, 9);
@@ -146,6 +169,8 @@ function buildLevel03Json(): AdventureLevelJson {
   b.plat(76, 80, 6);
   b.plat(96, 100, 5);
   b.plat(118, 122, 7);
+  // 移動平台示範：橫跨 13–15 的 3 格缺口（缺口本身可跳過，reduced 靜止仍可通）。
+  b.movingPlatform(13, 10, { w: 2, axis: "x", range: 2, speed: 70 });
   b.coinRow(5, 8, 6);
   b.coinRow(20, 24, 5);
   b.coinRow(36, 40, 5);
@@ -210,6 +235,9 @@ function buildLevel04Json(): AdventureLevelJson {
   b.enemy(72, 9);
   b.enemy(95, 9);
   b.enemy(112, 9);
+  // 新敵人示範：定點彈跳車（可踩）＋飄浮尖刺球（不可踩＝危險）。
+  b.enemy(60, 9, "hopper");
+  b.enemy(75, 6, "floater");
   return b.done({
     id: "level-04",
     name: "尖刺迷宮",

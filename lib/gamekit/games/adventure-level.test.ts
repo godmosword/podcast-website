@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { CAR_ADVENTURE_LEVELS } from "@/lib/games/car-adventure/levels";
-import { levelFromJson } from "@/lib/gamekit/games/adventure-level";
+import {
+  levelFromJson,
+  type AdventureLevelJson,
+} from "@/lib/gamekit/games/adventure-level";
 
 describe("adventure levels", () => {
   it("CAR_ADVENTURE_LEVELS 可轉為執行期關卡", () => {
@@ -10,6 +13,121 @@ describe("adventure levels", () => {
       expect(lv.total).toBe(json.coins?.length ?? 0);
       expect(lv.worldW).toBe(json.cols * json.tileSize);
     }
+  });
+});
+
+describe("S1 plumbing：breakable/secrets/abilityGates/movingPlatforms 帶入 runtime", () => {
+  it("新欄位 runtime 數量鏡射 JSON（未定義即空）", () => {
+    for (const json of CAR_ADVENTURE_LEVELS) {
+      const lv = levelFromJson(json);
+      expect(lv.breakable.size).toBe(json.breakable?.length ?? 0);
+      expect(lv.secrets.size).toBe(json.secrets?.length ?? 0);
+      expect(lv.abilityGates).toHaveLength(json.abilityGates?.length ?? 0);
+      expect(lv.movingPlatforms).toHaveLength(json.movingPlatforms?.length ?? 0);
+    }
+  });
+
+  it("提供新欄位時正確 tile→pixel 映射", () => {
+    const json: AdventureLevelJson = {
+      id: "t",
+      name: "t",
+      tileSize: 36,
+      cols: 10,
+      rows: 12,
+      solid: ["0,11"],
+      start: [1, 10],
+      finish: [8, 9],
+      breakable: ["3,5", "3,6"],
+      secrets: ["7,2"],
+      abilityGates: [{ x: 4, y: 8, ability: "dash" }],
+      movingPlatforms: [
+        { x: 2, y: 6, w: 3, axis: "y", range: 2, speed: 40 },
+      ],
+    };
+    const lv = levelFromJson(json);
+
+    expect([...lv.breakable].sort()).toEqual(["3,5", "3,6"]);
+    expect(lv.secrets.has("7,2")).toBe(true);
+
+    expect(lv.abilityGates).toEqual([
+      { x: 144, y: 288, w: 36, h: 72, ability: "dash" },
+    ]);
+
+    expect(lv.movingPlatforms).toEqual([
+      {
+        x: 72,
+        y: 216,
+        x0: 72,
+        y0: 216,
+        w: 108,
+        h: 18,
+        axis: "y",
+        range: 72,
+        speed: 40,
+        dir: 1,
+      },
+    ]);
+  });
+
+  it("含移動平台的關卡：地面缺口 ≤3 格（平台靜止/reduced 仍可跳過通關）", () => {
+    function maxGroundGap(json: (typeof CAR_ADVENTURE_LEVELS)[number]): number {
+      const solid = new Set(json.solid);
+      let maxGap = 0;
+      let cur = 0;
+      for (let x = 0; x < json.cols; x++) {
+        if (solid.has(`${x},10`)) cur = 0;
+        else {
+          cur++;
+          if (cur > maxGap) maxGap = cur;
+        }
+      }
+      return maxGap;
+    }
+    const withPlatforms = CAR_ADVENTURE_LEVELS.filter(
+      (l) => (l.movingPlatforms?.length ?? 0) > 0,
+    );
+    expect(withPlatforms.length).toBeGreaterThan(0);
+    for (const json of withPlatforms) {
+      expect(maxGroundGap(json)).toBeLessThanOrEqual(3);
+    }
+  });
+
+  it("enemies 映射 kind（預設 patrol）與行為欄位", () => {
+    const json: AdventureLevelJson = {
+      id: "t",
+      name: "t",
+      tileSize: 36,
+      cols: 10,
+      rows: 12,
+      solid: ["0,11"],
+      start: [1, 10],
+      finish: [8, 9],
+      enemies: [
+        { x: 5, y: 9 },
+        { x: 8, y: 6, kind: "floater" },
+      ],
+    };
+    const lv = levelFromJson(json);
+    expect(lv.enemies[0].kind).toBe("patrol");
+    expect(lv.enemies[1].kind).toBe("floater");
+    expect(lv.enemies[0]).toMatchObject({ vy: 0, t: 0, hopTimer: 0 });
+    expect(lv.enemies[0].baseY).toBe(lv.enemies[0].y);
+  });
+
+  it("movingPlatform 缺省：w=2 格、axis=x、range/speed=0", () => {
+    const json: AdventureLevelJson = {
+      id: "t",
+      name: "t",
+      tileSize: 36,
+      cols: 10,
+      rows: 12,
+      solid: ["0,11"],
+      start: [1, 10],
+      finish: [8, 9],
+      movingPlatforms: [{ x: 1, y: 1 }],
+    };
+    const [p] = levelFromJson(json).movingPlatforms;
+    expect(p).toMatchObject({ w: 72, axis: "x", range: 0, speed: 0, dir: 1 });
   });
 });
 
