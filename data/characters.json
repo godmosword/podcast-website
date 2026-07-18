@@ -111,7 +111,8 @@
     "ref": "characters/東東挖土機.jpg",
     "firstSeen": "ep-5",
     "alsoIn": [
-      "ep-15"
+      "ep-15",
+      "ep-20"
     ]
   },
   {
@@ -119,12 +120,19 @@
     "aliases": [
       "吊車",
       "老爺爺",
-      "吊車老爺"
+      "吊車老爺",
+      "大吊車阿公",
+      "吊車阿公",
+      "大吊車",
+      "阿公"
     ],
     "vehicle": "crane truck",
     "desc": "a wise cute claymation orange crane truck with a long extending boom arm, grey hook at the end, cream cab windows, kind gentle eyes and a warm grandfather smile",
     "ref": "characters/吊車老爺爺.jpg",
-    "firstSeen": "ep-5"
+    "firstSeen": "ep-5",
+    "alsoIn": [
+      "ep-20"
+    ]
   },
   {
     "name": "小橘高鐵",
@@ -353,7 +361,9 @@
     "desc": "a cute claymation sky-blue round water-park tour car named Pupu Pig (噗噗豬), pig-themed with a big pink snout on the front grille, floppy pink pig ears on the roof, winking expressive eyes, yellow headlight circles, light-blue and blue polka dots on the body, yellow roof rack with a blue water cannon spraying water jets, red-white life ring on the side, blue water splash from the rear, four small wheels, cheerful playful energy, soft hand-sculpted clay texture",
     "ref": "characters/噗噗豬.jpg",
     "firstSeen": "ep-16",
-    "alsoIn": ["ep-17"]
+    "alsoIn": [
+      "ep-17"
+    ]
   },
   {
     "name": "海龜老師暖暖",
@@ -366,6 +376,21 @@
     "desc": "a cute claymation anthropomorphic sea turtle teacher named Nuannuan (暖暖), warm beige-tan skin with brown spots, segmented pinkish-orange shell, large expressive eyes with long lashes, rosy cheeks, wide gentle smile, large pink polka-dot bow on head, riding a teal skateboard with white racing stripes and pink wheels, friendly waving flipper, water-park teacher energy, soft hand-sculpted clay texture, NO car body — turtle character only",
     "ref": "characters/海龜老師暖暖.jpg",
     "firstSeen": "ep-16",
-    "alsoIn": ["ep-17"]
+    "alsoIn": [
+      "ep-17"
+    ]
+  },
+  {
+    "name": "水泥車阿尼",
+    "aliases": [
+      "阿尼",
+      "阿妮",
+      "水泥車",
+      "水泥車阿尼"
+    ],
+    "vehicle": "cement mixer",
+    "desc": "a cute claymation bright yellow cement mixer truck named Ani (阿尼), round chubby cab with big shiny black round eyes, light-yellow circular cheeks and a warm friendly smile, large rotating mixing drum on the back with bold blue-and-white spiral stripes, grey front bumper, chunky black clay wheels, soft hand-sculpted clay texture — distinct from yellow bucket excavator Dongdong (東東挖土機) and yellow drill excavator Aku (阿酷)",
+    "ref": "characters/水泥車阿尼.jpg",
+    "firstSeen": "ep-20"
   }
 ]

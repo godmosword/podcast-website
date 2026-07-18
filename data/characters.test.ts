@@ -64,12 +64,18 @@ describe("getCharactersForStory", () => {
     expect(ids).toContain("an-an");
     expect(ids).toContain("xiao-hong");
   });
+
+  it("ep-20 含水泥車阿尼", () => {
+    const ids = getCharactersForStory("ep-20").map((c) => c.id);
+    expect(ids).toContain("a-ni");
+  });
 });
 
 describe("getCharacterName", () => {
   it("回傳角色正式名稱供 roamer 打招呼使用", () => {
     expect(getCharacterName("xiao-hong")).toBe("小紅賽車");
     expect(getCharacterName("a-ku")).toBe("阿酷鑽地車");
+    expect(getCharacterName("a-ni")).toBe("水泥車阿尼");
   });
 
   it("查無角色時回傳 null", () => {

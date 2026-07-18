@@ -1,0 +1,189 @@
+{
+  "slug": "ep-20",
+  "audioDuration": 415,
+  "model": "manual-semantic-ep20",
+  "generatedAt": "2026-07-17T14:40:00.000Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 0,
+      "end": 57.7,
+      "summary": "主持人預告：水泥車阿尼的101任務，觀景台看車像TOMICA",
+      "prompt": "Clay podcast cover-safe framing: yellow cement mixer Ani at a cheerful construction site beside a colorful toy Taipei 101 tower labeled 101, soft crane and unfinished building in soft background, bright blue sky, playful children's storybook mood",
+      "characters": ["水泥車阿尼"],
+      "keepCover": true,
+      "refPageHint": "Cover page 1 — keep published Apple cover. PRIMARY: 水泥車阿尼 match portrait — bright yellow cement mixer, blue-and-white spiral drum, ONE face. Do not regenerate if cover exists."
+    },
+    {
+      "index": 2,
+      "start": 57.7,
+      "end": 73.4,
+      "summary": "車車遊樂園出現特別任務：要蓋101層高的大樓",
+      "prompt": "Clay car amusement park announcement board showing a special mission to build a 101-story skyscraper, colorful park gate and little generic faceless cars gathering excitedly, bright daytime, wide establishing shot, no close-up named characters",
+      "characters": [],
+      "refPages": [1],
+      "refPageHint": "Wide establishing only. Generic faceless little cars. No cement mixer close-up yet. Cheerful mission-day energy."
+    },
+    {
+      "index": 3,
+      "start": 73.4,
+      "end": 102.5,
+      "summary": "介紹黃色圓滾滾水泥車阿尼，滾動攪拌水泥送到工地",
+      "prompt": "Cute clay yellow cement mixer truck Ani centered, big rotating drum with blue-and-white spiral stripes mixing sand water and cement, round chubby cab with friendly smile, delivering wet concrete toward a construction site entrance, soft clay texture",
+      "characters": ["水泥車阿尼"],
+      "refPages": [1],
+      "refPageHint": "PRIMARY: 水泥車阿尼 match portrait exactly — bright yellow body, blue-white spiral drum, grey bumper, chunky black wheels, ONE face, NO arms. Working mixer pose."
+    },
+    {
+      "index": 4,
+      "start": 102.5,
+      "end": 118.9,
+      "summary": "阿尼羨慕跑車開得好快好帥，覺得自己不夠厲害",
+      "prompt": "Yellow cement mixer Ani watching a sleek red race car zoom past with a whoosh motion streak, Ani looking small and envious with a wistful expression, clay construction-road backdrop, child-safe gentle emotion",
+      "characters": ["水泥車阿尼"],
+      "refPages": [3],
+      "refPageHint": "PRIMARY: 水泥車阿尼 match portrait — wistful not crying hard. Race car is generic faceless background prop, not a named roster character. ONE face on Ani only."
+    },
+    {
+      "index": 5,
+      "start": 118.9,
+      "end": 134.2,
+      "summary": "阿尼又看見吊車把鋼筋舉得高高的，覺得吊車好厲害",
+      "prompt": "Yellow cement mixer Ani looking up in awe as an orange crane truck lifts steel rebar high into the sky, Ani feeling not special enough, tall unfinished building silhouette, soft clay wonder mood",
+      "characters": ["水泥車阿尼", "吊車老爺爺"],
+      "refPages": [4],
+      "refPageHint": "PRIMARY: 水泥車阿尼 match portrait looking up. 吊車老爺爺 match portrait — orange crane, long boom, grey hook, warm grandfather eyes, ONE face each. Crane is impressive but distant."
+    },
+    {
+      "index": 6,
+      "start": 134.2,
+      "end": 159.2,
+      "summary": "有一天阿尼接到超級任務：幫忙蓋好高好高的101大樓",
+      "prompt": "Yellow cement mixer Ani, blue-and-white spiral drum, ABSOLUTELY NO arms, NO hands, NO thumbs, NO limbs of any kind, parked close beside a mission blueprint scroll that floats upright in the air or stands leaning on its own easel on the ground — Ani's cab nudged near the scroll with eyes gazing intently at it to show he has received the special mission, do NOT show Ani reaching, holding, grabbing, or touching the scroll with any limb. The blueprint clearly depicts the rainbow tiered Taipei 101 tower: light-blue base with bold white '101' text, stacked tiers colored green, yellow, orange, red, purple from bottom to top, topped with a bright yellow five-pointed star (a simplified sketch is fine but the colors and tier order must match). Determined hopeful sparkle in Ani's eyes, bright daytime construction site background, child-safe clay storybook mood",
+      "characters": ["水泥車阿尼"],
+      "refPages": [1, 3],
+      "refPageHint": "PRIMARY: 水泥車阿尼 match portrait — bright yellow body, blue-white spiral drum, ONE face, ABSOLUTELY NO arms/hands/thumbs/limbs — show receiving the mission via body proximity and gaze only, Ani must never reach or hold anything. CRITICAL BUILDING: the blueprint must depict the same rainbow 101 tower as reference page 1 cover — light-blue base with white 101, green/yellow/orange/red/purple tiers, yellow star on top. Do not draw a generic or solid-color tower on the blueprint."
+    },
+    {
+      "index": 7,
+      "start": 159.2,
+      "end": 176.3,
+      "summary": "工地好熱鬧：挖土機東東挖地基，大吊車阿公吊鋼筋",
+      "prompt": "Busy clay construction site: yellow excavator Dongdong digging the foundation with his bucket, orange crane grandpa lifting rebar high, unfinished grey building frame, traffic cones and bricks, energetic teamwork wide shot",
+      "characters": ["東東挖土機", "吊車老爺爺"],
+      "refPages": [5],
+      "refPageHint": "PRIMARY: 東東挖土機 match portrait — yellow excavator on black tracks, happy digging. 吊車老爺爺 match portrait lifting rebar. ONE face each. No Ani in this establishing work shot."
+    },
+    {
+      "index": 8,
+      "start": 176.3,
+      "end": 198.1,
+      "summary": "阿尼水泥桶滾動攪拌，一趟兩趟三趟送到大樓下面",
+      "prompt": "Yellow cement mixer Ani hard at work: drum spinning blue-white stripes, delivering load after load of wet concrete to the base of a rising building, counting trips one two three, diligent cheerful effort",
+      "characters": ["水泥車阿尼"],
+      "refPages": [3, 7],
+      "refPageHint": "PRIMARY: 水泥車阿尼 match portrait — drum rotating, working at ground level beside building base. ONE face. Continuity with construction site from page 7."
+    },
+    {
+      "index": 9,
+      "start": 198.1,
+      "end": 218.3,
+      "summary": "大樓越蓋越高，阿尼只能待在最下面嘆氣：誰會看見我呢",
+      "prompt": "Tall unfinished skyscraper rising high above, tiny yellow cement mixer Ani alone at the very bottom looking up with a sad sigh, feeling invisible while everyone notices the tall building, soft melancholic clay lighting, child-safe emotion",
+      "characters": ["水泥車阿尼"],
+      "refPages": [8],
+      "refPageHint": "PRIMARY: 水泥車阿尼 match portrait — sad sigh expression, still yellow with blue-white drum, ONE face. Emphasize scale: building huge, Ani small at foundation."
+    },
+    {
+      "index": 10,
+      "start": 218.3,
+      "end": 255.9,
+      "summary": "大吊車阿公拍拍阿尼：100分很棒，101是再努力再勇敢一點點",
+      "prompt": "Orange crane grandpa parked beside yellow cement mixer Ani, gently resting his grey crane hook near Ani's cab in a caring gesture — NO arms NO hands NO limbs on either vehicle — explaining that 100 is perfect but 101 means trying a little more and being a little braver, warm mentoring moment at the construction site",
+      "characters": ["吊車老爺爺", "水泥車阿尼"],
+      "refPages": [9, 5],
+      "refPageHint": "PRIMARY: 吊車老爺爺 match portrait — orange crane truck, long boom, grey hook only, warm grandfather face, absolutely NO arms NO hands NO mechanical limbs. 水泥車阿尼 match portrait listening. ONE face each. Comfort via crane hook proximity only."
+    },
+    {
+      "index": 11,
+      "start": 255.9,
+      "end": 278.6,
+      "summary": "阿公說高樓最重要的是地基，沒有阿尼的穩固水泥就蓋不上去",
+      "prompt": "Cross-section clay teaching shot at a construction site: orange crane truck grandpa with his long boom angled downward, grey hook lowered directly above a foundation cross-section filled with solid concrete, showing where the base meets the ground — the crane truck has NO limbs of any kind, only its boom and hook communicate. Yellow cement mixer Ani parked beside him, blinking thoughtfully with attentive round eyes, listening carefully, also with NO limbs of any kind. Behind them a tall unfinished building rises many storeys high with a visible steel skeleton frame, echoing the towering scale of the site — not a short three-floor stub. Bright daytime clay lighting, educational but playful mood",
+      "characters": ["吊車老爺爺", "水泥車阿尼"],
+      "refPages": [10, 9],
+      "refPageHint": "PRIMARY: 吊車老爺爺 and 水泥車阿尼 match portraits — BOTH characters have NO arms, NO hands, NO fingers, NO limbs of any kind. Crane conveys attention via its boom and hook lowered over the foundation cross-section, not a reaching gesture. Ani conveys listening via attentive blinking eyes only. Background unfinished building must read as a tall multi-storey skeleton (continuity with page 9's towering scale) — not a short 3-floor stub. Keep the foundation cross-section teaching visual clear. ONE face each."
+    },
+    {
+      "index": 12,
+      "start": 278.6,
+      "end": 294.8,
+      "summary": "阿尼心裡暖暖的：默默在下面幫忙也是很重要的事",
+      "prompt": "Yellow cement mixer Ani with a warm glowing heart feeling, soft smile realizing that quietly helping below is also very important, sunset-warm clay light at the foundation, peaceful hopeful mood",
+      "characters": ["水泥車阿尼"],
+      "refPages": [11],
+      "refPageHint": "PRIMARY: 水泥車阿尼 match portrait — warm happy realization smile, ONE face, blue-white drum. Soft emotional glow, no text clutter."
+    },
+    {
+      "index": 13,
+      "start": 294.8,
+      "end": 312.4,
+      "summary": "從那天起阿尼不再羨慕別人，認真負責一趟趟送水泥",
+      "prompt": "Yellow cement mixer Ani working proudly and responsibly day after day, drum spinning, steadily delivering cement beside the growing 101 tower, confident focused expression no longer envious, bright industrious mood",
+      "characters": ["水泥車阿尼"],
+      "refPages": [12, 8],
+      "refPageHint": "PRIMARY: 水泥車阿尼 match portrait — proud responsible work face, same yellow mixer on-model. ONE face. Show repeated diligent trips."
+    },
+    {
+      "index": 14,
+      "start": 312.4,
+      "end": 337.5,
+      "summary": "終於101蓋好了，阿尼遠遠看著又高又壯的大樓開心笑了",
+      "prompt": "Yellow cement mixer Ani, blue-and-white spiral drum, NO arms NO hands NO limbs, parked far away in the distance looking up with a big happy triumphant smile at the COMPLETED rainbow Taipei 101 tower behind him. The tower MUST match the episode cover exactly: light-blue base block with a clearly readable bold white number '101' and a small blue door at street level, stacked tiers rising green then yellow then orange then red-magenta then purple, topped with a bright yellow five-pointed star. This is the SAME building as the episode cover / homepage hero image — NOT a solid green or teal skyscraper, NOT a plain glass tower, the white 101 text on the blue base must be clearly readable. Bright daytime clay park grass, cheerful triumphant mood, soft clay texture",
+      "characters": ["水泥車阿尼"],
+      "refPages": [1],
+      "refPageHint": "CRITICAL BUILDING: match the rainbow multi-tier 101 tower from reference page 1 (episode cover / homepage LatestHero) EXACTLY — light-blue base with a clearly READABLE white '101' and small blue door, stacked green/yellow/orange/red-magenta/purple tiers, yellow five-pointed star on top. MUST show readable white 101 on the blue base. Do NOT invent a solid green/teal skyscraper or plain glass tower. PRIMARY: 水泥車阿尼 match portrait — joyful proud smile at a distance, yellow body blue-white spiral drum, ONE face, NO arms NO hands NO limbs."
+    },
+    {
+      "index": 15,
+      "start": 337.5,
+      "end": 367.2,
+      "summary": "阿尼的101任務完成了；默默負責完成小小任務也很棒",
+      "prompt": "Victory close-medium clay shot: yellow cement mixer Ani, blue-and-white spiral drum, NO arms NO hands NO limbs, smiling contentedly right beside the SAME completed rainbow Taipei 101 tower as the episode cover. The tower MUST show: light-blue base block with a clearly readable bold white number '101' and a small blue door, stacked tiers rising green then yellow then orange then red-magenta then purple, topped with a bright yellow five-pointed star — NOT a solid green or teal tower, the white 101 text must be clearly readable on the blue base. Soft mission-complete glow, quiet proud responsible-work mood, gentle clay epilogue framing, continuity with the distant view from the previous scene",
+      "characters": ["水泥車阿尼"],
+      "refPages": [1, 14],
+      "refPageHint": "CRITICAL BUILDING: same rainbow 101 tower as reference page 1 cover / homepage LatestHero, continuity with page 14 — light-blue base with readable white '101' and small blue door, stacked green/yellow/orange/red-magenta/purple tiers, yellow five-pointed star top. MUST show readable white 101 on the blue base. Do NOT draw a solid green/teal tower. PRIMARY: 水泥車阿尼 match portrait — content mission-complete smile, ONE face, NO arms NO hands NO limbs."
+    },
+    {
+      "index": 16,
+      "start": 367.2,
+      "end": 380.5,
+      "summary": "小任務例子：自己整理書包、時間到去刷牙、玩完玩具自己收",
+      "prompt": "Clay podcast teaching montage for kids: a neat backpack being packed, a toothbrush by a sink, toys being put back into a toy box, warm household vignettes showing small responsible tasks, no vehicles needed as main focus",
+      "characters": ["Bonbon", "馬米"],
+      "refPages": [1],
+      "refPageHint": "Optional tiny host cameo or pure vignette props. If hosts appear they are HUMAN clay matching Bonbon/馬米 portraits — not cars. Keep simple readable kid-task icons."
+    },
+    {
+      "index": 17,
+      "start": 380.5,
+      "end": 396.5,
+      "summary": "從今天開始也可以像阿尼一樣，一點一點把自己的事情做好",
+      "prompt": "Clay podcast studio: Bonbon and Mami encouraging kids to be like Ani and finish their own little tasks step by step, warm smile, small yellow cement mixer Ani toy or mural smiling in the background",
+      "characters": ["Bonbon", "馬米", "水泥車阿尼"],
+      "refPages": [16],
+      "refPageHint": "PRIMARY: Bonbon and 馬米 HUMAN clay match portraits exactly. Background small 水泥車阿尼 match portrait as mural/toy, ONE face each. Encouraging wrap-up."
+    },
+    {
+      "index": 18,
+      "start": 396.5,
+      "end": 415,
+      "summary": "結尾道別，邀請小朋友下次再一起來車車遊樂園玩",
+      "prompt": "Clay podcast studio closing shot: Bonbon and Mami, matching their established portraits, waving goodbye cheerfully to the camera. Behind them a mural or window view MUST clearly show the completed rainbow Taipei 101 tower — same as the episode cover: light-blue base with a clearly readable white '101' and a small blue door, stacked tiers rising green then yellow then orange then red-magenta then purple, a bright yellow five-pointed star on top, NOT a solid green or teal tower. In the mural near the tower, show three friend vehicles together: yellow cement mixer Ani with a blue-and-white spiral drum, orange crane truck grandpa with a long boom and grey hook, and yellow excavator Dongdong with a digging bucket — each vehicle has exactly ONE face and ABSOLUTELY NO arms, NO hands, NO limbs of any kind. Warm sunset studio glow, cheerful inviting farewell mood",
+      "characters": ["Bonbon", "馬米", "水泥車阿尼", "吊車老爺爺", "東東挖土機"],
+      "refPages": [17, 14, 1, 7],
+      "refPageHint": "PRIMARY: Bonbon and 馬米 HUMAN clay match portraits exactly, centered, waving goodbye (continuity with page 17). CRITICAL BUILDING: background mural must show the same completed rainbow 101 tower as reference page 1 cover / page 14 — light-blue base with readable white 101 and small blue door, green/yellow/orange/red-magenta/purple tiers, yellow star top, NOT solid green/teal. Background vehicles (continuity with page 7): 水泥車阿尼, 吊車老爺爺, 東東挖土機 each match portrait, ONE face each, NO arms NO hands NO limbs on all three. Warm inviting goodbye, invite next visit."
+    }
+  ],
+  "newCharacters": []
+}

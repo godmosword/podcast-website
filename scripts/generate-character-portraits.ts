@@ -25,13 +25,18 @@ async function portraitFromCoverRef(
 ): Promise<Buffer> {
   const { default: OpenAI, toFile } = await import("openai");
   const client = new OpenAI();
-  const label =
-    char.name.includes("圈圈") ? "圈圈" : char.name.includes("點點") ? "點點" : char.name;
+  const isolateHint = char.name.includes("圈圈")
+    ? "isolate the red twin fire engine labeled 「圈圈」 on its cab"
+    : char.name.includes("點點")
+      ? "isolate the red twin fire engine labeled 「點點」 on its cab"
+      : char.name === "水泥車阿尼"
+        ? "isolate the yellow cement mixer truck with the blue-and-white spiral mixing drum"
+        : `isolate the main character 「${char.name}」`;
   const prompt =
-    `${CLAY_STYLE_PREFIX}Character model sheet based on the reference image: isolate the red twin fire engine labeled 「${label}」 on its cab. ` +
+    `${CLAY_STYLE_PREFIX}Character model sheet based on the reference image: ${isolateHint}. ` +
     `${char.desc} ` +
     `Single character only, centered, front three-quarter view, full body, neutral happy pose, plain soft off-white background. ` +
-    `Match exact clay style, colors, face, badge, ladder and proportions from the reference. ${CLAY_NEGATIVE}`;
+    `Match exact clay style, colors, face and proportions from the reference. ${CLAY_NEGATIVE}`;
 
   const file = await toFile(readFileSync(coverPath), "cover.jpg", {
     type: "image/jpeg",
@@ -90,12 +95,19 @@ async function main(): Promise<void> {
   }
 
   const ep14Cover = join(ROOT, "public", "stories", "ep-14", "01.jpg");
+  const ep20Cover = join(ROOT, "public", "stories", "ep-20", "01.jpg");
   for (const char of targets) {
-    const useCover =
+    let cover: string | undefined;
+    if (
       char.firstSeen === "ep-14" &&
       char.vehicle === "fire engine" &&
-      existsSync(ep14Cover);
-    await generateOne(char, useCover ? ep14Cover : undefined);
+      existsSync(ep14Cover)
+    ) {
+      cover = ep14Cover;
+    } else if (char.name === "水泥車阿尼" && existsSync(ep20Cover)) {
+      cover = ep20Cover;
+    }
+    await generateOne(char, cover);
   }
 
   // 同步 ref 路徑

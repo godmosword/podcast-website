@@ -7,7 +7,7 @@
 
 > 格式：每項一段，行末標 `優先序 · 工時(人工) · 依賴`。工時 S/M/L。
 > **紀律：** 條目打 ✅ 時必須附 commit hash。
-> **資料基準（2026-07-17）：** `storiesByNewest()` **20 集**、最新 **`ep-20`**；`data/games.ts` 見下表。
+> **資料基準（2026-07-18）：** `storiesByNewest()` **20 集**、最新 **`ep-20`**（全幕 18 頁）；`data/games.ts` 見下表。
 >
 > **現役遊戲（canon，對齊 `data/games.ts`）：** `candy-match` 繽紛消消樂 · `car-adventure` 車車大冒險 · `block-drop` 繽紛樂園 · `candy-kart` 繽紛卡丁車 · `coloring-book` 繪本著色。
 > **歷史 slug：** `kart`／`pirate-kart`／`car-star`／`car-mission` 已退役，見 [archive](./docs/archive/TODOS-completed-2026-07-11.md)。
@@ -495,6 +495,46 @@ PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
 
 > **本輪不實作：** 以下四項是會員帳號／付費範圍；先完成 ASSET-P2、TRUST-P2、Growth-Measure-2 與穩定依賴，再由家長端產品決策開工。
 
+### 車車遊樂園 2.0 升級方案審核（2026-07-18）
+
+> **審核結論：條件通過。** 產品方向（家長付費、孩子端免費、家長閘門、單一會員層級、無 dark pattern）與既有原則一致；但 M0／M1／M2 尚不可照原案直接開工。下列 blocker 關閉前，不得宣稱 2.0 可收款上線。
+
+#### 開工前 blocker
+
+- **基準與時程：** 方案寫 18 集，但目前資料基準是 20 集（手動 6 集 + Apple 同步 EP7–20）；M0-5 要收 14 天基線，不能同時宣稱 M0 一週完成且「M0 未完成不得開 M1」。基礎設施與 14 天觀察須拆開，後者可與 M1 並行。
+- **R2／Git／CI 契約：** `storyAudioUrl()` 已支援外部 origin，但 `generate:audio-lengths`、Apple sync、轉錄與影片匯出仍直接讀 `public/stories`。移除音檔前須建立 R2 manifest（key／bytes／checksum／content-type），改造 build、RSS、`verify:geo`、sync CI，並完成從 R2 還原工作的演練；不可標示為「程式碼零改動」。
+- **歷史瘦身：** archive branch 若長期保留，舊 blob 仍可達，不能保證 `.git` 會降至 `<50MB`。先完成 R2 checksum、冷備份、CI／部署驗證，再重寫所有必要 refs；協作端需明確 re-clone／force-push 通知。
+- **登入與閘門：** `parents.login_token_hash` 不足以表達一次性 token、多裝置 session、撤銷與過期。需獨立 login-token／session 記錄、rate limit、Secure／HttpOnly／SameSite cookie、token prefetch 防護與帳號刪除流程。算術題只是 UX gate，付費 API 與私有資產仍須 server-side session／entitlement 驗證。
+- **進度同步：** 目前實際 key 是 `cheche:progress`。上雲前需用 allowlist schema、大小上限與版本號驗證 payload，定義首次登入的 local/server merge、離線重試、衝突與登出降級策略；不要直接把任意 localStorage JSON 寫入 JSONB。
+- **金流可行性：** Stripe 目前官方支援地區清單未列台灣；台灣主體不得把 Stripe 視為現成海外備援，須先確認受支援國家的合法實體、稅務與銀行條件。M2 v1 應先選定單一可落地 provider（預設綠界），Stripe 只在資格確認後加入。
+- **會員帳務：** `memberships` 不能只有 `status`／`current_period_end`／`provider_ref`。至少要有 provider customer／price ref、取消／退款／付款失敗狀態、webhook event idempotency、事件順序處理與人工對帳欄位；不得依賴 checkout success 頁面授權。
+- **內容切線：** 目前 Apple sync 與 RSS 是公開發布管線。必須先決定「7 天早鳥」是否不進公開 Apple/RSS，或改成僅會員 Web 內容；`access`／`availableAt` 需同步控制故事頁、播放器、RSS、sitemap、OG、JSON-LD 與私有 PDF，不能只把物件放進 private bucket。
+
+#### 修正版執行順序
+
+1. **M0a（1 週）：** 自訂網域、Resend、公開 R2、R2 manifest、build／RSS／sync CI 改造與 smoke test。
+2. **M0b（並行 14 天）：** 收集 `story_play_start → story_completed → return_visit → subscribe_submit` 基線；先定事件資料匯出方式與最小樣本／決策門檻。
+3. **M1：** parent session、server-side gate、guest localStorage 保留、進度同步與隱私／條款更新；不把付款混入身份層。
+4. **M2：** 單一 provider 的 hosted checkout、簽章 webhook、會員狀態／對帳、取消／退款與一種私有內容；完成一筆測試付款到失效的完整循環後才開放真實收款。
+5. **M3：** 依轉換、留存與會員內容使用數據排序價值迭代。TTS 姓名客製、實體包裹、具名感謝先不列核心交付。
+6. **M4：** YouTube、短影音、平台付費與實體包裹移出會員核心時程；它們需要獨立的內容、平台、客服與營運驗收。
+
+#### 驗收紅線
+
+- 無本機音檔仍可完成 production build，RSS enclosure bytes 正確，Apple sync／轉錄／影片匯出有明確本機快取或 R2 下載流程。
+- 未登入、gate bypass、過期 session、重放 magic link、撤銷 session、無 entitlement 的請求全部不能取得會員資產。
+- webhook 重送、亂序、付款失敗、取消、退款、續期與 provider downtime 不會錯誤授權或永久保留權限。
+- 私有內容不出現在公開 RSS／sitemap／OG／JSON-LD；signed URL 具短 TTL、Range／CORS／cache 行為測試，且明白其為 bearer token。
+- 首次登入、跨裝置合併、登出、刪除帳號與隱私政策均有測試與可觀測紀錄。
+
+#### 官方技術參考
+
+- [Cloudflare R2 presigned URLs](https://developers.cloudflare.com/r2/api/s3/presigned-urls/)：presigned URL 使用 S3 API domain，不能直接使用 custom domain。
+- [Stripe global availability](https://stripe.com/global)／[海外帳戶要求](https://support.stripe.com/questions/requirements-to-open-a-stripe-account-in-another-country)。
+- [綠界信用卡定期定額訂單作業](https://developers.ecpay.com.tw/12136/)：停用後不能重新啟用，只能建立新訂單。
+- [Stripe subscription webhooks](https://docs.stripe.com/billing/subscriptions/webhooks)：訂閱狀態與存取權應由 webhook 驗證與同步。
+- [Vercel custom events](https://vercel.com/docs/analytics/custom-events)：確認目前 Vercel plan 是否支援自訂事件與所需報表。
+
 #### AUTH-P4 家長會員帳號與跨裝置進度　`STEM-P4 · L · Neon + email provider`　〔trust+eng〕　⏸ 延後
 家長限定 magic link／session；保留 guest localStorage，登入後 merge 收藏、續播、遊戲摘要與圖鑑進度。不可要求孩子建立帳號；需補資料刪除、匯出、保留期限與家長閘門。
 
@@ -850,6 +890,14 @@ T+2d    社群貼文（B 戰場）
 |------|------|------|
 | 字幕校對 + `--mark` | ✅ | 115 句；重轉錄補齊 0–120s；刪幻覺／重複；`_proofread/ep-19.json` |
 | `illustrate --segment-only` → 生圖 → `--approve` | ✅ | 17 幕全幕繪本；定裝手修；幕 6／7 改單純相撞（多多無車門）；`verify:episodes` 全過 → `0dd9705` |
+
+### ep-20 上架進度（2026-07-18）
+
+| 步驟 | 狀態 | 備註 |
+|------|------|------|
+| 字幕校對 + `--mark` | ✅ | 137 句；阿妮→阿尼、觀景台／TOMICA／玩完；`_proofread/ep-20.json` |
+| 定裝照 | ✅ | 水泥車阿尼（封面 ref）；吊車阿公別名→吊車老爺爺；東東 alsoIn |
+| `illustrate` → 審圖 → `--approve` | ✅ | 18 幕全幕繪本；重抽 06／11／14／15／18（去手臂、彩虹 101）；`verify:episodes` 全過 → `10f94a0` |
 
 ### 現況缺口（勿忘）
 

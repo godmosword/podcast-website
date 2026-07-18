@@ -6,6 +6,8 @@
 
 ### Added
 
+- **ep-20 全幕繪本上線**：《水泥車阿尼的101任務》18 幕插圖＋幕級 captions；字幕校對 137 句並 `--mark`；定裝照「水泥車阿尼」；場景手修（去手臂、彩虹 101 對齊封面／LatestHero）；保留 Apple 封面 `01.jpg`。
+
 - **遊樂園教學示範 overlay**：新增 GameKit `TutorialOverlay`（手勢動畫示範 tap/swipe/hold/arrows、`prefers-reduced-motion` 降靜態圖、不落 localStorage）；`data/games.ts` 增 `tutorial` 欄位（五款各 2–3 步、每句 ≤10 字）；大冒險／方塊／消消樂／卡丁車開始畫面加「怎麼玩？」按鈕（≥48px）；大冒險觸控裝置操作提示改裝置感知短句。
 
 - **車車大冒險黏土化＋六關主題背景**：`render.ts` 全面黏土風（草皮帽地形、糖果金幣、軟糖尖刺、車臉造型對齊消消樂車車語彙、白底圓角 HUD 取代像素字；色值 JS 常數鏡射 `--c-*` token）；六關主題視差背景（草原薄荷／粉彩彩虹／海洋藍綠／森林深綠／黃昏星空／夜間嘉年華），reduced-motion 全靜止。未動共享 `lib/gamekit/runtime/`。

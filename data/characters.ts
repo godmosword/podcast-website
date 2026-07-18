@@ -54,6 +54,7 @@ const ID_BY_CANONICAL_NAME: Record<string, string> = {
   髒髒小怪獸: "dirty-germs",
   噗噗豬: "pu-pu-pig",
   海龜老師暖暖: "nuan-nuan-turtle",
+  水泥車阿尼: "a-ni",
 };
 
 const VEHICLE_ZH: Record<string, string> = {
@@ -85,6 +86,7 @@ const VEHICLE_ZH: Record<string, string> = {
   creature: "小怪獸",
   "tour car": "遊園車",
   "sea turtle": "海龜",
+  "cement mixer": "水泥車",
 };
 
 /** 車種對應的手動維護集數 slug（與 firstSeen 合併）。 */
@@ -131,6 +133,7 @@ const PERSONALITY_BY_ID: Record<string, string> = {
   "dirty-germs": "調皮躲藏、怕肥皂和清水",
   "pu-pu-pig": "歡樂開朗、愛帶大家認識新地方",
   "nuan-nuan-turtle": "溫柔耐心、教小朋友慢慢認識新朋友",
+  "a-ni": "認真負責、默默把地基打穩",
 };
 
 function shortName(entry: RawCharacter, id: string): string {
