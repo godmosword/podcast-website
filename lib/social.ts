@@ -32,7 +32,7 @@ const SOCIALS: Social[] = [
   },
   {
     label: "Threads",
-    url: "https://www.threads.com/@s32183218",
+    url: "https://www.threads.com/@bonboncarstory",
     background: BRAND_COLORS.threads,
     icon: "threads",
   },
