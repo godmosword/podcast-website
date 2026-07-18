@@ -34,7 +34,7 @@
 
 | ID | Commit |
 |----|--------|
-| docs(agent): Leader→Grok High Fast；對抗審／L1／L2→Composer；Cursor＋Claude Code 命令與契約測試對齊 | （待 commit） |
+| docs(agent): Leader→Grok High Fast；對抗審／L1／L2→Composer；Cursor＋Claude Code 命令與契約測試對齊 | `0e261fd` |
 
 ### 本輪已完成（2026-07-17）
 
