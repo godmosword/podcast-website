@@ -4,8 +4,11 @@ import { migrateV2ToV3 } from "@/lib/gamekit/progress/economy";
 import { vehiclesUnlockedAt } from "@/lib/gamekit/progress/garage";
 import {
   loadPlayerProfile,
+  migrateV3ToV4,
+  recordAdventureStars,
   recordBestScore,
   recordMedal,
+  SAVE_VERSION,
 } from "@/lib/gamekit/progress/save";
 import { reportGameSession } from "@/lib/gamekit/progress/session";
 import type { PlayerProfile } from "@/lib/gamekit/types";
@@ -130,6 +133,48 @@ describe("契約：存檔 migration 保留未知欄位（D2，v3→v4 只可加�
     expect(migrated.stars).toBe(5);
     expect(migrated.economy?.lifetimeStars).toBe(5);
     expect((migrated as Record<string, unknown>).adventureStars).toEqual({ 0: 3 });
+  });
+
+  it("v3→v4 只新增 adventureStars，既有 medal/economy/欄位不變", () => {
+    const v3 = {
+      version: 3,
+      stars: 4,
+      economy: {
+        lifetimeStars: 4,
+        balance: 4,
+        ledger: [{ id: "m", amount: 4, source: "test", at: "2026-01-01" }],
+      },
+      unlockedVehicles: ["小黃", "怪獸卡車"],
+      bests: { "car-adventure": 123 },
+      medals: { "car-adventure": [7] },
+      stickers: ["played-car-adventure"],
+      gamesPlayed: { "car-adventure": true },
+      futureField: "keep-me",
+    } as unknown as Partial<PlayerProfile>;
+    const migrated = migrateV3ToV4(v3);
+
+    expect(SAVE_VERSION).toBe(4);
+    expect(migrated.version).toBe(4);
+    expect(migrated.adventureStars).toEqual({});
+    expect(migrated.medals).toEqual(v3.medals);
+    expect(migrated.economy).toEqual(v3.economy);
+    expect((migrated as Record<string, unknown>).futureField).toBe("keep-me");
+  });
+});
+
+describe("契約：adventureStars 是獨立且取 max 的 car-adventure setter", () => {
+  it("不改 medal/economy，較低星數不覆蓋最佳值", () => {
+    const base = {
+      ...loadPlayerProfile(),
+      medals: { "car-adventure": [7] },
+      adventureStars: { 0: 2 },
+    };
+    const lower = recordAdventureStars(base, 0, 1);
+    expect(lower).toBe(base);
+    const higher = recordAdventureStars(base, 0, 3);
+    expect(higher.adventureStars).toEqual({ 0: 3 });
+    expect(higher.medals).toEqual(base.medals);
+    expect(higher.economy).toEqual(base.economy);
   });
 });
 

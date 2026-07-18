@@ -70,17 +70,17 @@ export const GAMES: GameMeta[] = [
   {
     slug: "car-adventure",
     title: "車車大冒險",
-    desc: "橫向跑跳過關：吃金幣、踩搗蛋車、躲尖刺、衝向終點旗。",
+    desc: "8 關橫向跑跳冒險：吃金幣、踩搗蛋車、躲尖刺、解開能力門，衝向終點旗。",
     href: "/games/car-adventure",
     emoji: "🏁",
     accent: "var(--c-sky)",
     ageBand: "challenge",
     ageRange: "6–12 歲",
-    estMinutes: 8,
+    estMinutes: 12,
     hasScore: true,
     hasTimer: false,
     gameType: "adventure",
-    controls: ["左右移動", "跳躍過關"],
+    controls: ["左右移動", "跳躍與衝刺"],
     art: {
       cover: "/games/v2/car-adventure/cover.webp",
       thumbnail: "/games/v2/car-adventure/cover.webp",
@@ -89,7 +89,7 @@ export const GAMES: GameMeta[] = [
     tutorial: [
       { text: "按住按鈕左右移動", gesture: "hold" },
       { text: "點一下跳起來", gesture: "tap" },
-      { text: "衝向終點旗", gesture: "arrows" },
+      { text: "按衝刺鍵破磚", gesture: "tap" },
     ],
   },
   {

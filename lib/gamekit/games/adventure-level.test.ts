@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CAR_ADVENTURE_LEVELS } from "@/lib/games/car-adventure/levels";
+import { WORLD_THEMES } from "@/lib/games/car-adventure/render";
 import {
   levelFromJson,
   type AdventureLevelJson,
@@ -10,8 +11,9 @@ describe("adventure levels", () => {
     for (const json of CAR_ADVENTURE_LEVELS) {
       const lv = levelFromJson(json);
       expect(lv.solid.size).toBeGreaterThan(0);
-      expect(lv.total).toBe(json.coins?.length ?? 0);
+      expect(lv.total).toBe((json.coins?.length ?? 0) + (json.secrets?.length ?? 0));
       expect(lv.worldW).toBe(json.cols * json.tileSize);
+      expect(lv.targetTime).toBe(json.targetTime ?? 0);
     }
   });
 });
@@ -23,6 +25,7 @@ describe("S1 plumbing：breakable/secrets/abilityGates/movingPlatforms 帶入 ru
       expect(lv.breakable.size).toBe(json.breakable?.length ?? 0);
       expect(lv.secrets.size).toBe(json.secrets?.length ?? 0);
       expect(lv.abilityGates).toHaveLength(json.abilityGates?.length ?? 0);
+      expect(lv.abilities.size).toBe(json.abilities?.length ?? 0);
       expect(lv.movingPlatforms).toHaveLength(json.movingPlatforms?.length ?? 0);
     }
   });
@@ -40,6 +43,7 @@ describe("S1 plumbing：breakable/secrets/abilityGates/movingPlatforms 帶入 ru
       breakable: ["3,5", "3,6"],
       secrets: ["7,2"],
       abilityGates: [{ x: 4, y: 8, ability: "dash" }],
+      abilities: ["dash", "break"],
       movingPlatforms: [
         { x: 2, y: 6, w: 3, axis: "y", range: 2, speed: 40 },
       ],
@@ -48,6 +52,7 @@ describe("S1 plumbing：breakable/secrets/abilityGates/movingPlatforms 帶入 ru
 
     expect([...lv.breakable].sort()).toEqual(["3,5", "3,6"]);
     expect(lv.secrets.has("7,2")).toBe(true);
+    expect([...lv.abilities]).toEqual(["dash", "break"]);
 
     expect(lv.abilityGates).toEqual([
       { x: 144, y: 288, w: 36, h: 72, ability: "dash" },
@@ -143,8 +148,8 @@ describe("car-adventure 關卡升級", () => {
     );
   }
 
-  it("共有 6 關（解決時長過短）", () => {
-    expect(CAR_ADVENTURE_LEVELS).toHaveLength(6);
+  it("共有 8 關（新增工坊與月光終點）", () => {
+    expect(CAR_ADVENTURE_LEVELS).toHaveLength(8);
   });
 
   it("每關 id 唯一且 name 非空", () => {
@@ -166,6 +171,33 @@ describe("car-adventure 關卡升級", () => {
   it("每關地圖夠長（cols >= 100，避免秒破）", () => {
     for (const json of CAR_ADVENTURE_LEVELS) {
       expect(json.cols).toBeGreaterThanOrEqual(100);
+    }
+  });
+
+  it("每關都有正的三星時間門檻", () => {
+    for (const json of CAR_ADVENTURE_LEVELS) {
+      expect(json.targetTime).toBeGreaterThan(0);
+    }
+  });
+
+  it("每一關都有對應的主題配色（含 glow）", () => {
+    expect(WORLD_THEMES).toHaveLength(CAR_ADVENTURE_LEVELS.length);
+    for (const theme of WORLD_THEMES) {
+      expect(theme.glow).toMatch(/^rgba\(/);
+    }
+  });
+
+  it("新關綜合使用 Phase 2/3 機制，能力門都有當關能力", () => {
+    for (const json of CAR_ADVENTURE_LEVELS.slice(6)) {
+      expect(json.breakable?.length ?? 0).toBeGreaterThan(0);
+      expect(json.movingPlatforms?.length ?? 0).toBeGreaterThan(0);
+      expect(json.enemies?.some((e) => e.kind === "hopper")).toBe(true);
+      expect(json.enemies?.some((e) => e.kind === "floater")).toBe(true);
+      expect(json.secrets?.length ?? 0).toBeGreaterThan(0);
+      expect(json.abilityGates?.length ?? 0).toBeGreaterThan(0);
+      for (const gate of json.abilityGates ?? []) {
+        expect(json.abilities ?? []).toContain(gate.ability);
+      }
     }
   });
 

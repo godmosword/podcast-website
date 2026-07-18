@@ -29,6 +29,7 @@ export interface Input {
   left: boolean;
   right: boolean;
   jump: boolean;
+  dash: boolean;
 }
 
 interface Player {
@@ -45,6 +46,9 @@ interface Player {
   jumpHeld: boolean;
   jumpCut: boolean;
   invuln: number;
+  dashTime: number;
+  dashCooldown: number;
+  dashHeld: boolean;
 }
 
 export interface GameState {
@@ -60,10 +64,17 @@ export interface GameState {
   input: Input;
   last: number | null;
   finishCleared: boolean;
+  /** 本關經過秒數；只在 playing 的 fixed update 累加。 */
+  elapsed: number;
+  /** 本次完成計算出的 0–3 顆車車大冒險顯示星。 */
+  earnedStars: number;
   prevPlayer: { x: number; y: number };
   renderAlpha: number;
   /** 本關已撞碎的可破壞磚 tile key（每關 reset 清空；不改 lv 資料）。 */
   broken: Set<string>;
+  /** 本關已觸發的秘密格與揭示進度（每關 reset 清空）。 */
+  revealedSecrets: Set<string>;
+  secretRevealProgress: Map<string, number>;
 }
 
 export const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -104,17 +115,24 @@ export function createGameState(
       jumpHeld: false,
       jumpCut: false,
       invuln: 0,
+      dashTime: 0,
+      dashCooldown: 0,
+      dashHeld: false,
     },
     cam: 0,
     score: 0,
     lives: startLives,
     taken: 0,
-    input: { left: false, right: false, jump: false },
+    input: { left: false, right: false, jump: false, dash: false },
     last: null,
     finishCleared: false,
+    elapsed: 0,
+    earnedStars: 0,
     prevPlayer: { x: lv.start.x, y: lv.start.y },
     renderAlpha: 1,
     broken: new Set(),
+    revealedSecrets: new Set(),
+    secretRevealProgress: new Map(),
   };
 }
 
@@ -137,12 +155,19 @@ export function applyAdvanceLevel(g: GameState, next: number): void {
     jumpHeld: false,
     jumpCut: false,
     invuln: INVULN,
+    dashTime: 0,
+    dashCooldown: 0,
+    dashHeld: false,
   };
   g.cam = 0;
   g.taken = 0;
   g.last = null;
   g.finishCleared = false;
+  g.elapsed = 0;
+  g.earnedStars = 0;
   g.prevPlayer = { x: lv.start.x, y: lv.start.y };
   g.renderAlpha = 1;
   g.broken = new Set();
+  g.revealedSecrets = new Set();
+  g.secretRevealProgress = new Map();
 }

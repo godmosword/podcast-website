@@ -4,6 +4,45 @@
 > 上游 Approved Plan：`/tmp/agent-plan-1784342234.md`（任務2）。Phase 1（render 靜態視覺）已完成落地。
 > 本 blueprint 只規劃**多階段、多 PR** 施工；每步自足，冷啟動可執行。
 
+---
+
+## 交接狀態（接手者先讀這節）
+
+**目前進度**：**S0–S9 已完成（未 commit/push）**。car-adventure scope 的 test/lint/build/check 與新增 E2E 全綠；全量既有 Playwright 尚有 4 個非本任務範圍的基線失敗，詳見文末「審計紀錄」表。
+
+**接手怎麼做**：若要延伸功能，請沿既有序列與 D1–D4 契約追加新步驟；本 blueprint 的 S5–S9 已依序落地。**預設不 commit/push**（除非使用者明說）。
+
+**護欄已就位**：S0 契約鎖定測試（`lib/gamekit/progress/contract-lock.test.ts`＋`candy-kart-bridge.test.ts`）會在 medal/star/存檔/bridge 語意漂移時讓 `npm test` 轉紅（已實證捕捉「加第 4 個 medal bit」的 C1 情境）；M2 斷言在 `adventure-level.test.ts`。
+
+**冷啟動 prompt 模板**（把 `<STEP>` 換成 S5/S6a/…；可經本 repo `/agent-action` 或直接派 subagent）：
+
+```
+Goal: 執行 plans/car-adventure-gameplay-depth-phase-2-3.md 的 <STEP>（只做這一步）。
+Context: 先讀本檔「已定案設計決策 D1–D4」「全域不變量」與 <STEP> 整段；
+         再讀 docs/AGENT-DOMAIN.md 紅線/Protected paths。S0–S4 已完成。
+Constraints: 嚴守 D1–D4；不破壞 GameKit progress/bridge 契約；
+             既有 6 關可玩性零回歸；會動的視覺守 prefers-reduced-motion。
+Do NOT: 重議 D1–D4；改 medalFlags/授星迴圈；動 GameSessionResult 形狀；
+        碰 sync workflow 或 public/candy-kart；擅自 commit/push。
+Verification: 依該步 Verification 節（npm test / build / test:e2e），全綠才算完成。
+Deliverable: 變更摘要＋驗證結果；在本檔「審計紀錄」表 append 一列。
+```
+
+**模型層**：S5、S6a＝strongest（Opus）；其餘＝default。
+
+**每步約束/驗證速查**：
+
+| 步 | 模型 | 關鍵約束 | 驗證 |
+|----|------|----------|------|
+| S5 三星 | Opus | D1 時間星 display-only；D2 獨立 `adventureStars`、v3→v4 純加欄位 | test＋build |
+| S6a 能力引擎 | Opus | D3 能力＝關卡臨時賦予、不碰 garage | test＋build |
+| S6b 能力UI | default | 觸控 ≥44px；tutorial 繁中 | test＋build |
+| S7 secrets | default | reduced 直接顯示 | test＋build |
+| S8 新關卡 | default | 新關設 `targetTime`；reduced 可通關 | test＋build |
+| S9 e2e | default | 補通關/重試/進度/手機輸入冒煙 | test:e2e＋check |
+
+---
+
 ## 目標
 
 - **Phase 2（遊戲性）**：可破壞磚 `breakable`、移動平台、新敵人種類、關卡三星評分（金幣% / 時間 / 無傷）。
@@ -269,3 +308,8 @@ S0 契約鎖定(gate) ─> S1 runtime plumbing ─> S2 breakable ─> S3 moving-
 | 2026-07-18 | S2 | **完成** | 可破壞磚：`types.ts` `GameState.broken`（每關 reset 清空）；`physics.ts` `solidAt` 納未撞碎 breakable（既有關卡空→零回歸）、`breakTileIfPossible` 頭頂撞碎（D4，+50 分、粒子守 reduced）、`collide(g,"y",fx)`；`render.ts` `drawBreakableTile` 焦糖裂紋磚（skip broken）；`levels.ts` builder `breakable()`＋level-02 示範（撞磚拿藏金幣）。`physics.test.ts` +5、S1 測試改為鏡射 JSON。738 測試綠、lint 綠、build 綠。未 commit。 |
 | 2026-07-18 | S3 | **完成** | 移動平台：`physics.ts` `updateMovingPlatforms`（往復移動、腳貼頂面承載位移、最小穿透 AABB 阻擋；**reduced 靜止於 x0/y0**）＋`collide` 後呼叫；`render.ts` `drawMovingPlatform` 薰衣草黏土板；`levels.ts` builder `movingPlatform()`＋level-03 橫跨 3 格缺口示範（既有關卡 movingPlatforms 空→零回歸）。`physics.test.ts` +3（承載/reduced 靜止/落下接住）；**M2 自動化斷言**：含平台關卡地面缺口 ≤3 格＝平台靜止仍可跳過通關。742 測試綠、lint 綠、build 綠。未 commit。 |
 | 2026-07-18 | S4 | **完成** | 新敵人：`adventure-level.ts` `AdventureEnemyKind`（patrol/hopper/floater）＋runtime 欄位（vy/baseY/t/hopTimer），enemies JSON 加 `kind`（預設 patrol→零回歸）；`physics.ts` 敵人迴圈按 kind 分支（hopper 重力＋定點彈跳、floater 浮動不可踩、patrol 原封不動）＋踩踏改 `stompable = kind!=="floater"`；`render.ts` `drawFloater`（紅尖刺球＝危險對比）＋hopper 青綠車身區隔；`levels.ts` `enemy(x,y,kind)`＋level-04 示範 hopper＋floater。`physics.test.ts` +4（patrol/hopper 踩死、floater 受傷、hopper 彈起）、`adventure-level.test.ts` +1（kind 映射）。747 測試綠、lint 綠、build 綠。未 commit。 |
+| 2026-07-18 | S5 | **完成** | 三星 display-only：`GameState.elapsed`／`earnedStars`、各關 `targetTime`、`calculateAdventureStars`（金幣全收／無傷／時間達標）；`reportGameSession` 形狀與既有 medal 路徑不變。存檔升 v4，`migrateV3ToV4` 僅補 `adventureStars:{}`，`recordAdventureStars` 取 max 且不改 medal/economy；選關顯示各關最佳星數。新增三星、reset、v3→v4 與 setter 契約測試。751 測試綠、lint 綠、build 綠。未 commit。 |
+| 2026-07-18 | S6a | **完成** | 能力引擎：`AdventureAbility`（jump-higher/dash/break）、關卡臨時 `abilities` 與 `abilityGates`；跳高改初速、X/Shift/手把 X 衝刺、衝刺破磚、無能力門阻擋；能力不觸碰 garage/progress。`render.ts` 新增能力門與 HUD 狀態提示，level-05/06 示範資料。`physics.test.ts` +5、`input.test.ts` +1；756 測試綠、lint 綠、build 綠。未 commit。 |
+| 2026-07-18 | S7 | **完成** | 秘密區：`revealedSecrets`／`secretRevealProgress`，進入秘密格一次性加隱藏金幣與 250 分；秘密金幣納入 `total` 確保全收三星語意；`render.ts` 未觸發遮罩、一般模式 0.35 秒揭示、reduced 直接揭示。level-02 放置秘密格，物理測試覆蓋獎勵一次性與 reduced。760 測試綠、lint 綠、build 綠。未 commit。 |
+| 2026-07-18 | S8 | **完成** | 新增 level-07「黏土工坊」與 level-08「月光終點」，均含 breakable／movingPlatforms／hopper+floater／abilityGates+abilities／secrets／targetTime；`WORLD_THEMES` 增至 8 組含 glow，選單提示與遊戲估時同步。資料測試新增 8 關、機制綜合、能力門相容、主題數量與時間門檻，並驗證地面缺口 ≤3 格供 reduced 通關。763 測試綠、lint 綠、build 綠。未 commit。 |
+| 2026-07-18 | S9 | **完成（car-adventure scope）** | 新增 `e2e/car-adventure.spec.ts`：8 關選單／切關、`debugFinish=1` 最後關通關與 `adventureStars` 存檔、實際掉落 Game Over 後重試、390px 粗指標衝刺鍵與 500ms 幀數 proxy；`JuiceController` 以 `MAX_PARTICLES=128` 加單元上限測試。car-adventure E2E 4/4、`npm run check` 全綠（764 tests）。全量 `npm run test:e2e` 另有 4 個既有非本範圍失敗（故事頁 contrast、宇宙地圖 contrast、首頁既有導覽期待、故事頁既有 snapshot），已保留未改動。未 commit。 |

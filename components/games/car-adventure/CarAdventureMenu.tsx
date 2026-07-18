@@ -9,6 +9,7 @@ export type CarAdventureMenuProps = {
   status: Status;
   levelIndex: number;
   score: number | null;
+  adventureStars?: Readonly<Record<number, number>>;
   kidsMode?: boolean;
   coverSrc: string;
   onSelectLevel: (index: number) => void;
@@ -33,6 +34,17 @@ const EMOJI: Record<Status, string> = {
   playing: "",
 };
 
+const LEVEL_HINTS = [
+  "先熟悉左右移動與跳躍",
+  "加入平台與短缺口",
+  "開始練習高低跳躍",
+  "尖刺與敵人變多，記得慢慢來",
+  "黃昏賽道：連續跳躍挑戰",
+  "最後一站，收集金幣再衝刺",
+  "黏土工坊：用衝刺穿過能力門",
+  "月光終點：三種能力一起挑戰",
+] as const;
+
 /**
  * 入口／暫停／結算選單：放在 PixelGameCanvas 外，避免 overflow:hidden 裁切 CTA。
  */
@@ -40,6 +52,7 @@ export function CarAdventureMenu({
   status,
   levelIndex,
   score,
+  adventureStars = {},
   kidsMode = false,
   coverSrc,
   onSelectLevel,
@@ -92,6 +105,10 @@ export function CarAdventureMenu({
             >
               {CAR_ADVENTURE_LEVELS.map((lv, i) => {
                 const selected = levelIndex === i;
+                const earned = Math.max(
+                  0,
+                  Math.min(3, Math.floor(adventureStars[i] ?? 0)),
+                );
                 return (
                   <button
                     key={lv.id}
@@ -107,19 +124,19 @@ export function CarAdventureMenu({
                   >
                     <span className={styles.chipNum}>{i + 1}</span>
                     <span className={styles.chipName}>{lv.name}</span>
+                    <span
+                      className={styles.chipStars}
+                      aria-label={`已得 ${earned} 顆顯示星`}
+                    >
+                      {"★".repeat(earned)}
+                      <span aria-hidden>{"☆".repeat(3 - earned)}</span>
+                    </span>
                   </button>
                 );
               })}
             </div>
             <p className={styles.levelHint} aria-live="polite">
-              {[
-                "先熟悉左右移動與跳躍",
-                "加入平台與短缺口",
-                "開始練習高低跳躍",
-                "尖刺與敵人變多，記得慢慢來",
-                "黃昏賽道：連續跳躍挑戰",
-                "最後一站，收集金幣再衝刺",
-              ][levelIndex]}
+              {LEVEL_HINTS[levelIndex] ?? "探索新的車車冒險"}
             </p>
           </div>
         </>

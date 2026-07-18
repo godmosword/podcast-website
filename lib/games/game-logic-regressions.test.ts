@@ -47,6 +47,19 @@ describe("game logic regressions", () => {
     expect(css).toContain("min-height: 48px");
   });
 
+  it("車車大冒險提供衝刺觸控鍵、手把/鍵盤映射與繁中教學", () => {
+    const game = source("components/games/car-adventure/CarAdventureGame.tsx");
+    const input = source("lib/gamekit/runtime/input.ts");
+    const games = source("data/games.ts");
+
+    expect(game).toContain('label="衝刺"');
+    expect(game).toContain('hold("dash", true)');
+    expect(game).toContain('input.isHeld("dash")');
+    expect(input).toContain('x: "dash"');
+    expect(input).toContain('2: "dash"');
+    expect(games).toContain("按衝刺鍵破磚");
+  });
+
   it("繽紛方塊鍵盤主操作只由 GameInput 統一處理一次", () => {
     const game = source("components/games/BlockDropGame.tsx");
 

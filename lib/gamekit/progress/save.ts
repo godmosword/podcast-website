@@ -9,7 +9,7 @@ import {
   migrateV2ToV3,
 } from "./economy";
 
-const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 
 const DEFAULT_PROFILE: PlayerProfile = {
   version: SAVE_VERSION,
@@ -18,12 +18,13 @@ const DEFAULT_PROFILE: PlayerProfile = {
   unlockedVehicles: ["小黃"],
   bests: {},
   medals: {},
+  adventureStars: {},
   stickers: [],
   gamesPlayed: {},
 };
 
 function migrateV1(parsed: Partial<PlayerProfile>): PlayerProfile {
-  return migrateV2ToV3({
+  return migrateV3ToV4(migrateV2ToV3({
     ...DEFAULT_PROFILE,
     stars: parsed.stars ?? 0,
     unlockedVehicles: parsed.unlockedVehicles ?? ["小黃"],
@@ -32,7 +33,19 @@ function migrateV1(parsed: Partial<PlayerProfile>): PlayerProfile {
     stickers: parsed.stickers ?? [],
     gamesPlayed: parsed.gamesPlayed ?? {},
     version: 2,
-  });
+  }));
+}
+
+/** v3→v4：只補車車大冒險的獨立顯示星欄位，既有進度原樣保留。 */
+export function migrateV3ToV4(
+  profile: Partial<PlayerProfile>,
+): PlayerProfile {
+  return {
+    ...DEFAULT_PROFILE,
+    ...profile,
+    version: SAVE_VERSION,
+    adventureStars: profile.adventureStars ?? {},
+  };
 }
 
 function ensureCurrentVersion(profile: Partial<PlayerProfile>): PlayerProfile {
@@ -42,7 +55,10 @@ function ensureCurrentVersion(profile: Partial<PlayerProfile>): PlayerProfile {
   if ((profile.version ?? 1) < 2) {
     return migrateV1(profile);
   }
-  return migrateV2ToV3(profile);
+  if ((profile.version ?? 1) < 3) {
+    return migrateV3ToV4(migrateV2ToV3(profile));
+  }
+  return migrateV3ToV4(profile);
 }
 
 export function loadPlayerProfile(): PlayerProfile {
@@ -91,6 +107,23 @@ export function recordMedal(
   return {
     ...profile,
     medals: { ...profile.medals, [gameId]: arr },
+  };
+}
+
+/** 寫入車車大冒險單關最佳顯示星數；不觸碰 medal、economy 或 garage。 */
+export function recordAdventureStars(
+  profile: PlayerProfile,
+  levelIndex: number,
+  stars: number,
+): PlayerProfile {
+  if (!Number.isInteger(levelIndex) || levelIndex < 0) return profile;
+  const nextStars = Math.max(0, Math.min(3, Math.floor(stars)));
+  const adventureStars = profile.adventureStars ?? {};
+  const previous = adventureStars[levelIndex] ?? 0;
+  if (nextStars <= previous) return profile;
+  return {
+    ...profile,
+    adventureStars: { ...adventureStars, [levelIndex]: nextStars },
   };
 }
 

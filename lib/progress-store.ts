@@ -78,15 +78,26 @@ const LEGACY_KEYS = {
 } as const;
 
 const DEFAULT_GAME_PROFILE: PlayerProfile = {
-  version: 3,
+  version: 4,
   stars: 0,
   economy: createEmptyEconomy(),
   unlockedVehicles: ["小黃"],
   bests: {},
   medals: {},
+  adventureStars: {},
   stickers: [],
   gamesPlayed: {},
 };
+
+/** progress-store 與 GameKit save 共用 v4 的純加欄位相容形狀。 */
+function migrateGameProfile(raw: Partial<PlayerProfile>): PlayerProfile {
+  const v3 = migrateV2ToV3(raw);
+  return {
+    ...v3,
+    version: 4,
+    adventureStars: raw.adventureStars ?? {},
+  };
+}
 
 export const DEFAULT_PROGRESS: ProgressStore = {
   schemaVersion: PROGRESS_SCHEMA_VERSION,
@@ -249,7 +260,7 @@ export function migrateProgress(): ProgressStore {
     localStorage.getItem(LEGACY_KEYS.gamekitProfile),
   );
   if (legacyProfile) {
-    next.gameProfile = migrateV2ToV3({
+    next.gameProfile = migrateGameProfile({
       ...DEFAULT_GAME_PROFILE,
       ...legacyProfile,
     });
@@ -322,7 +333,7 @@ function normalizeProgress(raw: Partial<ProgressStore>): ProgressStore {
       theme: normalizeThemeMode(raw.preferences?.theme),
       gameKit: normalizeGameKitPreferences(raw.preferences?.gameKit),
     },
-    gameProfile: migrateV2ToV3({
+    gameProfile: migrateGameProfile({
       ...DEFAULT_GAME_PROFILE,
       ...raw.gameProfile,
     }),
@@ -468,7 +479,7 @@ export function saveGameProfileToStore(profile: PlayerProfile): void {
   }
   writeProgress({
     ...current,
-    gameProfile: migrateV2ToV3({ ...profile, version: 3 }),
+    gameProfile: migrateGameProfile({ ...profile, version: 4 }),
     bestScores,
   });
 }

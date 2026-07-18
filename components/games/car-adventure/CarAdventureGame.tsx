@@ -19,6 +19,11 @@ import { useVisibilityPause } from "@/lib/gamekit/react/useVisibilityPause";
 import { TutorialOverlay } from "@/lib/gamekit/react/TutorialOverlay";
 import { JuiceController } from "@/lib/gamekit/runtime/juice";
 import { reportGameSession } from "@/lib/gamekit/progress/session";
+import {
+  loadPlayerProfile,
+  recordAdventureStars,
+  savePlayerProfile,
+} from "@/lib/gamekit/progress/save";
 import { GAMES } from "@/data/games";
 import { updateAdventure } from "@/lib/games/car-adventure/physics";
 import {
@@ -48,6 +53,7 @@ export default function CarAdventureGame() {
   const [showTutorial, setShowTutorial] = useState(false);
   const { kidsMode } = useGameKitSettings();
   const [levelIndex, setLevelIndex] = useState(0);
+  const [adventureStars, setAdventureStars] = useState<Record<number, number>>({});
   const [announce, setAnnounce] = useState("");
   const levelIndexRef = useRef(0);
   const levelStartLivesRef = useRef(3);
@@ -68,6 +74,17 @@ export default function CarAdventureGame() {
   useEffect(() => {
     reducedRef.current = reduced;
   }, [reduced]);
+
+  useEffect(() => {
+    setAdventureStars(loadPlayerProfile().adventureStars ?? {});
+  }, []);
+
+  const saveAdventureStars = useCallback((idx: number, stars: number) => {
+    const profile = loadPlayerProfile();
+    const next = recordAdventureStars(profile, idx, stars);
+    if (next !== profile) savePlayerProfile(next);
+    setAdventureStars(next.adventureStars ?? {});
+  }, []);
 
   const setStat = useCallback(
     (s: Status) => {
@@ -147,6 +164,7 @@ export default function CarAdventureGame() {
         onStomp: sStomp,
         onHurt: sHurt,
         onWin: sWin,
+        onStars: saveAdventureStars,
         setStatus: setStat,
         onAdvanceLevel: (next) => {
           levelIndexRef.current = next;
@@ -157,7 +175,7 @@ export default function CarAdventureGame() {
         },
       });
     },
-    [sJump, sCoin, sStomp, sHurt, sWin, setStat],
+    [sJump, sCoin, sStomp, sHurt, sWin, saveAdventureStars, setStat],
   );
 
   /** 單一鍵盤路徑：選單確認、暫停、移動／跳躍。 */
@@ -169,9 +187,10 @@ export default function CarAdventureGame() {
       else if (k === "ArrowRight" || k === "d" || k === "D") g.input.right = v;
       else if (k === "ArrowUp" || k === "w" || k === "W" || k === " ")
         g.input.jump = v;
+      else if (k === "Shift" || k === "x" || k === "X") g.input.dash = v;
     };
     const onDown = (e: KeyboardEvent) => {
-      if (["ArrowLeft", "ArrowRight", "ArrowUp", " "].includes(e.key))
+      if (["ArrowLeft", "ArrowRight", "ArrowUp", " ", "Shift", "x", "X"].includes(e.key))
         e.preventDefault();
       const s = statusRef.current;
       if (
@@ -212,6 +231,7 @@ export default function CarAdventureGame() {
         g.input.left = input.isHeld("move-left");
         g.input.right = input.isHeld("move-right");
         g.input.jump = input.isHeld("move-up") || input.isHeld("action");
+        g.input.dash = input.isHeld("dash");
       } else if (statusRef.current === "paused" && input.wasPressed("pause")) {
         togglePause();
       } else if (
@@ -232,6 +252,21 @@ export default function CarAdventureGame() {
 
   useEffect(() => {
     if (status === "playing" && game.current) game.current.last = null;
+  }, [status]);
+
+  /** E2E smoke hook：只把測試局送到終點，仍走正常結算／存檔路徑。 */
+  useEffect(() => {
+    if (status !== "playing" || typeof window === "undefined") return;
+    if (new URLSearchParams(window.location.search).get("debugFinish") !== "1") {
+      return;
+    }
+    const g = game.current;
+    if (!g || g.finishCleared) return;
+    g.player.x = g.lv.finish.x + g.player.w;
+    g.player.y = g.lv.finish.y;
+    g.player.vx = 0;
+    g.player.vy = 0;
+    g.taken = g.lv.total;
   }, [status]);
 
   useEffect(() => {
@@ -313,6 +348,7 @@ export default function CarAdventureGame() {
           status={status}
           levelIndex={levelIndex}
           score={game.current?.score ?? null}
+          adventureStars={adventureStars}
           kidsMode={kidsMode}
           coverSrc={COVER}
           onSelectLevel={(i) => {
@@ -360,12 +396,20 @@ export default function CarAdventureGame() {
           >
             ⬆️ 跳
           </BarTouchButton>
+          <BarTouchButton
+            label="衝刺"
+            coarse={isCoarse}
+            onDown={hold("dash", true)}
+            onUp={hold("dash", false)}
+          >
+            💨
+          </BarTouchButton>
         </div>
 
         <p className={styles.help}>
           {isCoarse
             ? "按住按鈕移動 · 點跳躍"
-            : "← → / A D 移動 · ↑ / W / 空白鍵 跳（可變高度）· 踩敵人頭可彈飛 · P 暫停 · 手把支援"}
+            : "← → / A D 移動 · ↑ / W / 空白鍵 跳 · X / Shift / 手把 X 衝刺 · P 暫停"}
         </p>
       </div>
     </GameChrome>

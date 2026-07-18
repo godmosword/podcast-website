@@ -18,6 +18,7 @@ export type GameAction =
   | "move-right"
   | "move-up"
   | "move-down"
+  | "dash"
   | "action"
   | "pause"
   | "confirm"
@@ -45,6 +46,8 @@ export type PlayerProfile = {
   bests: Partial<Record<GameScoreId, number>>;
   /** 每款遊戲各關／迷宮的三星 bit flags */
   medals: Partial<Record<GameKitGameId, number[]>>;
+  /** 車車大冒險各關最佳顯示星數；不參與 GameKit medal/economy。 */
+  adventureStars?: Record<number, number>;
   stickers: string[];
   gamesPlayed: Partial<Record<GameScoreId, boolean>>;
 };

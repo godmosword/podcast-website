@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { JuiceController } from "@/lib/gamekit/runtime/juice";
 import {
+  calculateAdventureStars,
   updateAdventure,
   type PhysicsCallbacks,
 } from "@/lib/games/car-adventure/physics";
@@ -36,6 +37,137 @@ describe("car-adventure physics", () => {
     expect(g.player.x).toBe(g.lv.start.x);
     expect(g.player.y).toBe(g.lv.start.y);
     expect(g.score).toBe(0);
+    expect(g.elapsed).toBe(0);
+    expect(g.earnedStars).toBe(0);
+  });
+
+  it("三星只依三個 client 條件計算，不改 GameKit medal", () => {
+    expect(calculateAdventureStars(10, 10, 3, 3, 20, 30)).toBe(3);
+    expect(calculateAdventureStars(9, 10, 3, 3, 20, 30)).toBe(2);
+    expect(calculateAdventureStars(10, 10, 2, 3, 20, 30)).toBe(2);
+    expect(calculateAdventureStars(10, 10, 3, 3, 31, 30)).toBe(2);
+  });
+
+  it("playing update 累加 elapsed，推進關卡時歸零", () => {
+    const g = createGameState(0, 3);
+    updateAdventure(g, 0.5, makeFx());
+    expect(g.elapsed).toBeCloseTo(0.5);
+    g.earnedStars = 3;
+    applyAdvanceLevel(g, 1);
+    expect(g.elapsed).toBe(0);
+    expect(g.earnedStars).toBe(0);
+  });
+
+  it("jump-higher 能力提高跳躍初速", () => {
+    const normal = createGameState(0, 3);
+    const boosted = createGameState(0, 3);
+    boosted.lv.abilities.add("jump-higher");
+    normal.player.onGround = true;
+    boosted.player.onGround = true;
+    normal.input.jump = true;
+    boosted.input.jump = true;
+    updateAdventure(normal, 1 / 60, makeFx());
+    updateAdventure(boosted, 1 / 60, makeFx());
+    expect(boosted.player.vy).toBeLessThan(normal.player.vy);
+  });
+
+  it("dash 能力啟動短暫衝刺，沒有能力不會啟動", () => {
+    const locked = createGameState(0, 3);
+    locked.input.dash = true;
+    updateAdventure(locked, 1 / 60, makeFx());
+    expect(locked.player.dashTime).toBe(0);
+
+    const g = createGameState(0, 3);
+    g.lv.abilities.add("dash");
+    g.input.dash = true;
+    updateAdventure(g, 1 / 60, makeFx());
+    expect(g.player.dashTime).toBeGreaterThan(0);
+    expect(g.player.vx).toBeGreaterThan(400);
+  });
+
+  it("能力門沒有能力時阻擋，有對應能力時放行", () => {
+    const g = createGameState(0, 3);
+    g.lv.abilityGates.push({
+      x: 3 * TILE,
+      y: 8 * TILE,
+      w: TILE,
+      h: TILE * 2,
+      ability: "dash",
+    });
+    g.player.x = 3 * TILE - g.player.w;
+    g.player.y = 10 * TILE - g.player.h;
+    g.lv.solid.delete("3,10");
+    g.lv.solid.delete("3,11");
+    g.player.onGround = true;
+    g.input.right = true;
+    updateAdventure(g, 0.2, makeFx());
+    expect(g.player.x).toBeLessThanOrEqual(3 * TILE - g.player.w);
+
+    g.lv.abilities.add("dash");
+    g.player.x = 3 * TILE - g.player.w;
+    g.player.vx = 0;
+    updateAdventure(g, 0.2, makeFx());
+    expect(g.player.x).toBeGreaterThan(3 * TILE - g.player.w);
+  });
+
+  it("break 能力可用 dash 水平撞碎可破壞磚", () => {
+    const g = createGameState(0, 3);
+    g.lv.breakable.add("3,9");
+    g.lv.abilities.add("dash");
+    g.lv.abilities.add("break");
+    g.player.x = 2 * TILE;
+    g.player.y = 10 * TILE - g.player.h;
+    g.player.onGround = true;
+    g.input.right = true;
+    g.input.dash = true;
+    updateAdventure(g, 1 / 60, makeFx());
+    expect(g.broken.has("3,9")).toBe(true);
+    expect(g.score).toBe(50);
+  });
+
+  it("能力來源是關卡資料，推進關卡時重設為下一關能力", () => {
+    const g = createGameState(4, 3);
+    expect(g.lv.abilities).toEqual(new Set(["jump-higher"]));
+    applyAdvanceLevel(g, 5);
+    expect(g.lv.abilities).toEqual(new Set(["dash", "break"]));
+  });
+
+  it("進入秘密格給一次性金幣／分數獎勵，重複更新不重複領取", () => {
+    const g = createGameState(0, 3);
+    g.lv.secrets.add("3,9");
+    g.player.x = 3 * TILE;
+    g.player.y = 10 * TILE - g.player.h;
+    g.player.onGround = true;
+    const fx = makeFx();
+    updateAdventure(g, 1 / 60, fx);
+    expect(g.revealedSecrets.has("3,9")).toBe(true);
+    expect(g.taken).toBe(1);
+    expect(g.score).toBe(250);
+    expect(fx.onCoin).toHaveBeenCalledTimes(1);
+    updateAdventure(g, 1 / 60, fx);
+    expect(g.taken).toBe(1);
+    expect(g.score).toBe(250);
+    expect(fx.onCoin).toHaveBeenCalledTimes(1);
+  });
+
+  it("reduced-motion 觸發秘密格時直接揭示；一般模式走淡出進度", () => {
+    const reduced = createGameState(0, 3);
+    reduced.lv.secrets.add("3,9");
+    reduced.player.x = 3 * TILE;
+    reduced.player.y = 10 * TILE - reduced.player.h;
+    reduced.player.onGround = true;
+    updateAdventure(reduced, 1 / 60, makeFx({ reduced: true }));
+    expect(reduced.secretRevealProgress.get("3,9")).toBe(1);
+
+    const normal = createGameState(0, 3);
+    normal.lv.secrets.add("3,9");
+    normal.player.x = 3 * TILE;
+    normal.player.y = 10 * TILE - normal.player.h;
+    normal.player.onGround = true;
+    updateAdventure(normal, 1 / 60, makeFx({ reduced: false }));
+    expect(normal.secretRevealProgress.get("3,9")).toBe(0);
+    updateAdventure(normal, 1 / 60, makeFx({ reduced: false }));
+    expect(normal.secretRevealProgress.get("3,9")).toBeGreaterThan(0);
   });
 
   it("落地時跳躍會觸發 onJump 並給向上速度", () => {

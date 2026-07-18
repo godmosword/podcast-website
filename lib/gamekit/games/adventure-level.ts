@@ -1,6 +1,9 @@
 /** 敵人種類：patrol＝水平巡邏可踩；hopper＝定點彈跳可踩；floater＝飄浮不可踩（危險）。 */
 export type AdventureEnemyKind = "patrol" | "hopper" | "floater";
 
+/** 車車大冒險當關臨時能力；不對應 garage 車輛解鎖。 */
+export type AdventureAbility = "jump-higher" | "dash" | "break";
+
 /** Game Kit 大冒險關卡 JSON（可由 Tiled 匯出再轉換，或直接手寫）。 */
 export type AdventureLevelJson = {
   id: string;
@@ -19,10 +22,14 @@ export type AdventureLevelJson = {
   start: [number, number];
   /** 終點旗 tile：x, y, 寬高（格數，預設 1×2） */
   finish: [number, number, number?, number?];
+  /** 三星時間門檻（秒）；只供車車大冒險顯示星數。 */
+  targetTime?: number;
   /** 可撞碎地形格，格式 `"tx,ty"` */
   breakable?: string[];
-  /** 能力門：需特定車輛能力才能通過 */
-  abilityGates?: { x: number; y: number; ability: string }[];
+  /** 能力門：需當關能力才能通過 */
+  abilityGates?: { x: number; y: number; ability: AdventureAbility }[];
+  /** 當關臨時賦予的能力，不寫入 garage/progress。 */
+  abilities?: AdventureAbility[];
   /** 祕密區域格，格式 `"tx,ty"` */
   secrets?: string[];
   /** 移動平台：tile 座標與往復設定（tile 單位；range 為往復幅度格數） */
@@ -69,12 +76,12 @@ type AdventureFinish = {
 };
 
 /** 能力門（pixel）：需 `ability` 才能通過；S6a 接判定。 */
-type AdventureAbilityGate = {
+export type AdventureAbilityGate = {
   x: number;
   y: number;
   w: number;
   h: number;
-  ability: string;
+  ability: AdventureAbility;
 };
 
 /** 移動平台（pixel）：`x0/y0` 為起點（reduced 靜止用）；S3 接模擬。 */
@@ -105,6 +112,8 @@ export type AdventureLevel = {
   worldH: number;
   start: { x: number; y: number };
   finish: AdventureFinish;
+  /** 三星時間門檻（秒）；不進 GameSessionResult。 */
+  targetTime: number;
   total: number;
   /** 可撞碎地形格（tile key `"tx,ty"`）；S2 接。預設空。 */
   breakable: Set<string>;
@@ -112,6 +121,8 @@ export type AdventureLevel = {
   secrets: Set<string>;
   /** 能力門（pixel）；S6a 接。預設空。 */
   abilityGates: AdventureAbilityGate[];
+  /** 當關臨時能力；S6a 接。預設空。 */
+  abilities: Set<AdventureAbility>;
   /** 移動平台（pixel）；S3 接。預設空。 */
   movingPlatforms: AdventureMovingPlatform[];
 };
@@ -164,6 +175,7 @@ export function levelFromJson(
       ability: a.ability,
     }),
   );
+  const abilities = new Set<AdventureAbility>(json.abilities ?? []);
   const movingPlatforms: AdventureMovingPlatform[] = (
     json.movingPlatforms ?? []
   ).map((m) => ({
@@ -200,10 +212,13 @@ export function levelFromJson(
       w: fw * tileSize,
       h: fh * tileSize,
     },
-    total: coins.length,
+    targetTime: json.targetTime ?? 0,
+    // secrets 每格是一枚隱藏額外金幣，納入全收三星的分母。
+    total: coins.length + secrets.size,
     breakable,
     secrets,
     abilityGates,
+    abilities,
     movingPlatforms,
   };
 }

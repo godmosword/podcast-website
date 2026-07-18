@@ -11,6 +11,8 @@ type Particle = {
   size: number;
 };
 
+export const MAX_PARTICLES = 128;
+
 /** 簡易粒子池（Phase 4 juice）。 */
 class ParticlePool {
   private pool: Particle[] = [];
@@ -29,6 +31,10 @@ class ParticlePool {
         size: 2,
       });
     }
+  }
+
+  get activeCount(): number {
+    return this.active.length;
   }
 
   /** 一次噴出多顆粒子（收集、落地、消行等）。 */
@@ -133,7 +139,7 @@ class Hitstop {
 }
 
 export class JuiceController {
-  readonly particles = new ParticlePool();
+  readonly particles = new ParticlePool(MAX_PARTICLES);
   readonly shake = new ScreenShake();
   readonly hitstop = new Hitstop();
 

@@ -121,9 +121,9 @@ interface WorldTheme {
 
 /**
  * 每關主題表（依 g.levelIndex 對映，非 levels.ts schema 欄位）。
- * 6 關對映 6 個主題：草原薄荷／粉彩彩虹／海洋藍綠／森林深綠／黃昏星空／夜間嘉年華。
+ * 8 關對映 8 個主題：草原薄荷／粉彩彩虹／海洋藍綠／森林深綠／黃昏星空／夜間嘉年華／黏土工坊／月光終點。
  */
-const WORLD_THEMES: WorldTheme[] = [
+export const WORLD_THEMES: WorldTheme[] = [
   // level-01 草原出發：草原薄荷（沿用改版前的基準配色）
   {
     skyTop: CLAY.sky,
@@ -183,6 +183,26 @@ const WORLD_THEMES: WorldTheme[] = [
     far: "#6b57a0",
     hill: "#7a5aa6",
     glow: "rgba(216,222,255,.42)",
+  },
+  // level-07 黏土工坊：暖橘工作室
+  {
+    skyTop: "#e8a66f",
+    skyBottom: "#fff0c7",
+    decoColor: "rgba(255,255,255,.82)",
+    decoKind: "cloud",
+    far: "#e7c18a",
+    hill: "#b9c982",
+    glow: "rgba(255,247,205,.56)",
+  },
+  // level-08 月光終點：藍紫月夜
+  {
+    skyTop: "#304a83",
+    skyBottom: "#c5b3e6",
+    decoColor: "rgba(255,255,255,.82)",
+    decoKind: "star",
+    far: "#5265a0",
+    hill: "#7e79b8",
+    glow: "rgba(226,232,255,.55)",
   },
 ];
 
@@ -274,6 +294,77 @@ function drawMovingPlatform(
   ctx.fillStyle = "rgba(120,90,160,.5)";
   rr(ctx, x, y + h - 3, w, 3, 2);
   ctx.fill();
+}
+
+function abilityLabel(ability: string): string {
+  if (ability === "jump-higher") return "跳高";
+  if (ability === "dash") return "衝刺";
+  if (ability === "break") return "破磚";
+  return ability;
+}
+
+/** 能力門：鎖定時為深色屏障，已具能力時以開啟色顯示可通過狀態。 */
+function drawAbilityGate(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  ability: string,
+  active: boolean,
+): void {
+  ctx.fillStyle = active ? "rgba(183,223,155,.32)" : "rgba(52,48,43,.62)";
+  rr(ctx, x + 2, y + 2, w - 4, h - 4, 7);
+  ctx.fill();
+  ctx.strokeStyle = active ? CLAY.mint : CLAY.pink;
+  ctx.lineWidth = 3;
+  ctx.setLineDash(active ? [] : [5, 4]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = active ? CLAY.ink : "#fff";
+  ctx.font = '700 9px "jf-open 粉圓", "Baloo 2", "PingFang TC", system-ui, sans-serif';
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(active ? "✓" : `🔒 ${abilityLabel(ability)}`, x + w / 2, y + h / 2);
+  ctx.textAlign = "start";
+}
+
+function drawSecretCover(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  tilePx: number,
+): void {
+  ctx.fillStyle = "rgba(75,57,111,.86)";
+  rr(ctx, x + 2, y + 2, tilePx - 4, tilePx - 4, 8);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(255,255,255,.75)";
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([3, 3]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = "#fff";
+  ctx.font = '800 18px "jf-open 粉圓", "Baloo 2", "PingFang TC", system-ui, sans-serif';
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("?", x + tilePx / 2, y + tilePx / 2 + 1);
+  ctx.textAlign = "start";
+}
+
+function drawSecretReward(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  tilePx: number,
+  alpha: number,
+): void {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = CLAY.lilac;
+  rr(ctx, x + 5, y + 8, tilePx - 10, tilePx - 12, 7);
+  ctx.fill();
+  drawClayCoin(ctx, x + tilePx / 2, y + tilePx / 2 - 2, 8);
+  ctx.restore();
 }
 
 /** 糖果金幣：奶油黃圓餅＋光點。 */
@@ -547,6 +638,32 @@ export function renderAdventureWorld(
     drawBreakableTile(ctx, tx * TILE - cam, ty * TILE, TILE);
   }
 
+  for (const gate of g.lv.abilityGates) {
+    drawAbilityGate(
+      ctx,
+      gate.x - cam,
+      gate.y,
+      gate.w,
+      gate.h,
+      gate.ability,
+      g.lv.abilities.has(gate.ability),
+    );
+  }
+
+  for (const key of g.lv.secrets) {
+    const [tx, ty] = key.split(",").map(Number);
+    const progress = g.secretRevealProgress.get(key) ?? 0;
+    const sx = tx * TILE - cam;
+    const sy = ty * TILE;
+    if (progress > 0) drawSecretReward(ctx, sx, sy, TILE, progress);
+    if (progress < 1) {
+      ctx.save();
+      ctx.globalAlpha = 1 - progress;
+      drawSecretCover(ctx, sx, sy, TILE);
+      ctx.restore();
+    }
+  }
+
   for (const key of g.lv.spikes) {
     const [tx, ty] = key.split(",").map(Number);
     drawClaySpike(ctx, tx * TILE - cam, ty * TILE, TILE);
@@ -642,6 +759,16 @@ export function drawAdventureHud(
     ctx.fillStyle = CLAY.ink;
     ctx.fillText(entry.text, 6 + 26, y + panelH / 2 + 0.5);
     y += panelH + gapY;
+  }
+
+  if (g.lv.abilities.size > 0) {
+    const labels = [...g.lv.abilities].map(abilityLabel).join(" · ");
+    const textW = ctx.measureText(labels).width;
+    ctx.fillStyle = CLAY.hudPanel;
+    rr(ctx, VW - textW - 20, 8, textW + 14, panelH, 10);
+    ctx.fill();
+    ctx.fillStyle = CLAY.ink;
+    ctx.fillText(`能力 ${labels}`, VW - textW - 13, 8 + panelH / 2 + 0.5);
   }
 
   // 小型關卡進度條：讓孩子知道終點在哪裡，降低「還要走多久」的不確定感。

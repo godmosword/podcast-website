@@ -1,4 +1,5 @@
 import type {
+  AdventureAbility,
   AdventureEnemyKind,
   AdventureLevelJson,
 } from "@/lib/gamekit/games/adventure-level";
@@ -13,8 +14,11 @@ function levelBuilder() {
   const coins: [number, number][] = [];
   const enemies: { x: number; y: number; kind?: AdventureEnemyKind }[] = [];
   const breakableTiles: string[] = [];
+  const secretTiles: string[] = [];
   const movingPlatforms: NonNullable<AdventureLevelJson["movingPlatforms"]> =
     [];
+  const abilityGates: NonNullable<AdventureLevelJson["abilityGates"]> = [];
+  const grantedAbilities: AdventureAbility[] = [];
 
   return {
     ground(a: number, b: number, baseRow = 10): void {
@@ -40,6 +44,9 @@ function levelBuilder() {
     breakable(x: number, y: number): void {
       breakableTiles.push(`${x},${y}`);
     },
+    secret(x: number, y: number): void {
+      secretTiles.push(`${x},${y}`);
+    },
     movingPlatform(
       x: number,
       y: number,
@@ -47,10 +54,17 @@ function levelBuilder() {
     ): void {
       movingPlatforms.push({ x, y, ...opts });
     },
+    abilityGate(x: number, y: number, ability: AdventureAbility): void {
+      abilityGates.push({ x, y, ability });
+    },
+    grantAbility(ability: AdventureAbility): void {
+      if (!grantedAbilities.includes(ability)) grantedAbilities.push(ability);
+    },
     done(
       meta: Pick<AdventureLevelJson, "id" | "name" | "cols"> & {
         start: [number, number];
         finish: [number, number, number?, number?];
+        targetTime: number;
       },
     ): AdventureLevelJson {
       return {
@@ -65,8 +79,12 @@ function levelBuilder() {
         enemies,
         start: meta.start,
         finish: meta.finish,
+        targetTime: meta.targetTime,
         ...(breakableTiles.length ? { breakable: breakableTiles } : {}),
+        ...(secretTiles.length ? { secrets: secretTiles } : {}),
         ...(movingPlatforms.length ? { movingPlatforms } : {}),
+        ...(abilityGates.length ? { abilityGates } : {}),
+        ...(grantedAbilities.length ? { abilities: grantedAbilities } : {}),
       };
     },
   };
@@ -108,6 +126,7 @@ function buildLevel01Json(): AdventureLevelJson {
     cols: 108,
     start: [2, 9],
     finish: [104, 8, 1, 2],
+    targetTime: 75,
   });
 }
 
@@ -137,6 +156,8 @@ function buildLevel02Json(): AdventureLevelJson {
   b.breakable(29, 7);
   b.coin(28, 5);
   b.coin(29, 5);
+  // 秘密格在短缺口上方，跳過時會揭示一枚隱藏金幣。
+  b.secret(15, 8);
   b.spike(70, 9);
   b.spike(71, 9);
   b.enemy(24, 9);
@@ -149,6 +170,7 @@ function buildLevel02Json(): AdventureLevelJson {
     cols: 120,
     start: [2, 9],
     finish: [116, 8, 1, 2],
+    targetTime: 88,
   });
 }
 
@@ -193,6 +215,7 @@ function buildLevel03Json(): AdventureLevelJson {
     cols: 132,
     start: [2, 9],
     finish: [126, 8, 1, 2],
+    targetTime: 102,
   });
 }
 
@@ -244,6 +267,7 @@ function buildLevel04Json(): AdventureLevelJson {
     cols: 146,
     start: [2, 9],
     finish: [140, 8, 1, 2],
+    targetTime: 116,
   });
 }
 
@@ -292,12 +316,16 @@ function buildLevel05Json(): AdventureLevelJson {
   b.enemy(86, 9);
   b.enemy(108, 9);
   b.enemy(124, 9);
+  // 能力示範：當關暫時獲得跳高，穿過能力門越過較高的捷徑。
+  b.grantAbility("jump-higher");
+  b.abilityGate(28, 8, "jump-higher");
   return b.done({
     id: "level-05",
     name: "空中走廊",
     cols: 158,
     start: [2, 9],
     finish: [150, 8, 1, 2],
+    targetTime: 132,
   });
 }
 
@@ -354,12 +382,176 @@ function buildLevel06Json(): AdventureLevelJson {
   b.enemy(114, 9);
   b.enemy(134, 9);
   b.enemy(160, 9);
+  // 收尾關示範衝刺能力門與水平破磚；能力只在本關生效，不改 garage。
+  b.grantAbility("dash");
+  b.grantAbility("break");
+  b.abilityGate(58, 8, "dash");
+  b.breakable(126, 9);
+  b.coin(126, 7);
   return b.done({
     id: "level-06",
     name: "終極大冒險",
     cols: 176,
     start: [2, 9],
     finish: [168, 8, 1, 2],
+    targetTime: 150,
+  });
+}
+
+/** 關卡 7：黏土工坊（綜合能力、移動平台與秘密格）。 */
+function buildLevel07Json(): AdventureLevelJson {
+  const b = levelBuilder();
+  b.ground(0, 12);
+  b.ground(16, 28);
+  b.ground(32, 46);
+  b.ground(50, 64);
+  b.ground(68, 82);
+  b.ground(86, 101);
+  b.ground(105, 120);
+  b.ground(124, 142);
+  b.ground(146, 179);
+  b.plat(5, 8, 7);
+  b.plat(19, 23, 6);
+  b.plat(36, 40, 5);
+  b.plat(54, 58, 6);
+  b.plat(73, 77, 5);
+  b.plat(91, 95, 6);
+  b.plat(112, 116, 5);
+  b.plat(132, 136, 6);
+  b.plat(153, 158, 7);
+  b.movingPlatform(29, 10, { w: 2, axis: "x", range: 2, speed: 82 });
+  b.coinRow(5, 8, 6);
+  b.coinRow(19, 23, 5);
+  b.coinRow(36, 40, 4);
+  b.coinRow(54, 58, 5);
+  b.coinRow(73, 77, 4);
+  b.coinRow(91, 95, 5);
+  b.coinRow(112, 116, 4);
+  b.coinRow(132, 136, 5);
+  b.coinRow(153, 158, 6);
+  b.spike(39, 9);
+  b.spike(40, 9);
+  b.spike(57, 9);
+  b.spike(58, 9);
+  b.spike(76, 9);
+  b.spike(77, 9);
+  b.spike(94, 9);
+  b.spike(95, 9);
+  b.spike(116, 9);
+  b.spike(117, 9);
+  b.spike(136, 9);
+  b.spike(137, 9);
+  b.enemy(22, 9);
+  b.enemy(38, 9, "hopper");
+  b.enemy(56, 9);
+  b.enemy(75, 6, "floater");
+  b.enemy(92, 9);
+  b.enemy(114, 9, "hopper");
+  b.enemy(134, 9);
+  b.enemy(156, 9);
+  b.enemy(168, 9, "hopper");
+  b.enemy(174, 6, "floater");
+  b.breakable(96, 9);
+  b.breakable(97, 9);
+  b.coin(96, 7);
+  b.coin(97, 7);
+  b.secret(81, 8);
+  b.grantAbility("dash");
+  b.grantAbility("break");
+  b.abilityGate(30, 8, "dash");
+  return b.done({
+    id: "level-07",
+    name: "黏土工坊",
+    cols: 180,
+    start: [2, 9],
+    finish: [174, 8, 1, 2],
+    targetTime: 168,
+  });
+}
+
+/** 關卡 8：月光終點（八關收尾，三種能力全部登場）。 */
+function buildLevel08Json(): AdventureLevelJson {
+  const b = levelBuilder();
+  b.ground(0, 12);
+  b.ground(16, 26);
+  b.ground(30, 42);
+  b.ground(46, 58);
+  b.ground(62, 74);
+  b.ground(78, 90);
+  b.ground(94, 108);
+  b.ground(112, 126);
+  b.ground(130, 145);
+  b.ground(149, 169);
+  b.ground(173, 195);
+  b.plat(5, 8, 7);
+  b.plat(18, 22, 6);
+  b.plat(33, 37, 5);
+  b.plat(49, 53, 6);
+  b.plat(65, 69, 4);
+  b.plat(81, 85, 6);
+  b.plat(98, 102, 5);
+  b.plat(115, 119, 6);
+  b.plat(134, 138, 5);
+  b.plat(153, 157, 6);
+  b.plat(180, 185, 7);
+  b.movingPlatform(27, 9, { w: 2, axis: "y", range: 1, speed: 56 });
+  b.movingPlatform(170, 9, { w: 2, axis: "x", range: 2, speed: 90 });
+  b.coinRow(5, 8, 6);
+  b.coinRow(18, 22, 5);
+  b.coinRow(33, 37, 4);
+  b.coinRow(49, 53, 5);
+  b.coinRow(65, 69, 3);
+  b.coinRow(81, 85, 5);
+  b.coinRow(98, 102, 4);
+  b.coinRow(115, 119, 5);
+  b.coinRow(134, 138, 4);
+  b.coinRow(153, 157, 5);
+  b.coinRow(180, 185, 6);
+  b.spike(35, 9);
+  b.spike(36, 9);
+  b.spike(52, 9);
+  b.spike(53, 9);
+  b.spike(68, 9);
+  b.spike(69, 9);
+  b.spike(84, 9);
+  b.spike(85, 9);
+  b.spike(101, 9);
+  b.spike(102, 9);
+  b.spike(118, 9);
+  b.spike(119, 9);
+  b.spike(136, 9);
+  b.spike(137, 9);
+  b.spike(155, 9);
+  b.spike(156, 9);
+  b.enemy(20, 9);
+  b.enemy(34, 9, "hopper");
+  b.enemy(50, 9);
+  b.enemy(66, 9, "hopper");
+  b.enemy(82, 6, "floater");
+  b.enemy(100, 9);
+  b.enemy(116, 9, "hopper");
+  b.enemy(134, 9);
+  b.enemy(152, 9, "hopper");
+  b.enemy(168, 6, "floater");
+  b.enemy(184, 9);
+  b.breakable(126, 9);
+  b.breakable(127, 9);
+  b.coin(126, 7);
+  b.coin(127, 7);
+  b.secret(73, 8);
+  b.secret(144, 8);
+  b.grantAbility("jump-higher");
+  b.grantAbility("dash");
+  b.grantAbility("break");
+  b.abilityGate(43, 8, "jump-higher");
+  b.abilityGate(59, 8, "dash");
+  return b.done({
+    id: "level-08",
+    name: "月光終點",
+    cols: 196,
+    start: [2, 9],
+    finish: [190, 8, 1, 2],
+    targetTime: 188,
   });
 }
 
@@ -370,4 +562,6 @@ export const CAR_ADVENTURE_LEVELS: AdventureLevelJson[] = [
   buildLevel04Json(),
   buildLevel05Json(),
   buildLevel06Json(),
+  buildLevel07Json(),
+  buildLevel08Json(),
 ];

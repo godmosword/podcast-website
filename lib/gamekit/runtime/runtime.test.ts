@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { GameKitAudioBus } from "@/lib/gamekit/runtime/audio";
 import { FIXED_DT, viewportFor } from "@/lib/gamekit/runtime/constants";
-import { JuiceController } from "@/lib/gamekit/runtime/juice";
+import { JuiceController, MAX_PARTICLES } from "@/lib/gamekit/runtime/juice";
 import { GameLoop } from "@/lib/gamekit/runtime/loop";
 import { colorsForGame, snapPixel } from "@/lib/gamekit/runtime/palette";
 import {
@@ -57,6 +57,12 @@ describe("gamekit runtime", () => {
     j.burst(10, 10, 4, "#fff");
     const r = j.update(0.016);
     expect(r.shakeX).toBeDefined();
+  });
+
+  it("粒子池有固定上限，避免大量互動超出效能預算", () => {
+    const juice = new JuiceController();
+    for (let i = 0; i < 24; i += 1) juice.burst(10, 10, 16);
+    expect(juice.particles.activeCount).toBeLessThanOrEqual(MAX_PARTICLES);
   });
 
   it("GameKitAudioBus 暴露合理預設音量", () => {

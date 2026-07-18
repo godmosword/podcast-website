@@ -9,6 +9,8 @@ const KEY_MAP: Record<string, GameAction> = {
   w: "move-up",
   arrowdown: "move-down",
   s: "move-down",
+  shift: "dash",
+  x: "dash",
   " ": "action",
   enter: "confirm",
   escape: "pause",
@@ -18,6 +20,7 @@ const KEY_MAP: Record<string, GameAction> = {
 const GAMEPAD_BUTTON_MAP: Partial<Record<number, GameAction>> = {
   0: "action",
   1: "cancel",
+  2: "dash",
   9: "pause",
   12: "move-up",
   13: "move-down",
@@ -51,6 +54,7 @@ export class InputManager {
       action === "move-down" ||
       action === "move-left" ||
       action === "move-right"
+      || action === "dash"
     ) {
       e.preventDefault();
     }
