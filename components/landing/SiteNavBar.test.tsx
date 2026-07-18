@@ -54,7 +54,6 @@ describe("SiteNavBar", () => {
     const html = await renderNavBarHtml();
     for (const label of [
       "全部故事",
-      "主題分類",
       "遊樂園",
       "宇宙地圖",
       "育兒專欄",
@@ -62,6 +61,8 @@ describe("SiteNavBar", () => {
     ]) {
       expect(html).toContain(label);
     }
+    // 成長主題自桌面主列降級（仍在行動抽屜與 /topic 頁）
+    expect(html).not.toContain("主題分類");
 
     const view = await renderNavBar();
     const trigger = view.getByRole("button", { name: "家長指南" });

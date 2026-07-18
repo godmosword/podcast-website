@@ -30,10 +30,11 @@ type NavItem = {
   external?: boolean;
 };
 
-/** 桌面主列連結順序（家長指南為下拉 trigger，不在此陣列）。 */
+/** 桌面主列連結順序（家長指南為下拉 trigger，不在此陣列）。
+ * 成長主題（`topic`）屬家長取向且與 /stories 篩選重疊，桌面不佔主膠囊；
+ * 仍保留於行動抽屜「探索」組與 `/topic` 視覺化頁。 */
 const PRIMARY_ORDER: readonly NavItemId[] = [
   "stories",
-  "topic",
   "games",
   "adventures",
   "parenting",

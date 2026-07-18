@@ -190,7 +190,7 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 Storyline 式**全螢幕分段捲動**：每段一張滿版黏土 hero（桌面 `segment-{id}.jpg` 16:9；行動 ≤768px `segment-{id}-portrait.jpg` 9:16），大圖主導 + 底部漸層遮罩 + 左下標題／副標／CTA。
 
 1. **SiteNavBar**（全站橘色頂欄 + 訂閱 CTA）
-   - **桌面（≥980px）**懸浮膠囊主列：全部故事／主題分類／遊樂園／宇宙地圖／育兒專欄（Threads 外連）＋ **ParentGuideDropdown「家長指南」**（指南首頁 `/for-parents`、關於、聯絡；Esc／外點關閉）。無「更多」下拉。主題切換與訂閱膠囊常駐。
+   - **桌面（≥980px）**懸浮膠囊主列：全部故事／遊樂園／宇宙地圖／育兒專欄（Threads 外連）＋ **ParentGuideDropdown「家長指南」**（指南首頁 `/for-parents`、關於、聯絡；Esc／外點關閉）。無「更多」下拉。主題切換與訂閱膠囊常駐。**成長主題（`/topic`）不佔桌面主列**（屬家長取向且與 /stories 篩選重疊），僅存在於行動抽屜「探索」組與視覺化的 `/topic` 頁。
    - **行動（＜980px）**漢堡抽屜：單欄依 **探索**（故事／主題／遊樂園／宇宙地圖）→ **家長**（育兒專欄／家長指南／關於／聯絡）分組；含 `/stories?q=` 搜尋。
 2. 四段 **LandingSegment** 全螢幕面板（資料：`data/landing-segments.ts`）：車車故事／睡前數綿羊／捏黏土／衛教宣導
 3. **SegmentNav**（右側進度點，手機隱藏）＋ 每段往下箭頭錨點；document scroll-snap，reduced-motion 自動停用
