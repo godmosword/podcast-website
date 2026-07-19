@@ -298,6 +298,10 @@
   align-items: center;
   gap: 3px;
   pointer-events: none;
+  /* 反縮放吃舞台 --map-scale（連續更新不觸發 React 重繪）；偏移吃 --label-offset-y */
+  transform: translate(-50%, var(--label-offset-y, 6px))
+    scale(calc(1 / var(--map-scale, 1)));
+  transform-origin: 50% 0;
 }
 
 .island {

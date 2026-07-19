@@ -22,18 +22,6 @@ import styles from "./ZoneIsland.module.css";
 /** 點島慶祝動畫長度（毫秒），與 CSS islandBounce／star-burst-particle 對齊。 */
 const CELEBRATE_MS = 640;
 
-/**
- * srcset `sizes` 用的縮放級距（0.25 一階）。連續 zoom 時 mapScale 逐 tick 變動，
- * 若每 tick 都重算 sizes 字串，瀏覽器會頻繁重新評估圖片候選來源；量化成離散級距降低
- * 抖動，純屬圖片載入的網路策略調整。label 反縮放（`scale(1/mapScale)`）仍吃連續值，
- * 視覺不受影響。
- */
-const SIZES_SCALE_BUCKET = 0.25;
-
-function bucketSizesScale(mapScale: number): number {
-  return Math.round(mapScale / SIZES_SCALE_BUCKET) * SIZES_SCALE_BUCKET;
-}
-
 type ZoneIslandProps = {
   zone: ResolvedZone;
   /** 統一點擊語意：點任何島（開放或鎖島本體）→ fly-to＋開介紹 sheet。 */
@@ -41,7 +29,10 @@ type ZoneIslandProps = {
   reduced?: boolean;
   paused?: boolean;
   night?: boolean;
-  /** 地圖鏡頭縮放（標籤反縮放用） */
+  /**
+   * 地圖鏡頭縮放（應傳 `bucketMapScale` 量化值）。
+   * 僅供 srcset sizes；木牌反縮放改吃舞台 CSS `--map-scale`，避免 zoom 每 tick 打穿 memo。
+   */
   mapScale?: number;
   /** dev-only：?devStatus=car-park:building */
   devStatusOverride?: ZoneStatus;
@@ -103,10 +94,9 @@ function ZoneIsland({
 
   if (tile.mode === "island") {
     const [ax, ay] = tile.anchorUV;
-    const sizesScale = bucketSizesScale(mapScale);
-    const artSrc = getZoneArtSrcSet(zone.id, sizesScale);
-    const nightArtSrc = getZoneNightArtSrcSet(zone.id, sizesScale);
-    const labelOffsetY = mapScale < 0.5 ? -140 : 6;
+    // mapScale 由呼叫端傳入 bucketMapScale；此處不再二次量化
+    const artSrc = getZoneArtSrcSet(zone.id, mapScale);
+    const nightArtSrc = getZoneNightArtSrcSet(zone.id, mapScale);
     return (
       <>
         <button
@@ -166,15 +156,14 @@ function ZoneIsland({
           </div>
         </button>
         {/* 木牌欄：島名＋狀態 pill（裝飾，島 button 已含同名 aria-label）。
-            點島（含鎖島）一律由島 button 本體開 sheet，木牌欄純展示。 */}
+            點島（含鎖島）一律由島 button 本體開 sheet，木牌欄純展示。
+            反縮放／遠距偏移由舞台 --map-scale／--label-offset-y 驅動。 */}
         <span
           className={styles.tileLabel}
           style={{
             left: `${zone.px.x}px`,
             top: `${zone.px.y}px`,
             zIndex: mapDepthZ(zone.depthY, "label"),
-            transform: `translate(-50%, ${labelOffsetY}px) scale(${1 / mapScale})`,
-            transformOrigin: "50% 0",
           }}
         >
           <span className={styles.name} aria-hidden="true">
@@ -231,8 +220,6 @@ function ZoneIsland({
   );
 }
 
-// 地圖平移期間 UniverseMapContent 每 pointer-move 都會重渲染（camera tx/ty 變動），
-// 但個別島的 props（zone/callbacks/mapScale 等）在平移中維持不變（callbacks 已在
-// UniverseMap.tsx 改用穩定的 cameraFlyTo）；memo 化讓純平移時每座島跳過重渲染。
-// zoom 導致 mapScale 改變仍會重渲染，屬階段二範圍。
+// 地圖平移／同桶 zoom 期間 UniverseMap 會重渲染，但島 props（含 bucket 後的
+// mapScale）維持不變；memo 化跳過島樹。木牌反縮放改吃舞台 CSS 變數，不依賴 props。
 export default memo(ZoneIsland);

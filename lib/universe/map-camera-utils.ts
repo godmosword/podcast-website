@@ -65,6 +65,41 @@ export function clampScale(scale: number): number {
   return Math.min(Math.max(scale, MIN_SCALE), MAX_SCALE);
 }
 
+/**
+ * srcset `sizes`／島 props 用的縮放級距（0.25 一階）。
+ * 連續 pinch zoom 時若每 tick 傳真實 scale，會打穿 memo；量化後同桶內不重渲染。
+ */
+export const MAP_SCALE_BUCKET = 0.25;
+
+export function bucketMapScale(scale: number): number {
+  const bucketed =
+    Math.round(scale / MAP_SCALE_BUCKET) * MAP_SCALE_BUCKET;
+  // 避免 round 到 0；下限對齊 MIN_SCALE 桶
+  return Math.max(MAP_SCALE_BUCKET, bucketed);
+}
+
+export type CameraState = { scale: number; tx: number; ty: number };
+
+/**
+ * 以焦點像素（viewport 座標）縮放鏡頭，維持焦點下的舞台點不動。
+ * 不含 viewport clamp；呼叫端接 `clampCamera`。
+ */
+export function zoomCameraAt(
+  cam: CameraState,
+  factor: number,
+  focusX: number,
+  focusY: number,
+): CameraState {
+  const ns = clampScale(cam.scale * factor);
+  const realFactor = ns / cam.scale;
+  if (realFactor === 1) return cam;
+  return {
+    scale: ns,
+    tx: focusX - (focusX - cam.tx) * realFactor,
+    ty: focusY - (focusY - cam.ty) * realFactor,
+  };
+}
+
 /** 依 viewport 尺寸算預設島群 contain-fit 鏡頭倍率（含 FIT_MARGIN 與 clamp）。 */
 export function fitScaleFor(w: number, h: number): number {
   if (w === 0 || h === 0) return 1;

@@ -7,6 +7,7 @@ import { resolveUniverseMap } from "@/lib/universe-map";
 import {
   RECENTER_IDLE_MS,
   anyPointVisible,
+  bucketMapScale,
 } from "@/lib/universe/map-camera-utils";
 import { getZoneArtTile } from "@/lib/universe/zone-art-tile";
 import { parseDevStatusOverrides } from "@/lib/universe/dev-map-flags";
@@ -418,6 +419,10 @@ function UniverseMapContent({
             transition: camera.isAnimating
               ? `transform ${FLY_DURATION_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`
               : "none",
+            // 連續 scale 只更新 CSS 變數；島 memo 吃 bucketMapScale，同桶不重繪
+            ["--map-scale" as string]: String(camera.scale),
+            ["--label-offset-y" as string]:
+              camera.scale < 0.5 ? "-140px" : "6px",
           }}
         >
           <svg
@@ -509,7 +514,7 @@ function UniverseMapContent({
               reduced={reduced}
               paused={paused}
               night={daylight === "night"}
-              mapScale={camera.scale}
+              mapScale={bucketMapScale(camera.scale)}
               devStatusOverride={devStatusOverrides[zone.id]}
               progress={zoneProgress[zone.id] ?? null}
             />
@@ -523,7 +528,8 @@ function UniverseMapContent({
               style={{
                 left: `${carParkZone.px.x}px`,
                 top: `${carParkZone.px.y - 118}px`,
-                transform: `translate(-50%, -100%) scale(${1 / camera.scale})`,
+                transform:
+                  "translate(-50%, -100%) scale(calc(1 / var(--map-scale, 1)))",
               }}
             >
               <span className={styles.tapHintFinger}>👆</span> 點點看！

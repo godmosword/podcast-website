@@ -36,6 +36,7 @@
 |----|--------|
 | feat(design): 夜間暖夜靛 token＋行動選單質感（emoji 降飽和、搜尋浮層、頂欄銜接） | `8a14f8d` |
 | feat(nav): 夜間漢堡開啟時頂欄微暗銜接面板（data-menu-open） | `96c90ae` |
+| feat(universe): 縮放 rAF 批次＋島 memo 隔離（CSS --map-scale） | _pending_ |
 
 ### 本輪已完成（2026-07-18）
 
