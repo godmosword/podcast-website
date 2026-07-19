@@ -15,6 +15,7 @@ import {
   exceedsDragSlop,
   fitScaleFor,
   wheelZoomFactor,
+  zoomCameraAt,
 } from "@/lib/universe/map-camera-utils";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
@@ -84,6 +85,10 @@ export function useMapCamera(): MapCamera {
   const pendingPanRef = useRef({ dx: 0, dy: 0 });
   const panRafRef = useRef<number | null>(null);
 
+  // rAF 批次縮放：同幀內倍率相乘、焦點取最新，一幀只 setCam 一次（對齊 pan）。
+  const pendingZoomRef = useRef({ factor: 1, fx: 0, fy: 0 });
+  const zoomRafRef = useRef<number | null>(null);
+
   // 速度取樣與慣性：velocityRef 為放手前的平滑速度（px/ms），供 startInertia 甩動。
   const velocityRef = useRef({ vx: 0, vy: 0 });
   const lastSampleRef = useRef<{ x: number; y: number; t: number } | null>(null);
@@ -102,18 +107,36 @@ export function useMapCamera(): MapCamera {
     return clampCamera(next, w, h);
   }, []);
 
+  /** 立即套用縮放（按鈕／flush）；會中止慣性。 */
   const zoomAt = useCallback(
     (factor: number, focusX: number, focusY: number) => {
       stopInertia();
-      setCam((c) => {
-        const ns = clampScale(c.scale * factor);
-        const realFactor = ns / c.scale;
-        const tx = focusX - (focusX - c.tx) * realFactor;
-        const ty = focusY - (focusY - c.ty) * realFactor;
-        return clampCam({ scale: ns, tx, ty });
-      });
+      setCam((c) => clampCam(zoomCameraAt(c, factor, focusX, focusY)));
     },
     [clampCam, stopInertia],
+  );
+
+  // 把本幀累積的縮放沖出（一幀一次 setCam）。
+  const flushZoom = useCallback(() => {
+    zoomRafRef.current = null;
+    const { factor, fx, fy } = pendingZoomRef.current;
+    pendingZoomRef.current = { factor: 1, fx: 0, fy: 0 };
+    if (Math.abs(factor - 1) < ZOOM_EPS) return;
+    zoomAt(factor, fx, fy);
+  }, [zoomAt]);
+
+  // 累積縮放倍率，並在尚未排程時排一幀 rAF（pinch／wheel 用）。
+  const scheduleZoom = useCallback(
+    (factor: number, focusX: number, focusY: number) => {
+      stopInertia();
+      pendingZoomRef.current.factor *= factor;
+      pendingZoomRef.current.fx = focusX;
+      pendingZoomRef.current.fy = focusY;
+      if (zoomRafRef.current == null) {
+        zoomRafRef.current = requestAnimationFrame(flushZoom);
+      }
+    },
+    [flushZoom, stopInertia],
   );
 
   const panBy = useCallback(
@@ -260,13 +283,13 @@ export function useMapCamera(): MapCamera {
     return () => ro.disconnect();
   }, [viewportEl, clampCam, flyTo, reduced]);
 
-  // wheel 需非 passive 才能 preventDefault。
+  // wheel 需非 passive 才能 preventDefault；縮走 rAF 批次避免每 delta 都 setState。
   useEffect(() => {
     if (!viewportEl) return;
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       const rect = viewportEl.getBoundingClientRect();
-      zoomAt(
+      scheduleZoom(
         wheelZoomFactor(e.deltaY),
         e.clientX - rect.left,
         e.clientY - rect.top,
@@ -274,12 +297,13 @@ export function useMapCamera(): MapCamera {
     };
     viewportEl.addEventListener("wheel", onWheel, { passive: false });
     return () => viewportEl.removeEventListener("wheel", onWheel);
-  }, [viewportEl, zoomAt]);
+  }, [viewportEl, scheduleZoom]);
 
   useEffect(() => {
     return () => {
       if (animTimerRef.current) clearTimeout(animTimerRef.current);
       if (panRafRef.current != null) cancelAnimationFrame(panRafRef.current);
+      if (zoomRafRef.current != null) cancelAnimationFrame(zoomRafRef.current);
       if (inertiaRafRef.current != null)
         cancelAnimationFrame(inertiaRafRef.current);
     };
@@ -327,7 +351,7 @@ export function useMapCamera(): MapCamera {
       const cur = { x: e.clientX, y: e.clientY };
       pointers.set(e.pointerId, cur);
 
-      // 雙指 pinch 縮放：沿用原本以雙指距離比值 zoomAt 的邏輯（不走 rAF 批次）。
+      // 雙指 pinch 縮放：距離比值經 rAF 批次（與 pan 同節奏，一幀一次 setCam）。
       if (pointers.size >= 2) {
         const pts = [...pointers.values()];
         const a = pts[0]!;
@@ -338,7 +362,7 @@ export function useMapCamera(): MapCamera {
         const midY = (a.y + b.y) / 2 - rect.top;
         const pp = prevPinchRef.current;
         if (pp && pp.dist > 0) {
-          zoomAt(dist / pp.dist, midX, midY);
+          scheduleZoom(dist / pp.dist, midX, midY);
         }
         prevPinchRef.current = { dist };
         return;
@@ -379,13 +403,21 @@ export function useMapCamera(): MapCamera {
       }
       lastSampleRef.current = { x: cur.x, y: cur.y, t: now };
     },
-    [schedulePan, zoomAt],
+    [schedulePan, scheduleZoom],
   );
 
   const endPointer = useCallback(
     (e: React.PointerEvent<HTMLDivElement>, allowInertia: boolean) => {
       pointersRef.current.delete(e.pointerId);
-      if (pointersRef.current.size < 2) prevPinchRef.current = null;
+      // 離開雙指：沖出待處理縮放，避免最後一格 pinch 掉幀。
+      if (pointersRef.current.size < 2) {
+        prevPinchRef.current = null;
+        if (zoomRafRef.current != null) {
+          cancelAnimationFrame(zoomRafRef.current);
+          zoomRafRef.current = null;
+          flushZoom();
+        }
+      }
 
       const drag = dragRef.current;
       if (!drag || drag.pointerId !== e.pointerId) return;
@@ -407,7 +439,7 @@ export function useMapCamera(): MapCamera {
       velocityRef.current = { vx: 0, vy: 0 };
       lastSampleRef.current = null;
     },
-    [flushPan, startInertia],
+    [flushPan, flushZoom, startInertia],
   );
 
   const onPointerUp = useCallback(

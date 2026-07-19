@@ -24,7 +24,7 @@ describe("ZoneIsland", () => {
     expect(html).toContain(`z-index:${mapDepthZ(zone.depthY, "label")}`);
   });
 
-  it("island tile 輸出 srcSet，標籤依 mapScale 反縮放", () => {
+  it("island tile 輸出 srcSet；木牌反縮放吃 CSS --map-scale", () => {
     const zone = resolveUniverseMap().zones.find((z) => z.id === "car-park")!;
     const html = renderToStaticMarkup(
       <ZoneIsland
@@ -40,7 +40,8 @@ describe("ZoneIsland", () => {
     expect(html).toContain("264w");
     expect(html).toContain("528w");
     expect(html).toContain("792w");
-    expect(html).toContain("scale(0.5)");
+    // 反縮放改由 CSS module（--map-scale），不再內聯 scale(1/mapScale)
+    expect(html).not.toContain("scale(0.5)");
   });
 
   it("統一點擊語意：鎖島不再有獨立看看鈕，pill 帶學齡前語意 icon", () => {

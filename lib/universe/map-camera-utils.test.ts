@@ -11,12 +11,14 @@ import {
   anyPointVisible,
   blendVelocity,
   clampCamera,
+  bucketMapScale,
   clampScale,
   decayVelocity,
   exceedsDragSlop,
   fitScaleFor,
   islandContentBounds,
   wheelZoomFactor,
+  zoomCameraAt,
 } from "./map-camera-utils";
 
 describe("map-camera-utils", () => {
@@ -29,6 +31,29 @@ describe("map-camera-utils", () => {
     expect(clampScale(0.01)).toBe(MIN_SCALE);
     expect(clampScale(99)).toBe(MAX_SCALE);
     expect(clampScale(1)).toBe(1);
+  });
+
+  it("bucketMapScale 以 0.25 級距量化", () => {
+    expect(bucketMapScale(1.0)).toBe(1);
+    expect(bucketMapScale(1.12)).toBe(1);
+    expect(bucketMapScale(1.13)).toBe(1.25);
+    expect(bucketMapScale(0.1)).toBe(0.25);
+  });
+
+  it("zoomCameraAt 維持焦點下的舞台點", () => {
+    const cam = { scale: 1, tx: 100, ty: 50 };
+    const next = zoomCameraAt(cam, 2, 200, 100);
+    expect(next.scale).toBe(2);
+    // 焦點 (200,100) 對應舞台點在縮放前後應投影到同一螢幕點
+    const stageX = (200 - cam.tx) / cam.scale;
+    const stageY = (100 - cam.ty) / cam.scale;
+    expect(stageX * next.scale + next.tx).toBeCloseTo(200);
+    expect(stageY * next.scale + next.ty).toBeCloseTo(100);
+  });
+
+  it("zoomCameraAt 達上限時不漂移", () => {
+    const cam = { scale: MAX_SCALE, tx: 10, ty: 20 };
+    expect(zoomCameraAt(cam, 1.5, 100, 100)).toEqual(cam);
   });
 
   it("FIT_MARGIN 維持 0.96（手機島群可讀、五島不裁切）", () => {
