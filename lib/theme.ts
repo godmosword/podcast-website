@@ -16,7 +16,7 @@ export const THEME_ATTRIBUTE = "data-theme";
 export const NIGHT_THEME: ThemePreference = "night";
 export const LIGHT_THEME: ThemePreference = "light";
 export const SYSTEM_THEME_MODE: ThemeMode = "system";
-const NIGHT_THEME_COLOR = "#1c2440";
+const NIGHT_THEME_COLOR = "#1e2438";
 const LIGHT_THEME_COLOR = "#ffffff";
 
 const DARK_SCHEME_QUERY = "(prefers-color-scheme: dark)";

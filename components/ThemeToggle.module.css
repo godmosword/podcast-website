@@ -74,6 +74,21 @@
   color: var(--accent);
 }
 
+/* 夜間：段控浮層更清楚；emoji 與選單一致降飽和 */
+:global(html[data-theme="night"]) .group {
+  background: var(--card-2);
+  border-color: color-mix(in srgb, var(--ink) 16%, transparent);
+}
+
+:global(html[data-theme="night"]) .segmentActive {
+  background: color-mix(in srgb, var(--c-teal) 28%, var(--card));
+  color: color-mix(in srgb, var(--c-teal) 35%, var(--ink));
+}
+
+:global(html[data-theme="night"]) .glyph {
+  filter: saturate(0.55) brightness(0.92);
+}
+
 .glyph {
   display: inline-flex;
   align-items: center;
