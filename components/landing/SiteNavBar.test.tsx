@@ -133,6 +133,19 @@ describe("SiteNavBar", () => {
     expect(view.getAllByRole("group", { name: "主題模式" }).length).toBeGreaterThan(0);
   });
 
+  test("開啟／關閉行動選單時 header 標記 data-menu-open", async () => {
+    const view = await renderNavBar();
+    const header = view.container.querySelector("header");
+    expect(header).toBeTruthy();
+    expect(header?.hasAttribute("data-menu-open")).toBe(false);
+
+    fireEvent.click(view.getByRole("button", { name: "開啟選單" }));
+    expect(header?.getAttribute("data-menu-open")).toBe("true");
+
+    fireEvent.click(view.getByRole("button", { name: "關閉選單" }));
+    expect(header?.hasAttribute("data-menu-open")).toBe(false);
+  });
+
   test("play route hides site nav bar", async () => {
     vi.resetModules();
     vi.doMock("next/navigation", () => ({
