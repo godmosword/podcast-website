@@ -237,7 +237,7 @@ export default function SiteNavBar() {
   if (playMode) return null;
 
   return (
-    <header className={styles.bar}>
+    <header className={styles.bar} {...(open ? { "data-menu-open": "true" as const } : {})}>
       <div className={styles.inner}>
         <Link href="/" className={styles.brand}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
