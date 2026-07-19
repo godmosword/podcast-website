@@ -115,6 +115,7 @@ function ZoneIsland({
           data-celebrate={isOpen && burst > 0 ? true : undefined}
           data-jelly={!isOpen && jelly > 0 ? jelly : undefined}
           data-progress={hasProgress ? true : undefined}
+          data-paused={paused || undefined}
           aria-label={
             hasProgress
               ? `${zone.name}，${meta.label}，已聽完 ${progress!.completed} 集`

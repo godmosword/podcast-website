@@ -46,7 +46,7 @@
 }
 
 /* v5：黏土海面貼圖（無縫平鋪）。screen-space 滿版 div，以 background-position/size
-   跟隨鏡頭（見 UniverseMap.tsx seaCameraStyle）；不得放回 transform 的 stage 內 —
+   跟隨鏡頭（useMapCamera.bindVisual → applySeaCamera）；不得放回 transform 的 stage 內 —
    外擴 rect 會把合成層撐到視窗數十倍大，iOS Safari 會 OOM crash。 */
 .seaFill {
   position: absolute;

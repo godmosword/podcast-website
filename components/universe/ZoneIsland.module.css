@@ -102,6 +102,12 @@
   animation: islandFloat 3.6s ease-in-out infinite;
 }
 
+/* 地圖手勢中暫停待機浮動／柔光，把合成預算留給縮放 */
+.islandTile[data-paused][data-status="open"]::before,
+.islandTile[data-paused][data-status="open"]:not([data-transition]) .tileStack {
+  animation-play-state: paused;
+}
+
 @keyframes islandFloat {
   0%,
   100% {
