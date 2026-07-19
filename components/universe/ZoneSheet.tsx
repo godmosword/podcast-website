@@ -64,6 +64,10 @@ export default function ZoneSheet({
   const wishPanelId = `${titleId}-wish`;
   const parentPanelId = `${titleId}-parent`;
   const hasStories = (zoneStories?.total ?? 0) > 0;
+  const showCarParkPrimaryCta = isCarPark && !hasStories && primaryCarParkLinks.length > 0;
+  const showParentDisclosure = isCarPark
+    ? secondaryCarParkLinks.length > 0
+    : true;
 
   return (
     <div className={styles.overlay} role="presentation" onClick={onClose}>
@@ -102,17 +106,6 @@ export default function ZoneSheet({
             </span>
           </div>
         </div>
-
-        <p className={styles.teaser}>{zone.teaser}</p>
-
-        <p className={styles.actionHint}>
-          <span aria-hidden="true">{zone.status === "open" ? "👆" : meta.icon}</span>{" "}
-          {zone.status === "open"
-            ? hasStories
-              ? "點一個故事，馬上開始聽"
-              : "一起探索這座島吧"
-            : meta.tapBubble ?? "這座島正在準備中，先來看看吧"}
-        </p>
 
         {zoneStories && zoneStories.total > 0 ? (
           <section className={styles.stories} aria-labelledby={`${titleId}-stories`}>
@@ -161,158 +154,151 @@ export default function ZoneSheet({
           </section>
         ) : null}
 
-        {isCarPark ? (
-          <>
-            <nav className={styles.links} aria-label={`${zone.name}入口`}>
-              {primaryCarParkLinks.map((link) => (
-                <a
-                  key={link.href}
-                  className={styles.linkBtnPrimary}
-                  href={link.href}
-                  onClick={() => trackUniverseSheetLink(zone.id, link.href)}
-                  {...(link.external
-                    ? { target: "_blank", rel: "noopener noreferrer" }
-                    : {})}
-                >
-                  {link.label}
-                  {link.external ? <span aria-hidden="true"> ↗</span> : null}
-                </a>
-              ))}
-            </nav>
-
-            {secondaryCarParkLinks.length > 0 ? (
-              <div className={styles.parentDisclosure}>
-                <button
-                  type="button"
-                  className={styles.wishToggle}
-                  aria-expanded={parentOpen}
-                  {...(parentOpen ? { "aria-controls": parentPanelId } : {})}
-                  onClick={() => setParentOpen((value) => !value)}
-                >
-                  給爸爸媽媽
-                </button>
-
-                {parentOpen ? (
-                  <div id={parentPanelId} className={styles.parentPanel}>
-                    <nav
-                      className={styles.links}
-                      aria-label={`${zone.name}更多入口`}
-                    >
-                      {secondaryCarParkLinks.map((link) => (
-                        <a
-                          key={link.href}
-                          className={styles.linkBtn}
-                          href={link.href}
-                          onClick={() => trackUniverseSheetLink(zone.id, link.href)}
-                          {...(link.external
-                            ? { target: "_blank", rel: "noopener noreferrer" }
-                            : {})}
-                        >
-                          {link.label}
-                          {link.external ? <span aria-hidden="true"> ↗</span> : null}
-                        </a>
-                      ))}
-                    </nav>
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
-          </>
-        ) : (
-          <div className={styles.stub}>
-            <p className={styles.exploreNote}>{zone.exploreNote ?? zone.teaser}</p>
-
-            {zone.status === "building" &&
-            typeof zone.buildProgress === "number" ? (
-              <div
-                className={styles.progress}
-                role="progressbar"
-                aria-valuenow={zone.buildProgress}
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-label="建造進度"
+        {showCarParkPrimaryCta ? (
+          <nav className={styles.links} aria-label={`${zone.name}入口`}>
+            {primaryCarParkLinks.map((link) => (
+              <a
+                key={link.href}
+                className={styles.linkBtnPrimary}
+                href={link.href}
+                onClick={() => trackUniverseSheetLink(zone.id, link.href)}
+                {...(link.external
+                  ? { target: "_blank", rel: "noopener noreferrer" }
+                  : {})}
               >
-                <div
-                  className={styles.progressBar}
-                  style={{ width: `${zone.buildProgress}%` }}
-                />
-                <span className={styles.progressLabel}>
-                  建造進度 {zone.buildProgress}%
-                </span>
-              </div>
-            ) : null}
+                {link.label}
+                {link.external ? <span aria-hidden="true"> ↗</span> : null}
+              </a>
+            ))}
+          </nav>
+        ) : null}
 
-            {zone.status === "planned" ? (
-              <p className={styles.voteNote}>
-                這座島還在收集想法，不需要完成任務，也不急著做決定。
-              </p>
-            ) : null}
+        {showParentDisclosure ? (
+          <div className={styles.parentDisclosure}>
+            <button
+              type="button"
+              className={styles.wishToggle}
+              aria-expanded={parentOpen}
+              {...(parentOpen ? { "aria-controls": parentPanelId } : {})}
+              onClick={() => setParentOpen((value) => !value)}
+            >
+              給爸爸媽媽
+            </button>
 
-            {zone.softLinks && zone.softLinks.length > 0 ? (
-              <nav className={styles.softLinks} aria-label={`${zone.name}可以先逛`}>
-                {zone.softLinks.map((link) => (
-                  <a
-                    key={link.href}
-                    className={styles.softLink}
-                    href={link.href}
-                    onClick={() => trackUniverseSheetLink(zone.id, link.href)}
-                    {...(link.external
-                      ? { target: "_blank", rel: "noopener noreferrer" }
-                      : {})}
+            {parentOpen ? (
+              <div id={parentPanelId} className={styles.parentPanel}>
+                {isCarPark ? (
+                  <nav
+                    className={styles.links}
+                    aria-label={`${zone.name}更多入口`}
                   >
-                    {link.label}
-                    {link.external ? <span aria-hidden="true"> ↗</span> : null}
-                  </a>
-                ))}
-              </nav>
-            ) : null}
+                    {secondaryCarParkLinks.map((link) => (
+                      <a
+                        key={link.href}
+                        className={styles.linkBtn}
+                        href={link.href}
+                        onClick={() => trackUniverseSheetLink(zone.id, link.href)}
+                        {...(link.external
+                          ? { target: "_blank", rel: "noopener noreferrer" }
+                          : {})}
+                      >
+                        {link.label}
+                        {link.external ? <span aria-hidden="true"> ↗</span> : null}
+                      </a>
+                    ))}
+                  </nav>
+                ) : (
+                  <>
+                    {zone.exploreNote ? (
+                      <p className={styles.exploreNote}>{zone.exploreNote}</p>
+                    ) : null}
 
-            <div className={styles.parentDisclosure}>
-              <button
-                type="button"
-                className={styles.wishToggle}
-                aria-expanded={parentOpen}
-                {...(parentOpen ? { "aria-controls": parentPanelId } : {})}
-                onClick={() => setParentOpen((value) => !value)}
-              >
-                給爸爸媽媽
-              </button>
-
-              {parentOpen ? (
-                <div id={parentPanelId} className={styles.parentPanel}>
-                  <ParentTrustStrip variant="compact" />
-
-                  <div className={styles.wishDisclosure}>
-                    <button
-                      type="button"
-                      className={styles.wishToggle}
-                      aria-expanded={wishOpen}
-                      {...(wishOpen ? { "aria-controls": wishPanelId } : {})}
-                      onClick={() => setWishOpen((value) => !value)}
-                    >
-                      想留一句話
-                    </button>
-
-                    {wishOpen ? (
-                      <div id={wishPanelId} className={styles.wishPanel}>
-                        <ZoneWishForm
-                          zoneId={zone.id}
-                          fallbackHref={notifyHref}
-                          onSubmitSuccess={({ hasEmail, category }) => {
-                            trackWishSubmitted(category);
-                            if (category === "feature") {
-                              trackUniverseWishSubmit(zone.id, hasEmail);
-                            }
-                          }}
+                    {zone.status === "building" &&
+                    typeof zone.buildProgress === "number" ? (
+                      <div
+                        className={styles.progress}
+                        role="progressbar"
+                        aria-valuenow={zone.buildProgress}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-label="建造進度"
+                      >
+                        <div
+                          className={styles.progressBar}
+                          style={{ width: `${zone.buildProgress}%` }}
                         />
+                        <span className={styles.progressLabel}>
+                          建造進度 {zone.buildProgress}%
+                        </span>
                       </div>
                     ) : null}
-                  </div>
-                </div>
-              ) : null}
-            </div>
+
+                    {zone.status === "planned" ? (
+                      <p className={styles.voteNote}>
+                        這座島還在收集想法，不需要完成任務，也不急著做決定。
+                      </p>
+                    ) : null}
+
+                    {zone.softLinks && zone.softLinks.length > 0 ? (
+                      <nav
+                        className={styles.softLinks}
+                        aria-label={`${zone.name}可以先逛`}
+                      >
+                        {zone.softLinks.map((link) => (
+                          <a
+                            key={link.href}
+                            className={styles.softLink}
+                            href={link.href}
+                            onClick={() =>
+                              trackUniverseSheetLink(zone.id, link.href)
+                            }
+                            {...(link.external
+                              ? { target: "_blank", rel: "noopener noreferrer" }
+                              : {})}
+                          >
+                            {link.label}
+                            {link.external ? (
+                              <span aria-hidden="true"> ↗</span>
+                            ) : null}
+                          </a>
+                        ))}
+                      </nav>
+                    ) : null}
+
+                    <ParentTrustStrip variant="compact" />
+
+                    <div className={styles.wishDisclosure}>
+                      <button
+                        type="button"
+                        className={styles.wishToggle}
+                        aria-expanded={wishOpen}
+                        {...(wishOpen ? { "aria-controls": wishPanelId } : {})}
+                        onClick={() => setWishOpen((value) => !value)}
+                      >
+                        想留一句話
+                      </button>
+
+                      {wishOpen ? (
+                        <div id={wishPanelId} className={styles.wishPanel}>
+                          <ZoneWishForm
+                            zoneId={zone.id}
+                            fallbackHref={notifyHref}
+                            onSubmitSuccess={({ hasEmail, category }) => {
+                              trackWishSubmitted(category);
+                              if (category === "feature") {
+                                trackUniverseWishSubmit(zone.id, hasEmail);
+                              }
+                            }}
+                          />
+                        </div>
+                      ) : null}
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : null}
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

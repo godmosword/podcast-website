@@ -37,6 +37,7 @@
 | feat(design): 夜間暖夜靛 token＋行動選單質感（emoji 降飽和、搜尋浮層、頂欄銜接） | `8a14f8d` |
 | feat(nav): 夜間漢堡開啟時頂欄微暗銜接面板（data-menu-open） | `96c90ae` |
 | feat(universe): 縮放 rAF 批次＋島 memo 隔離（CSS --map-scale） | `a34f5b7` |
+| feat(universe): ZoneSheet 兒童首屏極簡＋T3b 鏡頭視覺外置（縮放順暢） | `b2ba0a3` |
 
 ### 本輪已完成（2026-07-18）
 
@@ -220,7 +221,7 @@
 | ID | 優先 | 狀態 | 摘要 | 主要檔案 | 驗證 |
 |----|------|------|------|----------|------|
 | MAP-UX-P1a | P1 | ✅ `80457c4` | close／wishToggle ≥44px | `ZoneSheet.module.css` | CSS 契約測 + e2e |
-| MAP-UX-P1b | P1 | ✅ `80457c4` | sheet 開時 overlay 擋地圖手勢 + `min(72vh,34rem)` | `ZoneSheet.module.css` | e2e 拖曳／backdrop |
+| MAP-UX-P1b | P1 | ✅ `80457c4` | sheet 開時 overlay 擋地圖手勢 + 動態 max-height（後續首屏極簡改 `min(64vh,30rem)`） | `ZoneSheet.module.css` | e2e 拖曳／backdrop |
 | MAP-UX-P1c | P1 | ✅ `80457c4` | a11y `/adventures` + 開 sheet axe + 觸控 assertion | `e2e/a11y.spec.ts`、`e2e/universe-map.spec.ts` | `test:e2e` 24 綠 |
 | MAP-UX-P2a | P2 | ✅ `80457c4` | reduced-motion 點島即開 sheet | `e2e/universe-map.spec.ts` | `test:e2e` |
 | MAP-MOBILE-FIT | P1 | ✅ `6824d12` | 手機首屏：隱藏標題 pill／探險小抄（sr-only）＋ `FIT_MARGIN` 0.96 | `MapGuide.module.css`、`UniverseMap.module.css`、`map-camera-utils.ts` | 單元＋CSS 契約＋`universe-map` e2e 16 綠 |
@@ -430,7 +431,7 @@ D0 → D2-A(smoke) → D1 → D13-剩餘 → D3 → D14 → D6 ∥ D12
 > **STEM-P1 全數完成（2026-07-06）→ gate 解鎖**：凍結中的地圖美術長尾與遊戲 polish 可依數據擇機重開（建議先看兩週 story_completed／return_visit 基線再決定）。
 
 > **地圖進化方向決策（2026-07-09，委員會 plan `61d098b` 後）**：
-> ① **T3b camera 視覺更新外置**（zoom 期間重渲染隔離）——**先量測再定**：需低階裝置實測佐證（pinch zoom 期間 render 計數／FPS 有痛點）才開工；平移已由 memo 化解決（`61d098b`）。
+> ① ~~**T3b camera 視覺更新外置**（zoom 期間重渲染隔離）~~——使用者回饋縮放些微卡頓後落地：`bindVisual` 命令式寫 stage／海面／視差，React cam 僅在 bucket／zoom 限／手勢結束 commit；`isInteracting` 暫停漫遊與島待機動畫。見本輪已完成。
 > ② **D4 五島夜間美術**（`hasNightArt` 管線已 wired、零資產）——**等數據解凍**：看兩週 story_completed／return_visit 基線；重開時屬重啟凍結日夜美術決策，須另行同意＋定解凍門檻（比較基準與最低樣本數），走 generate-map-art 管線（Leader/Opus、人工審圖、成本確認）。
 
 > 分享鈕、平台排序、訂閱文案、viewport 縮放、sitemap 擴充等已上線，見 Completed；不再佔 Top 5 名額。

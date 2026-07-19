@@ -9,6 +9,11 @@ import {
   anyPointVisible,
   bucketMapScale,
 } from "@/lib/universe/map-camera-utils";
+import {
+  applyParallaxCamera,
+  applySeaCamera,
+  applyStageCamera,
+} from "@/lib/universe/map-camera-visual";
 import { getZoneArtTile } from "@/lib/universe/zone-art-tile";
 import { parseDevStatusOverrides } from "@/lib/universe/dev-map-flags";
 import { parseZoneDeepLink, parseZoneDeepLinkFromSearch } from "@/lib/universe/zone-deep-link";
@@ -43,9 +48,6 @@ const FOCUS_SCALE = 1.6;
 
 /** bottom dock 開啟時，fly-to 把島往上留出的視窗像素。 */
 const FOCUS_DOCK_OFFSET_Y = 96;
-
-/** 黏土海面貼圖平鋪尺寸（stage 單位）；無縫 tile 見 Art Bible §14。 */
-const SEA_TILE = 300;
 
 /** 首訪「點點看」引導：每個分頁 session 只出現一次（T5）。 */
 const TAP_HINT_KEY = "cc-universe-tap-hint-shown";
@@ -103,15 +105,23 @@ function UniverseMapContent({
   // 穩定的 flyTo 引用（useCallback，不隨 pointer-move 每 tick 重建的 camera 物件
   // 一起變動）；供下方多個 callback 當依賴，避免每次平移都重建它們並連鎖重渲染
   // ZoneIsland（ZoneIsland 已 memo）。deep-link effect 沿用同一個解構值。
-  const { flyTo: cameraFlyTo } = camera;
+  const { flyTo: cameraFlyTo, bindVisual, getCam, idleEpoch, isInteracting } =
+    camera;
   const reduced = useReducedMotion();
   const webpSupported = useWebpSupported();
   const { theme: daylight } = useTheme();
   const router = useRouter();
   const sectionRef = useRef<HTMLElement>(null);
+  const stageElRef = useRef<HTMLDivElement | null>(null);
+  const seaDayElRef = useRef<HTMLDivElement | null>(null);
+  const seaNightElRef = useRef<HTMLDivElement | null>(null);
+  const parallaxElRef = useRef<HTMLDivElement | null>(null);
+  const reducedRef = useRef(reduced);
+  reducedRef.current = reduced;
   const [tabHidden, setTabHidden] = useState(false);
   const [mapInView, setMapInView] = useState(true);
-  const paused = tabHidden || !mapInView;
+  // 手勢中暫停漫遊／裝飾動畫，把主執行緒留給鏡頭合成。
+  const paused = tabHidden || !mapInView || isInteracting;
   const [interaction, setInteraction] = useState<MapInteraction>({ phase: "idle" });
   // 供事件回呼／effect 讀「當下」狀態而不把 interaction 加進依賴（避免關 sheet
   // 時 deep-link effect 因狀態變動重跑、拿著尚未清掉的 query 又把 sheet 開回來）。
@@ -283,9 +293,55 @@ function UniverseMapContent({
     return () => el.removeEventListener("wheel", onWheel);
   }, [cancelPendingReveal]);
 
-  // 迷路自救（A′ 馴化鏡頭）：鏡頭靜止 RECENTER_IDLE_MS 後，若所有島心都在視窗外
-  //（孩子把地圖拖到只剩海），自動飛回樂園（camera.reset）。拖曳／慣性期間
-  // tx/ty 持續變動會不斷順延；fly-to 動畫中不檢查。
+  // 鏡頭視覺外置：連續 zoom／pan 只寫 DOM，不重跑本元件。
+  useEffect(() => {
+    bindVisual((pose, meta) => {
+      const visualMeta = {
+        isAnimating: meta.isAnimating,
+        flyDurationMs: FLY_DURATION_MS,
+        reducedMotion: reducedRef.current,
+      };
+      applyStageCamera(stageElRef.current, pose, visualMeta);
+      applySeaCamera(seaDayElRef.current, pose, visualMeta);
+      if (seaNightElRef.current) {
+        applySeaCamera(seaNightElRef.current, pose, visualMeta);
+        // 夜海保留 opacity crossfade；勿被海面 fly transition 整段覆寫掉。
+        seaNightElRef.current.style.transition = [
+          visualMeta.isAnimating
+            ? `background-position ${FLY_DURATION_MS}ms cubic-bezier(0.22, 1, 0.36, 1), ` +
+              `background-size ${FLY_DURATION_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`
+            : null,
+          "opacity 600ms ease",
+        ]
+          .filter(Boolean)
+          .join(", ");
+      }
+      applyParallaxCamera(parallaxElRef.current, pose, visualMeta);
+    });
+    return () => bindVisual(null);
+  }, [bindVisual]);
+
+  // 夜海首次掛載後補寫目前鏡頭（bindVisual 當時 ref 尚為 null）。
+  useEffect(() => {
+    if (!nightSeaMounted || !seaNightElRef.current) return;
+    applySeaCamera(seaNightElRef.current, getCam(), {
+      isAnimating: camera.isAnimating,
+      flyDurationMs: FLY_DURATION_MS,
+      reducedMotion: reduced,
+    });
+    seaNightElRef.current.style.transition = [
+      camera.isAnimating
+        ? `background-position ${FLY_DURATION_MS}ms cubic-bezier(0.22, 1, 0.36, 1), ` +
+          `background-size ${FLY_DURATION_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`
+        : null,
+      "opacity 600ms ease",
+    ]
+      .filter(Boolean)
+      .join(", ");
+  }, [nightSeaMounted, getCam, camera.isAnimating, reduced]);
+
+  // 迷路自救（A′ 馴化鏡頭）：訂閱 idleEpoch（手勢結束），勿訂閱每幀 cam。
+  // fly-to 動畫中不檢查；結束後 idleEpoch 會再 bump。
   const { reset: cameraReset } = camera;
   useEffect(() => {
     if (camera.isAnimating) return;
@@ -295,14 +351,14 @@ function UniverseMapContent({
       const rect = el.getBoundingClientRect();
       if (rect.width === 0 || rect.height === 0) return;
       if (interactionRef.current.phase !== "idle") return;
-      const cam = { scale: camera.scale, tx: camera.tx, ty: camera.ty };
+      const cam = getCam();
       const coords = zones.map((zone) => zone.coord);
       if (!anyPointVisible(cam, rect.width, rect.height, coords)) {
         cameraReset();
       }
     }, RECENTER_IDLE_MS);
     return () => clearTimeout(timer);
-  }, [camera.isAnimating, camera.scale, camera.tx, camera.ty, cameraReset, zones]);
+  }, [camera.isAnimating, idleEpoch, cameraReset, getCam, zones]);
 
   const handleMapKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
@@ -345,22 +401,10 @@ function UniverseMapContent({
     [camera, cancelPendingReveal],
   );
 
-  const transform = `translate(${camera.tx}px, ${camera.ty}px) scale(${camera.scale})`;
   const sceneClass = [styles.scene, paused ? styles.paused : ""].filter(Boolean).join(" ");
 
   // 海面貼圖：screen-space CSS 平鋪，不放進被 transform 的 stage。
-  // 舊做法（stage 內 SEA_BLEED 外擴 15400×15120 的 pattern rect）會把 will-change:
-  // transform 的合成層撐到視窗的數十倍大，iOS Safari 3× DPR 下 GPU 記憶體爆掉、
-  // WebContent 反覆 crash（「重複發生問題」）。改為 viewport 大小的 div 以
-  // background-position/size 跟隨鏡頭，tile 網格錨點與 stage 原點對齊，視覺等價。
-  const seaFlyTransition = camera.isAnimating
-    ? `background-position ${FLY_DURATION_MS}ms cubic-bezier(0.22, 1, 0.36, 1), ` +
-      `background-size ${FLY_DURATION_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`
-    : null;
-  const seaCameraStyle = {
-    backgroundSize: `${SEA_TILE * camera.scale}px ${SEA_TILE * camera.scale}px`,
-    backgroundPosition: `${camera.tx}px ${camera.ty}px`,
-  } as const;
+  // 鏡頭 background-position/size 由 bindVisual 命令式更新（T3b），避免 zoom 卡頓。
 
   return (
     <section ref={sectionRef} className={styles.map} aria-label="車車宇宙樂園地圖">
@@ -387,42 +431,31 @@ function UniverseMapContent({
       >
         {/* v5：黏土海面貼圖（無縫平鋪）。screen-space 滿版，天生蓋滿任何鏡頭。 */}
         <div
+          ref={seaDayElRef}
           className={styles.seaFill}
           aria-hidden="true"
           style={{
-            ...seaCameraStyle,
             backgroundImage: `url(${seaDayHref})`,
-            transition: seaFlyTransition ?? "none",
           }}
         />
         {nightSeaMounted && (
           <div
+            ref={seaNightElRef}
             className={styles.seaFill}
             aria-hidden="true"
             style={{
-              ...seaCameraStyle,
               backgroundImage: `url(${seaNightHref})`,
               opacity: daylight === "night" ? 1 : 0,
-              transition: [seaFlyTransition, "opacity 600ms ease"]
-                .filter(Boolean)
-                .join(", "),
             }}
           />
         )}
 
         <div
+          ref={stageElRef}
           className={styles.stage}
           style={{
             width: MAP_STAGE.width,
             height: MAP_STAGE.height,
-            transform,
-            transition: camera.isAnimating
-              ? `transform ${FLY_DURATION_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`
-              : "none",
-            // 連續 scale 只更新 CSS 變數；島 memo 吃 bucketMapScale，同桶不重繪
-            ["--map-scale" as string]: String(camera.scale),
-            ["--label-offset-y" as string]:
-              camera.scale < 0.5 ? "-140px" : "6px",
           }}
         >
           <svg
@@ -539,11 +572,7 @@ function UniverseMapContent({
 
         {/* 近景雲影：DOM 排在 stage 之後（同 z:1），飄在島群上方 */}
         <UniverseMapParallax
-          tx={camera.tx}
-          ty={camera.ty}
-          scale={camera.scale}
-          isAnimating={camera.isAnimating}
-          reduced={reduced}
+          layerRef={parallaxElRef}
           paused={paused}
           daylight={daylight}
         />

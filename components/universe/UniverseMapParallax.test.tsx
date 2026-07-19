@@ -7,15 +7,7 @@ vi.stubGlobal("React", React);
 
 describe("UniverseMapParallax", () => {
   const html = renderToStaticMarkup(
-    <UniverseMapParallax
-      tx={0}
-      ty={0}
-      scale={1}
-      isAnimating={false}
-      reduced={false}
-      paused={false}
-      daylight="light"
-    />,
+    <UniverseMapParallax paused={false} daylight="light" />,
   );
 
   it("海洋滿版後不再輸出遠島剪影", () => {

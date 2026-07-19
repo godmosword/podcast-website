@@ -19,6 +19,6 @@ describe("ZoneSheet.module.css touch and modal", () => {
   });
 
   it("sheet 高度採動態上限", () => {
-    expect(css).toMatch(/max-height:\s*min\(72vh,\s*34rem\)/);
+    expect(css).toMatch(/max-height:\s*min\(64vh,\s*30rem\)/);
   });
 });
