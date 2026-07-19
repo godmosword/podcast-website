@@ -62,7 +62,7 @@ Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範
 | `--card` | `#ffffff` | 卡片背景 |
 | `--surface-elevated` | `var(--card)` | 抬升表面（卡片／區塊） |
 | `--surface-glass` | 半透明 card mix | 導覽／次 CTA 玻璃層 |
-| `--hairline` | `rgba(0,0,0,0.08)`（夜間白 10%） | 細分隔線；`--line` 別名之 |
+| `--hairline` | `rgba(0,0,0,0.08)`（夜間白 12%） | 細分隔線；`--line` 別名之 |
 | `--accent` | `var(--warm-accent)` | 一般互動強調色；可由單集元件的區域樣式覆寫 |
 | `--accent-soft` | `color-mix(in srgb, var(--accent) 18%, transparent)` | 強調色淡底 |
 | `--on-dark` | `#ffffff` | 深色／品牌底上的文字與圖示 |
@@ -81,6 +81,20 @@ Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範
 
 頁面背景為純白（`--bg`），四角極淡多彩柔光由獨立節點 `.site-backdrop`（`position: fixed`）繪製，內容包在 `.site-root` 內；**不在 `body::before` 上畫 gradient**，避免 iOS Safari 上 sticky／合成層白塊跑版。柔光飽和度刻意偏低。實作見 `app/globals.css`、`app/layout.tsx`。
 每則故事另有 `story.color`（hex），用於極淡色邊、CTA、播放鈕。
+
+### 夜間色票原則（暖夜靛）
+
+睡前主題走「暖夜靛」而非冷產品暗黑。實作僅覆寫 `[data-theme="night"]` token 值，**不改 ThemeProvider API**。
+
+| 原則 | 落地 |
+|------|------|
+| 暖底＋可讀層次 | `--bg` `#1e2438`；`--bg-2`／`--card`／`--card-2` 拉開明度，搜尋與卡片有浮層 |
+| Accent 降飽和 | `--c-*`、`--night-link`、`--landing-heading` 比日間／舊夜版低一檔 chroma |
+| 頂欄不反轉 | `SiteNavBar` 桃色玻璃頂欄維持日間色；漢堡面板吃 night token，頂緣暖 hairline 銜接 |
+| Emoji 降飽和 | 行動選單／主題切換 glyph 用 `filter: saturate(0.55) brightness(0.92)`，不換成線稿 icon |
+| 地圖不反轉 | 宇宙地圖場景色固定印刷淺色（見紅線） |
+
+meta `theme-color`（夜）對齊 `--bg`：`lib/theme.ts` 的 `NIGHT_THEME_COLOR`。
 
 ## 裝飾（v0.2：克制留白）
 

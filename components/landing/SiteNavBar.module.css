@@ -184,6 +184,38 @@
   margin-top: 24px;
 }
 
+/* ---- 夜間：行動漢堡面板質感（頂欄仍桃色、不反轉） ---- */
+
+:global(html[data-theme="night"]) .panel {
+  /* 頂緣暖色 hairline 銜接桃色頂欄；陰影改夜色 */
+  border-top: 1px solid color-mix(in srgb, var(--landing-nav-border) 55%, var(--hairline));
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--c-yellow) 12%, transparent),
+    0 18px 32px rgba(8, 12, 28, 0.45);
+}
+
+:global(html[data-theme="night"]) .searchInput {
+  background: var(--card-2);
+  border-color: color-mix(in srgb, var(--ink) 18%, transparent);
+}
+
+:global(html[data-theme="night"]) .searchInput::placeholder {
+  opacity: 0.9;
+}
+
+:global(html[data-theme="night"]) .menuEmoji {
+  filter: saturate(0.55) brightness(0.92);
+}
+
+:global(html[data-theme="night"]) .menuLink:hover,
+:global(html[data-theme="night"]) .menuLink[aria-current="page"] {
+  background: color-mix(in srgb, var(--c-teal) 14%, transparent);
+}
+
+:global(html[data-theme="night"]) .menuGroupStart::before {
+  border-top-color: color-mix(in srgb, var(--ink) 14%, transparent);
+}
+
 /* ---- 桌面膠囊內嵌導覽（1c）：<980px 隱藏，走漢堡 ---- */
 
 .desktopNav {
