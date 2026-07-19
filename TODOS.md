@@ -216,6 +216,7 @@
 | MAP-UX-P1c | P1 | ✅ `80457c4` | a11y `/adventures` + 開 sheet axe + 觸控 assertion | `e2e/a11y.spec.ts`、`e2e/universe-map.spec.ts` | `test:e2e` 24 綠 |
 | MAP-UX-P2a | P2 | ✅ `80457c4` | reduced-motion 點島即開 sheet | `e2e/universe-map.spec.ts` | `test:e2e` |
 | MAP-MOBILE-FIT | P1 | ✅ `6824d12` | 手機首屏：隱藏標題 pill／探險小抄（sr-only）＋ `FIT_MARGIN` 0.96 | `MapGuide.module.css`、`UniverseMap.module.css`、`map-camera-utils.ts` | 單元＋CSS 契約＋`universe-map` e2e 16 綠 |
+| MAP-MOBILE-BBOX | P1 | 進行中 | 預設 fit 改島群 bbox（`islandContentBounds`），五島首屏更飽滿；不動 `useMapCamera` | `map-camera-utils.ts` | 單元＋e2e 五島 inViewport |
 | MAP-ROAM-doc | ops | ✅ `80457c4` | archive「待 commit」→ `3166cc5`／`503ad8b` 對帳 | `docs/archive/…` | 文件 only |
 
 ### 待使用者決策（實作前）

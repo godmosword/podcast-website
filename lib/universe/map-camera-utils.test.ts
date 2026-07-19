@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { MAP_STAGE } from "@/data/universe-zones";
+import { MAP_STAGE, ZONES } from "@/data/universe-zones";
+import { getZoneArtTile } from "@/lib/universe/zone-art-tile";
 import {
   DRAG_SLOP_PX,
   FIT_MARGIN,
@@ -14,6 +15,7 @@ import {
   decayVelocity,
   exceedsDragSlop,
   fitScaleFor,
+  islandContentBounds,
   wheelZoomFactor,
 } from "./map-camera-utils";
 
@@ -33,17 +35,46 @@ describe("map-camera-utils", () => {
     expect(FIT_MARGIN).toBe(0.96);
   });
 
-  it("fitScaleFor 為 contain-fit × FIT_MARGIN", () => {
-    // 寬受限（窄直向視窗）
+  it("islandContentBounds 包住五島 tile（小於整張 MAP_STAGE）", () => {
+    const bounds = islandContentBounds();
+    expect(bounds.width).toBeLessThan(MAP_STAGE.width);
+    expect(bounds.height).toBeLessThan(MAP_STAGE.height);
+    expect(bounds.width).toBeGreaterThan(0);
+    expect(bounds.height).toBeGreaterThan(0);
+
+    for (const zone of ZONES) {
+      const tile = getZoneArtTile(zone.id);
+      if (tile.mode !== "island") continue;
+      const [ax, ay] = tile.anchorUV;
+      const left = zone.coord.x - ax * tile.stageSize.w;
+      const right = zone.coord.x + (1 - ax) * tile.stageSize.w;
+      const top = zone.coord.y - ay * tile.stageSize.h;
+      const bottom = zone.coord.y + (1 - ay) * tile.stageSize.h;
+      expect(left).toBeGreaterThanOrEqual(bounds.minX);
+      expect(right).toBeLessThanOrEqual(bounds.maxX);
+      expect(top).toBeGreaterThanOrEqual(bounds.minY);
+      expect(bottom).toBeLessThanOrEqual(bounds.maxY);
+    }
+  });
+
+  it("fitScaleFor 依島群 bbox contain-fit × FIT_MARGIN（比整舞台更近）", () => {
+    const bounds = islandContentBounds();
+    // 寬受限（大視窗可能觸頂 MAX_SCALE）
     expect(fitScaleFor(2000, 3000)).toBeCloseTo(
-      (2000 / MAP_STAGE.width) * FIT_MARGIN,
+      clampScale((2000 / bounds.width) * FIT_MARGIN),
       6,
     );
-    // 高受限（寬橫向視窗）
+    // 高受限
     expect(fitScaleFor(5000, 1440)).toBeCloseTo(
-      (1440 / MAP_STAGE.height) * FIT_MARGIN,
+      clampScale((1440 / bounds.height) * FIT_MARGIN),
       6,
     );
+    // 手機 375：島群 fit 必須嚴謹大於整舞台 fit（五島更飽滿）
+    const mobile = fitScaleFor(375, 748);
+    const stageFit = clampScale(
+      Math.min(375 / MAP_STAGE.width, 748 / MAP_STAGE.height) * FIT_MARGIN,
+    );
+    expect(mobile).toBeGreaterThan(stageFit);
   });
 
   it("fitScaleFor 邊界：0 尺寸回 1、極端尺寸夾 clamp", () => {

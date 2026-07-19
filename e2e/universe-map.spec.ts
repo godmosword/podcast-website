@@ -146,6 +146,20 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     }
   }
 
+  test("手機 fit：五座島 button 皆在首屏可視區", async ({ page }) => {
+    await openMap(page, "light", 375, 812);
+    const islands = [
+      page.getByRole("button", { name: /車車樂園，開放中/ }),
+      page.getByRole("button", { name: /恐龍島，建造中/ }),
+      page.getByRole("button", { name: /英雄救援隊，即將登場/ }),
+      page.getByRole("button", { name: /未來夢想島，規劃中/ }),
+      page.getByRole("button", { name: /森林小島，建造中/ }),
+    ];
+    for (const island of islands) {
+      await expect(island).toBeInViewport();
+    }
+  });
+
   test("縮放按鈕 disabled、鍵盤、空白海點擊不會 click-zoom", async ({ page }) => {
     await openMap(page, "light");
     const zoomIn = page.getByRole("button", { name: /放大地圖/ });
