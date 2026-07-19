@@ -1,4 +1,5 @@
-import { MAP_STAGE } from "@/data/universe-zones";
+import { MAP_STAGE, ZONES } from "@/data/universe-zones";
+import { getZoneArtTile } from "@/lib/universe/zone-art-tile";
 
 /** 鏡頭縮放下限（zoom-out 到底）。 */
 export const MIN_SCALE = 0.34;
@@ -7,19 +8,69 @@ export const MIN_SCALE = 0.34;
  *  收斂上限讓「最放大」仍看得到至少一座島的機率大增（A′ 馴化鏡頭）。 */
 export const MAX_SCALE = 2.0;
 
-/** 預設鏡頭比 fit 再退一點，讓島群不貼視窗邊、保留拖曳呼吸感。 */
-export const FIT_MARGIN = 0.88;
+/** 預設鏡頭比 fit 再退一點，讓島群不貼視窗邊、保留拖曳呼吸感。
+ *  0.96：配合島群 bbox fit，手機首屏五島可讀且不裁切。 */
+export const FIT_MARGIN = 0.96;
+
+/**
+ * 島群 fit 外緣留白（stage px）：木牌／狀態 pill 與島 tile 外框之間的呼吸。
+ * 不含 MAP_STAGE 空白海面——fit 對齊島群而非整張舞台。
+ */
+export const CONTENT_FIT_PAD = 36;
+
+export type IslandContentBounds = {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+  width: number;
+  height: number;
+};
+
+/** 五島 tile 聯集 bbox（含 CONTENT_FIT_PAD），供預設 fit 使用。 */
+export function islandContentBounds(): IslandContentBounds {
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+
+  for (const zone of ZONES) {
+    const tile = getZoneArtTile(zone.id);
+    if (tile.mode !== "island") continue;
+    const [ax, ay] = tile.anchorUV;
+    const { w, h } = tile.stageSize;
+    minX = Math.min(minX, zone.coord.x - ax * w);
+    maxX = Math.max(maxX, zone.coord.x + (1 - ax) * w);
+    minY = Math.min(minY, zone.coord.y - ay * h);
+    maxY = Math.max(maxY, zone.coord.y + (1 - ay) * h);
+  }
+
+  minX -= CONTENT_FIT_PAD;
+  minY -= CONTENT_FIT_PAD;
+  maxX += CONTENT_FIT_PAD;
+  maxY += CONTENT_FIT_PAD;
+
+  return {
+    minX,
+    minY,
+    maxX,
+    maxY,
+    width: maxX - minX,
+    height: maxY - minY,
+  };
+}
 
 /** 把 scale 夾在 MIN_SCALE–MAX_SCALE。 */
 export function clampScale(scale: number): number {
   return Math.min(Math.max(scale, MIN_SCALE), MAX_SCALE);
 }
 
-/** 依 viewport 尺寸算預設 contain-fit 鏡頭倍率（含 FIT_MARGIN 與 clamp）。 */
+/** 依 viewport 尺寸算預設島群 contain-fit 鏡頭倍率（含 FIT_MARGIN 與 clamp）。 */
 export function fitScaleFor(w: number, h: number): number {
   if (w === 0 || h === 0) return 1;
+  const bounds = islandContentBounds();
   return clampScale(
-    Math.min(w / MAP_STAGE.width, h / MAP_STAGE.height) * FIT_MARGIN,
+    Math.min(w / bounds.width, h / bounds.height) * FIT_MARGIN,
   );
 }
 
