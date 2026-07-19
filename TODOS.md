@@ -34,7 +34,7 @@
 
 | ID | Commit |
 |----|--------|
-| feat(design): 夜間暖夜靛 token＋行動選單質感（emoji 降飽和、搜尋浮層、頂欄銜接） | _pending_ |
+| feat(design): 夜間暖夜靛 token＋行動選單質感（emoji 降飽和、搜尋浮層、頂欄銜接） | `8a14f8d` |
 
 ### 本輪已完成（2026-07-18）
 
