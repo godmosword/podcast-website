@@ -7,8 +7,9 @@ export const MIN_SCALE = 0.34;
  *  收斂上限讓「最放大」仍看得到至少一座島的機率大增（A′ 馴化鏡頭）。 */
 export const MAX_SCALE = 2.0;
 
-/** 預設鏡頭比 fit 再退一點，讓島群不貼視窗邊、保留拖曳呼吸感。 */
-export const FIT_MARGIN = 0.88;
+/** 預設鏡頭比 fit 再退一點，讓島群不貼視窗邊、保留拖曳呼吸感。
+ *  0.96：手機首屏島群可讀、五島不裁切（配合隱藏上方 chrome）。 */
+export const FIT_MARGIN = 0.96;
 
 /** 把 scale 夾在 MIN_SCALE–MAX_SCALE。 */
 export function clampScale(scale: number): number {

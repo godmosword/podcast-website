@@ -29,6 +29,10 @@ describe("map-camera-utils", () => {
     expect(clampScale(1)).toBe(1);
   });
 
+  it("FIT_MARGIN 維持 0.96（手機島群可讀、五島不裁切）", () => {
+    expect(FIT_MARGIN).toBe(0.96);
+  });
+
   it("fitScaleFor 為 contain-fit × FIT_MARGIN", () => {
     // 寬受限（窄直向視窗）
     expect(fitScaleFor(2000, 3000)).toBeCloseTo(
