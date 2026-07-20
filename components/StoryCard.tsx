@@ -93,9 +93,11 @@ export default function StoryCard({
               ))}
             </span>
           )}
+          {/* 底色用 story.color 淡染，字色不覆寫（沿用 --ink）：story.color 為自由
+              指定 hex，直接當前景色時對比僅 2.1–3.2:1，不過 WCAG AA。 */}
           <span
             className={styles.arrow}
-            style={{ backgroundColor: `${story.color}1f`, color: story.color }}
+            style={{ backgroundColor: `${story.color}1f` }}
             aria-hidden
           >
             <Icon name="play" size={12} />

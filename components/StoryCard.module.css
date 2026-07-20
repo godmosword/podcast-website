@@ -161,8 +161,13 @@
   }
 }
 
+/* DESIGN.md：prefers-reduced-motion 一律關閉非必要位移。
+   除 :hover 外，:active 的 scale(0.98) 與 transition 也須收斂。 */
 @media (prefers-reduced-motion: reduce) {
-  .card:hover {
+  .card,
+  .card:hover,
+  .card:active {
     transform: none;
+    transition: none;
   }
 }

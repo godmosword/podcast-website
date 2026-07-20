@@ -67,10 +67,14 @@
   color: var(--ink-soft);
 }
 
+/* DESIGN.md 密度底線：觸控目標 min-height ≥ 44px（兒童動線取 48px），且「只加不減」。
+   原 padding: 8px 14px 實高約 37px，未達底線。 */
 .cta {
   display: inline-flex;
+  align-items: center;
+  min-height: 48px;
   margin-top: var(--space-4);
-  padding: 8px 14px;
+  padding: var(--space-3) var(--space-6);
   border-radius: 999px;
   font-size: 0.95rem;
   font-weight: 700;
@@ -91,8 +95,12 @@
   }
 }
 
+/* 同 StoryCard：reduced-motion 下 :active 縮放與 transition 一併關閉。 */
 @media (prefers-reduced-motion: reduce) {
-  .hero:hover {
+  .hero,
+  .hero:hover,
+  .hero:active {
     transform: none;
+    transition: none;
   }
 }

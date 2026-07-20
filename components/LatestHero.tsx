@@ -43,12 +43,10 @@ export default function LatestHero({ story }: LatestHeroProps) {
       {story.summary && (
         <span className={styles.summary}>{story.summary}</span>
       )}
+      {/* 同 StoryCard：story.color 僅供淡底，字色不覆寫以保 AA 對比。 */}
       <span
         className={styles.cta}
-        style={{
-          backgroundColor: `${story.color}22`,
-          color: story.color,
-        }}
+        style={{ backgroundColor: `${story.color}22` }}
       >
         立即看故事 →
       </span>
