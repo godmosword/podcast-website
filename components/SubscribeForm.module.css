@@ -76,7 +76,7 @@
 }
 
 .privacyLink {
-  color: var(--accent);
+  color: var(--accent-ink);
   font-weight: 800;
 }
 
@@ -104,6 +104,6 @@
 }
 
 .unavailable a {
-  color: var(--accent);
+  color: var(--accent-ink);
   font-weight: 800;
 }

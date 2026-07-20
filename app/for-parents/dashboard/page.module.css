@@ -18,7 +18,7 @@
 
 .eyebrow {
   margin: 0 0 8px;
-  color: var(--warm-accent);
+  color: var(--accent-ink);
   font-size: 0.95rem;
   font-weight: 800;
 }
@@ -43,7 +43,7 @@
   display: inline-block;
   margin-top: 14px;
   font-weight: 800;
-  color: var(--warm-accent);
+  color: var(--accent-ink);
   text-decoration: none;
 }
 

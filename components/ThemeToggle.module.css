@@ -71,7 +71,7 @@
 
 .segmentActive {
   background: var(--accent-soft, color-mix(in srgb, var(--accent) 18%, transparent));
-  color: var(--accent);
+  color: var(--accent-ink);
 }
 
 /* 夜間：段控浮層更清楚；emoji 與選單一致降飽和 */

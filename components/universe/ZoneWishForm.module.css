@@ -71,8 +71,14 @@
   border-radius: var(--radius-sm);
   font-size: 0.95rem;
   font-weight: 700;
-  color: var(--warm-accent);
+  /* 薄荷底屬有色面，不在 --accent-ink 的保證範圍（該 token 只對中性面驗證）。
+     日間 --ink 對 #d7edc8 為 10.5:1；夜間薄荷需降比例壓暗底才過 AA。 */
+  color: var(--ink);
   background: color-mix(in srgb, var(--c-mint) 55%, var(--card));
+}
+
+:global([data-theme="night"]) .success {
+  background: color-mix(in srgb, var(--c-mint) 22%, var(--card));
 }
 
 .error {

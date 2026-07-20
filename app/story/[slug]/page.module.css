@@ -192,7 +192,7 @@
 
 .characterItem a,
 .inlineLink {
-  color: var(--accent);
+  color: var(--accent-ink);
   font-weight: 800;
   text-decoration-thickness: 0.12em;
   text-underline-offset: 0.18em;
@@ -245,7 +245,7 @@
   cursor: pointer;
   font-size: 0.95rem;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--accent-ink);
   list-style: none;
 }
 

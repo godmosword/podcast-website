@@ -78,6 +78,18 @@
   --surface-elevated: var(--card);
   --surface-glass: color-mix(in srgb, var(--card) 78%, transparent);
 
+  /* 字階（VIS-W1）：對齊 DESIGN.md「標題 1.8–2.3rem」。
+     只在觸碰的元件換用，不做全站機械替換。
+     不用 clamp() + vw：內容欄固定 max-width 640px，字隨 viewport 長大而欄寬
+     不變會使每行字數在桌面反而變少（量測基準錯配）。定值較誠實。
+     階梯須與同頁既有標題共存：SiteHeader 2.3rem > --fs-h1 1.85rem >
+     --fs-h2 1.35rem > FavoritesSection h2 1.15rem > --fs-h3 1.25rem（卡片）。 */
+  --fs-h1: 1.85rem; /* 頁標題（/stories h1） */
+  --fs-h2: 1.35rem; /* 頁內 hero（LatestHero，注意其為 span 非 heading） */
+  --fs-h3: 1.25rem; /* 卡片標題（StoryCard 列表） */
+  --fs-h3-compact: 1.15rem; /* 卡片標題（grid 變體與手機密度） */
+  --fs-meta: 0.78rem; /* 對齊全站既有 21 處 meta 字級，不另立新值 */
+
   /* 間距（token 階梯：只在觸碰處換用，不做全站機械替換） */
   --space-2: 8px;
   --space-3: 12px;
@@ -149,6 +161,10 @@
   --chip-active-fg: #ffffff;
   --accent: var(--warm-accent);
   --accent-soft: color-mix(in srgb, var(--accent) 18%, transparent);
+  /* --accent（#2a9d8f）對淺色面僅 3.22–3.32:1，不得當前景文字色。
+     --accent-ink 為同色相壓暗版，對 --bg／--card／--card-2／--bg-2 最差 5.54:1。
+     分工：--accent → 邊框／底色／裝飾；--accent-ink → 文字／圖示。 */
+  --accent-ink: #1f7268;
   --on-dark: #ffffff;
   --brand-instagram: #e6683c;
   --brand-favorite: #e64980;
@@ -226,6 +242,9 @@
   --warm-surface: color-mix(in srgb, var(--card) 88%, var(--c-yellow) 12%);
   --warm-surface-2: color-mix(in srgb, var(--c-teal) 14%, var(--card));
   --warm-accent: var(--c-teal);
+  /* 夜間 --accent（#549890）對 --card 3.66:1、--card-2 3.14:1，同樣不過 AA。
+     提亮版對四個夜間表面最差 4.94:1。 */
+  --accent-ink: #7fbdb5;
   --warm-highlight: var(--c-pink);
   --warm-chip-bg: color-mix(in srgb, var(--c-teal) 18%, var(--card));
   --warm-chip-hover: color-mix(in srgb, var(--c-teal) 28%, var(--card-2));

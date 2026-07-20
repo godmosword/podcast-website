@@ -53,11 +53,14 @@
 
 .title {
   display: block;
-  font-size: 1.3rem;
+  font-size: var(--fs-h2);
   font-weight: 700;
-  margin-bottom: 6px;
+  margin-bottom: var(--space-2);
   color: var(--ink);
   line-height: 1.25;
+  /* 長故事名（如「安安救護車｜勇敢說出我需要幫忙」）在 390px 下會折行，
+     balance 讓兩行長度接近，避免落在不自然的斷點。 */
+  text-wrap: balance;
 }
 
 .summary {
@@ -86,10 +89,8 @@
     margin-bottom: var(--space-4);
   }
 
-  .title {
-    font-size: 1.15rem;
-  }
-
+  /* .title 不再覆寫：--fs-h2 的 clamp() 已負責縮放（390px → 下限 1.45rem）。
+     此處硬寫 1.15rem 會蓋掉 token，等於抵銷字階升級。 */
   .summary {
     font-size: 0.88rem;
   }

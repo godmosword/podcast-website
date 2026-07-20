@@ -50,7 +50,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  font-size: 0.78rem;
+  font-size: var(--fs-meta);
   font-weight: 600;
   color: var(--ink-soft);
 }
@@ -62,7 +62,7 @@
 }
 
 .title {
-  font-size: 1.2rem;
+  font-size: var(--fs-h3);
   font-weight: 700;
   color: var(--ink);
   line-height: 1.25;
@@ -125,7 +125,7 @@
 }
 
 .cardGrid .title {
-  font-size: 1.05rem;
+  font-size: var(--fs-h3-compact);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -151,8 +151,11 @@
     height: 80px;
   }
 
+  /* 手機密度：較 --fs-h3 略收（不低於原 1.1rem，DESIGN.md 只加不減）。
+     註：.cardGrid .title 特異性 (0,2,0) 高於此處 (0,1,0)，grid 變體不受本規則
+     影響——兩者皆指向 --fs-h3-compact，值一致故無衝突。 */
   .title {
-    font-size: 1.1rem;
+    font-size: var(--fs-h3-compact);
   }
 
   .summary {
