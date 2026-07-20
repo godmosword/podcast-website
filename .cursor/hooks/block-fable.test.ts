@@ -1,7 +1,10 @@
 import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { shouldBlockFable } from "./block-fable.mjs";
+import {
+  extractModelAssignmentStrings,
+  shouldBlockFable,
+} from "./block-fable.mjs";
 
 const HOOK = join(process.cwd(), ".cursor/hooks/block-fable.mjs");
 
@@ -21,7 +24,7 @@ function runHook(payload: Record<string, unknown>): {
 }
 
 describe("block-fable hook", () => {
-  it("shouldBlockFable 辨識 Fable 5 slug／顯示名", () => {
+  it("shouldBlockFable 辨識 Fable 5 slug／顯示名（僅 model 欄）", () => {
     expect(
       shouldBlockFable({ model: "claude-fable-5-thinking-medium" }),
     ).toBe(true);
@@ -47,6 +50,29 @@ describe("block-fable hook", () => {
     );
   });
 
+  it("prompt 提及禁令文字不誤擋（model 為 Composer）", () => {
+    expect(
+      shouldBlockFable({
+        tool_name: "Task",
+        model: "composer-2.5-fast",
+        tool_input: {
+          model: "composer-2.5-fast",
+          prompt:
+            "Do NOT call Fable 5 or claude-fable-5-thinking-medium. Use Opus.",
+        },
+      }),
+    ).toBe(false);
+    expect(
+      extractModelAssignmentStrings({
+        model: "composer-2.5-fast",
+        tool_input: {
+          model: "composer-2.5-fast",
+          prompt: "禁止呼叫 Fable 5",
+        },
+      }),
+    ).toEqual(["composer-2.5-fast", "composer-2.5-fast"]);
+  });
+
   it("stdin 執行：deny Fable、allow 其他 model", () => {
     const denied = runHook({
       tool_name: "Task",
@@ -58,6 +84,10 @@ describe("block-fable hook", () => {
     const allowed = runHook({
       tool_name: "Task",
       model: "composer-2.5-fast",
+      tool_input: {
+        model: "composer-2.5-fast",
+        prompt: "Mentioning Fable 5 ban in prompt must not deny",
+      },
     });
     expect(allowed.permission).toBe("allow");
   });

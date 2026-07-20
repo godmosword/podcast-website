@@ -128,6 +128,7 @@
 | 使用者說「commit」 | 只 stage **本次相關檔**；禁止 `git add -A` |
 | 插圖 commit 範例 scope | `public/stories/`、`data/scenes/`、`data/subtitles/`、`data/subtitles/_proofread/`、`data/apple-synced.json`、`data/apple-sync.defaults.json`、`data/stories.ts`、`data/characters.json` |
 | 使用者說「ship／push」 | `npm run check` 全綠後 push；Vercel 自動部署 |
+| TODOS 完成態 + hash | 功能／chore **一併**更新 TODOS 完成標記（勿隔輪才補）。短 hash：可於該 commit 內寫「見本 commit」或緊接**一次**僅回填 hash 的 `docs(todos)`；**禁止**例行多輪堆疊補 hash。跨 PR／事後回填可例外 |
 | GHA sync | 僅 bot 可 push sync 產物；人工 push 走一般 PR／main 流程 |
 | branch protection | 若 push 被擋，報錯改人類處理 |
 

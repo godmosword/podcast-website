@@ -78,6 +78,8 @@ npm run dev
 | `npm run lint` | ESLint（零 warnings） |
 | `npm test` | Vitest 單元測試 |
 | `npm run test:e2e` | Playwright E2E（需先 build） |
+| `npm run test:visual` | D2 視覺回歸（**預設 skip**，VIS-DEBT-1；見 `test:visual:trusted`） |
+| `npm run test:visual:trusted` | 設 `VISUAL_BASELINE_TRUSTED=1` 後跑 visual spec（重產／對環境前用） |
 | `npm run check` | 品質閘門：test + verify:episodes + verify:zone-art + verify:map-art + build |
 | `npm run font:subset` | 重新子集化中文字型（新增文案後） |
 

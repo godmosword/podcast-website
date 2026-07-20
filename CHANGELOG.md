@@ -27,6 +27,8 @@
 
 ### Changed
 
+- **P0–P2 技術債（165b44e 檢討）：** smoke 對齊桌面膠囊四項 IA（主題分類僅行動抽屜）；`test:visual` 預設 skip（VIS-DEBT-1，`test:visual:trusted` opt-in）；`useMapCamera` 清 unused var；AGENT-DOMAIN Ship 約定 TODOS hash 與功能同 commit；`block-fable` 改只檢查 model 欄（避免 prompt 禁令誤擋）。
+
 - **Agent 路由硬擋 Fable 5：** `/agent-plan`／`/agent-action` 明令禁止呼叫 Fable 5（`claude-fable-5-*`）；新增 `.cursor/hooks/block-fable.mjs`（`preToolUse`＋`subagentStart`）；契約測試改為要求禁令＋hook 註冊。
 
 - **Landing 尾頁／頂欄協調：** 頁尾移除重複主題切換，改安靜文字 meta（關於 · 節目數據 · 條款）；首頁頂欄在 `#landing-foot` 進入視窗時改近實心底（`data-nav-solid`），避免白底透字；連結對比達 AA。

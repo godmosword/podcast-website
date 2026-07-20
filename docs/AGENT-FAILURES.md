@@ -49,6 +49,7 @@
 
 | 日期 | 命令／模型 | 症狀（exit code／timeout／額度／輸出品質） | 處置 |
 |------|------------|---------------------------------------------|------|
+| 2026-07-20 | `block-fable.mjs` preToolUse（Task + `composer-2.5-fast`） | 掃整包 JSON（含 prompt）→ prompt 寫「禁止 Fable 5」反被 deny，Task 無法派工 | 改只檢查 model／slug 欄位（`extractModelAssignmentStrings`）；補回歸測「prompt 提及禁令不誤擋」→ **已解除** |
 | 2026-07-17 | Cursor Agent + MCP `user-ask-user-questions`／`ask_user_questions`（Grok 4.5 session） | 預設 blocking AUQ 乾等 UI～145s；使用者中斷；整輪看似卡住 | 專案禁 AUQ：`.cursor/rules/no-ask-user-questions.mdc` + `.cursor/hooks.json`（`beforeMCPExecution`／`preToolUse` → `block-auq.mjs`）；選項改聊天文字 → **已緩解（專案層）**；使用者可另在 Cursor Settings 關閉該 MCP |
 | 2026-07-09 | `grok models` / grok-4.5 | `You are not authenticated` | 同日稍後探活已登入、單輪呼叫成功 → 已解除 |
 | 2026-07-09 | `codex exec` / gpt-5.5 | spawn ENOENT：`@openai/codex-darwin-arm64` vendor binary 遺失（npm wrapper 在但原生執行檔不在；exit code 仍為 0，須看 stderr 判斷） | 同日 `npm i -g @openai/codex` 重裝後探活回 OK → 已解除 |

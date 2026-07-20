@@ -8,10 +8,10 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await expect(page.getByRole("link", { name: /車車遊樂園/ })).toBeVisible();
   const capsuleNav = page.getByRole("navigation", { name: "主要分區" });
   await expect(capsuleNav.getByRole("link", { name: "全部故事" })).toBeVisible();
-  await expect(capsuleNav.getByRole("link", { name: "主題分類" })).toBeVisible();
   await expect(capsuleNav.getByRole("link", { name: "遊樂園" })).toBeVisible();
   await expect(capsuleNav.getByRole("link", { name: "宇宙地圖" })).toBeVisible();
   await expect(capsuleNav.getByRole("link", { name: /育兒專欄/ })).toBeVisible();
+  await expect(capsuleNav.getByRole("link", { name: "主題分類" })).toHaveCount(0);
   await expect(capsuleNav.getByRole("button", { name: "家長指南" })).toBeVisible();
   await expect(capsuleNav.getByRole("button", { name: /更多/ })).toHaveCount(0);
 
@@ -38,8 +38,10 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
 test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
-  // 行動版維持漢堡選單
+  // 行動版維持漢堡選單；「主題分類」僅在抽屜，不在桌面膠囊
   await expect(page.getByRole("button", { name: "開啟選單" })).toBeVisible();
+  await page.getByRole("button", { name: "開啟選單" }).click();
+  await expect(page.getByRole("link", { name: "主題分類" })).toBeVisible();
   await expect(page.getByRole("heading", { name: /車車與\s?遊樂園的故事/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: /陪孩子建立好習慣/ })).toBeVisible();
 });

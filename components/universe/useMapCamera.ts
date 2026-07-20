@@ -429,7 +429,7 @@ export function useMapCamera(): MapCamera {
     if (!viewportEl) return;
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
-      const { left, top, w, h } = sizeRef.current;
+      const { w, h } = sizeRef.current;
       // 尺寸尚未量到時補一次；滾動後 left/top 可能過期，手勢開始時刷新。
       if (w === 0 || h === 0 || !interactingRef.current) {
         refreshViewportRect(viewportEl);

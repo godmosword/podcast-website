@@ -2,6 +2,8 @@
 /**
  * 阻擋 Fable 5（claude-fable-5-*）被 /agent-plan、/agent-action 經 Task／subagent 派工。
  * 用於 preToolUse 與 subagentStart。
+ *
+ * 只檢查 model／slug 欄位，不掃 prompt 全文——避免「禁止 Fable」說明文字誤擋。
  */
 import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
@@ -20,32 +22,47 @@ function asString(value) {
 }
 
 /**
- * 是否為 Fable 5 相關派工（model slug／顯示名）。
+ * 從 payload 抽出「模型指派」字串（頂層 + tool_input／arguments 的 model 欄）。
+ * @param {Record<string, unknown>} input
+ * @returns {string[]}
+ */
+export function extractModelAssignmentStrings(input) {
+  /** @type {string[]} */
+  const out = [];
+  const push = (v) => {
+    const s = asString(v).trim();
+    if (s) out.push(s);
+  };
+
+  push(input.model);
+  push(input.subagent_model);
+  push(input.agent_model);
+  push(input.modelId);
+  push(input.model_slug);
+
+  const nested = input.tool_input ?? input.arguments ?? input.toolInput;
+  if (nested && typeof nested === "object" && !Array.isArray(nested)) {
+    const n = /** @type {Record<string, unknown>} */ (nested);
+    push(n.model);
+    push(n.subagent_model);
+    push(n.agent_model);
+    push(n.modelId);
+    push(n.model_slug);
+  }
+
+  return out;
+}
+
+const FABLE_MODEL_RE = /claude-fable-5|fable\s*5|\bfable-5\b/i;
+
+/**
+ * 是否為 Fable 5 相關派工（僅 model slug／顯示名欄位）。
  * @param {Record<string, unknown>} input
  */
 export function shouldBlockFable(input) {
-  const toolName = asString(
-    input.tool_name ?? input.toolName ?? input.tool ?? "",
-  ).toLowerCase();
-  const model = asString(
-    input.model ?? input.subagent_model ?? input.agent_model ?? "",
-  ).toLowerCase();
-  const command = asString(input.command ?? "").toLowerCase();
-  const toolInput = input.tool_input ?? input.arguments ?? input.toolInput;
-  const toolInputText =
-    typeof toolInput === "string"
-      ? toolInput.toLowerCase()
-      : JSON.stringify(toolInput ?? {}).toLowerCase();
-  const blob = `${toolName}\n${model}\n${command}\n${toolInputText}\n${JSON.stringify(input).toLowerCase()}`;
-
-  // slug 與顯示名；避免誤擋「fable」無關英文字時以 claude-fable / fable 5 為準
-  const patterns = [
-    /claude-fable-5/,
-    /fable\s*5/,
-    /\bfable-5\b/,
-  ];
-
-  return patterns.some((re) => re.test(blob));
+  return extractModelAssignmentStrings(input).some((s) =>
+    FABLE_MODEL_RE.test(s),
+  );
 }
 
 function main() {

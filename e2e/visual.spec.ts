@@ -11,6 +11,14 @@ import {
  */
 test.describe.configure({ mode: "serial" });
 
+/** VIS-DEBT-1：baseline 與本機渲染環境脫節；預設 skip，勿盲 --update-snapshots。 */
+const VISUAL_SKIP_REASON =
+  "VIS-DEBT-1：視覺 baseline 未對齊此環境（OS／字型／Chromium）。預設 skip；重產前對齊產生環境後用 npm run test:visual:trusted（VISUAL_BASELINE_TRUSTED=1）。";
+
+test.beforeEach(() => {
+  test.skip(process.env.VISUAL_BASELINE_TRUSTED !== "1", VISUAL_SKIP_REASON);
+});
+
 const VISUAL_PAGES = [
   { id: "home", name: "首頁", path: "/" },
   { id: "stories", name: "全部故事", path: "/stories" },

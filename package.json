@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:visual": "playwright test e2e/visual.spec.ts",
+    "test:visual:trusted": "VISUAL_BASELINE_TRUSTED=1 playwright test e2e/visual.spec.ts",
     "font:subset": "python3 scripts/subset_font.py",
     "sync:apple": "tsx scripts/sync-apple-podcast.ts",
     "transcribe": "tsx scripts/transcribe.ts",

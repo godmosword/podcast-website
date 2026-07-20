@@ -34,6 +34,7 @@
 
 | ID | Commit |
 |----|--------|
+| chore(debt): P0–P2 VIS-DEBT／lint／TODOS hash 慣例＋block-fable 誤擋修復 | 見本 commit |
 | chore(agents): Fable 5 禁令＋`block-fable` hook 硬擋 | `5bf10b8` |
 | feat(landing): 尾頁 meta 安靜化＋頂欄 footer 防透字（`data-nav-solid`） | `6511d08` |
 | [VIS-W0](#視覺升級2026-07-20agent-plan-三審) fix(a11y): StoryCard／LatestHero 對比＋reduced-motion＋觸控高度 | `fd401a7` |
@@ -171,19 +172,15 @@ Plan 經 Codex 工程審 + Grok 對抗審 + Opus 設計審**三審退回修訂**
 
 Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫寫的 $0.2）、卡片塞 `reflection-prompts`（違反 `DESIGN.md:147`，且已用於 `StoryEndScreen`）、新增 stagger（已存在）、全域紙紋 noise（iOS 合成風險 + 污染宇宙地圖）、重生 filter icon（已存在）、獎項 badge（無素材來源）。
 
-### VIS-DEBT-1　視覺 baseline 全面失效　`eng · M · 無`　待做
+### VIS-DEBT-1　視覺 baseline 全面失效　`eng · M · 無`　已隔離
 
-`npm run test:visual` 的 baseline 已與當前渲染環境脫節：抽樣 7 頁（`/stories`、`/for-parents`、`/characters`、`/subscribe`、`/adventures`、`/games`、`/about`）在**乾淨 HEAD 上全部失敗**，含完全未被近期改動觸及的頁。**這個 gate 目前是壞的**，不能當回歸保護。
+`npm run test:visual` 的 baseline 已與當前渲染環境脫節（乾淨 HEAD 上抽樣多頁全 fail）。**預設 skip**（`e2e/visual.spec.ts` 需 `VISUAL_BASELINE_TRUSTED=1` 才跑）；`npm run test:visual:trusted` 為 opt-in 重跑。刻意未盲 `--update-snapshots`。
 
-刻意未跑 `--update-snapshots`：在單一開發機重產會把該機字型渲染烘進 baseline，讓問題被遮蔽而非解決。需先查清 baseline 原始產生環境（OS／字型版本／Chromium build），再決定重產或改用容差更高的比對策略。
+重產／trusted 跑前須對齊 baseline 原始環境：**OS、字型版本、Chromium build**（見上方抽樣說明）。trusted 通過前勿當 CI／agent 硬閘。
 
-### VIS-DEBT-2　smoke 測試比設計決策舊　`eng · S · 無`　待做
+### VIS-DEBT-2　smoke 測試比設計決策舊　`eng · S · 無`　✅ 見本 commit
 
-`e2e/smoke.spec.ts:11` 斷言桌面膠囊主列必須有「主題分類」，但 `SiteNavBar.tsx` 的 `PRIMARY_ORDER` 依 [DESIGN.md](./DESIGN.md) §Landing Hub 刻意排除 `topic`（家長取向、與 `/stories` 篩選重疊）。此測試在乾淨 HEAD 上即失敗，屬**測試未跟上設計決策**，非程式碼缺陷。
-
-修法：把該斷言改為驗證主列四項（全部故事／遊樂園／宇宙地圖／育兒專欄），並另行斷言「主題分類」只存在於行動抽屜。
-
-> 既有技術債（非本輪引入，`npm run lint` 於 HEAD 即紅）：`components/universe/useMapCamera.ts:432` 兩個 unused var。
+`e2e/smoke.spec.ts` 已對齊 [DESIGN.md](./DESIGN.md) §Landing Hub：桌面膠囊主列四項（全部故事／遊樂園／宇宙地圖／育兒專欄）且無「主題分類」；390 開漢堡抽屜可見「主題分類」。
 
 ---
 
@@ -270,7 +267,7 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 | UX-P2-4 | P2 | 待做 | Dudu 鍵盤可及（內層 `tabIndex={0}`） | `DuduCompanion.tsx` | a11y |
 | UX-P2-5 | P2 | 待做 | `reflectionShown` 加 `source: detail \| end-screen` 精準量測 | `progress-store.ts`、`ReflectionPrompt.tsx` | test |
 | UX-P2-6 | P2 | 待做 | **car-adventure 封面重製 4:3**：現 16:9 素材於 4:3 卡框置中裁切可用（太陽／主角車／終點旗完整），重製走生圖 SOP＋人工審圖，對齊其他四款 1448×1086 | `public/games/v2/car-adventure/cover.webp` | 人工審圖 |
-| UX-P2-7 | P2 | 待做 | **`/stories` visual baseline 既存 drift**：乾淨 main 上 `visual：全部故事 390 light` 即 fail（整頁位移，疑內容更新後未刷新；fail-fast 使其餘未跑，可能不止一頁）——目檢 diff 後刷新 baselines | `e2e/visual.spec.ts-snapshots/stories*` | `npm run test:visual` |
+| UX-P2-7 | P2 | 待做（併 VIS-DEBT-1） | **`/stories` visual baseline 既存 drift**：trusted 跑時 `visual：全部故事 390 light` 即 fail——目檢 diff 後對齊環境再刷新 baselines；**預設 `test:visual` 為 skip≠通過** | `e2e/visual.spec.ts-snapshots/stories*` | `npm run test:visual:trusted`（勿用預設 `test:visual` 當通過證明） |
 
 ### Task DAG（建議 `/agent-action` 順序）
 
@@ -341,7 +338,7 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 > **與現役隊列關係：** 本段為**並行軌 B（視覺）**，不取代檔首信任／成長 Top 5（並行軌 A）。交集：D14↔UX-P1-1 觸控、D9↔UX-P2-4 Dudu 鍵盤。
 > **分層：** L0 治理地基 → L1 核心體驗地基 → L2 高價值體驗 → L3 系統化回饋 → L4 品牌亮點（對應工程 P1→P3）。
 > **建議執行順序：** D0 → D2（smoke baseline 先）→ 修正版 D1 → D13 剩餘 → D3 → D14 → D6 ∥ D12 → L2 其餘 → L3 → L4。
-> **驗證矩陣：** `npm test` + `npm run build` + `test:e2e`（axe 零新增 critical/serious）+（D2 落地後）`test:visual` diff；視覺類不進 `npm run check`。新動效僅 transform/opacity（含 stroke-dashoffset），一律 `prefers-reduced-motion` + visibility pause。
+> **驗證矩陣：** `npm test` + `npm run build` + `test:e2e`（axe 零新增 critical/serious）+（D2／VIS-DEBT-1）視覺 diff 用 `npm run test:visual:trusted`（預設 `test:visual`＝skip、exit 0≠通過）；視覺類不進 `npm run check`。新動效僅 transform/opacity（含 stroke-dashoffset），一律 `prefers-reduced-motion` + visibility pause。
 > **紅線：** 宇宙地圖場景固定淺色、不反轉海圖／島 tile；不動 `useMapCamera`／ZoneSheet 核心、landing scroll-snap 骨架；D12 不碰播放／地圖 runtime（OG 動態 route 或 build-time 產圖除外）。
 
 ### 狀態圖例
@@ -363,7 +360,7 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 
 #### D2 視覺回歸安全網　`eng · M · 無`　〔eng+design〕**Phase A** ✅ `1c1ca1b`　**Phase B** ✅ `42a9d38`
 現況：`playwright.config.ts` 僅 **Desktop Chromium**（無 mobile project）。目標：`e2e/visual.spec.ts` + `toHaveScreenshot`——8 主頁 × 390/1280 × light/night ＝ **32 組**完整矩陣。
-**分階：** Phase A **smoke baseline**（5 條黃金路徑 × 1280 light）✅ `e2e/visual.spec.ts` + `npm run test:visual`；Phase B **32 組**（8 主頁 × 390/1280 × light/night）✅ `42a9d38`。前置：字型固定、動畫 freeze、localStorage／theme 固定、等 image decode、寬鬆 `maxDiffPixelRatio`；字型渲染穩定性併入。不進 CI gate；視覺類 agent-action **必跑**回貼 diff。
+**分階：** Phase A／B 曾落地（✅ `42a9d38`），但 **VIS-DEBT-1**：baseline 已脫節 → 預設 `npm run test:visual` **skip**；真跑／重產用 `npm run test:visual:trusted`。不進 CI gate；視覺類 agent-action **必跑 `:trusted` 並回貼 diff**（不可把預設 skip 當通過）。
 
 ---
 
