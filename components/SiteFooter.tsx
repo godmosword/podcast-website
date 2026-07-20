@@ -1,7 +1,6 @@
 import Link from "next/link";
 import ConnectHub from "@/components/ConnectHub";
 import PlaygroundHubBadge from "@/components/games/PlaygroundHubBadge";
-import ThemeModeSwitch from "@/components/ThemeModeSwitch";
 import Doodle from "@/components/decor/Doodle";
 import decor from "@/components/decor/decor.module.css";
 import styles from "./SiteFooter.module.css";
@@ -70,18 +69,23 @@ export default function SiteFooter({
       </div>
 
       <div className={styles.bottomBar}>
-        <div className={styles.aboutRow}>
-          <Link href="/about" className={styles.aboutLink}>
+        <nav className={styles.metaStrip} aria-label="頁尾連結">
+          <Link href="/about" className={styles.metaLink}>
             關於我們
           </Link>
-          <ThemeModeSwitch />
-        </div>
-        <Link href="/studio" className={styles.studioLink}>
-          節目數據
-        </Link>
-        <Link href="/legal" className={styles.legalLink}>
-          使用條款與免責聲明
-        </Link>
+          <span className={styles.metaSep} aria-hidden>
+            ·
+          </span>
+          <Link href="/studio" className={styles.metaLink}>
+            節目數據
+          </Link>
+          <span className={styles.metaSep} aria-hidden>
+            ·
+          </span>
+          <Link href="/legal" className={styles.metaLink}>
+            使用條款與免責聲明
+          </Link>
+        </nav>
         <p className={styles.copyright}>© 車車遊樂園™ · Bonbon &amp; 馬米</p>
         <p className={styles.redistribution}>
           「車車遊樂園」「看圖聽故事」為 Bonbon &amp; 馬米之品牌名稱。

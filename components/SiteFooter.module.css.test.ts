@@ -9,7 +9,7 @@ describe("SiteFooter.module.css touch targets", () => {
     "utf8",
   );
 
-  it("節目數據與使用條款連結共用 min-height 44px", () => {
-    expect(css).toMatch(/\.studioLink,\s*\n\.legalLink\s*\{[\s\S]*?min-height:\s*44px/);
+  it("頁尾 meta 連結 min-height 44px", () => {
+    expect(css).toMatch(/\.metaLink\s*\{[\s\S]*?min-height:\s*44px/);
   });
 });

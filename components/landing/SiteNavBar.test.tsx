@@ -146,6 +146,12 @@ describe("SiteNavBar", () => {
     expect(header?.hasAttribute("data-menu-open")).toBe(false);
   });
 
+  test("首頁預設不標 data-nav-solid（無 #landing-foot 時）", async () => {
+    const view = await renderNavBar();
+    const header = view.container.querySelector("header");
+    expect(header?.hasAttribute("data-nav-solid")).toBe(false);
+  });
+
   test("play route hides site nav bar", async () => {
     vi.resetModules();
     vi.doMock("next/navigation", () => ({

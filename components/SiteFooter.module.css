@@ -52,8 +52,18 @@
 }
 
 .home .bottomBar {
-  margin-top: 12px;
-  gap: 8px;
+  margin-top: 10px;
+  gap: 6px;
+}
+
+.home .copyright {
+  margin-top: 2px;
+  font-size: 0.76rem;
+}
+
+.home .redistribution {
+  font-size: 0.68rem;
+  line-height: 1.45;
 }
 
 .parentNote {
@@ -137,60 +147,43 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
   margin-top: var(--space-page);
 }
 
-/* 關於我們 ＋ 主題切換並排一列 */
-.aboutRow {
+/* 安靜 meta 帶：關於 · 節目數據 · 條款（同視覺權重，非 pill） */
+.metaStrip {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  gap: var(--space-3);
-  margin-bottom: 2px;
+  gap: 4px 6px;
+  max-width: min(100%, 520px);
 }
 
-.aboutLink {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--ink);
-  padding: 8px 18px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, var(--card-2), var(--card));
-  border: 1.5px solid var(--line);
-  box-shadow: var(--shadow-sm);
-  text-decoration: none;
-  transition: transform var(--motion-press);
-}
-
-@media (hover: hover) {
-  .aboutLink:hover {
-    transform: translateY(-2px);
-  }
-}
-
-.studioLink,
-.legalLink {
+.metaLink {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 44px;
-  padding: 10px 14px;
+  padding: 8px 6px;
   font-size: 0.78rem;
   font-weight: 500;
-  color: var(--ink-soft);
+  color: var(--ink);
   text-decoration: none;
-  opacity: 0.9;
 }
 
-.studioLink {
-  opacity: 0.85;
+.metaSep {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  opacity: 0.55;
+  user-select: none;
+  line-height: 1;
 }
 
 @media (hover: hover) {
-  .studioLink:hover,
-  .legalLink:hover {
+  .metaLink:hover {
     text-decoration: underline;
     text-underline-offset: 2px;
   }
@@ -203,15 +196,8 @@
 }
 
 @media (max-width: 480px) {
-  .aboutRow {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .aboutLink {
-    width: 100%;
-    max-width: 280px;
-    text-align: center;
+  .metaStrip {
+    row-gap: 0;
   }
 
   .playgroundLink {
@@ -225,7 +211,6 @@
   font-size: 0.72rem;
   line-height: 1.55;
   color: var(--ink-soft);
-  opacity: 0.9;
 }
 
 .support {

@@ -16,6 +16,22 @@
     box-shadow var(--motion-press);
 }
 
+/* 首頁 landing：預設略提高不透明度，中段捲動少透字；仍保留毛玻璃 */
+:global(html:has([data-landing-root])) .bar {
+  background: color-mix(in srgb, var(--landing-nav-cta-bg) 86%, transparent);
+}
+
+/* footer snap 進視窗：頂欄近不透明，避免白底頁尾 meta 透過 */
+.bar[data-nav-solid="true"] {
+  background: color-mix(in srgb, var(--landing-nav-cta-bg) 96%, transparent);
+}
+
+:global(html:has([data-landing-root])) .bar[data-nav-solid="true"] {
+  background: var(--landing-nav-cta-bg);
+  backdrop-filter: blur(10px) saturate(130%);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+}
+
 .inner {
   max-width: 960px;
   margin: 0 auto;
@@ -436,5 +452,15 @@
 
   :global(html:has([data-landing-root])) .bar .inner {
     pointer-events: auto;
+    background: color-mix(in srgb, var(--landing-nav-cta-bg) 78%, transparent);
+  }
+
+  :global(html:has([data-landing-root])) .bar[data-nav-solid="true"] .inner {
+    background: color-mix(in srgb, var(--landing-nav-cta-bg) 96%, transparent);
+    border-color: rgba(255, 255, 255, 0.85);
+  }
+
+  .bar[data-nav-solid="true"] .inner {
+    background: color-mix(in srgb, var(--landing-nav-cta-bg) 96%, transparent);
   }
 }

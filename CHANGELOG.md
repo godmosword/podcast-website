@@ -27,6 +27,8 @@
 
 ### Changed
 
+- **Landing 尾頁／頂欄協調：** 頁尾移除重複主題切換，改安靜文字 meta（關於 · 節目數據 · 條款）；首頁頂欄在 `#landing-foot` 進入視窗時改近實心底（`data-nav-solid`），避免白底透字；連結對比達 AA。
+
 - **GEO Wave 1（聚合導言 sr-only）：** 首頁 `siteIntro` 與 `/stories`、`/topic`、`/topic/[tag]`、`/vehicles/[vehicle]` 的 answer-first 長導言改為 `sr-only`（SSR HTML 保留）；`/stories` 新增可見 `<h1>全部故事</h1>`；Vitest `lib/geo-visibility-contract.test.tsx`；`verify:geo` 標籤改為 HTML 存在性語意。
 
 - **宇宙地圖點島 sheet 兒童首屏極簡**：拿掉 teaser／actionHint；建造進度、exploreNote、softLinks、規劃說明改收進「給爸爸媽媽」；有故事只留故事卡，車車樂園無預覽時才顯示「全部故事」主 CTA。

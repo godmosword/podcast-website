@@ -9,6 +9,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import SubscribeMenu from "@/components/landing/SubscribeMenu";
 import Icon from "@/components/ui/Icon";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useLandingFooterNavSolid } from "@/hooks/useLandingFooterNavSolid";
 import { isStoryPlayRoute } from "@/lib/is-story-play-route";
 import { visibleSocials } from "@/lib/social";
 import styles from "./SiteNavBar.module.css";
@@ -225,6 +226,9 @@ export default function SiteNavBar() {
 
   useFocusTrap(open, panelRef, { initialFocus: "container" });
 
+  const onLandingHome = pathname === "/";
+  const navSolid = useLandingFooterNavSolid(onLandingHome);
+
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) {
@@ -237,7 +241,11 @@ export default function SiteNavBar() {
   if (playMode) return null;
 
   return (
-    <header className={styles.bar} {...(open ? { "data-menu-open": "true" as const } : {})}>
+    <header
+      className={styles.bar}
+      {...(open ? { "data-menu-open": "true" as const } : {})}
+      {...(navSolid ? { "data-nav-solid": "true" as const } : {})}
+    >
       <div className={styles.inner}>
         <Link href="/" className={styles.brand}>
           {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -15,7 +15,7 @@
   width: 100%;
   max-width: 960px;
   margin: 0 auto;
-  padding: 0 clamp(16px, 4vw, 32px) calc(4px + var(--safe-bottom));
+  padding: 8px clamp(16px, 4vw, 32px) calc(4px + var(--safe-bottom));
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--bg) 82%, var(--surface-game-warm)) 0%,
