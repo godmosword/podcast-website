@@ -17,7 +17,7 @@
 | **場景字幕** | `story.captions` + `captionTimes` | 每翻頁一幕一句（看圖提示／故事大綱） | **否** | 故事頁「故事大綱」HTML、播放器翻頁輔助 |
 | **完整逐字稿** | `data/subtitles/<slug>.json`（`getSubtitles`） | 音檔逐句 `{ t, text }` | **是** | `/story/<slug>/transcript.vtt`、RSS `podcast:transcript`、JSON-LD `MediaObject`（`text/vtt`）、`llms-full`「完整逐字稿」行 |
 
-**程式錨點（單一真相）：** [`lib/transcript.ts`](../lib/transcript.ts) — `hasSceneCaptions`、`hasFullTranscript`／`hasTranscriptVtt`、`buildFullTranscriptVtt`；舊名 `hasVtt`／`buildStoryVtt` 語意已對齊完整逐字稿。
+**程式錨點（單一真相）：** [`lib/transcript.ts`](../lib/transcript.ts) — `hasSceneCaptions`、`hasFullTranscript`／`validateFullTranscript`、`hasTranscriptVtt`、`buildFullTranscriptVtt`；字幕側車由 [`lib/subtitles.ts`](../lib/subtitles.ts) 驗證非空文字、非負且單調時間，build gate 另以 `data/scenes/<slug>.json` 的 `audioDuration` 檢查 cue 不超出音檔；舊名 `hasVtt`／`buildStoryVtt` 語意已對齊完整逐字稿。
 
 **禁止：** 用場景 `captions` 產生 `transcript.vtt`、在 JSON-LD／RSS／頁面文案把場景字幕標成「完整逐字稿」或「逐字字幕」。
 
@@ -110,7 +110,7 @@ type ParentGuide = {
 - 不得用「僅替換集名」的模板句（題目須綁該集具體劇情或角色）
 - 未寫好的集數寧可留白，不得為了衝覆蓋率硬湊填充內容
 
-**覆蓋率：** `episodeFaqCoverage(allSlugs)` 回傳 `{ total, covered, ratio, missingSlugs }`；`verify:geo` 的「Unique episode FAQ coverage」摘要即由此串接（`slugsWithEpisodeUniqueFaq`）。目前 `getStories()` 20 集全數覆蓋；日後新增集數若暫時沒空寫，缺漏 slug 請補進 `TODOS.md` 待議，不得為衝覆蓋率硬湊填充內容。
+**覆蓋率：** `episodeFaqCoverage(allSlugs)` 回傳 `{ total, covered, ratio, missingSlugs }`；`verify:geo` 直接以此檢查故事 slug 與 sidecar slug，缺漏或多餘都會 fail，不是僅供觀察的 warning。目前 `getStories()` 20 集全數覆蓋；日後新增集數若暫時沒空寫，應讓 gate 明確失敗並補齊內容，不得為衝覆蓋率硬湊填充內容。
 
 ## 程式錨點
 

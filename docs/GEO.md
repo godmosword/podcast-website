@@ -26,9 +26,9 @@
 | `public/llms-full.txt` | `llms.txt` 詳細版，含全部故事定義式摘要與角色索引；**prebuild 自動產生**（`npm run generate:llms-full`），不手動編輯 |
 | [`app/feed.xml/route.ts`](../app/feed.xml/route.ts) + [`lib/feed.ts`](../lib/feed.ts) | RSS 2.0 feed；enclosure length 來自建置時 `generate:audio-lengths` → [`data/audio-lengths.json`](../data/audio-lengths.json)（禁止 route runtime 掃 `public/`，避免 NFT 打包超標） |
 | [`lib/json-ld.ts`](../lib/json-ld.ts) | 結構化資料：`podcastSeriesJsonLd`（含 `sameAs` 平台節目頁連結）、`podcastEpisodeJsonLd`（**僅有完整逐字稿**時 `associatedMedia` 追加 `text/vtt` MediaObject，`name: 完整逐字稿`）、`breadcrumbListJsonLd`（五類頁純 JSON-LD，**無可見 UI**，僅供機器解析頁面階層）、`faqPageJsonLd`、`characterCreativeWorkJsonLd` |
-| `/story/<slug>/transcript.vtt`（[`lib/transcript.ts`](../lib/transcript.ts) 的 `hasFullTranscript`／`buildFullTranscriptVtt`，來源 `data/subtitles/<slug>.json`） | **完整音檔逐字稿** WebVTT 側車；**不得**用翻頁 `captions` 冒充。場景字幕僅在故事頁「故事大綱」HTML |
-| [`scripts/verify-geo.ts`](../scripts/verify-geo.ts) + `npm run verify:geo` | build 後護欄：sitemap 涵蓋度、`llms-full.txt` 新鮮度、重點頁 JSON-LD 可解析、`dateModified` 與 sitemap `lastModified` 同源、`noindex` 頁面正確性。已掛在 `npm run check` 尾端 |
-| [`scripts/verify-geo-live.ts`](../scripts/verify-geo-live.ts) + `npm run verify:geo-live` | **部署後**對 live base URL 煙霧測試（robots／sitemap／feed／llms、重點頁 200、JSON-LD）；**不在** `npm run check` 內 |
+| `/story/<slug>/transcript.vtt`（[`lib/transcript.ts`](../lib/transcript.ts) 的 `hasFullTranscript`／`validateFullTranscript`／`buildFullTranscriptVtt`，來源 `data/subtitles/<slug>.json`） | **完整音檔逐字稿** WebVTT 側車；字幕需有非空文字、非負且單調時間，build gate 另檢查 cue 不超過 `data/scenes/<slug>.json` 的音檔秒數；**不得**用翻頁 `captions` 冒充。場景字幕僅在故事頁「故事大綱」HTML |
+| [`scripts/verify-geo.ts`](../scripts/verify-geo.ts) + `npm run verify:geo` | build 後護欄：sitemap 涵蓋度、`llms-full.txt` 新鮮度、全量故事／聚合頁／靜態頁 JSON-LD、`dateModified` 與 sitemap `lastModified` 同源、FAQ／完整逐字稿覆蓋率與字幕時間軸、`noindex` 頁面正確性。已掛在 `npm run check` 尾端 |
+| [`scripts/verify-geo-live.ts`](../scripts/verify-geo-live.ts) + `npm run verify:geo-live` | **部署後**對 live base URL 煙霧測試（robots／sitemap／feed／transcript.vtt／llms、重點頁 200、最新集 FAQ／transcript JSON-LD）；**不在** `npm run check` 內 |
 | [`docs/GEO-BASELINE.md`](./GEO-BASELINE.md) | 每週人工 baseline 記錄表（AI 五題 + GSC／Bing／Vercel 指標）；勿捏造引用結果 |
 | [`scripts/generate-indexnow-key.ts`](../scripts/generate-indexnow-key.ts) | prebuild 依 `INDEXNOW_KEY` env 產生 `public/<key>.txt`（IndexNow key file）；未設定時安靜略過 |
 | [`scripts/submit-indexnow.ts`](../scripts/submit-indexnow.ts) + `npm run submit:indexnow` | sync 後 best-effort 通知 IndexNow（Bing 等），fail-soft（見 §4）；支援 `--dry-run` |

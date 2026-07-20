@@ -25,6 +25,7 @@ import {
   type Story,
 } from "../data/content";
 import { storyDateModified } from "../data/story-dates";
+import { episodeFaqCoverage, listEpisodeFaqSlugs } from "../data/episode-faqs";
 import { podcastSeriesJsonLd } from "../lib/json-ld";
 import {
   AI_RETRIEVAL_CRAWLERS,
@@ -32,14 +33,14 @@ import {
   verifyRobotsPolicy,
 } from "../lib/robots-policy";
 import { getSiteUrl } from "../lib/site-url";
-import { slugsWithEpisodeUniqueFaq, storyDefinitionSummary } from "../lib/story-geo";
+import { storyDefinitionSummary } from "../lib/story-geo";
 import { storiesCatalogSummary } from "../lib/stories-geo";
 import { storyAudioPath } from "../lib/story-utils";
 import { topicDefinitionSummary } from "../lib/topic-geo";
 import { vehicleDefinitionSummary } from "../lib/vehicle-geo";
 import {
-  hasFullTranscript,
   hasSceneCaptions,
+  validateFullTranscript,
 } from "../lib/transcript";
 
 const APP_DIR = join(process.cwd(), ".next/server/app");
@@ -83,10 +84,6 @@ function pass(label: string, detail?: string): void {
 
 function fail(label: string, detail: string): void {
   results.push({ ok: false, label, detail });
-}
-
-function warn(label: string, detail: string): void {
-  results.push({ ok: true, warn: true, label, detail });
 }
 
 function skip(label: string, reason: string): void {
@@ -206,6 +203,21 @@ function readHtml(relativePath: string): string | null {
   const path = join(APP_DIR, relativePath);
   if (!existsSync(path)) return null;
   return readFileSync(path, "utf-8");
+}
+
+/** 以場景檔的實際秒數驗證字幕 cue 不會落在音檔之外。 */
+function sceneAudioDuration(slug: string): number | undefined {
+  const path = join(process.cwd(), "data", "scenes", `${slug}.json`);
+  if (!existsSync(path)) return undefined;
+  try {
+    const value = (JSON.parse(readFileSync(path, "utf-8")) as { audioDuration?: unknown })
+      .audioDuration;
+    return typeof value === "number" && Number.isFinite(value) && value > 0
+      ? value
+      : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function extractCanonicalHref(html: string): string | null {
@@ -352,7 +364,10 @@ function checkStoryPage(
     fail(`story/${story.slug} definitionSummary`, "可見 answer-first 摘要未出現在 HTML");
   }
 
-  const fullTranscript = hasFullTranscript(story);
+  const transcriptValidation = validateFullTranscript(story, {
+    audioDuration: sceneAudioDuration(story.slug),
+  });
+  const fullTranscript = transcriptValidation.ok;
   const sceneCaptions = hasSceneCaptions(story);
   const hasTranscriptLd = episodeHasTranscriptMedia(episode);
   const vttPath = `/story/${story.slug}/transcript.vtt`;
@@ -380,6 +395,13 @@ function checkStoryPage(
     }
   } else {
     coverage.missingFullTranscriptSlugs.push(story.slug);
+    const validationDetail = transcriptValidation.issues
+      .map((issue) => issue.message)
+      .join("；");
+    fail(
+      `story/${story.slug} 完整逐字稿覆蓋`,
+      validationDetail || "字幕側車未通過完整性驗證",
+    );
     if (hasTranscriptLd) {
       fail(
         `story/${story.slug} transcript 契約`,
@@ -428,6 +450,8 @@ function checkCollectionPage(options: {
     return false;
   }
 
+  const resultStart = results.length;
+
   const sitemapUrl = [...options.sitemapUrls].find((u) => u.endsWith(options.sitemapSuffix));
   if (!sitemapUrl) {
     fail(`${options.label} sitemap`, `缺少 URL 結尾 ${options.sitemapSuffix}`);
@@ -464,7 +488,7 @@ function checkCollectionPage(options: {
     fail(`${options.label} 故事數`, `HTML 缺「${countLabel}」`);
   }
 
-  return true;
+  return !results.slice(resultStart).some((result) => !result.ok);
 }
 
 type StaticPageSpec = {
@@ -643,6 +667,29 @@ function checkHasNoindex(label: string, relativePath: string): void {
   }
 }
 
+/** FAQ 覆蓋率是目前內容契約，不是僅供觀察的統計。 */
+function checkEpisodeFaqCoverage(stories: Story[]): void {
+  const storySlugs = stories.map((story) => story.slug);
+  const report = episodeFaqCoverage(storySlugs);
+  const extraSlugs = listEpisodeFaqSlugs().filter((slug) => !storySlugs.includes(slug));
+
+  coverage.uniqueFaqCoverage = report.covered;
+  coverage.missingUniqueFaqSlugs = report.missingSlugs;
+
+  if (report.missingSlugs.length > 0) {
+    fail(
+      "Unique episode FAQ coverage",
+      `缺少：${report.missingSlugs.join(", ")}`,
+    );
+  } else {
+    pass("Unique episode FAQ coverage", `${report.covered}/${report.total}`);
+  }
+
+  if (extraSlugs.length > 0) {
+    fail("episodeFaq sidecar slug 對齊故事目錄", `多餘：${extraSlugs.join(", ")}`);
+  }
+}
+
 /** `/stories` 含 searchParams，build 常無獨立 prerender HTML；改驗資料層契約（對齊 generateMetadata）。 */
 function checkStoriesListingPage(stories: Story[]): void {
   const html = readHtml("stories.html");
@@ -677,13 +724,7 @@ function printDetailReport(): void {
   }
 }
 
-function printCoverageSummary(stories: Story[]): void {
-  const uniqueSlugs = slugsWithEpisodeUniqueFaq(stories);
-  coverage.uniqueFaqCoverage = uniqueSlugs.length;
-  coverage.missingUniqueFaqSlugs = stories
-    .map((s) => s.slug)
-    .filter((slug) => !uniqueSlugs.includes(slug));
-
+function printCoverageSummary(): void {
   console.log("\n=== GEO 覆蓋率摘要 ===");
   console.log(`Stories checked: ${coverage.storiesChecked}/${coverage.storiesTotal}`);
   console.log(
@@ -706,27 +747,12 @@ function printCoverageSummary(stories: Story[]): void {
   );
 
   if (coverage.missingFullTranscriptSlugs.length > 0) {
-    const preview = coverage.missingFullTranscriptSlugs.slice(0, 12).join(", ");
-    const more =
-      coverage.missingFullTranscriptSlugs.length > 12
-        ? ` …等 ${coverage.missingFullTranscriptSlugs.length} 篇`
-        : "";
-    warn(
-      "完整逐字稿覆蓋（非失敗）",
-      `尚缺 subtitles 側車：${preview}${more}`,
+    console.log(
+      `Missing full transcripts: ${coverage.missingFullTranscriptSlugs.join(", ")}`,
     );
   }
-
-  if (uniqueSlugs.length === 0) {
-    warn(
-      "獨特 FAQ 覆蓋（非失敗；未滿不擋整體）",
-      "目前無 episode FAQ sidecar；全部 slug 待 T3",
-    );
-  } else if (coverage.missingUniqueFaqSlugs.length > 0) {
-    warn(
-      "獨特 FAQ 待補（非失敗）",
-      coverage.missingUniqueFaqSlugs.slice(0, 12).join(", "),
-    );
+  if (coverage.missingUniqueFaqSlugs.length > 0) {
+    console.log(`Missing episode FAQs: ${coverage.missingUniqueFaqSlugs.join(", ")}`);
   }
 }
 
@@ -751,6 +777,7 @@ async function main(): Promise<void> {
 
   await checkSitemap(stories, siteUrl);
   checkLlmsFullTxt(latestStory.slug);
+  checkEpisodeFaqCoverage(stories);
 
   for (const story of stories) {
     checkStoryPage(story, sitemapByStory);
@@ -835,7 +862,7 @@ async function main(): Promise<void> {
   checkIndexNowKeyFile();
 
   printDetailReport();
-  printCoverageSummary(stories);
+  printCoverageSummary();
 
   const failures = results.filter((r) => !r.ok);
   if (failures.length > 0) {

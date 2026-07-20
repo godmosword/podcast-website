@@ -10,6 +10,7 @@
  */
 
 import { allVehicles, getStories, storiesByNewest } from "../data/content";
+import { getSubtitles } from "../lib/subtitles";
 import {
   contentTypeMatches,
   extractCanonicalHref,
@@ -211,6 +212,7 @@ async function main(): Promise<void> {
   const topicPath = "/topic";
   const vehiclePath = `/vehicles/${encodeURIComponent(vehicle)}`;
   const storyPath = `/story/${latest.slug}`;
+  const transcriptPath = `${storyPath}/transcript.vtt`;
 
   console.log(`=== 車車遊樂園 · GEO Live 煙霧測試 ===\nbase: ${baseUrl}\n`);
 
@@ -265,11 +267,41 @@ async function main(): Promise<void> {
     }
   }
 
-  await checkAsset(baseUrl, {
+  const feedBody = await checkAsset(baseUrl, {
     label: "GET /feed.xml",
     path: "/feed.xml",
     contentType: /^(application\/rss\+xml|application\/xml|text\/xml)/i,
   });
+
+  if (feedBody) {
+    const feedTranscriptPrefix = `<podcast:transcript url="${baseUrl}${transcriptPath}"`;
+    if (feedBody.includes(feedTranscriptPrefix)) {
+      pass("RSS 含最新一集 podcast:transcript", latest.slug);
+    } else {
+      fail("RSS 含最新一集 podcast:transcript", `找不到 ${transcriptPath}`);
+    }
+  }
+
+  const transcriptBody = await checkAsset(baseUrl, {
+    label: "GET 最新單集 transcript.vtt",
+    path: transcriptPath,
+    contentType: /^text\/vtt/i,
+  });
+
+  if (transcriptBody) {
+    if (!transcriptBody.startsWith("WEBVTT")) {
+      fail("最新單集 transcript.vtt 格式", "內容不是 WEBVTT");
+    } else {
+      const firstText = getSubtitles(latest.slug)?.[0]?.text;
+      if (!firstText) {
+        fail("最新單集 transcript.vtt 內容", "本地字幕側車缺少第一句，無法驗證 live cue");
+      } else if (!transcriptBody.includes(firstText)) {
+        fail("最新單集 transcript.vtt 內容", "缺少本地字幕側車的第一句");
+      } else {
+        pass("最新單集 transcript.vtt 內容", `${latest.slug} cue 可讀`);
+      }
+    }
+  }
 
   await checkAsset(baseUrl, {
     label: "GET /llms.txt",
@@ -301,6 +333,35 @@ async function main(): Promise<void> {
       fail("最新單集含 PodcastEpisode", storyPath);
     } else {
       pass("最新單集含 PodcastEpisode");
+      const media = Array.isArray(episode.associatedMedia)
+        ? episode.associatedMedia
+        : episode.associatedMedia
+          ? [episode.associatedMedia]
+          : [];
+      const transcriptMedia = media.find(
+        (item) =>
+          item &&
+          typeof item === "object" &&
+          (item as Record<string, unknown>).encodingFormat === "text/vtt",
+      ) as Record<string, unknown> | undefined;
+      if (transcriptMedia?.contentUrl === `${baseUrl}${transcriptPath}`) {
+        pass("最新單集 JSON-LD transcript MediaObject", latest.slug);
+      } else {
+        fail(
+          "最新單集 JSON-LD transcript MediaObject",
+          `contentUrl 應為 ${baseUrl}${transcriptPath}`,
+        );
+      }
+    }
+    const faq = types.find((t) => t["@type"] === "FAQPage");
+    if (!faq) {
+      fail("最新單集含 FAQPage", latest.slug);
+    } else if (!latest.episodeFaq) {
+      fail("最新單集含 episodeFaq 可見問題", "本地最新故事缺少 episodeFaq");
+    } else if (!storyHtml.includes(latest.episodeFaq.question)) {
+      fail("最新單集含 episodeFaq 可見問題", latest.episodeFaq.question);
+    } else {
+      pass("最新單集含 episodeFaq 可見問題", latest.slug);
     }
     const canonical = extractCanonicalHref(storyHtml);
     const expectedSuffix = storyPath;
@@ -316,6 +377,16 @@ async function main(): Promise<void> {
 
   const topicHtml = await checkHtmlPage(baseUrl, topicPath, "GET 主題索引頁");
   if (topicHtml) checkJsonLdParseable(topicHtml, "主題索引頁 JSON-LD 可解析");
+
+  const storiesHtml = await checkHtmlPage(baseUrl, "/stories", "GET 全部故事頁");
+  if (storiesHtml) {
+    const expectedCatalogNeedle = `全部 ${getStories().length} 則看圖聽故事`;
+    if (storiesHtml.includes(expectedCatalogNeedle)) {
+      pass("全部故事頁含 catalog summary", expectedCatalogNeedle);
+    } else {
+      fail("全部故事頁含 catalog summary", `找不到「${expectedCatalogNeedle}」`);
+    }
+  }
 
   const vehicleHtml = await checkHtmlPage(baseUrl, vehiclePath, "GET 車種頁（抽樣）");
   if (vehicleHtml) checkJsonLdParseable(vehicleHtml, "車種頁 JSON-LD 可解析");

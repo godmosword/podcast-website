@@ -691,7 +691,7 @@ EP1–7 已用 `large-v3` 轉錄 + 自動簡轉繁（`data/subtitles/*.json`）�
 ### SEO：主題與系列頁擴充　`P2 · S–M · 無`　〔growth〕
 延續 `/topic/[tag]`，每主題補一句家長向導語（非僅列表）、補站內連結結構。家長依「勇氣、睡前、安全」搜尋，主題頁是長尾入口。`generateStaticParams` 與 metadata 已具備。
 
-### GEO 營運基礎（crawler 政策／IndexNow／逐字稿／verify:geo）　`P2 · M · 無`　〔eng+growth〕　de2774b
+### GEO 營運基礎（crawler 政策／IndexNow／逐字稿／verify:geo）　`P2 · M · 無`　〔eng+growth〕　de2774b／165b44e
 本輪已實作：`app/robots.ts` AI 檢索型 crawler（`OAI-SearchBot`／`ChatGPT-User`／`Claude-SearchBot`／`Claude-User`／`PerplexityBot`／`Perplexity-User`）放行、訓練型（`GPTBot`／`ClaudeBot`／`Google-Extended`／`Applebot-Extended`／`CCBot`／`Bytespider`／`meta-externalagent`）拒絕；`lib/json-ld.ts` 補 `PodcastSeries.sameAs`、`breadcrumbListJsonLd`（純 JSON-LD，無可見 UI）、`PodcastEpisode.associatedMedia` 逐字稿 MediaObject；`lib/feed.ts`／`app/feed.xml/route.ts` 補 RSS enclosure length（建置時 `generate:audio-lengths` → `data/audio-lengths.json`，route 禁止 runtime 掃 public/）；新增 `scripts/generate-indexnow-key.ts`（prebuild）＋ `scripts/submit-indexnow.ts`（sync 後 best-effort、fail-soft、`--dry-run`）＋ `.github/workflows/sync-apple-podcast.yml` 新步驟；新增 `scripts/verify-geo.ts`（`npm run verify:geo`，已入 `npm run check` 尾端）。完整營運手冊見 [docs/GEO.md](./docs/GEO.md)。
 **剩餘（使用者手動）：** 設定 `INDEXNOW_KEY`（GitHub Secret + Vercel env，須同值，見 docs/GEO.md §3）；Google Search Console／Bing Webmaster 提交（見 docs/GEO.md §6）；每週量測記錄（GSC／Bing Webmaster／Vercel logs／AI prompt baseline 五題，見 [docs/GEO-BASELINE.md](./docs/GEO-BASELINE.md)）；部署後可跑 `npm run verify:geo-live -- --base-url=…`（見 docs/GEO.md §7）。
 
@@ -699,7 +699,7 @@ EP1–7 已用 `large-v3` 轉錄 + 自動簡轉繁（`data/subtitles/*.json`）�
 ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–10MB，總 50MB+）。睡前=手機弱網，載入慢。指令見 README；壓後本機聽確認音質再覆蓋。
 
 ### ~~每集專屬 FAQ（episodeFaq sidecar）~~　`P1 · M · 無`　〔content+eng〕 ✅ `165b44e`
-新增 `data/episode-faqs.ts` sidecar：每集 1 題緊扣該集劇情／主題的 FAQ（非模板換名），`data/content.ts` `enrichStory()` 合併進 `Story.episodeFaq`；`lib/story-geo.ts` `storyFaqs()` 有值時放最前面，其餘 3 題通用 FAQ 順序不變（可見區＝FAQPage JSON-LD 同一份資料）；有則附 1 行到 `llms-full`。契約補進 [docs/GEO-CONTENT-CONTRACT.md](./docs/GEO-CONTENT-CONTRACT.md#episodefaq已上線)。目前 `getStories()` 20 集**全數覆蓋**（`episodeFaqCoverage()`／`verify:geo` 摘要「Unique episode FAQ coverage」皆 20/20）；不得逐字重複 `familyActivity`／`reflectionPrompt`／`parentGuide`（`hasDuplicateGuideText` 迴歸測試）。測試：`data/episode-faqs.test.ts`、`lib/story-geo.test.ts`、`scripts/generate-llms-full.test.ts`。**待補齊：** 無（全數覆蓋）；新增集數時若暫無空寫優質題目，寧可留白，缺漏 slug 補在本行下次更新。
+新增 `data/episode-faqs.ts` sidecar：每集 1 題緊扣該集劇情／主題的 FAQ（非模板換名），`data/content.ts` `enrichStory()` 合併進 `Story.episodeFaq`；`lib/story-geo.ts` `storyFaqs()` 有值時放最前面，其餘 3 題通用 FAQ 順序不變（可見區＝FAQPage JSON-LD 同一份資料）；有則附 1 行到 `llms-full`。契約補進 [docs/GEO-CONTENT-CONTRACT.md](./docs/GEO-CONTENT-CONTRACT.md#episodefaq已上線)。目前 `getStories()` 20 集**全數覆蓋**（`episodeFaqCoverage()`／`verify:geo` 摘要「Unique episode FAQ coverage」皆 20/20）；`verify:geo` 對 FAQ 缺漏／多餘 slug 會 fail，不得逐字重複 `familyActivity`／`reflectionPrompt`／`parentGuide`（`hasDuplicateGuideText` 迴歸測試）。測試：`data/episode-faqs.test.ts`、`lib/story-geo.test.ts`、`scripts/generate-llms-full.test.ts`。**待補齊：** 無（全數覆蓋）；新增集數時若暫無空寫優質題目，寧可留白，缺漏 slug 補在本行下次更新。
 
 ## 待議：主持人／創作者實體強化
 

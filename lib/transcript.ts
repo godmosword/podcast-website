@@ -1,5 +1,11 @@
 import type { Story } from "@/data/content";
-import { getSubtitles, type Subtitle } from "@/lib/subtitles";
+import {
+  getSubtitles,
+  validateSubtitleFile,
+  type Subtitle,
+  type SubtitleFileValidation,
+  type SubtitleValidationOptions,
+} from "@/lib/subtitles";
 
 /** 場景字幕（翻頁摘要） vs 音檔完整逐字稿（subtitles 側車） */
 export type TranscriptKind = "scene-captions" | "full-transcript";
@@ -14,10 +20,20 @@ function subtitlesForSlug(slug: string): Subtitle[] | null {
   return subs && subs.length > 0 ? subs : null;
 }
 
-/** 有 `data/subtitles/<slug>.json` 且非空 → 可視為完整逐字稿 */
-export function hasFullTranscript(storyOrSlug: Story | string): boolean {
+export type FullTranscriptValidationOptions = SubtitleValidationOptions;
+
+/** 驗證 `data/subtitles/<slug>.json` 是否足以作為完整逐字稿來源。 */
+export function validateFullTranscript(
+  storyOrSlug: Story | string,
+  options: FullTranscriptValidationOptions = {},
+): SubtitleFileValidation {
   const slug = typeof storyOrSlug === "string" ? storyOrSlug : storyOrSlug.slug;
-  return subtitlesForSlug(slug) !== null;
+  return validateSubtitleFile(slug, options);
+}
+
+/** 有有效且非空的 `data/subtitles/<slug>.json` → 可視為完整逐字稿。 */
+export function hasFullTranscript(storyOrSlug: Story | string): boolean {
+  return validateFullTranscript(storyOrSlug).ok;
 }
 
 /** 可產出 `/story/<slug>/transcript.vtt`（來自 subtitles，非場景 captions） */

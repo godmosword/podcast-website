@@ -94,10 +94,9 @@ describe("episode-faqs sidecar", () => {
       const coverage = episodeFaqCoverage(allSlugs);
 
       expect(coverage.total).toBe(allSlugs.length);
-      expect(coverage.covered).toBeGreaterThan(0);
-      expect(coverage.covered + coverage.missingSlugs.length).toBe(
-        coverage.total,
-      );
+      expect(coverage.covered).toBe(allSlugs.length);
+      expect(coverage.missingSlugs).toEqual([]);
+      expect(new Set(listEpisodeFaqSlugs())).toEqual(new Set(allSlugs));
     });
   });
 });

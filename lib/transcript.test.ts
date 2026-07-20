@@ -9,7 +9,9 @@ import {
   hasTranscriptVtt,
   hasVtt,
   llmsTranscriptBullet,
+  validateFullTranscript,
 } from "./transcript";
+import { validateSubtitleSegments } from "./subtitles";
 
 function story(partial: Partial<Story> & Pick<Story, "slug">): Story {
   return {
@@ -68,6 +70,33 @@ describe("hasFullTranscript", () => {
     expect(hasTranscriptVtt(withSubs)).toBe(true);
     expect(hasTranscript(withoutSubs)).toBe(false);
     expect(hasVtt(withoutSubs)).toBe(false);
+  });
+});
+
+describe("validateSubtitleSegments", () => {
+  it("拒絕空字幕、空文字、負數與倒退時間", () => {
+    const issues = validateSubtitleSegments([
+      { t: 2, text: "第一句" },
+      { t: 1, text: "第二句" },
+      { t: 3, text: "   " },
+      { t: -1, text: "負數" },
+    ]);
+
+    expect(issues.map((issue) => issue.code)).toEqual([
+      "non-monotonic-time",
+      "empty-text",
+      "negative-time",
+      "non-monotonic-time",
+    ]);
+  });
+
+  it("拒絕超過音檔長度的 cue，並接受現有有效側車", () => {
+    expect(
+      validateSubtitleSegments([{ t: 11, text: "太晚" }], { audioDuration: 10 }),
+    ).toEqual([
+      expect.objectContaining({ code: "after-audio" }),
+    ]);
+    expect(validateFullTranscript("ep-1", { audioDuration: 395 }).ok).toBe(true);
   });
 });
 
