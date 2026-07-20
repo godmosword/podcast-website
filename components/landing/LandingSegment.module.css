@@ -139,16 +139,6 @@
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.38);
 }
 
-.siteIntro {
-  margin: 0.35em 0 0;
-  max-width: 36em;
-  font-size: clamp(0.82rem, 2.2vw, 0.94rem);
-  font-weight: 600;
-  line-height: 1.55;
-  opacity: 0.88;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.42);
-}
-
 .ctaRow {
   display: flex;
   flex-wrap: wrap;

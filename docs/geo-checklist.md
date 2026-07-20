@@ -16,6 +16,7 @@
 
 ## 2. Schema 與 HTML
 
+- [ ] 聚合頁（`/` 首段、`/stories`、`/topic`、`/topic/<tag>`、`/vehicles/<vehicle>`）的 answer-first 長導言在 DOM 仍完整（多為 `sr-only`），view-source 可見；**單集頁「本集介紹」一段仍預設可見**（Wave 2 另議）。
 - [ ] Rich Results Test：`/for-parents` FAQPage 無 error。
 - [ ] Rich Results Test：任選 1 個 `/topic/<tag>` 與 1 個 `/vehicles/<vehicle>` FAQPage 無 error。
 - [ ] Schema.org Validator：首頁 / `/stories` PodcastSeries 無 error。

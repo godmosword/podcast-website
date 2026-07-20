@@ -6,6 +6,7 @@ import JsonLd from "@/components/JsonLd";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import { podcastSeriesJsonLd } from "@/lib/json-ld";
+import { StoriesIndexHeader } from "@/components/stories/StoriesIndexHeader";
 import { storiesCatalogSummary } from "@/lib/stories-geo";
 import styles from "./page.module.css";
 
@@ -64,7 +65,7 @@ export default async function StoriesPage({ searchParams }: StoriesPageProps) {
     <main className={styles.main}>
       <JsonLd data={podcastSeriesJsonLd()} />
       <SiteHeader />
-      <p className={styles.lede}>{lede}</p>
+      <StoriesIndexHeader lede={lede} titleClassName={styles.title} />
       <HomeSectionList props={sectionProps} />
       <SiteFooter layout="home" />
     </main>

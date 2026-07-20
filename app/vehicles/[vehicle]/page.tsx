@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { allVehicles, getStoriesByVehicle } from "@/data/content";
 import { breadcrumbListJsonLd, faqPageJsonLd } from "@/lib/json-ld";
 import { collectionModifiedDate } from "@/lib/page-freshness";
+import { GeoSrOnlyLede } from "@/lib/geo-sr-only-lede";
 import { vehicleDefinitionSummary, vehicleFaqs } from "@/lib/vehicle-geo";
 import JsonLd from "@/components/JsonLd";
 import SiteFooter from "@/components/SiteFooter";
@@ -72,7 +73,7 @@ export default async function VehiclePage({
       </Link>
 
       <h1 className={styles.title}>{vehicle}故事屋</h1>
-      <p className={styles.lede}>{lede}</p>
+      <GeoSrOnlyLede>{lede}</GeoSrOnlyLede>
       <p className={styles.subtitle}>{stories.length} 則故事等你來聽</p>
 
       <ul className={styles.list}>

@@ -25,6 +25,16 @@
   }
 }
 
+.title {
+  font-family: var(--font-baloo), var(--font-huninn), "PingFang TC",
+    "Microsoft JhengHei", sans-serif;
+  font-size: 1.85rem;
+  font-weight: 800;
+  margin: 0 0 var(--space-6);
+  line-height: 1.2;
+  color: var(--ink);
+}
+
 .lede {
   margin: 0 0 var(--space-6);
   font-size: 0.98rem;

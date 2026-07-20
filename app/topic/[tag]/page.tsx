@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { allTags, getStoriesByTag } from "@/data/content";
 import { breadcrumbListJsonLd, faqPageJsonLd } from "@/lib/json-ld";
 import { collectionModifiedDate } from "@/lib/page-freshness";
+import { GeoSrOnlyLede } from "@/lib/geo-sr-only-lede";
 import { topicDefinitionSummary, topicFaqs } from "@/lib/topic-geo";
 import JsonLd from "@/components/JsonLd";
 import SiteFooter from "@/components/SiteFooter";
@@ -72,7 +73,7 @@ export default async function TopicPage({
       </Link>
 
       <h1 className={styles.title}>{tag}主題故事</h1>
-      <p className={styles.lede}>{lede}</p>
+      <GeoSrOnlyLede>{lede}</GeoSrOnlyLede>
       <p className={styles.subtitle}>{stories.length} 則故事等你來聽</p>
 
       <ul className={styles.list}>

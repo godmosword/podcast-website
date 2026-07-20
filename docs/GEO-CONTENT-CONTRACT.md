@@ -7,7 +7,7 @@
 ## 原則
 
 1. **一個意圖、一個欄位、一個主通路** — 同一句親子提問不要同時寫進 `familyActivity` 與 `parentGuide`。
-2. **可見層短、機器層全** — 頁面預設少字；完整語意走 JSON-LD、`llms-full`、VTT、RSS（見 `docs/geo-checklist.md`）。
+2. **可見層短、機器層全** — 頁面預設少字；完整語意走 JSON-LD、`llms-full`、VTT、RSS（見 `docs/geo-checklist.md`）。首頁與故事／主題／車種**聚合索引**的 answer-first 長導言以 `sr-only` 保留 SSR HTML；**單集 `definitionSummary`（本集介紹）仍預設可見**。
 3. **互動與 SEO 分離** — 播放器／結束畫面的互動提示，不另塞一題進 FAQPage JSON-LD。
 
 ## 場景字幕 vs 完整逐字稿（P0 契約）
@@ -126,6 +126,7 @@ type ParentGuide = {
 
 ## 變更紀錄
 
+- **2026-07-20（Wave 1）：** 聚合頁 GEO 導言改 `sr-only`（SSR 保留）；單集本集介紹維持可見。
 - **2026-07-20（GEO P1）：** 新增 `episodeFaq` sidecar（每集專屬 1 題 FAQ），併入 `storyFaqs()` 第一題。
 - **2026-07-20（GEO P0）：** 場景字幕 vs 完整逐字稿契約；`transcript.vtt`／RSS／JSON-LD 僅認 `subtitles` 側車。
 - **2026-07-10（GEO-P3）：** 初版契約；`parentGuide` 仍待 REUSE-2 實作。

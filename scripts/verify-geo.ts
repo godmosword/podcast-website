@@ -37,6 +37,7 @@ import { storyDefinitionSummary } from "../lib/story-geo";
 import { storiesCatalogSummary } from "../lib/stories-geo";
 import { storyAudioPath } from "../lib/story-utils";
 import { topicDefinitionSummary } from "../lib/topic-geo";
+import { topicIndexDefinitionSummary } from "../lib/topic-index-geo";
 import { vehicleDefinitionSummary } from "../lib/vehicle-geo";
 import {
   hasSceneCaptions,
@@ -361,7 +362,7 @@ function checkStoryPage(
 
   const definitionSummary = storyDefinitionSummary(story);
   if (!visibleTextPresent(html, definitionSummary)) {
-    fail(`story/${story.slug} definitionSummary`, "可見 answer-first 摘要未出現在 HTML");
+    fail(`story/${story.slug} definitionSummary`, "HTML 缺 answer-first 摘要");
   }
 
   const transcriptValidation = validateFullTranscript(story, {
@@ -481,7 +482,7 @@ function checkCollectionPage(options: {
     fail(`${options.label} 可見標題`, `HTML 缺「${options.expectedTitleFragment}」`);
   }
   if (!visibleTextPresent(html, options.expectedDescriptionFragment, 16)) {
-    fail(`${options.label} 可見描述`, "HTML 缺 definition summary／lede");
+    fail(`${options.label} HTML 描述`, "HTML 缺 definition summary／lede");
   }
   const countLabel = `${options.expectedStoryCount} 則故事`;
   if (!htmlContainsStoryCount(html, options.expectedStoryCount)) {
@@ -690,8 +691,13 @@ function checkEpisodeFaqCoverage(stories: Story[]): void {
   }
 }
 
-/** `/stories` 含 searchParams，build 常無獨立 prerender HTML；改驗資料層契約（對齊 generateMetadata）。 */
+/** `/stories` 含 searchParams，build 常無獨立 prerender HTML；改驗資料層契約（對齊 generateMetadata）。verify:geo 無 stories.html 時不驗證 body DOM。 */
 function checkStoriesListingPage(stories: Story[]): void {
+  const tags = allTags();
+  const vehicles = allVehicles();
+  const description = storiesCatalogSummary(stories, tags.length, vehicles.length);
+  const descriptionNeedle = Array.from(description.trim()).slice(0, 24).join("");
+
   const html = readHtml("stories.html");
   if (html !== null) {
     checkStaticPage({
@@ -699,17 +705,12 @@ function checkStoriesListingPage(stories: Story[]): void {
       relativePath: "stories.html",
       canonicalPath: "/stories",
       titleNeedle: "全部故事",
-      descriptionNeedle: "故事",
+      descriptionNeedle,
       requireJsonLd: true,
     });
     return;
   }
 
-  const description = storiesCatalogSummary(
-    stories,
-    allTags().length,
-    allVehicles().length,
-  );
   pass("/stories metadata canonical", "/stories（契約，見 app/stories/page）");
   pass("/stories catalog summary", `${Array.from(description).length} 字`);
   skip("/stories prerender HTML", "動態 searchParams 路由，無 stories.html");
@@ -829,11 +830,20 @@ async function main(): Promise<void> {
     requireJsonLd: true,
   });
   checkStoriesListingPage(stories);
+  const topicThemes = tags.map((tag) => ({
+    tag,
+    count: getStoriesByTag(tag).length,
+  }));
+  const topicIndexDescription = topicIndexDefinitionSummary(topicThemes);
+  const topicIndexNeedle = Array.from(topicIndexDescription.trim())
+    .slice(0, 24)
+    .join("");
   checkStaticPage({
     label: "/topic",
     relativePath: "topic.html",
     canonicalPath: "/topic",
     titleNeedle: "主題",
+    descriptionNeedle: topicIndexNeedle,
   });
   checkStaticPage({
     label: "/for-parents",

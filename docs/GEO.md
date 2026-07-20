@@ -201,6 +201,6 @@ npm run submit:indexnow -- --dry-run
 
 - [`GEO-BASELINE.md`](./GEO-BASELINE.md) — 每週 AI 引用與搜尋平台 baseline 記錄（人工填寫）
 - [`geo-checklist.md`](./geo-checklist.md) — 上線後人工檢查清單（Rich Results、Schema Validator、單集頁可見字數量測、AI 引用實測 prompt、baseline 記錄表）
-- [`GEO-CONTENT-CONTRACT.md`](./GEO-CONTENT-CONTRACT.md) — 內容欄位邊界（可見摘要 vs `<details>` 深挖內容）
+- [`GEO-CONTENT-CONTRACT.md`](./GEO-CONTENT-CONTRACT.md) — 內容欄位邊界（可見摘要 vs `<details>` 深挖內容；聚合頁 `sr-only` 導言 vs 單集可見本集介紹）
 - [`AGENT-DOMAIN.md`](./AGENT-DOMAIN.md) — 本專案 Bootstrap、紅線、驗證矩陣
 - [`EPISODE-WORKFLOW.md`](./EPISODE-WORKFLOW.md) — 單集流程（第 8 步：SoundOn show notes 回鏈，另一個站外 GEO 訊號來源）

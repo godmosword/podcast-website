@@ -62,6 +62,11 @@ describe("LandingSegment", () => {
     expect(html).toContain("聽最新一集");
     expect(html).toMatch(/href="\/story\/[^"]+\/play\?autoplay=1&amp;from=landing"/);
     expect(html).toContain(intro);
+    expect(html).toMatch(
+      new RegExp(
+        `<p class="sr-only">[\\s\\S]*${intro.slice(0, 24).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}[\\s\\S]*</p>`,
+      ),
+    );
     expect(html).toContain("5–10 分鐘");
   });
 

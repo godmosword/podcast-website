@@ -3,6 +3,7 @@ import Link from "next/link";
 import { allTags, getStoriesByTag } from "@/data/content";
 import { storyCoverPath } from "@/lib/story-utils";
 import { topicVisualFor } from "@/lib/topic-visuals";
+import { GeoSrOnlyLede } from "@/lib/geo-sr-only-lede";
 import { topicIndexDefinitionSummary } from "@/lib/topic-index-geo";
 import StoryImage from "@/components/StoryImage";
 import TopicIcon from "@/components/TopicIcon";
@@ -44,7 +45,7 @@ export default function TopicIndexPage() {
       </Link>
 
       <h1 className={styles.title}>主題分類</h1>
-      <p className={styles.lede}>{lede}</p>
+      <GeoSrOnlyLede>{lede}</GeoSrOnlyLede>
       <p className={styles.subtitle}>
         每集故事都有成長主題，點選主題瀏覽相關集數
       </p>
