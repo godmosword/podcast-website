@@ -125,7 +125,7 @@
 
 ## GEO（已完成 → 已封存）
 
-**Wave 1：** 聚合頁 GEO 長導言改 `sr-only`（`GeoSrOnlyLede`／`StoriesIndexHeader`）；契約測試 `lib/geo-visibility-contract.test.tsx`；單集本集介紹仍可見（Wave 2 另議）。詳見 `docs/GEO-CONTENT-CONTRACT.md`。
+**Wave 1：** ✅ `e6e45a0` — 聚合頁 GEO 長導言改 `sr-only`（`GeoSrOnlyLede`／`StoriesIndexHeader`）；契約測試 `lib/geo-visibility-contract.test.tsx`；單集本集介紹仍可見（Wave 2 另議）。詳見 `docs/GEO-CONTENT-CONTRACT.md`。
 
 > 全文見 [docs/archive/TODOS-completed-2026-07-11.md](./docs/archive/TODOS-completed-2026-07-11.md#geo-實作計畫--第二階段)。上線後人工檢查：[docs/geo-checklist.md](./docs/geo-checklist.md)。
 
