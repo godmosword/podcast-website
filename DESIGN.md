@@ -169,6 +169,7 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 | `Chip` | 篩選與標籤 pill，`aria-pressed` |
 | `PlayButton` | 全寬 CTA，主題色底 |
 | `StoryMeta` | EP / 時長（標註） / 車種 chip |
+| `StoryProgressBadge` | 「已聽完」星章，貼封面右上角。語彙與宇宙地圖一致（`⭐` + `aria-label="已聽完"`）；只表達聽完單一狀態，不做「聽到一半」（progress store 的 `continue` 為全站單一欄位，標記會無預警消失） |
 | `StoryPlayer` | 全螢幕黑底、字幕底板、底部控制列 |
 | `SiteFooter` | 家長說明 + 平台連結 |
 | `GamePageShell` | 街機四款遊戲共同外框，負責返回導覽、可及性與資產預載 |
@@ -205,7 +206,7 @@ Storyline 式**全螢幕分段捲動**：每段一張滿版黏土 hero（桌面 
 
 1. **SiteNavBar**（全站橘色頂欄 + 訂閱 CTA）
    - **桌面（≥980px）**懸浮膠囊主列：全部故事／遊樂園／宇宙地圖／育兒專欄（Threads 外連）＋ **ParentGuideDropdown「家長指南」**（指南首頁 `/for-parents`、關於、聯絡；Esc／外點關閉）。無「更多」下拉。主題切換與訂閱膠囊常駐。**成長主題（`/topic`）不佔桌面主列**（屬家長取向且與 /stories 篩選重疊），僅存在於行動抽屜「探索」組與視覺化的 `/topic` 頁。
-   - **行動（＜980px）**漢堡抽屜：單欄依 **探索**（故事／主題／遊樂園／宇宙地圖）→ **家長**（育兒專欄／家長指南／關於／聯絡）分組；含 `/stories?q=` 搜尋。
+   - **行動（＜980px）**漢堡抽屜：單欄依 **探索**（故事／主題／遊樂園／繪本著色／宇宙地圖）→ **家長**（育兒專欄／家長指南／關於／聯絡）分組；含 `/stories?q=` 搜尋。繪本著色雖為 `/games` 子路徑，仍在探索組獨立列出（兒童動線不應只能從遊樂園內層進入）；active 判定採**最長匹配獨佔**，`/games/coloring-book` 不得讓「遊樂園」同時高亮。
 2. 四段 **LandingSegment** 全螢幕面板（資料：`data/landing-segments.ts`）：車車故事／睡前數綿羊／捏黏土／衛教宣導
 3. **SegmentNav**（右側進度點，手機隱藏）＋ 每段往下箭頭錨點；document scroll-snap，reduced-motion 自動停用
 4. Segment 1 CTA → **`/stories`**（完整 Podcast 主頁）

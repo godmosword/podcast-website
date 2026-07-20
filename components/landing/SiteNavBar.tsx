@@ -18,6 +18,7 @@ type NavItemId =
   | "stories"
   | "topic"
   | "games"
+  | "coloring"
   | "adventures"
   | "parenting"
   | "for-parents"
@@ -62,8 +63,12 @@ const MOBILE_MENU_ROWS: readonly {
   emoji: string;
 }[] = [
   { id: "stories", emoji: "📖" },
-  { id: "topic", emoji: "🎨" },
+  // 調色盤給著色本：它才是美術活動。主題分類屬家長取向（見 DESIGN.md），改用種子。
+  { id: "topic", emoji: "🌱" },
   { id: "games", emoji: "🎡" },
+  // 著色本原本只能從遊樂園子頁進入；對不識字的兒童而言等於不存在。
+  // 提到「探索」組與遊樂園並列（桌面主膠囊維持四項，見 DESIGN.md）。
+  { id: "coloring", emoji: "🎨" },
   { id: "adventures", emoji: "🗺️" },
   { id: "parenting", emoji: "✏️" },
   { id: "for-parents", emoji: "🧭" },
@@ -83,6 +88,7 @@ function navItems(): NavItem[] {
     { id: "stories", label: "全部故事", href: "/stories" },
     { id: "topic", label: "主題分類", href: "/topic" },
     { id: "games", label: "遊樂園", href: "/games" },
+    { id: "coloring", label: "繪本著色", href: "/games/coloring-book" },
     { id: "adventures", label: "宇宙地圖", href: "/adventures" },
     // 下拉首項：顯示「指南首頁」；行動列另行覆寫為「家長指南」
     { id: "for-parents", label: "指南首頁", href: "/for-parents" },
@@ -111,8 +117,24 @@ function externalProps(item: NavItem) {
     : {};
 }
 
-function isInternalPathActive(pathname: string, href: string): boolean {
+function matchesPath(pathname: string, href: string): boolean {
   return href.startsWith("/") && (pathname === href || pathname.startsWith(`${href}/`));
+}
+
+/**
+ * 最長匹配獨佔 active。`/games/coloring-book` 同時被 `/games` 與著色本自身命中，
+ * 若不排除會出現兩個高亮與兩個 `aria-current="page"`。
+ */
+export function isInternalPathActive(
+  pathname: string,
+  href: string,
+  siblings: readonly string[] = [],
+): boolean {
+  if (!matchesPath(pathname, href)) return false;
+  return !siblings.some(
+    (other) =>
+      other.length > href.length && matchesPath(pathname, other),
+  );
 }
 
 /** 家長路徑是否應標 trigger active（聯絡為 mailto／外連，無站內 path）。 */
@@ -217,6 +239,10 @@ export default function SiteNavBar() {
   const panelRef = useRef<HTMLElement>(null);
   const items = navItems();
   const byId = new Map(items.map((item) => [item.id, item]));
+  // 供 active 判定做最長匹配（如 /games 與 /games/coloring-book 互斥）
+  const internalHrefs = items
+    .filter((item) => !item.external && item.href.startsWith("/"))
+    .map((item) => item.href);
   const primaryItems = PRIMARY_ORDER.map((id) => byId.get(id)).filter(
     (item): item is NavItem => item !== undefined,
   );
@@ -256,7 +282,7 @@ export default function SiteNavBar() {
         {/* 桌面：主列依 PRIMARY_ORDER＋家長指南下拉（無「更多」） */}
         <nav className={styles.desktopNav} aria-label="主要分區">
           {primaryItems.map((item) => {
-            const active = isInternalPathActive(pathname, item.href);
+            const active = isInternalPathActive(pathname, item.href, internalHrefs);
             return (
               <Link
                 key={item.id}
@@ -336,7 +362,7 @@ export default function SiteNavBar() {
               // 行動：for-parents 顯示「家長指南」（桌面下拉則為「指南首頁」）
               const displayLabel =
                 row.id === "for-parents" ? "家長指南" : item.label;
-              const active = isInternalPathActive(pathname, item.href);
+              const active = isInternalPathActive(pathname, item.href, internalHrefs);
               return (
                 <li
                   key={item.id}

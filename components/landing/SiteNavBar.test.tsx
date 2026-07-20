@@ -182,3 +182,46 @@ describe("SiteNavBar", () => {
     expect(html).toContain("家長指南");
   });
 });
+
+describe("isInternalPathActive 最長匹配", () => {
+  const hrefs = [
+    "/stories",
+    "/topic",
+    "/games",
+    "/games/coloring-book",
+    "/adventures",
+    "/for-parents",
+    "/about",
+  ];
+
+  test("在 /games 時只有遊樂園 active", async () => {
+    const { isInternalPathActive } = await import("./SiteNavBar");
+    expect(isInternalPathActive("/games", "/games", hrefs)).toBe(true);
+    expect(
+      isInternalPathActive("/games", "/games/coloring-book", hrefs),
+    ).toBe(false);
+  });
+
+  test("在 /games/coloring-book 時遊樂園不得同時 active", async () => {
+    const { isInternalPathActive } = await import("./SiteNavBar");
+    // 未修正前 /games 也會回 true，導致兩個 aria-current="page"
+    expect(isInternalPathActive("/games/coloring-book", "/games", hrefs)).toBe(
+      false,
+    );
+    expect(
+      isInternalPathActive("/games/coloring-book", "/games/coloring-book", hrefs),
+    ).toBe(true);
+  });
+
+  test("其他遊戲子頁仍歸遊樂園", async () => {
+    const { isInternalPathActive } = await import("./SiteNavBar");
+    expect(
+      isInternalPathActive("/games/candy-match", "/games", hrefs),
+    ).toBe(true);
+  });
+
+  test("外連／mailto 不視為站內 active", async () => {
+    const { isInternalPathActive } = await import("./SiteNavBar");
+    expect(isInternalPathActive("/games", "mailto:a@b.c", hrefs)).toBe(false);
+  });
+});

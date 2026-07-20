@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Story } from "@/data/content";
 import { formatDate, storyCoverPath } from "@/lib/story-utils";
 import StoryCoverMorph from "@/components/story/StoryCoverMorph";
+import StoryProgressBadge from "@/components/story/StoryProgressBadge";
 import StoryImage from "./StoryImage";
 import { TagChip } from "./Chip";
 import StoryAge from "./StoryAge";
@@ -60,6 +61,9 @@ export default function StoryCard({
             className={styles.thumb}
           />
         )}
+        {/* 星章不受 hideMeta 控制：它是圖形獎勵而非 meta 文字，且首頁精簡列表
+            正是最需要「哪些聽過」的地方。 */}
+        <StoryProgressBadge slug={story.slug} />
       </div>
 
       <span className={`${styles.body} ${isGrid ? styles.bodyGrid : ""}`}>
