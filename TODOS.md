@@ -698,7 +698,7 @@ EP1–7 已用 `large-v3` 轉錄 + 自動簡轉繁（`data/subtitles/*.json`）�
 ### 壓縮 Podcast 音檔　`P2 · S · 無`　〔content〕
 ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–10MB，總 50MB+）。睡前=手機弱網，載入慢。指令見 README；壓後本機聽確認音質再覆蓋。
 
-### 每集專屬 FAQ（episodeFaq sidecar）　`P1 · M · 無`　〔content+eng〕
+### ~~每集專屬 FAQ（episodeFaq sidecar）~~　`P1 · M · 無`　〔content+eng〕 ✅ `165b44e`
 新增 `data/episode-faqs.ts` sidecar：每集 1 題緊扣該集劇情／主題的 FAQ（非模板換名），`data/content.ts` `enrichStory()` 合併進 `Story.episodeFaq`；`lib/story-geo.ts` `storyFaqs()` 有值時放最前面，其餘 3 題通用 FAQ 順序不變（可見區＝FAQPage JSON-LD 同一份資料）；有則附 1 行到 `llms-full`。契約補進 [docs/GEO-CONTENT-CONTRACT.md](./docs/GEO-CONTENT-CONTRACT.md#episodefaq已上線)。目前 `getStories()` 20 集**全數覆蓋**（`episodeFaqCoverage()`／`verify:geo` 摘要「Unique episode FAQ coverage」皆 20/20）；不得逐字重複 `familyActivity`／`reflectionPrompt`／`parentGuide`（`hasDuplicateGuideText` 迴歸測試）。測試：`data/episode-faqs.test.ts`、`lib/story-geo.test.ts`、`scripts/generate-llms-full.test.ts`。**待補齊：** 無（全數覆蓋）；新增集數時若暫無空寫優質題目，寧可留白，缺漏 slug 補在本行下次更新。
 
 ## 待議：主持人／創作者實體強化
