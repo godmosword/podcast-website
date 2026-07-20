@@ -38,6 +38,7 @@
 | feat(landing): 尾頁 meta 安靜化＋頂欄 footer 防透字（`data-nav-solid`） | `6511d08` |
 | [VIS-W0](#視覺升級2026-07-20agent-plan-三審) fix(a11y): StoryCard／LatestHero 對比＋reduced-motion＋觸控高度 | `fd401a7` |
 | chore(agents): active 路由移除 Fable 5，Claude Code Leader 一律 Opus 4.8（含契約測試負向斷言） | `e9225da` |
+| [VIS-W1](#視覺升級2026-07-20agent-plan-三審) fix(a11y): `--accent-ink` 修 accent 文字對比 + 字階 token 收斂（a11y e2e 7/9 → 9/9） | `5e46965` |
 
 ### 本輪已完成（2026-07-19）
 
@@ -140,7 +141,7 @@ Plan 經 Codex 工程審 + Grok 對抗審 + Opus 設計審**三審退回修訂**
 
 三項既有違規（非新功能）：`story.color` 不再當前景字色（12 色票 11 個不過 AA，最差 1.93:1 → 修後 10.8–11.8:1）；`prefers-reduced-motion` 補 `:active`／`transition`；`.cta` 37px → `min-height: 48px`。
 
-### VIS-W1　`design · M · VIS-W0`　待做
+### VIS-W1　`design · M · VIS-W0`　✅ `5e46965`
 
 字階對齊 spec（`DESIGN.md:125` 寫 1.8–2.3rem，實作僅 1.2–1.3rem）。新增 `--fs-h1/-h2/-body/-meta`，**僅** `LatestHero`／`StoryCard`／`StoriesIndexHeader` 三處換用，不做全站機械替換。LatestHero 提權重但**維持 1:1 封面、不裁切、不壓字**（封面即故事第一頁，無安全區，裁 16:9 必切主體）。
 
@@ -161,6 +162,12 @@ Plan 經 Codex 工程審 + Grok 對抗審 + Opus 設計審**三審退回修訂**
 ### 明確不做
 
 Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫寫的 $0.2）、卡片塞 `reflection-prompts`（違反 `DESIGN.md:147`，且已用於 `StoryEndScreen`）、新增 stagger（已存在）、全域紙紋 noise（iOS 合成風險 + 污染宇宙地圖）、重生 filter icon（已存在）、獎項 badge（無素材來源）。
+
+### VIS-DEBT-1　視覺 baseline 全面失效　`eng · M · 無`　待做
+
+`npm run test:visual` 的 baseline 已與當前渲染環境脫節：抽樣 7 頁（`/stories`、`/for-parents`、`/characters`、`/subscribe`、`/adventures`、`/games`、`/about`）在**乾淨 HEAD 上全部失敗**，含完全未被近期改動觸及的頁。**這個 gate 目前是壞的**，不能當回歸保護。
+
+刻意未跑 `--update-snapshots`：在單一開發機重產會把該機字型渲染烘進 baseline，讓問題被遮蔽而非解決。需先查清 baseline 原始產生環境（OS／字型版本／Chromium build），再決定重產或改用容差更高的比對策略。
 
 > 既有技術債（非本輪引入，`npm run lint` 於 HEAD 即紅）：`components/universe/useMapCamera.ts:432` 兩個 unused var。
 
