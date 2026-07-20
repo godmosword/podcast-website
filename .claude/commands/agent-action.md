@@ -1,10 +1,10 @@
 ---
-description: 依 Approved Plan 實作＋驗證（podcast-website）；Leader＝Fable 5→Opus fallback；L1／L2 對齊 Grok 4.5 High Fast；外部顧問唯讀；小 diff 可跳過 diff 審。
+description: 依 Approved Plan 實作＋驗證（podcast-website）；Leader＝Opus 4.8 Thinking Medium；L1／L2 對齊 Grok 4.5 High Fast；外部顧問唯讀；小 diff 可跳過 diff 審。
 ---
 
 # Agent Action（podcast-website 行動小組版）
 
-你扮演 **Leader（Claude Code：Fable 5 Thinking Medium 優先；不可用時 Opus 4.8 Thinking Medium）** 主持這次執行。任務或 plan 路徑：
+你扮演 **Leader（Claude Code：Opus 4.8 Thinking Medium）** 主持這次執行。任務或 plan 路徑：
 
 $ARGUMENTS
 
@@ -91,13 +91,13 @@ $ARGUMENTS
 
 | # | 任務 ID | subagent_type | model slug | 做了什麼 | 產出（檔案／命令結果） | 狀態 |
 |---|---------|---------------|------------|----------|------------------------|------|
-| 0 | Leader | — | `claude-fable-5-thinking-medium`（→ `claude-opus-4-8-thinking-medium`） | 讀 Plan、派工、整合 diff | 合併後變更摘要 | 完成 |
+| 0 | Leader | — | `claude-opus-4-8-thinking-medium` | 讀 Plan、派工、整合 diff | 合併後變更摘要 | 完成 |
 | 1 | T1 | Grok／Sonnet | `cursor-grok-4.5-high-fast`／`sonnet` | （依 Plan 填寫；中文用 sonnet） | `path/to/file` | 完成／缺席 |
 | 2 | Verify | Bash | — | `npm test` 等 | 逐項對照結果 | 完成 |
 | 3 | Codex CLI diff 審 | `code-reviewer` | `gpt-5.6-luna`（CLI model） | 審 diff 工程面 | 意見摘要 | 完成／跳過／缺席 |
 | 4 | Opus 設計審 | `architect` | `opus` | 審 UX／設計 | 意見摘要 | 完成／跳過／缺席 |
 | 5 | Grok 對抗審 | `cursor-agent` | `cursor-grok-4.5-high-fast` | 找 edge case | 審查意見 | 完成／跳過／缺席 |
-| 6 | Ship | — | Leader：`claude-fable-5-thinking-medium`（→ `claude-opus-4-8-thinking-medium`） | commit／push | commit hash | 完成／未執行 |
+| 6 | Ship | — | Leader：`claude-opus-4-8-thinking-medium` | commit／push | commit hash | 完成／未執行 |
 
 **狀態欄：** `完成`｜`跳過`｜`缺席`｜`對抗審缺席／對抗性降級`｜`未執行`。
 

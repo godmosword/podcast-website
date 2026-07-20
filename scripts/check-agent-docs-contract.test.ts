@@ -69,6 +69,39 @@ describe("agent docs routing contract", () => {
     }
   });
 
+  it("Fable 5 已自 active 路由移除（Claude Code Leader 一律 Opus 4.8）", () => {
+    const ACTIVE_ROUTING_FILES = [
+      ".claude/commands/agent-plan.md",
+      ".claude/commands/agent-action.md",
+      ...CURSOR_ACTIVE_FILES,
+      CURSOR_META,
+    ];
+
+    for (const file of ACTIVE_ROUTING_FILES) {
+      const text = readRepoFile(file);
+      // AGENT-WORKFLOW 的「修訂紀錄」為歷史事實，允許保留 Fable 5 字樣；
+      // 其餘 active 路由段落一律不得出現。
+      const active =
+        file === CURSOR_META
+          ? text.split("## 修訂紀錄")[0]
+          : text;
+      expect(active, `${file} active 路由不得再含 Fable 5 slug`).not.toContain(
+        "claude-fable-5-thinking-medium",
+      );
+      expect(active, `${file} active 路由不得再提 Fable 5`).not.toMatch(
+        /Fable\s*5/i,
+      );
+    }
+
+    // Claude Code Leader 必須明列 Opus 4.8 slug
+    for (const file of [
+      ".claude/commands/agent-plan.md",
+      ".claude/commands/agent-action.md",
+    ]) {
+      expect(readRepoFile(file)).toContain("claude-opus-4-8-thinking-medium");
+    }
+  });
+
   it("podcast.mdc 註明 Agent Orchestration 優先於一般 commit 慣例", () => {
     const rule = readRepoFile(PODCAST_RULE);
     expect(rule).toContain("/agent-plan");

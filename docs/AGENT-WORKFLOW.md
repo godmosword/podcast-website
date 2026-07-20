@@ -109,7 +109,6 @@
      - **Composer 2.5** 對抗審：漏洞、edge case、失敗模式（中文定稿仍走 Sonnet）
      - **Opus 4.8 設計審**：`DESIGN.md` 對齊、兒童主路徑、親子 UX、觸控 ≥44px、`prefers-reduced-motion`、資訊層級、視覺一致性
    - **L3／Protected paths**：固定三審 + Leader 自審（Opus 設計審加強架構／紅線視角）
-   - **Fable 5**（`claude-fable-5-thinking-medium`）：**備選** — 僅委員衝突或邊界模糊時
    - **內容管線跳過委員會**（字幕校對、scenes、illustrate SOP 內出圖）：直做或只 `/agent-action`
    - **純文件／命令檔對齊**：可降級 Leader + GPT；**收尾固定分配表 Composer 對抗審／Opus 列仍須列出**（禁止 `跳過`）
    - **中間級——視覺／樣式微調**（預估 diff &lt;80 行、不碰 Protected paths、不觸發 UI 風險規則）：工程審**單審** + 落地後截圖目檢；Composer 對抗審／Opus 標 `按級距免派`（分配表仍全列）
@@ -171,7 +170,7 @@ Plan 若弱化 Domain 紅線 → 審稿標 **CRITICAL**。
 
 | 角色 | Claude Code（[`.claude/commands/`](../.claude/commands/agent-plan.md)） | Cursor（[`.cursor/commands/`](../.cursor/commands/agent-plan.md)） |
 |------|------|------|
-| **Leader** | 當前 session＝**Fable 5 Thinking Medium**（`claude-fable-5-thinking-medium`）**優先**；不可用時 **Opus 4.8 Thinking Medium**（`claude-opus-4-8-thinking-medium`）（骨架＋綜合；中文 Protected 不直改） | Session／Task 對齊 `cursor-grok-4.5-high-fast`（節流：只寫骨架，細節派 GPT） |
+| **Leader** | 當前 session＝**Opus 4.8 Thinking Medium**（`claude-opus-4-8-thinking-medium`）（骨架＋綜合；中文 Protected 不直改） | Session／Task 對齊 `cursor-grok-4.5-high-fast`（節流：只寫骨架，細節派 GPT） |
 | **Opus 4.8 設計審** | Agent tool `architect` + `model: "opus"`（附 `DESIGN.md`） | Task `architect`（readonly）+ `claude-opus-4-8-thinking-medium` |
 | **GPT 5.6 Luna MAX fast 工程審** | `codex exec -m gpt-5.6-luna -c model_reasoning_effort="medium" "…" </dev/null`（**Claude Code Codex CLI**；裸 `gpt-5.6` 於 ChatGPT 帳號 400，勿用） | Task + `gpt-5.6-luna-max-fast`（**Cursor Task slug**） |
 | **對抗審** | Grok 4.5 High Fast：`cursor-agent -p --model cursor-grok-4.5-high-fast --mode ask`（**每輪 plan 必派**；不可用 → 缺席） | Composer 2.5：Task（readonly）+ `composer-2.5-fast`（**每輪 plan 必派**；slug 不可用 → 缺席） |
@@ -195,12 +194,11 @@ Task 的 `model` **只能**用 Cursor 允許的 slug：
 |-----------|------|----------|
 | Grok 4.5 High Fast | `cursor-grok-4.5-high-fast` | **Cursor Leader** 編排、整合、git、&lt;10 行微調；**Claude Code 對抗審／L1・L2 實作**（`cursor-agent -p --model cursor-grok-4.5-high-fast --mode ask`）（**節流**；不直改中文 Protected） |
 | Composer 2.5 | `composer-2.5-fast` | **L1／L2 實作預設**；Plan／diff **對抗審**（唯讀；**每輪 plan 必派**；slug 不可用 → 缺席，勿頂替） |
-| Opus 4.8 Thinking Medium | `claude-opus-4-8-thinking-medium` | Plan／diff **設計審**（UX、`DESIGN.md`、兒童體驗、a11y 視覺；**每輪 plan 必派**）；**Claude Code Leader 備援**（Fable 5 不可用時） |
+| Opus 4.8 Thinking Medium | `claude-opus-4-8-thinking-medium` | Plan／diff **設計審**（UX、`DESIGN.md`、兒童體驗、a11y 視覺；**每輪 plan 必派**）；**Claude Code Leader**（Plan／Action session） |
 | GPT 5.6 Luna MAX fast | `gpt-5.6-luna-max-fast` | Plan 細節草稿、工程審、TS/React diff review（Cursor Task） |
 | Sonnet 4.6 Thinking Medium | `claude-4.6-sonnet-medium-thinking` | 內容管線中文校對（見 Domain Protected paths） |
 | Grok 4.3 | `grok-4.3` | explore（只讀） |
 | Grok Build 0.1 | `grok-build-0.1` | shell、批次命令 |
-| Fable 5 | `claude-fable-5-thinking-medium` | **Claude Code Leader 首選**（Plan／Action session；不可用 → Opus 4.8 Thinking Medium）；備選 Plan 第三意見 |
 
 slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 **例外——對抗審（Composer 2.5，readonly）**：Leader 不代做、其他模型不頂替；缺席標記但仍須出現在**固定分配表**。
@@ -276,7 +274,6 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 ## Review summary
 - 架構審：...
 - 工程審：...
-- Fable 5（若有）：...
 - **Approved / 待決策：** ...
 ```
 
@@ -420,3 +417,4 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 | 2026-07-17 | CRITICAL 互動禁止 AUQ／AskQuestion；改聊天文字 A/B/C（對齊 `no-ask-user-questions.mdc` + `block-auq` hook） |
 | 2026-07-18 | 角色對調：Leader → **Grok 4.5 High Fast**（`cursor-grok-4.5-high-fast`）；對抗審與 L1／L2 實作 → **Composer 2.5**（`composer-2.5-fast`）；內容管線仍 Sonnet；契約測試同步 |
 | 2026-07-18 | **Claude Code／Cursor agent group 分家**：Claude Code Leader → **Fable 5 Thinking Medium**（`claude-fable-5-thinking-medium`）優先、不可用時 **Opus 4.8 Thinking Medium**；Claude Code 對抗審＋L1／L2 實作 → **Grok 4.5 High Fast**（`cursor-agent --model cursor-grok-4.5-high-fast`）。Cursor 欄維持 Grok Leader＋Composer 對抗審／L1L2 不變；`.claude/commands/*` 同步 |
+| 2026-07-20 | **移除 Fable 5**：Claude Code Leader（Plan／Action session）一律 **Opus 4.8 Thinking Medium**（`claude-opus-4-8-thinking-medium`），不再有 fallback 二選一；slug 對照表刪 Fable 5 列、`.cursor/rules/agent-orchestration.mdc` 備選 Plan 審改 Opus；契約測試新增負向斷言（active 路由檔禁 `claude-fable-5-thinking-medium` 與 `Fable 5` 字樣，本修訂紀錄段除外） |
