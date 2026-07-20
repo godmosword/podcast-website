@@ -34,7 +34,7 @@
 
 | ID | Commit |
 |----|--------|
-| feat(landing): 尾頁 meta 安靜化＋頂欄 footer 防透字（`data-nav-solid`） | 待 commit |
+| feat(landing): 尾頁 meta 安靜化＋頂欄 footer 防透字（`data-nav-solid`） | `6511d08` |
 
 ### 本輪已完成（2026-07-19）
 
