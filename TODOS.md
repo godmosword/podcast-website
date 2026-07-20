@@ -34,7 +34,7 @@
 
 | ID | Commit |
 |----|--------|
-| chore(debt): P0–P2 VIS-DEBT／lint／TODOS hash 慣例＋block-fable 誤擋修復 | 見本 commit |
+| chore(debt): P0–P2 VIS-DEBT／lint／TODOS hash 慣例＋block-fable 誤擋修復 | `0ddcc26` |
 | chore(agents): Fable 5 禁令＋`block-fable` hook 硬擋 | `5bf10b8` |
 | feat(landing): 尾頁 meta 安靜化＋頂欄 footer 防透字（`data-nav-solid`） | `6511d08` |
 | [VIS-W0](#視覺升級2026-07-20agent-plan-三審) fix(a11y): StoryCard／LatestHero 對比＋reduced-motion＋觸控高度 | `fd401a7` |
@@ -178,7 +178,7 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 
 重產／trusted 跑前須對齊 baseline 原始環境：**OS、字型版本、Chromium build**（見上方抽樣說明）。trusted 通過前勿當 CI／agent 硬閘。
 
-### VIS-DEBT-2　smoke 測試比設計決策舊　`eng · S · 無`　✅ 見本 commit
+### VIS-DEBT-2　smoke 測試比設計決策舊　`eng · S · 無`　✅ `0ddcc26`
 
 `e2e/smoke.spec.ts` 已對齊 [DESIGN.md](./DESIGN.md) §Landing Hub：桌面膠囊主列四項（全部故事／遊樂園／宇宙地圖／育兒專欄）且無「主題分類」；390 開漢堡抽屜可見「主題分類」。
 
