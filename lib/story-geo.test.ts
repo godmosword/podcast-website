@@ -78,14 +78,38 @@ describe("storyParentExtension", () => {
 });
 
 describe("storyFaqs", () => {
-  it("每集產生 2–3 題 FAQ", () => {
-    const story = storiesByNewest()[0];
+  it("每集產生 3–4 題 FAQ，皆有非空 Q/A", () => {
+    for (const story of getStories()) {
+      const faqs = storyFaqs(story);
+
+      expect(faqs.length, story.slug).toBeGreaterThanOrEqual(3);
+      expect(faqs.length, story.slug).toBeLessThanOrEqual(4);
+      expect(
+        faqs.every((faq) => faq.question && faq.answer),
+        story.slug,
+      ).toBe(true);
+    }
+  });
+
+  it("有 episodeFaq 時放在最前面，其餘 3 題通用 FAQ 順序不變", () => {
+    const story = getStories().find((s) => s.episodeFaq);
+    expect(story).toBeDefined();
+
+    const faqs = storyFaqs(story!);
+
+    expect(faqs.length).toBe(4);
+    expect(faqs[0]).toEqual(story!.episodeFaq);
+    expect(faqs[1].question).toContain("適合");
+  });
+
+  it("無 episodeFaq 時維持 3 題通用 FAQ，第一題仍是年齡問題", () => {
+    const story = getStories().find((s) => !s.episodeFaq);
+    if (!story) return; // 目前集數已全數覆蓋 episodeFaq，保留降級路徑測試
+
     const faqs = storyFaqs(story);
 
-    expect(faqs.length).toBeGreaterThanOrEqual(2);
-    expect(faqs.length).toBeLessThanOrEqual(3);
+    expect(faqs.length).toBe(3);
     expect(faqs[0].question).toContain("適合");
-    expect(faqs.every((faq) => faq.question && faq.answer)).toBe(true);
   });
 });
 

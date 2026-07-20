@@ -6,6 +6,7 @@ import SegmentNav from "@/components/landing/SegmentNav";
 import DuduCompanion from "@/components/landing/DuduCompanion";
 import LandingBedtimeLayer from "@/components/landing/LandingBedtimeLayer";
 import { DUDU_EMOTION_BY_SEGMENT } from "@/data/dudu-emotions";
+import { homeSiteIntro } from "@/lib/home-geo";
 import { resolveLandingSegments } from "@/lib/landing-query";
 import { podcastSeriesJsonLd } from "@/lib/json-ld";
 import hubStyles from "./LandingHub.module.css";
@@ -14,6 +15,7 @@ import scrollStyles from "./LandingScrollView.module.css";
 const FOOTER_ANCHOR = "landing-foot";
 
 export default function LandingHub() {
+  const siteIntro = homeSiteIntro();
   const segments = resolveLandingSegments();
   const navItems = segments.map((s) => ({
     anchorId: s.anchorId,
@@ -43,6 +45,7 @@ export default function LandingHub() {
             segment={segment}
             index={index}
             total={segments.length}
+            siteIntro={index === 0 ? siteIntro : undefined}
             nextAnchorId={
               segments[index + 1]?.anchorId ??
               (index === segments.length - 1 ? FOOTER_ANCHOR : null)

@@ -6,6 +6,7 @@ import {
   CHANNEL_PODCAST_GUID,
 } from "@/lib/feed-constants";
 import { buildRssFeed } from "./feed";
+import { hasFullTranscript } from "@/lib/transcript";
 
 function storyFixture(partial: Partial<Story> & Pick<Story, "slug">): Story {
   const base = storiesByNewest()[0];
@@ -43,18 +44,17 @@ describe("buildRssFeed", () => {
     expect(count).toBe(storiesByNewest().length);
   });
 
-  it("有 VTT 的集含 podcast:transcript", () => {
+  it("有完整逐字稿側車的集含 podcast:transcript", () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
-    const withVtt = storyFixture({
-      slug: "ep-test-vtt",
+    const withTranscript = storyFixture({
+      slug: "ep-1",
       ep: 99,
-      title: "VTT 測試",
-      captions: ["a", "b"],
-      captionTimes: [0, 2],
+      title: "逐字稿測試",
     });
-    const xml = buildRssFeed([withVtt]);
+    expect(hasFullTranscript(withTranscript)).toBe(true);
+    const xml = buildRssFeed([withTranscript]);
     expect(xml).toContain(
-      '<podcast:transcript url="https://example.com/story/ep-test-vtt/transcript.vtt" type="text/vtt" language="zh-TW"/>',
+      '<podcast:transcript url="https://example.com/story/ep-1/transcript.vtt" type="text/vtt" language="zh-TW"/>',
     );
     vi.unstubAllEnvs();
   });
@@ -113,7 +113,19 @@ describe("buildRssFeed", () => {
     expect(xml).not.toContain("/adventures?zone=");
   });
 
-  it("captions 與 captionTimes 不一致時不輸出 transcript", () => {
+  it("僅場景 captions、無 subtitles 側車時不輸出 transcript", () => {
+    const sceneOnly = storyFixture({
+      slug: "ep-scene-only-fixture",
+      ep: 98,
+      title: "僅場景字幕",
+      captions: ["a", "b"],
+      captionTimes: [0, 2],
+    });
+    const xml = buildRssFeed([sceneOnly]);
+    expect(xml).not.toContain("podcast:transcript");
+  });
+
+  it("captions 與 captionTimes 不一致且無 subtitles 時不輸出 transcript", () => {
     const mismatch = storyFixture({
       slug: "ep-test-mismatch",
       ep: 98,

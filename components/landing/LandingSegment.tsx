@@ -13,6 +13,8 @@ type LandingSegmentProps = {
   index: number;
   /** segment 總數（編號「01 / 04」用）。 */
   total: number;
+  /** 首段 answer-first 網站導言（SSR 可索引）。 */
+  siteIntro?: string;
   /** 下一段錨點；最後一段指向 landing-foot（頁尾 snap pane）。 */
   nextAnchorId: string | null;
 };
@@ -24,6 +26,7 @@ export default function LandingSegment({
   segment,
   index,
   total,
+  siteIntro,
   nextAnchorId,
 }: LandingSegmentProps) {
   const landingScroll = useLandingScroll();
@@ -124,6 +127,16 @@ export default function LandingSegment({
           >
             {segment.title}
           </h2>
+          {segment.subtitle ? (
+            <p className={`${styles.subtitle} scrollEnter scrollEnterStagger2`}>
+              {segment.subtitle}
+            </p>
+          ) : null}
+          {siteIntro ? (
+            <p className={`${styles.siteIntro} scrollEnter scrollEnterStagger3`}>
+              {siteIntro}
+            </p>
+          ) : null}
         </div>
         <div className={`${styles.ctaRow} scrollEnter scrollEnterStagger3`}>
           {segment.play ? (

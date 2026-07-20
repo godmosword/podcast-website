@@ -1,12 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
+import { getSubtitles } from "@/lib/subtitles";
+import { hasFullTranscript } from "@/lib/transcript";
 import { storiesByNewest } from "@/data/content";
-import { hasVtt } from "@/lib/transcript";
 import { GET } from "@/app/story/[slug]/transcript.vtt/route";
 
 describe("GET /story/[slug]/transcript.vtt", () => {
-  it("有 VTT 的集回 200 與 text/vtt", async () => {
+  it("有完整逐字稿的集回 200 與 text/vtt", async () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
-    const story = storiesByNewest().find(hasVtt);
+    const story = storiesByNewest().find(hasFullTranscript);
     expect(story).toBeDefined();
 
     const res = await GET(new Request("http://localhost"), {
@@ -17,6 +18,9 @@ describe("GET /story/[slug]/transcript.vtt", () => {
     expect(res.headers.get("Content-Type")).toBe("text/vtt; charset=utf-8");
     const body = await res.text();
     expect(body.startsWith("WEBVTT")).toBe(true);
+    const subs = getSubtitles(story!.slug);
+    expect(subs?.[0]?.text).toBeDefined();
+    expect(body).toContain(subs![0].text);
 
     vi.unstubAllEnvs();
   });
@@ -28,13 +32,26 @@ describe("GET /story/[slug]/transcript.vtt", () => {
     expect(res.status).toBe(404);
   });
 
-  it("有 captions 但無 captionTimes 回 404", async () => {
+  it("僅場景 captions、無 subtitles 側車回 404", async () => {
     const res = await GET(new Request("http://localhost"), {
-      params: Promise.resolve({ slug: "ep-1" }),
+      params: Promise.resolve({ slug: "ep-scene-only-fixture" }),
     });
-    // ep-1 若無 captionTimes 應 404；若有則略過此斷言由其他測試覆蓋
-    if (res.status === 404) {
-      expect(res.status).toBe(404);
+    expect(res.status).toBe(404);
+  });
+
+  it("legacy slug alias 仍回 200 VTT（canonical subtitles）", async () => {
+    const res = await GET(new Request("http://localhost"), {
+      params: Promise.resolve({ slug: "excavator" }),
+    });
+    expect(res.status).toBe(200);
+    const body = await res.text();
+    expect(body.startsWith("WEBVTT")).toBe(true);
+    const ranges = body.match(
+      /\d{2}:\d{2}:\d{2}\.\d{3} --> \d{2}:\d{2}:\d{2}\.\d{3}/g,
+    );
+    for (const range of ranges ?? []) {
+      const [startStr, endStr] = range.split(" --> ");
+      expect(startStr).not.toBe(endStr);
     }
   });
 });

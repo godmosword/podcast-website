@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 import { getStories, storiesByNewest } from "@/data/content";
 import { metadata as aboutMetadata } from "@/app/about/page";
 import { metadata as adventuresMetadata } from "@/app/adventures/page";
-import { metadata as storiesMetadata } from "@/app/stories/page";
+import { generateMetadata as generateStoriesMetadata } from "@/app/stories/page";
 import { generateMetadata as generateTopicMetadata } from "@/app/topic/[tag]/page";
 import { generateMetadata as generateVehicleMetadata } from "@/app/vehicles/[vehicle]/page";
-import { hasVtt } from "@/lib/transcript";
+import { hasFullTranscript } from "@/lib/transcript";
 import { storyOgImagePath } from "@/lib/story-og";
 import { storyDetailMetadata, storyPlayMetadata } from "./story-metadata";
 
@@ -16,8 +16,8 @@ describe("storyDetailMetadata", () => {
     expect(meta.alternates?.canonical).toBe(`/story/${story.slug}`);
   });
 
-  it("有 VTT 的集數 alternates 含 text/vtt", () => {
-    const story = getStories().find((item) => hasVtt(item));
+  it("有完整逐字稿的集數 alternates 含 text/vtt", () => {
+    const story = getStories().find((item) => hasFullTranscript(item));
     expect(story).toBeDefined();
 
     const meta = storyDetailMetadata(story!);
@@ -50,7 +50,8 @@ describe("storyPlayMetadata", () => {
 });
 
 describe("static page metadata canonical", () => {
-  it("全部故事", () => {
+  it("全部故事", async () => {
+    const storiesMetadata = await generateStoriesMetadata();
     expect(storiesMetadata.alternates?.canonical).toBe("/stories");
   });
 

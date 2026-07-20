@@ -2,6 +2,7 @@ import appleSyncDefaults from "./apple-sync.defaults.json";
 import appleSynced from "./apple-synced.json";
 import { episodeColorForSlug } from "./episode-colors";
 import { getCharactersForStory } from "./characters";
+import { getEpisodeFaq, type EpisodeFaq } from "./episode-faqs";
 import { getFamilyActivity, type FamilyActivity } from "./family-activities";
 import type { ParentGuide } from "@/lib/geo-content-contract";
 import { getParentGuide } from "./parent-guides";
@@ -46,6 +47,8 @@ export type Story = StoryBase & {
   familyActivity?: FamilyActivity;
   /** 家長共讀指引（sidecar，見 data/parent-guides.ts；預設收合 ShowNotes） */
   parentGuide?: ParentGuide;
+  /** 本集專屬 FAQ（sidecar，見 data/episode-faqs.ts；併入 storyFaqs() 第一題） */
+  episodeFaq?: EpisodeFaq;
   /** 故事發生的樂園地圖 zone（sidecar，見 data/story-zones.ts） */
   zoneId?: ZoneId;
 };
@@ -95,6 +98,7 @@ function enrichStory(raw: RawStory): Story {
     merged.reflectionPrompt ?? getReflectionPrompt(merged.slug);
   const familyActivity = getFamilyActivity(merged.slug);
   const parentGuide = getParentGuide(merged.slug);
+  const episodeFaq = getEpisodeFaq(merged.slug);
   const zoneId = getStoryZoneId(merged.slug);
   return {
     ...merged,
@@ -105,6 +109,7 @@ function enrichStory(raw: RawStory): Story {
     reflectionPrompt,
     ...(familyActivity ? { familyActivity } : {}),
     ...(parentGuide ? { parentGuide } : {}),
+    ...(episodeFaq ? { episodeFaq } : {}),
     ...(zoneId ? { zoneId } : {}),
   };
 }

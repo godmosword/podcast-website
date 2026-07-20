@@ -24,3 +24,11 @@
     padding-right: calc(16px + var(--safe-right));
   }
 }
+
+.lede {
+  margin: 0 0 var(--space-6);
+  font-size: 0.98rem;
+  line-height: 1.75;
+  color: var(--ink-soft);
+  font-weight: 600;
+}

@@ -30,7 +30,7 @@ Bonbon & 馬米親子 Podcast《車車遊樂園》的官方 **看圖聽故事** 
 | 全部故事頁 | `/stories` | 最新集 Hero、收藏區、車種／主題篩選（`?vehicle=`、`?tag=`） |
 | 故事詳情 | `/story/[slug]` | SEO 落地頁、分享、收藏、訂閱收聽 CTA、ShowNotes、親子延伸、完播反思、地圖島徽章 |
 | 播放器 | `/story/[slug]/play` | 全螢幕翻頁、逐字字幕、進度條、字幕字級 |
-| 逐字稿 | `/story/[slug]/transcript.vtt` | WebVTT 端點（無障礙／GEO） |
+| 逐字稿 | `/story/[slug]/transcript.vtt` | 完整音檔逐字稿 WebVTT（來自 `data/subtitles/`，非翻頁場景字幕；無障礙／GEO） |
 | 新集通知 | `/subscribe` | Email 訂閱表單（Neon；未設 DB 時引導至收聽平台） |
 | 主題 | `/topic`、`/topic/[tag]` | 主題索引與分類頁（SSG + FAQ schema） |
 | 車種 | `/vehicles/[vehicle]` | 車種分類頁（SSG + GEO FAQ） |

@@ -6,14 +6,28 @@ import JsonLd from "@/components/JsonLd";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import { podcastSeriesJsonLd } from "@/lib/json-ld";
+import { storiesCatalogSummary } from "@/lib/stories-geo";
 import styles from "./page.module.css";
 
-export const metadata: Metadata = {
-  title: "全部故事",
-  description:
-    "車車遊樂園全部故事：看圖聽故事、睡前親子共讀，訂閱 Spotify 或 Apple Podcasts 新集自動更新。",
-  alternates: { canonical: "/stories" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const stories = storiesByNewest();
+  const description = storiesCatalogSummary(
+    stories,
+    allTags().length,
+    allVehicles().length,
+  );
+  return {
+    title: "全部故事",
+    description,
+    alternates: { canonical: "/stories" },
+    openGraph: {
+      title: "全部故事 · 車車遊樂園",
+      description,
+      url: "/stories",
+      type: "website",
+    },
+  };
+}
 
 type StoriesPageProps = {
   searchParams: Promise<{ vehicle?: string; tag?: string; q?: string }>;
@@ -33,6 +47,7 @@ export default async function StoriesPage({ searchParams }: StoriesPageProps) {
 
   const stories = storiesByNewest();
   const latest = stories[0];
+  const lede = storiesCatalogSummary(stories, tags.length, vehicles.length);
 
   const sectionProps: HomeSectionProps = {
     latest,
@@ -49,6 +64,7 @@ export default async function StoriesPage({ searchParams }: StoriesPageProps) {
     <main className={styles.main}>
       <JsonLd data={podcastSeriesJsonLd()} />
       <SiteHeader />
+      <p className={styles.lede}>{lede}</p>
       <HomeSectionList props={sectionProps} />
       <SiteFooter layout="home" />
     </main>

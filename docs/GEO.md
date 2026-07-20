@@ -25,9 +25,11 @@
 | [`public/llms.txt`](../public/llms.txt) | 站點重點、路由地圖、首頁 sections 摘要（人工維護，AI 代理快速定位用） |
 | `public/llms-full.txt` | `llms.txt` 詳細版，含全部故事定義式摘要與角色索引；**prebuild 自動產生**（`npm run generate:llms-full`），不手動編輯 |
 | [`app/feed.xml/route.ts`](../app/feed.xml/route.ts) + [`lib/feed.ts`](../lib/feed.ts) | RSS 2.0 feed；enclosure length 來自建置時 `generate:audio-lengths` → [`data/audio-lengths.json`](../data/audio-lengths.json)（禁止 route runtime 掃 `public/`，避免 NFT 打包超標） |
-| [`lib/json-ld.ts`](../lib/json-ld.ts) | 結構化資料：`podcastSeriesJsonLd`（含 `sameAs` 平台節目頁連結）、`podcastEpisodeJsonLd`（含逐字稿 `associatedMedia` MediaObject，`encodingFormat: text/vtt`）、`breadcrumbListJsonLd`（五類頁純 JSON-LD，**無可見 UI**，僅供機器解析頁面階層）、`faqPageJsonLd`、`characterCreativeWorkJsonLd` |
-| `public/story/<slug>/transcript.vtt`（經 [`lib/transcript.ts`](../lib/transcript.ts) 判定 `hasVtt`） | 逐字稿側車，供 AI 引擎直接讀取對話內容（非僅摘要） |
+| [`lib/json-ld.ts`](../lib/json-ld.ts) | 結構化資料：`podcastSeriesJsonLd`（含 `sameAs` 平台節目頁連結）、`podcastEpisodeJsonLd`（**僅有完整逐字稿**時 `associatedMedia` 追加 `text/vtt` MediaObject，`name: 完整逐字稿`）、`breadcrumbListJsonLd`（五類頁純 JSON-LD，**無可見 UI**，僅供機器解析頁面階層）、`faqPageJsonLd`、`characterCreativeWorkJsonLd` |
+| `/story/<slug>/transcript.vtt`（[`lib/transcript.ts`](../lib/transcript.ts) 的 `hasFullTranscript`／`buildFullTranscriptVtt`，來源 `data/subtitles/<slug>.json`） | **完整音檔逐字稿** WebVTT 側車；**不得**用翻頁 `captions` 冒充。場景字幕僅在故事頁「故事大綱」HTML |
 | [`scripts/verify-geo.ts`](../scripts/verify-geo.ts) + `npm run verify:geo` | build 後護欄：sitemap 涵蓋度、`llms-full.txt` 新鮮度、重點頁 JSON-LD 可解析、`dateModified` 與 sitemap `lastModified` 同源、`noindex` 頁面正確性。已掛在 `npm run check` 尾端 |
+| [`scripts/verify-geo-live.ts`](../scripts/verify-geo-live.ts) + `npm run verify:geo-live` | **部署後**對 live base URL 煙霧測試（robots／sitemap／feed／llms、重點頁 200、JSON-LD）；**不在** `npm run check` 內 |
+| [`docs/GEO-BASELINE.md`](./GEO-BASELINE.md) | 每週人工 baseline 記錄表（AI 五題 + GSC／Bing／Vercel 指標）；勿捏造引用結果 |
 | [`scripts/generate-indexnow-key.ts`](../scripts/generate-indexnow-key.ts) | prebuild 依 `INDEXNOW_KEY` env 產生 `public/<key>.txt`（IndexNow key file）；未設定時安靜略過 |
 | [`scripts/submit-indexnow.ts`](../scripts/submit-indexnow.ts) + `npm run submit:indexnow` | sync 後 best-effort 通知 IndexNow（Bing 等），fail-soft（見 §4）；支援 `--dry-run` |
 
@@ -137,15 +139,19 @@ npm run submit:indexnow -- --dry-run
 
 ### AI Prompt Baseline（五題，每週手動問一次記錄是否被引用/如何被引用）
 
+固定題目與記錄表見 **[`GEO-BASELINE.md`](./GEO-BASELINE.md)**（evergreen，含「最新一集」題，勿硬編 EP 編號）。
+
 1. 「適合 3–6 歲的中文車車 Podcast」
 2. 「睡前中文兒童故事 Podcast」
 3. 「車車遊樂園有哪些故事」
-4. 「車車遊樂園 EP-18 在講什麼」
+4. 「車車遊樂園最新一集在講什麼」
 5. 「適合親子共聽的車車安全故事」
 
-在 ChatGPT、Claude、Perplexity（至少覆蓋這三個，Gemini 有空再補）各問一次，記錄是否引用本站、引用哪個頁面、內容是否準確。
+在 ChatGPT、Claude、Perplexity（至少覆蓋這三個，Gemini 有空再補）各問一次，記錄是否引用本站、引用哪個頁面、內容是否準確。**請只填實測結果，勿捏造引用。**
 
 ### 每週記錄模板
+
+詳細欄位（含「是否混淆場景字幕與逐字稿」、搜尋平台指標）見 **[`GEO-BASELINE.md`](./GEO-BASELINE.md)**。下方為 GSC／Bing 速記簡表（可與該檔併用）：
 
 | 週次 | Google Indexed | Google Crawled-not-indexed | Sitemap errors | Bing URL submitted | Bing IndexNow 狀態 | Vercel AI crawler 200 率 | Prompt 1 引用 | Prompt 2 引用 | Prompt 3 引用 | Prompt 4 引用 | Prompt 5 引用 | 備註 |
 |------|-----------------|------------------------------|-----------------|----------------------|------------------------|----------------------------|----------------|----------------|----------------|----------------|----------------|------|
@@ -187,13 +193,14 @@ npm run submit:indexnow -- --dry-run
 - [ ] `curl -A "PerplexityBot" https://<domain>/robots.txt` → 同上
 - [ ] `npm run submit:indexnow`（正式 key，非 `--dry-run`）→ 回報 HTTP 200 或 202
 - [ ] `npm run check` 全綠（含 `verify:geo`）在 CI 上已通過，作為部署前把關
+- [ ] `npm run verify:geo-live -- --base-url=https://<domain>` → 全綠（見 [`scripts/verify-geo-live.ts`](../scripts/verify-geo-live.ts)）
 
 ---
 
 ## 相關文件
 
+- [`GEO-BASELINE.md`](./GEO-BASELINE.md) — 每週 AI 引用與搜尋平台 baseline 記錄（人工填寫）
 - [`geo-checklist.md`](./geo-checklist.md) — 上線後人工檢查清單（Rich Results、Schema Validator、單集頁可見字數量測、AI 引用實測 prompt、baseline 記錄表）
 - [`GEO-CONTENT-CONTRACT.md`](./GEO-CONTENT-CONTRACT.md) — 內容欄位邊界（可見摘要 vs `<details>` 深挖內容）
-- [`geo-audit.md`](./geo-audit.md) — GEO 現況稽核
 - [`AGENT-DOMAIN.md`](./AGENT-DOMAIN.md) — 本專案 Bootstrap、紅線、驗證矩陣
 - [`EPISODE-WORKFLOW.md`](./EPISODE-WORKFLOW.md) — 單集流程（第 8 步：SoundOn show notes 回鏈，另一個站外 GEO 訊號來源）

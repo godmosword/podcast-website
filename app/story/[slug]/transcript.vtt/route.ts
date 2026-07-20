@@ -1,5 +1,5 @@
 import { getStories, getStory } from "@/data/content";
-import { buildStoryVtt } from "@/lib/transcript";
+import { buildFullTranscriptVtt } from "@/lib/transcript";
 
 export function generateStaticParams() {
   return getStories().map((story) => ({ slug: story.slug }));
@@ -15,7 +15,7 @@ export async function GET(
     return new Response(null, { status: 404 });
   }
 
-  const vtt = buildStoryVtt(story);
+  const vtt = buildFullTranscriptVtt(story.slug);
   if (!vtt) {
     return new Response(null, { status: 404 });
   }

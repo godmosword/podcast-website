@@ -25,7 +25,7 @@
   - [ ] 可見區只有 **本集介紹一段**（定義式摘要），無第二段完整 `plainSummary`。
   - [ ] 大綱／角色／家長延伸／其餘 FAQ 在 `<details>` 內（DOM 仍有全文，預設不展開）。
   - [ ] `<script type="application/ld+json">` 仍含完整 FAQPage。
-- [ ] 有 VTT 的集數：`curl -I` 或 view-source 確認 `alternates`／頁內連到 `/story/<slug>/transcript.vtt`。
+- [ ] 有完整逐字稿（`data/subtitles/<slug>.json`）的集數：`curl -I` 或 view-source 確認 `alternates`／頁內連到 `/story/<slug>/transcript.vtt`；僅有場景 `captions` 的集不得出現「完整逐字稿」文案或 VTT 連結。
 
 ## 3. 單集頁預設可見字數（GEO 第二階段）
 

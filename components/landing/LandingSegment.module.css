@@ -130,6 +130,25 @@
   text-shadow: 0 2px 14px rgba(0, 0, 0, 0.46), 0 1px 2px rgba(0, 0, 0, 0.42);
 }
 
+.subtitle {
+  margin: 0;
+  font-size: clamp(0.92rem, 2.6vw, 1.05rem);
+  font-weight: 700;
+  line-height: 1.45;
+  opacity: 0.92;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.38);
+}
+
+.siteIntro {
+  margin: 0.35em 0 0;
+  max-width: 36em;
+  font-size: clamp(0.82rem, 2.2vw, 0.94rem);
+  font-weight: 600;
+  line-height: 1.55;
+  opacity: 0.88;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.42);
+}
+
 .ctaRow {
   display: flex;
   flex-wrap: wrap;

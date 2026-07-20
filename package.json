@@ -22,6 +22,7 @@
     "verify:function-size": "tsx scripts/verify-function-size.ts",
     "verify:no-public-fs": "tsx scripts/verify-no-public-fs.ts",
     "verify:geo": "tsx scripts/verify-geo.ts",
+    "verify:geo-live": "tsx scripts/verify-geo-live.ts",
     "audit:assets": "tsx scripts/audit-assets.ts",
     "audit:colors": "tsx scripts/audit-colors.ts",
     "proofread:subtitles": "tsx scripts/proofread-subtitles.ts",

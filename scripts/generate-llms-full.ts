@@ -8,7 +8,7 @@ import {
   storyDefinitionSummary,
   storyOutlinePreviewItems,
 } from "../lib/story-geo";
-import { hasVtt } from "../lib/transcript";
+import { llmsTranscriptBullet } from "../lib/transcript";
 
 type RawCharacter = {
   name: string;
@@ -76,6 +76,7 @@ export function buildLlmsFullText(options: BuildOptions = {}): string {
       const outlineBullets = storyOutlinePreviewItems(story).map(
         (line) => `- ${line}`,
       );
+      const transcriptLine = llmsTranscriptBullet(story, siteUrl);
       const lines = [
         `### 第 ${story.ep} 集：${story.title}`,
         "",
@@ -86,11 +87,12 @@ export function buildLlmsFullText(options: BuildOptions = {}): string {
         ...(story.familyActivity
           ? ["", `🏡 聽完聊一聊：${story.familyActivity.question}`]
           : []),
+        ...(story.episodeFaq
+          ? ["", `❓ ${story.episodeFaq.question}：${story.episodeFaq.answer}`]
+          : []),
         "",
         `- 頁面 URL：${siteUrl}/story/${story.slug}`,
-        ...(hasVtt(story)
-          ? [`- 逐字稿（WebVTT）：${siteUrl}/story/${story.slug}/transcript.vtt`]
-          : []),
+        ...(transcriptLine ? [transcriptLine] : []),
         ...(story.tags?.length ? [`- 主題標籤：${story.tags.join("、")}`] : []),
         ...(story.vehicle ? [`- 車種：${story.vehicle}`] : []),
         `- 發布日期：${story.date}`,

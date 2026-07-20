@@ -693,10 +693,25 @@ EP1–7 已用 `large-v3` 轉錄 + 自動簡轉繁（`data/subtitles/*.json`）�
 
 ### GEO 營運基礎（crawler 政策／IndexNow／逐字稿／verify:geo）　`P2 · M · 無`　〔eng+growth〕　de2774b
 本輪已實作：`app/robots.ts` AI 檢索型 crawler（`OAI-SearchBot`／`ChatGPT-User`／`Claude-SearchBot`／`Claude-User`／`PerplexityBot`／`Perplexity-User`）放行、訓練型（`GPTBot`／`ClaudeBot`／`Google-Extended`／`Applebot-Extended`／`CCBot`／`Bytespider`／`meta-externalagent`）拒絕；`lib/json-ld.ts` 補 `PodcastSeries.sameAs`、`breadcrumbListJsonLd`（純 JSON-LD，無可見 UI）、`PodcastEpisode.associatedMedia` 逐字稿 MediaObject；`lib/feed.ts`／`app/feed.xml/route.ts` 補 RSS enclosure length（建置時 `generate:audio-lengths` → `data/audio-lengths.json`，route 禁止 runtime 掃 public/）；新增 `scripts/generate-indexnow-key.ts`（prebuild）＋ `scripts/submit-indexnow.ts`（sync 後 best-effort、fail-soft、`--dry-run`）＋ `.github/workflows/sync-apple-podcast.yml` 新步驟；新增 `scripts/verify-geo.ts`（`npm run verify:geo`，已入 `npm run check` 尾端）。完整營運手冊見 [docs/GEO.md](./docs/GEO.md)。
-**剩餘（使用者手動）：** 設定 `INDEXNOW_KEY`（GitHub Secret + Vercel env，須同值，見 docs/GEO.md §3）；Google Search Console／Bing Webmaster 提交（見 docs/GEO.md §6）；每週量測記錄（GSC／Bing Webmaster／Vercel logs／AI prompt baseline 五題，見 docs/GEO.md §5）。
+**剩餘（使用者手動）：** 設定 `INDEXNOW_KEY`（GitHub Secret + Vercel env，須同值，見 docs/GEO.md §3）；Google Search Console／Bing Webmaster 提交（見 docs/GEO.md §6）；每週量測記錄（GSC／Bing Webmaster／Vercel logs／AI prompt baseline 五題，見 [docs/GEO-BASELINE.md](./docs/GEO-BASELINE.md)）；部署後可跑 `npm run verify:geo-live -- --base-url=…`（見 docs/GEO.md §7）。
 
 ### 壓縮 Podcast 音檔　`P2 · S · 無`　〔content〕
 ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–10MB，總 50MB+）。睡前=手機弱網，載入慢。指令見 README；壓後本機聽確認音質再覆蓋。
+
+### 每集專屬 FAQ（episodeFaq sidecar）　`P1 · M · 無`　〔content+eng〕
+新增 `data/episode-faqs.ts` sidecar：每集 1 題緊扣該集劇情／主題的 FAQ（非模板換名），`data/content.ts` `enrichStory()` 合併進 `Story.episodeFaq`；`lib/story-geo.ts` `storyFaqs()` 有值時放最前面，其餘 3 題通用 FAQ 順序不變（可見區＝FAQPage JSON-LD 同一份資料）；有則附 1 行到 `llms-full`。契約補進 [docs/GEO-CONTENT-CONTRACT.md](./docs/GEO-CONTENT-CONTRACT.md#episodefaq已上線)。目前 `getStories()` 20 集**全數覆蓋**（`episodeFaqCoverage()`／`verify:geo` 摘要「Unique episode FAQ coverage」皆 20/20）；不得逐字重複 `familyActivity`／`reflectionPrompt`／`parentGuide`（`hasDuplicateGuideText` 迴歸測試）。測試：`data/episode-faqs.test.ts`、`lib/story-geo.test.ts`、`scripts/generate-llms-full.test.ts`。**待補齊：** 無（全數覆蓋）；新增集數時若暫無空寫優質題目，寧可留白，缺漏 slug 補在本行下次更新。
+
+## 待議：主持人／創作者實體強化
+
+> **狀態：待議** — 以下**非**已核准工項；正式上線前再決定是否實作。**本階段不實作 Person JSON-LD／主持人照片／社群 sameAs。**
+
+- 討論馬米的公開定位：創作者、編劇、主持人、製作人
+- 討論 Bonbon 的公開定位與兒童隱私邊界
+- 評估 About 頁創作者介紹
+- 評估 Person JSON-LD 固定 `@id`
+- 評估 creator／author／contributor 的分工
+- 評估創作者社群 sameAs
+- 正式上線前再決定是否實作
 
 ### ~~家長放大閱讀（viewport 縮放）~~　`P2 · S · 產品決策`　〔design〕 ✅
 **已決並實作：** `app/layout.tsx` 移除 `maximumScale`／`userScalable: false`，開放 pinch-zoom，家長共讀可放大文字／插圖（WCAG 1.4.4）；`DESIGN.md` 已同步 viewport 原則。**剩餘（可選）：** 實機驗證 3–5 歲誤觸縮放是否影響操作；若困擾再評估「大字模式」而非重新鎖縮放。

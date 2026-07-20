@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { getCharacters } from "@/data/characters";
 import { storiesByNewest } from "@/data/content";
 import { storyDateModified } from "@/data/story-dates";
-import { hasVtt } from "@/lib/transcript";
+import { hasFullTranscript, hasSceneCaptions } from "@/lib/transcript";
 import {
   breadcrumbListJsonLd,
   characterCreativeWorkJsonLd,
@@ -110,21 +110,23 @@ describe("podcastEpisodeJsonLd", () => {
     vi.unstubAllEnvs();
   });
 
-  it("有 VTT 時 associatedMedia 追加逐字稿 MediaObject", () => {
+  it("有完整逐字稿時 associatedMedia 追加 transcript MediaObject", () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
     const story = {
       ...storiesByNewest()[0],
-      slug: "ep-vtt-test",
-      captions: ["第一句", "第二句"],
+      slug: "ep-1",
+      captions: ["場景短句一", "場景短句二"],
       captionTimes: [0, 2],
     };
-    expect(hasVtt(story)).toBe(true);
+    expect(hasFullTranscript(story)).toBe(true);
+    expect(hasSceneCaptions(story)).toBe(true);
     const data = podcastEpisodeJsonLd(story);
 
     expect(Array.isArray(data.associatedMedia)).toBe(true);
     expect(data.associatedMedia).toContainEqual({
       "@type": "MediaObject",
-      contentUrl: "https://example.com/story/ep-vtt-test/transcript.vtt",
+      name: "完整逐字稿",
+      contentUrl: "https://example.com/story/ep-1/transcript.vtt",
       encodingFormat: "text/vtt",
       inLanguage: "zh-TW",
     });
@@ -132,15 +134,36 @@ describe("podcastEpisodeJsonLd", () => {
     vi.unstubAllEnvs();
   });
 
-  it("無 VTT 時 associatedMedia 只有音檔、不含逐字稿 MediaObject", () => {
+  it("僅場景字幕、無 subtitles 側車時不含逐字稿 MediaObject", () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
     const story = {
       ...storiesByNewest()[0],
-      slug: "ep-no-vtt-test",
+      slug: "ep-scene-only-fixture",
+      captions: ["場景一", "場景二"],
+      captionTimes: [0, 2],
+    };
+    expect(hasFullTranscript(story)).toBe(false);
+    expect(hasSceneCaptions(story)).toBe(true);
+    const data = podcastEpisodeJsonLd(story);
+
+    expect(Array.isArray(data.associatedMedia)).toBe(false);
+    expect(data.associatedMedia).toMatchObject({
+      "@type": "MediaObject",
+      encodingFormat: "audio/mpeg",
+    });
+
+    vi.unstubAllEnvs();
+  });
+
+  it("無字幕也無逐字稿側車時 associatedMedia 只有音檔", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
+    const story = {
+      ...storiesByNewest()[0],
+      slug: "ep-scene-only-fixture",
       captions: undefined,
       captionTimes: undefined,
     };
-    expect(hasVtt(story)).toBe(false);
+    expect(hasFullTranscript(story)).toBe(false);
     const data = podcastEpisodeJsonLd(story);
 
     expect(Array.isArray(data.associatedMedia)).toBe(false);

@@ -4,6 +4,7 @@ import { vehicleDefinitionSummary, vehicleFaqs } from "./vehicle-geo";
 
 describe("vehicleDefinitionSummary", () => {
   it("每個車種產生含集數與代表例子的導言", () => {
+    const summaries = new Set<string>();
     for (const vehicle of allVehicles()) {
       const stories = getStoriesByVehicle(vehicle);
       const summary = vehicleDefinitionSummary(vehicle, stories);
@@ -11,7 +12,9 @@ describe("vehicleDefinitionSummary", () => {
       expect(summary, vehicle).toContain(vehicle);
       expect(summary, vehicle).toContain(String(stories.length));
       expect(summary, vehicle).toContain("EP ");
+      summaries.add(summary);
     }
+    expect(summaries.size).toBeGreaterThan(1);
   });
 });
 

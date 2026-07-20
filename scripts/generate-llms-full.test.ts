@@ -50,6 +50,24 @@ describe("buildLlmsFullText", () => {
     expect(occurrences).toHaveLength(withActivity.length);
   });
 
+  it("有 episodeFaq 的集數摘要後附「❓」問答行，其他集數無痕跡", () => {
+    const text = buildLlmsFullText({
+      siteUrl: "https://example.com",
+      generatedAt: "2026-07-02T00:00:00.000Z",
+    });
+
+    const withFaq = getStories().filter((s) => s.episodeFaq);
+    expect(withFaq.length).toBeGreaterThan(0);
+    for (const story of withFaq) {
+      expect(text).toContain(
+        `❓ ${story.episodeFaq!.question}：${story.episodeFaq!.answer}`,
+      );
+    }
+
+    const occurrences = text.match(/❓ /g) ?? [];
+    expect(occurrences).toHaveLength(withFaq.length);
+  });
+
   it("角色索引非空且連到 /characters", () => {
     const text = buildLlmsFullText({
       siteUrl: "https://example.com",
@@ -65,13 +83,15 @@ describe("buildLlmsFullText", () => {
     expect(characterLines.join("\n")).not.toContain("undefined");
   });
 
-  it("每集區塊含大綱要點，有 VTT 的集數附逐字稿連結", () => {
+  it("每集區塊含大綱要點，有完整逐字稿的集數附完整逐字稿連結", () => {
     const text = buildLlmsFullText({
       siteUrl: "https://example.com",
       generatedAt: "2026-07-02T00:00:00.000Z",
     });
 
     expect(text).toContain("大綱要點：");
+    expect(text).toContain("完整逐字稿（WebVTT）");
+    expect(text).not.toMatch(/- 逐字稿（WebVTT）：/);
 
     const firstStory = getStories()[0];
     const blockStart = text.indexOf(`### 第 ${firstStory.ep} 集：${firstStory.title}`);

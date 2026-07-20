@@ -1,24 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
+import {
+  AI_RETRIEVAL_CRAWLERS,
+  AI_TRAINING_CRAWLERS,
+  verifyRobotsPolicy,
+} from "@/lib/robots-policy";
 import robots from "./robots";
-
-const RETRIEVAL_CRAWLERS = [
-  "OAI-SearchBot",
-  "ChatGPT-User",
-  "Claude-SearchBot",
-  "Claude-User",
-  "PerplexityBot",
-  "Perplexity-User",
-] as const;
-
-const TRAINING_CRAWLERS = [
-  "GPTBot",
-  "ClaudeBot",
-  "Google-Extended",
-  "Applebot-Extended",
-  "CCBot",
-  "Bytespider",
-  "meta-externalagent",
-] as const;
 
 describe("robots", () => {
   it("放行檢索型 AI crawler、拒絕訓練型 crawler，並保留全站 allow 與 sitemap", () => {
@@ -27,16 +13,19 @@ describe("robots", () => {
     const data = robots();
     const rules = Array.isArray(data.rules) ? data.rules : [data.rules];
 
-    for (const userAgent of RETRIEVAL_CRAWLERS) {
+    for (const userAgent of AI_RETRIEVAL_CRAWLERS) {
       expect(rules).toContainEqual({ userAgent, allow: "/" });
     }
 
-    for (const userAgent of TRAINING_CRAWLERS) {
+    for (const userAgent of AI_TRAINING_CRAWLERS) {
       expect(rules).toContainEqual({ userAgent, disallow: "/" });
     }
 
     expect(rules).toContainEqual({ userAgent: "*", allow: "/" });
     expect(data.sitemap).toBe("https://example.com/sitemap.xml");
+
+    const policy = verifyRobotsPolicy(data.rules);
+    expect(policy.ok).toBe(true);
 
     vi.unstubAllEnvs();
   });
@@ -45,8 +34,10 @@ describe("robots", () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
 
     const data = robots();
-    const rules = Array.isArray(data.rules) ? data.rules : [data.rules];
+    const policy = verifyRobotsPolicy(data.rules);
+    expect(policy.ok).toBe(true);
 
+    const rules = Array.isArray(data.rules) ? data.rules : [data.rules];
     const disallowedAgents = rules
       .filter((rule) => "disallow" in rule && rule.disallow)
       .map((rule) => rule.userAgent);
@@ -54,11 +45,8 @@ describe("robots", () => {
       .filter((rule) => "allow" in rule && rule.allow)
       .map((rule) => rule.userAgent);
 
-    // Claude-SearchBot 是檢索型：必須出現在某條 allow，且不得出現在任何 disallow。
     expect(allowedAgents).toContainEqual("Claude-SearchBot");
     expect(disallowedAgents).not.toContainEqual("Claude-SearchBot");
-
-    // ClaudeBot 是訓練型：必須（精確全名）出現在 disallow「/」規則中，且不影響 Claude-SearchBot。
     expect(rules).toContainEqual({ userAgent: "ClaudeBot", disallow: "/" });
     expect(allowedAgents).not.toContainEqual("ClaudeBot");
 

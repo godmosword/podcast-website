@@ -15,7 +15,7 @@ import {
   storyParentExtension,
 } from "@/lib/story-geo";
 import { storyDetailMetadata } from "@/lib/story-metadata";
-import { hasVtt } from "@/lib/transcript";
+import { hasFullTranscript } from "@/lib/transcript";
 import { storyCoverPath } from "@/lib/story-utils";
 import FavoriteButton from "@/components/FavoriteButton";
 import JsonLd from "@/components/JsonLd";
@@ -74,7 +74,9 @@ export default async function StoryDetailPage({
   const parentExtension = storyParentExtension(story);
   const faqs = storyFaqs(story);
   const [primaryFaq, ...moreFaqs] = faqs;
-  const storyHasVtt = hasVtt(story);
+  const storyHasFullTranscript = hasFullTranscript(story);
+  // 僅在有更多大綱可展開時顯示收合區，避免與 preview 重複的空殼（設計審 M3）
+  const showOutlineDetails = hasFullOutline;
   // GEO：familyActivity 以 Q&A 形式併入 FAQPage JSON-LD（頁面可見文字由卡片提供）
   const activityFaq = familyActivityFaq(story);
   const jsonLdFaqs = activityFaq ? [...faqs, activityFaq] : faqs;
@@ -178,23 +180,23 @@ export default async function StoryDetailPage({
               <li key={`${story.slug}-outline-preview-${i}`}>{line}</li>
             ))}
           </ol>
-          {(hasFullOutline || storyHasVtt) && (
+          {showOutlineDetails && (
             <details className={styles.expandable}>
-              <summary>看完整逐字稿與詳細大綱</summary>
+              <summary>看詳細故事大綱</summary>
               <ol className={styles.lines}>
                 {outlineItems.map((line, i) => (
                   <li key={`${story.slug}-outline-${i}`}>{line}</li>
                 ))}
               </ol>
-              {storyHasVtt && (
-                <Link
-                  href={`/story/${story.slug}/transcript.vtt`}
-                  className={styles.inlineLink}
-                >
-                  下載完整逐字稿（WebVTT）
-                </Link>
-              )}
             </details>
+          )}
+          {storyHasFullTranscript && (
+            <Link
+              href={`/story/${story.slug}/transcript.vtt`}
+              className={styles.inlineLink}
+            >
+              下載完整逐字稿（WebVTT）
+            </Link>
           )}
         </section>
 

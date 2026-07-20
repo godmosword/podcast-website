@@ -11,7 +11,7 @@ import StoryCard from "@/components/StoryCard";
 import styles from "./page.module.css";
 
 export function generateStaticParams() {
-  return allTags().map((tag) => ({ tag: encodeURIComponent(tag) }));
+  return allTags().map((tag) => ({ tag }));
 }
 
 export async function generateMetadata({

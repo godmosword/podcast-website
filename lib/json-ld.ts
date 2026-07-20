@@ -126,6 +126,7 @@ export function podcastEpisodeJsonLd(story: Story): Record<string, unknown> {
   const transcriptMedia = hasVtt(story)
     ? {
         "@type": "MediaObject",
+        name: "完整逐字稿",
         contentUrl: `${pageUrl}/transcript.vtt`,
         encodingFormat: "text/vtt",
         inLanguage: "zh-TW",

@@ -1,0 +1,25 @@
+# 部署後 GEO live 煙霧測試（僅手動觸發）
+name: verify-geo-live
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "部署站點根 URL（含 https://，不含尾斜線）"
+        required: true
+        default: "https://podcast-website-mu.vercel.app"
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: verify:geo-live
+        env:
+          BASE_URL: ${{ inputs.base_url }}
+        run: npm run verify:geo-live -- --base-url="$BASE_URL"

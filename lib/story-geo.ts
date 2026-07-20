@@ -169,7 +169,13 @@ export function familyActivityFaq(story: Story): FaqItem | null {
   };
 }
 
-export function storyFaqs(story: Story): FaqItem[] {
+/** 有 episodeFaq（sidecar，見 data/episode-faqs.ts）的故事 slug；供 verify:geo 覆蓋率摘要用。 */
+export function slugsWithEpisodeUniqueFaq(stories: Story[]): string[] {
+  return stories.filter((story) => Boolean(story.episodeFaq)).map((story) => story.slug);
+}
+
+/** 3 題模板化通用 FAQ；episodeFaq（若有）由 storyFaqs() 併在最前面。 */
+function genericStoryFaqs(story: Story): FaqItem[] {
   return [
     {
       question: `這一集適合幾歲的孩子？`,
@@ -184,4 +190,14 @@ export function storyFaqs(story: Story): FaqItem[] {
       answer: `可以先一起看封面，再邊聽邊問孩子注意到哪台車、哪個表情或哪個選擇，最後用自己的生活經驗延伸${topicText(story)}。`,
     },
   ];
+}
+
+/**
+ * 單集 FAQ 清單：可見文字與 FAQPage JSON-LD 共用同一份資料（見
+ * app/story/[slug]/page.tsx）。有 `episodeFaq`（sidecar，見
+ * data/episode-faqs.ts）時放在最前面，其餘 3 題通用 FAQ 順序不變。
+ */
+export function storyFaqs(story: Story): FaqItem[] {
+  const generic = genericStoryFaqs(story);
+  return story.episodeFaq ? [story.episodeFaq, ...generic] : generic;
 }

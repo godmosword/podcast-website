@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
 import type { Story } from "@/data/content";
-import { buildStoryVtt, hasTranscript, hasVtt } from "./transcript";
+import {
+  buildFullTranscriptVtt,
+  buildStoryVtt,
+  hasFullTranscript,
+  hasSceneCaptions,
+  hasTranscript,
+  hasTranscriptVtt,
+  hasVtt,
+  llmsTranscriptBullet,
+} from "./transcript";
 
 function story(partial: Partial<Story> & Pick<Story, "slug">): Story {
   return {
@@ -19,76 +28,110 @@ function story(partial: Partial<Story> & Pick<Story, "slug">): Story {
   };
 }
 
-describe("hasTranscript", () => {
+describe("hasSceneCaptions", () => {
   it("有 captions 回 true", () => {
-    expect(hasTranscript(story({ slug: "ep-1", captions: ["你好"] }))).toBe(true);
+    expect(hasSceneCaptions(story({ slug: "ep-1", captions: ["你好"] }))).toBe(
+      true,
+    );
   });
 
   it("無 captions 回 false", () => {
-    expect(hasTranscript(story({ slug: "ep-1" }))).toBe(false);
+    expect(hasSceneCaptions(story({ slug: "ep-1" }))).toBe(false);
   });
 });
 
-describe("hasVtt", () => {
-  it("captions 與 captionTimes 長度一致回 true", () => {
+describe("hasFullTranscript", () => {
+  it("僅場景字幕、無 subtitles 側車回 false", () => {
     expect(
-      hasVtt(
+      hasFullTranscript(
         story({
-          slug: "ep-1",
-          captions: ["a", "b"],
-          captionTimes: [0, 2],
-        }),
-      ),
-    ).toBe(true);
-  });
-
-  it("長度不一致回 false", () => {
-    expect(
-      hasVtt(
-        story({
-          slug: "ep-1",
-          captions: ["a", "b"],
-          captionTimes: [0],
+          slug: "ep-no-subtitles-fixture",
+          captions: ["場景一", "場景二"],
+          captionTimes: [0, 5],
         }),
       ),
     ).toBe(false);
   });
 
-  it("只有 captions 無 captionTimes 回 false", () => {
-    expect(hasTranscript(story({ slug: "ep-1", captions: ["a"] }))).toBe(true);
-    expect(hasVtt(story({ slug: "ep-1", captions: ["a"] }))).toBe(false);
+  it("ep-1 有 subtitles 側車回 true", () => {
+    expect(hasFullTranscript(story({ slug: "ep-1" }))).toBe(true);
+  });
+
+  it("hasTranscript／hasVtt／hasTranscriptVtt 與完整逐字稿對齊", () => {
+    const withSubs = story({ slug: "ep-1" });
+    const withoutSubs = story({
+      slug: "ep-no-subtitles-fixture",
+      captions: ["a"],
+    });
+    expect(hasTranscript(withSubs)).toBe(true);
+    expect(hasVtt(withSubs)).toBe(true);
+    expect(hasTranscriptVtt(withSubs)).toBe(true);
+    expect(hasTranscript(withoutSubs)).toBe(false);
+    expect(hasVtt(withoutSubs)).toBe(false);
   });
 });
 
-describe("buildStoryVtt", () => {
-  it("產出 WEBVTT 與遞增 cue", () => {
-    const vtt = buildStoryVtt(
-      story({
-        slug: "ep-1",
-        captions: ["第一句", "第二句"],
-        captionTimes: [1.5, 5],
-      }),
-    );
-    expect(vtt).not.toBeNull();
-    expect(vtt).toMatch(/^WEBVTT/);
-    expect(vtt).toContain("00:00:01.500 --> 00:00:05.000");
-    expect(vtt).toContain("第一句");
-    expect(vtt).toContain("00:00:05.000 --> 00:00:09.000");
-    expect(vtt).toContain("第二句");
+describe("buildFullTranscriptVtt", () => {
+  it("無 subtitles 回 null（即使有場景 captions）", () => {
+    expect(
+      buildFullTranscriptVtt(
+        story({
+          slug: "ep-no-subtitles-fixture",
+          captions: ["只有場景"],
+          captionTimes: [0],
+        }),
+      ),
+    ).toBeNull();
+    expect(buildStoryVtt(story({ slug: "ep-no-subtitles-fixture" }))).toBeNull();
   });
 
-  it("負數時間 clamp 為 0", () => {
-    const vtt = buildStoryVtt(
-      story({
-        slug: "ep-1",
-        captions: ["開場"],
-        captionTimes: [-1],
-      }),
-    );
+  it("由 subtitles 產出 WEBVTT，cue 數遠多於場景 captions", () => {
+    const vtt = buildFullTranscriptVtt("ep-1");
+    expect(vtt).not.toBeNull();
+    expect(vtt).toMatch(/^WEBVTT/);
+    expect(vtt).toContain("嗨,我是 Bonbon");
+    const cueCount = (vtt!.match(/^\d+$/gm) ?? []).length;
+    expect(cueCount).toBeGreaterThan(50);
+  });
+
+  it("負數時間 clamp 為 0（mock slug 用 ep-1 首 cue）", () => {
+    const vtt = buildFullTranscriptVtt("ep-1");
     expect(vtt).toContain("00:00:00.000 -->");
   });
 
-  it("缺時間碼回 null", () => {
-    expect(buildStoryVtt(story({ slug: "ep-1", captions: ["只有字"] }))).toBeNull();
+  it("連續相同 timestamp 不產生零長度 cue（ep-5）", () => {
+    const vtt = buildFullTranscriptVtt("ep-5");
+    expect(vtt).not.toBeNull();
+    const timeRanges = vtt!.match(
+      /\d{2}:\d{2}:\d{2}\.\d{3} --> \d{2}:\d{2}:\d{2}\.\d{3}/g,
+    );
+    expect(timeRanges).toBeDefined();
+    for (const range of timeRanges ?? []) {
+      const [startStr, endStr] = range.split(" --> ");
+      expect(startStr).not.toBe(endStr);
+    }
+  });
+});
+
+describe("llmsTranscriptBullet", () => {
+  it("有完整逐字稿標完整逐字稿連結", () => {
+    const line = llmsTranscriptBullet(
+      story({ slug: "ep-1" }),
+      "https://example.com",
+    );
+    expect(line).toContain("完整逐字稿");
+    expect(line).toContain("/transcript.vtt");
+  });
+
+  it("僅場景字幕標場景字幕、不稱逐字稿", () => {
+    const line = llmsTranscriptBullet(
+      story({
+        slug: "ep-no-subtitles-fixture",
+        captions: ["場景"],
+      }),
+      "https://example.com",
+    );
+    expect(line).toContain("場景字幕");
+    expect(line).not.toContain("逐字稿");
   });
 });

@@ -23,7 +23,7 @@ YouTube Studio 手動上傳 + 設定（兒童向／AI 標示）
 | 來源 | 粒度 | 本 workflow |
 |------|------|-------------|
 | `data/subtitles/*.json` | 逐句 `{ t, text }` | **使用**（burn-in） |
-| `captions` + `captionTimes` | 每幕一句 | **不用**（RSS／`transcript.vtt` 用） |
+| `captions` + `captionTimes` | 每幕一句（故事大綱） | **不用**（RSS／`transcript.vtt` 亦用 `subtitles` 側車，非 captions） |
 
 YouTube 影片字幕應與站上播放器看到的**逐句**內容一致，而非幕級 `captions`。
 

@@ -3,23 +3,39 @@ import Link from "next/link";
 import { allTags, getStoriesByTag } from "@/data/content";
 import { storyCoverPath } from "@/lib/story-utils";
 import { topicVisualFor } from "@/lib/topic-visuals";
+import { topicIndexDefinitionSummary } from "@/lib/topic-index-geo";
 import StoryImage from "@/components/StoryImage";
 import TopicIcon from "@/components/TopicIcon";
 import SiteFooter from "@/components/SiteFooter";
 import styles from "./page.module.css";
 
-export const metadata: Metadata = {
-  title: "主題分類",
-  description:
-    "依勇氣、守信用、安全合作、情緒等成長主題，挑選車車遊樂園親子故事。",
-  alternates: { canonical: "/topic" },
-};
+export function generateMetadata(): Metadata {
+  const themes = allTags().map((tag) => ({
+    tag,
+    count: getStoriesByTag(tag).length,
+  }));
+  const description = topicIndexDefinitionSummary(themes);
+  return {
+    title: "主題分類",
+    description,
+    alternates: { canonical: "/topic" },
+    openGraph: {
+      title: "主題分類 · 車車遊樂園",
+      description,
+      url: "/topic",
+      type: "website",
+    },
+  };
+}
 
 export default function TopicIndexPage() {
   const themes = allTags().map((tag) => {
     const stories = getStoriesByTag(tag);
     return { tag, count: stories.length, coverSlug: stories[0]?.slug ?? null };
   });
+  const lede = topicIndexDefinitionSummary(
+    themes.map(({ tag, count }) => ({ tag, count })),
+  );
 
   return (
     <main className={styles.main}>
@@ -28,6 +44,7 @@ export default function TopicIndexPage() {
       </Link>
 
       <h1 className={styles.title}>主題分類</h1>
+      <p className={styles.lede}>{lede}</p>
       <p className={styles.subtitle}>
         每集故事都有成長主題，點選主題瀏覽相關集數
       </p>

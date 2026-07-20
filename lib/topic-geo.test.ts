@@ -4,6 +4,7 @@ import { topicDefinitionSummary, topicFaqs } from "./topic-geo";
 
 describe("topicDefinitionSummary", () => {
   it("每個主題標籤產生含集數與代表例子的導言", () => {
+    const summaries = new Set<string>();
     for (const tag of allTags()) {
       const stories = getStoriesByTag(tag);
       const summary = topicDefinitionSummary(tag, stories);
@@ -11,7 +12,9 @@ describe("topicDefinitionSummary", () => {
       expect(summary, tag).toContain(tag);
       expect(summary, tag).toContain(String(stories.length));
       expect(summary, tag).toContain("EP ");
+      summaries.add(summary);
     }
+    expect(summaries.size).toBeGreaterThan(1);
   });
 });
 
