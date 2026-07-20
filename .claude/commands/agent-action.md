@@ -103,6 +103,7 @@ $ARGUMENTS
 
 ## 禁止
 
+- **禁止呼叫 Fable 5**（`claude-fable-5-thinking-medium`／`claude-fable-5-*`／「Fable 5」顯示名）— Leader／設計審用 Opus；L1／L2 用 Grok／Sonnet（Cursor 對標另有 `block-fable` hook）
 - 無 Plan 擅自擴大 scope（內容管線 SOP 內除外）
 - 跳過 Verify 宣稱完成
 

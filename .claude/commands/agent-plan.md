@@ -72,6 +72,10 @@ $ARGUMENTS
 
 **#2 Grok 對抗審、#3 Opus 禁止標 `跳過`**；中間級任務標 `按級距免派`（列仍不可省略）。
 
+## 禁止
+
+- **禁止呼叫 Fable 5**（`claude-fable-5-thinking-medium`／`claude-fable-5-*`／「Fable 5」顯示名）— Leader／設計審一律 `claude-opus-4-8-thinking-medium`（Cursor 對標另有 `block-fable` hook）
+
 ## 輸出語言
 
 繁體中文。

@@ -27,6 +27,8 @@
 
 ### Changed
 
+- **Agent 路由硬擋 Fable 5：** `/agent-plan`／`/agent-action` 明令禁止呼叫 Fable 5（`claude-fable-5-*`）；新增 `.cursor/hooks/block-fable.mjs`（`preToolUse`＋`subagentStart`）；契約測試改為要求禁令＋hook 註冊。
+
 - **Landing 尾頁／頂欄協調：** 頁尾移除重複主題切換，改安靜文字 meta（關於 · 節目數據 · 條款）；首頁頂欄在 `#landing-foot` 進入視窗時改近實心底（`data-nav-solid`），避免白底透字；連結對比達 AA。
 
 - **GEO Wave 1（聚合導言 sr-only）：** 首頁 `siteIntro` 與 `/stories`、`/topic`、`/topic/[tag]`、`/vehicles/[vehicle]` 的 answer-first 長導言改為 `sr-only`（SSR HTML 保留）；`/stories` 新增可見 `<h1>全部故事</h1>`；Vitest `lib/geo-visibility-contract.test.tsx`；`verify:geo` 標籤改為 HTML 存在性語意。

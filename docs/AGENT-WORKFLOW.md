@@ -200,6 +200,8 @@ Task 的 `model` **只能**用 Cursor 允許的 slug：
 | Grok 4.3 | `grok-4.3` | explore（只讀） |
 | Grok Build 0.1 | `grok-build-0.1` | shell、批次命令 |
 
+**已淘汰／禁止派工：** Fable 5（`claude-fable-5-thinking-medium` 及任何 `claude-fable-5-*`）— `/agent-plan`／`/agent-action` **不得呼叫**；Cursor 機械閘門 [`.cursor/hooks/block-fable.mjs`](../.cursor/hooks/block-fable.mjs)（`preToolUse`＋`subagentStart`）。
+
 slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 **例外——對抗審（Composer 2.5，readonly）**：Leader 不代做、其他模型不頂替；缺席標記但仍須出現在**固定分配表**。
 **L1／L2 實作（Composer 2.5）**：slug 拒收 → Leader 接手實作，分配表註明缺席。
@@ -418,3 +420,4 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 | 2026-07-18 | 角色對調：Leader → **Grok 4.5 High Fast**（`cursor-grok-4.5-high-fast`）；對抗審與 L1／L2 實作 → **Composer 2.5**（`composer-2.5-fast`）；內容管線仍 Sonnet；契約測試同步 |
 | 2026-07-18 | **Claude Code／Cursor agent group 分家**：Claude Code Leader → **Fable 5 Thinking Medium**（`claude-fable-5-thinking-medium`）優先、不可用時 **Opus 4.8 Thinking Medium**；Claude Code 對抗審＋L1／L2 實作 → **Grok 4.5 High Fast**（`cursor-agent --model cursor-grok-4.5-high-fast`）。Cursor 欄維持 Grok Leader＋Composer 對抗審／L1L2 不變；`.claude/commands/*` 同步 |
 | 2026-07-20 | **移除 Fable 5**：Claude Code Leader（Plan／Action session）一律 **Opus 4.8 Thinking Medium**（`claude-opus-4-8-thinking-medium`），不再有 fallback 二選一；slug 對照表刪 Fable 5 列、`.cursor/rules/agent-orchestration.mdc` 備選 Plan 審改 Opus；契約測試新增負向斷言（active 路由檔禁 `claude-fable-5-thinking-medium` 與 `Fable 5` 字樣，本修訂紀錄段除外） |
+| 2026-07-20 | **Fable 5 硬擋**：active 指令明令禁止呼叫；新增 `.cursor/hooks/block-fable.mjs`（`preToolUse` Task／CallDynamicTool＋`subagentStart`）；契約改為要求禁令＋hook 註冊，並禁止正向 Task 派工 Fable slug |

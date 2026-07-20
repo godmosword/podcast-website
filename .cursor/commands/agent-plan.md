@@ -107,6 +107,7 @@ typo 級小事不進本命令——直接做即可。
 
 ## 禁止
 
+- **禁止呼叫 Fable 5**（`claude-fable-5-thinking-medium` 及任何 `claude-fable-5-*`／「Fable 5」顯示名）— 設計審／Claude Code Leader 用 `claude-opus-4-8-thinking-medium`；機械閘門：`.cursor/hooks/block-fable.mjs`
 - 不要 commit / push
 - 不要跳過 Review 直接實作（使用者說「直接做」除外）
 - 收尾分配表省略 Composer 對抗審／Opus 列

@@ -69,7 +69,7 @@ describe("agent docs routing contract", () => {
     }
   });
 
-  it("Fable 5 已自 active 路由移除（Claude Code Leader 一律 Opus 4.8）", () => {
+  it("Fable 5：active 路由明令禁止，且無正向 Task 派工（Claude Code Leader＝Opus）", () => {
     const ACTIVE_ROUTING_FILES = [
       ".claude/commands/agent-plan.md",
       ".claude/commands/agent-action.md",
@@ -79,27 +79,36 @@ describe("agent docs routing contract", () => {
 
     for (const file of ACTIVE_ROUTING_FILES) {
       const text = readRepoFile(file);
-      // AGENT-WORKFLOW 的「修訂紀錄」為歷史事實，允許保留 Fable 5 字樣；
-      // 其餘 active 路由段落一律不得出現。
+      // AGENT-WORKFLOW「修訂紀錄」為歷史；active 段須含禁令，且不得正向派工。
       const active =
         file === CURSOR_META
           ? text.split("## 修訂紀錄")[0]
           : text;
-      expect(active, `${file} active 路由不得再含 Fable 5 slug`).not.toContain(
-        "claude-fable-5-thinking-medium",
+      expect(
+        active,
+        `${file} 須明令禁止 Fable 5／claude-fable-5`,
+      ).toMatch(/禁止[^。\n]{0,80}(Fable\s*5|claude-fable-5)/i);
+      expect(active, `${file} 不得 Task 正向派工 Fable slug`).not.toMatch(
+        /Task[^\n]{0,120}claude-fable-5/i,
       );
-      expect(active, `${file} active 路由不得再提 Fable 5`).not.toMatch(
-        /Fable\s*5/i,
+      expect(active, `${file} 不得 model: 指定 Fable`).not.toMatch(
+        /model:\s*["']claude-fable-5/i,
       );
     }
 
-    // Claude Code Leader 必須明列 Opus 4.8 slug
     for (const file of [
       ".claude/commands/agent-plan.md",
       ".claude/commands/agent-action.md",
     ]) {
       expect(readRepoFile(file)).toContain("claude-opus-4-8-thinking-medium");
     }
+
+    const hooks = readRepoFile(".cursor/hooks.json");
+    expect(hooks, "hooks.json 須註冊 block-fable").toContain("block-fable.mjs");
+    expect(hooks).toContain("subagentStart");
+    expect(readRepoFile(".cursor/hooks/block-fable.mjs")).toContain(
+      "shouldBlockFable",
+    );
   });
 
   it("podcast.mdc 註明 Agent Orchestration 優先於一般 commit 慣例", () => {

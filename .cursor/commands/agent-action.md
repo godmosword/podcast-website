@@ -51,6 +51,7 @@
 
 **禁止：**
 
+- **禁止呼叫 Fable 5**（`claude-fable-5-thinking-medium` 及任何 `claude-fable-5-*`／「Fable 5」顯示名）— 改用對照表 Opus／Composer／Grok；機械閘門：`.cursor/hooks/block-fable.mjs`
 - 多 agent **同時改同一檔**
 - 違反 Domain § **Protected paths / models**（中文 → Sonnet；explore／shell／廉價模型不碰 Protected paths）
 - **gpt-5.4** 作為固定路由（已淘汰）

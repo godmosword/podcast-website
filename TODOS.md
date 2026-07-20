@@ -34,6 +34,7 @@
 
 | ID | Commit |
 |----|--------|
+| chore(agents): Fable 5 禁令＋`block-fable` hook 硬擋 | 待 commit |
 | feat(landing): 尾頁 meta 安靜化＋頂欄 footer 防透字（`data-nav-solid`） | `6511d08` |
 | [VIS-W0](#視覺升級2026-07-20agent-plan-三審) fix(a11y): StoryCard／LatestHero 對比＋reduced-motion＋觸控高度 | `fd401a7` |
 | chore(agents): active 路由移除 Fable 5，Claude Code Leader 一律 Opus 4.8（含契約測試負向斷言） | `e9225da` |

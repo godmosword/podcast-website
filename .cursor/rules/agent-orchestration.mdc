@@ -45,6 +45,8 @@ alwaysApply: false
 | shell / 批次 | `grok-build-0.1` | lint／test／verify |
 | 備選 Plan 審 | `claude-opus-4-8-thinking-medium` | 三審衝突時 |
 
+**禁止呼叫 Fable 5**（`claude-fable-5-thinking-medium`／`claude-fable-5-*`）— `/agent-plan`／`/agent-action` 不得派工；Cursor hook `block-fable` 硬擋。
+
 遵守 Domain § Protected paths / models。
 
 ## `/agent-action` 路由
