@@ -35,6 +35,8 @@
 | ID | Commit |
 |----|--------|
 | feat(landing): 尾頁 meta 安靜化＋頂欄 footer 防透字（`data-nav-solid`） | `6511d08` |
+| [VIS-W0](#視覺升級2026-07-20agent-plan-三審) fix(a11y): StoryCard／LatestHero 對比＋reduced-motion＋觸控高度 | `fd401a7` |
+| chore(agents): active 路由移除 Fable 5，Claude Code Leader 一律 Opus 4.8（含契約測試負向斷言） | `e9225da` |
 
 ### 本輪已完成（2026-07-19）
 
@@ -126,6 +128,40 @@
 
 - GEO／地圖完成大段 → [docs/archive/TODOS-completed-2026-07-11.md](./docs/archive/TODOS-completed-2026-07-11.md)
 - 2026-07-04 前完成項 → [docs/archive/TODOS-completed-2026-07-04.md](./docs/archive/TODOS-completed-2026-07-04.md)
+
+---
+
+## 視覺升級（2026-07-20，`/agent-plan` 三審）
+
+Plan 經 Codex 工程審 + Grok 對抗審 + Opus 設計審**三審退回修訂**：原 Draft 有三成事實錯誤（封面 `contain` 實為 no-op、stagger／`story.color` 系統／`reflection-prompts`／車種 icon 皆已存在），已刪除。倖存範圍如下。
+
+### VIS-W0　`a11y · S · 無`　✅ `fd401a7`
+
+三項既有違規（非新功能）：`story.color` 不再當前景字色（12 色票 11 個不過 AA，最差 1.93:1 → 修後 10.8–11.8:1）；`prefers-reduced-motion` 補 `:active`／`transition`；`.cta` 37px → `min-height: 48px`。
+
+### VIS-W1　`design · M · VIS-W0`　待做
+
+字階對齊 spec（`DESIGN.md:125` 寫 1.8–2.3rem，實作僅 1.2–1.3rem）。新增 `--fs-h1/-h2/-body/-meta`，**僅** `LatestHero`／`StoryCard`／`StoriesIndexHeader` 三處換用，不做全站機械替換。LatestHero 提權重但**維持 1:1 封面、不裁切、不壓字**（封面即故事第一頁，無安全區，裁 16:9 必切主體）。
+
+**併入本 Wave（原 CRITICAL-1，決策 B）：** `--landing-heading: #2a9d8f` → `--warm-accent` → `--accent` 對白底僅 **3.32:1**，卻被當**文字色**用於 `for-parents/page.module.css:28,91`、`dashboard:21,46`、`subscribe:37`、`characters:20`、`story/[slug]:195,248`、`FilterSelect:112` 等 10+ 處 —— 與 VIS-W0 同根源的 token 層版本。修法：新增 `--accent-ink`（同色相壓暗至 ≥4.5:1，如 `#1f7268` ≈ 4.9:1）供文字用，`--accent` 只留給邊框／底色／裝飾。這是 `e2e/a11y.spec.ts` 兩個既有 failure（故事詳情頁、宇宙地圖 sheet）的成因，修完應轉綠。
+
+### VIS-W2　`ux · M · VIS-W1`　待做
+
+兒童無字導航（Opus 設計審提出，對 3–7 歲主受眾 CP 值最高，原 Draft 完全遺漏）：`StoryFilter` chip 掛既有 `VehicleClayIcon`／`TopicIcon`；已聽／聽到一半／未聽視覺標記（用既有 localStorage 進度，無需新資產）；著色本從遊樂園子頁拉進主導覽「探索」組。
+
+### VIS-W3　`design · S · VIS-W1`　待做
+
+`--shadow-card` 拆 `--elev-1/2/3`（light+night 兩套，新 token alias 舊 token）；`--gloss` **僅**加於 CTA（Opus：feature card 加 gloss 違反 Content over chrome）。不做 hover `scale(1.02)`（與既有 `press-squash` 的 `scale(0.98)` 打架）。驗證須含 **iOS Safari 實機** sticky 頂欄捲動（`.site-backdrop` 有歷史合成事故，見 `DESIGN.md:82`）。
+
+### VIS-W4　`design · ? · 使用者決策`　待決策
+
+中文標題字型。**先 A/B 再花錢**：huninn 現況 vs Noto Sans TC 900（`app/fonts/noto-sans-tc-og.ttf` 已在 repo）vs 候選付費字，評分第一位是**兒童字形辨識度**（Opus：金萱屬高對比明體風，對初學識字者可能比免費黑體更差）。付費字須先確認 web license 允許子集化與自架。
+
+### 明確不做
+
+Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫寫的 $0.2）、卡片塞 `reflection-prompts`（違反 `DESIGN.md:147`，且已用於 `StoryEndScreen`）、新增 stagger（已存在）、全域紙紋 noise（iOS 合成風險 + 污染宇宙地圖）、重生 filter icon（已存在）、獎項 badge（無素材來源）。
+
+> 既有技術債（非本輪引入，`npm run lint` 於 HEAD 即紅）：`components/universe/useMapCamera.ts:432` 兩個 unused var。
 
 ---
 
