@@ -39,6 +39,7 @@
 | [VIS-W0](#視覺升級2026-07-20agent-plan-三審) fix(a11y): StoryCard／LatestHero 對比＋reduced-motion＋觸控高度 | `fd401a7` |
 | chore(agents): active 路由移除 Fable 5，Claude Code Leader 一律 Opus 4.8（含契約測試負向斷言） | `e9225da` |
 | [VIS-W1](#視覺升級2026-07-20agent-plan-三審) fix(a11y): `--accent-ink` 修 accent 文字對比 + 字階 token 收斂（a11y e2e 7/9 → 9/9） | `5e46965` |
+| [VIS-W2](#視覺升級2026-07-20agent-plan-三審) feat(ux): 故事卡「已聽完」星章（語彙對齊地圖）＋著色本進行動導覽探索組 | `75133f1` |
 
 ### 本輪已完成（2026-07-19）
 
@@ -147,9 +148,16 @@ Plan 經 Codex 工程審 + Grok 對抗審 + Opus 設計審**三審退回修訂**
 
 **併入本 Wave（原 CRITICAL-1，決策 B）：** `--landing-heading: #2a9d8f` → `--warm-accent` → `--accent` 對白底僅 **3.32:1**，卻被當**文字色**用於 `for-parents/page.module.css:28,91`、`dashboard:21,46`、`subscribe:37`、`characters:20`、`story/[slug]:195,248`、`FilterSelect:112` 等 10+ 處 —— 與 VIS-W0 同根源的 token 層版本。修法：新增 `--accent-ink`（同色相壓暗至 ≥4.5:1，如 `#1f7268` ≈ 4.9:1）供文字用，`--accent` 只留給邊框／底色／裝飾。這是 `e2e/a11y.spec.ts` 兩個既有 failure（故事詳情頁、宇宙地圖 sheet）的成因，修完應轉綠。
 
-### VIS-W2　`ux · M · VIS-W1`　待做
+### VIS-W2　`ux · M · VIS-W1`　✅ `75133f1`
 
-兒童無字導航（Opus 設計審提出，對 3–7 歲主受眾 CP 值最高，原 Draft 完全遺漏）：`StoryFilter` chip 掛既有 `VehicleClayIcon`／`TopicIcon`；已聽／聽到一半／未聽視覺標記（用既有 localStorage 進度，無需新資產）；著色本從遊樂園子頁拉進主導覽「探索」組。
+兒童無字導航（Opus 設計審提出，對 3–7 歲主受眾 CP 值最高，原 Draft 完全遺漏）。
+
+原定三項，實作前勘查發現 **2.1「`StoryFilter` 掛車種／主題圖示」已經存在**（`VehicleSelect.tsx:31`、`TopicSelect.tsx:22` 早已使用 `VehicleClayIcon`／`TopicIcon`），故只做兩項：
+
+- **已聽完星章**：沿用宇宙地圖既有語彙（`ZoneSheet` 的 `⭐` + `aria-label="已聽完"`），貼封面右上角。只做「聽完」不做「聽到一半」——`continue` 是全站單一欄位，標記至多出現一張且會因改聽別集無預警消失。新增 `useCompletedStories` 集中訂閱（原本每卡各自 parse localStorage，20 張卡 = 20 次）。
+- **著色本進行動抽屜「探索」組**：桌面膠囊主列維持四項。順帶修 active 判定為最長匹配獨佔（`/games/coloring-book` 原會讓「遊樂園」同時高亮、輸出兩個 `aria-current="page"`）。
+
+> 遺留設計機會（Opus L2）：對兒童端最有效的是**封面上的大獎勵貼紙**而非小星章；目前星章的實際使用者偏向家長（決定今晚聽哪集）。可另案評估。
 
 ### VIS-W3　`design · S · VIS-W1`　待做
 
@@ -168,6 +176,12 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 `npm run test:visual` 的 baseline 已與當前渲染環境脫節：抽樣 7 頁（`/stories`、`/for-parents`、`/characters`、`/subscribe`、`/adventures`、`/games`、`/about`）在**乾淨 HEAD 上全部失敗**，含完全未被近期改動觸及的頁。**這個 gate 目前是壞的**，不能當回歸保護。
 
 刻意未跑 `--update-snapshots`：在單一開發機重產會把該機字型渲染烘進 baseline，讓問題被遮蔽而非解決。需先查清 baseline 原始產生環境（OS／字型版本／Chromium build），再決定重產或改用容差更高的比對策略。
+
+### VIS-DEBT-2　smoke 測試比設計決策舊　`eng · S · 無`　待做
+
+`e2e/smoke.spec.ts:11` 斷言桌面膠囊主列必須有「主題分類」，但 `SiteNavBar.tsx` 的 `PRIMARY_ORDER` 依 [DESIGN.md](./DESIGN.md) §Landing Hub 刻意排除 `topic`（家長取向、與 `/stories` 篩選重疊）。此測試在乾淨 HEAD 上即失敗，屬**測試未跟上設計決策**，非程式碼缺陷。
+
+修法：把該斷言改為驗證主列四項（全部故事／遊樂園／宇宙地圖／育兒專欄），並另行斷言「主題分類」只存在於行動抽屜。
 
 > 既有技術債（非本輪引入，`npm run lint` 於 HEAD 即紅）：`components/universe/useMapCamera.ts:432` 兩個 unused var。
 
