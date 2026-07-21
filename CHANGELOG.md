@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **中文標題去假粗（VIS-W4）**：huninn 為單一字重，全站 `font-weight:800` 原觸發瀏覽器合成假粗、把密集字（鬱/龍/邊）內部糊成一團。全域 `font-synthesis-weight: none` 讓中文落回 master、拉丁補 Baloo 真 800。密集字辨識度提升；中文標題份量略輕（由字級階梯＋顏色扛）。
+
 ### Added
 
 - **陰影高度階梯（VIS-W3）**：新增 `--elev-1/2/3` 三階（light+night），`--shadow-card` 相容別名 `--elev-1`（既有零回歸）。精選最新集卡浮於目錄之上（elev-2 vs 列表卡 elev-1）；兩張故事卡 hover 陰影升階生效（修復原 inline 覆蓋導致永不作用的死碼）；landing 兩個實心黏土 CTA 加 `--gloss` 上緣高光。

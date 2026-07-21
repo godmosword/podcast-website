@@ -42,6 +42,7 @@
 | [VIS-W1](#視覺升級2026-07-20agent-plan-三審) fix(a11y): `--accent-ink` 修 accent 文字對比 + 字階 token 收斂（a11y e2e 7/9 → 9/9） | `5e46965` |
 | [VIS-W2](#視覺升級2026-07-20agent-plan-三審) feat(ux): 故事卡「已聽完」星章（語彙對齊地圖）＋著色本進行動導覽探索組 | `75133f1` |
 | [VIS-W3](#視覺升級2026-07-20agent-plan-三審) feat(design): 陰影高度階梯 elev-1/2/3、精選卡浮於目錄、修死碼 hover、CTA gloss | `2f646b8` |
+| [VIS-W4](#視覺升級2026-07-20agent-plan-三審) fix(type): 全站關閉字重合成、中文標題去假粗（Baloo 補真 800） | `38392ab` |
 
 ### 本輪已完成（2026-07-19）
 
@@ -172,9 +173,13 @@ Plan 經 Codex 工程審 + Grok 對抗審 + Opus 設計審**三審退回修訂**
 
 > 未做（Plan 原列）：hover `scale(1.02)` 確認不做（與 `press-squash` 打架）。**iOS Safari 實機 sticky 捲動**驗證未執行——本輪未動 `.site-backdrop`／sticky 頂欄，無該風險面；留待實際觸及時再驗。
 
-### VIS-W4　`design · ? · 使用者決策`　待決策
+### VIS-W4　`design · S · 無`　✅ `38392ab`（方向 A，免費）
 
-中文標題字型。**先 A/B 再花錢**：huninn 現況 vs Noto Sans TC 900（`app/fonts/noto-sans-tc-og.ttf` 已在 repo）vs 候選付費字，評分第一位是**兒童字形辨識度**（Opus：金萱屬高對比明體風，對初學識字者可能比免費黑體更差）。付費字須先確認 web license 允許子集化與自架。
+中文標題字型 A/B 實測結論：**真正的缺陷不是「huninn 不夠好」，是「假粗 huninn」**。huninn 單一字重被全站約 90 處 `font-weight:800` 合成假粗，密集字（鬱/龍/邊）內部糊團——傷初學識字兒童辨識（印證 Opus 三審警告）。
+
+方向 A（免費、無新資產）已實作：全域 `font-synthesis-weight: none` + Baloo 補載 800。中文落回 master、去糊團；拉丁拿真 800。
+
+> 未走的方向（若日後想要更重的標題份量）：**B** Noto Sans TC 900（`app/fonts/noto-sans-tc-og.ttf` 已在 repo，需子集化，換掉粉圓童趣）；**C** 付費圓體黑（同時要粗＋圓潤童趣，須確認 web license 可子集化自架）。A/B 比對圖與分析見本 session 對話。
 
 ### 明確不做
 
