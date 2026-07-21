@@ -18,7 +18,8 @@ export default function LatestHero({ story }: LatestHeroProps) {
       className={styles.hero}
       style={{
         borderColor: `${story.color}33`,
-        boxShadow: `var(--shadow-card), 0 0 0 1px ${story.color}14`,
+        // 色環走 CSS 變數，讓 elev 階梯回到 stylesheet（見 .hero / .hero:hover）。
+        ["--hero-ring" as string]: `${story.color}14`,
       }}
     >
       <div className={styles.topRow}>

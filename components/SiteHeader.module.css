@@ -15,7 +15,8 @@
   margin: 0 auto 16px;
   border-radius: var(--radius-xl);
   overflow: hidden;
-  box-shadow: var(--shadow-card);
+  /* 首頁 hero 主視覺升 elev-2：作為頁面焦點面，應浮於一般卡片之上（VIS-W3）。 */
+  box-shadow: var(--elev-2);
   border: 1px solid var(--hairline);
   background: var(--sky);
   line-height: 0;

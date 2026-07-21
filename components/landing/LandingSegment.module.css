@@ -162,7 +162,9 @@
   font-size: 1rem;
   text-decoration: none;
   border: 1px solid rgba(180, 120, 60, 0.22);
-  box-shadow: 0 6px 18px rgba(120, 80, 40, 0.2);
+  /* CTA 加 --gloss 上緣高光：做出「打光的黏土表面」，強化主要行動鈕的重量。
+     Opus 裁定 gloss 僅限 CTA，不擴散到內容卡（違反 Content over chrome）。 */
+  box-shadow: 0 6px 18px rgba(120, 80, 40, 0.2), var(--gloss);
   transition: transform var(--motion-press), opacity var(--motion-press),
     box-shadow var(--motion-press);
 }
@@ -212,7 +214,8 @@
   font-size: 1.02rem;
   text-decoration: none;
   border: 1px solid rgba(120, 60, 10, 0.2);
-  box-shadow: 0 8px 22px rgba(120, 70, 20, 0.26);
+  /* 主要播放鈕同 .cta 加 --gloss 上緣高光（實心黏土鈕才加；玻璃 subscribeCta 不加）。 */
+  box-shadow: 0 8px 22px rgba(120, 70, 20, 0.26), var(--gloss);
   transition: transform var(--motion-press), opacity var(--motion-press),
     box-shadow var(--motion-press);
 }

@@ -37,7 +37,9 @@ export default function StoryCard({
       className={`${styles.card} ${isGrid ? styles.cardGrid : ""} scrollEnter ${staggerClass} press-squash`}
       style={{
         borderColor: `${story.color}28`,
-        boxShadow: `var(--shadow-card), 0 0 0 1px ${story.color}12`,
+        // 色環走 CSS 變數，讓陰影階梯回到 stylesheet：原本 inline boxShadow 會蓋掉
+        // :hover 的陰影規則（永遠不生效）。改由 .card / .card:hover 控制 elev 階梯。
+        ["--card-ring" as string]: `${story.color}12`,
       }}
     >
       <div
