@@ -313,6 +313,10 @@ body {
   max-width: 100%;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  /* huninn 是單一字重（宣告 400–700）；全站約 90 處 font-weight:800 會超範圍觸發
+     合成假粗，把密集字（鬱/龍/邊）內部留白糊成一團，傷初學識字兒童的字形辨識
+     （VIS-W4 A/B 實測）。關閉字重合成 → 中文落回 master、拉丁用 Baloo 真 800。 */
+  font-synthesis-weight: none;
 }
 
 .site-root {

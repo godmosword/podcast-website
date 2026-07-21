@@ -16,7 +16,9 @@ import "./globals.css";
 // 童趣圓潤字型，避免使用 Inter/Arial 等通用字型。
 const baloo = Baloo_2({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  // 補 800：標題／標籤大量用 font-weight:800，拉丁/數字需真字重，
+  // 否則搭配全域 font-synthesis-weight:none 會落回 700（見 globals.css）。
+  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
   variable: "--font-baloo",
 });
