@@ -6,6 +6,8 @@
 
 ### Added
 
+- **陰影高度階梯（VIS-W3）**：新增 `--elev-1/2/3` 三階（light+night），`--shadow-card` 相容別名 `--elev-1`（既有零回歸）。精選最新集卡浮於目錄之上（elev-2 vs 列表卡 elev-1）；兩張故事卡 hover 陰影升階生效（修復原 inline 覆蓋導致永不作用的死碼）；landing 兩個實心黏土 CTA 加 `--gloss` 上緣高光。
+
 - **ep-20 全幕繪本上線**：《水泥車阿尼的101任務》18 幕插圖＋幕級 captions；字幕校對 137 句並 `--mark`；定裝照「水泥車阿尼」；場景手修（去手臂、彩虹 101 對齊封面／LatestHero）；保留 Apple 封面 `01.jpg`。
 
 - **遊樂園教學示範 overlay**：新增 GameKit `TutorialOverlay`（手勢動畫示範 tap/swipe/hold/arrows、`prefers-reduced-motion` 降靜態圖、不落 localStorage）；`data/games.ts` 增 `tutorial` 欄位（五款各 2–3 步、每句 ≤10 字）；大冒險／方塊／消消樂／卡丁車開始畫面加「怎麼玩？」按鈕（≥48px）；大冒險觸控裝置操作提示改裝置感知短句。

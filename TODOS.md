@@ -41,6 +41,7 @@
 | chore(agents): active 路由移除 Fable 5，Claude Code Leader 一律 Opus 4.8（含契約測試負向斷言） | `e9225da` |
 | [VIS-W1](#視覺升級2026-07-20agent-plan-三審) fix(a11y): `--accent-ink` 修 accent 文字對比 + 字階 token 收斂（a11y e2e 7/9 → 9/9） | `5e46965` |
 | [VIS-W2](#視覺升級2026-07-20agent-plan-三審) feat(ux): 故事卡「已聽完」星章（語彙對齊地圖）＋著色本進行動導覽探索組 | `75133f1` |
+| [VIS-W3](#視覺升級2026-07-20agent-plan-三審) feat(design): 陰影高度階梯 elev-1/2/3、精選卡浮於目錄、修死碼 hover、CTA gloss | `2f646b8` |
 
 ### 本輪已完成（2026-07-19）
 
@@ -160,9 +161,16 @@ Plan 經 Codex 工程審 + Grok 對抗審 + Opus 設計審**三審退回修訂**
 
 > 遺留設計機會（Opus L2）：對兒童端最有效的是**封面上的大獎勵貼紙**而非小星章；目前星章的實際使用者偏向家長（決定今晚聽哪集）。可另案評估。
 
-### VIS-W3　`design · S · VIS-W1`　待做
+### VIS-W3　`design · S · VIS-W1`　✅ `2f646b8`
 
-`--shadow-card` 拆 `--elev-1/2/3`（light+night 兩套，新 token alias 舊 token）；`--gloss` **僅**加於 CTA（Opus：feature card 加 gloss 違反 Content over chrome）。不做 hover `scale(1.02)`（與既有 `press-squash` 的 `scale(0.98)` 打架）。驗證須含 **iOS Safari 實機** sticky 頂欄捲動（`.site-backdrop` 有歷史合成事故，見 `DESIGN.md:82`）。
+`--shadow-card` 拆 `--elev-1/2/3`（light+night，`--shadow-card` 反向 alias `--elev-1`，既有 9 處消費零回歸）。實作時勘查發現：
+
+- **`--gloss` 已用於 9 處**（PlayButton/games/SiteFooter…），且兩個 landing CTA 原本**缺** gloss。故「加 gloss」實為補上離群者，非新增裝飾——加於兩個實心黏土鈕（`.playCta`/`.cta`），玻璃 `subscribeCta` 不加。
+- **精選卡層級原本被拉平**：`LatestHero` 與下方 compact 列表卡同為 elev-1。升精選卡至 elev-2 建立層級。
+- **兩張卡 hover 陰影是死碼**：inline `boxShadow` 覆蓋 `:hover` 規則使其永不生效（Opus 誤判只有 LatestHero，實測 StoryCard 亦然）。改 CSS custom-prop 帶色環、陰影回 stylesheet，形成階梯：列表 elev-1→hover elev-2、精選 elev-2→hover elev-3。
+- **刻意不重指派** MapControls（黏土觸感堆疊陰影）、dropdown/menu（暖色調手調陰影）為中性 elev——Grok 當初「命名儀式」警告在此 codebase 成立，硬拆會抹平既有刻意設計。
+
+> 未做（Plan 原列）：hover `scale(1.02)` 確認不做（與 `press-squash` 打架）。**iOS Safari 實機 sticky 捲動**驗證未執行——本輪未動 `.site-backdrop`／sticky 頂欄，無該風險面；留待實際觸及時再驗。
 
 ### VIS-W4　`design · ? · 使用者決策`　待決策
 
