@@ -28,9 +28,9 @@
 | `familyActivity` | `data/family-activities.ts` | 短：1 題 + 選填 1 個小活動 | `/for-parents#co-listen` 收合；單集頁僅 CTA | show notes 末段 `🏡 聽完聊一聊` | FAQPage **加 1 題**（`familyActivityFaq`） | 有則附問題行 |
 | `reflectionPrompt` | `data/reflection-prompts.ts` | 短：孩子問句 + 家長追問 | 播放結束／`ReflectionPrompt`；家長指南可複述 | **不進** | **不另加 FAQ** | **不進** |
 | `parentGuide` | `data/parent-guides.ts` | 中：2–3 句摘要 + 1–2 延伸提問／小活動 | `/for-parents#co-listen` 收合 ShowNotes；單集頁僅 CTA | 可選 1 段，**不得**複製 `familyActivity` 全文 | 可併入 `description` 衍生句，**不**重複 FAQ 題幹 | 可摘 1 段要點 |
-| `episodeFaq` | `data/episode-faqs.ts` | 短：1 題緊扣該集劇情／主題 | `storyFaqs()` 全量預設收合（HTML 仍在） | **不進** | FAQPage 併入 `storyFaqs()`（第一項） | 有則附 1 行 `❓` |
+| `episodeFaq` | `data/episode-faqs.ts` | 短：1 題緊扣該集劇情／主題 | **單集頁不渲染 UI**；FAQPage JSON-LD 第一項 | **不進** | FAQPage 併入 `storyFaqs()`（第一項） | 有則附 1 行 `❓` |
 | `storyParentExtension` | `lib/story-geo.ts` 程式產生 | 通用共聽引導（非逐集手寫） | **不在單集頁渲染**（語意併入家長指南／FAQ） | **不進** | 已含於 `storyFaqs` 通用答案語意 | **不進** |
-| `storyFaqs` | `lib/story-geo.ts` 程式產生 | 3 題模板化 FAQ | 預設收合 `<details>`（全文仍在 DOM） | **不進** | FAQPage 全量 | **不進** |
+| `storyFaqs` | `lib/story-geo.ts` 程式產生 | 3 題模板化 FAQ | **單集頁不渲染 UI**；僅 FAQPage JSON-LD | **不進** | FAQPage 全量 | **不進** |
 
 ## `familyActivity`（已上線）
 
@@ -102,8 +102,7 @@ type ParentGuide = {
 
 **允許通路：**
 
-- 單集詳情頁：`storyFaqs()` 輸出（預設 `<details>` 收合，全文仍在 SSR HTML）
-- JSON-LD：併入 FAQPage `mainEntity` 第一項
+- JSON-LD：併入 FAQPage `mainEntity`（單集頁不另開「常見問題」區塊）
 - `llms-full`：有則附 1 行 `❓ <question>：<answer>`
 
 **禁止：**
@@ -128,6 +127,7 @@ type ParentGuide = {
 
 ## 變更紀錄
 
+- **2026-07-22：** 單集頁拿掉「常見問題」可見區塊（FAQ 僅留 FAQPage JSON-LD／llms）；角色圖鑑改掛頂欄；共讀／活動／指引遷至 `/for-parents#co-listen`；FAQ 曾短暫收合後改為不渲染 UI。
 - **2026-07-22：** 單集頁精簡：共讀／親子活動／家長指引遷至 `/for-parents#co-listen`；FAQ 預設收合；角色僅一行＋圖鑑連結；接著聽併入 RelatedStories。
 - **2026-07-20（Wave 1）：** 聚合頁 GEO 導言改 `sr-only`（SSR 保留）；單集本集介紹維持可見。
 - **2026-07-20（GEO P1）：** 新增 `episodeFaq` sidecar（每集專屬 1 題 FAQ），併入 `storyFaqs()` 第一題。

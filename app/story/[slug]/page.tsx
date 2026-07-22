@@ -119,9 +119,10 @@ export default async function StoryDetailPage({
 
           <StoryMeta story={story} showTags={false} />
 
-          {story.zoneId ? <ZoneBadge zoneId={story.zoneId} /> : null}
-
-          <StoryTags story={story} />
+          <div className={styles.metaStack}>
+            {story.zoneId ? <ZoneBadge zoneId={story.zoneId} /> : null}
+            <StoryTags story={story} />
+          </div>
         </div>
 
         <div className={styles.actions}>
@@ -190,26 +191,6 @@ export default async function StoryDetailPage({
             出場角色
           </h2>
           <p className={styles.teaser}>{charactersTeaser}</p>
-          <Link href="/characters" className={styles.inlineLink}>
-            看角色圖鑑
-          </Link>
-        </section>
-
-        <section className={styles.contentSection} aria-labelledby="faq-heading">
-          <h2 id="faq-heading" className={styles.sectionHeading}>
-            常見問題
-          </h2>
-          <details className={styles.expandable}>
-            <summary>展開 {faqs.length} 個常見問題</summary>
-            <div className={styles.faqList}>
-              {faqs.map((faq, i) => (
-                <section key={`${story.slug}-faq-${i}`} className={styles.faqItem}>
-                  <h3>{faq.question}</h3>
-                  <p>{faq.answer}</p>
-                </section>
-              ))}
-            </div>
-          </details>
         </section>
 
         <RelatedStories

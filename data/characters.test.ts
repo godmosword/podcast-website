@@ -69,6 +69,25 @@ describe("getCharactersForStory", () => {
     const ids = getCharactersForStory("ep-20").map((c) => c.id);
     expect(ids).toContain("a-ni");
   });
+
+  it("ep-18 含水上樂園主角：小紅、噗噗豬、暖暖", () => {
+    const ids = getCharactersForStory("ep-18").map((c) => c.id);
+    expect(ids).toContain("xiao-hong");
+    expect(ids).toContain("pu-pu-pig");
+    expect(ids).toContain("nuan-nuan-turtle");
+  });
+
+  it("ep-19 含多多、爆米花老爺爺、安安", () => {
+    const ids = getCharactersForStory("ep-19").map((c) => c.id);
+    expect(ids).toContain("duo-duo");
+    expect(ids).toContain("popcorn-truck");
+    expect(ids).toContain("an-an");
+  });
+
+  it("ep-21 含黃色計程車", () => {
+    const ids = getCharactersForStory("ep-21").map((c) => c.id);
+    expect(ids).toContain("huang-ji-cheng");
+  });
 });
 
 describe("getCharacterName", () => {

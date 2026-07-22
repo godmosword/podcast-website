@@ -21,6 +21,20 @@
   text-align: center;
 }
 
+/* EP／時長下方：區域徽章與主題 chips 垂直堆疊，避免 inline 與 flex 貼齊重疊 */
+.metaStack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.metaStack > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 .coverWrap {
   position: relative;
   width: 100%;
@@ -199,25 +213,6 @@
   font-weight: 800;
   text-decoration-thickness: 0.12em;
   text-underline-offset: 0.18em;
-}
-
-.faqList {
-  display: grid;
-  gap: 14px;
-}
-
-.faqItem h3 {
-  margin: 0;
-  color: var(--ink);
-  font-size: 1.02rem;
-  line-height: 1.45;
-}
-
-.faqItem p {
-  margin: 6px 0 0;
-  color: var(--ink-soft);
-  font-size: 0.96rem;
-  line-height: 1.75;
 }
 
 .teaser {

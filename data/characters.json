@@ -29,7 +29,8 @@
     "firstSeen": "ep-9",
     "alsoIn": [
       "ep-15",
-      "ep-17"
+      "ep-17",
+      "ep-19"
     ]
   },
   {
@@ -43,7 +44,8 @@
     "ref": "characters/安安救護車.jpg",
     "firstSeen": "ep-6",
     "alsoIn": [
-      "ep-16"
+      "ep-16",
+      "ep-19"
     ]
   },
   {
@@ -59,7 +61,8 @@
     "firstSeen": "ep-3",
     "alsoIn": [
       "ep-15",
-      "ep-16"
+      "ep-16",
+      "ep-18"
     ]
   },
   {
@@ -83,7 +86,10 @@
     "vehicle": "taxi",
     "desc": "a cute claymation bright yellow taxi cab with a black-and-white checker stripe along the side, a small taxi sign on the roof, round headlights, big cheerful eyes and a happy smile",
     "ref": "characters/黃色計程車.jpg",
-    "firstSeen": "ep-3"
+    "firstSeen": "ep-3",
+    "alsoIn": [
+      "ep-21"
+    ]
   },
   {
     "name": "怪獸卡車",
@@ -325,7 +331,10 @@
     "vehicle": "food truck",
     "desc": "a cute claymation vintage popcorn food truck with a friendly grandfather vendor, striped awning, popcorn machine on the side, warm cream and red clay colors, soft hand-sculpted clay texture",
     "ref": "characters/老爺爺爆米花餐車.jpg",
-    "firstSeen": "ep-14"
+    "firstSeen": "ep-14",
+    "alsoIn": [
+      "ep-19"
+    ]
   },
   {
     "name": "消毒車噴噴",
@@ -362,7 +371,8 @@
     "ref": "characters/噗噗豬.jpg",
     "firstSeen": "ep-16",
     "alsoIn": [
-      "ep-17"
+      "ep-17",
+      "ep-18"
     ]
   },
   {
@@ -377,7 +387,8 @@
     "ref": "characters/海龜老師暖暖.jpg",
     "firstSeen": "ep-16",
     "alsoIn": [
-      "ep-17"
+      "ep-17",
+      "ep-18"
     ]
   },
   {

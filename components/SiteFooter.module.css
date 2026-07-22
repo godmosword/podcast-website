@@ -151,13 +151,7 @@
   margin-top: var(--space-page);
 }
 
-.footerTrust {
-  width: min(100%, 520px);
-  margin: var(--space-4) auto 0;
-  text-align: left;
-}
-
-/* 安靜 meta 帶：關於 · 節目數據 · 條款 · 隱私（同視覺權重，非 pill） */
+/* 安靜 meta 帶：關於 · 節目數據 · 條款（同視覺權重，非 pill） */
 .metaStrip {
   display: flex;
   align-items: center;
@@ -186,6 +180,26 @@
   opacity: 0.55;
   user-select: none;
   line-height: 1;
+}
+
+.privacyLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 6px;
+  max-width: min(100%, 520px);
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.privacyLine .metaLink {
+  min-height: 36px;
+  padding: 4px 6px;
 }
 
 @media (hover: hover) {

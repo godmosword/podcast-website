@@ -50,10 +50,11 @@ describe("SiteNavBar", () => {
     expect(view.queryByRole("button", { name: /更多/ })).toBeNull();
   });
 
-  test("桌面主列含宇宙地圖、育兒專欄與家長指南 trigger", async () => {
+  test("桌面主列含宇宙地圖、角色圖鑑、育兒專欄與家長指南 trigger", async () => {
     const html = await renderNavBarHtml();
     for (const label of [
       "全部故事",
+      "角色圖鑑",
       "遊樂園",
       "宇宙地圖",
       "育兒專欄",
@@ -115,6 +116,7 @@ describe("SiteNavBar", () => {
 
     for (const label of [
       "全部故事",
+      "角色圖鑑",
       "主題分類",
       "遊樂園",
       "宇宙地圖",
@@ -186,6 +188,7 @@ describe("SiteNavBar", () => {
 describe("isInternalPathActive 最長匹配", () => {
   const hrefs = [
     "/stories",
+    "/characters",
     "/topic",
     "/games",
     "/games/coloring-book",
