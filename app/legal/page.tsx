@@ -2,12 +2,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
 import { CONTACT_EMAIL } from "@/lib/contact";
+import {
+  LEGAL_POLICY_UPDATED_AT,
+  LEGAL_POLICY_VERSION,
+} from "@/lib/legal-policy";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
-  title: "使用條款與免責聲明",
+  title: "版權、隱私與使用條款",
   description:
-    "車車遊樂園官方網站的版權說明、節目內容使用限制、第三方服務與字型授權。",
+    "車車遊樂園官方網站的智慧財產權、隱私資料治理、兒少保護、第三方服務與使用條款。",
   alternates: { canonical: "/legal" },
 };
 
@@ -19,8 +23,21 @@ export default function LegalPage() {
           ← 回故事屋
         </Link>
 
-        <h1 className={styles.title}>使用條款與免責聲明</h1>
-        <p className={styles.updated}>最後更新：2026-07-11</p>
+        <h1 className={styles.title}>版權、隱私與使用條款</h1>
+        <p className={styles.updated}>
+          最後更新：{LEGAL_POLICY_UPDATED_AT} · 政策版本：{LEGAL_POLICY_VERSION}
+        </p>
+        <nav className={styles.toc} aria-label="本頁章節">
+          <a href="#copyright">智慧財產權</a>
+          <a href="#takedown">侵權通知</a>
+          <a href="#privacy">隱私說明</a>
+          <a href="#children">兒少與家長</a>
+          <a href="#contact">聯絡</a>
+        </nav>
+
+        <p className={styles.notice}>
+          本頁是網站政策摘要，不取代個別法律意見；如適用法域有強制規定，依該等規定辦理。
+        </p>
 
         <section className={styles.section} id="nature">
           <h2 className={styles.heading}>網站性質</h2>
@@ -31,7 +48,7 @@ export default function LegalPage() {
         </section>
 
         <section className={styles.section} id="copyright">
-          <h2 className={styles.heading}>版權與節目內容</h2>
+          <h2 className={styles.heading}>智慧財產權與節目內容</h2>
           <ul className={styles.list}>
             <li>
               節目音檔、插圖、封面、吉祥物、原創角色（如鈴鈴清潔車、恐龍車多多、亮亮警車等）、標題與相關文案，其著作權與商標權屬
@@ -50,6 +67,56 @@ export default function LegalPage() {
               該授權範圍內，即使取得程式碼，亦<strong>不</strong>
               表示取得節目內容之使用授權。維護者於私人儲存庫內另備{" "}
               <code>LICENSE</code>、<code>DISCLAIMER.md</code> 全文。
+            </li>
+          </ul>
+        </section>
+
+        <section className={styles.section} id="permission">
+          <h2 className={styles.heading}>可接受的分享方式</h2>
+          <ul className={styles.list}>
+            <li>
+              家庭可在本站或官方收聽平台進行個人、非商業的收聽與共讀；分享本站連結、官方分享按鈕或短摘錄評論時，請保留「車車遊樂園」與原始頁面連結。
+            </li>
+            <li>
+              不得下載、抓取、批量複製、重新上傳、改作、出售、訓練資料集收錄或以任何方式讓第三方誤認為獲得官方授權；不得移除著作權、商標或來源標示。
+            </li>
+            <li>
+              自動化取用以本站 <code>robots.txt</code>、<code>llms.txt</code> 與本頁為準；檢索型摘要僅限必要的短摘錄並附來源，訓練型資料集不獲授權。
+            </li>
+          </ul>
+        </section>
+
+        <section className={styles.section} id="takedown">
+          <h2 className={styles.heading}>侵權通知與處理</h2>
+          <p className={styles.text}>
+            如果您是權利人或經授權的代理人，認為本站頁面、音檔、圖片、字幕或文案侵害權利，請寄信至{" "}
+            <a href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("侵權通知｜車車遊樂園")}`}>
+              {CONTACT_EMAIL}
+            </a>
+            ，主旨請寫「侵權通知｜車車遊樂園」，並提供以下資料：
+          </p>
+          <ol className={styles.list}>
+            <li>您的姓名、聯絡方式，以及權利人身分或代理資格。</li>
+            <li>被主張侵權作品的名稱、權利證明或可供核對的原始連結。</li>
+            <li>本站疑似侵權內容的完整 URL、檔案或頁面位置，以及具體侵權說明。</li>
+            <li>您確認通知內容真實、完整，並願意配合必要查證的聲明。</li>
+          </ol>
+          <p className={styles.text}>
+            我們會記錄案件、核對權利與來源；在查證期間，得暫停相關頁面或素材的公開提供。若您不是權利人，請勿提交他人的個人資料或偽造權利聲明。
+          </p>
+        </section>
+
+        <section className={styles.section} id="submissions">
+          <h2 className={styles.heading}>許願、建議與投稿內容</h2>
+          <ul className={styles.list}>
+            <li>
+              樂園地圖的許願與故事建議僅供節目製作、需求統計與開幕通知；不會直接公開留言，也不保證採用、回覆或提供報酬。
+            </li>
+            <li>
+              請只提交您有權提供的文字，勿貼上孩子姓名、電話、地址、學校、照片、聲音或其他可識別資料，也勿貼上第三方受著作權保護的完整作品。
+            </li>
+            <li>
+              若未來希望公開使用某則投稿或將其改編為節目，我們會另行取得必要的授權或同意；單純送出許願不代表本站取得公開發表的完整授權。
             </li>
           </ul>
         </section>
@@ -122,8 +189,7 @@ export default function LegalPage() {
             </li>
             <li>
               <strong>許願／開幕通知表單</strong>：若您使用樂園地圖的許願表單，本站會收集您填寫的
-              Email 或暱稱、許願留言內容，以及瀏覽器
-              user-agent，儲存於本站資料庫。這些資料<strong>僅用於</strong>
+              Email 或暱稱、許願留言內容，儲存於本站資料庫。這些資料<strong>僅用於</strong>
               園區開幕通知與需求統計，<strong>不</strong>與第三方分享、
               <strong>不</strong>用於行銷。表單須由<strong>家長或照顧者</strong>
               填寫並勾選同意後才會送出；未勾選同意者不予收件。
@@ -139,7 +205,7 @@ export default function LegalPage() {
             </li>
             <li>
               <strong>IP 位址</strong>：送出表單時，本站僅將您的 IP
-              位址用於防濫用之速率限制，<strong>不儲存</strong>於資料庫。
+              位址暫時用於防濫用之速率限制，本站應用程式不將 IP 或瀏覽器 user-agent 寫入內容資料庫；託管服務的基礎設施紀錄則依其政策管理。
             </li>
             <li>
               為了解官網導流成效，本站使用{" "}
@@ -157,22 +223,63 @@ export default function LegalPage() {
               製作團隊後台（<code>/studio</code>）可讀取<strong>同一台裝置</strong>
               的本機互動摘要，僅供內部驗收，非全站統計報表。
             </li>
+            <li>
+              每次表單送出會以伺服器時間記錄家長同意的政策版本，僅用於證明告知版本與資料治理；不會因此建立使用者帳號或跨裝置識別。
+            </li>
           </ul>
+        </section>
+
+        <section className={styles.section} id="providers">
+          <h2 className={styles.heading}>第三方服務與資料處理者</h2>
+          <ul className={styles.list}>
+            <li>
+              網站託管、網站分析與部署可能使用 Vercel；匿名頁面瀏覽與事件依 Vercel Web Analytics 服務處理。
+            </li>
+            <li>
+              若環境設定啟用許願或訂閱功能，資料庫可能使用 Neon Postgres；新集通知確認信可能使用 Resend。它們只接收完成該功能所必要的資料，並依各自政策與合約處理。
+            </li>
+            <li>
+              Apple Podcasts、Spotify、KKBOX、YouTube、LINE、Instagram、Threads、Facebook 等外部平台由其自身控制資料處理；本站不替其隱私政策或內容負責。
+            </li>
+          </ul>
+        </section>
+
+        <section className={styles.section} id="children">
+          <h2 className={styles.heading}>兒少與家長使用</h2>
+          <ul className={styles.list}>
+            <li>
+              本站提供親子共讀內容，但不建立兒童帳號、不要求孩子直接提供個人資料，也不在播放器中放置個人化廣告追蹤。
+            </li>
+            <li>
+              許願與 Email 訂閱表單只接受家長或照顧者勾選同意；請由成人代為填寫，並避免在自由文字中留下孩子的個資。
+            </li>
+            <li>
+              若家長發現孩子的資料被提交，或希望查詢、更正、刪除相關資料，請寄信至{" "}
+              <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>；我們會核對必要資訊後處理請求。
+            </li>
+          </ul>
+        </section>
+
+        <section className={styles.section} id="security">
+          <h2 className={styles.heading}>安全與政策變更</h2>
+          <p className={styles.text}>
+            本站採取資料最小化、速率限制、一次性確認連結、伺服器端輸入驗證與安全標頭等措施；任何網路傳輸都不能保證絕對安全。若資料用途、第三方服務或保存期間變更，我們會更新本頁版本與日期；重大變更會在相關表單入口提醒重新閱讀。
+          </p>
         </section>
 
         <section className={styles.section} id="disclaimer">
           <h2 className={styles.heading}>網站免責</h2>
           <p className={styles.text}>
-            本網站與其程式碼依現狀（as is）提供，不提供任何明示或默示之保證。因使用或無法使用本網站所生之任何直接、間接或衍生損害，在法律允許範圍內，營運者與開發貢獻者不負賠償責任。營運者保留隨時調整內容、連結、功能與本聲明之權利。
+            本網站與其程式碼依現狀（as is）提供，不提供任何明示或默示之保證。因使用或無法使用本網站所生之任何直接、間接或衍生損害，在法律允許範圍內，營運者與開發貢獻者不負賠償責任。節目摘要、字幕與建議年齡僅供親子共讀參考，不構成教育、醫療、發展或其他專業意見。營運者保留隨時調整內容、連結、功能與本聲明之權利。
           </p>
         </section>
 
         <section className={styles.section} id="contact">
           <h2 className={styles.heading}>聯絡</h2>
           <p className={styles.text}>
-            若您為權利人，認為本網站內容有侵權或需更正之處；或您為家長，欲查詢、更正或刪除孩子相關資料，請來信{" "}
+            若您為權利人，認為本網站內容有侵權或需更正之處；或您為家長，欲查詢、更正或刪除您提供的資料，請來信{" "}
             <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
-            ，或透過節目官方社群或 Podcast 平台與 Bonbon &amp; 馬米聯繫。
+            ，並在主旨註明「版權／隱私請求」。我們會在合理期間內回覆；如需驗證身分，只會要求處理該請求所必要的資訊。
           </p>
         </section>
       </main>

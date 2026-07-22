@@ -148,6 +148,8 @@ NEXT_PUBLIC_SITE_URL=https://你的網域
 
 完整說明見 [`.env.example`](./.env.example)。
 
+Neon／`DATABASE_URL` 為選配。未設定時不需要執行 migration，許願與 Email 訂閱會維持既有的降級行為；只有未來決定啟用資料庫時，才需先執行 `npm run migrate -- 005_legal_consent_audit.sql`，新增家長同意政策版本與伺服器收到時間欄位。舊資料不回填、不推定同意版本。
+
 ## 新增一集故事（SOP）
 
 > **SoundOn 新集：** 多數由 [Apple Podcasts 自動同步](#apple-podcasts-自動同步) 每日上架（`ep-N` slug、`pageCount: 1`）。以下為**手動**在 `manualStories` 新增完整繪本時使用。

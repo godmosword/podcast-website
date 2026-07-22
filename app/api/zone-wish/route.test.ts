@@ -66,7 +66,8 @@ describe("/api/zone-wish", () => {
       message: null,
       email: "a@b.co",
       nickname: "星星",
-      userAgent: null,
+      consentVersion: "2026-07-22",
+      consentedAt: expect.any(Date),
     });
   });
 
@@ -98,7 +99,8 @@ describe("/api/zone-wish", () => {
       message: "垃圾車半夜去哪裡？",
       email: null,
       nickname: null,
-      userAgent: null,
+      consentVersion: "2026-07-22",
+      consentedAt: expect.any(Date),
     });
   });
 

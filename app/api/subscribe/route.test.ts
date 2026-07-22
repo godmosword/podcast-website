@@ -83,9 +83,10 @@ describe("/api/subscribe", () => {
     expect(upsertPendingSubscriber).toHaveBeenCalledWith({
       email: "parent@example.com",
       source: "subscribe_page",
-      userAgent: null,
       tokenHash: "token-hash",
       expiresAt: expect.any(Date),
+      consentVersion: "2026-07-22",
+      consentedAt: expect.any(Date),
     });
     expect(sendSubscribeConfirmation).toHaveBeenCalledWith({
       email: "parent@example.com",

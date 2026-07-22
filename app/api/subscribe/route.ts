@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { LEGAL_POLICY_VERSION } from "@/lib/legal-policy";
 import {
   isSubscribeDbConfigured,
   upsertPendingSubscriber,
@@ -60,9 +61,10 @@ export async function POST(request: Request): Promise<NextResponse> {
     const state = await upsertPendingSubscriber({
       email: parsed.data.email,
       source: parsed.data.source ?? null,
-      userAgent: request.headers.get("user-agent"),
       tokenHash,
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      consentVersion: LEGAL_POLICY_VERSION,
+      consentedAt: new Date(),
     });
     if (state === "pending") {
       await sendSubscribeConfirmation({ email: parsed.data.email, token });

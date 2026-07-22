@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useId, useState, type FormEvent } from "react";
 import type { ZoneId } from "@/data/universe-zones";
 import type { WishCategory } from "@/lib/zone-wish-schema";
@@ -200,7 +201,13 @@ export default function ZoneWishForm({ zoneId, fallbackHref, onSubmitSuccess }: 
           disabled={submitting}
           required
         />
-        <span>我是家長／照顧者，同意提供以上資料以接收開幕通知與需求統計</span>
+        <span>
+          我是家長／照顧者，已閱讀並同意
+          <Link href="/legal#privacy" aria-label="閱讀隱私說明">
+            隱私說明
+          </Link>
+          ，同意提供以上資料以接收開幕通知與需求統計
+        </span>
       </label>
 
       <button

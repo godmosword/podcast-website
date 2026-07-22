@@ -109,6 +109,13 @@
   cursor: pointer;
 }
 
+.consent a {
+  color: var(--accent-ink);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .consentCheckbox {
   flex-shrink: 0;
   width: 20px;

@@ -124,7 +124,13 @@ export default function SubscribeForm({ source = "subscribe_page" }: Props) {
           disabled={submitting}
           required
         />
-        <span>我是家長／照顧者，同意留下 Email 以接收新集通知</span>
+        <span>
+          我是家長／照顧者，已閱讀並同意
+          <Link href="/legal#privacy" aria-label="閱讀隱私說明">
+            隱私說明
+          </Link>
+          ，同意留下 Email 以接收新集通知
+        </span>
       </label>
 
       <button

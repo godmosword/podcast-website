@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { LEGAL_POLICY_VERSION } from "@/lib/legal-policy";
 import { insertZoneWish, isZoneWishDbConfigured } from "@/lib/zone-wish-db";
 import { checkZoneWishRateLimit } from "@/lib/zone-wish-rate-limit";
 import { zoneWishBodySchema } from "@/lib/zone-wish-schema";
@@ -49,7 +50,8 @@ export async function POST(request: Request): Promise<NextResponse> {
       message: parsed.data.message ?? null,
       email: parsed.data.email ?? null,
       nickname: parsed.data.nickname ?? null,
-      userAgent: request.headers.get("user-agent"),
+      consentVersion: LEGAL_POLICY_VERSION,
+      consentedAt: new Date(),
     });
   } catch {
     return NextResponse.json({ ok: false, reason: "db_error" }, { status: 500 });

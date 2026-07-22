@@ -7,9 +7,10 @@ export function isSubscribeDbConfigured(): boolean {
 export type SubscriberInsert = {
   email: string;
   source?: string | null;
-  userAgent?: string | null;
   tokenHash: string;
   expiresAt: Date;
+  consentVersion: string;
+  consentedAt: Date;
 };
 
 /**
@@ -26,18 +27,21 @@ export async function upsertPendingSubscriber(
   const sql = neon(url);
   const rows = await sql`
     INSERT INTO subscribers (
-      email, source, user_agent, status, confirmation_token_hash, confirmation_expires_at
+      email, source, status, confirmation_token_hash, confirmation_expires_at,
+      consent_version, consented_at
     )
     VALUES (
-      ${input.email}, ${input.source ?? null}, ${input.userAgent ?? null},
-      'pending', ${input.tokenHash}, ${input.expiresAt.toISOString()}
+      ${input.email}, ${input.source ?? null}, 'pending', ${input.tokenHash},
+      ${input.expiresAt.toISOString()}, ${input.consentVersion},
+      ${input.consentedAt.toISOString()}
     )
     ON CONFLICT ((lower(email))) DO UPDATE SET
       source = EXCLUDED.source,
-      user_agent = EXCLUDED.user_agent,
       status = 'pending',
       confirmation_token_hash = EXCLUDED.confirmation_token_hash,
       confirmation_expires_at = EXCLUDED.confirmation_expires_at,
+      consent_version = EXCLUDED.consent_version,
+      consented_at = EXCLUDED.consented_at,
       confirmed_at = NULL
     WHERE subscribers.status <> 'confirmed'
     RETURNING status

@@ -4,6 +4,17 @@
 
 ## [Unreleased]
 
+### Security
+
+- **法務／隱私強化**：
+  - **瀏覽器安全標頭**：`next.config.ts` 為全站 `/:path*` 加 `X-Content-Type-Options: nosniff`、`Referrer-Policy: strict-origin-when-cross-origin`、`Permissions-Policy: camera=()/microphone=()/geolocation=()/payment=()`、`X-Frame-Options: SAMEORIGIN` 與 CSP `frame-ancestors 'self'`（禁第三方嵌入整站，保留本站遊戲 iframe）；`Strict-Transport-Security` 僅在 `VERCEL_ENV=production` 附掛。新增 `next.config.test.ts` 契約鎖定基線標頭。
+  - **同意留痕（consent audit）**：新增 `lib/legal-policy.ts`（`LEGAL_POLICY_VERSION`／`LEGAL_POLICY_UPDATED_AT` = `2026-07-22`）；許願與 Email 訂閱送出時以伺服器時間寫入 `consent_version` + `consented_at`，僅用於證明告知版本與資料治理，不建帳號、不做跨裝置識別。migration `005_legal_consent_audit.sql` 以 `ADD COLUMN IF NOT EXISTS` 加欄，舊資料維持 `NULL`（不回填、不推定同意版本）。
+  - **資料最小化**：訂閱與許願 API 不再收集或寫入瀏覽器 `user-agent`；IP／user-agent 僅暫時用於防濫用速率限制，不入內容資料庫（`lib/subscribe-db.ts`、`lib/zone-wish-db.ts` 及對應路由測試同步）。
+
+### Added
+
+- **/legal 版權隱私頁全面擴充**：頁標改「版權、隱私與使用條款」，加章節錨點導覽與政策版本／日期標示；新增「可接受的分享方式」「侵權通知與處理（`/legal#takedown` 流程與必附資料）」「許願、建議與投稿內容」「第三方服務與資料處理者（Vercel／Neon／Resend／外部平台）」「兒少與家長使用」「安全與政策變更」章節。`DISCLAIMER.md`、`public/llms.txt` 同步侵權通知與分享／訓練限制措辭；訂閱與許願表單同意句更新（含「勿填孩子個資」提示）。
+
 ### Changed
 
 - **中文標題去假粗（VIS-W4）**：huninn 為單一字重，全站 `font-weight:800` 原觸發瀏覽器合成假粗、把密集字（鬱/龍/邊）內部糊成一團。全域 `font-synthesis-weight: none` 讓中文落回 master、拉丁補 Baloo 真 800。密集字辨識度提升；中文標題份量略輕（由字級階梯＋顏色扛）。

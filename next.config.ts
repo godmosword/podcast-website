@@ -27,6 +27,35 @@ const nextConfig: NextConfig = {
   async redirects() {
     return legacyStoryRedirects();
   },
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          // 避免瀏覽器把非預期格式的回應當成可執行內容。
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          // 僅在跨站請求送出 origin，降低網址與 query 意外外洩。
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          // 本站不需要相機、麥克風、定位或付款 API。
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=(), payment=()",
+          },
+          // 允許本站的遊戲 iframe，但禁止第三方網站嵌入整個網站。
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
+          ...(process.env.VERCEL_ENV === "production"
+            ? [
+                {
+                  key: "Strict-Transport-Security",
+                  value: "max-age=31536000; includeSubDomains",
+                },
+              ]
+            : []),
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

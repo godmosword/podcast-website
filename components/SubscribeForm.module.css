@@ -35,6 +35,13 @@
   color: var(--ink-soft);
 }
 
+.consent a {
+  color: var(--accent-ink);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .consentCheckbox {
   width: 20px;
   height: 20px;

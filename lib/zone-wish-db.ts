@@ -11,7 +11,8 @@ export type ZoneWishInsert = {
   message?: string | null;
   email?: string | null;
   nickname?: string | null;
-  userAgent?: string | null;
+  consentVersion: string;
+  consentedAt: Date;
 };
 
 export async function insertZoneWish(input: ZoneWishInsert): Promise<void> {
@@ -22,14 +23,17 @@ export async function insertZoneWish(input: ZoneWishInsert): Promise<void> {
 
   const sql = neon(url);
   await sql`
-    INSERT INTO zone_wishes (zone_id, category, message, email, nickname, user_agent)
+    INSERT INTO zone_wishes (
+      zone_id, category, message, email, nickname, consent_version, consented_at
+    )
     VALUES (
       ${input.zoneId},
       ${input.category},
       ${input.message ?? null},
       ${input.email ?? null},
       ${input.nickname ?? null},
-      ${input.userAgent ?? null}
+      ${input.consentVersion},
+      ${input.consentedAt.toISOString()}
     )
   `;
 }

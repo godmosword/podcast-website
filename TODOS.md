@@ -30,6 +30,15 @@
 | 4 | [Growth-Measure-1](#growth-measure-1-成長量測) SoundOn 回鏈 | ops/growth | S | ✅ `42a9d38` |
 | 5 | [UX-P1-2](#兒童-ux-與親子互動稽核2026-07-11) 詳情頁反思收合 | ux | S | ✅ `42a9d38` |
 
+### 本輪已完成（2026-07-22）
+
+| ID | Commit |
+|----|--------|
+| [LEGAL-1](#法務隱私強化2026-07-22) security: 全站瀏覽器安全標頭（nosniff／Referrer-Policy／Permissions-Policy／X-Frame-Options／CSP frame-ancestors；HSTS 限 prod）＋ `next.config.test.ts` 契約 | `（待 commit）` |
+| [LEGAL-2](#法務隱私強化2026-07-22) security: 同意留痕（`lib/legal-policy.ts`＋`consent_version`／`consented_at`；migration 005 `IF NOT EXISTS`、舊資料不回填） | `（待 commit）` |
+| [LEGAL-3](#法務隱私強化2026-07-22) security: 資料最小化，訂閱／許願不再收集儲存 `user-agent` | `（待 commit）` |
+| [LEGAL-4](#法務隱私強化2026-07-22) docs: `/legal` 擴充（侵權通知／投稿／第三方處理者／兒少與家長／安全變更）＋ DISCLAIMER／llms.txt／表單同意句同步 | `（待 commit）` |
+
 ### 本輪已完成（2026-07-20）
 
 | ID | Commit |
@@ -194,6 +203,28 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 ### VIS-DEBT-2　smoke 測試比設計決策舊　`eng · S · 無`　✅ `0ddcc26`
 
 `e2e/smoke.spec.ts` 已對齊 [DESIGN.md](./DESIGN.md) §Landing Hub：桌面膠囊主列四項（全部故事／遊樂園／宇宙地圖／育兒專欄）且無「主題分類」；390 開漢堡抽屜可見「主題分類」。
+
+---
+
+## 法務／隱私強化（2026-07-22）
+
+> 對外政策以 [`/legal`](./app/legal/page.tsx)、[DISCLAIMER.md](./DISCLAIMER.md)、[public/llms.txt](./public/llms.txt) 三者同步維護；政策版本統一由 [`lib/legal-policy.ts`](./lib/legal-policy.ts) 的 `LEGAL_POLICY_VERSION` 提供。啟用資料庫時，同意留痕欄位須先跑 migration。
+
+### LEGAL-1　瀏覽器安全標頭　`security · S · 無`　✅ `（待 commit）`
+
+`next.config.ts` `headers()` 為全站加 `X-Content-Type-Options: nosniff`、`Referrer-Policy: strict-origin-when-cross-origin`、`Permissions-Policy`（關 camera／microphone／geolocation／payment）、`X-Frame-Options: SAMEORIGIN`、CSP `frame-ancestors 'self'`；`Strict-Transport-Security` 僅 `VERCEL_ENV=production` 附掛。`next.config.test.ts` 鎖定基線標頭。
+
+### LEGAL-2　同意留痕（consent audit）　`security · S · DB（選配）`　✅ `（待 commit）`
+
+`lib/legal-policy.ts` 提供政策版本；`/api/subscribe`、`/api/zone-wish` 送出時寫入 `consent_version` + `consented_at`（伺服器時間）。migration `scripts/migrations/005_legal_consent_audit.sql` 以 `ADD COLUMN IF NOT EXISTS` 加欄，舊資料 `NULL`（不回填、不推定同意版本）；只在啟用 `DATABASE_URL` 時需執行。
+
+### LEGAL-3　資料最小化（移除 user-agent）　`security · S · 無`　✅ `（待 commit）`
+
+訂閱與許願不再收集或寫入瀏覽器 `user-agent`（`lib/subscribe-db.ts`／`lib/zone-wish-db.ts` 及對應路由測試同步）；IP／user-agent 僅暫時用於防濫用速率限制，不入內容資料庫。
+
+### LEGAL-4　/legal 擴充與文件同步　`docs · S · 無`　✅ `（待 commit）`
+
+`/legal` 加章節錨點導覽＋政策版本標示，新增侵權通知（`/legal#takedown`）、投稿內容、第三方處理者、兒少與家長、安全與政策變更等章節；`DISCLAIMER.md`、`llms.txt`、訂閱／許願表單同意句同步（含「勿填孩子個資」）。
 
 ---
 
