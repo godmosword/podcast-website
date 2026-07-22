@@ -34,10 +34,10 @@
 
 | ID | Commit |
 |----|--------|
-| [LEGAL-1](#法務隱私強化2026-07-22) security: 全站瀏覽器安全標頭（nosniff／Referrer-Policy／Permissions-Policy／X-Frame-Options／CSP frame-ancestors；HSTS 限 prod）＋ `next.config.test.ts` 契約 | `33fc3cf` |
-| [LEGAL-2](#法務隱私強化2026-07-22) security: 同意留痕（`lib/legal-policy.ts`＋`consent_version`／`consented_at`；migration 005 `IF NOT EXISTS`、舊資料不回填） | `33fc3cf` |
-| [LEGAL-3](#法務隱私強化2026-07-22) security: 資料最小化，訂閱／許願不再收集儲存 `user-agent` | `33fc3cf` |
-| [LEGAL-4](#法務隱私強化2026-07-22) docs: `/legal` 擴充（侵權通知／投稿／第三方處理者／兒少與家長／安全變更）＋ DISCLAIMER／llms.txt／表單同意句同步 | `33fc3cf` |
+| [LEGAL-1](#法務隱私強化2026-07-22) security: 全站瀏覽器安全標頭（nosniff／Referrer-Policy／Permissions-Policy／X-Frame-Options／CSP frame-ancestors；HSTS 限 prod）＋ `next.config.test.ts` 契約 | `fdbe8c9` |
+| [LEGAL-2](#法務隱私強化2026-07-22) security: 同意留痕（`lib/legal-policy.ts`＋`consent_version`／`consented_at`；migration 005 `IF NOT EXISTS`、舊資料不回填） | `fdbe8c9` |
+| [LEGAL-3](#法務隱私強化2026-07-22) security: 資料最小化，訂閱／許願不再收集儲存 `user-agent` | `fdbe8c9` |
+| [LEGAL-4](#法務隱私強化2026-07-22) docs: `/legal` 擴充（侵權通知／投稿／第三方處理者／兒少與家長／安全變更）＋ DISCLAIMER／llms.txt／表單同意句同步 | `fdbe8c9` |
 
 ### 本輪已完成（2026-07-20）
 
@@ -210,19 +210,19 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 
 > 對外政策以 [`/legal`](./app/legal/page.tsx)、[DISCLAIMER.md](./DISCLAIMER.md)、[public/llms.txt](./public/llms.txt) 三者同步維護；政策版本統一由 [`lib/legal-policy.ts`](./lib/legal-policy.ts) 的 `LEGAL_POLICY_VERSION` 提供。啟用資料庫時，同意留痕欄位須先跑 migration。
 
-### LEGAL-1　瀏覽器安全標頭　`security · S · 無`　✅ `33fc3cf`
+### LEGAL-1　瀏覽器安全標頭　`security · S · 無`　✅ `fdbe8c9`
 
 `next.config.ts` `headers()` 為全站加 `X-Content-Type-Options: nosniff`、`Referrer-Policy: strict-origin-when-cross-origin`、`Permissions-Policy`（關 camera／microphone／geolocation／payment）、`X-Frame-Options: SAMEORIGIN`、CSP `frame-ancestors 'self'`；`Strict-Transport-Security` 僅 `VERCEL_ENV=production` 附掛。`next.config.test.ts` 鎖定基線標頭。
 
-### LEGAL-2　同意留痕（consent audit）　`security · S · DB（選配）`　✅ `33fc3cf`
+### LEGAL-2　同意留痕（consent audit）　`security · S · DB（選配）`　✅ `fdbe8c9`
 
 `lib/legal-policy.ts` 提供政策版本；`/api/subscribe`、`/api/zone-wish` 送出時寫入 `consent_version` + `consented_at`（伺服器時間）。migration `scripts/migrations/005_legal_consent_audit.sql` 以 `ADD COLUMN IF NOT EXISTS` 加欄，舊資料 `NULL`（不回填、不推定同意版本）；只在啟用 `DATABASE_URL` 時需執行。
 
-### LEGAL-3　資料最小化（移除 user-agent）　`security · S · 無`　✅ `33fc3cf`
+### LEGAL-3　資料最小化（移除 user-agent）　`security · S · 無`　✅ `fdbe8c9`
 
 訂閱與許願不再收集或寫入瀏覽器 `user-agent`（`lib/subscribe-db.ts`／`lib/zone-wish-db.ts` 及對應路由測試同步）；IP／user-agent 僅暫時用於防濫用速率限制，不入內容資料庫。
 
-### LEGAL-4　/legal 擴充與文件同步　`docs · S · 無`　✅ `33fc3cf`
+### LEGAL-4　/legal 擴充與文件同步　`docs · S · 無`　✅ `fdbe8c9`
 
 `/legal` 加章節錨點導覽＋政策版本標示，新增侵權通知（`/legal#takedown`）、投稿內容、第三方處理者、兒少與家長、安全與政策變更等章節；`DISCLAIMER.md`、`llms.txt`、訂閱／許願表單同意句同步（含「勿填孩子個資」）。
 
