@@ -34,9 +34,9 @@
 
 | ID | Commit |
 |----|--------|
-| polish(story): 單集 Hero 介紹卡精緻化（intro↔cover 間距／較窄寬度；夜態 glass＋去 warm glow；ZoneBadge 夜態降噪） | `e047e57` |
-| polish(story): 訂閱 CTA＋家長安心／隱私整合進頁尾（中段拿掉；ConnectHub campaign UTM；meta 加隱私說明） | `e047e57` |
-| polish(story): 單集頁精簡 A——共讀／活動／指引遷 /for-parents#co-listen；FAQ 收合；角色一行；接著聽併 RelatedStories | `e047e57` |
+| polish(story): 單集 Hero 介紹卡精緻化（intro↔cover 間距／較窄寬度；夜態 glass＋去 warm glow；ZoneBadge 夜態降噪） | `8a89f1c` |
+| polish(story): 訂閱 CTA＋家長安心／隱私整合進頁尾（中段拿掉；ConnectHub campaign UTM；meta 加隱私說明） | `8a89f1c` |
+| polish(story): 單集頁精簡 A——共讀／活動／指引遷 /for-parents#co-listen；FAQ 收合；角色一行；接著聽併 RelatedStories | `8a89f1c` |
 | [LEGAL-1](#法務隱私強化2026-07-22) security: 全站瀏覽器安全標頭（nosniff／Referrer-Policy／Permissions-Policy／X-Frame-Options／CSP frame-ancestors；HSTS 限 prod）＋ `next.config.test.ts` 契約 | `fdbe8c9` |
 | [LEGAL-2](#法務隱私強化2026-07-22) security: 同意留痕（`lib/legal-policy.ts`＋`consent_version`／`consented_at`；migration 005 `IF NOT EXISTS`、舊資料不回填） | `fdbe8c9` |
 | [LEGAL-3](#法務隱私強化2026-07-22) security: 資料最小化，訂閱／許願不再收集儲存 `user-agent` | `fdbe8c9` |
