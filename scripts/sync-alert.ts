@@ -1,12 +1,12 @@
 #!/usr/bin/env npx tsx
 /**
  * 同步告警（只用 GitHub Issue）。集中 Issue 互動，供：
- *   - sync workflow：push 後 `notify-live`（新集上站＋開 illustrate Issue）、
- *     成功 `resolve --kind=sync-job-failure`（關閉舊版失敗單）。
+ *   - sync workflow：失敗即 `failure` 開／補 sync-job-failure Issue；
+ *     push 後 `notify-live`（新集上站＋開 illustrate Issue）；成功 resolve 舊失敗單。
  *   - watchdog：以 import 方式呼叫 openOrCommentIssue / resolveIssue。
  *
- * 紅線：單次 workflow/test/build 失敗不開 GitHub Issue；錯誤細節留在 Actions logs。
- * Issue 只保留人工動作：待生圖與 RSS stale。
+ * 紅線：失敗 Issue 只做去重告警與 run 連結，詳細錯誤仍以 Actions logs 為準；
+ * Issue 另保留人工動作：待生圖與 RSS stale。
  *
  * 全程 best-effort：找不到 gh / Issue / secret 一律吞掉，永遠 exit 0，不遮蔽原始失敗。
  *
@@ -193,6 +193,20 @@ function runUrl(env: NodeJS.ProcessEnv = process.env): string {
   return repo && runId ? `${server}/${repo}/actions/runs/${runId}` : "(本機)";
 }
 
+function syncFailureBody(env: NodeJS.ProcessEnv = process.env): string {
+  const run = runUrl(env);
+  const sha = env.GITHUB_SHA?.slice(0, 12) || "(unknown)";
+  const ref = env.GITHUB_REF_NAME || env.GITHUB_REF || "(unknown)";
+  return `${mentionPreamble(env)}## Apple sync workflow 失敗
+
+- **Run**：${run === "(本機)" ? run : `[查看 Actions log](${run})`}
+- **Commit**：\`${sha}\`
+- **Branch**：\`${ref}\`
+
+請先查看 Run 裡第一個失敗的 step 與錯誤訊息；本 Issue 只負責把失敗即時集中、去重，不以 watchdog 的 stale 判斷取代原始 CI 證據。
+`;
+}
+
 type GhIssue = {
   number?: number;
   title?: string;
@@ -341,7 +355,11 @@ export function runSyncAlertMode(
       }, deps);
       break;
     case "failure":
-      log(deps, "單次 workflow 失敗不開 Issue；請查看 GitHub Actions logs。");
+      openOrCommentIssue({
+        kind: kindArg ?? "sync-job-failure",
+        title: "[sync] Apple Podcast workflow 失敗",
+        body: syncFailureBody(env),
+      }, deps);
       break;
     default:
       console.error(`未知模式：${mode}（notify-live | resolve | failure）`);

@@ -24,6 +24,8 @@ export type SyncRunReport = {
   browseIndexTopics: string[];
   /** emoji 依索引校正 */
   emojiSync: string[];
+  /** Apple RSS 新集自動產生的 FAQ MVP，需人工改寫成劇情專屬問答 */
+  episodeFaqStubs: string[];
 };
 
 export function createEmptyReport(dryRun: boolean): SyncRunReport {
@@ -42,6 +44,7 @@ export function createEmptyReport(dryRun: boolean): SyncRunReport {
     browseIndexVehicles: [],
     browseIndexTopics: [],
     emojiSync: [],
+    episodeFaqStubs: [],
   };
 }
 

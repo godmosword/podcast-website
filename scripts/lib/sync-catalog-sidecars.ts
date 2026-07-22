@@ -1,13 +1,15 @@
 /**
- * Apple sync 新集時自動補齊 catalog 完備測試所需的三個 sidecar：
- * story-zones / reflection-prompts / story-dates。
+ * Apple sync 新集時自動補齊 catalog 完備測試所需的 sidecar：
+ * story-zones / reflection-prompts / story-dates / episode-faqs。
  * 只在缺 key 時寫入，不覆寫人工條目；反思文案為 MVP stub，Phase 2 再 refinement。
+ * FAQ 也是 MVP stub：先讓新集可被完整收錄與索引，再由人工把摘要改寫成劇情專屬問答。
  */
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { ZoneId } from "../../data/universe-zones";
+import type { EpisodeFaq } from "../../data/episode-faqs";
 
 const DEFAULT_ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -29,6 +31,7 @@ export type UpsertCatalogSidecarsOptions = {
 
 export type UpsertCatalogSidecarsResult = {
   updatedSlugs: string[];
+  episodeFaqStubSlugs: string[];
 };
 
 /** 對映原則對齊 data/story-zones.ts 註解。 */
@@ -57,6 +60,40 @@ export function buildReflectionStub(title: string): {
   const parentFollowUp =
     "先接住孩子的感覺，再一起聊聊故事裡學到的一件小事，不必急著給標準答案。";
   return { child, parentFollowUp };
+}
+
+function clipText(text: string, maxChars: number): string {
+  return Array.from(text.replace(/\s+/g, " ").trim())
+    .slice(0, maxChars)
+    .join("")
+    .trim();
+}
+
+function episodeLabel(slug: string): string {
+  const match = /^ep-(\d+)$/.exec(slug);
+  return match ? `第${match[1]}集` : slug;
+}
+
+/** 從 RSS title/summary 產生可上架、可驗證、待人工改寫的 FAQ MVP。 */
+export function buildEpisodeFaqStub(
+  slug: string,
+  title: string,
+  summary = "",
+): EpisodeFaq {
+  const stem = clipText(titleStem(title), 30) || "這個故事";
+  const summaryPart = clipText(summary, 45);
+  const answer = [
+    `本集用「${stem}」帶孩子認識故事裡的任務與心情。`,
+    summaryPart
+      ? `故事摘要是：${summaryPart}。`
+      : "故事會陪孩子一起觀察線索、想辦法並照顧身邊的夥伴。",
+    "聽完可以和孩子聊聊：哪個選擇最有幫助？如果是你，會怎麼做？",
+  ].join("");
+
+  return {
+    question: `${episodeLabel(slug)}「${stem}」這一集，故事裡最重要的發現是什麼？`,
+    answer,
+  };
 }
 
 function titleStem(title: string): string {
@@ -169,6 +206,10 @@ function formatDateSourceEntry(slug: string, source: string): string {
   return `  "${slug}": ${JSON.stringify(source)},\n`;
 }
 
+function formatFaqEntry(slug: string, faq: EpisodeFaq): string {
+  return `  "${slug}": {\n    question: ${JSON.stringify(faq.question)},\n    answer:\n      ${JSON.stringify(faq.answer)},\n  },\n`;
+}
+
 export function upsertCatalogSidecars(
   episodes: NewEpisodeSidecarInput[],
   options: UpsertCatalogSidecarsOptions = {},
@@ -181,12 +222,15 @@ export function upsertCatalogSidecars(
   const zonesPath = path.join(root, "data/story-zones.ts");
   const promptsPath = path.join(root, "data/reflection-prompts.ts");
   const datesPath = path.join(root, "data/story-dates.ts");
+  const faqsPath = path.join(root, "data/episode-faqs.ts");
 
   let zonesSrc = fs.readFileSync(zonesPath, "utf8");
   let promptsSrc = fs.readFileSync(promptsPath, "utf8");
   let datesSrc = fs.readFileSync(datesPath, "utf8");
+  let faqsSrc = fs.readFileSync(faqsPath, "utf8");
 
   const updatedSlugs: string[] = [];
+  const episodeFaqStubSlugs: string[] = [];
 
   for (const ep of episodes) {
     let touched = false;
@@ -230,6 +274,16 @@ export function upsertCatalogSidecars(
     datesSrc = sourceResult.source;
     touched ||= sourceResult.inserted;
 
+    const faqResult = insertBeforeRecordClose(
+      faqsSrc,
+      /const EPISODE_FAQS:\s*Record<string,\s*EpisodeFaq>\s*=\s*\{/,
+      ep.slug,
+      formatFaqEntry(ep.slug, buildEpisodeFaqStub(ep.slug, ep.title, ep.summary)),
+    );
+    faqsSrc = faqResult.source;
+    touched ||= faqResult.inserted;
+    if (faqResult.inserted) episodeFaqStubSlugs.push(ep.slug);
+
     if (touched) updatedSlugs.push(ep.slug);
   }
 
@@ -237,7 +291,8 @@ export function upsertCatalogSidecars(
     fs.writeFileSync(zonesPath, zonesSrc, "utf8");
     fs.writeFileSync(promptsPath, promptsSrc, "utf8");
     fs.writeFileSync(datesPath, datesSrc, "utf8");
+    fs.writeFileSync(faqsPath, faqsSrc, "utf8");
   }
 
-  return { updatedSlugs };
+  return { updatedSlugs, episodeFaqStubSlugs };
 }

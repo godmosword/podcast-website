@@ -21,6 +21,7 @@ const sampleReport: SyncRunReport = {
   browseIndexVehicles: [],
   browseIndexTopics: [],
   emojiSync: [],
+  episodeFaqStubs: [],
 };
 
 function makeDeps(
@@ -111,11 +112,22 @@ describe("sync-alert notify-live", () => {
     ]);
   });
 
-  it("keeps failure mode as a no-op so raw workflow errors stay in Actions logs", () => {
+  it("opens a deduplicated failure issue while preserving Actions logs as source of truth", () => {
     const { deps, calls } = makeDeps({});
 
     runSyncAlertMode("failure", ["--kind=sync-job-failure"], deps);
 
-    expect(calls).toEqual([]);
+    expect(calls).toContainEqual([
+      "issue",
+      "create",
+      "--title",
+      "[sync] Apple Podcast workflow 失敗",
+      "--body",
+      expect.stringContaining("Apple sync workflow 失敗"),
+      "--label",
+      "sync-alert",
+      "--label",
+      "sync-job-failure",
+    ]);
   });
 });

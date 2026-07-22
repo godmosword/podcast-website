@@ -779,7 +779,7 @@ async function main(): Promise<void> {
     title: s.title,
   }));
 
-  // 新集進入 getStories() 後，zone／reflection／dates 完備測試會擋 push；
+  // 新集進入 getStories() 後，catalog sidecar 完備測試會擋 push；
   // 在此自動補齊缺 key 的 sidecar（不覆寫人工條目）。
   if (hasNewEpisodes) {
     const sidecarResult = upsertCatalogSidecars(
@@ -790,9 +790,15 @@ async function main(): Promise<void> {
       })),
       { root: ROOT, dryRun },
     );
+    report.episodeFaqStubs = sidecarResult.episodeFaqStubSlugs;
     if (sidecarResult.updatedSlugs.length > 0) {
       console.log(
         `${dryRun ? "[dry-run] Would upsert catalog sidecars" : "Catalog sidecars"}: ${sidecarResult.updatedSlugs.join(", ")}`,
+      );
+    }
+    if (sidecarResult.episodeFaqStubSlugs.length > 0) {
+      console.log(
+        `FAQ MVP stubs（需人工改寫）: ${sidecarResult.episodeFaqStubSlugs.join(", ")}`,
       );
     }
   }

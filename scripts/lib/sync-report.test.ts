@@ -17,6 +17,7 @@ const sampleReport: SyncRunReport = {
   browseIndexVehicles: [],
   browseIndexTopics: [],
   emojiSync: [],
+  episodeFaqStubs: ["ep-10"],
 };
 
 describe("post-sync-notify", () => {
@@ -27,6 +28,7 @@ describe("post-sync-notify", () => {
     expect(msg).toContain("proofread:subtitles");
     expect(msg).toContain("GHA 已自動 --fix");
     expect(msg).toContain("字幕自動校稿");
+    expect(msg).toContain("FAQ MVP 待人工改寫");
   });
 
   it("Issue body 含 checklist 與故事連結", () => {
@@ -39,5 +41,6 @@ describe("post-sync-notify", () => {
     expect(body).toContain("--approve");
     expect(body).toContain("contact.html");
     expect(body).toContain("/story/ep-10");
+    expect(body).toContain("FAQ MVP stub");
   });
 });

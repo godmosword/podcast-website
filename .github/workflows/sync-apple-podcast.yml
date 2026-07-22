@@ -106,7 +106,14 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/apple-synced.json data/apple-sync-state.json data/browse-index.json public/stories/ data/subtitles/ \
-            data/story-zones.ts data/reflection-prompts.ts data/story-dates.ts
+            data/story-zones.ts data/reflection-prompts.ts data/story-dates.ts data/episode-faqs.ts
+          # 防止新增同步產物未列入 git add 時被「成功但未上站」地靜默遺漏。
+          if [ -n "$(git diff --name-only)" ] || [ -n "$(git ls-files --others --exclude-standard)" ]; then
+            echo "::error::sync 產生了未 stage 的檔案；請更新 workflow 的 git add 白名單。"
+            git diff --name-only
+            git ls-files --others --exclude-standard
+            exit 1
+          fi
           if git diff --staged --quiet; then
             echo "No staged changes to commit."
             exit 0
@@ -156,3 +163,13 @@ jobs:
           # 等待 Vercel 部署（best-effort，不保證完成；限制見 docs/GEO.md）
           sleep 120
           npx tsx scripts/submit-indexnow.ts
+
+      # 失敗即時集中告警；通知本身 fail-soft，不得掩蓋原始失敗 step。
+      - name: Report sync failure
+        if: failure()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SYNC_ISSUE_ASSIGNEES: ${{ secrets.SYNC_ISSUE_ASSIGNEES }}
+          SYNC_ISSUE_MENTIONS: ${{ secrets.SYNC_ISSUE_MENTIONS }}
+        run: npx tsx scripts/sync-alert.ts failure --kind=sync-job-failure

@@ -77,6 +77,14 @@ export function buildCommitMessage(report: SyncRunReport): string {
     lines.push("");
   }
 
+  if (report.episodeFaqStubs.length > 0) {
+    lines.push("## FAQ MVP 待人工改寫");
+    for (const slug of report.episodeFaqStubs) {
+      lines.push(`- ${slug}：sync 已先寫入可驗證的 FAQ stub，請依劇情改寫 \`data/episode-faqs.ts\``);
+    }
+    lines.push("");
+  }
+
   if (report.metadataUpdated.length > 0) {
     lines.push(`## Metadata 更新：${report.metadataUpdated.join(", ")}`);
     lines.push("");
@@ -169,6 +177,7 @@ export function buildIssueBody(slug: string, report: SyncRunReport): string {
   const storyUrl = `${siteBase()}/story/${slug}`;
 
   const pendingLint = report.proofreadPendingLint[slug];
+  const hasFaqStub = report.episodeFaqStubs.includes(slug);
 
   return `${issueNotifyPreamble()}## 新集待生圖：${slug}
 
@@ -177,6 +186,7 @@ export function buildIssueBody(slug: string, report: SyncRunReport): string {
 - **觸發**：Apple RSS（SoundOn）→ GHA \`sync-apple-podcast\`
 - **站上狀態**：MVP 已上線（\`pageCount=1\`、Apple 封面 \`01.jpg\`）
 - **字幕**：${subtitleLine(slug, report)}
+${hasFaqStub ? "- **FAQ**：已自動補 FAQ MVP stub，待依本集劇情人工改寫" : "- **FAQ**：已有內容契約"}
 
 ### Checklist
 
@@ -184,6 +194,7 @@ export function buildIssueBody(slug: string, report: SyncRunReport): string {
 - [x] ${proofreadFixNote(slug, report)}
 - [ ] 最終校稿 \`data/subtitles/${slug}.json\` → \`npm run proofread:subtitles -- ${slug} --mark\`（[SUBTITLE-PROOFREAD.md](docs/SUBTITLE-PROOFREAD.md)）${pendingLint !== undefined && pendingLint > 0 ? `\n- [ ] 修正 lint 待辦 ${pendingLint} 項（\`npm run proofread:subtitles -- ${slug}\` 查看）` : ""}
 - [ ] 確認車種／標籤（必要時 \`data/apple-sync.defaults.json\` overrides；sync 會自動更新 \`data/browse-index.json\`）
+${hasFaqStub ? "- [ ] 改寫 `data/episode-faqs.ts` 的 FAQ MVP stub，確認問題／答案真的對應本集劇情" : ""}
 - [ ] \`npm run illustrate -- ${slug} --segment-only\`
 - [ ] \`npm run illustrate -- ${slug}\`（需 \`OPENAI_API_KEY\`）
 - [ ] 審 \`public/.illustrate-staging/${slug}/contact.html\`

@@ -31,6 +31,7 @@ const STORY_ZONES: Record<string, ZoneId> = {
   "ep-18": "ocean", // 水上樂園練習說再見
   "ep-19": "dino", // 恐龍車多多闖禍了
   "ep-20": "car-park", // 水泥車阿尼的101任務
+  "ep-21": "car-park", // 自動駕駛計程車
 };
 
 export function getStoryZoneId(slug: string): ZoneId | undefined {

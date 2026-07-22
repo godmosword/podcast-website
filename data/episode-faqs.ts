@@ -110,6 +110,11 @@ const EPISODE_FAQS: Record<string, EpisodeFaq> = {
     answer:
       "阿尼羨慕跑車開得快、吊車舉得高，覺得自己不夠厲害。大吊車阿公提醒他，沒有阿尼穩固的水泥，高樓根本蓋不上去。故事想讓孩子知道，默默完成自己的小任務，一樣是很棒的貢獻。",
   },
+  "ep-21": {
+    question: "第21集「自動駕駛計程車」這一集，故事裡最重要的發現是什麼？",
+    answer:
+      "本集用「自動駕駛計程車」帶孩子認識故事裡的任務與心情。故事摘要是：Bonbon 第一次搭乘自動駕駛計程車知知，開心前往車車遊樂園。一路上認識沒有司機的自動駕。聽完可以和孩子聊聊：哪個選擇最有幫助？如果是你，會怎麼做？",
+  },
 };
 
 export function getEpisodeFaq(slug: string): EpisodeFaq | undefined {

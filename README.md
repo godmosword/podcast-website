@@ -196,7 +196,8 @@ Neon／`DATABASE_URL` 為選配。未設定時不需要執行 migration，許願
 - 資產：`public/stories/ep-N/audio.mp3` + Apple 封面 `01.jpg`
 - 資料：`pageCount: 1`（單圖 MVP）；摘要自動去 SoundOn 尾註
 - CI：**安裝 whisper-cpp + 快取 large-v3**，同步後自動轉錄 → `data/subtitles/`
-- 通過 `verify:episodes`、`verify:browse-index`、`npm test`、`npm run build` 後 commit push `main`
+- 新集會連同 `story-zones`、`reflection-prompts`、`story-dates`、`episode-faqs` 四個 sidecar 一起補齊；FAQ 先產生可驗證的 MVP stub，之後由人工依劇情改寫
+- 通過 `verify:episodes`、`verify:browse-index`、`npm test`、`npm run build` 後 commit push `main`；若 workflow 失敗會立即開／補去重的 sync failure Issue，成功後自動關閉
 
 ```bash
 npm run sync:apple -- --dry-run   # 預覽不寫檔

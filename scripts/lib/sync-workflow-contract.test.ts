@@ -6,11 +6,12 @@ import { CANONICAL_SITE_URL } from "../../lib/site-url";
 const ROOT = process.cwd();
 
 /** 完備測試（getStories 全集覆蓋）所需、sync 必須一起 commit 的 sidecar。
- * 教訓：#46 — 新集寫入 apple-synced 後缺這三檔會讓 npm test 擋死 push。 */
+ * 教訓：#46／#60 — 新集寫入 apple-synced 後漏 sidecar 會讓 sync 卡死或假成功。 */
 const CATALOG_SIDECAR_PATHS = [
   "data/story-zones.ts",
   "data/reflection-prompts.ts",
   "data/story-dates.ts",
+  "data/episode-faqs.ts",
 ] as const;
 
 function readWorkflow(name: string): string {
@@ -35,11 +36,13 @@ describe("sync workflow contract", () => {
       "git add data/apple-synced.json data/apple-sync-state.json data/browse-index.json public/stories/ data/subtitles/ \\",
     );
     expect(yaml).toContain(
-      "data/story-zones.ts data/reflection-prompts.ts data/story-dates.ts",
+      "data/story-zones.ts data/reflection-prompts.ts data/story-dates.ts data/episode-faqs.ts",
     );
+    expect(yaml).toContain("git diff --name-only");
+    expect(yaml).toContain("git ls-files --others --exclude-standard");
   });
 
-  it("git add 必須含 catalog 完備測試所需的三 sidecar（防 #46 回歸）", () => {
+  it("git add 必須含 catalog 完備測試所需的四 sidecar（防 #46／#60 回歸）", () => {
     const yaml = readWorkflow("sync-apple-podcast.yml");
     const addBlock = yaml.match(
       /git add[\s\S]*?(?=\n          if |\n          git )/,
@@ -62,7 +65,16 @@ describe("sync workflow contract", () => {
     );
   });
 
-  it("完備測試仍以 getStories() 要求三 sidecar 全集覆蓋（契約對齊點）", () => {
+  it("sync report 必須保留 FAQ MVP 待人工改寫清單", () => {
+    const report = readFileSync(join(ROOT, "scripts/lib/sync-report.ts"), "utf8");
+    const notify = readFileSync(join(ROOT, "scripts/post-sync-notify.ts"), "utf8");
+
+    expect(report).toContain("episodeFaqStubs");
+    expect(notify).toContain("FAQ MVP 待人工改寫");
+    expect(notify).toContain("data/episode-faqs.ts");
+  });
+
+  it("完備測試仍以 getStories() 要求 catalog sidecar 全集覆蓋（契約對齊點）", () => {
     const zones = readFileSync(join(ROOT, "data/story-zones.test.ts"), "utf8");
     const prompts = readFileSync(
       join(ROOT, "data/reflection-prompts.test.ts"),
@@ -89,14 +101,15 @@ describe("sync workflow contract", () => {
     expect(buildBlock).toContain(CANONICAL_SITE_URL);
   });
 
-  it("sync workflow 不得把單次 workflow 失敗升級成 GitHub Issue", () => {
+  it("sync workflow 失敗必須即時開去重告警，且告警步驟不得掩蓋原始失敗", () => {
     const yaml = readWorkflow("sync-apple-podcast.yml");
 
-    expect(yaml).not.toContain("if: failure()");
+    expect(yaml).toContain("- name: Report sync failure");
+    expect(yaml).toContain("if: failure()");
+    expect(yaml).toContain("continue-on-error: true");
+    expect(yaml).toContain("scripts/sync-alert.ts failure --kind=sync-job-failure");
     expect(yaml).not.toContain("actions/github-script");
     expect(yaml).not.toContain("github.rest.issues.create");
-    expect(yaml).not.toContain("sync-alert.ts failure");
-    expect(yaml).not.toContain("Apple 同步失敗");
   });
 
   it("IndexNow 提交必須在 push 之後、main-only、注入 env，且 fail-soft 由 script 保證", () => {
@@ -109,7 +122,10 @@ describe("sync workflow contract", () => {
       pushIndex,
     );
 
-    const indexNowBlock = yaml.slice(indexNowIndex);
+    const indexNowBlock = yaml.match(
+      /- name: Submit IndexNow[\s\S]*?(?=\n      - name:)/,
+    )?.[0];
+    expect(indexNowBlock, "找不到 Submit IndexNow step").toBeDefined();
     expect(indexNowBlock).toContain("scripts/submit-indexnow.ts");
     expect(indexNowBlock).toContain("github.ref == 'refs/heads/main'");
     expect(indexNowBlock).toContain("INDEXNOW_KEY:");
