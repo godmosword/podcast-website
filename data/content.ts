@@ -45,7 +45,7 @@ export type Story = StoryBase & {
   };
   /** 聽完聊一聊：親子延伸活動（sidecar，見 data/family-activities.ts；通路契約見 docs/GEO-CONTENT-CONTRACT.md） */
   familyActivity?: FamilyActivity;
-  /** 家長共讀指引（sidecar，見 data/parent-guides.ts；預設收合 ShowNotes） */
+  /** 家長共讀指引（sidecar，見 data/parent-guides.ts；呈現於 /for-parents#co-listen） */
   parentGuide?: ParentGuide;
   /** 本集專屬 FAQ（sidecar，見 data/episode-faqs.ts；併入 storyFaqs() 第一題） */
   episodeFaq?: EpisodeFaq;

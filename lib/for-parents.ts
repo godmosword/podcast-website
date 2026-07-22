@@ -54,6 +54,16 @@ export function representativeParentStories(): Story[] {
   return preferred;
 }
 
+/** 有共讀／親子活動／反思文案的集數（家長指南深讀區）。 */
+export function parentCoListenStories(): Story[] {
+  return storiesByNewest().filter(
+    (story) =>
+      Boolean(story.familyActivity) ||
+      Boolean(story.parentGuide) ||
+      Boolean(story.reflectionPrompt),
+  );
+}
+
 export function parentLandingFaqs(
   facts: ParentLandingFacts = parentLandingFacts(),
 ): FaqItem[] {

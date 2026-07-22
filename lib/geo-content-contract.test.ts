@@ -10,9 +10,10 @@ import {
 } from "./geo-content-contract";
 
 describe("geo content channel constants", () => {
-  it("familyActivity 通路含卡片、RSS、JSON-LD、llms-full", () => {
+  it("familyActivity 通路含家長指南、單集 CTA、RSS、JSON-LD、llms-full", () => {
     expect(FAMILY_ACTIVITY_CHANNELS).toEqual([
-      "story-page-card",
+      "for-parents-co-listen",
+      "story-page-cta",
       "rss-show-note",
       "faq-json-ld-one-item",
       "llms-full",
@@ -22,10 +23,11 @@ describe("geo content channel constants", () => {
   it("reflectionPrompt 不含 FAQ 或 RSS 通路", () => {
     expect(REFLECTION_PROMPT_CHANNELS).not.toContain("faq-json-ld-one-item");
     expect(REFLECTION_PROMPT_CHANNELS).not.toContain("rss-show-note");
+    expect(REFLECTION_PROMPT_CHANNELS).not.toContain("story-page-reflection-prompt");
   });
 
-  it("parentGuide 規劃為收合 ShowNotes，非預設可見卡片", () => {
-    expect(PARENT_GUIDE_CHANNELS[0]).toBe("story-page-show-notes-details");
+  it("parentGuide 主通路為家長指南共讀區，非單集預設可見卡片", () => {
+    expect(PARENT_GUIDE_CHANNELS[0]).toBe("for-parents-co-listen");
   });
 });
 

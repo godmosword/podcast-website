@@ -12,22 +12,16 @@ import {
   storyFaqs,
   storyOutlineItems,
   storyOutlinePreviewItems,
-  storyParentExtension,
 } from "@/lib/story-geo";
 import { storyDetailMetadata } from "@/lib/story-metadata";
 import { hasFullTranscript } from "@/lib/transcript";
 import { storyCoverPath } from "@/lib/story-utils";
 import FavoriteButton from "@/components/FavoriteButton";
 import JsonLd from "@/components/JsonLd";
-import ParentTrustStrip from "@/components/ParentTrustStrip";
 import PlayButton from "@/components/PlayButton";
 import ShareButton from "@/components/ShareButton";
 import RelatedStories from "@/components/RelatedStories";
-import FamilyActivityCard from "@/components/story/FamilyActivityCard";
-import ShowNotes from "@/components/story/ShowNotes";
 import ZoneBadge from "@/components/story/ZoneBadge";
-import StoryDetailReflection from "@/components/story/StoryDetailReflection";
-import SubscriptionCTA from "@/components/SubscriptionCTA";
 import SiteFooter from "@/components/SiteFooter";
 import StoryCoverMorph from "@/components/story/StoryCoverMorph";
 import StoryImage from "@/components/StoryImage";
@@ -71,15 +65,16 @@ export default async function StoryDetailPage({
   const hasFullOutline = outlineItems.length > outlinePreviewItems.length;
   const characters = getCharactersForStory(story.slug);
   const charactersTeaser = storyCharactersTeaser(characters);
-  const parentExtension = storyParentExtension(story);
   const faqs = storyFaqs(story);
-  const [primaryFaq, ...moreFaqs] = faqs;
   const storyHasFullTranscript = hasFullTranscript(story);
-  // 僅在有更多大綱可展開時顯示收合區，避免與 preview 重複的空殼（設計審 M3）
   const showOutlineDetails = hasFullOutline;
-  // GEO：familyActivity 以 Q&A 形式併入 FAQPage JSON-LD（頁面可見文字由卡片提供）
+  // GEO：familyActivity 以 Q&A 併入 FAQPage（可見文案改掛家長指南）
   const activityFaq = familyActivityFaq(story);
   const jsonLdFaqs = activityFaq ? [...faqs, activityFaq] : faqs;
+  const hasParentCoListen =
+    Boolean(story.familyActivity) ||
+    Boolean(story.parentGuide) ||
+    Boolean(story.reflectionPrompt);
 
   return (
     <main className={styles.main}>
@@ -150,26 +145,13 @@ export default async function StoryDetailPage({
             leading={<FavoriteButton slug={story.slug} />}
             className={styles.shareRow}
           />
-          <SubscriptionCTA
-            accent={story.color}
-            className={styles.subscribeBlock}
-            campaign={story.slug}
-          />
         </div>
 
-        <ParentTrustStrip className={styles.trustStrip} />
-
-        {story.familyActivity && (
-          <FamilyActivityCard
-            slug={story.slug}
-            familyActivity={story.familyActivity}
-            accent={story.color}
-          />
-        )}
-
-        {story.parentGuide && (
-          <ShowNotes slug={story.slug} parentGuide={story.parentGuide} />
-        )}
+        {hasParentCoListen ? (
+          <p className={styles.parentCta}>
+            <Link href="/for-parents#co-listen">家長共讀與延伸 →</Link>
+          </p>
+        ) : null}
 
         <section className={styles.contentSection} aria-labelledby="outline-heading">
           <h2 id="outline-heading" className={styles.sectionHeading}>
@@ -208,89 +190,36 @@ export default async function StoryDetailPage({
             出場角色
           </h2>
           <p className={styles.teaser}>{charactersTeaser}</p>
-          {characters.length > 0 && (
-            <details className={styles.expandable}>
-              <summary>看出場角色介紹</summary>
-              <ul className={styles.characterList}>
-                {characters.map((character) => (
-                  <li key={character.id} className={styles.characterItem}>
-                    <Link href={`/characters#${character.id}`}>
-                      {character.name}
-                    </Link>
-                    <span>
-                      {character.vehicle}，{character.personality}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </details>
-          )}
           <Link href="/characters" className={styles.inlineLink}>
-            看全部角色圖鑑
+            看角色圖鑑
           </Link>
         </section>
-
-        {story.reflectionPrompt && (
-          <StoryDetailReflection
-            slug={story.slug}
-            child={story.reflectionPrompt.child}
-            parentFollowUp={story.reflectionPrompt.parentFollowUp}
-            accent={story.color}
-          />
-        )}
-
-        <details className={styles.expandableSection}>
-          <summary className={styles.expandableSummary}>
-            {parentExtension.heading}
-          </summary>
-          <div className={styles.expandableBody}>
-            <ul className={styles.promptList}>
-              {parentExtension.prompts.map((prompt, i) => (
-                <li key={`${story.slug}-prompt-${i}`}>{prompt}</li>
-              ))}
-            </ul>
-            <Link href="/for-parents" className={styles.inlineLink}>
-              家長指南
-            </Link>
-          </div>
-        </details>
 
         <section className={styles.contentSection} aria-labelledby="faq-heading">
           <h2 id="faq-heading" className={styles.sectionHeading}>
             常見問題
           </h2>
-          <section className={styles.faqItem}>
-            <h3>{primaryFaq.question}</h3>
-            <p>{primaryFaq.answer}</p>
-          </section>
-          {moreFaqs.length > 0 && (
-            <details className={styles.expandable}>
-              <summary>還有其他 {moreFaqs.length} 個常見問題</summary>
-              <div className={styles.faqList}>
-                {moreFaqs.map((faq, i) => (
-                  <section key={`${story.slug}-faq-${i}`} className={styles.faqItem}>
-                    <h3>{faq.question}</h3>
-                    <p>{faq.answer}</p>
-                  </section>
-                ))}
-              </div>
-            </details>
-          )}
+          <details className={styles.expandable}>
+            <summary>展開 {faqs.length} 個常見問題</summary>
+            <div className={styles.faqList}>
+              {faqs.map((faq, i) => (
+                <section key={`${story.slug}-faq-${i}`} className={styles.faqItem}>
+                  <h3>{faq.question}</h3>
+                  <p>{faq.answer}</p>
+                </section>
+              ))}
+            </div>
+          </details>
         </section>
 
-        {nextStory && (
-          <p className={styles.nextHint}>
-            聽完這集可以接著聽{" "}
-            <Link href={`/story/${nextStory.slug}`} style={{ color: story.color }}>
-              EP {nextStory.ep} {nextStory.title}
-            </Link>
-          </p>
-        )}
-
-        <RelatedStories stories={related} />
+        <RelatedStories
+          stories={related}
+          nextStory={nextStory}
+          accent={story.color}
+        />
       </article>
 
-      <SiteFooter compact showPlatformSubscribe={false} />
+      <SiteFooter compact campaign={story.slug} />
     </main>
   );
 }

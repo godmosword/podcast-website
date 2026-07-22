@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { getCharacters } from "@/data/characters";
 import { getStories } from "@/data/content";
 import {
+  parentCoListenStories,
   parentLandingFacts,
   parentLandingFaqs,
   representativeParentStories,
@@ -48,5 +49,20 @@ describe("representativeParentStories", () => {
 
     expect(stories.length).toBeGreaterThanOrEqual(3);
     expect(stories.every((story) => allSlugs.has(story.slug))).toBe(true);
+  });
+});
+
+describe("parentCoListenStories", () => {
+  it("只含有共讀／活動／反思文案的集數", () => {
+    const stories = parentCoListenStories();
+    expect(stories.length).toBeGreaterThan(0);
+    expect(
+      stories.every(
+        (story) =>
+          Boolean(story.familyActivity) ||
+          Boolean(story.parentGuide) ||
+          Boolean(story.reflectionPrompt),
+      ),
+    ).toBe(true);
   });
 });

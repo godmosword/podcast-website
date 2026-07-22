@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ConnectHub from "@/components/ConnectHub";
+import ParentTrustStrip from "@/components/ParentTrustStrip";
 import PlaygroundHubBadge from "@/components/games/PlaygroundHubBadge";
 import Doodle from "@/components/decor/Doodle";
 import decor from "@/components/decor/decor.module.css";
@@ -14,12 +15,15 @@ type SiteFooterProps = {
   layout?: "default" | "home";
   /** 非首頁：頁尾是否顯示收聽平台 */
   showPlatformSubscribe?: boolean;
+  /** utm_campaign：單集 slug；傳給 ConnectHub */
+  campaign?: string;
 };
 
 export default function SiteFooter({
   compact = false,
   layout = "default",
   showPlatformSubscribe = true,
+  campaign,
 }: SiteFooterProps) {
   const isHome = layout === "home";
   const showPlatforms = isHome || showPlatformSubscribe;
@@ -57,7 +61,7 @@ export default function SiteFooter({
             </span>
             <span className={styles.playgroundCopy}>
               <span className={styles.playgroundTitle}>去遊樂園玩</span>
-              <span className={styles.playgroundSub}>小遊戲 · 免下載</span>
+              <span className={styles.playgroundSub}>小遊戲 · 免載</span>
             </span>
           </Link>
         )}
@@ -65,8 +69,14 @@ export default function SiteFooter({
         <ConnectHub
           id={showPlatforms ? "connect" : undefined}
           showPlatforms={showPlatforms}
+          campaign={campaign}
         />
       </div>
+
+      <ParentTrustStrip
+        variant="compact"
+        className={styles.footerTrust}
+      />
 
       <div className={styles.bottomBar}>
         <nav className={styles.metaStrip} aria-label="頁尾連結">
@@ -84,6 +94,12 @@ export default function SiteFooter({
           </span>
           <Link href="/legal" className={styles.metaLink}>
             使用條款與免責聲明
+          </Link>
+          <span className={styles.metaSep} aria-hidden>
+            ·
+          </span>
+          <Link href="/legal#privacy" className={styles.metaLink}>
+            隱私說明
           </Link>
         </nav>
         <p className={styles.copyright}>© 車車遊樂園™ · Bonbon &amp; 馬米</p>

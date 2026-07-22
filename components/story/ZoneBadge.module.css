@@ -24,4 +24,10 @@
 
 :global([data-theme="night"]) .badge {
   color: var(--ink);
+  background: color-mix(in srgb, var(--landing-brand) 12%, var(--card));
+  border-color: color-mix(in srgb, var(--landing-brand) 22%, transparent);
+}
+
+:global([data-theme="night"]) .badge:hover {
+  background: color-mix(in srgb, var(--landing-brand) 20%, var(--card));
 }

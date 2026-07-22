@@ -151,7 +151,13 @@
   margin-top: var(--space-page);
 }
 
-/* 安靜 meta 帶：關於 · 節目數據 · 條款（同視覺權重，非 pill） */
+.footerTrust {
+  width: min(100%, 520px);
+  margin: var(--space-4) auto 0;
+  text-align: left;
+}
+
+/* 安靜 meta 帶：關於 · 節目數據 · 條款 · 隱私（同視覺權重，非 pill） */
 .metaStrip {
   display: flex;
   align-items: center;

@@ -18,6 +18,8 @@ type Props = {
   className?: string;
   /** 是否顯示收聽平台圖示 */
   showPlatforms?: boolean;
+  /** utm_campaign：單集 slug；未傳則為 site */
+  campaign?: string;
 };
 
 function IconLink({
@@ -73,6 +75,7 @@ export default function ConnectHub({
   id = "connect",
   className,
   showPlatforms = true,
+  campaign,
 }: Props) {
   const socials = visibleSocials();
   const platforms = showPlatforms ? visiblePlatforms() : [];
@@ -100,7 +103,10 @@ export default function ConnectHub({
             {platforms.map((p) => (
               <IconLink
                 key={p.label}
-                href={appendPlatformUtm(p.url, { source: "footer-connect" })}
+                href={appendPlatformUtm(p.url, {
+                  source: "footer-connect",
+                  campaign,
+                })}
                 label={p.label}
                 ariaLabel={`在 ${p.label} 收聽`}
                 badgeStyle={{ background: p.color }}

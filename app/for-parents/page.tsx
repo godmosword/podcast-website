@@ -4,7 +4,9 @@ import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import JsonLd from "@/components/JsonLd";
+import ParentCoListenSection from "@/components/for-parents/ParentCoListenSection";
 import {
+  parentCoListenStories,
   parentLandingFacts,
   parentLandingFaqs,
   representativeParentStories,
@@ -33,6 +35,7 @@ export default function ForParentsPage() {
   const facts = parentLandingFacts();
   const faqs = parentLandingFaqs(facts);
   const representativeStories = representativeParentStories();
+  const coListenStories = parentCoListenStories();
 
   return (
     <main className={styles.main}>
@@ -80,7 +83,7 @@ export default function ForParentsPage() {
         <h2 id="what-heading">車車遊樂園是什麼？</h2>
         <p>{faqs[1].answer}</p>
         <p>
-          官網把每集整理成可分享的故事頁：封面、播放入口、故事大綱、出場角色與家長延伸問題。
+          官網把每集整理成可分享的故事頁：封面、播放入口與故事大綱；共讀提問與家長延伸集中在本頁下方。
         </p>
       </section>
 
@@ -135,6 +138,8 @@ export default function ForParentsPage() {
           ))}
         </div>
       </section>
+
+      <ParentCoListenSection stories={coListenStories} />
 
       <SiteFooter compact showPlatformSubscribe={false} />
     </main>

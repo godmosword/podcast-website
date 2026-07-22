@@ -2,7 +2,7 @@
 
 > 目的：釐清單集「家長向」內容欄位的責任邊界，避免同一套親子提示被兩處資料重複維護，也避免頁面為了 GEO 堆滿可見文字。  
 > 關聯任務：REUSE-2（`parentGuide`）、GEO 第二階段（低干擾閱讀）。  
-> 最後更新：2026-07-20
+> 最後更新：2026-07-22
 
 ## 原則
 
@@ -25,12 +25,12 @@
 
 | 欄位 | 資料來源 | 字數／語氣 | 頁面呈現 | RSS | JSON-LD | llms-full |
 |------|----------|------------|----------|-----|---------|-----------|
-| `familyActivity` | `data/family-activities.ts` | 短：1 題 + 選填 1 個小活動 | `FamilyActivityCard`（可見卡片） | show notes 末段 `🏡 聽完聊一聊` | FAQPage **加 1 題**（`familyActivityFaq`） | 有則附問題行 |
-| `reflectionPrompt` | `data/reflection-prompts.ts` | 短：孩子問句 + 家長追問 | 播放結束／`ReflectionPrompt` 互動 | **不進** | **不另加 FAQ** | **不進** |
-| `parentGuide`（待建） | 待 REUSE-2 定 sidecar 或 `stories` 選填 | 中：2–3 句摘要 + 1–2 延伸提問／小活動 | `ShowNotes` 區塊，預設 **收合** `<details>` | 可選 1 段，**不得**複製 `familyActivity` 全文 | 可併入 `description` 衍生句，**不**重複 FAQ 題幹 | 可摘 1 段要點 |
-| `episodeFaq` | `data/episode-faqs.ts` | 短：1 題緊扣該集劇情／主題 | `storyFaqs()` 第一題（可見 + 收合皆含） | **不進** | FAQPage 併入 `storyFaqs()`（第一項） | 有則附 1 行 `❓` |
-| `storyParentExtension` | `lib/story-geo.ts` 程式產生 | 通用共聽引導（非逐集手寫） | 單集頁 `<details>` 收合 | **不進** | 已含於 `storyFaqs` 通用答案語意 | **不進** |
-| `storyFaqs` | `lib/story-geo.ts` 程式產生 | 3 題模板化 FAQ | 可見 1 題 + 其餘收合 | **不進** | FAQPage 全量 | **不進** |
+| `familyActivity` | `data/family-activities.ts` | 短：1 題 + 選填 1 個小活動 | `/for-parents#co-listen` 收合；單集頁僅 CTA | show notes 末段 `🏡 聽完聊一聊` | FAQPage **加 1 題**（`familyActivityFaq`） | 有則附問題行 |
+| `reflectionPrompt` | `data/reflection-prompts.ts` | 短：孩子問句 + 家長追問 | 播放結束／`ReflectionPrompt`；家長指南可複述 | **不進** | **不另加 FAQ** | **不進** |
+| `parentGuide` | `data/parent-guides.ts` | 中：2–3 句摘要 + 1–2 延伸提問／小活動 | `/for-parents#co-listen` 收合 ShowNotes；單集頁僅 CTA | 可選 1 段，**不得**複製 `familyActivity` 全文 | 可併入 `description` 衍生句，**不**重複 FAQ 題幹 | 可摘 1 段要點 |
+| `episodeFaq` | `data/episode-faqs.ts` | 短：1 題緊扣該集劇情／主題 | `storyFaqs()` 全量預設收合（HTML 仍在） | **不進** | FAQPage 併入 `storyFaqs()`（第一項） | 有則附 1 行 `❓` |
+| `storyParentExtension` | `lib/story-geo.ts` 程式產生 | 通用共聽引導（非逐集手寫） | **不在單集頁渲染**（語意併入家長指南／FAQ） | **不進** | 已含於 `storyFaqs` 通用答案語意 | **不進** |
+| `storyFaqs` | `lib/story-geo.ts` 程式產生 | 3 題模板化 FAQ | 預設收合 `<details>`（全文仍在 DOM） | **不進** | FAQPage 全量 | **不進** |
 
 ## `familyActivity`（已上線）
 
@@ -38,7 +38,8 @@
 
 **允許通路：**
 
-- 單集詳情頁：`components/story/FamilyActivityCard.tsx`
+- 家長指南：`/for-parents#co-listen`（`ParentCoListenSection` + `FamilyActivityCard`）
+- 單集詳情頁：僅「家長共讀與延伸 →」CTA（不堆長文）
 - RSS：`lib/story-geo.ts` → `familyActivityShowNote`
 - JSON-LD：`familyActivityFaq` 併入 FAQPage（固定題幹「聽完這一集可以和孩子聊什麼？」）
 - `llms-full`：`scripts/generate-llms-full.ts`
@@ -55,14 +56,15 @@
 
 **允許通路：**
 
-- `StoryPlayer`／`StoryEndScreen`／`ReflectionPrompt`
-- `storyParentExtension` 可 **引用** 兩句作收合區補充（程式合併，非第二份資料）
+- `StoryPlayer`／`StoryEndScreen`／`ReflectionPrompt`（聽完才展開）
+- 家長指南 `/for-parents#co-listen` 可複述兩句供家長預覽
 
 **禁止：**
 
 - 不另產生 FAQPage 題目
 - 不進 RSS show notes
 - 不與 `familyActivity.question` 逐字相同（見 `lib/geo-content-contract.ts` 迴歸測試）
+- 不在單集詳情頁再掛一份可見反思卡（避免與結束畫面／家長延伸重複）
 
 ## `parentGuide`（REUSE-2 已上線）
 
@@ -79,7 +81,7 @@ type ParentGuide = {
 };
 ```
 
-**呈現：** `components/story/ShowNotes.tsx`，放在單集頁大綱區下方，**預設收合**；與 `FamilyActivityCard` 並存時，卡片維持短鉤子，`parentGuide` 放長文。
+**呈現：** `components/story/ShowNotes.tsx` 掛在 `/for-parents#co-listen`（預設收合）；單集頁改為 CTA 連家長指南，不堆長文。與 `FamilyActivityCard` 並存時，卡片維持短鉤子，`parentGuide` 放長文。
 
 **與 `familyActivity` 分工：**
 
@@ -87,7 +89,7 @@ type ParentGuide = {
 |--|------------------|---------------|
 | 長度 | 1 題 (+ 選填 1 活動) | 2–3 句 + 多個延伸 |
 | 目的 | 注意力鉤子、平台 show note | 睡前共讀深度指引 |
-| 可見性 | 常駐小卡片 | 收合區 |
+| 可見性 | 家長指南收合區 | 家長指南收合區 |
 | 重複規則 | 若兩者並存，`familyActivity.question` 不得與 `parentGuide.summary`／`prompts` 任一逐字相同 |
 
 **REUSE-2 開工條件：** 本文件 + `components/story/ShowNotes.tsx` 已上線；新增集數請補 sidecar 並跑 `data/parent-guides.test.ts`。
@@ -100,7 +102,7 @@ type ParentGuide = {
 
 **允許通路：**
 
-- 單集詳情頁：`storyFaqs()` 輸出的第一題（可見區 + `<details>` 收合區共用同一份資料）
+- 單集詳情頁：`storyFaqs()` 輸出（預設 `<details>` 收合，全文仍在 SSR HTML）
 - JSON-LD：併入 FAQPage `mainEntity` 第一項
 - `llms-full`：有則附 1 行 `❓ <question>：<answer>`
 
@@ -126,6 +128,7 @@ type ParentGuide = {
 
 ## 變更紀錄
 
+- **2026-07-22：** 單集頁精簡：共讀／親子活動／家長指引遷至 `/for-parents#co-listen`；FAQ 預設收合；角色僅一行＋圖鑑連結；接著聽併入 RelatedStories。
 - **2026-07-20（Wave 1）：** 聚合頁 GEO 導言改 `sr-only`（SSR 保留）；單集本集介紹維持可見。
 - **2026-07-20（GEO P1）：** 新增 `episodeFaq` sidecar（每集專屬 1 題 FAQ），併入 `storyFaqs()` 第一題。
 - **2026-07-20（GEO P0）：** 場景字幕 vs 完整逐字稿契約；`transcript.vtt`／RSS／JSON-LD 僅認 `subtitles` 側車。

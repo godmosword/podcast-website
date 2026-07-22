@@ -10,7 +10,8 @@ export type ParentGuide = {
 
 /** `familyActivity` 允許出現的通路（契約文件同步）。 */
 export const FAMILY_ACTIVITY_CHANNELS = [
-  "story-page-card",
+  "for-parents-co-listen",
+  "story-page-cta",
   "rss-show-note",
   "faq-json-ld-one-item",
   "llms-full",
@@ -20,13 +21,13 @@ export const FAMILY_ACTIVITY_CHANNELS = [
 export const REFLECTION_PROMPT_CHANNELS = [
   "story-player",
   "story-end-screen",
-  "story-page-reflection-prompt",
-  "story-parent-extension-merge",
+  "for-parents-co-listen",
 ] as const;
 
-/** `parentGuide` 規劃中的通路（REUSE-2）。 */
+/** `parentGuide` 通路（REUSE-2）。 */
 export const PARENT_GUIDE_CHANNELS = [
-  "story-page-show-notes-details",
+  "for-parents-co-listen",
+  "story-page-cta",
   "optional-rss-excerpt",
   "optional-llms-excerpt",
 ] as const;
