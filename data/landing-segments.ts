@@ -39,7 +39,6 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
     id: "stories",
     anchorId: "segment-stories",
     title: "車車與遊樂園的故事",
-    subtitle: "3–7 歲親子 Podcast · 每集約 5–10 分鐘",
     heroImage: "/landing/segment-stories.jpg",
     heroImagePortrait: "/landing/segment-stories-portrait.jpg",
     cta: { label: "全部故事", href: "/stories" },
