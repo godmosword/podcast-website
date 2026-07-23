@@ -30,6 +30,14 @@
 | 4 | [Growth-Measure-1](#growth-measure-1-成長量測) SoundOn 回鏈 | ops/growth | S | ✅ `42a9d38` |
 | 5 | [UX-P1-2](#兒童-ux-與親子互動稽核2026-07-11) 詳情頁反思收合 | ux | S | ✅ `42a9d38` |
 
+### 本輪已完成（2026-07-23）
+
+| ID | Commit |
+|----|--------|
+| polish(universe): 鎖島 `childHint` 短句＋「去聽車車故事」主 CTA；ZoneSheet 關閉鈕 48px | 待 commit |
+| polish(universe): session 首訪「點一座島看看」＋ StrictMode 門閂；MapGuide「鍵盤也可探索」（`pointer:fine`） | 待 commit |
+| test(universe): e2e／smoke 對齊兒童極簡（tap hint／鎖島 CTA／關閉鈕契約） | 待 commit |
+
 ### 本輪已完成（2026-07-22）
 
 | ID | Commit |

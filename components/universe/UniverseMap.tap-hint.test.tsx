@@ -1,32 +1,28 @@
 // @vitest-environment jsdom
 import React, { StrictMode } from "react";
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { FLY_DURATION_MS } from "./useMapCamera";
 import { TAP_HINT_KEY } from "./UniverseMap";
 
-// StrictMode 會模擬「掛載→卸載→重掛載」把 effect 跑兩輪；本測試鎖定
-// deep-link 門閂在該情境下仍能開 sheet（TODOS「?zone= dev 不開 sheet」回歸）。
+// StrictMode 會模擬 effect 雙跑；本測試鎖定 hint 僅 dismiss 才寫 session key，
+// 且雙 effect 下仍只排程一次 visible（ref 門閂）。
 
 const replaceMock = vi.fn();
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: replaceMock, prefetch: vi.fn() }),
-  useSearchParams: () => new URLSearchParams("zone=dino"),
+  useSearchParams: () => new URLSearchParams(""),
 }));
 
 vi.mock("@/lib/sfx", () => ({ playSfx: vi.fn() }));
 
-// jsdom 無 SVG getTotalLength：roamer 模擬非本測試對象，直接空殼化。
 vi.mock("./MapRoamerLayer", () => ({ default: () => null }));
 vi.mock("./IslandRoamerLayer", () => ({ default: () => null }));
-// jsdom canvas.toDataURL 回 null，webp 偵測非本測試對象。
 vi.mock("@/hooks/useWebpSupported", () => ({ useWebpSupported: () => false }));
 
 function stubBrowserApis() {
   vi.stubGlobal("React", React);
-  // camera ready gate 依賴首次量測非零尺寸；jsdom 預設回 0×0。
   vi.spyOn(Element.prototype, "getBoundingClientRect").mockReturnValue({
     width: 1280,
     height: 800,
@@ -66,11 +62,11 @@ function stubBrowserApis() {
   );
 }
 
-describe("UniverseMap deep link（StrictMode）", () => {
+describe("UniverseMap tap hint（StrictMode）", () => {
   beforeEach(() => {
     stubBrowserApis();
     sessionStorage.clear();
-    window.history.replaceState(null, "", "/adventures?zone=dino");
+    window.history.replaceState(null, "", "/adventures");
     vi.useFakeTimers();
   });
 
@@ -92,28 +88,48 @@ describe("UniverseMap deep link（StrictMode）", () => {
     );
   }
 
-  it("StrictMode 雙 effect 下 ?zone=dino 仍在 fly 之後開 sheet", async () => {
+  it("StrictMode 雙 effect 下顯示 hint 且 show 前不寫 session key", async () => {
     await renderMap();
 
-    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(screen.getByRole("status").textContent).toContain("點一座島看看");
+    expect(sessionStorage.getItem(TAP_HINT_KEY)).toBeNull();
+  });
+
+  it("關閉鈕 dismiss 才寫 session key", async () => {
+    await renderMap();
+
+    fireEvent.click(screen.getByRole("button", { name: "關閉提示" }));
+
+    expect(screen.queryByRole("status")).toBeNull();
+    expect(sessionStorage.getItem(TAP_HINT_KEY)).toBe("1");
+  });
+
+  it("TTL 逾時 dismiss 才寫 session key", async () => {
+    await renderMap();
+    expect(sessionStorage.getItem(TAP_HINT_KEY)).toBeNull();
 
     await act(async () => {
-      vi.advanceTimersByTime(FLY_DURATION_MS + 50);
+      vi.advanceTimersByTime(8000);
     });
 
-    const dialog = screen.getByRole("dialog");
-    expect(dialog.textContent).toContain("恐龍島");
-  });
-
-  it("深連結入場會預寫 entry key，跳過進場降落動畫", async () => {
-    expect(sessionStorage.getItem("cc-universe-entry-played")).toBeNull();
-    await renderMap();
-    expect(sessionStorage.getItem("cc-universe-entry-played")).toBe("1");
-  });
-
-  it("深連結入場不顯示 tap hint、也不寫 tap hint key", async () => {
-    await renderMap();
     expect(screen.queryByRole("status")).toBeNull();
-    expect(sessionStorage.getItem(TAP_HINT_KEY)).toBeNull();
+    expect(sessionStorage.getItem(TAP_HINT_KEY)).toBe("1");
+  });
+
+  it("點島 dismiss 才寫 session key", async () => {
+    await renderMap();
+
+    const islandButtons = screen.getAllByRole("button", { name: /島/ });
+    fireEvent.click(islandButtons[0]!);
+
+    expect(screen.queryByRole("status")).toBeNull();
+    expect(sessionStorage.getItem(TAP_HINT_KEY)).toBe("1");
+  });
+
+  it("sessionStorage 已有 key 時不顯示 hint", async () => {
+    sessionStorage.setItem(TAP_HINT_KEY, "1");
+    await renderMap();
+
+    expect(screen.queryByRole("status")).toBeNull();
   });
 });

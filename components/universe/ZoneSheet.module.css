@@ -58,8 +58,8 @@
   position: absolute;
   top: 8px;
   right: 8px;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border: none;
   border-radius: 12px;
   background: color-mix(in srgb, var(--ink) 7%, var(--card));
@@ -115,10 +115,19 @@
   border-radius: 999px;
 }
 
+.childHint {
+  margin: 0 0 0.65rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
 .links {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.55rem;
+  margin-bottom: 0.65rem;
 }
 
 .linkBtn {

@@ -106,30 +106,53 @@ test("關於頁面", async ({ page }) => {
 });
 
 test("車車宇宙樂園地圖 smoke", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.sessionStorage.removeItem("cc-universe-tap-hint-shown");
+  });
   await page.goto("/adventures");
   await expect(
     page.getByRole("region", { name: "車車宇宙樂園地圖" }),
   ).toBeVisible();
-  // 統一點擊語意：點鎖島本體一次即開介紹 sheet
+  await expect(page.getByRole("status")).toContainText("點一座島看看");
+
+  // 統一點擊語意：點鎖島本體一次即開介紹 sheet（兒童首屏契約）
   await expect(
     page.getByRole("button", { name: /恐龍島，建造中/ }),
   ).toBeVisible();
   await page.getByRole("button", { name: /恐龍島，建造中/ }).click();
-  await expect(page.getByRole("dialog")).toBeVisible({ timeout: 2_000 });
-  await expect(page.getByText("恐龍島還在蓋")).toBeVisible();
+  await expect(page.getByRole("status")).toHaveCount(0);
+
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible({ timeout: 2_000 });
+  await expect(dialog.getByText("恐龍島在長大")).toBeVisible();
+  await expect(dialog.getByRole("link", { name: "去聽車車故事" })).toHaveAttribute(
+    "href",
+    /\/stories/,
+  );
+  const parentToggle = dialog.getByRole("button", { name: "給爸爸媽媽" });
+  await expect(parentToggle).toBeVisible();
+  await expect(parentToggle).toHaveAttribute("aria-expanded", "false");
+  await expect(dialog.getByText(/恐龍島還在蓋/)).not.toBeVisible();
   // 家長內容收進「給爸爸媽媽」disclosure，孩子首屏不見許願表單
-  await expect(page.getByRole("button", { name: "給爸爸媽媽" })).toBeVisible();
   await expect(page.getByText("想留一句話")).toHaveCount(0);
   await expect(page.getByPlaceholder("暱稱或 Email")).toHaveCount(0);
+
+  await parentToggle.click();
+  await expect(dialog.getByText(/恐龍島還在蓋/)).toBeVisible();
+  await expect(dialog.getByLabel("建造進度")).toBeVisible();
+
   await page.getByRole("button", { name: "關閉" }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
 
   await expect(
     page.getByRole("button", { name: /車車樂園，開放中/ }),
   ).toBeVisible();
   await page.getByRole("button", { name: /車車樂園，開放中/ }).click();
-  await expect(page.getByRole("dialog")).toBeVisible({ timeout: 2_000 });
-  await expect(page.getByRole("heading", { name: "車車樂園" })).toBeVisible();
-  await expect(page.getByRole("navigation", { name: "車車樂園入口" })).toBeVisible();
+  const carParkDialog = page.getByRole("dialog");
+  await expect(carParkDialog).toBeVisible({ timeout: 2_000 });
+  await expect(carParkDialog.getByRole("heading", { name: "車車樂園" })).toBeVisible();
+  // 開放島有故事預覽時主 CTA nav 改為故事區塊
+  await expect(carParkDialog.getByRole("heading", { name: "這座島的故事" })).toBeVisible();
 });
 
 test("節目數據中心 /studio", async ({ page }) => {

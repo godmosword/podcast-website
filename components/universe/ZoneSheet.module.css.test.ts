@@ -9,8 +9,8 @@ describe("ZoneSheet.module.css touch and modal", () => {
     "utf8",
   );
 
-  it("關閉鈕與許願 toggle 觸控區 ≥44px", () => {
-    expect(css).toMatch(/\.close\s*\{[\s\S]*?width:\s*44px[\s\S]*?height:\s*44px/);
+  it("關閉鈕與許願 toggle 觸控區達標（關閉≥48、toggle≥44）", () => {
+    expect(css).toMatch(/\.close\s*\{[\s\S]*?width:\s*48px[\s\S]*?height:\s*48px/);
     expect(css).toMatch(/\.wishToggle\s*\{[\s\S]*?min-height:\s*44px/);
   });
 
@@ -20,5 +20,11 @@ describe("ZoneSheet.module.css touch and modal", () => {
 
   it("sheet 高度採動態上限", () => {
     expect(css).toMatch(/max-height:\s*min\(64vh,\s*30rem\)/);
+  });
+
+  it("主 CTA linkBtnPrimary 觸控區 ≥48px", () => {
+    expect(css).toMatch(/\.linkBtnPrimary\s*\{[\s\S]*?min-height:\s*52px/);
+    const match = css.match(/\.linkBtnPrimary\s*\{[\s\S]*?min-height:\s*(\d+)px/);
+    expect(Number(match?.[1])).toBeGreaterThanOrEqual(48);
   });
 });

@@ -15,6 +15,7 @@ describe("MapGuide", () => {
     expect(html).toContain("🚧");
     expect(html).toContain("🎁");
     expect(html).toContain("💭");
+    expect(html).toContain("鍵盤也可探索");
   });
 
   it("沒有某種狀態的島時不輸出空圖例項目", () => {

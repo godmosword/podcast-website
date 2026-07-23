@@ -90,6 +90,22 @@
   margin: 0 5px;
 }
 
+/* 僅精準指標裝置顯示；觸控手機不佔視覺空間 */
+.keyboardHint {
+  margin: 6px 0 0;
+  color: #8a6a43;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  display: none;
+}
+
+@media (pointer: fine) {
+  .keyboardHint {
+    display: block;
+  }
+}
+
 :global(html[data-theme="night"]) .guide {
   border-color: rgba(234, 198, 125, 0.42);
   color: #fff2d2;
@@ -99,7 +115,8 @@
 
 :global(html[data-theme="night"]) .openCount,
 :global(html[data-theme="night"]) .instruction,
-:global(html[data-theme="night"]) .gestureHint {
+:global(html[data-theme="night"]) .gestureHint,
+:global(html[data-theme="night"]) .keyboardHint {
   color: #f3d89c;
 }
 
@@ -128,7 +145,8 @@
   }
 
   .legend,
-  .gestureHint {
+  .gestureHint,
+  .keyboardHint {
     display: none;
   }
 }

@@ -40,10 +40,17 @@
 | MAP-UX-P1c | a11y `/adventures`、開 sheet 後 axe、觸控／拖曳 e2e | — |
 | MAP-UX-P2a | `prefers-reduced-motion` 點島即開 sheet | — |
 
+## 本輪已關閉（T7 · 2026-07-23）
+
+| 項目 | 處置 |
+|------|------|
+| 鍵盤探索提示 | MapGuide 探險小抄補「鍵盤也可探索」（僅 `pointer:fine` 顯示；≤480px 維持隱藏） |
+| 手機首訪 discoverability | session 一次性 overlay「點一座島看看」；StrictMode 雙 effect 門閂，僅 dismiss 寫 session key |
+
 ## Known gap（文件標記，不為此改核心）
 
 - **Pointer capture 殘留**：flying→sheet 交接若手指仍按在 viewport，理論上可能短暫 pan；穩態 sheet 開啟後 overlay 已擋海面手勢。
-- **鍵盤**：需手動 focus viewport 才可用 ±／方向鍵。
+- **鍵盤 focus**：viewport 仍須手動 focus 才可用 ±／方向鍵（T7 僅補 discoverability 文案，未改 `useMapCamera` 管線）。
 
 ## P2 長尾
 

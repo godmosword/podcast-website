@@ -54,6 +54,7 @@ export default function MapGuide({ zones }: MapGuideProps) {
         <span aria-hidden="true">·</span>
         <span aria-hidden="true">⊕</span> 加減鍵縮放
       </p>
+      <p className={styles.keyboardHint}>鍵盤也可探索</p>
     </aside>
   );
 }

@@ -228,44 +228,80 @@
   }
 }
 
-/* ── 首訪「點點看」引導泡泡（T5）：session 一次、點島或逾時即收 ────────── */
+/* ── 首訪底部提示（2A）：screen-space、session dismiss 才寫 key ────────── */
 .tapHint {
   position: absolute;
-  z-index: 9000;
+  left: 50%;
+  bottom: calc(16px + var(--safe-bottom));
+  z-index: 4;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 8px 14px;
+  gap: 8px;
+  padding: 10px 10px 10px 18px;
   border-radius: 999px;
   background: #fff8ea;
   border: 2px solid #f0b64e;
   color: #7a5410;
+  box-shadow: 0 4px 12px rgba(120, 90, 40, 0.22);
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateX(-50%) translateY(8px);
+  animation: tapHintEnter 400ms ease forwards;
+}
+
+.tapHintText {
   font-size: 15px;
   font-weight: 800;
   white-space: nowrap;
-  box-shadow: 0 4px 10px rgba(120, 90, 40, 0.25);
-  pointer-events: none;
-  transform-origin: 50% 100%;
 }
 
-.tapHintFinger {
-  display: inline-block;
-  font-size: 17px;
-  animation: tapHintPoke 1.1s ease-in-out infinite;
+.tapHintClose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 48px;
+  margin: -6px -4px -6px 0;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: #7a5410;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 120ms ease, opacity 120ms ease;
 }
 
-@keyframes tapHintPoke {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(3px);
+.tapHintClose:hover {
+  transform: scale(1.06);
+}
+
+.tapHintClose:active {
+  transform: scale(0.96);
+}
+
+.tapHintClose:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@keyframes tapHintEnter {
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tapHintFinger {
+  .tapHint {
     animation: none;
+    opacity: 1;
+    transform: translateX(-50%);
+  }
+
+  .tapHintClose {
+    transition: none;
   }
 }

@@ -49,11 +49,14 @@ const FOCUS_SCALE = 1.6;
 /** bottom dock 開啟時，fly-to 把島往上留出的視窗像素。 */
 const FOCUS_DOCK_OFFSET_Y = 96;
 
-/** 首訪「點點看」引導：每個分頁 session 只出現一次（T5）。 */
-const TAP_HINT_KEY = "cc-universe-tap-hint-shown";
+/** 首訪底部提示：每個分頁 session 僅 dismiss 後才寫入（StrictMode 安全）。 */
+export const TAP_HINT_KEY = "cc-universe-tap-hint-shown";
 
-/** 引導泡泡自動收合時間（毫秒）。 */
+/** 底部提示自動收合時間（毫秒）。 */
 const TAP_HINT_TTL_MS = 8000;
+
+/** 首訪提示狀態：pending→visible→dismissed；key 僅在 dismissed 寫入。 */
+type TapHintPhase = "pending" | "visible" | "dismissed";
 
 /**
  * 地圖互動狀態機（單一事實來源）：
@@ -130,29 +133,43 @@ function UniverseMapContent({
   const activeZone = interaction.phase === "sheet" ? interaction.zone : null;
   /** 迷路自救：viewport 元素引用（量測可見性用；camera.bind.ref 之外的旁支引用）。 */
   const viewportElRef = useRef<HTMLDivElement | null>(null);
-  // 首訪一次性「戳我」引導（T5）：指向開放主島；deep link 入場不顯示。
-  const [tapHintVisible, setTapHintVisible] = useState(false);
-  const carParkZone = useMemo(
-    () => zones.find((zone) => zone.id === "car-park") ?? null,
-    [zones],
-  );
+  // 首訪底部提示（2A）：screen-space、deep link 不顯示；dismiss 才寫 session key。
+  const [tapHintPhase, setTapHintPhase] = useState<TapHintPhase>("pending");
+  const tapHintScheduledRef = useRef(false);
 
-  useEffect(() => {
-    if (parseZoneDeepLinkFromSearch(window.location.search)) return;
+  const dismissTapHint = useCallback(() => {
+    setTapHintPhase("dismissed");
     try {
-      if (sessionStorage.getItem(TAP_HINT_KEY)) return;
       sessionStorage.setItem(TAP_HINT_KEY, "1");
     } catch {
-      return;
+      // sessionStorage 不可用時仍收合 UI，僅無法跨導覽記憶
     }
-    setTapHintVisible(true);
   }, []);
 
   useEffect(() => {
-    if (!tapHintVisible) return;
-    const timer = setTimeout(() => setTapHintVisible(false), TAP_HINT_TTL_MS);
+    if (tapHintScheduledRef.current) return;
+    if (parseZoneDeepLinkFromSearch(window.location.search)) {
+      setTapHintPhase("dismissed");
+      return;
+    }
+    try {
+      if (sessionStorage.getItem(TAP_HINT_KEY)) {
+        setTapHintPhase("dismissed");
+        return;
+      }
+    } catch {
+      setTapHintPhase("dismissed");
+      return;
+    }
+    tapHintScheduledRef.current = true;
+    setTapHintPhase("visible");
+  }, []);
+
+  useEffect(() => {
+    if (tapHintPhase !== "visible") return;
+    const timer = setTimeout(dismissTapHint, TAP_HINT_TTL_MS);
     return () => clearTimeout(timer);
-  }, [tapHintVisible]);
+  }, [tapHintPhase, dismissTapHint]);
   // 夜海貼圖惰性載入：首次切到夜晚才掛 pattern，日間不下載 sea-night.png；
   // 掛上後保持常駐，讓日夜切換仍有 600ms crossfade。
   const [nightSeaMounted, setNightSeaMounted] = useState(false);
@@ -245,7 +262,7 @@ function UniverseMapContent({
   /** 統一點擊語意（Q5）：點任何島（含鎖島本體）→ fly-to＋開介紹 sheet。 */
   const handleActivate = useCallback(
     (zone: ZoneDef) => {
-      setTapHintVisible(false);
+      if (tapHintPhase === "visible") dismissTapHint();
       trackUniverseZoneTap(zone.id, zone.status);
 
       if (zone.status === "open") {
@@ -273,7 +290,7 @@ function UniverseMapContent({
 
       openZone(zone);
     },
-    [openZone, revealSheet, router],
+    [dismissTapHint, openZone, revealSheet, router, tapHintPhase],
   );
 
   /** 使用者拖曳打斷 fly-to、或主動改鏡頭（縮放／重置／方向鍵）時，取消尚未開啟的 sheet。 */
@@ -553,21 +570,6 @@ function UniverseMapContent({
             />
           ))}
 
-          {/* 首訪引導泡泡：指向開放主島，點任何島或逾時即收（純裝飾，aria-hidden） */}
-          {tapHintVisible && carParkZone ? (
-            <span
-              className={styles.tapHint}
-              aria-hidden="true"
-              style={{
-                left: `${carParkZone.px.x}px`,
-                top: `${carParkZone.px.y - 118}px`,
-                transform:
-                  "translate(-50%, -100%) scale(calc(1 / var(--map-scale, 1)))",
-              }}
-            >
-              <span className={styles.tapHintFinger}>👆</span> 點點看！
-            </span>
-          ) : null}
         </div>
 
         {/* 近景雲影：DOM 排在 stage 之後（同 z:1），飄在島群上方 */}
@@ -579,6 +581,21 @@ function UniverseMapContent({
       </div>
 
       <MapGuide zones={zones} />
+
+      {/* 首訪底部提示：screen-space，不擋地圖拖曳；dismiss 才寫 session key */}
+      {tapHintPhase === "visible" ? (
+        <div className={styles.tapHint} role="status" aria-live="polite">
+          <span className={styles.tapHintText}>點一座島看看</span>
+          <button
+            type="button"
+            className={styles.tapHintClose}
+            aria-label="關閉提示"
+            onClick={dismissTapHint}
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+      ) : null}
 
       {/* 日月星：海洋滿版後改為 screen-space 固定天象裝飾（不隨鏡頭移動）；
           z:3 高於滿版海(stage z:1)與夜幕(z:2)，天象才不會被海面蓋掉 */}

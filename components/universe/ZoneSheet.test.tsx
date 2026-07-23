@@ -23,7 +23,7 @@ const zoneStoriesFixture: ZoneStoriesBundle = {
 };
 
 describe("ZoneSheet", () => {
-  it("兒童首屏極簡：不含 teaser／exploreNote／進度／softLinks，家長內容預設收合", () => {
+  it("兒童首屏極簡：含 childHint 與 CTA，不含 teaser／exploreNote／進度／softLinks，家長內容預設收合", () => {
     const zone = ZONES.find((item) => item.id === "dino")!;
     const html = renderToStaticMarkup(
       <ZoneSheet zone={zone} onClose={() => undefined} />,
@@ -31,6 +31,9 @@ describe("ZoneSheet", () => {
 
     expect(html).toContain("恐龍島");
     expect(html).toContain("建造中");
+    expect(html).toContain("恐龍島在長大");
+    expect(html).toContain("去聽車車故事");
+    expect(html).toContain('href="/stories"');
     expect(html).not.toContain("恐龍園區探險故事");
     expect(html).not.toContain("恐龍島還在蓋");
     expect(html).not.toContain("建造進度");
@@ -86,6 +89,30 @@ describe("ZoneSheet", () => {
     expect(html).toContain('href="/story/dino-01"');
     expect(html).toContain('href="/story/dino-02"');
     expect(html).toContain('aria-label="已聽完"');
+  });
+
+  it("鎖島有 zoneStories 時 CTA 在 stories 區塊 DOM 之前", () => {
+    const zone = ZONES.find((item) => item.id === "dino")!;
+    const { container } = render(
+      <ZoneSheet
+        zone={zone}
+        onClose={() => undefined}
+        zoneStories={zoneStoriesFixture}
+      />,
+    );
+
+    const cta = screen.getByRole("link", { name: "去聽車車故事" });
+    const storiesHeading = screen.getByRole("heading", {
+      name: "這座島已經有的故事",
+    });
+    const ctaIndex = Array.from(container.querySelectorAll("a, section")).indexOf(
+      cta,
+    );
+    const storiesIndex = Array.from(
+      container.querySelectorAll("a, section"),
+    ).indexOf(storiesHeading.closest("section")!);
+    expect(ctaIndex).toBeGreaterThanOrEqual(0);
+    expect(storiesIndex).toBeGreaterThan(ctaIndex);
   });
 
   it("car-park（開放島）無故事預覽時主 CTA 首屏可見，其餘入口收進「給爸爸媽媽」", () => {

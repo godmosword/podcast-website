@@ -5,6 +5,7 @@ type ThemeMode = "light" | "night";
 async function openMap(page: Page, theme: ThemeMode, width = 1280, height = 800) {
   await page.setViewportSize({ width, height });
   await page.addInitScript((mode) => {
+    window.sessionStorage.removeItem("cc-universe-tap-hint-shown");
     window.sessionStorage.setItem("cc-universe-entry-played", "1");
     window.localStorage.setItem(
       "cheche:progress",
@@ -15,6 +16,27 @@ async function openMap(page: Page, theme: ThemeMode, width = 1280, height = 800)
   await expect(page.getByRole("region", { name: "車車宇宙樂園地圖" })).toBeVisible();
   await expect(page.getByRole("application", { name: /車車樂園互動地圖/ })).toBeVisible();
   await page.waitForTimeout(250);
+}
+
+async function assertLockedIslandChildFirstScreen(dialog: Locator) {
+  await expect(dialog.getByText("恐龍島在長大")).toBeVisible();
+  await expect(dialog.getByRole("link", { name: "去聽車車故事" })).toHaveAttribute(
+    "href",
+    /\/stories/,
+  );
+  const parentToggle = dialog.getByRole("button", { name: "給爸爸媽媽" });
+  await expect(parentToggle).toBeVisible();
+  await expect(parentToggle).toHaveAttribute("aria-expanded", "false");
+  await expect(dialog.getByText(/恐龍島還在蓋/)).not.toBeVisible();
+}
+
+async function assertLockedIslandParentExpanded(dialog: Locator) {
+  await expect(dialog.getByText(/恐龍島還在蓋/)).toBeVisible();
+  await expect(dialog.getByLabel("建造進度")).toBeVisible();
+  await expect(dialog.getByRole("link", { name: "回故事屋" })).toHaveAttribute(
+    "href",
+    /\/stories/,
+  );
 }
 
 async function stageTransform(page: Page) {
@@ -217,7 +239,47 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     await page.getByRole("button", { name: /恐龍島，建造中/ }).click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible({ timeout: 3000 });
-    await expect(dialog).toContainText("恐龍島還在蓋");
+    await expect(dialog).toContainText("恐龍島");
+    await assertLockedIslandChildFirstScreen(dialog);
+
+    await dialog.getByRole("button", { name: "給爸爸媽媽" }).click();
+    await assertLockedIslandParentExpanded(dialog);
+  });
+
+  test("首訪非 deep link 顯示 tap hint，關閉後消失", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.addInitScript(() => {
+      window.sessionStorage.removeItem("cc-universe-tap-hint-shown");
+      window.sessionStorage.setItem("cc-universe-entry-played", "1");
+    });
+    await page.goto("/adventures");
+    await expect(page.getByRole("region", { name: "車車宇宙樂園地圖" })).toBeVisible();
+
+    const hint = page.getByRole("status");
+    await expect(hint).toContainText("點一座島看看");
+
+    await page.getByRole("button", { name: "關閉提示" }).click();
+    await expect(hint).toHaveCount(0);
+  });
+
+  test("首訪 tap hint 點島後消失", async ({ page }) => {
+    await openMap(page, "light");
+    const hint = page.getByRole("status");
+    await expect(hint).toContainText("點一座島看看");
+
+    await page.getByRole("button", { name: /車車樂園，開放中/ }).click();
+    await expect(hint).toHaveCount(0);
+  });
+
+  test("deep link ?zone=dino 不顯示 tap hint", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.addInitScript(() => {
+      window.sessionStorage.removeItem("cc-universe-tap-hint-shown");
+    });
+    await page.goto("/adventures?zone=dino");
+
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 3000 });
+    await expect(page.getByRole("status")).toHaveCount(0);
   });
 
   test("把地圖拖到只剩海，鏡頭自動飛回樂園（迷路自救）", async ({ page }) => {

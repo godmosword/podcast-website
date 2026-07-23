@@ -23,6 +23,8 @@ export type ZoneDef = {
   /** 可選靜態 tile（`/adventures/zones/{id}.png`）；未設則用 inline SVG */
   artTile?: string;
   teaser: string; // 卡片副標
+  /** 未開放島嶼兒童首屏短句（≤10 字；≠ exploreNote 截短）。 */
+  childHint?: string;
   /** 未開放島嶼的低壓探索說明：先告知狀態，不要求互動或投票。 */
   exploreNote?: string;
   /** 未開放島嶼可提供的溫和導向，例如回故事屋或已開放園區。 */
@@ -67,6 +69,7 @@ export const ZONES: ZoneDef[] = [
     artTile: zoneArtTilePath("dino"),
     buildProgress: 60,
     teaser: "恐龍園區探險故事",
+    childHint: "恐龍島在長大",
     exploreNote: "恐龍島還在蓋，現在可以先聽車車故事，之後再回來逛。",
     softLinks: [
       { label: "回故事屋", href: "/stories" },
@@ -82,6 +85,7 @@ export const ZONES: ZoneDef[] = [
     landmark: "🚓",
     artTile: zoneArtTilePath("rescue"),
     teaser: "冒險救援故事（救援小隊出動）",
+    childHint: "救援隊快來了",
     exploreNote: "救援隊快要登場，現在可以先回故事屋找警車、消防車、救護車。",
     softLinks: [
       { label: "找車車故事", href: "/stories" },
@@ -97,6 +101,7 @@ export const ZONES: ZoneDef[] = [
     landmark: "🌊",
     artTile: zoneArtTilePath("ocean"),
     teaser: "海洋？太空？慢慢蒐集想法",
+    childHint: "還在慢慢想",
     exploreNote: "這座島還在規劃，我們先把想法收好，不急著做選擇。",
     softLinks: [
       { label: "先聽一集故事", href: "/stories" },
@@ -113,6 +118,7 @@ export const ZONES: ZoneDef[] = [
     artTile: zoneArtTilePath("forest"),
     buildProgress: 45,
     teaser: "樹林裡的小探險，敬請期待",
+    childHint: "森林正在長大",
     exploreNote: "森林小島正在長大，現在先把它當成地圖上的散步點。",
     softLinks: [
       { label: "回故事屋", href: "/stories" },

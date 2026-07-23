@@ -20,4 +20,13 @@ describe("MapGuide.module.css mobile chrome", () => {
       /@media\s*\(max-width:\s*480px\)\s*\{[\s\S]*?\.guide\s*\{[\s\S]*?width:\s*1px/,
     );
   });
+
+  it("僅 pointer:fine 顯示鍵盤提示，≤480px 維持 display:none", () => {
+    expect(css).toMatch(
+      /@media\s*\(pointer:\s*fine\)\s*\{[\s\S]*?\.keyboardHint\s*\{[\s\S]*?display:\s*block/,
+    );
+    expect(css).toMatch(
+      /@media\s*\(max-width:\s*480px\)\s*\{[\s\S]*?\.keyboardHint[\s\S]*?display:\s*none/,
+    );
+  });
 });

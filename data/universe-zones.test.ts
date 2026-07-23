@@ -99,4 +99,47 @@ describe("universe-zones", () => {
       expect(zone.artTile).toMatch(/^\/adventures\/zones\/[\w-]+\.png$/);
     }
   });
+
+  it("id→coord→artTile 快照不變", () => {
+    const snapshot = Object.fromEntries(
+      ZONES.map((zone) => [
+        zone.id,
+        { coord: zone.coord, artTile: zone.artTile },
+      ]),
+    );
+    expect(snapshot).toEqual({
+      "car-park": {
+        coord: { x: 500, y: 400 },
+        artTile: "/adventures/zones/car-park.png",
+      },
+      dino: {
+        coord: { x: 210, y: 260 },
+        artTile: "/adventures/zones/dino.png",
+      },
+      rescue: {
+        coord: { x: 820, y: 250 },
+        artTile: "/adventures/zones/rescue.png",
+      },
+      ocean: {
+        coord: { x: 820, y: 560 },
+        artTile: "/adventures/zones/ocean.png",
+      },
+      forest: {
+        coord: { x: 210, y: 560 },
+        artTile: "/adventures/zones/forest.png",
+      },
+    });
+  });
+
+  it("未開放島有 childHint（≤10 字、≠ exploreNote 前綴）；open 島無 childHint", () => {
+    for (const zone of ZONES) {
+      if (zone.status === "open") {
+        expect(zone.childHint, `${zone.id} 不應有 childHint`).toBeUndefined();
+        continue;
+      }
+      expect(zone.childHint, `${zone.id} 缺少 childHint`).toBeTruthy();
+      expect(Array.from(zone.childHint!).length).toBeLessThanOrEqual(10);
+      expect(zone.exploreNote?.startsWith(zone.childHint!)).toBe(false);
+    }
+  });
 });

@@ -17,6 +17,7 @@
 
 ### Changed
 
+- **宇宙地圖兒童探索 polish（T7）**：鎖島 sheet 首屏改 `childHint` 短句＋「去聽車車故事」主 CTA；session 首訪 overlay「點一座島看看」（StrictMode 雙 effect 門閂，僅 dismiss 才寫 session key）；MapGuide 探險小抄補「鍵盤也可探索」（僅 `pointer:fine` 顯示）；ZoneSheet 關閉鈕觸控區 48px；e2e／smoke 對齊兒童極簡斷言。
 - **家長指南導覽減法**：導覽「家長指南」改為直連 `/for-parents`；「關於／聯絡」移出導覽，頁尾 meta 補「聯絡我們」；移除已無引用的 `framer-motion` 依賴。
 - **中文標題去假粗（VIS-W4）**：huninn 為單一字重，全站 `font-weight:800` 原觸發瀏覽器合成假粗、把密集字（鬱/龍/邊）內部糊成一團。全域 `font-synthesis-weight: none` 讓中文落回 master、拉丁補 Baloo 真 800。密集字辨識度提升；中文標題份量略輕（由字級階梯＋顏色扛）。
 

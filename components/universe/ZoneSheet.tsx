@@ -107,6 +107,22 @@ export default function ZoneSheet({
           </div>
         </div>
 
+        {!isCarPark && zone.childHint ? (
+          <p className={styles.childHint}>{zone.childHint}</p>
+        ) : null}
+
+        {!isCarPark ? (
+          <nav className={styles.links} aria-label={`${zone.name}入口`}>
+            <a
+              className={styles.linkBtnPrimary}
+              href="/stories"
+              onClick={() => trackUniverseSheetLink(zone.id, "/stories")}
+            >
+              去聽車車故事
+            </a>
+          </nav>
+        ) : null}
+
         {zoneStories && zoneStories.total > 0 ? (
           <section className={styles.stories} aria-labelledby={`${titleId}-stories`}>
             <h3 id={`${titleId}-stories`} className={styles.storiesHeading}>
