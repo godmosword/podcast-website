@@ -67,7 +67,7 @@ describe("LandingSegment", () => {
         `<p class="sr-only">[\\s\\S]*${intro.slice(0, 24).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}[\\s\\S]*</p>`,
       ),
     );
-    expect(html).toContain("5–10 分鐘");
+    expect(html).not.toContain("5–10 分鐘");
   });
 
   test("睡前段顯示播一集睡前故事直達鈕", async () => {

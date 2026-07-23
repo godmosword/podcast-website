@@ -5,3 +5,15 @@ export const CONTACT_EMAIL = "bonboncarstory@gmail.com";
 export function notifyMailto(label: string): string {
   return `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`通知我-${label}`)}`;
 }
+
+/** 頁尾／全站「聯絡我們」連結（表單 URL 或 mailto）。 */
+export function contactHref(): string {
+  const formUrl = process.env.NEXT_PUBLIC_CONTACT_FORM_URL?.trim();
+  if (formUrl) return formUrl;
+  return `mailto:${CONTACT_EMAIL}`;
+}
+
+/** 是否為外連（http/https）；mailto 等不算外連。 */
+export function isContactExternal(href: string): boolean {
+  return /^https?:\/\//i.test(href);
+}

@@ -78,12 +78,13 @@ test("a11y：宇宙地圖開 sheet 無 critical/serious 違規", async ({ page }
   ).toEqual([]);
 });
 
-test("a11y：開啟家長指南下拉無 critical/serious 違規", async ({ page }) => {
+test("a11y：桌面家長指南直連可見且無 critical/serious 違規", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/");
   const capsuleNav = page.getByRole("navigation", { name: "主要分區" });
-  await capsuleNav.getByRole("button", { name: "家長指南" }).click();
-  await expect(page.getByRole("menu")).toBeVisible();
+  const parentGuideLink = capsuleNav.getByRole("link", { name: "家長指南" });
+  await expect(parentGuideLink).toBeVisible();
+  await expect(parentGuideLink).toHaveAttribute("href", /\/for-parents/);
 
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])

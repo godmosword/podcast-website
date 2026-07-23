@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ConnectHub from "@/components/ConnectHub";
+import { contactHref, isContactExternal } from "@/lib/contact";
 import { PARENT_TRUST_TEXT } from "@/components/ParentTrustStrip";
 import PlaygroundHubBadge from "@/components/games/PlaygroundHubBadge";
 import Doodle from "@/components/decor/Doodle";
@@ -27,6 +28,8 @@ export default function SiteFooter({
 }: SiteFooterProps) {
   const isHome = layout === "home";
   const showPlatforms = isHome || showPlatformSubscribe;
+  const contactLink = contactHref();
+  const contactExternal = isContactExternal(contactLink);
 
   return (
     <footer
@@ -78,6 +81,22 @@ export default function SiteFooter({
           <Link href="/about" className={styles.metaLink}>
             關於我們
           </Link>
+          <span className={styles.metaSep} aria-hidden>
+            ·
+          </span>
+          <a
+            href={contactLink}
+            className={styles.metaLink}
+            {...(contactExternal
+              ? {
+                  target: "_blank",
+                  rel: "noopener noreferrer",
+                  "aria-label": "聯絡我們（另開視窗）",
+                }
+              : {})}
+          >
+            聯絡我們
+          </a>
           <span className={styles.metaSep} aria-hidden>
             ·
           </span>

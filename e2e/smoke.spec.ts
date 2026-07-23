@@ -12,15 +12,12 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await expect(capsuleNav.getByRole("link", { name: "宇宙地圖" })).toBeVisible();
   await expect(capsuleNav.getByRole("link", { name: /育兒專欄/ })).toBeVisible();
   await expect(capsuleNav.getByRole("link", { name: "主題分類" })).toHaveCount(0);
-  await expect(capsuleNav.getByRole("button", { name: "家長指南" })).toBeVisible();
+  const parentGuideLink = capsuleNav.getByRole("link", { name: "家長指南" });
+  await expect(parentGuideLink).toBeVisible();
+  await expect(parentGuideLink).toHaveAttribute("href", /\/for-parents/);
   await expect(capsuleNav.getByRole("button", { name: /更多/ })).toHaveCount(0);
-
-  // 家長指南下拉：指南首頁／關於我們／聯絡我們
-  await capsuleNav.getByRole("button", { name: "家長指南" }).click();
-  const parentMenu = page.getByRole("menu");
-  await expect(parentMenu.getByRole("menuitem", { name: "指南首頁" })).toBeVisible();
-  await expect(parentMenu.getByRole("menuitem", { name: "關於我們" })).toBeVisible();
-  await expect(parentMenu.getByRole("menuitem", { name: "聯絡我們" })).toBeVisible();
+  await expect(capsuleNav.getByRole("menu")).toHaveCount(0);
+  await expect(capsuleNav.getByText("指南首頁")).toHaveCount(0);
 
   await expect(page.getByRole("button", { name: "開啟選單" })).toBeHidden();
   // 第一段（車車故事）標題與 CTA、以及四段標題都存在
@@ -41,7 +38,13 @@ test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   // 行動版維持漢堡選單；「主題分類」僅在抽屜，不在桌面膠囊
   await expect(page.getByRole("button", { name: "開啟選單" })).toBeVisible();
   await page.getByRole("button", { name: "開啟選單" }).click();
-  await expect(page.getByRole("link", { name: "主題分類" })).toBeVisible();
+  const drawerNav = page.getByRole("navigation", { name: "網站選單" });
+  await expect(drawerNav.getByRole("link", { name: "主題分類" })).toBeVisible();
+  const drawerParentGuide = drawerNav.getByRole("link", { name: "家長指南" });
+  await expect(drawerParentGuide).toBeVisible();
+  await expect(drawerParentGuide).toHaveAttribute("href", /\/for-parents/);
+  await expect(drawerNav.getByRole("link", { name: "關於我們" })).toHaveCount(0);
+  await expect(drawerNav.getByRole("link", { name: "聯絡我們" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: /車車與\s?遊樂園的故事/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: /陪孩子建立好習慣/ })).toBeVisible();
 });

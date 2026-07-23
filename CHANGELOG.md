@@ -17,6 +17,7 @@
 
 ### Changed
 
+- **家長指南導覽減法**：導覽「家長指南」改為直連 `/for-parents`；「關於／聯絡」移出導覽，頁尾 meta 補「聯絡我們」；移除已無引用的 `framer-motion` 依賴。
 - **中文標題去假粗（VIS-W4）**：huninn 為單一字重，全站 `font-weight:800` 原觸發瀏覽器合成假粗、把密集字（鬱/龍/邊）內部糊成一團。全域 `font-synthesis-weight: none` 讓中文落回 master、拉丁補 Baloo 真 800。密集字辨識度提升；中文標題份量略輕（由字級階梯＋顏色扛）。
 
 ### Added
