@@ -881,7 +881,7 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 ### ~~同步後生圖通知（GitHub Issue）~~　`P2 · S · 新集偵測`　〔eng+ops〕 ✅
 GHA 同步新集並 push 成功後，`scripts/sync-alert.ts notify-live` 會開 `[illustrate] 新集待生圖：ep-N` Issue（標籤 `illustration`，可 assign／@mention 觸發 GitHub App 手機通知）；失敗與 RSS stale 也走 GitHub Issue 告警。`113680a`
 
-**缺口已補（本機繞過 Actions 漏通知）：** 本機 `npm run sync:apple` push 後另跑 `npm run sync:notify`（同一 `notify-live` 路徑，讀 `.cache/sync-run-report.json` 開／去重 Issue）；可選 `npm run sync:notify:reconcile` 補漏（≤3 筆、跳過已存在 open/closed 同標題單）；`SYNC_ALERT_DRY_RUN=1` 預覽、`--strict` 讓本機失敗可非 0；`dryRun`／逾 24h stale report 拒絕開單。GHA workflow 未變動。詳見 README「同步通知」。commit hash 待本次變更送出後回填。
+**缺口已補（本機繞過 Actions 漏通知）：** 本機 `npm run sync:apple` push 後另跑 `npm run sync:notify`（同一 `notify-live` 路徑，讀 `.cache/sync-run-report.json` 開／去重 Issue）；可選 `npm run sync:notify:reconcile` 補漏（≤3 筆、跳過已存在 open/closed 同標題單）；`SYNC_ALERT_DRY_RUN=1` 預覽、`--strict` 讓本機失敗可非 0；`dryRun`／逾 24h stale report 拒絕開單。GHA workflow 未變動。詳見 README「同步通知」。`9586153`
 
 ### ~~同步 commit 訊息帶生圖提示~~　`P2 · S · 無`　〔eng+ops〕 ✅
 GHA commit body 已由 `scripts/post-sync-notify.ts` 產生，列出本輪新 slug、字幕狀態、`npm run illustrate -- ep-N` 與完整生圖 checklist。`95ba69a`
