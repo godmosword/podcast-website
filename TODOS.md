@@ -30,6 +30,12 @@
 | 4 | [Growth-Measure-1](#growth-measure-1-成長量測) SoundOn 回鏈 | ops/growth | S | ✅ `42a9d38` |
 | 5 | [UX-P1-2](#兒童-ux-與親子互動稽核2026-07-11) 詳情頁反思收合 | ux | S | ✅ `42a9d38` |
 
+### 本輪已完成（2026-07-24）
+
+| ID | Commit |
+|----|--------|
+| fix(sync): git add 白名單補 `data/audio-lengths.json`（prebuild 產物，防 #61） | `PENDING` |
+
 ### 本輪已完成（2026-07-23）
 
 | ID | Commit |
@@ -952,7 +958,7 @@ Tiled 關卡管線、6–10 關+世界地圖、檢查點、多敵人類型、視
 | 14 | Commit + push `main` | Vercel 部署 MVP | 見下方 commit 範圍 |
 | 15 | **生圖通知** | GitHub Issue | 已實作：push 成功後開 `[illustrate]` Issue（`113680a`） |
 
-**GHA 目前 `git add` 範圍：** `data/apple-synced.json`、`data/apple-sync-state.json`、`data/browse-index.json`、`public/stories/`、`data/subtitles/`、`data/story-zones.ts`、`data/reflection-prompts.ts`、`data/story-dates.ts`。
+**GHA 目前 `git add` 範圍：** `data/apple-synced.json`、`data/apple-sync-state.json`、`data/browse-index.json`、`public/stories/`、`data/subtitles/`、`data/story-zones.ts`、`data/reflection-prompts.ts`、`data/story-dates.ts`、`data/episode-faqs.ts`、`data/audio-lengths.json`。
 
 **GHA 不會碰：** `public/.illustrate-staging/`、`data/apple-sync.defaults.json`（approve 寫入 overrides）、`data/characters.json`、`data/scenes/` — 生圖產物需**人工 commit**。
 

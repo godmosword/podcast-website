@@ -106,7 +106,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/apple-synced.json data/apple-sync-state.json data/browse-index.json public/stories/ data/subtitles/ \
-            data/story-zones.ts data/reflection-prompts.ts data/story-dates.ts data/episode-faqs.ts
+            data/story-zones.ts data/reflection-prompts.ts data/story-dates.ts data/episode-faqs.ts data/audio-lengths.json
           # 防止新增同步產物未列入 git add 時被「成功但未上站」地靜默遺漏。
           if [ -n "$(git diff --name-only)" ] || [ -n "$(git ls-files --others --exclude-standard)" ]; then
             echo "::error::sync 產生了未 stage 的檔案；請更新 workflow 的 git add 白名單。"

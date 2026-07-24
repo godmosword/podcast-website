@@ -36,7 +36,7 @@ describe("sync workflow contract", () => {
       "git add data/apple-synced.json data/apple-sync-state.json data/browse-index.json public/stories/ data/subtitles/ \\",
     );
     expect(yaml).toContain(
-      "data/story-zones.ts data/reflection-prompts.ts data/story-dates.ts data/episode-faqs.ts",
+      "data/story-zones.ts data/reflection-prompts.ts data/story-dates.ts data/episode-faqs.ts data/audio-lengths.json",
     );
     expect(yaml).toContain("git diff --name-only");
     expect(yaml).toContain("git ls-files --others --exclude-standard");
@@ -51,6 +51,18 @@ describe("sync workflow contract", () => {
     for (const path of CATALOG_SIDECAR_PATHS) {
       expect(addBlock, `git add 缺少 ${path}`).toContain(path);
     }
+  });
+
+  // prebuild（generate:audio-lengths）產物，非 catalog sidecar；漏白名單會讓 #61 類 Commit and push 失敗。
+  it("git add 必須含 data/audio-lengths.json（防 #61 回歸）", () => {
+    const yaml = readWorkflow("sync-apple-podcast.yml");
+    const addBlock = yaml.match(
+      /git add[\s\S]*?(?=\n          if |\n          git )/,
+    )?.[0];
+    expect(addBlock, "找不到 Commit and push 的 git add").toBeDefined();
+    expect(addBlock, "git add 缺少 data/audio-lengths.json").toContain(
+      "data/audio-lengths.json",
+    );
   });
 
   it("sync-apple-podcast.ts 必須呼叫 upsertCatalogSidecars（新集自動補 sidecar）", () => {
