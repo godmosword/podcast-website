@@ -3,22 +3,31 @@
  * 同步告警（只用 GitHub Issue）。集中 Issue 互動，供：
  *   - sync workflow：失敗即 `failure` 開／補 sync-job-failure Issue；
  *     push 後 `notify-live`（新集上站＋開 illustrate Issue）；成功 resolve 舊失敗單。
+ *   - 本機：`npm run sync:notify`（push 後讀 `.cache/sync-run-report.json` 開 illustrate Issue）
  *   - watchdog：以 import 方式呼叫 openOrCommentIssue / resolveIssue。
  *
  * 紅線：失敗 Issue 只做去重告警與 run 連結，詳細錯誤仍以 Actions logs 為準；
  * Issue 另保留人工動作：待生圖與 RSS stale。
  *
- * 全程 best-effort：找不到 gh / Issue / secret 一律吞掉，永遠 exit 0，不遮蔽原始失敗。
+ * notify-live 路徑：dryRun／過期 report 拒絕開單；gh 缺失時 fail-soft（GHA 預設 exit 0）；
+ * 本機 `--strict` 且全數 gh 失敗時可 exit 1。可選 `--reconcile` 從 catalog 補開（≤3）。
  *
  * 環境變數：
- *   SYNC_REPORT_PATH      — sync 寫入的 JSON（notify-live 用）
+ *   SYNC_REPORT_PATH      — sync 寫入的 JSON（notify-live 用；未設時 default `.cache/sync-run-report.json`）
  *   SYNC_ISSUE_ASSIGNEES  — 逗號分隔 GitHub username
  *   SYNC_ISSUE_MENTIONS   — Issue 開頭 @mention
  *   SYNC_ALERT_DRY_RUN=1  — 不實際呼叫 gh，只印出將執行的動作
  */
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
-import type { SyncRunReport } from "./lib/sync-report";
+import { getStories } from "../data/content";
+import {
+  createEmptyReport,
+  isIllustrateSlug,
+  resolveGitHeadShort,
+  resolveSyncReportPath,
+  type SyncRunReport,
+} from "./lib/sync-report";
 import { buildIssueBody } from "./post-sync-notify";
 
 export type AlertKind = "sync-job-failure" | "sync-stale-rss";
@@ -29,10 +38,33 @@ export type SyncAlertDeps = {
   log?: (message: string) => void;
   warn?: (message: string) => void;
   readFile?: (filePath: string) => string;
+  /** 測試用：覆寫 catalog 來源（預設 getStories） */
+  getStories?: () => Array<{
+    slug: string;
+    pageCount: number;
+    date: string;
+    ep: number;
+  }>;
+};
+
+export type NotifyLiveOptions = {
+  slugs?: string[];
+  trigger?: "local" | "gha";
+  /** reconcile 無完整 sync report 時，Issue 內文標註人工核對 */
+  catalogOnly?: boolean;
+};
+
+export type NotifyLiveResult = {
+  ok: number;
+  skipped: number;
+  failed: number;
 };
 
 const BASE_LABEL = "sync-alert";
 const DRY_RUN = process.env.SYNC_ALERT_DRY_RUN === "1";
+const STALE_MS = 24 * 60 * 60 * 1000;
+const RECONCILE_MAX = 3;
+const RECONCILE_RECENCY_DAYS = 30;
 
 const KIND_META: Record<AlertKind, { color: string; description: string }> = {
   "sync-job-failure": { color: "d73a4a", description: "Apple 同步 workflow 失敗" },
@@ -218,11 +250,23 @@ function hasLabel(issue: GhIssue, label: string): boolean {
   return (issue.labels ?? []).some((l) => l.name === label);
 }
 
-function findOpenIllustrationIssue(
+function illustrationIssueTitle(slug: string): string {
+  return `[illustrate] 新集待生圖：${slug}`;
+}
+
+class IllustrationListError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "IllustrationListError";
+  }
+}
+
+function findIllustrationIssuesByState(
   title: string,
   slug: string,
+  state: "open" | "closed",
   deps: SyncAlertDeps,
-): GhIssue | null {
+): GhIssue[] {
   try {
     const out = callGh([
       "issue",
@@ -230,23 +274,57 @@ function findOpenIllustrationIssue(
       "--search",
       `in:title ${slug} 待生圖`,
       "--state",
-      "open",
+      state,
       "--json",
       "number,title,url,labels",
       "--limit",
       "20",
     ], deps);
     const parsed = JSON.parse(out || "[]") as GhIssue[];
-    const exact = parsed
+    return parsed
       .filter((issue) => issue.title === title)
       .sort(
         (a, b) =>
           (a.number ?? Number.MAX_SAFE_INTEGER) -
           (b.number ?? Number.MAX_SAFE_INTEGER),
       );
-    return exact[0] ?? null;
-  } catch {
-    return null;
+  } catch (err) {
+    // 禁止 fail-open（當成「無 Issue」會誤開重複單）
+    throw new IllustrationListError(
+      `gh issue list(${state}) 失敗：${(err as Error).message}`,
+    );
+  }
+}
+
+function findOpenIllustrationIssue(
+  title: string,
+  slug: string,
+  deps: SyncAlertDeps,
+): GhIssue | null {
+  const exact = findIllustrationIssuesByState(title, slug, "open", deps);
+  return exact[0] ?? null;
+}
+
+/** open 或 closed 任一存在 exact title 即視為已有 Issue（reconcile 用）。 */
+export function hasIllustrationIssueAnyState(
+  title: string,
+  slug: string,
+  deps: SyncAlertDeps,
+): boolean {
+  try {
+    for (const state of ["open", "closed"] as const) {
+      if (findIllustrationIssuesByState(title, slug, state, deps).length > 0) {
+        return true;
+      }
+    }
+    return false;
+  } catch (err) {
+    // list 失敗時 fail-closed：當作已有 Issue，避免 reconcile 誤開
+    warn(
+      deps,
+      `NOTIFY_LIST_FAILED ${slug}（視為已有 Issue，略過）：${(err as Error).message}`,
+    );
+    return true;
   }
 }
 
@@ -272,66 +350,264 @@ function labelIllustrationIssueIfMissing(
   }
 }
 
-export function notifyLiveFromReport(
-  report: SyncRunReport,
-  deps: SyncAlertDeps = {},
-): void {
-  if (report.illustratePending.length === 0) {
-    log(deps, "無新 ep-N，略過 notify-live。");
-    return;
-  }
-
-  const env = deps.env ?? process.env;
-  for (const slug of report.illustratePending) {
-    const title = `[illustrate] 新集待生圖：${slug}`;
-    const existing = findOpenIllustrationIssue(title, slug, deps);
-    if (existing) {
-      labelIllustrationIssueIfMissing(existing, deps);
-      const target = existing.url ?? `#${existing.number ?? slug}`;
-      log(deps, `Issue 已存在，略過：${slug} → ${target}`);
-      continue;
-    }
-
-    const body = buildIssueBody(slug, report);
+function createIllustrationIssue(
+  title: string,
+  body: string,
+  env: NodeJS.ProcessEnv,
+  deps: SyncAlertDeps,
+  slug: string,
+): string {
+  ensureLabel("illustration", "0e8a16", "新集待生圖", deps);
+  try {
+    return callGh([
+      "issue",
+      "create",
+      "--title",
+      title,
+      "--body",
+      body,
+      "--label",
+      "illustration",
+      ...assigneeArgs(env),
+    ], deps);
+  } catch (firstErr) {
+    // assignee／label 失敗時，先查是否其實已建單，再決定是否無 label 重試
     try {
-      ensureLabel("illustration", "0e8a16", "新集待生圖", deps);
-      const url = callGh([
-        "issue",
-        "create",
-        "--title",
-        title,
-        "--body",
-        body,
-        "--label",
-        "illustration",
-        ...assigneeArgs(env),
-      ], deps);
-      log(deps, `已開 Issue：${url} ✅ ${slug} 已上站`);
+      const existing = findOpenIllustrationIssue(title, slug, deps);
+      if (existing?.url) return existing.url;
     } catch {
-      const url = callGh(["issue", "create", "--title", title, "--body", body], deps);
-      log(deps, `已開 Issue（無 label）：${url}`);
+      /* list 失敗則下面再試一次 create */
+    }
+    try {
+      return callGh(
+        ["issue", "create", "--title", title, "--body", body],
+        deps,
+      );
+    } catch (secondErr) {
+      try {
+        const existing = findOpenIllustrationIssue(title, slug, deps);
+        if (existing?.url) return existing.url;
+      } catch {
+        /* ignore */
+      }
+      throw secondErr instanceof Error ? secondErr : firstErr;
     }
   }
 }
 
-/** push 成功後：為新 ep-N 開 illustrate Issue（沿用 post-sync-notify 的內文）。 */
-function notifyLive(deps: SyncAlertDeps = {}): void {
-  const env = deps.env ?? process.env;
-  const reportPath = env.SYNC_REPORT_PATH;
-  if (!reportPath) {
-    log(deps, "SYNC_REPORT_PATH 未設，略過 notify-live。");
-    return;
+export function isReportStale(report: SyncRunReport, nowMs: number = Date.now()): boolean {
+  const runAt = Date.parse(report.runAt);
+  if (Number.isNaN(runAt)) return true;
+  return nowMs - runAt > STALE_MS;
+}
+
+export function resolveNotifyTrigger(env: NodeJS.ProcessEnv): "local" | "gha" {
+  return env.GITHUB_ACTIONS === "true" ? "gha" : "local";
+}
+
+/** 從 effective catalog 挑出待 reconcile 的 ep-N（pageCount=1、無 open/closed Issue）。 */
+export function buildReconcilePendingSlugs(
+  deps: SyncAlertDeps = {},
+  nowMs: number = Date.now(),
+): string[] {
+  const stories = (deps.getStories ?? getStories)();
+  const recencyCutoff = nowMs - RECONCILE_RECENCY_DAYS * 24 * 60 * 60 * 1000;
+
+  const ranked = stories
+    .filter((s) => isIllustrateSlug(s.slug) && s.pageCount === 1)
+    .sort((a, b) => {
+      const aRecent = Date.parse(a.date) >= recencyCutoff ? 1 : 0;
+      const bRecent = Date.parse(b.date) >= recencyCutoff ? 1 : 0;
+      if (bRecent !== aRecent) return bRecent - aRecent;
+      return b.ep - a.ep;
+    });
+
+  // 先排序再逐筆查 Issue，湊滿 RECONCILE_MAX 即停（避免全 catalog 亂打 gh）
+  const planned: string[] = [];
+  for (const story of ranked) {
+    if (planned.length >= RECONCILE_MAX) break;
+    const title = illustrationIssueTitle(story.slug);
+    if (!hasIllustrationIssueAnyState(title, story.slug, deps)) {
+      planned.push(story.slug);
+    }
   }
+  return planned;
+}
+
+export function notifyLiveFromReport(
+  report: SyncRunReport,
+  deps: SyncAlertDeps = {},
+  options: NotifyLiveOptions = {},
+): NotifyLiveResult {
+  const slugs = options.slugs ?? report.illustratePending;
+  const trigger = options.trigger ?? resolveNotifyTrigger(deps.env ?? process.env);
+  const env = deps.env ?? process.env;
+  const result: NotifyLiveResult = { ok: 0, skipped: 0, failed: 0 };
+
+  if (slugs.length === 0) {
+    log(deps, "無待生圖 ep-N，略過 notify-live。");
+    return result;
+  }
+
+  for (const slug of slugs) {
+    const title = illustrationIssueTitle(slug);
+
+    try {
+      let existing = findOpenIllustrationIssue(title, slug, deps);
+      if (existing) {
+        labelIllustrationIssueIfMissing(existing, deps);
+        const target = existing.url ?? `#${existing.number ?? slug}`;
+        log(deps, `NOTIFY_SKIPPED ${slug}（Issue 已存在 → ${target}）`);
+        result.skipped += 1;
+        continue;
+      }
+
+      // create 前二次 list（競態去重）
+      existing = findOpenIllustrationIssue(title, slug, deps);
+      if (existing) {
+        log(deps, `NOTIFY_SKIPPED ${slug}（競態：Issue 已存在）`);
+        result.skipped += 1;
+        continue;
+      }
+
+      const body = buildIssueBody(slug, report, {
+        trigger,
+        catalogOnly: options.catalogOnly,
+      });
+      try {
+        const url = createIllustrationIssue(title, body, env, deps, slug);
+        log(deps, `NOTIFY_OK ${slug} → ${url}`);
+        result.ok += 1;
+      } catch (err) {
+        let duplicate: GhIssue | null = null;
+        try {
+          duplicate = findOpenIllustrationIssue(title, slug, deps);
+        } catch {
+          /* list 失敗時下面當 FAILED */
+        }
+        if (duplicate) {
+          log(deps, `NOTIFY_SKIPPED ${slug}（create 競態 duplicate）`);
+          result.skipped += 1;
+          continue;
+        }
+        warn(deps, `NOTIFY_FAILED ${slug}：${(err as Error).message}`);
+        result.failed += 1;
+      }
+    } catch (err) {
+      if (err instanceof IllustrationListError) {
+        warn(deps, `NOTIFY_FAILED ${slug}：${err.message}`);
+        result.failed += 1;
+        continue;
+      }
+      warn(deps, `NOTIFY_FAILED ${slug}：${(err as Error).message}`);
+      result.failed += 1;
+    }
+  }
+
+  log(
+    deps,
+    `NOTIFY 摘要：OK=${result.ok} SKIPPED=${result.skipped} FAILED=${result.failed}`,
+  );
+  return result;
+}
+
+export type NotifyLiveFlags = {
+  reconcile?: boolean;
+  strict?: boolean;
+};
+
+/** push 成功後：為新 ep-N 開 illustrate Issue（沿用 post-sync-notify 的內文）。 */
+export function notifyLive(
+  deps: SyncAlertDeps = {},
+  flags: NotifyLiveFlags = {},
+): NotifyLiveResult {
+  const env = deps.env ?? process.env;
+  const reportPath = resolveSyncReportPath(env);
+
+  const trigger = resolveNotifyTrigger(env);
   let report: SyncRunReport;
+  let catalogOnly = false;
   try {
     const read =
       deps.readFile ?? ((filePath: string) => readFileSync(filePath, "utf8"));
     report = JSON.parse(read(reportPath)) as SyncRunReport;
   } catch {
-    log(deps, "讀不到 sync report，略過 notify-live。");
-    return;
+    if (!flags.reconcile) {
+      log(deps, `讀不到 sync report（${reportPath}），略過 notify-live。`);
+      if (flags.strict) process.exitCode = 1;
+      return { ok: 0, skipped: 0, failed: 0 };
+    }
+    log(
+      deps,
+      `讀不到 sync report（${reportPath}）；reconcile 改以 catalog 為準。`,
+    );
+    report = createEmptyReport(false);
+    catalogOnly = true;
   }
-  notifyLiveFromReport(report, deps);
+
+  // reconcile 以 catalog 為準，不受本次 report 的 dryRun／stale／gitHead 擋住
+  if (!flags.reconcile) {
+    if (report.dryRun) {
+      log(deps, "report.dryRun=true，拒絕開 Issue（略過 notify-live）。");
+      return { ok: 0, skipped: 0, failed: 0 };
+    }
+
+    if (isReportStale(report)) {
+      warn(
+        deps,
+        `sync report 已過期（runAt=${report.runAt}，超過 24h），拒絕開 Issue。`,
+      );
+      if (flags.strict) process.exitCode = 1;
+      return { ok: 0, skipped: 0, failed: 0 };
+    }
+
+    if (report.gitHead) {
+      const current = resolveGitHeadShort(process.cwd());
+      if (current && report.gitHead !== current) {
+        warn(
+          deps,
+          `sync report gitHead=${report.gitHead} 與目前 HEAD=${current} 不符，拒絕開 Issue（請在對應 commit／push 後再 notify）。`,
+        );
+        if (flags.strict) process.exitCode = 1;
+        return { ok: 0, skipped: 0, failed: 0 };
+      }
+    }
+  }
+
+  let slugs: string[] | undefined;
+
+  if (flags.reconcile) {
+    slugs = buildReconcilePendingSlugs(deps);
+    log(
+      deps,
+      `reconcile 將開 Issue（最多 ${RECONCILE_MAX}）：${
+        slugs.length > 0 ? slugs.join(", ") : "（無）"
+      }`,
+    );
+  }
+
+  const pendingCount = slugs ?? report.illustratePending;
+  const result = notifyLiveFromReport(report, deps, {
+    slugs,
+    trigger,
+    catalogOnly,
+  });
+
+  if (
+    flags.strict &&
+    pendingCount.length > 0 &&
+    result.ok === 0 &&
+    result.skipped === 0 &&
+    result.failed > 0
+  ) {
+    warn(
+      deps,
+      "strict：有待生圖但 gh 全數失敗；請 `gh auth login` 後重跑 `npm run sync:notify`。",
+    );
+    process.exitCode = 1;
+  }
+
+  return result;
 }
 
 export function runSyncAlertMode(
@@ -342,11 +618,13 @@ export function runSyncAlertMode(
   const kindArg = rest
     .find((a) => a.startsWith("--kind="))
     ?.split("=")[1] as AlertKind | undefined;
+  const reconcile = rest.includes("--reconcile");
+  const strict = rest.includes("--strict");
   const env = deps.env ?? process.env;
 
   switch (mode) {
     case "notify-live":
-      notifyLive(deps);
+      notifyLive(deps, { reconcile, strict });
       break;
     case "resolve":
       resolveIssue({

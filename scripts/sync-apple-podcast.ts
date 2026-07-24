@@ -29,6 +29,8 @@ import {
 import {
   createEmptyReport,
   isIllustrateSlug,
+  resolveGitHeadShort,
+  resolveSyncReportPath,
   writeSyncReport,
   type SyncRunReport,
 } from "./lib/sync-report";
@@ -116,14 +118,30 @@ function parseRefreshCover(): { enabled: boolean; slugs: string[] } {
 }
 
 const refreshCover = parseRefreshCover();
-const SYNC_REPORT_PATH = process.env.SYNC_REPORT_PATH;
+// GHA 設 SYNC_REPORT_PATH（$RUNNER_TEMP/...）優先；本機未設時落地至 ROOT/.cache。
+const SYNC_REPORT_PATH = resolveSyncReportPath(process.env, ROOT);
 const report: SyncRunReport = createEmptyReport(dryRun);
 
 async function finishSync(): Promise<void> {
   report.illustratePending = report.newEpisodes
     .map((e) => e.slug)
     .filter(isIllustrateSlug);
+  report.gitHead = resolveGitHeadShort(ROOT);
   await writeSyncReport(report, SYNC_REPORT_PATH);
+  // dry-run 不印「已上站」下一步，避免預覽時誤導去 push／notify
+  if (!dryRun && report.newEpisodes.length > 0) {
+    console.log(
+      [
+        "",
+        "─── 下一步（本機）───",
+        "1. commit + git push（必須先成功）",
+        "2. npm run sync:notify",
+        "（GHA 已 push 則由 Actions notify-live 處理；本機繞過 Actions 時必跑 sync:notify）",
+        "（切勿在 push 前 notify——Issue 會誤稱 MVP 已上線）",
+        "",
+      ].join("\n"),
+    );
+  }
 }
 
 async function readJson<T>(filePath: string, fallback: T): Promise<T> {

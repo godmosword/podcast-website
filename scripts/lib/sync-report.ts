@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 
@@ -26,7 +27,41 @@ export type SyncRunReport = {
   emojiSync: string[];
   /** Apple RSS 新集自動產生的 FAQ MVP，需人工改寫成劇情專屬問答 */
   episodeFaqStubs: string[];
+  /** 產生本報告時的 git HEAD short sha（notify 身分比對） */
+  gitHead?: string;
 };
+
+/** 讀取目前 HEAD short sha；失敗回傳 undefined（不捏造 0000000）。 */
+export function resolveGitHeadShort(
+  rootDir: string = process.cwd(),
+): string | undefined {
+  try {
+    const sha = execFileSync("git", ["rev-parse", "--short", "HEAD"], {
+      cwd: rootDir,
+      encoding: "utf8",
+    }).trim();
+    return sha || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** 未設定 SYNC_REPORT_PATH 時的本機預設報告路徑（相對 repo root） */
+export const DEFAULT_SYNC_REPORT_RELATIVE = ".cache/sync-run-report.json";
+
+/**
+ * 解析同步報告輸出路徑：
+ * - `env.SYNC_REPORT_PATH`（預設讀 `process.env`）非空時 → 原樣回傳（GHA 設 `$RUNNER_TEMP/...` 須維持優先）。
+ * - 否則 → `rootDir`（預設 `process.cwd()`）下的 `DEFAULT_SYNC_REPORT_RELATIVE`。
+ */
+export function resolveSyncReportPath(
+  env: NodeJS.ProcessEnv = process.env,
+  rootDir: string = process.cwd(),
+): string {
+  const fromEnv = env.SYNC_REPORT_PATH;
+  if (fromEnv && fromEnv.trim() !== "") return fromEnv;
+  return path.join(rootDir, DEFAULT_SYNC_REPORT_RELATIVE);
+}
 
 export function createEmptyReport(dryRun: boolean): SyncRunReport {
   return {

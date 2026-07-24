@@ -256,4 +256,24 @@ describe("sync workflow contract", () => {
     expect(yaml).toContain("group: sync-watchdog");
     expect(yaml).toContain("scripts/check-sync-fresh.ts");
   });
+
+  it("package.json 必須含本機 sync:notify 腳本", () => {
+    const scripts = readPackageJson().scripts ?? {};
+    expect(scripts["sync:notify"]).toBe("tsx scripts/sync-alert.ts notify-live");
+    expect(scripts["sync:notify:reconcile"]).toBe(
+      "tsx scripts/sync-alert.ts notify-live --reconcile",
+    );
+  });
+
+  it("預設 sync report 路徑必須落在 .cache 且被 gitignore", () => {
+    const reportSrc = readFileSync(
+      join(ROOT, "scripts/lib/sync-report.ts"),
+      "utf8",
+    );
+    const gitignore = readFileSync(join(ROOT, ".gitignore"), "utf8");
+
+    expect(reportSrc).toContain("DEFAULT_SYNC_REPORT_RELATIVE");
+    expect(reportSrc).toContain(".cache/sync-run-report.json");
+    expect(gitignore).toMatch(/\/\.cache\//);
+  });
 });

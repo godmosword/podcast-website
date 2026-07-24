@@ -1,13 +1,13 @@
 ---
 name: 新集待生圖
-description: Apple 同步後多頁黏土風插圖 checklist（通常由 GHA 自動開單）
+description: Apple 同步後多頁黏土風插圖 checklist（通常由 GHA 或本機 `npm run sync:notify` 自動開單）
 title: "[illustrate] 新集待生圖：ep-N"
 labels:
   - illustration
 body:
   - type: markdown
     value: |
-      MVP（單圖 + 字幕草稿）應已由 GHA 上線。以下在本機執行，需 `OPENAI_API_KEY`，審圖後才 `--approve`。
+      MVP（單圖 + 字幕草稿）應已由 GHA 或本機 `npm run sync:apple` 上線。以下在本機執行，需 `OPENAI_API_KEY`，審圖後才 `--approve`。
 
   - type: checkboxes
     id: checklist

@@ -13,7 +13,14 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import type { SyncRunReport } from "./lib/sync-report";
 
-function subtitleLine(slug: string, report: SyncRunReport): string {
+function subtitleLine(
+  slug: string,
+  report: SyncRunReport,
+  catalogOnly?: boolean,
+): string {
+  if (catalogOnly) {
+    return "字幕／校稿狀態請人工核對（無完整 sync report）";
+  }
   if (report.subtitlesMissing.includes(slug)) return "字幕：缺側車檔";
 
   const parts: string[] = [];
@@ -164,13 +171,34 @@ export function buildCommitMessage(report: SyncRunReport): string {
   return `${lines.join("\n").trimEnd()}\n`;
 }
 
-function issueNotifyPreamble(): string {
-  const mentions = process.env.SYNC_ISSUE_MENTIONS?.trim();
-  if (!mentions) return "";
-  return `${mentions}\n\n> 📱 已 @mention；請確認 GitHub App 已開啟 Issue 通知。\n\n`;
+export type BuildIssueBodyOptions = {
+  /** 開單觸發來源：本機 sync:notify 或 GHA workflow（預設 gha 以相容既有行為） */
+  trigger?: "local" | "gha";
+  /** 覆寫 @mention 前綴；未設時讀 SYNC_ISSUE_MENTIONS */
+  mentions?: string;
+  /** reconcile 僅有 catalog、無完整 sync report 時標註 */
+  catalogOnly?: boolean;
+};
+
+function issueNotifyPreamble(mentions?: string): string {
+  const resolved = mentions ?? process.env.SYNC_ISSUE_MENTIONS?.trim();
+  if (!resolved) return "";
+  return `${resolved}\n\n> 📱 已 @mention；請確認 GitHub App 已開啟 Issue 通知。\n\n`;
 }
 
-export function buildIssueBody(slug: string, report: SyncRunReport): string {
+function issueTriggerLine(trigger: "local" | "gha"): string {
+  return trigger === "local"
+    ? "本機 sync:notify（push 後）"
+    : "Apple RSS（SoundOn）→ GHA `sync-apple-podcast`";
+}
+
+export function buildIssueBody(
+  slug: string,
+  report: SyncRunReport,
+  options?: BuildIssueBodyOptions,
+): string {
+  const trigger = options?.trigger ?? "gha";
+  const catalogOnly = options?.catalogOnly === true;
   const ep = report.newEpisodes.find((e) => e.slug === slug);
   const title = ep?.title ?? slug;
   const runAt = report.runAt;
@@ -178,20 +206,23 @@ export function buildIssueBody(slug: string, report: SyncRunReport): string {
 
   const pendingLint = report.proofreadPendingLint[slug];
   const hasFaqStub = report.episodeFaqStubs.includes(slug);
+  const catalogNote = catalogOnly
+    ? "\n> ⚠️ **report 缺失（catalog-only reconcile）**：標題／字幕／校稿狀態請人工核對站上與 `data/subtitles/`。\n"
+    : "";
 
-  return `${issueNotifyPreamble()}## 新集待生圖：${slug}
-
+  return `${issueNotifyPreamble(options?.mentions)}## 新集待生圖：${slug}
+${catalogNote}
 - **標題**：${title}
-- **同步時間**：${runAt}
-- **觸發**：Apple RSS（SoundOn）→ GHA \`sync-apple-podcast\`
+- **同步時間**：${catalogOnly ? "（catalog reconcile，無本次 sync report）" : runAt}
+- **觸發**：${issueTriggerLine(trigger)}
 - **站上狀態**：MVP 已上線（\`pageCount=1\`、Apple 封面 \`01.jpg\`）
-- **字幕**：${subtitleLine(slug, report)}
-${hasFaqStub ? "- **FAQ**：已自動補 FAQ MVP stub，待依本集劇情人工改寫" : "- **FAQ**：已有內容契約"}
+- **字幕**：${subtitleLine(slug, report, catalogOnly)}
+${hasFaqStub ? "- **FAQ**：已自動補 FAQ MVP stub，待依本集劇情人工改寫" : catalogOnly ? "- **FAQ**：請人工核對" : "- **FAQ**：已有內容契約"}
 
 ### Checklist
 
 - [ ] 抽查站上 [${slug}](${storyUrl}) 能播、封面正確
-- [x] ${proofreadFixNote(slug, report)}
+- [${catalogOnly ? " " : "x"}] ${catalogOnly ? "確認字幕側車與校稿狀態（catalog-only，無自動 --fix 紀錄）" : proofreadFixNote(slug, report)}
 - [ ] 最終校稿 \`data/subtitles/${slug}.json\` → \`npm run proofread:subtitles -- ${slug} --mark\`（[SUBTITLE-PROOFREAD.md](docs/SUBTITLE-PROOFREAD.md)）${pendingLint !== undefined && pendingLint > 0 ? `\n- [ ] 修正 lint 待辦 ${pendingLint} 項（\`npm run proofread:subtitles -- ${slug}\` 查看）` : ""}
 - [ ] 確認車種／標籤（必要時 \`data/apple-sync.defaults.json\` overrides；sync 會自動更新 \`data/browse-index.json\`）
 ${hasFaqStub ? "- [ ] 改寫 `data/episode-faqs.ts` 的 FAQ MVP stub，確認問題／答案真的對應本集劇情" : ""}

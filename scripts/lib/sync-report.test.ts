@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { buildCommitMessage, buildIssueBody } from "../post-sync-notify";
-import type { SyncRunReport } from "./sync-report";
+import {
+  DEFAULT_SYNC_REPORT_RELATIVE,
+  resolveSyncReportPath,
+  type SyncRunReport,
+} from "./sync-report";
 
 const sampleReport: SyncRunReport = {
   runAt: "2026-06-11T12:00:00.000Z",
@@ -42,5 +46,32 @@ describe("post-sync-notify", () => {
     expect(body).toContain("contact.html");
     expect(body).toContain("/story/ep-10");
     expect(body).toContain("FAQ MVP stub");
+  });
+});
+
+describe("resolveSyncReportPath", () => {
+  it("SYNC_REPORT_PATH 非空時原樣回傳（GHA 優先）", () => {
+    const envPath = "/runner/temp/sync-run-report.json";
+    expect(
+      resolveSyncReportPath({ SYNC_REPORT_PATH: envPath }, "/repo/root"),
+    ).toBe(envPath);
+  });
+
+  it("未設定 SYNC_REPORT_PATH 時落地至 rootDir 下的預設路徑", () => {
+    const resolved = resolveSyncReportPath({}, "/repo/root");
+    expect(resolved).toBe(`/repo/root/${DEFAULT_SYNC_REPORT_RELATIVE}`);
+    expect(resolved.endsWith(".cache/sync-run-report.json")).toBe(true);
+  });
+
+  it("SYNC_REPORT_PATH 為空字串時視為未設定", () => {
+    const resolved = resolveSyncReportPath({ SYNC_REPORT_PATH: "  " }, "/repo/root");
+    expect(resolved.endsWith(".cache/sync-run-report.json")).toBe(true);
+  });
+});
+
+describe("buildIssueBody trigger", () => {
+  it("local trigger 文案", () => {
+    const body = buildIssueBody("ep-10", sampleReport, { trigger: "local" });
+    expect(body).toContain("本機 sync:notify（push 後）");
   });
 });

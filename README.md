@@ -212,9 +212,25 @@ npm run sync:apple                # 實際同步
 
 | 情況 | 行為 | Issue label |
 |------|------|-------------|
-| 新集 push 成功 | 開「待生圖」Issue | `illustration` |
+| GHA 同步新集並 push 成功 | 自動開「待生圖」Issue | `illustration` |
+| **本機** `npm run sync:apple` 繞過 Actions 直接 push | **不會**自動開單，push 後須另跑 `npm run sync:notify`（見下） | `illustration` |
 | RSS 有新集但逾時未上站 | 看門狗開告警 Issue | `sync-alert` |
 | 單次 CI 失敗 | 細節在 Actions logs，不開 Issue | — |
+
+**本機務必先 `git push` 成功，再跑通知**（走與 GHA 相同的 `notify-live` 路徑，去重不重開）。  
+Issue 文案會寫「MVP 已上線」——若尚未 push 就 `sync:notify`，會開出站上還沒有的假「已上站」單。
+
+```bash
+git push                           # 必須先成功
+npm run sync:notify                # 讀本次 sync report，為新 ep-N 開／去重「待生圖」Issue
+npm run sync:notify:reconcile      # 可選：另掃現有 catalog 補漏（最多 3 筆，跳過已存在 open/closed 同標題單）
+SYNC_ALERT_DRY_RUN=1 npm run sync:notify   # 只印出將執行的 gh 動作，不實際開單（可先預覽）
+```
+
+- 需本機已 `gh auth login`；未登入或 API 失敗時 fail-soft（不會讓指令當掉，只印警告與提示），可加 `--strict`（如 `tsx scripts/sync-alert.ts notify-live --strict`）讓有待生圖卻全數失敗時 exit 非 0，方便腳本化檢查。
+- `npm run sync:apple` 偵測到新集時，收尾會印出「push 後請跑 `npm run sync:notify`」的提醒（`--dry-run` 不會印此區塊）。
+- report 路徑：`SYNC_REPORT_PATH` 未設時本機預設寫入 `.cache/sync-run-report.json`（已 `.gitignore`）；GHA 設定 `SYNC_REPORT_PATH` 時優先採用，workflow 不受影響。請在 **repo 根目錄**執行 `npm run sync:notify`（與 `sync:apple` 相同 cwd）。
+- `report.dryRun === true`、report 已超過 24 小時（stale）、或 report 的 `gitHead` 與目前 HEAD 不符時，`sync:notify` 會拒絕開單，避免用過期／錯 commit 的結果誤發通知。
 
 ## 專案結構
 

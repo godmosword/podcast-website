@@ -74,6 +74,7 @@ git add public/stories/ data/scenes/ data/subtitles/ data/subtitles/_proofread/ 
   data/apple-synced.json data/apple-sync.defaults.json data/stories.ts data/characters.json
 git commit -m "feat(stories): illustrate <slug> full scenes"
 git push
+npm run sync:notify   # 務必先 push 成功再跑；走 GHA 同一路徑補開／去重「待生圖」Issue（見 README「同步通知」）
 
 # 7. （可選）匯出 YouTube 整集影片
 npm run export:video -- <slug>

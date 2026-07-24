@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- **本機 sync 繞過 Actions 漏開待生圖通知**：`npm run sync:apple` 本機 push 後新增 `npm run sync:notify`（複用 GHA `notify-live` 同一路徑，讀 `.cache/sync-run-report.json` 開／去重「待生圖」Issue），修正先前只有 GHA 觸發同步時才會通知、本機上架容易漏掉 `[illustrate]` Issue 的缺口；另補可選 `npm run sync:notify:reconcile`（掃 catalog 補漏，上限 3 筆、跳過已存在 open/closed 同標題單）、`SYNC_ALERT_DRY_RUN=1` 預覽、`--strict` 供本機非 0 檢查；`dryRun`／逾 24h 的 stale report 一律拒絕開單。GHA workflow 未變動。
+
 ### Security
 
 - **法務／隱私強化**：

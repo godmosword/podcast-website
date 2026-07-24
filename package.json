@@ -14,6 +14,8 @@
     "test:visual:trusted": "VISUAL_BASELINE_TRUSTED=1 playwright test e2e/visual.spec.ts",
     "font:subset": "python3 scripts/subset_font.py",
     "sync:apple": "tsx scripts/sync-apple-podcast.ts",
+    "sync:notify": "tsx scripts/sync-alert.ts notify-live",
+    "sync:notify:reconcile": "tsx scripts/sync-alert.ts notify-live --reconcile",
     "transcribe": "tsx scripts/transcribe.ts",
     "illustrate": "tsx --env-file-if-exists=.env.local scripts/illustrate.ts",
     "verify:episodes": "tsx scripts/verify-episodes.ts",
