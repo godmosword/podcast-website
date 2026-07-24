@@ -34,7 +34,7 @@
 
 | ID | Commit |
 |----|--------|
-| fix(sync): git add 白名單補 `data/audio-lengths.json`（prebuild 產物，防 #61） | `PENDING` |
+| fix(sync): git add 白名單補 `data/audio-lengths.json`（prebuild 產物，防 #61） | `8e20029` |
 
 ### 本輪已完成（2026-07-23）
 
