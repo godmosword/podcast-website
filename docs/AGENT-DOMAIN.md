@@ -101,8 +101,9 @@
 | `scripts/illustrate.ts`、`scripts/lib/illustrate-core.ts` | Leader 或 Opus；生圖前確認 `--mark`、成本 |
 | `data/apple-synced.json`、`data/apple-sync.defaults.json`、`data/stories.ts` | 改 metadata 必跑 `verify:episodes` |
 | `.github/workflows/sync-apple-podcast.yml`、`.github/workflows/sync-watchdog.yml` | **禁止非同步任務改動**；契約見 `scripts/lib/sync-workflow-contract.test.ts` |
-| `scripts/sync-apple-podcast.ts`、`scripts/lib/sync-catalog-sidecars.ts` | 新集必須 `upsertCatalogSidecars`；`git add` 必含 `story-zones`／`reflection-prompts`／`story-dates`（#46 紅線，同契約測試） |
-| `data/story-zones.ts`、`data/reflection-prompts.ts`、`data/story-dates.ts` | 完備測試以 `getStories()` 全集覆蓋；勿從 sync `git add` 拿掉；人工 refinement 可覆寫 stub |
+| `scripts/sync-apple-podcast.ts`、`scripts/lib/sync-catalog-sidecars.ts` | 新集必須 `upsertCatalogSidecars`；`git add` 必含四 sidecar（`story-zones`／`reflection-prompts`／`story-dates`／`episode-faqs`）＋ `data/audio-lengths.json`（#46／#60／#61；同契約測試） |
+| `data/story-zones.ts`、`data/reflection-prompts.ts`、`data/story-dates.ts`、`data/episode-faqs.ts` | 完備測試以 `getStories()` 全集覆蓋；勿從 sync `git add` 拿掉；人工 refinement 可覆寫 stub |
+| `package.json` `prebuild` | 新增腳本必先登錄 `PREBUILD_OUTPUT_REGISTRY`（`sync-workflow-contract.test.ts`），並依 disposition 補白名單或 gitignore；sync Production build **不得**設 `INDEXNOW_KEY` |
 | `data/subtitles/`、`data/scenes/`、`data/characters.json` | 中文校對／切場景 → Sonnet 4.6，**不要** Grok |
 | `public/stories/`、`public/characters/` | 素材上線須人工審圖；禁止自動 bulk approve |
 | `app/legal/`、`DISCLAIMER.md` | Leader；法律文案不可 LLM 臆造 |

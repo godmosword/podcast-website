@@ -94,6 +94,9 @@ jobs:
           # CI 上無 Vercel 環境變數，未設定時 siteUrl 會 fallback 成 localhost，
           # 觸發 generate-llms-full 的防呆而使 build 失敗（見 lib/site-url.ts）。
           NEXT_PUBLIC_SITE_URL: https://podcast-website-mu.vercel.app
+          # 禁止在此注入 INDEXNOW_KEY：prebuild 的 generate:indexnow-key 會寫
+          # public/<key>.txt（檔名無法 glob ignore）→ Commit and push 未 stage 守衛失敗。
+          # INDEXNOW_KEY 只給後面的 Submit IndexNow 步驟（契約見 sync-workflow-contract.test.ts）。
         run: npm run build
 
       - name: Prepare commit message
