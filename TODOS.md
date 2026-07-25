@@ -34,7 +34,7 @@
 
 > URL 為導覽唯一來源：世界地圖 → `/adventures/[zone]`。座標 0–1（runtime 轉 px）。
 
-- [x] M0 `data/universe.ts` 單一資料來源 + zod 驗證  _(hash 待回填)_
+- [x] M0 `data/universe.ts` 單一資料來源 + zod 驗證  `02f2a51`
 - [ ] M1 `/adventures/[zone]` 路由 + `targetFor()` 相機
 - [ ] M2 `@modal` 熱點層 + focus 管理 + prefetch
 - [ ] M3 逐島填 hotspots（恐龍島優先）
@@ -43,6 +43,7 @@
 
 | ID | Commit |
 |----|--------|
+| refactor(universe): M0 `data/universe.ts` 單一資料來源 + zod | `02f2a51` |
 | polish(universe): 主島小紅走 car-park 步道（單車）；map 層關 bob／bank；海面不復辟 | `0f44f7c` |
 
 ### 本輪已完成（2026-07-24）
