@@ -54,7 +54,9 @@ export const ZONES: ZoneDef[] = [
     id: "car-park",
     name: "車車樂園",
     status: "open",
-    coord: { x: 500, y: 400 },
+    // 有機錯落（非四角對稱）：主島偏下方中央偏左作為視線錨點（weenie），
+    // 其餘島依「開放順序」蜿蜒串成一條探險路徑（見各島 bridgeFrom）。
+    coord: { x: 410, y: 495 },
     landmark: "🎡",
     artTile: zoneArtTilePath("car-park"),
     teaser: "故事 · 睡前 · 黏土 · 安全",
@@ -64,7 +66,7 @@ export const ZONES: ZoneDef[] = [
     id: "dino",
     name: "恐龍島",
     status: "building",
-    coord: { x: 210, y: 260 },
+    coord: { x: 175, y: 300 },
     landmark: "🦕",
     artTile: zoneArtTilePath("dino"),
     buildProgress: 60,
@@ -75,13 +77,14 @@ export const ZONES: ZoneDef[] = [
       { label: "回故事屋", href: "/stories" },
       { label: "去車車樂園", href: "/" },
     ],
+    // 探險路徑第 1 站：自主島 car-park 出發
     bridgeFrom: "car-park",
   },
   {
     id: "rescue",
     name: "英雄救援隊",
     status: "coming",
-    coord: { x: 820, y: 250 },
+    coord: { x: 785, y: 300 },
     landmark: "🚓",
     artTile: zoneArtTilePath("rescue"),
     teaser: "冒險救援故事（救援小隊出動）",
@@ -91,13 +94,14 @@ export const ZONES: ZoneDef[] = [
       { label: "找車車故事", href: "/stories" },
       { label: "去車車樂園", href: "/" },
     ],
-    bridgeFrom: "car-park",
+    // 探險路徑第 3 站：接在森林小島之後
+    bridgeFrom: "forest",
   },
   {
     id: "ocean",
     name: "未來夢想島",
     status: "planned",
-    coord: { x: 820, y: 560 },
+    coord: { x: 825, y: 560 },
     landmark: "🌊",
     artTile: zoneArtTilePath("ocean"),
     teaser: "海洋？太空？慢慢蒐集想法",
@@ -107,13 +111,14 @@ export const ZONES: ZoneDef[] = [
       { label: "先聽一集故事", href: "/stories" },
       { label: "回車車樂園", href: "/" },
     ],
-    bridgeFrom: "car-park",
+    // 探險路徑最末站（規劃中）：接在救援隊之後，位於地圖最遠端
+    bridgeFrom: "rescue",
   },
   {
     id: "forest",
     name: "森林小島",
     status: "building",
-    coord: { x: 210, y: 560 },
+    coord: { x: 500, y: 215 },
     landmark: "🌲",
     artTile: zoneArtTilePath("forest"),
     buildProgress: 45,
@@ -124,7 +129,8 @@ export const ZONES: ZoneDef[] = [
       { label: "回故事屋", href: "/stories" },
       { label: "去車車樂園", href: "/" },
     ],
-    bridgeFrom: "car-park",
+    // 探險路徑第 2 站：接在恐龍島之後
+    bridgeFrom: "dino",
   },
 ];
 

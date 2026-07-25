@@ -56,6 +56,20 @@ const HERO_STAGE_SIZE = {
 } as const;
 
 /**
+ * 主從階層：越接近「開放」的島越大越近，越遠期（coming／planned）越小，
+ * 讀作「更遠、之後才到」。只縮 stage 呈現尺寸，不動座標與錨點（PNG @2x/@3x 餘裕）。
+ */
+function scaledStageSize(scale: number): { w: number; h: number } {
+  return {
+    w: Math.round(ISLAND_STAGE_SIZE.w * scale),
+    h: Math.round(ISLAND_STAGE_SIZE.h * scale),
+  };
+}
+
+const COMING_STAGE_SIZE = scaledStageSize(0.9);
+const PLANNED_STAGE_SIZE = scaledStageSize(0.82);
+
+/**
  * 各島 tile 詮釋資料（單一資料源）。
  * R1：四島皆 `island` 模式（整島黏土 diorama）。`ZoneIsland` 以 anchorUV 對齊 coord、
  * 以 stageSize 鋪該島；`UniverseMap.tsx` 對 island 島**跳過 SVG 沙／草橢圓**（整島圖已含
@@ -64,8 +78,8 @@ const HERO_STAGE_SIZE = {
 export const ZONE_ART_TILES: Record<ZoneId, ZoneArtTile> = {
   "car-park": { src: zoneArtTilePath("car-park"), mode: "island", anchor: "sand-bottom-center", stageSize: HERO_STAGE_SIZE, anchorUV: ISLAND_ANCHOR_UV },
   dino: { src: zoneArtTilePath("dino"), mode: "island", anchor: "sand-bottom-center", stageSize: ISLAND_STAGE_SIZE, anchorUV: ISLAND_ANCHOR_UV },
-  rescue: { src: zoneArtTilePath("rescue"), mode: "island", anchor: "sand-bottom-center", stageSize: ISLAND_STAGE_SIZE, anchorUV: ISLAND_ANCHOR_UV },
-  ocean: { src: zoneArtTilePath("ocean"), mode: "island", anchor: "sand-bottom-center", stageSize: ISLAND_STAGE_SIZE, anchorUV: ISLAND_ANCHOR_UV },
+  rescue: { src: zoneArtTilePath("rescue"), mode: "island", anchor: "sand-bottom-center", stageSize: COMING_STAGE_SIZE, anchorUV: ISLAND_ANCHOR_UV },
+  ocean: { src: zoneArtTilePath("ocean"), mode: "island", anchor: "sand-bottom-center", stageSize: PLANNED_STAGE_SIZE, anchorUV: ISLAND_ANCHOR_UV },
   forest: { src: zoneArtTilePath("forest"), mode: "island", anchor: "sand-bottom-center", stageSize: ISLAND_STAGE_SIZE, anchorUV: ISLAND_ANCHOR_UV },
 };
 

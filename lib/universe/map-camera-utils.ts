@@ -100,13 +100,30 @@ export function zoomCameraAt(
   };
 }
 
-/** 依 viewport 尺寸算預設島群 contain-fit 鏡頭倍率（含 FIT_MARGIN 與 clamp）。 */
+/** 島群 bbox 中心：預設鏡頭對齊此點，讓島群在視窗置中，而非偏向某一座島（避免單側空海）。 */
+export function islandContentCenter(): { x: number; y: number } {
+  const b = islandContentBounds();
+  return { x: (b.minX + b.maxX) / 2, y: (b.minY + b.maxY) / 2 };
+}
+
+/**
+ * 直向（portrait）視窗相對 contain 的最大放大倍率。
+ * 島群偏寬，直向若用寬度 contain 會縮成中央窄帶、上下大量空海；適度往「填滿高度」
+ * 偏移填滿垂直空間（上限此倍率，避免島群裁切過度、仍看得到主島與鄰島）。
+ */
+export const PORTRAIT_MAX_ZOOM = 1.5;
+
+/** 依 viewport 尺寸算預設島群 contain-fit 鏡頭倍率（含 FIT_MARGIN 與 clamp）。
+ *  直向視窗改偏向填滿高度（見 PORTRAIT_MAX_ZOOM），減少上下空海。 */
 export function fitScaleFor(w: number, h: number): number {
   if (w === 0 || h === 0) return 1;
   const bounds = islandContentBounds();
-  return clampScale(
-    Math.min(w / bounds.width, h / bounds.height) * FIT_MARGIN,
-  );
+  const contain = Math.min(w / bounds.width, h / bounds.height);
+  const scale =
+    h > w
+      ? Math.min(h / bounds.height, contain * PORTRAIT_MAX_ZOOM)
+      : contain;
+  return clampScale(scale * FIT_MARGIN);
 }
 
 type Camera = { scale: number; tx: number; ty: number };

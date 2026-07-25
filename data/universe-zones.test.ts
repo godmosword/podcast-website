@@ -109,23 +109,23 @@ describe("universe-zones", () => {
     );
     expect(snapshot).toEqual({
       "car-park": {
-        coord: { x: 500, y: 400 },
+        coord: { x: 410, y: 495 },
         artTile: "/adventures/zones/car-park.png",
       },
       dino: {
-        coord: { x: 210, y: 260 },
+        coord: { x: 175, y: 300 },
         artTile: "/adventures/zones/dino.png",
       },
       rescue: {
-        coord: { x: 820, y: 250 },
+        coord: { x: 785, y: 300 },
         artTile: "/adventures/zones/rescue.png",
       },
       ocean: {
-        coord: { x: 820, y: 560 },
+        coord: { x: 825, y: 560 },
         artTile: "/adventures/zones/ocean.png",
       },
       forest: {
-        coord: { x: 210, y: 560 },
+        coord: { x: 500, y: 215 },
         artTile: "/adventures/zones/forest.png",
       },
     });

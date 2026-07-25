@@ -1,5 +1,5 @@
 /** 樂園地圖 resolver：把 zones 資料換算成 SVG 像素座標、橋路徑與 viewBox。 */
-import { LANDING_SEGMENTS } from "@/data/landing-segments";
+import { LANDING_SEGMENTS, type LandingSegmentId } from "@/data/landing-segments";
 import {
   MAP_STAGE,
   ZONES,
@@ -161,7 +161,13 @@ export function resolveUniverseMap(): ResolvedUniverseMap {
   };
 }
 
-export type CarParkLink = { label: string; href: string; external?: boolean };
+export type CarParkLink = {
+  /** 來源 segment id（供 UI 配 emoji／排序，href 仍為單一資料源）。 */
+  id: LandingSegmentId;
+  label: string;
+  href: string;
+  external?: boolean;
+};
 
 /** car-park 子設施連結，衍生自 LANDING_SEGMENTS（單一資料源）。 */
 export function getCarParkLinks(): CarParkLink[] {
@@ -172,6 +178,7 @@ export function getCarParkLinks(): CarParkLink[] {
     if (!seg) return [];
     return [
       {
+        id: seg.id,
         label: seg.cta.label,
         href: seg.cta.href,
         external: seg.cta.external,

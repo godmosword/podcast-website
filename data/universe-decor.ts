@@ -20,24 +20,26 @@ export type DecorItem =
   | (DecorBase & { motion: "drift" | "bob" })
   | (DecorBase & { motion: "path"; travel: number });
 
+// 座標對齊新有機佈局（car-park 410,495；dino 175,300；forest 500,215；
+// rescue 785,300；ocean 825,560）：填充件落在島間水域與邊緣，避開島 tile 與旅程橋線。
 export const MAP_DECOR: DecorItem[] = [
-  { id: "boat-1", kind: "sailboat", x: 180, y: 470, size: 1, motion: "bob", periodMs: 3200 },
+  { id: "boat-1", kind: "sailboat", x: 110, y: 630, size: 1, motion: "bob", periodMs: 3200 },
   {
     id: "buoy-1",
     kind: "buoy",
-    x: 690,
-    y: 430,
+    x: 630,
+    y: 470,
     size: 0.8,
     motion: "bob",
     periodMs: 2600,
     delayMs: 400,
   },
-  { id: "fish-1", kind: "fish", x: 430, y: 560, size: 0.7, motion: "path", periodMs: 9000, travel: 120 },
+  { id: "fish-1", kind: "fish", x: 480, y: 660, size: 0.7, motion: "path", periodMs: 9000, travel: 120 },
   {
     id: "bird-1",
     kind: "bird",
-    x: 120,
-    y: 120,
+    x: 110,
+    y: 50,
     size: 0.8,
     motion: "path",
     periodMs: 14000,
@@ -47,8 +49,8 @@ export const MAP_DECOR: DecorItem[] = [
   {
     id: "bird-2",
     kind: "bird",
-    x: 640,
-    y: 90,
+    x: 680,
+    y: 70,
     size: 0.6,
     motion: "path",
     periodMs: 17000,
@@ -59,8 +61,8 @@ export const MAP_DECOR: DecorItem[] = [
   {
     id: "firefly-1",
     kind: "firefly",
-    x: 520,
-    y: 420,
+    x: 620,
+    y: 440,
     size: 0.5,
     motion: "drift",
     periodMs: 8000,
@@ -70,8 +72,8 @@ export const MAP_DECOR: DecorItem[] = [
   {
     id: "firefly-2",
     kind: "firefly",
-    x: 240,
-    y: 310,
+    x: 200,
+    y: 430,
     size: 0.4,
     motion: "bob",
     periodMs: 4200,
@@ -82,8 +84,8 @@ export const MAP_DECOR: DecorItem[] = [
   {
     id: "firefly-3",
     kind: "firefly",
-    x: 820,
-    y: 380,
+    x: 960,
+    y: 430,
     size: 0.45,
     motion: "drift",
     periodMs: 9500,
@@ -92,19 +94,18 @@ export const MAP_DECOR: DecorItem[] = [
     nightOnly: true,
   },
 
-  // ── R-joy 2 海面密度包：密度由 car-park（500,400）向外遞減，
-  //    避開島 tile、標籤帶與橋線；填充件一律不可互動（decor 層本身 pointer-events 無）。
-  { id: "boat-2", kind: "sailboat", x: 640, y: 620, size: 0.85, motion: "bob", periodMs: 3600, delayMs: 900 },
-  { id: "boat-3", kind: "sailboat", x: 330, y: 150, size: 0.7, motion: "bob", periodMs: 4000, delayMs: 1600 },
-  { id: "buoy-2", kind: "buoy", x: 350, y: 480, size: 0.75, motion: "bob", periodMs: 2900, delayMs: 800 },
-  { id: "buoy-3", kind: "buoy", x: 600, y: 250, size: 0.7, motion: "bob", periodMs: 3100, delayMs: 300 },
-  { id: "buoy-4", kind: "buoy", x: 140, y: 620, size: 0.65, motion: "bob", periodMs: 2700, delayMs: 1200 },
-  { id: "fish-2", kind: "fish", x: 700, y: 520, size: 0.6, motion: "path", periodMs: 10000, travel: 100, delayMs: 1400 },
-  { id: "fish-3", kind: "fish", x: 250, y: 400, size: 0.55, motion: "path", periodMs: 8500, travel: 90, delayMs: 2000 },
+  // ── 海面密度包：填島間水域與四邊留白，避開島 tile、標籤帶與旅程橋線。
+  { id: "boat-2", kind: "sailboat", x: 620, y: 640, size: 0.85, motion: "bob", periodMs: 3600, delayMs: 900 },
+  { id: "boat-3", kind: "sailboat", x: 330, y: 620, size: 0.7, motion: "bob", periodMs: 4000, delayMs: 1600 },
+  { id: "buoy-2", kind: "buoy", x: 200, y: 480, size: 0.75, motion: "bob", periodMs: 2900, delayMs: 800 },
+  { id: "buoy-3", kind: "buoy", x: 950, y: 300, size: 0.7, motion: "bob", periodMs: 3100, delayMs: 300 },
+  { id: "buoy-4", kind: "buoy", x: 60, y: 470, size: 0.65, motion: "bob", periodMs: 2700, delayMs: 1200 },
+  { id: "fish-2", kind: "fish", x: 700, y: 650, size: 0.6, motion: "path", periodMs: 10000, travel: 100, delayMs: 1400 },
+  { id: "fish-3", kind: "fish", x: 180, y: 560, size: 0.55, motion: "path", periodMs: 8500, travel: 90, delayMs: 2000 },
   {
     id: "bird-3",
     kind: "bird",
-    x: 400,
+    x: 250,
     y: 60,
     size: 0.7,
     motion: "path",
@@ -116,8 +117,8 @@ export const MAP_DECOR: DecorItem[] = [
   {
     id: "bird-4",
     kind: "bird",
-    x: 880,
-    y: 130,
+    x: 940,
+    y: 90,
     size: 0.55,
     motion: "path",
     periodMs: 19000,
@@ -128,8 +129,8 @@ export const MAP_DECOR: DecorItem[] = [
   {
     id: "firefly-4",
     kind: "firefly",
-    x: 450,
-    y: 300,
+    x: 520,
+    y: 640,
     size: 0.5,
     motion: "drift",
     periodMs: 8800,
@@ -140,8 +141,8 @@ export const MAP_DECOR: DecorItem[] = [
   {
     id: "firefly-5",
     kind: "firefly",
-    x: 700,
-    y: 470,
+    x: 150,
+    y: 600,
     size: 0.4,
     motion: "bob",
     periodMs: 5000,

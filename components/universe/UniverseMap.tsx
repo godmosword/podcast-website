@@ -567,6 +567,7 @@ function UniverseMapContent({
               mapScale={bucketMapScale(camera.scale)}
               devStatusOverride={devStatusOverrides[zone.id]}
               progress={zoneProgress[zone.id] ?? null}
+              invite={tapHintPhase === "visible" && zone.status === "open"}
             />
           ))}
 

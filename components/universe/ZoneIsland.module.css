@@ -102,6 +102,31 @@
   animation: islandFloat 3.6s ease-in-out infinite;
 }
 
+/* 首訪邀請：主島週期性雙彈跳吸引第一次點擊（覆蓋較靜的 islandFloat）。 */
+.islandTile[data-invite][data-status="open"]:not([data-transition]) .tileStack {
+  animation: islandInvite 2.6s ease-in-out infinite;
+}
+
+@keyframes islandInvite {
+  0%,
+  55%,
+  100% {
+    transform: translateY(0);
+  }
+  66% {
+    transform: translateY(-15px);
+  }
+  76% {
+    transform: translateY(0);
+  }
+  85% {
+    transform: translateY(-8px);
+  }
+  93% {
+    transform: translateY(0);
+  }
+}
+
 /* 地圖手勢中暫停待機浮動／柔光，把合成預算留給縮放 */
 .islandTile[data-paused][data-status="open"]::before,
 .islandTile[data-paused][data-status="open"]:not([data-transition]) .tileStack {
@@ -132,7 +157,8 @@
     transition: none;
   }
 
-  .islandTile[data-status="open"]:not([data-transition]) .tileStack {
+  .islandTile[data-status="open"]:not([data-transition]) .tileStack,
+  .islandTile[data-invite][data-status="open"]:not([data-transition]) .tileStack {
     animation: none;
   }
 

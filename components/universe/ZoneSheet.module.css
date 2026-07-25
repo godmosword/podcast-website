@@ -130,29 +130,75 @@
   margin-bottom: 0.65rem;
 }
 
-.linkBtn {
+/* ── 開放島四段內容支柱：2×2 平權 tile（emoji 主體 + 標籤） ── */
+.segmentGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+  margin-bottom: 0.65rem;
+}
+
+.segmentTile {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 52px;
-  padding: 0.6rem 0.8rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.95rem;
-  font-weight: 700;
+  gap: 0.35rem;
+  min-height: 92px;
+  padding: 0.7rem 0.6rem;
+  border-radius: var(--radius-md);
   text-align: center;
   text-decoration: none;
   color: var(--landing-brand-ink);
-  background: color-mix(in srgb, var(--landing-brand) 24%, var(--card));
-  border: 2px solid color-mix(in srgb, var(--landing-brand) 45%, transparent);
+  background: color-mix(in srgb, var(--landing-brand) 16%, var(--card));
+  border: 2px solid color-mix(in srgb, var(--landing-brand) 34%, transparent);
 }
 
-.linkBtn:hover {
-  background: color-mix(in srgb, var(--landing-brand) 34%, var(--card));
+.segmentTile:hover {
+  background: color-mix(in srgb, var(--landing-brand) 26%, var(--card));
 }
 
-.linkBtn:focus-visible {
+.segmentTile:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+/* 主段「全部故事」：沿用 landing CTA 橘色漸層，四段中最醒目 */
+.segmentTilePrimary {
+  color: var(--landing-cta-fg, #7a4012);
+  background: linear-gradient(
+    180deg,
+    var(--landing-cta-from, #ff9500) 0%,
+    var(--landing-cta-to, #ff7a00) 100%
+  );
+  border-color: rgba(180, 120, 60, 0.32);
+  box-shadow: 0 4px 0 var(--landing-cta-shadow, rgba(180, 110, 50, 0.32)),
+    0 8px 18px rgba(120, 80, 40, 0.18);
+}
+
+.segmentTilePrimary:hover {
+  filter: brightness(1.05);
+  background: linear-gradient(
+    180deg,
+    var(--landing-cta-from, #ff9500) 0%,
+    var(--landing-cta-to, #ff7a00) 100%
+  );
+}
+
+.segmentTilePrimary:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+.segmentEmoji {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.segmentLabel {
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.3;
 }
 
 /* 主 CTA「全部故事」：沿用 landing CTA 橘色漸層，整行置頂（其餘三顆為次要） */
@@ -279,12 +325,6 @@
   padding-top: 0.65rem;
 }
 
-.wishDisclosure {
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-}
-
 .wishToggle {
   align-self: flex-start;
   min-height: 44px;
@@ -311,6 +351,13 @@
 .wishPanel {
   border-top: 1.5px solid var(--line);
   padding-top: 0.65rem;
+}
+
+.wishHeading {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--ink);
 }
 
 @media (max-width: 480px) {
@@ -378,9 +425,28 @@
 }
 
 .storyCardEp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   font-size: 1.05rem;
   font-weight: 900;
   color: var(--landing-brand-ink);
+}
+
+/* 最新一集徽章：暖橘小 pill，讓「這集最新」一眼可辨 */
+.storyCardNew {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  color: #7a4012;
+  background: linear-gradient(180deg, #ffd27a, #ffb347);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+:global([data-theme="night"]) .storyCardNew {
+  color: #3a2410;
 }
 
 :global([data-theme="night"]) .storyCardEp,

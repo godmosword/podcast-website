@@ -7,6 +7,7 @@ import {
   INERTIA_DECAY_TAU,
   MAX_SCALE,
   MIN_SCALE,
+  PORTRAIT_MAX_ZOOM,
   RECENTER_VISIBLE_MARGIN_PX,
   anyPointVisible,
   blendVelocity,
@@ -82,17 +83,29 @@ describe("map-camera-utils", () => {
     }
   });
 
-  it("fitScaleFor 依島群 bbox contain-fit × FIT_MARGIN（比整舞台更近）", () => {
+  it("fitScaleFor：橫向 contain-fit；直向偏向填滿高度（減少上下空海）", () => {
     const bounds = islandContentBounds();
-    // 寬受限（大視窗可能觸頂 MAX_SCALE）
-    expect(fitScaleFor(2000, 3000)).toBeCloseTo(
-      clampScale((2000 / bounds.width) * FIT_MARGIN),
-      6,
-    );
-    // 高受限
+    // 橫向・高受限
     expect(fitScaleFor(5000, 1440)).toBeCloseTo(
       clampScale((1440 / bounds.height) * FIT_MARGIN),
       6,
+    );
+    // 橫向・寬受限
+    expect(fitScaleFor(1000, 900)).toBeCloseTo(
+      clampScale((1000 / bounds.width) * FIT_MARGIN),
+      6,
+    );
+    // 直向：min(高度fit, contain×PORTRAIT_MAX_ZOOM)，且嚴謹大於純寬度 contain
+    const portraitContain = Math.min(400 / bounds.width, 900 / bounds.height);
+    expect(fitScaleFor(400, 900)).toBeCloseTo(
+      clampScale(
+        Math.min(900 / bounds.height, portraitContain * PORTRAIT_MAX_ZOOM) *
+          FIT_MARGIN,
+      ),
+      6,
+    );
+    expect(fitScaleFor(400, 900)).toBeGreaterThan(
+      clampScale(portraitContain * FIT_MARGIN),
     );
     // 手機 375：島群 fit 必須嚴謹大於整舞台 fit（五島更飽滿）
     const mobile = fitScaleFor(375, 748);

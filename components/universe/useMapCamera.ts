@@ -15,6 +15,7 @@ import {
   decayVelocity,
   exceedsDragSlop,
   fitScaleFor,
+  islandContentCenter,
   wheelZoomFactor,
   zoomCameraAt,
 } from "@/lib/universe/map-camera-utils";
@@ -40,6 +41,10 @@ type FlyToOptions = {
 
 const CAR_PARK =
   ZONES.find((z) => z.id === "car-park")?.coord ?? { x: 500, y: 400 };
+
+/** 預設鏡頭錨點：島群 bbox 中心（首屏／進場飛抵處對齊此點，島群置中不偏一側）。
+ *  reset／回樂園仍飛向 CAR_PARK（聚焦主島）。 */
+const CONTENT_CENTER = islandContentCenter();
 
 type MapCameraBind = {
   ref: (el: HTMLDivElement | null) => void;
@@ -396,20 +401,20 @@ export function useMapCamera(): MapCamera {
           publishCam(
             clampCam({
               scale: es,
-              tx: rect.width / 2 - CAR_PARK.x * es,
-              ty: rect.height / 2 - CAR_PARK.y * es,
+              tx: rect.width / 2 - CONTENT_CENTER.x * es,
+              ty: rect.height / 2 - CONTENT_CENTER.y * es,
             }),
             "commit",
           );
           requestAnimationFrame(() => {
-            requestAnimationFrame(() => flyTo(CAR_PARK, ns));
+            requestAnimationFrame(() => flyTo(CONTENT_CENTER, ns));
           });
         } else {
           publishCam(
             clampCam({
               scale: ns,
-              tx: rect.width / 2 - CAR_PARK.x * ns,
-              ty: rect.height / 2 - CAR_PARK.y * ns,
+              tx: rect.width / 2 - CONTENT_CENTER.x * ns,
+              ty: rect.height / 2 - CONTENT_CENTER.y * ns,
             }),
             "commit",
           );

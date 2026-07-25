@@ -38,6 +38,8 @@ type ZoneIslandProps = {
   devStatusOverride?: ZoneStatus;
   /** 進度中樞：該島「已聽完／總集數」（無進度或零進度時不顯示星章）。 */
   progress?: ZoneProgress | null;
+  /** 首訪邀請：開放主島週期性彈跳吸引第一次點擊（reduced-motion 由 CSS 停用）。 */
+  invite?: boolean;
 };
 
 function ZoneIsland({
@@ -49,6 +51,7 @@ function ZoneIsland({
   mapScale = 1,
   devStatusOverride,
   progress = null,
+  invite = false,
 }: ZoneIslandProps) {
   const effectiveStatus = devStatusOverride ?? zone.status;
   const meta = ZONE_STATUS_META[effectiveStatus];
@@ -114,6 +117,7 @@ function ZoneIsland({
           data-transition={transition ?? undefined}
           data-celebrate={isOpen && burst > 0 ? true : undefined}
           data-jelly={!isOpen && jelly > 0 ? jelly : undefined}
+          data-invite={invite && isOpen ? true : undefined}
           data-progress={hasProgress ? true : undefined}
           data-paused={paused || undefined}
           aria-label={
