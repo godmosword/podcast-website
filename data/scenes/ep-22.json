@@ -1,0 +1,358 @@
+{
+  "slug": "ep-22",
+  "audioDuration": 512,
+  "model": "manual-semantic-15-20s",
+  "generatedAt": "2026-07-25T00:44:51.650Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 0,
+      "end": 24.5,
+      "summary": "介紹故事背景：車車遊樂園的笑話比賽，笑話不能嘲笑別人",
+      "prompt": "Clay podcast cover-safe framing: Bonbon and Mami warmly greet listeners and introduce today's story — the annual joke contest at the vehicle amusement park, where the lesson is that a good joke should never make fun of someone else.",
+      "characters": [
+        "Bonbon",
+        "馬米"
+      ],
+      "keepCover": true
+    },
+    {
+      "index": 2,
+      "start": 24.5,
+      "end": 43.4,
+      "summary": "車車遊樂園熱鬧登場，彩虹廣場擠滿小車車等笑話比賽開始",
+      "prompt": "The vehicle amusement park is lively and bright; many little clay cars gather at Rainbow Square for the annual joke contest, wide establishing shot, no primary character close-up, generic background cars only — NO arms, NO hands, NO limbs on any vehicle.",
+      "characters": [],
+      "refPages": [
+        1
+      ],
+      "refPageHint": "Wide establishing only, independent of scene 1's human hosts. Background little cars are generic faceless silhouettes, no named roster characters, no arms/hands/limbs on any vehicle."
+    },
+    {
+      "index": 3,
+      "start": 43.4,
+      "end": 65.8,
+      "summary": "海龜老師暖暖出場主持，歡迎大家並開始說明比賽規則",
+      "prompt": "Sea Turtle Teacher Nuan Nuan, riding her teal skateboard, warmly welcomes everyone to the car joke contest as the host, explaining that every contestant will share one joke to make everyone laugh together.",
+      "characters": [
+        "海龜老師暖暖"
+      ],
+      "refPages": [
+        2
+      ]
+    },
+    {
+      "index": 4,
+      "start": 65.8,
+      "end": 86.5,
+      "summary": "暖暖帶大家熱身：張大嘴巴、露出牙齒，一起哈哈哈大笑三聲",
+      "prompt": "Sea Turtle Teacher Nuan Nuan on her teal skateboard leads a warm-up laugh exercise on the joke-contest stage: kids and little cars open ONE mouth wide, show teeth, and laugh 'ha ha ha' three times together. Focus on Nuan Nuan as host; background little cars are simple rounded clay cars with exactly ONE face each (happy closed eyes + one open laughing mouth on the front), four wheels only. CRITICAL FACE RULE for every vehicle: exactly ONE face only — eyes + ONE mouth as the front grille/bumper; NEVER a second mouth, NEVER a face on the windshield stacked above another mouth, NEVER double jaws. NO arms, NO hands, NO limbs on any car. Do NOT invent named roster cars. Stage setting with microphone, not a water park.",
+      "characters": [
+        "海龜老師暖暖"
+      ],
+      "refPages": [
+        3
+      ],
+      "refPageHint": "Continuity with scene 3: 海龜老師暖暖 match portrait on skateboard. Background cars: ONE face only, no double mouth, no arms/hands/limbs."
+    },
+    {
+      "index": 5,
+      "start": 86.5,
+      "end": 114.4,
+      "summary": "暖暖說明獎品是老爺爺的超大杯爆米花，邀請恐龍車多多上台",
+      "prompt": "Sea Turtle Teacher Nuan Nuan on her teal skateboard announces the prize — Grandpa's extra-large cup of delicious popcorn (show a big popcorn cup prop near her) — and cheerfully invites the first contestant to come on stage. Nuan Nuan is the ONLY character on stage. Do NOT show 恐龍車多多 / any dinosaur car yet (he enters in the next scene). If any background little cars appear, each has exactly ONE face (eyes + one mouth as grille), four wheels only. CRITICAL FACE RULE for every vehicle: exactly ONE face only — eyes + ONE mouth as the front grille/bumper; NEVER a second mouth, NEVER a face on the windshield stacked above another mouth, NEVER double jaws. NO arms, NO hands, NO limbs on any car. Contest stage with pink curtains, not a beach water park.",
+      "characters": [
+        "海龜老師暖暖"
+      ],
+      "refPages": [
+        4
+      ],
+      "refPageHint": "Only 海龜老師暖暖 on stage matching portrait. NO dinosaur car in frame. Background cars if any: ONE face only, no double mouth."
+    },
+    {
+      "index": 6,
+      "start": 114.4,
+      "end": 138.1,
+      "summary": "多多開心走上舞台，自我介紹是一號參賽者，開始講笑話",
+      "prompt": "Dodo the Dinosaur Car, a small green dinosaur car with orange spikes, four black wheels only — NO arms, NO hands, NO limbs — happily walks onto the stage, introduces himself as contestant number one, and begins his joke: 'one day I fell asleep while brushing my teeth'.",
+      "characters": [
+        "恐龍車多多"
+      ],
+      "refPages": [
+        5
+      ]
+    },
+    {
+      "index": 7,
+      "start": 138.1,
+      "end": 151.6,
+      "summary": "多多說出笑點：早上起床發現牙刷還在嘴巴裡，大家拍手大笑",
+      "prompt": "Dodo the Dinosaur Car finishes his joke — he woke up in the morning and found the toothbrush still in his mouth — everyone bursts out laughing; the little cars cheer by bouncing happily on their tires, NOT hand-clapping. Four wheels only, NO arms, NO hands, NO limbs on any car.",
+      "characters": [
+        "恐龍車多多"
+      ],
+      "refPages": [
+        6
+      ],
+      "refPageHint": "Continuity with scene 6: 恐龍車多多 match portrait, same on-model green dino car. Laughter/applause shown via tire-bounce and body hop only — absolutely no hand-clapping, no arms, no hands, no limbs on any vehicle."
+    },
+    {
+      "index": 8,
+      "start": 151.6,
+      "end": 172.3,
+      "summary": "暖暖宣布二號選手挖土機東東出場，東東緊張走到麥克風前深呼吸",
+      "prompt": "Sea Turtle Teacher Nuan Nuan announces the second contestant, Dong Dong the Excavator; Dong Dong looks a little nervous as he rolls up to the microphone and takes a deep breath before saying hello. Dong Dong's digging arm and bucket are a machine part only (that is fine) — he has NO human arms, NO hands, NO other limbs.",
+      "characters": [
+        "海龜老師暖暖",
+        "東東挖土機"
+      ],
+      "refPages": [
+        7
+      ]
+    },
+    {
+      "index": 9,
+      "start": 172.3,
+      "end": 198.7,
+      "summary": "東東說出笑話：昨天挖了一個洞，結果今天找不到那個洞了",
+      "prompt": "Dong Dong the Excavator, still a little nervous, introduces himself as contestant number two and tells his joke: 'yesterday I dug a hole'; when the kids ask what the joke is, he seriously replies 'today I can't find that hole'. Digging arm and bucket are a machine part only, NO human arms, NO hands, NO other limbs.",
+      "characters": [
+        "東東挖土機"
+      ],
+      "refPages": [
+        8
+      ],
+      "refPageHint": "Continuity with scene 8: 東東挖土機 match portrait, same yellow excavator on black tracks. Boom and bucket are the only mechanical part — no human arms, hands, or other limbs."
+    },
+    {
+      "index": 10,
+      "start": 198.7,
+      "end": 216.1,
+      "summary": "大家笑到輪胎滾動；暖暖請大家坐好，準備歡迎三號選手出場",
+      "prompt": "Everyone laughs so hard at Dong Dong's joke that the little cars' tires wobble and roll with laughter; Sea Turtle Teacher Nuan Nuan then asks everyone to settle down and get ready to welcome contestant number three. Laughter shown via tire-roll and body wobble only, NO arms, NO hands, NO limbs on any car.",
+      "characters": [
+        "東東挖土機",
+        "海龜老師暖暖"
+      ],
+      "refPages": [
+        9
+      ],
+      "refPageHint": "Continuity with scene 9: 東東挖土機 match portrait, still on stage. 海龜老師暖暖 match portrait leading the transition. Laughter via tire-roll/body-wobble only, no hand-clapping, no arms, no hands, no limbs on any vehicle."
+    },
+    {
+      "index": 11,
+      "start": 216.1,
+      "end": 239.9,
+      "summary": "噗噗豬蹦上舞台自我介紹是三號選手，開始模仿多多平常害怕的樣子（多多不在台上）",
+      "prompt": "ONLY Pupu Pig on the contest stage — sky-blue pig water car with pink snout, pig ears, water cannon, life ring, four wheels; mischievous performer hopping up, introducing himself as contestant number three, beginning to imitate how Dodo usually looks scared (tire-shake + shrink body). CRITICAL: 恐龍車多多 / Dodo the Dinosaur Car is NOT on stage and NOT in the frame at all — this is an imitation of an absent friend, not a duet. Audience may be blurred little cars only. CRITICAL FACE RULE for every vehicle: exactly ONE face only — eyes + ONE mouth as the front grille/bumper; NEVER a second mouth, NEVER a face on the windshield stacked above another mouth, NEVER double jaws. Pupu has NO arms, NO hands, NO limbs. Stage with pink curtains and microphone.",
+      "characters": [
+        "噗噗豬"
+      ],
+      "refPages": [
+        10
+      ],
+      "refPageHint": "Solo stage shot of 噗噗豬 matching portrait. Do NOT include 恐龍車多多. ONE face only on Pupu and any background cars. NO arms/hands/limbs."
+    },
+    {
+      "index": 12,
+      "start": 239.9,
+      "end": 260.2,
+      "summary": "噗噗豬在台上模仿多多害怕：輪胎抖動、縮小身體，故意喊救命嘲笑多多膽小（多多不在台上）",
+      "prompt": "ONLY Pupu Pig on stage as the mocking performer — imitates fear by shaking tires and shrinking body low, playfully shouting 'help, bubble monster!' and teasing that Dodo is the most timid dinosaur; mischievous, NOT crying. CRITICAL: 恐龍車多多 / any green dinosaur car is NOT on stage and NOT visible in frame — the joke is about Dodo who is offstage; do not draw Dodo beside Pupu. Background audience little cars may laugh via body bounce. CRITICAL FACE RULE for every vehicle: exactly ONE face only — eyes + ONE mouth as the front grille/bumper; NEVER a second mouth, NEVER a face on the windshield stacked above another mouth, NEVER double jaws. STRICT: Pupu NO arms, NO hands, NO limbs — fear imitation via tire-shake and body-shrink ONLY, never hugging himself.",
+      "characters": [
+        "噗噗豬"
+      ],
+      "refPages": [
+        11
+      ],
+      "refPageHint": "Solo 噗噗豬 on stage matching portrait mid-imitation. Absolutely no 恐龍車多多 in frame. ONE face only. NO arms/hands/limbs."
+    },
+    {
+      "index": 13,
+      "start": 260.2,
+      "end": 283.7,
+      "summary": "小車車們笑完看向多多，發現多多沒有笑，反而低頭難過地說大家都覺得他膽小",
+      "prompt": "The little cars turn to look at Dodo the Dinosaur Car after Pupu's joke — but Dodo isn't laughing. He lowers his head and quietly says everyone must think he's timid; the once-lively stage suddenly turns silent. Dodo has four wheels only, NO arms, NO hands, NO limbs.",
+      "characters": [
+        "恐龍車多多",
+        "噗噗豬"
+      ],
+      "refPages": [
+        12
+      ],
+      "refPageHint": "Continuity with scene 12: 恐龍車多多 and 噗噗豬 match portraits. Dodo's sadness shown via lowered head, downcast eyes and quiet body language only — NO arms, NO hands, NO limbs on any car."
+    },
+    {
+      "index": 14,
+      "start": 283.7,
+      "end": 309.3,
+      "summary": "海龜老師暖暖滑過來說明真正的笑話是大家一起開心，不是嘲笑別人讓人難過",
+      "prompt": "Sea Turtle Teacher Nuan Nuan on teal skateboard gently teaches that real jokes make everyone laugh together, not mock someone until they feel sad. CRITICAL: Dodo the Dinosaur Car looks SAD and small (downcast eyes, closed mouth) — NOT smiling or laughing. Pupu Pig looks guilty/worried realizing he was wrong. Quiet stage. Turtle may use flippers. Cars: NO arms, NO hands, NO limbs.",
+      "characters": [
+        "海龜老師暖暖",
+        "噗噗豬",
+        "恐龍車多多"
+      ],
+      "refPages": [
+        13
+      ],
+      "refPageHint": "ROLES: 恐龍車多多 must be sad (not happy grin). 噗噗豬 guilty. 海龜老師暖暖 gentle teacher on skateboard. NO arms/hands/limbs on cars."
+    },
+    {
+      "index": 15,
+      "start": 309.3,
+      "end": 334.9,
+      "summary": "噗噗豬看到多多難過才發現說錯話，走到多多面前道歉；多多點頭原諒，約定下次一起想笑話",
+      "prompt": "Pupu Pig sees Dodo's hurt expression and realizes he said the wrong thing; he rolls up to Dodo and apologizes, saying he only wanted to make everyone laugh and didn't mean to hurt him; Dodo nods and forgives him, saying next time they'll think of a funny joke together. Warm reconciliation. NO arms, NO hands, NO limbs on either car — emotion via eyes, body proximity, and nodding only.",
+      "characters": [
+        "噗噗豬",
+        "恐龍車多多"
+      ],
+      "refPages": [
+        14
+      ],
+      "refPageHint": "Continuity with scene 14. Apology via expressions/body only — NO arms, NO hands, NO limbs."
+    },
+    {
+      "index": 16,
+      "start": 334.9,
+      "end": 357,
+      "summary": "噗噗豬想了一下，重新站上舞台，這次不模仿任何人，開始講泡澡看到泡泡的新笑話",
+      "prompt": "Pupu Pig thinks for a moment, then rolls back onto the stage — this time without imitating anyone — and cheerfully begins a brand new joke: 'one day I was taking a bath and saw so many bubbles'; the little cars curiously ask why. Vehicles have NO arms, NO hands, NO limbs — wheels/body/eyes only (excavator boom+bucket OK as machine part).",
+      "characters": [
+        "噗噗豬"
+      ],
+      "refPages": [
+        15
+      ],
+      "refPageHint": "Continuity with scene 15: 噗噗豬 match portrait, now cheerful and confident on stage. NO arms, NO hands, NO limbs."
+    },
+    {
+      "index": 17,
+      "start": 357,
+      "end": 377.9,
+      "summary": "噗噗豬偷偷笑、左看右看賣關子，問大家真的想知道嗎，開始說是因為屁股一直噗噗噗",
+      "prompt": "Pupu Pig giggles to himself, looks left and right teasingly to build suspense, asks if everyone really wants to know why, then starts explaining that his bottom kept going 'poot poot poot poot poot' — light, child-safe silly humor, no gross-out details. Vehicles have NO arms, NO hands, NO limbs — wheels/body/eyes only (excavator boom+bucket OK as machine part).",
+      "characters": [
+        "噗噗豬"
+      ],
+      "refPages": [
+        16
+      ],
+      "refPageHint": "Continuity with scene 16: 噗噗豬 match portrait, playful teasing expression. NO arms, NO hands, NO limbs."
+    },
+    {
+      "index": 18,
+      "start": 377.9,
+      "end": 390.2,
+      "summary": "噗噗豬說出他一直在放屁的笑點，大家和多多都笑了，暖暖拍拍鰭表示開心",
+      "prompt": "Pupu Pig reveals the punchline — he kept farting in the bathtub — and all the little cars burst out laughing, cheering by bouncing happily on their tires (NOT hand-clapping); Dodo the Dinosaur Car laughs along too, and Sea Turtle Teacher Nuan Nuan claps her flippers together with delight (she is a turtle with flippers, not a car).",
+      "characters": [
+        "噗噗豬",
+        "恐龍車多多",
+        "海龜老師暖暖"
+      ],
+      "refPages": [
+        17
+      ],
+      "refPageHint": "Continuity with scene 17: 噗噗豬 match portrait now delivering the punchline. 恐龍車多多 laughing warmly, reconciled. 海龜老師暖暖 claps her own flippers (she is not a car). Cars cheer via tire-bounce only — NO arms, NO hands, NO limbs on 噗噗豬 or 恐龍車多多."
+    },
+    {
+      "index": 19,
+      "start": 390.2,
+      "end": 412,
+      "summary": "暖暖說一起笑最開心；比賽結束，宣布冠軍是挖土機東東，大家歡呼",
+      "prompt": "Sea Turtle Teacher Nuan Nuan tells everyone that laughing together is the happiest kind of laugh. The contest ends, and she announces today's winner: Dong Dong the Excavator! Everyone cheers for him — little cars cheer by bouncing on their tires and honking, NOT hand-clapping; Nuan Nuan may clap her own flippers.",
+      "characters": [
+        "海龜老師暖暖",
+        "東東挖土機",
+        "恐龍車多多",
+        "噗噗豬"
+      ],
+      "refPages": [
+        18
+      ],
+      "refPageHint": "Continuity with scene 18: all four characters match portraits. Cheering cars use tire-bounce/honk only — NO arms, NO hands, NO limbs on 東東挖土機, 恐龍車多多, or 噗噗豬. 海龜老師暖暖 may clap her own flippers only, she is not a car."
+    },
+    {
+      "index": 20,
+      "start": 412,
+      "end": 424,
+      "summary": "東東又驚又喜，三位好朋友東東、多多、噗噗豬一起站上舞台拍下開心的大合照",
+      "prompt": "Dong Dong the Excavator looks surprised and delighted; the three friends — Dong Dong, Dodo the Dinosaur Car, and Pupu Pig — stand together on stage for a big happy group photo, warm celebratory mood. Vehicles have NO arms, NO hands, NO limbs — wheels/body/eyes only (excavator boom+bucket OK as machine part).",
+      "characters": [
+        "東東挖土機",
+        "恐龍車多多",
+        "噗噗豬"
+      ],
+      "refPages": [
+        19
+      ],
+      "refPageHint": "Continuity with scene 19: all three characters match portraits, same on-model designs. NO arms, NO hands, NO limbs on any of the three — express joy via eyes, body bounce, and tire posture only."
+    },
+    {
+      "index": 21,
+      "start": 424,
+      "end": 444.3,
+      "summary": "東東拿到老爺爺的超大杯爆米花，天空飄起彩色泡泡，車車遊樂園充滿笑聲",
+      "prompt": "Dong Dong the Excavator happily receives an enormous cup of popcorn from Grandpa's vintage popcorn food truck; colorful bubbles drift across the sky and the whole vehicle amusement park fills with laughter on this happy day. Vehicles have NO arms, NO hands, NO limbs — wheels/body/eyes only (excavator boom+bucket OK as machine part).",
+      "characters": [
+        "東東挖土機",
+        "恐龍車多多",
+        "噗噗豬",
+        "老爺爺爆米花餐車"
+      ],
+      "refPages": [
+        20
+      ],
+      "refPageHint": "Continuity with scene 20: 東東挖土機, 恐龍車多多, 噗噗豬 match portraits, NO arms/hands/limbs on any of the three. 老爺爺爆米花餐車 match portrait — truck body has no separate limbs; the grandfather vendor is built into the truck front with ONE face, serving popcorn through the counter/window rather than a detached human figure."
+    },
+    {
+      "index": 22,
+      "start": 444.3,
+      "end": 464.8,
+      "summary": "Bonbon和馬米總結故事：笑話是要讓大家一起開心，不是拿別人的害怕或外表開玩笑",
+      "prompt": "Clay podcast studio: Bonbon and Mami warmly wrap up the story, teaching listeners that jokes should make everyone happy together, not use someone's fear or appearance to make fun of them.",
+      "characters": [
+        "Bonbon",
+        "馬米"
+      ],
+      "refPages": [
+        1
+      ],
+      "refPageHint": "PRIMARY: Bonbon and 馬米 HUMAN clay match portraits exactly, same studio as scene 1. Warm teaching tone."
+    },
+    {
+      "index": 23,
+      "start": 464.8,
+      "end": 487.3,
+      "summary": "馬米引導小朋友思考：如果被笑的人是自己會有什麼感覺；答案是會不舒服、會難過",
+      "prompt": "Clay podcast studio: Mami gently asks the kids to imagine — if the person being laughed at were you, how would you feel? Bonbon thoughtfully answers that it would feel uncomfortable and sad, warm reflective conversation.",
+      "characters": [
+        "Bonbon",
+        "馬米"
+      ],
+      "refPages": [
+        22
+      ],
+      "refPageHint": "Continuity with scene 22: Bonbon and 馬米 HUMAN clay match portraits exactly, same studio setting. Thoughtful reflective conversation, no extra props needed."
+    },
+    {
+      "index": 24,
+      "start": 487.3,
+      "end": 512,
+      "summary": "Bonbon和馬米邀請小朋友一起做讓大家開心的好朋友，道別並邀請下次再回車車遊樂園玩",
+      "prompt": "Clay podcast studio closing: Bonbon and Mami invite kids to be the kind of friend who makes everyone laugh together happily, then wave goodbye cheerfully, inviting everyone to come back and play at the vehicle amusement park next time.",
+      "characters": [
+        "Bonbon",
+        "馬米"
+      ],
+      "refPages": [
+        1,
+        23
+      ],
+      "refPageHint": "Continuity with scene 23: Bonbon and 馬米 HUMAN clay match portraits exactly, waving goodbye. Warm inviting farewell, same studio as scene 1."
+    }
+  ],
+  "newCharacters": []
+}

@@ -30,7 +30,8 @@
     "alsoIn": [
       "ep-15",
       "ep-17",
-      "ep-19"
+      "ep-19",
+      "ep-22"
     ]
   },
   {
@@ -113,12 +114,13 @@
       "挖土機"
     ],
     "vehicle": "excavator",
-    "desc": "a cute claymation yellow excavator on black tracks with a digging arm and bucket, big round eyes, rosy cheeks and a happy smile",
+    "desc": "a cute claymation yellow excavator on black tracks with a mechanical digging arm and bucket (machine part only, not a human limb), big round eyes, rosy cheeks and a happy smile, no other arms, no hands, no legs, no human limbs",
     "ref": "characters/東東挖土機.jpg",
     "firstSeen": "ep-5",
     "alsoIn": [
       "ep-15",
-      "ep-20"
+      "ep-20",
+      "ep-22"
     ]
   },
   {
@@ -333,7 +335,8 @@
     "ref": "characters/老爺爺爆米花餐車.jpg",
     "firstSeen": "ep-14",
     "alsoIn": [
-      "ep-19"
+      "ep-19",
+      "ep-22"
     ]
   },
   {
@@ -367,12 +370,13 @@
       "水花遊園車"
     ],
     "vehicle": "tour car",
-    "desc": "a cute claymation sky-blue round water-park tour car named Pupu Pig (噗噗豬), pig-themed with a big pink snout on the front grille, floppy pink pig ears on the roof, winking expressive eyes, yellow headlight circles, light-blue and blue polka dots on the body, yellow roof rack with a blue water cannon spraying water jets, red-white life ring on the side, blue water splash from the rear, four small wheels, cheerful playful energy, soft hand-sculpted clay texture",
+    "desc": "a cute claymation sky-blue round water-park tour car named Pupu Pig (噗噗豬), pig-themed with a big pink snout on the front grille, floppy pink pig ears on the roof, winking expressive eyes, yellow headlight circles, light-blue and blue polka dots on the body, yellow roof rack with a blue water cannon spraying water jets, red-white life ring on the side, blue water splash from the rear, four small wheels only — no arms, no hands, no limbs, cheerful playful energy, soft hand-sculpted clay texture",
     "ref": "characters/噗噗豬.jpg",
     "firstSeen": "ep-16",
     "alsoIn": [
       "ep-17",
-      "ep-18"
+      "ep-18",
+      "ep-22"
     ]
   },
   {
@@ -388,7 +392,8 @@
     "firstSeen": "ep-16",
     "alsoIn": [
       "ep-17",
-      "ep-18"
+      "ep-18",
+      "ep-22"
     ]
   },
   {

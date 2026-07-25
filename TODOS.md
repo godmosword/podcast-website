@@ -1060,8 +1060,8 @@ T+2d    社群貼文（B 戰場）
 
 | 步驟 | 狀態 | 備註 |
 |------|------|------|
-| 字幕校對 + `--mark` | ✅ | 184→180 句；刪「我叫Bonbon」幻覺；海龜暖暖／挖土機東東／笑話呢／又驚又喜；補「三號是誰」→ `_proofread/ep-22.json` |
-| `illustrate --segment-only` → 生圖 → `--approve` | ⏳ | MVP pageCount=1；待全幕繪本 |
+| 字幕校對 + `--mark` | ✅ | 184→180 句；刪「我叫Bonbon」幻覺；海龜老師暖暖／挖土機東東／笑話呢／又驚又喜；補「三號是誰」→ `_proofread/ep-22.json` |
+| `illustrate --segment-only` → 生圖 → `--approve` | ✅ | 24 幕全幕繪本；車無手／#4#5 單臉／#11–12 多多不在台；見本 commit |
 
 ### ep-20 上架進度（2026-07-18）
 
