@@ -1,4 +1,5 @@
 /** 依 zone 反查故事；供 episode 頁、地圖 sheet 與 RSS 使用。 */
+import { cache } from "react";
 import { getStories, type Story } from "@/data/content";
 import { ZONE_IDS, type ZoneId } from "@/data/universe-zones";
 
@@ -32,8 +33,14 @@ function toPreview(story: Story): ZoneStoryPreview {
   };
 }
 
-/** SSG 預先序列化：每 zone 最多 3 集預覽 + 總數。 */
-export function buildZoneStoryPreviewsMap(): Record<ZoneId, ZoneStoriesBundle> {
+/**
+ * SSG 預先序列化：每 zone 最多 3 集預覽 + 總數。
+ * 未包 cache；production 請用 `buildZoneStoryPreviewsMap`。
+ */
+export function buildZoneStoryPreviewsMapUncached(): Record<
+  ZoneId,
+  ZoneStoriesBundle
+> {
   const map = {} as Record<ZoneId, ZoneStoriesBundle>;
   for (const zoneId of ZONE_IDS) {
     const stories = getStoriesByZone(zoneId);
@@ -44,4 +51,17 @@ export function buildZoneStoryPreviewsMap(): Record<ZoneId, ZoneStoriesBundle> {
     };
   }
   return map;
+}
+
+/**
+ * Request 內去重：`adventures/layout` 與 `[zone]/page` 共用同一次計算。
+ * （React `cache` 僅在 RSC request 的 Cache dispatcher 下生效。）
+ */
+export const buildZoneStoryPreviewsMap = cache(buildZoneStoryPreviewsMapUncached);
+
+/** 島頁 sr-only 用的完整故事標題列（非僅 3 筆預覽）。 */
+export function zoneStoryTitleLines(zoneId: ZoneId): string[] {
+  return getStoriesByZone(zoneId).map(
+    (story) => `第 ${story.ep} 集：${story.title}`,
+  );
 }

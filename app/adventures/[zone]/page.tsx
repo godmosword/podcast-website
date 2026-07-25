@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ZoneIslandPage from "@/components/universe/ZoneIslandPage";
-import {
-  STATUS_META,
-  ZONE_IDS,
-  universe,
-  zoneById,
-} from "@/data/universe";
+import { STATUS_META, ZONE_IDS, zoneById } from "@/data/universe";
 import { zoneToDef } from "@/data/universe-zones";
-import { buildZoneStoryPreviewsMap } from "@/lib/story-zone-query";
+import {
+  buildZoneStoryPreviewsMap,
+  zoneStoryTitleLines,
+} from "@/lib/story-zone-query";
 import { getSiteUrl } from "@/lib/site-url";
 
 type ZonePageProps = {
@@ -54,12 +52,14 @@ export default async function AdventuresZonePage({ params }: ZonePageProps) {
   if (!zone) notFound();
 
   const def = zoneToDef(zone);
-  const stories = buildZoneStoryPreviewsMap()[zone.id] ?? null;
+  const zoneStories = buildZoneStoryPreviewsMap()[zone.id] ?? null;
+  const storyTitles =
+    zoneStories && zoneStories.total > 0 ? zoneStoryTitleLines(zone.id) : [];
   const meta = STATUS_META[zone.status];
 
   return (
     <>
-      {/* 爬蟲／無 JS fallback：與 overlay 同源文案 */}
+      {/* 爬蟲／無 JS fallback：島專屬文案（勿放全站統計句，避免五頁重複雜訊） */}
       <article className="sr-only">
         <h1>{zone.name}</h1>
         <p>
@@ -75,17 +75,22 @@ export default async function AdventuresZonePage({ params }: ZonePageProps) {
             </li>
           ))}
         </ul>
-        {universe.zones.length > 0 ? (
-          <p>
-            車車宇宙共有 {universe.zones.length} 座島嶼。
-          </p>
+        {storyTitles.length > 0 ? (
+          <>
+            <h2>這個島的故事</h2>
+            <ul>
+              {storyTitles.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          </>
         ) : null}
       </article>
 
       <ZoneIslandPage
         zone={def}
         hotspots={zone.hotspots}
-        zoneStories={stories}
+        zoneStories={zoneStories}
       />
     </>
   );
