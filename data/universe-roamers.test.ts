@@ -25,15 +25,14 @@ describe("universe-roamers", () => {
     }
   });
 
-  it("小紅／多多 enabled 走 map 路線", () => {
-    const routeById = new Map(ROAMER_ROUTES.map((r) => [r.id, r]));
-    for (const roamer of MAP_ROAMERS.filter(
-      (r) => r.enabled && (r.id === "roam-xiaohong" || r.id === "roam-duoduo"),
-    )) {
-      const route = routeById.get(roamer.routeId);
-      expect(route, roamer.routeId).toBeDefined();
-      expect(route!.kind).toBe("map");
-    }
+  it("已移除海上繞圈漫遊車（無 sea-orbit roamer／路線）", () => {
+    expect(MAP_ROAMERS.some((r) => r.routeId === "map-sea-orbit")).toBe(false);
+    expect(ROAMER_ROUTES.some((r) => r.id === "map-sea-orbit")).toBe(false);
+    expect(
+      MAP_ROAMERS.some(
+        (r) => r.id === "roam-xiaohong" || r.id === "roam-duoduo",
+      ),
+    ).toBe(false);
   });
 
   it("每條 route path 以 M 開頭", () => {
@@ -42,9 +41,8 @@ describe("universe-roamers", () => {
     }
   });
 
-  it("含 map-sea-orbit 與至少一條開放橋", () => {
+  it("map 路線保留開放橋（供 dev 橋線視覺化）", () => {
     const mapRoutes = ROAMER_ROUTES.filter((r) => r.kind === "map");
-    expect(mapRoutes.some((r) => r.id === "map-sea-orbit")).toBe(true);
     expect(mapRoutes.some((r) => r.id.startsWith("map-bridge-"))).toBe(true);
   });
 
@@ -112,13 +110,7 @@ describe("roamer sprites（4 向）", () => {
     expect(roamerSpriteSrc(r, "front", false)).toBe("/a/f.png");
   });
 
-  it("小紅／多多 rear 尚未到位（回退 front）；恐龍島車已有 rear", () => {
-    const mapCars = MAP_ROAMERS.filter(
-      (r) => r.id === "roam-xiaohong" || r.id === "roam-duoduo",
-    );
-    for (const roamer of mapCars) {
-      expect(roamerHasRear(roamer)).toBe(false);
-    }
+  it("恐龍島車（阿酷／怪獸卡車）已有 rear 視圖", () => {
     expect(roamerHasRear(MAP_ROAMERS.find((r) => r.id === "roam-aku")!)).toBe(true);
     expect(roamerHasRear(MAP_ROAMERS.find((r) => r.id === "roam-monster")!)).toBe(
       true,

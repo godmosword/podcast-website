@@ -9,7 +9,7 @@ vi.stubGlobal("React", React);
 const baseRoamer: Roamer = {
   id: "roam-test",
   characterId: "xiao-hong",
-  routeId: "map-sea-orbit",
+  routeId: "dino-walkway",
   speed: 30,
   src: "/adventures/roamers/xiao-hong.png",
   enabled: true,

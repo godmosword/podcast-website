@@ -24,23 +24,24 @@ const zoneStoriesFixture: ZoneStoriesBundle = {
 };
 
 describe("ZoneSheet", () => {
-  it("鎖島首屏直接呈現說明、建造進度與 softLinks（不再藏進雙層折疊）；家長內容仍收合", () => {
+  it("鎖島首屏少字更視覺化：留 childHint／進度／CTA／softLinks，整句說明移入折疊", () => {
     const zone = ZONES.find((item) => item.id === "dino")!;
     const html = renderToStaticMarkup(
       <ZoneSheet zone={zone} onClose={() => undefined} />,
     );
 
-    // 首屏可見：狀態、childHint、主 CTA、說明、建造進度、softLinks
+    // 首屏可見：狀態、childHint（短句）、主 CTA、建造進度、softLinks
     expect(html).toContain("恐龍島");
     expect(html).toContain("建造中");
     expect(html).toContain("恐龍島在長大");
     expect(html).toContain("去聽車車故事");
     expect(html).toContain('href="/stories"');
-    expect(html).toContain("恐龍島還在蓋，現在可以先聽車車故事，之後再回來逛。");
     expect(html).toContain("建造進度 60%");
     expect(html).toContain("回故事屋");
     // teaser 不入卡
     expect(html).not.toContain("恐龍園區探險故事");
+    // 整句說明（exploreNote）移入「給爸爸媽媽」折疊、首屏不出現
+    expect(html).not.toContain("恐龍島還在蓋，現在可以先聽車車故事，之後再回來逛。");
     // 家長專區仍為單層折疊、預設收合
     expect(html).toContain("給爸爸媽媽");
     expect(html).toContain('aria-expanded="false"');
@@ -50,12 +51,15 @@ describe("ZoneSheet", () => {
     expect(html).not.toContain("暱稱或 Email");
   });
 
-  it("展開「給爸爸媽媽」後顯示安心資訊與「想留一句話」許願表單", () => {
+  it("展開「給爸爸媽媽」後顯示整句說明、安心資訊與「想留一句話」許願表單", () => {
     const zone = ZONES.find((item) => item.id === "dino")!;
     render(<ZoneSheet zone={zone} onClose={() => undefined} />);
 
     fireEvent.click(screen.getByRole("button", { name: "給爸爸媽媽" }));
 
+    expect(
+      screen.getByText("恐龍島還在蓋，現在可以先聽車車故事，之後再回來逛。"),
+    ).toBeTruthy();
     expect(screen.getByText(/無廣告/)).toBeTruthy();
     expect(screen.getByText("想留一句話")).toBeTruthy();
   });

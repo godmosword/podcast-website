@@ -138,11 +138,7 @@ export default function ZoneSheet({
               </div>
             ) : null}
 
-            {zone.exploreNote ? (
-              <p className={styles.exploreNote}>{zone.exploreNote}</p>
-            ) : null}
-
-            {/* 主 CTA 緊接說明、置於故事清單之前，讓主要動作不必捲動即可見 */}
+            {/* 整句說明移入「給爸爸媽媽」；兒童首屏靠 childHint＋進度條＋大按鈕承載，少字更直觀 */}
             <nav className={styles.links} aria-label={`${zone.name}入口`}>
               <a
                 className={styles.linkBtnPrimary}
@@ -240,12 +236,6 @@ export default function ZoneSheet({
         {/* ── 未開放島：溫和導向（softLinks），首屏直接呈現 ── */}
         {!isCarPark ? (
           <>
-            {zone.status === "planned" ? (
-              <p className={styles.voteNote}>
-                這座島還在收集想法，不需要完成任務，也不急著做決定。
-              </p>
-            ) : null}
-
             {zone.softLinks && zone.softLinks.length > 0 ? (
               <nav
                 className={styles.softLinks}
@@ -284,6 +274,16 @@ export default function ZoneSheet({
 
           {parentOpen ? (
             <div id={parentPanelId} className={styles.parentPanel}>
+              {!isCarPark && zone.exploreNote ? (
+                <p className={styles.exploreNote}>{zone.exploreNote}</p>
+              ) : null}
+
+              {!isCarPark && zone.status === "planned" ? (
+                <p className={styles.voteNote}>
+                  這座島還在收集想法，不需要完成任務，也不急著做決定。
+                </p>
+              ) : null}
+
               <ParentTrustStrip variant="compact" />
 
               {!isCarPark ? (

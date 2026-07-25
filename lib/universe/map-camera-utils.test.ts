@@ -5,11 +5,14 @@ import {
   DRAG_SLOP_PX,
   FIT_MARGIN,
   INERTIA_DECAY_TAU,
+  DOUBLE_TAP_DIST_PX,
+  DOUBLE_TAP_MS,
   MAX_SCALE,
   MIN_SCALE,
   PORTRAIT_MAX_ZOOM,
   RECENTER_VISIBLE_MARGIN_PX,
   anyPointVisible,
+  isDoubleTap,
   blendVelocity,
   clampCamera,
   bucketMapScale,
@@ -252,5 +255,21 @@ describe("map-camera-utils", () => {
     expect(anyPointVisible({ scale: 1, tx: 0, ty: 0 }, 0, 0, [{ x: 99999, y: 99999 }])).toBe(
       true,
     );
+  });
+
+  it("isDoubleTap：時間與位移皆在門檻內才算雙擊", () => {
+    const prev = { t: 1000, x: 100, y: 100 };
+    // 命中：150ms、位移 5px
+    expect(isDoubleTap(prev, { t: 1150, x: 105, y: 100 })).toBe(true);
+    // 無前次點擊
+    expect(isDoubleTap(null, { t: 1150, x: 105, y: 100 })).toBe(false);
+    // 超時
+    expect(
+      isDoubleTap(prev, { t: 1000 + DOUBLE_TAP_MS + 1, x: 100, y: 100 }),
+    ).toBe(false);
+    // 超距（位移剛好達門檻視為分開）
+    expect(
+      isDoubleTap(prev, { t: 1100, x: 100 + DOUBLE_TAP_DIST_PX, y: 100 }),
+    ).toBe(false);
   });
 });

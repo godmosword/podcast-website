@@ -16,6 +16,9 @@ import {
   exceedsDragSlop,
   fitScaleFor,
   islandContentCenter,
+  isDoubleTap,
+  DOUBLE_TAP_ZOOM,
+  type TapSample,
   wheelZoomFactor,
   zoomCameraAt,
 } from "@/lib/universe/map-camera-utils";
@@ -119,6 +122,9 @@ export function useMapCamera(): MapCamera {
     lastY: number;
     dragging: boolean;
   } | null>(null);
+
+  // 雙擊/雙點放大：記錄上一次「點擊（未拖曳）」的時間與位置，用於偵測雙擊。
+  const lastTapRef = useRef<TapSample | null>(null);
 
   // rAF 批次平移：把同一幀內多次 pointermove 的增量累積。
   const pendingPanRef = useRef({ dx: 0, dy: 0 });
@@ -620,11 +626,31 @@ export function useMapCamera(): MapCamera {
       }
       velocityRef.current = { vx: 0, vy: 0 };
       lastSampleRef.current = null;
+
+      // 空白地圖上的「點擊（未拖曳）」：偵測雙擊 → 放大並置中該點（複用 flyTo 動畫）。
+      // 島本體點擊走 button（onPointerDown 已提早 return），不會進到這裡。
+      if (!wasDragging) {
+        const { left, top } = sizeRef.current;
+        const tap: TapSample = { t: performance.now(), x: e.clientX, y: e.clientY };
+        if (isDoubleTap(lastTapRef.current, tap)) {
+          lastTapRef.current = null;
+          const cam = camRef.current;
+          const ns = clampScale(cam.scale * DOUBLE_TAP_ZOOM);
+          if (ns > cam.scale + ZOOM_EPS) {
+            const stageX = (e.clientX - left - cam.tx) / cam.scale;
+            const stageY = (e.clientY - top - cam.ty) / cam.scale;
+            flyTo({ x: stageX, y: stageY }, ns);
+          }
+        } else {
+          lastTapRef.current = tap;
+        }
+      }
+
       if (wasDragging || interactingRef.current) {
         endInteracting(true);
       }
     },
-    [endInteracting, flushPan, flushZoom, startInertia],
+    [endInteracting, flushPan, flushZoom, startInertia, flyTo],
   );
 
   const onPointerUp = useCallback(

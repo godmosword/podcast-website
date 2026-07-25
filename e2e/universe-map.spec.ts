@@ -373,17 +373,17 @@ test.describe("車車宇宙樂園地圖 UX", () => {
       .toBeCloseTo(1.6, 1);
   });
 
-  test("roamer 點擊打招呼，島內 roamer 不觸發島 sheet", async ({ page }) => {
+  test("島內 roamer 點擊打招呼，且不觸發島 sheet", async ({ page }) => {
     await openMap(page, "light");
 
-    await page.locator('[data-roamer-id="roam-xiaohong"]').dispatchEvent("click");
-    await expect(page.locator('[data-roamer-id="roam-xiaohong"]')).toHaveAttribute(
+    // 海上繞圈漫遊車已移除；改由島內 roamer（恐龍島阿酷）驗證點擊打招呼。
+    await page.locator('[data-roamer-id="roam-aku"]').dispatchEvent("click");
+    await expect(page.locator('[data-roamer-id="roam-aku"]')).toHaveAttribute(
       "data-greet",
       "true",
     );
-    await expect(page.getByText("嗨！我是小紅賽車！")).toBeVisible();
-
-    await page.locator('[data-roamer-id="roam-aku"]').dispatchEvent("click");
+    await expect(page.getByText("嗨！我是阿酷鑽地車！")).toBeVisible();
+    // roamer 點擊不冒泡到島 button → 不開島 sheet。
     await expect(page.getByRole("dialog")).toHaveCount(0);
   });
 

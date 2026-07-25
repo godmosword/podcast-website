@@ -194,6 +194,28 @@ export function wheelZoomFactor(deltaY: number): number {
 /** 拖曳判定門檻（像素）：指標移動未超過此距離視為點擊、不啟動平移。 */
 export const DRAG_SLOP_PX = 8;
 
+/** 雙擊/雙點放大：兩次點擊的最大時間間隔（毫秒）。 */
+export const DOUBLE_TAP_MS = 300;
+/** 雙擊/雙點放大：兩次點擊的最大位移（螢幕 px），超過視為兩次獨立點擊。 */
+export const DOUBLE_TAP_DIST_PX = 30;
+/** 雙擊/雙點放大的縮放倍率（相對當前 scale；達 MAX_SCALE 由 flyTo 自然 no-op）。 */
+export const DOUBLE_TAP_ZOOM = 1.8;
+
+/** 一次點擊取樣（螢幕座標 + 時間戳）。 */
+export type TapSample = { t: number; x: number; y: number };
+
+/** 判定兩次點擊是否構成雙擊：時間間隔與位移皆在門檻內。 */
+export function isDoubleTap(
+  prev: TapSample | null,
+  next: TapSample,
+  maxMs: number = DOUBLE_TAP_MS,
+  maxDistPx: number = DOUBLE_TAP_DIST_PX,
+): boolean {
+  if (!prev) return false;
+  if (next.t - prev.t > maxMs) return false;
+  return exceedsDragSlop(next.x - prev.x, next.y - prev.y, maxDistPx) === false;
+}
+
 /** 判斷指標位移是否已越過拖曳門檻（用平方比較避免開根號）。 */
 export function exceedsDragSlop(
   dx: number,

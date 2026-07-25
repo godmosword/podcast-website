@@ -21,13 +21,6 @@ const DINO_WALKWAY_PATH =
 const RESCUE_WALKWAY_PATH =
   "M 80 198 C 64 158 98 122 134 116 C 168 110 190 142 190 176 C 190 204 122 214 80 198 Z";
 
-/**
- * 海面環道（stage 座標）：繞 car-park 外海、接 car-park→dino 開放橋。
- * y 略低於橋面，讓車貼海／橋視覺。
- */
-const MAP_SEA_ORBIT_PATH =
-  "M 420 455 Q 500 418 580 455 Q 650 490 580 520 Q 500 548 420 520 Q 350 488 420 455";
-
 type IslandRoamerRoute = {
   id: string;
   kind: "island";
@@ -109,33 +102,11 @@ export const ROAMER_ROUTES: RoamerRoute[] = [
     zoneId: "rescue",
     tilePath: RESCUE_WALKWAY_PATH,
   },
-  {
-    id: "map-sea-orbit",
-    kind: "map",
-    d: MAP_SEA_ORBIT_PATH,
-  },
+  // 開放橋 map 路線保留供 dev（?devRoamers=1）橋線視覺化；prod 無 map roamer 指派。
   ...buildBridgeRoutes(),
 ];
 
 export const MAP_ROAMERS: Roamer[] = [
-  {
-    id: "roam-xiaohong",
-    characterId: "xiao-hong",
-    routeId: "map-sea-orbit",
-    speed: 38,
-    src: "/adventures/roamers/xiao-hong.png",
-    enabled: true,
-    startOffset: 0,
-  },
-  {
-    id: "roam-duoduo",
-    characterId: "duo-duo",
-    routeId: "map-sea-orbit",
-    speed: 34,
-    src: "/adventures/roamers/duo-duo.png",
-    enabled: true,
-    startOffset: 0.5,
-  },
   // 恐龍島（building）：阿酷鑽地車 + 怪獸卡車
   {
     id: "roam-aku",
