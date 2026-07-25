@@ -1,0 +1,53 @@
+.body {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--ink) 62%, transparent);
+}
+
+.title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.title:focus {
+  outline: none;
+}
+
+.hint,
+.coming {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.coming {
+  font-weight: 800;
+}
+
+.cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  margin-top: 0.25rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--landing-brand) 22%, var(--card));
+  border: 1.5px solid color-mix(in srgb, var(--landing-brand) 40%, var(--line));
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.cta:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}

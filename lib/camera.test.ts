@@ -27,6 +27,12 @@ describe("targetFor", () => {
   it("無效島 id 退回 world", () => {
     expect(targetFor("/adventures/nope").key).toBe("world");
   });
+
+  it("島內 hotspot 路徑仍鎖定該島相機", () => {
+    const t = targetFor("/adventures/dino/story-house");
+    expect(t.key).toBe("island:dino");
+    expect(t.level).toBe("island");
+  });
 });
 
 describe("clamp / targetToFlyParams", () => {

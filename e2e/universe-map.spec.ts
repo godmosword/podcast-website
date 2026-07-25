@@ -380,6 +380,29 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     await expect(page.getByRole("dialog")).toBeVisible({ timeout: 3000 });
   });
 
+  test("M2：島內熱點座標層可開 modal，關閉後回島", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.addInitScript(() => {
+      window.sessionStorage.setItem("cc-universe-entry-played", "1");
+    });
+    await page.goto("/adventures/dino");
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 3000 });
+
+    const pin = page.locator('[data-hotspot-id="story-house"]');
+    await expect(pin).toBeVisible({ timeout: 3000 });
+    await pin.click();
+
+    await expect
+      .poll(() => new URL(page.url()).pathname)
+      .toBe("/adventures/dino/story-house");
+    const hotspotDialog = page.getByRole("dialog", { name: /故事屋入口/ });
+    await expect(hotspotDialog).toBeVisible({ timeout: 3000 });
+    await hotspotDialog.getByRole("button", { name: /關閉探索點/ }).click();
+    await expect
+      .poll(() => new URL(page.url()).pathname)
+      .toBe("/adventures/dino");
+  });
+
   test("島內 roamer 點擊打招呼，且不觸發島 sheet", async ({ page }) => {
     await openMap(page, "light");
 

@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { ZONE_IDS } from "@/data/universe";
 import {
   MAP_STAGE,
   ZONE_TERRAIN,
@@ -53,6 +54,7 @@ import MapControls from "./MapControls";
 import NightFireworks from "./NightFireworks";
 import SkyBodies from "./SkyBodies";
 import UniverseMapParallax from "./UniverseMapParallax";
+import HotspotLayer from "./HotspotLayer";
 import ZoneIsland from "./ZoneIsland";
 import { ENTRY_PLAYED_KEY, FLY_DURATION_MS, useMapCamera } from "./useMapCamera";
 import styles from "./UniverseMap.module.css";
@@ -92,6 +94,11 @@ function UniverseMapContent({
   const pathname = usePathname() || "/adventures";
   const cameraTarget = useMemo(() => targetFor(pathname), [pathname]);
   const onIsland = cameraTarget.level === "island";
+  const activeZoneId = useMemo<ZoneId | null>(() => {
+    if (cameraTarget.level !== "island") return null;
+    const id = cameraTarget.key.replace(/^island:/, "");
+    return ZONE_IDS.includes(id as ZoneId) ? (id as ZoneId) : null;
+  }, [cameraTarget]);
 
   // 島路徑入場：預寫 entry key 跳過進場降落動畫，避免與 flyTo 目標島互搶鏡頭。
   useState(() => {
@@ -215,6 +222,18 @@ function UniverseMapContent({
     }
     trackUniverseDayNightToggle(daylight);
   }, [daylight]);
+
+  // 世界地圖：prefetch 各島路徑，進島更快。
+  useEffect(() => {
+    if (onIsland) return;
+    for (const id of ZONE_IDS) {
+      try {
+        router.prefetch(`/adventures/${id}`);
+      } catch {
+        // ignore
+      }
+    }
+  }, [onIsland, router]);
 
   useEffect(() => {
     const onVisibility = () => setTabHidden(document.hidden);
@@ -521,6 +540,8 @@ function UniverseMapContent({
               invite={tapHintPhase === "visible" && zone.status === "open"}
             />
           ))}
+
+          {activeZoneId ? <HotspotLayer zoneId={activeZoneId} /> : null}
 
         </div>
 

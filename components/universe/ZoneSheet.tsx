@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { STATUS_META, type Hotspot } from "@/data/universe";
 import type { ZoneDef } from "@/data/universe-zones";
@@ -11,6 +12,7 @@ import {
   trackUniverseWishSubmit,
   trackWishSubmitted,
 } from "@/lib/analytics";
+import { hotspotDetailHref } from "@/lib/universe/hotspot";
 import type { ZoneStoriesBundle } from "@/lib/story-zone-query";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import ParentTrustStrip from "@/components/ParentTrustStrip";
@@ -25,10 +27,14 @@ type ZoneSheetProps = {
   zoneStories?: ZoneStoriesBundle | null;
   /** 進度中樞：孩子已聽完的集數 slug（列表打星用）。 */
   completedSlugs?: ReadonlySet<string>;
-  /** M1：島內熱點清單（座標定位留 M2；此處先可點列表）。 */
+  /** 島內熱點清單（與地圖座標層同源；點擊開 @modal）。 */
   hotspots?: readonly Hotspot[];
   /** 進入島後把焦點移到島名 h1。 */
   focusOnMount?: boolean;
+  /** 熱點 modal 開啟時關閉 sheet 的 focus trap，避免雙 trap。 */
+  suppressFocusTrap?: boolean;
+  /** 熱點 modal 開啟時標記 inert，避免背景可聚焦。 */
+  inert?: boolean;
 };
 
 /** 四段內容支柱的學齡前語意 emoji（純呈現；href 仍由 getCarParkLinks 單一資料源）。 */
@@ -46,6 +52,8 @@ export default function ZoneSheet({
   completedSlugs,
   hotspots = [],
   focusOnMount = false,
+  suppressFocusTrap = false,
+  inert = false,
 }: ZoneSheetProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -53,7 +61,9 @@ export default function ZoneSheet({
   const [parentOpen, setParentOpen] = useState(false);
   const open = zone !== null;
 
-  useFocusTrap(open, panelRef, { initialFocus: "container" });
+  useFocusTrap(open && !suppressFocusTrap, panelRef, {
+    initialFocus: "container",
+  });
 
   // 換島重置家長折疊，避免上一座島的展開狀態殘留。
   useEffect(() => {
@@ -61,19 +71,19 @@ export default function ZoneSheet({
   }, [zone?.id]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || suppressFocusTrap) return;
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  }, [open, onClose, suppressFocusTrap]);
 
   // 層級改變後聚焦島名，並靠 aria-live 播報。
   useEffect(() => {
-    if (!open || !focusOnMount) return;
+    if (!open || !focusOnMount || suppressFocusTrap) return;
     titleRef.current?.focus();
-  }, [open, focusOnMount, zone?.id]);
+  }, [open, focusOnMount, zone?.id, suppressFocusTrap]);
 
   if (!zone) return null;
 
@@ -90,12 +100,17 @@ export default function ZoneSheet({
   const isLocked = zone.status !== "open";
 
   return (
-    <div className={styles.overlay} role="presentation" onClick={onClose}>
+    <div
+      className={styles.overlay}
+      role="presentation"
+      onClick={onClose}
+      {...(inert ? { inert: true } : {})}
+    >
       <div
         ref={panelRef}
         className={styles.sheet}
         role="dialog"
-        aria-modal="true"
+        aria-modal={inert ? undefined : true}
         aria-labelledby={titleId}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
@@ -195,32 +210,23 @@ export default function ZoneSheet({
             <h2 className={styles.hotspotsHeading}>探索點</h2>
             <ul className={styles.hotspotList}>
               {hotspots.map((spot) => {
-                if (spot.action.type === "link") {
-                  return (
-                    <li key={spot.id}>
-                      <a className={styles.hotspotLink} href={spot.action.href}>
-                        {spot.name}
-                      </a>
-                    </li>
-                  );
-                }
-                if (spot.action.type === "story") {
-                  return (
-                    <li key={spot.id}>
-                      <a
-                        className={styles.hotspotLink}
-                        href={`/story/${spot.action.slug}`}
-                      >
-                        {spot.name}
-                      </a>
-                    </li>
-                  );
-                }
+                const href = hotspotDetailHref(zone.id, spot);
+                const action = spot.action;
+                const locked = action.type === "locked";
                 return (
                   <li key={spot.id}>
-                    <span className={styles.hotspotLocked}>
-                      {spot.name}（{spot.action.hint}）
-                    </span>
+                    <Link
+                      className={
+                        locked ? styles.hotspotLocked : styles.hotspotLink
+                      }
+                      href={href}
+                      prefetch
+                      scroll={false}
+                    >
+                      {locked
+                        ? `${spot.name}（${action.hint}）`
+                        : spot.name}
+                    </Link>
                   </li>
                 );
               })}

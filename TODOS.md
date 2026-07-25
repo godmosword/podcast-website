@@ -36,7 +36,7 @@
 
 - [x] M0 `data/universe.ts` 單一資料來源 + zod 驗證  `02f2a51`
 - [x] M1 `/adventures/[zone]` 路由 + `targetFor()` 相機  `e00483f`
-- [ ] M2 `@modal` 熱點層 + focus 管理 + prefetch
+- [x] M2 `@modal` 熱點層 + focus 管理 + prefetch  _(hash 待回填)_
 - [ ] M3 逐島填 hotspots（恐龍島優先）
 
 ### 本輪已完成（2026-07-25）

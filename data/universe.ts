@@ -192,7 +192,21 @@ const raw = {
         { label: "回故事屋", href: "/stories" },
         { label: "去車車樂園", href: "/" },
       ],
-      hotspots: [],
+      // M2 種子熱點（座標層／@modal 管線）；M3 再擴充恐龍島內容。
+      hotspots: [
+        {
+          id: "story-house",
+          name: "故事屋入口",
+          pos: { x: 0.38, y: 0.58 },
+          action: { type: "link", href: "/stories" },
+        },
+        {
+          id: "dino-nest",
+          name: "恐龍巢穴",
+          pos: { x: 0.64, y: 0.4 },
+          action: { type: "locked", hint: "還在蓋喔！巢穴蓋好再來玩。" },
+        },
+      ],
       bridgeFrom: "car-park",
     }),
     zoneFromLegacyPx({

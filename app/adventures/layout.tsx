@@ -7,12 +7,14 @@ const carParkTilePreload = getZoneArtSrcSet("car-park");
 
 /**
  * 樂園地圖 layout：MapStage（UniverseMap）持續掛載；
- * 子路由（世界／島）只換 children，相機由 pathname 驅動。
+ * 子路由（世界／島）只換 children；@modal 攔截熱點詳情。
  */
 export default function AdventuresLayout({
   children,
+  modal = null,
 }: {
   children: ReactNode;
+  modal?: ReactNode;
 }) {
   const zoneStoryPreviewsMap = buildZoneStoryPreviewsMap();
 
@@ -36,6 +38,7 @@ export default function AdventuresLayout({
       <UniverseMap zoneStoryPreviewsMap={zoneStoryPreviewsMap}>
         {children}
       </UniverseMap>
+      {modal}
     </main>
   );
 }

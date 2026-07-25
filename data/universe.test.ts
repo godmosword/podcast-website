@@ -110,9 +110,14 @@ describe("data/universe（M0 單一資料來源）", () => {
     expect(MAP_STAGE).toEqual({ width: 1000, height: 720 });
   });
 
-  it("hotspots 骨架存在（M1/M2 填內容）", () => {
+  it("hotspots 陣列存在；恐龍島有 M2 種子熱點", () => {
     for (const zone of universe.zones) {
       expect(Array.isArray(zone.hotspots)).toBe(true);
     }
+    const dino = universe.zones.find((z) => z.id === "dino")!;
+    expect(dino.hotspots.map((h) => h.id).sort()).toEqual([
+      "dino-nest",
+      "story-house",
+    ]);
   });
 });
