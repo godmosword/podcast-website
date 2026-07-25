@@ -34,7 +34,7 @@
 
 | ID | Commit |
 |----|--------|
-| polish(universe): 主島小紅走 car-park 步道（單車）；map 層關 bob／bank；海面不復辟 | （待 commit 回填） |
+| polish(universe): 主島小紅走 car-park 步道（單車）；map 層關 bob／bank；海面不復辟 | `0f44f7c` |
 
 ### 本輪已完成（2026-07-24）
 
