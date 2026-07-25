@@ -26,6 +26,7 @@ import {
 } from "../data/content";
 import { storyDateModified } from "../data/story-dates";
 import { episodeFaqCoverage, listEpisodeFaqSlugs } from "../data/episode-faqs";
+import { universe } from "../data/universe";
 import { podcastSeriesJsonLd } from "../lib/json-ld";
 import {
   AI_RETRIEVAL_CRAWLERS,
@@ -151,6 +152,31 @@ async function checkSitemap(stories: Story[], siteUrl: string): Promise<void> {
     } else {
       pass("sitemap URL 以 canonical site URL 開頭", siteUrl);
     }
+  }
+
+  const openZones = universe.zones.filter((z) => z.status === "open");
+  const missingOpenZones = openZones.filter(
+    (z) => ![...urls].some((u) => u.endsWith(`/adventures/${z.id}`)),
+  );
+  const closedInSitemap = universe.zones
+    .filter((z) => z.status !== "open")
+    .filter((z) => [...urls].some((u) => u.endsWith(`/adventures/${z.id}`)));
+  if (missingOpenZones.length > 0 || closedInSitemap.length > 0) {
+    fail(
+      "sitemap 涵蓋開放島且排除非開放島",
+      [
+        missingOpenZones.length
+          ? `缺少開放島：${missingOpenZones.map((z) => z.id).join(", ")}`
+          : "",
+        closedInSitemap.length
+          ? `不應出現：${closedInSitemap.map((z) => z.id).join(", ")}`
+          : "",
+      ]
+        .filter(Boolean)
+        .join("；"),
+    );
+  } else {
+    pass("sitemap 涵蓋開放島且排除非開放島", `${openZones.length} 座開放島`);
   }
 }
 
@@ -863,6 +889,18 @@ async function main(): Promise<void> {
     canonicalPath: "/about",
     titleNeedle: "關於",
   });
+
+  // 開放島頁：與 checkStaticPage 同一機制；非開放島 noindex，不納入受管檢查。
+  for (const zone of universe.zones.filter((z) => z.status === "open")) {
+    checkStaticPage({
+      label: `/adventures/${zone.id}`,
+      relativePath: `adventures/${zone.id}.html`,
+      canonicalPath: `/adventures/${zone.id}`,
+      titleNeedle: zone.name,
+      descriptionNeedle: zone.tagline,
+      requireJsonLd: false,
+    });
+  }
 
   checkHasNoindex("story/[slug]/play 頁", `story/${latestStory.slug}/play.html`);
 

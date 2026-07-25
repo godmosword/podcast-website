@@ -48,6 +48,9 @@
 | feat(universe): M2 熱點座標層 + @modal + prefetch | `e915355` |
 | feat(universe): M3 五島填滿 hotspots（恐龍島優先） | `5c6784a` |
 | polish(universe): 主島小紅走 car-park 步道（單車）；map 層關 bob／bank；海面不復辟 | `0f44f7c` |
+| fix(universe): P1 島路由接上 sitemap／llms-full／geo contract | `03e3e7c` |
+| fix(universe): P2+P3 useMapCamera isMeasured + skipEntryAnimation | `97ba2a2` |
+| fix(universe): P4+P5 cache() 與島頁 sr-only 專屬化 | `4235fc1` |
 
 ### 本輪已完成（2026-07-24）
 

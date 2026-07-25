@@ -3,11 +3,13 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import rawCharacters from "../data/characters.json";
 import { getStories } from "../data/content";
+import { universe } from "../data/universe";
 import { getSiteUrl } from "../lib/site-url";
 import {
   storyDefinitionSummary,
   storyOutlinePreviewItems,
 } from "../lib/story-geo";
+import { buildZoneStoryPreviewsMap } from "../lib/story-zone-query";
 import { llmsTranscriptBullet } from "../lib/transcript";
 
 type RawCharacter = {
@@ -105,12 +107,42 @@ export function buildLlmsFullText(options: BuildOptions = {}): string {
     .map((character) => characterLine(character, siteUrl))
     .join("\n");
 
+  const storiesBySlug = new Map(stories.map((story) => [story.slug, story]));
+  const zoneStoryMap = buildZoneStoryPreviewsMap();
+  const openZones = universe.zones.filter((zone) => zone.status === "open");
+  const zoneSections = openZones
+    .map((zone) => {
+      const bundle = zoneStoryMap[zone.id];
+      const storyBullets = (bundle?.slugs ?? [])
+        .map((slug) => storiesBySlug.get(slug))
+        .filter((story): story is NonNullable<typeof story> => Boolean(story))
+        .map((story) => `- 第 ${story.ep} 集：${story.title}`);
+      const lines = [
+        `### ${zone.name}`,
+        "",
+        zone.tagline,
+        ...(zone.childHint ? ["", zone.childHint] : []),
+        ...(zone.exploreNote ? ["", zone.exploreNote] : []),
+        "",
+        "相關故事：",
+        ...(storyBullets.length > 0 ? storyBullets : ["- （此島尚無對應故事）"]),
+        "",
+        `- 頁面 URL：${siteUrl}/adventures/${zone.id}`,
+      ];
+      return lines.join("\n");
+    })
+    .join("\n\n");
+
   return [
     readLlmsIntro(),
     "",
     "## 全部故事索引",
     "",
     storySections,
+    "",
+    "## 車車宇宙島嶼",
+    "",
+    zoneSections || "（目前無開放島嶼）",
     "",
     "## 角色索引",
     "",

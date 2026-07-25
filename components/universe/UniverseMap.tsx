@@ -56,7 +56,7 @@ import SkyBodies from "./SkyBodies";
 import UniverseMapParallax from "./UniverseMapParallax";
 import HotspotLayer from "./HotspotLayer";
 import ZoneIsland from "./ZoneIsland";
-import { ENTRY_PLAYED_KEY, FLY_DURATION_MS, useMapCamera } from "./useMapCamera";
+import { FLY_DURATION_MS, useMapCamera } from "./useMapCamera";
 import styles from "./UniverseMap.module.css";
 
 /** bottom dock 開啟時，fly-to 把島往上留出的視窗像素。 */
@@ -100,17 +100,10 @@ function UniverseMapContent({
     return ZONE_IDS.includes(id as ZoneId) ? (id as ZoneId) : null;
   }, [cameraTarget]);
 
-  // 島路徑入場：預寫 entry key 跳過進場降落動畫，避免與 flyTo 目標島互搶鏡頭。
-  useState(() => {
-    if (typeof window === "undefined") return;
-    if (!isIslandPath(window.location.pathname)) return;
-    try {
-      sessionStorage.setItem(ENTRY_PLAYED_KEY, "1");
-    } catch {
-      // sessionStorage 不可用時退回原行為
-    }
+  // 島路徑 skip 進場降落，避免與 flyTo 目標島互搶鏡頭（session key 改由 hook effect 寫入）。
+  const camera = useMapCamera({
+    skipEntryAnimation: isIslandPath(pathname),
   });
-  const camera = useMapCamera();
   const {
     flyTo: cameraFlyTo,
     reset: cameraReset,
@@ -192,11 +185,9 @@ function UniverseMapContent({
   }, [daylight]);
 
   // 相機是 pathname 的結果：進島 flyTo；離島 reset（反向動畫／reduced 則瞬間）。
-  // camera 完成首次量測前 flyTo 會 no-op：以「已離開初始姿態」判定 ready。
-  const cameraInitialized =
-    camera.scale !== 1 || camera.tx !== 0 || camera.ty !== 0;
+  // 首次 viewport 量測完成前 flyTo 會 no-op：以 isMeasured 判定 ready。
   useEffect(() => {
-    if (!cameraInitialized) return;
+    if (!camera.isMeasured) return;
     if (appliedTargetKeyRef.current === cameraTarget.key) return;
 
     if (cameraTarget.level === "island") {
@@ -213,7 +204,7 @@ function UniverseMapContent({
       return;
     }
     appliedTargetKeyRef.current = cameraTarget.key;
-  }, [cameraInitialized, cameraTarget, cameraFlyTo, cameraReset]);
+  }, [camera.isMeasured, cameraTarget, cameraFlyTo, cameraReset]);
 
   useEffect(() => {
     if (!daylightTrackedRef.current) {

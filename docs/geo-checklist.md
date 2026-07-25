@@ -10,9 +10,10 @@
 - [ ] production `https://<domain>/robots.txt` 回傳 200，且保留 AI crawler allowlist。
 - [ ] production `https://<domain>/llms.txt` 回傳 200。
 - [ ] production `https://<domain>/llms-full.txt` 回傳 200（prebuild 自動產生）。
-- [ ] production `https://<domain>/sitemap.xml` 回傳 200，含 `/for-parents`、`/characters`、全部 `/story/<slug>`。
+- [ ] production `https://<domain>/sitemap.xml` 回傳 200，含 `/for-parents`、`/characters`、全部 `/story/<slug>`、以及 `data/universe.ts` 中 `status === "open"` 的 `/adventures/<zone>`（非開放島不得出現）。
+- [ ] production `https://<domain>/llms-full.txt` 含「車車宇宙島嶼」區塊，且每個開放島有對應 `### <島名>` 與頁面 URL。
 - [ ] Google Search Console 提交 `https://<domain>/sitemap.xml`。
-- [ ] Google Search Console 對 `/for-parents`、最新單集、3 個代表單集執行 URL Inspection / Request Indexing。
+- [ ] Google Search Console 對 `/for-parents`、最新單集、3 個代表單集、一座開放島（例 `/adventures/car-park`）執行 URL Inspection / Request Indexing。
 
 ## 2. Schema 與 HTML
 

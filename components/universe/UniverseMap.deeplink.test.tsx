@@ -87,10 +87,15 @@ describe("UniverseMap 島路徑（StrictMode）", () => {
     );
   }
 
-  it("島路徑入場會預寫 entry key，跳過進場降落動畫", async () => {
+  it("島路徑 skipEntryAnimation：量測 effect 後寫入 entry key（非 render 預寫）", async () => {
+    const setItemSpy = vi.spyOn(Storage.prototype, "setItem");
     expect(sessionStorage.getItem("cc-universe-entry-played")).toBeNull();
     await renderMap();
+    // 掛上 viewport 並完成量測後才寫入；證明不再依賴 render 期 useState 副作用。
     expect(sessionStorage.getItem("cc-universe-entry-played")).toBe("1");
+    expect(
+      setItemSpy.mock.calls.some(([key]) => key === "cc-universe-entry-played"),
+    ).toBe(true);
   });
 
   it("島路徑不顯示 tap hint、也不寫 tap hint key", async () => {
