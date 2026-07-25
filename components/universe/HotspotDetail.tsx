@@ -33,7 +33,13 @@ export default function HotspotDetail({
       ) : null}
 
       {action.type === "link" ? (
-        <a className={styles.cta} href={actionHref}>
+        <a
+          className={styles.cta}
+          href={actionHref}
+          {...(/^https?:\/\//i.test(actionHref)
+            ? { target: "_blank", rel: "noopener noreferrer" }
+            : {})}
+        >
           前往：{hotspot.name}
         </a>
       ) : null}

@@ -110,14 +110,19 @@ describe("data/universe（M0 單一資料來源）", () => {
     expect(MAP_STAGE).toEqual({ width: 1000, height: 720 });
   });
 
-  it("hotspots 陣列存在；恐龍島有 M2 種子熱點", () => {
-    for (const zone of universe.zones) {
-      expect(Array.isArray(zone.hotspots)).toBe(true);
-    }
+  it("M3：五島皆有熱點；恐龍島優先最完整", () => {
+    const counts = Object.fromEntries(
+      universe.zones.map((z) => [z.id, z.hotspots.length]),
+    );
+    expect(counts["car-park"]).toBeGreaterThanOrEqual(5);
+    expect(counts.dino).toBeGreaterThanOrEqual(8);
+    expect(counts.rescue).toBeGreaterThanOrEqual(4);
+    expect(counts.ocean).toBeGreaterThanOrEqual(4);
+    expect(counts.forest).toBeGreaterThanOrEqual(3);
+
     const dino = universe.zones.find((z) => z.id === "dino")!;
-    expect(dino.hotspots.map((h) => h.id).sort()).toEqual([
-      "dino-nest",
-      "story-house",
-    ]);
+    expect(dino.hotspots.some((h) => h.id === "joke-plaza")).toBe(true);
+    expect(dino.hotspots.some((h) => h.action.type === "story")).toBe(true);
+    expect(dino.hotspots.some((h) => h.action.type === "locked")).toBe(true);
   });
 });

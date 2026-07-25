@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { zoneById } from "@/data/universe";
+import { getStory } from "@/data/content";
+import { universe, zoneById } from "@/data/universe";
 import {
   hotspotActionHref,
   hotspotById,
@@ -10,7 +11,7 @@ import {
   resolvedZoneById,
 } from "./hotspot";
 
-describe("hotspot helpers（M2）", () => {
+describe("hotspot helpers（M2/M3）", () => {
   it("hotspotPath / hotspotById", () => {
     expect(hotspotPath("dino", "story-house")).toBe(
       "/adventures/dino/story-house",
@@ -19,22 +20,40 @@ describe("hotspot helpers（M2）", () => {
     expect(hotspotById("nope", "x")).toBeNull();
   });
 
-  it("dino 種子熱點可解析且座標落在 tileBox 內", () => {
-    const zone = zoneById("dino")!;
-    expect(zone.hotspots.length).toBeGreaterThanOrEqual(2);
-    const resolved = resolvedZoneById("dino")!;
-    for (const hotspot of zone.hotspots) {
-      const found = hotspotById("dino", hotspot.id);
-      expect(found?.hotspot.name).toBe(hotspot.name);
-      const pt = hotspotToStage(resolved, hotspot);
-      expect(pt.x).toBeGreaterThanOrEqual(resolved.tileBox.left);
-      expect(pt.x).toBeLessThanOrEqual(
-        resolved.tileBox.left + resolved.tileBox.w,
-      );
-      expect(pt.y).toBeGreaterThanOrEqual(resolved.tileBox.top);
-      expect(pt.y).toBeLessThanOrEqual(
-        resolved.tileBox.top + resolved.tileBox.h,
-      );
+  it("五島熱點皆可解析且座標落在 tileBox 內；id 島內唯一", () => {
+    for (const zone of universe.zones) {
+      const resolved = resolvedZoneById(zone.id)!;
+      const ids = new Set<string>();
+      expect(zone.hotspots.length).toBeGreaterThan(0);
+      for (const hotspot of zone.hotspots) {
+        expect(ids.has(hotspot.id), `${zone.id} 重複 id ${hotspot.id}`).toBe(
+          false,
+        );
+        ids.add(hotspot.id);
+        const found = hotspotById(zone.id, hotspot.id);
+        expect(found?.hotspot.name).toBe(hotspot.name);
+        const pt = hotspotToStage(resolved, hotspot);
+        expect(pt.x).toBeGreaterThanOrEqual(resolved.tileBox.left);
+        expect(pt.x).toBeLessThanOrEqual(
+          resolved.tileBox.left + resolved.tileBox.w,
+        );
+        expect(pt.y).toBeGreaterThanOrEqual(resolved.tileBox.top);
+        expect(pt.y).toBeLessThanOrEqual(
+          resolved.tileBox.top + resolved.tileBox.h,
+        );
+      }
+    }
+  });
+
+  it("story 型熱點的 slug 皆存在於 content", () => {
+    for (const zone of universe.zones) {
+      for (const hotspot of zone.hotspots) {
+        if (hotspot.action.type !== "story") continue;
+        expect(
+          getStory(hotspot.action.slug),
+          `${zone.id}/${hotspot.id} → ${hotspot.action.slug}`,
+        ).toBeTruthy();
+      }
     }
   });
 
@@ -42,6 +61,7 @@ describe("hotspot helpers（M2）", () => {
     const zone = zoneById("dino")!;
     const hrefs = hotspotPrefetchHrefs(zone);
     expect(hrefs).toContain("/adventures/dino/story-house");
+    expect(hrefs).toContain("/story/ep-22");
     expect(hrefs.some((h) => h === "/stories" || h.startsWith("/story/"))).toBe(
       true,
     );

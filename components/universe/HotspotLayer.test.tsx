@@ -49,8 +49,11 @@ describe("HotspotLayer", () => {
     );
   });
 
-  it("無熱點的島不渲染層", () => {
-    const { container } = render(<HotspotLayer zoneId="ocean" />);
-    expect(container.innerHTML).toBe("");
+  it("其他島（海洋）也渲染 M3 熱點", () => {
+    render(<HotspotLayer zoneId="ocean" />);
+    expect(
+      screen.getByLabelText("打開水上樂園門口").getAttribute("href"),
+    ).toBe("/adventures/ocean/wave-park");
+    expect(screen.getByLabelText("夢想碼頭（尚未開放）")).toBeTruthy();
   });
 });
