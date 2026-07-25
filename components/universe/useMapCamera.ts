@@ -29,7 +29,10 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 export const FLY_DURATION_MS = 600;
 /** 進場降落動畫：起始鏡頭相對 fit 的倍率（從高空俯瞰整個群島再飛向主島）。 */
 const ENTRY_START_FACTOR = 0.55;
-/** 每個分頁 session 只播一次進場動畫，回訪不重播；深連結入場會預寫此 key 跳過進場（見 UniverseMap）。 */
+/**
+ * 每個分頁 session 只播一次進場動畫，回訪不重播。
+ * 寫入僅在量測 effect 內（播完進場或 `skipEntryAnimation` 時），禁止 render 期預寫。
+ */
 export const ENTRY_PLAYED_KEY = "cc-universe-entry-played";
 const ZOOM_EPS = 0.0001;
 /** 滾輪手勢結束判定：靜止超過此時長才 commit／解除 interacting。 */
@@ -40,6 +43,14 @@ type Camera = CameraPose;
 type FlyToOptions = {
   /** 視窗像素：正值把舞台往下推（島在畫面上移，留給底部 dock）。 */
   viewportOffsetY?: number;
+};
+
+export type UseMapCameraOptions = {
+  /**
+   * 為 true 時跳過首訪進場降落動畫（島路徑深連結用），
+   * 並在量測 effect 標記 ENTRY_PLAYED_KEY，避免離島後重播。
+   */
+  skipEntryAnimation?: boolean;
 };
 
 const CAR_PARK =
@@ -66,6 +77,11 @@ export type MapCamera = {
   scale: number;
   tx: number;
   ty: number;
+  /**
+   * 首次取得有效 viewport 尺寸後為 true。
+   * 深連結 flyTo 應等此旗標，勿用姿態啟發式（fit 後可能恰為 1,0,0）。
+   */
+  isMeasured: boolean;
   isAnimating: boolean;
   /** 拖曳／pinch／滾輪／慣性進行中；供地圖降載動畫。 */
   isInteracting: boolean;
@@ -94,19 +110,23 @@ function shouldCommitReact(prev: Camera, next: Camera): boolean {
   return false;
 }
 
-export function useMapCamera(): MapCamera {
+export function useMapCamera(options: UseMapCameraOptions = {}): MapCamera {
   const reduced = useReducedMotion();
   const [cam, setCam] = useState<Camera>({ scale: 1, tx: 0, ty: 0 });
   const [animating, setAnimating] = useState(false);
   const [interacting, setInteracting] = useState(false);
   const [idleEpoch, setIdleEpoch] = useState(0);
   const [viewportEl, setViewportEl] = useState<HTMLDivElement | null>(null);
+  const [isMeasured, setIsMeasured] = useState(false);
 
   const camRef = useRef<Camera>(cam);
   const visualApplierRef = useRef<CameraVisualApplier | null>(null);
   const animatingRef = useRef(false);
   const sizeRef = useRef({ w: 0, h: 0, left: 0, top: 0 });
   const initializedRef = useRef(false);
+  const isMeasuredRef = useRef(false);
+  const skipEntryAnimationRef = useRef(Boolean(options.skipEntryAnimation));
+  skipEntryAnimationRef.current = Boolean(options.skipEntryAnimation);
   const pointersRef = useRef(new Map<number, { x: number; y: number }>());
   const prevPinchRef = useRef<{ dist: number } | null>(null);
   const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -378,6 +398,14 @@ export function useMapCamera(): MapCamera {
       left: rect.left,
       top: rect.top,
     };
+    if (
+      !isMeasuredRef.current &&
+      rect.width > 0 &&
+      rect.height > 0
+    ) {
+      isMeasuredRef.current = true;
+      setIsMeasured(true);
+    }
     return rect;
   }, []);
 
@@ -392,13 +420,21 @@ export function useMapCamera(): MapCamera {
         const ns = fitScaleFor(rect.width, rect.height);
 
         // 進場降落：首次進園從高空俯瞰整個群島，再飛向主島（每 session 一次）。
+        // 島路徑以 skipEntryAnimation 跳過，不依賴 render 期預寫 sessionStorage。
+        const skipEntry = skipEntryAnimationRef.current;
         let playEntry = false;
-        if (!reduced) {
+        if (!reduced && !skipEntry) {
           try {
             playEntry = !sessionStorage.getItem(ENTRY_PLAYED_KEY);
             if (playEntry) sessionStorage.setItem(ENTRY_PLAYED_KEY, "1");
           } catch {
             playEntry = false;
+          }
+        } else if (skipEntry) {
+          try {
+            sessionStorage.setItem(ENTRY_PLAYED_KEY, "1");
+          } catch {
+            // sessionStorage 不可用時仍跳過進場
           }
         }
 
@@ -668,6 +704,7 @@ export function useMapCamera(): MapCamera {
     scale: cam.scale,
     tx: cam.tx,
     ty: cam.ty,
+    isMeasured,
     isAnimating: animating,
     isInteracting: interacting,
     idleEpoch,
