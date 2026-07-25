@@ -51,6 +51,9 @@
 | fix(universe): P1 島路由接上 sitemap／llms-full／geo contract | `03e3e7c` |
 | fix(universe): P2+P3 useMapCamera isMeasured + skipEntryAnimation | `97ba2a2` |
 | fix(universe): P4+P5 cache() 與島頁 sr-only 專屬化 | `4235fc1` |
+| fix(universe): A 修正 reset 目標為島群中心 | `86f043d` |
+| fix(universe): B flyTo durationMs 參數化，雙擊縮放 250ms | `6665989` |
+| fix(universe): C sheetReady 閘門，選單等待鏡頭飛抵 | `ae76480` |
 
 ### 本輪已完成（2026-07-24）
 
