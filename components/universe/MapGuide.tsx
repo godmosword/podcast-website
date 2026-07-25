@@ -1,8 +1,9 @@
 import {
-  ZONE_STATUS_META,
-  type ZoneDef,
+  STATUS_META,
+  statusCounts,
   type ZoneStatus,
-} from "@/data/universe-zones";
+} from "@/data/universe";
+import type { ZoneDef } from "@/data/universe-zones";
 import styles from "./MapGuide.module.css";
 
 const STATUS_ORDER: ZoneStatus[] = ["open", "building", "coming", "planned"];
@@ -13,14 +14,11 @@ type MapGuideProps = {
 
 /**
  * 地圖固定的「第一眼說明」：讓孩子不必等一次性泡泡，也能理解地圖怎麼玩。
- * 狀態數量由 zones 資料推導，新增島嶼時不需要同步修改 UI 文案或計數。
+ * 狀態數量經 `statusCounts` 推導（與 `data/universe` 同源）。
  */
 export default function MapGuide({ zones }: MapGuideProps) {
-  const counts = zones.reduce<Partial<Record<ZoneStatus, number>>>((acc, zone) => {
-    acc[zone.status] = (acc[zone.status] ?? 0) + 1;
-    return acc;
-  }, {});
-  const openCount = counts.open ?? 0;
+  const counts = statusCounts(zones);
+  const openCount = counts.open;
 
   return (
     <aside
@@ -37,9 +35,9 @@ export default function MapGuide({ zones }: MapGuideProps) {
       <p className={styles.instruction}>點一座島，看看現在能做什麼</p>
       <ul className={styles.legend} aria-label="島嶼狀態圖例">
         {STATUS_ORDER.map((status) => {
-          const count = counts[status] ?? 0;
+          const count = counts[status];
           if (count === 0) return null;
-          const meta = ZONE_STATUS_META[status];
+          const meta = STATUS_META[status];
           return (
             <li key={status} className={styles.legendItem}>
               <span aria-hidden="true">{meta.icon}</span>

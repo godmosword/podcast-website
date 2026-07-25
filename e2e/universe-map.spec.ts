@@ -271,12 +271,12 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     await expect(hint).toHaveCount(0);
   });
 
-  test("deep link ?zone=dino 不顯示 tap hint", async ({ page }) => {
+  test("深連結 /adventures/dino 不顯示 tap hint", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.addInitScript(() => {
       window.sessionStorage.removeItem("cc-universe-tap-hint-shown");
     });
-    await page.goto("/adventures?zone=dino");
+    await page.goto("/adventures/dino");
 
     await expect(page.getByRole("dialog")).toBeVisible({ timeout: 3000 });
     await expect(page.getByRole("status")).toHaveCount(0);
@@ -308,17 +308,17 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     ).toBeInViewport();
   });
 
-  test("deep link ?zone=dino 開 sheet，關閉後移除 query（與點擊語意等價）", async ({ page }) => {
+  test("深連結 /adventures/dino 開 overlay，關閉後回到世界地圖", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.addInitScript(() => {
       window.sessionStorage.setItem("cc-universe-entry-played", "1");
     });
-    await page.goto("/adventures?zone=dino");
+    await page.goto("/adventures/dino");
 
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible({ timeout: 3000 });
     await expect(dialog).toContainText("恐龍島");
-    expect(new URL(page.url()).searchParams.get("zone")).toBe("dino");
+    expect(new URL(page.url()).pathname).toBe("/adventures/dino");
 
     // 鏡頭真的飛到目標島（FOCUS_SCALE=1.6），而非停在 car-park fit（≈0.9）。
     await expect
@@ -328,37 +328,32 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     await dialog.getByRole("button", { name: /關閉/ }).click();
     await expect(dialog).toHaveCount(0);
     await expect
-      .poll(() => new URL(page.url()).searchParams.get("zone"))
-      .toBeNull();
+      .poll(() => new URL(page.url()).pathname)
+      .toBe("/adventures");
   });
 
-  test("關閉 sheet 後同一 mount 內再進同深連結，可再開（門閂重置）", async ({ page }) => {
+  test("關閉 overlay 後再進同島路徑，可再開（layout 保活）", async ({ page }) => {
     await openMap(page, "light");
 
-    // 站內第二次深連結：Next App Router 會同步 history.pushState 的 search params。
-    await page.evaluate(() => {
-      window.history.pushState(null, "", "/adventures?zone=dino");
-    });
+    await page.getByRole("button", { name: /恐龍島，建造中/ }).click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible({ timeout: 3000 });
     await dialog.getByRole("button", { name: /關閉/ }).click();
     await expect(dialog).toHaveCount(0);
-    // 等 closeSheet 的 router.replace 落地，避免與下一次 pushState 競態。
     await expect
-      .poll(() => new URL(page.url()).searchParams.get("zone"))
-      .toBeNull();
+      .poll(() => new URL(page.url()).pathname)
+      .toBe("/adventures");
 
-    await page.evaluate(() => {
-      window.history.pushState(null, "", "/adventures?zone=dino");
-    });
+    await page.getByRole("button", { name: /恐龍島，建造中/ }).click();
     await expect(dialog).toBeVisible({ timeout: 3000 });
     await expect(dialog).toContainText("恐龍島");
+    expect(new URL(page.url()).pathname).toBe("/adventures/dino");
   });
 
-  test("首訪帶 ?zone= 跳過進場動畫，鏡頭不被拉回車庫", async ({ page }) => {
-    // 不預寫 entry-played：驗證 deep link 入場會自行抑制進場降落動畫。
+  test("首訪帶島路徑跳過進場動畫，鏡頭不被拉回車庫", async ({ page }) => {
+    // 不預寫 entry-played：驗證島路徑入場會自行抑制進場降落動畫。
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/adventures?zone=dino");
+    await page.goto("/adventures/dino");
 
     await expect(page.getByRole("dialog")).toBeVisible({ timeout: 3000 });
     await expect(page.getByRole("dialog")).toContainText("恐龍島");
@@ -371,6 +366,41 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     await expect
       .poll(async () => scaleFromTransform(await stageTransform(page)))
       .toBeCloseTo(1.6, 1);
+  });
+
+  test("舊 ?zone=dino 永久導向 /adventures/dino", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.addInitScript(() => {
+      window.sessionStorage.setItem("cc-universe-entry-played", "1");
+    });
+    await page.goto("/adventures?zone=dino");
+    await expect
+      .poll(() => new URL(page.url()).pathname)
+      .toBe("/adventures/dino");
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 3000 });
+  });
+
+  test("M2：島內熱點座標層可開 modal，關閉後回島", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.addInitScript(() => {
+      window.sessionStorage.setItem("cc-universe-entry-played", "1");
+    });
+    await page.goto("/adventures/dino");
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 3000 });
+
+    const pin = page.locator('[data-hotspot-id="story-house"]');
+    await expect(pin).toBeVisible({ timeout: 3000 });
+    await pin.click();
+
+    await expect
+      .poll(() => new URL(page.url()).pathname)
+      .toBe("/adventures/dino/story-house");
+    const hotspotDialog = page.getByRole("dialog", { name: /故事屋入口/ });
+    await expect(hotspotDialog).toBeVisible({ timeout: 3000 });
+    await hotspotDialog.getByRole("button", { name: /關閉探索點/ }).click();
+    await expect
+      .poll(() => new URL(page.url()).pathname)
+      .toBe("/adventures/dino");
   });
 
   test("島內 roamer 點擊打招呼，且不觸發島 sheet", async ({ page }) => {

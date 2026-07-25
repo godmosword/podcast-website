@@ -13,7 +13,7 @@ export default function ZoneBadge({ zoneId }: Props) {
 
   return (
     <Link
-      href={`/adventures?zone=${zoneId}`}
+      href={`/adventures/${zoneId}`}
       className={styles.badge}
       aria-label={`這個故事發生在${zone.name}，在樂園地圖上查看`}
     >

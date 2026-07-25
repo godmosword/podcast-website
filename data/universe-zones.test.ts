@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { LANDING_SEGMENT_IDS } from "./landing-segments";
+import { universe, worldToStage } from "./universe";
 import {
   MAP_STAGE,
   ZONE_IDS,
@@ -10,6 +11,16 @@ import {
 } from "./universe-zones";
 
 describe("universe-zones", () => {
+  it("ZONES 由 universe 衍生且 px 與 worldToStage 一致", () => {
+    expect(ZONES).toHaveLength(universe.zones.length);
+    for (const zone of universe.zones) {
+      const def = ZONES.find((z) => z.id === zone.id)!;
+      expect(def.coord).toEqual(worldToStage(zone.world));
+      expect(def.teaser).toBe(zone.tagline);
+      expect(def.artTile).toBe(zone.sprite);
+    }
+  });
+
   it("ZONE_IDS 唯一且與 ZONES 對應", () => {
     expect(new Set(ZONE_IDS).size).toBe(ZONE_IDS.length);
     expect(ZONES.length).toBe(ZONE_IDS.length);

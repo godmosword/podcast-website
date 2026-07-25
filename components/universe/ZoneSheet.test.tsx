@@ -38,8 +38,9 @@ describe("ZoneSheet", () => {
     expect(html).toContain('href="/stories"');
     expect(html).toContain("建造進度 60%");
     expect(html).toContain("回故事屋");
-    // teaser 不入卡
-    expect(html).not.toContain("恐龍園區探險故事");
+    // M1：tagline（舊 teaser）入卡，供 SSR／島內摘要
+    expect(html).toContain("恐龍園區探險故事");
+    expect(html).toContain("敬請期待");
     // 整句說明（exploreNote）移入「給爸爸媽媽」折疊、首屏不出現
     expect(html).not.toContain("恐龍島還在蓋，現在可以先聽車車故事，之後再回來逛。");
     // 家長專區仍為單層折疊、預設收合

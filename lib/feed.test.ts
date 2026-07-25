@@ -97,7 +97,7 @@ describe("buildRssFeed", () => {
     });
     const xml = buildRssFeed([withZone]);
     expect(xml).toContain(
-      "📍 在樂園地圖上看：https://example.com/adventures?zone=car-park",
+      "📍 在樂園地圖上看：https://example.com/adventures/car-park",
     );
     vi.unstubAllEnvs();
   });
@@ -111,6 +111,7 @@ describe("buildRssFeed", () => {
     });
     const xml = buildRssFeed([without]);
     expect(xml).not.toContain("/adventures?zone=");
+    expect(xml).not.toContain("/adventures/car-park"); // 無 zone 的集不該出現地圖句
   });
 
   it("僅場景 captions、無 subtitles 側車時不輸出 transcript", () => {

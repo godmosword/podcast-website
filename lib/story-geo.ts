@@ -150,7 +150,7 @@ export function familyActivityShowNote(story: Story): string | null {
 /** RSS show notes 末段的樂園地圖深連結；無 zoneId 回傳 null。 */
 export function storyZoneMapShowNote(story: Story): string | null {
   if (!story.zoneId) return null;
-  return `📍 在樂園地圖上看：${getSiteUrl()}/adventures?zone=${story.zoneId}`;
+  return `📍 在樂園地圖上看：${getSiteUrl()}/adventures/${story.zoneId}`;
 }
 
 /** 併入 FAQPage JSON-LD 的親子延伸 Q&A；無 familyActivity 回傳 null。 */

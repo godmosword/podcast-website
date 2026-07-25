@@ -1,0 +1,87 @@
+.layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.pin,
+.pinLocked {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0.2rem;
+  border: none;
+  background: transparent;
+  text-decoration: none;
+  color: inherit;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.pin:focus-visible,
+.pinLocked:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+  border-radius: 12px;
+}
+
+.dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ff8c2b;
+  border: 2.5px solid #fff8ef;
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--ink) 18%, transparent);
+}
+
+.pinLocked .dot {
+  background: #c4b5a0;
+}
+
+.label {
+  max-width: 7.5rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--ink) 10%, transparent);
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pin .dot {
+    animation: hotspot-pulse 1.8s ease-in-out infinite;
+  }
+}
+
+@keyframes hotspot-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 0.9;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pin .dot {
+    animation: none;
+  }
+}
