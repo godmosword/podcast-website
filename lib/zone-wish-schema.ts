@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { ZONE_IDS, type ZoneId } from "@/data/universe-zones";
+import { ZONE_IDS } from "@/data/universe";
 
-const zoneIdSchema = z.enum(ZONE_IDS as [ZoneId, ...ZoneId[]]);
+const zoneIdSchema = z.enum(ZONE_IDS);
 
 const WISH_CATEGORIES = ["feature", "story"] as const;
 export type WishCategory = (typeof WISH_CATEGORIES)[number];

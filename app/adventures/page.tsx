@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import UniverseMap from "@/components/universe/UniverseMap";
-import { ZONE_STATUS_META, ZONES } from "@/data/universe-zones";
+import { STATUS_META, universe } from "@/data/universe";
 import { getCarParkLinks } from "@/lib/universe-map";
 import { buildZoneStoryPreviewsMap } from "@/lib/story-zone-query";
 import { getZoneArtSrcSet } from "@/lib/universe/zone-art-src";
@@ -49,12 +49,12 @@ export default function AdventuresPage() {
       {/* 無障礙 / SEO fallback：SVG 對爬蟲不透明，提供純文字島嶼清單 */}
       <nav className="sr-only" aria-label="島嶼清單">
         <ul>
-          {ZONES.map((zone) => {
-            const meta = ZONE_STATUS_META[zone.status];
+          {universe.zones.map((zone) => {
+            const meta = STATUS_META[zone.status];
             const isCarPark = (zone.subSegmentIds?.length ?? 0) > 0;
             return (
               <li key={zone.id}>
-                {zone.name}（{meta.label}）：{zone.teaser}
+                {zone.name}（{meta.label}）：{zone.tagline}
                 {isCarPark ? (
                   <ul>
                     {carParkLinks.map((link) => (

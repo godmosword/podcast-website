@@ -30,6 +30,15 @@
 | 4 | [Growth-Measure-1](#growth-measure-1-成長量測) SoundOn 回鏈 | ops/growth | S | ✅ `42a9d38` |
 | 5 | [UX-P1-2](#兒童-ux-與親子互動稽核2026-07-11) 詳情頁反思收合 | ux | S | ✅ `42a9d38` |
 
+### 宇宙巢狀導覽（M0–M3）
+
+> URL 為導覽唯一來源：世界地圖 → `/adventures/[zone]`。座標 0–1（runtime 轉 px）。
+
+- [x] M0 `data/universe.ts` 單一資料來源 + zod 驗證  _(hash 待回填)_
+- [ ] M1 `/adventures/[zone]` 路由 + `targetFor()` 相機
+- [ ] M2 `@modal` 熱點層 + focus 管理 + prefetch
+- [ ] M3 逐島填 hotspots（恐龍島優先）
+
 ### 本輪已完成（2026-07-25）
 
 | ID | Commit |
