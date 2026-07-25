@@ -12,6 +12,7 @@ const replaceMock = vi.fn();
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: replaceMock, prefetch: vi.fn() }),
+  usePathname: () => "/adventures",
   useSearchParams: () => new URLSearchParams(""),
 }));
 

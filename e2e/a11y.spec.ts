@@ -61,7 +61,7 @@ test("a11y：宇宙地圖開 sheet 無 critical/serious 違規", async ({ page }
   await page.addInitScript(() => {
     window.sessionStorage.setItem("cc-universe-entry-played", "1");
   });
-  await page.goto("/adventures?zone=dino");
+  await page.goto("/adventures/dino");
   await expect(page.getByRole("dialog")).toBeVisible({ timeout: 3000 });
 
   const results = await new AxeBuilder({ page })

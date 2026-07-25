@@ -35,7 +35,7 @@
 > URL 為導覽唯一來源：世界地圖 → `/adventures/[zone]`。座標 0–1（runtime 轉 px）。
 
 - [x] M0 `data/universe.ts` 單一資料來源 + zod 驗證  `02f2a51`
-- [ ] M1 `/adventures/[zone]` 路由 + `targetFor()` 相機
+- [x] M1 `/adventures/[zone]` 路由 + `targetFor()` 相機  _(hash 待回填)_
 - [ ] M2 `@modal` 熱點層 + focus 管理 + prefetch
 - [ ] M3 逐島填 hotspots（恐龍島優先）
 

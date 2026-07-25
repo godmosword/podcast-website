@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { ZONE_STATUS_META, type ZoneDef } from "@/data/universe-zones";
+import { STATUS_META, type Hotspot } from "@/data/universe";
+import type { ZoneDef } from "@/data/universe-zones";
 import type { LandingSegmentId } from "@/data/landing-segments";
 import { getCarParkLinks } from "@/lib/universe-map";
 import { notifyMailto } from "@/lib/contact";
@@ -24,6 +25,10 @@ type ZoneSheetProps = {
   zoneStories?: ZoneStoriesBundle | null;
   /** 進度中樞：孩子已聽完的集數 slug（列表打星用）。 */
   completedSlugs?: ReadonlySet<string>;
+  /** M1：島內熱點清單（座標定位留 M2；此處先可點列表）。 */
+  hotspots?: readonly Hotspot[];
+  /** 進入島後把焦點移到島名 h1。 */
+  focusOnMount?: boolean;
 };
 
 /** 四段內容支柱的學齡前語意 emoji（純呈現；href 仍由 getCarParkLinks 單一資料源）。 */
@@ -39,8 +44,11 @@ export default function ZoneSheet({
   onClose,
   zoneStories,
   completedSlugs,
+  hotspots = [],
+  focusOnMount = false,
 }: ZoneSheetProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const titleId = useId();
   const [parentOpen, setParentOpen] = useState(false);
   const open = zone !== null;
@@ -61,9 +69,15 @@ export default function ZoneSheet({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
+  // 層級改變後聚焦島名，並靠 aria-live 播報。
+  useEffect(() => {
+    if (!open || !focusOnMount) return;
+    titleRef.current?.focus();
+  }, [open, focusOnMount, zone?.id]);
+
   if (!zone) return null;
 
-  const meta = ZONE_STATUS_META[zone.status];
+  const meta = STATUS_META[zone.status];
   const isCarPark = (zone.subSegmentIds?.length ?? 0) > 0;
   const carParkLinks = isCarPark ? getCarParkLinks() : [];
   const notifyHref = notifyMailto(zone.name);
@@ -73,6 +87,7 @@ export default function ZoneSheet({
     !isCarPark &&
     zone.status === "building" &&
     typeof zone.buildProgress === "number";
+  const isLocked = zone.status !== "open";
 
   return (
     <div className={styles.overlay} role="presentation" onClick={onClose}>
@@ -85,6 +100,10 @@ export default function ZoneSheet({
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
+        <p className="sr-only" aria-live="polite">
+          已進入{zone.name}
+        </p>
+
         <IconButton
           type="button"
           className={styles.close}
@@ -100,9 +119,14 @@ export default function ZoneSheet({
             <ZoneLandmark zoneId={zone.id} status={zone.status} artTile={zone.artTile} />
           </span>
           <div>
-            <h2 id={titleId} className={styles.title}>
+            <h1
+              id={titleId}
+              ref={titleRef}
+              className={styles.title}
+              tabIndex={-1}
+            >
               {zone.name}
-            </h2>
+            </h1>
             <span
               className={styles.pill}
               style={{ background: meta.pillBg, color: meta.pillInk }}
@@ -111,6 +135,8 @@ export default function ZoneSheet({
             </span>
           </div>
         </div>
+
+        <p className={styles.tagline}>{zone.teaser}</p>
 
         {/* ── 未開放島：首屏直接說清楚（不再藏進「給爸爸媽媽」雙層折疊） ── */}
         {!isCarPark ? (
@@ -138,6 +164,10 @@ export default function ZoneSheet({
               </div>
             ) : null}
 
+            {isLocked ? (
+              <p className={styles.comingSoon}>敬請期待</p>
+            ) : null}
+
             {/* 整句說明移入「給爸爸媽媽」；兒童首屏靠 childHint＋進度條＋大按鈕承載，少字更直觀 */}
             <nav className={styles.links} aria-label={`${zone.name}入口`}>
               <a
@@ -147,8 +177,55 @@ export default function ZoneSheet({
               >
                 去聽車車故事
               </a>
+              {isLocked ? (
+                <a
+                  className={styles.linkBtnSecondary}
+                  href={notifyHref}
+                  onClick={() => trackUniverseSheetLink(zone.id, notifyHref)}
+                >
+                  通知我開幕
+                </a>
+              ) : null}
             </nav>
           </>
+        ) : null}
+
+        {hotspots.length > 0 ? (
+          <nav className={styles.hotspots} aria-label={`${zone.name}探索點`}>
+            <h2 className={styles.hotspotsHeading}>探索點</h2>
+            <ul className={styles.hotspotList}>
+              {hotspots.map((spot) => {
+                if (spot.action.type === "link") {
+                  return (
+                    <li key={spot.id}>
+                      <a className={styles.hotspotLink} href={spot.action.href}>
+                        {spot.name}
+                      </a>
+                    </li>
+                  );
+                }
+                if (spot.action.type === "story") {
+                  return (
+                    <li key={spot.id}>
+                      <a
+                        className={styles.hotspotLink}
+                        href={`/story/${spot.action.slug}`}
+                      >
+                        {spot.name}
+                      </a>
+                    </li>
+                  );
+                }
+                return (
+                  <li key={spot.id}>
+                    <span className={styles.hotspotLocked}>
+                      {spot.name}（{spot.action.hint}）
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
         ) : null}
 
         {/* ── 故事清單（開放島與已有故事的鎖島共用）；第一集標「最新」 ── */}
@@ -259,6 +336,15 @@ export default function ZoneSheet({
             ) : null}
           </>
         ) : null}
+
+        <button
+          type="button"
+          className={styles.homeBtn}
+          onClick={onClose}
+          aria-label="回樂園"
+        >
+          回樂園
+        </button>
 
         {/* ── 「給爸爸媽媽」（單層折疊）：只留家長內容——安心資訊 + 鎖島許願 ── */}
         <div className={styles.parentDisclosure}>

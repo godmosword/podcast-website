@@ -1,32 +1,28 @@
 // @vitest-environment jsdom
 import React, { StrictMode } from "react";
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { FLY_DURATION_MS } from "./useMapCamera";
 import { TAP_HINT_KEY } from "./UniverseMap";
 
-// StrictMode 會模擬「掛載→卸載→重掛載」把 effect 跑兩輪；本測試鎖定
-// deep-link 門閂在該情境下仍能開 sheet（TODOS「?zone= dev 不開 sheet」回歸）。
+// M1：深連結改為 /adventures/[zone]；MapStage 跟 pathname 飛鏡頭，overlay 由子路由渲染。
 
-const replaceMock = vi.fn();
+const pushMock = vi.fn();
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn(), replace: replaceMock, prefetch: vi.fn() }),
-  useSearchParams: () => new URLSearchParams("zone=dino"),
+  useRouter: () => ({ push: pushMock, replace: vi.fn(), prefetch: vi.fn() }),
+  usePathname: () => "/adventures/dino",
+  useSearchParams: () => new URLSearchParams(""),
 }));
 
 vi.mock("@/lib/sfx", () => ({ playSfx: vi.fn() }));
 
-// jsdom 無 SVG getTotalLength：roamer 模擬非本測試對象，直接空殼化。
 vi.mock("./MapRoamerLayer", () => ({ default: () => null }));
 vi.mock("./IslandRoamerLayer", () => ({ default: () => null }));
-// jsdom canvas.toDataURL 回 null，webp 偵測非本測試對象。
 vi.mock("@/hooks/useWebpSupported", () => ({ useWebpSupported: () => false }));
 
 function stubBrowserApis() {
   vi.stubGlobal("React", React);
-  // camera ready gate 依賴首次量測非零尺寸；jsdom 預設回 0×0。
   vi.spyOn(Element.prototype, "getBoundingClientRect").mockReturnValue({
     width: 1280,
     height: 800,
@@ -66,54 +62,45 @@ function stubBrowserApis() {
   );
 }
 
-describe("UniverseMap deep link（StrictMode）", () => {
+describe("UniverseMap 島路徑（StrictMode）", () => {
   beforeEach(() => {
     stubBrowserApis();
     sessionStorage.clear();
-    window.history.replaceState(null, "", "/adventures?zone=dino");
-    vi.useFakeTimers();
+    window.history.replaceState(null, "", "/adventures/dino");
+    pushMock.mockClear();
   });
 
   afterEach(() => {
     cleanup();
-    vi.useRealTimers();
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
 
-  async function renderMap() {
+  async function renderMap(children?: React.ReactNode) {
     const { default: UniverseMap } = await import("./UniverseMap");
     render(
       <StrictMode>
         <ThemeProvider>
-          <UniverseMap />
+          <UniverseMap>{children}</UniverseMap>
         </ThemeProvider>
       </StrictMode>,
     );
   }
 
-  it("StrictMode 雙 effect 下 ?zone=dino 仍在 fly 之後開 sheet", async () => {
-    await renderMap();
-
-    expect(screen.queryByRole("dialog")).toBeNull();
-
-    await act(async () => {
-      vi.advanceTimersByTime(FLY_DURATION_MS + 50);
-    });
-
-    const dialog = screen.getByRole("dialog");
-    expect(dialog.textContent).toContain("恐龍島");
-  });
-
-  it("深連結入場會預寫 entry key，跳過進場降落動畫", async () => {
+  it("島路徑入場會預寫 entry key，跳過進場降落動畫", async () => {
     expect(sessionStorage.getItem("cc-universe-entry-played")).toBeNull();
     await renderMap();
     expect(sessionStorage.getItem("cc-universe-entry-played")).toBe("1");
   });
 
-  it("深連結入場不顯示 tap hint、也不寫 tap hint key", async () => {
+  it("島路徑不顯示 tap hint、也不寫 tap hint key", async () => {
     await renderMap();
     expect(screen.queryByRole("status")).toBeNull();
     expect(sessionStorage.getItem(TAP_HINT_KEY)).toBeNull();
+  });
+
+  it("島路徑 children（overlay）會掛在地圖內", async () => {
+    await renderMap(<div role="dialog">恐龍島</div>);
+    expect(screen.getByRole("dialog").textContent).toContain("恐龍島");
   });
 });

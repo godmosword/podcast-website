@@ -1,8 +1,24 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { MAP_STAGE, ZONE_TERRAIN, type ZoneDef, type ZoneId, type ZoneStatus } from "@/data/universe-zones";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import {
+  MAP_STAGE,
+  ZONE_TERRAIN,
+  type ZoneDef,
+  type ZoneId,
+  type ZoneStatus,
+} from "@/data/universe-zones";
+import { isIslandPath, targetFor, targetToFlyParams } from "@/lib/camera";
 import { resolveUniverseMap } from "@/lib/universe-map";
 import {
   RECENTER_IDLE_MS,
@@ -16,7 +32,6 @@ import {
 } from "@/lib/universe/map-camera-visual";
 import { getZoneArtTile } from "@/lib/universe/zone-art-tile";
 import { parseDevStatusOverrides } from "@/lib/universe/dev-map-flags";
-import { parseZoneDeepLink, parseZoneDeepLinkFromSearch } from "@/lib/universe/zone-deep-link";
 import type { ZoneStoriesBundle } from "@/lib/story-zone-query";
 import { mapDepthZ } from "@/lib/universe-depth";
 import { seaTexturePath } from "@/lib/universe/map-art-src";
@@ -39,12 +54,8 @@ import NightFireworks from "./NightFireworks";
 import SkyBodies from "./SkyBodies";
 import UniverseMapParallax from "./UniverseMapParallax";
 import ZoneIsland from "./ZoneIsland";
-import ZoneSheet from "./ZoneSheet";
 import { ENTRY_PLAYED_KEY, FLY_DURATION_MS, useMapCamera } from "./useMapCamera";
 import styles from "./UniverseMap.module.css";
-
-/** 點島後放大到的目標倍率。 */
-const FOCUS_SCALE = 1.6;
 
 /** bottom dock 開啟時，fly-to 把島往上留出的視窗像素。 */
 const FOCUS_DOCK_OFFSET_Y = 96;
@@ -58,58 +69,49 @@ const TAP_HINT_TTL_MS = 8000;
 /** 首訪提示狀態：pending→visible→dismissed；key 僅在 dismissed 寫入。 */
 type TapHintPhase = "pending" | "visible" | "dismissed";
 
-/**
- * 地圖互動狀態機（單一事實來源）：
- * idle（漫遊）→ flying（fly-to 中、sheet 已排程）→ sheet（介紹開啟）。
- * 取代舊的三個命令式門閂（focusedOpenZoneRef／openTimerRef／deepLinkHandledRef）——
- * 點島、深連結、拖曳取消全部走同一個模型，孩子看到的規則只有一條：
- * 「點任何島 → 飛過去 → 打開介紹」。
- */
-type MapInteraction =
-  | { phase: "idle" }
-  | { phase: "flying"; zone: ZoneDef }
-  | { phase: "sheet"; zone: ZoneDef };
-
 type MapContentProps = {
   devStatusOverrides: Partial<Record<ZoneId, ZoneStatus>>;
-  zoneQuery: string | null;
-  syncZoneQuery: (zoneId: ZoneId | null) => void;
   zoneStoryPreviewsMap: Record<ZoneId, ZoneStoriesBundle>;
+  children?: ReactNode;
 };
 
 function UniverseMapContent({
   devStatusOverrides,
-  zoneQuery,
-  syncZoneQuery,
   zoneStoryPreviewsMap,
+  children,
 }: MapContentProps) {
   // useMemo 錨定引用：resolveUniverseMap 每次呼叫都產新 zone 物件，
   // 不錨定的話 memo(ZoneIsland) 會被每 tick 全新的 zone prop 擊穿。
   const { zones, bridges, viewBox } = useMemo(() => resolveUniverseMap(), []);
-  // 進度中樞：孩子聽完的集數（localStorage，mount 後才讀）→ 各島星章與 sheet 打勾
+  // 進度中樞：孩子聽完的集數（localStorage，mount 後才讀）→ 各島星章
   const completedSlugs = useCompletedSlugs();
   const zoneProgress = useMemo(
     () => computeZoneProgress(zoneStoryPreviewsMap, completedSlugs),
     [zoneStoryPreviewsMap, completedSlugs],
   );
-  // 深連結入場：預寫 entry key 跳過進場降落動畫，避免與 flyTo 目標島互搶鏡頭
-  // （兩者共用 FLY_DURATION_MS 時序）。必須在 useMapCamera 首次量測 effect 讀取
-  // sessionStorage 之前寫入，故放 useState 初始化器（render 期一次、StrictMode 幂等）。
+  const pathname = usePathname() || "/adventures";
+  const cameraTarget = useMemo(() => targetFor(pathname), [pathname]);
+  const onIsland = cameraTarget.level === "island";
+
+  // 島路徑入場：預寫 entry key 跳過進場降落動畫，避免與 flyTo 目標島互搶鏡頭。
   useState(() => {
     if (typeof window === "undefined") return;
-    if (!parseZoneDeepLinkFromSearch(window.location.search)) return;
+    if (!isIslandPath(window.location.pathname)) return;
     try {
       sessionStorage.setItem(ENTRY_PLAYED_KEY, "1");
     } catch {
-      // sessionStorage 不可用時退回原行為（進場動畫照播，deep link 仍會開 sheet）
+      // sessionStorage 不可用時退回原行為
     }
   });
   const camera = useMapCamera();
-  // 穩定的 flyTo 引用（useCallback，不隨 pointer-move 每 tick 重建的 camera 物件
-  // 一起變動）；供下方多個 callback 當依賴，避免每次平移都重建它們並連鎖重渲染
-  // ZoneIsland（ZoneIsland 已 memo）。deep-link effect 沿用同一個解構值。
-  const { flyTo: cameraFlyTo, bindVisual, getCam, idleEpoch, isInteracting } =
-    camera;
+  const {
+    flyTo: cameraFlyTo,
+    reset: cameraReset,
+    bindVisual,
+    getCam,
+    idleEpoch,
+    isInteracting,
+  } = camera;
   const reduced = useReducedMotion();
   const webpSupported = useWebpSupported();
   const { theme: daylight } = useTheme();
@@ -125,15 +127,11 @@ function UniverseMapContent({
   const [mapInView, setMapInView] = useState(true);
   // 手勢中暫停漫遊／裝飾動畫，把主執行緒留給鏡頭合成。
   const paused = tabHidden || !mapInView || isInteracting;
-  const [interaction, setInteraction] = useState<MapInteraction>({ phase: "idle" });
-  // 供事件回呼／effect 讀「當下」狀態而不把 interaction 加進依賴（避免關 sheet
-  // 時 deep-link effect 因狀態變動重跑、拿著尚未清掉的 query 又把 sheet 開回來）。
-  const interactionRef = useRef(interaction);
-  interactionRef.current = interaction;
-  const activeZone = interaction.phase === "sheet" ? interaction.zone : null;
   /** 迷路自救：viewport 元素引用（量測可見性用；camera.bind.ref 之外的旁支引用）。 */
   const viewportElRef = useRef<HTMLDivElement | null>(null);
-  // 首訪底部提示（2A）：screen-space、deep link 不顯示；dismiss 才寫 session key。
+  // 已套用的相機目標 key（避免 StrictMode／重渲染重複 fly）。
+  const appliedTargetKeyRef = useRef<string | null>(null);
+  // 首訪底部提示：screen-space；島路徑不顯示；dismiss 才寫 session key。
   const [tapHintPhase, setTapHintPhase] = useState<TapHintPhase>("pending");
   const tapHintScheduledRef = useRef(false);
 
@@ -148,7 +146,7 @@ function UniverseMapContent({
 
   useEffect(() => {
     if (tapHintScheduledRef.current) return;
-    if (parseZoneDeepLinkFromSearch(window.location.search)) {
+    if (isIslandPath(window.location.pathname)) {
       setTapHintPhase("dismissed");
       return;
     }
@@ -166,10 +164,15 @@ function UniverseMapContent({
   }, []);
 
   useEffect(() => {
+    if (onIsland && tapHintPhase === "visible") dismissTapHint();
+  }, [onIsland, tapHintPhase, dismissTapHint]);
+
+  useEffect(() => {
     if (tapHintPhase !== "visible") return;
     const timer = setTimeout(dismissTapHint, TAP_HINT_TTL_MS);
     return () => clearTimeout(timer);
   }, [tapHintPhase, dismissTapHint]);
+
   // 夜海貼圖惰性載入：首次切到夜晚才掛 pattern，日間不下載 sea-night.png；
   // 掛上後保持常駐，讓日夜切換仍有 600ms crossfade。
   const [nightSeaMounted, setNightSeaMounted] = useState(false);
@@ -181,57 +184,29 @@ function UniverseMapContent({
     if (daylight === "night") setNightSeaMounted(true);
   }, [daylight]);
 
-  const closeSheet = useCallback(() => {
-    setInteraction({ phase: "idle" });
-    syncZoneQuery(null);
-  }, [syncZoneQuery]);
-
-  const revealSheet = useCallback(
-    (zone: ZoneDef) => {
-      setInteraction({ phase: "sheet", zone });
-      syncZoneQuery(zone.id);
-    },
-    [syncZoneQuery],
-  );
-
-  /** 單一開島入口：fly-to 並進入 flying（reduced-motion 直接開 sheet）。 */
-  const openZone = useCallback(
-    (zone: ZoneDef) => {
-      cameraFlyTo(zone.coord, FOCUS_SCALE, { viewportOffsetY: FOCUS_DOCK_OFFSET_Y });
-      if (reduced) {
-        revealSheet(zone);
-      } else {
-        setInteraction({ phase: "flying", zone });
-      }
-    },
-    [cameraFlyTo, reduced, revealSheet],
-  );
-
-  // flying → sheet 的排程走 effect：StrictMode 模擬卸載會 cleanup 再重排（幂等），
-  // 使用者拖曳把狀態切回 idle 時 cleanup 自動取消，無需手動管 timer ref。
-  useEffect(() => {
-    if (interaction.phase !== "flying") return;
-    const zone = interaction.zone;
-    const timer = setTimeout(() => revealSheet(zone), FLY_DURATION_MS);
-    return () => clearTimeout(timer);
-  }, [interaction, revealSheet]);
-
-  // 深連結開 sheet：與點島同一條狀態機路徑（openZone）。
-  // 依賴不含 interaction——關 sheet 時 query 尚未同步清掉，
-  // 若依賴狀態會立刻重跑把 sheet 開回來；改由 interactionRef 讀當下值。
-  // camera 完成首次量測前（sizeRef 0×0）flyTo 會 no-op：以「已離開初始姿態」
-  // 判定 ready，未 ready 先不開，等量測 setCam 的 commit 觸發本 effect 重跑再飛。
+  // 相機是 pathname 的結果：進島 flyTo；離島 reset（反向動畫／reduced 則瞬間）。
+  // camera 完成首次量測前 flyTo 會 no-op：以「已離開初始姿態」判定 ready。
   const cameraInitialized =
     camera.scale !== 1 || camera.tx !== 0 || camera.ty !== 0;
   useEffect(() => {
-    const zone = parseZoneDeepLink(zoneQuery);
-    if (!zone) return;
     if (!cameraInitialized) return;
-    const current = interactionRef.current;
-    // 已在飛往／已開同一座島 → 冪等跳過（StrictMode 雙跑、sheet 開啟後 query 回寫）。
-    if (current.phase !== "idle" && current.zone.id === zone.id) return;
-    openZone(zone);
-  }, [cameraInitialized, openZone, zoneQuery]);
+    if (appliedTargetKeyRef.current === cameraTarget.key) return;
+
+    if (cameraTarget.level === "island") {
+      appliedTargetKeyRef.current = cameraTarget.key;
+      const { coord, scale } = targetToFlyParams(cameraTarget);
+      cameraFlyTo(coord, scale, { viewportOffsetY: FOCUS_DOCK_OFFSET_Y });
+      return;
+    }
+
+    // 世界層：若上一目標是島，才 reset（保留首訪進場動畫由 useMapCamera 處理）。
+    if (appliedTargetKeyRef.current?.startsWith("island:")) {
+      appliedTargetKeyRef.current = cameraTarget.key;
+      cameraReset();
+      return;
+    }
+    appliedTargetKeyRef.current = cameraTarget.key;
+  }, [cameraInitialized, cameraTarget, cameraFlyTo, cameraReset]);
 
   useEffect(() => {
     if (!daylightTrackedRef.current) {
@@ -259,7 +234,10 @@ function UniverseMapContent({
     };
   }, []);
 
-  /** 統一點擊語意（Q5）：點任何島（含鎖島本體）→ fly-to＋開介紹 sheet。 */
+  /**
+   * 點島只改路由（M1 不變式）；相機由 pathname → targetFor 驅動。
+   * 手動 pan／zoom 不寫 URL。
+   */
   const handleActivate = useCallback(
     (zone: ZoneDef) => {
       if (tapHintPhase === "visible") dismissTapHint();
@@ -281,34 +259,18 @@ function UniverseMapContent({
         }
       }
 
-      // 連點加速：已在飛往同島途中再點一次 → 立即開 sheet，不重排 600ms。
-      const current = interactionRef.current;
-      if (current.phase === "flying" && current.zone.id === zone.id) {
-        revealSheet(zone);
-        return;
-      }
-
-      openZone(zone);
+      router.push(`/adventures/${zone.id}`);
     },
-    [dismissTapHint, openZone, revealSheet, router, tapHintPhase],
+    [dismissTapHint, router, tapHintPhase],
   );
 
-  /** 使用者拖曳打斷 fly-to、或主動改鏡頭（縮放／重置／方向鍵）時，取消尚未開啟的 sheet。 */
-  const cancelPendingReveal = useCallback(() => {
-    if (interactionRef.current.phase === "flying") {
-      setInteraction({ phase: "idle" });
+  const goWorld = useCallback(() => {
+    if (onIsland) {
+      router.push("/adventures");
+      return;
     }
-  }, []);
-
-  // wheel／觸控板縮放走 useMapCamera 內部監聽（非 React 事件），這裡補一個
-  // 平行監聽讓「主動改鏡頭 → 取消尚未開啟的 sheet」語意涵蓋滾輪（diff 審 HIGH）。
-  useEffect(() => {
-    const el = viewportElRef.current;
-    if (!el) return;
-    const onWheel = () => cancelPendingReveal();
-    el.addEventListener("wheel", onWheel, { passive: true });
-    return () => el.removeEventListener("wheel", onWheel);
-  }, [cancelPendingReveal]);
+    cameraReset();
+  }, [onIsland, router, cameraReset]);
 
   // 鏡頭視覺外置：連續 zoom／pan 只寫 DOM，不重跑本元件。
   useEffect(() => {
@@ -358,16 +320,14 @@ function UniverseMapContent({
   }, [nightSeaMounted, getCam, camera.isAnimating, reduced]);
 
   // 迷路自救（A′ 馴化鏡頭）：訂閱 idleEpoch（手勢結束），勿訂閱每幀 cam。
-  // fly-to 動畫中不檢查；結束後 idleEpoch 會再 bump。
-  const { reset: cameraReset } = camera;
+  // 島內路徑不自救（孩子正在看 overlay）；fly-to 動畫中不檢查。
   useEffect(() => {
-    if (camera.isAnimating) return;
+    if (camera.isAnimating || onIsland) return;
     const timer = setTimeout(() => {
       const el = viewportElRef.current;
       if (!el) return;
       const rect = el.getBoundingClientRect();
       if (rect.width === 0 || rect.height === 0) return;
-      if (interactionRef.current.phase !== "idle") return;
       const cam = getCam();
       const coords = zones.map((zone) => zone.coord);
       if (!anyPointVisible(cam, rect.width, rect.height, coords)) {
@@ -375,7 +335,7 @@ function UniverseMapContent({
       }
     }, RECENTER_IDLE_MS);
     return () => clearTimeout(timer);
-  }, [camera.isAnimating, idleEpoch, cameraReset, getCam, zones]);
+  }, [camera.isAnimating, idleEpoch, cameraReset, getCam, zones, onIsland]);
 
   const handleMapKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
@@ -383,39 +343,33 @@ function UniverseMapContent({
         case "+":
         case "=":
           e.preventDefault();
-          cancelPendingReveal();
           // 與控制列同一步進：放大略大、縮小略溫和，避免一次跳太兇
           camera.zoomBy(0.32);
           break;
         case "-":
         case "_":
           e.preventDefault();
-          cancelPendingReveal();
           camera.zoomBy(-0.24);
           break;
         case "ArrowUp":
           e.preventDefault();
-          cancelPendingReveal();
           camera.panBy(0, 80);
           break;
         case "ArrowDown":
           e.preventDefault();
-          cancelPendingReveal();
           camera.panBy(0, -80);
           break;
         case "ArrowLeft":
           e.preventDefault();
-          cancelPendingReveal();
           camera.panBy(80, 0);
           break;
         case "ArrowRight":
           e.preventDefault();
-          cancelPendingReveal();
           camera.panBy(-80, 0);
           break;
       }
     },
-    [camera, cancelPendingReveal],
+    [camera],
   );
 
   const sceneClass = [styles.scene, paused ? styles.paused : ""].filter(Boolean).join(" ");
@@ -423,7 +377,7 @@ function UniverseMapContent({
   // 海面貼圖：screen-space CSS 平鋪，不放進被 transform 的 stage。
   // 鏡頭 background-position/size 由 bindVisual 命令式更新（T3b），避免 zoom 卡頓。
 
-  return (
+  const mapSection = (
     <section ref={sectionRef} className={styles.map} aria-label="車車宇宙樂園地圖">
       <div className={styles.nightSeaOverlay} aria-hidden="true" />
 
@@ -438,10 +392,7 @@ function UniverseMapContent({
         aria-label="車車樂園互動地圖：方向鍵平移，加減鍵或右下角按鈕縮放"
         aria-describedby="universe-map-guide"
         onKeyDown={handleMapKeyDown}
-        onPointerDown={(e) => {
-          if (!(e.target as Element).closest("button")) cancelPendingReveal();
-          camera.bind.onPointerDown(e);
-        }}
+        onPointerDown={camera.bind.onPointerDown}
         onPointerMove={camera.bind.onPointerMove}
         onPointerUp={camera.bind.onPointerUp}
         onPointerCancel={camera.bind.onPointerCancel}
@@ -628,39 +579,40 @@ function UniverseMapContent({
       <MapControls
         onReset={() => {
           playSfx("tap");
-          cancelPendingReveal();
-          camera.reset();
+          goWorld();
         }}
         onZoomIn={() => {
           playSfx("tap");
-          cancelPendingReveal();
           camera.zoomBy(0.32);
         }}
         onZoomOut={() => {
           playSfx("tap");
-          cancelPendingReveal();
           camera.zoomBy(-0.24);
         }}
         canZoomIn={camera.canZoomIn}
         canZoomOut={camera.canZoomOut}
       />
 
-      <ZoneSheet
-        zone={activeZone}
-        onClose={closeSheet}
-        zoneStories={
-          activeZone ? (zoneStoryPreviewsMap[activeZone.id] ?? null) : null
-        }
-        completedSlugs={completedSlugs}
-      />
+      {/* 島內 overlay：由 /adventures/[zone] 經 layout children 傳入 */}
+      {onIsland ? children : null}
     </section>
+  );
+
+  return (
+    <>
+      {mapSection}
+      {/* 世界層 children（sr-only 清單等）；島層已塞進 map 內 absolute overlay */}
+      {!onIsland ? children : null}
+    </>
   );
 }
 
 function UniverseMapWithDevFlags({
   zoneStoryPreviewsMap,
+  children,
 }: {
   zoneStoryPreviewsMap: Record<ZoneId, ZoneStoriesBundle>;
+  children?: ReactNode;
 }) {
   const params = useSearchParams();
   const devStatusOverrides =
@@ -668,48 +620,37 @@ function UniverseMapWithDevFlags({
       ? parseDevStatusOverrides(`?${params.toString()}`)
       : {};
 
-  const syncZoneQuery = useCallback(
-    (zoneId: ZoneId | null) => {
-      const next = new URLSearchParams(params.toString());
-      if (zoneId) next.set("zone", zoneId);
-      else next.delete("zone");
-      const q = next.toString();
-      const href = q ? `/adventures?${q}` : "/adventures";
-      // Keep the address bar synchronous with the sheet state. This also
-      // avoids a production-only delay where navigation can leave a
-      // static route's old search params visible for several seconds.
-      window.history.replaceState(null, "", href);
-    },
-    [params],
-  );
-
   return (
     <UniverseMapContent
       devStatusOverrides={devStatusOverrides}
-      zoneQuery={params.get("zone")}
-      syncZoneQuery={syncZoneQuery}
       zoneStoryPreviewsMap={zoneStoryPreviewsMap}
-    />
+    >
+      {children}
+    </UniverseMapContent>
   );
 }
 
 export default function UniverseMap({
   zoneStoryPreviewsMap = {} as Record<ZoneId, ZoneStoriesBundle>,
+  children,
 }: {
   zoneStoryPreviewsMap?: Record<ZoneId, ZoneStoriesBundle>;
+  children?: ReactNode;
 }) {
   return (
     <Suspense
       fallback={
         <UniverseMapContent
           devStatusOverrides={{}}
-          zoneQuery={null}
-          syncZoneQuery={() => undefined}
           zoneStoryPreviewsMap={zoneStoryPreviewsMap}
-        />
+        >
+          {children}
+        </UniverseMapContent>
       }
     >
-      <UniverseMapWithDevFlags zoneStoryPreviewsMap={zoneStoryPreviewsMap} />
+      <UniverseMapWithDevFlags zoneStoryPreviewsMap={zoneStoryPreviewsMap}>
+        {children}
+      </UniverseMapWithDevFlags>
     </Suspense>
   );
 }

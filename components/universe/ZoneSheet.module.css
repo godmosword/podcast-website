@@ -107,6 +107,112 @@
   font-weight: 800;
 }
 
+.title:focus {
+  outline: none;
+}
+
+.tagline {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--ink) 72%, transparent);
+}
+
+.comingSoon {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.linkBtnSecondary {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.55rem 0.8rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 6%, var(--card));
+  border: 1.5px solid color-mix(in srgb, var(--ink) 12%, var(--line));
+}
+
+.linkBtnSecondary:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.hotspots {
+  margin: 0 0 0.85rem;
+}
+
+.hotspotsHeading {
+  margin: 0 0 0.4rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.hotspotList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.hotspotLink,
+.hotspotLocked {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.45rem 0.7rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.hotspotLink {
+  text-decoration: none;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--landing-brand) 12%, var(--card));
+}
+
+.hotspotLink:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.hotspotLocked {
+  color: color-mix(in srgb, var(--ink) 65%, transparent);
+  background: color-mix(in srgb, var(--ink) 5%, var(--card));
+}
+
+.homeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  margin: 0 0 0.85rem;
+  padding: 0.55rem 0.8rem;
+  border: 1.5px solid color-mix(in srgb, var(--landing-brand) 35%, var(--line));
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--landing-brand) 14%, var(--card));
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.homeBtn:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
 .pill {
   display: inline-block;
   font-size: 12px;

@@ -140,7 +140,7 @@ describe("familyActivity 輸出 helpers", () => {
     const story = getStory("ep-1");
     expect(story?.zoneId).toBe("car-park");
     expect(storyZoneMapShowNote(story!)).toBe(
-      "📍 在樂園地圖上看：https://example.com/adventures?zone=car-park",
+      "📍 在樂園地圖上看：https://example.com/adventures/car-park",
     );
     vi.unstubAllEnvs();
   });
