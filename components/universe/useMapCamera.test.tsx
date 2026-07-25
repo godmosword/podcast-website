@@ -1,11 +1,13 @@
 // @vitest-environment jsdom
-import React from "react";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import React, { useEffect } from "react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { clampCamera, fitScaleFor, islandContentCenter } from "@/lib/universe/map-camera-utils";
 import {
   ENTRY_PLAYED_KEY,
+  FLY_DURATION_MS,
   useMapCamera,
+  type CameraVisualMeta,
   type UseMapCameraOptions,
 } from "./useMapCamera";
 
@@ -87,6 +89,40 @@ function ResetHarness() {
       </button>
       <button type="button" onClick={() => camera.reset()}>
         重置鏡頭
+      </button>
+    </div>
+  );
+}
+
+function FlyDurationHarness({
+  durationMs,
+  onAnimatingMeta,
+}: {
+  durationMs?: number;
+  onAnimatingMeta?: (meta: CameraVisualMeta) => void;
+}) {
+  const { bind, bindVisual, isMeasured, isAnimating, flyTo, scale } =
+    useMapCamera({ skipEntryAnimation: true });
+
+  useEffect(() => {
+    bindVisual((_pose, meta) => {
+      if (meta.isAnimating) onAnimatingMeta?.(meta);
+    });
+    return () => bindVisual(null);
+  }, [bindVisual, onAnimatingMeta]);
+
+  return (
+    <div
+      data-testid="viewport"
+      ref={bind.ref}
+      data-measured={isMeasured ? "1" : "0"}
+      data-animating={isAnimating ? "1" : "0"}
+    >
+      <button
+        type="button"
+        onClick={() => flyTo({ x: 120, y: 140 }, scale * 1.2, { durationMs })}
+      >
+        飛行
       </button>
     </div>
   );
@@ -176,5 +212,72 @@ describe("useMapCamera", () => {
     const ty = Number(viewport.getAttribute("data-ty"));
     expect(tx).toBeCloseTo(expected.tx, 5);
     expect(ty).toBeCloseTo(expected.ty, 5);
+  });
+
+  it("flyTo 帶 durationMs 時，isAnimating 在該時長後轉 false", async () => {
+    const customMs = 320;
+    stubBrowserApis();
+    render(<FlyDurationHarness durationMs={customMs} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("viewport").getAttribute("data-measured")).toBe("1");
+    });
+
+    vi.useFakeTimers();
+
+    fireEvent.click(screen.getByRole("button", { name: "飛行" }));
+    expect(screen.getByTestId("viewport").getAttribute("data-animating")).toBe("1");
+
+    act(() => {
+      vi.advanceTimersByTime(customMs - 1);
+    });
+    expect(screen.getByTestId("viewport").getAttribute("data-animating")).toBe("1");
+
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(screen.getByTestId("viewport").getAttribute("data-animating")).toBe("0");
+
+    vi.useRealTimers();
+  });
+
+  it("bindVisual meta.flyDurationMs 等於本次飛行實際時長（預設）", async () => {
+    const captured: CameraVisualMeta[] = [];
+    stubBrowserApis();
+    render(
+      <FlyDurationHarness
+        onAnimatingMeta={(meta) => {
+          captured.push({ ...meta });
+        }}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("viewport").getAttribute("data-measured")).toBe("1");
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "飛行" }));
+    expect(captured.some((m) => m.flyDurationMs === FLY_DURATION_MS)).toBe(true);
+    expect(FLY_DURATION_MS).toBe(450);
+  });
+
+  it("bindVisual meta.flyDurationMs 等於自訂 durationMs", async () => {
+    const captured: CameraVisualMeta[] = [];
+    stubBrowserApis();
+    render(
+      <FlyDurationHarness
+        durationMs={250}
+        onAnimatingMeta={(meta) => {
+          captured.push({ ...meta });
+        }}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("viewport").getAttribute("data-measured")).toBe("1");
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "飛行" }));
+    expect(captured.some((m) => m.flyDurationMs === 250)).toBe(true);
   });
 });

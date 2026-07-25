@@ -26,7 +26,7 @@ import type { CameraPose } from "@/lib/universe/map-camera-visual";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 /** fly-to 過場時間（毫秒），與 CSS transition 對齊。 */
-export const FLY_DURATION_MS = 600;
+export const FLY_DURATION_MS = 450;
 /** 進場降落動畫：起始鏡頭相對 fit 的倍率（從高空俯瞰整個群島再飛向主島）。 */
 const ENTRY_START_FACTOR = 0.55;
 /**
@@ -43,6 +43,8 @@ type Camera = CameraPose;
 type FlyToOptions = {
   /** 視窗像素：正值把舞台往下推（島在畫面上移，留給底部 dock）。 */
   viewportOffsetY?: number;
+  /** 飛行過場毫秒；預設 FLY_DURATION_MS。 */
+  durationMs?: number;
 };
 
 export type UseMapCameraOptions = {
@@ -64,9 +66,14 @@ type MapCameraBind = {
   onPointerCancel: (e: React.PointerEvent<HTMLDivElement>) => void;
 };
 
+export type CameraVisualMeta = {
+  isAnimating: boolean;
+  flyDurationMs: number;
+};
+
 export type CameraVisualApplier = (
   cam: Camera,
-  meta: { isAnimating: boolean },
+  meta: CameraVisualMeta,
 ) => void;
 
 export type MapCamera = {
@@ -90,6 +97,8 @@ export type MapCamera = {
   bindVisual: (applier: CameraVisualApplier | null) => void;
   /** 讀取最新鏡頭（含尚未 commit 到 React 的視覺幀）。 */
   getCam: () => Camera;
+  /** 讀取本次 fly-to 的 transition 時長（毫秒）。 */
+  getFlyDurationMs: () => number;
   flyTo: (coord: ZoneCoord, targetScale?: number, options?: FlyToOptions) => void;
   reset: () => void;
   zoomBy: (delta: number) => void;
@@ -126,6 +135,8 @@ export function useMapCamera(options: UseMapCameraOptions = {}): MapCamera {
   const pointersRef = useRef(new Map<number, { x: number; y: number }>());
   const prevPinchRef = useRef<{ dist: number } | null>(null);
   const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** 本次 fly-to 的 CSS transition 時長（毫秒）。 */
+  const flyDurationMsRef = useRef(FLY_DURATION_MS);
   const wheelIdleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const interactingRef = useRef(false);
 
@@ -156,18 +167,28 @@ export function useMapCamera(options: UseMapCameraOptions = {}): MapCamera {
   const inertiaRafRef = useRef<number | null>(null);
 
   const paintVisual = useCallback((next: Camera) => {
-    visualApplierRef.current?.(next, { isAnimating: animatingRef.current });
+    visualApplierRef.current?.(next, {
+      isAnimating: animatingRef.current,
+      flyDurationMs: flyDurationMsRef.current,
+    });
   }, []);
 
   const bindVisual = useCallback(
     (applier: CameraVisualApplier | null) => {
       visualApplierRef.current = applier;
-      if (applier) applier(camRef.current, { isAnimating: animatingRef.current });
+      if (applier) {
+        applier(camRef.current, {
+          isAnimating: animatingRef.current,
+          flyDurationMs: flyDurationMsRef.current,
+        });
+      }
     },
     [],
   );
 
   const getCam = useCallback(() => camRef.current, []);
+
+  const getFlyDurationMs = useCallback(() => flyDurationMsRef.current, []);
 
   const setViewportInteractingAttr = useCallback(
     (on: boolean) => {
@@ -353,6 +374,8 @@ export function useMapCamera(options: UseMapCameraOptions = {}): MapCamera {
       const next = clampCam({ scale: ns, tx, ty });
       // 先開啟 transition，再寫 transform，CSS 才會插值。
       if (!reduced) {
+        const durationMs = options?.durationMs ?? FLY_DURATION_MS;
+        flyDurationMsRef.current = durationMs;
         animatingRef.current = true;
         setAnimating(true);
         if (animTimerRef.current) clearTimeout(animTimerRef.current);
@@ -361,7 +384,7 @@ export function useMapCamera(options: UseMapCameraOptions = {}): MapCamera {
           setAnimating(false);
           paintVisual(camRef.current);
           setIdleEpoch((n) => n + 1);
-        }, FLY_DURATION_MS);
+        }, durationMs);
       }
       publishCam(next, "commit");
     },
@@ -671,7 +694,7 @@ export function useMapCamera(options: UseMapCameraOptions = {}): MapCamera {
           if (ns > cam.scale + ZOOM_EPS) {
             const stageX = (e.clientX - left - cam.tx) / cam.scale;
             const stageY = (e.clientY - top - cam.ty) / cam.scale;
-            flyTo({ x: stageX, y: stageY }, ns);
+            flyTo({ x: stageX, y: stageY }, ns, { durationMs: 250 });
           }
         } else {
           lastTapRef.current = tap;
@@ -715,6 +738,7 @@ export function useMapCamera(options: UseMapCameraOptions = {}): MapCamera {
     },
     bindVisual,
     getCam,
+    getFlyDurationMs,
     flyTo,
     reset,
     zoomBy,

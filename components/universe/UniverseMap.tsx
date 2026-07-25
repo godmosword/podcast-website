@@ -56,7 +56,7 @@ import SkyBodies from "./SkyBodies";
 import UniverseMapParallax from "./UniverseMapParallax";
 import HotspotLayer from "./HotspotLayer";
 import ZoneIsland from "./ZoneIsland";
-import { FLY_DURATION_MS, useMapCamera } from "./useMapCamera";
+import { useMapCamera } from "./useMapCamera";
 import styles from "./UniverseMap.module.css";
 
 /** bottom dock 開啟時，fly-to 把島往上留出的視窗像素。 */
@@ -109,6 +109,7 @@ function UniverseMapContent({
     reset: cameraReset,
     bindVisual,
     getCam,
+    getFlyDurationMs,
     idleEpoch,
     isInteracting,
   } = camera;
@@ -287,7 +288,7 @@ function UniverseMapContent({
     bindVisual((pose, meta) => {
       const visualMeta = {
         isAnimating: meta.isAnimating,
-        flyDurationMs: FLY_DURATION_MS,
+        flyDurationMs: meta.flyDurationMs,
         reducedMotion: reducedRef.current,
       };
       applyStageCamera(stageElRef.current, pose, visualMeta);
@@ -297,8 +298,8 @@ function UniverseMapContent({
         // 夜海保留 opacity crossfade；勿被海面 fly transition 整段覆寫掉。
         seaNightElRef.current.style.transition = [
           visualMeta.isAnimating
-            ? `background-position ${FLY_DURATION_MS}ms cubic-bezier(0.22, 1, 0.36, 1), ` +
-              `background-size ${FLY_DURATION_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`
+            ? `background-position ${meta.flyDurationMs}ms cubic-bezier(0.22, 1, 0.36, 1), ` +
+              `background-size ${meta.flyDurationMs}ms cubic-bezier(0.22, 1, 0.36, 1)`
             : null,
           "opacity 600ms ease",
         ]
@@ -313,21 +314,22 @@ function UniverseMapContent({
   // 夜海首次掛載後補寫目前鏡頭（bindVisual 當時 ref 尚為 null）。
   useEffect(() => {
     if (!nightSeaMounted || !seaNightElRef.current) return;
+    const flyMs = getFlyDurationMs();
     applySeaCamera(seaNightElRef.current, getCam(), {
       isAnimating: camera.isAnimating,
-      flyDurationMs: FLY_DURATION_MS,
+      flyDurationMs: flyMs,
       reducedMotion: reduced,
     });
     seaNightElRef.current.style.transition = [
       camera.isAnimating
-        ? `background-position ${FLY_DURATION_MS}ms cubic-bezier(0.22, 1, 0.36, 1), ` +
-          `background-size ${FLY_DURATION_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`
+        ? `background-position ${flyMs}ms cubic-bezier(0.22, 1, 0.36, 1), ` +
+          `background-size ${flyMs}ms cubic-bezier(0.22, 1, 0.36, 1)`
         : null,
       "opacity 600ms ease",
     ]
       .filter(Boolean)
       .join(", ");
-  }, [nightSeaMounted, getCam, camera.isAnimating, reduced]);
+  }, [nightSeaMounted, getCam, getFlyDurationMs, camera.isAnimating, reduced]);
 
   // 迷路自救（A′ 馴化鏡頭）：訂閱 idleEpoch（手勢結束），勿訂閱每幀 cam。
   // 島內路徑不自救（孩子正在看 overlay）；fly-to 動畫中不檢查。

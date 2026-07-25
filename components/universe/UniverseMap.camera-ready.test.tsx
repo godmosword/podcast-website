@@ -21,7 +21,7 @@ vi.mock("./IslandRoamerLayer", () => ({ default: () => null }));
 vi.mock("@/hooks/useWebpSupported", () => ({ useWebpSupported: () => false }));
 
 vi.mock("./useMapCamera", () => ({
-  FLY_DURATION_MS: 600,
+  FLY_DURATION_MS: 450,
   ENTRY_PLAYED_KEY: "cc-universe-entry-played",
   useMapCamera: () => {
     const [isMeasured, setIsMeasured] = useState(false);
@@ -45,6 +45,7 @@ vi.mock("./useMapCamera", () => ({
       },
       bindVisual: () => {},
       getCam: () => ({ scale: 1, tx: 0, ty: 0 }),
+      getFlyDurationMs: () => 450,
       flyTo: flyToMock,
       reset: resetMock,
       zoomBy: () => {},
