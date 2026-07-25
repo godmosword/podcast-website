@@ -37,7 +37,7 @@
 - [x] M0 `data/universe.ts` 單一資料來源 + zod 驗證  `02f2a51`
 - [x] M1 `/adventures/[zone]` 路由 + `targetFor()` 相機  `e00483f`
 - [x] M2 `@modal` 熱點層 + focus 管理 + prefetch  `e915355`
-- [x] M3 逐島填 hotspots（恐龍島優先）  _(hash 待回填)_
+- [x] M3 逐島填 hotspots（恐龍島優先）  `5c6784a`
 
 ### 本輪已完成（2026-07-25）
 
@@ -46,6 +46,7 @@
 | refactor(universe): M0 `data/universe.ts` 單一資料來源 + zod | `02f2a51` |
 | feat(universe): M1 `/adventures/[zone]` + targetFor 相機 | `e00483f` |
 | feat(universe): M2 熱點座標層 + @modal + prefetch | `e915355` |
+| feat(universe): M3 五島填滿 hotspots（恐龍島優先） | `5c6784a` |
 | polish(universe): 主島小紅走 car-park 步道（單車）；map 層關 bob／bank；海面不復辟 | `0f44f7c` |
 
 ### 本輪已完成（2026-07-24）
