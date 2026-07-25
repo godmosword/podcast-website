@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { allTags, allVehicles, getStories } from "@/data/content";
 import { storyDateModified } from "@/data/story-dates";
+import { universe } from "@/data/universe";
 import {
   collectionModifiedDate,
   STATIC_PAGE_MODIFIED_DATES,
@@ -67,6 +68,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.65,
     },
+    // 僅開放島進 sitemap（與 generateMetadata robots.index 對齊；status 改 open 即自動跟上）。
+    ...universe.zones
+      .filter((z) => z.status === "open")
+      .map((z) => ({
+        url: `${baseUrl}/adventures/${z.id}`,
+        lastModified: STATIC_PAGE_MODIFIED_DATES["/adventures"],
+        changeFrequency: "monthly" as const,
+        priority: 0.65,
+      })),
     {
       url: `${baseUrl}/games`,
       lastModified: STATIC_PAGE_MODIFIED_DATES["/games"],

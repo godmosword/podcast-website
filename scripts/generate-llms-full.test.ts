@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getStories } from "../data/content";
+import { universe } from "../data/universe";
 import { buildLlmsFullText } from "./generate-llms-full";
 
 describe("buildLlmsFullText", () => {
@@ -81,6 +82,26 @@ describe("buildLlmsFullText", () => {
     expect(characterLines.length).toBeGreaterThan(0);
     expect(characterLines[0]).toContain("https://example.com/characters");
     expect(characterLines.join("\n")).not.toContain("undefined");
+  });
+
+  it("開放島各有一個區塊與頁面 URL；非開放島不出現", () => {
+    const text = buildLlmsFullText({
+      siteUrl: "https://example.com",
+      generatedAt: "2026-07-02T00:00:00.000Z",
+    });
+
+    expect(text).toContain("## 車車宇宙島嶼");
+    for (const zone of universe.zones) {
+      const heading = `### ${zone.name}`;
+      const pageUrl = `- 頁面 URL：https://example.com/adventures/${zone.id}`;
+      if (zone.status === "open") {
+        expect(text).toContain(heading);
+        expect(text).toContain(pageUrl);
+        expect(text).toContain(zone.tagline);
+      } else {
+        expect(text).not.toContain(pageUrl);
+      }
+    }
   });
 
   it("每集區塊含大綱要點，有完整逐字稿的集數附完整逐字稿連結", () => {

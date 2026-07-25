@@ -1,5 +1,12 @@
 import type { Story } from "@/data/content";
 
+/**
+ * 本檔只管家長向欄位通路與文案不重複；**可索引路由不在此列舉**。
+ * 靜態／聚合頁受管檢查見 `scripts/verify-geo.ts` 的 `checkStaticPage`／
+ * `checkCollectionPage`（含 `status === "open"` 的 `/adventures/<zone>`）。
+ * 契約說明見 `docs/GEO-CONTENT-CONTRACT.md`。
+ */
+
 /** REUSE-2 規劃中的家長共讀指引形狀（尚未寫入 Story）。 */
 export type ParentGuide = {
   /** 「這集可以聊什麼」2–3 句 */

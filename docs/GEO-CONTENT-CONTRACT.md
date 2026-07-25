@@ -113,6 +113,17 @@ type ParentGuide = {
 
 **覆蓋率：** `episodeFaqCoverage(allSlugs)` 回傳 `{ total, covered, ratio, missingSlugs }`；`verify:geo` 直接以此檢查故事 slug 與 sidecar slug，缺漏或多餘都會 fail，不是僅供觀察的 warning。目前 `getStories()` 20 集全數覆蓋；日後新增集數若暫時沒空寫，應讓 gate 明確失敗並補齊內容，不得為衝覆蓋率硬湊填充內容。
 
+## 可索引路由（不在本契約檔列舉）
+
+`lib/geo-content-contract.ts` **不**維護路由清單；build 後受管頁檢查集中在 [`scripts/verify-geo.ts`](../scripts/verify-geo.ts)（`checkStaticPage`／`checkCollectionPage`）。
+
+| 路由 | 資料來源 | sitemap | llms-full | verify:geo |
+|------|----------|---------|-----------|------------|
+| `/adventures` | 世界地圖頁 | ✅ | `llms.txt` 路由地圖 | （地圖互動非本輪核心） |
+| `/adventures/<zone>`（僅 `status === "open"`） | [`data/universe.ts`](../data/universe.ts) | ✅（沿用 `/adventures` lastmod） | `## 車車宇宙島嶼` 區塊（name／tagline／childHint／exploreNote＋島內故事） | `checkStaticPage`；非開放島 `robots: noindex`，不進 sitemap |
+
+開幕時只要把島的 `status` 改成 `open`，sitemap／llms-full／verify:geo 會自動跟上（M0 單一資料來源）。
+
 ## 程式錨點
 
 | 用途 | 檔案 |
@@ -124,9 +135,11 @@ type ParentGuide = {
 | FAQ／RSS 輸出 | `lib/story-geo.ts`、`lib/feed.ts` |
 | 場景字幕 vs 完整逐字稿 | `lib/transcript.ts`、`lib/subtitles.ts` |
 | 單集頁編排 | `app/story/[slug]/page.tsx` |
+| 開放島 sitemap／llms／verify | `app/sitemap.ts`、`scripts/generate-llms-full.ts`、`scripts/verify-geo.ts` |
 
 ## 變更紀錄
 
+- **2026-07-25：** 開放島 `/adventures/<zone>` 納入 sitemap、`llms-full`「車車宇宙島嶼」、`verify:geo` `checkStaticPage`；路由列舉仍在 verify 腳本，不進本契約常數檔。
 - **2026-07-22：** 單集頁拿掉「常見問題」可見區塊（FAQ 僅留 FAQPage JSON-LD／llms）；角色圖鑑改掛頂欄；共讀／活動／指引遷至 `/for-parents#co-listen`；FAQ 曾短暫收合後改為不渲染 UI。
 - **2026-07-22：** 單集頁精簡：共讀／親子活動／家長指引遷至 `/for-parents#co-listen`；FAQ 預設收合；角色僅一行＋圖鑑連結；接著聽併入 RelatedStories。
 - **2026-07-20（Wave 1）：** 聚合頁 GEO 導言改 `sr-only`（SSR 保留）；單集本集介紹維持可見。
