@@ -8,7 +8,7 @@ import { resolveUniverseMap } from "@/lib/universe-map";
  *
  * 環狀路線：前緣草地起步 → 後段繞到摩天輪後方（觸發深度遮擋，見 `ZONE_OCCLUDERS`）
  * → 右側折返 → 回前緣。閉合 `Z`，roamer 連續繞圈，每圈鑽過摩天輪後方一次。
- * 小紅／多多已改走 map 層級路線；保留供 dev／未來島內啟用。
+ * prod：小紅單車走此步道（海面環道已移除）。
  */
 export const CAR_PARK_WALKWAY_PATH =
   "M 90 245 C 70 187.5 115 137.5 162.5 130 C 197.5 125 230 165 235 215 C 235 252.5 145 265 90 245 Z";
@@ -107,6 +107,17 @@ export const ROAMER_ROUTES: RoamerRoute[] = [
 ];
 
 export const MAP_ROAMERS: Roamer[] = [
+  // 車車樂園（open）：主島單車，走步道鑽摩天輪後方。
+  {
+    id: "roam-xiaohong",
+    characterId: "xiao-hong",
+    zoneId: "car-park",
+    routeId: "car-park-walkway",
+    speed: 26,
+    src: "/adventures/roamers/xiao-hong.png",
+    enabled: true,
+    startOffset: 0,
+  },
   // 恐龍島（building）：阿酷鑽地車 + 怪獸卡車
   {
     id: "roam-aku",

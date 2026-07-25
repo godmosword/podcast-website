@@ -25,14 +25,20 @@ describe("universe-roamers", () => {
     }
   });
 
-  it("已移除海上繞圈漫遊車（無 sea-orbit roamer／路線）", () => {
+  it("已移除海上繞圈漫遊車（無 sea-orbit／多多）", () => {
     expect(MAP_ROAMERS.some((r) => r.routeId === "map-sea-orbit")).toBe(false);
     expect(ROAMER_ROUTES.some((r) => r.id === "map-sea-orbit")).toBe(false);
-    expect(
-      MAP_ROAMERS.some(
-        (r) => r.id === "roam-xiaohong" || r.id === "roam-duoduo",
-      ),
-    ).toBe(false);
+    expect(MAP_ROAMERS.some((r) => r.id === "roam-duoduo")).toBe(false);
+  });
+
+  it("主島小紅 enabled 走 car-park 島內步道", () => {
+    const xiaoHong = MAP_ROAMERS.find((r) => r.id === "roam-xiaohong");
+    expect(xiaoHong).toBeDefined();
+    expect(xiaoHong!.enabled).toBe(true);
+    expect(xiaoHong!.zoneId).toBe("car-park");
+    expect(xiaoHong!.routeId).toBe("car-park-walkway");
+    const route = ROAMER_ROUTES.find((r) => r.id === "car-park-walkway");
+    expect(route?.kind).toBe("island");
   });
 
   it("每條 route path 以 M 開頭", () => {

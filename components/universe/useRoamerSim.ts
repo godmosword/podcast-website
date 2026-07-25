@@ -93,11 +93,15 @@ export type RoamerFrame = {
   z: number;
 };
 
+/** tile＝島內近景（bob／bank）；map＝全圖遠距（關 bob／bank，少搶戲）。 */
+export type RoamerMotionSpace = "tile" | "map";
+
 export function computeFrame(
   sim: RoamerSim,
   height: number,
   dtMs: number,
   now: number,
+  motionSpace: RoamerMotionSpace = "tile",
 ): RoamerFrame {
   const { route } = sim;
   const length = route.length;
@@ -116,11 +120,17 @@ export function computeFrame(
   while (dAng > Math.PI) dAng -= 2 * Math.PI;
   while (dAng < -Math.PI) dAng += 2 * Math.PI;
   sim.angle = angle;
-  const angVel = dAng / Math.max(dtMs / 1000, 0.001);
-  const targetBank = clamp(-angVel * BANK_GAIN * sim.flip, -MAX_BANK, MAX_BANK);
-  sim.bankDeg += (targetBank - sim.bankDeg) * BANK_SMOOTH;
 
-  const bob = Math.sin(now * BOB_FREQ + sim.phase) * BOB_AMP;
+  const mapMotion = motionSpace === "map";
+  if (mapMotion) {
+    sim.bankDeg = 0;
+  } else {
+    const angVel = dAng / Math.max(dtMs / 1000, 0.001);
+    const targetBank = clamp(-angVel * BANK_GAIN * sim.flip, -MAX_BANK, MAX_BANK);
+    sim.bankDeg += (targetBank - sim.bankDeg) * BANK_SMOOTH;
+  }
+
+  const bob = mapMotion ? 0 : Math.sin(now * BOB_FREQ + sim.phase) * BOB_AMP;
   const hop = Math.max(0, -bob);
   const depthScale = DEPTH_MIN + (DEPTH_MAX - DEPTH_MIN) * clamp(P.y / height, 0, 1);
 
@@ -226,7 +236,7 @@ function applySim(
   now: number,
 ): void {
   const height = space.kind === "tile" ? space.tileH : space.stageH;
-  const frame = computeFrame(sim, height, dtMs, now);
+  const frame = computeFrame(sim, height, dtMs, now, space.kind);
   applyFrame(
     nodes,
     space.kind === "map" ? { ...frame, z: mapDepthZ(frame.groundY, "roamer") } : frame,

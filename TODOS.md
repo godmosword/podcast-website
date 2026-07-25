@@ -30,6 +30,12 @@
 | 4 | [Growth-Measure-1](#growth-measure-1-成長量測) SoundOn 回鏈 | ops/growth | S | ✅ `42a9d38` |
 | 5 | [UX-P1-2](#兒童-ux-與親子互動稽核2026-07-11) 詳情頁反思收合 | ux | S | ✅ `42a9d38` |
 
+### 本輪已完成（2026-07-25）
+
+| ID | Commit |
+|----|--------|
+| polish(universe): 主島小紅走 car-park 步道（單車）；map 層關 bob／bank；海面不復辟 | （待 commit 回填） |
+
 ### 本輪已完成（2026-07-24）
 
 | ID | Commit |
