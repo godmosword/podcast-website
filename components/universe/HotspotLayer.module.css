@@ -4,7 +4,7 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 6;
+  /* z-index 由 HotspotLayer 依島 depthY  inline 設定（高於 island tile） */
 }
 
 .pin,

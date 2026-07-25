@@ -56,7 +56,9 @@ import SkyBodies from "./SkyBodies";
 import UniverseMapParallax from "./UniverseMapParallax";
 import HotspotLayer from "./HotspotLayer";
 import ZoneIsland from "./ZoneIsland";
+import { UniverseCameraGateProvider } from "./UniverseCameraGateContext";
 import { useMapCamera } from "./useMapCamera";
+import { useSheetReadyLatch } from "./useSheetReadyLatch";
 import styles from "./UniverseMap.module.css";
 
 /** bottom dock 開啟時，fly-to 把島往上留出的視窗像素。 */
@@ -386,6 +388,13 @@ function UniverseMapContent({
 
   const sceneClass = [styles.scene, paused ? styles.paused : ""].filter(Boolean).join(" ");
 
+  const sheetReady = useSheetReadyLatch({
+    targetKey: cameraTarget.key,
+    onIsland,
+    isAnimating: camera.isAnimating,
+    reducedMotion: reduced,
+  });
+
   // 海面貼圖：screen-space CSS 平鋪，不放進被 transform 的 stage。
   // 鏡頭 background-position/size 由 bindVisual 命令式更新（T3b），避免 zoom 卡頓。
 
@@ -613,11 +622,11 @@ function UniverseMapContent({
   );
 
   return (
-    <>
+    <UniverseCameraGateProvider value={{ sheetReady }}>
       {mapSection}
       {/* 世界層 children（sr-only 清單等）；島層已塞進 map 內 absolute overlay */}
       {!onIsland ? children : null}
-    </>
+    </UniverseCameraGateProvider>
   );
 }
 

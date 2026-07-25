@@ -18,6 +18,29 @@
   pointer-events: auto;
 }
 
+.overlayHidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/*
+ * sheetReady：overlay 穿透讓島上熱點可點；子層 .sheet 仍可互動。
+ * 點空白關閉改走 Esc／✕（與熱點共用視窗空間，無法兩者兼得）。
+ */
+.overlayPassthrough {
+  pointer-events: none;
+}
+
+.overlayPassthrough > * {
+  pointer-events: auto;
+}
+
+/* 熱點 modal：背景 sheet 可見但不攔截（含卡片） */
+.overlayInertPassthrough > * {
+  pointer-events: none;
+}
+
 .sheet {
   position: relative;
   width: min(100%, 30rem);
@@ -29,6 +52,15 @@
     var(--radius-md);
   background: var(--card);
   box-shadow: var(--shadow-md), 0 8px 0 color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+.sheetHidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.sheetAnimate {
   animation: sheet-rise 0.28s var(--ease-spring) both;
 }
 
@@ -49,7 +81,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sheet {
+  .sheetAnimate {
     animation: none;
   }
 }

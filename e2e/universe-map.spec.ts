@@ -226,6 +226,7 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     await expect
       .poll(async () => (await stageTransformParts(page)).scale)
       .toBeCloseTo(1.6, 1);
+    // sheetReady 閂鎖：等鏡頭 fly-to 結束後 dialog 才視覺揭示
     await expect(dialog).toBeVisible({ timeout: 3000 });
     await expect(dialog).toContainText("車車樂園");
     // sheet 開啟時鏡頭已停在 dock-offset 構圖，不再位移
@@ -278,7 +279,9 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     });
     await page.goto("/adventures/dino");
 
-    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 3000 });
+    const dialog = page.getByRole("dialog");
+    // 深連結亦等鏡頭飛抵後 sheet 才揭示
+    await expect(dialog).toBeVisible({ timeout: 3000 });
     await expect(page.getByRole("status")).toHaveCount(0);
   });
 
@@ -417,27 +420,15 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     await expect(page.getByRole("dialog")).toHaveCount(0);
   });
 
-  test("MAP-UX-P1b：sheet 開啟時拖曳 dimmed 海面不會平移地圖", async ({ page }) => {
-    await openMap(page, "light", 375, 812);
-    await page.getByRole("button", { name: /車車樂園，開放中/ }).click();
-    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 3000 });
-
-    const before = await stageTransformParts(page);
-    await page.mouse.move(188, 140);
-    await page.mouse.down();
-    await page.mouse.move(260, 200, { steps: 10 });
-    await page.mouse.up();
-    await page.waitForTimeout(120);
-    expectTransformClose(await stageTransformParts(page), before);
-  });
-
-  test("MAP-UX-P1b：點擊 backdrop 可關閉 sheet", async ({ page }) => {
+  test("MAP-UX-P1b：Esc 可關閉 sheet（overlay 穿透供熱點，點空白不再關）", async ({
+    page,
+  }) => {
     await openMap(page, "light", 375, 812);
     await page.getByRole("button", { name: /車車樂園，開放中/ }).click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible({ timeout: 3000 });
 
-    await page.mouse.click(188, 140);
+    await page.keyboard.press("Escape");
     await expect(dialog).toHaveCount(0);
   });
 

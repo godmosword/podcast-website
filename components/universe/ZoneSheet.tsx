@@ -19,6 +19,7 @@ import ParentTrustStrip from "@/components/ParentTrustStrip";
 import IconButton from "@/components/ui/IconButton";
 import ZoneLandmark from "./ZoneLandmark";
 import ZoneWishForm from "./ZoneWishForm";
+import { useUniverseCameraGate } from "./UniverseCameraGateContext";
 import styles from "./ZoneSheet.module.css";
 
 type ZoneSheetProps = {
@@ -59,9 +60,12 @@ export default function ZoneSheet({
   const titleRef = useRef<HTMLHeadingElement>(null);
   const titleId = useId();
   const [parentOpen, setParentOpen] = useState(false);
+  const { sheetReady } = useUniverseCameraGate();
   const open = zone !== null;
+  const interactive = open && sheetReady && !suppressFocusTrap;
+  const escClosable = open && !suppressFocusTrap;
 
-  useFocusTrap(open && !suppressFocusTrap, panelRef, {
+  useFocusTrap(interactive, panelRef, {
     initialFocus: "container",
   });
 
@@ -71,19 +75,19 @@ export default function ZoneSheet({
   }, [zone?.id]);
 
   useEffect(() => {
-    if (!open || suppressFocusTrap) return;
+    if (!escClosable) return;
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose, suppressFocusTrap]);
+  }, [escClosable, onClose]);
 
-  // 層級改變後聚焦島名，並靠 aria-live 播報。
+  // 鏡頭飛抵後才聚焦島名，避免 SR 念看不見的內容。
   useEffect(() => {
-    if (!open || !focusOnMount || suppressFocusTrap) return;
+    if (!open || !sheetReady || !focusOnMount || suppressFocusTrap) return;
     titleRef.current?.focus();
-  }, [open, focusOnMount, zone?.id, suppressFocusTrap]);
+  }, [open, sheetReady, focusOnMount, zone?.id, suppressFocusTrap]);
 
   if (!zone) return null;
 
@@ -99,25 +103,42 @@ export default function ZoneSheet({
     typeof zone.buildProgress === "number";
   const isLocked = zone.status !== "open";
 
+  const overlayClass = [
+    styles.overlay,
+    !sheetReady ? styles.overlayHidden : styles.overlayPassthrough,
+    sheetReady && inert ? styles.overlayInertPassthrough : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const sheetClass = [
+    styles.sheet,
+    sheetReady ? styles.sheetAnimate : styles.sheetHidden,
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const sheetInert = inert || !sheetReady;
+
   return (
     <div
-      className={styles.overlay}
+      className={overlayClass}
       role="presentation"
-      onClick={onClose}
-      {...(inert ? { inert: true } : {})}
+      {...(sheetInert ? { inert: true } : {})}
     >
       <div
         ref={panelRef}
-        className={styles.sheet}
+        className={sheetClass}
         role="dialog"
-        aria-modal={inert ? undefined : true}
+        aria-modal={sheetInert ? undefined : true}
         aria-labelledby={titleId}
+        aria-hidden={!sheetReady}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
-        <p className="sr-only" aria-live="polite">
-          已進入{zone.name}
-        </p>
+        {sheetReady ? (
+          <p className="sr-only" aria-live="polite">
+            已進入{zone.name}
+          </p>
+        ) : null}
 
         <IconButton
           type="button"

@@ -10,6 +10,7 @@ import {
   hotspotToStage,
   resolvedZoneById,
 } from "@/lib/universe/hotspot";
+import { mapDepthZ } from "@/lib/universe-depth";
 import styles from "./HotspotLayer.module.css";
 
 type HotspotLayerProps = {
@@ -39,7 +40,11 @@ export default function HotspotLayer({ zoneId }: HotspotLayerProps) {
   if (!zone || !resolved || zone.hotspots.length === 0) return null;
 
   return (
-    <div className={styles.layer} aria-label={`${zone.name}探索點`}>
+    <div
+      className={styles.layer}
+      style={{ zIndex: mapDepthZ(resolved.depthY, "roamer") }}
+      aria-label={`${zone.name}探索點`}
+    >
       {zone.hotspots.map((hotspot) => {
         const pt = hotspotToStage(resolved, hotspot);
         const href = hotspotDetailHref(zoneId, hotspot);
@@ -59,6 +64,7 @@ export default function HotspotLayer({ zoneId }: HotspotLayerProps) {
             }
             data-hotspot-id={hotspot.id}
             scroll={false}
+            onPointerDown={(e) => e.stopPropagation()}
           >
             <span className={styles.dot} aria-hidden="true" />
             <span className={styles.label}>{hotspot.name}</span>
