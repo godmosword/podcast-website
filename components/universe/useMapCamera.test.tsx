@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import React from "react";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { fitScaleFor } from "@/lib/universe/map-camera-utils";
+import { clampCamera, fitScaleFor, islandContentCenter } from "@/lib/universe/map-camera-utils";
 import {
   ENTRY_PLAYED_KEY,
   useMapCamera,
@@ -67,6 +67,31 @@ function CameraHarness({
   );
 }
 
+function ResetHarness() {
+  const camera = useMapCamera({ skipEntryAnimation: true });
+
+  return (
+    <div
+      data-testid="viewport"
+      ref={camera.bind.ref}
+      data-measured={camera.isMeasured ? "1" : "0"}
+      data-scale={String(camera.scale)}
+      data-tx={String(camera.tx)}
+      data-ty={String(camera.ty)}
+    >
+      <button
+        type="button"
+        onClick={() => camera.flyTo({ x: 120, y: 140 }, camera.scale * 1.6)}
+      >
+        偏離鏡頭
+      </button>
+      <button type="button" onClick={() => camera.reset()}>
+        重置鏡頭
+      </button>
+    </div>
+  );
+}
+
 describe("useMapCamera", () => {
   beforeEach(() => {
     stubBrowserApis();
@@ -89,7 +114,7 @@ describe("useMapCamera", () => {
   });
 
   it("skipEntryAnimation: true 掛 viewport 後不播進場，並於 effect 寫入 entry key", async () => {
-    const setItemSpy = vi.spyOn(Storage.prototype, "setItem");
+    expect(sessionStorage.getItem(ENTRY_PLAYED_KEY)).toBeNull();
     render(<CameraHarness options={{ skipEntryAnimation: true }} />);
 
     await waitFor(() => {
@@ -102,9 +127,6 @@ describe("useMapCamera", () => {
     expect(scale).toBeCloseTo(fit, 5);
     expect(scale).toBeGreaterThan(fit * 0.55 + 0.01);
     expect(sessionStorage.getItem(ENTRY_PLAYED_KEY)).toBe("1");
-    expect(
-      setItemSpy.mock.calls.some(([key]) => key === ENTRY_PLAYED_KEY),
-    ).toBe(true);
   });
 
   it("首次有效量測後 isMeasured 為 true", async () => {
@@ -112,5 +134,47 @@ describe("useMapCamera", () => {
     await waitFor(() => {
       expect(screen.getByTestId("viewport").getAttribute("data-measured")).toBe("1");
     });
+  });
+
+  it("reset() 飛向 islandContentCenter 並套用 fit scale", async () => {
+    render(<ResetHarness />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("viewport").getAttribute("data-measured")).toBe("1");
+    });
+
+    const viewport = screen.getByTestId("viewport");
+    const w = 1280;
+    const h = 800;
+    const center = islandContentCenter();
+    const fit = fitScaleFor(w, h);
+    const expected = clampCamera(
+      {
+        scale: fit,
+        tx: w / 2 - center.x * fit,
+        ty: h / 2 - center.y * fit,
+      },
+      w,
+      h,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "偏離鏡頭" }));
+
+    await waitFor(() => {
+      const scale = Number(viewport.getAttribute("data-scale"));
+      expect(scale).toBeGreaterThan(fit + 0.05);
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "重置鏡頭" }));
+
+    await waitFor(() => {
+      const scale = Number(viewport.getAttribute("data-scale"));
+      expect(scale).toBeCloseTo(expected.scale, 5);
+    });
+
+    const tx = Number(viewport.getAttribute("data-tx"));
+    const ty = Number(viewport.getAttribute("data-ty"));
+    expect(tx).toBeCloseTo(expected.tx, 5);
+    expect(ty).toBeCloseTo(expected.ty, 5);
   });
 });

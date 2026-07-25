@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ZONES, type ZoneCoord } from "@/data/universe-zones";
+import type { ZoneCoord } from "@/data/universe-zones";
 import {
   INERTIA_STOP_SPEED,
   MAX_SCALE,
@@ -53,11 +53,7 @@ export type UseMapCameraOptions = {
   skipEntryAnimation?: boolean;
 };
 
-const CAR_PARK =
-  ZONES.find((z) => z.id === "car-park")?.coord ?? { x: 500, y: 400 };
-
-/** 預設鏡頭錨點：島群 bbox 中心（首屏／進場飛抵處對齊此點，島群置中不偏一側）。
- *  reset／回樂園仍飛向 CAR_PARK（聚焦主島）。 */
+/** 預設鏡頭錨點：島群 bbox 中心（首屏／reset／回樂園皆對齊此點，島群置中不偏一側）。 */
 const CONTENT_CENTER = islandContentCenter();
 
 type MapCameraBind = {
@@ -378,7 +374,7 @@ export function useMapCamera(options: UseMapCameraOptions = {}): MapCamera {
   }, []);
 
   const reset = useCallback(() => {
-    flyTo(CAR_PARK, fitScale());
+    flyTo(CONTENT_CENTER, fitScale());
   }, [flyTo, fitScale]);
 
   const zoomBy = useCallback(
@@ -409,7 +405,7 @@ export function useMapCamera(options: UseMapCameraOptions = {}): MapCamera {
     return rect;
   }, []);
 
-  // 量測 viewport 尺寸 + 首次置中 car-park。
+  // 量測 viewport 尺寸 + 首次置中島群（CONTENT_CENTER）。
   useEffect(() => {
     if (!viewportEl) return;
     const measure = () => {
