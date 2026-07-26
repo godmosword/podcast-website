@@ -8,8 +8,7 @@ import { GAMES } from "@/data/games";
 const CAR_ADVENTURE_META = GAMES.find((g) => g.slug === "car-adventure");
 const VP = viewportFor("car-adventure");
 
-/** 薄包裝：GameHost + carAdventureAdapter（頁面亦可直接 import GameHost）。 */
-export default function CarAdventureGame() {
+export default function CarAdventureGameHost() {
   return (
     <GameHost
       adapter={carAdventureAdapter}

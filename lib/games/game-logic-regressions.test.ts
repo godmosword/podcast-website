@@ -21,26 +21,29 @@ describe("game logic regressions", () => {
   });
 
   it("車車大冒險兒童模式第一關用當局起始生命判定 flawless", () => {
-    const game = source("components/games/car-adventure/CarAdventureGame.tsx");
+    const adapter = source("lib/gamekit/games/car-adventure/adapter.ts");
 
-    expect(game).toContain("const startLives = kidsModeRef.current ? 5 : 3;");
-    expect(game).toContain("createGameState(idx, startLives, kidsModeRef.current)");
-    expect(game).toContain("levelStartLivesRef.current = startLives;");
+    expect(adapter).toContain("const startLives = this.options.kidsMode ? 5 : 3;");
+    expect(adapter).toContain("createGameState(idx, startLives, this.options.kidsMode)");
+    expect(adapter).toContain("this.levelStartLives = startLives;");
   });
 
-  it("車車大冒險選單在 PixelGameCanvas 外，避免入口 CTA 被裁切", () => {
-    const game = source("components/games/car-adventure/CarAdventureGame.tsx");
+  it("車車大冒險選單在 Host canvas 外，避免入口 CTA 被裁切", () => {
+    const view = source("components/games/CarAdventureView.tsx");
+    const host = source("lib/gamekit/host/GameHost.tsx");
     const menu = source("components/games/car-adventure/CarAdventureMenu.tsx");
     const css = source(
       "components/games/car-adventure/CarAdventureMenu.module.css",
     );
 
-    expect(game).toContain("<CarAdventureMenu");
-    expect(game).toContain("</PixelGameCanvas>");
-    // 選單在 canvas 關閉標籤之後
-    expect(game.indexOf("</PixelGameCanvas>")).toBeLessThan(
-      game.indexOf("<CarAdventureMenu"),
-    );
+    expect(view).toContain("<CarAdventureMenu");
+    expect(view).not.toContain('from "@/components/games/PixelGameCanvas"');
+    // Host JSX：canvas 區塊先於 renderOverlay（選單在 canvas 外）
+    const canvasJsx = host.indexOf("{needsCanvas && (");
+    const overlayJsx = host.indexOf("instanceRef.current?.renderOverlay?.(");
+    expect(canvasJsx).toBeGreaterThan(-1);
+    expect(overlayJsx).toBeGreaterThan(-1);
+    expect(canvasJsx).toBeLessThan(overlayJsx);
     expect(menu).toContain("開始冒險 ▶");
     expect(menu).toContain('data-testid="car-adventure-menu"');
     expect(css).toContain("overflow: visible");
@@ -49,13 +52,14 @@ describe("game logic regressions", () => {
   });
 
   it("車車大冒險提供衝刺觸控鍵、手把/鍵盤映射與繁中教學", () => {
-    const game = source("components/games/car-adventure/CarAdventureGame.tsx");
+    const view = source("components/games/CarAdventureView.tsx");
+    const adapter = source("lib/gamekit/games/car-adventure/adapter.ts");
     const input = source("lib/gamekit/runtime/input.ts");
     const games = source("data/games.ts");
 
-    expect(game).toContain('label="衝刺"');
-    expect(game).toContain('hold("dash", true)');
-    expect(game).toContain('input.isHeld("dash")');
+    expect(view).toContain('label="衝刺"');
+    expect(view).toContain('hold("dash", true)');
+    expect(adapter).toContain('action === "dash"');
     expect(input).toContain('x: "dash"');
     expect(input).toContain('2: "dash"');
     expect(games).toContain("按衝刺鍵破磚");

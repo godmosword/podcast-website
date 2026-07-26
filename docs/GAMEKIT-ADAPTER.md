@@ -36,7 +36,7 @@ interface GameInstance {
 - Instantiates the adapter once.
 - Owns `GameChrome`, toolbar, settings dialog, tutorial overlay.
 - Owns audio bus via `useGameAudio`.
-- Owns best-score + `reportGameSession` (exactly once per finished session).
+- Owns best-score + `reportGameSession`（每次 `onSession` 都寫入；中關通關可多次，終局由 adapter 去重）。
 - Maps keyboard / touch / gamepad → `setAction`.
 - Runs the shared `GameLoop` when the instance exposes `fixedUpdate`.
 - Renders a generic touch bar when coarse pointer is detected.
