@@ -6,8 +6,7 @@ import { GAMES } from "@/data/games";
 
 const BLOCK_DROP_META = GAMES.find((g) => g.slug === "block-drop");
 
-/** 薄包裝：GameHost + blockDropAdapter（頁面亦可直接 import GameHost）。 */
-export default function BlockDropGame() {
+export default function BlockDropGameHost() {
   return (
     <GameHost
       adapter={blockDropAdapter}

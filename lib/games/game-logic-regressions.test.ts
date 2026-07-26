@@ -65,24 +65,27 @@ describe("game logic regressions", () => {
     expect(games).toContain("按衝刺鍵破磚");
   });
 
-  it("繽紛方塊鍵盤主操作只由 GameInput 統一處理一次", () => {
-    const game = source("components/games/BlockDropGame.tsx");
+  it("繽紛方塊走 gamekit 回報、鍵盤主操作只由 GameInput 統一處理一次", () => {
+    const view = source("components/games/BlockDropView.tsx");
+    const adapter = source("lib/gamekit/games/block-drop/adapter.ts");
 
-    expect(game).not.toContain('if (k === "ArrowLeft") move(-1);');
-    expect(game).not.toContain('else if (k === "ArrowRight") move(1);');
-    expect(game).not.toContain('else if (k === "ArrowUp" || k === "x" || k === "X") rotate(1);');
-    expect(game).not.toContain('else if (k === " ") hardDrop();');
-    expect(game).toContain('if (k === "z" || k === "Z") rotate(-1);');
-    expect(game).toContain('else if (k === "c" || k === "C" || k === "Shift") holdPiece();');
+    expect(adapter).toContain('gameId: "block-drop"');
+    expect(adapter).toContain("onSession");
+    expect(view).not.toContain('if (k === "ArrowLeft") move(-1);');
+    expect(view).not.toContain('else if (k === "ArrowRight") move(1);');
+    expect(view).not.toContain('else if (k === "ArrowUp" || k === "x" || k === "X") rotate(1);');
+    expect(view).not.toContain('else if (k === " ") hardDrop();');
+    expect(view).toContain('if (k === "z" || k === "Z") rotate(-1);');
+    expect(view).toContain('else if (k === "c" || k === "C" || k === "Shift") holdPiece();');
   });
 
   it("繽紛方塊提供難度、彩虹模式與到頂重新開始引導", () => {
-    const game = source("components/games/BlockDropGame.tsx");
+    const view = source("components/games/BlockDropView.tsx");
 
-    expect(game).toContain("DIFFICULTY_CONFIG");
-    expect(game).toContain("specialMode === \"rainbow\"");
-    expect(game).toContain("方塊堆到頂了");
-    expect(game).toContain("switchToRelaxedAndRestart");
+    expect(view).toContain("DIFFICULTY_CONFIG");
+    expect(view).toContain("specialMode === \"rainbow\"");
+    expect(view).toContain("方塊堆到頂了");
+    expect(view).toContain("switchToRelaxedAndRestart");
   });
 
   it("UX-P2-1：繽紛方塊難度預設與 kidsMode 預設同步為 relaxed，且尊重使用者明確選擇", () => {
@@ -168,13 +171,13 @@ describe("game logic regressions", () => {
   });
 
   it("繽紛樂園使用黏土馬卡龍風格、大按鈕與消排慶祝效果", () => {
-    const game = source("components/games/BlockDropGame.tsx");
+    const view = source("components/games/BlockDropView.tsx");
 
-    expect(game).toContain("CLAY_BLOCK_COLORS");
-    expect(game).toContain("macaron");
-    expect(game).toContain("clearFx");
-    expect(game).toContain("太棒了");
-    expect(game).toContain("minHeight: 56");
+    expect(view).toContain("CLAY_BLOCK_COLORS");
+    expect(view).toContain("macaron");
+    expect(view).toContain("clearFx");
+    expect(view).toContain("太棒了");
+    expect(view).toContain("minHeight: 56");
   });
 
   it("遊戲頁保留頂部安全距離與較大的返回鍵點擊區", () => {

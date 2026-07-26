@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import BlockDropGame from "@/components/games/BlockDropGame";
+import BlockDropGameHost from "@/app/games/block-drop/BlockDropGameHost";
 import { GamePageShell } from "@/components/games/GamePageShell";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 export default function BlockDropPage() {
   return (
     <GamePageShell title="繽紛樂園" gameId="block-drop">
-      <BlockDropGame />
+      <BlockDropGameHost />
     </GamePageShell>
   );
 }

@@ -45,6 +45,7 @@
 |----|--------|
 | feat(gamekit): migrate candy-match to GameAdapter（PR #66） | `ceb92f4` |
 | feat(gamekit): migrate car-adventure to GameAdapter（fixedUpdate + render） | `e0d9766` |
+| feat(gamekit): migrate block-drop to GameAdapter | _(待 commit)_ |
 
 ### GameKit Adapter 遷移（進行中）
 
@@ -54,7 +55,7 @@
 |-------|------|------|
 | 1 | candy-match | ✅ `ceb92f4` |
 | 2 | car-adventure | ✅ `e0d9766` |
-| 3 | block-drop | 待做 |
+| 3 | block-drop | 進行中（本分支／main） |
 | 4 | candy-kart（iframe bridge） | 待做 |
 
 ### 本輪已完成（2026-07-25）
