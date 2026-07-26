@@ -1,0 +1,19 @@
+/*
+ * 遊戲區工具列。刻意保持單列、右對齊、貼齊畫布上緣，
+ * 避免與 GamePageShell 的 .playHeader 疊成兩層厚 chrome（Content over chrome）。
+ */
+.toolbarRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  min-height: 44px;
+  margin-bottom: var(--space-2);
+}
+
+.bestScore {
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  font-weight: 800;
+  white-space: nowrap;
+}

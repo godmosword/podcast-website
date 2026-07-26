@@ -5,12 +5,25 @@ import AxeBuilder from "@axe-core/playwright";
  * 無障礙回歸：用 axe-core 掃描主要頁面，只擋下 critical / serious 等級的問題，
  * 避免裝飾性低風險規則造成假性失敗。新頁面請一併補進清單。
  */
-const PAGES: { name: string; path: string }[] = [
+const PAGES: { name: string; path: string; exclude?: string }[] = [
   { name: "首頁 Landing", path: "/" },
   { name: "全部故事", path: "/stories" },
   { name: "關於我們", path: "/about" },
   { name: "主題索引", path: "/topic" },
   { name: "遊樂園", path: "/games" },
+  // 遊戲頁只排除遊戲自身的美術節點（canvas／iframe／標題屏），DESIGN.md 允許這些用
+  // component-local 固定色。**不排除 `#game-play` 整區** —— 暫停／靜音／設定工具列是
+  // 兒童最常點的控制，必須留在回歸掃描範圍內。
+  {
+    name: "遊戲頁（探索）",
+    path: "/games/candy-match",
+    exclude: "canvas, iframe, [class*=titleScreen], [class*=gameTitle]",
+  },
+  {
+    name: "遊戲頁（挑戰）",
+    path: "/games/car-adventure",
+    exclude: "canvas, iframe, [class*=titleScreen], [class*=gameTitle]",
+  },
   { name: "宇宙地圖", path: "/adventures" },
 ];
 
@@ -19,9 +32,14 @@ const BLOCKING_IMPACTS = new Set(["critical", "serious"]);
 for (const pageDef of PAGES) {
   test(`a11y：${pageDef.name} 無 critical/serious 違規`, async ({ page }) => {
     await page.goto(pageDef.path);
-    const results = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
-      .analyze();
+    let builder = new AxeBuilder({ page }).withTags([
+      "wcag2a",
+      "wcag2aa",
+      "wcag21a",
+      "wcag21aa",
+    ]);
+    if (pageDef.exclude) builder = builder.exclude(pageDef.exclude);
+    const results = await builder.analyze();
 
     const blocking = results.violations.filter(
       (v) => v.impact != null && BLOCKING_IMPACTS.has(v.impact),

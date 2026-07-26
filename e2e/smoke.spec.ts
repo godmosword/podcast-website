@@ -157,7 +157,7 @@ test("首頁 Hero 不含節目數據入口", async ({ page }) => {
 test("繽紛卡丁車 debugFinish 會透過 Godot iframe 更新進度", async ({ page }) => {
   test.setTimeout(60_000);
   await page.goto("/games/candy-kart?debugFinish=macaron-meadow");
-  await expect(page.getByRole("link", { name: "← 回遊樂園" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "回遊樂園" })).toBeVisible();
   await expect(page.locator("iframe[title='繽紛卡丁車遊戲']")).toHaveCount(0);
   await page.getByRole("button", { name: "出發！開始遊戲" }).click();
   await expect(page.locator("iframe[title='繽紛卡丁車遊戲']")).toHaveAttribute(
@@ -184,7 +184,7 @@ test("繽紛卡丁車 debugFinish 會透過 Godot iframe 更新進度", async ({
 test("阿蹦雪山衝刺 debugFinish 會透過 Godot iframe 更新三星進度", async ({ page }) => {
   test.setTimeout(60_000);
   await page.goto("/games/snowboard?debugFinish=bonbon-peak");
-  await expect(page.getByRole("link", { name: "← 回遊樂園" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "回遊樂園" })).toBeVisible();
   await expect(page.locator("iframe[title='阿蹦雪山衝刺遊戲']")).toHaveCount(0);
   await page.getByRole("button", { name: "出發！開始滑雪" }).click();
   await expect(page.locator("iframe[title='阿蹦雪山衝刺遊戲']")).toHaveAttribute(
@@ -231,7 +231,7 @@ test("阿蹦雪山衝刺 visual QA 會轉送景別且不寫入成績", async ({ 
 
 test("車車大冒險頁面可載入", async ({ page }) => {
   await page.goto("/games/car-adventure");
-  await expect(page.getByRole("link", { name: "← 回遊樂園" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "回遊樂園" })).toBeVisible();
   await expect(
     page.getByRole("button", { name: /開始冒險/ }),
   ).toBeVisible({ timeout: 15_000 });
@@ -250,7 +250,7 @@ test("車車大冒險窄螢幕可點開始冒險進入遊戲", async ({ page }) 
 
 test("繽紛樂園（Block Drop）頁面可載入", async ({ page }) => {
   await page.goto("/games/block-drop");
-  await expect(page.getByRole("link", { name: "← 回遊樂園" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "回遊樂園" })).toBeVisible();
   await expect(page.getByLabel(/^分數 /)).toBeVisible({ timeout: 15_000 });
   await expect(page.getByRole("progressbar")).toBeVisible();
 });

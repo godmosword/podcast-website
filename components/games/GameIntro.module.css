@@ -5,14 +5,14 @@
   align-items: stretch;
   margin-bottom: 20px;
   padding: 14px;
-  border: 1.5px solid var(--line);
+  border: 1px solid var(--hairline);
   border-radius: var(--radius-xl);
-  background: linear-gradient(135deg, var(--card), var(--card-2));
-  box-shadow: var(--shadow-md), var(--gloss);
+  background: var(--surface-elevated);
+  box-shadow: var(--elev-1);
 }
 
 :global([data-theme="night"]) .intro {
-  border-color: color-mix(in srgb, var(--c-yellow) 18%, var(--line));
+  border-color: color-mix(in srgb, var(--c-yellow) 18%, var(--hairline));
   box-shadow: var(--shadow-sm), var(--warm-card-glow);
 }
 
@@ -22,7 +22,6 @@
   overflow: hidden;
   border-radius: var(--radius-lg);
   background: color-mix(in srgb, var(--c-pink) 25%, var(--mix-base));
-  box-shadow: var(--gloss), inset 0 -8px 16px rgba(52, 48, 43, 0.12);
 }
 
 .cover::after {
@@ -45,9 +44,9 @@
   padding: 6px 10px;
   border-radius: 999px;
   color: var(--on-dark);
-  background: rgba(47, 41, 54, 0.68);
+  background: rgba(47, 41, 54, 0.76);
   backdrop-filter: blur(8px);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 900;
 }
 
@@ -63,17 +62,18 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  margin-bottom: 6px;
   color: var(--ink-soft);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 900;
 }
 
-.copy h1 {
-  margin: 7px 0 6px;
+.parentHeading {
+  margin: 0 0 8px;
   color: var(--ink);
-  font-size: clamp(1.55rem, 3vw, 2.1rem);
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
   font-weight: 900;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .copy p {
@@ -90,25 +90,9 @@
   margin-top: 8px;
   padding: 2px 0;
   color: var(--ink-soft);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 700;
   line-height: 1.4;
-}
-
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 13px;
-}
-
-.controls span {
-  padding: 5px 9px;
-  border-radius: 8px;
-  color: var(--ink-soft);
-  background: color-mix(in srgb, var(--c-sky) 16%, var(--card));
-  font-size: 0.76rem;
-  font-weight: 800;
 }
 
 .playFacts {
@@ -118,34 +102,15 @@
   margin-top: 9px;
 }
 
+/* 對比：--ink-soft 疊在 c-mint 淡底上於夜間僅 4.41:1，未達 WCAG AA，故用 --ink。 */
 .playFacts span {
   padding: 5px 8px;
-  border: 1px solid color-mix(in srgb, var(--c-mint) 38%, var(--line));
+  border: 1px solid color-mix(in srgb, var(--c-mint) 38%, var(--hairline));
   border-radius: 999px;
-  color: var(--ink-soft);
-  background: color-mix(in srgb, var(--c-mint) 15%, var(--card));
-  font-size: 0.75rem;
-  font-weight: 800;
-}
-
-.moreLink {
-  align-self: flex-start;
-  min-height: 44px;
-  margin-top: 10px;
-  padding: 10px 0;
-  color: var(--ink-soft);
-  font-size: 0.82rem;
-  font-weight: 900;
-  text-decoration: none;
-}
-
-.moreLink:hover {
   color: var(--ink);
-}
-
-.moreLink:focus-visible {
-  outline: 3px solid var(--focus-ring, var(--c-sky));
-  outline-offset: 3px;
+  background: color-mix(in srgb, var(--c-mint) 15%, var(--card));
+  font-size: 0.8rem;
+  font-weight: 800;
 }
 
 @media (max-width: 640px) {

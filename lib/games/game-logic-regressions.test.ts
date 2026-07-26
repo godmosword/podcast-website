@@ -188,8 +188,30 @@ describe("game logic regressions", () => {
   it("遊戲頁保留頂部安全距離與較大的返回鍵點擊區", () => {
     const shell = source("components/games/GamePageShell.module.css");
 
-    expect(shell).toContain("padding-top: clamp(2.25rem");
+    // 遊戲頁已隱藏全站導覽（isImmersiveRoute），頂部距離改由 safe-area 承擔，
+    // 讓遊戲本體進入首屏；返回鍵點擊區維持 52px（DESIGN.md「密度只加不減」）。
+    expect(shell).toContain("var(--safe-top)");
     expect(shell).toContain("min-height: 52px");
+  });
+
+  it("遊戲頁把遊戲區排在家長說明之前", () => {
+    const shell = source("components/games/GamePageShell.tsx");
+    const playIndex = shell.indexOf('id="game-play"');
+    const introIndex = shell.indexOf("<GameIntro");
+
+    expect(playIndex).toBeGreaterThan(-1);
+    expect(introIndex).toBeGreaterThan(playIndex);
+  });
+
+  it("GameHost 工具列無條件渲染（hasScore:false 的遊戲仍有暫停／靜音／返回）", () => {
+    const host = source("lib/gamekit/host/GameHost.tsx");
+    const rowIndex = host.indexOf("hostStyles.toolbarRow");
+    const toolbarIndex = host.indexOf("<GameChromeToolbar");
+
+    expect(rowIndex).toBeGreaterThan(-1);
+    expect(toolbarIndex).toBeGreaterThan(rowIndex);
+    // 舊寫法把整列（含工具列）包在 title/best 條件內，candy-match 會完全失去控制鈕
+    expect(host).not.toContain("{(title || best != null) && (");
   });
 
   it("GameChrome 不再於暫停時跳出全螢幕選單", () => {

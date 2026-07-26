@@ -14,19 +14,15 @@ describe("decor.module.css", () => {
     expect(css).toMatch(/@keyframes doodle-draw/);
   });
 
-  it("roughShift 輪替 rough-1/2/3 濾鏡", () => {
-    expect(css).toMatch(/@keyframes rough-filter-shift[\s\S]*#rough-1/);
-    expect(css).toMatch(/#rough-2/);
-    expect(css).toMatch(/#rough-3/);
+  it("v0.2：不再有麥克筆式粗糙外框濾鏡", () => {
+    // RoughFrame／SvgDefs 已於遊樂園 v0.2 收斂時整條移除（DESIGN.md「不靠麥克筆描邊」）
+    expect(css).not.toMatch(/rough/i);
   });
 
-  it("prefers-reduced-motion 關閉 doodleDraw 與 roughShift", () => {
+  it("prefers-reduced-motion 關閉 doodleDraw", () => {
     expect(css).toContain("prefers-reduced-motion: reduce");
     expect(css).toMatch(
       /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.doodleDraw path[\s\S]*animation:\s*none/,
-    );
-    expect(css).toMatch(
-      /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.roughShift[\s\S]*animation:\s*none/,
     );
   });
 });

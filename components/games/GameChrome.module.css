@@ -34,9 +34,9 @@
   box-shadow: var(--shadow-sm);
 }
 
+/* DESIGN.md §互動：按壓用 scale(0.98)，不用厚底影下沉。 */
 .toolBtn:active {
-  transform: translateY(3px);
-  box-shadow: none;
+  transform: scale(0.98);
 }
 
 .toolBtn[aria-pressed="true"] {
@@ -44,7 +44,7 @@
 }
 
 .toolBtn:focus-visible {
-  outline: 3px solid var(--c-sky);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -199,7 +199,7 @@
 }
 
 .segmentBtn:focus-visible {
-  outline: 3px solid var(--c-sky);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 

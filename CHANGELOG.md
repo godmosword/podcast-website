@@ -6,6 +6,10 @@
 
 ### Fixed
 
+- **遊戲頁 hasScore:false 會失去所有遊戲控制**：`GameHost` 原本把整條工具列包在 `{(title || best != null) && …}` 內，而主打的 `candy-match` 是 `hasScore: false`（`best` 恆為 null），一旦不傳 title 就會連暫停、靜音、設定一起消失。工具列改為無條件渲染，只有「最佳 ⭐」條件顯示；補反向契約回歸測試鎖住這個條件。
+- **`/games/candy-match` 有兩個 `<h1>`**：`GameIntro` 與 `CandyMatchView` 的關卡標題屏各一。頁面唯一 `<h1>` 改由 `GamePageShell` 抬頭持有，其餘降為 `<h2>`；`GameIntro` 的 `aria-labelledby` 一併改指向自己的標題（原本指向已搬走的 id）。
+- **遊戲頁對比未達 WCAG AA**：`CarAdventureGame` 的鍵盤說明硬寫 `#3a5a8c`，夜間僅 **1.4:1**；`GameIntro` 的遊玩條件 chip 為 4.41:1。皆改用主題 token。
+- **遊戲頁 focus ring 硬寫 `--c-sky`**：改用 `--focus-ring`（夜間為黃色，對比足夠）。
 - **本機 sync 繞過 Actions 漏開待生圖通知**：`npm run sync:apple` 本機 push 後新增 `npm run sync:notify`（複用 GHA `notify-live` 同一路徑，讀 `.cache/sync-run-report.json` 開／去重「待生圖」Issue），修正先前只有 GHA 觸發同步時才會通知、本機上架容易漏掉 `[illustrate]` Issue 的缺口；另補可選 `npm run sync:notify:reconcile`（掃 catalog 補漏，上限 3 筆、跳過已存在 open/closed 同標題單）、`SYNC_ALERT_DRY_RUN=1` 預覽、`--strict` 供本機非 0 檢查；`dryRun`／逾 24h 的 stale report 一律拒絕開單。GHA workflow 未變動。
 
 ### Security
@@ -20,6 +24,17 @@
 - **/legal 版權隱私頁全面擴充**：頁標改「版權、隱私與使用條款」，加章節錨點導覽與政策版本／日期標示；新增「可接受的分享方式」「侵權通知與處理（`/legal#takedown` 流程與必附資料）」「許願、建議與投稿內容」「第三方服務與資料處理者（Vercel／Neon／Resend／外部平台）」「兒少與家長使用」「安全與政策變更」章節。`DISCLAIMER.md`、`public/llms.txt` 同步侵權通知與分享／訓練限制措辭；訂閱與許願表單同意句更新（含「勿填孩子個資」提示）。
 
 ### Changed
+
+- **遊樂園動線重構（兒童優先 + DESIGN v0.2 收斂）**：
+  - **遊戲頁改「遊戲 → 操作提示 → 家長說明」**：`#game-play` 前移到 `GameIntro` 之前，390×844 下遊戲區起點由 ~780px 降到 **72px**。`GameIntro` 降為第二層並改標題「給家長的說明」；`game.controls` 屬兒童資訊，留在遊戲正下方不隨之下移。
+  - **單一 sticky 抬頭**：`GamePageShell` 改為 `← 回遊樂園 + h1` 的 52px sticky 單列。因為遊戲頁已隱藏全站導覽、畫布可高達 640px，抬頭必須 sticky，否則唯一出口會被捲出畫面。同步移除 `GameChromeToolbar` 的 🎡 與 `GameIntro` 的「看其他遊戲」，全頁只留一個返回。
+  - **沉浸式路由**：新增 `isGamePlayRoute`／`isImmersiveRoute`，`/games/:slug` 比照故事播放器隱藏 `SiteNavBar`。`/games` hub 與 `/games/coloring-book`（走 `ColoringPageShell`，無 sticky 出口）不納入。
+  - **hub 由四層扁平為兩層**：取消獨立「今天主打」區塊與過場文案，主打改為所屬分類的第一張大卡（桌面跨兩欄、圖左文右）。「小小探索」回到 2 款、每款遊戲只剩一個入口。行動版 hero `min-height` 500px → `min(48svh, 340px)`，第一張卡進入首屏（~513px）。
+  - **卡片補家長決策資訊**：「約 N 分鐘」「🌿 沒有時間壓力／⏱ 有計時」由只存在 `aria-label` 改為可見文字。
+  - **v0.2 收斂**：移除 hover 歪斜 rotate、厚底影下沉（改 `scale(0.98)`）、內容卡上的 `--gloss`、標題的麥克筆 `text-shadow`；hero Doodle 4 → 2；卡片改 elevated surface + `--hairline` + 極淡 accent 邊。
+  - **夜間過渡層**：深藍頁底與高明度黏土畫布之間補一階 surface；不動 canvas 背景（DESIGN.md「不做：改遊戲畫布」）。
+  - **移除 `RoughFrame` 與 `SvgDefs`（`#rough-1/2/3` 粗糙濾鏡）**：`/games` 是最後一個消費點，收斂後全站歸零。連同 `decor.module.css` 的 `roughShift`／`roughFrame`、對應契約測試與 `app/layout.tsx` 掛載一併清除；`DESIGN.md` 刪除「`/games` 等非本方針範圍頁面」的 carve-out，改為「日後要恢復須先登記」。
+  - **新增 `e2e/games.spec.ts`**（首屏、DOM 順序、唯一 h1、單一返回、hub 入口不重複、橫向／平板），`e2e/a11y.spec.ts` 補兩個遊戲頁。
 
 - **宇宙地圖減法點島**：點任一島改為飛鏡頭＋顯示探索點（pin），不再自動開底部選單；鎖島接 `LockedIslandBubble`（`tapBubble`）；MapGuide／tap hint 改「點一座島飛過去，再點探索點」；島頁保留 GEO sr-only，卸載 `ZoneIslandPage`。
 - **宇宙地圖兒童探索 polish（T7）**：鎖島 sheet 首屏改 `childHint` 短句＋「去聽車車故事」主 CTA；session 首訪 overlay「點一座島看看」（StrictMode 雙 effect 門閂，僅 dismiss 才寫 session key）；MapGuide 探險小抄補「鍵盤也可探索」（僅 `pointer:fine` 顯示）；ZoneSheet 關閉鈕觸控區 48px；e2e／smoke 對齊兒童極簡斷言。

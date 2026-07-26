@@ -573,21 +573,9 @@ export function CandyMatchView({
           marginBottom: 10,
         }}
       >
+        {/* 遊戲名由 GamePageShell 的 h1 唯一持有，這裡只顯示目前關卡地點。 */}
         <div className={styles.gameTitle} style={{ fontSize: 18, fontWeight: 900, color: INK, whiteSpace: "nowrap" }}>
-          繽紛消消樂
-          {screen === "play" && (
-            <span
-              style={{
-                color: INK_SOFT,
-                fontWeight: 800,
-                fontSize: 14,
-                marginLeft: 8,
-                whiteSpace: "nowrap",
-              }}
-            >
-              {level.place}
-            </span>
-          )}
+          {screen === "play" ? level.place : null}
         </div>
       </div>
 
@@ -600,9 +588,10 @@ export function CandyMatchView({
               </span>
             ))}
           </div>
-          <h1 style={{ fontSize: 40, fontWeight: 900, color: ACCENT_PINK, margin: "0 0 8px" }}>
+          {/* 頁面唯一 h1 屬 GamePageShell；此處為關卡畫面標題，降為 h2 避免重複 h1。 */}
+          <h2 style={{ fontSize: 40, fontWeight: 900, color: ACCENT_PINK, margin: "0 0 8px" }}>
             準備找糖果！
-          </h1>
+          </h2>
           <p style={{ color: INK_SOFT, fontWeight: 700, margin: "0 0 26px", fontSize: 15 }}>
             找一找、排一排、消一消，完成小任務就有星星！
           </p>

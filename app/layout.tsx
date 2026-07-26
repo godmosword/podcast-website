@@ -7,7 +7,6 @@ import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import ReturnVisitPing from "@/components/ReturnVisitPing";
 import SiteNavBar from "@/components/landing/SiteNavBar";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import SvgDefs from "@/components/decor/SvgDefs";
 import { siteIdentityJsonLd } from "@/lib/json-ld";
 import { getSiteUrl } from "@/lib/site-url";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
@@ -114,7 +113,6 @@ export default function RootLayout({
             跳到主內容
           </a>
           <div className="site-backdrop" aria-hidden />
-          <SvgDefs />
           <SiteNavBar />
           <div id="main-content" tabIndex={-1} className="site-root">
             {children}

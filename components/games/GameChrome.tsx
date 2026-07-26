@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
   createContext,
   useContext,
@@ -64,10 +63,9 @@ export function GameChromeToolbar({
   };
 
   return (
+    // 返回動線由 GamePageShell 的抬頭唯一持有（它就在遊戲正上方、恆在首屏內）。
+    // 這裡不再放第二顆「回遊樂園」，避免同頁兩個同名連結與多餘 chrome。
     <div className={styles.toolbar} role="group" aria-label="遊戲控制">
-      <Link href="/games" className={styles.toolBtn} aria-label="回遊樂園">
-        🎡
-      </Link>
       {canPause && (
         <button
           type="button"

@@ -22,10 +22,11 @@ import type { GameAdapter, GameInstance, GameStatus, OverlayProps } from "@/lib/
 import type { GameAction } from "@/lib/gamekit/types";
 import type { TutorialStep } from "@/data/games";
 import { BarTouchButton, touchControlStyles } from "@/lib/gamekit/react/TouchControls";
+import hostStyles from "./GameHost.module.css";
 
 export type GameHostProps = {
   adapter: GameAdapter;
-  /** Optional title shown in chrome heading. */
+  /** 遊戲名。頁面標題由 GamePageShell 的 h1 持有；此處僅供 TutorialOverlay 使用。 */
   title?: string;
   /** Cover image for ready screen (passed to overlay). */
   coverSrc?: string;
@@ -305,37 +306,26 @@ export default function GameHost({
       className={className}
     >
       <div style={{ position: "relative", width: "100%" }}>
-        {(title || best != null) && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 8,
-              gap: 8,
-            }}
-          >
-            <div style={{ fontWeight: 800, fontSize: 16 }}>
-              {title}
-              {kidsMode ? " 🧒" : ""}
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              {(best ?? 0) > 0 && (
-                <span style={{ fontSize: 13, fontWeight: 700 }}>
-                  最佳 ⭐ {best}
-                </span>
-              )}
-              <GameChromeToolbar
-                canPause={status === "playing" || status === "paused"}
-                paused={status === "paused"}
-                onPause={handlePause}
-                onResume={handleResume}
-                soundOn={soundUi}
-                onToggleSound={toggleSound}
-              />
-            </div>
-          </div>
-        )}
+        {/*
+         * 契約：這一列必須「無條件」渲染。
+         * GameChromeToolbar（暫停／靜音／設定）唯一掛載點就在這裡，
+         * 若把整列包進 `title || best != null` 之類的條件，hasScore: false 的遊戲
+         * （例如主打的 candy-match，best 恆為 null）會完全失去這些控制。
+         * 只有「最佳分數」可以條件顯示；遊戲名由 GamePageShell 的 h1 持有，此處不重複。
+         */}
+        <div className={hostStyles.toolbarRow}>
+          {(best ?? 0) > 0 ? (
+            <span className={hostStyles.bestScore}>最佳 ⭐ {best}</span>
+          ) : null}
+          <GameChromeToolbar
+            canPause={status === "playing" || status === "paused"}
+            paused={status === "paused"}
+            onPause={handlePause}
+            onResume={handleResume}
+            soundOn={soundUi}
+            onToggleSound={toggleSound}
+          />
+        </div>
 
         {needsCanvas && (
           <canvas

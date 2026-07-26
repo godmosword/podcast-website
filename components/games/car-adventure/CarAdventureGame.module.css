@@ -38,9 +38,13 @@
   color: #3a5a8c;
 }
 
+/*
+ * 操作說明是功能性文字不是美術色：硬寫的 #3a5a8c 在夜間僅 1.4:1。
+ * 用 --ink 而非 --ink-soft——13px 小字疊在夜間 mat 底上，--ink-soft 只有 4.39:1，仍未達 AA。
+ */
 .help {
   text-align: center;
-  color: #3a5a8c;
+  color: var(--ink);
   font-size: 13px;
   margin-top: 10px;
 }

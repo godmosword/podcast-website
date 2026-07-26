@@ -100,13 +100,10 @@ meta `theme-color`（夜）對齊 `--bg`：`lib/theme.ts` 的 `NIGHT_THEME_COLOR
 
 插畫與封面是視覺主角；裝飾預設關閉，僅在品牌點綴處極少量使用。
 
-### 全域 SVG 粗糙濾鏡（保留供遊戲等例外）
-- `components/decor/SvgDefs.tsx`：定義 `#rough-1/2/3`，於 `app/layout.tsx <body>` 掛載一次。
-- 收聽／內容動線的 StoryCard、LatestHero **不再**使用 RoughFrame。
-
-### RoughFrame
-- 元件仍保留於 `components/decor/RoughFrame.tsx`，供 `/games` 等非本方針範圍頁面使用。
-- 核心收聽動線改為 elevated surface + `--hairline`／極淡 `story.color` 邊。
+### 麥克筆式粗糙外框（已全站移除）
+- `RoughFrame` 與 `SvgDefs`（`#rough-1/2/3` 濾鏡）**已刪除**；`/games` 於 v0.2 收斂後不再是例外，全站無粗糙描邊。
+- 卡片一律 elevated surface + `--hairline`／極淡主題色邊（`story.color` 或 `--card-accent`）。
+- 若日後要恢復手繪描邊，須先在本節登記使用範圍與理由，不得直接復活死碼。
 
 ### 塗鴉散布
 - `components/decor/Doodle.tsx` 仍可用；**上限**：SiteHeader／SiteFooter 合計各 ≤2 極淡點綴；LatestHero／StoryCard／StoryFilter **無** Doodle。

@@ -9,7 +9,7 @@ import SubscribeMenu from "@/components/landing/SubscribeMenu";
 import Icon from "@/components/ui/Icon";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useLandingFooterNavSolid } from "@/hooks/useLandingFooterNavSolid";
-import { isStoryPlayRoute } from "@/lib/is-story-play-route";
+import { isImmersiveRoute } from "@/lib/is-story-play-route";
 import { visibleSocials } from "@/lib/social";
 import styles from "./SiteNavBar.module.css";
 
@@ -118,7 +118,7 @@ export function isInternalPathActive(
 
 export default function SiteNavBar() {
   const pathname = usePathname();
-  const playMode = isStoryPlayRoute(pathname);
+  const playMode = isImmersiveRoute(pathname);
   const menuId = useId();
   const searchId = useId();
   const [open, setOpen] = useState(false);

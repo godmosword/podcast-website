@@ -98,13 +98,18 @@
   transform: translateY(-2px);
 }
 
+/* DESIGN.md §互動：按壓用 scale(0.98)，不用厚底影下沉。 */
 .replayBtn:active,
 .nextBtn:active {
-  transform: translateY(3px);
-  box-shadow: none;
+  transform: scale(0.98);
 }
 
+/* 兒童頁觸控底線 44px（DESIGN.md §間距）：這是玩完後最常按的離開動線。 */
 .nextSoft {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: 12px;
   color: var(--ink-soft, #5c564f);
   font-size: 0.9rem;
   font-weight: 800;
@@ -117,7 +122,11 @@
 }
 
 .hubLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   margin-top: 2px;
+  padding-inline: 12px;
   color: var(--ink-soft, #5c564f);
   font-size: 0.86rem;
   font-weight: 700;
