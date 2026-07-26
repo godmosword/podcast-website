@@ -2,28 +2,17 @@ class_name TrackBuilder
 ## 把 TrackData 轉成 3D 世界：路面網格、護欄糖珠、裝飾道具、加速帶、起跑線、環境光。
 ## 全程序生成（無外部資產），MultiMesh 控制 draw call。
 
+const KartMaterials = preload("res://scripts/materials.gd")
+
 const SAMPLE_STEP := 4.0
 const BARRIER_STEP := 10.0
 const PROP_STEP := 26.0
 
 static func make_clay_material() -> StandardMaterial3D:
-	var mat := StandardMaterial3D.new()
-	mat.vertex_color_use_as_albedo = true
-	mat.roughness = 0.85
-	mat.metallic = 0.0
-	# 程序生成的路面/起跑線/加速帶三角形繞向不保證一致，關閉背面剔除
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	return mat
+	return KartMaterials.road()
 
 static func solid_material(color: Color, emissive := 0.0) -> StandardMaterial3D:
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = color
-	mat.roughness = 0.8
-	if emissive > 0.0:
-		mat.emission_enabled = true
-		mat.emission = color
-		mat.emission_energy_multiplier = emissive
-	return mat
+	return KartMaterials.solid(color, emissive)
 
 ## 建出整個賽道世界，回傳掛了所有東西的 Node3D。
 static func build_world(track: Dictionary, curve: Curve3D) -> Node3D:
@@ -257,7 +246,7 @@ static func _add_landmark(root: Node3D, track: Dictionary, curve: Curve3D) -> vo
 			trunk.height = 10.0
 			var trunk_inst := MeshInstance3D.new()
 			trunk_inst.mesh = trunk
-			trunk_inst.material_override = solid_material(Color8(157, 231, 184).darkened(0.15))
+			trunk_inst.material_override = KartMaterials.wood(Color8(157, 231, 184).darkened(0.35))
 			trunk_inst.position = Vector3(0, 5.0, 0)
 			landmark.add_child(trunk_inst)
 			for layer in 3:
@@ -267,7 +256,7 @@ static func _add_landmark(root: Node3D, track: Dictionary, curve: Curve3D) -> vo
 				var inst := MeshInstance3D.new()
 				inst.mesh = canopy
 				var cols: Array = track["prop_colors"]
-				inst.material_override = solid_material(cols[layer % cols.size()])
+				inst.material_override = KartMaterials.foliage(cols[layer % cols.size()])
 				inst.position = Vector3(0, 12.0 + layer * 3.5, 0)
 				landmark.add_child(inst)
 		"ice_mountain":
@@ -287,7 +276,7 @@ static func _add_landmark(root: Node3D, track: Dictionary, curve: Curve3D) -> vo
 			cone.height = 16.0
 			var body := MeshInstance3D.new()
 			body.mesh = cone
-			body.material_override = solid_material(Color8(122, 82, 48))
+			body.material_override = KartMaterials.wood()
 			body.position = Vector3(0, 8.0, 0)
 			body.scale = Vector3(1.2, 1.5, 1.2)
 			landmark.add_child(body)

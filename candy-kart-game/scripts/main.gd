@@ -3,6 +3,7 @@ extends Node3D
 ## 獲勝標準：單場名次（前 3 = 通關星）＋時間達標星＋全星星；
 ## 大獎賽 6 站積分 10-8-6-5-4-3-2-1，總分最高奪繽紛糖果盃。
 
+const KartMaterials = preload("res://scripts/materials.gd")
 const GP_POINTS := [10, 8, 6, 5, 4, 3, 2, 1]
 
 var sfx: Sfx
@@ -45,9 +46,19 @@ func _run_smoke() -> void:
 	race.player.input_steer = 0.2
 	var timer := get_tree().create_timer(6.0)
 	timer.timeout.connect(func() -> void:
-		var ok := race != null and race.karts.size() >= 5 and race.player.progress > 0.0
-		print("SMOKE_RESULT pos=%d progress=%.1f karts=%d ok=%s" % [
-			race.position_of(race.player), race.player.progress, race.karts.size(), str(ok),
+		var player := race.player
+		var mats_ok: bool = KartMaterials.CATALOG.size() >= 8
+		var grounded: bool = player != null and player.global_position.y > -2.0 and player.global_position.y < 80.0
+		var ok: bool = (
+			race != null
+			and race.karts.size() >= 5
+			and player.progress > 0.0
+			and mats_ok
+			and grounded
+		)
+		print("SMOKE_RESULT pos=%d progress=%.1f karts=%d y=%.2f mats=%d ok=%s" % [
+			race.position_of(player), player.progress, race.karts.size(),
+			player.global_position.y, KartMaterials.CATALOG.size(), str(ok),
 		])
 		get_tree().quit(0 if ok else 1)
 	)

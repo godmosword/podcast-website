@@ -43,6 +43,7 @@
 
 | ID | Commit |
 |----|--------|
+| feat(candy-kart): clay material catalog + curve ground stick | `PENDING` |
 | feat(snowboard): rebuild visual presentation（材質／QA 景別） | `b8e8238` |
 | feat(snowboard): clay material catalog + visual QA contract（軌道 A） | `5a623ef` |
 | feat(snowboard): Bonbon character textures + face detail | `38453aa` |

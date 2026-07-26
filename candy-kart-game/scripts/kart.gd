@@ -2,6 +2,9 @@ class_name Kart
 extends Node3D
 ## Arcade 卡丁車：沿賽道曲線以 progress（前進量）＋ lateral（橫向偏移）模擬。
 ## 無物理引擎依賴——行動端效能穩定、不可能抄捷徑；玩家與 AI 共用同一套模型。
+## 貼地：sample_baked_with_rotation 對齊路面法線（賽道無碰撞體，等同 raycast 手感）。
+
+const KartMaterials = preload("res://scripts/materials.gd")
 
 const MAX_SPEED := 30.0
 const ACCEL := 14.0
@@ -12,6 +15,8 @@ const GRASS_FACTOR := 0.42
 const GRIP := 36.0
 const BOOST_MULT := 1.32
 const DRIFT_CHARGE_TIME := 1.1
+const GROUND_BLEND := 12.0
+const RIDE_HEIGHT := 0.5
 
 var curve: Curve3D
 var track_length := 1.0
@@ -45,6 +50,7 @@ var _drift_dust: CPUParticles3D
 var _wheel_spin := 0.0
 var _rng := RandomNumberGenerator.new()
 var _ai_wobble := 0.0
+var _ground_up := Vector3.UP
 
 func setup(p_curve: Curve3D, color: Color, player: bool, skill: float, name_text: String) -> void:
 	curve = p_curve
@@ -55,8 +61,9 @@ func setup(p_curve: Curve3D, color: Color, player: bool, skill: float, name_text
 	display_name = name_text
 	_rng.seed = hash(name_text) + int(skill * 1000.0)
 	_ai_wobble = _rng.randf_range(0.0, TAU)
+	_ground_up = Vector3.UP
 	_build_body()
-	_apply_pose()
+	_apply_pose(1.0)
 
 func lap_fraction() -> float:
 	return fposmod(progress, track_length) / track_length
@@ -119,7 +126,7 @@ func step(dt: float, race_running: bool, rubber_band: float) -> void:
 
 	progress += speed * dt
 	_update_lap()
-	_apply_pose()
+	_apply_pose(dt)
 	_update_fx(dt)
 
 func _idle_roll(dt: float) -> void:
@@ -127,7 +134,7 @@ func _idle_roll(dt: float) -> void:
 	if speed > 0.0:
 		progress += speed * dt
 		lateral = move_toward(lateral, 0.0, dt * 2.0)
-	_apply_pose()
+	_apply_pose(dt)
 	_update_fx(dt)
 
 func _update_fx(dt: float) -> void:
@@ -171,16 +178,32 @@ func _ai_steer(dt: float) -> float:
 	target_lat = clampf(target_lat, -6.5, 6.5)
 	return clampf((target_lat - lateral) * 0.5, -1.0, 1.0)
 
-func _apply_pose() -> void:
+func _apply_pose(dt := 0.016) -> void:
 	var off := fposmod(progress, track_length)
-	var pos := curve.sample_baked(off, true)
-	var ahead := curve.sample_baked(fposmod(off + 1.5, track_length), true)
-	var tangent := (ahead - pos).normalized()
-	var side := Vector3(-tangent.z, 0.0, tangent.x)
-	position = pos + side * lateral + Vector3(0, 0.5, 0)
-	var yaw := atan2(-tangent.x, -tangent.z)
-	var visual_yaw := yaw - steer * 0.35 - (steer * 0.55 if drifting else 0.0)
-	rotation = Vector3(0, visual_yaw, 0)
+	# Curve3D：+Z 沿切線、+Y 為路面法線（平行搬運），等同沿賽道「raycast」貼地。
+	var xf := curve.sample_baked_with_rotation(off, true)
+	var tangent := xf.basis.z.normalized()
+	var up := xf.basis.y.normalized()
+	if up.dot(Vector3.UP) < 0.25:
+		up = Vector3.UP
+	_ground_up = _ground_up.slerp(up, minf(1.0, dt * GROUND_BLEND)).normalized()
+
+	var forward := (tangent - _ground_up * tangent.dot(_ground_up)).normalized()
+	if forward.length_squared() < 0.0001:
+		forward = (-xf.basis.x).normalized()
+	var side := _ground_up.cross(forward).normalized()
+	position = xf.origin + side * lateral + _ground_up * RIDE_HEIGHT
+
+	# 車體本地 -Z 為車頭（bumper 在 -Z）
+	var visual_yaw := -steer * 0.35 - (steer * 0.55 if drifting else 0.0)
+	var basis := Basis()
+	basis.z = -forward
+	basis.y = _ground_up
+	basis.x = basis.y.cross(basis.z).normalized()
+	basis.y = basis.z.cross(basis.x).normalized()
+	basis = basis.rotated(_ground_up, visual_yaw)
+	transform.basis = basis.orthonormalized()
+
 	if _body:
 		_body.rotation.z = steer * (0.22 if drifting else 0.1)
 	_wheel_spin += speed * 0.08
@@ -195,7 +218,7 @@ func _build_body() -> void:
 	body_mesh.size = Vector3(1.75, 0.62, 2.5)
 	var body_inst := MeshInstance3D.new()
 	body_inst.mesh = body_mesh
-	body_inst.material_override = TrackBuilder.solid_material(kart_color)
+	body_inst.material_override = KartMaterials.kart_shell(kart_color)
 	body_inst.position.y = 0.42
 	_body.add_child(body_inst)
 
@@ -203,7 +226,7 @@ func _build_body() -> void:
 	cabin.size = Vector3(1.2, 0.45, 1.1)
 	var cabin_inst := MeshInstance3D.new()
 	cabin_inst.mesh = cabin
-	cabin_inst.material_override = TrackBuilder.solid_material(kart_color.lightened(0.18))
+	cabin_inst.material_override = KartMaterials.kart_shell(kart_color.lightened(0.18))
 	cabin_inst.position = Vector3(0, 0.78, -0.15)
 	_body.add_child(cabin_inst)
 
@@ -211,7 +234,7 @@ func _build_body() -> void:
 	spoiler.size = Vector3(1.5, 0.12, 0.35)
 	var spoiler_inst := MeshInstance3D.new()
 	spoiler_inst.mesh = spoiler
-	spoiler_inst.material_override = TrackBuilder.solid_material(kart_color.darkened(0.12))
+	spoiler_inst.material_override = KartMaterials.kart_shell(kart_color.darkened(0.12))
 	spoiler_inst.position = Vector3(0, 0.92, 1.05)
 	_body.add_child(spoiler_inst)
 
@@ -220,7 +243,7 @@ func _build_body() -> void:
 	bumper.height = 1.05
 	var bumper_inst := MeshInstance3D.new()
 	bumper_inst.mesh = bumper
-	bumper_inst.material_override = TrackBuilder.solid_material(kart_color.lightened(0.25))
+	bumper_inst.material_override = KartMaterials.candy(kart_color.lightened(0.25), 0.08)
 	bumper_inst.position = Vector3(0, 0.42, -1.28)
 	_body.add_child(bumper_inst)
 
@@ -229,7 +252,7 @@ func _build_body() -> void:
 	head.height = 0.88
 	var head_inst := MeshInstance3D.new()
 	head_inst.mesh = head
-	head_inst.material_override = TrackBuilder.solid_material(Color(1.0, 0.92, 0.84))
+	head_inst.material_override = KartMaterials.skin()
 	head_inst.position = Vector3(0, 1.02, 0.15)
 	_body.add_child(head_inst)
 
@@ -239,7 +262,7 @@ func _build_body() -> void:
 		eye.height = 0.22
 		var eye_inst := MeshInstance3D.new()
 		eye_inst.mesh = eye
-		eye_inst.material_override = TrackBuilder.solid_material(Color(0.12, 0.1, 0.14))
+		eye_inst.material_override = KartMaterials.solid(Color(0.12, 0.1, 0.14))
 		eye_inst.position = Vector3(ex, 1.08, -0.05)
 		_body.add_child(eye_inst)
 
@@ -248,14 +271,14 @@ func _build_body() -> void:
 	helmet.height = 0.52
 	var helmet_inst := MeshInstance3D.new()
 	helmet_inst.mesh = helmet
-	helmet_inst.material_override = TrackBuilder.solid_material(kart_color.lightened(0.4))
+	helmet_inst.material_override = KartMaterials.fabric(kart_color.lightened(0.4))
 	helmet_inst.position = Vector3(0, 1.26, 0.15)
 	_body.add_child(helmet_inst)
 
 	var wheel_mesh := SphereMesh.new()
 	wheel_mesh.radius = 0.4
 	wheel_mesh.height = 0.8
-	var wheel_mat := TrackBuilder.solid_material(Color(0.32, 0.26, 0.34))
+	var wheel_mat := KartMaterials.rubber()
 	for wx in [-0.88, 0.88]:
 		for wz in [-0.92, 0.92]:
 			var w := MeshInstance3D.new()
