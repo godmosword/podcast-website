@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import { CandyKartIframeHost } from "@/components/games/CandyKartIframeHost";
+import CandyKartGameHost from "@/app/games/candy-kart/CandyKartGameHost";
 import { GamePageShell } from "@/components/games/GamePageShell";
-import { candyKartIframeSrc } from "@/lib/games/candy-kart/iframe-src";
 import { getSiteUrl } from "@/lib/site-url";
-import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "繽紛卡丁車",
@@ -19,12 +17,7 @@ export const metadata: Metadata = {
 export default function CandyKartGamePage() {
   return (
     <GamePageShell title="繽紛卡丁車小遊戲" gameId="candy-kart" preload={false}>
-      <CandyKartIframeHost
-        title="繽紛卡丁車遊戲"
-        src={candyKartIframeSrc()}
-        className={styles.kartFrame}
-      />
-      <p className={styles.kartNote}>畫面沒出來嗎？重新整理一下試試 🍬</p>
+      <CandyKartGameHost />
     </GamePageShell>
   );
 }

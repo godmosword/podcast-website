@@ -102,14 +102,19 @@ describe("game logic regressions", () => {
   });
 
   it("繽紛卡丁車 Host 驗證來源並走 gamekit 回報，含按需載入", () => {
-    const host = source("components/games/CandyKartIframeHost.tsx");
+    const view = source("components/games/CandyKartView.tsx");
+    const adapter = source("lib/gamekit/games/candy-kart/adapter.ts");
+    const bridge = source("lib/gamekit/games/candy-kart-bridge.ts");
 
-    expect(host).toContain("event.origin !== window.location.origin");
-    expect(host).toContain("isCandyKartFinishMessage");
-    expect(host).toContain("candyKartSessionFromFinish");
-    expect(host).toContain("reportGameSession");
-    expect(host).toContain("manualStart: true");
-    expect(host).toContain("readGodotLoaderProgress");
+    expect(view).toContain("event.origin !== window.location.origin");
+    expect(view).toContain("isCandyKartFinishMessage");
+    expect(view).toContain("candyKartSessionFromFinish");
+    expect(view).toContain("manualStart: true");
+    expect(view).toContain("readGodotLoaderProgress");
+    expect(adapter).toContain("onSession");
+    expect(adapter).toContain('id: "candy-kart"');
+    expect(bridge).toContain('CANDY_KART_MESSAGE_SOURCE = "cheche-candy-kart"');
+    expect(bridge).toContain('type: "race-finish"');
   });
 
   it("繽紛卡丁車保留觸控方向、漂移與煞車控制", () => {

@@ -43,10 +43,10 @@ interface GameInstance {
 
 ## Migration Order
 
-1. **Candy Match** – pure function engine already exists → easiest adapter.
-2. **Car Adventure** – physics + render already split.
-3. **Block Drop** – extract state machine from the large component.
-4. **Candy Kart** – iframe adapter wrapping existing postMessage bridge.
+1. **Candy Match** – ✅ overlay adapter（`lib/gamekit/games/candy-match/`）
+2. **Car Adventure** – ✅ canvas `fixedUpdate` + `render`
+3. **Block Drop** – ✅ overlay adapter（DOM board）
+4. **Candy Kart** – ✅ iframe adapter wrapping `candy-kart-bridge` postMessage
 
 ## Compatibility Rules
 
