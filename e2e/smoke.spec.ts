@@ -208,6 +208,27 @@ test("阿蹦雪山衝刺 debugFinish 會透過 Godot iframe 更新三星進度",
     .toBe(true);
 });
 
+test("阿蹦雪山衝刺 visual QA 會轉送景別且不寫入成績", async ({ page }) => {
+  test.setTimeout(60_000);
+  await page.goto("/games/snowboard?visualStage=forest&visualPose=carve");
+  await page.getByRole("button", { name: "出發！開始滑雪" }).click();
+  await expect(page.locator("iframe[title='阿蹦雪山衝刺遊戲']")).toHaveAttribute(
+    "src",
+    "/snowboard/index.html?visualStage=forest&visualPose=carve",
+  );
+  await page.waitForTimeout(4_000);
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const raw = localStorage.getItem("cheche:progress");
+        if (!raw) return false;
+        const progress = JSON.parse(raw);
+        return progress.gameProfile?.gamesPlayed?.snowboard === true;
+      }),
+    )
+    .toBe(false);
+});
+
 test("車車大冒險頁面可載入", async ({ page }) => {
   await page.goto("/games/car-adventure");
   await expect(page.getByRole("link", { name: "← 回遊樂園" })).toBeVisible();

@@ -51,3 +51,11 @@ static func prefers_reduced_motion() -> bool:
 		"window.matchMedia('(prefers-reduced-motion: reduce)').matches", true
 	)
 	return result == true
+
+static func uses_coarse_pointer() -> bool:
+	if not OS.has_feature("web"):
+		return DisplayServer.is_touchscreen_available()
+	var result: Variant = JavaScriptBridge.eval(
+		"window.matchMedia('(pointer: coarse)').matches || Math.min(window.innerWidth, window.innerHeight) < 700", true
+	)
+	return result == true

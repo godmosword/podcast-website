@@ -7,6 +7,7 @@ const SnowboardRider = preload("res://scripts/rider.gd")
 const SnowTrails = preload("res://scripts/trails.gd")
 const SnowboardHud = preload("res://scripts/hud.gd")
 const SnowboardSfx = preload("res://scripts/sfx.gd")
+const SnowVisualProfile = preload("res://scripts/visual_profile.gd")
 
 enum RunState { MENU, COUNTDOWN, RUNNING, FINISHED }
 
@@ -24,6 +25,10 @@ var camera: Camera3D
 var run_environment: Environment
 var app_theme: Theme
 var reduced_motion := false
+var visual_profile: SnowVisualProfile
+var visual_qa: bool = false
+var visual_stage: String = ""
+var visual_pose: String = "ride"
 var elapsed_seconds := 0.0
 var penalty_ms := 0
 var falls := 0
@@ -33,9 +38,43 @@ var _last_checkpoint_announced := 0.0
 var _finish_sent := false
 var _audio_unlocked := false
 var _touch_jump_previous := false
+var _camera_impact := 0.0
+var _camera_spring := 0.0
+var _camera_spring_velocity := 0.0
+var _visual_perf_elapsed := 0.0
+var _visual_perf_reported := false
 
 func _ready() -> void:
-	reduced_motion = SnowboardBridge.prefers_reduced_motion()
+	# Web-export argv entries are JavaScript-backed string variants in Godot 4.3.
+	# A JSON round-trip normalizes them before GDScript comparisons.
+	var parsed_args: Variant = JSON.parse_string(JSON.stringify(OS.get_cmdline_user_args()))
+	var user_args: Array = parsed_args if parsed_args is Array else []
+	reduced_motion = user_args.has("--visual-reduced-motion") or SnowboardBridge.prefers_reduced_motion()
+	var coarse_pointer := user_args.has("--visual-mobile") or SnowboardBridge.uses_coarse_pointer()
+	visual_profile = SnowVisualProfile.create(reduced_motion, coarse_pointer)
+	visual_qa = false
+	if user_args.has("--visual-stage=start"):
+		visual_stage = "start"
+		visual_qa = true
+	elif user_args.has("--visual-stage=forest"):
+		visual_stage = "forest"
+		visual_qa = true
+	elif user_args.has("--visual-stage=valley"):
+		visual_stage = "valley"
+		visual_qa = true
+	elif user_args.has("--visual-stage=finish"):
+		visual_stage = "finish"
+		visual_qa = true
+	else:
+		visual_stage = ""
+	if user_args.has("--visual-pose=carve"):
+		visual_pose = "carve"
+	elif user_args.has("--visual-pose=jump"):
+		visual_pose = "jump"
+	elif user_args.has("--visual-pose=landing"):
+		visual_pose = "landing"
+	else:
+		visual_pose = "ride"
 	_load_theme_font()
 	_setup_ui_scale()
 	sfx = SnowboardSfx.new()
@@ -45,11 +84,15 @@ func _ready() -> void:
 	ui_layer.layer = 20
 	add_child(ui_layer)
 	SnowboardBridge.send_ready()
-	SnowboardBridge.send_debug_finish_if_requested()
+	if not visual_qa:
+		SnowboardBridge.send_debug_finish_if_requested()
 	if OS.get_cmdline_user_args().has("--smoke"):
 		_run_smoke()
 		return
-	_show_title()
+	if visual_qa:
+		call_deferred("_start_visual_qa")
+	else:
+		_show_title()
 
 func _input(event: InputEvent) -> void:
 	if not _audio_unlocked and (event is InputEventKey or event is InputEventMouseButton or event is InputEventScreenTouch or event is InputEventJoypadButton):
@@ -57,6 +100,19 @@ func _input(event: InputEvent) -> void:
 		sfx.unlock()
 
 func _process(delta: float) -> void:
+	if visual_qa and rider and hud:
+		world_builder.update_focus(Course.progress_of(rider.global_position))
+		_update_camera(delta)
+		_visual_perf_elapsed += delta
+		if _visual_perf_elapsed >= 4.0 and not _visual_perf_reported:
+			_visual_perf_reported = true
+			print("VIS_PERF_RESULT fps=%d draws=%d primitives=%d mobile=%s" % [
+				Engine.get_frames_per_second(),
+				int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)),
+				int(Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME)),
+				str(visual_profile.mobile),
+			])
+		return
 	if state == RunState.RUNNING and not get_tree().paused and rider and hud:
 		elapsed_seconds += delta
 		var steer := Input.get_action_strength("steer_right") - Input.get_action_strength("steer_left")
@@ -69,8 +125,9 @@ func _process(delta: float) -> void:
 		rider.input_jump = Input.is_action_just_pressed("jump") or (touch_jump_now and not _touch_jump_previous)
 		_touch_jump_previous = touch_jump_now
 		var progress := Course.progress_of(rider.position)
+		world_builder.update_focus(progress)
 		_update_checkpoint(progress)
-		trails.record(rider.global_position, rider.global_basis, rider.is_on_floor())
+		trails.record(rider.global_position, rider.global_basis, rider.is_on_floor(), rider.carve_strength)
 		var total_ms := int(elapsed_seconds * 1000.0) + penalty_ms
 		hud.update_state(total_ms, snowflakes_collected, rider.speed, progress)
 		_update_camera(delta)
@@ -102,21 +159,25 @@ func _start_run(skip_countdown := false) -> void:
 	add_child(run_root)
 	world_builder = SnowWorldBuilder.new()
 	world_builder.reduced_motion = reduced_motion
+	world_builder.visual_profile = visual_profile
 	run_root.add_child(world_builder)
 	run_environment = world_builder.environment
 	for pickup in world_builder.snowflakes:
 		pickup.collected.connect(_on_snowflake_collected)
 	rider = SnowboardRider.new()
+	rider.visual_profile = visual_profile
 	rider.position = Course.position_at(8.0, 0.0, 1.5)
 	rider.wiped_out.connect(_on_wipeout)
 	rider.jumped.connect(func() -> void: sfx.play(sfx.snd_jump))
-	rider.landed.connect(func() -> void: sfx.play(sfx.snd_land, -4.0))
+	rider.landed.connect(_on_rider_landed)
 	run_root.add_child(rider)
 	trails = SnowTrails.new()
+	trails.visual_profile = visual_profile
 	run_root.add_child(trails)
 	_build_camera()
 	hud = SnowboardHud.new()
 	hud.app_theme = app_theme
+	hud.touch_layout = visual_profile.touch_layout
 	hud.pause_requested.connect(_pause_run)
 	hud.resume_requested.connect(_resume_run)
 	hud.restart_requested.connect(func() -> void:
@@ -154,13 +215,20 @@ func _update_checkpoint(progress: float) -> void:
 	if current_checkpoint > _last_checkpoint_announced:
 		_last_checkpoint_announced = current_checkpoint
 		sfx.play(sfx.snd_checkpoint)
+		if hud:
+			hud.notify_checkpoint()
 
 func _on_snowflake_collected(pickup: Area3D) -> void:
 	if state != RunState.RUNNING:
 		return
 	snowflakes_collected += 1
 	sfx.play(sfx.snd_pickup)
-	pickup.queue_free()
+	if hud:
+		hud.notify_snowflake()
+	if pickup.has_method("play_collect"):
+		pickup.play_collect()
+	else:
+		pickup.queue_free()
 
 func _on_wipeout() -> void:
 	if state != RunState.RUNNING:
@@ -168,6 +236,7 @@ func _on_wipeout() -> void:
 	falls += 1
 	penalty_ms += 3000
 	sfx.play(sfx.snd_bump)
+	_camera_impact = 0.7 if visual_profile.camera_motion else 0.0
 	await get_tree().create_timer(0.45).timeout
 	if state != RunState.RUNNING or rider == null:
 		return
@@ -176,7 +245,7 @@ func _on_wipeout() -> void:
 	rider.enabled = true
 
 func _finish_run() -> void:
-	if _finish_sent or state != RunState.RUNNING:
+	if visual_qa or _finish_sent or state != RunState.RUNNING:
 		return
 	_finish_sent = true
 	state = RunState.FINISHED
@@ -205,24 +274,70 @@ func _build_camera() -> void:
 	camera_pivot.name = "CameraPivot"
 	run_root.add_child(camera_pivot)
 	camera = Camera3D.new()
-	camera.fov = 60.0
+	camera.fov = 61.0
 	camera.environment = run_environment
 	camera.current = true
-	camera.position = Vector3(0, 0, 9.5)
+	camera.position = Vector3(0.75, 1.2, 13.2)
 	camera_pivot.add_child(camera)
-	camera_pivot.global_position = rider.global_position + Vector3(0, 2.3, 0)
+	camera_pivot.global_position = rider.global_position + Vector3(0, 1.8, 0)
 	_update_camera(1.0)
 
 func _update_camera(delta: float) -> void:
 	if camera_pivot == null or rider == null:
 		return
-	var desired := rider.global_position + Vector3(0, 2.4, 0)
-	var smoothing := 1.0 - exp(-delta * 6.0)
+	var progress := Course.progress_of(rider.global_position)
+	var normal := Course.surface_normal(progress, Course.lateral_of(rider.global_position))
+	var forward := Course.tangent_at(progress)
+	var right := forward.cross(normal).normalized()
+	var speed_ratio := clampf(rider.speed / SnowboardRider.MAX_SPEED, 0.0, 1.0)
+	var desired: Vector3 = rider.global_position + normal * 1.75 - right * rider.input_steer * 0.55
+	_camera_spring_velocity += (-_camera_spring * 42.0 - _camera_spring_velocity * 11.0) * delta
+	_camera_spring += _camera_spring_velocity * delta
+	desired += normal * _camera_spring
+	var smoothing := 1.0 - exp(-delta * 5.2)
 	camera_pivot.global_position = camera_pivot.global_position.lerp(desired, smoothing)
-	var look_target := rider.global_position + Vector3(0, -1.2, -10.0)
-	camera_pivot.look_at(look_target, Vector3.UP)
-	if not reduced_motion:
-		camera.fov = lerpf(camera.fov, lerpf(58.0, 72.0, clampf(rider.speed / SnowboardRider.MAX_SPEED, 0.0, 1.0)), smoothing)
+	var look_distance := lerpf(12.0, 22.0, speed_ratio)
+	var look_target := rider.global_position + forward * look_distance + normal * 0.55
+	var shake := Vector3.ZERO
+	if visual_profile.camera_motion and _camera_impact > 0.001:
+		shake = Vector3(randf_range(-1.0, 1.0), randf_range(-0.65, 0.65), 0) * _camera_impact * 0.16
+		_camera_impact = move_toward(_camera_impact, 0.0, delta * 3.8)
+	camera_pivot.look_at(look_target + shake, normal)
+	var target_roll := deg_to_rad(-rider.input_steer * 3.0) if visual_profile.camera_motion else 0.0
+	camera_pivot.rotation.z = lerp_angle(camera_pivot.rotation.z, target_roll, minf(1.0, delta * 4.8))
+	var side_offset: float = lerpf(0.45, 0.95, speed_ratio) - rider.input_steer * 0.26
+	camera.position.x = lerpf(camera.position.x, side_offset, smoothing)
+	camera.position.y = lerpf(camera.position.y, lerpf(1.35, 0.95, speed_ratio), smoothing)
+	if visual_profile.camera_motion:
+		camera.fov = lerpf(camera.fov, lerpf(60.0, 68.0, speed_ratio), smoothing)
+	else:
+		camera.fov = 60.0
+
+func _on_rider_landed() -> void:
+	sfx.play(sfx.snd_land, -4.0)
+	if visual_profile.camera_motion:
+		_camera_spring_velocity = -2.2 * maxf(0.35, rider.landing_impact)
+		_camera_impact = maxf(_camera_impact, rider.landing_impact * 0.28)
+
+func _start_visual_qa() -> void:
+	_start_run(true)
+	_visual_perf_elapsed = 0.0
+	_visual_perf_reported = false
+	var stage_progress: float = float({
+		"start": 85.0,
+		"forest": 455.0,
+		"valley": 785.0,
+		"finish": 1150.0,
+	}.get(visual_stage, 85.0))
+	var lift := 5.4 if visual_pose == "jump" else 1.15
+	rider.enabled = false
+	rider.visual_preview = true
+	rider.position = Course.position_at(stage_progress, 0.0, lift)
+	rider.velocity = Course.tangent_at(stage_progress) * SnowboardRider.MAX_SPEED * 0.72
+	rider.apply_visual_pose(visual_pose)
+	world_builder.update_focus(stage_progress, true)
+	hud.update_state(42_350, 7, rider.speed, stage_progress)
+	_update_camera(1.0)
 
 func _show_title() -> void:
 	_teardown_run()
@@ -362,8 +477,7 @@ func _setup_ui_scale() -> void:
 	get_window().size_changed.connect(_update_ui_scale)
 
 func _update_ui_scale() -> void:
-	var size := Vector2(get_window().size)
-	get_window().content_scale_factor = clampf(minf(size.x / 820.0, size.y / 620.0), 1.0, 3.0)
+	get_window().content_scale_factor = 1.0
 
 func _load_theme_font() -> void:
 	if not ResourceLoader.exists("res://fonts/cjk.ttf"):
@@ -375,7 +489,12 @@ func _load_theme_font() -> void:
 
 func _run_smoke() -> void:
 	_start_run(true)
-	await get_tree().create_timer(1.0).timeout
+	var simulation_start := Course.progress_of(rider.position)
+	Engine.time_scale = 10.0
+	await get_tree().create_timer(10.0).timeout
+	Engine.time_scale = 1.0
+	var simulation_progress := Course.progress_of(rider.position)
+	var simulation_ok := simulation_progress > simulation_start + 35.0 and absf(Course.lateral_of(rider.position)) < Course.HALF_WIDTH
 	rider.position = Course.position_at(320.0, 0.0, 1.5)
 	_update_checkpoint(320.0)
 	rider.request_wipeout()
@@ -385,6 +504,15 @@ func _run_smoke() -> void:
 	var has_terrain := world_builder != null and world_builder.get_node_or_null("SnowTerrain") != null and world_builder.get_node_or_null("SnowCollision") != null
 	var checkpoint_ok := current_checkpoint == 300.0 and progress >= 308.0
 	var wipeout_ok := falls == 1 and penalty_ms == 3000
-	var ok := rider != null and has_terrain and snowflake_count == Course.SNOWFLAKE_TOTAL and checkpoint_ok and wipeout_ok
-	print("SMOKE_RESULT progress=%.1f flakes=%d falls=%d penalty=%d terrain=%s ok=%s" % [progress, snowflake_count, falls, penalty_ms, str(has_terrain), str(ok)])
-	get_tree().quit(0 if ok else 1)
+	var samples_finite := true
+	for sample_progress in [0.0, 300.0, 650.0, 950.0, 1200.0]:
+		for sample_lateral in [-48.0, 0.0, 48.0]:
+			var point := Course.surface_point(sample_progress, sample_lateral)
+			var normal := Course.surface_normal(sample_progress, sample_lateral)
+			samples_finite = samples_finite and point.is_finite() and normal.is_finite() and normal.y > 0.6
+	var ok := rider != null and has_terrain and snowflake_count == Course.SNOWFLAKE_TOTAL and checkpoint_ok and wipeout_ok and samples_finite and simulation_ok
+	print("SMOKE_RESULT progress=%.1f simulated=%.1f flakes=%d falls=%d penalty=%d terrain=%s surface=%s ok=%s" % [progress, simulation_progress, snowflake_count, falls, penalty_ms, str(has_terrain), str(samples_finite), str(ok)])
+	var exit_code := 0 if ok else 1
+	_teardown_run()
+	await get_tree().process_frame
+	get_tree().quit(exit_code)

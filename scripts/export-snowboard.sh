@@ -44,4 +44,5 @@ fi
 rm -f "$SMOKE_LOG"
 
 "$GODOT_BIN" --headless --path "$PROJECT_DIR" --export-release "Web" >/dev/null
+node "$REPO_ROOT/scripts/patch-snowboard-html.mjs"
 ls -la "$OUT_DIR"

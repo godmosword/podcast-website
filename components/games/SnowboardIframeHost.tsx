@@ -40,7 +40,12 @@ export function SnowboardIframeHost({
     const debugFinish = new URLSearchParams(window.location.search).get(
       "debugFinish",
     );
-    return snowboardIframeSrc(debugFinish ?? undefined);
+    const pageParams = new URLSearchParams(window.location.search);
+    return snowboardIframeSrc(
+      debugFinish ?? undefined,
+      pageParams.get("visualStage") ?? undefined,
+      pageParams.get("visualPose") ?? undefined,
+    );
   });
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const iframeLoadedRef = useRef(false);

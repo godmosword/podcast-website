@@ -97,8 +97,18 @@ body {
 
 		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":1159952,"index.wasm":35376909},"focusCanvas":true,"gdextensionLibs":[]};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":1215120,"index.wasm":35376909},"focusCanvas":true,"gdextensionLibs":[]};
 const GODOT_THREADS_ENABLED = false;
+// snowboard-runtime-options
+const snowboardParams = new URLSearchParams(window.location.search);
+const snowboardStage = snowboardParams.get('visualStage');
+const snowboardPose = snowboardParams.get('visualPose');
+const snowboardArgs = [];
+if (['start', 'forest', 'valley', 'finish'].includes(snowboardStage)) snowboardArgs.push('--visual-stage=' + snowboardStage);
+if (['ride', 'carve', 'jump', 'landing'].includes(snowboardPose)) snowboardArgs.push('--visual-pose=' + snowboardPose);
+if (window.matchMedia('(pointer: coarse)').matches || Math.min(window.innerWidth, window.innerHeight) < 700) snowboardArgs.push('--visual-mobile');
+if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) snowboardArgs.push('--visual-reduced-motion');
+if (snowboardArgs.length) GODOT_CONFIG.args.push('--', ...snowboardArgs);
 const engine = new Engine(GODOT_CONFIG);
 
 (function () {

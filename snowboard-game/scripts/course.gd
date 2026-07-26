@@ -16,13 +16,40 @@ const SNOWFLAKES := [
 	Vector2(-14, 995), Vector2(15, 1085), Vector2(0, 1160),
 ]
 
+static func center_x(progress: float) -> float:
+	var p := clampf(progress, 0.0, LENGTH)
+	var fade_in := smoothstep(0.0, 90.0, p)
+	return (sin(p * 0.0105) * 6.6 + sin(p * 0.0039 + 0.35) * 3.6 - 1.23) * fade_in
+
+static func lateral_of(world_position: Vector3) -> float:
+	var progress := progress_of(world_position)
+	return world_position.x - center_x(progress)
+
 static func height_at(x: float, progress: float) -> float:
-	# 首版使用平滑、可預測的 22% 主坡；視覺起伏由跳台與場景道具提供。
-	# 單一斜面碰撞能避免 Web trimesh 接縫把玩家誤判為撞牆。
-	return -progress * SLOPE
+	var p := clampf(progress, 0.0, LENGTH)
+	var relative_x := x - center_x(p)
+	var long_roll := sin(p * 0.038) * 0.68 + sin(p * 0.012 + 0.65) * 1.35
+	var start_blend := smoothstep(0.0, 45.0, p)
+	var edge_bank := relative_x * relative_x * 0.00052
+	var side_roll := sin(relative_x * 0.075 + p * 0.009) * 0.18
+	return -p * SLOPE + (long_roll + side_roll) * start_blend + edge_bank
+
+static func surface_point(progress: float, lateral := 0.0, lift := 0.0) -> Vector3:
+	var x := center_x(progress) + lateral
+	return Vector3(x, height_at(x, progress) + lift, -progress)
+
+static func tangent_at(progress: float) -> Vector3:
+	var before := surface_point(maxf(0.0, progress - 0.75))
+	var after := surface_point(minf(LENGTH, progress + 0.75))
+	return (after - before).normalized()
+
+static func surface_normal(progress: float, lateral := 0.0) -> Vector3:
+	var across := surface_point(progress, lateral + 0.5) - surface_point(progress, lateral - 0.5)
+	var tangent := tangent_at(progress)
+	return across.cross(tangent).normalized()
 
 static func position_at(progress: float, lateral := 0.0, lift := 0.0) -> Vector3:
-	return Vector3(lateral, height_at(lateral, progress) + lift, -progress)
+	return surface_point(progress, lateral, lift)
 
 static func progress_of(world_position: Vector3) -> float:
 	return clampf(-world_position.z, 0.0, LENGTH)
