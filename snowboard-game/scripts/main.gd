@@ -488,6 +488,18 @@ func _load_theme_font() -> void:
 	app_theme.default_font_size = 18
 
 func _run_smoke() -> void:
+	# 具名材質可實例化（snow／blob_shadow 含貼圖，改由 _start_run 建世界時覆蓋）。
+	var SnowMaterials = preload("res://scripts/materials.gd")
+	SnowMaterials.skin()
+	SnowMaterials.fabric(Color.WHITE)
+	SnowMaterials.wood()
+	SnowMaterials.foliage()
+	SnowMaterials.board_plastic()
+	SnowMaterials.ice()
+	if SnowMaterials.CATALOG.size() < 12:
+		print("SMOKE_RESULT progress=0.0 simulated=0.0 flakes=0 falls=0 penalty=0 terrain=false surface=false ok=false")
+		get_tree().quit(1)
+		return
 	_start_run(true)
 	var simulation_start := Course.progress_of(rider.position)
 	Engine.time_scale = 10.0

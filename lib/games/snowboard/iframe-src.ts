@@ -2,10 +2,12 @@ import {
   isSnowboardCourseId,
   type SnowboardCourseId,
 } from "./course";
+import {
+  isSnowboardVisualPose,
+  isSnowboardVisualStage,
+} from "./visual-qa";
 
 const SNOWBOARD_EXPORT_PATH = "/snowboard/index.html";
-const VISUAL_STAGES = ["start", "forest", "valley", "finish"] as const;
-const VISUAL_POSES = ["ride", "carve", "jump", "landing"] as const;
 
 export function snowboardIframeSrc(
   debugFinish?: string,
@@ -16,10 +18,10 @@ export function snowboardIframeSrc(
   if (debugFinish && isSnowboardCourseId(debugFinish)) {
     params.set("debugFinish", debugFinish satisfies SnowboardCourseId);
   }
-  if (visualStage && VISUAL_STAGES.some((stage) => stage === visualStage)) {
+  if (isSnowboardVisualStage(visualStage)) {
     params.set("visualStage", visualStage);
   }
-  if (visualPose && VISUAL_POSES.some((pose) => pose === visualPose)) {
+  if (isSnowboardVisualPose(visualPose)) {
     params.set("visualPose", visualPose);
   }
   const query = params.toString();

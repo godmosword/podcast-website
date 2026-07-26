@@ -339,19 +339,19 @@ static func _add_tree_multimeshes(parent: Node3D, points: Array[Vector3], chunk_
 	trunk_mesh.bottom_radius = 0.31
 	trunk_mesh.height = 2.1
 	trunk_mesh.radial_segments = 7
-	trunk_mesh.material = SnowMaterials.clay(Color8(102, 72, 55), 0.94)
+	trunk_mesh.material = SnowMaterials.wood(Color8(102, 72, 55))
 	var crown_mesh := CylinderMesh.new()
 	crown_mesh.top_radius = 0.0
 	crown_mesh.bottom_radius = 1.52
 	crown_mesh.height = 2.5
 	crown_mesh.radial_segments = 9
-	crown_mesh.material = SnowMaterials.clay(Color8(28, 91, 76), 0.95)
+	crown_mesh.material = SnowMaterials.foliage()
 	var cap_mesh := CylinderMesh.new()
 	cap_mesh.top_radius = 0.0
 	cap_mesh.bottom_radius = 1.43
 	cap_mesh.height = 0.42
 	cap_mesh.radial_segments = 9
-	cap_mesh.material = SnowMaterials.clay(Color8(232, 246, 249), 0.96)
+	cap_mesh.material = SnowMaterials.snow()
 
 	var trunks := MultiMesh.new()
 	trunks.transform_format = MultiMesh.TRANSFORM_3D
@@ -436,20 +436,20 @@ static func _add_pine(parent: Node3D, position: Vector3, scale_value: float, haz
 	trunk.bottom_radius = 0.32
 	trunk.height = 2.2
 	trunk.radial_segments = 7
-	_add_mesh(tree, trunk, SnowMaterials.clay(Color8(107, 72, 53), 0.94), Vector3(0, 1.1, 0))
+	_add_mesh(tree, trunk, SnowMaterials.wood(), Vector3(0, 1.1, 0))
 	for layer in 3:
 		var crown := CylinderMesh.new()
 		crown.top_radius = 0.0
 		crown.bottom_radius = 1.72 - layer * 0.29
 		crown.height = 2.5
 		crown.radial_segments = 9
-		_add_mesh(tree, crown, SnowMaterials.clay(Color8(28, 94 + layer * 7, 78), 0.94), Vector3(0, 2.2 + layer * 1.16, 0), Vector3(0, layer * 0.21, 0))
+		_add_mesh(tree, crown, SnowMaterials.foliage(Color8(28, 94 + layer * 7, 78)), Vector3(0, 2.2 + layer * 1.16, 0), Vector3(0, layer * 0.21, 0))
 		var cap := CylinderMesh.new()
 		cap.top_radius = 0.0
 		cap.bottom_radius = 1.6 - layer * 0.29
 		cap.height = 0.46
 		cap.radial_segments = 9
-		_add_mesh(tree, cap, SnowMaterials.clay(Color8(235, 247, 250), 0.97), Vector3(0, 2.84 + layer * 1.16, 0))
+		_add_mesh(tree, cap, SnowMaterials.snow(), Vector3(0, 2.84 + layer * 1.16, 0))
 	if hazard:
 		var body := StaticBody3D.new()
 		body.add_to_group("snowboard_hazard")

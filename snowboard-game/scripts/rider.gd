@@ -233,14 +233,14 @@ func _build_bonbon() -> void:
 	_model.add_child(_board)
 	var board_middle := BoxMesh.new()
 	board_middle.size = Vector3(1.42, 0.12, 2.75)
-	_add_mesh(_board, board_middle, SnowMaterials.clay(Color8(226, 67, 70), 0.64), Vector3(0, 0.04, 0))
+	_add_mesh(_board, board_middle, SnowMaterials.board_plastic(), Vector3(0, 0.04, 0))
 	for z in [-1.43, 1.43]:
 		var tip := SphereMesh.new()
 		tip.radius = 0.72
 		tip.height = 0.24
 		tip.radial_segments = 12
 		tip.rings = 4
-		_add_mesh(_board, tip, SnowMaterials.clay(Color8(226, 67, 70), 0.64), Vector3(0, 0.11, z), Vector3(0.12 * signf(z), 0, 0))
+		_add_mesh(_board, tip, SnowMaterials.board_plastic(), Vector3(0, 0.11, z), Vector3(0.12 * signf(z), 0, 0))
 
 	_body_root = Node3D.new()
 	_body_root.name = "PoseRig"
@@ -250,7 +250,7 @@ func _build_bonbon() -> void:
 	_body_root.add_child(_hips)
 	var hip_mesh := SphereMesh.new()
 	_mesh_sphere_quality(hip_mesh, 0.55, 0.72)
-	_add_mesh(_hips, hip_mesh, SnowMaterials.clay(Color8(40, 66, 105), 0.84), Vector3(0, 1.22, 0))
+	_add_mesh(_hips, hip_mesh, SnowMaterials.fabric(Color8(40, 66, 105)), Vector3(0, 1.22, 0))
 
 	_left_leg = _build_leg(_hips, -0.34)
 	_right_leg = _build_leg(_hips, 0.34)
@@ -262,24 +262,24 @@ func _build_bonbon() -> void:
 	torso_mesh.height = 1.62
 	torso_mesh.radial_segments = 12
 	torso_mesh.rings = 5
-	_add_mesh(_torso, torso_mesh, SnowMaterials.clay(Color8(57, 173, 161), 0.82), Vector3(0, 2.0, 0))
+	_add_mesh(_torso, torso_mesh, SnowMaterials.fabric(Color8(57, 173, 161)), Vector3(0, 2.0, 0))
 
 	_left_arm = _build_arm(_torso, -0.68)
 	_right_arm = _build_arm(_torso, 0.68)
 	var head := SphereMesh.new()
 	_mesh_sphere_quality(head, 0.67, 1.38)
-	_add_mesh(_torso, head, SnowMaterials.clay(Color8(238, 172, 121), 0.82), Vector3(0, 3.08, -0.08))
+	_add_mesh(_torso, head, SnowMaterials.skin(), Vector3(0, 3.08, -0.08))
 	var hood := TorusMesh.new()
 	hood.inner_radius = 0.49
 	hood.outer_radius = 0.69
 	hood.rings = 18
 	hood.ring_segments = 8
-	_add_mesh(_torso, hood, SnowMaterials.clay(Color8(48, 159, 151), 0.84), Vector3(0, 3.12, 0.05), Vector3(PI * 0.5, 0, 0))
+	_add_mesh(_torso, hood, SnowMaterials.fabric(Color8(48, 159, 151)), Vector3(0, 3.12, 0.05), Vector3(PI * 0.5, 0, 0))
 	for x in [-0.23, 0.23]:
 		var eye := SphereMesh.new()
 		_mesh_sphere_quality(eye, 0.09, 0.18)
 		_add_mesh(_torso, eye, SnowMaterials.clay(Color8(43, 34, 31), 0.68), Vector3(x, 3.15, -0.67))
-	var hair_material := SnowMaterials.clay(Color8(91, 53, 34), 0.9)
+	var hair_material := SnowMaterials.fabric(Color8(91, 53, 34))
 	for spec in [Vector3(-0.43, 3.49, -0.12), Vector3(-0.15, 3.62, -0.24), Vector3(0.17, 3.61, -0.25), Vector3(0.44, 3.45, -0.1), Vector3(-0.37, 3.5, -0.49), Vector3(0.36, 3.5, -0.49)]:
 		var hair := SphereMesh.new()
 		_mesh_sphere_quality(hair, 0.29, 0.48)
@@ -316,10 +316,10 @@ func _build_leg(parent: Node3D, x: float) -> Node3D:
 	leg.radius = 0.23
 	leg.height = 1.08
 	leg.radial_segments = 10
-	_add_mesh(pivot, leg, SnowMaterials.clay(Color8(39, 63, 101), 0.86), Vector3(0, 0.18, 0))
+	_add_mesh(pivot, leg, SnowMaterials.fabric(Color8(39, 63, 101)), Vector3(0, 0.18, 0))
 	var shoe := BoxMesh.new()
 	shoe.size = Vector3(0.52, 0.28, 0.78)
-	_add_mesh(pivot, shoe, SnowMaterials.clay(Color8(224, 66, 68), 0.72), Vector3(0, -0.38, 0.08))
+	_add_mesh(pivot, shoe, SnowMaterials.board_plastic(Color8(224, 66, 68)), Vector3(0, -0.38, 0.08))
 	return pivot
 
 func _build_arm(parent: Node3D, x: float) -> Node3D:
@@ -330,20 +330,20 @@ func _build_arm(parent: Node3D, x: float) -> Node3D:
 	arm.radius = 0.17
 	arm.height = 1.18
 	arm.radial_segments = 9
-	_add_mesh(pivot, arm, SnowMaterials.clay(Color8(57, 173, 161), 0.82), Vector3(0, -0.38, 0))
+	_add_mesh(pivot, arm, SnowMaterials.fabric(Color8(57, 173, 161)), Vector3(0, -0.38, 0))
 	var glove := SphereMesh.new()
 	_mesh_sphere_quality(glove, 0.2, 0.38)
-	_add_mesh(pivot, glove, SnowMaterials.clay(Color8(242, 194, 68), 0.8), Vector3(0, -0.94, 0))
+	_add_mesh(pivot, glove, SnowMaterials.fabric(Color8(242, 194, 68)), Vector3(0, -0.94, 0))
 	return pivot
 
 func _build_backpack(parent: Node3D) -> void:
 	var backpack := SphereMesh.new()
 	_mesh_sphere_quality(backpack, 0.61, 1.24)
-	_add_mesh(parent, backpack, SnowMaterials.clay(Color8(241, 184, 48), 0.78), Vector3(0, 2.02, 0.5), Vector3(0.08, 0, 0))
+	_add_mesh(parent, backpack, SnowMaterials.fabric(Color8(241, 184, 48)), Vector3(0, 2.02, 0.5), Vector3(0.08, 0, 0))
 	for x in [-0.43, 0.43]:
 		var strap := BoxMesh.new()
 		strap.size = Vector3(0.11, 1.1, 0.11)
-		_add_mesh(parent, strap, SnowMaterials.clay(Color8(216, 142, 35), 0.82), Vector3(x, 2.0, -0.52), Vector3(0, 0, x * 0.22))
+		_add_mesh(parent, strap, SnowMaterials.fabric(Color8(216, 142, 35)), Vector3(x, 2.0, -0.52), Vector3(0, 0, x * 0.22))
 
 func _build_shadow() -> void:
 	var quad := QuadMesh.new()
