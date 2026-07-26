@@ -95,20 +95,32 @@ export default function GameHost({
     stopBgm,
     pauseBgm,
     resumeBgm,
+    tone,
   } = useGameAudio(adapter.id);
+
+  const syncHost = useCallback(() => {
+    const g = instanceRef.current;
+    if (!g) return;
+    setStatus(g.getStatus());
+    setScore(g.getScore());
+  }, []);
 
   // ── create / dispose instance ──────────────────────────────────────────
   useEffect(() => {
     const inst = adapter.create({
       kidsMode,
       reducedMotion: reduced,
+      audio: { ensureAudio, tone },
       onSession: (result) => {
-        if (sessionReportedRef.current) return;
-        sessionReportedRef.current = true;
+        // 中關通關也需回報（medal bits）；不可用「整局一次」閂鎖擋住。
+        // 終局（won／over 且無 cleared 中繼）由 adapter 自行去重。
         if (best == null || result.score > best) {
           void saveBest(result.score);
         }
         reportGameSession(result);
+        if (result.cleared !== true) {
+          sessionReportedRef.current = true;
+        }
       },
     });
     instanceRef.current = inst;
@@ -277,6 +289,7 @@ export default function GameHost({
     onResume: handleResume,
     onRestart: handleRestart,
     onOpenTutorial: () => setShowTutorial(true),
+    syncHost,
   };
 
   const touchActions =

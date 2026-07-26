@@ -39,6 +39,24 @@
 - [x] M2 `@modal` 熱點層 + focus 管理 + prefetch  `e915355`
 - [x] M3 逐島填 hotspots（恐龍島優先）  `5c6784a`
 
+### 本輪已完成（2026-07-26）
+
+| ID | Commit |
+|----|--------|
+| feat(gamekit): migrate candy-match to GameAdapter（PR #66） | `ceb92f4` |
+| feat(gamekit): migrate car-adventure to GameAdapter（fixedUpdate + render） | `e0d9766` |
+
+### GameKit Adapter 遷移（進行中）
+
+> 契約：[`docs/GAMEKIT-ADAPTER.md`](./docs/GAMEKIT-ADAPTER.md)。紅線：不改 localStorage／`reportGameSession` payload／GameKitGameId。
+
+| Phase | 遊戲 | 狀態 |
+|-------|------|------|
+| 1 | candy-match | ✅ `ceb92f4` |
+| 2 | car-adventure | ✅ `e0d9766` |
+| 3 | block-drop | 待做 |
+| 4 | candy-kart（iframe bridge） | 待做 |
+
 ### 本輪已完成（2026-07-25）
 
 | ID | Commit |
@@ -919,12 +937,13 @@ GHA commit body 已由 `scripts/post-sync-notify.ts` 產生，列出本輪新 sl
 
 Phase 0–8 的探索已完成並在 2026-06-25 收斂。現行架構只保留四款已出貨遊戲真正使用的能力：
 
+- `lib/gamekit/adapter.ts` + `lib/gamekit/host/GameHost.tsx`：統一生命週期（遷移中，見上表）
 - `lib/gamekit/react/`：React hooks 與觸控控制
 - `lib/gamekit/runtime/`：loop、輸入、渲染、音訊、juice、程序圖塊
 - `lib/gamekit/progress/`：設定、存檔 migration、獎牌與 session
-- `lib/gamekit/games/`：大冒險關卡與 Candy Kart bridge
+- `lib/gamekit/games/`：大冒險關卡、各遊戲 Adapter、Candy Kart bridge
 
-舊 Phase scaffolding（state machine、scene、pool、abilities、tilemap、Tiled loader、sprite adapter）已移除。歷史變更見 [CHANGELOG.md](./CHANGELOG.md)，現行規範見 [GAMEKIT-ART-BIBLE.md](./docs/GAMEKIT-ART-BIBLE.md)。
+舊 Phase scaffolding（state machine、scene、pool、abilities、tilemap、Tiled loader、sprite adapter）已移除。歷史變更見 [CHANGELOG.md](./CHANGELOG.md)，現行規範見 [GAMEKIT-ART-BIBLE.md](./docs/GAMEKIT-ART-BIBLE.md)／[GAMEKIT-ADAPTER.md](./docs/GAMEKIT-ADAPTER.md)。
 
 ### ~~車車卡丁車 Kart P0 — Scaffold~~　`P3 · M · 無`　〔eng〕 ✅
 `kart-game/`（Vite+TS+Three）：固定步進、kinematic 方塊車、spline 練習道、跟隨相機、HUD；`npm run build:kart` → `public/kart/`；`/games/kart` iframe 嵌入。

@@ -1,5 +1,5 @@
-import { reportGameSession } from "@/lib/gamekit/progress/session";
 import type { JuiceController } from "@/lib/gamekit/runtime/juice";
+import type { GameSessionResult } from "@/lib/gamekit/progress/session";
 import { CAR_ADVENTURE_LEVELS } from "@/lib/games/car-adventure/levels";
 import {
   approach,
@@ -20,6 +20,9 @@ import {
   type Status,
 } from "@/lib/games/car-adventure/types";
 
+/** 物理層回報 session（不含 gameId；由 adapter／Host 補上）。 */
+export type AdventureSessionPayload = Omit<GameSessionResult, "gameId">;
+
 export type PhysicsCallbacks = {
   reduced: boolean;
   juice: JuiceController;
@@ -31,6 +34,8 @@ export type PhysicsCallbacks = {
   onWin: () => void;
   /** 將獨立的車車大冒險顯示星數交給 UI/存檔層；不走 reportGameSession。 */
   onStars?: (levelIndex: number, stars: number) => void;
+  /** 通關／Game Over 時回報；Host 統一呼叫 reportGameSession。 */
+  onSession?: (payload: AdventureSessionPayload) => void;
   setStatus: (s: Status) => void;
   onAdvanceLevel: (next: number) => void;
 };
@@ -313,8 +318,7 @@ function die(g: GameState, fx: PhysicsCallbacks): void {
   if (!fx.reduced) fx.juice.shake.trigger(0.22, 6);
   g.lives--;
   if (g.lives <= 0) {
-    reportGameSession({
-      gameId: "car-adventure",
+    fx.onSession?.({
       score: g.score,
     });
     fx.setStatus("over");
@@ -495,8 +499,7 @@ export function updateAdventure(
       g.lv.targetTime,
     );
     fx.onStars?.(g.levelIndex, g.earnedStars);
-    reportGameSession({
-      gameId: "car-adventure",
+    fx.onSession?.({
       score: g.score,
       levelIndex: g.levelIndex,
       cleared: true,

@@ -6,8 +6,7 @@ import { GAMES } from "@/data/games";
 
 const CANDY_MATCH_META = GAMES.find((g) => g.slug === "candy-match");
 
-/** 薄包裝：GameHost + candyMatchAdapter（頁面亦可直接 import GameHost）。 */
-export default function CandyMatchGame() {
+export default function CandyMatchGameHost() {
   return (
     <GameHost
       adapter={candyMatchAdapter}
