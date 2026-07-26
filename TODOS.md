@@ -43,7 +43,7 @@
 
 | ID | Commit |
 |----|--------|
-| feat(games): Hub 主打卡＋GameEndStation 下一站動線 | `PENDING` |
+| feat(games): Hub 主打卡＋GameEndStation 下一站動線 | `5cb3fc6` |
 | feat(car-adventure): clay material catalog + sprite polish | `3707cf8` |
 | feat(candy-kart): clay material catalog + curve ground stick | `f1652e8` |
 | feat(snowboard): rebuild visual presentation（材質／QA 景別） | `b8e8238` |
