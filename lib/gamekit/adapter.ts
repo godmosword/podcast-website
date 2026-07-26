@@ -17,6 +17,16 @@ import type { GameSessionResult } from "./progress/session";
 
 export type GameStatus = "ready" | "playing" | "paused" | "over" | "won";
 
+export type GameAudioBus = {
+  ensureAudio(): void;
+  tone(
+    freq: number,
+    dur: number,
+    type?: OscillatorType,
+    vol?: number,
+  ): void;
+};
+
 export type GameCreateOptions = {
   kidsMode: boolean;
   reducedMotion: boolean;
@@ -25,6 +35,8 @@ export type GameCreateOptions = {
   specialMode?: string;
   /** Starting level / track index when applicable. */
   levelIndex?: number;
+  /** Host-injected audio bus (avoid duplicate useGameAudio in overlays). */
+  audio?: GameAudioBus;
   /** Called once when a session ends (won / over). Host will also call reportGameSession. */
   onSession?: (result: GameSessionResult) => void;
 };
@@ -39,6 +51,8 @@ export type OverlayProps = {
   onResume: () => void;
   onRestart: () => void;
   onOpenTutorial: () => void;
+  /** DOM 遊戲在局內狀態變更後呼叫，Host 重讀 getStatus / getScore。 */
+  syncHost: () => void;
 };
 
 /**

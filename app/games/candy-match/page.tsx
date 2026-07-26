@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import CandyMatchGame from "@/components/games/CandyMatchGame";
+import CandyMatchGameHost from "@/app/games/candy-match/CandyMatchGameHost";
 import { GamePageShell } from "@/components/games/GamePageShell";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 export default function CandyMatchPage() {
   return (
     <GamePageShell title="繽紛消消樂小遊戲" gameId="candy-match">
-      <CandyMatchGame />
+      <CandyMatchGameHost />
     </GamePageShell>
   );
 }

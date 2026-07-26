@@ -68,7 +68,7 @@ describe("repository architecture", () => {
       .filter((entry) => entry.isFile())
       .map((entry) => entry.name)
       .sort();
-    const allowedRootFiles = new Set(["iframe-bridge.ts", "types.ts"]);
+    const allowedRootFiles = new Set(["adapter.ts", "iframe-bridge.ts", "types.ts"]);
     expect(rootGamekitFiles.every((file) => allowedRootFiles.has(file))).toBe(true);
     expect(rootGamekitFiles).toContain("types.ts");
 
@@ -76,7 +76,7 @@ describe("repository architecture", () => {
       .filter((entry) => entry.isDirectory())
       .map((entry) => entry.name)
       .sort();
-    expect(rootGamekitDirs).toEqual(["games", "progress", "react", "runtime"]);
+    expect(rootGamekitDirs).toEqual(["games", "host", "progress", "react", "runtime"]);
 
     const sources = sourceFiles().map((path) => readFileSync(path, "utf8")).join("\n");
 
