@@ -54,7 +54,7 @@
 | fix(universe): A 修正 reset 目標為島群中心 | `86f043d` |
 | fix(universe): B flyTo durationMs 參數化，雙擊縮放 250ms | `6665989` |
 | fix(universe): C sheetReady 閘門，選單等待鏡頭飛抵 | `ae76480` |
-| feat(universe): 減法點島改飛鏡頭＋探索點，不再自動開選單 | 見本 commit |
+| feat(universe): 減法點島改飛鏡頭＋探索點，不再自動開選單 | `87c7359` |
 
 ### 本輪已完成（2026-07-24）
 
