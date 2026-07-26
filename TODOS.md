@@ -44,7 +44,7 @@
 | ID | Commit |
 |----|--------|
 | feat(gamekit): migrate candy-match to GameAdapter（PR #66） | `ceb92f4` |
-| feat(gamekit): migrate car-adventure to GameAdapter（fixedUpdate + render） | _(待 commit)_ |
+| feat(gamekit): migrate car-adventure to GameAdapter（fixedUpdate + render） | `e0d9766` |
 
 ### GameKit Adapter 遷移（進行中）
 
@@ -53,7 +53,7 @@
 | Phase | 遊戲 | 狀態 |
 |-------|------|------|
 | 1 | candy-match | ✅ `ceb92f4` |
-| 2 | car-adventure | 進行中（本分支） |
+| 2 | car-adventure | ✅ `e0d9766` |
 | 3 | block-drop | 待做 |
 | 4 | candy-kart（iframe bridge） | 待做 |
 
