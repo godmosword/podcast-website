@@ -1,5 +1,7 @@
 import { CAR_ADVENTURE_LEVELS } from "@/lib/games/car-adventure/levels";
+import { CAR_ADVENTURE_CLAY } from "@/lib/games/car-adventure/materials-contract";
 import {
+  INVULN,
   lerp,
   ROWS,
   TILE,
@@ -8,29 +10,8 @@ import {
   type GameState,
 } from "@/lib/games/car-adventure/types";
 
-/**
- * Car Adventure 黏土風美術色（component-local allowlist）。
- * canvas 讀不到 CSS 變數，故以 JS 常數鏡射 DESIGN.md 的 --c-* token 與 --ink。
- */
-const CLAY = {
-  ink: "#34302b",
-  pink: "#f7a8c4",
-  yellow: "#ffd866",
-  mint: "#b7df9b",
-  sky: "#8fcde8",
-  teal: "#79c8c1",
-  lilac: "#c5b3e6",
-  // 地形／點綴衍生色（同一色相的深淺階，非品牌語意色）
-  soil: "#f0c795",
-  soilEdge: "#d9a566",
-  grassEdge: "#93c979",
-  coinRim: "#e8b64a",
-  spike: "#f27ba0",
-  cloud: "rgba(255,255,255,.9)",
-  hudPanel: "rgba(255,255,255,.82)",
-  brick: "#e8b06a",
-  brickSeam: "rgba(120,80,40,.5)",
-} as const;
+/** 色票契約：見 `materials-contract.ts`（brush:* 標註對齊 catalog）。 */
+const CLAY = CAR_ADVENTURE_CLAY;
 
 function rr(
   ctx: CanvasRenderingContext2D,
@@ -83,7 +64,8 @@ function tree(
   y: number,
   canopy: string,
 ): void {
-  ctx.fillStyle = "#a9764f";
+  // brush:wood
+  ctx.fillStyle = CLAY.wood;
   ctx.fillRect(x - 3, y + 10, 6, 14);
   ctx.fillStyle = canopy;
   ctx.beginPath();
@@ -214,19 +196,26 @@ function drawClayGroundTile(
   tilePx: number,
   hasGrassTop: boolean,
 ): void {
+  // brush:soil
   ctx.fillStyle = CLAY.soil;
   ctx.fillRect(sx, sy, tilePx, tilePx);
   ctx.fillStyle = CLAY.soilEdge;
   ctx.fillRect(sx, sy + tilePx - 3, tilePx, 3);
-  // 黏土斑點紋理：兩顆深沙色小點，位置依 tile 座標決定（穩定、不閃爍）。
-  ctx.fillStyle = "rgba(200,150,90,.28)";
+  // 頂緣捏痕：讓土塊不那麼「填色磚」
+  ctx.fillStyle = "rgba(255,255,255,.18)";
+  ctx.fillRect(sx + 2, sy + 1, tilePx - 4, 2);
+  // 黏土斑點紋理：穩定座標雜訊（不閃爍）
+  ctx.fillStyle = "rgba(200,150,90,.3)";
   const d0 = (Math.abs(Math.round(sx)) % 5) + 4;
   const d1 = (Math.abs(Math.round(sy)) % 4) + 3;
+  const d2 = (Math.abs(Math.round(sx + sy)) % 6) + 5;
   ctx.beginPath();
   ctx.arc(sx + d0 + 2, sy + tilePx * 0.5, 1.4, 0, Math.PI * 2);
   ctx.arc(sx + tilePx - d1 - 2, sy + tilePx * 0.72, 1.2, 0, Math.PI * 2);
+  ctx.arc(sx + d2, sy + tilePx * 0.38, 1.0, 0, Math.PI * 2);
   ctx.fill();
   if (hasGrassTop) {
+    // brush:grass
     const capH = Math.round(tilePx * 0.38);
     ctx.fillStyle = CLAY.mint;
     rr(ctx, sx - 1, sy - 2, tilePx + 2, capH + 2, 7);
@@ -234,13 +223,15 @@ function drawClayGroundTile(
     ctx.fillStyle = CLAY.grassEdge;
     rr(ctx, sx - 1, sy + capH - 4, tilePx + 2, 4, 2);
     ctx.fill();
-    // 草皮高光：黏土捏痕
-    ctx.fillStyle = "rgba(255,255,255,.35)";
+    ctx.fillStyle = CLAY.shellHighlight;
     rr(ctx, sx + 4, sy + 1, tilePx * 0.4, 3, 2);
     ctx.fill();
-    // 草叢：草帽上冒出的圓潤小草葉，加地表細節與景深。
+    // 第二道微高光（捏痕層次）
+    ctx.fillStyle = "rgba(255,255,255,.22)";
+    rr(ctx, sx + tilePx * 0.48, sy + 3, tilePx * 0.22, 2, 1.5);
+    ctx.fill();
     ctx.fillStyle = CLAY.grassEdge;
-    for (const gx of [sx + 8, sx + tilePx - 10]) {
+    for (const gx of [sx + 8, sx + tilePx / 2 - 1, sx + tilePx - 10]) {
       ctx.beginPath();
       ctx.moveTo(gx, sy - 1);
       ctx.quadraticCurveTo(gx + 2, sy - 8, gx + 5, sy - 2);
@@ -250,26 +241,37 @@ function drawClayGroundTile(
   }
 }
 
-/** 可破壞磚：焦糖磚身＋十字磚縫＋高光（與地形土塊區隔，一眼可辨可撞）。 */
+/** 可破壞磚：焦糖磚身＋磚縫＋高光（與地形土塊區隔，一眼可辨可撞）。 */
 function drawBreakableTile(
   ctx: CanvasRenderingContext2D,
   sx: number,
   sy: number,
   tilePx: number,
 ): void {
+  // brush:brick
   ctx.fillStyle = CLAY.brick;
   rr(ctx, sx + 1, sy + 1, tilePx - 2, tilePx - 2, 6);
   ctx.fill();
   ctx.strokeStyle = CLAY.brickSeam;
-  ctx.lineWidth = 1.4;
+  ctx.lineWidth = 1.3;
   ctx.beginPath();
   ctx.moveTo(sx + tilePx / 2, sy + 4);
   ctx.lineTo(sx + tilePx / 2, sy + tilePx - 4);
   ctx.moveTo(sx + 5, sy + tilePx / 2);
   ctx.lineTo(sx + tilePx - 5, sy + tilePx / 2);
+  // 橫向分層縫：黏土磚感
+  ctx.moveTo(sx + 5, sy + tilePx * 0.32);
+  ctx.lineTo(sx + tilePx * 0.42, sy + tilePx * 0.32);
+  ctx.moveTo(sx + tilePx * 0.58, sy + tilePx * 0.68);
+  ctx.lineTo(sx + tilePx - 5, sy + tilePx * 0.68);
   ctx.stroke();
-  ctx.fillStyle = "rgba(255,255,255,.4)";
+  ctx.fillStyle = CLAY.shellHighlight;
   rr(ctx, sx + 4, sy + 3, tilePx * 0.35, 3, 2);
+  ctx.fill();
+  // 角捏凹痕
+  ctx.fillStyle = "rgba(120,80,40,.22)";
+  ctx.beginPath();
+  ctx.arc(sx + tilePx - 7, sy + tilePx - 7, 2.2, 0, Math.PI * 2);
   ctx.fill();
 }
 
@@ -281,6 +283,7 @@ function drawMovingPlatform(
   w: number,
   h: number,
 ): void {
+  // brush:platform
   ctx.fillStyle = "rgba(52,48,43,.14)";
   ctx.beginPath();
   ctx.ellipse(x + w / 2, y + h + 3, w / 2, 3, 0, 0, Math.PI * 2);
@@ -288,11 +291,20 @@ function drawMovingPlatform(
   ctx.fillStyle = CLAY.lilac;
   rr(ctx, x, y, w, h, 7);
   ctx.fill();
-  ctx.fillStyle = "rgba(255,255,255,.4)";
+  ctx.fillStyle = CLAY.shellHighlight;
   rr(ctx, x + 4, y + 2, w - 8, 3, 2);
+  ctx.fill();
+  ctx.fillStyle = "rgba(255,255,255,.22)";
+  rr(ctx, x + 8, y + 5, w * 0.28, 2, 1.5);
   ctx.fill();
   ctx.fillStyle = "rgba(120,90,160,.5)";
   rr(ctx, x, y + h - 3, w, 3, 2);
+  ctx.fill();
+  // 側邊捏痕：強調黏土厚度
+  ctx.fillStyle = "rgba(120,90,160,.28)";
+  ctx.beginPath();
+  ctx.arc(x + 6, y + h * 0.55, 2, 0, Math.PI * 2);
+  ctx.arc(x + w - 6, y + h * 0.45, 1.8, 0, Math.PI * 2);
   ctx.fill();
 }
 
@@ -374,6 +386,7 @@ function drawClayCoin(
   y: number,
   radius: number,
 ): void {
+  // brush:coin / brush:candy
   ctx.fillStyle = CLAY.coinRim;
   ctx.beginPath();
   ctx.arc(x, y + 1, radius, 0, Math.PI * 2);
@@ -386,6 +399,12 @@ function drawClayCoin(
   ctx.beginPath();
   ctx.arc(x - radius * 0.32, y - radius * 0.32, radius * 0.28, 0, Math.PI * 2);
   ctx.fill();
+  // 內圈糖線：增加糖果厚度
+  ctx.strokeStyle = "rgba(232,182,74,.55)";
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.arc(x, y, radius * 0.55, 0, Math.PI * 2);
+  ctx.stroke();
 }
 
 /** 軟糖尖刺：圓頭粉色糖錐（仍需一眼可辨為危險物）。 */
@@ -395,6 +414,7 @@ function drawClaySpike(
   sy: number,
   tilePx: number,
 ): void {
+  // brush:spike
   const half = tilePx / 2;
   for (const off of [0, half]) {
     const cx = sx + off + half / 2;
@@ -411,6 +431,13 @@ function drawClaySpike(
   }
 }
 
+interface DrawCarOpts {
+  /** 輪輻角度（弧度）；依位移推進可產生滾動感。 */
+  wheelPhase?: number;
+  /** 垂直 squash（1 = 正常；<1 壓扁／>1 拉長）；hurt／落地用。 */
+  squashY?: number;
+}
+
 /**
  * 黏土車車：圓潤車身＋車臉（眼睛/微笑/腮紅），
  * 造型語彙對齊 CandyMatchPieceArt 的車車角色。
@@ -425,9 +452,15 @@ function drawCar(
   roof: string,
   facing: number,
   mood: "happy" | "grumpy",
+  opts: DrawCarOpts = {},
 ): void {
+  const wheelPhase = opts.wheelPhase ?? 0;
+  const squashY = opts.squashY ?? 1;
   ctx.save();
-  ctx.translate(sx + w / 2, sy + h / 2);
+  ctx.translate(sx + w / 2, sy + h);
+  ctx.scale(1 / Math.max(0.75, squashY), squashY);
+  ctx.translate(-w / 2, -h);
+  ctx.translate(w / 2, h / 2);
   if (facing < 0) ctx.scale(-1, 1);
   ctx.translate(-w / 2, -h / 2);
   // 柔影
@@ -435,39 +468,75 @@ function drawCar(
   ctx.beginPath();
   ctx.ellipse(w / 2, h + 2, w / 2, 4, 0, 0, Math.PI * 2);
   ctx.fill();
-  // 輪子：深色胎＋奶油輪圈
-  ctx.fillStyle = CLAY.ink;
-  [w * 0.27, w * 0.75].forEach((wx) => {
+  // brush:rubber — 輪子：橡膠胎＋奶油輪圈＋微輪輻
+  const hubs = [w * 0.27, w * 0.75];
+  for (const wx of hubs) {
+    const wy = h - 3;
+    ctx.fillStyle = CLAY.rubber;
     ctx.beginPath();
-    ctx.arc(wx, h - 3, 6, 0, Math.PI * 2);
+    ctx.arc(wx, wy, 6.2, 0, Math.PI * 2);
     ctx.fill();
-  });
-  ctx.fillStyle = "#fff6e0";
-  [w * 0.27, w * 0.75].forEach((wx) => {
+    ctx.fillStyle = CLAY.hub;
     ctx.beginPath();
-    ctx.arc(wx, h - 3, 2.6, 0, Math.PI * 2);
+    ctx.arc(wx, wy, 2.7, 0, Math.PI * 2);
     ctx.fill();
-  });
-  // 一體式圓潤車身（黏土團）
+    ctx.strokeStyle = "rgba(52,48,43,.45)";
+    ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    ctx.moveTo(
+      wx + Math.cos(wheelPhase) * 2.2,
+      wy + Math.sin(wheelPhase) * 2.2,
+    );
+    ctx.lineTo(
+      wx - Math.cos(wheelPhase) * 2.2,
+      wy - Math.sin(wheelPhase) * 2.2,
+    );
+    ctx.stroke();
+  }
+  // brush:car_shell — 一體式圓潤車身（黏土團）
   ctx.fillStyle = body;
   rr(ctx, 0, h * 0.32, w, h * 0.55, 8);
   ctx.fill();
   ctx.fillStyle = roof;
   rr(ctx, w * 0.22, h * 0.02, w * 0.56, h * 0.48, 9);
   ctx.fill();
+  // 車底陰影邊：厚度感
+  ctx.fillStyle = "rgba(52,48,43,.12)";
+  rr(ctx, 1, h * 0.72, w - 2, h * 0.12, 4);
+  ctx.fill();
   // 車窗＝臉底
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = CLAY.face;
   rr(ctx, w * 0.3, h * 0.1, w * 0.42, h * 0.32, 7);
   ctx.fill();
-  // 眼睛
+  // 眼睛（含小高光）
   ctx.fillStyle = CLAY.ink;
   const eyeY = h * 0.24;
   ctx.beginPath();
-  ctx.arc(w * 0.42, eyeY, 1.9, 0, Math.PI * 2);
-  ctx.arc(w * 0.6, eyeY, 1.9, 0, Math.PI * 2);
+  ctx.arc(w * 0.42, eyeY, 2.0, 0, Math.PI * 2);
+  ctx.arc(w * 0.6, eyeY, 2.0, 0, Math.PI * 2);
   ctx.fill();
-  // 嘴：微笑（玩家）／抿嘴（搗蛋車）
+  ctx.fillStyle = "rgba(255,255,255,.85)";
+  ctx.beginPath();
+  ctx.arc(w * 0.405, eyeY - 0.6, 0.7, 0, Math.PI * 2);
+  ctx.arc(w * 0.585, eyeY - 0.6, 0.7, 0, Math.PI * 2);
+  ctx.fill();
+  // 眉毛：開心微揚／搗蛋微皺
   ctx.strokeStyle = CLAY.ink;
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  if (mood === "happy") {
+    ctx.moveTo(w * 0.37, eyeY - 3.2);
+    ctx.quadraticCurveTo(w * 0.42, eyeY - 4.4, w * 0.47, eyeY - 3.0);
+    ctx.moveTo(w * 0.55, eyeY - 3.0);
+    ctx.quadraticCurveTo(w * 0.6, eyeY - 4.4, w * 0.65, eyeY - 3.2);
+  } else {
+    ctx.moveTo(w * 0.37, eyeY - 2.6);
+    ctx.lineTo(w * 0.47, eyeY - 3.8);
+    ctx.moveTo(w * 0.55, eyeY - 3.8);
+    ctx.lineTo(w * 0.65, eyeY - 2.6);
+  }
+  ctx.stroke();
+  // 嘴：微笑（玩家）／抿嘴（搗蛋車）
   ctx.lineWidth = 1.4;
   ctx.beginPath();
   if (mood === "happy") {
@@ -484,13 +553,20 @@ function drawCar(
   ctx.arc(w * 0.67, eyeY + 3.6, 1.8, 0, Math.PI * 2);
   ctx.fill();
   // 車頭燈
-  ctx.fillStyle = "#fff3b0";
+  ctx.fillStyle = CLAY.headlamp;
   ctx.beginPath();
   ctx.arc(w - 4, h * 0.58, 3, 0, Math.PI * 2);
   ctx.fill();
+  ctx.fillStyle = "rgba(255,255,255,.55)";
+  ctx.beginPath();
+  ctx.arc(w - 5, h * 0.56, 1.1, 0, Math.PI * 2);
+  ctx.fill();
   // 車身高光：黏土捏痕
-  ctx.fillStyle = "rgba(255,255,255,.35)";
+  ctx.fillStyle = CLAY.shellHighlight;
   rr(ctx, w * 0.08, h * 0.38, w * 0.2, 3.4, 2);
+  ctx.fill();
+  ctx.fillStyle = "rgba(255,255,255,.2)";
+  rr(ctx, w * 0.55, h * 0.42, w * 0.18, 2.2, 1.5);
   ctx.fill();
   ctx.restore();
 }
@@ -546,11 +622,15 @@ function drawFinishFlag(
   fy: number,
   fh: number,
 ): void {
-  ctx.fillStyle = "#b48a5a";
+  // brush:wood
+  ctx.fillStyle = CLAY.wood;
   rr(ctx, fx + TILE / 2 - 2.5, fy - 8, 5, fh + 8, 2.5);
   ctx.fill();
+  ctx.fillStyle = "rgba(255,255,255,.25)";
+  rr(ctx, fx + TILE / 2 - 1.5, fy - 6, 2, fh * 0.35, 1);
+  ctx.fill();
   const flagX = fx + TILE / 2 + 3;
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = CLAY.face;
   rr(ctx, flagX, fy - 6, 26, 26, 5);
   ctx.fill();
   for (let i = 0; i < 3; i++)
@@ -687,15 +767,28 @@ export function renderAdventureWorld(
       drawFloater(ctx, e.x - cam, e.y, e.w, e.h);
     } else if (e.kind === "hopper") {
       // 彈跳車：青綠車身與粉色巡邏車區隔（皆可踩）。
-      drawCar(ctx, e.x - cam, e.y, e.w, e.h, CLAY.teal, "#4f9e97", e.dir, "grumpy");
+      drawCar(ctx, e.x - cam, e.y, e.w, e.h, CLAY.teal, "#4f9e97", e.dir, "grumpy", {
+        wheelPhase: e.x * 0.12,
+        squashY: e.vy < -40 ? 1.06 : 1,
+      });
     } else {
-      drawCar(ctx, e.x - cam, e.y, e.w, e.h, CLAY.pink, "#e087aa", e.dir, "grumpy");
+      drawCar(ctx, e.x - cam, e.y, e.w, e.h, CLAY.pink, "#e087aa", e.dir, "grumpy", {
+        wheelPhase: e.x * 0.12,
+      });
     }
   }
 
   const p = g.player;
   const drawX = lerp(g.prevPlayer.x, p.x, g.renderAlpha);
   const drawY = lerp(g.prevPlayer.y, p.y, g.renderAlpha);
+  const playerSquash =
+    p.invuln > INVULN - 0.22
+      ? 0.86
+      : !p.onGround && p.vy < -120
+        ? 1.08
+        : !p.onGround && p.vy > 280
+          ? 0.9
+          : 1;
   if (!(p.invuln > 0 && Math.floor(p.invuln * 12) % 2))
     drawCar(
       ctx,
@@ -707,6 +800,10 @@ export function renderAdventureWorld(
       "#e8b64a",
       p.facing,
       "happy",
+      {
+        wheelPhase: drawX * 0.14,
+        squashY: playerSquash,
+      },
     );
 }
 

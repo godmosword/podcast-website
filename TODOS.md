@@ -43,6 +43,7 @@
 
 | ID | Commit |
 |----|--------|
+| feat(car-adventure): clay material catalog + sprite polish | `PENDING` |
 | feat(candy-kart): clay material catalog + curve ground stick | `f1652e8` |
 | feat(snowboard): rebuild visual presentation（材質／QA 景別） | `b8e8238` |
 | feat(snowboard): clay material catalog + visual QA contract（軌道 A） | `5a623ef` |
