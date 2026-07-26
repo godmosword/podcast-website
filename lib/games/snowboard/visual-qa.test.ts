@@ -1,7 +1,9 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { existsSync } from "node:fs";
 import {
+  SNOWBOARD_CHARACTER_TEXTURES,
   SNOWBOARD_MATERIAL_CATALOG,
   SNOWBOARD_VISUAL_POSES,
   SNOWBOARD_VISUAL_STAGES,
@@ -49,14 +51,28 @@ describe("snowboard visual QA contract", () => {
     expect(materials).toContain("uv1_scale");
   });
 
-  it("rider／world 使用具名材質（skin／fabric／wood／board_plastic）", () => {
+  it("rider／world 使用具名材質（skin／fabric／wood／board_plastic／board_decal）", () => {
     const rider = source("snowboard-game/scripts/rider.gd");
     const world = source("snowboard-game/scripts/world_builder.gd");
     expect(rider).toContain("SnowMaterials.skin()");
     expect(rider).toContain("SnowMaterials.fabric(");
     expect(rider).toContain("SnowMaterials.board_plastic(");
+    expect(rider).toContain("SnowMaterials.board_decal(");
+    expect(rider).toContain("func _build_face(");
     expect(world).toContain("SnowMaterials.wood(");
     expect(world).toContain("SnowMaterials.foliage(");
+  });
+
+  it("角色微貼圖資產入庫", () => {
+    for (const file of SNOWBOARD_CHARACTER_TEXTURES) {
+      expect(existsSync(join(ROOT, "snowboard-game/assets", file)), file).toBe(
+        true,
+      );
+    }
+    const materials = source("snowboard-game/scripts/materials.gd");
+    expect(materials).toContain("TEX_CLAY_MICRO");
+    expect(materials).toContain("TEX_FABRIC_KNIT");
+    expect(materials).toContain("TEX_BOARD_STRIPE");
   });
 
   it("HTML patch 與 iframe-src 轉送 visualStage／visualPose", () => {

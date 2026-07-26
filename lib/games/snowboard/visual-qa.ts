@@ -35,6 +35,16 @@ export const SNOWBOARD_MATERIAL_CATALOG = [
   "foliage",
   "board_plastic",
   "ice",
+  "board_decal",
+] as const;
+
+/** 角色／材質微貼圖（須存在於 snowboard-game/assets）。 */
+export const SNOWBOARD_CHARACTER_TEXTURES = [
+  "clay-micro.svg",
+  "fabric-knit.svg",
+  "board-stripe.svg",
+  "snow-detail.svg",
+  "blob-shadow.svg",
 ] as const;
 
 export type SnowboardMaterialId = (typeof SNOWBOARD_MATERIAL_CATALOG)[number];

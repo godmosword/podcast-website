@@ -234,6 +234,9 @@ func _build_bonbon() -> void:
 	var board_middle := BoxMesh.new()
 	board_middle.size = Vector3(1.42, 0.12, 2.75)
 	_add_mesh(_board, board_middle, SnowMaterials.board_plastic(), Vector3(0, 0.04, 0))
+	var board_stripe := BoxMesh.new()
+	board_stripe.size = Vector3(0.72, 0.02, 2.05)
+	_add_mesh(_board, board_stripe, SnowMaterials.board_decal(), Vector3(0, 0.11, 0))
 	for z in [-1.43, 1.43]:
 		var tip := SphereMesh.new()
 		tip.radius = 0.72
@@ -275,10 +278,7 @@ func _build_bonbon() -> void:
 	hood.rings = 18
 	hood.ring_segments = 8
 	_add_mesh(_torso, hood, SnowMaterials.fabric(Color8(48, 159, 151)), Vector3(0, 3.12, 0.05), Vector3(PI * 0.5, 0, 0))
-	for x in [-0.23, 0.23]:
-		var eye := SphereMesh.new()
-		_mesh_sphere_quality(eye, 0.09, 0.18)
-		_add_mesh(_torso, eye, SnowMaterials.clay(Color8(43, 34, 31), 0.68), Vector3(x, 3.15, -0.67))
+	_build_face(_torso)
 	var hair_material := SnowMaterials.fabric(Color8(91, 53, 34))
 	for spec in [Vector3(-0.43, 3.49, -0.12), Vector3(-0.15, 3.62, -0.24), Vector3(0.17, 3.61, -0.25), Vector3(0.44, 3.45, -0.1), Vector3(-0.37, 3.5, -0.49), Vector3(0.36, 3.5, -0.49)]:
 		var hair := SphereMesh.new()
@@ -287,6 +287,31 @@ func _build_bonbon() -> void:
 	_build_backpack(_torso)
 	_build_shadow()
 	_build_snow_particles()
+
+func _build_face(parent: Node3D) -> void:
+	# 眼白 → 瞳孔 → 腮紅 → 眉 → 微笑，讓 QA 近景不像光頭積木。
+	for x in [-0.23, 0.23]:
+		var white := SphereMesh.new()
+		_mesh_sphere_quality(white, 0.13, 0.22)
+		_add_mesh(parent, white, SnowMaterials.clay(Color8(250, 248, 244), 0.72), Vector3(x, 3.16, -0.62))
+		var pupil := SphereMesh.new()
+		_mesh_sphere_quality(pupil, 0.075, 0.14)
+		_add_mesh(parent, pupil, SnowMaterials.clay(Color8(43, 34, 31), 0.55), Vector3(x, 3.16, -0.72))
+		var blush := SphereMesh.new()
+		_mesh_sphere_quality(blush, 0.11, 0.08)
+		_add_mesh(parent, blush, SnowMaterials.clay(Color8(255, 156, 148), 0.88), Vector3(x * 1.35, 3.0, -0.58))
+		var brow := BoxMesh.new()
+		brow.size = Vector3(0.22, 0.05, 0.06)
+		_add_mesh(parent, brow, SnowMaterials.fabric(Color8(91, 53, 34)), Vector3(x, 3.34, -0.62), Vector3(0, 0, x * 0.18))
+	var smile := TorusMesh.new()
+	smile.inner_radius = 0.11
+	smile.outer_radius = 0.16
+	smile.rings = 14
+	smile.ring_segments = 6
+	_add_mesh(parent, smile, SnowMaterials.clay(Color8(214, 92, 104), 0.7), Vector3(0, 2.92, -0.68), Vector3(PI * 0.5, 0, 0))
+	var nose := SphereMesh.new()
+	_mesh_sphere_quality(nose, 0.09, 0.14)
+	_add_mesh(parent, nose, SnowMaterials.skin(Color8(232, 150, 112)), Vector3(0, 3.08, -0.74))
 
 func _build_headless_rig() -> void:
 	_model = Node3D.new()

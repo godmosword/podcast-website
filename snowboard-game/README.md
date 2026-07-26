@@ -21,7 +21,8 @@ Web 匯出產物位於 `public/snowboard/`，需與程式碼一同入庫。
 
 - 雪道使用固定 seed 的曲面高度場；視覺網格與 `HeightMapShape3D` 共用 `Course.height_at()`。
 - 桌機使用方向光陰影與完整雪粉，觸控裝置自動縮減粒子、樹林密度與壓雪紋密度。
-- **黏土材質庫** `scripts/materials.gd`（`SnowMaterials`）：`clay`／`snow`（normal + UV tile）／`grooming`／具名 `skin`・`fabric`・`wood`・`foliage`・`board_plastic`・`ice`。站內契約見 `lib/games/snowboard/visual-qa.ts`。
+- **黏土材質庫** `scripts/materials.gd`（`SnowMaterials`）：`clay`／`snow`／`grooming`／具名 `skin`・`fabric`・`wood`・`foliage`・`board_plastic`・`ice`・`board_decal`；角色微貼圖 `assets/clay-micro.svg`・`fabric-knit.svg`・`board-stripe.svg`。站內契約見 `lib/games/snowboard/visual-qa.ts`。
+- 阿蹦角色含臉部細節（眼白／腮紅／眉／微笑）與板面条紋，QA 近景可用 `visualPose=carve`。
 - `scripts/export-snowboard.sh` 會在 smoke 與 Web 匯出後注入裝置／視覺 QA 參數，請勿以未經 wrapper 處理的 `index.html` 發佈。
 - QA 截圖可直接開啟：
   - `?visualStage=start|forest|valley|finish`

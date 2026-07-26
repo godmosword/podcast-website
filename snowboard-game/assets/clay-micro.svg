@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Soft clay normal: mostly flat (#8080ff) with gentle pits -->
+  <defs>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.2"/>
+    </filter>
+    <radialGradient id="pit" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#6e6ef0"/>
+      <stop offset="0.55" stop-color="#7c7cfa"/>
+      <stop offset="1" stop-color="#8080ff"/>
+    </radialGradient>
+  </defs>
+  <rect width="256" height="256" fill="#8080ff"/>
+  <g filter="url(#soft)" opacity="0.85">
+    <circle cx="48" cy="62" r="18" fill="url(#pit)"/>
+    <circle cx="132" cy="44" r="14" fill="url(#pit)"/>
+    <circle cx="206" cy="78" r="20" fill="url(#pit)"/>
+    <circle cx="74" cy="148" r="16" fill="url(#pit)"/>
+    <circle cx="168" cy="136" r="22" fill="url(#pit)"/>
+    <circle cx="38" cy="208" r="15" fill="url(#pit)"/>
+    <circle cx="118" cy="198" r="19" fill="url(#pit)"/>
+    <circle cx="210" cy="188" r="17" fill="url(#pit)"/>
+  </g>
+</svg>

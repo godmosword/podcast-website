@@ -496,7 +496,7 @@ func _run_smoke() -> void:
 	SnowMaterials.foliage()
 	SnowMaterials.board_plastic()
 	SnowMaterials.ice()
-	if SnowMaterials.CATALOG.size() < 12:
+	if SnowMaterials.CATALOG.size() < 13:
 		print("SMOKE_RESULT progress=0.0 simulated=0.0 flakes=0 falls=0 penalty=0 terrain=false surface=false ok=false")
 		get_tree().quit(1)
 		return

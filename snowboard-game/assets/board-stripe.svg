@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="128" viewBox="0 0 512 128">
+  <!-- Board top stripe / cream accent -->
+  <rect width="512" height="128" rx="24" fill="#ffe08a"/>
+  <rect x="24" y="28" width="464" height="72" rx="18" fill="#fff6c8"/>
+  <rect x="48" y="48" width="120" height="32" rx="10" fill="#ffb84d" opacity="0.85"/>
+  <circle cx="420" cy="64" r="22" fill="#ff7a90"/>
+  <circle cx="420" cy="64" r="12" fill="#fff1a8"/>
+</svg>
