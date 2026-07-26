@@ -366,11 +366,11 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 
 | ID | 優先 | 狀態 | 摘要 | 主要檔案 | 驗證 |
 |----|------|------|------|----------|------|
-| PLAY-IA-1 | P0 | ✅ 見本 commit | **遊戲頁兒童優先重排**：`#game-play` 前移；單一 52px **sticky** 抬頭持有唯一 h1 與唯一返回；`GameIntro` 降為「給家長的說明」第二層；操作提示留在遊戲正下方 | `GamePageShell.tsx`／`.module.css`、`GameIntro.tsx`／`.module.css` | `e2e/games.spec.ts`（首屏 <160px、DOM 順序、唯一 h1） |
-| PLAY-IA-2 | P0 | ✅ 見本 commit | **`GameHost` 工具列解耦**：改無條件渲染，修正 `hasScore:false` 遊戲會失去暫停／靜音／設定的缺陷；inline style → `GameHost.module.css` | `lib/gamekit/host/GameHost.tsx`、`GameHost.module.css` | 反向契約回歸測試 |
-| PLAY-IA-3 | P0 | ✅ 見本 commit | **沉浸式路由**：`/games/:slug` 隱藏 `SiteNavBar`；hub 與 `coloring-book` 除外 | `lib/is-story-play-route.ts`、`SiteNavBar.tsx` | `is-story-play-route.test.ts`（含巢狀／著色本負向） |
-| PLAY-IA-4 | P1 | ✅ 見本 commit | **hub 四層扁平為兩層**：取消 featured 區塊，主打改分類內大卡（桌面跨兩欄、圖左文右）；卡片補「約 N 分鐘／有無計時」；行動 hero `min(48svh, 340px)` | `app/games/page.tsx`／`page.module.css` | `e2e/games.spec.ts`（第一張卡 <560px、入口不重複） |
-| PLAY-IA-5 | P1 | ✅ 見本 commit | **DESIGN v0.2 收斂**：移除 hover rotate、厚底影下沉、內容卡 `--gloss`、麥克筆 `text-shadow`；`RoughFrame`／`SvgDefs` 整條刪除；`DESIGN.md` 刪 `/games` carve-out | `page.module.css`、`GameChrome.module.css`、`GameEndStation.module.css`、`components/decor/*`、`DESIGN.md` | `npm test` + `decor.module.css.test.ts` |
+| PLAY-IA-1 | P0 | ✅ `40c951b` | **遊戲頁兒童優先重排**：`#game-play` 前移；單一 52px **sticky** 抬頭持有唯一 h1 與唯一返回；`GameIntro` 降為「給家長的說明」第二層；操作提示留在遊戲正下方 | `GamePageShell.tsx`／`.module.css`、`GameIntro.tsx`／`.module.css` | `e2e/games.spec.ts`（首屏 <160px、DOM 順序、唯一 h1） |
+| PLAY-IA-2 | P0 | ✅ `40c951b` | **`GameHost` 工具列解耦**：改無條件渲染，修正 `hasScore:false` 遊戲會失去暫停／靜音／設定的缺陷；inline style → `GameHost.module.css` | `lib/gamekit/host/GameHost.tsx`、`GameHost.module.css` | 反向契約回歸測試 |
+| PLAY-IA-3 | P0 | ✅ `40c951b` | **沉浸式路由**：`/games/:slug` 隱藏 `SiteNavBar`；hub 與 `coloring-book` 除外 | `lib/is-story-play-route.ts`、`SiteNavBar.tsx` | `is-story-play-route.test.ts`（含巢狀／著色本負向） |
+| PLAY-IA-4 | P1 | ✅ `40c951b` | **hub 四層扁平為兩層**：取消 featured 區塊，主打改分類內大卡（桌面跨兩欄、圖左文右）；卡片補「約 N 分鐘／有無計時」；行動 hero `min(48svh, 340px)` | `app/games/page.tsx`／`page.module.css` | `e2e/games.spec.ts`（第一張卡 <560px、入口不重複） |
+| PLAY-IA-5 | P1 | ✅ `40c951b` | **DESIGN v0.2 收斂**：移除 hover rotate、厚底影下沉、內容卡 `--gloss`、麥克筆 `text-shadow`；`RoughFrame`／`SvgDefs` 整條刪除；`DESIGN.md` 刪 `/games` carve-out | `page.module.css`、`GameChrome.module.css`、`GameEndStation.module.css`、`components/decor/*`、`DESIGN.md` | `npm test` + `decor.module.css.test.ts` |
 | PLAY-IA-6 | P2 | 待做 | **暫停覆蓋層補「回遊樂園」**：sticky 抬頭已保證出口可達，但「暫停 → 我要離開」仍是最自然的兒童動線 | `BlockDropView.tsx`、`car-adventure/CarAdventureMenu.tsx` | 手動 390×844 |
 | PLAY-IA-7 | P2 | 待做 | **抬頭與 `GameHost` 工具列合成單列**（portal + context，約 30 行，不動 GameKit 對外契約）：目前遊戲上方仍是 52+48 兩列 | `GamePageShell.tsx`、`lib/gamekit/host/GameHost.tsx` | 手動 + e2e |
 | PLAY-IA-8 | P2 | 待做 | **遊戲頁無法切換日／夜**：`ThemeToggle` 只掛在已隱藏的 `SiteNavBar` | `GamePageShell.tsx` | 手動 |
