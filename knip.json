@@ -1,7 +1,8 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "ignore": [
-    "components/universe/LockedIslandBubble.tsx",
+    "components/universe/ZoneIslandPage.tsx",
+    "components/universe/ZoneSheet.tsx",
     "lib/chip-scroll.ts",
     "lib/podcast-apple.ts",
     "lib/universe/roamer-coords.ts",

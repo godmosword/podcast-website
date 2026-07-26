@@ -92,7 +92,9 @@ describe("UniverseMap tap hint（StrictMode）", () => {
   it("StrictMode 雙 effect 下顯示 hint 且 show 前不寫 session key", async () => {
     await renderMap();
 
-    expect(screen.getByRole("status").textContent).toContain("點一座島看看");
+    expect(screen.getByRole("status").textContent).toContain(
+      "點一座島飛過去，再點探索點",
+    );
     expect(sessionStorage.getItem(TAP_HINT_KEY)).toBeNull();
   });
 

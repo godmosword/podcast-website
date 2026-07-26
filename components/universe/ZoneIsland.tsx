@@ -11,6 +11,7 @@ import { requestCelebration } from "@/lib/celebration";
 import { ISLAND_BURST_PRESET, createRadialBurstParticles } from "@/lib/celebration-dom";
 import StarBurst from "@/components/celebration/StarBurst";
 import IslandRoamerLayer from "./IslandRoamerLayer";
+import LockedIslandBubble from "./LockedIslandBubble";
 import ZoneLandmark from "./ZoneLandmark";
 import ZoneMotionLayer from "./ZoneMotionLayer";
 import StatusOverlay from "./StatusOverlay";
@@ -24,7 +25,7 @@ const CELEBRATE_MS = 640;
 
 type ZoneIslandProps = {
   zone: ResolvedZone;
-  /** 統一點擊語意：點任何島（開放或鎖島本體）→ fly-to＋開介紹 sheet。 */
+  /** 點任何島 → 路由進島（fly-to＋探索點）；鎖島另播短泡，不開選單。 */
   onActivate: (zone: ZoneDef) => void;
   reduced?: boolean;
   paused?: boolean;
@@ -80,14 +81,21 @@ function ZoneIsland({
         burstTimerRef.current = setTimeout(() => setBurst(0), CELEBRATE_MS);
       }
     } else {
-      // 鎖島保留果凍晃動＋輕音效回饋；sheet 由 onActivate 統一開啟。
+      // 鎖島：果凍＋短泡；不開選單（選單已卸載，互動改探索點）。
       playSfx("tap");
-      if (!reduced) {
-        setJelly((n) => n + 1);
-      }
+      setJelly((n) => n + 1);
     }
     onActivate(zone);
   };
+
+  const lockedBubble =
+    !isOpen && jelly > 0 && meta.tapBubble ? (
+      <LockedIslandBubble
+        message={meta.tapBubble}
+        bubbleKey={jelly}
+        reduced={reduced}
+      />
+    ) : null;
 
   useEffect(() => {
     return () => {
@@ -158,10 +166,11 @@ function ZoneIsland({
                 <StarBurst particles={burstParticles} />
               </span>
             )}
+            {lockedBubble}
           </div>
         </button>
         {/* 木牌欄：島名＋狀態 pill（裝飾，島 button 已含同名 aria-label）。
-            點島（含鎖島）一律由島 button 本體開 sheet，木牌欄純展示。
+            點島 → 飛鏡頭＋探索點；木牌欄純展示。
             反縮放／遠距偏移由舞台 --map-scale／--label-offset-y 驅動。 */}
         <span
           className={styles.tileLabel}
@@ -221,6 +230,7 @@ function ZoneIsland({
       >
         {meta.icon} {meta.label}
       </span>
+      {lockedBubble}
     </button>
   );
 }

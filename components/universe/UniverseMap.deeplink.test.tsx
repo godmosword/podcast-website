@@ -102,8 +102,8 @@ describe("UniverseMap 島路徑（StrictMode）", () => {
     expect(sessionStorage.getItem(TAP_HINT_KEY)).toBeNull();
   });
 
-  it("島路徑 children（overlay）會掛在地圖內", async () => {
-    await renderMap(<div role="dialog">恐龍島</div>);
-    expect(screen.getByRole("dialog").textContent).toContain("恐龍島");
+  it("島路徑仍可掛載 layout children（slot 保活）", async () => {
+    await renderMap(<div data-testid="island-slot">恐龍島 slot</div>);
+    expect(screen.getByTestId("island-slot").textContent).toContain("恐龍島");
   });
 });

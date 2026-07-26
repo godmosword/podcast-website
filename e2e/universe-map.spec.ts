@@ -18,27 +18,6 @@ async function openMap(page: Page, theme: ThemeMode, width = 1280, height = 800)
   await page.waitForTimeout(250);
 }
 
-async function assertLockedIslandChildFirstScreen(dialog: Locator) {
-  await expect(dialog.getByText("恐龍島在長大")).toBeVisible();
-  await expect(dialog.getByRole("link", { name: "去聽車車故事" })).toHaveAttribute(
-    "href",
-    /\/stories/,
-  );
-  const parentToggle = dialog.getByRole("button", { name: "給爸爸媽媽" });
-  await expect(parentToggle).toBeVisible();
-  await expect(parentToggle).toHaveAttribute("aria-expanded", "false");
-  await expect(dialog.getByText(/恐龍島還在蓋/)).not.toBeVisible();
-}
-
-async function assertLockedIslandParentExpanded(dialog: Locator) {
-  await expect(dialog.getByText(/恐龍島還在蓋/)).toBeVisible();
-  await expect(dialog.getByLabel("建造進度")).toBeVisible();
-  await expect(dialog.getByRole("link", { name: "回故事屋" })).toHaveAttribute(
-    "href",
-    /\/stories/,
-  );
-}
-
 async function stageTransform(page: Page) {
   return page.evaluate(() => {
     const stage = [...document.querySelectorAll<HTMLDivElement>("div")].find(
@@ -217,34 +196,34 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     expect(scaleFromTransform(await stageTransform(page))).toBeCloseTo(beforeClickScale, 5);
   });
 
-  test("開放車車樂園一次點擊即飛抵並開 sheet（單段式）", async ({ page }) => {
+  test("開放車車樂園一次點擊即飛抵並顯示探索點（無選單）", async ({ page }) => {
     await openMap(page, "light");
     const carPark = page.getByRole("button", { name: /車車樂園，開放中/ });
-    const dialog = page.getByRole("dialog");
 
     await carPark.click();
     await expect
       .poll(async () => (await stageTransformParts(page)).scale)
       .toBeCloseTo(1.6, 1);
-    // sheetReady 閂鎖：等鏡頭 fly-to 結束後 dialog 才視覺揭示
-    await expect(dialog).toBeVisible({ timeout: 3000 });
-    await expect(dialog).toContainText("車車樂園");
-    // sheet 開啟時鏡頭已停在 dock-offset 構圖，不再位移
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(page.locator('[data-hotspot-id="story-gate"]')).toBeVisible({
+      timeout: 3000,
+    });
     const opened = await stageTransformParts(page);
     await page.waitForTimeout(250);
     expectTransformClose(await stageTransformParts(page), opened);
   });
 
-  test("鎖島本體一次點擊也開介紹 sheet（統一點擊語意）", async ({ page }) => {
+  test("鎖島本體一次點擊飛抵＋短泡，不開選單", async ({ page }) => {
     await openMap(page, "light");
     await page.getByRole("button", { name: /恐龍島，建造中/ }).click();
-    const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible({ timeout: 3000 });
-    await expect(dialog).toContainText("恐龍島");
-    await assertLockedIslandChildFirstScreen(dialog);
-
-    await dialog.getByRole("button", { name: "給爸爸媽媽" }).click();
-    await assertLockedIslandParentExpanded(dialog);
+    await expect
+      .poll(async () => (await stageTransformParts(page)).scale)
+      .toBeCloseTo(1.6, 1);
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(page.getByText("還在蓋喔！")).toBeVisible({ timeout: 2000 });
+    await expect(page.locator('[data-hotspot-id="story-house"]')).toBeVisible({
+      timeout: 3000,
+    });
   });
 
   test("首訪非 deep link 顯示 tap hint，關閉後消失", async ({ page }) => {
@@ -257,7 +236,7 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     await expect(page.getByRole("region", { name: "車車宇宙樂園地圖" })).toBeVisible();
 
     const hint = page.getByRole("status");
-    await expect(hint).toContainText("點一座島看看");
+    await expect(hint).toContainText("點一座島飛過去，再點探索點");
 
     await page.getByRole("button", { name: "關閉提示" }).click();
     await expect(hint).toHaveCount(0);
@@ -266,7 +245,7 @@ test.describe("車車宇宙樂園地圖 UX", () => {
   test("首訪 tap hint 點島後消失", async ({ page }) => {
     await openMap(page, "light");
     const hint = page.getByRole("status");
-    await expect(hint).toContainText("點一座島看看");
+    await expect(hint).toContainText("點一座島飛過去，再點探索點");
 
     await page.getByRole("button", { name: /車車樂園，開放中/ }).click();
     await expect(hint).toHaveCount(0);
@@ -279,10 +258,11 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     });
     await page.goto("/adventures/dino");
 
-    const dialog = page.getByRole("dialog");
-    // 深連結亦等鏡頭飛抵後 sheet 才揭示
-    await expect(dialog).toBeVisible({ timeout: 3000 });
+    await expect(page.locator('[data-hotspot-id="story-house"]')).toBeVisible({
+      timeout: 3000,
+    });
     await expect(page.getByRole("status")).toHaveCount(0);
+    await expect(page.getByRole("dialog")).toHaveCount(0);
   });
 
   test("把地圖拖到只剩海，鏡頭自動飛回樂園（迷路自救）", async ({ page }) => {
@@ -311,46 +291,52 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     ).toBeInViewport();
   });
 
-  test("深連結 /adventures/dino 開 overlay，關閉後回到世界地圖", async ({ page }) => {
+  test("深連結 /adventures/dino 飛抵後可回樂園", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.addInitScript(() => {
       window.sessionStorage.setItem("cc-universe-entry-played", "1");
     });
     await page.goto("/adventures/dino");
 
-    const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible({ timeout: 3000 });
-    await expect(dialog).toContainText("恐龍島");
     expect(new URL(page.url()).pathname).toBe("/adventures/dino");
-
-    // 鏡頭真的飛到目標島（FOCUS_SCALE=1.6），而非停在 car-park fit（≈0.9）。
+    await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect
       .poll(async () => scaleFromTransform(await stageTransform(page)))
       .toBeCloseTo(1.6, 1);
+    await expect(page.locator('[data-hotspot-id="story-house"]')).toBeVisible({
+      timeout: 3000,
+    });
 
-    await dialog.getByRole("button", { name: /關閉/ }).click();
-    await expect(dialog).toHaveCount(0);
+    await page.getByRole("button", { name: /回樂園/ }).click();
     await expect
       .poll(() => new URL(page.url()).pathname)
       .toBe("/adventures");
   });
 
-  test("關閉 overlay 後再進同島路徑，可再開（layout 保活）", async ({ page }) => {
+  test("回樂園後再進同島路徑，探索點可再出現（layout 保活）", async ({ page }) => {
     await openMap(page, "light");
 
     await page.getByRole("button", { name: /恐龍島，建造中/ }).click();
-    const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible({ timeout: 3000 });
-    await dialog.getByRole("button", { name: /關閉/ }).click();
-    await expect(dialog).toHaveCount(0);
+    await expect
+      .poll(() => new URL(page.url()).pathname)
+      .toBe("/adventures/dino");
+    await expect(page.locator('[data-hotspot-id="story-house"]')).toBeVisible({
+      timeout: 3000,
+    });
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+
+    await page.getByRole("button", { name: /回樂園/ }).click();
     await expect
       .poll(() => new URL(page.url()).pathname)
       .toBe("/adventures");
 
     await page.getByRole("button", { name: /恐龍島，建造中/ }).click();
-    await expect(dialog).toBeVisible({ timeout: 3000 });
-    await expect(dialog).toContainText("恐龍島");
-    expect(new URL(page.url()).pathname).toBe("/adventures/dino");
+    await expect
+      .poll(() => new URL(page.url()).pathname)
+      .toBe("/adventures/dino");
+    await expect(page.locator('[data-hotspot-id="story-house"]')).toBeVisible({
+      timeout: 3000,
+    });
   });
 
   test("首訪帶島路徑跳過進場動畫，鏡頭不被拉回車庫", async ({ page }) => {
@@ -358,14 +344,12 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto("/adventures/dino");
 
-    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 3000 });
-    await expect(page.getByRole("dialog")).toContainText("恐龍島");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
     expect(
       await page.evaluate(() =>
         window.sessionStorage.getItem("cc-universe-entry-played"),
       ),
     ).toBe("1");
-    // 首訪也要真的飛到目標島，不是停在車庫 fit。
     await expect
       .poll(async () => scaleFromTransform(await stageTransform(page)))
       .toBeCloseTo(1.6, 1);
@@ -380,7 +364,10 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     await expect
       .poll(() => new URL(page.url()).pathname)
       .toBe("/adventures/dino");
-    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 3000 });
+    await expect(page.locator('[data-hotspot-id="story-house"]')).toBeVisible({
+      timeout: 3000,
+    });
+    await expect(page.getByRole("dialog")).toHaveCount(0);
   });
 
   test("M2：島內熱點座標層可開 modal，關閉後回島", async ({ page }) => {
@@ -389,7 +376,7 @@ test.describe("車車宇宙樂園地圖 UX", () => {
       window.sessionStorage.setItem("cc-universe-entry-played", "1");
     });
     await page.goto("/adventures/dino");
-    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 3000 });
+    await expect(page.getByRole("dialog")).toHaveCount(0);
 
     const pin = page.locator('[data-hotspot-id="story-house"]');
     await expect(pin).toBeVisible({ timeout: 3000 });
@@ -406,7 +393,7 @@ test.describe("車車宇宙樂園地圖 UX", () => {
       .toBe("/adventures/dino");
   });
 
-  test("島內 roamer 點擊打招呼，且不觸發島 sheet", async ({ page }) => {
+  test("島內 roamer 點擊打招呼，且不開島選單", async ({ page }) => {
     await openMap(page, "light");
 
     // 海上繞圈漫遊車已移除；改由島內 roamer（恐龍島阿酷）驗證點擊打招呼。
@@ -416,41 +403,17 @@ test.describe("車車宇宙樂園地圖 UX", () => {
       "true",
     );
     await expect(page.getByText("嗨！我是阿酷鑽地車！")).toBeVisible();
-    // roamer 點擊不冒泡到島 button → 不開島 sheet。
     await expect(page.getByRole("dialog")).toHaveCount(0);
   });
 
-  test("MAP-UX-P1b：Esc 可關閉 sheet（overlay 穿透供熱點，點空白不再關）", async ({
-    page,
-  }) => {
-    await openMap(page, "light", 375, 812);
-    await page.getByRole("button", { name: /車車樂園，開放中/ }).click();
-    const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible({ timeout: 3000 });
-
-    await page.keyboard.press("Escape");
-    await expect(dialog).toHaveCount(0);
-  });
-
-  test("MAP-UX-P1a：關閉鈕觸控區 ≥44px", async ({ page }) => {
-    await openMap(page, "light", 375, 812);
-    await page.getByRole("button", { name: /車車樂園，開放中/ }).click();
-    const close = page.getByRole("button", { name: "關閉" });
-    await expect(close).toBeVisible({ timeout: 3000 });
-
-    const box = await close.boundingBox();
-    expect(box).not.toBeNull();
-    expect(box!.height).toBeGreaterThanOrEqual(44);
-    expect(box!.width).toBeGreaterThanOrEqual(44);
-  });
-
-  test("MAP-UX-P2a：reduced-motion 點島即開 sheet", async ({ page }) => {
+  test("MAP-UX-P2a：reduced-motion 點島飛抵並顯示探索點", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await openMap(page, "light", 375, 812);
-    const dialog = page.getByRole("dialog");
 
     await page.getByRole("button", { name: /車車樂園，開放中/ }).click();
-    await expect(dialog).toBeVisible({ timeout: 250 });
-    await expect(dialog).toContainText("車車樂園");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(page.locator('[data-hotspot-id="story-gate"]')).toBeVisible({
+      timeout: 2000,
+    });
   });
 });

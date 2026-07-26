@@ -61,9 +61,6 @@ import { useMapCamera } from "./useMapCamera";
 import { useSheetReadyLatch } from "./useSheetReadyLatch";
 import styles from "./UniverseMap.module.css";
 
-/** bottom dock 開啟時，fly-to 把島往上留出的視窗像素。 */
-const FOCUS_DOCK_OFFSET_Y = 96;
-
 /** 首訪底部提示：每個分頁 session 僅 dismiss 後才寫入（StrictMode 安全）。 */
 export const TAP_HINT_KEY = "cc-universe-tap-hint-shown";
 
@@ -196,7 +193,8 @@ function UniverseMapContent({
     if (cameraTarget.level === "island") {
       appliedTargetKeyRef.current = cameraTarget.key;
       const { coord, scale } = targetToFlyParams(cameraTarget);
-      cameraFlyTo(coord, scale, { viewportOffsetY: FOCUS_DOCK_OFFSET_Y });
+      // 無底部選單：飛抵島心，不再為 dock 預留 viewportOffsetY。
+      cameraFlyTo(coord, scale);
       return;
     }
 
@@ -248,8 +246,8 @@ function UniverseMapContent({
   }, []);
 
   /**
-   * 點島只改路由（M1 不變式）；相機由 pathname → targetFor 驅動。
-   * 手動 pan／zoom 不寫 URL。
+   * 點島只改路由（M1 不變式）；相機由 pathname → targetFor 驅動；
+   * 島上互動改探索點，不再自動開選單。手動 pan／zoom 不寫 URL。
    */
   const handleActivate = useCallback(
     (zone: ZoneDef) => {
@@ -560,7 +558,7 @@ function UniverseMapContent({
       {/* 首訪底部提示：screen-space，不擋地圖拖曳；dismiss 才寫 session key */}
       {tapHintPhase === "visible" ? (
         <div className={styles.tapHint} role="status" aria-live="polite">
-          <span className={styles.tapHintText}>點一座島看看</span>
+          <span className={styles.tapHintText}>點一座島飛過去，再點探索點</span>
           <button
             type="button"
             className={styles.tapHintClose}

@@ -56,13 +56,18 @@ test("a11y：故事詳情頁無 critical/serious 違規", async ({ page }) => {
   ).toEqual([]);
 });
 
-test("a11y：宇宙地圖開 sheet 無 critical/serious 違規", async ({ page }) => {
+test("a11y：宇宙地圖島路徑（探索點、無選單）無 critical/serious 違規", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.addInitScript(() => {
     window.sessionStorage.setItem("cc-universe-entry-played", "1");
   });
   await page.goto("/adventures/dino");
-  await expect(page.getByRole("dialog")).toBeVisible({ timeout: 3000 });
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.locator('[data-hotspot-id="story-house"]')).toBeVisible({
+    timeout: 3000,
+  });
 
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])

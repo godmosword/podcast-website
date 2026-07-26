@@ -32,7 +32,7 @@ export default function MapGuide({ zones }: MapGuideProps) {
           {openCount} / {zones.length} 座可以玩
         </span>
       </div>
-      <p className={styles.instruction}>點一座島，看看現在能做什麼</p>
+      <p className={styles.instruction}>點一座島飛過去，再點探索點</p>
       <ul className={styles.legend} aria-label="島嶼狀態圖例">
         {STATUS_ORDER.map((status) => {
           const count = counts[status];

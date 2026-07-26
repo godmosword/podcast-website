@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import ZoneIslandPage from "@/components/universe/ZoneIslandPage";
 import { STATUS_META, ZONE_IDS, zoneById } from "@/data/universe";
-import { zoneToDef } from "@/data/universe-zones";
 import {
   buildZoneStoryPreviewsMap,
   zoneStoryTitleLines,
@@ -44,6 +42,7 @@ export async function generateMetadata({
 
 /**
  * L1 島內頁：SSR 真實 HTML（島名／tagline／狀態／連結／hotspots）。
+ * 互動選單已卸載——點島改飛鏡頭＋探索點；此頁只保留 GEO／無 JS fallback。
  * 未開放島渲染「敬請期待」而非 404。
  */
 export default async function AdventuresZonePage({ params }: ZonePageProps) {
@@ -51,7 +50,6 @@ export default async function AdventuresZonePage({ params }: ZonePageProps) {
   const zone = zoneById(id);
   if (!zone) notFound();
 
-  const def = zoneToDef(zone);
   const zoneStories = buildZoneStoryPreviewsMap()[zone.id] ?? null;
   const storyTitles =
     zoneStories && zoneStories.total > 0 ? zoneStoryTitleLines(zone.id) : [];
@@ -86,12 +84,6 @@ export default async function AdventuresZonePage({ params }: ZonePageProps) {
           </>
         ) : null}
       </article>
-
-      <ZoneIslandPage
-        zone={def}
-        hotspots={zone.hotspots}
-        zoneStories={zoneStories}
-      />
     </>
   );
 }
