@@ -44,7 +44,7 @@
 | ID | Commit |
 |----|--------|
 | feat(snowboard): rebuild visual presentation（材質／QA 景別） | `b8e8238` |
-| feat(snowboard): clay material catalog + visual QA contract（軌道 A） | _(待 commit)_ |
+| feat(snowboard): clay material catalog + visual QA contract（軌道 A） | `5a623ef` |
 | feat(gamekit): migrate candy-match to GameAdapter（PR #66） | `ceb92f4` |
 | feat(gamekit): migrate car-adventure to GameAdapter（fixedUpdate + render） | `e0d9766` |
 | feat(gamekit): migrate block-drop to GameAdapter | `98a6944` |
