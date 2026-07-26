@@ -19,6 +19,8 @@ import {
 import { candyKartIframeSrc } from "@/lib/games/candy-kart/iframe-src";
 import { useGameLoadGate } from "@/lib/gamekit/react/useGameLoadGate";
 import type { OverlayProps } from "@/lib/gamekit/adapter";
+import type { GameSessionResult } from "@/lib/gamekit/progress/session";
+import { GameEndStation } from "@/components/games/GameEndStation";
 import { GameLoadOverlay } from "@/components/games/GameLoadOverlay";
 import type { CandyKartInstance } from "@/lib/gamekit/games/candy-kart/adapter";
 import styles from "./CandyKartIframeHost.module.css";
@@ -41,6 +43,7 @@ export type CandyKartViewProps = OverlayProps & {
  * 繽紛卡丁車（Godot Web export）DOM overlay：
  * - 按需載入：進頁不拉 WASM，點「開始遊戲」才掛 iframe
  * - race-finish → instance.notifyFinish → Host onSession
+ * - 結算再蓋一層 GameEndStation，導向下一站
  * - postMessage 契約見 candy-kart-bridge（dual-accept 護欄）
  */
 export function CandyKartView({
@@ -60,6 +63,7 @@ export function CandyKartView({
   const reportedRef = useRef<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const iframeLoadedRef = useRef(false);
+  const [endSession, setEndSession] = useState<GameSessionResult | null>(null);
 
   const {
     phase,
@@ -94,6 +98,7 @@ export function CandyKartView({
       const session = candyKartSessionFromFinish(event.data);
       instance.notifyFinish(session);
       syncHost();
+      setEndSession(session);
 
       const eventId = celebrationEventFromKartFinish(event.data);
       const decision = requestCelebration(eventId);
@@ -118,6 +123,17 @@ export function CandyKartView({
 
   const handleRetry = useCallback(() => {
     reportedRef.current = null;
+    iframeLoadedRef.current = false;
+    setEndSession(null);
+    retry();
+    instance.notifyReady();
+    syncHost();
+  }, [retry, instance, syncHost]);
+
+  const handleReplayRace = useCallback(() => {
+    reportedRef.current = null;
+    setEndSession(null);
+    // 重載 iframe，回到選關／開賽流程（與 retry 同路徑）
     iframeLoadedRef.current = false;
     retry();
     instance.notifyReady();
@@ -204,6 +220,23 @@ export function CandyKartView({
         artSrc="/games/v2/candy-kart/cover.webp"
         artAlt="粉紅黏土卡丁車在遊樂園賽道上準備出發"
       />
+      {endSession ? (
+        <div className={styles.endOverlay}>
+          <GameEndStation
+            mood={endSession.cleared ? "win" : "over"}
+            title={endSession.cleared ? "衝線了！" : "這局好玩！"}
+            scoreLabel={`分數 ${endSession.score}`}
+            stars={
+              (endSession.cleared ? 1 : 0) +
+              (endSession.flawless ? 1 : 0) +
+              (endSession.collectedAll ? 1 : 0) || undefined
+            }
+            onReplay={handleReplayRace}
+            replayLabel="再玩一次"
+            gameSlug="candy-kart"
+          />
+        </div>
+      ) : null}
     </div>
   );
 }

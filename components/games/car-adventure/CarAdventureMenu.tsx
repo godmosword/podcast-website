@@ -2,6 +2,7 @@
 
 import { CAR_ADVENTURE_LEVELS } from "@/lib/games/car-adventure/levels";
 import type { Status } from "@/lib/games/car-adventure/types";
+import { GameEndStation } from "@/components/games/GameEndStation";
 import { GameResultActions } from "@/components/games/GameResultActions";
 import styles from "./CarAdventureMenu.module.css";
 
@@ -62,6 +63,12 @@ export function CarAdventureMenu({
 }: CarAdventureMenuProps) {
   if (status === "playing") return null;
 
+  const endMood = status === "won" ? "win" : status === "over" ? "over" : null;
+  const earnedStars = Math.max(
+    0,
+    Math.min(3, Math.floor(adventureStars[levelIndex] ?? 0)),
+  );
+
   return (
     <section
       className={styles.panel}
@@ -72,94 +79,106 @@ export function CarAdventureMenu({
       <div className={styles.hero} aria-hidden>
         <span className={styles.emoji}>{EMOJI[status]}</span>
       </div>
-      <h2 className={styles.title}>{TITLE[status]}</h2>
-      {(status === "won" || status === "over") && score != null && (
-        <p className={styles.score}>得分 ⭐ {score}</p>
-      )}
-
-      {status === "ready" && (
+      {endMood ? (
+        <GameEndStation
+          mood={endMood}
+          title={TITLE[status]}
+          scoreLabel={score != null ? `得分 ${score}` : undefined}
+          stars={earnedStars > 0 ? earnedStars : undefined}
+          onReplay={onStart}
+          replayLabel="再玩一次"
+          gameSlug="car-adventure"
+        />
+      ) : (
         <>
-          <p className={styles.hint}>
-            左右移動、上鍵或空白鍵跳躍；踩搗蛋車、吃金幣、躲尖刺，衝向終點旗！
-          </p>
-          <p className={styles.assistNote}>
-            {kidsMode ? "🧒 兒童模式：5 顆愛心，跳躍判定更寬鬆" : "每關約 1–2 分鐘，失敗後可以立刻再試一次"}
-          </p>
-          {onOpenTutorial && (
-            <button
-              type="button"
-              className={styles.tutorialBtn}
-              onClick={onOpenTutorial}
-            >
-              怎麼玩？
-            </button>
+          <h2 className={styles.title}>{TITLE[status]}</h2>
+          {status === "ready" && (
+            <>
+              <p className={styles.hint}>
+                左右移動、上鍵或空白鍵跳躍；踩搗蛋車、吃金幣、躲尖刺，衝向終點旗！
+              </p>
+              <p className={styles.assistNote}>
+                {kidsMode
+                  ? "🧒 兒童模式：5 顆愛心，跳躍判定更寬鬆"
+                  : "每關約 1–2 分鐘，失敗後可以立刻再試一次"}
+              </p>
+              {onOpenTutorial && (
+                <button
+                  type="button"
+                  className={styles.tutorialBtn}
+                  onClick={onOpenTutorial}
+                >
+                  怎麼玩？
+                </button>
+              )}
+              <div className={styles.levelBlock}>
+                <p className={styles.levelLabel} id="car-adventure-level-label">
+                  選擇關卡
+                </p>
+                <div
+                  className={styles.levelChips}
+                  role="listbox"
+                  aria-labelledby="car-adventure-level-label"
+                >
+                  {CAR_ADVENTURE_LEVELS.map((lv, i) => {
+                    const selected = levelIndex === i;
+                    const earned = Math.max(
+                      0,
+                      Math.min(3, Math.floor(adventureStars[i] ?? 0)),
+                    );
+                    return (
+                      <button
+                        key={lv.id}
+                        type="button"
+                        role="option"
+                        aria-selected={selected}
+                        className={
+                          selected
+                            ? `${styles.chip} ${styles.chipSelected}`
+                            : styles.chip
+                        }
+                        onClick={() => onSelectLevel(i)}
+                      >
+                        <span className={styles.chipNum}>{i + 1}</span>
+                        <span className={styles.chipName}>{lv.name}</span>
+                        <span
+                          className={styles.chipStars}
+                          aria-label={`已得 ${earned} 顆顯示星`}
+                        >
+                          {"★".repeat(earned)}
+                          <span aria-hidden>{"☆".repeat(3 - earned)}</span>
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className={styles.levelHint} aria-live="polite">
+                  {LEVEL_HINTS[levelIndex] ?? "探索新的車車冒險"}
+                </p>
+              </div>
+            </>
           )}
-          <div className={styles.levelBlock}>
-            <p className={styles.levelLabel} id="car-adventure-level-label">
-              選擇關卡
-            </p>
-            <div
-              className={styles.levelChips}
-              role="listbox"
-              aria-labelledby="car-adventure-level-label"
-            >
-              {CAR_ADVENTURE_LEVELS.map((lv, i) => {
-                const selected = levelIndex === i;
-                const earned = Math.max(
-                  0,
-                  Math.min(3, Math.floor(adventureStars[i] ?? 0)),
-                );
-                return (
-                  <button
-                    key={lv.id}
-                    type="button"
-                    role="option"
-                    aria-selected={selected}
-                    className={
-                      selected
-                        ? `${styles.chip} ${styles.chipSelected}`
-                        : styles.chip
-                    }
-                    onClick={() => onSelectLevel(i)}
-                  >
-                    <span className={styles.chipNum}>{i + 1}</span>
-                    <span className={styles.chipName}>{lv.name}</span>
-                    <span
-                      className={styles.chipStars}
-                      aria-label={`已得 ${earned} 顆顯示星`}
-                    >
-                      {"★".repeat(earned)}
-                      <span aria-hidden>{"☆".repeat(3 - earned)}</span>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-            <p className={styles.levelHint} aria-live="polite">
-              {LEVEL_HINTS[levelIndex] ?? "探索新的車車冒險"}
-            </p>
+
+          <div className={styles.ctaBar}>
+            {status === "paused" ? (
+              <button
+                type="button"
+                className={styles.primaryBtn}
+                onClick={onResume}
+                aria-label="繼續遊戲"
+              >
+                繼續 ▶
+              </button>
+            ) : (
+              <GameResultActions
+                onReplay={onStart}
+                replayLabel="開始冒險 ▶"
+                replayClassName={styles.primaryBtn}
+              />
+            )}
           </div>
         </>
       )}
-
-      <div className={styles.ctaBar}>
-        {status === "paused" ? (
-          <button
-            type="button"
-            className={styles.primaryBtn}
-            onClick={onResume}
-            aria-label="繼續遊戲"
-          >
-            繼續 ▶
-          </button>
-        ) : (
-          <GameResultActions
-            onReplay={onStart}
-            replayLabel={status === "ready" ? "開始冒險 ▶" : "再玩一次 🔁"}
-            replayClassName={styles.primaryBtn}
-          />
-        )}
-      </div>
     </section>
   );
 }

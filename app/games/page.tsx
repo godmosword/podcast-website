@@ -29,13 +29,79 @@ const GAME_TYPE_LABEL: Record<GameMeta["gameType"], string> = {
   coloring: "塗顏色",
 };
 
-function GameCard({ game, index }: { game: GameMeta; index: number }) {
+/** 精簡年齡標：3–7 歲 → 3–7 */
+function ageShort(ageRange: string): string {
+  return ageRange.replace(/\s*歲\s*$/u, "");
+}
+
+function FeaturedCard({ game }: { game: GameMeta }) {
   const parentTip = gameParentTip(game);
   const ariaParts = [
     game.title,
+    game.teaser,
     GAME_TYPE_LABEL[game.gameType],
     game.ageRange,
     `約 ${game.estMinutes} 分鐘`,
+    ...game.controls,
+    parentTip,
+    "一起玩",
+  ].filter(Boolean);
+
+  return (
+    <section className={styles.featuredSection} aria-labelledby="games-featured">
+      <div className={styles.featuredHeading}>
+        <p className={styles.zoneKicker}>今天主打</p>
+        <h2 id="games-featured" className={styles.zoneTitle}>
+          先玩這一站
+        </h2>
+      </div>
+      <Link
+        href={game.href}
+        className={`${styles.featuredCard} scrollEnter press-squash`}
+        aria-label={ariaParts.join("，")}
+        style={{
+          ["--card-accent" as string]: game.accent,
+        }}
+      >
+        <RoughFrame color={game.accent} rough={1} width={3} shiftFilter />
+        <div className={styles.featuredThumb}>
+          <Image
+            src={game.art.cover}
+            alt={game.art.alt}
+            fill
+            sizes="(max-width: 640px) 94vw, 920px"
+            className={styles.featuredImage}
+            style={{ objectPosition: game.art.position ?? "50% 50%" }}
+            priority
+          />
+        </div>
+        <span className={styles.featuredBody}>
+          <span className={styles.featuredEmoji} aria-hidden>
+            {game.emoji}
+          </span>
+          <span className={styles.featuredTitle}>{game.title}</span>
+          <span className={styles.featuredTeaser}>{game.teaser}</span>
+          <span className={styles.featuredCta}>
+            一起玩 ▶
+          </span>
+          {parentTip ? (
+            <span className={styles.parentTipSoft}>{parentTip}</span>
+          ) : null}
+        </span>
+      </Link>
+    </section>
+  );
+}
+
+function CompactGameCard({ game, index }: { game: GameMeta; index: number }) {
+  const parentTip = gameParentTip(game);
+  const ariaParts = [
+    game.title,
+    game.teaser,
+    GAME_TYPE_LABEL[game.gameType],
+    game.ageRange,
+    `約 ${game.estMinutes} 分鐘`,
+    game.desc,
     ...game.controls,
     parentTip,
     "開始玩",
@@ -45,55 +111,37 @@ function GameCard({ game, index }: { game: GameMeta; index: number }) {
     <li className={styles.gridItem}>
       <Link
         href={game.href}
-        className={`${styles.card} scrollEnter press-squash`}
+        className={`${styles.compactCard} scrollEnter press-squash`}
         aria-label={ariaParts.join("，")}
         style={{
           ["--card-accent" as string]: game.accent,
-          ["--card-image-position" as string]: game.art.position ?? "50% 50%",
         }}
       >
         <RoughFrame
           color={game.accent}
           rough={index % 2 === 0 ? 1 : 2}
-          width={3}
+          width={2.5}
           shiftFilter
         />
-        <div className={styles.thumb}>
+        <div className={styles.compactThumb}>
           <Image
             src={game.art.thumbnail ?? game.art.cover}
             alt={game.art.alt}
             fill
-            sizes="(max-width: 640px) 92vw, 440px"
-            className={styles.thumbImage}
+            sizes="(max-width: 640px) 88vw, 280px"
+            className={styles.compactImage}
             style={{ objectPosition: game.art.position ?? "50% 50%" }}
           />
-          <span className={styles.typePill}>{GAME_TYPE_LABEL[game.gameType]}</span>
-          {game.featured ? <span className={styles.featuredPill}>第一次玩推薦</span> : null}
+          <span className={styles.ageBadge}>{ageShort(game.ageRange)}</span>
+          <span className={styles.playFab} aria-hidden>
+            <Icon name="play" size={14} />
+          </span>
+          {parentTip ? (
+            <span className={styles.parentCorner}>{parentTip}</span>
+          ) : null}
         </div>
-        <span className={styles.body}>
-          <span className={styles.meta}>
-            <span
-              className={`${styles.ageTag} marker`}
-              style={{ ["--marker-color" as string]: game.accent }}
-            >
-              {game.ageRange}
-            </span>
-            <span className={styles.duration}>⏱ 約 {game.estMinutes} 分鐘</span>
-          </span>
-          <span className={styles.cardTitle}>{game.title}</span>
-          <span className={styles.summary}>{game.desc}</span>
-          <span className={styles.controls}>
-            {game.controls.map((control) => (
-              <span key={control}>{control}</span>
-            ))}
-          </span>
-          {parentTip ? <span className={styles.parentTip}>{parentTip}</span> : null}
-          <span className={styles.footer}>
-            <span className={styles.playLabel}>開始玩</span>
-            <span className={styles.arrow} aria-hidden>
-              <Icon name="play" size={13} />
-            </span>
-          </span>
+        <span className={styles.compactTitle}>
+          <span aria-hidden>{game.emoji}</span> {game.title}
         </span>
       </Link>
     </li>
@@ -113,6 +161,7 @@ function GameSection({
   games: GameMeta[];
   startIndex: number;
 }) {
+  if (games.length === 0) return null;
   return (
     <section className={styles.zone} aria-labelledby={id}>
       <div className={styles.zoneHeading}>
@@ -124,9 +173,13 @@ function GameSection({
         </div>
         <span className={styles.zoneCount}>{games.length} 款</span>
       </div>
-      <ul className={styles.grid}>
+      <ul className={styles.compactGrid}>
         {games.map((game, index) => (
-          <GameCard key={game.slug} game={game} index={startIndex + index} />
+          <CompactGameCard
+            key={game.slug}
+            game={game}
+            index={startIndex + index}
+          />
         ))}
       </ul>
     </section>
@@ -135,7 +188,9 @@ function GameSection({
 
 export default function GamesHubPage() {
   const featured = GAMES.find((game) => game.featured) ?? GAMES[0];
-  const exploreGames = GAMES.filter((game) => game.ageBand === "explore");
+  const exploreGames = GAMES.filter(
+    (game) => game.ageBand === "explore" && !game.featured,
+  );
   const challengeGames = GAMES.filter((game) => game.ageBand === "challenge");
 
   return (
@@ -177,7 +232,7 @@ export default function GamesHubPage() {
           </p>
           <div className={styles.heroActions}>
             <Link href={featured.href} className={styles.primaryCta}>
-              <span aria-hidden>▶</span> 先玩繽紛消消樂
+              <span aria-hidden>▶</span> 先去玩一站
             </Link>
             <span className={styles.heroNote}>免下載 · 手機也能玩</span>
           </div>
@@ -206,9 +261,11 @@ export default function GamesHubPage() {
         />
       </header>
 
+      <FeaturedCard game={featured} />
+
       <div className={styles.sectionIntro}>
         <span className={styles.sectionDot} aria-hidden />
-        <p>每一站都有新的小任務，挑一款就出發。</p>
+        <p>還想逛逛？下面還有其他車站。</p>
         <span className={styles.sectionDot} aria-hidden />
       </div>
 
@@ -224,7 +281,7 @@ export default function GamesHubPage() {
         title="挑戰賽道"
         hint="6–12 歲 · 準備好再來挑戰"
         games={challengeGames}
-        startIndex={1}
+        startIndex={exploreGames.length}
       />
 
       <p className={styles.footerNote}>玩完一站，還有下一站等你發現 🎡</p>

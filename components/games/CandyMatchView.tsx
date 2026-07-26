@@ -10,7 +10,8 @@ import {
 } from "react";
 import { CandyMatchBoard } from "@/components/games/CandyMatchBoard";
 import { DirtOverlay, PieceArt, PieceGift } from "@/components/games/CandyMatchPieceArt";
-import { IconReplay, IconSparkle, IconStar, IconTrophy } from "@/components/games/ClayIcons";
+import { GameEndStation } from "@/components/games/GameEndStation";
+import { IconReplay, IconSparkle, IconStar } from "@/components/games/ClayIcons";
 import type { GameAudioBus, OverlayProps } from "@/lib/gamekit/adapter";
 import { loadPlayerProfile } from "@/lib/gamekit/progress/save";
 import { medalCount } from "@/lib/gamekit/progress/meta";
@@ -814,48 +815,48 @@ export function CandyMatchView({
               }}
             >
               {overlay === "win" ? (
-                <>
-                  <IconSparkle size={52} />
-                  <div style={{ fontSize: 30, fontWeight: 900, color: ACCENT_PINK }}>
-                    {levelIndex === CANDY_MATCH_LEVELS.length - 1 ? "全部完成！🎆" : "任務完成！"}
-                  </div>
-                  <div style={{ display: "flex", gap: 6 }}>
-                    {[0, 1, 2].map((s) => (
-                      <IconStar key={s} size={40} color={s < winStars ? "#ffd34d" : "#e3dce6"} />
-                    ))}
-                  </div>
-                  {levelIndex === CANDY_MATCH_LEVELS.length - 1 && (
-                    <div style={{ display: "inline-flex", alignItems: "center", gap: 6, color: INK, fontWeight: 900 }}>
-                      <IconTrophy size={22} /> 你完成了整座遊樂園！
-                    </div>
-                  )}
-                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
-                    {levelIndex < CANDY_MATCH_LEVELS.length - 1 ? (
-                      <button type="button" style={bigBtn} onClick={() => startLevel(levelIndex + 1)}>
-                        下一關 ▶
-                      </button>
-                    ) : (
-                      <button type="button" style={bigBtn} onClick={() => startLevel(0)}>
-                        <IconReplay size={18} /> 再玩一輪
-                      </button>
-                    )}
-                    <button type="button" style={softBtn} onClick={goToMap}>
-                      回地圖
-                    </button>
-                  </div>
-                </>
+                <GameEndStation
+                  mood="win"
+                  title={
+                    levelIndex === CANDY_MATCH_LEVELS.length - 1
+                      ? "全部完成！"
+                      : "任務完成！"
+                  }
+                  stars={winStars}
+                  gameSlug="candy-match"
+                  onReplay={
+                    levelIndex === CANDY_MATCH_LEVELS.length - 1
+                      ? () => startLevel(0)
+                      : restartCurrentLevel
+                  }
+                  replayLabel={
+                    levelIndex === CANDY_MATCH_LEVELS.length - 1
+                      ? "再玩一輪"
+                      : "再玩這一關"
+                  }
+                  mainAction={
+                    levelIndex < CANDY_MATCH_LEVELS.length - 1
+                      ? {
+                          label: "下一關 ▶",
+                          onClick: () => startLevel(levelIndex + 1),
+                        }
+                      : undefined
+                  }
+                  hideHubLink
+                />
               ) : (
-                <>
-                  <div style={{ fontSize: 26, fontWeight: 900, color: INK }}>我們再試一次！</div>
-                  <p style={{ color: INK_SOFT, fontWeight: 700, margin: 0 }}>你已經很棒了，再找找看！</p>
-                  <button type="button" style={bigBtn} onClick={restartCurrentLevel}>
-                    <IconReplay size={18} /> 再來一次
-                  </button>
-                  <button type="button" style={softBtn} onClick={goToMap}>
-                    回地圖
-                  </button>
-                </>
+                <GameEndStation
+                  mood="retry"
+                  title="我們再試一次！"
+                  gameSlug="candy-match"
+                  onReplay={restartCurrentLevel}
+                  replayLabel="再來一次"
+                  hideHubLink
+                />
               )}
+              <button type="button" style={softBtn} onClick={goToMap}>
+                回地圖
+              </button>
             </div>
           )}
         </>

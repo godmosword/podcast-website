@@ -19,12 +19,14 @@ export type TutorialStep = {
 };
 
 /** UX-P0-4：challenge 遊戲列表卡家長提示（僅文案，不隱藏入口）。 */
-export const CHALLENGE_PARENT_TIP = "建議 6 歲以上 · 家長陪同" as const;
+export const CHALLENGE_PARENT_TIP = "爸媽陪玩更有趣" as const;
 
 export type GameMeta = {
   slug: string;
   title: string;
   desc: string;
+  /** Hub 主打卡短情緒句（≤14 字）。 */
+  teaser: string;
   href: string;
   emoji: string;
   accent: string;
@@ -46,6 +48,7 @@ export const GAMES: GameMeta[] = [
     slug: "candy-match",
     title: "繽紛消消樂",
     desc: "小朋友的第一款消除遊戲：找一找、排一排、消一消，完成繽紛任務！",
+    teaser: "找一樣的，消掉它！",
     href: "/games/candy-match",
     emoji: "🍭",
     accent: "var(--c-pink)",
@@ -71,6 +74,7 @@ export const GAMES: GameMeta[] = [
     slug: "car-adventure",
     title: "車車大冒險",
     desc: "8 關橫向跑跳冒險：吃金幣、踩搗蛋車、躲尖刺、解開能力門，衝向終點旗。",
+    teaser: "跳一跳，衝向終點！",
     href: "/games/car-adventure",
     emoji: "🏁",
     accent: "var(--c-sky)",
@@ -96,6 +100,7 @@ export const GAMES: GameMeta[] = [
     slug: "block-drop",
     title: "繽紛樂園",
     desc: "黏土糖果風落下方塊，排滿整行就消除。",
+    teaser: "排滿一行就消掉！",
     href: "/games/block-drop",
     emoji: "🧩",
     accent: "var(--c-pink)",
@@ -121,6 +126,7 @@ export const GAMES: GameMeta[] = [
     slug: "candy-kart",
     title: "繽紛卡丁車",
     desc: "馬卡龍黏土風卡丁車：6 條糖果賽道、漂移收星星，爭奪繽紛糖果盃！",
+    teaser: "漂移一下，收星星！",
     href: "/games/candy-kart",
     emoji: "🍬",
     accent: "var(--c-pink)",
@@ -146,6 +152,7 @@ export const GAMES: GameMeta[] = [
     slug: "snowboard",
     title: "阿蹦雪山衝刺",
     desc: "跟著阿蹦滑下糖霜雪峰：轉彎、跳躍、收齊彩虹雪花，挑戰三星完賽！",
+    teaser: "轉彎跳躍收雪花！",
     href: "/games/snowboard",
     emoji: "🏂",
     accent: "var(--c-sky)",
@@ -172,6 +179,7 @@ export const GAMES: GameMeta[] = [
     slug: "coloring-book",
     title: "繪本著色",
     desc: "選定裝人物或故事場景線稿，用蠟筆與油漆桶輕輕塗上喜歡的顏色！",
+    teaser: "選顏色，塗一塗！",
     href: "/games/coloring-book",
     emoji: "🖍️",
     accent: "var(--c-sky)",
@@ -195,6 +203,23 @@ export const GAMES: GameMeta[] = [
     ],
   },
 ];
+
+/** 遊樂園動線：玩完 A 建議去 B。 */
+export const GAME_NEXT: Record<string, string> = {
+  "candy-match": "coloring-book",
+  "coloring-book": "candy-match",
+  "car-adventure": "block-drop",
+  "block-drop": "candy-kart",
+  "candy-kart": "snowboard",
+  snowboard: "car-adventure",
+};
+
+/** 依 slug 取下一站遊戲；找不到回 null。 */
+export function getNextGame(slug: string): GameMeta | null {
+  const next = GAME_NEXT[slug];
+  if (!next) return null;
+  return GAMES.find((game) => game.slug === next) ?? null;
+}
 
 /** challenge 遊戲回傳家長提示文案；explore 不回傳。 */
 export function gameParentTip(game: GameMeta): string | null {

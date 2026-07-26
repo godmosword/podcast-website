@@ -16,6 +16,7 @@ import { useGameLoop } from "@/lib/gamekit/react/useGameLoop";
 import { useTouchControls } from "@/lib/gamekit/react/useTouchControls";
 import type { BlockDropDifficulty } from "@/lib/gamekit/progress/settings";
 import type { GameAudioBus, OverlayProps } from "@/lib/gamekit/adapter";
+import { GameEndStation } from "@/components/games/GameEndStation";
 import { GameResultActions } from "@/components/games/GameResultActions";
 import { useGameKitSettings } from "@/hooks/useGameKitSettings";
 import type { BlockDropInstance } from "@/lib/gamekit/games/block-drop/adapter";
@@ -2189,126 +2190,102 @@ export function BlockDropView({
                padding: 16,
              }}
           >
-            <div
-              style={{
-                lineHeight: 0,
-                animation: reduced ? "none" : "popIn .35s ease-out",
-              }}
-            >
-              {g.status === "over" ? (
-                <IconSparkle size={48} />
-              ) : g.status === "paused" ? (
-                <IconPauseGlyph size={44} color={MACARON_THEME.inkSoft} />
-              ) : (
-                <IconCandy size={48} />
-              )}
-            </div>
-            <div style={{ fontSize: 22, fontWeight: 900 }}>
-              {g.status === "over"
-                ? topOut
-                  ? "方塊堆到頂了"
-                  : "遊戲結束"
-                : g.status === "paused"
-                  ? "暫停中"
-                  : "繽紛方塊"}
-            </div>
-            {g.status === "over" && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  fontSize: 22,
-                  fontWeight: 900,
-                  color: MACARON_THEME.ink,
-                }}
-              >
-                <IconStar size={22} /> {g.score}
-                {newBestRef.current && (
-                  <span
+            {g.status === "over" ? (
+              <>
+                <GameEndStation
+                  mood="over"
+                  title={topOut ? "方塊堆到頂了" : "這局好玩！"}
+                  scoreLabel={
+                    newBestRef.current
+                      ? `分數 ${g.score} · 新紀錄！`
+                      : `分數 ${g.score}`
+                  }
+                  onReplay={onRestart}
+                  replayLabel="再玩一次"
+                  gameSlug="block-drop"
+                />
+                {topOut && blockDropDifficulty !== "relaxed" ? (
+                  <button
+                    type="button"
+                    onClick={switchToRelaxedAndRestart}
                     style={{
-                      color: MACARON_THEME.accentPink,
-                      fontSize: 15,
+                      ...secondaryBtn(font),
                       display: "inline-flex",
                       alignItems: "center",
-                      gap: 4,
+                      gap: 6,
                     }}
                   >
-                    <IconTrophy size={16} /> 新紀錄！
-                  </span>
-                )}
-              </div>
-            )}
-            {g.status === "ready" && (
-              <HintChips
-                items={isCoarse ? touchHintItems : KEY_HINTS}
-                iconOnly={isCoarse}
-              />
-            )}
-            {g.status === "ready" && (
-              <button
-                type="button"
-                onClick={onOpenTutorial}
-                style={{
-                  ...secondaryBtn(font),
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                }}
-              >
-                怎麼玩？
-              </button>
-            )}
-            {g.status !== "paused" ? (
-              <GameResultActions
-                onReplay={onRestart}
-                replayLabel={
-                  g.status === "over" ? (
-                    <>
-                      <IconReplay size={19} /> 再玩
-                    </>
-                  ) : (
-                    <>
-                      <IconPlay size={19} /> 開始
-                    </>
-                  )
-                }
-                replayStyle={{
-                  ...primaryBtn(font),
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                }}
-                extraActions={
-                  topOut && blockDropDifficulty !== "relaxed" ? (
-                    <button
-                      type="button"
-                      onClick={switchToRelaxedAndRestart}
-                      style={{
-                        ...secondaryBtn(font),
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 6,
-                      }}
-                    >
-                      <IconSprout size={16} /> 換輕鬆
-                    </button>
-                  ) : null
-                }
-              />
+                    <IconSprout size={16} /> 換輕鬆
+                  </button>
+                ) : null}
+              </>
             ) : (
-              <button
-                type="button"
-                onClick={onResume}
-                style={{
-                  ...primaryBtn(font),
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                }}
-              >
-                <IconPlay size={19} /> 繼續
-              </button>
+              <>
+                <div
+                  style={{
+                    lineHeight: 0,
+                    animation: reduced ? "none" : "popIn .35s ease-out",
+                  }}
+                >
+                  {g.status === "paused" ? (
+                    <IconPauseGlyph size={44} color={MACARON_THEME.inkSoft} />
+                  ) : (
+                    <IconCandy size={48} />
+                  )}
+                </div>
+                <div style={{ fontSize: 22, fontWeight: 900 }}>
+                  {g.status === "paused" ? "暫停中" : "繽紛方塊"}
+                </div>
+                {g.status === "ready" && (
+                  <HintChips
+                    items={isCoarse ? touchHintItems : KEY_HINTS}
+                    iconOnly={isCoarse}
+                  />
+                )}
+                {g.status === "ready" && (
+                  <button
+                    type="button"
+                    onClick={onOpenTutorial}
+                    style={{
+                      ...secondaryBtn(font),
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                    }}
+                  >
+                    怎麼玩？
+                  </button>
+                )}
+                {g.status === "paused" ? (
+                  <button
+                    type="button"
+                    onClick={onResume}
+                    style={{
+                      ...primaryBtn(font),
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                  >
+                    <IconPlay size={19} /> 繼續
+                  </button>
+                ) : (
+                  <GameResultActions
+                    onReplay={onRestart}
+                    replayLabel={
+                      <>
+                        <IconPlay size={19} /> 開始
+                      </>
+                    }
+                    replayStyle={{
+                      ...primaryBtn(font),
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                  />
+                )}
+              </>
             )}
           </div>
         )}

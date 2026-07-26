@@ -3,6 +3,19 @@
   width: 100%;
 }
 
+.endOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 250, 242, 0.94);
+  backdrop-filter: blur(4px);
+}
+
 .frame {
   width: 100%;
   height: min(72vh, 640px);

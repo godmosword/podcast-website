@@ -88,13 +88,10 @@
   display: inline-block;
   align-self: flex-start;
   margin-top: 8px;
-  padding: 5px 8px;
-  border: 1px solid color-mix(in srgb, var(--c-yellow) 45%, var(--line));
-  border-radius: var(--radius-sm);
+  padding: 2px 0;
   color: var(--ink-soft);
-  background: color-mix(in srgb, var(--c-yellow) 22%, var(--card));
-  font-size: 0.77rem;
-  font-weight: 800;
+  font-size: 0.78rem;
+  font-weight: 700;
   line-height: 1.4;
 }
 
