@@ -4,7 +4,17 @@ import {
   isIslandPath,
   targetFor,
   targetToFlyParams,
+  type IslandCameraTarget,
 } from "./camera";
+
+/** 取島層目標並收窄型別；非島層直接讓測試失敗。 */
+function islandTarget(pathname: string): IslandCameraTarget {
+  const t = targetFor(pathname);
+  if (t.level !== "island") {
+    throw new Error(`expected island target for ${pathname}, got ${t.level}`);
+  }
+  return t;
+}
 
 describe("targetFor", () => {
   it("世界地圖路徑 → world", () => {
@@ -15,8 +25,15 @@ describe("targetFor", () => {
     expect(targetFor("/adventures/")).toMatchObject({ key: "world" });
   });
 
+  it("world 目標不帶靜態 center/zoom（構圖唯一真相在 useMapCamera.reset）", () => {
+    const t = targetFor("/adventures");
+    expect(t).toEqual({ key: "world", level: "world" });
+    expect("center" in t).toBe(false);
+    expect("zoom" in t).toBe(false);
+  });
+
   it("島路徑 → island + 該島 camera", () => {
-    const t = targetFor("/adventures/dino");
+    const t = islandTarget("/adventures/dino");
     expect(t.key).toBe("island:dino");
     expect(t.level).toBe("island");
     expect(t.zoom).toBe(1.6);
@@ -42,7 +59,7 @@ describe("clamp / targetToFlyParams", () => {
   });
 
   it("dino fly 參數還原既有 stage px 與 FOCUS 1.6", () => {
-    const { coord, scale } = targetToFlyParams(targetFor("/adventures/dino"));
+    const { coord, scale } = targetToFlyParams(islandTarget("/adventures/dino"));
     expect(coord).toEqual({ x: 175, y: 300 });
     expect(scale).toBe(1.6);
   });

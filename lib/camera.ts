@@ -11,17 +11,24 @@ import {
 } from "@/data/universe";
 
 export type CameraState = { center: [number, number]; zoom: number };
-export type CameraTarget = CameraState & {
-  key: string;
-  level: "world" | "island";
-};
 
-const WORLD: CameraTarget = {
-  key: "world",
-  level: "world",
-  center: [0.5, 0.5],
-  zoom: universe.camera.worldZoom,
-};
+/**
+ * 相機目標。刻意做成 discriminated union：世界層**沒有**靜態 center/zoom。
+ * 世界層構圖是 viewport 的函式（島群 bbox 中心 @ fitScaleFor），唯一實作在
+ * `useMapCamera.reset()`；此處若再宣告一份座標就是第二份真相，兩邊遲早分岔。
+ */
+export type CameraTarget =
+  | { key: "world"; level: "world" }
+  | {
+      key: `island:${string}`;
+      level: "island";
+      center: [number, number];
+      zoom: number;
+    };
+
+export type IslandCameraTarget = Extract<CameraTarget, { level: "island" }>;
+
+const WORLD: CameraTarget = { key: "world", level: "world" };
 
 /** 相機目標是 pathname 的純函式 —— 巢狀導覽核心不變式 */
 export function targetFor(pathname: string): CameraTarget {
@@ -46,11 +53,13 @@ export function clamp(s: CameraState, u: Universe = universe): CameraState {
 }
 
 /**
- * 將 CameraTarget 轉成 useMapCamera.flyTo 所需的 stage px + scale。
+ * 將島層 CameraTarget 轉成 useMapCamera.flyTo 所需的 stage px + scale。
  * 只夾 zoom；center 必須對齊島心（勿套用 0–1 viewport clamp，否則邊緣島會被推離）。
  * 舞台邊界仍由 useMapCamera.clampCam 處理。
+ *
+ * 只吃島層：世界層請走 `useMapCamera.reset()`（傳世界層進來是編譯錯誤）。
  */
-export function targetToFlyParams(target: CameraTarget): {
+export function targetToFlyParams(target: IslandCameraTarget): {
   coord: { x: number; y: number };
   scale: number;
 } {

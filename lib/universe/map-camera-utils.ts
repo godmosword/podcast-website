@@ -257,3 +257,106 @@ export function blendVelocity(
 ): number {
   return prev * (1 - alpha) + instant * alpha;
 }
+
+/**
+ * 把「舞台某點置中於視窗」轉成相機 pose（未 clamp；呼叫端接 `clampCamera`）。
+ * offsetY 為正時把舞台往下推（島在畫面上移）。
+ */
+export function poseFor(
+  coord: { x: number; y: number },
+  scale: number,
+  viewportW: number,
+  viewportH: number,
+  offsetY = 0,
+): CameraState {
+  return {
+    scale,
+    tx: viewportW / 2 - coord.x * scale,
+    ty: viewportH / 2 - coord.y * scale + offsetY,
+  };
+}
+
+/** `poseFor` 的反函式：目前鏡頭下位於視窗中心的舞台座標。 */
+export function cameraCenter(
+  cam: CameraState,
+  viewportW: number,
+  viewportH: number,
+): { x: number; y: number } {
+  return {
+    x: (viewportW / 2 - cam.tx) / cam.scale,
+    y: (viewportH / 2 - cam.ty) / cam.scale,
+  };
+}
+
+/**
+ * van Wijk & Nuij 曲率參數（INFOVIS '03「Smooth and efficient zooming and panning」）。
+ * 1.414 為論文與 Mapbox flyTo 的預設值。
+ */
+export const FLY_RHO = 1.414;
+
+/**
+ * 飛行「感知速度」（van Wijk 世界單位／秒）：時長 = 感知路徑長 S ÷ 此速度。
+ * 校準基準為手機直向（390×740，主要使用情境）：進島車車樂園約 390ms、
+ * 雙擊放大約 245ms——刻意對齊改動前手調的 450／250 手感。調小＝整體變慢。
+ */
+export const FLY_VELOCITY = 2.5;
+
+/** 飛行時長下限（ms）：極短位移也別瞬移，孩子需要看得到鏡頭在動。 */
+export const MIN_FLY_MS = 180;
+/** 飛行時長上限（ms）：跨全圖也不該拖過久。 */
+export const MAX_FLY_MS = 700;
+
+/** 純縮放判定門檻（stage px）：位移小於此值走退化分支，避免除以近零。 */
+const FLY_PAN_EPS = 1e-6;
+
+/**
+ * van Wijk & Nuij 的感知路徑長 S：同時計入平移與縮放，且縮放取對數尺度
+ * （0.34→0.68 的感知距離大於 1.6→2.0，雖然兩者都是放大一倍以內）。
+ *
+ * 注意：這裡只借用論文的「距離度量」，不採用其參數化弧線路徑——實際過場仍由
+ * CSS transition 直線插值（見 map-camera-visual.ts）。
+ */
+export function flyPathLength(
+  from: CameraState,
+  to: CameraState,
+  viewportW: number,
+  viewportH: number,
+): number {
+  if (viewportW === 0 || viewportH === 0) return 0;
+
+  const c0 = cameraCenter(from, viewportW, viewportH);
+  const c1 = cameraCenter(to, viewportW, viewportH);
+  const du = Math.hypot(c1.x - c0.x, c1.y - c0.y);
+
+  // 視窗涵蓋的世界寬度（stage px）：縮放越大看得越少。
+  const w0 = viewportW / from.scale;
+  const w1 = viewportW / to.scale;
+
+  const rho2 = FLY_RHO * FLY_RHO;
+  if (du < FLY_PAN_EPS) {
+    // 純縮放：退化為對數距離。
+    return Math.abs(Math.log(w1 / w0)) / FLY_RHO;
+  }
+
+  const rho4 = rho2 * rho2;
+  const b0 = (w1 * w1 - w0 * w0 + rho4 * du * du) / (2 * w0 * rho2 * du);
+  const b1 = (w1 * w1 - w0 * w0 - rho4 * du * du) / (2 * w1 * rho2 * du);
+  const r0 = Math.log(Math.sqrt(b0 * b0 + 1) - b0);
+  const r1 = Math.log(Math.sqrt(b1 * b1 + 1) - b1);
+  return (r1 - r0) / FLY_RHO;
+}
+
+/**
+ * 依起訖鏡頭推導過場時長（ms）：近距離縮放自動變快、跨島飛行自動變慢，
+ * 不需要為每個呼叫點各拍一個常數。
+ */
+export function flyDurationFor(
+  from: CameraState,
+  to: CameraState,
+  viewportW: number,
+  viewportH: number,
+): number {
+  const ms = (flyPathLength(from, to, viewportW, viewportH) / FLY_VELOCITY) * 1000;
+  if (!Number.isFinite(ms)) return MIN_FLY_MS;
+  return clamp(ms, MIN_FLY_MS, MAX_FLY_MS);
+}

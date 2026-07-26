@@ -7,11 +7,14 @@ import {
   INERTIA_DECAY_TAU,
   DOUBLE_TAP_DIST_PX,
   DOUBLE_TAP_MS,
+  MAX_FLY_MS,
   MAX_SCALE,
+  MIN_FLY_MS,
   MIN_SCALE,
   PORTRAIT_MAX_ZOOM,
   RECENTER_VISIBLE_MARGIN_PX,
   anyPointVisible,
+  cameraCenter,
   isDoubleTap,
   blendVelocity,
   clampCamera,
@@ -20,7 +23,11 @@ import {
   decayVelocity,
   exceedsDragSlop,
   fitScaleFor,
+  flyDurationFor,
+  flyPathLength,
   islandContentBounds,
+  islandContentCenter,
+  poseFor,
   wheelZoomFactor,
   zoomCameraAt,
 } from "./map-camera-utils";
@@ -271,5 +278,122 @@ describe("map-camera-utils", () => {
     expect(
       isDoubleTap(prev, { t: 1100, x: 100 + DOUBLE_TAP_DIST_PX, y: 100 }),
     ).toBe(false);
+  });
+});
+
+describe("poseFor / cameraCenter", () => {
+  it("poseFor 把指定舞台點置中於視窗", () => {
+    const pose = poseFor({ x: 400, y: 300 }, 2, 800, 600);
+    // 400*2 + tx 應等於視窗中心 400
+    expect(pose.tx).toBe(800 / 2 - 400 * 2);
+    expect(pose.ty).toBe(600 / 2 - 300 * 2);
+    expect(400 * pose.scale + pose.tx).toBe(400);
+    expect(300 * pose.scale + pose.ty).toBe(300);
+  });
+
+  it("poseFor 的 offsetY 把舞台往下推（島在畫面上移）", () => {
+    const base = poseFor({ x: 400, y: 300 }, 1, 800, 600);
+    const shifted = poseFor({ x: 400, y: 300 }, 1, 800, 600, 40);
+    expect(shifted.ty - base.ty).toBe(40);
+    expect(shifted.tx).toBe(base.tx);
+  });
+
+  it("cameraCenter 是 poseFor 的反函式", () => {
+    const coord = { x: 175, y: 300 };
+    const pose = poseFor(coord, 1.6, 390, 740);
+    const back = cameraCenter(pose, 390, 740);
+    expect(back.x).toBeCloseTo(coord.x, 10);
+    expect(back.y).toBeCloseTo(coord.y, 10);
+  });
+});
+
+describe("flyPathLength / flyDurationFor（van Wijk 距離推導）", () => {
+  const W = 390;
+  const H = 740;
+  const at = (x: number, y: number, scale: number) =>
+    poseFor({ x, y }, scale, W, H);
+
+  it("純縮放（無位移）走退化分支，回傳有限正值", () => {
+    const S = flyPathLength(at(500, 360, 0.6), at(500, 360, 1.2), W, H);
+    expect(Number.isFinite(S)).toBe(true);
+    expect(S).toBeGreaterThan(0);
+  });
+
+  it("同一鏡頭的路徑長為 0", () => {
+    expect(flyPathLength(at(500, 360, 1), at(500, 360, 1), W, H)).toBeCloseTo(0, 10);
+  });
+
+  it("純平移：距離越遠路徑長越大", () => {
+    const from = at(200, 360, 1);
+    const near = flyPathLength(from, at(300, 360, 1), W, H);
+    const far = flyPathLength(from, at(800, 360, 1), W, H);
+    expect(near).toBeGreaterThan(0);
+    expect(far).toBeGreaterThan(near);
+  });
+
+  it("路徑長對稱：S(a→b) === S(b→a)", () => {
+    const a = at(175, 300, 0.6);
+    const b = at(825, 560, 1.6);
+    expect(flyPathLength(a, b, W, H)).toBeCloseTo(flyPathLength(b, a, W, H), 10);
+  });
+
+  it("縮放取對數尺度：低倍率端的同倍數放大感知距離更大", () => {
+    const low = flyPathLength(at(500, 360, 0.34), at(500, 360, 0.68), W, H);
+    const high = flyPathLength(at(500, 360, 1.0), at(500, 360, 2.0), W, H);
+    // 兩者都是放大一倍，對數尺度下應相等（這正是不用線性尺度的理由）
+    expect(low).toBeCloseTo(high, 10);
+    // 而同樣的「絕對 scale 差」在低倍率端感知距離遠大於高倍率端
+    const lowDelta = flyPathLength(at(500, 360, 0.34), at(500, 360, 1.34), W, H);
+    const highDelta = flyPathLength(at(500, 360, 1.0), at(500, 360, 2.0), W, H);
+    expect(lowDelta).toBeGreaterThan(highDelta);
+  });
+
+  it("視窗未量測（0 尺寸）回傳 0 路徑長與最小時長", () => {
+    const a = { scale: 1, tx: 0, ty: 0 };
+    const b = { scale: 2, tx: 100, ty: 100 };
+    expect(flyPathLength(a, b, 0, 0)).toBe(0);
+    expect(flyDurationFor(a, b, 0, 0)).toBe(MIN_FLY_MS);
+  });
+
+  it("flyDurationFor 夾在 MIN_FLY_MS–MAX_FLY_MS 之間", () => {
+    // 零位移 → 撞下限
+    expect(flyDurationFor(at(500, 360, 1), at(500, 360, 1), W, H)).toBe(MIN_FLY_MS);
+    // 跨全圖 + 極端縮放 → 撞上限
+    expect(
+      flyDurationFor(at(0, 0, MIN_SCALE), at(MAP_STAGE.width, MAP_STAGE.height, MAX_SCALE), W, H),
+    ).toBe(MAX_FLY_MS);
+  });
+
+  it("代表性場景釘樁：進島約 390ms、雙擊放大約 245ms（手機直向）", () => {
+    const fit = fitScaleFor(W, H);
+    const world = poseFor(islandContentCenter(), fit, W, H);
+
+    // 進島：車車樂園（唯一 open 的島）
+    const carPark = ZONES.find((z) => z.id === "car-park")!;
+    const enterMs = flyDurationFor(world, poseFor(carPark.coord, 1.6, W, H), W, H);
+    expect(enterMs).toBeGreaterThan(330);
+    expect(enterMs).toBeLessThan(460);
+
+    // 雙擊：原地放大 1.8 倍，焦點偏視窗 1/4 寬
+    const center = islandContentCenter();
+    const tapScale = clampScale(fit * 1.8);
+    const tapMs = flyDurationFor(
+      world,
+      poseFor({ x: center.x + W / 4 / fit, y: center.y }, tapScale, W, H),
+      W,
+      H,
+    );
+    expect(tapMs).toBeGreaterThan(200);
+    expect(tapMs).toBeLessThan(300);
+  });
+
+  it("近島比遠島快：forest（近中心）< ocean（角落）", () => {
+    const fit = fitScaleFor(W, H);
+    const world = poseFor(islandContentCenter(), fit, W, H);
+    const forest = ZONES.find((z) => z.id === "forest")!;
+    const ocean = ZONES.find((z) => z.id === "ocean")!;
+    const forestMs = flyDurationFor(world, poseFor(forest.coord, 1.6, W, H), W, H);
+    const oceanMs = flyDurationFor(world, poseFor(ocean.coord, 1.6, W, H), W, H);
+    expect(forestMs).toBeLessThan(oceanMs);
   });
 });

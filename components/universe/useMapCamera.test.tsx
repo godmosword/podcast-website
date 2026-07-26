@@ -2,10 +2,18 @@
 import React, { useEffect } from "react";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { clampCamera, fitScaleFor, islandContentCenter } from "@/lib/universe/map-camera-utils";
+import {
+  MAX_FLY_MS,
+  MIN_FLY_MS,
+  clampCamera,
+  clampScale,
+  fitScaleFor,
+  flyDurationFor,
+  islandContentCenter,
+  poseFor,
+} from "@/lib/universe/map-camera-utils";
 import {
   ENTRY_PLAYED_KEY,
-  FLY_DURATION_MS,
   useMapCamera,
   type CameraVisualMeta,
   type UseMapCameraOptions,
@@ -241,7 +249,7 @@ describe("useMapCamera", () => {
     vi.useRealTimers();
   });
 
-  it("bindVisual meta.flyDurationMs 等於本次飛行實際時長（預設）", async () => {
+  it("bindVisual meta.flyDurationMs 預設為依距離推導的時長", async () => {
     const captured: CameraVisualMeta[] = [];
     stubBrowserApis();
     render(
@@ -256,9 +264,23 @@ describe("useMapCamera", () => {
       expect(screen.getByTestId("viewport").getAttribute("data-measured")).toBe("1");
     });
 
+    // 重建 harness 的起訖鏡頭（viewport 1280×800、skipEntryAnimation → 起點為 fit 構圖）
+    const W = 1280;
+    const H = 800;
+    const fit = fitScaleFor(W, H);
+    const from = clampCamera(poseFor(islandContentCenter(), fit, W, H), W, H);
+    const to = clampCamera(
+      poseFor({ x: 120, y: 140 }, clampScale(fit * 1.2), W, H),
+      W,
+      H,
+    );
+    const expectedMs = flyDurationFor(from, to, W, H);
+
     fireEvent.click(screen.getByRole("button", { name: "飛行" }));
-    expect(captured.some((m) => m.flyDurationMs === FLY_DURATION_MS)).toBe(true);
-    expect(FLY_DURATION_MS).toBe(450);
+    expect(captured.some((m) => m.flyDurationMs === expectedMs)).toBe(true);
+    // 推導值必落在上下限內，且不再等於舊的固定常數來源
+    expect(expectedMs).toBeGreaterThanOrEqual(MIN_FLY_MS);
+    expect(expectedMs).toBeLessThanOrEqual(MAX_FLY_MS);
   });
 
   it("bindVisual meta.flyDurationMs 等於自訂 durationMs", async () => {

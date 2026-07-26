@@ -15,8 +15,10 @@ import {
   decayVelocity,
   exceedsDragSlop,
   fitScaleFor,
+  flyDurationFor,
   islandContentCenter,
   isDoubleTap,
+  poseFor,
   DOUBLE_TAP_ZOOM,
   type TapSample,
   wheelZoomFactor,
@@ -25,7 +27,11 @@ import {
 import type { CameraPose } from "@/lib/universe/map-camera-visual";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
-/** fly-to 過場時間（毫秒），與 CSS transition 對齊。 */
+/**
+ * fly-to 過場時間（毫秒）的 fallback，與 CSS transition 對齊。
+ * 預設時長已改由 `flyDurationFor` 依起訖鏡頭距離推導；此常數僅作為
+ * 視覺層在尚未收到任何 flyTo 前的初值。
+ */
 export const FLY_DURATION_MS = 450;
 /** 進場降落動畫：起始鏡頭相對 fit 的倍率（從高空俯瞰整個群島再飛向主島）。 */
 const ENTRY_START_FACTOR = 0.55;
@@ -43,7 +49,7 @@ type Camera = CameraPose;
 type FlyToOptions = {
   /** 視窗像素：正值把舞台往下推（島在畫面上移，留給底部 dock）。 */
   viewportOffsetY?: number;
-  /** 飛行過場毫秒；預設 FLY_DURATION_MS。 */
+  /** 飛行過場毫秒；預設由 `flyDurationFor` 依起訖鏡頭的感知距離推導。 */
   durationMs?: number;
 };
 
@@ -369,12 +375,12 @@ export function useMapCamera(options: UseMapCameraOptions = {}): MapCamera {
       if (w === 0 || h === 0) return;
       const ns = clampScale(targetScale ?? camRef.current.scale);
       const offsetY = options?.viewportOffsetY ?? 0;
-      const tx = w / 2 - coord.x * ns;
-      const ty = h / 2 - coord.y * ns + offsetY;
-      const next = clampCam({ scale: ns, tx, ty });
+      const next = clampCam(poseFor(coord, ns, w, h, offsetY));
       // 先開啟 transition，再寫 transform，CSS 才會插值。
       if (!reduced) {
-        const durationMs = options?.durationMs ?? FLY_DURATION_MS;
+        // 時長是距離的函式：近距離縮放自動變快、跨島飛行自動變慢。
+        const durationMs =
+          options?.durationMs ?? flyDurationFor(camRef.current, next, w, h);
         flyDurationMsRef.current = durationMs;
         animatingRef.current = true;
         setAnimating(true);
@@ -460,11 +466,7 @@ export function useMapCamera(options: UseMapCameraOptions = {}): MapCamera {
         if (playEntry) {
           const es = clampScale(ns * ENTRY_START_FACTOR);
           publishCam(
-            clampCam({
-              scale: es,
-              tx: rect.width / 2 - CONTENT_CENTER.x * es,
-              ty: rect.height / 2 - CONTENT_CENTER.y * es,
-            }),
+            clampCam(poseFor(CONTENT_CENTER, es, rect.width, rect.height)),
             "commit",
           );
           requestAnimationFrame(() => {
@@ -472,11 +474,7 @@ export function useMapCamera(options: UseMapCameraOptions = {}): MapCamera {
           });
         } else {
           publishCam(
-            clampCam({
-              scale: ns,
-              tx: rect.width / 2 - CONTENT_CENTER.x * ns,
-              ty: rect.height / 2 - CONTENT_CENTER.y * ns,
-            }),
+            clampCam(poseFor(CONTENT_CENTER, ns, rect.width, rect.height)),
             "commit",
           );
         }
@@ -694,7 +692,8 @@ export function useMapCamera(options: UseMapCameraOptions = {}): MapCamera {
           if (ns > cam.scale + ZOOM_EPS) {
             const stageX = (e.clientX - left - cam.tx) / cam.scale;
             const stageY = (e.clientY - top - cam.ty) / cam.scale;
-            flyTo({ x: stageX, y: stageY }, ns, { durationMs: 250 });
+            // 時長由 flyTo 依距離推導（雙擊位移小 → 自然比進島快）。
+            flyTo({ x: stageX, y: stageY }, ns);
           }
         } else {
           lastTapRef.current = tap;
