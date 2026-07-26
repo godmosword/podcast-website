@@ -32,7 +32,8 @@ function isGameKitGameId(gameId: GameScoreId): gameId is GameKitGameId {
     gameId === "block-drop" ||
     gameId === "car-adventure" ||
     gameId === "candy-kart" ||
-    gameId === "candy-match"
+    gameId === "candy-match" ||
+    gameId === "snowboard"
   );
 }
 

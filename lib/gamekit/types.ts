@@ -5,7 +5,8 @@ export type GameKitGameId =
   | "block-drop"
   | "car-adventure"
   | "candy-kart"
-  | "candy-match";
+  | "candy-match"
+  | "snowboard";
 
 export type ViewportSize = {
   width: number;

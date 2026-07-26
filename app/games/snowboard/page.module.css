@@ -1,0 +1,10 @@
+.snowFrame {
+  width: 100%;
+}
+
+.snowNote {
+  margin-top: 0.75rem;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}

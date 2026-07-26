@@ -181,6 +181,33 @@ test("繽紛卡丁車 debugFinish 會透過 Godot iframe 更新進度", async ({
     .toBe(true);
 });
 
+test("阿蹦雪山衝刺 debugFinish 會透過 Godot iframe 更新三星進度", async ({ page }) => {
+  test.setTimeout(60_000);
+  await page.goto("/games/snowboard?debugFinish=bonbon-peak");
+  await expect(page.getByRole("link", { name: "← 回遊樂園" })).toBeVisible();
+  await expect(page.locator("iframe[title='阿蹦雪山衝刺遊戲']")).toHaveCount(0);
+  await page.getByRole("button", { name: "出發！開始滑雪" }).click();
+  await expect(page.locator("iframe[title='阿蹦雪山衝刺遊戲']")).toHaveAttribute(
+    "src",
+    "/snowboard/index.html?debugFinish=bonbon-peak",
+  );
+  await expect
+    .poll(
+      async () =>
+        page.evaluate(() => {
+          const raw = localStorage.getItem("cheche:progress");
+          if (!raw) return false;
+          const progress = JSON.parse(raw);
+          return (
+            progress.gameProfile?.gamesPlayed?.snowboard === true &&
+            progress.gameProfile?.medals?.snowboard?.[0] === 7
+          );
+        }),
+      { timeout: 30_000 },
+    )
+    .toBe(true);
+});
+
 test("車車大冒險頁面可載入", async ({ page }) => {
   await page.goto("/games/car-adventure");
   await expect(page.getByRole("link", { name: "← 回遊樂園" })).toBeVisible();

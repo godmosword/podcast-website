@@ -20,6 +20,8 @@ const GAME_VIEWPORTS: Record<GameKitGameId, ViewportSize> = {
   "car-adventure": { width: 320, height: 180 },
   // candy-kart 為 Godot iframe 遊戲，解析度由遊戲端自管；此值僅供型別完整
   "candy-kart": { width: 320, height: 180 },
+  // snowboard 為 Godot iframe 遊戲，解析度由遊戲端自管
+  "snowboard": { width: 320, height: 180 },
   // candy-match 為 DOM 遊戲（非像素 canvas）；此值僅供型別完整
   "candy-match": { width: 320, height: 360 },
 };

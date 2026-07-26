@@ -1,0 +1,27 @@
+.wrap {
+  position: relative;
+  width: 100%;
+}
+
+.frame,
+.framePlaceholder {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  min-height: 360px;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--surface-game-sky);
+}
+
+.frame {
+  display: block;
+  box-shadow: var(--shadow-md);
+}
+
+@media (max-width: 540px) {
+  .frame,
+  .framePlaceholder {
+    min-height: 0;
+  }
+}

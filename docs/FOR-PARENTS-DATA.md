@@ -6,7 +6,7 @@
 
 | 欄位 | 路徑 | 說明 |
 |------|------|------|
-| 玩過哪些遊戲 | `gameProfile.gamesPlayed` | 四款遊戲 boolean |
+| 玩過哪些遊戲 | `gameProfile.gamesPlayed` | 五款遊戲 boolean |
 | 最佳分數 | `gameProfile.bests` / `bestScores` | 各遊戲最高分 |
 | 關卡三星 | `gameProfile.medals` | 每關 bit flags（通關／無失誤／全收集） |
 | 累積星星 | `gameProfile.stars` / `economy.lifetimeStars` | 車庫解鎖用 |

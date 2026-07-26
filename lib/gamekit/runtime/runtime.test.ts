@@ -16,11 +16,12 @@ describe("gamekit runtime", () => {
       "block-drop",
       "candy-kart",
       "candy-match",
+      "snowboard",
     ] as const) {
       const vp = viewportFor(id);
       expect(vp.width).toBeGreaterThan(0);
       expect(vp.height).toBeGreaterThan(0);
-      expect(id).toMatch(/^car-adventure$|^block-drop$|^candy-kart$|^candy-match$/);
+      expect(id).toMatch(/^car-adventure$|^block-drop$|^candy-kart$|^candy-match$|^snowboard$/);
     }
   });
 

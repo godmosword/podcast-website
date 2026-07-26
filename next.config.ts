@@ -19,6 +19,7 @@ const nextConfig: NextConfig = {
     "/feed.xml": [
       "./public/stories/**",
       "./public/candy-kart/**",
+      "./public/snowboard/**",
       "./public/games/**",
       "./public/adventures/**",
       "./public/characters/**",

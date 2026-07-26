@@ -1,7 +1,7 @@
 # GameKit Architecture
 
-GameKit is the shared layer for the four shipped games: Car Adventure, Block Drop,
-Candy Match, and Candy Kart. It is intentionally small. Game-specific UI can live
+GameKit is the shared layer for the five shipped games: Car Adventure, Block Drop,
+Candy Match, Candy Kart, and Bonbon Snowboard. It is intentionally small. Game-specific UI can live
 in `components/games/`, while reusable loops, input, rendering, audio, progress,
 and bridge contracts live under `lib/gamekit/`.
 
@@ -95,6 +95,7 @@ cross-game. A single-game bridge belongs in `lib/gamekit/games/`.
 | Block Drop | `components/games/BlockDropGame.tsx` | `useGameLoop`, `useTouchControls`, `useVisibilityPause`, `useBestScore`, `useGameAudio`; `progress/settings`; `progress/session` | local component game logic |
 | Candy Match | `components/games/CandyMatchGame.tsx` | `useGameAudio`; `progress/save`, `progress/meta`, `progress/session` | engine/levels in `lib/games/candy-match/` |
 | Candy Kart | `components/games/CandyKartIframeHost.tsx` | `games/candy-kart-bridge` validates iframe messages and maps finish data to `progress/session` | Godot export in `public/candy-kart/` |
+| Bonbon Snowboard | `components/games/SnowboardIframeHost.tsx` | `games/snowboard-bridge` validates iframe messages and maps finish data to `progress/session` | Godot export in `public/snowboard/` |
 
 ## Adding a New Game
 

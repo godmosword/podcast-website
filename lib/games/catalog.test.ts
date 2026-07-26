@@ -31,4 +31,10 @@ describe("games catalog", () => {
     const urls = sitemap().map((entry) => entry.url);
     expect(urls.some((url) => url.endsWith("/adventures"))).toBe(true);
   });
+
+  test("includes the shipped snowboard game route", () => {
+    const urls = sitemap().map((entry) => entry.url);
+    expect(GAMES.some((game) => game.slug === "snowboard")).toBe(true);
+    expect(urls.some((url) => url.endsWith("/games/snowboard"))).toBe(true);
+  });
 });

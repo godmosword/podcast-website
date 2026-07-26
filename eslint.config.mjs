@@ -8,6 +8,7 @@ const eslintConfig = [
       "next-env.d.ts",
       "node_modules/**",
       "public/candy-kart/**",
+      "public/snowboard/**",
       "public/stories/**",
       "test-results/**",
       "models/**",

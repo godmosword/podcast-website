@@ -26,7 +26,7 @@ type GameLoadOverlayProps = {
 };
 
 /**
- * 四款遊戲共用的載入／開始／重試 overlay。
+ * GameKit 遊戲共用的載入／開始／重試 overlay。
  */
 export function GameLoadOverlay({
   phase,

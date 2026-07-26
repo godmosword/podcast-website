@@ -1,12 +1,13 @@
 # 遊戲載入性能
 
-本文件記錄四款小遊戲的資源載入策略與 2026-07 優化結果。
+本文件記錄五款小遊戲的資源載入策略與 2026-07 優化結果。
 
 ## 資產規模概覽
 
 | 遊戲 | 主要資產 | 載入策略 |
 |------|----------|----------|
-| **Candy Kart** | `index.wasm` ~34MB、`index.pck` ~131KB | **按需**：進頁不載入；點「出發！開始遊戲」才掛 iframe |
+| **Candy Kart** | `index.wasm` ~34MB、`index.pck` ~1.4MB | **按需**：進頁不載入；點「出發！開始遊戲」才掛 iframe |
+| **Bonbon Snowboard** | `index.wasm` ~34MB、`index.pck` 目標 <2MB | **按需**：進頁不載入；點「出發！開始滑雪」才掛 iframe |
 | Car Adventure | 程序生成 sheet `tiles-common` | `GameLoadingGate` 自動 idle 預載（`requestIdleCallback`） |
 | Block Drop | sheet `blocks-drop` | 同上 |
 | Candy Match | 全 SVG/DOM | 無 sheet 預載 |
@@ -50,7 +51,7 @@ idle（可選：顯示「開始遊戲」）
 ```bash
 npm test -- game-load export-video-core   # 單元
 npm run build
-npx playwright test e2e/smoke.spec.ts   # 含四款遊戲 smoke
+npx playwright test e2e/smoke.spec.ts   # 含五款遊戲 smoke
 ```
 
 ## 後續建議（非本次範圍）

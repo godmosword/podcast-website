@@ -85,6 +85,8 @@
     "ignore": [
       "public/candy-kart/index.audio.worklet.js",
       "public/candy-kart/index.js",
+      "public/snowboard/index.audio.worklet.js",
+      "public/snowboard/index.js",
       "public/sw.js"
     ],
     "ignoreBinaries": [
