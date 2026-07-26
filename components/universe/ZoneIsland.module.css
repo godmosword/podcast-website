@@ -15,38 +15,44 @@
   position: relative;
   width: 100%;
   height: 100%;
-  /* 微互動光影：提亮掛在 tileStack 與 tileImg 的狀態濾鏡（coming 降彩、
-     夜間調暗）「相乘」疊加而非覆蓋；時長 120~180ms、低對比（Art Bible §2）。 */
-  transition: filter 160ms ease;
-}
-
-/* hover：輕微高光增強＝整體極輕提亮（黏土被光「摸到」，不加對比不加飽和） */
-@media (hover: hover) {
-  .islandTile:hover .tileStack {
-    filter: brightness(1.04);
-  }
-}
-
-/* 按住：再亮一階，與按壓下沉的 transform 配對成「壓進光裡」 */
-.islandTile:active .tileStack {
-  filter: brightness(1.06);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tileStack {
-    transition: none;
-  }
-
-  .islandTile:hover .tileStack,
-  .islandTile:active .tileStack {
-    filter: none;
-  }
 }
 
 .tileArt {
   position: relative;
   width: 100%;
   height: 100%;
+  /* hover／press 只動這一層（日＋夜圖同移），避免 filter＋子層 scale 造成重影。 */
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: auto;
+}
+
+/* hover：只輕輕上抬，不加 brightness filter、不 scale（兩者疊加易 GPU 重影） */
+@media (hover: hover) {
+  .islandTile:hover .tileArt {
+    transform: translateY(-3px);
+  }
+
+  /* 與待機浮動同幀時暫停 float，避免雙重位移殘影 */
+  .islandTile:hover[data-status="open"]:not([data-transition]) .tileStack {
+    animation-play-state: paused;
+  }
+}
+
+/* 按住：黏土下沉壓扁感（短促、無 filter） */
+.islandTile:active .tileArt {
+  transform: translateY(1px) scale(1.02, 0.97);
+  transition-duration: 100ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tileArt {
+    transition: none;
+  }
+
+  .islandTile:hover .tileArt,
+  .islandTile:active .tileArt {
+    transform: none;
+  }
 }
 
 .tilePlaceholder {
@@ -60,6 +66,7 @@
 /* PNG 載入後隱藏骨架，避免透明島四周露出矩形沙色底（clay 海上尤其明顯）。 */
 .tilePlaceholderHidden {
   opacity: 0;
+  visibility: hidden;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -252,47 +259,24 @@
   object-fit: contain;
   pointer-events: none;
   user-select: none;
-  /* 黏土 hover 微彈跳：過衝 bezier 讓島「輕輕跳一下再坐回去」；
-     transform-origin 由 inline anchorStyle 定在沙岸錨點，島是「坐著」彈。 */
-  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-/* hover 彈跳只給有游標的裝置，避免手機 tap 後殘留 sticky hover */
-@media (hover: hover) {
-  .islandTile:hover .tileImg {
-    transform: translateY(-5px) scale(1.04);
-  }
-}
-
-/* 按住＝黏土被壓扁一點（配合點擊後的 islandBounce 慶祝，press → release → bounce） */
-.islandTile:active .tileImg {
-  transform: translateY(1px) scale(1.05, 0.95);
-  transition-duration: 100ms;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tileImg {
-    transition: none;
-  }
-
-  .islandTile:hover .tileImg,
-  .islandTile:active .tileImg {
-    transform: none;
-  }
+  /* transform-origin 仍由 inline anchorStyle 定在沙岸錨點（慶祝 bounce 用）。 */
 }
 
 /* R-joy 3 夜間點燈層：疊於日圖上 crossfade（600ms 與夜海一致）；
-   點燈版本身已是夜間色調，不再吃全域夜間調暗濾鏡。 */
+   點燈版本身已是夜間色調，不再吃全域夜間調暗濾鏡。
+   隱藏時 visibility:hidden，避免 opacity:0 層仍參與合成造成重影。 */
 .tileArt .tileImgNight {
   position: absolute;
   inset: 0;
   z-index: 2;
   opacity: 0;
-  transition: opacity 600ms ease;
+  visibility: hidden;
+  transition: opacity 600ms ease, visibility 600ms ease;
 }
 
 .tileArt .tileImgNightVisible {
   opacity: 1;
+  visibility: visible;
 }
 
 :global(html[data-theme="night"]) .islandTile .tileImgNight {
@@ -352,18 +336,18 @@
   color: var(--ink);
   font: inherit;
   -webkit-tap-highlight-color: transparent;
-  /* 與 island tile hover 同語彙的過衝彈跳 */
-  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* 與 island tile 同語彙：輕移、不 scale */
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @media (hover: hover) {
   .island:hover {
-    transform: translate(-50%, -50%) translateY(-4px) scale(1.05);
+    transform: translate(-50%, -50%) translateY(-3px);
   }
 }
 
 .island:active {
-  transform: translate(-50%, -50%) translateY(1px) scale(1.04, 0.96);
+  transform: translate(-50%, -50%) translateY(1px) scale(1.02, 0.97);
   transition-duration: 100ms;
 }
 
@@ -399,24 +383,6 @@
     inset 0 -6px 10px rgba(120, 90, 40, 0.18),
     0 9px 16px rgba(36, 74, 46, 0.22);
   overflow: visible;
-  /* 與 island tile 同語彙的 hover 提亮（160ms、低對比） */
-  transition: filter 160ms ease;
-}
-
-@media (hover: hover) {
-  .island:hover .landmark {
-    filter: brightness(1.04);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .landmark {
-    transition: none;
-  }
-
-  .island:hover .landmark {
-    filter: none;
-  }
 }
 
 .landmark img,
