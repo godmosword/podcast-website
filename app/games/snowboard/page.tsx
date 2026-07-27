@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import { SnowboardIframeHost } from "@/components/games/SnowboardIframeHost";
+import SnowboardGameHost from "./SnowboardGameHost";
 import { GamePageShell } from "@/components/games/GamePageShell";
-import { snowboardIframeSrc } from "@/lib/games/snowboard/iframe-src";
 import { getSiteUrl } from "@/lib/site-url";
-import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "阿蹦雪山衝刺",
@@ -20,12 +18,7 @@ export const metadata: Metadata = {
 export default function SnowboardGamePage() {
   return (
     <GamePageShell title="阿蹦雪山衝刺小遊戲" gameId="snowboard" preload={false}>
-      <SnowboardIframeHost
-        title="阿蹦雪山衝刺遊戲"
-        src={snowboardIframeSrc()}
-        className={styles.snowFrame}
-      />
-      <p className={styles.snowNote}>畫面沒出來嗎？重新整理一下再試試 🏂</p>
+      <SnowboardGameHost />
     </GamePageShell>
   );
 }

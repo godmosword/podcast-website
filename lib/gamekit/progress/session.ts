@@ -14,12 +14,16 @@ import { saveBestScoreInStore } from "@/lib/progress-store";
 import { trackGameSessionComplete } from "@/lib/analytics";
 
 import { GAMEKIT_PROGRESS_EVENT } from "../runtime/constants";
+import { SNOWBOARD_COURSES } from "@/lib/games/snowboard/course";
 
 export { GAMEKIT_PROGRESS_EVENT } from "../runtime/constants";
 
 export type GameSessionResult = {
   gameId: GameScoreId;
   score: number;
+  courseId?: string;
+  trickScore?: number;
+  bestCombo?: number;
   /** 關卡索引。 */
   levelIndex?: number;
   cleared?: boolean;
@@ -60,6 +64,26 @@ function checkBonusStickers(profile: PlayerProfile): PlayerProfile {
   return next;
 }
 
+function unlockNextSnowboardCourse(
+  profile: PlayerProfile,
+  result: GameSessionResult,
+): PlayerProfile {
+  if (result.gameId !== "snowboard" || !result.cleared || !result.courseId) {
+    return profile;
+  }
+  const current = profile.snowboardCoursesUnlocked ?? [SNOWBOARD_COURSES[0].id];
+  const course = SNOWBOARD_COURSES.find((item) => item.id === result.courseId);
+  if (!course) return profile;
+  const next = SNOWBOARD_COURSES.find(
+    (item) => item.unlockAfter === course.id,
+  )?.id;
+  if (!next || current.includes(next)) return profile;
+  return {
+    ...profile,
+    snowboardCoursesUnlocked: [...current, next],
+  };
+}
+
 /** 回報一局結果，更新存檔並廣播進度事件。 */
 export function reportGameSession(result: GameSessionResult): PlayerProfile {
   let profile = loadPlayerProfile();
@@ -94,6 +118,8 @@ export function reportGameSession(result: GameSessionResult): PlayerProfile {
       }
     }
   }
+
+  profile = unlockNextSnowboardCourse(profile, result);
 
   for (const id of vehiclesUnlockedAt(getLifetimeStars(profile))) {
     profile = unlockVehicle(profile, id);

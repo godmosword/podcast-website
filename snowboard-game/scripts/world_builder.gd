@@ -13,9 +13,11 @@ const TERRAIN_CHUNK := 100.0
 const TREE_CHUNK := 150.0
 
 var reduced_motion := false
+var obstacle_multiplier := 1.0
 var visual_profile: SnowVisualProfile
 var environment: Environment
 var snowflakes: Array = []
+var _height_map_shape: HeightMapShape3D
 var _visual_instances: Array[GeometryInstance3D] = []
 var _last_focus_progress := -9999.0
 
@@ -100,6 +102,11 @@ static func _add_environment(parent: Node3D, profile: SnowVisualProfile) -> Envi
 	result.fog_depth_curve = 1.35
 	result.fog_sky_affect = 0.32
 	result.fog_sun_scatter = 0.12
+	if Course.NIGHT:
+		result.background_energy_multiplier = 0.34
+		result.ambient_light_color = Color8(82, 110, 166)
+		result.ambient_light_energy = 0.28
+		result.fog_light_color = Color8(102, 130, 190)
 	result.ssao_enabled = profile.ssao_enabled
 	if profile.ssao_enabled:
 		result.ssao_radius = 2.0
@@ -118,8 +125,8 @@ static func _add_environment(parent: Node3D, profile: SnowVisualProfile) -> Envi
 	var sun := DirectionalLight3D.new()
 	sun.name = "WinterSun"
 	sun.rotation_degrees = Vector3(-52, -34, -4)
-	sun.light_color = Color8(255, 238, 204)
-	sun.light_energy = 0.88
+	sun.light_color = Color8(152, 184, 255) if Course.NIGHT else Color8(255, 238, 204)
+	sun.light_energy = 0.42 if Course.NIGHT else 0.88
 	sun.light_angular_distance = 2.2
 	sun.shadow_enabled = profile.shadows_enabled
 	sun.directional_shadow_max_distance = 105.0 if profile.shadows_enabled else 48.0
@@ -144,8 +151,8 @@ func _add_terrain(parent: Node3D) -> void:
 			var p0 := start_progress + float(iz) * TERRAIN_STEP_Z
 			var p1 := minf(end_progress, p0 + TERRAIN_STEP_Z)
 			for ix in across_cells:
-				var x0 := -TERRAIN_HALF_WIDTH + float(ix) * TERRAIN_STEP_X
-				var x1 := x0 + TERRAIN_STEP_X
+				var x0 := terrain_x_at(ix, across_cells + 1)
+				var x1 := terrain_x_at(ix + 1, across_cells + 1)
 				_add_terrain_vertex(surface, x0, p0, chunk_origin)
 				_add_terrain_vertex(surface, x1, p0, chunk_origin)
 				_add_terrain_vertex(surface, x0, p1, chunk_origin)
@@ -205,7 +212,12 @@ static func _add_terrain_vertex(surface: SurfaceTool, x: float, progress: float,
 	surface.set_uv(Vector2((x + TERRAIN_HALF_WIDTH) * 0.155, progress * 0.035))
 	surface.add_vertex(Vector3(x, Course.height_at(x, progress), -progress) - origin)
 
-static func _add_height_map_collision(parent: Node3D) -> void:
+static func terrain_x_at(index: int, sample_width: int) -> float:
+	# HeightMapShape3D is centered and spans (sample_width - 1) cells.
+	# Keep render vertices and collision samples on exactly the same grid.
+	return -float(sample_width - 1) * TERRAIN_STEP_X * 0.5 + float(index) * TERRAIN_STEP_X
+
+func _add_height_map_collision(parent: Node3D) -> void:
 	var map_width := int(TERRAIN_HALF_WIDTH * 2.0 / TERRAIN_STEP_X) + 1
 	var map_depth := int(Course.LENGTH / TERRAIN_STEP_Z) + 1
 	var heights := PackedFloat32Array()
@@ -213,12 +225,13 @@ static func _add_height_map_collision(parent: Node3D) -> void:
 	for iz in map_depth:
 		var progress := Course.LENGTH - float(iz) * TERRAIN_STEP_Z
 		for ix in map_width:
-			var x := -TERRAIN_HALF_WIDTH + float(ix) * TERRAIN_STEP_X
+			var x := terrain_x_at(ix, map_width)
 			heights[iz * map_width + ix] = Course.height_at(x, progress)
 	var height_map := HeightMapShape3D.new()
 	height_map.map_width = map_width
 	height_map.map_depth = map_depth
 	height_map.map_data = heights
+	_height_map_shape = height_map
 	var collision := CollisionShape3D.new()
 	collision.shape = height_map
 	collision.scale = Vector3(TERRAIN_STEP_X, 1.0, TERRAIN_STEP_Z)
@@ -229,6 +242,20 @@ static func _add_height_map_collision(parent: Node3D) -> void:
 	ground.collision_mask = 0
 	ground.add_child(collision)
 	parent.add_child(ground)
+
+func terrain_alignment_error() -> float:
+	if _height_map_shape == null:
+		return INF
+	var max_error := 0.0
+	var map_width := _height_map_shape.map_width
+	var map_depth := _height_map_shape.map_depth
+	for iz in [0, int(map_depth / 2), map_depth - 1]:
+		var progress := Course.LENGTH - float(iz) * TERRAIN_STEP_Z
+		for ix in [0, int(map_width / 2), map_width - 1]:
+			var x := terrain_x_at(ix, map_width)
+			var index: int = iz * map_width + ix
+			max_error = maxf(max_error, absf(_height_map_shape.map_data[index] - Course.height_at(x, progress)))
+	return max_error
 
 func _add_background(parent: Node3D) -> void:
 	_add_mountain_ranges(parent)
@@ -321,7 +348,7 @@ func _add_tree_belts(parent: Node3D) -> void:
 	var chunk_count := int(ceil(Course.LENGTH / TREE_CHUNK))
 	for chunk_index in chunk_count:
 		var points: Array[Vector3] = []
-		var target_count := int(roundi(15.0 * visual_profile.scenery_density))
+		var target_count := int(roundi(15.0 * visual_profile.scenery_density * Course.TREE_DENSITY))
 		for i in target_count:
 			var progress := float(chunk_index) * TREE_CHUNK + rng.randf_range(12.0, TREE_CHUNK - 8.0)
 			if progress >= Course.LENGTH - 25.0:
@@ -415,15 +442,12 @@ static func _add_course_markers(parent: Node3D) -> void:
 			flag_instance.position = Vector3(side * 1.05, 3.55, 0)
 			root.add_child(flag_instance)
 
-static func _add_hazards(parent: Node3D) -> void:
-	var points: Array[Vector2] = []
-	for i in 10:
-		points.append(Vector2(-29.0 + float((i * 17) % 55), 338.0 + i * 28.0))
-	for i in 7:
-		points.append(Vector2(-31.0 + float((i * 23) % 62), 970.0 + i * 27.0))
-	for p in points:
+func _add_hazards(parent: Node3D) -> void:
+	var hazard_count := mini(Course.HAZARD_TREES.size(), maxi(1, int(ceil(float(Course.HAZARD_TREES.size()) * obstacle_multiplier))))
+	for index in hazard_count:
+		var p: Vector2 = Course.HAZARD_TREES[index]
 		_add_pine(parent, Course.position_at(p.y, p.x), 1.55 + fmod(p.y, 3.0) * 0.12, true)
-	for p in [Vector2(-22, 530), Vector2(24, 1015), Vector2(-12, 1110)]:
+	for p in Course.SNOWMEN:
 		_add_snowman(parent, Course.position_at(p.y, p.x))
 
 static func _add_pine(parent: Node3D, position: Vector3, scale_value: float, hazard: bool) -> void:
@@ -496,7 +520,7 @@ static func _add_snowman(parent: Node3D, position: Vector3) -> void:
 	root.add_child(body)
 
 static func _add_ramps(parent: Node3D) -> void:
-	for p in [Vector2(-8, 690), Vector2(0, 785), Vector2(11, 880)]:
+	for p in Course.RAMPS:
 		var ramp := StaticBody3D.new()
 		ramp.position = Course.position_at(p.y, p.x, 0.12)
 		ramp.rotation.x = deg_to_rad(-8.5)

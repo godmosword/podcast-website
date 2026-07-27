@@ -19,6 +19,17 @@
   box-shadow: var(--shadow-md);
 }
 
+.endOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  border-radius: var(--radius-lg);
+  background: rgb(23 62 91 / 38%);
+}
+
 @media (max-width: 540px) {
   .frame,
   .framePlaceholder {

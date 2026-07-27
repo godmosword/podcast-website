@@ -32,6 +32,18 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: "/snowboard/v2/index.html",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=0, must-revalidate" },
+        ],
+      },
+      {
+        source: "/snowboard/v2/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      {
         source: "/:path*",
         headers: [
           // 避免瀏覽器把非預期格式的回應當成可執行內容。

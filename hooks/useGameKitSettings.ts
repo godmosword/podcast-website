@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   type BlockDropDifficulty,
   type BlockDropSpecialMode,
+  type SnowboardDifficulty,
   GAMEKIT_SETTINGS_EVENT,
   loadGameKitSettings,
   saveGameKitSettings,
@@ -41,6 +42,21 @@ export function useGameKitSettings() {
     [update],
   );
 
+  const setSnowboardDifficulty = useCallback(
+    (difficulty: SnowboardDifficulty) => update({ snowboardDifficulty: difficulty }),
+    [update],
+  );
+
+  const setGameVolume = useCallback(
+    (gameVolume: number) => update({ gameVolume: Math.max(0, Math.min(1, gameVolume)) }),
+    [update],
+  );
+
+  const setMotionPreference = useCallback(
+    (motionPreference: GameKitSettings["motionPreference"]) => update({ motionPreference }),
+    [update],
+  );
+
   useEffect(() => {
     refresh();
     const onChange = () => refresh();
@@ -57,10 +73,16 @@ export function useGameKitSettings() {
     kidsMode: settings?.kidsMode ?? true,
     blockDropDifficulty: settings?.blockDropDifficulty ?? "relaxed",
     blockDropSpecialMode: settings?.blockDropSpecialMode ?? "classic",
+    snowboardDifficulty: settings?.snowboardDifficulty ?? "relaxed",
+    gameVolume: settings?.gameVolume ?? 1,
+    motionPreference: settings?.motionPreference ?? "system",
     refresh,
     update,
     setKidsMode,
     setBlockDropDifficulty,
     setBlockDropSpecialMode,
+    setSnowboardDifficulty,
+    setGameVolume,
+    setMotionPreference,
   };
 }

@@ -13,6 +13,7 @@ import { useGameKitSettings } from "@/hooks/useGameKitSettings";
 import {
   BLOCK_DROP_DIFFICULTIES,
   BLOCK_DROP_SPECIAL_MODES,
+  SNOWBOARD_DIFFICULTIES,
 } from "@/lib/gamekit/progress/settings";
 import Icon from "@/components/ui/Icon";
 import styles from "./GameChrome.module.css";
@@ -111,9 +112,15 @@ function SettingsDialog({
     kidsMode,
     blockDropDifficulty,
     blockDropSpecialMode,
+    snowboardDifficulty,
+    gameVolume,
+    motionPreference,
     setKidsMode,
     setBlockDropDifficulty,
     setBlockDropSpecialMode,
+    setSnowboardDifficulty,
+    setGameVolume,
+    setMotionPreference,
   } = useGameKitSettings();
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
@@ -177,6 +184,66 @@ function SettingsDialog({
                 title={option.hint}
               >
                 {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className={styles.settingBlock}>
+          <div className={styles.settingHeading}>
+            <strong>阿蹦雪板難度</strong>
+            <small>調整速度、障礙密度與失誤寬容度。</small>
+          </div>
+          <div className={styles.segmented} role="radiogroup" aria-label="阿蹦雪板難度">
+            {SNOWBOARD_DIFFICULTIES.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                className={styles.segmentBtn}
+                aria-pressed={snowboardDifficulty === option.id}
+                data-active={snowboardDifficulty === option.id}
+                onClick={() => setSnowboardDifficulty(option.id)}
+                title={option.hint}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <label className={styles.settingRow}>
+          <span>
+            <strong>遊戲音量</strong>
+            <small>{Math.round(gameVolume * 100)}%</small>
+          </span>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            value={gameVolume}
+            onChange={(e) => setGameVolume(Number(e.target.value))}
+            aria-label="遊戲音量"
+          />
+        </label>
+        <div className={styles.settingBlock}>
+          <div className={styles.settingHeading}>
+            <strong>動態效果</strong>
+            <small>可覆寫系統的減少動態偏好。</small>
+          </div>
+          <div className={styles.segmented} role="radiogroup" aria-label="動態效果">
+            {([
+              ["system", "跟隨系統"],
+              ["on", "減少動態"],
+              ["off", "完整動態"],
+            ] as const).map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                className={styles.segmentBtn}
+                aria-pressed={motionPreference === id}
+                data-active={motionPreference === id}
+                onClick={() => setMotionPreference(id)}
+              >
+                {label}
               </button>
             ))}
           </div>

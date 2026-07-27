@@ -1,7 +1,11 @@
 import { readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const htmlPath = new URL("../public/snowboard/index.html", import.meta.url);
-const loaderPath = new URL("../public/snowboard/index.js", import.meta.url);
+const root = fileURLToPath(new URL("..", import.meta.url));
+const exportDir = process.env.SNOWBOARD_EXPORT_DIR ?? "public/snowboard/v2";
+const htmlPath = join(root, exportDir, "index.html");
+const loaderPath = join(root, exportDir, "index.js");
 const marker = "// snowboard-runtime-options";
 let html = readFileSync(htmlPath, "utf8");
 

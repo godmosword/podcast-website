@@ -5,6 +5,7 @@ import { vehiclesUnlockedAt } from "@/lib/gamekit/progress/garage";
 import {
   loadPlayerProfile,
   migrateV3ToV4,
+  migrateV4ToV5,
   recordAdventureStars,
   recordBestScore,
   recordMedal,
@@ -153,12 +154,26 @@ describe("契約：存檔 migration 保留未知欄位（D2，v3→v4 只可加�
     } as unknown as Partial<PlayerProfile>;
     const migrated = migrateV3ToV4(v3);
 
-    expect(SAVE_VERSION).toBe(4);
+    expect(SAVE_VERSION).toBe(5);
     expect(migrated.version).toBe(4);
     expect(migrated.adventureStars).toEqual({});
     expect(migrated.medals).toEqual(v3.medals);
     expect(migrated.economy).toEqual(v3.economy);
     expect((migrated as Record<string, unknown>).futureField).toBe("keep-me");
+  });
+
+  it("v4→v5 清掉舊 snowboard 分數但保留 medal/economy/sticker", () => {
+    const migrated = migrateV4ToV5({
+      version: 4,
+      bests: { snowboard: 999, "car-adventure": 123 },
+      medals: { snowboard: [7] },
+      stickers: ["played-snowboard"],
+    });
+    expect(migrated.version).toBe(5);
+    expect(migrated.bests.snowboard).toBeUndefined();
+    expect(migrated.bests["car-adventure"]).toBe(123);
+    expect(migrated.medals.snowboard).toEqual([7]);
+    expect(migrated.stickers).toEqual(["played-snowboard"]);
   });
 });
 

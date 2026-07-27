@@ -20,11 +20,16 @@ export type ThemePreference = ThemeMode;
 export type GameScoreId = GameKitGameId;
 export type BlockDropDifficultyPreference = "relaxed" | "standard" | "challenge";
 export type BlockDropSpecialModePreference = "classic" | "rainbow";
+export type SnowboardDifficultyPreference = "relaxed" | "standard" | "challenge";
+export type MotionPreference = "system" | "on" | "off";
 
 export type GameKitPreferenceStore = {
   kidsMode: boolean;
   blockDropDifficulty: BlockDropDifficultyPreference;
   blockDropSpecialMode: BlockDropSpecialModePreference;
+  snowboardDifficulty: SnowboardDifficultyPreference;
+  gameVolume: number;
+  motionPreference: MotionPreference;
 };
 
 export type ContinueState = {
@@ -78,7 +83,7 @@ const LEGACY_KEYS = {
 } as const;
 
 const DEFAULT_GAME_PROFILE: PlayerProfile = {
-  version: 4,
+  version: 5,
   stars: 0,
   economy: createEmptyEconomy(),
   unlockedVehicles: ["小黃"],
@@ -87,15 +92,22 @@ const DEFAULT_GAME_PROFILE: PlayerProfile = {
   adventureStars: {},
   stickers: [],
   gamesPlayed: {},
+  snowboardCoursesUnlocked: ["bonbon-peak"],
 };
 
 /** progress-store 與 GameKit save 共用 v4 的純加欄位相容形狀。 */
 function migrateGameProfile(raw: Partial<PlayerProfile>): PlayerProfile {
   const v3 = migrateV2ToV3(raw);
+  const bests = { ...(v3.bests ?? {}) };
+  if ((raw.version ?? 1) < 5) delete bests.snowboard;
   return {
     ...v3,
-    version: 4,
+    version: 5,
     adventureStars: raw.adventureStars ?? {},
+    bests,
+    snowboardCoursesUnlocked:
+      raw.snowboardCoursesUnlocked?.filter((id) => typeof id === "string") ??
+      ["bonbon-peak"],
   };
 }
 
@@ -110,6 +122,9 @@ export const DEFAULT_PROGRESS: ProgressStore = {
       kidsMode: true,
       blockDropDifficulty: "relaxed",
       blockDropSpecialMode: "classic",
+      snowboardDifficulty: "relaxed",
+      gameVolume: 1,
+      motionPreference: "system",
     },
     theme: "system",
     nightPromptDismissed: false,
@@ -187,6 +202,22 @@ function normalizeBlockDropSpecialMode(
   return value === "rainbow" ? "rainbow" : "classic";
 }
 
+function normalizeSnowboardDifficulty(
+  value: unknown,
+): SnowboardDifficultyPreference {
+  return value === "standard" || value === "challenge" ? value : "relaxed";
+}
+
+function normalizeMotionPreference(value: unknown): MotionPreference {
+  return value === "on" || value === "off" ? value : "system";
+}
+
+function normalizeGameVolume(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value)
+    ? Math.max(0, Math.min(1, value))
+    : 1;
+}
+
 function normalizeGameKitPreferences(
   value: Partial<GameKitPreferenceStore> | undefined,
 ): GameKitPreferenceStore {
@@ -197,6 +228,9 @@ function normalizeGameKitPreferences(
         : DEFAULT_PROGRESS.preferences.gameKit.kidsMode,
     blockDropDifficulty: normalizeBlockDropDifficulty(value?.blockDropDifficulty),
     blockDropSpecialMode: normalizeBlockDropSpecialMode(value?.blockDropSpecialMode),
+    snowboardDifficulty: normalizeSnowboardDifficulty(value?.snowboardDifficulty),
+    gameVolume: normalizeGameVolume(value?.gameVolume),
+    motionPreference: normalizeMotionPreference(value?.motionPreference),
   };
 }
 
@@ -322,11 +356,18 @@ function normalizeProgress(raw: Partial<ProgressStore>): ProgressStore {
     migrateStorySlug,
   );
 
+  const bestScores = {
+    ...DEFAULT_PROGRESS.bestScores,
+    ...raw.bestScores,
+  };
+  if ((raw.gameProfile?.version ?? 1) < 5) delete bestScores.snowboard;
+
   return {
     ...DEFAULT_PROGRESS,
     ...raw,
     favorites,
     continue: continueState,
+    bestScores,
     preferences: {
       ...DEFAULT_PROGRESS.preferences,
       ...raw.preferences,
@@ -479,7 +520,7 @@ export function saveGameProfileToStore(profile: PlayerProfile): void {
   }
   writeProgress({
     ...current,
-    gameProfile: migrateGameProfile({ ...profile, version: 4 }),
+    gameProfile: migrateGameProfile({ ...profile, version: 5 }),
     bestScores,
   });
 }

@@ -10,6 +10,7 @@ import { reportGameSession } from "@/lib/gamekit/progress/session";
 import {
   BLOCK_DROP_DIFFICULTIES,
   BLOCK_DROP_SPECIAL_MODES,
+  SNOWBOARD_DIFFICULTIES,
   loadGameKitSettings,
   saveGameKitSettings,
 } from "@/lib/gamekit/progress/settings";
@@ -100,6 +101,14 @@ describe("gamekit progress settings", () => {
     ]);
     expect(settings.blockDropDifficulty).toBe("relaxed");
     expect(settings.blockDropSpecialMode).toBe("classic");
+    expect(settings.snowboardDifficulty).toBe("relaxed");
+    expect(settings.gameVolume).toBe(1);
+    expect(settings.motionPreference).toBe("system");
+    expect(SNOWBOARD_DIFFICULTIES.map((d) => d.id)).toEqual([
+      "relaxed",
+      "standard",
+      "challenge",
+    ]);
   });
 
   it("繽紛方塊難度與特殊模式可儲存", () => {
@@ -114,6 +123,10 @@ describe("gamekit progress settings", () => {
     const rainbow = loadGameKitSettings();
     expect(rainbow.blockDropDifficulty).toBe("challenge");
     expect(rainbow.blockDropSpecialMode).toBe("rainbow");
+
+    saveGameKitSettings({ ...rainbow, snowboardDifficulty: "challenge", gameVolume: 0.35 });
+    expect(loadGameKitSettings().snowboardDifficulty).toBe("challenge");
+    expect(loadGameKitSettings().gameVolume).toBe(0.35);
 
     saveGameKitSettings({
       ...rainbow,

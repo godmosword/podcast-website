@@ -189,7 +189,7 @@ test("阿蹦雪山衝刺 debugFinish 會透過 Godot iframe 更新三星進度",
   await page.getByRole("button", { name: "出發！開始滑雪" }).click();
   await expect(page.locator("iframe[title='阿蹦雪山衝刺遊戲']")).toHaveAttribute(
     "src",
-    "/snowboard/index.html?debugFinish=bonbon-peak",
+    "/snowboard/v2/index.html?debugFinish=bonbon-peak",
   );
   await expect
     .poll(
@@ -200,7 +200,8 @@ test("阿蹦雪山衝刺 debugFinish 會透過 Godot iframe 更新三星進度",
           const progress = JSON.parse(raw);
           return (
             progress.gameProfile?.gamesPlayed?.snowboard === true &&
-            progress.gameProfile?.medals?.snowboard?.[0] === 7
+            progress.gameProfile?.medals?.snowboard?.[0] === 7 &&
+            progress.gameProfile?.snowboardCoursesUnlocked?.includes("pine-trail")
           );
         }),
       { timeout: 30_000 },
@@ -214,7 +215,7 @@ test("阿蹦雪山衝刺 visual QA 會轉送景別且不寫入成績", async ({ 
   await page.getByRole("button", { name: "出發！開始滑雪" }).click();
   await expect(page.locator("iframe[title='阿蹦雪山衝刺遊戲']")).toHaveAttribute(
     "src",
-    "/snowboard/index.html?visualStage=forest&visualPose=carve",
+    "/snowboard/v2/index.html?visualStage=forest&visualPose=carve",
   );
   await page.waitForTimeout(4_000);
   await expect

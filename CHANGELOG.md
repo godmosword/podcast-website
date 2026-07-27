@@ -28,6 +28,8 @@
 
 ### Added
 
+- **阿蹦雪山衝刺 P0–P4 完整化**：Snowboard 遷移至 `GameHost`／adapter，加入共享地形座標契約、`FINISHING` 結束流程、跌倒進度回溯、遊戲端分數與 trick／combo、3 條 `CourseData` 雪道、難度／音量／減少動態設定、解鎖與結算站；bridge 升級 protocol v2 並加 source／origin／window／runId／score 驗證。Web export 改為 `public/snowboard/v2/`，搭配 no-cache HTML、immutable runtime、Service Worker runtime cache 與 smoke／contract tests。
+
 - **/legal 版權隱私頁全面擴充**：頁標改「版權、隱私與使用條款」，加章節錨點導覽與政策版本／日期標示；新增「可接受的分享方式」「侵權通知與處理（`/legal#takedown` 流程與必附資料）」「許願、建議與投稿內容」「第三方服務與資料處理者（Vercel／Neon／Resend／外部平台）」「兒少與家長使用」「安全與政策變更」章節。`DISCLAIMER.md`、`public/llms.txt` 同步侵權通知與分享／訓練限制措辭；訂閱與許願表單同意句更新（含「勿填孩子個資」提示）。
 
 ### Changed

@@ -8,6 +8,7 @@ const SnowVisualProfile = preload("res://scripts/visual_profile.gd")
 signal wiped_out
 signal jumped
 signal landed
+signal trick_landed(points: int, clean: bool, air_seconds: float, rotation_radians: float)
 
 const START_SPEED := 8.0
 const MAX_SPEED := 28.0
@@ -23,6 +24,9 @@ var visual_preview := false
 var input_steer := 0.0
 var input_jump := false
 var enabled := false
+var finish_mode := false
+var speed_multiplier := 1.0
+var assist_strength := 1.0
 var invulnerable_time := 0.0
 var speed := START_SPEED
 var carve_strength := 0.0
@@ -33,6 +37,8 @@ var _coyote_time := 0.0
 var _was_grounded := false
 var _previous_vertical_speed := 0.0
 var _landing_compression := 0.0
+var _air_seconds := 0.0
+var _air_rotation := 0.0
 var _model: Node3D
 var _body_root: Node3D
 var _hips: Node3D
@@ -87,23 +93,32 @@ func _physics_process(delta: float) -> void:
 		var normal := get_floor_normal()
 		var downhill := Vector3.DOWN.slide(normal)
 		var planar := velocity.slide(normal)
-		speed = clampf(speed + downhill.length() * SLOPE_ACCEL * delta, START_SPEED, MAX_SPEED)
+		if finish_mode:
+			speed = move_toward(speed, START_SPEED * 0.55, 24.0 * delta)
+		else:
+			speed = clampf(speed + downhill.length() * SLOPE_ACCEL * Course.FRICTION * delta, START_SPEED, MAX_SPEED * speed_multiplier)
 		if planar.length() < 0.1:
 			planar = Course.tangent_at(progress)
 		planar = planar.normalized() * speed
-		var ratio := clampf(speed / MAX_SPEED, 0.0, 1.0)
+		var ratio := clampf(speed / (MAX_SPEED * speed_multiplier), 0.0, 1.0)
 		planar = planar.rotated(normal, -input_steer * TURN_SPEED * lerpf(0.82, 0.42, ratio) * delta)
 		var course_forward := Course.tangent_at(progress).slide(normal).normalized()
-		planar = planar.lerp(course_forward * planar.length(), delta * 0.46)
+		planar = planar.lerp(course_forward * planar.length(), delta * 0.46 * assist_strength * Course.FRICTION)
 		velocity = planar
-		if _jump_buffer_time > 0.0 and _coyote_time > 0.0:
+		if not finish_mode and _jump_buffer_time > 0.0 and _coyote_time > 0.0:
 			velocity += normal * JUMP_SPEED
 			_jump_buffer_time = 0.0
 			_coyote_time = 0.0
+			_air_seconds = 0.0
+			_air_rotation = 0.0
 			jumped.emit()
 	else:
 		_coyote_time = maxf(0.0, _coyote_time - delta)
+		_air_seconds += delta
+		_air_rotation += input_steer * 11.0 * delta
 		velocity.y -= AIR_GRAVITY * delta
+	# The edge-triggered jump latch is consumed once per physics tick.
+	input_jump = false
 	_previous_vertical_speed = velocity.y
 	move_and_slide()
 	grounded = is_on_floor()
@@ -111,6 +126,14 @@ func _physics_process(delta: float) -> void:
 		landing_impact = clampf(absf(_previous_vertical_speed) / 13.0, 0.25, 1.0)
 		_landing_compression = landing_impact
 		_emit_landing_burst()
+		var wrapped_rotation := fmod(absf(_air_rotation), TAU)
+		var distance_from_front := minf(wrapped_rotation, TAU - wrapped_rotation)
+		var clean := distance_from_front <= deg_to_rad(35.0)
+		var trick_points := int((_air_seconds * 180.0) + absf(_air_rotation) * 42.0)
+		if _air_seconds > 0.08:
+			trick_landed.emit(trick_points, clean, _air_seconds, _air_rotation)
+		_air_seconds = 0.0
+		_air_rotation = 0.0
 		landed.emit()
 	else:
 		landing_impact = move_toward(landing_impact, 0.0, delta * 4.0)
@@ -156,6 +179,14 @@ func reset_at(world_position: Vector3) -> void:
 	_model.rotation = Vector3.ZERO
 	_model.position = Vector3.ZERO
 	_body_root.position = Vector3.ZERO
+	finish_mode = false
+	_air_seconds = 0.0
+	_air_rotation = 0.0
+	input_jump = false
+
+func configure_difficulty(multiplier: float, assist: float) -> void:
+	speed_multiplier = multiplier
+	assist_strength = assist
 
 func apply_visual_pose(pose: String) -> void:
 	match pose:
@@ -198,7 +229,8 @@ func _update_visual(delta: float, grounded: bool) -> void:
 	_right_leg.rotation.x = lerp_angle(_right_leg.rotation.x, -0.18 - crouch * 0.65, minf(1.0, delta * 8.0))
 	_left_arm.rotation.z = lerp_angle(_left_arm.rotation.z, 0.72 + input_steer * 0.26, minf(1.0, delta * 6.0))
 	_right_arm.rotation.z = lerp_angle(_right_arm.rotation.z, -0.72 + input_steer * 0.26, minf(1.0, delta * 6.0))
-	_board.rotation.y = lerp_angle(_board.rotation.y, -input_steer * 0.08, minf(1.0, delta * 8.0))
+	var target_board_yaw := _air_rotation if not grounded else -input_steer * 0.08
+	_board.rotation.y = lerp_angle(_board.rotation.y, target_board_yaw, minf(1.0, delta * 8.0))
 	var progress := Course.progress_of(global_position)
 	air_height = maxf(0.0, global_position.y - Course.height_at(global_position.x, progress) - 0.62)
 	_set_snow_emitting(grounded and speed > 9.0)

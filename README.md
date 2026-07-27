@@ -53,7 +53,7 @@ Bonbon & 馬米親子 Podcast《車車遊樂園》的官方 **看圖聽故事** 
 | `/games/block-drop` | 繽紛樂園 | 落下方塊消除（GameKit） |
 | `/games/candy-match` | 繽紛消消樂 | 關卡地圖 + 消除棋盤（GameKit） |
 | `/games/candy-kart` | 繽紛卡丁車 | Godot HTML5 iframe，見 [GAME-PERFORMANCE.md](./docs/GAME-PERFORMANCE.md) |
-| `/games/snowboard` | 阿蹦雪山衝刺 | Godot 3D 滑雪板，單雪道三星挑戰 |
+| `/games/snowboard` | 阿蹦雪山衝刺 | Godot 3D 滑雪板，3 條雪道、trick／combo、三星挑戰 |
 | `/games/coloring-book` | 繪本著色 | 定裝／場景線稿著色（不掛 GameKit）；線稿：`npm run generate:coloring-lineart`；封面：`npm run generate:coloring-cover` |
 
 GameKit 跨遊戲進度（星星、獎牌、車庫）見 [GAMEKIT-ARCHITECTURE.md](./docs/GAMEKIT-ARCHITECTURE.md)。
@@ -283,10 +283,10 @@ docs/                         見下方「文件索引」
 public/
   stories/<slug>/             每集音檔與插圖
   adventures/                 地圖／島嶼／漫遊者資產
-  characters/、landing/、candy-kart/
+  characters/、landing/、candy-kart/、snowboard/v2/
   llms.txt、llms-full.txt
 candy-kart-game/              Godot 原始專案（匯出到 public/candy-kart/）
-snowboard-game/               Godot 滑雪原始專案（匯出到 public/snowboard/）
+snowboard-game/               Godot 滑雪原始專案（匯出到 public/snowboard/v2/）
 .cursor/、.claude/             Agent slash commands 與規則
 ```
 

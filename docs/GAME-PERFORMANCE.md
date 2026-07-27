@@ -28,13 +28,21 @@ idle（可選：顯示「開始遊戲」）
 - `hooks/useGameAssetPreload.ts` — canvas 遊戲 sheet 預載
 - `components/games/GameLoadOverlay.tsx` — 開始／進度／重試 UI
 
-## Candy Kart 細節
+## Godot iframe 細節
 
 - **宿主**：`components/games/CandyKartIframeHost.tsx`
 - **Bridge**：維持 `cheche-candy-kart` postMessage（`ready`、`race-finish`），未改 Godot 專案
 - **進度**：同源輪詢 iframe 內 `#status-progress`（Godot `Engine.startGame.onProgress`）
 - **逾時**：45s；失敗可「再試一次」重新掛 iframe
 - **首屏收益**：遊戲頁 HTML/CSS 立即可互動，~35MB WASM 延後至使用者意圖明確時
+
+### Bonbon Snowboard
+
+- **宿主**：`GameHost` → `components/games/SnowboardView.tsx` → `snowboardAdapter`
+- **Bridge**：`cheche-snowboard` protocol v2；驗證同源、iframe window、`runId`、雪道與遊戲端分數
+- **內容**：3 條 data-driven 雪道、難度／音量／減少動態效果設定、trick／combo／終點動畫
+- **資產路徑**：`/snowboard/v2/index.html`；HTML 不快取，版本化 WASM／PCK 長快取
+- **離線策略**：`public/sw.js` 對 Snowboard runtime 使用 index network-first、immutable assets cache-first
 
 ## Canvas 遊戲擴充
 
@@ -56,7 +64,7 @@ npx playwright test e2e/smoke.spec.ts   # 含五款遊戲 smoke
 
 ## 後續建議（非本次範圍）
 
-1. **Service Worker / HTTP cache**：對 `index.wasm` 做長快取，二次造訪更快
+1. **Brotli／CDN 壓縮觀測**：確認 Vercel 對版本化 runtime 的實際 content-encoding 與快取命中率
 2. **Brotli 壓縮**：Vercel 靜態資源已 gzip；可評估預壓 wasm 或 CDN brotli
 3. **Godot export 瘦身**：關閉未用功能、壓紋理，從源頭縮 wasm
 4. **Bridge 進度**：若需更精準進度，可在 `bridge.gd` 加 `type: "load-progress"`（需重匯出）

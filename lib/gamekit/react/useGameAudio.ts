@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { GameKitAudioBus } from "@/lib/gamekit/runtime/audio";
+import { useGameKitSettings } from "@/hooks/useGameKitSettings";
 import type { GameKitGameId } from "@/lib/gamekit/types";
 import {
   SFX_CHANGE_EVENT,
@@ -11,15 +12,18 @@ import {
 
 export function useGameAudio(gameId?: GameKitGameId) {
   const busRef = useRef<GameKitAudioBus | null>(null);
+  const { gameVolume } = useGameKitSettings();
   const bgmWanted = useRef(false);
   const [soundUi, setSoundUi] = useState(true);
 
   const syncMuted = useCallback(() => {
     const on = isSfxEnabled();
     setSoundUi(on);
+    busRef.current?.setMusicVolume(0.28 * gameVolume);
+    busRef.current?.setSfxVolume(0.85 * gameVolume);
     busRef.current?.setMuted(!on);
     return on;
-  }, []);
+  }, [gameVolume]);
 
   const getBus = useCallback(() => {
     if (!busRef.current) busRef.current = new GameKitAudioBus();
@@ -29,8 +33,10 @@ export function useGameAudio(gameId?: GameKitGameId) {
   const ensureAudio = useCallback(() => {
     const bus = getBus();
     bus.ensureContext();
+    bus.setMusicVolume(0.28 * gameVolume);
+    bus.setSfxVolume(0.85 * gameVolume);
     bus.setMuted(!isSfxEnabled());
-  }, [getBus]);
+  }, [gameVolume, getBus]);
 
   const tone = useCallback(
     (

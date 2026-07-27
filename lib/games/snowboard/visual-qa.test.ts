@@ -92,4 +92,30 @@ describe("snowboard visual QA contract", () => {
     expect(main).toContain("send_debug_finish_if_requested");
     expect(main).toContain("_start_visual_qa");
   });
+
+  it("P0 correctness contract keeps the input latch, shared terrain grid and finish state", () => {
+    const main = source("snowboard-game/scripts/main.gd");
+    const world = source("snowboard-game/scripts/world_builder.gd");
+    expect(main).toContain("FINISHING");
+    expect(main).toContain("rider.input_jump = rider.input_jump or");
+    expect(main).toContain("fall_progress_snapshot - 12.0");
+    expect(world).toContain("terrain_x_at");
+    expect(world).toContain("terrain_alignment_error");
+  });
+
+  it("P1 scoring contract is emitted by the Godot bridge", () => {
+    const bridge = source("snowboard-game/scripts/bridge.gd");
+    const rider = source("snowboard-game/scripts/rider.gd");
+    expect(bridge).toContain('"trickScore"');
+    expect(bridge).toContain('"bestCombo"');
+    expect(rider).toContain("signal trick_landed");
+    expect(rider).toContain("_air_rotation");
+  });
+
+  it("GameHost overlay rejects forged iframe messages and renders the result station", () => {
+    const view = source("components/games/SnowboardView.tsx");
+    expect(view).toContain("event.origin !== window.location.origin");
+    expect(view).toContain("event.source !== iframeRef.current?.contentWindow");
+    expect(view).toContain("GameEndStation");
+  });
 });

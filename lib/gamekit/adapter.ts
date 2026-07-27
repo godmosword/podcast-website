@@ -47,6 +47,9 @@ export type OverlayProps = {
   best: number | null;
   kidsMode: boolean;
   reducedMotion: boolean;
+  gameVolume: number;
+  soundOn: boolean;
+  snowboardDifficulty: "relaxed" | "standard" | "challenge";
   onStart: () => void;
   onResume: () => void;
   onRestart: () => void;

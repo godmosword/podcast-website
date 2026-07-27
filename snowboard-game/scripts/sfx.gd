@@ -15,6 +15,7 @@ var snd_click: AudioStreamWAV
 var _players: Array[AudioStreamPlayer] = []
 var _bgm: AudioStreamPlayer
 var _unlocked := false
+var master_volume := 1.0
 
 func _ready() -> void:
 	snd_count = _tone([[440.0, 0.13]], 0.45)
@@ -46,7 +47,24 @@ func play(stream: AudioStreamWAV, volume_db := 0.0) -> void:
 	for player in _players:
 		if not player.playing:
 			player.stream = stream
-			player.volume_db = volume_db
+			player.pitch_scale = 1.0
+			player.volume_db = volume_db + linear_to_db(maxf(0.001, master_volume))
+			player.play()
+			return
+
+func set_volume(value: float) -> void:
+	master_volume = clampf(value, 0.0, 1.0)
+	if _bgm:
+		_bgm.volume_db = -12.0 + linear_to_db(maxf(0.001, master_volume))
+
+func play_pickup(chain: int, volume := 1.0) -> void:
+	if not _unlocked or snd_pickup == null:
+		return
+	for player in _players:
+		if not player.playing:
+			player.stream = snd_pickup
+			player.pitch_scale = 1.0 + clampf(float(chain - 1) * 0.045, 0.0, 0.45)
+			player.volume_db = linear_to_db(maxf(0.001, master_volume * volume))
 			player.play()
 			return
 
@@ -60,6 +78,7 @@ func _start_bgm() -> void:
 	var notes: Array = []
 	for frequency in melody:
 		notes.append([frequency, step])
+	_bgm.volume_db = -12.0 + linear_to_db(maxf(0.001, master_volume))
 	_bgm.stream = _tone(notes, 0.13, "square", true)
 	_bgm.play()
 

@@ -49,6 +49,8 @@ export type PlayerProfile = {
   medals: Partial<Record<GameKitGameId, number[]>>;
   /** 車車大冒險各關最佳顯示星數；不參與 GameKit medal/economy。 */
   adventureStars?: Record<number, number>;
+  /** Snowboard 已解鎖賽道；舊存檔預設只開放第一條。 */
+  snowboardCoursesUnlocked?: string[];
   stickers: string[];
   gamesPlayed: Partial<Record<GameScoreId, boolean>>;
 };

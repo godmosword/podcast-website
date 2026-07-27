@@ -2,6 +2,7 @@ class_name SnowboardHud
 extends CanvasLayer
 
 const Course = preload("res://scripts/course.gd")
+const Strings = preload("res://scripts/strings.gd")
 
 signal pause_requested
 signal resume_requested
@@ -21,6 +22,8 @@ var app_theme: Theme
 var time_label: Label
 var flakes_label: Label
 var speed_label: Label
+var score_label: Label
+var combo_label: Label
 var progress_bar: ProgressBar
 var countdown_label: Label
 var pause_panel: PanelContainer
@@ -59,12 +62,14 @@ func _build() -> void:
 	top.offset_bottom = 138 if touch_layout else 66
 	top.add_theme_constant_override("separation", 9)
 	root.add_child(top)
-	time_label = _chip(top, "0:00.00", 38 if touch_layout else 21, "時間", 252 if touch_layout else 168)
-	flakes_label = _chip(top, "0/12", 38 if touch_layout else 21, "雪花", 182 if touch_layout else 126)
+	time_label = _chip(top, "0:00.00", 38 if touch_layout else 21, Strings.t("time"), 252 if touch_layout else 168)
+	flakes_label = _chip(top, "0/12", 38 if touch_layout else 21, Strings.t("snowflakes"), 182 if touch_layout else 126)
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(spacer)
-	speed_label = _chip(top, "29", 36 if touch_layout else 20, "KM/H", 156 if touch_layout else 112)
+	speed_label = _chip(top, "29", 36 if touch_layout else 20, Strings.t("speed"), 156 if touch_layout else 112)
+	score_label = _chip(top, "0", 30 if touch_layout else 17, Strings.t("score"), 150 if touch_layout else 108)
+	combo_label = _chip(top, "×1", 30 if touch_layout else 17, Strings.t("combo"), 150 if touch_layout else 108)
 	var pause_button := Button.new()
 	pause_button.text = "Ⅱ"
 	pause_button.custom_minimum_size = Vector2(178, 138) if touch_layout else Vector2(54, 48)
@@ -171,14 +176,14 @@ func _build_pause(root: Control) -> void:
 	box.add_theme_constant_override("separation", 12)
 	pause_panel.add_child(box)
 	var title := Label.new()
-	title.text = "暫停中"
+	title.text = Strings.t("pause")
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 32)
 	title.add_theme_color_override("font_color", INK)
 	box.add_child(title)
-	box.add_child(_menu_button("繼續滑", func() -> void: resume_requested.emit(), YELLOW))
-	box.add_child(_menu_button("重新開始", func() -> void: restart_requested.emit(), Color8(211, 235, 244)))
-	box.add_child(_menu_button("回主選單", func() -> void: quit_requested.emit(), Color8(236, 233, 239)))
+	box.add_child(_menu_button(Strings.t("resume"), func() -> void: resume_requested.emit(), YELLOW))
+	box.add_child(_menu_button(Strings.t("restart"), func() -> void: restart_requested.emit(), Color8(211, 235, 244)))
+	box.add_child(_menu_button(Strings.t("quit"), func() -> void: quit_requested.emit(), Color8(236, 233, 239)))
 
 func _menu_button(text: String, callback: Callable, color: Color) -> Button:
 	var button := Button.new()
@@ -190,15 +195,38 @@ func _menu_button(text: String, callback: Callable, color: Color) -> Button:
 	button.pressed.connect(callback)
 	return button
 
-func update_state(total_ms: int, collected: int, speed_mps: float, progress: float) -> void:
+func update_state(total_ms: int, collected: int, speed_mps: float, progress: float, score := 0, combo := 1.0) -> void:
 	var total_seconds := total_ms / 1000
 	time_label.text = "%d:%02d.%02d" % [total_seconds / 60, total_seconds % 60, (total_ms % 1000) / 10]
 	flakes_label.text = "%d/%d" % [collected, Course.SNOWFLAKE_TOTAL]
 	speed_label.text = "%d" % int(speed_mps * 3.6)
+	if score_label:
+		score_label.text = "%d" % score
+	if combo_label:
+		combo_label.text = "×%d" % int(ceil(combo))
 	progress_bar.value = clampf(progress / Course.LENGTH * 100.0, 0.0, 100.0)
 
-func notify_snowflake() -> void:
+func notify_snowflake(chain := 1, combo := 1.0) -> void:
 	_pulse_label(flakes_label, Color8(232, 161, 32))
+	if combo_label:
+		combo_label.text = "×%d" % int(ceil(combo))
+		_pulse_label(combo_label, Color8(232, 161, 32))
+
+func notify_trick(points: int, clean: bool, combo := 1.0) -> void:
+	if score_label:
+		score_label.text = "%d" % points
+		_pulse_label(score_label, Color8(69, 178, 142) if clean else Color8(244, 142, 62))
+	if combo_label:
+		combo_label.text = "×%d" % int(ceil(combo))
+		_pulse_label(combo_label, Color8(69, 178, 142) if clean else Color8(244, 142, 62))
+
+func notify_finish_line() -> void:
+	if countdown_label:
+		countdown_label.text = Strings.t("finish_line")
+
+func show_celebration() -> void:
+	if countdown_label:
+		countdown_label.text = "🎉"
 
 func notify_checkpoint() -> void:
 	var tween := create_tween()

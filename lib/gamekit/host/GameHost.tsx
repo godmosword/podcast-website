@@ -78,8 +78,8 @@ export default function GameHost({
   const sessionReportedRef = useRef(false);
 
   const isCoarse = useCoarsePointer();
-  const reduced = useReducedMotion();
-  const { kidsMode } = useGameKitSettings();
+  const { kidsMode, gameVolume, snowboardDifficulty, motionPreference } = useGameKitSettings();
+  const reduced = useReducedMotion(motionPreference);
   const { best, saveBest } = useBestScore(adapter.id);
   const { useKeyboardInput } = useTouchControls();
 
@@ -281,6 +281,9 @@ export default function GameHost({
     best,
     kidsMode,
     reducedMotion: reduced,
+    gameVolume,
+    soundOn: soundUi,
+    snowboardDifficulty,
     onStart: handleStart,
     onResume: handleResume,
     onRestart: handleRestart,

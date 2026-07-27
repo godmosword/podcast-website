@@ -4,7 +4,8 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PROJECT_DIR="$REPO_ROOT/snowboard-game"
-OUT_DIR="$REPO_ROOT/public/snowboard"
+EXPORT_VERSION="${SNOWBOARD_EXPORT_VERSION:-v2}"
+OUT_DIR="$REPO_ROOT/public/snowboard/$EXPORT_VERSION"
 
 GODOT_BIN="${GODOT_BIN:-}"
 if [ -z "$GODOT_BIN" ]; then
@@ -44,5 +45,5 @@ fi
 rm -f "$SMOKE_LOG"
 
 "$GODOT_BIN" --headless --path "$PROJECT_DIR" --export-release "Web" >/dev/null
-node "$REPO_ROOT/scripts/patch-snowboard-html.mjs"
+SNOWBOARD_EXPORT_DIR="public/snowboard/$EXPORT_VERSION" node "$REPO_ROOT/scripts/patch-snowboard-html.mjs"
 ls -la "$OUT_DIR"

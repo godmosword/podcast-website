@@ -94,7 +94,7 @@ Landing Hero 由 `scripts/generate-landing-art.ts` 產生到 `public/.landing-st
 - `block-drop`：`components/games/BlockDropGame.tsx`
 - `candy-match`：`components/games/CandyMatchGame.tsx`
 - `candy-kart`：`components/games/CandyKartIframeHost.tsx` 載入 `public/candy-kart/` 的 Godot Web export
-- `snowboard`：`components/games/SnowboardIframeHost.tsx` 載入 `public/snowboard/` 的 Godot Web export
+- `snowboard`：`GameHost` + `components/games/SnowboardView.tsx` 載入版本化 `public/snowboard/v2/` 的 Godot Web export
 
 `components/games/GamePageShell.tsx` 提供遊戲頁共同的可及性、返回導覽與資產預載。遊戲 metadata 的唯一來源是 `data/games.ts`。
 
@@ -103,7 +103,7 @@ Game Kit 已收斂為單一、無 barrel 的明確分層：
 - `lib/gamekit/react/`：React hooks、音效橋接、最佳分數、觸控控制與可見性暫停。
 - `lib/gamekit/runtime/`：固定步進 loop、輸入、像素渲染、調色盤、音訊與程序圖塊。
 - `lib/gamekit/progress/`：存檔 migration、設定、獎牌、車庫與 session 回報。
-- `lib/gamekit/games/`：大冒險關卡契約與兩款 Godot iframe bridge。
+- `lib/gamekit/games/`：大冒險關卡契約與 Candy Kart／Snowboard Godot iframe bridge、adapter。
 - `docs/GAMEKIT-ARCHITECTURE.md`：GameKit 分層、import policy、新遊戲擴充流程與五款遊戲對照。
 
 所有消費端直接匯入 leaf module。Godot iframe 完成比賽後，Candy Kart 與 Snowboard 的專用 host 會驗證同源訊息，再經各自 bridge 與 `progress/session.ts` 寫入既有進度 schema。

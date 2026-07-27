@@ -5,16 +5,16 @@ import { useEffect, useState } from "react";
  * SSR/首次渲染固定回 false（與 server 一致，避免 hydration mismatch），
  * 掛載後才讀 matchMedia 並訂閱變更。
  */
-export function useReducedMotion(): boolean {
+export function useReducedMotion(preference: "system" | "on" | "off" = "system"): boolean {
   const [reduced, setReduced] = useState(false);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setReduced(mq.matches);
+    const update = () => setReduced(preference === "on" || (preference === "system" && mq.matches));
     update();
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
-  }, []);
+  }, [preference]);
 
   return reduced;
 }

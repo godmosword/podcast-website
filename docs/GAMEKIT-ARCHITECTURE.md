@@ -17,6 +17,7 @@ app/games/* pages
        -> lib/gamekit/types.ts      cross-layer shared types only
 
 public/candy-kart/*                 Godot static runtime, loaded by iframe
+public/snowboard/v2/*              Versioned Godot static runtime, loaded by iframe
 lib/games/*                         standalone game data/engines outside GameKit
 ```
 
@@ -45,8 +46,8 @@ behavior are compatibility contracts.
 
 `lib/gamekit/games/`
 : Game-domain contracts that are shared outside one component. Today this is
-Car Adventure level JSON conversion and the Candy Kart iframe finish-message to
-GameKit session translator.
+Car Adventure level JSON conversion plus the Candy Kart and Snowboard iframe
+bridges/adapters.
 
 `lib/gamekit/types.ts`
 : Cross-layer TypeScript types only, such as `GameKitGameId`, viewport/input
@@ -94,8 +95,8 @@ cross-game. A single-game bridge belongs in `lib/gamekit/games/`.
 | Car Adventure | `components/games/car-adventure/CarAdventureGame.tsx` | `react/TouchControls`, `useFixedGameLoop`, `useGameAudio`, `useBestScore`, `useVisibilityPause`; `runtime/juice`; `games/adventure-level`; `progress/session` | level/physics／clay draw in `lib/games/car-adventure/`；選單在 canvas 外避免裁切 |
 | Block Drop | `components/games/BlockDropGame.tsx` | `useGameLoop`, `useTouchControls`, `useVisibilityPause`, `useBestScore`, `useGameAudio`; `progress/settings`; `progress/session` | local component game logic |
 | Candy Match | `components/games/CandyMatchGame.tsx` | `useGameAudio`; `progress/save`, `progress/meta`, `progress/session` | engine/levels in `lib/games/candy-match/` |
-| Candy Kart | `components/games/CandyKartIframeHost.tsx` | `games/candy-kart-bridge` validates iframe messages and maps finish data to `progress/session` | Godot export in `public/candy-kart/` |
-| Bonbon Snowboard | `components/games/SnowboardIframeHost.tsx` | `games/snowboard-bridge` validates iframe messages and maps finish data to `progress/session` | Godot export in `public/snowboard/` |
+| Candy Kart | `components/games/CandyKartView.tsx` via `GameHost` | `games/candy-kart-bridge` validates iframe messages and maps finish data to `progress/session` | Godot export in `public/candy-kart/` |
+| Bonbon Snowboard | `components/games/SnowboardView.tsx` via `GameHost` | `games/snowboard-bridge` validates source, origin, window, run id and score fields | Versioned Godot export in `public/snowboard/v2/` |
 
 ## Adding a New Game
 
