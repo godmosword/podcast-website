@@ -31,10 +31,8 @@ import {
   IconPauseGlyph,
   IconPlay,
   IconRainbow,
-  IconReplay,
   IconRotate,
   IconSpaceKey,
-  IconSparkle,
   IconSprout,
   IconStar,
   IconSwipeDown,
@@ -1285,13 +1283,19 @@ export function BlockDropView({
     repaint();
   };
 
+  // 遊戲迴圈的區域函式每 render 重建（彼此互相引用，無法逐一 useCallback 化）。
+  // 以 ref 鏡射最新版：useCallback／effect 依賴保持穩定（鍵盤訂閱不必每 render
+  // 重掛），呼叫到的仍是最新閉包，行為與直接呼叫一致。
+  const liveFnsRef = useRef({ spawnNext, rotate, holdPiece });
+  liveFnsRef.current = { spawnNext, rotate, holdPiece };
+
   const begin = useCallback(() => {
     audio?.ensureAudio();
     const g = freshGame();
     g.status = "playing";
     newBestRef.current = false;
     refill(g);
-    spawnNext(g);
+    liveFnsRef.current.spawnNext(g);
     g.lastTime = null;
     G.current = g;
     setToasts([]);
@@ -1420,9 +1424,10 @@ export function BlockDropView({
         return;
       }
       if (g.status !== "playing") return;
-      if (k === "z" || k === "Z") rotate(-1);
-      else if (k === "x" || k === "X") rotate(1);
-      else if (k === "c" || k === "C" || k === "Shift") holdPiece();
+      const { rotate: doRotate, holdPiece: doHold } = liveFnsRef.current;
+      if (k === "z" || k === "Z") doRotate(-1);
+      else if (k === "x" || k === "X") doRotate(1);
+      else if (k === "c" || k === "C" || k === "Shift") doHold();
     };
     window.addEventListener("keydown", onKey);
     return () => {

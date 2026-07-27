@@ -48,7 +48,6 @@ import { computeZoneProgress, useCompletedSlugs } from "@/hooks/useZoneProgress"
 import { useTheme } from "@/components/ThemeProvider";
 import { MapDecorBirds, MapDecorNearWater } from "./MapDecorLayer";
 import MapBridgeLayer from "./MapBridgeLayer";
-import MapGuide from "./MapGuide";
 import MapRoamerLayer from "./MapRoamerLayer";
 import MapControls from "./MapControls";
 import NightFireworks from "./NightFireworks";
@@ -192,9 +191,10 @@ function UniverseMapContent({
 
     if (cameraTarget.level === "island") {
       appliedTargetKeyRef.current = cameraTarget.key;
-      const { coord, scale } = targetToFlyParams(cameraTarget);
-      // 無底部選單：飛抵島心，不再為 dock 預留 viewportOffsetY。
-      cameraFlyTo(coord, scale);
+      const { coord, scale, fitBox } = targetToFlyParams(cameraTarget);
+      // 焦點是島圖視覺中心（非沙岸錨點），fitBox 再夾住「島放得進畫面」的縮放上限；
+      // 無底部選單，不需為 dock 預留 viewportOffsetY。
+      cameraFlyTo(coord, scale, { fitBox });
       return;
     }
 
@@ -248,11 +248,18 @@ function UniverseMapContent({
   /**
    * 點島只改路由（M1 不變式）；相機由 pathname → targetFor 驅動；
    * 島上互動改探索點，不再自動開選單。手動 pan／zoom 不寫 URL。
+   * 再點一次目前所在的島＝回世界層（鏡頭由離島 reset 分支收尾）。
    */
   const handleActivate = useCallback(
     (zone: ZoneDef) => {
       if (tapHintPhase === "visible") dismissTapHint();
       trackUniverseZoneTap(zone.id, zone.status);
+
+      if (zone.id === activeZoneId) {
+        playSfx("tap");
+        router.push("/adventures");
+        return;
+      }
 
       if (zone.status === "open") {
         playSfx("collect");
@@ -272,7 +279,7 @@ function UniverseMapContent({
 
       router.push(`/adventures/${zone.id}`);
     },
-    [dismissTapHint, router, tapHintPhase],
+    [activeZoneId, dismissTapHint, router, tapHintPhase],
   );
 
   const goWorld = useCallback(() => {
@@ -538,6 +545,7 @@ function UniverseMapContent({
               devStatusOverride={devStatusOverrides[zone.id]}
               progress={zoneProgress[zone.id] ?? null}
               invite={tapHintPhase === "visible" && zone.status === "open"}
+              active={zone.id === activeZoneId}
             />
           ))}
 
@@ -553,7 +561,13 @@ function UniverseMapContent({
         />
       </div>
 
-      <MapGuide zones={zones} />
+      {/* 地圖操作說明：`aria-describedby` 的目標。原本是右上角「探險小抄」面板，
+          但它 pointer-events: none、手機本來就 sr-only，狀態圖例島木牌 pill 已有，
+          對孩子等於裝飾——改為純讀屏描述，首屏讓給地圖。 */}
+      <p id="universe-map-guide" className="sr-only">
+        點一座島就會飛過去，再點島上的探索點打開故事；再點同一座島可以回到整片樂園。
+        拖曳可以移動地圖，右下角的加號減號可以放大縮小；鍵盤可用方向鍵移動、加減鍵縮放。
+      </p>
 
       {/* 首訪底部提示：screen-space，不擋地圖拖曳；dismiss 才寫 session key */}
       {tapHintPhase === "visible" ? (

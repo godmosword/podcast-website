@@ -95,7 +95,6 @@ export default function GameHost({
     playBgm,
     stopBgm,
     pauseBgm,
-    resumeBgm,
     tone,
   } = useGameAudio(adapter.id);
 
@@ -332,6 +331,10 @@ export default function GameHost({
             ref={canvasRef}
             width={canvasWidth}
             height={canvasHeight}
+            /* 可及名稱：GameAdapter 化之前由 PixelGameCanvas 提供，遷移時遺漏，
+               讀屏會念成無名 canvas（smoke 亦以此定位遊戲畫面）。 */
+            role="img"
+            aria-label="遊戲畫面"
             style={{
               display: "block",
               width: "100%",

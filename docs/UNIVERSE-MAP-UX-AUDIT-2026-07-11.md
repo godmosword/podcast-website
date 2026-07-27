@@ -44,7 +44,7 @@
 
 | 項目 | 處置 |
 |------|------|
-| 鍵盤探索提示 | MapGuide 探險小抄補「鍵盤也可探索」（僅 `pointer:fine` 顯示；≤480px 維持隱藏） |
+| 鍵盤探索提示 | ~~MapGuide 探險小抄補「鍵盤也可探索」（僅 `pointer:fine` 顯示；≤480px 維持隱藏）~~ → **2026-07-27 探險小抄整塊刪除**（使用者回饋：面板無意義）；操作說明改為 `#universe-map-guide` 的 sr-only 段落，仍是地圖 `aria-describedby` 目標 |
 | 手機首訪 discoverability | session 一次性 overlay「點一座島看看」；StrictMode 雙 effect 門閂，僅 dismiss 寫 session key |
 
 ## Known gap（文件標記，不為此改核心）

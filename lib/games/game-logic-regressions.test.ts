@@ -75,8 +75,12 @@ describe("game logic regressions", () => {
     expect(view).not.toContain('else if (k === "ArrowRight") move(1);');
     expect(view).not.toContain('else if (k === "ArrowUp" || k === "x" || k === "X") rotate(1);');
     expect(view).not.toContain('else if (k === " ") hardDrop();');
-    expect(view).toContain('if (k === "z" || k === "Z") rotate(-1);');
-    expect(view).toContain('else if (k === "c" || k === "C" || k === "Shift") holdPiece();');
+    // 旋轉／暫存仍只有這一個 keydown 分支（呼叫改走 liveFnsRef 鏡射，見 BlockDropView）
+    expect(view).toContain('if (k === "z" || k === "Z") doRotate(-1);');
+    expect(view).toContain('else if (k === "c" || k === "C" || k === "Shift") doHold();');
+    expect(view).toContain(
+      'const { rotate: doRotate, holdPiece: doHold } = liveFnsRef.current;',
+    );
   });
 
   it("繽紛方塊提供難度、彩虹模式與到頂重新開始引導", () => {

@@ -41,6 +41,8 @@ type ZoneIslandProps = {
   progress?: ZoneProgress | null;
   /** 首訪邀請：開放主島週期性彈跳吸引第一次點擊（reduced-motion 由 CSS 停用）。 */
   invite?: boolean;
+  /** 鏡頭目前停在這座島：再點一次＝回世界層（aria-label 需說明）。 */
+  active?: boolean;
 };
 
 function ZoneIsland({
@@ -53,6 +55,7 @@ function ZoneIsland({
   devStatusOverride,
   progress = null,
   invite = false,
+  active = false,
 }: ZoneIslandProps) {
   const effectiveStatus = devStatusOverride ?? zone.status;
   const meta = ZONE_STATUS_META[effectiveStatus];
@@ -97,6 +100,16 @@ function ZoneIsland({
       />
     ) : null;
 
+  // 島 button 的無障礙名稱：進度星章與「再點一次看整片地圖」都要念得出來。
+  // 刻意不用「回樂園」字樣——那是右下角控制鈕的名稱，同名會讓讀屏與 e2e 都分不清。
+  const ariaLabel = [
+    `${zone.name}，${meta.label}`,
+    hasProgress ? `已聽完 ${progress!.completed} 集` : null,
+    active ? "再點一次看整片地圖" : null,
+  ]
+    .filter(Boolean)
+    .join("，");
+
   useEffect(() => {
     return () => {
       if (burstTimerRef.current) clearTimeout(burstTimerRef.current);
@@ -128,11 +141,7 @@ function ZoneIsland({
           data-invite={invite && isOpen ? true : undefined}
           data-progress={hasProgress ? true : undefined}
           data-paused={paused || undefined}
-          aria-label={
-            hasProgress
-              ? `${zone.name}，${meta.label}，已聽完 ${progress!.completed} 集`
-              : `${zone.name}，${meta.label}`
-          }
+          aria-label={ariaLabel}
           onClick={handleActivate}
           onAnimationEnd={onTransitionEnd}
         >
@@ -166,9 +175,23 @@ function ZoneIsland({
                 <StarBurst particles={burstParticles} />
               </span>
             )}
-            {lockedBubble}
           </div>
         </button>
+        {/* 鎖島泡泡：必須是 button 的 sibling —— 島 button 有 z-index（自成 stacking
+            context），泡泡放在裡面永遠被木牌層（LABEL_BASE）壓住。定位在 tile box
+            頂緣（沙岸錨點往上 ay×h），層深走 bubble band（高於木牌與探索點）。 */}
+        {lockedBubble ? (
+          <span
+            className={styles.tileBubbleAnchor}
+            style={{
+              left: `${zone.px.x}px`,
+              top: `${zone.px.y - ay * tile.stageSize.h}px`,
+              zIndex: mapDepthZ(zone.depthY, "bubble"),
+            }}
+          >
+            {lockedBubble}
+          </span>
+        ) : null}
         {/* 木牌欄：島名＋狀態 pill（裝飾，島 button 已含同名 aria-label）。
             點島 → 飛鏡頭＋探索點；木牌欄純展示。
             反縮放／遠距偏移由舞台 --map-scale／--label-offset-y 驅動。 */}
@@ -217,7 +240,7 @@ function ZoneIsland({
         zIndex: mapDepthZ(zone.depthY, "island"),
       }}
       data-status={effectiveStatus}
-      aria-label={`${zone.name}，${meta.label}`}
+      aria-label={ariaLabel}
       onClick={handleActivate}
     >
       <span className={styles.landmark} aria-hidden="true">
@@ -230,7 +253,13 @@ function ZoneIsland({
       >
         {meta.icon} {meta.label}
       </span>
-      {lockedBubble}
+      {lockedBubble ? (
+        <span
+          className={`${styles.tileBubbleAnchor} ${styles.landmarkBubbleAnchor}`}
+        >
+          {lockedBubble}
+        </span>
+      ) : null}
     </button>
   );
 }

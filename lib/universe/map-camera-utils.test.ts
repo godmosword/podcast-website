@@ -10,7 +10,9 @@ import {
   MAX_FLY_MS,
   MAX_SCALE,
   MIN_FLY_MS,
+  LABEL_SCREEN_PAD,
   MIN_SCALE,
+  NAMEPLATE_FOCUS_ALLOWANCE,
   PORTRAIT_MAX_ZOOM,
   RECENTER_VISIBLE_MARGIN_PX,
   anyPointVisible,
@@ -23,10 +25,12 @@ import {
   decayVelocity,
   exceedsDragSlop,
   fitScaleFor,
+  fitScaleForBox,
   flyDurationFor,
   flyPathLength,
   islandContentBounds,
   islandContentCenter,
+  islandFocus,
   poseFor,
   wheelZoomFactor,
   zoomCameraAt,
@@ -95,21 +99,26 @@ describe("map-camera-utils", () => {
 
   it("fitScaleFor：橫向 contain-fit；直向偏向填滿高度（減少上下空海）", () => {
     const bounds = islandContentBounds();
+    // 可用空間先扣掉木牌的螢幕留白（LABEL_SCREEN_PAD，單邊）
+    const avail = (v: number) => Math.max(1, v - LABEL_SCREEN_PAD * 2);
     // 橫向・高受限
     expect(fitScaleFor(5000, 1440)).toBeCloseTo(
-      clampScale((1440 / bounds.height) * FIT_MARGIN),
+      clampScale((avail(1440) / bounds.height) * FIT_MARGIN),
       6,
     );
     // 橫向・寬受限
     expect(fitScaleFor(1000, 900)).toBeCloseTo(
-      clampScale((1000 / bounds.width) * FIT_MARGIN),
+      clampScale((avail(1000) / bounds.width) * FIT_MARGIN),
       6,
     );
     // 直向：min(高度fit, contain×PORTRAIT_MAX_ZOOM)，且嚴謹大於純寬度 contain
-    const portraitContain = Math.min(400 / bounds.width, 900 / bounds.height);
+    const portraitContain = Math.min(
+      avail(400) / bounds.width,
+      avail(900) / bounds.height,
+    );
     expect(fitScaleFor(400, 900)).toBeCloseTo(
       clampScale(
-        Math.min(900 / bounds.height, portraitContain * PORTRAIT_MAX_ZOOM) *
+        Math.min(avail(900) / bounds.height, portraitContain * PORTRAIT_MAX_ZOOM) *
           FIT_MARGIN,
       ),
       6,
@@ -123,6 +132,15 @@ describe("map-camera-utils", () => {
       Math.min(375 / MAP_STAGE.width, 748 / MAP_STAGE.height) * FIT_MARGIN,
     );
     expect(mobile).toBeGreaterThan(stageFit);
+  });
+
+  it("LABEL_SCREEN_PAD 讓 fit 比無留白版本略小（木牌不被視窗裁掉）", () => {
+    const bounds = islandContentBounds();
+    // 同尺寸下，扣留白後的 fit 必須小於直接用整個 viewport 算的 contain
+    expect(fitScaleFor(1000, 900)).toBeLessThan(
+      clampScale((1000 / bounds.width) * FIT_MARGIN),
+    );
+    expect(LABEL_SCREEN_PAD).toBeGreaterThan(0);
   });
 
   it("fitScaleFor 邊界：0 尺寸回 1、極端尺寸夾 clamp", () => {
@@ -395,5 +413,58 @@ describe("flyPathLength / flyDurationFor（van Wijk 距離推導）", () => {
     const forestMs = flyDurationFor(world, poseFor(forest.coord, 1.6, W, H), W, H);
     const oceanMs = flyDurationFor(world, poseFor(ocean.coord, 1.6, W, H), W, H);
     expect(forestMs).toBeLessThan(oceanMs);
+  });
+
+  describe("islandFocus", () => {
+    it("焦點落在沙岸錨點上方（anchorUV v=0.84，島高 84% 在錨點之上）", () => {
+      for (const zone of ZONES) {
+        const tile = getZoneArtTile(zone.id);
+        if (tile.mode !== "island") continue;
+        const focus = islandFocus(zone.id);
+        expect(focus.center.y).toBeLessThan(zone.coord.y);
+        // anchorUV 的 u=0.5，橫向不偏移
+        expect(focus.center.x).toBe(zone.coord.x);
+      }
+    });
+
+    it("焦點＝tile box 中心 + 木牌讓位；box＝tile stageSize", () => {
+      const dino = ZONES.find((z) => z.id === "dino")!;
+      const tile = getZoneArtTile("dino");
+      if (tile.mode !== "island") throw new Error("dino 應為 island tile");
+      const [, ay] = tile.anchorUV;
+      const focus = islandFocus("dino");
+
+      expect(focus.center.y).toBeCloseTo(
+        dino.coord.y + (0.5 - ay) * tile.stageSize.h + NAMEPLATE_FOCUS_ALLOWANCE,
+        5,
+      );
+      expect(focus.box).toEqual(tile.stageSize);
+    });
+
+    it("hero 島（car-park，tile 放大一級）偏移量大於一般島", () => {
+      const carPark = ZONES.find((z) => z.id === "car-park")!;
+      const dino = ZONES.find((z) => z.id === "dino")!;
+      const heroLift = carPark.coord.y - islandFocus("car-park").center.y;
+      const plainLift = dino.coord.y - islandFocus("dino").center.y;
+      expect(heroLift).toBeGreaterThan(plainLift);
+    });
+  });
+
+  describe("fitScaleForBox", () => {
+    it("島比視窗寬時夾到 contain-fit（手機直向）", () => {
+      const box = islandFocus("car-park").box;
+      const phone = fitScaleForBox(box, 390, 640);
+      expect(phone).toBeLessThan(1.6);
+      expect(phone).toBeGreaterThan(MIN_SCALE);
+      // 夾完的縮放真的放得下島（含留白）
+      expect(box.w * phone).toBeLessThanOrEqual(390);
+      expect(box.h * phone).toBeLessThanOrEqual(640);
+    });
+
+    it("桌面視窗算出的上限高於 ISLAND_FOCUS_ZOOM（進島手感不變）", () => {
+      expect(fitScaleForBox(islandFocus("car-park").box, 1280, 800)).toBeGreaterThan(
+        1.6,
+      );
+    });
   });
 });

@@ -6,6 +6,13 @@
 
 ### Fixed
 
+- **宇宙地圖點島沒有置中（正式站回饋）**：`targetToFlyParams` 拿 `zone.camera.center` 當島心，但那是島圖的**沙岸底錨點**（`anchorUV [0.5, 0.84]`）——84% 的島高在錨點上方，於是整座島被推到畫面上緣，1280×800 下車車樂園島頂實際被切掉約 117px。新增 `islandFocus()` 取 tile box 視覺中心並為木牌欄讓位；`flyTo` 新增 `fitBox` 把進島縮放夾到「島放得進畫面」（桌面算出的上限高於 1.6 故手感不變，390 手機從 1.6 落到約 1.15，島不再比螢幕寬）。
+- **宇宙地圖再點同一座島沒有反應**：改為回世界層（`router.push("/adventures")`，鏡頭由既有離島 reset 分支收尾），島 `aria-label` 補「再點一次看整片地圖」。
+- **夜間地圖 chrome 融進背景**：縮放／回樂園鈕吃 `--card`＋`--cta-warm-fg`，夜間是深靛底壓深靛夜海（輪廓消失）、字 `#2a1808` 對底僅約 1.4:1；鎖島泡泡則是硬白底＋`var(--ink)`，夜間變近白字壓白底。新增一組**日夜不反轉**的地圖印刷色 `--map-chip`／`--map-chip-2`／`--map-chip-ink`／`--map-chip-line`（字底 5.4:1、鈕對夜海約 7.9:1），對齊既有 `.tapHint` 與島名木牌語彙。
+- **鎖島泡泡永遠被島名木牌遮住**：泡泡原本在島 `<button>`（有 z-index，自成 stacking context）內，木牌層（`LABEL_BASE`）必定蓋過它；改為 button 的 sibling、走新的 `bubble` 層深、定位在 tile box 頂緣，並補反縮放與尾巴。探索點層同步升到新的 `hotspot` 層深（互動元件不該被裝飾木牌壓住）。
+- **手機島名木牌被視窗裁掉**：`CONTENT_FIT_PAD` 是 stage 單位會隨 fit 縮小，但木牌反縮放後是固定螢幕尺寸。新增 `LABEL_SCREEN_PAD` 在螢幕空間預留留白，375×812 下恐龍島木牌由裁掉 24px（可見 0.66）變為完整可見。
+- **故事詳情頁「接著聽」連結對比 2.2:1（axe serious）**：`RelatedStories` 把單集色 `story.color`（如 `#7048e8`）當文字色，夜間壓 `--card` 不足 AA。單集色改只當底線裝飾，文字走 `--accent-ink`（分工同 DESIGN.md：accent → 裝飾／邊框，accent-ink → 文字）。
+- **GameKit 遊戲畫布沒有可及名稱**：`PixelGameCanvas` 遷移到 `GameHost` 時漏了 `role="img" aria-label="遊戲畫面"`，讀屏會念成無名 canvas。補回。
 - **遊戲頁 hasScore:false 會失去所有遊戲控制**：`GameHost` 原本把整條工具列包在 `{(title || best != null) && …}` 內，而主打的 `candy-match` 是 `hasScore: false`（`best` 恆為 null），一旦不傳 title 就會連暫停、靜音、設定一起消失。工具列改為無條件渲染，只有「最佳 ⭐」條件顯示；補反向契約回歸測試鎖住這個條件。
 - **`/games/candy-match` 有兩個 `<h1>`**：`GameIntro` 與 `CandyMatchView` 的關卡標題屏各一。頁面唯一 `<h1>` 改由 `GamePageShell` 抬頭持有，其餘降為 `<h2>`；`GameIntro` 的 `aria-labelledby` 一併改指向自己的標題（原本指向已搬走的 id）。
 - **遊戲頁對比未達 WCAG AA**：`CarAdventureGame` 的鍵盤說明硬寫 `#3a5a8c`，夜間僅 **1.4:1**；`GameIntro` 的遊玩條件 chip 為 4.41:1。皆改用主題 token。
@@ -24,6 +31,11 @@
 - **/legal 版權隱私頁全面擴充**：頁標改「版權、隱私與使用條款」，加章節錨點導覽與政策版本／日期標示；新增「可接受的分享方式」「侵權通知與處理（`/legal#takedown` 流程與必附資料）」「許願、建議與投稿內容」「第三方服務與資料處理者（Vercel／Neon／Resend／外部平台）」「兒少與家長使用」「安全與政策變更」章節。`DISCLAIMER.md`、`public/llms.txt` 同步侵權通知與分享／訓練限制措辭；訂閱與許願表單同意句更新（含「勿填孩子個資」提示）。
 
 ### Changed
+
+- **宇宙地圖島上文字重排（正式站回饋）**：探索點標籤改印刷 chip（13px/800、`--map-chip*` 色票）並加反縮放——縮放時字級不再變形，命中區固定 48 螢幕 px（原本 fit 縮放下只有約 29px）；島下半部標籤翻到圓點上方避開木牌與彼此碰撞；未開放的點降權讓可玩的點當主角。探索點詳情視窗改置中單欄：島名降為小徽章、標題升 1.7rem、只留一顆膠囊主 CTA（56px）、回島降為文字鈕、「敬請期待」改小 pill。
+- **移除宇宙地圖「探險小抄」面板**：`pointer-events: none`、≤480px 本來就 sr-only 隱藏，狀態圖例資訊島木牌 pill 已有，對孩子等於裝飾。刪除 `MapGuide`；`aria-describedby="universe-map-guide"` 改指向 sr-only 操作說明（點島飛過去／拖曳探索／加減鍵與鍵盤縮放平移）。
+- **`e2e/universe-map.spec.ts` 島名木牌測試改測真不變式**：舊版比對「後方島可見圖頂 − 前方島木牌底 ≥16px」，前提是兩島在螢幕上垂直相鄰；M0（`02f2a51`）重排座標後森林小島移到上方中央，該配對失去意義、測試自此長紅（−364px）。改測木牌垂直完整可見、彼此不重疊、層深高於所有島身，橫向則因直向刻意讓島群比畫面寬而要求可見比例 ≥0.7（實測最差 0.76）。
+- **`npm run lint` 回到 0 warning**：`--max-warnings=0` 的閘門原本被 19 個既有 warning 擋著。移除死 import／死解構（含 `GameHost` 未接線的 `resumeBgm`）；`CandyMatchView` 的 `ensureAudio`／`tone` fallback 改指模組層 noop（原 `?? (() => {})` 每 render 產新函式，讓 9 個 `useCallback` 依賴每幀失效）；`BlockDropView` 以 `liveFnsRef` 鏡射遊戲迴圈函式，鍵盤訂閱不必每 render 重掛。未動 `eslint.config.mjs`。
 
 - **遊樂園動線重構（兒童優先 + DESIGN v0.2 收斂）**：
   - **遊戲頁改「遊戲 → 操作提示 → 家長說明」**：`#game-play` 前移到 `GameIntro` 之前，390×844 下遊戲區起點由 ~780px 降到 **72px**。`GameIntro` 降為第二層並改標題「給家長的說明」；`game.controls` 屬兒童資訊，留在遊戲正下方不隨之下移。

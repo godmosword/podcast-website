@@ -320,6 +320,20 @@
   transform-origin: 50% 0;
 }
 
+/* 鎖島泡泡的定位點：tile box 頂緣中心。零尺寸容器，泡泡自身負責置中與反縮放。 */
+.tileBubbleAnchor {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* landmark 模式（歷史 fallback，現況五島皆不走）：錨在 button 頂緣中央。 */
+.landmarkBubbleAnchor {
+  left: 50%;
+  top: 0;
+}
+
 .island {
   position: absolute;
   /* px 為島中心：以 transform 置中 */

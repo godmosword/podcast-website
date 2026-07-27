@@ -15,6 +15,7 @@ import {
   decayVelocity,
   exceedsDragSlop,
   fitScaleFor,
+  fitScaleForBox,
   flyDurationFor,
   islandContentCenter,
   isDoubleTap,
@@ -51,6 +52,12 @@ type FlyToOptions = {
   viewportOffsetY?: number;
   /** 飛行過場毫秒；預設由 `flyDurationFor` 依起訖鏡頭的感知距離推導。 */
   durationMs?: number;
+  /**
+   * 構圖框（stage px）：目標 scale 會被夾到「此框放得進視窗」的上限。
+   * 手機直向進島時島比畫面寬，置中也看不到全島；桌面算出的上限高於
+   * ISLAND_FOCUS_ZOOM，故不影響既有手感。
+   */
+  fitBox?: { w: number; h: number };
 };
 
 export type UseMapCameraOptions = {
@@ -373,7 +380,10 @@ export function useMapCamera(options: UseMapCameraOptions = {}): MapCamera {
       stopInertia();
       const { w, h } = sizeRef.current;
       if (w === 0 || h === 0) return;
-      const ns = clampScale(targetScale ?? camRef.current.scale);
+      const wanted = clampScale(targetScale ?? camRef.current.scale);
+      const ns = options?.fitBox
+        ? Math.min(wanted, fitScaleForBox(options.fitBox, w, h))
+        : wanted;
       const offsetY = options?.viewportOffsetY ?? 0;
       const next = clampCam(poseFor(coord, ns, w, h, offsetY));
       // 先開啟 transition，再寫 transform，CSS 才會插值。

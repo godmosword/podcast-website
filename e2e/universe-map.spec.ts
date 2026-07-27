@@ -59,35 +59,45 @@ function expectTransformClose(actual: StageTransform, expected: StageTransform) 
   expect(actual.scale).toBeCloseTo(expected.scale, 5);
 }
 
-async function labelBottom(locator: Locator) {
-  return locator.evaluate((el) => {
-    const label = el.closest('span[class*="tileLabel"]');
-    if (!label) throw new Error("tile label not found");
-    return label.getBoundingClientRect().bottom;
+type LabelGeometry = {
+  name: string;
+  rect: { left: number; top: number; right: number; bottom: number };
+  /** 木牌欄的 z-index（label band）。 */
+  z: number;
+};
+
+/** 五座島的木牌欄幾何 + 層深，以及所有島身 z 的最大值（畫最前面的島）。 */
+async function labelGeometry(page: Page): Promise<{
+  labels: LabelGeometry[];
+  maxIslandZ: number;
+}> {
+  return page.evaluate(() => {
+    const labels = [
+      ...document.querySelectorAll<HTMLElement>('span[class*="tileLabel"]'),
+    ].map((el) => {
+      const r = el.getBoundingClientRect();
+      return {
+        name: el.textContent?.replace(/\s+/g, "") ?? "",
+        rect: { left: r.left, top: r.top, right: r.right, bottom: r.bottom },
+        z: Number(el.style.zIndex),
+      };
+    });
+    const maxIslandZ = Math.max(
+      ...[...document.querySelectorAll<HTMLElement>('button[class*="islandTile"]')].map(
+        (el) => Number(el.style.zIndex),
+      ),
+    );
+    return { labels, maxIslandZ };
   });
 }
 
-async function visibleImageTop(locator: Locator) {
-  return locator.evaluate(async (el) => {
-    const img = el.querySelector("img");
-    if (!img) throw new Error("island image not found");
-    if (!img.complete) await img.decode();
-    const canvas = document.createElement("canvas");
-    canvas.width = img.naturalWidth;
-    canvas.height = img.naturalHeight;
-    const ctx = canvas.getContext("2d", { willReadFrequently: true });
-    if (!ctx) throw new Error("canvas context not available");
-    ctx.drawImage(img, 0, 0);
-    const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-    let top = 0;
-    scan: for (; top < canvas.height; top += 1) {
-      for (let x = 0; x < canvas.width; x += 1) {
-        if (pixels[(top * canvas.width + x) * 4 + 3] > 16) break scan;
-      }
-    }
-    const rect = img.getBoundingClientRect();
-    return rect.y + (top / canvas.height) * rect.height;
-  });
+function rectsOverlap(
+  a: LabelGeometry["rect"],
+  b: LabelGeometry["rect"],
+): boolean {
+  return (
+    a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom
+  );
 }
 
 function scaleFromTransform(transform: string) {
@@ -121,28 +131,61 @@ test.describe("車車宇宙樂園地圖 UX", () => {
       { width: 375, height: 812 },
       { width: 1280, height: 800 },
     ]) {
-      test(`fit 構圖與鎖島 label 淨空：${theme} ${viewport.width}px`, async ({ page }) => {
+      /**
+       * 島名木牌可讀性。
+       *
+       * 舊版比對「後方島的可見圖頂 − 前方島木牌底」≥16px，前提是兩島在螢幕上
+       * 垂直相鄰（恐龍島正下方是森林小島）。M0（`02f2a51`）重排座標後森林小島
+       * 移到上方中央，該配對失去意義、測試自此長紅（−364px）。
+       *
+       * 改測真正的不變式：木牌都在視窗內、彼此不重疊、且畫在所有島身之上
+       * （原本要防的「木牌被前方島埋掉」由層深保證；band 順序另有單元測試
+       * `lib/universe-depth.test.ts`）。
+       */
+      test(`fit 構圖與島名木牌可讀：${theme} ${viewport.width}px`, async ({ page }) => {
         await openMap(page, theme, viewport.width, viewport.height);
 
         if (theme === "night") {
           await expect(page.locator("html")).toHaveAttribute("data-theme", "night");
         }
 
-        const dinoLabel = page
-          .locator('span[class*="tileLabel"]')
-          .filter({ hasText: "恐龍島" });
-        const forestIsland = page.getByRole("button", { name: /森林小島，建造中/ });
-        const rescueLabel = page
-          .locator('span[class*="tileLabel"]')
-          .filter({ hasText: "英雄救援隊" });
-        const oceanIsland = page.getByRole("button", { name: /未來夢想島，規劃中/ });
+        const frame = (await page
+          .getByRole("application", { name: /車車樂園互動地圖/ })
+          .boundingBox())!;
+        const { labels, maxIslandZ } = await labelGeometry(page);
 
-        expect(
-          (await visibleImageTop(forestIsland)) - (await labelBottom(dinoLabel)),
-        ).toBeGreaterThanOrEqual(16);
-        expect(
-          (await visibleImageTop(oceanIsland)) - (await labelBottom(rescueLabel)),
-        ).toBeGreaterThanOrEqual(16);
+        expect(labels).toHaveLength(5);
+
+        for (const label of labels) {
+          // 垂直方向必須完整可見（上下不裁切）
+          expect(label.rect.top, `${label.name} 上緣`).toBeGreaterThanOrEqual(
+            frame.y - 1,
+          );
+          expect(label.rect.bottom, `${label.name} 下緣`).toBeLessThanOrEqual(
+            frame.y + frame.height + 1,
+          );
+          // 橫向：直向視窗刻意讓島群比畫面寬（PORTRAIT_MAX_ZOOM，減少上下空海），
+          // 最外側島本身就會被裁一角，孩子拖曳即可看全，故不能要求完整可見。
+          // 實測 375×812 最差為未來夢想島 0.76（`LABEL_SCREEN_PAD` 已把恐龍島從
+          // 0.66 拉到完整可見）；門檻取 0.7 守住「島名還認得出來、沒被推出畫面」。
+          const visibleW =
+            Math.min(label.rect.right, frame.x + frame.width) -
+            Math.max(label.rect.left, frame.x);
+          const ratio = visibleW / (label.rect.right - label.rect.left);
+          expect(ratio, `${label.name} 可見比例`).toBeGreaterThanOrEqual(0.7);
+          // 木牌永遠畫在最前面的島身之上
+          expect(label.z, `${label.name} 層深`).toBeGreaterThan(maxIslandZ);
+        }
+
+        // 木牌之間不重疊（真正會讓孩子讀不到島名的情況）
+        for (let i = 0; i < labels.length; i += 1) {
+          for (let j = i + 1; j < labels.length; j += 1) {
+            expect(
+              rectsOverlap(labels[i]!.rect, labels[j]!.rect),
+              `${labels[i]!.name} 與 ${labels[j]!.name} 木牌重疊`,
+            ).toBe(false);
+          }
+        }
       });
     }
   }
@@ -211,6 +254,49 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     const opened = await stageTransformParts(page);
     await page.waitForTimeout(250);
     expectTransformClose(await stageTransformParts(page), opened);
+  });
+
+  test("點島後島真的置中（焦點是島圖中心，不是沙岸錨點）", async ({ page }) => {
+    await openMap(page, "light");
+    const viewport = page.getByRole("application", { name: /車車樂園互動地圖/ });
+    const carPark = page.getByRole("button", { name: /車車樂園，開放中/ });
+
+    await carPark.click();
+    await expect
+      .poll(async () => (await stageTransformParts(page)).scale)
+      .toBeCloseTo(1.6, 1);
+    await page.waitForTimeout(500);
+
+    const island = (await carPark.boundingBox())!;
+    const frame = (await viewport.boundingBox())!;
+    const dx =
+      island.x + island.width / 2 - (frame.x + frame.width / 2);
+    const dy =
+      island.y + island.height / 2 - (frame.y + frame.height / 2);
+
+    expect(Math.abs(dx)).toBeLessThan(40);
+    expect(Math.abs(dy)).toBeLessThan(60);
+    // 島頂不被切出畫面上緣（回歸前 car-park 島頂約在 viewport 上方 117px）
+    expect(island.y).toBeGreaterThan(frame.y - 4);
+  });
+
+  test("再點一次同一座島＝回樂園（縮回島群全景）", async ({ page }) => {
+    await openMap(page, "light");
+    const carPark = page.getByRole("button", { name: /車車樂園，開放中/ });
+
+    await carPark.click();
+    await expect
+      .poll(async () => (await stageTransformParts(page)).scale)
+      .toBeCloseTo(1.6, 1);
+    await expect(page).toHaveURL(/\/adventures\/car-park$/);
+
+    await page.getByRole("button", { name: /車車樂園，開放中.*再點一次看整片地圖/ }).click();
+
+    await expect(page).toHaveURL(/\/adventures$/);
+    await expect
+      .poll(async () => (await stageTransformParts(page)).scale, { timeout: 5000 })
+      .toBeLessThan(1.4);
+    await expect(carPark).toBeInViewport();
   });
 
   test("鎖島本體一次點擊飛抵＋短泡，不開選單", async ({ page }) => {

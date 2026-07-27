@@ -39,6 +39,23 @@
 - [x] M2 `@modal` 熱點層 + focus 管理 + prefetch  `e915355`
 - [x] M3 逐島填 hotspots（恐龍島優先）  `5c6784a`
 
+### 本輪已完成（2026-07-27）
+
+> 正式站 `/adventures` 實測五點回饋（點島未置中／島上文字擺放／夜間縮放鍵融背景／
+> 白色對話框看不清／探險小抄無意義）。詳見下方
+> [宇宙地圖回饋修正](#宇宙地圖回饋修正2026-07-27)。
+
+| ID | Commit |
+|----|--------|
+| fix(universe): 進島焦點改島圖視覺中心（`islandFocus`）＋`fitBox` 夾縮放；再點同島回世界層 | `TBD` |
+| polish(universe): 探索點標籤／詳情視窗重排字階；標籤反縮放（命中區固定 48px）＋下半島翻上 | `TBD` |
+| fix(universe): 地圖 chrome `--map-chip*` token（日夜不反轉）——修夜間縮放鍵融背景、鎖島泡泡白字壓白底 | `TBD` |
+| refactor(universe): 刪除探險小抄面板，`aria-describedby` 改 sr-only 操作說明 | `TBD` |
+| chore(quality): 清掉 19 個既有 lint warning，`npm run lint` 回到 0（未動 eslint 設定） | `TBD` |
+| fix(a11y): `RelatedStories` 單集色改底線裝飾＋`--accent-ink`（夜間 2.2:1 → AA）；`GameHost` canvas 補 `role=img`／`aria-label` | `TBD` |
+| test(universe): 島名木牌 e2e 改測真不變式（垂直完整／不重疊／層深）＋ `LABEL_SCREEN_PAD` 修手機木牌裁切 | `TBD` |
+| test(visual): 重產 `adventures-*` 四張基準（刪小抄＋奶油鈕＋新構圖） | `TBD` |
+
 ### 本輪已完成（2026-07-26）
 
 | ID | Commit |
@@ -277,6 +294,8 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 
 重產／trusted 跑前須對齊 baseline 原始環境：**OS、字型版本、Chromium build**（見上方抽樣說明）。trusted 通過前勿當 CI／agent 硬閘。
 
+**2026-07-27 修正診斷：** 「與渲染環境脫節」至少不是全貌——`home-390`（light／night）與 `home-1280-light` 在本機 trusted 跑**逐像素相符**，字型／OS 若不同不可能全等。逐頁落差（全部故事 21%、遊樂園 44%、宇宙地圖 25%、家長指南 19%、角色圖鑑 23%、關於 9%、訂閱 7%）主要是 **07-12～07-17 產基準後的 UI 演進未重新基準**。`adventures-*` 四張已重產（見[宇宙地圖回饋修正](#宇宙地圖回饋修正2026-07-27)）；其餘 8 頁待逐頁審圖重產，之後即可評估解除預設 skip。注意 `e2e/visual.spec.ts` 是 `mode: "serial"`，首個 fail 會 skip 其餘，逐頁診斷要用 `-g`。
+
 ### VIS-DEBT-2　smoke 測試比設計決策舊　`eng · S · 無`　✅ `0ddcc26`
 
 `e2e/smoke.spec.ts` 已對齊 [DESIGN.md](./DESIGN.md) §Landing Hub：桌面膠囊主列四項（全部故事／遊樂園／宇宙地圖／育兒專欄）且無「主題分類」；390 開漢堡抽屜可見「主題分類」。
@@ -355,6 +374,44 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 
 ### ~~W27-3 森林小島 magenta 暈圈修復~~　`asset · S · 無`　〔review+design〕 ✅
 = 下方既有條目「森林小島底部洋紅色暈圈」，W27 週報將其提升優先。`c33ebb3` `ea49200`
+
+---
+
+## 宇宙地圖回饋修正（2026-07-27）
+
+> **來源：** 正式站 `/adventures` 使用者實測五點回饋。
+> **決策：** 第 2 點兩處都重排（島上標籤＋詳情視窗）· 第 5 點探險小抄直接刪除 ·
+> 第 3／4 點夜間對比走「固定奶油色實體按鈕」（對齊 `.tapHint` 與島名木牌，符合
+> DESIGN.md「地圖不反轉」紅線）。
+> **紅線守住：** 未動 `data/universe.ts` 座標與 `camera.center`、`zone-art-tile` 契約、
+> `useMapCamera` pointer／慣性管線、海圖與島 tile 美術。
+
+| # | 回饋 | 根因 | 處置 | 驗證 |
+|---|------|------|------|------|
+| 1 | 點小島未置中；想再點一次回原尺寸 | `targetToFlyParams` 把 `zone.camera.center`（＝`anchorUV [0.5, 0.84]` 的**沙岸底錨點**）當島心置中，84% 島高落在畫面上緣（1280×800 下 car-park 島頂被切約 117px） | 新增 `islandFocus(zoneId)`：焦點＝tile box 視覺中心＋木牌讓位 14px；`flyTo` 新增 `fitBox` 夾住「島放得進畫面」的縮放上限（桌面 >1.6 故手感不變，390 手機落到約 1.15）；`handleActivate` 對同島改 `router.push("/adventures")` | `lib/camera.test.ts`、`map-camera-utils.test.ts`、`useMapCamera.test.tsx`、e2e「點島後島真的置中」「再點一次同一座島」 |
+| 2 | 島上各位置介紹的文字擺放不夠簡潔有力 | 探索點標籤 0.72rem 同權重、隨鏡頭縮放變形（fit 下命中區僅約 29px）、被木牌壓在下層；詳情視窗兩顆同重量全寬按鈕 | 標籤改印刷 chip 13px/800＋反縮放（命中區固定 48px）＋`hotspot` 層深＋下半島 `data-flip="up"`＋鎖定點降權；詳情視窗置中單欄、島名降為徽章、標題升 1.7rem、只留一顆膠囊主 CTA、回島降為文字鈕 | `HotspotLayer.test.tsx` |
+| 3 | 夜間右下縮放鍵與背景融合 | `.btn` 吃 `--card`／`--cta-warm-fg`：夜間深靛底壓深靛夜海、字為 `#2a1808`（約 1.4:1） | 新增 `--map-chip*`（日夜不反轉）；`.btn` 改奶油底＋深棕字（字底 5.4:1、鈕對夜海約 7.9:1） | `MapControls.module.css.test.ts` |
+| 4 | 白色對話框「還在蓋」非常不清楚 | 硬白底＋`var(--ink)`（夜間近白字壓白底）；在島 button 的 stacking context 內被木牌永久遮蓋；不反縮放；`top: 8%` 配上第 1 點常已被切出畫面 | 改 `--map-chip*` 色票＋反縮放（keyframes 同步）＋加尾巴；DOM 搬到 button 之外的 sibling、走新的 `bubble` 層深、定位 tile box 頂緣 | `LockedIslandBubble.module.css.test.ts`、`ZoneIsland.bubble.test.tsx`、`universe-depth.test.ts` |
+| 5 | 探險小抄沒意義 | 面板 `pointer-events: none`、≤480px 本就 sr-only、狀態圖例島木牌 pill 已有 | 刪除 `MapGuide.{tsx,module.css}` 與兩支測試；`aria-describedby="universe-map-guide"` 改指 sr-only 操作說明 | `e2e/a11y.spec.ts`（`/adventures` 2 案綠） |
+
+### 同輪順手清掉的既有紅燈
+
+驗證這五點時發現 repo 的品質閘門本來就是紅的，且都不是本輪造成，一併修掉：
+
+| 項目 | 既有狀況 | 處置 |
+|------|---------|------|
+| `npm run lint` | `--max-warnings=0` 被 19 個既有 warning 擋住（死 import／`exhaustive-deps`） | 全部修到 0。`CandyMatchView` 的 `ensureAudio`／`tone` fallback 改模組層 noop（原 `?? (() => {})` 每 render 產新函式，9 個 `useCallback` 依賴每幀失效）；`BlockDropView` 用 `liveFnsRef` 鏡射迴圈函式（鍵盤訂閱不再每 render 重掛）；`GameHost` 移除未接線的 `resumeBgm`。**未動 `eslint.config.mjs`**（config-protection hook 亦擋） |
+| `e2e/universe-map.spec.ts` label 淨空 ×4 | M0（`02f2a51`）重排座標後，「恐龍島木牌 ↔ 森林小島圖頂」不再垂直相鄰，斷言恆為 −364px | 改測真不變式（垂直完整可見／木牌互不重疊／層深高於所有島身／橫向可見比例 ≥0.7）；並新增 `LABEL_SCREEN_PAD` 修掉手機木牌被裁（375px 恐龍島 0.66 → 完整） |
+| `e2e/a11y.spec.ts` 故事詳情頁 | `RelatedStories` 拿 `story.color` 當文字色，夜間對 `--card` 僅 2.2:1（axe serious） | 單集色改底線裝飾、文字走 `--accent-ink`。a11y 11/11 綠 |
+| `e2e/smoke.spec.ts` car-adventure | 找不到 `role=img[name=遊戲畫面]`——GameAdapter 遷移時 `GameHost` canvas 漏了可及名稱（讀屏會念成無名 canvas） | 補回 `role="img" aria-label="遊戲畫面"`。smoke 18/18 綠 |
+
+**全庫現況：** lint 0 warning · `tsc` 綠 · vitest 1041 綠 · playwright **83 passed / 0 failed**（39 個 visual 依政策 skip）。
+
+### 視覺基準
+
+`adventures-*` 四張已重產並逐張審圖（刪小抄／奶油鈕／新構圖）。
+
+順手釐清 **VIS-DEBT-1**：它的理由寫「baseline 與本機渲染環境脫節」，但 `home-390` 三張在本機**逐像素相符**——字型／OS 若不同不可能全等。逐頁量到的落差（全部故事 21%、遊樂園 44%、宇宙地圖 25%、家長指南 19%、角色圖鑑 23%、關於 9%、訂閱 7%）主要是 07-12～07-17 產基準後兩週的 UI 演進沒有重新基準（例：`adventures-390-night` 舊圖還有探險小抄與「👆點點看！」）。**待辦：** 其餘 8 頁逐頁審圖重產後，再評估是否解除 `test.beforeEach` 的預設 skip。
 
 ---
 

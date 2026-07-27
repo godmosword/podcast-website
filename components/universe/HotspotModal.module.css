@@ -33,21 +33,29 @@
   height: 48px;
 }
 
+/* 次要出口：降為文字鈕（主行動只有一顆 .cta），命中區仍保 48px。 */
 .backBtn {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   min-height: 48px;
-  margin-top: 0.9rem;
-  padding: 0.55rem 0.8rem;
-  border: 1.5px solid color-mix(in srgb, var(--ink) 14%, var(--line));
+  margin-top: 0.35rem;
+  padding: 0.4rem 0.8rem;
+  border: none;
   border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--ink) 5%, var(--card));
-  color: var(--ink);
-  font-size: 1rem;
-  font-weight: 800;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
   cursor: pointer;
+}
+
+.backBtn:hover {
+  color: var(--ink);
 }
 
 .backBtn:focus-visible {

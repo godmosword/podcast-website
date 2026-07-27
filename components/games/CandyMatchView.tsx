@@ -11,7 +11,7 @@ import {
 import { CandyMatchBoard } from "@/components/games/CandyMatchBoard";
 import { DirtOverlay, PieceArt, PieceGift } from "@/components/games/CandyMatchPieceArt";
 import { GameEndStation } from "@/components/games/GameEndStation";
-import { IconReplay, IconSparkle, IconStar } from "@/components/games/ClayIcons";
+import { IconSparkle, IconStar } from "@/components/games/ClayIcons";
 import type { GameAudioBus, OverlayProps } from "@/lib/gamekit/adapter";
 import { loadPlayerProfile } from "@/lib/gamekit/progress/save";
 import { medalCount } from "@/lib/gamekit/progress/meta";
@@ -66,6 +66,10 @@ export type CandyMatchViewProps = OverlayProps & {
   audio?: GameAudioBus;
   instance: CandyMatchInstance;
 };
+
+/** 無音效環境的穩定 fallback（見 CandyMatchView 內 ensureAudio／tone）。 */
+const noopAudio: GameAudioBus["ensureAudio"] = () => {};
+const noopTone: GameAudioBus["tone"] = () => {};
 
 const freshProgress = (): Progress => ({
   collected: Array(CANDY_MATCH_PIECES.length).fill(0),
@@ -137,8 +141,10 @@ export function CandyMatchView({
   audio,
   instance,
 }: CandyMatchViewProps) {
-  const ensureAudio = audio?.ensureAudio ?? (() => {});
-  const tone = audio?.tone ?? (() => {});
+  // fallback 取模組層 noop：寫成 `?? (() => {})` 會每次 render 產生新函式，
+  // 讓所有以此為依賴的 useCallback 每幀失效（lint exhaustive-deps 亦會警告）。
+  const ensureAudio = audio?.ensureAudio ?? noopAudio;
+  const tone = audio?.tone ?? noopTone;
 
   const [screen, setScreen] = useState<Screen>("title");
   const [levelIndex, setLevelIndex] = useState(0);

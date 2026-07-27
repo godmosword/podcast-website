@@ -8,8 +8,10 @@ import {
   clampCamera,
   clampScale,
   fitScaleFor,
+  fitScaleForBox,
   flyDurationFor,
   islandContentCenter,
+  islandFocus,
   poseFor,
 } from "@/lib/universe/map-camera-utils";
 import {
@@ -97,6 +99,36 @@ function ResetHarness() {
       </button>
       <button type="button" onClick={() => camera.reset()}>
         重置鏡頭
+      </button>
+    </div>
+  );
+}
+
+/** 進島構圖 harness：以 fitBox 夾住「島放得進畫面」的縮放上限。 */
+function FitBoxHarness() {
+  const camera = useMapCamera({ skipEntryAnimation: true });
+  const box = islandFocus("car-park").box;
+
+  return (
+    <div
+      data-testid="viewport"
+      ref={camera.bind.ref}
+      data-measured={camera.isMeasured ? "1" : "0"}
+      data-scale={String(camera.scale)}
+    >
+      <button
+        type="button"
+        onClick={() => camera.flyTo(islandFocus("car-park").center, 1.6)}
+      >
+        進島（不夾）
+      </button>
+      <button
+        type="button"
+        onClick={() =>
+          camera.flyTo(islandFocus("car-park").center, 1.6, { fitBox: box })
+        }
+      >
+        進島（夾 fitBox）
       </button>
     </div>
   );
@@ -281,6 +313,47 @@ describe("useMapCamera", () => {
     // 推導值必落在上下限內，且不再等於舊的固定常數來源
     expect(expectedMs).toBeGreaterThanOrEqual(MIN_FLY_MS);
     expect(expectedMs).toBeLessThanOrEqual(MAX_FLY_MS);
+  });
+
+  it("flyTo 的 fitBox 在手機直向夾住進島縮放（島不超出畫面）", async () => {
+    stubBrowserApis({ width: 390, height: 640 });
+    render(<FitBoxHarness />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("viewport").getAttribute("data-measured")).toBe("1");
+    });
+
+    const viewport = screen.getByTestId("viewport");
+    const box = islandFocus("car-park").box;
+
+    fireEvent.click(screen.getByRole("button", { name: "進島（不夾）" }));
+    await waitFor(() => {
+      expect(Number(viewport.getAttribute("data-scale"))).toBeCloseTo(1.6, 5);
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "進島（夾 fitBox）" }));
+    await waitFor(() => {
+      const scale = Number(viewport.getAttribute("data-scale"));
+      expect(scale).toBeCloseTo(fitScaleForBox(box, 390, 640), 5);
+      expect(scale).toBeLessThan(1.6);
+      expect(box.w * scale).toBeLessThanOrEqual(390);
+    });
+  });
+
+  it("桌面視窗 fitBox 不改變進島縮放（維持 1.6）", async () => {
+    stubBrowserApis({ width: 1280, height: 800 });
+    render(<FitBoxHarness />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("viewport").getAttribute("data-measured")).toBe("1");
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "進島（夾 fitBox）" }));
+    await waitFor(() => {
+      expect(
+        Number(screen.getByTestId("viewport").getAttribute("data-scale")),
+      ).toBeCloseTo(1.6, 5);
+    });
   });
 
   it("bindVisual meta.flyDurationMs 等於自訂 durationMs", async () => {

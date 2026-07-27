@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import type { Roamer } from "@/data/universe-roamers";
 import { MAP_STAGE } from "@/data/universe-zones";
 import {
   advanceDistance,

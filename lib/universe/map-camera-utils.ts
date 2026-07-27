@@ -1,4 +1,4 @@
-import { MAP_STAGE, ZONES } from "@/data/universe-zones";
+import { MAP_STAGE, ZONES, type ZoneId } from "@/data/universe-zones";
 import { getZoneArtTile } from "@/lib/universe/zone-art-tile";
 
 /** 鏡頭縮放下限（zoom-out 到底）。 */
@@ -65,6 +65,65 @@ export function clampScale(scale: number): number {
   return Math.min(Math.max(scale, MIN_SCALE), MAX_SCALE);
 }
 
+/** landmark 模式（歷史 fallback）的構圖框，對齊 `lib/universe-map.ts` 的 tileBox。 */
+const LANDMARK_BOX = { w: 184, h: 150 } as const;
+
+/**
+ * 木牌欄在錨點下方佔的讓位（stage px）：木牌反縮放後約 44 螢幕 px，
+ * 焦點往下推半個木牌高，島與木牌才一起落在畫面中央。
+ */
+export const NAMEPLATE_FOCUS_ALLOWANCE = 14;
+
+export type IslandFocus = {
+  /** 應置中於視窗的舞台座標（島圖視覺中心，非沙岸錨點）。 */
+  center: { x: number; y: number };
+  /** 島構圖框（stage px）：供 flyTo 夾住「島放得進畫面」的縮放上限。 */
+  box: { w: number; h: number };
+};
+
+/**
+ * 進島鏡頭焦點：island tile 的 anchorUV 是**沙岸底中心**（[0.5, 0.84]），
+ * 直接把 zone.coord 置中會讓 84% 的島高落在畫面上緣（島頂被切）。
+ * 故焦點取 tile box 視覺中心，再為木牌欄讓位。
+ */
+export function islandFocus(zoneId: ZoneId): IslandFocus {
+  const zone = ZONES.find((z) => z.id === zoneId);
+  const coord = zone?.coord ?? { x: MAP_STAGE.width / 2, y: MAP_STAGE.height / 2 };
+  const tile = getZoneArtTile(zoneId);
+  if (tile.mode !== "island") {
+    return { center: { x: coord.x, y: coord.y }, box: { ...LANDMARK_BOX } };
+  }
+
+  const [ax, ay] = tile.anchorUV;
+  const { w, h } = tile.stageSize;
+  return {
+    center: {
+      x: coord.x + (0.5 - ax) * w,
+      y: coord.y + (0.5 - ay) * h + NAMEPLATE_FOCUS_ALLOWANCE,
+    },
+    box: { w, h },
+  };
+}
+
+/** 島構圖框外緣留白（stage px）：島與視窗邊之間的呼吸，供 fitBox 上限使用。 */
+export const ISLAND_FIT_PAD = 16;
+
+/**
+ * 「島放得進畫面」的縮放上限：島比視窗還寬（手機直向）時，
+ * 置中也看不到全島，故把進島 scale 夾到 contain-fit。
+ */
+export function fitScaleForBox(
+  box: { w: number; h: number },
+  viewportW: number,
+  viewportH: number,
+): number {
+  if (viewportW === 0 || viewportH === 0) return MAX_SCALE;
+  const pad = ISLAND_FIT_PAD * 2;
+  return clampScale(
+    Math.min(viewportW / (box.w + pad), viewportH / (box.h + pad)),
+  );
+}
+
 /**
  * srcset `sizes`／島 props 用的縮放級距（0.25 一階）。
  * 連續 pinch zoom 時若每 tick 傳真實 scale，會打穿 memo；量化後同桶內不重渲染。
@@ -113,15 +172,27 @@ export function islandContentCenter(): { x: number; y: number } {
  */
 export const PORTRAIT_MAX_ZOOM = 1.5;
 
+/**
+ * 島名木牌呼吸（螢幕 px，單邊）。
+ *
+ * `CONTENT_FIT_PAD` 是 stage 單位，會隨 fit 縮放一起縮小；但木牌反縮放後是**固定
+ * 螢幕尺寸**，所以手機 fit 下那份留白不夠，最外側島的木牌會被視窗裁掉（375px 實測
+ * 溢出 24px）。這裡改在螢幕空間預留，維持 MAP-MOBILE-FIT 的「五島可讀且不裁切」。
+ */
+export const LABEL_SCREEN_PAD = 28;
+
 /** 依 viewport 尺寸算預設島群 contain-fit 鏡頭倍率（含 FIT_MARGIN 與 clamp）。
  *  直向視窗改偏向填滿高度（見 PORTRAIT_MAX_ZOOM），減少上下空海。 */
 export function fitScaleFor(w: number, h: number): number {
   if (w === 0 || h === 0) return 1;
   const bounds = islandContentBounds();
-  const contain = Math.min(w / bounds.width, h / bounds.height);
+  // 先扣掉木牌的螢幕留白，再算 contain（見 LABEL_SCREEN_PAD）。
+  const availW = Math.max(1, w - LABEL_SCREEN_PAD * 2);
+  const availH = Math.max(1, h - LABEL_SCREEN_PAD * 2);
+  const contain = Math.min(availW / bounds.width, availH / bounds.height);
   const scale =
     h > w
-      ? Math.min(h / bounds.height, contain * PORTRAIT_MAX_ZOOM)
+      ? Math.min(availH / bounds.height, contain * PORTRAIT_MAX_ZOOM)
       : contain;
   return clampScale(scale * FIT_MARGIN);
 }

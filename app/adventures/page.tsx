@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   },
 };
 
-/** L0 世界地圖：HUD／探險小抄在 MapStage；本頁提供 SEO／a11y 文字清單。 */
+/** L0 世界地圖：地圖 chrome 在 MapStage；本頁提供 SEO／a11y 文字清單。 */
 export default function AdventuresPage() {
   const carParkLinks = getCarParkLinks();
 

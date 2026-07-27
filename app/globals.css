@@ -187,6 +187,15 @@
   /* 螢光筆色塊上的文字：底色恆為淺色（黃/粉/薄荷…），文字需恆深，
      不可隨夜晚模式變淺，否則淺字壓淺底會讀不到（WCAG 對比）。 */
   --marker-ink: #34302b;
+
+  /* 地圖印刷 chrome（縮放鍵／探索點標籤／島泡泡）：日夜**不反轉**，見 DESIGN.md
+     「地圖不反轉」紅線。深靛夜海（#2a4468）與淺日海上都要留得住輪廓，
+     故走奶油底＋深棕字，而非 --card／--ink（夜間會翻成深底近白字，兩邊都糊）。 */
+  --map-chip: #fffaf0;
+  --map-chip-2: #f6e4c4;
+  /* 對 --map-chip-2 為 5.4:1、對 --map-chip 為 6.9:1（AA） */
+  --map-chip-ink: #7a5410;
+  --map-chip-line: #e0a33f;
 }
 
 /* ============ 夜晚模式（睡前・暖夜靛） ============ */
@@ -269,6 +278,8 @@
   --cta-warm-fg: var(--landing-brand-ink);
   --warm-card-glow: 0 0 0 1px color-mix(in srgb, var(--c-yellow) 14%, transparent),
     0 12px 32px color-mix(in srgb, var(--c-yellow) 8%, transparent);
+
+  /* --map-chip-* 刻意不覆寫：地圖 chrome 維持印刷奶油色，夜海上才有輪廓。 */
 }
 
 [data-theme="night"] .site-backdrop {

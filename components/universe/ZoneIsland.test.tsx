@@ -60,6 +60,32 @@ describe("ZoneIsland", () => {
     expect(html).toContain("🚧 建造中");
   });
 
+  it("鏡頭停在該島時，aria-label 說明再點一次看整片地圖", () => {
+    const zone = resolveUniverseMap().zones.find((z) => z.id === "dino")!;
+    const idle = renderToStaticMarkup(
+      <ZoneIsland
+        zone={zone}
+        onActivate={() => undefined}
+        reduced
+        paused={false}
+        night={false}
+      />,
+    );
+    const active = renderToStaticMarkup(
+      <ZoneIsland
+        zone={zone}
+        onActivate={() => undefined}
+        reduced
+        paused={false}
+        night={false}
+        active
+      />,
+    );
+
+    expect(idle).not.toContain("再點一次看整片地圖");
+    expect(active).toContain("恐龍島，建造中，再點一次看整片地圖");
+  });
+
   it("開放島顯示「可以進去玩」氣球訊號，鎖島不顯示", () => {
     const zones = resolveUniverseMap().zones;
     const openHtml = renderToStaticMarkup(

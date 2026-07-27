@@ -34,7 +34,7 @@ Bonbon & 馬米親子 Podcast《車車遊樂園》的官方 **看圖聽故事** 
 | 新集通知 | `/subscribe` | Email 訂閱表單（Neon；未設 DB 時引導至收聽平台） |
 | 主題 | `/topic`、`/topic/[tag]` | 主題索引與分類頁（SSG + FAQ schema） |
 | 車種 | `/vehicles/[vehicle]` | 車種分類頁（SSG + GEO FAQ） |
-| 宇宙地圖 | `/adventures` | 五島滿版海洋、pan/zoom/fly-to、ZoneSheet、漫遊 NPC、鎖島許願（`?zone=` deep link） |
+| 宇宙地圖 | `/adventures` | 五島滿版海洋、pan/zoom/fly-to（點島飛抵島心、再點同島回全景）、島上探索點 `/adventures/[zone]/[hotspot]`、漫遊 NPC、`?zone=` deep link |
 | 角色圖鑑 | `/characters` | `data/characters.json` 定裝照與出場故事 |
 | 家長指南 | `/for-parents` | answer-first FAQ、代表性集數（GEO／STEM-P3） |
 | 家庭儀表板 | `/for-parents/dashboard` | 本機 localStorage 收聽／遊戲摘要（不上傳） |
@@ -80,7 +80,7 @@ npm run dev
 | `npm test` | Vitest 單元測試 |
 | `npm run test:e2e` | Playwright E2E（需先 build） |
 | `npm run test:visual` | D2 視覺回歸（**預設 skip**，VIS-DEBT-1；見 `test:visual:trusted`） |
-| `npm run test:visual:trusted` | 設 `VISUAL_BASELINE_TRUSTED=1` 後跑 visual spec（重產／對環境前用） |
+| `npm run test:visual:trusted` | 設 `VISUAL_BASELINE_TRUSTED=1` 後跑 visual spec（重產／對環境前用）。註：`adventures-*` 已於 2026-07-27 重產；其餘 8 頁基準仍是 07-12～07-17，落差 7–44%（多為期間 UI 演進，非環境差異——`home-390` 三張仍逐像素相符），待逐頁審圖重產 |
 | `npm run check` | 品質閘門：test + verify:episodes + verify:zone-art + verify:map-art + build |
 | `npm run font:subset` | 重新子集化中文字型（新增文案後） |
 

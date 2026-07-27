@@ -4,17 +4,20 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  /* z-index 由 HotspotLayer 依島 depthY  inline 設定（高於 island tile） */
+  /* z-index 由 HotspotLayer 依島 depthY  inline 設定（hotspot band，高於島名木牌） */
 }
 
+/* 反縮放吃舞台 --map-scale（同島名木牌手法）：字級與 48px 命中區在任何縮放下
+   都是固定螢幕尺寸，不會 fit 縮放時縮成 29px、放大時撐成巨標。 */
 .pin,
 .pinLocked {
   position: absolute;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) scale(calc(1 / var(--map-scale, 1)));
+  transform-origin: 50% 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.2rem;
+  gap: 0.3rem;
   min-width: 48px;
   min-height: 48px;
   padding: 0.2rem;
@@ -24,6 +27,12 @@
   color: inherit;
   pointer-events: auto;
   cursor: pointer;
+}
+
+/* 島下半部：名字翻到圓點上方（避開島名木牌） */
+.pin[data-flip="up"],
+.pinLocked[data-flip="up"] {
+  flex-direction: column-reverse;
 }
 
 .pin:focus-visible,
@@ -39,27 +48,36 @@
   border-radius: 50%;
   background: #ff8c2b;
   border: 2.5px solid #fff8ef;
-  box-shadow: 0 2px 0 color-mix(in srgb, var(--ink) 18%, transparent);
+  box-shadow: 0 2px 6px rgba(36, 40, 58, 0.32);
 }
 
 .pinLocked .dot {
   background: #c4b5a0;
 }
 
+/* 印刷 chip：色票走 --map-chip*（日夜不反轉），夜海上仍讀得到。 */
 .label {
-  max-width: 7.5rem;
-  padding: 0.15rem 0.45rem;
+  max-width: 8.5rem;
+  padding: 0.16rem 0.5rem;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--card) 92%, transparent);
-  box-shadow: 0 1px 0 color-mix(in srgb, var(--ink) 10%, transparent);
-  font-size: 0.72rem;
+  background: var(--map-chip-2);
+  border: 1px solid var(--map-chip-line);
+  box-shadow: 0 2px 5px rgba(36, 40, 58, 0.2);
+  color: var(--map-chip-ink);
+  font-size: 13px;
   font-weight: 800;
-  line-height: 1.2;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
   text-align: center;
-  color: var(--ink);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* 尚未開放的點降權，讓可以玩的探索點當視覺主角 */
+.pinLocked .label {
+  font-weight: 700;
+  opacity: 0.82;
 }
 
 @media (prefers-reduced-motion: no-preference) {

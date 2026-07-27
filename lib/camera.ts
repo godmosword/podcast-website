@@ -5,10 +5,11 @@
 import {
   MAP_STAGE,
   universe,
-  worldToStage,
   zoneById,
   type Universe,
+  type ZoneId,
 } from "@/data/universe";
+import { islandFocus } from "@/lib/universe/map-camera-utils";
 
 export type CameraState = { center: [number, number]; zoom: number };
 
@@ -22,6 +23,7 @@ export type CameraTarget =
   | {
       key: `island:${string}`;
       level: "island";
+      zoneId: ZoneId;
       center: [number, number];
       zoom: number;
     };
@@ -39,6 +41,7 @@ export function targetFor(pathname: string): CameraTarget {
   return {
     key: `island:${zone.id}`,
     level: "island",
+    zoneId: zone.id,
     center: zone.camera.center,
     zoom: zone.camera.zoom,
   };
@@ -53,23 +56,28 @@ export function clamp(s: CameraState, u: Universe = universe): CameraState {
 }
 
 /**
- * 將島層 CameraTarget 轉成 useMapCamera.flyTo 所需的 stage px + scale。
- * 只夾 zoom；center 必須對齊島心（勿套用 0–1 viewport clamp，否則邊緣島會被推離）。
- * 舞台邊界仍由 useMapCamera.clampCam 處理。
+ * 將島層 CameraTarget 轉成 useMapCamera.flyTo 所需的 stage px + scale + 構圖框。
+ *
+ * coord 取 `islandFocus()`（島圖視覺中心）而非 `zone.camera.center`：後者是 island tile
+ * 的**沙岸底錨點**，置中它會把 84% 的島高推到畫面上緣。只夾 zoom，不套 0–1 viewport
+ * clamp（否則邊緣島會被推離）；舞台邊界仍由 useMapCamera.clampCam 處理。
  *
  * 只吃島層：世界層請走 `useMapCamera.reset()`（傳世界層進來是編譯錯誤）。
  */
 export function targetToFlyParams(target: IslandCameraTarget): {
   coord: { x: number; y: number };
   scale: number;
+  fitBox: { w: number; h: number };
 } {
   const zoom = Math.min(
     universe.camera.maxZoom,
     Math.max(universe.camera.minZoom, target.zoom),
   );
+  const focus = islandFocus(target.zoneId);
   return {
-    coord: worldToStage({ x: target.center[0], y: target.center[1] }),
+    coord: focus.center,
     scale: zoom,
+    fitBox: focus.box,
   };
 }
 

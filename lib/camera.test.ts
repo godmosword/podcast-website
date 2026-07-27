@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { islandFocus } from "@/lib/universe/map-camera-utils";
 import {
   clamp,
   isIslandPath,
@@ -58,10 +59,23 @@ describe("clamp / targetToFlyParams", () => {
     expect(clamp({ center: [0.5, 0.5], zoom: 0.01 }).zoom).toBe(0.34);
   });
 
-  it("dino fly 參數還原既有 stage px 與 FOCUS 1.6", () => {
-    const { coord, scale } = targetToFlyParams(islandTarget("/adventures/dino"));
-    expect(coord).toEqual({ x: 175, y: 300 });
+  it("dino fly 焦點取島圖視覺中心（非沙岸錨點）＋ FOCUS 1.6", () => {
+    const { coord, scale, fitBox } = targetToFlyParams(
+      islandTarget("/adventures/dino"),
+    );
+    const focus = islandFocus("dino");
+
+    expect(coord).toEqual(focus.center);
+    expect(fitBox).toEqual(focus.box);
     expect(scale).toBe(1.6);
+    // 沙岸錨點在 y=300；焦點必須落在它上方（否則 84% 島高會被推出畫面上緣）
+    expect(coord.x).toBe(175);
+    expect(coord.y).toBeLessThan(300);
+  });
+
+  it("島層目標帶 zoneId，供焦點／構圖框查表", () => {
+    expect(islandTarget("/adventures/car-park").zoneId).toBe("car-park");
+    expect(islandTarget("/adventures/dino/story-house").zoneId).toBe("dino");
   });
 });
 

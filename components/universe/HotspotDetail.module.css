@@ -1,48 +1,69 @@
+/* 探索點詳情：孩子視角的「一句話 + 一個動作」。
+   置中單欄、標題當主角、只有一顆搶眼按鈕（回島降為文字鈕）。 */
 .body {
   display: grid;
-  gap: 0.65rem;
+  justify-items: center;
+  gap: 0.5rem;
+  text-align: center;
 }
 
+/* 島名降為小徽章，不與標題爭灰階層次 */
 .eyebrow {
   margin: 0;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: color-mix(in srgb, var(--ink) 62%, transparent);
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--map-chip-2);
+  color: var(--map-chip-ink);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
 }
 
 .title {
-  margin: 0;
-  font-size: 1.35rem;
+  margin: 0.1rem 0 0;
+  font-size: 1.7rem;
   font-weight: 800;
-  line-height: 1.25;
+  line-height: 1.2;
 }
 
 .title:focus {
   outline: none;
 }
 
-.hint,
+.hint {
+  margin: 0;
+  max-width: 18rem;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+/* 「敬請期待」從整行文字改成小 pill，重量讓給 hint */
 .coming {
   margin: 0;
-  line-height: 1.45;
-}
-
-.coming {
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+  color: var(--ink-soft);
+  font-size: 0.8rem;
   font-weight: 800;
+  letter-spacing: 0.02em;
 }
 
+/* 唯一主行動：全站暖 CTA 語彙、圓角膠囊、56px 好按 */
 .cta {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 48px;
-  margin-top: 0.25rem;
-  padding: 0.55rem 0.9rem;
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--landing-brand) 22%, var(--card));
-  border: 1.5px solid color-mix(in srgb, var(--landing-brand) 40%, var(--line));
-  color: var(--ink);
-  font-size: 1rem;
+  width: 100%;
+  min-height: 56px;
+  margin-top: 0.35rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 999px;
+  background: linear-gradient(var(--cta-warm-from), var(--cta-warm-to));
+  border: none;
+  box-shadow: var(--shadow-sm);
+  color: var(--cta-warm-fg);
+  font-size: 1.05rem;
   font-weight: 800;
   text-decoration: none;
 }
@@ -50,4 +71,10 @@
 .cta:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.45rem;
+  }
 }
