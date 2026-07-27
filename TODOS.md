@@ -47,14 +47,14 @@
 
 | ID | Commit |
 |----|--------|
-| fix(universe): 進島焦點改島圖視覺中心（`islandFocus`）＋`fitBox` 夾縮放；再點同島回世界層 | `TBD` |
-| polish(universe): 探索點標籤／詳情視窗重排字階；標籤反縮放（命中區固定 48px）＋下半島翻上 | `TBD` |
-| fix(universe): 地圖 chrome `--map-chip*` token（日夜不反轉）——修夜間縮放鍵融背景、鎖島泡泡白字壓白底 | `TBD` |
-| refactor(universe): 刪除探險小抄面板，`aria-describedby` 改 sr-only 操作說明 | `TBD` |
-| chore(quality): 清掉 19 個既有 lint warning，`npm run lint` 回到 0（未動 eslint 設定） | `TBD` |
-| fix(a11y): `RelatedStories` 單集色改底線裝飾＋`--accent-ink`（夜間 2.2:1 → AA）；`GameHost` canvas 補 `role=img`／`aria-label` | `TBD` |
-| test(universe): 島名木牌 e2e 改測真不變式（垂直完整／不重疊／層深）＋ `LABEL_SCREEN_PAD` 修手機木牌裁切 | `TBD` |
-| test(visual): 重產 `adventures-*` 四張基準（刪小抄＋奶油鈕＋新構圖） | `TBD` |
+| fix(universe): 進島焦點改島圖視覺中心（`islandFocus`）＋`fitBox` 夾縮放；再點同島回世界層 | `01b4b07` |
+| polish(universe): 探索點標籤／詳情視窗重排字階；標籤反縮放（命中區固定 48px）＋下半島翻上 | `01b4b07` |
+| fix(universe): 地圖 chrome `--map-chip*` token（日夜不反轉）——修夜間縮放鍵融背景、鎖島泡泡白字壓白底 | `01b4b07` |
+| refactor(universe): 刪除探險小抄面板，`aria-describedby` 改 sr-only 操作說明 | `01b4b07` |
+| chore(quality): 清掉 19 個既有 lint warning，`npm run lint` 回到 0（未動 eslint 設定） | `01b4b07` |
+| fix(a11y): `RelatedStories` 單集色改底線裝飾＋`--accent-ink`（夜間 2.2:1 → AA）；`GameHost` canvas 補 `role=img`／`aria-label` | `01b4b07` |
+| test(universe): 島名木牌 e2e 改測真不變式（垂直完整／不重疊／層深）＋ `LABEL_SCREEN_PAD` 修手機木牌裁切 | `01b4b07` |
+| test(visual): 重產 `adventures-*` 四張基準（刪小抄＋奶油鈕＋新構圖） | `01b4b07` |
 
 ### 本輪已完成（2026-07-26）
 
