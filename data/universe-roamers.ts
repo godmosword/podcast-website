@@ -55,6 +55,15 @@ export type RoamerSprites = {
   rearNight?: string;
 };
 
+/** 定點展示座標（island＝tile 本地 px；map＝stage px）。 */
+export type RoamerIdleSpot = {
+  x: number;
+  y: number;
+  facing?: RoamerDir;
+  /** 1＝面朝左（基準圖）；-1＝鏡像面朝右 */
+  flip?: 1 | -1;
+};
+
 export type Roamer = {
   id: string;
   characterId: string;
@@ -70,6 +79,15 @@ export type Roamer = {
   srcNight?: string;
   enabled?: boolean;
   startOffset?: number;
+  /**
+   * 定點 idle。有值時 prod 預設不巡邏；移動只發生在
+   * tapJoyride（`joyrideRouteId`）或 rareCrossing（`crossingRouteId`）。
+   */
+  idleSpot?: RoamerIdleSpot;
+  /** map 稀有跨島：對應 `ROAMER_ROUTES` 的 map-bridge-* id */
+  crossingRouteId?: string;
+  /** 點擊短兜風：對應島內／短程 route id；無則只打招呼 */
+  joyrideRouteId?: string;
 };
 
 function buildBridgeRoutes(): MapRoamerRoute[] {
