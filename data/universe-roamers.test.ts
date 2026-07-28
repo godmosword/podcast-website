@@ -31,14 +31,35 @@ describe("universe-roamers", () => {
     expect(MAP_ROAMERS.some((r) => r.id === "roam-duoduo")).toBe(false);
   });
 
-  it("主島小紅 enabled 走 car-park 島內步道", () => {
+  it("主島小紅為近景招牌 idle（不巡邏）；joyride 仍指步道", () => {
     const xiaoHong = MAP_ROAMERS.find((r) => r.id === "roam-xiaohong");
     expect(xiaoHong).toBeDefined();
     expect(xiaoHong!.enabled).toBe(true);
     expect(xiaoHong!.zoneId).toBe("car-park");
-    expect(xiaoHong!.routeId).toBe("car-park-walkway");
-    const route = ROAMER_ROUTES.find((r) => r.id === "car-park-walkway");
-    expect(route?.kind).toBe("island");
+    expect(xiaoHong!.idleSpot).toEqual({
+      x: 168,
+      y: 230,
+      facing: "front",
+      flip: 1,
+    });
+    expect(xiaoHong!.joyrideRouteId).toBe("car-park-walkway");
+  });
+
+  it("遠景有 open 島 map idle（小紅橋頭）＋ crossingRouteId", () => {
+    const mapXiao = MAP_ROAMERS.find((r) => r.id === "map-xiaohong");
+    expect(mapXiao).toBeDefined();
+    expect(mapXiao!.zoneId).toBeUndefined();
+    expect(mapXiao!.enabled).toBe(true);
+    expect(mapXiao!.idleSpot).toBeDefined();
+    expect(mapXiao!.crossingRouteId).toBe("map-bridge-car-park-dino");
+  });
+
+  it("恐龍島 prod 僅一台招牌（阿酷）；怪獸卡車 disabled", () => {
+    const aku = MAP_ROAMERS.find((r) => r.id === "roam-aku");
+    const monster = MAP_ROAMERS.find((r) => r.id === "roam-monster");
+    expect(aku?.enabled).toBe(true);
+    expect(aku?.idleSpot).toBeDefined();
+    expect(monster?.enabled).toBe(false);
   });
 
   it("每條 route path 以 M 開頭", () => {
@@ -133,13 +154,19 @@ describe("ZONE_OCCLUDERS", () => {
     }
   });
 
-  it("car-park 步道為閉合迴圈（含 Z），後段繞過遮擋基線後方", () => {
+  it("招牌 idleSpot 在地標 baseline 前方（y 更大，可讀）", () => {
+    const xiao = MAP_ROAMERS.find((r) => r.id === "roam-xiaohong")!;
+    const aku = MAP_ROAMERS.find((r) => r.id === "roam-aku")!;
+    expect(xiao.idleSpot!.y).toBeGreaterThan(ZONE_OCCLUDERS["car-park"]!.baselineY);
+    expect(aku.idleSpot!.y).toBeGreaterThan(ZONE_OCCLUDERS.dino!.baselineY);
+  });
+
+  it("car-park 步道仍保留給 joyride（閉合 Z）", () => {
     const route = ROAMER_ROUTES.find(
       (r) => r.kind === "island" && r.zoneId === "car-park",
     );
     expect(route?.kind).toBe("island");
     if (route?.kind !== "island") return;
     expect(route.tilePath.trim().endsWith("Z")).toBe(true);
-    expect(route.pingpong).toBeFalsy();
   });
 });

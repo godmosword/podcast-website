@@ -3,21 +3,17 @@ import { getCharacterName } from "@/data/characters";
 import { resolveUniverseMap } from "@/lib/universe-map";
 
 /**
- * car-park 島內步道（tile 330×325 hero box 本地座標；weenie 放大 1.25×，
- * 原 264×260 座標已同步縮放）。
- *
- * 環狀路線：前緣草地起步 → 後段繞到摩天輪後方（觸發深度遮擋，見 `ZONE_OCCLUDERS`）
- * → 右側折返 → 回前緣。閉合 `Z`，roamer 連續繞圈，每圈鑽過摩天輪後方一次。
- * prod：小紅單車走此步道（海面環道已移除）。
+ * car-park 島內步道（tile 330×325 hero box 本地座標；weenie 放大 1.25×）。
+ * 保留供 tapJoyride／`?devRoamers=1`；prod 招牌車改 `idleSpot`，不再閉合巡邏。
  */
 export const CAR_PARK_WALKWAY_PATH =
   "M 90 245 C 70 187.5 115 137.5 162.5 130 C 197.5 125 230 165 235 215 C 235 252.5 145 265 90 245 Z";
 
-/** 恐龍島步道：閉合迴圈，後段繞行火山後方（觸發遮擋）。tile 264×260 本地座標。 */
+/** 恐龍島步道（joyride／dev）。tile 264×260 本地座標。 */
 const DINO_WALKWAY_PATH =
   "M 78 196 C 60 152 96 114 132 108 C 166 102 188 134 188 170 C 188 200 120 212 78 196 Z";
 
-/** 英雄救援隊步道：閉合迴圈，後段繞行消防局後方。tile 264×260 本地座標。 */
+/** 英雄救援隊步道（joyride／dev）。tile 264×260 本地座標。 */
 const RESCUE_WALKWAY_PATH =
   "M 80 198 C 64 158 98 122 134 116 C 168 110 190 142 190 176 C 190 204 122 214 80 198 Z";
 
@@ -62,6 +58,22 @@ export type RoamerIdleSpot = {
   facing?: RoamerDir;
   /** 1＝面朝左（基準圖）；-1＝鏡像面朝右 */
   flip?: 1 | -1;
+};
+
+/** 主島招牌位：摩天輪前方草地（y > baselineY 168）。 */
+export const CAR_PARK_SIGNBOARD_SPOT: RoamerIdleSpot = {
+  x: 168,
+  y: 230,
+  facing: "front",
+  flip: 1,
+};
+
+/** 恐龍島招牌位：火山前方（y > baselineY 128）。 */
+export const DINO_SIGNBOARD_SPOT: RoamerIdleSpot = {
+  x: 132,
+  y: 185,
+  facing: "front",
+  flip: 1,
 };
 
 export type Roamer = {
@@ -120,12 +132,36 @@ export const ROAMER_ROUTES: RoamerRoute[] = [
     zoneId: "rescue",
     tilePath: RESCUE_WALKWAY_PATH,
   },
-  // 開放橋 map 路線保留供 dev（?devRoamers=1）橋線視覺化；prod 無 map roamer 指派。
+  // 開放橋 map 路線：rareCrossing 與 `?devRoamers=1` 橋線視覺化。
   ...buildBridgeRoutes(),
 ];
 
+function openIslandBridgeIdleSpot(): RoamerIdleSpot {
+  const bridge = resolveUniverseMap().bridges.find((b) => b.id === "car-park-dino");
+  if (!bridge) {
+    return { x: 346.9, y: 442.64, facing: "front", flip: -1 };
+  }
+  return {
+    x: bridge.fromPort.x,
+    y: bridge.fromPort.y,
+    facing: "front",
+    flip: -1,
+  };
+}
+
 export const MAP_ROAMERS: Roamer[] = [
-  // 車車樂園（open）：主島單車，走步道鑽摩天輪後方。
+  // 遠景（open 島池）：小紅停在車車樂園橋頭，偶爾過橋去恐龍島。
+  {
+    id: "map-xiaohong",
+    characterId: "xiao-hong",
+    routeId: "map-bridge-car-park-dino",
+    speed: 22,
+    src: "/adventures/roamers/xiao-hong.png",
+    enabled: true,
+    idleSpot: openIslandBridgeIdleSpot(),
+    crossingRouteId: "map-bridge-car-park-dino",
+  },
+  // 近景招牌：車車樂園小紅（摩天輪前 idle；點擊可短 joyride）。
   {
     id: "roam-xiaohong",
     characterId: "xiao-hong",
@@ -134,9 +170,10 @@ export const MAP_ROAMERS: Roamer[] = [
     speed: 26,
     src: "/adventures/roamers/xiao-hong.png",
     enabled: true,
-    startOffset: 0,
+    idleSpot: CAR_PARK_SIGNBOARD_SPOT,
+    joyrideRouteId: "car-park-walkway",
   },
-  // 恐龍島（building）：阿酷鑽地車 + 怪獸卡車
+  // 近景招牌：恐龍島阿酷（每島一台；怪獸卡車改 disabled）。
   {
     id: "roam-aku",
     characterId: "a-ku",
@@ -149,7 +186,8 @@ export const MAP_ROAMERS: Roamer[] = [
       rear: "/adventures/roamers/a-ku.rear.png",
     },
     enabled: true,
-    startOffset: 0,
+    idleSpot: DINO_SIGNBOARD_SPOT,
+    joyrideRouteId: "dino-walkway",
   },
   {
     id: "roam-monster",
@@ -162,10 +200,12 @@ export const MAP_ROAMERS: Roamer[] = [
       front: "/adventures/roamers/monster-truck.png",
       rear: "/adventures/roamers/monster-truck.rear.png",
     },
-    enabled: true,
+    enabled: false,
     startOffset: 0.5,
+    idleSpot: { x: 160, y: 200, facing: "front", flip: -1 },
+    joyrideRouteId: "dino-walkway",
   },
-  // 英雄救援隊（coming）：亮亮警車 + 消防車點點。enabled=false，待產圖後開。
+  // 英雄救援隊（coming）：enabled=false，待產圖後開。
   {
     id: "roam-liangliang",
     characterId: "liang-liang",
@@ -174,6 +214,8 @@ export const MAP_ROAMERS: Roamer[] = [
     speed: 27,
     src: "/adventures/roamers/liang-liang.png",
     startOffset: 0,
+    idleSpot: { x: 134, y: 190, facing: "front", flip: 1 },
+    joyrideRouteId: "rescue-walkway",
   },
   {
     id: "roam-diandian",
@@ -183,8 +225,15 @@ export const MAP_ROAMERS: Roamer[] = [
     speed: 23,
     src: "/adventures/roamers/dian-dian.png",
     startOffset: 0.55,
+    idleSpot: { x: 150, y: 200, facing: "front", flip: -1 },
+    joyrideRouteId: "rescue-walkway",
   },
 ];
+
+/** 有 idleSpot ＝ prod 預設定點展示（不巡邏）。 */
+export function roamerUsesIdleSpot(roamer: Roamer): boolean {
+  return Boolean(roamer.idleSpot);
+}
 
 /** 整島地標的深度遮擋設定（單張 tile 用同圖 clip-path 複製疊在 roamer 上方）。 */
 export type ZoneOccluder = {
