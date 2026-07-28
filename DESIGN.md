@@ -44,7 +44,7 @@ Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範
 
 ## 響應式斷點
 
-- viewport 只使用五層：`480px`（手機／小尺寸控制）、`640px`（內容欄與手機版型）、`768px`（平板雙欄）、`920px`（Landing 桌面版）、`980px`（全站膠囊導覽）。
+- viewport 只使用四層：`480px`（手機／小尺寸控制）、`640px`（內容欄與手機版型）、`768px`（平板雙欄）、`980px`（全站膠囊導覽＋Landing 桌面版）。內容欄最大寬（如家長頁 `min(920px, 100%)`）不屬 viewport 切版斷點。
 - 導覽內部依父容器寬度使用 `@container nav-inner (max-width: 300px)`；元件尺寸受父容器影響時優先用 container query，不新增任意 viewport breakpoint。
 - 新頁面先用 fluid `clamp()` 與現有 token；只有整體版型切換才使用上述斷點。
 
@@ -207,11 +207,11 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 Storyline 式**全螢幕分段捲動**：每段一張滿版黏土 hero（桌面 `segment-{id}.jpg` 16:9；行動 ≤768px `segment-{id}-portrait.jpg` 9:16），大圖主導 + 底部漸層遮罩 + 左下標題／副標／CTA。
 
 1. **SiteNavBar**（全站橘色頂欄 + 訂閱 CTA）
-   - **桌面（≥980px）**懸浮膠囊主列：全部故事／角色圖鑑／遊樂園／宇宙地圖／育兒專欄（Threads 外連）／**家長指南**（直連 `/for-parents`）。無「更多」下拉。主題切換與訂閱膠囊常駐。**成長主題（`/topic`）不佔桌面主列**（屬家長取向且與 /stories 篩選重疊），僅存在於行動抽屜「探索」組與視覺化的 `/topic` 頁。
-   - **行動（＜980px）**漢堡抽屜：單欄依 **探索**（故事／主題／遊樂園／繪本著色／宇宙地圖）→ **家長**（育兒專欄／家長指南）分組；含 `/stories?q=` 搜尋。繪本著色雖為 `/games` 子路徑，仍在探索組獨立列出（兒童動線不應只能從遊樂園內層進入）；active 判定採**最長匹配獨佔**，`/games/coloring-book` 不得讓「遊樂園」同時高亮。
+   - **桌面（≥980px）**懸浮膠囊主列：全部故事／角色圖鑑／遊樂園／宇宙地圖／育兒專欄（Threads 外連）／**家長指南**（直連 `/for-parents`）。無「更多」下拉。主題切換與訂閱膠囊常駐。**成長主題（`/topic`）不佔導覽**（屬家長取向且與 /stories 篩選重疊），頁面仍可直達。
+   - **行動（＜980px）**漢堡抽屜：單欄依 **探索**（故事／角色圖鑑／遊樂園／繪本著色／宇宙地圖）→ **家長**（育兒專欄／家長指南）分組；含 `/stories?q=` 搜尋。與桌面一致不列「主題分類」。繪本著色雖為 `/games` 子路徑，仍在探索組獨立列出（兒童動線不應只能從遊樂園內層進入）；active 判定採**最長匹配獨佔**，`/games/coloring-book` 不得讓「遊樂園」同時高亮。
    - 關於我們／聯絡我們在頁尾 meta（聯絡另有 ConnectHub Email icon）。
 2. 四段 **LandingSegment** 全螢幕面板（資料：`data/landing-segments.ts`）：車車故事／睡前數綿羊／捏黏土／衛教宣導
-3. **SegmentNav**（右側進度點，手機隱藏）＋ 每段往下箭頭錨點；document scroll-snap，reduced-motion 自動停用
+3. **SegmentNav**：桌面右側垂直進度點；**≤768px** 改為底部水平指示列（含 safe area）。每段往下箭點錨點於平板／手機隱藏（改由底列承擔）。document scroll-snap，reduced-motion 自動停用
 4. Segment 1 CTA → **`/stories`**（完整 Podcast 主頁）
 
 Hero 圖走 `images.edit` + `public/characters/` 定裝照參考圖，與單集插畫同流程以維持 on-model。

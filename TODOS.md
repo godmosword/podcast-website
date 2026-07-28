@@ -306,7 +306,7 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 
 ### VIS-DEBT-2　smoke 測試比設計決策舊　`eng · S · 無`　✅ `0ddcc26`
 
-`e2e/smoke.spec.ts` 已對齊 [DESIGN.md](./DESIGN.md) §Landing Hub：桌面膠囊主列四項（全部故事／遊樂園／宇宙地圖／育兒專欄）且無「主題分類」；390 開漢堡抽屜可見「主題分類」。
+`e2e/smoke.spec.ts` 已對齊 [DESIGN.md](./DESIGN.md) §Landing Hub：桌面膠囊與行動抽屜皆無「主題分類」（`/topic` 仍可直達）；390 開漢堡可見角色圖鑑／繪本著色。Landing 桌面 chrome 與導覽同斷點 ≥980px。
 
 ---
 

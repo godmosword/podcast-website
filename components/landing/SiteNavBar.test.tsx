@@ -62,7 +62,7 @@ describe("SiteNavBar", () => {
     ]) {
       expect(html).toContain(label);
     }
-    // 成長主題自桌面主列降級（仍在行動抽屜與 /topic 頁）
+    // 成長主題不佔導覽（桌面膠囊與行動抽屜皆無；頁面仍可直達 /topic）
     expect(html).not.toContain("主題分類");
     // 導覽內不再輸出 about／contact
     expect(html).not.toContain("指南首頁");
@@ -85,14 +85,15 @@ describe("SiteNavBar", () => {
     for (const label of [
       "全部故事",
       "角色圖鑑",
-      "主題分類",
       "遊樂園",
+      "繪本著色",
       "宇宙地圖",
       "育兒專欄",
       "家長指南",
     ]) {
       expect(view.getAllByText(label).length).toBeGreaterThan(0);
     }
+    expect(view.queryByText("主題分類")).toBeNull();
     expect(view.queryByText("關於我們")).toBeNull();
     expect(view.queryByText("聯絡我們")).toBeNull();
     expect(view.queryByText("指南首頁")).toBeNull();

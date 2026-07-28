@@ -35,11 +35,13 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
 test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
-  // 行動版維持漢堡選單；「主題分類」僅在抽屜，不在桌面膠囊
+  // 行動版漢堡選單；主題分類與桌面一致不進導覽（頁面仍可直達 /topic）
   await expect(page.getByRole("button", { name: "開啟選單" })).toBeVisible();
   await page.getByRole("button", { name: "開啟選單" }).click();
   const drawerNav = page.getByRole("navigation", { name: "網站選單" });
-  await expect(drawerNav.getByRole("link", { name: "主題分類" })).toBeVisible();
+  await expect(drawerNav.getByRole("link", { name: "主題分類" })).toHaveCount(0);
+  await expect(drawerNav.getByRole("link", { name: "角色圖鑑" })).toBeVisible();
+  await expect(drawerNav.getByRole("link", { name: "繪本著色" })).toBeVisible();
   const drawerParentGuide = drawerNav.getByRole("link", { name: "家長指南" });
   await expect(drawerParentGuide).toBeVisible();
   await expect(drawerParentGuide).toHaveAttribute("href", /\/for-parents/);

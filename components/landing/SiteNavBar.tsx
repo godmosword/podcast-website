@@ -16,7 +16,6 @@ import styles from "./SiteNavBar.module.css";
 type NavItemId =
   | "stories"
   | "characters"
-  | "topic"
   | "games"
   | "coloring"
   | "adventures"
@@ -31,8 +30,8 @@ type NavItem = {
 };
 
 /** 桌面主列連結順序。
- * 成長主題（`topic`）屬家長取向且與 /stories 篩選重疊，桌面不佔主膠囊；
- * 仍保留於行動抽屜「探索」組與 `/topic` 視覺化頁。 */
+ * 成長主題（`/topic`）屬家長取向且與 /stories 篩選重疊，導覽（桌面＋行動）都不佔位；
+ * 頁面仍可直達。繪本著色僅行動抽屜獨立列出（兒童動線）。 */
 const PRIMARY_ORDER: readonly NavItemId[] = [
   "stories",
   "characters",
@@ -55,8 +54,6 @@ const MOBILE_MENU_ROWS: readonly {
 }[] = [
   { id: "stories", emoji: "📖" },
   { id: "characters", emoji: "🚗" },
-  // 調色盤給著色本：它才是美術活動。主題分類屬家長取向（見 DESIGN.md），改用種子。
-  { id: "topic", emoji: "🌱" },
   { id: "games", emoji: "🎡" },
   // 著色本原本只能從遊樂園子頁進入；對不識字的兒童而言等於不存在。
   // 提到「探索」組與遊樂園並列（桌面主膠囊見 PRIMARY_ORDER）。
@@ -73,7 +70,6 @@ function navItems(): NavItem[] {
   const items: NavItem[] = [
     { id: "stories", label: "全部故事", href: "/stories" },
     { id: "characters", label: "角色圖鑑", href: "/characters" },
-    { id: "topic", label: "主題分類", href: "/topic" },
     { id: "games", label: "遊樂園", href: "/games" },
     { id: "coloring", label: "繪本著色", href: "/games/coloring-book" },
     { id: "adventures", label: "宇宙地圖", href: "/adventures" },

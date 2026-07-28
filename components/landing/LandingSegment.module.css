@@ -70,8 +70,8 @@
     );
 }
 
-/* 桌面滿版 hero：頂部極淡漸層，讓懸浮膠囊在淺色美術上仍有邊界感 */
-@media (min-width: 920px) {
+/* 桌面滿版 hero：頂部極淡漸層，讓懸浮膠囊在淺色美術上仍有邊界感（≥980 與導覽對齊） */
+@media (min-width: 980px) {
   .visual::after {
     content: "";
     position: absolute;

@@ -14,10 +14,11 @@
 }
 
 /* 桌面（1c 懸浮膠囊）：hero 滿版到視窗頂，膠囊真正浮在圖上。
+   與 SiteNavBar／`--nav-h` 同用 ≥980px，避免 920–979 出現「桌面 hero＋漢堡」錯位。
    document 捲動已鎖（globals.css html:has([data-landing-root])），
    navbar 不參與內層捲動；負 margin 讓內容滑到 z-index 40 的膠囊下。
    （負 margin 可能 collapse 到 .site-root，最終視覺等價：整頁上移 nav-h。） */
-@media (min-width: 920px) {
+@media (min-width: 980px) {
   .main {
     --landing-pane-h: 100svh;
     height: 100svh;
