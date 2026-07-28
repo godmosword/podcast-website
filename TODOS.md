@@ -412,8 +412,8 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 
 ### 待辦（本輪未完成）
 
-- **C2/C3 實際生圖**：`npm run generate:zone-night`（5 次影像呼叫）→ 人工審 contact sheet →
-  `--approve` → 逐島翻 `hasNightArt`。**卡在成本閘門與人工審圖，需另行下令**。
+- ~~**C2/C3 實際生圖**~~：已跑，**產出不符契約故不採用**（剪影 IoU 64–73%、沙岸消失、相機壓平）。
+  詳見上方「D4 生圖實測結果與再凍結」。夜間視覺維持 CSS 點燈；重開需換技術路線。
 - **`sea.png`／`sea-night.png` 無損壓縮**（3.0MB）：sharp 的 PNG 重編碼**並非逐像素無損**
   （實測 maxdiff 35），而環境無 `oxipng`／`zopflipng`／`optipng`。改動一張平鋪全圖的海會有
   可見風險，且該 PNG 只是 WebP（57KB／18KB）之外的 fallback 路徑，實務上近乎沒人走。
@@ -812,6 +812,24 @@ D0 → D2-A(smoke) → D1 → D13-剩餘 → D3 → D14 → D6 ∥ D12
 >   且 `ZoneNightLights` 的 CSS 點燈會自動回場），不需回滾程式碼。
 > - **管線**：`scripts/generate-zone-night-art.ts`（新增；`generate-map-art.ts` 只管 map 素材、不含 zone）。
 >   走 `--dry-run` 估量 → 生圖到 staging → 人工審 contact sheet（日／夜並排＋剪影 IoU）→ `--approve` → 翻 `hasNightArt`。
+
+> **D4 生圖實測結果與再凍結（2026-07-29）** — 管線可用，**但模型產出不符契約，未 `--approve`，public 未動。**
+>
+> | 檢查項 | 結果 |
+> |---|---|
+> | 剪影 IoU（crossfade 前提） | car-park 71.1%／dino 73.3%／rescue 68.3%／ocean 63.8%／**forest 94.4%**（門檻 90%） |
+> | 是否僅留白差異 | 否。日／夜 trim 後長寬比 **1.126 vs 1.313**；離線 trim 正規化僅 71.9%，強制拉伸才 84%（會變形） |
+> | 奶油沙岸 `#ead7ac`（§4） | **消失**，整條變深紫，島像被染色 |
+> | 3/4 高視角（§1） | **被壓平**，夜圖明顯更俯視，跨島一致性破功 |
+>
+> **踩到的坑（已修進管線，勿重蹈）**：`input_fidelity` 與 `background:"transparent"`
+> **只有 `gpt-image-1`／`gpt-image-1.5` 支援**，`gpt-image-2`（repo 預設）送了直接 400。
+> 首輪等於在預設 `input_fidelity: "low"` 下跑。改 1.5 + `high` 重測：
+> ocean 63.8→72.7%、rescue 68.3→72.1% —— 有進步但遠低於門檻。
+>
+> **結論**：壞的是三個 Art Bible 契約（剪影／沙岸／相機），不是單一參數，**不是靠調 prompt 能收斂的**。
+> 本輪成本共 7 次影像呼叫。重開時應**換技術路線**（區域遮罩編輯，或人工繪製夜圖），
+> 而不是繼續同一套 text-prompt roulette。夜間視覺暫由 `ZoneNightLights` 的 CSS 點燈承擔。
 
 > 分享鈕、平台排序、訂閱文案、viewport 縮放、sitemap 擴充等已上線，見 Completed；不再佔 Top 5 名額。
 ---
