@@ -91,43 +91,65 @@ function promptFor(spec: ZoneNightSpec): string {
   return `${CLAY_STYLE_PREFIX}${NIGHT_BASE} ${spec.scene} ${CLAY_NEGATIVE}`;
 }
 
+/**
+ * 模型能力差異（實測，2026-07）：
+ * - `gpt-image-1` / `gpt-image-1.5`：支援 `input_fidelity` 與 `background:"transparent"`。
+ * - `gpt-image-2`（本 repo 預設）：兩者皆**不支援**，送了直接 400。
+ *   故走「洋紅墊底 ＋ chroma-key」的舊路。
+ */
+function supportsEditExtras(model: string): boolean {
+  return /^gpt-image-1(\.\d+)?$/.test(model);
+}
+
 function requireKey(): void {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error("需要 OPENAI_API_KEY（.env.local）");
   }
 }
 
-/** 日圖去背後底下墊洋紅，讓模型看得到完整島形，回傳的背景也才好 chroma-key。 */
-async function dayRefOnMagenta(id: string): Promise<Buffer> {
-  const src = join(ZONE_DIR, `${id}@3x.png`);
-  const fallback = join(ZONE_DIR, `${id}.png`);
-  const path = existsSync(src) ? src : fallback;
+/**
+ * 日圖 reference。支援透明底的模型直接餵去背 RGBA；
+ * gpt-image-2 需要洋紅墊底，回傳的背景才 chroma-key 得掉。
+ */
+async function dayRef(id: string, extras: boolean): Promise<Buffer> {
+  const hi = join(ZONE_DIR, `${id}@3x.png`);
+  const lo = join(ZONE_DIR, `${id}.png`);
+  const path = existsSync(hi) ? hi : lo;
   if (!existsSync(path)) throw new Error(`缺少日圖 ${path}`);
-  return sharp(path)
-    .flatten({ background: { r: 255, g: 0, b: 255 } })
-    .png()
-    .toBuffer();
+  if (extras) return readFileSync(path);
+  return sharp(path).flatten({ background: { r: 255, g: 0, b: 255 } }).png().toBuffer();
 }
 
 async function generateNight(id: string, spec: ZoneNightSpec): Promise<Buffer> {
   requireKey();
   const { default: OpenAI, toFile } = await import("openai");
   const client = new OpenAI();
-  const ref = await toFile(await dayRefOnMagenta(id), `${id}.png`, {
+  const model = getImageModel();
+  const extras = supportsEditExtras(model);
+  const ref = await toFile(await dayRef(id, extras), `${id}.png`, {
     type: "image/png",
   });
   const res = await client.images.edit({
-    model: getImageModel(),
+    model,
     image: [ref],
     prompt: promptFor(spec),
     size: "1024x1024",
+    ...(extras
+      ? {
+          // 直接輸出透明底，省掉 chroma-key（夜圖紫羅蘭色調容易誤中洋紅閾值）。
+          background: "transparent" as const,
+          // 預設 "low" 會讓模型「重畫一座島」而非「幫同一座島打夜燈」。
+          input_fidelity: "high" as const,
+        }
+      : {}),
   });
   const b64 = res.data?.[0]?.b64_json;
   if (!b64) throw new Error(`圖像模型未回傳 ${id} 夜圖`);
-  return Buffer.from(b64, "base64");
+  const raw = Buffer.from(b64, "base64");
+  return extras ? raw : chromaKey(raw);
 }
 
-/** 洋紅 chroma-key 去背（與 generate-forest-zone-art.ts 同閾值，跨管線一致）。 */
+/** 洋紅 chroma-key 去背（gpt-image-2 路徑；閾值同 generate-forest-zone-art.ts）。 */
 async function chromaKey(input: Buffer): Promise<Buffer> {
   const { data, info } = await sharp(input)
     .ensureAlpha()
@@ -140,6 +162,22 @@ async function chromaKey(input: Buffer): Promise<Buffer> {
   return sharp(out, { raw: { width: info.width, height: info.height, channels: 4 } })
     .png()
     .toBuffer();
+}
+
+/**
+ * 透明底健檢：`background:"transparent"` 若沒生效會回傳實底，
+ * 那張圖貼到地圖上會是一個方塊。寧可在這裡吵，也不要靜靜產出壞資產。
+ */
+async function assertTransparentBackground(input: Buffer, id: string): Promise<void> {
+  const { data } = await sharp(input).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  let clear = 0;
+  for (let i = 3; i < data.length; i += 4) if (data[i]! < 16) clear += 1;
+  const ratio = clear / (data.length / 4);
+  if (ratio < 0.05) {
+    throw new Error(
+      `${id}：回傳圖僅 ${(ratio * 100).toFixed(1)}% 透明像素，背景疑似未去乾淨，中止以免產出方塊資產。`,
+    );
+  }
 }
 
 /**
@@ -244,10 +282,11 @@ function runDryRun(specs: readonly ZoneNightSpec[]): void {
 async function runGenerate(specs: readonly ZoneNightSpec[]): Promise<void> {
   mkdirSync(STAGING_DIR, { recursive: true });
   for (const spec of specs) {
-    console.log(`生圖 ${spec.id} 夜圖（reference: 日圖）…`);
-    const keyed = await chromaKey(await generateNight(spec.id, spec));
-    const iou = await silhouetteIoU(keyed, spec.id, spec.stage);
-    writeFileSync(join(STAGING_DIR, `${spec.id}.night.png`), keyed);
+    console.log(`生圖 ${spec.id} 夜圖（reference: 日圖，input_fidelity=high）…`);
+    const png = await generateNight(spec.id, spec);
+    await assertTransparentBackground(png, spec.id);
+    const iou = await silhouetteIoU(png, spec.id, spec.stage);
+    writeFileSync(join(STAGING_DIR, `${spec.id}.night.png`), png);
     const flag = iou < 0.9 ? "⚠ 剪影漂移，crossfade 會看起來像島在變形" : "✓";
     console.log(`  ${flag} 日夜剪影 IoU ${(iou * 100).toFixed(1)}%`);
   }
