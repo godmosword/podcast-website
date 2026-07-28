@@ -410,7 +410,7 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 
 ## 宇宙地圖佈局修正（2026-07-28）
 
-> Commit：（待回填）· CRITICAL-1 B／CRITICAL-2 B
+> Commit：`c0bc723`· CRITICAL-1 B／CRITICAL-2 B
 
 | 項目 | 說明 |
 |------|------|
