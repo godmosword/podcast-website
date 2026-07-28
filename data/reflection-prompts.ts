@@ -104,6 +104,11 @@ const REFLECTION_PROMPTS: Record<
     parentFollowUp:
       "陪孩子分辨「大家一起笑」和「嘲笑別人」；練習先想「如果被笑的人是我」再開口。",
   },
+  "ep-23": {
+    child: "小紅賽車第一次穿越大山。聽完這個故事，你心裡最先想到什麼？",
+    parentFollowUp:
+      "先接住孩子的感覺，再一起聊聊故事裡學到的一件小事，不必急著給標準答案。",
+  },
 };
 
 export function getReflectionPrompt(slug: string) {

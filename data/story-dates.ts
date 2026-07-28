@@ -26,6 +26,7 @@ export const storyModifiedDates: Record<string, string> = {
   "ep-20": "2026-07-17T08:44:40.173Z",
   "ep-21": "2026-07-22T14:19:03.679Z",
   "ep-22": "2026-07-24T10:48:09.771Z",
+  "ep-23": "2026-07-28T09:24:50.083Z",
 };
 
 export const STORY_MODIFIED_DATE_SOURCE: Record<string, string> = {
@@ -51,6 +52,7 @@ export const STORY_MODIFIED_DATE_SOURCE: Record<string, string> = {
   "ep-20": "aa3d8ea sync Apple RSS MVP",
   "ep-21": "37c2d54 sync Apple RSS MVP",
   "ep-22": "078fdd7 sync Apple RSS MVP",
+  "ep-23": "bee2e35 sync Apple RSS MVP",
 };
 
 export function storyDateModified(story: StoryDateInput): string {
