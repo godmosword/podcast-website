@@ -125,4 +125,12 @@ describe("data/universe（M0 單一資料來源）", () => {
     expect(dino.hotspots.some((h) => h.action.type === "story")).toBe(true);
     expect(dino.hotspots.some((h) => h.action.type === "locked")).toBe(true);
   });
+
+  it("每座島明確標記 3 個精選地標", () => {
+    for (const zone of universe.zones) {
+      const featured = zone.hotspots.filter((hotspot) => hotspot.featured);
+      expect(featured, `${zone.id} 精選地標數量`).toHaveLength(3);
+      expect(new Set(featured.map((hotspot) => hotspot.id)).size).toBe(3);
+    }
+  });
 });

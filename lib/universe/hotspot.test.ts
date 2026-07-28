@@ -2,11 +2,13 @@ import { describe, expect, it } from "vitest";
 import { getStory } from "@/data/content";
 import { universe, zoneById } from "@/data/universe";
 import {
+  getFeaturedHotspots,
   hotspotActionHref,
   hotspotById,
   hotspotDetailHref,
   hotspotPath,
   hotspotPrefetchHrefs,
+  sortHotspotsForDisplay,
   hotspotToStage,
   resolvedZoneById,
 } from "./hotspot";
@@ -67,22 +69,41 @@ describe("hotspot helpers（M2/M3）", () => {
     );
   });
 
+  it("精選地標與探索列排序不改動原始資料", () => {
+    const zone = zoneById("dino")!;
+    const featured = getFeaturedHotspots(zone.hotspots);
+    const ordered = sortHotspotsForDisplay(zone.hotspots);
+
+    expect(featured).toHaveLength(3);
+    expect(featured.every((hotspot) => hotspot.featured)).toBe(true);
+    expect(ordered.slice(0, 3).every((hotspot) => hotspot.featured)).toBe(true);
+    expect(ordered.map((hotspot) => hotspot.id)).toHaveLength(
+      zone.hotspots.length,
+    );
+    expect(zone.hotspots.map((hotspot) => hotspot.id)).toEqual(
+      expect.arrayContaining(ordered.map((hotspot) => hotspot.id)),
+    );
+  });
+
   it("action href 對齊型別", () => {
     const link = {
       id: "a",
       name: "A",
+      featured: false,
       pos: { x: 0.5, y: 0.5 },
       action: { type: "link" as const, href: "/stories" },
     };
     const story = {
       id: "b",
       name: "B",
+      featured: false,
       pos: { x: 0.5, y: 0.5 },
       action: { type: "story" as const, slug: "ep-1" },
     };
     const locked = {
       id: "c",
       name: "C",
+      featured: false,
       pos: { x: 0.5, y: 0.5 },
       action: { type: "locked" as const, hint: "等等" },
     };

@@ -12,7 +12,10 @@ import {
   trackUniverseWishSubmit,
   trackWishSubmitted,
 } from "@/lib/analytics";
-import { hotspotDetailHref } from "@/lib/universe/hotspot";
+import {
+  hotspotDetailHref,
+  sortHotspotsForDisplay,
+} from "@/lib/universe/hotspot";
 import type { ZoneStoriesBundle } from "@/lib/story-zone-query";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import ParentTrustStrip from "@/components/ParentTrustStrip";
@@ -97,6 +100,7 @@ export default function ZoneSheet({
   const parentPanelId = `${titleId}-parent`;
   const wishPanelId = `${titleId}-wish`;
   const isLocked = zone.status !== "open";
+  const displayHotspots = sortHotspotsForDisplay(hotspots);
 
   const overlayClass = [
     styles.overlay,
@@ -191,27 +195,37 @@ export default function ZoneSheet({
           </>
         ) : null}
 
-        {hotspots.length > 0 ? (
+        {displayHotspots.length > 0 ? (
           <nav className={styles.hotspots} aria-label={`${zone.name}探索點`}>
-            <h2 className={styles.hotspotsHeading}>探索點</h2>
+            <h2 className={styles.hotspotsHeading}>
+              探索這座島・共 {displayHotspots.length} 個地點
+            </h2>
             <ul className={styles.hotspotList}>
-              {hotspots.map((spot) => {
+              {displayHotspots.map((spot) => {
                 const href = hotspotDetailHref(zone.id, spot);
                 const action = spot.action;
                 const locked = action.type === "locked";
+                const icon =
+                  locked ? "·" : action.type === "story" ? "✦" : "↗";
+                const className = [
+                  locked ? styles.hotspotLocked : styles.hotspotLink,
+                  spot.featured ? styles.hotspotFeatured : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ");
                 return (
                   <li key={spot.id}>
                     <Link
-                      className={
-                        locked ? styles.hotspotLocked : styles.hotspotLink
-                      }
+                      className={className}
                       href={href}
                       prefetch
                       scroll={false}
+                      data-featured={spot.featured || undefined}
                     >
-                      {locked
-                        ? `${spot.name}（${action.hint}）`
-                        : spot.name}
+                      <span className={styles.hotspotIcon} aria-hidden="true">
+                        {icon}
+                      </span>
+                      <span className={styles.hotspotName}>{spot.name}</span>
                     </Link>
                   </li>
                 );

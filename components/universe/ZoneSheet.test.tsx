@@ -3,6 +3,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { zoneById } from "@/data/universe";
 import { ZONES } from "@/data/universe-zones";
 import { getCarParkLinks } from "@/lib/universe-map";
 import type { ZoneStoriesBundle } from "@/lib/story-zone-query";
@@ -137,5 +138,27 @@ describe("ZoneSheet", () => {
     expect(html).toContain('aria-expanded="false"');
     // 開放島無許願表單
     expect(html).not.toContain("想留一句話");
+  });
+
+  it("探索列保留全部地點，且精選地標優先排列", () => {
+    const zone = ZONES.find((item) => item.id === "dino")!;
+    const source = zoneById("dino")!;
+    const html = renderToStaticMarkup(
+      <ZoneSheet
+        zone={zone}
+        onClose={() => undefined}
+        hotspots={source.hotspots}
+      />,
+    );
+
+    expect(html).toContain("探索這座島・共 9 個地點");
+    for (const hotspot of source.hotspots) {
+      expect(html).toContain(hotspot.name);
+      expect(html).toContain(`/adventures/dino/${hotspot.id}`);
+    }
+    expect(html.indexOf("故事屋入口")).toBeLessThan(
+      html.indexOf("阿酷隧道"),
+    );
+    expect(html).toContain('data-featured="true"');
   });
 });

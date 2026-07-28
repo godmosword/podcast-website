@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { zoneById, type ZoneId } from "@/data/universe";
 import {
+  getFeaturedHotspots,
   hotspotDetailHref,
   hotspotPrefetchHrefs,
   hotspotToStage,
@@ -52,11 +53,13 @@ export default function HotspotLayer({
       data-paused={paused || undefined}
       aria-label={`${zone.name}探索點`}
     >
-      {zone.hotspots.map((hotspot) => {
+      {getFeaturedHotspots(zone.hotspots).map((hotspot) => {
         const pt = hotspotToStage(resolved, hotspot);
         const href = hotspotDetailHref(zoneId, hotspot);
         const locked = hotspot.action.type === "locked";
         const kind = locked ? "locked" : hotspot.action.type;
+        const icon =
+          kind === "story" ? "✦" : kind === "link" ? "↗" : "·";
         return (
           <Link
             key={hotspot.id}
@@ -72,13 +75,18 @@ export default function HotspotLayer({
             }
             data-hotspot-id={hotspot.id}
             data-kind={kind}
-            data-label="above"
+            data-featured="true"
             scroll={false}
             onPointerDown={(e) => e.stopPropagation()}
           >
-            {/* 標籤在上；預設收起，互動時才展開。 */}
-            <span className={styles.label}>{hotspot.name}</span>
-            <span className={styles.dot} aria-hidden="true" />
+            <span className={styles.sign} aria-hidden="true">
+              <span className={styles.signPlate}>
+                <span className={styles.signIcon}>{icon}</span>
+                <span className={styles.label}>{hotspot.name}</span>
+              </span>
+              <span className={styles.signStem} />
+              <span className={styles.signBase} />
+            </span>
           </Link>
         );
       })}

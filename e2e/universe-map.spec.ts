@@ -193,7 +193,7 @@ test.describe("車車宇宙樂園地圖 UX", () => {
   test("手機 fit：五座島 button 皆在首屏可視區", async ({ page }) => {
     await openMap(page, "light", 375, 812);
     const islands = [
-      page.getByRole("button", { name: /車車樂園/ }),
+      page.locator('button[data-zone="car-park"]'),
       page.getByRole("button", { name: /恐龍島/ }),
       page.getByRole("button", { name: /英雄救援隊/ }),
       page.getByRole("button", { name: /未來夢想島/ }),
@@ -241,7 +241,7 @@ test.describe("車車宇宙樂園地圖 UX", () => {
 
   test("開放車車樂園一次點擊即飛抵並顯示探索點", async ({ page }) => {
     await openMap(page, "light");
-    const carPark = page.getByRole("button", { name: /車車樂園/ });
+    const carPark = page.locator('button[data-zone="car-park"]');
 
     await carPark.click();
     await expect
@@ -259,7 +259,7 @@ test.describe("車車宇宙樂園地圖 UX", () => {
   test("點島後島真的置中（焦點是島圖中心，不是沙岸錨點）", async ({ page }) => {
     await openMap(page, "light");
     const viewport = page.getByRole("application", { name: /車車樂園互動地圖/ });
-    const carPark = page.getByRole("button", { name: /車車樂園/ });
+    const carPark = page.locator('button[data-zone="car-park"]');
 
     await carPark.click();
     await expect
@@ -282,7 +282,7 @@ test.describe("車車宇宙樂園地圖 UX", () => {
 
   test("再點一次同一座島＝回樂園（縮回島群全景）", async ({ page }) => {
     await openMap(page, "light");
-    const carPark = page.getByRole("button", { name: /車車樂園/ });
+    const carPark = page.locator('button[data-zone="car-park"]');
 
     await carPark.click();
     await expect
@@ -334,7 +334,7 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     const hint = page.getByRole("status");
     await expect(hint).toContainText("點一座島飛過去，再點探索點");
 
-    await page.getByRole("button", { name: /車車樂園/ }).click();
+    await page.locator('button[data-zone="car-park"]').click();
     await expect(hint).toHaveCount(0);
   });
 
@@ -374,7 +374,7 @@ test.describe("車車宇宙樂園地圖 UX", () => {
       .toBeLessThan(1.4);
     // 而且車車樂園真的回到可視區（不只縮小，還要回中）
     await expect(
-      page.getByRole("button", { name: /車車樂園/ }),
+      page.locator('button[data-zone="car-park"]'),
     ).toBeInViewport();
   });
 
@@ -491,7 +491,7 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await openMap(page, "light", 375, 812);
 
-    await page.getByRole("button", { name: /車車樂園/ }).click();
+    await page.locator('button[data-zone="car-park"]').click();
     await expect(page).toHaveURL(/\/adventures\/car-park$/);
     await expect(page.locator("[data-hotspot-id]").first()).toBeVisible({
       timeout: 5_000,

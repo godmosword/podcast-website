@@ -34,6 +34,8 @@ export type ZoneStatus = z.infer<typeof zoneStatusSchema>;
 export const hotspotSchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/),
   name: z.string(),
+  /** 島圖上優先呈現的 3 個精選地標；完整清單仍在島嶼 sheet。 */
+  featured: z.boolean().default(false),
   pos: z.object({
     x: z.number().min(0).max(1),
     y: z.number().min(0).max(1),
@@ -179,18 +181,21 @@ const raw = {
         {
           id: "ferris-wheel",
           name: "摩天輪",
+          featured: true,
           pos: { x: 0.5, y: 0.28 },
           action: { type: "story", slug: "ep-11" },
         },
         {
           id: "story-gate",
           name: "全部故事",
+          featured: true,
           pos: { x: 0.28, y: 0.55 },
           action: { type: "link", href: "/stories" },
         },
         {
           id: "bedtime-nook",
           name: "睡前小窩",
+          featured: true,
           pos: { x: 0.72, y: 0.48 },
           action: { type: "link", href: "/topic/睡前" },
         },
@@ -243,18 +248,21 @@ const raw = {
         {
           id: "story-house",
           name: "故事屋入口",
+          featured: true,
           pos: { x: 0.3, y: 0.72 },
           action: { type: "link", href: "/stories" },
         },
         {
           id: "joke-plaza",
           name: "笑話廣場",
+          featured: true,
           pos: { x: 0.5, y: 0.55 },
           action: { type: "story", slug: "ep-22" },
         },
         {
           id: "brush-corner",
           name: "刷牙角落",
+          featured: true,
           pos: { x: 0.28, y: 0.42 },
           action: { type: "story", slug: "ep-9" },
         },
@@ -319,18 +327,21 @@ const raw = {
         {
           id: "police-bus",
           name: "警車巴士站",
+          featured: true,
           pos: { x: 0.35, y: 0.45 },
           action: { type: "story", slug: "ep-12" },
         },
         {
           id: "twin-fire",
           name: "雙子消防局",
+          featured: true,
           pos: { x: 0.65, y: 0.4 },
           action: { type: "story", slug: "ep-14" },
         },
         {
           id: "ambulance-bay",
           name: "安安救護站",
+          featured: true,
           pos: { x: 0.48, y: 0.62 },
           action: { type: "story", slug: "ep-6" },
         },
@@ -376,18 +387,21 @@ const raw = {
         {
           id: "wave-park",
           name: "水上樂園門口",
+          featured: true,
           pos: { x: 0.4, y: 0.55 },
           action: { type: "story", slug: "ep-16" },
         },
         {
           id: "drift-river",
           name: "漂漂河",
+          featured: true,
           pos: { x: 0.62, y: 0.42 },
           action: { type: "story", slug: "ep-17" },
         },
         {
           id: "goodbye-pier",
           name: "再見碼頭",
+          featured: true,
           pos: { x: 0.55, y: 0.7 },
           action: { type: "story", slug: "ep-18" },
         },
@@ -430,18 +444,21 @@ const raw = {
         {
           id: "dong-dong-dig",
           name: "東東工地",
+          featured: true,
           pos: { x: 0.45, y: 0.55 },
           action: { type: "story", slug: "ep-5" },
         },
         {
           id: "treehouse",
           name: "樹屋",
+          featured: true,
           pos: { x: 0.62, y: 0.35 },
           action: { type: "locked", hint: "樹屋還在長高，蓋好再上來玩！" },
         },
         {
           id: "forest-trail",
           name: "森林步道",
+          featured: true,
           pos: { x: 0.3, y: 0.4 },
           action: {
             type: "locked",

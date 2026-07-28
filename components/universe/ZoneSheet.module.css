@@ -179,13 +179,14 @@
 }
 
 .hotspots {
-  margin: 0 0 0.85rem;
+  margin: 0 0 0.9rem;
 }
 
 .hotspotsHeading {
-  margin: 0 0 0.4rem;
-  font-size: 0.95rem;
+  margin: 0 0 0.5rem;
+  font-size: 0.92rem;
   font-weight: 800;
+  letter-spacing: 0.02em;
 }
 
 .hotspotList {
@@ -193,24 +194,29 @@
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 0.4rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
 }
 
 .hotspotLink,
 .hotspotLocked {
   display: flex;
   align-items: center;
+  min-width: 0;
   min-height: 44px;
-  padding: 0.45rem 0.7rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.95rem;
+  gap: 0.42rem;
+  padding: 0.42rem 0.55rem;
+  border: 1.5px solid transparent;
+  border-radius: 12px;
+  font-size: 0.88rem;
   font-weight: 700;
   text-decoration: none;
 }
 
 .hotspotLink {
   color: var(--ink);
-  background: color-mix(in srgb, var(--landing-brand) 12%, var(--card));
+  background: color-mix(in srgb, var(--landing-brand) 9%, var(--card));
+  border-color: color-mix(in srgb, var(--landing-brand) 18%, var(--line));
 }
 
 .hotspotLink:focus-visible,
@@ -221,7 +227,35 @@
 
 .hotspotLocked {
   color: color-mix(in srgb, var(--ink) 65%, transparent);
-  background: color-mix(in srgb, var(--ink) 5%, var(--card));
+  background: color-mix(in srgb, var(--ink) 4%, var(--card));
+  border-color: color-mix(in srgb, var(--ink) 10%, var(--line));
+}
+
+.hotspotFeatured {
+  color: #704817;
+  background: linear-gradient(180deg, #fff4d6, #f4dc9d);
+  border-color: #e2b565;
+  box-shadow: 0 2px 0 rgba(170, 117, 47, 0.18);
+}
+
+.hotspotIcon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  font-size: 0.9rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.hotspotName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .homeBtn {

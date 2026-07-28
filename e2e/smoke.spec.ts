@@ -136,9 +136,9 @@ test("車車宇宙樂園地圖 smoke", async ({ page }) => {
     .toBe("/adventures");
 
   await expect(
-    page.getByRole("button", { name: /車車樂園/ }),
+    page.locator('button[data-zone="car-park"]'),
   ).toBeVisible();
-  await page.getByRole("button", { name: /車車樂園/ }).click();
+  await page.locator('button[data-zone="car-park"]').click();
   await expect(page).toHaveURL(/\/adventures\/car-park$/);
   await expect(page.locator("[data-hotspot-id]").first()).toBeVisible({
     timeout: 5_000,

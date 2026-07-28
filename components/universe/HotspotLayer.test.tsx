@@ -44,13 +44,11 @@ describe("HotspotLayer", () => {
     expect(screen.getByLabelText("打開故事屋入口").getAttribute("href")).toBe(
       "/adventures/dino/story-house",
     );
-    expect(
-      screen.getByLabelText("恐龍巢穴（尚未開放）").getAttribute("href"),
-    ).toBe("/adventures/dino/dino-nest");
     expect(prefetch).toHaveBeenCalled();
     expect(prefetch.mock.calls.flat()).toContain(
       "/adventures/dino/story-house",
     );
+    expect(screen.queryByLabelText("恐龍巢穴（尚未開放）")).toBeNull();
   });
 
   it("其他島（海洋）也渲染 M3 熱點", () => {
@@ -58,7 +56,7 @@ describe("HotspotLayer", () => {
     expect(
       screen.getByLabelText("打開水上樂園門口").getAttribute("href"),
     ).toBe("/adventures/ocean/wave-park");
-    expect(screen.getByLabelText("夢想碼頭（尚未開放）")).toBeTruthy();
+    expect(screen.queryByLabelText("夢想碼頭（尚未開放）")).toBeNull();
   });
 
   it("探索點層走 hotspot band，高於島名木牌", () => {
@@ -72,19 +70,21 @@ describe("HotspotLayer", () => {
     );
   });
 
-  it("標籤一律在圓點上方（DOM 順序 label → dot）", () => {
+  it("精選點渲染為常駐地標牌與接地標記", () => {
     render(<HotspotLayer zoneId="dino" />);
     const pin = screen.getByLabelText("打開故事屋入口");
-    expect(pin.getAttribute("data-label")).toBe("above");
-    const children = [...pin.children] as HTMLElement[];
-    expect(children[0]?.textContent).toBe("故事屋入口");
-    expect(children[1]?.getAttribute("aria-hidden")).toBe("true");
+    expect(pin.getAttribute("data-featured")).toBe("true");
+    expect(pin.querySelector('[aria-hidden="true"]')?.textContent).toContain(
+      "故事屋入口",
+    );
+    expect(pin.querySelector('[class*="signStem"]')).toBeTruthy();
+    expect(pin.querySelector('[class*="signBase"]')).toBeTruthy();
   });
 
-  it("探索點預設安靜；paused 時層標記 data-paused", () => {
+  it("探索點只呈現精選三點；paused 時層標記 data-paused", () => {
     const { container, rerender } = render(<HotspotLayer zoneId="dino" />);
-    const first = screen.getByLabelText("打開故事屋入口");
-    expect(first.style.getPropertyValue("--bubble-delay")).toBe("");
+    expect(container.querySelectorAll('[data-featured="true"]')).toHaveLength(3);
+    expect(screen.queryByLabelText("打開阿酷隧道")).toBeNull();
 
     rerender(<HotspotLayer zoneId="dino" paused />);
     expect(
@@ -99,13 +99,12 @@ describe("HotspotLayer.module.css 視覺契約", () => {
     "utf8",
   );
 
-  it("預設隱藏標籤，互動時顯名，並支援 reduced-motion", () => {
-    expect(css).not.toMatch(/hotspot-bubble-rise/);
-    expect(css).not.toMatch(/hotspot-dot-float/);
-    expect(css).not.toMatch(/hotspot-glow-breathe/);
-    expect(css).toMatch(/opacity:\s*0/);
-    expect(css).toMatch(/\.pin:hover \.label/);
-    expect(css).toMatch(/\.pin:focus-visible \.label/);
+  it("地標牌包含牌面／旗桿／底座，並支援 reduced-motion", () => {
+    expect(css).toMatch(/\.signPlate/);
+    expect(css).toMatch(/\.signStem/);
+    expect(css).toMatch(/\.signBase/);
+    expect(css).toMatch(/\.pin\[data-kind="story"\]/);
+    expect(css).toMatch(/\.pin\[data-kind="link"\]/);
     expect(css).toMatch(/prefers-reduced-motion:\s*reduce/);
   });
 
@@ -118,8 +117,10 @@ describe("HotspotLayer.module.css 視覺契約", () => {
     expect(screen.getByLabelText("打開笑話廣場").getAttribute("data-kind")).toBe(
       "story",
     );
-    expect(
-      screen.getByLabelText("恐龍巢穴（尚未開放）").getAttribute("data-kind"),
-    ).toBe("locked");
+    cleanup();
+    render(<HotspotLayer zoneId="forest" />);
+    expect(screen.getByLabelText("樹屋（尚未開放）").getAttribute("data-kind")).toBe(
+      "locked",
+    );
   });
 });

@@ -28,6 +28,22 @@ export function hotspotById(
   return { zone, hotspot };
 }
 
+/** 島圖上要呈現的精選地標；資料順序不影響編輯選擇。 */
+export function getFeaturedHotspots(
+  hotspots: readonly Hotspot[],
+): Hotspot[] {
+  return hotspots.filter((hotspot) => hotspot.featured);
+}
+
+/** 島嶼 sheet 的探索列排序：精選先列出，其餘維持資料順序。 */
+export function sortHotspotsForDisplay(
+  hotspots: readonly Hotspot[],
+): Hotspot[] {
+  return [...hotspots].sort(
+    (a, b) => Number(b.featured) - Number(a.featured),
+  );
+}
+
 /** 熱點動作的最終導向（供 Link／prefetch）；locked 仍指向自身 modal 路徑。 */
 export function hotspotActionHref(
   zoneId: string,
