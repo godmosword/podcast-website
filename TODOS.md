@@ -45,6 +45,7 @@
 - [x] LOD 純函式＋資料 idleSpot／每島一台招牌  `4df55fc` `748e760`
 - [x] useRoamerSim idle／joyride／crossing  `0206042`
 - [x] 層接 LOD＋關巡邏＋稀有跨島  `ddeed40`
+- [x] Art Bible §12.8／TODOS 對齊  `8ce39f6`
 
 ### 本輪已完成（2026-07-27）
 
