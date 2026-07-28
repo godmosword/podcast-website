@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, type RefObject } from "react";
 import type { Roamer, RoamerDir, RoamerRoute } from "@/data/universe-roamers";
-import { getRoutePathD } from "@/data/universe-roamers";
+import { getRoutePathD, roamerUsesIdleSpot } from "@/data/universe-roamers";
 import { mapDepthZ } from "@/lib/universe-depth";
 
 export type RouteMeta = {
@@ -8,6 +8,9 @@ export type RouteMeta = {
   length: number;
   pingpong: boolean;
 };
+
+/** idle＝定點；joyride／crossing＝path 移動；path＝無 idleSpot 的舊行為／dev */
+export type RoamerDrive = "idle" | "joyride" | "crossing" | "path";
 
 export type RoamerSim = {
   roamer: Roamer;
@@ -22,6 +25,9 @@ export type RoamerSim = {
   angle: number;
   bankDeg: number;
   pausedUntil: number;
+  drive: RoamerDrive;
+  /** joyride 結束時刻（performance.now）。 */
+  driveUntil: number;
 };
 
 /** heading 取樣前瞻距離（px）：比動畫位移大，讓朝向穩定。 */
@@ -40,6 +46,8 @@ const BANK_SMOOTH = 0.15;
 /** 島內 bob 上下浮動。map 層關閉。 */
 const BOB_AMP = 2.2;
 const BOB_FREQ = 0.005;
+/** 點擊短兜風時長。 */
+export const JOYRIDE_MS = 2600;
 
 function clamp(v: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, v));
@@ -91,10 +99,33 @@ export type RoamerFrame = {
   shadowOpacity: number;
   /** 依 groundY 的深度排序值（與遮擋層 baseline 比較）。 */
   z: number;
+  idle: boolean;
 };
 
 /** tile＝島內近景（bob／bank）；map＝全圖遠距（關 bob／bank，少搶戲）。 */
 export type RoamerMotionSpace = "tile" | "map";
+
+export function computeIdleFrame(sim: RoamerSim, height: number): RoamerFrame {
+  const spot = sim.roamer.idleSpot;
+  if (!spot) {
+    throw new Error(`roamer ${sim.roamer.id} 缺少 idleSpot`);
+  }
+  const depthScale =
+    DEPTH_MIN + (DEPTH_MAX - DEPTH_MIN) * clamp(spot.y / height, 0, 1);
+  return {
+    groundX: spot.x,
+    groundY: spot.y,
+    flip: spot.flip ?? 1,
+    dir: spot.facing ?? "front",
+    bobPx: 0,
+    bankDeg: 0,
+    depthScale,
+    shadowScale: depthScale,
+    shadowOpacity: 0.82,
+    z: Math.round(spot.y),
+    idle: true,
+  };
+}
 
 export function computeFrame(
   sim: RoamerSim,
@@ -145,6 +176,7 @@ export function computeFrame(
     shadowScale: depthScale * (1 - hop * 0.05),
     shadowOpacity: 0.82 - hop * 0.04,
     z: Math.round(P.y),
+    idle: false,
   };
 }
 
@@ -168,6 +200,22 @@ export function advanceDistance(sim: RoamerSim, dtMs: number, now: number): void
   sim.distance = dist;
 }
 
+/** 單程前進；抵達終點回 true（用於 rareCrossing）。 */
+export function advanceDistanceOneShot(
+  sim: RoamerSim,
+  dtMs: number,
+  now: number,
+): boolean {
+  if (now < sim.pausedUntil) return false;
+  const dist = sim.distance + sim.roamer.speed * (dtMs / 1000);
+  if (dist >= sim.route.length) {
+    sim.distance = sim.route.length;
+    return true;
+  }
+  sim.distance = dist;
+  return false;
+}
+
 /** 每 roamer 的 DOM 節點快取（effect 建立一次），避免每幀 querySelector。 */
 type RoamerNodes = {
   node: HTMLElement;
@@ -175,6 +223,7 @@ type RoamerNodes = {
   shadow: HTMLElement | null;
   lastZ: number | null;
   lastDir: RoamerDir | null;
+  lastIdle: boolean | null;
 };
 
 function buildNodeMap(layer: HTMLElement): Map<string, RoamerNodes> {
@@ -188,6 +237,7 @@ function buildNodeMap(layer: HTMLElement): Map<string, RoamerNodes> {
       shadow: node.querySelector<HTMLElement>("[data-roamer-shadow]"),
       lastZ: null,
       lastDir: null,
+      lastIdle: null,
     });
   }
   return map;
@@ -200,6 +250,10 @@ function applyFrame(nodes: RoamerNodes, frame: RoamerFrame): void {
   if (nodes.lastZ !== frame.z) {
     nodes.node.style.zIndex = String(frame.z);
     nodes.lastZ = frame.z;
+  }
+  if (nodes.lastIdle !== frame.idle) {
+    nodes.node.dataset.idle = frame.idle ? "true" : "false";
+    nodes.lastIdle = frame.idle;
   }
 
   if (nodes.body) {
@@ -227,6 +281,10 @@ type UseRoamerSimOptions = {
   paused: boolean;
 };
 
+function initialDrive(roamer: Roamer): RoamerDrive {
+  return roamerUsesIdleSpot(roamer) ? "idle" : "path";
+}
+
 /** 依座標空間計算 frame（map 層 z 改用全圖深度）並套用到快取節點。 */
 function applySim(
   nodes: RoamerNodes,
@@ -236,11 +294,26 @@ function applySim(
   now: number,
 ): void {
   const height = space.kind === "tile" ? space.tileH : space.stageH;
-  const frame = computeFrame(sim, height, dtMs, now, space.kind);
+  const frame =
+    sim.drive === "idle" && sim.roamer.idleSpot
+      ? computeIdleFrame(sim, height)
+      : computeFrame(sim, height, dtMs, now, space.kind);
   applyFrame(
     nodes,
     space.kind === "map" ? { ...frame, z: mapDepthZ(frame.groundY, "roamer") } : frame,
   );
+}
+
+function finishDriveToIdle(sim: RoamerSim): void {
+  sim.drive = "idle";
+  sim.driveUntil = 0;
+  sim.distance = 0;
+  sim.direction = 1;
+  sim.bankDeg = 0;
+  if (sim.roamer.idleSpot) {
+    sim.flip = sim.roamer.idleSpot.flip ?? 1;
+    sim.dir = sim.roamer.idleSpot.facing ?? "front";
+  }
 }
 
 export function useRoamerSim({
@@ -256,6 +329,8 @@ export function useRoamerSim({
   const nodesRef = useRef<Map<string, RoamerNodes>>(new Map());
   const rafRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number | null>(null);
+  const reducedRef = useRef(reduced);
+  reducedRef.current = reduced;
 
   useEffect(() => {
     if (roamers.length === 0) return;
@@ -264,17 +339,20 @@ export function useRoamerSim({
     simsRef.current = roamers.map((roamer, i) => {
       const route = routeMapRef.current!.get(roamer.routeId);
       if (!route) throw new Error(`roamer ${roamer.id} 缺少 route ${roamer.routeId}`);
+      const drive = initialDrive(roamer);
       return {
         roamer,
-        distance: (roamer.startOffset ?? 0) * route.length,
+        distance: drive === "idle" ? 0 : (roamer.startOffset ?? 0) * route.length,
         direction: 1 as const,
         route,
         phase: i * 1.7,
-        flip: 1 as const,
-        dir: "front" as RoamerDir,
+        flip: (roamer.idleSpot?.flip ?? 1) as 1 | -1,
+        dir: (roamer.idleSpot?.facing ?? "front") as RoamerDir,
         angle: 0,
         bankDeg: 0,
         pausedUntil: 0,
+        drive,
+        driveUntil: 0,
       };
     });
 
@@ -290,7 +368,19 @@ export function useRoamerSim({
   }, [roamers, routes, space, layerRef]);
 
   useEffect(() => {
-    if (roamers.length === 0 || reduced) return;
+    if (roamers.length === 0 || reduced) {
+      // reduced：仍套一次 idle／靜態位置，但不開 rAF。
+      if (roamers.length > 0 && layerRef.current) {
+        nodesRef.current = buildNodeMap(layerRef.current);
+        const now = performance.now();
+        for (const sim of simsRef.current) {
+          if (sim.roamer.idleSpot) finishDriveToIdle(sim);
+          const nodes = nodesRef.current.get(sim.roamer.id);
+          if (nodes) applySim(nodes, sim, space, 16, now);
+        }
+      }
+      return;
+    }
 
     const tick = (now: number) => {
       if (!paused) {
@@ -300,7 +390,15 @@ export function useRoamerSim({
 
         if (dt > 0 && layerRef.current) {
           for (const sim of simsRef.current) {
-            advanceDistance(sim, dt, now);
+            if (sim.drive === "joyride" && now >= sim.driveUntil) {
+              finishDriveToIdle(sim);
+            } else if (sim.drive === "crossing") {
+              if (advanceDistanceOneShot(sim, dt, now)) {
+                finishDriveToIdle(sim);
+              }
+            } else if (sim.drive === "path" || sim.drive === "joyride") {
+              advanceDistance(sim, dt, now);
+            }
 
             const nodes = nodesRef.current.get(sim.roamer.id);
             if (nodes) applySim(nodes, sim, space, dt, now);
@@ -330,5 +428,51 @@ export function useRoamerSim({
     }
   }, []);
 
-  return { pauseRoamer };
+  const startJoyride = useCallback((id: string) => {
+    if (reducedRef.current) return;
+    const now = performance.now();
+    const routesMap = routeMapRef.current;
+    if (!routesMap) return;
+    for (const sim of simsRef.current) {
+      if (sim.roamer.id !== id) continue;
+      const routeId = sim.roamer.joyrideRouteId ?? sim.roamer.routeId;
+      const route = routesMap.get(routeId);
+      if (!route) return;
+      sim.route = route;
+      sim.distance = (sim.roamer.startOffset ?? 0) * route.length;
+      sim.direction = 1;
+      sim.drive = "joyride";
+      sim.driveUntil = now + JOYRIDE_MS;
+    }
+  }, []);
+
+  const startCrossing = useCallback((id: string) => {
+    if (reducedRef.current) return;
+    const routesMap = routeMapRef.current;
+    if (!routesMap) return;
+    for (const sim of simsRef.current) {
+      if (sim.roamer.id !== id) continue;
+      if (sim.drive !== "idle") return;
+      const routeId = sim.roamer.crossingRouteId;
+      if (!routeId) return;
+      const route = routesMap.get(routeId);
+      if (!route) return;
+      // 單程：關閉 pingpong，走到終點回 idle。
+      sim.route = { ...route, pingpong: false };
+      sim.distance = 0;
+      sim.direction = 1;
+      sim.drive = "crossing";
+      sim.driveUntil = 0;
+    }
+  }, []);
+
+  const isCrossing = useCallback((id: string): boolean => {
+    return simsRef.current.some((s) => s.roamer.id === id && s.drive === "crossing");
+  }, []);
+
+  const anyCrossing = useCallback((): boolean => {
+    return simsRef.current.some((s) => s.drive === "crossing");
+  }, []);
+
+  return { pauseRoamer, startJoyride, startCrossing, isCrossing, anyCrossing };
 }

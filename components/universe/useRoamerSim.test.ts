@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import { MAP_STAGE } from "@/data/universe-zones";
 import {
   advanceDistance,
+  advanceDistanceOneShot,
   computeFrame,
+  computeIdleFrame,
   pickDir,
   pickFlip,
   type RoamerSim,
@@ -62,8 +64,29 @@ function makeSim(distance: number, bankDeg = 0): RoamerSim {
     angle: 0,
     bankDeg,
     pausedUntil: 0,
+    drive: "path",
+    driveUntil: 0,
   };
 }
+
+describe("computeIdleFrame", () => {
+  it("用 idleSpot 定點，不取 path，無 bob／bank", () => {
+    const sim = makeSim(200);
+    sim.drive = "idle";
+    sim.roamer = {
+      ...sim.roamer,
+      idleSpot: { x: 168, y: 230, facing: "front", flip: -1 },
+    };
+    const frame = computeIdleFrame(sim, 325);
+    expect(frame.groundX).toBe(168);
+    expect(frame.groundY).toBe(230);
+    expect(frame.dir).toBe("front");
+    expect(frame.flip).toBe(-1);
+    expect(frame.bobPx).toBe(0);
+    expect(frame.bankDeg).toBe(0);
+    expect(frame.z).toBe(230);
+  });
+});
 
 describe("computeFrame（map 層 2.5D frame）", () => {
   it("computes direction, shadow and depth scale in stage coordinates", () => {
@@ -115,6 +138,8 @@ describe("advanceDistance", () => {
       angle: 0,
       bankDeg: 0,
       pausedUntil: 0,
+      drive: "path",
+      driveUntil: 0,
     };
   }
 
@@ -136,5 +161,12 @@ describe("advanceDistance", () => {
     sim.pausedUntil = 2000;
     advanceDistance(sim, 1000, 1000);
     expect(sim.distance).toBe(95);
+  });
+
+  it("oneShot 到終點回 true 且不 wrap", () => {
+    const sim = simFor({ length: 100, pingpong: false });
+    sim.distance = 95;
+    expect(advanceDistanceOneShot(sim, 1000, 0)).toBe(true);
+    expect(sim.distance).toBe(100);
   });
 });

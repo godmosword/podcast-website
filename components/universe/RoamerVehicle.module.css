@@ -74,6 +74,11 @@
   transform-origin: 50% 92%;
 }
 
+/* idle 微晃掛在 img（不與 engine 寫的 body transform 互搶）；打招呼時改 bounce */
+.roamer[data-idle="true"]:not([data-greet]) .img {
+  animation: roamerIdleBob 2.6s ease-in-out infinite;
+}
+
 .body[data-dir="rear"] .imgFront {
   opacity: 0;
 }
@@ -97,6 +102,10 @@
   .roamer[data-greet] .img {
     animation: none;
   }
+
+  .roamer[data-idle="true"] .img {
+    animation: none;
+  }
 }
 
 @keyframes roamerGreetBounce {
@@ -111,5 +120,15 @@
   }
   100% {
     transform: scale(1, 1);
+  }
+}
+
+@keyframes roamerIdleBob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
   }
 }
