@@ -9,35 +9,40 @@ type Props = {
   paused: boolean;
 };
 
-/** 淺色黏土棧道（開放／未開放島共用；虛線改實橋但更淡）。 */
-function BridgePlanks({ d, muted }: { d: string; muted: boolean }) {
-  const faceOpacity = muted ? 0.55 : 0.78;
-  const baseOpacity = muted ? 0.28 : 0.38;
-  const seamOpacity = muted ? 0.35 : 0.45;
+/**
+ * 黏土棧道：奶油外暈＋深木底＋淺木面＋板縫節奏。
+ * muted＝連到 coming/planned 島時略淡，仍為實橋（非虛線）。
+ */
+function ClayBridge({ d, muted }: { d: string; muted: boolean }) {
+  const glowOpacity = muted ? 0.28 : 0.48;
+  const baseOpacity = muted ? 0.42 : 0.62;
+  const faceOpacity = muted ? 0.7 : 0.95;
+  const seamOpacity = muted ? 0.4 : 0.65;
+  const railOpacity = muted ? 0.35 : 0.55;
   return (
     <>
       <path
         d={d}
         fill="none"
-        stroke="#f3e6c8"
-        strokeWidth="26"
+        stroke="#ffe9b3"
+        strokeWidth="30"
         strokeLinecap="round"
         className={styles.bridgeGlow}
-        opacity={muted ? 0.25 : 0.4}
+        opacity={glowOpacity}
       />
       <path
         d={d}
         fill="none"
-        stroke="#c4a574"
-        strokeWidth="14"
+        stroke="#8a6438"
+        strokeWidth="16"
         strokeLinecap="round"
         opacity={baseOpacity}
       />
       <path
         d={d}
         fill="none"
-        stroke="#e8d4a8"
-        strokeWidth="10"
+        stroke="#e8c890"
+        strokeWidth="12"
         strokeLinecap="round"
         className={styles.bridgePlank}
         opacity={faceOpacity}
@@ -45,11 +50,21 @@ function BridgePlanks({ d, muted }: { d: string; muted: boolean }) {
       <path
         d={d}
         fill="none"
-        stroke="#d4bc8a"
-        strokeWidth="10"
+        stroke="#c8a26e"
+        strokeWidth="12"
         strokeLinecap="butt"
         strokeDasharray="3 11"
         opacity={seamOpacity}
+      />
+      {/* 兩側細欄杆：黏土棧道輪廓 */}
+      <path
+        d={d}
+        fill="none"
+        stroke="#b88955"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeDasharray="1 18"
+        opacity={railOpacity}
       />
     </>
   );
@@ -71,7 +86,7 @@ export default function MapBridgeLayer({ bridges, viewBox, paused }: Props) {
           aria-hidden="true"
           focusable="false"
         >
-          <BridgePlanks d={bridge.d} muted={bridge.dashed} />
+          <ClayBridge d={bridge.d} muted={bridge.dashed} />
           {/* hover 命中層：寬透明描邊承接滑鼠；svg 本身維持 pointer-events:none，
               事件照常冒泡給 viewport，pan/zoom 不受影響 */}
           <path

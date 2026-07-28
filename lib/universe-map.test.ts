@@ -6,10 +6,12 @@ import { getCarParkLinks, resolveUniverseMap } from "./universe-map";
 describe("resolveUniverseMap", () => {
   const map = resolveUniverseMap();
 
-  it("每個有 bridgeFrom 的 zone 都產出一條 bridge", () => {
-    const expected = ZONES.filter((z) => z.bridgeFrom).length;
-    expect(map.bridges.length).toBe(expected);
-    expect(expected).toBe(4);
+  it("五島完全圖：每對島各一條 bridge（C(5,2)=10）", () => {
+    const n = ZONES.length;
+    expect(map.bridges.length).toBe((n * (n - 1)) / 2);
+    expect(map.bridges.length).toBe(10);
+    const ids = new Set(map.bridges.map((b) => b.id));
+    expect(ids.size).toBe(10);
   });
 
   it("bridge.d 非空且以 M 開頭（合法 path 起始）", () => {
@@ -49,15 +51,29 @@ describe("resolveUniverseMap", () => {
     }
   });
 
-  it("dashed 旗標符合 coming/planned", () => {
-    const dino = map.bridges.find((b) => b.to === "dino")!;
-    const rescue = map.bridges.find((b) => b.to === "rescue")!;
-    const ocean = map.bridges.find((b) => b.to === "ocean")!;
-    const forest = map.bridges.find((b) => b.to === "forest")!;
-    expect(dino.dashed).toBe(false); // building → 實心
-    expect(forest.dashed).toBe(false); // building → 實心
-    expect(rescue.dashed).toBe(true); // coming → 虛線
-    expect(ocean.dashed).toBe(true); // planned → 虛線
+  it("dashed＝連到 coming/planned 時略淡；open↔building 仍為實心黏土", () => {
+    const carParkDino = map.bridges.find(
+      (b) =>
+        (b.from === "car-park" && b.to === "dino") ||
+        (b.from === "dino" && b.to === "car-park"),
+    )!;
+    const carParkForest = map.bridges.find(
+      (b) =>
+        (b.from === "car-park" && b.to === "forest") ||
+        (b.from === "forest" && b.to === "car-park"),
+    )!;
+    const dinoRescue = map.bridges.find(
+      (b) =>
+        (b.from === "dino" && b.to === "rescue") ||
+        (b.from === "rescue" && b.to === "dino"),
+    )!;
+    const oceanAny = map.bridges.find(
+      (b) => b.from === "ocean" || b.to === "ocean",
+    )!;
+    expect(carParkDino.dashed).toBe(false);
+    expect(carParkForest.dashed).toBe(false);
+    expect(dinoRescue.dashed).toBe(true);
+    expect(oceanAny.dashed).toBe(true);
   });
 });
 

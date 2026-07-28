@@ -93,7 +93,7 @@ describe("UniverseMap tap hint（StrictMode）", () => {
     await renderMap();
 
     expect(screen.getByRole("status").textContent).toContain(
-      "點一座島飛過去看故事",
+      "點一座島飛過去，再點探索點",
     );
     expect(sessionStorage.getItem(TAP_HINT_KEY)).toBeNull();
   });

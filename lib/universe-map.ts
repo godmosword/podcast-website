@@ -130,24 +130,35 @@ function bridgePorts(from: ResolvedZone, to: ResolvedZone): {
   };
 }
 
+/** 未開通島相關橋仍用實心黏土棧道，僅以 muted（dashed 旗標）略淡。 */
+function bridgeMuted(a: ResolvedZone, b: ResolvedZone): boolean {
+  return (
+    a.status === "coming" ||
+    a.status === "planned" ||
+    b.status === "coming" ||
+    b.status === "planned"
+  );
+}
+
+/** 五島完全圖：每對島各一條黏土橋（不依賴 bridgeFrom 鏈）。 */
 function resolveBridges(zones: ResolvedZone[]): ResolvedBridge[] {
-  const byId = new Map<ZoneId, ResolvedZone>(zones.map((z) => [z.id, z]));
   const bridges: ResolvedBridge[] = [];
-  for (const zone of zones) {
-    if (!zone.bridgeFrom) continue;
-    const source = byId.get(zone.bridgeFrom);
-    if (!source) continue;
-    const { fromPort, toPort } = bridgePorts(source, zone);
-    bridges.push({
-      id: `${source.id}-${zone.id}`,
-      from: source.id,
-      to: zone.id,
-      fromPort,
-      toPort,
-      depthY: Math.max(fromPort.y, toPort.y),
-      d: bridgePath(fromPort, toPort),
-      dashed: zone.status === "coming" || zone.status === "planned",
-    });
+  for (let i = 0; i < zones.length; i += 1) {
+    for (let j = i + 1; j < zones.length; j += 1) {
+      const from = zones[i]!;
+      const to = zones[j]!;
+      const { fromPort, toPort } = bridgePorts(from, to);
+      bridges.push({
+        id: `${from.id}-${to.id}`,
+        from: from.id,
+        to: to.id,
+        fromPort,
+        toPort,
+        depthY: Math.max(fromPort.y, toPort.y),
+        d: bridgePath(fromPort, toPort),
+        dashed: bridgeMuted(from, to),
+      });
+    }
   }
   return bridges;
 }

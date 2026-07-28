@@ -31,10 +31,10 @@ describe("universe-roamers", () => {
     expect(MAP_ROAMERS.some((r) => r.id === "roam-duoduo")).toBe(false);
   });
 
-  it("主島小紅為近景招牌 idle（不巡邏）；joyride 仍指步道", () => {
+  it("主島小紅／恐龍島漫遊 prod 關閉（避免動圖搶戲）", () => {
     const xiaoHong = MAP_ROAMERS.find((r) => r.id === "roam-xiaohong");
     expect(xiaoHong).toBeDefined();
-    expect(xiaoHong!.enabled).toBe(true);
+    expect(xiaoHong!.enabled).toBe(false);
     expect(xiaoHong!.zoneId).toBe("car-park");
     expect(xiaoHong!.idleSpot).toEqual({
       x: 168,
@@ -45,19 +45,19 @@ describe("universe-roamers", () => {
     expect(xiaoHong!.joyrideRouteId).toBe("car-park-walkway");
   });
 
-  it("遠景有 open 島 map idle（小紅橋頭）＋ crossingRouteId", () => {
+  it("遠景 map 小紅亦關閉；crossingRouteId 仍保留供 dev", () => {
     const mapXiao = MAP_ROAMERS.find((r) => r.id === "map-xiaohong");
     expect(mapXiao).toBeDefined();
     expect(mapXiao!.zoneId).toBeUndefined();
-    expect(mapXiao!.enabled).toBe(true);
+    expect(mapXiao!.enabled).toBe(false);
     expect(mapXiao!.idleSpot).toBeDefined();
     expect(mapXiao!.crossingRouteId).toBe("map-bridge-car-park-dino");
   });
 
-  it("恐龍島 prod 僅一台招牌（阿酷）；怪獸卡車 disabled", () => {
+  it("恐龍島漫遊 prod 關閉（阿酷／怪獸卡車）", () => {
     const aku = MAP_ROAMERS.find((r) => r.id === "roam-aku");
     const monster = MAP_ROAMERS.find((r) => r.id === "roam-monster");
-    expect(aku?.enabled).toBe(true);
+    expect(aku?.enabled).toBe(false);
     expect(aku?.idleSpot).toBeDefined();
     expect(monster?.enabled).toBe(false);
   });

@@ -115,7 +115,9 @@ test("車車宇宙樂園地圖 smoke", async ({ page }) => {
   await expect(
     page.getByRole("region", { name: "車車宇宙樂園地圖" }),
   ).toBeVisible();
-  await expect(page.getByRole("status")).toContainText("點一座島飛過去看故事");
+  await expect(page.getByRole("status")).toContainText(
+    "點一座島飛過去，再點探索點",
+  );
 
   await expect(
     page.getByRole("button", { name: /恐龍島/ }),
@@ -124,7 +126,9 @@ test("車車宇宙樂園地圖 smoke", async ({ page }) => {
   await expect(page.getByRole("status")).toHaveCount(0);
   await expect(page).toHaveURL(/\/adventures\/dino$/);
   await expect(page.getByText("還在蓋喔！")).toHaveCount(0);
-  await expect(page.locator("[data-hotspot-id]")).toHaveCount(0);
+  await expect(page.locator("[data-hotspot-id]").first()).toBeVisible({
+    timeout: 5_000,
+  });
 
   await page.getByRole("button", { name: /回樂園/ }).click();
   await expect
@@ -136,7 +140,9 @@ test("車車宇宙樂園地圖 smoke", async ({ page }) => {
   ).toBeVisible();
   await page.getByRole("button", { name: /車車樂園/ }).click();
   await expect(page).toHaveURL(/\/adventures\/car-park$/);
-  await expect(page.locator("[data-hotspot-id]")).toHaveCount(0);
+  await expect(page.locator("[data-hotspot-id]").first()).toBeVisible({
+    timeout: 5_000,
+  });
 });
 
 test("節目數據中心 /studio", async ({ page }) => {

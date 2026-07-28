@@ -124,6 +124,7 @@ function ZoneIsland({
             transform: `translate(${-ax * 100}%, ${-ay * 100}%)`,
             zIndex: mapDepthZ(zone.depthY, "island"),
           }}
+          data-zone={zone.id}
           data-status={effectiveStatus}
           data-transition={transition ?? undefined}
           data-celebrate={isOpen && burst > 0 ? true : undefined}
@@ -172,6 +173,7 @@ function ZoneIsland({
             狀態字樣已移除；反縮放由舞台 --map-scale／--label-offset-y 驅動。 */}
         <span
           className={styles.tileLabel}
+          data-zone={zone.id}
           style={{
             left: `${zone.px.x}px`,
             top: `${zone.px.y}px`,

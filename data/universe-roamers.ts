@@ -150,18 +150,17 @@ function openIslandBridgeIdleSpot(): RoamerIdleSpot {
 }
 
 export const MAP_ROAMERS: Roamer[] = [
-  // 遠景（open 島池）：小紅停在車車樂園橋頭，偶爾過橋去恐龍島。
+  // 遠景／近景漫遊暫關：主島小紅、恐龍島車會搶戲；保留資料供 ?devRoamers=1。
   {
     id: "map-xiaohong",
     characterId: "xiao-hong",
     routeId: "map-bridge-car-park-dino",
     speed: 22,
     src: "/adventures/roamers/xiao-hong.png",
-    enabled: true,
+    enabled: false,
     idleSpot: openIslandBridgeIdleSpot(),
     crossingRouteId: "map-bridge-car-park-dino",
   },
-  // 近景招牌：車車樂園小紅（摩天輪前 idle；點擊可短 joyride）。
   {
     id: "roam-xiaohong",
     characterId: "xiao-hong",
@@ -169,11 +168,10 @@ export const MAP_ROAMERS: Roamer[] = [
     routeId: "car-park-walkway",
     speed: 26,
     src: "/adventures/roamers/xiao-hong.png",
-    enabled: true,
+    enabled: false,
     idleSpot: CAR_PARK_SIGNBOARD_SPOT,
     joyrideRouteId: "car-park-walkway",
   },
-  // 近景招牌：恐龍島阿酷（每島一台；怪獸卡車改 disabled）。
   {
     id: "roam-aku",
     characterId: "a-ku",
@@ -185,7 +183,7 @@ export const MAP_ROAMERS: Roamer[] = [
       front: "/adventures/roamers/a-ku.png",
       rear: "/adventures/roamers/a-ku.rear.png",
     },
-    enabled: true,
+    enabled: false,
     idleSpot: DINO_SIGNBOARD_SPOT,
     joyrideRouteId: "dino-walkway",
   },
