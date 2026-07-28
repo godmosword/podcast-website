@@ -162,6 +162,7 @@ function ZoneIsland({
               reduced={reduced}
               paused={paused}
               night={night}
+              focused={Boolean(active)}
             />
             <StatusOverlay status={effectiveStatus} paused={paused} transition={transition} />
             <ZoneMotionLayer

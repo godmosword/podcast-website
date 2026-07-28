@@ -1,16 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { MAP_STAGE } from "@/data/universe-zones";
+import { MAP_STAGE, type ZoneId } from "@/data/universe-zones";
 import {
   MAP_ROAMERS,
   ROAMER_ROUTES,
   getRoutePathD,
   isDevRoamersQuery,
   roamerGreeting,
-  shouldRenderRoamer,
   type Roamer,
 } from "@/data/universe-roamers";
+import { selectMapRoamers } from "@/lib/universe/roamer-presentation";
 import { trackUniverseRoamerTap } from "@/lib/analytics";
 import { playSfx } from "@/lib/sfx";
 import RoamerVehicle from "./RoamerVehicle";
@@ -18,13 +18,25 @@ import type { RoamerGreetingState } from "./RoamerVehicle";
 import { useRoamerSim } from "./useRoamerSim";
 import styles from "./MapRoamerLayer.module.css";
 
+/** 遠景稀有跨島最小間隔（毫秒）。 */
+const CROSSING_MIN_INTERVAL_MS = 45_000;
+/** 進場後再開始排程，避免首屏立刻過場。 */
+const CROSSING_INITIAL_DELAY_MS = 12_000;
+
 type Props = {
   reduced: boolean;
   paused: boolean;
   night: boolean;
+  /** 鏡頭聚焦的島；有值時隱藏遠景車 */
+  focusedZoneId: ZoneId | null;
 };
 
-export default function MapRoamerLayer({ reduced, paused, night }: Props) {
+export default function MapRoamerLayer({
+  reduced,
+  paused,
+  night,
+  focusedZoneId,
+}: Props) {
   const [devRoamers, setDevRoamers] = useState(false);
   const [greeting, setGreeting] =
     useState<(RoamerGreetingState & { id: string }) | null>(null);
@@ -41,14 +53,9 @@ export default function MapRoamerLayer({ reduced, paused, night }: Props) {
     [],
   );
 
-  const mapRouteIds = useMemo(() => new Set(routes.map((r) => r.id)), [routes]);
-
   const visible = useMemo(
-    () =>
-      MAP_ROAMERS.filter(
-        (r) => mapRouteIds.has(r.routeId) && shouldRenderRoamer(r, devRoamers),
-      ),
-    [mapRouteIds, devRoamers],
+    () => selectMapRoamers(MAP_ROAMERS, focusedZoneId, { devRoamers }),
+    [focusedZoneId, devRoamers],
   );
 
   const space = useMemo(
@@ -59,7 +66,7 @@ export default function MapRoamerLayer({ reduced, paused, night }: Props) {
     [],
   );
 
-  const { pauseRoamer } = useRoamerSim({
+  const { pauseRoamer, startCrossing, anyCrossing } = useRoamerSim({
     roamers: visible,
     routes,
     space,
@@ -67,6 +74,39 @@ export default function MapRoamerLayer({ reduced, paused, night }: Props) {
     reduced,
     paused,
   });
+
+  // 稀有跨島：長間隔、同時最多一台；reduced／聚焦／暫停時不排程。
+  useEffect(() => {
+    if (reduced || paused || focusedZoneId || visible.length === 0) return;
+
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const schedule = (delay: number) => {
+      timer = setTimeout(() => {
+        if (cancelled) return;
+        if (!anyCrossing()) {
+          const candidates = visible.filter((r) => r.crossingRouteId);
+          const pick = candidates[0];
+          if (pick) startCrossing(pick.id);
+        }
+        schedule(CROSSING_MIN_INTERVAL_MS);
+      }, delay);
+    };
+
+    schedule(CROSSING_INITIAL_DELAY_MS);
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
+  }, [
+    reduced,
+    paused,
+    focusedZoneId,
+    visible,
+    startCrossing,
+    anyCrossing,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -91,11 +131,13 @@ export default function MapRoamerLayer({ reduced, paused, night }: Props) {
     [pauseRoamer],
   );
 
-  if (visible.length === 0 && !(devRoamers && routes.length > 0)) return null;
+  if (visible.length === 0 && !(devRoamers && routes.length > 0 && !focusedZoneId)) {
+    return null;
+  }
 
   return (
     <div ref={layerRef} className={styles.layer} aria-hidden="true">
-      {devRoamers && (
+      {devRoamers && !focusedZoneId && (
         <svg
           className={styles.devPath}
           viewBox={`0 0 ${MAP_STAGE.width} ${MAP_STAGE.height}`}

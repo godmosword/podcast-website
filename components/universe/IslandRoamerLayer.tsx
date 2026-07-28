@@ -9,9 +9,9 @@ import {
   getRoutePathD,
   isDevRoamersQuery,
   roamerGreeting,
-  shouldRenderRoamer,
   type Roamer,
 } from "@/data/universe-roamers";
+import { selectIslandRoamers } from "@/lib/universe/roamer-presentation";
 import { getZoneArtSrcSet } from "@/lib/universe/zone-art-tile";
 import { trackUniverseRoamerTap } from "@/lib/analytics";
 import { playSfx } from "@/lib/sfx";
@@ -28,6 +28,8 @@ type Props = {
   reduced: boolean;
   paused: boolean;
   night: boolean;
+  /** 鏡頭是否聚焦此島；未聚焦不渲染招牌車 */
+  focused: boolean;
 };
 
 export default function IslandRoamerLayer({
@@ -38,6 +40,7 @@ export default function IslandRoamerLayer({
   reduced,
   paused,
   night,
+  focused,
 }: Props) {
   const [devRoamers, setDevRoamers] = useState(false);
   const [greeting, setGreeting] =
@@ -50,6 +53,8 @@ export default function IslandRoamerLayer({
     setDevRoamers(isDevRoamersQuery());
   }, []);
 
+  const focusedZoneId = focused ? zoneId : null;
+
   const routes = useMemo(
     () => ROAMER_ROUTES.filter((r) => r.kind === "island" && r.zoneId === zoneId),
     [zoneId],
@@ -57,10 +62,8 @@ export default function IslandRoamerLayer({
 
   const visible = useMemo(
     () =>
-      MAP_ROAMERS.filter(
-        (r) => r.zoneId === zoneId && shouldRenderRoamer(r, devRoamers),
-      ),
-    [zoneId, devRoamers],
+      selectIslandRoamers(MAP_ROAMERS, zoneId, focusedZoneId, { devRoamers }),
+    [zoneId, focusedZoneId, devRoamers],
   );
 
   const space = useMemo(
@@ -71,7 +74,7 @@ export default function IslandRoamerLayer({
   const occluder = ZONE_OCCLUDERS[zoneId];
   const artSrc = getZoneArtSrcSet(zoneId, mapScale);
 
-  const { pauseRoamer } = useRoamerSim({
+  const { pauseRoamer, startJoyride } = useRoamerSim({
     roamers: visible,
     routes,
     space,
@@ -88,7 +91,10 @@ export default function IslandRoamerLayer({
 
   const handleRoamerTap = useCallback(
     (roamer: Roamer) => {
-      pauseRoamer(roamer.id, 1400);
+      pauseRoamer(roamer.id, 400);
+      if (!reduced && roamer.joyrideRouteId) {
+        startJoyride(roamer.id);
+      }
       playSfx("horn");
       trackUniverseRoamerTap(roamer.characterId);
       greetingKeyRef.current += 1;
@@ -100,14 +106,17 @@ export default function IslandRoamerLayer({
       if (greetingTimerRef.current) clearTimeout(greetingTimerRef.current);
       greetingTimerRef.current = setTimeout(() => setGreeting(null), 1500);
     },
-    [pauseRoamer],
+    [pauseRoamer, startJoyride, reduced],
   );
 
-  if (visible.length === 0 && !(devRoamers && routes.length > 0)) return null;
+  if (visible.length === 0 && !(devRoamers && focused && routes.length > 0)) {
+    return null;
+  }
 
   return (
     <div ref={layerRef} className={styles.layer} aria-hidden="true">
       {devRoamers &&
+        focused &&
         routes.map((route) => (
           <svg
             key={`dev-${route.id}`}
@@ -137,7 +146,7 @@ export default function IslandRoamerLayer({
         );
       })}
 
-      {occluder && (
+      {occluder && visible.length > 0 && (
         <ArtSrcPicture
           artSrc={artSrc}
           className={styles.occluder}

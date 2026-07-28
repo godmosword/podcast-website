@@ -531,6 +531,7 @@ function UniverseMapContent({
             reduced={reduced}
             paused={paused}
             night={daylight === "night"}
+            focusedZoneId={activeZoneId}
           />
 
           {zones.map((zone) => (
