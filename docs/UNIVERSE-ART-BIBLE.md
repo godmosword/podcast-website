@@ -272,14 +272,15 @@ type MotionPart = {
 
 ### 12.8 漫遊小車＝2.5D unit（R-anim 3 新增）
 
-島上漫遊小車不是貼紙，是**會面向行進方向的 2.5D unit**。資料層 `data/universe-roamers.ts`、引擎 `components/universe/useRoamerSim.ts`。
+島上漫遊小車不是貼紙，是**2.5D unit**：預設定點 idle，**移動時**（tapJoyride／rareCrossing）才依行進方向面向。資料層 `data/universe-roamers.ts`、LOD `lib/universe/roamer-presentation.ts`、引擎 `components/universe/useRoamerSim.ts`。呈現定版見 `docs/superpowers/specs/2026-07-28-universe-roamer-presentation-design.md`。
 
 - **4 向 sprite：** 每角色生 **2 張面朝畫面左**的視圖 → `{id}.png`（¾ 前視、車頭朝觀者）、`{id}.rear.png`（¾ 後視、車尾朝觀者）。左右向由前端 `scaleX(-1)` 鏡像，共 4 朝向。`RoamerSprites` 契約；rear 未到位時回退 front（不渲染破圖）。
 - **生圖管線：** `npm run generate:roamer-assets`（front + rear 兩視圖）。模型回傳近白底而非約定 magenta 時，postProcess 以**邊界 flood 去背保險絲**（`scripts/lib/roamer-alpha.ts`）救回；既有資產用 `npm run fix:roamer-alpha` 就地修補（保留牙齒／眼白等內部白）。
-- **朝向選擇（遲滯）：** 依 path 切線 `hx/hy` 選 front/rear 與左右鏡像，零附近維持原朝向避免抖動。
-- **接地：** 陰影是**獨立地面橢圓**（不隨 bob 浮動，只隨 hop 微縮），維持 §2「短柔接地陰影」；sprite 本身只留極淡形狀陰影。
-- **景深：** tile 內越上（遠）越小、越下（近）越大；過彎輕微 bank。
-- **深度遮擋：** `ZONE_OCCLUDERS` 用**同一張 tile 的 clip-path 複製**露出地標剪影、疊在 roamer 上方（z-index = `baselineY`）。roamer `z-index = groundY`：groundY < baselineY（在地標後方）即落到剪影下被擋住，呈現立體書式「鑽到地標後方」。新島若要遮擋，量好地標剪影 `clipPath` 與接地基線 `baselineY` 即可，**無需另畫前景圖**。
+- **呈現：** 遠景 map 層最多 1～2 台 idle（open 島池）＋極少跨島；近景聚焦島一台招牌 `idleSpot`；點擊打招呼，可選短 joyride。不做閉合巡邏、不做導覽箭頭。
+- **朝向：** `idleSpot` 用預設 `facing`／`flip`；移動時依 path 切線 `hx/hy` 選 front/rear 與左右鏡像（遲滯，零附近維持原朝向）。
+- **接地：** 陰影是**獨立地面橢圓**（不隨 bob 浮動，只隨 hop 微縮），維持 §2「短柔接地陰影」；sprite 本身只留極淡形狀陰影。idle 微晃掛在 img（transform），受 `prefers-reduced-motion` 關閉。
+- **景深：** tile 內越上（遠）越小、越下（近）越大；過彎輕微 bank（map 層關閉）。
+- **深度遮擋：** `ZONE_OCCLUDERS` 用**同一張 tile 的 clip-path 複製**露出地標剪影、疊在 roamer 上方（z-index = `baselineY`）。roamer `z-index = groundY`：groundY < baselineY（在地標後方）即落到剪影下被擋住，呈現立體書式「鑽到地標後方」。招牌 idle 應放在 baseline **前方**（y 更大）。新島若要遮擋，量好地標剪影 `clipPath` 與接地基線 `baselineY` 即可，**無需另畫前景圖**。
 
 ## 13. 共享 2.5D 深度舞台（v4）
 

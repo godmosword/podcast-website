@@ -39,9 +39,12 @@
 - [x] M2 `@modal` 熱點層 + focus 管理 + prefetch  `e915355`
 - [x] M3 逐島填 hotspots（恐龍島優先）  `5c6784a`
 
-### 小車呈現定版（設計中 → 待實作）
+### 小車呈現定版（2026-07-28）
 
-- [ ] 設計 spec 已確認：[宇宙地圖小車呈現定版](#宇宙地圖小車呈現定版2026-07-28)（靜態角色＋稀有過場；關巡邏）
+- [x] 設計 spec：[宇宙地圖小車呈現定版](#宇宙地圖小車呈現定版2026-07-28)  `130d776`
+- [x] LOD 純函式＋資料 idleSpot／每島一台招牌  `4df55fc` `748e760`
+- [x] useRoamerSim idle／joyride／crossing  `0206042`
+- [x] 層接 LOD＋關巡邏＋稀有跨島  `ddeed40`
 
 ### 本輪已完成（2026-07-27）
 
@@ -383,15 +386,16 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 
 ## 宇宙地圖小車呈現定版（2026-07-28）
 
-> **狀態：** 設計已確認，待 implementation plan／實作。  
-> **Spec：** [docs/superpowers/specs/2026-07-28-universe-roamer-presentation-design.md](./docs/superpowers/specs/2026-07-28-universe-roamer-presentation-design.md)
+> **狀態：** 實作已落地（分支 `cursor/universe-roamer-presentation-design-f0ac`）。  
+> **Spec：** [docs/superpowers/specs/2026-07-28-universe-roamer-presentation-design.md](./docs/superpowers/specs/2026-07-28-universe-roamer-presentation-design.md)  
+> **Plan：** [docs/superpowers/plans/2026-07-28-universe-roamer-presentation.md](./docs/superpowers/plans/2026-07-28-universe-roamer-presentation.md)
 
-| 項目 | 說明 |
-|------|------|
-| 決策 | 方案 1：靜態角色＋稀有過場；小車＝氣氛／點擊互動／角色辨識，不做導覽 |
-| LOD | 遠景橋／岸 1～2 台 idle＋極少跨島；近景每島一台招牌 idle，點了才短動 |
-| 紅線 | 不动 `useMapCamera`／`ZoneSheet`／zones 座標／zone-art-tile／地圖淺色場景 |
-| 下一步 | 審查 spec → writing-plans → 實作（關巡邏 → rareCrossing → tapJoyride） |
+| 項目 | 說明 | Commit |
+|------|------|--------|
+| 決策 | 方案 1：靜態角色＋稀有過場；氣氛／點擊／角色辨識，不做導覽 | `130d776` |
+| LOD／資料 | 遠景最多 2；近景每島 1；idleSpot；關巡邏 | `4df55fc` `748e760` |
+| 引擎／層 | idle 預設；joyride；rareCrossing；聚焦切換 | `0206042` `ddeed40` |
+| 紅線 | 未動 `useMapCamera`／`ZoneSheet`／zones 座標／zone-art-tile／地圖淺色 | — |
 
 ---
 
