@@ -4,11 +4,10 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  /* z-index 由 HotspotLayer 依島 depthY  inline 設定（hotspot band，高於島名木牌） */
+  /* z-index 由 HotspotLayer 依島 depthY inline 設定（hotspot band，高於島名木牌） */
 }
 
-/* 反縮放吃舞台 --map-scale（同島名木牌手法）：字級與 48px 命中區在任何縮放下
-   都是固定螢幕尺寸，不會 fit 縮放時縮成 29px、放大時撐成巨標。 */
+/* 反縮放吃舞台 --map-scale：視覺標記與 48px 命中區維持固定螢幕尺寸。 */
 .pin,
 .pinLocked {
   position: absolute;
@@ -36,47 +35,54 @@
   border-radius: 12px;
 }
 
+/* 安靜標記：小小的羅盤珠取代大橘點與同步呼吸動畫。 */
 .dot {
   position: relative;
   flex-shrink: 0;
-  width: 18px;
-  height: 18px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
-  background: #ff8c2b;
-  border: 2.5px solid #fff8ef;
-  box-shadow: 0 2px 6px rgba(36, 40, 58, 0.32);
+  background: #fffaf0;
+  border: 2px solid #ff9a42;
+  color: #ff8c2b;
+  box-shadow:
+    0 0 0 3px rgba(255, 154, 66, 0.18),
+    0 2px 5px rgba(36, 40, 58, 0.25);
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
-/* 呼吸光暈：只動 opacity／scale，不觸 layout */
-.dot::before {
+.dot::after {
   content: "";
   position: absolute;
-  inset: -7px;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 140, 43, 0.45) 0%,
-    rgba(255, 140, 43, 0) 70%
-  );
-  opacity: 0.35;
-  pointer-events: none;
-  z-index: -1;
+  inset: 3px;
+  border-radius: inherit;
+  background: currentColor;
+}
+
+.pin[data-kind="link"] .dot {
+  color: #5aa7a5;
+  border-color: #6fc2bf;
+  box-shadow:
+    0 0 0 3px rgba(111, 194, 191, 0.2),
+    0 2px 5px rgba(36, 40, 58, 0.22);
 }
 
 .pinLocked .dot {
-  background: #c4b5a0;
+  color: #b7aa99;
+  border-color: #cfc2b2;
+  box-shadow:
+    0 0 0 3px rgba(183, 170, 153, 0.16),
+    0 2px 5px rgba(36, 40, 58, 0.16);
 }
 
-.pinLocked .dot::before {
-  background: radial-gradient(
-    circle,
-    rgba(196, 181, 160, 0.35) 0%,
-    rgba(196, 181, 160, 0) 70%
-  );
-  opacity: 0.22;
-}
-
-/* 印刷 chip：色票走 --map-chip*（日夜不反轉），夜海上仍讀得到。 */
+/*
+ * 安靜標記：探索點平時只保留一枚小小的「羅盤珠」。
+ * 名稱仍在 DOM／aria-label 中，滑過或鍵盤聚焦時才展開，讓島面保持留白。
+ */
 .label {
   position: relative;
   max-width: 8.5rem;
@@ -94,9 +100,17 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px) scale(0.92);
+  transform-origin: 50% 100%;
+  transition:
+    opacity 140ms ease,
+    visibility 140ms ease,
+    transform 140ms ease;
 }
 
-/* 小尾巴指向圓點，強化「泡泡」閱讀 */
+/* 小尾巴指向標記，保留原本印刷地圖的泡泡語彙。 */
 .label::after {
   content: "";
   position: absolute;
@@ -110,123 +124,49 @@
   transform: translateX(-50%) rotate(45deg);
 }
 
-/* 尚未開放的點降權，讓可以玩的探索點當視覺主角 */
 .pinLocked .label {
   font-weight: 700;
-  opacity: 0.82;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .label {
-    animation: hotspot-bubble-rise 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
-    animation-delay: var(--bubble-delay, 0ms);
-  }
-
-  .pin .dot {
-    animation: hotspot-dot-float 2.2s ease-in-out infinite;
-    animation-delay: var(--bubble-delay, 0ms);
-  }
-
-  .pin .dot::before {
-    animation: hotspot-glow-breathe 2.2s ease-in-out infinite;
-    animation-delay: var(--bubble-delay, 0ms);
-  }
-
-  .pinLocked .dot {
-    animation: hotspot-dot-float-soft 2.8s ease-in-out infinite;
-    animation-delay: var(--bubble-delay, 0ms);
-  }
-
-  .pinLocked .dot::before {
-    animation: hotspot-glow-breathe-soft 2.8s ease-in-out infinite;
-    animation-delay: var(--bubble-delay, 0ms);
-  }
+/* 互動時才把單一探索點提亮並顯名。 */
+.pin:hover .dot,
+.pinLocked:hover .dot,
+.pin:focus-visible .dot,
+.pinLocked:focus-visible .dot {
+  transform: scale(1.14);
+  background: #fff3d1;
+  box-shadow:
+    0 0 0 4px rgba(255, 154, 66, 0.26),
+    0 3px 7px rgba(36, 40, 58, 0.25);
 }
 
-@keyframes hotspot-bubble-rise {
-  0% {
-    opacity: 0;
-    transform: translateY(12px) scale(0.82);
-  }
-  65% {
-    opacity: 1;
-    transform: translateY(-2px) scale(1.04);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+.pin[data-kind="link"]:hover .dot,
+.pin[data-kind="link"]:focus-visible .dot {
+  box-shadow:
+    0 0 0 4px rgba(111, 194, 191, 0.28),
+    0 3px 7px rgba(36, 40, 58, 0.22);
 }
 
-@keyframes hotspot-dot-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-3px);
-  }
+.pinLocked:hover .dot,
+.pinLocked:focus-visible .dot {
+  background: #f3eee5;
+  box-shadow:
+    0 0 0 4px rgba(183, 170, 153, 0.22),
+    0 3px 7px rgba(36, 40, 58, 0.18);
 }
 
-@keyframes hotspot-dot-float-soft {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-1.5px);
-  }
-}
-
-@keyframes hotspot-glow-breathe {
-  0%,
-  100% {
-    opacity: 0.28;
-    transform: scale(0.92);
-  }
-  50% {
-    opacity: 0.62;
-    transform: scale(1.12);
-  }
-}
-
-@keyframes hotspot-glow-breathe-soft {
-  0%,
-  100% {
-    opacity: 0.14;
-    transform: scale(0.95);
-  }
-  50% {
-    opacity: 0.32;
-    transform: scale(1.06);
-  }
-}
-
-/* 分頁隱藏／拖曳中：暫停連續動畫；進場泡泡直接到位避免卡半空 */
-.layer[data-paused] .pin .dot,
-.layer[data-paused] .pin .dot::before,
-.layer[data-paused] .pinLocked .dot,
-.layer[data-paused] .pinLocked .dot::before {
-  animation-play-state: paused;
-}
-
-.layer[data-paused] .label {
-  animation: none;
+.pin:hover .label,
+.pinLocked:hover .label,
+.pin:focus-visible .label,
+.pinLocked:focus-visible .label {
   opacity: 1;
-  transform: none;
+  visibility: visible;
+  transform: translateY(0) scale(1);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .label,
-  .pin .dot,
-  .pin .dot::before,
-  .pinLocked .dot,
-  .pinLocked .dot::before {
-    animation: none;
-  }
-
+  .dot,
   .label {
-    opacity: 1;
-    transform: none;
+    transition: none;
   }
 }

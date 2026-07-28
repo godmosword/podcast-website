@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, type CSSProperties } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { zoneById, type ZoneId } from "@/data/universe";
 import {
@@ -15,17 +15,14 @@ import styles from "./HotspotLayer.module.css";
 
 type HotspotLayerProps = {
   zoneId: ZoneId;
-  /** 分頁隱藏／地圖不可見／拖曳中：暫停連續動畫 */
+  /** 分頁隱藏／地圖不可見／拖曳中：保留狀態標記供地圖層協調。 */
   paused?: boolean;
 };
-
-/** 泡泡進場錯開（毫秒）；僅 transform／opacity。 */
-const BUBBLE_STAGGER_MS = 70;
 
 /**
  * 島內熱點座標層：掛在 stage 上，隨相機 transform。
  * 點擊走 `/adventures/[zone]/[hotspot]`（可被 @modal 攔截）。
- * 字永遠在圓點上方；進場以泡泡上飄，圓點有呼吸光暈。
+ * 預設只顯示安靜標記，名稱在滑過／鍵盤聚焦時才顯現，避免小島被文字淹沒。
  */
 export default function HotspotLayer({
   zoneId,
@@ -55,10 +52,11 @@ export default function HotspotLayer({
       data-paused={paused || undefined}
       aria-label={`${zone.name}探索點`}
     >
-      {zone.hotspots.map((hotspot, index) => {
+      {zone.hotspots.map((hotspot) => {
         const pt = hotspotToStage(resolved, hotspot);
         const href = hotspotDetailHref(zoneId, hotspot);
         const locked = hotspot.action.type === "locked";
+        const kind = locked ? "locked" : hotspot.action.type;
         return (
           <Link
             key={hotspot.id}
@@ -66,24 +64,19 @@ export default function HotspotLayer({
             href={href}
             prefetch
             className={locked ? styles.pinLocked : styles.pin}
-            style={
-              {
-                left: pt.x,
-                top: pt.y,
-                "--bubble-delay": `${index * BUBBLE_STAGGER_MS}ms`,
-              } as CSSProperties
-            }
+            style={{ left: pt.x, top: pt.y }}
             aria-label={
               locked
                 ? `${hotspot.name}（尚未開放）`
                 : `打開${hotspot.name}`
             }
             data-hotspot-id={hotspot.id}
+            data-kind={kind}
             data-label="above"
             scroll={false}
             onPointerDown={(e) => e.stopPropagation()}
           >
-            {/* 標籤在上：泡泡進場；圓點在下：呼吸光暈／微浮 */}
+            {/* 標籤在上；預設收起，互動時才展開。 */}
             <span className={styles.label}>{hotspot.name}</span>
             <span className={styles.dot} aria-hidden="true" />
           </Link>

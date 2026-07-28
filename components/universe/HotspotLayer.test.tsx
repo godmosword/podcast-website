@@ -81,12 +81,10 @@ describe("HotspotLayer", () => {
     expect(children[1]?.getAttribute("aria-hidden")).toBe("true");
   });
 
-  it("泡泡進場錯開 delay；paused 時層標記 data-paused", () => {
+  it("探索點預設安靜；paused 時層標記 data-paused", () => {
     const { container, rerender } = render(<HotspotLayer zoneId="dino" />);
     const first = screen.getByLabelText("打開故事屋入口");
-    const second = screen.getByLabelText("打開笑話廣場");
-    expect(first.style.getPropertyValue("--bubble-delay")).toBe("0ms");
-    expect(second.style.getPropertyValue("--bubble-delay")).toBe("70ms");
+    expect(first.style.getPropertyValue("--bubble-delay")).toBe("");
 
     rerender(<HotspotLayer zoneId="dino" paused />);
     expect(
@@ -95,24 +93,33 @@ describe("HotspotLayer", () => {
   });
 });
 
-describe("HotspotLayer.module.css 動效契約", () => {
+describe("HotspotLayer.module.css 視覺契約", () => {
   const css = readFileSync(
     join(import.meta.dirname, "HotspotLayer.module.css"),
     "utf8",
   );
 
-  it("泡泡／呼吸僅 transform／opacity，並有 reduced-motion 與 paused", () => {
-    expect(css).toMatch(/hotspot-bubble-rise/);
-    expect(css).toMatch(/hotspot-dot-float/);
-    expect(css).toMatch(/hotspot-glow-breathe/);
+  it("預設隱藏標籤，互動時顯名，並支援 reduced-motion", () => {
+    expect(css).not.toMatch(/hotspot-bubble-rise/);
+    expect(css).not.toMatch(/hotspot-dot-float/);
+    expect(css).not.toMatch(/hotspot-glow-breathe/);
+    expect(css).toMatch(/opacity:\s*0/);
+    expect(css).toMatch(/\.pin:hover \.label/);
+    expect(css).toMatch(/\.pin:focus-visible \.label/);
     expect(css).toMatch(/prefers-reduced-motion:\s*reduce/);
-    expect(css).toMatch(/\[data-paused\]/);
-    // 禁止 layout 觸發屬性進 keyframes
-    const keyframes = css.match(/@keyframes[\s\S]*?(?=@keyframes|@media|$)/g) ?? [];
-    for (const block of keyframes) {
-      expect(block).not.toMatch(
-        /\b(width|height|top|left|margin|padding)\s*:/,
-      );
-    }
+  });
+
+  it("探索點帶有動作種類標記，供安靜標記層分色", () => {
+    render(<HotspotLayer zoneId="dino" />);
+
+    expect(screen.getByLabelText("打開故事屋入口").getAttribute("data-kind")).toBe(
+      "link",
+    );
+    expect(screen.getByLabelText("打開笑話廣場").getAttribute("data-kind")).toBe(
+      "story",
+    );
+    expect(
+      screen.getByLabelText("恐龍巢穴（尚未開放）").getAttribute("data-kind"),
+    ).toBe("locked");
   });
 });
