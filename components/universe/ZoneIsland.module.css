@@ -320,12 +320,6 @@
   transform-origin: 50% 0;
 }
 
-/* 森林小島木牌略上移，避免壓到下方車車樂園摩天輪（不改 zone 座標） */
-.tileLabel[data-zone="forest"] {
-  transform: translate(-50%, calc(var(--label-offset-y, 6px) - 42px))
-    scale(calc(1 / var(--map-scale, 1)));
-}
-
 /* 鎖島泡泡的定位點：tile box 頂緣中心。零尺寸容器，泡泡自身負責置中與反縮放。 */
 .tileBubbleAnchor {
   position: absolute;

@@ -140,25 +140,38 @@ function bridgeMuted(a: ResolvedZone, b: ResolvedZone): boolean {
   );
 }
 
-/** 五島完全圖：每對島各一條黏土橋（不依賴 bridgeFrom 鏈）。 */
+/**
+ * 樂園地圖拓撲：車車樂園中樞 4 輻＋外環 3（共 7）。
+ * 不畫對角穿越（如 dino–ocean），對齊「從主島往外長」的旅程感。
+ */
+const BRIDGE_EDGES: ReadonlyArray<readonly [ZoneId, ZoneId]> = [
+  ["car-park", "dino"],
+  ["car-park", "forest"],
+  ["car-park", "rescue"],
+  ["car-park", "ocean"],
+  ["dino", "forest"],
+  ["forest", "rescue"],
+  ["rescue", "ocean"],
+];
+
 function resolveBridges(zones: ResolvedZone[]): ResolvedBridge[] {
+  const byId = new Map<ZoneId, ResolvedZone>(zones.map((z) => [z.id, z]));
   const bridges: ResolvedBridge[] = [];
-  for (let i = 0; i < zones.length; i += 1) {
-    for (let j = i + 1; j < zones.length; j += 1) {
-      const from = zones[i]!;
-      const to = zones[j]!;
-      const { fromPort, toPort } = bridgePorts(from, to);
-      bridges.push({
-        id: `${from.id}-${to.id}`,
-        from: from.id,
-        to: to.id,
-        fromPort,
-        toPort,
-        depthY: Math.max(fromPort.y, toPort.y),
-        d: bridgePath(fromPort, toPort),
-        dashed: bridgeMuted(from, to),
-      });
-    }
+  for (const [fromId, toId] of BRIDGE_EDGES) {
+    const from = byId.get(fromId);
+    const to = byId.get(toId);
+    if (!from || !to) continue;
+    const { fromPort, toPort } = bridgePorts(from, to);
+    bridges.push({
+      id: `${from.id}-${to.id}`,
+      from: from.id,
+      to: to.id,
+      fromPort,
+      toPort,
+      depthY: Math.max(fromPort.y, toPort.y),
+      d: bridgePath(fromPort, toPort),
+      dashed: bridgeMuted(from, to),
+    });
   }
   return bridges;
 }

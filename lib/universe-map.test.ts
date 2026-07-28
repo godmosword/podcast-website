@@ -1,17 +1,35 @@
 import { describe, expect, it } from "vitest";
 import { LANDING_SEGMENTS } from "@/data/landing-segments";
-import { MAP_STAGE, ZONES } from "@/data/universe-zones";
+import { MAP_STAGE } from "@/data/universe-zones";
 import { getCarParkLinks, resolveUniverseMap } from "./universe-map";
 
 describe("resolveUniverseMap", () => {
   const map = resolveUniverseMap();
 
-  it("五島完全圖：每對島各一條 bridge（C(5,2)=10）", () => {
-    const n = ZONES.length;
-    expect(map.bridges.length).toBe((n * (n - 1)) / 2);
-    expect(map.bridges.length).toBe(10);
+  it("中樞 4 輻＋外環 3＝7 條 bridge", () => {
+    expect(map.bridges.length).toBe(7);
     const ids = new Set(map.bridges.map((b) => b.id));
-    expect(ids.size).toBe(10);
+    expect(ids).toEqual(
+      new Set([
+        "car-park-dino",
+        "car-park-forest",
+        "car-park-rescue",
+        "car-park-ocean",
+        "dino-forest",
+        "forest-rescue",
+        "rescue-ocean",
+      ]),
+    );
+  });
+
+  it("不畫對角穿越（dino–ocean、dino–rescue、forest–ocean）", () => {
+    const pairs = new Set(map.bridges.map((b) => `${b.from}-${b.to}`));
+    expect(pairs.has("dino-ocean")).toBe(false);
+    expect(pairs.has("ocean-dino")).toBe(false);
+    expect(pairs.has("dino-rescue")).toBe(false);
+    expect(pairs.has("rescue-dino")).toBe(false);
+    expect(pairs.has("forest-ocean")).toBe(false);
+    expect(pairs.has("ocean-forest")).toBe(false);
   });
 
   it("bridge.d 非空且以 M 開頭（合法 path 起始）", () => {
@@ -52,28 +70,22 @@ describe("resolveUniverseMap", () => {
   });
 
   it("dashed＝連到 coming/planned 時略淡；open↔building 仍為實心黏土", () => {
-    const carParkDino = map.bridges.find(
-      (b) =>
-        (b.from === "car-park" && b.to === "dino") ||
-        (b.from === "dino" && b.to === "car-park"),
-    )!;
-    const carParkForest = map.bridges.find(
-      (b) =>
-        (b.from === "car-park" && b.to === "forest") ||
-        (b.from === "forest" && b.to === "car-park"),
-    )!;
-    const dinoRescue = map.bridges.find(
-      (b) =>
-        (b.from === "dino" && b.to === "rescue") ||
-        (b.from === "rescue" && b.to === "dino"),
-    )!;
-    const oceanAny = map.bridges.find(
-      (b) => b.from === "ocean" || b.to === "ocean",
-    )!;
+    const carParkDino = map.bridges.find((b) => b.id === "car-park-dino")!;
+    const carParkForest = map.bridges.find((b) => b.id === "car-park-forest")!;
+    const carParkRescue = map.bridges.find((b) => b.id === "car-park-rescue")!;
+    const rescueOcean = map.bridges.find((b) => b.id === "rescue-ocean")!;
     expect(carParkDino.dashed).toBe(false);
     expect(carParkForest.dashed).toBe(false);
-    expect(dinoRescue.dashed).toBe(true);
-    expect(oceanAny.dashed).toBe(true);
+    expect(carParkRescue.dashed).toBe(true);
+    expect(rescueOcean.dashed).toBe(true);
+  });
+
+  it("森林小島偏東北，錯開車車樂園正上方", () => {
+    const forest = map.zones.find((z) => z.id === "forest")!;
+    const carPark = map.zones.find((z) => z.id === "car-park")!;
+    expect(forest.px).toEqual({ x: 580, y: 175 });
+    expect(forest.px.x).toBeGreaterThan(carPark.px.x);
+    expect(forest.px.y).toBeLessThan(200);
   });
 });
 

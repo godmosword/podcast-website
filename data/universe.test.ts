@@ -54,7 +54,7 @@ describe("data/universe（M0 單一資料來源）", () => {
         sprite: "/adventures/zones/ocean.png",
       },
       forest: {
-        coord: { x: 500, y: 215 },
+        coord: { x: 580, y: 175 },
         sprite: "/adventures/zones/forest.png",
       },
     });

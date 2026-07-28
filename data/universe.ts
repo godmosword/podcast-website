@@ -413,7 +413,9 @@ const raw = {
       id: "forest",
       name: "森林小島",
       status: "building",
-      coord: { x: 500, y: 215 },
+      // 偏東北，錯開車車樂園正上方，避免木牌壓到摩天輪
+      // y 取 175：再往上 tile 頂會超出 MAP_STAGE，撐破島群 fit bbox
+      coord: { x: 580, y: 175 },
       landmark: "🌲",
       sprite: "/adventures/zones/forest.png",
       buildProgress: 45,
@@ -453,7 +455,7 @@ const raw = {
           action: { type: "link", href: "/stories" },
         },
       ],
-      bridgeFrom: "dino",
+      bridgeFrom: "car-park",
     }),
   ],
 } satisfies z.input<typeof universeSchema>;

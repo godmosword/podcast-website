@@ -20,7 +20,7 @@ export type DecorItem =
   | (DecorBase & { motion: "drift" | "bob" })
   | (DecorBase & { motion: "path"; travel: number });
 
-// 座標對齊新有機佈局（car-park 410,495；dino 175,300；forest 500,215；
+// 座標對齊有機佈局（car-park 410,495；dino 175,300；forest 580,175；
 // rescue 785,300；ocean 825,560）：填充件落在島間水域與邊緣，避開島 tile 與旅程橋線。
 // 紅色浮標已移除（視覺噪音）。
 export const MAP_DECOR: DecorItem[] = [

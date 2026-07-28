@@ -136,7 +136,7 @@ describe("universe-zones", () => {
         artTile: "/adventures/zones/ocean.png",
       },
       forest: {
-        coord: { x: 500, y: 215 },
+        coord: { x: 580, y: 175 },
         artTile: "/adventures/zones/forest.png",
       },
     });
