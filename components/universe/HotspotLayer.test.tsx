@@ -1,4 +1,6 @@
 // @vitest-environment jsdom
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import React from "react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -70,14 +72,47 @@ describe("HotspotLayer", () => {
     );
   });
 
-  it("島下半部的標籤翻到圓點上方（避開木牌與彼此重疊）", () => {
+  it("標籤一律在圓點上方（DOM 順序 label → dot）", () => {
     render(<HotspotLayer zoneId="dino" />);
-    // story-house pos.y = 0.72 → 翻上；soft-truck pos.y = 0.32 → 維持下方
+    const pin = screen.getByLabelText("打開故事屋入口");
+    expect(pin.getAttribute("data-label")).toBe("above");
+    const children = [...pin.children] as HTMLElement[];
+    expect(children[0]?.textContent).toBe("故事屋入口");
+    expect(children[1]?.getAttribute("aria-hidden")).toBe("true");
+  });
+
+  it("泡泡進場錯開 delay；paused 時層標記 data-paused", () => {
+    const { container, rerender } = render(<HotspotLayer zoneId="dino" />);
+    const first = screen.getByLabelText("打開故事屋入口");
+    const second = screen.getByLabelText("打開笑話廣場");
+    expect(first.style.getPropertyValue("--bubble-delay")).toBe("0ms");
+    expect(second.style.getPropertyValue("--bubble-delay")).toBe("70ms");
+
+    rerender(<HotspotLayer zoneId="dino" paused />);
     expect(
-      screen.getByLabelText("打開故事屋入口").getAttribute("data-flip"),
-    ).toBe("up");
-    expect(
-      screen.getByLabelText("打開輕輕停車格").getAttribute("data-flip"),
-    ).toBeNull();
+      (container.firstElementChild as HTMLElement).hasAttribute("data-paused"),
+    ).toBe(true);
+  });
+});
+
+describe("HotspotLayer.module.css 動效契約", () => {
+  const css = readFileSync(
+    join(import.meta.dirname, "HotspotLayer.module.css"),
+    "utf8",
+  );
+
+  it("泡泡／呼吸僅 transform／opacity，並有 reduced-motion 與 paused", () => {
+    expect(css).toMatch(/hotspot-bubble-rise/);
+    expect(css).toMatch(/hotspot-dot-float/);
+    expect(css).toMatch(/hotspot-glow-breathe/);
+    expect(css).toMatch(/prefers-reduced-motion:\s*reduce/);
+    expect(css).toMatch(/\[data-paused\]/);
+    // 禁止 layout 觸發屬性進 keyframes
+    const keyframes = css.match(/@keyframes[\s\S]*?(?=@keyframes|@media|$)/g) ?? [];
+    for (const block of keyframes) {
+      expect(block).not.toMatch(
+        /\b(width|height|top|left|margin|padding)\s*:/,
+      );
+    }
   });
 });

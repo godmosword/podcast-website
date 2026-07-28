@@ -17,7 +17,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.28rem;
   min-width: 48px;
   min-height: 48px;
   padding: 0.2rem;
@@ -29,12 +29,6 @@
   cursor: pointer;
 }
 
-/* 島下半部：名字翻到圓點上方（避開島名木牌） */
-.pin[data-flip="up"],
-.pinLocked[data-flip="up"] {
-  flex-direction: column-reverse;
-}
-
 .pin:focus-visible,
 .pinLocked:focus-visible {
   outline: 3px solid var(--focus-ring);
@@ -43,6 +37,8 @@
 }
 
 .dot {
+  position: relative;
+  flex-shrink: 0;
   width: 18px;
   height: 18px;
   border-radius: 50%;
@@ -51,14 +47,40 @@
   box-shadow: 0 2px 6px rgba(36, 40, 58, 0.32);
 }
 
+/* 呼吸光暈：只動 opacity／scale，不觸 layout */
+.dot::before {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 140, 43, 0.45) 0%,
+    rgba(255, 140, 43, 0) 70%
+  );
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: -1;
+}
+
 .pinLocked .dot {
   background: #c4b5a0;
 }
 
+.pinLocked .dot::before {
+  background: radial-gradient(
+    circle,
+    rgba(196, 181, 160, 0.35) 0%,
+    rgba(196, 181, 160, 0) 70%
+  );
+  opacity: 0.22;
+}
+
 /* 印刷 chip：色票走 --map-chip*（日夜不反轉），夜海上仍讀得到。 */
 .label {
+  position: relative;
   max-width: 8.5rem;
-  padding: 0.16rem 0.5rem;
+  padding: 0.22rem 0.55rem;
   border-radius: 999px;
   background: var(--map-chip-2);
   border: 1px solid var(--map-chip-line);
@@ -74,6 +96,20 @@
   text-overflow: ellipsis;
 }
 
+/* 小尾巴指向圓點，強化「泡泡」閱讀 */
+.label::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  width: 8px;
+  height: 8px;
+  background: var(--map-chip-2);
+  border-right: 1px solid var(--map-chip-line);
+  border-bottom: 1px solid var(--map-chip-line);
+  transform: translateX(-50%) rotate(45deg);
+}
+
 /* 尚未開放的點降權，讓可以玩的探索點當視覺主角 */
 .pinLocked .label {
   font-weight: 700;
@@ -81,25 +117,116 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  .label {
+    animation: hotspot-bubble-rise 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--bubble-delay, 0ms);
+  }
+
   .pin .dot {
-    animation: hotspot-pulse 1.8s ease-in-out infinite;
+    animation: hotspot-dot-float 2.2s ease-in-out infinite;
+    animation-delay: var(--bubble-delay, 0ms);
+  }
+
+  .pin .dot::before {
+    animation: hotspot-glow-breathe 2.2s ease-in-out infinite;
+    animation-delay: var(--bubble-delay, 0ms);
+  }
+
+  .pinLocked .dot {
+    animation: hotspot-dot-float-soft 2.8s ease-in-out infinite;
+    animation-delay: var(--bubble-delay, 0ms);
+  }
+
+  .pinLocked .dot::before {
+    animation: hotspot-glow-breathe-soft 2.8s ease-in-out infinite;
+    animation-delay: var(--bubble-delay, 0ms);
   }
 }
 
-@keyframes hotspot-pulse {
+@keyframes hotspot-bubble-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.82);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes hotspot-dot-float {
   0%,
   100% {
-    transform: scale(1);
-    opacity: 1;
+    transform: translateY(0);
   }
   50% {
-    transform: scale(1.12);
-    opacity: 0.9;
+    transform: translateY(-3px);
   }
+}
+
+@keyframes hotspot-dot-float-soft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-1.5px);
+  }
+}
+
+@keyframes hotspot-glow-breathe {
+  0%,
+  100% {
+    opacity: 0.28;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 0.62;
+    transform: scale(1.12);
+  }
+}
+
+@keyframes hotspot-glow-breathe-soft {
+  0%,
+  100% {
+    opacity: 0.14;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 0.32;
+    transform: scale(1.06);
+  }
+}
+
+/* 分頁隱藏／拖曳中：暫停連續動畫；進場泡泡直接到位避免卡半空 */
+.layer[data-paused] .pin .dot,
+.layer[data-paused] .pin .dot::before,
+.layer[data-paused] .pinLocked .dot,
+.layer[data-paused] .pinLocked .dot::before {
+  animation-play-state: paused;
+}
+
+.layer[data-paused] .label {
+  animation: none;
+  opacity: 1;
+  transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pin .dot {
+  .label,
+  .pin .dot,
+  .pin .dot::before,
+  .pinLocked .dot,
+  .pinLocked .dot::before {
     animation: none;
+  }
+
+  .label {
+    opacity: 1;
+    transform: none;
   }
 }

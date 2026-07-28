@@ -550,7 +550,9 @@ function UniverseMapContent({
             />
           ))}
 
-          {activeZoneId ? <HotspotLayer zoneId={activeZoneId} /> : null}
+          {activeZoneId ? (
+            <HotspotLayer zoneId={activeZoneId} paused={paused} />
+          ) : null}
 
         </div>
 

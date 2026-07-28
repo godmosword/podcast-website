@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import { zoneById, type ZoneId } from "@/data/universe";
 import {
@@ -15,19 +15,22 @@ import styles from "./HotspotLayer.module.css";
 
 type HotspotLayerProps = {
   zoneId: ZoneId;
+  /** 分頁隱藏／地圖不可見／拖曳中：暫停連續動畫 */
+  paused?: boolean;
 };
 
-/**
- * 標籤翻到圓點上方的門檻（tile 本地 UV）：島下半部若把名字放在圓點下方，
- * 會撞到沙岸錨點的島名木牌，也容易與鄰近探索點的標籤重疊。
- */
-const FLIP_LABEL_ABOVE_UV = 0.6;
+/** 泡泡進場錯開（毫秒）；僅 transform／opacity。 */
+const BUBBLE_STAGGER_MS = 70;
 
 /**
  * 島內熱點座標層：掛在 stage 上，隨相機 transform。
  * 點擊走 `/adventures/[zone]/[hotspot]`（可被 @modal 攔截）。
+ * 字永遠在圓點上方；進場以泡泡上飄，圓點有呼吸光暈。
  */
-export default function HotspotLayer({ zoneId }: HotspotLayerProps) {
+export default function HotspotLayer({
+  zoneId,
+  paused = false,
+}: HotspotLayerProps) {
   const router = useRouter();
   const zone = zoneById(zoneId);
   const resolved = resolvedZoneById(zoneId);
@@ -49,9 +52,10 @@ export default function HotspotLayer({ zoneId }: HotspotLayerProps) {
     <div
       className={styles.layer}
       style={{ zIndex: mapDepthZ(resolved.depthY, "hotspot") }}
+      data-paused={paused || undefined}
       aria-label={`${zone.name}探索點`}
     >
-      {zone.hotspots.map((hotspot) => {
+      {zone.hotspots.map((hotspot, index) => {
         const pt = hotspotToStage(resolved, hotspot);
         const href = hotspotDetailHref(zoneId, hotspot);
         const locked = hotspot.action.type === "locked";
@@ -62,20 +66,26 @@ export default function HotspotLayer({ zoneId }: HotspotLayerProps) {
             href={href}
             prefetch
             className={locked ? styles.pinLocked : styles.pin}
-            /* 島下半部的標籤翻到圓點上方，避開島名木牌與彼此的橫向碰撞。 */
-            data-flip={hotspot.pos.y > FLIP_LABEL_ABOVE_UV ? "up" : undefined}
-            style={{ left: pt.x, top: pt.y }}
+            style={
+              {
+                left: pt.x,
+                top: pt.y,
+                "--bubble-delay": `${index * BUBBLE_STAGGER_MS}ms`,
+              } as CSSProperties
+            }
             aria-label={
               locked
                 ? `${hotspot.name}（尚未開放）`
                 : `打開${hotspot.name}`
             }
             data-hotspot-id={hotspot.id}
+            data-label="above"
             scroll={false}
             onPointerDown={(e) => e.stopPropagation()}
           >
-            <span className={styles.dot} aria-hidden="true" />
+            {/* 標籤在上：泡泡進場；圓點在下：呼吸光暈／微浮 */}
             <span className={styles.label}>{hotspot.name}</span>
+            <span className={styles.dot} aria-hidden="true" />
           </Link>
         );
       })}
