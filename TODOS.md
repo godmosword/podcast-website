@@ -377,6 +377,20 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 
 ---
 
+## 宇宙地圖小車呈現定版（2026-07-28）
+
+> **狀態：** 設計已確認，待 implementation plan／實作。  
+> **Spec：** [docs/superpowers/specs/2026-07-28-universe-roamer-presentation-design.md](./docs/superpowers/specs/2026-07-28-universe-roamer-presentation-design.md)
+
+| 項目 | 說明 |
+|------|------|
+| 決策 | 方案 1：靜態角色＋稀有過場；小車＝氣氛／點擊互動／角色辨識，不做導覽 |
+| LOD | 遠景橋／岸 1～2 台 idle＋極少跨島；近景每島一台招牌 idle，點了才短動 |
+| 紅線 | 不动 `useMapCamera`／`ZoneSheet`／zones 座標／zone-art-tile／地圖淺色場景 |
+| 下一步 | 審查 spec → writing-plans → 實作（關巡邏 → rareCrossing → tapJoyride） |
+
+---
+
 ## 宇宙地圖回饋修正（2026-07-27）
 
 > **來源：** 正式站 `/adventures` 使用者實測五點回饋。
