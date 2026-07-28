@@ -53,7 +53,6 @@ import MapControls from "./MapControls";
 import NightFireworks from "./NightFireworks";
 import SkyBodies from "./SkyBodies";
 import UniverseMapParallax from "./UniverseMapParallax";
-import HotspotLayer from "./HotspotLayer";
 import ZoneIsland from "./ZoneIsland";
 import { UniverseCameraGateProvider } from "./UniverseCameraGateContext";
 import { useMapCamera } from "./useMapCamera";
@@ -550,8 +549,6 @@ function UniverseMapContent({
             />
           ))}
 
-          {activeZoneId ? <HotspotLayer zoneId={activeZoneId} /> : null}
-
         </div>
 
         {/* 近景雲影：DOM 排在 stage 之後（同 z:1），飄在島群上方 */}
@@ -566,14 +563,14 @@ function UniverseMapContent({
           但它 pointer-events: none、手機本來就 sr-only，狀態圖例島木牌 pill 已有，
           對孩子等於裝飾——改為純讀屏描述，首屏讓給地圖。 */}
       <p id="universe-map-guide" className="sr-only">
-        點一座島就會飛過去，再點島上的探索點打開故事；再點同一座島可以回到整片樂園。
+        點一座島就會飛過去，在側欄看探索點與故事；再點同一座島可以回到整片樂園。
         拖曳可以移動地圖，右下角的加號減號可以放大縮小；鍵盤可用方向鍵移動、加減鍵縮放。
       </p>
 
       {/* 首訪底部提示：screen-space，不擋地圖拖曳；dismiss 才寫 session key */}
       {tapHintPhase === "visible" ? (
         <div className={styles.tapHint} role="status" aria-live="polite">
-          <span className={styles.tapHintText}>點一座島飛過去，再點探索點</span>
+          <span className={styles.tapHintText}>點一座島飛過去看故事</span>
           <button
             type="button"
             className={styles.tapHintClose}

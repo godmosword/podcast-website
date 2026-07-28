@@ -57,7 +57,8 @@ describe("ZoneIsland", () => {
     );
 
     expect(html).not.toContain("看看");
-    expect(html).toContain("🚧 建造中");
+    expect(html).not.toContain("建造中");
+    expect(html).not.toContain("🚧");
   });
 
   it("鏡頭停在該島時，aria-label 說明再點一次看整片地圖", () => {
@@ -83,7 +84,7 @@ describe("ZoneIsland", () => {
     );
 
     expect(idle).not.toContain("再點一次看整片地圖");
-    expect(active).toContain("恐龍島，建造中，再點一次看整片地圖");
+    expect(active).toContain("恐龍島，再點一次看整片地圖");
   });
 
   it("開放島顯示「可以進去玩」氣球訊號，鎖島不顯示", () => {
@@ -108,7 +109,7 @@ describe("ZoneIsland", () => {
     );
 
     expect(openHtml).toContain("🎈");
-    expect(openHtml).toContain("🎉 開放中");
+    expect(openHtml).not.toContain("開放中");
     expect(lockedHtml).not.toContain("🎈");
   });
 });

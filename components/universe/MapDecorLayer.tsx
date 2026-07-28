@@ -51,16 +51,6 @@ function Sailboat({ size }: { size: number }) {
   );
 }
 
-function Buoy({ size }: { size: number }) {
-  const s = 14 * size;
-  return (
-    <>
-      <rect x={-s * 0.12} y={-s * 0.2} width={s * 0.24} height={s * 0.9} rx={s * 0.08} fill="#d94a4a" />
-      <circle cx={0} cy={-s * 0.35} r={s * 0.28} fill="#f04a4a" />
-    </>
-  );
-}
-
 function Fish({ size }: { size: number }) {
   const s = 16 * size;
   return (
@@ -93,8 +83,6 @@ function DecorShape({ item }: { item: DecorItem }) {
   switch (item.kind) {
     case "sailboat":
       return <Sailboat size={item.size} />;
-    case "buoy":
-      return <Buoy size={item.size} />;
     case "fish":
       return <Fish size={item.size} />;
     case "bird":
@@ -125,9 +113,9 @@ function filterDecor(daylight: ThemePreference, kinds: DecorKind[]): DecorItem[]
   );
 }
 
-/** 近水裝飾（帆船、浮標、魚）；回傳 SVG `<g>`，插入 scene 內橋之後。 */
+/** 近水裝飾（帆船、魚）；回傳 SVG `<g>`，插入 scene 內橋之後。 */
 export function MapDecorNearWater({ reduced, paused, daylight }: Props) {
-  const items = filterDecor(daylight, ["sailboat", "buoy", "fish"]);
+  const items = filterDecor(daylight, ["sailboat", "fish"]);
   const rootClass = [styles.decor, paused ? styles.paused : ""].filter(Boolean).join(" ");
   return (
     <g className={rootClass} aria-hidden="true">

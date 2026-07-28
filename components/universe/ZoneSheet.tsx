@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
-import { STATUS_META, type Hotspot } from "@/data/universe";
+import type { Hotspot } from "@/data/universe";
 import type { ZoneDef } from "@/data/universe-zones";
 import type { LandingSegmentId } from "@/data/landing-segments";
 import { getCarParkLinks } from "@/lib/universe-map";
@@ -91,16 +91,11 @@ export default function ZoneSheet({
 
   if (!zone) return null;
 
-  const meta = STATUS_META[zone.status];
   const isCarPark = (zone.subSegmentIds?.length ?? 0) > 0;
   const carParkLinks = isCarPark ? getCarParkLinks() : [];
   const notifyHref = notifyMailto(zone.name);
   const parentPanelId = `${titleId}-parent`;
   const wishPanelId = `${titleId}-wish`;
-  const showBuildProgress =
-    !isCarPark &&
-    zone.status === "building" &&
-    typeof zone.buildProgress === "number";
   const isLocked = zone.status !== "open";
 
   const overlayClass = [
@@ -163,48 +158,18 @@ export default function ZoneSheet({
             >
               {zone.name}
             </h1>
-            <span
-              className={styles.pill}
-              style={{ background: meta.pillBg, color: meta.pillInk }}
-            >
-              {meta.label}
-            </span>
           </div>
         </div>
 
         <p className={styles.tagline}>{zone.teaser}</p>
 
-        {/* ── 未開放島：首屏直接說清楚（不再藏進「給爸爸媽媽」雙層折疊） ── */}
+        {/* ── 未開放島：首屏少字；狀態／建造進度字樣已移除 ── */}
         {!isCarPark ? (
           <>
             {zone.childHint ? (
               <p className={styles.childHint}>{zone.childHint}</p>
             ) : null}
 
-            {showBuildProgress ? (
-              <div
-                className={styles.progress}
-                role="progressbar"
-                aria-valuenow={zone.buildProgress}
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-label="建造進度"
-              >
-                <div
-                  className={styles.progressBar}
-                  style={{ width: `${zone.buildProgress}%` }}
-                />
-                <span className={styles.progressLabel}>
-                  建造進度 {zone.buildProgress}%
-                </span>
-              </div>
-            ) : null}
-
-            {isLocked ? (
-              <p className={styles.comingSoon}>敬請期待</p>
-            ) : null}
-
-            {/* 整句說明移入「給爸爸媽媽」；兒童首屏靠 childHint＋進度條＋大按鈕承載，少字更直觀 */}
             <nav className={styles.links} aria-label={`${zone.name}入口`}>
               <a
                 className={styles.linkBtnPrimary}

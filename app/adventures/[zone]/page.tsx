@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { STATUS_META, ZONE_IDS, zoneById } from "@/data/universe";
+import { ZONE_IDS, zoneById } from "@/data/universe";
 import {
   buildZoneStoryPreviewsMap,
   zoneStoryTitleLines,
@@ -53,19 +53,15 @@ export default async function AdventuresZonePage({ params }: ZonePageProps) {
   const zoneStories = buildZoneStoryPreviewsMap()[zone.id] ?? null;
   const storyTitles =
     zoneStories && zoneStories.total > 0 ? zoneStoryTitleLines(zone.id) : [];
-  const meta = STATUS_META[zone.status];
 
   return (
     <>
       {/* 爬蟲／無 JS fallback：島專屬文案（勿放全站統計句，避免五頁重複雜訊） */}
       <article className="sr-only">
         <h1>{zone.name}</h1>
-        <p>
-          {meta.label}：{zone.tagline}
-        </p>
+        <p>{zone.tagline}</p>
         {zone.childHint ? <p>{zone.childHint}</p> : null}
         {zone.exploreNote ? <p>{zone.exploreNote}</p> : null}
-        {zone.status !== "open" ? <p>敬請期待</p> : null}
         <ul>
           {zone.links.map((link) => (
             <li key={link.href}>

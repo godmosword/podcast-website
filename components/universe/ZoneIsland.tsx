@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useEffect, useRef, useState } from "react";
-import { ZONE_STATUS_META, type ZoneDef, type ZoneStatus } from "@/data/universe-zones";
+import type { ZoneDef, ZoneStatus } from "@/data/universe-zones";
 import { mapDepthZ } from "@/lib/universe-depth";
 import type { ResolvedZone } from "@/lib/universe-map";
 import { getZoneArtTile, getZoneArtSrcSet } from "@/lib/universe/zone-art-tile";
@@ -11,7 +11,6 @@ import { requestCelebration } from "@/lib/celebration";
 import { ISLAND_BURST_PRESET, createRadialBurstParticles } from "@/lib/celebration-dom";
 import StarBurst from "@/components/celebration/StarBurst";
 import IslandRoamerLayer from "./IslandRoamerLayer";
-import LockedIslandBubble from "./LockedIslandBubble";
 import ZoneLandmark from "./ZoneLandmark";
 import ZoneMotionLayer from "./ZoneMotionLayer";
 import StatusOverlay from "./StatusOverlay";
@@ -58,7 +57,6 @@ function ZoneIsland({
   active = false,
 }: ZoneIslandProps) {
   const effectiveStatus = devStatusOverride ?? zone.status;
-  const meta = ZONE_STATUS_META[effectiveStatus];
   const isOpen = effectiveStatus === "open";
   const hasProgress = (progress?.completed ?? 0) > 0;
   const tile = getZoneArtTile(zone.id);
@@ -91,19 +89,11 @@ function ZoneIsland({
     onActivate(zone);
   };
 
-  const lockedBubble =
-    !isOpen && jelly > 0 && meta.tapBubble ? (
-      <LockedIslandBubble
-        message={meta.tapBubble}
-        bubbleKey={jelly}
-        reduced={reduced}
-      />
-    ) : null;
-
   // 島 button 的無障礙名稱：進度星章與「再點一次看整片地圖」都要念得出來。
   // 刻意不用「回樂園」字樣——那是右下角控制鈕的名稱，同名會讓讀屏與 e2e 都分不清。
+  // 狀態（建造中／規劃中等）不進可見文案與 aria，避免蓋過島名。
   const ariaLabel = [
-    `${zone.name}，${meta.label}`,
+    zone.name,
     hasProgress ? `已聽完 ${progress!.completed} 集` : null,
     active ? "再點一次看整片地圖" : null,
   ]
@@ -178,24 +168,8 @@ function ZoneIsland({
             )}
           </div>
         </button>
-        {/* 鎖島泡泡：必須是 button 的 sibling —— 島 button 有 z-index（自成 stacking
-            context），泡泡放在裡面永遠被木牌層（LABEL_BASE）壓住。定位在 tile box
-            頂緣（沙岸錨點往上 ay×h），層深走 bubble band（高於木牌與探索點）。 */}
-        {lockedBubble ? (
-          <span
-            className={styles.tileBubbleAnchor}
-            style={{
-              left: `${zone.px.x}px`,
-              top: `${zone.px.y - ay * tile.stageSize.h}px`,
-              zIndex: mapDepthZ(zone.depthY, "bubble"),
-            }}
-          >
-            {lockedBubble}
-          </span>
-        ) : null}
-        {/* 木牌欄：島名＋狀態 pill（裝飾，島 button 已含同名 aria-label）。
-            點島 → 飛鏡頭＋探索點；木牌欄純展示。
-            反縮放／遠距偏移由舞台 --map-scale／--label-offset-y 驅動。 */}
+        {/* 木牌欄：島名（裝飾，島 button 已含同名 aria-label）。
+            狀態字樣已移除；反縮放由舞台 --map-scale／--label-offset-y 驅動。 */}
         <span
           className={styles.tileLabel}
           style={{
@@ -212,20 +186,13 @@ function ZoneIsland({
             ) : null}
             {zone.name}
           </span>
-          <span className={styles.pillRow}>
-            <span
-              className={styles.pill}
-              aria-hidden="true"
-              style={{ background: meta.pillBg, color: meta.pillInk }}
-            >
-              {meta.icon} {meta.label}
-            </span>
-            {hasProgress ? (
+          {hasProgress ? (
+            <span className={styles.pillRow}>
               <span className={styles.progressChip} aria-hidden="true">
                 ⭐ {progress!.completed}/{progress!.total}
               </span>
-            ) : null}
-          </span>
+            </span>
+          ) : null}
         </span>
       </>
     );
@@ -248,19 +215,6 @@ function ZoneIsland({
         <ZoneLandmark zoneId={zone.id} status={effectiveStatus} artTile={zone.artTile} />
       </span>
       <span className={styles.name}>{zone.name}</span>
-      <span
-        className={styles.pill}
-        style={{ background: meta.pillBg, color: meta.pillInk }}
-      >
-        {meta.icon} {meta.label}
-      </span>
-      {lockedBubble ? (
-        <span
-          className={`${styles.tileBubbleAnchor} ${styles.landmarkBubbleAnchor}`}
-        >
-          {lockedBubble}
-        </span>
-      ) : null}
     </button>
   );
 }

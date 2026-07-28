@@ -30,17 +30,17 @@ describe("ZoneSheet", () => {
       <ZoneSheet zone={zone} onClose={() => undefined} />,
     );
 
-    // 首屏可見：狀態、childHint（短句）、主 CTA、建造進度、softLinks
+    // 首屏可見：島名、childHint、主 CTA、softLinks；狀態／建造進度字樣已移除
     expect(html).toContain("恐龍島");
-    expect(html).toContain("建造中");
+    expect(html).not.toContain("建造中");
     expect(html).toContain("恐龍島在長大");
     expect(html).toContain("去聽車車故事");
     expect(html).toContain('href="/stories"');
-    expect(html).toContain("建造進度 60%");
+    expect(html).not.toContain("建造進度");
     expect(html).toContain("回故事屋");
     // M1：tagline（舊 teaser）入卡，供 SSR／島內摘要
     expect(html).toContain("恐龍園區探險故事");
-    expect(html).toContain("敬請期待");
+    expect(html).not.toContain("敬請期待");
     // 整句說明（exploreNote）移入「給爸爸媽媽」折疊、首屏不出現
     expect(html).not.toContain("恐龍島還在蓋，現在可以先聽車車故事，之後再回來逛。");
     // 家長專區仍為單層折疊、預設收合

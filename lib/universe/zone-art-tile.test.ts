@@ -52,4 +52,31 @@ describe("ZONE_ART_TILES 詮釋資料契約", () => {
       }
     }
   });
+
+  it("非主島與恐龍島同尺；車車樂園維持 hero weenie", () => {
+    const dino = getZoneArtTile("dino");
+    const forest = getZoneArtTile("forest");
+    const rescue = getZoneArtTile("rescue");
+    const ocean = getZoneArtTile("ocean");
+    const carPark = getZoneArtTile("car-park");
+    expect(dino.mode).toBe("island");
+    if (dino.mode !== "island") return;
+    expect(forest.mode).toBe("island");
+    expect(rescue.mode).toBe("island");
+    expect(ocean.mode).toBe("island");
+    expect(carPark.mode).toBe("island");
+    if (
+      forest.mode !== "island" ||
+      rescue.mode !== "island" ||
+      ocean.mode !== "island" ||
+      carPark.mode !== "island"
+    ) {
+      return;
+    }
+    expect(forest.stageSize).toEqual(dino.stageSize);
+    expect(rescue.stageSize).toEqual(dino.stageSize);
+    expect(ocean.stageSize).toEqual(dino.stageSize);
+    expect(carPark.stageSize.w).toBeGreaterThan(dino.stageSize.w);
+    expect(carPark.stageSize.h).toBeGreaterThan(dino.stageSize.h);
+  });
 });

@@ -1,6 +1,6 @@
 import { MAP_STAGE } from "@/data/universe-zones";
 
-export type DecorKind = "bird" | "sailboat" | "fish" | "buoy" | "firefly";
+export type DecorKind = "bird" | "sailboat" | "fish" | "firefly";
 
 type DecorBase = {
   id: string;
@@ -22,18 +22,9 @@ export type DecorItem =
 
 // 座標對齊新有機佈局（car-park 410,495；dino 175,300；forest 500,215；
 // rescue 785,300；ocean 825,560）：填充件落在島間水域與邊緣，避開島 tile 與旅程橋線。
+// 紅色浮標已移除（視覺噪音）。
 export const MAP_DECOR: DecorItem[] = [
   { id: "boat-1", kind: "sailboat", x: 110, y: 630, size: 1, motion: "bob", periodMs: 3200 },
-  {
-    id: "buoy-1",
-    kind: "buoy",
-    x: 630,
-    y: 470,
-    size: 0.8,
-    motion: "bob",
-    periodMs: 2600,
-    delayMs: 400,
-  },
   { id: "fish-1", kind: "fish", x: 480, y: 660, size: 0.7, motion: "path", periodMs: 9000, travel: 120 },
   {
     id: "bird-1",
@@ -97,9 +88,6 @@ export const MAP_DECOR: DecorItem[] = [
   // ── 海面密度包：填島間水域與四邊留白，避開島 tile、標籤帶與旅程橋線。
   { id: "boat-2", kind: "sailboat", x: 620, y: 640, size: 0.85, motion: "bob", periodMs: 3600, delayMs: 900 },
   { id: "boat-3", kind: "sailboat", x: 330, y: 620, size: 0.7, motion: "bob", periodMs: 4000, delayMs: 1600 },
-  { id: "buoy-2", kind: "buoy", x: 200, y: 480, size: 0.75, motion: "bob", periodMs: 2900, delayMs: 800 },
-  { id: "buoy-3", kind: "buoy", x: 950, y: 300, size: 0.7, motion: "bob", periodMs: 3100, delayMs: 300 },
-  { id: "buoy-4", kind: "buoy", x: 60, y: 470, size: 0.65, motion: "bob", periodMs: 2700, delayMs: 1200 },
   { id: "fish-2", kind: "fish", x: 700, y: 650, size: 0.6, motion: "path", periodMs: 10000, travel: 100, delayMs: 1400 },
   { id: "fish-3", kind: "fish", x: 180, y: 560, size: 0.55, motion: "path", periodMs: 8500, travel: 90, delayMs: 2000 },
   {

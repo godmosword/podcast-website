@@ -48,26 +48,14 @@ const ISLAND_ANCHOR_UV: [number, number] = [0.5, 0.84];
  * Weenie（視覺磁鐵）：主題樂園地圖的中央地標原則——car-park 是全園核心，
  * 放大一級作為視線錨點與羅盤（迪士尼城堡手法）。只放大 stage 呈現尺寸，
  * 不動地理座標與錨點；PNG 有 @2x/@3x 餘裕，放大不糊。
+ *
+ * 其餘島與恐龍島同尺（264×260）；不再依 coming／planned 縮小。
  */
 const HERO_SCALE = 1.25;
 const HERO_STAGE_SIZE = {
   w: Math.round(ISLAND_STAGE_SIZE.w * HERO_SCALE),
   h: Math.round(ISLAND_STAGE_SIZE.h * HERO_SCALE),
 } as const;
-
-/**
- * 主從階層：越接近「開放」的島越大越近，越遠期（coming／planned）越小，
- * 讀作「更遠、之後才到」。只縮 stage 呈現尺寸，不動座標與錨點（PNG @2x/@3x 餘裕）。
- */
-function scaledStageSize(scale: number): { w: number; h: number } {
-  return {
-    w: Math.round(ISLAND_STAGE_SIZE.w * scale),
-    h: Math.round(ISLAND_STAGE_SIZE.h * scale),
-  };
-}
-
-const COMING_STAGE_SIZE = scaledStageSize(0.9);
-const PLANNED_STAGE_SIZE = scaledStageSize(0.82);
 
 /**
  * 各島 tile 詮釋資料（單一資料源）。
@@ -78,8 +66,8 @@ const PLANNED_STAGE_SIZE = scaledStageSize(0.82);
 export const ZONE_ART_TILES: Record<ZoneId, ZoneArtTile> = {
   "car-park": { src: zoneArtTilePath("car-park"), mode: "island", anchor: "sand-bottom-center", stageSize: HERO_STAGE_SIZE, anchorUV: ISLAND_ANCHOR_UV },
   dino: { src: zoneArtTilePath("dino"), mode: "island", anchor: "sand-bottom-center", stageSize: ISLAND_STAGE_SIZE, anchorUV: ISLAND_ANCHOR_UV },
-  rescue: { src: zoneArtTilePath("rescue"), mode: "island", anchor: "sand-bottom-center", stageSize: COMING_STAGE_SIZE, anchorUV: ISLAND_ANCHOR_UV },
-  ocean: { src: zoneArtTilePath("ocean"), mode: "island", anchor: "sand-bottom-center", stageSize: PLANNED_STAGE_SIZE, anchorUV: ISLAND_ANCHOR_UV },
+  rescue: { src: zoneArtTilePath("rescue"), mode: "island", anchor: "sand-bottom-center", stageSize: ISLAND_STAGE_SIZE, anchorUV: ISLAND_ANCHOR_UV },
+  ocean: { src: zoneArtTilePath("ocean"), mode: "island", anchor: "sand-bottom-center", stageSize: ISLAND_STAGE_SIZE, anchorUV: ISLAND_ANCHOR_UV },
   forest: { src: zoneArtTilePath("forest"), mode: "island", anchor: "sand-bottom-center", stageSize: ISLAND_STAGE_SIZE, anchorUV: ISLAND_ANCHOR_UV },
 };
 

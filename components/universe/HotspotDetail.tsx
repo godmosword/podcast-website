@@ -26,10 +26,7 @@ export default function HotspotDetail({
       </h2>
 
       {action.type === "locked" ? (
-        <>
-          <p className={styles.hint}>{action.hint}</p>
-          <p className={styles.coming}>敬請期待</p>
-        </>
+        <p className={styles.hint}>{action.hint}</p>
       ) : null}
 
       {action.type === "link" ? (

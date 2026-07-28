@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { STATUS_META, universe } from "@/data/universe";
+import { universe } from "@/data/universe";
 import { getCarParkLinks } from "@/lib/universe-map";
 import { notifyMailto } from "@/lib/contact";
 import { getSiteUrl } from "@/lib/site-url";
@@ -28,11 +28,10 @@ export default function AdventuresPage() {
       <nav className="sr-only" aria-label="島嶼清單">
         <ul>
           {universe.zones.map((zone) => {
-            const meta = STATUS_META[zone.status];
             const isCarPark = (zone.subSegmentIds?.length ?? 0) > 0;
             return (
               <li key={zone.id}>
-                {zone.name}（{meta.label}）：{zone.tagline}
+                {zone.name}：{zone.tagline}
                 {isCarPark ? (
                   <ul>
                     {carParkLinks.map((link) => (
