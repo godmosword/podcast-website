@@ -29,9 +29,11 @@ import {
 import {
   applyParallaxCamera,
   applySeaCamera,
+  applySkyCamera,
   applyStageCamera,
 } from "@/lib/universe/map-camera-visual";
 import { getZoneArtTile } from "@/lib/universe/zone-art-tile";
+import { getIslandGround } from "@/lib/universe/island-ground";
 import { parseDevStatusOverrides } from "@/lib/universe/dev-map-flags";
 import type { ZoneStoriesBundle } from "@/lib/story-zone-query";
 import { mapDepthZ } from "@/lib/universe-depth";
@@ -120,6 +122,9 @@ function UniverseMapContent({
   const seaDayElRef = useRef<HTMLDivElement | null>(null);
   const seaNightElRef = useRef<HTMLDivElement | null>(null);
   const parallaxElRef = useRef<HTMLDivElement | null>(null);
+  /** 遠景天象：日月層與水面月光共用同一組視差位移，兩者才會維持對齊。 */
+  const skyElRef = useRef<HTMLDivElement | null>(null);
+  const moonGlitterElRef = useRef<HTMLDivElement | null>(null);
   const reducedRef = useRef(reduced);
   reducedRef.current = reduced;
   const [tabHidden, setTabHidden] = useState(false);
@@ -314,6 +319,19 @@ function UniverseMapContent({
           .join(", ");
       }
       applyParallaxCamera(parallaxElRef.current, pose, visualMeta);
+      applySkyCamera(skyElRef.current, pose, visualMeta);
+      if (moonGlitterElRef.current) {
+        applySkyCamera(moonGlitterElRef.current, pose, visualMeta);
+        // 月光帶保留 opacity crossfade；勿被視差 transform transition 整段覆寫掉。
+        moonGlitterElRef.current.style.transition = [
+          visualMeta.isAnimating
+            ? `transform ${meta.flyDurationMs}ms cubic-bezier(0.22, 1, 0.36, 1)`
+            : null,
+          "opacity 700ms ease",
+        ]
+          .filter(Boolean)
+          .join(", ");
+      }
     });
     return () => bindVisual(null);
   }, [bindVisual]);
@@ -406,6 +424,9 @@ function UniverseMapContent({
   const mapSection = (
     <section ref={sectionRef} className={styles.map} aria-label="車車宇宙樂園地圖">
       <div className={styles.nightSeaOverlay} aria-hidden="true" />
+      {/* v6 大氣層：海面縱向水深漸層 + 極淡暗角。與海面同為 screen-space（相機相對），
+          刻意不進 stage——這是鏡頭／空氣效果，本就該跟著視窗而非跟著世界跑。 */}
+      <div className={styles.atmosphere} aria-hidden="true" />
 
       <div
         className={styles.viewport}
@@ -444,6 +465,13 @@ function UniverseMapContent({
           />
         )}
 
+        {/* v6 水面月光：夜間限定，位於島之下 ⇒ 光打在海面而非蒙住島。 */}
+        <div
+          ref={moonGlitterElRef}
+          className={styles.moonGlitter}
+          aria-hidden="true"
+        />
+
         <div
           ref={stageElRef}
           className={styles.stage}
@@ -469,6 +497,10 @@ function UniverseMapContent({
               </radialGradient>
               <filter id="islandShadow" x="-30%" y="-30%" width="160%" height="160%">
                 <feGaussianBlur stdDeviation="7" />
+              </filter>
+              {/* 淺灘：比接地影更大的模糊半徑，散到完全無邊界（見 Art Bible §14.6）。 */}
+              <filter id="islandShoal" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="18" />
               </filter>
             </defs>
             {zones.map((zone) => {
@@ -502,16 +534,37 @@ function UniverseMapContent({
               );
             })}
 
-            {/* v5：島底單一短柔接地陰影（取代白硬 foam 環，見 Art Bible §0/§2）。 */}
+            {/* v6 淺灘光暈：水色、柔散、無邊界的水深漸變，讓島讀作泡在水裡。
+                刻意畫在接地影之下，且**不是**被 v5 移除的白硬 foam 環（見 Art Bible §14.6）。 */}
             {zones.map((zone) => {
-              if (getZoneArtTile(zone.id).mode !== "island") return null;
+              const ground = getIslandGround(zone.id, zone.px);
+              if (!ground) return null;
+              return (
+                <ellipse
+                  key={`shoal-${zone.id}`}
+                  cx={ground.shoal.cx}
+                  cy={ground.shoal.cy}
+                  rx={ground.shoal.rx}
+                  ry={ground.shoal.ry}
+                  fill="#cfe8f3"
+                  opacity="0.5"
+                  filter="url(#islandShoal)"
+                />
+              );
+            })}
+
+            {/* v5：島底單一短柔接地陰影（取代白硬 foam 環，見 Art Bible §0/§2）。
+                v6：尺寸改由 tile stageSize 推導，hero 島不再用一般島的影子。 */}
+            {zones.map((zone) => {
+              const ground = getIslandGround(zone.id, zone.px);
+              if (!ground) return null;
               return (
                 <ellipse
                   key={`contact-${zone.id}`}
-                  cx={zone.px.x}
-                  cy={zone.px.y + 30}
-                  rx="112"
-                  ry="34"
+                  cx={ground.shadow.cx}
+                  cy={ground.shadow.cy}
+                  rx={ground.shadow.rx}
+                  ry={ground.shadow.ry}
                   fill="#6b5a48"
                   opacity="0.18"
                   filter="url(#islandShadow)"
@@ -590,7 +643,7 @@ function UniverseMapContent({
 
       {/* 日月星：海洋滿版後改為 screen-space 固定天象裝飾（不隨鏡頭移動）；
           z:3 高於滿版海(stage z:1)與夜幕(z:2)，天象才不會被海面蓋掉 */}
-      <div className={styles.skyLayer} aria-hidden="true">
+      <div ref={skyElRef} className={styles.skyLayer} aria-hidden="true">
         <SkyBodies daylight={daylight} reduced={reduced} paused={paused} />
       </div>
 

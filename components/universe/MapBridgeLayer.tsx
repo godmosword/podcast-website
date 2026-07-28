@@ -14,6 +14,7 @@ type Props = {
  * muted＝連到 coming/planned 島時略淡，仍為實橋（非虛線）。
  */
 function ClayBridge({ d, muted }: { d: string; muted: boolean }) {
+  const shadowOpacity = muted ? 0.1 : 0.16;
   const glowOpacity = muted ? 0.28 : 0.48;
   const baseOpacity = muted ? 0.42 : 0.62;
   const faceOpacity = muted ? 0.7 : 0.95;
@@ -21,6 +22,18 @@ function ClayBridge({ d, muted }: { d: string; muted: boolean }) {
   const railOpacity = muted ? 0.35 : 0.55;
   return (
     <>
+      {/* v6 水面投影：往下位移一點的寬圓頭低透明描邊，讓棧道落在海面上而不是漂著。
+          沿用本層既有立場——不用 blur filter，寬圓頭低透明描邊本身就讀作柔影，最省 GPU。
+          寬度／位移刻意讓它探出外暈（30/2=15）之外，否則會被外暈整條蓋掉。 */}
+      <path
+        d={d}
+        fill="none"
+        stroke="#3f5d78"
+        strokeWidth="24"
+        strokeLinecap="round"
+        transform="translate(0, 7)"
+        opacity={shadowOpacity}
+      />
       <path
         d={d}
         fill="none"

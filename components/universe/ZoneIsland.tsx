@@ -1,8 +1,8 @@
 "use client";
 
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState, type CSSProperties } from "react";
 import type { ZoneDef, ZoneStatus } from "@/data/universe-zones";
-import { mapDepthZ } from "@/lib/universe-depth";
+import { islandHaze, mapDepthZ } from "@/lib/universe-depth";
 import type { ResolvedZone } from "@/lib/universe-map";
 import { getZoneArtTile, getZoneArtSrcSet } from "@/lib/universe/zone-art-tile";
 import { getZoneNightArtSrcSet } from "@/lib/universe/zone-art-src";
@@ -16,6 +16,7 @@ import ZoneMotionLayer from "./ZoneMotionLayer";
 import StatusOverlay from "./StatusOverlay";
 import { useZoneTransition } from "./useZoneTransition";
 import ZoneIslandTileArt from "./ZoneIslandTileArt";
+import ZoneNightLights from "./ZoneNightLights";
 import type { ZoneProgress } from "@/hooks/useZoneProgress";
 import styles from "./ZoneIsland.module.css";
 
@@ -137,31 +138,45 @@ function ZoneIsland({
           onAnimationEnd={onTransitionEnd}
         >
           <div className={styles.tileStack}>
-            <ZoneIslandTileArt
-              zoneId={zone.id}
-              artSrc={artSrc}
-              anchorUV={[ax, ay]}
-              reduced={reduced}
-              nightArtSrc={nightArtSrc}
-              night={night}
-            />
-            <IslandRoamerLayer
-              zoneId={zone.id}
-              tileW={tile.stageSize.w}
-              tileH={tile.stageSize.h}
-              mapScale={mapScale}
-              reduced={reduced}
-              paused={paused}
-              night={night}
-              focused={Boolean(active)}
-            />
-            <StatusOverlay status={effectiveStatus} paused={paused} transition={transition} />
-            <ZoneMotionLayer
-              zoneId={zone.id}
-              reduced={reduced}
-              paused={paused}
-              night={night}
-            />
+            {/* 大氣透視層：只掛靜態 filter、零 transform。
+                刻意不把 filter 加在已有 transform 的 .tileArt／.tileStack 上——
+                同層 filter＋子層 scale 會在 iOS 造成重影（見 .tileArt 註解）。 */}
+            <div
+              className={styles.tileHaze}
+              style={{ "--island-haze": islandHaze(zone.depthY) } as CSSProperties}
+            >
+              <ZoneIslandTileArt
+                zoneId={zone.id}
+                artSrc={artSrc}
+                anchorUV={[ax, ay]}
+                reduced={reduced}
+                nightArtSrc={nightArtSrc}
+                night={night}
+              />
+              <IslandRoamerLayer
+                zoneId={zone.id}
+                tileW={tile.stageSize.w}
+                tileH={tile.stageSize.h}
+                mapScale={mapScale}
+                reduced={reduced}
+                paused={paused}
+                night={night}
+                focused={Boolean(active)}
+              />
+              <ZoneNightLights
+                zoneId={zone.id}
+                night={night}
+                reduced={reduced}
+                paused={paused}
+              />
+              <StatusOverlay status={effectiveStatus} paused={paused} transition={transition} />
+              <ZoneMotionLayer
+                zoneId={zone.id}
+                reduced={reduced}
+                paused={paused}
+                night={night}
+              />
+            </div>
             {burst > 0 && isOpen && (
               <span className={styles.burstLayer} aria-hidden="true">
                 <StarBurst particles={burstParticles} />

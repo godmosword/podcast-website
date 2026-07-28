@@ -1,4 +1,10 @@
 .map {
+  /* 天象錨點單一資料源：日月（SkyBodies）與水面月光（.moonGlitter）分屬不同 z 層，
+     必須共用同一組座標，月光才會看起來真的是那顆月亮打下來的。 */
+  --sky-top: 36px;
+  --sky-right: 72px;
+  --sky-size: 64px;
+
   position: relative;
   width: 100%;
   /* 扣掉全站頂欄高度，填滿可視高度 */
@@ -53,6 +59,35 @@
   inset: 0;
   pointer-events: none;
   background-repeat: repeat;
+}
+
+/* v6 水面月光：自月心往下散開的柔光帶（夜間限定）。
+   刻意放在 .stage 之前（z 低於島）——月光是打在「海面」上的，
+   蓋過島嶼會變成島上蒙了一層霧。位置吃 .map 的 --sky-* 與日月同源。
+   不用 mask／blur：單一 radial-gradient 就足以讀作月光，且最省 GPU。 */
+.moonGlitter {
+  --glitter-w: 220px;
+
+  position: absolute;
+  top: calc(var(--sky-top, 36px) + var(--sky-size, 64px) / 2);
+  right: calc(
+    var(--sky-right, 72px) + var(--sky-size, 64px) / 2 - var(--glitter-w) / 2
+  );
+  width: var(--glitter-w);
+  bottom: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 46% 92% at 50% 0%,
+    rgba(214, 232, 255, 0.34) 0%,
+    rgba(196, 220, 252, 0.13) 32%,
+    transparent 72%
+  );
+  opacity: 0;
+  transition: opacity 700ms ease;
+}
+
+:global(html[data-theme="night"]) .moonGlitter {
+  opacity: 1;
 }
 
 /* screen-space 天象層（日月星）：蓋在滿版海與夜幕之上、招牌與控制鈕之下 */
@@ -165,6 +200,48 @@
 
 :global(html[data-theme="night"]) .nightSeaOverlay {
   opacity: 1;
+}
+
+/* v6 大氣層：修掉「全場一個 Z」——海面單一平鋪貼圖本身沒有任何遠近訊號。
+   兩段極低 alpha 疊加：
+   ① 縱向水深：頂端（遠）微微泛白＝空氣感，底端（近）加深＝水更深；
+      與 ZoneIsland 的 `--island-haze` 同向，兩者互相加強。
+   ② 暗角：把視線收往畫面中央的島群。
+   刻意不用 backdrop-filter／blur（iOS 合成成本），純漸層即可讀。
+   z-index 2 且排在 .nightSeaOverlay 之後 ⇒ 疊在夜間色溫罩之上、天象層（3）之下。 */
+.atmosphere {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background:
+    radial-gradient(
+      ellipse 78% 68% at 50% 46%,
+      transparent 52%,
+      rgba(42, 68, 104, 0.1) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 253, 246, 0.16) 0%,
+      transparent 34%,
+      rgba(58, 96, 140, 0.07) 100%
+    );
+}
+
+/* 夜間：暗角加重、頂端泛白改為冷月光微亮（場景仍由貼圖承擔主色，此層僅收邊）。 */
+:global(html[data-theme="night"]) .atmosphere {
+  background:
+    radial-gradient(
+      ellipse 74% 64% at 50% 46%,
+      transparent 46%,
+      rgba(8, 20, 44, 0.28) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(168, 196, 236, 0.08) 0%,
+      transparent 32%,
+      rgba(6, 18, 40, 0.16) 100%
+    );
 }
 
 /* ── 樂園招牌（標題花字 + 羅盤）：木牌質感沿用島名牌語彙，固定色不隨日夜反轉 ── */

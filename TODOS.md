@@ -385,6 +385,43 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 
 ---
 
+## 宇宙地圖視覺升級 v6：景深與夜晚（2026-07-28）
+
+> **問題：** 資產層（五島 diorama、海／雲／日月黏土 PNG）本來就好，但合成層幾乎沒做事——
+> 海是單一 300px 平鋪、無淺灘、無遠近差；五島共用同一顆硬寫接地橢圓；夜間島身只有
+> `brightness(0.93)`。整張圖讀起來像「五張漂亮貼紙貼在一張平鋪海面上」。
+> **決策：** Phase A／B 零資產先落地（拿到八成效果），Phase C 才動生圖成本。
+> **紅線守住：** 未動座標／`useMapCamera`／`ZoneSheet`／DESIGN.md「地圖不反轉」；
+> 未新增 `backdrop-filter`／CSS `blur()`；`MapControls`／`LockedIslandBubble`／`ZoneSheet` 的
+> `.module.css` 完全未動（契約測試不受影響）。
+
+| # | 項目 | 處置 | 驗證 |
+|---|------|------|------|
+| A1 | 島貼在海面上、無水深訊號 | 場景 svg 於接地影**之下**加水色柔散淺灘（非 v5 白硬 foam 環，分界寫進 Art Bible §14.6） | 視覺截圖；DESIGN.md／Art Bible 登記 |
+| A2 | 五島共用 `rx=112 ry=34`，hero 島影子偏小而顯得飄 | 新增 `lib/universe/island-ground.ts` 依 tile `stageSize` 推導淺灘＋接地影 | `island-ground.test.ts`（10 案，含「基準島與重構前完全一致」） |
+| A3 | 遠島與近島一樣銳利 | `islandHaze(depthY)` → `--island-haze`；filter 掛無 transform 的 `.tileHaze` 層，避開 iOS 重影 | `universe-depth.test.ts`（+5 案）；瀏覽器實測 `saturate(0.9625)` |
+| A4 | 海面無縱向景深、視線不收斂 | screen-space `.atmosphere`：上亮下深＋四角暗角；不進 `.stage`（歷史 OOM 點） | 視覺截圖 |
+| A5 | 橋漂在水面上 | 每座橋補下移的寬圓頭低透明投影描邊（沿用該層「不用 blur filter」立場） | `MapBridgeLayer.test.tsx` |
+| — | ~~7 個滿版橋 svg 合併成 1~~ | **放棄**：每座橋各自帶 `mapDepthZ(depthY,"bridge")` 才能與島**交錯**（同一座橋要能在遠島之前、近島之後）。合併＝只剩一個 z-index，該穿到遠島前的橋會被蓋掉 | 新增回歸測試鎖住「一橋一 svg」與交錯性質 |
+| B1 | 夜間水面沒有光源感 | 月心正下方柔光帶，層級**低於島**；與 `SkyBodies` 共用 `.map` 的 `--sky-*` 錨點 | 瀏覽器實測位置對齊 |
+| B2 | 夜間島身只是變暗 | `data/universe-zone-lights.ts` ＋ `ZoneNightLights`，每島 ≤3 顆亮核＋柔暈。**`hasNightArt` 翻 true 該島自動退場** | `ZoneNightLights.test.tsx`（9 案，含退場契約） |
+| B3 | 日月完全靜止在角落 | `applySkyCamera`（`PARALLAX_FAR = 0.06`）＋`SKY_MAX_DRIFT` 夾住位移——不夾的話月亮會整顆離開視窗；尺寸 56→64px | `map-camera-visual.test.ts`（+4 案） |
+| C0 | D4 凍結 | 補記解凍決策：同意人／比較基準／最低樣本數／回滾方式（見上方「地圖進化方向決策」） | — |
+| C1 | `sea.png` 1.95MB、Art Bible 說缺 `@2x` | **文件是錯的**：影像 API 方形上限即 1024，`needs2x` 早已是 `false`，再生只會得到另一張 1024 的海。§14.1 改為記錄刻意契約。PNG 壓縮**未做**（見下方待辦） | `verify:map-art` 綠 |
+| C2 | 沒有通用島圖生成腳本 | 新增 `scripts/generate-zone-night-art.ts`：參數化五島、`--dry-run`／`--only`／`--approve`、**日圖當 `images.edit` reference**（否則 crossfade 會變成島在變形）、輸出日／夜並排 contact sheet ＋ 剪影 IoU | `--dry-run` 通過；tsc／eslint 綠 |
+
+### 待辦（本輪未完成）
+
+- **C2/C3 實際生圖**：`npm run generate:zone-night`（5 次影像呼叫）→ 人工審 contact sheet →
+  `--approve` → 逐島翻 `hasNightArt`。**卡在成本閘門與人工審圖，需另行下令**。
+- **`sea.png`／`sea-night.png` 無損壓縮**（3.0MB）：sharp 的 PNG 重編碼**並非逐像素無損**
+  （實測 maxdiff 35），而環境無 `oxipng`／`zopflipng`／`optipng`。改動一張平鋪全圖的海會有
+  可見風險，且該 PNG 只是 WebP（57KB／18KB）之外的 fallback 路徑，實務上近乎沒人走。
+  要做應加 `oxipng` devDependency，另案評估。
+- **視覺基準重產**：4 張 `/adventures` 基準預期全部漂移，待人工比對後重新產生（VIS-DEBT-1）。
+
+---
+
 ## 宇宙地圖瀏覽簡化（2026-07-28）
 
 > Commit：`c040158`
@@ -762,7 +799,19 @@ D0 → D2-A(smoke) → D1 → D13-剩餘 → D3 → D14 → D6 ∥ D12
 
 > **地圖進化方向決策（2026-07-09，委員會 plan `61d098b` 後）**：
 > ① ~~**T3b camera 視覺更新外置**（zoom 期間重渲染隔離）~~——使用者回饋縮放些微卡頓後落地：`bindVisual` 命令式寫 stage／海面／視差，React cam 僅在 bucket／zoom 限／手勢結束 commit；`isInteracting` 暫停漫遊與島待機動畫。見本輪已完成。
-> ② **D4 五島夜間美術**（`hasNightArt` 管線已 wired、零資產）——**等數據解凍**：看兩週 story_completed／return_visit 基線；重開時屬重啟凍結日夜美術決策，須另行同意＋定解凍門檻（比較基準與最低樣本數），走 generate-map-art 管線（Leader/Opus、人工審圖、成本確認）。
+> ② ~~**D4 五島夜間美術**（`hasNightArt` 管線已 wired、零資產）——**等數據解凍**~~：**已解凍（2026-07-28）**，見下方解凍紀錄。
+
+> **D4 解凍紀錄（2026-07-28）**
+> - **同意人**：專案負責人（本輪視覺升級決策，選項「全開，含五島夜間島圖」）。
+> - **解凍理由**：本輪目標是把地圖從「五張貼紙貼在平鋪海面上」提升為有水深／空氣／夜晚的世界。
+>   零資產手段（淺灘、大氣透視、暗角、CSS 點燈、水面月光）已全部落地，
+>   夜間島身仍只是 `brightness(0.93)`，**剩下的天花板只能由夜圖突破**。
+> - **比較基準**：解凍前 4 週 `story_completed`／`return_visit`（夜間時段佔比）為 baseline。
+> - **最低樣本數**：夜圖上線後至少 2 週且 `return_visit` ≥ 100 筆才做結論；未達門檻不做加減碼判斷。
+> - **回滾**：把該島 `hasNightArt` 翻回 false 即恢復日圖（`ZoneIslandTileArt` 已有降級路徑，
+>   且 `ZoneNightLights` 的 CSS 點燈會自動回場），不需回滾程式碼。
+> - **管線**：`scripts/generate-zone-night-art.ts`（新增；`generate-map-art.ts` 只管 map 素材、不含 zone）。
+>   走 `--dry-run` 估量 → 生圖到 staging → 人工審 contact sheet（日／夜並排＋剪影 IoU）→ `--approve` → 翻 `hasNightArt`。
 
 > 分享鈕、平台排序、訂閱文案、viewport 縮放、sitemap 擴充等已上線，見 Completed；不再佔 Top 5 名額。
 ---

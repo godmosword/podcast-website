@@ -4,6 +4,23 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **宇宙地圖視覺升級 v6：從「五張貼紙」到「有水深／空氣／夜晚的世界」**。地圖的**資產層**（五島整島黏土 diorama、海／雲／日月 PNG）本來就好，但**合成層**幾乎沒做事，所有元素讀在同一個 Z 上。本輪全為 CSS／SVG，零新資產：
+  - **淺灘光暈**：島底加一顆更大更柔的水色橢圓（`#cfe8f3` ＋ `feGaussianBlur`，無邊界），島從「貼在海面上」變成「泡在水裡」。與 v5 移除的白硬 foam 環的分界寫進 Art Bible §14.6。
+  - **接地陰影不再硬寫**：原本五島共用 `rx=112 ry=34 cy=+30`，1.25× 的 hero 島（car-park）用了一般島的影子，所以看起來在飄。改由新的 `lib/universe/island-ground.ts` 依 tile `stageSize` 推導，基準島輸出與重構前完全一致（測試鎖定）。
+  - **大氣透視**：由 `islandHaze(depthY)` 推 `--island-haze`，遠島降飽和 ≤12%／降對比 ≤6%，遠近不再一樣銳利。filter 掛在新的無 transform `.tileHaze` 層，避開既有註解記載的 iOS「filter＋子層 transform 重影」。
+  - **海面景深＋暗角**：screen-space `.atmosphere` 兩段極低 alpha 漸層，上亮下深、四角收光。刻意不進 `.stage`（該層歷史上會讓 iOS Safari OOM）。
+  - **橋的水面投影**：七座棧道各補一條下移的寬圓頭低透明描邊，橋落在水面上而非漂著。沿用該層「不用 blur filter」的既有立場。
+  - **水面月光**（夜間）：月心正下方的柔光帶，層級**低於島**（打在海面上，蓋過島會變成島上蒙霧）。與 `SkyBodies` 共用 `.map` 的 `--sky-*` 錨點單一資料源。
+  - **夜間窗燈**（夜間，過渡方案）：`data/universe-zone-lights.ts` 資料驅動，每島 ≤3 顆，亮核＋柔暈雙段漸層。某島 `hasNightArt` 翻 true 後該島**自動退場**，不會與烘進夜圖的燈疊加。`prefers-reduced-motion` 只停呼吸、不熄燈。
+  - **日月遠景視差**：`applySkyCamera` 以 `PARALLAX_FAR = 0.06` 並**夾住位移**（`SKY_MAX_DRIFT`）——世界可平移數千 px，不夾的話月亮連同水面月光會整顆離開視窗。日月尺寸 56→64px。
+- **`generate-map-art` 的海面 `@2x` 契約澄清**：Art Bible §14.1 原寫「海面需 `@2x`」，但影像 API 方形上限即 `1024×1024`、`SPECS` 與 `verify-map-art.ts` 早已是 `needs2x: false`。再生一張只會得到另一張 1024 的海（零解析度增益，卻要重驗四邊無縫）。文件改為記錄這是刻意契約而非缺件。
+
+### Added
+
+- **`scripts/generate-zone-night-art.ts`**（D4 五島夜間點燈美術管線）。原本只有寫死 forest 的一次性腳本，`generate-map-art.ts` 又只管 map 素材不含 zone。新腳本參數化五島，支援 `--dry-run`／`--only`／`--approve`，並以**日圖當 `images.edit` 的 image reference**——夜圖與日圖會 crossfade，若夜圖是重新生成的另一座島，淡入時島會變形。另輸出日／夜並排 contact sheet 與**剪影 IoU**，讓審圖的人看得到剪影是否漂移。
+
 ### Fixed
 
 - **宇宙地圖點島沒有置中（正式站回饋）**：`targetToFlyParams` 拿 `zone.camera.center` 當島心，但那是島圖的**沙岸底錨點**（`anchorUV [0.5, 0.84]`）——84% 的島高在錨點上方，於是整座島被推到畫面上緣，1280×800 下車車樂園島頂實際被切掉約 117px。新增 `islandFocus()` 取 tile box 視覺中心並為木牌欄讓位；`flyTo` 新增 `fitBox` 把進島縮放夾到「島放得進畫面」（桌面算出的上限高於 1.6 故手感不變，390 手機從 1.6 落到約 1.15，島不再比螢幕寬）。

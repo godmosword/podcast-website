@@ -1,10 +1,13 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from "vitest";
 import {
+  PARALLAX_FAR,
   PARALLAX_NEAR,
   SEA_TILE,
+  SKY_MAX_DRIFT,
   applyParallaxCamera,
   applySeaCamera,
+  applySkyCamera,
   applyStageCamera,
 } from "./map-camera-visual";
 
@@ -45,5 +48,35 @@ describe("map-camera-visual", () => {
     expect(el.style.transform).toBe(
       `translate(${40 * PARALLAX_NEAR}px, ${-20 * PARALLAX_NEAR}px) scale(${pScale})`,
     );
+  });
+
+  it("applySkyCamera 用遠景係數，且比近景雲移動得少", () => {
+    const el = document.createElement("div");
+    applySkyCamera(el, cam, meta);
+    expect(el.style.transform).toBe(
+      `translate(${40 * PARALLAX_FAR}px, ${-20 * PARALLAX_FAR}px)`,
+    );
+    expect(Math.abs(40 * PARALLAX_FAR)).toBeLessThan(Math.abs(40 * PARALLAX_NEAR));
+  });
+
+  it("applySkyCamera 夾住位移，日月不會被平移推出視窗", () => {
+    const el = document.createElement("div");
+    // 世界可平移數千 px；未夾住的話月亮（及其水面月光）會整顆離開畫面。
+    applySkyCamera(el, { scale: 1, tx: 9000, ty: -9000 }, meta);
+    expect(el.style.transform).toBe(
+      `translate(${SKY_MAX_DRIFT}px, ${-SKY_MAX_DRIFT}px)`,
+    );
+  });
+
+  it("applySkyCamera 在 reduced-motion 下完全不位移", () => {
+    const el = document.createElement("div");
+    applySkyCamera(el, cam, { ...meta, reducedMotion: true });
+    expect(el.style.transform).toBe("none");
+  });
+
+  it("applySkyCamera 不縮放：天象遠到不該跟著 zoom 變大", () => {
+    const el = document.createElement("div");
+    applySkyCamera(el, { scale: 2.4, tx: 0, ty: 0 }, meta);
+    expect(el.style.transform).not.toContain("scale");
   });
 });

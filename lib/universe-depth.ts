@@ -40,3 +40,15 @@ export function mapDepthZ(y: number, band: MapDepthBand): number {
   if (band === "bubble") return BUBBLE_BASE + yy;
   return yy * DEPTH_SCALE + BAND_OFFSET[band];
 }
+
+/**
+ * 大氣透視強度（0＝最近、1＝最遠），由同一個 stage y 推導，與 `mapDepthZ` 共用深度語彙。
+ *
+ * 消費端是 `ZoneIsland` 的 `--island-haze`：遠島輕微降飽和／降對比／提亮，
+ * 讓五島不再全部一樣銳利。幅度刻意保守（Art Bible §14.2 遠景去飽和 15–25% 的下半段），
+ * 因為五島 y 差距遠小於真正的遠景，過強會讀成「島髒掉」而不是「島退後」。
+ */
+export function islandHaze(y: number): number {
+  const t = y / MAP_STAGE.height;
+  return Math.min(1, Math.max(0, 1 - t));
+}

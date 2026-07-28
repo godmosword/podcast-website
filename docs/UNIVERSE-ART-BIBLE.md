@@ -309,7 +309,13 @@ type MotionPart = {
 > `far-island-a/b`（地平線遠景剪影，曾含 `@2x`）已於 2026-07 移除：parallax 層改以前景雲承載景深，遠島剪影與海面滿版視覺衝突。移除範圍見 `lib/universe/map-art-src.ts`、`scripts/generate-map-art.ts`、`scripts/verify-map-art.ts`、`scripts/fix-map-art.ts`；`UniverseMapParallax.test.tsx` 保留「不再輸出 far-island」的防護測試。
 
 - 路徑集中於 `lib/universe/map-art-src.ts`（比照 `lib/universe/zone-art-src.ts`），前端不散寫字串。
-- 海面需 `@2x`（跟隨 pan/zoom 放大）；雲可只 1x。
+- ~~海面需 `@2x`（跟隨 pan/zoom 放大）；雲可只 1x。~~
+  **修正（v6，2026-07-28）：海面與雲皆只有 1x，這是刻意的契約，不是缺件。**
+  影像 API 方形上限即 `1024×1024`（`generate-map-art.ts` 的 `apiSize`／`outLong` 已到頂），
+  再生一張只會得到「另一張 1024 的海」——解析度零增益，卻要重驗四邊無縫、且整張海會換掉。
+  故 `SPECS` 與 `verify-map-art.ts` 的 `needs2x` 對海面一律 `false`。
+  海面平鋪為 `SEA_TILE = 300` stage px，1024 來源在 1x 已是約 3.4× 超取樣；
+  僅「最大縮放 × 高 DPR」時會略軟，屬可接受取捨。
 
 ### 14.2 材質一致性（與島同世界）
 - **鐵律同 §8：生任何 map 素材都餵 `car-park.png` 當 image/style reference**，共用 `CLAY_STYLE_PREFIX` + `CLAY_NEGATIVE`。
@@ -333,7 +339,26 @@ type MotionPart = {
 - [ ] 海面上下左右**無縫平鋪**、無明顯接縫
 - [ ] 遠景（雲/遠島）去飽和、柔邊，不搶島
 - [ ] 透明底素材為乾淨 RGBA，無白邊殘留
-- [ ] 海面/遠島 `@2x` 已生、尺寸對齊契約
+- [ ] ~~海面/遠島 `@2x` 已生~~ → 見 §14.1 修正：海面／雲一律只 1x，`needs2x: false`
+
+---
+
+## 14.6 淺灘光暈（v6 新增，與 foam 環的分界）
+
+v5 拿掉「白硬 foam 環」之後，島直接坐在平鋪海面上，缺少任何水深訊號。
+v6 補回的是**淺灘**，不是 foam 環——兩者的分界必須寫死，否則日後 review 會誤判為復活死碼：
+
+| | v5 移除的 foam 環（禁止） | v6 淺灘光暈（允許） |
+|---|---|---|
+| 顏色 | 近純白 `#eaf7fc` | 海淺色 `#cfe8f3` |
+| 邊緣 | `stroke` 描邊，硬邊界 | `fill` ＋ 大 `feGaussianBlur`，無邊界 |
+| 讀作 | 浪花／貼紙勾邊 | 島周圍變淺的水 |
+
+- 幾何由 `lib/universe/island-ground.ts` 依該島 tile `stageSize` 推導，**不得硬寫常數**
+  （v5 曾五島共用 `rx=112`，導致 1.25× 的 hero 島用了一般島的影子而看起來在飄）。
+- 淺灘比接地影**更寬且更扁**、位置略高：更寬＝水向外散開，更扁＝不會被讀成第二顆影子，
+  略高＝接地影仍是視覺上的接觸點。
+- 畫序固定：淺灘 → 接地影 → 島。
 
 ---
 

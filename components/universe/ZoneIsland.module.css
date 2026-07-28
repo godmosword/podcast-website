@@ -17,6 +17,19 @@
   height: 100%;
 }
 
+/* 大氣透視層：遠島（stage y 小）輕微降飽和／降對比／提亮，讓五島不再全部一樣銳利。
+   `--island-haze` 由 `islandHaze(depthY)` 於 ZoneIsland 寫入（0＝最近、1＝最遠）。
+   本層**只掛靜態 filter、不放任何 transform**——同層 filter＋子層 transform 是
+   .tileArt 註解裡那個 iOS 重影成因，這裡靠拆層避開。
+   幅度取 Art Bible §14.2 遠景去飽和區間的下半段：五島 y 差距小，過強會讀成島髒掉。 */
+.tileHaze {
+  position: absolute;
+  inset: 0;
+  filter: saturate(calc(1 - 0.12 * var(--island-haze, 0)))
+    contrast(calc(1 - 0.06 * var(--island-haze, 0)))
+    brightness(calc(1 + 0.03 * var(--island-haze, 0)));
+}
+
 .tileArt {
   position: relative;
   width: 100%;

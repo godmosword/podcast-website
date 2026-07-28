@@ -5,13 +5,14 @@
   overflow: hidden;
 }
 
+/* 座標吃 UniverseMap `.map` 的 --sky-* 天象錨點（與水面月光共用單一資料源）。 */
 .sun,
 .moon {
   position: absolute;
-  top: 36px;
-  right: 72px;
-  width: 56px;
-  height: 56px;
+  top: var(--sky-top, 36px);
+  right: var(--sky-right, 72px);
+  width: var(--sky-size, 64px);
+  height: var(--sky-size, 64px);
   object-fit: contain;
   transition: opacity 600ms ease, transform 600ms ease;
 }

@@ -96,6 +96,26 @@ Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範
 
 meta `theme-color`（夜）對齊 `--bg`：`lib/theme.ts` 的 `NIGHT_THEME_COLOR`。
 
+### 宇宙地圖景深層（v6，2026-07-28 登記）
+
+地圖過去所有元素讀在同一個 Z 上。以下五個**場景層**負責建立景深，全部是 CSS／SVG、零新資產；
+它們屬「固定美術色」允許清單（同木牌），不吃主題 token，但**皆不反轉**——夜間只調整強度，不換語意色。
+
+| 元素 | 位置 | 規則 |
+|------|------|------|
+| 淺灘光暈 | `UniverseMap.tsx` 場景 svg，接地影**之下** | 水色 `#cfe8f3` 低 alpha ＋ `feGaussianBlur`，**無邊界**。這不是 v5 移除的白硬 foam 環（硬邊／純白／勾邊），是水深漸變。尺寸由 `lib/universe/island-ground.ts` 依 tile `stageSize` 推導，不得硬寫 |
+| 接地陰影 | 同上 | Art Bible §2「單一短柔」；尺寸同樣由 `island-ground.ts` 推導，島放大時影子一起放大 |
+| 大氣透視 | `ZoneIsland` 的 `.tileHaze` | 由 `islandHaze(depthY)` 寫入 `--island-haze`；遠島降飽和 ≤12%、降對比 ≤6%。**只掛靜態 filter、不放 transform**（同層 filter＋子層 transform 在 iOS 會重影） |
+| 海面景深＋暗角 | `.atmosphere`（screen-space） | 兩段極低 alpha 漸層；相機相對而非世界相對（這是空氣／鏡頭效果）。不得放進 `.stage` |
+| 水面月光 | `.moonGlitter`（screen-space，**z 低於島**） | 夜間限定。月光打在海面上，蓋過島會變成島上蒙霧。位置與 `SkyBodies` 共用 `.map` 的 `--sky-*` 錨點 |
+
+夜間窗燈（`ZoneNightLights` ＋ `data/universe-zone-lights.ts`）為**過渡方案**：
+某島 `hasNightArt` 翻 true 後該島自動退場，避免與烘進夜圖的燈疊加。每島 ≤3 顆，
+亮核＋柔暈雙段漸層（純散開會讀成暖霧而非燈）；reduced-motion 只停呼吸、**不熄燈**。
+
+> 不用 `backdrop-filter`／CSS `blur()`：iOS 合成成本高且歷史上在此頁 OOM 過。
+> 需要柔化一律走 SVG `feGaussianBlur` 或寬圓頭低透明描邊。
+
 ## 裝飾（v0.2：克制留白）
 
 插畫與封面是視覺主角；裝飾預設關閉，僅在品牌點綴處極少量使用。

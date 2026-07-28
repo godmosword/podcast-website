@@ -1,0 +1,55 @@
+/* 夜間窗燈：零資產點燈（見 data/universe-zone-lights.ts）。
+   固定暖色美術色，不隨主題 token 反轉——這是島上的燈，不是 UI。 */
+.layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+  /* 島圖之上、漫遊車之下 */
+  z-index: 1;
+}
+
+/* 單顆燈：圓形暖光暈。aspect-ratio 讓高度跟著 width（相對 tile 寬）走，
+   translate(-50%,-50%) 把 u/v 當成光心而非左上角。 */
+/* 亮核 + 柔暈的雙段漸層。單純由實心散到透明會讀成「一團暖霧」而不是「一盞燈」——
+   要有一個小而近白的核心，眼睛才會判定那是光源本身。 */
+.light {
+  position: absolute;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    color-mix(in srgb, var(--light-color, #ffd98a) 40%, #fffdf4) 0%,
+    var(--light-color, #ffd98a) 17%,
+    color-mix(in srgb, var(--light-color, #ffd98a) 45%, transparent) 38%,
+    transparent 74%
+  );
+  opacity: 0.85;
+}
+
+.breathe {
+  animation: zoneLightBreathe 3.4s ease-in-out infinite alternate;
+}
+
+@keyframes zoneLightBreathe {
+  from {
+    opacity: 0.62;
+  }
+  to {
+    opacity: 0.95;
+  }
+}
+
+/* 手勢／離開視窗時暫停，納入既有 paused 預算。 */
+[data-paused] .breathe {
+  animation-play-state: paused;
+}
+
+/* 動效敏感：燈**不熄**，只是不呼吸——夜間辨識訊號不能因此消失。 */
+@media (prefers-reduced-motion: reduce) {
+  .breathe {
+    animation: none;
+    opacity: 0.85;
+  }
+}

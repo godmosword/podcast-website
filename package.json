@@ -34,6 +34,7 @@
     "backfill:captions": "tsx scripts/backfill-scene-captions.ts",
     "generate:map-art": "tsx --env-file-if-exists=.env.local scripts/generate-map-art.ts",
     "generate:forest-zone": "tsx --env-file-if-exists=.env.local scripts/generate-forest-zone-art.ts",
+    "generate:zone-night": "tsx --env-file-if-exists=.env.local scripts/generate-zone-night-art.ts",
     "fix:map-art": "tsx scripts/fix-map-art.ts",
     "fix:forest-zone": "tsx scripts/fix-forest-zone-art.ts",
     "generate:character-portraits": "tsx --env-file-if-exists=.env.local scripts/generate-character-portraits.ts",
