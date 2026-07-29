@@ -36,7 +36,7 @@
 
 - [x] 現況盤點＋目標架構＋`/api/v1` 契約草案＋分階段切片：[docs/IOS-APP-ARCHITECTURE.md](./docs/IOS-APP-ARCHITECTURE.md)  `b3f570a`
 - [x] **P1：** 網站 `GET /api/v1/stories`（+ `{slug}`／`meta`）+ 契約測試 — 見 [docs/IOS-APP-ARCHITECTURE.md](./docs/IOS-APP-ARCHITECTURE.md) §6／§9  `d565fff`
-- [x] **P2：** SwiftUI 骨架（列表→詳情→串流播放）於 monorepo [`ios/`](./ios/README.md)  `PENDING_HASH`
+- [x] **P2：** SwiftUI 骨架（列表→詳情→串流播放）於 monorepo [`ios/`](./ios/README.md)  `001ebe6`
 - [ ] **P3+（未開工）：** 本機進度／離線／Universal Links — 見同文件 §9
 
 ### 宇宙巢狀導覽（M0–M3）
