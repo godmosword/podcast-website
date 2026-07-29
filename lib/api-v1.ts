@@ -46,6 +46,8 @@ export type ApiV1ChannelMeta = {
 };
 
 const CACHE_CONTROL = "public, max-age=3600, s-maxage=3600";
+/** 404 用；避免 CDN 把「這集還不存在」快取住。 */
+const NO_STORE = "no-store";
 
 /** 相對路徑 → 絕對 URL；已是 http(s) 則原樣回傳。 */
 export function toAbsoluteUrl(pathOrUrl: string, siteUrl = getSiteUrl()): string {
@@ -150,19 +152,27 @@ export function getChannelMetaApi(siteUrl = getSiteUrl()): ApiV1ChannelMeta {
 /** 統一 JSON 回應（長快取；內容來自 SSG 靜態目錄）。 */
 export function apiV1Json(
   body: unknown,
-  init: { status?: number } = {},
+  init: { status?: number; cacheControl?: string } = {},
 ): Response {
   return Response.json(body, {
     status: init.status ?? 200,
     headers: {
-      "Cache-Control": CACHE_CONTROL,
+      "Cache-Control": init.cacheControl ?? CACHE_CONTROL,
     },
   });
 }
 
-/** 404 契約：`{ "error": "not_found" }` */
+/**
+ * 404 契約：`{ "error": "not_found" }`
+ *
+ * 刻意**不**快取：新集上線前若有客戶端先打過該 slug，
+ * 公開快取會讓 CDN 把 not_found 留一小時。
+ */
 export function apiV1NotFound(): Response {
-  return apiV1Json({ error: "not_found" }, { status: 404 });
+  return apiV1Json(
+    { error: "not_found" },
+    { status: 404, cacheControl: NO_STORE },
+  );
 }
 
 /** 供測試／除錯：目錄長度應與 getStories 一致。 */

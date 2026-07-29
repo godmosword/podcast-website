@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { getStory, storiesByNewest } from "@/data/content";
 import {
+  apiV1Json,
   apiV1NotFound,
   apiV1StoryCount,
   getChannelMetaApi,
@@ -115,5 +116,17 @@ describe("apiV1NotFound", () => {
     const res = apiV1NotFound();
     expect(res.status).toBe(404);
     await expect(res.json()).resolves.toEqual({ error: "not_found" });
+  });
+
+  it("404 不進公開快取（新集上線前不該被 CDN 鎖住）", () => {
+    expect(apiV1NotFound().headers.get("Cache-Control")).toBe("no-store");
+  });
+});
+
+describe("apiV1Json", () => {
+  it("200 預設長快取", () => {
+    expect(apiV1Json({ ok: true }).headers.get("Cache-Control")).toBe(
+      "public, max-age=3600, s-maxage=3600",
+    );
   });
 });
