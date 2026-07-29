@@ -3,7 +3,16 @@
 > **分支紀律：** `main` = 網頁版開發線；`cursor/ios-app-architecture-1652` = iOS 開發線（PR #69）。
 > 兩者皆有 GitHub ruleset 擋刪除、不擋 force push。
 >
+> **本 branch 的唯一目標＝把 App 送上 App Store。**
+> 網頁版功能開發一律回 `main`；本 branch 只接受「iOS 上架路徑上的改動」與「為此必需的網站介面」。
+> 送審清單見 [TODOS.md](../TODOS.md)「上架送審清單」三關卡。
+>
 > **本文回答一個問題：** 網頁版改了東西，什麼時候必須順帶改 iOS？
+
+> ⚠️ **Git 不會自動同步。** `main` 有新 commit 時，本 branch **不會**自己更新，
+> 護欄也不會自己叫——因為護欄（`lib/api-v1.contract-guard.test.ts`）目前只存在於本 branch，
+> `main` 上沒有。必須手動 `git merge main` 之後跑 `npm run check`，護欄才會在這裡發聲。
+> 詳見 §4。
 
 ## 1. 這條 branch 裡有什麼
 

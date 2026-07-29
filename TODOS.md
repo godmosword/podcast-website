@@ -80,10 +80,32 @@
 - [ ] **無護欄的缺口：** 新增 `/story`、`/stories` 以外的故事路由前綴，或搬動 `/story/{slug}/play`，會同時打破 AASA `IOS_APP_LINK_COMPONENTS` 與 `DeepLinkParser`，**目前沒有測試會提醒**。（既有 EP1–6 舊 slug redirect 已實測安全：`/api/v1/stories/ev` → `ep-1`） · P2 · M · 依賴 無
 - [ ] **合併後遷移：** PR #69 併入 `main` 後，`ios/Fixtures` 的每集 churn 會落在 `main`，應併進 [docs/EPISODE-WORKFLOW.md](./docs/EPISODE-WORKFLOW.md)；並重新決定 iOS 是否另開長期 branch／獨立 repo · P2 · M · 依賴 PR #69 合併
 
-#### 上架前置（非 code）
+#### 上架送審清單（本 branch 的收斂目標）
 
-- [ ] **N4：** 媒體授權對齊 — [docs/IOS-APP-ARCHITECTURE.md](./docs/IOS-APP-ARCHITECTURE.md) §3.4 明訂「App 內嵌同一批媒體須走官方授權／發行路徑，**實作前**需產品／法務對齊並同步 [/legal](./app/legal/page.tsx)」，但 P3 已先落地下載功能且 `/legal` 未動；另 `/api/v1/stories` 已是公開、無 auth、無 rate limit 的全集 MP3 索引，與「禁止再散布」立場需明確決策紀錄 · P1 · M · 依賴 產品／法務
+> **本 branch 的唯一目標＝把 App 送上 App Store。** 網頁版功能開發一律回 `main`。
+> 下列三關全清才可送審；每關的順序不可跳（打不開 → 不能上傳 → 不能過審）。
+
+**關卡 A｜App 打不開／體驗壞掉（需 macOS）**
+
+見上方「iOS 待修」區塊：**B2**（進度回呼失效）、**N1**（看不到新集）為 P0；**N2**（無背景播放）、**N3**（備份未排除）為 P1。
+
+**關卡 B｜Archive 上傳會被 App Store Connect 擋（需 macOS）**
+
+- [ ] **A1（Blocking）：** **App Icon 是空的** — [`AppIcon.appiconset`](./ios/CheCheCar/Assets.xcassets/AppIcon.appiconset/) 只有 `Contents.json`（宣告 1024×1024 但無圖檔）。無 App Icon 無法上傳 · P0 · S · 依賴 設計素材
+- [ ] **A2（Blocking）：** **缺 `PrivacyInfo.xcprivacy`** — [`ProgressStore`](./ios/CheCheCar/Services/ProgressStore.swift) 使用 `UserDefaults`，屬 Apple **Required Reason API**（`NSPrivacyAccessedAPICategoryUserDefaults`，app 自有資料用理由碼 `CA92.1`）。未宣告會在上傳階段退件 · P0 · S · 依賴 macOS
+- [ ] **A3：** pbxproj 未設 `INFOPLIST_KEY_ITSAppUsesNonExemptEncryption`；未設會讓每次上傳都卡出口合規問答（本 App 僅 HTTPS，應為 `NO`） · P1 · S
+- [ ] **A4：** `DEVELOPMENT_TEAM = ""`、`MARKETING_VERSION = 0.2.0`：送審前需填 Team 並升為 `1.0.0` · P1 · S · 依賴 Apple Developer 帳號
+
+**關卡 C｜審查與法務**
+
+- [ ] **N4（Blocking）：** 媒體授權對齊 — [docs/IOS-APP-ARCHITECTURE.md](./docs/IOS-APP-ARCHITECTURE.md) §3.4 明訂「App 內嵌同一批媒體須走官方授權／發行路徑，**實作前**需產品／法務對齊並同步 [/legal](./app/legal/page.tsx)」，但 P3 已先落地下載功能且 `/legal` 未動；另 `/api/v1/stories` 已是公開、無 auth、無 rate limit 的全集 MP3 索引，與「禁止再散布」立場需明確決策紀錄 · P0 · M · 依賴 產品／法務
+- [ ] **A5：** Kids Category 決策 — 選了 Kids 就受更嚴限制（第三方分析、外部連結需家長閘門）。`OpenInAppCTA` 反向的「App 內連外」若存在需一併檢查 · P1 · M · 依賴 產品
+- [ ] **A6：** App Privacy 營養標籤（App Store Connect 填寫）＋ 隱私政策 URL · P1 · S · 依賴 產品
 - [ ] **P4 生效前置：** Vercel 設 `APPLE_TEAM_ID`（需重新部署）+ Xcode 填同一 Development Team + 裝機驗證 AASA · P1 · S · 依賴 Apple Developer 帳號
+- [ ] **A7：** App Store 素材：截圖（6.7"／6.5" 各一組）、描述、關鍵字、年齡分級問卷 · P2 · M · 依賴 設計素材
+
+**非送審阻擋（可延後）**
+
 - [ ] **文件一致性：** [docs/IOS-APP-ARCHITECTURE.md](./docs/IOS-APP-ARCHITECTURE.md) §1 仍寫「不新增 Route Handler、不開 Xcode 專案」，與抬頭「P0–P4 ✅」及實際交付矛盾 · P3 · S
 
 ### 宇宙巢狀導覽（M0–M3）
