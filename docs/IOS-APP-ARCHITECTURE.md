@@ -1,8 +1,8 @@
 # iOS App 架構研究（SwiftUI）
 
-> **狀態：** 研究／架構文件（本輪不實作程式）  
-> **決策：** 技術路線 = **原生 SwiftUI**；本輪範圍 = **僅文件**  
-> **日期：** 2026-07-29  
+> **狀態：** P0 架構文件 ✅；**P1 JSON API 已實作**（`/api/v1/stories`、`/api/v1/stories/[slug]`、`/api/v1/meta`）  
+> **決策：** 技術路線 = **原生 SwiftUI**；P0 僅文件，P1 為網站 API  
+> **日期：** 2026-07-29（P1 同日）  
 > **Canonical 網站：** `https://podcast-website-mu.vercel.app`（見 [`lib/site-url.ts`](../lib/site-url.ts)）
 
 ## 1. 為什麼現在寫這份文件
@@ -43,7 +43,9 @@
 | 完整逐字稿 | `{site}/story/{slug}/transcript.vtt` | WebVTT（**不是**翻頁場景字幕） |
 | 訂閱／許願 | `/api/subscribe`、`/api/zone-wish` | Email／地圖許願，**非**集目 API |
 
-**沒有：** 公開 JSON 集目 API、OpenAPI、Universal Links（`apple-app-site-association`）、自訂 URL scheme、帳號系統。
+**沒有（P0 時）：** 公開 JSON 集目 API、OpenAPI、Universal Links（`apple-app-site-association`）、自訂 URL scheme、帳號系統。
+
+**P1 已補：** `GET /api/v1/stories`、`GET /api/v1/stories/[slug]`、`GET /api/v1/meta`（見 §6）。仍無 OpenAPI／Universal Links／帳號。
 
 ### 3.3 網站有、但未對外暴露的能力（App 差異化候選）
 
@@ -108,18 +110,19 @@ flowchart LR
 | 元件 | 建議 |
 |------|------|
 | **iOS 專案** | 獨立 Git repo（或 monorepo `ios/`）；SwiftUI + AVFoundation；最低部署版本建議 iOS 17+ |
-| **目錄來源** | 長期：本站 **JSON API**（包 `getStories()`／單集詳情）；過渡期可 parse `/feed.xml` 驗證播放鏈 |
+| **目錄來源** | **已上線：** 本站 **JSON API**（[`lib/api-v1.ts`](../lib/api-v1.ts)）；RSS `/feed.xml` 仍為 podcast 目錄／備援 |
 | **媒體** | HTTPS 串流或下載快取；URL 與網站 `storyCoverPath`／`storyAudioUrl` 對齊 |
 | **進度** | App 內 `UserDefaults`／SwiftData，欄位對齊網站 `favorites` + `continue`（見 §7）；**不**假設與 PWA `cheche:progress` 互通 |
 | **深連結** | Universal Links：`/story/{slug}`、`/story/{slug}/play`、可選 `/adventures?zone=` |
 
-## 6. 建議 JSON API 契約（未來實作，本輪不寫 code）
+## 6. JSON API 契約（P1 已實作）
 
-> 設計原則：薄包裝現有 `data/content.ts` + 靜態路徑；**不**把 GameKit／Neon 訂閱塞進 v1；版本前綴 `/api/v1`；回應 JSON、`Cache-Control` 可長（SSG 內容）。
+> 實作：[`lib/api-v1.ts`](../lib/api-v1.ts)；路由：`app/api/v1/stories`、`app/api/v1/stories/[slug]`、`app/api/v1/meta`。  
+> 原則：薄包裝 `data/content.ts` + 靜態路徑；**不**把 GameKit／Neon 訂閱塞進 v1；版本前綴 `/api/v1`；`Cache-Control: public, max-age=3600, s-maxage=3600`。
 
 ### 6.1 `GET /api/v1/stories`
 
-回傳集目摘要（列表用）：
+回應：`{ "stories": StoryListItem[] }`（最新在前）。
 
 ```ts
 type StoryListItem = {
@@ -141,11 +144,11 @@ type StoryListItem = {
 };
 ```
 
-實作錨點：`getStories()`／`storiesByNewest()`、`storyCoverPath`、`storyAudioUrl`、`hasVtt`／transcript helpers。
+實作錨點：`listStoriesApi()` ← `storiesByNewest()`、`storyCoverPath`、`storyAudioUrl`、`hasTranscriptVtt`。
 
 ### 6.2 `GET /api/v1/stories/{slug}`
 
-列表欄位 + 播放器所需：
+列表欄位 + 播放器所需（頂層物件，非包在 `story` 鍵下）：
 
 ```ts
 type StoryDetail = StoryListItem & {
@@ -159,6 +162,8 @@ type StoryDetail = StoryListItem & {
 ```
 
 **刻意省略 v1：** `familyActivity`／`parentGuide`／`episodeFaq`（家長網頁為主通路；App 需要時再加 `?include=parents`）。
+
+未知 slug → `404` `{ "error": "not_found" }`。
 
 ### 6.3 `GET /api/v1/meta`
 
@@ -182,10 +187,7 @@ type ChannelMeta = {
 
 ### 6.5 過渡策略
 
-在 JSON API 上線前，Swift 原型可：
-
-1. 解析 `/feed.xml` 取得 `slug`／音檔／封面；
-2. 翻頁圖用慣例 `{site}/stories/{slug}/{nn}.jpg`（`pageCount` 需 HEAD 探測或暫時寫死，**不佳**——故正式版仍應做 JSON）。
+Swift 原型可直接打 JSON API；`/feed.xml` 僅作 podcast／備援，不必再 HEAD 探測翻頁圖。
 
 ## 7. SwiftUI 模組草圖（獨立專案）
 
@@ -219,8 +221,8 @@ type ChannelMeta = {
 
 | 階段 | 範圍 | 主要異動面 |
 |------|------|------------|
-| **P0** | 本文件 + 產品／法務確認媒體進 App | `docs/` のみ（本輪） |
-| **P1** | 網站 `GET /api/v1/stories` (+ `{slug}`、`meta`) + 契約測試 | `app/api/v1/**`、`lib/*` 薄層、vitest |
+| **P0** | 本文件 + 產品／法務確認媒體進 App | `docs/` ✅ |
+| **P1** | 網站 `GET /api/v1/stories` (+ `{slug}`、`meta`) + 契約測試 | `lib/api-v1.ts`、`app/api/v1/**`、vitest ✅ |
 | **P2** | SwiftUI 骨架：列表 → 詳情 → 播放（串流） | 獨立 iOS repo |
 | **P3** | 本機進度、收藏、繼續聽、基本離線 | iOS |
 | **P4** | Universal Links + 官網 CTA「用 App 看圖聽」 | 網站 AASA + 文案 |
@@ -255,11 +257,12 @@ type ChannelMeta = {
 | 家長資料說明 | [`docs/FOR-PARENTS-DATA.md`](./FOR-PARENTS-DATA.md) |
 | 平台連結 | [`lib/platforms.ts`](../lib/platforms.ts) |
 
-## 12. 本輪交付清單
+## 12. 交付清單
 
-- [x] 現況盤點與可消費面
-- [x] SwiftUI + JSON API 目標架構
-- [x] `/api/v1` 契約草案
+- [x] 現況盤點與可消費面（P0）
+- [x] SwiftUI + JSON API 目標架構（P0）
+- [x] `/api/v1` 契約草案（P0）→ **已實作（P1）**
 - [x] 分階段切片與紅線
-- [ ] 程式實作（**明確排除**）
-- [ ] Xcode 專案（**明確排除**）
+- [x] P1 程式：`lib/api-v1.ts` + Route Handlers + vitest
+- [ ] Xcode／SwiftUI 專案（P2+）
+- [ ] Universal Links／AASA（P4）
