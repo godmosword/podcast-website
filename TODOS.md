@@ -38,7 +38,7 @@
 - [x] **P1：** 網站 `GET /api/v1/stories`（+ `{slug}`／`meta`）+ 契約測試 — 見 [docs/IOS-APP-ARCHITECTURE.md](./docs/IOS-APP-ARCHITECTURE.md) §6／§9  `d565fff`
 - [x] **P2：** SwiftUI 骨架（列表→詳情→串流播放）於 monorepo [`ios/`](./ios/README.md)  `001ebe6`
 - [x] **P3：** 收藏／繼續聽／基本離線 — [`ProgressStore`](./ios/CheCheCar/Services/ProgressStore.swift)／[`OfflineLibrary`](./ios/CheCheCar/Services/OfflineLibrary.swift)  `4acb77d`
-- [x] **P4：** Universal Links＋官網 CTA — AASA／[`OpenInAppCTA`](./components/OpenInAppCTA.tsx)／Associated Domains  `PENDING_HASH`
+- [x] **P4：** Universal Links＋官網 CTA — AASA／[`OpenInAppCTA`](./components/OpenInAppCTA.tsx)／Associated Domains  `d34ba77`
 - [ ] **P5+（未開工）：** 睡前定時／反思 UI — 見同文件 §9
 
 ### 宇宙巢狀導覽（M0–M3）
