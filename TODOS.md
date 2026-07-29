@@ -7,7 +7,9 @@
 
 > 格式：每項一段，行末標 `優先序 · 工時(人工) · 依賴`。工時 S/M/L。
 > **紀律：** 條目打 ✅ 時必須附 commit hash。
-> **資料基準（2026-07-18）：** `storiesByNewest()` **20 集**、最新 **`ep-20`**（全幕 18 頁）；`data/games.ts` 見下表。
+> **資料基準（2026-07-29）：** `storiesByNewest()` **23 集**、最新 **`ep-23`**（2026-07-28）。
+> **出圖落後：** `ep-21`／`ep-23` 只有 `01.jpg` + 音檔、尚未跑出圖管線（多頁插圖 **21/23** 集）；最新有全幕插圖的是 **`ep-22`（24 頁）**。
+> 完整逐字稿與 episode FAQ 覆蓋皆 **23/23**（`verify:geo`）。`data/games.ts` 見下表。
 >
 > **現役遊戲（canon，對齊 `data/games.ts`）：** `candy-match` 繽紛消消樂 · `car-adventure` 車車大冒險 · `block-drop` 繽紛樂園 · `candy-kart` 繽紛卡丁車 · `snowboard` 阿蹦雪山衝刺 · `coloring-book` 繪本著色。
 > **歷史 slug：** `kart`／`pirate-kart`／`car-star`／`car-mission` 已退役，見 [archive](./docs/archive/TODOS-completed-2026-07-11.md)。
@@ -100,6 +102,18 @@
 - [x] useRoamerSim idle／joyride／crossing  `0206042`
 - [x] 層接 LOD＋關巡邏＋稀有跨島  `ddeed40`
 - [x] Art Bible §12.8／TODOS 對齊  `8ce39f6`
+
+### 本輪已完成（2026-07-29）
+
+> 宇宙地圖召喚式探索抽屜＋鎖島減法（移除 `LockedIslandBubble` legacy）。詳見 [CHANGELOG.md](./CHANGELOG.md) `[Unreleased]`。
+
+| ID | 說明 |
+|----|------|
+| feat(universe): 召喚把手「來這裡逛逛」＋非模態探索抽屜（`?sheet=1`） | `cc299b4` |
+| feat(universe): 島星章滿星 chip 進場里程碑 | `cc299b4` |
+| chore(universe): 刪除 `LockedIslandBubble` 及契約測（生產零引用） | `cc299b4` |
+| docs: DESIGN 元件規格補探索抽屜／召喚把手 | `cc299b4` |
+| fix(universe): 召喚抽屜 scrim／焦點／h1／glyph／次層捲動（Opus 必修） | 見本 commit |
 
 ### 本輪已完成（2026-07-27）
 
@@ -446,7 +460,7 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 > `brightness(0.93)`。整張圖讀起來像「五張漂亮貼紙貼在一張平鋪海面上」。
 > **決策：** Phase A／B 零資產先落地（拿到八成效果），Phase C 才動生圖成本。
 > **紅線守住：** 未動座標／`useMapCamera`／`ZoneSheet`／DESIGN.md「地圖不反轉」；
-> 未新增 `backdrop-filter`／CSS `blur()`；`MapControls`／`LockedIslandBubble`／`ZoneSheet` 的
+> 未新增 `backdrop-filter`／CSS `blur()`；`MapControls`／`ZoneSheet` 的
 > `.module.css` 完全未動（契約測試不受影響）。
 
 | # | 項目 | 處置 | 驗證 |
@@ -551,7 +565,7 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 | 1 | 點小島未置中；想再點一次回原尺寸 | `targetToFlyParams` 把 `zone.camera.center`（＝`anchorUV [0.5, 0.84]` 的**沙岸底錨點**）當島心置中，84% 島高落在畫面上緣（1280×800 下 car-park 島頂被切約 117px） | 新增 `islandFocus(zoneId)`：焦點＝tile box 視覺中心＋木牌讓位 14px；`flyTo` 新增 `fitBox` 夾住「島放得進畫面」的縮放上限（桌面 >1.6 故手感不變，390 手機落到約 1.15）；`handleActivate` 對同島改 `router.push("/adventures")` | `lib/camera.test.ts`、`map-camera-utils.test.ts`、`useMapCamera.test.tsx`、e2e「點島後島真的置中」「再點一次同一座島」 |
 | 2 | 島上各位置介紹的文字擺放不夠簡潔有力 | 探索點標籤 0.72rem 同權重、隨鏡頭縮放變形（fit 下命中區僅約 29px）、被木牌壓在下層；詳情視窗兩顆同重量全寬按鈕 | 標籤改印刷 chip 13px/800＋反縮放（命中區固定 48px）＋`hotspot` 層深＋下半島 `data-flip="up"`＋鎖定點降權；詳情視窗置中單欄、島名降為徽章、標題升 1.7rem、只留一顆膠囊主 CTA、回島降為文字鈕 | `HotspotLayer.test.tsx` |
 | 3 | 夜間右下縮放鍵與背景融合 | `.btn` 吃 `--card`／`--cta-warm-fg`：夜間深靛底壓深靛夜海、字為 `#2a1808`（約 1.4:1） | 新增 `--map-chip*`（日夜不反轉）；`.btn` 改奶油底＋深棕字（字底 5.4:1、鈕對夜海約 7.9:1） | `MapControls.module.css.test.ts` |
-| 4 | 白色對話框「還在蓋」非常不清楚 | 硬白底＋`var(--ink)`（夜間近白字壓白底）；在島 button 的 stacking context 內被木牌永久遮蓋；不反縮放；`top: 8%` 配上第 1 點常已被切出畫面 | 改 `--map-chip*` 色票＋反縮放（keyframes 同步）＋加尾巴；DOM 搬到 button 之外的 sibling、走新的 `bubble` 層深、定位 tile box 頂緣 | `LockedIslandBubble.module.css.test.ts`、`ZoneIsland.bubble.test.tsx`、`universe-depth.test.ts` |
+| 4 | 白色對話框「還在蓋」非常不清楚 | 硬白底＋`var(--ink)`（夜間近白字壓白底）；在島 button 的 stacking context 內被木牌永久遮蓋；不反縮放；`top: 8%` 配上第 1 點常已被切出畫面 | 改 `--map-chip*` 色票＋反縮放（後續整體移除鎖島泡泡，改果凍回饋） | `ZoneIsland.bubble.test.tsx`、`universe-depth.test.ts` |
 | 5 | 探險小抄沒意義 | 面板 `pointer-events: none`、≤480px 本就 sr-only、狀態圖例島木牌 pill 已有 | 刪除 `MapGuide.{tsx,module.css}` 與兩支測試；`aria-describedby="universe-map-guide"` 改指 sr-only 操作說明 | `e2e/a11y.spec.ts`（`/adventures` 2 案綠） |
 
 ### 同輪順手清掉的既有紅燈
@@ -1150,7 +1164,7 @@ EP1–7 已用 `large-v3` 轉錄 + 自動簡轉繁（`data/subtitles/*.json`）�
 ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–10MB，總 50MB+）。睡前=手機弱網，載入慢。指令見 README；壓後本機聽確認音質再覆蓋。
 
 ### ~~每集專屬 FAQ（episodeFaq sidecar）~~　`P1 · M · 無`　〔content+eng〕 ✅ `165b44e`
-新增 `data/episode-faqs.ts` sidecar：每集 1 題緊扣該集劇情／主題的 FAQ（非模板換名），`data/content.ts` `enrichStory()` 合併進 `Story.episodeFaq`；`lib/story-geo.ts` `storyFaqs()` 有值時放最前面，其餘 3 題通用 FAQ 順序不變（可見區＝FAQPage JSON-LD 同一份資料）；有則附 1 行到 `llms-full`。契約補進 [docs/GEO-CONTENT-CONTRACT.md](./docs/GEO-CONTENT-CONTRACT.md#episodefaq已上線)。目前 `getStories()` 20 集**全數覆蓋**（`episodeFaqCoverage()`／`verify:geo` 摘要「Unique episode FAQ coverage」皆 20/20）；`verify:geo` 對 FAQ 缺漏／多餘 slug 會 fail，不得逐字重複 `familyActivity`／`reflectionPrompt`／`parentGuide`（`hasDuplicateGuideText` 迴歸測試）。測試：`data/episode-faqs.test.ts`、`lib/story-geo.test.ts`、`scripts/generate-llms-full.test.ts`。**待補齊：** 無（全數覆蓋）；新增集數時若暫無空寫優質題目，寧可留白，缺漏 slug 補在本行下次更新。
+新增 `data/episode-faqs.ts` sidecar：每集 1 題緊扣該集劇情／主題的 FAQ（非模板換名），`data/content.ts` `enrichStory()` 合併進 `Story.episodeFaq`；`lib/story-geo.ts` `storyFaqs()` 有值時放最前面，其餘 3 題通用 FAQ 順序不變（可見區＝FAQPage JSON-LD 同一份資料）；有則附 1 行到 `llms-full`。契約補進 [docs/GEO-CONTENT-CONTRACT.md](./docs/GEO-CONTENT-CONTRACT.md#episodefaq已上線)。目前 `getStories()` 23 集**全數覆蓋**（`episodeFaqCoverage()`／`verify:geo` 摘要「Unique episode FAQ coverage」皆 23/23，2026-07-29 覆核）；`verify:geo` 對 FAQ 缺漏／多餘 slug 會 fail，不得逐字重複 `familyActivity`／`reflectionPrompt`／`parentGuide`（`hasDuplicateGuideText` 迴歸測試）。測試：`data/episode-faqs.test.ts`、`lib/story-geo.test.ts`、`scripts/generate-llms-full.test.ts`。**待補齊：** 無（全數覆蓋）；新增集數時若暫無空寫優質題目，寧可留白，缺漏 slug 補在本行下次更新。
 
 ## 待議：主持人／創作者實體強化
 

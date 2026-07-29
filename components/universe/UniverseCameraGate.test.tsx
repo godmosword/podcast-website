@@ -21,17 +21,20 @@ function LatchProbe({
   onIsland,
   isAnimating,
   reducedMotion,
+  isMeasured = false,
 }: {
   targetKey: string;
   onIsland: boolean;
   isAnimating: boolean;
   reducedMotion: boolean;
+  isMeasured?: boolean;
 }) {
   const sheetReady = useSheetReadyLatch({
     targetKey,
     onIsland,
     isAnimating,
     reducedMotion,
+    isMeasured,
   });
   return <output data-testid="sheet-ready">{String(sheetReady)}</output>;
 }
@@ -81,6 +84,34 @@ function WorldToIslandHarness() {
         進島
       </button>
     </>
+  );
+}
+
+function IslandSheetHarness() {
+  const [isAnimating, setIsAnimating] = useState(false);
+  const sheetReady = useSheetReadyLatch({
+    targetKey: "island:dino",
+    onIsland: true,
+    isAnimating,
+    reducedMotion: false,
+  });
+  const zone = ZONES.find((item) => item.id === "dino")!;
+
+  return (
+    <UniverseCameraGateProvider value={{ sheetReady }}>
+      <ZoneSheet
+        zone={zone}
+        expanded={false}
+        onExpand={() => undefined}
+        onCollapse={() => undefined}
+      />
+      <button type="button" onClick={() => setIsAnimating(true)}>
+        開始飛
+      </button>
+      <button type="button" onClick={() => setIsAnimating(false)}>
+        飛抵
+      </button>
+    </UniverseCameraGateProvider>
   );
 }
 
@@ -156,6 +187,79 @@ describe("useSheetReadyLatch", () => {
     });
     expect(screen.getByTestId("sheet-ready").textContent).toBe("true");
   });
+
+  it("飛抵後快速換島：立刻 false，再飛抵才 true", () => {
+    render(<ControlledLatchHarness />);
+
+    act(() => {
+      screen.getByRole("button", { name: "開始飛" }).click();
+    });
+    act(() => {
+      screen.getByRole("button", { name: "飛抵" }).click();
+    });
+    expect(screen.getByTestId("sheet-ready").textContent).toBe("true");
+
+    act(() => {
+      screen.getByRole("button", { name: "換島" }).click();
+    });
+    expect(screen.getByTestId("sheet-ready").textContent).toBe("false");
+
+    act(() => {
+      screen.getByRole("button", { name: "開始飛" }).click();
+    });
+    act(() => {
+      screen.getByRole("button", { name: "飛抵" }).click();
+    });
+    expect(screen.getByTestId("sheet-ready").textContent).toBe("true");
+  });
+
+  it("flyTo no-op：量測後 isAnimating 從未 true 時 fallback 收斂", () => {
+    vi.useFakeTimers();
+
+    render(
+      <LatchProbe
+        targetKey="island:dino"
+        onIsland
+        isAnimating={false}
+        reducedMotion={false}
+        isMeasured
+      />,
+    );
+    expect(screen.getByTestId("sheet-ready").textContent).toBe("false");
+
+    act(() => {
+      vi.advanceTimersByTime(749);
+    });
+    expect(screen.getByTestId("sheet-ready").textContent).toBe("false");
+
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(screen.getByTestId("sheet-ready").textContent).toBe("true");
+
+    vi.useRealTimers();
+  });
+
+  it("量測前不啟動 no-op fallback（深連結競態維持 false）", () => {
+    vi.useFakeTimers();
+
+    render(
+      <LatchProbe
+        targetKey="island:dino"
+        onIsland
+        isAnimating={false}
+        reducedMotion={false}
+        isMeasured={false}
+      />,
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(10_000);
+    });
+    expect(screen.getByTestId("sheet-ready").textContent).toBe("false");
+
+    vi.useRealTimers();
+  });
 });
 
 describe("UniverseCameraGateContext", () => {
@@ -170,16 +274,22 @@ describe("UniverseCameraGateContext", () => {
 });
 
 describe("ZoneSheet sheetReady gate", () => {
-  it("!sheetReady 時 overlay inert、dialog aria-hidden 且帶 hidden class", () => {
+  const sheetProps = {
+    expanded: true,
+    onExpand: () => undefined,
+    onCollapse: () => undefined,
+  };
+
+  it("!sheetReady 時 overlay inert、region aria-hidden 且帶 hidden class", () => {
     const zone = ZONES.find((item) => item.id === "dino")!;
     const { container } = render(
       <UniverseCameraGateProvider value={{ sheetReady: false }}>
-        <ZoneSheet zone={zone} onClose={() => undefined} />
+        <ZoneSheet zone={zone} {...sheetProps} />
       </UniverseCameraGateProvider>,
     );
 
-    const dialog = screen.getByRole("dialog", { hidden: true });
-    expect(dialog.getAttribute("aria-hidden")).toBe("true");
+    const region = screen.getByRole("region", { hidden: true });
+    expect(region.getAttribute("aria-hidden")).toBe("true");
     const overlay = container.firstElementChild as HTMLElement;
     expect(overlay.hasAttribute("inert")).toBe(true);
     expect(container.querySelector('[class*="overlayHidden"]')).toBeTruthy();
@@ -191,7 +301,7 @@ describe("ZoneSheet sheetReady gate", () => {
     const zone = ZONES.find((item) => item.id === "dino")!;
     const { container } = render(
       <UniverseCameraGateProvider value={{ sheetReady: true }}>
-        <ZoneSheet zone={zone} onClose={() => undefined} />
+        <ZoneSheet zone={zone} {...sheetProps} />
       </UniverseCameraGateProvider>,
     );
 
@@ -199,11 +309,64 @@ describe("ZoneSheet sheetReady gate", () => {
     expect(container.querySelector('[class*="sheetHidden"]')).toBeNull();
   });
 
+  it("收合時 sheetReady 後顯示召喚把手", () => {
+    const zone = ZONES.find((item) => item.id === "dino")!;
+    render(
+      <UniverseCameraGateProvider value={{ sheetReady: true }}>
+        <ZoneSheet
+          zone={zone}
+          expanded={false}
+          onExpand={() => undefined}
+          onCollapse={() => undefined}
+        />
+      </UniverseCameraGateProvider>,
+    );
+
+    expect(screen.getByRole("button", { name: "來這裡逛逛" })).toBeTruthy();
+    expect(screen.queryByRole("region")).toBeNull();
+  });
+
+  it("!sheetReady 時召喚把手 disabled 且帶 hidden class", () => {
+    const zone = ZONES.find((item) => item.id === "dino")!;
+    const { container } = render(
+      <UniverseCameraGateProvider value={{ sheetReady: false }}>
+        <ZoneSheet
+          zone={zone}
+          expanded={false}
+          onExpand={() => undefined}
+          onCollapse={() => undefined}
+        />
+      </UniverseCameraGateProvider>,
+    );
+
+    const handle = screen.getByRole("button", { name: "來這裡逛逛" });
+    expect(handle.hasAttribute("disabled")).toBe(true);
+    expect(container.querySelector('[class*="summonHandleHidden"]')).toBeTruthy();
+    expect(container.querySelector('[class*="summonHandleReady"]')).toBeNull();
+  });
+
+  it("島路徑：鏡頭 settle 後召喚把手可點", () => {
+    render(<IslandSheetHarness />);
+
+    const handle = () =>
+      screen.getByRole("button", { name: "來這裡逛逛" });
+    expect(handle().hasAttribute("disabled")).toBe(true);
+
+    act(() => {
+      screen.getByRole("button", { name: "開始飛" }).click();
+    });
+    act(() => {
+      screen.getByRole("button", { name: "飛抵" }).click();
+    });
+
+    expect(handle().hasAttribute("disabled")).toBe(false);
+  });
+
   it("inert 且 sheetReady 時 overlay 穿透 class 存在、sheet 仍可見", () => {
     const zone = ZONES.find((item) => item.id === "dino")!;
     const { container } = render(
       <UniverseCameraGateProvider value={{ sheetReady: true }}>
-        <ZoneSheet zone={zone} onClose={() => undefined} inert suppressFocusTrap />
+        <ZoneSheet zone={zone} {...sheetProps} inert />
       </UniverseCameraGateProvider>,
     );
 

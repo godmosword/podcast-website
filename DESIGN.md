@@ -92,7 +92,7 @@ Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範
 | Accent 降飽和 | `--c-*`、`--night-link`、`--landing-heading` 比日間／舊夜版低一檔 chroma |
 | 頂欄不反轉 | `SiteNavBar` 桃色玻璃頂欄預設維持日間色；漢堡開啟時（行動＋night）頂欄微暗混入 `--bg` 銜接面板，關閉即恢復；不改 ThemeProvider |
 | Emoji 降飽和 | 行動選單／主題切換 glyph 用 `filter: saturate(0.55) brightness(0.92)`，不換成線稿 icon |
-| 地圖不反轉 | 宇宙地圖場景色固定印刷淺色（見紅線）。地圖 chrome（縮放鍵／探索點標籤／島泡泡）走 `--map-chip`／`--map-chip-2`／`--map-chip-ink`／`--map-chip-line`，`[data-theme="night"]` **不覆寫**——用 `--card`／`--ink` 會在深靛夜海上失去輪廓 |
+| 地圖不反轉 | 宇宙地圖場景色固定印刷淺色（見紅線）。地圖 chrome（縮放鍵／探索點標籤／召喚把手）走 `--map-chip`／`--map-chip-2`／`--map-chip-ink`／`--map-chip-line`，`[data-theme="night"]` **不覆寫**——用 `--card`／`--ink` 會在深靛夜海上失去輪廓 |
 
 meta `theme-color`（夜）對齊 `--bg`：`lib/theme.ts` 的 `NIGHT_THEME_COLOR`。
 
@@ -197,6 +197,7 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 | `GamePageShell` | 街機五款遊戲共同外框，負責返回導覽、可及性與資產預載 |
 | `ColoringPageShell` | 繪本著色活動外框（不掛 GameKit） |
 | `GameChrome` | 遊戲內暫停、音效與設定對話框 |
+| `ZoneSheet`／探索抽屜／召喚把手 | 進島後預設收合，底部「來這裡逛逛」召喚把手（觸控 ≥56px、`--map-chip*`）；展開為非模態 `region` 抽屜（`?sheet=1` 深連結）；兒童首屏故事卡、探索點次層；✕／Esc 收合 |
 
 ## 播放器狀態
 

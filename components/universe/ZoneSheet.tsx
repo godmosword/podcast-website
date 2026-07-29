@@ -17,26 +17,24 @@ import {
   sortHotspotsForDisplay,
 } from "@/lib/universe/hotspot";
 import type { ZoneStoriesBundle } from "@/lib/story-zone-query";
-import { useFocusTrap } from "@/hooks/useFocusTrap";
 import ParentTrustStrip from "@/components/ParentTrustStrip";
 import IconButton from "@/components/ui/IconButton";
-import ZoneLandmark from "./ZoneLandmark";
 import ZoneWishForm from "./ZoneWishForm";
 import { useUniverseCameraGate } from "./UniverseCameraGateContext";
 import styles from "./ZoneSheet.module.css";
 
 type ZoneSheetProps = {
   zone: ZoneDef | null;
-  onClose: () => void;
+  /** 抽屜是否展開；false 時只顯示召喚把手。 */
+  expanded: boolean;
+  onExpand: () => void;
+  /** ✕／Esc：收合抽屜（非離島）。 */
+  onCollapse: () => void;
   zoneStories?: ZoneStoriesBundle | null;
   /** 進度中樞：孩子已聽完的集數 slug（列表打星用）。 */
   completedSlugs?: ReadonlySet<string>;
   /** 島內熱點清單（與地圖座標層同源；點擊開 @modal）。 */
   hotspots?: readonly Hotspot[];
-  /** 進入島後把焦點移到島名 h1。 */
-  focusOnMount?: boolean;
-  /** 熱點 modal 開啟時關閉 sheet 的 focus trap，避免雙 trap。 */
-  suppressFocusTrap?: boolean;
   /** 熱點 modal 開啟時標記 inert，避免背景可聚焦。 */
   inert?: boolean;
 };
@@ -51,46 +49,66 @@ const SEGMENT_EMOJI: Record<LandingSegmentId, string> = {
 
 export default function ZoneSheet({
   zone,
-  onClose,
+  expanded,
+  onExpand,
+  onCollapse,
   zoneStories,
   completedSlugs,
   hotspots = [],
-  focusOnMount = false,
-  suppressFocusTrap = false,
   inert = false,
 }: ZoneSheetProps) {
   const panelRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
+  const handleRef = useRef<HTMLButtonElement>(null);
+  const explorePanelRef = useRef<HTMLDivElement>(null);
+  const wasExpandedRef = useRef(false);
   const titleId = useId();
   const [parentOpen, setParentOpen] = useState(false);
+  const [exploreOpen, setExploreOpen] = useState(false);
   const { sheetReady } = useUniverseCameraGate();
   const open = zone !== null;
-  const interactive = open && sheetReady && !suppressFocusTrap;
-  const escClosable = open && !suppressFocusTrap;
+  const escClosable = open && expanded && sheetReady && !inert;
 
-  useFocusTrap(interactive, panelRef, {
-    initialFocus: "container",
-  });
-
-  // 換島重置家長折疊，避免上一座島的展開狀態殘留。
+  // 換島重置折疊，避免上一座島的展開狀態殘留。
   useEffect(() => {
     setParentOpen(false);
+    setExploreOpen(false);
+    wasExpandedRef.current = false;
   }, [zone?.id]);
 
   useEffect(() => {
     if (!escClosable) return;
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") onCollapse();
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [escClosable, onClose]);
+  }, [escClosable, onCollapse]);
 
-  // 鏡頭飛抵後才聚焦島名，避免 SR 念看不見的內容。
+  // 展開→焦點進面板；收合→焦點還把手（非模態仍需 focus move）。
   useEffect(() => {
-    if (!open || !sheetReady || !focusOnMount || suppressFocusTrap) return;
-    titleRef.current?.focus();
-  }, [open, sheetReady, focusOnMount, zone?.id, suppressFocusTrap]);
+    if (!sheetReady || inert) return;
+    if (expanded) {
+      wasExpandedRef.current = true;
+      panelRef.current?.focus();
+      return;
+    }
+    if (wasExpandedRef.current) {
+      handleRef.current?.focus();
+    }
+  }, [expanded, sheetReady, inert, zone?.id]);
+
+  // 次層展開後捲入可視區，避免 40vh 盒底「按了沒反應」。
+  useEffect(() => {
+    if (!exploreOpen || !explorePanelRef.current) return;
+    const reduce =
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    explorePanelRef.current.scrollIntoView({
+      block: "nearest",
+      behavior: reduce ? "auto" : "smooth",
+    });
+  }, [exploreOpen]);
 
   if (!zone) return null;
 
@@ -98,24 +116,60 @@ export default function ZoneSheet({
   const carParkLinks = isCarPark ? getCarParkLinks() : [];
   const notifyHref = notifyMailto(zone.name);
   const parentPanelId = `${titleId}-parent`;
+  const explorePanelId = `${titleId}-explore`;
   const wishPanelId = `${titleId}-wish`;
   const isLocked = zone.status !== "open";
   const displayHotspots = sortHotspotsForDisplay(hotspots);
 
   const overlayClass = [
     styles.overlay,
+    expanded ? styles.overlayScrim : "",
     !sheetReady ? styles.overlayHidden : styles.overlayPassthrough,
     sheetReady && inert ? styles.overlayInertPassthrough : "",
   ]
     .filter(Boolean)
     .join(" ");
-  const sheetClass = [
-    styles.sheet,
-    sheetReady ? styles.sheetAnimate : styles.sheetHidden,
+
+  const handleClass = [
+    styles.summonHandle,
+    sheetReady ? styles.summonHandleReady : styles.summonHandleHidden,
   ]
     .filter(Boolean)
     .join(" ");
+
+  const sheetClass = [
+    styles.sheet,
+    sheetReady && expanded ? styles.sheetAnimate : styles.sheetHidden,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   const sheetInert = inert || !sheetReady;
+
+  if (!expanded) {
+    return (
+      <div
+        className={overlayClass}
+        role="presentation"
+        {...(!sheetReady || inert ? { inert: true } : {})}
+      >
+        <button
+          ref={handleRef}
+          type="button"
+          className={handleClass}
+          onClick={onExpand}
+          aria-label="來這裡逛逛"
+          aria-expanded="false"
+          disabled={!sheetReady || inert}
+        >
+          <span className={styles.summonHandleGlyph} aria-hidden="true">
+            👋
+          </span>
+          <span>來這裡逛逛</span>
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -125,17 +179,17 @@ export default function ZoneSheet({
     >
       <div
         ref={panelRef}
+        id={`${titleId}-panel`}
         className={sheetClass}
-        role="dialog"
-        aria-modal={sheetInert ? undefined : true}
-        aria-labelledby={titleId}
+        role="region"
+        aria-label={zone.name}
         aria-hidden={!sheetReady}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
         {sheetReady ? (
           <p className="sr-only" aria-live="polite">
-            已進入{zone.name}
+            已打開{zone.name}的探索抽屜
           </p>
         ) : null}
 
@@ -145,101 +199,19 @@ export default function ZoneSheet({
           variant="soft"
           icon="close"
           iconSize={20}
-          onClick={onClose}
+          onClick={onCollapse}
           aria-label="關閉"
         />
 
-        <div className={styles.header}>
-          <span className={styles.landmark} aria-hidden="true">
-            <ZoneLandmark zoneId={zone.id} status={zone.status} artTile={zone.artTile} />
-          </span>
-          <div>
-            <h1
-              id={titleId}
-              ref={titleRef}
-              className={styles.title}
-              tabIndex={-1}
-            >
-              {zone.name}
-            </h1>
-          </div>
-        </div>
-
-        <p className={styles.tagline}>{zone.teaser}</p>
-
-        {/* ── 未開放島：首屏少字；狀態／建造進度字樣已移除 ── */}
-        {!isCarPark ? (
-          <>
-            {zone.childHint ? (
-              <p className={styles.childHint}>{zone.childHint}</p>
-            ) : null}
-
-            <nav className={styles.links} aria-label={`${zone.name}入口`}>
-              <a
-                className={styles.linkBtnPrimary}
-                href="/stories"
-                onClick={() => trackUniverseSheetLink(zone.id, "/stories")}
-              >
-                去聽車車故事
-              </a>
-              {isLocked ? (
-                <a
-                  className={styles.linkBtnSecondary}
-                  href={notifyHref}
-                  onClick={() => trackUniverseSheetLink(zone.id, notifyHref)}
-                >
-                  通知我開幕
-                </a>
-              ) : null}
-            </nav>
-          </>
+        {!isCarPark && zone.childHint ? (
+          <p className={styles.childHint}>{zone.childHint}</p>
         ) : null}
 
-        {displayHotspots.length > 0 ? (
-          <nav className={styles.hotspots} aria-label={`${zone.name}探索點`}>
-            <h2 className={styles.hotspotsHeading}>
-              探索這座島・共 {displayHotspots.length} 個地點
-            </h2>
-            <ul className={styles.hotspotList}>
-              {displayHotspots.map((spot) => {
-                const href = hotspotDetailHref(zone.id, spot);
-                const action = spot.action;
-                const locked = action.type === "locked";
-                const icon =
-                  locked ? "·" : action.type === "story" ? "✦" : "↗";
-                const className = [
-                  locked ? styles.hotspotLocked : styles.hotspotLink,
-                  spot.featured ? styles.hotspotFeatured : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ");
-                return (
-                  <li key={spot.id}>
-                    <Link
-                      className={className}
-                      href={href}
-                      prefetch
-                      scroll={false}
-                      data-featured={spot.featured || undefined}
-                    >
-                      <span className={styles.hotspotIcon} aria-hidden="true">
-                        {icon}
-                      </span>
-                      <span className={styles.hotspotName}>{spot.name}</span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
-        ) : null}
-
-        {/* ── 故事清單（開放島與已有故事的鎖島共用）；第一集標「最新」 ── */}
         {zoneStories && zoneStories.total > 0 ? (
           <section className={styles.stories} aria-labelledby={`${titleId}-stories`}>
-            <h3 id={`${titleId}-stories`} className={styles.storiesHeading}>
+            <h2 id={`${titleId}-stories`} className="sr-only">
               {zone.status === "open" ? "這座島的故事" : "這座島已經有的故事"}
-            </h3>
+            </h2>
             <ul className={styles.storyList}>
               {zoneStories.previews.map((story, index) => (
                 <li key={story.slug}>
@@ -287,72 +259,159 @@ export default function ZoneSheet({
           </section>
         ) : null}
 
-        {/* ── 開放島（車車樂園）：四段內容支柱前置、平權可見 ── */}
-        {isCarPark ? (
-          <nav className={styles.segmentGrid} aria-label={`${zone.name}入口`}>
-            {carParkLinks.map((link) => (
+        {!isCarPark ? (
+          <nav className={styles.links} aria-label={`${zone.name}入口`}>
+            <a
+              className={styles.linkBtnPrimary}
+              href="/stories"
+              onClick={() => trackUniverseSheetLink(zone.id, "/stories")}
+            >
+              去聽車車故事
+            </a>
+            {isLocked ? (
               <a
-                key={link.id}
-                className={
-                  link.id === "stories"
-                    ? `${styles.segmentTile} ${styles.segmentTilePrimary}`
-                    : styles.segmentTile
-                }
-                href={link.href}
-                onClick={() => trackUniverseSheetLink(zone.id, link.href)}
-                {...(link.external
-                  ? { target: "_blank", rel: "noopener noreferrer" }
-                  : {})}
+                className={styles.linkBtnSecondary}
+                href={notifyHref}
+                onClick={() => trackUniverseSheetLink(zone.id, notifyHref)}
               >
-                <span className={styles.segmentEmoji} aria-hidden="true">
-                  {SEGMENT_EMOJI[link.id]}
-                </span>
-                <span className={styles.segmentLabel}>
-                  {link.label}
-                  {link.external ? <span aria-hidden="true"> ↗</span> : null}
-                </span>
+                通知我開幕
               </a>
-            ))}
+            ) : null}
           </nav>
         ) : null}
 
-        {/* ── 未開放島：溫和導向（softLinks），首屏直接呈現 ── */}
-        {!isCarPark ? (
-          <>
-            {zone.softLinks && zone.softLinks.length > 0 ? (
-              <nav
-                className={styles.softLinks}
-                aria-label={`${zone.name}可以先逛`}
+        {displayHotspots.length > 0 ||
+        (isCarPark && carParkLinks.length > 0) ||
+        (!isCarPark && zone.softLinks && zone.softLinks.length > 0) ? (
+          <div className={styles.exploreDisclosure}>
+            <button
+              type="button"
+              className={styles.exploreToggle}
+              aria-expanded={exploreOpen}
+              {...(exploreOpen ? { "aria-controls": explorePanelId } : {})}
+              onClick={() => setExploreOpen((value) => !value)}
+            >
+              看看這座島有什麼
+            </button>
+
+            {exploreOpen ? (
+              <div
+                ref={explorePanelRef}
+                id={explorePanelId}
+                className={styles.explorePanel}
               >
-                {zone.softLinks.map((link) => (
-                  <a
-                    key={link.href}
-                    className={styles.softLink}
-                    href={link.href}
-                    onClick={() => trackUniverseSheetLink(zone.id, link.href)}
-                    {...(link.external
-                      ? { target: "_blank", rel: "noopener noreferrer" }
-                      : {})}
+                {displayHotspots.length > 0 ? (
+                  <nav
+                    className={styles.hotspots}
+                    aria-label={`${zone.name}探索點`}
                   >
-                    {link.label}
-                    {link.external ? <span aria-hidden="true"> ↗</span> : null}
-                  </a>
-                ))}
-              </nav>
+                    <h2 className={styles.hotspotsHeading}>
+                      探索這座島・共 {displayHotspots.length} 個地點
+                    </h2>
+                    <ul className={styles.hotspotList}>
+                      {displayHotspots.map((spot) => {
+                        const href = hotspotDetailHref(zone.id, spot);
+                        const action = spot.action;
+                        const locked = action.type === "locked";
+                        const icon =
+                          locked ? "·" : action.type === "story" ? "✦" : "↗";
+                        const className = [
+                          locked ? styles.hotspotLocked : styles.hotspotLink,
+                          spot.featured ? styles.hotspotFeatured : "",
+                        ]
+                          .filter(Boolean)
+                          .join(" ");
+                        return (
+                          <li key={spot.id}>
+                            <Link
+                              className={className}
+                              href={href}
+                              prefetch
+                              scroll={false}
+                              data-featured={spot.featured || undefined}
+                            >
+                              <span
+                                className={styles.hotspotIcon}
+                                aria-hidden="true"
+                              >
+                                {icon}
+                              </span>
+                              <span className={styles.hotspotName}>
+                                {spot.name}
+                              </span>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </nav>
+                ) : null}
+
+                {isCarPark ? (
+                  <nav
+                    className={styles.segmentGrid}
+                    aria-label={`${zone.name}入口`}
+                  >
+                    {carParkLinks.map((link) => (
+                      <a
+                        key={link.id}
+                        className={
+                          link.id === "stories"
+                            ? `${styles.segmentTile} ${styles.segmentTilePrimary}`
+                            : styles.segmentTile
+                        }
+                        href={link.href}
+                        onClick={() =>
+                          trackUniverseSheetLink(zone.id, link.href)
+                        }
+                        {...(link.external
+                          ? { target: "_blank", rel: "noopener noreferrer" }
+                          : {})}
+                      >
+                        <span className={styles.segmentEmoji} aria-hidden="true">
+                          {SEGMENT_EMOJI[link.id]}
+                        </span>
+                        <span className={styles.segmentLabel}>
+                          {link.label}
+                          {link.external ? (
+                            <span aria-hidden="true"> ↗</span>
+                          ) : null}
+                        </span>
+                      </a>
+                    ))}
+                  </nav>
+                ) : null}
+
+                {!isCarPark && zone.softLinks && zone.softLinks.length > 0 ? (
+                  <nav
+                    className={styles.softLinks}
+                    aria-label={`${zone.name}可以先逛`}
+                  >
+                    {zone.softLinks.map((link) => (
+                      <a
+                        key={link.href}
+                        className={styles.softLink}
+                        href={link.href}
+                        onClick={() =>
+                          trackUniverseSheetLink(zone.id, link.href)
+                        }
+                        {...(link.external
+                          ? { target: "_blank", rel: "noopener noreferrer" }
+                          : {})}
+                      >
+                        {link.label}
+                        {link.external ? (
+                          <span aria-hidden="true"> ↗</span>
+                        ) : null}
+                      </a>
+                    ))}
+                  </nav>
+                ) : null}
+              </div>
             ) : null}
-          </>
+          </div>
         ) : null}
 
-        <button
-          type="button"
-          className={styles.homeBtn}
-          onClick={onClose}
-          aria-label="回樂園"
-        >
-          回樂園
-        </button>
-
-        {/* ── 「給爸爸媽媽」（單層折疊）：只留家長內容——安心資訊 + 鎖島許願 ── */}
         <div className={styles.parentDisclosure}>
           <button
             type="button"

@@ -115,9 +115,8 @@ test("車車宇宙樂園地圖 smoke", async ({ page }) => {
   await expect(
     page.getByRole("region", { name: "車車宇宙樂園地圖" }),
   ).toBeVisible();
-  await expect(page.getByRole("status")).toContainText(
-    "點一座島飛過去，再點探索點",
-  );
+  await expect(page.getByRole("status")).toContainText("點一座島飛過去");
+  await expect(page.getByRole("status")).toContainText("來這裡逛逛");
 
   await expect(
     page.getByRole("button", { name: /恐龍島/ }),
@@ -129,8 +128,14 @@ test("車車宇宙樂園地圖 smoke", async ({ page }) => {
   await expect(page.locator("[data-hotspot-id]").first()).toBeVisible({
     timeout: 5_000,
   });
+  await expect(page.getByRole("button", { name: "來這裡逛逛" })).toBeVisible({
+    timeout: 5000,
+  });
+  await expect(page.getByRole("region", { name: /恐龍島/ })).toHaveCount(0);
 
-  await page.getByRole("button", { name: /回樂園/ }).click();
+  await page
+    .getByRole("button", { name: "回樂園（置中車車樂園）" })
+    .click();
   await expect
     .poll(() => new URL(page.url()).pathname)
     .toBe("/adventures");
