@@ -72,8 +72,8 @@
 
 > 工作流：[ios/SYNC-WITH-WEB.md](./ios/SYNC-WITH-WEB.md)——耦合點對照表、兩種測試失敗的差別、例行 review 節奏。
 
-- [x] **耦合護欄：** 新增 [`lib/api-v1.contract-guard.test.ts`](./lib/api-v1.contract-guard.test.ts)（7 tests）——鎖欄位結構（增／刪／改名、家長內容外洩）與網域搬家（`CANONICAL_SITE_URL` ↔ `AppConfig.swift` ↔ `entitlements`）。**不**比對集數／標題，故 Apple 同步新集不會誤報。已實測注入漂移會 fail · P1 · S  `<pending>`
-- [x] **工作流文件：** [ios/SYNC-WITH-WEB.md](./ios/SYNC-WITH-WEB.md) + [ios/README.md](./ios/README.md) 契約測試兩層說明 · P1 · S  `<pending>`
+- [x] **耦合護欄：** 新增 [`lib/api-v1.contract-guard.test.ts`](./lib/api-v1.contract-guard.test.ts)（7 tests）——鎖欄位結構（增／刪／改名、家長內容外洩）與網域搬家（`CANONICAL_SITE_URL` ↔ `AppConfig.swift` ↔ `entitlements`）。**不**比對集數／標題，故 Apple 同步新集不會誤報。已實測注入漂移會 fail · P1 · S  `214f544`
+- [x] **工作流文件：** [ios/SYNC-WITH-WEB.md](./ios/SYNC-WITH-WEB.md) + [ios/README.md](./ios/README.md) 契約測試兩層說明 · P1 · S  `214f544`
 - [ ] **例行 review（每月／動 `data/content.ts`／路由／網域時）：** 走一次 SYNC-WITH-WEB §2 表格 · P2 · S · 依賴 無
 - [ ] **無護欄的缺口：** 新增 `/story`、`/stories` 以外的故事路由前綴，或搬動 `/story/{slug}/play`，會同時打破 AASA `IOS_APP_LINK_COMPONENTS` 與 `DeepLinkParser`，**目前沒有測試會提醒**。（既有 EP1–6 舊 slug redirect 已實測安全：`/api/v1/stories/ev` → `ep-1`） · P2 · M · 依賴 無
 - [ ] **合併後遷移：** PR #69 併入 `main` 後，`ios/Fixtures` 的每集 churn 會落在 `main`，應併進 [docs/EPISODE-WORKFLOW.md](./docs/EPISODE-WORKFLOW.md)；並重新決定 iOS 是否另開長期 branch／獨立 repo · P2 · M · 依賴 PR #69 合併
