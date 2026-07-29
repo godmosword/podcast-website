@@ -37,8 +37,6 @@ type ZoneSheetProps = {
   hotspots?: readonly Hotspot[];
   /** 熱點 modal 開啟時標記 inert，避免背景可聚焦。 */
   inert?: boolean;
-  /** 保留 API：熱點 modal 開啟時不再設 focus trap（本元件已非模態）。 */
-  suppressFocusTrap?: boolean;
 };
 
 /** 四段內容支柱的學齡前語意 emoji（純呈現；href 仍由 getCarParkLinks 單一資料源）。 */
@@ -60,6 +58,9 @@ export default function ZoneSheet({
   inert = false,
 }: ZoneSheetProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const handleRef = useRef<HTMLButtonElement>(null);
+  const explorePanelRef = useRef<HTMLDivElement>(null);
+  const wasExpandedRef = useRef(false);
   const titleId = useId();
   const [parentOpen, setParentOpen] = useState(false);
   const [exploreOpen, setExploreOpen] = useState(false);
@@ -71,6 +72,7 @@ export default function ZoneSheet({
   useEffect(() => {
     setParentOpen(false);
     setExploreOpen(false);
+    wasExpandedRef.current = false;
   }, [zone?.id]);
 
   useEffect(() => {
@@ -81,6 +83,32 @@ export default function ZoneSheet({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [escClosable, onCollapse]);
+
+  // 展開→焦點進面板；收合→焦點還把手（非模態仍需 focus move）。
+  useEffect(() => {
+    if (!sheetReady || inert) return;
+    if (expanded) {
+      wasExpandedRef.current = true;
+      panelRef.current?.focus();
+      return;
+    }
+    if (wasExpandedRef.current) {
+      handleRef.current?.focus();
+    }
+  }, [expanded, sheetReady, inert, zone?.id]);
+
+  // 次層展開後捲入可視區，避免 40vh 盒底「按了沒反應」。
+  useEffect(() => {
+    if (!exploreOpen || !explorePanelRef.current) return;
+    const reduce =
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    explorePanelRef.current.scrollIntoView({
+      block: "nearest",
+      behavior: reduce ? "auto" : "smooth",
+    });
+  }, [exploreOpen]);
 
   if (!zone) return null;
 
@@ -95,6 +123,7 @@ export default function ZoneSheet({
 
   const overlayClass = [
     styles.overlay,
+    expanded ? styles.overlayScrim : "",
     !sheetReady ? styles.overlayHidden : styles.overlayPassthrough,
     sheetReady && inert ? styles.overlayInertPassthrough : "",
   ]
@@ -125,14 +154,18 @@ export default function ZoneSheet({
         {...(!sheetReady || inert ? { inert: true } : {})}
       >
         <button
+          ref={handleRef}
           type="button"
           className={handleClass}
           onClick={onExpand}
+          aria-label="來這裡逛逛"
           aria-expanded="false"
-          aria-controls={`${titleId}-panel`}
           disabled={!sheetReady || inert}
         >
-          來這裡逛逛
+          <span className={styles.summonHandleGlyph} aria-hidden="true">
+            👋
+          </span>
+          <span>來這裡逛逛</span>
         </button>
       </div>
     );
@@ -149,13 +182,14 @@ export default function ZoneSheet({
         id={`${titleId}-panel`}
         className={sheetClass}
         role="region"
-        aria-labelledby={titleId}
+        aria-label={zone.name}
         aria-hidden={!sheetReady}
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
         {sheetReady ? (
           <p className="sr-only" aria-live="polite">
-            已進入{zone.name}
+            已打開{zone.name}的探索抽屜
           </p>
         ) : null}
 
@@ -168,10 +202,6 @@ export default function ZoneSheet({
           onClick={onCollapse}
           aria-label="關閉"
         />
-
-        <h1 id={titleId} className="sr-only">
-          {zone.name}
-        </h1>
 
         {!isCarPark && zone.childHint ? (
           <p className={styles.childHint}>{zone.childHint}</p>
@@ -265,7 +295,11 @@ export default function ZoneSheet({
             </button>
 
             {exploreOpen ? (
-              <div id={explorePanelId} className={styles.explorePanel}>
+              <div
+                ref={explorePanelRef}
+                id={explorePanelId}
+                className={styles.explorePanel}
+              >
                 {displayHotspots.length > 0 ? (
                   <nav
                     className={styles.hotspots}

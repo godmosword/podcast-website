@@ -24,6 +24,7 @@
 
 ### Fixed
 
+- **召喚抽屜設計審必修（Opus／GPT 條件通過後補齊）**：收合態拿掉半透明 scrim（僅展開掛 `overlayScrim`）；展開／收合做 focus move（面板 ↔ 把手）；region 改 `aria-label`、拿掉與島頁重複的 sr-only h1；把手補 👋 glyph；次層展開 `scrollIntoView`＋橫向高度下限；收合把手不掛幽靈 `aria-controls`。
 - **宇宙地圖點島沒有置中（正式站回饋）**：`targetToFlyParams` 拿 `zone.camera.center` 當島心，但那是島圖的**沙岸底錨點**（`anchorUV [0.5, 0.84]`）——84% 的島高在錨點上方，於是整座島被推到畫面上緣，1280×800 下車車樂園島頂實際被切掉約 117px。新增 `islandFocus()` 取 tile box 視覺中心並為木牌欄讓位；`flyTo` 新增 `fitBox` 把進島縮放夾到「島放得進畫面」（桌面算出的上限高於 1.6 故手感不變，390 手機從 1.6 落到約 1.15，島不再比螢幕寬）。
 - **宇宙地圖再點同一座島沒有反應**：改為回世界層（`router.push("/adventures")`，鏡頭由既有離島 reset 分支收尾），島 `aria-label` 補「再點一次看整片地圖」。
 - **夜間地圖 chrome 融進背景**：縮放／回樂園鈕吃 `--card`＋`--cta-warm-fg`，夜間是深靛底壓深靛夜海（輪廓消失）、字 `#2a1808` 對底僅約 1.4:1；鎖島泡泡則是硬白底＋`var(--ink)`，夜間變近白字壓白底。新增一組**日夜不反轉**的地圖印刷色 `--map-chip`／`--map-chip-2`／`--map-chip-ink`／`--map-chip-line`（字底 5.4:1、鈕對夜海約 7.9:1），對齊既有 `.tapHint` 與島名木牌語彙。

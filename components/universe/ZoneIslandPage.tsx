@@ -79,7 +79,6 @@ export default function ZoneIslandPage({
       expanded={expanded}
       onExpand={handleExpand}
       onCollapse={handleCollapse}
-      suppressFocusTrap={hotspotOpen}
       inert={hotspotOpen}
     />
   );

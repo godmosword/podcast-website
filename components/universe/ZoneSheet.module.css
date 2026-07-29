@@ -5,13 +5,18 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  /* 收合態無 scrim——印刷地圖不被壓暗（非模態召喚把手） */
+  background: none;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.overlayScrim {
   background: linear-gradient(
     180deg,
     rgba(15, 23, 42, 0.08) 0%,
     rgba(15, 23, 42, 0.22) 100%
   );
-  pointer-events: auto;
-  cursor: default;
 }
 
 .overlay > * {
@@ -45,6 +50,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.4rem;
   min-height: 56px;
   min-width: 11rem;
   margin: 0 12px calc(12px + var(--safe-bottom));
@@ -57,6 +63,11 @@
   font-weight: 800;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(120, 90, 40, 0.22);
+}
+
+.summonHandleGlyph {
+  font-size: 1.25rem;
+  line-height: 1;
 }
 
 .summonHandle:focus-visible {
@@ -102,6 +113,14 @@
     var(--radius-md);
   background: var(--card);
   box-shadow: var(--shadow-md), 0 8px 0 color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+/* 橫向矮屏：給抽屜可用高度下限，避免次層展開「按了沒反應」 */
+@media (orientation: landscape) and (max-height: 500px) {
+  .sheet {
+    max-height: min(72vh, 28rem);
+    min-height: 11rem;
+  }
 }
 
 .sheetHidden {

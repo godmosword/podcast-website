@@ -366,7 +366,7 @@ describe("ZoneSheet sheetReady gate", () => {
     const zone = ZONES.find((item) => item.id === "dino")!;
     const { container } = render(
       <UniverseCameraGateProvider value={{ sheetReady: true }}>
-        <ZoneSheet zone={zone} {...sheetProps} inert suppressFocusTrap />
+        <ZoneSheet zone={zone} {...sheetProps} inert />
       </UniverseCameraGateProvider>,
     );
 

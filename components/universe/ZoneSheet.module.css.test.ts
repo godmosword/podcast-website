@@ -16,12 +16,17 @@ describe("ZoneSheet.module.css touch and summon drawer", () => {
     expect(css).toMatch(/\.exploreToggle\s*\{[\s\S]*?min-height:\s*48px/);
   });
 
-  it("overlay 基礎可定位；sheetReady 時走 passthrough 不擋地圖 pan", () => {
+  it("overlay 收合無 scrim；展開才掛 overlayScrim；passthrough 不擋 pan", () => {
+    expect(css).toMatch(/\.overlay\s*\{[\s\S]*?background:\s*none/);
+    expect(css).toMatch(/\.overlayScrim\s*\{[\s\S]*?linear-gradient/);
     expect(css).toMatch(/\.overlayPassthrough\s*\{[\s\S]*?pointer-events:\s*none/);
   });
 
-  it("展開面板高度採較低動態上限（≤40vh）", () => {
+  it("展開面板高度採較低動態上限（≤40vh）；橫向有高度下限", () => {
     expect(css).toMatch(/max-height:\s*min\(40vh,\s*28rem\)/);
+    expect(css).toMatch(
+      /@media\s*\(orientation:\s*landscape\)[\s\S]*?min-height:\s*11rem/,
+    );
   });
 
   it("召喚把手走 --map-chip* 色票", () => {

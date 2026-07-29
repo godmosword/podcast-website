@@ -2,7 +2,7 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { zoneById } from "@/data/universe";
 import { ZONES } from "@/data/universe-zones";
 import { getCarParkLinks } from "@/lib/universe-map";
@@ -10,6 +10,24 @@ import type { ZoneStoriesBundle } from "@/lib/story-zone-query";
 import ZoneSheet from "./ZoneSheet";
 
 vi.stubGlobal("React", React);
+
+beforeEach(() => {
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    configurable: true,
+    value: vi.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
+  Element.prototype.scrollIntoView = vi.fn();
+});
 
 const sheetProps = {
   expanded: true,
@@ -33,7 +51,7 @@ const zoneStoriesFixture: ZoneStoriesBundle = {
 describe("ZoneSheet", () => {
   it("收合時只顯示召喚把手「來這裡逛逛」", () => {
     const zone = ZONES.find((item) => item.id === "dino")!;
-    render(
+    const { container } = render(
       <ZoneSheet
         zone={zone}
         expanded={false}
@@ -44,6 +62,48 @@ describe("ZoneSheet", () => {
 
     expect(screen.getByRole("button", { name: "來這裡逛逛" })).toBeTruthy();
     expect(screen.queryByRole("region")).toBeNull();
+    expect(container.querySelector('[aria-hidden="true"]')?.textContent).toContain(
+      "👋",
+    );
+    // 收合態不掛 scrim class（印刷地圖不被壓暗）
+    expect(container.firstElementChild?.className ?? "").not.toMatch(
+      /overlayScrim/,
+    );
+    // panel 未掛載時不宣稱 aria-controls（避免指向幽靈 id）
+    expect(
+      screen.getByRole("button", { name: "來這裡逛逛" }).getAttribute(
+        "aria-controls",
+      ),
+    ).toBeNull();
+  });
+
+  it("展開後焦點落在面板 region，且無重複 h1", () => {
+    const zone = ZONES.find((item) => item.id === "dino")!;
+    render(<ZoneSheet zone={zone} {...sheetProps} />);
+
+    const region = screen.getByRole("region", { name: zone.name });
+    expect(document.activeElement).toBe(region);
+    expect(region.querySelectorAll("h1")).toHaveLength(0);
+  });
+
+  it("展開時掛 overlayScrim；收合無 scrim", () => {
+    const zone = ZONES.find((item) => item.id === "dino")!;
+    const { container, rerender } = render(
+      <ZoneSheet zone={zone} {...sheetProps} />,
+    );
+    expect(container.firstElementChild?.className ?? "").toMatch(/overlayScrim/);
+
+    rerender(
+      <ZoneSheet
+        zone={zone}
+        expanded={false}
+        onExpand={() => undefined}
+        onCollapse={() => undefined}
+      />,
+    );
+    expect(container.firstElementChild?.className ?? "").not.toMatch(
+      /overlayScrim/,
+    );
   });
 
   it("鎖島首屏少字更視覺化：留 childHint／進度／CTA／softLinks 在次層，整句說明移入折疊", () => {
@@ -66,6 +126,8 @@ describe("ZoneSheet", () => {
     expect(html).not.toContain("回樂園");
     expect(html).not.toContain('role="dialog"');
     expect(html).toContain('role="region"');
+    expect(html).toContain(`aria-label="${zone.name}"`);
+    expect(html).not.toContain("<h1");
   });
 
   it("展開「給爸爸媽媽」後顯示整句說明、安心資訊與「想留一句話」許願表單", () => {
@@ -103,7 +165,7 @@ describe("ZoneSheet", () => {
     expect(html).toContain('aria-label="已聽完"');
   });
 
-  it("鎖島有 zoneStories 時 CTA 在 stories 區塊 DOM 之前", () => {
+  it("鎖島有 zoneStories 時 CTA 在 stories 區塊 DOM 之後（首屏故事卡優先）", () => {
     const zone = ZONES.find((item) => item.id === "dino")!;
     const { container } = render(
       <ZoneSheet

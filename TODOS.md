@@ -55,10 +55,11 @@
 
 | ID | 說明 |
 |----|------|
-| feat(universe): 召喚把手「來這裡逛逛」＋非模態探索抽屜（`?sheet=1`） | 見本 commit |
-| feat(universe): 島星章滿星 chip 進場里程碑 | 見本 commit |
-| chore(universe): 刪除 `LockedIslandBubble` 及契約測（生產零引用） | 見本 commit |
-| docs: DESIGN 元件規格補探索抽屜／召喚把手 | 見本 commit |
+| feat(universe): 召喚把手「來這裡逛逛」＋非模態探索抽屜（`?sheet=1`） | `cc299b4` |
+| feat(universe): 島星章滿星 chip 進場里程碑 | `cc299b4` |
+| chore(universe): 刪除 `LockedIslandBubble` 及契約測（生產零引用） | `cc299b4` |
+| docs: DESIGN 元件規格補探索抽屜／召喚把手 | `cc299b4` |
+| fix(universe): 召喚抽屜 scrim／焦點／h1／glyph／次層捲動（Opus 必修） | 見本 commit |
 
 ### 本輪已完成（2026-07-27）
 
