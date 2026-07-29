@@ -37,7 +37,7 @@
 - [x] 現況盤點＋目標架構＋`/api/v1` 契約草案＋分階段切片：[docs/IOS-APP-ARCHITECTURE.md](./docs/IOS-APP-ARCHITECTURE.md)  `b3f570a`
 - [x] **P1：** 網站 `GET /api/v1/stories`（+ `{slug}`／`meta`）+ 契約測試 — 見 [docs/IOS-APP-ARCHITECTURE.md](./docs/IOS-APP-ARCHITECTURE.md) §6／§9  `d565fff`
 - [x] **P2：** SwiftUI 骨架（列表→詳情→串流播放）於 monorepo [`ios/`](./ios/README.md)  `001ebe6`
-- [x] **P3：** 收藏／繼續聽／基本離線 — [`ProgressStore`](./ios/CheCheCar/Services/ProgressStore.swift)／[`OfflineLibrary`](./ios/CheCheCar/Services/OfflineLibrary.swift)  `PENDING_HASH`
+- [x] **P3：** 收藏／繼續聽／基本離線 — [`ProgressStore`](./ios/CheCheCar/Services/ProgressStore.swift)／[`OfflineLibrary`](./ios/CheCheCar/Services/OfflineLibrary.swift)  `4acb77d`
 - [ ] **P4+（未開工）：** Universal Links／AASA — 見同文件 §9
 
 ### 宇宙巢狀導覽（M0–M3）
