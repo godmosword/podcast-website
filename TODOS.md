@@ -33,6 +33,11 @@
 ### iOS App 架構研究（2026-07-29）
 
 > 決策：技術 **原生 SwiftUI**；P0→P4 已落地。成長主戰場仍為 Spotify／Apple；App CTA 為次要、僅 iOS Safari。
+>
+> **分支紀律（2026-07-29）：** `main` = 網頁版開發線；`cursor/ios-app-architecture-1652` = iOS 開發線（PR #69）。
+> 兩者皆有 GitHub ruleset 擋刪除、**不**擋 force push（`protect-main-web` 19973557／`protect-ios-app-architecture-1652` 19973114）。
+>
+> **環境限制：** 本 repo 的 CI 與雲端環境**無法編譯 Xcode**；所有 `ios/**` 項目只能在 macOS + Xcode 15+ 實機驗收。
 
 - [x] 現況盤點＋目標架構＋`/api/v1` 契約草案＋分階段切片：[docs/IOS-APP-ARCHITECTURE.md](./docs/IOS-APP-ARCHITECTURE.md)  `b3f570a`
 - [x] **P1：** 網站 `GET /api/v1/stories`（+ `{slug}`／`meta`）+ 契約測試 — 見 [docs/IOS-APP-ARCHITECTURE.md](./docs/IOS-APP-ARCHITECTURE.md) §6／§9  `d565fff`
@@ -40,6 +45,34 @@
 - [x] **P3：** 收藏／繼續聽／基本離線 — [`ProgressStore`](./ios/CheCheCar/Services/ProgressStore.swift)／[`OfflineLibrary`](./ios/CheCheCar/Services/OfflineLibrary.swift)  `4acb77d`
 - [x] **P4：** Universal Links＋官網 CTA — AASA／[`OpenInAppCTA`](./components/OpenInAppCTA.tsx)／Associated Domains  `d34ba77`
 - [ ] **P5+（未開工）：** 睡前定時／反思 UI — 見同文件 §9
+
+#### Code review 修正（2026-07-29，PR #69）
+
+> 三個 Blocking：B1／B3 已修（網站端，可完整驗證）；**B2 待 macOS**。
+> 驗證基準：`npm run check` 全綠 — 1143 tests／209 files、build、`verify:no-public-fs`、`verify:function-size`（46 traces，最大 33.1MB）、`verify:geo`。
+
+- [x] **B1：** `/api/v1/*` 由動態 function 回歸 SSG — `stories`／`meta` 加 `force-static`、`[slug]` 補 `generateStaticParams`；build 路由表 `ƒ` → `○`／`●`，恢復 [next.config.ts](./next.config.ts) 開頭「零後端」紅線 · P0 · S  `989513c`
+- [x] **B3：** [`OpenInAppCTA`](./components/OpenInAppCTA.tsx) 在 `NEXT_PUBLIC_IOS_APP_STORE_URL` 未設時不渲染（App 未上架前，Universal Link 目標＝當前頁，點擊只會原地重載卻佔住單集頁最貴版位） · P0 · S  `989513c`
+- [x] **M1：** `/api/v1` 404 改 `no-store`，避免 CDN 把「這集還不存在」快取一小時 · P2 · S  `989513c`
+- [x] **M5：** CTA 補 iPadOS 桌面版 UA 判斷（`Macintosh` + `maxTouchPoints`） · P2 · S  `989513c`
+
+#### iOS 待修（需 macOS + Xcode 實機驗收）
+
+> **P3 標記為 ✅ 但 B2／N1 未修前，「繼續聽」與「看得到新集」實際上不成立**——上架前必須清掉。
+
+- [ ] **B2（Blocking）：** [`AudioPlayerController.load()`](./ios/CheCheCar/Services/AudioPlayerController.swift) 開頭呼叫 `tearDown()`，而 `tearDown()` 末行 `onProgress = nil` → [`StoryPlayerView.bootstrap()`](./ios/CheCheCar/Views/StoryPlayerView.swift) 設好的回呼在 `load()` 後即失效，播放期間與播畢的進度寫回**從未執行**；且 `tearDown()` 那次 report 會用 `pageIndex=0／currentTime=0` 覆寫剛讀出的續播點。修法：`load()` 改用不 report、不清 callback 的私有 `resetPlayer()` · P0 · S · 依賴 macOS
+- [ ] **N1（High）：** [`APIClient`](./ios/CheCheCar/Services/APIClient.swift) 用 `cachePolicy: .returnCacheDataElseLoad`，無視 `Cache-Control` → **新集永遠不出現**，`StoryListView` 下拉更新亦無效。改 `.useProtocolCachePolicy` · P0 · S · 依賴 macOS
+- [ ] **N2（High）：** 無背景播放 — 全 `ios/` 無 `AVAudioSession`／`MPNowPlayingInfoCenter`／`MPRemoteCommandCenter`／`UIBackgroundModes`；實機會靜音鍵無聲、鎖屏即停、無鎖屏控制。與 [docs/IOS-APP-ARCHITECTURE.md](./docs/IOS-APP-ARCHITECTURE.md) §4 自述的 MVP「離線／背景播放」不符 · P1 · M · 依賴 macOS
+- [ ] **N3（High）：** [`OfflineLibrary`](./ios/CheCheCar/Services/OfflineLibrary.swift) 未設 `isExcludedFromBackupKey` → 音檔＋頁圖進 iCloud 備份，違反 Apple Data Storage Guidelines（上架常見退件）；另無容量上限／淘汰策略／已用空間顯示 · P1 · M · 依賴 macOS
+- [ ] **M2：** [`StoryDetailView.preview`](./ios/CheCheCar/Views/StoryDetailView.swift) 為死參數（`AppRoute.detail` 只帶 slug），列表點進詳情永遠空白等網路 · P2 · S · 依賴 macOS
+- [ ] **M3：** `OfflineLibrary` 全 `@MainActor`，`Data(contentsOf:)`／`moveItem`／`JSONDecoder` 皆在主執行緒；離線 fallback 逐集同步讀 `detail.json` · P2 · M · 依賴 macOS
+- [ ] **M4：** `download(detail:)` 的 `guard downloadingSlug == nil` 靜默吞第二個請求，UI 零回饋 · P3 · S · 依賴 macOS
+
+#### 上架前置（非 code）
+
+- [ ] **N4：** 媒體授權對齊 — [docs/IOS-APP-ARCHITECTURE.md](./docs/IOS-APP-ARCHITECTURE.md) §3.4 明訂「App 內嵌同一批媒體須走官方授權／發行路徑，**實作前**需產品／法務對齊並同步 [/legal](./app/legal/page.tsx)」，但 P3 已先落地下載功能且 `/legal` 未動；另 `/api/v1/stories` 已是公開、無 auth、無 rate limit 的全集 MP3 索引，與「禁止再散布」立場需明確決策紀錄 · P1 · M · 依賴 產品／法務
+- [ ] **P4 生效前置：** Vercel 設 `APPLE_TEAM_ID`（需重新部署）+ Xcode 填同一 Development Team + 裝機驗證 AASA · P1 · S · 依賴 Apple Developer 帳號
+- [ ] **文件一致性：** [docs/IOS-APP-ARCHITECTURE.md](./docs/IOS-APP-ARCHITECTURE.md) §1 仍寫「不新增 Route Handler、不開 Xcode 專案」，與抬頭「P0–P4 ✅」及實際交付矛盾 · P3 · S
 
 ### 宇宙巢狀導覽（M0–M3）
 
