@@ -1,7 +1,9 @@
 # iOS App（SwiftUI）— P2–P4
 
 > 對齊 [docs/IOS-APP-ARCHITECTURE.md](../docs/IOS-APP-ARCHITECTURE.md)。  
-> **Cloud／Linux CI 無法編譯 Xcode**；請在 macOS + Xcode 15+ 開啟本專案。
+> **Cloud／Linux CI 無法編譯 Xcode**；請在 macOS + Xcode 15+ 開啟本專案。  
+> **改網頁版之前先看 [SYNC-WITH-WEB.md](./SYNC-WITH-WEB.md)** — 哪些網站改動必須連帶改 iOS、
+> 兩種測試失敗分別代表什麼、例行 review 節奏。
 
 ## 開啟方式
 
@@ -39,8 +41,15 @@
 ## 契約測試
 
 ```bash
-npm test -- lib/api-v1.ios-fixture.test.ts lib/ios-app-links.test.ts
+npm test -- api-v1 ios-app-links OpenInAppCTA next.config
 ```
+
+兩層，失敗的意義不同（詳見 [SYNC-WITH-WEB.md §3](./SYNC-WITH-WEB.md)）：
+
+| 檔案 | 鎖什麼 | 紅了代表 |
+|---|---|---|
+| `lib/api-v1.ios-fixture.test.ts` | 樣本 JSON 的**值** | 多半只是進新集 → `UPDATE_IOS_FIXTURES=1 npm test -- api-v1.ios-fixture` |
+| `lib/api-v1.contract-guard.test.ts` | 欄位**結構**＋網域 | **契約真的變了** → 停下來同步改 Swift，不可用環境變數掩蓋 |
 
 ## 授權提醒
 

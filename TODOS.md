@@ -68,6 +68,16 @@
 - [ ] **M3：** `OfflineLibrary` 全 `@MainActor`，`Data(contentsOf:)`／`moveItem`／`JSONDecoder` 皆在主執行緒；離線 fallback 逐集同步讀 `detail.json` · P2 · M · 依賴 macOS
 - [ ] **M4：** `download(detail:)` 的 `guard downloadingSlug == nil` 靜默吞第二個請求，UI 零回饋 · P3 · S · 依賴 macOS
 
+#### 網頁版 ↔ iOS 同步（工作流已定案）
+
+> 工作流：[ios/SYNC-WITH-WEB.md](./ios/SYNC-WITH-WEB.md)——耦合點對照表、兩種測試失敗的差別、例行 review 節奏。
+
+- [x] **耦合護欄：** 新增 [`lib/api-v1.contract-guard.test.ts`](./lib/api-v1.contract-guard.test.ts)（7 tests）——鎖欄位結構（增／刪／改名、家長內容外洩）與網域搬家（`CANONICAL_SITE_URL` ↔ `AppConfig.swift` ↔ `entitlements`）。**不**比對集數／標題，故 Apple 同步新集不會誤報。已實測注入漂移會 fail · P1 · S  `<pending>`
+- [x] **工作流文件：** [ios/SYNC-WITH-WEB.md](./ios/SYNC-WITH-WEB.md) + [ios/README.md](./ios/README.md) 契約測試兩層說明 · P1 · S  `<pending>`
+- [ ] **例行 review（每月／動 `data/content.ts`／路由／網域時）：** 走一次 SYNC-WITH-WEB §2 表格 · P2 · S · 依賴 無
+- [ ] **無護欄的缺口：** 新增 `/story`、`/stories` 以外的故事路由前綴，或搬動 `/story/{slug}/play`，會同時打破 AASA `IOS_APP_LINK_COMPONENTS` 與 `DeepLinkParser`，**目前沒有測試會提醒**。（既有 EP1–6 舊 slug redirect 已實測安全：`/api/v1/stories/ev` → `ep-1`） · P2 · M · 依賴 無
+- [ ] **合併後遷移：** PR #69 併入 `main` 後，`ios/Fixtures` 的每集 churn 會落在 `main`，應併進 [docs/EPISODE-WORKFLOW.md](./docs/EPISODE-WORKFLOW.md)；並重新決定 iOS 是否另開長期 branch／獨立 repo · P2 · M · 依賴 PR #69 合併
+
 #### 上架前置（非 code）
 
 - [ ] **N4：** 媒體授權對齊 — [docs/IOS-APP-ARCHITECTURE.md](./docs/IOS-APP-ARCHITECTURE.md) §3.4 明訂「App 內嵌同一批媒體須走官方授權／發行路徑，**實作前**需產品／法務對齊並同步 [/legal](./app/legal/page.tsx)」，但 P3 已先落地下載功能且 `/legal` 未動；另 `/api/v1/stories` 已是公開、無 auth、無 rate limit 的全集 MP3 索引，與「禁止再散布」立場需明確決策紀錄 · P1 · M · 依賴 產品／法務
