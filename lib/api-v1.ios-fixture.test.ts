@@ -93,4 +93,20 @@ describe("iOS Fixtures ↔ api-v1 契約", () => {
     expect(src).toContain("detail.json");
     expect(src).toContain("CheCheCarOffline");
   });
+
+  it("P4 DeepLinkParser 對齊 /story 與 /stories", () => {
+    const src = readFileSync(
+      join(process.cwd(), "ios/CheCheCar/Services/DeepLinkRouter.swift"),
+      "utf8",
+    );
+    expect(src).toContain("enum DeepLinkParser");
+    expect(src).toContain('parts[0] == "stories"');
+    expect(src).toContain('parts[0] == "story"');
+    expect(src).toContain('parts[2] == "play"');
+    const entitlements = readFileSync(
+      join(process.cwd(), "ios/CheCheCar/CheCheCar.entitlements"),
+      "utf8",
+    );
+    expect(entitlements).toContain("applinks:podcast-website-mu.vercel.app");
+  });
 });

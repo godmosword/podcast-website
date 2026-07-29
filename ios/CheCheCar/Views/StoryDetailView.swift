@@ -169,13 +169,7 @@ struct StoryDetailView: View {
     }
 
     private var playButton: some View {
-        NavigationLink {
-            if let detail = model.detail {
-                StoryPlayerView(detail: detail)
-            } else {
-                ProgressView()
-            }
-        } label: {
+        NavigationLink(value: AppRoute.play(slug: slug)) {
             Label("開始看圖聽故事", systemImage: "play.fill")
                 .font(.headline)
                 .frame(maxWidth: .infinity)

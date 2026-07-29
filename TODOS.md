@@ -32,13 +32,14 @@
 
 ### iOS App 架構研究（2026-07-29）
 
-> 決策：技術 **原生 SwiftUI**；P0 文件 → P1 JSON API → P2 骨架 → P3 本機進度／離線。成長主戰場仍為 Spotify／Apple。
+> 決策：技術 **原生 SwiftUI**；P0→P4 已落地。成長主戰場仍為 Spotify／Apple；App CTA 為次要、僅 iOS Safari。
 
 - [x] 現況盤點＋目標架構＋`/api/v1` 契約草案＋分階段切片：[docs/IOS-APP-ARCHITECTURE.md](./docs/IOS-APP-ARCHITECTURE.md)  `b3f570a`
 - [x] **P1：** 網站 `GET /api/v1/stories`（+ `{slug}`／`meta`）+ 契約測試 — 見 [docs/IOS-APP-ARCHITECTURE.md](./docs/IOS-APP-ARCHITECTURE.md) §6／§9  `d565fff`
 - [x] **P2：** SwiftUI 骨架（列表→詳情→串流播放）於 monorepo [`ios/`](./ios/README.md)  `001ebe6`
 - [x] **P3：** 收藏／繼續聽／基本離線 — [`ProgressStore`](./ios/CheCheCar/Services/ProgressStore.swift)／[`OfflineLibrary`](./ios/CheCheCar/Services/OfflineLibrary.swift)  `4acb77d`
-- [ ] **P4+（未開工）：** Universal Links／AASA — 見同文件 §9
+- [x] **P4：** Universal Links＋官網 CTA — AASA／[`OpenInAppCTA`](./components/OpenInAppCTA.tsx)／Associated Domains  `PENDING_HASH`
+- [ ] **P5+（未開工）：** 睡前定時／反思 UI — 見同文件 §9
 
 ### 宇宙巢狀導覽（M0–M3）
 

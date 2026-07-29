@@ -1,7 +1,7 @@
 # iOS App 架構研究（SwiftUI）
 
-> **狀態：** P0 架構 ✅ · P1 JSON API ✅ · P2 SwiftUI 骨架 ✅ · **P3 本機進度／離線 ✅**（[`ios/`](../ios/README.md)）  
-> **決策：** 技術路線 = **原生 SwiftUI**（monorepo `ios/`；可之後拆獨立 repo）  
+> **狀態：** P0–**P4 ✅**（架構／API／SwiftUI／進度離線／Universal Links＋官網 CTA）  
+> **決策：** 技術路線 = **原生 SwiftUI**（monorepo `ios/`）  
 > **日期：** 2026-07-29  
 > **Canonical 網站：** `https://podcast-website-mu.vercel.app`（見 [`lib/site-url.ts`](../lib/site-url.ts)）
 
@@ -43,9 +43,9 @@
 | 完整逐字稿 | `{site}/story/{slug}/transcript.vtt` | WebVTT（**不是**翻頁場景字幕） |
 | 訂閱／許願 | `/api/subscribe`、`/api/zone-wish` | Email／地圖許願，**非**集目 API |
 
-**沒有（P0 時）：** 公開 JSON 集目 API、OpenAPI、Universal Links（`apple-app-site-association`）、自訂 URL scheme、帳號系統。
+**P0 時沒有：** 公開 JSON 集目 API、OpenAPI、Universal Links、帳號系統。
 
-**P1 已補：** `GET /api/v1/stories`、`GET /api/v1/stories/[slug]`、`GET /api/v1/meta`（見 §6）。仍無 OpenAPI／Universal Links／帳號。
+**P1–P4 已補：** `/api/v1/*`；`/.well-known/apple-app-site-association`（需 `APPLE_TEAM_ID`）；官網 `OpenInAppCTA`。仍無帳號／OpenAPI。
 
 ### 3.3 網站有、但未對外暴露的能力（App 差異化候選）
 
@@ -213,7 +213,7 @@ Swift 原型可直接打 JSON API；`/feed.xml` 僅作 podcast／備援，不必
 | `/adventures?zone=` | 後續地圖版；MVP 可開 Safari 或略過 |
 | `/feed.xml` | 不上 App UI |
 
-網站側未來需：`public/.well-known/apple-app-site-association` + Apple Developer Associated Domains。**本輪不實作。**
+網站側：**已實作** [`lib/ios-app-links.ts`](../lib/ios-app-links.ts) + `/.well-known/apple-app-site-association`（需設 `APPLE_TEAM_ID`）；官網 CTA [`OpenInAppCTA`](../components/OpenInAppCTA.tsx)。iOS：`CheCheCar.entitlements` + `DeepLinkRouter`。
 
 ## 9. 建議實作切片（文件之後）
 
@@ -225,7 +225,7 @@ Swift 原型可直接打 JSON API；`/feed.xml` 僅作 podcast／備援，不必
 | **P1** | 網站 `GET /api/v1/stories` (+ `{slug}`、`meta`) + 契約測試 | `lib/api-v1.ts`、`app/api/v1/**`、vitest ✅ |
 | **P2** | SwiftUI 骨架：列表 → 詳情 → 播放（串流） | [`ios/`](../ios/README.md) ✅ |
 | **P3** | 本機進度、收藏、繼續聽、基本離線 | [`ios/`](../ios/README.md) `ProgressStore`／`OfflineLibrary` ✅ |
-| **P4** | Universal Links + 官網 CTA「用 App 看圖聽」 | 網站 AASA + 文案 |
+| **P4** | Universal Links + 官網 CTA「用 App 看圖聽」 | AASA／`OpenInAppCTA`／Associated Domains ✅ |
 | **P5** | 場景字幕／反思／地圖唯讀（可選） | API 加欄 + iOS |
 | **P6+** | 遊戲／帳號／商業化 | 對齊 STEM-P4，不提前做半套 |
 
@@ -266,5 +266,5 @@ Swift 原型可直接打 JSON API；`/feed.xml` 僅作 podcast／備援，不必
 - [x] P1 程式：`lib/api-v1.ts` + Route Handlers + vitest
 - [x] P2 SwiftUI：`ios/CheCheCar` 列表／詳情／AVPlayer（需 Mac 開 Xcode）
 - [x] P3：收藏／繼續聽／基本離線下載
-- [ ] Universal Links／AASA（P4）
+- [x] P4：Universal Links／AASA／官網 CTA
 - [ ] 睡前定時／反思 UI（P5）

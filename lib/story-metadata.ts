@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { Story } from "@/data/content";
 import { storyDateModified } from "@/data/story-dates";
+import { iosAppStoreId, storyAppLinkUrl } from "@/lib/ios-app-links";
 import { storyDefinitionSummary } from "@/lib/story-geo";
 import { storyOgImagePath } from "@/lib/story-og-path";
 import { hasVtt } from "@/lib/transcript";
@@ -26,6 +27,11 @@ export function storyDetailMetadata(story: Story): Metadata {
     ? `/story/${story.slug}/transcript.vtt`
     : undefined;
 
+  const appStoreId = iosAppStoreId();
+  const appleItunesApp = appStoreId
+    ? `app-id=${appStoreId}, app-argument=${storyAppLinkUrl(story.slug)}`
+    : undefined;
+
   return {
     title: story.title,
     description,
@@ -36,6 +42,7 @@ export function storyDetailMetadata(story: Story): Metadata {
     other: {
       dateModified: modified,
       "article:modified_time": modified,
+      ...(appleItunesApp ? { "apple-itunes-app": appleItunesApp } : {}),
     },
     openGraph: {
       title: story.title,

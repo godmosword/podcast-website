@@ -22,4 +22,16 @@ describe("next security headers", () => {
       ]),
     );
   });
+
+  it("AASA 路徑宣告 application/json", async () => {
+    const groups = await nextConfig.headers?.();
+    const aasa = groups?.find(
+      (g) => g.source === "/.well-known/apple-app-site-association",
+    );
+    expect(aasa?.headers).toEqual(
+      expect.arrayContaining([
+        { key: "Content-Type", value: "application/json" },
+      ]),
+    );
+  });
 });

@@ -1,55 +1,47 @@
-# iOS App（SwiftUI）— P2 骨架 + P3 本機進度／離線
+# iOS App（SwiftUI）— P2–P4
 
-> 對齊 [docs/IOS-APP-ARCHITECTURE.md](../docs/IOS-APP-ARCHITECTURE.md) **P2–P3**。  
-> 本目錄在官網 monorepo 的 `ios/`。  
+> 對齊 [docs/IOS-APP-ARCHITECTURE.md](../docs/IOS-APP-ARCHITECTURE.md)。  
 > **Cloud／Linux CI 無法編譯 Xcode**；請在 macOS + Xcode 15+ 開啟本專案。
 
 ## 開啟方式
 
 1. 安裝 Xcode 15+（iOS 17 SDK）
 2. 開啟 [`CheCheCar.xcodeproj`](./CheCheCar.xcodeproj)
-3. 選模擬器或真機 → Run
-4. （可選）Signing：在 Target → Signing 填你的 Development Team
+3. Signing：填 Development Team（Associated Domains 需付費／有效 Team）
+4. 官網 Vercel 設 `APPLE_TEAM_ID`（與 Xcode Team 一致）後重新部署，AASA 才會含 `appIDs`
 
 預設 API：`https://podcast-website-mu.vercel.app`  
-本機官網：Xcode scheme 環境變數 `CHECHECAR_API_BASE=http://127.0.0.1:3000`，或改 [`AppConfig.swift`](./CheCheCar/Services/AppConfig.swift)。
+本機：`CHECHECAR_API_BASE=http://127.0.0.1:3000`
 
 ## 功能範圍
 
-| 有（P2–P3） | 沒有（後續） |
+| 有（P2–P4） | 沒有（後續） |
 |-------------|--------------|
-| `/api/v1` 列表／詳情／串流播放 | Universal Links（P4） |
-| ±10 秒、`captionTimes` 翻頁＋場景字幕 | 睡前定時、完播反思 UI（P5） |
-| **收藏**、**繼續聽**（UserDefaults） | 與網站 PWA 進度互通 |
-| **基本離線**：下載音檔＋頁圖＋詳情 JSON | 地圖／遊戲／帳號 |
+| `/api/v1` 列表／詳情／串流播放 | 睡前定時、完播反思 UI（P5） |
+| 收藏／繼續聽／基本離線 | 地圖／遊戲／帳號 |
+| **Universal Links**（`applinks:podcast-website-mu.vercel.app`） | App Store 上架本身 |
+| 官網單集頁「用 App 開啟本集」（僅 iPhone／iPad 顯示） | 與 PWA 進度互通 |
 
-> App 進度鍵：`chechecar.ios.progress`（欄位形狀對齊官網 `ContinueState`／`favorites`，**不**讀寫 `cheche:progress`）。
+### Universal Links 路徑
 
-## 目錄
+| URL | App |
+|-----|-----|
+| `/stories` | 列表 |
+| `/story/{slug}` | 詳情 |
+| `/story/{slug}/play` | 播放器 |
 
-```text
-ios/
-  CheCheCar.xcodeproj/
-  CheCheCar/
-    Models/APIModels.swift
-    Services/APIClient.swift
-    Services/AudioPlayerController.swift
-    Services/ProgressStore.swift     # P3
-    Services/OfflineLibrary.swift    # P3
-    Views/StoryListView.swift
-    Views/StoryDetailView.swift
-    Views/StoryPlayerView.swift
-  Fixtures/*.sample.json
-```
+## 目錄重點
 
-## 契約測試（官網 repo）
+- `Services/DeepLinkRouter.swift` — 解析與 `NavigationPath`
+- `CheCheCar.entitlements` — Associated Domains
+- 官網：`/.well-known/apple-app-site-association`、`components/OpenInAppCTA.tsx`
+
+## 契約測試
 
 ```bash
-npm test -- lib/api-v1.ios-fixture.test.ts
+npm test -- lib/api-v1.ios-fixture.test.ts lib/ios-app-links.test.ts
 ```
-
-更新 fixture：`UPDATE_IOS_FIXTURES=1 npm test -- lib/api-v1.ios-fixture.test.ts`
 
 ## 授權提醒
 
-`public/stories/` 音訊與插圖**禁止再散布**；離線下載僅供本機播放快取，上架前請對齊 legal／產品授權。
+音訊與插圖禁止再散布；離線僅本機快取。上架前對齊 legal／產品授權。

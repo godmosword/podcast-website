@@ -18,6 +18,7 @@ import { hasFullTranscript } from "@/lib/transcript";
 import { storyCoverPath } from "@/lib/story-utils";
 import FavoriteButton from "@/components/FavoriteButton";
 import JsonLd from "@/components/JsonLd";
+import OpenInAppCTA from "@/components/OpenInAppCTA";
 import PlayButton from "@/components/PlayButton";
 import ShareButton from "@/components/ShareButton";
 import RelatedStories from "@/components/RelatedStories";
@@ -26,6 +27,10 @@ import SiteFooter from "@/components/SiteFooter";
 import StoryCoverMorph from "@/components/story/StoryCoverMorph";
 import StoryImage from "@/components/StoryImage";
 import StoryMeta, { StoryTags } from "@/components/StoryMeta";
+import {
+  iosAppStoreUrl,
+  storyAppLinkUrl,
+} from "@/lib/ios-app-links";
 import styles from "./page.module.css";
 
 export function generateStaticParams() {
@@ -145,6 +150,10 @@ export default async function StoryDetailPage({
             )}
             leading={<FavoriteButton slug={story.slug} />}
             className={styles.shareRow}
+          />
+          <OpenInAppCTA
+            href={storyAppLinkUrl(story.slug)}
+            storeUrl={iosAppStoreUrl()}
           />
         </div>
 

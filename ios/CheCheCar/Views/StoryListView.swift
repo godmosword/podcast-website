@@ -104,7 +104,7 @@ struct StoryListView: View {
             if let cont = progress.snapshot.continueListening,
                let story = model.stories.first(where: { $0.slug == cont.slug }) {
                 Section("繼續聽") {
-                    NavigationLink(value: story) {
+                    NavigationLink(value: AppRoute.detail(slug: story.slug)) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(story.title)
                                 .font(.headline)
@@ -134,13 +134,10 @@ struct StoryListView: View {
             }
         }
         .listStyle(.insetGrouped)
-        .navigationDestination(for: StoryListItem.self) { story in
-            StoryDetailView(slug: story.slug, preview: story)
-        }
     }
 
     private func storyLink(_ story: StoryListItem) -> some View {
-        NavigationLink(value: story) {
+        NavigationLink(value: AppRoute.detail(slug: story.slug)) {
             StoryRowView(
                 story: story,
                 isFavorite: progress.isFavorite(story.slug),
