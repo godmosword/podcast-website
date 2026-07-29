@@ -81,3 +81,7 @@ next-env.d.ts
 /docs/metrics/*.png
 /docs/metrics/*.csv
 /docs/metrics/weekly-*.md
+
+# iOS Xcode 本機狀態（見 ios/.gitignore）
+ios/**/xcuserdata/
+ios/**/DerivedData/

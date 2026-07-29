@@ -1,0 +1,24 @@
+{
+  "title": "車車遊樂園",
+  "siteUrl": "https://podcast-website-mu.vercel.app",
+  "feedUrl": "https://podcast-website-mu.vercel.app/feed.xml",
+  "artworkUrl": "https://podcast-website-mu.vercel.app/mascot.png",
+  "platforms": [
+    {
+      "label": "Spotify",
+      "url": "https://open.spotify.com/show/2Ohik6D77MvLTyqHbM6CYt"
+    },
+    {
+      "label": "Apple Podcasts",
+      "url": "https://podcasts.apple.com/tw/podcast/%E8%BB%8A%E8%BB%8A%E9%81%8A%E6%A8%82%E5%9C%92/id1896610920"
+    },
+    {
+      "label": "KKBOX",
+      "url": "https://podcast.kkbox.com/tw/channel/4lgSa7YAwpk6neQme3"
+    },
+    {
+      "label": "YouTube",
+      "url": "https://www.youtube.com/playlist?list=PLVbyl20K8lOeuJ2ky6dEsmpew7xAxZDhF"
+    }
+  ]
+}

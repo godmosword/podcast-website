@@ -32,11 +32,12 @@
 
 ### iOS App 架構研究（2026-07-29）
 
-> 決策：技術 **原生 SwiftUI**；P0 僅文件。成長主戰場仍為 Spotify／Apple；App 定位見文件。
+> 決策：技術 **原生 SwiftUI**；P0 文件 → P1 JSON API → P2 骨架。成長主戰場仍為 Spotify／Apple。
 
 - [x] 現況盤點＋目標架構＋`/api/v1` 契約草案＋分階段切片：[docs/IOS-APP-ARCHITECTURE.md](./docs/IOS-APP-ARCHITECTURE.md)  `b3f570a`
 - [x] **P1：** 網站 `GET /api/v1/stories`（+ `{slug}`／`meta`）+ 契約測試 — 見 [docs/IOS-APP-ARCHITECTURE.md](./docs/IOS-APP-ARCHITECTURE.md) §6／§9  `d565fff`
-- [ ] **P2+（未開工）：** 獨立 SwiftUI 專案 — 見同文件 §9
+- [x] **P2：** SwiftUI 骨架（列表→詳情→串流播放）於 monorepo [`ios/`](./ios/README.md)  `PENDING_HASH`
+- [ ] **P3+（未開工）：** 本機進度／離線／Universal Links — 見同文件 §9
 
 ### 宇宙巢狀導覽（M0–M3）
 

@@ -1,0 +1,28 @@
+{
+  "slug": "ep-23",
+  "ep": 23,
+  "title": "小紅賽車第一次穿越大山｜雪山隧道會說話？",
+  "date": "2026-07-28",
+  "vehicle": "賽車",
+  "color": "#7048e8",
+  "pageCount": 1,
+  "coverUrl": "https://podcast-website-mu.vercel.app/stories/ep-23/01.jpg",
+  "audioUrl": "https://podcast-website-mu.vercel.app/stories/ep-23/audio.mp3",
+  "hasTranscriptVtt": true,
+  "duration": "8:12",
+  "summary": "小紅賽車第一次挑戰開雪山隧道，開進長長的隧道裡，聽見神祕的說話聲！一起認識隧道廣播、行車安全，和爸爸完成第一次穿越大山的任務。 歡迎留言跟我們說育兒的路上遇到什麼有趣或頭疼的事？也許下一集就會在《車車遊樂園》裡，聽見你們家的故事囉 🚗車車遊樂園 h ttps://linktr.ee/bonboncarstory",
+  "tags": [
+    "安全"
+  ],
+  "ageRange": "約 3–7 歲",
+  "zoneId": "car-park",
+  "pageImageUrls": [
+    "https://podcast-website-mu.vercel.app/stories/ep-23/01.jpg"
+  ],
+  "transcriptVttUrl": "https://podcast-website-mu.vercel.app/story/ep-23/transcript.vtt",
+  "reflectionPrompt": {
+    "child": "小紅賽車第一次穿越大山。聽完這個故事，你心裡最先想到什麼？",
+    "parentFollowUp": "先接住孩子的感覺，再一起聊聊故事裡學到的一件小事，不必急著給標準答案。"
+  },
+  "characterIds": []
+}

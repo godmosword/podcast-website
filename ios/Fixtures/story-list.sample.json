@@ -1,0 +1,62 @@
+{
+  "stories": [
+    {
+      "slug": "ep-23",
+      "ep": 23,
+      "title": "小紅賽車第一次穿越大山｜雪山隧道會說話？",
+      "date": "2026-07-28",
+      "vehicle": "賽車",
+      "color": "#7048e8",
+      "pageCount": 1,
+      "coverUrl": "https://podcast-website-mu.vercel.app/stories/ep-23/01.jpg",
+      "audioUrl": "https://podcast-website-mu.vercel.app/stories/ep-23/audio.mp3",
+      "hasTranscriptVtt": true,
+      "duration": "8:12",
+      "summary": "小紅賽車第一次挑戰開雪山隧道，開進長長的隧道裡，聽見神祕的說話聲！一起認識隧道廣播、行車安全，和爸爸完成第一次穿越大山的任務。 歡迎留言跟我們說育兒的路上遇到什麼有趣或頭疼的事？也許下一集就會在《車車遊樂園》裡，聽見你們家的故事囉 🚗車車遊樂園 h ttps://linktr.ee/bonboncarstory",
+      "tags": [
+        "安全"
+      ],
+      "ageRange": "約 3–7 歲",
+      "zoneId": "car-park"
+    },
+    {
+      "slug": "ep-22",
+      "ep": 22,
+      "title": "車車笑話比賽｜不嘲笑別人｜品格故事",
+      "date": "2026-07-24",
+      "vehicle": "挖土機",
+      "color": "#7048e8",
+      "pageCount": 24,
+      "coverUrl": "https://podcast-website-mu.vercel.app/stories/ep-22/01.jpg",
+      "audioUrl": "https://podcast-website-mu.vercel.app/stories/ep-22/audio.mp3",
+      "hasTranscriptVtt": true,
+      "duration": "8:38",
+      "summary": "一年一度的車車笑話比賽開始囉！三位選手都好搞笑，但其中ㄧ位選手卻出現了嘲笑的行為，最後怎麼化解呢？這集用輕鬆搞笑方式陪孩子一起學習同理心，不隨意嘲笑別人，知道真正的笑話，是讓大家一起開心大笑。 👶這集裡面很多Bonbon大笑聲音，還笑倒在地上，讓我們一起跟孩子大笑吧 歡迎留言跟我們說育兒的路上遇到什麼有趣或頭疼的事？也許下一集就會在《車車遊樂園》裡，聽見你們家的故事囉 🚗車車遊樂園 h ttps://linktr.ee/bonboncarstory",
+      "tags": [
+        "情緒"
+      ],
+      "ageRange": "約 3–7 歲",
+      "zoneId": "dino"
+    },
+    {
+      "slug": "ep-21",
+      "ep": 21,
+      "title": "自動駕駛計程車｜陪大家平安到達目的地",
+      "date": "2026-07-22",
+      "vehicle": "計程車",
+      "color": "#7048e8",
+      "pageCount": 1,
+      "coverUrl": "https://podcast-website-mu.vercel.app/stories/ep-21/01.jpg",
+      "audioUrl": "https://podcast-website-mu.vercel.app/stories/ep-21/audio.mp3",
+      "hasTranscriptVtt": true,
+      "duration": "5:22",
+      "summary": "Bonbon 第一次搭乘自動駕駛計程車知知，開心前往車車遊樂園。一路上認識沒有司機的自動駕駛車，也學會上車要繫好安全帶、注意行人，明白平安到達才是最重要的。 👶我們可以一起跟孩子聊看看什麼是自動駕駛，也可以找影片一起觀看，看看孩子有哪些有趣的發現，陪伴他一起認識新科技哦。 謝謝大家支持Bonbon與馬米，歡迎留言告訴我們，你遇到什麼有趣的事或頭痛的事呢？也許下一次就會在車車遊樂園聽到你家的故事喔。 馬米最近感冒聲音不佳請見諒！努力恢復中。 🚗車車遊樂園 h ttps://linktr.ee/bonboncarstory",
+      "tags": [
+        "安全",
+        "成長"
+      ],
+      "ageRange": "約 3–7 歲",
+      "zoneId": "car-park"
+    }
+  ]
+}

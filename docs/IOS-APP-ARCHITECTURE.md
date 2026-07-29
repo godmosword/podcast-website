@@ -1,8 +1,8 @@
 # iOS App 架構研究（SwiftUI）
 
-> **狀態：** P0 架構文件 ✅；**P1 JSON API 已實作**（`/api/v1/stories`、`/api/v1/stories/[slug]`、`/api/v1/meta`）  
-> **決策：** 技術路線 = **原生 SwiftUI**；P0 僅文件，P1 為網站 API  
-> **日期：** 2026-07-29（P1 同日）  
+> **狀態：** P0 架構 ✅ · P1 JSON API ✅ · **P2 SwiftUI 骨架 ✅**（[`ios/`](../ios/README.md)）  
+> **決策：** 技術路線 = **原生 SwiftUI**（monorepo `ios/`；可之後拆獨立 repo）  
+> **日期：** 2026-07-29  
 > **Canonical 網站：** `https://podcast-website-mu.vercel.app`（見 [`lib/site-url.ts`](../lib/site-url.ts)）
 
 ## 1. 為什麼現在寫這份文件
@@ -109,7 +109,7 @@ flowchart LR
 
 | 元件 | 建議 |
 |------|------|
-| **iOS 專案** | 獨立 Git repo（或 monorepo `ios/`）；SwiftUI + AVFoundation；最低部署版本建議 iOS 17+ |
+| **iOS 專案** | monorepo [`ios/`](../ios/README.md)（SwiftUI + AVFoundation；iOS 17+）；可之後拆獨立 repo |
 | **目錄來源** | **已上線：** 本站 **JSON API**（[`lib/api-v1.ts`](../lib/api-v1.ts)）；RSS `/feed.xml` 仍為 podcast 目錄／備援 |
 | **媒體** | HTTPS 串流或下載快取；URL 與網站 `storyCoverPath`／`storyAudioUrl` 對齊 |
 | **進度** | App 內 `UserDefaults`／SwiftData，欄位對齊網站 `favorites` + `continue`（見 §7）；**不**假設與 PWA `cheche:progress` 互通 |
@@ -223,7 +223,7 @@ Swift 原型可直接打 JSON API；`/feed.xml` 僅作 podcast／備援，不必
 |------|------|------------|
 | **P0** | 本文件 + 產品／法務確認媒體進 App | `docs/` ✅ |
 | **P1** | 網站 `GET /api/v1/stories` (+ `{slug}`、`meta`) + 契約測試 | `lib/api-v1.ts`、`app/api/v1/**`、vitest ✅ |
-| **P2** | SwiftUI 骨架：列表 → 詳情 → 播放（串流） | 獨立 iOS repo |
+| **P2** | SwiftUI 骨架：列表 → 詳情 → 播放（串流） | [`ios/`](../ios/README.md) ✅ |
 | **P3** | 本機進度、收藏、繼續聽、基本離線 | iOS |
 | **P4** | Universal Links + 官網 CTA「用 App 看圖聽」 | 網站 AASA + 文案 |
 | **P5** | 場景字幕／反思／地圖唯讀（可選） | API 加欄 + iOS |
@@ -264,5 +264,6 @@ Swift 原型可直接打 JSON API；`/feed.xml` 僅作 podcast／備援，不必
 - [x] `/api/v1` 契約草案（P0）→ **已實作（P1）**
 - [x] 分階段切片與紅線
 - [x] P1 程式：`lib/api-v1.ts` + Route Handlers + vitest
-- [ ] Xcode／SwiftUI 專案（P2+）
+- [x] P2 SwiftUI：`ios/CheCheCar` 列表／詳情／AVPlayer（需 Mac 開 Xcode）
+- [ ] 本機進度／離線（P3）
 - [ ] Universal Links／AASA（P4）
