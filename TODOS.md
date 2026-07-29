@@ -30,6 +30,14 @@
 | 4 | [Growth-Measure-1](#growth-measure-1-成長量測) SoundOn 回鏈 | ops/growth | S | ✅ `42a9d38` |
 | 5 | [UX-P1-2](#兒童-ux-與親子互動稽核2026-07-11) 詳情頁反思收合 | ux | S | ✅ `42a9d38` |
 
+### iOS App 架構研究（2026-07-29）
+
+> 決策：技術 **原生 SwiftUI**；本輪 **僅文件**（不寫 API／Xcode）。成長主戰場仍為 Spotify／Apple；App 定位見文件。
+
+- [x] 現況盤點＋目標架構＋`/api/v1` 契約草案＋分階段切片：[docs/IOS-APP-ARCHITECTURE.md](./docs/IOS-APP-ARCHITECTURE.md)  `b3f570a`
+- [ ] **P1（未開工）：** 網站 `GET /api/v1/stories`（+ `{slug}`／`meta`）— 依架構文件 §6／§9，另開任務
+- [ ] **P2+（未開工）：** 獨立 SwiftUI 專案 — 見同文件 §9
+
 ### 宇宙巢狀導覽（M0–M3）
 
 > URL 為導覽唯一來源：世界地圖 → `/adventures/[zone]`。座標 0–1（runtime 轉 px）。
