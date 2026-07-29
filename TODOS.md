@@ -35,7 +35,7 @@
 > 決策：技術 **原生 SwiftUI**；P0 僅文件。成長主戰場仍為 Spotify／Apple；App 定位見文件。
 
 - [x] 現況盤點＋目標架構＋`/api/v1` 契約草案＋分階段切片：[docs/IOS-APP-ARCHITECTURE.md](./docs/IOS-APP-ARCHITECTURE.md)  `b3f570a`
-- [x] **P1：** 網站 `GET /api/v1/stories`（+ `{slug}`／`meta`）+ 契約測試 — 見 [docs/IOS-APP-ARCHITECTURE.md](./docs/IOS-APP-ARCHITECTURE.md) §6／§9  `PENDING_HASH`
+- [x] **P1：** 網站 `GET /api/v1/stories`（+ `{slug}`／`meta`）+ 契約測試 — 見 [docs/IOS-APP-ARCHITECTURE.md](./docs/IOS-APP-ARCHITECTURE.md) §6／§9  `d565fff`
 - [ ] **P2+（未開工）：** 獨立 SwiftUI 專案 — 見同文件 §9
 
 ### 宇宙巢狀導覽（M0–M3）
