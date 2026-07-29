@@ -21,6 +21,7 @@
 
 - **宇宙地圖召喚式探索抽屜**：進島後預設只顯示底部「來這裡逛逛」召喚把手（觸控 ≥56px、`--map-chip*`）；點把手或 `?sheet=1` 才展開非模態 `region` 抽屜——兒童首屏故事卡、探索點次層；✕／Esc 收合不清路由。島上星章滿星時 chip 一次性進場慶祝（session 每島一次）。
 - **`scripts/generate-zone-night-art.ts`**（D4 五島夜間點燈美術管線）。原本只有寫死 forest 的一次性腳本，`generate-map-art.ts` 又只管 map 素材不含 zone。新腳本參數化五島，支援 `--dry-run`／`--only`／`--approve`，並以**日圖當 `images.edit` 的 image reference**——夜圖與日圖會 crossfade，若夜圖是重新生成的另一座島，淡入時島會變形。另輸出日／夜並排 contact sheet 與**剪影 IoU**，讓審圖的人看得到剪影是否漂移。
+- **ep-21 全幕繪本 + 自動駕駛計程車知知定裝**：18 幕（保留 Apple 封面）；名冊新增知知（白車＋藍光 LiDAR，與 ep-3 黃色計程車分離）；車無手臂。
 
 ### Fixed
 

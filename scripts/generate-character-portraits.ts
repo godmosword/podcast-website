@@ -31,7 +31,9 @@ async function portraitFromCoverRef(
       ? "isolate the red twin fire engine labeled 「點點」 on its cab"
       : char.name === "水泥車阿尼"
         ? "isolate the yellow cement mixer truck with the blue-and-white spiral mixing drum"
-        : `isolate the main character 「${char.name}」`;
+        : char.name === "自動駕駛計程車知知"
+          ? "isolate the white modern autonomous robotaxi with neon-blue LED eyes and the white roof LiDAR sensor pod — NOT any yellow checker taxi"
+          : `isolate the main character 「${char.name}」`;
   const prompt =
     `${CLAY_STYLE_PREFIX}Character model sheet based on the reference image: ${isolateHint}. ` +
     `${char.desc} ` +
@@ -96,6 +98,7 @@ async function main(): Promise<void> {
 
   const ep14Cover = join(ROOT, "public", "stories", "ep-14", "01.jpg");
   const ep20Cover = join(ROOT, "public", "stories", "ep-20", "01.jpg");
+  const ep21Cover = join(ROOT, "public", "stories", "ep-21", "01.jpg");
   for (const char of targets) {
     let cover: string | undefined;
     if (
@@ -106,6 +109,8 @@ async function main(): Promise<void> {
       cover = ep14Cover;
     } else if (char.name === "水泥車阿尼" && existsSync(ep20Cover)) {
       cover = ep20Cover;
+    } else if (char.name === "自動駕駛計程車知知" && existsSync(ep21Cover)) {
+      cover = ep21Cover;
     }
     await generateOne(char, cover);
   }

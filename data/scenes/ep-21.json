@@ -1,0 +1,265 @@
+{
+  "slug": "ep-21",
+  "audioDuration": 316,
+  "model": "manual-semantic-15-20s",
+  "generatedAt": "2026-07-29T13:58:00.000Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 0,
+      "end": 26.5,
+      "summary": "開場：Bonbon 和馬米聊美國已經有自動駕駛計程車，台灣還沒有，今天的故事就是自動駕駛計程車",
+      "prompt": "Clay podcast cover-safe framing: the white autonomous robotaxi Zhizhi (知知) waits cheerfully on the path of the colorful vehicle amusement park while Bonbon and Mami introduce today's topic — self-driving taxis that already carry passengers in America. Zhizhi is a white modern clay robotaxi with glowing neon-blue LED eye rings, thin neon-blue light strips, a white roof LiDAR pod with dark-blue lens, small camera pods on the front fenders and dark five-spoke wheels — match portrait 自動駕駛計程車知知, never a yellow checker taxi. Exactly ONE face: two big glossy round eyes plus one small smile on the front, no face on the windshield. Four wheels only — NO arms, NO hands, NO limbs on any vehicle.",
+      "characters": [
+        "自動駕駛計程車知知"
+      ],
+      "keepCover": true
+    },
+    {
+      "index": 2,
+      "start": 26.5,
+      "end": 44.8,
+      "summary": "馬米解釋自動駕駛計程車車上沒有司機，方向盤只在緊急狀況才轉，車子會自己開；Bonbon 好驚訝",
+      "prompt": "Clay podcast studio: Bonbon and Mami at a round wooden table with microphones, warmly discussing that this autonomous taxi has NO driver — only a steering wheel for emergencies — and it can drive by itself. On the table place a SMALL WHITE clay toy of Zhizhi the robotaxi (white body, neon-blue LED eye rings, roof LiDAR pod) — NEVER a yellow checker taxi. Humans Bonbon and Mami have normal hands. Any vehicle toy has NO arms, NO hands, NO limbs. No text, no logos.",
+      "characters": [
+        "Bonbon",
+        "馬米"
+      ],
+      "refPageHint": "Studio hosts only. If any taxi toy appears it MUST be white robotaxi Zhizhi matching portrait 自動駕駛計程車知知 — NEVER yellow checker taxi. NO arms/hands/limbs on any vehicle."
+    },
+    {
+      "index": 3,
+      "start": 44.8,
+      "end": 61.8,
+      "summary": "宣布今天的故事是自動駕駛計程車、要一起出發去車車遊樂園；故事開場，早上 Bonbon 一睜開眼睛就開心跳下床，說今天要去吃甜點",
+      "prompt": "The story opens in a sunny clay bedroom: Bonbon opens his eyes, springs happily out of bed and cheers that today he gets to go eat dessert — today's story is about riding a self-driving taxi all the way to the vehicle amusement park. Warm morning light, cozy handmade clay room with a small bed and window. Bonbon is a HUMAN clay boy and keeps his normal hands. No vehicle is needed in this frame; if any vehicle appears it has wheels and a body only — NO arms, NO hands, NO limbs.",
+      "characters": [
+        "Bonbon"
+      ]
+    },
+    {
+      "index": 4,
+      "start": 61.8,
+      "end": 79.6,
+      "summary": "Bonbon 趕快洗好臉、換好衣服、背上最愛的小書包；馬米看了看時間，說我們要準備去搭車囉",
+      "prompt": "Morning routine inside the clay home: Bonbon has washed his face, changed into his light-teal hoodie and navy shorts and is putting on his favourite bright yellow backpack; Mami checks the time and says it is time to get ready to catch their ride. Both are HUMAN clay characters with normal hands. No vehicle needed in frame; any vehicle that appears must have NO arms, NO hands, NO limbs.",
+      "characters": [
+        "Bonbon",
+        "馬米"
+      ]
+    },
+    {
+      "index": 5,
+      "start": 79.6,
+      "end": 98.1,
+      "summary": "Bonbon 走到窗戶旁邊左看右看，問今天要搭什麼車；馬米神神秘秘地說今天要搭一台很特別的計程車",
+      "prompt": "Bonbon stands beside the living-room window, looking left and right, wondering out loud whether they will take the bus or drive today; Mami smiles mysteriously and tells him they are taking a very special taxi. Cozy clay home interior, quiet empty street outside the window with no car arrived yet. Bonbon and Mami are HUMAN clay characters with normal hands. Any vehicle that appears has wheels and body only — NO arms, NO hands, NO limbs.",
+      "characters": [
+        "Bonbon",
+        "馬米"
+      ]
+    },
+    {
+      "index": 6,
+      "start": 98.1,
+      "end": 113.5,
+      "summary": "馬米的手機傳來通知說車子到了；兩人走到家門口，看到一台白色亮亮的計程車慢慢停在路邊",
+      "prompt": "Bonbon and Mami at their house doorway see white robotaxi Zhizhi slowly parked at the curb — first reveal of the bright white taxi. NO cat, NO extra pets. Match portrait 自動駕駛計程車知知 EXACTLY: matte off-white compact SUV body; TWO large circular eyes each with a glowing neon-blue RING and bright white pupil highlight; simple black smile below; thin glowing neon-blue LED strip across the forehead; white roof LiDAR pod — top cylindrical blue lens PLUS a wider bar with THREE forward blue camera lenses; small white fender camera pods with blue lenses; white side mirrors with a thin amber signal strip; recessed black side-door panel outlined in glowing neon blue; dark five-spoke wheels; opaque black windows on exterior shots; ONE face only; NO arms, NO hands, NO limbs; NEVER yellow, NEVER checker-taxi. Humans Bonbon and Mami match their portraits with normal hands. No text.",
+      "characters": [
+        "Bonbon",
+        "馬米",
+        "自動駕駛計程車知知"
+      ],
+      "refPageHint": "Zhizhi must match portrait 自動駕駛計程車知知 exactly. No cat. NO arms/hands/limbs."
+    },
+    {
+      "index": 7,
+      "start": 113.5,
+      "end": 129.3,
+      "summary": "近看知知：頭頂上有一個小小的燈，車身旁邊有圓圓的小鏡頭，看起來像好多個小眼睛",
+      "prompt": "A close curious look at Zhizhi parked at the curb: the little sensor light glowing on top of his roof pod, and the round camera lenses along his body that look like many tiny eyes; Bonbon leans in to study them while Zhizhi smiles gently. Keep Zhizhi exactly on-model — white clay body, neon-blue LED eye rings and light strips, roof LiDAR pod, fender camera pods, dark five-spoke wheels. Exactly ONE face (two eyes plus one small smile on the front), no second mouth, no face on the windshield. Four wheels only — NO arms, NO hands, NO limbs on the car; Bonbon is human and keeps his normal hands.",
+      "characters": [
+        "Bonbon",
+        "自動駕駛計程車知知"
+      ],
+      "refPages": [
+        6
+      ],
+      "refPageHint": "Continuity with scene 6: 自動駕駛計程車知知 must match the portrait and the previous page exactly — same white robotaxi, neon-blue eye rings, roof LiDAR pod, fender camera pods, ONE face only, never a yellow checker taxi. NO arms, NO hands, NO limbs on the car; Bonbon is human with normal hands."
+    },
+    {
+      "index": 8,
+      "start": 129.3,
+      "end": 144.4,
+      "summary": "知知說早安、自我介紹是自動駕駛計程車、名字叫知知；Bonbon 睜大了眼睛（車門保持關閉）",
+      "prompt": "Exterior suburban driveway: Bonbon and Mami stand beside white robotaxi Zhizhi. Zhizhi greets them warmly — 'good morning, I am a self-driving taxi, my name is Zhizhi' — while Bonbon's eyes go wide with amazement. CRITICAL: ALL doors stay fully CLOSED — do NOT open any door, do NOT show an open door panel or dark interior cavity. Show Zhizhi's friendly front three-quarter face clearly. Keep Zhizhi on-model — white robotaxi, neon-blue eye rings, roof LiDAR pod, fender camera pods, ONE face only. NO arms, NO hands, NO limbs on the car. Bonbon and Mami are human with normal hands. No text.",
+      "characters": [
+        "Bonbon",
+        "馬米",
+        "自動駕駛計程車知知"
+      ],
+      "refPages": [
+        7
+      ],
+      "refPageHint": "Continuity with scene 7: 自動駕駛計程車知知 white robotaxi on-model. ALL doors CLOSED. NO arms/hands/limbs."
+    },
+    {
+      "index": 9,
+      "start": 144.4,
+      "end": 160.9,
+      "summary": "Bonbon 問司機叔叔在哪裡；知知溫柔地說我沒有司機，會用身上的小眼睛看路，也會用聰明的頭腦想一想",
+      "prompt": "Exterior: Bonbon leans in curiously asking where the driver uncle is; Mami stands behind him. Zhizhi's ALL doors stay CLOSED — opaque black windows; do NOT open a door or show a dark cabin cavity. Hint the empty driver's seat only as a soft silhouette through the windshield if needed. Zhizhi gently explains he has no driver and watches the road with his little camera eyes. Match portrait 自動駕駛計程車知知 EXACTLY: matte off-white compact SUV body; TWO large circular eyes each with a glowing neon-blue RING and bright white pupil highlight; simple black smile below; thin glowing neon-blue LED strip across the forehead; white roof LiDAR pod — top cylindrical blue lens PLUS a wider bar with THREE forward blue camera lenses; small white fender camera pods with blue lenses; white side mirrors with a thin amber signal strip; recessed black side-door panel outlined in glowing neon blue; dark five-spoke wheels; opaque black windows on exterior shots; ONE face only; NO arms, NO hands, NO limbs; NEVER yellow, NEVER checker-taxi. Humans have normal hands. No text.",
+      "characters": [
+        "Bonbon",
+        "馬米",
+        "自動駕駛計程車知知"
+      ],
+      "refPages": [
+        8
+      ],
+      "refPageHint": "Closed-door exterior. Portrait-exact Zhizhi. Empty driver only as windshield silhouette. NO open door."
+    },
+    {
+      "index": 10,
+      "start": 160.9,
+      "end": 176.1,
+      "summary": "知知說會安全送到車車遊樂園；Bonbon 又驚訝又期待，馬米牽著 Bonbon 的手準備上車（車門關閉、站在車旁）",
+      "prompt": "Exterior: Mami holds Bonbon's hand as they stand RIGHT BESIDE white robotaxi Zhizhi, excited and about to board after Zhizhi promises to take them safely to the vehicle amusement park. CRITICAL COMPOSITION: ALL doors remain CLOSED — do NOT depict an open swinging door, do NOT show a thick door slab, do NOT show a weird gap into a dark cabin. Camera angle: clear side three-quarter of the CLOSED white car + the two humans standing on the sidewalk. Keep Zhizhi on-model — white body, neon-blue eye rings, roof LiDAR, fender cameras, ONE face. NO arms, NO hands, NO limbs on the car. Humans may hold hands. No text.",
+      "characters": [
+        "Bonbon",
+        "馬米",
+        "自動駕駛計程車知知"
+      ],
+      "refPages": [
+        9
+      ],
+      "refPageHint": "Zhizhi white robotaxi, doors CLOSED. Bonbon+馬米 standing beside car holding hands — no open-door boarding pose."
+    },
+    {
+      "index": 11,
+      "start": 176.1,
+      "end": 192.6,
+      "summary": "知知提醒請扣好安全帶、我們要準備出發囉；馬米和 Bonbon 把安全帶扣好，知知就慢慢開動了",
+      "prompt": "Interior of Zhizhi looking FORWARD from just behind the rear seat headrests. STANDARD 5-seat family-car proportions — NOT a van cargo bay, NOT a flat floor, NOT a third-row pit. Bonbon and Mami sit upright on a normal raised REAR BENCH with proper seat cushions and backrests, seatbelts on, shoulders against the rear seatbacks, feet on the cabin floor — they must NOT sit on the floor or a low cargo platform. Directly in front of them: two normal empty FRONT BUCKET SEATS (driver + passenger) at standard height, close enough that knees almost reach the front seatbacks — typical sedan spacing, not a huge empty gap. Optional plain steering wheel on driver side with soft neon-blue glow, turning alone. Dashboard: plain clay panels + thin neon-blue accent strips ONLY — NO exterior car face, NO giant eyes/mouth, NO hood visible. Through windshield: soft clay street. Humans have normal hands. Car has NO arms, NO hands, NO limbs. No text, no logos.",
+      "characters": [
+        "Bonbon",
+        "馬米",
+        "自動駕駛計程車知知"
+      ],
+      "refPages": [
+        10
+      ],
+      "refPageHint": "Standard sedan cabin: rear bench upright + two empty front seats, normal spacing. No cargo-floor seating. No dash face."
+    },
+    {
+      "index": 12,
+      "start": 192.6,
+      "end": 208.2,
+      "summary": "一路上 Bonbon 好奇地看窗外；前面有人要過馬路時知知馬上停下來，說因為看到有人在斑馬線旁邊",
+      "prompt": "Exterior street: white autonomous taxi Zhizhi STOPPED at a zebra crossing; a human pedestrian waits beside the crosswalk. Bonbon is a PASSENGER INSIDE the car, visible ONLY through the SIDE WINDOW looking out curiously — NOT standing outside, NOT popping out of the roof or sunroof, roof stays CLOSED. 馬米 is NOT in this scene. Keep Zhizhi on-model: white robotaxi, neon-blue eye rings, roof LiDAR pod, fender camera pods, ONE face only. Zhizhi and all background cars: NO arms, NO hands, NO limbs. Humans may have hands.",
+      "characters": [
+        "Bonbon",
+        "自動駕駛計程車知知"
+      ],
+      "refPages": [
+        11
+      ],
+      "refPageHint": "Zhizhi white robotaxi on-model. Bonbon only as passenger seen through closed side window. NO roof hatch, NO sunroof passenger, NO arms/hands/limbs on cars."
+    },
+    {
+      "index": 13,
+      "start": 208.2,
+      "end": 223.5,
+      "summary": "知知說開車除了要注意其他車子，還要注意路上的每一個人；過了一會兒一顆紅色籃球突然滾到路上，知知又停了下來",
+      "prompt": "Street scene: white robotaxi Zhizhi stopped again because a RED basketball has rolled onto the road. Bonbon is INSIDE looking out through the CLOSED side window with a surprised face — NOT outside, NOT through sunroof/roof hatch. No invented bystander girl in a window. Keep Zhizhi on-model: white body, neon-blue eye rings, roof LiDAR, fender cameras, ONE face. All vehicles: NO arms, NO hands, NO limbs.",
+      "characters": [
+        "Bonbon",
+        "自動駕駛計程車知知"
+      ],
+      "refPages": [
+        12
+      ],
+      "refPageHint": "Continuity with scene 12: Bonbon passenger through side window only; Zhizhi white robotaxi; red basketball on road; NO arms/hands/limbs on cars."
+    },
+    {
+      "index": 14,
+      "start": 223.5,
+      "end": 241.3,
+      "summary": "Bonbon 問只是一顆球為什麼要停；知知說球後面可能會有小朋友跑出來，多想一想才能更安全，任務就是讓大家平安到想去的地方",
+      "prompt": "Street: white robotaxi Zhizhi stopped because of a red basketball on the road. Bonbon is INSIDE as a passenger, visible ONLY through the CLOSED side window (finger-on-chin curious) — NOT standing outside. Optional small human child may peek from behind a bush/curb (ball might mean a kid nearby) — do NOT invent a second blue car character that steals focus. Match portrait 自動駕駛計程車知知 EXACTLY: matte off-white compact SUV body; TWO large circular eyes each with a glowing neon-blue RING and bright white pupil highlight; simple black smile below; thin glowing neon-blue LED strip across the forehead; white roof LiDAR pod — top cylindrical blue lens PLUS a wider bar with THREE forward blue camera lenses; small white fender camera pods with blue lenses; white side mirrors with a thin amber signal strip; recessed black side-door panel outlined in glowing neon blue; dark five-spoke wheels; opaque black windows on exterior shots; ONE face only; NO arms, NO hands, NO limbs; NEVER yellow, NEVER checker-taxi. NO arms, NO hands, NO limbs on Zhizhi. No text.",
+      "characters": [
+        "Bonbon",
+        "自動駕駛計程車知知"
+      ],
+      "refPages": [
+        13
+      ],
+      "refPageHint": "Bonbon passenger through side window only. Portrait-exact Zhizhi + red basketball. NO arms/hands/limbs."
+    },
+    {
+      "index": 15,
+      "start": 241.3,
+      "end": 259,
+      "summary": "Bonbon 聽了點點頭；不久後看到彩色的大門，車車遊樂園到了，Bonbon 開心地跟知知說謝謝",
+      "prompt": "Bonbon nods as he understands the lesson; soon the big colorful rainbow gate of the vehicle amusement park comes into view, Zhizhi pulls up gently in front of it, and Bonbon cheerfully thanks him for the ride. Bright clay park entrance with ferris wheel and carousel behind the gate. Keep Zhizhi on-model — white robotaxi, neon-blue eye rings, roof LiDAR pod, fender camera pods, ONE face only — with NO arms, NO hands, NO limbs; any little background cars also have NO arms, NO hands, NO limbs.",
+      "characters": [
+        "Bonbon",
+        "馬米",
+        "自動駕駛計程車知知"
+      ],
+      "refPages": [
+        14
+      ],
+      "refPageHint": "Continuity with scene 14: 自動駕駛計程車知知 match portrait and previous page. Park gate setting; background cars generic and faceless. NO arms, NO hands, NO limbs on any vehicle."
+    },
+    {
+      "index": 16,
+      "start": 259,
+      "end": 275.4,
+      "summary": "知知說不用客氣、祝你們今天玩得開心；Bonbon 牽著馬米的手，開開心心走進車車遊樂園",
+      "prompt": "Zhizhi kindly answers 'you are welcome, have a wonderful day'; Bonbon holds Mami's hand and the two walk happily through the colorful gate into the vehicle amusement park, turning back to wave at Zhizhi who waits at the curb. Human hand-holding and waving are fine — Bonbon and Mami are HUMAN clay characters with normal hands. Zhizhi says goodbye only with his glowing neon-blue eye rings and small smile — he has NO arms, NO hands, NO limbs and never waves a hand.",
+      "characters": [
+        "Bonbon",
+        "馬米",
+        "自動駕駛計程車知知"
+      ],
+      "refPages": [
+        15
+      ],
+      "refPageHint": "Continuity with scene 15: 自動駕駛計程車知知 match portrait and previous page at the same park gate. Farewell shown through his glowing eye rings only — NO arms, NO hands, NO limbs on any vehicle; only the humans wave."
+    },
+    {
+      "index": 17,
+      "start": 275.4,
+      "end": 293.1,
+      "summary": "結語：馬米說未來可能會遇到更多自動駕駛車，也可以稱為無人駕駛車，並謝謝 Bonbon 今天幫忙配音",
+      "prompt": "Clay podcast studio: Bonbon and Mami at the round wooden table with microphones. Mami explains that in the future we may meet more self-driving cars, also called driverless cars, and thanks Bonbon for voicing today's story. On the table center sits a SMALL clay toy of Zhizhi matching portrait 自動駕駛計程車知知 exactly: WHITE modern robotaxi, neon-blue LED eye rings, white roof LiDAR pod — NEVER a yellow checker taxi, NEVER yellow body. Optional soft thought-bubble may show more WHITE robotaxis (not yellow). Humans have normal hands. Toy car: NO arms, NO hands, NO limbs. No text.",
+      "characters": [
+        "Bonbon",
+        "馬米",
+        "自動駕駛計程車知知"
+      ],
+      "refPages": [
+        2
+      ],
+      "refPageHint": "Studio hosts + WHITE Zhizhi toy on table matching portrait. NEVER yellow taxi."
+    },
+    {
+      "index": 18,
+      "start": 293.1,
+      "end": 316,
+      "summary": "Bonbon 和馬米邀請小朋友留言說喜不喜歡自動駕駛計程車，約好下次再一起來車車遊樂園玩，開心道別拜拜",
+      "prompt": "Clay podcast studio farewell: Bonbon and Mami wave goodbye, inviting kids to leave a message about whether they liked the self-driving taxi, and promise to return to the vehicle amusement park. On the table between the mics sits the SAME small WHITE Zhizhi robotaxi toy matching portrait 自動駕駛計程車知知 — white body, neon-blue eye rings, roof LiDAR — NEVER yellow, NEVER checker stripe. Humans wave with normal hands. Toy car: NO arms, NO hands, NO limbs. No text.",
+      "characters": [
+        "Bonbon",
+        "馬米",
+        "自動駕駛計程車知知"
+      ],
+      "refPages": [
+        17
+      ],
+      "refPageHint": "Continuity with scene 17: WHITE Zhizhi toy on table + hosts waving. NEVER yellow taxi."
+    }
+  ],
+  "newCharacters": []
+}

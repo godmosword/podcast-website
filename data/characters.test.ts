@@ -84,9 +84,10 @@ describe("getCharactersForStory", () => {
     expect(ids).toContain("an-an");
   });
 
-  it("ep-21 含黃色計程車", () => {
+  it("ep-21 含自動駕駛計程車知知（非黃色計程車）", () => {
     const ids = getCharactersForStory("ep-21").map((c) => c.id);
-    expect(ids).toContain("huang-ji-cheng");
+    expect(ids).toContain("zhi-zhi");
+    expect(ids).not.toContain("huang-ji-cheng");
   });
 });
 
@@ -95,6 +96,7 @@ describe("getCharacterName", () => {
     expect(getCharacterName("xiao-hong")).toBe("小紅賽車");
     expect(getCharacterName("a-ku")).toBe("阿酷鑽地車");
     expect(getCharacterName("a-ni")).toBe("水泥車阿尼");
+    expect(getCharacterName("zhi-zhi")).toBe("自動駕駛計程車知知");
   });
 
   it("查無角色時回傳 null", () => {

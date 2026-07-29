@@ -87,10 +87,7 @@
     "vehicle": "taxi",
     "desc": "a cute claymation bright yellow taxi cab with a black-and-white checker stripe along the side, a small taxi sign on the roof, round headlights, big cheerful eyes and a happy smile",
     "ref": "characters/黃色計程車.jpg",
-    "firstSeen": "ep-3",
-    "alsoIn": [
-      "ep-21"
-    ]
+    "firstSeen": "ep-3"
   },
   {
     "name": "怪獸卡車",
@@ -408,5 +405,19 @@
     "desc": "a cute claymation bright yellow cement mixer truck named Ani (阿尼), round chubby cab with big shiny black round eyes, light-yellow circular cheeks and a warm friendly smile, large rotating mixing drum on the back with bold blue-and-white spiral stripes, grey front bumper, chunky black clay wheels, soft hand-sculpted clay texture — distinct from yellow bucket excavator Dongdong (東東挖土機) and yellow drill excavator Aku (阿酷)",
     "ref": "characters/水泥車阿尼.jpg",
     "firstSeen": "ep-20"
+  },
+  {
+    "name": "自動駕駛計程車知知",
+    "aliases": [
+      "知知",
+      "自動駕駛計程車",
+      "無人駕駛計程車",
+      "芝芝",
+      "智智"
+    ],
+    "vehicle": "robotaxi",
+    "desc": "a cute claymation modern white autonomous robotaxi named Zhizhi (知知), sleek rounded white SUV/crossover clay body, big glossy black round eyes on the front face each ringed with a thin glowing neon-blue circle, simple cheerful black smile below, thin glowing neon-blue LED headlight strips, white roof LiDAR sensor pod with a dark-blue cylindrical top lens and three forward camera lenses, small white camera pods on the front fenders, recessed black side door panels outlined in glowing blue, dark matte five-spoke wheels, soft hand-sculpted clay texture — NOT a classic yellow checker taxi",
+    "ref": "characters/自動駕駛計程車知知.jpg",
+    "firstSeen": "ep-21"
   }
 ]
