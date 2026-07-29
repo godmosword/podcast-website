@@ -1,9 +1,12 @@
 import SwiftUI
+import UIKit
 
 struct StoryPlayerView: View {
     let detail: StoryDetail
 
     @StateObject private var player = AudioPlayerController()
+    @EnvironmentObject private var progress: ProgressStore
+    @EnvironmentObject private var offline: OfflineLibrary
 
     var body: some View {
         VStack(spacing: 0) {
@@ -20,55 +23,62 @@ struct StoryPlayerView: View {
                     .lineLimit(1)
             }
         }
-        .onAppear {
-            player.load(
-                audioURL: detail.audioUrl,
-                captionTimes: detail.captionTimes,
-                pageCount: detail.pageCount
-            )
-        }
+        .onAppear(perform: bootstrap)
         .onDisappear {
+            saveProgress()
             player.tearDown()
         }
         .statusBarHidden(true)
     }
 
+    private var pageURLs: [URL] {
+        if let local = offline.localPageURLs(slug: detail.slug), !local.isEmpty {
+            return local
+        }
+        return detail.pageImageUrls
+    }
+
     private var pageStage: some View {
-        let urls = detail.pageImageUrls
-        let index = min(player.pageIndex, max(0, urls.count - 1))
-        let url = urls.isEmpty ? detail.coverUrl : urls[index]
+        let urls = pageURLs
+        let fallback = offline.localPageURLs(slug: detail.slug)?.first ?? detail.coverUrl
 
         return TabView(selection: Binding(
             get: { player.pageIndex },
             set: { player.seek(toPage: $0) }
         )) {
             ForEach(Array(urls.enumerated()), id: \.offset) { idx, pageURL in
-                AsyncImage(url: pageURL) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .scaledToFit()
-                    case .failure:
-                        AppTheme.episodeColor(detail.color)
-                    default:
-                        ProgressView()
-                    }
-                }
-                .tag(idx)
-                .padding(.horizontal, 8)
-                .accessibilityLabel("第 \(idx + 1) 頁，共 \(detail.pageCount) 頁")
+                pageImage(pageURL)
+                    .tag(idx)
+                    .padding(.horizontal, 8)
+                    .accessibilityLabel("第 \(idx + 1) 頁，共 \(detail.pageCount) 頁")
             }
         }
         .tabViewStyle(.page(indexDisplayMode: .automatic))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        // 單頁集仍顯示封面
         .overlay {
             if urls.isEmpty {
-                AsyncImage(url: url) { phase in
-                    if case .success(let image) = phase {
-                        image.resizable().scaledToFit()
-                    }
+                pageImage(fallback)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func pageImage(_ url: URL) -> some View {
+        if url.isFileURL, let uiImage = UIImage(contentsOfFile: url.path) {
+            Image(uiImage: uiImage)
+                .resizable()
+                .scaledToFit()
+        } else {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .success(let image):
+                    image
+                        .resizable()
+                        .scaledToFit()
+                case .failure:
+                    AppTheme.episodeColor(detail.color)
+                default:
+                    ProgressView()
                 }
             }
         }
@@ -133,5 +143,30 @@ struct StoryPlayerView: View {
             }
         }
         .padding(.horizontal)
+    }
+
+    private func bootstrap() {
+        let cont = progress.snapshot.continueListening
+        let resume = cont?.slug == detail.slug ? cont : nil
+        let audioURL = offline.localAudioURL(slug: detail.slug) ?? detail.audioUrl
+
+        player.onProgress = { page, time in
+            progress.setContinue(slug: detail.slug, page: page, time: time)
+        }
+        player.load(
+            audioURL: audioURL,
+            captionTimes: detail.captionTimes,
+            pageCount: detail.pageCount,
+            startTime: resume?.time ?? 0,
+            startPage: resume?.page ?? 0
+        )
+    }
+
+    private func saveProgress() {
+        progress.setContinue(
+            slug: detail.slug,
+            page: player.pageIndex,
+            time: player.currentTime
+        )
     }
 }

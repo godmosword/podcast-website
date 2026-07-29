@@ -7,11 +7,13 @@ final class StoryDetailViewModel: ObservableObject {
     @Published var errorMessage: String?
 
     private let client: APIClient
+    private let offline: OfflineLibrary
     private let slug: String
 
-    init(slug: String, client: APIClient = .shared) {
+    init(slug: String, client: APIClient = .shared, offline: OfflineLibrary = .shared) {
         self.slug = slug
         self.client = client
+        self.offline = offline
     }
 
     func load() async {
@@ -22,7 +24,11 @@ final class StoryDetailViewModel: ObservableObject {
         do {
             detail = try await client.fetchStory(slug: slug)
         } catch {
-            errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            if let cached = offline.cachedDetail(slug: slug) {
+                detail = cached
+            } else {
+                errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            }
         }
     }
 }
@@ -32,6 +38,8 @@ struct StoryDetailView: View {
     let preview: StoryListItem?
 
     @StateObject private var model: StoryDetailViewModel
+    @EnvironmentObject private var progress: ProgressStore
+    @EnvironmentObject private var offline: OfflineLibrary
 
     init(slug: String, preview: StoryListItem? = nil) {
         self.slug = slug
@@ -54,23 +62,16 @@ struct StoryDetailView: View {
                         .font(.footnote)
                         .foregroundStyle(.red)
                 }
-                NavigationLink {
-                    if let detail = model.detail {
-                        StoryPlayerView(detail: detail)
-                    } else {
-                        ProgressView()
-                    }
-                } label: {
-                    Label("開始看圖聽故事", systemImage: "play.fill")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(AppTheme.accentPink)
-                        .foregroundStyle(AppTheme.ink)
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                if let err = offline.lastError {
+                    Text(err)
+                        .font(.footnote)
+                        .foregroundStyle(.red)
                 }
-                .disabled(model.detail == nil)
-                .accessibilityHint("開啟全螢幕播放器")
+                actionButtons
+                playButton
+                Text("進度與收藏僅存於此裝置，不會與網站同步。")
+                    .font(.caption2)
+                    .foregroundStyle(AppTheme.inkSoft)
             }
             .padding()
         }
@@ -115,5 +116,75 @@ struct StoryDetailView: View {
                     .foregroundStyle(AppTheme.inkSoft)
             }
         }
+    }
+
+    private var actionButtons: some View {
+        HStack(spacing: 12) {
+            Button {
+                progress.toggleFavorite(slug)
+            } label: {
+                Label(
+                    progress.isFavorite(slug) ? "已收藏" : "收藏",
+                    systemImage: progress.isFavorite(slug) ? "heart.fill" : "heart"
+                )
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(AppTheme.bg2)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            }
+            .accessibilityLabel(progress.isFavorite(slug) ? "取消收藏" : "加入收藏")
+
+            Button {
+                Task {
+                    if offline.isDownloaded(slug) {
+                        offline.remove(slug: slug)
+                    } else if let detail = model.detail {
+                        await offline.download(detail: detail)
+                    }
+                }
+            } label: {
+                Group {
+                    if offline.downloadingSlug == slug {
+                        ProgressView()
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                    } else {
+                        Label(
+                            offline.isDownloaded(slug) ? "移除離線" : "下載離線",
+                            systemImage: offline.isDownloaded(slug)
+                                ? "arrow.down.circle.fill"
+                                : "arrow.down.circle"
+                        )
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                    }
+                }
+                .background(AppTheme.bg2)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            }
+            .disabled(model.detail == nil && !offline.isDownloaded(slug))
+            .accessibilityLabel(offline.isDownloaded(slug) ? "移除離線檔案" : "下載離線檔案")
+        }
+        .foregroundStyle(AppTheme.ink)
+    }
+
+    private var playButton: some View {
+        NavigationLink {
+            if let detail = model.detail {
+                StoryPlayerView(detail: detail)
+            } else {
+                ProgressView()
+            }
+        } label: {
+            Label("開始看圖聽故事", systemImage: "play.fill")
+                .font(.headline)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(AppTheme.accentPink)
+                .foregroundStyle(AppTheme.ink)
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        }
+        .disabled(model.detail == nil)
+        .accessibilityHint("開啟全螢幕播放器")
     }
 }

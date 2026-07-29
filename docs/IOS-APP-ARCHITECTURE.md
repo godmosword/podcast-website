@@ -1,6 +1,6 @@
 # iOS App 架構研究（SwiftUI）
 
-> **狀態：** P0 架構 ✅ · P1 JSON API ✅ · **P2 SwiftUI 骨架 ✅**（[`ios/`](../ios/README.md)）  
+> **狀態：** P0 架構 ✅ · P1 JSON API ✅ · P2 SwiftUI 骨架 ✅ · **P3 本機進度／離線 ✅**（[`ios/`](../ios/README.md)）  
 > **決策：** 技術路線 = **原生 SwiftUI**（monorepo `ios/`；可之後拆獨立 repo）  
 > **日期：** 2026-07-29  
 > **Canonical 網站：** `https://podcast-website-mu.vercel.app`（見 [`lib/site-url.ts`](../lib/site-url.ts)）
@@ -224,7 +224,7 @@ Swift 原型可直接打 JSON API；`/feed.xml` 僅作 podcast／備援，不必
 | **P0** | 本文件 + 產品／法務確認媒體進 App | `docs/` ✅ |
 | **P1** | 網站 `GET /api/v1/stories` (+ `{slug}`、`meta`) + 契約測試 | `lib/api-v1.ts`、`app/api/v1/**`、vitest ✅ |
 | **P2** | SwiftUI 骨架：列表 → 詳情 → 播放（串流） | [`ios/`](../ios/README.md) ✅ |
-| **P3** | 本機進度、收藏、繼續聽、基本離線 | iOS |
+| **P3** | 本機進度、收藏、繼續聽、基本離線 | [`ios/`](../ios/README.md) `ProgressStore`／`OfflineLibrary` ✅ |
 | **P4** | Universal Links + 官網 CTA「用 App 看圖聽」 | 網站 AASA + 文案 |
 | **P5** | 場景字幕／反思／地圖唯讀（可選） | API 加欄 + iOS |
 | **P6+** | 遊戲／帳號／商業化 | 對齊 STEM-P4，不提前做半套 |
@@ -265,5 +265,6 @@ Swift 原型可直接打 JSON API；`/feed.xml` 僅作 podcast／備援，不必
 - [x] 分階段切片與紅線
 - [x] P1 程式：`lib/api-v1.ts` + Route Handlers + vitest
 - [x] P2 SwiftUI：`ios/CheCheCar` 列表／詳情／AVPlayer（需 Mac 開 Xcode）
-- [ ] 本機進度／離線（P3）
+- [x] P3：收藏／繼續聽／基本離線下載
 - [ ] Universal Links／AASA（P4）
+- [ ] 睡前定時／反思 UI（P5）

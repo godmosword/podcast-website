@@ -1,7 +1,7 @@
 import AVFoundation
 import Foundation
 
-/// 串流音檔 + 依 `captionTimes` 推算翻頁（對齊網頁 StoryPlayer 行為的精簡版）。
+/// 串流或本機音檔 + 依 `captionTimes` 推算翻頁。
 @MainActor
 final class AudioPlayerController: ObservableObject {
     @Published private(set) var isPlaying = false
@@ -10,20 +10,31 @@ final class AudioPlayerController: ObservableObject {
     @Published private(set) var pageIndex: Int = 0
     @Published var errorMessage: String?
 
+    /// 播放進度回呼（節流由呼叫端決定）。
+    var onProgress: ((Int, Double) -> Void)?
+
     private var player: AVPlayer?
     private var timeObserver: Any?
     private var endObserver: NSObjectProtocol?
     private var captionTimes: [Double] = []
     private var pageCount: Int = 1
+    private var lastReportedAt: TimeInterval = 0
 
-    func load(audioURL: URL, captionTimes: [Double]?, pageCount: Int) {
+    func load(
+        audioURL: URL,
+        captionTimes: [Double]?,
+        pageCount: Int,
+        startTime: Double = 0,
+        startPage: Int = 0
+    ) {
         tearDown()
         self.captionTimes = captionTimes ?? []
         self.pageCount = max(1, pageCount)
-        self.pageIndex = 0
-        self.currentTime = 0
+        self.pageIndex = min(max(0, startPage), self.pageCount - 1)
+        self.currentTime = max(0, startTime)
         self.duration = 0
         self.errorMessage = nil
+        self.lastReportedAt = 0
 
         let item = AVPlayerItem(url: audioURL)
         let player = AVPlayer(playerItem: item)
@@ -45,7 +56,12 @@ final class AudioPlayerController: ObservableObject {
         ) { [weak self] _ in
             Task { @MainActor in
                 self?.isPlaying = false
+                self?.reportProgress(force: true)
             }
+        }
+
+        if startTime > 0 {
+            player.seek(to: CMTime(seconds: startTime, preferredTimescale: 600))
         }
 
         Task {
@@ -66,6 +82,7 @@ final class AudioPlayerController: ObservableObject {
         if isPlaying {
             player.pause()
             isPlaying = false
+            reportProgress(force: true)
         } else {
             player.play()
             isPlaying = true
@@ -79,11 +96,13 @@ final class AudioPlayerController: ObservableObject {
         player.seek(to: CMTime(seconds: capped, preferredTimescale: 600))
         currentTime = capped
         pageIndex = pageIndex(for: capped)
+        reportProgress(force: true)
     }
 
     func seek(toPage index: Int) {
         guard !captionTimes.isEmpty else {
             pageIndex = min(max(0, index), pageCount - 1)
+            reportProgress(force: true)
             return
         }
         let clamped = min(max(0, index), captionTimes.count - 1)
@@ -91,9 +110,11 @@ final class AudioPlayerController: ObservableObject {
         let t = captionTimes[clamped]
         player?.seek(to: CMTime(seconds: t, preferredTimescale: 600))
         currentTime = t
+        reportProgress(force: true)
     }
 
     func tearDown() {
+        reportProgress(force: true)
         if let timeObserver, let player {
             player.removeTimeObserver(timeObserver)
         }
@@ -105,6 +126,7 @@ final class AudioPlayerController: ObservableObject {
         player?.pause()
         player = nil
         isPlaying = false
+        onProgress = nil
     }
 
     private func handleTime(_ seconds: Double) {
@@ -116,6 +138,16 @@ final class AudioPlayerController: ObservableObject {
                 duration = d
             }
         }
+        reportProgress(force: false)
+    }
+
+    private func reportProgress(force: Bool) {
+        let now = Date().timeIntervalSince1970
+        if !force, now - lastReportedAt < 2 {
+            return
+        }
+        lastReportedAt = now
+        onProgress?(pageIndex, currentTime)
     }
 
     /// 與網頁類似：找最後一個 `captionTimes[i] <= t` 的頁。

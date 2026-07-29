@@ -67,4 +67,30 @@ describe("iOS Fixtures ↔ api-v1 契約", () => {
       expect(models, field).toContain(field);
     }
   });
+
+  it("P3 ProgressStore 對齊 ContinueState／favorites 形狀", () => {
+    const src = readFileSync(
+      join(process.cwd(), "ios/CheCheCar/Services/ProgressStore.swift"),
+      "utf8",
+    );
+    expect(src).toContain("chechecar.ios.progress");
+    expect(src).toContain("struct ContinueListening");
+    expect(src).toContain("var slug: String");
+    expect(src).toContain("var page: Int");
+    expect(src).toContain("var time: Double");
+    expect(src).toContain("var updatedAt: Double");
+    expect(src).toContain('case continueListening = "continue"');
+    expect(src).toContain("var favorites: [String]");
+  });
+
+  it("P3 OfflineLibrary 下載音檔與頁圖", () => {
+    const src = readFileSync(
+      join(process.cwd(), "ios/CheCheCar/Services/OfflineLibrary.swift"),
+      "utf8",
+    );
+    expect(src).toContain("func download(detail:");
+    expect(src).toContain("audio.mp3");
+    expect(src).toContain("detail.json");
+    expect(src).toContain("CheCheCarOffline");
+  });
 });

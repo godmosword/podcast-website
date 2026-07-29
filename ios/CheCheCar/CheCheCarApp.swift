@@ -7,6 +7,8 @@ struct CheCheCarApp: App {
             NavigationStack {
                 StoryListView()
             }
+            .environmentObject(ProgressStore.shared)
+            .environmentObject(OfflineLibrary.shared)
             .tint(AppTheme.accentPink)
         }
     }
