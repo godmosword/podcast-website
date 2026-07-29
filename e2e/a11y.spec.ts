@@ -79,7 +79,7 @@ test("a11y：故事詳情頁無 critical/serious 違規", async ({ page }) => {
   ).toEqual([]);
 });
 
-test("a11y：宇宙地圖島路徑（探索點、無選單）無 critical/serious 違規", async ({
+test("a11y：宇宙地圖島路徑（召喚抽屜、探索點）無 critical/serious 違規", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 375, height: 812 });
@@ -87,22 +87,45 @@ test("a11y：宇宙地圖島路徑（探索點、無選單）無 critical/seriou
     window.sessionStorage.setItem("cc-universe-entry-played", "1");
   });
   await page.goto("/adventures/dino");
-  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "來這裡逛逛" })).toBeVisible({
+    timeout: 5000,
+  });
   await expect(page.locator('[data-hotspot-id="story-house"]')).toBeVisible({
     timeout: 3000,
   });
+  await expect(page.getByRole("region", { name: /恐龍島/ })).toHaveCount(0);
 
-  const results = await new AxeBuilder({ page })
+  const collapsed = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
     .analyze();
 
-  const blocking = results.violations.filter(
+  const collapsedBlocking = collapsed.violations.filter(
     (v) => v.impact != null && BLOCKING_IMPACTS.has(v.impact),
   );
 
   expect(
-    blocking,
-    blocking.map((v) => `[${v.impact}] ${v.id}: ${v.help}`).join("\n"),
+    collapsedBlocking,
+    collapsedBlocking
+      .map((v) => `[${v.impact}] ${v.id}: ${v.help}`)
+      .join("\n"),
+  ).toEqual([]);
+
+  await page.getByRole("button", { name: "來這裡逛逛" }).click();
+  await expect(page.getByRole("region", { name: /恐龍島/ })).toBeVisible();
+
+  const expanded = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+    .analyze();
+
+  const expandedBlocking = expanded.violations.filter(
+    (v) => v.impact != null && BLOCKING_IMPACTS.has(v.impact),
+  );
+
+  expect(
+    expandedBlocking,
+    expandedBlocking
+      .map((v) => `[${v.impact}] ${v.id}: ${v.help}`)
+      .join("\n"),
   ).toEqual([]);
 });
 

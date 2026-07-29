@@ -19,6 +19,7 @@
 
 ### Added
 
+- **宇宙地圖召喚式探索抽屜**：進島後預設只顯示底部「來這裡逛逛」召喚把手（觸控 ≥56px、`--map-chip*`）；點把手或 `?sheet=1` 才展開非模態 `region` 抽屜——兒童首屏故事卡、探索點次層；✕／Esc 收合不清路由。島上星章滿星時 chip 一次性進場慶祝（session 每島一次）。
 - **`scripts/generate-zone-night-art.ts`**（D4 五島夜間點燈美術管線）。原本只有寫死 forest 的一次性腳本，`generate-map-art.ts` 又只管 map 素材不含 zone。新腳本參數化五島，支援 `--dry-run`／`--only`／`--approve`，並以**日圖當 `images.edit` 的 image reference**——夜圖與日圖會 crossfade，若夜圖是重新生成的另一座島，淡入時島會變形。另輸出日／夜並排 contact sheet 與**剪影 IoU**，讓審圖的人看得到剪影是否漂移。
 
 ### Fixed
@@ -26,7 +27,7 @@
 - **宇宙地圖點島沒有置中（正式站回饋）**：`targetToFlyParams` 拿 `zone.camera.center` 當島心，但那是島圖的**沙岸底錨點**（`anchorUV [0.5, 0.84]`）——84% 的島高在錨點上方，於是整座島被推到畫面上緣，1280×800 下車車樂園島頂實際被切掉約 117px。新增 `islandFocus()` 取 tile box 視覺中心並為木牌欄讓位；`flyTo` 新增 `fitBox` 把進島縮放夾到「島放得進畫面」（桌面算出的上限高於 1.6 故手感不變，390 手機從 1.6 落到約 1.15，島不再比螢幕寬）。
 - **宇宙地圖再點同一座島沒有反應**：改為回世界層（`router.push("/adventures")`，鏡頭由既有離島 reset 分支收尾），島 `aria-label` 補「再點一次看整片地圖」。
 - **夜間地圖 chrome 融進背景**：縮放／回樂園鈕吃 `--card`＋`--cta-warm-fg`，夜間是深靛底壓深靛夜海（輪廓消失）、字 `#2a1808` 對底僅約 1.4:1；鎖島泡泡則是硬白底＋`var(--ink)`，夜間變近白字壓白底。新增一組**日夜不反轉**的地圖印刷色 `--map-chip`／`--map-chip-2`／`--map-chip-ink`／`--map-chip-line`（字底 5.4:1、鈕對夜海約 7.9:1），對齊既有 `.tapHint` 與島名木牌語彙。
-- **鎖島泡泡永遠被島名木牌遮住**：泡泡原本在島 `<button>`（有 z-index，自成 stacking context）內，木牌層（`LABEL_BASE`）必定蓋過它；改為 button 的 sibling、走新的 `bubble` 層深、定位在 tile box 頂緣，並補反縮放與尾巴。探索點層同步升到新的 `hotspot` 層深（互動元件不該被裝飾木牌壓住）。
+- **鎖島泡泡永遠被島名木牌遮住**：泡泡原本在島 `<button>`（有 z-index，自成 stacking context）內，木牌層（`LABEL_BASE`）必定蓋過它；改為 button 的 sibling、走新的 `bubble` 層深、定位在 tile box 頂緣，並補反縮放與尾巴。探索點層同步升到新的 `hotspot` 層深（互動元件不該被裝飾木牌壓住）。（後續已移除鎖島狀態泡泡，改果凍回饋＋召喚抽屜。）
 - **手機島名木牌被視窗裁掉**：`CONTENT_FIT_PAD` 是 stage 單位會隨 fit 縮小，但木牌反縮放後是固定螢幕尺寸。新增 `LABEL_SCREEN_PAD` 在螢幕空間預留留白，375×812 下恐龍島木牌由裁掉 24px（可見 0.66）變為完整可見。
 - **故事詳情頁「接著聽」連結對比 2.2:1（axe serious）**：`RelatedStories` 把單集色 `story.color`（如 `#7048e8`）當文字色，夜間壓 `--card` 不足 AA。單集色改只當底線裝飾，文字走 `--accent-ink`（分工同 DESIGN.md：accent → 裝飾／邊框，accent-ink → 文字）。
 - **GameKit 遊戲畫布沒有可及名稱**：`PixelGameCanvas` 遷移到 `GameHost` 時漏了 `role="img" aria-label="遊戲畫面"`，讀屏會念成無名 canvas。補回。
@@ -67,7 +68,7 @@
   - **移除 `RoughFrame` 與 `SvgDefs`（`#rough-1/2/3` 粗糙濾鏡）**：`/games` 是最後一個消費點，收斂後全站歸零。連同 `decor.module.css` 的 `roughShift`／`roughFrame`、對應契約測試與 `app/layout.tsx` 掛載一併清除；`DESIGN.md` 刪除「`/games` 等非本方針範圍頁面」的 carve-out，改為「日後要恢復須先登記」。
   - **新增 `e2e/games.spec.ts`**（首屏、DOM 順序、唯一 h1、單一返回、hub 入口不重複、橫向／平板），`e2e/a11y.spec.ts` 補兩個遊戲頁。
 
-- **宇宙地圖減法點島**：點任一島改為飛鏡頭＋顯示探索點（pin），不再自動開底部選單；鎖島接 `LockedIslandBubble`（`tapBubble`）；MapGuide／tap hint 改「點一座島飛過去，再點探索點」；島頁保留 GEO sr-only，卸載 `ZoneIslandPage`。
+- **宇宙地圖減法點島**：點任一島改為飛鏡頭＋顯示探索點（pin），不再自動開底部選單；MapGuide／tap hint 改「點一座島飛過去，再點探索點／來這裡逛逛」；島頁保留 GEO sr-only，探索內容改召喚抽屜承載。
 - **宇宙地圖兒童探索 polish（T7）**：鎖島 sheet 首屏改 `childHint` 短句＋「去聽車車故事」主 CTA；session 首訪 overlay「點一座島看看」（StrictMode 雙 effect 門閂，僅 dismiss 才寫 session key）；MapGuide 探險小抄補「鍵盤也可探索」（僅 `pointer:fine` 顯示）；ZoneSheet 關閉鈕觸控區 48px；e2e／smoke 對齊兒童極簡斷言。
 - **家長指南導覽減法**：導覽「家長指南」改為直連 `/for-parents`；「關於／聯絡」移出導覽，頁尾 meta 補「聯絡我們」；移除已無引用的 `framer-motion` 依賴。
 - **中文標題去假粗（VIS-W4）**：huninn 為單一字重，全站 `font-weight:800` 原觸發瀏覽器合成假粗、把密集字（鬱/龍/邊）內部糊成一團。全域 `font-synthesis-weight: none` 讓中文落回 master、拉丁補 Baloo 真 800。密集字辨識度提升；中文標題份量略輕（由字級階梯＋顏色扛）。

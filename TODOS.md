@@ -49,6 +49,17 @@
 - [x] 層接 LOD＋關巡邏＋稀有跨島  `ddeed40`
 - [x] Art Bible §12.8／TODOS 對齊  `8ce39f6`
 
+### 本輪已完成（2026-07-29）
+
+> 宇宙地圖召喚式探索抽屜＋鎖島減法（移除 `LockedIslandBubble` legacy）。詳見 [CHANGELOG.md](./CHANGELOG.md) `[Unreleased]`。
+
+| ID | 說明 |
+|----|------|
+| feat(universe): 召喚把手「來這裡逛逛」＋非模態探索抽屜（`?sheet=1`） | 見本 commit |
+| feat(universe): 島星章滿星 chip 進場里程碑 | 見本 commit |
+| chore(universe): 刪除 `LockedIslandBubble` 及契約測（生產零引用） | 見本 commit |
+| docs: DESIGN 元件規格補探索抽屜／召喚把手 | 見本 commit |
+
 ### 本輪已完成（2026-07-27）
 
 > 正式站 `/adventures` 實測五點回饋（點島未置中／島上文字擺放／夜間縮放鍵融背景／
@@ -394,7 +405,7 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 > `brightness(0.93)`。整張圖讀起來像「五張漂亮貼紙貼在一張平鋪海面上」。
 > **決策：** Phase A／B 零資產先落地（拿到八成效果），Phase C 才動生圖成本。
 > **紅線守住：** 未動座標／`useMapCamera`／`ZoneSheet`／DESIGN.md「地圖不反轉」；
-> 未新增 `backdrop-filter`／CSS `blur()`；`MapControls`／`LockedIslandBubble`／`ZoneSheet` 的
+> 未新增 `backdrop-filter`／CSS `blur()`；`MapControls`／`ZoneSheet` 的
 > `.module.css` 完全未動（契約測試不受影響）。
 
 | # | 項目 | 處置 | 驗證 |
@@ -499,7 +510,7 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 | 1 | 點小島未置中；想再點一次回原尺寸 | `targetToFlyParams` 把 `zone.camera.center`（＝`anchorUV [0.5, 0.84]` 的**沙岸底錨點**）當島心置中，84% 島高落在畫面上緣（1280×800 下 car-park 島頂被切約 117px） | 新增 `islandFocus(zoneId)`：焦點＝tile box 視覺中心＋木牌讓位 14px；`flyTo` 新增 `fitBox` 夾住「島放得進畫面」的縮放上限（桌面 >1.6 故手感不變，390 手機落到約 1.15）；`handleActivate` 對同島改 `router.push("/adventures")` | `lib/camera.test.ts`、`map-camera-utils.test.ts`、`useMapCamera.test.tsx`、e2e「點島後島真的置中」「再點一次同一座島」 |
 | 2 | 島上各位置介紹的文字擺放不夠簡潔有力 | 探索點標籤 0.72rem 同權重、隨鏡頭縮放變形（fit 下命中區僅約 29px）、被木牌壓在下層；詳情視窗兩顆同重量全寬按鈕 | 標籤改印刷 chip 13px/800＋反縮放（命中區固定 48px）＋`hotspot` 層深＋下半島 `data-flip="up"`＋鎖定點降權；詳情視窗置中單欄、島名降為徽章、標題升 1.7rem、只留一顆膠囊主 CTA、回島降為文字鈕 | `HotspotLayer.test.tsx` |
 | 3 | 夜間右下縮放鍵與背景融合 | `.btn` 吃 `--card`／`--cta-warm-fg`：夜間深靛底壓深靛夜海、字為 `#2a1808`（約 1.4:1） | 新增 `--map-chip*`（日夜不反轉）；`.btn` 改奶油底＋深棕字（字底 5.4:1、鈕對夜海約 7.9:1） | `MapControls.module.css.test.ts` |
-| 4 | 白色對話框「還在蓋」非常不清楚 | 硬白底＋`var(--ink)`（夜間近白字壓白底）；在島 button 的 stacking context 內被木牌永久遮蓋；不反縮放；`top: 8%` 配上第 1 點常已被切出畫面 | 改 `--map-chip*` 色票＋反縮放（keyframes 同步）＋加尾巴；DOM 搬到 button 之外的 sibling、走新的 `bubble` 層深、定位 tile box 頂緣 | `LockedIslandBubble.module.css.test.ts`、`ZoneIsland.bubble.test.tsx`、`universe-depth.test.ts` |
+| 4 | 白色對話框「還在蓋」非常不清楚 | 硬白底＋`var(--ink)`（夜間近白字壓白底）；在島 button 的 stacking context 內被木牌永久遮蓋；不反縮放；`top: 8%` 配上第 1 點常已被切出畫面 | 改 `--map-chip*` 色票＋反縮放（後續整體移除鎖島泡泡，改果凍回饋） | `ZoneIsland.bubble.test.tsx`、`universe-depth.test.ts` |
 | 5 | 探險小抄沒意義 | 面板 `pointer-events: none`、≤480px 本就 sr-only、狀態圖例島木牌 pill 已有 | 刪除 `MapGuide.{tsx,module.css}` 與兩支測試；`aria-describedby="universe-map-guide"` 改指 sr-only 操作說明 | `e2e/a11y.spec.ts`（`/adventures` 2 案綠） |
 
 ### 同輪順手清掉的既有紅燈

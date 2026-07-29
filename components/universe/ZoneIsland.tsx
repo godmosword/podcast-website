@@ -22,10 +22,12 @@ import styles from "./ZoneIsland.module.css";
 
 /** 點島慶祝動畫長度（毫秒），與 CSS islandBounce／star-burst-particle 對齊。 */
 const CELEBRATE_MS = 640;
+/** 滿星 chip 進場彈跳（毫秒），與 CSS chipFullStarsPop 對齊。 */
+const FULL_STARS_CHIP_MS = 520;
 
 type ZoneIslandProps = {
   zone: ResolvedZone;
-  /** 點任何島 → 路由進島（fly-to＋探索點）；鎖島另播短泡，不開選單。 */
+  /** 點任何島 → 路由進島（fly-to＋探索點）；鎖島只播果凍回饋，不開選單。 */
   onActivate: (zone: ZoneDef) => void;
   reduced?: boolean;
   paused?: boolean;
@@ -60,6 +62,10 @@ function ZoneIsland({
   const effectiveStatus = devStatusOverride ?? zone.status;
   const isOpen = effectiveStatus === "open";
   const hasProgress = (progress?.completed ?? 0) > 0;
+  const isFullStars =
+    hasProgress &&
+    progress!.completed === progress!.total &&
+    progress!.total > 0;
   const tile = getZoneArtTile(zone.id);
   const { transition, onTransitionEnd } = useZoneTransition(effectiveStatus, reduced);
 
@@ -68,6 +74,8 @@ function ZoneIsland({
     createRadialBurstParticles({ ...ISLAND_BURST_PRESET, seed: 0 }),
   );
   const burstTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const chipCelebrateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [chipCelebrate, setChipCelebrate] = useState(false);
   const [jelly, setJelly] = useState(0);
 
   const handleActivate = () => {
@@ -83,7 +91,7 @@ function ZoneIsland({
         burstTimerRef.current = setTimeout(() => setBurst(0), CELEBRATE_MS);
       }
     } else {
-      // 鎖島：果凍＋短泡；不開選單（選單已卸載，互動改探索點）。
+      // 鎖島：果凍回饋；不開選單（互動改探索點／召喚抽屜）。
       playSfx("tap");
       setJelly((n) => n + 1);
     }
@@ -95,15 +103,48 @@ function ZoneIsland({
   // 狀態（建造中／規劃中等）不進可見文案與 aria，避免蓋過島名。
   const ariaLabel = [
     zone.name,
-    hasProgress ? `已聽完 ${progress!.completed} 集` : null,
+    hasProgress
+      ? isFullStars
+        ? `已聽完 ${progress!.completed} 集，這座島的故事都聽完了`
+        : `已聽完 ${progress!.completed} 集`
+      : null,
     active ? "再點一次看整片地圖" : null,
   ]
     .filter(Boolean)
     .join("，");
 
+  // 滿星柔性里程碑：chip 內層一次性進場彈跳（session 每島一次；不搶點島 burst 預算）。
+  useEffect(() => {
+    if (!isFullStars || reduced) return;
+
+    const storageKey = `cheche-zone-full-${zone.id}`;
+    try {
+      if (sessionStorage.getItem(storageKey)) return;
+    } catch {
+      // 私密瀏覽等無 sessionStorage 時仍允許單次視覺
+    }
+
+    const decision = requestCelebration("zone_full_stars");
+    if (!decision.allowed) return;
+
+    try {
+      sessionStorage.setItem(storageKey, "1");
+    } catch {
+      // ignore
+    }
+
+    setChipCelebrate(true);
+    if (chipCelebrateTimerRef.current) clearTimeout(chipCelebrateTimerRef.current);
+    chipCelebrateTimerRef.current = setTimeout(
+      () => setChipCelebrate(false),
+      FULL_STARS_CHIP_MS,
+    );
+  }, [isFullStars, reduced, zone.id]);
+
   useEffect(() => {
     return () => {
       if (burstTimerRef.current) clearTimeout(burstTimerRef.current);
+      if (chipCelebrateTimerRef.current) clearTimeout(chipCelebrateTimerRef.current);
     };
   }, []);
 
@@ -205,8 +246,17 @@ function ZoneIsland({
           </span>
           {hasProgress ? (
             <span className={styles.pillRow}>
-              <span className={styles.progressChip} aria-hidden="true">
-                ⭐ {progress!.completed}/{progress!.total}
+              <span
+                className={styles.progressChip}
+                data-full-stars={isFullStars || undefined}
+                aria-hidden="true"
+              >
+                <span
+                  className={styles.progressChipInner}
+                  data-celebrate={chipCelebrate || undefined}
+                >
+                  ⭐ {progress!.completed}/{progress!.total}
+                </span>
               </span>
             </span>
           ) : null}

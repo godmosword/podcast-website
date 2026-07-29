@@ -4,7 +4,8 @@ export type CelebrationEventId =
   | "favorite_added"
   | "island_open_tap"
   | "story_end"
-  | "game_race_finish";
+  | "game_race_finish"
+  | "zone_full_stars";
 
 export type CelebrationIntensity = "whisper" | "spark" | "burst";
 
@@ -16,6 +17,7 @@ export const CELEBRATION_INTENSITY_BY_EVENT: Record<
   island_open_tap: "spark",
   story_end: "whisper",
   game_race_finish: "burst",
+  zone_full_stars: "whisper",
 };
 
 /** 同強度連發冷卻（毫秒）。 */

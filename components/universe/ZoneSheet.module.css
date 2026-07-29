@@ -41,10 +41,60 @@
   pointer-events: none;
 }
 
+.summonHandle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  min-width: 11rem;
+  margin: 0 12px calc(12px + var(--safe-bottom));
+  padding: 0 1.25rem;
+  border: 2px solid var(--map-chip-line);
+  border-radius: 999px;
+  background: linear-gradient(var(--map-chip), var(--map-chip-2));
+  color: var(--map-chip-ink);
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(120, 90, 40, 0.22);
+}
+
+.summonHandle:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.summonHandleReady {
+  animation: handle-rise 0.24s var(--ease-spring) both;
+}
+
+.summonHandleHidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+@keyframes handle-rise {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .summonHandleReady {
+    animation: none;
+  }
+}
+
 .sheet {
   position: relative;
   width: min(100%, 30rem);
-  max-height: min(64vh, 30rem);
+  max-height: min(40vh, 28rem);
   overflow-y: auto;
   margin: 0 12px calc(12px + var(--safe-bottom));
   padding: 1rem 1.2rem 1.15rem;
@@ -258,28 +308,6 @@
   white-space: nowrap;
 }
 
-.homeBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-height: 48px;
-  margin: 0 0 0.85rem;
-  padding: 0.55rem 0.8rem;
-  border: 1.5px solid color-mix(in srgb, var(--landing-brand) 35%, var(--line));
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--landing-brand) 14%, var(--card));
-  color: var(--ink);
-  font-size: 1rem;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.homeBtn:focus-visible {
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-
 .pill {
   display: inline-block;
   font-size: 12px;
@@ -483,6 +511,37 @@
 }
 
 /* 「給爸爸媽媽」外層 disclosure：收合家長內容（安心資訊 + 許願），孩子首屏不看到 */
+.exploreDisclosure {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin: 0 0 0.65rem;
+}
+
+.exploreToggle {
+  align-self: flex-start;
+  min-height: 48px;
+  padding: 0.5rem 0.9rem;
+  border: 1.5px solid color-mix(in srgb, var(--landing-brand) 28%, var(--line));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--landing-brand) 10%, var(--card));
+  color: var(--landing-brand-ink);
+  font-size: 0.92rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.exploreToggle:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.explorePanel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
 .parentDisclosure {
   display: flex;
   flex-direction: column;

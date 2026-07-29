@@ -91,7 +91,14 @@ function UniverseMapContent({
     () => computeZoneProgress(zoneStoryPreviewsMap, completedSlugs),
     [zoneStoryPreviewsMap, completedSlugs],
   );
-  const pathname = usePathname() || "/adventures";
+  const pathnameRaw = usePathname();
+  // 軟導航瞬間 pathname 可能短暫為 null；勿 fallback 成「/adventures」世界層，
+  // 否則會卸載島 overlay、誤觸發 world reset（對抗審 #1）。
+  const lastPathnameRef = useRef(pathnameRaw ?? "/adventures");
+  if (pathnameRaw) {
+    lastPathnameRef.current = pathnameRaw;
+  }
+  const pathname = pathnameRaw ?? lastPathnameRef.current;
   const cameraTarget = useMemo(() => targetFor(pathname), [pathname]);
   const onIsland = cameraTarget.level === "island";
   const activeZoneId = useMemo<ZoneId | null>(() => {
@@ -416,6 +423,7 @@ function UniverseMapContent({
     onIsland,
     isAnimating: camera.isAnimating,
     reducedMotion: reduced,
+    isMeasured: camera.isMeasured,
   });
 
   // 海面貼圖：screen-space CSS 平鋪，不放進被 transform 的 stage。
@@ -621,7 +629,7 @@ function UniverseMapContent({
           但它 pointer-events: none、手機本來就 sr-only，狀態圖例島木牌 pill 已有，
           對孩子等於裝飾——改為純讀屏描述，首屏讓給地圖。 */}
       <p id="universe-map-guide" className="sr-only">
-        點一座島就會飛過去，島上會顯示精選地標；完整探索點在下方探索列，點擊即可打開故事。
+        點一座島就會飛過去；要看故事或探索點，可點島下方的「來這裡逛逛」。
         再點同一座島可以回到整片樂園。
         拖曳可以移動地圖，右下角的加號減號可以放大縮小；鍵盤可用方向鍵移動、加減鍵縮放。
       </p>
@@ -629,7 +637,9 @@ function UniverseMapContent({
       {/* 首訪底部提示：screen-space，不擋地圖拖曳；dismiss 才寫 session key */}
       {tapHintPhase === "visible" ? (
         <div className={styles.tapHint} role="status" aria-live="polite">
-          <span className={styles.tapHintText}>點一座島飛過去，再點探索點</span>
+          <span className={styles.tapHintText}>
+            點一座島飛過去；要看故事／探索點可點「來這裡逛逛」
+          </span>
           <button
             type="button"
             className={styles.tapHintClose}

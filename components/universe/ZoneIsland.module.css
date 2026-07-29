@@ -333,20 +333,6 @@
   transform-origin: 50% 0;
 }
 
-/* 鎖島泡泡的定位點：tile box 頂緣中心。零尺寸容器，泡泡自身負責置中與反縮放。 */
-.tileBubbleAnchor {
-  position: absolute;
-  width: 0;
-  height: 0;
-  pointer-events: none;
-}
-
-/* landmark 模式（歷史 fallback，現況五島皆不走）：錨在 button 頂緣中央。 */
-.landmarkBubbleAnchor {
-  left: 50%;
-  top: 0;
-}
-
 .island {
   position: absolute;
   /* px 為島中心：以 transform 置中 */
@@ -607,6 +593,42 @@
   font-weight: 800;
   line-height: 18px;
   white-space: nowrap;
+}
+
+/* 滿星態：暖金 chip 持續呈現；慶祝動畫只掛內層，不動 .tileLabel 反縮放。 */
+.progressChip[data-full-stars] {
+  background: rgba(255, 220, 120, 0.96);
+  color: #6b4808;
+  box-shadow: 0 0 8px rgba(255, 200, 80, 0.42);
+}
+
+.progressChipInner {
+  display: inline-block;
+}
+
+.progressChipInner[data-celebrate] {
+  animation: chipFullStarsPop 520ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes chipFullStarsPop {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  38% {
+    transform: scale(1.14);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progressChipInner[data-celebrate] {
+    animation: none;
+  }
 }
 
 /* 進度 glow：有進度的島在海面多一圈很淡的暖光（沿用開放島光暈語彙，
