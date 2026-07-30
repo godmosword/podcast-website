@@ -9,7 +9,7 @@ export const MIN_SCALE = 0.34;
 export const MAX_SCALE = 2.0;
 
 /** 預設鏡頭比 fit 再退一點，讓島群不貼視窗邊、保留拖曳呼吸感。
- *  0.96：配合島群 bbox fit，手機首屏五島可讀且不裁切。 */
+ *  0.96：配合島群 bbox + 嚴格 contain（PORTRAIT_MAX_ZOOM=1）與 chrome inset。 */
 export const FIT_MARGIN = 0.96;
 
 /**
@@ -111,6 +111,7 @@ export const ISLAND_FIT_PAD = 16;
 /**
  * 「島放得進畫面」的縮放上限：島比視窗還寬（手機直向）時，
  * 置中也看不到全島，故把進島 scale 夾到 contain-fit。
+ * 可用空間扣除木牌 pad + 右下 MapControls（與世界層 fit 一致）。
  */
 export function fitScaleForBox(
   box: { w: number; h: number },
@@ -118,9 +119,10 @@ export function fitScaleForBox(
   viewportH: number,
 ): number {
   if (viewportW === 0 || viewportH === 0) return MAX_SCALE;
+  const { availW, availH } = fitAvailableViewport(viewportW, viewportH);
   const pad = ISLAND_FIT_PAD * 2;
   return clampScale(
-    Math.min(viewportW / (box.w + pad), viewportH / (box.h + pad)),
+    Math.min(availW / (box.w + pad), availH / (box.h + pad)),
   );
 }
 
@@ -166,11 +168,11 @@ export function islandContentCenter(): { x: number; y: number } {
 }
 
 /**
- * 直向（portrait）視窗相對 contain 的最大放大倍率。
- * 島群偏寬，直向若用寬度 contain 會縮成中央窄帶、上下大量空海；適度往「填滿高度」
- * 偏移填滿垂直空間（上限此倍率，避免島群裁切過度、仍看得到主島與鄰島）。
+ * 直向（portrait）相對 contain 的最大放大倍率。
+ * 曾為 1.5（填滿高度、允許橫切外側島）；改 1＝嚴格 contain，
+ * 手機首屏五島＋木牌完整入框，寧可上下多一點空海。
  */
-export const PORTRAIT_MAX_ZOOM = 1.5;
+export const PORTRAIT_MAX_ZOOM = 1;
 
 /**
  * 島名木牌呼吸（螢幕 px，單邊）。
@@ -181,14 +183,46 @@ export const PORTRAIT_MAX_ZOOM = 1.5;
  */
 export const LABEL_SCREEN_PAD = 28;
 
+/**
+ * 右下 MapControls 佔用（螢幕 px，不含 safe-area）。
+ * 對齊 `MapControls.module.css` 邊距 12、鈕 56。
+ * 不全額扣三顆鈕疊高（375 寬會無謂壓到 MIN_SCALE）；改扣鈕寬 + 底部一顆半高度，
+ * 讓外側島／進島構圖不被鈕心蓋住即可。
+ */
+export const MAP_CHROME_RIGHT = 12 + 56;
+export const MAP_CHROME_BOTTOM = 12 + 56 + 20;
+
+/**
+ * 進島後底部召喚把手（螢幕 px，不含 safe）：min-height 56 + margin 12。
+ * 高度小於 MapControls 疊高，故世界層／進島共用 bottom chrome 時取 max 即可。
+ */
+export const MAP_SUMMON_BOTTOM = 12 + 56;
+
+/** fit 可用視窗：扣木牌 pad 與右下／底部 chrome，避免島被控制鈕蓋住。 */
+export function fitAvailableViewport(
+  w: number,
+  h: number,
+): { availW: number; availH: number } {
+  const left = LABEL_SCREEN_PAD;
+  const top = LABEL_SCREEN_PAD;
+  const right = Math.max(LABEL_SCREEN_PAD, MAP_CHROME_RIGHT);
+  const bottom = Math.max(
+    LABEL_SCREEN_PAD,
+    MAP_CHROME_BOTTOM,
+    MAP_SUMMON_BOTTOM,
+  );
+  return {
+    availW: Math.max(1, w - left - right),
+    availH: Math.max(1, h - top - bottom),
+  };
+}
+
 /** 依 viewport 尺寸算預設島群 contain-fit 鏡頭倍率（含 FIT_MARGIN 與 clamp）。
- *  直向視窗改偏向填滿高度（見 PORTRAIT_MAX_ZOOM），減少上下空海。 */
+ *  直向採嚴格 contain（PORTRAIT_MAX_ZOOM=1），並扣 chrome inset。 */
 export function fitScaleFor(w: number, h: number): number {
   if (w === 0 || h === 0) return 1;
   const bounds = islandContentBounds();
-  // 先扣掉木牌的螢幕留白，再算 contain（見 LABEL_SCREEN_PAD）。
-  const availW = Math.max(1, w - LABEL_SCREEN_PAD * 2);
-  const availH = Math.max(1, h - LABEL_SCREEN_PAD * 2);
+  const { availW, availH } = fitAvailableViewport(w, h);
   const contain = Math.min(availW / bounds.width, availH / bounds.height);
   const scale =
     h > w

@@ -15,6 +15,7 @@
 
 ### Changed
 
+- **手機宇宙地圖嚴格 contain + chrome inset（MAP-MOBILE-CONTAIN／CHROME）**：`PORTRAIT_MAX_ZOOM` 1.5→1，直向不再為填滿高度而橫切外側島；新增 `fitAvailableViewport` 從可用視窗扣除木牌 pad 與右下 MapControls（＋召喚把手高度），`fitScaleFor`／`fitScaleForBox` 共用。首屏島略小、上下空海略多，換完整可點與木牌不被裁。不動 `useMapCamera`／`ZoneSheet` 互動核心。
 - **宇宙地圖視覺升級 v6：從「五張貼紙」到「有水深／空氣／夜晚的世界」**。地圖的**資產層**（五島整島黏土 diorama、海／雲／日月 PNG）本來就好，但**合成層**幾乎沒做事，所有元素讀在同一個 Z 上。本輪全為 CSS／SVG，零新資產：
   - **淺灘光暈**：島底加一顆更大更柔的水色橢圓（`#cfe8f3` ＋ `feGaussianBlur`，無邊界），島從「貼在海面上」變成「泡在水裡」。與 v5 移除的白硬 foam 環的分界寫進 Art Bible §14.6。
   - **接地陰影不再硬寫**：原本五島共用 `rx=112 ry=34 cy=+30`，1.25× 的 hero 島（car-park）用了一般島的影子，所以看起來在飄。改由新的 `lib/universe/island-ground.ts` 依 tile `stageSize` 推導，基準島輸出與重構前完全一致（測試鎖定）。

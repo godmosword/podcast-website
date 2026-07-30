@@ -11,6 +11,8 @@ import {
   MAX_SCALE,
   MIN_FLY_MS,
   LABEL_SCREEN_PAD,
+  MAP_CHROME_BOTTOM,
+  MAP_CHROME_RIGHT,
   MIN_SCALE,
   NAMEPLATE_FOCUS_ALLOWANCE,
   PORTRAIT_MAX_ZOOM,
@@ -24,6 +26,7 @@ import {
   clampScale,
   decayVelocity,
   exceedsDragSlop,
+  fitAvailableViewport,
   fitScaleFor,
   fitScaleForBox,
   flyDurationFor,
@@ -97,46 +100,48 @@ describe("map-camera-utils", () => {
     }
   });
 
-  it("fitScaleFor：橫向 contain-fit；直向偏向填滿高度（減少上下空海）", () => {
+  it("fitScaleFor：橫向 contain-fit；直向嚴格 contain（不為填高而橫切）", () => {
     const bounds = islandContentBounds();
-    // 可用空間先扣掉木牌的螢幕留白（LABEL_SCREEN_PAD，單邊）
-    const avail = (v: number) => Math.max(1, v - LABEL_SCREEN_PAD * 2);
+    const availFor = (vw: number, vh: number) => fitAvailableViewport(vw, vh);
     // 橫向・高受限
+    const wide = availFor(5000, 1440);
     expect(fitScaleFor(5000, 1440)).toBeCloseTo(
-      clampScale((avail(1440) / bounds.height) * FIT_MARGIN),
+      clampScale((wide.availH / bounds.height) * FIT_MARGIN),
       6,
     );
     // 橫向・寬受限
+    const mid = availFor(1000, 900);
     expect(fitScaleFor(1000, 900)).toBeCloseTo(
-      clampScale((avail(1000) / bounds.width) * FIT_MARGIN),
+      clampScale((mid.availW / bounds.width) * FIT_MARGIN),
       6,
     );
-    // 直向：min(高度fit, contain×PORTRAIT_MAX_ZOOM)，且嚴謹大於純寬度 contain
+    // 直向：PORTRAIT_MAX_ZOOM=1 → 等於純 contain（不再大於寬度 contain）
+    const portrait = availFor(400, 900);
     const portraitContain = Math.min(
-      avail(400) / bounds.width,
-      avail(900) / bounds.height,
+      portrait.availW / bounds.width,
+      portrait.availH / bounds.height,
     );
+    expect(PORTRAIT_MAX_ZOOM).toBe(1);
     expect(fitScaleFor(400, 900)).toBeCloseTo(
-      clampScale(
-        Math.min(avail(900) / bounds.height, portraitContain * PORTRAIT_MAX_ZOOM) *
-          FIT_MARGIN,
-      ),
+      clampScale(portraitContain * FIT_MARGIN),
       6,
     );
-    expect(fitScaleFor(400, 900)).toBeGreaterThan(
-      clampScale(portraitContain * FIT_MARGIN),
-    );
-    // 手機 375：島群 fit 必須嚴謹大於整舞台 fit（五島更飽滿）
+    // 嚴格 contain 後：島群 bbox 寬≈舞台（986≈1000），再扣 pad／chrome → 手機落在 MIN_SCALE
     const mobile = fitScaleFor(375, 748);
-    const stageFit = clampScale(
-      Math.min(375 / MAP_STAGE.width, 748 / MAP_STAGE.height) * FIT_MARGIN,
-    );
-    expect(mobile).toBeGreaterThan(stageFit);
+    expect(mobile).toBe(MIN_SCALE);
+  });
+
+  it("fitAvailableViewport 扣掉 MapControls chrome（右／下大於木牌 pad）", () => {
+    const { availW, availH } = fitAvailableViewport(390, 844);
+    expect(MAP_CHROME_RIGHT).toBeGreaterThan(LABEL_SCREEN_PAD);
+    expect(MAP_CHROME_BOTTOM).toBeGreaterThan(LABEL_SCREEN_PAD);
+    expect(availW).toBe(390 - LABEL_SCREEN_PAD - MAP_CHROME_RIGHT);
+    expect(availH).toBe(844 - LABEL_SCREEN_PAD - MAP_CHROME_BOTTOM);
   });
 
   it("LABEL_SCREEN_PAD 讓 fit 比無留白版本略小（木牌不被視窗裁掉）", () => {
     const bounds = islandContentBounds();
-    // 同尺寸下，扣留白後的 fit 必須小於直接用整個 viewport 算的 contain
+    // 同尺寸下，扣留白＋chrome 後的 fit 必須小於直接用整個 viewport 算的 contain
     expect(fitScaleFor(1000, 900)).toBeLessThan(
       clampScale((1000 / bounds.width) * FIT_MARGIN),
     );
@@ -382,15 +387,16 @@ describe("flyPathLength / flyDurationFor（van Wijk 距離推導）", () => {
     ).toBe(MAX_FLY_MS);
   });
 
-  it("代表性場景釘樁：進島約 390ms、雙擊放大約 245ms（手機直向）", () => {
+  it("代表性場景釘樁：進島約 480ms、雙擊放大約 245ms（手機直向／嚴格 contain）", () => {
     const fit = fitScaleFor(W, H);
     const world = poseFor(islandContentCenter(), fit, W, H);
 
     // 進島：車車樂園（唯一 open 的島）
+    // 嚴格 contain 後世界層 fit 落在 MIN_SCALE，飛到 1.6 的路徑比舊 PORTRAIT_MAX_ZOOM=1.5 略長
     const carPark = ZONES.find((z) => z.id === "car-park")!;
     const enterMs = flyDurationFor(world, poseFor(carPark.coord, 1.6, W, H), W, H);
-    expect(enterMs).toBeGreaterThan(330);
-    expect(enterMs).toBeLessThan(460);
+    expect(enterMs).toBeGreaterThan(430);
+    expect(enterMs).toBeLessThan(530);
 
     // 雙擊：原地放大 1.8 倍，焦點偏視窗 1/4 寬
     const center = islandContentCenter();
@@ -451,14 +457,15 @@ describe("flyPathLength / flyDurationFor（van Wijk 距離推導）", () => {
   });
 
   describe("fitScaleForBox", () => {
-    it("島比視窗寬時夾到 contain-fit（手機直向）", () => {
+    it("島比視窗寬時夾到 contain-fit（手機直向，含 chrome inset）", () => {
       const box = islandFocus("car-park").box;
       const phone = fitScaleForBox(box, 390, 640);
+      const { availW, availH } = fitAvailableViewport(390, 640);
       expect(phone).toBeLessThan(1.6);
       expect(phone).toBeGreaterThan(MIN_SCALE);
-      // 夾完的縮放真的放得下島（含留白）
-      expect(box.w * phone).toBeLessThanOrEqual(390);
-      expect(box.h * phone).toBeLessThanOrEqual(640);
+      // 夾完的縮放真的放得進可用視窗（扣 chrome 後）
+      expect(box.w * phone).toBeLessThanOrEqual(availW + 1e-6);
+      expect(box.h * phone).toBeLessThanOrEqual(availH + 1e-6);
     });
 
     it("桌面視窗算出的上限高於 ISLAND_FOCUS_ZOOM（進島手感不變）", () => {

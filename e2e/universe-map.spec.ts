@@ -199,15 +199,13 @@ test.describe("車車宇宙樂園地圖 UX", () => {
           expect(label.rect.bottom, `${label.name} 下緣`).toBeLessThanOrEqual(
             frame.y + frame.height + 1,
           );
-          // 橫向：直向視窗刻意讓島群比畫面寬（PORTRAIT_MAX_ZOOM，減少上下空海），
-          // 最外側島本身就會被裁一角，孩子拖曳即可看全，故不能要求完整可見。
-          // 實測 375×812 最差為未來夢想島 0.76（`LABEL_SCREEN_PAD` 已把恐龍島從
-          // 0.66 拉到完整可見）；門檻取 0.7 守住「島名還認得出來、沒被推出畫面」。
+          // 橫向：PORTRAIT_MAX_ZOOM=1 嚴格 contain＋chrome inset 後，
+          // 五座島木牌應完整可見（不再允許為填高而橫切）。
           const visibleW =
             Math.min(label.rect.right, frame.x + frame.width) -
             Math.max(label.rect.left, frame.x);
           const ratio = visibleW / (label.rect.right - label.rect.left);
-          expect(ratio, `${label.name} 可見比例`).toBeGreaterThanOrEqual(0.7);
+          expect(ratio, `${label.name} 可見比例`).toBeGreaterThanOrEqual(0.98);
           // 木牌永遠畫在最前面的島身之上
           expect(label.z, `${label.name} 層深`).toBeGreaterThan(maxIslandZ);
         }
