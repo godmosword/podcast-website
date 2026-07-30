@@ -79,7 +79,7 @@
 | feat(universe): 島星章滿星 chip 進場里程碑 | `cc299b4` |
 | chore(universe): 刪除 `LockedIslandBubble` 及契約測（生產零引用） | `cc299b4` |
 | docs: DESIGN 元件規格補探索抽屜／召喚把手 | `cc299b4` |
-| fix(universe): 召喚抽屜 scrim／焦點／h1／glyph／次層捲動（Opus 必修） | `37e42eb` |
+| fix(universe): 召喚抽屜 scrim／焦點／h1／glyph／次層捲動（Opus 必修） | 見本 commit |
 
 ### 本輪已完成（2026-07-27）
 
@@ -1364,7 +1364,7 @@ T+2d    社群貼文（B 戰場）
 | 步驟 | 狀態 | 備註 |
 |------|------|------|
 | 字幕校對 + `--mark` | ✅ | 184→180 句；刪「我叫Bonbon」幻覺；海龜老師暖暖／挖土機東東／笑話呢／又驚又喜；補「三號是誰」→ `_proofread/ep-22.json` |
-| `illustrate --segment-only` → 生圖 → `--approve` | ✅ | 24 幕全幕繪本；車無手／#4#5 單臉／#11–12 多多不在台；`37e42eb` |
+| `illustrate --segment-only` → 生圖 → `--approve` | ✅ | 24 幕全幕繪本；車無手／#4#5 單臉／#11–12 多多不在台；見本 commit |
 
 ### ep-21 上架進度（2026-07-29）
 
