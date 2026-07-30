@@ -55,8 +55,8 @@
 
 | ID | 說明 |
 |----|------|
-| MAP-MOBILE-CONTAIN | `PORTRAIT_MAX_ZOOM` 1.5→1：直向不再為填高而橫切外側島 | 見本 commit |
-| MAP-MOBILE-CHROME | `fitAvailableViewport` 扣 MapControls 右／下 inset；`fitScaleFor`／`fitScaleForBox` 共用 | 見本 commit |
+| MAP-MOBILE-CONTAIN | `PORTRAIT_MAX_ZOOM` 1.5→1：直向不再為填高而橫切外側島 | `37e42eb` |
+| MAP-MOBILE-CHROME | `fitAvailableViewport` 扣 MapControls 右／下 inset；`fitScaleFor`／`fitScaleForBox` 共用 | `37e42eb` |
 
 ### 本輪已完成（2026-07-30 · PLAY-IA）
 
@@ -79,7 +79,7 @@
 | feat(universe): 島星章滿星 chip 進場里程碑 | `cc299b4` |
 | chore(universe): 刪除 `LockedIslandBubble` 及契約測（生產零引用） | `cc299b4` |
 | docs: DESIGN 元件規格補探索抽屜／召喚把手 | `cc299b4` |
-| fix(universe): 召喚抽屜 scrim／焦點／h1／glyph／次層捲動（Opus 必修） | 見本 commit |
+| fix(universe): 召喚抽屜 scrim／焦點／h1／glyph／次層捲動（Opus 必修） | `37e42eb` |
 
 ### 本輪已完成（2026-07-27）
 
@@ -627,8 +627,8 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 | MAP-UX-P2a | P2 | ✅ `80457c4` | reduced-motion 點島即開 sheet | `e2e/universe-map.spec.ts` | `test:e2e` |
 | MAP-MOBILE-FIT | P1 | ✅ `6824d12` | 手機首屏：隱藏標題 pill／探險小抄（sr-only）＋ `FIT_MARGIN` 0.96 | `MapGuide.module.css`、`UniverseMap.module.css`、`map-camera-utils.ts` | 單元＋CSS 契約＋`universe-map` e2e 16 綠 |
 | MAP-MOBILE-BBOX | P1 | ✅ `88b0f67` | 預設 fit 改島群 bbox（`islandContentBounds`），五島首屏更飽滿；不動 `useMapCamera` | `map-camera-utils.ts` | 單元＋e2e 五島 inViewport 17 綠 |
-| MAP-MOBILE-CONTAIN | P1 | ✅ 見本 commit | 直向嚴格 contain：`PORTRAIT_MAX_ZOOM` 1.5→1，首屏不橫切外側島／木牌 | `map-camera-utils.ts` | 單元＋e2e 木牌可見比 ≥0.98 |
-| MAP-MOBILE-CHROME | P1 | ✅ 見本 commit | fit 扣右下 MapControls／召喚把手 inset（`fitAvailableViewport`） | `map-camera-utils.ts` | 單元 |
+| MAP-MOBILE-CONTAIN | P1 | ✅ `37e42eb` | 直向嚴格 contain：`PORTRAIT_MAX_ZOOM` 1.5→1，首屏不橫切外側島／木牌 | `map-camera-utils.ts` | 單元＋e2e 木牌可見比 ≥0.98 |
+| MAP-MOBILE-CHROME | P1 | ✅ `37e42eb` | fit 扣右下 MapControls／召喚把手 inset（`fitAvailableViewport`） | `map-camera-utils.ts` | 單元 |
 | MAP-ROAM-doc | ops | ✅ `80457c4` | archive「待 commit」→ `3166cc5`／`503ad8b` 對帳 | `docs/archive/…` | 文件 only |
 
 ### 待使用者決策（實作前）
@@ -1364,7 +1364,7 @@ T+2d    社群貼文（B 戰場）
 | 步驟 | 狀態 | 備註 |
 |------|------|------|
 | 字幕校對 + `--mark` | ✅ | 184→180 句；刪「我叫Bonbon」幻覺；海龜老師暖暖／挖土機東東／笑話呢／又驚又喜；補「三號是誰」→ `_proofread/ep-22.json` |
-| `illustrate --segment-only` → 生圖 → `--approve` | ✅ | 24 幕全幕繪本；車無手／#4#5 單臉／#11–12 多多不在台；見本 commit |
+| `illustrate --segment-only` → 生圖 → `--approve` | ✅ | 24 幕全幕繪本；車無手／#4#5 單臉／#11–12 多多不在台；`37e42eb` |
 
 ### ep-21 上架進度（2026-07-29）
 
