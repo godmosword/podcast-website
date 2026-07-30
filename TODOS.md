@@ -49,6 +49,17 @@
 - [x] 層接 LOD＋關巡邏＋稀有跨島  `ddeed40`
 - [x] Art Bible §12.8／TODOS 對齊  `8ce39f6`
 
+### 本輪已完成（2026-07-30）
+
+> 接手 Claude 遊戲升級審修殘留（PR #52 已合入 main，不做 port）＋ PLAY-IA-6／7／8。詳見 [CHANGELOG.md](./CHANGELOG.md) `[Unreleased]`。
+
+| ID | 說明 |
+|----|------|
+| chore: 確認 `claude/theme-park-game-assessment-ivvwoo` 四筆審修已 cherry-pick 進 main（PR #52）；遠端殘留 ref 已不存在／已 prune | 見本 commit |
+| PLAY-IA-6 | 方塊／大冒險暫停層補「回遊樂園」 | 見本 commit |
+| PLAY-IA-7 | sticky 抬頭與 GameHost 工具列合成單列（portal + chrome slot） | 見本 commit |
+| PLAY-IA-8 | 沉浸遊戲頁抬頭掛 ThemeToggle iconOnly | 見本 commit |
+
 ### 本輪已完成（2026-07-29）
 
 > 宇宙地圖召喚式探索抽屜＋鎖島減法（移除 `LockedIslandBubble` legacy）。詳見 [CHANGELOG.md](./CHANGELOG.md) `[Unreleased]`。
@@ -548,9 +559,9 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 | PLAY-IA-3 | P0 | ✅ `40c951b` | **沉浸式路由**：`/games/:slug` 隱藏 `SiteNavBar`；hub 與 `coloring-book` 除外 | `lib/is-story-play-route.ts`、`SiteNavBar.tsx` | `is-story-play-route.test.ts`（含巢狀／著色本負向） |
 | PLAY-IA-4 | P1 | ✅ `40c951b` | **hub 四層扁平為兩層**：取消 featured 區塊，主打改分類內大卡（桌面跨兩欄、圖左文右）；卡片補「約 N 分鐘／有無計時」；行動 hero `min(48svh, 340px)` | `app/games/page.tsx`／`page.module.css` | `e2e/games.spec.ts`（第一張卡 <560px、入口不重複） |
 | PLAY-IA-5 | P1 | ✅ `40c951b` | **DESIGN v0.2 收斂**：移除 hover rotate、厚底影下沉、內容卡 `--gloss`、麥克筆 `text-shadow`；`RoughFrame`／`SvgDefs` 整條刪除；`DESIGN.md` 刪 `/games` carve-out | `page.module.css`、`GameChrome.module.css`、`GameEndStation.module.css`、`components/decor/*`、`DESIGN.md` | `npm test` + `decor.module.css.test.ts` |
-| PLAY-IA-6 | P2 | 待做 | **暫停覆蓋層補「回遊樂園」**：sticky 抬頭已保證出口可達，但「暫停 → 我要離開」仍是最自然的兒童動線 | `BlockDropView.tsx`、`car-adventure/CarAdventureMenu.tsx` | 手動 390×844 |
-| PLAY-IA-7 | P2 | 待做 | **抬頭與 `GameHost` 工具列合成單列**（portal + context，約 30 行，不動 GameKit 對外契約）：目前遊戲上方仍是 52+48 兩列 | `GamePageShell.tsx`、`lib/gamekit/host/GameHost.tsx` | 手動 + e2e |
-| PLAY-IA-8 | P2 | 待做 | **遊戲頁無法切換日／夜**：`ThemeToggle` 只掛在已隱藏的 `SiteNavBar` | `GamePageShell.tsx` | 手動 |
+| PLAY-IA-6 | P2 | ✅ 見本 commit | **暫停覆蓋層補「回遊樂園」**：sticky 抬頭已保證出口可達，但「暫停 → 我要離開」仍是最自然的兒童動線 | `BlockDropView.tsx`、`car-adventure/CarAdventureMenu.tsx` | 手動 390×844 |
+| PLAY-IA-7 | P2 | ✅ 見本 commit | **抬頭與 `GameHost` 工具列合成單列**（portal + context，約 30 行，不動 GameKit 對外契約）：目前遊戲上方仍是 52+48 兩列 | `GamePageShell.tsx`、`lib/gamekit/host/GameHost.tsx` | 手動 + e2e |
+| PLAY-IA-8 | P2 | ✅ 見本 commit | **遊戲頁無法切換日／夜**：`ThemeToggle` 只掛在已隱藏的 `SiteNavBar` | `GamePageShell.tsx` | 手動 |
 | PLAY-IA-9 | P2 | 待做 | **視覺基準線重拍**：本次改動會推翻 `games-*` 4 張快照，但 `e2e/visual.spec.ts` 明文禁止在未對齊環境盲跑 `--update-snapshots`（VIS-DEBT-1） | `e2e/visual.spec.ts-snapshots/` | 對齊產生環境後 `npm run test:visual:trusted` |
 
 ---

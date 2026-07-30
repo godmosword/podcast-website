@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { CAR_ADVENTURE_LEVELS } from "@/lib/games/car-adventure/levels";
 import type { Status } from "@/lib/games/car-adventure/types";
 import { GameEndStation } from "@/components/games/GameEndStation";
@@ -159,16 +160,28 @@ export function CarAdventureMenu({
             </>
           )}
 
-          <div className={styles.ctaBar}>
+          <div
+            className={
+              status === "paused"
+                ? `${styles.ctaBar} ${styles.ctaBarPaused}`
+                : styles.ctaBar
+            }
+          >
             {status === "paused" ? (
-              <button
-                type="button"
-                className={styles.primaryBtn}
-                onClick={onResume}
-                aria-label="繼續遊戲"
-              >
-                繼續 ▶
-              </button>
+              <>
+                <button
+                  type="button"
+                  className={styles.primaryBtn}
+                  onClick={onResume}
+                  aria-label="繼續遊戲"
+                >
+                  繼續 ▶
+                </button>
+                {/* PLAY-IA-6：暫停層補兒童最自然的離站出口（對齊 GamePageShell） */}
+                <Link href="/games" className={styles.hubLink}>
+                  回遊樂園
+                </Link>
+              </>
             ) : (
               <GameResultActions
                 onReplay={onStart}

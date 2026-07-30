@@ -7,10 +7,12 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { createPortal } from "react-dom";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useGameKitSettings } from "@/hooks/useGameKitSettings";
 import GameChrome, { GameChromeToolbar } from "@/components/games/GameChrome";
+import { useGamePlayChromeSlot } from "@/components/games/GamePlayChromeSlot";
 import { TutorialOverlay } from "@/lib/gamekit/react/TutorialOverlay";
 import { useBestScore } from "@/lib/gamekit/react/useBestScore";
 import { useGameAudio } from "@/lib/gamekit/react/useGameAudio";
@@ -82,6 +84,8 @@ export default function GameHost({
   const reduced = useReducedMotion(motionPreference);
   const { best, saveBest } = useBestScore(adapter.id);
   const { useKeyboardInput } = useTouchControls();
+  /** PLAY-IA-7：有 shell slot 就 portal；否則 fallback 畫布上方原列 */
+  const chromeSlot = useGamePlayChromeSlot();
 
   const [status, setStatus] = useState<GameStatus>("ready");
   const [score, setScore] = useState(0);
@@ -297,6 +301,35 @@ export default function GameHost({
 
   const needsCanvas = Boolean(instanceRef.current?.fixedUpdate);
 
+  /*
+   * 契約：工具列必須「無條件」渲染。
+   * 若把整列包進 `title || best != null` 之類的條件，hasScore: false 的遊戲
+   * （例如主打的 candy-match，best 恆為 null）會完全失去這些控制。
+   * 只有「最佳分數」可以條件顯示；遊戲名由 GamePageShell 的 h1 持有，此處不重複。
+   * PLAY-IA-7：有 chromeSlot 時 portal 進 sticky 抬頭，否則 fallback 原列。
+   */
+  const toolbarRow = (
+    <div
+      className={
+        chromeSlot
+          ? `${hostStyles.toolbarRow} ${hostStyles.toolbarRowPortaled}`
+          : hostStyles.toolbarRow
+      }
+    >
+      {(best ?? 0) > 0 ? (
+        <span className={hostStyles.bestScore}>最佳 ⭐ {best}</span>
+      ) : null}
+      <GameChromeToolbar
+        canPause={status === "playing" || status === "paused"}
+        paused={status === "paused"}
+        onPause={handlePause}
+        onResume={handleResume}
+        soundOn={soundUi}
+        onToggleSound={toggleSound}
+      />
+    </div>
+  );
+
   return (
     <GameChrome
       canPause={status === "playing" || status === "paused"}
@@ -308,26 +341,7 @@ export default function GameHost({
       className={className}
     >
       <div style={{ position: "relative", width: "100%" }}>
-        {/*
-         * 契約：這一列必須「無條件」渲染。
-         * GameChromeToolbar（暫停／靜音／設定）唯一掛載點就在這裡，
-         * 若把整列包進 `title || best != null` 之類的條件，hasScore: false 的遊戲
-         * （例如主打的 candy-match，best 恆為 null）會完全失去這些控制。
-         * 只有「最佳分數」可以條件顯示；遊戲名由 GamePageShell 的 h1 持有，此處不重複。
-         */}
-        <div className={hostStyles.toolbarRow}>
-          {(best ?? 0) > 0 ? (
-            <span className={hostStyles.bestScore}>最佳 ⭐ {best}</span>
-          ) : null}
-          <GameChromeToolbar
-            canPause={status === "playing" || status === "paused"}
-            paused={status === "paused"}
-            onPause={handlePause}
-            onResume={handleResume}
-            soundOn={soundUi}
-            onToggleSound={toggleSound}
-          />
-        </div>
+        {chromeSlot ? createPortal(toolbarRow, chromeSlot) : toolbarRow}
 
         {needsCanvas && (
           <canvas

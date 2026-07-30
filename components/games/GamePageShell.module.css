@@ -25,7 +25,7 @@
 }
 
 /*
- * 單列遊戲頁抬頭：返回 + 唯一 h1。
+ * 單列遊戲頁抬頭：返回 + 唯一 h1 + chrome slot + 日夜切換（PLAY-IA-7／8）。
  *
  * 必須 sticky：遊戲頁隱藏了全站導覽（isImmersiveRoute），且遊戲畫布可高達 640px，
  * 孩子往下捲之後這是唯一的離站出口。非 sticky 會把兒童困在遊戲裡。
@@ -42,6 +42,29 @@
   padding-top: var(--safe-top);
   background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: blur(10px);
+}
+
+.headerActions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-left: auto;
+  min-width: 0;
+}
+
+.chromeSlot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* portal 進來的工具列：去掉畫布上方的 margin，避免單列被撐高 */
+.chromeSlot > * {
+  margin-bottom: 0;
 }
 
 .back {
@@ -76,6 +99,7 @@
 }
 
 .playTitle {
+  flex: 1 1 auto;
   min-width: 0;
   margin: 0;
   color: var(--ink);

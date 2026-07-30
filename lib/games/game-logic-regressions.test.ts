@@ -216,11 +216,37 @@ describe("game logic regressions", () => {
     expect(toolbarIndex).toBeGreaterThan(rowIndex);
     // 舊寫法把整列（含工具列）包在 title/best 條件內，candy-match 會完全失去控制鈕
     expect(host).not.toContain("{(title || best != null) && (");
+    // PLAY-IA-7：有 shell slot 時 portal，否則 fallback 原列
+    expect(host).toContain("createPortal");
+    expect(host).toContain("useGamePlayChromeSlot");
   });
 
   it("GameChrome 不再於暫停時跳出全螢幕選單", () => {
     const chrome = source("components/games/GameChrome.tsx");
 
     expect(chrome).not.toContain("<PauseOverlay");
+  });
+
+  it("PLAY-IA-6：方塊／大冒險暫停層含回遊樂園出口", () => {
+    const block = source("components/games/BlockDropView.tsx");
+    const adventure = source(
+      "components/games/car-adventure/CarAdventureMenu.tsx",
+    );
+
+    expect(block).toContain('href="/games"');
+    expect(block).toContain("回遊樂園");
+    expect(adventure).toContain('href="/games"');
+    expect(adventure).toContain("回遊樂園");
+  });
+
+  it("PLAY-IA-7／8：遊戲頁抬頭含 chrome slot 與 ThemeToggle", () => {
+    const slot = source("components/games/GamePlayChromeSlot.tsx");
+    const shell = source("components/games/GamePageShell.tsx");
+
+    expect(slot).toContain("ThemeToggle");
+    expect(slot).toContain("iconOnly");
+    expect(slot).toContain("GamePlayChromeProvider");
+    expect(shell).toContain("GamePlayChromeProvider");
+    expect(shell).toContain("GamePlayHeader");
   });
 });

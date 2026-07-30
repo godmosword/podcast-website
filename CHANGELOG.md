@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+### Added
+
+- **PLAY-IA-6：暫停層「回遊樂園」出口**：繽紛方塊與車車大冒險的暫停覆蓋層在「繼續」下方補 `href="/games"` 弱 CTA，對齊抬頭文案；其餘無 React 暫停層的遊戲不動。
+- **PLAY-IA-7：遊戲頁 chrome 單列**：`GamePlayChromeSlot` + `createPortal` 把 `GameHost` 工具列掛進 sticky 抬頭右側；無 slot 時 fallback 畫布上方原列。不動 GameKit adapter 契約。
+- **PLAY-IA-8：沉浸遊戲頁日夜切換**：抬頭右側掛 `ThemeToggle iconOnly`（沉浸路由隱藏 `SiteNavBar` 後仍可切主題）。
+- **宇宙地圖召喚式探索抽屜**：進島後預設只顯示底部「來這裡逛逛」召喚把手（觸控 ≥56px、`--map-chip*`）；點把手或 `?sheet=1` 才展開非模態 `region` 抽屜——兒童首屏故事卡、探索點次層；✕／Esc 收合不清路由。島上星章滿星時 chip 一次性進場慶祝（session 每島一次）。
+- **`scripts/generate-zone-night-art.ts`**（D4 五島夜間點燈美術管線）。原本只有寫死 forest 的一次性腳本，`generate-map-art.ts` 又只管 map 素材不含 zone。新腳本參數化五島，支援 `--dry-run`／`--only`／`--approve`，並以**日圖當 `images.edit` 的 image reference**——夜圖與日圖會 crossfade，若夜圖是重新生成的另一座島，淡入時島會變形。另輸出日／夜並排 contact sheet 與**剪影 IoU**，讓審圖的人看得到剪影是否漂移。
+- **ep-21 全幕繪本 + 自動駕駛計程車知知定裝**：18 幕（保留 Apple 封面）；名冊新增知知（白車＋藍光 LiDAR，與 ep-3 黃色計程車分離）；車無手臂。
+
 ### Changed
 
 - **宇宙地圖視覺升級 v6：從「五張貼紙」到「有水深／空氣／夜晚的世界」**。地圖的**資產層**（五島整島黏土 diorama、海／雲／日月 PNG）本來就好，但**合成層**幾乎沒做事，所有元素讀在同一個 Z 上。本輪全為 CSS／SVG，零新資產：
@@ -16,12 +25,6 @@
   - **夜間窗燈**（夜間，過渡方案）：`data/universe-zone-lights.ts` 資料驅動，每島 ≤3 顆，亮核＋柔暈雙段漸層。某島 `hasNightArt` 翻 true 後該島**自動退場**，不會與烘進夜圖的燈疊加。`prefers-reduced-motion` 只停呼吸、不熄燈。
   - **日月遠景視差**：`applySkyCamera` 以 `PARALLAX_FAR = 0.06` 並**夾住位移**（`SKY_MAX_DRIFT`）——世界可平移數千 px，不夾的話月亮連同水面月光會整顆離開視窗。日月尺寸 56→64px。
 - **`generate-map-art` 的海面 `@2x` 契約澄清**：Art Bible §14.1 原寫「海面需 `@2x`」，但影像 API 方形上限即 `1024×1024`、`SPECS` 與 `verify-map-art.ts` 早已是 `needs2x: false`。再生一張只會得到另一張 1024 的海（零解析度增益，卻要重驗四邊無縫）。文件改為記錄這是刻意契約而非缺件。
-
-### Added
-
-- **宇宙地圖召喚式探索抽屜**：進島後預設只顯示底部「來這裡逛逛」召喚把手（觸控 ≥56px、`--map-chip*`）；點把手或 `?sheet=1` 才展開非模態 `region` 抽屜——兒童首屏故事卡、探索點次層；✕／Esc 收合不清路由。島上星章滿星時 chip 一次性進場慶祝（session 每島一次）。
-- **`scripts/generate-zone-night-art.ts`**（D4 五島夜間點燈美術管線）。原本只有寫死 forest 的一次性腳本，`generate-map-art.ts` 又只管 map 素材不含 zone。新腳本參數化五島，支援 `--dry-run`／`--only`／`--approve`，並以**日圖當 `images.edit` 的 image reference**——夜圖與日圖會 crossfade，若夜圖是重新生成的另一座島，淡入時島會變形。另輸出日／夜並排 contact sheet 與**剪影 IoU**，讓審圖的人看得到剪影是否漂移。
-- **ep-21 全幕繪本 + 自動駕駛計程車知知定裝**：18 幕（保留 Apple 封面）；名冊新增知知（白車＋藍光 LiDAR，與 ep-3 黃色計程車分離）；車無手臂。
 
 ### Fixed
 

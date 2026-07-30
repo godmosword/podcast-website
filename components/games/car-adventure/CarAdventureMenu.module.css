@@ -185,6 +185,36 @@
   );
 }
 
+/* 暫停：主 CTA + 弱出口上下排，避免與「繼續」搶同權重 */
+.ctaBarPaused {
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.hubLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 11rem;
+  padding: 0.45rem 1.25rem;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 0.9375rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.hubLink:focus-visible {
+  outline: 3px solid #ffd23f;
+  outline-offset: 2px;
+}
+
 .primaryBtn {
   min-height: 48px;
   min-width: 11rem;

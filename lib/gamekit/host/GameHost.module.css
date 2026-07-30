@@ -1,6 +1,7 @@
 /*
- * 遊戲區工具列。刻意保持單列、右對齊、貼齊畫布上緣，
- * 避免與 GamePageShell 的 .playHeader 疊成兩層厚 chrome（Content over chrome）。
+ * 遊戲區工具列。刻意保持單列、右對齊。
+ * 有 GamePlayChromeSlot 時 portal 進 sticky 抬頭（PLAY-IA-7），此時不加底 margin；
+ * fallback（無 shell）仍貼畫布上緣留一小段間距。
  */
 .toolbarRow {
   display: flex;
@@ -9,6 +10,10 @@
   gap: var(--space-2);
   min-height: 44px;
   margin-bottom: var(--space-2);
+}
+
+.toolbarRowPortaled {
+  margin-bottom: 0;
 }
 
 .bestScore {

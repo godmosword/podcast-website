@@ -9,6 +9,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
+import Link from "next/link";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useDomJuice } from "@/hooks/useDomJuice";
@@ -2262,18 +2263,33 @@ export function BlockDropView({
                   </button>
                 )}
                 {g.status === "paused" ? (
-                  <button
-                    type="button"
-                    onClick={onResume}
-                    style={{
-                      ...primaryBtn(font),
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 8,
-                    }}
-                  >
-                    <IconPlay size={19} /> 繼續
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      onClick={onResume}
+                      style={{
+                        ...primaryBtn(font),
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 8,
+                      }}
+                    >
+                      <IconPlay size={19} /> 繼續
+                    </button>
+                    {/* PLAY-IA-6：暫停層補兒童最自然的離站出口（對齊 GamePageShell） */}
+                    <Link
+                      href="/games"
+                      style={{
+                        ...secondaryBtn(font),
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        textDecoration: "none",
+                      }}
+                    >
+                      回遊樂園
+                    </Link>
+                  </>
                 ) : (
                   <GameResultActions
                     onReplay={onRestart}
