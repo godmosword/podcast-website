@@ -39,6 +39,7 @@
 | `git add -A` 混入無關 WIP | 只 stage 本次相關檔（AGENT-DOMAIN 紅線） |
 | `--approve` 覆蓋 Apple 封面 `01.jpg` | 重抽單幕改用單張 `cp`，勿全量 approve |
 | CI 放 `OPENAI_API_KEY` 自動生圖 | 成本失控、無人工審圖；CI 永不持有生圖 key |
+| Agent 審圖後自行多輪 `--scene`／regen（ep-23 車道修正） | **付費越權**；一輪生圖後必須停，重抽先列幕號等文字確認；見 `podcast.mdc`／AGENT-DOMAIN 紅線「生圖／重抽禁止自行連抽」 |
 | Grok CLI 曾探到未登入（同日稍後已登入） | 呼叫前先 `grok models` 探活；未登入 → 缺席並提醒使用者 `grok login` |
 | Grok `-p` 語法：`grok -p -m grok-4.5-fast "<prompt>"` 會報 `a value is required for '--single <PROMPT>'` | prompt 必須緊跟 `-p`：`grok -p "<prompt>" -m grok-4.5-fast --effort medium --no-plan` |
 | Cursor Task `grok-4.5-fast-medium` slug 不可用或拒收 | **已淘汰**：Cursor 改 `grok-4.5-fast-high`；舊 slug 勿再寫入 active 路由 |
@@ -49,6 +50,8 @@
 
 | 日期 | 命令／模型 | 症狀（exit code／timeout／額度／輸出品質） | 處置 |
 |------|------------|---------------------------------------------|------|
+| 2026-07-31 | Task `model=claude-opus-4-8-thinking-medium`（Cursor） | `Invalid model selection`；允許清單僅 `claude-opus-5-thinking-high` 等 | 本輪 Opus 設計審標**缺席**；不擅自頂替 opus-5；slug 對照表待另案同步 |
+| 2026-07-31 | Cursor Agent + `illustrate --scene`／自寫 regen（ep-23） | 使用者要修車道／標示後，agent **未等確認**自行多輪重抽（含 timeout 後再續跑），圖像 API 費用失控 | 紅線寫入 alwaysApply `podcast.mdc`、`AGENT-DOMAIN.md`、`EPISODE-WORKFLOW.md`「審圖與重抽」；整集一輪即停，重抽須先列幕號等文字確認 |
 | 2026-07-20 | `block-fable.mjs` preToolUse（Task + `composer-2.5-fast`） | 掃整包 JSON（含 prompt）→ prompt 寫「禁止 Fable 5」反被 deny，Task 無法派工 | 改只檢查 model／slug 欄位（`extractModelAssignmentStrings`）；補回歸測「prompt 提及禁令不誤擋」→ **已解除** |
 | 2026-07-17 | Cursor Agent + MCP `user-ask-user-questions`／`ask_user_questions`（Grok 4.5 session） | 預設 blocking AUQ 乾等 UI～145s；使用者中斷；整輪看似卡住 | 專案禁 AUQ：`.cursor/rules/no-ask-user-questions.mdc` + `.cursor/hooks.json`（`beforeMCPExecution`／`preToolUse` → `block-auq.mjs`）；選項改聊天文字 → **已緩解（專案層）**；使用者可另在 Cursor Settings 關閉該 MCP |
 | 2026-07-09 | `grok models` / grok-4.5 | `You are not authenticated` | 同日稍後探活已登入、單輪呼叫成功 → 已解除 |

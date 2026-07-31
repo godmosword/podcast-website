@@ -39,3 +39,17 @@ alwaysApply: true
 - 日／夜主題系統、`useMapCamera` / `ZoneSheet` 互動邏輯、zone-art-tile 契約、zones 座標。
 - 地圖場景色是「印刷地圖」固定淺色，日夜兩態都不反轉。
 - **Apple 同步 workflow**（`.github/workflows/sync-apple-podcast.yml`、`.github/workflows/sync-watchdog.yml`）及 `scripts/sync-apple-podcast.ts`：屬營運關鍵路徑，非同步任務不得改。若 build／site-url／llms 等改動可能影響 CI，須跑 `npm test -- scripts/lib/sync-workflow-contract.test.ts` 並確認 sync workflow 的 `NEXT_PUBLIC_SITE_URL` 仍對齊 `lib/site-url.ts` 的 `CANONICAL_SITE_URL`。
+
+## 生圖／重抽成本紅線（付費 API，違反＝嚴重越權）
+
+`OPENAI_API_KEY` 的圖像呼叫（`npm run illustrate`、`--from-scenes`、`--scene N`、`--char`、`generate-character-portraits`、任何直接呼叫 `generateSceneImage`／`generateCharacterPortrait`）**每一輪都要錢**。
+
+| 規則 | 說明 |
+|------|------|
+| **首輪才可整集生圖** | 使用者明確說「出圖／illustrate／--from-scenes」→ 只允許**一輪**整集（或指定範圍）生圖，然後**停**。 |
+| **重抽須先報價再等回覆** | 審圖後若要修：只准在聊天列出「建議重抽幕號＋原因＋大約張數」，用 A/B/C 等文字確認；**未收到明確幕號／「准許重抽」前，禁止再呼叫生圖 API**。 |
+| **禁止自行連抽** | 不得因「還不夠好／還有 3 線道／再試一次」自動再跑第 2、3…輪 `--scene` 或自寫 regen 腳本。Timeout／失敗可**同幕最多重試 1 次**，仍失敗就停下來報告。 |
+| **「修正／檢查／對齊」≠ 准許燒額度** | 這類指令＝審圖＋列問題清單；**不是**授權重抽。 |
+| **定裝照同規** | `--char`／`generate-character-portraits` 每次重生也要先問；不得連抽到滿意為止。 |
+
+細節見 [`docs/AGENT-DOMAIN.md`](docs/AGENT-DOMAIN.md) 紅線、[`docs/EPISODE-WORKFLOW.md`](docs/EPISODE-WORKFLOW.md)「審圖與重抽」。

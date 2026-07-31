@@ -66,7 +66,7 @@ A/B/C 格式 — 見 `review-user-choice.mdc`（若有）
 ## 跳過 `/agent-plan`
 
 - 單檔小改、一條命令、使用者說「直接做」
-- **內容管線**（字幕／scenes／illustrate SOP 內）→ 直做或只 `/agent-action`
+- **內容管線**（字幕／scenes／illustrate SOP 內）→ 直做或只 `/agent-action`；**整集生圖一輪即停**，重抽須先列幕號等文字確認（`podcast.mdc`／Domain 紅線）
 
 ## 委員會門檻（精簡）
 

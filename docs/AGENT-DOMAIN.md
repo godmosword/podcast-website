@@ -51,7 +51,7 @@
 |------|------|------|
 | 字幕校對 | [`SUBTITLE-PROOFREAD.md`](SUBTITLE-PROOFREAD.md)；`--mark` 後才可 illustrate | 人工校對品質 |
 | 切場景／scenes | 對齊 ep-9／ep-10 全幕契約；中文 → Sonnet | `verify:episodes` |
-| illustrate 出圖（SOP 內） | 未 `--mark` 不得生圖；暫存 → 人工審 contact → 才 `--approve` | `verify:episodes`；strict 於 approve 前 |
+| illustrate 出圖（SOP 內） | 未 `--mark` 不得生圖；**一輪**生圖後停；重抽須先列幕號等文字確認；暫存 → 人工審 contact → 才 `--approve` | `verify:episodes`；strict 於 approve 前 |
 
 仍須開 `/agent-plan` 的例外：改 `scripts/illustrate*`、改 sync workflow、改全幕契約／schema、或跨模組發佈路徑。
 
@@ -64,6 +64,7 @@
 | **素材禁止再散布** | `public/stories/`、`public/characters/` 音訊／插圖／字幕屬 Bonbon & 馬米；禁止複製到外站、CDN 或第三方 repo |
 | **illustrate 前必校對字幕** | 未 `--mark` 不得跑 `npm run illustrate`（兒童產品、專名正確性） |
 | **AI 插圖須人工審圖** | 暫存 → 審 contact sheet → 才 `--approve` 上線；CI **不放** `OPENAI_API_KEY`、不自動生圖 |
+| **生圖／重抽禁止自行連抽** | 圖像 API 付費。使用者准許的整集出圖＝**一輪**；之後任何 `--scene`／`--char`／定裝重生／自寫 regen，須先在聊天列出幕號＋張數，等文字確認才可呼叫。Timeout 同幕最多重試 1 次。「修正／檢查」≠ 准許重抽。見 alwaysApply `podcast.mdc`、[`EPISODE-WORKFLOW.md`](EPISODE-WORKFLOW.md) |
 | **音檔不外送** | 轉錄／生圖管線只送**已公開劇本文字**（字幕側車），不送 `audio.mp3` |
 | **全幕集對齊 ep-9／ep-10** | `pageCount`、`captions`、`captionTimes`、插圖數、scenes 幕數必須一致；不得跳步 |
 | **保留 Apple 封面** | 重抽單幕時勿用 `--approve` 覆蓋 `01.jpg`；單張 `cp` 進 `public/stories/<slug>/` |
@@ -144,6 +145,7 @@
 | 多 agent 改同一檔 | merge 衝突 |
 | `--approve` 覆蓋 Apple 封面 `01.jpg` | 破壞 RSS 同步封面 |
 | CI 放 `OPENAI_API_KEY` 自動生圖 | 成本失控、無人工審圖 |
+| 審圖不滿意就自行多輪 `--scene`／regen | **付費越權**；先報幕號等確認（2026-07-31 ep-23） |
 | MVP（`pageCount=1`）靜默當完成 | `verify:episodes` 會列 warn，須依 EPISODE-WORKFLOW 升級 |
 | 每個 typo 都跑 `/agent-plan` 雙審 | 太慢；typo 直接做 |
 | SOP 內單集字幕／出圖硬開完整委員會 | 成本浪費；應走內容管線 + verify |
@@ -162,3 +164,4 @@
 | 2026-07-09 | 內容管線跳過委員會；反模式補「SOP 內出圖硬開委員會」「預設雙審」 |
 | 2026-07-12 | 反模式補「小型視覺／樣式微調硬開固定三審」（中間級工程單審，對齊 agent-plan §1） |
 | 2026-07-17 | 反模式補「呼叫 AskQuestion／AUQ MCP」；專案 hook + alwaysApply 規則硬擋 |
+| 2026-07-31 | 紅線「生圖／重抽禁止自行連抽」；alwaysApply `podcast.mdc` + EPISODE-WORKFLOW 審圖閘門（ep-23 越權連抽） |

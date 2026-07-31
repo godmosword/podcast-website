@@ -226,7 +226,7 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 | Plan 工程審（**預設固定**） | GPT 5.6 Luna MAX fast（Cursor）／Codex CLI `gpt-5.6-luna`（Claude Code） |
 | Plan **設計審**（**預設固定**） | Opus 4.8（`architect` readonly；讀 `DESIGN.md`）— UX、兒童體驗、觸控、a11y 視覺 |
 | Plan／diff 對抗審（**預設固定**） | Composer 2.5（readonly；每輪必派） |
-| 字幕／scenes／illustrate（SOP 內） | **跳過 `/agent-plan`**；直做或 `/agent-action` + Domain verify（Sonnet） |
+| 字幕／scenes／illustrate（SOP 內） | **跳過 `/agent-plan`**；直做或 `/agent-action` + Domain verify（Sonnet）。**整集生圖一輪即停**；重抽須先列幕號等文字確認（Domain 紅線／`podcast.mdc`） |
 | 純 docs／命令對齊 | Leader 自審或 GPT；分配表 Composer 對抗審列仍須列出 |
 | 探索 codebase（路徑不明） | Task `explore`（Grok 4.3） |
 | L1／L2 實作 | Task + Composer 2.5 |

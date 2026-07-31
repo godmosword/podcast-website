@@ -331,7 +331,7 @@ npm run illustrate -- ep-9 --approve                               # 上線
 | 旗標 | 作用 |
 |------|------|
 | `--segment-only` | 只產 `data/scenes/<slug>.json` |
-| `--scene N` | 重抽第 N 幕 |
+| `--scene N` | 重抽第 N 幕（**付費**；agent 須先列幕號等人確認，禁止自行連抽） |
 | `--approve` | 暫存 → `public/` + 寫接線 |
 
 角色名冊 `data/characters.json`、定裝照 `public/characters/`、跨集一致性見 README 舊節或 [EPISODE-WORKFLOW.md](./docs/EPISODE-WORKFLOW.md)。

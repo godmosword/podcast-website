@@ -89,6 +89,12 @@ describe("getCharactersForStory", () => {
     expect(ids).toContain("zhi-zhi");
     expect(ids).not.toContain("huang-ji-cheng");
   });
+
+  it("ep-23 含小紅賽車的爸爸與小紅賽車", () => {
+    const ids = getCharactersForStory("ep-23").map((c) => c.id);
+    expect(ids).toContain("xiao-hong-dad");
+    expect(ids).toContain("xiao-hong");
+  });
 });
 
 describe("getCharacterName", () => {
@@ -97,6 +103,7 @@ describe("getCharacterName", () => {
     expect(getCharacterName("a-ku")).toBe("阿酷鑽地車");
     expect(getCharacterName("a-ni")).toBe("水泥車阿尼");
     expect(getCharacterName("zhi-zhi")).toBe("自動駕駛計程車知知");
+    expect(getCharacterName("xiao-hong-dad")).toBe("小紅賽車的爸爸");
   });
 
   it("查無角色時回傳 null", () => {

@@ -63,7 +63,8 @@
     "alsoIn": [
       "ep-15",
       "ep-16",
-      "ep-18"
+      "ep-18",
+      "ep-23"
     ]
   },
   {
@@ -419,5 +420,16 @@
     "desc": "a cute claymation modern white autonomous robotaxi named Zhizhi (知知), sleek rounded white SUV/crossover clay body, big glossy black round eyes on the front face each ringed with a thin glowing neon-blue circle, simple cheerful black smile below, thin glowing neon-blue LED headlight strips, white roof LiDAR sensor pod with a dark-blue cylindrical top lens and three forward camera lenses, small white camera pods on the front fenders, recessed black side door panels outlined in glowing blue, dark matte five-spoke wheels, soft hand-sculpted clay texture — NOT a classic yellow checker taxi",
     "ref": "characters/自動駕駛計程車知知.jpg",
     "firstSeen": "ep-21"
+  },
+  {
+    "name": "小紅賽車的爸爸",
+    "aliases": [
+      "小紅的爸爸",
+      "紅爸"
+    ],
+    "vehicle": "race car",
+    "desc": "a cute claymation adult bright red race car — dad of Xiao Hong (小紅賽車) — slightly larger and longer than the child race car, glossy red rounded body with a white racing stripe down the middle, blue and yellow accents, white circle with the number 1 (not 2). FACE LAYOUT (important): big warm mature round eyes ONLY on the windshield; the MOUTH is on the lower front bumper/grille of the car (車前臉), and a playful curly black handlebar mustache sits directly ABOVE that mouth on the front of the car — mustache and mouth are on the car front nose/bumper, NOT floating on the windshield. Soft friendly dad smile under the curled-up mustache tips (俏皮翹鬍子). Soft hand-sculpted clay texture, same family look as red race car number 2 but clearly an adult father car",
+    "ref": "characters/小紅賽車的爸爸.jpg",
+    "firstSeen": "ep-23"
   }
 ]

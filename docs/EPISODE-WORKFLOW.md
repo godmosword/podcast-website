@@ -55,9 +55,13 @@ npm run proofread:subtitles -- <slug> --mark   # 通過後標記（illustrate �
 # 2. 切場景（可先審、不生圖）
 npm run illustrate -- <slug> --segment-only
 
-# 3. 生圖 → staging + contact.html（需 OPENAI_API_KEY）
+# 3. 生圖 → staging + contact.html（需 OPENAI_API_KEY）— 整集只跑一輪
 OPENAI_API_KEY=sk-... npm run illustrate -- <slug>
 open public/.illustrate-staging/<slug>/contact.html
+
+# 3b. 審圖後若要重抽：先列幕號給人確認，再執行（禁止 agent 自行連抽）
+#    npm run illustrate -- <slug> --scene N
+#    npm run illustrate -- <slug> --char 名字
 
 # 4. 審圖通過 → 上線
 npm run illustrate -- <slug> --approve
@@ -85,6 +89,18 @@ npm run export:video -- <slug>
 #    於 SoundOn 後台該集 show notes 尾段貼官網連結（含 UTM），見 docs/metrics/README.md
 #    lib/soundon-backlink.ts → soundOnStoryBacklinkLine(slug, title)
 ```
+
+## 審圖與重抽（成本閘門）
+
+圖像 API **按張計費**。Agent 必須遵守：
+
+1. **整集生圖一輪即停** — `illustrate`／`--from-scenes` 跑完 → 開 contact → **停止**，把結果交使用者審。
+2. **重抽前先報價** — 在聊天列出建議幕號、原因、張數；用 A/B/C 等文字等回覆。未確認前**不得**跑 `--scene`／`--char`／自寫 regen。
+3. **「修正／檢查／對齊定裝」≠ 准許重抽** — 預設產出問題清單；只有使用者明確說「重抽 #N／這些幕可以重抽」才可呼叫 API。
+4. **失敗重試上限** — 單次 API timeout／5xx：同幕最多再試 **1** 次；仍失敗就停下來報告，不要換一批幕繼續燒。
+5. **定裝照同規** — `generate-character-portraits`／`--char` 每次重生都要先問。
+
+紅線亦見 [`AGENT-DOMAIN.md`](AGENT-DOMAIN.md)、alwaysApply [`.cursor/rules/podcast.mdc`](../.cursor/rules/podcast.mdc)。
 
 ## 驗證
 

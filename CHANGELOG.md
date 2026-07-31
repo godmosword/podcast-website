@@ -6,6 +6,7 @@
 
 ### Added
 
+- **ep-23 全幕繪本 + 小紅賽車的爸爸定裝**：26 幕（雪山隧道）；俏皮翹鬍子爸爸定裝；禁手；場景公里牌整數例外於場景 negative；23／24 頁序對調（慶祝↔風景）。
 - **PLAY-IA-6：暫停層「回遊樂園」出口**：繽紛方塊與車車大冒險的暫停覆蓋層在「繼續」下方補 `href="/games"` 弱 CTA，對齊抬頭文案；其餘無 React 暫停層的遊戲不動。
 - **PLAY-IA-7：遊戲頁 chrome 單列**：`GamePlayChromeSlot` + `createPortal` 把 `GameHost` 工具列掛進 sticky 抬頭右側；無 slot 時 fallback 畫布上方原列。不動 GameKit adapter 契約。
 - **PLAY-IA-8：沉浸遊戲頁日夜切換**：抬頭右側掛 `ThemeToggle iconOnly`（沉浸路由隱藏 `SiteNavBar` 後仍可切主題）。

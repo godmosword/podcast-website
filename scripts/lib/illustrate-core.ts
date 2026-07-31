@@ -130,6 +130,10 @@ export const CLAY_STYLE_PREFIX =
 export const CLAY_NEGATIVE =
   "No text, no words, no captions, no logos, no watermark. No scary or violent imagery. No realistic humans. No photorealism.";
 
+/** 場景生圖用：允許隧道公里牌整數，其餘仍禁文字（CRITICAL-2=B／ep-23） */
+export const CLAY_NEGATIVE_SCENE =
+  "No captions, no logos, no watermark, and no words other than optional square white kilometer plaques with dark-blue whole-number digits. No scary or violent imagery. No realistic humans. No photorealism.";
+
 // ── 字幕讀取 ─────────────────────────────────────────────
 export function readSubtitles(slug: string): Subtitle[] {
   const p = subtitleSidecarPath(slug);
@@ -498,7 +502,7 @@ export async function generateSceneImage(
     (scene.refPages?.length ?? 0) > 0
       ? ` ${scene.refPageHint ?? "Match every on-model character's exact colors, proportions, face, and body silhouette from the provided reference image(s); only change pose, composition, lighting and background as described."}`
       : "";
-  const prompt = `${CLAY_STYLE_PREFIX}Scene: ${scene.prompt}.${refPageLine}${charLine} ${CLAY_NEGATIVE}`;
+  const prompt = `${CLAY_STYLE_PREFIX}Scene: ${scene.prompt}.${refPageLine}${charLine} ${CLAY_NEGATIVE_SCENE}`;
 
   const refs = refPaths.filter((p) => existsSync(p));
   if (refs.length > 0) {
