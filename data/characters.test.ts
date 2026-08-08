@@ -95,6 +95,12 @@ describe("getCharactersForStory", () => {
     expect(ids).toContain("xiao-hong-dad");
     expect(ids).toContain("xiao-hong");
   });
+
+  it("ep-24 含小紅賽車的爸爸與小紅賽車", () => {
+    const ids = getCharactersForStory("ep-24").map((c) => c.id);
+    expect(ids).toContain("xiao-hong-dad");
+    expect(ids).toContain("xiao-hong");
+  });
 });
 
 describe("getCharacterName", () => {

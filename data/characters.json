@@ -64,7 +64,8 @@
       "ep-15",
       "ep-16",
       "ep-18",
-      "ep-23"
+      "ep-23",
+      "ep-24"
     ]
   },
   {
@@ -430,6 +431,9 @@
     "vehicle": "race car",
     "desc": "a cute claymation adult bright red race car — dad of Xiao Hong (小紅賽車) — slightly larger and longer than the child race car, glossy red rounded body with a white racing stripe down the middle, blue and yellow accents, white circle with the number 1 (not 2). FACE LAYOUT (important): big warm mature round eyes ONLY on the windshield; the MOUTH is on the lower front bumper/grille of the car (車前臉), and a playful curly black handlebar mustache sits directly ABOVE that mouth on the front of the car — mustache and mouth are on the car front nose/bumper, NOT floating on the windshield. Soft friendly dad smile under the curled-up mustache tips (俏皮翹鬍子). Soft hand-sculpted clay texture, same family look as red race car number 2 but clearly an adult father car",
     "ref": "characters/小紅賽車的爸爸.jpg",
-    "firstSeen": "ep-23"
+    "firstSeen": "ep-23",
+    "alsoIn": [
+      "ep-24"
+    ]
   }
 ]
