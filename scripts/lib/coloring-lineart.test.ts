@@ -202,9 +202,7 @@ describe("measureCompositionFidelity／構圖 gate", () => {
   test("scene＋參考圖：構圖過低 → gate 失敗", async () => {
     const size = 128;
     const ref = await colorBlockPng(size, { x: 40, y: 40, w: 70, h: 70 }, [40, 120, 220]);
-    const mismatched = await lineSquarePng(size, { x: 2, y: 2, w: 24, h: 24 });
-    // 先過可填／雙峰：用閉合大方框當乾淨線稿基底再疊錯位小框不夠；改以對齊大方框為乾淨線稿
-    // 這裡直接用錯位小框——可能 ink 過低觸發 interiorMin；補一圈外框確保有內部可填
+    // 閉合外框＋角落錯位濃線團（與中央色塊參考構圖不合；可能 ink 過低故補外框）
     const raw = Buffer.alloc(size * size * 3, 255);
     const put = (x: number, y: number) => {
       const i = (y * size + x) * 3;
