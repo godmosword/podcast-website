@@ -29,6 +29,22 @@ export const COLORING_GATES = {
 
 export type ColoringGateKind = keyof typeof COLORING_GATES;
 
+/**
+ * 構圖相似度（edge IoU）：線稿墨線 vs 參考彩圖 Laplacian 邊緣。
+ * scene 硬擋、character 僅 warn；未傳 referenceBuffer 時不跑（相容現役資產契約）。
+ * 門檻依現行 AI 簡化場景（edgeIou≈0.08–0.15）與演算法忠實線稿（≈0.18+）校準。
+ */
+export const COLORING_FIDELITY = {
+  sampleSize: 64,
+  scene: { minEdgeIou: 0.16 },
+  character: { warnEdgeIou: 0.13 },
+} as const;
+
+export type CompositionFidelity = {
+  /** 線稿墨線（經輕微膨脹）與參考邊緣的 IoU，0–1。 */
+  edgeIou: number;
+};
+
 /** morph close 半徑（px）：封小於約 2r 的缺口。 */
 const MORPH_CLOSE_RADIUS = 3;
 
@@ -638,19 +654,100 @@ export async function postprocessAiLineArt(raw: Buffer): Promise<Buffer> {
   return closed.buffer;
 }
 
+export type LineArtGateOptions = {
+  /** 原彩／參考圖；提供時才跑構圖相似度。 */
+  referenceBuffer?: Buffer;
+};
+
 export type LineArtGateResult = {
   ok: boolean;
   problems: string[];
+  warnings: string[];
   quality: LineArtQuality;
+  /** 有傳 referenceBuffer 時才有值（= edgeIou）。 */
+  compositionScore?: number;
 };
 
-/** 依頁面種類跑完整品質 gate（白底＋不透明＋雙峰＋覆蓋率＋噪點＋漏色）。 */
+/**
+ * 量測線稿相對參考彩圖的構圖相似度（downsample → 參考 Laplacian 邊緣 vs 線稿墨線 IoU）。
+ * 語意級「換成太陽雲場」仍靠 prompt＋人工清單；此分數擋明顯錯位／空洞構圖。
+ */
+export async function measureCompositionFidelity(
+  linePng: Buffer,
+  referenceImage: Buffer,
+): Promise<CompositionFidelity> {
+  const size = COLORING_FIDELITY.sampleSize;
+  const resizeOpts = {
+    fit: "contain" as const,
+    background: "#ffffff",
+  };
+  const { data: refData } = await sharp(referenceImage)
+    .resize(size, size, resizeOpts)
+    .greyscale()
+    .blur(0.6)
+    .convolve({
+      width: 3,
+      height: 3,
+      kernel: [-1, -1, -1, -1, 8, -1, -1, -1, -1],
+    })
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  const { data: lineData } = await sharp(linePng)
+    .resize(size, size, resizeOpts)
+    .greyscale()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  const n = size * size;
+  const refEdge = new Uint8Array(n);
+  const lineInk = new Uint8Array(n);
+  for (let i = 0; i < n; i += 1) {
+    refEdge[i] = (refData[i] ?? 0) > 40 ? 1 : 0;
+    lineInk[i] = (lineData[i] ?? 255) < LINE_LUMA_WALL ? 1 : 0;
+  }
+
+  // 輕微膨脹線稿，容忍描邊對齊誤差
+  const dilated = new Uint8Array(n);
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      let black = 0;
+      for (let dy = -1; dy <= 1 && !black; dy += 1) {
+        for (let dx = -1; dx <= 1; dx += 1) {
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= size || ny >= size) continue;
+          if (lineInk[ny * size + nx]) {
+            black = 1;
+            break;
+          }
+        }
+      }
+      dilated[y * size + x] = black;
+    }
+  }
+
+  let inter = 0;
+  let uni = 0;
+  for (let i = 0; i < n; i += 1) {
+    const a = refEdge[i] ?? 0;
+    const b = dilated[i] ?? 0;
+    if (a | b) uni += 1;
+    if (a & b) inter += 1;
+  }
+
+  return { edgeIou: uni === 0 ? 0 : inter / uni };
+}
+
+/** 依頁面種類跑完整品質 gate（白底＋不透明＋雙峰＋覆蓋率＋噪點＋漏色［＋可選構圖］）。 */
 export async function evaluateLineArtGate(
   pngBuffer: Buffer,
   kind: ColoringGateKind,
+  options: LineArtGateOptions = {},
 ): Promise<LineArtGateResult> {
   const gate = COLORING_GATES[kind];
   const problems: string[] = [];
+  const warnings: string[] = [];
 
   if (!(await isMostlyWhiteBackground(pngBuffer))) problems.push("背景不夠白");
 
@@ -686,7 +783,32 @@ export async function evaluateLineArtGate(
     );
   }
 
-  return { ok: problems.length === 0, problems, quality };
+  let compositionScore: number | undefined;
+  if (options.referenceBuffer) {
+    const fidelity = await measureCompositionFidelity(pngBuffer, options.referenceBuffer);
+    compositionScore = fidelity.edgeIou;
+    const scoreText = `構圖相似度 edgeIou=${fidelity.edgeIou.toFixed(3)}`;
+    if (kind === "scene" && fidelity.edgeIou < COLORING_FIDELITY.scene.minEdgeIou) {
+      problems.push(
+        `${scoreText} < ${COLORING_FIDELITY.scene.minEdgeIou}（與參考構圖落差過大）`,
+      );
+    } else if (
+      kind === "character" &&
+      fidelity.edgeIou < COLORING_FIDELITY.character.warnEdgeIou
+    ) {
+      warnings.push(
+        `${scoreText} < ${COLORING_FIDELITY.character.warnEdgeIou}（建議對照原圖確認大型道具）`,
+      );
+    }
+  }
+
+  return {
+    ok: problems.length === 0,
+    problems,
+    warnings,
+    quality,
+    compositionScore,
+  };
 }
 
 /** 摘要一行品質數據（log 用）。 */

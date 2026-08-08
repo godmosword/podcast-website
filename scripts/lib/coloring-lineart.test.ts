@@ -4,6 +4,7 @@ import { describe, expect, test } from "vitest";
 import sharp from "sharp";
 import {
   COLORING_BUCKET_LEAK_MAX,
+  COLORING_FIDELITY,
   COLORING_GATES,
   COLORING_LINEART_MAX_SIDE,
   COLORING_MIDTONE_RATIO_MAX,
@@ -12,8 +13,10 @@ import {
   convertToLineArt,
   despeckleInk,
   estimateBucketLeakRatio,
+  evaluateLineArtGate,
   isMostlyWhiteBackground,
   labelInkComponents,
+  measureCompositionFidelity,
   measureLineArtQuality,
   postprocessAiLineArt,
   subjectOutlineFromRgba,
@@ -129,6 +132,150 @@ describe("despeckleInk", () => {
     bin[10 * W + 10] = 1;
     bin[11 * W + 11] = 1;
     expect(labelInkComponents(bin, W, H)).toHaveLength(1);
+  });
+});
+
+describe("measureCompositionFidelity／構圖 gate", () => {
+  /** 白底＋指定位置的粗黑框方形（線稿；3px 描邊利於 edge IoU）。 */
+  async function lineSquarePng(
+    size: number,
+    box: { x: number; y: number; w: number; h: number },
+  ): Promise<Buffer> {
+    const raw = Buffer.alloc(size * size * 3, 255);
+    const stroke = (x: number, y: number) => {
+      if (x < 0 || y < 0 || x >= size || y >= size) return;
+      const i = (y * size + x) * 3;
+      raw[i] = 0;
+      raw[i + 1] = 0;
+      raw[i + 2] = 0;
+    };
+    for (let t = 0; t < 3; t += 1) {
+      for (let x = box.x; x < box.x + box.w; x += 1) {
+        stroke(x, box.y + t);
+        stroke(x, box.y + box.h - 1 - t);
+      }
+      for (let y = box.y; y < box.y + box.h; y += 1) {
+        stroke(box.x + t, y);
+        stroke(box.x + box.w - 1 - t, y);
+      }
+    }
+    return sharp(raw, { raw: { width: size, height: size, channels: 3 } })
+      .png()
+      .toBuffer();
+  }
+
+  /** 對應位置的實心色塊（當參考彩圖，邊緣可被 Laplacian 抓到）。 */
+  async function colorBlockPng(
+    size: number,
+    box: { x: number; y: number; w: number; h: number },
+    fill: [number, number, number],
+  ): Promise<Buffer> {
+    const raw = Buffer.alloc(size * size * 3, 240);
+    for (let y = box.y; y < box.y + box.h; y += 1) {
+      for (let x = box.x; x < box.x + box.w; x += 1) {
+        const i = (y * size + x) * 3;
+        raw[i] = fill[0];
+        raw[i + 1] = fill[1];
+        raw[i + 2] = fill[2];
+      }
+    }
+    return sharp(raw, { raw: { width: size, height: size, channels: 3 } })
+      .png()
+      .toBuffer();
+  }
+
+  test("對齊構圖的線稿 edgeIou 高於錯位構圖", async () => {
+    const size = 128;
+    const box = { x: 24, y: 24, w: 80, h: 80 };
+    const ref = await colorBlockPng(size, box, [220, 40, 40]);
+    const aligned = await lineSquarePng(size, box);
+    const mismatched = await lineSquarePng(size, { x: 4, y: 4, w: 28, h: 28 });
+
+    const good = await measureCompositionFidelity(aligned, ref);
+    const bad = await measureCompositionFidelity(mismatched, ref);
+
+    expect(good.edgeIou).toBeGreaterThan(COLORING_FIDELITY.scene.minEdgeIou);
+    expect(bad.edgeIou).toBeLessThan(COLORING_FIDELITY.scene.minEdgeIou);
+    expect(good.edgeIou).toBeGreaterThan(bad.edgeIou);
+  });
+
+  test("scene＋參考圖：構圖過低 → gate 失敗", async () => {
+    const size = 128;
+    const ref = await colorBlockPng(size, { x: 40, y: 40, w: 70, h: 70 }, [40, 120, 220]);
+    const mismatched = await lineSquarePng(size, { x: 2, y: 2, w: 24, h: 24 });
+    // 先過可填／雙峰：用閉合大方框當乾淨線稿基底再疊錯位小框不夠；改以對齊大方框為乾淨線稿
+    // 這裡直接用錯位小框——可能 ink 過低觸發 interiorMin；補一圈外框確保有內部可填
+    const raw = Buffer.alloc(size * size * 3, 255);
+    const put = (x: number, y: number) => {
+      const i = (y * size + x) * 3;
+      raw[i] = 0;
+      raw[i + 1] = 0;
+      raw[i + 2] = 0;
+    };
+    for (let x = 8; x < 120; x += 1) {
+      put(x, 8);
+      put(x, 119);
+    }
+    for (let y = 8; y < 120; y += 1) {
+      put(8, y);
+      put(119, y);
+    }
+    // 錯位濃線團在角落（與中央色塊參考構圖不合）
+    for (let y = 10; y < 36; y += 1) for (let x = 10; x < 36; x += 1) if ((x + y) % 2 === 0) put(x, y);
+    const line = await sharp(raw, { raw: { width: size, height: size, channels: 3 } })
+      .png()
+      .toBuffer();
+
+    const fidelity = await measureCompositionFidelity(line, ref);
+    expect(fidelity.edgeIou).toBeLessThan(COLORING_FIDELITY.scene.minEdgeIou);
+
+    const gate = await evaluateLineArtGate(line, "scene", { referenceBuffer: ref });
+    expect(gate.compositionScore).toBeDefined();
+    expect(gate.ok).toBe(false);
+    expect(gate.problems.some((p) => p.includes("構圖相似度"))).toBe(true);
+  });
+
+  test("character＋參考圖：構圖偏低只進 warnings、不擋 ok（其他 gate 通過時）", async () => {
+    const size = 160;
+    // 乾淨大閉合框（通過 fillable／leak）＋角落錯位細節 → 相對中央色塊參考偏低
+    const raw = Buffer.alloc(size * size * 3, 255);
+    const put = (x: number, y: number) => {
+      const i = (y * size + x) * 3;
+      raw[i] = 0;
+      raw[i + 1] = 0;
+      raw[i + 2] = 0;
+    };
+    for (let x = 20; x < 140; x += 1) {
+      put(x, 20);
+      put(x, 139);
+    }
+    for (let y = 20; y < 140; y += 1) {
+      put(20, y);
+      put(139, y);
+    }
+    for (let y = 24; y < 48; y += 1) for (let x = 24; x < 48; x += 1) if ((x + y) % 3 === 0) put(x, y);
+    const line = await sharp(raw, { raw: { width: size, height: size, channels: 3 } })
+      .png()
+      .toBuffer();
+    const ref = await colorBlockPng(size, { x: 50, y: 50, w: 80, h: 80 }, [200, 60, 60]);
+
+    const withoutRef = await evaluateLineArtGate(line, "character");
+    expect(withoutRef.ok).toBe(true);
+
+    const withRef = await evaluateLineArtGate(line, "character", { referenceBuffer: ref });
+    // 錯位時應有構圖警告；若分數意外偏高則至少不應 hard-fail
+    if ((withRef.compositionScore ?? 1) < COLORING_FIDELITY.character.warnEdgeIou) {
+      expect(withRef.warnings.some((w) => w.includes("構圖相似度"))).toBe(true);
+    }
+    expect(withRef.problems.some((p) => p.includes("構圖相似度"))).toBe(false);
+    expect(withRef.ok).toBe(withoutRef.ok);
+  });
+
+  test("未提供 referenceBuffer 時不跑構圖檢查（現役資產契約相容）", async () => {
+    const line = await lineSquarePng(64, { x: 8, y: 8, w: 48, h: 48 });
+    const gate = await evaluateLineArtGate(line, "scene");
+    expect(gate.compositionScore).toBeUndefined();
+    expect(gate.warnings).toEqual([]);
   });
 });
 

@@ -97,7 +97,7 @@ npm run dev
 | `npm run generate:story-blurs` | 故事圖 blur placeholder |
 | `npm run generate:coloring-lineart` | 由定裝／場景 JPG 產生著色線稿 PNG（演算法版；`--only <id>`／`--kind`／`--verify`） |
 | `npm run generate:coloring-cover` | 繪本著色 hero cover（黏土風 1448×1086 webp；寫入 `public/.games-staging/<run>/`，人工審後 `--approve`；需 `OPENAI_API_KEY`，CI 不跑） |
-| `npm run generate:coloring-ai-lineart` | AI 重生著色線稿（images.edit＋定裝 ref；寫入 `public/.coloring-staging/<run>/`，人工審 contact sheet 後 `--approve <id>` 才上線；硬閘 16 calls/run，需 `OPENAI_API_KEY`，CI 不跑） |
+| `npm run generate:coloring-ai-lineart` | AI 重生著色線稿（images.edit＋定裝 ref；character／scene 分流 prompt；gate 含構圖 edgeIou；寫入 `public/.coloring-staging/<run>/`，人工審 contact sheet＋清單後 `--approve <id>` 才上線；硬閘 16 calls/run，需 `OPENAI_API_KEY`，CI 不跑） |
 
 ### 地圖／資產（維護者）
 

@@ -6,14 +6,16 @@
  *   npm run generate:coloring-ai-lineart -- --only <id[,id]>   # 指定頁
  *   npm run generate:coloring-ai-lineart -- --all              # 全部頁
  *
- * 人工審 contact-sheet.jpg 後逐頁上線（會重跑 gate，未過拒絕覆蓋）：
+ * 人工審 contact-sheet.jpg 後逐頁上線（會重跑 gate＋構圖相似度，未過拒絕覆蓋）：
  *   npm run generate:coloring-ai-lineart -- --approve <id[,id]> [--run <run-id>]
  *
  * gate 常數調整後對既有 staging 免 API 重跑 gate＋重建 contact sheet：
  *   npm run generate:coloring-ai-lineart -- --regate [--run <run-id>]
  *
+ * Prompt 依 kind 分流（character／scene），見 scripts/lib/coloring-ai-prompts.ts。
  * 紅線：AI 圖未經人工審不得上線；CI 不放 OPENAI_API_KEY，僅本機執行。
  * 成本硬閘：每頁最多 MAX_ATTEMPTS_PER_PAGE 次、單次執行最多 MAX_API_CALLS 次 API。
+ * 本腳本不會自動連抽；重產須使用者明確指定 id。
  */
 import { createHash } from "node:crypto";
 import {
@@ -29,6 +31,10 @@ import sharp from "sharp";
 import { COLORING_PAGES, type ColoringPage } from "../data/coloring-pages";
 import { ROOT } from "./lib/transcribe-core";
 import {
+  formatColoringReviewChecklist,
+  lineArtPromptFor,
+} from "./lib/coloring-ai-prompts";
+import {
   evaluateLineArtGate,
   formatLineArtQuality,
   postprocessAiLineArt,
@@ -39,15 +45,6 @@ const PUBLIC_DIR = join(ROOT, "public");
 const STAGING_ROOT = join(PUBLIC_DIR, ".coloring-staging");
 const MAX_ATTEMPTS_PER_PAGE = 2;
 const MAX_API_CALLS = 16;
-
-const LINE_ART_PROMPT =
-  "Convert this illustration into a children's coloring book page: clean black line art only. " +
-  "Thick, uniform black outlines; pure opaque white background; no transparency, no shading, " +
-  "no texture, no gray tones, no color fills. Every contour must be fully closed so each region " +
-  "can be flood-filled. Simplify or remove the busy background — keep the single main subject " +
-  "plus at most a few large simple shapes (cloud, sun, road line). Big simple regions suitable " +
-  "for ages 3-7. No text, letters, or numbers anywhere. Keep the characters exactly on-model " +
-  "with the reference image(s): same proportions, face, and distinctive features.";
 
 type ManifestEntry = {
   id: string;
@@ -102,7 +99,7 @@ async function generateRawLineArt(page: ColoringPage): Promise<Buffer> {
   const res = await client.images.edit({
     model: getImageModel(),
     image: files,
-    prompt: LINE_ART_PROMPT,
+    prompt: lineArtPromptFor(page.kind),
     size: "1024x1024",
   });
   const b64 = res.data?.[0]?.b64_json;
@@ -201,10 +198,17 @@ async function runGenerate(ids: readonly string[]): Promise<void> {
       console.log(`→ ${page.id} images.edit（第 ${attempts} 次）…`);
       raw = await generateRawLineArt(page);
       line = await postprocessAiLineArt(raw);
-      gate = await evaluateLineArtGate(line, page.kind);
+      const sourceFs = join(PUBLIC_DIR, page.sourcePath);
+      const referenceBuffer = existsSync(sourceFs) ? readFileSync(sourceFs) : undefined;
+      gate = await evaluateLineArtGate(line, page.kind, { referenceBuffer });
+      const scoreNote =
+        gate.compositionScore === undefined
+          ? ""
+          : ` composition=${gate.compositionScore.toFixed(3)}`;
       console.log(
-        `  ${gate.ok ? "✓" : "✗"} gate ${formatLineArtQuality(gate.quality)}` +
-          (gate.ok ? "" : `\n  - ${gate.problems.join("\n  - ")}`),
+        `  ${gate.ok ? "✓" : "✗"} gate ${formatLineArtQuality(gate.quality)}${scoreNote}` +
+          (gate.ok ? "" : `\n  - ${gate.problems.join("\n  - ")}`) +
+          (gate.warnings.length ? `\n  ! ${gate.warnings.join("\n  ! ")}` : ""),
       );
       if (gate.ok) break;
     }
@@ -244,6 +248,7 @@ async function runGenerate(ids: readonly string[]): Promise<void> {
   const rel = runDir.replace(`${ROOT}/`, "");
   console.log(`\n✓ staging：${rel}（API 呼叫 ${apiCalls} 次）`);
   console.log(`  請人工審 ${rel}/contact-sheet.jpg（建議同時開原尺寸 *.line.png）`);
+  console.log(`\n${formatColoringReviewChecklist()}`);
   console.log(
     `  通過後：npm run generate:coloring-ai-lineart -- --approve <id,...> --run ${runId}`,
   );
@@ -257,15 +262,22 @@ async function runRegate(runIdArg: string | null): Promise<void> {
 
   for (const entry of manifest.entries) {
     const buf = readFileSync(join(runDir, entry.lineFile));
-    const gate = await evaluateLineArtGate(buf, entry.kind);
+    const sourceFs = join(PUBLIC_DIR, entry.sourcePath);
+    const referenceBuffer = existsSync(sourceFs) ? readFileSync(sourceFs) : undefined;
+    const gate = await evaluateLineArtGate(buf, entry.kind, { referenceBuffer });
     entry.gate = {
       ok: gate.ok,
       problems: gate.problems,
-      metrics: formatLineArtQuality(gate.quality),
+      metrics:
+        formatLineArtQuality(gate.quality) +
+        (gate.compositionScore === undefined
+          ? ""
+          : ` composition=${gate.compositionScore.toFixed(3)}`),
     };
     console.log(
       `${gate.ok ? "✓" : "✗"} ${entry.id} ${entry.gate.metrics}` +
-        (gate.ok ? "" : `\n  - ${gate.problems.join("\n  - ")}`),
+        (gate.ok ? "" : `\n  - ${gate.problems.join("\n  - ")}`) +
+        (gate.warnings.length ? `\n  ! ${gate.warnings.join("\n  ! ")}` : ""),
     );
   }
   writeFileSync(join(runDir, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
@@ -293,18 +305,30 @@ async function runApprove(ids: readonly string[], runIdArg: string | null): Prom
       ok = false;
       continue;
     }
-    const gate = await evaluateLineArtGate(buf, entry.kind);
+    const sourceFs = join(PUBLIC_DIR, entry.sourcePath);
+    const referenceBuffer = existsSync(sourceFs) ? readFileSync(sourceFs) : undefined;
+    const gate = await evaluateLineArtGate(buf, entry.kind, { referenceBuffer });
     if (!gate.ok) {
       console.error(`✗ ${id}: approve 前 gate 未過：${gate.problems.join("; ")}`);
       ok = false;
       continue;
     }
+    if (gate.warnings.length) {
+      console.warn(`! ${id}: ${gate.warnings.join("; ")}`);
+    }
     const dest = join(PUBLIC_DIR, `coloring/${id}/line.png`);
     mkdirSync(join(PUBLIC_DIR, `coloring/${id}`), { recursive: true });
     copyFileSync(linePath, dest);
-    console.log(`✓ ${id} → ${dest.replace(`${ROOT}/`, "")}（${gate ? formatLineArtQuality(gate.quality) : ""}）`);
+    const scoreNote =
+      gate.compositionScore === undefined
+        ? ""
+        : ` composition=${gate.compositionScore.toFixed(3)}`;
+    console.log(
+      `✓ ${id} → ${dest.replace(`${ROOT}/`, "")}（${formatLineArtQuality(gate.quality)}${scoreNote}）`,
+    );
   }
   if (!ok) process.exit(1);
+  console.log(`\n${formatColoringReviewChecklist()}`);
 }
 
 function parseList(argv: readonly string[], flag: string): string[] {
