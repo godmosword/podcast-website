@@ -49,6 +49,12 @@
 - [x] 層接 LOD＋關巡邏＋稀有跨島  `ddeed40`
 - [x] Art Bible §12.8／TODOS 對齊  `8ce39f6`
 
+### 本輪已完成（2026-08-08）
+
+| ID | 說明 |
+|----|------|
+| fix(content): ep-24 補角色圖鑑 alsoIn（小紅賽車、小紅賽車的爸爸） | `00fefee` |
+
 ### 本輪已完成（2026-07-30）
 
 > 手機宇宙地圖：嚴格 contain + fit 扣 chrome（方案 E）。詳見 [CHANGELOG.md](./CHANGELOG.md) `[Unreleased]`。
