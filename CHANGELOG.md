@@ -17,6 +17,7 @@
 
 ### Changed
 
+- **GameKit 兒童觸控（PR-A）**：虛擬鍵採 pointer capture（滑出＝續按，up／cancel／lost 才放開）；消消樂棋盤補 capture 避免跨格吞 tap、格寬下限 48px（gap 4／padding 6）；方塊棋盤 cancel／lost 釋放 capture。不動 DAS／bridge／medal。
 - **繪本著色 scene 線稿重產（構圖對齊）**：`scene-ep-9-05`／`scene-ep-3-05`／`scene-ep-6-05`／`scene-ep-16-05` 以硬化後 AI 管線（image 0 構圖權威、禁太陽雲替身、edge IoU＋人工 checklist）重產並上線；取代舊「簡化太陽雲」稿。character 四頁未動。
 - **手機宇宙地圖溫和放大（銜接 MAP-MOBILE-CONTAIN）**：`PORTRAIT_MAX_ZOOM` 1→1.15，直向島圖更顯著、允許輕微橫向溢出；`fitAvailableViewport` 預留選擇列高度；島 tile 手機 hit pad `::before` inset -12%；e2e 木牌可見比 ≥0.85。不動島座標／zone-art-tile。
 - **手機宇宙地圖嚴格 contain + chrome inset（MAP-MOBILE-CONTAIN／CHROME）**：`PORTRAIT_MAX_ZOOM` 1.5→1，直向不再為填滿高度而橫切外側島；新增 `fitAvailableViewport` 從可用視窗扣除木牌 pad 與右下 MapControls（＋召喚把手高度），`fitScaleFor`／`fitScaleForBox` 共用。首屏島略小、上下空海略多，換完整可點與木牌不被裁。不動 `useMapCamera`／`ZoneSheet` 互動核心。

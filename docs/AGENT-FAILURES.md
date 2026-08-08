@@ -25,7 +25,7 @@
 | Grok 4.5 High Fast（**Claude Code 對抗審／L1／L2**，`cursor-agent`） | 主路徑：`cursor-agent -p --model cursor-grok-4.5-high-fast --mode ask "回覆 OK"`（看輸出內容，非 exit code）。**slug 被 cursor-agent 拒收 → 備援** `grok -p "回覆 OK" -m grok-4.5 --effort high --no-plan`（grok CLI 允許清單僅 `grok-4.5`，不吃 `-fast` 變體，見 07-13 案例）。兩路皆失敗 → 對抗審標**對抗審缺席**；L1／L2 實作 → Leader 接手 |
 | Composer 2.5（Cursor Task：對抗審／L1／L2，`composer-2.5-fast`） | Bootstrap 可派最小 readonly Task（`回覆 OK`）；CLI：`cursor-agent -p --model composer-2.5-fast --mode ask "回覆 OK"`；拒收 → 對抗審標**對抗審缺席**（L1／L2 實作 → Leader 接手） |
 | Cursor Task（其他 slug） | 無低成本探活；第一次拒收／失敗 → 追加案例並標缺席（對抗審 slug 同上規則） |
-| Opus 4.8／Sonnet／Haiku | Claude Code Agent tool，不需探活 |
+| Opus 5／Sonnet／Haiku | Claude Code Agent tool（`model: "opus"`）不需探活；Cursor Task 設計審用 `claude-opus-5-thinking-high` |
 
 ---
 
@@ -50,8 +50,8 @@
 
 | 日期 | 命令／模型 | 症狀（exit code／timeout／額度／輸出品質） | 處置 |
 |------|------------|---------------------------------------------|------|
-| 2026-08-08 | Task `model=claude-opus-4-8-thinking-medium`（Cursor） | `Invalid model selection`；允許清單僅 `claude-opus-5-thinking-high` 等（同 07-31） | 本輪 Opus 設計審標**缺席**；不擅自頂替 opus-5；slug 對照表待另案同步 |
-| 2026-07-31 | Task `model=claude-opus-4-8-thinking-medium`（Cursor） | `Invalid model selection`；允許清單僅 `claude-opus-5-thinking-high` 等 | 本輪 Opus 設計審標**缺席**；不擅自頂替 opus-5；slug 對照表待另案同步 |
+| 2026-08-08 | Task `model=claude-opus-4-8-thinking-medium`（Cursor） | `Invalid model selection`；允許清單僅 `claude-opus-5-thinking-high` 等（同 07-31） | **已解除（2026-08-08）**：active 路由改 `claude-opus-5-thinking-high`；舊 4.8 slug 僅留修訂／FAILURES 歷史 |
+| 2026-07-31 | Task `model=claude-opus-4-8-thinking-medium`（Cursor） | `Invalid model selection`；允許清單僅 `claude-opus-5-thinking-high` 等 | **已解除（2026-08-08）**：同上；勿再派 4.8 slug |
 | 2026-07-31 | Cursor Agent + `illustrate --scene`／自寫 regen（ep-23） | 使用者要修車道／標示後，agent **未等確認**自行多輪重抽（含 timeout 後再續跑），圖像 API 費用失控 | 紅線寫入 alwaysApply `podcast.mdc`、`AGENT-DOMAIN.md`、`EPISODE-WORKFLOW.md`「審圖與重抽」；整集一輪即停，重抽須先列幕號等文字確認 |
 | 2026-07-20 | `block-fable.mjs` preToolUse（Task + `composer-2.5-fast`） | 掃整包 JSON（含 prompt）→ prompt 寫「禁止 Fable 5」反被 deny，Task 無法派工 | 改只檢查 model／slug 欄位（`extractModelAssignmentStrings`）；補回歸測「prompt 提及禁令不誤擋」→ **已解除** |
 | 2026-07-17 | Cursor Agent + MCP `user-ask-user-questions`／`ask_user_questions`（Grok 4.5 session） | 預設 blocking AUQ 乾等 UI～145s；使用者中斷；整輪看似卡住 | 專案禁 AUQ：`.cursor/rules/no-ask-user-questions.mdc` + `.cursor/hooks.json`（`beforeMCPExecution`／`preToolUse` → `block-auq.mjs`）；選項改聊天文字 → **已緩解（專案層）**；使用者可另在 Cursor Settings 關閉該 MCP |

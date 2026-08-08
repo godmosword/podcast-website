@@ -70,3 +70,20 @@ export default function Page() {
 ```
 
 No new chrome / audio / progress code required.
+
+## Touch / coarse-pointer contract（兒童路徑）
+
+手動 coarse 檢查（PR-A 觸及路徑；各玩 1 短局）：
+
+| 路徑 | 檢查 |
+|------|------|
+| candy-match | 輕點格可選取；手指微飄仍可 tap；滑出格後抬起不應吞掉有效 tap |
+| block-drop | 棋盤拖移／點按旋轉；cancel／失焦後不黏手勢 |
+| car-adventure（共用 `TouchControls`） | 按住方向鍵滑出按鈕外仍續按；抬起／cancel 必停 |
+
+契約要點：
+
+- 虛擬鍵：**capture 後滑出＝續按**；放開三路＝`pointerup`／`pointercancel`／`lostpointercapture`（見 `DESIGN.md` 互動節）。BlockDrop 左右移鍵同約；`HintChips` 暫除外。
+- 消消樂格寬：`candyMatchCellPx(availableWidth, cols)`（`ResizeObserver` 量 `boardWrap`）；min 48／max 64；gap／padding 常數見 `lib/games/candy-match/cell-size.ts`。
+- 單元測須 shim `setPointerCapture`／`releasePointerCapture` 並**斷言呼叫**（jsdom 無實作）。
+- `test:visual` 預設 skip ≠ visual 通過；勿以未 trusted 的 visual 當回歸綠燈。

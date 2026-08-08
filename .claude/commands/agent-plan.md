@@ -1,10 +1,10 @@
 ---
-description: podcast-website 專用 Plan 委員會（Claude Code：Leader Opus 4.8 Thinking Medium；Codex CLI gpt-5.6-luna 工程審；對抗審 Grok 4.5 High Fast；Cursor 對標見 .cursor 版）——只規劃、審核，不實作。
+description: podcast-website 專用 Plan 委員會（Claude Code：Leader Opus 5 Thinking High；Codex CLI gpt-5.6-luna 工程審；對抗審 Grok 4.5 High Fast；Cursor 對標見 .cursor 版）——只規劃、審核，不實作。
 ---
 
 # Agent Plan（podcast-website 委員會版）
 
-你扮演 **Leader（Claude Code：Opus 4.8 Thinking Medium）** 主持這次規劃。任務描述：
+你扮演 **Leader（Claude Code：Opus 5 Thinking High）** 主持這次規劃。任務描述：
 
 $ARGUMENTS
 
@@ -44,7 +44,7 @@ $ARGUMENTS
 |------|------|----------|
 | **Codex CLI 工程審** | 工程可行性／驗證／漏檔 | `codex exec -m gpt-5.6-luna -c model_reasoning_effort="medium" "…$(cat /tmp/agent-plan-<ts>.md)" </dev/null`（**Claude Code 專用**；非 Cursor Task slug） |
 | **Grok 4.5 High Fast 對抗審** | 對抗審 | `cursor-agent -p --model cursor-grok-4.5-high-fast --mode ask "<prompt + plan>"`；slug 拒收 → 備援 `grok -p "<prompt>" -m grok-4.5 --effort high --no-plan`（見 FAILURES 探活） |
-| **Opus 4.8 設計審** | **設計／UX**：`DESIGN.md`、兒童主路徑、觸控、a11y 視覺、動畫原則；L3 加架構／紅線 | Agent tool：`architect`（readonly）+ `model: "opus"`，prompt 附 `DESIGN.md` |
+| **Opus 5 設計審** | **設計／UX**：`DESIGN.md`、兒童主路徑、觸控、a11y 視覺、動畫原則；L3 加架構／紅線 | Agent tool：`architect`（readonly）+ `model: "opus"`，prompt 附 `DESIGN.md` |
 
 ## 4. Leader 綜合
 
@@ -52,7 +52,7 @@ $ARGUMENTS
 |------|----------|----------|
 | Codex CLI 工程審 | … | … |
 | Grok 4.5 High Fast 對抗審 | …／缺席 | … |
-| Opus 4.8 設計審 | …／缺席 | … |
+| Opus 5 設計審 | …／缺席 | … |
 
 覆寫 **Approved Plan** → 提示 **`/agent-action`**
 
@@ -64,17 +64,17 @@ $ARGUMENTS
 
 | # | 角色 | 執行方式 | subagent_type | model slug | 做了什麼 | 產出 | 狀態 |
 |---|------|----------|---------------|------------|----------|------|------|
-| 0 | Leader | 當前 session | — | `claude-opus-4-8-thinking-medium` | Draft Plan、綜合 | plan 檔 | 完成 |
+| 0 | Leader | 當前 session | — | `claude-opus-5-thinking-high` | Draft Plan、綜合 | plan 檔 | 完成 |
 | 1 | Codex CLI 工程審 | `codex exec` | — | `gpt-5.6-luna`（CLI model） | 審工程面 | 審查意見 | 完成／缺席 |
 | 2 | Grok 4.5 High Fast 對抗審 | `cursor-agent` | — | `cursor-grok-4.5-high-fast` | 找漏洞 | 審查意見 | 完成／缺席 |
-| 3 | Opus 4.8 設計審 | Agent tool | `architect` | `opus` | 審 UX／DESIGN.md | 審查意見 | 完成／缺席 |
-| 4 | Leader 可行性自審 | Leader 自審 | — | `claude-opus-4-8-thinking-medium` | L3 成本 | 自審 | 完成／未派 |
+| 3 | Opus 5 設計審 | Agent tool | `architect` | `opus` | 審 UX／DESIGN.md | 審查意見 | 完成／缺席 |
+| 4 | Leader 可行性自審 | Leader 自審 | — | `claude-opus-5-thinking-high` | L3 成本 | 自審 | 完成／未派 |
 
 **#2 Grok 對抗審、#3 Opus 禁止標 `跳過`**；中間級任務標 `按級距免派`（列仍不可省略）。
 
 ## 禁止
 
-- **禁止呼叫 Fable 5**（`claude-fable-5-thinking-medium`／`claude-fable-5-*`／「Fable 5」顯示名）— Leader／設計審一律 `claude-opus-4-8-thinking-medium`（Cursor 對標另有 `block-fable` hook）
+- **禁止呼叫 Fable 5**（`claude-fable-5-thinking-medium`／`claude-fable-5-*`／「Fable 5」顯示名）— Leader／設計審一律 `claude-opus-5-thinking-high`（Cursor 對標另有 `block-fable` hook）
 
 ## 輸出語言
 

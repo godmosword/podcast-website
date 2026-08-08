@@ -34,7 +34,7 @@
 
 | 級別 | 判準 | Cursor 派工 |
 |------|------|-------------|
-| L3 架構／高風險 | 跨模組、Protected paths | Task + `claude-opus-4-8-thinking-medium`，或 Leader（僅 Domain 要求路徑） |
+| L3 架構／高風險 | 跨模組、Protected paths | Task + `claude-opus-5-thinking-high`，或 Leader（僅 Domain 要求路徑） |
 | L2 多檔實作 | 模式固定 | Task + `composer-2.5-fast`（**預設**；Domain 內容管線仍 Sonnet） |
 | L1 單檔 | 範圍明確 | **路徑已知** → Task + `composer-2.5-fast`；**路徑不明** → Task `explore`（`grok-4.3`）→ Composer |
 | L0 命令 | lint／test／腳本 | Task `shell` 或 `grok-build-0.1` |
@@ -45,7 +45,7 @@
 
 | 顧問 | 用途 | Cursor 派工 |
 |------|------|-------------|
-| Opus 4.8 設計審 | UX／CSS Modules／兒童觸控／a11y 視覺 | Task `architect`（readonly）+ `claude-opus-4-8-thinking-medium` |
+| Opus 5 設計審 | UX／CSS Modules／兒童觸控／a11y 視覺 | Task `architect`（readonly）+ `claude-opus-5-thinking-high` |
 | GPT 5.6 Luna MAX fast | TS/React diff 審、工程第二意見 | Task（readonly）+ `gpt-5.6-luna-max-fast` |
 | Composer 2.5 對抗審 | 對抗審：找 diff 的 edge case | Task（readonly）+ `composer-2.5-fast`；slug 不可用 → 缺席（見 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md) § Cursor Task） |
 
@@ -75,11 +75,11 @@
 ### 5. Diff 委員審（分級、readonly，可跳過）
 
 - **可跳過**：已有 Approved Plan、diff 約 &lt;80 行、未碰 Protected paths／紅線、**且未觸發下方 UI 風險規則** → 只跑 Verify
-- **UI 風險（Opus 設計審不可跳過）**：diff 命中以下任一 → **必派** Opus 4.8 設計審（即使 &lt;80 行）：
+- **UI 風險（Opus 設計審不可跳過）**：diff 命中以下任一 → **必派** Opus 5 設計審（即使 &lt;80 行）：
   - **屬性觸發**：`min-height`、`padding`、`gap`、`animation`、`transition`、`transform`、`@media (prefers-reduced-motion)`、`z-index`
   - **元件 allowlist**：`StoryPlayer`、`PlayButton`、`StoryCard`、`Chip`、`GamePageShell`、`LandingSegment`、`SiteNavBar`
   - **動畫相關 TS/JS**：`useAnimation`、`requestAnimationFrame`、`@keyframes`
-- **一般**：GPT 5.6 Luna MAX fast + Opus 4.8 設計審（Task）；Python → `python-reviewer`；TS/JS → `typescript-reviewer`
+- **一般**：GPT 5.6 Luna MAX fast + Opus 5 設計審（Task）；Python → `python-reviewer`；TS/JS → `typescript-reviewer`
 - **L3／觸紅線／Protected**：再加 Composer 2.5 對抗審
 - 呼叫失敗 → 追加 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md)，分配表註明缺席
 
@@ -112,7 +112,7 @@ Task 失敗 → 追加 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md)�
 | 1 | T1 | `generalPurpose` | `composer-2.5-fast` | （依 Plan 填寫） | `path/to/file` | 完成／缺席 |
 | 2 | Verify | `shell` | `grok-build-0.1` | `npm test` 等 | 逐項對照結果 | 完成 |
 | 3 | GPT diff 審 | `typescript-reviewer` | `gpt-5.6-luna-max-fast` | 審 diff 工程面 | 意見摘要 | 完成／跳過／缺席 |
-| 4 | Opus 設計審 | `architect` | `claude-opus-4-8-thinking-medium` | 審 UX／設計／a11y 視覺 | 審查意見 | 完成／跳過／缺席 |
+| 4 | Opus 設計審 | `architect` | `claude-opus-5-thinking-high` | 審 UX／設計／a11y 視覺 | 審查意見 | 完成／跳過／缺席 |
 | 5 | Composer 對抗審 | `generalPurpose` | `composer-2.5-fast` | 找 edge case | 審查意見 | 完成／跳過／缺席 |
 | 6 | Ship | — | `cursor-grok-4.5-high-fast` | commit／push | commit hash | 完成／未執行 |
 

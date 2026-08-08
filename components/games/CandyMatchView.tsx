@@ -37,6 +37,7 @@ import {
   type CandyMatchTask,
 } from "@/lib/games/candy-match/levels";
 import type { CandyMatchInstance } from "@/lib/gamekit/games/candy-match/adapter";
+import { candyMatchCellPx } from "@/lib/games/candy-match/cell-size";
 import styles from "./CandyMatchGame.module.css";
 
 const INK = "#5d4a67";
@@ -166,6 +167,7 @@ export function CandyMatchView({
 
   const processingRef = useRef(false);
   const usedPropRef = useRef(false);
+  const boardWrapRef = useRef<HTMLDivElement | null>(null);
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const boardRef = useRef<BoardState | null>(null);
   boardRef.current = board;
@@ -193,14 +195,19 @@ export function CandyMatchView({
   const maxCleared = medals.reduce((m, f, i) => (medalCount(f) > 0 ? Math.max(m, i + 1) : m), 0);
 
   useEffect(() => {
+    const el = boardWrapRef.current;
+    if (!el) return;
     const apply = () => {
       const cols = levelRef.current.cols;
-      const w = Math.min(window.innerWidth, 520) - 64;
-      setCellPx(Math.max(40, Math.min(64, Math.floor((w - (cols - 1) * 6) / cols))));
+      const w = el.clientWidth;
+      setCellPx(
+        w > 0 ? candyMatchCellPx(w, cols) : candyMatchCellPx(window.innerWidth, cols),
+      );
     };
     apply();
-    window.addEventListener("resize", apply);
-    return () => window.removeEventListener("resize", apply);
+    const ro = new ResizeObserver(apply);
+    ro.observe(el);
+    return () => ro.disconnect();
   }, [screen, level]);
 
   const armIdleHint = useCallback(() => {
@@ -701,7 +708,11 @@ export function CandyMatchView({
             </div>
           </div>
 
-          <div className={styles.boardWrap} style={{ display: "flex", justifyContent: "center" }}>
+          <div
+            ref={boardWrapRef}
+            className={styles.boardWrap}
+            style={{ display: "flex", justifyContent: "center" }}
+          >
             <CandyMatchBoard
               board={board}
               cellPx={cellPx}

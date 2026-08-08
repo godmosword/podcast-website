@@ -135,6 +135,16 @@
 | 3 | block-drop | ✅ `98a6944` |
 | 4 | candy-kart（iframe bridge） | ✅ `6ee3c69` |
 
+### GameKit 手感票
+
+> 票模板：遊戲／裝置／步驟／預期／實際／嚴重度 C\|H\|M\|L／重現。只修 C/H；M/L 僅記票。PR-B／PR-C 另授權。
+
+| ID | 嚴重度 | 狀態 | 說明 |
+|----|--------|------|------|
+| GK-TOUCH-A | — | ✅（本 commit） | **PR-A**：TouchControls capture、CandyMatch capture＋cell≥48、BlockDrop capture cleanup、契約測／docs |
+| GK-GODOT-FOCUS | C | 📋 下一輪 PR-C | candy-kart 補 focus-out 暫停；兩款 Godot 暫停／失焦時清 `touch_*` 旗（防黏鍵）。需 source＋re-export 同 PR |
+| GK-PLAYTEST | — | 📋 模板 | 有票才開 PR-B（car assist）／其餘 C/H |
+
 ### 本輪已完成（2026-07-25）
 
 | ID | Commit |

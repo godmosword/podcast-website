@@ -56,7 +56,7 @@ typo 級小事不進本命令——直接做即可。
 |------|------|-------------|
 | **GPT 5.6 Luna MAX fast** | 工程可行性／驗證命令／漏檔／測試 | Task（`readonly: true`）+ `gpt-5.6-luna-max-fast` |
 | **Composer 2.5 對抗審** | 對抗審：漏洞、edge case、失敗模式 | Task（`readonly: true`）+ `composer-2.5-fast` |
-| **Opus 4.8 設計審** | **設計／UX**：`DESIGN.md` 對齊、兒童主路徑、親子互動、觸控 ≥44px、`prefers-reduced-motion`、資訊層級、視覺一致性；L3 時加架構／紅線 | Task `architect`（`readonly: true`）+ `claude-opus-4-8-thinking-medium`；prompt 附 `DESIGN.md` 要點 |
+| **Opus 5 設計審** | **設計／UX**：`DESIGN.md` 對齊、兒童主路徑、親子互動、觸控 ≥44px、`prefers-reduced-motion`、資訊層級、視覺一致性；L3 時加架構／紅線 | Task `architect`（`readonly: true`）+ `claude-opus-5-thinking-high`；prompt 附 `DESIGN.md` 要點 |
 
 **純文件／命令檔對齊：** 可降級 Leader + GPT；**§7 表 Composer 對抗審／Opus 列仍須出現**（標 `未派` 或嘗試派工後標 `缺席`）。
 
@@ -75,7 +75,7 @@ typo 級小事不進本命令——直接做即可。
 | Leader（可行性自審，L3） | … | — |
 | GPT 5.6 Luna MAX fast 工程審 | … | 採納 / 不採納 |
 | Composer 2.5 對抗審 | …／缺席 | … |
-| Opus 4.8 設計審 | …／缺席 | … |
+| Opus 5 設計審 | …／缺席 | … |
 
 產出 **Approved Plan** → 覆寫 plan 檔 → **下一步請用 `/agent-action`**
 
@@ -100,14 +100,14 @@ typo 級小事不進本命令——直接做即可。
 | 1 | Plan 細節 | Task | `generalPurpose` | `gpt-5.6-luna-max-fast` | 填 DAG、Files、Verification | plan 區塊 | 完成／未派 |
 | 2 | GPT 5.6 Luna MAX fast 工程審 | Task（readonly） | `generalPurpose` | `gpt-5.6-luna-max-fast` | 審可行性、驗證、漏檔 | 審查意見 | 完成／缺席 |
 | 3 | Composer 2.5 對抗審 | Task（readonly） | `generalPurpose` | `composer-2.5-fast` | 找漏洞、edge case | 審查意見 | 完成／缺席 |
-| 4 | Opus 4.8 設計審 | Task（readonly） | `architect` | `claude-opus-4-8-thinking-medium` | 審 UX／DESIGN.md／兒童體驗／a11y 視覺 | 審查意見 | 完成／缺席 |
+| 4 | Opus 5 設計審 | Task（readonly） | `architect` | `claude-opus-5-thinking-high` | 審 UX／DESIGN.md／兒童體驗／a11y 視覺 | 審查意見 | 完成／缺席 |
 | 5 | Leader 可行性自審 | Leader 自審 | — | `cursor-grok-4.5-high-fast` | L3 成本／範圍 | 自審結論 | 完成／未派 |
 
 **狀態欄：** `完成`｜`未派`｜`缺席`｜`對抗審缺席／對抗性降級`｜`按級距免派`（中間級視覺／樣式微調）。**#3 Composer 對抗審、#4 Opus 禁止標 `跳過`**。
 
 ## 禁止
 
-- **禁止呼叫 Fable 5**（`claude-fable-5-thinking-medium` 及任何 `claude-fable-5-*`／「Fable 5」顯示名）— 設計審／Claude Code Leader 用 `claude-opus-4-8-thinking-medium`；機械閘門：`.cursor/hooks/block-fable.mjs`
+- **禁止呼叫 Fable 5**（`claude-fable-5-thinking-medium` 及任何 `claude-fable-5-*`／「Fable 5」顯示名）— 設計審／Claude Code Leader 用 `claude-opus-5-thinking-high`；機械閘門：`.cursor/hooks/block-fable.mjs`
 - 不要 commit / push
 - 不要跳過 Review 直接實作（使用者說「直接做」除外）
 - 收尾分配表省略 Composer 對抗審／Opus 列

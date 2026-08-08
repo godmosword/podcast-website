@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties, PointerEvent, ReactNode } from "react";
+import { useEffect, useRef, type CSSProperties, type PointerEvent, type ReactNode } from "react";
 import styles from "./touch-controls.module.css";
 
 export { styles as touchControlStyles };
@@ -9,6 +9,58 @@ type PointerHandlers = {
   onDown: () => void;
   onUp?: () => void;
 };
+
+/** 同一 pointer 只觸發一次 onUp（cancel / lost 可能連續觸發）。 */
+function useCapturedPress(onDown: () => void, onUp?: () => void) {
+  const pressedRef = useRef(false);
+  const pointerIdRef = useRef<number | null>(null);
+  const onUpRef = useRef(onUp);
+  onUpRef.current = onUp;
+
+  useEffect(
+    () => () => {
+      if (!pressedRef.current) return;
+      pressedRef.current = false;
+      pointerIdRef.current = null;
+      onUpRef.current?.();
+    },
+    [],
+  );
+
+  const release = (el: HTMLButtonElement, pointerId: number) => {
+    try {
+      if (el.hasPointerCapture?.(pointerId)) {
+        el.releasePointerCapture(pointerId);
+      }
+    } catch {
+      // 部分環境不支援 capture
+    }
+  };
+
+  const handleDown = (e: PointerEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // 部分環境不支援 capture
+    }
+    if (pressedRef.current) return;
+    pressedRef.current = true;
+    pointerIdRef.current = e.pointerId;
+    onDown();
+  };
+
+  const handleUp = (e: PointerEvent<HTMLButtonElement>) => {
+    if (pointerIdRef.current !== null && e.pointerId !== pointerIdRef.current) return;
+    release(e.currentTarget, e.pointerId);
+    if (!pressedRef.current) return;
+    pressedRef.current = false;
+    pointerIdRef.current = null;
+    onUp?.();
+  };
+
+  return { handleDown, handleUp };
+}
 
 /** 方塊遊戲用：深色網格虛擬鍵（≥44×44px）。 */
 export function GridTouchButton({
@@ -24,6 +76,7 @@ export function GridTouchButton({
   coarse?: boolean;
   wide?: boolean;
 } & PointerHandlers) {
+  const { handleDown, handleUp } = useCapturedPress(onDown, onUp);
   const extraClass = coarse
     ? wide
       ? styles.coarseBtnWide
@@ -34,13 +87,10 @@ export function GridTouchButton({
       type="button"
       aria-label={label}
       className={extraClass || undefined}
-      onPointerDown={(e) => {
-        e.preventDefault();
-        onDown();
-      }}
-      onPointerUp={onUp}
-      onPointerLeave={onUp}
-      onPointerCancel={onUp}
+      onPointerDown={handleDown}
+      onPointerUp={handleUp}
+      onPointerCancel={handleUp}
+      onLostPointerCapture={handleUp}
       style={{
         minWidth: coarse ? 56 : 52,
         minHeight: coarse ? 56 : 52,
@@ -74,22 +124,19 @@ export function BarTouchButton({
   coarse?: boolean;
   style?: CSSProperties;
 } & Required<Pick<PointerHandlers, "onDown" | "onUp">>) {
-  const down = (e: PointerEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    onDown();
-  };
+  const { handleDown, handleUp } = useCapturedPress(onDown, onUp);
   const up = (e: PointerEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    onUp();
+    handleUp(e);
   };
   return (
     <button
       type="button"
       aria-label={label}
-      onPointerDown={down}
+      onPointerDown={handleDown}
       onPointerUp={up}
-      onPointerLeave={up}
       onPointerCancel={up}
+      onLostPointerCapture={up}
       className={
         coarse
           ? big

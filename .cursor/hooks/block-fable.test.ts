@@ -41,7 +41,7 @@ describe("block-fable hook", () => {
         arguments: { model: "claude-fable-5-thinking-medium" },
       }),
     ).toBe(true);
-    expect(shouldBlockFable({ model: "claude-opus-4-8-thinking-medium" })).toBe(
+    expect(shouldBlockFable({ model: "claude-opus-5-thinking-high" })).toBe(
       false,
     );
     expect(shouldBlockFable({ model: "composer-2.5-fast" })).toBe(false);

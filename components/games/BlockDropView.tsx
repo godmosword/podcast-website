@@ -610,6 +610,37 @@ function TouchControlPad({
   const half = touchPadButton(metrics, "half");
   const { icon, gap, colW } = metrics;
   const holdCell = Math.max(7, Math.floor(metrics.btn / 5.5));
+  const movePointerIdRef = useRef<number | null>(null);
+
+  const releaseMoveCapture = (el: HTMLButtonElement, pointerId: number) => {
+    try {
+      if (el.hasPointerCapture?.(pointerId)) {
+        el.releasePointerCapture(pointerId);
+      }
+    } catch {
+      // 部分環境不支援 capture
+    }
+  };
+
+  const handleMoveDown =
+    (startMove: () => void) => (e: ReactPointerEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      try {
+        e.currentTarget.setPointerCapture(e.pointerId);
+      } catch {
+        // 部分環境不支援 capture
+      }
+      movePointerIdRef.current = e.pointerId;
+      startMove();
+    };
+
+  const handleMoveEnd = (e: ReactPointerEvent<HTMLButtonElement>) => {
+    if (movePointerIdRef.current !== null && e.pointerId !== movePointerIdRef.current) return;
+    releaseMoveCapture(e.currentTarget, e.pointerId);
+    movePointerIdRef.current = null;
+    onMoveStop();
+  };
+
   return (
     <div
       data-testid="touch-control-pad"
@@ -633,13 +664,10 @@ function TouchControlPad({
           type="button"
           aria-label="左移"
           style={half}
-          onPointerDown={(e) => {
-            e.preventDefault();
-            onMoveLeftDown();
-          }}
-          onPointerUp={onMoveStop}
-          onPointerLeave={onMoveStop}
-          onPointerCancel={onMoveStop}
+          onPointerDown={handleMoveDown(onMoveLeftDown)}
+          onPointerUp={handleMoveEnd}
+          onPointerCancel={handleMoveEnd}
+          onLostPointerCapture={handleMoveEnd}
         >
           <IconChevronLeft size={icon} />
         </button>
@@ -647,13 +675,10 @@ function TouchControlPad({
           type="button"
           aria-label="右移"
           style={half}
-          onPointerDown={(e) => {
-            e.preventDefault();
-            onMoveRightDown();
-          }}
-          onPointerUp={onMoveStop}
-          onPointerLeave={onMoveStop}
-          onPointerCancel={onMoveStop}
+          onPointerDown={handleMoveDown(onMoveRightDown)}
+          onPointerUp={handleMoveEnd}
+          onPointerCancel={handleMoveEnd}
+          onLostPointerCapture={handleMoveEnd}
         >
           <IconChevronRight size={icon} />
         </button>
@@ -868,6 +893,17 @@ type ClearFx = {
   text: string;
   kind: "spark" | "wave" | "confetti";
 };
+
+/** 棋盤手勢層：釋放 pointer capture（可單元測試）。 */
+export function releaseBoardPointerCapture(target: HTMLElement, pointerId: number): void {
+  try {
+    if (target.hasPointerCapture?.(pointerId)) {
+      target.releasePointerCapture(pointerId);
+    }
+  } catch {
+    // 部分環境不支援 capture
+  }
+}
 
 export type BlockDropController = {
   begin(): void;
@@ -1473,7 +1509,7 @@ export function BlockDropView({
 
   const onBoardPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     const g = G.current;
-    if (g.status !== "playing" || !g.active) return;
+    if (g.status !== "playing" || !g.active || dragRef.current) return;
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {
@@ -1514,6 +1550,7 @@ export function BlockDropView({
   const onBoardPointerUp = (e: ReactPointerEvent<HTMLDivElement>) => {
     const d = dragRef.current;
     if (!d || d.pid !== e.pointerId) return;
+    releaseBoardPointerCapture(e.currentTarget, e.pointerId);
     dragRef.current = null;
     const g = G.current;
     if (g.status !== "playing") return;
@@ -1534,8 +1571,19 @@ export function BlockDropView({
     }
   };
 
-  const onBoardPointerCancel = () => {
-    dragRef.current = null;
+  const onBoardPointerCancel = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const d = dragRef.current;
+    if (d && d.pid === e.pointerId) {
+      releaseBoardPointerCapture(e.currentTarget, e.pointerId);
+      dragRef.current = null;
+    }
+  };
+
+  const onBoardLostPointerCapture = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const d = dragRef.current;
+    if (d && d.pid === e.pointerId) {
+      dragRef.current = null;
+    }
   };
 
   const g = G.current;
@@ -2077,6 +2125,7 @@ export function BlockDropView({
             onPointerMove={onBoardPointerMove}
             onPointerUp={onBoardPointerUp}
             onPointerCancel={onBoardPointerCancel}
+            onLostPointerCapture={onBoardLostPointerCapture}
             style={{
               position: "absolute",
               inset: 0,

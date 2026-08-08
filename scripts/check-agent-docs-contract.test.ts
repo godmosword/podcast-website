@@ -28,6 +28,12 @@ describe("agent docs routing contract", () => {
         "cursor-grok-4.5-high-fast",
       );
       expect(text, `${file} 須含 Composer slug`).toContain("composer-2.5-fast");
+      expect(text, `${file} 須含 Opus 5 設計審 slug`).toContain(
+        "claude-opus-5-thinking-high",
+      );
+      expect(text, `${file} 不得再以 Opus 4.8 slug 當 active 路由`).not.toContain(
+        "claude-opus-4-8-thinking-medium",
+      );
       expect(text, `${file} 不得再以 medium-fast 當 active Grok 路由`).not.toContain(
         "cursor-grok-4.5-medium-fast",
       );
@@ -37,6 +43,10 @@ describe("agent docs routing contract", () => {
     expect(workflow).toContain("gpt-5.6-luna-max-fast");
     expect(workflow).toContain("cursor-grok-4.5-high-fast");
     expect(workflow).toContain("composer-2.5-fast");
+    expect(workflow).toContain("claude-opus-5-thinking-high");
+    // 修訂紀錄可保留歷史 4.8；active 對照表列必須是 5
+    const activeWorkflow = workflow.split("## 修訂紀錄")[0];
+    expect(activeWorkflow).not.toContain("claude-opus-4-8-thinking-medium");
   });
 
   it("active 路由不得使用已淘汰的 Grok slug（fast-medium／fast-high 裸名）", () => {
@@ -100,7 +110,7 @@ describe("agent docs routing contract", () => {
       ".claude/commands/agent-plan.md",
       ".claude/commands/agent-action.md",
     ]) {
-      expect(readRepoFile(file)).toContain("claude-opus-4-8-thinking-medium");
+      expect(readRepoFile(file)).toContain("claude-opus-5-thinking-high");
     }
 
     const hooks = readRepoFile(".cursor/hooks.json");

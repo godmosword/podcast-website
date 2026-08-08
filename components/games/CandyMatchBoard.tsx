@@ -2,6 +2,10 @@
 
 import { useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { DROP_ITEM, type BoardState } from "@/lib/games/candy-match/engine";
+import {
+  CANDY_MATCH_BOARD_PADDING,
+  CANDY_MATCH_CELL_GAP,
+} from "@/lib/games/candy-match/cell-size";
 import { CANDY_MATCH_PIECES } from "@/lib/games/candy-match/levels";
 import { DirtOverlay, PieceArt, PieceGift } from "@/components/games/CandyMatchPieceArt";
 
@@ -35,17 +39,49 @@ export function CandyMatchBoard({
   onTapCell,
   onSwipeCell,
 }: CandyMatchBoardProps) {
-  const dragRef = useRef<{ index: number; x: number; y: number; fired: boolean } | null>(null);
+  const dragRef = useRef<{
+    index: number;
+    pointerId: number;
+    x: number;
+    y: number;
+    fired: boolean;
+  } | null>(null);
   const { cols, rows, pieces, dirt } = board;
+
+  const releaseCapture = (el: HTMLButtonElement, pointerId: number) => {
+    try {
+      if (el.hasPointerCapture?.(pointerId)) {
+        el.releasePointerCapture(pointerId);
+      }
+    } catch {
+      // 部分環境不支援 capture
+    }
+  };
+
+  const clearDrag = (el: HTMLButtonElement, pointerId: number) => {
+    dragRef.current = null;
+    releaseCapture(el, pointerId);
+  };
 
   const onPointerDown = (i: number) => (e: ReactPointerEvent<HTMLButtonElement>) => {
     if (disabled) return;
-    dragRef.current = { index: i, x: e.clientX, y: e.clientY, fired: false };
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // 部分環境不支援 capture
+    }
+    dragRef.current = {
+      index: i,
+      pointerId: e.pointerId,
+      x: e.clientX,
+      y: e.clientY,
+      fired: false,
+    };
   };
 
   const onPointerMove = (e: ReactPointerEvent<HTMLButtonElement>) => {
     const d = dragRef.current;
-    if (!d || d.fired || disabled) return;
+    if (!d || d.pointerId !== e.pointerId || d.fired || disabled) return;
     const dx = e.clientX - d.x;
     const dy = e.clientY - d.y;
     if (Math.hypot(dx, dy) < 14) return;
@@ -64,11 +100,26 @@ export function CandyMatchBoard({
     if (target >= 0) onSwipeCell(d.index, target);
   };
 
-  const onPointerUp = (i: number) => () => {
+  const onPointerUp = (e: ReactPointerEvent<HTMLButtonElement>) => {
     const d = dragRef.current;
+    if (!d || d.pointerId !== e.pointerId) return;
     dragRef.current = null;
+    releaseCapture(e.currentTarget, e.pointerId);
     if (disabled) return;
-    if (d && d.index === i && !d.fired) onTapCell(i);
+    // capture 下 up 落在按下的格子；以 drag 起點 index 觸發 tap
+    if (!d.fired) onTapCell(d.index);
+  };
+
+  const onPointerCancel = (e: ReactPointerEvent<HTMLButtonElement>) => {
+    if (dragRef.current?.pointerId !== e.pointerId) return;
+    clearDrag(e.currentTarget, e.pointerId);
+  };
+
+  const onLostPointerCapture = (e: ReactPointerEvent<HTMLButtonElement>) => {
+    const d = dragRef.current;
+    if (d && d.pointerId === e.pointerId) {
+      dragRef.current = null;
+    }
   };
 
   const hintSet = hint ? new Set([hint.a, hint.b]) : new Set<number>();
@@ -80,8 +131,8 @@ export function CandyMatchBoard({
         display: "grid",
         gridTemplateColumns: `repeat(${cols}, ${cellPx}px)`,
         gridTemplateRows: `repeat(${rows}, ${cellPx}px)`,
-        gap: 6,
-        padding: 10,
+        gap: CANDY_MATCH_CELL_GAP,
+        padding: CANDY_MATCH_BOARD_PADDING,
         borderRadius: 22,
         background: "rgba(255,255,255,.66)",
         boxShadow:
@@ -137,10 +188,9 @@ export function CandyMatchBoard({
             style={cellStyle}
             onPointerDown={onPointerDown(i)}
             onPointerMove={onPointerMove}
-            onPointerUp={onPointerUp(i)}
-            onPointerCancel={() => {
-              dragRef.current = null;
-            }}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerCancel}
+            onLostPointerCapture={onLostPointerCapture}
           >
             {dirt[i] && (
               <span style={{ position: "absolute", inset: 0 }}>
