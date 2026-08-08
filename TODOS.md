@@ -141,7 +141,7 @@
 
 | ID | 嚴重度 | 狀態 | 說明 |
 |----|--------|------|------|
-| GK-TOUCH-A | — | ✅（本 commit） | **PR-A**：TouchControls capture、CandyMatch capture＋cell≥48、BlockDrop capture cleanup、契約測／docs |
+| GK-TOUCH-A | — | ✅ `38c9b6a` | **PR-A**：TouchControls capture、CandyMatch capture＋cell≥48、BlockDrop capture cleanup、契約測／docs |
 | GK-GODOT-FOCUS | C | 📋 下一輪 PR-C | candy-kart 補 focus-out 暫停；兩款 Godot 暫停／失焦時清 `touch_*` 旗（防黏鍵）。需 source＋re-export 同 PR |
 | GK-PLAYTEST | — | 📋 模板 | 有票才開 PR-B（car assist）／其餘 C/H |
 
