@@ -9,7 +9,7 @@ export const MIN_SCALE = 0.34;
 export const MAX_SCALE = 2.0;
 
 /** 預設鏡頭比 fit 再退一點，讓島群不貼視窗邊、保留拖曳呼吸感。
- *  0.96：配合島群 bbox + 嚴格 contain（PORTRAIT_MAX_ZOOM=1）與 chrome inset。 */
+ *  0.96：配合島群 bbox + 溫和直向放大（PORTRAIT_MAX_ZOOM）與 chrome inset。 */
 export const FIT_MARGIN = 0.96;
 
 /**
@@ -169,17 +169,17 @@ export function islandContentCenter(): { x: number; y: number } {
 
 /**
  * 直向（portrait）相對 contain 的最大放大倍率。
- * 曾為 1.5（填滿高度、允許橫切外側島）；改 1＝嚴格 contain，
- * 手機首屏五島＋木牌完整入框，寧可上下多一點空海。
+ * 1＝嚴格 contain（五島完整、空海多）；1.5＝舊填高（外側易被橫切）。
+ * 1.15＝溫和放大：島圖更顯著，允許輕微橫向溢出。
  */
-export const PORTRAIT_MAX_ZOOM = 1;
+export const PORTRAIT_MAX_ZOOM = 1.15;
 
 /**
  * 島名木牌呼吸（螢幕 px，單邊）。
  *
  * `CONTENT_FIT_PAD` 是 stage 單位，會隨 fit 縮放一起縮小；但木牌反縮放後是**固定
  * 螢幕尺寸**，所以手機 fit 下那份留白不夠，最外側島的木牌會被視窗裁掉（375px 實測
- * 溢出 24px）。這裡改在螢幕空間預留，維持 MAP-MOBILE-FIT 的「五島可讀且不裁切」。
+ * 溢出 24px）。這裡改在螢幕空間預留，維持 MAP-MOBILE-FIT 的「五島可讀」。
  */
 export const LABEL_SCREEN_PAD = 28;
 
@@ -198,7 +198,16 @@ export const MAP_CHROME_BOTTOM = 12 + 56 + 20;
  */
 export const MAP_SUMMON_BOTTOM = 12 + 56;
 
-/** fit 可用視窗：扣木牌 pad 與右下／底部 chrome，避免島被控制鈕蓋住。 */
+/**
+ * 手機世界層底部島選擇列高度（螢幕 px，不含 safe）。
+ * 對齊 `IslandPickerStrip`；僅 ≤480 直向世界層顯示，fit 需預留。
+ */
+export const MAP_PICKER_HEIGHT = 72;
+
+/** 手機直向寬度門檻：與 IslandPickerStrip／MapControls 手機樣式一致。 */
+export const MAP_MOBILE_MAX_WIDTH = 480;
+
+/** fit 可用視窗：扣木牌 pad 與右下／底部 chrome，避免島被控制鈕／選擇列蓋住。 */
 export function fitAvailableViewport(
   w: number,
   h: number,
@@ -206,10 +215,16 @@ export function fitAvailableViewport(
   const left = LABEL_SCREEN_PAD;
   const top = LABEL_SCREEN_PAD;
   const right = Math.max(LABEL_SCREEN_PAD, MAP_CHROME_RIGHT);
+  const mobilePortrait = w <= MAP_MOBILE_MAX_WIDTH && h > w;
+  // 選擇列貼底，MapControls 疊在列上方 → 直向手機預留列高 + 一顆控制鈕淨空
+  const mobileWorldBottom = mobilePortrait
+    ? MAP_PICKER_HEIGHT + 8 + 12 + 56
+    : 0;
   const bottom = Math.max(
     LABEL_SCREEN_PAD,
     MAP_CHROME_BOTTOM,
     MAP_SUMMON_BOTTOM,
+    mobileWorldBottom,
   );
   return {
     availW: Math.max(1, w - left - right),
@@ -218,7 +233,7 @@ export function fitAvailableViewport(
 }
 
 /** 依 viewport 尺寸算預設島群 contain-fit 鏡頭倍率（含 FIT_MARGIN 與 clamp）。
- *  直向採嚴格 contain（PORTRAIT_MAX_ZOOM=1），並扣 chrome inset。 */
+ *  直向允許溫和放大（PORTRAIT_MAX_ZOOM），並扣 chrome／選擇列 inset。 */
 export function fitScaleFor(w: number, h: number): number {
   if (w === 0 || h === 0) return 1;
   const bounds = islandContentBounds();

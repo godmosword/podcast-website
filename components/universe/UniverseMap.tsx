@@ -7,6 +7,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type KeyboardEvent,
   type ReactNode,
 } from "react";
@@ -22,6 +23,7 @@ import {
 import { isIslandPath, targetFor, targetToFlyParams } from "@/lib/camera";
 import { resolveUniverseMap } from "@/lib/universe-map";
 import {
+  MAP_PICKER_HEIGHT,
   RECENTER_IDLE_MS,
   anyPointVisible,
   bucketMapScale,
@@ -51,6 +53,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import { MapDecorBirds, MapDecorNearWater } from "./MapDecorLayer";
 import MapBridgeLayer from "./MapBridgeLayer";
 import MapRoamerLayer from "./MapRoamerLayer";
+import IslandPickerStrip from "./IslandPickerStrip";
 import MapControls from "./MapControls";
 import NightFireworks from "./NightFireworks";
 import SkyBodies from "./SkyBodies";
@@ -430,7 +433,16 @@ function UniverseMapContent({
   // 鏡頭 background-position/size 由 bindVisual 命令式更新（T3b），避免 zoom 卡頓。
 
   const mapSection = (
-    <section ref={sectionRef} className={styles.map} aria-label="車車宇宙樂園地圖">
+    <section
+      ref={sectionRef}
+      className={styles.map}
+      aria-label="車車宇宙樂園地圖"
+      style={
+        !onIsland
+          ? ({ "--map-picker-offset": `${MAP_PICKER_HEIGHT}px` } as CSSProperties)
+          : undefined
+      }
+    >
       <div className={styles.nightSeaOverlay} aria-hidden="true" />
       {/* v6 大氣層：海面縱向水深漸層 + 極淡暗角。與海面同為 screen-space（相機相對），
           刻意不進 stage——這是鏡頭／空氣效果，本就該跟著視窗而非跟著世界跑。 */}
@@ -694,6 +706,15 @@ function UniverseMapContent({
         canZoomIn={camera.canZoomIn}
         canZoomOut={camera.canZoomOut}
       />
+
+      {/* 手機世界層：底部大島選擇列（桌面 CSS 隱藏）；點擊走既有 handleActivate */}
+      {!onIsland ? (
+        <IslandPickerStrip
+          zones={zones}
+          onSelect={handleActivate}
+          activeZoneId={activeZoneId}
+        />
+      ) : null}
 
       {/* 島內 overlay：由 /adventures/[zone] 經 layout children 傳入 */}
       {onIsland ? children : null}

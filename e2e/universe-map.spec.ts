@@ -199,13 +199,13 @@ test.describe("車車宇宙樂園地圖 UX", () => {
           expect(label.rect.bottom, `${label.name} 下緣`).toBeLessThanOrEqual(
             frame.y + frame.height + 1,
           );
-          // 橫向：PORTRAIT_MAX_ZOOM=1 嚴格 contain＋chrome inset 後，
-          // 五座島木牌應完整可見（不再允許為填高而橫切）。
+          // 橫向：PORTRAIT_MAX_ZOOM=1.15 溫和放大後允許輕微溢出，
+          // 木牌仍須大部分可見（不再要求 ≥0.98 全入框）。
           const visibleW =
             Math.min(label.rect.right, frame.x + frame.width) -
             Math.max(label.rect.left, frame.x);
           const ratio = visibleW / (label.rect.right - label.rect.left);
-          expect(ratio, `${label.name} 可見比例`).toBeGreaterThanOrEqual(0.98);
+          expect(ratio, `${label.name} 可見比例`).toBeGreaterThanOrEqual(0.85);
           // 木牌永遠畫在最前面的島身之上
           expect(label.z, `${label.name} 層深`).toBeGreaterThan(maxIslandZ);
         }
@@ -223,14 +223,23 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     }
   }
 
+  test("手機世界層顯示底部島選擇列", async ({ page }) => {
+    await openMap(page, "light", 375, 812);
+    const strip = page.getByTestId("island-picker-strip");
+    await expect(strip).toBeVisible();
+    await expect(strip.getByRole("button")).toHaveCount(5);
+  });
+
   test("手機 fit：五座島 button 皆在首屏可視區", async ({ page }) => {
     await openMap(page, "light", 375, 812);
+    // 限定地圖舞台內的島 button（排除底部 IslandPickerStrip 同名 chip）
+    const stage = page.getByRole("application", { name: /車車樂園互動地圖/ });
     const islands = [
-      page.locator('button[data-zone="car-park"]'),
-      page.getByRole("button", { name: /恐龍島/ }),
-      page.getByRole("button", { name: /英雄救援隊/ }),
-      page.getByRole("button", { name: /未來夢想島/ }),
-      page.getByRole("button", { name: /森林小島/ }),
+      stage.locator('button[data-zone="car-park"]'),
+      stage.locator('button[data-zone="dino"]'),
+      stage.locator('button[data-zone="rescue"]'),
+      stage.locator('button[data-zone="ocean"]'),
+      stage.locator('button[data-zone="forest"]'),
     ];
     for (const island of islands) {
       await expect(island).toBeInViewport();

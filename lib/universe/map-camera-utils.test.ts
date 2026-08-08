@@ -13,6 +13,7 @@ import {
   LABEL_SCREEN_PAD,
   MAP_CHROME_BOTTOM,
   MAP_CHROME_RIGHT,
+  MAP_PICKER_HEIGHT,
   MIN_SCALE,
   NAMEPLATE_FOCUS_ALLOWANCE,
   PORTRAIT_MAX_ZOOM,
@@ -100,7 +101,7 @@ describe("map-camera-utils", () => {
     }
   });
 
-  it("fitScaleFor：橫向 contain-fit；直向嚴格 contain（不為填高而橫切）", () => {
+  it("fitScaleFor：橫向 contain-fit；直向溫和放大（PORTRAIT_MAX_ZOOM）", () => {
     const bounds = islandContentBounds();
     const availFor = (vw: number, vh: number) => fitAvailableViewport(vw, vh);
     // 橫向・高受限
@@ -115,20 +116,24 @@ describe("map-camera-utils", () => {
       clampScale((mid.availW / bounds.width) * FIT_MARGIN),
       6,
     );
-    // 直向：PORTRAIT_MAX_ZOOM=1 → 等於純 contain（不再大於寬度 contain）
+    // 直向：PORTRAIT_MAX_ZOOM=1.15 → 可略大於純 contain，但仍受 availH 夾住
     const portrait = availFor(400, 900);
     const portraitContain = Math.min(
       portrait.availW / bounds.width,
       portrait.availH / bounds.height,
     );
-    expect(PORTRAIT_MAX_ZOOM).toBe(1);
+    expect(PORTRAIT_MAX_ZOOM).toBe(1.15);
     expect(fitScaleFor(400, 900)).toBeCloseTo(
-      clampScale(portraitContain * FIT_MARGIN),
+      clampScale(
+        Math.min(portrait.availH / bounds.height, portraitContain * PORTRAIT_MAX_ZOOM) *
+          FIT_MARGIN,
+      ),
       6,
     );
-    // 嚴格 contain 後：島群 bbox 寬≈舞台（986≈1000），再扣 pad／chrome → 手機落在 MIN_SCALE
+    // 手機直向：扣選擇列＋chrome 後仍可能落在 MIN_SCALE 附近
     const mobile = fitScaleFor(375, 748);
-    expect(mobile).toBe(MIN_SCALE);
+    expect(mobile).toBeGreaterThanOrEqual(MIN_SCALE);
+    expect(mobile).toBeLessThanOrEqual(MIN_SCALE * PORTRAIT_MAX_ZOOM + 0.05);
   });
 
   it("fitAvailableViewport 扣掉 MapControls chrome（右／下大於木牌 pad）", () => {
@@ -136,7 +141,9 @@ describe("map-camera-utils", () => {
     expect(MAP_CHROME_RIGHT).toBeGreaterThan(LABEL_SCREEN_PAD);
     expect(MAP_CHROME_BOTTOM).toBeGreaterThan(LABEL_SCREEN_PAD);
     expect(availW).toBe(390 - LABEL_SCREEN_PAD - MAP_CHROME_RIGHT);
-    expect(availH).toBe(844 - LABEL_SCREEN_PAD - MAP_CHROME_BOTTOM);
+    // 390 直向：預留選擇列 + 控制鈕淨空
+    const mobileWorldBottom = MAP_PICKER_HEIGHT + 8 + 12 + 56;
+    expect(availH).toBe(844 - LABEL_SCREEN_PAD - mobileWorldBottom);
   });
 
   it("LABEL_SCREEN_PAD 讓 fit 比無留白版本略小（木牌不被視窗裁掉）", () => {

@@ -80,7 +80,8 @@
 @media (max-width: 480px) {
   .controls {
     right: calc(10px + var(--safe-right));
-    bottom: calc(10px + var(--safe-bottom));
+    /* 世界層有島選擇列時抬高，避免疊在 chip 上（--map-picker-offset 由 UniverseMap 注入） */
+    bottom: calc(10px + var(--safe-bottom) + var(--map-picker-offset, 0px));
     gap: 8px;
   }
 

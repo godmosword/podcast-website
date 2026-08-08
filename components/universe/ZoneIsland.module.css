@@ -11,6 +11,17 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* 手機：擴大不可見觸控墊（約 +20%），不改 stageSize／視覺框 */
+@media (max-width: 480px) {
+  .islandTile::before {
+    content: "";
+    position: absolute;
+    inset: -12%;
+    /* 純命中擴張，不搶繪圖 */
+    background: transparent;
+  }
+}
+
 .tileStack {
   position: relative;
   width: 100%;

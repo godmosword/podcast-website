@@ -55,6 +55,7 @@
 |----|------|
 | fix(content): ep-24 補角色圖鑑 alsoIn（小紅賽車、小紅賽車的爸爸） | `00fefee` |
 | chore(games): 著色線稿管線硬化（character／scene 分流 prompt、構圖 edgeIou gate、審核清單；**未重產 PNG／未呼叫生圖 API**） | `67020ba` |
+| polish(universe): 手機地圖溫和放大（PORTRAIT_MAX_ZOOM=1.15）＋IslandPickerStrip＋tile hit pad | _pending_ |
 
 > **著色下輪（須准許 API）建議重產順序：** `scene-ep-9-05` → `scene-ep-3-05` → `scene-ep-6-05` → `scene-ep-16-05`（可選再補 4 張 character）。現役空白圖仍為舊「簡化太陽雲」AI 稿。
 

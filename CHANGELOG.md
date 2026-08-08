@@ -6,6 +6,7 @@
 
 ### Added
 
+- **手機宇宙地圖底部島選擇列（IslandPickerStrip）**：≤480px 世界層橫滑大 chip（圖＋名、觸控 ≥56×72）；點擊走既有進島路由，不動 `useMapCamera`／`ZoneSheet`。MapControls 隨 `--map-picker-offset` 抬高。
 - **ep-23 全幕繪本 + 小紅賽車的爸爸定裝**：26 幕（雪山隧道）；俏皮翹鬍子爸爸定裝；禁手；場景公里牌整數例外於場景 negative；23／24 頁序對調（慶祝↔風景）。
 - **PLAY-IA-6：暫停層「回遊樂園」出口**：繽紛方塊與車車大冒險的暫停覆蓋層在「繼續」下方補 `href="/games"` 弱 CTA，對齊抬頭文案；其餘無 React 暫停層的遊戲不動。
 - **PLAY-IA-7：遊戲頁 chrome 單列**：`GamePlayChromeSlot` + `createPortal` 把 `GameHost` 工具列掛進 sticky 抬頭右側；無 slot 時 fallback 畫布上方原列。不動 GameKit adapter 契約。
@@ -16,6 +17,7 @@
 
 ### Changed
 
+- **手機宇宙地圖溫和放大（銜接 MAP-MOBILE-CONTAIN）**：`PORTRAIT_MAX_ZOOM` 1→1.15，直向島圖更顯著、允許輕微橫向溢出；`fitAvailableViewport` 預留選擇列高度；島 tile 手機 hit pad `::before` inset -12%；e2e 木牌可見比 ≥0.85。不動島座標／zone-art-tile。
 - **手機宇宙地圖嚴格 contain + chrome inset（MAP-MOBILE-CONTAIN／CHROME）**：`PORTRAIT_MAX_ZOOM` 1.5→1，直向不再為填滿高度而橫切外側島；新增 `fitAvailableViewport` 從可用視窗扣除木牌 pad 與右下 MapControls（＋召喚把手高度），`fitScaleFor`／`fitScaleForBox` 共用。首屏島略小、上下空海略多，換完整可點與木牌不被裁。不動 `useMapCamera`／`ZoneSheet` 互動核心。
 - **宇宙地圖視覺升級 v6：從「五張貼紙」到「有水深／空氣／夜晚的世界」**。地圖的**資產層**（五島整島黏土 diorama、海／雲／日月 PNG）本來就好，但**合成層**幾乎沒做事，所有元素讀在同一個 Z 上。本輪全為 CSS／SVG，零新資產：
   - **淺灘光暈**：島底加一顆更大更柔的水色橢圓（`#cfe8f3` ＋ `feGaussianBlur`，無邊界），島從「貼在海面上」變成「泡在水裡」。與 v5 移除的白硬 foam 環的分界寫進 Art Bible §14.6。
