@@ -56,7 +56,7 @@
 | fix(content): ep-24 補角色圖鑑 alsoIn（小紅賽車、小紅賽車的爸爸） | `00fefee` |
 | chore(games): 著色線稿管線硬化（character／scene 分流 prompt、構圖 edgeIou gate、審核清單；**未重產 PNG／未呼叫生圖 API**） | `67020ba` |
 | polish(universe): 手機地圖溫和放大（PORTRAIT_MAX_ZOOM=1.15）＋IslandPickerStrip＋tile hit pad | `18ac8d6` |
-| content(games): 著色 scene 四頁重產上線（9／3／6／16；API 4 次；character Wave 2 仍 Out） | 見本 commit |
+| content(games): 著色 scene 四頁重產上線（9／3／6／16；API 4 次；character Wave 2 仍 Out） | `60c1e0d` |
 
 > **著色下輪：** Wave 1 scene 四頁已重產並 `--approve`（`scene-ep-9-05`／`3-05`／`6-05`／`16-05`）。**Wave 2 character 四張仍 Out**，須另文字准許 API 後才重產。
 
