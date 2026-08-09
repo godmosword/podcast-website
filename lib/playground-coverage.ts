@@ -98,3 +98,28 @@ export function assertWave1CoverageMet(
   }
   return { ok: missing.length === 0, missing };
 }
+
+/** Wave 2 必達縣市（竹苗中彰投雲）。 */
+export const WAVE2_CITIES = [
+  "新竹市",
+  "新竹縣",
+  "苗栗縣",
+  "台中市",
+  "彰化縣",
+  "南投縣",
+  "雲林縣",
+] as const;
+
+export function assertWave2CoverageMet(
+  rows: CityCoverage[] = listCityCoverage(),
+): { ok: boolean; missing: string[] } {
+  const byCity = new Map(rows.map((row) => [row.city, row]));
+  const missing: string[] = [];
+  for (const city of WAVE2_CITIES) {
+    const row = byCity.get(city);
+    if (!row || row.status !== "met") {
+      missing.push(city);
+    }
+  }
+  return { ok: missing.length === 0, missing };
+}

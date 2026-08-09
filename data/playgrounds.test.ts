@@ -7,7 +7,10 @@ import {
   listPlaygrounds,
   type Playground,
 } from "./playgrounds";
-import { assertWave1CoverageMet } from "@/lib/playground-coverage";
+import {
+  assertWave1CoverageMet,
+  assertWave2CoverageMet,
+} from "@/lib/playground-coverage";
 
 const VALID_TYPES = new Set([
   "公園",
@@ -111,6 +114,12 @@ describe("playgrounds sidecar", () => {
 
   it("Wave 1 北北基桃各縣市達覆蓋門檻", () => {
     const { ok, missing } = assertWave1CoverageMet();
+    expect(missing, `未達門檻：${missing.join("、")}`).toEqual([]);
+    expect(ok).toBe(true);
+  });
+
+  it("Wave 2 竹苗中彰投雲各縣市達覆蓋門檻", () => {
+    const { ok, missing } = assertWave2CoverageMet();
     expect(missing, `未達門檻：${missing.join("、")}`).toEqual([]);
     expect(ok).toBe(true);
   });

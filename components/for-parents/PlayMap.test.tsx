@@ -109,9 +109,9 @@ describe("PlayMap", () => {
     ).toBeNull();
   });
 
-  it("涵蓋區顯示北北基桃覆蓋文案", () => {
+  it("涵蓋區顯示北北基桃與竹苗中彰投雲覆蓋文案", () => {
     render(<PlayMap />);
-    expect(screen.getByText(/北北基桃已上線/)).toBeTruthy();
+    expect(screen.getByText(/北北基桃與竹苗中彰投雲已上線/)).toBeTruthy();
     expect(screen.getByText(/目前收錄：/)).toBeTruthy();
   });
 

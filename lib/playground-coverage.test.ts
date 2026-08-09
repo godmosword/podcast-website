@@ -2,12 +2,14 @@ import { describe, expect, it } from "vitest";
 import { listPlaygrounds } from "@/data/playgrounds";
 import {
   assertWave1CoverageMet,
+  assertWave2CoverageMet,
   coverageStatus,
   coverageThreshold,
   coverageTierForCity,
   listCityCoverage,
   normalizeCityKey,
   WAVE1_CITIES,
+  WAVE2_CITIES,
 } from "@/lib/playground-coverage";
 
 describe("playground-coverage", () => {
@@ -56,6 +58,19 @@ describe("playground-coverage", () => {
 
     const rows = listCityCoverage();
     for (const city of WAVE1_CITIES) {
+      const row = rows.find((r) => r.city === city);
+      expect(row, city).toBeDefined();
+      expect(row?.status).toBe("met");
+    }
+  });
+
+  it("Wave 2 七縣市皆達門檻", () => {
+    const { ok, missing } = assertWave2CoverageMet();
+    expect(missing).toEqual([]);
+    expect(ok).toBe(true);
+
+    const rows = listCityCoverage();
+    for (const city of WAVE2_CITIES) {
       const row = rows.find((r) => r.city === city);
       expect(row, city).toBeDefined();
       expect(row?.status).toBe("met");
