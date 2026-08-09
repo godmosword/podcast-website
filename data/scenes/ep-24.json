@@ -1,0 +1,284 @@
+{
+  "slug": "ep-24",
+  "audioDuration": 389,
+  "model": "manual-semantic+age-variant-v1",
+  "generatedAt": "2026-08-09T03:15:20.290Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 0,
+      "end": 20,
+      "summary": "開場：Bonbon 和馬米打招呼，聊到這禮拜是父親節，問小朋友想送爸爸什麼禮物（封面沿用既有主視覺：年幼小紅坐在年輕爸爸的車頂）",
+      "prompt": "COVER — keepCover, this page reuses the published 01.jpg and is NOT regenerated; the prompt only records what the cover shows.\n\nAGE LOCK (highest priority): this is the memory hero image, so ONLY the young-age versions appear — 小紅賽車年幼版 and 小紅賽車的爸爸年輕版. Do NOT draw the present-day 小紅賽車 (number 2) or the present-day 小紅賽車的爸爸 (number 1).\n\nSTORY BEAT: A warm sunny clay playground with a red-and-yellow carousel roof, a purple slide and rounded green bushes against a bright blue sky. 小紅賽車的爸爸年輕版 fills the foreground with a proud gentle smile, and tiny 小紅賽車年幼版 sits perched happily on his roof. Match portrait 小紅賽車的爸爸年輕版 exactly: a compact rounded younger dad red race car with pebbled honeycomb clay texture, LARGE round white eyes with black pupils on the UPPER FRONT FACE, thick arched black eyebrows above the eyes on a blue clay window band, a prominent playful black curly handlebar mustache centred BELOW the eyes on the red front face, a simple curved black smile under the mustache, two bright yellow round cheek dots beside the mustache, blue side windows, small red round side mirrors, chunky black wheels with light hubs; NO long sports-car profile, NO door number, NO white racing stripe, NO pacifier. Match portrait 小紅賽車年幼版 exactly: a TINY stubby toddler red race car with pebbled honeycomb clay texture, LARGE round white eyes with black pupils set high on the UPPER FRONT FACE (they are eyes, never headlights on the bumper), directly BELOW the eyes a teal-blue vanilla pacifier with a ring handle held in her mouth, two small bright yellow round cheek spots beside the pacifier, a rounded blue clay top window, tiny black wheels with cream hubs; NO racing number, NO white racing stripe, NO rear wing; she is dramatically SMALLER than any adult car. Every vehicle in the image is a pure car — body, four wheels, eyes and one mouth ONLY: NO arms, NO hands, NO limbs, no fingers, no legs. No text, no logos.",
+      "characters": [
+        "小紅賽車年幼版",
+        "小紅賽車的爸爸年輕版"
+      ],
+      "keepCover": true
+    },
+    {
+      "index": 2,
+      "start": 20,
+      "end": 48.8,
+      "summary": "Bonbon 說他已經準備好給爸爸的驚喜，和馬米一起大聲說「父親節快樂」，接著宣布今天要聽的是「小紅賽車與爸爸」的故事",
+      "prompt": "Clay podcast studio, hosts only. Bonbon and 馬米 sit at their round wooden table with their microphones, both beaming: Bonbon hints excitedly that he has already prepared a surprise for his dad, and the two of them cheer 'Happy Father's Day' together before announcing today's story about the little red race car and her dad. Warm studio light, a few red and yellow clay balloons floating behind them and a small clay gift box tied with a ribbon sitting on the table. Bonbon and 馬米 are HUMAN clay characters and keep their normal arms and hands. NO cars of any kind in this shot — no baby car, no mustache car. No text, no logos.",
+      "characters": [
+        "Bonbon",
+        "馬米"
+      ],
+      "refPages": []
+    },
+    {
+      "index": 3,
+      "start": 48.8,
+      "end": 72.3,
+      "summary": "今天是很特別的日子：彩虹廣場掛滿了彩色氣球和照片，每一台小車車都準備了一張小卡片，因為今天是父親節",
+      "prompt": "PRESENT DAY, Father's Day at Rainbow Square: a wide sunny clay plaza strung with garlands of colourful balloons and rows of small square photo prints pegged along bunting lines between the lamp posts. In front of each parked little car stands a small folded clay greeting card, propped upright on the ground or leaning against a bumper — the cards stand up by themselves because cars have no hands to hold them. Rainbow-coloured paving stones, rounded green clay trees, fluffy clay clouds in a bright blue sky, festive and warm. Every car here is a tiny, generic, faceless background vehicle — NO named hero cars in this shot, NO pacifier baby car, NO mustache dad car. The photos on the bunting are soft blurry little colour rectangles with no readable faces. Every vehicle is a pure car — body, four wheels ONLY: NO arms, NO hands, NO limbs, no fingers, no legs. No text, no logos.",
+      "characters": [],
+      "refPages": []
+    },
+    {
+      "index": 4,
+      "start": 72.3,
+      "end": 100.1,
+      "summary": "小紅賽車開心地和爸爸來到車車遊樂園；爸爸有大大的翹鬍子、笑起來總是很溫暖，大家都覺得小紅跑得又快又勇敢——可是小紅以前也只是一台小小的小baby車喔",
+      "prompt": "AGE LOCK (highest priority): the two real cars standing in the plaza are ONLY the present-day pair — 小紅賽車 (number 2) and 小紅賽車的爸爸 (number 1, handlebar mustache). NEITHER of them wears a pacifier. 小紅賽車年幼版 appears ONLY inside a small floating memory bubble and NEVER as a car standing on the ground.\n\nSTORY BEAT: Bright cheerful daylight at Rainbow Square on Father's Day, balloons and photo bunting overhead. 小紅賽車 rolls in happily side by side with 小紅賽車的爸爸, her eyes sparkling with excitement, while a few tiny faceless clay cars in the background admire how fast and brave she is. In the upper corner floats ONE small soft-edged oval memory bubble trailing a line of little fluffy dots and glowing warm gold: inside it, very small and softly blurred, sits 小紅賽車年幼版 as she used to be. The bubble is obviously a memory — no bigger than one third of the hero cars, with feathered edges.\n\nMatch portrait 小紅賽車 exactly: glossy bright red rounded clay race car, white racing stripe over the hood with a blue number 2, a white circle with a blue 2 on each door, light-blue windshield and side windows, cream face panel under the windshield with TWO big round blue-iris eyes and black eyebrows, ONE smiling mouth low on the front bumper, yellow headlights, blue lower trim, small red rear wing, black tyres with cream hubcaps; she NEVER has a pacifier. Match portrait 小紅賽車的爸爸 exactly: clearly LARGER and longer adult red race car, glossy red clay body, white racing stripe down the middle, blue window trim, blue side mirrors, blue rear wing, a white circle with a blue number 1 (NEVER 2) on each door, yellow headlights ringed in blue, black tyres with blue rims and yellow hubs; FACE LAYOUT — warm mature round black eyes ONLY on the cream windshield panel, and on the FRONT BUMPER/GRILLE a playful curly black handlebar mustache with curled-up tips sitting directly ABOVE a friendly smiling mouth; mustache and mouth belong to the front nose, never floating on the windshield; he NEVER has a pacifier. Match portrait 小紅賽車年幼版 exactly (inside the memory bubble only): a TINY stubby toddler red race car with pebbled honeycomb clay texture, LARGE round white eyes with black pupils set high on the UPPER FRONT FACE, directly BELOW the eyes a teal-blue vanilla pacifier with a ring handle, two small bright yellow round cheek spots beside the pacifier, a rounded blue clay top window, tiny black wheels with cream hubs; NO racing number, NO white racing stripe, NO rear wing.\n\nEvery vehicle in the image is a pure car — body, four wheels, eyes and one mouth ONLY: NO arms, NO hands, NO limbs, no fingers, no legs; no car points, waves, claps, holds anything or hugs with hands. Any extra car is a tiny generic faceless background vehicle, also with NO arms, NO hands, NO limbs. No text, no logos.",
+      "characters": [
+        "小紅賽車",
+        "小紅賽車的爸爸",
+        "小紅賽車年幼版"
+      ],
+      "refPages": [
+        3
+      ],
+      "refPageHint": "Continuity with scene 3: same sunny Rainbow Square, same balloons and photo bunting. Reference is for setting only — the hero cars must match their own portraits."
+    },
+    {
+      "index": 5,
+      "start": 100.1,
+      "end": 121,
+      "summary": "小紅看著廣場上的照片，好奇地問「爸爸啊爸爸，我以前真的這麼小嗎？」；爸爸點點頭叫出相簿，第一張照片裡的小紅嘴裡還吸著一顆青綠色的香草奶嘴",
+      "prompt": "AGE LOCK (highest priority): the only real cars in this scene are the present-day 小紅賽車 (number 2) and 小紅賽車的爸爸 (number 1, mustache), and neither of them wears a pacifier. 小紅賽車年幼版 appears ONLY as the picture on the phone screen — never as a real car on the ground.\n\nNO-HANDS STAGING (important): the dad has no hands and can never hold a phone. A chunky clay smartphone stands upright in a little clay stand on a low wooden bench beside the two cars, its bright screen turned toward them; the dad has nudged the photo album open with the very tip of his front bumper, and nothing is held by anybody.\n\nSTORY BEAT: Sunny Rainbow Square, balloons and photo bunting. 小紅賽車 tips her nose up toward the propped-up phone with big curious eyes, asking whether she really used to be that small; 小紅賽車的爸爸 nods warmly beside her with a gentle smile. Filling the phone screen, clearly readable, is the very first photo of the album: a tiny red baby race car with a teal-blue vanilla pacifier, glowing softly like a cherished picture.\n\nMatch portrait 小紅賽車 exactly: glossy bright red rounded clay race car, white racing stripe over the hood with a blue number 2, a white circle with a blue 2 on each door, light-blue windshield and side windows, cream face panel under the windshield with TWO big round blue-iris eyes and black eyebrows, ONE smiling mouth low on the front bumper, yellow headlights, blue lower trim, small red rear wing, black tyres with cream hubcaps; she NEVER has a pacifier. Match portrait 小紅賽車的爸爸 exactly: clearly LARGER and longer adult red race car, white racing stripe down the middle, blue window trim, blue side mirrors, blue rear wing, a white circle with a blue number 1 (NEVER 2) on each door, yellow headlights ringed in blue, black tyres with blue rims and yellow hubs; warm mature round black eyes ONLY on the cream windshield panel, and on the FRONT BUMPER/GRILLE a playful curly black handlebar mustache with curled-up tips directly ABOVE a friendly smiling mouth. Match portrait 小紅賽車年幼版 exactly (on the phone screen only): a TINY stubby toddler red race car with pebbled honeycomb clay texture, LARGE round white eyes with black pupils set high on the UPPER FRONT FACE, directly BELOW the eyes a teal-blue vanilla pacifier with a ring handle, two small bright yellow round cheek spots beside the pacifier, a rounded blue clay top window, tiny black wheels with cream hubs; NO racing number, NO white racing stripe, NO rear wing.\n\nEvery vehicle in the image is a pure car — body, four wheels, eyes and one mouth ONLY: NO arms, NO hands, NO limbs, no fingers, no legs; nobody holds the phone. No text, no logos.",
+      "characters": [
+        "小紅賽車",
+        "小紅賽車的爸爸",
+        "小紅賽車年幼版"
+      ],
+      "refPages": [
+        4
+      ],
+      "refPageHint": "Continuity with scene 4: same present-day Rainbow Square and the same present-day pair (小紅賽車 number 2, 小紅賽車的爸爸 number 1 with mustache). The baby version stays inside the phone screen only."
+    },
+    {
+      "index": 6,
+      "start": 121,
+      "end": 135.5,
+      "summary": "回憶照片：那時候小紅的輪子小小的，開起車來歪歪扭扭，連轉個彎都會跌倒，翻在軟軟的草地上",
+      "prompt": "AGE LOCK (highest priority): FLASHBACK — ONLY 小紅賽車年幼版 appears. Do NOT draw the present-day 小紅賽車 (number 2), do NOT draw any adult car, do NOT draw the mustache dad.\n\nMEMORY LOOK: the whole picture is an old photo from the album — set it inside a soft rounded white photo border with warm, slightly faded golden light and gently blurred edges, clearly reading as the past and NOT the present-day Rainbow Square.\n\nSTORY BEAT: On a soft green clay lawn in gentle sunshine, tiny 小紅賽車年幼版 has wobbled through a turn and tipped over onto her side, her four little wheels still spinning in the air. A wobbly dotted tyre track curves crookedly across the grass behind her, showing how zig-zag her driving was. She is not hurt at all — her eyes are wide and startled, tiny clay daisies and clover scattered around her, a couple of soft motion swirls in the air.\n\nMatch portrait 小紅賽車年幼版 exactly: a TINY stubby toddler red race car with pebbled honeycomb clay texture, LARGE round white eyes with black pupils set high on the UPPER FRONT FACE (they are eyes, never headlights on the bumper), directly BELOW the eyes a teal-blue vanilla pacifier with a ring handle held in her mouth, two small bright yellow round cheek spots beside the pacifier, a rounded blue clay top window, tiny black wheels with cream hubs; NO racing number, NO white racing stripe, NO rear wing. Her wheels are noticeably tiny and stubby.\n\nShe is a pure car — body, four wheels, eyes and a pacifier ONLY: NO arms, NO hands, NO limbs, no fingers, no legs. No text, no logos.",
+      "characters": [
+        "小紅賽車年幼版"
+      ],
+      "refPages": [
+        1
+      ],
+      "refPageHint": "Use the cover ONLY for the baby's identity (pebbled red clay body, big white eyes high on the front face, teal vanilla pacifier, yellow cheek dots). IGNORE the cover's roof-perch pose and IGNORE the dad — this scene has no adult car."
+    },
+    {
+      "index": 7,
+      "start": 135.5,
+      "end": 150.4,
+      "summary": "回到現在：爸爸笑著說「那時候你每天都吵著要我陪你」，小紅害羞地笑著問「真的嗎？」，爸爸點點頭，接著說起晚上睡不著的那些夜晚",
+      "prompt": "AGE LOCK (highest priority): PRESENT DAY — ONLY 小紅賽車 (number 2) and 小紅賽車的爸爸 (number 1, handlebar mustache) appear. NO pacifier on either car, NO baby car, NO young-dad car anywhere in this image, and NO memory bubble.\n\nSTORY BEAT: Sunny Rainbow Square under the balloons and photo bunting. 小紅賽車的爸爸 laughs warmly, telling Xiao Hong that back then she used to beg him every single day to keep her company; 小紅賽車 giggles shyly beside him with her eyes squeezed happily shut and two soft pink blush patches on her cheeks. The clay smartphone still stands in its little stand on the wooden bench beside them, its screen turned away and softly dimmed so no photo is readable. Nobody touches or holds it.\n\nMatch portrait 小紅賽車 exactly: glossy bright red rounded clay race car, white racing stripe over the hood with a blue number 2, a white circle with a blue 2 on each door, light-blue windshield and side windows, cream face panel under the windshield with TWO big round blue-iris eyes and black eyebrows, ONE smiling mouth low on the front bumper, yellow headlights, blue lower trim, small red rear wing, black tyres with cream hubcaps. Match portrait 小紅賽車的爸爸 exactly: clearly LARGER and longer adult red race car, white racing stripe down the middle, blue window trim, blue side mirrors, blue rear wing, a white circle with a blue number 1 (NEVER 2) on each door, yellow headlights ringed in blue, black tyres with blue rims and yellow hubs; warm mature round black eyes ONLY on the cream windshield panel, and on the FRONT BUMPER/GRILLE a playful curly black handlebar mustache with curled-up tips directly ABOVE a friendly laughing mouth.\n\nEvery vehicle in the image is a pure car — body, four wheels, eyes and one mouth ONLY: NO arms, NO hands, NO limbs, no fingers, no legs. Any extra car is a tiny generic faceless background vehicle, also with NO arms, NO hands, NO limbs. No text, no logos.",
+      "characters": [
+        "小紅賽車",
+        "小紅賽車的爸爸"
+      ],
+      "refPages": [
+        5
+      ],
+      "refPageHint": "Continuity with scene 5: same present-day Rainbow Square spot and the same present-day pair. This time the phone screen is dimmed and empty — the baby version must NOT appear."
+    },
+    {
+      "index": 8,
+      "start": 150.4,
+      "end": 168.7,
+      "summary": "回憶：晚上睡不著的時候，年輕的爸爸帶著小小的小紅在花園裡慢慢繞圈，一圈、兩圈、三圈，直到她累了睏了，閉上眼睛甜甜地睡著",
+      "prompt": "AGE LOCK (highest priority): FLASHBACK — ONLY 小紅賽車年幼版 (tiny pacifier baby) and 小紅賽車的爸爸年輕版 (compact mustache young dad) appear. Do NOT draw the present-day 小紅賽車 (number 2) and do NOT draw the present-day long adult 小紅賽車的爸爸 (number 1) anywhere in this image.\n\nMEMORY LOOK: the whole picture is a remembered night from long ago — set it inside a soft rounded white photo border with warm, slightly faded light and gently blurred edges, clearly the past and NOT the present-day Rainbow Square.\n\nSTORY BEAT: A calm clay night garden lit by a big round moon, tiny fireflies and two little warm lanterns. 小紅賽車的爸爸年輕版 rolls very slowly along a round garden path with tiny 小紅賽車年幼版 tucked close behind him, following in his tracks. A faint glowing dotted spiral loops around the flowerbed showing they have gone round and round, again and again. The baby's eyes are closed in peaceful sleep, her pacifier still in place, with three little soft sleep bubbles floating above her; the young dad glances back at her with an extremely gentle smile and drives at a crawl so as not to wake her.\n\nMatch portrait 小紅賽車年幼版 exactly: a TINY stubby toddler red race car with pebbled honeycomb clay texture, LARGE round eyes set high on the UPPER FRONT FACE (here drawn as two happy closed curved lashes because she is asleep), directly BELOW the eyes a teal-blue vanilla pacifier with a ring handle held in her mouth, two small bright yellow round cheek spots beside the pacifier, a rounded blue clay top window, tiny black wheels with cream hubs; NO racing number, NO white racing stripe, NO rear wing. Match portrait 小紅賽車的爸爸年輕版 exactly: a compact rounded younger dad red race car with pebbled honeycomb clay texture, LARGE round white eyes with black pupils on the UPPER FRONT FACE, thick arched black eyebrows above the eyes on a blue clay window band, a prominent playful black curly handlebar mustache centred BELOW the eyes on the red front face, a simple curved black smile under the mustache, two bright yellow round cheek dots beside the mustache, blue side windows, small red round side mirrors, chunky black wheels with light hubs; NO long sports-car profile, NO door number, NO white racing stripe, NO pacifier. The baby is dramatically smaller than the young dad.\n\nBoth cars are pure vehicles — body, four wheels, eyes and one mouth ONLY: NO arms, NO hands, NO limbs, no fingers, no legs; nobody tucks anybody in with hands. No text, no logos.",
+      "characters": [
+        "小紅賽車年幼版",
+        "小紅賽車的爸爸年輕版"
+      ],
+      "refPages": [
+        1
+      ],
+      "refPageHint": "Use the cover ONLY for the two young-age identities (baby: pebbled red body, big white eyes high on the front face, teal vanilla pacifier, yellow cheek dots / young dad: compact red body, big white eyes, thick black eyebrows, curly handlebar mustache, yellow cheek dots). IGNORE the roof-perch pose and the daytime playground — here they drive on the ground in a night garden."
+    },
+    {
+      "index": 9,
+      "start": 168.7,
+      "end": 184.6,
+      "summary": "回憶：下雨打雷的夜裡，小小的小紅嚇得躲到爸爸旁邊說「爸爸好可怕喔」，爸爸溫柔地說「別怕，有爸爸在」",
+      "prompt": "AGE LOCK (highest priority): FLASHBACK — ONLY 小紅賽車年幼版 (tiny pacifier baby) and 小紅賽車的爸爸年輕版 (compact mustache young dad) appear. Do NOT draw the present-day 小紅賽車 (number 2) and do NOT draw the present-day long adult 小紅賽車的爸爸 (number 1).\n\nMEMORY LOOK: a remembered stormy night — soft rounded white photo border, slightly faded warm-cool light and gently blurred edges, clearly the past.\n\nSTORY BEAT: A rainy clay night under a little wooden carport beside the garden. Silver rain streaks fall outside, round puddles ripple on the ground and a soft fork of lightning glows behind the dark clay clouds. Tiny 小紅賽車年幼版 has pressed her whole little body right up against the side of 小紅賽車的爸爸年輕版, sheltering close, her eyes wide and worried and her pacifier still in her mouth, with two tiny fright squiggles above her. The young dad leans his body gently toward her so she fits snugly into his side and gives her a calm reassuring smile — comfort is shown ONLY by leaning bodies pressed together, never by an arm or a hand.\n\nMatch portrait 小紅賽車年幼版 exactly: a TINY stubby toddler red race car with pebbled honeycomb clay texture, LARGE round white eyes with black pupils set high on the UPPER FRONT FACE, directly BELOW the eyes a teal-blue vanilla pacifier with a ring handle held in her mouth, two small bright yellow round cheek spots beside the pacifier, a rounded blue clay top window, tiny black wheels with cream hubs; NO racing number, NO white racing stripe, NO rear wing. Match portrait 小紅賽車的爸爸年輕版 exactly: a compact rounded younger dad red race car with pebbled honeycomb clay texture, LARGE round white eyes with black pupils on the UPPER FRONT FACE, thick arched black eyebrows above the eyes on a blue clay window band, a prominent playful black curly handlebar mustache centred BELOW the eyes on the red front face, a simple curved black smile under the mustache, two bright yellow round cheek dots beside the mustache, blue side windows, small red round side mirrors, chunky black wheels with light hubs; NO long sports-car profile, NO door number, NO white racing stripe, NO pacifier.\n\nBoth cars are pure vehicles — body, four wheels, eyes and one mouth ONLY: NO arms, NO hands, NO limbs, no fingers, no legs; no protective arm, no umbrella held by anyone. No text, no logos.",
+      "characters": [
+        "小紅賽車年幼版",
+        "小紅賽車的爸爸年輕版"
+      ],
+      "refPages": [
+        8
+      ],
+      "refPageHint": "Continuity with scene 8: exactly the same two young-age characters (tiny pacifier baby and compact mustache young dad) and the same memory photo-border treatment. Only the weather, time of day and staging change."
+    },
+    {
+      "index": 10,
+      "start": 184.6,
+      "end": 203,
+      "summary": "回憶：第一次學開車的時候，小小的小紅一直說「爸爸爸爸，我怕怕、怕怕」，爸爸總是回她「沒關係，爸爸陪你慢慢練習」",
+      "prompt": "AGE LOCK (highest priority): FLASHBACK — ONLY 小紅賽車年幼版 (tiny pacifier baby) and 小紅賽車的爸爸年輕版 (compact mustache young dad) appear. Do NOT draw the present-day 小紅賽車 (number 2) and do NOT draw the present-day long adult 小紅賽車的爸爸 (number 1).\n\nMEMORY LOOK: a remembered sunny morning — soft rounded white photo border, warm slightly faded golden light, gently blurred edges, clearly the past.\n\nSTORY BEAT: A friendly little clay practice ground with a gently curving practice lane marked by small orange cones and a soft grassy verge. Tiny 小紅賽車年幼版 is having her very first driving lesson: she creeps forward at a crawl, front wheels turned slightly crooked, eyes big and nervous, tiny worry squiggles and wobble lines around her body, pacifier still in her mouth. 小紅賽車的爸爸年輕版 rolls patiently right alongside her at exactly the same slow speed, matching her pace, smiling encouragingly under his mustache. He guides her only by driving beside her and angling his nose along the lane — he has NO hands and never steers her, holds her or pushes her.\n\nMatch portrait 小紅賽車年幼版 exactly: a TINY stubby toddler red race car with pebbled honeycomb clay texture, LARGE round white eyes with black pupils set high on the UPPER FRONT FACE, directly BELOW the eyes a teal-blue vanilla pacifier with a ring handle held in her mouth, two small bright yellow round cheek spots beside the pacifier, a rounded blue clay top window, tiny black wheels with cream hubs; NO racing number, NO white racing stripe, NO rear wing. Match portrait 小紅賽車的爸爸年輕版 exactly: a compact rounded younger dad red race car with pebbled honeycomb clay texture, LARGE round white eyes with black pupils on the UPPER FRONT FACE, thick arched black eyebrows above the eyes on a blue clay window band, a prominent playful black curly handlebar mustache centred BELOW the eyes on the red front face, a simple curved black smile under the mustache, two bright yellow round cheek dots beside the mustache, blue side windows, small red round side mirrors, chunky black wheels with light hubs; NO long sports-car profile, NO door number, NO white racing stripe, NO pacifier.\n\nBoth cars are pure vehicles — body, four wheels, eyes and one mouth ONLY: NO arms, NO hands, NO limbs, no fingers, no legs; no steering wheel is held, no hand on her roof. No text, no logos.",
+      "characters": [
+        "小紅賽車年幼版",
+        "小紅賽車的爸爸年輕版"
+      ],
+      "refPages": [
+        9
+      ],
+      "refPageHint": "Continuity with scene 9: exactly the same two young-age characters (tiny pacifier baby and compact mustache young dad) and the same memory photo-border treatment. Only the setting and mood change to a sunny first driving lesson."
+    },
+    {
+      "index": 11,
+      "start": 203,
+      "end": 224.1,
+      "summary": "爸爸又翻到相簿的下一頁：照片裡的小紅第一次自己開過小橋，那一天她高興得一直轉圈圈，爸爸就在旁邊大聲喊「你好棒！」",
+      "prompt": "AGE LOCK (highest priority): FLASHBACK — ONLY 小紅賽車年幼版 (tiny pacifier baby) and 小紅賽車的爸爸年輕版 (compact mustache young dad) appear. Do NOT draw the present-day 小紅賽車 (number 2) and do NOT draw the present-day long adult 小紅賽車的爸爸 (number 1).\n\nMEMORY LOOK: a remembered happy afternoon — soft rounded white photo border, warm slightly faded golden light, gently blurred edges, clearly the past.\n\nSTORY BEAT: A small arched wooden clay bridge crosses a sparkling blue stream in a green park. Tiny 小紅賽車年幼版 has just rolled all the way over the bridge by herself for the very first time and is now spinning round and round on the grass in pure delight, leaving a swirling clay dust curl and little sparkle stars around her; her eyes are curved into happy arcs and her pacifier is still in her mouth. 小紅賽車的爸爸年輕版 stands at the end of the bridge cheering — he celebrates by bouncing up on his tyres, tilting his whole body and flashing his bright yellow cheek lights, with cheerful little sound curls floating from his mouth. He NEVER claps, because he has no hands.\n\nMatch portrait 小紅賽車年幼版 exactly: a TINY stubby toddler red race car with pebbled honeycomb clay texture, LARGE round white eyes with black pupils set high on the UPPER FRONT FACE, directly BELOW the eyes a teal-blue vanilla pacifier with a ring handle held in her mouth, two small bright yellow round cheek spots beside the pacifier, a rounded blue clay top window, tiny black wheels with cream hubs; NO racing number, NO white racing stripe, NO rear wing. Match portrait 小紅賽車的爸爸年輕版 exactly: a compact rounded younger dad red race car with pebbled honeycomb clay texture, LARGE round white eyes with black pupils on the UPPER FRONT FACE, thick arched black eyebrows above the eyes on a blue clay window band, a prominent playful black curly handlebar mustache centred BELOW the eyes on the red front face, a simple curved black smile under the mustache, two bright yellow round cheek dots beside the mustache, blue side windows, small red round side mirrors, chunky black wheels with light hubs; NO long sports-car profile, NO door number, NO white racing stripe, NO pacifier.\n\nBoth cars are pure vehicles — body, four wheels, eyes and one mouth ONLY: NO arms, NO hands, NO limbs, no fingers, no legs; absolutely NO clapping hands and NO waving. No text, no logos.",
+      "characters": [
+        "小紅賽車年幼版",
+        "小紅賽車的爸爸年輕版"
+      ],
+      "refPages": [
+        10
+      ],
+      "refPageHint": "Continuity with scene 10: exactly the same two young-age characters (tiny pacifier baby and compact mustache young dad) and the same memory photo-border treatment. Only the setting changes to the little bridge and stream."
+    },
+    {
+      "index": 12,
+      "start": 224.1,
+      "end": 244.3,
+      "summary": "還有一張照片：小紅第一次參加小小賽車比賽，因為太緊張，開到一半竟然停了下來大哭；爸爸就站在終點線那頭",
+      "prompt": "AGE LOCK (highest priority): FLASHBACK — ONLY 小紅賽車年幼版 (tiny pacifier baby) and 小紅賽車的爸爸年輕版 (compact mustache young dad) appear. Do NOT draw the present-day 小紅賽車 (number 2) and do NOT draw the present-day long adult 小紅賽車的爸爸 (number 1).\n\nMEMORY LOOK: a remembered race day — soft rounded white photo border, warm slightly faded light, gently blurred edges, clearly the past.\n\nSTORY BEAT: A cheerful little clay racetrack for toddler cars, ringed with colourful triangular bunting and a few tiny faceless spectator cars in the stands. Tiny 小紅賽車年幼版 has become too nervous, has stopped dead in the middle of the track and is crying: big glossy teary eyes brimming over, two fat clay teardrops rolling down her front face, her whole body trembling with little wobble lines. IMPORTANT: her teal vanilla pacifier stays in place — it is part of who she is; the crying is shown ONLY through her big teary eyes, the tear drops and her trembling body, never by removing the pacifier. Far ahead of her, at the end of the track, 小紅賽車的爸爸年輕版 waits at the finish line under a black-and-white chequered banner strung between two posts, looking at her with a warm hopeful expression. Distance between them is clear: she is small in the middle of the track, he is at the far finish line.\n\nMatch portrait 小紅賽車年幼版 exactly: a TINY stubby toddler red race car with pebbled honeycomb clay texture, LARGE round white eyes with black pupils set high on the UPPER FRONT FACE, directly BELOW the eyes a teal-blue vanilla pacifier with a ring handle held in her mouth, two small bright yellow round cheek spots beside the pacifier, a rounded blue clay top window, tiny black wheels with cream hubs; NO racing number, NO white racing stripe, NO rear wing. Match portrait 小紅賽車的爸爸年輕版 exactly: a compact rounded younger dad red race car with pebbled honeycomb clay texture, LARGE round white eyes with black pupils on the UPPER FRONT FACE, thick arched black eyebrows above the eyes on a blue clay window band, a prominent playful black curly handlebar mustache centred BELOW the eyes on the red front face, a simple curved black smile under the mustache, two bright yellow round cheek dots beside the mustache, blue side windows, small red round side mirrors, chunky black wheels with light hubs; NO long sports-car profile, NO door number, NO white racing stripe, NO pacifier.\n\nEvery vehicle in the image is a pure car — body, four wheels, eyes and one mouth ONLY: NO arms, NO hands, NO limbs, no fingers, no legs; the chequered banner hangs on posts and is never held by anyone. Spectator cars are tiny, generic and faceless with NO arms, NO hands, NO limbs. No text, no logos.",
+      "characters": [
+        "小紅賽車年幼版",
+        "小紅賽車的爸爸年輕版"
+      ],
+      "refPages": [
+        11
+      ],
+      "refPageHint": "Continuity with scene 11: exactly the same two young-age characters (tiny pacifier baby and compact mustache young dad) and the same memory photo-border treatment. Only the setting changes to the toddler racetrack."
+    },
+    {
+      "index": 13,
+      "start": 244.3,
+      "end": 257.6,
+      "summary": "回憶：爸爸在終點線那頭大聲喊著「寶貝，爸爸在這裡！不用急、不要害怕，慢慢來，爸爸相信你可以的，加油加油！」",
+      "prompt": "AGE LOCK (highest priority): FLASHBACK — ONLY 小紅賽車年幼版 (tiny pacifier baby) and 小紅賽車的爸爸年輕版 (compact mustache young dad) appear. Do NOT draw the present-day 小紅賽車 (number 2) and do NOT draw the present-day long adult 小紅賽車的爸爸 (number 1).\n\nMEMORY LOOK: same remembered race day — soft rounded white photo border, warm slightly faded light, gently blurred edges, clearly the past.\n\nSTORY BEAT: Close on the finish line of the little clay racetrack. 小紅賽車的爸爸年輕版 is cheering with everything he has: mouth open wide in a big encouraging shout, eyebrows raised high, his whole body rocking up onto his front wheels and tilting forward, his yellow cheek lights glowing bright, with warm glowing sound-wave rings rippling out from his mouth toward the track. He shouts only — he has NO hands, so there is absolutely NO waving hand and NO hand-held flag; the black-and-white chequered banner is strung between two posts above him. Further back down the track, small in the frame, tiny 小紅賽車年幼版 is still stopped with teary eyes and her pacifier in her mouth, lifting her nose to look toward his voice, a first flicker of courage in her eyes.\n\nMatch portrait 小紅賽車的爸爸年輕版 exactly: a compact rounded younger dad red race car with pebbled honeycomb clay texture, LARGE round white eyes with black pupils on the UPPER FRONT FACE, thick arched black eyebrows above the eyes on a blue clay window band, a prominent playful black curly handlebar mustache centred BELOW the eyes on the red front face, a wide open shouting mouth under the mustache, two bright yellow round cheek dots beside the mustache, blue side windows, small red round side mirrors, chunky black wheels with light hubs; NO long sports-car profile, NO door number, NO white racing stripe, NO pacifier. Match portrait 小紅賽車年幼版 exactly: a TINY stubby toddler red race car with pebbled honeycomb clay texture, LARGE round white eyes with black pupils set high on the UPPER FRONT FACE, directly BELOW the eyes a teal-blue vanilla pacifier with a ring handle held in her mouth, two small bright yellow round cheek spots beside the pacifier, a rounded blue clay top window, tiny black wheels with cream hubs; NO racing number, NO white racing stripe, NO rear wing.\n\nEvery vehicle in the image is a pure car — body, four wheels, eyes and one mouth ONLY: NO arms, NO hands, NO limbs, no fingers, no legs; nothing is waved or held. Spectator cars are tiny, generic and faceless with NO arms, NO hands, NO limbs. No text, no logos.",
+      "characters": [
+        "小紅賽車年幼版",
+        "小紅賽車的爸爸年輕版"
+      ],
+      "refPages": [
+        12
+      ],
+      "refPageHint": "Continuity with scene 12: the same toddler racetrack, the same chequered banner on posts, and the same two young-age characters. Camera now moves closer to the finish line."
+    },
+    {
+      "index": 14,
+      "start": 257.6,
+      "end": 284.3,
+      "summary": "回憶：小紅聽見爸爸的打氣聲，吸了一口氣繼續出發，慢慢地開到終點；雖然沒有得到第一名，爸爸還是給她一個大大的擁抱，說「你願意勇敢地完成，就已經很棒了」",
+      "prompt": "AGE LOCK (highest priority): FLASHBACK — ONLY 小紅賽車年幼版 (tiny pacifier baby) and 小紅賽車的爸爸年輕版 (compact mustache young dad) appear. Do NOT draw the present-day 小紅賽車 (number 2) and do NOT draw the present-day long adult 小紅賽車的爸爸 (number 1).\n\nMEMORY LOOK: same remembered race day, now golden and glowing — soft rounded white photo border, warm slightly faded light, gently blurred edges, clearly the past.\n\nSTORY BEAT: Tiny 小紅賽車年幼版 has just rolled across the finish line at her own slow pace, the black-and-white chequered banner on its posts right above her, a soft dotted line on the ground behind her showing the long way she came. She did not win first place — no podium and no trophy, just a small cheerful clay 'finisher' rosette lying on the ground nearby. Immediately after, the hug: the young dad and the baby are pressed gently together, her little front nose tucked warmly against his side, both of them leaning into each other with eyes closed in happy curves, surrounded by soft clay heart sparkles and golden light. THE HUG IS BODY-TO-BODY ONLY — the cars snuggle by touching bodies and noses; there are absolutely NO arms and NO hands. Her pacifier stays in her mouth; her earlier tear tracks have dried into two faint shiny marks.\n\nMatch portrait 小紅賽車年幼版 exactly: a TINY stubby toddler red race car with pebbled honeycomb clay texture, LARGE round eyes set high on the UPPER FRONT FACE, directly BELOW the eyes a teal-blue vanilla pacifier with a ring handle held in her mouth, two small bright yellow round cheek spots beside the pacifier, a rounded blue clay top window, tiny black wheels with cream hubs; NO racing number, NO white racing stripe, NO rear wing. Match portrait 小紅賽車的爸爸年輕版 exactly: a compact rounded younger dad red race car with pebbled honeycomb clay texture, LARGE round white eyes with black pupils on the UPPER FRONT FACE, thick arched black eyebrows above the eyes on a blue clay window band, a prominent playful black curly handlebar mustache centred BELOW the eyes on the red front face, a proud tender smile under the mustache, two bright yellow round cheek dots beside the mustache, blue side windows, small red round side mirrors, chunky black wheels with light hubs; NO long sports-car profile, NO door number, NO white racing stripe, NO pacifier.\n\nEvery vehicle in the image is a pure car — body, four wheels, eyes and one mouth ONLY: NO arms, NO hands, NO limbs, no fingers, no legs; the hug never uses arms. Spectator cars are tiny, generic and faceless with NO arms, NO hands, NO limbs. No text, no logos.",
+      "characters": [
+        "小紅賽車年幼版",
+        "小紅賽車的爸爸年輕版"
+      ],
+      "refPages": [
+        13
+      ],
+      "refPageHint": "Continuity with scene 13: the same toddler racetrack, the same chequered banner on posts, and the same two young-age characters. Now the baby has reached the finish line and the two snuggle body-to-body — still NO arms, NO hands."
+    },
+    {
+      "index": 15,
+      "start": 284.3,
+      "end": 306,
+      "summary": "回到現在：小紅看著照片才明白，自己慢慢長大的每一天，爸爸一直都陪在身邊；她靠上前抱住爸爸說「爸爸謝謝你，謝謝你陪我學會開車，謝謝你在我害怕的時候陪著我」（構圖：兩台車肩並肩靠在一起，但車頭都略朝鏡頭的正面斜角，讓爸爸的鬍子與眼睛完整可見）",
+      "prompt": "CAMERA LOCK (highest priority): shoot this scene from a NEAR-FRONT or mild FRONT-THREE-QUARTER angle — both cars are turned mostly TOWARD the camera and only slightly angled. Do NOT use a pure side profile, and never show 小紅賽車的爸爸 from the side; his complete front face (both eyes AND the whole handlebar mustache) must be fully visible and readable on the FRONT of the car — not foreshortened, not wrapped around a fender, not cropped by the body.\n\nDAD FACE LOCK (highest priority, copy portrait 小紅賽車的爸爸 exactly — this beats the pose): his face is strictly LEFT-RIGHT SYMMETRICAL about the car's centre line. TWO big round black eyes sit ONLY on the cream windshield/face panel, the same size, perfectly level with each other and evenly spaced either side of the centre line — they never slide across the hood, never drift apart, never land on the bumper. The curly black handlebar mustache sits on the FRONT BUMPER/GRILLE, centred on that same centre line directly UNDER the eyes, both curled tips mirrored and level — NEVER on the windshield, NEVER tilted or rotated, NEVER sliding onto a fender, headlight or side panel. ONE simple curved smiling mouth is centred directly under the mustache, level and not slanted. The two yellow cheek dots are symmetric, one each side at the same height. The white racing stripe and the number 1 are identity markings only and must not drag or distort his features. No facial feature may be skewed, sheared, melted or warped to follow the car's angle; if a pose would twist or hide his face, rotate the CAR toward the camera instead.\n\nAGE LOCK (highest priority): PRESENT DAY — ONLY 小紅賽車 (number 2) and 小紅賽車的爸爸 (number 1, handlebar mustache) appear. NO pacifier on either car, NO baby car and NO young-dad car anywhere in this image. The memory section is over: NO photo border, NO sepia wash.\n\nSTORY BEAT: Back at sunny Rainbow Square under the balloons and photo bunting. 小紅賽車 has understood that her dad was beside her for every single day of growing up; deeply moved, she snuggles up and hugs him — she leans the side of her body warmly against his side, eyes closed in a happy curve, thanking him for teaching her to drive and for staying with her whenever she was scared. 小紅賽車的爸爸 leans gently back into her with a soft proud smile. STAGING FOR THE CAMERA: the two cars stand shoulder to shoulder with their sides touching, but BOTH are rotated so their noses point out toward the viewer in a mild front-three-quarter view — the hug reads from the front, and both faces stay square-on and symmetric. THE HUG IS BODY-TO-BODY ONLY — no arms, no hands, nothing wraps around anybody. Warm clay heart sparkles float around the pair. The clay smartphone still rests in its stand on the bench nearby, its screen dimmed so no photo is readable.\n\nMatch portrait 小紅賽車 exactly: glossy bright red rounded clay race car, white racing stripe over the hood with a blue number 2, a white circle with a blue 2 on each door, light-blue windshield and side windows, cream face panel under the windshield with TWO big round blue-iris eyes and black eyebrows, ONE smiling mouth low on the front bumper, yellow headlights, blue lower trim, small red rear wing, black tyres with cream hubcaps. Match portrait 小紅賽車的爸爸 exactly: clearly LARGER and longer adult red race car, white racing stripe down the middle, blue window trim, blue side mirrors, blue rear wing, a white circle with a blue number 1 (NEVER 2) on each door, yellow headlights ringed in blue, black tyres with blue rims and yellow hubs; warm mature round black eyes ONLY on the cream windshield panel, level and symmetric, and on the FRONT BUMPER/GRILLE a playful curly black handlebar mustache with curled-up tips, centred under the eyes and directly ABOVE a tender smiling mouth.\n\nEvery vehicle in the image is a pure car — body, four wheels, eyes and one mouth ONLY: NO arms, NO hands, NO limbs, no fingers, no legs. No text, no logos.",
+      "characters": [
+        "小紅賽車",
+        "小紅賽車的爸爸"
+      ],
+      "refPages": [
+        7
+      ],
+      "refPageHint": "Continuity with scene 7: the same present-day Rainbow Square and the same present-day pair (小紅賽車 number 2, 小紅賽車的爸爸 number 1). Copy the dad's face from the reference EXACTLY and keep it symmetric: level round eyes on the windshield panel, curly handlebar mustache centred on the FRONT BUMPER directly under the eyes, level smile under the mustache. Keep the same near-front / mild front-three-quarter camera as the reference — no side profile, no tilted or off-centre mustache. The flashback is over: no photo border, no baby car, no young-dad car."
+    },
+    {
+      "index": 16,
+      "start": 306,
+      "end": 326.3,
+      "summary": "小紅說「也謝謝你一直相信我，我最愛爸爸和媽媽了」；爸爸用車鼻輕輕蹭蹭小紅的車頭，溫柔地說「爸爸最快樂的事，就是看你一天一天長大」（構圖：正面微斜角，爸爸從側後方低頭蹭她的車頭，但兩張臉仍朝向鏡頭）",
+      "prompt": "CAMERA LOCK (highest priority): shoot this scene from a NEAR-FRONT or mild FRONT-THREE-QUARTER angle — both cars are turned mostly TOWARD the camera and only slightly angled. Do NOT use a pure side profile, and never show 小紅賽車的爸爸 from the side; his complete front face (both eyes AND the whole handlebar mustache) must be fully visible and readable on the FRONT of the car — not foreshortened, not wrapped around a fender, not cropped by the body.\n\nDAD FACE LOCK (highest priority, copy portrait 小紅賽車的爸爸 exactly — this beats the pose): his face is strictly LEFT-RIGHT SYMMETRICAL about the car's centre line. TWO big round black eyes sit ONLY on the cream windshield/face panel, the same size, perfectly level with each other and evenly spaced either side of the centre line — they never slide across the hood, never drift apart, never land on the bumper. The curly black handlebar mustache sits on the FRONT BUMPER/GRILLE, centred on that same centre line directly UNDER the eyes, both curled tips mirrored and level — NEVER on the windshield, NEVER tilted or rotated, NEVER sliding onto a fender, headlight or side panel. ONE simple curved smiling mouth is centred directly under the mustache, level and not slanted. The two yellow cheek dots are symmetric, one each side at the same height. The white racing stripe and the number 1 are identity markings only and must not drag or distort his features. No facial feature may be skewed, sheared, melted or warped to follow the car's angle; if a pose would twist or hide his face, rotate the CAR toward the camera instead.\n\nAGE LOCK (highest priority): PRESENT DAY — ONLY 小紅賽車 (number 2) and 小紅賽車的爸爸 (number 1, handlebar mustache) appear. NO pacifier on either car, NO baby car and NO young-dad car anywhere in this image, NO photo border.\n\nNO-HANDS STAGING (important): the dad cannot pat anyone, because he has no hands. He leans down and nuzzles the top of 小紅賽車's hood with the very tip of his own front nose — a gentle car-to-car nuzzle, with a few small warm sparkles at the point where they touch. Absolutely NO hand, NO paw, NO patting arm. Stage the nuzzle so it does NOT turn either car sideways: the dad stands slightly behind and beside her, both cars angled toward the viewer, and he dips his nose forward and down to touch her hood while BOTH faces stay turned to the camera and fully symmetric.\n\nSTORY BEAT: A tender close moment at sunny Rainbow Square, seen from the front. 小紅賽車 tells him she is grateful that he always believed in her and that she loves her dad and her mum the most, her eyes shining and slightly teary with happiness; 小紅賽車的爸爸 nuzzles her hood and says softly that his happiest thing in the world is watching her grow up day by day. Soft focus balloons and photo bunting behind them, warm afternoon light.\n\nMatch portrait 小紅賽車 exactly: glossy bright red rounded clay race car, white racing stripe over the hood with a blue number 2, a white circle with a blue 2 on each door, light-blue windshield and side windows, cream face panel under the windshield with TWO big round blue-iris eyes and black eyebrows, ONE smiling mouth low on the front bumper, yellow headlights, blue lower trim, small red rear wing, black tyres with cream hubcaps. Match portrait 小紅賽車的爸爸 exactly: clearly LARGER and longer adult red race car, white racing stripe down the middle, blue window trim, blue side mirrors, blue rear wing, a white circle with a blue number 1 (NEVER 2) on each door, yellow headlights ringed in blue, black tyres with blue rims and yellow hubs; warm mature round black eyes ONLY on the cream windshield panel, level and symmetric, and on the FRONT BUMPER/GRILLE a playful curly black handlebar mustache with curled-up tips, centred under the eyes and directly ABOVE a gentle smiling mouth.\n\nEvery vehicle in the image is a pure car — body, four wheels, eyes and one mouth ONLY: NO arms, NO hands, NO limbs, no fingers, no legs. No text, no logos.",
+      "characters": [
+        "小紅賽車",
+        "小紅賽車的爸爸"
+      ],
+      "refPages": [
+        15
+      ],
+      "refPageHint": "Continuity with scene 15: the same present-day pair in the same Rainbow Square light, and the same near-front / mild front-three-quarter camera. Copy the dad's face from the reference EXACTLY and keep it symmetric: level round eyes on the windshield panel, curly handlebar mustache centred on the FRONT BUMPER directly under the eyes, level smile under the mustache. Only the pose changes to a nose-to-hood nuzzle, and the nuzzle must not turn either car into a side profile — still absolutely NO arms and NO hands."
+    },
+    {
+      "index": 17,
+      "start": 326.3,
+      "end": 346,
+      "summary": "夕陽慢慢落下，小紅和爸爸一起開著車在車車遊樂園裡兜風；以前是爸爸陪著小小的小紅，現在小紅也能陪著爸爸，一起欣賞最美的風景（構圖：兩台車並排但車頭略朝鏡頭的正面斜角，不要純側面追車鏡頭）",
+      "prompt": "CAMERA LOCK (highest priority): shoot this scene from a NEAR-FRONT or mild FRONT-THREE-QUARTER angle — both cars are turned mostly TOWARD the camera and only slightly angled. This is NOT a side-on chase shot: even while driving, both cars stay angled toward the viewer. Do NOT use a pure side profile, and never show 小紅賽車的爸爸 from the side; his complete front face (both eyes AND the whole handlebar mustache) must be fully visible and readable on the FRONT of the car — not foreshortened, not wrapped around a fender, not cropped by the body.\n\nDAD FACE LOCK (highest priority, copy portrait 小紅賽車的爸爸 exactly — this beats the pose): his face is strictly LEFT-RIGHT SYMMETRICAL about the car's centre line. TWO big round black eyes sit ONLY on the cream windshield/face panel, the same size, perfectly level with each other and evenly spaced either side of the centre line — they never slide across the hood, never drift apart, never land on the bumper. The curly black handlebar mustache sits on the FRONT BUMPER/GRILLE, centred on that same centre line directly UNDER the eyes, both curled tips mirrored and level — NEVER on the windshield, NEVER tilted or rotated, NEVER sliding onto a fender, headlight or side panel. ONE simple curved smiling mouth is centred directly under the mustache, level and not slanted. The two yellow cheek dots are symmetric, one each side at the same height. The white racing stripe and the number 1 are identity markings only and must not drag or distort his features. No facial feature may be skewed, sheared, melted or warped to follow the car's angle; if a pose would twist or hide his face, rotate the CAR toward the camera instead.\n\nAGE LOCK (highest priority): PRESENT DAY — ONLY 小紅賽車 (number 2) and 小紅賽車的爸爸 (number 1, handlebar mustache) appear. NO pacifier on either car, NO baby car, NO young-dad car, NO memory bubble and NO photo border anywhere in this image.\n\nSTORY BEAT: A wide, breathtaking golden-hour clay landscape. The sun sinks low over the vehicle amusement park, washing everything in warm orange and pink light; the carousel, the little ferris wheel and the rounded trees stand as soft silhouettes against the glowing sky. 小紅賽車 and 小紅賽車的爸爸 cruise side by side along a gentle winding park road, rolling gently toward the camera as the road curves out of the golden light — they stay side by side, but BOTH are angled toward the viewer in a mild front-three-quarter view so both faces read clearly, never a flat sideways profile. Calm happy smiles, long soft shadows stretching behind them, warm rim light on their roofs; she now rolls confidently at his shoulder, grown up and keeping HIM company. Tiny sparkles of dust hang in the golden air, a few faceless background cars parked far away.\n\nMatch portrait 小紅賽車 exactly: glossy bright red rounded clay race car, white racing stripe over the hood with a blue number 2, a white circle with a blue 2 on each door, light-blue windshield and side windows, cream face panel under the windshield with TWO big round blue-iris eyes and black eyebrows, ONE contented smiling mouth low on the front bumper, yellow headlights, blue lower trim, small red rear wing, black tyres with cream hubcaps. Match portrait 小紅賽車的爸爸 exactly: clearly LARGER and longer adult red race car, white racing stripe down the middle, blue window trim, blue side mirrors, blue rear wing, a white circle with a blue number 1 (NEVER 2) on each door, yellow headlights ringed in blue, black tyres with blue rims and yellow hubs; warm mature round black eyes ONLY on the cream windshield panel, level and symmetric, and on the FRONT BUMPER/GRILLE a playful curly black handlebar mustache with curled-up tips, centred under the eyes and directly ABOVE a peaceful smiling mouth.\n\nEvery vehicle in the image is a pure car — body, four wheels, eyes and one mouth ONLY: NO arms, NO hands, NO limbs, no fingers, no legs. Any extra car is a tiny generic faceless background vehicle, also with NO arms, NO hands, NO limbs. No text, no logos.",
+      "characters": [
+        "小紅賽車",
+        "小紅賽車的爸爸"
+      ],
+      "refPages": [
+        16
+      ],
+      "refPageHint": "Continuity with scene 16: the same present-day pair (小紅賽車 number 2, 小紅賽車的爸爸 number 1). Copy the dad's face from the reference EXACTLY and keep it symmetric: level round eyes on the windshield panel, curly handlebar mustache centred on the FRONT BUMPER directly under the eyes, level smile under the mustache. Keep the same near-front / mild front-three-quarter camera even though they are driving — no sideways chase profile. Only the lighting and setting change to a wide golden sunset drive."
+    },
+    {
+      "index": 18,
+      "start": 346,
+      "end": 368.8,
+      "summary": "小小任務時間：找找看自己小時候的照片，看看自己還是小baby的樣子，然後抱抱爸爸，或者對爸爸說「爸爸謝謝你陪我長大，父親節快樂」",
+      "prompt": "Clay podcast studio, hosts giving today's little mission. Bonbon and 馬米 lean in at their round wooden table with their microphones, warm and encouraging, inviting the children to go and find their own baby photos, to give their dad a big hug and to tell him thank you for helping them grow up. Lying open on the table between the microphones is a SMALL clay photo album; on its open page is ONE tiny flat printed photo of a little red baby race car with a teal-blue vanilla pacifier.\n\nSCALE LOCK (important): 小紅賽車年幼版 appears ONLY as that tiny flat printed photo inside the album — she is NOT a real car in the studio, NOT a toy on the table, NOT life-size, and she never moves or speaks. The printed photo must still match her portrait: pebbled red clay body, LARGE round white eyes with black pupils high on the front face, a teal-blue vanilla pacifier below the eyes, two bright yellow round cheek dots, a rounded blue top window, NO racing number.\n\nBonbon and 馬米 are HUMAN clay characters and keep their normal arms and hands. The car in the photo is a pure vehicle — NO arms, NO hands, NO limbs. Warm studio light, a couple of red clay balloons in the background. No text, no logos.",
+      "characters": [
+        "Bonbon",
+        "馬米",
+        "小紅賽車年幼版"
+      ],
+      "refPages": [
+        2
+      ],
+      "refPageHint": "Continuity with scene 2: the same clay podcast studio, the same round wooden table and microphones, the same Bonbon and 馬米. New on the table is the small open photo album; the baby car exists only as a tiny printed photo on its page."
+    },
+    {
+      "index": 19,
+      "start": 368.8,
+      "end": 389,
+      "summary": "Bonbon 和馬米說「父親節快樂，愛你喔」，今天的故事就說到這邊，約好下次再一起來車車遊樂園玩，開心揮手道別拜拜",
+      "prompt": "Clay podcast studio farewell. Bonbon and 馬米 wave goodbye cheerfully from behind their round wooden table and microphones, wishing everyone a happy Father's Day and saying 'love you', then promising to come back and play at the vehicle amusement park together next time. The SAME small clay photo album still sits on the table, now gently closed, with a couple of red and yellow clay balloons floating behind them in the warm studio light. Bonbon and 馬米 are HUMAN clay characters and wave with their normal arms and hands. NO cars of any kind appear in this shot — no baby car, no mustache car, no toy car. No text, no logos.",
+      "characters": [
+        "Bonbon",
+        "馬米"
+      ],
+      "refPages": [
+        18
+      ],
+      "refPageHint": "Continuity with scene 18: the same clay podcast studio, table, microphones and hosts. The photo album is now closed and no car appears in frame — only the two human hosts wave."
+    }
+  ],
+  "newCharacters": []
+}
