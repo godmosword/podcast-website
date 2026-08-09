@@ -125,6 +125,16 @@ export default function ForParentsPage() {
         <p>{faqs[3].answer}</p>
       </section>
 
+      <section className={styles.answerSection} aria-labelledby="play-map-heading">
+        <h2 id="play-map-heading">附近哪裡適合放電？</h2>
+        <p>
+          用地圖找適合 3–8 歲的公園與室內樂園，可依室內／免費篩選，並一鍵開啟 Google 地圖導航。目前示範資料以桃園為主。
+        </p>
+        <Link href="/for-parents/play-map" className={styles.dashboardLink}>
+          開啟親子遊樂地圖 →
+        </Link>
+      </section>
+
       <section className={styles.answerSection} aria-labelledby="dashboard-heading">
         <h2 id="dashboard-heading">這台裝置上的親子進度</h2>
         <p>

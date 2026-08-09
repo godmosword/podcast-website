@@ -19,6 +19,14 @@ const ROUTE_SOURCES: Record<string, string[]> = {
     "app/for-parents/page.module.css",
     "lib/for-parents.ts",
   ],
+  "/for-parents/play-map": [
+    "app/for-parents/play-map/page.tsx",
+    "app/for-parents/play-map/page.module.css",
+    "components/for-parents/PlayMap.tsx",
+    "components/for-parents/PlayMap.module.css",
+    "components/for-parents/PlayMapLoader.tsx",
+    "data/playgrounds.ts",
+  ],
   "/games": [
     "app/games/page.tsx",
     "app/games/layout.tsx",
