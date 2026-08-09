@@ -55,7 +55,7 @@
 |----|------|
 | content(subtitles): ep-24 字幕校對 + `--mark`（重轉錄補尾段、刪幻覺／重複） | `0c4ccf6` |
 | content(characters): ep-24 hero 定裝「小紅賽車年幼版」「小紅賽車的爸爸年輕版」（API 2 次） | `0c4ccf6` |
-| feat(stories): ep-24 全幕 19 頁插圖 approve（分齡定裝、#15–17 重抽） | `05e2be1` |
+| feat(stories): ep-24 全幕 19 頁插圖 approve（分齡定裝、#15–17 重抽） | `79ca151` |
 
 ### 本輪已完成（2026-08-08）
 
@@ -1409,7 +1409,7 @@ T+2d    社群貼文（B 戰場）
 |------|------|------|
 | 字幕校對 + `--mark` | ✅ | 134→133 句；整集重轉錄補尾段；刪害羞重複句／「第一次發現」；修找找看／她／語病 → `_proofread/ep-24.json` → `0c4ccf6` |
 | 定裝照（年齡變體） | ✅ | hero isolate：小紅賽車年幼版（青綠奶嘴）、小紅賽車的爸爸年輕版（正面翹鬍子）；年輕爸審後重抽 → `0c4ccf6` |
-| `illustrate --segment-only` → 生圖 → `--approve` | ✅ | 19 幕全幕繪本；分齡定裝（回憶年幼／年輕爸、當下現在版）；#15–17 爸臉 FACE LOCK 重抽；keepCover 01 → `05e2be1` |
+| `illustrate --segment-only` → 生圖 → `--approve` | ✅ | 19 幕全幕繪本；分齡定裝（回憶年幼／年輕爸、當下現在版）；#15–17 爸臉 FACE LOCK 重抽；keepCover 01 → `79ca151` |
 
 ### ep-21 上架進度（2026-07-29）
 
