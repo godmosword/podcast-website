@@ -7,6 +7,7 @@ import {
   listPlaygrounds,
   type Playground,
 } from "./playgrounds";
+import { assertWave1CoverageMet } from "@/lib/playground-coverage";
 
 const VALID_TYPES = new Set([
   "公園",
@@ -108,11 +109,10 @@ describe("playgrounds sidecar", () => {
     }
   });
 
-  it("示範資料以桃園為主", () => {
-    const taoyuanCount = listPlaygrounds().filter((item) =>
-      item.city.includes("桃園"),
-    ).length;
-    expect(taoyuanCount).toBeGreaterThanOrEqual(3);
+  it("Wave 1 北北基桃各縣市達覆蓋門檻", () => {
+    const { ok, missing } = assertWave1CoverageMet();
+    expect(missing, `未達門檻：${missing.join("、")}`).toEqual([]);
+    expect(ok).toBe(true);
   });
 
   it("buildGoogleMapsNavUrl 為 dir 導航格式且不含 origin", () => {

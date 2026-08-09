@@ -18,8 +18,8 @@ import {
 } from "@/data/playgrounds";
 import {
   filterPlaygrounds,
-  listCoverageSummary,
 } from "@/lib/playgrounds-query";
+import { listCityCoverage } from "@/lib/playground-coverage";
 import styles from "./PlayMap.module.css";
 
 const DEFAULT_CENTER: [number, number] = [24.9935, 121.301];
@@ -358,7 +358,7 @@ function PlaygroundListItem({ place, selected, onSelect }: PlaygroundListItemPro
 
 export default function PlayMap() {
   const cities = useMemo(() => listCities(), []);
-  const coverage = useMemo(() => listCoverageSummary(), []);
+  const coverage = useMemo(() => listCityCoverage(), []);
   const reduceMotion = usePrefersReducedMotion();
 
   const [city, setCity] = useState(() => cities[0] ?? "");
@@ -461,9 +461,13 @@ export default function PlayMap() {
       {cityCoverage ? (
         <p className={styles.coverage}>
           目前收錄：{cityCoverage.city} {cityCoverage.count} 處
-          {cityCoverage.count < 8 ? "（持續擴充中）" : ""}
+          {cityCoverage.status === "partial"
+            ? "（持續擴充中）"
+            : cityCoverage.status === "met"
+              ? "（本縣市已達起步覆蓋）"
+              : ""}
           {" · "}
-          其他縣市建置中
+          北北基桃已上線，其他縣市陸續補上
         </p>
       ) : null}
 

@@ -7,6 +7,7 @@
 ### Added
 
 - **親子遊樂地圖 Wave 0（家長工具）**：canonical 維持 `/for-parents/play-map`；行動抽屜家長組新增「📍 親子景點」（桌面主列不加項）；`/for-parents` 並排工具卡；PlayMap 列表主路徑＋縣市預設＋Sheet `region`／Esc；`sources`／`lastVerified` 契約與 `lib/playgrounds-query`；editorial SOP（`docs/PLAY-MAP-EDITORIAL.md`）。社群僅候選、不自動爬取。
+- **親子遊樂地圖 Wave 1（北北基桃）**：擴充台北／新北／基隆／桃園至分級覆蓋門檻（共約 29 筆）；`lib/playground-coverage` 追蹤 Tier A／B 達標狀態。
 - **手機宇宙地圖底部島選擇列（IslandPickerStrip）**：≤480px 世界層橫滑大 chip（圖＋名、觸控 ≥56×72）；點擊走既有進島路由，不動 `useMapCamera`／`ZoneSheet`。MapControls 隨 `--map-picker-offset` 抬高。
 - **ep-23 全幕繪本 + 小紅賽車的爸爸定裝**：26 幕（雪山隧道）；俏皮翹鬍子爸爸定裝；禁手；場景公里牌整數例外於場景 negative；23／24 頁序對調（慶祝↔風景）。
 - **PLAY-IA-6：暫停層「回遊樂園」出口**：繽紛方塊與車車大冒險的暫停覆蓋層在「繼續」下方補 `href="/games"` 弱 CTA，對齊抬頭文案；其餘無 React 暫停層的遊戲不動。

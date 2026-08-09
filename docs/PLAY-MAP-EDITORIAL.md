@@ -79,7 +79,7 @@
 - `lastWave`（最近一次資料波次，如 `wave-0`、`wave-1`）
 - `notes`（缺什麼類型、待複核場館）
 
-ledger **不**進使用者-facing UI 細節；PlayMap 僅顯示摘要狀態（例如「目前以桃園為主，其他縣市建置中」）。
+ledger **不**進使用者-facing UI 細節；PlayMap 僅顯示摘要狀態（例如「北北基桃已上線，其他縣市陸續補上」）。
 
 ## 發現路徑（CRITICAL-1 A）
 

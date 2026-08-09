@@ -109,9 +109,10 @@ describe("PlayMap", () => {
     ).toBeNull();
   });
 
-  it("涵蓋區顯示建置中文案", () => {
+  it("涵蓋區顯示北北基桃覆蓋文案", () => {
     render(<PlayMap />);
-    expect(screen.getByText(/其他縣市建置中/)).toBeTruthy();
+    expect(screen.getByText(/北北基桃已上線/)).toBeTruthy();
+    expect(screen.getByText(/目前收錄：/)).toBeTruthy();
   });
 
   it("篩選導致 Sheet 關閉時不搶 focus", () => {
