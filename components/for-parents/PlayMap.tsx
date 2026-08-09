@@ -10,9 +10,10 @@ import {
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import {
+  buildGoogleMapsNavUrl,
+  buildGoogleMapsPlaceUrl,
   listCities,
   listPlaygrounds,
-  type Playground,
 } from "@/data/playgrounds";
 import styles from "./PlayMap.module.css";
 
@@ -59,13 +60,6 @@ function FitBounds({ points }: FitBoundsProps) {
 
 function formatAgeRange(ageRange: [number, number]): string {
   return `${ageRange[0]}–${ageRange[1]} 歲`;
-}
-
-function navigationUrl(place: Playground): string {
-  return (
-    place.googleMapsUrl ??
-    `https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}`
-  );
 }
 
 export default function PlayMap() {
@@ -231,12 +225,21 @@ export default function PlayMap() {
           <div className={styles.actions}>
             <a
               className={styles.navButton}
-              href={navigationUrl(selected)}
+              href={buildGoogleMapsNavUrl(selected.lat, selected.lng)}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={`用 Google 地圖開啟 ${selected.name}（另開視窗）`}
+              aria-label={`開啟 Google 地圖導航前往 ${selected.name}（另開視窗）`}
             >
-              Google 地圖導航
+              開啟 Google 地圖導航
+            </a>
+            <a
+              className={styles.placeLink}
+              href={buildGoogleMapsPlaceUrl(selected.lat, selected.lng)}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`在 Google 地圖只顯示 ${selected.name} 位置（另開視窗）`}
+            >
+              只顯示位置
             </a>
             {selected.officialUrl ? (
               <a

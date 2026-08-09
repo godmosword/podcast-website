@@ -220,6 +220,7 @@
 }
 
 .navButton,
+.placeLink,
 .officialLink {
   display: inline-flex;
   align-items: center;
@@ -238,6 +239,7 @@
   box-shadow: var(--shadow-md);
 }
 
+.placeLink,
 .officialLink {
   border: 1px solid var(--warm-accent);
   color: var(--accent-ink);
@@ -245,6 +247,7 @@
 }
 
 .navButton:active,
+.placeLink:active,
 .officialLink:active {
   transform: scale(0.98);
   opacity: 0.94;

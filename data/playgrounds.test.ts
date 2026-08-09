@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildGoogleMapsNavUrl,
+  buildGoogleMapsPlaceUrl,
   getPlayground,
   listCities,
   listPlaygrounds,
@@ -65,5 +67,28 @@ describe("playgrounds sidecar", () => {
       item.city.includes("桃園"),
     ).length;
     expect(taoyuanCount).toBeGreaterThanOrEqual(3);
+  });
+
+  it("buildGoogleMapsNavUrl 為 dir 導航格式且不含 origin", () => {
+    const url = buildGoogleMapsNavUrl(25.0018, 121.3056);
+    const parsed = new URL(url);
+    expect(parsed.origin + parsed.pathname).toBe(
+      "https://www.google.com/maps/dir/",
+    );
+    expect(parsed.searchParams.get("api")).toBe("1");
+    expect(parsed.searchParams.get("destination")).toBe("25.0018,121.3056");
+    expect(parsed.searchParams.get("travelmode")).toBe("driving");
+    expect(parsed.searchParams.get("dir_action")).toBe("navigate");
+    expect(parsed.searchParams.has("origin")).toBe(false);
+  });
+
+  it("buildGoogleMapsPlaceUrl 為 search 定位格式", () => {
+    const url = buildGoogleMapsPlaceUrl(25.0018, 121.3056);
+    const parsed = new URL(url);
+    expect(parsed.origin + parsed.pathname).toBe(
+      "https://www.google.com/maps/search/",
+    );
+    expect(parsed.searchParams.get("api")).toBe("1");
+    expect(parsed.searchParams.get("query")).toBe("25.0018,121.3056");
   });
 });

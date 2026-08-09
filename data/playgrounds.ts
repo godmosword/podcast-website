@@ -1,6 +1,7 @@
 /**
  * 真實世界親子遊樂地點（sidecar）。
  * 供 /for-parents/play-map 地圖篩選與標記使用；與虛構宇宙地圖無關。
+ * Google Maps 導航／定位連結由 buildGoogleMaps* helper 動態產生，不存於資料列。
  */
 
 export type PlaygroundType =
@@ -26,14 +27,30 @@ export type Playground = {
   facilities: string[];
   tags: string[];
   tips?: string;
-  googleMapsUrl?: string;
   officialUrl?: string;
   relatedEpisodes?: string[];
   lastVerified?: string;
 };
 
-function mapsSearchUrl(lat: number, lng: number): string {
-  return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+/** Google Maps 即時導航（不傳 origin，由 Maps 使用目前位置）。免 API Key。 */
+export function buildGoogleMapsNavUrl(lat: number, lng: number): string {
+  const destination = `${lat},${lng}`;
+  const params = new URLSearchParams({
+    api: "1",
+    destination,
+    travelmode: "driving",
+    dir_action: "navigate",
+  });
+  return `https://www.google.com/maps/dir/?${params.toString()}`;
+}
+
+/** Google Maps 只顯示位置（search 備案）。免 API Key。 */
+export function buildGoogleMapsPlaceUrl(lat: number, lng: number): string {
+  const params = new URLSearchParams({
+    api: "1",
+    query: `${lat},${lng}`,
+  });
+  return `https://www.google.com/maps/search/?${params.toString()}`;
 }
 
 const PLAYGROUNDS: readonly Playground[] = [
@@ -52,7 +69,6 @@ const PLAYGROUNDS: readonly Playground[] = [
     facilities: ["溜滑梯", "鞦韆", "遮蔭區", "洗手間"],
     tags: ["免費", "大型溜滑梯", "野餐友善"],
     tips: "假日人潮多，建議傍晚去；太陽大時優先找遮蔭遊具區。",
-    googleMapsUrl: mapsSearchUrl(25.0018, 121.3056),
     lastVerified: "2026-08-09",
   },
   {
@@ -70,7 +86,6 @@ const PLAYGROUNDS: readonly Playground[] = [
     facilities: ["環湖步道", "草地", "兒童遊戲場", "洗手間"],
     tags: ["免費", "散步", "餵鴨注意"],
     tips: "適合慢慢散步放電；餵食水鳥請遵守園區規定，也記得帶防蚊液。",
-    googleMapsUrl: mapsSearchUrl(25.0142, 121.2145),
     lastVerified: "2026-08-09",
   },
   {
@@ -88,7 +103,6 @@ const PLAYGROUNDS: readonly Playground[] = [
     facilities: ["兒童遊戲場", "跑道", "籃球場", "停車場"],
     tags: ["免費", "運動", "停車方便"],
     tips: "遊戲場與跑道分開，適合先跑一圈再玩遊具；夏天記得多補水。",
-    googleMapsUrl: mapsSearchUrl(25.0206, 121.3001),
     lastVerified: "2026-08-09",
   },
   {
@@ -106,7 +120,6 @@ const PLAYGROUNDS: readonly Playground[] = [
     facilities: ["展覽", "創作體驗", "洗手間", "親子廁所"],
     tags: ["室內", "免費入場", "雨天備案"],
     tips: "部分體驗活動需現場登記或另收費，出發前可查官網當期活動。",
-    googleMapsUrl: mapsSearchUrl(24.9935, 121.2018),
     officialUrl: "https://tmoca.tycg.gov.tw/",
     lastVerified: "2026-08-09",
   },
@@ -125,7 +138,6 @@ const PLAYGROUNDS: readonly Playground[] = [
     facilities: ["球池", "溜滑梯", "角色扮演區", "洗手間"],
     tags: ["室內放電", "雨天備案", "需購票"],
     tips: "假日建議先查票價與營業時間；襪子通常要自備或現場購買。",
-    googleMapsUrl: mapsSearchUrl(24.9658, 121.2212),
     lastVerified: "2026-08-09",
   },
 ];
