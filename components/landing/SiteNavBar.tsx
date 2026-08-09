@@ -29,12 +29,14 @@ type NavItem = {
 
 /** 桌面主列連結順序。
  * 成長主題（`/topic`）屬家長取向且與 /stories 篩選重疊，導覽（桌面＋行動）都不佔位；
- * 頁面仍可直達。繪本著色僅行動抽屜獨立列出（兒童動線）。 */
+ * 頁面仍可直達。繪本著色僅行動抽屜獨立列出（兒童動線）。
+ * 「親子景點」與「親子指南」並列於主列（CRITICAL-R A：路徑仍為 `/for-parents/play-map`）。 */
 const PRIMARY_ORDER: readonly NavItemId[] = [
   "stories",
   "characters",
   "games",
   "adventures",
+  "play-map",
   "for-parents",
 ] as const;
 
@@ -107,7 +109,7 @@ export default function SiteNavBar() {
   const primaryItems = PRIMARY_ORDER.map((id) => byId.get(id)).filter(
     (item): item is NavItem => item !== undefined,
   );
-  // 桌面主列不含 play-map，最長匹配僅在同列 href 間互斥
+  // 桌面主列含 play-map；最長匹配使 /for-parents/play-map 獨佔「親子景點」
   const primaryHrefs = primaryItems.map((item) => item.href);
 
   useFocusTrap(open, panelRef, { initialFocus: "container" });

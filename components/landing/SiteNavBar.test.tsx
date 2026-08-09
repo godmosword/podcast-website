@@ -50,13 +50,14 @@ describe("SiteNavBar", () => {
     expect(view.queryByRole("button", { name: /更多/ })).toBeNull();
   });
 
-  test("桌面主列含宇宙地圖、角色圖鑑與親子指南直連", async () => {
+  test("桌面主列含宇宙地圖、親子景點與親子指南直連", async () => {
     const html = await renderNavBarHtml();
     for (const label of [
       "全部故事",
       "角色圖鑑",
       "遊樂園",
       "宇宙地圖",
+      "親子景點",
       "親子指南",
     ]) {
       expect(html).toContain(label);
@@ -69,15 +70,15 @@ describe("SiteNavBar", () => {
     expect(html).not.toContain("聯絡我們");
     // 育兒專欄（Threads）已整併進 /for-parents 頁內區塊
     expect(html).not.toContain("育兒專欄");
-    // 親子景點僅行動抽屜，桌面主列維持 5 項
-    expect(html).not.toContain("親子景點");
 
     const view = await renderNavBar();
     const desktopNav = view.getByRole("navigation", { name: "主要分區" });
     const parentLink = desktopNav.querySelector('a[href="/for-parents"]');
     expect(parentLink).toBeTruthy();
     expect(parentLink?.textContent).toContain("親子指南");
-    expect(desktopNav.querySelector('a[href="/for-parents/play-map"]')).toBeNull();
+    const playMapLink = desktopNav.querySelector('a[href="/for-parents/play-map"]');
+    expect(playMapLink).toBeTruthy();
+    expect(playMapLink?.textContent).toContain("親子景點");
     expect(view.queryByRole("button", { name: "親子指南" })).toBeNull();
     expect(view.queryByRole("menu")).toBeNull();
   });
@@ -243,17 +244,25 @@ describe("isInternalPathActive 最長匹配", () => {
     ).toBe(true);
   });
 
-  test("在 /for-parents/play-map 時桌面主列 siblings 仍讓親子指南 active", async () => {
+  test("在 /for-parents/play-map 時桌面主列 siblings 讓親子景點獨佔 active", async () => {
     const { isInternalPathActive } = await import("./SiteNavBar");
     const primaryHrefs = [
       "/stories",
       "/characters",
       "/games",
       "/adventures",
+      "/for-parents/play-map",
       "/for-parents",
     ];
     expect(
       isInternalPathActive("/for-parents/play-map", "/for-parents", primaryHrefs),
+    ).toBe(false);
+    expect(
+      isInternalPathActive(
+        "/for-parents/play-map",
+        "/for-parents/play-map",
+        primaryHrefs,
+      ),
     ).toBe(true);
   });
 
@@ -289,13 +298,17 @@ describe("SiteNavBar active 狀態", () => {
     }
   });
 
-  test("/for-parents/play-map 桌面親子指南 active、行動親子景點 active", async () => {
+  test("/for-parents/play-map 桌面與行動皆僅親子景點 active", async () => {
     const view = await renderNavBarAt("/for-parents/play-map");
     fireEvent.click(view.getByRole("button", { name: "開啟選單" }));
 
     const desktopNav = view.getByRole("navigation", { name: "主要分區" });
+    const playMapDesktop = desktopNav.querySelector(
+      'a[href="/for-parents/play-map"]',
+    );
     const parentDesktop = desktopNav.querySelector('a[href="/for-parents"]');
-    expect(parentDesktop?.getAttribute("aria-current")).toBe("page");
+    expect(playMapDesktop?.getAttribute("aria-current")).toBe("page");
+    expect(parentDesktop?.hasAttribute("aria-current")).toBe(false);
 
     const mobileNav = view.getByRole("navigation", { name: "網站選單" });
     const playMapLink = mobileNav.querySelector('a[href="/for-parents/play-map"]');

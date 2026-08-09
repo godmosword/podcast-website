@@ -81,13 +81,13 @@
 
 ledger **不**進使用者-facing UI 細節；PlayMap 僅顯示摘要狀態（例如「北北基桃已上線，其他縣市陸續補上」）。
 
-## 發現路徑（CRITICAL-1 A）
+## 發現路徑（CRITICAL-R A）
 
 | 裝置 | 行為 |
 |------|------|
-| **桌面 Top bar** | **不加**「親子景點」主列項；家長入口維持「親子指南」一項 |
-| **行動抽屜 · 家長組** | 新增「📍 親子景點」→ `/for-parents/play-map` |
-| **桌面主發現** | `/for-parents` 工具卡（景點地圖） |
+| **桌面 Top bar** | 主列含「親子景點」→ `/for-parents/play-map`（路徑不另開 `/play-map`） |
+| **行動抽屜 · 家長組** | 「📍 親子景點」→ `/for-parents/play-map` |
+| **桌面輔助** | `/for-parents` 工具卡仍可進景點地圖 |
 
 ## UI 與 DESIGN 對齊
 

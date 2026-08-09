@@ -16,6 +16,9 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   const parentGuideLink = capsuleNav.getByRole("link", { name: "親子指南" });
   await expect(parentGuideLink).toBeVisible();
   await expect(parentGuideLink).toHaveAttribute("href", /\/for-parents/);
+  const playMapLink = capsuleNav.getByRole("link", { name: "親子景點" });
+  await expect(playMapLink).toBeVisible();
+  await expect(playMapLink).toHaveAttribute("href", /\/for-parents\/play-map/);
   await expect(capsuleNav.getByRole("button", { name: /更多/ })).toHaveCount(0);
   await expect(capsuleNav.getByRole("menu")).toHaveCount(0);
   await expect(capsuleNav.getByText("指南首頁")).toHaveCount(0);
