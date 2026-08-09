@@ -57,7 +57,7 @@
 | content(characters): ep-24 hero 定裝「小紅賽車年幼版」「小紅賽車的爸爸年輕版」（API 2 次） | `0c4ccf6` |
 | feat(stories): ep-24 全幕 19 頁插圖 approve（分齡定裝、#15–17 重抽） | `79ca151` |
 | fix(stories): ep-24 #12–13 爸改終點旁側（非賽道中央） | `2be9cb5` |
-| polish(nav): 育兒專欄整併進 `/for-parents`（導覽家長入口只留一項）；顯示名改「親子指南」；頁內加 Threads「育兒小筆記」外連卡 | 待 commit |
+| polish(nav): 育兒專欄整併進 `/for-parents`（導覽家長入口只留一項）；顯示名改「親子指南」；頁內加 Threads「育兒小筆記」外連卡 | `e1bc42a` |
 
 ### 本輪已完成（2026-08-08）
 
