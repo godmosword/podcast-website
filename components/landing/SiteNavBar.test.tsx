@@ -69,12 +69,15 @@ describe("SiteNavBar", () => {
     expect(html).not.toContain("聯絡我們");
     // 育兒專欄（Threads）已整併進 /for-parents 頁內區塊
     expect(html).not.toContain("育兒專欄");
+    // 親子景點僅行動抽屜，桌面主列維持 5 項
+    expect(html).not.toContain("親子景點");
 
     const view = await renderNavBar();
     const desktopNav = view.getByRole("navigation", { name: "主要分區" });
     const parentLink = desktopNav.querySelector('a[href="/for-parents"]');
     expect(parentLink).toBeTruthy();
     expect(parentLink?.textContent).toContain("親子指南");
+    expect(desktopNav.querySelector('a[href="/for-parents/play-map"]')).toBeNull();
     expect(view.queryByRole("button", { name: "親子指南" })).toBeNull();
     expect(view.queryByRole("menu")).toBeNull();
   });
@@ -90,6 +93,7 @@ describe("SiteNavBar", () => {
       "繪本著色",
       "宇宙地圖",
       "親子指南",
+      "親子景點",
     ]) {
       expect(view.getAllByText(label).length).toBeGreaterThan(0);
     }
@@ -103,6 +107,10 @@ describe("SiteNavBar", () => {
     const parentLink = mobileNav.querySelector('a[href="/for-parents"]');
     expect(parentLink).toBeTruthy();
     expect(parentLink?.textContent).toContain("親子指南");
+
+    const playMapLink = mobileNav.querySelector('a[href="/for-parents/play-map"]');
+    expect(playMapLink).toBeTruthy();
+    expect(playMapLink?.textContent).toContain("親子景點");
 
     expect(view.container.querySelector('form[action="/stories"]')).toBeTruthy();
     expect(view.container.querySelector('input[name="q"]')).toBeTruthy();
@@ -181,6 +189,7 @@ describe("isInternalPathActive 最長匹配", () => {
     "/games/coloring-book",
     "/adventures",
     "/for-parents",
+    "/for-parents/play-map",
   ];
 
   test("在 /games 時只有遊樂園 active", async () => {
@@ -224,6 +233,30 @@ describe("isInternalPathActive 最長匹配", () => {
     ).toBe(true);
   });
 
+  test("在 /for-parents/play-map 時親子指南不得 active（完整 siblings）", async () => {
+    const { isInternalPathActive } = await import("./SiteNavBar");
+    expect(
+      isInternalPathActive("/for-parents/play-map", "/for-parents", hrefs),
+    ).toBe(false);
+    expect(
+      isInternalPathActive("/for-parents/play-map", "/for-parents/play-map", hrefs),
+    ).toBe(true);
+  });
+
+  test("在 /for-parents/play-map 時桌面主列 siblings 仍讓親子指南 active", async () => {
+    const { isInternalPathActive } = await import("./SiteNavBar");
+    const primaryHrefs = [
+      "/stories",
+      "/characters",
+      "/games",
+      "/adventures",
+      "/for-parents",
+    ];
+    expect(
+      isInternalPathActive("/for-parents/play-map", "/for-parents", primaryHrefs),
+    ).toBe(true);
+  });
+
   test("首頁與 /about 不應標親子指南 active", async () => {
     const { isInternalPathActive } = await import("./SiteNavBar");
     expect(isInternalPathActive("/", "/for-parents", hrefs)).toBe(false);
@@ -254,6 +287,30 @@ describe("SiteNavBar active 狀態", () => {
       expect(link?.getAttribute("aria-current")).toBe("page");
       cleanup();
     }
+  });
+
+  test("/for-parents/play-map 桌面親子指南 active、行動親子景點 active", async () => {
+    const view = await renderNavBarAt("/for-parents/play-map");
+    fireEvent.click(view.getByRole("button", { name: "開啟選單" }));
+
+    const desktopNav = view.getByRole("navigation", { name: "主要分區" });
+    const parentDesktop = desktopNav.querySelector('a[href="/for-parents"]');
+    expect(parentDesktop?.getAttribute("aria-current")).toBe("page");
+
+    const mobileNav = view.getByRole("navigation", { name: "網站選單" });
+    const playMapLink = mobileNav.querySelector('a[href="/for-parents/play-map"]');
+    const parentMobile = mobileNav.querySelector('a[href="/for-parents"]');
+    expect(playMapLink?.getAttribute("aria-current")).toBe("page");
+    expect(parentMobile?.hasAttribute("aria-current")).toBe(false);
+  });
+
+  test("/adventures 僅宇宙地圖 active", async () => {
+    const view = await renderNavBarAt("/adventures");
+    const desktopNav = view.getByRole("navigation", { name: "主要分區" });
+    const adventuresLink = desktopNav.querySelector('a[href="/adventures"]');
+    const parentLink = desktopNav.querySelector('a[href="/for-parents"]');
+    expect(adventuresLink?.getAttribute("aria-current")).toBe("page");
+    expect(parentLink?.hasAttribute("aria-current")).toBe(false);
   });
 
   test("首頁與 /about 不標親子指南 active", async () => {

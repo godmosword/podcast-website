@@ -55,6 +55,7 @@
 |----|------|
 | feat(for-parents): 親子遊樂地圖 `/for-parents/play-map`（Leaflet + 桃園示範資料） | `32aad0d` |
 | polish(for-parents): play-map Google Maps dir 導航 URL（免 Key）＋只顯示位置備案 | `4e41587` |
+| feat(for-parents): play-map Wave 0（行動「親子景點」、工具卡、UI 重設、schema／query） | （待 commit） |
 | content(subtitles): ep-24 字幕校對 + `--mark`（重轉錄補尾段、刪幻覺／重複） | `0c4ccf6` |
 | content(characters): ep-24 hero 定裝「小紅賽車年幼版」「小紅賽車的爸爸年輕版」（API 2 次） | `0c4ccf6` |
 | feat(stories): ep-24 全幕 19 頁插圖 approve（分齡定裝、#15–17 重抽） | `79ca151` |

@@ -41,7 +41,7 @@ export default function PlayMapPage() {
         <p className={styles.eyebrow}>親子指南</p>
         <h1 className={styles.title}>親子遊樂地圖</h1>
         <p className={styles.lede}>
-          找適合 3–8 歲的公園與室內樂園，看 Tips、一鍵導航。目前示範資料以桃園為主。
+          找適合 3–8 歲的公園與室內樂園，看 Tips、一鍵導航。目前先收錄桃園，其他縣市陸續補上。
         </p>
         <Link href="/for-parents" className={styles.backLink}>
           ← 回到親子指南

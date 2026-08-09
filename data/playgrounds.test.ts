@@ -17,6 +17,33 @@ const VALID_TYPES = new Set([
   "其他",
 ]);
 
+const VALID_SOURCE_KINDS = new Set(["official", "gov", "editorial"]);
+
+const SOCIAL_DOMAIN_BLACKLIST = [
+  "ptt.cc",
+  "threads.net",
+  "instagram.com",
+  "facebook.com",
+  "dcard.tw",
+];
+
+const COMMERCIAL_TYPES = new Set(["室內樂園"]);
+
+const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+function parseIsoDate(value: string): Date {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
+function assertSourceUrl(url: string, id: string): void {
+  const parsed = new URL(url);
+  expect(parsed.protocol, `${id} source url`).toBe("https:");
+  for (const domain of SOCIAL_DOMAIN_BLACKLIST) {
+    expect(parsed.hostname.includes(domain), `${id} ${url}`).toBe(false);
+  }
+}
+
 function assertPlaygroundShape(item: Playground): void {
   expect(item.id.trim().length, item.id).toBeGreaterThan(0);
   expect(item.name.trim().length, item.id).toBeGreaterThan(0);
@@ -31,6 +58,25 @@ function assertPlaygroundShape(item: Playground): void {
   expect(item.lng, item.id).toBeLessThan(123);
   expect(Array.isArray(item.facilities), item.id).toBe(true);
   expect(Array.isArray(item.tags), item.id).toBe(true);
+
+  expect(item.sources.length, item.id).toBeGreaterThanOrEqual(1);
+  for (const source of item.sources) {
+    expect(VALID_SOURCE_KINDS.has(source.kind), item.id).toBe(true);
+    expect(source.name.trim().length, item.id).toBeGreaterThan(0);
+    assertSourceUrl(source.url, item.id);
+  }
+
+  expect(ISO_DATE_PATTERN.test(item.lastVerified), item.id).toBe(true);
+  expect(Number.isNaN(parseIsoDate(item.lastVerified).getTime()), item.id).toBe(
+    false,
+  );
+
+  if (COMMERCIAL_TYPES.has(item.type)) {
+    const hasOfficial =
+      Boolean(item.officialUrl) ||
+      item.sources.some((source) => source.kind === "official");
+    expect(hasOfficial, item.id).toBe(true);
+  }
 }
 
 describe("playgrounds sidecar", () => {

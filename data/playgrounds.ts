@@ -12,11 +12,21 @@ export type PlaygroundType =
   | "室內放電"
   | "其他";
 
+export type PlaygroundSourceKind = "official" | "gov" | "editorial";
+
+export type PlaygroundSource = {
+  kind: PlaygroundSourceKind;
+  name: string;
+  url: string;
+};
+
 export type Playground = {
   id: string;
   name: string;
   city: string;
   district?: string;
+  /** 次級行政區或園區分區（選填，供未來跨區覆蓋說明）。 */
+  region?: string;
   lat: number;
   lng: number;
   address: string;
@@ -29,7 +39,12 @@ export type Playground = {
   tips?: string;
   officialUrl?: string;
   relatedEpisodes?: string[];
-  lastVerified?: string;
+  /** 資料來源（至少一筆；商業場館須含 official 或 officialUrl）。 */
+  sources: PlaygroundSource[];
+  /** 欄位最後人工核對日（ISO YYYY-MM-DD）。 */
+  lastVerified: string;
+  /** 覆蓋範圍或資料缺口說明（選填）。 */
+  coverageNote?: string;
 };
 
 /** Google Maps 即時導航（不傳 origin，由 Maps 使用目前位置）。免 API Key。 */
@@ -69,6 +84,23 @@ const PLAYGROUNDS: readonly Playground[] = [
     facilities: ["溜滑梯", "鞦韆", "遮蔭區", "洗手間"],
     tags: ["免費", "大型溜滑梯", "野餐友善"],
     tips: "假日人潮多，建議傍晚去；太陽大時優先找遮蔭遊具區。",
+    sources: [
+      {
+        kind: "gov",
+        name: "桃園市政府",
+        url: "https://www.tycg.gov.tw/News_Content.aspx?n=10&s=639822",
+      },
+      {
+        kind: "gov",
+        name: "桃園市政府工務局",
+        url: "https://pwb.tycg.gov.tw/News_Content.aspx?n=5035&s=799799",
+      },
+      {
+        kind: "editorial",
+        name: "桃園市政府新聞稿",
+        url: "https://www.tycg.gov.tw/News_Content.aspx?n=10&s=639822",
+      },
+    ],
     lastVerified: "2026-08-09",
   },
   {
@@ -76,9 +108,9 @@ const PLAYGROUNDS: readonly Playground[] = [
     name: "青塘園",
     city: "桃園市",
     district: "中壢區",
-    lat: 25.0142,
-    lng: 121.2145,
-    address: "桃園市中壢區青塘路",
+    lat: 25.0054,
+    lng: 121.2021,
+    address: "桃園市中壢區文德路／高鐵南路二段附近",
     type: "公園",
     ageRange: [3, 8],
     free: true,
@@ -86,6 +118,18 @@ const PLAYGROUNDS: readonly Playground[] = [
     facilities: ["環湖步道", "草地", "兒童遊戲場", "洗手間"],
     tags: ["免費", "散步", "餵鴨注意"],
     tips: "適合慢慢散步放電；餵食水鳥請遵守園區規定，也記得帶防蚊液。",
+    sources: [
+      {
+        kind: "gov",
+        name: "桃園市政府",
+        url: "https://www.tycg.gov.tw/",
+      },
+      {
+        kind: "editorial",
+        name: "桃園市政府觀光導覽",
+        url: "https://travel.tycg.gov.tw/zh-tw/event/detail/1015",
+      },
+    ],
     lastVerified: "2026-08-09",
   },
   {
@@ -103,6 +147,18 @@ const PLAYGROUNDS: readonly Playground[] = [
     facilities: ["兒童遊戲場", "跑道", "籃球場", "停車場"],
     tags: ["免費", "運動", "停車方便"],
     tips: "遊戲場與跑道分開，適合先跑一圈再玩遊具；夏天記得多補水。",
+    sources: [
+      {
+        kind: "gov",
+        name: "桃園市政府",
+        url: "https://www.tycg.gov.tw/",
+      },
+      {
+        kind: "editorial",
+        name: "桃園市政府觀光導覽",
+        url: "https://travel.tycg.gov.tw/",
+      },
+    ],
     lastVerified: "2026-08-09",
   },
   {
@@ -110,9 +166,9 @@ const PLAYGROUNDS: readonly Playground[] = [
     name: "桃園市立兒童美術館",
     city: "桃園市",
     district: "中壢區",
-    lat: 24.9935,
-    lng: 121.2018,
-    address: "桃園市中壢區高鐵南路二段99號",
+    lat: 25.0039,
+    lng: 121.2132,
+    address: "桃園市中壢區高鐵南路二段90號",
     type: "博物館",
     ageRange: [3, 8],
     free: true,
@@ -121,6 +177,18 @@ const PLAYGROUNDS: readonly Playground[] = [
     tags: ["室內", "免費入場", "雨天備案"],
     tips: "部分體驗活動需現場登記或另收費，出發前可查官網當期活動。",
     officialUrl: "https://tmoca.tycg.gov.tw/",
+    sources: [
+      {
+        kind: "official",
+        name: "桃園市立兒童美術館",
+        url: "https://tmoca.tycg.gov.tw/",
+      },
+      {
+        kind: "gov",
+        name: "桃園市政府文化局",
+        url: "https://culture.tycg.gov.tw/",
+      },
+    ],
     lastVerified: "2026-08-09",
   },
   {
@@ -138,6 +206,19 @@ const PLAYGROUNDS: readonly Playground[] = [
     facilities: ["球池", "溜滑梯", "角色扮演區", "洗手間"],
     tags: ["室內放電", "雨天備案", "需購票"],
     tips: "假日建議先查票價與營業時間；襪子通常要自備或現場購買。",
+    officialUrl: "https://castellaland.com/",
+    sources: [
+      {
+        kind: "official",
+        name: "卡司．蒂菈樂園",
+        url: "https://castellaland.com/",
+      },
+      {
+        kind: "editorial",
+        name: "TravelKing 旅遊王",
+        url: "https://www.travelking.com.tw/tourguide/scenery105513.html",
+      },
+    ],
     lastVerified: "2026-08-09",
   },
 ];

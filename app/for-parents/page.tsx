@@ -125,24 +125,38 @@ export default function ForParentsPage() {
         <p>{faqs[3].answer}</p>
       </section>
 
-      <section className={styles.answerSection} aria-labelledby="play-map-heading">
-        <h2 id="play-map-heading">附近哪裡適合放電？</h2>
-        <p>
-          用地圖找適合 3–8 歲的公園與室內樂園，可依室內／免費篩選，並一鍵開啟 Google 地圖導航。目前示範資料以桃園為主。
-        </p>
-        <Link href="/for-parents/play-map" className={styles.dashboardLink}>
-          開啟親子遊樂地圖 →
-        </Link>
-      </section>
+      <section className={styles.toolSection} aria-labelledby="parent-tools-heading">
+        <h2 id="parent-tools-heading" className={styles.toolSectionTitle}>
+          家長工具
+        </h2>
+        <div className={styles.toolGrid}>
+          <article className={styles.toolCard} aria-labelledby="play-map-heading">
+            <p className={styles.toolEmoji} aria-hidden>
+              📍
+            </p>
+            <h3 id="play-map-heading">附近哪裡適合放電？</h3>
+            <p>
+              用地圖找適合 3–8 歲的公園與室內樂園，可依室內／免費篩選，並一鍵開啟 Google
+              地圖導航。目前先收錄桃園，其他縣市陸續補上。
+            </p>
+            <Link href="/for-parents/play-map" className={styles.toolCta}>
+              開啟親子遊樂地圖 →
+            </Link>
+          </article>
 
-      <section className={styles.answerSection} aria-labelledby="dashboard-heading">
-        <h2 id="dashboard-heading">這台裝置上的親子進度</h2>
-        <p>
-          查看小遊戲探索、最近收聽與推薦共讀故事。所有資料只留在您的瀏覽器，不會上傳到伺服器。
-        </p>
-        <Link href="/for-parents/dashboard" className={styles.dashboardLink}>
-          開啟家庭儀表板 →
-        </Link>
+          <article className={styles.toolCard} aria-labelledby="dashboard-heading">
+            <p className={styles.toolEmoji} aria-hidden>
+              📊
+            </p>
+            <h3 id="dashboard-heading">這台裝置上的親子進度</h3>
+            <p>
+              查看小遊戲探索、最近收聽與推薦共讀故事。所有資料只留在您的瀏覽器，不會上傳到伺服器。
+            </p>
+            <Link href="/for-parents/dashboard" className={styles.toolCta}>
+              開啟家庭儀表板 →
+            </Link>
+          </article>
+        </div>
       </section>
 
       <section className={styles.storySection} aria-labelledby="episodes-heading">

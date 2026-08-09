@@ -46,6 +46,9 @@ test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   const drawerParentGuide = drawerNav.getByRole("link", { name: "親子指南" });
   await expect(drawerParentGuide).toBeVisible();
   await expect(drawerParentGuide).toHaveAttribute("href", /\/for-parents/);
+  const drawerPlayMap = drawerNav.getByRole("link", { name: "親子景點" });
+  await expect(drawerPlayMap).toBeVisible();
+  await expect(drawerPlayMap).toHaveAttribute("href", /\/for-parents\/play-map/);
   await expect(drawerNav.getByRole("link", { name: "關於我們" })).toHaveCount(0);
   await expect(drawerNav.getByRole("link", { name: "聯絡我們" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: /車車與\s?遊樂園的故事/ })).toBeVisible();

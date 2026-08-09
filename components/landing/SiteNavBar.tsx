@@ -18,7 +18,8 @@ type NavItemId =
   | "games"
   | "coloring"
   | "adventures"
-  | "for-parents";
+  | "for-parents"
+  | "play-map";
 
 type NavItem = {
   id: NavItemId;
@@ -38,7 +39,7 @@ const PRIMARY_ORDER: readonly NavItemId[] = [
 ] as const;
 
 /** 行動版家長組 id（分隔線落在「實際首個可見項」）。 */
-const MOBILE_PARENT_GROUP_IDS = new Set<NavItemId>(["for-parents"]);
+const MOBILE_PARENT_GROUP_IDS = new Set<NavItemId>(["for-parents", "play-map"]);
 
 /** 行動版單欄：探索在前、家長組在後；lookup 一律用 id。 */
 const MOBILE_MENU_ROWS: readonly {
@@ -53,6 +54,7 @@ const MOBILE_MENU_ROWS: readonly {
   { id: "coloring", emoji: "🎨" },
   { id: "adventures", emoji: "🗺️" },
   { id: "for-parents", emoji: "🧭" },
+  { id: "play-map", emoji: "📍" },
 ] as const;
 
 function navItems(): NavItem[] {
@@ -65,6 +67,7 @@ function navItems(): NavItem[] {
     { id: "coloring", label: "繪本著色", href: "/games/coloring-book" },
     { id: "adventures", label: "宇宙地圖", href: "/adventures" },
     { id: "for-parents", label: "親子指南", href: "/for-parents" },
+    { id: "play-map", label: "親子景點", href: "/for-parents/play-map" },
   ];
 }
 
@@ -104,6 +107,8 @@ export default function SiteNavBar() {
   const primaryItems = PRIMARY_ORDER.map((id) => byId.get(id)).filter(
     (item): item is NavItem => item !== undefined,
   );
+  // 桌面主列不含 play-map，最長匹配僅在同列 href 間互斥
+  const primaryHrefs = primaryItems.map((item) => item.href);
 
   useFocusTrap(open, panelRef, { initialFocus: "container" });
 
@@ -137,7 +142,7 @@ export default function SiteNavBar() {
         {/* 桌面：主列依 PRIMARY_ORDER（無「更多」） */}
         <nav className={styles.desktopNav} aria-label="主要分區">
           {primaryItems.map((item) => {
-            const active = isInternalPathActive(pathname, item.href, internalHrefs);
+            const active = isInternalPathActive(pathname, item.href, primaryHrefs);
             return (
               <Link
                 key={item.id}
