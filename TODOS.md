@@ -56,7 +56,7 @@
 | content(subtitles): ep-24 字幕校對 + `--mark`（重轉錄補尾段、刪幻覺／重複） | `0c4ccf6` |
 | content(characters): ep-24 hero 定裝「小紅賽車年幼版」「小紅賽車的爸爸年輕版」（API 2 次） | `0c4ccf6` |
 | feat(stories): ep-24 全幕 19 頁插圖 approve（分齡定裝、#15–17 重抽） | `79ca151` |
-| fix(stories): ep-24 #12–13 爸改終點旁側（非賽道中央） | 見本 commit |
+| fix(stories): ep-24 #12–13 爸改終點旁側（非賽道中央） | `2be9cb5` |
 
 ### 本輪已完成（2026-08-08）
 
