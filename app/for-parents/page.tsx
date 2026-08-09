@@ -13,17 +13,18 @@ import {
 } from "@/lib/for-parents";
 import { breadcrumbListJsonLd, faqPageJsonLd } from "@/lib/json-ld";
 import { STATIC_PAGE_MODIFIED_DATES } from "@/lib/page-freshness";
+import { visibleSocials } from "@/lib/social";
 import { storyCoverPath } from "@/lib/story-utils";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
-  title: "給家長的中文車車 Podcast 指南",
+  title: "親子指南：給家長的中文車車 Podcast",
   description:
     "整理車車遊樂園適合家長搜尋的重點：中文車車 Podcast、適合年齡、故事主題、陪聽方法與代表性集數。",
   alternates: { canonical: "/for-parents" },
   other: { dateModified: STATIC_PAGE_MODIFIED_DATES["/for-parents"] },
   openGraph: {
-    title: "給家長的中文車車 Podcast 指南 · 車車遊樂園",
+    title: "親子指南：給家長的中文車車 Podcast · 車車遊樂園",
     description:
       "用 answer-first 的方式整理車車遊樂園適合親子共聽的原因、集數、角色、更新方式與代表性故事。",
     url: "/for-parents",
@@ -36,6 +37,7 @@ export default function ForParentsPage() {
   const faqs = parentLandingFaqs(facts);
   const representativeStories = representativeParentStories();
   const coListenStories = parentCoListenStories();
+  const threads = visibleSocials().find((s) => s.icon === "threads");
 
   return (
     <main className={styles.main}>
@@ -43,18 +45,39 @@ export default function ForParentsPage() {
       <JsonLd
         data={breadcrumbListJsonLd([
           { name: "車車遊樂園", url: "/" },
-          { name: "家長指南", url: "/for-parents" },
+          { name: "親子指南", url: "/for-parents" },
         ])}
       />
       <SiteHeader />
 
       <header className={styles.header}>
-        <p className={styles.eyebrow}>家長指南</p>
+        <p className={styles.eyebrow}>親子指南</p>
         <h1 className={styles.title}>中文車車故事，陪孩子安心聽</h1>
         <p className={styles.lede}>
-          整理家長最常搜尋的問題：適合年齡、故事內容、更新方式與代表性集數。
+          適合年齡、故事內容、更新方式與代表性集數，一頁看完。
         </p>
       </header>
+
+      {threads?.url ? (
+        <section
+          className={`${styles.answerSection} ${styles.threadsSection}`}
+          aria-labelledby="threads-heading"
+        >
+          <h2 id="threads-heading">育兒小筆記</h2>
+          <p>
+            站外的日常短筆記：共讀心得、車車冷知識與錄音幕後，更新比官網零碎但更即時。
+          </p>
+          <a
+            className={styles.threadsLink}
+            href={threads.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="到 Threads 看育兒小筆記（另開視窗）"
+          >
+            另開 Threads →
+          </a>
+        </section>
+      ) : null}
 
       <section className={styles.answerSection} aria-labelledby="podcast-heading">
         <h2 id="podcast-heading">有哪些適合 3–6 歲的中文車車 Podcast？</h2>

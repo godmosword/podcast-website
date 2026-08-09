@@ -73,6 +73,35 @@
   line-height: 1.78;
 }
 
+/* 育兒小筆記（Threads 外連）：與 .answerSection 同語言，靠左側色條輕量區隔。 */
+.threadsSection {
+  border-left: 4px solid var(--warm-accent);
+}
+
+.threadsLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 12px;
+  padding: 10px 18px;
+  border: 1px solid var(--warm-accent);
+  border-radius: 999px;
+  color: var(--accent-ink);
+  font-weight: 800;
+  text-decoration: none;
+  transition: transform var(--motion-press), opacity var(--motion-press);
+}
+
+.threadsLink:hover,
+.threadsLink:focus-visible {
+  background: var(--warm-chip-bg);
+}
+
+.threadsLink:active {
+  transform: scale(0.98);
+  opacity: 0.94;
+}
+
 .facts {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

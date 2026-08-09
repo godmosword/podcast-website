@@ -36,7 +36,7 @@ Bonbon & 馬米親子 Podcast《車車遊樂園》的官方 **看圖聽故事** 
 | 車種 | `/vehicles/[vehicle]` | 車種分類頁（SSG + GEO FAQ） |
 | 宇宙地圖 | `/adventures` | 五島滿版海洋、pan/zoom/fly-to（點島飛抵島心、再點同島回全景）、島上探索點 `/adventures/[zone]/[hotspot]`、漫遊 NPC、`?zone=` deep link |
 | 角色圖鑑 | `/characters` | `data/characters.json` 定裝照與出場故事 |
-| 家長指南 | `/for-parents` | answer-first FAQ、代表性集數（GEO／STEM-P3） |
+| 親子指南 | `/for-parents` | answer-first FAQ、代表性集數、Threads 育兒小筆記外連（GEO／STEM-P3） |
 | 家庭儀表板 | `/for-parents/dashboard` | 本機 localStorage 收聽／遊戲摘要（不上傳） |
 | 小遊戲 | `/games` | 街機五款 hub + 繪本著色；canvas 遊戲預載 sheet，**Godot 遊戲（WASM ~35MB）進頁按需載入** |
 | 節目數據 | `/studio` | 製作團隊專用（`noindex`、不在 sitemap） |
@@ -242,7 +242,7 @@ app/
   story/[slug]/               故事詳情 + play 播放器 + transcript.vtt
   adventures/page.tsx         車車宇宙地圖
   characters/page.tsx         角色圖鑑
-  for-parents/                家長指南 + dashboard
+  for-parents/                親子指南 + dashboard
   subscribe/page.tsx          新集 email 訂閱
   games/                      街機五款 + 繪本著色
   topic/、vehicles/           主題／車種索引

@@ -10,7 +10,6 @@ import Icon from "@/components/ui/Icon";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useLandingFooterNavSolid } from "@/hooks/useLandingFooterNavSolid";
 import { isImmersiveRoute } from "@/lib/is-story-play-route";
-import { visibleSocials } from "@/lib/social";
 import styles from "./SiteNavBar.module.css";
 
 type NavItemId =
@@ -19,14 +18,12 @@ type NavItemId =
   | "games"
   | "coloring"
   | "adventures"
-  | "parenting"
   | "for-parents";
 
 type NavItem = {
   id: NavItemId;
   label: string;
   href: string;
-  external?: boolean;
 };
 
 /** 桌面主列連結順序。
@@ -37,15 +34,11 @@ const PRIMARY_ORDER: readonly NavItemId[] = [
   "characters",
   "games",
   "adventures",
-  "parenting",
   "for-parents",
 ] as const;
 
-/** 行動版家長組 id（分隔線落在「實際首個可見項」，避免 Threads 缺席時 groupStart 消失）。 */
-const MOBILE_PARENT_GROUP_IDS = new Set<NavItemId>([
-  "parenting",
-  "for-parents",
-]);
+/** 行動版家長組 id（分隔線落在「實際首個可見項」）。 */
+const MOBILE_PARENT_GROUP_IDS = new Set<NavItemId>(["for-parents"]);
 
 /** 行動版單欄：探索在前、家長組在後；lookup 一律用 id。 */
 const MOBILE_MENU_ROWS: readonly {
@@ -59,37 +52,20 @@ const MOBILE_MENU_ROWS: readonly {
   // 提到「探索」組與遊樂園並列（桌面主膠囊見 PRIMARY_ORDER）。
   { id: "coloring", emoji: "🎨" },
   { id: "adventures", emoji: "🗺️" },
-  { id: "parenting", emoji: "✏️" },
   { id: "for-parents", emoji: "🧭" },
 ] as const;
 
 function navItems(): NavItem[] {
-  const threads = visibleSocials().find((s) => s.icon === "threads");
-
   // 全站一致的次級導覽；filter／key 一律用穩定 id。
-  const items: NavItem[] = [
+  // Threads 育兒分享改由 /for-parents 頁內區塊承接，不再佔導覽。
+  return [
     { id: "stories", label: "全部故事", href: "/stories" },
     { id: "characters", label: "角色圖鑑", href: "/characters" },
     { id: "games", label: "遊樂園", href: "/games" },
     { id: "coloring", label: "繪本著色", href: "/games/coloring-book" },
     { id: "adventures", label: "宇宙地圖", href: "/adventures" },
-    { id: "for-parents", label: "家長指南", href: "/for-parents" },
+    { id: "for-parents", label: "親子指南", href: "/for-parents" },
   ];
-  if (threads?.url) {
-    items.push({
-      id: "parenting",
-      label: "育兒專欄",
-      href: threads.url,
-      external: true,
-    });
-  }
-  return items;
-}
-
-function externalProps(item: NavItem) {
-  return item.external
-    ? { target: "_blank" as const, rel: "noopener noreferrer" }
-    : {};
 }
 
 function matchesPath(pathname: string, href: string): boolean {
@@ -123,7 +99,7 @@ export default function SiteNavBar() {
   const byId = new Map(items.map((item) => [item.id, item]));
   // 供 active 判定做最長匹配（如 /games 與 /games/coloring-book 互斥）
   const internalHrefs = items
-    .filter((item) => !item.external && item.href.startsWith("/"))
+    .filter((item) => item.href.startsWith("/"))
     .map((item) => item.href);
   const primaryItems = PRIMARY_ORDER.map((id) => byId.get(id)).filter(
     (item): item is NavItem => item !== undefined,
@@ -168,15 +144,8 @@ export default function SiteNavBar() {
                 href={item.href}
                 className={`${styles.navLink} ${active ? styles.navLinkActive : ""}`}
                 aria-current={active ? "page" : undefined}
-                aria-label={
-                  item.id === "parenting" ? "育兒專欄（Threads，另開視窗）" : undefined
-                }
-                {...externalProps(item)}
               >
                 {item.label}
-                {item.external ? (
-                  <Icon name="external" size={13} className={styles.extIcon} />
-                ) : null}
               </Link>
             );
           })}
@@ -249,21 +218,12 @@ export default function SiteNavBar() {
                     href={item.href}
                     className={styles.menuLink}
                     aria-current={active ? "page" : undefined}
-                    aria-label={
-                      row.id === "parenting"
-                        ? "育兒專欄（Threads，另開視窗）"
-                        : undefined
-                    }
                     onClick={() => setOpen(false)}
-                    {...externalProps(item)}
                   >
                     <span className={styles.menuEmoji} aria-hidden>
                       {row.emoji}
                     </span>
                     <span>{item.label}</span>
-                    {item.external ? (
-                      <Icon name="external" size={13} className={styles.extIcon} />
-                    ) : null}
                   </Link>
                 </li>
               );

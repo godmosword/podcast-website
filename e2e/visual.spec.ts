@@ -24,7 +24,7 @@ const VISUAL_PAGES = [
   { id: "stories", name: "全部故事", path: "/stories" },
   { id: "games", name: "遊樂園", path: "/games" },
   { id: "adventures", name: "宇宙地圖", path: "/adventures" },
-  { id: "for-parents", name: "家長指南", path: "/for-parents" },
+  { id: "for-parents", name: "親子指南", path: "/for-parents" },
   { id: "characters", name: "角色圖鑑", path: "/characters" },
   { id: "about", name: "關於", path: "/about" },
   { id: "subscribe", name: "訂閱", path: "/subscribe" },

@@ -10,9 +10,10 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await expect(capsuleNav.getByRole("link", { name: "全部故事" })).toBeVisible();
   await expect(capsuleNav.getByRole("link", { name: "遊樂園" })).toBeVisible();
   await expect(capsuleNav.getByRole("link", { name: "宇宙地圖" })).toBeVisible();
-  await expect(capsuleNav.getByRole("link", { name: /育兒專欄/ })).toBeVisible();
   await expect(capsuleNav.getByRole("link", { name: "主題分類" })).toHaveCount(0);
-  const parentGuideLink = capsuleNav.getByRole("link", { name: "家長指南" });
+  // 育兒專欄（Threads）已整併進 /for-parents 頁內區塊
+  await expect(capsuleNav.getByRole("link", { name: /育兒專欄/ })).toHaveCount(0);
+  const parentGuideLink = capsuleNav.getByRole("link", { name: "親子指南" });
   await expect(parentGuideLink).toBeVisible();
   await expect(parentGuideLink).toHaveAttribute("href", /\/for-parents/);
   await expect(capsuleNav.getByRole("button", { name: /更多/ })).toHaveCount(0);
@@ -42,7 +43,7 @@ test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   await expect(drawerNav.getByRole("link", { name: "主題分類" })).toHaveCount(0);
   await expect(drawerNav.getByRole("link", { name: "角色圖鑑" })).toBeVisible();
   await expect(drawerNav.getByRole("link", { name: "繪本著色" })).toBeVisible();
-  const drawerParentGuide = drawerNav.getByRole("link", { name: "家長指南" });
+  const drawerParentGuide = drawerNav.getByRole("link", { name: "親子指南" });
   await expect(drawerParentGuide).toBeVisible();
   await expect(drawerParentGuide).toHaveAttribute("href", /\/for-parents/);
   await expect(drawerNav.getByRole("link", { name: "關於我們" })).toHaveCount(0);

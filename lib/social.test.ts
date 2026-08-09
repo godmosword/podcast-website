@@ -11,7 +11,7 @@ describe("visibleSocials", () => {
     });
   });
 
-  it("points the Threads / 育兒專欄 link at the brand handle", () => {
+  it("points the Threads / 育兒小筆記 link at the brand handle", () => {
     const threads = visibleSocials().find((social) => social.icon === "threads");
 
     expect(threads?.url).toBe("https://www.threads.com/@bonboncarstory");

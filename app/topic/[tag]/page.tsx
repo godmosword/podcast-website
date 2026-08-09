@@ -87,7 +87,7 @@ export default async function TopicPage({
       <p className={styles.more}>
         <Link href="/topic">瀏覽其他主題 →</Link>
         {" · "}
-        <Link href="/for-parents">家長指南</Link>
+        <Link href="/for-parents">親子指南</Link>
       </p>
 
       <SiteFooter />

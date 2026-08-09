@@ -129,11 +129,11 @@ test("a11y：宇宙地圖島路徑（召喚抽屜、探索點）無 critical/ser
   ).toEqual([]);
 });
 
-test("a11y：桌面家長指南直連可見且無 critical/serious 違規", async ({ page }) => {
+test("a11y：桌面親子指南直連可見且無 critical/serious 違規", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/");
   const capsuleNav = page.getByRole("navigation", { name: "主要分區" });
-  const parentGuideLink = capsuleNav.getByRole("link", { name: "家長指南" });
+  const parentGuideLink = capsuleNav.getByRole("link", { name: "親子指南" });
   await expect(parentGuideLink).toBeVisible();
   await expect(parentGuideLink).toHaveAttribute("href", /\/for-parents/);
 

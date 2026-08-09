@@ -50,15 +50,14 @@ describe("SiteNavBar", () => {
     expect(view.queryByRole("button", { name: /更多/ })).toBeNull();
   });
 
-  test("桌面主列含宇宙地圖、角色圖鑑、育兒專欄與家長指南直連", async () => {
+  test("桌面主列含宇宙地圖、角色圖鑑與親子指南直連", async () => {
     const html = await renderNavBarHtml();
     for (const label of [
       "全部故事",
       "角色圖鑑",
       "遊樂園",
       "宇宙地圖",
-      "育兒專欄",
-      "家長指南",
+      "親子指南",
     ]) {
       expect(html).toContain(label);
     }
@@ -68,13 +67,15 @@ describe("SiteNavBar", () => {
     expect(html).not.toContain("指南首頁");
     expect(html).not.toContain("關於我們");
     expect(html).not.toContain("聯絡我們");
+    // 育兒專欄（Threads）已整併進 /for-parents 頁內區塊
+    expect(html).not.toContain("育兒專欄");
 
     const view = await renderNavBar();
     const desktopNav = view.getByRole("navigation", { name: "主要分區" });
     const parentLink = desktopNav.querySelector('a[href="/for-parents"]');
     expect(parentLink).toBeTruthy();
-    expect(parentLink?.textContent).toContain("家長指南");
-    expect(view.queryByRole("button", { name: "家長指南" })).toBeNull();
+    expect(parentLink?.textContent).toContain("親子指南");
+    expect(view.queryByRole("button", { name: "親子指南" })).toBeNull();
     expect(view.queryByRole("menu")).toBeNull();
   });
 
@@ -88,12 +89,12 @@ describe("SiteNavBar", () => {
       "遊樂園",
       "繪本著色",
       "宇宙地圖",
-      "育兒專欄",
-      "家長指南",
+      "親子指南",
     ]) {
       expect(view.getAllByText(label).length).toBeGreaterThan(0);
     }
     expect(view.queryByText("主題分類")).toBeNull();
+    expect(view.queryByText("育兒專欄")).toBeNull();
     expect(view.queryByText("關於我們")).toBeNull();
     expect(view.queryByText("聯絡我們")).toBeNull();
     expect(view.queryByText("指南首頁")).toBeNull();
@@ -101,7 +102,7 @@ describe("SiteNavBar", () => {
     const mobileNav = view.getByRole("navigation", { name: "網站選單" });
     const parentLink = mobileNav.querySelector('a[href="/for-parents"]');
     expect(parentLink).toBeTruthy();
-    expect(parentLink?.textContent).toContain("家長指南");
+    expect(parentLink?.textContent).toContain("親子指南");
 
     expect(view.container.querySelector('form[action="/stories"]')).toBeTruthy();
     expect(view.container.querySelector('input[name="q"]')).toBeTruthy();
@@ -150,7 +151,7 @@ describe("SiteNavBar", () => {
     expect(html).toBe("");
   });
 
-  test("Threads 缺席時不顯示育兒專欄", async () => {
+  test("Threads 缺席時導覽不受影響（親子指南仍在、無育兒專欄）", async () => {
     vi.resetModules();
     vi.doMock("next/navigation", () => ({
       usePathname: () => "/",
@@ -167,7 +168,7 @@ describe("SiteNavBar", () => {
     );
     expect(html).not.toContain("育兒專欄");
     expect(html).toContain("宇宙地圖");
-    expect(html).toContain("家長指南");
+    expect(html).toContain("親子指南");
   });
 });
 
@@ -213,7 +214,7 @@ describe("isInternalPathActive 最長匹配", () => {
     expect(isInternalPathActive("/games", "mailto:a@b.c", hrefs)).toBe(false);
   });
 
-  test("家長指南 pathname 應 active", async () => {
+  test("親子指南 pathname 應 active", async () => {
     const { isInternalPathActive } = await import("./SiteNavBar");
     expect(isInternalPathActive("/for-parents", "/for-parents", hrefs)).toBe(
       true,
@@ -223,7 +224,7 @@ describe("isInternalPathActive 最長匹配", () => {
     ).toBe(true);
   });
 
-  test("首頁與 /about 不應標家長指南 active", async () => {
+  test("首頁與 /about 不應標親子指南 active", async () => {
     const { isInternalPathActive } = await import("./SiteNavBar");
     expect(isInternalPathActive("/", "/for-parents", hrefs)).toBe(false);
     expect(isInternalPathActive("/about", "/for-parents", hrefs)).toBe(false);
@@ -255,7 +256,7 @@ describe("SiteNavBar active 狀態", () => {
     }
   });
 
-  test("首頁與 /about 不標家長指南 active", async () => {
+  test("首頁與 /about 不標親子指南 active", async () => {
     for (const pathname of ["/", "/about"]) {
       const view = await renderNavBarAt(pathname);
       const desktopNav = view.getByRole("navigation", { name: "主要分區" });
