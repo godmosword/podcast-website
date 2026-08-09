@@ -435,5 +435,30 @@
     "alsoIn": [
       "ep-24"
     ]
+  },
+  {
+    "name": "小紅賽車年幼版",
+    "aliases": [
+      "小小紅",
+      "Baby小紅",
+      "小baby車",
+      "香草奶嘴小紅"
+    ],
+    "vehicle": "baby race car",
+    "desc": "a cute claymation TINY toddler bright red race car — baby Xiao Hong exactly as in the ep-24 hero (perched on dad's roof). FACE LAYOUT (critical, copy reference baby): large round white eyes with black pupils sit on the UPPER FRONT FACE / windshield face plane (same layout as the mustache dad beside it) — eyes are NOT headlights on the bumper. Directly BELOW the eyes: a teal-blue vanilla pacifier (青綠香草奶嘴) in the mouth/grille, with a ring handle. Two small bright yellow round cheek spots beside the pacifier. Compact stubby mini race-car body, pebbled/honeycomb clay texture matching the hero, dark-blue side/top window clay, tiny black wheels, no racing number. Same family look as the hero baby — NOT a bubble car with eyes on the bumper, NOT the adult dad",
+    "ref": "characters/小紅賽車年幼版.jpg",
+    "firstSeen": "ep-24"
+  },
+  {
+    "name": "小紅賽車的爸爸年輕版",
+    "aliases": [
+      "年輕紅爸",
+      "年輕的小紅爸爸",
+      "年輕版紅爸"
+    ],
+    "vehicle": "young race car",
+    "desc": "a cute claymation younger dad bright red race car — EXACTLY the large foreground father car from the ep-24 hero (小紅賽車的爸爸年輕版). FACE LAYOUT (critical, copy reference dad 1:1): front-facing (not long side-profile race car); large round white eyes with black pupils on the UPPER FRONT FACE; thick arched black eyebrows above the eyes on a small blue clay window band; prominent playful black curly handlebar mustache (俏皮翹鬍子) centered BELOW the eyes on the red front face; simple curved black smile under the mustache; two bright yellow round cheek/headlight dots beside the mustache. Compact rounded red clay body with pebbled/honeycomb texture matching the hero, blue side windows, small red round side mirrors, chunky black wheels with light hubs. NO long sports-car profile, NO grey bumper bar, NO door number badge required. Single character — NOT the tiny pacifier baby on the roof",
+    "ref": "characters/小紅賽車的爸爸年輕版.jpg",
+    "firstSeen": "ep-24"
   }
 ]

@@ -33,10 +33,20 @@ async function portraitFromCoverRef(
         ? "isolate the yellow cement mixer truck with the blue-and-white spiral mixing drum"
         : char.name === "自動駕駛計程車知知"
           ? "isolate the white modern autonomous robotaxi with neon-blue LED eyes and the white roof LiDAR sensor pod — NOT any yellow checker taxi"
-          : `isolate the main character 「${char.name}」`;
+          : char.name === "小紅賽車年幼版"
+            ? "isolate ONLY the tiny toddler bright-red race car with the teal-blue pacifier perched on the larger car's roof — NOT the large mustache dad car underneath. Keep the baby's exact face layout from the reference"
+            : char.name === "小紅賽車的爸爸年輕版"
+              ? "isolate ONLY the larger bright-red father race car with the black curly mustache in the foreground — NOT the tiny pacifier baby car on the roof"
+              : `isolate the main character 「${char.name}」`;
+  const matchHint =
+    char.name === "小紅賽車年幼版"
+      ? "CRITICAL: reproduce the roof-baby from the reference almost 1:1 — same eye placement on the upper face (not bumper headlights), same teal pacifier under the eyes, same yellow cheek dots, same stubby red clay proportions and honeycomb texture. "
+      : char.name === "小紅賽車的爸爸年輕版"
+        ? "CRITICAL: reproduce the large foreground dad from the reference almost 1:1 — front-facing round clay face (not a long three-quarter race-car body), eyes on the upper front face with thick black eyebrows, curly black mustache centered under the eyes on the red face, yellow cheek dots, same pebbled red clay texture. Remove the baby car; plain off-white background. "
+        : "";
   const prompt =
     `${CLAY_STYLE_PREFIX}Character model sheet based on the reference image: ${isolateHint}. ` +
-    `${char.desc} ` +
+    `${matchHint}${char.desc} ` +
     `Single character only, centered, front three-quarter view, full body, neutral happy pose, plain soft off-white background. ` +
     `Match exact clay style, colors, face and proportions from the reference. ${CLAY_NEGATIVE}`;
 
@@ -99,6 +109,7 @@ async function main(): Promise<void> {
   const ep14Cover = join(ROOT, "public", "stories", "ep-14", "01.jpg");
   const ep20Cover = join(ROOT, "public", "stories", "ep-20", "01.jpg");
   const ep21Cover = join(ROOT, "public", "stories", "ep-21", "01.jpg");
+  const ep24Cover = join(ROOT, "public", "stories", "ep-24", "01.jpg");
   for (const char of targets) {
     let cover: string | undefined;
     if (
@@ -111,6 +122,21 @@ async function main(): Promise<void> {
       cover = ep20Cover;
     } else if (char.name === "自動駕駛計程車知知" && existsSync(ep21Cover)) {
       cover = ep21Cover;
+    } else if (char.name === "小紅賽車年幼版" && existsSync(ep24Cover)) {
+      cover = ep24Cover;
+    } else if (char.name === "小紅賽車的爸爸年輕版") {
+      const dadCrop = join(
+        ROOT,
+        "public",
+        ".illustrate-staging",
+        "ep-24",
+        "_dad-young-crop.jpg",
+      );
+      cover = existsSync(dadCrop)
+        ? dadCrop
+        : existsSync(ep24Cover)
+          ? ep24Cover
+          : undefined;
     }
     await generateOne(char, cover);
   }

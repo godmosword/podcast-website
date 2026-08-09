@@ -100,6 +100,8 @@ describe("getCharactersForStory", () => {
     const ids = getCharactersForStory("ep-24").map((c) => c.id);
     expect(ids).toContain("xiao-hong-dad");
     expect(ids).toContain("xiao-hong");
+    expect(ids).toContain("xiao-hong-baby");
+    expect(ids).toContain("xiao-hong-dad-young");
   });
 });
 
@@ -110,6 +112,8 @@ describe("getCharacterName", () => {
     expect(getCharacterName("a-ni")).toBe("水泥車阿尼");
     expect(getCharacterName("zhi-zhi")).toBe("自動駕駛計程車知知");
     expect(getCharacterName("xiao-hong-dad")).toBe("小紅賽車的爸爸");
+    expect(getCharacterName("xiao-hong-baby")).toBe("小紅賽車年幼版");
+    expect(getCharacterName("xiao-hong-dad-young")).toBe("小紅賽車的爸爸年輕版");
   });
 
   it("查無角色時回傳 null", () => {

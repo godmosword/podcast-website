@@ -57,6 +57,8 @@ const ID_BY_CANONICAL_NAME: Record<string, string> = {
   水泥車阿尼: "a-ni",
   自動駕駛計程車知知: "zhi-zhi",
   小紅賽車的爸爸: "xiao-hong-dad",
+  小紅賽車年幼版: "xiao-hong-baby",
+  小紅賽車的爸爸年輕版: "xiao-hong-dad-young",
 };
 
 const VEHICLE_ZH: Record<string, string> = {
@@ -64,6 +66,8 @@ const VEHICLE_ZH: Record<string, string> = {
   "dinosaur car": "恐龍車",
   ambulance: "救護車",
   "race car": "賽車",
+  "baby race car": "Baby 賽車",
+  "young race car": "年輕賽車",
   minibus: "小巴士",
   taxi: "計程車",
   "monster truck": "怪獸卡車",
@@ -139,6 +143,8 @@ const PERSONALITY_BY_ID: Record<string, string> = {
   "a-ni": "認真負責、默默把地基打穩",
   "zhi-zhi": "溫柔提醒、陪大家平安到達想去的地方",
   "xiao-hong-dad": "溫柔耐心、陪小紅安全完成第一次穿越大山",
+  "xiao-hong-baby": "小小軟軟、愛吸香草奶嘴、需要爸爸陪伴",
+  "xiao-hong-dad-young": "年輕溫暖、陪 Baby 小紅慢慢練習長大",
 };
 
 function shortName(entry: RawCharacter, id: string): string {
