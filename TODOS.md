@@ -57,7 +57,7 @@
 | polish(for-parents): play-map Google Maps dir 導航 URL（免 Key）＋只顯示位置備案 | `4e41587` |
 | feat(for-parents): play-map Wave 0（行動「親子景點」、工具卡、UI 重設、schema／query） | `8847fbe` |
 | feat(for-parents): play-map Wave 1 北北基桃覆蓋達標（coverage tier） | `3114164` |
-| feat(for-parents): play-map Wave 2 竹苗中彰投雲覆蓋達標（coverage tier） | （待 commit） |
+| feat(for-parents): play-map Wave 2 竹苗中彰投雲覆蓋達標（coverage tier） | `9a85e44` |
 | polish(nav): 親子景點進桌面 Top bar（路徑維持 `/for-parents/play-map`） | `056c2df` |
 | content(subtitles): ep-24 字幕校對 + `--mark`（重轉錄補尾段、刪幻覺／重複） | `0c4ccf6` |
 | content(characters): ep-24 hero 定裝「小紅賽車年幼版」「小紅賽車的爸爸年輕版」（API 2 次） | `0c4ccf6` |
