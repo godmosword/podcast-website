@@ -2,30 +2,43 @@ import { test, expect } from "@playwright/test";
 
 const PHONE = { width: 390, height: 844 };
 
-/** 等待 PlayMap 動態載入（Leaflet／OSM 可能較慢）。 */
+/** 等待 PlayMap 卡片殼就緒（Leaflet 僅地圖 tab 才載入）。 */
 async function waitForPlayMapReady(page: import("@playwright/test").Page) {
-  await expect(page.getByLabel("依縣市篩選")).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByLabel("依縣市篩選")).toBeVisible({ timeout: 8_000 });
   await expect(
-    page.getByText(/找到 \d+ 個地點|目前沒有符合條件的地點/),
-  ).toBeVisible({ timeout: 15_000 });
+    page.getByText(/→ \d+ 個地點|目前沒有符合條件的地點/),
+  ).toBeVisible({ timeout: 5_000 });
 }
 
 test.describe("親子遊樂地圖", () => {
+  test("SSR HTML 含 H1 與至少一景點名（G1）", async ({ request }) => {
+    const response = await request.get("/for-parents/play-map");
+    expect(response.ok()).toBeTruthy();
+    const html = await response.text();
+    expect(html).toContain("親子遊樂地圖");
+    expect(html).not.toContain("hero-home");
+    expect(html).not.toMatch(/地圖載入中/);
+    // 預設台北市至少一筆（名稱會出現在 SSR 卡片）
+    expect(html).toMatch(/台北|大安|兒童|科教|動物園|天文|官邸|自來水/);
+  });
+
   test("頁面載入、結果數、卡片與詳情抽屜", async ({ page }) => {
-    test.setTimeout(60_000);
+    test.setTimeout(30_000);
     await page.goto("/for-parents/play-map");
 
     await expect(
       page.getByRole("heading", { level: 1, name: "親子遊樂地圖" }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 5_000 });
+
+    await expect(page.getByText("地圖載入中…")).toHaveCount(0);
 
     await waitForPlayMapReady(page);
 
-    await expect(page.getByText(/北北基桃與竹苗中彰投雲已上線/)).toBeVisible();
+    await expect(page.getByText(/已收錄 \d+ 縣市、共 \d+ 處/)).toBeVisible();
 
     const cardsPanel = page.locator("#play-map-panel-cards");
     const firstCardButton = cardsPanel.getByRole("button").first();
-    await expect(firstCardButton).toBeVisible({ timeout: 15_000 });
+    await expect(firstCardButton).toBeVisible({ timeout: 5_000 });
 
     await firstCardButton.click();
 
@@ -39,8 +52,29 @@ test.describe("親子遊樂地圖", () => {
     await expect(sheet).toHaveCount(0);
   });
 
+  test("地圖 tab 才載入 Leaflet", async ({ page }) => {
+    test.setTimeout(45_000);
+    const leafletRequests: string[] = [];
+    page.on("request", (req) => {
+      const url = req.url();
+      if (/leaflet|tile\.openstreetmap/i.test(url)) {
+        leafletRequests.push(url);
+      }
+    });
+
+    await page.goto("/for-parents/play-map");
+    await waitForPlayMapReady(page);
+    expect(leafletRequests.length).toBe(0);
+
+    await page.getByRole("tab", { name: "地圖" }).click();
+    await expect(page.locator(".leaflet-container")).toBeVisible({
+      timeout: 15_000,
+    });
+    expect(leafletRequests.length).toBeGreaterThan(0);
+  });
+
   test("行動選單「親子景點」可直達地圖頁", async ({ page }) => {
-    test.setTimeout(60_000);
+    test.setTimeout(30_000);
     await page.setViewportSize(PHONE);
     await page.goto("/");
     await page.getByRole("button", { name: "開啟選單" }).click();
@@ -53,7 +87,7 @@ test.describe("親子遊樂地圖", () => {
     await expect(page).toHaveURL(/\/for-parents\/play-map/);
     await expect(
       page.getByRole("heading", { level: 1, name: "親子遊樂地圖" }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 5_000 });
     await waitForPlayMapReady(page);
   });
 });

@@ -1,14 +1,7 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import L from "leaflet";
-import {
-  MapContainer,
-  Marker,
-  TileLayer,
-  useMap,
-} from "react-leaflet";
-import "leaflet/dist/leaflet.css";
 import {
   buildGoogleMapsNavUrl,
   buildGoogleMapsPlaceUrl,
@@ -18,48 +11,33 @@ import {
   type PlaygroundType,
 } from "@/data/playgrounds";
 import { filterPlaygrounds } from "@/lib/playgrounds-query";
-import { listCityCoverage } from "@/lib/playground-coverage";
+import {
+  coverageHeadline,
+  DEFAULT_PLAY_MAP_CITY,
+  DEFAULT_PLAY_MAP_CENTER,
+  listCityCoverage,
+} from "@/lib/playground-coverage";
 import styles from "./PlayMap.module.css";
 
-const DEFAULT_CENTER: [number, number] = [24.9935, 121.301];
-const DEFAULT_ZOOM = 11;
-const LEAFLET_CDN = "https://unpkg.com/leaflet@1.9.4/dist/images";
+const PlayMapLeaflet = dynamic(() => import("./PlayMapLeaflet"), {
+  ssr: false,
+  loading: () => (
+    <p className={styles.mapLoading} role="status" aria-live="polite">
+      地圖載入中…
+    </p>
+  ),
+});
 
 const PLAYGROUND_TYPES: readonly PlaygroundType[] = [
   "公園",
   "室內樂園",
+  "主題樂園",
   "博物館",
   "農場",
-  "室內放電",
   "其他",
 ];
 
-const defaultMarkerIcon = L.icon({
-  iconUrl: `${LEAFLET_CDN}/marker-icon.png`,
-  iconRetinaUrl: `${LEAFLET_CDN}/marker-icon-2x.png`,
-  shadowUrl: `${LEAFLET_CDN}/marker-shadow.png`,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
-
-L.Marker.prototype.options.icon = defaultMarkerIcon;
-
 type BrowseView = "cards" | "map";
-
-type FitBoundsProps = {
-  points: Array<[number, number]>;
-  animate: boolean;
-};
-
-function escapeAttr(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/"/g, "&quot;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
 
 function usePrefersReducedMotion(): boolean {
   const [reduce, setReduce] = useState(false);
@@ -73,45 +51,6 @@ function usePrefersReducedMotion(): boolean {
   }, []);
 
   return reduce;
-}
-
-/** 面板由 display:none 切回可見時，Leaflet 需重算容器尺寸。 */
-function InvalidateSizeOnActive({ active }: { active: boolean }) {
-  const map = useMap();
-
-  useEffect(() => {
-    if (!active) return;
-    const id = window.requestAnimationFrame(() => {
-      map.invalidateSize();
-    });
-    return () => window.cancelAnimationFrame(id);
-  }, [active, map]);
-
-  return null;
-}
-
-function FitBounds({ points, animate }: FitBoundsProps) {
-  const map = useMap();
-
-  useEffect(() => {
-    const motion = animate ? undefined : ({ animate: false } as L.ZoomPanOptions);
-
-    if (points.length === 0) {
-      map.setView(DEFAULT_CENTER, DEFAULT_ZOOM, motion);
-      return;
-    }
-    if (points.length === 1) {
-      map.setView(points[0], 14, motion);
-      return;
-    }
-    map.fitBounds(L.latLngBounds(points), {
-      padding: [48, 48],
-      maxZoom: 14,
-      animate: animate,
-    });
-  }, [animate, map, points]);
-
-  return null;
 }
 
 function formatAgeRange(ageRange: [number, number]): string {
@@ -139,67 +78,34 @@ function needsCommercialNotice(place: Playground): boolean {
   return !place.free;
 }
 
+function buildFilterSummaryParts(
+  city: string,
+  typeFilter: PlaygroundType | null,
+  indoorOnly: boolean,
+  freeOnly: boolean,
+): string[] {
+  const parts = [city];
+  if (typeFilter) parts.push(typeFilter);
+  if (indoorOnly) parts.push("室內");
+  if (freeOnly) parts.push("免費");
+  return parts;
+}
+
 function typeDataAttr(type: PlaygroundType): string {
   switch (type) {
     case "公園":
       return "park";
     case "室內樂園":
       return "indoor-park";
+    case "主題樂園":
+      return "theme-park";
     case "博物館":
       return "museum";
     case "農場":
       return "farm";
-    case "室內放電":
-      return "indoor-play";
     case "其他":
       return "other";
   }
-}
-
-type AccessibleMarkerProps = {
-  place: Playground;
-  selected: boolean;
-  onSelect: (id: string, trigger: HTMLElement) => void;
-};
-
-function AccessibleMarker({ place, selected, onSelect }: AccessibleMarkerProps) {
-  const markerRef = useRef<L.Marker>(null);
-
-  const icon = useMemo(() => {
-    const label = escapeAttr(place.name);
-    return L.divIcon({
-      className: "playMapMarkerHost",
-      html: `<button type="button" class="playMapMarkerButton" aria-label="${label}" aria-pressed="false"></button>`,
-      iconSize: [44, 44],
-      iconAnchor: [22, 44],
-    });
-  }, [place.name]);
-
-  useEffect(() => {
-    const marker = markerRef.current;
-    if (!marker) return;
-    const button = marker.getElement()?.querySelector(".playMapMarkerButton");
-    if (!(button instanceof HTMLButtonElement)) return;
-    button.setAttribute("aria-pressed", selected ? "true" : "false");
-  }, [selected]);
-
-  return (
-    <Marker
-      ref={markerRef}
-      position={[place.lat, place.lng]}
-      icon={icon}
-      eventHandlers={{
-        click: (event) => {
-          const target = event.originalEvent.target;
-          if (target instanceof HTMLElement) {
-            onSelect(place.id, target);
-            return;
-          }
-          onSelect(place.id, document.body);
-        },
-      }}
-    />
-  );
 }
 
 type PlayMapSheetProps = {
@@ -207,6 +113,8 @@ type PlayMapSheetProps = {
   onClose: () => void;
   panelRef: React.RefObject<HTMLDivElement | null>;
 };
+
+const SHEET_BG_HINT_ID = "play-map-sheet-bg-hint";
 
 function PlayMapSheet({ place, onClose, panelRef }: PlayMapSheetProps) {
   useEffect(() => {
@@ -227,8 +135,12 @@ function PlayMapSheet({ place, onClose, panelRef }: PlayMapSheetProps) {
       className={styles.sheet}
       role="region"
       aria-label={`${place.name} 詳情`}
+      aria-describedby={SHEET_BG_HINT_ID}
       tabIndex={-1}
     >
+      <p id={SHEET_BG_HINT_ID} className={styles.sheetBgHint}>
+        關閉後可繼續瀏覽地圖與列表，不需離開本頁。
+      </p>
       <div className={styles.sheetHeader}>
         <h2 className={styles.sheetTitle}>{place.name}</h2>
         <button
@@ -349,7 +261,7 @@ function PlaygroundCard({ place, selected, onSelect }: PlaygroundCardProps) {
         <button
           type="button"
           className={styles.cardMain}
-          aria-pressed={selected}
+          aria-expanded={selected}
           onClick={(event) => onSelect(place.id, event.currentTarget)}
         >
           <span className={styles.cardType}>{place.type}</span>
@@ -384,12 +296,21 @@ function PlaygroundCard({ place, selected, onSelect }: PlaygroundCardProps) {
   );
 }
 
-export default function PlayMap() {
+export type PlayMapProps = {
+  defaultCity?: string;
+  /** Server 預算預設縣市卡片，供 SSR 首屏對齊（client 以 filterPlaygrounds 重算）。 */
+  initialPlaces?: Playground[];
+};
+
+export default function PlayMap({
+  defaultCity = DEFAULT_PLAY_MAP_CITY,
+  initialPlaces,
+}: PlayMapProps) {
   const cities = useMemo(() => listCities(), []);
   const coverage = useMemo(() => listCityCoverage(), []);
   const reduceMotion = usePrefersReducedMotion();
 
-  const [city, setCity] = useState(() => cities[0] ?? "");
+  const [city, setCity] = useState(defaultCity);
   const [typeFilter, setTypeFilter] = useState<PlaygroundType | null>(null);
   const [indoorOnly, setIndoorOnly] = useState(false);
   const [freeOnly, setFreeOnly] = useState(false);
@@ -400,15 +321,31 @@ export default function PlayMap() {
   const sheetRef = useRef<HTMLDivElement>(null);
   const userClosedSheetRef = useRef(false);
 
+  const pristineDefaults =
+    city === defaultCity &&
+    typeFilter === null &&
+    !indoorOnly &&
+    !freeOnly &&
+    initialPlaces !== undefined;
+
   const filtered = useMemo(
     () =>
-      filterPlaygrounds({
-        city,
-        indoorOnly,
-        freeOnly,
-        type: typeFilter ?? undefined,
-      }),
-    [city, indoorOnly, freeOnly, typeFilter],
+      pristineDefaults
+        ? [...initialPlaces]
+        : filterPlaygrounds({
+            city,
+            indoorOnly,
+            freeOnly,
+            type: typeFilter ?? undefined,
+          }),
+    [
+      pristineDefaults,
+      initialPlaces,
+      city,
+      indoorOnly,
+      freeOnly,
+      typeFilter,
+    ],
   );
 
   const points = useMemo(
@@ -420,7 +357,45 @@ export default function PlayMap() {
     ? (filtered.find((place) => place.id === selectedId) ?? null)
     : null;
 
-  const cityCoverage = coverage.find((row) => row.city === city);
+  const coverageByCity = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const row of coverage) {
+      map.set(row.city, row.count);
+    }
+    return map;
+  }, [coverage]);
+
+  const cityPlaces = useMemo(
+    () => filterPlaygrounds({ city }),
+    [city],
+  );
+
+  const cityCenter = useMemo((): [number, number] => {
+    const first = cityPlaces[0];
+    if (first) return [first.lat, first.lng];
+    return DEFAULT_PLAY_MAP_CENTER;
+  }, [cityPlaces]);
+
+  const hasExtraFilters =
+    typeFilter !== null || indoorOnly || freeOnly;
+
+  const filterSummaryParts = buildFilterSummaryParts(
+    city,
+    typeFilter,
+    indoorOnly,
+    freeOnly,
+  );
+
+  const filterSummaryLabel =
+    filtered.length === 0
+      ? `${filterSummaryParts.join(" · ")} → 0 個地點`
+      : `${filterSummaryParts.join(" · ")} → ${filtered.length} 個地點`;
+
+  const handleClearFilters = useCallback(() => {
+    setTypeFilter(null);
+    setIndoorOnly(false);
+    setFreeOnly(false);
+  }, []);
 
   const handleSelect = useCallback((id: string, trigger: HTMLElement) => {
     lastTriggerRef.current = trigger;
@@ -445,20 +420,12 @@ export default function PlayMap() {
     userClosedSheetRef.current = false;
   }, [selected]);
 
-  const resultLabel =
-    filtered.length === 0
-      ? "目前沒有符合條件的地點"
-      : `找到 ${filtered.length} 個地點`;
-
   return (
     <div className={styles.root}>
       <header className={styles.toolbar}>
         <div className={styles.titleBlock}>
           <h1 className={styles.title}>親子遊樂地圖</h1>
-          <p className={styles.coverage}>
-            北北基桃與竹苗中彰投雲已上線
-            {cityCoverage ? ` · ${cityCoverage.city} ${cityCoverage.count} 處` : ""}
-          </p>
+          <p className={styles.coverage}>{coverageHeadline(coverage)}</p>
         </div>
 
         <div
@@ -500,9 +467,6 @@ export default function PlayMap() {
           </button>
         </div>
 
-        <p className={styles.resultCount} aria-live="polite">
-          {resultLabel}
-        </p>
       </header>
 
       <form className={styles.filters} aria-label="遊樂地點篩選">
@@ -513,17 +477,22 @@ export default function PlayMap() {
             role="group"
             aria-label="依縣市篩選"
           >
-            {cities.map((item) => (
-              <button
-                key={item}
-                type="button"
-                className={styles.chip}
-                aria-pressed={city === item}
-                onClick={() => setCity(item)}
-              >
-                {item}
-              </button>
-            ))}
+            {cities.map((item) => {
+              const count = coverageByCity.get(item);
+              const label =
+                count !== undefined ? `${item} · ${count}` : item;
+              return (
+                <button
+                  key={item}
+                  type="button"
+                  className={styles.chip}
+                  aria-pressed={city === item}
+                  onClick={() => setCity(item)}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -576,12 +545,24 @@ export default function PlayMap() {
         </div>
       </form>
 
+      <div className={styles.filterSummary} aria-live="polite">
+        <p className={styles.filterSummaryText}>{filterSummaryLabel}</p>
+        {hasExtraFilters ? (
+          <button
+            type="button"
+            className={styles.clearFilters}
+            onClick={handleClearFilters}
+          >
+            清除條件
+          </button>
+        ) : null}
+      </div>
+
       <div className={styles.content}>
         <section
           id="play-map-panel-cards"
           role="tabpanel"
           aria-labelledby="play-map-tab-cards"
-          aria-label="卡片"
           hidden={browseView !== "cards"}
           className={styles.cardsPanel}
         >
@@ -607,43 +588,19 @@ export default function PlayMap() {
           id="play-map-panel-map"
           role="tabpanel"
           aria-labelledby="play-map-tab-map"
-          aria-label="地圖"
           hidden={browseView !== "map"}
           className={styles.mapShell}
         >
           {browseView === "map" ? (
-            <>
-              <MapContainer
-                className={styles.map}
-                center={DEFAULT_CENTER}
-                zoom={DEFAULT_ZOOM}
-                scrollWheelZoom={false}
-                aria-label="親子遊樂地點地圖"
-              >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <InvalidateSizeOnActive active={browseView === "map"} />
-                <FitBounds points={points} animate={!reduceMotion} />
-                {filtered.map((place) => (
-                  <AccessibleMarker
-                    key={place.id}
-                    place={place}
-                    selected={selectedId === place.id}
-                    onSelect={handleSelect}
-                  />
-                ))}
-              </MapContainer>
-
-              <p className={styles.mapHint}>雙指或工具列可縮放</p>
-
-              {filtered.length === 0 ? (
-                <p className={styles.empty} role="status">
-                  目前沒有符合條件的地點，試試放寬篩選。
-                </p>
-              ) : null}
-            </>
+            <PlayMapLeaflet
+              places={filtered}
+              points={points}
+              emptyCenter={cityCenter}
+              selectedId={selectedId}
+              onSelect={handleSelect}
+              reduceMotion={reduceMotion}
+              active={browseView === "map"}
+            />
           ) : null}
         </div>
       </div>

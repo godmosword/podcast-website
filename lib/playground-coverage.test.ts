@@ -3,9 +3,11 @@ import { listPlaygrounds } from "@/data/playgrounds";
 import {
   assertWave1CoverageMet,
   assertWave2CoverageMet,
+  coverageHeadline,
   coverageStatus,
   coverageThreshold,
   coverageTierForCity,
+  DEFAULT_PLAY_MAP_CITY,
   listCityCoverage,
   normalizeCityKey,
   WAVE1_CITIES,
@@ -13,6 +15,18 @@ import {
 } from "@/lib/playground-coverage";
 
 describe("playground-coverage", () => {
+  it("DEFAULT_PLAY_MAP_CITY 為台北市", () => {
+    expect(DEFAULT_PLAY_MAP_CITY).toBe("台北市");
+  });
+
+  it("coverageHeadline 產生縣市與總筆數摘要", () => {
+    const rows = listCityCoverage();
+    const headline = coverageHeadline(rows);
+    const cityCount = rows.length;
+    const placeCount = rows.reduce((sum, row) => sum + row.count, 0);
+    expect(headline).toBe(`已收錄 ${cityCount} 縣市、共 ${placeCount} 處`);
+  });
+
   it("coverageTierForCity 分級正確", () => {
     expect(coverageTierForCity("台北市")).toBe("A");
     expect(coverageTierForCity("臺北市")).toBe("A");

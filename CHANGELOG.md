@@ -11,6 +11,7 @@
 - **親子景點進桌面 Top bar**：膠囊主列加入「親子景點」（路徑仍 `/for-parents/play-map`）；與「宇宙地圖」命名區隔，active 最長匹配獨佔。
 - **親子遊樂地圖 Wave 2（竹苗中彰投雲）**：擴充新竹市／縣、苗栗、台中、彰化、南投、雲林至分級覆蓋門檻（全庫約 73 筆）；涵蓋文案與 SEO 同步。
 - **親子遊樂地圖版面重設**：極簡工具殼（去行銷 header／hero）；卡片｜地圖互斥瀏覽；縣市／類型 chip 篩選；詳情來源摺疊。
+- **親子遊樂地圖 UX 精煉（CRITICAL-1／2 A）**：compact SiteHeader；卡片殼可 SSR、Leaflet 僅地圖 tab；`主題樂園` type 與 indoor 契約；預設台北市；chip 選取態／條件摘要／coverage 同源；零結果視野與 zoom ≥44px。
 - **手機宇宙地圖底部島選擇列（IslandPickerStrip）**：≤480px 世界層橫滑大 chip（圖＋名、觸控 ≥56×72）；點擊走既有進島路由，不動 `useMapCamera`／`ZoneSheet`。MapControls 隨 `--map-picker-offset` 抬高。
 - **ep-23 全幕繪本 + 小紅賽車的爸爸定裝**：26 幕（雪山隧道）；俏皮翹鬍子爸爸定裝；禁手；場景公里牌整數例外於場景 negative；23／24 頁序對調（慶祝↔風景）。
 - **PLAY-IA-6：暫停層「回遊樂園」出口**：繽紛方塊與車車大冒險的暫停覆蓋層在「繼續」下方補 `href="/games"` 弱 CTA，對齊抬頭文案；其餘無 React 暫停層的遊戲不動。

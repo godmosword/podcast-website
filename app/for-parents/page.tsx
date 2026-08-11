@@ -11,6 +11,7 @@ import {
   parentLandingFaqs,
   representativeParentStories,
 } from "@/lib/for-parents";
+import { coverageHeadline } from "@/lib/playground-coverage";
 import { breadcrumbListJsonLd, faqPageJsonLd } from "@/lib/json-ld";
 import { STATIC_PAGE_MODIFIED_DATES } from "@/lib/page-freshness";
 import { visibleSocials } from "@/lib/social";
@@ -38,6 +39,7 @@ export default function ForParentsPage() {
   const representativeStories = representativeParentStories();
   const coListenStories = parentCoListenStories();
   const threads = visibleSocials().find((s) => s.icon === "threads");
+  const playMapCoverage = coverageHeadline();
 
   return (
     <main className={styles.main}>
@@ -137,7 +139,7 @@ export default function ForParentsPage() {
             <h3 id="play-map-heading">附近哪裡適合放電？</h3>
             <p>
               用地圖找適合 3–8 歲的公園與室內樂園，可依室內／免費篩選，並一鍵開啟 Google
-              地圖導航。目前收錄台北、新北、基隆、桃園，其他縣市陸續補上。
+              地圖導航。{playMapCoverage}。
             </p>
             <Link href="/for-parents/play-map" className={styles.toolCta}>
               開啟親子遊樂地圖 →

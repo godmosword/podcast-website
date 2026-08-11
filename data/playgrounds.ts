@@ -7,9 +7,9 @@
 export type PlaygroundType =
   | "公園"
   | "室內樂園"
+  | "主題樂園"
   | "博物館"
   | "農場"
-  | "室內放電"
   | "其他";
 
 export type PlaygroundSourceKind = "official" | "gov" | "editorial";
@@ -320,7 +320,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     lat: 25.0972,
     lng: 121.5156,
     address: "台北市士林區承德路五段55號",
-    type: "室內樂園",
+    type: "主題樂園",
     ageRange: [3, 8],
     free: true,
     indoor: false,
@@ -1173,7 +1173,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     lat: 24.8625,
     lng: 121.1690,
     address: "新竹縣湖口鄉德興路168號",
-    type: "室內樂園",
+    type: "主題樂園",
     ageRange: [3, 8],
     free: false,
     indoor: false,
@@ -1233,7 +1233,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     lat: 24.8242,
     lng: 121.1822,
     address: "新竹縣關西鎮錦山里十六張129號",
-    type: "室內樂園",
+    type: "主題樂園",
     ageRange: [3, 8],
     free: false,
     indoor: false,
@@ -1511,7 +1511,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     lat: 24.5456,
     lng: 120.7619,
     address: "苗栗縣西湖鄉三湖村店仔街1號",
-    type: "室內樂園",
+    type: "主題樂園",
     ageRange: [3, 8],
     free: false,
     indoor: false,
@@ -1688,7 +1688,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     lat: 24.3239,
     lng: 120.6989,
     address: "台中市后里區福容路8號附近",
-    type: "室內樂園",
+    type: "主題樂園",
     ageRange: [3, 8],
     free: false,
     indoor: false,
@@ -1918,7 +1918,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     lat: 23.8425,
     lng: 120.9406,
     address: "南投縣魚池鄉大林村金天巷45號",
-    type: "室內樂園",
+    type: "主題樂園",
     ageRange: [3, 8],
     free: false,
     indoor: false,
@@ -2067,7 +2067,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     lat: 23.6425,
     lng: 120.5756,
     address: "雲林縣古坑鄉永光村大湖口67號",
-    type: "室內樂園",
+    type: "主題樂園",
     ageRange: [3, 8],
     free: false,
     indoor: false,

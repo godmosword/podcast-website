@@ -85,13 +85,6 @@
   opacity: 0.94;
 }
 
-.resultCount {
-  margin: 0;
-  color: var(--ink-soft);
-  font-size: 0.9rem;
-  font-weight: 700;
-}
-
 .filters {
   display: grid;
   gap: var(--space-3);
@@ -120,9 +113,15 @@
   gap: var(--space-2);
   min-width: 0;
   overflow-x: auto;
+  overscroll-behavior-x: contain;
   padding-bottom: 2px;
   scrollbar-width: thin;
   -webkit-overflow-scrolling: touch;
+  mask-image: linear-gradient(
+    to right,
+    #000 calc(100% - 28px),
+    transparent 100%
+  );
 }
 
 .chipGroup {
@@ -148,12 +147,49 @@
 }
 
 .chip[aria-pressed="true"] {
-  border-color: var(--warm-accent, var(--accent));
-  box-shadow: inset 0 0 0 1px
-    color-mix(in srgb, var(--warm-accent, var(--accent)) 35%, transparent);
+  border-color: var(--map-chip-ink);
+  background: var(--map-chip-ink);
+  color: var(--map-chip);
+  box-shadow: var(--shadow-sm);
 }
 
 .chip:active {
+  transform: scale(0.98);
+  opacity: 0.94;
+}
+
+.filterSummary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  min-width: 0;
+}
+
+.filterSummaryText {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.clearFilters {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 2px solid var(--map-chip-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--accent-ink);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform var(--motion-press), opacity var(--motion-press);
+}
+
+.clearFilters:active {
   transform: scale(0.98);
   opacity: 0.94;
 }
@@ -210,16 +246,16 @@
   --card-accent: var(--c-sky, #6aa9e8);
 }
 
+.card[data-type="theme-park"] {
+  --card-accent: var(--c-pink, #e89bb5);
+}
+
 .card[data-type="museum"] {
   --card-accent: var(--c-lilac, #9b8fd4);
 }
 
 .card[data-type="farm"] {
   --card-accent: var(--c-yellow, #e6c35c);
-}
-
-.card[data-type="indoor-play"] {
-  --card-accent: var(--c-pink, #e89bb5);
 }
 
 .card[data-type="other"] {
@@ -305,10 +341,10 @@
   min-height: 44px;
   margin-right: var(--space-3);
   padding: 8px 14px;
-  border: 2px solid var(--map-chip-line);
+  border: 1px solid color-mix(in srgb, var(--map-chip-line) 55%, transparent);
   border-radius: 999px;
-  background: linear-gradient(var(--map-chip), var(--map-chip-2));
-  color: var(--map-chip-ink);
+  background: transparent;
+  color: var(--ink-soft);
   font-size: 0.88rem;
   font-weight: 800;
   text-decoration: none;
@@ -380,6 +416,18 @@
   font-size: 0.95rem;
   font-weight: 700;
   box-shadow: var(--shadow-sm);
+}
+
+.sheetBgHint {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .sheet {
@@ -570,6 +618,22 @@
   opacity: 0.94;
 }
 
+:global(.leaflet-control-zoom a) {
+  min-width: 44px;
+  min-height: 44px;
+  line-height: 44px;
+  border-color: var(--map-chip-line) !important;
+  background: linear-gradient(var(--map-chip), var(--map-chip-2)) !important;
+  color: var(--map-chip-ink) !important;
+}
+
+:global(.leaflet-control-zoom a:hover),
+:global(.leaflet-control-zoom a:focus) {
+  border-color: var(--map-chip-ink) !important;
+  background: var(--map-chip-ink) !important;
+  color: var(--map-chip) !important;
+}
+
 :global(.playMapMarkerHost) {
   background: transparent;
   border: none;
@@ -603,7 +667,7 @@
   }
 }
 
-@media (min-width: 960px) {
+@media (min-width: 980px) {
   .cardGrid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -633,10 +697,6 @@
   .viewTabs {
     width: 100%;
   }
-
-  .resultCount {
-    width: 100%;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -644,6 +704,7 @@
   .viewTab,
   .cardMain,
   .cardNav,
+  .clearFilters,
   .closeButton,
   .navButton,
   .placeLink,

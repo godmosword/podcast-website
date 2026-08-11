@@ -50,12 +50,21 @@
 |------|------|
 | `id` | 穩定 slug，不重複 |
 | `name`、`city`、`lat`、`lng`、`address` | 基本定位 |
-| `type` | 見 `PlaygroundType`；商業場館須用可辨識 type／tags |
-| `ageRange`、`free`、`indoor` | 家長篩選 |
+| `type` | 場館家族（`PlaygroundType`）；與 `indoor` 獨立，勿混用 |
+| `ageRange`、`free`、`indoor` | 家長篩選；`indoor` 表物理室內條件（雨天備案），非 type 別名 |
 | `sources[]` | 公開可點的依據 URL（官網、縣市政府、觀光局等） |
 | `lastVerified` | ISO 日期（`YYYY-MM-DD`），最後人工複核日 |
 
 `officialUrl` 對商業場館為必填；公園等免費場域建議填縣市開放資料或管理單位頁面。
+
+## 分類契約（type 與 indoor）
+
+- **`type`**：場館家族，供類型 chip 篩選；合法值：`公園`、`室內樂園`、`主題樂園`、`博物館`、`農場`、`其他`
+- **`indoor`**：物理上是否以室內為主（雨天備案）；與 `type` **獨立**
+- **主題樂園**：戶外或混合式主題／遊樂園（如六福村、兒童新樂園）；通常 `indoor: false`
+- **室內樂園**：以室內遊樂設施為主的商業場館（如卡司蒂樂園）；須 `indoor: true`
+- **Invariant**：`type` 字串含「室內」者必須 `indoor: true`；每個 `PlaygroundType` 至少一筆資料
+- **`tags`** 可保留「室內放電」等描述性標籤；**不得**再作為 `type` 值
 
 ## 分級覆蓋門檻（Wave 1+）
 
@@ -79,7 +88,7 @@
 - `lastWave`（最近一次資料波次，如 `wave-0`、`wave-1`）
 - `notes`（缺什麼類型、待複核場館）
 
-ledger **不**進使用者-facing UI 細節；PlayMap 僅顯示摘要狀態（例如「北北基桃與竹苗中彰投雲已上線，其他縣市陸續補上」）。
+ledger **不**進使用者-facing UI 細節；PlayMap 僅顯示摘要狀態（由 `coverageHeadline()` 產生，例如「已收錄 11 縣市、共 73 處」）。
 
 ### 波次對照（摘要）
 

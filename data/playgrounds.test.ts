@@ -6,18 +6,19 @@ import {
   listCities,
   listPlaygrounds,
   type Playground,
+  type PlaygroundType,
 } from "./playgrounds";
 import {
   assertWave1CoverageMet,
   assertWave2CoverageMet,
 } from "@/lib/playground-coverage";
 
-const VALID_TYPES = new Set([
+const VALID_TYPES = new Set<PlaygroundType>([
   "公園",
   "室內樂園",
+  "主題樂園",
   "博物館",
   "農場",
-  "室內放電",
   "其他",
 ]);
 
@@ -31,7 +32,7 @@ const SOCIAL_DOMAIN_BLACKLIST = [
   "dcard.tw",
 ];
 
-const COMMERCIAL_TYPES = new Set(["室內樂園"]);
+const COMMERCIAL_TYPES = new Set<PlaygroundType>(["室內樂園", "主題樂園"]);
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -122,6 +123,21 @@ describe("playgrounds sidecar", () => {
     const { ok, missing } = assertWave2CoverageMet();
     expect(missing, `未達門檻：${missing.join("、")}`).toEqual([]);
     expect(ok).toBe(true);
+  });
+
+  it("每個 PlaygroundType 至少一筆", () => {
+    const types = new Set(listPlaygrounds().map((item) => item.type));
+    for (const type of VALID_TYPES) {
+      expect(types.has(type), `缺少 type: ${type}`).toBe(true);
+    }
+  });
+
+  it("type 字串含「室內」⇒ indoor 為 true", () => {
+    for (const item of listPlaygrounds()) {
+      if (item.type.includes("室內")) {
+        expect(item.indoor, item.id).toBe(true);
+      }
+    }
   });
 
   it("buildGoogleMapsNavUrl 為 dir 導航格式且不含 origin", () => {

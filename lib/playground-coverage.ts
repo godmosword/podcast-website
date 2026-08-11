@@ -16,6 +16,12 @@ export type CityCoverage = {
   status: CoverageStatus;
 };
 
+/** 親子遊樂地圖預設縣市（產品常數；測試勿用 listCities()[0] 代替）。 */
+export const DEFAULT_PLAY_MAP_CITY = "台北市" as const;
+
+/** 親子遊樂地圖預設地圖中心（台北市區域）。 */
+export const DEFAULT_PLAY_MAP_CENTER: [number, number] = [25.04, 121.55];
+
 /** Tier A：六都＋新竹縣市；門檻 ≥8。 */
 const TIER_A_CITIES = new Set([
   "臺北市",
@@ -80,6 +86,15 @@ export function listCityCoverage(): CityCoverage[] {
       };
     })
     .sort((a, b) => a.city.localeCompare(b.city, "zh-Hant"));
+}
+
+/** 從縣市覆蓋表產生短摘要文案（不含波次硬編名單）。 */
+export function coverageHeadline(
+  rows: CityCoverage[] = listCityCoverage(),
+): string {
+  const cityCount = rows.length;
+  const placeCount = rows.reduce((sum, row) => sum + row.count, 0);
+  return `已收錄 ${cityCount} 縣市、共 ${placeCount} 處`;
 }
 
 /** Wave 1 必達縣市（北北基桃）。 */

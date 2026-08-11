@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import JsonLd from "@/components/JsonLd";
-import PlayMapLoader from "@/components/for-parents/PlayMapLoader";
+import PlayMap from "@/components/for-parents/PlayMap";
 import { breadcrumbListJsonLd } from "@/lib/json-ld";
 import { STATIC_PAGE_MODIFIED_DATES } from "@/lib/page-freshness";
+import { DEFAULT_PLAY_MAP_CITY } from "@/lib/playground-coverage";
+import { filterPlaygrounds } from "@/lib/playgrounds-query";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
@@ -25,6 +27,8 @@ export const metadata: Metadata = {
 };
 
 export default function PlayMapPage() {
+  const initialPlaces = filterPlaygrounds({ city: DEFAULT_PLAY_MAP_CITY });
+
   return (
     <main className={styles.main}>
       <JsonLd
@@ -34,8 +38,11 @@ export default function PlayMapPage() {
           { name: "親子遊樂地圖", url: "/for-parents/play-map" },
         ])}
       />
-      <SiteHeader />
-      <PlayMapLoader />
+      <SiteHeader variant="compact" />
+      <PlayMap
+        defaultCity={DEFAULT_PLAY_MAP_CITY}
+        initialPlaces={initialPlaces}
+      />
       <SiteFooter compact showPlatformSubscribe={false} />
     </main>
   );
