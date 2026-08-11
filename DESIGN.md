@@ -40,6 +40,7 @@ Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範
 
 - **Mobile-first**，內容欄寬 `max-width: 640px` 置中
 - **地圖／儀表板工具頁**（如 `/for-parents/play-map`、`/for-parents/dashboard`）豁免 640px 單欄限制，內容區 `max-width: 1100px` 置中，以容納地圖與並排控制
+- **親子景點頁（`/for-parents/play-map`）**：極簡工具殼（無行銷 hero／長 lede）；H1「親子遊樂地圖」在工具頂列；瀏覽互斥為 **卡片｜地圖**；縣市／類型／條件用 chip 篩選；無場館照片時以類型色點與短標籤構成卡片
 - 桌面端維持單欄，兩側留白
 - PWA：`manifest.json` + Apple Web App meta
 - Viewport 允許使用者縮放（未設 `maximum-scale` / `user-scalable=no`），方便家長放大閱讀

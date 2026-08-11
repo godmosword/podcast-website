@@ -15,16 +15,24 @@ import {
   listCities,
   type Playground,
   type PlaygroundSourceKind,
+  type PlaygroundType,
 } from "@/data/playgrounds";
-import {
-  filterPlaygrounds,
-} from "@/lib/playgrounds-query";
+import { filterPlaygrounds } from "@/lib/playgrounds-query";
 import { listCityCoverage } from "@/lib/playground-coverage";
 import styles from "./PlayMap.module.css";
 
 const DEFAULT_CENTER: [number, number] = [24.9935, 121.301];
 const DEFAULT_ZOOM = 11;
 const LEAFLET_CDN = "https://unpkg.com/leaflet@1.9.4/dist/images";
+
+const PLAYGROUND_TYPES: readonly PlaygroundType[] = [
+  "公園",
+  "室內樂園",
+  "博物館",
+  "農場",
+  "室內放電",
+  "其他",
+];
 
 const defaultMarkerIcon = L.icon({
   iconUrl: `${LEAFLET_CDN}/marker-icon.png`,
@@ -38,7 +46,7 @@ const defaultMarkerIcon = L.icon({
 
 L.Marker.prototype.options.icon = defaultMarkerIcon;
 
-type MobileView = "list" | "map";
+type BrowseView = "cards" | "map";
 
 type FitBoundsProps = {
   points: Array<[number, number]>;
@@ -73,7 +81,6 @@ function InvalidateSizeOnActive({ active }: { active: boolean }) {
 
   useEffect(() => {
     if (!active) return;
-    // 等 panelVisible 套用後再量測
     const id = window.requestAnimationFrame(() => {
       map.invalidateSize();
     });
@@ -130,6 +137,23 @@ function sourceKindLabel(kind: PlaygroundSourceKind): string {
 
 function needsCommercialNotice(place: Playground): boolean {
   return !place.free;
+}
+
+function typeDataAttr(type: PlaygroundType): string {
+  switch (type) {
+    case "公園":
+      return "park";
+    case "室內樂園":
+      return "indoor-park";
+    case "博物館":
+      return "museum";
+    case "農場":
+      return "farm";
+    case "室內放電":
+      return "indoor-play";
+    case "其他":
+      return "other";
+  }
 }
 
 type AccessibleMarkerProps = {
@@ -230,14 +254,6 @@ function PlayMapSheet({ place, onClose, panelRef }: PlayMapSheetProps) {
         {place.indoor ? "室內" : "戶外"}
       </p>
 
-      {place.tags.length > 0 ? (
-        <ul className={styles.tags}>
-          {place.tags.map((tag) => (
-            <li key={tag}>{tag}</li>
-          ))}
-        </ul>
-      ) : null}
-
       {place.tips ? (
         <p className={styles.tips}>
           <span className={styles.tipsLabel}>Tips</span>
@@ -258,8 +274,8 @@ function PlayMapSheet({ place, onClose, panelRef }: PlayMapSheetProps) {
       </p>
 
       {place.sources.length > 0 ? (
-        <section className={styles.sources} aria-label="資料來源">
-          <h3 className={styles.sourcesHeading}>資料來源</h3>
+        <details className={styles.sourcesDetails}>
+          <summary className={styles.sourcesSummary}>資料來源</summary>
           <ul className={styles.sourcesList}>
             {place.sources.map((source) => (
               <li key={`${source.kind}-${source.url}`}>
@@ -277,7 +293,7 @@ function PlayMapSheet({ place, onClose, panelRef }: PlayMapSheetProps) {
               </li>
             ))}
           </ul>
-        </section>
+        </details>
       ) : null}
 
       <div className={styles.actions}>
@@ -288,7 +304,7 @@ function PlayMapSheet({ place, onClose, panelRef }: PlayMapSheetProps) {
           rel="noopener noreferrer"
           aria-label={`開啟 Google 地圖導航前往 ${place.name}（另開視窗）`}
         >
-          開啟 Google 地圖導航
+          導航
         </a>
         <a
           className={styles.placeLink}
@@ -297,7 +313,7 @@ function PlayMapSheet({ place, onClose, panelRef }: PlayMapSheetProps) {
           rel="noopener noreferrer"
           aria-label={`在 Google 地圖只顯示 ${place.name} 位置（另開視窗）`}
         >
-          只顯示位置
+          顯示位置
         </a>
         {place.officialUrl ? (
           <a
@@ -307,7 +323,7 @@ function PlayMapSheet({ place, onClose, panelRef }: PlayMapSheetProps) {
             rel="noopener noreferrer"
             aria-label={`開啟 ${place.name} 官網（另開視窗）`}
           >
-            官方網站
+            官網
           </a>
         ) : null}
       </div>
@@ -315,43 +331,55 @@ function PlayMapSheet({ place, onClose, panelRef }: PlayMapSheetProps) {
   );
 }
 
-type PlaygroundListItemProps = {
+type PlaygroundCardProps = {
   place: Playground;
   selected: boolean;
   onSelect: (id: string, trigger: HTMLElement) => void;
 };
 
-function PlaygroundListItem({ place, selected, onSelect }: PlaygroundListItemProps) {
+function PlaygroundCard({ place, selected, onSelect }: PlaygroundCardProps) {
   return (
-    <li
-      className={[styles.listItem, selected ? styles.listItemSelected : ""]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      <button
-        type="button"
-        className={styles.listItemMain}
-        aria-pressed={selected}
-        onClick={(event) => onSelect(place.id, event.currentTarget)}
+    <li>
+      <article
+        className={[styles.card, selected ? styles.cardSelected : ""]
+          .filter(Boolean)
+          .join(" ")}
+        data-type={typeDataAttr(place.type)}
       >
-        <span className={styles.listItemName}>{place.name}</span>
-        <span className={styles.listItemMeta}>
-          {place.district ?? place.city}
-          {" · "}
-          {place.type}
-          {" · "}
-          {place.free ? "免費" : "需購票"}
-        </span>
-      </button>
-      <a
-        className={styles.listNavCta}
-        href={buildGoogleMapsNavUrl(place.lat, place.lng)}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={`導航前往 ${place.name}（另開視窗）`}
-      >
-        導航
-      </a>
+        <button
+          type="button"
+          className={styles.cardMain}
+          aria-pressed={selected}
+          onClick={(event) => onSelect(place.id, event.currentTarget)}
+        >
+          <span className={styles.cardType}>{place.type}</span>
+          <span className={styles.cardName}>{place.name}</span>
+          <span className={styles.cardMeta}>
+            {place.district ?? place.city}
+          </span>
+          <span className={styles.cardFlags}>
+            {place.free ? (
+              <span className={styles.flag}>免費</span>
+            ) : (
+              <span className={styles.flagMuted}>需購票</span>
+            )}
+            {place.indoor ? (
+              <span className={styles.flag}>室內</span>
+            ) : (
+              <span className={styles.flagMuted}>戶外</span>
+            )}
+          </span>
+        </button>
+        <a
+          className={styles.cardNav}
+          href={buildGoogleMapsNavUrl(place.lat, place.lng)}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`導航前往 ${place.name}（另開視窗）`}
+        >
+          導航
+        </a>
+      </article>
     </li>
   );
 }
@@ -362,18 +390,25 @@ export default function PlayMap() {
   const reduceMotion = usePrefersReducedMotion();
 
   const [city, setCity] = useState(() => cities[0] ?? "");
+  const [typeFilter, setTypeFilter] = useState<PlaygroundType | null>(null);
   const [indoorOnly, setIndoorOnly] = useState(false);
   const [freeOnly, setFreeOnly] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [mobileView, setMobileView] = useState<MobileView>("list");
+  const [browseView, setBrowseView] = useState<BrowseView>("cards");
 
   const lastTriggerRef = useRef<HTMLElement | null>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
   const userClosedSheetRef = useRef(false);
 
   const filtered = useMemo(
-    () => filterPlaygrounds({ city, indoorOnly, freeOnly }),
-    [city, indoorOnly, freeOnly],
+    () =>
+      filterPlaygrounds({
+        city,
+        indoorOnly,
+        freeOnly,
+        type: typeFilter ?? undefined,
+      }),
+    [city, indoorOnly, freeOnly, typeFilter],
   );
 
   const points = useMemo(
@@ -417,22 +452,109 @@ export default function PlayMap() {
 
   return (
     <div className={styles.root}>
+      <header className={styles.toolbar}>
+        <div className={styles.titleBlock}>
+          <h1 className={styles.title}>親子遊樂地圖</h1>
+          <p className={styles.coverage}>
+            北北基桃與竹苗中彰投雲已上線
+            {cityCoverage ? ` · ${cityCoverage.city} ${cityCoverage.count} 處` : ""}
+          </p>
+        </div>
+
+        <div
+          className={styles.viewTabs}
+          role="tablist"
+          aria-label="瀏覽方式"
+        >
+          <button
+            type="button"
+            role="tab"
+            id="play-map-tab-cards"
+            aria-selected={browseView === "cards"}
+            aria-controls="play-map-panel-cards"
+            className={[
+              styles.viewTab,
+              browseView === "cards" ? styles.viewTabActive : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            onClick={() => setBrowseView("cards")}
+          >
+            卡片
+          </button>
+          <button
+            type="button"
+            role="tab"
+            id="play-map-tab-map"
+            aria-selected={browseView === "map"}
+            aria-controls="play-map-panel-map"
+            className={[
+              styles.viewTab,
+              browseView === "map" ? styles.viewTabActive : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            onClick={() => setBrowseView("map")}
+          >
+            地圖
+          </button>
+        </div>
+
+        <p className={styles.resultCount} aria-live="polite">
+          {resultLabel}
+        </p>
+      </header>
+
       <form className={styles.filters} aria-label="遊樂地點篩選">
-        <label className={styles.field}>
-          <span className={styles.fieldLabel}>縣市</span>
-          <select
-            className={styles.select}
-            value={city}
-            onChange={(event) => setCity(event.target.value)}
+        <div className={styles.facetRow}>
+          <span className={styles.facetLabel}>縣市</span>
+          <div
+            className={styles.chipScroller}
+            role="group"
             aria-label="依縣市篩選"
           >
             {cities.map((item) => (
-              <option key={item} value={item}>
+              <button
+                key={item}
+                type="button"
+                className={styles.chip}
+                aria-pressed={city === item}
+                onClick={() => setCity(item)}
+              >
                 {item}
-              </option>
+              </button>
             ))}
-          </select>
-        </label>
+          </div>
+        </div>
+
+        <div className={styles.facetRow}>
+          <span className={styles.facetLabel}>類型</span>
+          <div
+            className={styles.chipScroller}
+            role="group"
+            aria-label="依類型篩選"
+          >
+            <button
+              type="button"
+              className={styles.chip}
+              aria-pressed={typeFilter === null}
+              onClick={() => setTypeFilter(null)}
+            >
+              全部
+            </button>
+            {PLAYGROUND_TYPES.map((item) => (
+              <button
+                key={item}
+                type="button"
+                className={styles.chip}
+                aria-pressed={typeFilter === item}
+                onClick={() => setTypeFilter(item)}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+        </div>
 
         <div className={styles.chipGroup} role="group" aria-label="進階篩選">
           <button
@@ -452,84 +574,25 @@ export default function PlayMap() {
             免費
           </button>
         </div>
-
-        <p className={styles.resultCount} aria-live="polite">
-          {resultLabel}
-        </p>
       </form>
-
-      {cityCoverage ? (
-        <p className={styles.coverage}>
-          目前收錄：{cityCoverage.city} {cityCoverage.count} 處
-          {cityCoverage.status === "partial"
-            ? "（持續擴充中）"
-            : cityCoverage.status === "met"
-              ? "（本縣市已達起步覆蓋）"
-              : ""}
-          {" · "}
-          北北基桃與竹苗中彰投雲已上線，其他縣市陸續補上
-        </p>
-      ) : null}
-
-      <div
-        className={styles.viewTabs}
-        role="tablist"
-        aria-label="列表或地圖檢視"
-      >
-        <button
-          type="button"
-          role="tab"
-          id="play-map-tab-list"
-          aria-selected={mobileView === "list"}
-          aria-controls="play-map-panel-list"
-          className={[
-            styles.viewTab,
-            mobileView === "list" ? styles.viewTabActive : "",
-          ]
-            .filter(Boolean)
-            .join(" ")}
-          onClick={() => setMobileView("list")}
-        >
-          列表
-        </button>
-        <button
-          type="button"
-          role="tab"
-          id="play-map-tab-map"
-          aria-selected={mobileView === "map"}
-          aria-controls="play-map-panel-map"
-          className={[
-            styles.viewTab,
-            mobileView === "map" ? styles.viewTabActive : "",
-          ]
-            .filter(Boolean)
-            .join(" ")}
-          onClick={() => setMobileView("map")}
-        >
-          地圖
-        </button>
-      </div>
 
       <div className={styles.content}>
         <section
-          id="play-map-panel-list"
+          id="play-map-panel-cards"
           role="tabpanel"
-          aria-labelledby="play-map-tab-list"
-          className={[
-            styles.listPanel,
-            mobileView === "list" ? styles.panelVisible : styles.panelHiddenMobile,
-          ]
-            .filter(Boolean)
-            .join(" ")}
+          aria-labelledby="play-map-tab-cards"
+          aria-label="卡片"
+          hidden={browseView !== "cards"}
+          className={styles.cardsPanel}
         >
           {filtered.length === 0 ? (
             <p className={styles.listEmpty} role="status">
               目前沒有符合條件的地點，試試放寬篩選。
             </p>
           ) : (
-            <ul className={styles.list}>
+            <ul className={styles.cardGrid}>
               {filtered.map((place) => (
-                <PlaygroundListItem
+                <PlaygroundCard
                   key={place.id}
                   place={place}
                   selected={selectedId === place.id}
@@ -544,44 +607,43 @@ export default function PlayMap() {
           id="play-map-panel-map"
           role="tabpanel"
           aria-labelledby="play-map-tab-map"
-          className={[
-            styles.mapShell,
-            mobileView === "map" ? styles.panelVisible : styles.panelHiddenMobile,
-          ]
-            .filter(Boolean)
-            .join(" ")}
+          aria-label="地圖"
+          hidden={browseView !== "map"}
+          className={styles.mapShell}
         >
-          <MapContainer
-            className={styles.map}
-            center={DEFAULT_CENTER}
-            zoom={DEFAULT_ZOOM}
-            scrollWheelZoom={false}
-            aria-label="親子遊樂地圖"
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <InvalidateSizeOnActive active={mobileView === "map"} />
-            <FitBounds points={points} animate={!reduceMotion} />
-            {filtered.map((place) => (
-              <AccessibleMarker
-                key={place.id}
-                place={place}
-                selected={selectedId === place.id}
-                onSelect={handleSelect}
-              />
-            ))}
-          </MapContainer>
+          {browseView === "map" ? (
+            <>
+              <MapContainer
+                className={styles.map}
+                center={DEFAULT_CENTER}
+                zoom={DEFAULT_ZOOM}
+                scrollWheelZoom={false}
+                aria-label="親子遊樂地點地圖"
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <InvalidateSizeOnActive active={browseView === "map"} />
+                <FitBounds points={points} animate={!reduceMotion} />
+                {filtered.map((place) => (
+                  <AccessibleMarker
+                    key={place.id}
+                    place={place}
+                    selected={selectedId === place.id}
+                    onSelect={handleSelect}
+                  />
+                ))}
+              </MapContainer>
 
-          <p className={styles.mapHint}>
-            捲動頁面瀏覽地圖；雙指或工具列可縮放。
-          </p>
+              <p className={styles.mapHint}>雙指或工具列可縮放</p>
 
-          {filtered.length === 0 ? (
-            <p className={styles.empty} role="status">
-              目前沒有符合條件的地點，試試放寬篩選。
-            </p>
+              {filtered.length === 0 ? (
+                <p className={styles.empty} role="status">
+                  目前沒有符合條件的地點，試試放寬篩選。
+                </p>
+              ) : null}
+            </>
           ) : null}
         </div>
       </div>

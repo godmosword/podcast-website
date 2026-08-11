@@ -11,7 +11,7 @@ async function waitForPlayMapReady(page: import("@playwright/test").Page) {
 }
 
 test.describe("親子遊樂地圖", () => {
-  test("頁面載入、結果數、列表與詳情抽屜", async ({ page }) => {
+  test("頁面載入、結果數、卡片與詳情抽屜", async ({ page }) => {
     test.setTimeout(60_000);
     await page.goto("/for-parents/play-map");
 
@@ -21,21 +21,15 @@ test.describe("親子遊樂地圖", () => {
 
     await waitForPlayMapReady(page);
 
-    await expect(page.getByText(/目前收錄：/)).toBeVisible();
+    await expect(page.getByText(/北北基桃與竹苗中彰投雲已上線/)).toBeVisible();
 
-    const firstListButton = page
-      .locator("#play-map-panel-list ul button")
-      .first();
-    await expect(firstListButton).toBeVisible({ timeout: 15_000 });
+    const cardsPanel = page.locator("#play-map-panel-cards");
+    const firstCardButton = cardsPanel.getByRole("button").first();
+    await expect(firstCardButton).toBeVisible({ timeout: 15_000 });
 
-    const placeName = (
-      await firstListButton.locator("span").first().textContent()
-    )?.trim();
-    expect(placeName).toBeTruthy();
+    await firstCardButton.click();
 
-    await firstListButton.click();
-
-    const sheet = page.getByRole("region", { name: `${placeName} 詳情` });
+    const sheet = page.getByRole("region", { name: /詳情$/ });
     await expect(sheet).toBeVisible();
     await expect(
       sheet.getByRole("button", { name: "關閉地點詳情" }),

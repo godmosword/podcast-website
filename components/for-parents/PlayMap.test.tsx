@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React from "react";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { listCities } from "@/data/playgrounds";
 import { filterPlaygrounds } from "@/lib/playgrounds-query";
@@ -57,11 +57,23 @@ afterEach(() => {
 });
 
 describe("PlayMap", () => {
-  it("預設選取第一個縣市", () => {
+  it("預設選取第一個縣市與卡片瀏覽", () => {
     render(<PlayMap />);
-    const select = screen.getByLabelText("依縣市篩選") as HTMLSelectElement;
-    expect(select.value).toBe(listCities()[0]);
-    expect(select.value).not.toBe("全部");
+    expect(
+      screen.getByRole("heading", { level: 1, name: "親子遊樂地圖" }),
+    ).toBeTruthy();
+
+    const cityGroup = screen.getByRole("group", { name: "依縣市篩選" });
+    const firstCity = listCities()[0];
+    const pressed = within(cityGroup).getByRole("button", { name: firstCity });
+    expect(pressed.getAttribute("aria-pressed")).toBe("true");
+
+    expect(screen.getByRole("tab", { name: "卡片" }).getAttribute("aria-selected")).toBe(
+      "true",
+    );
+    expect(screen.getByRole("tabpanel", { name: "卡片" }).hasAttribute("hidden")).toBe(
+      false,
+    );
   });
 
   it("切換免費篩選會改變結果數", () => {
@@ -75,6 +87,32 @@ describe("PlayMap", () => {
     fireEvent.click(screen.getByRole("button", { name: "免費" }));
 
     expect(screen.getByText(`找到 ${freeCount} 個地點`)).toBeTruthy();
+  });
+
+  it("類型篩選會縮小結果", () => {
+    render(<PlayMap />);
+    const city = listCities()[0];
+    const parkCount = filterPlaygrounds({ city, type: "公園" }).length;
+
+    fireEvent.click(screen.getByRole("button", { name: "公園" }));
+
+    expect(screen.getByText(`找到 ${parkCount} 個地點`)).toBeTruthy();
+  });
+
+  it("可切換至地圖瀏覽", () => {
+    const { container } = render(<PlayMap />);
+    fireEvent.click(screen.getByRole("tab", { name: "地圖" }));
+
+    expect(screen.getByRole("tab", { name: "地圖" }).getAttribute("aria-selected")).toBe(
+      "true",
+    );
+    expect(container.querySelector("#play-map-panel-map")?.hasAttribute("hidden")).toBe(
+      false,
+    );
+    expect(container.querySelector("#play-map-panel-cards")?.hasAttribute("hidden")).toBe(
+      true,
+    );
+    expect(screen.getByTestId("map-container")).toBeTruthy();
   });
 
   it("開啟 Sheet 後可按關閉還原", () => {
@@ -109,10 +147,9 @@ describe("PlayMap", () => {
     ).toBeNull();
   });
 
-  it("涵蓋區顯示北北基桃與竹苗中彰投雲覆蓋文案", () => {
+  it("涵蓋區顯示短文案", () => {
     render(<PlayMap />);
     expect(screen.getByText(/北北基桃與竹苗中彰投雲已上線/)).toBeTruthy();
-    expect(screen.getByText(/目前收錄：/)).toBeTruthy();
   });
 
   it("篩選導致 Sheet 關閉時不搶 focus", () => {
