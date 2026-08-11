@@ -50,6 +50,8 @@
 
 | 日期 | 命令／模型 | 症狀（exit code／timeout／額度／輸出品質） | 處置 |
 |------|------------|---------------------------------------------|------|
+| 2026-08-10 | `cursor-agent -p --model cursor-grok-4.5-high-fast --mode ask`（Claude Code 對抗審） | `Authentication required. Please run 'agent login' first, or set CURSOR_API_KEY` | 依探活表改備援 `grok -p ... -m grok-4.5`；備援同樣未登入（見下列）→ 本輪標**對抗審缺席／對抗性降級**；請使用者執行 `cursor-agent login` 或設 `CURSOR_API_KEY` |
+| 2026-08-10 | `grok models`（Grok CLI 備援） | `You are not authenticated`（可用清單仍列 `grok-4.5`） | 未頂替其他模型；提醒使用者 `grok login --device-auth`。**注意**：與 07-15／07-16 同症狀，30 天內若再現一次即維持缺席判定 |
 | 2026-08-08 | Task `model=claude-opus-4-8-thinking-medium`（Cursor） | `Invalid model selection`；允許清單僅 `claude-opus-5-thinking-high` 等（同 07-31） | **已解除（2026-08-08）**：active 路由改 `claude-opus-5-thinking-high`；舊 4.8 slug 僅留修訂／FAILURES 歷史 |
 | 2026-07-31 | Task `model=claude-opus-4-8-thinking-medium`（Cursor） | `Invalid model selection`；允許清單僅 `claude-opus-5-thinking-high` 等 | **已解除（2026-08-08）**：同上；勿再派 4.8 slug |
 | 2026-07-31 | Cursor Agent + `illustrate --scene`／自寫 regen（ep-23） | 使用者要修車道／標示後，agent **未等確認**自行多輪重抽（含 timeout 後再續跑），圖像 API 費用失控 | 紅線寫入 alwaysApply `podcast.mdc`、`AGENT-DOMAIN.md`、`EPISODE-WORKFLOW.md`「審圖與重抽」；整集一輪即停，重抽須先列幕號等文字確認 |
