@@ -18,9 +18,13 @@ const VALID_TYPES = new Set<PlaygroundType>([
   "室內樂園",
   "主題樂園",
   "博物館",
+  "動物園",
   "農場",
   "其他",
 ]);
+
+/** 由 PlayMap 元件統一渲染的固定提示；`tips` 不得重複（見 docs/PLAY-MAP-EDITORIAL.md）。 */
+const UI_VOLATILITY_NOTICE = "票價與營業時間易變動，出發前請以官網為準。";
 
 const VALID_SOURCE_KINDS = new Set(["official", "gov", "editorial"]);
 
@@ -30,7 +34,22 @@ const SOCIAL_DOMAIN_BLACKLIST = [
   "instagram.com",
   "facebook.com",
   "dcard.tw",
+  // 商業旅遊入口不算官方來源（editorial 契約：官網／公部門開放資料／場館官方頁）
+  "travelking.com.tw",
 ];
+
+/**
+ * 2026-08-11 全量連通性稽核抓到的失效網域（多為拼字錯誤或站台搬遷）。
+ * 靜態測試無法驗證連通性（CI 不打外網），改以「不得再出現」擋住回歸。
+ * 右側為當時查證到的正確網域。
+ */
+const RETIRED_DOMAINS: Record<string, string> = {
+  "tmoca.tycg.gov.tw": "tmofa.tycg.gov.tw（桃園市立美術館）",
+  "www.puhsin.com.tw": "www.pushin-ranch.com（埔心牧場）",
+  "museum.taipei.gov.tw": "waterpark.water.gov.taipei（臺北自來水園區）",
+  "zoo.hccg.gov.tw": "zoo-info.hccg.gov.tw（新竹市立動物園）",
+  "tour.klcg.gov.tw": "travel.klcg.gov.tw（基隆旅遊網）",
+};
 
 const COMMERCIAL_TYPES = new Set<PlaygroundType>(["室內樂園", "主題樂園"]);
 
@@ -47,6 +66,11 @@ function assertSourceUrl(url: string, id: string): void {
   for (const domain of SOCIAL_DOMAIN_BLACKLIST) {
     expect(parsed.hostname.includes(domain), `${id} ${url}`).toBe(false);
   }
+  const retiredHint = RETIRED_DOMAINS[parsed.hostname];
+  expect(
+    retiredHint,
+    `${id} 使用了已失效網域 ${parsed.hostname}，請改用 ${retiredHint}`,
+  ).toBeUndefined();
 }
 
 function assertPlaygroundShape(item: Playground): void {
@@ -69,6 +93,11 @@ function assertPlaygroundShape(item: Playground): void {
     expect(VALID_SOURCE_KINDS.has(source.kind), item.id).toBe(true);
     expect(source.name.trim().length, item.id).toBeGreaterThan(0);
     assertSourceUrl(source.url, item.id);
+  }
+
+  // officialUrl 過去沒被驗證，2026-08-11 稽核時 4 個失效網域有 2 個就藏在這裡
+  if (item.officialUrl !== undefined) {
+    assertSourceUrl(item.officialUrl, `${item.id} officialUrl`);
   }
 
   expect(ISO_DATE_PATTERN.test(item.lastVerified), item.id).toBe(true);
@@ -104,13 +133,20 @@ describe("playgrounds sidecar", () => {
     expect(getPlayground("does-not-exist")).toBeUndefined();
   });
 
-  it("listCities 去重且排序", () => {
+  it("listCities 去重且依由北到南排序", () => {
     const cities = listCities();
     expect(cities.length).toBeGreaterThan(0);
-    expect(cities).toEqual([...new Set(cities)].sort((a, b) => a.localeCompare(b, "zh-Hant")));
+    expect(cities).toEqual([...new Set(cities)]);
     for (const city of cities) {
       expect(listPlaygrounds().some((item) => item.city === city)).toBe(true);
     }
+
+    // 北到南的相對順序（字典序會排成 台中→台北→南投→苗栗，對家長無意義）
+    const order = (city: string) => cities.indexOf(city);
+    expect(order("基隆市")).toBeLessThan(order("台北市"));
+    expect(order("台北市")).toBeLessThan(order("桃園市"));
+    expect(order("桃園市")).toBeLessThan(order("台中市"));
+    expect(order("台中市")).toBeLessThan(order("雲林縣"));
   });
 
   it("Wave 1 北北基桃各縣市達覆蓋門檻", () => {
@@ -129,6 +165,32 @@ describe("playgrounds sidecar", () => {
     const types = new Set(listPlaygrounds().map((item) => item.type));
     for (const type of VALID_TYPES) {
       expect(types.has(type), `缺少 type: ${type}`).toBe(true);
+    }
+  });
+
+  it("tips 不得重複 UI 固定票價提示", () => {
+    for (const item of listPlaygrounds()) {
+      expect(
+        item.tips?.includes(UI_VOLATILITY_NOTICE) ?? false,
+        `${item.id} 的 tips 重複了元件已渲染的固定提示`,
+      ).toBe(false);
+    }
+  });
+
+  it("需購票場館必有 officialUrl 或 official 來源", () => {
+    for (const item of listPlaygrounds()) {
+      if (item.free) continue;
+      const hasOfficial =
+        Boolean(item.officialUrl) ||
+        item.sources.some((source) => source.kind === "official");
+      expect(hasOfficial, `${item.id} 需購票但缺 official 來源`).toBe(true);
+    }
+  });
+
+  it("feeNote 若存在則為非空字串", () => {
+    for (const item of listPlaygrounds()) {
+      if (item.feeNote === undefined) continue;
+      expect(item.feeNote.trim().length, item.id).toBeGreaterThan(0);
     }
   });
 

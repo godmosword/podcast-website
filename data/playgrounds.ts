@@ -9,8 +9,20 @@ export type PlaygroundType =
   | "室內樂園"
   | "主題樂園"
   | "博物館"
+  | "動物園"
   | "農場"
   | "其他";
+
+/** 類型 chip 的顯示順序；同時作為 URL `type` 參數的合法值白名單。 */
+export const PLAYGROUND_TYPES: readonly PlaygroundType[] = [
+  "公園",
+  "室內樂園",
+  "主題樂園",
+  "博物館",
+  "動物園",
+  "農場",
+  "其他",
+];
 
 export type PlaygroundSourceKind = "official" | "gov" | "editorial";
 
@@ -33,6 +45,11 @@ export type Playground = {
   type: PlaygroundType;
   ageRange: [number, number];
   free: boolean;
+  /**
+   * 分層收費說明（選填）。`free` 只表達「一般家庭是否需付費入場」，
+   * 幼童免票、常設展免費／特展另收費等細節寫在這裡，顯示於地點詳情。
+   */
+  feeNote?: string;
   indoor: boolean;
   facilities: string[];
   tags: string[];
@@ -88,7 +105,7 @@ const PLAYGROUNDS: readonly Playground[] = [
       {
         kind: "gov",
         name: "桃園市政府",
-        url: "https://www.tycg.gov.tw/News_Content.aspx?n=10&s=639822",
+        url: "https://travel.tycg.gov.tw/zh-tw/travel/attraction/1532",
       },
       {
         kind: "gov",
@@ -98,10 +115,10 @@ const PLAYGROUNDS: readonly Playground[] = [
       {
         kind: "editorial",
         name: "桃園市政府新聞稿",
-        url: "https://www.tycg.gov.tw/News_Content.aspx?n=10&s=639822",
+        url: "https://travel.tycg.gov.tw/zh-tw/travel/attraction/1532",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-11",
   },
   {
     id: "ty-chingtang",
@@ -127,10 +144,10 @@ const PLAYGROUNDS: readonly Playground[] = [
       {
         kind: "editorial",
         name: "桃園市政府觀光導覽",
-        url: "https://travel.tycg.gov.tw/zh-tw/event/detail/1015",
+        url: "https://travel.tycg.gov.tw/zh-tw/travel/attraction/506",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-11",
   },
   {
     id: "ty-yangming",
@@ -176,12 +193,12 @@ const PLAYGROUNDS: readonly Playground[] = [
     facilities: ["展覽", "創作體驗", "洗手間", "親子廁所"],
     tags: ["室內", "免費入場", "雨天備案"],
     tips: "部分體驗活動需現場登記或另收費，出發前可查官網當期活動。",
-    officialUrl: "https://tmoca.tycg.gov.tw/",
+    officialUrl: "https://tmofa.tycg.gov.tw/",
     sources: [
       {
         kind: "official",
         name: "桃園市立兒童美術館",
-        url: "https://tmoca.tycg.gov.tw/",
+        url: "https://tmofa.tycg.gov.tw/",
       },
       {
         kind: "gov",
@@ -189,7 +206,7 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://culture.tycg.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-11",
   },
   {
     id: "ty-casti",
@@ -205,18 +222,13 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["球池", "溜滑梯", "角色扮演區", "洗手間"],
     tags: ["室內放電", "雨天備案", "需購票"],
-    tips: "假日建議先查票價與營業時間；襪子通常要自備或現場購買。票價與營業時間易變動，出發前請以官網為準。",
+    tips: "假日建議先查票價與營業時間；襪子通常要自備或現場購買。",
     officialUrl: "https://castellaland.com/",
     sources: [
       {
         kind: "official",
         name: "卡司．蒂菈樂園",
         url: "https://castellaland.com/",
-      },
-      {
-        kind: "editorial",
-        name: "TravelKing 旅遊王",
-        url: "https://www.travelking.com.tw/tourguide/scenery105513.html",
       },
     ],
     lastVerified: "2026-08-09",
@@ -236,13 +248,13 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["餵牛體驗", "牧場小徑", "DIY 體驗", "洗手間"],
     tags: ["農場", "餵動物", "親子體驗"],
-    tips: "戶外活動多，建議防曬防蚊；餵食請依現場指引。票價與營業時間易變動，出發前請以官網為準。",
-    officialUrl: "https://www.puhsin.com.tw/",
+    tips: "戶外活動多，建議防曬防蚊；餵食請依現場指引。",
+    officialUrl: "https://www.pushin-ranch.com/",
     sources: [
       {
         kind: "official",
         name: "埔心牧場",
-        url: "https://www.puhsin.com.tw/",
+        url: "https://www.pushin-ranch.com/",
       },
       {
         kind: "gov",
@@ -250,7 +262,7 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://travel.tycg.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-11",
   },
   {
     id: "ty-xpark",
@@ -266,7 +278,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["水族展示", "互動體驗", "親子廁所", "餐飲"],
     tags: ["室內", "雨天備案", "需購票"],
-    tips: "建議平日或開園初入場，動線較順；推車可借但數量有限。票價與營業時間易變動，出發前請以官網為準。",
+    tips: "建議平日或開園初入場，動線較順；推車可借但數量有限。",
     officialUrl: "https://www.xpark.com.tw/",
     sources: [
       {
@@ -322,11 +334,12 @@ const PLAYGROUNDS: readonly Playground[] = [
     address: "台北市士林區承德路五段55號",
     type: "主題樂園",
     ageRange: [3, 8],
-    free: true,
+    free: false,
+    feeNote: "入園全票 30 元，未滿 7 歲免費；遊樂設施另購遊樂券。",
     indoor: false,
     facilities: ["遊樂設施", "餐飲", "親子廁所", "置物櫃"],
     tags: ["遊樂設施", "需另購遊樂券", "捷運友善"],
-    tips: "園區免費入場，遊樂設施需購券；假日人潮多，可早到排熱門設施。",
+    tips: "入園與遊樂設施分開收費；假日人潮多，可早到排熱門設施。",
     officialUrl: "https://www.tcap.taipei/",
     sources: [
       {
@@ -340,7 +353,7 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://www.gov.taipei/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-11",
   },
   {
     id: "tp-zoo",
@@ -350,13 +363,13 @@ const PLAYGROUNDS: readonly Playground[] = [
     lat: 24.9983,
     lng: 121.5806,
     address: "台北市文山區新光路二段30號",
-    type: "其他",
+    type: "動物園",
     ageRange: [3, 8],
     free: false,
     indoor: false,
     facilities: ["動物展示", "遊園車", "親子廁所", "餐飲"],
     tags: ["動物", "爬山", "需購票"],
-    tips: "園區坡道多，推車或穿好走的鞋；貓空纜車可搭配規劃半日遊。票價與營業時間易變動，出發前請以官網為準。",
+    tips: "園區坡道多，推車或穿好走的鞋；貓空纜車可搭配規劃半日遊。",
     officialUrl: "https://www.zoo.gov.taipei/",
     sources: [
       {
@@ -386,7 +399,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["互動展", "3D 劇院", "親子廁所", "餐飲"],
     tags: ["室內", "雨天備案", "需購票"],
-    tips: "展區分樓層，低齡兒童可先從一樓互動區開始。票價與營業時間易變動，出發前請以官網為準。",
+    tips: "展區分樓層，低齡兒童可先從一樓互動區開始。",
     officialUrl: "https://www.ntsec.gov.tw/",
     sources: [
       {
@@ -416,13 +429,13 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["水資源展", "親水設施", "親子廁所", "餐飲"],
     tags: ["室內", "玩水", "需購票"],
-    tips: "親水區建議多帶一套衣物；博物館與親水區票券分開販售。票價與營業時間易變動，出發前請以官網為準。",
-    officialUrl: "https://museum.taipei.gov.tw/",
+    tips: "親水區建議多帶一套衣物；博物館與親水區票券分開販售。",
+    officialUrl: "https://waterpark.water.gov.taipei/",
     sources: [
       {
         kind: "official",
         name: "臺北自來水園區",
-        url: "https://museum.taipei.gov.tw/",
+        url: "https://waterpark.water.gov.taipei/",
       },
       {
         kind: "gov",
@@ -430,7 +443,7 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://www.gov.taipei/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-11",
   },
   {
     id: "tp-da-an-park",
@@ -504,7 +517,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["天文展", "球幕劇場", "親子廁所", "餐飲"],
     tags: ["室內", "雨天備案", "需購票"],
-    tips: "球幕場次固定，建議先查放映表再排時間。票價與營業時間易變動，出發前請以官網為準。",
+    tips: "球幕場次固定，建議先查放映表再排時間。",
     officialUrl: "https://www.tam.gov.taipei/",
     sources: [
       {
@@ -589,11 +602,12 @@ const PLAYGROUNDS: readonly Playground[] = [
     address: "新北市八里區博物館路53號",
     type: "博物館",
     ageRange: [3, 8],
-    free: true,
+    free: false,
+    feeNote: "全票 80 元；新北市民、未滿 12 歲兒童免費入館。",
     indoor: true,
     facilities: ["常設展", "考古體驗", "親子廁所", "停車場"],
-    tags: ["室內", "免費入場", "雨天備案"],
-    tips: "常設展免費，特展可能另收費；戶外瞭望台風大記得加外套。",
+    tags: ["室內", "雨天備案"],
+    tips: "特展可能另收費；戶外瞭望台風大記得加外套。",
     officialUrl: "https://www.sshm.ntpc.gov.tw/",
     sources: [
       {
@@ -607,7 +621,7 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://www.ntpc.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-11",
   },
   {
     id: "nt-yingge-ceramic",
@@ -623,7 +637,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["常設展", "陶藝體驗", "親子廁所", "停車場"],
     tags: ["室內", "雨天備案", "需購票"],
-    tips: "體驗課程常需預約；館內禁止奔跑，低齡兒建議先逛一樓。票價與營業時間易變動，出發前請以官網為準。",
+    tips: "體驗課程常需預約；館內禁止奔跑，低齡兒建議先逛一樓。",
     officialUrl: "https://www.ceramics.ntpc.gov.tw/",
     sources: [
       {
@@ -653,7 +667,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["戶外雕塑", "展覽", "親子廁所", "餐飲"],
     tags: ["藝術", "戶外", "需購票"],
-    tips: "戶外步道多，推車可行但部分階梯需抱娃；海邊風大防曬。票價與營業時間易變動，出發前請以官網為準。",
+    tips: "戶外步道多，推車可行但部分階梯需抱娃；海邊風大防曬。",
     officialUrl: "https://www.juming.org.tw/",
     sources: [
       {
@@ -801,7 +815,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["常設展", "IMAX", "親子廁所", "停車場"],
     tags: ["室內", "雨天備案", "需購票"],
-    tips: "主題館分區大，低齡兒可先鎖定兒童館或深海探索；山區溫差大。票價與營業時間易變動，出發前請以官網為準。",
+    tips: "主題館分區大，低齡兒可先鎖定兒童館或深海探索；山區溫差大。",
     officialUrl: "https://www.nmmst.gov.tw/",
     sources: [
       {
@@ -831,7 +845,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["地質奇岩", "步道", "親水區", "洗手間"],
     tags: ["海邊", "地質", "需購票"],
-    tips: "潮間帶活動依現場與潮汐公告；岩石區濕滑，請牽好幼童。票價與營業時間易變動，出發前請以官網為準。",
+    tips: "潮間帶活動依現場與潮汐公告；岩石區濕滑，請牽好幼童。",
     officialUrl: "https://www.northguan-nsa.gov.tw/",
     sources: [
       {
@@ -871,10 +885,10 @@ const PLAYGROUNDS: readonly Playground[] = [
       {
         kind: "editorial",
         name: "基隆市觀光處",
-        url: "https://tour.klcg.gov.tw/",
+        url: "https://travel.klcg.gov.tw/TourContent.aspx?n=8103&s=392",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-11",
   },
   {
     id: "kl-chungcheng-park",
@@ -900,10 +914,10 @@ const PLAYGROUNDS: readonly Playground[] = [
       {
         kind: "editorial",
         name: "基隆市觀光處",
-        url: "https://tour.klcg.gov.tw/",
+        url: "https://travel.klcg.gov.tw/TourContent.aspx?n=8103&s=384",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-11",
   },
   {
     id: "kl-nuan-nuan-sports",
@@ -929,10 +943,10 @@ const PLAYGROUNDS: readonly Playground[] = [
       {
         kind: "editorial",
         name: "基隆市觀光處",
-        url: "https://tour.klcg.gov.tw/",
+        url: "https://travel.klcg.gov.tw/TourContent.aspx?n=8103&s=634",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-11",
   },
   // ── Wave 2：新竹市 ≥8 ──
   {
@@ -943,19 +957,19 @@ const PLAYGROUNDS: readonly Playground[] = [
     lat: 24.8003,
     lng: 120.9795,
     address: "新竹市東區食品路291號附近",
-    type: "其他",
+    type: "動物園",
     ageRange: [3, 8],
     free: false,
     indoor: false,
     facilities: ["動物展示", "兒童遊戲場", "親子廁所", "餐飲"],
     tags: ["動物", "市區", "需購票"],
-    tips: "園區不大適合半日遊；假日排隊較久。票價與營業時間易變動，出發前請以官網為準。",
-    officialUrl: "https://zoo.hccg.gov.tw/",
+    tips: "園區不大適合半日遊；假日排隊較久。",
+    officialUrl: "https://zoo-info.hccg.gov.tw/",
     sources: [
       {
         kind: "official",
         name: "新竹市立動物園",
-        url: "https://zoo.hccg.gov.tw/",
+        url: "https://zoo-info.hccg.gov.tw/",
       },
       {
         kind: "gov",
@@ -963,7 +977,7 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://www.hccg.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-11",
   },
   {
     id: "hc-hsinchu-park",
@@ -1148,7 +1162,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["玻璃展", "親子廁所", "周邊公園", "餐飲"],
     tags: ["室內", "雨天備案", "文化"],
-    tips: "館內勿奔跑；可與新竹公園草地放電搭配。票價與營業時間易變動，出發前請以官網為準。",
+    tips: "館內勿奔跑；可與新竹公園草地放電搭配。",
     officialUrl: "https://www.hccg.gov.tw/",
     sources: [
       {
@@ -1179,7 +1193,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["科學遊具", "戲水區", "親子廁所", "餐飲"],
     tags: ["主題樂園", "動手玩", "需購票"],
-    tips: "戶外設施多，記得防曬與換洗衣物。票價與營業時間易變動，出發前請以官網為準。",
+    tips: "戶外設施多，記得防曬與換洗衣物。",
     officialUrl: "https://www.ding-dong.com.tw/",
     sources: [
       {
@@ -1209,7 +1223,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["生態導覽", "蝴蝶館", "步道", "餐飲"],
     tags: ["生態", "賞蝶", "需購票"],
-    tips: "園區坡道與步道多，建議穿好走的鞋並防蚊。票價與營業時間易變動，出發前請以官網為準。",
+    tips: "園區坡道與步道多，建議穿好走的鞋並防蚊。",
     officialUrl: "https://green-world.com.tw/",
     sources: [
       {
@@ -1239,7 +1253,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["遊樂設施", "野生動物區", "親子廁所", "餐飲"],
     tags: ["主題樂園", "動物", "需購票"],
-    tips: "園區大，建議先排優先設施；推車友善但路程長。票價與營業時間易變動，出發前請以官網為準。",
+    tips: "園區大，建議先排優先設施；推車友善但路程長。",
     officialUrl: "https://www.leofoo.com.tw/",
     sources: [
       {
@@ -1415,7 +1429,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["餵動物", "草原", "DIY 體驗", "餐飲"],
     tags: ["農場", "餵動物", "需購票"],
-    tips: "草原日照強，請備帽子與水；餵食請依現場指引。票價與營業時間易變動，出發前請以官網為準。",
+    tips: "草原日照強，請備帽子與水；餵食請依現場指引。",
     officialUrl: "https://www.flyingcow.com.tw/",
     sources: [
       {
@@ -1517,7 +1531,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["遊樂設施", "戲水區", "親子廁所", "餐飲"],
     tags: ["主題樂園", "戲水", "需購票"],
-    tips: "戲水設施建議多帶一套衣物。票價與營業時間易變動，出發前請以官網為準。",
+    tips: "戲水設施建議多帶一套衣物。",
     officialUrl: "https://www.westlake.com.tw/",
     sources: [
       {
@@ -1548,7 +1562,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["科學展", "植物園", "親子廁所", "餐飲"],
     tags: ["室內", "雨天備案", "需購票"],
-    tips: "館區大，低齡兒可先鎖定太空劇場周邊或植物園。票價與營業時間易變動，出發前請以官網為準。",
+    tips: "館區大，低齡兒可先鎖定太空劇場周邊或植物園。",
     officialUrl: "https://www.nmns.edu.tw/",
     sources: [
       {
@@ -1694,7 +1708,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["遊樂設施", "親子廁所", "餐飲", "停車場"],
     tags: ["主題樂園", "需購票", "放電"],
-    tips: "園區與 outlet 可分區規劃；熱門設施假日排隊久。票價與營業時間易變動，出發前請以官網為準。",
+    tips: "園區與 outlet 可分區規劃；熱門設施假日排隊久。",
     officialUrl: "https://www.lihpao.com.tw/",
     sources: [
       {
@@ -1924,7 +1938,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["遊樂設施", "纜車", "原住民文化區", "餐飲"],
     tags: ["主題樂園", "纜車", "需購票"],
-    tips: "園區坡度大，建議穿好走的鞋；可搭配日月潭行程。票價與營業時間易變動，出發前請以官網為準。",
+    tips: "園區坡度大，建議穿好走的鞋；可搭配日月潭行程。",
     officialUrl: "https://www.nine.com.tw/",
     sources: [
       {
@@ -1954,7 +1968,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["青青草原", "畜牧區", "步道", "餐飲"],
     tags: ["農場", "高山", "需購票"],
-    tips: "海拔高溫差大，請備外套；草原日照強記得防曬。票價與營業時間易變動，出發前請以官網為準。",
+    tips: "海拔高溫差大，請備外套；草原日照強記得防曬。",
     officialUrl: "https://www.qingjing-farm.com.tw/",
     sources: [
       {
@@ -2042,7 +2056,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["園區步道", "展場", "餐飲", "停車場"],
     tags: ["園區", "拍照", "需購票"],
-    tips: "園區以散步與拍照為主；雨天步道濕滑請小心。票價與營業時間易變動，出發前請以官網為準。",
+    tips: "園區以散步與拍照為主；雨天步道濕滑請小心。",
     officialUrl: "https://www.paperdome.org.tw/",
     sources: [
       {
@@ -2073,7 +2087,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["遊樂設施", "親子廁所", "餐飲", "停車場"],
     tags: ["主題樂園", "需購票", "放電"],
-    tips: "園區坡度與步行距離不短，建議規劃休息節奏。票價與營業時間易變動，出發前請以官網為準。",
+    tips: "園區坡度與步行距離不短，建議規劃休息節奏。",
     officialUrl: "https://www.janfusun.com.tw/",
     sources: [
       {
@@ -2151,7 +2165,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["布袋戲展示", "體驗區", "親子廁所", "停車場"],
     tags: ["室內", "雨天備案", "文化"],
-    tips: "低齡兒適合短逛與偶戲體驗場次。票價與營業時間易變動，出發前請以官網為準。",
+    tips: "低齡兒適合短逛與偶戲體驗場次。",
     officialUrl: "https://www.yunlin.gov.tw/",
     sources: [
       {
@@ -2196,8 +2210,43 @@ export function listPlaygrounds(): readonly Playground[] {
   return PLAYGROUNDS;
 }
 
+/**
+ * 縣市 chip 的顯示順序：由北到南。
+ * 字典序（台中→台北→南投→苗栗…）對家長沒有意義，改用地理直覺排列；
+ * 未列入者退回字典序排在最後（新縣市進資料時不會消失）。
+ */
+const CITY_DISPLAY_ORDER: readonly string[] = [
+  "基隆市",
+  "台北市",
+  "新北市",
+  "桃園市",
+  "新竹市",
+  "新竹縣",
+  "苗栗縣",
+  "台中市",
+  "彰化縣",
+  "南投縣",
+  "雲林縣",
+  "嘉義市",
+  "嘉義縣",
+  "台南市",
+  "高雄市",
+  "屏東縣",
+  "宜蘭縣",
+  "花蓮縣",
+  "台東縣",
+  "澎湖縣",
+  "金門縣",
+  "連江縣",
+];
+
 export function listCities(): string[] {
-  return [...new Set(PLAYGROUNDS.map((item) => item.city))].sort((a, b) =>
-    a.localeCompare(b, "zh-Hant"),
-  );
+  return [...new Set(PLAYGROUNDS.map((item) => item.city))].sort((a, b) => {
+    const ai = CITY_DISPLAY_ORDER.indexOf(a);
+    const bi = CITY_DISPLAY_ORDER.indexOf(b);
+    if (ai !== -1 && bi !== -1) return ai - bi;
+    if (ai !== -1) return -1;
+    if (bi !== -1) return 1;
+    return a.localeCompare(b, "zh-Hant");
+  });
 }
