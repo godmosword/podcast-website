@@ -239,33 +239,40 @@
 }
 
 .card[data-type="park"] {
-  --card-accent: var(--c-mint, #6ec6a8);
+  --card-accent: var(--c-mint, #b7df9b);
 }
 
 .card[data-type="indoor-park"] {
-  --card-accent: var(--c-sky, #6aa9e8);
+  --card-accent: var(--c-sky, #8fcde8);
 }
 
 .card[data-type="theme-park"] {
-  --card-accent: var(--c-pink, #e89bb5);
+  --card-accent: var(--c-pink, #f7a8c4);
 }
 
 .card[data-type="museum"] {
-  --card-accent: var(--c-lilac, #9b8fd4);
+  --card-accent: var(--c-lilac, #c5b3e6);
+}
+
+.card[data-type="zoo"] {
+  --card-accent: var(--c-teal, #79c8c1);
 }
 
 .card[data-type="farm"] {
-  --card-accent: var(--c-yellow, #e6c35c);
+  --card-accent: var(--c-yellow, #ffd866);
 }
 
 .card[data-type="other"] {
   --card-accent: var(--ink-soft);
 }
 
+/*
+ * 選中狀態只加外框、不換底色。
+ * 原本用 color-mix(--map-chip 40%, --card)，夜間會混成 #808390，
+ * 讓卡片上的淺色字掉到 3.08:1（標題）與 1.69:1（區名）。
+ */
 .cardSelected {
-  background: color-mix(in srgb, var(--map-chip) 40%, var(--card));
-  box-shadow: var(--shadow-sm),
-    inset 0 0 0 1px color-mix(in srgb, var(--map-chip-line) 55%, transparent);
+  box-shadow: var(--shadow-sm), inset 0 0 0 2px var(--map-chip-line);
 }
 
 .cardMain {
@@ -323,7 +330,7 @@
 }
 
 .flag {
-  background: color-mix(in srgb, var(--c-mint, #6ec6a8) 22%, var(--card));
+  background: color-mix(in srgb, var(--c-mint, #b7df9b) 22%, var(--card));
   color: var(--accent-ink);
 }
 
@@ -341,10 +348,15 @@
   min-height: 44px;
   margin-right: var(--space-3);
   padding: 8px 14px;
-  border: 1px solid color-mix(in srgb, var(--map-chip-line) 55%, transparent);
+  /*
+   * 離站動作：要比 metadata 顯眼（原本用 --ink-soft 看起來像停用），
+   * 但不能沿用 chip 的奶油實色——那會讓「跳去 Google Maps」比「點開卡片看
+   * 收費與核對日」還搶眼，而且和篩選 chip 無法區分。用外框式作為中間層級。
+   */
+  border: 2px solid var(--map-chip-line);
   border-radius: 999px;
   background: transparent;
-  color: var(--ink-soft);
+  color: var(--accent-ink);
   font-size: 0.88rem;
   font-weight: 800;
   text-decoration: none;
@@ -357,19 +369,33 @@
 }
 
 .listEmpty {
-  margin: 0;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-3);
   padding: var(--space-6) var(--space-4);
   border: 1px dashed var(--hairline);
   border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.listEmptyText {
+  margin: 0;
   color: var(--ink-soft);
   font-size: 0.95rem;
   font-weight: 700;
-  text-align: center;
+}
+
+.chip:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
 }
 
 .mapShell {
   position: relative;
   isolation: isolate;
+  /* 置頂導覽列（--nav-h）會疊在地圖上緣；捲動對位時把地圖讓到它下方。 */
+  scroll-margin-top: calc(var(--nav-h) + var(--space-2));
   min-height: 58dvh;
   border: 1px solid var(--hairline);
   border-radius: var(--radius-lg);
@@ -391,7 +417,9 @@
 
 .mapHint {
   position: absolute;
-  inset: auto 12px 12px;
+  /* 下緣讓給縮放控制（左下）與 OSM attribution（右下），提示移到左上。 */
+  inset: 12px auto auto 12px;
+  max-width: calc(100% - 96px);
   z-index: 500;
   margin: 0;
   padding: 8px 12px;
@@ -406,7 +434,8 @@
 
 .empty {
   position: absolute;
-  inset: auto 16px 56px;
+  inset: auto auto 56px 16px;
+  max-width: calc(100% - 88px);
   z-index: 500;
   margin: 0;
   padding: 12px 14px;
@@ -507,6 +536,20 @@
   font-weight: 900;
 }
 
+.feeNote {
+  margin: 12px 0 0;
+  color: var(--ink);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.feeNoteLabel {
+  display: inline-block;
+  margin-right: 8px;
+  color: var(--accent-ink);
+  font-weight: 900;
+}
+
 .volatilityNotice {
   margin: 12px 0 0;
   padding: 10px 12px;
@@ -558,6 +601,9 @@
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
+  /* 觸控目標 ≥44px：來源連結原本只有約 20px 高，列間距又只有 8px。 */
+  min-height: 44px;
+  padding-block: 10px;
   gap: 8px;
   color: var(--ink);
   font-size: 0.9rem;
@@ -645,7 +691,12 @@
   height: 44px;
   padding: 0;
   border: none;
-  background: transparent url("https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png")
+  /* 自帶 Leaflet 標記圖（原始檔在 node_modules/leaflet/dist/images/），不打第三方 CDN。 */
+  background: transparent
+    image-set(
+      url("/map-pins/marker-icon.png") 1x,
+      url("/map-pins/marker-icon-2x.png") 2x
+    )
     no-repeat center bottom / 25px 41px;
   cursor: pointer;
   transition: transform var(--motion-press), opacity var(--motion-press);

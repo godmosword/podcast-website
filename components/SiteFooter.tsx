@@ -18,13 +18,22 @@ type SiteFooterProps = {
   showPlatformSubscribe?: boolean;
   /** utm_campaign：單集 slug；傳給 ConnectHub */
   campaign?: string;
+  /**
+   * 頁尾給家長的一句話。預設是播放器導向的文案；
+   * 沒有播放器的工具頁（如親子遊樂地圖）可覆寫，或傳 null 隱藏。
+   */
+  parentNote?: string | null;
 };
+
+const DEFAULT_PARENT_NOTE =
+  "給家長：點播放鈕，孩子邊看圖邊聽故事，適合睡前親子共讀。";
 
 export default function SiteFooter({
   compact = false,
   layout = "default",
   showPlatformSubscribe = true,
   campaign,
+  parentNote = DEFAULT_PARENT_NOTE,
 }: SiteFooterProps) {
   const isHome = layout === "home";
   const showPlatforms = isHome || showPlatformSubscribe;
@@ -52,9 +61,9 @@ export default function SiteFooter({
         className={`${decor.doodle}`}
         style={{ left: "10px", bottom: "8px", opacity: 0.4 }}
       />
-      <p className={styles.parentNote}>
-        給家長：點播放鈕，孩子邊看圖邊聽故事，適合睡前親子共讀。
-      </p>
+      {parentNote ? (
+        <p className={styles.parentNote}>{parentNote}</p>
+      ) : null}
 
       <div className={styles.footerConnect}>
         {isHome && (

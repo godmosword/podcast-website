@@ -7,6 +7,7 @@ import {
   Marker,
   TileLayer,
   useMap,
+  ZoomControl,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import type { Playground } from "@/data/playgrounds";
@@ -14,19 +15,6 @@ import { DEFAULT_PLAY_MAP_CENTER } from "@/lib/playground-coverage";
 import styles from "./PlayMap.module.css";
 
 const DEFAULT_ZOOM = 11;
-const LEAFLET_CDN = "https://unpkg.com/leaflet@1.9.4/dist/images";
-
-const defaultMarkerIcon = L.icon({
-  iconUrl: `${LEAFLET_CDN}/marker-icon.png`,
-  iconRetinaUrl: `${LEAFLET_CDN}/marker-icon-2x.png`,
-  shadowUrl: `${LEAFLET_CDN}/marker-shadow.png`,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
-
-L.Marker.prototype.options.icon = defaultMarkerIcon;
 
 type FitBoundsProps = {
   points: Array<[number, number]>;
@@ -72,7 +60,9 @@ function FitBounds({ points, emptyCenter, animate }: FitBoundsProps) {
       return;
     }
     map.fitBounds(L.latLngBounds(points), {
-      padding: [48, 48],
+      // 頂部多留一點：置頂導覽列可能疊在地圖上緣，避免最北標記貼邊。
+      paddingTopLeft: [48, 72],
+      paddingBottomRight: [48, 48],
       maxZoom: 14,
       animate: animate,
     });
@@ -113,6 +103,10 @@ function AccessibleMarker({ place, selected, onSelect }: AccessibleMarkerProps) 
       ref={markerRef}
       position={[place.lat, place.lng]}
       icon={icon}
+      // Leaflet 預設會給 marker 外層 host 加上 tabindex／role=button，
+      // 與 divIcon 內的真實 <button> 形成巢狀互動元素（axe nested-interactive）。
+      // 關閉後只留內層 button 可聚焦；Enter 觸發的 click 仍會冒泡到 Leaflet handler。
+      keyboard={false}
       eventHandlers={{
         click: (event) => {
           const target = event.originalEvent.target;
@@ -153,8 +147,14 @@ export default function PlayMapLeaflet({
         center={DEFAULT_PLAY_MAP_CENTER}
         zoom={DEFAULT_ZOOM}
         scrollWheelZoom={false}
+        zoomControl={false}
         aria-label="親子遊樂地點地圖"
       >
+        {/*
+          預設 topleft 會被置頂導覽列蓋住；右下則會被地點詳情面板（桌面固定於右下）
+          與 OSM attribution 佔用，因此放左下。
+        */}
+        <ZoomControl position="bottomleft" />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

@@ -11,6 +11,14 @@
 | Baloo 2 | 拉丁字母與數字 | SIL OFL 1.1 | [Google Fonts](https://fonts.google.com/specimen/Baloo+2) |
 | Gochi Hand | 手繪風拉丁標題 | SIL OFL 1.1 | [Google Fonts](https://fonts.google.com/specimen/Gochi+Hand) |
 
+## 內嵌圖形資產
+
+| 資產 | 用途 | 來源 | 授權 |
+|------|------|------|------|
+| `public/map-pins/marker-icon.png`、`marker-icon-2x.png` | 親子遊樂地圖（`/for-parents/play-map`）的地圖標記圖示 | Leaflet 1.9.4（`node_modules/leaflet/dist/images/`，原樣複製未修改） | BSD-2-Clause，見 [Leaflet LICENSE](https://github.com/Leaflet/Leaflet/blob/main/LICENSE) |
+
+自帶而非引用 CDN，是為了避免使用者瀏覽器對第三方主機發出請求。
+
 ## 商標（指示性使用）
 
 頁面上的 Apple Podcasts、Spotify、KKBOX、YouTube、LINE、Instagram、Threads、Facebook

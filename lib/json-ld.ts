@@ -1,5 +1,6 @@
 import type { Character } from "@/data/characters";
 import type { Story } from "@/data/content";
+import type { Playground } from "@/data/playgrounds";
 import { storyDateModified } from "@/data/story-dates";
 import { CHANNEL_DESCRIPTION, CHANNEL_TITLE } from "@/lib/feed-constants";
 import { siteRssUrl } from "@/lib/feed";
@@ -236,6 +237,52 @@ export function characterCreativeWorkJsonLd(
       description: `${character.vehicle}角色，${character.personality}`,
       url: `${siteUrl}/characters#${character.id}`,
       ...(character.ref ? { image: absoluteUrl(`/${character.ref}`) } : {}),
+    })),
+  };
+}
+
+/**
+ * 親子遊樂地圖的地點清單（ItemList of Place）。
+ * 卡片列表本身受篩選影響，這裡固定輸出全部收錄地點，讓各縣市名稱有穩定的結構化訊號。
+ */
+export function playgroundItemListJsonLd(places: readonly Playground[]) {
+  const siteUrl = getSiteUrl();
+  const pageUrl = `${siteUrl}/for-parents/play-map`;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "@id": `${pageUrl}#item-list`,
+    name: "親子遊樂地圖收錄地點",
+    description:
+      "適合 3–8 歲親子的公園、博物館、動物園與農場清單，含縣市、是否室內與是否免費。",
+    url: pageUrl,
+    dateModified: STATIC_PAGE_MODIFIED_DATES["/for-parents/play-map"],
+    inLanguage: LANGUAGE,
+    numberOfItems: places.length,
+    itemListOrder: "https://schema.org/ItemListUnordered",
+    itemListElement: places.map((place, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "Place",
+        "@id": `${pageUrl}#${place.id}`,
+        name: place.name,
+        address: {
+          "@type": "PostalAddress",
+          addressCountry: "TW",
+          addressLocality: place.city,
+          ...(place.district ? { addressRegion: place.district } : {}),
+          streetAddress: place.address,
+        },
+        geo: {
+          "@type": "GeoCoordinates",
+          latitude: place.lat,
+          longitude: place.lng,
+        },
+        isAccessibleForFree: place.free,
+        ...(place.officialUrl ? { url: place.officialUrl } : {}),
+      },
     })),
   };
 }

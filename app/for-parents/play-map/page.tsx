@@ -1,18 +1,25 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import SiteFooter from "@/components/SiteFooter";
-import SiteHeader from "@/components/SiteHeader";
 import JsonLd from "@/components/JsonLd";
 import PlayMap from "@/components/for-parents/PlayMap";
-import { breadcrumbListJsonLd } from "@/lib/json-ld";
+import { listPlaygrounds } from "@/data/playgrounds";
+import {
+  breadcrumbListJsonLd,
+  playgroundItemListJsonLd,
+} from "@/lib/json-ld";
 import { STATIC_PAGE_MODIFIED_DATES } from "@/lib/page-freshness";
 import { DEFAULT_PLAY_MAP_CITY } from "@/lib/playground-coverage";
-import { filterPlaygrounds } from "@/lib/playgrounds-query";
+import {
+  parsePlayMapQuery,
+  type RawPlayMapParams,
+} from "@/lib/playgrounds-query";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
-  title: "親子遊樂地圖：北北基桃與中台灣適合 3–8 歲的公園與室內樂園",
+  title: "親子遊樂地圖：北北基桃與中台灣適合 3–8 歲的公園與親子景點",
   description:
-    "用地圖快速找適合 3–8 歲小孩的公園、室內樂園與雨天備案；目前收錄北北基桃與竹苗中彰投雲，可依縣市、室內、免費篩選，並一鍵開啟 Google 地圖導航。",
+    "用地圖快速找適合 3–8 歲小孩的公園、博物館、動物園與農場；目前收錄北北基桃與竹苗中彰投雲，可依縣市、類型、室內、免費篩選，並一鍵開啟 Google 地圖導航。",
   alternates: { canonical: "/for-parents/play-map" },
   other: {
     dateModified: STATIC_PAGE_MODIFIED_DATES["/for-parents/play-map"],
@@ -20,14 +27,18 @@ export const metadata: Metadata = {
   openGraph: {
     title: "親子遊樂地圖 · 車車遊樂園",
     description:
-      "北北基桃與中台灣核心親子遊樂地點地圖：公園、室內樂園與實用 Tips，幫家長快速規劃放電行程。",
+      "北北基桃與中台灣核心親子遊樂地點地圖：公園、博物館、動物園與實用 Tips，幫家長快速規劃放電行程。",
     url: "/for-parents/play-map",
     type: "website",
   },
 };
 
-export default function PlayMapPage() {
-  const initialPlaces = filterPlaygrounds({ city: DEFAULT_PLAY_MAP_CITY });
+export default async function PlayMapPage({
+  searchParams,
+}: {
+  searchParams: Promise<RawPlayMapParams>;
+}) {
+  const query = parsePlayMapQuery(await searchParams, DEFAULT_PLAY_MAP_CITY);
 
   return (
     <main className={styles.main}>
@@ -38,12 +49,23 @@ export default function PlayMapPage() {
           { name: "親子遊樂地圖", url: "/for-parents/play-map" },
         ])}
       />
-      <SiteHeader variant="compact" />
-      <PlayMap
-        defaultCity={DEFAULT_PLAY_MAP_CITY}
-        initialPlaces={initialPlaces}
+      <JsonLd data={playgroundItemListJsonLd(listPlaygrounds())} />
+      {/* SiteNavBar（app/layout.tsx）已顯示品牌，此處不再放第二個字標。 */}
+      <Suspense fallback={null}>
+        <PlayMap
+          defaultCity={DEFAULT_PLAY_MAP_CITY}
+          initialCity={query.city}
+          initialType={query.type}
+          initialIndoorOnly={query.indoorOnly}
+          initialFreeOnly={query.freeOnly}
+          initialView={query.view}
+        />
+      </Suspense>
+      <SiteFooter
+        compact
+        showPlatformSubscribe={false}
+        parentNote="給家長：資料為人工整理，出發前請再確認官網的營業時間與收費。"
       />
-      <SiteFooter compact showPlatformSubscribe={false} />
     </main>
   );
 }

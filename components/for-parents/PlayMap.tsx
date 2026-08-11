@@ -1,16 +1,26 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   buildGoogleMapsNavUrl,
   buildGoogleMapsPlaceUrl,
   listCities,
+  listPlaygrounds,
+  PLAYGROUND_TYPES,
   type Playground,
   type PlaygroundSourceKind,
   type PlaygroundType,
 } from "@/data/playgrounds";
-import { filterPlaygrounds } from "@/lib/playgrounds-query";
+import {
+  buildPlayMapQueryString,
+  countByCity,
+  countByType,
+  filterPlaygrounds,
+  type PlayMapQuery,
+  type PlayMapView,
+} from "@/lib/playgrounds-query";
 import {
   coverageHeadline,
   DEFAULT_PLAY_MAP_CITY,
@@ -28,16 +38,27 @@ const PlayMapLeaflet = dynamic(() => import("./PlayMapLeaflet"), {
   ),
 });
 
-const PLAYGROUND_TYPES: readonly PlaygroundType[] = [
-  "公園",
-  "室內樂園",
-  "主題樂園",
-  "博物館",
-  "農場",
-  "其他",
-];
+type BrowseView = PlayMapView;
 
-type BrowseView = "cards" | "map";
+const VIEW_TABS: readonly {
+  view: BrowseView;
+  label: string;
+  id: string;
+  panelId: string;
+}[] = [
+  {
+    view: "cards",
+    label: "卡片",
+    id: "play-map-tab-cards",
+    panelId: "play-map-panel-cards",
+  },
+  {
+    view: "map",
+    label: "地圖",
+    id: "play-map-tab-map",
+    panelId: "play-map-panel-map",
+  },
+];
 
 function usePrefersReducedMotion(): boolean {
   const [reduce, setReduce] = useState(false);
@@ -101,6 +122,8 @@ function typeDataAttr(type: PlaygroundType): string {
       return "theme-park";
     case "博物館":
       return "museum";
+    case "動物園":
+      return "zoo";
     case "農場":
       return "farm";
     case "其他":
@@ -170,6 +193,13 @@ function PlayMapSheet({ place, onClose, panelRef }: PlayMapSheetProps) {
         <p className={styles.tips}>
           <span className={styles.tipsLabel}>Tips</span>
           {place.tips}
+        </p>
+      ) : null}
+
+      {place.feeNote ? (
+        <p className={styles.feeNote}>
+          <span className={styles.feeNoteLabel}>收費</span>
+          {place.feeNote}
         </p>
       ) : null}
 
@@ -246,12 +276,19 @@ function PlayMapSheet({ place, onClose, panelRef }: PlayMapSheetProps) {
 type PlaygroundCardProps = {
   place: Playground;
   selected: boolean;
+  /** 不符合當前篩選：仍留在 SSR HTML（可被索引），但不進無障礙樹與視覺。 */
+  hidden: boolean;
   onSelect: (id: string, trigger: HTMLElement) => void;
 };
 
-function PlaygroundCard({ place, selected, onSelect }: PlaygroundCardProps) {
+function PlaygroundCard({
+  place,
+  selected,
+  hidden,
+  onSelect,
+}: PlaygroundCardProps) {
   return (
-    <li>
+    <li hidden={hidden}>
       <article
         className={[styles.card, selected ? styles.cardSelected : ""]
           .filter(Boolean)
@@ -298,54 +335,63 @@ function PlaygroundCard({ place, selected, onSelect }: PlaygroundCardProps) {
 
 export type PlayMapProps = {
   defaultCity?: string;
-  /** Server 預算預設縣市卡片，供 SSR 首屏對齊（client 以 filterPlaygrounds 重算）。 */
-  initialPlaces?: Playground[];
+  /** 由網址參數解析而來的首屏狀態，讓 deep link 的 SSR 與 client 一致。 */
+  initialCity?: string;
+  initialType?: PlaygroundType | null;
+  initialIndoorOnly?: boolean;
+  initialFreeOnly?: boolean;
+  initialView?: BrowseView;
 };
 
 export default function PlayMap({
   defaultCity = DEFAULT_PLAY_MAP_CITY,
-  initialPlaces,
+  initialCity,
+  initialType = null,
+  initialIndoorOnly = false,
+  initialFreeOnly = false,
+  initialView = "cards",
 }: PlayMapProps) {
   const cities = useMemo(() => listCities(), []);
   const coverage = useMemo(() => listCityCoverage(), []);
+  const allPlaces = useMemo(() => listPlaygrounds(), []);
   const reduceMotion = usePrefersReducedMotion();
+  const router = useRouter();
+  const pathname = usePathname();
 
-  const [city, setCity] = useState(defaultCity);
-  const [typeFilter, setTypeFilter] = useState<PlaygroundType | null>(null);
-  const [indoorOnly, setIndoorOnly] = useState(false);
-  const [freeOnly, setFreeOnly] = useState(false);
+  const [city, setCity] = useState(initialCity ?? defaultCity);
+  const [typeFilter, setTypeFilter] = useState<PlaygroundType | null>(
+    initialType,
+  );
+  const [indoorOnly, setIndoorOnly] = useState(initialIndoorOnly);
+  const [freeOnly, setFreeOnly] = useState(initialFreeOnly);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [browseView, setBrowseView] = useState<BrowseView>("cards");
+  const [browseView, setBrowseView] = useState<BrowseView>(initialView);
 
   const lastTriggerRef = useRef<HTMLElement | null>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
+  const cityScrollerRef = useRef<HTMLDivElement>(null);
   const userClosedSheetRef = useRef(false);
-
-  const pristineDefaults =
-    city === defaultCity &&
-    typeFilter === null &&
-    !indoorOnly &&
-    !freeOnly &&
-    initialPlaces !== undefined;
 
   const filtered = useMemo(
     () =>
-      pristineDefaults
-        ? [...initialPlaces]
-        : filterPlaygrounds({
-            city,
-            indoorOnly,
-            freeOnly,
-            type: typeFilter ?? undefined,
-          }),
-    [
-      pristineDefaults,
-      initialPlaces,
-      city,
-      indoorOnly,
-      freeOnly,
-      typeFilter,
-    ],
+      filterPlaygrounds({
+        city,
+        indoorOnly,
+        freeOnly,
+        type: typeFilter ?? undefined,
+      }),
+    [city, indoorOnly, freeOnly, typeFilter],
+  );
+
+  const matchedIds = useMemo(
+    () => new Set(filtered.map((place) => place.id)),
+    [filtered],
+  );
+
+  /** 目前縣市＋進階開關下，各類型還剩幾筆（0 筆的 chip 停用，避免點進空結果）。 */
+  const typeCounts = useMemo(
+    () => countByType({ city, indoorOnly, freeOnly }),
+    [city, indoorOnly, freeOnly],
   );
 
   const points = useMemo(
@@ -357,13 +403,16 @@ export default function PlayMap({
     ? (filtered.find((place) => place.id === selectedId) ?? null)
     : null;
 
-  const coverageByCity = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const row of coverage) {
-      map.set(row.city, row.count);
-    }
-    return map;
-  }, [coverage]);
+  /** 縣市 chip 的「· N」與類型 chip 同語意：都是「套用其他條件後的剩餘數」。 */
+  const cityCounts = useMemo(
+    () =>
+      countByCity({
+        indoorOnly,
+        freeOnly,
+        type: typeFilter ?? undefined,
+      }),
+    [indoorOnly, freeOnly, typeFilter],
+  );
 
   const cityPlaces = useMemo(
     () => filterPlaygrounds({ city }),
@@ -391,11 +440,104 @@ export default function PlayMap({
       ? `${filterSummaryParts.join(" · ")} → 0 個地點`
       : `${filterSummaryParts.join(" · ")} → ${filtered.length} 個地點`;
 
+  /**
+   * 把狀態寫回網址（沿用 StoryFilter 慣例：互動時顯式 replace，不用 mount 觸發的 effect）。
+   * 呼叫端傳「下一個值」，避免讀到尚未 commit 的 state。
+   */
+  const syncUrl = useCallback(
+    (next: Partial<PlayMapQuery>) => {
+      const qs = buildPlayMapQueryString(
+        {
+          city,
+          type: typeFilter,
+          indoorOnly,
+          freeOnly,
+          view: browseView,
+          ...next,
+        },
+        defaultCity,
+      );
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [
+      city,
+      typeFilter,
+      indoorOnly,
+      freeOnly,
+      browseView,
+      defaultCity,
+      pathname,
+      router,
+    ],
+  );
+
+  const handleSelectCity = useCallback(
+    (nextCity: string) => {
+      setCity(nextCity);
+      syncUrl({ city: nextCity });
+    },
+    [syncUrl],
+  );
+
+  const handleSelectType = useCallback(
+    (nextType: PlaygroundType | null) => {
+      setTypeFilter(nextType);
+      syncUrl({ type: nextType });
+    },
+    [syncUrl],
+  );
+
+  const handleToggleIndoor = useCallback(() => {
+    const next = !indoorOnly;
+    setIndoorOnly(next);
+    syncUrl({ indoorOnly: next });
+  }, [indoorOnly, syncUrl]);
+
+  const handleToggleFree = useCallback(() => {
+    const next = !freeOnly;
+    setFreeOnly(next);
+    syncUrl({ freeOnly: next });
+  }, [freeOnly, syncUrl]);
+
+  const handleSelectView = useCallback(
+    (next: BrowseView) => {
+      setBrowseView(next);
+      syncUrl({ view: next });
+    },
+    [syncUrl],
+  );
+
+  /** ARIA tabs 模式：方向鍵／Home／End 切換並把焦點帶到目標 tab。 */
+  const handleTabKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      const index = VIEW_TABS.findIndex((tab) => tab.view === browseView);
+      let nextIndex: number | null = null;
+
+      if (event.key === "ArrowRight") nextIndex = (index + 1) % VIEW_TABS.length;
+      else if (event.key === "ArrowLeft")
+        nextIndex = (index - 1 + VIEW_TABS.length) % VIEW_TABS.length;
+      else if (event.key === "Home") nextIndex = 0;
+      else if (event.key === "End") nextIndex = VIEW_TABS.length - 1;
+      if (nextIndex === null) return;
+
+      event.preventDefault();
+      const nextTab = VIEW_TABS[nextIndex];
+      handleSelectView(nextTab.view);
+      event.currentTarget
+        .querySelector<HTMLButtonElement>(
+          `[data-view-tab="${nextTab.view}"]`,
+        )
+        ?.focus();
+    },
+    [browseView, handleSelectView],
+  );
+
   const handleClearFilters = useCallback(() => {
     setTypeFilter(null);
     setIndoorOnly(false);
     setFreeOnly(false);
-  }, []);
+    syncUrl({ type: null, indoorOnly: false, freeOnly: false });
+  }, [syncUrl]);
 
   const handleSelect = useCallback((id: string, trigger: HTMLElement) => {
     lastTriggerRef.current = trigger;
@@ -420,6 +562,47 @@ export default function PlayMap({
     userClosedSheetRef.current = false;
   }, [selected]);
 
+  /*
+   * 上一頁／下一頁時 App Router 會保留這個 client component，只換掉 server 傳來的
+   * initial* props；useState 的初值只在 mount 取一次，因此需要逐一同步回 state，
+   * 否則網址變了畫面卻停在舊條件（沿用 StoryFilter 的「每個 prop 一個 effect」慣例）。
+   */
+  useEffect(() => {
+    if (initialCity !== undefined) setCity(initialCity);
+  }, [initialCity]);
+
+  useEffect(() => {
+    setTypeFilter(initialType);
+  }, [initialType]);
+
+  useEffect(() => {
+    setIndoorOnly(initialIndoorOnly);
+  }, [initialIndoorOnly]);
+
+  useEffect(() => {
+    setFreeOnly(initialFreeOnly);
+  }, [initialFreeOnly]);
+
+  useEffect(() => {
+    setBrowseView(initialView);
+  }, [initialView]);
+
+  // 縣市 chip 是橫向捲動列，選中的可能在畫面外（deep link 尤其）；帶它進視野。
+  useEffect(() => {
+    const chip = cityScrollerRef.current?.querySelector<HTMLElement>(
+      `[data-city-chip="${city}"]`,
+    );
+    chip?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+  }, [city]);
+
+  /*
+   * 註：這裡刻意「不」自動捲動地圖對位。
+   * 置頂導覽列是半透明的，把地圖捲到緊貼它下方會讓篩選摘要文字透出來疊在導覽列上
+   * （實測 active 連結對比掉到 3.91，axe color-contrast serious）。
+   * 導覽列遮擋改由兩個不動版面的手段解決：縮放控制移到 bottomright，
+   * 以及 fitBounds 的 paddingTopLeft 加大，讓最北標記不會落進被遮的那條帶狀區。
+   */
+
   return (
     <div className={styles.root}>
       <header className={styles.toolbar}>
@@ -432,39 +615,30 @@ export default function PlayMap({
           className={styles.viewTabs}
           role="tablist"
           aria-label="瀏覽方式"
+          onKeyDown={handleTabKeyDown}
         >
-          <button
-            type="button"
-            role="tab"
-            id="play-map-tab-cards"
-            aria-selected={browseView === "cards"}
-            aria-controls="play-map-panel-cards"
-            className={[
-              styles.viewTab,
-              browseView === "cards" ? styles.viewTabActive : "",
-            ]
-              .filter(Boolean)
-              .join(" ")}
-            onClick={() => setBrowseView("cards")}
-          >
-            卡片
-          </button>
-          <button
-            type="button"
-            role="tab"
-            id="play-map-tab-map"
-            aria-selected={browseView === "map"}
-            aria-controls="play-map-panel-map"
-            className={[
-              styles.viewTab,
-              browseView === "map" ? styles.viewTabActive : "",
-            ]
-              .filter(Boolean)
-              .join(" ")}
-            onClick={() => setBrowseView("map")}
-          >
-            地圖
-          </button>
+          {VIEW_TABS.map((tab) => {
+            const active = browseView === tab.view;
+            return (
+              <button
+                key={tab.view}
+                type="button"
+                role="tab"
+                id={tab.id}
+                data-view-tab={tab.view}
+                aria-selected={active}
+                aria-controls={tab.panelId}
+                // roving tabindex：只有選中的 tab 進 Tab 順序，其餘用方向鍵移動。
+                tabIndex={active ? 0 : -1}
+                className={[styles.viewTab, active ? styles.viewTabActive : ""]
+                  .filter(Boolean)
+                  .join(" ")}
+                onClick={() => handleSelectView(tab.view)}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
 
       </header>
@@ -473,23 +647,25 @@ export default function PlayMap({
         <div className={styles.facetRow}>
           <span className={styles.facetLabel}>縣市</span>
           <div
+            ref={cityScrollerRef}
             className={styles.chipScroller}
             role="group"
             aria-label="依縣市篩選"
           >
             {cities.map((item) => {
-              const count = coverageByCity.get(item);
-              const label =
-                count !== undefined ? `${item} · ${count}` : item;
+              const count = cityCounts.get(item) ?? 0;
               return (
                 <button
                   key={item}
                   type="button"
+                  data-city-chip={item}
                   className={styles.chip}
                   aria-pressed={city === item}
-                  onClick={() => setCity(item)}
+                  // 「公園 · 5」讀屏會唸成「公園 五」，補完整語意。
+                  aria-label={`${item}，${count} 個地點`}
+                  onClick={() => handleSelectCity(item)}
                 >
-                  {label}
+                  {`${item} · ${count}`}
                 </button>
               );
             })}
@@ -507,21 +683,29 @@ export default function PlayMap({
               type="button"
               className={styles.chip}
               aria-pressed={typeFilter === null}
-              onClick={() => setTypeFilter(null)}
+              onClick={() => handleSelectType(null)}
             >
               全部
             </button>
-            {PLAYGROUND_TYPES.map((item) => (
-              <button
-                key={item}
-                type="button"
-                className={styles.chip}
-                aria-pressed={typeFilter === item}
-                onClick={() => setTypeFilter(item)}
-              >
-                {item}
-              </button>
-            ))}
+            {PLAYGROUND_TYPES.map((item) => {
+              const count = typeCounts.get(item) ?? 0;
+              const selected = typeFilter === item;
+              // 0 筆時停用，但已選中的不停用——否則使用者無法取消自己造成的空結果。
+              const disabled = count === 0 && !selected;
+              return (
+                <button
+                  key={item}
+                  type="button"
+                  className={styles.chip}
+                  aria-pressed={selected}
+                  disabled={disabled}
+                  aria-label={`${item}，${count} 個地點`}
+                  onClick={() => handleSelectType(item)}
+                >
+                  {`${item} · ${count}`}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -530,7 +714,7 @@ export default function PlayMap({
             type="button"
             className={styles.chip}
             aria-pressed={indoorOnly}
-            onClick={() => setIndoorOnly((value) => !value)}
+            onClick={handleToggleIndoor}
           >
             室內
           </button>
@@ -538,7 +722,7 @@ export default function PlayMap({
             type="button"
             className={styles.chip}
             aria-pressed={freeOnly}
-            onClick={() => setFreeOnly((value) => !value)}
+            onClick={handleToggleFree}
           >
             免費
           </button>
@@ -547,7 +731,8 @@ export default function PlayMap({
 
       <div className={styles.filterSummary} aria-live="polite">
         <p className={styles.filterSummaryText}>{filterSummaryLabel}</p>
-        {hasExtraFilters ? (
+        {/* 0 筆時清除鈕由空狀態那顆負責，這裡不重複渲染同名按鈕 */}
+        {hasExtraFilters && filtered.length > 0 ? (
           <button
             type="button"
             className={styles.clearFilters}
@@ -567,21 +752,37 @@ export default function PlayMap({
           className={styles.cardsPanel}
         >
           {filtered.length === 0 ? (
-            <p className={styles.listEmpty} role="status">
-              目前沒有符合條件的地點，試試放寬篩選。
-            </p>
-          ) : (
-            <ul className={styles.cardGrid}>
-              {filtered.map((place) => (
-                <PlaygroundCard
-                  key={place.id}
-                  place={place}
-                  selected={selectedId === place.id}
-                  onSelect={handleSelect}
-                />
-              ))}
-            </ul>
-          )}
+            <div className={styles.listEmpty} role="status">
+              <p className={styles.listEmptyText}>
+                目前沒有符合條件的地點，試試放寬篩選。
+              </p>
+              {hasExtraFilters ? (
+                <button
+                  type="button"
+                  className={styles.clearFilters}
+                  onClick={handleClearFilters}
+                >
+                  清除條件
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+
+          {/*
+            全部 73 筆都渲染進 SSR HTML（不符條件者掛 hidden），
+            讓各縣市地點名稱可被搜尋引擎索引；hidden 同時排除於無障礙樹。
+          */}
+          <ul className={styles.cardGrid}>
+            {allPlaces.map((place) => (
+              <PlaygroundCard
+                key={place.id}
+                place={place}
+                hidden={!matchedIds.has(place.id)}
+                selected={selectedId === place.id}
+                onSelect={handleSelect}
+              />
+            ))}
+          </ul>
         </section>
 
         <div

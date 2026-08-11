@@ -3,9 +3,6 @@
   margin: 8px 0 26px;
 }
 
-.compact {
-  margin: 0 0 16px;
-}
 
 /* ---- Hero 主視覺（遊樂園場景圖） ---- */
 .scene {
@@ -55,13 +52,6 @@
   }
 }
 
-.mascotCompact {
-  position: static;
-  width: 48px;
-  max-width: none;
-  margin: 0;
-  z-index: auto;
-}
 
 @media (prefers-reduced-motion: reduce) {
   [data-theme="night"] .scene {
@@ -80,12 +70,6 @@
   line-height: 1.15;
 }
 
-.titleCompact {
-  font-size: 1.3rem;
-  margin: 0;
-  letter-spacing: 0;
-  font-weight: 700;
-}
 
 /* ---- 圓鈕：合作聯繫 / 許願投稿 / 留言給我 ---- */
 .actions {
@@ -138,12 +122,6 @@
   }
 }
 
-.compactRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  text-align: left;
-}
 
 .link {
   color: inherit;

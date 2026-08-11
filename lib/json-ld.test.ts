@@ -1,12 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 import { getCharacters } from "@/data/characters";
 import { storiesByNewest } from "@/data/content";
+import { listPlaygrounds } from "@/data/playgrounds";
 import { storyDateModified } from "@/data/story-dates";
 import { hasFullTranscript, hasSceneCaptions } from "@/lib/transcript";
 import {
   breadcrumbListJsonLd,
   characterCreativeWorkJsonLd,
   faqPageJsonLd,
+  playgroundItemListJsonLd,
   podcastEpisodeJsonLd,
   podcastSeriesJsonLd,
   siteIdentityJsonLd,
@@ -282,6 +284,34 @@ describe("characterCreativeWorkJsonLd", () => {
         }),
       ),
     );
+
+    vi.unstubAllEnvs();
+  });
+});
+
+describe("playgroundItemListJsonLd", () => {
+  it("用 ItemList of Place 標記全部收錄地點", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
+    const places = listPlaygrounds();
+    const data = playgroundItemListJsonLd(places);
+
+    expect(data["@type"]).toBe("ItemList");
+    expect(data.numberOfItems).toBe(places.length);
+    expect(data.itemListElement).toHaveLength(places.length);
+    expect(data.inLanguage).toBe("zh-Hant");
+
+    const first = data.itemListElement[0];
+    expect(first.position).toBe(1);
+    expect(first.item["@type"]).toBe("Place");
+    expect(first.item["@id"]).toBe(
+      `https://example.com/for-parents/play-map#${places[0].id}`,
+    );
+    expect(first.item.geo).toEqual({
+      "@type": "GeoCoordinates",
+      latitude: places[0].lat,
+      longitude: places[0].lng,
+    });
+    expect(first.item.isAccessibleForFree).toBe(places[0].free);
 
     vi.unstubAllEnvs();
   });
