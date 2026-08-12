@@ -68,7 +68,7 @@ describe("repository architecture", () => {
       .filter((entry) => entry.isFile())
       .map((entry) => entry.name)
       .sort();
-    const allowedRootFiles = new Set(["adapter.ts", "iframe-bridge.ts", "types.ts"]);
+    const allowedRootFiles = new Set(["adapter.ts", "types.ts"]);
     expect(rootGamekitFiles.every((file) => allowedRootFiles.has(file))).toBe(true);
     expect(rootGamekitFiles).toContain("types.ts");
 

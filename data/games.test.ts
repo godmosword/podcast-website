@@ -66,7 +66,7 @@ describe("games next-station flow", () => {
 
   test("getNextGame 回傳正確下一站", () => {
     expect(getNextGame("candy-match")?.slug).toBe("coloring-book");
-    expect(getNextGame("block-drop")?.slug).toBe("candy-kart");
+    expect(getNextGame("block-drop")?.slug).toBe("candy-match");
     expect(getNextGame("nope")).toBeNull();
   });
 });

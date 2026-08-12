@@ -18,10 +18,8 @@ const DEFAULT_PROFILE: PlayerProfile = {
   unlockedVehicles: ["小黃"],
   bests: {},
   medals: {},
-  adventureStars: {},
   stickers: [],
   gamesPlayed: {},
-  snowboardCoursesUnlocked: ["bonbon-peak"],
 };
 
 function migrateV1(parsed: Partial<PlayerProfile>): PlayerProfile {
@@ -37,7 +35,7 @@ function migrateV1(parsed: Partial<PlayerProfile>): PlayerProfile {
   })));
 }
 
-/** v3→v4：只補車車大冒險的獨立顯示星欄位，既有進度原樣保留。 */
+/** v3→v4：保留既有資料並標記相容版本。 */
 export function migrateV3ToV4(
   profile: Partial<PlayerProfile>,
 ): PlayerProfile {
@@ -45,24 +43,17 @@ export function migrateV3ToV4(
     ...DEFAULT_PROFILE,
     ...profile,
     version: 4,
-    adventureStars: profile.adventureStars ?? {},
   };
 }
 
-/** v4→v5：雪板分數公式改版，清掉舊語意的分數，保留星章與貼紙。 */
+/** v4→v5：保留既有資料並標記目前存檔版本。 */
 export function migrateV4ToV5(
   profile: Partial<PlayerProfile>,
 ): PlayerProfile {
-  const bests = { ...(profile.bests ?? {}) };
-  delete bests.snowboard;
   return {
     ...DEFAULT_PROFILE,
     ...profile,
     version: SAVE_VERSION,
-    bests,
-    snowboardCoursesUnlocked:
-      profile.snowboardCoursesUnlocked?.filter((id) => typeof id === "string") ??
-      ["bonbon-peak"],
   };
 }
 
@@ -129,23 +120,6 @@ export function recordMedal(
   return {
     ...profile,
     medals: { ...profile.medals, [gameId]: arr },
-  };
-}
-
-/** 寫入車車大冒險單關最佳顯示星數；不觸碰 medal、economy 或 garage。 */
-export function recordAdventureStars(
-  profile: PlayerProfile,
-  levelIndex: number,
-  stars: number,
-): PlayerProfile {
-  if (!Number.isInteger(levelIndex) || levelIndex < 0) return profile;
-  const nextStars = Math.max(0, Math.min(3, Math.floor(stars)));
-  const adventureStars = profile.adventureStars ?? {};
-  const previous = adventureStars[levelIndex] ?? 0;
-  if (nextStars <= previous) return profile;
-  return {
-    ...profile,
-    adventureStars: { ...adventureStars, [levelIndex]: nextStars },
   };
 }
 

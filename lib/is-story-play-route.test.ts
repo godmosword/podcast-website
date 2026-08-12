@@ -22,7 +22,7 @@ describe("isGamePlayRoute", () => {
   test("matches single game pages", () => {
     expect(isGamePlayRoute("/games/candy-match")).toBe(true);
     expect(isGamePlayRoute("/games/candy-match/")).toBe(true);
-    expect(isGamePlayRoute("/games/snowboard")).toBe(true);
+    expect(isGamePlayRoute("/games/block-drop")).toBe(true);
   });
 
   test("hub 本身保留全站導覽", () => {
@@ -49,7 +49,7 @@ describe("isGamePlayRoute", () => {
 describe("isImmersiveRoute", () => {
   test("涵蓋故事播放器與單一遊戲頁", () => {
     expect(isImmersiveRoute("/story/ep-14/play")).toBe(true);
-    expect(isImmersiveRoute("/games/car-adventure")).toBe(true);
+    expect(isImmersiveRoute("/games/block-drop")).toBe(true);
   });
 
   test("不涵蓋瀏覽頁", () => {

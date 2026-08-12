@@ -13,7 +13,6 @@ import { useGameKitSettings } from "@/hooks/useGameKitSettings";
 import {
   BLOCK_DROP_DIFFICULTIES,
   BLOCK_DROP_SPECIAL_MODES,
-  SNOWBOARD_DIFFICULTIES,
 } from "@/lib/gamekit/progress/settings";
 import Icon from "@/components/ui/Icon";
 import styles from "./GameChrome.module.css";
@@ -112,13 +111,11 @@ function SettingsDialog({
     kidsMode,
     blockDropDifficulty,
     blockDropSpecialMode,
-    snowboardDifficulty,
     gameVolume,
     motionPreference,
     setKidsMode,
     setBlockDropDifficulty,
     setBlockDropSpecialMode,
-    setSnowboardDifficulty,
     setGameVolume,
     setMotionPreference,
   } = useGameKitSettings();
@@ -181,27 +178,6 @@ function SettingsDialog({
                 aria-pressed={blockDropDifficulty === option.id}
                 data-active={blockDropDifficulty === option.id}
                 onClick={() => setBlockDropDifficulty(option.id)}
-                title={option.hint}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className={styles.settingBlock}>
-          <div className={styles.settingHeading}>
-            <strong>阿蹦雪板難度</strong>
-            <small>調整速度、障礙密度與失誤寬容度。</small>
-          </div>
-          <div className={styles.segmented} role="radiogroup" aria-label="阿蹦雪板難度">
-            {SNOWBOARD_DIFFICULTIES.map((option) => (
-              <button
-                key={option.id}
-                type="button"
-                className={styles.segmentBtn}
-                aria-pressed={snowboardDifficulty === option.id}
-                data-active={snowboardDifficulty === option.id}
-                onClick={() => setSnowboardDifficulty(option.id)}
                 title={option.hint}
               >
                 {option.label}

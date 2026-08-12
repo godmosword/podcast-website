@@ -22,12 +22,6 @@ describe("celebration scheduler", () => {
     expect(scheduler.request("favorite_added", 2_500).allowed).toBe(true);
   });
 
-  it("burst 強度冷卻阻擋連發", () => {
-    expect(scheduler.request("game_race_finish", 1_000).allowed).toBe(true);
-    expect(scheduler.request("game_race_finish", 1_500).allowed).toBe(false);
-    expect(scheduler.request("game_race_finish", 4_500).allowed).toBe(true);
-  });
-
   it("whisper 事件無粒子", () => {
     const decision = scheduler.request("story_end", 5_000);
     expect(decision.allowed).toBe(true);

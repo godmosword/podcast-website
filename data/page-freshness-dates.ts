@@ -10,10 +10,7 @@ export const STATIC_PAGE_MODIFIED_DATES: Record<string, string> = {
   "/for-parents/play-map": "2026-08-11T21:35:42+08:00",
   "/games": "2026-07-26T22:54:15+08:00",
   "/games/block-drop": "2026-07-26T11:31:46+08:00",
-  "/games/car-adventure": "2026-07-26T11:18:52+08:00",
-  "/games/candy-kart": "2026-07-26T11:35:36+08:00",
   "/games/candy-match": "2026-07-26T11:12:56+08:00",
-  "/games/snowboard": "2026-07-27T23:20:16+08:00",
   "/legal": "2026-07-22T21:54:21+08:00",
 };
 
@@ -26,9 +23,6 @@ export const STATIC_PAGE_MODIFIED_DATE_SOURCE: Record<string, string> = {
   "/for-parents/play-map": "08ec732 app/for-parents/play-map/page.tsx, app/for-parents/play-map/page.module.css, components/for-parents/PlayMap.tsx, components/for-parents/PlayMap.module.css, components/for-parents/PlayMapLeaflet.tsx, components/for-parents/PlayMapLoader.tsx, lib/playgrounds-query.ts, lib/playground-coverage.ts, data/playgrounds.ts",
   "/games": "40c951b app/games/page.tsx, app/games/layout.tsx, app/games/page.module.css",
   "/games/block-drop": "98a6944 app/games/block-drop/page.tsx, app/games/block-drop/page.module.css",
-  "/games/car-adventure": "e0d9766 app/games/car-adventure/page.tsx, app/games/car-adventure/page.module.css",
-  "/games/candy-kart": "6ee3c69 app/games/candy-kart/page.tsx, app/games/candy-kart/page.module.css",
   "/games/candy-match": "ceb92f4 app/games/candy-match/page.tsx",
-  "/games/snowboard": "7847d4e app/games/snowboard/page.tsx, app/games/snowboard/page.module.css",
   "/legal": "fdbe8c9 app/legal/page.tsx, app/legal/page.module.css",
 };

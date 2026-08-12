@@ -7,7 +7,7 @@
  * Design goals:
  * - Pure game logic stays inside the adapter / instance
  * - Host owns React chrome, audio bus, visibility pause, session reporting
- * - Canvas games expose fixedUpdate + render; DOM / iframe games use overlay only
+ * - Canvas games expose fixedUpdate + render; DOM games use overlay only
  * - Progress reporting stays on the existing reportGameSession path
  */
 
@@ -30,11 +30,6 @@ export type GameAudioBus = {
 export type GameCreateOptions = {
   kidsMode: boolean;
   reducedMotion: boolean;
-  /** Optional difficulty / mode keys (game-specific). */
-  difficulty?: string;
-  specialMode?: string;
-  /** Starting level / track index when applicable. */
-  levelIndex?: number;
   /** Host-injected audio bus (avoid duplicate useGameAudio in overlays). */
   audio?: GameAudioBus;
   /** Called once when a session ends (won / over). Host will also call reportGameSession. */
@@ -49,7 +44,6 @@ export type OverlayProps = {
   reducedMotion: boolean;
   gameVolume: number;
   soundOn: boolean;
-  snowboardDifficulty: "relaxed" | "standard" | "challenge";
   onStart: () => void;
   onResume: () => void;
   onRestart: () => void;

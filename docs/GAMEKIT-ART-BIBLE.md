@@ -7,7 +7,6 @@
 | 遊戲 id | 內部解析度 | 比例 |
 |---------|-----------|------|
 | `block-drop` | 200×360 | 5:9 直式井 |
-| `car-adventure` | 320×180 | 16:9 橫向關卡 |
 
 - **放大**：僅整數倍 nearest-neighbor（`image-rendering: pixelated`）。
 - **相機**：座標 `Math.round`，禁止次像素漂移。
@@ -17,7 +16,6 @@
 
 - **主盤**：32 色（`lib/gamekit/runtime/palette.ts` → `MASTER_PALETTE`）。
 - **光源**：左上高光、右下陰影；描邊 `#34302b` 1px（內部解析度）。
-- **各款子集**：同檔 `GAME_PALETTE_INDICES`；不另起第二套 hex。
 
 ## 角色 IP（跨遊戲卡司）
 
@@ -56,9 +54,8 @@
 
 1. **佔位**：Kenney CC0 tileset / sprite。
 2. **原創**：Aseprite → PNG sprite sheet → `public/games/<id>/`。現行 Canvas 遊戲使用 `lib/gamekit/runtime/procedural-sheets.ts` 的程序圖塊。
-3. **關卡**：`lib/gamekit/games/adventure-level.ts` 的直接 JSON 契約。
 
 ## 技術錨點
 
-- 程式入口：`lib/gamekit/`、`hooks/usePixelRenderer.ts`、`components/games/PixelGameCanvas.tsx`。
+- 程式入口：`lib/gamekit/`、`components/games/GameHost.tsx`。
 - **不引入 Phaser**：維持純 Canvas + 自建 kit。

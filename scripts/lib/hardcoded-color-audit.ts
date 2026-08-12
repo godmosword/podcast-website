@@ -14,7 +14,6 @@ const HARDCODED_COLOR_ALLOWLIST = [
   "components/universe/ZoneSheet.module.css",
   "components/landing/LandingSegment.module.css",
   "app/topic/page.module.css",
-  "app/games/candy-kart/page.module.css",
 ] as const;
 
 /** D3 驗收頁：不得出現裸 hex（須改用 design token）。 */

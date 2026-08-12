@@ -10,7 +10,6 @@ import { reportGameSession } from "@/lib/gamekit/progress/session";
 import {
   BLOCK_DROP_DIFFICULTIES,
   BLOCK_DROP_SPECIAL_MODES,
-  SNOWBOARD_DIFFICULTIES,
   loadGameKitSettings,
   saveGameKitSettings,
 } from "@/lib/gamekit/progress/settings";
@@ -26,19 +25,19 @@ describe("gamekit progress meta", () => {
 describe("gamekit progress save", () => {
   it("recordBestScore 只在新高分時更新", () => {
     const base = loadPlayerProfile();
-    const next = recordBestScore(base, "car-adventure", 100);
-    expect(next.bests["car-adventure"]).toBe(100);
-    const same = recordBestScore(next, "car-adventure", 50);
-    expect(same.bests["car-adventure"]).toBe(100);
+    const next = recordBestScore(base, "block-drop", 100);
+    expect(next.bests["block-drop"]).toBe(100);
+    const same = recordBestScore(next, "block-drop", 50);
+    expect(same.bests["block-drop"]).toBe(100);
   });
 
   it("recordMedal 合併三星 bit", () => {
     const base = loadPlayerProfile();
     const f1 = medalFlags(true, false, false);
     const f2 = medalFlags(false, true, true);
-    let p = recordMedal(base, "car-adventure", 0, f1);
-    p = recordMedal(p, "car-adventure", 0, f2);
-    expect(medalCount(p.medals["car-adventure"]?.[0] ?? 0)).toBe(3);
+    let p = recordMedal(base, "candy-match", 0, f1);
+    p = recordMedal(p, "candy-match", 0, f2);
+    expect(medalCount(p.medals["candy-match"]?.[0] ?? 0)).toBe(3);
   });
 });
 
@@ -101,14 +100,8 @@ describe("gamekit progress settings", () => {
     ]);
     expect(settings.blockDropDifficulty).toBe("relaxed");
     expect(settings.blockDropSpecialMode).toBe("classic");
-    expect(settings.snowboardDifficulty).toBe("relaxed");
     expect(settings.gameVolume).toBe(1);
     expect(settings.motionPreference).toBe("system");
-    expect(SNOWBOARD_DIFFICULTIES.map((d) => d.id)).toEqual([
-      "relaxed",
-      "standard",
-      "challenge",
-    ]);
   });
 
   it("繽紛方塊難度與特殊模式可儲存", () => {
@@ -124,8 +117,7 @@ describe("gamekit progress settings", () => {
     expect(rainbow.blockDropDifficulty).toBe("challenge");
     expect(rainbow.blockDropSpecialMode).toBe("rainbow");
 
-    saveGameKitSettings({ ...rainbow, snowboardDifficulty: "challenge", gameVolume: 0.35 });
-    expect(loadGameKitSettings().snowboardDifficulty).toBe("challenge");
+    saveGameKitSettings({ ...rainbow, gameVolume: 0.35 });
     expect(loadGameKitSettings().gameVolume).toBe(0.35);
 
     saveGameKitSettings({
@@ -139,17 +131,17 @@ describe("gamekit progress settings", () => {
 describe("gamekit progress session", () => {
   it("reportGameSession 通關發星與貼紙", () => {
     const cleared = reportGameSession({
-      gameId: "car-adventure",
+      gameId: "candy-match",
       score: 500,
       levelIndex: 0,
       cleared: true,
       flawless: true,
       collectedAll: true,
     });
-    expect(cleared.gamesPlayed["car-adventure"]).toBe(true);
-    expect(cleared.stickers).toContain("played-car-adventure");
+    expect(cleared.gamesPlayed["candy-match"]).toBe(true);
+    expect(cleared.stickers).toContain("played-candy-match");
     expect(cleared.stars).toBeGreaterThan(0);
-    expect(medalCount(cleared.medals["car-adventure"]?.[0] ?? 0)).toBeGreaterThan(0);
-    expect(cleared.bests["car-adventure"]).toBe(500);
+    expect(medalCount(cleared.medals["candy-match"]?.[0] ?? 0)).toBeGreaterThan(0);
+    expect(cleared.bests["candy-match"]).toBe(500);
   });
 });

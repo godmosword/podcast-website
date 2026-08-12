@@ -1,5 +1,4 @@
 const CACHE_NAME = "chechecar-v4";
-const SNOWBOARD_PREFIX = "/snowboard/v2/";
 const SHELL = [
   "/",
   "/manifest.json",
@@ -45,23 +44,6 @@ self.addEventListener("fetch", (event) => {
           void cache.put(request, response.clone());
         }
         return response;
-      }),
-    );
-    return;
-  }
-
-  if (url.pathname.startsWith(SNOWBOARD_PREFIX)) {
-    event.respondWith(
-      caches.open(CACHE_NAME).then(async (cache) => {
-        const cached = await cache.match(request);
-        if (cached && !url.pathname.endsWith("/index.html")) return cached;
-        try {
-          const response = await fetch(request);
-          if (response.ok) void cache.put(request, response.clone());
-          return response;
-        } catch {
-          return cached ?? Response.error();
-        }
       }),
     );
     return;

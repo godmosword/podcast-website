@@ -5,7 +5,6 @@ import {
   type BlockDropDifficultyPreference,
   type BlockDropSpecialModePreference,
   type MotionPreference,
-  type SnowboardDifficultyPreference,
   getGameKitSettingsFromStore,
   saveGameKitSettingsToStore,
 } from "@/lib/progress-store";
@@ -14,7 +13,6 @@ export const GAMEKIT_SETTINGS_EVENT = "cheche:gamekit-settings-changed";
 
 export type BlockDropDifficulty = BlockDropDifficultyPreference;
 export type BlockDropSpecialMode = BlockDropSpecialModePreference;
-export type SnowboardDifficulty = SnowboardDifficultyPreference;
 
 export const BLOCK_DROP_DIFFICULTIES: {
   id: BlockDropDifficulty;
@@ -35,23 +33,12 @@ export const BLOCK_DROP_SPECIAL_MODES: {
   { id: "rainbow", label: "彩虹消除", hint: "連續消行會觸發額外彩虹分" },
 ];
 
-export const SNOWBOARD_DIFFICULTIES: {
-  id: SnowboardDifficulty;
-  label: string;
-  hint: string;
-}[] = [
-  { id: "relaxed", label: "輕鬆", hint: "速度較慢、轉向自動導正、失誤更寬容" },
-  { id: "standard", label: "標準", hint: "原本的雪道節奏" },
-  { id: "challenge", label: "挑戰", hint: "速度更快、障礙更多、分數倍率更高" },
-];
-
 export type GameKitSettings = {
   version: 3;
   /** 預設開啟：較慢節奏、減少 Game Over 壓力 */
   kidsMode: boolean;
   blockDropDifficulty: BlockDropDifficulty;
   blockDropSpecialMode: BlockDropSpecialMode;
-  snowboardDifficulty: SnowboardDifficulty;
   gameVolume: number;
   motionPreference: MotionPreference;
 };
@@ -65,7 +52,6 @@ const DEFAULT_SETTINGS: GameKitSettings = {
   kidsMode: true,
   blockDropDifficulty: "relaxed",
   blockDropSpecialMode: "classic",
-  snowboardDifficulty: "relaxed",
   gameVolume: 1,
   motionPreference: "system",
 };
@@ -79,7 +65,6 @@ export function loadGameKitSettings(): GameKitSettings {
       kidsMode: stored.kidsMode,
       blockDropDifficulty: stored.blockDropDifficulty,
       blockDropSpecialMode: stored.blockDropSpecialMode,
-      snowboardDifficulty: stored.snowboardDifficulty,
       gameVolume: stored.gameVolume,
       motionPreference: stored.motionPreference,
     };
@@ -94,7 +79,6 @@ export function saveGameKitSettings(settings: GameKitSettings): void {
     kidsMode: settings.kidsMode,
     blockDropDifficulty: settings.blockDropDifficulty,
     blockDropSpecialMode: settings.blockDropSpecialMode,
-    snowboardDifficulty: settings.snowboardDifficulty,
     gameVolume: settings.gameVolume,
     motionPreference: settings.motionPreference,
   });

@@ -106,13 +106,6 @@
   animation: gameLoadIndeterminate 1.2s ease-in-out infinite;
 }
 
-.progressLabel {
-  margin: 0;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--ink-soft);
-}
-
 .startBtn,
 .retryBtn {
   display: inline-flex;

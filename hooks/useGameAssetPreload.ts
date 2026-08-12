@@ -15,7 +15,7 @@ type UseGameAssetPreloadOptions = {
 };
 
 /**
- * 預載 GameKit 程序生成 sheet；candy-kart 無 sheet，由 iframe 宿主自行控管。
+ * 預載 GameKit 程序生成 sheet，並在相同遊戲生命週期內重用快取。
  */
 export function useGameAssetPreload(
   gameId: GameKitGameId,
@@ -46,7 +46,6 @@ export function useGameAssetPreload(
   return {
     ready,
     phase: gate.phase as GameLoadPhase,
-    progress: gate.progress,
     start: gate.start,
     retry: gate.retry,
   };

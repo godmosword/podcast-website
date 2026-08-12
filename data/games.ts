@@ -1,6 +1,6 @@
 type AgeBand = "explore" | "challenge";
 
-type GameType = "match" | "adventure" | "blocks" | "racing" | "coloring";
+type GameType = "match" | "blocks" | "coloring";
 
 type GameArt = {
   cover: string;
@@ -71,32 +71,6 @@ export const GAMES: GameMeta[] = [
     ],
   },
   {
-    slug: "car-adventure",
-    title: "車車大冒險",
-    desc: "8 關橫向跑跳冒險：吃金幣、踩搗蛋車、躲尖刺、解開能力門，衝向終點旗。",
-    teaser: "跳一跳，衝向終點！",
-    href: "/games/car-adventure",
-    emoji: "🏁",
-    accent: "var(--c-sky)",
-    ageBand: "challenge",
-    ageRange: "6–12 歲",
-    estMinutes: 12,
-    hasScore: true,
-    hasTimer: false,
-    gameType: "adventure",
-    controls: ["左右移動", "跳躍與衝刺"],
-    art: {
-      cover: "/games/v2/car-adventure/cover.webp",
-      thumbnail: "/games/v2/car-adventure/cover.webp",
-      alt: "黃色黏土車車在遊樂園平台間跳躍並收集金幣",
-    },
-    tutorial: [
-      { text: "按住按鈕左右移動", gesture: "hold" },
-      { text: "點一下跳起來", gesture: "tap" },
-      { text: "按衝刺鍵破磚", gesture: "tap" },
-    ],
-  },
-  {
     slug: "block-drop",
     title: "繽紛樂園",
     desc: "黏土糖果風落下方塊，排滿整行就消除。",
@@ -120,59 +94,6 @@ export const GAMES: GameMeta[] = [
       { text: "左右滑動移動方塊", gesture: "swipe" },
       { text: "點一下旋轉方塊", gesture: "tap" },
       { text: "往下滑快快落下", gesture: "swipe" },
-    ],
-  },
-  {
-    slug: "candy-kart",
-    title: "繽紛卡丁車",
-    desc: "馬卡龍黏土風卡丁車：6 條糖果賽道、漂移收星星，爭奪繽紛糖果盃！",
-    teaser: "漂移一下，收星星！",
-    href: "/games/candy-kart",
-    emoji: "🍬",
-    accent: "var(--c-pink)",
-    ageBand: "challenge",
-    ageRange: "6–12 歲",
-    estMinutes: 4,
-    hasScore: true,
-    hasTimer: true,
-    gameType: "racing",
-    controls: ["左右轉向", "漂移收星星"],
-    art: {
-      cover: "/games/v2/candy-kart/cover.webp",
-      thumbnail: "/games/v2/candy-kart/cover.webp",
-      alt: "粉紅黏土卡丁車在遊樂園賽道上漂移競速",
-    },
-    tutorial: [
-      { text: "左右滑動轉方向", gesture: "swipe" },
-      { text: "按住加速衝刺", gesture: "hold" },
-      { text: "過彎收集星星", gesture: "tap" },
-    ],
-  },
-  {
-    slug: "snowboard",
-    title: "阿蹦雪山衝刺",
-    desc: "跟著阿蹦滑下糖霜雪峰：轉彎、跳躍、收齊彩虹雪花，挑戰三星完賽！",
-    teaser: "轉彎跳躍收雪花！",
-    href: "/games/snowboard",
-    emoji: "🏂",
-    accent: "var(--c-sky)",
-    ageBand: "challenge",
-    ageRange: "6–12 歲",
-    estMinutes: 4,
-    hasScore: true,
-    hasTimer: true,
-    gameType: "racing",
-    controls: ["左右轉向", "跳躍收雪花"],
-    art: {
-      cover: "/games/v2/snowboard/cover.webp",
-      thumbnail: "/games/v2/snowboard/cover.webp",
-      position: "50% 48%",
-      alt: "阿蹦背著黃色背包，在明亮雪山上踩紅色滑雪板轉彎並收集彩虹雪花",
-    },
-    tutorial: [
-      { text: "左右轉方向", gesture: "arrows" },
-      { text: "跳過障礙", gesture: "tap" },
-      { text: "收齊彩虹雪花", gesture: "tap" },
     ],
   },
   {
@@ -208,10 +129,7 @@ export const GAMES: GameMeta[] = [
 export const GAME_NEXT: Record<string, string> = {
   "candy-match": "coloring-book",
   "coloring-book": "candy-match",
-  "car-adventure": "block-drop",
-  "block-drop": "candy-kart",
-  "candy-kart": "snowboard",
-  snowboard: "car-adventure",
+  "block-drop": "candy-match",
 };
 
 /** 依 slug 取下一站遊戲；找不到回 null。 */

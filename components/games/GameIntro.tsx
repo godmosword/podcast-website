@@ -5,9 +5,7 @@ import styles from "./GameIntro.module.css";
 
 const TYPE_LABELS = {
   match: "溫柔探索",
-  adventure: "跑跳闖關",
   blocks: "堆疊挑戰",
-  racing: "賽道競速",
   coloring: "塗顏色",
 } as const;
 

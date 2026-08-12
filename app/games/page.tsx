@@ -22,9 +22,7 @@ export const metadata: Metadata = {
 
 const GAME_TYPE_LABEL: Record<GameMeta["gameType"], string> = {
   match: "找一找",
-  adventure: "跑跳闖關",
   blocks: "堆疊挑戰",
-  racing: "賽道競速",
   coloring: "塗顏色",
 };
 
@@ -181,7 +179,7 @@ export default function GamesHubPage() {
           <span className={styles.eyebrow}>今天想玩哪一站？</span>
           <h1 className={styles.title}>車車遊樂園</h1>
           <p className={styles.subtitle}>
-            和故事裡的車車朋友一起玩，找糖果、塗顏色、跑跳、堆方塊、衝上賽道！
+            和故事裡的車車朋友一起玩，找糖果、塗顏色、堆方塊！
           </p>
           <ul className={styles.highlights} aria-label="遊樂園特色">
             <li className={styles.chip}>

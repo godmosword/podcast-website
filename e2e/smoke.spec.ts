@@ -104,9 +104,8 @@ test("遊樂園 v2 入口分區與遊戲卡片", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "小小探索" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "挑戰賽道" })).toBeVisible();
   await expect(page.getByRole("link", { name: /繽紛消消樂.*開始玩/ })).toBeVisible();
-  await expect(page.getByRole("link", { name: /車車大冒險.*開始玩/ })).toBeVisible();
   await expect(page.getByRole("link", { name: /繽紛樂園.*開始玩/ })).toBeVisible();
-  await expect(page.getByRole("link", { name: /繽紛卡丁車.*開始玩/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /繪本著色.*開始玩/ })).toBeVisible();
 });
 
 test("關於頁面", async ({ page }) => {
@@ -168,101 +167,6 @@ test("首頁 Hero 不含節目數據入口", async ({ page }) => {
   await page.goto("/stories");
   const header = page.locator("header");
   await expect(header.getByRole("link", { name: "節目數據" })).toHaveCount(0);
-});
-
-test("繽紛卡丁車 debugFinish 會透過 Godot iframe 更新進度", async ({ page }) => {
-  test.setTimeout(60_000);
-  await page.goto("/games/candy-kart?debugFinish=macaron-meadow");
-  await expect(page.getByRole("link", { name: "回遊樂園" })).toBeVisible();
-  await expect(page.locator("iframe[title='繽紛卡丁車遊戲']")).toHaveCount(0);
-  await page.getByRole("button", { name: "出發！開始遊戲" }).click();
-  await expect(page.locator("iframe[title='繽紛卡丁車遊戲']")).toHaveAttribute(
-    "src",
-    "/candy-kart/index.html?debugFinish=macaron-meadow",
-  );
-  await expect
-    .poll(
-      async () =>
-        page.evaluate(() => {
-          const raw = localStorage.getItem("cheche:progress");
-          if (!raw) return false;
-          const progress = JSON.parse(raw);
-          return (
-            progress.gameProfile?.gamesPlayed?.["candy-kart"] === true &&
-            progress.gameProfile?.medals?.["candy-kart"]?.[0] === 7
-          );
-        }),
-      { timeout: 30_000 },
-    )
-    .toBe(true);
-});
-
-test("阿蹦雪山衝刺 debugFinish 會透過 Godot iframe 更新三星進度", async ({ page }) => {
-  test.setTimeout(60_000);
-  await page.goto("/games/snowboard?debugFinish=bonbon-peak");
-  await expect(page.getByRole("link", { name: "回遊樂園" })).toBeVisible();
-  await expect(page.locator("iframe[title='阿蹦雪山衝刺遊戲']")).toHaveCount(0);
-  await page.getByRole("button", { name: "出發！開始滑雪" }).click();
-  await expect(page.locator("iframe[title='阿蹦雪山衝刺遊戲']")).toHaveAttribute(
-    "src",
-    "/snowboard/v2/index.html?debugFinish=bonbon-peak",
-  );
-  await expect
-    .poll(
-      async () =>
-        page.evaluate(() => {
-          const raw = localStorage.getItem("cheche:progress");
-          if (!raw) return false;
-          const progress = JSON.parse(raw);
-          return (
-            progress.gameProfile?.gamesPlayed?.snowboard === true &&
-            progress.gameProfile?.medals?.snowboard?.[0] === 7 &&
-            progress.gameProfile?.snowboardCoursesUnlocked?.includes("pine-trail")
-          );
-        }),
-      { timeout: 30_000 },
-    )
-    .toBe(true);
-});
-
-test("阿蹦雪山衝刺 visual QA 會轉送景別且不寫入成績", async ({ page }) => {
-  test.setTimeout(60_000);
-  await page.goto("/games/snowboard?visualStage=forest&visualPose=carve");
-  await page.getByRole("button", { name: "出發！開始滑雪" }).click();
-  await expect(page.locator("iframe[title='阿蹦雪山衝刺遊戲']")).toHaveAttribute(
-    "src",
-    "/snowboard/v2/index.html?visualStage=forest&visualPose=carve",
-  );
-  await page.waitForTimeout(4_000);
-  await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const raw = localStorage.getItem("cheche:progress");
-        if (!raw) return false;
-        const progress = JSON.parse(raw);
-        return progress.gameProfile?.gamesPlayed?.snowboard === true;
-      }),
-    )
-    .toBe(false);
-});
-
-test("車車大冒險頁面可載入", async ({ page }) => {
-  await page.goto("/games/car-adventure");
-  await expect(page.getByRole("link", { name: "回遊樂園" })).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: /開始冒險/ }),
-  ).toBeVisible({ timeout: 15_000 });
-});
-
-test("車車大冒險窄螢幕可點開始冒險進入遊戲", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/games/car-adventure");
-  const start = page.getByRole("button", { name: /開始冒險/ });
-  await expect(start).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByTestId("car-adventure-menu")).toBeVisible();
-  await start.click();
-  await expect(page.getByTestId("car-adventure-menu")).toHaveCount(0);
-  await expect(page.getByRole("img", { name: "遊戲畫面" })).toBeVisible();
 });
 
 test("繽紛樂園（Block Drop）頁面可載入", async ({ page }) => {

@@ -21,7 +21,6 @@ export type CelebrationDecision = {
 
 const CELEBRATION_SFX_BY_EVENT: Partial<Record<CelebrationEventId, SfxKind>> = {
   favorite_added: "collect",
-  game_race_finish: "collect",
 };
 
 export type CelebrationScheduler = {

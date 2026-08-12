@@ -92,9 +92,9 @@ describe("progress-store migration", () => {
 
   it("saveBestScore only increases", () => {
     migrateProgress();
-    expect(saveBestScoreInStore("car-adventure", 100)).toBe(100);
-    expect(saveBestScoreInStore("car-adventure", 50)).toBe(100);
-    expect(getBestScoreFromStore("car-adventure")).toBe(100);
+    expect(saveBestScoreInStore("block-drop", 100)).toBe(100);
+    expect(saveBestScoreInStore("block-drop", 50)).toBe(100);
+    expect(getBestScoreFromStore("block-drop")).toBe(100);
   });
 
   it("returns default on server", async () => {

@@ -10,7 +10,7 @@ import { dirname, join } from "node:path";
 
 /** 低於 Vercel 250MB 上限的保守門檻；正常 function 約 1–4MB。 */
 const LIMIT_MB = 200;
-/** public/ 一旦進 trace 幾乎必為依賴汙染；stories+candy-kart 已 >230MB。 */
+/** public/ 一旦進 trace 幾乎必為依賴汙染；故事素材可能超過部署上限。 */
 const PUBLIC_LIMIT_MB = 20;
 /** feed.xml 曾兩次踩雷，單獨再卡一層（正常應遠低於此）。 */
 const FEED_LIMIT_MB = 10;

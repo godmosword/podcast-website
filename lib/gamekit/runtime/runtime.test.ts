@@ -1,30 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { GameKitAudioBus } from "@/lib/gamekit/runtime/audio";
-import { FIXED_DT, viewportFor } from "@/lib/gamekit/runtime/constants";
+import { FIXED_DT } from "@/lib/gamekit/runtime/constants";
 import { JuiceController, MAX_PARTICLES } from "@/lib/gamekit/runtime/juice";
 import { GameLoop } from "@/lib/gamekit/runtime/loop";
-import { colorsForGame, snapPixel } from "@/lib/gamekit/runtime/palette";
-import {
-  TILE_INDEX,
-  TILE_SIZE,
-} from "@/lib/gamekit/runtime/procedural-sheets";
+import { snapPixel } from "@/lib/gamekit/runtime/palette";
 
 describe("gamekit runtime", () => {
-  it("Game Kit viewport 為正整數", () => {
-    for (const id of [
-      "car-adventure",
-      "block-drop",
-      "candy-kart",
-      "candy-match",
-      "snowboard",
-    ] as const) {
-      const vp = viewportFor(id);
-      expect(vp.width).toBeGreaterThan(0);
-      expect(vp.height).toBeGreaterThan(0);
-      expect(id).toMatch(/^car-adventure$|^block-drop$|^candy-kart$|^candy-match$|^snowboard$/);
-    }
-  });
-
   it("FIXED_DT 錨定 120Hz", () => {
     expect(FIXED_DT).toBeCloseTo(1 / 120, 5);
   });
@@ -39,18 +20,6 @@ describe("gamekit runtime", () => {
   it("snapPixel 四捨五入", () => {
     expect(snapPixel(1.4)).toBe(1);
     expect(snapPixel(1.6)).toBe(2);
-  });
-
-  it("colorsForGame 回傳子調色盤", () => {
-    const c = colorsForGame("car-adventure");
-    expect(c.length).toBeGreaterThan(0);
-    expect(c[0]).toMatch(/^#/);
-  });
-
-  it("TILE_INDEX 對齊平台遊戲 tiles", () => {
-    expect(TILE_SIZE).toBe(16);
-    expect(TILE_INDEX.road).toBe(0);
-    expect(TILE_INDEX.spike).toBe(5);
   });
 
   it("JuiceController burst 不拋錯", () => {

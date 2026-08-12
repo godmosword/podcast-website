@@ -1,12 +1,9 @@
 import { test, expect } from "@playwright/test";
 
-/** 走 GamePageShell 的五款；coloring-book 用 ColoringPageShell，另行驗收。 */
+/** 走 GamePageShell 的兩款；coloring-book 用 ColoringPageShell，另行驗收。 */
 const SHELL_ROUTES = [
   "candy-match",
-  "car-adventure",
   "block-drop",
-  "candy-kart",
-  "snowboard",
 ] as const;
 
 const PHONE = { width: 390, height: 844 };

@@ -11,7 +11,7 @@
 > **出圖落後：** 多頁插圖 **23/23** 集（含 **`ep-23`（26 頁）**）；最新全幕含 **`ep-21`（18 頁）**／**`ep-22`（24 頁）**／**`ep-23`（26 頁）**。
 > 完整逐字稿與 episode FAQ 覆蓋皆 **23/23**（`verify:geo`）。`data/games.ts` 見下表。
 >
-> **現役遊戲（canon，對齊 `data/games.ts`）：** `candy-match` 繽紛消消樂 · `car-adventure` 車車大冒險 · `block-drop` 繽紛樂園 · `candy-kart` 繽紛卡丁車 · `snowboard` 阿蹦雪山衝刺 · `coloring-book` 繪本著色。
+> **現役遊戲（canon，對齊 `data/games.ts`）：** `candy-match` 繽紛消消樂 · `block-drop` 繽紛樂園 · `coloring-book` 繪本著色。
 > **歷史 slug：** `kart`／`pirate-kart`／`car-star`／`car-mission` 已退役，見 [archive](./docs/archive/TODOS-completed-2026-07-11.md)。
 
 > **商業化切割（2026-07-17）：** 本輪先完成不依賴會員身份的資產、通知、量測與依賴穩定化；家長會員帳號、會員 entitlement、訂閱付款與 Stripe 明確保留在 [STEM-P4 商業化](#stem-p4--商業化) 待辦，不在本輪誤做半套付費牆。

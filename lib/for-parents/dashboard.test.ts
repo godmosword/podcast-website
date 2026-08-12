@@ -20,10 +20,10 @@ describe("buildParentDashboardSnapshot", () => {
       gameProfile: {
         ...DEFAULT_PROGRESS.gameProfile,
         stars: 4,
-        gamesPlayed: { "car-adventure": true },
-        bests: { "car-adventure": 1200 },
-        medals: { "car-adventure": [7, 3] },
-        stickers: ["played-car-adventure"],
+        gamesPlayed: { "block-drop": true },
+        bests: { "block-drop": 1200 },
+        medals: { "block-drop": [7, 3] },
+        stickers: ["played-block-drop"],
       },
       engagement: {
         storiesCompleted: ["ep-14"],
@@ -37,8 +37,8 @@ describe("buildParentDashboardSnapshot", () => {
     expect(snap.gamesPlayedCount).toBe(1);
     expect(snap.totalMedalStars).toBe(5);
     expect(snap.profileStars).toBe(4);
-    expect(snap.stickerLabels).toContain("玩過車車大冒險");
-    expect(snap.games.find((g) => g.gameId === "car-adventure")?.played).toBe(
+    expect(snap.stickerLabels).toContain("玩過繽紛樂園");
+    expect(snap.games.find((g) => g.gameId === "block-drop")?.played).toBe(
       true,
     );
     expect(snap.recentStories[0]?.slug).toBe("ep-15");

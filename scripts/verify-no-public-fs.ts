@@ -2,7 +2,7 @@
  * 紅線：禁止 app/ 路由對 public/ 使用動態 cwd 路徑。
  *
  * Next.js output file tracing 看到 `join(process.cwd(), "public", …)` 會保守打包
- * 整個 public/（stories + candy-kart 等可 >250MB）→ Vercel Function 部署失敗。
+ * 整個 public/（故事音檔與圖片可 >250MB）→ Vercel Function 部署失敗。
  *
  * 正確作法：建置時預計算寫入 data/（例：generate-audio-lengths），route 只 import 常數。
  * 歷史：a3bdca7（story-og）、de2774b→255MB feed.xml（enclosure length）。

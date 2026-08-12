@@ -1,5 +1,3 @@
-import type { GameKitGameId } from "../types";
-
 /**
  * 車車故事屋 Game Kit 主調色盤（32 色）。
  * 各遊戲取子集；HUD／tile 共用同一光源方向（左上高光）。
@@ -38,21 +36,6 @@ export const MASTER_PALETTE = [
   "#264653",
   "#2a9d8f",
 ] as const;
-
-export type PaletteColor = (typeof MASTER_PALETTE)[number];
-
-/** 各遊戲子調色盤索引（指向 MASTER_PALETTE）。 */
-const GAME_PALETTE_INDICES: Record<GameKitGameId, number[]> = {
-  "block-drop": [1, 6, 7, 9, 12, 15, 22, 23],
-  "car-adventure": [0, 13, 14, 15, 24, 25, 26, 30],
-  "candy-kart": [7, 8, 9, 11, 16, 17, 22, 27],
-  "candy-match": [5, 7, 9, 11, 17, 22, 26, 27],
-  "snowboard": [4, 7, 13, 16, 17, 22, 23, 30],
-};
-
-export function colorsForGame(gameId: GameKitGameId): PaletteColor[] {
-  return GAME_PALETTE_INDICES[gameId].map((i) => MASTER_PALETTE[i]);
-}
 
 /** 相機／座標次像素取整，保持像素邊緣穩定。 */
 export function snapPixel(value: number): number {

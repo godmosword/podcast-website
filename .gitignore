@@ -59,13 +59,6 @@ next-env.d.ts
 # 遊戲封面生圖暫存（人工審圖前的草稿，勿入庫）
 /public/.games-staging/
 
-# Godot editor/cache state（專案源碼保留，cache 由 Godot 重建）
-/candy-kart-game/.godot/
-/snowboard-game/.godot/
-
-# 本機 Candy Kart 臨時驗證腳本（正式覆蓋已在 e2e/smoke.spec.ts）
-/ck-verify.mjs
-
 # 由 prebuild（generate:llms-full）產生，隨每次建置重新產生，不進版控
 /public/llms-full.txt
 

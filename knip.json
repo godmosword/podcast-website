@@ -49,7 +49,6 @@
     "data/story-dates.ts",
     "data/universe-decor.ts",
     "data/universe-roamers.ts",
-    "lib/games/candy-kart/tracks.ts",
     "lib/games/candy-match/engine.ts",
     "lib/page-freshness.ts",
     "lib/progress-store.ts",
@@ -64,8 +63,6 @@
     "lib/universe/zone-art-tile.ts",
     "lib/universe/zone-deep-link.ts",
     "lib/zone-wish-rate-limit.ts",
-    "public/candy-kart/index.audio.worklet.js",
-    "public/candy-kart/index.js",
     "public/sw.js"
   ],
   "ignoreDependencies": ["openai", "sharp"]

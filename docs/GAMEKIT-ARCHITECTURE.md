@@ -1,7 +1,7 @@
 # GameKit Architecture
 
-GameKit is the shared layer for the five shipped games: Car Adventure, Block Drop,
-Candy Match, Candy Kart, and Bonbon Snowboard. It is intentionally small. Game-specific UI can live
+GameKit is the shared layer for the two shipped arcade games: Block Drop and
+Candy Match. It is intentionally small. Game-specific UI can live
 in `components/games/`, while reusable loops, input, rendering, audio, progress,
 and bridge contracts live under `lib/gamekit/`.
 
@@ -16,8 +16,6 @@ app/games/* pages
        -> lib/gamekit/games/*       domain translators and game-specific contracts
        -> lib/gamekit/types.ts      cross-layer shared types only
 
-public/candy-kart/*                 Godot static runtime, loaded by iframe
-public/snowboard/v2/*              Versioned Godot static runtime, loaded by iframe
 lib/games/*                         standalone game data/engines outside GameKit
 ```
 
@@ -35,8 +33,8 @@ may use React APIs and CSS modules.
 
 `lib/gamekit/runtime/`
 : Browser runtime primitives that do not depend on React components: fixed-step
-loops, input mapping, pixel renderer helpers, palettes, audio bus, chiptune BGM,
-preloading, procedural sheets, and juice effects.
+loops, input mapping, palettes, audio bus, chiptune BGM, preloading, procedural
+sheets, and juice effects.
 
 `lib/gamekit/progress/`
 : Persistent player data and cross-game progression: save migration, settings,
@@ -45,9 +43,8 @@ economy, garage unlocks, medal bit flags, session reporting, stickers, and the
 behavior are compatibility contracts.
 
 `lib/gamekit/games/`
-: Game-domain contracts that are shared outside one component. Today this is
-Car Adventure level JSON conversion plus the Candy Kart and Snowboard iframe
-bridges/adapters.
+: Game-domain contracts that are shared outside one component. Game-specific
+adapters live here when a component and its tests both need the contract.
 
 `lib/gamekit/types.ts`
 : Cross-layer TypeScript types only, such as `GameKitGameId`, viewport/input
@@ -64,7 +61,6 @@ Use explicit leaf-path imports:
 
 ```ts
 import { useGameAudio } from "@/lib/gamekit/react/useGameAudio";
-import { viewportFor } from "@/lib/gamekit/runtime/constants";
 import { reportGameSession } from "@/lib/gamekit/progress/session";
 import type { GameKitGameId } from "@/lib/gamekit/types";
 ```
@@ -85,18 +81,15 @@ Also forbidden:
 - New localStorage keys or postMessage fields without migration/compatibility
   tests.
 
-Only add a root-level file such as `iframe-bridge.ts` when the contract is truly
-cross-game. A single-game bridge belongs in `lib/gamekit/games/`.
+Only add a root-level bridge when the contract is truly cross-game. A
+single-game bridge belongs in `lib/gamekit/games/`.
 
 ## Current Game Usage
 
 | Game | Main Surface | GameKit Usage | External Runtime |
 | --- | --- | --- | --- |
-| Car Adventure | `components/games/car-adventure/CarAdventureGame.tsx` | `react/TouchControls`, `useFixedGameLoop`, `useGameAudio`, `useBestScore`, `useVisibilityPause`; `runtime/juice`; `games/adventure-level`; `progress/session` | level/physics／clay draw in `lib/games/car-adventure/`；選單在 canvas 外避免裁切 |
 | Block Drop | `components/games/BlockDropGame.tsx` | `useGameLoop`, `useTouchControls`, `useVisibilityPause`, `useBestScore`, `useGameAudio`; `progress/settings`; `progress/session` | local component game logic |
 | Candy Match | `components/games/CandyMatchGame.tsx` | `useGameAudio`; `progress/save`, `progress/meta`, `progress/session` | engine/levels in `lib/games/candy-match/` |
-| Candy Kart | `components/games/CandyKartView.tsx` via `GameHost` | `games/candy-kart-bridge` validates iframe messages and maps finish data to `progress/session` | Godot export in `public/candy-kart/` |
-| Bonbon Snowboard | `components/games/SnowboardView.tsx` via `GameHost` | `games/snowboard-bridge` validates source, origin, window, run id and score fields | Versioned Godot export in `public/snowboard/v2/` |
 
 ## Adding a New Game
 
@@ -121,11 +114,6 @@ cross-game. A single-game bridge belongs in `lib/gamekit/games/`.
 
 - Preserve localStorage schema compatibility. Add migrations before changing
   `PlayerProfile`, economy, medals, or settings fields.
-- Preserve Candy Kart postMessage compatibility. If Godot changes the message
-  contract, accept both old and new payloads until the static export and website
-  are deployed together.
-- Keep static runtime assets out of dead-code deletion decisions. Godot files in
-  `public/candy-kart/` are loaded by the browser, not imported by TypeScript.
 - Avoid root convenience APIs. They make future refactors look easy while
   hiding which layer a consumer actually needs.
 - Do not add placeholder modules for planned games. Add the smallest real

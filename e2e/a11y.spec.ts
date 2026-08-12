@@ -19,16 +19,6 @@ const PAGES: { name: string; path: string; exclude?: string }[] = [
     path: "/games/candy-match",
     exclude: "canvas, iframe, [class*=titleScreen], [class*=gameTitle]",
   },
-  {
-    name: "遊戲頁（挑戰）",
-    path: "/games/car-adventure",
-    exclude: "canvas, iframe, [class*=titleScreen], [class*=gameTitle]",
-  },
-  {
-    name: "遊戲頁（雪板）",
-    path: "/games/snowboard",
-    exclude: "canvas, iframe, [class*=titleScreen], [class*=gameTitle]",
-  },
   { name: "宇宙地圖", path: "/adventures" },
   { name: "親子遊樂地圖", path: "/for-parents/play-map" },
 ];

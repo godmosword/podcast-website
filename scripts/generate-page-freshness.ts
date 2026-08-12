@@ -39,19 +39,7 @@ const ROUTE_SOURCES: Record<string, string[]> = {
     "app/games/block-drop/page.tsx",
     "app/games/block-drop/page.module.css",
   ],
-  "/games/car-adventure": [
-    "app/games/car-adventure/page.tsx",
-    "app/games/car-adventure/page.module.css",
-  ],
-  "/games/candy-kart": [
-    "app/games/candy-kart/page.tsx",
-    "app/games/candy-kart/page.module.css",
-  ],
   "/games/candy-match": ["app/games/candy-match/page.tsx"],
-  "/games/snowboard": [
-    "app/games/snowboard/page.tsx",
-    "app/games/snowboard/page.module.css",
-  ],
   "/legal": ["app/legal/page.tsx", "app/legal/page.module.css"],
 };
 

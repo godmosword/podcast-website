@@ -198,7 +198,7 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 | `StoryProgressBadge` | 「已聽完」星章，貼封面右上角。語彙與宇宙地圖一致（`⭐` + `aria-label="已聽完"`）；只表達聽完單一狀態，不做「聽到一半」（progress store 的 `continue` 為全站單一欄位，標記會無預警消失） |
 | `StoryPlayer` | 全螢幕黑底、字幕底板、底部控制列 |
 | `SiteFooter` | 家長說明 + 平台連結 |
-| `GamePageShell` | 街機五款遊戲共同外框，負責返回導覽、可及性與資產預載 |
+| `GamePageShell` | 街機兩款遊戲共同外框，負責返回導覽、可及性與資產預載 |
 | `ColoringPageShell` | 繪本著色活動外框（不掛 GameKit） |
 | `GameChrome` | 遊戲內暫停、音效與設定對話框 |
 | `ZoneSheet`／探索抽屜／召喚把手 | 進島後預設收合，底部「來這裡逛逛」召喚把手（觸控 ≥56px、`--map-chip*`）；展開為非模態 `region` 抽屜（`?sheet=1` 深連結）；兒童首屏故事卡、探索點次層；✕／Esc 收合 |
@@ -212,12 +212,12 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 
 ## 遊戲架構規範
 
-- `/games` 呈現可玩活動：Car Adventure、Block Drop（繽紛樂園）、Candy Match、Candy Kart、阿蹦雪山衝刺，以及 **繪本著色**（`/games/coloring-book`）；不放「製作中」或未承諾 placeholder。
+- `/games` 呈現可玩活動：Block Drop（繽紛樂園）、Candy Match，以及 **繪本著色**（`/games/coloring-book`）；不放「製作中」或未承諾 placeholder。
 - 繪本著色為 explore 活動：線稿來自既有定裝／場景圖，不併入 `GameKitGameId` 分數進度。
-- Game Kit 只保留單一 `lib/gamekit/` 樹，分為 `react/`、`runtime/`、`progress/`、`games/` 與 `types.ts`（街機五款）。
+- Game Kit 只保留單一 `lib/gamekit/` 樹，分為 `react/`、`runtime/`、`progress/`、`games/` 與 `types.ts`（街機兩款）。
 - Consumer 必須匯入明確 leaf path，例如 `@/lib/gamekit/react/useGameAudio`；不使用 `@/lib/gamekit` 根目錄或 barrel。
 - 詳細邊界、import policy 與新增遊戲流程見 [GAMEKIT-ARCHITECTURE.md](./docs/GAMEKIT-ARCHITECTURE.md)。
-- 遊戲進度、最佳分數、獎牌、星星、貼紙與 Candy Kart iframe bridge schema 屬相容性契約，不因 UI 或文件整理而變更。
+- 遊戲進度、最佳分數、獎牌、星星與貼紙屬相容性契約，不因 UI 或文件整理而變更。
 
 ## 新增故事檢查清單
 

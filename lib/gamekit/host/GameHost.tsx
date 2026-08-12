@@ -77,10 +77,9 @@ export default function GameHost({
   const instanceRef = useRef<GameInstance | null>(null);
   const loopRef = useRef<GameLoop | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const sessionReportedRef = useRef(false);
 
   const isCoarse = useCoarsePointer();
-  const { kidsMode, gameVolume, snowboardDifficulty, motionPreference } = useGameKitSettings();
+  const { kidsMode, gameVolume, motionPreference } = useGameKitSettings();
   const reduced = useReducedMotion(motionPreference);
   const { best, saveBest } = useBestScore(adapter.id);
   const { useKeyboardInput } = useTouchControls();
@@ -229,7 +228,6 @@ export default function GameHost({
         input.wasPressed("confirm")
       ) {
         ensureAudio();
-        sessionReportedRef.current = false;
         g.start();
         setStatus(g.getStatus());
         setScore(g.getScore());
@@ -247,7 +245,6 @@ export default function GameHost({
     const g = instanceRef.current;
     if (!g) return;
     ensureAudio();
-    sessionReportedRef.current = false;
     g.start();
     setStatus(g.getStatus());
     setScore(g.getScore());
@@ -273,7 +270,6 @@ export default function GameHost({
     const g = instanceRef.current;
     if (!g) return;
     ensureAudio();
-    sessionReportedRef.current = false;
     g.restart();
     setStatus(g.getStatus());
     setScore(g.getScore());
@@ -287,7 +283,6 @@ export default function GameHost({
     reducedMotion: reduced,
     gameVolume,
     soundOn: soundUi,
-    snowboardDifficulty,
     onStart: handleStart,
     onResume: handleResume,
     onRestart: handleRestart,
@@ -348,8 +343,7 @@ export default function GameHost({
             ref={canvasRef}
             width={canvasWidth}
             height={canvasHeight}
-            /* 可及名稱：GameAdapter 化之前由 PixelGameCanvas 提供，遷移時遺漏，
-               讀屏會念成無名 canvas（smoke 亦以此定位遊戲畫面）。 */
+            /* 遊戲畫面需有可及名稱，smoke 亦以此定位畫布。 */
             role="img"
             aria-label="遊戲畫面"
             style={{

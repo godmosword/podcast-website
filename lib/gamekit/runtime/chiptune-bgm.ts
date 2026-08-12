@@ -20,7 +20,6 @@ const E3 = 165;
 const G3 = 196;
 const A3 = 220;
 const B3 = 247;
-const G4 = 392;
 const A4 = 440;
 const B4 = 494;
 const C5 = 523;
@@ -32,22 +31,6 @@ const R = 0;
 
 /** Game Kit 遊戲的程序生成 chiptune 主題（Phase 3 佔位，日後可換 BeepBox 匯出）。 */
 const BGM_THEMES: Record<GameKitGameId, BgmTheme> = {
-  "car-adventure": {
-    bpm: 108,
-    stepsPerBeat: 4,
-    melodyWave: "square",
-    bassWave: "triangle",
-    melodyVol: 0.085,
-    bassVol: 0.065,
-    melody: [
-      [E5, R, G5, E5, C5, R, D5, E5, G5, R, A5, G5, E5, D5, C5, R],
-      [G5, R, A5, G5, E5, R, D5, E5, C5, R, D5, E5, G5, E5, D5, R],
-    ],
-    bass: [
-      [C3, R, C3, G3, C3, R, G3, C3, A3, R, A3, E3, A3, R, E3, A3],
-      [G3, R, G3, D3, G3, R, D3, G3, E3, R, E3, B3, E3, R, B3, E3],
-    ],
-  },
   "block-drop": {
     bpm: 120,
     stepsPerBeat: 4,
@@ -62,40 +45,6 @@ const BGM_THEMES: Record<GameKitGameId, BgmTheme> = {
     bass: [
       [E3, E3, C3, C3, G3, G3, A3, A3, E3, E3, C3, C3, G3, G3, A3, A3],
       [C3, C3, G3, G3, E3, E3, A3, A3, D3, D3, A3, A3, E3, E3, B3, B3],
-    ],
-  },
-  // candy-kart BGM 由 Godot 端播放；此主題僅供型別完整與大廳預覽
-  "candy-kart": {
-    bpm: 132,
-    stepsPerBeat: 4,
-    melodyWave: "square",
-    bassWave: "triangle",
-    melodyVol: 0.08,
-    bassVol: 0.06,
-    melody: [
-      [C5, E5, G5, E5, A5, G5, E5, C5, D5, E5, D5, C5, B4, C5, D5, R],
-      [E5, G5, A5, G5, C5, D5, E5, G5, A5, G5, E5, D5, C5, R, G4, C5],
-    ],
-    bass: [
-      [C3, R, G3, C3, A3, R, E3, A3, D3, R, A3, D3, G3, R, D3, G3],
-      [C3, C3, G3, G3, A3, A3, E3, E3, D3, D3, G3, G3, C3, R, C3, R],
-    ],
-  },
-  // 阿蹦雪山衝刺 BGM 由 Godot 端播放；此主題供型別完整與大廳預覽
-  "snowboard": {
-    bpm: 138,
-    stepsPerBeat: 4,
-    melodyWave: "square",
-    bassWave: "triangle",
-    melodyVol: 0.075,
-    bassVol: 0.05,
-    melody: [
-      [E5, G5, A5, G5, D5, E5, G5, R, C5, E5, G5, A5, G5, E5, D5, R],
-      [G5, A5, G5, E5, D5, E5, G5, A5, G5, E5, D5, C5, D5, E5, D5, R],
-    ],
-    bass: [
-      [C3, R, G3, R, A3, R, E3, R, C3, R, G3, R, D3, R, G3, R],
-      [A3, R, E3, R, G3, R, D3, R, C3, R, G3, R, C3, R, G3, R],
     ],
   },
   // 繽紛消消樂：放慢、輕柔（3–7 歲療癒節奏）

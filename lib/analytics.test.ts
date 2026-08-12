@@ -198,14 +198,14 @@ describe("story and game funnel analytics", () => {
       "./analytics"
     );
 
-    trackGameSessionStart("car-adventure");
-    trackGameSessionComplete("car-adventure", true);
+    trackGameSessionStart("block-drop");
+    trackGameSessionComplete("block-drop", true);
 
     expect(track).toHaveBeenNthCalledWith(1, "game_session_start", {
-      gameId: "car-adventure",
+      gameId: "block-drop",
     });
     expect(track).toHaveBeenNthCalledWith(2, "game_session_complete", {
-      gameId: "car-adventure",
+      gameId: "block-drop",
       cleared: true,
     });
     expect(

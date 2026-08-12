@@ -41,10 +41,7 @@ export type ParentDashboardSnapshot = {
 
 const STICKER_LABELS: Record<string, string> = {
   "played-block-drop": "玩過繽紛樂園",
-  "played-car-adventure": "玩過車車大冒險",
-  "played-candy-kart": "玩過繽紛卡丁車",
   "played-candy-match": "玩過繽紛消消樂",
-  "played-snowboard": "玩過阿蹦雪山衝刺",
 };
 
 function gameMeta(gameId: GameKitGameId) {
@@ -67,10 +64,7 @@ function countMedalStars(
 function buildGameRows(profile: ProgressStore["gameProfile"]): ParentGameRow[] {
   const ids: GameKitGameId[] = [
     "candy-match",
-    "car-adventure",
     "block-drop",
-    "candy-kart",
-    "snowboard",
   ];
   return ids.map((gameId) => {
     const meta = gameMeta(gameId);

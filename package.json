@@ -87,10 +87,6 @@
   },
   "knip": {
     "ignore": [
-      "public/candy-kart/index.audio.worklet.js",
-      "public/candy-kart/index.js",
-      "public/snowboard/v2/index.audio.worklet.js",
-      "public/snowboard/v2/index.js",
       "public/sw.js"
     ],
     "ignoreBinaries": [

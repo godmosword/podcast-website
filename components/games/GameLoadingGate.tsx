@@ -8,17 +8,14 @@ import { GameLoadOverlay } from "@/components/games/GameLoadOverlay";
 import styles from "./GameLoadingGate.module.css";
 
 const LABELS: Record<GameKitGameId, string> = {
-  "car-adventure": "車車大冒險",
   "block-drop": "繽紛方塊",
-  "candy-kart": "繽紛卡丁車",
   "candy-match": "繽紛消消樂",
-  "snowboard": "阿蹦雪山衝刺",
 };
 
 type GameLoadingGateProps = {
   gameId: GameKitGameId;
   children: ReactNode;
-  /** 按需預載 sheet；Godot WASM 請在 CandyKartIframeHost 處理 */
+  /** 按需預載程序生成的遊戲資產。 */
   manualStart?: boolean;
 };
 
@@ -48,8 +45,8 @@ export function GameLoadingGate({
           }
           hint={
             phase === "idle"
-              ? "點下方按鈕開始載入像素圖與音效"
-              : "載入像素圖與音效，請稍候"
+              ? "點下方按鈕開始載入遊戲資源與音效"
+              : "載入遊戲資源與音效，請稍候"
           }
           onStart={manualStart ? start : undefined}
           onRetry={retry}

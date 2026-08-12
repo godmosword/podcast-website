@@ -90,11 +90,8 @@ Landing Hero 由 `scripts/generate-landing-art.ts` 產生到 `public/.landing-st
 
 遊戲入口集中於 `app/games/`：
 
-- `car-adventure`：`components/games/car-adventure/CarAdventureGame.tsx`
 - `block-drop`：`components/games/BlockDropGame.tsx`
 - `candy-match`：`components/games/CandyMatchGame.tsx`
-- `candy-kart`：`components/games/CandyKartIframeHost.tsx` 載入 `public/candy-kart/` 的 Godot Web export
-- `snowboard`：`GameHost` + `components/games/SnowboardView.tsx` 載入版本化 `public/snowboard/v2/` 的 Godot Web export
 
 `components/games/GamePageShell.tsx` 提供遊戲頁共同的可及性、返回導覽與資產預載。遊戲 metadata 的唯一來源是 `data/games.ts`。
 
@@ -103,10 +100,10 @@ Game Kit 已收斂為單一、無 barrel 的明確分層：
 - `lib/gamekit/react/`：React hooks、音效橋接、最佳分數、觸控控制與可見性暫停。
 - `lib/gamekit/runtime/`：固定步進 loop、輸入、像素渲染、調色盤、音訊與程序圖塊。
 - `lib/gamekit/progress/`：存檔 migration、設定、獎牌、車庫與 session 回報。
-- `lib/gamekit/games/`：大冒險關卡契約與 Candy Kart／Snowboard Godot iframe bridge、adapter。
-- `docs/GAMEKIT-ARCHITECTURE.md`：GameKit 分層、import policy、新遊戲擴充流程與五款遊戲對照。
+- `lib/gamekit/games/`：目前 GameKit 遊戲的 adapter 與領域契約。
+- `docs/GAMEKIT-ARCHITECTURE.md`：GameKit 分層、import policy、新遊戲擴充流程與兩款街機遊戲對照。
 
-所有消費端直接匯入 leaf module。Godot iframe 完成比賽後，Candy Kart 與 Snowboard 的專用 host 會驗證同源訊息，再經各自 bridge 與 `progress/session.ts` 寫入既有進度 schema。
+所有消費端直接匯入 leaf module；遊戲結算統一經 `progress/session.ts` 寫入既有進度 schema。
 
 ## Automation and verification
 
@@ -150,11 +147,10 @@ Game Kit 已收斂為單一、無 barrel 的明確分層：
 已移除的未使用宣告與 test-only API surface：
 
 - `components/games/BlockDropGame.tsx`：`MAX_BOARD_W`
-- `components/games/CarPlatformer.tsx`：`Enemy`（已遷移至 `components/games/car-adventure/`）
 - `components/landing/LandingScrollContext.tsx`：`RefObject` import
 - `lib/gamekit/runtime/chiptune-bgm.ts`：`C4`、`D4`、`E4`
 - `lib/gamekit/gamekit.test.ts`：已拆到 `runtime/`、`progress/`、`games/` 對應邊界測試。
-- `lib/gamekit/*`：移除無 production consumer 的 exported constants、setter shortcuts、legacy spend/add-stars helpers 與測試專用 exports；保留內部實作與五款遊戲正式入口。
+- `lib/gamekit/*`：移除無 production consumer 的 exported constants、setter shortcuts、legacy spend/add-stars helpers 與測試專用 exports；保留內部實作與兩款街機遊戲正式入口。
 - `data/content.ts`：泛用 `ContentBase` 收斂為 `StoryBase`，不恢復 `Craft`／`Printable`／`Content` 預留模型。
 
 保留的隱式入口包括 `app/games/**/opengraph-image.tsx`、`app/robots.ts`、`app/sitemap.ts`、`scripts/check-sync-fresh.ts` 與 `scripts/sync-alert.ts`。
@@ -177,7 +173,7 @@ Game Kit 已收斂為單一、無 barrel 的明確分層：
 
 ## Remaining maintenance risks
 
-- `components/games/BlockDropGame.tsx`、`StoryPlayer.tsx` 與 `CandyMatchGame.tsx` 仍偏大；`car-adventure` 已拆至 `components/games/car-adventure/` + `lib/games/car-adventure/`。後續修改需靠 focused tests 防止跨責任回歸。
+- `components/games/BlockDropGame.tsx`、`StoryPlayer.tsx` 與 `CandyMatchGame.tsx` 仍偏大。後續修改需靠 focused tests 防止跨責任回歸。
 - `tsconfig.json` 尚未預設啟用 `noUnusedLocals` / `noUnusedParameters`，因此 consolidation 驗證需額外執行 strict unused check。
 - `npx knip --production` 會把 CLI scripts、Next.js convention entries、runtime static assets 與部分測試輔助 export 列為候選；刪除前仍需以 npm scripts、GitHub Actions、Next.js convention 與 `rg` 交叉確認。
 - Next.js metadata routes 與 GitHub Actions 腳本屬隱式入口；未來執行 automated dead-code 工具時，必須持續維護 entry-point allowlist。

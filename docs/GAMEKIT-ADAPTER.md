@@ -2,8 +2,8 @@
 
 ## Goal
 
-Unify the four playground games (Candy Match, Car Adventure, Block Drop, Candy Kart)
-behind a single `GameAdapter` contract so that:
+Keep the two arcade games (Candy Match and Block Drop) behind a single
+`GameAdapter` contract so that:
 
 1. Lifecycle, input, audio, pause, progress and chrome live in one place (`GameHost`).
 2. Each game only owns its pure logic + rendering.
@@ -44,16 +44,12 @@ interface GameInstance {
 ## Migration Order
 
 1. **Candy Match** – ✅ overlay adapter（`lib/gamekit/games/candy-match/`）
-2. **Car Adventure** – ✅ canvas `fixedUpdate` + `render`
-3. **Block Drop** – ✅ overlay adapter（DOM board）
-4. **Candy Kart** – ✅ iframe adapter wrapping `candy-kart-bridge` postMessage
+2. **Block Drop** – ✅ overlay adapter（DOM board）
 
 ## Compatibility Rules
 
 - Do **not** change localStorage schema or `reportGameSession` payload shape.
 - Keep existing `GameKitGameId` string values unchanged.
-- Candy Kart postMessage contract must remain accepted (old + new) until the
-  Godot export and website are deployed together.
 - Existing component routes stay as thin wrappers that just pass the adapter
   into `<GameHost adapter={...} />`.
 
@@ -79,7 +75,6 @@ No new chrome / audio / progress code required.
 |------|------|
 | candy-match | 輕點格可選取；手指微飄仍可 tap；滑出格後抬起不應吞掉有效 tap |
 | block-drop | 棋盤拖移／點按旋轉；cancel／失焦後不黏手勢 |
-| car-adventure（共用 `TouchControls`） | 按住方向鍵滑出按鈕外仍續按；抬起／cancel 必停 |
 
 契約要點：
 

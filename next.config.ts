@@ -18,8 +18,6 @@ const nextConfig: NextConfig = {
   outputFileTracingExcludes: {
     "/feed.xml": [
       "./public/stories/**",
-      "./public/candy-kart/**",
-      "./public/snowboard/**",
       "./public/games/**",
       "./public/adventures/**",
       "./public/characters/**",
@@ -31,18 +29,6 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
-      {
-        source: "/snowboard/v2/index.html",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=0, must-revalidate" },
-        ],
-      },
-      {
-        source: "/snowboard/v2/:path*",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        ],
-      },
       {
         source: "/:path*",
         headers: [

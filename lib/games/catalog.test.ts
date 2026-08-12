@@ -32,9 +32,11 @@ describe("games catalog", () => {
     expect(urls.some((url) => url.endsWith("/adventures"))).toBe(true);
   });
 
-  test("includes the shipped snowboard game route", () => {
+  test("does not expose removed game routes", () => {
     const urls = sitemap().map((entry) => entry.url);
-    expect(GAMES.some((game) => game.slug === "snowboard")).toBe(true);
-    expect(urls.some((url) => url.endsWith("/games/snowboard"))).toBe(true);
+    for (const slug of ["car-adventure", "candy-kart", "snowboard"]) {
+      expect(GAMES.some((game) => game.slug === slug)).toBe(false);
+      expect(urls.some((url) => url.endsWith(`/games/${slug}`))).toBe(false);
+    }
   });
 });

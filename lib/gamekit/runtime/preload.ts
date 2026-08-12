@@ -3,12 +3,7 @@ import { getGameSheet, type SheetId } from "./procedural-sheets";
 
 /** 各款遊戲啟動前需暖機的程序生成 sheet。 */
 const GAME_PRELOAD_SHEETS: Record<GameKitGameId, SheetId[]> = {
-  "car-adventure": ["tiles-common"],
   "block-drop": ["blocks-drop"],
-  // candy-kart 資產由 Godot iframe 自載，無程序生成 sheet
-  "candy-kart": [],
-  // snowboard 資產由 Godot iframe 自載，無程序生成 sheet
-  "snowboard": [],
   // candy-match 全 SVG/DOM 繪製，無程序生成 sheet
   "candy-match": [],
 };

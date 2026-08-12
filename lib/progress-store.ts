@@ -20,14 +20,12 @@ export type ThemePreference = ThemeMode;
 export type GameScoreId = GameKitGameId;
 export type BlockDropDifficultyPreference = "relaxed" | "standard" | "challenge";
 export type BlockDropSpecialModePreference = "classic" | "rainbow";
-export type SnowboardDifficultyPreference = "relaxed" | "standard" | "challenge";
 export type MotionPreference = "system" | "on" | "off";
 
 export type GameKitPreferenceStore = {
   kidsMode: boolean;
   blockDropDifficulty: BlockDropDifficultyPreference;
   blockDropSpecialMode: BlockDropSpecialModePreference;
-  snowboardDifficulty: SnowboardDifficultyPreference;
   gameVolume: number;
   motionPreference: MotionPreference;
 };
@@ -79,7 +77,6 @@ const LEGACY_KEYS = {
   gamekitProfile: "cheche:gamekit-profile",
   gamekitSettings: "cheche:gamekit-settings",
   blockDropBest: "block-drop-best",
-  carAdventureBest: "car-adventure-best",
 } as const;
 
 const DEFAULT_GAME_PROFILE: PlayerProfile = {
@@ -89,25 +86,16 @@ const DEFAULT_GAME_PROFILE: PlayerProfile = {
   unlockedVehicles: ["小黃"],
   bests: {},
   medals: {},
-  adventureStars: {},
   stickers: [],
   gamesPlayed: {},
-  snowboardCoursesUnlocked: ["bonbon-peak"],
 };
 
 /** progress-store 與 GameKit save 共用 v4 的純加欄位相容形狀。 */
 function migrateGameProfile(raw: Partial<PlayerProfile>): PlayerProfile {
   const v3 = migrateV2ToV3(raw);
-  const bests = { ...(v3.bests ?? {}) };
-  if ((raw.version ?? 1) < 5) delete bests.snowboard;
   return {
     ...v3,
     version: 5,
-    adventureStars: raw.adventureStars ?? {},
-    bests,
-    snowboardCoursesUnlocked:
-      raw.snowboardCoursesUnlocked?.filter((id) => typeof id === "string") ??
-      ["bonbon-peak"],
   };
 }
 
@@ -122,7 +110,6 @@ export const DEFAULT_PROGRESS: ProgressStore = {
       kidsMode: true,
       blockDropDifficulty: "relaxed",
       blockDropSpecialMode: "classic",
-      snowboardDifficulty: "relaxed",
       gameVolume: 1,
       motionPreference: "system",
     },
@@ -202,12 +189,6 @@ function normalizeBlockDropSpecialMode(
   return value === "rainbow" ? "rainbow" : "classic";
 }
 
-function normalizeSnowboardDifficulty(
-  value: unknown,
-): SnowboardDifficultyPreference {
-  return value === "standard" || value === "challenge" ? value : "relaxed";
-}
-
 function normalizeMotionPreference(value: unknown): MotionPreference {
   return value === "on" || value === "off" ? value : "system";
 }
@@ -228,7 +209,6 @@ function normalizeGameKitPreferences(
         : DEFAULT_PROGRESS.preferences.gameKit.kidsMode,
     blockDropDifficulty: normalizeBlockDropDifficulty(value?.blockDropDifficulty),
     blockDropSpecialMode: normalizeBlockDropSpecialMode(value?.blockDropSpecialMode),
-    snowboardDifficulty: normalizeSnowboardDifficulty(value?.snowboardDifficulty),
     gameVolume: normalizeGameVolume(value?.gameVolume),
     motionPreference: normalizeMotionPreference(value?.motionPreference),
   };
@@ -301,12 +281,6 @@ export function migrateProgress(): ProgressStore {
   }
 
   mergeBest(next.bestScores, "block-drop", readLegacyBest(LEGACY_KEYS.blockDropBest));
-  mergeBest(
-    next.bestScores,
-    "car-adventure",
-    readLegacyBest(LEGACY_KEYS.carAdventureBest),
-  );
-
   for (const [gameId, score] of Object.entries(next.gameProfile.bests) as [
     GameKitGameId,
     number,
@@ -317,8 +291,6 @@ export function migrateProgress(): ProgressStore {
   next.gameProfile.bests = {
     ...next.gameProfile.bests,
     "block-drop": next.bestScores["block-drop"] ?? next.gameProfile.bests["block-drop"],
-    "car-adventure":
-      next.bestScores["car-adventure"] ?? next.gameProfile.bests["car-adventure"],
   };
 
   if (!next.engagement) {
@@ -360,7 +332,6 @@ function normalizeProgress(raw: Partial<ProgressStore>): ProgressStore {
     ...DEFAULT_PROGRESS.bestScores,
     ...raw.bestScores,
   };
-  if ((raw.gameProfile?.version ?? 1) < 5) delete bestScores.snowboard;
 
   return {
     ...DEFAULT_PROGRESS,
@@ -498,7 +469,7 @@ export function saveBestScoreInStore(gameId: GameScoreId, score: number): number
   if (score <= prev) return prev;
   const bestScores = { ...current.bestScores, [gameId]: score };
   const gameProfile =
-    gameId === "block-drop" || gameId === "car-adventure"
+    gameId === "block-drop"
       ? {
           ...current.gameProfile,
           bests: { ...current.gameProfile.bests, [gameId]: score },

@@ -96,26 +96,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
     },
     {
-      url: `${baseUrl}/games/car-adventure`,
-      lastModified: STATIC_PAGE_MODIFIED_DATES["/games/car-adventure"],
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/games/candy-kart`,
-      lastModified: STATIC_PAGE_MODIFIED_DATES["/games/candy-kart"],
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
       url: `${baseUrl}/games/candy-match`,
       lastModified: STATIC_PAGE_MODIFIED_DATES["/games/candy-match"],
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/games/snowboard`,
-      lastModified: STATIC_PAGE_MODIFIED_DATES["/games/snowboard"],
       changeFrequency: "monthly",
       priority: 0.6,
     },
