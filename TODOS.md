@@ -49,6 +49,12 @@
 - [x] 層接 LOD＋關巡邏＋稀有跨島  `ddeed40`
 - [x] Art Bible §12.8／TODOS 對齊  `8ce39f6`
 
+### 本輪已完成（2026-08-12）
+
+| ID | 說明 |
+|----|------|
+| fix(sync): notify-live 接受 report.gitHead 為 HEAD 近期祖先（GHA 先寫 report 再 commit 不再漏開待生圖 Issue） | 見本 commit |
+
 ### 本輪已完成（2026-08-09）
 
 | ID | 說明 |
@@ -1416,6 +1422,15 @@ T+2d    社群貼文（B 戰場）
 | 字幕校對 + `--mark` | ✅ | 167 句；補開場「車車遊樂園」；再到／速限／勿拉長／蘭陽平原；刪幻覺句 → `_proofread/ep-23.json` |
 | 定裝照 | ✅ | 小紅賽車的爸爸（俏皮翹鬍子在車前臉、號碼 1）；小紅 alsoIn +ep-23 |
 | `illustrate --segment-only` → 生圖 → `--approve` | ✅ | 26 幕全幕繪本；禁手；定裝對齊；23／24 頁序對調 → `6d9012b` |
+
+### ep-25 上架進度（2026-08-12）
+
+| 步驟 | 狀態 | 備註 |
+|------|------|------|
+| Apple RSS 同步 MVP | ✅ | `6c550e2`；封面＋音檔＋Whisper 127 句草稿；GHA 已 `--fix` 1 處 |
+| 待生圖 Issue | 漏開 | notify-live 因 gitHead≠HEAD 拒絕；修正在本 commit。請本機 `npm run sync:notify:reconcile` 補開 |
+| 字幕校對 + `--mark` | 待做 | `subtitle-unproofread`；illustrate 前必校對 |
+| 全幕插圖 | 待做 | `pageCount=1`（`illustrate-pending`） |
 
 ### ep-24 上架進度（2026-08-09）
 
