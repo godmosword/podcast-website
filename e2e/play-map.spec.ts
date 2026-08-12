@@ -37,7 +37,8 @@ test.describe("親子遊樂地圖", () => {
 
     await expect(page.getByText(/已收錄 \d+ 縣市、共 \d+ 處/)).toBeVisible();
     await expect(page.getByRole("button", { name: "免費放電" })).toBeVisible();
-    await expect(page.getByText(/全部 · .+ → \d+ 個地點/)).toBeVisible();
+    // 無篩選時摘要只有「全部」一段（不會有 ` · `），既有斷言誤寫成必有第二段。
+    await expect(page.getByText(/全部 → \d+ 個地點/)).toBeVisible();
 
     const cardsPanel = page.locator("#play-map-panel-cards");
     const firstCardButton = cardsPanel.getByRole("button").first();

@@ -97,9 +97,14 @@
   font-weight: 800;
 }
 
+/*
+ * 三顆一列：意圖只留跨類型的一級動線（離我最近／免費／室內）。
+ * 「主題樂園」本身是 type，已下放類型 facet，避免同詞在兩層重複出現。
+ * 2×2 改 3×1 同時少一列高度。
+ */
 .intentGrid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-2);
 }
 
@@ -161,6 +166,22 @@
   display: none;
 }
 
+/*
+ * 縣市 facet：手機隨篩選面板收摺，桌機常駐（見 640 斷點覆寫）。
+ */
+.cityFacet {
+  display: grid;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+}
+
+.cityFacet[data-open="false"] {
+  display: none;
+}
+
 .facetRow {
   display: grid;
   gap: var(--space-2);
@@ -180,6 +201,9 @@
   min-width: 0;
   overflow-x: auto;
   overscroll-behavior-x: contain;
+  /* 焦點環 outline-offset: 2px；留白避免 Tab 到邊緣 chip 時被裁切（WCAG 2.4.11）。 */
+  padding-inline: 4px;
+  scroll-padding-inline: 12px;
   padding-bottom: 2px;
   scrollbar-width: thin;
   -webkit-overflow-scrolling: touch;
@@ -807,7 +831,27 @@
 
 @media (min-width: 640px) {
   .intentGrid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  /*
+   * 桌機空間夠，chip 直接 wrap 成多列：縣市是最高基數 facet，
+   * 橫捲會讓「雲林縣」等被裁掉且發現性差。同一份 JSX，只用 CSS 切換型態
+   * （避免手機／桌機兩套 JSX 造成長期不一致）。
+   */
+  /* 桌機縣市常駐，不隨面板收摺。 */
+  .cityFacet[data-open="false"] {
+    display: grid;
+  }
+
+  /*
+   * 只有縣市 wrap（最高基數、橫捲會裁掉尾端縣市）。
+   * 類型／條件維持單列，避免整片 chrome 把卡片推出首屏。
+   */
+  .cityFacet .chipScroller {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    mask-image: none;
   }
 
   .chipCompact {
@@ -851,6 +895,42 @@
   }
 }
 
+/*
+ * 分批載入列：放在卡片列表容器內，維持鍵盤動線連續。
+ * 動效相關宣告一律受檔尾 prefers-reduced-motion 區塊管轄。
+ */
+.loadMoreBar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-top: var(--space-4);
+}
+
+.loadMoreStatus {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.loadMore {
+  min-height: 44px;
+  padding: 10px 20px;
+  border: 2px solid var(--map-chip-line);
+  border-radius: 999px;
+  background: linear-gradient(var(--map-chip), var(--map-chip-2));
+  color: var(--map-chip-ink);
+  font-size: 0.9rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.loadMore:active {
+  transform: scale(0.98);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .chip,
   .intentChip,
@@ -864,8 +944,13 @@
   .placeLink,
   .officialLink,
   .moreButton,
+  .loadMore,
   :global(.playMapMarkerButton) {
     transition: none;
+  }
+
+  .loadMore:active {
+    transform: none;
   }
 
   .filtersSticky {

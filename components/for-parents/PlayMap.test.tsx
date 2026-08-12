@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { listPlaygrounds, PLAYGROUND_TYPES } from "@/data/playgrounds";
 import { filterPlaygrounds } from "@/lib/playgrounds-query";
 import { coverageHeadline, listCityCoverage } from "@/lib/playground-coverage";
+import { VISIBLE_STEP } from "./PlayMapContract";
 import PlayMap from "./PlayMap";
 
 vi.stubGlobal("React", React);
@@ -73,6 +74,15 @@ function openFilters() {
   }
 }
 
+/** 反覆點「載入更多」直到全部命中卡片都可見。 */
+function showAllCards(): void {
+  for (let i = 0; i < 20; i += 1) {
+    const more = screen.queryByRole("button", { name: "載入更多" });
+    if (!more) return;
+    fireEvent.click(more);
+  }
+}
+
 describe("PlayMap", () => {
   it("預設選取全部縣市與卡片瀏覽，並顯示意圖入口", () => {
     render(<PlayMap />);
@@ -80,10 +90,15 @@ describe("PlayMap", () => {
       screen.getByRole("heading", { level: 1, name: "親子遊樂地圖" }),
     ).toBeTruthy();
 
-    expect(screen.getByRole("button", { name: "離我最近" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "免費放電" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "室內" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "主題樂園" })).toBeTruthy();
+    // 「室內」同時存在於意圖列與條件 facet（共用 state），故限定在意圖群組內查。
+    const intentGroup = screen.getByRole("group", { name: "意圖快捷" });
+    expect(
+      within(intentGroup).getByRole("button", { name: "離我最近" }),
+    ).toBeTruthy();
+    expect(
+      within(intentGroup).getByRole("button", { name: "免費放電" }),
+    ).toBeTruthy();
+    expect(within(intentGroup).getByRole("button", { name: "室內" })).toBeTruthy();
 
     openFilters();
     const cityGroup = screen.getByRole("group", { name: "依縣市篩選" });
@@ -109,15 +124,55 @@ describe("PlayMap", () => {
     expect(screen.getByText(summaryText("全部", freeCount, ["免費"]))).toBeTruthy();
   });
 
-  it("主題樂園意圖會縮小結果", () => {
+  /**
+   * 「主題樂園」本身是 type，已由意圖列下放到類型 facet
+   * （原本同詞在意圖與類型兩層重複出現）。
+   */
+  it("主題樂園改由類型 facet 縮小結果", () => {
     render(<PlayMap />);
+    openFilters();
     const themeCount = filterPlaygrounds({ type: "主題樂園" }).length;
 
-    fireEvent.click(screen.getByRole("button", { name: "主題樂園" }));
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: typeChipName("主題樂園", themeCount),
+      }),
+    );
 
     expect(
       screen.getByText(summaryText("全部", themeCount, ["主題樂園"])),
     ).toBeTruthy();
+  });
+
+  it("意圖列只留三顆跨類型的一級動線", () => {
+    render(<PlayMap />);
+    const intents = within(
+      screen.getByRole("group", { name: "意圖快捷" }),
+    ).getAllByRole("button");
+
+    expect(intents.map((btn) => btn.textContent)).toEqual([
+      "離我最近",
+      "免費放電",
+      "室內",
+    ]);
+  });
+
+  it("條件 facet 與意圖列共用同一組狀態，不會雙軌不同步", () => {
+    render(<PlayMap />);
+    openFilters();
+    const conditions = screen.getByRole("group", { name: "依條件篩選" });
+    const indoorFacet = within(conditions).getByRole("button", {
+      name: "室內",
+    });
+    const indoorIntent = within(
+      screen.getByRole("group", { name: "意圖快捷" }),
+    ).getByRole("button", { name: "室內" });
+
+    fireEvent.click(indoorIntent);
+    expect(indoorFacet.getAttribute("aria-pressed")).toBe("true");
+
+    fireEvent.click(indoorFacet);
+    expect(indoorIntent.getAttribute("aria-pressed")).toBe("false");
   });
 
   it("類型篩選會縮小結果", () => {
@@ -217,9 +272,13 @@ describe("PlayMap", () => {
     ).toBeNull();
   });
 
-  it("涵蓋區顯示 coverageHeadline 文案", () => {
+  it("涵蓋區顯示年齡定位與 coverageHeadline 文案", () => {
     render(<PlayMap />);
-    expect(screen.getByText(coverageHeadline())).toBeTruthy();
+    // 年齡改在此講一次（卡片層已移除重複標籤），依實際資料推導而非寫死。
+    const coverage = screen.getByText(
+      new RegExp(`適合 \\d+–\\d+ 歲 · ${coverageHeadline()}`),
+    );
+    expect(coverage).toBeTruthy();
   });
 
   it("篩選狀態寫回網址，預設值不入 query", () => {
@@ -318,12 +377,27 @@ describe("PlayMap", () => {
     ).toBeNull();
   });
 
-  it("卡片顯示年齡標籤且不含需購票／戶外 muted", () => {
+  /**
+   * 年齡標籤已從卡片移到 toolbar（全站每筆同一區間，73 張卡各講一次是噪音）。
+   * 「需購票／戶外」不得出現的斷言**保留**——那是反向 muted 標籤，另一回事。
+   */
+  it("卡片不再重複年齡標籤，且仍不含需購票／戶外 muted", () => {
     render(<PlayMap />);
     const cardsPanel = screen.getByRole("tabpanel", { name: "卡片" });
-    expect(within(cardsPanel).getAllByText(/歲$/).length).toBeGreaterThan(0);
+    expect(within(cardsPanel).queryAllByText(/^\d+–\d+ 歲$/)).toHaveLength(0);
     expect(within(cardsPanel).queryByText("需購票")).toBeNull();
     expect(within(cardsPanel).queryByText("戶外")).toBeNull();
+  });
+
+  it("卡片以文字標示類型，不只靠色條（色彩單一編碼）", () => {
+    render(<PlayMap />);
+    const cardsPanel = screen.getByRole("tabpanel", { name: "卡片" });
+    const first = filterPlaygrounds()[0];
+    expect(first).toBeDefined();
+    if (!first) return;
+    expect(
+      within(cardsPanel).getAllByText(new RegExp(first.type)).length,
+    ).toBeGreaterThan(0);
   });
 
   it("tabs 支援方向鍵切換", () => {
@@ -347,6 +421,9 @@ describe("PlayMap", () => {
     expect(paidPlace).toBeDefined();
     if (!paidPlace) return;
 
+    // 無定位時排序為「免費優先」，付費地點必然落在首批之外；先展開再取。
+    showAllCards();
+
     fireEvent.click(
       screen.getByRole("button", { name: new RegExp(paidPlace.name) }),
     );
@@ -362,4 +439,68 @@ describe("PlayMap", () => {
     ).toBeNull();
     expect(document.activeElement).toBe(freeChip);
   });
+
+  it("分批顯示：DOM 恆為全量，僅可見數受批次限制（禁止 slice）", () => {
+    const { container } = render(<PlayMap />);
+    const all = listPlaygrounds();
+    const items = container.querySelectorAll("#play-map-panel-cards li");
+    const visible = [...items].filter((li) => !li.hasAttribute("hidden"));
+
+    expect(items.length).toBe(all.length);
+    expect(visible.length).toBe(VISIBLE_STEP);
+  });
+
+  /**
+   * 紅線：導航 CTA 永不消失。只斷言「可見卡都有導航」等於沒斷言——
+   * slice 會讓未顯示的卡連同其導航連結一起從 DOM 消失而測試仍全綠。
+   */
+  it("每一筆地點在 DOM 中都保有導航連結（含未顯示與未命中）", () => {
+    const { container } = render(<PlayMap />);
+    const navLinks = container.querySelectorAll(
+      '#play-map-panel-cards a[href^="https://www.google.com/maps/dir/"]',
+    );
+    expect(navLinks.length).toBe(listPlaygrounds().length);
+  });
+
+  it("載入更多會擴批，且到底時按鈕消失", () => {
+    const { container } = render(<PlayMap />);
+    const total = filterPlaygrounds().length;
+
+    fireEvent.click(screen.getByRole("button", { name: "載入更多" }));
+    const visible = [
+      ...container.querySelectorAll("#play-map-panel-cards li"),
+    ].filter((li) => !li.hasAttribute("hidden"));
+    expect(visible.length).toBe(Math.min(VISIBLE_STEP * 2, total));
+
+    showAllCards();
+    expect(screen.queryByRole("button", { name: "載入更多" })).toBeNull();
+  });
+
+  it("「載入更多」以命中數為準，不是全站總數", () => {
+    render(<PlayMap />);
+    openFilters();
+    const themeCount = filterPlaygrounds({ type: "主題樂園" }).length;
+    expect(themeCount).toBeLessThan(VISIBLE_STEP);
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: typeChipName("主題樂園", themeCount),
+      }),
+    );
+
+    // 命中數 < 一批，即使全站有 73 筆也不該出現無效的「載入更多」。
+    expect(screen.queryByRole("button", { name: "載入更多" })).toBeNull();
+  });
+
+  it("篩選變更會把批次歸零", () => {
+    const { container } = render(<PlayMap />);
+    showAllCards();
+    fireEvent.click(screen.getByRole("button", { name: "免費放電" }));
+
+    const visible = [
+      ...container.querySelectorAll("#play-map-panel-cards li"),
+    ].filter((li) => !li.hasAttribute("hidden"));
+    expect(visible.length).toBe(VISIBLE_STEP);
+  });
+
 });

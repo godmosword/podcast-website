@@ -50,6 +50,7 @@
 
 | 日期 | 命令／模型 | 症狀（exit code／timeout／額度／輸出品質） | 處置 |
 |------|------------|---------------------------------------------|------|
+| 2026-08-12 | `grok -p ... -m grok-4.5 --effort high --no-plan`（×1）與加 `--max-turns 6`（×1）（Claude Code 對抗審備援） | 兩次皆只輸出一行開場白即結束（exit 0、無審查內容）：「先讀 agent-plan 規範…」「先對照實際程式與測試約束…」。同 07-15 症狀 | **已解除（2026-08-12 同日）**。根因不是 auth（`grok models` 回 `You are logged in with grok.com.`）也不是 MCP（`grok mcp list` 回 no servers configured，07-15 的 `ask-user-questions` spawn 問題已不存在），而是**長 prompt 讓 agent 把 turns 全花在讀檔上、未作答就結束**。<br>**可用配方**：prompt 開頭明寫「**不要使用任何工具、不要讀取檔案，直接依下方資訊作答**」＋ 把所需 context 全部內嵌 ＋ `--no-plan --max-turns 20`。同日以此配方跑完整對抗審，輸出 172 行、六題全答。<br>短 prompt（如探活「回覆 OK」）不受影響，任何參數都正常 |
 | 2026-08-10 | `cursor-agent -p --model cursor-grok-4.5-high-fast --mode ask`（Claude Code 對抗審） | `Authentication required. Please run 'agent login' first, or set CURSOR_API_KEY` | 依探活表改備援 `grok -p ... -m grok-4.5`；備援同樣未登入（見下列）→ 本輪標**對抗審缺席／對抗性降級**；請使用者執行 `cursor-agent login` 或設 `CURSOR_API_KEY` |
 | 2026-08-10 | `grok models`（Grok CLI 備援） | `You are not authenticated`（可用清單仍列 `grok-4.5`） | 未頂替其他模型；提醒使用者 `grok login --device-auth`。**注意**：與 07-15／07-16 同症狀，30 天內若再現一次即維持缺席判定 |
 | 2026-08-08 | Task `model=claude-opus-4-8-thinking-medium`（Cursor） | `Invalid model selection`；允許清單僅 `claude-opus-5-thinking-high` 等（同 07-31） | **已解除（2026-08-08）**：active 路由改 `claude-opus-5-thinking-high`；舊 4.8 slug 僅留修訂／FAILURES 歷史 |
