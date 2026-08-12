@@ -53,7 +53,7 @@
 
 | ID | 說明 |
 |----|------|
-| polish(for-parents): play-map 桌面並排、類型色塊、縣市聚合、chip 分級與精簡 sheet | `ea37f97` |
+| polish(for-parents): play-map 桌面並排、類型色塊、縣市聚合、chip 分級與精簡 sheet | `bfc4e11` |
 
 ### 本輪已完成（2026-08-09）
 
