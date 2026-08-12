@@ -100,6 +100,21 @@ function assertPlaygroundShape(item: Playground): void {
     assertSourceUrl(item.officialUrl, `${item.id} officialUrl`);
   }
 
+  if (item.imageSrc !== undefined) {
+    expect(item.imageSrc.startsWith("/play-map/"), item.id).toBe(true);
+    expect(item.imageSrc.endsWith(".webp"), item.id).toBe(true);
+    expect(item.imageAlt?.trim().length, `${item.id} imageAlt`).toBeGreaterThan(
+      0,
+    );
+    expect(
+      item.imageCredit?.trim().length,
+      `${item.id} imageCredit`,
+    ).toBeGreaterThan(0);
+  } else {
+    expect(item.imageAlt, item.id).toBeUndefined();
+    expect(item.imageCredit, item.id).toBeUndefined();
+  }
+
   expect(ISO_DATE_PATTERN.test(item.lastVerified), item.id).toBe(true);
   expect(Number.isNaN(parseIsoDate(item.lastVerified).getTime()), item.id).toBe(
     false,

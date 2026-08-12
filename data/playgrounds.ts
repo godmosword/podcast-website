@@ -4,6 +4,8 @@
  * Google Maps 導航／定位連結由 buildGoogleMaps* helper 動態產生，不存於資料列。
  */
 
+import { PLAYGROUND_IMAGES } from "./playground-images";
+
 export type PlaygroundType =
   | "公園"
   | "室內樂園"
@@ -56,6 +58,12 @@ export type Playground = {
   tips?: string;
   officialUrl?: string;
   relatedEpisodes?: string[];
+  /** 本機靜態圖路徑（如 `/play-map/{id}.webp`）；無圖時 UI 退回類型色條。 */
+  imageSrc?: string;
+  /** 有 imageSrc 時必填（無障礙）。 */
+  imageAlt?: string;
+  /** 有 imageSrc 時必填（作者／授權／來源頁）。 */
+  imageCredit?: string;
   /** 資料來源（至少一筆；商業場館須含 official 或 officialUrl）。 */
   sources: PlaygroundSource[];
   /** 欄位最後人工核對日（ISO YYYY-MM-DD）。 */
@@ -2202,12 +2210,24 @@ const PLAYGROUNDS: readonly Playground[] = [
   },
 ];
 
+function withImage(item: Playground): Playground {
+  const image = PLAYGROUND_IMAGES[item.id];
+  if (!image) return item;
+  return {
+    ...item,
+    imageSrc: image.src,
+    imageAlt: image.alt,
+    imageCredit: image.credit,
+  };
+}
+
 export function getPlayground(id: string): Playground | undefined {
-  return PLAYGROUNDS.find((item) => item.id === id);
+  const item = PLAYGROUNDS.find((row) => row.id === id);
+  return item ? withImage(item) : undefined;
 }
 
 export function listPlaygrounds(): readonly Playground[] {
-  return PLAYGROUNDS;
+  return PLAYGROUNDS.map(withImage);
 }
 
 /**

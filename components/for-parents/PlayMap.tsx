@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -210,6 +211,22 @@ function PlayMapSheet({
         </button>
       </div>
 
+      {place.imageSrc ? (
+        <div className={styles.sheetMedia}>
+          <Image
+            className={styles.sheetImage}
+            src={place.imageSrc}
+            alt={place.imageAlt ?? `${place.name}實景`}
+            width={800}
+            height={500}
+            sizes="(max-width: 640px) 100vw, 400px"
+          />
+          {place.imageCredit ? (
+            <p className={styles.imageCredit}>{place.imageCredit}</p>
+          ) : null}
+        </div>
+      ) : null}
+
       {compact ? (
         <>
           {decisionTags.length > 0 ? (
@@ -374,17 +391,31 @@ function PlaygroundCard({
           aria-expanded={selected}
           onClick={(event) => onSelect(place.id, event.currentTarget)}
         >
-          <span className={styles.cardName}>{place.name}</span>
-          <span className={styles.cardMeta}>{meta}</span>
-          {decisionTags.length > 0 ? (
-            <span className={styles.cardFlags}>
-              {decisionTags.map((tag) => (
-                <span key={tag} className={styles.flag}>
-                  {tag}
-                </span>
-              ))}
+          {place.imageSrc ? (
+            <span className={styles.cardThumb}>
+              <Image
+                className={styles.cardThumbImage}
+                src={place.imageSrc}
+                alt=""
+                width={160}
+                height={120}
+                sizes="120px"
+              />
             </span>
           ) : null}
+          <span className={styles.cardBody}>
+            <span className={styles.cardName}>{place.name}</span>
+            <span className={styles.cardMeta}>{meta}</span>
+            {decisionTags.length > 0 ? (
+              <span className={styles.cardFlags}>
+                {decisionTags.map((tag) => (
+                  <span key={tag} className={styles.flag}>
+                    {tag}
+                  </span>
+                ))}
+              </span>
+            ) : null}
+          </span>
         </button>
         <a
           className={styles.cardNav}

@@ -120,6 +120,7 @@ ledger **不**進使用者-facing UI 細節；PlayMap 僅顯示摘要狀態（�
 - 瀏覽模式互斥：**卡片**（預設目錄）｜**地圖**（Leaflet／OSM）；桌面亦不並陳雙面板
 - 篩選面：首屏 **意圖 chips**（離我最近／免費放電／室內／主題樂園）；縣市／類型為可收合次要篩選；預設**不鎖縣市**（全部已收錄）
 - 詳情 Sheet：地圖點選先精簡（名稱＋標籤＋導航），卡片點選開完整；來源預設收合
+- **景點圖片**：選填；本機 `public/play-map/{id}.webp`，meta 在 `data/playground-images.ts`。有圖必填 `imageAlt`／`imageCredit`。來源優先政府開放授權；實務上以維基共享資源 CC 實景圖覆蓋並標 credit（見 `scripts/fetch-playground-images.ts`）。禁止社群爬圖、Places 圖、未授權商用行銷圖、生圖假實景。
 - 地圖／儀表板工具頁寬度上限 1100px（豁免一般 640px 單欄）
 - 真實地圖 chrome 可用 `--map-chip*`；OSM tile **禁止** invert（含夜間主題）
 
