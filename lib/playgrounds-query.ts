@@ -1,6 +1,6 @@
 /**
  * 親子遊樂地圖查詢 resolver。
- * UI 應先讓使用者選縣市再篩選；city 省略時回傳全部（供測試與後台統計）。
+ * city 省略／null 表示全部已收錄縣市（供意圖優先首屏與統計）。
  */
 import {
   listCities,
@@ -35,7 +35,7 @@ export function filterPlaygrounds(filter: PlaygroundFilter = {}): Playground[] {
 
 /**
  * 在既有條件（縣市／室內／免費）下，各 type 還剩幾筆。
- * 供類型 chip 顯示數量並停用 0 筆選項，避免使用者點進空結果。
+ * 供類型 chip 顯示數量；0 筆選項由 UI 隱藏。
  */
 export function countByType(
   filter: Omit<PlaygroundFilter, "type"> = {},
@@ -49,8 +49,7 @@ export function countByType(
 
 /**
  * 在既有條件（類型／室內／免費）下，各縣市還剩幾筆。
- * 與 countByType 同語意——兩排 chip 的「· N」必須都是「剩餘數」，
- * 否則勾了免費看到「彰化縣 · 5」切過去卻只有 2 筆，家長會以為資料錯了。
+ * 與 countByType 同語意——兩排 chip 的「· N」必須都是「剩餘數」。
  */
 export function countByCity(
   filter: Omit<PlaygroundFilter, "city"> = {},
@@ -66,7 +65,8 @@ export type PlayMapView = "cards" | "map";
 
 /** 可分享／可加書籤的 play-map 檢視狀態（server 與 client 共用同一組解析）。 */
 export type PlayMapQuery = {
-  city: string;
+  /** null = 全部已收錄；URL 省略 city。 */
+  city: string | null;
   type: PlaygroundType | null;
   indoorOnly: boolean;
   freeOnly: boolean;
@@ -86,22 +86,17 @@ function first(value: string | string[] | undefined): string | undefined {
 }
 
 /**
- * 把網址參數收斂成合法狀態；任何無法識別的值都退回預設，
- * 避免使用者改網址就把 UI 推進不存在的篩選組合。
+ * 把網址參數收斂成合法狀態；無法識別的值退回安全預設。
+ * 無／非法 city → null（全部），不再預設鎖台北市。
  */
-export function parsePlayMapQuery(
-  params: RawPlayMapParams,
-  defaultCity: string,
-): PlayMapQuery {
+export function parsePlayMapQuery(params: RawPlayMapParams): PlayMapQuery {
   const rawCity = first(params.city);
   const rawType = first(params.type);
   const view = first(params.view) === "map" ? "map" : "cards";
 
   return {
     city:
-      rawCity !== undefined && listCities().includes(rawCity)
-        ? rawCity
-        : defaultCity,
+      rawCity !== undefined && listCities().includes(rawCity) ? rawCity : null,
     type:
       rawType !== undefined &&
       (PLAYGROUND_TYPES as readonly string[]).includes(rawType)
@@ -113,13 +108,10 @@ export function parsePlayMapQuery(
   };
 }
 
-/** 反向：把狀態寫回 query string；等於預設值的 key 一律省略，網址保持乾淨。 */
-export function buildPlayMapQueryString(
-  query: PlayMapQuery,
-  defaultCity: string,
-): string {
+/** 反向：把狀態寫回 query string；等於預設值的 key 一律省略。 */
+export function buildPlayMapQueryString(query: PlayMapQuery): string {
   const params = new URLSearchParams();
-  if (query.city !== defaultCity) params.set("city", query.city);
+  if (query.city) params.set("city", query.city);
   if (query.type) params.set("type", query.type);
   if (query.indoorOnly) params.set("indoor", "1");
   if (query.freeOnly) params.set("free", "1");

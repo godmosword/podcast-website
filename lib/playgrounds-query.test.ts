@@ -9,15 +9,16 @@ import {
   parsePlayMapQuery,
 } from "@/lib/playgrounds-query";
 
-const DEFAULT_CITY = "台北市";
-
 describe("play-map 網址狀態", () => {
   test("parsePlayMapQuery 讀取合法參數", () => {
     expect(
-      parsePlayMapQuery(
-        { city: "新北市", type: "公園", indoor: "1", free: "1", view: "map" },
-        DEFAULT_CITY,
-      ),
+      parsePlayMapQuery({
+        city: "新北市",
+        type: "公園",
+        indoor: "1",
+        free: "1",
+        view: "map",
+      }),
     ).toEqual({
       city: "新北市",
       type: "公園",
@@ -27,14 +28,26 @@ describe("play-map 網址狀態", () => {
     });
   });
 
-  test("parsePlayMapQuery 對不合法值退回預設", () => {
+  test("parsePlayMapQuery 無參數時 city 為 null（全部）", () => {
+    expect(parsePlayMapQuery({})).toEqual({
+      city: null,
+      type: null,
+      indoorOnly: false,
+      freeOnly: false,
+      view: "cards",
+    });
+  });
+
+  test("parsePlayMapQuery 對不合法值退回安全預設", () => {
     expect(
-      parsePlayMapQuery(
-        { city: "火星市", type: "夜店", indoor: "yes", view: "3d" },
-        DEFAULT_CITY,
-      ),
+      parsePlayMapQuery({
+        city: "火星市",
+        type: "夜店",
+        indoor: "yes",
+        view: "3d",
+      }),
     ).toEqual({
-      city: DEFAULT_CITY,
+      city: null,
       type: null,
       indoorOnly: false,
       freeOnly: false,
@@ -43,23 +56,32 @@ describe("play-map 網址狀態", () => {
   });
 
   test("parsePlayMapQuery 接受陣列型參數並取第一個", () => {
-    const query = parsePlayMapQuery({ city: ["新北市", "台中市"] }, DEFAULT_CITY);
+    const query = parsePlayMapQuery({ city: ["新北市", "台中市"] });
     expect(query.city).toBe("新北市");
   });
 
-  test("buildPlayMapQueryString 省略等於預設的值", () => {
+  test("buildPlayMapQueryString 省略全部預設（含 city null）", () => {
     expect(
-      buildPlayMapQueryString(
-        {
-          city: DEFAULT_CITY,
-          type: null,
-          indoorOnly: false,
-          freeOnly: false,
-          view: "cards",
-        },
-        DEFAULT_CITY,
-      ),
+      buildPlayMapQueryString({
+        city: null,
+        type: null,
+        indoorOnly: false,
+        freeOnly: false,
+        view: "cards",
+      }),
     ).toBe("");
+  });
+
+  test("buildPlayMapQueryString 有縣市一律寫入", () => {
+    expect(
+      buildPlayMapQueryString({
+        city: "台北市",
+        type: null,
+        indoorOnly: false,
+        freeOnly: false,
+        view: "cards",
+      }),
+    ).toBe("city=%E5%8F%B0%E5%8C%97%E5%B8%82");
   });
 
   test("parse 與 build 對稱", () => {
@@ -70,12 +92,9 @@ describe("play-map 網址狀態", () => {
       freeOnly: false,
       view: "map" as const,
     };
-    const qs = buildPlayMapQueryString(original, DEFAULT_CITY);
+    const qs = buildPlayMapQueryString(original);
     expect(
-      parsePlayMapQuery(
-        Object.fromEntries(new URLSearchParams(qs)),
-        DEFAULT_CITY,
-      ),
+      parsePlayMapQuery(Object.fromEntries(new URLSearchParams(qs))),
     ).toEqual(original);
   });
 });
