@@ -38,6 +38,7 @@ function needsCommercialNotice(place: Playground): boolean {
 export function PlayMapSheet({
   place,
   variant,
+  distanceLabel,
   onClose,
   onExpand,
   panelRef,
@@ -93,6 +94,10 @@ export function PlayMapSheet({
               ))}
             </ul>
           ) : null}
+          <p className={styles.address}>
+            {place.address}
+            {distanceLabel ? ` · ${distanceLabel}` : ""}
+          </p>
           <div className={styles.actions}>
             <a
               className={styles.navButton}
@@ -125,6 +130,7 @@ export function PlayMapSheet({
             {place.free ? "免費" : "需購票"}
             {" · "}
             {place.indoor ? "室內" : "戶外"}
+            {distanceLabel ? ` · ${distanceLabel}` : ""}
           </p>
 
           {place.tips ? (

@@ -1,33 +1,16 @@
 "use client";
 
 import type { Playground } from "@/data/playgrounds";
-import {
-  estimateDriveMinutes,
-  formatDriveMinutesLabel,
-  haversineKm,
-  type LatLng,
-} from "@/lib/playground-distance";
+import { formatPlaceDistanceLabel, type LatLng } from "@/lib/playground-distance";
 import { PlayMapCard } from "./PlayMapCard";
 import type { PlayMapCardListProps } from "./PlayMapContract";
 import styles from "./PlayMap.module.css";
-
-/**
- * `estimateDriveMinutes` 上限硬夾在 90 分。收錄擴到中彰投雲後，
- * 台北的家長看台中場館會讀到精確的「約 90 分鐘」（實際 2.5 小時以上），
- * 屬對家長的錯誤承諾。觸頂時改為開放式文案；排序仍用真實距離。
- */
-const DRIVE_MINUTES_CAP = 90;
 
 function distanceLabelFor(
   place: Playground,
   user: LatLng | null,
 ): string | null {
-  if (!user) return null;
-  const minutes = estimateDriveMinutes(
-    haversineKm(user, { lat: place.lat, lng: place.lng }),
-  );
-  if (minutes >= DRIVE_MINUTES_CAP) return `車程 ${DRIVE_MINUTES_CAP} 分以上`;
-  return formatDriveMinutesLabel(minutes);
+  return formatPlaceDistanceLabel(place, user);
 }
 
 export function PlayMapCardList({
@@ -38,6 +21,8 @@ export function PlayMapCardList({
   hasExtraFilters,
   onClearFilters,
   onSelect,
+  onShowOnMap,
+  showScopeHint,
   visibleCount,
   canLoadMore,
   visibleCountLabel,
@@ -47,6 +32,11 @@ export function PlayMapCardList({
   return (
     <>
       <div ref={topRef} aria-hidden />
+      {showScopeHint ? (
+        <p className={styles.scopeHint} role="status">
+          目前顯示全台收錄。選縣市或點「離我最近」，名單與地圖會更準。
+        </p>
+      ) : null}
       {matched.length === 0 ? (
         <div className={styles.listEmpty} role="status">
           <p className={styles.listEmptyText}>
@@ -72,28 +62,27 @@ export function PlayMapCardList({
           <PlayMapCard
             key={place.id}
             place={place}
-            /* 命中但超出本批：暫時收起，不從 DOM 移除。 */
             hidden={index >= visibleCount}
             distanceLabel={distanceLabelFor(place, userLatLng)}
             selected={selectedId === place.id}
             onSelect={onSelect}
+            onShowOnMap={onShowOnMap}
           />
         ))}
         {unmatched.map((place) => (
           <PlayMapCard
             key={`hidden-${place.id}`}
             place={place}
-            /* 未命中篩選：與「超出批次」是不同語意，各自獨立表達。 */
             hidden
             distanceLabel={null}
             selected={false}
             onSelect={onSelect}
+            onShowOnMap={onShowOnMap}
           />
         ))}
       </ul>
 
       {matched.length > 0 ? (
-        /* 放在列表容器內，鍵盤使用者從最後一張卡 Tab 得到，不會卡在批次牆後。 */
         <div className={styles.loadMoreBar}>
           <p className={styles.loadMoreStatus} role="status" aria-live="polite">
             {visibleCountLabel}

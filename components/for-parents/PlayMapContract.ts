@@ -23,6 +23,9 @@ export const SHEET_BG_HINT_ID = "play-map-sheet-bg-hint";
  */
 export const VISIBLE_STEP = 24;
 
+/** 桌面並排名單＋地圖（對齊全站 980 導覽斷點）。 */
+export const SPLIT_MIN_WIDTH_PX = 980;
+
 export const VIEW_TABS: readonly {
   view: BrowseView;
   label: string;
@@ -48,6 +51,8 @@ export type PlayMapToolbarProps = {
   browseView: BrowseView;
   onSelectView: (next: BrowseView) => void;
   onTabKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void;
+  /** 桌面並排時隱藏互斥分頁，避免與雙欄重複。 */
+  hideViewTabs?: boolean;
 };
 
 export type PlayMapIntentRowProps = {
@@ -89,6 +94,7 @@ export type PlayMapCardProps = {
   hidden: boolean;
   distanceLabel: string | null;
   onSelect: (id: string, trigger: HTMLElement) => void;
+  onShowOnMap: (id: string, trigger: HTMLElement) => void;
 };
 
 export type PlayMapCardListProps = {
@@ -99,6 +105,9 @@ export type PlayMapCardListProps = {
   hasExtraFilters: boolean;
   onClearFilters: () => void;
   onSelect: (id: string, trigger: HTMLElement) => void;
+  onShowOnMap: (id: string, trigger: HTMLElement) => void;
+  /** 未選縣市且未定位時，提示先縮小範圍。 */
+  showScopeHint: boolean;
   /** 本批可見筆數；超出者收 hidden，**不得** slice 陣列。 */
   visibleCount: number;
   /** 相對於「篩選後命中數」而非全站 73，否則會出現無效按鈕。 */
@@ -112,6 +121,7 @@ export type PlayMapCardListProps = {
 export type PlayMapSheetProps = {
   place: Playground;
   variant: SheetVariant;
+  distanceLabel: string | null;
   onClose: () => void;
   onExpand: () => void;
   panelRef: RefObject<HTMLDivElement | null>;

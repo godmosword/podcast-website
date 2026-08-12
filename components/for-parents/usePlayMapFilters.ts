@@ -15,7 +15,15 @@ import {
   PLAYGROUND_TYPES,
   type PlaygroundType,
 } from "@/data/playgrounds";
-import { sortPlaygrounds, type LatLng } from "@/lib/playground-distance";
+import {
+  formatPlaceDistanceLabel,
+  sortPlaygrounds,
+  type LatLng,
+} from "@/lib/playground-distance";
+import {
+  clusterPlaygroundsByCity,
+  isNationwideUnscoped,
+} from "@/lib/playground-clusters";
 import {
   buildPlayMapQueryString,
   countByCity,
@@ -29,6 +37,7 @@ import {
   listCityCoverage,
 } from "@/lib/playground-coverage";
 import {
+  SPLIT_MIN_WIDTH_PX,
   VIEW_TABS,
   VISIBLE_STEP,
   type BrowseView,
@@ -49,6 +58,20 @@ function usePrefersReducedMotion(): boolean {
   }, []);
 
   return reduce;
+}
+
+function useMinWidth(px: number): boolean {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia(`(min-width: ${px}px)`);
+    const sync = () => setMatches(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, [px]);
+
+  return matches;
 }
 
 function cityLabel(city: string | null): string {
@@ -92,6 +115,7 @@ export function usePlayMapFilters({
   const coverage = useMemo(() => listCityCoverage(), []);
   const allPlaces = useMemo(() => listPlaygrounds(), []);
   const reduceMotion = usePrefersReducedMotion();
+  const splitLayout = useMinWidth(SPLIT_MIN_WIDTH_PX);
 
   /*
    * 年齡在 toolbar 講一次（卡片層已移除重複標籤）。
@@ -353,6 +377,28 @@ export function usePlayMapFilters({
     [handleSelect],
   );
 
+  const handleShowOnMap = useCallback(
+    (id: string, trigger: HTMLElement) => {
+      lastTriggerRef.current = trigger;
+      const place = allPlaces.find((item) => item.id === id);
+      const nextCity = city === null && place ? place.city : city;
+      if (nextCity !== city) {
+        setCity(nextCity);
+      }
+      setSelectedId(id);
+      setSheetVariant("compact");
+      if (!splitLayout) {
+        setBrowseView("map");
+        syncUrl({ city: nextCity, view: "map" });
+        return;
+      }
+      if (nextCity !== city) {
+        syncUrl({ city: nextCity });
+      }
+    },
+    [allPlaces, city, splitLayout, syncUrl],
+  );
+
   const handleCloseSheet = useCallback(() => {
     userClosedSheetRef.current = true;
     setSelectedId(null);
@@ -438,12 +484,29 @@ export function usePlayMapFilters({
     return count > 0 || typeFilter === item;
   });
 
+  const clusterMode = isNationwideUnscoped(city, userLatLng !== null);
+  const cityClusters = useMemo(
+    () => clusterPlaygroundsByCity(filtered),
+    [filtered],
+  );
+  const showCards = splitLayout || browseView === "cards";
+  const showMap = splitLayout || browseView === "map";
+  const selectedDistanceLabel = selected
+    ? formatPlaceDistanceLabel(selected, userLatLng)
+    : null;
+
   return {
     cities,
     coverageLabel: [ageHeadline, coverageHeadline(coverage)]
       .filter(Boolean)
       .join(" · "),
     reduceMotion,
+    splitLayout,
+    clusterMode,
+    cityClusters,
+    showCards,
+    showMap,
+    selectedDistanceLabel,
     city,
     typeFilter,
     indoorOnly,
@@ -483,6 +546,7 @@ export function usePlayMapFilters({
     handleClearFilters,
     handleSelectFromCard,
     handleSelectFromMap,
+    handleShowOnMap,
     handleCloseSheet,
     handleExpandSheet,
     handleToggleFilters,

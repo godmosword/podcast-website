@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { listPlaygrounds, PLAYGROUND_TYPES } from "@/data/playgrounds";
 import { filterPlaygrounds } from "@/lib/playgrounds-query";
 import { coverageHeadline, listCityCoverage } from "@/lib/playground-coverage";
+import { playgroundTypeVisualKey } from "@/lib/playground-type-visual";
 import { VISIBLE_STEP } from "./PlayMapContract";
 import PlayMap from "./PlayMap";
 
@@ -242,7 +243,7 @@ describe("PlayMap", () => {
     expect(firstPlace).toBeDefined();
 
     fireEvent.click(
-      screen.getByRole("button", { name: new RegExp(firstPlace.name) }),
+      screen.getByRole("button", { name: `${firstPlace.name}，查看詳情` }),
     );
     expect(
       screen.getByRole("region", { name: `${firstPlace.name} 詳情` }),
@@ -260,7 +261,7 @@ describe("PlayMap", () => {
     expect(firstPlace).toBeDefined();
 
     fireEvent.click(
-      screen.getByRole("button", { name: new RegExp(firstPlace.name) }),
+      screen.getByRole("button", { name: `${firstPlace.name}，查看詳情` }),
     );
     expect(
       screen.getByRole("region", { name: `${firstPlace.name} 詳情` }),
@@ -398,6 +399,11 @@ describe("PlayMap", () => {
     expect(
       within(cardsPanel).getAllByText(new RegExp(first.type)).length,
     ).toBeGreaterThan(0);
+    expect(
+      cardsPanel.querySelector(
+        `[data-type="${playgroundTypeVisualKey(first.type)}"] svg`,
+      ),
+    ).toBeTruthy();
   });
 
   it("tabs 支援方向鍵切換", () => {
@@ -425,7 +431,7 @@ describe("PlayMap", () => {
     showAllCards();
 
     fireEvent.click(
-      screen.getByRole("button", { name: new RegExp(paidPlace.name) }),
+      screen.getByRole("button", { name: `${paidPlace.name}，查看詳情` }),
     );
     expect(
       screen.getByRole("region", { name: `${paidPlace.name} 詳情` }),
@@ -503,4 +509,78 @@ describe("PlayMap", () => {
     expect(visible.length).toBe(VISIBLE_STEP);
   });
 
+  it("全國未縮小範圍時提示選縣市或離我最近", () => {
+    render(<PlayMap />);
+    expect(screen.getByText(/目前顯示全台收錄/)).toBeTruthy();
+
+    openFilters();
+    fireEvent.click(
+      within(screen.getByRole("group", { name: "依縣市篩選" })).getByRole(
+        "button",
+        { name: cityChipName("台北市") },
+      ),
+    );
+    expect(screen.queryByText(/目前顯示全台收錄/)).toBeNull();
+  });
+
+  it("在地圖看會切到地圖、帶入該縣市並開精簡詳情", () => {
+    const { container } = render(<PlayMap />);
+    const firstPlace = filterPlaygrounds()[0];
+    expect(firstPlace).toBeDefined();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: `在地圖上看 ${firstPlace.name}` }),
+    );
+
+    expect(
+      screen.getByRole("tab", { name: "地圖" }).getAttribute("aria-selected"),
+    ).toBe("true");
+    expect(
+      container.querySelector("#play-map-panel-map")?.hasAttribute("hidden"),
+    ).toBe(false);
+    const sheet = screen.getByRole("region", {
+      name: `${firstPlace.name} 詳情`,
+    });
+    expect(sheet).toBeTruthy();
+    expect(within(sheet).getByRole("button", { name: "更多" })).toBeTruthy();
+    expect(within(sheet).getByText(firstPlace.address, { exact: false })).toBeTruthy();
+    expect(
+      within(screen.getByRole("group", { name: "依縣市篩選" })).getByRole(
+        "button",
+        { name: cityChipName(firstPlace.city) },
+      ).getAttribute("aria-pressed"),
+    ).toBe("true");
+  });
+
+  it("桌面並排時名單與地圖同時可見、不顯示互斥分頁", () => {
+    Object.defineProperty(window, "matchMedia", {
+      writable: true,
+      configurable: true,
+      value: vi.fn().mockImplementation((query: string) => ({
+        matches: query.includes("prefers-reduced-motion")
+          ? false
+          : query.includes("min-width: 640px") ||
+            query.includes("min-width: 980px"),
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
+
+    const { container } = render(<PlayMap />);
+    expect(screen.queryByRole("tab", { name: "卡片" })).toBeNull();
+    expect(screen.getByRole("region", { name: "地點名單" })).toBeTruthy();
+    expect(screen.getByRole("region", { name: "地點地圖" })).toBeTruthy();
+    expect(
+      container.querySelector("#play-map-panel-cards")?.hasAttribute("hidden"),
+    ).toBe(false);
+    expect(
+      container.querySelector("#play-map-panel-map")?.hasAttribute("hidden"),
+    ).toBe(false);
+    expect(screen.getByTestId("map-container")).toBeTruthy();
+  });
 });

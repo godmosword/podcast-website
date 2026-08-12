@@ -45,12 +45,16 @@ export default function PlayMap({
   });
 
   return (
-    <div className={styles.root}>
+    <div
+      className={styles.root}
+      data-split={map.splitLayout ? "true" : "false"}
+    >
       <PlayMapToolbar
         coverageLabel={map.coverageLabel}
         browseView={map.browseView}
         onSelectView={map.handleSelectView}
         onTabKeyDown={map.handleTabKeyDown}
+        hideViewTabs={map.splitLayout}
       />
 
       <PlayMapIntentRow
@@ -88,9 +92,10 @@ export default function PlayMap({
       <div className={styles.content}>
         <section
           id="play-map-panel-cards"
-          role="tabpanel"
-          aria-labelledby="play-map-tab-cards"
-          hidden={map.browseView !== "cards"}
+          role={map.splitLayout ? "region" : "tabpanel"}
+          aria-labelledby={map.splitLayout ? undefined : "play-map-tab-cards"}
+          aria-label={map.splitLayout ? "地點名單" : undefined}
+          hidden={!map.showCards}
           className={styles.cardsPanel}
         >
           <PlayMapCardList
@@ -101,6 +106,8 @@ export default function PlayMap({
             hasExtraFilters={map.hasExtraFilters}
             onClearFilters={map.handleClearFilters}
             onSelect={map.handleSelectFromCard}
+            onShowOnMap={map.handleShowOnMap}
+            showScopeHint={map.clusterMode}
             visibleCount={map.visibleCount}
             canLoadMore={map.canLoadMore}
             visibleCountLabel={map.visibleCountLabel}
@@ -111,12 +118,13 @@ export default function PlayMap({
 
         <div
           id="play-map-panel-map"
-          role="tabpanel"
-          aria-labelledby="play-map-tab-map"
-          hidden={map.browseView !== "map"}
+          role={map.splitLayout ? "region" : "tabpanel"}
+          aria-labelledby={map.splitLayout ? undefined : "play-map-tab-map"}
+          aria-label={map.splitLayout ? "地點地圖" : undefined}
+          hidden={!map.showMap}
           className={styles.mapShell}
         >
-          {map.browseView === "map" ? (
+          {map.showMap ? (
             <PlayMapLeaflet
               places={map.filtered}
               points={map.points}
@@ -124,7 +132,12 @@ export default function PlayMap({
               selectedId={map.selectedId}
               onSelect={map.handleSelectFromMap}
               reduceMotion={map.reduceMotion}
-              active={map.browseView === "map"}
+              active={map.showMap}
+              clusterMode={map.clusterMode}
+              cityClusters={map.cityClusters}
+              onSelectCity={map.handleSelectCity}
+              userLatLng={map.userLatLng}
+              splitLayout={map.splitLayout}
             />
           ) : null}
         </div>
@@ -134,6 +147,7 @@ export default function PlayMap({
         <PlayMapSheet
           place={map.selected}
           variant={map.sheetVariant}
+          distanceLabel={map.selectedDistanceLabel}
           onClose={map.handleCloseSheet}
           onExpand={map.handleExpandSheet}
           panelRef={map.sheetRef}

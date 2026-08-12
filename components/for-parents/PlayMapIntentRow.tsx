@@ -44,7 +44,7 @@ export function PlayMapIntentRow({
       </div>
       {geoStatus === "denied" ? (
         <p className={styles.geoHint} role="status">
-          無法定位，已改為免費優先。
+          無法定位。可改選縣市，或稍後再開啟定位。
         </p>
       ) : null}
       {geoStatus === "pending" ? (

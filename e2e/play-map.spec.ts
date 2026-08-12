@@ -25,6 +25,7 @@ test.describe("親子遊樂地圖", () => {
 
   test("頁面載入、意圖、結果數、卡片與詳情抽屜", async ({ page }) => {
     test.setTimeout(30_000);
+    await page.setViewportSize(PHONE);
     await page.goto("/for-parents/play-map");
 
     await expect(
@@ -41,7 +42,9 @@ test.describe("親子遊樂地圖", () => {
     await expect(page.getByText(/全部 → \d+ 個地點/)).toBeVisible();
 
     const cardsPanel = page.locator("#play-map-panel-cards");
-    const firstCardButton = cardsPanel.getByRole("button").first();
+    const firstCardButton = cardsPanel
+      .getByRole("button", { name: /查看詳情/ })
+      .first();
     await expect(firstCardButton).toBeVisible({ timeout: 5_000 });
 
     await firstCardButton.click();
@@ -68,8 +71,9 @@ test.describe("親子遊樂地圖", () => {
     await expect(page).toHaveURL(/free=1/);
   });
 
-  test("地圖 tab 才載入 Leaflet", async ({ page }) => {
+  test("地圖 tab 才載入 Leaflet（行動互斥）", async ({ page }) => {
     test.setTimeout(45_000);
+    await page.setViewportSize(PHONE);
     const leafletRequests: string[] = [];
     page.on("request", (req) => {
       const url = req.url();
@@ -87,6 +91,16 @@ test.describe("親子遊樂地圖", () => {
       timeout: 15_000,
     });
     expect(leafletRequests.length).toBeGreaterThan(0);
+  });
+
+  test("桌面並排直接載入地圖", async ({ page }) => {
+    test.setTimeout(45_000);
+    await page.goto("/for-parents/play-map");
+    await waitForPlayMapReady(page);
+    await expect(page.getByRole("tab", { name: "地圖" })).toHaveCount(0);
+    await expect(page.locator(".leaflet-container")).toBeVisible({
+      timeout: 15_000,
+    });
   });
 
   test("行動選單「親子景點」可直達地圖頁", async ({ page }) => {

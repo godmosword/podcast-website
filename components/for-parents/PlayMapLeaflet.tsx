@@ -11,6 +11,9 @@ import {
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import type { Playground } from "@/data/playgrounds";
+import type { CityCluster } from "@/lib/playground-clusters";
+import type { LatLng } from "@/lib/playground-distance";
+import { playgroundTypeVisualKey } from "@/lib/playground-type-visual";
 import { DEFAULT_PLAY_MAP_CENTER } from "@/lib/playground-coverage";
 import styles from "./PlayMap.module.css";
 
@@ -20,6 +23,9 @@ type FitBoundsProps = {
   points: Array<[number, number]>;
   emptyCenter: [number, number];
   animate: boolean;
+  selectedPoint: [number, number] | null;
+  /** 選中時把針抬出 sheet 覆蓋區：[right, bottom] */
+  selectedPad: [number, number];
 };
 
 function escapeAttr(value: string): string {
@@ -45,11 +51,27 @@ function InvalidateSizeOnActive({ active }: { active: boolean }) {
   return null;
 }
 
-function FitBounds({ points, emptyCenter, animate }: FitBoundsProps) {
+function FitBounds({
+  points,
+  emptyCenter,
+  animate,
+  selectedPoint,
+  selectedPad,
+}: FitBoundsProps) {
   const map = useMap();
 
   useEffect(() => {
     const motion = animate ? undefined : ({ animate: false } as L.ZoomPanOptions);
+
+    if (selectedPoint) {
+      map.fitBounds(L.latLngBounds([selectedPoint]), {
+        paddingTopLeft: [48, 72],
+        paddingBottomRight: selectedPad,
+        maxZoom: 15,
+        animate,
+      });
+      return;
+    }
 
     if (points.length === 0) {
       map.setView(emptyCenter, DEFAULT_ZOOM, motion);
@@ -60,13 +82,12 @@ function FitBounds({ points, emptyCenter, animate }: FitBoundsProps) {
       return;
     }
     map.fitBounds(L.latLngBounds(points), {
-      // 頂部多留一點：置頂導覽列可能疊在地圖上緣，避免最北標記貼邊。
       paddingTopLeft: [48, 72],
       paddingBottomRight: [48, 48],
       maxZoom: 14,
-      animate: animate,
+      animate,
     });
-  }, [animate, emptyCenter, map, points]);
+  }, [animate, emptyCenter, map, points, selectedPad, selectedPoint]);
 
   return null;
 }
@@ -79,16 +100,17 @@ type AccessibleMarkerProps = {
 
 function AccessibleMarker({ place, selected, onSelect }: AccessibleMarkerProps) {
   const markerRef = useRef<L.Marker>(null);
+  const typeKey = playgroundTypeVisualKey(place.type);
 
   const icon = useMemo(() => {
     const label = escapeAttr(`${place.city} · ${place.type} · ${place.name}`);
     return L.divIcon({
       className: "playMapMarkerHost",
-      html: `<button type="button" class="playMapMarkerButton" aria-label="${label}" aria-pressed="false"></button>`,
+      html: `<button type="button" class="playMapMarkerButton" data-type="${typeKey}" aria-label="${label}" aria-pressed="false"><span class="playMapPin" aria-hidden="true"></span></button>`,
       iconSize: [44, 44],
-      iconAnchor: [22, 44],
+      iconAnchor: [22, 42],
     });
-  }, [place.city, place.name, place.type]);
+  }, [place.city, place.name, place.type, typeKey]);
 
   useEffect(() => {
     const marker = markerRef.current;
@@ -103,9 +125,6 @@ function AccessibleMarker({ place, selected, onSelect }: AccessibleMarkerProps) 
       ref={markerRef}
       position={[place.lat, place.lng]}
       icon={icon}
-      // Leaflet 預設會給 marker 外層 host 加上 tabindex／role=button，
-      // 與 divIcon 內的真實 <button> 形成巢狀互動元素（axe nested-interactive）。
-      // 關閉後只留內層 button 可聚焦；Enter 觸發的 click 仍會冒泡到 Leaflet handler。
       keyboard={false}
       eventHandlers={{
         click: (event) => {
@@ -121,6 +140,69 @@ function AccessibleMarker({ place, selected, onSelect }: AccessibleMarkerProps) 
   );
 }
 
+type ClusterMarkerProps = {
+  cluster: CityCluster;
+  onSelectCity: (city: string, trigger: HTMLElement) => void;
+};
+
+function ClusterMarker({ cluster, onSelectCity }: ClusterMarkerProps) {
+  const icon = useMemo(() => {
+    const label = escapeAttr(`${cluster.city}，${cluster.count} 處`);
+    const count = escapeAttr(String(cluster.count));
+    return L.divIcon({
+      className: "playMapMarkerHost",
+      html: `<button type="button" class="playMapClusterButton" aria-label="${label}"><span class="playMapClusterCount">${count}</span></button>`,
+      iconSize: [44, 44],
+      iconAnchor: [22, 22],
+    });
+  }, [cluster.city, cluster.count]);
+
+  return (
+    <Marker
+      position={[cluster.lat, cluster.lng]}
+      icon={icon}
+      keyboard={false}
+      eventHandlers={{
+        click: (event) => {
+          const target = event.originalEvent.target;
+          if (target instanceof HTMLElement) {
+            onSelectCity(cluster.city, target);
+            return;
+          }
+          onSelectCity(cluster.city, document.body);
+        },
+      }}
+    />
+  );
+}
+
+type MeMarkerProps = {
+  position: LatLng;
+};
+
+function MeMarker({ position }: MeMarkerProps) {
+  const icon = useMemo(
+    () =>
+      L.divIcon({
+        className: "playMapMarkerHost",
+        html: `<span class="playMapMeMarker" role="img" aria-label="你目前的位置"></span>`,
+        iconSize: [18, 18],
+        iconAnchor: [9, 9],
+      }),
+    [],
+  );
+
+  return (
+    <Marker
+      position={[position.lat, position.lng]}
+      icon={icon}
+      keyboard={false}
+      interactive={false}
+      zIndexOffset={600}
+    />
+  );
+}
+
 export type PlayMapLeafletProps = {
   places: Playground[];
   points: Array<[number, number]>;
@@ -129,6 +211,12 @@ export type PlayMapLeafletProps = {
   onSelect: (id: string, trigger: HTMLElement) => void;
   reduceMotion: boolean;
   active: boolean;
+  clusterMode: boolean;
+  cityClusters: readonly CityCluster[];
+  onSelectCity: (city: string) => void;
+  userLatLng: LatLng | null;
+  /** 桌面並排時 sheet 在右側，padding 改偏右。 */
+  splitLayout: boolean;
 };
 
 export default function PlayMapLeaflet({
@@ -139,7 +227,25 @@ export default function PlayMapLeaflet({
   onSelect,
   reduceMotion,
   active,
+  clusterMode,
+  cityClusters,
+  onSelectCity,
+  userLatLng,
+  splitLayout,
 }: PlayMapLeafletProps) {
+  const selected = selectedId
+    ? (places.find((place) => place.id === selectedId) ?? null)
+    : null;
+  const selectedPoint: [number, number] | null = selected
+    ? [selected.lat, selected.lng]
+    : null;
+  const clusterPoints: Array<[number, number]> = cityClusters.map((row) => [
+    row.lat,
+    row.lng,
+  ]);
+  const fitPoints = clusterMode ? clusterPoints : points;
+  const selectedPad: [number, number] = splitLayout ? [280, 72] : [48, 220];
+
   return (
     <>
       <MapContainer
@@ -150,10 +256,6 @@ export default function PlayMapLeaflet({
         zoomControl={false}
         aria-label="親子遊樂地點地圖"
       >
-        {/*
-          預設 topleft 會被置頂導覽列蓋住；右下則會被地點詳情面板（桌面固定於右下）
-          與 OSM attribution 佔用，因此放左下。
-        */}
         <ZoomControl position="bottomleft" />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -161,23 +263,38 @@ export default function PlayMapLeaflet({
         />
         <InvalidateSizeOnActive active={active} />
         <FitBounds
-          points={points}
+          points={fitPoints}
           emptyCenter={emptyCenter}
           animate={!reduceMotion}
+          selectedPoint={clusterMode ? null : selectedPoint}
+          selectedPad={selectedPad}
         />
-        {places.map((place) => (
-          <AccessibleMarker
-            key={place.id}
-            place={place}
-            selected={selectedId === place.id}
-            onSelect={onSelect}
-          />
-        ))}
+        {clusterMode
+          ? cityClusters.map((cluster) => (
+              <ClusterMarker
+                key={cluster.city}
+                cluster={cluster}
+                onSelectCity={(city) => onSelectCity(city)}
+              />
+            ))
+          : places.map((place) => (
+              <AccessibleMarker
+                key={place.id}
+                place={place}
+                selected={selectedId === place.id}
+                onSelect={onSelect}
+              />
+            ))}
+        {userLatLng ? <MeMarker position={userLatLng} /> : null}
       </MapContainer>
 
-      <p className={styles.mapHint}>雙指或工具列可縮放</p>
+      <p className={styles.mapHint}>
+        {clusterMode
+          ? "點縣市看該區地點，或先點離我最近"
+          : "雙指或工具列可縮放"}
+      </p>
 
-      {places.length === 0 ? (
+      {fitPoints.length === 0 ? (
         <p className={styles.empty} role="status">
           目前沒有符合條件的地點，試試放寬篩選。
         </p>

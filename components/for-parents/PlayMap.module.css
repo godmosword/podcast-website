@@ -226,11 +226,11 @@
   padding: 8px 14px;
   border: 2px solid var(--map-chip-line);
   border-radius: 999px;
-  background: linear-gradient(var(--map-chip), var(--map-chip-2));
-  color: var(--map-chip-ink);
+  background: var(--card);
+  color: var(--accent-ink);
   font: inherit;
   font-size: 0.9rem;
-  font-weight: 800;
+  font-weight: 700;
   white-space: nowrap;
   cursor: pointer;
   transition: transform var(--motion-press), opacity var(--motion-press);
@@ -329,22 +329,12 @@
 .card {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: stretch;
-  gap: var(--space-2);
+  gap: 0;
   border: 1px solid var(--hairline);
   border-radius: var(--radius-lg);
   background: var(--card);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
-}
-
-.card::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 4px;
-  background: var(--card-accent, var(--accent));
 }
 
 .card[data-type="park"] {
@@ -375,6 +365,22 @@
   --card-accent: var(--ink-soft);
 }
 
+.typeSwatch {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--card-accent, var(--accent));
+  color: var(--ink);
+}
+
+.typeSwatch svg {
+  width: 22px;
+  height: 22px;
+  opacity: 0.72;
+}
+
 /*
  * 選中狀態只加外框、不換底色。
  * 原本用 color-mix(--map-chip 40%, --card)，夜間會混成 #808390，
@@ -386,9 +392,11 @@
 
 .cardMain {
   display: grid;
-  gap: 6px;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 10px 12px;
+  align-items: start;
   min-height: 44px;
-  padding: var(--space-3) var(--space-4) var(--space-3) calc(var(--space-4) + 4px);
+  padding: var(--space-3) var(--space-4);
   border: none;
   background: transparent;
   color: inherit;
@@ -400,6 +408,12 @@
 
 .cardMain:active {
   opacity: 0.88;
+}
+
+.cardText {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
 }
 
 .cardName {
@@ -441,30 +455,35 @@
   color: var(--ink-soft);
 }
 
+.cardActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 0 var(--space-3) var(--space-3);
+}
+
+.cardMapBtn,
 .cardNav {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  align-self: center;
   min-width: 44px;
   min-height: 44px;
-  margin-right: var(--space-3);
   padding: 8px 14px;
-  /*
-   * 離站動作：要比 metadata 顯眼（原本用 --ink-soft 看起來像停用），
-   * 但不能沿用 chip 的奶油實色——那會讓「跳去 Google Maps」比「點開卡片看
-   * 收費與核對日」還搶眼，而且和篩選 chip 無法區分。用外框式作為中間層級。
-   */
   border: 2px solid var(--map-chip-line);
   border-radius: 999px;
   background: transparent;
   color: var(--accent-ink);
+  font: inherit;
   font-size: 0.88rem;
   font-weight: 800;
   text-decoration: none;
+  cursor: pointer;
   transition: transform var(--motion-press), opacity var(--motion-press);
 }
 
+.cardMapBtn:active,
 .cardNav:active {
   transform: scale(0.98);
   opacity: 0.94;
@@ -479,6 +498,17 @@
   border: 1px dashed var(--hairline);
   border-radius: var(--radius-lg);
   text-align: center;
+}
+
+.scopeHint {
+  margin: 0 0 var(--space-3);
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--map-chip) 58%, var(--card));
+  color: var(--map-chip-ink);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.5;
 }
 
 .listEmptyText {
@@ -803,30 +833,95 @@
 }
 
 :global(.playMapMarkerButton) {
-  display: block;
+  display: grid;
+  place-items: center;
   width: 44px;
   height: 44px;
   padding: 0;
   border: none;
-  /* 自帶 Leaflet 標記圖（原始檔在 node_modules/leaflet/dist/images/），不打第三方 CDN。 */
-  background: transparent
-    image-set(
-      url("/map-pins/marker-icon.png") 1x,
-      url("/map-pins/marker-icon-2x.png") 2x
-    )
-    no-repeat center bottom / 25px 41px;
+  background: transparent;
   cursor: pointer;
   transition: transform var(--motion-press), opacity var(--motion-press);
 }
 
-:global(.playMapMarkerButton[aria-pressed="true"]) {
-  background-size: 30px 49px;
+:global(.playMapPin) {
+  width: 18px;
+  height: 18px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  background: var(--pin-color, var(--c-mint, #b7df9b));
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 22%, transparent);
+}
+
+:global(.playMapMarkerButton[data-type="park"]) {
+  --pin-color: var(--c-mint, #b7df9b);
+}
+
+:global(.playMapMarkerButton[data-type="indoor-park"]) {
+  --pin-color: var(--c-sky, #8fcde8);
+}
+
+:global(.playMapMarkerButton[data-type="theme-park"]) {
+  --pin-color: var(--c-pink, #f7a8c4);
+}
+
+:global(.playMapMarkerButton[data-type="museum"]) {
+  --pin-color: var(--c-lilac, #c5b3e6);
+}
+
+:global(.playMapMarkerButton[data-type="zoo"]) {
+  --pin-color: var(--c-teal, #79c8c1);
+}
+
+:global(.playMapMarkerButton[data-type="farm"]) {
+  --pin-color: var(--c-yellow, #ffd866);
+}
+
+:global(.playMapMarkerButton[data-type="other"]) {
+  --pin-color: var(--ink-soft);
+}
+
+  :global(.playMapMarkerButton[aria-pressed="true"] .playMapPin) {
+  transform: rotate(-45deg) scale(1.18);
   filter: drop-shadow(0 2px 4px color-mix(in srgb, var(--ink) 18%, transparent));
 }
 
 :global(.playMapMarkerButton:active) {
   transform: scale(0.96);
   opacity: 0.92;
+}
+
+:global(.playMapClusterButton) {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 2px solid var(--map-chip-ink);
+  border-radius: 50%;
+  background: linear-gradient(var(--map-chip), var(--map-chip-2));
+  color: var(--map-chip-ink);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--motion-press), opacity var(--motion-press);
+}
+
+:global(.playMapClusterButton:active) {
+  transform: scale(0.96);
+  opacity: 0.92;
+}
+
+:global(.playMapMeMarker) {
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--warm-accent, #2a9d8f);
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px var(--warm-accent, #2a9d8f);
 }
 
 @media (min-width: 640px) {
@@ -864,8 +959,20 @@
 }
 
 @media (min-width: 980px) {
+  .content {
+    grid-template-columns: minmax(280px, 38%) minmax(0, 1fr);
+    align-items: stretch;
+    min-height: 64dvh;
+  }
+
+  .cardsPanel {
+    max-height: 64dvh;
+    overflow: auto;
+    padding-right: 2px;
+  }
+
   .cardGrid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .map {
@@ -874,6 +981,7 @@
 
   .mapShell {
     min-height: 64dvh;
+    height: 64dvh;
   }
 
   .sheet {
@@ -920,10 +1028,10 @@
   padding: 10px 20px;
   border: 2px solid var(--map-chip-line);
   border-radius: 999px;
-  background: linear-gradient(var(--map-chip), var(--map-chip-2));
-  color: var(--map-chip-ink);
+  background: var(--card);
+  color: var(--accent-ink);
   font-size: 0.9rem;
-  font-weight: 900;
+  font-weight: 800;
   cursor: pointer;
 }
 
@@ -937,6 +1045,7 @@
   .viewTab,
   .cardMain,
   .cardNav,
+  .cardMapBtn,
   .clearFilters,
   .filterToggle,
   .closeButton,
@@ -945,12 +1054,24 @@
   .officialLink,
   .moreButton,
   .loadMore,
-  :global(.playMapMarkerButton) {
+  :global(.playMapMarkerButton),
+  :global(.playMapClusterButton) {
     transition: none;
   }
 
   .loadMore:active {
     transform: none;
+  }
+
+  :global(.playMapMarkerButton[aria-pressed="true"] .playMapPin) {
+    transform: rotate(-45deg);
+    filter: none;
+  }
+
+  :global(.playMapMarkerButton:active),
+  :global(.playMapClusterButton:active) {
+    transform: none;
+    opacity: 1;
   }
 
   .filtersSticky {

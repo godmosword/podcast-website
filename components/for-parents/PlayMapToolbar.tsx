@@ -8,6 +8,7 @@ export function PlayMapToolbar({
   browseView,
   onSelectView,
   onTabKeyDown,
+  hideViewTabs = false,
 }: PlayMapToolbarProps) {
   return (
     <header className={styles.toolbar}>
@@ -16,34 +17,36 @@ export function PlayMapToolbar({
         <p className={styles.coverage}>{coverageLabel}</p>
       </div>
 
-      <div
-        className={styles.viewTabs}
-        role="tablist"
-        aria-label="瀏覽方式"
-        onKeyDown={onTabKeyDown}
-      >
-        {VIEW_TABS.map((tab) => {
-          const active = browseView === tab.view;
-          return (
-            <button
-              key={tab.view}
-              type="button"
-              role="tab"
-              id={tab.id}
-              data-view-tab={tab.view}
-              aria-selected={active}
-              aria-controls={tab.panelId}
-              tabIndex={active ? 0 : -1}
-              className={[styles.viewTab, active ? styles.viewTabActive : ""]
-                .filter(Boolean)
-                .join(" ")}
-              onClick={() => onSelectView(tab.view)}
-            >
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
+      {hideViewTabs ? null : (
+        <div
+          className={styles.viewTabs}
+          role="tablist"
+          aria-label="瀏覽方式"
+          onKeyDown={onTabKeyDown}
+        >
+          {VIEW_TABS.map((tab) => {
+            const active = browseView === tab.view;
+            return (
+              <button
+                key={tab.view}
+                type="button"
+                role="tab"
+                id={tab.id}
+                data-view-tab={tab.view}
+                aria-selected={active}
+                aria-controls={tab.panelId}
+                tabIndex={active ? 0 : -1}
+                className={[styles.viewTab, active ? styles.viewTabActive : ""]
+                  .filter(Boolean)
+                  .join(" ")}
+                onClick={() => onSelectView(tab.view)}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </header>
   );
 }

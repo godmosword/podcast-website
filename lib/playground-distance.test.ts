@@ -3,6 +3,7 @@ import type { Playground } from "@/data/playgrounds";
 import {
   estimateDriveMinutes,
   formatDriveMinutesLabel,
+  formatPlaceDistanceLabel,
   haversineKm,
   isStrollerFriendly,
   listPlaceDecisionTags,
@@ -32,9 +33,19 @@ describe("estimateDriveMinutes", () => {
   });
 });
 
-describe("formatDriveMinutesLabel", () => {
-  test("繁中文案", () => {
-    expect(formatDriveMinutesLabel(18)).toBe("約 18 分鐘");
+describe("formatPlaceDistanceLabel", () => {
+  test("無定位不顯示", () => {
+    expect(
+      formatPlaceDistanceLabel({ lat: 25, lng: 121 }, null),
+    ).toBeNull();
+  });
+
+  test("觸頂改為 90 分以上", () => {
+    const label = formatPlaceDistanceLabel(
+      { lat: 22.6, lng: 120.3 },
+      { lat: 25.04, lng: 121.55 },
+    );
+    expect(label).toBe("車程 90 分以上");
   });
 });
 

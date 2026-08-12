@@ -41,6 +41,21 @@ export function formatDriveMinutesLabel(minutes: number): string {
   return `約 ${minutes} 分鐘`;
 }
 
+/**
+ * 有定位才顯示。觸頂（90 分）改開放式文案，避免中台灣場館被讀成「剛好 90 分」。
+ */
+export function formatPlaceDistanceLabel(
+  place: LatLng,
+  user: LatLng | null | undefined,
+): string | null {
+  if (!user) return null;
+  const minutes = estimateDriveMinutes(haversineKm(user, place));
+  if (minutes >= MAX_DRIVE_MINUTES) {
+    return `車程 ${MAX_DRIVE_MINUTES} 分以上`;
+  }
+  return formatDriveMinutesLabel(minutes);
+}
+
 export function sortPlaygrounds(
   places: readonly Playground[],
   user: LatLng | null | undefined,
