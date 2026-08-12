@@ -4,11 +4,7 @@ import { cleanup, fireEvent, render, screen, within } from "@testing-library/rea
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { listPlaygrounds, PLAYGROUND_TYPES } from "@/data/playgrounds";
 import { filterPlaygrounds } from "@/lib/playgrounds-query";
-import {
-  coverageHeadline,
-  DEFAULT_PLAY_MAP_CITY,
-  listCityCoverage,
-} from "@/lib/playground-coverage";
+import { coverageHeadline, listCityCoverage } from "@/lib/playground-coverage";
 import PlayMap from "./PlayMap";
 
 vi.stubGlobal("React", React);
@@ -33,7 +29,9 @@ beforeEach(() => {
     writable: true,
     configurable: true,
     value: vi.fn().mockImplementation((query: string) => ({
-      matches: query.includes("prefers-reduced-motion"),
+      matches: query.includes("prefers-reduced-motion")
+        ? false
+        : query.includes("min-width: 640px"),
       media: query,
       onchange: null,
       addListener: vi.fn(),
@@ -50,7 +48,6 @@ afterEach(() => {
   replaceMock.mockClear();
 });
 
-/** chip 的無障礙名稱來自 aria-label（視覺上是「台北市 · 8」，讀屏是「台北市，8 個地點」）。 */
 function cityChipName(city: string): RegExp {
   const count = listCityCoverage().find((row) => row.city === city)?.count ?? 0;
   return new RegExp(`^${city}，${count} 個地點$`);
@@ -60,93 +57,110 @@ function typeChipName(type: string, count: number): RegExp {
   return new RegExp(`^${type}，${count} 個地點$`);
 }
 
-function summaryText(city: string, count: number, extras: string[] = []): string {
+function summaryText(
+  city: string,
+  count: number,
+  extras: string[] = [],
+): string {
   const parts = [city, ...extras];
   return `${parts.join(" · ")} → ${count} 個地點`;
 }
 
+function openFilters() {
+  const toggle = screen.getByRole("button", { name: "篩選" });
+  if (toggle.getAttribute("aria-expanded") !== "true") {
+    fireEvent.click(toggle);
+  }
+}
+
 describe("PlayMap", () => {
-  it("預設選取台北市與卡片瀏覽", () => {
+  it("預設選取全部縣市與卡片瀏覽，並顯示意圖入口", () => {
     render(<PlayMap />);
     expect(
       screen.getByRole("heading", { level: 1, name: "親子遊樂地圖" }),
     ).toBeTruthy();
 
-    const cityGroup = screen.getByRole("group", { name: "依縣市篩選" });
-    const pressed = within(cityGroup).getByRole("button", {
-      name: cityChipName(DEFAULT_PLAY_MAP_CITY),
-    });
-    expect(pressed.getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByRole("button", { name: "離我最近" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "免費放電" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "室內" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "主題樂園" })).toBeTruthy();
 
-    expect(screen.getByRole("tab", { name: "卡片" }).getAttribute("aria-selected")).toBe(
-      "true",
-    );
-    expect(screen.getByRole("tabpanel", { name: "卡片" }).hasAttribute("hidden")).toBe(
-      false,
-    );
+    openFilters();
+    const cityGroup = screen.getByRole("group", { name: "依縣市篩選" });
+    const allChip = within(cityGroup).getByRole("button", {
+      name: /全部，\d+ 個地點/,
+    });
+    expect(allChip.getAttribute("aria-pressed")).toBe("true");
+
+    expect(
+      screen.getByRole("tab", { name: "卡片" }).getAttribute("aria-selected"),
+    ).toBe("true");
   });
 
-  it("切換免費篩選會改變結果數", () => {
+  it("切換免費放電會改變結果數", () => {
     render(<PlayMap />);
-    const baseline = filterPlaygrounds({ city: DEFAULT_PLAY_MAP_CITY }).length;
-    const freeCount = filterPlaygrounds({
-      city: DEFAULT_PLAY_MAP_CITY,
-      freeOnly: true,
-    }).length;
+    const baseline = filterPlaygrounds().length;
+    const freeCount = filterPlaygrounds({ freeOnly: true }).length;
+
+    expect(screen.getByText(summaryText("全部", baseline))).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "免費放電" }));
+
+    expect(screen.getByText(summaryText("全部", freeCount, ["免費"]))).toBeTruthy();
+  });
+
+  it("主題樂園意圖會縮小結果", () => {
+    render(<PlayMap />);
+    const themeCount = filterPlaygrounds({ type: "主題樂園" }).length;
+
+    fireEvent.click(screen.getByRole("button", { name: "主題樂園" }));
 
     expect(
-      screen.getByText(summaryText(DEFAULT_PLAY_MAP_CITY, baseline)),
-    ).toBeTruthy();
-
-    fireEvent.click(screen.getByRole("button", { name: "免費" }));
-
-    expect(
-      screen.getByText(summaryText(DEFAULT_PLAY_MAP_CITY, freeCount, ["免費"])),
+      screen.getByText(summaryText("全部", themeCount, ["主題樂園"])),
     ).toBeTruthy();
   });
 
   it("類型篩選會縮小結果", () => {
     render(<PlayMap />);
-    const parkCount = filterPlaygrounds({
-      city: DEFAULT_PLAY_MAP_CITY,
-      type: "公園",
-    }).length;
+    openFilters();
+    const parkCount = filterPlaygrounds({ type: "公園" }).length;
 
     fireEvent.click(
       screen.getByRole("button", { name: typeChipName("公園", parkCount) }),
     );
 
     expect(
-      screen.getByText(summaryText(DEFAULT_PLAY_MAP_CITY, parkCount, ["公園"])),
+      screen.getByText(summaryText("全部", parkCount, ["公園"])),
     ).toBeTruthy();
   });
 
   it("清除條件保留縣市並還原類型／進階篩選", () => {
     render(<PlayMap />);
-    const baseline = filterPlaygrounds({ city: DEFAULT_PLAY_MAP_CITY }).length;
+    openFilters();
+    fireEvent.click(
+      within(screen.getByRole("group", { name: "依縣市篩選" })).getByRole(
+        "button",
+        { name: cityChipName("台北市") },
+      ),
+    );
 
-    const parkCount = filterPlaygrounds({
-      city: DEFAULT_PLAY_MAP_CITY,
-      type: "公園",
-    }).length;
+    const baseline = filterPlaygrounds({ city: "台北市" }).length;
+    const parkCount = filterPlaygrounds({ city: "台北市", type: "公園" }).length;
 
     fireEvent.click(
       screen.getByRole("button", { name: typeChipName("公園", parkCount) }),
     );
-    fireEvent.click(screen.getByRole("button", { name: "免費" }));
+    fireEvent.click(screen.getByRole("button", { name: "免費放電" }));
 
     expect(screen.getByRole("button", { name: "清除條件" })).toBeTruthy();
-
     fireEvent.click(screen.getByRole("button", { name: "清除條件" }));
 
-    expect(
-      screen.getByText(summaryText(DEFAULT_PLAY_MAP_CITY, baseline)),
-    ).toBeTruthy();
+    expect(screen.getByText(summaryText("台北市", baseline))).toBeTruthy();
     expect(screen.queryByRole("button", { name: "清除條件" })).toBeNull();
     expect(
       within(screen.getByRole("group", { name: "依縣市篩選" })).getByRole(
         "button",
-        { name: cityChipName(DEFAULT_PLAY_MAP_CITY) },
+        { name: cityChipName("台北市") },
       ).getAttribute("aria-pressed"),
     ).toBe("true");
   });
@@ -155,27 +169,29 @@ describe("PlayMap", () => {
     const { container } = render(<PlayMap />);
     fireEvent.click(screen.getByRole("tab", { name: "地圖" }));
 
-    expect(screen.getByRole("tab", { name: "地圖" }).getAttribute("aria-selected")).toBe(
-      "true",
-    );
-    expect(container.querySelector("#play-map-panel-map")?.hasAttribute("hidden")).toBe(
-      false,
-    );
-    expect(container.querySelector("#play-map-panel-cards")?.hasAttribute("hidden")).toBe(
-      true,
-    );
+    expect(
+      screen.getByRole("tab", { name: "地圖" }).getAttribute("aria-selected"),
+    ).toBe("true");
+    expect(
+      container.querySelector("#play-map-panel-map")?.hasAttribute("hidden"),
+    ).toBe(false);
+    expect(
+      container.querySelector("#play-map-panel-cards")?.hasAttribute("hidden"),
+    ).toBe(true);
     expect(screen.getByTestId("map-container")).toBeTruthy();
   });
 
   it("開啟 Sheet 後可按關閉還原", () => {
     render(<PlayMap />);
-    const firstPlace = filterPlaygrounds({ city: DEFAULT_PLAY_MAP_CITY })[0];
+    const firstPlace = filterPlaygrounds()[0];
     expect(firstPlace).toBeDefined();
 
     fireEvent.click(
       screen.getByRole("button", { name: new RegExp(firstPlace.name) }),
     );
-    expect(screen.getByRole("region", { name: `${firstPlace.name} 詳情` })).toBeTruthy();
+    expect(
+      screen.getByRole("region", { name: `${firstPlace.name} 詳情` }),
+    ).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "關閉地點詳情" }));
     expect(
@@ -185,13 +201,15 @@ describe("PlayMap", () => {
 
   it("開啟 Sheet 後按 Esc 可關閉", () => {
     render(<PlayMap />);
-    const firstPlace = filterPlaygrounds({ city: DEFAULT_PLAY_MAP_CITY })[0];
+    const firstPlace = filterPlaygrounds()[0];
     expect(firstPlace).toBeDefined();
 
     fireEvent.click(
       screen.getByRole("button", { name: new RegExp(firstPlace.name) }),
     );
-    expect(screen.getByRole("region", { name: `${firstPlace.name} 詳情` })).toBeTruthy();
+    expect(
+      screen.getByRole("region", { name: `${firstPlace.name} 詳情` }),
+    ).toBeTruthy();
 
     fireEvent.keyDown(window, { key: "Escape" });
     expect(
@@ -207,7 +225,7 @@ describe("PlayMap", () => {
   it("篩選狀態寫回網址，預設值不入 query", () => {
     render(<PlayMap />);
 
-    fireEvent.click(screen.getByRole("button", { name: "免費" }));
+    fireEvent.click(screen.getByRole("button", { name: "免費放電" }));
     expect(replaceMock).toHaveBeenCalledWith(
       "/for-parents/play-map?free=1",
       { scroll: false },
@@ -219,8 +237,7 @@ describe("PlayMap", () => {
       { scroll: false },
     );
 
-    // 取消免費後只剩 view，預設縣市不寫進網址
-    fireEvent.click(screen.getByRole("button", { name: "免費" }));
+    fireEvent.click(screen.getByRole("button", { name: "免費放電" }));
     expect(replaceMock).toHaveBeenLastCalledWith(
       "/for-parents/play-map?view=map",
       { scroll: false },
@@ -244,7 +261,9 @@ describe("PlayMap", () => {
     );
 
     expect(
-      screen.getByText(summaryText("新北市", indoorFreeCount, ["室內", "免費"])),
+      screen.getByText(
+        summaryText("新北市", indoorFreeCount, ["室內", "免費"]),
+      ),
     ).toBeTruthy();
     expect(
       screen.getByRole("tab", { name: "地圖" }).getAttribute("aria-selected"),
@@ -255,14 +274,10 @@ describe("PlayMap", () => {
     const { rerender } = render(<PlayMap initialCity="台北市" />);
     expect(
       screen.getByText(
-        summaryText(
-          "台北市",
-          filterPlaygrounds({ city: "台北市" }).length,
-        ),
+        summaryText("台北市", filterPlaygrounds({ city: "台北市" }).length),
       ),
     ).toBeTruthy();
 
-    // 模擬瀏覽器返回：App Router 保留元件、只換 server 傳入的 initial* props
     rerender(<PlayMap initialCity="桃園市" initialFreeOnly />);
 
     expect(
@@ -277,9 +292,9 @@ describe("PlayMap", () => {
   });
 
   it("SSR 渲染全部地點，未命中者掛 hidden", () => {
-    const { container } = render(<PlayMap />);
+    const { container } = render(<PlayMap initialCity="台北市" />);
     const all = listPlaygrounds();
-    const matched = filterPlaygrounds({ city: DEFAULT_PLAY_MAP_CITY });
+    const matched = filterPlaygrounds({ city: "台北市" });
 
     const items = container.querySelectorAll("#play-map-panel-cards li");
     expect(items.length).toBe(all.length);
@@ -288,19 +303,27 @@ describe("PlayMap", () => {
     ).toBe(matched.length);
   });
 
-  it("0 筆的類型 chip 停用", () => {
-    render(<PlayMap />);
+  it("0 筆的類型 chip 隱藏", () => {
+    render(<PlayMap initialCity="台北市" />);
+    openFilters();
     const emptyType = PLAYGROUND_TYPES.find(
       (type) =>
-        filterPlaygrounds({ city: DEFAULT_PLAY_MAP_CITY, type }).length === 0,
+        filterPlaygrounds({ city: "台北市", type }).length === 0,
     );
     expect(emptyType).toBeDefined();
     if (!emptyType) return;
 
-    const chip = screen.getByRole("button", {
-      name: typeChipName(emptyType, 0),
-    });
-    expect((chip as HTMLButtonElement).disabled).toBe(true);
+    expect(
+      screen.queryByRole("button", { name: typeChipName(emptyType, 0) }),
+    ).toBeNull();
+  });
+
+  it("卡片顯示年齡標籤且不含需購票／戶外 muted", () => {
+    render(<PlayMap />);
+    const cardsPanel = screen.getByRole("tabpanel", { name: "卡片" });
+    expect(within(cardsPanel).getAllByText(/歲$/).length).toBeGreaterThan(0);
+    expect(within(cardsPanel).queryByText("需購票")).toBeNull();
+    expect(within(cardsPanel).queryByText("戶外")).toBeNull();
   });
 
   it("tabs 支援方向鍵切換", () => {
@@ -320,18 +343,18 @@ describe("PlayMap", () => {
 
   it("篩選導致 Sheet 關閉時不搶 focus", () => {
     render(<PlayMap />);
-    const paidPlace = filterPlaygrounds({ city: DEFAULT_PLAY_MAP_CITY }).find(
-      (place) => !place.free,
-    );
+    const paidPlace = filterPlaygrounds().find((place) => !place.free);
     expect(paidPlace).toBeDefined();
     if (!paidPlace) return;
 
     fireEvent.click(
       screen.getByRole("button", { name: new RegExp(paidPlace.name) }),
     );
-    expect(screen.getByRole("region", { name: `${paidPlace.name} 詳情` })).toBeTruthy();
+    expect(
+      screen.getByRole("region", { name: `${paidPlace.name} 詳情` }),
+    ).toBeTruthy();
 
-    const freeChip = screen.getByRole("button", { name: "免費" });
+    const freeChip = screen.getByRole("button", { name: "免費放電" });
     freeChip.focus();
     fireEvent.click(freeChip);
     expect(
