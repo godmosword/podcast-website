@@ -62,7 +62,9 @@ export function sortPlaygrounds(
   return copy;
 }
 
-function placeTextBlob(place: Playground): string {
+type StrollerFields = Pick<Playground, "tags" | "facilities" | "tips">;
+
+function placeTextBlob(place: StrollerFields): string {
   return [
     ...place.tags,
     ...place.facilities,
@@ -71,7 +73,7 @@ function placeTextBlob(place: Playground): string {
 }
 
 /** 啟發式：明確正面且無風險語才顯示「推車友善」。 */
-export function isStrollerFriendly(place: Playground): boolean {
+export function isStrollerFriendly(place: StrollerFields): boolean {
   const blob = placeTextBlob(place);
   if (!blob) return false;
   if (STROLLER_NEGATIVE.test(blob)) return false;
@@ -82,8 +84,13 @@ export function formatAgeRangeLabel(ageRange: [number, number]): string {
   return `${ageRange[0]}–${ageRange[1]} 歲`;
 }
 
+type DecisionTagFields = Pick<
+  Playground,
+  "free" | "indoor" | "ageRange" | "tags" | "facilities" | "tips"
+>;
+
 /** 卡片／精簡 sheet 決策標籤（有資料才出現）。 */
-export function listPlaceDecisionTags(place: Playground): string[] {
+export function listPlaceDecisionTags(place: DecisionTagFields): string[] {
   const tags: string[] = [];
   if (place.free) tags.push("免費");
   if (place.indoor) tags.push("室內");

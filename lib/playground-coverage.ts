@@ -16,7 +16,7 @@ export type CityCoverage = {
   status: CoverageStatus;
 };
 
-/** 親子遊樂地圖預設縣市（產品常數；測試勿用 listCities()[0] 代替）。 */
+/** 歷史預設縣市常數（文件／測試對照）；進頁預設已改為「全部」不鎖縣市。 */
 export const DEFAULT_PLAY_MAP_CITY = "台北市" as const;
 
 /** 親子遊樂地圖預設地圖中心（台北市區域）。 */

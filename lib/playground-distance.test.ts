@@ -126,14 +126,14 @@ describe("isStrollerFriendly", () => {
         tags: ["推車友善"],
         facilities: [],
         tips: undefined,
-      } as Playground),
+      }),
     ).toBe(true);
     expect(
       isStrollerFriendly({
         tags: [],
         facilities: [],
         tips: "推車慎選路線",
-      } as Playground),
+      }),
     ).toBe(false);
   });
 });
@@ -147,7 +147,7 @@ describe("listPlaceDecisionTags", () => {
       tags: ["推車友善"],
       facilities: [],
       tips: undefined,
-    } as Playground);
+    });
     expect(tags).toEqual(["免費", "室內", "推車友善", "3–8 歲"]);
   });
 });

@@ -2,9 +2,11 @@ import { test, expect } from "@playwright/test";
 
 const PHONE = { width: 390, height: 844 };
 
-/** 等待 PlayMap 卡片殼就緒（Leaflet 僅地圖 tab 才載入）。 */
+/** 等待 PlayMap 意圖列與結果摘要就緒（Leaflet 僅地圖 tab 才載入）。 */
 async function waitForPlayMapReady(page: import("@playwright/test").Page) {
-  await expect(page.getByLabel("依縣市篩選")).toBeVisible({ timeout: 8_000 });
+  await expect(page.getByRole("button", { name: "離我最近" })).toBeVisible({
+    timeout: 8_000,
+  });
   await expect(
     page.getByText(/→ \d+ 個地點|目前沒有符合條件的地點/),
   ).toBeVisible({ timeout: 5_000 });
@@ -18,11 +20,10 @@ test.describe("親子遊樂地圖", () => {
     expect(html).toContain("親子遊樂地圖");
     expect(html).not.toContain("hero-home");
     expect(html).not.toMatch(/地圖載入中/);
-    // 預設台北市至少一筆（名稱會出現在 SSR 卡片）
-    expect(html).toMatch(/台北|大安|兒童|科教|動物園|天文|官邸|自來水/);
+    expect(html).toMatch(/台北|大安|兒童|科教|動物園|天文|官邸|自來水|風禾/);
   });
 
-  test("頁面載入、結果數、卡片與詳情抽屜", async ({ page }) => {
+  test("頁面載入、意圖、結果數、卡片與詳情抽屜", async ({ page }) => {
     test.setTimeout(30_000);
     await page.goto("/for-parents/play-map");
 
@@ -35,6 +36,8 @@ test.describe("親子遊樂地圖", () => {
     await waitForPlayMapReady(page);
 
     await expect(page.getByText(/已收錄 \d+ 縣市、共 \d+ 處/)).toBeVisible();
+    await expect(page.getByRole("button", { name: "免費放電" })).toBeVisible();
+    await expect(page.getByText(/全部 · .+ → \d+ 個地點/)).toBeVisible();
 
     const cardsPanel = page.locator("#play-map-panel-cards");
     const firstCardButton = cardsPanel.getByRole("button").first();
@@ -47,9 +50,21 @@ test.describe("親子遊樂地圖", () => {
     await expect(
       sheet.getByRole("button", { name: "關閉地點詳情" }),
     ).toBeVisible();
+    // 卡片點選開完整 sheet：不應只有「更多」精簡態
+    await expect(sheet.getByRole("button", { name: "更多" })).toHaveCount(0);
 
     await sheet.getByRole("button", { name: "關閉地點詳情" }).click();
     await expect(sheet).toHaveCount(0);
+  });
+
+  test("免費放電意圖可縮小結果", async ({ page }) => {
+    test.setTimeout(30_000);
+    await page.goto("/for-parents/play-map");
+    await waitForPlayMapReady(page);
+
+    await page.getByRole("button", { name: "免費放電" }).click();
+    await expect(page.getByText(/免費 · .+ → \d+ 個地點|全部 · 免費 →/)).toBeVisible();
+    await expect(page).toHaveURL(/free=1/);
   });
 
   test("地圖 tab 才載入 Leaflet", async ({ page }) => {

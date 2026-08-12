@@ -63,6 +63,7 @@
 | polish(for-parents): play-map UX 精煉（compact／SSR／主題樂園／摘要） | `08ec732` |
 | fix(data): play-map 收費旗標、死連結與 editorial 契約（含 RETIRED_DOMAINS 回歸防護） | `5b4a37e` |
 | feat(for-parents): play-map 無障礙、網址狀態與 SEO 修復（nested-interactive／SSR 73 筆／ItemList） | `4b99f6c` |
+| feat(for-parents): play-map 意圖優先改版（意圖 chips、縣市可選、sticky 篩選、決策標籤卡片、精簡 sheet） | `ad189d5` |
 | content(subtitles): ep-24 字幕校對 + `--mark`（重轉錄補尾段、刪幻覺／重複） | `0c4ccf6` |
 | content(characters): ep-24 hero 定裝「小紅賽車年幼版」「小紅賽車的爸爸年輕版」（API 2 次） | `0c4ccf6` |
 | feat(stories): ep-24 全幕 19 頁插圖 approve（分齡定裝、#15–17 重抽） | `79ca151` |
