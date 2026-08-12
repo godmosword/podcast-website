@@ -98,11 +98,10 @@ test("404 頁面", async ({ page }) => {
   expect(response?.status()).toBe(404);
 });
 
-test("遊樂園 v2 入口分區與遊戲卡片", async ({ page }) => {
+test("遊樂園 v2 入口與遊戲卡片", async ({ page }) => {
   await page.goto("/games");
   await expect(page.getByRole("heading", { name: "車車遊樂園" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "小小探索" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "挑戰賽道" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "全部遊戲" })).toBeVisible();
   await expect(page.getByRole("link", { name: /繽紛消消樂.*開始玩/ })).toBeVisible();
   await expect(page.getByRole("link", { name: /繽紛樂園.*開始玩/ })).toBeVisible();
   await expect(page.getByRole("link", { name: /繪本著色.*開始玩/ })).toBeVisible();

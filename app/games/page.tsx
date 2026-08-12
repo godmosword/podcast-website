@@ -12,7 +12,7 @@ import styles from "./page.module.css";
 export const metadata: Metadata = {
   title: "車車遊樂園",
   description:
-    "和故事裡的車車朋友一起玩小遊戲：消消樂、著色、跑跳、方塊與糖果卡丁車，適合 3–12 歲親子。",
+    "和故事裡的車車朋友一起玩小遊戲：繽紛消消樂、繪本著色與繽紛樂園，適合 3–12 歲親子。",
   openGraph: {
     title: "車車遊樂園 · 小遊戲",
     description: "黏土風親子小遊戲與繪本著色，一起探索車車遊樂園。",
@@ -31,12 +31,16 @@ function ageShort(ageRange: string): string {
   return ageRange.replace(/\s*歲\s*$/u, "");
 }
 
-/** 家長在選卡當下就需要的判斷資訊（時長／有無時間壓力）。 */
+/**
+ * 家長在選卡當下就需要的判斷資訊（時長／有無時間壓力）。
+ * 文案刻意短：meta 行要在 3 欄網格最窄的 234px 卡上仍保持單行，
+ * 否則各卡文字基線會參差（見 /design-review 2026-08-12）。
+ */
 function paceLabel(game: GameMeta): string {
-  return game.hasTimer ? "⏱ 有計時" : "🌿 沒有時間壓力";
+  return game.hasTimer ? "⏱ 有計時" : "🌿 不趕時間";
 }
 
-function GameCard({ game, feature }: { game: GameMeta; feature?: boolean }) {
+function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
   const parentTip = gameParentTip(game);
   const ariaParts = [
     game.title,
@@ -52,10 +56,10 @@ function GameCard({ game, feature }: { game: GameMeta; feature?: boolean }) {
   ].filter(Boolean);
 
   return (
-    <li className={`${styles.gridItem} ${feature ? styles.gridItemWide : ""}`}>
+    <li className={styles.gridItem}>
       <Link
         href={game.href}
-        className={`${styles.gameCard} ${feature ? styles.gameCardFeature : ""} scrollEnter press-squash`}
+        className={`${styles.gameCard} scrollEnter press-squash`}
         aria-label={ariaParts.join("，")}
         style={{
           ["--card-accent" as string]: game.accent,
@@ -63,21 +67,21 @@ function GameCard({ game, feature }: { game: GameMeta; feature?: boolean }) {
       >
         <div className={styles.thumb}>
           <Image
-            src={feature ? game.art.cover : (game.art.thumbnail ?? game.art.cover)}
+            src={game.art.thumbnail ?? game.art.cover}
             alt={game.art.alt}
             fill
-            sizes={
-              feature
-                ? "(max-width: 640px) 94vw, 600px"
-                : "(max-width: 640px) 88vw, 280px"
-            }
+            /* 每張卡同寬，sizes 必須貼齊實際渲染寬度，否則會下載到過小的檔再放大。 */
+            sizes="(max-width: 640px) calc(100vw - 32px), 300px"
             className={styles.thumbImage}
             style={{ objectPosition: game.art.position ?? "50% 50%" }}
-            priority={feature}
+            /* 只有 3 張卡：首張 preload（LCP），其餘 eager 但不佔 preload 預算。
+               卡片本身由 .scrollEnter 淡入，圖若還在 lazy 佇列會再疊一層延遲。 */
+            priority={eager}
+            {...(eager ? {} : { loading: "eager" as const })}
           />
           <span className={styles.ageBadge}>{ageShort(game.ageRange)}</span>
           <span className={styles.playFab} aria-hidden>
-            <Icon name="play" size={feature ? 18 : 14} />
+            <Icon name="play" size={16} />
           </span>
           {parentTip ? (
             <span className={styles.parentCorner}>{parentTip}</span>
@@ -87,10 +91,9 @@ function GameCard({ game, feature }: { game: GameMeta; feature?: boolean }) {
           <span className={styles.cardTitle}>
             <span aria-hidden>{game.emoji}</span> {game.title}
           </span>
-          {feature ? (
-            <span className={styles.cardTeaser}>{game.teaser}</span>
-          ) : null}
+          <span className={styles.cardTeaser}>{game.teaser}</span>
           <span className={styles.cardMeta}>
+            <span>{game.ageRange}</span>
             <span>約 {game.estMinutes} 分鐘</span>
             <span>{paceLabel(game)}</span>
           </span>
@@ -100,62 +103,21 @@ function GameCard({ game, feature }: { game: GameMeta; feature?: boolean }) {
   );
 }
 
-function GameSection({
-  id,
-  title,
-  hint,
-  games,
-  featuredSlug,
-}: {
-  id: string;
-  title: string;
-  hint: string;
-  games: GameMeta[];
-  featuredSlug?: string;
-}) {
-  if (games.length === 0) return null;
-  return (
-    <section className={styles.zone} aria-labelledby={id}>
-      <div className={styles.zoneHeading}>
-        <div>
-          <p className={styles.zoneKicker}>{hint}</p>
-          <h2 id={id} className={styles.zoneTitle}>
-            {title}
-          </h2>
-        </div>
-        <span className={styles.zoneCount}>{games.length} 款</span>
-      </div>
-      <ul className={styles.cardGrid}>
-        {games.map((game) => (
-          <GameCard
-            key={game.slug}
-            game={game}
-            feature={game.slug === featuredSlug}
-          />
-        ))}
-      </ul>
-    </section>
-  );
-}
+/**
+ * 單一均等網格：3 個活動不足以撐起兩個年齡分區，
+ * 分區只會把版面切碎（其中一區永遠只有一張卡）。年齡改由卡上徽章與 meta 行承擔。
+ * 3–7 歲的活動排前面；同齡層維持 `data/games.ts` 的順序（sort 穩定）。
+ */
+const AGE_BAND_ORDER: Record<GameMeta["ageBand"], number> = {
+  explore: 0,
+  challenge: 1,
+};
 
-/** 主打遊戲排到所屬分類的第一張，並以大卡呈現（不另開 featured 區塊）。 */
-function withFeaturedFirst(games: GameMeta[], featuredSlug: string): GameMeta[] {
-  const featured = games.filter((game) => game.slug === featuredSlug);
-  const rest = games.filter((game) => game.slug !== featuredSlug);
-  return [...featured, ...rest];
-}
+const ORDERED_GAMES: GameMeta[] = [...GAMES].sort(
+  (a, b) => AGE_BAND_ORDER[a.ageBand] - AGE_BAND_ORDER[b.ageBand],
+);
 
 export default function GamesHubPage() {
-  const featured = GAMES.find((game) => game.featured) ?? GAMES[0];
-  const exploreGames = withFeaturedFirst(
-    GAMES.filter((game) => game.ageBand === "explore"),
-    featured.slug,
-  );
-  const challengeGames = withFeaturedFirst(
-    GAMES.filter((game) => game.ageBand === "challenge"),
-    featured.slug,
-  );
-
   return (
     <main className={styles.main} aria-label="車車遊樂園小遊戲">
       <header className={styles.hero}>
@@ -198,20 +160,16 @@ export default function GamesHubPage() {
         />
       </header>
 
-      <GameSection
-        id="games-explore"
-        title="小小探索"
-        hint="3–7 歲 · 沒有壓力，慢慢玩"
-        games={exploreGames}
-        featuredSlug={featured.slug}
-      />
-      <GameSection
-        id="games-challenge"
-        title="挑戰賽道"
-        hint="6–12 歲 · 準備好再來挑戰"
-        games={challengeGames}
-        featuredSlug={featured.slug}
-      />
+      <section className={styles.zone} aria-labelledby="games-all">
+        <h2 id="games-all" className={styles.zoneTitle}>
+          全部遊戲
+        </h2>
+        <ul className={styles.cardGrid}>
+          {ORDERED_GAMES.map((game, index) => (
+            <GameCard key={game.slug} game={game} eager={index === 0} />
+          ))}
+        </ul>
+      </section>
 
       <p className={styles.footerNote}>玩完一站，還有下一站等你發現 🎡</p>
     </main>

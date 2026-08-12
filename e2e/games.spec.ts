@@ -112,6 +112,6 @@ test.describe("遊樂園 hub", () => {
     await page.goto("/games");
     const firstCard = page.locator('main a[href^="/games/"]').first();
     await expect(firstCard).toContainText(/約 \d+ 分鐘/);
-    await expect(firstCard).toContainText(/沒有時間壓力|有計時/);
+    await expect(firstCard).toContainText(/不趕時間|有計時/);
   });
 });

@@ -64,8 +64,7 @@
   padding: clamp(24px, 6vw, 56px);
 }
 
-.eyebrow,
-.zoneKicker {
+.eyebrow {
   color: var(--ink-soft);
   font-size: 0.8rem;
   font-weight: 900;
@@ -128,43 +127,22 @@
   margin-bottom: 36px;
 }
 
-.zoneHeading {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 14px;
-}
-
-.zoneKicker {
-  margin: 0 0 3px;
-  color: var(--ink-soft);
-  letter-spacing: 0.03em;
-}
-
 .zoneTitle {
-  margin: 0;
+  margin: 0 0 14px;
   color: var(--ink);
   font-size: clamp(1.35rem, 3vw, 1.65rem);
   font-weight: 900;
 }
 
-.zoneCount {
-  flex: 0 0 auto;
-  min-height: 32px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  color: var(--ink-soft);
-  background: color-mix(in srgb, var(--card) 80%, transparent);
-  border: 1px solid var(--hairline);
-  font-size: 0.8rem;
-  font-weight: 900;
-}
-
+/*
+ * 固定 3 欄而非 auto-fit：auto-fit 會摺疊空軌道，
+ * 單卡分類時那張卡會撐成整條 928px，跟同頁其他卡差了 2.5 倍。
+ * 活動數量少且固定，明確欄數才保證每張卡等寬等高。
+ */
 .cardGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -173,15 +151,6 @@
 .gridItem {
   display: flex;
   min-width: 0;
-}
-
-/*
- * 主打大卡：跨兩欄建立主次關係。
- * 不用 `1 / -1`——960 容器下 auto-fit 會排 3 欄，滿寬卡會變 928px 寬、
- * 把同分類其他卡擠成孤兒列，也把下一區推出首屏。
- */
-.gridItemWide {
-  grid-column: span 2;
 }
 
 /*
@@ -219,23 +188,6 @@
   transform: scale(0.98);
 }
 
-/*
- * 主打大卡：桌面走「圖左文右」而非滿寬 16:9——
- * 滿寬 16:9 在 1280 寬會讓縮圖高達 ~520px，把整個分類推出首屏。
- */
-.gameCardFeature {
-  gap: 14px;
-  padding: 12px;
-}
-
-@media (min-width: 641px) {
-  .gameCardFeature {
-    display: grid;
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-    align-items: center;
-  }
-}
-
 .thumb {
   position: relative;
   width: 100%;
@@ -243,10 +195,6 @@
   overflow: hidden;
   border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--card-accent) 22%, var(--mix-base));
-}
-
-.gameCardFeature .thumb {
-  aspect-ratio: 16 / 9;
 }
 
 .thumbImage {
@@ -288,11 +236,6 @@
   box-shadow: var(--shadow-sm);
 }
 
-.gameCardFeature .playFab {
-  width: 44px;
-  height: 44px;
-}
-
 .parentCorner {
   position: absolute;
   z-index: 1;
@@ -320,10 +263,6 @@
   font-size: 1.02rem;
   font-weight: 900;
   line-height: 1.3;
-}
-
-.gameCardFeature .cardTitle {
-  font-size: clamp(1.25rem, 3vw, 1.6rem);
 }
 
 .cardTeaser {
@@ -396,16 +335,7 @@
 
   .cardGrid {
     grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  /* 單欄 grid 遇到 span 2 會長出隱式欄位，行動端必須解除。 */
-  .gridItemWide {
-    grid-column: auto;
-  }
-
-  .gameCardFeature .thumb {
-    aspect-ratio: 4 / 3;
+    gap: var(--space-3);
   }
 }
 
