@@ -38,7 +38,7 @@ import {
 } from "@/lib/games/candy-match/levels";
 import type { CandyMatchInstance } from "@/lib/gamekit/games/candy-match/adapter";
 import { candyMatchCellPx } from "@/lib/games/candy-match/cell-size";
-import styles from "./CandyMatchGame.module.css";
+import styles from "./CandyMatchView.module.css";
 
 const INK = "#5d4a67";
 const INK_SOFT = "#7c6886";
