@@ -1,4 +1,6 @@
-const CACHE_NAME = "chechecar-v4";
+// v5：退役 Godot 遊戲的 /snowboard/v2/* 曾寫進 v4（index.wasm 約 35MB）。
+// 改名讓 activate 整包回收，否則舊快取沒有任何路徑會再淘汰它。
+const CACHE_NAME = "chechecar-v5";
 const SHELL = [
   "/",
   "/manifest.json",

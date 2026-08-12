@@ -126,9 +126,10 @@ export const GAMES: GameMeta[] = [
 ];
 
 /** 遊樂園動線：玩完 A 建議去 B。 */
+/** 下一站動線：必須是走得完的單一環，否則有遊戲永遠不會被推薦到。 */
 export const GAME_NEXT: Record<string, string> = {
   "candy-match": "coloring-book",
-  "coloring-book": "candy-match",
+  "coloring-book": "block-drop",
   "block-drop": "candy-match",
 };
 

@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { adventuresZoneQueryRedirects } from "./lib/adventures-redirects";
+import { retiredGameRedirects } from "./lib/retired-game-redirects";
 import { legacyStoryRedirects } from "./lib/story-slug-aliases";
 
 const nextConfig: NextConfig = {
@@ -25,7 +26,11 @@ const nextConfig: NextConfig = {
     ],
   },
   async redirects() {
-    return [...legacyStoryRedirects(), ...adventuresZoneQueryRedirects()];
+    return [
+      ...legacyStoryRedirects(),
+      ...adventuresZoneQueryRedirects(),
+      ...retiredGameRedirects(),
+    ];
   },
   async headers() {
     return [

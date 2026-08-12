@@ -64,8 +64,23 @@ describe("games next-station flow", () => {
     }
   });
 
+  test("GAME_NEXT 是走得完的單一環（每款都到得了）", () => {
+    // 退役遊戲時最容易踩的坑：剩下的 slug 形成封閉小環，
+    // 有遊戲只當起點、從不當目的地，就永遠不會被「下一站」推薦到。
+    const slugs = GAMES.map((game) => game.slug);
+    const visited: string[] = [];
+    let cursor = slugs[0]!;
+    for (let i = 0; i < slugs.length; i += 1) {
+      visited.push(cursor);
+      cursor = GAME_NEXT[cursor]!;
+    }
+    expect(visited.sort()).toEqual([...slugs].sort());
+    expect(cursor).toBe(slugs[0]);
+  });
+
   test("getNextGame 回傳正確下一站", () => {
     expect(getNextGame("candy-match")?.slug).toBe("coloring-book");
+    expect(getNextGame("coloring-book")?.slug).toBe("block-drop");
     expect(getNextGame("block-drop")?.slug).toBe("candy-match");
     expect(getNextGame("nope")).toBeNull();
   });
