@@ -307,6 +307,23 @@ describe("PlayMap", () => {
     expect(within(sheet).getByText(hukou.coverageNote)).toBeTruthy();
   });
 
+  it("選中 hc-nanliao 時 sheet 顯示 coverageNote，tips 不含導航落點", () => {
+    render(<PlayMap />);
+    showAllCards();
+    const nanliao = getPlayground("hc-nanliao");
+    expect(nanliao?.coverageNote).toBeDefined();
+    if (!nanliao?.coverageNote) return;
+
+    fireEvent.click(
+      screen.getByRole("button", { name: `${nanliao.name}，查看詳情` }),
+    );
+    const sheet = screen.getByRole("region", { name: `${nanliao.name} 詳情` });
+    expect(within(sheet).getByText("資料範圍")).toBeTruthy();
+    expect(within(sheet).getByText(nanliao.coverageNote)).toBeTruthy();
+    expect(nanliao.tips).not.toMatch(/導航會停在/);
+    expect(within(sheet).queryByText(/導航會停在/)).toBeNull();
+  });
+
   it("coverageNote 未定義時 sheet 不出現資料範圍區塊", () => {
     render(<PlayMap />);
     showAllCards();

@@ -138,6 +138,38 @@ test.describe("親子遊樂地圖", () => {
     });
   });
 
+  test("手機精簡 sheet 有 coverageNote 時導航仍在 viewport 內", async ({
+    page,
+  }) => {
+    test.setTimeout(45_000);
+    await page.setViewportSize(PHONE);
+    await page.goto("/for-parents/play-map");
+    await waitForPlayMapReady(page);
+
+    const hukouName = "王爺壟運動公園";
+    const viewOnMap = page.getByRole("button", {
+      name: `在地圖上看 ${hukouName}`,
+    });
+    for (let i = 0; i < 12; i += 1) {
+      if (await viewOnMap.isVisible()) break;
+      const more = page.getByRole("button", { name: "載入更多" });
+      if (!(await more.isVisible())) break;
+      await more.click();
+    }
+    await expect(viewOnMap).toBeVisible();
+    await viewOnMap.click();
+
+    const sheet = page.getByRole("region", { name: `${hukouName} 詳情` });
+    await expect(sheet).toBeVisible();
+    await expect(sheet.getByRole("button", { name: "更多" })).toBeVisible();
+    await expect(sheet.getByText("資料範圍")).toBeVisible();
+    await expect(
+      sheet.getByRole("link", {
+        name: `開啟 Google 地圖導航前往 ${hukouName}（另開視窗）`,
+      }),
+    ).toBeInViewport();
+  });
+
   test("行動選單「親子景點」可直達地圖頁", async ({ page }) => {
     test.setTimeout(30_000);
     await page.setViewportSize(PHONE);

@@ -486,6 +486,13 @@ describe("playgrounds sidecar", () => {
     expect(getPlayground("hc-nanliao")?.mapsQuery).toBe(
       "南寮漁港旅遊服務中心",
     );
+    expect(getPlayground("hc-nanliao")?.tips).toBe(
+      "海風大記得防曬與外套；可搭配南寮親水公園與自行車道。",
+    );
+    expect(getPlayground("hc-nanliao")?.coverageNote).toBe(
+      "導航落點為南寮漁港旅遊服務中心，實際遊戲區在旁邊步行可達。",
+    );
+    expect(getPlayground("hc-nanliao")?.lastVerified).toBe("2026-08-13");
     expect(getPlayground("nt-metro-park")?.name).toBe("新北大都會公園");
     expect(getPlayground("nt-sanchong-floodway")?.name).toBe(
       "二重疏洪親水公園",

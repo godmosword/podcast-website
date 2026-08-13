@@ -1114,7 +1114,9 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["大型遊具", "沙坑", "遮蔭區", "洗手間"],
     tags: ["免費", "海邊", "放電"],
-    tips: "海風大記得防曬與外套；可搭配南寮親水公園與自行車道。導航會停在南寮漁港旅遊服務中心，遊戲區在旁邊步行可達。",
+    tips: "海風大記得防曬與外套；可搭配南寮親水公園與自行車道。",
+    coverageNote:
+      "導航落點為南寮漁港旅遊服務中心，實際遊戲區在旁邊步行可達。",
     sources: [
       {
         kind: "gov",
