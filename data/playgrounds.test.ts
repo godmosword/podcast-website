@@ -342,11 +342,13 @@ describe("playgrounds sidecar", () => {
     expect(getPlayground("nto-xiangshan")?.address).toBe(
       "南投縣魚池鄉中山路599號",
     );
-    expect(getPlayground("hcx-hukou-sports")?.mapsQuery).toBe(
-      "王爺壟運動公園 湖口",
-    );
+    expect(getPlayground("hcx-hukou-sports")?.name).toBe("王爺壟運動公園");
+    expect(getPlayground("hcx-hukou-sports")?.mapsQuery).toBeUndefined();
     expect(getPlayground("hcx-hukou-sports")?.address).toBe(
       "新竹縣湖口鄉中山路一段789號",
+    );
+    expect(getPlayground("hcx-hukou-sports")?.coverageNote).toBe(
+      "以運動設施為主，幼童遊具待現場確認",
     );
   });
 
@@ -458,7 +460,10 @@ describe("playgrounds sidecar", () => {
     expect(getPlayground("tc-calligraphy-greenway")?.name).toBe(
       "草悟道兒童公園",
     );
-    expect(getPlayground("hc-nanliao")?.name).toBe("南寮漁港旅遊服務中心");
+    expect(getPlayground("hc-nanliao")?.name).toBe("南寮親子沙灘");
+    expect(getPlayground("hc-nanliao")?.mapsQuery).toBe(
+      "南寮漁港旅遊服務中心",
+    );
     expect(getPlayground("nt-metro-park")?.name).toBe("新北大都會公園");
     expect(getPlayground("nt-sanchong-floodway")?.name).toBe(
       "二重疏洪親水公園",
@@ -469,7 +474,7 @@ describe("playgrounds sidecar", () => {
     );
   });
 
-  it("mapsQuery 不重複（PlayMap 以 destination 反查場館）", () => {
+  it("mapsQuery 不重複（相同字串會導到同一地點，屬重複資料）", () => {
     const queries = listPlaygrounds()
       .map((place) => place.mapsQuery)
       .filter((query): query is string => query !== undefined);

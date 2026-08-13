@@ -51,8 +51,8 @@
 | 欄位 | 說明 |
 |------|------|
 | `id` | 穩定 slug，不重複 |
-| `name`、`city`、`lat`、`lng`、`address` | 基本定位。**`name` 是 Google 導航的 load-bearing 欄位**（destination 預設為 `${name}, ${city}`），須對照 Maps 實際場館名，不可把兩個場館黏在同一筆名稱裡 |
-| `mapsQuery`（選填） | 覆寫導航／搜尋字串。顯示名含間隔號或與 Maps 常用名不同時填（例：顯示「卡司‧蒂菈樂園」、`mapsQuery: "卡司蒂菈樂園 中壢"`） |
+| `name`、`city`、`lat`、`lng`、`address` | 基本定位。`name` 是場館身分（見下節），導航 destination **預設**為 `${name}, ${city}`；不可把兩個場館黏在同一筆名稱裡，也不可為了搜尋好解析而改名 |
+| `mapsQuery`（選填） | 覆寫導航／搜尋字串。僅在 `name` 正確但搜尋不穩時填（例：顯示「卡司‧蒂菈樂園」、`mapsQuery: "卡司蒂菈樂園 中壢"`）。分工見下節 |
 | `placeId`（選填） | Google Place ID；有值時 URL 加 `destination_place_id`／`query_place_id`。免 API Key；**不要為了填而呼叫 Places API** |
 | `type` | 場館家族（`PlaygroundType`）；與 `indoor` 獨立，勿混用 |
 | `ageRange`、`free`、`indoor` | 家長篩選；`indoor` 表物理室內條件（雨天備案），非 type 別名 |
@@ -62,6 +62,13 @@
 | `lastVerified` | ISO 日期（`YYYY-MM-DD`），最後人工複核日 |
 
 `officialUrl` 對商業場館為必填；公園等免費場域建議填縣市開放資料或管理單位頁面。
+
+## name 與 mapsQuery 的分工
+
+- **`name` 是場館身分，不是搜尋字串。** 家長在現場招牌或 Google Maps 上會認得的場館名稱，同時是卡片標題、地圖針名稱、`aria-label` 與 SEO 標題的來源。不得為了讓導航好解析而更動。
+- **導航預設**仍是 `${name}, ${city}`；`name` 正確且 Maps 搜得到時，不要填 `mapsQuery`。
+- **`mapsQuery` 只用在「name 正確但搜尋字串不穩」**：同名場館需加地名消歧、顯示名含間隔號或特殊符號、場館位於大園區內（Maps 用園區名才穩）等。它只覆寫導航 destination／搜尋 query，不改卡片上看到的名字。
+- **導航只能指向鄰近地標、而非場館本身時**：`name` 保留場館本名，`mapsQuery` 指向地標，`tips` 明寫「導航會停在 X，實際場地在旁邊」。**不得把 `name` 改成地標名**（那會把場館身分換成一棟建築或路口）。
 
 ## 分類契約（type 與 indoor）
 
@@ -127,11 +134,11 @@ ledger **不**進使用者-facing UI 細節；PlayMap 僅顯示摘要狀態（�
 
 ## Editorial SOP（新增／更新一筆）
 
-1. 從官方或公部門來源確認名稱、地址、座標、適齡、收費、營業時間；**名稱須對照 Google Maps 實際場館名**（具名導航不再靠座標自我糾錯）。通用名（如青青草原）或顯示名與官名不同時填 `mapsQuery`；不可把兩個場館黏成一筆（如紙教堂＋新桃花源農莊）
+1. 從官方或公部門來源確認名稱、地址、座標、適齡、收費、營業時間；**`name` 須為現場招牌／官方場館本名**（具名導航不再靠座標自我糾錯）。通用名（如青青草原）搜尋不穩時填 `mapsQuery` 消歧，**不要改 `name`**；不可把兩個場館黏成一筆（如紙教堂＋新桃花源農莊）
 2. 若僅有社群候選 → 找到官網或政府頁面後才可寫入
 3. 商業場館：填 `officialUrl`（**先實際開啟確認可連通**）；票價／營業易變提示交給 UI，勿寫進 `tips`；分層收費寫 `feeNote`
 4. 寫入 `sources[]` 與當日 `lastVerified`；`sources[]` 與 `officialUrl` 的每個 URL 都須實際點開驗證
-5. 顯示名與 Maps 常用名不一致時填 `mapsQuery`；有把握的 Place ID 才填 `placeId`（本輪可不填）
+5. `name` 正確但搜尋不穩時才填 `mapsQuery`；有把握的 Place ID 才填 `placeId`（本輪可不填）。導航只能指到鄰近地標時，見「name 與 mapsQuery 的分工」
 
 > **連通性稽核（2026-08-11）**：全量 60 個 URL 實測後修正 10 筆地點的死連結，其中 4 個網域已不存在（多為拼字錯誤，如 `tmoca` 應為 `tmofa`、`puhsin` 應為 `pushin`）。
 > 連通性無法進 CI（不打外網），改由 `data/playgrounds.test.ts` 的 `RETIRED_DOMAINS` 清單擋住回歸；**新增或搬遷網域時請一併更新該清單**。

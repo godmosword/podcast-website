@@ -256,6 +256,7 @@ describe("PlayMap", () => {
 
   it("開啟 Sheet 後可按關閉還原", () => {
     render(<PlayMap />);
+    showAllCards();
     const firstPlace = filterPlaygrounds()[0];
     expect(firstPlace).toBeDefined();
 
@@ -274,6 +275,7 @@ describe("PlayMap", () => {
 
   it("開啟 Sheet 後按 Esc 可關閉", () => {
     render(<PlayMap />);
+    showAllCards();
     const firstPlace = filterPlaygrounds()[0];
     expect(firstPlace).toBeDefined();
 
@@ -562,6 +564,7 @@ describe("PlayMap", () => {
 
   it("在地圖看會切到地圖、帶入該縣市並開精簡詳情", () => {
     const { container } = render(<PlayMap />);
+    showAllCards();
     const firstPlace = filterPlaygrounds()[0];
     expect(firstPlace).toBeDefined();
 

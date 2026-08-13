@@ -63,7 +63,7 @@ export type Playground = {
   placeId?: string;
   /**
    * Google Maps 搜尋字串覆寫（選填）。有值時導航 destination／搜尋 query 用此字串，
-   * 不用 `${name}, ${city}`。顯示名與 Maps 實際場館名不一致時才填。
+   * 不用 `${name}, ${city}`。僅在 name 正確但搜尋不穩時填；不得為導航而改 name。
    */
   mapsQuery?: string;
 };
@@ -1101,7 +1101,7 @@ const PLAYGROUNDS: readonly Playground[] = [
   },
   {
     id: "hc-nanliao",
-    name: "南寮漁港旅遊服務中心",
+    name: "南寮親子沙灘",
     city: "新竹市",
     district: "北區",
     lat: 24.8495,
@@ -1114,7 +1114,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["大型遊具", "沙坑", "遮蔭區", "洗手間"],
     tags: ["免費", "海邊", "放電"],
-    tips: "海風大記得防曬與外套；可搭配南寮親水公園與自行車道。",
+    tips: "海風大記得防曬與外套；可搭配南寮親水公園與自行車道。導航會停在南寮漁港旅遊服務中心，遊戲區在旁邊步行可達。",
     sources: [
       {
         kind: "gov",
@@ -1123,11 +1123,16 @@ const PLAYGROUNDS: readonly Playground[] = [
       },
       {
         kind: "gov",
+        name: "新竹市觀光旅遊網｜南寮親子沙灘",
+        url: "https://tourism.hccg.gov.tw/chtravel/app/multimessage_list/view?id=17&module=municipalnews&serno=202506250002",
+      },
+      {
+        kind: "gov",
         name: "新竹縣市觀光旅遊網",
         url: "https://travel.hsinchu.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-13",
   },
   {
     id: "hc-qingqing",
@@ -1422,25 +1427,30 @@ const PLAYGROUNDS: readonly Playground[] = [
   },
   {
     id: "hcx-hukou-sports",
-    name: "湖口運動公園",
+    name: "王爺壟運動公園",
     city: "新竹縣",
     district: "湖口鄉",
     lat: 24.9028,
     lng: 121.0447,
     address: "新竹縣湖口鄉中山路一段789號",
-    mapsQuery: "王爺壟運動公園 湖口",
     type: "公園",
     ageRange: [3, 8],
     free: true,
     indoor: false,
-    facilities: ["兒童遊戲場", "跑道", "球場", "停車場"],
+    facilities: ["直排輪場", "風雨球場", "槌球場", "停車場"],
     tags: ["免費", "運動", "社區公園"],
-    tips: "遊戲場與跑道分離，適合家長慢跑、小孩放電。",
+    tips: "以直排輪、風雨球場與槌球草地為主。",
+    coverageNote: "以運動設施為主，幼童遊具待現場確認",
     sources: [
       {
         kind: "gov",
         name: "新竹縣政府",
         url: "https://www.hsinchu.gov.tw/",
+      },
+      {
+        kind: "gov",
+        name: "新竹縣政府｜王爺壟運動公園開幕（縣政報告）",
+        url: "https://ws.hsinchu.gov.tw/001/Upload/1/relfile/8700/246106/77758aba-6a55-4b24-a632-857bf9dac577.pdf",
       },
       {
         kind: "gov",
