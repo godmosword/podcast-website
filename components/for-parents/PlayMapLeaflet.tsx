@@ -29,7 +29,8 @@ type FitBoundsProps = {
   /** 選中時把針抬出 sheet 覆蓋區：[right, bottom] */
   selectedPad: [number, number];
   /**
-   * 鏡頭重算的唯一觸發鍵。涵蓋 clusterMode、縣市範圍、命中筆數、selectedId。
+   * 鏡頭重算的唯一觸發鍵。涵蓋 clusterMode、縣市範圍、命中筆數、selectedId、
+   * splitLayout（選中 padding 隨並排／堆疊切換）。
    * 其餘鏡頭參數由 ref 讀最新快照，避免 parent 重繪把使用者平移／縮放拉回去。
    */
   fitKey: string;
@@ -43,10 +44,13 @@ export function playMapFitKey(args: {
   selectedId: string | null;
   /** 未選縣市且已定位時帶入座標，避免跟全集鏡頭共用同一把鍵。 */
   nearMeToken?: string;
+  /** 並排／堆疊會改 selectedPad；跨過 980px 或手機轉橫向時需重算鏡頭。 */
+  splitLayout?: boolean;
 }): string {
   const cityScope = [...new Set(args.cities)].sort().join(",");
   const near = args.nearMeToken ? `|near:${args.nearMeToken}` : "";
-  return `${args.clusterMode ? "cluster" : "pins"}|${cityScope}|${args.filteredCount}|${args.selectedId ?? ""}${near}`;
+  const split = args.splitLayout ? "|split" : "|stack";
+  return `${args.clusterMode ? "cluster" : "pins"}|${cityScope}|${args.filteredCount}|${args.selectedId ?? ""}${near}${split}`;
 }
 
 function escapeAttr(value: string): string {
@@ -91,13 +95,17 @@ function FitBounds({
     selectedPoint,
     selectedPad,
   });
-  snapshotRef.current = {
-    points,
-    emptyCenter,
-    animate,
-    selectedPoint,
-    selectedPad,
-  };
+  // 無依賴陣列：每次 commit 都寫入最新快照。宣告在主 effect 之前，
+  // 同一次 commit 內主 effect 讀到的已是本輪 props。
+  useEffect(() => {
+    snapshotRef.current = {
+      points,
+      emptyCenter,
+      animate,
+      selectedPoint,
+      selectedPad,
+    };
+  });
 
   useEffect(() => {
     const markUserMoved = () => {
@@ -109,6 +117,19 @@ function FitBounds({
     return () => {
       map.off("dragstart", markUserMoved);
       map.off("zoomstart", markUserMoved);
+    };
+  }, [map]);
+
+  useEffect(() => {
+    const clearProgrammatic = () => {
+      programmaticRef.current = false;
+    };
+    // 只平移不縮放時沒有 zoomend，兩者都要聽。
+    map.on("zoomend", clearProgrammatic);
+    map.on("moveend", clearProgrammatic);
+    return () => {
+      map.off("zoomend", clearProgrammatic);
+      map.off("moveend", clearProgrammatic);
     };
   }, [map]);
 
@@ -148,14 +169,6 @@ function FitBounds({
         animate: snap.animate,
       });
     }
-    // fitBounds／setView 會同步（或下一幀）發 zoomstart；延後清旗標避免誤判成使用者操作。
-    const raf = window.requestAnimationFrame(() => {
-      programmaticRef.current = false;
-    });
-    return () => {
-      window.cancelAnimationFrame(raf);
-      programmaticRef.current = false;
-    };
   }, [map, fitKey]);
 
   return null;
@@ -347,6 +360,7 @@ export default function PlayMapLeaflet({
       nearMeCamera && userLatLng
         ? `${userLatLng.lat.toFixed(3)},${userLatLng.lng.toFixed(3)}`
         : undefined,
+    splitLayout,
   });
 
   return (

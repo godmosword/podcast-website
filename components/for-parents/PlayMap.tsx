@@ -47,6 +47,9 @@ export default function PlayMap({
   /**
    * 第一次需要顯示地圖後保持掛載，之後只靠 hidden。
    * 進頁若是卡片分頁，先不掛 Leaflet，避免搶首屏。
+   *
+   * 在 render 期間 latch：showMap 轉 true 必定伴隨一次 state 觸發的重繪，
+   * 同一次 commit 就能決定是否渲染 Leaflet，不必晚一幀才掛載。
    */
   const mapMountedRef = useRef(map.showMap);
   if (map.showMap) mapMountedRef.current = true;

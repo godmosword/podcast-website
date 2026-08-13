@@ -36,9 +36,13 @@ function emit(type: string): void {
 
 const fitBounds = vi.fn(() => {
   emit("zoomstart");
+  emit("zoomend");
+  emit("moveend");
 });
 const setView = vi.fn(() => {
   emit("zoomstart");
+  emit("zoomend");
+  emit("moveend");
 });
 
 const mapStub = {
@@ -112,7 +116,7 @@ describe("playMapFitKey", () => {
     );
   });
 
-  it("clusterMode、筆數、selectedId 任一改變都會換鍵", () => {
+  it("clusterMode、筆數、selectedId、splitLayout 任一改變都會換鍵", () => {
     const base = {
       clusterMode: false,
       cities: ["台北市"],
@@ -133,6 +137,9 @@ describe("playMapFitKey", () => {
     );
     expect(playMapFitKey(base)).not.toBe(
       playMapFitKey({ ...base, nearMeToken: "25.040,121.550" }),
+    );
+    expect(playMapFitKey(base)).not.toBe(
+      playMapFitKey({ ...base, splitLayout: true }),
     );
   });
 });
@@ -160,11 +167,19 @@ describe("PlayMapLeaflet FitBounds", () => {
     expect(fitBounds).toHaveBeenCalledTimes(1);
 
     rerender(
-      <PlayMapLeaflet
-        {...leafletProps({ onSelect: vi.fn(), splitLayout: false })}
-      />,
+      <PlayMapLeaflet {...leafletProps({ onSelect: vi.fn() })} />,
     );
     expect(fitBounds).toHaveBeenCalledTimes(1);
+  });
+
+  it("splitLayout 改變時會重算鏡頭", () => {
+    const { rerender } = render(<PlayMapLeaflet {...leafletProps()} />);
+    expect(fitBounds).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <PlayMapLeaflet {...leafletProps({ splitLayout: false })} />,
+    );
+    expect(fitBounds).toHaveBeenCalledTimes(2);
   });
 
   it("fitKey 改變時仍會呼叫", () => {
@@ -195,6 +210,23 @@ describe("PlayMapLeaflet FitBounds", () => {
       <PlayMapLeaflet {...leafletProps({ onSelect: vi.fn() })} />,
     );
     expect(fitBounds).toHaveBeenCalledTimes(1);
+  });
+
+  it("程式觸發的 fitBounds 不會被誤判成使用者操作", () => {
+    const { rerender } = render(<PlayMapLeaflet {...leafletProps()} />);
+    expect(fitBounds).toHaveBeenCalledTimes(1);
+
+    // 換 map 參考迫使 effect 重跑；若 zoomstart 被當成使用者操作，這裡會被擋下。
+    mapState.current = { ...mapStub };
+    rerender(<PlayMapLeaflet {...leafletProps({ onSelect: vi.fn() })} />);
+    expect(fitBounds).toHaveBeenCalledTimes(2);
+
+    rerender(
+      <PlayMapLeaflet
+        {...leafletProps({ selectedId: samplePlaces[0]?.id ?? "ty-fenghe" })}
+      />,
+    );
+    expect(fitBounds).toHaveBeenCalledTimes(3);
   });
 
   it("使用者拖曳後 fitKey 改變仍會重算鏡頭", () => {

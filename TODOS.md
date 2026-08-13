@@ -59,7 +59,8 @@
 | fix(data): play-map 清除地址「附近」 | `bfa10db` |
 | fix(for-parents): play-map FitBounds 不再被 parent 重繪拉回鏡頭 | `0a150bd` |
 | fix(for-parents): play-map 定位鏡頭框最近 8 筆、地圖分頁保持掛載 | `2b755c0` |
-| fix(data): play-map name／mapsQuery 身分與導航分工（湖口、南寮） | 見本 commit |
+| fix(data): play-map name／mapsQuery 身分與導航分工（湖口、南寮） | `f80a0ff` |
+| fix(for-parents): play-map FitBounds 納入 splitLayout、zoomend／moveend 清旗標 | 見本 commit |
 
 ### 本輪待辦（2026-08-13）
 
