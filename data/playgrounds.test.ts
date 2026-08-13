@@ -379,6 +379,7 @@ describe("playgrounds sidecar", () => {
     expect(place.district).toBe("板橋區");
     expect(place.address).toBe("新北市板橋區中正路435號");
     expect(place.officialUrl).toBe("https://www.435.culture.ntpc.gov.tw/");
+    expect(place.mapsQuery).toBe("板橋435藝文特區");
     expect(
       place.sources.some((source) => source.url.includes("ntcart.museum")),
     ).toBe(false);
@@ -400,5 +401,50 @@ describe("playgrounds sidecar", () => {
     expect(place.address).toBe("桃園市中壢區春德路105號");
     expect(place.lat).toBe(25.0128);
     expect(place.lng).toBe(121.2135);
+    expect(place.mapsQuery).toBe("Xpark 中壢");
+  });
+
+  it("nto-paper-dome 是紙教堂見學園區，不是新桃花源農莊", () => {
+    const place = getPlayground("nto-paper-dome");
+    expect(place).toBeDefined();
+    if (!place) return;
+    expect(place.name).toBe("紙教堂新故鄉見學園區");
+    expect(place.mapsQuery).toBe("紙教堂 埔里");
+    expect(place.address).toBe("南投縣埔里鎮桃米巷52-12號");
+    expect(place.name.includes("新桃花源")).toBe(false);
+  });
+
+  it("hcx-dingdong 在新豐鄉康和路，不是湖口德興路", () => {
+    const place = getPlayground("hcx-dingdong");
+    expect(place).toBeDefined();
+    if (!place) return;
+    expect(place.district).toBe("新豐鄉");
+    expect(place.address).toBe("新竹縣新豐鄉松柏村康和路199號");
+    expect(place.address.includes("湖口")).toBe(false);
+  });
+
+  it("高風險通用名以 mapsQuery 消歧", () => {
+    expect(getPlayground("hc-qingqing")?.mapsQuery).toBe("青青草原 香山");
+    expect(getPlayground("ty-chingtang")?.mapsQuery).toBe("青塘園 中壢");
+    expect(getPlayground("kl-heping-island")?.name).toBe("和平島地質公園");
+    expect(getPlayground("tc-calligraphy-greenway")?.name).toBe(
+      "草悟道兒童公園",
+    );
+    expect(getPlayground("hc-nanliao")?.name).toBe("南寮漁港旅遊服務中心");
+    expect(getPlayground("nt-metro-park")?.name).toBe("新北大都會公園");
+    expect(getPlayground("nt-sanchong-floodway")?.name).toBe(
+      "二重疏洪親水公園",
+    );
+    expect(getPlayground("tc-lihpao")?.name).toBe("麗寶樂園渡假區");
+    expect(getPlayground("tp-children-park")?.name).toBe(
+      "臺北市立兒童新樂園",
+    );
+  });
+
+  it("mapsQuery 不重複（PlayMap 以 destination 反查場館）", () => {
+    const queries = listPlaygrounds()
+      .map((place) => place.mapsQuery)
+      .filter((query): query is string => query !== undefined);
+    expect(new Set(queries).size).toBe(queries.length);
   });
 });

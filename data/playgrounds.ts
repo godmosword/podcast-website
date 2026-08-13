@@ -184,6 +184,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     lat: 25.0054,
     lng: 121.2021,
     address: "桃園市中壢區文德路／高鐵南路二段附近",
+    mapsQuery: "青塘園 中壢",
     type: "公園",
     ageRange: [3, 8],
     free: true,
@@ -329,6 +330,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     lat: 25.0128,
     lng: 121.2135,
     address: "桃園市中壢區春德路105號",
+    mapsQuery: "Xpark 中壢",
     type: "博物館",
     ageRange: [3, 8],
     free: false,
@@ -383,7 +385,7 @@ const PLAYGROUNDS: readonly Playground[] = [
   // ── Wave 1：台北市 ≥8 ──
   {
     id: "tp-children-park",
-    name: "台北市立兒童新樂園",
+    name: "臺北市立兒童新樂園",
     city: "台北市",
     district: "士林區",
     lat: 25.0972,
@@ -401,7 +403,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     sources: [
       {
         kind: "official",
-        name: "台北市立兒童新樂園",
+        name: "臺北市立兒童新樂園",
         url: "https://www.tcap.taipei/",
       },
       {
@@ -622,7 +624,7 @@ const PLAYGROUNDS: readonly Playground[] = [
   // ── Wave 1：新北市 ≥8 ──
   {
     id: "nt-metro-park",
-    name: "新北市大都會公園",
+    name: "新北大都會公園",
     city: "新北市",
     district: "三重區",
     lat: 25.0667,
@@ -742,19 +744,20 @@ const PLAYGROUNDS: readonly Playground[] = [
   },
   {
     id: "nt-sanchong-floodway",
-    name: "三重疏洪親水公園",
+    name: "二重疏洪親水公園",
     city: "新北市",
     district: "三重區",
     lat: 25.0833,
     lng: 121.4833,
     address: "新北市三重區疏洪道右岸（近重新橋）",
+    mapsQuery: "二重疏洪親水公園 三重",
     type: "公園",
     ageRange: [3, 8],
     free: true,
     indoor: false,
     facilities: ["親水設施", "大草坪", "自行車道", "停車場"],
     tags: ["免費", "玩水", "野餐友善"],
-    tips: "亲水設施開放時段依公告為準；記得帶替換衣物與毛巾。",
+    tips: "親水設施開放時段依公告為準；記得帶替換衣物與毛巾。",
     sources: [
       {
         kind: "gov",
@@ -806,6 +809,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     lat: 25.0083,
     lng: 121.4583,
     address: "新北市板橋區中正路435號",
+    mapsQuery: "板橋435藝文特區",
     type: "博物館",
     ageRange: [3, 8],
     free: true,
@@ -890,7 +894,7 @@ const PLAYGROUNDS: readonly Playground[] = [
   },
   {
     id: "kl-heping-island",
-    name: "和平島公園",
+    name: "和平島地質公園",
     city: "基隆市",
     district: "中正區",
     lat: 25.1583,
@@ -1096,12 +1100,13 @@ const PLAYGROUNDS: readonly Playground[] = [
   },
   {
     id: "hc-nanliao",
-    name: "南寮漁港親子公園",
+    name: "南寮漁港旅遊服務中心",
     city: "新竹市",
     district: "北區",
     lat: 24.8495,
     lng: 120.9289,
-    address: "新竹市北區南寮里附近",
+    address: "新竹市北區南寮街261號",
+    mapsQuery: "南寮漁港旅遊服務中心",
     type: "公園",
     ageRange: [3, 8],
     free: true,
@@ -1130,7 +1135,8 @@ const PLAYGROUNDS: readonly Playground[] = [
     district: "香山區",
     lat: 24.7756,
     lng: 120.9231,
-    address: "新竹市香山區海埔路附近",
+    address: "新竹市香山區草原路",
+    mapsQuery: "青青草原 香山",
     type: "公園",
     ageRange: [3, 8],
     free: true,
@@ -1240,10 +1246,10 @@ const PLAYGROUNDS: readonly Playground[] = [
     id: "hcx-dingdong",
     name: "小叮噹科學主題樂園",
     city: "新竹縣",
-    district: "湖口鄉",
-    lat: 24.8625,
-    lng: 121.1690,
-    address: "新竹縣湖口鄉德興路168號",
+    district: "新豐鄉",
+    lat: 24.8690,
+    lng: 120.9801,
+    address: "新竹縣新豐鄉松柏村康和路199號",
     type: "主題樂園",
     ageRange: [3, 8],
     free: false,
@@ -1264,7 +1270,7 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://travel.hsinchu.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-13",
   },
   {
     id: "hcx-greenworld",
@@ -1753,7 +1759,8 @@ const PLAYGROUNDS: readonly Playground[] = [
   },
   {
     id: "tc-lihpao",
-    name: "麗寶樂園",
+    name: "麗寶樂園渡假區",
+    mapsQuery: "麗寶樂園渡假區 后里",
     city: "台中市",
     district: "后里區",
     lat: 24.3239,
@@ -1770,7 +1777,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     sources: [
       {
         kind: "official",
-        name: "麗寶樂園",
+        name: "麗寶樂園渡假區",
         url: "https://www.lihpao.com.tw/",
       },
       {
@@ -1779,7 +1786,7 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://travel.taichung.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-13",
   },
   {
     id: "tc-gaomei",
@@ -1812,12 +1819,13 @@ const PLAYGROUNDS: readonly Playground[] = [
   },
   {
     id: "tc-calligraphy-greenway",
-    name: "草悟道市民廣場遊戲場",
+    name: "草悟道兒童公園",
     city: "台中市",
     district: "西區",
     lat: 24.1478,
     lng: 120.6639,
-    address: "台中市西區英才路與公益路附近（草悟道沿線）",
+    address: "台中市西區英才路536號旁",
+    mapsQuery: "草悟道兒童公園 台中",
     type: "公園",
     ageRange: [3, 8],
     free: true,
@@ -2101,12 +2109,13 @@ const PLAYGROUNDS: readonly Playground[] = [
   },
   {
     id: "nto-paper-dome",
-    name: "紙教堂新桃花源農莊",
+    name: "紙教堂新故鄉見學園區",
     city: "南投縣",
     district: "埔里鎮",
-    lat: 23.9681,
-    lng: 120.9444,
-    address: "南投縣埔里鎮中山路一段518號附近",
+    lat: 23.9429,
+    lng: 120.9313,
+    address: "南投縣埔里鎮桃米巷52-12號",
+    mapsQuery: "紙教堂 埔里",
     type: "其他",
     ageRange: [3, 8],
     free: false,
@@ -2118,7 +2127,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     sources: [
       {
         kind: "official",
-        name: "紙教堂",
+        name: "紙教堂新故鄉見學園區",
         url: "https://www.paperdome.org.tw/",
       },
       {
@@ -2127,7 +2136,7 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://travel.nantou.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-13",
   },
   // ── Wave 2：雲林縣 ≥5 ──
   {
