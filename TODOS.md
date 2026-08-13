@@ -56,7 +56,7 @@
 | polish(for-parents): play-map 具名導航、類型場景帶與選中針場館名 | `dedf98c` |
 | fix(data): play-map 三筆場館錯置與 mapsQuery／placeId 契約 | `01ace1c` |
 | chore(data): play-map 場館名人工複核 | `f277e89` |
-| fix(data): play-map 清除地址「附近」 | 見本 commit |
+| fix(data): play-map 清除地址「附近」 | `bfa10db` |
 
 ### 本輪待辦（2026-08-13）
 
