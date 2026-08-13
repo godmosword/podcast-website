@@ -54,7 +54,7 @@ export type Playground = {
   sources: PlaygroundSource[];
   /** 欄位最後人工核對日（ISO YYYY-MM-DD）。 */
   lastVerified: string;
-  /** 覆蓋範圍或資料缺口說明（選填）。 */
+  /** 資料涵蓋範圍或可信度的誠實聲明（選填）；詳情 sheet 會顯示，不是遊玩建議。 */
   coverageNote?: string;
   /**
    * Google Maps Place ID（選填）。有值時導航加 `destination_place_id`、搜尋加 `query_place_id`。
@@ -96,7 +96,7 @@ export const playgroundSchema = z.object({
   relatedEpisodes: z.array(z.string()).optional(),
   sources: z.array(playgroundSourceSchema).min(1),
   lastVerified: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  coverageNote: z.string().optional(),
+  coverageNote: z.string().min(1).optional(),
   placeId: z.string().min(1).optional(),
   mapsQuery: z.string().min(1).optional(),
 });

@@ -196,6 +196,13 @@ describe("playgrounds sidecar", () => {
     }
   });
 
+  it("coverageNote 若存在則為非空字串", () => {
+    for (const item of listPlaygrounds()) {
+      if (item.coverageNote === undefined) continue;
+      expect(item.coverageNote.trim().length, item.id).toBeGreaterThan(0);
+    }
+  });
+
   it("type 字串含「室內」⇒ indoor 為 true", () => {
     for (const item of listPlaygrounds()) {
       if (item.type.includes("室內")) {

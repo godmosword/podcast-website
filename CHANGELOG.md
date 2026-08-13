@@ -6,6 +6,7 @@
 
 ### Added
 
+- **親子遊樂地圖資料範圍聲明**：詳情 sheet 在 Tips 之後顯示 `coverageNote`（標籤「資料範圍」）；無值不渲染。卡片名單不加，避免列表噪音。
 - **親子遊樂地圖 `mapsQuery`／`placeId`**：導航／搜尋可用選填搜尋字串覆寫，有 Place ID 時加 `destination_place_id`／`query_place_id`；仍不傳座標、免 API Key。
 
 ### Changed

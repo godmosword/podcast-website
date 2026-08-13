@@ -35,6 +35,15 @@ function needsCommercialNotice(place: Playground): boolean {
   return !place.free;
 }
 
+function CoverageNote({ text }: { text: string }) {
+  return (
+    <p className={styles.coverageNote}>
+      <span className={styles.coverageNoteLabel}>資料範圍</span>
+      {text}
+    </p>
+  );
+}
+
 export function PlayMapSheet({
   place,
   variant,
@@ -98,6 +107,9 @@ export function PlayMapSheet({
             {place.address}
             {distanceLabel ? ` · ${distanceLabel}` : ""}
           </p>
+          {place.coverageNote ? (
+            <CoverageNote text={place.coverageNote} />
+          ) : null}
           <div className={styles.actions}>
             <a
               className={styles.navButton}
@@ -138,6 +150,10 @@ export function PlayMapSheet({
               <span className={styles.tipsLabel}>Tips</span>
               {place.tips}
             </p>
+          ) : null}
+
+          {place.coverageNote ? (
+            <CoverageNote text={place.coverageNote} />
           ) : null}
 
           {place.feeNote ? (

@@ -2,7 +2,7 @@
 import React from "react";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { listPlaygrounds, PLAYGROUND_TYPES } from "@/data/playgrounds";
+import { listPlaygrounds, PLAYGROUND_TYPES, getPlayground } from "@/data/playgrounds";
 import { filterPlaygrounds } from "@/lib/playgrounds-query";
 import { coverageHeadline, listCityCoverage } from "@/lib/playground-coverage";
 import { playgroundTypeVisualKey } from "@/lib/playground-type-visual";
@@ -290,6 +290,38 @@ describe("PlayMap", () => {
     expect(
       screen.queryByRole("region", { name: `${firstPlace.name} 詳情` }),
     ).toBeNull();
+  });
+
+  it("選中有 coverageNote 的場館時 sheet 顯示資料範圍", () => {
+    render(<PlayMap />);
+    showAllCards();
+    const hukou = getPlayground("hcx-hukou-sports");
+    expect(hukou?.coverageNote).toBeDefined();
+    if (!hukou?.coverageNote) return;
+
+    fireEvent.click(
+      screen.getByRole("button", { name: `${hukou.name}，查看詳情` }),
+    );
+    const sheet = screen.getByRole("region", { name: `${hukou.name} 詳情` });
+    expect(within(sheet).getByText("資料範圍")).toBeTruthy();
+    expect(within(sheet).getByText(hukou.coverageNote)).toBeTruthy();
+  });
+
+  it("coverageNote 未定義時 sheet 不出現資料範圍區塊", () => {
+    render(<PlayMap />);
+    showAllCards();
+    const firstPlace = filterPlaygrounds()[0];
+    expect(firstPlace).toBeDefined();
+    if (!firstPlace) return;
+    expect(firstPlace.coverageNote).toBeUndefined();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: `${firstPlace.name}，查看詳情` }),
+    );
+    const sheet = screen.getByRole("region", {
+      name: `${firstPlace.name} 詳情`,
+    });
+    expect(within(sheet).queryByText("資料範圍")).toBeNull();
   });
 
   it("涵蓋區顯示年齡定位與 coverageHeadline 文案", () => {
