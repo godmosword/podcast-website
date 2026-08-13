@@ -93,6 +93,41 @@ test.describe("親子遊樂地圖", () => {
     expect(leafletRequests.length).toBeGreaterThan(0);
   });
 
+  test("行動切換分頁不重建 Leaflet 容器", async ({ page }) => {
+    test.setTimeout(45_000);
+    await page.setViewportSize(PHONE);
+    await page.goto("/for-parents/play-map");
+    await waitForPlayMapReady(page);
+
+    await page.getByRole("tab", { name: "地圖" }).click();
+    const map = page.locator(".leaflet-container");
+    await expect(map).toBeVisible({ timeout: 15_000 });
+
+    const leafletId = await map.evaluate((el) => {
+      const id = (el as HTMLElement & { _leaflet_id?: number })._leaflet_id;
+      if (id == null) throw new Error("Leaflet 容器沒有 _leaflet_id");
+      return id;
+    });
+
+    await page.locator(".leaflet-control-zoom-in").click();
+    await page.waitForFunction(
+      () => !document.querySelector(".leaflet-zoom-anim"),
+      undefined,
+      { timeout: 10_000 },
+    );
+
+    await page.getByRole("tab", { name: "卡片" }).click();
+    await expect(page.locator("#play-map-panel-map")).toBeHidden();
+    await expect(map).toHaveCount(1);
+
+    await page.getByRole("tab", { name: "地圖" }).click();
+    await expect(map).toBeVisible();
+    const leafletIdAgain = await map.evaluate((el) => {
+      return (el as HTMLElement & { _leaflet_id?: number })._leaflet_id;
+    });
+    expect(leafletIdAgain).toBe(leafletId);
+  });
+
   test("桌面並排直接載入地圖", async ({ page }) => {
     test.setTimeout(45_000);
     await page.goto("/for-parents/play-map");

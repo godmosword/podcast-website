@@ -15,6 +15,8 @@ import type { CityCluster } from "@/lib/playground-clusters";
 import type { LatLng } from "@/lib/playground-distance";
 import { playgroundTypeVisualKey } from "@/lib/playground-type-visual";
 import { DEFAULT_PLAY_MAP_CENTER } from "@/lib/playground-coverage";
+import { pickNearest } from "@/lib/playground-distance";
+import { NEAR_ME_FIT_COUNT } from "./PlayMapContract";
 import styles from "./PlayMap.module.css";
 
 const DEFAULT_ZOOM = 11;
@@ -39,9 +41,12 @@ export function playMapFitKey(args: {
   cities: readonly string[];
   filteredCount: number;
   selectedId: string | null;
+  /** 未選縣市且已定位時帶入座標，避免跟全集鏡頭共用同一把鍵。 */
+  nearMeToken?: string;
 }): string {
   const cityScope = [...new Set(args.cities)].sort().join(",");
-  return `${args.clusterMode ? "cluster" : "pins"}|${cityScope}|${args.filteredCount}|${args.selectedId ?? ""}`;
+  const near = args.nearMeToken ? `|near:${args.nearMeToken}` : "";
+  return `${args.clusterMode ? "cluster" : "pins"}|${cityScope}|${args.filteredCount}|${args.selectedId ?? ""}${near}`;
 }
 
 function escapeAttr(value: string): string {
@@ -285,6 +290,11 @@ export type PlayMapLeafletProps = {
   userLatLng: LatLng | null;
   /** 桌面並排時 sheet 在右側，padding 改偏右。 */
   splitLayout: boolean;
+  /**
+   * 未選縣市且已定位：鏡頭框自己＋最近 N 筆。
+   * 針仍畫 `places` 全集。
+   */
+  nearMeCamera: boolean;
 };
 
 export default function PlayMapLeaflet({
@@ -300,6 +310,7 @@ export default function PlayMapLeaflet({
   onSelectCity,
   userLatLng,
   splitLayout,
+  nearMeCamera,
 }: PlayMapLeafletProps) {
   const selected = selectedId
     ? (places.find((place) => place.id === selectedId) ?? null)
@@ -316,12 +327,26 @@ export default function PlayMapLeaflet({
     (): [number, number] => (splitLayout ? [280, 72] : [48, 220]),
     [splitLayout],
   );
-  const fitPoints = clusterMode ? clusterPoints : points;
+  const nearMePoints = useMemo((): Array<[number, number]> | null => {
+    if (!nearMeCamera || !userLatLng) return null;
+    const nearest = pickNearest(places, userLatLng, NEAR_ME_FIT_COUNT);
+    return [
+      [userLatLng.lat, userLatLng.lng],
+      ...nearest.map((place) => [place.lat, place.lng] as [number, number]),
+    ];
+  }, [nearMeCamera, places, userLatLng]);
+  const fitPoints = clusterMode
+    ? clusterPoints
+    : (nearMePoints ?? points);
   const fitKey = playMapFitKey({
     clusterMode,
     cities: places.map((place) => place.city),
     filteredCount: places.length,
     selectedId,
+    nearMeToken:
+      nearMeCamera && userLatLng
+        ? `${userLatLng.lat.toFixed(3)},${userLatLng.lng.toFixed(3)}`
+        : undefined,
   });
 
   return (

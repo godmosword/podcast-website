@@ -7,6 +7,7 @@ import { clusterPlaygroundsByCity } from "@/lib/playground-clusters";
 import { DEFAULT_PLAY_MAP_CENTER } from "@/lib/playground-coverage";
 import PlayMapLeaflet, { playMapFitKey } from "./PlayMapLeaflet";
 import type { PlayMapLeafletProps } from "./PlayMapLeaflet";
+import { NEAR_ME_FIT_COUNT } from "./PlayMapContract";
 
 vi.stubGlobal("React", React);
 
@@ -87,6 +88,7 @@ function leafletProps(
     onSelectCity: vi.fn(),
     userLatLng: null,
     splitLayout: true,
+    nearMeCamera: false,
     ...overrides,
   };
 }
@@ -128,6 +130,9 @@ describe("playMapFitKey", () => {
     );
     expect(playMapFitKey(base)).not.toBe(
       playMapFitKey({ ...base, cities: ["新北市"] }),
+    );
+    expect(playMapFitKey(base)).not.toBe(
+      playMapFitKey({ ...base, nearMeToken: "25.040,121.550" }),
     );
   });
 });
@@ -201,5 +206,26 @@ describe("PlayMapLeaflet FitBounds", () => {
       />,
     );
     expect(fitBounds).toHaveBeenCalledTimes(2);
+  });
+
+  it("nearMeCamera 鏡頭只框使用者位置＋最近 N 筆", () => {
+    const places = listPlaygrounds().slice(0, 20);
+    const user = { lat: places[0]?.lat ?? 25, lng: places[0]?.lng ?? 121 };
+    render(
+      <PlayMapLeaflet
+        {...leafletProps({
+          places,
+          nearMeCamera: true,
+          userLatLng: user,
+          clusterMode: false,
+        })}
+      />,
+    );
+    expect(fitBounds).toHaveBeenCalledTimes(1);
+    const boundsArg = fitBounds.mock.calls[0] as unknown as [
+      { points: Array<[number, number]> },
+    ];
+    expect(boundsArg[0].points).toHaveLength(1 + NEAR_ME_FIT_COUNT);
+    expect(boundsArg[0].points[0]).toEqual([user.lat, user.lng]);
   });
 });

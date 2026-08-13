@@ -23,6 +23,12 @@ export const SHEET_BG_HINT_ID = "play-map-sheet-bg-hint";
  */
 export const VISIBLE_STEP = 24;
 
+/**
+ * 「離我最近」未選縣市時，鏡頭只框使用者位置＋距離最近的這幾筆。
+ * 地圖針仍畫篩選全集，避免 73 根針把 fitBounds 拉成全台。
+ */
+export const NEAR_ME_FIT_COUNT = 8;
+
 /** 桌面並排名單＋地圖（對齊全站 980 導覽斷點）。 */
 export const SPLIT_MIN_WIDTH_PX = 980;
 

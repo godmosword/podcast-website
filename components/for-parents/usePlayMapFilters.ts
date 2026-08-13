@@ -284,12 +284,6 @@ export function usePlayMapFilters({
     syncUrl({ freeOnly: next });
   }, [freeOnly, syncUrl]);
 
-  const handleToggleThemePark = useCallback(() => {
-    const next = typeFilter === "主題樂園" ? null : "主題樂園";
-    setTypeFilter(next);
-    syncUrl({ type: next });
-  }, [typeFilter, syncUrl]);
-
   const handleNearMe = useCallback(() => {
     if (userLatLng) {
       setUserLatLng(null);
@@ -539,7 +533,6 @@ export function usePlayMapFilters({
     handleSelectType,
     handleToggleIndoor,
     handleToggleFree,
-    handleToggleThemePark,
     handleNearMe,
     handleSelectView,
     handleTabKeyDown,

@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useRef } from "react";
 import type { PlaygroundType } from "@/data/playgrounds";
 import type { BrowseView } from "./PlayMapContract";
 import { PlayMapCardList } from "./PlayMapCardList";
@@ -43,6 +44,12 @@ export default function PlayMap({
     initialFreeOnly,
     initialView,
   });
+  /**
+   * 第一次需要顯示地圖後保持掛載，之後只靠 hidden。
+   * 進頁若是卡片分頁，先不掛 Leaflet，避免搶首屏。
+   */
+  const mapMountedRef = useRef(map.showMap);
+  if (map.showMap) mapMountedRef.current = true;
 
   return (
     <div
@@ -124,7 +131,7 @@ export default function PlayMap({
           hidden={!map.showMap}
           className={styles.mapShell}
         >
-          {map.showMap ? (
+          {mapMountedRef.current ? (
             <PlayMapLeaflet
               places={map.filtered}
               points={map.points}
@@ -138,6 +145,7 @@ export default function PlayMap({
               onSelectCity={map.handleSelectCity}
               userLatLng={map.userLatLng}
               splitLayout={map.splitLayout}
+              nearMeCamera={map.city === null && map.userLatLng !== null}
             />
           ) : null}
         </div>

@@ -237,6 +237,23 @@ describe("PlayMap", () => {
     expect(screen.getByTestId("map-container")).toBeTruthy();
   });
 
+  it("卡片首屏不掛地圖，切過地圖後再回卡片仍保持掛載", () => {
+    const { container } = render(<PlayMap />);
+    expect(screen.queryByTestId("map-container")).toBeNull();
+
+    fireEvent.click(screen.getByRole("tab", { name: "地圖" }));
+    expect(screen.getByTestId("map-container")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("tab", { name: "卡片" }));
+    expect(screen.getByTestId("map-container")).toBeTruthy();
+    expect(
+      container.querySelector("#play-map-panel-map")?.hasAttribute("hidden"),
+    ).toBe(true);
+    expect(
+      container.querySelector("#play-map-panel-cards")?.hasAttribute("hidden"),
+    ).toBe(false);
+  });
+
   it("開啟 Sheet 後可按關閉還原", () => {
     render(<PlayMap />);
     const firstPlace = filterPlaygrounds()[0];

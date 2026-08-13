@@ -77,6 +77,20 @@ export function sortPlaygrounds(
   return copy;
 }
 
+/**
+ * 取距離 `user` 最近的 `n` 筆（近到遠；同距再依名稱）。
+ * 不修改傳入陣列；`n <= 0` 回傳空陣列。
+ */
+export function pickNearest(
+  places: readonly Playground[],
+  user: LatLng,
+  n: number,
+): Playground[] {
+  const count = Number.isFinite(n) ? Math.floor(n) : 0;
+  if (count <= 0) return [];
+  return sortPlaygrounds(places, user).slice(0, count);
+}
+
 type StrollerFields = Pick<Playground, "tags" | "facilities" | "tips">;
 
 function placeTextBlob(place: StrollerFields): string {

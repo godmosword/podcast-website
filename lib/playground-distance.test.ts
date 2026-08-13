@@ -7,6 +7,7 @@ import {
   haversineKm,
   isStrollerFriendly,
   listPlaceDecisionTags,
+  pickNearest,
   sortPlaygrounds,
 } from "@/lib/playground-distance";
 
@@ -49,25 +50,25 @@ describe("formatPlaceDistanceLabel", () => {
   });
 });
 
-describe("sortPlaygrounds", () => {
-  const base = {
-    district: "區",
-    lat: 0,
-    lng: 0,
-    address: "x",
-    type: "公園" as const,
-    ageRange: [3, 8] as [number, number],
-    indoor: false,
-    facilities: [] as string[],
-    tags: [] as string[],
-    sources: [],
-    lastVerified: "2026-01-01",
-  };
+const PLACE_BASE = {
+  district: "區",
+  lat: 0,
+  lng: 0,
+  address: "x",
+  type: "公園" as const,
+  ageRange: [3, 8] as [number, number],
+  indoor: false,
+  facilities: [] as string[],
+  tags: [] as string[],
+  sources: [],
+  lastVerified: "2026-01-01",
+};
 
+describe("sortPlaygrounds", () => {
   test("無定位：免費優先再依名稱", () => {
     const places = [
       {
-        ...base,
+        ...PLACE_BASE,
         id: "b",
         name: "公園B",
         city: "台北市",
@@ -76,7 +77,7 @@ describe("sortPlaygrounds", () => {
         lng: 1,
       },
       {
-        ...base,
+        ...PLACE_BASE,
         id: "a",
         name: "公園A",
         city: "台北市",
@@ -85,7 +86,7 @@ describe("sortPlaygrounds", () => {
         lng: 2,
       },
       {
-        ...base,
+        ...PLACE_BASE,
         id: "c",
         name: "公園C",
         city: "台北市",
@@ -105,7 +106,7 @@ describe("sortPlaygrounds", () => {
     const user = { lat: 0, lng: 0 };
     const places = [
       {
-        ...base,
+        ...PLACE_BASE,
         id: "far",
         name: "遠",
         city: "台北市",
@@ -114,7 +115,7 @@ describe("sortPlaygrounds", () => {
         lng: 1,
       },
       {
-        ...base,
+        ...PLACE_BASE,
         id: "near",
         name: "近",
         city: "台北市",
@@ -127,6 +128,54 @@ describe("sortPlaygrounds", () => {
       "near",
       "far",
     ]);
+  });
+});
+
+describe("pickNearest", () => {
+  const user = { lat: 0, lng: 0 };
+  const places = [
+    {
+      ...PLACE_BASE,
+      id: "far",
+      name: "遠",
+      city: "台北市",
+      free: true,
+      lat: 1,
+      lng: 1,
+    },
+    {
+      ...PLACE_BASE,
+      id: "mid",
+      name: "中",
+      city: "台北市",
+      free: true,
+      lat: 0.5,
+      lng: 0.5,
+    },
+    {
+      ...PLACE_BASE,
+      id: "near",
+      name: "近",
+      city: "台北市",
+      free: false,
+      lat: 0.01,
+      lng: 0.01,
+    },
+  ] as Playground[];
+
+  test("取最近 n 筆、不修改原陣列", () => {
+    const originalIds = places.map((place) => place.id);
+    expect(pickNearest(places, user, 2).map((place) => place.id)).toEqual([
+      "near",
+      "mid",
+    ]);
+    expect(places.map((place) => place.id)).toEqual(originalIds);
+  });
+
+  test("n 大於筆數時回傳全部、n<=0 回傳空", () => {
+    expect(pickNearest(places, user, 10)).toHaveLength(3);
+    expect(pickNearest(places, user, 0)).toEqual([]);
+    expect(pickNearest(places, user, -1)).toEqual([]);
   });
 });
 

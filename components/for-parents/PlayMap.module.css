@@ -393,22 +393,6 @@
   height: 100%;
 }
 
-.typeSwatch {
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: var(--card-accent, var(--accent));
-  color: var(--ink);
-}
-
-.typeSwatch svg {
-  width: 22px;
-  height: 22px;
-  opacity: 0.72;
-}
-
 /*
  * 選中狀態只加外框、不換底色。
  * 原本用 color-mix(--map-chip 40%, --card)，夜間會混成 #808390，
