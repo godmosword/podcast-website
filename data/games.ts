@@ -38,7 +38,6 @@ export type GameMeta = {
   gameType: GameType;
   controls: readonly string[];
   art: GameArt;
-  featured?: boolean;
   /** 首玩教學示範 overlay 的步驟資料（2–3 步）。 */
   tutorial: readonly TutorialStep[];
 };
@@ -64,7 +63,6 @@ export const GAMES: GameMeta[] = [
       thumbnail: "/games/v2/candy-match/cover.webp",
       alt: "粉紅黏土遊樂園裡的繽紛消消樂方塊與車車",
     },
-    featured: true,
     tutorial: [
       { text: "點兩個相鄰的圖案", gesture: "tap" },
       { text: "三個一樣就消除", gesture: "tap" },

@@ -27,6 +27,7 @@ function makeBoard(cols = 3, rows = 3): BoardState {
     rows,
     pieces: Array.from({ length: cols * rows }, (_, i) => i % 5),
     dirt: Array(cols * rows).fill(false),
+    specials: Array(cols * rows).fill("none"),
   };
 }
 
@@ -180,5 +181,45 @@ describe("CandyMatchBoard pointer capture", () => {
     expect(
       screen.getByRole("button", { name: /第 2 列第 1 格/ }).getAttribute("data-fall-rows"),
     ).toBe("2");
+  });
+
+  it("掃把糖顯示徽章；reduced 不標 data-sweep", () => {
+    const board = makeBoard();
+    board.specials[0] = "row";
+    const { rerender } = render(
+      <CandyMatchBoard
+        board={board}
+        cellPx={48}
+        selected={null}
+        hint={null}
+        popping={new Set([0])}
+        shaking={new Set()}
+        disabled={false}
+        onTapCell={vi.fn()}
+        onSwipeCell={vi.fn()}
+        motion={{ sweep: "row" }}
+      />,
+    );
+    const cell = screen.getByRole("button", { name: /掃把糖/ });
+    expect(cell.getAttribute("data-special")).toBe("row");
+    expect(cell.getAttribute("data-sweep")).toBe("row");
+
+    rerender(
+      <CandyMatchBoard
+        board={board}
+        cellPx={48}
+        selected={null}
+        hint={null}
+        popping={new Set([0])}
+        shaking={new Set()}
+        disabled={false}
+        onTapCell={vi.fn()}
+        onSwipeCell={vi.fn()}
+        motion={{ sweep: "row", reduced: true }}
+      />,
+    );
+    expect(
+      screen.getByRole("button", { name: /掃把糖/ }).getAttribute("data-sweep"),
+    ).toBeNull();
   });
 });

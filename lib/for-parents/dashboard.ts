@@ -1,6 +1,7 @@
 import { GAMES } from "@/data/games";
 import { getStory, storiesByNewest, type Story } from "@/data/content";
 import { medalCount } from "@/lib/gamekit/progress/meta";
+import { stickerLabel } from "@/lib/gamekit/progress/stickers";
 import type { GameKitGameId } from "@/lib/gamekit/types";
 import type { ContinueState, ProgressStore } from "@/lib/progress-store";
 
@@ -37,16 +38,6 @@ export type ParentDashboardSnapshot = {
   continueListening: ContinueState | null;
   kidsMode: boolean;
   sfxEnabled: boolean;
-};
-
-const STICKER_LABELS: Record<string, string> = {
-  "played-block-drop": "玩過繽紛樂園",
-  "played-candy-match": "玩過繽紛消消樂",
-  // 已退役遊戲：舊存檔仍留著這些貼紙，孩子賺到的就不收回；
-  // 少了 label 會在家長儀表板上顯示成生的英文 ID。
-  "played-car-adventure": "玩過車車大冒險",
-  "played-candy-kart": "玩過繽紛卡丁車",
-  "played-snowboard": "玩過阿蹦雪山衝刺",
 };
 
 function gameMeta(gameId: GameKitGameId) {
@@ -189,9 +180,7 @@ export function buildParentDashboardSnapshot(
     totalMedalStars: countMedalStars(profile.medals),
     profileStars: profile.stars,
     stickerCount: profile.stickers.length,
-    stickerLabels: profile.stickers.map(
-      (id) => STICKER_LABELS[id] ?? id,
-    ),
+    stickerLabels: profile.stickers.map(stickerLabel),
     games,
     recentStories: buildRecentStoryRows(progress),
     recommendedStories: recommendStoriesForParent(progress),

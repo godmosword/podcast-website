@@ -2,18 +2,26 @@ import { describe, expect, it } from "vitest";
 import {
   DROP_ITEM,
   EMPTY,
+  applySpecialSpawns,
   applyGravity,
   areAdjacent,
+  clearCells,
   createBoard,
+  emptySpecials,
+  expandClearsWithSpecials,
   planGravity,
+  planSpecialSpawns,
+  planWaveClears,
   findHintMove,
   findMatches,
   idx,
   reshuffle,
   resolveBoard,
   swapCreatesMatch,
+  swapIsLegal,
   swapped,
   type BoardState,
+  type CandySpecial,
 } from "./engine";
 import { CANDY_MATCH_LEVELS, kidsModeLevel } from "./levels";
 
@@ -27,7 +35,13 @@ function seededRng(seed: number): () => number {
 }
 
 function board(cols: number, rows: number, pieces: number[]): BoardState {
-  return { cols, rows, pieces, dirt: Array(cols * rows).fill(false) };
+  return {
+    cols,
+    rows,
+    pieces,
+    dirt: Array(cols * rows).fill(false),
+    specials: Array(cols * rows).fill("none"),
+  };
 }
 
 describe("findMatches", () => {
@@ -117,20 +131,20 @@ describe("applyGravity", () => {
     ];
     const next = applyGravity(pieces, 2, 3, 3, rng);
     // 欄0：只有一個 0 → 沉到底，上面兩格補新
-    expect(next[idx(0, 2, 2)]).toBe(0);
-    expect(next[idx(0, 0, 2)]).toBeGreaterThanOrEqual(0);
+    expect(next.pieces[idx(0, 2, 2)]).toBe(0);
+    expect(next.pieces[idx(0, 0, 2)]).toBeGreaterThanOrEqual(0);
     // 欄1：1、2 壓實到下兩格
-    expect(next[idx(1, 2, 2)]).toBe(2);
-    expect(next[idx(1, 1, 2)]).toBe(1);
-    expect(next.every((v) => v >= 0)).toBe(true);
+    expect(next.pieces[idx(1, 2, 2)]).toBe(2);
+    expect(next.pieces[idx(1, 1, 2)]).toBe(1);
+    expect(next.pieces.every((v) => v >= 0)).toBe(true);
   });
 
   it("掉落物隨重力下落", () => {
     const rng = seededRng(3);
     const pieces = [DROP_ITEM, EMPTY, 0];
     const next = applyGravity(pieces, 1, 3, 3, rng);
-    expect(next[1]).toBe(DROP_ITEM);
-    expect(next[2]).toBe(0);
+    expect(next.pieces[1]).toBe(DROP_ITEM);
+    expect(next.pieces[2]).toBe(0);
   });
 });
 
@@ -170,7 +184,8 @@ describe("createBoard", () => {
       const rng = seededRng(seed);
       const b = createBoard(6, 6, 5, rng);
       expect(findMatches(b.pieces, 6, 6).size).toBe(0);
-      expect(findHintMove(b.pieces, 6, 6)).not.toBeNull();
+      expect(findHintMove(b.pieces, 6, 6, b.specials)).not.toBeNull();
+      expect(b.specials).toEqual(emptySpecials(36));
     }
   });
 
@@ -210,7 +225,7 @@ describe("reshuffle", () => {
     const r = reshuffle(b, rng);
     expect(r.pieces.indexOf(DROP_ITEM)).toBe(dropAt);
     expect(findMatches(r.pieces, 6, 6).size).toBe(0);
-    expect(findHintMove(r.pieces, 6, 6)).not.toBeNull();
+    expect(findHintMove(r.pieces, 6, 6, r.specials)).not.toBeNull();
   });
 });
 
@@ -254,5 +269,108 @@ describe("關卡資料", () => {
     expect(kinds.has("clean-dirt")).toBe(true);
     expect(kinds.has("drop-item")).toBe(true);
     expect(kinds.has("clear-any")).toBe(true);
+  });
+});
+
+describe("特殊糖", () => {
+  it("四連在交換格留下掃把糖", () => {
+    // 第一列 0,0,1,0 → 交換 idx2(1) 與 idx6(0) 後變 0,0,0,0
+    const pieces = [
+      0, 0, 1, 0,
+      2, 3, 0, 2,
+      3, 2, 3, 1,
+    ];
+    const swappedPieces = swapped(pieces, 2, 6);
+    const spawns = planSpecialSpawns(swappedPieces, 4, 3, [2, 6]);
+    expect(spawns).toEqual([{ index: 2, kind: "row" }]);
+  });
+
+  it("五連留下彩虹糖", () => {
+    const pieces = [0, 0, 0, 0, 0, 1, 2, 1, 2, 1];
+    const spawns = planSpecialSpawns(pieces, 5, 2, [2]);
+    expect(spawns).toEqual([{ index: 2, kind: "color" }]);
+  });
+
+  it("掃把糖啟動清掉整排可消除格", () => {
+    const pieces = [
+      0, 1, 2, 3,
+      1, 2, 3, 0,
+    ];
+    const specials: CandySpecial[] = emptySpecials(8);
+    specials[1] = "row";
+    const cleared = expandClearsWithSpecials(pieces, specials, [1], 4);
+    expect(cleared).toEqual(new Set([0, 1, 2, 3]));
+  });
+
+  it("彩虹糖啟動清掉同色", () => {
+    const pieces = [
+      0, 1, 0,
+      2, 0, 1,
+    ];
+    const specials: CandySpecial[] = emptySpecials(6);
+    specials[0] = "color";
+    const cleared = expandClearsWithSpecials(pieces, specials, [0], 3);
+    expect(cleared).toEqual(new Set([0, 2, 4]));
+  });
+
+  it("雙特殊糖相換：先掃把再彩虹", () => {
+    const pieces = [
+      0, 1, 2, 3,
+      1, 0, 1, 2,
+    ];
+    const specials: CandySpecial[] = emptySpecials(8);
+    specials[0] = "row";
+    specials[1] = "color";
+    const wave = planWaveClears(pieces, specials, 4, 2, [0, 1], [0, 1], false);
+    expect(wave.detonated[0]).toBe("row");
+    expect(wave.detonated).toContain("color");
+    expect(wave.clear.has(0)).toBe(true);
+    expect(wave.clear.has(1)).toBe(true);
+  });
+
+  it("特殊糖與鄰格交換不必先湊三連", () => {
+    const pieces = [
+      0, 1, 2,
+      1, 2, 0,
+      2, 0, 1,
+    ];
+    const specials: CandySpecial[] = emptySpecials(9);
+    specials[0] = "row";
+    expect(swapCreatesMatch(pieces, 0, 1, 3, 3)).toBe(false);
+    expect(swapIsLegal(pieces, specials, 0, 1, 3, 3)).toBe(true);
+  });
+
+  it("重力讓特殊糖跟著棋子掉落，新補格沒有特殊糖", () => {
+    const rng = seededRng(4);
+    const pieces = [
+      0, 1,
+      EMPTY, 2,
+      EMPTY, 3,
+    ];
+    const specials: CandySpecial[] = emptySpecials(6);
+    specials[0] = "row";
+    const next = applyGravity(pieces, 2, 3, 3, rng, specials);
+    expect(next.pieces[idx(0, 2, 2)]).toBe(0);
+    expect(next.specials[idx(0, 2, 2)]).toBe("row");
+    expect(next.specials[idx(0, 0, 2)]).toBe("none");
+    expect(next.specials[idx(0, 1, 2)]).toBe("none");
+  });
+
+  it("四連解算當波留下掃把糖，該格不跟著被清掉", () => {
+    const pieces = [
+      0, 0, 0, 0,
+      1, 2, 1, 2,
+      2, 1, 2, 1,
+    ];
+    const specials = emptySpecials(12);
+    const wave = planWaveClears(pieces, specials, 4, 3);
+    expect(wave.spawns).toEqual([{ index: 0, kind: "row" }]);
+    expect(wave.clear.has(0)).toBe(false);
+    expect(wave.clear.size).toBe(3);
+    const cleared = clearCells(pieces, Array(12).fill(false), wave.clear, 3, specials);
+    const nextSpecials = applySpecialSpawns(cleared.specials, wave.spawns);
+    expect(cleared.pieces[0]).toBe(0);
+    expect(nextSpecials[0]).toBe("row");
+    expect(cleared.pieces.filter((v) => v === 0).length).toBe(1);
   });
 });

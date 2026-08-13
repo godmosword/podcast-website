@@ -47,10 +47,8 @@ describe("games v2 presentation metadata", () => {
     }
   });
 
-  test("只有繽紛消消樂是入口主打遊戲", () => {
-    expect(GAMES.filter((game) => game.featured).map((game) => game.slug)).toEqual([
-      "candy-match",
-    ]);
+  test("入口第一張卡是繽紛消消樂", () => {
+    expect(GAMES[0]?.slug).toBe("candy-match");
   });
 });
 

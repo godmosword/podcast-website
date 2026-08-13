@@ -5,19 +5,16 @@ import { listColoringDrafts } from "@/lib/coloring/draft-storage";
 import { loadPlayerProfile } from "@/lib/gamekit/progress/save";
 import { GAMEKIT_PROGRESS_EVENT } from "@/lib/gamekit/progress/session";
 import {
+  emptyHubSnapshot,
   hubProgressFromProfile,
   hubProgressLabel,
   type HubProgressSnapshot,
 } from "@/lib/games/hub-progress";
 import styles from "./GamesHubProgress.module.css";
 
-function emptySnap(): HubProgressSnapshot {
-  return hubProgressFromProfile(loadPlayerProfile(), false);
-}
-
-/** Hub 低壓進度條：星星／已玩／下一輛車庫車。無進度也要能渲染。 */
+/** Hub 低壓進度：星星句＋車庫五格＋貼紙。無進度也要能渲染。 */
 export default function GamesHubProgress() {
-  const [label, setLabel] = useState("收集了 0 顆星星");
+  const [snap, setSnap] = useState<HubProgressSnapshot>(emptyHubSnapshot);
 
   useEffect(() => {
     let cancelled = false;
@@ -25,15 +22,13 @@ export default function GamesHubProgress() {
       void listColoringDrafts()
         .then((drafts) => {
           if (cancelled) return;
-          const snap = hubProgressFromProfile(
-            loadPlayerProfile(),
-            drafts.length > 0,
+          setSnap(
+            hubProgressFromProfile(loadPlayerProfile(), drafts.length > 0),
           );
-          setLabel(hubProgressLabel(snap));
         })
         .catch(() => {
           if (cancelled) return;
-          setLabel(hubProgressLabel(emptySnap()));
+          setSnap(emptyHubSnapshot());
         });
     };
     refresh();
@@ -45,8 +40,35 @@ export default function GamesHubProgress() {
   }, []);
 
   return (
-    <p className={styles.progress} aria-live="polite">
-      {label}
-    </p>
+    <div className={styles.wrap} aria-label="車庫與貼紙">
+      <p className={styles.progress} aria-live="polite">
+        {hubProgressLabel(snap)}
+      </p>
+      <ul className={styles.garage} aria-label="車庫">
+        {snap.vehicles.map((vehicle) => (
+          <li key={vehicle.id}>
+            <span
+              className={vehicle.unlocked ? styles.vehicleOn : styles.vehicleOff}
+              aria-label={
+                vehicle.unlocked
+                  ? `認識${vehicle.name}`
+                  : `還差 ${vehicle.remaining} 顆星星就能認識${vehicle.name}`
+              }
+            >
+              <span aria-hidden>{vehicle.emoji}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+      {snap.stickerLabels.length > 0 ? (
+        <ul className={styles.stickers} aria-label="貼紙">
+          {snap.stickerLabels.map((label) => (
+            <li key={label} className={styles.sticker}>
+              {label}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
   );
 }

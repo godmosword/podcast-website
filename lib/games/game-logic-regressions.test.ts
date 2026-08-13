@@ -14,6 +14,8 @@ describe("game logic regressions", () => {
     expect(adapter).toContain("onSession");
     expect(view).toContain("HINT_IDLE_MS");
     expect(view).toContain("我們再試一次！");
+    expect(view).toContain("掃把出發！");
+    expect(view).toContain("彩虹全收！");
     expect(view).not.toContain("失敗");
     expect(view).not.toContain("Game Over");
     expect(view).not.toContain("你輸了");

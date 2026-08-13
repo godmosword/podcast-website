@@ -118,5 +118,6 @@ test.describe("遊樂園 hub", () => {
   test("低壓進度文案可見（無存檔也不崩潰）", async ({ page }) => {
     await page.goto("/games");
     await expect(page.getByText(/收集了 \d+ 顆星星/)).toBeVisible();
+    await expect(page.getByRole("list", { name: "車庫" })).toBeVisible();
   });
 });

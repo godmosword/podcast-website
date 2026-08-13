@@ -9,6 +9,14 @@ export const DROP_ITEM = -2;
 
 export type Rng = () => number;
 
+/** 棋盤特殊糖：4 連掃把（消一排）、5 連彩虹（消同色）。 */
+export type CandySpecial = "none" | "row" | "color";
+
+export type SpecialSpawn = {
+  index: number;
+  kind: Exclude<CandySpecial, "none">;
+};
+
 export type BoardState = {
   cols: number;
   rows: number;
@@ -16,7 +24,25 @@ export type BoardState = {
   pieces: number[];
   /** 髒髒格（在其上完成消除即清潔） */
   dirt: boolean[];
+  /** 與 pieces 等長；一般格為 none */
+  specials: CandySpecial[];
 };
+
+export function emptySpecials(count: number): CandySpecial[] {
+  return Array<CandySpecial>(count).fill("none");
+}
+
+export function swappedSpecials(
+  specials: CandySpecial[],
+  a: number,
+  b: number,
+): CandySpecial[] {
+  const next = specials.slice();
+  const tmp = next[a];
+  next[a] = next[b];
+  next[b] = tmp;
+  return next;
+}
 
 export type ResolveEvents = {
   /** 各圖案被消除的數量 */
@@ -51,9 +77,18 @@ export function swapped(pieces: number[], a: number, b: number): number[] {
 
 const matchable = (v: number): boolean => v >= 0;
 
-/** 找出所有橫向／直向 3+ 連線的格子索引（不含斜線）。 */
-export function findMatches(pieces: number[], cols: number, rows: number): Set<number> {
-  const out = new Set<number>();
+export type CandyMatchRun = {
+  cells: number[];
+  length: number;
+};
+
+/** 橫向／直向 3+ 連線（不含斜線）。 */
+export function findMatchRuns(
+  pieces: number[],
+  cols: number,
+  rows: number,
+): CandyMatchRun[] {
+  const runs: CandyMatchRun[] = [];
   for (let r = 0; r < rows; r++) {
     let run = 1;
     for (let c = 1; c <= cols; c++) {
@@ -63,7 +98,9 @@ export function findMatches(pieces: number[], cols: number, rows: number): Set<n
         run += 1;
       } else {
         if (run >= 3 && matchable(prev)) {
-          for (let k = c - run; k < c; k++) out.add(idx(k, r, cols));
+          const cells: number[] = [];
+          for (let k = c - run; k < c; k++) cells.push(idx(k, r, cols));
+          runs.push({ cells, length: run });
         }
         run = 1;
       }
@@ -78,11 +115,22 @@ export function findMatches(pieces: number[], cols: number, rows: number): Set<n
         run += 1;
       } else {
         if (run >= 3 && matchable(prev)) {
-          for (let k = r - run; k < r; k++) out.add(idx(c, k, cols));
+          const cells: number[] = [];
+          for (let k = r - run; k < r; k++) cells.push(idx(c, k, cols));
+          runs.push({ cells, length: run });
         }
         run = 1;
       }
     }
+  }
+  return runs;
+}
+
+/** 找出所有橫向／直向 3+ 連線的格子索引（不含斜線）。 */
+export function findMatches(pieces: number[], cols: number, rows: number): Set<number> {
+  const out = new Set<number>();
+  for (const run of findMatchRuns(pieces, cols, rows)) {
+    for (const i of run.cells) out.add(i);
   }
   return out;
 }
@@ -100,26 +148,167 @@ export function swapCreatesMatch(
   return findMatches(swapped(pieces, a, b), cols, rows).size > 0;
 }
 
-/** 找一步可消除的交換（提示用）；無解回傳 null。 */
+/** 找一步可消除的交換（提示用）；無解回傳 null。特殊糖可與鄰格交換啟動。 */
 export function findHintMove(
   pieces: number[],
   cols: number,
   rows: number,
+  specials: CandySpecial[] = emptySpecials(pieces.length),
 ): { a: number; b: number } | null {
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const a = idx(c, r, cols);
       if (c + 1 < cols) {
         const b = a + 1;
-        if (swapCreatesMatch(pieces, a, b, cols, rows)) return { a, b };
+        if (swapIsLegal(pieces, specials, a, b, cols, rows)) return { a, b };
       }
       if (r + 1 < rows) {
         const b = a + cols;
-        if (swapCreatesMatch(pieces, a, b, cols, rows)) return { a, b };
+        if (swapIsLegal(pieces, specials, a, b, cols, rows)) return { a, b };
       }
     }
   }
   return null;
+}
+
+/** 特殊糖與可消除鄰格交換即合法（不必先湊三連）。 */
+export function swapIsLegal(
+  pieces: number[],
+  specials: CandySpecial[],
+  a: number,
+  b: number,
+  cols: number,
+  rows: number,
+): boolean {
+  if (!areAdjacent(a, b, cols)) return false;
+  const aOk = matchable(pieces[a]);
+  const bOk = matchable(pieces[b]);
+  if (aOk && bOk && (specials[a] !== "none" || specials[b] !== "none")) {
+    return true;
+  }
+  return swapCreatesMatch(pieces, a, b, cols, rows);
+}
+
+export function planSpecialSpawns(
+  pieces: number[],
+  cols: number,
+  rows: number,
+  preferCells: readonly number[] = [],
+): SpecialSpawn[] {
+  const runs = findMatchRuns(pieces, cols, rows).filter((run) => run.length >= 4);
+  const spawns: SpecialSpawn[] = [];
+  const used = new Set<number>();
+  for (const run of runs) {
+    const kind: Exclude<CandySpecial, "none"> = run.length >= 5 ? "color" : "row";
+    const preferred = preferCells.find((cell) => run.cells.includes(cell) && !used.has(cell));
+    const fallback = run.cells.find((cell) => !used.has(cell));
+    const index = preferred ?? fallback;
+    if (index == null) continue;
+    used.add(index);
+    const existing = spawns.find((spawn) => spawn.index === index);
+    if (existing) {
+      if (kind === "color") existing.kind = "color";
+    } else {
+      spawns.push({ index, kind });
+    }
+  }
+  return spawns;
+}
+
+export function cellsClearedBySpecial(
+  pieces: number[],
+  specials: CandySpecial[],
+  origin: number,
+  cols: number,
+): number[] {
+  const kind = specials[origin];
+  if (kind === "none") return [];
+  const out: number[] = [];
+  if (kind === "row") {
+    const row = Math.floor(origin / cols);
+    for (let c = 0; c < cols; c++) {
+      const i = idx(c, row, cols);
+      if (pieces[i] >= 0) out.push(i);
+    }
+    return out;
+  }
+  const color = pieces[origin];
+  if (color < 0) return out;
+  pieces.forEach((piece, i) => {
+    if (piece === color) out.push(i);
+  });
+  return out;
+}
+
+export function expandClearsWithSpecials(
+  pieces: number[],
+  specials: CandySpecial[],
+  initial: Iterable<number>,
+  cols: number,
+): Set<number> {
+  const rank = (i: number): number =>
+    specials[i] === "row" ? 0 : specials[i] === "color" ? 1 : 2;
+  const out = new Set(initial);
+  const queue = [...out];
+  while (queue.length > 0) {
+    queue.sort((a, b) => rank(a) - rank(b));
+    const i = queue.shift();
+    if (i == null || specials[i] === "none") continue;
+    for (const j of cellsClearedBySpecial(pieces, specials, i, cols)) {
+      if (!out.has(j)) {
+        out.add(j);
+        queue.push(j);
+      }
+    }
+  }
+  return out;
+}
+
+export function planWaveClears(
+  pieces: number[],
+  specials: CandySpecial[],
+  cols: number,
+  rows: number,
+  extraCells?: Iterable<number>,
+  preferSpawnAt: readonly number[] = [],
+  extraOnly = false,
+): {
+  clear: Set<number>;
+  spawns: SpecialSpawn[];
+  detonated: Array<Exclude<CandySpecial, "none">>;
+} {
+  const matches = extraOnly ? new Set<number>() : findMatches(pieces, cols, rows);
+  const initial = new Set(matches);
+  if (extraCells) {
+    for (const i of extraCells) initial.add(i);
+  }
+  if (initial.size === 0) {
+    return { clear: new Set(), spawns: [], detonated: [] };
+  }
+  const clear = expandClearsWithSpecials(pieces, specials, initial, cols);
+  const detonated: Array<Exclude<CandySpecial, "none">> = [];
+  for (const i of clear) {
+    if (specials[i] === "row" || specials[i] === "color") detonated.push(specials[i]);
+  }
+  detonated.sort((a, b) => (a === "row" && b === "color" ? -1 : a === "color" && b === "row" ? 1 : 0));
+  const spawns = extraOnly
+    ? []
+    : planSpecialSpawns(pieces, cols, rows, preferSpawnAt).filter((spawn) => {
+        if (!matches.has(spawn.index)) return false;
+        if (specials[spawn.index] !== "none") return false;
+        return true;
+      });
+  for (const spawn of spawns) clear.delete(spawn.index);
+  return { clear, spawns, detonated };
+}
+
+export function applySpecialSpawns(
+  specials: CandySpecial[],
+  spawns: SpecialSpawn[],
+): CandySpecial[] {
+  const next = specials.slice();
+  for (const spawn of spawns) next[spawn.index] = spawn.kind;
+  return next;
 }
 
 function randomPiece(kinds: number, rng: Rng): number {
@@ -132,6 +321,8 @@ export const CANDY_SWAP_MS = 180;
 export const CANDY_FALL_MS = 220;
 /** 消除 pop 動畫時長（ms）。 */
 export const CANDY_POP_MS = 280;
+/** 特殊糖掃過動畫時長（ms）。減少動態時應跳過。 */
+export const CANDY_SWEEP_MS = 280;
 
 /** 單格重力位移：目的地格子與往下掉幾列。 */
 export type CandyFallMotion = {
@@ -172,29 +363,36 @@ export function planGravity(
   return moves;
 }
 
-/** 重力：各欄往下壓實，頂部補新圖案（掉落物一起下落）。 */
+/** 重力：各欄往下壓實，頂部補新圖案（掉落物與特殊糖一起下落）。 */
 export function applyGravity(
   pieces: number[],
   cols: number,
   rows: number,
   kinds: number,
   rng: Rng,
-): number[] {
+  specials: readonly CandySpecial[] = emptySpecials(pieces.length),
+): { pieces: number[]; specials: CandySpecial[] } {
+  const prevSpecials =
+    specials.length === pieces.length ? specials.slice() : emptySpecials(pieces.length);
   const next = pieces.slice();
+  const nextSpecials = prevSpecials.slice();
   for (let c = 0; c < cols; c++) {
     let write = rows - 1;
     for (let r = rows - 1; r >= 0; r--) {
-      const v = next[idx(c, r, cols)];
-      if (v !== EMPTY) {
-        next[idx(c, write, cols)] = v;
+      const i = idx(c, r, cols);
+      if (next[i] !== EMPTY) {
+        next[idx(c, write, cols)] = next[i];
+        nextSpecials[idx(c, write, cols)] = nextSpecials[i];
         write -= 1;
       }
     }
     for (let r = write; r >= 0; r--) {
-      next[idx(c, r, cols)] = randomPiece(kinds, rng);
+      const i = idx(c, r, cols);
+      next[i] = randomPiece(kinds, rng);
+      nextSpecials[i] = "none";
     }
   }
-  return next;
+  return { pieces: next, specials: nextSpecials };
 }
 
 /**
@@ -208,7 +406,8 @@ export function resolveBoard(
 ): { state: BoardState; events: ResolveEvents } {
   const { cols, rows } = state;
   let pieces = state.pieces.slice();
-  const dirt = state.dirt.slice();
+  let dirt = state.dirt.slice();
+  let specials = (state.specials ?? emptySpecials(pieces.length)).slice();
   const events: ResolveEvents = {
     collected: Array<number>(kinds).fill(0),
     cleaned: 0,
@@ -219,40 +418,40 @@ export function resolveBoard(
 
   // 掉落物可能已在底排（例如交換直接送到底）
   const collectDrops = () => {
-    for (let c = 0; c < cols; c++) {
-      const bottom = idx(c, rows - 1, cols);
-      if (pieces[bottom] === DROP_ITEM) {
-        pieces[bottom] = EMPTY;
-        events.dropped += 1;
-      }
-    }
+    const collected = collectBottomDrops(pieces, cols, rows, specials);
+    pieces = collected.pieces;
+    specials = collected.specials;
+    events.dropped += collected.dropped;
   };
 
   let guard = 32;
   while (guard-- > 0) {
     collectDrops();
     if (pieces.includes(EMPTY)) {
-      pieces = applyGravity(pieces, cols, rows, kinds, rng);
+      const fallen = applyGravity(pieces, cols, rows, kinds, rng, specials);
+      pieces = fallen.pieces;
+      specials = fallen.specials;
       continue;
     }
-    const matches = findMatches(pieces, cols, rows);
-    if (matches.size === 0) break;
+    const wave = planWaveClears(pieces, specials, cols, rows);
+    if (wave.clear.size === 0) break;
     events.waves += 1;
-    events.clearedByWave.push([...matches]);
-    for (const i of matches) {
-      const v = pieces[i];
-      if (v >= 0) events.collected[v] += 1;
-      pieces[i] = EMPTY;
-      if (dirt[i]) {
-        dirt[i] = false;
-        events.cleaned += 1;
-      }
-    }
-    pieces = applyGravity(pieces, cols, rows, kinds, rng);
+    events.clearedByWave.push([...wave.clear]);
+    const cleared = clearCells(pieces, dirt, wave.clear, kinds, specials);
+    pieces = cleared.pieces;
+    dirt = cleared.dirt;
+    specials = applySpecialSpawns(cleared.specials, wave.spawns);
+    events.collected.forEach((_, i) => {
+      events.collected[i] += cleared.collected[i] ?? 0;
+    });
+    events.cleaned += cleared.cleaned;
+    const fallen = applyGravity(pieces, cols, rows, kinds, rng, specials);
+    pieces = fallen.pieces;
+    specials = fallen.specials;
   }
   collectDrops();
 
-  return { state: { cols, rows, pieces, dirt }, events };
+  return { state: { cols, rows, pieces, dirt, specials }, events };
 }
 
 /**
@@ -264,26 +463,30 @@ export function clearCells(
   dirt: boolean[],
   cells: Iterable<number>,
   kinds: number,
+  specials: CandySpecial[] = emptySpecials(pieces.length),
 ): {
   pieces: number[];
   dirt: boolean[];
+  specials: CandySpecial[];
   collected: number[];
   cleaned: number;
 } {
   const nextPieces = pieces.slice();
   const nextDirt = dirt.slice();
+  const nextSpecials = specials.slice();
   const collected = Array<number>(kinds).fill(0);
   let cleaned = 0;
   for (const i of cells) {
     const v = nextPieces[i];
     if (v >= 0) collected[v] += 1;
     if (v !== DROP_ITEM) nextPieces[i] = EMPTY;
+    nextSpecials[i] = "none";
     if (nextDirt[i]) {
       nextDirt[i] = false;
       cleaned += 1;
     }
   }
-  return { pieces: nextPieces, dirt: nextDirt, collected, cleaned };
+  return { pieces: nextPieces, dirt: nextDirt, specials: nextSpecials, collected, cleaned };
 }
 
 /** 底排掉落物送達：回傳新 pieces 與送達數。 */
@@ -291,17 +494,20 @@ export function collectBottomDrops(
   pieces: number[],
   cols: number,
   rows: number,
-): { pieces: number[]; dropped: number } {
+  specials: CandySpecial[] = emptySpecials(pieces.length),
+): { pieces: number[]; specials: CandySpecial[]; dropped: number } {
   const next = pieces.slice();
+  const nextSpecials = specials.slice();
   let dropped = 0;
   for (let c = 0; c < cols; c++) {
     const bottom = idx(c, rows - 1, cols);
     if (next[bottom] === DROP_ITEM) {
       next[bottom] = EMPTY;
+      nextSpecials[bottom] = "none";
       dropped += 1;
     }
   }
-  return { pieces: next, dropped };
+  return { pieces: next, specials: nextSpecials, dropped };
 }
 
 /** 生成棋盤：無初始三連、至少一步可解；髒髒格與掉落物依關卡配置。 */
@@ -345,11 +551,17 @@ export function createBoard(
         placed += 1;
       }
     }
-    return { cols, rows, pieces, dirt };
+    return { cols, rows, pieces, dirt, specials: emptySpecials(cols * rows) };
   }
   // 理論上不會到這；保底回傳最後一次生成（仍可玩，靠重排修復）
   const pieces = Array.from({ length: cols * rows }, () => randomPiece(kinds, rng));
-  return { cols, rows, pieces, dirt: Array<boolean>(cols * rows).fill(false) };
+  return {
+    cols,
+    rows,
+    pieces,
+    dirt: Array<boolean>(cols * rows).fill(false),
+    specials: emptySpecials(cols * rows),
+  };
 }
 
 function createsImmediateRun(
@@ -379,10 +591,11 @@ function createsImmediateRun(
 /** 無解時重排：保留掉落物位置，重洗一般圖案直到無初始三連且有解。 */
 export function reshuffle(state: BoardState, rng: Rng): BoardState {
   const { cols, rows } = state;
-  const movable: number[] = [];
-  for (const v of state.pieces) {
-    if (matchable(v)) movable.push(v);
-  }
+  const specials = state.specials ?? emptySpecials(state.pieces.length);
+  const movable: { piece: number; special: CandySpecial }[] = [];
+  state.pieces.forEach((v, i) => {
+    if (matchable(v)) movable.push({ piece: v, special: specials[i] ?? "none" });
+  });
   let guard = 64;
   while (guard-- > 0) {
     const pool = movable.slice();
@@ -392,10 +605,18 @@ export function reshuffle(state: BoardState, rng: Rng): BoardState {
       pool[i] = pool[j];
       pool[j] = t;
     }
-    const pieces = state.pieces.map((v) => (matchable(v) ? pool.pop()! : v));
+    const pieces = state.pieces.slice();
+    const nextSpecials = specials.slice();
+    for (let i = 0; i < pieces.length; i++) {
+      if (!matchable(pieces[i])) continue;
+      const taken = pool.pop();
+      if (!taken) continue;
+      pieces[i] = taken.piece;
+      nextSpecials[i] = taken.special;
+    }
     if (findMatches(pieces, cols, rows).size > 0) continue;
-    if (!findHintMove(pieces, cols, rows)) continue;
-    return { ...state, pieces, dirt: state.dirt.slice() };
+    if (!findHintMove(pieces, cols, rows, nextSpecials)) continue;
+    return { ...state, pieces, specials: nextSpecials, dirt: state.dirt.slice() };
   }
   return state;
 }

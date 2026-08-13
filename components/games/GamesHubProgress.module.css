@@ -1,7 +1,57 @@
-.progress {
+.wrap {
+  display: grid;
+  gap: 10px;
   margin: 0 0 14px;
+}
+
+.progress {
+  margin: 0;
   color: var(--ink-soft);
   font-size: 0.92rem;
   font-weight: 800;
   line-height: 1.45;
+}
+
+.garage {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vehicleOn,
+.vehicleOff {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  font-size: 1.25rem;
+  background: var(--card, #fff);
+  box-shadow: 0 1px 0 var(--hairline, rgba(0, 0, 0, 0.08));
+}
+
+.vehicleOff {
+  opacity: 0.38;
+}
+
+.stickers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sticker {
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--ink-soft);
+  background: color-mix(in srgb, var(--c-yellow, #ffd34d) 28%, var(--card, #fff));
 }

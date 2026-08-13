@@ -25,6 +25,19 @@
   animation: candyMatchFall var(--fall-ms, 220ms) ease-out both;
 }
 
+.pieceSweep {
+  animation: candySpecialSweep var(--sweep-ms, 280ms) ease both;
+}
+
+.specialBadge {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  font-size: 0.72em;
+  line-height: 1;
+  pointer-events: none;
+}
+
 @keyframes candyMatchSwap {
   from {
     transform: translate(0, 0);
@@ -43,13 +56,25 @@
   }
 }
 
+@keyframes candySpecialSweep {
+  from {
+    opacity: 0.45;
+    transform: scale(1.08);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pieceArt {
     transition: none;
   }
 
   .pieceSwap,
-  .pieceFall {
+  .pieceFall,
+  .pieceSweep {
     animation: none;
   }
 }

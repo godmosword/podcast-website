@@ -19,6 +19,7 @@ import { medalCount } from "@/lib/gamekit/progress/meta";
 import { GAMEKIT_PROGRESS_EVENT } from "@/lib/gamekit/progress/session";
 import {
   applyGravity,
+  applySpecialSpawns,
   areAdjacent,
   CANDY_FALL_MS,
   CANDY_POP_MS,
@@ -27,13 +28,15 @@ import {
   collectBottomDrops,
   createBoard,
   findHintMove,
-  findMatches,
   planGravity,
+  planWaveClears,
   reshuffle,
-  swapCreatesMatch,
+  swapIsLegal,
   swapped,
+  swappedSpecials,
   type BoardState,
   type CandyFallMotion,
+  type CandySpecial,
 } from "@/lib/games/candy-match/engine";
 import {
   CANDY_MATCH_LEVELS,
@@ -173,6 +176,7 @@ export function CandyMatchView({
   const [comboToast, setComboToast] = useState<string | null>(null);
   const [swapMotion, setSwapMotion] = useState<{ a: number; b: number } | null>(null);
   const [fallMotion, setFallMotion] = useState<readonly CandyFallMotion[] | null>(null);
+  const [sweepMotion, setSweepMotion] = useState<"row" | "color" | null>(null);
   const [medals, setMedals] = useState<number[]>([]);
   const [cellPx, setCellPx] = useState(56);
 
@@ -231,7 +235,7 @@ export function CandyMatchView({
     idleTimer.current = setTimeout(() => {
       const b = boardRef.current;
       if (!b || processingRef.current || screenRef.current !== "play" || inputPaused) return;
-      const move = findHintMove(b.pieces, b.cols, b.rows);
+      const move = findHintMove(b.pieces, b.cols, b.rows, b.specials);
       if (move) {
         setHint(move);
         setMessage(pick(CHEER_HINT));
@@ -275,6 +279,7 @@ export function CandyMatchView({
       setPopping(new Set());
       setSwapMotion(null);
       setFallMotion(null);
+      setSweepMotion(null);
       setComboToast(null);
       usedPropRef.current = false;
       processingRef.current = false;
@@ -323,28 +328,59 @@ export function CandyMatchView({
   }, [goToMap, goToTitle, instance, restartCurrentLevel, startLevel, syncHost]);
 
   const runResolve = useCallback(
-    async (startPieces: number[], startDirt: boolean[], preCleared?: Set<number>) => {
+    async (
+      startPieces: number[],
+      startDirt: boolean[],
+      startSpecials: CandySpecial[],
+      options?: {
+        preCleared?: Set<number>;
+        preferSpawnAt?: readonly number[];
+        extraOnly?: boolean;
+      },
+    ) => {
       const lv = levelRef.current;
       processingRef.current = true;
       setHint(null);
       let pieces = startPieces;
       let dirt = startDirt;
+      let specials = startSpecials.slice();
       const gained = freshProgress();
       let wave = 0;
       let guard = 24;
       while (guard-- > 0) {
-        const matches = preCleared && wave === 0 && preCleared.size > 0
-          ? preCleared
-          : findMatches(pieces, lv.cols, lv.rows);
-        if (matches.size === 0) break;
+        const extra = wave === 0 ? options?.preCleared : undefined;
+        const extraOnly = wave === 0 && Boolean(options?.extraOnly);
+        const preferSpawnAt = wave === 0 ? options?.preferSpawnAt ?? [] : [];
+        const planned = planWaveClears(
+          pieces,
+          specials,
+          lv.cols,
+          lv.rows,
+          extra,
+          preferSpawnAt,
+          extraOnly,
+        );
+        if (planned.clear.size === 0 && planned.spawns.length === 0) break;
         wave += 1;
-        setPopping(new Set(matches));
+        setPopping(new Set(planned.clear));
+        if (!reducedRef.current && planned.detonated[0]) {
+          setSweepMotion(planned.detonated[0]);
+        }
         tone(523 + wave * 110, 0.12, "triangle", 0.06);
-        if (wave >= 2) setComboToast("連連看！");
+        if (planned.detonated.includes("row")) setComboToast("掃把出發！");
+        else if (planned.detonated.includes("color")) setComboToast("彩虹全收！");
+        else if (wave >= 2) setComboToast("連連看！");
         await motionSleep(CANDY_POP_MS);
-        const cleared = clearCells(pieces, dirt, matches, CANDY_MATCH_PIECES.length);
+        const cleared = clearCells(
+          pieces,
+          dirt,
+          planned.clear,
+          CANDY_MATCH_PIECES.length,
+          specials,
+        );
         pieces = cleared.pieces;
         dirt = cleared.dirt;
+        specials = applySpecialSpawns(cleared.specials, planned.spawns);
         cleared.collected.forEach((n, i) => {
           gained.collected[i] += n;
         });
@@ -354,32 +390,44 @@ export function CandyMatchView({
         }
         gained.waves += 1;
         setPopping(new Set());
-        setBoard({ cols: lv.cols, rows: lv.rows, pieces, dirt });
+        setSweepMotion(null);
+        setBoard({ cols: lv.cols, rows: lv.rows, pieces, dirt, specials });
         const falls = planGravity(pieces, lv.cols, lv.rows);
-        pieces = applyGravity(pieces, lv.cols, lv.rows, lv.pieceKinds, Math.random);
+        const fallen = applyGravity(
+          pieces,
+          lv.cols,
+          lv.rows,
+          lv.pieceKinds,
+          Math.random,
+          specials,
+        );
+        pieces = fallen.pieces;
+        specials = fallen.specials;
         if (!reducedRef.current && falls.length > 0) {
           setFallMotion(falls);
-          setBoard({ cols: lv.cols, rows: lv.rows, pieces, dirt });
+          setBoard({ cols: lv.cols, rows: lv.rows, pieces, dirt, specials });
           await sleep(CANDY_FALL_MS);
           setFallMotion(null);
         } else {
-          setBoard({ cols: lv.cols, rows: lv.rows, pieces, dirt });
+          setBoard({ cols: lv.cols, rows: lv.rows, pieces, dirt, specials });
           await motionSleep(180);
         }
-        const drops = collectBottomDrops(pieces, lv.cols, lv.rows);
+        const drops = collectBottomDrops(pieces, lv.cols, lv.rows, specials);
         pieces = drops.pieces;
+        specials = drops.specials;
         if (drops.dropped > 0) {
           gained.dropped += drops.dropped;
           tone(784, 0.16, "triangle", 0.06);
-          setBoard({ cols: lv.cols, rows: lv.rows, pieces, dirt });
+          setBoard({ cols: lv.cols, rows: lv.rows, pieces, dirt, specials });
         }
       }
-      const finalDrops = collectBottomDrops(pieces, lv.cols, lv.rows);
+      const finalDrops = collectBottomDrops(pieces, lv.cols, lv.rows, specials);
       if (finalDrops.dropped > 0) {
         pieces = finalDrops.pieces;
+        specials = finalDrops.specials;
         gained.dropped += finalDrops.dropped;
         tone(784, 0.16, "triangle", 0.06);
-        setBoard({ cols: lv.cols, rows: lv.rows, pieces, dirt });
+        setBoard({ cols: lv.cols, rows: lv.rows, pieces, dirt, specials });
       }
 
       const next: Progress = {
@@ -429,9 +477,12 @@ export function CandyMatchView({
         processingRef.current = false;
         return;
       }
-      if (!findHintMove(pieces, lv.cols, lv.rows)) {
+      if (!findHintMove(pieces, lv.cols, lv.rows, specials)) {
         await sleep(250);
-        const shuffled = reshuffle({ cols: lv.cols, rows: lv.rows, pieces, dirt }, Math.random);
+        const shuffled = reshuffle(
+          { cols: lv.cols, rows: lv.rows, pieces, dirt, specials },
+          Math.random,
+        );
         setBoard(shuffled);
         setMessage("圖案重新排隊囉！");
       }
@@ -467,13 +518,20 @@ export function CandyMatchView({
         } else {
           tone(660, 0.06, "square", 0.04);
         }
-        const next = swapped(b0.pieces, a, b);
-        setBoard({ ...b0, pieces: next });
+        const nextPieces = swapped(b0.pieces, a, b);
+        const nextSpecials = swappedSpecials(b0.specials, a, b);
+        setBoard({ ...b0, pieces: nextPieces, specials: nextSpecials });
         if (levelRef.current.moves > 0) setMovesLeft((m) => m - 1);
-        await runResolve(next, b0.dirt);
+        const extra = new Set<number>();
+        if (nextSpecials[a] !== "none") extra.add(a);
+        if (nextSpecials[b] !== "none") extra.add(b);
+        await runResolve(nextPieces, b0.dirt, nextSpecials, {
+          preCleared: extra.size > 0 ? extra : undefined,
+          preferSpawnAt: [a, b],
+        });
       };
 
-      if (swapCreatesMatch(b0.pieces, a, b, b0.cols, b0.rows)) {
+      if (swapIsLegal(b0.pieces, b0.specials, a, b, b0.cols, b0.rows)) {
         void commitSwap();
       } else if (b0.pieces[a] === -2 || b0.pieces[b] === -2) {
         const giftIdx = b0.pieces[a] === -2 ? a : b;
@@ -516,7 +574,10 @@ export function CandyMatchView({
       setPropsLeft((p) => ({ ...p, [kind]: p[kind] - 1 }));
       setPropMode(null);
       tone(880, 0.12, "triangle", 0.06);
-      void runResolve(b0.pieces, b0.dirt, cells);
+      void runResolve(b0.pieces, b0.dirt, b0.specials, {
+        preCleared: cells,
+        extraOnly: true,
+      });
     },
     [inputPaused, runResolve, tone],
   );
@@ -550,7 +611,7 @@ export function CandyMatchView({
   const manualHint = useCallback(() => {
     const b = boardRef.current;
     if (!b || processingRef.current || inputPaused) return;
-    const move = findHintMove(b.pieces, b.cols, b.rows);
+    const move = findHintMove(b.pieces, b.cols, b.rows, b.specials);
     if (move) {
       setHint(move);
       tone(1175, 0.12, "triangle", 0.05);
@@ -671,7 +732,7 @@ export function CandyMatchView({
             遊樂園地圖
           </h2>
           <p className={styles.starLegend}>
-            通關一顆星，沒用道具再一顆，步數還夠再一顆
+            通關一顆星，沒用道具再一顆，步數還夠再一顆。做出特別糖更好玩
           </p>
           <div style={{ textAlign: "center", marginBottom: 12 }}>
             <button type="button" style={softBtn} onClick={onOpenTutorial}>
@@ -784,6 +845,7 @@ export function CandyMatchView({
               motion={{
                 swap: swapMotion,
                 falls: fallMotion,
+                sweep: sweepMotion,
                 reduced: reducedMotion,
               }}
             />

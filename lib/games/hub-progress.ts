@@ -1,7 +1,17 @@
 import { GAMES } from "@/data/games";
-import { getLifetimeStars } from "@/lib/gamekit/progress/economy";
-import { nextGarageUnlock } from "@/lib/gamekit/progress/garage";
+import { createEmptyEconomy, getLifetimeStars } from "@/lib/gamekit/progress/economy";
+import { listGarageVehicles, nextGarageUnlock } from "@/lib/gamekit/progress/garage";
+import { SAVE_VERSION } from "@/lib/gamekit/progress/save";
+import { stickerLabel } from "@/lib/gamekit/progress/stickers";
 import type { PlayerProfile } from "@/lib/gamekit/types";
+
+export type HubVehicleSnap = {
+  id: string;
+  name: string;
+  emoji: string;
+  unlocked: boolean;
+  remaining: number;
+};
 
 export type HubProgressSnapshot = {
   stars: number;
@@ -9,10 +19,12 @@ export type HubProgressSnapshot = {
   totalGames: number;
   playedSlugs: readonly string[];
   nextUnlock: { name: string; remaining: number } | null;
+  vehicles: HubVehicleSnap[];
+  stickerLabels: string[];
 };
 
 /**
- * Hub 低壓進度：星星／已玩幾款／下一輛車庫車。
+ * Hub 低壓進度：星星／已玩幾款／下一輛車庫車／貼紙。
  * coloringPlayed 來自本機著色草稿，不寫入 GameKit schema。
  */
 export function hubProgressFromProfile(
@@ -39,6 +51,14 @@ export function hubProgressFromProfile(
     totalGames: GAMES.length,
     playedSlugs,
     nextUnlock: nextGarageUnlock(stars),
+    vehicles: listGarageVehicles().map((vehicle) => ({
+      id: vehicle.id,
+      name: vehicle.name,
+      emoji: vehicle.emoji,
+      unlocked: stars >= vehicle.starsRequired,
+      remaining: Math.max(0, vehicle.starsRequired - stars),
+    })),
+    stickerLabels: profile.stickers.map(stickerLabel),
   };
 }
 
@@ -51,4 +71,21 @@ export function hubProgressLabel(snap: HubProgressSnapshot): string {
     parts.push(`再 ${snap.nextUnlock.remaining} 顆就能認識${snap.nextUnlock.name}`);
   }
   return parts.join(" · ");
+}
+
+/** 無存檔時的低壓快照，不讀 localStorage。 */
+export function emptyHubSnapshot(): HubProgressSnapshot {
+  return hubProgressFromProfile(
+    {
+      version: SAVE_VERSION,
+      stars: 0,
+      economy: createEmptyEconomy(),
+      unlockedVehicles: ["小黃"],
+      bests: {},
+      medals: {},
+      stickers: [],
+      gamesPlayed: {},
+    },
+    false,
+  );
 }

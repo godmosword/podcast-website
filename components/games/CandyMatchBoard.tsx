@@ -4,8 +4,10 @@ import { useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } fr
 import {
   CANDY_FALL_MS,
   CANDY_SWAP_MS,
+  CANDY_SWEEP_MS,
   type CandyFallMotion,
   DROP_ITEM,
+  emptySpecials,
   type BoardState,
 } from "@/lib/games/candy-match/engine";
 import {
@@ -26,6 +28,7 @@ export type CandyMatchBoardMotion = {
   swap?: { a: number; b: number } | null;
   falls?: readonly CandyFallMotion[] | null;
   reduced?: boolean;
+  sweep?: "row" | "color" | null;
 };
 
 type CandyMatchBoardProps = {
@@ -63,8 +66,10 @@ export function CandyMatchBoard({
     fired: boolean;
   } | null>(null);
   const { cols, rows, pieces, dirt } = board;
+  const specials = board.specials ?? emptySpecials(pieces.length);
   const reduced = Boolean(motion?.reduced);
   const swap = reduced ? null : motion?.swap ?? null;
+  const sweep = reduced ? null : motion?.sweep ?? null;
   const fallByTo = new Map<number, number>();
   if (!reduced) {
     for (const fall of motion?.falls ?? []) {
@@ -177,6 +182,8 @@ export function CandyMatchBoard({
           : v >= 0
             ? CANDY_MATCH_PIECES[v]?.name ?? "圖案"
             : "空格";
+        const specialKind = specials[i] === "row" || specials[i] === "color" ? specials[i] : null;
+        const specialName = specialKind === "row" ? "掃把糖" : specialKind === "color" ? "彩虹糖" : "";
         const swapPeer = swap
           ? i === swap.a
             ? swap.b
@@ -223,6 +230,7 @@ export function CandyMatchBoard({
           v < 0 && v !== DROP_ITEM ? styles.pieceHidden : "",
           swapOff ? styles.pieceSwap : "",
           fallRows > 0 ? styles.pieceFall : "",
+          isPopping && sweep ? styles.pieceSweep : "",
         ]
           .filter(Boolean)
           .join(" ");
@@ -237,14 +245,18 @@ export function CandyMatchBoard({
                 ["--fall-from" as string]: `${-fallRows * (cellPx + CANDY_MATCH_CELL_GAP)}px`,
                 ["--fall-ms" as string]: `${CANDY_FALL_MS}ms`,
               }
-            : {};
+            : sweep
+              ? { ["--sweep-ms" as string]: `${CANDY_SWEEP_MS}ms` }
+              : {};
         return (
           <button
             key={i}
             type="button"
-            aria-label={`第 ${Math.floor(i / cols) + 1} 列第 ${(i % cols) + 1} 格，${pieceName}`}
+            aria-label={`第 ${Math.floor(i / cols) + 1} 列第 ${(i % cols) + 1} 格，${pieceName}${specialName ? `，${specialName}` : ""}`}
             aria-pressed={isSelected}
             data-selected={isSelected ? "true" : undefined}
+            data-special={specialKind ?? undefined}
+            data-sweep={isPopping && sweep ? sweep : undefined}
             data-swap={swapOff ? "true" : undefined}
             data-fall-rows={fallRows > 0 ? String(fallRows) : undefined}
             style={cellStyle}
@@ -261,6 +273,11 @@ export function CandyMatchBoard({
             )}
             <span className={artClass} style={artStyle}>
               {v === DROP_ITEM ? <PieceGift size="100%" /> : v >= 0 ? <PieceArt piece={v} size="100%" /> : null}
+              {specialKind ? (
+                <span className={styles.specialBadge} aria-hidden>
+                  {specialKind === "row" ? "🧹" : "🌈"}
+                </span>
+              ) : null}
             </span>
           </button>
         );
