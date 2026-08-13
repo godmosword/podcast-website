@@ -54,6 +54,11 @@
 | ID | 說明 |
 |----|------|
 | polish(for-parents): play-map 具名導航、類型場景帶與選中針場館名 | `dedf98c` |
+| fix(data): play-map 三筆場館錯置與 mapsQuery／placeId 契約 | 待回填 |
+
+### 本輪待辦（2026-08-13）
+
+- [ ] chore(for-parents): **play-map 場館名人工複核** — 具名導航讓 `name`（及選填 `mapsQuery`／`placeId`）成為 load-bearing；73 筆需逐筆對照 Google Maps 實際名稱。縣市 lat/lng bounding box 測試只是粗篩，同縣市錯置（如觀音 vs 中壢）抓不到。
 
 ### 本輪已完成（2026-08-12）
 

@@ -5,6 +5,8 @@ import {
   getPlayground,
   listCities,
   listPlaygrounds,
+  playgroundMapsSearchQuery,
+  playgroundSchema,
   type Playground,
   type PlaygroundType,
 } from "./playgrounds";
@@ -202,6 +204,24 @@ describe("playgrounds sidecar", () => {
     }
   });
 
+  it("每一筆通過 playgroundSchema（僅測試 safeParse，runtime 不丟例外）", () => {
+    for (const item of listPlaygrounds()) {
+      const parsed = playgroundSchema.safeParse(item);
+      expect(
+        parsed.success,
+        parsed.success
+          ? item.id
+          : `${item.id}: ${JSON.stringify(parsed.error.issues)}`,
+      ).toBe(true);
+    }
+  });
+
+  it("playgroundSchema 拒絕非法 type", () => {
+    const sample = listPlaygrounds()[0];
+    const bad = { ...sample, type: "遊樂場" };
+    expect(playgroundSchema.safeParse(bad).success).toBe(false);
+  });
+
   it("buildGoogleMapsNavUrl 以頁面名稱＋縣市為 destination，不是座標圖釘", () => {
     const place = getPlayground("ty-fenghe");
     expect(place).toBeDefined();
@@ -219,16 +239,60 @@ describe("playgrounds sidecar", () => {
     expect(parsed.searchParams.get("travelmode")).toBe("driving");
     expect(parsed.searchParams.get("dir_action")).toBe("navigate");
     expect(parsed.searchParams.has("origin")).toBe(false);
+    expect(parsed.searchParams.has("destination_place_id")).toBe(false);
   });
 
-  it("每一筆導航 destination 含頁面名稱與縣市，且不是 lat,lng", () => {
+  it("mapsQuery 優先於 name＋city（ty-casti）", () => {
+    const place = getPlayground("ty-casti");
+    expect(place).toBeDefined();
+    if (!place) return;
+
+    expect(place.mapsQuery).toBe("卡司蒂菈樂園 中壢");
+    expect(playgroundMapsSearchQuery(place)).toBe("卡司蒂菈樂園 中壢");
+    expect(playgroundMapsSearchQuery(place)).not.toBe(
+      `${place.name}, ${place.city}`,
+    );
+
+    const dest = new URL(buildGoogleMapsNavUrl(place)).searchParams.get(
+      "destination",
+    );
+    const query = new URL(buildGoogleMapsPlaceUrl(place)).searchParams.get(
+      "query",
+    );
+    expect(dest).toBe("卡司蒂菈樂園 中壢");
+    expect(query).toBe("卡司蒂菈樂園 中壢");
+  });
+
+  it("有 placeId 時導航與搜尋帶 *_place_id（測試用物件，不寫進資料列）", () => {
+    const fixture = {
+      name: "測試場館",
+      city: "桃園市",
+      mapsQuery: "測試查詢字串",
+      placeId: "ChIJ_test_fixture_not_real",
+    };
+    const nav = new URL(buildGoogleMapsNavUrl(fixture));
+    expect(nav.searchParams.get("destination")).toBe("測試查詢字串");
+    expect(nav.searchParams.get("destination_place_id")).toBe(
+      "ChIJ_test_fixture_not_real",
+    );
+    expect(nav.searchParams.has("origin")).toBe(false);
+
+    const search = new URL(buildGoogleMapsPlaceUrl(fixture));
+    expect(search.searchParams.get("query")).toBe("測試查詢字串");
+    expect(search.searchParams.get("query_place_id")).toBe(
+      "ChIJ_test_fixture_not_real",
+    );
+  });
+
+  it("每一筆導航 destination 不是座標，且等於 mapsQuery 或 name＋city", () => {
     const coordOnly = /^-?\d+(\.\d+)?,\s*-?\d+/;
     for (const place of listPlaygrounds()) {
       const dest = new URL(buildGoogleMapsNavUrl(place)).searchParams.get(
         "destination",
       );
-      expect(dest, place.id).toBe(`${place.name}, ${place.city}`);
-      expect(dest, place.id).toContain(place.name);
+      expect(dest, place.id).toBe(
+        place.mapsQuery ?? `${place.name}, ${place.city}`,
+      );
       expect(dest, place.id).not.toMatch(coordOnly);
     }
   });
@@ -247,5 +311,94 @@ describe("playgrounds sidecar", () => {
     expect(parsed.searchParams.get("query")).toBe(
       `${place.name}, ${place.city}`,
     );
+  });
+
+  it("address 以 city 開頭，有 district 則含 district", () => {
+    for (const item of listPlaygrounds()) {
+      expect(item.address.startsWith(item.city), item.id).toBe(true);
+      if (item.district) {
+        expect(item.address.includes(item.district), item.id).toBe(true);
+      }
+    }
+  });
+
+  /**
+   * 縣市 lat/lng 粗篩。只抓「縣市欄位與座標明顯不符」；
+   * 同縣市錯置（例如桃園觀音 vs 中壢）抓不到，不能取代人工複核。
+   * 範圍依地理邊界加邊際，不為遷就錯誤資料而放寬。
+   */
+  const CITY_BOUNDS: Record<
+    string,
+    { lat: readonly [number, number]; lng: readonly [number, number] }
+  > = {
+    基隆市: { lat: [25.05, 25.2], lng: [121.68, 121.85] },
+    台北市: { lat: [24.96, 25.22], lng: [121.45, 121.67] },
+    新北市: { lat: [24.67, 25.32], lng: [121.28, 122.01] },
+    桃園市: { lat: [24.7, 25.15], lng: [120.98, 121.4] },
+    新竹市: { lat: [24.76, 24.87], lng: [120.88, 121.03] },
+    新竹縣: { lat: [24.45, 24.95], lng: [120.88, 121.35] },
+    苗栗縣: { lat: [24.3, 24.75], lng: [120.6, 121.05] },
+    台中市: { lat: [24.05, 24.45], lng: [120.45, 121.0] },
+    彰化縣: { lat: [23.8, 24.2], lng: [120.25, 120.7] },
+    南投縣: { lat: [23.65, 24.15], lng: [120.65, 121.25] },
+    雲林縣: { lat: [23.5, 23.85], lng: [120.15, 120.7] },
+  };
+
+  it("每筆 lat/lng 落在該縣市粗篩範圍", () => {
+    for (const item of listPlaygrounds()) {
+      const bounds = CITY_BOUNDS[item.city];
+      expect(
+        bounds,
+        `${item.id} 缺少 ${item.city} 的 CITY_BOUNDS，請補地理範圍`,
+      ).toBeDefined();
+      if (!bounds) continue;
+      expect(
+        item.lat,
+        `${item.id} lat ${item.lat} 超出 ${item.city} ${bounds.lat.join("–")}`,
+      ).toBeGreaterThanOrEqual(bounds.lat[0]);
+      expect(
+        item.lat,
+        `${item.id} lat ${item.lat} 超出 ${item.city} ${bounds.lat.join("–")}`,
+      ).toBeLessThanOrEqual(bounds.lat[1]);
+      expect(
+        item.lng,
+        `${item.id} lng ${item.lng} 超出 ${item.city} ${bounds.lng.join("–")}`,
+      ).toBeGreaterThanOrEqual(bounds.lng[0]);
+      expect(
+        item.lng,
+        `${item.id} lng ${item.lng} 超出 ${item.city} ${bounds.lng.join("–")}`,
+      ).toBeLessThanOrEqual(bounds.lng[1]);
+    }
+  });
+
+  it("nt-435 是板橋 435 藝文特區，不是鶯歌美術館", () => {
+    const place = getPlayground("nt-435");
+    expect(place).toBeDefined();
+    if (!place) return;
+    expect(place.name).toBe("板橋 435 藝文特區");
+    expect(place.district).toBe("板橋區");
+    expect(place.address).toBe("新北市板橋區中正路435號");
+    expect(place.officialUrl).toBe("https://www.435.culture.ntpc.gov.tw/");
+    expect(
+      place.sources.some((source) => source.url.includes("ntcart.museum")),
+    ).toBe(false);
+  });
+
+  it("ty-casti 顯示名與 Maps 查詢分開", () => {
+    const place = getPlayground("ty-casti");
+    expect(place).toBeDefined();
+    if (!place) return;
+    expect(place.name).toBe("卡司‧蒂菈樂園");
+    expect(place.mapsQuery).toBe("卡司蒂菈樂園 中壢");
+  });
+
+  it("ty-xpark 在中壢青埔而非觀音", () => {
+    const place = getPlayground("ty-xpark");
+    expect(place).toBeDefined();
+    if (!place) return;
+    expect(place.district).toBe("中壢區");
+    expect(place.address).toBe("桃園市中壢區春德路105號");
+    expect(place.lat).toBe(25.0128);
+    expect(place.lng).toBe(121.2135);
   });
 });

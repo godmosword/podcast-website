@@ -1,20 +1,13 @@
 /**
  * 真實世界親子遊樂地點（sidecar）。
  * 供 /for-parents/play-map 地圖篩選與標記使用；與虛構宇宙地圖無關。
- * Google Maps 導航／定位連結由 buildGoogleMaps* helper 以頁面場館名＋縣市動態產生，不存於資料列、不用 lat,lng 圖釘。
+ * Google Maps 導航／定位連結由 buildGoogleMaps* helper 以 playgroundMapsSearchQuery
+ * （mapsQuery 或場館名＋縣市）動態產生，不用 lat,lng 圖釘；可選 placeId。
  */
-
-export type PlaygroundType =
-  | "公園"
-  | "室內樂園"
-  | "主題樂園"
-  | "博物館"
-  | "動物園"
-  | "農場"
-  | "其他";
+import { z } from "zod";
 
 /** 類型 chip 的顯示順序；同時作為 URL `type` 參數的合法值白名單。 */
-export const PLAYGROUND_TYPES: readonly PlaygroundType[] = [
+export const PLAYGROUND_TYPES = [
   "公園",
   "室內樂園",
   "主題樂園",
@@ -22,7 +15,8 @@ export const PLAYGROUND_TYPES: readonly PlaygroundType[] = [
   "動物園",
   "農場",
   "其他",
-];
+] as const;
+export type PlaygroundType = (typeof PLAYGROUND_TYPES)[number];
 
 export type PlaygroundSourceKind = "official" | "gov" | "editorial";
 
@@ -62,28 +56,88 @@ export type Playground = {
   lastVerified: string;
   /** 覆蓋範圍或資料缺口說明（選填）。 */
   coverageNote?: string;
+  /**
+   * Google Maps Place ID（選填）。有值時導航加 `destination_place_id`、搜尋加 `query_place_id`。
+   * 本輪不填真實 placeId；契約由測試用物件覆蓋。
+   */
+  placeId?: string;
+  /**
+   * Google Maps 搜尋字串覆寫（選填）。有值時導航 destination／搜尋 query 用此字串，
+   * 不用 `${name}, ${city}`。顯示名與 Maps 實際場館名不一致時才填。
+   */
+  mapsQuery?: string;
 };
 
+export const playgroundSourceSchema = z.object({
+  kind: z.enum(["official", "gov", "editorial"]),
+  name: z.string().min(1),
+  url: z.string().min(1),
+});
+
+/** 僅測試用 safeParse；頁面 runtime 不因 schema 丟例外。 */
+export const playgroundSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  city: z.string().min(1),
+  district: z.string().min(1).optional(),
+  region: z.string().min(1).optional(),
+  lat: z.number(),
+  lng: z.number(),
+  address: z.string().min(1),
+  type: z.enum(PLAYGROUND_TYPES),
+  ageRange: z.tuple([z.number(), z.number()]),
+  free: z.boolean(),
+  feeNote: z.string().min(1).optional(),
+  indoor: z.boolean(),
+  facilities: z.array(z.string()),
+  tags: z.array(z.string()),
+  tips: z.string().optional(),
+  officialUrl: z.string().min(1).optional(),
+  relatedEpisodes: z.array(z.string()).optional(),
+  sources: z.array(playgroundSourceSchema).min(1),
+  lastVerified: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  coverageNote: z.string().optional(),
+  placeId: z.string().min(1).optional(),
+  mapsQuery: z.string().min(1).optional(),
+});
+
+export type PlaygroundMapsFields = Pick<
+  Playground,
+  "name" | "city" | "mapsQuery" | "placeId"
+>;
+
+/** 導航 destination／搜尋 query：mapsQuery 優先，否則場館名＋縣市。 */
+export function playgroundMapsSearchQuery(
+  place: Pick<Playground, "name" | "city" | "mapsQuery">,
+): string {
+  return place.mapsQuery ?? `${place.name}, ${place.city}`;
+}
+
 /** Google Maps 即時導航（不傳 origin，由 Maps 使用目前位置）。免 API Key。
- * destination 用頁面顯示的場館名＋縣市，避免 lat,lng 變成 Dropped pin。
+ * destination 用 playgroundMapsSearchQuery，避免 lat,lng 變成 Dropped pin。
  */
-export function buildGoogleMapsNavUrl(place: Pick<Playground, "name" | "city">): string {
-  const destination = `${place.name}, ${place.city}`;
+export function buildGoogleMapsNavUrl(place: PlaygroundMapsFields): string {
   const params = new URLSearchParams({
     api: "1",
-    destination,
+    destination: playgroundMapsSearchQuery(place),
     travelmode: "driving",
     dir_action: "navigate",
   });
+  if (place.placeId) {
+    params.set("destination_place_id", place.placeId);
+  }
   return `https://www.google.com/maps/dir/?${params.toString()}`;
 }
 
 /** Google Maps 只顯示位置（search 備案）。免 API Key。query 同樣用具名，不傳座標。 */
-export function buildGoogleMapsPlaceUrl(place: Pick<Playground, "name" | "city">): string {
+export function buildGoogleMapsPlaceUrl(place: PlaygroundMapsFields): string {
   const params = new URLSearchParams({
     api: "1",
-    query: `${place.name}, ${place.city}`,
+    query: playgroundMapsSearchQuery(place),
   });
+  if (place.placeId) {
+    params.set("query_place_id", place.placeId);
+  }
   return `https://www.google.com/maps/search/?${params.toString()}`;
 }
 
@@ -212,7 +266,7 @@ const PLAYGROUNDS: readonly Playground[] = [
   },
   {
     id: "ty-casti",
-    name: "卡司蒂樂園",
+    name: "卡司‧蒂菈樂園",
     city: "桃園市",
     district: "中壢區",
     lat: 24.9658,
@@ -226,14 +280,15 @@ const PLAYGROUNDS: readonly Playground[] = [
     tags: ["室內放電", "雨天備案", "需購票"],
     tips: "假日建議先查票價與營業時間；襪子通常要自備或現場購買。",
     officialUrl: "https://castellaland.com/",
+    mapsQuery: "卡司蒂菈樂園 中壢",
     sources: [
       {
         kind: "official",
-        name: "卡司．蒂菈樂園",
+        name: "卡司‧蒂菈樂園",
         url: "https://castellaland.com/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-13",
   },
   // ── Wave 1：桃園市 +3 ──
   {
@@ -270,10 +325,10 @@ const PLAYGROUNDS: readonly Playground[] = [
     id: "ty-xpark",
     name: "Xpark 水族館",
     city: "桃園市",
-    district: "觀音區",
-    lat: 25.0669,
-    lng: 121.0865,
-    address: "桃園市觀音區春好路501號",
+    district: "中壢區",
+    lat: 25.0128,
+    lng: 121.2135,
+    address: "桃園市中壢區春德路105號",
     type: "博物館",
     ageRange: [3, 8],
     free: false,
@@ -294,7 +349,7 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://travel.tycg.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-13",
   },
   {
     id: "ty-longtan-pond",
@@ -745,7 +800,7 @@ const PLAYGROUNDS: readonly Playground[] = [
   },
   {
     id: "nt-435",
-    name: "新北市美術館（435 藝文特區）",
+    name: "板橋 435 藝文特區",
     city: "新北市",
     district: "板橋區",
     lat: 25.0083,
@@ -758,12 +813,12 @@ const PLAYGROUNDS: readonly Playground[] = [
     facilities: ["展覽", "戶外雕塑", "親子廁所", "停車場"],
     tags: ["室內", "免費入場", "雨天備案"],
     tips: "常設展多免費，特展與活動依官網公告；戶外廣場可短暫放電。",
-    officialUrl: "https://www.ntcart.museum/",
+    officialUrl: "https://www.435.culture.ntpc.gov.tw/",
     sources: [
       {
         kind: "official",
-        name: "新北市美術館",
-        url: "https://www.ntcart.museum/",
+        name: "板橋435藝文特區",
+        url: "https://www.435.culture.ntpc.gov.tw/",
       },
       {
         kind: "gov",
@@ -771,7 +826,7 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://www.ntpc.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-13",
   },
   {
     id: "nt-tamsui-shalun",

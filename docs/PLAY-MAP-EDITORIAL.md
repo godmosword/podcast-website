@@ -51,7 +51,9 @@
 | 欄位 | 說明 |
 |------|------|
 | `id` | 穩定 slug，不重複 |
-| `name`、`city`、`lat`、`lng`、`address` | 基本定位 |
+| `name`、`city`、`lat`、`lng`、`address` | 基本定位。**`name` 是 Google 導航的 load-bearing 欄位**（destination 預設為 `${name}, ${city}`），須對照 Maps 實際場館名，不可把兩個場館黏在同一筆名稱裡 |
+| `mapsQuery`（選填） | 覆寫導航／搜尋字串。顯示名含間隔號或與 Maps 常用名不同時填（例：顯示「卡司‧蒂菈樂園」、`mapsQuery: "卡司蒂菈樂園 中壢"`） |
+| `placeId`（選填） | Google Place ID；有值時 URL 加 `destination_place_id`／`query_place_id`。免 API Key；**不要為了填而呼叫 Places API** |
 | `type` | 場館家族（`PlaygroundType`）；與 `indoor` 獨立，勿混用 |
 | `ageRange`、`free`、`indoor` | 家長篩選；`indoor` 表物理室內條件（雨天備案），非 type 別名 |
 | `free` 判準 | **以「一般家庭是否需付費入場」為準**，不以「是否有人可免費」為準。成人需購票即 `free: false`（例：兒童新樂園全票 30 元、十三行博物館全票 80 元），縱使幼童免票亦然 |
@@ -66,7 +68,7 @@
 - **`type`**：場館家族，供類型 chip 篩選；合法值：`公園`、`室內樂園`、`主題樂園`、`博物館`、`動物園`、`農場`、`其他`
 - **`indoor`**：物理上是否以室內為主（雨天備案）；與 `type` **獨立**
 - **主題樂園**：戶外或混合式主題／遊樂園（如六福村、兒童新樂園）；通常 `indoor: false`
-- **室內樂園**：以室內遊樂設施為主的商業場館（如卡司蒂樂園）；須 `indoor: true`
+- **室內樂園**：以室內遊樂設施為主的商業場館（如卡司‧蒂菈樂園）；須 `indoor: true`
 - **動物園**：以動物展示為主的園區（如臺北市立動物園、新竹市立動物園）；不再歸入 `其他`
 - **Invariant**：`type` 字串含「室內」者必須 `indoor: true`；每個 `PlaygroundType` 至少一筆資料
 - **`tags`** 可保留「室內放電」等描述性標籤；**不得**再作為 `type` 值
@@ -125,16 +127,17 @@ ledger **不**進使用者-facing UI 細節；PlayMap 僅顯示摘要狀態（�
 
 ## Editorial SOP（新增／更新一筆）
 
-1. 從官方或公部門來源確認名稱、地址、座標、適齡、收費、營業時間
+1. 從官方或公部門來源確認名稱、地址、座標、適齡、收費、營業時間；**名稱須對照 Google Maps 實際場館名**（具名導航不再靠座標自我糾錯）
 2. 若僅有社群候選 → 找到官網或政府頁面後才可寫入
 3. 商業場館：填 `officialUrl`（**先實際開啟確認可連通**）；票價／營業易變提示交給 UI，勿寫進 `tips`；分層收費寫 `feeNote`
 4. 寫入 `sources[]` 與當日 `lastVerified`；`sources[]` 與 `officialUrl` 的每個 URL 都須實際點開驗證
+5. 顯示名與 Maps 常用名不一致時填 `mapsQuery`；有把握的 Place ID 才填 `placeId`（本輪可不填）
 
 > **連通性稽核（2026-08-11）**：全量 60 個 URL 實測後修正 10 筆地點的死連結，其中 4 個網域已不存在（多為拼字錯誤，如 `tmoca` 應為 `tmofa`、`puhsin` 應為 `pushin`）。
 > 連通性無法進 CI（不打外網），改由 `data/playgrounds.test.ts` 的 `RETIRED_DOMAINS` 清單擋住回歸；**新增或搬遷網域時請一併更新該清單**。
 > 建議每次 Wave 收尾各做一次全量連通性稽核。注意部分政府站台（`*.tycg.gov.tw`）有 HiNet bot 防護，自動化會回 428，需人工確認。
-5. 更新該縣 coverage ledger 計數
-6. `npm test -- data/playgrounds.test.ts` 通過後合併
+6. 更新該縣 coverage ledger 計數
+7. `npm test -- data/playgrounds.test.ts` 通過後合併
 
 ## 相關文件
 

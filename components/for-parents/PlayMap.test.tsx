@@ -468,19 +468,24 @@ describe("PlayMap", () => {
     expect(navLinks.length).toBe(listPlaygrounds().length);
 
     const coordOnly = /^-?\d+(\.\d+)?,\s*-?\d+/;
-    const byName = new Map(listPlaygrounds().map((place) => [place.name, place]));
+    const expectedByQuery = new Map(
+      listPlaygrounds().map((place) => [
+        place.mapsQuery ?? `${place.name}, ${place.city}`,
+        place,
+      ]),
+    );
+    const seen = new Set<string>();
     for (const link of navLinks) {
       const dest = new URL(link.getAttribute("href") ?? "").searchParams.get(
         "destination",
       );
       expect(dest).toBeTruthy();
       expect(dest).not.toMatch(coordOnly);
-      const name = dest?.split(", ")[0] ?? "";
-      const place = byName.get(name);
+      const place = dest ? expectedByQuery.get(dest) : undefined;
       expect(place, dest ?? "").toBeDefined();
-      if (!place) continue;
-      expect(dest).toBe(`${place.name}, ${place.city}`);
+      if (dest) seen.add(dest);
     }
+    expect(seen.size).toBe(listPlaygrounds().length);
   });
 
   it("載入更多會擴批，且到底時按鈕消失", () => {
