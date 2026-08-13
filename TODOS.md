@@ -53,7 +53,7 @@
 
 | ID | 說明 |
 |----|------|
-| polish(for-parents): play-map 具名導航、類型場景帶與選中針場館名 | 見本 commit |
+| polish(for-parents): play-map 具名導航、類型場景帶與選中針場館名 | `dedf98c` |
 
 ### 本輪已完成（2026-08-12）
 
