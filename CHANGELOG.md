@@ -16,6 +16,7 @@
 ### Fixed
 
 - **親子遊樂地圖 name／mapsQuery 身分**：`hcx-hukou-sports` 顯示名改回「王爺壟運動公園」並移除多餘 `mapsQuery`；`hc-nanliao` 顯示名改回「南寮親子沙灘」，導航仍指向旅遊服務中心。編輯守則新增「name 與 mapsQuery 的分工」。
+- **親子遊樂地圖台／臺用字**：`city`／地址維持「台」；`台中公園`、`台中都會公園` 改對官名「臺中…」。王爺壟幼童遊具待辦撤銷（資料列保留、`ageRange` 仍 `[3, 8]`）。
 - **親子遊樂地圖 FitBounds 版面與旗標**：`playMapFitKey` 納入 `splitLayout`，跨過 980px 或手機轉橫向時重算鏡頭；程式觸發的 fit 改聽 `zoomend`／`moveend` 清旗標，避免誤判成使用者拖曳。
 - **親子遊樂地圖 FitBounds**：`clusterPoints`／`selectedPad` 改 `useMemo`，鏡頭改 `fitKey` 驅動並尊重使用者拖曳／縮放，避免桌面並排點「載入更多」時把手動平移拉回去。
 - **親子遊樂地圖定位鏡頭與地圖生命週期**：「離我最近」未選縣市時鏡頭只框自己＋最近 8 筆，不再 fit 全台；手機切回卡片後地圖保持掛載，避免縮放被重置。

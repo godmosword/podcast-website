@@ -453,6 +453,21 @@ describe("playgrounds sidecar", () => {
     expect(place.address.includes("湖口")).toBe(false);
   });
 
+  it("city／address 用台，場館官名用臺", () => {
+    for (const item of listPlaygrounds()) {
+      expect(item.city, `${item.id} city`).not.toMatch(/臺/);
+      expect(item.address, `${item.id} address`).not.toMatch(/臺/);
+      expect(item.name, `${item.id} name 官名應作臺`).not.toMatch(
+        /^台[北中南東]/,
+      );
+    }
+    expect(getPlayground("tc-taichung-park")?.name).toBe("臺中公園");
+    expect(getPlayground("tc-metro-park")?.name).toBe("臺中都會公園");
+    expect(getPlayground("tp-children-park")?.name).toBe(
+      "臺北市立兒童新樂園",
+    );
+  });
+
   it("高風險通用名以 mapsQuery 消歧", () => {
     expect(getPlayground("hc-qingqing")?.mapsQuery).toBe("青青草原 香山");
     expect(getPlayground("ty-chingtang")?.mapsQuery).toBe("青塘園 中壢");

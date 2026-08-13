@@ -1655,7 +1655,7 @@ const PLAYGROUNDS: readonly Playground[] = [
   },
   {
     id: "tc-taichung-park",
-    name: "台中公園",
+    name: "臺中公園",
     city: "台中市",
     district: "中區",
     lat: 24.1452,
@@ -1742,7 +1742,7 @@ const PLAYGROUNDS: readonly Playground[] = [
   },
   {
     id: "tc-metro-park",
-    name: "台中都會公園",
+    name: "臺中都會公園",
     city: "台中市",
     district: "西屯區",
     lat: 24.2181,
