@@ -76,6 +76,13 @@ function InvalidateSizeOnActive({ active }: { active: boolean }) {
   return null;
 }
 
+/**
+ * 鏡頭只在 fitKey 改變時重算。parent 重繪（載入更多、新的 onSelect 參考等）
+ * 不在依賴陣列裡，因此不會把使用者已平移／縮放的視窗拉回去。
+ * 不要再加 userMoved／programmatic 旗標：effect 依賴是 [map, fitKey]，
+ * MapContainer 生命週期內 map 恆定，fitKey 不變就不會跑；fitKey 一變
+ * 本來就該重算。那些旗標在此依賴下是不可達邏輯。
+ */
 function FitBounds({
   points,
   emptyCenter,
@@ -85,9 +92,6 @@ function FitBounds({
   fitKey,
 }: FitBoundsProps) {
   const map = useMap();
-  const userMovedRef = useRef(false);
-  const programmaticRef = useRef(false);
-  const prevFitKeyRef = useRef<string | undefined>(undefined);
   const snapshotRef = useRef({
     points,
     emptyCenter,
@@ -108,48 +112,11 @@ function FitBounds({
   });
 
   useEffect(() => {
-    const markUserMoved = () => {
-      if (programmaticRef.current) return;
-      userMovedRef.current = true;
-    };
-    map.on("dragstart", markUserMoved);
-    map.on("zoomstart", markUserMoved);
-    return () => {
-      map.off("dragstart", markUserMoved);
-      map.off("zoomstart", markUserMoved);
-    };
-  }, [map]);
-
-  useEffect(() => {
-    const clearProgrammatic = () => {
-      programmaticRef.current = false;
-    };
-    // 只平移不縮放時沒有 zoomend，兩者都要聽。
-    map.on("zoomend", clearProgrammatic);
-    map.on("moveend", clearProgrammatic);
-    return () => {
-      map.off("zoomend", clearProgrammatic);
-      map.off("moveend", clearProgrammatic);
-    };
-  }, [map]);
-
-  useEffect(() => {
-    const keyChanged = prevFitKeyRef.current !== fitKey;
-    prevFitKeyRef.current = fitKey;
-
-    if (userMovedRef.current && !keyChanged) {
-      return;
-    }
-    if (keyChanged) {
-      userMovedRef.current = false;
-    }
-
     const snap = snapshotRef.current;
     const motion = snap.animate
       ? undefined
       : ({ animate: false } as L.ZoomPanOptions);
 
-    programmaticRef.current = true;
     if (snap.selectedPoint) {
       map.fitBounds(L.latLngBounds([snap.selectedPoint]), {
         paddingTopLeft: [48, 72],

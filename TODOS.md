@@ -62,7 +62,8 @@
 | fix(data): play-map name／mapsQuery 身分與導航分工（湖口、南寮） | `f80a0ff` |
 | fix(for-parents): play-map FitBounds 納入 splitLayout、zoomend／moveend 清旗標 | `169a027` |
 | chore(data): play-map city／地址用「台」、場館官名用「臺」（麗寶維持一針） | `2644dd8` |
-| feat(for-parents): play-map 詳情 sheet 顯示 coverageNote | 見本 commit |
+| feat(for-parents): play-map 詳情 sheet 顯示 coverageNote | `bd338d9` |
+| refactor(for-parents): 移除 FitBounds 不可達的 userMoved／programmatic 旗標 | 見本 commit |
 
 ### 本輪已完成（2026-08-12）
 

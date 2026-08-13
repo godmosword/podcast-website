@@ -24,41 +24,13 @@ vi.mock("leaflet", () => {
   return { default: leaflet, ...leaflet };
 });
 
-type Handler = (event?: unknown) => void;
-
-const listeners = new Map<string, Set<Handler>>();
-
-function emit(type: string): void {
-  const set = listeners.get(type);
-  if (!set) return;
-  for (const handler of set) handler({});
-}
-
-const fitBounds = vi.fn(() => {
-  emit("zoomstart");
-  emit("zoomend");
-  emit("moveend");
-});
-const setView = vi.fn(() => {
-  emit("zoomstart");
-  emit("zoomend");
-  emit("moveend");
-});
+const fitBounds = vi.fn();
+const setView = vi.fn();
 
 const mapStub = {
   fitBounds,
   setView,
   invalidateSize: vi.fn(),
-  on(type: string, handler: Handler) {
-    const set = listeners.get(type) ?? new Set<Handler>();
-    set.add(handler);
-    listeners.set(type, set);
-    return this;
-  },
-  off(type: string, handler: Handler) {
-    listeners.get(type)?.delete(handler);
-    return this;
-  },
 };
 
 const mapState: { current: typeof mapStub } = { current: mapStub };
@@ -148,7 +120,6 @@ describe("PlayMapLeaflet FitBounds", () => {
   beforeEach(() => {
     fitBounds.mockClear();
     setView.mockClear();
-    listeners.clear();
     mapState.current = mapStub;
     vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
       cb(0);
@@ -169,6 +140,16 @@ describe("PlayMapLeaflet FitBounds", () => {
     rerender(
       <PlayMapLeaflet {...leafletProps({ onSelect: vi.fn() })} />,
     );
+    expect(fitBounds).toHaveBeenCalledTimes(1);
+  });
+
+  it("連續多次 parent 重繪且 fitKey 不變時，fitBounds 只呼叫一次", () => {
+    const { rerender } = render(<PlayMapLeaflet {...leafletProps()} />);
+    expect(fitBounds).toHaveBeenCalledTimes(1);
+
+    rerender(<PlayMapLeaflet {...leafletProps({ onSelect: vi.fn() })} />);
+    rerender(<PlayMapLeaflet {...leafletProps({ onSelect: vi.fn() })} />);
+    rerender(<PlayMapLeaflet {...leafletProps({ onSelect: vi.fn() })} />);
     expect(fitBounds).toHaveBeenCalledTimes(1);
   });
 
@@ -197,47 +178,6 @@ describe("PlayMapLeaflet FitBounds", () => {
       <PlayMapLeaflet {...leafletProps({ places: samplePlaces.slice(0, 2) })} />,
     );
     expect(fitBounds).toHaveBeenCalledTimes(3);
-  });
-
-  it("使用者拖曳後、fitKey 不變的重繪不會移動鏡頭", () => {
-    const { rerender } = render(<PlayMapLeaflet {...leafletProps()} />);
-    expect(fitBounds).toHaveBeenCalledTimes(1);
-
-    emit("dragstart");
-    // 換 useMap 參考以迫使 effect 重跑；fitKey 不變時應被 userMoved 擋下。
-    mapState.current = { ...mapStub };
-    rerender(
-      <PlayMapLeaflet {...leafletProps({ onSelect: vi.fn() })} />,
-    );
-    expect(fitBounds).toHaveBeenCalledTimes(1);
-  });
-
-  it("程式觸發的 fitBounds 不會被誤判成使用者操作", () => {
-    const { rerender } = render(<PlayMapLeaflet {...leafletProps()} />);
-    expect(fitBounds).toHaveBeenCalledTimes(1);
-
-    // 換 map 參考迫使 effect 重跑；若 zoomstart 被當成使用者操作，這裡會被擋下。
-    mapState.current = { ...mapStub };
-    rerender(<PlayMapLeaflet {...leafletProps({ onSelect: vi.fn() })} />);
-    expect(fitBounds).toHaveBeenCalledTimes(2);
-
-    rerender(
-      <PlayMapLeaflet
-        {...leafletProps({ selectedId: samplePlaces[0]?.id ?? "ty-fenghe" })}
-      />,
-    );
-    expect(fitBounds).toHaveBeenCalledTimes(3);
-  });
-
-  it("使用者拖曳後 fitKey 改變仍會重算鏡頭", () => {
-    const { rerender } = render(<PlayMapLeaflet {...leafletProps()} />);
-    emit("dragstart");
-    rerender(
-      <PlayMapLeaflet
-        {...leafletProps({ selectedId: samplePlaces[1]?.id ?? null })}
-      />,
-    );
-    expect(fitBounds).toHaveBeenCalledTimes(2);
   });
 
   it("nearMeCamera 鏡頭只框使用者位置＋最近 N 筆", () => {
