@@ -60,8 +60,8 @@
 | fix(for-parents): play-map FitBounds 不再被 parent 重繪拉回鏡頭 | `0a150bd` |
 | fix(for-parents): play-map 定位鏡頭框最近 8 筆、地圖分頁保持掛載 | `2b755c0` |
 | fix(data): play-map name／mapsQuery 身分與導航分工（湖口、南寮） | `f80a0ff` |
-| fix(for-parents): play-map FitBounds 納入 splitLayout、zoomend／moveend 清旗標 | 見本 commit |
-| chore(data): play-map city／地址用「台」、場館官名用「臺」（麗寶維持一針） | 見本 commit |
+| fix(for-parents): play-map FitBounds 納入 splitLayout、zoomend／moveend 清旗標 | `169a027` |
+| chore(data): play-map city／地址用「台」、場館官名用「臺」（麗寶維持一針） | `2644dd8` |
 
 ### 本輪已完成（2026-08-12）
 
