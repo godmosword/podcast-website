@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { vehiclesUnlockedAt } from "@/lib/gamekit/progress/garage";
+import { vehiclesUnlockedAt, nextGarageUnlock } from "@/lib/gamekit/progress/garage";
 import { medalCount, medalFlags } from "@/lib/gamekit/progress/meta";
 import {
   loadPlayerProfile,
@@ -46,6 +46,12 @@ describe("gamekit progress garage", () => {
     expect(vehiclesUnlockedAt(0)).toEqual(["小黃"]);
     expect(vehiclesUnlockedAt(3)).toContain("怪獸卡車");
     expect(vehiclesUnlockedAt(15)).toContain("恐龍車多多");
+  });
+
+  it("nextGarageUnlock 回下一輛與剩餘星星", () => {
+    expect(nextGarageUnlock(0)).toEqual({ name: "怪獸卡車", remaining: 3 });
+    expect(nextGarageUnlock(3)).toEqual({ name: "小紅賽車", remaining: 3 });
+    expect(nextGarageUnlock(15)).toBeNull();
   });
 });
 

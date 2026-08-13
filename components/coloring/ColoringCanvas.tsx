@@ -7,12 +7,14 @@ import {
   useState,
   type PointerEvent as ReactPointerEvent,
 } from "react";
+import { GameEndStation } from "@/components/games/GameEndStation";
 import type { ColoringPage } from "@/data/coloring-pages";
 import {
   clearColoringDraft,
   loadColoringDraft,
   saveColoringDraft,
 } from "@/lib/coloring/draft-storage";
+import { COLORING_DONE_CTA } from "@/lib/coloring/flow";
 import {
   BRUSH_SIZES,
   ERASER_RADIUS_BONUS,
@@ -107,6 +109,7 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
   const [canUndo, setCanUndo] = useState(false);
   const [viewActive, setViewActive] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [doneOpen, setDoneOpen] = useState(false);
 
   const composite = useCallback(() => {
     const display = displayRef.current;
@@ -580,6 +583,34 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
     link.click();
   };
 
+  const playDoneTone = () => {
+    try {
+      const AudioCtx = window.AudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      [523, 659, 784].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "triangle";
+        osc.frequency.value = freq;
+        gain.gain.value = 0.05;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        const start = ctx.currentTime + i * 0.12;
+        osc.start(start);
+        osc.stop(start + 0.18);
+      });
+    } catch {
+      // 無音效環境略過
+    }
+  };
+
+  const handleDone = () => {
+    composite();
+    playDoneTone();
+    setDoneOpen(true);
+  };
+
   return (
     <div className={styles.root}>
       <div className={styles.topBar}>
@@ -587,6 +618,14 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
           ← 換一張
         </button>
         <p className={styles.pageTitle}>{page.title}</p>
+        <button
+          type="button"
+          className={styles.doneBtn}
+          onClick={handleDone}
+          disabled={!ready}
+        >
+          {COLORING_DONE_CTA}
+        </button>
       </div>
 
       <p className={styles.guide}>
@@ -639,6 +678,19 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
         viewActive={viewActive}
         onResetView={() => applyView(DEFAULT_VIEW)}
       />
+
+      {doneOpen ? (
+        <div className={styles.doneOverlay} role="presentation">
+          <GameEndStation
+            mood="win"
+            title="塗好了！"
+            gameSlug="coloring-book"
+            onReplay={() => setDoneOpen(false)}
+            replayLabel="再塗這一張"
+            mainAction={{ label: "換一張塗", onClick: onBack }}
+          />
+        </div>
+      ) : null}
     </div>
   );
 }

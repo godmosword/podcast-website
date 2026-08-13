@@ -4,6 +4,8 @@ import {
   CANDY_MATCH_CELL_GAP,
   candyMatchBoardOuterWidth,
   candyMatchCellPx,
+  candyMatchCellStep,
+  candyMatchSwapOffset,
 } from "./cell-size";
 
 describe("candyMatchCellPx", () => {
@@ -21,5 +23,13 @@ describe("candyMatchCellPx", () => {
 
   it("寬螢幕 6 欄上限 64", () => {
     expect(candyMatchCellPx(2000, 6)).toBe(64);
+  });
+});
+
+describe("candyMatchSwapOffset", () => {
+  it("相鄰格位移等於 cell + gap", () => {
+    expect(candyMatchCellStep(48)).toBe(52);
+    expect(candyMatchSwapOffset(0, 1, 3, 48)).toEqual({ dx: 52, dy: 0 });
+    expect(candyMatchSwapOffset(0, 3, 3, 48)).toEqual({ dx: 0, dy: 52 });
   });
 });

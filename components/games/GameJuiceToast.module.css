@@ -1,0 +1,38 @@
+.toast {
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--ink, #5d4a67);
+  font-size: 14px;
+  font-weight: 900;
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 18px rgba(146, 106, 121, 0.16);
+  white-space: nowrap;
+  animation: toastUp 1s ease-out forwards;
+}
+
+.big {
+  color: var(--c-pink, #a5567a);
+  font-size: 18px;
+}
+
+.static {
+  animation: none;
+}
+
+@keyframes toastUp {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+}

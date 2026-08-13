@@ -42,4 +42,19 @@ describe("GameEndStation", () => {
     expect(html).toContain("或去玩 繪本著色");
     expect(html).not.toContain("回遊樂園");
   });
+
+  it("可選摘要列顯示三星條件說明", async () => {
+    const { GameEndStation } = await import("./GameEndStation");
+    const html = renderToStaticMarkup(
+      <GameEndStation
+        mood="win"
+        title="任務完成！"
+        stars={3}
+        summary="沒用道具 · 步數還很夠"
+        onReplay={() => undefined}
+        hideHubLink
+      />,
+    );
+    expect(html).toContain("沒用道具 · 步數還很夠");
+  });
 });

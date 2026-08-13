@@ -17,3 +17,12 @@ const GARAGE_VEHICLES: GarageVehicle[] = [
 export function vehiclesUnlockedAt(stars: number): string[] {
   return GARAGE_VEHICLES.filter((v) => stars >= v.starsRequired).map((v) => v.id);
 }
+
+/** 下一輛尚未解鎖的車庫車；全解鎖回 null。不改存檔 schema。 */
+export function nextGarageUnlock(
+  stars: number,
+): { name: string; remaining: number } | null {
+  const next = GARAGE_VEHICLES.find((v) => stars < v.starsRequired);
+  if (!next) return null;
+  return { name: next.name, remaining: next.starsRequired - stars };
+}

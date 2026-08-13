@@ -5,7 +5,7 @@
  * 不再遷移，僅於清除時順手移除。
  * save 失敗會 throw，由 UI 顯示提示（不再靜默吞掉）。
  */
-import { coloringDraftKey, coloringDraftStorageKey } from "@/lib/coloring/tools";
+import { coloringDraftKey, coloringDraftStorageKey, parseColoringDraftPageId } from "@/lib/coloring/tools";
 
 const DB_NAME = "coloring-drafts";
 const DB_VERSION = 1;
@@ -95,5 +95,35 @@ export async function clearColoringDraft(pageId: string): Promise<void> {
     await withStore("readwrite", (store) => store.delete(coloringDraftStorageKey(pageId)));
   } catch {
     // 清除失敗無害，忽略
+  }
+}
+
+/** 列出當前世代草稿（本機作品牆用；不上傳）。 */
+export async function listColoringDrafts(): Promise<
+  { pageId: string; draft: ColoringDraft }[]
+> {
+  if (!canUseIndexedDb()) return [];
+  try {
+    const db = await openDb();
+    try {
+      const store = db.transaction(STORE, "readonly").objectStore(STORE);
+      const keys = await requestToPromise(
+        store.getAllKeys() as IDBRequest<IDBValidKey[]>,
+      );
+      const values = await requestToPromise(
+        store.getAll() as IDBRequest<ColoringDraft[]>,
+      );
+      const out: { pageId: string; draft: ColoringDraft }[] = [];
+      for (let i = 0; i < keys.length; i++) {
+        const pageId = parseColoringDraftPageId(String(keys[i]));
+        const draft = values[i];
+        if (pageId && draft) out.push({ pageId, draft });
+      }
+      return out;
+    } finally {
+      db.close();
+    }
+  } catch {
+    return [];
   }
 }

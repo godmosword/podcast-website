@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import {
   clearColoringDraft,
+  listColoringDrafts,
   loadColoringDraft,
   saveColoringDraft,
 } from "@/lib/coloring/draft-storage";
@@ -45,6 +46,16 @@ function makeFakeIndexedDb(store: Map<string, unknown>, opts?: { failPut?: boole
       const req: FakeRequest = {};
       store.delete(key);
       fireSuccess(req);
+      return req;
+    },
+    getAllKeys() {
+      const req: FakeRequest = {};
+      fireSuccess(req, [...store.keys()]);
+      return req;
+    },
+    getAll() {
+      const req: FakeRequest = {};
+      fireSuccess(req, [...store.values()]);
       return req;
     },
   };
@@ -131,5 +142,17 @@ describe("coloring draft-storage", () => {
 
     expect(await loadColoringDraft("p4")).toBeNull();
     await expect(saveColoringDraft("p4", "data:x")).rejects.toThrow();
+  });
+
+  test("listColoringDrafts 只回當前世代 key", async () => {
+    const idbStore = new Map<string, unknown>([
+      [coloringDraftStorageKey("p1"), "data:image/png;base64,a"],
+      ["p-old", "data:image/png;base64,old"],
+    ]);
+    vi.stubGlobal("indexedDB", makeFakeIndexedDb(idbStore));
+    stubLocalStorage(new Map());
+
+    const listed = await listColoringDrafts();
+    expect(listed).toEqual([{ pageId: "p1", draft: "data:image/png;base64,a" }]);
   });
 });

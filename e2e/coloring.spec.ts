@@ -92,4 +92,13 @@ test.describe("coloring book", () => {
     }
     await expect(page.getByRole("button", { name: "縮放還原" })).toBeDisabled();
   });
+
+  test("我塗好了打開完成站，可再塗這一張", async ({ page }) => {
+    await openFirstColoringPage(page);
+    await page.getByRole("button", { name: "我塗好了" }).click();
+    await expect(page.getByRole("dialog", { name: "塗好了！" })).toBeVisible();
+    await page.getByRole("button", { name: "再塗這一張" }).click();
+    await expect(page.getByRole("dialog", { name: "塗好了！" })).toHaveCount(0);
+    await expect(page.locator("canvas")).toBeVisible();
+  });
 });

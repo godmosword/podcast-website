@@ -125,4 +125,60 @@ describe("CandyMatchBoard pointer capture", () => {
     fireEvent.pointerUp(cell, { pointerId: 4, clientX: 20, clientY: 20 });
     expect(onTapCell).not.toHaveBeenCalled();
   });
+
+  it("swap motion 標在兩格上；reduced 不標 data-swap", () => {
+    const { rerender } = render(
+      <CandyMatchBoard
+        board={makeBoard()}
+        cellPx={48}
+        selected={null}
+        hint={null}
+        popping={new Set()}
+        shaking={new Set()}
+        disabled={false}
+        onTapCell={vi.fn()}
+        onSwipeCell={vi.fn()}
+        motion={{ swap: { a: 0, b: 1 } }}
+      />,
+    );
+    expect(screen.getByTestId("candy-match-board").getAttribute("data-swap")).toBe("0-1");
+    expect(screen.getByRole("button", { name: /第 1 列第 1 格/ }).getAttribute("data-swap")).toBe("true");
+
+    rerender(
+      <CandyMatchBoard
+        board={makeBoard()}
+        cellPx={48}
+        selected={null}
+        hint={null}
+        popping={new Set()}
+        shaking={new Set()}
+        disabled={false}
+        onTapCell={vi.fn()}
+        onSwipeCell={vi.fn()}
+        motion={{ swap: { a: 0, b: 1 }, reduced: true }}
+      />,
+    );
+    expect(screen.getByTestId("candy-match-board").getAttribute("data-swap")).toBeNull();
+  });
+
+  it("fall motion 寫入 data-fall-rows；reduced 跳過", () => {
+    render(
+      <CandyMatchBoard
+        board={makeBoard()}
+        cellPx={48}
+        selected={null}
+        hint={null}
+        popping={new Set()}
+        shaking={new Set()}
+        disabled={false}
+        onTapCell={vi.fn()}
+        onSwipeCell={vi.fn()}
+        motion={{ falls: [{ to: 3, rows: 2 }] }}
+      />,
+    );
+    expect(screen.getByTestId("candy-match-board").getAttribute("data-falling")).toBe("true");
+    expect(
+      screen.getByRole("button", { name: /第 2 列第 1 格/ }).getAttribute("data-fall-rows"),
+    ).toBe("2");
+  });
 });

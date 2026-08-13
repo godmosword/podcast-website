@@ -13,6 +13,8 @@ export type GameEndStationProps = {
   scoreLabel?: string;
   /** 0–3 顆星（可選）。 */
   stars?: number;
+  /** 通關摘要（步數／道具等），低壓說明不是成績單。 */
+  summary?: string;
   onReplay: () => void;
   replayLabel?: string;
   /** 目前遊戲 slug；用來解析下一站。 */
@@ -53,6 +55,7 @@ export function GameEndStation({
   title,
   scoreLabel,
   stars,
+  summary,
   onReplay,
   replayLabel = "再玩一次",
   gameSlug,
@@ -90,7 +93,7 @@ export function GameEndStation({
       </p>
       <h2 className={styles.title}>{resolvedTitle}</h2>
 
-      {(starCount != null || scoreLabel) && (
+      {(starCount != null || scoreLabel || summary) && (
         <div className={styles.scoreRow}>
           {starCount != null ? (
             <p className={styles.stars} aria-label={`${starCount} 顆星`}>
@@ -101,6 +104,7 @@ export function GameEndStation({
             </p>
           ) : null}
           {scoreLabel ? <p className={styles.scoreLabel}>{scoreLabel}</p> : null}
+          {summary ? <p className={styles.summary}>{summary}</p> : null}
         </div>
       )}
 

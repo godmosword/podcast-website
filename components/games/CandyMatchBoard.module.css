@@ -1,0 +1,55 @@
+.pieceArt {
+  position: absolute;
+  inset: 3px;
+  display: block;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.piecePop {
+  opacity: 0;
+  transform: scale(1.45);
+}
+
+.pieceHidden {
+  opacity: 0;
+}
+
+.pieceSwap {
+  z-index: 3;
+  transition: none;
+  animation: candyMatchSwap var(--swap-ms, 180ms) ease-in-out both;
+}
+
+.pieceFall {
+  transition: none;
+  animation: candyMatchFall var(--fall-ms, 220ms) ease-out both;
+}
+
+@keyframes candyMatchSwap {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(var(--swap-dx, 0px), var(--swap-dy, 0px));
+  }
+}
+
+@keyframes candyMatchFall {
+  from {
+    transform: translateY(var(--fall-from, 0px));
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pieceArt {
+    transition: none;
+  }
+
+  .pieceSwap,
+  .pieceFall {
+    animation: none;
+  }
+}

@@ -66,6 +66,14 @@ export function coloringDraftStorageKey(pageId: string): string {
   return `${pageId}@r${COLORING_LINEART_REV}`;
 }
 
+/** 從 IndexedDB key 還原 pageId；非當前世代回 null。 */
+export function parseColoringDraftPageId(storageKey: string): string | null {
+  const suffix = `@r${COLORING_LINEART_REV}`;
+  if (!storageKey.endsWith(suffix)) return null;
+  const id = storageKey.slice(0, -suffix.length);
+  return id.length > 0 ? id : null;
+}
+
 export function lumaAt(
   data: Uint8ClampedArray,
   width: number,

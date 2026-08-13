@@ -126,6 +126,52 @@ function randomPiece(kinds: number, rng: Rng): number {
   return Math.floor(rng() * kinds);
 }
 
+/** 交換位移動畫時長（ms）。減少動態時應跳過。 */
+export const CANDY_SWAP_MS = 180;
+/** 重力掉落動畫時長（ms）。 */
+export const CANDY_FALL_MS = 220;
+/** 消除 pop 動畫時長（ms）。 */
+export const CANDY_POP_MS = 280;
+
+/** 單格重力位移：目的地格子與往下掉幾列。 */
+export type CandyFallMotion = {
+  to: number;
+  rows: number;
+};
+
+/**
+ * 在套用重力前，計算各格會掉幾列（含頂部新補進來的圖案）。
+ * 給 UI 用 transform 播掉落；不改 pieces。
+ */
+export function planGravity(
+  pieces: number[],
+  cols: number,
+  rows: number,
+): CandyFallMotion[] {
+  const moves: CandyFallMotion[] = [];
+  for (let c = 0; c < cols; c++) {
+    const surviving: number[] = [];
+    for (let r = 0; r < rows; r++) {
+      const i = idx(c, r, cols);
+      if (pieces[i] !== EMPTY) surviving.push(i);
+    }
+    const emptyCount = rows - surviving.length;
+    if (emptyCount === 0) continue;
+    surviving.forEach((from, k) => {
+      const destRow = emptyCount + k;
+      const fromRow = Math.floor(from / cols);
+      const fallRows = destRow - fromRow;
+      if (fallRows > 0) {
+        moves.push({ to: idx(c, destRow, cols), rows: fallRows });
+      }
+    });
+    for (let destRow = 0; destRow < emptyCount; destRow++) {
+      moves.push({ to: idx(c, destRow, cols), rows: emptyCount });
+    }
+  }
+  return moves;
+}
+
 /** 重力：各欄往下壓實，頂部補新圖案（掉落物一起下落）。 */
 export function applyGravity(
   pieces: number[],

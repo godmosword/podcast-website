@@ -14,6 +14,7 @@ import {
   BLOCK_DROP_DIFFICULTIES,
   BLOCK_DROP_SPECIAL_MODES,
 } from "@/lib/gamekit/progress/settings";
+import type { GameKitGameId } from "@/lib/gamekit/types";
 import Icon from "@/components/ui/Icon";
 import styles from "./GameChrome.module.css";
 
@@ -38,6 +39,8 @@ export type GameChromeProps = {
   onRestart?: () => void;
   announce?: string;
   className?: string;
+  /** 用來隱藏非本局的設定項（方塊難度／彩虹）。 */
+  gameId?: GameKitGameId;
 };
 
 export function GameChromeToolbar({
@@ -103,9 +106,11 @@ export function GameChromeToolbar({
 function SettingsDialog({
   open,
   onClose,
+  gameId,
 }: {
   open: boolean;
   onClose: () => void;
+  gameId?: GameKitGameId;
 }) {
   const {
     kidsMode,
@@ -138,6 +143,8 @@ function SettingsDialog({
 
   if (!open) return null;
 
+  const showBlockDrop = gameId === "block-drop";
+
   return (
     <div className={styles.overlay} role="presentation" onClick={onClose}>
       <div
@@ -164,6 +171,7 @@ function SettingsDialog({
             className={styles.checkbox}
           />
         </label>
+        {showBlockDrop ? (
         <div className={styles.settingBlock}>
           <div className={styles.settingHeading}>
             <strong>繽紛方塊難度</strong>
@@ -185,6 +193,7 @@ function SettingsDialog({
             ))}
           </div>
         </div>
+        ) : null}
         <label className={styles.settingRow}>
           <span>
             <strong>遊戲音量</strong>
@@ -224,6 +233,7 @@ function SettingsDialog({
             ))}
           </div>
         </div>
+        {showBlockDrop ? (
         <div className={styles.settingBlock}>
           <div className={styles.settingHeading}>
             <strong>特殊模式</strong>
@@ -245,9 +255,12 @@ function SettingsDialog({
             ))}
           </div>
         </div>
+        ) : null}
+        {showBlockDrop ? (
         <p className={styles.settingNote}>
           鍵盤：方向鍵／WASD 操作 · P 或 Esc 暫停 · 手把 D-pad／搖桿亦可操作（若瀏覽器支援）。
         </p>
+        ) : null}
         <button type="button" className={styles.primaryBtn} onClick={onClose}>
           完成
         </button>
@@ -261,6 +274,7 @@ export default function GameChrome({
   children,
   announce,
   className,
+  gameId,
 }: GameChromeProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -271,7 +285,11 @@ export default function GameChrome({
           {announce ?? ""}
         </div>
         {children}
-        <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+        <SettingsDialog
+          open={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+          gameId={gameId}
+        />
       </div>
     </ChromeContext.Provider>
   );

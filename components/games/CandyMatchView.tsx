@@ -11,6 +11,7 @@ import {
 import { CandyMatchBoard } from "@/components/games/CandyMatchBoard";
 import { DirtOverlay, PieceArt, PieceGift } from "@/components/games/CandyMatchPieceArt";
 import { GameEndStation } from "@/components/games/GameEndStation";
+import { GameJuiceToast } from "@/components/games/GameJuiceToast";
 import { IconSparkle, IconStar } from "@/components/games/ClayIcons";
 import type { GameAudioBus, OverlayProps } from "@/lib/gamekit/adapter";
 import { loadPlayerProfile } from "@/lib/gamekit/progress/save";
@@ -19,15 +20,20 @@ import { GAMEKIT_PROGRESS_EVENT } from "@/lib/gamekit/progress/session";
 import {
   applyGravity,
   areAdjacent,
+  CANDY_FALL_MS,
+  CANDY_POP_MS,
+  CANDY_SWAP_MS,
   clearCells,
   collectBottomDrops,
   createBoard,
   findHintMove,
   findMatches,
+  planGravity,
   reshuffle,
   swapCreatesMatch,
   swapped,
   type BoardState,
+  type CandyFallMotion,
 } from "@/lib/games/candy-match/engine";
 import {
   CANDY_MATCH_LEVELS,
@@ -136,6 +142,7 @@ function computeScore(progress: Progress, movesLeft: number): number {
 
 export function CandyMatchView({
   kidsMode,
+  reducedMotion,
   status,
   syncHost,
   onOpenTutorial,
@@ -161,7 +168,11 @@ export function CandyMatchView({
   const [shaking, setShaking] = useState<Set<number>>(new Set());
   const [overlay, setOverlay] = useState<"win" | "retry" | null>(null);
   const [winStars, setWinStars] = useState(0);
+  const [winSummary, setWinSummary] = useState("");
   const [message, setMessage] = useState("");
+  const [comboToast, setComboToast] = useState<string | null>(null);
+  const [swapMotion, setSwapMotion] = useState<{ a: number; b: number } | null>(null);
+  const [fallMotion, setFallMotion] = useState<readonly CandyFallMotion[] | null>(null);
   const [medals, setMedals] = useState<number[]>([]);
   const [cellPx, setCellPx] = useState(56);
 
@@ -181,6 +192,10 @@ export function CandyMatchView({
   levelIndexRef.current = levelIndex;
   const screenRef = useRef(screen);
   screenRef.current = screen;
+  const reducedRef = useRef(reducedMotion);
+  reducedRef.current = reducedMotion;
+
+  const motionSleep = (ms: number) => sleep(reducedRef.current ? 0 : ms);
 
   const inputPaused = instance.isInputPaused() || status === "paused";
 
@@ -232,6 +247,12 @@ export function CandyMatchView({
     [],
   );
 
+  useEffect(() => {
+    if (!comboToast) return;
+    const t = setTimeout(() => setComboToast(null), 900);
+    return () => clearTimeout(t);
+  }, [comboToast]);
+
   const startLevel = useCallback(
     (index: number) => {
       ensureAudio();
@@ -252,6 +273,9 @@ export function CandyMatchView({
       setSelected(null);
       setOverlay(null);
       setPopping(new Set());
+      setSwapMotion(null);
+      setFallMotion(null);
+      setComboToast(null);
       usedPropRef.current = false;
       processingRef.current = false;
       setScreen("play");
@@ -316,7 +340,8 @@ export function CandyMatchView({
         wave += 1;
         setPopping(new Set(matches));
         tone(523 + wave * 110, 0.12, "triangle", 0.06);
-        await sleep(280);
+        if (wave >= 2) setComboToast("連連看！");
+        await motionSleep(CANDY_POP_MS);
         const cleared = clearCells(pieces, dirt, matches, CANDY_MATCH_PIECES.length);
         pieces = cleared.pieces;
         dirt = cleared.dirt;
@@ -330,16 +355,24 @@ export function CandyMatchView({
         gained.waves += 1;
         setPopping(new Set());
         setBoard({ cols: lv.cols, rows: lv.rows, pieces, dirt });
-        await sleep(120);
+        const falls = planGravity(pieces, lv.cols, lv.rows);
         pieces = applyGravity(pieces, lv.cols, lv.rows, lv.pieceKinds, Math.random);
+        if (!reducedRef.current && falls.length > 0) {
+          setFallMotion(falls);
+          setBoard({ cols: lv.cols, rows: lv.rows, pieces, dirt });
+          await sleep(CANDY_FALL_MS);
+          setFallMotion(null);
+        } else {
+          setBoard({ cols: lv.cols, rows: lv.rows, pieces, dirt });
+          await motionSleep(180);
+        }
         const drops = collectBottomDrops(pieces, lv.cols, lv.rows);
         pieces = drops.pieces;
         if (drops.dropped > 0) {
           gained.dropped += drops.dropped;
           tone(784, 0.16, "triangle", 0.06);
+          setBoard({ cols: lv.cols, rows: lv.rows, pieces, dirt });
         }
-        setBoard({ cols: lv.cols, rows: lv.rows, pieces, dirt });
-        await sleep(180);
       }
       const finalDrops = collectBottomDrops(pieces, lv.cols, lv.rows);
       if (finalDrops.dropped > 0) {
@@ -366,6 +399,10 @@ export function CandyMatchView({
         const flawless = !usedPropRef.current;
         const stars = 1 + (flawless ? 1 : 0) + (remainOk ? 1 : 0);
         setWinStars(stars);
+        setWinSummary(
+          [flawless ? "沒用道具" : "用了道具", remainOk || lv.moves === 0 ? "步數還很夠" : "步數剛好"]
+            .join(" · "),
+        );
         setOverlay("win");
         setMessage(pick(CHEER_WIN));
         [523, 659, 784, 1046].forEach((f, i) =>
@@ -419,21 +456,30 @@ export function CandyMatchView({
       armIdleHint();
       setSelected(null);
       if (!areAdjacent(a, b, b0.cols)) return;
-      if (swapCreatesMatch(b0.pieces, a, b, b0.cols, b0.rows)) {
+
+      const commitSwap = async () => {
+        processingRef.current = true;
+        if (!reducedRef.current) {
+          setSwapMotion({ a, b });
+          tone(660, 0.06, "square", 0.04);
+          await sleep(CANDY_SWAP_MS);
+          setSwapMotion(null);
+        } else {
+          tone(660, 0.06, "square", 0.04);
+        }
         const next = swapped(b0.pieces, a, b);
         setBoard({ ...b0, pieces: next });
-        tone(660, 0.06, "square", 0.04);
         if (levelRef.current.moves > 0) setMovesLeft((m) => m - 1);
-        void runResolve(next, b0.dirt);
+        await runResolve(next, b0.dirt);
+      };
+
+      if (swapCreatesMatch(b0.pieces, a, b, b0.cols, b0.rows)) {
+        void commitSwap();
       } else if (b0.pieces[a] === -2 || b0.pieces[b] === -2) {
         const giftIdx = b0.pieces[a] === -2 ? a : b;
         const otherIdx = giftIdx === a ? b : a;
         if (otherIdx === giftIdx + b0.cols) {
-          const next = swapped(b0.pieces, a, b);
-          setBoard({ ...b0, pieces: next });
-          tone(660, 0.06, "square", 0.04);
-          if (levelRef.current.moves > 0) setMovesLeft((m) => m - 1);
-          void runResolve(next, b0.dirt);
+          void commitSwap();
           return;
         }
         shakePair(a, b);
@@ -621,9 +667,12 @@ export function CandyMatchView({
 
       {screen === "map" && (
         <div className={styles.mapScreen} style={{ paddingBottom: 12 }}>
-          <h2 style={{ textAlign: "center", color: INK, fontSize: 22, fontWeight: 900, margin: "6px 0 14px" }}>
+          <h2 style={{ textAlign: "center", color: INK, fontSize: 22, fontWeight: 900, margin: "6px 0 8px" }}>
             遊樂園地圖
           </h2>
+          <p className={styles.starLegend}>
+            通關一顆星，沒用道具再一顆，步數還夠再一顆
+          </p>
           <div style={{ textAlign: "center", marginBottom: 12 }}>
             <button type="button" style={softBtn} onClick={onOpenTutorial}>
               怎麼玩？
@@ -633,12 +682,15 @@ export function CandyMatchView({
             {CANDY_MATCH_LEVELS.map((lv, i) => {
               const locked = i > maxCleared;
               const stars = medalCount(medals[i] ?? 0);
+              const nextPlay = !locked && i === maxCleared;
               return (
                 <button
                   key={lv.index}
                   type="button"
                   disabled={locked}
                   onClick={() => startLevel(i)}
+                  data-next={nextPlay ? "true" : undefined}
+                  className={nextPlay ? styles.mapNext : undefined}
                   style={{
                     ...softBtn,
                     flexDirection: "column",
@@ -650,12 +702,18 @@ export function CandyMatchView({
                   }}
                 >
                   <span style={{ fontSize: 13, color: INK_SOFT, fontWeight: 800 }}>
-                    {locked ? "🔒" : `第 ${i + 1} 關`}
+                    {locked ? "🔒" : nextPlay ? "下一關" : `第 ${i + 1} 關`}
                   </span>
                   <span style={{ fontSize: 16, fontWeight: 900 }}>{lv.place}</span>
-                  <span aria-label={`${stars} 顆星`} style={{ display: "inline-flex", gap: 2 }}>
+                  <span aria-label={`${stars} 顆星`} className={styles.starSlots}>
                     {[0, 1, 2].map((s) => (
-                      <IconStar key={s} size={16} color={s < stars ? "#ffd34d" : "#e3dce6"} />
+                      <span
+                        key={s}
+                        className={s < stars ? styles.starFilled : styles.starEmpty}
+                        aria-hidden
+                      >
+                        <IconStar size={16} color={s < stars ? "#ffd34d" : "#d9d0e0"} />
+                      </span>
                     ))}
                   </span>
                 </button>
@@ -723,7 +781,17 @@ export function CandyMatchView({
               disabled={processingRef.current || overlay !== null || inputPaused}
               onTapCell={onTapCell}
               onSwipeCell={attemptSwap}
+              motion={{
+                swap: swapMotion,
+                falls: fallMotion,
+                reduced: reducedMotion,
+              }}
             />
+            {comboToast ? (
+              <div className={styles.comboSlot}>
+                <GameJuiceToast text={comboToast} big reduced={reducedMotion} />
+              </div>
+            ) : null}
           </div>
 
           <div
@@ -820,6 +888,24 @@ export function CandyMatchView({
                 zIndex: 5,
               }}
             >
+              {overlay === "win" && !reducedMotion ? (
+                <div className={styles.confetti} aria-hidden>
+                  {["var(--c-pink)", "var(--c-yellow)", "var(--c-mint)", "var(--c-sky)", "var(--c-lilac)"].flatMap(
+                    (color, i) =>
+                      [0, 1].map((copy) => (
+                        <span
+                          key={`${i}-${copy}`}
+                          className={styles.confettiPiece}
+                          style={{
+                            ["--x" as string]: `${12 + i * 18 + copy * 8}%`,
+                            ["--c" as string]: color,
+                            ["--delay" as string]: `${(i + copy) * 70}ms`,
+                          }}
+                        />
+                      )),
+                  )}
+                </div>
+              ) : null}
               {overlay === "win" ? (
                 <GameEndStation
                   mood="win"
@@ -829,6 +915,7 @@ export function CandyMatchView({
                       : "任務完成！"
                   }
                   stars={winStars}
+                  summary={winSummary}
                   gameSlug="candy-match"
                   onReplay={
                     levelIndex === CANDY_MATCH_LEVELS.length - 1

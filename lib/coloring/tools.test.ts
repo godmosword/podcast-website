@@ -3,9 +3,11 @@ import {
   BRUSH_SIZES,
   COLORING_PALETTE,
   coloringDraftKey,
+  coloringDraftStorageKey,
   cropImageDataRect,
   floodFillPaint,
   hexToRgba,
+  parseColoringDraftPageId,
   pasteImageDataRect,
   stampBrush,
   unionDirtyRect,
@@ -131,5 +133,13 @@ describe("coloring tools", () => {
     pasteImageDataRect(img, before, rect);
     expect(img.data[(2 * 4 + 2) * 4]).toBe(255);
     expect(img.data[(1 * 4 + 1) * 4 + 3]).toBe(255);
+  });
+});
+
+describe("coloring draft key", () => {
+  test("parseColoringDraftPageId 只接受當前世代", () => {
+    expect(parseColoringDraftPageId(coloringDraftStorageKey("char-x"))).toBe("char-x");
+    expect(parseColoringDraftPageId("char-x@r1")).toBeNull();
+    expect(parseColoringDraftPageId("char-x")).toBeNull();
   });
 });

@@ -5,6 +5,7 @@ import {
   applyGravity,
   areAdjacent,
   createBoard,
+  planGravity,
   findHintMove,
   findMatches,
   idx,
@@ -178,6 +179,26 @@ describe("createBoard", () => {
     const b = createBoard(6, 6, 4, rng, { dirtCount: 5, dropCount: 1 });
     expect(b.dirt.filter(Boolean).length).toBe(5);
     expect(b.pieces.filter((v) => v === DROP_ITEM).length).toBe(1);
+  });
+});
+
+describe("planGravity", () => {
+  it("空格壓實後，既有圖案與新補格都帶掉落列數", () => {
+    // 3×3 第 0 欄：頂 0、中空、底 1 → 空 1 格
+    const pieces = [
+      0, 2, 3,
+      EMPTY, 4, 5,
+      1, 6, 7,
+    ];
+    const moves = planGravity(pieces, 3, 3);
+    expect(moves).toEqual([
+      { to: 3, rows: 1 },
+      { to: 0, rows: 1 },
+    ]);
+  });
+
+  it("滿欄不產生位移", () => {
+    expect(planGravity([0, 1, 2, 3, 4, 5, 6, 7, 8], 3, 3)).toEqual([]);
   });
 });
 

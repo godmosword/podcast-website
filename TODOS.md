@@ -719,7 +719,21 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 
 ---
 
-## 設計待辦（現役 polish）
+## 遊樂園品質打磨 Wave 1（2026-08-13）
+
+> 手感＋完成儀式＋hub 進度露出。不解凍方塊 Marathon／Sprint、不燒生圖、不改 GameKit schema。
+
+| 項目 | 狀態 | 摘要 |
+|------|------|------|
+| polish(games): 消消樂 swap／掉落／連鎖 toast、地圖三星說明、過關 confetti | 完成 | `CandyMatchBoard` motion、`planGravity` |
+| polish(games): 著色「我塗好了」＋本機作品牆 | 完成 | `GameEndStation`、IndexedDB 草稿列 |
+| polish(games): GameChrome 依 gameId 隱藏方塊選項；方塊開場露出難度／彩虹 | 完成 | |
+| polish(games): Hub 低壓星星／已玩／車庫下一輛 | 完成 | 不改 progress schema |
+| 驗證 | 全綠，待 commit 後回填 hash | `npm test` 1125／`build`／`tsc` |
+
+---
+
+
 
 > 已完成地圖／設計審查見 [archive](./docs/archive/TODOS-completed-2026-07-11.md)。對齊 [DESIGN.md](./DESIGN.md)。
 

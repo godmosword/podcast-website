@@ -1,18 +1,32 @@
 "use client";
 
 import { useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
-import { DROP_ITEM, type BoardState } from "@/lib/games/candy-match/engine";
+import {
+  CANDY_FALL_MS,
+  CANDY_SWAP_MS,
+  type CandyFallMotion,
+  DROP_ITEM,
+  type BoardState,
+} from "@/lib/games/candy-match/engine";
 import {
   CANDY_MATCH_BOARD_PADDING,
   CANDY_MATCH_CELL_GAP,
+  candyMatchSwapOffset,
 } from "@/lib/games/candy-match/cell-size";
 import { CANDY_MATCH_PIECES } from "@/lib/games/candy-match/levels";
 import { DirtOverlay, PieceArt, PieceGift } from "@/components/games/CandyMatchPieceArt";
+import styles from "./CandyMatchBoard.module.css";
 
 /**
  * 消除棋盤：渲染格子＋圖案，處理「點兩下相鄰」與「拖一下」兩種交換手勢。
- * 動畫（選取縮放、提示發光、消除 pop）以 CSS class/style 呈現。
+ * 動畫（選取縮放、提示發光、消除 pop、交換／掉落）以 CSS class/style 呈現。
  */
+
+export type CandyMatchBoardMotion = {
+  swap?: { a: number; b: number } | null;
+  falls?: readonly CandyFallMotion[] | null;
+  reduced?: boolean;
+};
 
 type CandyMatchBoardProps = {
   board: BoardState;
@@ -26,6 +40,7 @@ type CandyMatchBoardProps = {
   disabled: boolean;
   onTapCell: (i: number) => void;
   onSwipeCell: (from: number, to: number) => void;
+  motion?: CandyMatchBoardMotion;
 };
 
 export function CandyMatchBoard({
@@ -38,6 +53,7 @@ export function CandyMatchBoard({
   disabled,
   onTapCell,
   onSwipeCell,
+  motion,
 }: CandyMatchBoardProps) {
   const dragRef = useRef<{
     index: number;
@@ -47,6 +63,14 @@ export function CandyMatchBoard({
     fired: boolean;
   } | null>(null);
   const { cols, rows, pieces, dirt } = board;
+  const reduced = Boolean(motion?.reduced);
+  const swap = reduced ? null : motion?.swap ?? null;
+  const fallByTo = new Map<number, number>();
+  if (!reduced) {
+    for (const fall of motion?.falls ?? []) {
+      fallByTo.set(fall.to, fall.rows);
+    }
+  }
 
   const releaseCapture = (el: HTMLButtonElement, pointerId: number) => {
     try {
@@ -127,6 +151,8 @@ export function CandyMatchBoard({
   return (
     <div
       data-testid="candy-match-board"
+      data-swap={swap ? `${swap.a}-${swap.b}` : undefined}
+      data-falling={fallByTo.size > 0 ? "true" : undefined}
       style={{
         display: "grid",
         gridTemplateColumns: `repeat(${cols}, ${cellPx}px)`,
@@ -151,6 +177,17 @@ export function CandyMatchBoard({
           : v >= 0
             ? CANDY_MATCH_PIECES[v]?.name ?? "圖案"
             : "空格";
+        const swapPeer = swap
+          ? i === swap.a
+            ? swap.b
+            : i === swap.b
+              ? swap.a
+              : null
+          : null;
+        const swapOff = swapPeer != null
+          ? candyMatchSwapOffset(i, swapPeer, cols, cellPx)
+          : null;
+        const fallRows = fallByTo.get(i) ?? 0;
         const cellStyle: CSSProperties = {
           position: "relative",
           width: cellPx,
@@ -164,20 +201,43 @@ export function CandyMatchBoard({
               : "rgba(208,240,255,.5)",
           cursor: disabled ? "default" : "pointer",
           WebkitTapHighlightColor: "transparent",
-          transition: "transform .15s ease",
-          transform: isSelected ? "scale(1.12)" : "scale(1)",
+          transition: reduced ? "none" : "transform .15s ease",
+          transform: isSelected && !swapOff ? "scale(1.12)" : "scale(1)",
           boxShadow: isSelected
             ? "0 0 0 3px #ff9fb7, 0 6px 14px rgba(217,95,135,.3)"
             : isHint
               ? "0 0 0 3px rgba(255,211,77,.9), 0 0 14px rgba(255,211,77,.6)"
               : "none",
-          animation: isShaking
-            ? "candyMatchShake .3s ease"
-            : isHint
-              ? "candyMatchGlow 1s ease-in-out infinite"
-              : "none",
-          zIndex: isSelected ? 2 : 1,
+          animation: reduced
+            ? "none"
+            : isShaking
+              ? "candyMatchShake .3s ease"
+              : isHint
+                ? "candyMatchGlow 1s ease-in-out infinite"
+                : "none",
+          zIndex: isSelected || swapOff ? 2 : 1,
         };
+        const artClass = [
+          styles.pieceArt,
+          isPopping ? styles.piecePop : "",
+          v < 0 && v !== DROP_ITEM ? styles.pieceHidden : "",
+          swapOff ? styles.pieceSwap : "",
+          fallRows > 0 ? styles.pieceFall : "",
+        ]
+          .filter(Boolean)
+          .join(" ");
+        const artStyle: CSSProperties = swapOff
+          ? {
+              ["--swap-dx" as string]: `${swapOff.dx}px`,
+              ["--swap-dy" as string]: `${swapOff.dy}px`,
+              ["--swap-ms" as string]: `${CANDY_SWAP_MS}ms`,
+            }
+          : fallRows > 0
+            ? {
+                ["--fall-from" as string]: `${-fallRows * (cellPx + CANDY_MATCH_CELL_GAP)}px`,
+                ["--fall-ms" as string]: `${CANDY_FALL_MS}ms`,
+              }
+            : {};
         return (
           <button
             key={i}
@@ -185,6 +245,8 @@ export function CandyMatchBoard({
             aria-label={`第 ${Math.floor(i / cols) + 1} 列第 ${(i % cols) + 1} 格，${pieceName}`}
             aria-pressed={isSelected}
             data-selected={isSelected ? "true" : undefined}
+            data-swap={swapOff ? "true" : undefined}
+            data-fall-rows={fallRows > 0 ? String(fallRows) : undefined}
             style={cellStyle}
             onPointerDown={onPointerDown(i)}
             onPointerMove={onPointerMove}
@@ -197,16 +259,7 @@ export function CandyMatchBoard({
                 <DirtOverlay size="100%" />
               </span>
             )}
-            <span
-              style={{
-                position: "absolute",
-                inset: 3,
-                display: "block",
-                transition: "opacity .22s ease, transform .22s ease",
-                opacity: isPopping || v < 0 ? 0 : 1,
-                transform: isPopping ? "scale(1.45)" : "scale(1)",
-              }}
-            >
+            <span className={artClass} style={artStyle}>
               {v === DROP_ITEM ? <PieceGift size="100%" /> : v >= 0 ? <PieceArt piece={v} size="100%" /> : null}
             </span>
           </button>

@@ -7,6 +7,8 @@ import decor from "@/components/decor/decor.module.css";
 import Icon from "@/components/ui/Icon";
 import { GAMES, gameParentTip, type GameMeta } from "@/data/games";
 import { getSiteUrl } from "@/lib/site-url";
+import GamesHubProgress from "@/components/games/GamesHubProgress";
+import GamePlayedMark from "@/components/games/GamePlayedMark";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
@@ -90,6 +92,7 @@ function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
         <span className={styles.cardBody}>
           <span className={styles.cardTitle}>
             <span aria-hidden>{game.emoji}</span> {game.title}
+            <GamePlayedMark slug={game.slug} />
           </span>
           <span className={styles.cardTeaser}>{game.teaser}</span>
           <span className={styles.cardMeta}>
@@ -164,6 +167,7 @@ export default function GamesHubPage() {
         <h2 id="games-all" className={styles.zoneTitle}>
           全部遊戲
         </h2>
+        <GamesHubProgress />
         <ul className={styles.cardGrid}>
           {ORDERED_GAMES.map((game, index) => (
             <GameCard key={game.slug} game={game} eager={index === 0} />

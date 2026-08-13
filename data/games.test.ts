@@ -38,6 +38,8 @@ describe("games v2 presentation metadata", () => {
         game.gameType,
       );
       expect(game.controls.length).toBeGreaterThanOrEqual(2);
+      expect(game.tutorial.length).toBeGreaterThanOrEqual(2);
+      expect(game.tutorial.length).toBeLessThanOrEqual(3);
       expect(game.art.cover).toMatch(/^\/games\/v2\//);
       expect(game.art.alt.length).toBeGreaterThan(0);
       expect(game.teaser.length).toBeGreaterThan(0);

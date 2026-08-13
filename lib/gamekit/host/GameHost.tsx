@@ -334,6 +334,7 @@ export default function GameHost({
       onRestart={handleRestart}
       announce={announce}
       className={className}
+      gameId={adapter.id}
     >
       <div style={{ position: "relative", width: "100%" }}>
         {chromeSlot ? createPortal(toolbarRow, chromeSlot) : toolbarRow}

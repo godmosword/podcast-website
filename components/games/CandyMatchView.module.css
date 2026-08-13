@@ -145,7 +145,75 @@
 }
 
 .boardWrap {
+  position: relative;
   padding: 4px 0 2px;
+}
+
+.comboSlot {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  z-index: 3;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.starLegend {
+  margin: 0 0 12px;
+  text-align: center;
+  color: #7c6886;
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.starSlots {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.starEmpty {
+  opacity: 0.55;
+  filter: grayscale(0.35);
+}
+
+.starFilled {
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.8));
+}
+
+.mapNext {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-pink) 55%, transparent) !important;
+}
+
+.confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.confettiPiece {
+  position: absolute;
+  top: 8%;
+  left: var(--x);
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--c);
+  animation: confettiFall 900ms ease-out forwards;
+  animation-delay: var(--delay, 0ms);
+}
+
+@keyframes confettiFall {
+  from {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(240px) rotate(140deg);
+    opacity: 0;
+  }
 }
 
 .actionRow {
@@ -178,5 +246,10 @@
 
   .taskProgressFill {
     transition: none;
+  }
+
+  .confettiPiece {
+    animation: none;
+    opacity: 0;
   }
 }

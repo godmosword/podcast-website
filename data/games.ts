@@ -68,6 +68,7 @@ export const GAMES: GameMeta[] = [
     tutorial: [
       { text: "點兩個相鄰的圖案", gesture: "tap" },
       { text: "三個一樣就消除", gesture: "tap" },
+      { text: "髒髒的格子消掉就乾淨", gesture: "tap" },
     ],
   },
   {
