@@ -728,7 +728,7 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 | polish(games): 消消樂 4 連掃把糖／5 連彩虹糖 | 完成 | `planWaveClears`、棋盤徽章 |
 | polish(games): Hub 車庫五格＋貼紙列 | 完成 | 不改 progress schema、不開新路由 |
 | chore(games): 刪 `GameMeta.featured` 死欄位 | 完成 | PLAY-IA-4 後未再使用 |
-| 驗證 | 全綠，待 commit 後回填 hash | `npm test` 1145／`build`／`tsc` |
+| 驗證 | ✅ `3abe632` | `npm test` 1145／`build`／`tsc` |
 
 ---
 
