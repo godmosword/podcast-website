@@ -54,7 +54,7 @@
 | ID | 說明 |
 |----|------|
 | polish(for-parents): play-map 具名導航、類型場景帶與選中針場館名 | `dedf98c` |
-| fix(data): play-map 三筆場館錯置與 mapsQuery／placeId 契約 | 待回填 |
+| fix(data): play-map 三筆場館錯置與 mapsQuery／placeId 契約 | `01ace1c` |
 
 ### 本輪待辦（2026-08-13）
 
