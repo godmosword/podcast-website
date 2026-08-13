@@ -26,7 +26,23 @@ type FitBoundsProps = {
   selectedPoint: [number, number] | null;
   /** 選中時把針抬出 sheet 覆蓋區：[right, bottom] */
   selectedPad: [number, number];
+  /**
+   * 鏡頭重算的唯一觸發鍵。涵蓋 clusterMode、縣市範圍、命中筆數、selectedId。
+   * 其餘鏡頭參數由 ref 讀最新快照，避免 parent 重繪把使用者平移／縮放拉回去。
+   */
+  fitKey: string;
 };
+
+/** 組出 FitBounds 的 fitKey；城市名排序後拼接，避免集合相同但順序不同。 */
+export function playMapFitKey(args: {
+  clusterMode: boolean;
+  cities: readonly string[];
+  filteredCount: number;
+  selectedId: string | null;
+}): string {
+  const cityScope = [...new Set(args.cities)].sort().join(",");
+  return `${args.clusterMode ? "cluster" : "pins"}|${cityScope}|${args.filteredCount}|${args.selectedId ?? ""}`;
+}
 
 function escapeAttr(value: string): string {
   return value
@@ -57,37 +73,85 @@ function FitBounds({
   animate,
   selectedPoint,
   selectedPad,
+  fitKey,
 }: FitBoundsProps) {
   const map = useMap();
+  const userMovedRef = useRef(false);
+  const programmaticRef = useRef(false);
+  const prevFitKeyRef = useRef<string | undefined>(undefined);
+  const snapshotRef = useRef({
+    points,
+    emptyCenter,
+    animate,
+    selectedPoint,
+    selectedPad,
+  });
+  snapshotRef.current = {
+    points,
+    emptyCenter,
+    animate,
+    selectedPoint,
+    selectedPad,
+  };
 
   useEffect(() => {
-    const motion = animate ? undefined : ({ animate: false } as L.ZoomPanOptions);
+    const markUserMoved = () => {
+      if (programmaticRef.current) return;
+      userMovedRef.current = true;
+    };
+    map.on("dragstart", markUserMoved);
+    map.on("zoomstart", markUserMoved);
+    return () => {
+      map.off("dragstart", markUserMoved);
+      map.off("zoomstart", markUserMoved);
+    };
+  }, [map]);
 
-    if (selectedPoint) {
-      map.fitBounds(L.latLngBounds([selectedPoint]), {
+  useEffect(() => {
+    const keyChanged = prevFitKeyRef.current !== fitKey;
+    prevFitKeyRef.current = fitKey;
+
+    if (userMovedRef.current && !keyChanged) {
+      return;
+    }
+    if (keyChanged) {
+      userMovedRef.current = false;
+    }
+
+    const snap = snapshotRef.current;
+    const motion = snap.animate
+      ? undefined
+      : ({ animate: false } as L.ZoomPanOptions);
+
+    programmaticRef.current = true;
+    if (snap.selectedPoint) {
+      map.fitBounds(L.latLngBounds([snap.selectedPoint]), {
         paddingTopLeft: [48, 72],
-        paddingBottomRight: selectedPad,
+        paddingBottomRight: snap.selectedPad,
         maxZoom: 15,
-        animate,
+        animate: snap.animate,
       });
-      return;
+    } else if (snap.points.length === 0) {
+      map.setView(snap.emptyCenter, DEFAULT_ZOOM, motion);
+    } else if (snap.points.length === 1) {
+      map.setView(snap.points[0], 14, motion);
+    } else {
+      map.fitBounds(L.latLngBounds(snap.points), {
+        paddingTopLeft: [48, 72],
+        paddingBottomRight: [48, 48],
+        maxZoom: 14,
+        animate: snap.animate,
+      });
     }
-
-    if (points.length === 0) {
-      map.setView(emptyCenter, DEFAULT_ZOOM, motion);
-      return;
-    }
-    if (points.length === 1) {
-      map.setView(points[0], 14, motion);
-      return;
-    }
-    map.fitBounds(L.latLngBounds(points), {
-      paddingTopLeft: [48, 72],
-      paddingBottomRight: [48, 48],
-      maxZoom: 14,
-      animate,
+    // fitBounds／setView 會同步（或下一幀）發 zoomstart；延後清旗標避免誤判成使用者操作。
+    const raf = window.requestAnimationFrame(() => {
+      programmaticRef.current = false;
     });
-  }, [animate, emptyCenter, map, points, selectedPad, selectedPoint]);
+    return () => {
+      window.cancelAnimationFrame(raf);
+      programmaticRef.current = false;
+    };
+  }, [map, fitKey]);
 
   return null;
 }
@@ -243,12 +307,22 @@ export default function PlayMapLeaflet({
   const selectedPoint: [number, number] | null = selected
     ? [selected.lat, selected.lng]
     : null;
-  const clusterPoints: Array<[number, number]> = cityClusters.map((row) => [
-    row.lat,
-    row.lng,
-  ]);
+  const clusterPoints = useMemo(
+    (): Array<[number, number]> =>
+      cityClusters.map((row) => [row.lat, row.lng]),
+    [cityClusters],
+  );
+  const selectedPad = useMemo(
+    (): [number, number] => (splitLayout ? [280, 72] : [48, 220]),
+    [splitLayout],
+  );
   const fitPoints = clusterMode ? clusterPoints : points;
-  const selectedPad: [number, number] = splitLayout ? [280, 72] : [48, 220];
+  const fitKey = playMapFitKey({
+    clusterMode,
+    cities: places.map((place) => place.city),
+    filteredCount: places.length,
+    selectedId,
+  });
 
   return (
     <>
@@ -272,6 +346,7 @@ export default function PlayMapLeaflet({
           animate={!reduceMotion}
           selectedPoint={clusterMode ? null : selectedPoint}
           selectedPad={selectedPad}
+          fitKey={fitKey}
         />
         {clusterMode
           ? cityClusters.map((cluster) => (
