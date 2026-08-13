@@ -104,13 +104,17 @@ function AccessibleMarker({ place, selected, onSelect }: AccessibleMarkerProps) 
 
   const icon = useMemo(() => {
     const label = escapeAttr(`${place.city} · ${place.type} · ${place.name}`);
+    const name = escapeAttr(place.name);
+    const nameHtml = selected
+      ? `<span class="playMapMarkerName">${name}</span>`
+      : "";
     return L.divIcon({
       className: "playMapMarkerHost",
-      html: `<button type="button" class="playMapMarkerButton" data-type="${typeKey}" aria-label="${label}" aria-pressed="false"><span class="playMapPin" aria-hidden="true"></span></button>`,
+      html: `<button type="button" class="playMapMarkerButton" data-type="${typeKey}" aria-label="${label}" aria-pressed="${selected ? "true" : "false"}"><span class="playMapPin" aria-hidden="true"></span>${nameHtml}</button>`,
       iconSize: [44, 44],
       iconAnchor: [22, 42],
     });
-  }, [place.city, place.name, place.type, typeKey]);
+  }, [place.city, place.name, place.type, selected, typeKey]);
 
   useEffect(() => {
     const marker = markerRef.current;

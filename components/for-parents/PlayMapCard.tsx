@@ -45,7 +45,7 @@ export function PlayMapCard({
           onClick={(event) => onSelect(place.id, event.currentTarget)}
         >
           <PlaygroundTypeMark type={place.type} />
-          <span className={styles.cardText}>
+          <span className={styles.cardBody}>
             <span className={styles.cardName}>{place.name}</span>
             <span className={styles.cardMeta}>{meta}</span>
             {decisionTags.length > 0 ? (
@@ -70,7 +70,7 @@ export function PlayMapCard({
           </button>
           <a
             className={styles.cardNav}
-            href={buildGoogleMapsNavUrl(place.lat, place.lng)}
+            href={buildGoogleMapsNavUrl(place)}
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`導航前往 ${place.name}（另開視窗）`}

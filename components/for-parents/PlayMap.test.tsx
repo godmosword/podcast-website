@@ -401,7 +401,7 @@ describe("PlayMap", () => {
     ).toBeGreaterThan(0);
     expect(
       cardsPanel.querySelector(
-        `[data-type="${playgroundTypeVisualKey(first.type)}"] svg`,
+        `[data-type="${playgroundTypeVisualKey(first.type)}"][data-scene] svg`,
       ),
     ).toBeTruthy();
   });
@@ -466,6 +466,21 @@ describe("PlayMap", () => {
       '#play-map-panel-cards a[href^="https://www.google.com/maps/dir/"]',
     );
     expect(navLinks.length).toBe(listPlaygrounds().length);
+
+    const coordOnly = /^-?\d+(\.\d+)?,\s*-?\d+/;
+    const byName = new Map(listPlaygrounds().map((place) => [place.name, place]));
+    for (const link of navLinks) {
+      const dest = new URL(link.getAttribute("href") ?? "").searchParams.get(
+        "destination",
+      );
+      expect(dest).toBeTruthy();
+      expect(dest).not.toMatch(coordOnly);
+      const name = dest?.split(", ")[0] ?? "";
+      const place = byName.get(name);
+      expect(place, dest ?? "").toBeDefined();
+      if (!place) continue;
+      expect(dest).toBe(`${place.name}, ${place.city}`);
+    }
   });
 
   it("載入更多會擴批，且到底時按鈕消失", () => {

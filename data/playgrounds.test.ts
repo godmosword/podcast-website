@@ -202,26 +202,50 @@ describe("playgrounds sidecar", () => {
     }
   });
 
-  it("buildGoogleMapsNavUrl 為 dir 導航格式且不含 origin", () => {
-    const url = buildGoogleMapsNavUrl(25.0018, 121.3056);
+  it("buildGoogleMapsNavUrl 以頁面名稱＋縣市為 destination，不是座標圖釘", () => {
+    const place = getPlayground("ty-fenghe");
+    expect(place).toBeDefined();
+    if (!place) return;
+
+    const url = buildGoogleMapsNavUrl(place);
     const parsed = new URL(url);
     expect(parsed.origin + parsed.pathname).toBe(
       "https://www.google.com/maps/dir/",
     );
     expect(parsed.searchParams.get("api")).toBe("1");
-    expect(parsed.searchParams.get("destination")).toBe("25.0018,121.3056");
+    expect(parsed.searchParams.get("destination")).toBe(
+      `${place.name}, ${place.city}`,
+    );
     expect(parsed.searchParams.get("travelmode")).toBe("driving");
     expect(parsed.searchParams.get("dir_action")).toBe("navigate");
     expect(parsed.searchParams.has("origin")).toBe(false);
   });
 
-  it("buildGoogleMapsPlaceUrl 為 search 定位格式", () => {
-    const url = buildGoogleMapsPlaceUrl(25.0018, 121.3056);
+  it("每一筆導航 destination 含頁面名稱與縣市，且不是 lat,lng", () => {
+    const coordOnly = /^-?\d+(\.\d+)?,\s*-?\d+/;
+    for (const place of listPlaygrounds()) {
+      const dest = new URL(buildGoogleMapsNavUrl(place)).searchParams.get(
+        "destination",
+      );
+      expect(dest, place.id).toBe(`${place.name}, ${place.city}`);
+      expect(dest, place.id).toContain(place.name);
+      expect(dest, place.id).not.toMatch(coordOnly);
+    }
+  });
+
+  it("buildGoogleMapsPlaceUrl 以頁面名稱搜尋，不是座標", () => {
+    const place = getPlayground("ty-fenghe");
+    expect(place).toBeDefined();
+    if (!place) return;
+
+    const url = buildGoogleMapsPlaceUrl(place);
     const parsed = new URL(url);
     expect(parsed.origin + parsed.pathname).toBe(
       "https://www.google.com/maps/search/",
     );
     expect(parsed.searchParams.get("api")).toBe("1");
-    expect(parsed.searchParams.get("query")).toBe("25.0018,121.3056");
+    expect(parsed.searchParams.get("query")).toBe(
+      `${place.name}, ${place.city}`,
+    );
   });
 });

@@ -40,7 +40,7 @@ Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範
 
 - **Mobile-first**，內容欄寬 `max-width: 640px` 置中
 - **地圖／儀表板工具頁**（如 `/for-parents/play-map`、`/for-parents/dashboard`）豁免 640px 單欄限制，內容區 `max-width: 1100px` 置中，以容納地圖與並排控制
-- **親子景點頁（`/for-parents/play-map`）**：不掛 `SiteHeader`（全域 `SiteNavBar` 已顯示品牌，再放一次會出現兩個字標與重複 h1）；工具殼無行銷 hero／長 lede；H1「親子遊樂地圖」在工具頂列。**手機**瀏覽互斥為卡片｜地圖（Leaflet 僅地圖 tab 動態載入）；**桌面 ≥980px** 名單與地圖並排，隱藏互斥分頁。縣市／類型／條件用次要描邊 chip；意圖列為主按鈕。無場館照片時以**類型色塊＋簡圖**與短標籤構成卡片；全國未定位時地圖改縣市聚合，不撒全部針。
+- **親子景點頁（`/for-parents/play-map`）**：不掛 `SiteHeader`（全域 `SiteNavBar` 已顯示品牌，再放一次會出現兩個字標與重複 h1）；工具殼無行銷 hero／長 lede；H1「親子遊樂地圖」在工具頂列。**手機**瀏覽互斥為卡片｜地圖（Leaflet 僅地圖 tab 動態載入）；**桌面 ≥980px** 名單與地圖並排，隱藏互斥分頁。縣市／類型／條件用次要描邊 chip；意圖列為主按鈕。無場館照片時以**類型場景帶**（7 種手繪 SVG）與短標籤構成卡片；Google 導航／顯示位置用頁面場館名＋縣市，不用 lat,lng 圖釘。全國未定位時地圖改縣市聚合，不撒全部針。
 - 桌面端維持單欄，兩側留白
 - PWA：`manifest.json` + Apple Web App meta
 - Viewport 允許使用者縮放（未設 `maximum-scale` / `user-scalable=no`），方便家長放大閱讀

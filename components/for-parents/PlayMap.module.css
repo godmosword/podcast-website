@@ -40,6 +40,20 @@
   line-height: 1.15;
 }
 
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+
+.titleDecor {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
 .coverage {
   margin: 6px 0 0;
   color: var(--ink-soft);
@@ -365,6 +379,20 @@
   --card-accent: var(--ink-soft);
 }
 
+.typeScene {
+  display: block;
+  width: 100%;
+  height: 96px;
+  background: color-mix(in srgb, var(--card-accent, var(--accent)) 42%, var(--card));
+  overflow: hidden;
+}
+
+.typeScene svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .typeSwatch {
   display: grid;
   place-items: center;
@@ -392,11 +420,11 @@
 
 .cardMain {
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr);
-  gap: 10px 12px;
-  align-items: start;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  align-items: stretch;
   min-height: 44px;
-  padding: var(--space-3) var(--space-4);
+  padding: 0;
   border: none;
   background: transparent;
   color: inherit;
@@ -410,10 +438,12 @@
   opacity: 0.88;
 }
 
+.cardBody,
 .cardText {
   display: grid;
   gap: 6px;
   min-width: 0;
+  padding: var(--space-3) var(--space-4);
 }
 
 .cardName {
@@ -830,9 +860,11 @@
 :global(.playMapMarkerHost) {
   background: transparent;
   border: none;
+  overflow: visible;
 }
 
 :global(.playMapMarkerButton) {
+  position: relative;
   display: grid;
   place-items: center;
   width: 44px;
@@ -841,6 +873,7 @@
   border: none;
   background: transparent;
   cursor: pointer;
+  overflow: visible;
   transition: transform var(--motion-press), opacity var(--motion-press);
 }
 
@@ -912,6 +945,26 @@
 :global(.playMapClusterButton:active) {
   transform: scale(0.96);
   opacity: 0.92;
+}
+
+:global(.playMapMarkerName) {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - 4px);
+  transform: translateX(-50%);
+  max-width: 160px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: var(--shadow-sm);
+  pointer-events: none;
 }
 
 :global(.playMapMeMarker) {

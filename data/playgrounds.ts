@@ -1,7 +1,7 @@
 /**
  * 真實世界親子遊樂地點（sidecar）。
  * 供 /for-parents/play-map 地圖篩選與標記使用；與虛構宇宙地圖無關。
- * Google Maps 導航／定位連結由 buildGoogleMaps* helper 動態產生，不存於資料列。
+ * Google Maps 導航／定位連結由 buildGoogleMaps* helper 以頁面場館名＋縣市動態產生，不存於資料列、不用 lat,lng 圖釘。
  */
 
 export type PlaygroundType =
@@ -64,9 +64,11 @@ export type Playground = {
   coverageNote?: string;
 };
 
-/** Google Maps 即時導航（不傳 origin，由 Maps 使用目前位置）。免 API Key。 */
-export function buildGoogleMapsNavUrl(lat: number, lng: number): string {
-  const destination = `${lat},${lng}`;
+/** Google Maps 即時導航（不傳 origin，由 Maps 使用目前位置）。免 API Key。
+ * destination 用頁面顯示的場館名＋縣市，避免 lat,lng 變成 Dropped pin。
+ */
+export function buildGoogleMapsNavUrl(place: Pick<Playground, "name" | "city">): string {
+  const destination = `${place.name}, ${place.city}`;
   const params = new URLSearchParams({
     api: "1",
     destination,
@@ -76,11 +78,11 @@ export function buildGoogleMapsNavUrl(lat: number, lng: number): string {
   return `https://www.google.com/maps/dir/?${params.toString()}`;
 }
 
-/** Google Maps 只顯示位置（search 備案）。免 API Key。 */
-export function buildGoogleMapsPlaceUrl(lat: number, lng: number): string {
+/** Google Maps 只顯示位置（search 備案）。免 API Key。query 同樣用具名，不傳座標。 */
+export function buildGoogleMapsPlaceUrl(place: Pick<Playground, "name" | "city">): string {
   const params = new URLSearchParams({
     api: "1",
-    query: `${lat},${lng}`,
+    query: `${place.name}, ${place.city}`,
   });
   return `https://www.google.com/maps/search/?${params.toString()}`;
 }

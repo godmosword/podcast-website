@@ -101,7 +101,7 @@ export function PlayMapSheet({
           <div className={styles.actions}>
             <a
               className={styles.navButton}
-              href={buildGoogleMapsNavUrl(place.lat, place.lng)}
+              href={buildGoogleMapsNavUrl(place)}
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`開啟 Google 地圖導航前往 ${place.name}（另開視窗）`}
@@ -185,7 +185,7 @@ export function PlayMapSheet({
           <div className={styles.actions}>
             <a
               className={styles.navButton}
-              href={buildGoogleMapsNavUrl(place.lat, place.lng)}
+              href={buildGoogleMapsNavUrl(place)}
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`開啟 Google 地圖導航前往 ${place.name}（另開視窗）`}
@@ -194,7 +194,7 @@ export function PlayMapSheet({
             </a>
             <a
               className={styles.placeLink}
-              href={buildGoogleMapsPlaceUrl(place.lat, place.lng)}
+              href={buildGoogleMapsPlaceUrl(place)}
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`在 Google 地圖只顯示 ${place.name} 位置（另開視窗）`}
