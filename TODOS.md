@@ -58,7 +58,7 @@
 | chore(data): play-map 場館名人工複核 | `f277e89` |
 | fix(data): play-map 清除地址「附近」 | `bfa10db` |
 | fix(for-parents): play-map FitBounds 不再被 parent 重繪拉回鏡頭 | `0a150bd` |
-| fix(for-parents): play-map 定位鏡頭框最近 8 筆、地圖分頁保持掛載 | 見本 commit |
+| fix(for-parents): play-map 定位鏡頭框最近 8 筆、地圖分頁保持掛載 | `2b755c0` |
 
 ### 本輪待辦（2026-08-13）
 
