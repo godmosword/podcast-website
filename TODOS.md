@@ -729,7 +729,7 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 | polish(games): 著色「我塗好了」＋本機作品牆 | 完成 | `GameEndStation`、IndexedDB 草稿列 |
 | polish(games): GameChrome 依 gameId 隱藏方塊選項；方塊開場露出難度／彩虹 | 完成 | |
 | polish(games): Hub 低壓星星／已玩／車庫下一輛 | 完成 | 不改 progress schema |
-| 驗證 | 全綠，待 commit 後回填 hash | `npm test` 1125／`build`／`tsc` |
+| 驗證 | ✅ `728af8c` | `npm test` 1125／`build`／`tsc` |
 
 ---
 
