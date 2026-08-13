@@ -322,6 +322,34 @@ describe("playgrounds sidecar", () => {
     }
   });
 
+  it("address 不得含「附近」", () => {
+    for (const item of listPlaygrounds()) {
+      expect(item.address.includes("附近"), item.id).toBe(false);
+    }
+  });
+
+  it("先前錯址改為可導航門牌", () => {
+    expect(getPlayground("ty-fenghe")?.address).toBe(
+      "桃園市桃園區慈文路688號",
+    );
+    expect(getPlayground("hc-zoo")?.address).toBe("新竹市東區食品路66號");
+    expect(getPlayground("hcx-xinwaya")?.address).toBe(
+      "新竹縣竹北市文興路一段123號",
+    );
+    expect(getPlayground("tc-metro-park")?.address).toBe(
+      "台中市西屯區都會園路1215巷140號",
+    );
+    expect(getPlayground("nto-xiangshan")?.address).toBe(
+      "南投縣魚池鄉中山路599號",
+    );
+    expect(getPlayground("hcx-hukou-sports")?.mapsQuery).toBe(
+      "王爺壟運動公園 湖口",
+    );
+    expect(getPlayground("hcx-hukou-sports")?.address).toBe(
+      "新竹縣湖口鄉中山路一段789號",
+    );
+  });
+
   /**
    * 縣市 lat/lng 粗篩。只抓「縣市欄位與座標明顯不符」；
    * 同縣市錯置（例如桃園觀音 vs 中壢）抓不到，不能取代人工複核。

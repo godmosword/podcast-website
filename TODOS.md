@@ -56,10 +56,11 @@
 | polish(for-parents): play-map 具名導航、類型場景帶與選中針場館名 | `dedf98c` |
 | fix(data): play-map 三筆場館錯置與 mapsQuery／placeId 契約 | `01ace1c` |
 | chore(data): play-map 場館名人工複核 | `f277e89` |
+| fix(data): play-map 清除地址「附近」 | 見本 commit |
 
 ### 本輪待辦（2026-08-13）
 
-- [ ] chore(for-parents): play-map 地址「附近」與臺／台用字 — 風禾、龍潭大池、沙崙、青塘園等仍寫附近；縣市欄位用「台」、部分官名用「臺」。麗寶渡假區多入口維持一針。
+- [ ] chore(for-parents): play-map 縣市欄位「台」與部分官名「臺」用字對齊。麗寶渡假區多入口維持一針。
 
 ### 本輪已完成（2026-08-12）
 
