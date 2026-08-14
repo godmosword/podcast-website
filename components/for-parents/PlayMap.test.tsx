@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { listPlaygrounds, PLAYGROUND_TYPES, getPlayground } from "@/data/playgrounds";
 import { filterPlaygrounds } from "@/lib/playgrounds-query";
 import { coverageHeadline, listCityCoverage } from "@/lib/playground-coverage";
+import { composeParentBlurb } from "@/lib/playground-parent-voice";
 import { playgroundTypeVisualKey } from "@/lib/playground-type-visual";
 import { VISIBLE_STEP } from "./PlayMapContract";
 import PlayMap from "./PlayMap";
@@ -69,7 +70,7 @@ function summaryText(
 }
 
 function openFilters() {
-  const toggle = screen.getByRole("button", { name: "篩選" });
+  const toggle = screen.getByRole("button", { name: /篩選/ });
   if (toggle.getAttribute("aria-expanded") !== "true") {
     fireEvent.click(toggle);
   }
@@ -90,8 +91,10 @@ describe("PlayMap", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "親子遊樂地圖" }),
     ).toBeTruthy();
+    expect(
+      screen.getByText("先點離我最近，或直接點下面卡片看怎麼帶。"),
+    ).toBeTruthy();
 
-    // 「室內」同時存在於意圖列與條件 facet（共用 state），故限定在意圖群組內查。
     const intentGroup = screen.getByRole("group", { name: "意圖快捷" });
     expect(
       within(intentGroup).getByRole("button", { name: "離我最近" }),
@@ -158,22 +161,24 @@ describe("PlayMap", () => {
     ]);
   });
 
-  it("條件 facet 與意圖列共用同一組狀態，不會雙軌不同步", () => {
+  it("縣市與類型只在篩選面板，預設不展開", () => {
     render(<PlayMap />);
+    expect(screen.queryByRole("group", { name: "依縣市篩選" })).toBeNull();
+    expect(screen.queryByRole("group", { name: "依類型篩選" })).toBeNull();
     openFilters();
-    const conditions = screen.getByRole("group", { name: "依條件篩選" });
-    const indoorFacet = within(conditions).getByRole("button", {
-      name: "室內",
-    });
-    const indoorIntent = within(
-      screen.getByRole("group", { name: "意圖快捷" }),
-    ).getByRole("button", { name: "室內" });
+    expect(screen.getByRole("group", { name: "依縣市篩選" })).toBeTruthy();
+    expect(screen.getByRole("group", { name: "依類型篩選" })).toBeTruthy();
+  });
 
-    fireEvent.click(indoorIntent);
-    expect(indoorFacet.getAttribute("aria-pressed")).toBe("true");
+  it("室內／免費只出現在意圖列，篩選面板沒有條件 facet", () => {
+    render(<PlayMap />);
+    const intentGroup = screen.getByRole("group", { name: "意圖快捷" });
+    expect(within(intentGroup).getByRole("button", { name: "室內" })).toBeTruthy();
+    expect(screen.getAllByRole("button", { name: "室內" })).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: "免費放電" })).toHaveLength(1);
 
-    fireEvent.click(indoorFacet);
-    expect(indoorIntent.getAttribute("aria-pressed")).toBe("false");
+    openFilters();
+    expect(screen.queryByRole("group", { name: "依條件篩選" })).toBeNull();
   });
 
   it("類型篩選會縮小結果", () => {
@@ -263,9 +268,10 @@ describe("PlayMap", () => {
     fireEvent.click(
       screen.getByRole("button", { name: `${firstPlace.name}，查看詳情` }),
     );
-    expect(
-      screen.getByRole("region", { name: `${firstPlace.name} 詳情` }),
-    ).toBeTruthy();
+    const sheet = screen.getByRole("region", { name: `${firstPlace.name} 詳情` });
+    expect(sheet).toBeTruthy();
+    expect(within(sheet).getByText("帶小孩時")).toBeTruthy();
+    expect(within(sheet).getByText(/資料於 \d{4} 年 \d{1,2} 月核對/)).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "關閉地點詳情" }));
     expect(
@@ -450,6 +456,20 @@ describe("PlayMap", () => {
    * 年齡標籤已從卡片移到 toolbar（全站每筆同一區間，73 張卡各講一次是噪音）。
    * 「需購票／戶外」不得出現的斷言**保留**——那是反向 muted 標籤，另一回事。
    */
+  it("卡片顯示家長筆記，且名單沒有在地圖看按鈕", () => {
+    render(<PlayMap />);
+    const cardsPanel = screen.getByRole("tabpanel", { name: "卡片" });
+    const first = filterPlaygrounds()[0];
+    expect(first).toBeDefined();
+    if (!first) return;
+    expect(within(cardsPanel).getByText(composeParentBlurb(first))).toBeTruthy();
+    expect(
+      within(cardsPanel).queryByRole("button", {
+        name: `在地圖上看 ${first.name}`,
+      }),
+    ).toBeNull();
+  });
+
   it("卡片不再重複年齡標籤，且仍不含需購票／戶外 muted", () => {
     render(<PlayMap />);
     const cardsPanel = screen.getByRole("tabpanel", { name: "卡片" });
@@ -618,6 +638,9 @@ describe("PlayMap", () => {
     expect(firstPlace).toBeDefined();
 
     fireEvent.click(
+      screen.getByRole("button", { name: `${firstPlace.name}，查看詳情` }),
+    );
+    fireEvent.click(
       screen.getByRole("button", { name: `在地圖上看 ${firstPlace.name}` }),
     );
 
@@ -633,6 +656,7 @@ describe("PlayMap", () => {
     expect(sheet).toBeTruthy();
     expect(within(sheet).getByRole("button", { name: "更多" })).toBeTruthy();
     expect(within(sheet).getByText(firstPlace.address, { exact: false })).toBeTruthy();
+    openFilters();
     expect(
       within(screen.getByRole("group", { name: "依縣市篩選" })).getByRole(
         "button",

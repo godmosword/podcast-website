@@ -47,7 +47,7 @@ export type Playground = {
   indoor: boolean;
   facilities: string[];
   tags: string[];
-  tips?: string;
+  tips: string;
   officialUrl?: string;
   relatedEpisodes?: string[];
   /** 資料來源（至少一筆；商業場館須含 official 或 officialUrl）。 */
@@ -91,7 +91,7 @@ export const playgroundSchema = z.object({
   indoor: z.boolean(),
   facilities: z.array(z.string()),
   tags: z.array(z.string()),
-  tips: z.string().optional(),
+  tips: z.string().min(1),
   officialUrl: z.string().min(1).optional(),
   relatedEpisodes: z.array(z.string()).optional(),
   sources: z.array(playgroundSourceSchema).min(1),
@@ -156,7 +156,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["溜滑梯", "鞦韆", "遮蔭區", "洗手間"],
     tags: ["免費", "大型溜滑梯", "野餐友善"],
-    tips: "假日人潮多，建議傍晚去；太陽大時優先找遮蔭遊具區。",
+    tips: "假日人潮多，建議傍晚去；太陽大時優先找遮蔭遊具區。場內有溜滑梯、鞦韆、遮蔭區。",
     sources: [
       {
         kind: "gov",
@@ -191,7 +191,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["環湖步道", "草地", "兒童遊戲場", "洗手間"],
     tags: ["免費", "散步", "餵鴨注意"],
-    tips: "適合慢慢散步放電；餵食水鳥請遵守園區規定，也記得帶防蚊液。",
+    tips: "適合慢慢散步放電；餵食水鳥請遵守園區規定，也記得帶防蚊液。場內有環湖步道、草地、兒童遊戲場。",
     sources: [
       {
         kind: "gov",
@@ -220,7 +220,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "跑道", "籃球場", "停車場"],
     tags: ["免費", "運動", "停車方便"],
-    tips: "遊戲場與跑道分開，適合先跑一圈再玩遊具；夏天記得多補水。",
+    tips: "遊戲場與跑道分開，適合先跑一圈再玩遊具；夏天記得多補水。場內有兒童遊戲場、籃球場、停車場。",
     sources: [
       {
         kind: "gov",
@@ -249,7 +249,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["展覽", "創作體驗", "洗手間", "親子廁所"],
     tags: ["室內", "免費入場", "雨天備案"],
-    tips: "部分體驗活動需現場登記或另收費，出發前可查官網當期活動。",
+    tips: "部分體驗活動需現場登記或另收費，出發前可查官網當期活動。場內有展覽、創作體驗、洗手間。",
     officialUrl: "https://tmofa.tycg.gov.tw/",
     sources: [
       {
@@ -279,7 +279,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["球池", "溜滑梯", "角色扮演區", "洗手間"],
     tags: ["室內放電", "雨天備案", "需購票"],
-    tips: "假日建議先查票價與營業時間；襪子通常要自備或現場購買。",
+    tips: "假日建議先查票價與營業時間；襪子通常要自備或現場購買。場內有球池、溜滑梯、角色扮演區。",
     officialUrl: "https://castellaland.com/",
     mapsQuery: "卡司蒂菈樂園 中壢",
     sources: [
@@ -306,7 +306,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["餵牛體驗", "牧場小徑", "DIY 體驗", "洗手間"],
     tags: ["農場", "餵動物", "親子體驗"],
-    tips: "戶外活動多，建議防曬防蚊；餵食請依現場指引。",
+    tips: "戶外活動多，建議防曬防蚊；餵食請依現場指引。場內有餵牛體驗、牧場小徑、DIY 體驗。",
     officialUrl: "https://www.pushin-ranch.com/",
     sources: [
       {
@@ -337,7 +337,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["水族展示", "互動體驗", "親子廁所", "餐飲"],
     tags: ["室內", "雨天備案", "需購票"],
-    tips: "建議平日或開園初入場，動線較順；推車可借但數量有限。",
+    tips: "建議平日或開園初入場，動線較順；推車可借但數量有限。場內有水族展示、互動體驗、親子廁所。",
     officialUrl: "https://www.xpark.com.tw/",
     sources: [
       {
@@ -367,7 +367,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["環湖步道", "涼亭", "兒童遊戲場", "停車場"],
     tags: ["免費", "散步", "野餐友善"],
-    tips: "環湖平緩好推車；傍晚風大時記得加件外套。",
+    tips: "環湖平緩好推車；傍晚風大時記得加件外套。場內有環湖步道、涼亭、兒童遊戲場。",
     sources: [
       {
         kind: "gov",
@@ -398,7 +398,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["遊樂設施", "餐飲", "親子廁所", "置物櫃"],
     tags: ["遊樂設施", "需另購遊樂券", "捷運友善"],
-    tips: "入園與遊樂設施分開收費；假日人潮多，可早到排熱門設施。",
+    tips: "入園與遊樂設施分開收費；假日人潮多，可早到排熱門設施。場內有餐飲、親子廁所、置物櫃。",
     officialUrl: "https://www.tcap.taipei/",
     sources: [
       {
@@ -428,7 +428,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["動物展示", "遊園車", "親子廁所", "餐飲"],
     tags: ["動物", "爬山", "需購票"],
-    tips: "園區坡道多，推車或穿好走的鞋；貓空纜車可搭配規劃半日遊。",
+    tips: "園區坡道多，推車或穿好走的鞋；貓空纜車可搭配規劃半日遊。場內有動物展示、遊園車、親子廁所。",
     officialUrl: "https://www.zoo.gov.taipei/",
     sources: [
       {
@@ -458,7 +458,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["互動展", "3D 劇院", "親子廁所", "餐飲"],
     tags: ["室內", "雨天備案", "需購票"],
-    tips: "展區分樓層，低齡兒童可先從一樓互動區開始。",
+    tips: "展區分樓層，低齡兒童可先從一樓互動區開始。場內有互動展、3D 劇院、親子廁所。",
     officialUrl: "https://www.ntsec.gov.tw/",
     sources: [
       {
@@ -488,7 +488,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["水資源展", "親水設施", "親子廁所", "餐飲"],
     tags: ["室內", "玩水", "需購票"],
-    tips: "親水區建議多帶一套衣物；博物館與親水區票券分開販售。",
+    tips: "親水區建議多帶一套衣物；博物館與親水區票券分開販售。場內有水資源展、親水設施、親子廁所。",
     officialUrl: "https://waterpark.water.gov.taipei/",
     sources: [
       {
@@ -518,7 +518,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "生態池", "步道", "洗手間"],
     tags: ["免費", "捷運友善", "野餐友善"],
-    tips: "遊戲場在公園北側，假日建議上午較不擁擠；生態池旁防蚊。",
+    tips: "遊戲場在公園北側，假日建議上午較不擁擠；生態池旁防蚊。場內有兒童遊戲場、步道、洗手間。",
     sources: [
       {
         kind: "gov",
@@ -547,7 +547,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["玫瑰園", "大草坪", "步道", "洗手間"],
     tags: ["免費", "散步", "花季"],
-    tips: "正館需另購票，戶外公園區免費；玫瑰季人潮多，推車動線以主路為主。",
+    tips: "正館需另購票，戶外公園區免費；玫瑰季人潮多，推車動線以主路為主。場內有玫瑰園、大草坪、步道。",
     sources: [
       {
         kind: "gov",
@@ -576,7 +576,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["天文展", "球幕劇場", "親子廁所", "餐飲"],
     tags: ["室內", "雨天備案", "需購票"],
-    tips: "球幕場次固定，建議先查放映表再排時間。",
+    tips: "球幕場次固定，建議先查放映表再排時間。場內有天文展、球幕劇場、親子廁所。",
     officialUrl: "https://www.tam.gov.taipei/",
     sources: [
       {
@@ -606,7 +606,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "大草坪", "步道", "洗手間"],
     tags: ["免費", "社區公園", "野餐友善"],
-    tips: "遊戲場設備多元但面積不大，適合學齡前後短時間放電。",
+    tips: "遊戲場設備多元但面積不大，適合學齡前後短時間放電。場內有兒童遊戲場、大草坪、步道。",
     sources: [
       {
         kind: "gov",
@@ -636,7 +636,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["河濱步道", "自行車道", "兒童遊戲場", "停車場"],
     tags: ["免費", "騎車", "野餐友善"],
-    tips: "園區幅員大，可先鎖定重新橋或熊猴森遊戲場；假日防曬補水。",
+    tips: "園區幅員大，可先鎖定重新橋或熊猴森遊戲場；假日防曬補水。場內有河濱步道、自行車道、兒童遊戲場。",
     sources: [
       {
         kind: "gov",
@@ -667,7 +667,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["常設展", "考古體驗", "親子廁所", "停車場"],
     tags: ["室內", "雨天備案"],
-    tips: "特展可能另收費；戶外瞭望台風大記得加外套。",
+    tips: "特展可能另收費；戶外瞭望台風大記得加外套。場內有常設展、考古體驗、親子廁所。",
     officialUrl: "https://www.sshm.ntpc.gov.tw/",
     sources: [
       {
@@ -697,7 +697,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["常設展", "陶藝體驗", "親子廁所", "停車場"],
     tags: ["室內", "雨天備案", "需購票"],
-    tips: "體驗課程常需預約；館內禁止奔跑，低齡兒建議先逛一樓。",
+    tips: "體驗課程常需預約；館內禁止奔跑，低齡兒建議先逛一樓。場內有常設展、陶藝體驗、親子廁所。",
     officialUrl: "https://www.ceramics.ntpc.gov.tw/",
     sources: [
       {
@@ -727,7 +727,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["戶外雕塑", "展覽", "親子廁所", "餐飲"],
     tags: ["藝術", "戶外", "需購票"],
-    tips: "戶外步道多，推車可行但部分階梯需抱娃；海邊風大防曬。",
+    tips: "戶外步道多，推車可行但部分階梯需抱娃；海邊風大防曬。場內有戶外雕塑、展覽、親子廁所。",
     officialUrl: "https://www.juming.org.tw/",
     sources: [
       {
@@ -758,7 +758,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["親水設施", "大草坪", "自行車道", "停車場"],
     tags: ["免費", "玩水", "野餐友善"],
-    tips: "親水設施開放時段依公告為準；記得帶替換衣物與毛巾。",
+    tips: "親水設施開放時段依公告為準；記得帶替換衣物與毛巾。場內有大草坪、自行車道、停車場。",
     sources: [
       {
         kind: "gov",
@@ -787,7 +787,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "跑道", "籃球場", "停車場"],
     tags: ["免費", "運動", "停車方便"],
-    tips: "遊戲場分區，低齡與較大童可各玩各的；夏天記得多補水。",
+    tips: "遊戲場分區，低齡與較大童可各玩各的；夏天記得多補水。場內有兒童遊戲場、跑道、籃球場。",
     sources: [
       {
         kind: "gov",
@@ -817,7 +817,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["展覽", "戶外雕塑", "親子廁所", "停車場"],
     tags: ["室內", "免費入場", "雨天備案"],
-    tips: "常設展多免費，特展與活動依官網公告；戶外廣場可短暫放電。",
+    tips: "常設展多免費，特展與活動依官網公告；戶外廣場可短暫放電。場內有展覽、戶外雕塑、親子廁所。",
     officialUrl: "https://www.435.culture.ntpc.gov.tw/",
     sources: [
       {
@@ -847,7 +847,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["沙灘", "步道", "沖洗區", "停車場"],
     tags: ["免費", "海邊", "戲沙"],
-    tips: "僅適合戲沙與踏浪，勿單獨讓幼童近水；風大時注意防曬與保暖。",
+    tips: "僅適合戲沙與踏浪，勿單獨讓幼童近水；風大時注意防曬與保暖。場內有沙灘、步道、沖洗區。",
     sources: [
       {
         kind: "gov",
@@ -877,7 +877,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["常設展", "IMAX", "親子廁所", "停車場"],
     tags: ["室內", "雨天備案", "需購票"],
-    tips: "主題館分區大，低齡兒可先鎖定兒童館或深海探索；山區溫差大。",
+    tips: "主題館分區大，低齡兒可先鎖定兒童館或深海探索；山區溫差大。場內有常設展、IMAX、親子廁所。",
     officialUrl: "https://www.nmmst.gov.tw/",
     sources: [
       {
@@ -907,7 +907,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["地質奇岩", "步道", "親水區", "洗手間"],
     tags: ["海邊", "地質", "需購票"],
-    tips: "潮間帶活動依現場與潮汐公告；岩石區濕滑，請牽好幼童。",
+    tips: "潮間帶活動依現場與潮汐公告；岩石區濕滑，請牽好幼童。場內有地質奇岩、步道、親水區。",
     officialUrl: "https://www.northguan-nsa.gov.tw/",
     sources: [
       {
@@ -937,7 +937,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["海景平台", "步道", "停車場", "洗手間"],
     tags: ["免費", "海邊", "看海"],
-    tips: "可與海科館串遊；海風大，建議帶外套與防曬。",
+    tips: "可與海科館串遊；海風大，建議帶外套與防曬。場內有海景平台、步道、停車場。",
     sources: [
       {
         kind: "gov",
@@ -966,7 +966,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "步道", "觀景", "洗手間"],
     tags: ["免費", "市區公園", "看夜景"],
-    tips: "坡道與階梯多，推車建議走主車道；傍晚可看基隆港夜景。",
+    tips: "坡道與階梯多，推車建議走主車道；傍晚可看基隆港夜景。場內有兒童遊戲場、步道、觀景。",
     sources: [
       {
         kind: "gov",
@@ -995,7 +995,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "跑道", "籃球場", "停車場"],
     tags: ["免費", "運動", "社區公園"],
-    tips: "遊戲場設備較新，平日午後較少人；夏天記得防曬補水。",
+    tips: "遊戲場設備較新，平日午後較少人；夏天記得防曬補水。場內有兒童遊戲場、跑道、籃球場。",
     sources: [
       {
         kind: "gov",
@@ -1025,7 +1025,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["動物展示", "兒童遊戲場", "親子廁所", "餐飲"],
     tags: ["動物", "市區", "需購票"],
-    tips: "園區不大適合半日遊；假日排隊較久。",
+    tips: "園區不大適合半日遊；假日排隊較久。場內有動物展示、兒童遊戲場、親子廁所。",
     officialUrl: "https://zoo-info.hccg.gov.tw/",
     sources: [
       {
@@ -1055,7 +1055,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "草地", "湖畔步道", "洗手間"],
     tags: ["免費", "市區公園", "野餐友善"],
-    tips: "可與動物園、玻璃工藝博物館串遊；假日人潮多，建議早到。",
+    tips: "可與動物園、玻璃工藝博物館串遊；假日人潮多，建議早到。場內有兒童遊戲場、草地、湖畔步道。",
     sources: [
       {
         kind: "gov",
@@ -1084,7 +1084,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["登山步道", "觀景平台", "休憩區", "洗手間"],
     tags: ["免費", "爬山", "親近自然"],
-    tips: "主步道多緩坡，推車可行部分路段；週末早晨較涼適。",
+    tips: "主步道多緩坡，推車可行部分路段；週末早晨較涼適。場內有登山步道、觀景平台、休憩區。",
     sources: [
       {
         kind: "gov",
@@ -1114,7 +1114,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["大型遊具", "沙坑", "遮蔭區", "洗手間"],
     tags: ["免費", "海邊", "放電"],
-    tips: "海風大記得防曬與外套；可搭配南寮親水公園與自行車道。",
+    tips: "海風大記得防曬與外套；可搭配南寮親水公園與自行車道。場內有大型遊具、沙坑、遮蔭區。",
     coverageNote:
       "導航落點為南寮漁港旅遊服務中心，實際遊戲區在旁邊步行可達。",
     sources: [
@@ -1151,7 +1151,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["大草原", "風箏場", "步道", "停車場"],
     tags: ["免費", "放風箏", "野餐"],
-    tips: "無大量遮蔭，夏天請備帽子與水；風大時適合放風箏。",
+    tips: "無大量遮蔭，夏天請備帽子與水；風大時適合放風箏。場內有大草原、風箏場、步道。",
     sources: [
       {
         kind: "gov",
@@ -1180,7 +1180,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["觀鳥平台", "木棧道", "生態解說", "洗手間"],
     tags: ["免費", "賞鳥", "生態"],
-    tips: "潮間帶濕滑請牽好幼童；建議帶望遠鏡與防蚊液。",
+    tips: "潮間帶濕滑請牽好幼童；建議帶望遠鏡與防蚊液。場內有觀鳥平台、木棧道、生態解說。",
     sources: [
       {
         kind: "gov",
@@ -1209,7 +1209,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "鞦韆", "遮蔭區", "洗手間"],
     tags: ["免費", "社區公園", "市區"],
-    tips: "市區小而完整的遊戲場，適合短時間放電。",
+    tips: "市區小而完整的遊戲場，適合短時間放電。場內有兒童遊戲場、鞦韆、遮蔭區。",
     sources: [
       {
         kind: "gov",
@@ -1233,7 +1233,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["玻璃展", "親子廁所", "周邊公園", "餐飲"],
     tags: ["室內", "雨天備案", "文化"],
-    tips: "館內勿奔跑；可與新竹公園草地放電搭配。",
+    tips: "館內勿奔跑；可與新竹公園草地放電搭配。場內有玻璃展、親子廁所、周邊公園。",
     officialUrl: "https://www.hccg.gov.tw/",
     sources: [
       {
@@ -1264,7 +1264,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["科學遊具", "戲水區", "親子廁所", "餐飲"],
     tags: ["主題樂園", "動手玩", "需購票"],
-    tips: "戶外設施多，記得防曬與換洗衣物。",
+    tips: "戶外設施多，記得防曬與換洗衣物。場內有科學遊具、戲水區、親子廁所。",
     officialUrl: "https://www.ding-dong.com.tw/",
     sources: [
       {
@@ -1294,7 +1294,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["生態導覽", "蝴蝶館", "步道", "餐飲"],
     tags: ["生態", "賞蝶", "需購票"],
-    tips: "園區坡道與步道多，建議穿好走的鞋並防蚊。",
+    tips: "園區坡道與步道多，建議穿好走的鞋並防蚊。場內有生態導覽、蝴蝶館、餐飲。",
     officialUrl: "https://green-world.com.tw/",
     sources: [
       {
@@ -1324,7 +1324,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["遊樂設施", "野生動物區", "親子廁所", "餐飲"],
     tags: ["主題樂園", "動物", "需購票"],
-    tips: "園區大，建議先排優先設施；推車友善但路程長。",
+    tips: "園區大，建議先排優先設施；推車友善但路程長。場內有遊樂設施、野生動物區、親子廁所。",
     officialUrl: "https://www.leofoo.com.tw/",
     sources: [
       {
@@ -1354,7 +1354,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["文化展館", "廣場", "草地", "洗手間"],
     tags: ["免費", "客家文化", "散步"],
-    tips: "戶外廣場適合短時間放電；展館開放時間請先查詢。",
+    tips: "戶外廣場適合短時間放電；展館開放時間請先查詢。場內有文化展館、草地、洗手間。",
     sources: [
       {
         kind: "gov",
@@ -1383,7 +1383,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["林業展示", "親子廁所", "周邊園區", "停車場"],
     tags: ["室內", "雨天備案", "免費"],
-    tips: "展館不大，可與竹東動漫園區周邊散步串遊；開放時間請先確認。",
+    tips: "展館不大，可與竹東動漫園區周邊散步串遊；開放時間請先確認。場內有林業展示、親子廁所、周邊園區。",
     sources: [
       {
         kind: "gov",
@@ -1412,7 +1412,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["環湖步道", "觀景平台", "休憩區", "停車場"],
     tags: ["免費", "散步", "湖景"],
-    tips: "親子友善路段以平緩步道為主；夏天防曬防蚊。",
+    tips: "親子友善路段以平緩步道為主；夏天防曬防蚊。場內有環湖步道、觀景平台、休憩區。",
     sources: [
       {
         kind: "gov",
@@ -1441,7 +1441,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["直排輪場", "風雨球場", "槌球場", "停車場"],
     tags: ["免費", "運動", "社區公園"],
-    tips: "以直排輪、風雨球場與槌球草地為主。",
+    tips: "以直排輪、風雨球場與槌球草地為主。場內有直排輪場、槌球場、停車場。",
     coverageNote: "以運動設施為主，幼童遊具待現場確認",
     sources: [
       {
@@ -1476,7 +1476,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["親水區", "步道", "休憩區", "洗手間"],
     tags: ["免費", "戲水", "老街串遊"],
-    tips: "可與內灣老街串遊；戲水後記得帶換洗衣物與防蚊液。",
+    tips: "可與內灣老街串遊；戲水後記得帶換洗衣物與防蚊液。場內有親水區、步道、休憩區。",
     sources: [
       {
         kind: "gov",
@@ -1506,7 +1506,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["餵動物", "草原", "DIY 體驗", "餐飲"],
     tags: ["農場", "餵動物", "需購票"],
-    tips: "草原日照強，請備帽子與水；餵食請依現場指引。",
+    tips: "草原日照強，請備帽子與水；餵食請依現場指引。場內有餵動物、DIY 體驗、餐飲。",
     officialUrl: "https://www.flyingcow.com.tw/",
     sources: [
       {
@@ -1536,7 +1536,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["大型溜滑梯", "遊戲場", "遮蔭區", "洗手間"],
     tags: ["免費", "大型溜滑梯", "放電"],
-    tips: "假日人潮多，建議傍晚去；溜滑梯區請注意安全排隊。",
+    tips: "假日人潮多，建議傍晚去；溜滑梯區請注意安全排隊。場內有大型溜滑梯、遊戲場、遮蔭區。",
     sources: [
       {
         kind: "gov",
@@ -1560,7 +1560,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "跑道", "球場", "停車場"],
     tags: ["免費", "運動", "社區公園"],
-    tips: "園區開闊適合騎車與跑步；夏天遮蔭有限請補水。",
+    tips: "園區開闊適合騎車與跑步；夏天遮蔭有限請補水。場內有兒童遊戲場、跑道、球場。",
     sources: [
       {
         kind: "gov",
@@ -1584,7 +1584,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["觀景平台", "步道", "休憩區", "停車場"],
     tags: ["免費", "看海", "散步"],
-    tips: "海風大，建議帶外套；部分步道有坡度，推車慎選路線。",
+    tips: "海風大，建議帶外套；部分步道有坡度，推車慎選路線。場內有觀景平台、休憩區、停車場。",
     sources: [
       {
         kind: "gov",
@@ -1608,7 +1608,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["遊樂設施", "戲水區", "親子廁所", "餐飲"],
     tags: ["主題樂園", "戲水", "需購票"],
-    tips: "戲水設施建議多帶一套衣物。",
+    tips: "戲水設施建議多帶一套衣物。場內有遊樂設施、戲水區、親子廁所。",
     officialUrl: "https://www.westlake.com.tw/",
     sources: [
       {
@@ -1639,7 +1639,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["科學展", "植物園", "親子廁所", "餐飲"],
     tags: ["室內", "雨天備案", "需購票"],
-    tips: "館區大，低齡兒可先鎖定太空劇場周邊或植物園。",
+    tips: "館區大，低齡兒可先鎖定太空劇場周邊或植物園。場內有科學展、親子廁所、餐飲。",
     officialUrl: "https://www.nmns.edu.tw/",
     sources: [
       {
@@ -1669,7 +1669,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "湖畔步道", "草地", "洗手間"],
     tags: ["免費", "市區公園", "湖心亭"],
-    tips: "假日人潮多；遊戲場與湖畔請牽好幼童。",
+    tips: "假日人潮多；遊戲場與湖畔請牽好幼童。場內有兒童遊戲場、湖畔步道、草地。",
     sources: [
       {
         kind: "gov",
@@ -1698,7 +1698,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["步道", "草地", "觀景", "洗手間"],
     tags: ["免費", "散步", "都會公園"],
-    tips: "以散步與野餐為主，大型遊具較少；適合與附近商場雨天備案搭配。",
+    tips: "以散步與野餐為主，大型遊具較少；適合與附近商場雨天備案搭配。場內有步道、草地、觀景。",
     sources: [
       {
         kind: "gov",
@@ -1727,7 +1727,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "雕塑步道", "草地", "洗手間"],
     tags: ["免費", "雕塑", "放電"],
-    tips: "遊戲場設備豐富；雕塑區請提醒孩子勿攀爬作品。",
+    tips: "遊戲場設備豐富；雕塑區請提醒孩子勿攀爬作品。場內有兒童遊戲場、雕塑步道、草地。",
     sources: [
       {
         kind: "gov",
@@ -1756,7 +1756,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["大草原", "步道", "兒童遊戲場", "停車場"],
     tags: ["免費", "野餐", "放電"],
-    tips: "園區廣闊，建議帶推車或滑步車；遮蔭有限請防曬。",
+    tips: "園區廣闊，建議帶推車或滑步車；遮蔭有限請防曬。場內有大草原、步道、兒童遊戲場。",
     sources: [
       {
         kind: "gov",
@@ -1786,7 +1786,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["遊樂設施", "親子廁所", "餐飲", "停車場"],
     tags: ["主題樂園", "需購票", "放電"],
-    tips: "園區與 outlet 可分區規劃；熱門設施假日排隊久。",
+    tips: "園區與 outlet 可分區規劃；熱門設施假日排隊久。場內有遊樂設施、親子廁所、餐飲。",
     officialUrl: "https://www.lihpao.com.tw/",
     sources: [
       {
@@ -1816,7 +1816,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["木棧道", "觀景平台", "停車場", "洗手間"],
     tags: ["免費", "賞夕陽", "生態"],
-    tips: "請走木棧道、勿踩踏濕地；風大防曬，低潮／開放時段請先查公告。",
+    tips: "請走木棧道、勿踩踏濕地；風大防曬，低潮／開放時段請先查公告。場內有觀景平台、停車場、洗手間。",
     sources: [
       {
         kind: "gov",
@@ -1846,7 +1846,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "綠道", "遮蔭區", "洗手間"],
     tags: ["免費", "市區", "散步"],
-    tips: "可與勤美周邊室內備案串遊；週末人潮與腳踏車多請留意。",
+    tips: "可與勤美周邊室內備案串遊；週末人潮與腳踏車多請留意。場內有兒童遊戲場、綠道、遮蔭區。",
     sources: [
       {
         kind: "gov",
@@ -1876,7 +1876,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["步道", "觀景平台", "休憩區", "停車場"],
     tags: ["免費", "散步", "看夜景"],
-    tips: "主廣場與平緩步道較親子友善；部分登山步道坡度大。",
+    tips: "主廣場與平緩步道較親子友善；部分登山步道坡度大。場內有觀景平台、休憩區、停車場。",
     sources: [
       {
         kind: "gov",
@@ -1905,7 +1905,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["大草原", "步道", "兒童遊戲場", "停車場"],
     tags: ["免費", "野餐", "花季"],
-    tips: "園區廣闊適合野餐；花季人潮多，建議平日或早晨。",
+    tips: "園區廣闊適合野餐；花季人潮多，建議平日或早晨。場內有大草原、步道、兒童遊戲場。",
     sources: [
       {
         kind: "gov",
@@ -1934,7 +1934,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["步道", "休憩區", "觀景", "停車場"],
     tags: ["免費", "爬山", "郊外"],
-    tips: "部分步道有坡度，幼童建議選平緩路段並備水。",
+    tips: "部分步道有坡度，幼童建議選平緩路段並備水。場內有休憩區、觀景、停車場。",
     sources: [
       {
         kind: "gov",
@@ -1958,7 +1958,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["鐵道展示", "觀景平台", "洗手間", "停車場"],
     tags: ["免費", "火車", "親子"],
-    tips: "開放時段與導覽請先查臺鐵公告；現場請注意列車動線安全。",
+    tips: "開放時段與導覽請先查臺鐵公告；現場請注意列車動線安全。場內有鐵道展示、觀景平台、洗手間。",
     sources: [
       {
         kind: "gov",
@@ -1987,7 +1987,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "草地", "遮蔭區", "洗手間"],
     tags: ["免費", "社區公園", "老街串遊"],
-    tips: "可與鹿港老街串遊；遊戲場假日較擠，建議錯峰。",
+    tips: "可與鹿港老街串遊；遊戲場假日較擠，建議錯峰。場內有兒童遊戲場、草地、遮蔭區。",
     sources: [
       {
         kind: "gov",
@@ -2017,7 +2017,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["遊樂設施", "纜車", "原住民文化區", "餐飲"],
     tags: ["主題樂園", "纜車", "需購票"],
-    tips: "園區坡度大，建議穿好走的鞋；可搭配日月潭行程。",
+    tips: "園區坡度大，建議穿好走的鞋；可搭配日月潭行程。場內有遊樂設施、纜車、原住民文化區。",
     officialUrl: "https://www.nine.com.tw/",
     sources: [
       {
@@ -2047,7 +2047,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["青青草原", "畜牧區", "步道", "餐飲"],
     tags: ["農場", "高山", "需購票"],
-    tips: "海拔高溫差大，請備外套；草原日照強記得防曬。",
+    tips: "海拔高溫差大，請備外套；草原日照強記得防曬。場內有青青草原、畜牧區、步道。",
     officialUrl: "https://www.qingjing-farm.com.tw/",
     sources: [
       {
@@ -2077,7 +2077,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["遊客中心", "環湖步道", "洗手間", "停車場"],
     tags: ["免費", "湖景", "雨天備案"],
-    tips: "建築內可避雨；周邊步道平緩，適合親子散步。",
+    tips: "建築內可避雨；周邊步道平緩，適合親子散步。場內有遊客中心、環湖步道、洗手間。",
     sources: [
       {
         kind: "gov",
@@ -2106,7 +2106,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["木業展示", "親子廁所", "周邊老街", "停車場"],
     tags: ["室內", "雨天備案", "鐵道"],
-    tips: "可與車埕車站、貯木池散步串遊；開放時間請先確認。",
+    tips: "可與車埕車站、貯木池散步串遊；開放時間請先確認。場內有木業展示、親子廁所、周邊老街。",
     sources: [
       {
         kind: "gov",
@@ -2136,7 +2136,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["園區步道", "展場", "餐飲", "停車場"],
     tags: ["園區", "拍照", "需購票"],
-    tips: "園區以散步與拍照為主；雨天步道濕滑請小心。",
+    tips: "園區以散步與拍照為主；雨天步道濕滑請小心。場內有園區步道、展場、餐飲。",
     officialUrl: "https://www.paperdome.org.tw/",
     sources: [
       {
@@ -2167,7 +2167,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["遊樂設施", "親子廁所", "餐飲", "停車場"],
     tags: ["主題樂園", "需購票", "放電"],
-    tips: "園區坡度與步行距離不短，建議規劃休息節奏。",
+    tips: "園區坡度與步行距離不短，建議規劃休息節奏。場內有遊樂設施、親子廁所、餐飲。",
     officialUrl: "https://www.janfusun.com.tw/",
     sources: [
       {
@@ -2197,7 +2197,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["林蔭步道", "自行車道", "休憩區", "停車場"],
     tags: ["免費", "散步", "遮蔭"],
-    tips: "樹蔭多適合散步；假日汽機車多，牽好幼童。",
+    tips: "樹蔭多適合散步；假日汽機車多，牽好幼童。場內有林蔭步道、自行車道、休憩區。",
     sources: [
       {
         kind: "gov",
@@ -2221,7 +2221,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "森林步道", "草地", "洗手間"],
     tags: ["免費", "放電", "市區公園"],
-    tips: "遊戲場與林間步道可分區玩；夏天蚊蟲多請防蚊。",
+    tips: "遊戲場與林間步道可分區玩；夏天蚊蟲多請防蚊。場內有兒童遊戲場、森林步道、草地。",
     sources: [
       {
         kind: "gov",
@@ -2245,7 +2245,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["布袋戲展示", "體驗區", "親子廁所", "停車場"],
     tags: ["室內", "雨天備案", "文化"],
-    tips: "低齡兒適合短逛與偶戲體驗場次。",
+    tips: "低齡兒適合短逛與偶戲體驗場次。場內有布袋戲展示、體驗區、親子廁所。",
     officialUrl: "https://www.yunlin.gov.tw/",
     sources: [
       {
@@ -2270,7 +2270,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "草地", "遮蔭區", "洗手間"],
     tags: ["免費", "社區公園", "放電"],
-    tips: "可與北港朝天宮周邊行程搭配；假日較擠請錯峰。",
+    tips: "可與北港朝天宮周邊行程搭配；假日較擠請錯峰。場內有兒童遊戲場、草地、遮蔭區。",
     sources: [
       {
         kind: "gov",

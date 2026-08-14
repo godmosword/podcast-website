@@ -36,6 +36,9 @@ test.describe("親子遊樂地圖", () => {
 
     await waitForPlayMapReady(page);
 
+    await expect(
+      page.getByText("先點離我最近，或直接點下面卡片看怎麼帶。"),
+    ).toBeVisible();
     await expect(page.getByText(/已收錄 \d+ 縣市、共 \d+ 處/)).toBeVisible();
     await expect(page.getByRole("button", { name: "免費放電" })).toBeVisible();
     // 無篩選時摘要只有「全部」一段（不會有 ` · `），既有斷言誤寫成必有第二段。
@@ -56,6 +59,7 @@ test.describe("親子遊樂地圖", () => {
     ).toBeVisible();
     // 卡片點選開完整 sheet：不應只有「更多」精簡態
     await expect(sheet.getByRole("button", { name: "更多" })).toHaveCount(0);
+    await expect(sheet.getByText("帶小孩時")).toBeVisible();
 
     await sheet.getByRole("button", { name: "關閉地點詳情" }).click();
     await expect(sheet).toHaveCount(0);
@@ -147,17 +151,19 @@ test.describe("親子遊樂地圖", () => {
     await waitForPlayMapReady(page);
 
     const hukouName = "王爺壟運動公園";
-    const viewOnMap = page.getByRole("button", {
-      name: `在地圖上看 ${hukouName}`,
+    const cardsPanel = page.locator("#play-map-panel-cards");
+    const hukouCard = cardsPanel.getByRole("button", {
+      name: `${hukouName}，查看詳情`,
     });
     for (let i = 0; i < 12; i += 1) {
-      if (await viewOnMap.isVisible()) break;
+      if (await hukouCard.isVisible()) break;
       const more = page.getByRole("button", { name: "載入更多" });
       if (!(await more.isVisible())) break;
       await more.click();
     }
-    await expect(viewOnMap).toBeVisible();
-    await viewOnMap.click();
+    await expect(hukouCard).toBeVisible();
+    await hukouCard.click();
+    await page.getByRole("button", { name: `在地圖上看 ${hukouName}` }).click();
 
     const sheet = page.getByRole("region", { name: `${hukouName} 詳情` });
     await expect(sheet).toBeVisible();

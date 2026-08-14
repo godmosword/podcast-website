@@ -155,9 +155,8 @@ export function usePlayMapFilters({
   const userClosedSheetRef = useRef(false);
 
   /*
-   * 類型／條件面板預設收摺（含桌機）。縣市 facet 不受此開關影響，
-   * 由 CSS 在 ≥640 常駐——桌機把三排 facet 全部攤開會把第一張卡推到
-   * 700px 以下，等於用一整屏換一組多數人不會立刻改的篩選。
+   * 類型／條件面板預設收摺（含桌機）。縣市也進同一塊篩選面板，
+   * 不再用 CSS 在 ≥640 常駐——避免首屏被篩選佔滿。
    */
 
   const filtered = useMemo(() => {

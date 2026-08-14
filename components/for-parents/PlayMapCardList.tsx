@@ -21,7 +21,6 @@ export function PlayMapCardList({
   hasExtraFilters,
   onClearFilters,
   onSelect,
-  onShowOnMap,
   showScopeHint,
   visibleCount,
   canLoadMore,
@@ -66,7 +65,6 @@ export function PlayMapCardList({
             distanceLabel={distanceLabelFor(place, userLatLng)}
             selected={selectedId === place.id}
             onSelect={onSelect}
-            onShowOnMap={onShowOnMap}
           />
         ))}
         {unmatched.map((place) => (
@@ -77,7 +75,6 @@ export function PlayMapCardList({
             distanceLabel={null}
             selected={false}
             onSelect={onSelect}
-            onShowOnMap={onShowOnMap}
           />
         ))}
       </ul>

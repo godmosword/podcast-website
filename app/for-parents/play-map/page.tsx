@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "親子遊樂地圖 · 車車遊樂園",
     description:
-      "北北基桃與中台灣核心親子遊樂地點地圖：公園、博物館、動物園與實用 Tips，幫家長快速規劃放電行程。",
+      "北北基桃與中台灣核心親子遊樂地點地圖：公園、博物館、動物園與帶小孩時的實用筆記，幫家長快速規劃放電行程。",
     url: "/for-parents/play-map",
     type: "website",
   },

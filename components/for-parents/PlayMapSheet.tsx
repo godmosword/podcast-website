@@ -11,14 +11,9 @@ import {
   formatAgeRangeLabel,
   listPlaceDecisionTags,
 } from "@/lib/playground-distance";
+import { formatVerifiedMonthLabel } from "@/lib/playground-parent-voice";
 import { SHEET_BG_HINT_ID, type PlayMapSheetProps } from "./PlayMapContract";
 import styles from "./PlayMap.module.css";
-
-function formatVerifiedDate(iso: string): string {
-  const [year, month, day] = iso.split("-");
-  if (!year || !month || !day) return iso;
-  return `${year} 年 ${Number(month)} 月 ${Number(day)} 日`;
-}
 
 function sourceKindLabel(kind: PlaygroundSourceKind): string {
   switch (kind) {
@@ -50,6 +45,7 @@ export function PlayMapSheet({
   distanceLabel,
   onClose,
   onExpand,
+  onShowOnMap,
   panelRef,
 }: PlayMapSheetProps) {
   const compact = variant === "compact";
@@ -147,7 +143,7 @@ export function PlayMapSheet({
 
           {place.tips ? (
             <p className={styles.tips}>
-              <span className={styles.tipsLabel}>Tips</span>
+              <span className={styles.tipsLabel}>帶小孩時</span>
               {place.tips}
             </p>
           ) : null}
@@ -172,7 +168,7 @@ export function PlayMapSheet({
           <p className={styles.address}>{place.address}</p>
 
           <p className={styles.verified}>
-            資料最後核對：{formatVerifiedDate(place.lastVerified)}
+            {formatVerifiedMonthLabel(place.lastVerified)}
           </p>
 
           {place.sources.length > 0 ? (
@@ -208,6 +204,14 @@ export function PlayMapSheet({
             >
               導航
             </a>
+            <button
+              type="button"
+              className={styles.moreButton}
+              aria-label={`在地圖上看 ${place.name}`}
+              onClick={(event) => onShowOnMap(place.id, event.currentTarget)}
+            >
+              在地圖看
+            </button>
             <a
               className={styles.placeLink}
               href={buildGoogleMapsPlaceUrl(place)}

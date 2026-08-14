@@ -5,8 +5,7 @@ import { useRef } from "react";
 import type { PlaygroundType } from "@/data/playgrounds";
 import type { BrowseView } from "./PlayMapContract";
 import { PlayMapCardList } from "./PlayMapCardList";
-import { PlayMapFilters } from "./PlayMapFilters";
-import { PlayMapIntentRow } from "./PlayMapIntentRow";
+import { PlayMapControlBar } from "./PlayMapControlBar";
 import { PlayMapSheet } from "./PlayMapSheet";
 import { PlayMapToolbar } from "./PlayMapToolbar";
 import { usePlayMapFilters } from "./usePlayMapFilters";
@@ -60,6 +59,7 @@ export default function PlayMap({
       data-split={map.splitLayout ? "true" : "false"}
     >
       <PlayMapToolbar
+        howToStart="先點離我最近，或直接點下面卡片看怎麼帶。"
         coverageLabel={map.coverageLabel}
         browseView={map.browseView}
         onSelectView={map.handleSelectView}
@@ -67,7 +67,7 @@ export default function PlayMap({
         hideViewTabs={map.splitLayout}
       />
 
-      <PlayMapIntentRow
+      <PlayMapControlBar
         nearMeActive={map.userLatLng !== null}
         geoStatus={map.geoStatus}
         freeOnly={map.freeOnly}
@@ -75,9 +75,6 @@ export default function PlayMap({
         onNearMe={map.handleNearMe}
         onToggleFree={map.handleToggleFree}
         onToggleIndoor={map.handleToggleIndoor}
-      />
-
-      <PlayMapFilters
         filtersOpen={map.filtersOpen}
         onToggleFilters={map.handleToggleFilters}
         filterSummaryLabel={map.filterSummaryLabel}
@@ -93,10 +90,6 @@ export default function PlayMap({
         typeCounts={map.typeCounts}
         visibleTypeOptions={map.visibleTypeOptions}
         onSelectType={map.handleSelectType}
-        indoorOnly={map.indoorOnly}
-        freeOnly={map.freeOnly}
-        onToggleIndoor={map.handleToggleIndoor}
-        onToggleFree={map.handleToggleFree}
       />
 
       <div className={styles.content}>
@@ -116,7 +109,6 @@ export default function PlayMap({
             hasExtraFilters={map.hasExtraFilters}
             onClearFilters={map.handleClearFilters}
             onSelect={map.handleSelectFromCard}
-            onShowOnMap={map.handleShowOnMap}
             showScopeHint={map.clusterMode}
             visibleCount={map.visibleCount}
             canLoadMore={map.canLoadMore}
@@ -161,6 +153,7 @@ export default function PlayMap({
           distanceLabel={map.selectedDistanceLabel}
           onClose={map.handleCloseSheet}
           onExpand={map.handleExpandSheet}
+          onShowOnMap={map.handleShowOnMap}
           panelRef={map.sheetRef}
         />
       ) : null}

@@ -2,7 +2,6 @@ import { describe, expect, test } from "vitest";
 import type { Playground } from "@/data/playgrounds";
 import {
   estimateDriveMinutes,
-  formatDriveMinutesLabel,
   formatPlaceDistanceLabel,
   haversineKm,
   isStrollerFriendly,
@@ -62,6 +61,7 @@ const PLACE_BASE = {
   tags: [] as string[],
   sources: [],
   lastVerified: "2026-01-01",
+  tips: "",
 };
 
 describe("sortPlaygrounds", () => {
@@ -185,7 +185,7 @@ describe("isStrollerFriendly", () => {
       isStrollerFriendly({
         tags: ["推車友善"],
         facilities: [],
-        tips: undefined,
+        tips: "",
       }),
     ).toBe(true);
     expect(
@@ -206,7 +206,7 @@ describe("listPlaceDecisionTags", () => {
       ageRange: [3, 8],
       tags: ["推車友善"],
       facilities: [],
-      tips: undefined,
+      tips: "",
     });
     expect(tags).toEqual(["免費", "室內", "推車友善", "3–8 歲"]);
   });

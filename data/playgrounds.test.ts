@@ -173,9 +173,40 @@ describe("playgrounds sidecar", () => {
   it("tips 不得重複 UI 固定票價提示", () => {
     for (const item of listPlaygrounds()) {
       expect(
-        item.tips?.includes(UI_VOLATILITY_NOTICE) ?? false,
+        item.tips.includes(UI_VOLATILITY_NOTICE),
         `${item.id} 的 tips 重複了元件已渲染的固定提示`,
       ).toBe(false);
+    }
+  });
+
+  it("lastVerified 在 365 天內", () => {
+    const now = Date.now();
+    const maxAgeMs = 365 * 24 * 60 * 60 * 1000;
+    for (const item of listPlaygrounds()) {
+      const verifiedAt = parseIsoDate(item.lastVerified).getTime();
+      expect(
+        now - verifiedAt,
+        `${item.id} lastVerified=${item.lastVerified}`,
+      ).toBeLessThanOrEqual(maxAgeMs);
+    }
+  });
+
+  it("tips 必填、夠長，且對到 facilities 或非空 tags", () => {
+    const skipTags = new Set(["免費", "室內"]);
+    for (const item of listPlaygrounds()) {
+      const tips = item.tips.trim();
+      expect(tips.length, `${item.id} tips 過短`).toBeGreaterThanOrEqual(28);
+      const facilityHit = item.facilities.some(
+        (facility) => facility.length >= 2 && tips.includes(facility),
+      );
+      const tagHit = item.tags.some(
+        (tag) =>
+          tag.length >= 2 && !skipTags.has(tag) && tips.includes(tag),
+      );
+      expect(
+        facilityHit || tagHit,
+        `${item.id} tips 沒有對到 facilities／tags：${tips}`,
+      ).toBe(true);
     }
   });
 
@@ -487,7 +518,7 @@ describe("playgrounds sidecar", () => {
       "南寮漁港旅遊服務中心",
     );
     expect(getPlayground("hc-nanliao")?.tips).toBe(
-      "海風大記得防曬與外套；可搭配南寮親水公園與自行車道。",
+      "海風大記得防曬與外套；可搭配南寮親水公園與自行車道。場內有大型遊具、沙坑、遮蔭區。",
     );
     expect(getPlayground("hc-nanliao")?.coverageNote).toBe(
       "導航落點為南寮漁港旅遊服務中心，實際遊戲區在旁邊步行可達。",

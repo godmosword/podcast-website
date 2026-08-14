@@ -53,6 +53,7 @@ export const VIEW_TABS: readonly {
 ];
 
 export type PlayMapToolbarProps = {
+  howToStart: string;
   coverageLabel: string;
   browseView: BrowseView;
   onSelectView: (next: BrowseView) => void;
@@ -61,7 +62,7 @@ export type PlayMapToolbarProps = {
   hideViewTabs?: boolean;
 };
 
-export type PlayMapIntentRowProps = {
+export type PlayMapControlBarProps = {
   nearMeActive: boolean;
   geoStatus: GeoStatus;
   freeOnly: boolean;
@@ -69,9 +70,6 @@ export type PlayMapIntentRowProps = {
   onNearMe: () => void;
   onToggleFree: () => void;
   onToggleIndoor: () => void;
-};
-
-export type PlayMapFiltersProps = {
   filtersOpen: boolean;
   onToggleFilters: () => void;
   filterSummaryLabel: string;
@@ -87,11 +85,6 @@ export type PlayMapFiltersProps = {
   typeCounts: ReadonlyMap<PlaygroundType, number>;
   visibleTypeOptions: readonly PlaygroundType[];
   onSelectType: (next: PlaygroundType | null) => void;
-  /** 條件 facet（DESIGN.md 明訂的第三個 facet：縣市／類型／條件）。 */
-  indoorOnly: boolean;
-  freeOnly: boolean;
-  onToggleIndoor: () => void;
-  onToggleFree: () => void;
 };
 
 export type PlayMapCardProps = {
@@ -100,7 +93,6 @@ export type PlayMapCardProps = {
   hidden: boolean;
   distanceLabel: string | null;
   onSelect: (id: string, trigger: HTMLElement) => void;
-  onShowOnMap: (id: string, trigger: HTMLElement) => void;
 };
 
 export type PlayMapCardListProps = {
@@ -111,7 +103,6 @@ export type PlayMapCardListProps = {
   hasExtraFilters: boolean;
   onClearFilters: () => void;
   onSelect: (id: string, trigger: HTMLElement) => void;
-  onShowOnMap: (id: string, trigger: HTMLElement) => void;
   /** 未選縣市且未定位時，提示先縮小範圍。 */
   showScopeHint: boolean;
   /** 本批可見筆數；超出者收 hidden，**不得** slice 陣列。 */
@@ -130,5 +121,6 @@ export type PlayMapSheetProps = {
   distanceLabel: string | null;
   onClose: () => void;
   onExpand: () => void;
+  onShowOnMap: (id: string, trigger: HTMLElement) => void;
   panelRef: RefObject<HTMLDivElement | null>;
 };

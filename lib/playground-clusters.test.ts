@@ -16,6 +16,7 @@ const base = {
   tags: [] as string[],
   sources: [],
   lastVerified: "2026-01-01",
+  tips: "",
 };
 
 describe("clusterPlaygroundsByCity", () => {

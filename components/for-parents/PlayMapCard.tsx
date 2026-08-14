@@ -5,6 +5,7 @@ import {
   formatAgeRangeLabel,
   listPlaceDecisionTags,
 } from "@/lib/playground-distance";
+import { composeParentBlurb } from "@/lib/playground-parent-voice";
 import { playgroundTypeVisualKey } from "@/lib/playground-type-visual";
 import type { PlayMapCardProps } from "./PlayMapContract";
 import { PlaygroundTypeMark } from "./PlaygroundTypeMark";
@@ -16,7 +17,6 @@ export function PlayMapCard({
   hidden,
   distanceLabel,
   onSelect,
-  onShowOnMap,
 }: PlayMapCardProps) {
   /*
    * 年齡標籤在卡片層過濾掉：全站每筆都是同一個區間，73 張卡重複講 73 次是噪音，
@@ -28,6 +28,7 @@ export function PlayMapCard({
   );
   const area = place.district ?? place.city;
   const meta = [area, place.type, distanceLabel].filter(Boolean).join(" · ");
+  const blurb = composeParentBlurb(place);
 
   return (
     <li hidden={hidden}>
@@ -57,17 +58,10 @@ export function PlayMapCard({
                 ))}
               </span>
             ) : null}
+            <span className={styles.cardBlurb}>{blurb}</span>
           </span>
         </button>
         <div className={styles.cardActions}>
-          <button
-            type="button"
-            className={styles.cardMapBtn}
-            aria-label={`在地圖上看 ${place.name}`}
-            onClick={(event) => onShowOnMap(place.id, event.currentTarget)}
-          >
-            在地圖看
-          </button>
           <a
             className={styles.cardNav}
             href={buildGoogleMapsNavUrl(place)}

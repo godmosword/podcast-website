@@ -1,9 +1,16 @@
 "use client";
 
-import type { PlayMapFiltersProps } from "./PlayMapContract";
+import type { PlayMapControlBarProps } from "./PlayMapContract";
 import styles from "./PlayMap.module.css";
 
-export function PlayMapFilters({
+export function PlayMapControlBar({
+  nearMeActive,
+  geoStatus,
+  freeOnly,
+  indoorOnly,
+  onNearMe,
+  onToggleFree,
+  onToggleIndoor,
   filtersOpen,
   onToggleFilters,
   filterSummaryLabel,
@@ -19,24 +26,64 @@ export function PlayMapFilters({
   typeCounts,
   visibleTypeOptions,
   onSelectType,
-  indoorOnly,
-  freeOnly,
-  onToggleIndoor,
-  onToggleFree,
-}: PlayMapFiltersProps) {
+}: PlayMapControlBarProps) {
   return (
-    <div className={styles.filtersSticky}>
+    <div className={styles.controlBar}>
+      <section className={styles.intentSection} aria-label="快速意圖與篩選">
+        <p className={styles.intentLead}>今天想去哪？</p>
+        <div className={styles.controlRow}>
+          <div className={styles.intentGrid} role="group" aria-label="意圖快捷">
+            <button
+              type="button"
+              className={styles.intentChip}
+              aria-pressed={nearMeActive}
+              aria-busy={geoStatus === "pending"}
+              onClick={onNearMe}
+            >
+              離我最近
+            </button>
+            <button
+              type="button"
+              className={styles.intentChip}
+              aria-pressed={freeOnly}
+              onClick={onToggleFree}
+            >
+              免費放電
+            </button>
+            <button
+              type="button"
+              className={styles.intentChip}
+              aria-pressed={indoorOnly}
+              onClick={onToggleIndoor}
+            >
+              室內
+            </button>
+          </div>
+          <button
+            type="button"
+            className={styles.filterToggle}
+            aria-expanded={filtersOpen}
+            aria-controls="play-map-filter-panel"
+            aria-label={`篩選，${filterSummaryLabel}`}
+            onClick={onToggleFilters}
+          >
+            篩選
+          </button>
+        </div>
+        {geoStatus === "denied" ? (
+          <p className={styles.geoHint} role="status">
+            無法定位。可改選縣市，或稍後再開啟定位。
+          </p>
+        ) : null}
+        {geoStatus === "pending" ? (
+          <p className={styles.geoHint} role="status">
+            正在取得位置…
+          </p>
+        ) : null}
+      </section>
+
       <div className={styles.filterSummary} aria-live="polite">
         <p className={styles.filterSummaryText}>{filterSummaryLabel}</p>
-        <button
-          type="button"
-          className={styles.filterToggle}
-          aria-expanded={filtersOpen}
-          aria-controls="play-map-city-facet play-map-filter-facets"
-          onClick={onToggleFilters}
-        >
-          篩選
-        </button>
         {canClearFilters ? (
           <button
             type="button"
@@ -48,14 +95,11 @@ export function PlayMapFilters({
         ) : null}
       </div>
 
-      {/*
-        縣市是最高基數 facet，桌機常駐以維持發現性；手機隨面板收摺。
-        同一份 JSX，可見性交給 CSS 依斷點決定（避免手機／桌機兩套 JSX）。
-      */}
-      <div
-        id="play-map-city-facet"
-        className={styles.cityFacet}
-        data-open={filtersOpen}
+      <form
+        id="play-map-filter-panel"
+        className={styles.filters}
+        aria-label="遊樂地點篩選"
+        hidden={!filtersOpen}
       >
         <div className={styles.facetRow}>
           <span className={styles.facetLabel}>縣市</span>
@@ -94,14 +138,7 @@ export function PlayMapFilters({
             })}
           </div>
         </div>
-      </div>
 
-      <form
-        id="play-map-filter-facets"
-        className={styles.filters}
-        aria-label="遊樂地點篩選"
-        hidden={!filtersOpen}
-      >
         <div className={styles.facetRow}>
           <span className={styles.facetLabel}>類型</span>
           <div
@@ -133,37 +170,6 @@ export function PlayMapFilters({
                 </button>
               );
             })}
-          </div>
-        </div>
-
-        {/*
-          條件 facet：DESIGN.md 要求「縣市／類型／條件」三個 facet。
-          室內／免費是與 type 正交的 boolean，不能塞進類型排（會被讀成互斥）。
-          與意圖列共用同一組 state 與 handler，不另存 active 態，避免雙軌不同步。
-        */}
-        <div className={styles.facetRow}>
-          <span className={styles.facetLabel}>條件</span>
-          <div
-            className={styles.chipGroup}
-            role="group"
-            aria-label="依條件篩選"
-          >
-            <button
-              type="button"
-              className={`${styles.chip} ${styles.chipCompact}`}
-              aria-pressed={indoorOnly}
-              onClick={onToggleIndoor}
-            >
-              室內
-            </button>
-            <button
-              type="button"
-              className={`${styles.chip} ${styles.chipCompact}`}
-              aria-pressed={freeOnly}
-              onClick={onToggleFree}
-            >
-              免費
-            </button>
           </div>
         </div>
       </form>

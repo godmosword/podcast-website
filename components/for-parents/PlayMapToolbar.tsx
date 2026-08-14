@@ -6,6 +6,7 @@ import { VIEW_TABS, type PlayMapToolbarProps } from "./PlayMapContract";
 import styles from "./PlayMap.module.css";
 
 export function PlayMapToolbar({
+  howToStart,
   coverageLabel,
   browseView,
   onSelectView,
@@ -23,6 +24,7 @@ export function PlayMapToolbar({
             <Doodle kind="burst" size={26} color="var(--c-pink)" />
           </span>
         </div>
+        <p className={styles.howToStart}>{howToStart}</p>
         <p className={styles.coverage}>{coverageLabel}</p>
       </div>
 
