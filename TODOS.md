@@ -53,6 +53,7 @@
 
 | ID | 說明 |
 |----|------|
+| chore(debt): Wave B 代碼瘦身（knip SSOT、列名死碼、RTL 直接依賴、OG race） | 見本 commit |
 | polish(for-parents): play-map 字階／卡片 plate／map-chip 遷移 | `8b13f20` |
 | feat(for-parents): play-map 一列篩選與家長筆記 | `36204c6` |
 
@@ -301,10 +302,10 @@
 | refactor(cleanup): Wave A 代碼瘦身（刪 `GameThumbArt`／`runtime/style`／`tileset-draw`；收斂 games／car-adventure／og 內部 export；修 GAMEKIT-ARCHITECTURE） | `c440d62` |
 | fix+refactor(games): 車車大冒險入口 CTA 移出 canvas 裁切＋模組拆分＋封面刷新 | `ccf0fde` |
 
-### 後續（代碼瘦身，未開工）
+### 後續（代碼瘦身）
 
-- **Wave B（opt-in）**：`@testing-library/dom` 直接依賴、knip 設定單一來源、test seam／`TILE_*` 決策
-- **Wave C（另 `/agent-plan`）**：BackLink／遊戲 CTA 抽共用／大檔拆分；開工前先決策「找一找」vs「溫柔探索」文案
+- **Wave B（opt-in）** ✅ 見本 commit：knip 單一來源（`knip.json`；`package.json#knip` 已刪）；刪 `PlayMapLoader`／`chip-scroll`／退役 kart／snowboard iframe CSS；拿掉 `@testing-library/dom` 直接依賴；OG 去掉 test-only `race`。**未**抽 BackLink、**未**拆大檔、**未**動「找一找／溫柔探索」。`TILE_*`／宇宙常數不動。
+- **Wave C（另 `/agent-plan`）**：BackLink／遊戲 CTA 抽共用／大檔拆分 — **維持不做**（STRENGTHENING-PRIORITY 明確不做；2026-08-14 委員會否決掛在 Wave B）。開工前仍須先決策「找一找」vs「溫柔探索」文案。
 
 ### 本輪已完成（2026-07-15）
 

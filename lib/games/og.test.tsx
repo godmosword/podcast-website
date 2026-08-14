@@ -18,7 +18,7 @@ describe("game og", () => {
     expect(gameOgContentType).toBe("image/png");
   });
 
-  it.each(["play", "race", "puzzle"] as const)(
+  it.each(["play", "puzzle"] as const)(
     "renders %s without external asset fetches",
     async (icon) => {
       const fetchMock = vi.fn(async () => {

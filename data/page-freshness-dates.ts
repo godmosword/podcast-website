@@ -20,7 +20,7 @@ export const STATIC_PAGE_MODIFIED_DATE_SOURCE: Record<string, string> = {
   "/adventures": "c040158 app/adventures/page.tsx, app/adventures/page.module.css",
   "/characters": "0c4ccf6 app/characters/page.tsx, app/characters/page.module.css, data/characters.json",
   "/for-parents": "08ec732 app/for-parents/page.tsx, app/for-parents/page.module.css, lib/for-parents.ts",
-  "/for-parents/play-map": "08ec732 app/for-parents/play-map/page.tsx, app/for-parents/play-map/page.module.css, components/for-parents/PlayMap.tsx, components/for-parents/PlayMap.module.css, components/for-parents/PlayMapLeaflet.tsx, components/for-parents/PlayMapLoader.tsx, lib/playgrounds-query.ts, lib/playground-coverage.ts, data/playgrounds.ts",
+  "/for-parents/play-map": "08ec732 app/for-parents/play-map/page.tsx, app/for-parents/play-map/page.module.css, components/for-parents/PlayMap.tsx, components/for-parents/PlayMap.module.css, components/for-parents/PlayMapLeaflet.tsx, lib/playgrounds-query.ts, lib/playground-coverage.ts, data/playgrounds.ts",
   "/games": "40c951b app/games/page.tsx, app/games/layout.tsx, app/games/page.module.css",
   "/games/block-drop": "98a6944 app/games/block-drop/page.tsx, app/games/block-drop/page.module.css",
   "/games/candy-match": "ceb92f4 app/games/candy-match/page.tsx",

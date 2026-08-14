@@ -25,7 +25,7 @@ type GameOgOptions = {
   accentColor?: string;
 };
 
-type GameOgIcon = "play" | "race" | "puzzle";
+type GameOgIcon = "play" | "puzzle";
 
 /**
  * ImageResponse 會把 emoji 轉成遠端 SVG（預設來源是 jsDelivr）。
@@ -84,12 +84,12 @@ function GameOgMark({ icon, accentColor }: { icon: GameOgIcon; accentColor: stri
         marginBottom: 28,
         boxShadow: "0 10px 0 rgba(52,48,43,0.16)",
         color: GAME_OG_COLORS.ink,
-        fontSize: icon === "play" ? 88 : 58,
+        fontSize: 88,
         fontWeight: 800,
-        letterSpacing: icon === "play" ? 0 : 2,
+        letterSpacing: 0,
       }}
     >
-      {icon === "play" ? ">" : "GO"}
+      {">"}
     </div>
   );
 }

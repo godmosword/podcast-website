@@ -1,7 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "ignore": [
-    "lib/chip-scroll.ts",
     "lib/podcast-apple.ts",
     "lib/universe/roamer-coords.ts",
     "scripts/backfill-scene-captions.ts",
@@ -65,5 +64,6 @@
     "lib/zone-wish-rate-limit.ts",
     "public/sw.js"
   ],
-  "ignoreDependencies": ["openai", "sharp"]
+  "ignoreBinaries": ["ffmpeg", "ffprobe", "gh", "python3", "which"],
+  "ignoreDependencies": ["openai", "sharp", "eslint-config-next"]
 }

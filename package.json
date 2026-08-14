@@ -70,7 +70,6 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
     "@playwright/test": "^1.52.0",
-    "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
     "@types/leaflet": "^1.9.22",
     "@types/node": "^22.10.0",
@@ -84,20 +83,5 @@
     "tsx": "^4.20.3",
     "typescript": "^5.7.0",
     "vitest": "^3.2.4"
-  },
-  "knip": {
-    "ignore": [
-      "public/sw.js"
-    ],
-    "ignoreBinaries": [
-      "ffmpeg",
-      "ffprobe",
-      "gh",
-      "python3",
-      "which"
-    ],
-    "ignoreDependencies": [
-      "eslint-config-next"
-    ]
   }
 }
