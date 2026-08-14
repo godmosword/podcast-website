@@ -27,7 +27,7 @@ export function PlayMapCard({
     (tag) => tag !== ageLabel,
   );
   const area = place.district ?? place.city;
-  const meta = [area, place.type, distanceLabel].filter(Boolean).join(" · ");
+  const meta = [area, place.type].filter(Boolean).join(" · ");
   const blurb = composeParentBlurb(place);
 
   return (
@@ -47,7 +47,12 @@ export function PlayMapCard({
         >
           <PlaygroundTypeMark type={place.type} />
           <span className={styles.cardBody}>
-            <span className={styles.cardName}>{place.name}</span>
+            <span className={styles.cardHead}>
+              <span className={styles.cardName}>{place.name}</span>
+              {distanceLabel ? (
+                <span className={styles.cardDistance}>{distanceLabel}</span>
+              ) : null}
+            </span>
             <span className={styles.cardMeta}>{meta}</span>
             {decisionTags.length > 0 ? (
               <span className={styles.cardFlags}>

@@ -1,7 +1,7 @@
 .root {
   position: relative;
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-6);
   width: min(1100px, 100%);
   margin: var(--space-4) auto 0;
 }
@@ -16,7 +16,7 @@
   border-radius: var(--radius-lg);
   background: var(--card);
   color: var(--ink-soft);
-  font-weight: 700;
+  font-weight: 600;
   box-shadow: var(--shadow-sm);
 }
 
@@ -35,8 +35,8 @@
 .title {
   margin: 0;
   color: var(--ink);
-  font-size: clamp(1.65rem, 4vw, 2.1rem);
-  font-weight: 800;
+  font-size: var(--fs-h1);
+  font-weight: 700;
   line-height: 1.15;
 }
 
@@ -58,15 +58,15 @@
   margin: 8px 0 0;
   color: var(--accent-ink);
   font-size: 0.95rem;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.45;
 }
 
 .coverage {
   margin: 6px 0 0;
   color: var(--ink-soft);
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: var(--fs-meta);
+  font-weight: 600;
   line-height: 1.4;
 }
 
@@ -90,16 +90,18 @@
   color: var(--ink-soft);
   font: inherit;
   font-size: 0.95rem;
-  font-weight: 800;
+  font-weight: 600;
   cursor: pointer;
   transition: transform var(--motion-press), opacity var(--motion-press),
     background-color var(--motion-press);
 }
 
 .viewTabActive {
-  background: linear-gradient(var(--map-chip), var(--map-chip-2));
-  color: var(--map-chip-ink);
+  background: var(--accent-ink);
+  color: var(--card);
+  border: 1px solid var(--accent-ink);
   box-shadow: var(--shadow-sm);
+  font-weight: 700;
 }
 
 .viewTab:active {
@@ -116,15 +118,16 @@
   margin: 0;
   color: var(--accent-ink);
   font-size: 0.95rem;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 /*
  * 三顆意圖＋一顆次要「篩選」同一列，避免意圖、摘要、縣市、條件四層搶首屏。
+ * flex wrap：不要把三顆奶油磚撐滿 1100px。
  */
 .intentGrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
   min-width: 0;
 }
@@ -136,8 +139,7 @@
   display: grid;
   gap: var(--space-2);
   padding: var(--space-2) 0;
-  background: color-mix(in srgb, var(--bg, #fff) 92%, transparent);
-  backdrop-filter: blur(8px);
+  background: var(--bg);
 }
 
 .controlRow {
@@ -150,21 +152,22 @@
 .intentChip {
   min-height: 48px;
   padding: 10px 14px;
-  border: 2px solid var(--map-chip-line);
+  border: 1px solid var(--hairline);
   border-radius: var(--radius-lg);
-  background: linear-gradient(var(--map-chip), var(--map-chip-2));
-  color: var(--map-chip-ink);
+  background: transparent;
+  color: var(--ink);
   font: inherit;
   font-size: 0.95rem;
-  font-weight: 800;
+  font-weight: 600;
   cursor: pointer;
   transition: transform var(--motion-press), opacity var(--motion-press);
 }
 
 .intentChip[aria-pressed="true"] {
-  border-color: var(--map-chip-ink);
-  background: var(--map-chip-ink);
-  color: var(--map-chip);
+  border-color: var(--accent-ink);
+  background: var(--accent-ink);
+  color: var(--card);
+  font-weight: 700;
   box-shadow: var(--shadow-sm);
 }
 
@@ -176,8 +179,8 @@
 .geoHint {
   margin: 0;
   color: var(--ink-soft);
-  font-size: 0.88rem;
-  font-weight: 700;
+  font-size: var(--fs-meta);
+  font-weight: 600;
 }
 
 .filters {
@@ -202,8 +205,8 @@
 
 .facetLabel {
   color: var(--accent-ink);
-  font-size: 0.78rem;
-  font-weight: 800;
+  font-size: var(--fs-meta);
+  font-weight: 700;
   letter-spacing: 0.02em;
 }
 
@@ -236,13 +239,13 @@
   flex: 0 0 auto;
   min-height: 44px;
   padding: 8px 14px;
-  border: 2px solid var(--map-chip-line);
+  border: 1px solid var(--hairline);
   border-radius: 999px;
-  background: var(--card);
-  color: var(--accent-ink);
+  background: transparent;
+  color: var(--ink);
   font: inherit;
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
   transition: transform var(--motion-press), opacity var(--motion-press);
@@ -255,9 +258,10 @@
 }
 
 .chip[aria-pressed="true"] {
-  border-color: var(--map-chip-ink);
-  background: var(--map-chip-ink);
-  color: var(--map-chip);
+  border-color: var(--accent-ink);
+  background: var(--accent-ink);
+  color: var(--card);
+  font-weight: 700;
   box-shadow: var(--shadow-sm);
 }
 
@@ -283,8 +287,8 @@
   margin: 0;
   flex: 1 1 140px;
   color: var(--ink-soft);
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: var(--fs-meta);
+  font-weight: 600;
   line-height: 1.45;
 }
 
@@ -293,13 +297,13 @@
   flex: 0 0 auto;
   min-height: 44px;
   padding: 8px 14px;
-  border: 2px solid var(--map-chip-line);
+  border: 1px solid var(--hairline);
   border-radius: 999px;
   background: transparent;
-  color: var(--accent-ink);
+  color: var(--ink);
   font: inherit;
   font-size: 0.88rem;
-  font-weight: 800;
+  font-weight: 600;
   cursor: pointer;
   transition: transform var(--motion-press), opacity var(--motion-press);
 }
@@ -310,9 +314,10 @@
 }
 
 .filterToggle[aria-expanded="true"] {
-  border-color: var(--map-chip-ink);
-  background: var(--map-chip-ink);
-  color: var(--map-chip);
+  border-color: var(--accent-ink);
+  background: var(--accent-ink);
+  color: var(--card);
+  font-weight: 700;
 }
 
 .clearFilters:active {
@@ -348,10 +353,17 @@
   display: grid;
   gap: 0;
   border: 1px solid var(--hairline);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   background: var(--card);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  box-shadow: var(--elev-1), 0 0 0 1px var(--card-accent);
+  transition: transform var(--motion-press), box-shadow var(--motion-press);
+}
+
+@media (hover: hover) {
+  .card:hover {
+    box-shadow: var(--elev-2), 0 0 0 1px var(--card-accent);
+    transform: translateY(-2px);
+  }
 }
 
 .card[data-type="park"] {
@@ -384,10 +396,16 @@
 
 .typeScene {
   display: block;
-  width: 100%;
-  height: 96px;
-  background: color-mix(in srgb, var(--card-accent, var(--accent)) 42%, var(--card));
+  flex: 0 0 auto;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-md);
   overflow: hidden;
+  background: color-mix(in srgb, var(--card-accent, var(--accent)) 42%, var(--card));
+}
+
+:global([data-theme="night"]) .typeScene {
+  background: color-mix(in srgb, var(--card-accent, var(--accent)) 20%, var(--card));
 }
 
 .typeScene svg {
@@ -398,20 +416,19 @@
 
 /*
  * 選中狀態只加外框、不換底色。
- * 原本用 color-mix(--map-chip 40%, --card)，夜間會混成 #808390，
- * 讓卡片上的淺色字掉到 3.08:1（標題）與 1.69:1（區名）。
+ * 外框改走卡片類型色，不再借用地圖 overlay 色票。
  */
 .cardSelected {
-  box-shadow: var(--shadow-sm), inset 0 0 0 2px var(--map-chip-line);
+  box-shadow: var(--elev-1), 0 0 0 1px var(--card-accent), inset 0 0 0 2px var(--card-accent);
 }
 
 .cardMain {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0;
-  align-items: stretch;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: center;
   min-height: 44px;
-  padding: 0;
+  padding: var(--space-3);
   border: none;
   background: transparent;
   color: inherit;
@@ -430,20 +447,36 @@
   display: grid;
   gap: 6px;
   min-width: 0;
-  padding: var(--space-3) var(--space-4);
+  padding: 0;
+}
+
+.cardHead {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: start;
 }
 
 .cardName {
   color: var(--ink);
-  font-size: 1.05rem;
-  font-weight: 800;
+  font-size: var(--fs-h3-compact);
+  font-weight: 700;
   line-height: 1.3;
+}
+
+.cardDistance {
+  color: var(--ink);
+  font-size: var(--fs-meta);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.3;
+  white-space: nowrap;
 }
 
 .cardMeta {
   color: var(--ink-soft);
-  font-size: 0.88rem;
-  font-weight: 700;
+  font-size: var(--fs-meta);
+  font-weight: 600;
   line-height: 1.4;
 }
 
@@ -455,9 +488,9 @@
 }
 
 .cardBlurb {
-  color: var(--ink);
+  color: var(--ink-soft);
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.45;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -470,17 +503,17 @@
   padding: 3px 8px;
   border-radius: 999px;
   font-size: 0.75rem;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .flag {
-  background: color-mix(in srgb, var(--c-mint, #b7df9b) 22%, var(--card));
+  background: var(--warm-chip-bg);
   color: var(--accent-ink);
 }
 
 .flagMuted {
-  background: color-mix(in srgb, var(--ink-soft) 12%, var(--card));
-  color: var(--ink-soft);
+  background: var(--warm-chip-bg);
+  color: var(--accent-ink);
 }
 
 .cardActions {
@@ -499,13 +532,13 @@
   min-width: 44px;
   min-height: 44px;
   padding: 8px 14px;
-  border: 2px solid var(--map-chip-line);
+  border: 1px solid var(--hairline);
   border-radius: 999px;
   background: transparent;
-  color: var(--accent-ink);
+  color: var(--ink);
   font: inherit;
   font-size: 0.88rem;
-  font-weight: 800;
+  font-weight: 600;
   text-decoration: none;
   cursor: pointer;
   transition: transform var(--motion-press), opacity var(--motion-press);
@@ -528,14 +561,29 @@
   text-align: center;
 }
 
-.scopeHint {
+.brandAnchor {
+  display: block;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+}
+
+.scopeHintRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
   margin: 0 0 var(--space-3);
+}
+
+.scopeHint {
+  margin: 0;
+  flex: 1 1 auto;
   padding: 10px 14px;
   border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--map-chip) 58%, var(--card));
-  color: var(--map-chip-ink);
+  background: var(--warm-chip-bg);
+  color: var(--accent-ink);
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.5;
 }
 
@@ -543,7 +591,7 @@
   margin: 0;
   color: var(--ink-soft);
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .chip:disabled {
@@ -587,7 +635,7 @@
   background: color-mix(in srgb, var(--map-chip) 92%, transparent);
   color: var(--map-chip-ink);
   font-size: 0.82rem;
-  font-weight: 700;
+  font-weight: 600;
   box-shadow: var(--shadow-sm);
   pointer-events: none;
 }
@@ -603,7 +651,7 @@
   background: color-mix(in srgb, var(--card) 92%, transparent);
   color: var(--ink-soft);
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 600;
   box-shadow: var(--shadow-sm);
 }
 
@@ -642,11 +690,19 @@
   gap: var(--space-3);
 }
 
+.sheetBrand {
+  display: block;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+}
+
 .sheetTitle {
   margin: 0;
+  flex: 1 1 auto;
   color: var(--ink);
   font-size: 1.28rem;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.3;
 }
 
@@ -655,12 +711,12 @@
   min-width: 44px;
   min-height: 44px;
   padding: 8px 14px;
-  border: 2px solid var(--map-chip-line);
+  border: 1px solid var(--hairline);
   border-radius: 999px;
-  background: linear-gradient(var(--map-chip), var(--map-chip-2));
-  color: var(--map-chip-ink);
+  background: var(--warm-chip-bg);
+  color: var(--accent-ink);
   font: inherit;
-  font-weight: 800;
+  font-weight: 600;
   cursor: pointer;
   transition: transform var(--motion-press), opacity var(--motion-press);
 }
@@ -693,7 +749,7 @@
   display: inline-block;
   margin-right: 8px;
   color: var(--accent-ink);
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .coverageNote {
@@ -709,8 +765,8 @@
   display: block;
   margin-bottom: 4px;
   color: var(--ink-soft);
-  font-size: 0.78rem;
-  font-weight: 800;
+  font-size: var(--fs-meta);
+  font-weight: 700;
   letter-spacing: 0.04em;
 }
 
@@ -725,17 +781,17 @@
   display: inline-block;
   margin-right: 8px;
   color: var(--accent-ink);
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .volatilityNotice {
   margin: 12px 0 0;
   padding: 10px 12px;
   border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--map-chip) 70%, var(--card));
-  color: var(--map-chip-ink);
+  background: var(--warm-chip-bg);
+  color: var(--accent-ink);
   font-size: 0.9rem;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.55;
 }
 
@@ -750,7 +806,7 @@
   margin: 10px 0 0;
   color: var(--ink-soft);
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .sourcesDetails {
@@ -763,7 +819,7 @@
   align-items: center;
   color: var(--accent-ink);
   font-size: 0.88rem;
-  font-weight: 900;
+  font-weight: 700;
   cursor: pointer;
 }
 
@@ -785,7 +841,7 @@
   gap: 8px;
   color: var(--ink);
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.45;
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -797,7 +853,7 @@
   background: color-mix(in srgb, var(--ink-soft) 12%, var(--card));
   color: var(--accent-ink);
   font-size: 0.75rem;
-  font-weight: 800;
+  font-weight: 600;
   text-decoration: none;
 }
 
@@ -828,7 +884,7 @@
   padding: 10px 18px;
   border-radius: 999px;
   font: inherit;
-  font-weight: 800;
+  font-weight: 700;
   text-decoration: none;
   cursor: pointer;
   transition: transform var(--motion-press), opacity var(--motion-press);
@@ -894,12 +950,22 @@
 }
 
 :global(.playMapPin) {
-  width: 18px;
-  height: 18px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
   border-radius: 50% 50% 50% 0;
   transform: rotate(-45deg);
   background: var(--pin-color, var(--c-mint, #b7df9b));
+  border: 2px solid var(--card);
   box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 22%, transparent);
+}
+
+:global(.playMapPinGlyph) {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--card);
 }
 
 :global(.playMapMarkerButton[data-type="park"]) {
@@ -930,8 +996,12 @@
   --pin-color: var(--ink-soft);
 }
 
-  :global(.playMapMarkerButton[aria-pressed="true"] .playMapPin) {
-  transform: rotate(-45deg) scale(1.18);
+:global(.playMapMarkerButton[aria-pressed="true"]) {
+  transform: translateY(-3px);
+}
+
+:global(.playMapMarkerButton[aria-pressed="true"] .playMapPin) {
+  transform: rotate(-45deg);
   filter: drop-shadow(0 2px 4px color-mix(in srgb, var(--ink) 18%, transparent));
 }
 
@@ -941,6 +1011,7 @@
 }
 
 :global(.playMapClusterButton) {
+  position: relative;
   display: grid;
   place-items: center;
   width: 44px;
@@ -952,9 +1023,10 @@
   color: var(--map-chip-ink);
   font: inherit;
   font-size: 0.82rem;
-  font-weight: 800;
+  font-weight: 700;
   cursor: pointer;
   box-shadow: var(--shadow-sm);
+  overflow: visible;
   transition: transform var(--motion-press), opacity var(--motion-press);
 }
 
@@ -968,13 +1040,13 @@
   left: 50%;
   bottom: calc(100% - 4px);
   transform: translateX(-50%);
-  max-width: 160px;
+  max-width: min(42vw, 160px);
   padding: 4px 8px;
   border-radius: 999px;
   background: var(--card);
   color: var(--ink);
   font-size: 0.72rem;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
@@ -994,10 +1066,6 @@
 }
 
 @media (min-width: 640px) {
-  .intentGrid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
   /*
    * 縣市 chip 直接 wrap 成多列：最高基數，橫捲會讓尾端縣市被裁掉。
    * 類型維持單列。縣市不再桌機常駐，一律進篩選面板。
@@ -1060,6 +1128,11 @@
   .viewTabs {
     width: 100%;
   }
+
+  .typeScene {
+    width: 64px;
+    height: 64px;
+  }
 }
 
 /*
@@ -1078,19 +1151,19 @@
 .loadMoreStatus {
   margin: 0;
   color: var(--ink-soft);
-  font-size: 0.85rem;
-  font-weight: 800;
+  font-size: var(--fs-meta);
+  font-weight: 600;
 }
 
 .loadMore {
   min-height: 44px;
   padding: 10px 20px;
-  border: 2px solid var(--map-chip-line);
+  border: 1px solid var(--hairline);
   border-radius: 999px;
-  background: var(--card);
-  color: var(--accent-ink);
+  background: transparent;
+  color: var(--ink);
   font-size: 0.9rem;
-  font-weight: 800;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -1102,6 +1175,7 @@
   .chip,
   .intentChip,
   .viewTab,
+  .card,
   .cardMain,
   .cardNav,
   .cardMapBtn,
@@ -1118,7 +1192,17 @@
     transition: none;
   }
 
+  .card,
+  .card:hover,
+  .card:active {
+    transform: none;
+  }
+
   .loadMore:active {
+    transform: none;
+  }
+
+  :global(.playMapMarkerButton[aria-pressed="true"]) {
     transform: none;
   }
 
@@ -1131,9 +1215,5 @@
   :global(.playMapClusterButton:active) {
     transform: none;
     opacity: 1;
-  }
-
-  .controlBar {
-    backdrop-filter: none;
   }
 }

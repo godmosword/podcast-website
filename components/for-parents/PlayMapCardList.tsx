@@ -1,5 +1,6 @@
 "use client";
 
+import DuduSprite from "@/components/dudu/DuduSprite";
 import type { Playground } from "@/data/playgrounds";
 import { formatPlaceDistanceLabel, type LatLng } from "@/lib/playground-distance";
 import { PlayMapCard } from "./PlayMapCard";
@@ -32,13 +33,21 @@ export function PlayMapCardList({
     <>
       <div ref={topRef} aria-hidden />
       {showScopeHint ? (
-        <p className={styles.scopeHint} role="status">
-          目前顯示全台收錄。選縣市或點「離我最近」，名單與地圖會更準。
-        </p>
+        <div className={styles.scopeHintRow}>
+          <span className={styles.brandAnchor} aria-hidden>
+            <DuduSprite emotion="happy" decorative />
+          </span>
+          <p className={styles.scopeHint} role="status">
+            目前顯示全台收錄。選縣市或點「離我最近」，名單與地圖會更準。
+          </p>
+        </div>
       ) : null}
       {matched.length === 0 ? (
-        <div className={styles.listEmpty} role="status">
-          <p className={styles.listEmptyText}>
+        <div className={styles.listEmpty}>
+          <span className={styles.brandAnchor} aria-hidden>
+            <DuduSprite emotion="surprised" decorative />
+          </span>
+          <p className={styles.listEmptyText} role="status">
             目前沒有符合條件的地點，試試改意圖或放寬篩選。
           </p>
           {hasExtraFilters ? (

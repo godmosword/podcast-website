@@ -53,6 +53,7 @@
 
 | ID | 說明 |
 |----|------|
+| polish(for-parents): play-map 字階／卡片 plate／map-chip 遷移 | 見本 commit |
 | feat(for-parents): play-map 一列篩選與家長筆記 | `36204c6` |
 
 ### 本輪已完成（2026-08-13）

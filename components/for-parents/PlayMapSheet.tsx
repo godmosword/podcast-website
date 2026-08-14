@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import DuduSprite from "@/components/dudu/DuduSprite";
 import {
   buildGoogleMapsNavUrl,
   buildGoogleMapsPlaceUrl,
@@ -77,6 +78,9 @@ export function PlayMapSheet({
         關閉後可繼續瀏覽地圖與列表，不需離開本頁。
       </p>
       <div className={styles.sheetHeader}>
+        <span className={styles.sheetBrand} aria-hidden>
+          <DuduSprite emotion="star" decorative />
+        </span>
         <h2 className={styles.sheetTitle}>{place.name}</h2>
         <button
           type="button"

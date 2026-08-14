@@ -159,7 +159,7 @@ function AccessibleMarker({ place, selected, onSelect }: AccessibleMarkerProps) 
       : "";
     return L.divIcon({
       className: "playMapMarkerHost",
-      html: `<button type="button" class="playMapMarkerButton" data-type="${typeKey}" aria-label="${label}" aria-pressed="${selected ? "true" : "false"}"><span class="playMapPin" aria-hidden="true"></span>${nameHtml}</button>`,
+      html: `<button type="button" class="playMapMarkerButton" data-type="${typeKey}" aria-label="${label}" aria-pressed="${selected ? "true" : "false"}"><span class="playMapPin" aria-hidden="true"><span class="playMapPinGlyph"></span></span>${nameHtml}</button>`,
       iconSize: [44, 44],
       iconAnchor: [22, 42],
     });
@@ -202,9 +202,10 @@ function ClusterMarker({ cluster, onSelectCity }: ClusterMarkerProps) {
   const icon = useMemo(() => {
     const label = escapeAttr(`${cluster.city}，${cluster.count} 處`);
     const count = escapeAttr(String(cluster.count));
+    const city = escapeAttr(cluster.city);
     return L.divIcon({
       className: "playMapMarkerHost",
-      html: `<button type="button" class="playMapClusterButton" aria-label="${label}"><span class="playMapClusterCount">${count}</span></button>`,
+      html: `<button type="button" class="playMapClusterButton" aria-label="${label}"><span class="playMapMarkerName">${city}</span><span class="playMapClusterCount">${count}</span></button>`,
       iconSize: [44, 44],
       iconAnchor: [22, 22],
     });

@@ -40,7 +40,7 @@ Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範
 
 - **Mobile-first**，內容欄寬 `max-width: 640px` 置中
 - **地圖／儀表板工具頁**（如 `/for-parents/play-map`、`/for-parents/dashboard`）豁免 640px 單欄限制，內容區 `max-width: 1100px` 置中，以容納地圖與並排控制
-- **親子景點頁（`/for-parents/play-map`）**：不掛 `SiteHeader`（全域 `SiteNavBar` 已顯示品牌，再放一次會出現兩個字標與重複 h1）；工具殼無行銷 hero／長 lede；H1「親子遊樂地圖」在工具頂列。**手機**瀏覽互斥為卡片｜地圖（Leaflet 僅地圖 tab 動態載入）；**桌面 ≥980px** 名單與地圖並排，隱藏互斥分頁。一列主控制（離我最近／免費放電／室內＋次要「篩選」）；縣市／類型收進可收合篩選面板，不再桌機常駐、不再重複室內／免費條件 facet。無場館照片時以**類型場景帶**（7 種手繪 SVG）與家長筆記構成卡片；Google 導航／顯示位置用頁面場館名＋縣市，不用 lat,lng 圖釘。全國未定位時地圖改縣市聚合，不撒全部針。
+- **親子景點頁（`/for-parents/play-map`）**：不掛 `SiteHeader`（全域 `SiteNavBar` 已顯示品牌，再放一次會出現兩個字標與重複 h1）；工具殼無行銷 hero／長 lede；H1「親子遊樂地圖」在工具頂列。**手機**瀏覽互斥為卡片｜地圖（Leaflet 僅地圖 tab 動態載入）；**桌面 ≥980px** 名單與地圖並排，隱藏互斥分頁。一列主控制（離我最近／免費放電／室內＋次要「篩選」）；縣市／類型收進可收合篩選面板，不再桌機常駐、不再重複室內／免費條件 facet。無場館照片時以**1:1 類型縮圖 plate**（7 種手繪 SVG，置左）與家長筆記構成卡片，距離為卡片第二視覺焦點；Google 導航／顯示位置用頁面場館名＋縣市，不用 lat,lng 圖釘。全國未定位時地圖改縣市聚合，不撒全部針。頁面層篩選 chip 走 ghost／`--accent-ink`；`--map-chip*` 只留給地圖 overlay（縮放鍵、cluster、mapHint）。
 - 桌面端維持單欄，兩側留白
 - PWA：`manifest.json` + Apple Web App meta
 - Viewport 允許使用者縮放（未設 `maximum-scale` / `user-scalable=no`），方便家長放大閱讀
@@ -95,7 +95,7 @@ Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範
 | Accent 降飽和 | `--c-*`、`--night-link`、`--landing-heading` 比日間／舊夜版低一檔 chroma |
 | 頂欄不反轉 | `SiteNavBar` 桃色玻璃頂欄預設維持日間色；漢堡開啟時（行動＋night）頂欄微暗混入 `--bg` 銜接面板，關閉即恢復；不改 ThemeProvider |
 | Emoji 降飽和 | 行動選單／主題切換 glyph 用 `filter: saturate(0.55) brightness(0.92)`，不換成線稿 icon |
-| 地圖不反轉 | 宇宙地圖場景色固定印刷淺色（見紅線）。地圖 chrome（縮放鍵／探索點標籤／召喚把手）走 `--map-chip`／`--map-chip-2`／`--map-chip-ink`／`--map-chip-line`，`[data-theme="night"]` **不覆寫**——用 `--card`／`--ink` 會在深靛夜海上失去輪廓。**真實世界地圖**（`/for-parents/play-map`）的 OSM tile 同樣**禁止 invert**；篩選 chip、Sheet、縮放控制等 chrome 可共用 `--map-chip*` |
+| 地圖不反轉 | 宇宙地圖場景色固定印刷淺色（見紅線）。地圖 chrome（縮放鍵／探索點標籤／召喚把手）走 `--map-chip`／`--map-chip-2`／`--map-chip-ink`／`--map-chip-line`，`[data-theme="night"]` **不覆寫**——用 `--card`／`--ink` 會在深靛夜海上失去輪廓。**真實世界地圖**（`/for-parents/play-map`）的 OSM tile 同樣**禁止 invert**；該頁篩選 chip、Sheet 等頁面層 chrome **不**共用 `--map-chip*`（改 ghost／`--accent-ink`），僅縮放鍵、cluster、mapHint 保留 |
 
 meta `theme-color`（夜）對齊 `--bg`：`lib/theme.ts` 的 `NIGHT_THEME_COLOR`。
 
