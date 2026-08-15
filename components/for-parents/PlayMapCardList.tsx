@@ -32,6 +32,15 @@ export function PlayMapCardList({
   return (
     <>
       <div ref={topRef} aria-hidden />
+      <div className={styles.resultHeader}>
+        <div>
+          <p className={styles.resultEyebrow}>地點清單</p>
+          <h2 className={styles.resultTitle}>
+            {matched.length} 個適合親子出遊的地點
+          </h2>
+        </div>
+        <p className={styles.resultHint}>點卡片看家長筆記</p>
+      </div>
       {showScopeHint ? (
         <div className={styles.scopeHintRow}>
           <span className={styles.brandAnchor} aria-hidden>

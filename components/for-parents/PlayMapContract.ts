@@ -67,6 +67,8 @@ export type PlayMapControlBarProps = {
   geoStatus: GeoStatus;
   freeOnly: boolean;
   indoorOnly: boolean;
+  /** 顯示目前有幾個進階條件已套用；離我最近不算進階篩選。 */
+  activeFilterCount: number;
   onNearMe: () => void;
   onToggleFree: () => void;
   onToggleIndoor: () => void;

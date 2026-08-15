@@ -72,6 +72,7 @@ export default function PlayMap({
         geoStatus={map.geoStatus}
         freeOnly={map.freeOnly}
         indoorOnly={map.indoorOnly}
+        activeFilterCount={map.activeFilterCount}
         onNearMe={map.handleNearMe}
         onToggleFree={map.handleToggleFree}
         onToggleIndoor={map.handleToggleIndoor}

@@ -64,6 +64,9 @@ export function PlayMapCard({
               </span>
             ) : null}
             <span className={styles.cardBlurb}>{blurb}</span>
+            <span className={styles.cardDetailsCta}>
+              查看家長筆記 <span aria-hidden>→</span>
+            </span>
           </span>
         </button>
         <div className={styles.cardActions}>

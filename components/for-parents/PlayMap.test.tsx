@@ -128,6 +128,26 @@ describe("PlayMap", () => {
     expect(screen.getByText(summaryText("全部", freeCount, ["免費"]))).toBeTruthy();
   });
 
+  it("結果區說明卡片可開啟家長筆記，篩選按鈕顯示已套用條件數", () => {
+    render(<PlayMap />);
+
+    expect(screen.getByRole("heading", { level: 2 }).textContent).toMatch(
+      /\d+ 個適合親子出遊的地點/,
+    );
+    expect(screen.getAllByText("查看家長筆記").length).toBeGreaterThan(0);
+
+    openFilters();
+    fireEvent.click(
+      within(screen.getByRole("group", { name: "依縣市篩選" })).getByRole(
+        "button",
+        { name: cityChipName("台北市") },
+      ),
+    );
+    expect(
+      screen.getByRole("button", { name: /篩選條件，已套用 1 個/ }),
+    ).toBeTruthy();
+  });
+
   /**
    * 「主題樂園」本身是 type，已由意圖列下放到類型 facet
    * （原本同詞在意圖與類型兩層重複出現）。

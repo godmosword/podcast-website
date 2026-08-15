@@ -16,6 +16,7 @@ export function PlayMapToolbar({
   return (
     <header className={styles.toolbar}>
       <div className={styles.titleBlock}>
+        <p className={styles.eyebrow}>親子出遊工具</p>
         <div className={styles.titleRow}>
           <h1 className={styles.title}>親子遊樂地圖</h1>
           <span className={styles.titleDecor} aria-hidden>

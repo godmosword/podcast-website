@@ -477,6 +477,13 @@ export function usePlayMapFilters({
     return count > 0 || typeFilter === item;
   });
 
+  const activeFilterCount = [
+    city !== null,
+    typeFilter !== null,
+    indoorOnly,
+    freeOnly,
+  ].filter(Boolean).length;
+
   const clusterMode = isNationwideUnscoped(city, userLatLng !== null);
   const cityClusters = useMemo(
     () => clusterPlaygroundsByCity(filtered),
@@ -504,6 +511,7 @@ export function usePlayMapFilters({
     typeFilter,
     indoorOnly,
     freeOnly,
+    activeFilterCount,
     selectedId,
     browseView,
     sheetVariant,

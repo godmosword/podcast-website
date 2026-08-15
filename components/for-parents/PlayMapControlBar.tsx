@@ -8,6 +8,7 @@ export function PlayMapControlBar({
   geoStatus,
   freeOnly,
   indoorOnly,
+  activeFilterCount,
   onNearMe,
   onToggleFree,
   onToggleIndoor,
@@ -64,10 +65,15 @@ export function PlayMapControlBar({
             className={styles.filterToggle}
             aria-expanded={filtersOpen}
             aria-controls="play-map-filter-panel"
-            aria-label={`篩選，${filterSummaryLabel}`}
+            aria-label={`篩選條件${activeFilterCount > 0 ? `，已套用 ${activeFilterCount} 個` : ""}，${filterSummaryLabel}`}
             onClick={onToggleFilters}
           >
-            篩選
+            <span>篩選條件</span>
+            {activeFilterCount > 0 ? (
+              <span className={styles.filterCount} aria-hidden>
+                {activeFilterCount}
+              </span>
+            ) : null}
           </button>
         </div>
         {geoStatus === "denied" ? (
@@ -83,6 +89,7 @@ export function PlayMapControlBar({
       </section>
 
       <div className={styles.filterSummary} aria-live="polite">
+        <span className={styles.filterSummaryKicker}>目前結果</span>
         <p className={styles.filterSummaryText}>{filterSummaryLabel}</p>
         {canClearFilters ? (
           <button
