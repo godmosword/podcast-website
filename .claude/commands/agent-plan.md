@@ -43,7 +43,7 @@ $ARGUMENTS
 | 委員 | 角度 | 呼叫方式 |
 |------|------|----------|
 | **Codex CLI 工程審** | 工程可行性／驗證／漏檔 | `codex exec -m gpt-5.6-luna -c model_reasoning_effort="medium" "…$(cat /tmp/agent-plan-<ts>.md)" </dev/null`（**Claude Code 專用**；非 Cursor Task slug） |
-| **Grok 4.5 High Fast 對抗審** | 對抗審 | `cursor-agent -p --model cursor-grok-4.5-high-fast --mode ask "<prompt + plan>"`；slug 拒收 → 備援 `grok -p "<prompt>" -m grok-4.5 --effort high --no-plan`（見 FAILURES 探活） |
+| **Grok 4.5 High Fast 對抗審** | 對抗審 | `cursor-agent -p --model cursor-grok-4.5-high-fast --mode ask "<prompt + plan>"`；slug 拒收或認證失敗 → 備援 `grok -p "<prompt>" -m grok-4.6 --effort high --no-plan`（見 FAILURES 探活） |
 | **Opus 5 設計審** | **設計／UX**：`DESIGN.md`、兒童主路徑、觸控、a11y 視覺、動畫原則；L3 加架構／紅線 | Agent tool：`architect`（readonly）+ `model: "opus"`，prompt 附 `DESIGN.md` |
 
 ## 4. Leader 綜合

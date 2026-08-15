@@ -173,7 +173,7 @@ Plan 若弱化 Domain 紅線 → 審稿標 **CRITICAL**。
 | **Leader** | 當前 session＝**Opus 5 Thinking High**（`claude-opus-5-thinking-high`）（骨架＋綜合；中文 Protected 不直改） | Session／Task 對齊 `cursor-grok-4.5-high-fast`（節流：只寫骨架，細節派 GPT） |
 | **Opus 5 設計審** | Agent tool `architect` + `model: "opus"`（附 `DESIGN.md`） | Task `architect`（readonly）+ `claude-opus-5-thinking-high` |
 | **GPT 5.6 Luna MAX fast 工程審** | `codex exec -m gpt-5.6-luna -c model_reasoning_effort="medium" "…" </dev/null`（**Claude Code Codex CLI**；裸 `gpt-5.6` 於 ChatGPT 帳號 400，勿用） | Task + `gpt-5.6-luna-max-fast`（**Cursor Task slug**） |
-| **對抗審** | Grok 4.5 High Fast：`cursor-agent -p --model cursor-grok-4.5-high-fast --mode ask`（**每輪 plan 必派**；不可用 → 缺席） | Composer 2.5：Task（readonly）+ `composer-2.5-fast`（**每輪 plan 必派**；slug 不可用 → 缺席） |
+| **對抗審** | Grok 4.5 High Fast：`cursor-agent -p --model cursor-grok-4.5-high-fast --mode ask`（**每輪 plan 必派**）；slug 拒收**或認證失敗** → 備援 grok CLI `-m grok-4.6`；兩路皆失敗 → 缺席 | Composer 2.5：Task（readonly）+ `composer-2.5-fast`（**每輪 plan 必派**；slug 不可用 → 缺席） |
 | **Leader 可行性自審（L3）** | Leader 自審 | Leader 自審（**不計入**非 leader 委員） |
 | **L3 實作** | Leader 親自 | Task + Opus slug，Protected paths 才 Leader |
 | **L2 實作** | Grok patch（`cursor-agent --model cursor-grok-4.5-high-fast` ask）→ Leader 落檔；**中文 → Sonnet** | Task + `composer-2.5-fast` |
@@ -197,6 +197,7 @@ Task 的 `model` **只能**用 Cursor 允許的 slug：
 | Opus 5 Thinking High | `claude-opus-5-thinking-high` | Plan／diff **設計審**（UX、`DESIGN.md`、兒童體驗、a11y 視覺；**每輪 plan 必派**）；**Claude Code Leader**（Plan／Action session） |
 | GPT 5.6 Luna MAX fast | `gpt-5.6-luna-max-fast` | Plan 細節草稿、工程審、TS/React diff review（Cursor Task） |
 | Sonnet 4.6 Thinking Medium | `claude-4.6-sonnet-medium-thinking` | 內容管線中文校對（見 Domain Protected paths） |
+| Grok（**grok CLI 備援**，Claude Code） | `grok-4.6` | Claude Code 對抗審備援：`cursor-agent` slug 拒收**或認證失敗**時走此路。**與 `cursor-grok-4.5-high-fast` 是兩套 model id，勿混用**；CLI 不吃 `-fast` 變體。允許清單會漂移（2026-08-15 由 `grok-4.5` 換 `grok-4.6`），呼叫前用 `grok models` 核對「Available models」 |
 | Grok 4.3 | `grok-4.3` | explore（只讀） |
 | Grok Build 0.1 | `grok-build-0.1` | shell、批次命令 |
 
@@ -422,3 +423,4 @@ slug 不可用時：**不要**替換；Leader 代做並告知使用者。
 | 2026-07-20 | **移除 Fable 5**：Claude Code Leader（Plan／Action session）一律 **Opus 4.8 Thinking Medium**（`claude-opus-4-8-thinking-medium`），不再有 fallback 二選一；slug 對照表刪 Fable 5 列、`.cursor/rules/agent-orchestration.mdc` 備選 Plan 審改 Opus；契約測試新增負向斷言（active 路由檔禁 `claude-fable-5-thinking-medium` 與 `Fable 5` 字樣，本修訂紀錄段除外） |
 | 2026-07-20 | **Fable 5 硬擋**：active 指令明令禁止呼叫；新增 `.cursor/hooks/block-fable.mjs`（`preToolUse` Task／CallDynamicTool＋`subagentStart`）；契約改為要求禁令＋hook 註冊，並禁止正向 Task 派工 Fable slug |
 | 2026-08-08 | **Cursor Opus 設計審升級**：Task slug `claude-opus-4-8-thinking-medium` 拒收（見 FAILURES 07-31／08-08）→ active 路由改 **`claude-opus-5-thinking-high`**（Opus 5 Thinking High）；Claude Code 設計審／Leader 顯示名對齊；契約測鎖 active 段禁 4.8 slug |
+| 2026-08-15 | **補上 SSOT 缺口＋grok CLI slug 漂移**：對照表原本只列 Cursor 的 `cursor-grok-4.5-high-fast`，**未列 grok CLI 備援的 model id**，導致 CLI 允許清單漂移時無處可查。本次新增「grok CLI 備援」列並定為 **`grok-4.6`**（2026-08-15 實測 `grok models` 允許清單已無 `grok-4.5`，見 FAILURES 08-15）。同步：探活表、`.claude/commands/agent-plan.md`／`agent-action.md` 備援命令、契約測試改守 `-m grok-4.6`。另把備援觸發條件由「slug 拒收」放寬為「slug 拒收**或認證失敗**」（08-10／08-15 兩次皆為 auth 失敗，舊寫法在字面上不涵蓋）。**`cursor-grok-4.5-high-fast` 未變更**——它是 Cursor slug，失敗原因是 auth 而非 slug |

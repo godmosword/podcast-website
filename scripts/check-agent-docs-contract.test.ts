@@ -44,6 +44,12 @@ describe("agent docs routing contract", () => {
     expect(workflow).toContain("cursor-grok-4.5-high-fast");
     expect(workflow).toContain("composer-2.5-fast");
     expect(workflow).toContain("claude-opus-5-thinking-high");
+    // SSOT 缺口回歸防護：對照表必須同時列 Cursor slug 與 grok CLI 備援 model id，
+    // 否則 CLI 允許清單漂移時（2026-08-15）無處可查。
+    expect(
+      workflow.split("## 修訂紀錄")[0],
+      "slug 對照表須列 grok CLI 備援 model id",
+    ).toContain("grok-4.6");
     // 修訂紀錄可保留歷史 4.8；active 對照表列必須是 5
     const activeWorkflow = workflow.split("## 修訂紀錄")[0];
     expect(activeWorkflow).not.toContain("claude-opus-4-8-thinking-medium");
@@ -154,10 +160,13 @@ describe("agent docs routing contract", () => {
     expect(probeSection).not.toContain("cursor-grok-4.5-medium-fast");
     expect(probeSection).not.toContain("grok-4.5-fast-medium");
     expect(probeSection).not.toContain("grok-4.5-fast-high");
-    // Claude Code CLI 若仍列 grok models 探活：一律 -m grok-4.5（grok-4.5-fast 為無效 model id）
-    if (probeSection.includes("-m grok-4.5")) {
-      expect(probeSection).not.toContain("-m grok-4.5-fast");
-    }
+    // Claude Code CLI 備援 model id：一律 -m grok-4.6。
+    // 與 Cursor 的 cursor-grok-4.5-high-fast 是**兩套** id，勿混用；CLI 不吃 -fast 變體。
+    // 2026-08-15 grok models 允許清單已無 grok-4.5（見 FAILURES 08-15）。
+    // 原本這裡是 if(...) 條件式，slug 一漂移就整段靜默跳過；改為無條件斷言。
+    expect(probeSection).toContain("-m grok-4.6");
+    expect(probeSection).not.toContain("-m grok-4.5");
+    expect(probeSection).not.toContain("-m grok-4.6-fast");
   });
 
   it("禁用 AUQ：規則、hook、podcast 與 FAILURES 對齊", () => {

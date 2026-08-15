@@ -38,7 +38,7 @@ $ARGUMENTS
 |------|------|----------|
 | Opus 5 設計審 | UX／設計／a11y 視覺 | Agent tool `architect` + `model: "opus"` |
 | Codex CLI 工程審 | TS/React diff 審、工程第二意見 | `codex exec -m gpt-5.6-luna -c model_reasoning_effort="medium" "<prompt + diff>" </dev/null`（**Claude Code 專用**；Cursor 對標 `gpt-5.6-luna-max-fast`） |
-| Grok 4.5 High Fast 對抗審 | 對抗審：找 diff 的 edge case | `cursor-agent -p --model cursor-grok-4.5-high-fast --mode ask "<prompt>"`；slug 拒收 → 備援 `grok -p "<prompt>" -m grok-4.5 --effort high --no-plan`（見 FAILURES 探活）；兩路皆不可用 → 缺席 |
+| Grok 4.5 High Fast 對抗審 | 對抗審：找 diff 的 edge case | `cursor-agent -p --model cursor-grok-4.5-high-fast --mode ask "<prompt>"`；slug 拒收或認證失敗 → 備援 `grok -p "<prompt>" -m grok-4.6 --effort high --no-plan`（見 FAILURES 探活）；兩路皆不可用 → 缺席 |
 
 **執行紅線：**
 - 禁止用 `codex exec`／`grok`／`cursor-agent` **直接**改 repo 檔案——顧問／Grok 實作建議只出 patch，由 leader 落檔
