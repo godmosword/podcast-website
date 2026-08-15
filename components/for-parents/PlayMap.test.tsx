@@ -12,10 +12,10 @@ import PlayMap from "./PlayMap";
 
 vi.stubGlobal("React", React);
 
-const replaceMock = vi.fn();
+let replaceStateSpy!: ReturnType<typeof vi.spyOn>;
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn(), replace: replaceMock, prefetch: vi.fn() }),
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), prefetch: vi.fn() }),
   usePathname: () => "/for-parents/play-map",
   useSearchParams: () => new URLSearchParams(""),
 }));
@@ -28,6 +28,7 @@ vi.mock("next/dynamic", () => ({
 }));
 
 beforeEach(() => {
+  replaceStateSpy = vi.spyOn(window.history, "replaceState");
   Object.defineProperty(window, "matchMedia", {
     writable: true,
     configurable: true,
@@ -48,7 +49,7 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
-  replaceMock.mockClear();
+  replaceStateSpy.mockRestore();
 });
 
 function cityChipName(city: string): RegExp {
@@ -380,21 +381,24 @@ describe("PlayMap", () => {
     render(<PlayMap />);
 
     fireEvent.click(screen.getByRole("button", { name: "免費放電" }));
-    expect(replaceMock).toHaveBeenCalledWith(
+    expect(replaceStateSpy).toHaveBeenCalledWith(
+      null,
+      "",
       "/for-parents/play-map?free=1",
-      { scroll: false },
     );
 
     fireEvent.click(screen.getByRole("tab", { name: "地圖" }));
-    expect(replaceMock).toHaveBeenCalledWith(
+    expect(replaceStateSpy).toHaveBeenCalledWith(
+      null,
+      "",
       "/for-parents/play-map?free=1&view=map",
-      { scroll: false },
     );
 
     fireEvent.click(screen.getByRole("button", { name: "免費放電" }));
-    expect(replaceMock).toHaveBeenLastCalledWith(
+    expect(replaceStateSpy).toHaveBeenLastCalledWith(
+      null,
+      "",
       "/for-parents/play-map?view=map",
-      { scroll: false },
     );
   });
 

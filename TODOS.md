@@ -53,8 +53,11 @@
 
 | ID | 說明 |
 |----|------|
+| polish(for-parents): play-map 篩選條件徽章、結果標頭與卡片「查看家長筆記」CTA | `3c10938` |
 | content(subtitles): ep-25 字幕校對 + `--mark`（刪幻覺／重複、補漏句、專名） | `6d50696` |
 | fix(ci): 恢復 `@testing-library/dom` 直接依賴（#82 GHA sync `npm ci` 缺 RTL peer） | 見本 commit |
+| fix(config): play-map 定位解封（`Permissions-Policy` 改 `geolocation=(self)`；原 `()` 讓「離我最近」線上全失效） | 見本 commit |
+| perf(for-parents): play-map 網址同步改 History API（每次篩選少一次 ~51KB RSC 往返，5 個 prop-sync effect 併為 1） | 見本 commit |
 
 ### 本輪已完成（2026-08-14）
 

@@ -15,7 +15,7 @@ describe("next security headers", () => {
         },
         {
           key: "Permissions-Policy",
-          value: "camera=(), microphone=(), geolocation=(), payment=()",
+          value: "camera=(), microphone=(), geolocation=(self), payment=()",
         },
         { key: "X-Frame-Options", value: "SAMEORIGIN" },
         { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },

@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   useCallback,
   useEffect,
@@ -131,7 +131,6 @@ export function usePlayMapFilters({
     }
     return `適合 ${low}–${high} 歲`;
   }, [allPlaces]);
-  const router = useRouter();
   const pathname = usePathname();
 
   const [city, setCity] = useState<string | null>(initialCity);
@@ -250,9 +249,9 @@ export function usePlayMapFilters({
         view: browseView,
         ...next,
       });
-      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+      window.history.replaceState(null, "", qs ? `${pathname}?${qs}` : pathname);
     },
-    [city, typeFilter, indoorOnly, freeOnly, browseView, pathname, router],
+    [city, typeFilter, indoorOnly, freeOnly, browseView, pathname],
   );
 
   const handleSelectCity = useCallback(
@@ -440,25 +439,18 @@ export function usePlayMapFilters({
     userClosedSheetRef.current = false;
   }, [selected]);
 
+  /*
+   * 網址由 history.replaceState 就地更新，不會觸發 server component 重繪，
+   * 所以這個 effect 只在「真的換頁」時才會跑（例如從導覽列再點一次親子景點）。
+   * 五個值同源於一次 parsePlayMapQuery 快照，一起同步才不會出現半套狀態。
+   */
   useEffect(() => {
     setCity(initialCity);
-  }, [initialCity]);
-
-  useEffect(() => {
     setTypeFilter(initialType);
-  }, [initialType]);
-
-  useEffect(() => {
     setIndoorOnly(initialIndoorOnly);
-  }, [initialIndoorOnly]);
-
-  useEffect(() => {
     setFreeOnly(initialFreeOnly);
-  }, [initialFreeOnly]);
-
-  useEffect(() => {
     setBrowseView(initialView);
-  }, [initialView]);
+  }, [initialCity, initialType, initialIndoorOnly, initialFreeOnly, initialView]);
 
   useEffect(() => {
     if (city === null) return;

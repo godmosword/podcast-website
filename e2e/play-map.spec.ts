@@ -13,6 +13,13 @@ async function waitForPlayMapReady(page: import("@playwright/test").Page) {
 }
 
 test.describe("親子遊樂地圖", () => {
+  test("play-map 回應允許同源定位（P0 回歸）", async ({ request }) => {
+    const response = await request.get("/for-parents/play-map");
+    expect(response.headers()["permissions-policy"]).toContain(
+      "geolocation=(self)",
+    );
+  });
+
   test("SSR HTML 含 H1 與至少一景點名（G1）", async ({ request }) => {
     const response = await request.get("/for-parents/play-map");
     expect(response.ok()).toBeTruthy();
@@ -73,6 +80,50 @@ test.describe("親子遊樂地圖", () => {
     await page.getByRole("button", { name: "免費放電" }).click();
     await expect(page.getByText(/免費 · .+ → \d+ 個地點|全部 · 免費 →/)).toBeVisible();
     await expect(page).toHaveURL(/free=1/);
+  });
+
+  test("「離我最近」可取得定位並顯示車程（P0 回歸）", async ({
+    page,
+    context,
+  }) => {
+    test.setTimeout(45_000);
+    await context.grantPermissions(["geolocation"]);
+    await context.setGeolocation({ latitude: 25.033, longitude: 121.5654 });
+    await page.setViewportSize(PHONE);
+    await page.goto("/for-parents/play-map");
+    await waitForPlayMapReady(page);
+
+    const nearMe = page.getByRole("button", { name: "離我最近" });
+    await nearMe.click();
+
+    await expect(nearMe).toHaveAttribute("aria-pressed", "true");
+    await expect(
+      page.getByText("無法定位。可改選縣市，或稍後再開啟定位。"),
+    ).toHaveCount(0);
+    await expect(
+      page
+        .locator("#play-map-panel-cards")
+        .getByText(/約 \d+ 分鐘|車程 \d+ 分以上/)
+        .first(),
+    ).toBeVisible();
+  });
+
+  test("點篩選 chip 不觸發 RSC 往返（P1 回歸）", async ({ page }) => {
+    test.setTimeout(30_000);
+    const rscRequests: string[] = [];
+    page.on("request", (req) => {
+      const url = req.url();
+      if (url.includes("_rsc=") && url.includes("free=1")) rscRequests.push(url);
+    });
+
+    await page.goto("/for-parents/play-map");
+    await waitForPlayMapReady(page);
+
+    await page.getByRole("button", { name: "免費放電" }).click();
+    await expect(page).toHaveURL(/free=1/);
+    await page.waitForTimeout(1_000);
+
+    expect(rscRequests).toEqual([]);
   });
 
   test("地圖 tab 才載入 Leaflet（行動互斥）", async ({ page }) => {

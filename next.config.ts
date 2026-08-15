@@ -41,10 +41,10 @@ const nextConfig: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           // 僅在跨站請求送出 origin，降低網址與 query 意外外洩。
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          // 本站不需要相機、麥克風、定位或付款 API。
+          // play-map 需要同源定位；本站不需要相機、麥克風或付款 API。
           {
             key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=(), payment=()",
+            value: "camera=(), microphone=(), geolocation=(self), payment=()",
           },
           // 允許本站的遊戲 iframe，但禁止第三方網站嵌入整個網站。
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
