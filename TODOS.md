@@ -58,7 +58,8 @@
 | fix(ci): 恢復 `@testing-library/dom` 直接依賴（#82 GHA sync `npm ci` 缺 RTL peer） | 見本 commit |
 | fix(config): play-map 定位解封（`Permissions-Policy` 改 `geolocation=(self)`；原 `()` 讓「離我最近」線上全失效） | 見本 commit |
 | perf(for-parents): play-map 網址同步改 History API（每次篩選少一次 ~51KB RSC 往返，5 個 prop-sync effect 併為 1） | `bf8b841` |
-| docs(agent): 補 slug 對照表 SSOT 缺口（新增 grok CLI 備援列＝`grok-4.6`）、備援觸發含認證失敗、契約測試改無條件斷言 | 見本 commit |
+| docs(agent): 補 slug 對照表 SSOT 缺口（新增 grok CLI 備援列＝`grok-4.6`）、備援觸發含認證失敗、契約測試改無條件斷言 | `fd65c16` |
+| feat(for-parents): play-map 地圖針改色相＋剪影雙重編碼（七類型母題對齊卡片 plate，固定深墨過 WCAG 3:1） | 見本 commit |
 
 ### 本輪已完成（2026-08-14）
 

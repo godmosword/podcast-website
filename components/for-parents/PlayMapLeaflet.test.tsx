@@ -5,6 +5,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { listPlaygrounds } from "@/data/playgrounds";
 import { clusterPlaygroundsByCity } from "@/lib/playground-clusters";
 import { DEFAULT_PLAY_MAP_CENTER } from "@/lib/playground-coverage";
+import { playgroundTypeGlyphSvg } from "@/lib/playground-type-glyph";
+import { playgroundTypeVisualKey } from "@/lib/playground-type-visual";
 import PlayMapLeaflet, { playMapFitKey } from "./PlayMapLeaflet";
 import type { PlayMapLeafletProps } from "./PlayMapLeaflet";
 import { NEAR_ME_FIT_COUNT } from "./PlayMapContract";
@@ -13,13 +15,21 @@ vi.stubGlobal("React", React);
 
 vi.mock("leaflet/dist/leaflet.css", () => ({}));
 
+/*
+ * divIcon 原本是 `() => ({})` 的黑洞，等於針的 HTML（aria-label、aria-pressed、
+ * 類型剪影）完全沒有測試在守。改成 spy 以便斷言標記內容。
+ */
+const { divIconSpy } = vi.hoisted(() => ({
+  divIconSpy: vi.fn<(options?: { html?: string }) => object>(() => ({})),
+}));
+
 vi.mock("leaflet", () => {
   class LatLngBounds {
     constructor(public points: unknown) {}
   }
   const leaflet = {
     latLngBounds: (points: unknown) => new LatLngBounds(points),
-    divIcon: () => ({}),
+    divIcon: divIconSpy,
   };
   return { default: leaflet, ...leaflet };
 });
@@ -199,5 +209,26 @@ describe("PlayMapLeaflet FitBounds", () => {
     ];
     expect(boundsArg[0].points).toHaveLength(1 + NEAR_ME_FIT_COUNT);
     expect(boundsArg[0].points[0]).toEqual([user.lat, user.lng]);
+  });
+
+  it("每根針都帶對應類型的剪影，且 glyph 掛在 pin 內", () => {
+    divIconSpy.mockClear();
+    const places = listPlaygrounds().slice(0, 6);
+    render(<PlayMapLeaflet {...leafletProps({ places, clusterMode: false })} />);
+
+    const htmls = divIconSpy.mock.calls
+      .map((call) => call[0]?.html ?? "")
+      .filter((html) => html.includes("playMapMarkerButton"));
+    expect(htmls).toHaveLength(places.length);
+
+    for (const [index, place] of places.entries()) {
+      const html = htmls[index] ?? "";
+      const key = playgroundTypeVisualKey(place.type);
+      expect(html).toContain(`data-type="${key}"`);
+      // 剪影必須包在 playMapPinGlyph 內——它負責反轉抵銷水滴的 rotate(-45deg)
+      expect(html).toContain(
+        `<span class="playMapPinGlyph">${playgroundTypeGlyphSvg(key)}</span>`,
+      );
+    }
   });
 });

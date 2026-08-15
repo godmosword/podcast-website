@@ -13,6 +13,7 @@ import "leaflet/dist/leaflet.css";
 import type { Playground } from "@/data/playgrounds";
 import type { CityCluster } from "@/lib/playground-clusters";
 import type { LatLng } from "@/lib/playground-distance";
+import { playgroundTypeGlyphSvg } from "@/lib/playground-type-glyph";
 import { playgroundTypeVisualKey } from "@/lib/playground-type-visual";
 import { DEFAULT_PLAY_MAP_CENTER } from "@/lib/playground-coverage";
 import { pickNearest } from "@/lib/playground-distance";
@@ -159,7 +160,7 @@ function AccessibleMarker({ place, selected, onSelect }: AccessibleMarkerProps) 
       : "";
     return L.divIcon({
       className: "playMapMarkerHost",
-      html: `<button type="button" class="playMapMarkerButton" data-type="${typeKey}" aria-label="${label}" aria-pressed="${selected ? "true" : "false"}"><span class="playMapPin" aria-hidden="true"><span class="playMapPinGlyph"></span></span>${nameHtml}</button>`,
+      html: `<button type="button" class="playMapMarkerButton" data-type="${typeKey}" aria-label="${label}" aria-pressed="${selected ? "true" : "false"}"><span class="playMapPin" aria-hidden="true"><span class="playMapPinGlyph">${playgroundTypeGlyphSvg(typeKey)}</span></span>${nameHtml}</button>`,
       iconSize: [44, 44],
       iconAnchor: [22, 42],
     });
