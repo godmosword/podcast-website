@@ -65,5 +65,5 @@
     "public/sw.js"
   ],
   "ignoreBinaries": ["ffmpeg", "ffprobe", "gh", "python3", "which"],
-  "ignoreDependencies": ["openai", "sharp", "eslint-config-next"]
+  "ignoreDependencies": ["openai", "sharp", "eslint-config-next", "@testing-library/dom"]
 }

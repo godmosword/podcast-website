@@ -53,7 +53,8 @@
 
 | ID | 說明 |
 |----|------|
-| content(subtitles): ep-25 字幕校對 + `--mark`（刪幻覺／重複、補漏句、專名） | 見本 commit |
+| content(subtitles): ep-25 字幕校對 + `--mark`（刪幻覺／重複、補漏句、專名） | `6d50696` |
+| fix(ci): 恢復 `@testing-library/dom` 直接依賴（#82 GHA sync `npm ci` 缺 RTL peer） | 見本 commit |
 
 ### 本輪已完成（2026-08-14）
 
