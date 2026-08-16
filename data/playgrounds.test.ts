@@ -191,7 +191,33 @@ describe("playgrounds sidecar", () => {
     }
   });
 
-  it("tips 必填、夠長，且對到 facilities 或非空 tags", () => {
+  /**
+   * 「場內有 X、Y、Z。」型尾句——與 facilities 陣列重複的設施列舉。
+   * 卡片層的 composeParentBlurb 早就在過濾它（見 lib/playground-parent-voice.ts）。
+   */
+  const FACILITY_TAIL = /\s*(?:場|園|館)內有[^。]*。\s*$/;
+
+  it("tips 不得留下佔位或待辦字樣", () => {
+    const placeholder = /待[^。]{0,40}定稿|定稿中|TODO|FIXME|XXX|待補|待撰|佔位/;
+    for (const item of listPlaygrounds()) {
+      expect(
+        placeholder.test(item.tips),
+        `${item.id} 的 tips 仍是佔位字串：${item.tips}`,
+      ).toBe(false);
+    }
+  });
+
+  /*
+   * 原本這條要求 tips 必須包含某個 facility 或 tag 名稱，用意是逼出「場館專屬」
+   * 而非通用的句子。實際效果相反：作者寫不出自然帶到設施名的句子，就在句尾接
+   * 「場內有 X、Y、Z。」把契約湊過去——73 筆全部有這個尾句，其中 47 筆一旦
+   * 拿掉尾句就過不了。這正是 tips 剝除尾句後中位數只剩 24 字的成因。
+   *
+   * 改成：設施名命中「或」剝除尾句後仍有足量家長專屬敘述，兩者擇一即可。
+   * 這讓寫得好、但沒剛好提到設施名的筆記過得了，同時不必一次改寫全部 73 筆。
+   * 待既有資料補寫完成後，再收緊為「一律禁止設施列舉尾句」。
+   */
+  it("tips 必填、夠長，且具場館專屬資訊", () => {
     const skipTags = new Set(["免費", "室內"]);
     for (const item of listPlaygrounds()) {
       const tips = item.tips.trim();
@@ -203,9 +229,10 @@ describe("playgrounds sidecar", () => {
         (tag) =>
           tag.length >= 2 && !skipTags.has(tag) && tips.includes(tag),
       );
+      const bodyLength = tips.replace(FACILITY_TAIL, "").trim().length;
       expect(
-        facilityHit || tagHit,
-        `${item.id} tips 沒有對到 facilities／tags：${tips}`,
+        facilityHit || tagHit || bodyLength >= 28,
+        `${item.id} tips 既沒對到 facilities／tags，剝除設施尾句後也不足 28 字：${tips}`,
       ).toBe(true);
     }
   });
