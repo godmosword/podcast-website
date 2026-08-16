@@ -53,6 +53,7 @@
 
 | ID | 說明 |
 |----|------|
+| fix(for-parents): play-map 補場館 DOM 錨點與選中 marker z-index | `3cd2ffa` |
 | polish(pages): 角色圖鑑／親子指南拿掉 SiteHeader hero，改緊湊頁首；家長工具上移、Threads 改細長 callout | `b790677` |
 | refactor(for-parents): play-map 針旋轉建 `--pin-rot` SSOT，補 museum 基座、zoo 耳角、`aria-label` 分隔符 | `eb57176` |
 | test(data): 修掉逼出「場內有…」尾句的 tips 契約（73 筆全中、47 筆依賴尾句），並擋佔位字串 | `6a7d39f` |
