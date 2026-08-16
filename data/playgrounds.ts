@@ -57,6 +57,16 @@ export type Playground = {
   /** 資料涵蓋範圍或可信度的誠實聲明（選填）；詳情 sheet 會顯示，不是遊玩建議。 */
   coverageNote?: string;
   /**
+   * 營運狀態。未填＝正常營業。
+   *
+   * 場館休園／整修時，光靠 `coverageNote` 不夠——那段文字只在詳情 sheet 出現，
+   * 家長在卡片與地圖上看不出任何差別，可能直接按導航開車過去撲空。
+   * 標記後卡片會掛醒目標籤、sheet 會在最上方警告。
+   *
+   * 設了這個欄位就**必須**同時寫 `coverageNote` 說明依據與查證日（契約測試會擋）。
+   */
+  status?: "temporarily-closed";
+  /**
    * Google Maps Place ID（選填）。有值時導航加 `destination_place_id`、搜尋加 `query_place_id`。
    * 本輪不填真實 placeId；契約由測試用物件覆蓋。
    */
@@ -97,6 +107,7 @@ export const playgroundSchema = z.object({
   sources: z.array(playgroundSourceSchema).min(1),
   lastVerified: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   coverageNote: z.string().min(1).optional(),
+  status: z.literal("temporarily-closed").optional(),
   placeId: z.string().min(1).optional(),
   mapsQuery: z.string().min(1).optional(),
 });
@@ -306,7 +317,9 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["餵牛體驗", "牧場小徑", "DIY 體驗", "洗手間"],
     tags: ["農場", "餵動物", "親子體驗"],
-    tips: "戶外活動多，建議防曬防蚊；餵食請依現場指引。場內有餵牛體驗、牧場小徑、DIY 體驗。",
+    feeNote:
+      "官方票價頁列成人 300、學生 250、博幼 150、午後 200、星光 150；未滿 3 歲或身高未滿 90 公分免費，門票不含場內遊樂設施。惟官方另公告 2026-02-23 起休園重整，重開後票價須重新核對。",
+    tips: "出發前務必先打電話確認有沒有開，官網公告與票價頁說法不一致。園內育嬰室有尿布台與熱水，娃娃車免費租借但要押證件；從埔心車站走過來要 20–30 分鐘，帶小小孩建議直接開車。",
     officialUrl: "https://www.pushin-ranch.com/",
     sources: [
       {
@@ -320,7 +333,10 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://travel.tycg.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-11",
+    lastVerified: "2026-08-16",
+    coverageNote:
+      "官方 2026-02-11 公告自 02-23 起休園重整，但票價頁仍顯示一般營業，兩頁互相矛盾；2026-08-16 查證時仍未見重開公告。",
+    status: "temporarily-closed",
   },
   {
     id: "ty-xpark",
@@ -458,7 +474,9 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["互動展", "3D 劇院", "親子廁所", "餐飲"],
     tags: ["室內", "雨天備案", "需購票"],
-    tips: "展區分樓層，低齡兒童可先從一樓互動區開始。場內有互動展、3D 劇院、親子廁所。",
+    feeNote:
+      "常設展全票 120、優待 90，6 歲以下免費；空中腳踏車 80／優待 50；小黑盒與大劇院各 150／優待 100，劇場另計，20 人以上團體另有價差。",
+    tips: "週一休館，國定假日、特定假日及寒暑假不休；非寒暑假平日售票至 16:00，九樓也在改造，出發前要看當日開放樓層。",
     officialUrl: "https://www.ntsec.gov.tw/",
     sources: [
       {
@@ -472,7 +490,9 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://www.edu.tw/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-16",
+    coverageNote:
+      "九樓空間改造中，需依官方最新消息確認當日可開放樓層；劇場與空中腳踏車不是常設展門票自動包含項目。",
   },
   {
     id: "tp-water-museum",
@@ -576,7 +596,9 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["天文展", "球幕劇場", "親子廁所", "餐飲"],
     tags: ["室內", "雨天備案", "需購票"],
-    tips: "球幕場次固定，建議先查放映表再排時間。場內有天文展、球幕劇場、親子廁所。",
+    feeNote:
+      "查無官方目前可核對的常態票價；宇宙劇場、立體劇場、宇宙探險設施與展示場應分項確認購票，請以官方票務頁／現場公告為準。",
+    tips: "週六可開到 20:00，但展示場與劇場 19:00 截止；宇宙探險每日 09:30–16:00，6 歲以下須 12 歲以上陪同。",
     officialUrl: "https://www.tam.gov.taipei/",
     sources: [
       {
@@ -590,7 +612,9 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://www.gov.taipei/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-16",
+    coverageNote:
+      "開放時間依平日、週六及設施分項不同；6 歲以下搭乘宇宙探險設施須 12 歲以上陪同，劇場需按節目表排場次。",
   },
   {
     id: "tp-rongxing",
@@ -663,11 +687,12 @@ const PLAYGROUNDS: readonly Playground[] = [
     type: "博物館",
     ageRange: [3, 8],
     free: false,
-    feeNote: "全票 80 元；新北市民、未滿 12 歲兒童免費入館。",
+    feeNote:
+      "全票 80 元；未滿 12 歲、新北市民、國內學生、65 歲以上本國籍及身障者與陪伴者等憑證免費；特展／換展及活動是否另收依當日公告。",
     indoor: true,
     facilities: ["常設展", "考古體驗", "親子廁所", "停車場"],
     tags: ["室內", "雨天備案"],
-    tips: "特展可能另收費；戶外瞭望台風大記得加外套。場內有常設展、考古體驗、親子廁所。",
+    tips: "體驗課需預約，場次為 09:50、10:50、13:20、14:20、15:20，每場約 40–50 分鐘；週末售票至 17:30。",
     officialUrl: "https://www.sshm.ntpc.gov.tw/",
     sources: [
       {
@@ -681,7 +706,9 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://www.ntpc.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-11",
+    lastVerified: "2026-08-16",
+    coverageNote:
+      "每月第一個週一及除夕、初一休館；週末／國定假日延長至 18:00，售票至閉館前 30 分鐘；體驗課程與導覽需另外預約。",
   },
   {
     id: "nt-yingge-ceramic",
@@ -718,7 +745,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     name: "朱銘美術館",
     city: "新北市",
     district: "金山區",
-    lat: 25.2500,
+    lat: 25.25,
     lng: 121.6083,
     address: "新北市金山區西勢湖2號",
     type: "博物館",
@@ -929,7 +956,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     city: "基隆市",
     district: "中正區",
     lat: 25.1333,
-    lng: 121.8000,
+    lng: 121.8,
     address: "基隆市中正區北寧路369號",
     type: "公園",
     ageRange: [3, 8],
@@ -958,7 +985,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     city: "基隆市",
     district: "信義區",
     lat: 25.1283,
-    lng: 121.7450,
+    lng: 121.745,
     address: "基隆市信義區信二路74巷",
     type: "公園",
     ageRange: [3, 8],
@@ -1025,7 +1052,9 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["動物展示", "兒童遊戲場", "親子廁所", "餐飲"],
     tags: ["動物", "市區", "需購票"],
-    tips: "園區不大適合半日遊；假日排隊較久。場內有動物展示、兒童遊戲場、親子廁所。",
+    feeNote:
+      "全票 50、6 歲至未滿 12 歲優待票 25、20 人以上團體票 40；未滿 6 歲、新竹市籍未滿 12 歲及符合身障／敬老等資格者免費，須帶證件。",
+    tips: "只有 2.7 公頃，小小孩走得完一圈，適合半天行程。16:20 就停止進場，週一固定休園。園內禁止滑板車、幼兒三輪車等代步工具，別讓孩子騎來。未滿 6 歲免費。",
     officialUrl: "https://zoo-info.hccg.gov.tw/",
     sources: [
       {
@@ -1039,7 +1068,9 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://www.hccg.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-13",
+    lastVerified: "2026-08-16",
+    coverageNote:
+      "週一固定休園，官方曾有暑期週末延長公告；16:20 最後進場的資訊出現在官方活動公告，出發前應再看「開放時間」與最新公告。",
   },
   {
     id: "hc-hsinchu-park",
@@ -1047,7 +1078,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     city: "新竹市",
     district: "東區",
     lat: 24.8046,
-    lng: 120.9790,
+    lng: 120.979,
     address: "新竹市東區公園路",
     type: "公園",
     ageRange: [3, 8],
@@ -1115,8 +1146,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     facilities: ["大型遊具", "沙坑", "遮蔭區", "洗手間"],
     tags: ["免費", "海邊", "放電"],
     tips: "海風大記得防曬與外套；可搭配南寮親水公園與自行車道。場內有大型遊具、沙坑、遮蔭區。",
-    coverageNote:
-      "導航落點為南寮漁港旅遊服務中心，實際遊戲區在旁邊步行可達。",
+    coverageNote: "導航落點為南寮漁港旅遊服務中心，實際遊戲區在旁邊步行可達。",
     sources: [
       {
         kind: "gov",
@@ -1233,7 +1263,9 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["玻璃展", "親子廁所", "周邊公園", "餐飲"],
     tags: ["室內", "雨天備案", "文化"],
-    tips: "館內勿奔跑；可與新竹公園草地放電搭配。場內有玻璃展、親子廁所、周邊公園。",
+    feeNote:
+      "全票 50、優待票 30；新竹市民、65 歲以上及未滿 6 歲免費，身障者及必要陪伴者亦免票；20 人以上團體適用優待票。",
+    tips: "館舍雖在新竹公園內，週二至週日仍於 16:30 截止入館；週一、春節及選舉日休館，公園行程不要直接套用館舍開放日。",
     officialUrl: "https://www.hccg.gov.tw/",
     sources: [
       {
@@ -1247,7 +1279,9 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://travel.hsinchu.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-16",
+    coverageNote:
+      "週一、春節、選舉日休館，週二至日 16:30 截止入館；官方入口目前是新竹市文化局參觀資訊頁，不是原資料中的市政府首頁。",
   },
   // ── Wave 2：新竹縣 ≥8 ──
   {
@@ -1255,7 +1289,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     name: "小叮噹科學主題樂園",
     city: "新竹縣",
     district: "新豐鄉",
-    lat: 24.8690,
+    lat: 24.869,
     lng: 120.9801,
     address: "新竹縣新豐鄉松柏村康和路199號",
     type: "主題樂園",
@@ -1264,7 +1298,9 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["科學遊具", "戲水區", "親子廁所", "餐飲"],
     tags: ["主題樂園", "動手玩", "需購票"],
-    tips: "戶外設施多，記得防曬與換洗衣物。場內有科學遊具、戲水區、親子廁所。",
+    feeNote:
+      "全票 760、學生 720、3 歲至未滿 6 歲學童 660、孝親票 380、未滿 3 歲免費；30 人以上團體另有團體價，門票不含機械遊樂設施與滑雪衣物／玩具租借。",
+    tips: "室內滑雪場 12:00–12:30 維護，戲雪與雪毯 16:30 截止；雪毯滿 100 公分，雪圈滑梯未滿 130 公分可改雙人雪毯。",
     officialUrl: "https://www.ding-dong.com.tw/",
     sources: [
       {
@@ -1278,7 +1314,9 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://travel.hsinchu.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-13",
+    lastVerified: "2026-08-16",
+    coverageNote:
+      "平日與假日開園時間不同；室內滑雪場每天 12:00–12:30 維護，戲雪／雪毯 16:30 截止；滑雪課程與自滑需另行預約。",
   },
   {
     id: "hcx-greenworld",
@@ -1294,7 +1332,9 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["生態導覽", "蝴蝶館", "步道", "餐飲"],
     tags: ["生態", "賞蝶", "需購票"],
-    tips: "園區坡道與步道多，建議穿好走的鞋並防蚊。場內有生態導覽、蝴蝶館、餐飲。",
+    feeNote:
+      "全票 380、半票 320；30 人以上團體 9 折；愛心票 190（身障者及陪同者 1 人）；90 公分以下或未滿 3 歲免費。",
+    tips: "園區約 75 公頃，步道有多處樓梯和陡坡，推車路線不能想當然；售票 16:00 截止，例假日雖可能延長，官方沒有固定延長時間。",
     officialUrl: "https://green-world.com.tw/",
     sources: [
       {
@@ -1308,7 +1348,9 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://travel.hsinchu.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-16",
+    coverageNote:
+      "園區約 75 公頃且有樓梯與陡坡，推車與低齡兒動線需保守安排；售票至 16:00，例假日可能彈性延長；官方現行地址為新竹縣北埔鄉大湖村 7 鄰 20 號。",
   },
   {
     id: "hcx-leofoo",
@@ -1324,7 +1366,9 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["遊樂設施", "野生動物區", "親子廁所", "餐飲"],
     tags: ["主題樂園", "動物", "需購票"],
-    tips: "園區大，建議先排優先設施；推車友善但路程長。場內有遊樂設施、野生動物區、親子廁所。",
+    feeNote:
+      "四大園區（含動物園）原則一票玩到底，特殊體驗與部分機台另計；未滿 3 歲或身高 100 公分以下且有家長陪伴免費；20 人以上團體與勇闖猛獸島需另行預約／洽詢。",
+    tips: "勇闖猛獸島是入園後加價體驗，購買後須提前 1 週預約；未滿 3 歲或身高 100 公分以下且有家長陪同免費。",
     officialUrl: "https://www.leofoo.com.tw/",
     sources: [
       {
@@ -1338,7 +1382,9 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://travel.hsinchu.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-16",
+    coverageNote:
+      "六福村票價、開園時間與設施狀態會依官方最新公告變動；勇闖猛獸島不是一般門票自動包含且需提前一週預約。",
   },
   {
     id: "hcx-xinwaya",
@@ -1506,7 +1552,9 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["餵動物", "草原", "DIY 體驗", "餐飲"],
     tags: ["農場", "餵動物", "需購票"],
-    tips: "草原日照強，請備帽子與水；餵食請依現場指引。場內有餵動物、DIY 體驗、餐飲。",
+    feeNote:
+      "全票 280、學童 220、幼童 160、敬老 160、身障優惠 140、3 歲以下免費；團體票門檻 40 人，門票另含乳製品兌換 1 杯。",
+    tips: "景觀區是行人徒步區，園區有多處樓梯、自然鋪面和陡坡，推車不適合全程依賴；教堂廣場要事先預約，DIY 也要先問時段。",
     officialUrl: "https://www.flyingcow.com.tw/",
     sources: [
       {
@@ -1520,7 +1568,9 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://miaolitravel.net/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-16",
+    coverageNote:
+      "園區大且有樓梯、陡坡與自然鋪面，景觀區不開放一般車輛；動物區、水域區與 DIY 需依現場／預約安排。",
   },
   {
     id: "ml-catmeow",
@@ -1608,7 +1658,9 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["遊樂設施", "戲水區", "親子廁所", "餐飲"],
     tags: ["主題樂園", "戲水", "需購票"],
-    tips: "戲水設施建議多帶一套衣物。場內有遊樂設施、戲水區、親子廁所。",
+    feeNote:
+      "115 年度常態全票 399、幼兒票 250、未滿 3 歲或未滿 90 公分免費；團體優待 350 需 30 人以上且搭大客車／遊覽車，活動期間優惠另看公告。",
+    tips: "設施與賣店 17:00 就收，別看到「閉園 21:00」以為傍晚還能玩，下午三點後進場等於只剩散步。娃娃車與輪椅數量有限，進門先到服務台借。3 歲以上未滿 6 歲買幼兒票。",
     officialUrl: "https://www.westlake.com.tw/",
     sources: [
       {
@@ -1622,7 +1674,9 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://miaolitravel.net/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-16",
+    coverageNote:
+      "17:00 是賣店與設施關閉時間，雖標示閉園 21:00，不代表 17:00 後仍可玩設施；娃娃車／輪椅數量有限。",
   },
   // ── Wave 2：台中市 ≥8 ──
   {
@@ -1639,7 +1693,9 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["科學展", "植物園", "親子廁所", "餐飲"],
     tags: ["室內", "雨天備案", "需購票"],
-    tips: "館區大，低齡兒可先鎖定太空劇場周邊或植物園。場內有科學展、親子廁所、餐飲。",
+    feeNote:
+      "展示場全票 120、6 歲以下免費、6–未滿 12 歲 60、12 歲以上學生及 20 人以上團體 90；太空劇場／必可飛劇場／植物園溫室／科學中心均另計。",
+    tips: "週二至週日 16:30 就停止售票、17:00 停止入場。展示場票不包含太空劇場、植物園溫室與科學中心，別以為一張票能玩遍整個館區；低齡兒建議只挑一到兩區。",
     officialUrl: "https://www.nmns.edu.tw/",
     sources: [
       {
@@ -1653,7 +1709,9 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://travel.taichung.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-16",
+    coverageNote:
+      "週一及除夕、初一休館，售票至 16:30；本館會有展區暫停開放公告，且劇場與三園區不是展示場票自動包含內容。",
   },
   {
     id: "tc-taichung-park",
@@ -1690,7 +1748,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     city: "台中市",
     district: "西屯區",
     lat: 24.1656,
-    lng: 120.6400,
+    lng: 120.64,
     address: "台中市西屯區朝富路30號",
     type: "公園",
     ageRange: [3, 8],
@@ -1808,7 +1866,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     city: "台中市",
     district: "清水區",
     lat: 24.3128,
-    lng: 120.5500,
+    lng: 120.55,
     address: "台中市清水區美堤街8號",
     type: "其他",
     ageRange: [3, 8],
@@ -2017,7 +2075,9 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["遊樂設施", "纜車", "原住民文化區", "餐飲"],
     tags: ["主題樂園", "纜車", "需購票"],
-    tips: "園區坡度大，建議穿好走的鞋；可搭配日月潭行程。場內有遊樂設施、纜車、原住民文化區。",
+    feeNote:
+      "常態成人 1100、學生 980、兒童 880、博幼 550；未滿 3 歲或未滿 100 公分免費，20 人以上大客車團體前一日預約；日月潭纜車屬贈送項目且可能停駛。",
+    tips: "全年無休，但每天都有設施輪流保養，孩子想玩的那項可能剛好停機。日月潭纜車不屬於園區，每月第一個週三固定停駛、雷雨也會停，要搭得另外查纜車公告。",
     officialUrl: "https://www.nine.com.tw/",
     sources: [
       {
@@ -2031,7 +2091,9 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://travel.nantou.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-16",
+    coverageNote:
+      "九族全年無休但每日有設施保養，除夕提早閉園；日月潭纜車每月第一個週三固定保養，出發前須看設施／纜車公告。",
   },
   {
     id: "nto-cingjing",
@@ -2047,7 +2109,9 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["青青草原", "畜牧區", "步道", "餐飲"],
     tags: ["農場", "高山", "需購票"],
-    tips: "海拔高溫差大，請備外套；草原日照強記得防曬。場內有青青草原、畜牧區、步道。",
+    feeNote:
+      "全票 270、優待 210、兒童半票 130；0 歲至未滿 6 歲且未滿 115 公分收 20 元保險行政費，非一般免費；寒暑假團體門檻 30 人，非寒暑假 20 人。",
+    tips: "青青草原海拔 1750 公尺以上，草坡陡峭濕滑要沿步道走；綿羊秀 09:30、14:30，馬術秀 10:45、15:45，霧雨時可能異動。",
     officialUrl: "https://www.qingjing-farm.com.tw/",
     sources: [
       {
@@ -2061,7 +2125,9 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://travel.nantou.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-13",
+    lastVerified: "2026-08-16",
+    coverageNote:
+      "海拔 1750 公尺以上且草坡陡峭濕滑，需按步道行走；綿羊秀及馬術秀有固定場次，遇天候或動物狀況依現場公告。",
   },
   {
     id: "nto-xiangshan",
@@ -2136,7 +2202,9 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["園區步道", "展場", "餐飲", "停車場"],
     tags: ["園區", "拍照", "需購票"],
-    tips: "園區以散步與拍照為主；雨天步道濕滑請小心。場內有園區步道、展場、餐飲。",
+    feeNote:
+      "全票 70 並附 20 元園區消費折抵券；15 人以上團客／65 歲優惠票 60；6 歲以下含 6 歲、埔里鎮民及身障者與陪同者 1 人免費。",
+    tips: "紙教堂每週三公休，但寒暑假、國定假日和特定預約團例外；16:30 截止入園，園區有水域，孩子不能下水或捕捉青蛙昆蟲。",
     officialUrl: "https://www.paperdome.org.tw/",
     sources: [
       {
@@ -2150,7 +2218,9 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://travel.nantou.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-13",
+    lastVerified: "2026-08-16",
+    coverageNote:
+      "每週三公休但寒暑假、國定假日及特定預約團例外；16:30 截止入園，園區以靜態與生態參訪為主，非大型遊樂設施。",
   },
   // ── Wave 2：雲林縣 ≥5 ──
   {
@@ -2167,7 +2237,9 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["遊樂設施", "親子廁所", "餐飲", "停車場"],
     tags: ["主題樂園", "需購票", "放電"],
-    tips: "園區坡度與步行距離不短，建議規劃休息節奏。場內有遊樂設施、親子廁所、餐飲。",
+    feeNote:
+      "2026-06-19–09-06 官方現行頁列全票 1199、學生 999、學童 899、博幼 500、午後 799；未滿 3 歲或未達 100 公分免費；20 人以上團體 899，水陸一票但另付費／投幣設施除外。",
+    tips: "遊具身高關卡很多：嘟嘟車限 80–130 公分、咕咕飛車 80 公分以下禁乘且 80–110 公分要大人陪、皇家馬車 7 歲以下須成人同行。嬰兒車可租 100 元、押 500，限 100 公分以下。",
     officialUrl: "https://www.janfusun.com.tw/",
     sources: [
       {
@@ -2181,7 +2253,9 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://www.yunlin.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-16",
+    coverageNote:
+      "票價及設施營運皆有適用期間與公告，官方營業時間頁目前仍是 2025 暑期資料；出發前需重新確認 2026 當日時間與保養公告。",
   },
   {
     id: "yl-gukeng-tunnel",
@@ -2245,7 +2319,8 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["布袋戲展示", "體驗區", "親子廁所", "停車場"],
     tags: ["室內", "雨天備案", "文化"],
-    tips: "低齡兒適合短逛與偶戲體驗場次。場內有布袋戲展示、體驗區、親子廁所。",
+    feeNote: "官方目前未公告常態票價，出發前請先向館方確認收費方式。",
+    tips: "週三至週日 10:00–18:00，週一、週二兩天都休館，排週末以外的行程容易撲空。全室內館舍，是雨天備案；導覽場次每年調整，想聽解說要先致電確認當期時間。",
     officialUrl: "https://www.yunlin.gov.tw/",
     sources: [
       {
@@ -2254,7 +2329,9 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://www.yunlin.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-13",
+    lastVerified: "2026-08-16",
+    coverageNote:
+      "官方入口目前為雲林縣政府轉知頁／藝文月刊資料，內容含舊年度節目；到訪前需向雲林布袋戲館確認當期開放、票價及活動。",
   },
   {
     id: "yl-beigang-park",
@@ -2279,6 +2356,314 @@ const PLAYGROUNDS: readonly Playground[] = [
       },
     ],
     lastVerified: "2026-08-09",
+  },
+  {
+    id: "cyc-city-museum",
+    name: "嘉義市立博物館",
+    city: "嘉義市",
+    district: "東區",
+    lat: 23.48719,
+    lng: 120.45169,
+    address: "嘉義市東區忠孝路275-1號",
+    type: "博物館",
+    ageRange: [3, 8],
+    free: false,
+    feeNote:
+      "一般票50元；6歲以上未滿12歲兒童優待25元；未滿6歲兒童免費；嘉義市民免費。",
+    indoor: true,
+    facilities: ["兒童廳", "常設展", "交趾陶館", "特展"],
+    tags: ["室內", "兒童廳", "需購票"],
+    tips: "兒童廳要現場索券、每梯一小時，12:30–13:30 清消不開放；進場得穿襪子，記得幫孩子帶一雙。最後售票 16:30，想玩滿一梯要早點到。",
+    officialUrl: "https://museum.chiayi.gov.tw/",
+    sources: [
+      {
+        kind: "official",
+        name: "嘉義市立博物館參觀須知",
+        url: "https://museum.chiayi.gov.tw/Visit/Visit.html",
+      },
+      {
+        kind: "gov",
+        name: "交通部觀光署觀光資訊資料庫—景點（資料集7777）",
+        url: "https://data.gov.tw/dataset/7777",
+      },
+    ],
+    lastVerified: "2026-08-16",
+  },
+  {
+    id: "cyc-art-museum",
+    name: "嘉義市立美術館",
+    city: "嘉義市",
+    district: "西區",
+    lat: 23.47681,
+    lng: 120.44069,
+    address: "嘉義市西區廣寧街101號",
+    type: "博物館",
+    ageRange: [3, 8],
+    free: false,
+    feeNote:
+      "門票依官方當期收費基準；本輪以一般票50元、團體票35元、優待票25元資料核對。",
+    indoor: true,
+    facilities: ["展覽", "定時導覽", "嬰兒車借用", "輪椅借用"],
+    tags: ["室內", "藝術", "需購票"],
+    tips: "沒有附設停車場，開車要找周邊停車格。嬰兒車與輪椅可在服務台借用，需押有照證件。定時導覽每場限 20 人，平日 10:30、14:30，假日多一場 15:30。週一休館。",
+    officialUrl: "https://chiayiartmuseum.chiayi.gov.tw/",
+    sources: [
+      {
+        kind: "official",
+        name: "嘉義市立美術館參觀資訊",
+        url: "https://chiayiartmuseum.chiayi.gov.tw/cp.aspx?n=13504",
+      },
+      {
+        kind: "gov",
+        name: "交通部觀光署觀光資訊資料庫—景點（資料集7777）",
+        url: "https://data.gov.tw/dataset/7777",
+      },
+    ],
+    lastVerified: "2026-08-16",
+  },
+  {
+    id: "cyc-shellginger",
+    name: "月桃故事館",
+    city: "嘉義市",
+    district: "東區",
+    lat: 23.51256,
+    lng: 120.44844,
+    address: "嘉義市東區保忠一街359號",
+    type: "其他",
+    ageRange: [3, 8],
+    free: true,
+    indoor: true,
+    facilities: ["月桃主題展示", "月桃時光隧道", "主題小測驗", "停車場"],
+    tags: ["室內", "觀光工廠", "免費入場"],
+    tips: "免門票、自由入園，還附免費停車場，適合臨時起意順路彎進去。8:30 就開門，是早上第一站的好選擇；全年只有除夕休館。",
+    officialUrl: "https://www.sgsh.com.tw/tw/index.html",
+    sources: [
+      {
+        kind: "official",
+        name: "月桃故事館官方網站",
+        url: "https://www.sgsh.com.tw/tw/index.html",
+      },
+      {
+        kind: "gov",
+        name: "環境部環境教育認證系統—月桃故事館",
+        url: "https://neecs.moenv.gov.tw/Home/PlaceQryView?id=3ae34ba2-d2ff-49df-b938-5a15efbbfba2",
+      },
+      {
+        kind: "gov",
+        name: "交通部觀光署觀光資訊資料庫—景點（資料集7777）",
+        url: "https://data.gov.tw/dataset/7777",
+      },
+    ],
+    lastVerified: "2026-08-16",
+  },
+  {
+    id: "cyc-tile-museum",
+    name: "臺灣花磚博物館",
+    city: "嘉義市",
+    district: "西區",
+    lat: 23.48331,
+    lng: 120.44606,
+    address: "嘉義市西區林森西路282號",
+    type: "博物館",
+    ageRange: [3, 8],
+    free: false,
+    feeNote: "參觀門票100元；購買館內商品可折抵50元。",
+    indoor: true,
+    facilities: ["花磚展示", "DIY課程", "導覽"],
+    tags: ["室內", "工藝", "需購票"],
+    tips: "館內地板是檜木，進去要脫鞋，帶孩子建議穿好穿脫的鞋並帶襪子。門票 100 元，買館內商品可折抵 50。週二休館，想聽導覽要先跟館方確認時間。",
+    officialUrl: "https://www.1920t.com/",
+    sources: [
+      {
+        kind: "official",
+        name: "臺灣花磚博物館官方網站",
+        url: "https://www.1920t.com/",
+      },
+      {
+        kind: "gov",
+        name: "經濟部創意生活網—臺灣花磚博物館",
+        url: "https://keid.nat.gov.tw/creativelife/information/enjoy_ct?id=35",
+      },
+      {
+        kind: "gov",
+        name: "交通部觀光署觀光資訊資料庫—景點（資料集7777）",
+        url: "https://data.gov.tw/dataset/7777",
+      },
+    ],
+    lastVerified: "2026-08-16",
+  },
+  {
+    id: "cy-npm-south",
+    name: "國立故宮博物院南部院區",
+    city: "嘉義縣",
+    district: "太保市",
+    lat: 23.47278,
+    lng: 120.2927,
+    address: "嘉義縣太保市故宮大道888號",
+    type: "博物館",
+    ageRange: [3, 8],
+    free: false,
+    feeNote:
+      "一般參觀券150元；未滿18歲、本國學生、身心障礙者及必要陪同者等依官方規定免費；嘉義縣市居民115年下午3時後免費兌票。",
+    indoor: true,
+    facilities: ["展覽", "兒童創意中心", "親子互動遊憩區", "停車場"],
+    tags: ["室內", "兒童友善", "需購票"],
+    tips: "未滿 18 歲免費入館，兒童創意中心也不收費，是這一帶最省錢的室內行程。展廳平日開到 17:00、假日延到 18:00，週一休館。園區停車場 05:00 到 24:00 都開。",
+    officialUrl: "https://south.npm.gov.tw/",
+    sources: [
+      {
+        kind: "official",
+        name: "國立故宮博物院南部院區開放時間",
+        url: "https://south.npm.gov.tw/Visit/OpenHours.htm",
+      },
+      {
+        kind: "official",
+        name: "國立故宮博物院南部院區票價資訊",
+        url: "https://south.npm.gov.tw/Visit/Ticket.htm",
+      },
+      {
+        kind: "gov",
+        name: "交通部觀光署觀光資訊資料庫—景點（資料集7777）",
+        url: "https://data.gov.tw/dataset/7777",
+      },
+    ],
+    lastVerified: "2026-08-16",
+  },
+  {
+    id: "cy-radio-museum",
+    name: "國家廣播文物館",
+    city: "嘉義縣",
+    district: "民雄鄉",
+    lat: 23.5646469,
+    lng: 120.4295487,
+    address: "嘉義縣民雄鄉寮頂村民權路74號",
+    type: "博物館",
+    ageRange: [3, 8],
+    free: false,
+    feeNote: "全票50元；優惠票20元；身心障礙者及必要陪同一人免費。",
+    indoor: true,
+    facilities: ["廣播文物展示", "錄音體驗", "電臺運作參觀", "導覽服務"],
+    tags: ["室內", "互動", "需購票"],
+    tips: "開放時段切成上午 09:00–11:00 與下午 13:30–16:00 兩段，中午不開，別挑中午到。週末的 DIY、導覽與錄音體驗要三天前預約，臨時去只能自己看展。週一休館。",
+    officialUrl: "https://archive.tw.rti.org.tw/index/content/id/3.html",
+    coverageNote:
+      "資料集未收錄「國家廣播文物館」館名；座標採 Nominatim 場館名結果，行政區顯示民雄鄉、嘉義縣。",
+    sources: [
+      {
+        kind: "official",
+        name: "中央廣播電臺—參觀申請：嘉義民雄國家廣播文物館",
+        url: "https://archive.tw.rti.org.tw/index/content/id/3.html",
+      },
+      {
+        kind: "gov",
+        name: "文化部博物之島—國家廣播文物館",
+        url: "https://museums.moc.gov.tw/MusData/Detail?museumsId=f3bc85f3-3ead-4ad6-9742-4b99123e097d",
+      },
+    ],
+    lastVerified: "2026-08-16",
+  },
+  {
+    id: "cy-space-education",
+    name: "北回二館太空教育館",
+    city: "嘉義縣",
+    district: "水上鄉",
+    lat: 23.45188,
+    lng: 120.41686,
+    address: "嘉義縣水上鄉回歸村北回188號",
+    type: "博物館",
+    ageRange: [3, 8],
+    free: true,
+    indoor: true,
+    facilities: ["室內太空展覽", "室外展覽區", "影片播放"],
+    tags: ["室內", "免費入場", "科學教育"],
+    tips: "全館免費，但週日與週一都休館，想排週末只剩週六。室內展覽中午 12:00–13:30 休息，室外展區則全天開放。戶外溜滑梯區整修中，別為了溜滑梯專程跑一趟。",
+    officialUrl: "https://sec235.cyc.edu.tw/",
+    coverageNote:
+      "資料集條目將北回歸線標誌公園與北回二館合併；本筆座標採 Nominatim 場館名結果，指向北回188號太空教育館。",
+    sources: [
+      {
+        kind: "official",
+        name: "嘉義縣科學教育中心—北回二館太空教育館開館時間",
+        url: "https://sec235.cyc.edu.tw/modules/tadnews/page.php?nsn=13",
+      },
+      {
+        kind: "gov",
+        name: "交通部觀光署觀光資訊資料庫—景點（資料集7777）",
+        url: "https://data.gov.tw/dataset/7777",
+      },
+    ],
+    lastVerified: "2026-08-16",
+  },
+  {
+    id: "cy-bantaoyao",
+    name: "板陶窯交趾剪黏工藝園區",
+    city: "嘉義縣",
+    district: "新港鄉",
+    lat: 23.56561,
+    lng: 120.32068,
+    address: "嘉義縣新港鄉板頭村板頭厝45號",
+    type: "其他",
+    ageRange: [3, 8],
+    free: false,
+    feeNote: "入園費每人100元；身心障礙者本人持證明免票，陪同者一位免費。",
+    indoor: true,
+    facilities: ["交趾陶展示", "剪黏展示", "DIY", "室內外溜滑梯", "球池"],
+    tags: ["室內外", "DIY", "需購票"],
+    tips: "入園 100 元，DIY 只做到 16:30，想手作要早點到。園區有雞、鴨、羊但都不能餵，只有魚可以用飼料機餵，先跟孩子講好免得現場吵。全區禁帶外食。",
+    officialUrl: "https://www.bantaoyao.com/",
+    sources: [
+      {
+        kind: "official",
+        name: "板陶窯參觀資訊",
+        url: "https://www.bantaoyao.com/vistorinformation",
+      },
+      {
+        kind: "gov",
+        name: "國立臺灣工藝研究發展中心—板陶窯交趾剪黏工藝園區",
+        url: "https://www.ntcri.gov.tw/home/zh-tw/placec/16986",
+      },
+      {
+        kind: "gov",
+        name: "交通部觀光署觀光資訊資料庫—景點（資料集7777）",
+        url: "https://data.gov.tw/dataset/7777",
+      },
+    ],
+    lastVerified: "2026-08-16",
+  },
+  {
+    id: "cy-minxiong-kumquat",
+    name: "民雄金桔觀光工廠",
+    city: "嘉義縣",
+    district: "民雄鄉",
+    lat: 23.558153,
+    lng: 120.476685,
+    address: "嘉義縣民雄鄉三興村陳厝寮7鄰38號",
+    type: "其他",
+    ageRange: [3, 8],
+    free: true,
+    indoor: true,
+    facilities: ["金桔產業文化館", "製程參觀", "DIY", "孩童樹屋遊戲區"],
+    tags: ["室內", "觀光工廠", "免費入場"],
+    tips: "全年無休、入園免費，20 人以下可直接進去自由參觀與試吃，不必預約。DIY 要另外報名收費。禁帶外食，違規會加收 100 元清潔費。",
+    officialUrl: "https://www.kingezi.com.tw/",
+    sources: [
+      {
+        kind: "official",
+        name: "民雄金桔入場須知",
+        url: "https://www.kingezi.com.tw/pages/rules-and-regulations",
+      },
+      {
+        kind: "gov",
+        name: "經濟部創意生活網—民雄金桔",
+        url: "https://keid.nat.gov.tw/creativelife/information/enjoy_ct?id=96",
+      },
+      {
+        kind: "gov",
+        name: "交通部觀光署觀光資訊資料庫—景點（資料集7777）",
+        url: "https://data.gov.tw/dataset/7777",
+      },
+    ],
+    lastVerified: "2026-08-16",
   },
 ];
 

@@ -92,6 +92,17 @@ export function PlayMapSheet({
         </button>
       </div>
 
+      {/*
+       * 休園警告排在所有內容之前，compact 與 full 都顯示。
+       * 只寫在 coverageNote 不夠——那段在 full sheet 中段，家長可能先按了導航。
+       */}
+      {place.status === "temporarily-closed" ? (
+        <p className={styles.closedNotice} role="alert">
+          <span className={styles.closedNoticeLabel}>暫停營業</span>
+          官方公告休園整修中，出發前請先電話確認是否已重新開放。
+        </p>
+      ) : null}
+
       {compact ? (
         <>
           {decisionTags.length > 0 ? (

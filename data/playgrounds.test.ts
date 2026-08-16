@@ -197,6 +197,21 @@ describe("playgrounds sidecar", () => {
    */
   const FACILITY_TAIL = /\s*(?:場|園|館)內有[^。]*。\s*$/;
 
+  /*
+   * status 是「今天過去會撲空」的阻擋條件，必須有依據。
+   * 沒有 coverageNote 就無從得知是哪一則公告、何時查的，下一個維護的人
+   * 也無法判斷該不該解除標記。
+   */
+  it("標記 status 的場館必須有 coverageNote 說明依據", () => {
+    for (const item of listPlaygrounds()) {
+      if (!item.status) continue;
+      expect(
+        (item.coverageNote ?? "").length,
+        `${item.id} 標了 status=${item.status} 卻沒有 coverageNote`,
+      ).toBeGreaterThan(0);
+    }
+  });
+
   it("tips 不得留下佔位或待辦字樣", () => {
     const placeholder = /待[^。]{0,40}定稿|定稿中|TODO|FIXME|XXX|待補|待撰|佔位/;
     for (const item of listPlaygrounds()) {
@@ -437,6 +452,9 @@ describe("playgrounds sidecar", () => {
     彰化縣: { lat: [23.8, 24.2], lng: [120.25, 120.7] },
     南投縣: { lat: [23.65, 24.15], lng: [120.65, 121.25] },
     雲林縣: { lat: [23.5, 23.85], lng: [120.15, 120.7] },
+    嘉義市: { lat: [23.44, 23.53], lng: [120.4, 120.5] },
+    // 嘉義縣包住嘉義市並向西延伸到東石／布袋海線、向東到阿里山，範圍較寬。
+    嘉義縣: { lat: [23.2, 23.68], lng: [120.1, 120.9] },
   };
 
   it("每筆 lat/lng 落在該縣市粗篩範圍", () => {

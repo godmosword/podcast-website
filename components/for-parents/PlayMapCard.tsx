@@ -53,6 +53,9 @@ export function PlayMapCard({
                 <span className={styles.cardDistance}>{distanceLabel}</span>
               ) : null}
             </span>
+            {place.status === "temporarily-closed" ? (
+              <span className={styles.cardClosed}>暫停營業</span>
+            ) : null}
             <span className={styles.cardMeta}>{meta}</span>
             {decisionTags.length > 0 ? (
               <span className={styles.cardFlags}>

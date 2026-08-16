@@ -876,6 +876,52 @@
   font-weight: 700;
 }
 
+/*
+ * 休園警告。用 --status-error 而非 .volatilityNotice 的暖色系：
+ * 「票價可能變動」是提醒，「今天過去會撲空」是阻擋條件，兩者的視覺權重不該相同。
+ */
+.closedNotice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--status-error) 32%, transparent);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--status-error) 10%, var(--card));
+  color: var(--status-error);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.closedNoticeLabel {
+  flex: 0 0 auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--status-error);
+  color: var(--card);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+/*
+ * 卡片上的暫停營業標籤：掃視時就要看得到，不能只藏在詳情裡。
+ * 父層 .cardBody 是 grid，要用 justify-self 收寬度；align-self 只管交錯軸，
+ * 在這裡會讓 pill 撐成整條橫幅，讀起來像警告橫幅而不是狀態標籤。
+ */
+.cardClosed {
+  justify-self: start;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--status-error) 14%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--status-error) 34%, transparent);
+  color: var(--status-error);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
 .volatilityNotice {
   margin: 12px 0 0;
   padding: 10px 12px;
