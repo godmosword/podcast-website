@@ -1392,12 +1392,14 @@
     transform: none;
   }
 
-  :global(.playMapMarkerButton[aria-pressed="true"]) {
-    transform: none;
-  }
-
-  /* 旋轉保留（水滴造型與 glyph 抵銷都靠它）；陰影是靜態狀態指示，不是動畫，故不清除。 */
+  /*
+   * 選中態的 translateY(-3px) 與加重陰影是**靜態狀態指示**，不是動畫——
+   * reduced-motion 要關的是 transition（本區塊開頭已關），不是狀態本身。
+   * 過去把它一併 transform: none，等於 RM 使用者只剩場館名標籤一個選中線索。
+   * transition 既已停用，位移會瞬間套用，沒有動態可言。
+   */
   :global(.playMapMarkerButton[aria-pressed="true"] .playMapPin) {
+    /* 旋轉保留：水滴造型與 glyph 抵銷都靠它。 */
     transform: rotate(var(--pin-rot));
   }
 

@@ -47,11 +47,14 @@ const GLYPH_BODY: Record<PlaygroundTypeVisualKey, string> = {
   museum:
     '<path d="M3 10 L12 4 L21 10 Z"/><rect x="5" y="12" width="2.6" height="7"/><rect x="10.7" y="12" width="2.6" height="7"/><rect x="16.4" y="12" width="2.6" height="7"/><rect x="4" y="19" width="16" height="1.6" rx="0.3"/>',
   /*
-   * 長頸鹿的頸與頭，加兩根短耳角（ZooScene 最具識別度的母題）。
-   * 耳角拉開到約 1.5–2 單位，15px 下仍能把它和問號／手杖輪廓分開；
-   * 整組平移後的 bbox 中心回到 (12, 12)，與其他六個剪影的視覺重心一致。
+   * 長頸鹿的頸、頭、吻部與兩根角（ZooScene 最具識別度的母題）。
+   *
+   * 角必須用 stroke 且 ≥2 單位。先前版本用 1.5 單位的實心三角形，換算後只有
+   * 0.94px——次像素會被抗鋸齒吃掉，整顆退回「一根曲線＋一顆球」，讀成手杖
+   * 或問號（與摩天輪輻條同一個失效模式）。吻部是把「頭」和「球」分開的關鍵。
+   * 整組平移後 bbox 中心回到 (12, 12)，與其他六個剪影的視覺重心一致。
    */
-  zoo: '<g transform="translate(-1 -0.5)"><path d="M9.5 20 Q9 12 13.5 9.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="15.5" cy="8" r="3"/><path d="M13.3 6.1 L11.8 4 L14.1 5.4 Z"/><path d="M16.5 5.4 L18.9 4 L17.3 6.2 Z"/></g>',
+  zoo: '<g transform="translate(-1 -0.5)"><path d="M9.5 20 Q9 12 13.5 9.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="15.5" cy="8" r="3.2"/><path d="M18.4 7.4 h2.6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M14 5.2 L12.9 2.4 M17.2 5 L18.6 2.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></g>',
   // 穀倉五角形（FarmScene）
   farm: '<path d="M5 20 V11 L12 5 L19 11 V20 Z"/>',
   /*

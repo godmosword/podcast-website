@@ -59,7 +59,8 @@
 | feat(for-parents): play-map 休園標記（`status`）、17 筆家長筆記改寫、嘉義 9 筆（13 縣市 82 處） | `e4f7076` |
 | fix(for-parents): 覆蓋不計休園場館，補桃園第 9 筆（祥儀機器人夢工廠）恢復 Wave 1 達標 | `b1bf63c` |
 | docs(editorial): `tips` 品質標準取代字數門檻，記錄 CRITICAL-1 決議與 56 筆改寫 backlog | `981bb09` |
-| feat(data): Wave 3 台南 7 筆＋高雄 6 筆入庫（15 縣市 95 處、室內 32 筆；台南 7/8、高雄 6/8 為 partial） | 見本 commit |
+| feat(data): Wave 3 台南 7 筆＋高雄 6 筆入庫（15 縣市 95 處、室內 32 筆；台南 7/8、高雄 6/8 為 partial） | `c9b3f33` |
+| fix(a11y): reduced-motion 保留選中態靜態位移；zoo 剪影角改 stroke ≥2 單位並加吻部 | 見本 commit |
 
 ### 本輪已完成（2026-08-15）
 
