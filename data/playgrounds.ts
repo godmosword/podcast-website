@@ -398,6 +398,38 @@ const PLAYGROUNDS: readonly Playground[] = [
     ],
     lastVerified: "2026-08-13",
   },
+  {
+    id: "ty-shayangye-robot",
+    name: "祥儀機器人夢工廠",
+    city: "桃園市",
+    district: "桃園區",
+    lat: 24.97614,
+    lng: 121.32347,
+    address: "桃園市桃園區桃鶯路461號",
+    type: "其他",
+    ageRange: [4, 8],
+    free: false,
+    feeNote:
+      "全票 200 元、愛心票 100 元（身心障礙者及必要陪同者）；100 公分以下兒童與 65 歲以上長者憑證件免費。DIY 體驗包 149 元、AI 實作課程 330–580 元，均不含在門票內。",
+    indoor: true,
+    facilities: ["機器人展演", "互動體驗", "DIY 教室", "定時導覽"],
+    tags: ["室內", "雨天備案", "機器人"],
+    tips: "100 公分以下免費入館。DIY 要另外付費，體驗包 149 元、做 20–30 分鐘，想玩要預留時間。暑假八月有多天不接待散客（8/4、8/7、8/11–14、8/18–21、8/25），出發前務必確認當日開放。",
+    officialUrl: "https://robot.shayangye.com/",
+    sources: [
+      {
+        kind: "official",
+        name: "祥儀機器人夢工廠票價與課程資訊",
+        url: "https://robot.shayangye.com/reservation/intro",
+      },
+      {
+        kind: "official",
+        name: "祥儀機器人夢工廠官方網站",
+        url: "https://robot.shayangye.com/",
+      },
+    ],
+    lastVerified: "2026-08-16",
+  },
   // ── Wave 1：台北市 ≥8 ──
   {
     id: "tp-children-park",

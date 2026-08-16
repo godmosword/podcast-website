@@ -55,14 +55,31 @@ describe("playground-coverage", () => {
     expect(normalizeCityKey("臺北市")).toBe("臺北市");
   });
 
-  it("listCityCoverage 加總與資料一致", () => {
+  /*
+   * 覆蓋只計「現在帶得成小孩去」的場館，休園中的不算——把去不了的地方
+   * 算進「共 N 處」等於對外灌水，tier 門檻也會被墊高一格。
+   */
+  it("listCityCoverage 加總等於可造訪場館數，休園者不計", () => {
     const rows = listCityCoverage();
     const total = rows.reduce((sum, row) => sum + row.count, 0);
-    expect(total).toBe(listPlaygrounds().length);
+    const open = listPlaygrounds().filter(
+      (place) => place.status !== "temporarily-closed",
+    );
+    expect(total).toBe(open.length);
     for (const row of rows) {
       expect(row.threshold).toBe(coverageThreshold(row.tier));
       expect(row.status).toBe(coverageStatus(row.count, row.tier));
     }
+  });
+
+  it("休園場館確實被排除在覆蓋之外", () => {
+    const closed = listPlaygrounds().filter(
+      (place) => place.status === "temporarily-closed",
+    );
+    if (closed.length === 0) return;
+    const rows = listCityCoverage();
+    const total = rows.reduce((sum, row) => sum + row.count, 0);
+    expect(total).toBe(listPlaygrounds().length - closed.length);
   });
 
   it("Wave 1 四縣市皆達門檻", () => {

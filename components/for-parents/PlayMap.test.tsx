@@ -3,8 +3,8 @@ import React from "react";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { listPlaygrounds, PLAYGROUND_TYPES, getPlayground } from "@/data/playgrounds";
-import { filterPlaygrounds } from "@/lib/playgrounds-query";
-import { coverageHeadline, listCityCoverage } from "@/lib/playground-coverage";
+import { countByCity, filterPlaygrounds } from "@/lib/playgrounds-query";
+import { coverageHeadline } from "@/lib/playground-coverage";
 import { composeParentBlurb } from "@/lib/playground-parent-voice";
 import { playgroundTypeVisualKey } from "@/lib/playground-type-visual";
 import { VISIBLE_STEP } from "./PlayMapContract";
@@ -52,8 +52,13 @@ afterEach(() => {
   replaceStateSpy.mockRestore();
 });
 
+/*
+ * 期望值必須取自 UI 實際使用的來源 countByCity（＝篩選會列出幾張卡），
+ * 不是 listCityCoverage（＝有幾個地方帶得成小孩去，休園者不計）。
+ * 兩者在休園場館出現後就會分岔：桃園 chip 顯示 9，覆蓋計 8。
+ */
 function cityChipName(city: string): RegExp {
-  const count = listCityCoverage().find((row) => row.city === city)?.count ?? 0;
+  const count = countByCity().get(city) ?? 0;
   return new RegExp(`^${city}，${count} 個地點$`);
 }
 

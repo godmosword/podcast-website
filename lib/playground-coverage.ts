@@ -68,9 +68,18 @@ export function normalizeCityKey(city: string): string {
   return city.replace(/^台/, "臺");
 }
 
+/**
+ * 覆蓋只計「家長現在真的帶得成小孩去」的場館。
+ *
+ * 休園整修中的場館仍留在資料裡（會重開，且卡片與 sheet 需要顯示休園警告），
+ * 但計進覆蓋等於對外宣稱一個去不了的地方——`coverageHeadline` 會說「共 N 處」，
+ * tier 門檻也會被墊高一格。門檻的用途是判斷「這個縣市收得夠不夠用」，
+ * 把去不了的場館算進去就失去意義。
+ */
 export function listCityCoverage(): CityCoverage[] {
   const counts = new Map<string, number>();
   for (const place of listPlaygrounds()) {
+    if (place.status === "temporarily-closed") continue;
     counts.set(place.city, (counts.get(place.city) ?? 0) + 1);
   }
 
