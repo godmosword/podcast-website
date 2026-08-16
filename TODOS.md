@@ -53,7 +53,7 @@
 
 | ID | 說明 |
 |----|------|
-| polish(pages): 角色圖鑑／親子指南拿掉 SiteHeader hero，改緊湊頁首；家長工具上移、Threads 改細長 callout | 見本 commit |
+| polish(pages): 角色圖鑑／親子指南拿掉 SiteHeader hero，改緊湊頁首；家長工具上移、Threads 改細長 callout | `b790677` |
 
 ### 本輪已完成（2026-08-15）
 
