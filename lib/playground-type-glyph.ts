@@ -45,9 +45,13 @@ const GLYPH_BODY: Record<PlaygroundTypeVisualKey, string> = {
     '<circle cx="12" cy="9.6" r="6" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M12 3.6 V15.6 M6 9.6 H18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M7.6 21 L12 16.4 L16.4 21 Z"/>',
   // 山形屋頂＋列柱（MuseumScene）
   museum:
-    '<path d="M3 10 L12 4 L21 10 Z"/><rect x="5" y="12" width="2.6" height="7"/><rect x="10.7" y="12" width="2.6" height="7"/><rect x="16.4" y="12" width="2.6" height="7"/>',
-  // 長頸鹿的頸與頭（ZooScene 最具識別度的母題）
-  zoo: '<path d="M9.5 20 Q9 12 13.5 9.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="15.5" cy="8" r="3"/>',
+    '<path d="M3 10 L12 4 L21 10 Z"/><rect x="5" y="12" width="2.6" height="7"/><rect x="10.7" y="12" width="2.6" height="7"/><rect x="16.4" y="12" width="2.6" height="7"/><rect x="4" y="19" width="16" height="1.6" rx="0.3"/>',
+  /*
+   * 長頸鹿的頸與頭，加兩根短耳角（ZooScene 最具識別度的母題）。
+   * 耳角拉開到約 1.5–2 單位，15px 下仍能把它和問號／手杖輪廓分開；
+   * 整組平移後的 bbox 中心回到 (12, 12)，與其他六個剪影的視覺重心一致。
+   */
+  zoo: '<g transform="translate(-1 -0.5)"><path d="M9.5 20 Q9 12 13.5 9.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="15.5" cy="8" r="3"/><path d="M13.3 6.1 L11.8 4 L14.1 5.4 Z"/><path d="M16.5 5.4 L18.9 4 L17.3 6.2 Z"/></g>',
   // 穀倉五角形（FarmScene）
   farm: '<path d="M5 20 V11 L12 5 L19 11 V20 Z"/>',
   /*

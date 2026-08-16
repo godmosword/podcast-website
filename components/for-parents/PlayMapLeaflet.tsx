@@ -153,7 +153,7 @@ function AccessibleMarker({ place, selected, onSelect }: AccessibleMarkerProps) 
   const typeKey = playgroundTypeVisualKey(place.type);
 
   const icon = useMemo(() => {
-    const label = escapeAttr(`${place.city} · ${place.type} · ${place.name}`);
+    const label = escapeAttr(`${place.city}，${place.type}，${place.name}`);
     const name = escapeAttr(place.name);
     const nameHtml = selected
       ? `<span class="playMapMarkerName">${name}</span>`

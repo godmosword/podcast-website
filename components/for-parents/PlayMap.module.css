@@ -1025,6 +1025,7 @@
   /* 地圖針的固定美術色：不隨主題反轉（同 DESIGN.md 的 OSM tile 禁止 invert 精神）。 */
   --pin-glyph-ink: #34302b;
   --pin-neutral: #cfcac2;
+  --pin-rot: -45deg;
   background: transparent;
   border: none;
   overflow: visible;
@@ -1050,7 +1051,7 @@
   width: 30px;
   height: 30px;
   border-radius: 50% 50% 50% 0;
-  transform: rotate(-45deg);
+  transform: rotate(var(--pin-rot));
   background: var(--pin-color, var(--c-mint, #b7df9b));
   border: 2px solid var(--card);
   box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 22%, transparent);
@@ -1059,17 +1060,17 @@
 /*
  * 類型剪影 holder（內容由 lib/playground-type-glyph.ts 產生）。
  *
- * `.playMapPin` 帶 rotate(-45deg) 做水滴造型，子元素會一起轉。原本這裡是
+ * `.playMapPin` 帶 `var(--pin-rot)` 做水滴造型，子元素會一起轉。原本這裡是
  * 旋轉對稱的圓點所以看不出來；換成有方向性的剪影後必須反轉抵銷，否則
- * 七個母題會整組歪 45 度。reduced-motion 區塊同樣保留 pin 的 -45deg，
- * 所以這個抵銷在所有狀態下都成立。
+ * 七個母題會整組歪 45 度。抵銷值從同一個 `--pin-rot` 推導，避免日後
+ * 基礎宣告增加其他 transform 時，選中態或 reduced-motion 狀態靜默遺失。
  */
 :global(.playMapPinGlyph) {
   display: grid;
   place-items: center;
   width: 15px;
   height: 15px;
-  transform: rotate(45deg);
+  transform: rotate(calc(-1 * var(--pin-rot)));
   /*
    * 固定深墨，**不隨主題翻轉**（登記於 DESIGN.md play-map 段的固定美術色）。
    * 針色 --c-* 在日夜皆為中高明度，兩個看似自然的選擇都不到 WCAG 1.4.11 的 3:1：
@@ -1134,7 +1135,7 @@
  * box-shadow 跟隨 border-radius 的水滴輪廓，視覺結果幾乎相同且無離屏面。
  */
 :global(.playMapMarkerButton[aria-pressed="true"] .playMapPin) {
-  transform: rotate(-45deg);
+  transform: rotate(var(--pin-rot));
   box-shadow: 0 3px 6px color-mix(in srgb, var(--ink) 30%, transparent);
 }
 
@@ -1351,7 +1352,7 @@
 
   /* 旋轉保留（水滴造型與 glyph 抵銷都靠它）；陰影是靜態狀態指示，不是動畫，故不清除。 */
   :global(.playMapMarkerButton[aria-pressed="true"] .playMapPin) {
-    transform: rotate(-45deg);
+    transform: rotate(var(--pin-rot));
   }
 
   :global(.playMapMarkerButton:active),

@@ -31,15 +31,19 @@ describe("PlayMap.module.css map-chip 用量", () => {
   });
 
   /*
-   * 針的水滴造型靠 .playMapPin 的 rotate(-45deg)，子元素會一起轉。
-   * glyph 換成有方向性的剪影後，少了這個抵銷，七個母題會整組歪 45 度。
+   * 針的水滴造型與 glyph 抵銷必須共用同一個旋轉來源，避免日後只改到
+   * 基礎宣告時，選中態或 reduced-motion 狀態靜默遺失抵銷。
    */
-  it("剪影 holder 反轉抵銷水滴旋轉", () => {
+  it("剪影 holder 以 SSOT 反轉抵銷水滴旋轉", () => {
     expect(css).toMatch(
-      /:global\(\.playMapPin\)\s*\{[^}]*transform:\s*rotate\(-45deg\)/,
+      /:global\(\.playMapMarkerHost\)\s*\{[^}]*--pin-rot:\s*-45deg/,
     );
     expect(css).toMatch(
-      /:global\(\.playMapPinGlyph\)\s*\{[^}]*transform:\s*rotate\(45deg\)/,
+      /:global\(\.playMapPin\)\s*\{[^}]*transform:\s*rotate\(var\(--pin-rot\)\)/,
     );
+    expect(css).toMatch(
+      /:global\(\.playMapPinGlyph\)\s*\{[^}]*transform:\s*rotate\(calc\(-1 \* var\(--pin-rot\)\)\)/,
+    );
+    expect(css).not.toMatch(/rotate\(-45deg\)|rotate\(45deg\)/);
   });
 });
