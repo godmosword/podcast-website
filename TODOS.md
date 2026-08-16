@@ -49,6 +49,12 @@
 - [x] 層接 LOD＋關巡邏＋稀有跨島  `ddeed40`
 - [x] Art Bible §12.8／TODOS 對齊  `8ce39f6`
 
+### 本輪已完成（2026-08-16）
+
+| ID | 說明 |
+|----|------|
+| polish(pages): 角色圖鑑／親子指南拿掉 SiteHeader hero，改緊湊頁首；家長工具上移、Threads 改細長 callout | 見本 commit |
+
 ### 本輪已完成（2026-08-15）
 
 | ID | 說明 |

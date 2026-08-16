@@ -91,4 +91,12 @@ describe("repository architecture", () => {
       expect(text, path).not.toMatch(/export\s+\*\s+from/);
     }
   });
+
+  it("角色圖鑑與親子指南不掛 SiteHeader 行銷 hero", () => {
+    for (const file of ["app/characters/page.tsx", "app/for-parents/page.tsx"]) {
+      const src = readFileSync(join(ROOT, file), "utf8");
+      expect(src, file).not.toContain("SiteHeader");
+      expect(src, file).not.toContain("hero-home");
+    }
+  });
 });

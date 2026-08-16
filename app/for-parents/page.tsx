@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
-import SiteHeader from "@/components/SiteHeader";
 import JsonLd from "@/components/JsonLd";
 import ParentCoListenSection from "@/components/for-parents/ParentCoListenSection";
 import {
@@ -50,7 +49,6 @@ export default function ForParentsPage() {
           { name: "親子指南", url: "/for-parents" },
         ])}
       />
-      <SiteHeader />
 
       <header className={styles.header}>
         <p className={styles.eyebrow}>親子指南</p>
@@ -58,32 +56,6 @@ export default function ForParentsPage() {
         <p className={styles.lede}>
           適合年齡、故事內容、更新方式與代表性集數，一頁看完。
         </p>
-      </header>
-
-      {threads?.url ? (
-        <section
-          className={`${styles.answerSection} ${styles.threadsSection}`}
-          aria-labelledby="threads-heading"
-        >
-          <h2 id="threads-heading">育兒小筆記</h2>
-          <p>
-            站外的日常短筆記：共讀心得、車車冷知識與錄音幕後，更新比官網零碎但更即時。
-          </p>
-          <a
-            className={styles.threadsLink}
-            href={threads.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="到 Threads 看育兒小筆記（另開視窗）"
-          >
-            另開 Threads →
-          </a>
-        </section>
-      ) : null}
-
-      <section className={styles.answerSection} aria-labelledby="podcast-heading">
-        <h2 id="podcast-heading">有哪些適合 3–6 歲的中文車車 Podcast？</h2>
-        <p>{faqs[0].answer}</p>
         <dl className={styles.facts}>
           <div>
             <dt>目前集數</dt>
@@ -102,30 +74,7 @@ export default function ForParentsPage() {
             <dd>{facts.syncCadence}</dd>
           </div>
         </dl>
-      </section>
-
-      <section className={styles.answerSection} aria-labelledby="what-heading">
-        <h2 id="what-heading">車車遊樂園是什麼？</h2>
-        <p>{faqs[1].answer}</p>
-        <p>
-          官網把每集整理成可分享的故事頁：封面、播放入口與故事大綱；共讀提問與家長延伸集中在本頁下方。
-        </p>
-      </section>
-
-      <section className={styles.answerSection} aria-labelledby="listen-heading">
-        <h2 id="listen-heading">如何陪孩子一起聽？</h2>
-        <p>{faqs[2].answer}</p>
-        <ul className={styles.steps}>
-          <li>先讓孩子從封面或車種挑一集，降低選擇壓力。</li>
-          <li>播放時可以短暫停下來，請孩子說說角色現在的感覺。</li>
-          <li>聽完再回到生活經驗，例如洗手、合作、認識新朋友或勇敢求助。</li>
-        </ul>
-      </section>
-
-      <section className={styles.answerSection} aria-labelledby="update-heading">
-        <h2 id="update-heading">車車遊樂園多久更新？</h2>
-        <p>{faqs[3].answer}</p>
-      </section>
+      </header>
 
       <section className={styles.toolSection} aria-labelledby="parent-tools-heading">
         <h2 id="parent-tools-heading" className={styles.toolSectionTitle}>
@@ -159,6 +108,57 @@ export default function ForParentsPage() {
             </Link>
           </article>
         </div>
+      </section>
+
+      {threads?.url ? (
+        <section
+          className={styles.threadsCallout}
+          aria-labelledby="threads-heading"
+        >
+          <div>
+            <h2 id="threads-heading">育兒小筆記</h2>
+            <p>
+              站外的日常短筆記：共讀心得、車車冷知識與錄音幕後，更新比官網零碎但更即時。
+            </p>
+          </div>
+          <a
+            className={styles.threadsLink}
+            href={threads.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="到 Threads 看育兒小筆記（另開視窗）"
+          >
+            另開 Threads →
+          </a>
+        </section>
+      ) : null}
+
+      <section className={styles.answerSection} aria-labelledby="podcast-heading">
+        <h2 id="podcast-heading">有哪些適合 3–6 歲的中文車車 Podcast？</h2>
+        <p>{faqs[0].answer}</p>
+      </section>
+
+      <section className={styles.answerSection} aria-labelledby="what-heading">
+        <h2 id="what-heading">車車遊樂園是什麼？</h2>
+        <p>{faqs[1].answer}</p>
+        <p>
+          官網把每集整理成可分享的故事頁：封面、播放入口與故事大綱；共讀提問與家長延伸集中在本頁下方。
+        </p>
+      </section>
+
+      <section className={styles.answerSection} aria-labelledby="listen-heading">
+        <h2 id="listen-heading">如何陪孩子一起聽？</h2>
+        <p>{faqs[2].answer}</p>
+        <ul className={styles.steps}>
+          <li>先讓孩子從封面或車種挑一集，降低選擇壓力。</li>
+          <li>播放時可以短暫停下來，請孩子說說角色現在的感覺。</li>
+          <li>聽完再回到生活經驗，例如洗手、合作、認識新朋友或勇敢求助。</li>
+        </ul>
+      </section>
+
+      <section className={styles.answerSection} aria-labelledby="update-heading">
+        <h2 id="update-heading">車車遊樂園多久更新？</h2>
+        <p>{faqs[3].answer}</p>
       </section>
 
       <section className={styles.storySection} aria-labelledby="episodes-heading">

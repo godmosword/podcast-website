@@ -3,7 +3,6 @@ import { getCharacters } from "@/data/characters";
 import CharacterCatalogGrid from "@/components/characters/CharacterCatalogGrid";
 import JsonLd from "@/components/JsonLd";
 import SiteFooter from "@/components/SiteFooter";
-import SiteHeader from "@/components/SiteHeader";
 import {
   breadcrumbListJsonLd,
   characterCreativeWorkJsonLd,
@@ -58,9 +57,8 @@ export default function CharactersPage() {
           { name: "角色圖鑑", url: "/characters" },
         ])}
       />
-      <SiteHeader />
 
-      <section className={styles.hero} aria-labelledby="characters-title">
+      <header className={styles.header}>
         <p className={styles.eyebrow}>車車遊樂園原創角色</p>
         <h1 id="characters-title" className={styles.title}>
           角色圖鑑
@@ -68,7 +66,8 @@ export default function CharactersPage() {
         <p className={styles.intro}>
           認識車車遊樂園的原創角色：車種、個性與出場故事。聽完故事就會認識新朋友！
         </p>
-      </section>
+        <p className={styles.meta}>{characters.length} 位角色</p>
+      </header>
 
       <CharacterCatalogGrid characters={characters} />
 

@@ -1,6 +1,6 @@
 .main {
   min-height: 100vh;
-  padding: calc(22px + var(--safe-top)) calc(20px + var(--safe-right))
+  padding: calc(18px + var(--safe-top)) calc(20px + var(--safe-right))
     calc(42px + var(--safe-bottom)) calc(20px + var(--safe-left));
   background: linear-gradient(
     180deg,
@@ -13,20 +13,21 @@
 
 .header,
 .answerSection,
-.storySection {
+.storySection,
+.threadsCallout,
+.toolSection {
   width: min(920px, 100%);
   margin-inline: auto;
 }
 
 .header {
-  margin-top: var(--space-6);
   margin-bottom: var(--space-6);
 }
 
 .eyebrow {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   color: var(--accent-ink);
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   font-weight: 800;
 }
 
@@ -34,22 +35,22 @@
   max-width: 760px;
   margin: 0;
   color: var(--ink);
-  font-size: clamp(2.2rem, 6vw, 3.2rem);
+  font-size: var(--fs-h1);
   font-weight: 800;
-  line-height: 1.12;
+  line-height: 1.2;
 }
 
 .lede {
   max-width: 720px;
-  margin: 18px 0 0;
+  margin: 10px 0 0;
   color: var(--ink-soft);
-  font-size: 1.08rem;
-  line-height: 1.8;
+  font-size: 1rem;
+  line-height: 1.7;
 }
 
 .answerSection,
 .storySection {
-  margin-top: var(--space-8);
+  margin-top: var(--space-6);
   padding: var(--space-6);
   border: 1px solid var(--hairline);
   border-radius: var(--radius-lg);
@@ -73,17 +74,39 @@
   line-height: 1.78;
 }
 
-/* 育兒小筆記（Threads 外連）：與 .answerSection 同語言，靠左側色條輕量區隔。 */
-.threadsSection {
+.threadsCallout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  padding: 12px 16px;
+  border: 1px solid var(--hairline);
   border-left: 4px solid var(--warm-accent);
+  border-radius: var(--radius-md);
+  background: var(--warm-chip-bg);
+}
+
+.threadsCallout h2 {
+  margin: 0;
+  color: var(--warm-heading);
+  font-size: 1.05rem;
+  line-height: 1.35;
+}
+
+.threadsCallout p {
+  margin: 4px 0 0;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  line-height: 1.6;
 }
 
 .threadsLink {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  margin-top: 12px;
-  padding: 10px 18px;
+  padding: 8px 16px;
   border: 1px solid var(--warm-accent);
   border-radius: 999px;
   color: var(--accent-ink);
@@ -94,7 +117,7 @@
 
 .threadsLink:hover,
 .threadsLink:focus-visible {
-  background: var(--warm-chip-bg);
+  background: var(--warm-surface);
 }
 
 .threadsLink:active {
@@ -187,21 +210,6 @@
   font-weight: 900;
 }
 
-@media (max-width: 768px) {
-  .main {
-    padding-inline: calc(14px + var(--safe-left));
-  }
-
-  .title {
-    font-size: 2.35rem;
-  }
-
-  .facts,
-  .storyGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 .storyTitle {
   display: block;
   margin-top: 6px;
@@ -212,9 +220,7 @@
 }
 
 .toolSection {
-  width: min(920px, 100%);
-  margin-top: var(--space-8);
-  margin-inline: auto;
+  margin-top: 0;
 }
 
 .toolSectionTitle {
@@ -288,6 +294,15 @@
 }
 
 @media (max-width: 768px) {
+  .main {
+    padding-inline: calc(14px + var(--safe-left));
+  }
+
+  .facts,
+  .storyGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .toolGrid {
     grid-template-columns: 1fr;
   }
@@ -297,5 +312,9 @@
   .facts,
   .storyGrid {
     grid-template-columns: 1fr;
+  }
+
+  .threadsCallout {
+    align-items: flex-start;
   }
 }

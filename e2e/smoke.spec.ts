@@ -175,6 +175,34 @@ test("繽紛樂園（Block Drop）頁面可載入", async ({ page }) => {
   await expect(page.getByRole("progressbar")).toBeVisible();
 });
 
+test("角色圖鑑與親子指南不含內頁 hero", async ({ page, request }) => {
+  for (const path of ["/characters", "/for-parents"]) {
+    const response = await request.get(path);
+    expect(response.ok()).toBeTruthy();
+    const html = await response.text();
+    expect(html).not.toContain("hero-home");
+  }
+
+  await page.goto("/characters");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "角色圖鑑" }),
+  ).toBeVisible();
+  await expect(page.getByText(/\d+ 位角色/)).toBeVisible();
+
+  await page.goto("/for-parents");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "中文車車故事，陪孩子安心聽" }),
+  ).toBeVisible();
+  const tools = page.getByRole("heading", { name: "家長工具" });
+  const podcastFaq = page.getByRole("heading", {
+    name: "有哪些適合 3–6 歲的中文車車 Podcast？",
+  });
+  await expect(tools).toBeVisible();
+  const toolsBox = await tools.boundingBox();
+  const podcastBox = await podcastFaq.boundingBox();
+  expect(toolsBox?.y).toBeLessThan(podcastBox?.y ?? Number.POSITIVE_INFINITY);
+});
+
 test("家庭儀表板頁面可載入", async ({ page }) => {
   await page.goto("/for-parents/dashboard");
   const main = page.getByRole("main");
