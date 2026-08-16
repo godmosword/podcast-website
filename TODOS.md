@@ -54,6 +54,11 @@
 | ID | 說明 |
 |----|------|
 | polish(pages): 角色圖鑑／親子指南拿掉 SiteHeader hero，改緊湊頁首；家長工具上移、Threads 改細長 callout | `b790677` |
+| refactor(for-parents): play-map 針旋轉建 `--pin-rot` SSOT，補 museum 基座、zoo 耳角、`aria-label` 分隔符 | `eb57176` |
+| test(data): 修掉逼出「場內有…」尾句的 tips 契約（73 筆全中、47 筆依賴尾句），並擋佔位字串 | `6a7d39f` |
+| feat(for-parents): play-map 休園標記（`status`）、17 筆家長筆記改寫、嘉義 9 筆（13 縣市 82 處） | `e4f7076` |
+| fix(for-parents): 覆蓋不計休園場館，補桃園第 9 筆（祥儀機器人夢工廠）恢復 Wave 1 達標 | `b1bf63c` |
+| docs(editorial): `tips` 品質標準取代字數門檻，記錄 CRITICAL-1 決議與 56 筆改寫 backlog | 見本 commit |
 
 ### 本輪已完成（2026-08-15）
 
@@ -65,7 +70,7 @@
 | fix(config): play-map 定位解封（`Permissions-Policy` 改 `geolocation=(self)`；原 `()` 讓「離我最近」線上全失效） | 見本 commit |
 | perf(for-parents): play-map 網址同步改 History API（每次篩選少一次 ~51KB RSC 往返，5 個 prop-sync effect 併為 1） | `bf8b841` |
 | docs(agent): 補 slug 對照表 SSOT 缺口（新增 grok CLI 備援列＝`grok-4.6`）、備援觸發含認證失敗、契約測試改無條件斷言 | `fd65c16` |
-| feat(for-parents): play-map 地圖針改色相＋剪影雙重編碼（七類型母題對齊卡片 plate，固定深墨過 WCAG 3:1） | 見本 commit |
+| feat(for-parents): play-map 地圖針改色相＋剪影雙重編碼（七類型母題對齊卡片 plate，固定深墨過 WCAG 3:1） | `a724197` |
 
 ### 本輪已完成（2026-08-14）
 
