@@ -466,6 +466,15 @@ describe("PlayMap", () => {
     ).toBe(matched.length);
   });
 
+  it("每筆地點都有以 id 對應的 DOM 錨點，且包含場館名稱", () => {
+    render(<PlayMap />);
+    const place = listPlaygrounds()[0];
+    const anchor = document.getElementById(place.id);
+
+    expect(anchor).toBeTruthy();
+    expect(anchor?.textContent).toContain(place.name);
+  });
+
   it("0 筆的類型 chip 隱藏", () => {
     render(<PlayMap initialCity="台北市" />);
     openFilters();

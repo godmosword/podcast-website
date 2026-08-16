@@ -19,8 +19,14 @@ vi.mock("leaflet/dist/leaflet.css", () => ({}));
  * divIcon 原本是 `() => ({})` 的黑洞，等於針的 HTML（aria-label、aria-pressed、
  * 類型剪影）完全沒有測試在守。改成 spy 以便斷言標記內容。
  */
-const { divIconSpy } = vi.hoisted(() => ({
+type MarkerSpyProps = {
+  position?: unknown;
+  zIndexOffset?: number;
+};
+
+const { divIconSpy, markerSpy } = vi.hoisted(() => ({
   divIconSpy: vi.fn<(options?: { html?: string }) => object>(() => ({})),
+  markerSpy: vi.fn<(props: MarkerSpyProps) => void>(() => {}),
 }));
 
 vi.mock("leaflet", () => {
@@ -49,7 +55,10 @@ vi.mock("react-leaflet", () => ({
   MapContainer: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="map-container">{children}</div>
   ),
-  Marker: () => null,
+  Marker: (props: MarkerSpyProps) => {
+    markerSpy(props);
+    return null;
+  },
   TileLayer: () => null,
   ZoomControl: () => null,
   useMap: () => mapState.current,
@@ -130,6 +139,7 @@ describe("PlayMapLeaflet FitBounds", () => {
   beforeEach(() => {
     fitBounds.mockClear();
     setView.mockClear();
+    markerSpy.mockClear();
     mapState.current = mapStub;
     vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
       cb(0);
@@ -230,5 +240,33 @@ describe("PlayMapLeaflet FitBounds", () => {
         `<span class="playMapPinGlyph">${playgroundTypeGlyphSvg(key)}</span>`,
       );
     }
+  });
+
+  it("選中針的 zIndexOffset 為 1000，其餘為 0", () => {
+    const places = listPlaygrounds().slice(0, 3);
+    const selected = places[1];
+    expect(selected).toBeDefined();
+    if (!selected) return;
+
+    render(
+      <PlayMapLeaflet
+        {...leafletProps({ places, selectedId: selected.id })}
+      />,
+    );
+
+    const offsetsByPosition = new Map(
+      markerSpy.mock.calls.map(([props]) => [
+        JSON.stringify(props.position),
+        props.zIndexOffset,
+      ]),
+    );
+    expect(offsetsByPosition).toEqual(
+      new Map(
+        places.map((place) => [
+          JSON.stringify([place.lat, place.lng]),
+          place.id === selected.id ? 1000 : 0,
+        ]),
+      ),
+    );
   });
 });

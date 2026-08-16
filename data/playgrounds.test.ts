@@ -129,6 +129,12 @@ describe("playgrounds sidecar", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
+  it("id 可作為全域唯一且合法的 HTML fragment identifier", () => {
+    const ids = listPlaygrounds().map((item) => item.id);
+    expect(ids.every((id) => /^[A-Za-z][A-Za-z0-9_-]*$/.test(id))).toBe(true);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
   it("getPlayground 可依 id 取得", () => {
     const first = listPlaygrounds()[0];
     expect(getPlayground(first.id)).toEqual(first);

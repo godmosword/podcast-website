@@ -31,7 +31,7 @@ export function PlayMapCard({
   const blurb = composeParentBlurb(place);
 
   return (
-    <li hidden={hidden}>
+    <li id={place.id} hidden={hidden}>
       <article
         className={[styles.card, selected ? styles.cardSelected : ""]
           .filter(Boolean)

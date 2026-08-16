@@ -180,6 +180,7 @@ function AccessibleMarker({ place, selected, onSelect }: AccessibleMarkerProps) 
       position={[place.lat, place.lng]}
       icon={icon}
       keyboard={false}
+      zIndexOffset={selected ? 1000 : 0}
       eventHandlers={{
         click: (event) => {
           const target = event.originalEvent.target;
