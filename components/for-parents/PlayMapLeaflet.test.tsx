@@ -3,7 +3,10 @@ import React from "react";
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { listPlaygrounds } from "@/data/playgrounds";
-import { clusterPlaygroundsByCity } from "@/lib/playground-clusters";
+import {
+  clusterPlaygroundsByCity,
+  clusterPlaygroundsByZoom,
+} from "@/lib/playground-clusters";
 import { DEFAULT_PLAY_MAP_CENTER } from "@/lib/playground-coverage";
 import { playgroundTypeGlyphSvg } from "@/lib/playground-type-glyph";
 import { playgroundTypeVisualKey } from "@/lib/playground-type-visual";
@@ -22,6 +25,7 @@ vi.mock("leaflet/dist/leaflet.css", () => ({}));
 type MarkerSpyProps = {
   position?: unknown;
   zIndexOffset?: number;
+  eventHandlers?: Record<string, (event: never) => void>;
 };
 
 const { divIconSpy, markerSpy } = vi.hoisted(() => ({
@@ -42,10 +46,29 @@ vi.mock("leaflet", () => {
 
 const fitBounds = vi.fn();
 const setView = vi.fn();
+const mapOn = vi.fn();
+const mapOff = vi.fn();
+type MapBoundsStub = {
+  contains: (point: unknown) => boolean;
+  getSouth: () => number;
+  getWest: () => number;
+  getNorth: () => number;
+  getEast: () => number;
+};
 
 const mapStub = {
   fitBounds,
   setView,
+  getBounds: vi.fn((): MapBoundsStub => ({
+    contains: () => false,
+    getSouth: () => 24,
+    getWest: () => 120,
+    getNorth: () => 26,
+    getEast: () => 122,
+  })),
+  getZoom: vi.fn(() => 11),
+  on: mapOn,
+  off: mapOff,
   invalidateSize: vi.fn(),
 };
 
@@ -75,6 +98,10 @@ function leafletProps(
     points: places.map((place) => [place.lat, place.lng]),
     emptyCenter: DEFAULT_PLAY_MAP_CENTER,
     selectedId: null,
+    hoveredPlaceId: null,
+    hoverCorrelationEnabled: true,
+    onHover: vi.fn(),
+    onBlur: vi.fn(),
     onSelect: vi.fn(),
     reduceMotion: true,
     active: true,
@@ -82,6 +109,10 @@ function leafletProps(
     cityClusters: clusterPlaygroundsByCity(places),
     onSelectCity: vi.fn(),
     userLatLng: null,
+    viewportZoom: null,
+    preserveViewport: false,
+    onViewportSettled: vi.fn(),
+    resizeRequest: 0,
     splitLayout: true,
     nearMeCamera: false,
     ...overrides,
@@ -139,7 +170,19 @@ describe("PlayMapLeaflet FitBounds", () => {
   beforeEach(() => {
     fitBounds.mockClear();
     setView.mockClear();
+    mapStub.invalidateSize.mockClear();
     markerSpy.mockClear();
+    mapStub.getBounds.mockReset();
+    mapStub.getBounds.mockReturnValue({
+      contains: () => false,
+      getSouth: () => 24,
+      getWest: () => 120,
+      getNorth: () => 26,
+      getEast: () => 122,
+    });
+    mapStub.getZoom.mockReturnValue(11);
+    mapOn.mockClear();
+    mapOff.mockClear();
     mapState.current = mapStub;
     vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
       cb(0);
@@ -160,6 +203,19 @@ describe("PlayMapLeaflet FitBounds", () => {
     rerender(
       <PlayMapLeaflet {...leafletProps({ onSelect: vi.fn() })} />,
     );
+    expect(fitBounds).toHaveBeenCalledTimes(1);
+  });
+
+  it("mobile results sheet snap 變更時只要求 Leaflet 重算尺寸", () => {
+    const { rerender } = render(
+      <PlayMapLeaflet {...leafletProps({ resizeRequest: 0 })} />,
+    );
+    expect(mapStub.invalidateSize).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <PlayMapLeaflet {...leafletProps({ resizeRequest: 1 })} />,
+    );
+    expect(mapStub.invalidateSize).toHaveBeenCalledTimes(2);
     expect(fitBounds).toHaveBeenCalledTimes(1);
   });
 
@@ -200,6 +256,25 @@ describe("PlayMapLeaflet FitBounds", () => {
     expect(fitBounds).toHaveBeenCalledTimes(3);
   });
 
+  it("選中 marker 已在目前 bounds 時不重複移動鏡頭", () => {
+    const selected = samplePlaces[0];
+    expect(selected).toBeDefined();
+    if (!selected) return;
+
+    const { rerender } = render(<PlayMapLeaflet {...leafletProps()} />);
+    expect(fitBounds).toHaveBeenCalledTimes(1);
+    mapStub.getBounds.mockReturnValue({
+      contains: () => true,
+      getSouth: () => 24,
+      getWest: () => 120,
+      getNorth: () => 26,
+      getEast: () => 122,
+    });
+
+    rerender(<PlayMapLeaflet {...leafletProps({ selectedId: selected.id })} />);
+    expect(fitBounds).toHaveBeenCalledTimes(1);
+  });
+
   it("nearMeCamera 鏡頭只框使用者位置＋最近 N 筆", () => {
     const places = listPlaygrounds().slice(0, 20);
     const user = { lat: places[0]?.lat ?? 25, lng: places[0]?.lng ?? 121 };
@@ -221,6 +296,115 @@ describe("PlayMapLeaflet FitBounds", () => {
     expect(boundsArg[0].points[0]).toEqual([user.lat, user.lng]);
   });
 
+  it("全台 zoom 由 city aggregate 轉 spatial cluster，再到 individual", () => {
+    const places = [
+      { ...samplePlaces[0], id: "cluster-a", lat: 25.02, lng: 121.52 },
+      { ...samplePlaces[1], id: "cluster-b", lat: 25.04, lng: 121.54 },
+      { ...samplePlaces[2], id: "single-c", lat: 24.8, lng: 120.96 },
+    ];
+    const { rerender } = render(
+      <PlayMapLeaflet
+        {...leafletProps({ places, clusterMode: true, viewportZoom: 8 })}
+      />,
+    );
+    expect(markerSpy.mock.calls).toHaveLength(
+      clusterPlaygroundsByCity(places).length,
+    );
+
+    markerSpy.mockClear();
+    divIconSpy.mockClear();
+    rerender(
+      <PlayMapLeaflet
+        {...leafletProps({ places, clusterMode: true, viewportZoom: 11 })}
+      />,
+    );
+    expect(
+      divIconSpy.mock.calls.some((call) =>
+        call[0]?.html?.includes("playMapSpatialClusterButton"),
+      ),
+    ).toBe(true);
+
+    markerSpy.mockClear();
+    rerender(
+      <PlayMapLeaflet
+        {...leafletProps({ places, clusterMode: true, viewportZoom: 13 })}
+      />,
+    );
+    expect(markerSpy.mock.calls).toHaveLength(places.length);
+    expect(clusterPlaygroundsByZoom(places, 11).some((cluster) => cluster.count > 1)).toBe(
+      true,
+    );
+  });
+
+  it("spatial cluster click 只聚焦 contained places，不開 Sheet 或選景點", () => {
+    const places = [
+      { ...samplePlaces[0], id: "cluster-a", lat: 25.02, lng: 121.52 },
+      { ...samplePlaces[1], id: "cluster-b", lat: 25.04, lng: 121.54 },
+      { ...samplePlaces[2], id: "single-c", lat: 24.8, lng: 120.96 },
+    ];
+    const onSelect = vi.fn();
+    const onSelectCity = vi.fn();
+    render(
+      <PlayMapLeaflet
+        {...leafletProps({
+          places,
+          clusterMode: true,
+          viewportZoom: 11,
+          onSelect,
+          onSelectCity,
+        })}
+      />,
+    );
+    const clusterMarker = markerSpy.mock.calls.find(([props]) =>
+      props.eventHandlers?.click &&
+      JSON.stringify(props.position) !== JSON.stringify([places[2]?.lat, places[2]?.lng]),
+    )?.[0];
+    expect(clusterMarker?.eventHandlers?.click).toBeTypeOf("function");
+
+    clusterMarker?.eventHandlers?.click?.(undefined as never);
+    expect(fitBounds).toHaveBeenCalled();
+    expect(onSelect).not.toHaveBeenCalled();
+    expect(onSelectCity).not.toHaveBeenCalled();
+  });
+
+  it("selected place 在 zoom-out 進入 cluster 後仍不被 Leaflet 清除", () => {
+    const places = [
+      { ...samplePlaces[0], id: "cluster-a", lat: 25.02, lng: 121.52 },
+      { ...samplePlaces[1], id: "cluster-b", lat: 25.04, lng: 121.54 },
+    ];
+    const selectedId = places[0]?.id ?? "cluster-a";
+    const { rerender } = render(
+      <PlayMapLeaflet
+        {...leafletProps({
+          places,
+          selectedId,
+          clusterMode: true,
+          viewportZoom: 13,
+        })}
+      />,
+    );
+    expect(
+      markerSpy.mock.calls.some(
+        ([props]) => props.zIndexOffset === 1000,
+      ),
+    ).toBe(true);
+
+    markerSpy.mockClear();
+    rerender(
+      <PlayMapLeaflet
+        {...leafletProps({
+          places,
+          selectedId,
+          clusterMode: true,
+          viewportZoom: 8,
+        })}
+      />,
+    );
+    expect(markerSpy.mock.calls.some(([props]) => props.zIndexOffset === 1000)).toBe(
+      false,
+    );
+  });
+
   it("每根針都帶對應類型的剪影，且 glyph 掛在 pin 內", () => {
     divIconSpy.mockClear();
     const places = listPlaygrounds().slice(0, 6);
@@ -234,12 +418,51 @@ describe("PlayMapLeaflet FitBounds", () => {
     for (const [index, place] of places.entries()) {
       const html = htmls[index] ?? "";
       const key = playgroundTypeVisualKey(place.type);
+      expect(html).toContain(`data-playground-id="${place.id}"`);
       expect(html).toContain(`data-type="${key}"`);
       // 剪影必須包在 playMapPinGlyph 內——它負責反轉抵銷水滴的 rotate(-45deg)
       expect(html).toContain(
         `<span class="playMapPinGlyph">${playgroundTypeGlyphSvg(key)}</span>`,
       );
     }
+  });
+
+  it("marker hover 回報對應 id，且只更新狀態不重建 icon", () => {
+    const place = samplePlaces[0];
+    expect(place).toBeDefined();
+    if (!place) return;
+    const onHover = vi.fn();
+    const onBlur = vi.fn();
+    divIconSpy.mockClear();
+
+    const { rerender } = render(
+      <PlayMapLeaflet
+        {...leafletProps({ onHover, onBlur, hoveredPlaceId: null })}
+      />,
+    );
+    const initialIconCount = divIconSpy.mock.calls.filter(([options]) =>
+      options?.html?.includes("playMapMarkerButton"),
+    ).length;
+    const marker = markerSpy.mock.calls.find(
+      ([props]) => JSON.stringify(props.position) === JSON.stringify([place.lat, place.lng]),
+    )?.[0];
+    expect(marker?.eventHandlers?.mouseover).toBeTypeOf("function");
+    expect(marker?.eventHandlers?.mouseout).toBeTypeOf("function");
+
+    marker?.eventHandlers?.mouseover?.(undefined as never);
+    marker?.eventHandlers?.mouseout?.(undefined as never);
+    expect(onHover).toHaveBeenCalledWith(place.id);
+    expect(onBlur).toHaveBeenCalledWith(place.id);
+
+    rerender(
+      <PlayMapLeaflet
+        {...leafletProps({ onHover, onBlur, hoveredPlaceId: place.id })}
+      />,
+    );
+    const nextIconCount = divIconSpy.mock.calls.filter(([options]) =>
+      options?.html?.includes("playMapMarkerButton"),
+    ).length;
+    expect(nextIconCount).toBe(initialIconCount);
   });
 
   it("選中針的 zIndexOffset 為 1000，其餘為 0", () => {
@@ -250,7 +473,11 @@ describe("PlayMapLeaflet FitBounds", () => {
 
     render(
       <PlayMapLeaflet
-        {...leafletProps({ places, selectedId: selected.id })}
+        {...leafletProps({
+          places,
+          selectedId: selected.id,
+          hoveredPlaceId: selected.id,
+        })}
       />,
     );
 
@@ -268,5 +495,27 @@ describe("PlayMapLeaflet FitBounds", () => {
         ]),
       ),
     );
+  });
+
+  it("city aggregate marker 不接 individual card hover synchronization", () => {
+    const onHover = vi.fn();
+    render(
+      <PlayMapLeaflet
+        {...leafletProps({
+          clusterMode: true,
+          onHover,
+          hoveredPlaceId: samplePlaces[0]?.id ?? null,
+        })}
+      />,
+    );
+
+    expect(markerSpy.mock.calls).toHaveLength(
+      clusterPlaygroundsByCity(samplePlaces).length,
+    );
+    for (const [props] of markerSpy.mock.calls) {
+      expect(props.eventHandlers?.mouseover).toBeUndefined();
+      expect(props.eventHandlers?.mouseout).toBeUndefined();
+    }
+    expect(onHover).not.toHaveBeenCalled();
   });
 });
