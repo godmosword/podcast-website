@@ -72,6 +72,13 @@ describe("playground-coverage", () => {
     }
   });
 
+  it("保留 96 筆原始資料，覆蓋統計只計 95 筆可造訪資料", () => {
+    const places = listPlaygrounds();
+    const open = places.filter((place) => place.status !== "temporarily-closed");
+    expect(places).toHaveLength(96);
+    expect(open).toHaveLength(95);
+  });
+
   it("休園場館確實被排除在覆蓋之外", () => {
     const closed = listPlaygrounds().filter(
       (place) => place.status === "temporarily-closed",

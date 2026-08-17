@@ -9,13 +9,47 @@ import {
   type Playground,
   type PlaygroundType,
 } from "@/data/playgrounds";
+import {
+  isEasyParking,
+  isHighEnergy,
+  isOutdoorPlace,
+  isRainyDayFriendly,
+  isStrollerFriendly,
+} from "@/lib/playground-context";
 
 export type PlaygroundFilter = {
   city?: string;
   indoorOnly?: boolean;
+  outdoorOnly?: boolean;
   freeOnly?: boolean;
+  rainyDayOnly?: boolean;
+  parkingOnly?: boolean;
+  strollerFriendlyOnly?: boolean;
+  highEnergyOnly?: boolean;
   type?: PlaygroundType;
+  bounds?: PlaygroundBounds;
 };
+
+/** Leaflet live/committed viewport 的 serializable geographic snapshot。 */
+export type PlaygroundBounds = {
+  south: number;
+  west: number;
+  north: number;
+  east: number;
+};
+
+export function isPlaygroundWithinBounds(
+  place: Playground,
+  bounds: PlaygroundBounds,
+): boolean {
+  const withinLatitude = place.lat >= bounds.south && place.lat <= bounds.north;
+  if (!withinLatitude) return false;
+  if (bounds.west <= bounds.east) {
+    return place.lng >= bounds.west && place.lng <= bounds.east;
+  }
+  // 台灣目前不會跨 antimeridian，但保留這個分支讓 predicate 完整。
+  return place.lng >= bounds.west || place.lng <= bounds.east;
+}
 
 export type CoverageSummary = {
   city: string;
@@ -23,12 +57,29 @@ export type CoverageSummary = {
 };
 
 export function filterPlaygrounds(filter: PlaygroundFilter = {}): Playground[] {
-  const { city, indoorOnly, freeOnly, type } = filter;
+  const {
+    city,
+    indoorOnly,
+    outdoorOnly,
+    freeOnly,
+    rainyDayOnly,
+    parkingOnly,
+    strollerFriendlyOnly,
+    highEnergyOnly,
+    type,
+    bounds,
+  } = filter;
   return listPlaygrounds().filter((place) => {
     if (city !== undefined && place.city !== city) return false;
     if (indoorOnly && !place.indoor) return false;
+    if (outdoorOnly && !isOutdoorPlace(place)) return false;
     if (freeOnly && !place.free) return false;
+    if (rainyDayOnly && !isRainyDayFriendly(place)) return false;
+    if (parkingOnly && !isEasyParking(place)) return false;
+    if (strollerFriendlyOnly && !isStrollerFriendly(place)) return false;
+    if (highEnergyOnly && !isHighEnergy(place)) return false;
     if (type !== undefined && place.type !== type) return false;
+    if (bounds && !isPlaygroundWithinBounds(place, bounds)) return false;
     return true;
   });
 }
@@ -69,7 +120,12 @@ export type PlayMapQuery = {
   city: string | null;
   type: PlaygroundType | null;
   indoorOnly: boolean;
+  outdoorOnly: boolean;
   freeOnly: boolean;
+  rainyDayOnly: boolean;
+  parkingOnly: boolean;
+  strollerFriendlyOnly: boolean;
+  highEnergyOnly: boolean;
   view: PlayMapView;
 };
 
@@ -77,7 +133,12 @@ export type RawPlayMapParams = {
   city?: string | string[];
   type?: string | string[];
   indoor?: string | string[];
+  outdoor?: string | string[];
   free?: string | string[];
+  rain?: string | string[];
+  parking?: string | string[];
+  stroller?: string | string[];
+  energy?: string | string[];
   view?: string | string[];
 };
 
@@ -103,7 +164,12 @@ export function parsePlayMapQuery(params: RawPlayMapParams): PlayMapQuery {
         ? (rawType as PlaygroundType)
         : null,
     indoorOnly: first(params.indoor) === "1",
+    outdoorOnly: first(params.outdoor) === "1",
     freeOnly: first(params.free) === "1",
+    rainyDayOnly: first(params.rain) === "1",
+    parkingOnly: first(params.parking) === "1",
+    strollerFriendlyOnly: first(params.stroller) === "1",
+    highEnergyOnly: first(params.energy) === "1",
     view,
   };
 }
@@ -114,7 +180,12 @@ export function buildPlayMapQueryString(query: PlayMapQuery): string {
   if (query.city) params.set("city", query.city);
   if (query.type) params.set("type", query.type);
   if (query.indoorOnly) params.set("indoor", "1");
+  if (query.outdoorOnly) params.set("outdoor", "1");
   if (query.freeOnly) params.set("free", "1");
+  if (query.rainyDayOnly) params.set("rain", "1");
+  if (query.parkingOnly) params.set("parking", "1");
+  if (query.strollerFriendlyOnly) params.set("stroller", "1");
+  if (query.highEnergyOnly) params.set("energy", "1");
   if (query.view === "map") params.set("view", "map");
   return params.toString();
 }

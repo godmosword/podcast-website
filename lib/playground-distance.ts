@@ -3,6 +3,9 @@
  * 開車分鐘為市區啟發式，非即時路況。
  */
 import type { Playground } from "@/data/playgrounds";
+import { isStrollerFriendly } from "@/lib/playground-context";
+
+export { isStrollerFriendly } from "@/lib/playground-context";
 
 export type LatLng = { lat: number; lng: number };
 
@@ -11,10 +14,6 @@ const EARTH_RADIUS_KM = 6371;
 const MINUTES_PER_KM = 2.8;
 const MIN_DRIVE_MINUTES = 1;
 const MAX_DRIVE_MINUTES = 90;
-
-const STROLLER_NEGATIVE =
-  /推車(?:慎選|不宜|不便)|不宜推車|推車困難|階梯多|坡道多/;
-const STROLLER_POSITIVE = /推車友善|推車可行|好推車|可推車/;
 
 function toRad(deg: number): number {
   return (deg * Math.PI) / 180;
@@ -89,24 +88,6 @@ export function pickNearest(
   const count = Number.isFinite(n) ? Math.floor(n) : 0;
   if (count <= 0) return [];
   return sortPlaygrounds(places, user).slice(0, count);
-}
-
-type StrollerFields = Pick<Playground, "tags" | "facilities" | "tips">;
-
-function placeTextBlob(place: StrollerFields): string {
-  return [
-    ...place.tags,
-    ...place.facilities,
-    place.tips ?? "",
-  ].join(" ");
-}
-
-/** 啟發式：明確正面且無風險語才顯示「推車友善」。 */
-export function isStrollerFriendly(place: StrollerFields): boolean {
-  const blob = placeTextBlob(place);
-  if (!blob) return false;
-  if (STROLLER_NEGATIVE.test(blob)) return false;
-  return STROLLER_POSITIVE.test(blob);
 }
 
 export function formatAgeRangeLabel(ageRange: [number, number]): string {

@@ -1,10 +1,18 @@
 import { describe, expect, test } from "vitest";
 import { listPlaygrounds } from "@/data/playgrounds";
 import {
+  isEasyParking,
+  isHighEnergy,
+  isOutdoorPlace,
+  isRainyDayFriendly,
+  isStrollerFriendly,
+} from "@/lib/playground-context";
+import {
   buildPlayMapQueryString,
   countByCity,
   countByType,
   filterPlaygrounds,
+  isPlaygroundWithinBounds,
   listCoverageSummary,
   parsePlayMapQuery,
 } from "@/lib/playgrounds-query";
@@ -23,7 +31,12 @@ describe("play-map 網址狀態", () => {
       city: "新北市",
       type: "公園",
       indoorOnly: true,
+      outdoorOnly: false,
       freeOnly: true,
+      rainyDayOnly: false,
+      parkingOnly: false,
+      strollerFriendlyOnly: false,
+      highEnergyOnly: false,
       view: "map",
     });
   });
@@ -33,7 +46,12 @@ describe("play-map 網址狀態", () => {
       city: null,
       type: null,
       indoorOnly: false,
+      outdoorOnly: false,
       freeOnly: false,
+      rainyDayOnly: false,
+      parkingOnly: false,
+      strollerFriendlyOnly: false,
+      highEnergyOnly: false,
       view: "cards",
     });
   });
@@ -50,7 +68,12 @@ describe("play-map 網址狀態", () => {
       city: null,
       type: null,
       indoorOnly: false,
+      outdoorOnly: false,
       freeOnly: false,
+      rainyDayOnly: false,
+      parkingOnly: false,
+      strollerFriendlyOnly: false,
+      highEnergyOnly: false,
       view: "cards",
     });
   });
@@ -66,7 +89,12 @@ describe("play-map 網址狀態", () => {
         city: null,
         type: null,
         indoorOnly: false,
+        outdoorOnly: false,
         freeOnly: false,
+        rainyDayOnly: false,
+        parkingOnly: false,
+        strollerFriendlyOnly: false,
+        highEnergyOnly: false,
         view: "cards",
       }),
     ).toBe("");
@@ -78,7 +106,12 @@ describe("play-map 網址狀態", () => {
         city: "台北市",
         type: null,
         indoorOnly: false,
+        outdoorOnly: false,
         freeOnly: false,
+        rainyDayOnly: false,
+        parkingOnly: false,
+        strollerFriendlyOnly: false,
+        highEnergyOnly: false,
         view: "cards",
       }),
     ).toBe("city=%E5%8F%B0%E5%8C%97%E5%B8%82");
@@ -89,13 +122,131 @@ describe("play-map 網址狀態", () => {
       city: "台中市",
       type: "博物館" as const,
       indoorOnly: true,
+      outdoorOnly: false,
       freeOnly: false,
+      rainyDayOnly: false,
+      parkingOnly: false,
+      strollerFriendlyOnly: false,
+      highEnergyOnly: false,
       view: "map" as const,
     };
     const qs = buildPlayMapQueryString(original);
     expect(
       parsePlayMapQuery(Object.fromEntries(new URLSearchParams(qs))),
     ).toEqual(original);
+  });
+
+  test("parsePlayMapQuery 讀取 contextual filter 參數", () => {
+    expect(
+      parsePlayMapQuery({
+        outdoor: "1",
+        rain: "1",
+        parking: "1",
+        stroller: "1",
+        energy: "1",
+      }),
+    ).toMatchObject({
+      outdoorOnly: true,
+      rainyDayOnly: true,
+      parkingOnly: true,
+      strollerFriendlyOnly: true,
+      highEnergyOnly: true,
+    });
+  });
+
+  test("buildPlayMapQueryString 可分享 contextual filter 且保留舊參數", () => {
+    expect(
+      buildPlayMapQueryString({
+        city: "桃園市",
+        type: "公園",
+        indoorOnly: false,
+        outdoorOnly: true,
+        freeOnly: true,
+        rainyDayOnly: false,
+        parkingOnly: true,
+        strollerFriendlyOnly: true,
+        highEnergyOnly: true,
+        view: "cards",
+      }),
+    ).toBe(
+      "city=%E6%A1%83%E5%9C%92%E5%B8%82&type=%E5%85%AC%E5%9C%92&outdoor=1&free=1&parking=1&stroller=1&energy=1",
+    );
+  });
+});
+
+describe("contextual playground filters", () => {
+  const cases = [
+    ["outdoorOnly", { outdoorOnly: true }, isOutdoorPlace],
+    ["rainyDayOnly", { rainyDayOnly: true }, isRainyDayFriendly],
+    ["parkingOnly", { parkingOnly: true }, isEasyParking],
+    ["strollerFriendlyOnly", { strollerFriendlyOnly: true }, isStrollerFriendly],
+    ["highEnergyOnly", { highEnergyOnly: true }, isHighEnergy],
+  ] as const;
+
+  for (const [name, filter, predicate] of cases) {
+    test(`${name} 只回傳符合條件的地點`, () => {
+      const result = filterPlaygrounds(filter);
+      expect(result.length, name).toBeGreaterThan(0);
+      expect(result.every(predicate), name).toBe(true);
+    });
+  }
+
+  test("contextual filters 使用 AND semantics", () => {
+    const result = filterPlaygrounds({
+      city: "桃園市",
+      freeOnly: true,
+      outdoorOnly: true,
+      parkingOnly: true,
+    });
+    expect(result.length).toBeGreaterThan(0);
+    expect(
+      result.every(
+        (place) =>
+          place.city === "桃園市" &&
+          place.free &&
+          isOutdoorPlace(place) &&
+          isEasyParking(place),
+      ),
+    ).toBe(true);
+  });
+
+  test("city/type counts 會套用 contextual filters", () => {
+    const filter = {
+      outdoorOnly: true,
+      parkingOnly: true,
+      highEnergyOnly: true,
+    };
+    const result = filterPlaygrounds(filter);
+    const byCity = countByCity(filter);
+    const byType = countByType(filter);
+    expect([...byCity.values()].reduce((sum, count) => sum + count, 0)).toBe(
+      result.length,
+    );
+    expect([...byType.values()].reduce((sum, count) => sum + count, 0)).toBe(
+      result.length,
+    );
+  });
+
+  test("viewport bounds 與 structured filters 使用 AND semantics", () => {
+    const bounds = {
+      south: 24.9,
+      west: 120.9,
+      north: 25.2,
+      east: 121.7,
+    };
+    const result = filterPlaygrounds({ freeOnly: true, bounds });
+    expect(result.length).toBeGreaterThan(0);
+    expect(
+      result.every(
+        (place) =>
+          place.free &&
+          isPlaygroundWithinBounds(place, bounds),
+      ),
+    ).toBe(true);
+    const byCity = countByCity({ freeOnly: true, bounds });
+    expect([...byCity.values()].reduce((sum, count) => sum + count, 0)).toBe(
+      result.length,
+    );
   });
 });
 
