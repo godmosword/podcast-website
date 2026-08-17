@@ -464,7 +464,7 @@ describe("PlayMap", () => {
     expect(results.getAttribute("data-snap")).toBe("half");
 
     const handle = within(results).getByRole("button", {
-      name: "收合景點列表",
+      name: "展開更多景點",
     });
     fireEvent.click(handle);
     expect(results.getAttribute("data-snap")).toBe("expanded");

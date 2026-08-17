@@ -53,7 +53,7 @@ export function MobileMapResultsSheet({
     snap === "collapsed"
       ? "展開景點列表"
       : snap === "half"
-        ? "收合景點列表"
+        ? "展開更多景點"
         : "收合景點列表";
   const summary =
     matched.length === 0

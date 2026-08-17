@@ -262,7 +262,7 @@ test.describe("親子遊樂地圖", () => {
     await expect(results).toHaveAttribute("data-snap", "half");
 
     await results
-      .getByRole("button", { name: "收合景點列表" })
+      .getByRole("button", { name: "展開更多景點" })
       .click();
     await expect(results).toHaveAttribute("data-snap", "expanded");
     await results

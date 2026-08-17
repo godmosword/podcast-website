@@ -465,6 +465,31 @@ describe("PlayMapLeaflet FitBounds", () => {
     expect(nextIconCount).toBe(initialIconCount);
   });
 
+  it("點到 marker 內的 SVG glyph 時，focus trigger 仍回到 marker button", () => {
+    const place = samplePlaces[0];
+    expect(place).toBeDefined();
+    if (!place) return;
+
+    const onSelect = vi.fn();
+    render(<PlayMapLeaflet {...leafletProps({ onSelect })} />);
+    const marker = markerSpy.mock.calls.find(
+      ([props]) => JSON.stringify(props.position) === JSON.stringify([place.lat, place.lng]),
+    )?.[0];
+    expect(marker?.eventHandlers?.click).toBeTypeOf("function");
+
+    const button = document.createElement("button");
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    button.append(path);
+    document.body.append(button);
+
+    marker?.eventHandlers?.click?.({
+      originalEvent: { target: path },
+    } as never);
+
+    expect(onSelect).toHaveBeenCalledWith(place.id, button);
+    button.remove();
+  });
+
   it("選中針的 zIndexOffset 為 1000，其餘為 0", () => {
     const places = listPlaygrounds().slice(0, 3);
     const selected = places[1];

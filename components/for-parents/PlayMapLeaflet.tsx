@@ -255,8 +255,10 @@ type AccessibleMarkerProps = {
 
 function markerTrigger(event: L.LeafletMouseEvent): HTMLElement {
   const target = event.originalEvent.target;
-  if (target instanceof HTMLElement) {
-    return target.closest("button") ?? target;
+  if (target instanceof Element) {
+    const button = target.closest("button");
+    if (button instanceof HTMLElement) return button;
+    if (target instanceof HTMLElement) return target;
   }
   return document.body;
 }
