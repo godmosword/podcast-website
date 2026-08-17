@@ -8,15 +8,23 @@ export function PlayMapControlBar({
   geoStatus,
   freeOnly,
   indoorOnly,
+  outdoorOnly,
+  rainyDayOnly,
+  parkingOnly,
+  strollerFriendlyOnly,
+  highEnergyOnly,
   activeFilterCount,
   onNearMe,
   onToggleFree,
   onToggleIndoor,
+  onSelectEnvironment,
+  onToggleRainyDay,
+  onToggleParking,
+  onToggleStrollerFriendly,
+  onToggleHighEnergy,
   filtersOpen,
   onToggleFilters,
   filterSummaryLabel,
-  canClearFilters,
-  onClearFilters,
   cities,
   city,
   cityCounts,
@@ -33,28 +41,53 @@ export function PlayMapControlBar({
       <section className={styles.intentSection} aria-label="快速意圖與篩選">
         <p className={styles.intentLead}>今天想去哪？</p>
         <div className={styles.controlRow}>
-          <div className={styles.intentGrid} role="group" aria-label="意圖快捷">
+          <div
+            className={styles.intentGrid}
+            role="group"
+            aria-label="意圖快捷"
+          >
             <button
               type="button"
               className={styles.intentChip}
               aria-pressed={nearMeActive}
               aria-busy={geoStatus === "pending"}
+              data-quick-filter="nearby"
               onClick={onNearMe}
             >
-              離我最近
+              附近
+            </button>
+            <button
+              type="button"
+              className={styles.intentChip}
+              aria-pressed={rainyDayOnly}
+              data-quick-filter="rain"
+              onClick={onToggleRainyDay}
+            >
+              雨天
             </button>
             <button
               type="button"
               className={styles.intentChip}
               aria-pressed={freeOnly}
+              data-quick-filter="free"
               onClick={onToggleFree}
             >
-              免費放電
+              免費
+            </button>
+            <button
+              type="button"
+              className={styles.intentChip}
+              aria-pressed={highEnergyOnly}
+              data-quick-filter="energy"
+              onClick={onToggleHighEnergy}
+            >
+              放電
             </button>
             <button
               type="button"
               className={styles.intentChip}
               aria-pressed={indoorOnly}
+              data-quick-filter="indoor"
               onClick={onToggleIndoor}
             >
               室內
@@ -87,20 +120,6 @@ export function PlayMapControlBar({
           </p>
         ) : null}
       </section>
-
-      <div className={styles.filterSummary} aria-live="polite">
-        <span className={styles.filterSummaryKicker}>目前結果</span>
-        <p className={styles.filterSummaryText}>{filterSummaryLabel}</p>
-        {canClearFilters ? (
-          <button
-            type="button"
-            className={styles.clearFilters}
-            onClick={onClearFilters}
-          >
-            清除條件
-          </button>
-        ) : null}
-      </div>
 
       <form
         id="play-map-filter-panel"
@@ -177,6 +196,66 @@ export function PlayMapControlBar({
                 </button>
               );
             })}
+          </div>
+        </div>
+
+        <div className={styles.facetRow}>
+          <span className={styles.facetLabel}>親子條件</span>
+          <div
+            className={styles.chipGroup}
+            role="group"
+            aria-label="進階親子條件"
+          >
+            <button
+              type="button"
+              className={`${styles.chip} ${styles.chipCompact}`}
+              aria-pressed={parkingOnly}
+              onClick={onToggleParking}
+            >
+              好停車
+            </button>
+            <button
+              type="button"
+              className={`${styles.chip} ${styles.chipCompact}`}
+              aria-pressed={strollerFriendlyOnly}
+              onClick={onToggleStrollerFriendly}
+            >
+              推車 OK
+            </button>
+          </div>
+        </div>
+
+        <div className={styles.facetRow}>
+          <span className={styles.facetLabel}>環境</span>
+          <div
+            className={styles.chipGroup}
+            role="group"
+            aria-label="室內外環境"
+          >
+            <button
+              type="button"
+              className={`${styles.chip} ${styles.chipCompact}`}
+              aria-pressed={!indoorOnly && !outdoorOnly}
+              onClick={() => onSelectEnvironment("all")}
+            >
+              不限
+            </button>
+            <button
+              type="button"
+              className={`${styles.chip} ${styles.chipCompact}`}
+              aria-pressed={indoorOnly}
+              onClick={() => onSelectEnvironment("indoor")}
+            >
+              室內
+            </button>
+            <button
+              type="button"
+              className={`${styles.chip} ${styles.chipCompact}`}
+              aria-pressed={outdoorOnly}
+              onClick={() => onSelectEnvironment("outdoor")}
+            >
+              戶外
+            </button>
           </div>
         </div>
       </form>

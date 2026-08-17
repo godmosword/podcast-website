@@ -4,11 +4,13 @@ const PHONE = { width: 390, height: 844 };
 
 /** 等待 PlayMap 意圖列與結果摘要就緒（Leaflet 僅地圖 tab 才載入）。 */
 async function waitForPlayMapReady(page: import("@playwright/test").Page) {
-  await expect(page.getByRole("button", { name: "離我最近" })).toBeVisible({
+  await expect(page.getByRole("button", { name: "附近" })).toBeVisible({
     timeout: 8_000,
   });
   await expect(
-    page.getByText(/→ \d+ 個地點|目前沒有符合條件的地點/),
+    page.getByText(
+      /全台資料庫 · \d+ 個地點|\d+ 個適合親子出遊的地點|這個區域有 \d+ 個地方|目前沒有符合條件的地點/,
+    ),
   ).toBeVisible({ timeout: 5_000 });
 }
 
@@ -44,18 +46,29 @@ test.describe("親子遊樂地圖", () => {
     await waitForPlayMapReady(page);
 
     await expect(
-      page.getByText("先點離我最近，或直接點下面卡片看怎麼帶。"),
+      page.getByText("選附近或縣市，再挑一個今天適合的地方。"),
     ).toBeVisible();
-    await expect(page.getByText(/已收錄 \d+ 縣市、共 \d+ 處/)).toBeVisible();
-    await expect(page.getByRole("button", { name: "免費放電" })).toBeVisible();
+    await expect(
+      page.getByText(/全台資料 \d+ 筆 · 目前可造訪 \d+ 處 · 暫停營業 \d+ 筆/),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "免費" })).toBeVisible();
     // 無篩選時摘要只有「全部」一段（不會有 ` · `），既有斷言誤寫成必有第二段。
-    await expect(page.getByText(/全部 → \d+ 個地點/)).toBeVisible();
+    await expect(page.getByText(/全台資料庫 · \d+ 個地點/)).toBeVisible();
 
     const cardsPanel = page.locator("#play-map-panel-cards");
     const firstCardButton = cardsPanel
       .getByRole("button", { name: /查看詳情/ })
       .first();
     await expect(firstCardButton).toBeVisible({ timeout: 5_000 });
+    const mobileNav = cardsPanel
+      .locator('a[aria-label^="導航前往"]')
+      .first();
+    await expect(mobileNav).toBeHidden();
+    const becameFocused = await mobileNav.evaluate((element) => {
+      (element as HTMLElement).focus();
+      return document.activeElement === element;
+    });
+    expect(becameFocused).toBe(false);
 
     await firstCardButton.click();
 
@@ -72,17 +85,39 @@ test.describe("親子遊樂地圖", () => {
     await expect(sheet).toHaveCount(0);
   });
 
-  test("免費放電意圖可縮小結果", async ({ page }) => {
+  test("免費 contextual filter 可縮小結果", async ({ page }) => {
     test.setTimeout(30_000);
     await page.goto("/for-parents/play-map");
     await waitForPlayMapReady(page);
 
-    await page.getByRole("button", { name: "免費放電" }).click();
-    await expect(page.getByText(/免費 · .+ → \d+ 個地點|全部 · 免費 →/)).toBeVisible();
+    await page.getByRole("button", { name: "免費" }).click();
+    await expect(page.getByText(/全台資料庫 · \d+ 個地點/)).toBeVisible();
     await expect(page).toHaveURL(/free=1/);
   });
 
-  test("「離我最近」可取得定位並顯示車程（P0 回歸）", async ({
+  test("有縣市 scope 時顯示 editorial pick，點擊沿用既有 full detail", async ({
+    page,
+  }) => {
+    test.setTimeout(30_000);
+    await page.setViewportSize(PHONE);
+    await page.goto("/for-parents/play-map?city=%E6%A1%83%E5%9C%92%E5%B8%82");
+    await waitForPlayMapReady(page);
+
+    await expect(page.getByText("⭐ 媽米先幫你看")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 3, name: "⭐ 媽米先幫你看" }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: /桃園市立兒童美術館，看看這個/ }).click();
+
+    const sheet = page.getByRole("region", {
+      name: "桃園市立兒童美術館 詳情",
+    });
+    await expect(sheet).toHaveAttribute("data-variant", "full");
+    await expect(sheet.getByText("帶小孩時")).toBeVisible();
+    await sheet.getByRole("button", { name: "關閉地點詳情" }).click();
+  });
+
+  test("「附近」可取得定位並顯示車程（P0 回歸）", async ({
     page,
     context,
   }) => {
@@ -93,7 +128,7 @@ test.describe("親子遊樂地圖", () => {
     await page.goto("/for-parents/play-map");
     await waitForPlayMapReady(page);
 
-    const nearMe = page.getByRole("button", { name: "離我最近" });
+    const nearMe = page.getByRole("button", { name: "附近" });
     await nearMe.click();
 
     await expect(nearMe).toHaveAttribute("aria-pressed", "true");
@@ -119,11 +154,28 @@ test.describe("親子遊樂地圖", () => {
     await page.goto("/for-parents/play-map");
     await waitForPlayMapReady(page);
 
-    await page.getByRole("button", { name: "免費放電" }).click();
+    await page.getByRole("button", { name: "免費" }).click();
     await expect(page).toHaveURL(/free=1/);
     await page.waitForTimeout(1_000);
 
     expect(rscRequests).toEqual([]);
+  });
+
+  test("contextual quick filters 可組合並寫入網址", async ({ page }) => {
+    test.setTimeout(30_000);
+    await page.goto("/for-parents/play-map");
+    await waitForPlayMapReady(page);
+
+    const rain = page.getByRole("button", { name: "雨天" });
+    await rain.click();
+    await page.getByRole("button", { name: /篩選/ }).click();
+    const outdoor = page.getByRole("button", { name: "戶外" });
+    await outdoor.click();
+
+    await expect(rain).toHaveAttribute("aria-pressed", "true");
+    await expect(outdoor).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByText(/全台資料庫 · \d+ 個地點/)).toBeVisible();
+    await expect(page).toHaveURL(/outdoor=1&rain=1/);
   });
 
   test("地圖 tab 才載入 Leaflet（行動互斥）", async ({ page }) => {
@@ -164,7 +216,15 @@ test.describe("親子遊樂地圖", () => {
       return id;
     });
 
+    await page.waitForFunction(
+      () => !document.querySelector(".leaflet-zoom-anim"),
+      undefined,
+      { timeout: 10_000 },
+    );
     await page.locator(".leaflet-control-zoom-in").click();
+    await expect(
+      page.getByRole("button", { name: "搜尋此區域" }),
+    ).toBeVisible();
     await page.waitForFunction(
       () => !document.querySelector(".leaflet-zoom-anim"),
       undefined,
@@ -183,6 +243,73 @@ test.describe("親子遊樂地圖", () => {
     expect(leafletIdAgain).toBe(leafletId);
   });
 
+  test("mobile map results bottom sheet 可 snap、選卡片並保留地圖操作", async ({
+    page,
+  }) => {
+    test.setTimeout(45_000);
+    await page.setViewportSize(PHONE);
+    await page.goto("/for-parents/play-map");
+    await waitForPlayMapReady(page);
+
+    await expect(page.locator(".leaflet-container")).toHaveCount(0);
+    await expect(page.getByRole("region", { name: "地圖結果" })).toHaveCount(0);
+
+    await page.getByRole("tab", { name: "地圖" }).click();
+    const map = page.locator(".leaflet-container");
+    await expect(map).toBeVisible({ timeout: 15_000 });
+    const results = page.getByRole("region", { name: "地圖結果" });
+    await expect(results.getByText("⭐ 媽米先幫你看")).toHaveCount(0);
+    await expect(results).toHaveAttribute("data-snap", "half");
+
+    await results
+      .getByRole("button", { name: "收合景點列表" })
+      .click();
+    await expect(results).toHaveAttribute("data-snap", "expanded");
+    await results
+      .getByRole("button", { name: "收合景點列表" })
+      .click();
+    await expect(results).toHaveAttribute("data-snap", "collapsed");
+    await results
+      .getByRole("button", { name: "展開景點列表" })
+      .click();
+    await expect(results).toHaveAttribute("data-snap", "half");
+
+    const firstResult = results
+      .getByRole("button", { name: /查看詳情/ })
+      .first();
+    await expect(firstResult).toBeVisible();
+    await firstResult.click();
+    const placeSheet = page.getByRole("region", { name: /詳情$/ });
+    await expect(placeSheet).toBeVisible();
+    await expect(placeSheet.getByRole("button", { name: "更多" })).toBeVisible();
+    await expect(placeSheet).toHaveAttribute("data-variant", "compact");
+    await placeSheet.getByRole("button", { name: "關閉地點詳情" }).click();
+    await expect(results).toHaveAttribute("data-snap", "half");
+
+    await page.waitForFunction(
+      () => !document.querySelector(".leaflet-zoom-anim"),
+      undefined,
+      { timeout: 10_000 },
+    );
+    const box = await map.boundingBox();
+    expect(box).toBeTruthy();
+    if (!box) return;
+    await page.mouse.move(box.x + box.width * 0.28, box.y + 24);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.28, box.y + 52);
+    await page.mouse.up();
+
+    const searchArea = page.getByRole("button", { name: "搜尋此區域" });
+    await expect(searchArea).toBeVisible({ timeout: 10_000 });
+    await searchArea.click();
+    await expect(
+      results.getByText(/這個區域有 \d+ 個地方|這個區域目前沒有符合條件的景點/),
+    ).toBeVisible();
+    await expect(
+      results.getByRole("button", { name: "看全台" }),
+    ).toBeVisible();
+  });
+
   test("桌面並排直接載入地圖", async ({ page }) => {
     test.setTimeout(45_000);
     await page.goto("/for-parents/play-map");
@@ -191,6 +318,79 @@ test.describe("親子遊樂地圖", () => {
     await expect(page.locator(".leaflet-container")).toBeVisible({
       timeout: 15_000,
     });
+    await expect(
+      page.getByRole("button", { name: "搜尋此區域" }),
+    ).toHaveCount(0);
+  });
+
+  test("搜尋此區域 commit 後約束結果，清除後恢復", async ({ page }) => {
+    test.setTimeout(45_000);
+    await page.goto("/for-parents/play-map");
+    await waitForPlayMapReady(page);
+    await expect(page.locator(".leaflet-container")).toBeVisible({
+      timeout: 15_000,
+    });
+
+    await page.waitForFunction(
+      () => !document.querySelector(".leaflet-zoom-anim"),
+      undefined,
+      { timeout: 10_000 },
+    );
+    await page.locator(".leaflet-control-zoom-in").click();
+    const searchArea = page.getByRole("button", { name: "搜尋此區域" });
+    await expect(searchArea).toBeVisible();
+    await searchArea.click();
+
+    await expect(page.getByText(/這個區域有 \d+ 個地方|這個區域目前沒有符合條件的景點/)).toBeVisible();
+    await expect(searchArea).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "看全台" }).first(),
+    ).toBeVisible();
+
+    await page.getByRole("button", { name: "免費" }).click();
+    await expect(page.getByText(/這個區域有 \d+ 個地方|這個區域目前沒有符合條件的景點/)).toBeVisible();
+
+    await page.getByRole("button", { name: "看全台" }).first().click();
+    await expect(page.getByText(/\d+ 個適合親子出遊的地點|全台資料庫 · \d+ 個地點/)).toBeVisible();
+  });
+
+  test("桌面 card 與 individual marker 互相同步，marker 維持 compact Sheet", async ({
+    page,
+  }) => {
+    test.setTimeout(45_000);
+    await page.goto("/for-parents/play-map?city=%E5%8F%B0%E5%8C%97%E5%B8%82");
+    await waitForPlayMapReady(page);
+    await expect(page.getByRole("tab", { name: "地圖" })).toHaveCount(0);
+
+    const card = page.locator("#play-map-panel-cards li:not([hidden])").first();
+    const placeId = await card.getAttribute("id");
+    expect(placeId).toBeTruthy();
+    if (!placeId) return;
+    await expect(card.getByRole("link", { name: /導航前往/ })).toBeVisible();
+    const marker = page.locator(
+      `.playMapMarkerButton[data-playground-id="${placeId}"]`,
+    );
+    await expect(marker).toBeVisible({ timeout: 15_000 });
+
+    await card.locator("article").hover();
+    await expect(marker).toHaveAttribute("data-hovered", "true");
+
+    await marker.hover();
+    await expect(card).toHaveAttribute("data-card-state", "hover-correlated");
+
+    await page.mouse.move(10, 10);
+    await expect(marker).toHaveAttribute("data-hovered", "false");
+    await marker.focus();
+    await expect(card).toHaveAttribute("data-card-state", "hover-correlated");
+
+    await marker.click();
+    await expect(marker).toHaveAttribute("aria-pressed", "true");
+    await expect(card).toHaveAttribute("data-card-state", "selected");
+    await expect(
+      page.getByRole("region", { name: /詳情$/ }).getByRole("button", {
+        name: "更多",
+      }),
+    ).toBeVisible();
   });
 
   test("手機精簡 sheet 有 coverageNote 時導航仍在 viewport 內", async ({

@@ -26,7 +26,7 @@ export function PlayMapToolbar({
           </span>
         </div>
         <p className={styles.howToStart}>{howToStart}</p>
-        <p className={styles.coverage}>{coverageLabel}</p>
+        {coverageLabel ? <p className={styles.coverage}>{coverageLabel}</p> : null}
       </div>
 
       {hideViewTabs ? null : (
