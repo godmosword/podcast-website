@@ -5,13 +5,15 @@
  * 「diff 來自拆檔」還是「diff 來自功能變更」。改這裡等同改契約，
  * 需回到 Plan 重新過審。
  */
-import type { KeyboardEvent, RefObject } from "react";
+import type { KeyboardEvent, PointerEvent, RefObject } from "react";
 import type { Playground, PlaygroundType } from "@/data/playgrounds";
 import type { LatLng } from "@/lib/playground-distance";
 import type { PlayMapView } from "@/lib/playgrounds-query";
 
 export type BrowseView = PlayMapView;
 export type SheetVariant = "compact" | "full";
+export type MobileMapResultsSnap = "collapsed" | "half" | "expanded";
+export type EnvironmentFilter = "all" | "indoor" | "outdoor";
 export type SelectSource = "card" | "map";
 export type GeoStatus = "idle" | "pending" | "ready" | "denied";
 
@@ -24,7 +26,7 @@ export const SHEET_BG_HINT_ID = "play-map-sheet-bg-hint";
 export const VISIBLE_STEP = 24;
 
 /**
- * 「離我最近」未選縣市時，鏡頭只框使用者位置＋距離最近的這幾筆。
+ * 「附近」未選縣市時，鏡頭只框使用者位置＋距離最近的這幾筆。
  * 地圖針仍畫篩選全集，避免 73 根針把 fitBounds 拉成全台。
  */
 export const NEAR_ME_FIT_COUNT = 8;
@@ -67,16 +69,24 @@ export type PlayMapControlBarProps = {
   geoStatus: GeoStatus;
   freeOnly: boolean;
   indoorOnly: boolean;
-  /** 顯示目前有幾個進階條件已套用；離我最近不算進階篩選。 */
+  outdoorOnly: boolean;
+  rainyDayOnly: boolean;
+  parkingOnly: boolean;
+  strollerFriendlyOnly: boolean;
+  highEnergyOnly: boolean;
+  /** 顯示目前有幾個進階條件已套用；附近不算進階篩選。 */
   activeFilterCount: number;
   onNearMe: () => void;
   onToggleFree: () => void;
   onToggleIndoor: () => void;
+  onSelectEnvironment: (next: EnvironmentFilter) => void;
+  onToggleRainyDay: () => void;
+  onToggleParking: () => void;
+  onToggleStrollerFriendly: () => void;
+  onToggleHighEnergy: () => void;
   filtersOpen: boolean;
   onToggleFilters: () => void;
   filterSummaryLabel: string;
-  canClearFilters: boolean;
-  onClearFilters: () => void;
   cities: readonly string[];
   city: string | null;
   cityCounts: ReadonlyMap<string, number>;
@@ -91,22 +101,43 @@ export type PlayMapControlBarProps = {
 
 export type PlayMapCardProps = {
   place: Playground;
+  variant?: "default" | "mapSheet";
   selected: boolean;
+  hovered: boolean;
+  hoverCorrelationEnabled: boolean;
   hidden: boolean;
   distanceLabel: string | null;
+  onHover: (id: string) => void;
+  onBlur: (id: string) => void;
   onSelect: (id: string, trigger: HTMLElement) => void;
+  registerCardRef: (id: string, element: HTMLLIElement | null) => void;
 };
 
 export type PlayMapCardListProps = {
   matched: readonly Playground[];
   unmatched: readonly Playground[];
   selectedId: string | null;
+  hoveredPlaceId: string | null;
+  hoverCorrelationEnabled: boolean;
   userLatLng: LatLng | null;
   hasExtraFilters: boolean;
   onClearFilters: () => void;
+  viewportSearchActive: boolean;
+  onClearViewportSearch: () => void;
+  onHover: (id: string) => void;
+  onBlur: (id: string) => void;
   onSelect: (id: string, trigger: HTMLElement) => void;
+  registerCardRef: (id: string, element: HTMLLIElement | null) => void;
   /** 未選縣市且未定位時，提示先縮小範圍。 */
   showScopeHint: boolean;
+  /** 未縮小範圍時，明確說明這是全台資料庫而非個人化推薦。 */
+  catalogStatusLabel: string;
+  /** 低於主要結果摘要顯示的 coverage/editorial 狀態。 */
+  coverageLabel: string;
+  editorialPick: {
+    place: Playground;
+    reason: string;
+  } | null;
   /** 本批可見筆數；超出者收 hidden，**不得** slice 陣列。 */
   visibleCount: number;
   /** 相對於「篩選後命中數」而非全站 73，否則會出現無效按鈕。 */
@@ -125,4 +156,21 @@ export type PlayMapSheetProps = {
   onExpand: () => void;
   onShowOnMap: (id: string, trigger: HTMLElement) => void;
   panelRef: RefObject<HTMLDivElement | null>;
+};
+
+export type MobileMapResultsSheetProps = {
+  snap: MobileMapResultsSnap;
+  panelRef: RefObject<HTMLElement | null>;
+  matched: readonly Playground[];
+  selectedId: string | null;
+  userLatLng: LatLng | null;
+  nearbyActive: boolean;
+  viewportSearchActive: boolean;
+  onClearViewportSearch: () => void;
+  onSelect: (id: string, trigger: HTMLElement) => void;
+  onHandleClick: () => void;
+  onHandlePointerDown: (event: PointerEvent<HTMLButtonElement>) => void;
+  onHandlePointerMove: (event: PointerEvent<HTMLButtonElement>) => void;
+  onHandlePointerUp: (event: PointerEvent<HTMLButtonElement>) => void;
+  onHandlePointerCancel: (event: PointerEvent<HTMLButtonElement>) => void;
 };
