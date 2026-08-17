@@ -6,12 +6,18 @@
 
 ### Added
 
+- **親子遊樂地圖 PR6 editorial recommendation**：新增與景點事實資料分離的 `play-map-editorial-picks` sidecar 與 deterministic resolver；只有在附近／縣市／已提交地圖視野且至少兩筆結果時，依目前意圖、附近距離、編輯優先序與既有結果順序顯示最多一筆「媽米先幫你看」。僅出現在 mobile Card tab 與 desktop 結果欄，點擊沿用既有完整詳情互動，不改 96 筆景點資料、Leaflet、SEO 或其他頁面。
+- **親子遊樂地圖 PR5 UX subtraction**：首屏收斂為「附近／雨天／免費／放電／室內」五個主要快捷；好停車／推車 OK／室內外移入進階篩選；全台初始狀態明確標示資料庫與 coverage，行動地圖結果列預設 half，地圖卡片改開 compact preview。保留原有 query 相容性、96 筆資料、SSR hidden-card、SEO 與桌面版行為。
+- **親子遊樂地圖 mobile results bottom sheet**：行動版 Map tab 新增 collapsed／half／expanded 三段式景點結果列；沿用既有卡片與 Place Sheet 語意，拖曳只作用於把手，snap 後通知 Leaflet 重算尺寸，不改 URL／SEO／景點資料或桌面並排版面。
+- **親子遊樂地圖 contextual quick filters**：快捷列新增「附近／雨天／免費／好停車／推車 OK／放電／戶外／室內」；除「附近」外可組合、可分享並寫入短 query 參數，篩選只使用既有 normalized tags／facilities／indoor 欄位，不改動 96 筆景點資料。覆蓋統計維持 95 筆可造訪資料，休園資料仍保留在 SSR hidden-card 契約中。
 - **親子遊樂地圖一列控制＋家長筆記**：意圖與篩選收成同一列（離我最近／免費／室內＋篩選）；縣市／類型進單一面板，拿掉重複的條件 facet。H1 加上手句；卡片露出「帶小孩時」摘錄；詳情核對改年月；`tips` 對到已核對設施。
 - **親子遊樂地圖資料範圍聲明**：詳情 sheet 在「帶小孩時」之後顯示 `coverageNote`（標籤「資料範圍」）；無值不渲染。卡片名單不加，避免列表噪音。
 - **親子遊樂地圖 `mapsQuery`／`placeId`**：導航／搜尋可用選填搜尋字串覆寫，有 Place ID 時加 `destination_place_id`／`query_place_id`；仍不傳座標、免 API Key。
 
 ### Changed
 
+- **親子遊樂地圖探索基礎**：保留全台縣市 aggregate，依 zoom 轉 deterministic spatial clusters／individual markers；新增 client-only「搜尋此區域」commit／清除流程，結果以 structured filters AND committed bounds 收斂，URL／SSR／SEO／Leaflet library 不變。
+- **親子遊樂地圖卡片／地圖針互動**：桌面卡片 hover／focus 與 individual marker 互相高亮；marker click 選取對應卡片並在 desktop 名單容器內定位，沿用 full／compact Sheet 與既有 Leaflet／aggregate marker 行為。
 - **親子遊樂地圖質感改版（底圖暫停）**：字階改押 token 與 `--ink`／`--ink-soft`；頁面層 chip 改 ghost，`--map-chip*` 只留地圖 overlay；卡片改 1:1 類型 plate、距離獨立、對齊 `StoryCard` elev；夜間旗標對比與控制列改不透明底。底圖 provider 另輪決定。
 - **親子遊樂地圖 coverageNote 收尾**：詳情內文改 `--ink`（標籤維持 `--ink-soft`）；`hc-nanliao` 導航落點聲明從 `tips` 歸位到 `coverageNote`；編輯守則補 full／compact 版位與南寮範例。
 - **親子遊樂地圖具名導航與類型場景**：Google 導航／顯示位置改用頁面場館名＋縣市，不再傳 lat,lng 圖釘；卡片改 7 種手繪類型場景帶，選中地圖針顯示與名單相同的場館名。
