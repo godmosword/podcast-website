@@ -1,14 +1,17 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useRef } from "react";
+import { useCallback, useRef } from "react";
 import type { PlaygroundType } from "@/data/playgrounds";
 import type { BrowseView } from "./PlayMapContract";
 import { PlayMapCardList } from "./PlayMapCardList";
 import { PlayMapControlBar } from "./PlayMapControlBar";
 import { PlayMapSheet } from "./PlayMapSheet";
 import { PlayMapToolbar } from "./PlayMapToolbar";
+import { MobileMapResultsSheet } from "./MobileMapResultsSheet";
 import { usePlayMapFilters } from "./usePlayMapFilters";
+import { useMobileMapResultsSheet } from "./useMobileMapResultsSheet";
+import { usePlayMapViewport } from "./usePlayMapViewport";
 import styles from "./PlayMap.module.css";
 
 const PlayMapLeaflet = dynamic(() => import("./PlayMapLeaflet"), {
@@ -25,7 +28,12 @@ export type PlayMapProps = {
   initialCity?: string | null;
   initialType?: PlaygroundType | null;
   initialIndoorOnly?: boolean;
+  initialOutdoorOnly?: boolean;
   initialFreeOnly?: boolean;
+  initialRainyDayOnly?: boolean;
+  initialParkingOnly?: boolean;
+  initialStrollerFriendlyOnly?: boolean;
+  initialHighEnergyOnly?: boolean;
   initialView?: BrowseView;
 };
 
@@ -33,15 +41,30 @@ export default function PlayMap({
   initialCity = null,
   initialType = null,
   initialIndoorOnly = false,
+  initialOutdoorOnly = false,
   initialFreeOnly = false,
+  initialRainyDayOnly = false,
+  initialParkingOnly = false,
+  initialStrollerFriendlyOnly = false,
+  initialHighEnergyOnly = false,
   initialView = "cards",
 }: PlayMapProps) {
+  const viewport = usePlayMapViewport();
   const map = usePlayMapFilters({
     initialCity,
     initialType,
     initialIndoorOnly,
+    initialOutdoorOnly,
     initialFreeOnly,
+    initialRainyDayOnly,
+    initialParkingOnly,
+    initialStrollerFriendlyOnly,
+    initialHighEnergyOnly,
     initialView,
+    viewportBounds: viewport.committedSearchBounds,
+  });
+  const mobileResults = useMobileMapResultsSheet({
+    active: !map.splitLayout && map.showMap,
   });
   /**
    * 第一次需要顯示地圖後保持掛載，之後只靠 hidden。
@@ -53,14 +76,94 @@ export default function PlayMap({
   const mapMountedRef = useRef(map.showMap);
   if (map.showMap) mapMountedRef.current = true;
 
+  const cardRefs = useRef(new Map<string, HTMLLIElement>());
+  const cardPanelRef = useRef<HTMLElement>(null);
+  const registerCardRef = useCallback(
+    (id: string, element: HTMLLIElement | null) => {
+      if (element) cardRefs.current.set(id, element);
+      else cardRefs.current.delete(id);
+    },
+    [],
+  );
+  const scrollCardIntoView = useCallback(
+    (id: string) => {
+      if (!map.splitLayout) return;
+      const card = cardRefs.current.get(id);
+      const panel = cardPanelRef.current;
+      if (!card || card.hidden || !panel || panel.clientHeight <= 0) return;
+
+      const panelRect = panel.getBoundingClientRect();
+      const cardRect = card.getBoundingClientRect();
+      const currentTop = panel.scrollTop;
+      const cardTop = currentTop + cardRect.top - panelRect.top;
+      const cardBottom = currentTop + cardRect.bottom - panelRect.top;
+      const nextTop =
+        cardTop < currentTop
+          ? cardTop
+          : cardBottom > currentTop + panel.clientHeight
+            ? cardBottom - panel.clientHeight
+            : currentTop;
+      if (nextTop === currentTop) return;
+
+      if (typeof panel.scrollTo === "function") {
+        panel.scrollTo({
+          top: Math.max(0, nextTop),
+          behavior: map.reduceMotion ? "auto" : "smooth",
+        });
+      } else {
+        panel.scrollTop = Math.max(0, nextTop);
+      }
+    },
+    [map.reduceMotion, map.splitLayout],
+  );
+  const selectFromMap = map.handleSelectFromMap;
+  const selectedCity = map.city;
+  const filteredPlaces = map.filtered;
+  const unmatchedPlaces = map.unmatchedPlaces;
+  const selectCity = map.handleSelectCity;
+  const showOnMap = map.handleShowOnMap;
+  const resetViewportForMajorFilter = viewport.handleResetForMajorFilter;
+  const handleSelectFromMap = useCallback(
+    (id: string, trigger: HTMLElement) => {
+      selectFromMap(id, trigger);
+      scrollCardIntoView(id);
+    },
+    [scrollCardIntoView, selectFromMap],
+  );
+  const handleSelectCity = useCallback(
+    (nextCity: string | null) => {
+      if (nextCity !== selectedCity) resetViewportForMajorFilter();
+      selectCity(nextCity);
+    },
+    [resetViewportForMajorFilter, selectCity, selectedCity],
+  );
+  const handleShowOnMap = useCallback(
+    (id: string, trigger: HTMLElement) => {
+      if (selectedCity === null) {
+        const place = [...filteredPlaces, ...unmatchedPlaces].find(
+          (item) => item.id === id,
+        );
+        if (place) resetViewportForMajorFilter();
+      }
+      showOnMap(id, trigger);
+    },
+    [
+      filteredPlaces,
+      resetViewportForMajorFilter,
+      selectedCity,
+      showOnMap,
+      unmatchedPlaces,
+    ],
+  );
+
   return (
     <div
       className={styles.root}
       data-split={map.splitLayout ? "true" : "false"}
     >
       <PlayMapToolbar
-        howToStart="先點離我最近，或直接點下面卡片看怎麼帶。"
-        coverageLabel={map.coverageLabel}
+        howToStart="選附近或縣市，再挑一個今天適合的地方。"
+        coverageLabel=""
         browseView={map.browseView}
         onSelectView={map.handleSelectView}
         onTabKeyDown={map.handleTabKeyDown}
@@ -72,20 +175,28 @@ export default function PlayMap({
         geoStatus={map.geoStatus}
         freeOnly={map.freeOnly}
         indoorOnly={map.indoorOnly}
+        outdoorOnly={map.outdoorOnly}
+        rainyDayOnly={map.rainyDayOnly}
+        parkingOnly={map.parkingOnly}
+        strollerFriendlyOnly={map.strollerFriendlyOnly}
+        highEnergyOnly={map.highEnergyOnly}
         activeFilterCount={map.activeFilterCount}
         onNearMe={map.handleNearMe}
         onToggleFree={map.handleToggleFree}
         onToggleIndoor={map.handleToggleIndoor}
+        onToggleRainyDay={map.handleToggleRainyDay}
+        onToggleParking={map.handleToggleParking}
+        onToggleStrollerFriendly={map.handleToggleStrollerFriendly}
+        onToggleHighEnergy={map.handleToggleHighEnergy}
         filtersOpen={map.filtersOpen}
         onToggleFilters={map.handleToggleFilters}
         filterSummaryLabel={map.filterSummaryLabel}
-        canClearFilters={map.hasExtraFilters && map.filtered.length > 0}
-        onClearFilters={map.handleClearFilters}
+        onSelectEnvironment={map.handleSelectEnvironment}
         cities={map.cities}
         city={map.city}
         cityCounts={map.cityCounts}
         allCityCount={map.allCityCount}
-        onSelectCity={map.handleSelectCity}
+        onSelectCity={handleSelectCity}
         cityScrollerRef={map.cityScrollerRef}
         typeFilter={map.typeFilter}
         typeCounts={map.typeCounts}
@@ -96,6 +207,7 @@ export default function PlayMap({
       <div className={styles.content}>
         <section
           id="play-map-panel-cards"
+          ref={cardPanelRef}
           role={map.splitLayout ? "region" : "tabpanel"}
           aria-labelledby={map.splitLayout ? undefined : "play-map-tab-cards"}
           aria-label={map.splitLayout ? "地點名單" : undefined}
@@ -106,11 +218,21 @@ export default function PlayMap({
             matched={map.filtered}
             unmatched={map.unmatchedPlaces}
             selectedId={map.selectedId}
+            hoveredPlaceId={map.hoveredPlaceId}
+            hoverCorrelationEnabled={map.splitLayout}
             userLatLng={map.userLatLng}
             hasExtraFilters={map.hasExtraFilters}
             onClearFilters={map.handleClearFilters}
+            viewportSearchActive={map.viewportSearchActive}
+            onClearViewportSearch={viewport.handleClearViewportSearch}
+            onHover={map.handleHoverPlace}
+            onBlur={map.handleBlurPlace}
             onSelect={map.handleSelectFromCard}
-            showScopeHint={map.clusterMode}
+            registerCardRef={registerCardRef}
+            showScopeHint={map.clusterMode && !map.viewportSearchActive}
+            catalogStatusLabel={map.catalogStatusLabel}
+            coverageLabel={map.coverageLabel}
+            editorialPick={map.showCards ? map.editorialPick : null}
             visibleCount={map.visibleCount}
             canLoadMore={map.canLoadMore}
             visibleCountLabel={map.visibleCountLabel}
@@ -127,19 +249,57 @@ export default function PlayMap({
           hidden={!map.showMap}
           className={styles.mapShell}
         >
+          {viewport.hasPendingViewportSearch ? (
+            <button
+              type="button"
+              className={styles.viewportSearchButton}
+              onClick={viewport.handleCommitViewportSearch}
+            >
+              搜尋此區域
+            </button>
+          ) : null}
+          {!map.splitLayout && map.showMap ? (
+            <MobileMapResultsSheet
+              snap={mobileResults.snap}
+              panelRef={mobileResults.panelRef}
+              matched={map.filtered}
+              selectedId={map.selectedId}
+              userLatLng={map.userLatLng}
+              nearbyActive={map.userLatLng !== null}
+              viewportSearchActive={map.viewportSearchActive}
+              onClearViewportSearch={viewport.handleClearViewportSearch}
+              onSelect={handleSelectFromMap}
+              onHandleClick={mobileResults.onHandleClick}
+              onHandlePointerDown={mobileResults.onHandlePointerDown}
+              onHandlePointerMove={mobileResults.onHandlePointerMove}
+              onHandlePointerUp={mobileResults.onHandlePointerUp}
+              onHandlePointerCancel={mobileResults.onHandlePointerCancel}
+            />
+          ) : null}
           {mapMountedRef.current ? (
             <PlayMapLeaflet
               places={map.filtered}
               points={map.points}
               emptyCenter={map.cityCenter}
               selectedId={map.selectedId}
-              onSelect={map.handleSelectFromMap}
+              hoveredPlaceId={map.hoveredPlaceId}
+              hoverCorrelationEnabled={map.splitLayout}
+              onHover={map.handleHoverPlace}
+              onBlur={map.handleBlurPlace}
+              onSelect={handleSelectFromMap}
               reduceMotion={map.reduceMotion}
               active={map.showMap}
               clusterMode={map.clusterMode}
               cityClusters={map.cityClusters}
-              onSelectCity={map.handleSelectCity}
+              onSelectCity={handleSelectCity}
               userLatLng={map.userLatLng}
+              viewportZoom={viewport.zoom}
+              preserveViewport={
+                map.viewportSearchActive &&
+                !(map.city === null && map.userLatLng !== null)
+              }
+              onViewportSettled={viewport.handleViewportSettled}
+              resizeRequest={mobileResults.resizeEpoch}
               splitLayout={map.splitLayout}
               nearMeCamera={map.city === null && map.userLatLng !== null}
             />
@@ -154,7 +314,7 @@ export default function PlayMap({
           distanceLabel={map.selectedDistanceLabel}
           onClose={map.handleCloseSheet}
           onExpand={map.handleExpandSheet}
-          onShowOnMap={map.handleShowOnMap}
+          onShowOnMap={handleShowOnMap}
           panelRef={map.sheetRef}
         />
       ) : null}

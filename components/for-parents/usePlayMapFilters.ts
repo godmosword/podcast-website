@@ -29,6 +29,7 @@ import {
   countByCity,
   countByType,
   filterPlaygrounds,
+  type PlaygroundBounds,
   type PlayMapQuery,
 } from "@/lib/playgrounds-query";
 import {
@@ -41,10 +42,16 @@ import {
   VIEW_TABS,
   VISIBLE_STEP,
   type BrowseView,
+  type EnvironmentFilter,
   type GeoStatus,
   type SelectSource,
   type SheetVariant,
 } from "./PlayMapContract";
+import {
+  resolvePlayMapEditorialPick,
+  type PlayMapEditorialScope,
+} from "@/lib/play-map-editorial";
+import type { PlayMapEditorialIntent } from "@/data/play-map-editorial-picks";
 
 function usePrefersReducedMotion(): boolean {
   const [reduce, setReduce] = useState(false);
@@ -74,29 +81,18 @@ function useMinWidth(px: number): boolean {
   return matches;
 }
 
-function cityLabel(city: string | null): string {
-  return city ?? "全部";
-}
-
-function buildFilterSummaryParts(
-  city: string | null,
-  typeFilter: PlaygroundType | null,
-  indoorOnly: boolean,
-  freeOnly: boolean,
-): string[] {
-  const parts = [cityLabel(city)];
-  if (typeFilter) parts.push(typeFilter);
-  if (indoorOnly) parts.push("室內");
-  if (freeOnly) parts.push("免費");
-  return parts;
-}
-
 export type UsePlayMapFiltersOptions = {
   initialCity: string | null;
   initialType: PlaygroundType | null;
   initialIndoorOnly: boolean;
+  initialOutdoorOnly: boolean;
   initialFreeOnly: boolean;
+  initialRainyDayOnly: boolean;
+  initialParkingOnly: boolean;
+  initialStrollerFriendlyOnly: boolean;
+  initialHighEnergyOnly: boolean;
   initialView: BrowseView;
+  viewportBounds: PlaygroundBounds | null;
 };
 
 /**
@@ -108,12 +104,25 @@ export function usePlayMapFilters({
   initialCity,
   initialType,
   initialIndoorOnly,
+  initialOutdoorOnly,
   initialFreeOnly,
+  initialRainyDayOnly,
+  initialParkingOnly,
+  initialStrollerFriendlyOnly,
+  initialHighEnergyOnly,
   initialView,
+  viewportBounds,
 }: UsePlayMapFiltersOptions) {
   const cities = useMemo(() => listCities(), []);
   const coverage = useMemo(() => listCityCoverage(), []);
   const allPlaces = useMemo(() => listPlaygrounds(), []);
+  const catalogStatusLabel = useMemo(() => {
+    const closedCount = allPlaces.filter(
+      (place) => place.status === "temporarily-closed",
+    ).length;
+    const activeCount = allPlaces.length - closedCount;
+    return `全台資料 ${allPlaces.length} 筆 · 目前可造訪 ${activeCount} 處 · 暫停營業 ${closedCount} 筆`;
+  }, [allPlaces]);
   const reduceMotion = usePrefersReducedMotion();
   const splitLayout = useMinWidth(SPLIT_MIN_WIDTH_PX);
 
@@ -138,8 +147,16 @@ export function usePlayMapFilters({
     initialType,
   );
   const [indoorOnly, setIndoorOnly] = useState(initialIndoorOnly);
+  const [outdoorOnly, setOutdoorOnly] = useState(initialOutdoorOnly);
   const [freeOnly, setFreeOnly] = useState(initialFreeOnly);
+  const [rainyDayOnly, setRainyDayOnly] = useState(initialRainyDayOnly);
+  const [parkingOnly, setParkingOnly] = useState(initialParkingOnly);
+  const [strollerFriendlyOnly, setStrollerFriendlyOnly] = useState(
+    initialStrollerFriendlyOnly,
+  );
+  const [highEnergyOnly, setHighEnergyOnly] = useState(initialHighEnergyOnly);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [hoveredPlaceId, setHoveredPlaceId] = useState<string | null>(null);
   const [browseView, setBrowseView] = useState<BrowseView>(initialView);
   const [sheetVariant, setSheetVariant] = useState<SheetVariant>("full");
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -162,11 +179,29 @@ export function usePlayMapFilters({
     const raw = filterPlaygrounds({
       city: city ?? undefined,
       indoorOnly,
+      outdoorOnly,
       freeOnly,
+      rainyDayOnly,
+      parkingOnly,
+      strollerFriendlyOnly,
+      highEnergyOnly,
       type: typeFilter ?? undefined,
+      bounds: viewportBounds ?? undefined,
     });
     return sortPlaygrounds(raw, userLatLng);
-  }, [city, indoorOnly, freeOnly, typeFilter, userLatLng]);
+  }, [
+    city,
+    indoorOnly,
+    outdoorOnly,
+    freeOnly,
+    rainyDayOnly,
+    parkingOnly,
+    strollerFriendlyOnly,
+    highEnergyOnly,
+    typeFilter,
+    userLatLng,
+    viewportBounds,
+  ]);
 
   const matchedIds = useMemo(
     () => new Set(filtered.map((place) => place.id)),
@@ -178,15 +213,63 @@ export function usePlayMapFilters({
     [allPlaces, matchedIds],
   );
 
+  const editorialScope: PlayMapEditorialScope =
+    userLatLng !== null
+      ? "nearby"
+      : viewportBounds !== null
+        ? "viewport"
+        : city !== null
+          ? "city"
+          : "national";
+  const editorialIntents = useMemo<readonly PlayMapEditorialIntent[]>(() => {
+    const intents: PlayMapEditorialIntent[] = [];
+    if (rainyDayOnly) intents.push("rainy-day");
+    if (freeOnly) intents.push("free");
+    if (highEnergyOnly) intents.push("high-energy");
+    if (indoorOnly) intents.push("indoor");
+    if (parkingOnly) intents.push("easy-parking");
+    return intents;
+  }, [freeOnly, highEnergyOnly, indoorOnly, parkingOnly, rainyDayOnly]);
+  const editorialPick = useMemo(
+    () => {
+      const resolved = resolvePlayMapEditorialPick({
+        finalResults: filtered,
+        scope: editorialScope,
+        activeIntents: editorialIntents,
+        userLatLng,
+      });
+      return resolved
+        ? { place: resolved.place, reason: resolved.pick.reason }
+        : null;
+    },
+    [editorialIntents, editorialScope, filtered, userLatLng],
+  );
+
   /** 目前縣市＋進階開關下，各類型還剩幾筆。 */
   const typeCounts = useMemo(
     () =>
       countByType({
         city: city ?? undefined,
         indoorOnly,
+        outdoorOnly,
         freeOnly,
+        rainyDayOnly,
+        parkingOnly,
+        strollerFriendlyOnly,
+        highEnergyOnly,
+        bounds: viewportBounds ?? undefined,
       }),
-    [city, indoorOnly, freeOnly],
+    [
+      city,
+      indoorOnly,
+      outdoorOnly,
+      freeOnly,
+      rainyDayOnly,
+      parkingOnly,
+      strollerFriendlyOnly,
+      highEnergyOnly,
+      viewportBounds,
+    ],
   );
 
   const points = useMemo(
@@ -203,10 +286,24 @@ export function usePlayMapFilters({
     () =>
       countByCity({
         indoorOnly,
+        outdoorOnly,
         freeOnly,
+        rainyDayOnly,
+        parkingOnly,
+        strollerFriendlyOnly,
+        highEnergyOnly,
         type: typeFilter ?? undefined,
       }),
-    [indoorOnly, freeOnly, typeFilter],
+    [
+      indoorOnly,
+      outdoorOnly,
+      freeOnly,
+      rainyDayOnly,
+      parkingOnly,
+      strollerFriendlyOnly,
+      highEnergyOnly,
+      typeFilter,
+    ],
   );
 
   const allCityCount = useMemo(
@@ -225,19 +322,21 @@ export function usePlayMapFilters({
     return DEFAULT_PLAY_MAP_CENTER;
   }, [cityPlaces, filtered]);
 
-  const hasExtraFilters = typeFilter !== null || indoorOnly || freeOnly;
+  const hasExtraFilters =
+    typeFilter !== null ||
+    indoorOnly ||
+    outdoorOnly ||
+    freeOnly ||
+    rainyDayOnly ||
+    parkingOnly ||
+    strollerFriendlyOnly ||
+    highEnergyOnly;
 
-  const filterSummaryParts = buildFilterSummaryParts(
-    city,
-    typeFilter,
-    indoorOnly,
-    freeOnly,
-  );
-
-  const filterSummaryLabel =
-    filtered.length === 0
-      ? `${filterSummaryParts.join(" · ")} → 0 個地點`
-      : `${filterSummaryParts.join(" · ")} → ${filtered.length} 個地點`;
+  const filterSummaryLabel = viewportBounds
+    ? `這個區域有 ${filtered.length} 個地方`
+    : city === null && userLatLng === null
+      ? `全台資料庫 · ${filtered.length} 個地點`
+      : `${filtered.length} 個適合親子出遊的地點`;
 
   const syncUrl = useCallback(
     (next: Partial<PlayMapQuery>) => {
@@ -245,13 +344,30 @@ export function usePlayMapFilters({
         city,
         type: typeFilter,
         indoorOnly,
+        outdoorOnly,
         freeOnly,
+        rainyDayOnly,
+        parkingOnly,
+        strollerFriendlyOnly,
+        highEnergyOnly,
         view: browseView,
         ...next,
       });
       window.history.replaceState(null, "", qs ? `${pathname}?${qs}` : pathname);
     },
-    [city, typeFilter, indoorOnly, freeOnly, browseView, pathname],
+    [
+      city,
+      typeFilter,
+      indoorOnly,
+      outdoorOnly,
+      freeOnly,
+      rainyDayOnly,
+      parkingOnly,
+      strollerFriendlyOnly,
+      highEnergyOnly,
+      browseView,
+      pathname,
+    ],
   );
 
   const handleSelectCity = useCallback(
@@ -276,11 +392,60 @@ export function usePlayMapFilters({
     syncUrl({ indoorOnly: next });
   }, [indoorOnly, syncUrl]);
 
+  const handleToggleOutdoor = useCallback(() => {
+    const next = !outdoorOnly;
+    setOutdoorOnly(next);
+    syncUrl({ outdoorOnly: next });
+  }, [outdoorOnly, syncUrl]);
+
+  const handleSelectEnvironment = useCallback(
+    (next: EnvironmentFilter) => {
+      const nextIndoor = next === "indoor";
+      const nextOutdoor = next === "outdoor";
+      setIndoorOnly(nextIndoor);
+      setOutdoorOnly(nextOutdoor);
+      syncUrl({ indoorOnly: nextIndoor, outdoorOnly: nextOutdoor });
+    },
+    [syncUrl],
+  );
+
   const handleToggleFree = useCallback(() => {
     const next = !freeOnly;
     setFreeOnly(next);
     syncUrl({ freeOnly: next });
   }, [freeOnly, syncUrl]);
+
+  const handleToggleRainyDay = useCallback(() => {
+    const next = !rainyDayOnly;
+    setRainyDayOnly(next);
+    syncUrl({ rainyDayOnly: next });
+  }, [rainyDayOnly, syncUrl]);
+
+  const handleToggleParking = useCallback(() => {
+    const next = !parkingOnly;
+    setParkingOnly(next);
+    syncUrl({ parkingOnly: next });
+  }, [parkingOnly, syncUrl]);
+
+  const handleToggleStrollerFriendly = useCallback(() => {
+    const next = !strollerFriendlyOnly;
+    setStrollerFriendlyOnly(next);
+    syncUrl({ strollerFriendlyOnly: next });
+  }, [strollerFriendlyOnly, syncUrl]);
+
+  const handleToggleHighEnergy = useCallback(() => {
+    const next = !highEnergyOnly;
+    setHighEnergyOnly(next);
+    syncUrl({ highEnergyOnly: next });
+  }, [highEnergyOnly, syncUrl]);
+
+  const handleHoverPlace = useCallback((id: string) => {
+    setHoveredPlaceId(id);
+  }, []);
+
+  const handleBlurPlace = useCallback((id: string) => {
+    setHoveredPlaceId((current) => (current === id ? null : current));
+  }, []);
 
   const handleNearMe = useCallback(() => {
     if (userLatLng) {
@@ -342,8 +507,22 @@ export function usePlayMapFilters({
   const handleClearFilters = useCallback(() => {
     setTypeFilter(null);
     setIndoorOnly(false);
+    setOutdoorOnly(false);
     setFreeOnly(false);
-    syncUrl({ type: null, indoorOnly: false, freeOnly: false });
+    setRainyDayOnly(false);
+    setParkingOnly(false);
+    setStrollerFriendlyOnly(false);
+    setHighEnergyOnly(false);
+    syncUrl({
+      type: null,
+      indoorOnly: false,
+      outdoorOnly: false,
+      freeOnly: false,
+      rainyDayOnly: false,
+      parkingOnly: false,
+      strollerFriendlyOnly: false,
+      highEnergyOnly: false,
+    });
   }, [syncUrl]);
 
   const handleSelect = useCallback(
@@ -415,7 +594,17 @@ export function usePlayMapFilters({
    */
   useEffect(() => {
     setVisibleCount(VISIBLE_STEP);
-  }, [city, typeFilter, indoorOnly, freeOnly]);
+  }, [
+    city,
+    typeFilter,
+    indoorOnly,
+    outdoorOnly,
+    freeOnly,
+    rainyDayOnly,
+    parkingOnly,
+    strollerFriendlyOnly,
+    highEnergyOnly,
+  ]);
 
   /*
    * 定位授權成功會讓整批卡片重排（前 N 筆整批換人）。
@@ -430,7 +619,13 @@ export function usePlayMapFilters({
     if (selectedId && !filtered.some((place) => place.id === selectedId)) {
       setSelectedId(null);
     }
-  }, [filtered, selectedId]);
+    if (
+      hoveredPlaceId &&
+      !filtered.some((place) => place.id === hoveredPlaceId)
+    ) {
+      setHoveredPlaceId(null);
+    }
+  }, [filtered, hoveredPlaceId, selectedId]);
 
   useEffect(() => {
     if (selected) return;
@@ -448,9 +643,25 @@ export function usePlayMapFilters({
     setCity(initialCity);
     setTypeFilter(initialType);
     setIndoorOnly(initialIndoorOnly);
+    setOutdoorOnly(initialOutdoorOnly);
     setFreeOnly(initialFreeOnly);
+    setRainyDayOnly(initialRainyDayOnly);
+    setParkingOnly(initialParkingOnly);
+    setStrollerFriendlyOnly(initialStrollerFriendlyOnly);
+    setHighEnergyOnly(initialHighEnergyOnly);
     setBrowseView(initialView);
-  }, [initialCity, initialType, initialIndoorOnly, initialFreeOnly, initialView]);
+  }, [
+    initialCity,
+    initialType,
+    initialIndoorOnly,
+    initialOutdoorOnly,
+    initialFreeOnly,
+    initialRainyDayOnly,
+    initialParkingOnly,
+    initialStrollerFriendlyOnly,
+    initialHighEnergyOnly,
+    initialView,
+  ]);
 
   useEffect(() => {
     if (city === null) return;
@@ -473,7 +684,12 @@ export function usePlayMapFilters({
     city !== null,
     typeFilter !== null,
     indoorOnly,
+    outdoorOnly,
     freeOnly,
+    rainyDayOnly,
+    parkingOnly,
+    strollerFriendlyOnly,
+    highEnergyOnly,
   ].filter(Boolean).length;
 
   const clusterMode = isNationwideUnscoped(city, userLatLng !== null);
@@ -492,9 +708,12 @@ export function usePlayMapFilters({
     coverageLabel: [ageHeadline, coverageHeadline(coverage)]
       .filter(Boolean)
       .join(" · "),
+    catalogStatusLabel,
+    editorialPick,
     reduceMotion,
     splitLayout,
     clusterMode,
+    viewportSearchActive: viewportBounds !== null,
     cityClusters,
     showCards,
     showMap,
@@ -502,9 +721,15 @@ export function usePlayMapFilters({
     city,
     typeFilter,
     indoorOnly,
+    outdoorOnly,
     freeOnly,
+    rainyDayOnly,
+    parkingOnly,
+    strollerFriendlyOnly,
+    highEnergyOnly,
     activeFilterCount,
     selectedId,
+    hoveredPlaceId,
     browseView,
     sheetVariant,
     filtersOpen,
@@ -531,7 +756,15 @@ export function usePlayMapFilters({
     handleSelectCity,
     handleSelectType,
     handleToggleIndoor,
+    handleToggleOutdoor,
+    handleSelectEnvironment,
     handleToggleFree,
+    handleToggleRainyDay,
+    handleToggleParking,
+    handleToggleStrollerFriendly,
+    handleToggleHighEnergy,
+    handleHoverPlace,
+    handleBlurPlace,
     handleNearMe,
     handleSelectView,
     handleTabKeyDown,
