@@ -13,6 +13,7 @@ test.describe("親子景點 curated collections", () => {
     ).toBeVisible();
     await expect(page.getByRole("heading", { name: "依地區找" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "依需求找" })).toBeVisible();
+    await expect(page.locator("body")).not.toContainText("active 景點");
     await expect(
       page.locator('a[href^="/for-parents/play-map/collections/"]'),
     ).toHaveCount(19);
@@ -56,10 +57,19 @@ test.describe("親子景點 curated collections", () => {
     await expect(
       page.getByRole("heading", { level: 1, name: "桃園親子景點" }),
     ).toBeVisible();
-    await expect(page.getByText("目前收錄 8 個桃園親子景點")).toBeVisible();
+    await expect(page.getByText("8 個可以去的景點")).toBeVisible();
+    await expect(page.getByText("免費 5")).toBeVisible();
+    await expect(page.getByText("室內 4")).toBeVisible();
+    await expect(page.getByText("放電 5")).toBeVisible();
+    await expect(page.locator('[class*="editorialInline"]')).toContainText(
+      "媽米先看",
+    );
+    await expect(page.locator('[aria-labelledby="editorial-heading"]')).toHaveCount(0);
+    await expect(page.locator("body")).not.toContainText("PR7");
+    await expect(page.locator("body")).not.toContainText("active 清單");
     await expect(page.locator('[data-collection-card="true"]')).toHaveCount(8);
     await expect(
-      page.getByRole("link", { name: "在地圖上看" }),
+      page.getByRole("link", { name: "在地圖上看桃園景點" }),
     ).toHaveAttribute(
       "href",
       "/for-parents/play-map?city=%E6%A1%83%E5%9C%92%E5%B8%82&view=map",
@@ -92,6 +102,11 @@ test.describe("親子景點 curated collections", () => {
     const itemList = graphItems.find((item) => item["@type"] === "ItemList");
     expect(itemList?.numberOfItems).toBe(8);
     expect(
+      jsonLd
+        .map((text) => JSON.parse(text) as Record<string, unknown>)
+        .some((data) => data["@type"] === "BreadcrumbList"),
+    ).toBe(true);
+    expect(
       JSON.stringify(itemList),
     ).toContain("/for-parents/play-map/ty-fenghe#place");
   });
@@ -102,9 +117,20 @@ test.describe("親子景點 curated collections", () => {
     await page.goto("/for-parents/play-map/collections/taoyuan-free");
 
     await expect(page).toHaveTitle("桃園免費親子景點｜車車遊樂園");
+    await expect(page.getByText("5 個可以去的景點")).toBeVisible();
+    await expect(page.getByText("免費 5")).toBeVisible();
+    await expect(page.getByText("室內 1")).toBeVisible();
+    await expect(page.getByText("放電 4")).toBeVisible();
+    await expect(
+      page.getByText("桃園目前 8 個親子景點中，有 5 個不用門票。"),
+    ).toBeVisible();
+    await expect(page.locator('[class*="editorialInline"]')).toContainText(
+      "媽米先看",
+    );
+    await expect(page.locator('[data-redundant-flag="true"]')).toHaveCount(5);
     await expect(page.locator('[data-collection-card="true"]')).toHaveCount(5);
     await expect(
-      page.getByRole("link", { name: "在地圖上看" }),
+      page.getByRole("link", { name: "在地圖上看桃園免費景點" }),
     ).toHaveAttribute(
       "href",
       "/for-parents/play-map?city=%E6%A1%83%E5%9C%92%E5%B8%82&free=1&view=map",
@@ -114,6 +140,31 @@ test.describe("親子景點 curated collections", () => {
         '[data-collection-card="true"] a[href="/for-parents/play-map/ty-kids-museum"]',
       ),
     ).toHaveCount(1);
+  });
+
+  test("hsinchu free communicates its parent relationship and outdoor trait", async ({
+    page,
+  }) => {
+    await page.goto("/for-parents/play-map/collections/hsinchu-city-free");
+
+    await expect(page).toHaveTitle("新竹免費親子景點｜車車遊樂園");
+    await expect(page.getByText("6 個可以去的景點")).toBeVisible();
+    await expect(page.getByText("免費 6")).toBeVisible();
+    await expect(page.getByText("室內 0")).toBeVisible();
+    await expect(page.getByText("放電 4")).toBeVisible();
+    await expect(
+      page.getByText(
+        "新竹目前 8 個親子景點中，有 6 個不用門票。目前這 6 個免費選擇都是戶外景點。",
+      ),
+    ).toBeVisible();
+    await expect(page.locator('[class*="editorialInline"]')).toContainText(
+      "南寮親子沙灘",
+    );
+    await expect(page.getByRole("link", { name: "在地圖上看新竹免費景點" })).toHaveAttribute(
+      "href",
+      "/for-parents/play-map?city=%E6%96%B0%E7%AB%B9%E5%B8%82&free=1&view=map",
+    );
+    await expect(page.locator('[data-collection-card="true"]')).toHaveCount(6);
   });
 
   test("removed duplicate variants are absent while their Play Map filters remain available", async ({
@@ -152,6 +203,22 @@ test.describe("親子景點 curated collections", () => {
       await expect(
         page.getByRole("heading", { level: 1, name: "桃園親子景點" }),
       ).toBeVisible();
+      if (viewport.width === 390) {
+        await expect(page.locator('nav[aria-label="麵包屑"]')).toBeHidden();
+        await expect(
+          page.getByRole("link", { name: /回各地親子景點整理/ }),
+        ).toHaveCount(1);
+        const firstCardBox = await page
+          .locator('[data-collection-card="true"]')
+          .first()
+          .boundingBox();
+        expect(firstCardBox?.y ?? Number.POSITIVE_INFINITY).toBeLessThan(480);
+      } else {
+        await expect(page.locator('nav[aria-label="麵包屑"]')).toBeVisible();
+        await expect(
+          page.getByRole("link", { name: /回各地親子景點整理/ }),
+        ).toBeHidden();
+      }
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - window.innerWidth,
       );

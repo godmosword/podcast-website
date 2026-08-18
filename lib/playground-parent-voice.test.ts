@@ -6,6 +6,18 @@ import {
 } from "./playground-parent-voice";
 
 describe("composeParentBlurb", () => {
+  test("先呈現 tips，再補充未重複的設施", () => {
+    const blurb = composeParentBlurb({
+      tips: "適合傍晚去，先找有遮蔭的遊具區。",
+      facilities: ["洗手間"],
+      free: true,
+      indoor: false,
+    });
+
+    expect(blurb.startsWith("適合傍晚去")).toBe(true);
+    expect(blurb).toContain("有洗手間");
+  });
+
   test("tips 已含設施時不重複前綴", () => {
     const blurb = composeParentBlurb({
       tips: "太陽大時優先找遮蔭區；假日建議傍晚去。",

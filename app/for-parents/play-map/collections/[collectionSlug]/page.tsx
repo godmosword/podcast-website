@@ -11,7 +11,9 @@ import { resolvePlayMapEditorialPick } from "@/lib/play-map-editorial";
 import {
   assertCollectionDefinitions,
   collectionDescription,
+  collectionMapCtaLabel,
   collectionMapPath,
+  collectionParentSummary,
   collectionPath,
   isCollectionIndexable,
   listCollectionDefinitions,
@@ -20,6 +22,7 @@ import {
 } from "@/lib/playground-collections";
 import { breadcrumbListJsonLd, playgroundCollectionJsonLd } from "@/lib/json-ld";
 import { PlayMapCollectionCard } from "@/components/for-parents/PlayMapCollectionCard";
+import { clipParentVoice } from "@/lib/playground-parent-voice";
 import styles from "./page.module.css";
 
 type CollectionPageProps = {
@@ -118,6 +121,10 @@ export default async function PlaygroundCollectionPage({
   });
   const related = relatedCollections(definition);
   const detailUrl = collectionPath(definition.slug);
+  const parentSummary = collectionParentSummary(resolved);
+  const editorialReason = editorialPick
+    ? clipParentVoice(editorialPick.pick.reason, 42)
+    : null;
   const filterLabel =
     definition.family === "city"
       ? definition.city
@@ -149,12 +156,37 @@ export default async function PlaygroundCollectionPage({
           <header className={styles.hero}>
             <p className={styles.eyebrow}>{definition.cityDisplayName}</p>
             <h1>{definition.title}</h1>
-            <p className={styles.summary}>{collectionDescription(resolved)}</p>
+            <p className={styles.summary}>
+              {resolved.activeCount} 個可以去的景點
+            </p>
+            <ul className={styles.decisionFacts} aria-label="景點條件摘要">
+              <li>免費 {resolved.freeCount}</li>
+              <li>室內 {resolved.indoorCount}</li>
+              <li>放電 {resolved.highEnergyCount}</li>
+            </ul>
+            {parentSummary ? (
+              <p className={styles.parentSummary}>{parentSummary}</p>
+            ) : null}
+            <p className={styles.aggregateSummary}>
+              {resolved.districtCount} 個行政區 · {resolved.typeCount} 種類型
+            </p>
+            {editorialPick ? (
+              <p className={styles.editorialInline}>
+                <span aria-hidden>⭐</span>
+                <span>媽米先看：</span>{" "}
+                <Link
+                  href={`/for-parents/play-map/${encodeURIComponent(editorialPick.place.id)}`}
+                >
+                  {editorialPick.place.name}
+                </Link>
+                <span>：{editorialReason}</span>
+              </p>
+            ) : null}
           </header>
 
           <div className={styles.actions}>
             <Link className={styles.mapAction} href={collectionMapPath(definition)}>
-              在地圖上看
+              {collectionMapCtaLabel(definition)}
             </Link>
           </div>
 
@@ -165,26 +197,14 @@ export default async function PlaygroundCollectionPage({
             </div>
             <ul className={styles.cardGrid}>
               {resolved.places.map((place) => (
-                <PlayMapCollectionCard key={place.id} place={place} />
+                <PlayMapCollectionCard
+                  key={place.id}
+                  place={place}
+                  deemphasizeFreeFlag={definition.family === "free"}
+                />
               ))}
             </ul>
           </section>
-
-          {editorialPick ? (
-            <section
-              className={`${styles.section} ${styles.editorial}`}
-              aria-labelledby="editorial-heading"
-            >
-              <p className={styles.editorialEyebrow} id="editorial-heading">
-                ⭐ 媽米先幫你看
-              </p>
-              <p className={styles.editorialName}>{editorialPick.place.name}</p>
-              <p>{editorialPick.pick.reason}</p>
-              <Link href={`/for-parents/play-map/${encodeURIComponent(editorialPick.place.id)}`}>
-                查看景點詳情 →
-              </Link>
-            </section>
-          ) : null}
 
           {related.length > 0 ? (
             <section className={styles.section} aria-labelledby="related-heading">
@@ -209,11 +229,11 @@ export default async function PlaygroundCollectionPage({
           >
             <h2 id="explanation-heading">資料與篩選方式</h2>
             <p>
-              本頁依「{filterLabel}」的親子遊樂地圖條件整理，景點卡片連到各自的 PR7 詳情頁；暫停營業地點不列入本頁的 active 清單。
+              本頁依「{filterLabel}」的親子遊樂地圖條件整理，景點卡片可查看各自的完整介紹；暫停營業地點不列入本頁。
             </p>
             {resolved.matchingCount !== resolved.activeCount ? (
               <p>
-                原始條件共找到 {resolved.matchingCount} 筆，其中 {resolved.activeCount} 筆目前可安排。
+                原始條件找到 {resolved.matchingCount} 個地點，目前有 {resolved.activeCount} 個可以安排。
               </p>
             ) : null}
           </section>

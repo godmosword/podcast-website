@@ -20,8 +20,8 @@ export function composeParentBlurb(
     .filter((item) => item.length > 0 && !tip.includes(item))
     .slice(0, 2)
     .map((item) => `有${item}`);
-  const prefix = extras.length > 0 ? `${extras.join("、")}。` : "";
-  const combined = `${prefix}${tip}`.trim();
+  const facilityNote = extras.length > 0 ? `${extras.join("、")}。` : "";
+  const combined = [tip, facilityNote].filter(Boolean).join(" ").trim();
   if (!combined) {
     if (place.free) return "免費放電，適合帶小孩出門晃一下。";
     return "出發前可先看詳情與官網再決定怎麼排。";

@@ -8,6 +8,7 @@ import {
   type PlaygroundFilter,
   type PlayMapQuery,
 } from "@/lib/playgrounds-query";
+import { isHighEnergy } from "@/lib/playground-context";
 
 export const MIN_INDEXABLE_COLLECTION_SIZE = 5;
 
@@ -226,6 +227,9 @@ export type ResolvedCollection = {
   definition: CollectionDefinition;
   matchingCount: number;
   activeCount: number;
+  freeCount: number;
+  indoorCount: number;
+  highEnergyCount: number;
   districtCount: number;
   typeCount: number;
   places: Playground[];
@@ -272,6 +276,18 @@ export function collectionMapPath(definition: CollectionDefinition): string {
   return `/for-parents/play-map?${query}`;
 }
 
+export function collectionMapCtaLabel(
+  definition: CollectionDefinition,
+): string {
+  const suffix =
+    definition.family === "city"
+      ? "景點"
+      : definition.family === "free"
+        ? "免費景點"
+        : "室內景點";
+  return `在地圖上看${definition.cityDisplayName}${suffix}`;
+}
+
 export function collectionConditionLabel(
   definition: CollectionDefinition,
 ): string {
@@ -300,6 +316,9 @@ export function resolveCollection(
     definition,
     matchingCount: matchingPlaces.length,
     activeCount: places.length,
+    freeCount: places.filter((place) => place.free).length,
+    indoorCount: places.filter((place) => place.indoor).length,
+    highEnergyCount: places.filter(isHighEnergy).length,
     districtCount: districts.size,
     typeCount: types.size,
     places,
@@ -321,6 +340,36 @@ export function collectionDescription(
 ): string {
   const { definition } = resolved;
   return `目前收錄 ${resolved.activeCount} 個${definition.cityDisplayName}${collectionConditionLabel(definition)}，涵蓋 ${resolved.districtCount} 個行政區、${resolved.typeCount} 種景點類型。`;
+}
+
+export function collectionParentSummary(
+  resolved: ResolvedCollection,
+): string | null {
+  const { definition } = resolved;
+  if (definition.family === "city") return null;
+
+  const parentDefinition = allDefinitions.find(
+    (candidate) =>
+      candidate.family === "city" && candidate.city === definition.city,
+  );
+  if (!parentDefinition) return null;
+
+  const parent = resolveCollection(parentDefinition);
+  const condition =
+    definition.family === "free"
+      ? `${resolved.activeCount} 個不用門票`
+      : `${resolved.activeCount} 個室內選擇`;
+  const summary = `${parentDefinition.cityDisplayName}目前 ${parent.activeCount} 個親子景點中，有 ${condition}。`;
+
+  if (
+    definition.family === "free" &&
+    resolved.places.length > 0 &&
+    resolved.places.every((place) => !place.indoor)
+  ) {
+    return `${summary}目前這 ${resolved.activeCount} 個免費選擇都是戶外景點。`;
+  }
+
+  return summary;
 }
 
 export function isCollectionIndexable(

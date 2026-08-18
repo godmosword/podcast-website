@@ -7,17 +7,19 @@ import styles from "./PlayMapCollectionCard.module.css";
 
 type PlayMapCollectionCardProps = {
   place: Playground;
+  deemphasizeFreeFlag?: boolean;
 };
 
 export function PlayMapCollectionCard({
   place,
+  deemphasizeFreeFlag = false,
 }: PlayMapCollectionCardProps) {
   const area = [place.city, place.district].filter(Boolean).join(" · ");
   const excerpt = clipParentVoice(composeParentBlurb(place), 88);
   const flags = [
-    place.free ? "免費" : "需購票",
-    place.indoor ? "室內" : "戶外",
-    formatAgeRangeLabel(place.ageRange),
+    { label: place.free ? "免費" : "需購票", kind: "price" },
+    { label: place.indoor ? "室內" : "戶外", kind: "environment" },
+    { label: formatAgeRangeLabel(place.ageRange), kind: "age" },
   ];
 
   return (
@@ -35,7 +37,16 @@ export function PlayMapCollectionCard({
           </p>
           <ul className={styles.flags} aria-label={`${place.name}重點`}>
             {flags.map((flag) => (
-              <li key={flag}>{flag}</li>
+              <li
+                key={flag.label}
+                data-redundant-flag={
+                  deemphasizeFreeFlag && flag.kind === "price" && place.free
+                    ? "true"
+                    : undefined
+                }
+              >
+                {flag.label}
+              </li>
             ))}
           </ul>
           <p className={styles.excerpt}>{excerpt}</p>

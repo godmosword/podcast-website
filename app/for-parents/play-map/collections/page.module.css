@@ -50,7 +50,7 @@
 }
 
 .backLink {
-  display: inline-block;
+  display: none;
   margin-top: 20px;
   font-weight: 700;
 }
@@ -162,6 +162,16 @@
 @media (max-width: 760px) {
   .main {
     padding-inline: calc(12px + var(--safe-left)) calc(12px + var(--safe-right));
+  }
+
+  .breadcrumbs {
+    display: none;
+  }
+
+  .backLink {
+    display: inline-block;
+    min-height: 44px;
+    padding-top: 10px;
   }
 
   .hero {

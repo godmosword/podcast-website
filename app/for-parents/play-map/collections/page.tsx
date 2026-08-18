@@ -58,7 +58,7 @@ function CollectionLink({
       <Link className={styles.collectionLink} href={collectionPath(slug)}>
         <span>
           <strong>{title}</strong>
-          <small>{count} 個 active 景點</small>
+          <small>{count} 個可以去的景點</small>
         </span>
         <span className={styles.linkArrow} aria-hidden>
           →

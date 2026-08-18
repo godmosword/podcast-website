@@ -3,7 +3,9 @@ import {
   COLLECTION_DEFINITIONS,
   MIN_INDEXABLE_COLLECTION_SIZE,
   assertCollectionDefinitions,
+  collectionMapCtaLabel,
   collectionMapPath,
+  collectionParentSummary,
   getCollectionDefinition,
   relatedCollections,
   resolveCollection,
@@ -133,6 +135,9 @@ describe("resolved collection semantics", () => {
     expect(resolved).toMatchObject({
       matchingCount: 9,
       activeCount: 8,
+      freeCount: 5,
+      indoorCount: 4,
+      highEnergyCount: 5,
       districtCount: 3,
       typeCount: 4,
     });
@@ -195,6 +200,26 @@ describe("resolved collection semantics", () => {
     );
     expect(collectionMapPath(chiayiIndoor)).toBe(
       "/for-parents/play-map?city=%E5%98%89%E7%BE%A9%E7%B8%A3&indoor=1&view=map",
+    );
+  });
+
+  test("builds contextual map CTA labels without changing query semantics", () => {
+    expect(collectionMapCtaLabel(getCollectionDefinition("taoyuan")!)).toBe(
+      "在地圖上看桃園景點",
+    );
+    expect(
+      collectionMapCtaLabel(getCollectionDefinition("taoyuan-free")!),
+    ).toBe("在地圖上看桃園免費景點");
+  });
+
+  test("computes parent relationship summaries from resolved data", () => {
+    expect(
+      collectionParentSummary(resolveCollectionBySlug("taoyuan-free")!),
+    ).toBe("桃園目前 8 個親子景點中，有 5 個不用門票。");
+    expect(
+      collectionParentSummary(resolveCollectionBySlug("hsinchu-city-free")!),
+    ).toBe(
+      "新竹目前 8 個親子景點中，有 6 個不用門票。目前這 6 個免費選擇都是戶外景點。",
     );
   });
 
