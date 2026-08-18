@@ -1467,6 +1467,14 @@
 }
 
 @media (max-width: 480px) {
+  .intentChip {
+    padding: 10px 12px;
+  }
+
+  .filterToggle {
+    padding-inline: 12px;
+  }
+
   .toolbar {
     align-items: stretch;
   }

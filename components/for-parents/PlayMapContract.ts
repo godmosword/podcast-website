@@ -63,7 +63,6 @@ export type PlayMapControlBarProps = {
   onToggleHighEnergy: () => void;
   filtersOpen: boolean;
   onToggleFilters: () => void;
-  resultTitle: string;
   cities: readonly string[];
   city: string | null;
   cityCounts: ReadonlyMap<string, number>;

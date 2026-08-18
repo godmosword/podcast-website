@@ -184,7 +184,6 @@ export default function PlayMap({
           onToggleHighEnergy={map.handleToggleHighEnergy}
           filtersOpen={map.filtersOpen}
           onToggleFilters={map.handleToggleFilters}
-          resultTitle={map.resultTitle}
           onSelectEnvironment={map.handleSelectEnvironment}
           cities={map.cities}
           city={map.city}

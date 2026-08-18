@@ -22,12 +22,12 @@ export const TAIWAN_MAX_BOUNDS = {
 } as const;
 
 /** 全國鏡頭要守住的西緣：海峽東側，不把福州／平潭當主畫面。 */
-export const TAIWAN_NATIONAL_TARGET_WEST = 120.05;
+export const TAIWAN_NATIONAL_TARGET_WEST = 120.35;
 
 export const TAIWAN_NATIONAL_LAT = 23.75;
 
-/** 地圖寬度未知時的後備中心（略偏東）。 */
-export const TAIWAN_MAP_CENTER: [number, number] = [23.75, 121.55];
+/** 地圖寬度未知時的後備中心（用中等寬度估，略偏東）。 */
+export const TAIWAN_MAP_CENTER: [number, number] = [23.75, 121.89];
 
 /** 全國預設縮放：再放大就交給縣市／附近鏡頭。 */
 export const TAIWAN_NATIONAL_MAX_ZOOM = 8;
@@ -38,6 +38,7 @@ export const TAIWAN_SOFT_MIN_ZOOM = 7;
 export const TAIWAN_MAX_BOUNDS_VISCOSITY = 0.35;
 
 const WEB_MERCATOR_TILE_PX = 256;
+const FALLBACK_MAP_WIDTH_PX = 560;
 
 export type PlayMapCameraBounds = {
   south: number;
@@ -73,10 +74,11 @@ export function taiwanNationalView(mapWidthPx: number): {
   zoom: number;
 } {
   const zoom = TAIWAN_NATIONAL_MAX_ZOOM;
-  if (!Number.isFinite(mapWidthPx) || mapWidthPx < 80) {
-    return { center: TAIWAN_MAP_CENTER, zoom };
-  }
-  const halfLng = (mapWidthPx / 2) * lngDegreesPerPixel(zoom);
+  const width =
+    Number.isFinite(mapWidthPx) && mapWidthPx >= 80
+      ? mapWidthPx
+      : FALLBACK_MAP_WIDTH_PX;
+  const halfLng = (width / 2) * lngDegreesPerPixel(zoom);
   return {
     center: [TAIWAN_NATIONAL_LAT, TAIWAN_NATIONAL_TARGET_WEST + halfLng],
     zoom,
@@ -85,9 +87,10 @@ export function taiwanNationalView(mapWidthPx: number): {
 
 export function taiwanNationalWestEdge(mapWidthPx: number): number {
   const view = taiwanNationalView(mapWidthPx);
-  if (!Number.isFinite(mapWidthPx) || mapWidthPx < 80) {
-    return TAIWAN_NATIONAL_TARGET_WEST;
-  }
-  const halfLng = (mapWidthPx / 2) * lngDegreesPerPixel(view.zoom);
+  const width =
+    Number.isFinite(mapWidthPx) && mapWidthPx >= 80
+      ? mapWidthPx
+      : FALLBACK_MAP_WIDTH_PX;
+  const halfLng = (width / 2) * lngDegreesPerPixel(view.zoom);
   return view.center[1] - halfLng;
 }

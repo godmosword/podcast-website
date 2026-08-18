@@ -122,7 +122,7 @@ test.describe("親子遊樂地圖", () => {
     await page.goto("/for-parents/play-map");
     await waitForPlayMapReady(page);
 
-    const nearMe = page.getByRole("button", { name: "附近" });
+    const nearMe = page.getByRole("button", { name: "附近", exact: true });
     await nearMe.click();
 
     await expect(nearMe).toHaveAttribute("aria-pressed", "true");
@@ -178,13 +178,14 @@ test.describe("親子遊樂地圖", () => {
     const leafletRequests: string[] = [];
     page.on("request", (req) => {
       const url = req.url();
-      if (/leaflet|tile\.openstreetmap/i.test(url)) {
+      if (/leaflet\.css|react-leaflet|tile\.openstreetmap/i.test(url)) {
         leafletRequests.push(url);
       }
     });
 
     await page.goto("/for-parents/play-map");
     await waitForPlayMapReady(page);
+    await expect(page.locator(".leaflet-container")).toHaveCount(0);
     expect(leafletRequests.length).toBe(0);
 
     await page.getByRole("button", { name: "看地圖" }).click();

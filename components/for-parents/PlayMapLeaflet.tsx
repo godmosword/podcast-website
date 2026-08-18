@@ -28,10 +28,11 @@ import {
 import type { LatLng } from "@/lib/playground-distance";
 import { playgroundTypeGlyphSvg } from "@/lib/playground-type-glyph";
 import { playgroundTypeVisualKey } from "@/lib/playground-type-visual";
-import { DEFAULT_PLAY_MAP_CENTER } from "@/lib/playground-coverage";
 import {
+  TAIWAN_MAP_CENTER,
   TAIWAN_MAX_BOUNDS,
   TAIWAN_MAX_BOUNDS_VISCOSITY,
+  TAIWAN_NATIONAL_MAX_ZOOM,
   TAIWAN_SOFT_MIN_ZOOM,
   taiwanMapBoundsCorners,
   taiwanNationalView,
@@ -184,9 +185,21 @@ function FitBounds({
       return;
     } else if (snap.nationalFrame) {
       markProgrammaticCamera();
-      map.invalidateSize();
-      const view = taiwanNationalView(map.getSize().x);
-      map.setView(view.center, view.zoom, motion);
+      const applyNational = () => {
+        map.invalidateSize();
+        const view = taiwanNationalView(map.getSize().x);
+        map.setView(view.center, view.zoom, { animate: false });
+      };
+      applyNational();
+      let nestedRaf = 0;
+      const raf = window.requestAnimationFrame(() => {
+        applyNational();
+        nestedRaf = window.requestAnimationFrame(applyNational);
+      });
+      return () => {
+        window.cancelAnimationFrame(raf);
+        window.cancelAnimationFrame(nestedRaf);
+      };
     } else if (snap.points.length === 0) {
       markProgrammaticCamera();
       map.setView(snap.emptyCenter, DEFAULT_ZOOM, motion);
@@ -642,8 +655,8 @@ export default function PlayMapLeaflet({
     <>
         <MapContainer
         className={styles.map}
-        center={DEFAULT_PLAY_MAP_CENTER}
-        zoom={DEFAULT_ZOOM}
+        center={TAIWAN_MAP_CENTER}
+        zoom={TAIWAN_NATIONAL_MAX_ZOOM}
         minZoom={TAIWAN_SOFT_MIN_ZOOM}
         maxBounds={taiwanMapBoundsCorners(TAIWAN_MAX_BOUNDS)}
         maxBoundsViscosity={TAIWAN_MAX_BOUNDS_VISCOSITY}
