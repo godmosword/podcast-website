@@ -6,6 +6,37 @@
   color: var(--ink);
 }
 
+.collectionsLinkWrap {
+  width: min(100%, 1100px);
+  margin: 24px auto 0;
+  text-align: center;
+}
+
+.collectionsLink {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 16px;
+  color: var(--accent-ink);
+  font-weight: 800;
+  text-decoration: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+}
+
+.collectionsLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.collectionsLink:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
 @media (max-width: 768px) {
   .main {
     padding-inline: calc(12px + var(--safe-left)) calc(12px + var(--safe-right));

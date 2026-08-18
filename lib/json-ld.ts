@@ -7,6 +7,11 @@ import { siteRssUrl } from "@/lib/feed";
 import { STATIC_PAGE_MODIFIED_DATES } from "@/lib/page-freshness";
 import { platformShowUrls } from "@/lib/platforms";
 import {
+  collectionDescription,
+  collectionPath,
+  type ResolvedCollection,
+} from "@/lib/playground-collections";
+import {
   playgroundDetailDescription,
   playgroundDetailUrl,
 } from "@/lib/playground-detail";
@@ -271,6 +276,51 @@ export function playgroundPlaceJsonLd(
     },
     isAccessibleForFree: place.free,
     ...(place.officialUrl ? { sameAs: place.officialUrl } : {}),
+  };
+}
+
+export function playgroundCollectionJsonLd(
+  resolved: ResolvedCollection,
+): Record<string, unknown> {
+  const siteUrl = getSiteUrl();
+  const pageUrl = `${siteUrl}${collectionPath(resolved.definition.slug)}`;
+  const collectionId = `${pageUrl}#collection`;
+  const itemListId = `${pageUrl}#item-list`;
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "CollectionPage",
+        "@id": collectionId,
+        name: resolved.definition.title,
+        url: pageUrl,
+        description: collectionDescription(resolved),
+        inLanguage: LANGUAGE,
+        mainEntity: { "@id": itemListId },
+      },
+      {
+        "@type": "ItemList",
+        "@id": itemListId,
+        name: resolved.definition.title,
+        url: pageUrl,
+        numberOfItems: resolved.activeCount,
+        itemListOrder: "https://schema.org/ItemListUnordered",
+        itemListElement: resolved.places.map((place, index) => {
+          const detailUrl = playgroundDetailUrl(place.id);
+          return {
+            "@type": "ListItem",
+            position: index + 1,
+            item: {
+              "@type": "Place",
+              "@id": `${detailUrl}#place`,
+              name: place.name,
+              url: detailUrl,
+            },
+          };
+        }),
+      },
+    ],
   };
 }
 

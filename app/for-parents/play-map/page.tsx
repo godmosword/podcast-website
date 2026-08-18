@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 import SiteFooter from "@/components/SiteFooter";
 import JsonLd from "@/components/JsonLd";
@@ -64,6 +65,11 @@ export default async function PlayMapPage({
           initialView={query.view}
         />
       </Suspense>
+      <div className={styles.collectionsLinkWrap}>
+        <Link className={styles.collectionsLink} href="/for-parents/play-map/collections">
+          看各地親子景點整理 <span aria-hidden>→</span>
+        </Link>
+      </div>
       <SiteFooter
         compact
         showPlatformSubscribe={false}

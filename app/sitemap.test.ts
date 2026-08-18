@@ -5,6 +5,10 @@ import { listPlaygrounds } from "@/data/playgrounds";
 import { universe } from "@/data/universe";
 import { STATIC_PAGE_MODIFIED_DATES } from "@/lib/page-freshness";
 import { podcastEpisodeJsonLd } from "@/lib/json-ld";
+import {
+  collectionPath,
+  listCollectionDefinitions,
+} from "@/lib/playground-collections";
 import { storyDetailMetadata } from "@/lib/story-metadata";
 import { playgroundDetailPath } from "@/lib/playground-detail";
 import sitemap from "./sitemap";
@@ -74,7 +78,11 @@ describe("sitemap freshness", () => {
     const entries = sitemap();
     const playgrounds = listPlaygrounds();
     const detailEntries = entries.filter((entry) =>
-      entry.url.startsWith("https://example.com/for-parents/play-map/"),
+      playgrounds.some(
+        (place) =>
+          entry.url ===
+          `https://example.com${playgroundDetailPath(place.id)}`,
+      ),
     );
 
     expect(detailEntries).toHaveLength(playgrounds.length);
@@ -98,6 +106,52 @@ describe("sitemap freshness", () => {
           `https://example.com${playgroundDetailPath(closed!.id)}`,
       ),
     ).toBe(true);
+
+    vi.unstubAllEnvs();
+  });
+
+  it("只包含 collection index 與 19 筆 launch collection URLs", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
+    const entries = sitemap();
+    const collectionDefinitions = listCollectionDefinitions();
+    const collectionUrls = entries
+      .filter((entry) =>
+        entry.url.startsWith(
+          "https://example.com/for-parents/play-map/collections",
+        ),
+      )
+      .map((entry) => entry.url);
+
+    expect(collectionDefinitions).toHaveLength(19);
+    expect(collectionUrls).toHaveLength(20);
+    expect(collectionUrls).toContain(
+      "https://example.com/for-parents/play-map/collections",
+    );
+    expect(new Set(collectionUrls).size).toBe(20);
+
+    for (const definition of collectionDefinitions) {
+      const entry = entries.find(
+        (item) =>
+          item.url ===
+          `https://example.com${collectionPath(definition.slug)}`,
+      );
+      expect(entry, definition.slug).toBeDefined();
+      expect(entry, definition.slug).not.toHaveProperty("lastModified");
+      expect(entry, definition.slug).not.toHaveProperty("changeFrequency");
+    }
+
+    expect(
+      collectionUrls.some((url) => url.includes("rainy-day")),
+    ).toBe(false);
+    expect(
+      collectionUrls.some((url) => url.includes("?")),
+    ).toBe(false);
+    expect(collectionUrls).not.toContain(
+      "https://example.com/for-parents/play-map/collections/changhua-free",
+    );
+    expect(collectionUrls).not.toContain(
+      "https://example.com/for-parents/play-map/collections/chiayi-county-indoor",
+    );
 
     vi.unstubAllEnvs();
   });

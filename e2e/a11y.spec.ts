@@ -25,6 +25,14 @@ const PAGES: { name: string; path: string; exclude?: string }[] = [
     name: "親子景點詳情",
     path: "/for-parents/play-map/ty-kids-museum",
   },
+  {
+    name: "親子景點集合索引",
+    path: "/for-parents/play-map/collections",
+  },
+  {
+    name: "桃園親子景點集合",
+    path: "/for-parents/play-map/collections/taoyuan",
+  },
 ];
 
 const BLOCKING_IMPACTS = new Set(["critical", "serious"]);

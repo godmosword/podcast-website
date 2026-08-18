@@ -7,6 +7,7 @@ import { hasFullTranscript, hasSceneCaptions } from "@/lib/transcript";
 import {
   breadcrumbListJsonLd,
   characterCreativeWorkJsonLd,
+  playgroundCollectionJsonLd,
   faqPageJsonLd,
   playgroundItemListJsonLd,
   playgroundPlaceJsonLd,
@@ -14,6 +15,7 @@ import {
   podcastSeriesJsonLd,
   siteIdentityJsonLd,
 } from "./json-ld";
+import { resolveCollectionBySlug } from "@/lib/playground-collections";
 
 /** 取出 associatedMedia 中的音檔 MediaObject（單一或陣列皆可） */
 function audioMedia(associatedMedia: unknown): unknown {
@@ -357,6 +359,42 @@ describe("playgroundPlaceJsonLd", () => {
     expect(data).not.toHaveProperty("review");
     expect(data).not.toHaveProperty("priceRange");
     expect(data).not.toHaveProperty("image");
+
+    vi.unstubAllEnvs();
+  });
+});
+
+describe("playgroundCollectionJsonLd", () => {
+  it("outputs CollectionPage and ItemList with PR7 Place identities", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
+    const resolved = resolveCollectionBySlug("taoyuan");
+    expect(resolved).toBeDefined();
+
+    const data = playgroundCollectionJsonLd(resolved!);
+    const graph = data["@graph"] as Record<string, unknown>[];
+    const collection = graph.find((item) => item["@type"] === "CollectionPage");
+    const itemList = graph.find((item) => item["@type"] === "ItemList");
+
+    expect(data["@context"]).toBe("https://schema.org");
+    expect(collection).toMatchObject({
+      "@id": "https://example.com/for-parents/play-map/collections/taoyuan#collection",
+      url: "https://example.com/for-parents/play-map/collections/taoyuan",
+      mainEntity: {
+        "@id": "https://example.com/for-parents/play-map/collections/taoyuan#item-list",
+      },
+    });
+    expect(itemList).toMatchObject({
+      "@id": "https://example.com/for-parents/play-map/collections/taoyuan#item-list",
+      numberOfItems: 8,
+    });
+
+    const elements = itemList?.itemListElement as Record<string, unknown>[];
+    expect(elements).toHaveLength(8);
+    expect(elements[0].item).toMatchObject({
+      "@type": "Place",
+      "@id": "https://example.com/for-parents/play-map/ty-fenghe#place",
+      url: "https://example.com/for-parents/play-map/ty-fenghe",
+    });
 
     vi.unstubAllEnvs();
   });

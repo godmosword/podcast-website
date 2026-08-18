@@ -4,6 +4,11 @@ import { storyDateModified } from "@/data/story-dates";
 import { listPlaygrounds } from "@/data/playgrounds";
 import { universe } from "@/data/universe";
 import {
+  assertCollectionDefinitions,
+  collectionPath,
+  listCollectionDefinitions,
+} from "@/lib/playground-collections";
+import {
   collectionModifiedDate,
   STATIC_PAGE_MODIFIED_DATES,
 } from "@/lib/page-freshness";
@@ -11,6 +16,7 @@ import { playgroundDetailPath } from "@/lib/playground-detail";
 import { getSiteUrl } from "@/lib/site-url";
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  assertCollectionDefinitions();
   const baseUrl = getSiteUrl();
   const stories = getStories();
   const collectionModified = collectionModifiedDate(stories);
@@ -138,8 +144,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }),
   );
 
+  const collectionPages: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}/for-parents/play-map/collections` },
+    ...listCollectionDefinitions().map((definition) => ({
+      url: `${baseUrl}${collectionPath(definition.slug)}`,
+    })),
+  ];
+
   return [
     ...staticPages,
+    ...collectionPages,
     ...playgroundPages,
     ...storyPages,
     ...topicPages,
