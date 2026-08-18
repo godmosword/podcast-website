@@ -53,7 +53,7 @@
 
 | ID | 說明 |
 |----|------|
-| feat(for-parents): play-map V3 名單優先、台灣鏡頭與類型針 | 見本 commit |
+| feat(for-parents): play-map V3 名單優先、台灣鏡頭與類型針 | `a31b094` `392c01e` |
 
 ### 本輪已完成（2026-08-16）
 
