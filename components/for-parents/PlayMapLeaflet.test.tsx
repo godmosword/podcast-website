@@ -8,6 +8,7 @@ import {
   clusterPlaygroundsByZoom,
 } from "@/lib/playground-clusters";
 import { DEFAULT_PLAY_MAP_CENTER } from "@/lib/playground-coverage";
+import { taiwanNationalView } from "@/lib/play-map-camera";
 import { playgroundTypeGlyphSvg } from "@/lib/playground-type-glyph";
 import { playgroundTypeVisualKey } from "@/lib/playground-type-visual";
 import PlayMapLeaflet, { playMapFitKey } from "./PlayMapLeaflet";
@@ -70,6 +71,7 @@ const mapStub = {
   on: mapOn,
   off: mapOff,
   invalidateSize: vi.fn(),
+  getSize: vi.fn(() => ({ x: 720, y: 512 })),
 };
 
 const mapState: { current: typeof mapStub } = { current: mapStub };
@@ -171,6 +173,8 @@ describe("PlayMapLeaflet FitBounds", () => {
     fitBounds.mockClear();
     setView.mockClear();
     mapStub.invalidateSize.mockClear();
+    mapStub.getSize.mockClear();
+    mapStub.getSize.mockReturnValue({ x: 720, y: 512 });
     markerSpy.mockClear();
     mapStub.getBounds.mockReset();
     mapStub.getBounds.mockReturnValue({
@@ -204,6 +208,25 @@ describe("PlayMapLeaflet FitBounds", () => {
       <PlayMapLeaflet {...leafletProps({ onSelect: vi.fn() })} />,
     );
     expect(fitBounds).toHaveBeenCalledTimes(1);
+  });
+
+  it("全國未縮小範圍用寬度感知 setView，西緣不把福建當主體", () => {
+    const places = [...listPlaygrounds()];
+    render(
+      <PlayMapLeaflet
+        {...leafletProps({
+          places,
+          clusterMode: true,
+          viewportZoom: 8,
+        })}
+      />,
+    );
+    expect(setView).toHaveBeenCalled();
+    const last = setView.mock.calls.at(-1);
+    const expected = taiwanNationalView(720);
+    expect(last?.[0]).toEqual(expected.center);
+    expect(last?.[1]).toBe(expected.zoom);
+    expect(fitBounds).not.toHaveBeenCalled();
   });
 
   it("mobile results sheet snap 變更時只要求 Leaflet 重算尺寸", () => {
@@ -420,7 +443,7 @@ describe("PlayMapLeaflet FitBounds", () => {
       const key = playgroundTypeVisualKey(place.type);
       expect(html).toContain(`data-playground-id="${place.id}"`);
       expect(html).toContain(`data-type="${key}"`);
-      // 剪影必須包在 playMapPinGlyph 內——它負責反轉抵銷水滴的 rotate(-45deg)
+      // 剪影必須包在 playMapPinGlyph 內，語意由外層 button 承擔
       expect(html).toContain(
         `<span class="playMapPinGlyph">${playgroundTypeGlyphSvg(key)}</span>`,
       );

@@ -24,7 +24,7 @@ export function PlayMapControlBar({
   onToggleHighEnergy,
   filtersOpen,
   onToggleFilters,
-  filterSummaryLabel,
+  resultTitle,
   cities,
   city,
   cityCounts,
@@ -98,7 +98,7 @@ export function PlayMapControlBar({
             className={styles.filterToggle}
             aria-expanded={filtersOpen}
             aria-controls="play-map-filter-panel"
-            aria-label={`篩選條件${activeFilterCount > 0 ? `，已套用 ${activeFilterCount} 個` : ""}，${filterSummaryLabel}`}
+            aria-label={`篩選條件${activeFilterCount > 0 ? `，已套用 ${activeFilterCount} 個` : ""}，${resultTitle}`}
             onClick={onToggleFilters}
           >
             <span>篩選條件</span>

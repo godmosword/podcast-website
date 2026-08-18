@@ -3,14 +3,12 @@
 import dynamic from "next/dynamic";
 import { useCallback, useRef } from "react";
 import type { PlaygroundType } from "@/data/playgrounds";
-import type { BrowseView } from "./PlayMapContract";
+import { CARDS_PANEL_ID, MAP_PANEL_ID, type BrowseView } from "./PlayMapContract";
 import { PlayMapCardList } from "./PlayMapCardList";
 import { PlayMapControlBar } from "./PlayMapControlBar";
 import { PlayMapSheet } from "./PlayMapSheet";
 import { PlayMapToolbar } from "./PlayMapToolbar";
-import { MobileMapResultsSheet } from "./MobileMapResultsSheet";
 import { usePlayMapFilters } from "./usePlayMapFilters";
-import { useMobileMapResultsSheet } from "./useMobileMapResultsSheet";
 import { usePlayMapViewport } from "./usePlayMapViewport";
 import styles from "./PlayMap.module.css";
 
@@ -63,12 +61,9 @@ export default function PlayMap({
     initialView,
     viewportBounds: viewport.committedSearchBounds,
   });
-  const mobileResults = useMobileMapResultsSheet({
-    active: !map.splitLayout && map.showMap,
-  });
   /**
    * 第一次需要顯示地圖後保持掛載，之後只靠 hidden。
-   * 進頁若是卡片分頁，先不掛 Leaflet，避免搶首屏。
+   * 進頁若是名單模式，先不掛 Leaflet，避免搶首屏。
    *
    * 在 render 期間 latch：showMap 轉 true 必定伴隨一次 state 觸發的重繪，
    * 同一次 commit 就能決定是否渲染 Leaflet，不必晚一幀才掛載。
@@ -85,6 +80,7 @@ export default function PlayMap({
     },
     [],
   );
+
   const scrollCardIntoView = useCallback(
     (id: string) => {
       if (!map.splitLayout) return;
@@ -116,6 +112,7 @@ export default function PlayMap({
     },
     [map.reduceMotion, map.splitLayout],
   );
+
   const selectFromMap = map.handleSelectFromMap;
   const selectedCity = map.city;
   const filteredPlaces = map.filtered;
@@ -156,61 +153,58 @@ export default function PlayMap({
     ],
   );
 
+  const mobileMap = !map.splitLayout && map.showMap;
+
   return (
     <div
       className={styles.root}
       data-split={map.splitLayout ? "true" : "false"}
+      data-mobile-map={mobileMap ? "true" : "false"}
     >
-      <PlayMapToolbar
-        howToStart="選附近或縣市，再挑一個今天適合的地方。"
-        coverageLabel=""
-        browseView={map.browseView}
-        onSelectView={map.handleSelectView}
-        onTabKeyDown={map.handleTabKeyDown}
-        hideViewTabs={map.splitLayout}
-      />
+      <PlayMapToolbar compact={mobileMap} />
 
-      <PlayMapControlBar
-        nearMeActive={map.userLatLng !== null}
-        geoStatus={map.geoStatus}
-        freeOnly={map.freeOnly}
-        indoorOnly={map.indoorOnly}
-        outdoorOnly={map.outdoorOnly}
-        rainyDayOnly={map.rainyDayOnly}
-        parkingOnly={map.parkingOnly}
-        strollerFriendlyOnly={map.strollerFriendlyOnly}
-        highEnergyOnly={map.highEnergyOnly}
-        activeFilterCount={map.activeFilterCount}
-        onNearMe={map.handleNearMe}
-        onToggleFree={map.handleToggleFree}
-        onToggleIndoor={map.handleToggleIndoor}
-        onToggleRainyDay={map.handleToggleRainyDay}
-        onToggleParking={map.handleToggleParking}
-        onToggleStrollerFriendly={map.handleToggleStrollerFriendly}
-        onToggleHighEnergy={map.handleToggleHighEnergy}
-        filtersOpen={map.filtersOpen}
-        onToggleFilters={map.handleToggleFilters}
-        filterSummaryLabel={map.filterSummaryLabel}
-        onSelectEnvironment={map.handleSelectEnvironment}
-        cities={map.cities}
-        city={map.city}
-        cityCounts={map.cityCounts}
-        allCityCount={map.allCityCount}
-        onSelectCity={handleSelectCity}
-        cityScrollerRef={map.cityScrollerRef}
-        typeFilter={map.typeFilter}
-        typeCounts={map.typeCounts}
-        visibleTypeOptions={map.visibleTypeOptions}
-        onSelectType={map.handleSelectType}
-      />
+      <div hidden={mobileMap}>
+        <PlayMapControlBar
+          nearMeActive={map.userLatLng !== null}
+          geoStatus={map.geoStatus}
+          freeOnly={map.freeOnly}
+          indoorOnly={map.indoorOnly}
+          outdoorOnly={map.outdoorOnly}
+          rainyDayOnly={map.rainyDayOnly}
+          parkingOnly={map.parkingOnly}
+          strollerFriendlyOnly={map.strollerFriendlyOnly}
+          highEnergyOnly={map.highEnergyOnly}
+          activeFilterCount={map.activeFilterCount}
+          onNearMe={map.handleNearMe}
+          onToggleFree={map.handleToggleFree}
+          onToggleIndoor={map.handleToggleIndoor}
+          onToggleRainyDay={map.handleToggleRainyDay}
+          onToggleParking={map.handleToggleParking}
+          onToggleStrollerFriendly={map.handleToggleStrollerFriendly}
+          onToggleHighEnergy={map.handleToggleHighEnergy}
+          filtersOpen={map.filtersOpen}
+          onToggleFilters={map.handleToggleFilters}
+          resultTitle={map.resultTitle}
+          onSelectEnvironment={map.handleSelectEnvironment}
+          cities={map.cities}
+          city={map.city}
+          cityCounts={map.cityCounts}
+          allCityCount={map.allCityCount}
+          onSelectCity={handleSelectCity}
+          cityScrollerRef={map.cityScrollerRef}
+          typeFilter={map.typeFilter}
+          typeCounts={map.typeCounts}
+          visibleTypeOptions={map.visibleTypeOptions}
+          onSelectType={map.handleSelectType}
+        />
+      </div>
 
       <div className={styles.content}>
         <section
-          id="play-map-panel-cards"
+          id={CARDS_PANEL_ID}
           ref={cardPanelRef}
-          role={map.splitLayout ? "region" : "tabpanel"}
-          aria-labelledby={map.splitLayout ? undefined : "play-map-tab-cards"}
-          aria-label={map.splitLayout ? "地點名單" : undefined}
+          role="region"
+          aria-label="地點名單"
           hidden={!map.showCards}
           className={styles.cardsPanel}
         >
@@ -229,8 +223,9 @@ export default function PlayMap({
             onBlur={map.handleBlurPlace}
             onSelect={map.handleSelectFromCard}
             registerCardRef={registerCardRef}
-            showScopeHint={map.clusterMode && !map.viewportSearchActive}
-            catalogStatusLabel={map.catalogStatusLabel}
+            resultTitle={map.resultTitle}
+            showMapAction={!map.splitLayout}
+            onOpenMap={() => map.handleSelectView("map")}
             coverageLabel={map.coverageLabel}
             editorialPick={map.showCards ? map.editorialPick : null}
             visibleCount={map.visibleCount}
@@ -242,13 +237,23 @@ export default function PlayMap({
         </section>
 
         <div
-          id="play-map-panel-map"
-          role={map.splitLayout ? "region" : "tabpanel"}
-          aria-labelledby={map.splitLayout ? undefined : "play-map-tab-map"}
-          aria-label={map.splitLayout ? "地點地圖" : undefined}
+          id={MAP_PANEL_ID}
+          role="region"
+          aria-label="地點地圖"
           hidden={!map.showMap}
           className={styles.mapShell}
         >
+          {mobileMap ? (
+            <div className={styles.mapChrome}>
+              <button
+                type="button"
+                className={styles.backToListButton}
+                onClick={() => map.handleSelectView("cards")}
+              >
+                返回名單
+              </button>
+            </div>
+          ) : null}
           {viewport.hasPendingViewportSearch ? (
             <button
               type="button"
@@ -257,24 +262,6 @@ export default function PlayMap({
             >
               搜尋此區域
             </button>
-          ) : null}
-          {!map.splitLayout && map.showMap ? (
-            <MobileMapResultsSheet
-              snap={mobileResults.snap}
-              panelRef={mobileResults.panelRef}
-              matched={map.filtered}
-              selectedId={map.selectedId}
-              userLatLng={map.userLatLng}
-              nearbyActive={map.userLatLng !== null}
-              viewportSearchActive={map.viewportSearchActive}
-              onClearViewportSearch={viewport.handleClearViewportSearch}
-              onSelect={handleSelectFromMap}
-              onHandleClick={mobileResults.onHandleClick}
-              onHandlePointerDown={mobileResults.onHandlePointerDown}
-              onHandlePointerMove={mobileResults.onHandlePointerMove}
-              onHandlePointerUp={mobileResults.onHandlePointerUp}
-              onHandlePointerCancel={mobileResults.onHandlePointerCancel}
-            />
           ) : null}
           {mapMountedRef.current ? (
             <PlayMapLeaflet
@@ -299,7 +286,7 @@ export default function PlayMap({
                 !(map.city === null && map.userLatLng !== null)
               }
               onViewportSettled={viewport.handleViewportSettled}
-              resizeRequest={mobileResults.resizeEpoch}
+              resizeRequest={0}
               splitLayout={map.splitLayout}
               nearMeCamera={map.city === null && map.userLatLng !== null}
             />

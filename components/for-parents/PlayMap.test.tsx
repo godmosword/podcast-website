@@ -123,6 +123,14 @@ function showAllCards(): void {
   }
 }
 
+function openMap(): void {
+  fireEvent.click(screen.getByRole("button", { name: "看地圖" }));
+}
+
+function backToList(): void {
+  fireEvent.click(screen.getByRole("button", { name: "返回名單" }));
+}
+
 function mockDesktopMatchMedia(reducedMotion = false): void {
   Object.defineProperty(window, "matchMedia", {
     writable: true,
@@ -149,9 +157,8 @@ describe("PlayMap", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "親子遊樂地圖" }),
     ).toBeTruthy();
-    expect(
-      screen.getByText("選附近或縣市，再挑一個今天適合的地方。"),
-    ).toBeTruthy();
+    expect(screen.queryByRole("tab", { name: "卡片" })).toBeNull();
+    expect(screen.getByRole("button", { name: "看地圖" })).toBeTruthy();
 
     const intentGroup = screen.getByRole("group", { name: "意圖快捷" });
     expect(
@@ -168,10 +175,6 @@ describe("PlayMap", () => {
       name: /全部，\d+ 個地點/,
     });
     expect(allChip.getAttribute("aria-pressed")).toBe("true");
-
-    expect(
-      screen.getByRole("tab", { name: "卡片" }).getAttribute("aria-selected"),
-    ).toBe("true");
   });
 
   it("切換免費會改變結果數", () => {
@@ -179,11 +182,11 @@ describe("PlayMap", () => {
     const baseline = filterPlaygrounds().length;
     const freeCount = filterPlaygrounds({ freeOnly: true }).length;
 
-    expect(screen.getByText(`全台資料庫 · ${baseline} 個地點`)).toBeTruthy();
+    expect(screen.getByText(`全台・${baseline} 個適合的地方`)).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "免費" }));
 
-    expect(screen.getByText(`全台資料庫 · ${freeCount} 個地點`)).toBeTruthy();
+    expect(screen.getByText(`全台・${freeCount} 個適合的地方`)).toBeTruthy();
   });
 
   it("有明確縣市與至少兩筆結果時顯示媽米先幫你看，點擊沿用既有詳情", () => {
@@ -273,9 +276,9 @@ describe("PlayMap", () => {
     render(<PlayMap />);
 
     expect(screen.getByRole("heading", { level: 2 }).textContent).toMatch(
-      /全台資料庫 · \d+ 個地點/,
+      /全台・\d+ 個適合的地方/,
     );
-    expect(screen.getAllByText("查看家長筆記").length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: "看地圖" })).toBeTruthy();
 
     openFilters();
     fireEvent.click(
@@ -305,7 +308,7 @@ describe("PlayMap", () => {
     );
 
     expect(
-      screen.getByText(`全台資料庫 · ${themeCount} 個地點`),
+      screen.getByText(`全台・${themeCount} 個適合的地方`),
     ).toBeTruthy();
   });
 
@@ -369,7 +372,7 @@ describe("PlayMap", () => {
         "aria-pressed",
       ),
     ).toBe("false");
-    expect(screen.getByText(`全台資料庫 · ${outdoorCount} 個地點`)).toBeTruthy();
+    expect(screen.getByText(`全台・${outdoorCount} 個適合的地方`)).toBeTruthy();
 
     fireEvent.click(within(environment).getByRole("button", { name: "不限" }));
     expect(
@@ -389,7 +392,7 @@ describe("PlayMap", () => {
     );
 
     expect(
-      screen.getByText(`全台資料庫 · ${parkCount} 個地點`),
+      screen.getByText(`全台・${parkCount} 個適合的地方`),
     ).toBeTruthy();
   });
 
@@ -415,7 +418,9 @@ describe("PlayMap", () => {
     fireEvent.click(screen.getByRole("button", { name: "清除條件" }));
 
     expect(
-      screen.getByText(`${baseline} 個適合親子出遊的地點`),
+      screen.getByText(
+        `台北市・${baseline} 個適合的地方`,
+      ),
     ).toBeTruthy();
     expect(screen.queryByRole("button", { name: "清除條件" })).toBeNull();
     expect(
@@ -428,11 +433,9 @@ describe("PlayMap", () => {
 
   it("可切換至地圖瀏覽", () => {
     const { container } = render(<PlayMap />);
-    fireEvent.click(screen.getByRole("tab", { name: "地圖" }));
+    openMap();
 
-    expect(
-      screen.getByRole("tab", { name: "地圖" }).getAttribute("aria-selected"),
-    ).toBe("true");
+    expect(screen.getByRole("button", { name: "返回名單" })).toBeTruthy();
     expect(
       container.querySelector("#play-map-panel-map")?.hasAttribute("hidden"),
     ).toBe(false);
@@ -442,14 +445,14 @@ describe("PlayMap", () => {
     expect(screen.getByTestId("map-container")).toBeTruthy();
   });
 
-  it("卡片首屏不掛地圖，切過地圖後再回卡片仍保持掛載", () => {
+  it("名單首屏不掛地圖，切過地圖後再回名單仍保持掛載", () => {
     const { container } = render(<PlayMap />);
     expect(screen.queryByTestId("map-container")).toBeNull();
 
-    fireEvent.click(screen.getByRole("tab", { name: "地圖" }));
+    openMap();
     expect(screen.getByTestId("map-container")).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("tab", { name: "卡片" }));
+    backToList();
     expect(screen.getByTestId("map-container")).toBeTruthy();
     expect(
       container.querySelector("#play-map-panel-map")?.hasAttribute("hidden"),
@@ -459,50 +462,32 @@ describe("PlayMap", () => {
     ).toBe(false);
   });
 
-  it("mobile Map tab 顯示獨立 bottom sheet，並可在三個 snap 間切換", () => {
-    const { container } = render(<PlayMap />);
-    expect(screen.queryByRole("region", { name: "地圖結果" })).toBeNull();
-    expect(container.querySelector(".leaflet-container")).toBeNull();
-
-    fireEvent.click(screen.getByRole("tab", { name: "地圖" }));
-    const results = screen.getByRole("region", { name: "地圖結果" });
-    expect(results.getAttribute("data-snap")).toBe("half");
-
-    const handle = within(results).getByRole("button", {
-      name: "展開更多景點",
-    });
-    fireEvent.click(handle);
-    expect(results.getAttribute("data-snap")).toBe("expanded");
-    fireEvent.click(
-      within(results).getByRole("button", { name: "收合景點列表" }),
-    );
-    expect(results.getAttribute("data-snap")).toBe("collapsed");
-    fireEvent.click(
-      within(results).getByRole("button", { name: "展開景點列表" }),
-    );
-    expect(results.getAttribute("data-snap")).toBe("half");
-  });
-
-  it("editorial recommendation 不進 mobile map results sheet", () => {
-    render(<PlayMap initialCity="桃園市" />);
-    fireEvent.click(screen.getByRole("tab", { name: "地圖" }));
-
-    const results = screen.getByRole("region", { name: "地圖結果" });
-    expect(within(results).queryByText("⭐ 媽米先幫你看")).toBeNull();
-  });
-
-  it("bottom sheet 卡片沿用 Place Sheet 語意，選取不重設 snap", () => {
+  it("手機地圖模式沒有 bottom sheet，改由返回名單離開", () => {
     render(<PlayMap />);
-    fireEvent.click(screen.getByRole("tab", { name: "地圖" }));
-    const results = screen.getByRole("region", { name: "地圖結果" });
+    expect(screen.queryByRole("region", { name: "地圖結果" })).toBeNull();
+    openMap();
+    expect(screen.queryByRole("region", { name: "地圖結果" })).toBeNull();
+    expect(screen.getByRole("button", { name: "返回名單" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "附近" })).toBeNull();
+  });
+
+  it("editorial recommendation 不在地圖模式重複出現", () => {
+    render(<PlayMap initialCity="桃園市" />);
+    expect(screen.getByText("⭐ 媽米先幫你看")).toBeTruthy();
+    openMap();
+    expect(screen.queryByText("⭐ 媽米先幫你看")).toBeNull();
+  });
+
+  it("地圖標記選取開精簡詳情，不依賴列表 sheet", () => {
+    render(<PlayMap />);
+    openMap();
     const place = filterPlaygrounds()[0];
     expect(place).toBeDefined();
     if (!place) return;
-    fireEvent.click(
-      within(results).getByRole("button", {
-        name: `${place.name}，查看詳情`,
-      }),
-    );
+    const trigger = document.createElement("button");
+    act(() => {
+      leafletPropsRef.current?.onSelect(place.id, trigger);
+    });
 
     const placeSheet = screen.getByRole("region", {
       name: `${place.name} 詳情`,
@@ -510,11 +495,7 @@ describe("PlayMap", () => {
     expect(placeSheet).toBeTruthy();
     expect(placeSheet.getAttribute("data-variant")).toBe("compact");
     expect(within(placeSheet).getByRole("button", { name: "更多" })).toBeTruthy();
-    expect(results.getAttribute("data-snap")).toBe("half");
-
-    fireEvent.click(screen.getByRole("button", { name: "關閉地點詳情" }));
-    expect(screen.getByRole("region", { name: "地圖結果" })).toBeTruthy();
-    expect(results.getAttribute("data-snap")).toBe("half");
+    expect(screen.queryByRole("region", { name: "地圖結果" })).toBeNull();
   });
 
   it("開啟 Sheet 後可按關閉還原", () => {
@@ -624,18 +605,19 @@ describe("PlayMap", () => {
       "/for-parents/play-map?free=1",
     );
 
-    fireEvent.click(screen.getByRole("tab", { name: "地圖" }));
+    openMap();
     expect(replaceStateSpy).toHaveBeenCalledWith(
       null,
       "",
       "/for-parents/play-map?free=1&view=map",
     );
 
+    backToList();
     fireEvent.click(screen.getByRole("button", { name: "免費" }));
     expect(replaceStateSpy).toHaveBeenLastCalledWith(
       null,
       "",
-      "/for-parents/play-map?view=map",
+      "/for-parents/play-map",
     );
   });
 
@@ -656,20 +638,16 @@ describe("PlayMap", () => {
     );
 
     expect(
-      screen.getByText(
-        `${indoorFreeCount} 個適合親子出遊的地點`,
-      ),
+      screen.getByText(`新北市・${indoorFreeCount} 個適合的地方`),
     ).toBeTruthy();
-    expect(
-      screen.getByRole("tab", { name: "地圖" }).getAttribute("aria-selected"),
-    ).toBe("true");
+    expect(screen.getByRole("button", { name: "返回名單" })).toBeTruthy();
   });
 
   it("上一頁／下一頁換 initial props 時同步回 state", () => {
     const { rerender } = render(<PlayMap initialCity="台北市" />);
     expect(
       screen.getByText(
-        `${filterPlaygrounds({ city: "台北市" }).length} 個適合親子出遊的地點`,
+        `台北市・${filterPlaygrounds({ city: "台北市" }).length} 個適合的地方`,
       ),
     ).toBeTruthy();
 
@@ -677,7 +655,7 @@ describe("PlayMap", () => {
 
     expect(
       screen.getByText(
-        `${filterPlaygrounds({ city: "桃園市", freeOnly: true }).length} 個適合親子出遊的地點`,
+        `桃園市・${filterPlaygrounds({ city: "桃園市", freeOnly: true }).length} 個適合的地方`,
       ),
     ).toBeTruthy();
   });
@@ -724,7 +702,7 @@ describe("PlayMap", () => {
    */
   it("卡片顯示家長筆記，且名單沒有在地圖看按鈕", () => {
     render(<PlayMap />);
-    const cardsPanel = screen.getByRole("tabpanel", { name: "卡片" });
+    const cardsPanel = screen.getByRole("region", { name: "地點名單" });
     const first = filterPlaygrounds()[0];
     expect(first).toBeDefined();
     if (!first) return;
@@ -738,7 +716,7 @@ describe("PlayMap", () => {
 
   it("卡片不再重複年齡標籤，且仍不含需購票／戶外 muted", () => {
     render(<PlayMap />);
-    const cardsPanel = screen.getByRole("tabpanel", { name: "卡片" });
+    const cardsPanel = screen.getByRole("region", { name: "地點名單" });
     expect(within(cardsPanel).queryAllByText(/^\d+–\d+ 歲$/)).toHaveLength(0);
     expect(within(cardsPanel).queryByText("需購票")).toBeNull();
     expect(within(cardsPanel).queryByText("戶外")).toBeNull();
@@ -746,7 +724,7 @@ describe("PlayMap", () => {
 
   it("卡片以文字標示類型，不只靠色條（色彩單一編碼）", () => {
     render(<PlayMap />);
-    const cardsPanel = screen.getByRole("tabpanel", { name: "卡片" });
+    const cardsPanel = screen.getByRole("region", { name: "地點名單" });
     const first = filterPlaygrounds()[0];
     expect(first).toBeDefined();
     if (!first) return;
@@ -760,19 +738,16 @@ describe("PlayMap", () => {
     ).toBeTruthy();
   });
 
-  it("tabs 支援方向鍵切換", () => {
-    render(<PlayMap />);
-    const cardsTab = screen.getByRole("tab", { name: "卡片" });
-    const mapTab = screen.getByRole("tab", { name: "地圖" });
-
-    expect(cardsTab.getAttribute("tabindex")).toBe("0");
-    expect(mapTab.getAttribute("tabindex")).toBe("-1");
-
-    fireEvent.keyDown(cardsTab, { key: "ArrowRight" });
-
-    expect(mapTab.getAttribute("aria-selected")).toBe("true");
-    expect(mapTab.getAttribute("tabindex")).toBe("0");
-    expect(cardsTab.getAttribute("tabindex")).toBe("-1");
+  it("看地圖與返回名單切換瀏覽模式", () => {
+    const { container } = render(<PlayMap />);
+    openMap();
+    expect(
+      container.querySelector("#play-map-panel-map")?.hasAttribute("hidden"),
+    ).toBe(false);
+    backToList();
+    expect(
+      container.querySelector("#play-map-panel-cards")?.hasAttribute("hidden"),
+    ).toBe(false);
   });
 
   it("篩選導致 Sheet 關閉時不搶 focus", () => {
@@ -883,14 +858,14 @@ describe("PlayMap", () => {
     expect(visible.length).toBe(VISIBLE_STEP);
   });
 
-  it("全國未縮小範圍時區分全台資料庫與個人化結果", () => {
+  it("全國未縮小範圍時用全台摘要，選縣市後改寫範圍", () => {
     render(<PlayMap />);
     expect(
-      screen.getByText("先選「附近」或縣市，名單與地圖會更貼近今天的安排。"),
+      screen.getByRole("heading", { level: 2, name: /全台・\d+ 個適合的地方/ }),
     ).toBeTruthy();
     expect(
-      screen.getByText(/全台資料 \d+ 筆 · 目前可造訪 \d+ 處 · 暫停營業 \d+ 筆/),
-    ).toBeTruthy();
+      screen.queryByText("先選「附近」或縣市，名單與地圖會更貼近今天的安排。"),
+    ).toBeNull();
 
     openFilters();
     fireEvent.click(
@@ -900,8 +875,11 @@ describe("PlayMap", () => {
       ),
     );
     expect(
-      screen.queryByText("先選「附近」或縣市，名單與地圖會更貼近今天的安排。"),
-    ).toBeNull();
+      screen.getByRole("heading", {
+        level: 2,
+        name: `台北市・${filterPlaygrounds({ city: "台北市" }).length} 個適合的地方`,
+      }),
+    ).toBeTruthy();
   });
 
   it("在地圖看會切到地圖、帶入該縣市並開精簡詳情", () => {
@@ -917,9 +895,7 @@ describe("PlayMap", () => {
       screen.getByRole("button", { name: `在地圖上看 ${firstPlace.name}` }),
     );
 
-    expect(
-      screen.getByRole("tab", { name: "地圖" }).getAttribute("aria-selected"),
-    ).toBe("true");
+    expect(screen.getByRole("button", { name: "返回名單" })).toBeTruthy();
     expect(
       container.querySelector("#play-map-panel-map")?.hasAttribute("hidden"),
     ).toBe(false);
@@ -929,6 +905,7 @@ describe("PlayMap", () => {
     expect(sheet).toBeTruthy();
     expect(within(sheet).getByRole("button", { name: "更多" })).toBeTruthy();
     expect(within(sheet).getByText(firstPlace.address, { exact: false })).toBeTruthy();
+    backToList();
     openFilters();
     expect(
       within(screen.getByRole("group", { name: "依縣市篩選" })).getByRole(
@@ -1077,7 +1054,7 @@ describe("PlayMap", () => {
     const areaCount = filterPlaygrounds({ bounds: committedBounds }).length;
     expect(areaCount).toBeGreaterThan(0);
     expect(
-      screen.getByText(`這個區域有 ${areaCount} 個地方`),
+      screen.getByText(`這個區域・${areaCount} 個適合的地方`),
     ).toBeTruthy();
     expect(screen.getByText("⭐ 媽米先幫你看")).toBeTruthy();
     expect(leafletPropsRef.current?.places).toHaveLength(areaCount);
@@ -1089,7 +1066,7 @@ describe("PlayMap", () => {
       freeOnly: true,
     }).length;
     expect(
-      screen.getByText(`這個區域有 ${freeAreaCount} 個地方`),
+      screen.getByText(`這個區域・${freeAreaCount} 個適合的地方`),
     ).toBeTruthy();
     expect(leafletPropsRef.current?.places).toHaveLength(freeAreaCount);
 
@@ -1128,8 +1105,10 @@ describe("PlayMap", () => {
     );
     expect(leafletPropsRef.current?.preserveViewport).toBe(false);
     expect(
-      screen.getByText(/\d+ 個適合親子出遊的地點/).textContent,
-    ).toMatch(/個適合親子出遊的地點/);
+      screen.getByText(
+        `高雄市・${filterPlaygrounds({ city: "高雄市" }).length} 個適合的地方`,
+      ),
+    ).toBeTruthy();
   });
 
   it("桌面並排時名單與地圖同時可見、不顯示互斥分頁", () => {
@@ -1152,7 +1131,7 @@ describe("PlayMap", () => {
     });
 
     const { container } = render(<PlayMap />);
-    expect(screen.queryByRole("tab", { name: "卡片" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "看地圖" })).toBeNull();
     expect(screen.getByRole("region", { name: "地點名單" })).toBeTruthy();
     expect(screen.getByRole("region", { name: "地點地圖" })).toBeTruthy();
     expect(

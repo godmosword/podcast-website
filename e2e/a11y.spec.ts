@@ -143,7 +143,7 @@ test("a11y：親子遊樂地圖（地圖檢視、地點詳情）無 critical/ser
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/for-parents/play-map?city=%E5%8F%B0%E5%8C%97%E5%B8%82");
 
-  await page.getByRole("tab", { name: "地圖" }).click();
+  await page.getByRole("button", { name: "看地圖" }).click();
   await expect(page.locator(".leaflet-container")).toBeVisible({
     timeout: 15_000,
   });

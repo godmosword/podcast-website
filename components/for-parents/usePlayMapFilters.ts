@@ -7,7 +7,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type KeyboardEvent,
 } from "react";
 import {
   listCities,
@@ -37,9 +36,9 @@ import {
   DEFAULT_PLAY_MAP_CENTER,
   listCityCoverage,
 } from "@/lib/playground-coverage";
+import { playMapResultTitle } from "@/lib/play-map-copy";
 import {
   SPLIT_MIN_WIDTH_PX,
-  VIEW_TABS,
   VISIBLE_STEP,
   type BrowseView,
   type EnvironmentFilter,
@@ -116,13 +115,6 @@ export function usePlayMapFilters({
   const cities = useMemo(() => listCities(), []);
   const coverage = useMemo(() => listCityCoverage(), []);
   const allPlaces = useMemo(() => listPlaygrounds(), []);
-  const catalogStatusLabel = useMemo(() => {
-    const closedCount = allPlaces.filter(
-      (place) => place.status === "temporarily-closed",
-    ).length;
-    const activeCount = allPlaces.length - closedCount;
-    return `全台資料 ${allPlaces.length} 筆 · 目前可造訪 ${activeCount} 處 · 暫停營業 ${closedCount} 筆`;
-  }, [allPlaces]);
   const reduceMotion = usePrefersReducedMotion();
   const splitLayout = useMinWidth(SPLIT_MIN_WIDTH_PX);
 
@@ -332,11 +324,12 @@ export function usePlayMapFilters({
     strollerFriendlyOnly ||
     highEnergyOnly;
 
-  const filterSummaryLabel = viewportBounds
-    ? `這個區域有 ${filtered.length} 個地方`
-    : city === null && userLatLng === null
-      ? `全台資料庫 · ${filtered.length} 個地點`
-      : `${filtered.length} 個適合親子出遊的地點`;
+  const resultTitle = playMapResultTitle({
+    count: filtered.length,
+    city,
+    nearbyActive: userLatLng !== null,
+    viewportSearchActive: viewportBounds !== null,
+  });
 
   const syncUrl = useCallback(
     (next: Partial<PlayMapQuery>) => {
@@ -480,28 +473,6 @@ export function usePlayMapFilters({
       syncUrl({ view: next });
     },
     [syncUrl],
-  );
-
-  const handleTabKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
-      const index = VIEW_TABS.findIndex((tab) => tab.view === browseView);
-      let nextIndex: number | null = null;
-
-      if (event.key === "ArrowRight") nextIndex = (index + 1) % VIEW_TABS.length;
-      else if (event.key === "ArrowLeft")
-        nextIndex = (index - 1 + VIEW_TABS.length) % VIEW_TABS.length;
-      else if (event.key === "Home") nextIndex = 0;
-      else if (event.key === "End") nextIndex = VIEW_TABS.length - 1;
-      if (nextIndex === null) return;
-
-      event.preventDefault();
-      const nextTab = VIEW_TABS[nextIndex];
-      handleSelectView(nextTab.view);
-      event.currentTarget
-        .querySelector<HTMLButtonElement>(`[data-view-tab="${nextTab.view}"]`)
-        ?.focus();
-    },
-    [browseView, handleSelectView],
   );
 
   const handleClearFilters = useCallback(() => {
@@ -708,7 +679,6 @@ export function usePlayMapFilters({
     coverageLabel: [ageHeadline, coverageHeadline(coverage)]
       .filter(Boolean)
       .join(" · "),
-    catalogStatusLabel,
     editorialPick,
     reduceMotion,
     splitLayout,
@@ -747,7 +717,7 @@ export function usePlayMapFilters({
     allCityCount,
     cityCenter,
     hasExtraFilters,
-    filterSummaryLabel,
+    resultTitle,
     visibleCount,
     canLoadMore,
     visibleCountLabel,
@@ -767,7 +737,6 @@ export function usePlayMapFilters({
     handleBlurPlace,
     handleNearMe,
     handleSelectView,
-    handleTabKeyDown,
     handleClearFilters,
     handleSelectFromCard,
     handleSelectFromMap,

@@ -2,63 +2,22 @@
 
 import Doodle from "@/components/decor/Doodle";
 import Wheel from "@/components/decor/Wheel";
-import { VIEW_TABS, type PlayMapToolbarProps } from "./PlayMapContract";
+import type { PlayMapToolbarProps } from "./PlayMapContract";
 import styles from "./PlayMap.module.css";
 
-export function PlayMapToolbar({
-  howToStart,
-  coverageLabel,
-  browseView,
-  onSelectView,
-  onTabKeyDown,
-  hideViewTabs = false,
-}: PlayMapToolbarProps) {
+export function PlayMapToolbar({ compact = false }: PlayMapToolbarProps) {
   return (
-    <header className={styles.toolbar}>
+    <header className={styles.toolbar} data-compact={compact ? "true" : "false"}>
       <div className={styles.titleBlock}>
-        <p className={styles.eyebrow}>親子出遊工具</p>
-        <div className={styles.titleRow}>
-          <h1 className={styles.title}>親子遊樂地圖</h1>
+        <h1 className={styles.title}>親子遊樂地圖</h1>
+        {compact ? null : (
           <span className={styles.titleDecor} aria-hidden>
-            <Doodle kind="blob" size={34} color="var(--c-mint)" />
-            <Wheel size={26} color="var(--c-yellow)" />
-            <Doodle kind="burst" size={26} color="var(--c-pink)" />
+            <Doodle kind="blob" size={28} color="var(--c-mint)" />
+            <Wheel size={22} color="var(--c-yellow)" />
+            <Doodle kind="burst" size={22} color="var(--c-pink)" />
           </span>
-        </div>
-        <p className={styles.howToStart}>{howToStart}</p>
-        {coverageLabel ? <p className={styles.coverage}>{coverageLabel}</p> : null}
+        )}
       </div>
-
-      {hideViewTabs ? null : (
-        <div
-          className={styles.viewTabs}
-          role="tablist"
-          aria-label="瀏覽方式"
-          onKeyDown={onTabKeyDown}
-        >
-          {VIEW_TABS.map((tab) => {
-            const active = browseView === tab.view;
-            return (
-              <button
-                key={tab.view}
-                type="button"
-                role="tab"
-                id={tab.id}
-                data-view-tab={tab.view}
-                aria-selected={active}
-                aria-controls={tab.panelId}
-                tabIndex={active ? 0 : -1}
-                className={[styles.viewTab, active ? styles.viewTabActive : ""]
-                  .filter(Boolean)
-                  .join(" ")}
-                onClick={() => onSelectView(tab.view)}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
-      )}
     </header>
   );
 }

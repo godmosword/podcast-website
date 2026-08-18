@@ -29,6 +29,13 @@ import type { LatLng } from "@/lib/playground-distance";
 import { playgroundTypeGlyphSvg } from "@/lib/playground-type-glyph";
 import { playgroundTypeVisualKey } from "@/lib/playground-type-visual";
 import { DEFAULT_PLAY_MAP_CENTER } from "@/lib/playground-coverage";
+import {
+  TAIWAN_MAX_BOUNDS,
+  TAIWAN_MAX_BOUNDS_VISCOSITY,
+  TAIWAN_SOFT_MIN_ZOOM,
+  taiwanMapBoundsCorners,
+  taiwanNationalView,
+} from "@/lib/play-map-camera";
 import { pickNearest } from "@/lib/playground-distance";
 import { NEAR_ME_FIT_COUNT } from "./PlayMapContract";
 import type {
@@ -50,6 +57,8 @@ type FitBoundsProps = {
   markProgrammaticCamera: () => void;
   /** 選中時把針抬出 sheet 覆蓋區：[right, bottom] */
   selectedPad: [number, number];
+  /** 全國未縮小範圍：用台灣框，不用 fit 縣市聚合點（會把福建放進主畫面）。 */
+  nationalFrame: boolean;
   /**
    * 鏡頭重算的唯一觸發鍵。涵蓋 clusterMode、縣市範圍、命中筆數、selectedId、
    * splitLayout（選中 padding 隨並排／堆疊切換）。
@@ -123,6 +132,7 @@ function FitBounds({
   preserveViewport,
   markProgrammaticCamera,
   selectedPad,
+  nationalFrame,
   fitKey,
 }: FitBoundsProps) {
   const map = useMap();
@@ -134,6 +144,7 @@ function FitBounds({
     selectedId,
     preserveViewport,
     selectedPad,
+    nationalFrame,
   });
   // 無依賴陣列：每次 commit 都寫入最新快照。宣告在主 effect 之前，
   // 同一次 commit 內主 effect 讀到的已是本輪 props。
@@ -146,6 +157,7 @@ function FitBounds({
       selectedId,
       preserveViewport,
       selectedPad,
+      nationalFrame,
     };
   });
 
@@ -170,6 +182,11 @@ function FitBounds({
       return;
     } else if (snap.preserveViewport) {
       return;
+    } else if (snap.nationalFrame) {
+      markProgrammaticCamera();
+      map.invalidateSize();
+      const view = taiwanNationalView(map.getSize().x);
+      map.setView(view.center, view.zoom, motion);
     } else if (snap.points.length === 0) {
       markProgrammaticCamera();
       map.setView(snap.emptyCenter, DEFAULT_ZOOM, motion);
@@ -479,7 +496,7 @@ export type PlayMapLeafletProps = {
     snapshot: PlayMapViewportSnapshot,
     source: PlayMapViewportChangeSource,
   ) => void;
-  /** Mobile results sheet snap 完成後，要求 Leaflet 重算容器尺寸。 */
+  /** 面板由 hidden 切回可見時，Leaflet 需重算容器尺寸。 */
   resizeRequest: number;
   /** 桌面並排時 sheet 在右側，padding 改偏右。 */
   splitLayout: boolean;
@@ -592,7 +609,7 @@ export default function PlayMapLeaflet({
     [spatialSingletons, visibleSpatialClusters],
   );
   const selectedPad = useMemo(
-    (): [number, number] => (splitLayout ? [280, 72] : [48, 220]),
+    (): [number, number] => (splitLayout ? [280, 72] : [48, 120]),
     [splitLayout],
   );
   const nearMePoints = useMemo((): Array<[number, number]> | null => {
@@ -623,10 +640,13 @@ export default function PlayMapLeaflet({
 
   return (
     <>
-      <MapContainer
+        <MapContainer
         className={styles.map}
         center={DEFAULT_PLAY_MAP_CENTER}
         zoom={DEFAULT_ZOOM}
+        minZoom={TAIWAN_SOFT_MIN_ZOOM}
+        maxBounds={taiwanMapBoundsCorners(TAIWAN_MAX_BOUNDS)}
+        maxBoundsViscosity={TAIWAN_MAX_BOUNDS_VISCOSITY}
         scrollWheelZoom={false}
         zoomControl={false}
         aria-label="親子遊樂地點地圖"
@@ -654,6 +674,7 @@ export default function PlayMapLeaflet({
           preserveViewport={preserveViewport}
           markProgrammaticCamera={markProgrammaticCamera}
           selectedPad={selectedPad}
+          nationalFrame={clusterMode && selectedId === null && !nearMeCamera}
           fitKey={fitKey}
         />
         {markerMode === "city"

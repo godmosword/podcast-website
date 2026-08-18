@@ -51,43 +51,27 @@ describe("PlayMap.module.css map-chip 用量", () => {
     );
   });
 
-  /*
-   * 針的水滴造型與 glyph 抵銷必須共用同一個旋轉來源，避免日後只改到
-   * 基礎宣告時，選中態或 reduced-motion 狀態靜默遺失抵銷。
-   */
-  it("剪影 holder 以 SSOT 反轉抵銷水滴旋轉", () => {
+  it("地圖針改圓形容器，剪影正向不再靠旋轉抵銷", () => {
     expect(css).toMatch(
-      /:global\(\.playMapMarkerHost\)\s*\{[^}]*--pin-rot:\s*-45deg/,
+      /:global\(\.playMapPin\)\s*\{[^}]*border-radius:\s*50%/s,
     );
     expect(css).toMatch(
-      /:global\(\.playMapPin\)\s*\{[^}]*transform:\s*rotate\(var\(--pin-rot\)\)/,
+      /:global\(\.playMapPinGlyph\)\s*\{[^}]*width:\s*18px/s,
     );
-    expect(css).toMatch(
-      /:global\(\.playMapPinGlyph\)\s*\{[^}]*transform:\s*rotate\(calc\(-1 \* var\(--pin-rot\)\)\)/,
-    );
-    expect(css).not.toMatch(/rotate\(-45deg\)|rotate\(45deg\)/);
+    expect(css).not.toMatch(/--pin-rot/);
   });
 
-  it("mobile results sheet 保留三段高度、獨立捲動與拖曳觸控區", () => {
-    expect(css).toMatch(/\.resultsSheet\s*\{[^}]*position:\s*absolute/s);
-    expect(css).toMatch(/\.resultsSheet\s*\{[^}]*height:\s*18%/s);
-    expect(css).toMatch(/\.resultsSheetHalf\s*\{[^}]*height:\s*50%/s);
-    expect(css).toMatch(/\.resultsSheetExpanded\s*\{[^}]*height:\s*86%/s);
+  it("不再保留 mobile results sheet 三段高度", () => {
+    expect(css).not.toMatch(/\.resultsSheet\b/);
+  });
+
+  it("手機地圖模式改全幅，不跟篩選列搶高度", () => {
     expect(css).toMatch(
-      /\.resultsSheetScroll\s*\{[^}]*overflow-y:\s*auto[^}]*overscroll-behavior:\s*contain/s,
-    );
-    expect(css).toMatch(
-      /\.resultsSheetHandle\s*\{[^}]*touch-action:\s*none/s,
-    );
-    expect(css).toMatch(
-      /\.resultsSheet\[data-dragging="true"\]\s*\{[^}]*transition:\s*none/s,
+      /\.root\[data-mobile-map="true"\] \.mapShell\s*\{[^}]*100dvh/s,
     );
   });
 
-  it("mobile handle 加寬置中，卡片導航只視覺降噪而不移除 DOM", () => {
-    expect(css).toMatch(
-      /\.resultsSheetHandle\s*\{[^}]*width:\s*72px[^}]*justify-self:\s*center/s,
-    );
+  it("卡片導航只視覺降噪而不移除 DOM", () => {
     expect(css).toMatch(
       /@media\s*\(max-width:\s*979px\)\s*\{[^}]*\.cardsPanel \.cardActions\s*\{[^}]*display:\s*none/s,
     );

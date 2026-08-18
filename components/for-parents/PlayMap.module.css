@@ -1,7 +1,7 @@
 .root {
   position: relative;
   display: grid;
-  gap: var(--space-6);
+  gap: var(--space-4);
   width: min(1100px, 100%);
   margin: var(--space-4) auto 0;
 }
@@ -23,13 +23,20 @@
 .toolbar {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--space-3) var(--space-4);
-  padding-bottom: var(--space-2);
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding-bottom: var(--space-1);
+}
+
+.toolbar[data-compact="true"] {
+  padding-bottom: 0;
 }
 
 .titleBlock {
-  flex: 1 1 200px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
   min-width: 0;
 }
 
@@ -41,83 +48,11 @@
   line-height: 1.15;
 }
 
-.eyebrow,
-.resultEyebrow {
-  margin: 0 0 6px;
-  color: var(--accent-ink);
-  font-size: var(--fs-meta);
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  line-height: 1.3;
-}
-
-.titleRow {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 14px;
-}
-
 .titleDecor {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
-}
-
-.howToStart {
-  margin: 8px 0 0;
-  color: var(--accent-ink);
-  font-size: 0.95rem;
-  font-weight: 700;
-  line-height: 1.45;
-}
-
-.coverage {
-  margin: 6px 0 0;
-  color: var(--ink-soft);
-  font-size: var(--fs-meta);
-  font-weight: 600;
-  line-height: 1.4;
-}
-
-.viewTabs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px;
-  min-width: min(220px, 100%);
-  padding: 4px;
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius-lg);
-  background: var(--card);
-  box-shadow: var(--shadow-sm);
-}
-
-.viewTab {
-  min-height: 44px;
-  border: none;
-  border-radius: calc(var(--radius-lg) - 4px);
-  background: transparent;
-  color: var(--ink-soft);
-  font: inherit;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform var(--motion-press), opacity var(--motion-press),
-    background-color var(--motion-press);
-}
-
-.viewTabActive {
-  background: var(--accent-ink);
-  color: var(--card);
-  border: 1px solid var(--accent-ink);
-  box-shadow: var(--shadow-sm);
-  font-weight: 700;
-}
-
-.viewTab:active {
-  transform: scale(0.98);
-  opacity: 0.94;
 }
 
 .intentSection {
@@ -393,32 +328,42 @@
 
 .resultHeaderActions {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: flex-end;
   gap: var(--space-2);
   flex: 0 0 auto;
 }
 
-.resultEyebrow {
-  margin-bottom: 4px;
+.openMapButton,
+.backToListButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--accent-ink);
+  border-radius: var(--radius-lg);
+  background: var(--accent-ink);
+  color: var(--card);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform var(--motion-press), opacity var(--motion-press);
+}
+
+.openMapButton:active,
+.backToListButton:active {
+  transform: scale(0.98);
+  opacity: 0.94;
 }
 
 .resultTitle {
   margin: 0;
   color: var(--ink);
-  font-size: 1.12rem;
+  font-size: 1.05rem;
   font-weight: 800;
   line-height: 1.3;
-}
-
-.resultHint {
-  flex: 0 0 auto;
-  margin: 0 0 2px;
-  color: var(--ink-soft);
-  font-size: var(--fs-meta);
-  font-weight: 600;
-  line-height: 1.4;
-  text-align: right;
 }
 
 .cardsPanel {
@@ -502,8 +447,8 @@
 .typeScene {
   display: block;
   flex: 0 0 auto;
-  width: 72px;
-  height: 72px;
+  width: 52px;
+  height: 52px;
   border-radius: var(--radius-md);
   overflow: hidden;
   background: color-mix(in srgb, var(--card-accent, var(--accent)) 42%, var(--card));
@@ -828,6 +773,54 @@
   box-shadow: var(--shadow-sm);
 }
 
+.root[data-mobile-map="true"] {
+  width: 100%;
+  margin: 0;
+  gap: 0;
+}
+
+.root[data-mobile-map="true"] .toolbar {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.root[data-mobile-map="true"] .content {
+  gap: 0;
+  min-height: 0;
+}
+
+.root[data-mobile-map="true"] .mapShell {
+  height: calc(100dvh - var(--nav-h, 56px));
+  min-height: calc(100dvh - var(--nav-h, 56px));
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+}
+
+.mapChrome {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 720;
+}
+
+.backToListButton {
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+  color: var(--accent-ink);
+  box-shadow: var(--shadow-sm);
+}
+
+.root[data-mobile-map="true"] .mapHint {
+  top: 60px;
+}
+
 .mapShell[hidden] {
   display: none;
 }
@@ -841,7 +834,6 @@
 
 .mapHint {
   position: absolute;
-  /* 下緣讓給 bottom sheet 與 OSM attribution，提示移到左上。 */
   inset: 12px auto auto 12px;
   max-width: calc(100% - 96px);
   z-index: 500;
@@ -879,137 +871,6 @@
 .viewportSearchButton:focus-visible {
   background: var(--map-chip-ink);
   color: var(--map-chip);
-}
-
-.resultsSheet {
-  position: absolute;
-  inset: auto 0 0;
-  z-index: 600;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  height: 18%;
-  min-height: 112px;
-  max-height: calc(100% - 48px);
-  padding: 0 var(--space-3) calc(var(--space-3) + var(--safe-bottom));
-  overflow: hidden;
-  border: 1px solid var(--hairline);
-  border-bottom: none;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  background: color-mix(in srgb, var(--card) 97%, transparent);
-  box-shadow: var(--shadow-md);
-  transition: height var(--motion-page);
-}
-
-.resultsSheetHalf {
-  height: 50%;
-}
-
-.resultsSheetExpanded {
-  height: 86%;
-}
-
-.resultsSheetHeader {
-  display: grid;
-  gap: 2px;
-  align-items: center;
-  min-height: 88px;
-  padding: 6px 0 4px;
-}
-
-.resultsSheetHeaderTop {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--space-2);
-  align-items: center;
-}
-
-.resultsSheetHeaderActions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.resultsSheetScopeButton {
-  min-width: 44px;
-  padding-inline: 10px;
-  color: var(--accent-ink);
-  font-size: 0.78rem;
-  white-space: nowrap;
-}
-
-.resultsSheetSummary {
-  min-width: 0;
-  padding-left: 2px;
-}
-
-.resultsSheetSummary .resultEyebrow {
-  margin-bottom: 2px;
-}
-
-.resultsSheetTitle {
-  margin: 0;
-  color: var(--ink);
-  font-size: 1rem;
-  font-weight: 800;
-  line-height: 1.3;
-}
-
-.resultsSheetHandle {
-  display: grid;
-  place-items: center;
-  width: 72px;
-  height: 44px;
-  justify-self: center;
-  border: 1px solid var(--hairline);
-  border-radius: 999px;
-  background: var(--warm-chip-bg);
-  cursor: grab;
-  touch-action: none;
-}
-
-.resultsSheetHandle:active,
-.resultsSheet[data-dragging="true"] .resultsSheetHandle {
-  cursor: grabbing;
-}
-
-.resultsSheetGrip {
-  display: block;
-  width: 42px;
-  height: 5px;
-  border-radius: 999px;
-  background: var(--accent-ink);
-}
-
-.resultsSheetScroll {
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scroll-padding-block: var(--space-2);
-  -webkit-overflow-scrolling: touch;
-}
-
-.resultsSheetList {
-  display: grid;
-  gap: var(--space-3);
-  margin: 0;
-  padding: 0 0 var(--space-3);
-  list-style: none;
-}
-
-.resultsSheetCollapsed .resultsSheetList > li:not(:first-child) {
-  display: none;
-}
-
-.resultsSheetEmpty {
-  display: grid;
-  justify-items: start;
-  gap: var(--space-3);
-  padding: var(--space-3) 2px;
-}
-
-.resultsSheet[data-dragging="true"] {
-  user-select: none;
-  transition: none;
 }
 
 .empty {
@@ -1351,7 +1212,6 @@
   /* 地圖針的固定美術色：不隨主題反轉（同 DESIGN.md 的 OSM tile 禁止 invert 精神）。 */
   --pin-glyph-ink: #34302b;
   --pin-neutral: #cfcac2;
-  --pin-rot: -45deg;
   background: transparent;
   border: none;
   overflow: visible;
@@ -1372,31 +1232,40 @@
 }
 
 :global(.playMapPin) {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 50% 50% 50% 0;
-  transform: rotate(var(--pin-rot));
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   background: var(--pin-color, var(--c-mint, #b7df9b));
   border: 2px solid var(--card);
   box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 22%, transparent);
 }
 
+:global(.playMapPin)::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 1px;
+  width: 8px;
+  height: 8px;
+  border-radius: 0 0 2px;
+  background: var(--pin-color, var(--c-mint, #b7df9b));
+  border-right: 2px solid var(--card);
+  border-bottom: 2px solid var(--card);
+  transform: translate(-50%, 6px) rotate(45deg);
+}
+
 /*
  * 類型剪影 holder（內容由 lib/playground-type-glyph.ts 產生）。
- *
- * `.playMapPin` 帶 `var(--pin-rot)` 做水滴造型，子元素會一起轉。原本這裡是
- * 旋轉對稱的圓點所以看不出來；換成有方向性的剪影後必須反轉抵銷，否則
- * 七個母題會整組歪 45 度。抵銷值從同一個 `--pin-rot` 推導，避免日後
- * 基礎宣告增加其他 transform 時，選中態或 reduced-motion 狀態靜默遺失。
+ * 圓形容器不再旋轉，剪影維持正向、可比水滴針更大。
  */
 :global(.playMapPinGlyph) {
   display: grid;
   place-items: center;
-  width: 15px;
-  height: 15px;
-  transform: rotate(calc(-1 * var(--pin-rot)));
+  width: 18px;
+  height: 18px;
   /*
    * 固定深墨，**不隨主題翻轉**（登記於 DESIGN.md play-map 段的固定美術色）。
    * 針色 --c-* 在日夜皆為中高明度，兩個看似自然的選擇都不到 WCAG 1.4.11 的 3:1：
@@ -1463,13 +1332,9 @@
 
 /*
  * 選中態用加重的 box-shadow，不用 filter: drop-shadow。
- * filter 會建立離屏合成面：glyph 以 +45° 光柵化進 buffer、再由本層 -45° 轉回來，
- * 同一組剪影被重取樣兩次，選中的那根針反而比未選中的糊——而那正是使用者在看的針。
- * DESIGN.md 也已登記「同層 filter＋子層 transform 在 iOS 會重影」。
- * box-shadow 跟隨 border-radius 的水滴輪廓，視覺結果幾乎相同且無離屏面。
+ * filter 會建立離屏合成面；圓形容器不再旋轉，陰影即可表達抬升。
  */
 :global(.playMapMarkerButton[aria-pressed="true"] .playMapPin) {
-  transform: rotate(var(--pin-rot));
   box-shadow: 0 3px 6px color-mix(in srgb, var(--ink) 30%, transparent);
 }
 
@@ -1561,7 +1426,7 @@
 
 @media (min-width: 980px) {
   .content {
-    grid-template-columns: minmax(280px, 38%) minmax(0, 1fr);
+    grid-template-columns: minmax(300px, 44%) minmax(0, 1fr);
     align-items: stretch;
     min-height: 64dvh;
   }
@@ -1606,23 +1471,17 @@
     align-items: stretch;
   }
 
+  .titleDecor {
+    display: none;
+  }
+
   .resultHeader {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .resultHint {
-    text-align: left;
-  }
-
-  .viewTabs {
-    width: 100%;
+    align-items: center;
   }
 
   .typeScene {
-    width: 64px;
-    height: 64px;
+    width: 48px;
+    height: 48px;
   }
 
   .editorialPickButton {
@@ -1672,13 +1531,14 @@
 @media (prefers-reduced-motion: reduce) {
   .chip,
   .intentChip,
-  .viewTab,
   .card,
   .cardMain,
   .cardNav,
   .cardMapBtn,
   .clearFilters,
   .filterToggle,
+  .openMapButton,
+  .backToListButton,
   .closeButton,
   .navButton,
   .placeLink,
@@ -1686,8 +1546,6 @@
   .moreButton,
   .loadMore,
   .viewportSearchButton,
-  .resultsSheet,
-  .resultsSheetHandle,
   :global(.playMapMarkerButton),
   :global(.playMapClusterButton) {
     transition: none;
@@ -1711,8 +1569,7 @@
    * transition 既已停用，位移會瞬間套用，沒有動態可言。
    */
   :global(.playMapMarkerButton[aria-pressed="true"] .playMapPin) {
-    /* 旋轉保留：水滴造型與 glyph 抵銷都靠它。 */
-    transform: rotate(var(--pin-rot));
+    transform: none;
   }
 
   :global(.playMapMarkerButton:active),

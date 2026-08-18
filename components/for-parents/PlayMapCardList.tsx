@@ -30,8 +30,9 @@ export function PlayMapCardList({
   onBlur,
   onSelect,
   registerCardRef,
-  showScopeHint,
-  catalogStatusLabel,
+  resultTitle,
+  showMapAction,
+  onOpenMap,
   coverageLabel,
   editorialPick,
   visibleCount,
@@ -44,18 +45,8 @@ export function PlayMapCardList({
     <>
       <div ref={topRef} aria-hidden />
       <div className={styles.resultHeader}>
-        <div>
-          <p className={styles.resultEyebrow}>地點清單</p>
-          <h2 className={styles.resultTitle}>
-            {viewportSearchActive
-              ? `這個區域有 ${matched.length} 個地方`
-              : showScopeHint
-                ? `全台資料庫 · ${matched.length} 個地點`
-                : `${matched.length} 個適合親子出遊的地點`}
-          </h2>
-        </div>
+        <h2 className={styles.resultTitle}>{resultTitle}</h2>
         <div className={styles.resultHeaderActions}>
-          <p className={styles.resultHint}>點卡片看家長筆記</p>
           {viewportSearchActive ? (
             <button
               type="button"
@@ -73,21 +64,17 @@ export function PlayMapCardList({
               清除條件
             </button>
           ) : null}
+          {showMapAction ? (
+            <button
+              type="button"
+              className={styles.openMapButton}
+              onClick={onOpenMap}
+            >
+              看地圖
+            </button>
+          ) : null}
         </div>
       </div>
-      {showScopeHint ? (
-        <div className={styles.scopeHintRow}>
-          <span className={styles.brandAnchor} aria-hidden>
-            <DuduSprite emotion="happy" decorative />
-          </span>
-          <div className={styles.scopeHintCopy}>
-            <p className={styles.scopeHint} role="status">
-              先選「附近」或縣市，名單與地圖會更貼近今天的安排。
-            </p>
-            <p className={styles.scopeStatus}>{catalogStatusLabel}</p>
-          </div>
-        </div>
-      ) : null}
       {editorialPick ? (
         <PlayMapEditorialPick
           place={editorialPick.place}

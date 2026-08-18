@@ -5,14 +5,13 @@
  * 「diff 來自拆檔」還是「diff 來自功能變更」。改這裡等同改契約，
  * 需回到 Plan 重新過審。
  */
-import type { KeyboardEvent, PointerEvent, RefObject } from "react";
+import type { RefObject } from "react";
 import type { Playground, PlaygroundType } from "@/data/playgrounds";
 import type { LatLng } from "@/lib/playground-distance";
 import type { PlayMapView } from "@/lib/playgrounds-query";
 
 export type BrowseView = PlayMapView;
 export type SheetVariant = "compact" | "full";
-export type MobileMapResultsSnap = "collapsed" | "half" | "expanded";
 export type EnvironmentFilter = "all" | "indoor" | "outdoor";
 export type SelectSource = "card" | "map";
 export type GeoStatus = "idle" | "pending" | "ready" | "denied";
@@ -34,34 +33,12 @@ export const NEAR_ME_FIT_COUNT = 8;
 /** 桌面並排名單＋地圖（對齊全站 980 導覽斷點）。 */
 export const SPLIT_MIN_WIDTH_PX = 980;
 
-export const VIEW_TABS: readonly {
-  view: BrowseView;
-  label: string;
-  id: string;
-  panelId: string;
-}[] = [
-  {
-    view: "cards",
-    label: "卡片",
-    id: "play-map-tab-cards",
-    panelId: "play-map-panel-cards",
-  },
-  {
-    view: "map",
-    label: "地圖",
-    id: "play-map-tab-map",
-    panelId: "play-map-panel-map",
-  },
-];
+export const CARDS_PANEL_ID = "play-map-panel-cards";
+export const MAP_PANEL_ID = "play-map-panel-map";
 
 export type PlayMapToolbarProps = {
-  howToStart: string;
-  coverageLabel: string;
-  browseView: BrowseView;
-  onSelectView: (next: BrowseView) => void;
-  onTabKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void;
-  /** 桌面並排時隱藏互斥分頁，避免與雙欄重複。 */
-  hideViewTabs?: boolean;
+  /** 手機地圖模式隱藏頁首裝飾，把畫面讓給地圖。 */
+  compact?: boolean;
 };
 
 export type PlayMapControlBarProps = {
@@ -86,7 +63,7 @@ export type PlayMapControlBarProps = {
   onToggleHighEnergy: () => void;
   filtersOpen: boolean;
   onToggleFilters: () => void;
-  filterSummaryLabel: string;
+  resultTitle: string;
   cities: readonly string[];
   city: string | null;
   cityCounts: ReadonlyMap<string, number>;
@@ -128,10 +105,10 @@ export type PlayMapCardListProps = {
   onBlur: (id: string) => void;
   onSelect: (id: string, trigger: HTMLElement) => void;
   registerCardRef: (id: string, element: HTMLLIElement | null) => void;
-  /** 未選縣市且未定位時，提示先縮小範圍。 */
-  showScopeHint: boolean;
-  /** 未縮小範圍時，明確說明這是全台資料庫而非個人化推薦。 */
-  catalogStatusLabel: string;
+  resultTitle: string;
+  /** 手機名單模式顯示「看地圖」；桌面並排不需要。 */
+  showMapAction: boolean;
+  onOpenMap: () => void;
   /** 低於主要結果摘要顯示的 coverage/editorial 狀態。 */
   coverageLabel: string;
   editorialPick: {
@@ -156,21 +133,4 @@ export type PlayMapSheetProps = {
   onExpand: () => void;
   onShowOnMap: (id: string, trigger: HTMLElement) => void;
   panelRef: RefObject<HTMLDivElement | null>;
-};
-
-export type MobileMapResultsSheetProps = {
-  snap: MobileMapResultsSnap;
-  panelRef: RefObject<HTMLElement | null>;
-  matched: readonly Playground[];
-  selectedId: string | null;
-  userLatLng: LatLng | null;
-  nearbyActive: boolean;
-  viewportSearchActive: boolean;
-  onClearViewportSearch: () => void;
-  onSelect: (id: string, trigger: HTMLElement) => void;
-  onHandleClick: () => void;
-  onHandlePointerDown: (event: PointerEvent<HTMLButtonElement>) => void;
-  onHandlePointerMove: (event: PointerEvent<HTMLButtonElement>) => void;
-  onHandlePointerUp: (event: PointerEvent<HTMLButtonElement>) => void;
-  onHandlePointerCancel: (event: PointerEvent<HTMLButtonElement>) => void;
 };
