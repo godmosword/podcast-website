@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect } from "react";
 import DuduSprite from "@/components/dudu/DuduSprite";
 import {
@@ -236,6 +237,12 @@ export function PlayMapSheet({
             >
               顯示位置
             </a>
+            <Link
+              className={styles.officialLink}
+              href={`/for-parents/play-map/${encodeURIComponent(place.id)}`}
+            >
+              查看完整資訊
+            </Link>
             {place.officialUrl ? (
               <a
                 className={styles.officialLink}

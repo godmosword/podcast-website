@@ -6,6 +6,10 @@ import { CHANNEL_DESCRIPTION, CHANNEL_TITLE } from "@/lib/feed-constants";
 import { siteRssUrl } from "@/lib/feed";
 import { STATIC_PAGE_MODIFIED_DATES } from "@/lib/page-freshness";
 import { platformShowUrls } from "@/lib/platforms";
+import {
+  playgroundDetailDescription,
+  playgroundDetailUrl,
+} from "@/lib/playground-detail";
 import { getSiteUrl } from "@/lib/site-url";
 import { storyDescription } from "@/lib/story-metadata";
 import { storyAudioUrl, storyCoverPath } from "@/lib/story-utils";
@@ -241,6 +245,35 @@ export function characterCreativeWorkJsonLd(
   };
 }
 
+export function playgroundPlaceJsonLd(
+  place: Playground,
+): Record<string, unknown> {
+  const url = playgroundDetailUrl(place.id);
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Place",
+    "@id": `${url}#place`,
+    name: place.name,
+    url,
+    description: playgroundDetailDescription(place),
+    address: {
+      "@type": "PostalAddress",
+      addressCountry: "TW",
+      addressLocality: place.city,
+      ...(place.district ? { addressRegion: place.district } : {}),
+      streetAddress: place.address,
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: place.lat,
+      longitude: place.lng,
+    },
+    isAccessibleForFree: place.free,
+    ...(place.officialUrl ? { sameAs: place.officialUrl } : {}),
+  };
+}
+
 /**
  * 親子遊樂地圖的地點清單（ItemList of Place）。
  * 卡片列表本身受篩選影響，這裡固定輸出全部收錄地點，讓各縣市名稱有穩定的結構化訊號。
@@ -266,8 +299,9 @@ export function playgroundItemListJsonLd(places: readonly Playground[]) {
       position: index + 1,
       item: {
         "@type": "Place",
-        "@id": `${pageUrl}#${place.id}`,
+        "@id": `${playgroundDetailUrl(place.id)}#place`,
         name: place.name,
+        url: playgroundDetailUrl(place.id),
         address: {
           "@type": "PostalAddress",
           addressCountry: "TW",
@@ -281,7 +315,7 @@ export function playgroundItemListJsonLd(places: readonly Playground[]) {
           longitude: place.lng,
         },
         isAccessibleForFree: place.free,
-        ...(place.officialUrl ? { url: place.officialUrl } : {}),
+        ...(place.officialUrl ? { sameAs: place.officialUrl } : {}),
       },
     })),
   };

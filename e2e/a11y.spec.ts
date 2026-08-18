@@ -21,6 +21,10 @@ const PAGES: { name: string; path: string; exclude?: string }[] = [
   },
   { name: "宇宙地圖", path: "/adventures" },
   { name: "親子遊樂地圖", path: "/for-parents/play-map" },
+  {
+    name: "親子景點詳情",
+    path: "/for-parents/play-map/ty-kids-museum",
+  },
 ];
 
 const BLOCKING_IMPACTS = new Set(["critical", "serious"]);

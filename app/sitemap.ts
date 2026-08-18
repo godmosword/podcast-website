@@ -1,11 +1,13 @@
 import type { MetadataRoute } from "next";
 import { allTags, allVehicles, getStories } from "@/data/content";
 import { storyDateModified } from "@/data/story-dates";
+import { listPlaygrounds } from "@/data/playgrounds";
 import { universe } from "@/data/universe";
 import {
   collectionModifiedDate,
   STATIC_PAGE_MODIFIED_DATES,
 } from "@/lib/page-freshness";
+import { playgroundDetailPath } from "@/lib/playground-detail";
 import { getSiteUrl } from "@/lib/site-url";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -130,5 +132,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
-  return [...staticPages, ...storyPages, ...topicPages, ...vehiclePages];
+  const playgroundPages: MetadataRoute.Sitemap = listPlaygrounds().map(
+    (place) => ({
+      url: `${baseUrl}${playgroundDetailPath(place.id)}`,
+    }),
+  );
+
+  return [
+    ...staticPages,
+    ...playgroundPages,
+    ...storyPages,
+    ...topicPages,
+    ...vehiclePages,
+  ];
 }

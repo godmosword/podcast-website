@@ -1,10 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import { getStories } from "@/data/content";
 import { storyDateModified } from "@/data/story-dates";
+import { listPlaygrounds } from "@/data/playgrounds";
 import { universe } from "@/data/universe";
 import { STATIC_PAGE_MODIFIED_DATES } from "@/lib/page-freshness";
 import { podcastEpisodeJsonLd } from "@/lib/json-ld";
 import { storyDetailMetadata } from "@/lib/story-metadata";
+import { playgroundDetailPath } from "@/lib/playground-detail";
 import sitemap from "./sitemap";
 
 describe("sitemap freshness", () => {
@@ -63,6 +65,39 @@ describe("sitemap freshness", () => {
       expect(metadata.other?.dateModified, story.slug).toBe(modified);
       expect(jsonLd.dateModified, story.slug).toBe(modified);
     }
+
+    vi.unstubAllEnvs();
+  });
+
+  it("包含所有景點 detail canonical，且不宣稱內容修改時間", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
+    const entries = sitemap();
+    const playgrounds = listPlaygrounds();
+    const detailEntries = entries.filter((entry) =>
+      entry.url.startsWith("https://example.com/for-parents/play-map/"),
+    );
+
+    expect(detailEntries).toHaveLength(playgrounds.length);
+    expect(new Set(detailEntries.map((entry) => entry.url)).size).toBe(
+      playgrounds.length,
+    );
+    for (const place of playgrounds) {
+      const entry = entries.find(
+        (item) => item.url === `https://example.com${playgroundDetailPath(place.id)}`,
+      );
+      expect(entry, place.id).toBeDefined();
+      expect(entry, place.id).not.toHaveProperty("lastModified");
+      expect(entry, place.id).not.toHaveProperty("changeFrequency");
+    }
+
+    const closed = playgrounds.find((place) => place.status === "temporarily-closed");
+    expect(
+      entries.some(
+        (entry) =>
+          entry.url ===
+          `https://example.com${playgroundDetailPath(closed!.id)}`,
+      ),
+    ).toBe(true);
 
     vi.unstubAllEnvs();
   });

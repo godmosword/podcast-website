@@ -9,6 +9,7 @@ import {
   characterCreativeWorkJsonLd,
   faqPageJsonLd,
   playgroundItemListJsonLd,
+  playgroundPlaceJsonLd,
   podcastEpisodeJsonLd,
   podcastSeriesJsonLd,
   siteIdentityJsonLd,
@@ -304,7 +305,10 @@ describe("playgroundItemListJsonLd", () => {
     expect(first.position).toBe(1);
     expect(first.item["@type"]).toBe("Place");
     expect(first.item["@id"]).toBe(
-      `https://example.com/for-parents/play-map#${places[0].id}`,
+      `https://example.com/for-parents/play-map/${places[0].id}#place`,
+    );
+    expect(first.item.url).toBe(
+      `https://example.com/for-parents/play-map/${places[0].id}`,
     );
     expect(first.item.geo).toEqual({
       "@type": "GeoCoordinates",
@@ -312,6 +316,47 @@ describe("playgroundItemListJsonLd", () => {
       longitude: places[0].lng,
     });
     expect(first.item.isAccessibleForFree).toBe(places[0].free);
+
+    for (const place of places) {
+      const item = data.itemListElement.find(
+        (entry) => entry.item.name === place.name,
+      );
+      expect(item, place.id).toBeDefined();
+      expect(item?.item["@id"], place.id).toBe(
+        `https://example.com/for-parents/play-map/${place.id}#place`,
+      );
+      expect(item?.item.url, place.id).toBe(
+        `https://example.com/for-parents/play-map/${place.id}`,
+      );
+    }
+
+    vi.unstubAllEnvs();
+  });
+});
+
+describe("playgroundPlaceJsonLd", () => {
+  it("uses the detail canonical as the stable Place entity", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
+    const place = listPlaygrounds().find((item) => item.id === "ty-kids-museum");
+    expect(place).toBeDefined();
+
+    const data = playgroundPlaceJsonLd(place!);
+
+    expect(data).toMatchObject({
+      "@context": "https://schema.org",
+      "@type": "Place",
+      "@id": "https://example.com/for-parents/play-map/ty-kids-museum#place",
+      url: "https://example.com/for-parents/play-map/ty-kids-museum",
+      name: "桃園市立兒童美術館",
+      isAccessibleForFree: true,
+      sameAs: "https://tmofa.tycg.gov.tw/",
+    });
+    expect(data).not.toHaveProperty("dateModified");
+    expect(data).not.toHaveProperty("openingHours");
+    expect(data).not.toHaveProperty("aggregateRating");
+    expect(data).not.toHaveProperty("review");
+    expect(data).not.toHaveProperty("priceRange");
+    expect(data).not.toHaveProperty("image");
 
     vi.unstubAllEnvs();
   });

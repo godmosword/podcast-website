@@ -205,6 +205,11 @@ describe("PlayMap", () => {
       name: "桃園市立兒童美術館 詳情",
     });
     expect(sheet.getAttribute("data-variant")).toBe("full");
+    expect(
+      within(sheet).getByRole("link", { name: "查看完整資訊" }).getAttribute(
+        "href",
+      ),
+    ).toBe("/for-parents/play-map/ty-kids-museum");
   });
 
   it("全台初始與單筆結果不顯示 editorial recommendation", () => {
