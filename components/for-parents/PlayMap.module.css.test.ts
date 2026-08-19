@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 /**
  * 頁面層不得再借用地圖 overlay 的 --map-chip*。
- * 允許：mapHint、viewport search、leaflet 縮放鍵、cluster。
+ * 允許：viewport search、leaflet 縮放鍵、cluster。
  */
 describe("PlayMap.module.css map-chip 用量", () => {
   const css = readFileSync(
@@ -20,7 +20,7 @@ describe("PlayMap.module.css map-chip 用量", () => {
     expect(selectors.length).toBeGreaterThanOrEqual(3);
     for (const selector of selectors) {
       expect(selector).toMatch(
-        /mapHint|viewportSearchButton|leaflet-control-zoom|playMapClusterButton/,
+        /viewportSearchButton|leaflet-control-zoom|playMapClusterButton/,
       );
     }
   });

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React from "react";
-import { cleanup, render } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { listPlaygrounds } from "@/data/playgrounds";
 import {
@@ -565,5 +565,33 @@ describe("PlayMapLeaflet FitBounds", () => {
       expect(props.eventHandlers?.mouseout).toBeUndefined();
     }
     expect(onHover).not.toHaveBeenCalled();
+  });
+
+  it("不再渲染過時的地圖操作說明", () => {
+    render(
+      <PlayMapLeaflet
+        {...leafletProps({
+          places: [...listPlaygrounds()],
+          clusterMode: true,
+          viewportZoom: 8,
+        })}
+      />,
+    );
+    expect(screen.queryByText("點縣市看該區地點，或先點附近")).toBeNull();
+    expect(screen.queryByText("雙指或工具列可縮放")).toBeNull();
+    expect(screen.queryByText("點區域群組聚焦，或繼續縮放看單點")).toBeNull();
+  });
+
+  it("個別標記模式也不再顯示縮放教學", () => {
+    render(
+      <PlayMapLeaflet
+        {...leafletProps({
+          clusterMode: false,
+          viewportZoom: 14,
+        })}
+      />,
+    );
+    expect(screen.queryByText("雙指或工具列可縮放")).toBeNull();
+    expect(screen.queryByText("點縣市看該區地點，或先點附近")).toBeNull();
   });
 });

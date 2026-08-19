@@ -35,6 +35,8 @@ export const SPLIT_MIN_WIDTH_PX = 980;
 
 export const CARDS_PANEL_ID = "play-map-panel-cards";
 export const MAP_PANEL_ID = "play-map-panel-map";
+/** 手機「看地圖」；離開地圖模式時把 focus 還給這個鈕。 */
+export const OPEN_MAP_BUTTON_ID = "play-map-open-map";
 
 export type PlayMapToolbarProps = {
   /** 手機地圖模式隱藏頁首裝飾，把畫面讓給地圖。 */

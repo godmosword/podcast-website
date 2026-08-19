@@ -469,10 +469,21 @@ export function usePlayMapFilters({
 
   const handleSelectView = useCallback(
     (next: BrowseView) => {
+      /*
+       * 手機 Map → List：清掉 marker 選取，否則 compact preview 會蓋在名單上。
+       * 只在 !splitLayout 時做；桌面並排沒有「返回名單」，選取／hover 契約維持原樣。
+       */
+      const leavingMobileMap =
+        !splitLayout && browseView === "map" && next === "cards";
+      if (leavingMobileMap) {
+        userClosedSheetRef.current = false;
+        setSelectedId(null);
+        setHoveredPlaceId(null);
+      }
       setBrowseView(next);
       syncUrl({ view: next });
     },
-    [syncUrl],
+    [browseView, splitLayout, syncUrl],
   );
 
   const handleClearFilters = useCallback(() => {

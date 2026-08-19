@@ -1,15 +1,30 @@
 "use client";
 
-import { buildGoogleMapsNavUrl } from "@/data/playgrounds";
-import {
-  formatAgeRangeLabel,
-  listPlaceDecisionTags,
-} from "@/lib/playground-distance";
+import { buildGoogleMapsNavUrl, type Playground } from "@/data/playgrounds";
 import { composeParentBlurb } from "@/lib/playground-parent-voice";
 import { playgroundTypeVisualKey } from "@/lib/playground-type-visual";
 import type { PlayMapCardProps } from "./PlayMapContract";
 import { PlaygroundTypeMark } from "./PlaygroundTypeMark";
 import styles from "./PlayMap.module.css";
+
+type CardBinaryFact = {
+  label: string;
+  kind: "fee" | "environment";
+};
+
+/**
+ * 名單卡片只明示兩項二元事實，不靠「沒有標籤」讓使用者自己推。
+ * 「需購票」＝資料未標免費，不代表票價、預約或一律收費。
+ * 「戶外」＝非室內，不推導遮蔭／天氣／雨天適不適合。
+ */
+export function listPlayMapCardBinaryFacts(
+  place: Pick<Playground, "free" | "indoor">,
+): readonly CardBinaryFact[] {
+  return [
+    { label: place.free ? "免費" : "需購票", kind: "fee" },
+    { label: place.indoor ? "室內" : "戶外", kind: "environment" },
+  ];
+}
 
 export function PlayMapCard({
   place,
@@ -24,19 +39,8 @@ export function PlayMapCard({
   onSelect,
   registerCardRef,
 }: PlayMapCardProps) {
-  /*
-   * 年齡標籤在卡片層過濾掉：全站每筆都是同一個區間，73 張卡重複講 73 次是噪音，
-  * 改由 toolbar 講一次。lib 的 listPlaceDecisionTags 不動，詳情 sheet 維持顯示。
-   */
   const mapSheet = variant === "mapSheet";
-  const ageLabel = formatAgeRangeLabel(place.ageRange);
-  const decisionTags = listPlaceDecisionTags(place).filter(
-    (tag) => tag !== ageLabel,
-  );
-  const cardDecisionTags =
-    mapSheet && !decisionTags.some((tag) => tag === "室內" || tag === "戶外")
-      ? [...decisionTags, place.indoor ? "室內" : "戶外"]
-      : decisionTags;
+  const cardFacts = listPlayMapCardBinaryFacts(place);
   const area = place.district ?? place.city;
   const meta = [area, place.type].filter(Boolean).join(" · ");
   const blurb = composeParentBlurb(place);
@@ -99,18 +103,13 @@ export function PlayMapCard({
               <span className={styles.cardClosed}>暫停營業</span>
             ) : null}
             <span className={styles.cardMeta}>{meta}</span>
-            {cardDecisionTags.length > 0 ? (
-              <span className={styles.cardFlags}>
-                {cardDecisionTags.map((tag) => (
-                  <span
-                    key={tag}
-                    className={tag === "戶外" ? styles.flagEnvironment : styles.flag}
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </span>
-            ) : null}
+            <span className={styles.cardFlags}>
+              {cardFacts.map((fact) => (
+                <span key={fact.kind} className={styles.flag}>
+                  {fact.label}
+                </span>
+              ))}
+            </span>
             <span className={styles.cardBlurb}>{blurb}</span>
           </span>
         </button>

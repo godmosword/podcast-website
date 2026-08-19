@@ -736,14 +736,6 @@ export default function PlayMapLeaflet({
         {userLatLng ? <MeMarker position={userLatLng} /> : null}
       </MapContainer>
 
-      <p className={styles.mapHint}>
-        {markerMode === "city"
-          ? "點縣市看該區地點，或先點附近"
-          : markerMode === "spatial"
-            ? "點區域群組聚焦，或繼續縮放看單點"
-            : "雙指或工具列可縮放"}
-      </p>
-
       {fitPoints.length === 0 ? (
         <p className={styles.empty} role="status">
           目前沒有符合條件的地點，試試放寬篩選。

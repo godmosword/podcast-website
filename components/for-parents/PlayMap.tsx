@@ -1,9 +1,14 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { PlaygroundType } from "@/data/playgrounds";
-import { CARDS_PANEL_ID, MAP_PANEL_ID, type BrowseView } from "./PlayMapContract";
+import {
+  CARDS_PANEL_ID,
+  MAP_PANEL_ID,
+  OPEN_MAP_BUTTON_ID,
+  type BrowseView,
+} from "./PlayMapContract";
 import { PlayMapCardList } from "./PlayMapCardList";
 import { PlayMapControlBar } from "./PlayMapControlBar";
 import { PlayMapSheet } from "./PlayMapSheet";
@@ -154,6 +159,13 @@ export default function PlayMap({
   );
 
   const mobileMap = !map.splitLayout && map.showMap;
+  const wasMobileMapRef = useRef(mobileMap);
+  useEffect(() => {
+    const leftMobileMap = wasMobileMapRef.current && !mobileMap;
+    wasMobileMapRef.current = mobileMap;
+    if (!leftMobileMap) return;
+    document.getElementById(OPEN_MAP_BUTTON_ID)?.focus();
+  }, [mobileMap]);
 
   return (
     <div
