@@ -55,7 +55,7 @@
 |----|------|
 | test(play-map): 鎖定 playground／合輯 A0 baseline census | `28ae3c1` |
 | docs/data(play-map): A1 付費 feeNote／官網、A1.1 卡司蒂菈蘆竹座標、A2 15 筆 tips 試點 | `637fef2` |
-| docs/data(play-map): A3 第二輪 15 筆 tips 品質改寫 | 見本輪 hash |
+| docs/data(play-map): A3 第二輪 15 筆 tips 品質改寫 | `03cdd05` |
 | fix(for-parents): play-map V3 返回名單清預覽、卡片明示二元旗標、拿掉地圖操作說明 | `390f2a5` |
 
 ### 本輪已完成（2026-08-18）
