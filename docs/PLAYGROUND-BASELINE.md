@@ -21,15 +21,15 @@ Schema **沒有** `open` / `closed`。
 
 | 項目 | 值 |
 |---|---|
-| total | 96 |
-| operating | 95 |
+| total | 97 |
+| operating | 96 |
 | temporarilyClosed | 1 |
 | cities | 15 |
 | districts（有填 district） | 66 |
-| free / paid（operating） | 55 / 40 |
-| indoor / outdoor（operating） | 32 / 63 |
+| free / paid（operating） | 56 / 40 |
+| indoor / outdoor（operating） | 32 / 64 |
 
-類型（含休園）：公園 41、博物館 29、其他 10、主題樂園 7、動物園 4、農場 4、室內樂園 1。
+類型（含休園）：公園 42、博物館 29、其他 10、主題樂園 7、動物園 4、農場 4、室內樂園 1。
 
 驗證：`operating + temporarilyClosed === total`、`free + paid === operating`、`indoor + outdoor === operating`。
 
@@ -50,7 +50,7 @@ Schema **沒有** `open` / `closed`。
 | 彰化縣 | 5 | 5 | 5 | 0 | launched `changhua` |
 | 南投縣 | 5 | 5 | 2 | 2 | launched `nantou` |
 | 雲林縣 | 5 | 5 | 3 | 1 | launched `yunlin` |
-| 嘉義市 | 4 | 4 | 1 | 4 | **未上線**（無 definition） |
+| 嘉義市 | 5 | 5 | 2 | 4 | **未上線**（達門檻、無 definition；B1 Phase 3） |
 | 嘉義縣 | 5 | 5 | 2 | 5 | launched `chiayi-county` |
 | 台南市 | 7 | 7 | 2 | 3 | launched `tainan` |
 | 高雄市 | 6 | 6 | 4 | 3 | launched `kaohsiung` |
@@ -100,11 +100,11 @@ TOTAL = 19
 
 **A.** 15 cities 與 14 city collections 可以同時成立：資料有 15 縣市，registry 只有 14 個 city family。舊數字「14 city collections」對；「基隆未上線」錯。
 
-**B.** 基隆有 definition、已 launch（5 筆達標）。嘉義市沒有 definition、未 launch（4 筆）。真正未 launch city candidate = 1。
+**B.** 基隆有 definition、已 launch（5 筆達標）。嘉義市 **沒有 definition、未 launch**（現 5 筆已達門檻）。真正未 launch city candidate = 1。
 
-**C.** 「4 個全室內館」是 **嘉義市**（4/4 indoor）。嘉義縣是 **5/5 indoor**；`chiayi-county-indoor` 與 parent city 完全相同，所以沒有上線。舊 audit 把市／縣 label 寫反，且縣的 6／indoor 1 已過期。
+**C.** 嘉義市現 **5／5／2 free／4 indoor／1 outdoor**（B1 新增嘉義公園）。嘉義縣仍是 **5/5 indoor**；`chiayi-county-indoor` 與 parent city 完全相同，所以沒有上線。`chiayi-city-indoor` 現 4 筆，**不再**與 `chiayi-city` 完全重複。
 
-**D.** global indoor 32 = sum(city indoorActive) 32。global free 55 = sum(city freeActive) 55。MATCH。
+**D.** global indoor 32 = sum(city indoorActive) 32。global free 56 = sum(city freeActive) 56。MATCH。
 
 ## Threshold contract
 
@@ -121,7 +121,7 @@ Launched duplicates: `[]`
 
 - `changhua` vs `changhua-free` — 5 筆全免費
 - `chiayi-county` vs `chiayi-county-indoor` vs `chiayi-county-rainy-day` — 5 筆全室內
-- `chiayi-city` vs `chiayi-city-indoor` vs `chiayi-city-rainy-day` — 4 筆全室內
+- `chiayi-city` vs `chiayi-city-indoor` vs `chiayi-city-rainy-day` — **已解除** city／indoor 完全重複（5 vs 4）；indoor 與 rainy-day 仍可能相同
 - 多數縣市 `*-indoor` vs `*-rainy-day` 相同（雨天定義 ⊇ indoor，且沒有額外「雨天備案」戶外場）
 
 完整 pair 由 `candidateExactDuplicates` 現算。不要為 duplicate 開後門。
@@ -132,30 +132,28 @@ Launched duplicates: `[]`
 |---|---:|---:|---:|---:|---|
 | taoyuan-indoor | 4 | 1 | 8 | 4 | no |
 | kaohsiung-free | 4 | 1 | 6 | 4 | no |
-| chiayi-city | 4 | 1 | 4 | 4 | no（但 indoor/rainy 會跟它重複） |
 | taipei-free | 3 | 2 | 8 | 3 | no |
 | taipei-indoor | 3 | 2 | 8 | 3 | no |
 | new-taipei-indoor | 3 | 2 | 8 | 3 | no |
 | tainan-indoor | 3 | 2 | 7 | 3 | no |
 | kaohsiung-indoor | 3 | 2 | 6 | 3 | no |
 
-真正只差 1、且不是 parent duplicate：`taoyuan-indoor`、`kaohsiung-free`、`chiayi-city`。  
-`chiayi-city-indoor` 也是 4，但是 city 的 exact duplicate，不能當獨立合輯解鎖。
-
-本批**不推薦新場地名稱**。
+真正只差 1、且不是 parent duplicate：`taoyuan-indoor`、`kaohsiung-free`。
+`chiayi-city` 已達 5，但 **沒有** production definition，仍未 launch（B1 Phase 3 再決定是否開 route）。
+`chiayi-city-indoor` 現 4，不再是 city 的 exact duplicate。
 
 ## Optional fields（RAW vs 品質債）
 
 | 欄位 | present | missing | likely debt | 說明 |
 |---|---:|---:|---:|---|
-| officialUrl | 49 | 47 | 0 | 免費公園缺官網可以；active paid 缺 officialUrl = 0 |
-| feeNote | 42 | 54 | 0 | 免費場沒票價說明合理；A1 已補 9 筆 active paid feeNote |
-| coverageNote | 22 | 74 | 0 | 選填誠實聲明；有 `status` 時才必填 |
-| mapsQuery | 10 | 86 | 0 | 搜尋不穩才填 |
-| relatedEpisodes | 0 | 96 | 0 | 產品缺口，不是 schema 必填 |
-| placeId | 0 | 96 | 0 | 地圖不用 Google Place ID |
+| officialUrl | 50 | 47 | 0 | 免費公園缺官網可以；active paid 缺 officialUrl = 0 |
+| feeNote | 42 | 55 | 0 | 免費場沒票價說明合理；A1 已補 9 筆 active paid feeNote |
+| coverageNote | 23 | 74 | 0 | 選填誠實聲明；有 `status` 時才必填 |
+| mapsQuery | 10 | 87 | 0 | 搜尋不穩才填 |
+| relatedEpisodes | 0 | 97 | 0 | 產品缺口，不是 schema 必填 |
+| placeId | 0 | 97 | 0 | 地圖不用 Google Place ID |
 
-sources：1 筆 22、≥2 筆 74、有官方 39、有政府 93、editorial-only 0。
+sources：1 筆 22、≥2 筆 75、有官方 39、有政府 94、editorial-only 0。
 lastVerified：多數仍 2026-08-09～2026-08-16；A1 逐筆查證的 10 筆為 2026-08-19。
 
 ## Paid fee clarity
@@ -170,7 +168,7 @@ lastVerified：多數仍 2026-08-09～2026-08-16；A1 逐筆查證的 10 筆為 
 
 - exact count = 14（`FACILITY_LIST_TAIL_PATTERN`）
 - A2／A3／A4 共改 42 筆；剩餘 14 筆多為低決策價值的免費公園，或需事實查證
-- 編輯清理至此停止（不自動開 A5）；下一階段 B1 嘉義市 diversity
+- 編輯清理至此停止（不自動開 A5）；B1 Phase 2 已新增嘉義公園
 
 ## relatedEpisodes
 
@@ -182,5 +180,5 @@ lastVerified：多數仍 2026-08-09～2026-08-16；A1 逐筆查證的 10 筆為 
 
 ## 下一步（尚未執行）
 
-B1 嘉義市 diversity → B2 桃園 indoor → B3 高雄 free → relatedEpisodes pilot。
+B1 Phase 3：是否為 `chiayi-city` 建立 collection definition（現已 5 筆、達門檻、尚未上線）→ B2 桃園 indoor → B3 高雄 free → relatedEpisodes pilot。
 （tips 設施列舉尾句：STOP EDITORIAL CLEANUP，剩餘 14 筆不自動開 A5。）

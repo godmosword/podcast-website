@@ -2478,6 +2478,38 @@ const PLAYGROUNDS: readonly Playground[] = [
     lastVerified: "2026-08-09",
   },
   {
+    id: "cyc-chiayi-park",
+    name: "嘉義公園",
+    city: "嘉義市",
+    district: "東區",
+    lat: 23.483329,
+    lng: 120.46523,
+    address: "嘉義市東區啟明路264號",
+    type: "公園",
+    ageRange: [3, 8],
+    free: true,
+    indoor: false,
+    facilities: ["兒童遊戲場"],
+    tags: ["免費", "市區公園", "放電"],
+    tips: "遊戲場分散在公園不同入口；射日塔位於園內，但登塔需另購票。",
+    officialUrl: "https://www.taiwan.net.tw/m1.aspx?id=8990&sNo=0001117",
+    sources: [
+      {
+        kind: "gov",
+        name: "交通部觀光署—嘉義公園",
+        url: "https://www.taiwan.net.tw/m1.aspx?id=8990&sNo=0001117",
+      },
+      {
+        kind: "gov",
+        name: "嘉義市政府建設處—特色公園",
+        url: "https://economic.chiayi.gov.tw/News_Content.aspx?n=4&s=771338",
+      },
+    ],
+    lastVerified: "2026-08-19",
+    coverageNote:
+      "星光溜滑梯官方寫在毗鄰的嘉義棒球場前，與公園不是同一入口。",
+  },
+  {
     id: "cyc-city-museum",
     name: "嘉義市立博物館",
     city: "嘉義市",

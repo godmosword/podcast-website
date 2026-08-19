@@ -37,7 +37,6 @@ export type CandidateFamily = (typeof CANDIDATE_FAMILIES)[number];
 export const HIGH_INTENT_CANDIDATE_SLUGS = [
   "taoyuan-indoor",
   "kaohsiung-free",
-  "chiayi-city",
   "taipei-free",
   "taipei-indoor",
   "new-taipei-indoor",

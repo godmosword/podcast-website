@@ -136,7 +136,8 @@ describe("resolved contradictions", () => {
     const keelung = baseline.cities.find((row) => row.city === "基隆市");
     const chiayiCity = baseline.cities.find((row) => row.city === "嘉義市");
     expect(keelung?.operating).toBeGreaterThanOrEqual(5);
-    expect(chiayiCity?.operating).toBeLessThan(5);
+    expect(chiayiCity?.operating).toBeGreaterThanOrEqual(5);
+    expect(chiayiCity?.hasLaunchedCityCollection).toBe(false);
     expect(
       baseline.candidates.find((row) => row.slug === "keelung")?.currentlyLaunched,
     ).toBe(true);
@@ -146,15 +147,31 @@ describe("resolved contradictions", () => {
     ).toBe(false);
   });
 
-  test("C: 嘉義市 4 筆全室內；嘉義縣 5 筆也全室內，indoor 會跟 city 重複", () => {
+  test("C: 嘉義市 5 筆含 1 戶外；嘉義縣 5 筆仍全室內，indoor 會跟 city 重複", () => {
     const chiayiCity = baseline.cities.find((row) => row.city === "嘉義市");
     const chiayiCounty = baseline.cities.find((row) => row.city === "嘉義縣");
     expect(chiayiCity).toMatchObject({
       city: "嘉義市",
-      total: 4,
-      operating: 4,
+      total: 5,
+      operating: 5,
       indoorActive: 4,
-      outdoorActive: 0,
+      outdoorActive: 1,
+      freeActive: 2,
+    });
+    expect(
+      baseline.candidates.find((row) => row.slug === "chiayi-city"),
+    ).toMatchObject({
+      activeCount: 5,
+      currentlyLaunched: false,
+      thresholdReached: true,
+      exactDuplicateOfParent: false,
+    });
+    expect(
+      baseline.candidates.find((row) => row.slug === "chiayi-city-indoor"),
+    ).toMatchObject({
+      activeCount: 4,
+      currentlyLaunched: false,
+      exactDuplicateOfParent: false,
     });
     expect(chiayiCounty).toMatchObject({
       city: "嘉義縣",
@@ -174,13 +191,13 @@ describe("resolved contradictions", () => {
 
   test("locks the current global census so later agents do not guess", () => {
     expect(baseline.global).toEqual({
-      total: 96,
-      operating: 95,
+      total: 97,
+      operating: 96,
       temporarilyClosed: 1,
       cities: 15,
       districts: 66,
       typeDistribution: {
-        公園: 41,
+        公園: 42,
         室內樂園: 1,
         主題樂園: 7,
         博物館: 29,
@@ -188,10 +205,10 @@ describe("resolved contradictions", () => {
         農場: 4,
         其他: 10,
       },
-      free: 55,
+      free: 56,
       paid: 40,
       indoor: 32,
-      outdoor: 63,
+      outdoor: 64,
     });
     expect(
       baseline.cities.map((row) => [
@@ -213,7 +230,7 @@ describe("resolved contradictions", () => {
       ["彰化縣", 5, 5, 5, 0],
       ["南投縣", 5, 5, 2, 2],
       ["雲林縣", 5, 5, 3, 1],
-      ["嘉義市", 4, 4, 1, 4],
+      ["嘉義市", 5, 5, 2, 4],
       ["嘉義縣", 5, 5, 2, 5],
       ["台南市", 7, 7, 2, 3],
       ["高雄市", 6, 6, 4, 3],
@@ -276,7 +293,6 @@ describe("collection candidates and near-threshold", () => {
     ).toEqual([
       ["taoyuan-indoor", 4, 1, false],
       ["kaohsiung-free", 4, 1, false],
-      ["chiayi-city", 4, 1, false],
       ["taipei-free", 3, 2, false],
       ["taipei-indoor", 3, 2, false],
       ["new-taipei-indoor", 3, 2, false],
@@ -307,7 +323,7 @@ describe("optional fields, tips, relatedEpisodes", () => {
   test("does not treat every null optional field as quality debt", () => {
     expect(baseline.optionalFields.placeId).toMatchObject({
       present: 0,
-      missing: 96,
+      missing: 97,
       required: false,
     });
     expect(baseline.optionalFields.mapsQuery.required).toBe(false);
@@ -349,8 +365,8 @@ describe("documentation drift guards", () => {
   });
 
   test("baseline doc cites the locked census", () => {
-    expect(BASELINE_DOC).toContain("| total | 96 |");
-    expect(BASELINE_DOC).toContain("| operating | 95 |");
+    expect(BASELINE_DOC).toContain("| total | 97 |");
+    expect(BASELINE_DOC).toContain("| operating | 96 |");
     expect(BASELINE_DOC).toContain("TOTAL = 19");
     expect(BASELINE_DOC).toContain("未 launch 的 city candidate 只有 **嘉義市**");
   });

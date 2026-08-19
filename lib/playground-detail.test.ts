@@ -23,8 +23,8 @@ describe("playground detail route helpers", () => {
     const places = listPlaygrounds();
     const ids = places.map((place) => place.id);
 
-    expect(places).toHaveLength(96);
-    expect(new Set(ids).size).toBe(96);
+    expect(places).toHaveLength(97);
+    expect(new Set(ids).size).toBe(97);
     expect(playgroundDetailPath("ty-kids-museum")).toBe(
       "/for-parents/play-map/ty-kids-museum",
     );

@@ -1026,3 +1026,76 @@ describe("A4 tips quality final round", () => {
     expect(tipsDebt.count).toBe(14);
   });
 });
+
+describe("B1 Chiayi City diversity — 嘉義公園", () => {
+  it("只新增一筆戶外免費公園，且 ID 遵循 cyc- 前綴", () => {
+    const place = getPlayground("cyc-chiayi-park");
+    expect(place).toBeDefined();
+    expect(place?.name).toBe("嘉義公園");
+    expect(place?.city).toBe("嘉義市");
+    expect(place?.district).toBe("東區");
+    expect(place?.address).toBe("嘉義市東區啟明路264號");
+    expect(place?.type).toBe("公園");
+    expect(place?.free).toBe(true);
+    expect(place?.indoor).toBe(false);
+    expect(place?.status).toBeUndefined();
+    expect(place?.relatedEpisodes).toBeUndefined();
+    expect(place?.ageRange).toEqual([3, 8]);
+  });
+
+  it("座標採用觀光署嘉義公園頁，不是棒球場／KANO", () => {
+    const place = getPlayground("cyc-chiayi-park");
+    expect(place?.lat).toBe(23.483329);
+    expect(place?.lng).toBe(120.46523);
+  });
+
+  it("公園本身免費、戶外，射日塔不另開一筆", () => {
+    expect(getPlayground("cyc-chiayi-park")?.free).toBe(true);
+    expect(listPlaygrounds().some((item) => item.name === "射日塔")).toBe(
+      false,
+    );
+  });
+
+  it("tips 只寫分散入口與登塔另購票，不含內部對照用語", () => {
+    const tips = getPlayground("cyc-chiayi-park")?.tips ?? "";
+    expect(tips).toBe(
+      "遊戲場分散在公園不同入口；射日塔位於園內，但登塔需另購票。",
+    );
+    expect(tips).not.toContain("這裡是戶外公園，不是室內館");
+    expect(tips.length).toBeGreaterThanOrEqual(28);
+  });
+
+  it("嘉義市 census：5／5／2 free／4 indoor／1 outdoor", () => {
+    const { cities, launchRegistry, global } = computePlaygroundBaseline();
+    const chiayiCity = cities.find((row) => row.city === "嘉義市");
+    expect(chiayiCity).toMatchObject({
+      total: 5,
+      operating: 5,
+      freeActive: 2,
+      indoorActive: 4,
+      outdoorActive: 1,
+    });
+    expect(global.total).toBe(97);
+    expect(launchRegistry.total).toBe(19);
+    expect(launchRegistry.unlaunchedCitySlugs).toEqual(["chiayi-city"]);
+  });
+
+  it("chiayi-city 不再與 indoor 完全重複，也不自動上線", () => {
+    const { candidates, candidateExactDuplicates, launchRegistry } =
+      computePlaygroundBaseline();
+    const city = candidates.find((row) => row.slug === "chiayi-city");
+    const indoor = candidates.find((row) => row.slug === "chiayi-city-indoor");
+    expect(city?.activeCount).toBe(5);
+    expect(indoor?.activeCount).toBe(4);
+    expect(city?.currentlyLaunched).toBe(false);
+    expect(launchRegistry.slugs).not.toContain("chiayi-city");
+    expect(candidateExactDuplicates).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          slugA: "chiayi-city",
+          slugB: "chiayi-city-indoor",
+        }),
+      ]),
+    );
+  });
+});
