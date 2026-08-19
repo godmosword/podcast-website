@@ -18,10 +18,10 @@ import {
 } from "@/lib/playground-collections";
 
 describe("playground collection registry", () => {
-  test("contains exactly the 20 launch collections", () => {
-    expect(COLLECTION_DEFINITIONS).toHaveLength(20);
+  test("contains exactly the 21 launch collections", () => {
+    expect(COLLECTION_DEFINITIONS).toHaveLength(21);
     expect(new Set(COLLECTION_DEFINITIONS.map((item) => item.slug)).size).toBe(
-      20,
+      21,
     );
     expect(COLLECTION_DEFINITIONS.map((item) => item.slug)).toEqual([
       "keelung",
@@ -44,6 +44,7 @@ describe("playground collection registry", () => {
       "hsinchu-city-free",
       "hsinchu-county-free",
       "taichung-free",
+      "taoyuan-indoor",
     ]);
     expect(COLLECTION_DEFINITIONS.every((item) => item.family !== "city" || item.filter.city)).toBe(
       true,
@@ -138,17 +139,52 @@ describe("resolved collection semantics", () => {
     const resolved = resolveCollectionBySlug("taoyuan");
 
     expect(resolved).toMatchObject({
-      matchingCount: 9,
-      activeCount: 8,
-      freeCount: 5,
-      indoorCount: 4,
+      matchingCount: 10,
+      activeCount: 9,
+      freeCount: 6,
+      indoorCount: 5,
       highEnergyCount: 5,
-      districtCount: 4,
+      districtCount: 5,
       typeCount: 4,
     });
     expect(resolved?.places.some((place) => place.id === "ty-puhsin")).toBe(
       false,
     );
+  });
+
+  test("launches taoyuan-indoor with five distinct indoor places", () => {
+    const definition = getCollectionDefinition("taoyuan-indoor");
+    const resolved = resolveCollectionBySlug("taoyuan-indoor");
+
+    expect(definition).toMatchObject({
+      slug: "taoyuan-indoor",
+      city: "桃園市",
+      cityDisplayName: "桃園",
+      family: "indoor",
+      filter: { city: "桃園市", indoorOnly: true },
+      title: "桃園室內親子景點",
+      shortLabel: "桃園室內",
+    });
+    expect(resolved).toMatchObject({
+      matchingCount: 5,
+      activeCount: 5,
+      freeCount: 2,
+      indoorCount: 5,
+      districtCount: 4,
+      typeCount: 3,
+    });
+    expect(resolved?.places.map((place) => place.id)).toEqual([
+      "ty-kids-museum",
+      "ty-casti",
+      "ty-xpark",
+      "ty-shayangye-robot",
+      "ty-disaster-education",
+    ]);
+    expect(collectionDescription(resolved!)).toBe(
+      "目前收錄 5 個桃園室內親子景點，涵蓋 4 個行政區、3 種景點類型。",
+    );
+    expect(isCollectionIndexable(resolved!)).toBe(true);
+    expect(getCollectionDefinition("taoyuan-rainy-day")).toBeUndefined();
   });
 
   test("keeps the removed indoor filter semantics available to Play Map", () => {
@@ -179,6 +215,9 @@ describe("resolved collection semantics", () => {
     );
     expect(collectionMapPath(getCollectionDefinition("taoyuan-free")!)).toBe(
       "/for-parents/play-map?city=%E6%A1%83%E5%9C%92%E5%B8%82&free=1&view=map",
+    );
+    expect(collectionMapPath(getCollectionDefinition("taoyuan-indoor")!)).toBe(
+      "/for-parents/play-map?city=%E6%A1%83%E5%9C%92%E5%B8%82&indoor=1&view=map",
     );
 
     const changhuaFree: CollectionDefinition = {
@@ -215,17 +254,23 @@ describe("resolved collection semantics", () => {
     expect(
       collectionMapCtaLabel(getCollectionDefinition("taoyuan-free")!),
     ).toBe("在地圖上看桃園免費景點");
+    expect(
+      collectionMapCtaLabel(getCollectionDefinition("taoyuan-indoor")!),
+    ).toBe("在地圖上看桃園室內景點");
   });
 
   test("computes parent relationship summaries from resolved data", () => {
     expect(
       collectionParentSummary(resolveCollectionBySlug("taoyuan-free")!),
-    ).toBe("桃園目前 8 個親子景點中，有 5 個不用門票。");
+    ).toBe("桃園目前 9 個親子景點中，有 6 個不用門票。");
     expect(
       collectionParentSummary(resolveCollectionBySlug("hsinchu-city-free")!),
     ).toBe(
       "新竹目前 8 個親子景點中，有 6 個不用門票。目前這 6 個免費選擇都是戶外景點。",
     );
+    expect(
+      collectionParentSummary(resolveCollectionBySlug("taoyuan-indoor")!),
+    ).toBe("桃園目前 9 個親子景點中，有 5 個室內選擇。");
   });
 
   test("does not create the rainy-day duplicate family", () => {
@@ -298,21 +343,28 @@ describe("related collections", () => {
   test("links only to valid city and variant collections", () => {
     const taoyuan = getCollectionDefinition("taoyuan")!;
     const taoyuanFree = getCollectionDefinition("taoyuan-free")!;
+    const taoyuanIndoor = getCollectionDefinition("taoyuan-indoor")!;
     const chiayiCounty = getCollectionDefinition("chiayi-county")!;
     const chiayiCity = getCollectionDefinition("chiayi-city")!;
 
     expect(relatedCollections(taoyuan).map((item) => item.slug)).toEqual([
       "taoyuan-free",
+      "taoyuan-indoor",
     ]);
     expect(relatedCollections(taoyuanFree).map((item) => item.slug)).toEqual([
       "taoyuan",
+      "taoyuan-indoor",
+    ]);
+    expect(relatedCollections(taoyuanIndoor).map((item) => item.slug)).toEqual([
+      "taoyuan",
+      "taoyuan-free",
     ]);
     expect(relatedCollections(chiayiCounty)).toEqual([]);
     expect(relatedCollections(chiayiCity)).toEqual([]);
   });
 
-  test("static params come from the 20 launch definitions", () => {
-    expect(listCollectionDefinitions()).toHaveLength(20);
+  test("static params come from the 21 launch definitions", () => {
+    expect(listCollectionDefinitions()).toHaveLength(21);
     expect(
       listCollectionDefinitions("city").map((item) => item.slug),
     ).toEqual([
@@ -332,6 +384,8 @@ describe("related collections", () => {
       "tainan",
       "kaohsiung",
     ]);
-    expect(listCollectionDefinitions("indoor")).toEqual([]);
+    expect(listCollectionDefinitions("indoor").map((item) => item.slug)).toEqual([
+      "taoyuan-indoor",
+    ]);
   });
 });

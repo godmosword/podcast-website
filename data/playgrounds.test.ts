@@ -1075,8 +1075,8 @@ describe("B1 Chiayi City diversity — 嘉義公園", () => {
       indoorActive: 4,
       outdoorActive: 1,
     });
-    expect(global.total).toBe(97);
-    expect(launchRegistry.total).toBe(20);
+    expect(global.total).toBe(98);
+    expect(launchRegistry.total).toBe(21);
     expect(launchRegistry.unlaunchedCitySlugs).toEqual([]);
   });
 
@@ -1102,5 +1102,70 @@ describe("B1 Chiayi City diversity — 嘉義公園", () => {
         }),
       ]),
     );
+  });
+});
+
+describe("B2 Taoyuan indoor diversity — 桃園防災教育館", () => {
+  it("新增一筆八德區免費室內防災教育場館", () => {
+    const place = getPlayground("ty-disaster-education");
+    expect(place).toMatchObject({
+      id: "ty-disaster-education",
+      name: "桃園防災教育館",
+      city: "桃園市",
+      district: "八德區",
+      address: "桃園市八德區介壽路二段901巷49弄35號",
+      type: "其他",
+      ageRange: [3, 8],
+      free: true,
+      indoor: true,
+    });
+    expect(place?.status).toBeUndefined();
+    expect(place?.relatedEpisodes).toBeUndefined();
+    expect(place?.feeNote).toBeUndefined();
+    expect(place?.lat).toBe(24.93668);
+    expect(place?.lng).toBe(121.29828);
+    expect(place?.facilities).toEqual(["展覽", "互動體驗", "體驗區"]);
+    expect(place?.tags).toEqual(["免費", "室內", "互動"]);
+    expect(place?.tips).toContain("免費參觀");
+    expect(place?.coverageNote).toContain("未滿12歲不得單獨入館");
+    expect(place?.lastVerified).toBe("2026-08-19");
+  });
+
+  it("讓桃園與 indoor candidate 增長並通過 launch gate", () => {
+    const { candidates, launchRegistry } = computePlaygroundBaseline();
+    const taoyuan = candidates.find((row) => row.slug === "taoyuan");
+    const indoor = candidates.find((row) => row.slug === "taoyuan-indoor");
+    const free = candidates.find((row) => row.slug === "taoyuan-free");
+    const rainy = candidates.find((row) => row.slug === "taoyuan-rainy-day");
+
+    expect(taoyuan).toMatchObject({
+      matchingTotal: 10,
+      activeCount: 9,
+      thresholdReached: true,
+    });
+    expect(indoor).toMatchObject({
+      matchingTotal: 5,
+      activeCount: 5,
+      thresholdReached: true,
+      currentlyLaunched: true,
+      exactDuplicateOfParent: false,
+      overlapWithParentCity: {
+        parentActiveCount: 9,
+        overlapCount: 5,
+        identical: false,
+      },
+    });
+    expect(indoor?.activePlaceIds).toEqual([
+      "ty-kids-museum",
+      "ty-casti",
+      "ty-xpark",
+      "ty-shayangye-robot",
+      "ty-disaster-education",
+    ]);
+    expect(free?.activeCount).toBe(6);
+    expect(rainy?.activeCount).toBe(5);
+    expect(launchRegistry.total).toBe(21);
+    expect(launchRegistry.indoorCount).toBe(1);
+    expect(launchRegistry.slugs).toContain("taoyuan-indoor");
   });
 });

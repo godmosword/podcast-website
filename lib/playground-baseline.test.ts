@@ -101,11 +101,12 @@ describe("launch collection registry", () => {
     expect(baseline.launchRegistry.total).toBe(MIN_COLLECTION_DEFINITION_COUNT);
     expect(baseline.launchRegistry.cityCount).toBe(15);
     expect(baseline.launchRegistry.freeCount).toBe(5);
-    expect(baseline.launchRegistry.indoorCount).toBe(0);
+    expect(baseline.launchRegistry.indoorCount).toBe(1);
     expect(baseline.launchRegistry.otherFamilyCount).toBe(0);
     expect(baseline.launchRegistry.slugs).toEqual(
       COLLECTION_DEFINITIONS.map((item) => item.slug),
     );
+    expect(baseline.launchRegistry.slugs).toContain("taoyuan-indoor");
   });
 
   test("keelung and chiayi-city are launched city collections", () => {
@@ -120,6 +121,27 @@ describe("launch collection registry", () => {
     expect(baseline.threshold.usesActiveCount).toBe(true);
     expect(baseline.threshold.excludesTemporarilyClosed).toBe(true);
     expect(validateCollectionDefinitions()).toEqual([]);
+  });
+
+  test("taoyuan-indoor is launched at the threshold without a rainy-day route", () => {
+    const candidate = baseline.candidates.find(
+      (row) => row.slug === "taoyuan-indoor",
+    );
+    expect(candidate).toMatchObject({
+      activeCount: 5,
+      thresholdReached: true,
+      currentlyLaunched: true,
+      exactDuplicateOfParent: false,
+      overlapWithParentCity: {
+        parentActiveCount: 9,
+        overlapCount: 5,
+        identical: false,
+      },
+    });
+    expect(baseline.launchRegistry.indoorSlugs).toEqual(["taoyuan-indoor"]);
+    expect(
+      baseline.launchRegistry.slugs.includes("taoyuan-rainy-day"),
+    ).toBe(false);
   });
 
   test("launched collections have no exact duplicate active ID sets", () => {
@@ -197,11 +219,11 @@ describe("resolved contradictions", () => {
 
   test("locks the current global census so later agents do not guess", () => {
     expect(baseline.global).toEqual({
-      total: 97,
-      operating: 96,
+      total: 98,
+      operating: 97,
       temporarilyClosed: 1,
       cities: 15,
-      districts: 66,
+      districts: 67,
       typeDistribution: {
         公園: 42,
         室內樂園: 1,
@@ -209,11 +231,11 @@ describe("resolved contradictions", () => {
         博物館: 29,
         動物園: 4,
         農場: 4,
-        其他: 10,
+        其他: 11,
       },
-      free: 56,
+      free: 57,
       paid: 40,
-      indoor: 32,
+      indoor: 33,
       outdoor: 64,
     });
     expect(
@@ -228,7 +250,7 @@ describe("resolved contradictions", () => {
       ["基隆市", 5, 5, 3, 1],
       ["台北市", 8, 8, 3, 3],
       ["新北市", 8, 8, 5, 3],
-      ["桃園市", 9, 8, 5, 4],
+      ["桃園市", 10, 9, 6, 5],
       ["新竹市", 8, 8, 6, 1],
       ["新竹縣", 8, 8, 5, 1],
       ["苗栗縣", 5, 5, 3, 0],
@@ -297,7 +319,7 @@ describe("collection candidates and near-threshold", () => {
         .filter((row) => row.highIntent)
         .map((row) => [row.slug, row.currentActive, row.shortOf5, row.exactDuplicate]),
     ).toEqual([
-      ["taoyuan-indoor", 4, 1, false],
+      ["taoyuan-indoor", 5, 0, false],
       ["kaohsiung-free", 4, 1, false],
       ["taipei-free", 3, 2, false],
       ["taipei-indoor", 3, 2, false],
@@ -329,7 +351,7 @@ describe("optional fields, tips, relatedEpisodes", () => {
   test("does not treat every null optional field as quality debt", () => {
     expect(baseline.optionalFields.placeId).toMatchObject({
       present: 0,
-      missing: 97,
+      missing: 98,
       required: false,
     });
     expect(baseline.optionalFields.mapsQuery.required).toBe(false);
@@ -371,9 +393,9 @@ describe("documentation drift guards", () => {
   });
 
   test("baseline doc cites the locked census", () => {
-    expect(BASELINE_DOC).toContain("| total | 97 |");
-    expect(BASELINE_DOC).toContain("| operating | 96 |");
-    expect(BASELINE_DOC).toContain("TOTAL = 20");
+    expect(BASELINE_DOC).toContain("| total | 98 |");
+    expect(BASELINE_DOC).toContain("| operating | 97 |");
+    expect(BASELINE_DOC).toContain("TOTAL = 21");
     expect(BASELINE_DOC).toContain("未 launch 的 city candidate：**無**");
   });
 });

@@ -459,6 +459,44 @@ const PLAYGROUNDS: readonly Playground[] = [
     ],
     lastVerified: "2026-08-16",
   },
+  {
+    id: "ty-disaster-education",
+    name: "桃園防災教育館",
+    city: "桃園市",
+    district: "八德區",
+    lat: 24.93668,
+    lng: 121.29828,
+    address: "桃園市八德區介壽路二段901巷49弄35號",
+    type: "其他",
+    ageRange: [3, 8],
+    free: true,
+    indoor: true,
+    facilities: ["展覽", "互動體驗", "體驗區"],
+    tags: ["免費", "室內", "互動"],
+    tips:
+      "免費參觀，以互動防災體驗為主；部分體驗有年齡、預約或場次限制，出發前先看官方規定。",
+    officialUrl: "https://tydec.tyfd.gov.tw/",
+    sources: [
+      {
+        kind: "official",
+        name: "桃園防災教育館參觀注意事項",
+        url: "https://tydec.tyfd.gov.tw/About/Notice",
+      },
+      {
+        kind: "gov",
+        name: "桃園市政府消防局 Q&A",
+        url: "https://www.tyfd.gov.tw/cht/index.php?code=list&ids=47&page=6",
+      },
+      {
+        kind: "gov",
+        name: "觀光署觀光多媒體開放資料",
+        url: "https://media.taiwan.net.tw/en-us/portal/travel/details/attraction_376430000a_001425",
+      },
+    ],
+    lastVerified: "2026-08-19",
+    coverageNote:
+      "未滿12歲不得單獨入館；地震、煙霧與密室等體驗各有年齡、預約或場次規則。",
+  },
   // ── Wave 1：台北市 ≥8 ──
   {
     id: "tp-children-park",

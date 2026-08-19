@@ -216,7 +216,17 @@ const FREE_COLLECTIONS = [
   },
 ] as const satisfies readonly CollectionDefinition[];
 
-const INDOOR_COLLECTIONS = [] as const satisfies readonly CollectionDefinition[];
+const INDOOR_COLLECTIONS = [
+  {
+    slug: "taoyuan-indoor",
+    city: "桃園市",
+    cityDisplayName: "桃園",
+    family: "indoor",
+    filter: { city: "桃園市", indoorOnly: true },
+    title: "桃園室內親子景點",
+    shortLabel: "桃園室內",
+  },
+] as const satisfies readonly CollectionDefinition[];
 
 export const COLLECTION_DEFINITIONS = [
   ...CITY_COLLECTIONS,
@@ -224,7 +234,7 @@ export const COLLECTION_DEFINITIONS = [
   ...INDOOR_COLLECTIONS,
 ] as const satisfies readonly CollectionDefinition[];
 
-export const MIN_COLLECTION_DEFINITION_COUNT = 20;
+export const MIN_COLLECTION_DEFINITION_COUNT = 21;
 
 const definitionsBySlug = new Map<string, CollectionDefinition>(
   COLLECTION_DEFINITIONS.map((definition) => [definition.slug, definition]),

@@ -385,11 +385,11 @@ describe("playgroundCollectionJsonLd", () => {
     });
     expect(itemList).toMatchObject({
       "@id": "https://example.com/for-parents/play-map/collections/taoyuan#item-list",
-      numberOfItems: 8,
+      numberOfItems: 9,
     });
 
     const elements = itemList?.itemListElement as Record<string, unknown>[];
-    expect(elements).toHaveLength(8);
+    expect(elements).toHaveLength(9);
     expect(elements[0].item).toMatchObject({
       "@type": "Place",
       "@id": "https://example.com/for-parents/play-map/ty-fenghe#place",
@@ -458,6 +458,35 @@ describe("playgroundCollectionJsonLd", () => {
     expect(serialized).not.toContain("aggregateRating");
     expect(serialized).not.toContain("FAQPage");
     expect(serialized).not.toContain("dateModified");
+
+    vi.unstubAllEnvs();
+  });
+
+  it("taoyuan-indoor ItemList uses the five launched indoor place IDs", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
+    const resolved = resolveCollectionBySlug("taoyuan-indoor");
+    expect(resolved).toBeDefined();
+
+    const data = playgroundCollectionJsonLd(resolved!);
+    const graph = data["@graph"] as Record<string, unknown>[];
+    const collection = graph.find((item) => item["@type"] === "CollectionPage");
+    const itemList = graph.find((item) => item["@type"] === "ItemList");
+    const elements = itemList?.itemListElement as Record<string, unknown>[];
+
+    expect(collection).toMatchObject({
+      "@id":
+        "https://example.com/for-parents/play-map/collections/taoyuan-indoor#collection",
+      url: "https://example.com/for-parents/play-map/collections/taoyuan-indoor",
+      name: "桃園室內親子景點",
+    });
+    expect(itemList).toMatchObject({ numberOfItems: 5 });
+    expect(elements.map((entry) => (entry.item as Record<string, unknown>)["@id"])).toEqual([
+      "https://example.com/for-parents/play-map/ty-kids-museum#place",
+      "https://example.com/for-parents/play-map/ty-casti#place",
+      "https://example.com/for-parents/play-map/ty-xpark#place",
+      "https://example.com/for-parents/play-map/ty-shayangye-robot#place",
+      "https://example.com/for-parents/play-map/ty-disaster-education#place",
+    ]);
 
     vi.unstubAllEnvs();
   });

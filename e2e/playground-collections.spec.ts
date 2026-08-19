@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("親子景點 curated collections", () => {
-  test("collections index exposes exactly the 20 launch links", async ({
+  test("collections index exposes exactly the 21 launch links", async ({
     page,
     request,
   }) => {
@@ -16,10 +16,15 @@ test.describe("親子景點 curated collections", () => {
     await expect(page.locator("body")).not.toContainText("active 景點");
     await expect(
       page.locator('a[href^="/for-parents/play-map/collections/"]'),
-    ).toHaveCount(20);
+    ).toHaveCount(21);
     await expect(page.locator(".leaflet-container")).toHaveCount(0);
 
-    for (const slug of ["changhua-free", "chiayi-county-indoor", "chiayi-city-indoor"]) {
+    for (const slug of [
+      "changhua-free",
+      "chiayi-county-indoor",
+      "chiayi-city-indoor",
+      "taoyuan-rainy-day",
+    ]) {
       const response = await request.get(
         `/for-parents/play-map/collections/${slug}`,
       );
@@ -57,9 +62,9 @@ test.describe("親子景點 curated collections", () => {
     await expect(
       page.getByRole("heading", { level: 1, name: "桃園親子景點" }),
     ).toBeVisible();
-    await expect(page.getByText("8 個可以去的景點")).toBeVisible();
-    await expect(page.getByText("免費 5")).toBeVisible();
-    await expect(page.getByText("室內 4")).toBeVisible();
+    await expect(page.getByText("9 個可以去的景點")).toBeVisible();
+    await expect(page.getByText("免費 6")).toBeVisible();
+    await expect(page.getByText("室內 5")).toBeVisible();
     await expect(page.getByText("放電 5")).toBeVisible();
     await expect(page.locator('[class*="editorialInline"]')).toContainText(
       "媽米先看",
@@ -67,7 +72,7 @@ test.describe("親子景點 curated collections", () => {
     await expect(page.locator('[aria-labelledby="editorial-heading"]')).toHaveCount(0);
     await expect(page.locator("body")).not.toContainText("PR7");
     await expect(page.locator("body")).not.toContainText("active 清單");
-    await expect(page.locator('[data-collection-card="true"]')).toHaveCount(8);
+    await expect(page.locator('[data-collection-card="true"]')).toHaveCount(9);
     await expect(
       page.getByRole("link", { name: "在地圖上看桃園景點" }),
     ).toHaveAttribute(
@@ -80,6 +85,11 @@ test.describe("親子景點 curated collections", () => {
     await expect(
       page.locator(
         'a[href="/for-parents/play-map/collections/taoyuan-free"]',
+      ),
+    ).toHaveCount(1);
+    await expect(
+      page.locator(
+        'a[href="/for-parents/play-map/collections/taoyuan-indoor"]',
       ),
     ).toHaveCount(1);
 
@@ -100,7 +110,7 @@ test.describe("親子景點 curated collections", () => {
       expect.arrayContaining(["CollectionPage", "ItemList"]),
     );
     const itemList = graphItems.find((item) => item["@type"] === "ItemList");
-    expect(itemList?.numberOfItems).toBe(8);
+    expect(itemList?.numberOfItems).toBe(9);
     expect(
       jsonLd
         .map((text) => JSON.parse(text) as Record<string, unknown>)
@@ -109,6 +119,64 @@ test.describe("親子景點 curated collections", () => {
     expect(
       JSON.stringify(itemList),
     ).toContain("/for-parents/play-map/ty-fenghe#place");
+  });
+
+  test("taoyuan-indoor launches with the indoor map filter", async ({
+    page,
+    request,
+  }) => {
+    const response = await request.get(
+      "/for-parents/play-map/collections/taoyuan-indoor",
+    );
+    expect(response.ok()).toBeTruthy();
+    const html = await response.text();
+    expect(html).not.toContain("leaflet-container");
+    expect(html).toContain("桃園防災教育館");
+    expect(html).not.toContain("雨天景點");
+
+    await page.goto("/for-parents/play-map/collections/taoyuan-indoor");
+    await expect(page).toHaveTitle("桃園室內親子景點｜車車遊樂園");
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      /\/for-parents\/play-map\/collections\/taoyuan-indoor$/,
+    );
+    await expect(page.getByText("5 個可以去的景點")).toBeVisible();
+    await expect(page.getByText("免費 2")).toBeVisible();
+    await expect(page.getByText("室內 5")).toBeVisible();
+    await expect(page.locator('[data-collection-card="true"]')).toHaveCount(5);
+    await expect(
+      page.getByRole("link", { name: "在地圖上看桃園室內景點" }),
+    ).toHaveAttribute(
+      "href",
+      "/for-parents/play-map?city=%E6%A1%83%E5%9C%92%E5%B8%82&indoor=1&view=map",
+    );
+    await expect(page.locator('[class*="editorialInline"]')).toContainText(
+      "媽米先看",
+    );
+    await expect(
+      page.locator('a[href="/for-parents/play-map/ty-disaster-education"]'),
+    ).toHaveCount(1);
+
+    const jsonLd = await page
+      .locator('script[type="application/ld+json"]')
+      .allTextContents();
+    const graph = jsonLd
+      .map((text) => JSON.parse(text) as Record<string, unknown>)
+      .find(
+        (data) =>
+          Array.isArray(data["@graph"]) &&
+          (data["@graph"] as Record<string, unknown>[]).some(
+            (item) => item["@type"] === "CollectionPage",
+          ),
+      );
+    const graphItems = (graph?.["@graph"] as Record<string, unknown>[]) ?? [];
+    const itemList = graphItems.find((item) => item["@type"] === "ItemList");
+    expect(itemList?.numberOfItems).toBe(5);
+    expect(
+      jsonLd
+        .map((text) => JSON.parse(text) as Record<string, unknown>)
+        .some((data) => data["@type"] === "BreadcrumbList"),
+    ).toBe(true);
   });
 
   test("chiayi-city is distinct from the county and opens the city map filter", async ({
@@ -156,18 +224,18 @@ test.describe("親子景點 curated collections", () => {
     await page.goto("/for-parents/play-map/collections/taoyuan-free");
 
     await expect(page).toHaveTitle("桃園免費親子景點｜車車遊樂園");
-    await expect(page.getByText("5 個可以去的景點")).toBeVisible();
-    await expect(page.getByText("免費 5")).toBeVisible();
-    await expect(page.getByText("室內 1")).toBeVisible();
+    await expect(page.getByText("6 個可以去的景點")).toBeVisible();
+    await expect(page.getByText("免費 6")).toBeVisible();
+    await expect(page.getByText("室內 2")).toBeVisible();
     await expect(page.getByText("放電 4")).toBeVisible();
     await expect(
-      page.getByText("桃園目前 8 個親子景點中，有 5 個不用門票。"),
+      page.getByText("桃園目前 9 個親子景點中，有 6 個不用門票。"),
     ).toBeVisible();
     await expect(page.locator('[class*="editorialInline"]')).toContainText(
       "媽米先看",
     );
-    await expect(page.locator('[data-redundant-flag="true"]')).toHaveCount(5);
-    await expect(page.locator('[data-collection-card="true"]')).toHaveCount(5);
+    await expect(page.locator('[data-redundant-flag="true"]')).toHaveCount(6);
+    await expect(page.locator('[data-collection-card="true"]')).toHaveCount(6);
     await expect(
       page.getByRole("link", { name: "在地圖上看桃園免費景點" }),
     ).toHaveAttribute(

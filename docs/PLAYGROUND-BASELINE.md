@@ -21,15 +21,15 @@ Schema **沒有** `open` / `closed`。
 
 | 項目 | 值 |
 |---|---|
-| total | 97 |
-| operating | 96 |
+| total | 98 |
+| operating | 97 |
 | temporarilyClosed | 1 |
 | cities | 15 |
-| districts（有填 district） | 66 |
-| free / paid（operating） | 56 / 40 |
-| indoor / outdoor（operating） | 32 / 64 |
+| districts（有填 district） | 67 |
+| free / paid（operating） | 57 / 40 |
+| indoor / outdoor（operating） | 33 / 64 |
 
-類型（含休園）：公園 42、博物館 29、其他 10、主題樂園 7、動物園 4、農場 4、室內樂園 1。
+類型（含休園）：公園 42、博物館 29、其他 11、主題樂園 7、動物園 4、農場 4、室內樂園 1。
 
 驗證：`operating + temporarilyClosed === total`、`free + paid === operating`、`indoor + outdoor === operating`。
 
@@ -42,7 +42,7 @@ Schema **沒有** `open` / `closed`。
 | 基隆市 | 5 | 5 | 3 | 1 | launched `keelung` |
 | 台北市 | 8 | 8 | 3 | 3 | launched `taipei` |
 | 新北市 | 8 | 8 | 5 | 3 | launched `new-taipei` |
-| 桃園市 | 9 | 8 | 5 | 4 | launched `taoyuan`（含 1 筆休園） |
+| 桃園市 | 10 | 9 | 6 | 5 | launched `taoyuan`（含 1 筆休園） |
 | 新竹市 | 8 | 8 | 6 | 1 | launched `hsinchu-city` |
 | 新竹縣 | 8 | 8 | 5 | 1 | launched `hsinchu-county` |
 | 苗栗縣 | 5 | 5 | 3 | 0 | launched `miaoli` |
@@ -57,7 +57,7 @@ Schema **沒有** `open` / `closed`。
 
 `sum(city.*) === global.*`。舊 Phase 0 表（基隆 2、台北 9、新北 10、嘉義縣 6／indoor 1）已過期。
 
-## Launch registry（20）
+## Launch registry（21）
 
 門檻：`activeCount >= 5`（`MIN_INDEXABLE_COLLECTION_SIZE`）。低於門檻的合輯**不會**進 registry。
 
@@ -87,11 +87,11 @@ FREE（5）:
 - hsinchu-county-free
 - taichung-free
 
-INDOOR（0）:
+INDOOR（1）:
 
-- （無）
+- taoyuan-indoor
 
-TOTAL = 20
+TOTAL = 21
 
 未 launch 的 city candidate：**無**（嘉義市已上線 `chiayi-city`，與嘉義縣 `chiayi-county` 分開）。
 
@@ -105,7 +105,7 @@ TOTAL = 20
 
 **C.** 嘉義市現 **5／5／2 free／4 indoor／1 outdoor**（B1 新增嘉義公園後上線 city 合輯）。嘉義縣仍是 **5/5 indoor**；`chiayi-county-indoor` 與 parent city 完全相同，所以沒有上線。`chiayi-city-indoor` 現 4 筆，**不是** `chiayi-city` 的 exact duplicate，本批也不上線。
 
-**D.** global indoor 32 = sum(city indoorActive) 32。global free 56 = sum(city freeActive) 56。MATCH。
+**D.** global indoor 33 = sum(city indoorActive) 33。global free 57 = sum(city freeActive) 57。MATCH。
 
 ## Threshold contract
 
@@ -131,7 +131,7 @@ Launched duplicates: `[]`
 
 | slug | CURRENT ACTIVE | SHORT OF 5 | PARENT ACTIVE | OVERLAP | EXACT DUPLICATE? |
 |---|---:|---:|---:|---:|---|
-| taoyuan-indoor | 4 | 1 | 8 | 4 | no |
+| taoyuan-indoor | 5 | 0 | 9 | 5 | no |
 | kaohsiung-free | 4 | 1 | 6 | 4 | no |
 | taipei-free | 3 | 2 | 8 | 3 | no |
 | taipei-indoor | 3 | 2 | 8 | 3 | no |
@@ -139,7 +139,8 @@ Launched duplicates: `[]`
 | tainan-indoor | 3 | 2 | 7 | 3 | no |
 | kaohsiung-indoor | 3 | 2 | 6 | 3 | no |
 
-真正只差 1、且不是 parent duplicate：`taoyuan-indoor`、`kaohsiung-free`。
+真正只差 1、且不是 parent duplicate：`kaohsiung-free`。
+`taoyuan-indoor` 已達 5 且在 B2 Phase 3 上線；仍保留為獨立 indoor collection，不建立 rainy-day variant。
 `chiayi-city` 已達 5 且 **已 launch**（B1 Phase 3）。
 `chiayi-city-indoor` 現 4，不是 city 的 exact duplicate，本批不上線。
 
@@ -147,14 +148,14 @@ Launched duplicates: `[]`
 
 | 欄位 | present | missing | likely debt | 說明 |
 |---|---:|---:|---:|---|
-| officialUrl | 50 | 47 | 0 | 免費公園缺官網可以；active paid 缺 officialUrl = 0 |
-| feeNote | 42 | 55 | 0 | 免費場沒票價說明合理；A1 已補 9 筆 active paid feeNote |
-| coverageNote | 23 | 74 | 0 | 選填誠實聲明；有 `status` 時才必填 |
-| mapsQuery | 10 | 87 | 0 | 搜尋不穩才填 |
-| relatedEpisodes | 0 | 97 | 0 | 產品缺口，不是 schema 必填 |
-| placeId | 0 | 97 | 0 | 地圖不用 Google Place ID |
+| officialUrl | 51 | 47 | 0 | 免費公園缺官網可以；active paid 缺 officialUrl = 0 |
+| feeNote | 42 | 56 | 0 | 免費場沒票價說明合理；A1 已補 9 筆 active paid feeNote |
+| coverageNote | 24 | 74 | 0 | 選填誠實聲明；有 `status` 時才必填 |
+| mapsQuery | 10 | 88 | 0 | 搜尋不穩才填 |
+| relatedEpisodes | 0 | 98 | 0 | 產品缺口，不是 schema 必填 |
+| placeId | 0 | 98 | 0 | 地圖不用 Google Place ID |
 
-sources：1 筆 22、≥2 筆 75、有官方 39、有政府 94、editorial-only 0。
+sources：1 筆 22、≥2 筆 76、有官方 40、有政府 95、editorial-only 0。
 lastVerified：多數仍 2026-08-09～2026-08-16；A1 逐筆查證的 10 筆為 2026-08-19。
 
 ## Paid fee clarity
@@ -181,5 +182,5 @@ lastVerified：多數仍 2026-08-09～2026-08-16；A1 逐筆查證的 10 筆為 
 
 ## 下一步（尚未執行）
 
-B2 桃園 indoor → B3 高雄 free → relatedEpisodes pilot。
+B2 桃園 indoor 已上線 → B3 高雄 free → relatedEpisodes pilot。
 （tips 設施列舉尾句：STOP EDITORIAL CLEANUP，剩餘 14 筆不自動開 A5。）

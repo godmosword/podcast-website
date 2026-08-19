@@ -89,6 +89,9 @@ describe("sitemap freshness", () => {
     expect(new Set(detailEntries.map((entry) => entry.url)).size).toBe(
       playgrounds.length,
     );
+    expect(detailEntries.map((entry) => entry.url)).toContain(
+      "https://example.com/for-parents/play-map/ty-disaster-education",
+    );
     for (const place of playgrounds) {
       const entry = entries.find(
         (item) => item.url === `https://example.com${playgroundDetailPath(place.id)}`,
@@ -110,7 +113,7 @@ describe("sitemap freshness", () => {
     vi.unstubAllEnvs();
   });
 
-  it("只包含 collection index 與 20 筆 launch collection URLs", () => {
+  it("只包含 collection index 與 21 筆 launch collection URLs", () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
     const entries = sitemap();
     const collectionDefinitions = listCollectionDefinitions();
@@ -122,12 +125,15 @@ describe("sitemap freshness", () => {
       )
       .map((entry) => entry.url);
 
-    expect(collectionDefinitions).toHaveLength(20);
-    expect(collectionUrls).toHaveLength(21);
+    expect(collectionDefinitions).toHaveLength(21);
+    expect(collectionUrls).toHaveLength(22);
     expect(collectionUrls).toContain(
       "https://example.com/for-parents/play-map/collections",
     );
-    expect(new Set(collectionUrls).size).toBe(21);
+    expect(new Set(collectionUrls).size).toBe(22);
+    expect(collectionUrls).toContain(
+      "https://example.com/for-parents/play-map/collections/taoyuan-indoor",
+    );
 
     for (const definition of collectionDefinitions) {
       const entry = entries.find(
