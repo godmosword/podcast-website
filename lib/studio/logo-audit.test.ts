@@ -1,0 +1,55 @@
+import { describe, expect, it } from "vitest";
+import { getCharacterLogos } from "@/data/character-logos";
+import sitemap from "@/app/sitemap";
+import {
+  LOGO_AUDIT_VIEWS,
+  LOGO_COLLISION_LABELS,
+  LOGO_PREVIEW_SIZES,
+  familyOnDark,
+  logoAssetPath,
+  logoSourceSize,
+  logosByFamily,
+  resolveCollisionSets,
+} from "./logo-audit";
+
+describe("logo audit helpers", () => {
+  it("預覽尺寸對到 32／128／512 資產", () => {
+    expect(LOGO_PREVIEW_SIZES).toEqual([32, 64, 128, 512]);
+    expect(logoSourceSize(32)).toBe(32);
+    expect(logoSourceSize(64)).toBe(128);
+    expect(logoSourceSize(128)).toBe(128);
+    expect(logoSourceSize(512)).toBe(512);
+    expect(logoAssetPath("xiao-hong", 64)).toBe(
+      "/characters/logo/xiao-hong-128.webp",
+    );
+  });
+
+  it("五組撞型都解析得出且有中文標籤", () => {
+    const sets = resolveCollisionSets(getCharacterLogos());
+    expect(sets).toHaveLength(5);
+    expect(sets.map((set) => set.id)).toEqual(Object.keys(LOGO_COLLISION_LABELS));
+    expect(sets[0]?.logos).toHaveLength(4);
+  });
+
+  it("家族分群覆蓋 35 人且順序固定", () => {
+    const groups = logosByFamily(getCharacterLogos());
+    expect(groups.map((group) => group.family)).toEqual([
+      "rescue",
+      "construction",
+      "speed",
+      "transit",
+      "joy",
+      "fantasy",
+      "people",
+    ]);
+    expect(groups.reduce((sum, group) => sum + group.logos.length, 0)).toBe(35);
+    expect(familyOnDark("rescue")).toBe(true);
+    expect(familyOnDark("joy")).toBe(false);
+  });
+
+  it("驗收頁不進 sitemap", () => {
+    const urls = sitemap().map((entry) => entry.url);
+    expect(urls.some((url) => url.includes("/studio"))).toBe(false);
+    expect(LOGO_AUDIT_VIEWS).toHaveLength(3);
+  });
+});

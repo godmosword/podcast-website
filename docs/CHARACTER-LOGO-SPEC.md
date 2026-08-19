@@ -236,6 +236,14 @@ Pilot 定案後必須回填本 SPEC：
 
 ---
 
-## 11. 驗收頁掛點（Phase 3，本 Phase 不實作）
+## 11. 驗收頁
 
-`/studio/logo-audit`：比照現有 `/studio` — 頁面 `robots: noindex`，不進 `sitemap.ts` 白名單，元件放 `components/studio/`。工具頁寬度不要沿用節目數據中心的 720px。
+`/studio/logo-audit`：比照 `/studio`，頁面 `robots: noindex`，不進 sitemap。元件 `components/studio/LogoAuditBoard.tsx`。工具頁 `max-width: 1100px`。稽核清單：[`CHARACTER-LOGO-AUDIT.md`](./CHARACTER-LOGO-AUDIT.md)。
+
+---
+
+## 12. 生成 prompt
+
+- 恆定層原文：[`docs/logo-prompts/_shared.md`](./logo-prompts/_shared.md)
+- 每角色可整段貼的英文：`docs/logo-prompts/{slug}.md`
+- 改共用區塊後執行 `npx tsx scripts/generate-logo-prompts.ts` 重產 35 份，不要只改其中幾份恆定句。
