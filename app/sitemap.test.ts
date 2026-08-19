@@ -110,7 +110,7 @@ describe("sitemap freshness", () => {
     vi.unstubAllEnvs();
   });
 
-  it("只包含 collection index 與 19 筆 launch collection URLs", () => {
+  it("只包含 collection index 與 20 筆 launch collection URLs", () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
     const entries = sitemap();
     const collectionDefinitions = listCollectionDefinitions();
@@ -122,12 +122,12 @@ describe("sitemap freshness", () => {
       )
       .map((entry) => entry.url);
 
-    expect(collectionDefinitions).toHaveLength(19);
-    expect(collectionUrls).toHaveLength(20);
+    expect(collectionDefinitions).toHaveLength(20);
+    expect(collectionUrls).toHaveLength(21);
     expect(collectionUrls).toContain(
       "https://example.com/for-parents/play-map/collections",
     );
-    expect(new Set(collectionUrls).size).toBe(20);
+    expect(new Set(collectionUrls).size).toBe(21);
 
     for (const definition of collectionDefinitions) {
       const entry = entries.find(
@@ -151,6 +151,15 @@ describe("sitemap freshness", () => {
     );
     expect(collectionUrls).not.toContain(
       "https://example.com/for-parents/play-map/collections/chiayi-county-indoor",
+    );
+    expect(collectionUrls).not.toContain(
+      "https://example.com/for-parents/play-map/collections/chiayi-city-indoor",
+    );
+    expect(collectionUrls).toContain(
+      "https://example.com/for-parents/play-map/collections/chiayi-city",
+    );
+    expect(collectionUrls).toContain(
+      "https://example.com/for-parents/play-map/collections/chiayi-county",
     );
 
     vi.unstubAllEnvs();

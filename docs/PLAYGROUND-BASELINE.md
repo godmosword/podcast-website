@@ -50,18 +50,18 @@ Schema **沒有** `open` / `closed`。
 | 彰化縣 | 5 | 5 | 5 | 0 | launched `changhua` |
 | 南投縣 | 5 | 5 | 2 | 2 | launched `nantou` |
 | 雲林縣 | 5 | 5 | 3 | 1 | launched `yunlin` |
-| 嘉義市 | 5 | 5 | 2 | 4 | **未上線**（達門檻、無 definition；B1 Phase 3） |
+| 嘉義市 | 5 | 5 | 2 | 4 | launched `chiayi-city` |
 | 嘉義縣 | 5 | 5 | 2 | 5 | launched `chiayi-county` |
 | 台南市 | 7 | 7 | 2 | 3 | launched `tainan` |
 | 高雄市 | 6 | 6 | 4 | 3 | launched `kaohsiung` |
 
 `sum(city.*) === global.*`。舊 Phase 0 表（基隆 2、台北 9、新北 10、嘉義縣 6／indoor 1）已過期。
 
-## Launch registry（19）
+## Launch registry（20）
 
 門檻：`activeCount >= 5`（`MIN_INDEXABLE_COLLECTION_SIZE`）。低於門檻的合輯**不會**進 registry。
 
-CITY（14）:
+CITY（15）:
 
 - keelung
 - taipei
@@ -74,6 +74,7 @@ CITY（14）:
 - changhua
 - nantou
 - yunlin
+- chiayi-city
 - chiayi-county
 - tainan
 - kaohsiung
@@ -90,19 +91,19 @@ INDOOR（0）:
 
 - （無）
 
-TOTAL = 19
+TOTAL = 20
 
-未 launch 的 city candidate 只有 **嘉義市**（`chiayi-city` 只是對帳 slug，不是 route）。
+未 launch 的 city candidate：**無**（嘉義市已上線 `chiayi-city`，與嘉義縣 `chiayi-county` 分開）。
 
 舊報告把台北免費、南投免費當成已上線——**錯**。那兩組不在 registry；`taipei-free` 現 3 筆、`nantou-free` 現 2 筆。
 
 ## 已解的四個矛盾
 
-**A.** 15 cities 與 14 city collections 可以同時成立：資料有 15 縣市，registry 只有 14 個 city family。舊數字「14 city collections」對；「基隆未上線」錯。
+**A.** 15 cities 與 15 city collections 對齊：資料有 15 縣市，registry 也有 15 個 city family。舊數字「14 city collections」已過期。
 
-**B.** 基隆有 definition、已 launch（5 筆達標）。嘉義市 **沒有 definition、未 launch**（現 5 筆已達門檻）。真正未 launch city candidate = 1。
+**B.** 基隆有 definition、已 launch（5 筆達標）。嘉義市 **有 definition、已 launch**（5 筆達門檻）。真正未 launch city candidate = 0。
 
-**C.** 嘉義市現 **5／5／2 free／4 indoor／1 outdoor**（B1 新增嘉義公園）。嘉義縣仍是 **5/5 indoor**；`chiayi-county-indoor` 與 parent city 完全相同，所以沒有上線。`chiayi-city-indoor` 現 4 筆，**不再**與 `chiayi-city` 完全重複。
+**C.** 嘉義市現 **5／5／2 free／4 indoor／1 outdoor**（B1 新增嘉義公園後上線 city 合輯）。嘉義縣仍是 **5/5 indoor**；`chiayi-county-indoor` 與 parent city 完全相同，所以沒有上線。`chiayi-city-indoor` 現 4 筆，**不是** `chiayi-city` 的 exact duplicate，本批也不上線。
 
 **D.** global indoor 32 = sum(city indoorActive) 32。global free 56 = sum(city freeActive) 56。MATCH。
 
@@ -139,8 +140,8 @@ Launched duplicates: `[]`
 | kaohsiung-indoor | 3 | 2 | 6 | 3 | no |
 
 真正只差 1、且不是 parent duplicate：`taoyuan-indoor`、`kaohsiung-free`。
-`chiayi-city` 已達 5，但 **沒有** production definition，仍未 launch（B1 Phase 3 再決定是否開 route）。
-`chiayi-city-indoor` 現 4，不再是 city 的 exact duplicate。
+`chiayi-city` 已達 5 且 **已 launch**（B1 Phase 3）。
+`chiayi-city-indoor` 現 4，不是 city 的 exact duplicate，本批不上線。
 
 ## Optional fields（RAW vs 品質債）
 
@@ -180,5 +181,5 @@ lastVerified：多數仍 2026-08-09～2026-08-16；A1 逐筆查證的 10 筆為 
 
 ## 下一步（尚未執行）
 
-B1 Phase 3：是否為 `chiayi-city` 建立 collection definition（現已 5 筆、達門檻、尚未上線）→ B2 桃園 indoor → B3 高雄 free → relatedEpisodes pilot。
+B2 桃園 indoor → B3 高雄 free → relatedEpisodes pilot。
 （tips 設施列舉尾句：STOP EDITORIAL CLEANUP，剩餘 14 筆不自動開 A5。）

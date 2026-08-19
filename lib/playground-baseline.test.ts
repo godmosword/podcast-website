@@ -99,7 +99,7 @@ describe("launch collection registry", () => {
   test("production registry is COLLECTION_DEFINITIONS, not an old PLAY_MAP_COLLECTIONS file", () => {
     expect(baseline.launchRegistry.total).toBe(COLLECTION_DEFINITIONS.length);
     expect(baseline.launchRegistry.total).toBe(MIN_COLLECTION_DEFINITION_COUNT);
-    expect(baseline.launchRegistry.cityCount).toBe(14);
+    expect(baseline.launchRegistry.cityCount).toBe(15);
     expect(baseline.launchRegistry.freeCount).toBe(5);
     expect(baseline.launchRegistry.indoorCount).toBe(0);
     expect(baseline.launchRegistry.otherFamilyCount).toBe(0);
@@ -108,10 +108,10 @@ describe("launch collection registry", () => {
     );
   });
 
-  test("keelung is a launched city collection; chiayi-city is not in the registry", () => {
+  test("keelung and chiayi-city are launched city collections", () => {
     expect(baseline.launchRegistry.citySlugs).toContain("keelung");
-    expect(baseline.launchRegistry.citySlugs).not.toContain("chiayi-city");
-    expect(baseline.launchRegistry.unlaunchedCitySlugs).toEqual(["chiayi-city"]);
+    expect(baseline.launchRegistry.citySlugs).toContain("chiayi-city");
+    expect(baseline.launchRegistry.unlaunchedCitySlugs).toEqual([]);
   });
 
   test("threshold contract uses active count >= 5 and excludes temporarily-closed", () => {
@@ -130,21 +130,21 @@ describe("launch collection registry", () => {
 describe("resolved contradictions", () => {
   const baseline = computePlaygroundBaseline();
 
-  test("A/B: 15 cities vs 14 launched city collections; 基隆已上線、嘉義市未上線", () => {
+  test("A/B: 15 cities and 15 launched city collections; 基隆與嘉義市皆已上線", () => {
     expect(baseline.global.cities).toBe(15);
-    expect(baseline.launchRegistry.cityCount).toBe(14);
+    expect(baseline.launchRegistry.cityCount).toBe(15);
     const keelung = baseline.cities.find((row) => row.city === "基隆市");
     const chiayiCity = baseline.cities.find((row) => row.city === "嘉義市");
     expect(keelung?.operating).toBeGreaterThanOrEqual(5);
     expect(chiayiCity?.operating).toBeGreaterThanOrEqual(5);
-    expect(chiayiCity?.hasLaunchedCityCollection).toBe(false);
+    expect(chiayiCity?.hasLaunchedCityCollection).toBe(true);
     expect(
       baseline.candidates.find((row) => row.slug === "keelung")?.currentlyLaunched,
     ).toBe(true);
     expect(
       baseline.candidates.find((row) => row.slug === "chiayi-city")
         ?.currentlyLaunched,
-    ).toBe(false);
+    ).toBe(true);
   });
 
   test("C: 嘉義市 5 筆含 1 戶外；嘉義縣 5 筆仍全室內，indoor 會跟 city 重複", () => {
@@ -162,7 +162,7 @@ describe("resolved contradictions", () => {
       baseline.candidates.find((row) => row.slug === "chiayi-city"),
     ).toMatchObject({
       activeCount: 5,
-      currentlyLaunched: false,
+      currentlyLaunched: true,
       thresholdReached: true,
       exactDuplicateOfParent: false,
     });
@@ -172,6 +172,12 @@ describe("resolved contradictions", () => {
       activeCount: 4,
       currentlyLaunched: false,
       exactDuplicateOfParent: false,
+    });
+    expect(
+      baseline.candidates.find((row) => row.slug === "chiayi-city-rainy-day"),
+    ).toMatchObject({
+      activeCount: 4,
+      currentlyLaunched: false,
     });
     expect(chiayiCounty).toMatchObject({
       city: "嘉義縣",
@@ -367,7 +373,7 @@ describe("documentation drift guards", () => {
   test("baseline doc cites the locked census", () => {
     expect(BASELINE_DOC).toContain("| total | 97 |");
     expect(BASELINE_DOC).toContain("| operating | 96 |");
-    expect(BASELINE_DOC).toContain("TOTAL = 19");
-    expect(BASELINE_DOC).toContain("未 launch 的 city candidate 只有 **嘉義市**");
+    expect(BASELINE_DOC).toContain("TOTAL = 20");
+    expect(BASELINE_DOC).toContain("未 launch 的 city candidate：**無**");
   });
 });

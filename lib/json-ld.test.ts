@@ -398,4 +398,67 @@ describe("playgroundCollectionJsonLd", () => {
 
     vi.unstubAllEnvs();
   });
+
+  it("chiayi-city ItemList uses playground detail entity IDs", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
+    const resolved = resolveCollectionBySlug("chiayi-city");
+    expect(resolved).toBeDefined();
+    expect(resolved?.activeCount).toBe(5);
+
+    const data = playgroundCollectionJsonLd(resolved!);
+    const graph = data["@graph"] as Record<string, unknown>[];
+    const collection = graph.find((item) => item["@type"] === "CollectionPage");
+    const itemList = graph.find((item) => item["@type"] === "ItemList");
+    const elements = itemList?.itemListElement as Record<string, unknown>[];
+    const serialized = JSON.stringify(data);
+
+    expect(collection).toMatchObject({
+      "@id":
+        "https://example.com/for-parents/play-map/collections/chiayi-city#collection",
+      url: "https://example.com/for-parents/play-map/collections/chiayi-city",
+      name: "嘉義市親子景點",
+    });
+    expect(itemList).toMatchObject({
+      numberOfItems: 5,
+    });
+    expect(elements).toHaveLength(5);
+    expect(elements.map((entry) => entry.item)).toEqual([
+      {
+        "@type": "Place",
+        "@id": "https://example.com/for-parents/play-map/cyc-chiayi-park#place",
+        name: "嘉義公園",
+        url: "https://example.com/for-parents/play-map/cyc-chiayi-park",
+      },
+      {
+        "@type": "Place",
+        "@id": "https://example.com/for-parents/play-map/cyc-city-museum#place",
+        name: "嘉義市立博物館",
+        url: "https://example.com/for-parents/play-map/cyc-city-museum",
+      },
+      {
+        "@type": "Place",
+        "@id": "https://example.com/for-parents/play-map/cyc-art-museum#place",
+        name: "嘉義市立美術館",
+        url: "https://example.com/for-parents/play-map/cyc-art-museum",
+      },
+      {
+        "@type": "Place",
+        "@id": "https://example.com/for-parents/play-map/cyc-shellginger#place",
+        name: "月桃故事館",
+        url: "https://example.com/for-parents/play-map/cyc-shellginger",
+      },
+      {
+        "@type": "Place",
+        "@id": "https://example.com/for-parents/play-map/cyc-tile-museum#place",
+        name: "臺灣花磚博物館",
+        url: "https://example.com/for-parents/play-map/cyc-tile-museum",
+      },
+    ]);
+    expect(serialized).not.toContain("嘉義縣");
+    expect(serialized).not.toContain("aggregateRating");
+    expect(serialized).not.toContain("FAQPage");
+    expect(serialized).not.toContain("dateModified");
+
+    vi.unstubAllEnvs();
+  });
 });

@@ -131,6 +131,15 @@ const CITY_COLLECTIONS = [
     shortLabel: "雲林縣",
   },
   {
+    slug: "chiayi-city",
+    city: "嘉義市",
+    cityDisplayName: "嘉義市",
+    family: "city",
+    filter: { city: "嘉義市" },
+    title: "嘉義市親子景點",
+    shortLabel: "嘉義市",
+  },
+  {
     slug: "chiayi-county",
     city: "嘉義縣",
     cityDisplayName: "嘉義縣",
@@ -215,7 +224,7 @@ export const COLLECTION_DEFINITIONS = [
   ...INDOOR_COLLECTIONS,
 ] as const satisfies readonly CollectionDefinition[];
 
-export const MIN_COLLECTION_DEFINITION_COUNT = 19;
+export const MIN_COLLECTION_DEFINITION_COUNT = 20;
 
 const definitionsBySlug = new Map<string, CollectionDefinition>(
   COLLECTION_DEFINITIONS.map((definition) => [definition.slug, definition]),

@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("親子景點 curated collections", () => {
-  test("collections index exposes exactly the 19 launch links", async ({
+  test("collections index exposes exactly the 20 launch links", async ({
     page,
     request,
   }) => {
@@ -16,10 +16,10 @@ test.describe("親子景點 curated collections", () => {
     await expect(page.locator("body")).not.toContainText("active 景點");
     await expect(
       page.locator('a[href^="/for-parents/play-map/collections/"]'),
-    ).toHaveCount(19);
+    ).toHaveCount(20);
     await expect(page.locator(".leaflet-container")).toHaveCount(0);
 
-    for (const slug of ["changhua-free", "chiayi-county-indoor"]) {
+    for (const slug of ["changhua-free", "chiayi-county-indoor", "chiayi-city-indoor"]) {
       const response = await request.get(
         `/for-parents/play-map/collections/${slug}`,
       );
@@ -111,6 +111,45 @@ test.describe("親子景點 curated collections", () => {
     ).toContain("/for-parents/play-map/ty-fenghe#place");
   });
 
+  test("chiayi-city is distinct from the county and opens the city map filter", async ({
+    page,
+    request,
+  }) => {
+    const response = await request.get(
+      "/for-parents/play-map/collections/chiayi-city",
+    );
+    expect(response.ok()).toBeTruthy();
+    const html = await response.text();
+    expect(html).not.toContain("leaflet-container");
+    expect(html).not.toContain("國立故宮博物院南部院區");
+
+    await page.goto("/for-parents/play-map/collections/chiayi-city");
+    await expect(page).toHaveTitle("嘉義市親子景點｜車車遊樂園");
+    await expect(
+      page.getByRole("heading", { level: 1, name: "嘉義市親子景點" }),
+    ).toBeVisible();
+    await expect(page.getByText("5 個可以去的景點")).toBeVisible();
+    await expect(page.getByText("免費 2")).toBeVisible();
+    await expect(page.getByText("室內 4")).toBeVisible();
+    await expect(page.locator('[class*="editorialInline"]')).toHaveCount(0);
+    await expect(page.locator('[data-collection-card="true"]')).toHaveCount(5);
+    await expect(
+      page.getByRole("link", { name: "在地圖上看嘉義市景點" }),
+    ).toHaveAttribute(
+      "href",
+      "/for-parents/play-map?city=%E5%98%89%E7%BE%A9%E5%B8%82&view=map",
+    );
+    await expect(
+      page.locator('a[href="/for-parents/play-map/collections/chiayi-city-indoor"]'),
+    ).toHaveCount(0);
+    await expect(
+      page.locator('a[href="/for-parents/play-map/collections/chiayi-county"]'),
+    ).toHaveCount(0);
+    await expect(
+      page.locator('a[href="/for-parents/play-map/cyc-chiayi-park"]'),
+    ).toHaveCount(1);
+  });
+
   test("taoyuan-free uses the free map filter and detail links", async ({
     page,
   }) => {
@@ -170,7 +209,7 @@ test.describe("親子景點 curated collections", () => {
   test("removed duplicate variants are absent while their Play Map filters remain available", async ({
     request,
   }) => {
-    for (const slug of ["changhua-free", "chiayi-county-indoor"]) {
+    for (const slug of ["changhua-free", "chiayi-county-indoor", "chiayi-city-indoor"]) {
       const response = await request.get(
         `/for-parents/play-map/collections/${slug}`,
       );

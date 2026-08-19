@@ -45,8 +45,7 @@ export const HIGH_INTENT_CANDIDATE_SLUGS = [
 ] as const;
 
 /**
- * 縣市 → 合輯 slug。嘉義市沒有 production city collection，
- * `chiayi-city` 只是對帳用 candidate id，不是新 route。
+ * 縣市 → 合輯 slug。嘉義市／嘉義縣必須分開對應，不得共用「嘉義」。
  */
 export const PLAYGROUND_CITY_SLUGS: Readonly<Record<string, string>> = {
   基隆市: "keelung",

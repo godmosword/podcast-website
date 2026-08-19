@@ -1076,19 +1076,24 @@ describe("B1 Chiayi City diversity — 嘉義公園", () => {
       outdoorActive: 1,
     });
     expect(global.total).toBe(97);
-    expect(launchRegistry.total).toBe(19);
-    expect(launchRegistry.unlaunchedCitySlugs).toEqual(["chiayi-city"]);
+    expect(launchRegistry.total).toBe(20);
+    expect(launchRegistry.unlaunchedCitySlugs).toEqual([]);
   });
 
-  it("chiayi-city 不再與 indoor 完全重複，也不自動上線", () => {
+  it("chiayi-city 已上線，且不再與 indoor 完全重複", () => {
     const { candidates, candidateExactDuplicates, launchRegistry } =
       computePlaygroundBaseline();
     const city = candidates.find((row) => row.slug === "chiayi-city");
     const indoor = candidates.find((row) => row.slug === "chiayi-city-indoor");
+    const rainy = candidates.find((row) => row.slug === "chiayi-city-rainy-day");
     expect(city?.activeCount).toBe(5);
     expect(indoor?.activeCount).toBe(4);
-    expect(city?.currentlyLaunched).toBe(false);
-    expect(launchRegistry.slugs).not.toContain("chiayi-city");
+    expect(rainy?.activeCount).toBe(4);
+    expect(city?.currentlyLaunched).toBe(true);
+    expect(indoor?.currentlyLaunched).toBe(false);
+    expect(rainy?.currentlyLaunched).toBe(false);
+    expect(launchRegistry.slugs).toContain("chiayi-city");
+    expect(launchRegistry.slugs).not.toContain("chiayi-city-indoor");
     expect(candidateExactDuplicates).not.toEqual(
       expect.arrayContaining([
         expect.objectContaining({

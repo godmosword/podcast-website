@@ -6,7 +6,10 @@ import {
   collectionMapCtaLabel,
   collectionMapPath,
   collectionParentSummary,
+  collectionDescription,
   getCollectionDefinition,
+  isCollectionIndexable,
+  listCollectionDefinitions,
   relatedCollections,
   resolveCollection,
   resolveCollectionBySlug,
@@ -15,10 +18,10 @@ import {
 } from "@/lib/playground-collections";
 
 describe("playground collection registry", () => {
-  test("contains exactly the 19 launch collections", () => {
-    expect(COLLECTION_DEFINITIONS).toHaveLength(19);
+  test("contains exactly the 20 launch collections", () => {
+    expect(COLLECTION_DEFINITIONS).toHaveLength(20);
     expect(new Set(COLLECTION_DEFINITIONS.map((item) => item.slug)).size).toBe(
-      19,
+      20,
     );
     expect(COLLECTION_DEFINITIONS.map((item) => item.slug)).toEqual([
       "keelung",
@@ -32,6 +35,7 @@ describe("playground collection registry", () => {
       "changhua",
       "nantou",
       "yunlin",
+      "chiayi-city",
       "chiayi-county",
       "tainan",
       "kaohsiung",
@@ -49,6 +53,7 @@ describe("playground collection registry", () => {
   test("uses explicit ambiguous city mappings", () => {
     expect(getCollectionDefinition("hsinchu-city")?.city).toBe("新竹市");
     expect(getCollectionDefinition("hsinchu-county")?.city).toBe("新竹縣");
+    expect(getCollectionDefinition("chiayi-city")?.city).toBe("嘉義市");
     expect(getCollectionDefinition("chiayi-county")?.city).toBe("嘉義縣");
   });
 
@@ -225,6 +230,67 @@ describe("resolved collection semantics", () => {
 
   test("does not create the rainy-day duplicate family", () => {
     expect(getCollectionDefinition("chiayi-county-rainy-day")).toBeUndefined();
+    expect(getCollectionDefinition("chiayi-city-rainy-day")).toBeUndefined();
+  });
+
+  test("launches chiayi-city as a city collection distinct from the county", () => {
+    const definition = getCollectionDefinition("chiayi-city");
+    expect(definition).toMatchObject({
+      slug: "chiayi-city",
+      city: "嘉義市",
+      cityDisplayName: "嘉義市",
+      family: "city",
+      filter: { city: "嘉義市" },
+      title: "嘉義市親子景點",
+      shortLabel: "嘉義市",
+    });
+    expect(getCollectionDefinition("chiayi-city-indoor")).toBeUndefined();
+    expect(getCollectionDefinition("chiayi-city-free")).toBeUndefined();
+    expect(getCollectionDefinition("chiayi-city-rainy-day")).toBeUndefined();
+
+    const resolved = resolveCollectionBySlug("chiayi-city");
+    expect(resolved).toMatchObject({
+      matchingCount: 5,
+      activeCount: 5,
+      freeCount: 2,
+      indoorCount: 4,
+      districtCount: 2,
+      typeCount: 3,
+    });
+    expect(resolved && isCollectionIndexable(resolved)).toBe(true);
+    expect(resolved?.places.map((place) => place.id)).toEqual([
+      "cyc-chiayi-park",
+      "cyc-city-museum",
+      "cyc-art-museum",
+      "cyc-shellginger",
+      "cyc-tile-museum",
+    ]);
+    expect(resolved?.places.some((place) => place.city === "嘉義縣")).toBe(
+      false,
+    );
+    expect(collectionDescription(resolved!)).toBe(
+      "目前收錄 5 個嘉義市親子景點，涵蓋 2 個行政區、3 種景點類型。",
+    );
+    expect(collectionParentSummary(resolved!)).toBeNull();
+
+    const indoorDefinition: CollectionDefinition = {
+      slug: "chiayi-city-indoor",
+      city: "嘉義市",
+      cityDisplayName: "嘉義市",
+      family: "indoor",
+      filter: { city: "嘉義市", indoorOnly: true },
+      title: "嘉義市室內親子景點",
+      shortLabel: "嘉義市室內",
+    };
+    expect(resolveCollection(indoorDefinition).activeCount).toBe(4);
+
+    expect(collectionMapPath(definition!)).toBe(
+      "/for-parents/play-map?city=%E5%98%89%E7%BE%A9%E5%B8%82&view=map",
+    );
+    expect(collectionMapCtaLabel(definition!)).toBe("在地圖上看嘉義市景點");
+    expect(
+      collectionMapPath(getCollectionDefinition("chiayi-county")!),
+    ).toBe("/for-parents/play-map?city=%E5%98%89%E7%BE%A9%E7%B8%A3&view=map");
   });
 });
 
@@ -233,6 +299,7 @@ describe("related collections", () => {
     const taoyuan = getCollectionDefinition("taoyuan")!;
     const taoyuanFree = getCollectionDefinition("taoyuan-free")!;
     const chiayiCounty = getCollectionDefinition("chiayi-county")!;
+    const chiayiCity = getCollectionDefinition("chiayi-city")!;
 
     expect(relatedCollections(taoyuan).map((item) => item.slug)).toEqual([
       "taoyuan-free",
@@ -241,5 +308,30 @@ describe("related collections", () => {
       "taoyuan",
     ]);
     expect(relatedCollections(chiayiCounty)).toEqual([]);
+    expect(relatedCollections(chiayiCity)).toEqual([]);
+  });
+
+  test("static params come from the 20 launch definitions", () => {
+    expect(listCollectionDefinitions()).toHaveLength(20);
+    expect(
+      listCollectionDefinitions("city").map((item) => item.slug),
+    ).toEqual([
+      "keelung",
+      "taipei",
+      "new-taipei",
+      "taoyuan",
+      "hsinchu-city",
+      "hsinchu-county",
+      "miaoli",
+      "taichung",
+      "changhua",
+      "nantou",
+      "yunlin",
+      "chiayi-city",
+      "chiayi-county",
+      "tainan",
+      "kaohsiung",
+    ]);
+    expect(listCollectionDefinitions("indoor")).toEqual([]);
   });
 });
