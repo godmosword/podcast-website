@@ -101,8 +101,8 @@
 
 ### 待清理的既有資料
 
-至 2026-08-16 為止仍有 56 筆帶設施列舉尾句、剝除後不足 28 字，屬待改寫
-backlog。改寫時事實查證可外包，但**中文成稿一律由 Sonnet 或 Leader 定稿**
+設施列舉尾句筆數以 `computePlaygroundBaseline().tipsDebt` 為準（見 [PLAYGROUND-BASELINE.md](./PLAYGROUND-BASELINE.md)），
+屬待改寫 backlog。改寫時事實查證可外包，但**中文成稿一律由 Sonnet 或 Leader 定稿**
 （見 `docs/AGENT-WORKFLOW.md` 路由表）。
 
 ## name 與 mapsQuery 的分工
@@ -151,7 +151,7 @@ backlog。改寫時事實查證可外包，但**中文成稿一律由 Sonnet 或
 - `lastWave`（最近一次資料波次，如 `wave-0`、`wave-1`）
 - `notes`（缺什麼類型、待複核場館）
 
-ledger **不**進使用者-facing UI 細節；PlayMap 僅顯示摘要狀態（由 `coverageHeadline()` 產生，例如「已收錄 11 縣市、共 73 處」）。
+ledger **不**進使用者-facing UI 細節；PlayMap 僅顯示摘要狀態（由 `coverageHeadline()` 從可造訪場館現算，勿把舊 Wave 的縣市／筆數當現況）。合輯與 census 以 [`lib/playground-baseline.ts`](../lib/playground-baseline.ts) 為準，摘要見 [PLAYGROUND-BASELINE.md](./PLAYGROUND-BASELINE.md)。
 
 ### 波次對照（摘要）
 
@@ -161,7 +161,7 @@ ledger **不**進使用者-facing UI 細節；PlayMap 僅顯示摘要狀態（�
 | Wave 2 | 新竹市、新竹縣、苗栗縣、台中市、彰化縣、南投縣、雲林縣 | 達標 |
 | Wave 3+ | 嘉義以南西台灣／宜花東／離島 | 待擴充 |
 
-**Wave 3 併行目標 — 室內／雨天備案覆蓋**：目前 `indoor: true` 僅 16／73 筆，彰化縣與苗栗縣為 0，`室內樂園` 全站僅 1 筆。依「不捏造 filler 點位」原則，先在頁面文案上不單獨主打室內樂園，待資料補足再恢復。各縣至少 2 筆室內為下一階段門檻。
+**Wave 3 併行目標 — 室內／雨天備案覆蓋**：室內／免費／合輯現況以 [`lib/playground-baseline.ts`](../lib/playground-baseline.ts) 重算為準，不要抄舊 Wave 的 indoor 比例。`室內樂園` type 全站仍僅 1 筆；彰化縣與苗栗縣 indoor 仍為 0。合輯 registry 目前沒有 indoor family。依「不捏造 filler 點位」原則，先不要為了合輯硬標室內。各縣至少 2 筆室內為下一階段門檻。
 
 ## 發現路徑（CRITICAL-R A）
 
@@ -199,4 +199,5 @@ ledger **不**進使用者-facing UI 細節；PlayMap 僅顯示摘要狀態（�
 
 - 視覺與命名：[DESIGN.md](../DESIGN.md)
 - 資料型別：`data/playgrounds.ts`
+- 合輯／census：[`PLAYGROUND-BASELINE.md`](./PLAYGROUND-BASELINE.md)、`lib/playground-baseline.ts`
 - 家長端其他資料：[FOR-PARENTS-DATA.md](./FOR-PARENTS-DATA.md)

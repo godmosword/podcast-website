@@ -11,6 +11,10 @@ import {
   type PlaygroundType,
 } from "./playgrounds";
 import {
+  computePlaygroundBaseline,
+  FACILITY_LIST_TAIL_PATTERN,
+} from "@/lib/playground-baseline";
+import {
   assertWave1CoverageMet,
   assertWave2CoverageMet,
 } from "@/lib/playground-coverage";
@@ -201,7 +205,7 @@ describe("playgrounds sidecar", () => {
    * 「場內有 X、Y、Z。」型尾句——與 facilities 陣列重複的設施列舉。
    * 卡片層的 composeParentBlurb 早就在過濾它（見 lib/playground-parent-voice.ts）。
    */
-  const FACILITY_TAIL = /\s*(?:場|園|館)內有[^。]*。\s*$/;
+  const FACILITY_TAIL = FACILITY_LIST_TAIL_PATTERN;
 
   /*
    * status 是「今天過去會撲空」的阻擋條件，必須有依據。
@@ -333,8 +337,8 @@ describe("playgrounds sidecar", () => {
     expect(place).toBeDefined();
     if (!place) return;
 
-    expect(place.mapsQuery).toBe("卡司蒂菈樂園 中壢");
-    expect(playgroundMapsSearchQuery(place)).toBe("卡司蒂菈樂園 中壢");
+    expect(place.mapsQuery).toBe("卡司蒂菈樂園 蘆竹");
+    expect(playgroundMapsSearchQuery(place)).toBe("卡司蒂菈樂園 蘆竹");
     expect(playgroundMapsSearchQuery(place)).not.toBe(
       `${place.name}, ${place.city}`,
     );
@@ -345,8 +349,8 @@ describe("playgrounds sidecar", () => {
     const query = new URL(buildGoogleMapsPlaceUrl(place)).searchParams.get(
       "query",
     );
-    expect(dest).toBe("卡司蒂菈樂園 中壢");
-    expect(query).toBe("卡司蒂菈樂園 中壢");
+    expect(dest).toBe("卡司蒂菈樂園 蘆竹");
+    expect(query).toBe("卡司蒂菈樂園 蘆竹");
   });
 
   it("有 placeId 時導航與搜尋帶 *_place_id（測試用物件，不寫進資料列）", () => {
@@ -512,7 +516,7 @@ describe("playgrounds sidecar", () => {
     expect(place).toBeDefined();
     if (!place) return;
     expect(place.name).toBe("卡司‧蒂菈樂園");
-    expect(place.mapsQuery).toBe("卡司蒂菈樂園 中壢");
+    expect(place.mapsQuery).toBe("卡司蒂菈樂園 蘆竹");
   });
 
   it("ty-xpark 在中壢青埔而非觀音", () => {
@@ -593,5 +597,183 @@ describe("playgrounds sidecar", () => {
       .map((place) => place.mapsQuery)
       .filter((query): query is string => query !== undefined);
     expect(new Set(queries).size).toBe(queries.length);
+  });
+
+  it("officialUrl 若存在則不與其他場館重複", () => {
+    const urls = listPlaygrounds()
+      .map((place) => place.officialUrl)
+      .filter((url): url is string => url !== undefined);
+    expect(new Set(urls).size).toBe(urls.length);
+  });
+});
+
+/** A1 查證日期；只鎖「有查過」，不鎖 feeNote 全文。 */
+const A1_VERIFIED_ON = "2026-08-19";
+
+const A1_PAID_FEE_NOTE_IDS = [
+  "ty-casti",
+  "ty-xpark",
+  "tp-zoo",
+  "tp-water-museum",
+  "nt-yingge-ceramic",
+  "nt-juming",
+  "kl-nmmst",
+  "kl-heping-island",
+  "tc-lihpao",
+] as const;
+
+describe("A1 factual trust", () => {
+  it("A1 九筆付費場皆有 feeNote，且 lastVerified 為本次查證日", () => {
+    for (const id of A1_PAID_FEE_NOTE_IDS) {
+      const place = getPlayground(id);
+      expect(place, id).toBeDefined();
+      if (!place) continue;
+      expect(place.free, id).toBe(false);
+      expect(place.feeNote?.trim().length, id).toBeGreaterThan(8);
+      expect(place.lastVerified, id).toBe(A1_VERIFIED_ON);
+    }
+  });
+
+  it("A1 feeNote 含關鍵決策條件，不鎖全文", () => {
+    expect(getPlayground("ty-casti")?.feeNote).toMatch(/90\s*公分/);
+    expect(getPlayground("ty-xpark")?.feeNote).toMatch(/未滿\s*4\s*歲/);
+    expect(getPlayground("tp-zoo")?.feeNote).toMatch(/普通票/);
+    expect(getPlayground("tp-water-museum")?.feeNote).toMatch(/親水/);
+    expect(getPlayground("nt-yingge-ceramic")?.feeNote).toMatch(/80/);
+    expect(getPlayground("nt-juming")?.feeNote).toMatch(/6\s*歲/);
+    expect(getPlayground("kl-nmmst")?.feeNote).toMatch(/主題館|分館/);
+    expect(getPlayground("kl-heping-island")?.feeNote).toMatch(
+      /未滿\s*6\s*歲|岩石/,
+    );
+    expect(getPlayground("tc-lihpao")?.feeNote).toMatch(/馬拉灣|探索世界/);
+  });
+
+  it("kl-heping-island officialUrl 指向地質公園營運站", () => {
+    const place = getPlayground("kl-heping-island");
+    expect(place?.officialUrl).toBe("https://www.hpigeopark.org/");
+    expect(place?.officialUrl).not.toContain("northguan-nsa.gov.tw");
+    expect(
+      place?.sources.some((source) =>
+        source.url.includes("hpigeopark.org/hours-admission"),
+      ),
+    ).toBe(true);
+  });
+
+  it("tc-lihpao officialUrl 指向樂園而非建設公司", () => {
+    const place = getPlayground("tc-lihpao");
+    expect(place?.officialUrl).toBe("https://www.lihpaoresort.com/");
+    expect(place?.officialUrl).not.toContain("lihpao.com.tw");
+    expect(
+      place?.sources.some((source) => source.url.includes("lihpao.com.tw")),
+    ).toBe(false);
+  });
+
+  it("ty-puhsin 仍為暫時休園，且本次有複核", () => {
+    const place = getPlayground("ty-puhsin");
+    expect(place?.status).toBe("temporarily-closed");
+    expect(place?.lastVerified).toBe(A1_VERIFIED_ON);
+    expect(place?.coverageNote).toMatch(/2026-08-19/);
+    expect(
+      place?.sources.some((source) =>
+        source.url.includes("pushin-ranch.com/news-detail/170"),
+      ),
+    ).toBe(true);
+  });
+
+  it("ty-casti 訪客位置在蘆竹大竹北路，不是中壢大江", () => {
+    const place = getPlayground("ty-casti");
+    expect(place).toBeDefined();
+    if (!place) return;
+    expect(place.city).toBe("桃園市");
+    expect(place.district).toBe("蘆竹區");
+    expect(place.address).toBe("桃園市蘆竹區大竹北路 90-66 號");
+    expect(place.address).not.toMatch(/中園路/);
+    expect(place.district).not.toBe("中壢區");
+    // 官方園區地址 Google 地圖釘 !8m2!3d25.0315274!4d121.2534857
+    expect(place.lat).toBeCloseTo(25.03153, 4);
+    expect(place.lng).toBeCloseTo(121.25349, 4);
+    expect(place.lat).not.toBe(24.9658);
+    expect(place.lng).not.toBe(121.2212);
+    expect(place.mapsQuery).toBe("卡司蒂菈樂園 蘆竹");
+    expect(place.coverageNote).toBeUndefined();
+  });
+});
+
+const A2_TIPS_PILOT_IDS = [
+  "ty-casti",
+  "ty-xpark",
+  "tp-children-park",
+  "tp-zoo",
+  "tp-water-museum",
+  "nt-yingge-ceramic",
+  "nt-juming",
+  "kl-nmmst",
+  "kl-heping-island",
+  "tc-lihpao",
+  "ty-kids-museum",
+  "nt-435",
+  "tp-shilin-residence",
+  "nt-sanchong-floodway",
+  "hc-qingqing",
+] as const;
+
+/** 僅文案改寫、未做 A1 事實查證的試點；lastVerified 不得因改寫 tips 而改動。 */
+const A2_COPY_ONLY_LAST_VERIFIED = {
+  "ty-kids-museum": "2026-08-11",
+  "tp-children-park": "2026-08-11",
+  "nt-435": "2026-08-13",
+  "tp-shilin-residence": "2026-08-09",
+  "nt-sanchong-floodway": "2026-08-09",
+  "hc-qingqing": "2026-08-09",
+} as const;
+
+const SALESY_TIP_PATTERN =
+  /必去|超好玩|絕對不能錯過|小孩一定會愛|CP值超高|網美|打卡必去/;
+
+describe("A2 tips quality pilot", () => {
+  it("試點 tips 非空，且不再使用設施列舉尾句", () => {
+    for (const id of A2_TIPS_PILOT_IDS) {
+      const place = getPlayground(id);
+      expect(place, id).toBeDefined();
+      if (!place) continue;
+      expect(place.tips.trim().length, id).toBeGreaterThan(8);
+      expect(
+        FACILITY_LIST_TAIL_PATTERN.test(place.tips),
+        `${id} 仍是「場／園／館內有…」尾句：${place.tips}`,
+      ).toBe(false);
+      expect(
+        /(?:場|園|館)內有/.test(place.tips),
+        `${id} 仍把設施清單寫進 tips：${place.tips}`,
+      ).toBe(false);
+      expect(
+        SALESY_TIP_PATTERN.test(place.tips),
+        `${id} tips 含推銷用語：${place.tips}`,
+      ).toBe(false);
+      expect(place.relatedEpisodes, id).toBeUndefined();
+    }
+  });
+
+  it("試點沒有改成同一句開頭", () => {
+    const openings = A2_TIPS_PILOT_IDS.map((id) => {
+      const tips = getPlayground(id)?.tips ?? "";
+      return tips.slice(0, 4);
+    });
+    expect(new Set(openings).size).toBeGreaterThan(10);
+  });
+
+  it("僅文案改寫的試點不更新 lastVerified", () => {
+    for (const [id, verified] of Object.entries(A2_COPY_ONLY_LAST_VERIFIED)) {
+      expect(getPlayground(id)?.lastVerified, id).toBe(verified);
+    }
+  });
+
+  it("試點已離開 tipsDebt，但全庫尾句債仍在（未一次清完）", () => {
+    const { tipsDebt } = computePlaygroundBaseline();
+    const remaining = new Set(tipsDebt.placeIds);
+    for (const id of A2_TIPS_PILOT_IDS) {
+      expect(remaining.has(id), id).toBe(false);
+    }
+    expect(tipsDebt.count).toBeGreaterThan(0);
+    expect(tipsDebt.count).toBe(41);
   });
 });

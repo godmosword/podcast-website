@@ -138,7 +138,7 @@ describe("resolved collection semantics", () => {
       freeCount: 5,
       indoorCount: 4,
       highEnergyCount: 5,
-      districtCount: 3,
+      districtCount: 4,
       typeCount: 4,
     });
     expect(resolved?.places.some((place) => place.id === "ty-puhsin")).toBe(
