@@ -10,6 +10,7 @@ import {
   type Playground,
   type PlaygroundType,
 } from "./playgrounds";
+import { FACILITY_LIST_TAIL_PATTERN } from "@/lib/playground-baseline";
 import {
   assertWave1CoverageMet,
   assertWave2CoverageMet,
@@ -201,7 +202,7 @@ describe("playgrounds sidecar", () => {
    * 「場內有 X、Y、Z。」型尾句——與 facilities 陣列重複的設施列舉。
    * 卡片層的 composeParentBlurb 早就在過濾它（見 lib/playground-parent-voice.ts）。
    */
-  const FACILITY_TAIL = /\s*(?:場|園|館)內有[^。]*。\s*$/;
+  const FACILITY_TAIL = FACILITY_LIST_TAIL_PATTERN;
 
   /*
    * status 是「今天過去會撲空」的阻擋條件，必須有依據。
