@@ -119,6 +119,11 @@ const REFLECTION_PROMPTS: Record<
     parentFollowUp:
       "先接住孩子的感覺，再一起聊聊故事裡學到的一件小事，不必急著給標準答案。",
   },
+  "ep-26": {
+    child: "流浪小車車的零食派對。聽完這個故事，你心裡最先想到什麼？",
+    parentFollowUp:
+      "先接住孩子的感覺，再一起聊聊故事裡學到的一件小事，不必急著給標準答案。",
+  },
 };
 
 export function getReflectionPrompt(slug: string) {
