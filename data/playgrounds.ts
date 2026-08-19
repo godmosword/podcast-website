@@ -260,7 +260,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["展覽", "創作體驗", "洗手間", "親子廁所"],
     tags: ["室內", "免費入場", "雨天備案"],
-    tips: "部分體驗活動需現場登記或另收費，出發前可查官網當期活動。場內有展覽、創作體驗、洗手間。",
+    tips: "部分創作體驗要現場登記或另收費；出門前先看當期活動再決定要不要排體驗。",
     officialUrl: "https://tmofa.tycg.gov.tw/",
     sources: [
       {
@@ -280,27 +280,44 @@ const PLAYGROUNDS: readonly Playground[] = [
     id: "ty-casti",
     name: "卡司‧蒂菈樂園",
     city: "桃園市",
-    district: "中壢區",
-    lat: 24.9658,
-    lng: 121.2212,
-    address: "桃園市中壢區中園路二段501號",
+    district: "蘆竹區",
+    lat: 25.03153,
+    lng: 121.25349,
+    address: "桃園市蘆竹區大竹北路 90-66 號",
     type: "室內樂園",
     ageRange: [3, 8],
     free: false,
     indoor: true,
     facilities: ["球池", "溜滑梯", "角色扮演區", "洗手間"],
     tags: ["室內放電", "雨天備案", "需購票"],
-    tips: "假日建議先查票價與營業時間；襪子通常要自備或現場購買。場內有球池、溜滑梯、角色扮演區。",
+    feeNote:
+      "需購票；一般票 250 元（可折抵園內消費）、優待票 150 元（身高 90–140 公分、65 歲以上或身障及陪同 1 人）；身高未滿 90 公分免票。戶外景觀池另計。",
+    tips: "室內球池與角色扮演較適合小小孩；襪子通常要自備或現場購買。",
     officialUrl: "https://castellaland.com/",
-    mapsQuery: "卡司蒂菈樂園 中壢",
+    mapsQuery: "卡司蒂菈樂園 蘆竹",
     sources: [
       {
         kind: "official",
         name: "卡司‧蒂菈樂園",
         url: "https://castellaland.com/",
       },
+      {
+        kind: "official",
+        name: "卡司‧蒂菈樂園園區位置",
+        url: "https://castellaland.com/%E5%9C%92%E5%8D%80%E8%B3%87%E8%A8%8A/%E5%9C%92%E5%8D%80%E4%BD%8D%E7%BD%AE/",
+      },
+      {
+        kind: "official",
+        name: "卡司‧蒂菈樂園營業資訊",
+        url: "https://castellaland.com/%E5%9C%92%E5%8D%80%E8%B3%87%E8%A8%8A/%E7%87%9F%E6%A5%AD%E8%B3%87%E8%A8%8A/",
+      },
+      {
+        kind: "gov",
+        name: "桃園觀光導覽網",
+        url: "https://travel.tycg.gov.tw/zh-tw/consume/detail/638",
+      },
     ],
-    lastVerified: "2026-08-13",
+    lastVerified: "2026-08-19",
   },
   // ── Wave 1：桃園市 +3 ──
   {
@@ -328,14 +345,19 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://www.pushin-ranch.com/",
       },
       {
+        kind: "official",
+        name: "埔心牧場營運異動通知",
+        url: "https://www.pushin-ranch.com/news-detail/170/",
+      },
+      {
         kind: "gov",
         name: "桃園市政府觀光導覽",
         url: "https://travel.tycg.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-16",
+    lastVerified: "2026-08-19",
     coverageNote:
-      "官方 2026-02-11 公告自 02-23 起休園重整，但票價頁仍顯示一般營業，兩頁互相矛盾；2026-08-16 查證時仍未見重開公告。",
+      "官方 2026-02-11 公告自 02-23 起休園重整，但票價頁與首頁仍顯示一般營業時間，兩處互相矛盾；2026-08-19 查證最新消息列表仍以該休園公告為最新營運通知，未見重開公告。",
     status: "temporarily-closed",
   },
   {
@@ -353,7 +375,9 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["水族展示", "互動體驗", "親子廁所", "餐飲"],
     tags: ["室內", "雨天備案", "需購票"],
-    tips: "建議平日或開園初入場，動線較順；推車可借但數量有限。場內有水族展示、互動體驗、親子廁所。",
+    feeNote:
+      "需購票；成人 600、學生 430、孩童／博愛 270；未滿 4 歲且家長陪同免費。部分展區與活動另計。",
+    tips: "平日或剛開園入場時動線比較順；館內推車可借，但數量有限。",
     officialUrl: "https://www.xpark.com.tw/",
     sources: [
       {
@@ -362,12 +386,17 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://www.xpark.com.tw/",
       },
       {
+        kind: "official",
+        name: "Xpark 票價與購票",
+        url: "https://www.xpark.com.tw/ticket",
+      },
+      {
         kind: "gov",
         name: "桃園市政府觀光導覽",
         url: "https://travel.tycg.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-13",
+    lastVerified: "2026-08-19",
   },
   {
     id: "ty-longtan-pond",
@@ -446,7 +475,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["遊樂設施", "餐飲", "親子廁所", "置物櫃"],
     tags: ["遊樂設施", "需另購遊樂券", "捷運友善"],
-    tips: "入園與遊樂設施分開收費；假日人潮多，可早到排熱門設施。場內有餐飲、親子廁所、置物櫃。",
+    tips: "入園票不含遊樂設施，想玩要另購遊樂券；假日熱門設施常要排隊。",
     officialUrl: "https://www.tcap.taipei/",
     sources: [
       {
@@ -476,7 +505,9 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["動物展示", "遊園車", "親子廁所", "餐飲"],
     tags: ["動物", "爬山", "需購票"],
-    tips: "園區坡道多，推車或穿好走的鞋；貓空纜車可搭配規劃半日遊。場內有動物展示、遊園車、親子廁所。",
+    feeNote:
+      "需購票；普通票 100、臺北市民票 60、優待票 50；未滿 6 歲免費。遊客列車與教育中心另計。",
+    tips: "坡道多，推車或穿好走的鞋比較輕鬆；也可搭配貓空纜車排半天。",
     officialUrl: "https://www.zoo.gov.taipei/",
     sources: [
       {
@@ -485,12 +516,17 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://www.zoo.gov.taipei/",
       },
       {
+        kind: "official",
+        name: "臺北市立動物園參觀票價",
+        url: "https://www.zoo.gov.taipei/cp.aspx?n=763493FD7ECCAA11",
+      },
+      {
         kind: "gov",
         name: "臺北市政府",
         url: "https://www.gov.taipei/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-19",
   },
   {
     id: "tp-ntsec",
@@ -540,7 +576,9 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["水資源展", "親水設施", "親子廁所", "餐飲"],
     tags: ["室內", "玩水", "需購票"],
-    tips: "親水區建議多帶一套衣物；博物館與親水區票券分開販售。場內有水資源展、親水設施、親子廁所。",
+    feeNote:
+      "園區需購票，夏季（7–8 月）全票 80、非夏季 50；未滿 6 歲免費。親水樂園另購，夏日或有票根折抵，請以官網參觀票價頁為準。",
+    tips: "博物館與親水區要分開買票；若要玩水，記得再多帶一套衣物。",
     officialUrl: "https://waterpark.water.gov.taipei/",
     sources: [
       {
@@ -549,12 +587,17 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://waterpark.water.gov.taipei/",
       },
       {
+        kind: "official",
+        name: "臺北自來水園區參觀票價",
+        url: "https://waterpark.water.gov.taipei/cp.aspx?n=83AB9156FF18845C",
+      },
+      {
         kind: "gov",
         name: "臺北市政府",
         url: "https://www.gov.taipei/",
       },
     ],
-    lastVerified: "2026-08-11",
+    lastVerified: "2026-08-19",
   },
   {
     id: "tp-da-an-park",
@@ -599,7 +642,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["玫瑰園", "大草坪", "步道", "洗手間"],
     tags: ["免費", "散步", "花季"],
-    tips: "正館需另購票，戶外公園區免費；玫瑰季人潮多，推車動線以主路為主。場內有玫瑰園、大草坪、步道。",
+    tips: "戶外公園免費，正館要另買票；玫瑰季人多，推車走主路比較穩。",
     sources: [
       {
         kind: "gov",
@@ -756,7 +799,9 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["常設展", "陶藝體驗", "親子廁所", "停車場"],
     tags: ["室內", "雨天備案", "需購票"],
-    tips: "體驗課程常需預約；館內禁止奔跑，低齡兒建議先逛一樓。場內有常設展、陶藝體驗、親子廁所。",
+    feeNote:
+      "展館一般票 80 元；新北市民、12 歲以下、在校學生、65 歲以上等持證免票。請以陶博館官網為準。",
+    tips: "陶藝體驗多半要先預約；館內不宜奔跑，低齡兒可以先從一樓逛。",
     officialUrl: "https://www.ceramics.ntpc.gov.tw/",
     sources: [
       {
@@ -765,12 +810,22 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://www.ceramics.ntpc.gov.tw/",
       },
       {
+        kind: "official",
+        name: "新北市立鶯歌陶瓷博物館參觀資訊",
+        url: "https://www.ceramics.ntpc.gov.tw/xmdoc/cont?xsmsid=0l196418676818644838",
+      },
+      {
+        kind: "official",
+        name: "新北市立鶯歌陶瓷博物館參觀資訊（英文）",
+        url: "https://en.ceramics.ntpc.gov.tw/xmdoc/cont?xsmsid=0G300021256745679608",
+      },
+      {
         kind: "gov",
         name: "新北市政府",
         url: "https://www.ntpc.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-19",
   },
   {
     id: "nt-juming",
@@ -786,7 +841,9 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["戶外雕塑", "展覽", "親子廁所", "餐飲"],
     tags: ["藝術", "戶外", "需購票"],
-    tips: "戶外步道多，推車可行但部分階梯需抱娃；海邊風大防曬。場內有戶外雕塑、展覽、親子廁所。",
+    feeNote:
+      "需購票；常態全票 350，學生與 65 歲以上優待 320；6 歲（含）以下憑證免費。展期可能另有優惠票，請以官網開館時間及票價頁為準。",
+    tips: "以戶外雕塑步道為主，推車大多行得通，遇階梯得抱娃；靠海風大要防曬。",
     officialUrl: "https://www.juming.org.tw/",
     sources: [
       {
@@ -795,12 +852,17 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://www.juming.org.tw/",
       },
       {
+        kind: "official",
+        name: "朱銘美術館開館時間及票價",
+        url: "https://www.juming.org.tw/mainssl/modules/MySpace/index.php?pg=ZC143727&sn=ec",
+      },
+      {
         kind: "gov",
         name: "新北市政府文化局",
         url: "https://www.culture.ntpc.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-19",
   },
   {
     id: "nt-sanchong-floodway",
@@ -817,7 +879,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["親水設施", "大草坪", "自行車道", "停車場"],
     tags: ["免費", "玩水", "野餐友善"],
-    tips: "親水設施開放時段依公告為準；記得帶替換衣物與毛巾。場內有大草坪、自行車道、停車場。",
+    tips: "親水設施開不開放看出發前公告；要玩水就帶替換衣物與毛巾。",
     sources: [
       {
         kind: "gov",
@@ -876,7 +938,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["展覽", "戶外雕塑", "親子廁所", "停車場"],
     tags: ["室內", "免費入場", "雨天備案"],
-    tips: "常設展多免費，特展與活動依官網公告；戶外廣場可短暫放電。場內有展覽、戶外雕塑、親子廁所。",
+    tips: "常設展多半免費，特展與活動另計；戶外廣場能讓孩子短暫跑一跑。",
     officialUrl: "https://www.435.culture.ntpc.gov.tw/",
     sources: [
       {
@@ -936,7 +998,9 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["常設展", "IMAX", "親子廁所", "停車場"],
     tags: ["室內", "雨天備案", "需購票"],
-    tips: "主題館分區大，低齡兒可先鎖定兒童館或深海探索；山區溫差大。場內有常設展、IMAX、親子廁所。",
+    feeNote:
+      "主題館、海洋劇場、潮境智能海洋館等分館分別購票；主題館未滿 6 歲免費。特展另計，請以官網票價頁為準。",
+    tips: "主題館分區大，帶小小孩可先走兒童館或深海探索；山區溫差大，可多帶一件薄外套。",
     officialUrl: "https://www.nmmst.gov.tw/",
     sources: [
       {
@@ -945,12 +1009,17 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://www.nmmst.gov.tw/",
       },
       {
+        kind: "official",
+        name: "國立海洋科技博物館票價資訊",
+        url: "https://www.nmmst.gov.tw/chhtml/content/216",
+      },
+      {
         kind: "gov",
         name: "基隆市政府",
         url: "https://www.klcg.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-19",
   },
   {
     id: "kl-heping-island",
@@ -966,11 +1035,23 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["地質奇岩", "步道", "親水區", "洗手間"],
     tags: ["海邊", "地質", "需購票"],
-    tips: "潮間帶活動依現場與潮汐公告；岩石區濕滑，請牽好幼童。場內有地質奇岩、步道、親水區。",
-    officialUrl: "https://www.northguan-nsa.gov.tw/",
+    feeNote:
+      "需購票；全票 120（不含岩石管制區及阿拉寶灣）；未滿 6 歲免費；12 歲以下須家長陪同。戲水設施依季節與風浪公告。",
+    tips: "岩石區濕滑，潮間帶看現場與潮汐公告；12 歲以下要家長陪同。",
+    officialUrl: "https://www.hpigeopark.org/",
     sources: [
       {
         kind: "official",
+        name: "和平島地質公園",
+        url: "https://www.hpigeopark.org/",
+      },
+      {
+        kind: "official",
+        name: "和平島地質公園時間及票價",
+        url: "https://www.hpigeopark.org/hours-admission",
+      },
+      {
+        kind: "gov",
         name: "東北及宜蘭海岸國家風景區",
         url: "https://www.northguan-nsa.gov.tw/",
       },
@@ -980,7 +1061,7 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://www.klcg.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-09",
+    lastVerified: "2026-08-19",
   },
   {
     id: "kl-chaojing",
@@ -1213,7 +1294,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["大草原", "風箏場", "步道", "停車場"],
     tags: ["免費", "放風箏", "野餐"],
-    tips: "無大量遮蔭，夏天請備帽子與水；風大時適合放風箏。場內有大草原、風箏場、步道。",
+    tips: "草原開闊、遮蔭少，夏天要備帽子和水；風夠大才比較適合放風箏。",
     sources: [
       {
         kind: "gov",
@@ -1876,13 +1957,20 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["遊樂設施", "親子廁所", "餐飲", "停車場"],
     tags: ["主題樂園", "需購票", "放電"],
-    tips: "園區與 outlet 可分區規劃；熱門設施假日排隊久。場內有遊樂設施、親子廁所、餐飲。",
-    officialUrl: "https://www.lihpao.com.tw/",
+    feeNote:
+      "探索世界與季節限定馬拉灣分開購票，亦可選水陸聯合票；3 歲以下或身高未滿 100 公分免費入園。方案與現場價常變動，請以樂園官網為準。",
+    tips: "樂園與 outlet 可以分開走，當天不必全部排完；熱門設施假日等候會拉長。",
+    officialUrl: "https://www.lihpaoresort.com/",
     sources: [
       {
         kind: "official",
         name: "麗寶樂園渡假區",
-        url: "https://www.lihpao.com.tw/",
+        url: "https://www.lihpaoresort.com/",
+      },
+      {
+        kind: "official",
+        name: "麗寶樂園探索世界常見問題",
+        url: "https://www.lihpaoresort.com/LihpaolandApp/Question/Discover",
       },
       {
         kind: "gov",
@@ -1890,7 +1978,7 @@ const PLAYGROUNDS: readonly Playground[] = [
         url: "https://travel.taichung.gov.tw/",
       },
     ],
-    lastVerified: "2026-08-13",
+    lastVerified: "2026-08-19",
   },
   {
     id: "tc-gaomei",

@@ -25,7 +25,7 @@ Schema **沒有** `open` / `closed`。
 | operating | 95 |
 | temporarilyClosed | 1 |
 | cities | 15 |
-| districts（有填 district） | 65 |
+| districts（有填 district） | 66 |
 | free / paid（operating） | 55 / 40 |
 | indoor / outdoor（operating） | 32 / 63 |
 
@@ -149,28 +149,28 @@ Launched duplicates: `[]`
 | 欄位 | present | missing | likely debt | 說明 |
 |---|---:|---:|---:|---|
 | officialUrl | 49 | 47 | 0 | 免費公園缺官網可以；active paid 缺 officialUrl = 0 |
-| feeNote | 33 | 63 | 9 | 免費場沒票價說明合理；債是 paid 缺 note |
+| feeNote | 42 | 54 | 0 | 免費場沒票價說明合理；A1 已補 9 筆 active paid feeNote |
 | coverageNote | 22 | 74 | 0 | 選填誠實聲明；有 `status` 時才必填 |
 | mapsQuery | 10 | 86 | 0 | 搜尋不穩才填 |
 | relatedEpisodes | 0 | 96 | 0 | 產品缺口，不是 schema 必填 |
 | placeId | 0 | 96 | 0 | 地圖不用 Google Place ID |
 
-sources：1 筆 23、≥2 筆 73、有官方 39、有政府 92、editorial-only 0。  
-lastVerified：2026-08-09～2026-08-16（全體同一週，不能當品質訊號）。
+sources：1 筆 22、≥2 筆 74、有官方 39、有政府 93、editorial-only 0。
+lastVerified：多數仍 2026-08-09～2026-08-16；A1 逐筆查證的 10 筆為 2026-08-19。
 
 ## Paid fee clarity
 
 - active paid = 40
-- paid + feeNote = 31
-- paid without feeNote = 9：`ty-casti`、`ty-xpark`、`tp-zoo`、`tp-water-museum`、`nt-yingge-ceramic`、`nt-juming`、`kl-nmmst`、`kl-heping-island`、`tc-lihpao`
+- paid + feeNote = 40
+- paid without feeNote = 0
 - paid + officialUrl = 40
 - paid without officialUrl = 0
 
 ## Tips debt
 
-- exact count = 56（`FACILITY_LIST_TAIL_PATTERN`）
-- 集中在基隆→雲林的公園（公園 38／56）；嘉義／台南／高雄目前 0 筆這個尾句
-- Batch A2 規則：先改「需購票或缺 feeNote」的尾句，再改室內館，最後才是免費公園；一次 10–15 筆
+- exact count = 41（`FACILITY_LIST_TAIL_PATTERN`）
+- A2 試點已改 15 筆；剩餘仍集中在基隆→雲林的免費公園
+- 後續規則：一次 10–15 筆，不要一次清全部
 
 ## relatedEpisodes
 
@@ -182,4 +182,4 @@ lastVerified：2026-08-09～2026-08-16（全體同一週，不能當品質訊號
 
 ## 下一步（尚未執行）
 
-A1 factual trust → A2 tips → B1 嘉義市 diversity → B2 桃園 indoor → B3 高雄 free → relatedEpisodes pilot。
+A3 續改 tips 尾句 → B1 嘉義市 diversity → B2 桃園 indoor → B3 高雄 free → relatedEpisodes pilot。

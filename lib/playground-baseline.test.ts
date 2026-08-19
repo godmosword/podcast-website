@@ -178,7 +178,7 @@ describe("resolved contradictions", () => {
       operating: 95,
       temporarilyClosed: 1,
       cities: 15,
-      districts: 65,
+      districts: 66,
       typeDistribution: {
         公園: 41,
         室內樂園: 1,
@@ -313,31 +313,24 @@ describe("optional fields, tips, relatedEpisodes", () => {
     expect(baseline.optionalFields.mapsQuery.required).toBe(false);
     expect(baseline.optionalFields.relatedEpisodes.required).toBe(false);
     expect(baseline.optionalFields.officialUrl.missingLikelyDebt).toBe(0);
-    expect(baseline.optionalFields.feeNote.missingLikelyDebt).toBe(9);
+    expect(baseline.optionalFields.feeNote.missingLikelyDebt).toBe(0);
     expect(baseline.paidFeeClarity).toMatchObject({
       activePaid: 40,
-      paidWithFeeNote: 31,
-      paidWithoutFeeNote: 9,
+      paidWithFeeNote: 40,
+      paidWithoutFeeNote: 0,
       paidWithOfficialUrl: 40,
       paidWithoutOfficialUrl: 0,
-      paidWithoutFeeNoteIds: [
-        "ty-casti",
-        "ty-xpark",
-        "tp-zoo",
-        "tp-water-museum",
-        "nt-yingge-ceramic",
-        "nt-juming",
-        "kl-nmmst",
-        "kl-heping-island",
-        "tc-lihpao",
-      ],
+      paidWithoutFeeNoteIds: [],
     });
   });
 
   test("tips facility-list tail uses the shared pattern", () => {
     expect(FACILITY_LIST_TAIL_PATTERN.test("場內有溜滑梯、鞦韆。")).toBe(true);
-    expect(baseline.tipsDebt.count).toBe(56);
-    expect(baseline.tipsDebt.placeIds).toHaveLength(56);
+    expect(baseline.tipsDebt.count).toBe(41);
+    expect(baseline.tipsDebt.placeIds).toHaveLength(41);
+    // A2 是增量試點，不得一次清掉全部尾句債
+    expect(baseline.tipsDebt.count).toBeGreaterThan(0);
+    expect(baseline.tipsDebt.count).toBeLessThan(56);
   });
 
   test("relatedEpisodes is an optional story-slug array and currently empty", () => {

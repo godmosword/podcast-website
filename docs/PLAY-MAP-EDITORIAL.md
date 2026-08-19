@@ -101,8 +101,8 @@
 
 ### 待清理的既有資料
 
-設施列舉尾句筆數以 `computePlaygroundBaseline().tipsDebt` 為準（A0 鎖定 56 筆），
-屬待改寫 backlog，不要從舊 Wave 備註抄數字。改寫時事實查證可外包，但**中文成稿一律由 Sonnet 或 Leader 定稿**
+設施列舉尾句筆數以 `computePlaygroundBaseline().tipsDebt` 為準（見 [PLAYGROUND-BASELINE.md](./PLAYGROUND-BASELINE.md)），
+屬待改寫 backlog。改寫時事實查證可外包，但**中文成稿一律由 Sonnet 或 Leader 定稿**
 （見 `docs/AGENT-WORKFLOW.md` 路由表）。
 
 ## name 與 mapsQuery 的分工
