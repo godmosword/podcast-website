@@ -13,6 +13,7 @@ import {
 import {
   COLLECTION_DEFINITIONS,
   MIN_INDEXABLE_COLLECTION_SIZE,
+  type CollectionDefinition,
   type CollectionFamily,
 } from "@/lib/playground-collections";
 import {
@@ -312,23 +313,22 @@ function optionalStat(
 }
 
 function computeLaunchRegistry(cities: readonly CityBaseline[]): LaunchRegistry {
-  const cityDefs = COLLECTION_DEFINITIONS.filter((item) => item.family === "city");
-  const freeDefs = COLLECTION_DEFINITIONS.filter((item) => item.family === "free");
-  const indoorDefs = COLLECTION_DEFINITIONS.filter(
-    (item) => item.family === "indoor",
-  );
+  const definitions: readonly CollectionDefinition[] = COLLECTION_DEFINITIONS;
+  const cityDefs = definitions.filter((item) => item.family === "city");
+  const freeDefs = definitions.filter((item) => item.family === "free");
+  const indoorDefs = definitions.filter((item) => item.family === "indoor");
   const knownFamilies = new Set<CollectionFamily>(["city", "free", "indoor"]);
-  const otherFamilyCount = COLLECTION_DEFINITIONS.filter(
+  const otherFamilyCount = definitions.filter(
     (item) => !knownFamilies.has(item.family),
   ).length;
 
   return {
-    total: COLLECTION_DEFINITIONS.length,
+    total: definitions.length,
     cityCount: cityDefs.length,
     freeCount: freeDefs.length,
     indoorCount: indoorDefs.length,
     otherFamilyCount,
-    slugs: COLLECTION_DEFINITIONS.map((item) => item.slug),
+    slugs: definitions.map((item) => item.slug),
     citySlugs: cityDefs.map((item) => item.slug),
     freeSlugs: freeDefs.map((item) => item.slug),
     indoorSlugs: indoorDefs.map((item) => item.slug),
@@ -605,9 +605,9 @@ export function computePlaygroundBaseline(): PlaygroundBaseline {
       .filter((district): district is string => Boolean(district)),
   );
 
-  const launchedCityByName = new Map(
+  const launchedCityByName = new Map<string, string>(
     COLLECTION_DEFINITIONS.filter((item) => item.family === "city").map(
-      (item) => [item.city, item.slug] as const,
+      (item) => [item.city, item.slug],
     ),
   );
 
