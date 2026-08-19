@@ -100,13 +100,14 @@ describe("launch collection registry", () => {
     expect(baseline.launchRegistry.total).toBe(COLLECTION_DEFINITIONS.length);
     expect(baseline.launchRegistry.total).toBe(MIN_COLLECTION_DEFINITION_COUNT);
     expect(baseline.launchRegistry.cityCount).toBe(15);
-    expect(baseline.launchRegistry.freeCount).toBe(5);
+    expect(baseline.launchRegistry.freeCount).toBe(6);
     expect(baseline.launchRegistry.indoorCount).toBe(1);
     expect(baseline.launchRegistry.otherFamilyCount).toBe(0);
     expect(baseline.launchRegistry.slugs).toEqual(
       COLLECTION_DEFINITIONS.map((item) => item.slug),
     );
     expect(baseline.launchRegistry.slugs).toContain("taoyuan-indoor");
+    expect(baseline.launchRegistry.slugs).toContain("kaohsiung-free");
   });
 
   test("keelung and chiayi-city are launched city collections", () => {
@@ -146,6 +147,27 @@ describe("launch collection registry", () => {
 
   test("launched collections have no exact duplicate active ID sets", () => {
     expect(baseline.launchedExactDuplicates).toEqual([]);
+  });
+
+  test("kaohsiung-free launches at five without indoor or rainy-day variants", () => {
+    expect(
+      baseline.candidates.find((row) => row.slug === "kaohsiung-free"),
+    ).toMatchObject({
+      activeCount: 5,
+      thresholdReached: true,
+      currentlyLaunched: true,
+      exactDuplicateOfParent: false,
+      overlapWithParentCity: {
+        parentActiveCount: 7,
+        overlapCount: 5,
+        identical: false,
+      },
+    });
+    expect(baseline.launchRegistry.freeSlugs).toContain("kaohsiung-free");
+    expect(baseline.launchRegistry.slugs).not.toContain("kaohsiung-indoor");
+    expect(baseline.launchRegistry.slugs).not.toContain(
+      "kaohsiung-rainy-day",
+    );
   });
 });
 
@@ -395,7 +417,7 @@ describe("documentation drift guards", () => {
   test("baseline doc cites the locked census", () => {
     expect(BASELINE_DOC).toContain("| total | 99 |");
     expect(BASELINE_DOC).toContain("| operating | 98 |");
-    expect(BASELINE_DOC).toContain("TOTAL = 21");
+    expect(BASELINE_DOC).toContain("TOTAL = 22");
     expect(BASELINE_DOC).toContain("未 launch 的 city candidate：**無**");
   });
 });

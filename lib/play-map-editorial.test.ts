@@ -1,4 +1,5 @@
 import { getPlayground } from "@/data/playgrounds";
+import { resolveCollectionBySlug } from "@/lib/playground-collections";
 import { describe, expect, it } from "vitest";
 import { resolvePlayMapEditorialPick } from "./play-map-editorial";
 
@@ -42,6 +43,20 @@ describe("resolvePlayMapEditorialPick", () => {
 
     expect(resolved?.place.id).toBe("ty-kids-museum");
     expect(resolved?.matchedIntentCount).toBe(1);
+  });
+
+  it("kaohsiung-free reuses the existing free editorial seed", () => {
+    const resolvedCollection = resolveCollectionBySlug("kaohsiung-free");
+    expect(resolvedCollection).toBeDefined();
+
+    const resolved = resolvePlayMapEditorialPick({
+      finalResults: resolvedCollection!.places,
+      scope: "city",
+      activeIntents: ["free"],
+    });
+
+    expect(resolved?.place.id).toBe("kh-main-library");
+    expect(resolved?.pick.placeId).toBe("kh-main-library");
   });
 
   it("does not recommend a closed place", () => {

@@ -18,10 +18,10 @@ import {
 } from "@/lib/playground-collections";
 
 describe("playground collection registry", () => {
-  test("contains exactly the 21 launch collections", () => {
-    expect(COLLECTION_DEFINITIONS).toHaveLength(21);
+  test("contains exactly the 22 launch collections", () => {
+    expect(COLLECTION_DEFINITIONS).toHaveLength(22);
     expect(new Set(COLLECTION_DEFINITIONS.map((item) => item.slug)).size).toBe(
-      21,
+      22,
     );
     expect(COLLECTION_DEFINITIONS.map((item) => item.slug)).toEqual([
       "keelung",
@@ -44,6 +44,7 @@ describe("playground collection registry", () => {
       "hsinchu-city-free",
       "hsinchu-county-free",
       "taichung-free",
+      "kaohsiung-free",
       "taoyuan-indoor",
     ]);
     expect(COLLECTION_DEFINITIONS.every((item) => item.family !== "city" || item.filter.city)).toBe(
@@ -185,6 +186,50 @@ describe("resolved collection semantics", () => {
     );
     expect(isCollectionIndexable(resolved!)).toBe(true);
     expect(getCollectionDefinition("taoyuan-rainy-day")).toBeUndefined();
+  });
+
+  test("launches kaohsiung-free with the exact five free places", () => {
+    const definition = getCollectionDefinition("kaohsiung-free");
+    const resolved = resolveCollectionBySlug("kaohsiung-free");
+
+    expect(definition).toMatchObject({
+      slug: "kaohsiung-free",
+      city: "高雄市",
+      cityDisplayName: "高雄",
+      family: "free",
+      filter: { city: "高雄市", freeOnly: true },
+      title: "高雄免費親子景點",
+      shortLabel: "高雄免費",
+    });
+    expect(resolved).toMatchObject({
+      matchingCount: 5,
+      activeCount: 5,
+      freeCount: 5,
+      indoorCount: 2,
+      districtCount: 3,
+      typeCount: 3,
+    });
+    expect(resolved?.places.map((place) => place.id)).toEqual([
+      "kh-children-art-museum",
+      "kh-main-library",
+      "kh-weiwuying-park",
+      "kh-dadong-wetland",
+      "kh-family-playground",
+    ]);
+    expect(resolved?.places.every((place) => place.free)).toBe(true);
+    expect(collectionDescription(resolved!)).toBe(
+      "目前收錄 5 個高雄免費親子景點，從兒童藝術、閱讀，到公園散步、生態觀察與大型遊戲，涵蓋 3 個行政區、3 種景點類型。",
+    );
+    expect(collectionParentSummary(resolved!)).toBe(
+      "高雄目前 7 個親子景點中，有 5 個不用門票。",
+    );
+    expect(isCollectionIndexable(resolved!)).toBe(true);
+    expect(getCollectionDefinition("kaohsiung-indoor")).toBeUndefined();
+    expect(getCollectionDefinition("kaohsiung-rainy-day")).toBeUndefined();
+    expect(collectionMapPath(definition!)).toBe(
+      "/for-parents/play-map?city=%E9%AB%98%E9%9B%84%E5%B8%82&free=1&view=map",
+    );
+    expect(collectionMapCtaLabel(definition!)).toBe("在地圖上看高雄免費景點");
   });
 
   test("keeps the removed indoor filter semantics available to Play Map", () => {
@@ -346,6 +391,8 @@ describe("related collections", () => {
     const taoyuanIndoor = getCollectionDefinition("taoyuan-indoor")!;
     const chiayiCounty = getCollectionDefinition("chiayi-county")!;
     const chiayiCity = getCollectionDefinition("chiayi-city")!;
+    const kaohsiung = getCollectionDefinition("kaohsiung")!;
+    const kaohsiungFree = getCollectionDefinition("kaohsiung-free")!;
 
     expect(relatedCollections(taoyuan).map((item) => item.slug)).toEqual([
       "taoyuan-free",
@@ -361,10 +408,16 @@ describe("related collections", () => {
     ]);
     expect(relatedCollections(chiayiCounty)).toEqual([]);
     expect(relatedCollections(chiayiCity)).toEqual([]);
+    expect(relatedCollections(kaohsiung).map((item) => item.slug)).toEqual([
+      "kaohsiung-free",
+    ]);
+    expect(relatedCollections(kaohsiungFree).map((item) => item.slug)).toEqual([
+      "kaohsiung",
+    ]);
   });
 
-  test("static params come from the 21 launch definitions", () => {
-    expect(listCollectionDefinitions()).toHaveLength(21);
+  test("static params come from the 22 launch definitions", () => {
+    expect(listCollectionDefinitions()).toHaveLength(22);
     expect(
       listCollectionDefinitions("city").map((item) => item.slug),
     ).toEqual([
@@ -386,6 +439,14 @@ describe("related collections", () => {
     ]);
     expect(listCollectionDefinitions("indoor").map((item) => item.slug)).toEqual([
       "taoyuan-indoor",
+    ]);
+    expect(listCollectionDefinitions("free").map((item) => item.slug)).toEqual([
+      "new-taipei-free",
+      "taoyuan-free",
+      "hsinchu-city-free",
+      "hsinchu-county-free",
+      "taichung-free",
+      "kaohsiung-free",
     ]);
   });
 });

@@ -214,6 +214,15 @@ const FREE_COLLECTIONS = [
     title: "台中免費親子景點",
     shortLabel: "台中免費",
   },
+  {
+    slug: "kaohsiung-free",
+    city: "高雄市",
+    cityDisplayName: "高雄",
+    family: "free",
+    filter: { city: "高雄市", freeOnly: true },
+    title: "高雄免費親子景點",
+    shortLabel: "高雄免費",
+  },
 ] as const satisfies readonly CollectionDefinition[];
 
 const INDOOR_COLLECTIONS = [
@@ -234,7 +243,12 @@ export const COLLECTION_DEFINITIONS = [
   ...INDOOR_COLLECTIONS,
 ] as const satisfies readonly CollectionDefinition[];
 
-export const MIN_COLLECTION_DEFINITION_COUNT = 21;
+export const MIN_COLLECTION_DEFINITION_COUNT = 22;
+
+const COLLECTION_DESCRIPTION_OVERRIDES: Readonly<Record<string, string>> = {
+  "kaohsiung-free":
+    "目前收錄 5 個高雄免費親子景點，從兒童藝術、閱讀，到公園散步、生態觀察與大型遊戲，涵蓋 3 個行政區、3 種景點類型。",
+};
 
 const definitionsBySlug = new Map<string, CollectionDefinition>(
   COLLECTION_DEFINITIONS.map((definition) => [definition.slug, definition]),
@@ -358,6 +372,8 @@ export function collectionDescription(
   resolved: ResolvedCollection,
 ): string {
   const { definition } = resolved;
+  const override = COLLECTION_DESCRIPTION_OVERRIDES[definition.slug];
+  if (override) return override;
   return `目前收錄 ${resolved.activeCount} 個${definition.cityDisplayName}${collectionConditionLabel(definition)}，涵蓋 ${resolved.districtCount} 個行政區、${resolved.typeCount} 種景點類型。`;
 }
 

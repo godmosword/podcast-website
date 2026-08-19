@@ -490,4 +490,35 @@ describe("playgroundCollectionJsonLd", () => {
 
     vi.unstubAllEnvs();
   });
+
+  it("kaohsiung-free uses the exact five free place IDs and factual description", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
+    const resolved = resolveCollectionBySlug("kaohsiung-free");
+    expect(resolved).toBeDefined();
+
+    const data = playgroundCollectionJsonLd(resolved!);
+    const graph = data["@graph"] as Record<string, unknown>[];
+    const collection = graph.find((item) => item["@type"] === "CollectionPage");
+    const itemList = graph.find((item) => item["@type"] === "ItemList");
+    const elements = itemList?.itemListElement as Record<string, unknown>[];
+
+    expect(collection).toMatchObject({
+      "@id":
+        "https://example.com/for-parents/play-map/collections/kaohsiung-free#collection",
+      url: "https://example.com/for-parents/play-map/collections/kaohsiung-free",
+      name: "高雄免費親子景點",
+      description:
+        "目前收錄 5 個高雄免費親子景點，從兒童藝術、閱讀，到公園散步、生態觀察與大型遊戲，涵蓋 3 個行政區、3 種景點類型。",
+    });
+    expect(itemList).toMatchObject({ numberOfItems: 5 });
+    expect(elements.map((entry) => (entry.item as Record<string, unknown>)["@id"])).toEqual([
+      "https://example.com/for-parents/play-map/kh-children-art-museum#place",
+      "https://example.com/for-parents/play-map/kh-main-library#place",
+      "https://example.com/for-parents/play-map/kh-weiwuying-park#place",
+      "https://example.com/for-parents/play-map/kh-dadong-wetland#place",
+      "https://example.com/for-parents/play-map/kh-family-playground#place",
+    ]);
+
+    vi.unstubAllEnvs();
+  });
 });

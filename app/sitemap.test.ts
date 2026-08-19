@@ -116,7 +116,7 @@ describe("sitemap freshness", () => {
     vi.unstubAllEnvs();
   });
 
-  it("只包含 collection index 與 21 筆 launch collection URLs", () => {
+  it("只包含 collection index 與 22 筆 launch collection URLs", () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
     const entries = sitemap();
     const collectionDefinitions = listCollectionDefinitions();
@@ -128,14 +128,17 @@ describe("sitemap freshness", () => {
       )
       .map((entry) => entry.url);
 
-    expect(collectionDefinitions).toHaveLength(21);
-    expect(collectionUrls).toHaveLength(22);
+    expect(collectionDefinitions).toHaveLength(22);
+    expect(collectionUrls).toHaveLength(23);
     expect(collectionUrls).toContain(
       "https://example.com/for-parents/play-map/collections",
     );
-    expect(new Set(collectionUrls).size).toBe(22);
+    expect(new Set(collectionUrls).size).toBe(23);
     expect(collectionUrls).toContain(
       "https://example.com/for-parents/play-map/collections/taoyuan-indoor",
+    );
+    expect(collectionUrls).toContain(
+      "https://example.com/for-parents/play-map/collections/kaohsiung-free",
     );
 
     for (const definition of collectionDefinitions) {

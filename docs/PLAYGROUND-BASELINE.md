@@ -57,7 +57,7 @@ Schema **沒有** `open` / `closed`。
 
 `sum(city.*) === global.*`。舊 Phase 0 表（基隆 2、台北 9、新北 10、嘉義縣 6／indoor 1）已過期。
 
-## Launch registry（21）
+## Launch registry（22）
 
 門檻：`activeCount >= 5`（`MIN_INDEXABLE_COLLECTION_SIZE`）。低於門檻的合輯**不會**進 registry。
 
@@ -79,19 +79,20 @@ CITY（15）:
 - tainan
 - kaohsiung
 
-FREE（5）:
+FREE（6）:
 
 - new-taipei-free
 - taoyuan-free
 - hsinchu-city-free
 - hsinchu-county-free
 - taichung-free
+- kaohsiung-free
 
 INDOOR（1）:
 
 - taoyuan-indoor
 
-TOTAL = 21
+TOTAL = 22
 
 未 launch 的 city candidate：**無**（嘉義市已上線 `chiayi-city`，與嘉義縣 `chiayi-county` 分開）。
 
@@ -101,11 +102,11 @@ TOTAL = 21
 
 **A.** 15 cities 與 15 city collections 對齊：資料有 15 縣市，registry 也有 15 個 city family。舊數字「14 city collections」已過期。
 
-**B.** 基隆有 definition、已 launch（5 筆達標）。嘉義市 **有 definition、已 launch**（5 筆達門檻）。真正未 launch city candidate = 0。
+**B.** 基隆有 definition、已 launch（5 筆達標）。嘉義市 **有 definition、已 launch**（5 筆達門檻）；高雄免費合輯也已在 5 筆達門檻後 launch。真正未 launch city candidate = 0。
 
 **C.** 嘉義市現 **5／5／2 free／4 indoor／1 outdoor**（B1 新增嘉義公園後上線 city 合輯）。嘉義縣仍是 **5/5 indoor**；`chiayi-county-indoor` 與 parent city 完全相同，所以沒有上線。`chiayi-city-indoor` 現 4 筆，**不是** `chiayi-city` 的 exact duplicate，本批也不上線。
 
-**D.** global indoor 33 = sum(city indoorActive) 33。global free 57 = sum(city freeActive) 57。MATCH。
+**D.** global indoor 33 = sum(city indoorActive) 33。global free 58 = sum(city freeActive) 58。MATCH。
 
 ## Threshold contract
 
@@ -139,8 +140,7 @@ Launched duplicates: `[]`
 | tainan-indoor | 3 | 2 | 7 | 3 | no |
 | kaohsiung-indoor | 3 | 2 | 6 | 3 | no |
 
-真正只差 1、且不是 parent duplicate：`kaohsiung-free`。
-`kaohsiung-free` 已達 5 筆，但 B3 Phase 2 僅完成資料增補，尚未加入 registry。
+`kaohsiung-free` 已達 5 筆，B3 Phase 3 已加入 registry；它與高雄 parent active ID set 不同，沒有 duplicate exception。
 `taoyuan-indoor` 已達 5 且在 B2 Phase 3 上線；仍保留為獨立 indoor collection，不建立 rainy-day variant。
 `chiayi-city` 已達 5 且 **已 launch**（B1 Phase 3）。
 `chiayi-city-indoor` 現 4，不是 city 的 exact duplicate，本批不上線。
@@ -183,5 +183,5 @@ lastVerified：多數仍 2026-08-09～2026-08-16；A1 逐筆查證的 10 筆為 
 
 ## 下一步（尚未執行）
 
-B3 高雄 free 已達門檻但尚未上線 → relatedEpisodes pilot。
+relatedEpisodes pilot。
 （tips 設施列舉尾句：STOP EDITORIAL CLEANUP，剩餘 14 筆不自動開 A5。）

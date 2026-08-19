@@ -1076,7 +1076,7 @@ describe("B1 Chiayi City diversity — 嘉義公園", () => {
       outdoorActive: 1,
     });
     expect(global.total).toBe(99);
-    expect(launchRegistry.total).toBe(21);
+    expect(launchRegistry.total).toBe(22);
     expect(launchRegistry.unlaunchedCitySlugs).toEqual([]);
   });
 
@@ -1164,7 +1164,7 @@ describe("B2 Taoyuan indoor diversity — 桃園防災教育館", () => {
     ]);
     expect(free?.activeCount).toBe(6);
     expect(rainy?.activeCount).toBe(5);
-    expect(launchRegistry.total).toBe(21);
+    expect(launchRegistry.total).toBe(22);
     expect(launchRegistry.indoorCount).toBe(1);
     expect(launchRegistry.slugs).toContain("taoyuan-indoor");
   });
@@ -1198,7 +1198,7 @@ describe("B3 Kaohsiung free diversity — 高雄親子遊樂園區", () => {
     expect(place?.tips).toContain("半室內棚架");
   });
 
-  it("讓高雄 free candidate 達門檻但維持未上線", () => {
+  it("讓高雄 free candidate 達門檻並正式上線", () => {
     const { cities, candidates, global, launchRegistry } =
       computePlaygroundBaseline();
     const kaohsiung = cities.find((row) => row.city === "高雄市");
@@ -1225,7 +1225,7 @@ describe("B3 Kaohsiung free diversity — 高雄親子遊樂園區", () => {
       matchingTotal: 5,
       activeCount: 5,
       thresholdReached: true,
-      currentlyLaunched: false,
+      currentlyLaunched: true,
       exactDuplicateOfParent: false,
       overlapWithParentCity: {
         parentActiveCount: 7,
@@ -1234,7 +1234,7 @@ describe("B3 Kaohsiung free diversity — 高雄親子遊樂園區", () => {
       },
     });
     expect(free?.activePlaceIds).toContain("kh-family-playground");
-    expect(launchRegistry.total).toBe(21);
-    expect(launchRegistry.slugs).not.toContain("kaohsiung-free");
+    expect(launchRegistry.total).toBe(22);
+    expect(launchRegistry.slugs).toContain("kaohsiung-free");
   });
 });

@@ -14,7 +14,7 @@ import styles from "./page.module.css";
 export const metadata: Metadata = {
   title: { absolute: "各地親子景點整理｜車車遊樂園" },
   description:
-    "整理目前資料中達到收錄門檻的 15 個城市親子景點、5 組免費景點與 1 組室內親子景點，直接連到景點詳情與親子遊樂地圖。",
+    "整理目前資料中達到收錄門檻的 15 個城市親子景點、6 組免費景點與 1 組室內親子景點，直接連到景點詳情與親子遊樂地圖。",
   alternates: { canonical: "/for-parents/play-map/collections" },
   openGraph: {
     title: "各地親子景點整理｜車車遊樂園",
