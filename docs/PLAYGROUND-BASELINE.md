@@ -21,15 +21,15 @@ Schema **沒有** `open` / `closed`。
 
 | 項目 | 值 |
 |---|---|
-| total | 98 |
-| operating | 97 |
+| total | 99 |
+| operating | 98 |
 | temporarilyClosed | 1 |
 | cities | 15 |
 | districts（有填 district） | 67 |
-| free / paid（operating） | 57 / 40 |
-| indoor / outdoor（operating） | 33 / 64 |
+| free / paid（operating） | 58 / 40 |
+| indoor / outdoor（operating） | 33 / 65 |
 
-類型（含休園）：公園 42、博物館 29、其他 11、主題樂園 7、動物園 4、農場 4、室內樂園 1。
+類型（含休園）：公園 43、博物館 29、其他 11、主題樂園 7、動物園 4、農場 4、室內樂園 1。
 
 驗證：`operating + temporarilyClosed === total`、`free + paid === operating`、`indoor + outdoor === operating`。
 
@@ -53,7 +53,7 @@ Schema **沒有** `open` / `closed`。
 | 嘉義市 | 5 | 5 | 2 | 4 | launched `chiayi-city` |
 | 嘉義縣 | 5 | 5 | 2 | 5 | launched `chiayi-county` |
 | 台南市 | 7 | 7 | 2 | 3 | launched `tainan` |
-| 高雄市 | 6 | 6 | 4 | 3 | launched `kaohsiung` |
+| 高雄市 | 7 | 7 | 5 | 3 | launched `kaohsiung` |
 
 `sum(city.*) === global.*`。舊 Phase 0 表（基隆 2、台北 9、新北 10、嘉義縣 6／indoor 1）已過期。
 
@@ -132,7 +132,7 @@ Launched duplicates: `[]`
 | slug | CURRENT ACTIVE | SHORT OF 5 | PARENT ACTIVE | OVERLAP | EXACT DUPLICATE? |
 |---|---:|---:|---:|---:|---|
 | taoyuan-indoor | 5 | 0 | 9 | 5 | no |
-| kaohsiung-free | 4 | 1 | 6 | 4 | no |
+| kaohsiung-free | 5 | 0 | 7 | 5 | no |
 | taipei-free | 3 | 2 | 8 | 3 | no |
 | taipei-indoor | 3 | 2 | 8 | 3 | no |
 | new-taipei-indoor | 3 | 2 | 8 | 3 | no |
@@ -140,6 +140,7 @@ Launched duplicates: `[]`
 | kaohsiung-indoor | 3 | 2 | 6 | 3 | no |
 
 真正只差 1、且不是 parent duplicate：`kaohsiung-free`。
+`kaohsiung-free` 已達 5 筆，但 B3 Phase 2 僅完成資料增補，尚未加入 registry。
 `taoyuan-indoor` 已達 5 且在 B2 Phase 3 上線；仍保留為獨立 indoor collection，不建立 rainy-day variant。
 `chiayi-city` 已達 5 且 **已 launch**（B1 Phase 3）。
 `chiayi-city-indoor` 現 4，不是 city 的 exact duplicate，本批不上線。
@@ -149,13 +150,13 @@ Launched duplicates: `[]`
 | 欄位 | present | missing | likely debt | 說明 |
 |---|---:|---:|---:|---|
 | officialUrl | 51 | 47 | 0 | 免費公園缺官網可以；active paid 缺 officialUrl = 0 |
-| feeNote | 42 | 56 | 0 | 免費場沒票價說明合理；A1 已補 9 筆 active paid feeNote |
-| coverageNote | 24 | 74 | 0 | 選填誠實聲明；有 `status` 時才必填 |
-| mapsQuery | 10 | 88 | 0 | 搜尋不穩才填 |
-| relatedEpisodes | 0 | 98 | 0 | 產品缺口，不是 schema 必填 |
-| placeId | 0 | 98 | 0 | 地圖不用 Google Place ID |
+| feeNote | 42 | 57 | 0 | 免費場沒票價說明合理；A1 已補 9 筆 active paid feeNote |
+| coverageNote | 24 | 75 | 0 | 選填誠實聲明；有 `status` 時才必填 |
+| mapsQuery | 10 | 89 | 0 | 搜尋不穩才填 |
+| relatedEpisodes | 0 | 99 | 0 | 產品缺口，不是 schema 必填 |
+| placeId | 0 | 99 | 0 | 地圖不用 Google Place ID |
 
-sources：1 筆 22、≥2 筆 76、有官方 40、有政府 95、editorial-only 0。
+sources：1 筆 22、≥2 筆 77、有官方 40、有政府 96、editorial-only 0。
 lastVerified：多數仍 2026-08-09～2026-08-16；A1 逐筆查證的 10 筆為 2026-08-19。
 
 ## Paid fee clarity
@@ -182,5 +183,5 @@ lastVerified：多數仍 2026-08-09～2026-08-16；A1 逐筆查證的 10 筆為 
 
 ## 下一步（尚未執行）
 
-B2 桃園 indoor 已上線 → B3 高雄 free → relatedEpisodes pilot。
+B3 高雄 free 已達門檻但尚未上線 → relatedEpisodes pilot。
 （tips 設施列舉尾句：STOP EDITORIAL CLEANUP，剩餘 14 筆不自動開 A5。）

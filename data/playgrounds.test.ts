@@ -1075,7 +1075,7 @@ describe("B1 Chiayi City diversity — 嘉義公園", () => {
       indoorActive: 4,
       outdoorActive: 1,
     });
-    expect(global.total).toBe(98);
+    expect(global.total).toBe(99);
     expect(launchRegistry.total).toBe(21);
     expect(launchRegistry.unlaunchedCitySlugs).toEqual([]);
   });
@@ -1167,5 +1167,74 @@ describe("B2 Taoyuan indoor diversity — 桃園防災教育館", () => {
     expect(launchRegistry.total).toBe(21);
     expect(launchRegistry.indoorCount).toBe(1);
     expect(launchRegistry.slugs).toContain("taoyuan-indoor");
+  });
+});
+
+describe("B3 Kaohsiung free diversity — 高雄親子遊樂園區", () => {
+  it("新增一筆鳳山區免費半室內親子遊樂場域", () => {
+    const place = getPlayground("kh-family-playground");
+    expect(place).toMatchObject({
+      id: "kh-family-playground",
+      name: "高雄親子遊樂園區",
+      city: "高雄市",
+      district: "鳳山區",
+      address: "高雄市鳳山區武慶二路221號",
+      type: "公園",
+      ageRange: [3, 8],
+      free: true,
+      indoor: false,
+      facilities: ["沙坑", "攀爬網", "抱石攀岩", "跑酷練習場"],
+      tags: ["免費", "放電", "親子", "遊戲場"],
+      officialUrl: "https://khh.travel/zh-tw/attractions/detail/1338/",
+      lastVerified: "2026-08-19",
+    });
+    expect(place?.lat).toBe(22.6163482);
+    expect(place?.lng).toBe(120.329175);
+    expect(place?.status).toBeUndefined();
+    expect(place?.relatedEpisodes).toBeUndefined();
+    expect(place?.feeNote).toBeUndefined();
+    expect(place?.coverageNote).toBeUndefined();
+    expect(place?.sources).toHaveLength(2);
+    expect(place?.tips).toContain("半室內棚架");
+  });
+
+  it("讓高雄 free candidate 達門檻但維持未上線", () => {
+    const { cities, candidates, global, launchRegistry } =
+      computePlaygroundBaseline();
+    const kaohsiung = cities.find((row) => row.city === "高雄市");
+    const city = candidates.find((row) => row.slug === "kaohsiung");
+    const free = candidates.find((row) => row.slug === "kaohsiung-free");
+
+    expect(kaohsiung).toMatchObject({
+      total: 7,
+      operating: 7,
+      freeActive: 5,
+      indoorActive: 3,
+      outdoorActive: 4,
+    });
+    expect(global.total).toBe(99);
+    expect(global.operating).toBe(98);
+    expect(global.free).toBe(58);
+    expect(global.outdoor).toBe(65);
+    expect(city).toMatchObject({
+      activeCount: 7,
+      currentlyLaunched: true,
+      thresholdReached: true,
+    });
+    expect(free).toMatchObject({
+      matchingTotal: 5,
+      activeCount: 5,
+      thresholdReached: true,
+      currentlyLaunched: false,
+      exactDuplicateOfParent: false,
+      overlapWithParentCity: {
+        parentActiveCount: 7,
+        overlapCount: 5,
+        identical: false,
+      },
+    });
+    expect(free?.activePlaceIds).toContain("kh-family-playground");
+    expect(launchRegistry.total).toBe(21);
+    expect(launchRegistry.slugs).not.toContain("kaohsiung-free");
   });
 });

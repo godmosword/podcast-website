@@ -219,13 +219,13 @@ describe("resolved contradictions", () => {
 
   test("locks the current global census so later agents do not guess", () => {
     expect(baseline.global).toEqual({
-      total: 98,
-      operating: 97,
+      total: 99,
+      operating: 98,
       temporarilyClosed: 1,
       cities: 15,
       districts: 67,
       typeDistribution: {
-        公園: 42,
+        公園: 43,
         室內樂園: 1,
         主題樂園: 7,
         博物館: 29,
@@ -233,10 +233,10 @@ describe("resolved contradictions", () => {
         農場: 4,
         其他: 11,
       },
-      free: 57,
+      free: 58,
       paid: 40,
       indoor: 33,
-      outdoor: 64,
+      outdoor: 65,
     });
     expect(
       baseline.cities.map((row) => [
@@ -261,7 +261,7 @@ describe("resolved contradictions", () => {
       ["嘉義市", 5, 5, 2, 4],
       ["嘉義縣", 5, 5, 2, 5],
       ["台南市", 7, 7, 2, 3],
-      ["高雄市", 6, 6, 4, 3],
+      ["高雄市", 7, 7, 5, 3],
     ]);
   });
 
@@ -320,7 +320,7 @@ describe("collection candidates and near-threshold", () => {
         .map((row) => [row.slug, row.currentActive, row.shortOf5, row.exactDuplicate]),
     ).toEqual([
       ["taoyuan-indoor", 5, 0, false],
-      ["kaohsiung-free", 4, 1, false],
+      ["kaohsiung-free", 5, 0, false],
       ["taipei-free", 3, 2, false],
       ["taipei-indoor", 3, 2, false],
       ["new-taipei-indoor", 3, 2, false],
@@ -351,7 +351,7 @@ describe("optional fields, tips, relatedEpisodes", () => {
   test("does not treat every null optional field as quality debt", () => {
     expect(baseline.optionalFields.placeId).toMatchObject({
       present: 0,
-      missing: 98,
+      missing: 99,
       required: false,
     });
     expect(baseline.optionalFields.mapsQuery.required).toBe(false);
@@ -393,8 +393,8 @@ describe("documentation drift guards", () => {
   });
 
   test("baseline doc cites the locked census", () => {
-    expect(BASELINE_DOC).toContain("| total | 98 |");
-    expect(BASELINE_DOC).toContain("| operating | 97 |");
+    expect(BASELINE_DOC).toContain("| total | 99 |");
+    expect(BASELINE_DOC).toContain("| operating | 98 |");
     expect(BASELINE_DOC).toContain("TOTAL = 21");
     expect(BASELINE_DOC).toContain("未 launch 的 city candidate：**無**");
   });

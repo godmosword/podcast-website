@@ -92,6 +92,9 @@ describe("sitemap freshness", () => {
     expect(detailEntries.map((entry) => entry.url)).toContain(
       "https://example.com/for-parents/play-map/ty-disaster-education",
     );
+    expect(detailEntries.map((entry) => entry.url)).toContain(
+      "https://example.com/for-parents/play-map/kh-family-playground",
+    );
     for (const place of playgrounds) {
       const entry = entries.find(
         (item) => item.url === `https://example.com${playgroundDetailPath(place.id)}`,

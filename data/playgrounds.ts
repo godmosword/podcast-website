@@ -3195,6 +3195,37 @@ const PLAYGROUNDS: readonly Playground[] = [
     ],
     lastVerified: "2026-08-15",
   },
+  {
+    id: "kh-family-playground",
+    name: "高雄親子遊樂園區",
+    city: "高雄市",
+    district: "鳳山區",
+    lat: 22.6163482,
+    lng: 120.329175,
+    address: "高雄市鳳山區武慶二路221號",
+    type: "公園",
+    ageRange: [3, 8],
+    free: true,
+    indoor: false,
+    facilities: ["沙坑", "攀爬網", "抱石攀岩", "跑酷練習場"],
+    tags: ["免費", "放電", "親子", "遊戲場"],
+    tips:
+      "以大型攀爬、沙坑與主動遊戲設施為主，適合想讓孩子跑跳放電；場域為半室內棚架，實際開放設施依現場公告與使用規則。",
+    officialUrl: "https://khh.travel/zh-tw/attractions/detail/1338/",
+    sources: [
+      {
+        kind: "gov",
+        name: "高雄旅遊網—高雄親子遊樂園區",
+        url: "https://khh.travel/zh-tw/attractions/detail/1338/",
+      },
+      {
+        kind: "gov",
+        name: "高雄旅遊網—高雄親子遊樂園區開幕公告",
+        url: "https://khh.travel/zh-tw/event/news/7879/",
+      },
+    ],
+    lastVerified: "2026-08-19",
+  },
 ];
 
 export function getPlayground(id: string): Playground | undefined {
