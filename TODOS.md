@@ -49,10 +49,22 @@
 - [x] 層接 LOD＋關巡邏＋稀有跨島  `ddeed40`
 - [x] Art Bible §12.8／TODOS 對齊  `8ce39f6`
 
+### 角色 Logo 識別系統（2026-08-19）
+
+> 35 人、1 套系統。硬性驗收 32×32。不產圖、不動 `public/characters/*.jpg`。  
+> 規範：[`docs/CHARACTER-LOGO-SPEC.md`](./docs/CHARACTER-LOGO-SPEC.md)、[`docs/CHARACTER-LOGO-COLORS.md`](./docs/CHARACTER-LOGO-COLORS.md)。資料：`data/character-logos.json`。
+
+- [x] Phase 0 盤點／Gate 1 A：slug = `Character.id`；小南名稱「小南」；紅爸眉線為血緣例外
+- [x] Phase 1 規範＋色票＋35 筆資料＋vitest  見本 commit
+- [ ] Phase 2 `docs/logo-prompts/` 每角色生成 prompt
+- [ ] Phase 3 `/studio/logo-audit` 驗收頁＋`docs/CHARACTER-LOGO-AUDIT.md`
+- [ ] Phase 4 schema `logoFamily`／`logoFeature`；24–32px 使用點改掛 logo
+
 ### 本輪已完成（2026-08-19）
 
 | ID | 說明 |
 |----|------|
+| docs(data): 角色 Logo 系統 Phase 1 規範／色票／35 筆 roster | 見本 commit |
 | test(play-map): 鎖定 playground／合輯 A0 baseline census | `28ae3c1` |
 | docs/data(play-map): A1 付費 feeNote／官網、A1.1 卡司蒂菈蘆竹座標、A2 15 筆 tips 試點 | `637fef2` |
 | docs/data(play-map): A3 第二輪 15 筆 tips 品質改寫 | `03cdd05` |
