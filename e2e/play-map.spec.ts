@@ -396,6 +396,75 @@ test.describe("親子遊樂地圖", () => {
     ).toBeInViewport();
   });
 
+  test("返回名單會關掉精簡預覽，不殘留在名單上", async ({ page }) => {
+    test.setTimeout(45_000);
+    await page.setViewportSize(PHONE);
+    await page.goto("/for-parents/play-map");
+    await waitForPlayMapReady(page);
+
+    const hukouName = "王爺壟運動公園";
+    const cardsPanel = page.locator("#play-map-panel-cards");
+    const hukouCard = cardsPanel.getByRole("button", {
+      name: `${hukouName}，查看詳情`,
+    });
+    for (let i = 0; i < 12; i += 1) {
+      if (await hukouCard.isVisible()) break;
+      const more = page.getByRole("button", { name: "載入更多" });
+      if (!(await more.isVisible())) break;
+      await more.click();
+    }
+    await expect(hukouCard).toBeVisible();
+    await hukouCard.click();
+    await page.getByRole("button", { name: `在地圖上看 ${hukouName}` }).click();
+
+    const sheet = page.getByRole("region", { name: `${hukouName} 詳情` });
+    await expect(sheet).toBeVisible();
+    await expect(sheet.getByRole("button", { name: "更多" })).toBeVisible();
+
+    await page.getByRole("button", { name: "返回名單" }).click();
+    await expect(sheet).toHaveCount(0);
+    await expect(page.getByRole("region", { name: /詳情$/ })).toHaveCount(0);
+    await expect(cardsPanel).toBeVisible();
+    await expect(page.getByRole("button", { name: "看地圖" })).toBeFocused();
+    await expect(
+      page.locator(`.playMapMarkerButton[aria-pressed="true"]`),
+    ).toHaveCount(0);
+  });
+
+  test("名單卡片明示免費／需購票與室內／戶外", async ({ page }) => {
+    test.setTimeout(30_000);
+    await page.setViewportSize(PHONE);
+    await page.goto("/for-parents/play-map");
+    await waitForPlayMapReady(page);
+
+    const firstCard = page.locator("#play-map-panel-cards li:not([hidden])").first();
+    await expect(firstCard.getByText(/免費|需購票/)).toBeVisible();
+    await expect(firstCard.getByText(/室內|戶外/)).toBeVisible();
+    await expect(firstCard.getByText(/^\d+–\d+ 歲$/)).toHaveCount(0);
+  });
+
+  test("地圖模式不再顯示過時操作說明，搜尋此區域仍可用", async ({ page }) => {
+    test.setTimeout(45_000);
+    await page.setViewportSize(PHONE);
+    await page.goto("/for-parents/play-map");
+    await waitForPlayMapReady(page);
+
+    await page.getByRole("button", { name: "看地圖" }).click();
+    const map = page.locator(".leaflet-container");
+    await expect(map).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText("點縣市看該區地點，或先點附近")).toHaveCount(0);
+    await expect(page.getByText("雙指或工具列可縮放")).toHaveCount(0);
+    await expect(page.getByText("點區域群組聚焦，或繼續縮放看單點")).toHaveCount(0);
+
+    await page.waitForFunction(
+      () => !document.querySelector(".leaflet-zoom-anim"),
+      undefined,
+      { timeout: 10_000 },
+    );
+    await page.locator(".leaflet-control-zoom-in").click();
+    await expect(page.getByRole("button", { name: "搜尋此區域" })).toBeVisible();
+  });
+
   test("行動選單「親子景點」可直達地圖頁", async ({ page }) => {
     test.setTimeout(30_000);
     await page.setViewportSize(PHONE);

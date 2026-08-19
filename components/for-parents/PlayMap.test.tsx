@@ -131,6 +131,14 @@ function backToList(): void {
   fireEvent.click(screen.getByRole("button", { name: "返回名單" }));
 }
 
+function cardFlagLabels(placeId: string): string[] {
+  const card = document.getElementById(placeId);
+  const flags = card?.querySelector("[class*='cardFlags']");
+  return [...(flags?.querySelectorAll("span") ?? [])].map(
+    (node) => node.textContent ?? "",
+  );
+}
+
 function mockDesktopMatchMedia(reducedMotion = false): void {
   Object.defineProperty(window, "matchMedia", {
     writable: true,
@@ -498,6 +506,40 @@ describe("PlayMap", () => {
     expect(screen.queryByRole("region", { name: "地圖結果" })).toBeNull();
   });
 
+  it("手機標記選取開精簡預覽，返回名單後預覽關閉且選取清空", () => {
+    render(<PlayMap />);
+    openMap();
+    const place = filterPlaygrounds()[0];
+    expect(place).toBeDefined();
+    if (!place) return;
+    const trigger = document.createElement("button");
+    document.body.appendChild(trigger);
+    act(() => {
+      leafletPropsRef.current?.onSelect(place.id, trigger);
+    });
+
+    const preview = screen.getByRole("region", { name: `${place.name} 詳情` });
+    expect(preview.getAttribute("data-variant")).toBe("compact");
+    expect(screen.getByTestId("map-container").getAttribute("data-selected-id")).toBe(
+      place.id,
+    );
+
+    backToList();
+
+    expect(screen.queryByRole("region", { name: `${place.name} 詳情` })).toBeNull();
+    expect(screen.queryByRole("region", { name: /詳情$/ })).toBeNull();
+    expect(screen.getByTestId("map-container").getAttribute("data-selected-id")).toBe(
+      "",
+    );
+    expect(screen.getByTestId("map-container").getAttribute("data-hovered-id")).toBe(
+      "",
+    );
+    expect(document.activeElement).toBe(
+      screen.getByRole("button", { name: "看地圖" }),
+    );
+    expect(preview.isConnected).toBe(false);
+  });
+
   it("開啟 Sheet 後可按關閉還原", () => {
     render(<PlayMap />);
     showAllCards();
@@ -697,8 +739,8 @@ describe("PlayMap", () => {
   });
 
   /**
-   * 年齡標籤已從卡片移到 toolbar（全站每筆同一區間，73 張卡各講一次是噪音）。
-   * 「需購票／戶外」不得出現的斷言**保留**——那是反向 muted 標籤，另一回事。
+   * 年齡標籤已從卡片移到 toolbar（全站每筆同一區間，重複講是噪音）。
+   * 收費／室內外改為明示二元狀態，不再靠缺席讓使用者自己推。
    */
   it("卡片顯示家長筆記，且名單沒有在地圖看按鈕", () => {
     render(<PlayMap />);
@@ -714,12 +756,38 @@ describe("PlayMap", () => {
     ).toBeNull();
   });
 
-  it("卡片不再重複年齡標籤，且仍不含需購票／戶外 muted", () => {
+  it("卡片不再重複年齡標籤，並明示免費／需購票與室內／戶外", () => {
     render(<PlayMap />);
+    showAllCards();
     const cardsPanel = screen.getByRole("region", { name: "地點名單" });
     expect(within(cardsPanel).queryAllByText(/^\d+–\d+ 歲$/)).toHaveLength(0);
-    expect(within(cardsPanel).queryByText("需購票")).toBeNull();
-    expect(within(cardsPanel).queryByText("戶外")).toBeNull();
+
+    const cases = [
+      filterPlaygrounds().find((place) => place.free && place.indoor),
+      filterPlaygrounds().find((place) => place.free && !place.indoor),
+      filterPlaygrounds().find((place) => !place.free && place.indoor),
+      filterPlaygrounds().find((place) => !place.free && !place.indoor),
+    ];
+    expect(cases.every(Boolean)).toBe(true);
+    for (const place of cases) {
+      if (!place) return;
+      expect(cardFlagLabels(place.id)).toEqual([
+        place.free ? "免費" : "需購票",
+        place.indoor ? "室內" : "戶外",
+      ]);
+      expect(cardFlagLabels(place.id).join()).not.toMatch(/\d|全票|NT\$|票價/);
+    }
+
+    const closed = listPlaygrounds().find(
+      (place) => place.status === "temporarily-closed",
+    );
+    expect(closed).toBeDefined();
+    if (!closed) return;
+    expect(within(document.getElementById(closed.id)!).getByText("暫停營業")).toBeTruthy();
+    expect(cardFlagLabels(closed.id)).toEqual([
+      closed.free ? "免費" : "需購票",
+      closed.indoor ? "室內" : "戶外",
+    ]);
   });
 
   it("卡片以文字標示類型，不只靠色條（色彩單一編碼）", () => {
@@ -906,6 +974,9 @@ describe("PlayMap", () => {
     expect(within(sheet).getByRole("button", { name: "更多" })).toBeTruthy();
     expect(within(sheet).getByText(firstPlace.address, { exact: false })).toBeTruthy();
     backToList();
+    expect(
+      screen.queryByRole("region", { name: `${firstPlace.name} 詳情` }),
+    ).toBeNull();
     openFilters();
     expect(
       within(screen.getByRole("group", { name: "依縣市篩選" })).getByRole(
@@ -944,6 +1015,31 @@ describe("PlayMap", () => {
     fireEvent.blur(cardButton);
     expect(card.dataset.cardState).toBe("default");
     expect(leafletPropsRef.current?.hoveredPlaceId).toBeNull();
+  });
+
+  it("桌面選取與 hover 相關性不因手機返回名單清理而改變", () => {
+    mockDesktopMatchMedia();
+    render(<PlayMap initialCity="台北市" />);
+    const place = filterPlaygrounds({ city: "台北市" })[0];
+    expect(place).toBeDefined();
+    if (!place) return;
+
+    act(() => {
+      leafletPropsRef.current?.onSelect(place.id, document.body);
+    });
+    expect(leafletPropsRef.current?.selectedId).toBe(place.id);
+    expect(
+      screen.getByRole("region", { name: `${place.name} 詳情` }),
+    ).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "返回名單" })).toBeNull();
+
+    const card = document.getElementById(place.id);
+    const article = card?.querySelector("article");
+    expect(card?.dataset.cardState).toBe("selected");
+    if (article) fireEvent.pointerEnter(article);
+    expect(card?.dataset.cardState).toBe("selected");
+    expect(leafletPropsRef.current?.selectedId).toBe(place.id);
+    expect(leafletPropsRef.current?.hoveredPlaceId).toBe(place.id);
   });
 
   it("桌面 marker click 開 compact Sheet 並只捲動可見 card list", () => {

@@ -5,7 +5,7 @@ import type { Playground } from "@/data/playgrounds";
 import { formatPlaceDistanceLabel, type LatLng } from "@/lib/playground-distance";
 import { PlayMapCard } from "./PlayMapCard";
 import { PlayMapEditorialPick } from "./PlayMapEditorialPick";
-import type { PlayMapCardListProps } from "./PlayMapContract";
+import { OPEN_MAP_BUTTON_ID, type PlayMapCardListProps } from "./PlayMapContract";
 import styles from "./PlayMap.module.css";
 
 function distanceLabelFor(
@@ -67,6 +67,7 @@ export function PlayMapCardList({
           {showMapAction ? (
             <button
               type="button"
+              id={OPEN_MAP_BUTTON_ID}
               className={styles.openMapButton}
               onClick={onOpenMap}
             >
