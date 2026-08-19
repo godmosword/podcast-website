@@ -575,9 +575,11 @@ describe("playgrounds sidecar", () => {
     expect(getPlayground("hc-nanliao")?.mapsQuery).toBe(
       "南寮漁港旅遊服務中心",
     );
-    expect(getPlayground("hc-nanliao")?.tips).toBe(
-      "海風大記得防曬與外套；可搭配南寮親水公園與自行車道。場內有大型遊具、沙坑、遮蔭區。",
-    );
+    expect(getPlayground("hc-nanliao")?.tips).not.toContain("導航落點");
+    expect(getPlayground("hc-nanliao")?.tips).not.toContain("旅遊服務中心");
+    expect(
+      FACILITY_LIST_TAIL_PATTERN.test(getPlayground("hc-nanliao")?.tips ?? ""),
+    ).toBe(false);
     expect(getPlayground("hc-nanliao")?.coverageNote).toBe(
       "導航落點為南寮漁港旅遊服務中心，實際遊戲區在旁邊步行可達。",
     );
@@ -774,7 +776,7 @@ describe("A2 tips quality pilot", () => {
       expect(remaining.has(id), id).toBe(false);
     }
     expect(tipsDebt.count).toBeGreaterThan(0);
-    expect(tipsDebt.count).toBe(26);
+    expect(tipsDebt.count).toBe(14);
   });
 });
 
@@ -897,6 +899,130 @@ describe("A3 tips quality round 2", () => {
       expect(remaining.has(id), id).toBe(false);
     }
     expect(tipsDebt.count).toBeGreaterThan(0);
-    expect(tipsDebt.count).toBe(26);
+    expect(tipsDebt.count).toBe(14);
+  });
+});
+
+const A4_TIPS_FINAL_IDS = [
+  "tp-da-an-park",
+  "hc-hsinchu-park",
+  "hc-nanliao",
+  "ty-chingtang",
+  "kl-chaojing",
+  "kl-chungcheng-park",
+  "tc-qiuhonggu",
+  "tc-calligraphy-greenway",
+  "ch-lukang-children",
+  "yl-beigang-park",
+  "nt-linkou-sports",
+  "ty-yangming",
+] as const;
+
+/** A3 成稿開頭；A4 不得回寫。 */
+const A3_TIP_OPENINGS = {
+  "hcx-zhudong-forestry": "展館不大",
+  "nto-xiangshan": "建築內可",
+  "nto-checheng": "木業館可",
+  "ch-fan-garage": "現場有列",
+  "hc-xiangshan-wetland": "潮間帶濕",
+  "tc-gaomei": "請走木棧",
+  "hcx-xinwaya": "戶外廣場",
+  "nt-tamsui-shalun": "以戲沙、",
+  "hcx-neiwan": "親水區玩",
+  "hcx-hukou-sports": "直排輪、",
+  "tc-fengle": "雕塑區的",
+  "nt-metro-park": "園區幅員",
+  "tp-rongxing": "遊戲場設",
+  "ch-baguashan": "帶小孩可",
+  "yl-gukeng-tunnel": "走的是林",
+} as const;
+
+const A4_COPY_ONLY_LAST_VERIFIED = {
+  "tp-da-an-park": "2026-08-09",
+  "hc-hsinchu-park": "2026-08-09",
+  "hc-nanliao": "2026-08-13",
+  "ty-chingtang": "2026-08-13",
+  "kl-chaojing": "2026-08-11",
+  "kl-chungcheng-park": "2026-08-11",
+  "tc-qiuhonggu": "2026-08-13",
+  "tc-calligraphy-greenway": "2026-08-09",
+  "ch-lukang-children": "2026-08-09",
+  "yl-beigang-park": "2026-08-09",
+  "nt-linkou-sports": "2026-08-09",
+  "ty-yangming": "2026-08-09",
+} as const;
+
+describe("A4 tips quality final round", () => {
+  it("不與 A2／A3 試點重疊", () => {
+    const prior = new Set<string>([
+      ...A2_TIPS_PILOT_IDS,
+      ...A3_TIPS_ROUND2_IDS,
+    ]);
+    expect(A4_TIPS_FINAL_IDS.filter((id) => prior.has(id))).toEqual([]);
+  });
+
+  it("A2／A3 成稿開頭維持不變", () => {
+    for (const [id, opening] of Object.entries(A2_TIP_OPENINGS)) {
+      expect(getPlayground(id)?.tips.slice(0, 4), id).toBe(opening);
+    }
+    for (const [id, opening] of Object.entries(A3_TIP_OPENINGS)) {
+      expect(getPlayground(id)?.tips.slice(0, 4), id).toBe(opening);
+    }
+  });
+
+  it("最終輪 tips 非空，且不再使用設施列舉尾句", () => {
+    for (const id of A4_TIPS_FINAL_IDS) {
+      const place = getPlayground(id);
+      expect(place, id).toBeDefined();
+      if (!place) continue;
+      expect(place.tips.trim().length, id).toBeGreaterThan(8);
+      expect(
+        FACILITY_LIST_TAIL_PATTERN.test(place.tips),
+        `${id} 仍是「場／園／館內有…」尾句：${place.tips}`,
+      ).toBe(false);
+      expect(
+        /(?:場|園|館)內有/.test(place.tips),
+        `${id} 仍把設施清單寫進 tips：${place.tips}`,
+      ).toBe(false);
+      expect(
+        SALESY_TIP_PATTERN.test(place.tips),
+        `${id} tips 含推銷用語：${place.tips}`,
+      ).toBe(false);
+      expect(place.relatedEpisodes, id).toBeUndefined();
+      expect(place.free, id).toBe(true);
+    }
+  });
+
+  it("最終輪沒有改成同一句開頭", () => {
+    const openings = A4_TIPS_FINAL_IDS.map((id) => {
+      const tips = getPlayground(id)?.tips ?? "";
+      return tips.slice(0, 4);
+    });
+    expect(new Set(openings).size).toBeGreaterThan(8);
+  });
+
+  it("最終輪不更新 lastVerified", () => {
+    for (const [id, verified] of Object.entries(A4_COPY_ONLY_LAST_VERIFIED)) {
+      expect(getPlayground(id)?.lastVerified, id).toBe(verified);
+    }
+  });
+
+  it("南寮 coverageNote／mapsQuery 不因改 tips 而變動", () => {
+    const place = getPlayground("hc-nanliao");
+    expect(place?.mapsQuery).toBe("南寮漁港旅遊服務中心");
+    expect(place?.coverageNote).toBe(
+      "導航落點為南寮漁港旅遊服務中心，實際遊戲區在旁邊步行可達。",
+    );
+    expect(place?.tips).not.toContain("導航落點");
+  });
+
+  it("最終輪已離開 tipsDebt，全庫尾句債仍未清完、也不求清零", () => {
+    const { tipsDebt } = computePlaygroundBaseline();
+    const remaining = new Set(tipsDebt.placeIds);
+    for (const id of A4_TIPS_FINAL_IDS) {
+      expect(remaining.has(id), id).toBe(false);
+    }
+    expect(tipsDebt.count).toBeGreaterThan(0);
+    expect(tipsDebt.count).toBe(14);
   });
 });

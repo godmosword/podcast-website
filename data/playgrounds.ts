@@ -202,7 +202,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["環湖步道", "草地", "兒童遊戲場", "洗手間"],
     tags: ["免費", "散步", "餵鴨注意"],
-    tips: "適合慢慢散步放電；餵食水鳥請遵守園區規定，也記得帶防蚊液。場內有環湖步道、草地、兒童遊戲場。",
+    tips: "餵食水鳥要遵守園區規定；沿著湖岸散步時也要記得帶防蚊液。",
     sources: [
       {
         kind: "gov",
@@ -231,7 +231,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "跑道", "籃球場", "停車場"],
     tags: ["免費", "運動", "停車方便"],
-    tips: "遊戲場與跑道分開，適合先跑一圈再玩遊具；夏天記得多補水。場內有兒童遊戲場、籃球場、停車場。",
+    tips: "兒童遊戲場跟跑道是分開的，想跑的可以先跑一圈再去玩遊具。",
     sources: [
       {
         kind: "gov",
@@ -613,7 +613,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "生態池", "步道", "洗手間"],
     tags: ["免費", "捷運友善", "野餐友善"],
-    tips: "遊戲場在公園北側，假日建議上午較不擁擠；生態池旁防蚊。場內有兒童遊戲場、步道、洗手間。",
+    tips: "遊戲場在公園北側，不是整座都能玩遊具；生態池旁記得防蚊。",
     sources: [
       {
         kind: "gov",
@@ -908,7 +908,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "跑道", "籃球場", "停車場"],
     tags: ["免費", "運動", "停車方便"],
-    tips: "遊戲場分區，低齡與較大童可各玩各的；夏天記得多補水。場內有兒童遊戲場、跑道、籃球場。",
+    tips: "遊戲場有分區，低齡與較大童可以各玩各的，也不用擠同一區。",
     sources: [
       {
         kind: "gov",
@@ -1077,7 +1077,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["海景平台", "步道", "停車場", "洗手間"],
     tags: ["免費", "海邊", "看海"],
-    tips: "可與海科館串遊；海風大，建議帶外套與防曬。場內有海景平台、步道、停車場。",
+    tips: "和海科館可以排在同一趟；海邊風大，外套跟防曬都要記得帶。",
     sources: [
       {
         kind: "gov",
@@ -1106,7 +1106,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "步道", "觀景", "洗手間"],
     tags: ["免費", "市區公園", "看夜景"],
-    tips: "坡道與階梯多，推車建議走主車道；傍晚可看基隆港夜景。場內有兒童遊戲場、步道、觀景。",
+    tips: "坡道與階梯比較多，推車請走主車道；傍晚還可看基隆港夜景。",
     sources: [
       {
         kind: "gov",
@@ -1199,7 +1199,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "草地", "湖畔步道", "洗手間"],
     tags: ["免費", "市區公園", "野餐友善"],
-    tips: "可與動物園、玻璃工藝博物館串遊；假日人潮多，建議早到。場內有兒童遊戲場、草地、湖畔步道。",
+    tips: "動物園和玻璃工藝博物館也都在附近，不必只把這裡當遊戲場。",
     sources: [
       {
         kind: "gov",
@@ -1258,7 +1258,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["大型遊具", "沙坑", "遮蔭區", "洗手間"],
     tags: ["免費", "海邊", "放電"],
-    tips: "海風大記得防曬與外套；可搭配南寮親水公園與自行車道。場內有大型遊具、沙坑、遮蔭區。",
+    tips: "海風大，記得防曬和外套；也可搭配南寮親水公園與自行車道。",
     coverageNote: "導航落點為南寮漁港旅遊服務中心，實際遊戲區在旁邊步行可達。",
     sources: [
       {
@@ -1869,7 +1869,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["步道", "草地", "觀景", "洗手間"],
     tags: ["免費", "散步", "都會公園"],
-    tips: "以散步與野餐為主，大型遊具較少；適合與附近商場雨天備案搭配。場內有步道、草地、觀景。",
+    tips: "大型遊具比較少，來這裡主要是散步和野餐；雨天可轉附近商場。",
     sources: [
       {
         kind: "gov",
@@ -2024,7 +2024,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "綠道", "遮蔭區", "洗手間"],
     tags: ["免費", "市區", "散步"],
-    tips: "可與勤美周邊室內備案串遊；週末人潮與腳踏車多請留意。場內有兒童遊戲場、綠道、遮蔭區。",
+    tips: "勤美周邊室內能當雨天備案；綠道上腳踏車多，請看顧好孩子。",
     sources: [
       {
         kind: "gov",
@@ -2165,7 +2165,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "草地", "遮蔭區", "洗手間"],
     tags: ["免費", "社區公園", "老街串遊"],
-    tips: "可與鹿港老街串遊；遊戲場假日較擠，建議錯峰。場內有兒童遊戲場、草地、遮蔭區。",
+    tips: "可與鹿港老街串遊；兒童遊戲場拿來當中途停下來放電就夠了。",
     sources: [
       {
         kind: "gov",
@@ -2467,7 +2467,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "草地", "遮蔭區", "洗手間"],
     tags: ["免費", "社區公園", "放電"],
-    tips: "可與北港朝天宮周邊行程搭配；假日較擠請錯峰。場內有兒童遊戲場、草地、遮蔭區。",
+    tips: "可與北港朝天宮周邊行程搭配；兒童遊戲場當中途停點就好了。",
     sources: [
       {
         kind: "gov",

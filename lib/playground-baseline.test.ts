@@ -326,11 +326,11 @@ describe("optional fields, tips, relatedEpisodes", () => {
 
   test("tips facility-list tail uses the shared pattern", () => {
     expect(FACILITY_LIST_TAIL_PATTERN.test("場內有溜滑梯、鞦韆。")).toBe(true);
-    expect(baseline.tipsDebt.count).toBe(26);
-    expect(baseline.tipsDebt.placeIds).toHaveLength(26);
-    // A2／A3 都是增量試點，不得一次清掉全部尾句債
+    expect(baseline.tipsDebt.count).toBe(14);
+    expect(baseline.tipsDebt.placeIds).toHaveLength(14);
+    // A2–A4 都是增量試點，不得一次清掉全部尾句債
     expect(baseline.tipsDebt.count).toBeGreaterThan(0);
-    expect(baseline.tipsDebt.count).toBeLessThan(41);
+    expect(baseline.tipsDebt.count).toBeLessThan(26);
   });
 
   test("relatedEpisodes is an optional story-slug array and currently empty", () => {
