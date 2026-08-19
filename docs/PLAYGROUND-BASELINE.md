@@ -168,8 +168,8 @@ lastVerified：多數仍 2026-08-09～2026-08-16；A1 逐筆查證的 10 筆為 
 
 ## Tips debt
 
-- exact count = 41（`FACILITY_LIST_TAIL_PATTERN`）
-- A2 試點已改 15 筆；剩餘仍集中在基隆→雲林的免費公園
+- exact count = 26（`FACILITY_LIST_TAIL_PATTERN`）
+- A2 改 15 筆、A3 再改 15 筆；剩餘仍多為免費公園
 - 後續規則：一次 10–15 筆，不要一次清全部
 
 ## relatedEpisodes
@@ -182,4 +182,4 @@ lastVerified：多數仍 2026-08-09～2026-08-16；A1 逐筆查證的 10 筆為 
 
 ## 下一步（尚未執行）
 
-A3 續改 tips 尾句 → B1 嘉義市 diversity → B2 桃園 indoor → B3 高雄 free → relatedEpisodes pilot。
+A4 續改 tips 尾句 → B1 嘉義市 diversity → B2 桃園 indoor → B3 高雄 free → relatedEpisodes pilot。

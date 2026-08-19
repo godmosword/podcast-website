@@ -705,7 +705,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "大草坪", "步道", "洗手間"],
     tags: ["免費", "社區公園", "野餐友善"],
-    tips: "遊戲場設備多元但面積不大，適合學齡前後短時間放電。場內有兒童遊戲場、大草坪、步道。",
+    tips: "遊戲場設備多元但面積不大，帶學齡前後孩子短時間放電就夠。",
     sources: [
       {
         kind: "gov",
@@ -735,7 +735,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["河濱步道", "自行車道", "兒童遊戲場", "停車場"],
     tags: ["免費", "騎車", "野餐友善"],
-    tips: "園區幅員大，可先鎖定重新橋或熊猴森遊戲場；假日防曬補水。場內有河濱步道、自行車道、兒童遊戲場。",
+    tips: "園區幅員大，可先鎖定重新橋或熊猴森遊戲場；假日防曬補水。",
     sources: [
       {
         kind: "gov",
@@ -968,7 +968,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["沙灘", "步道", "沖洗區", "停車場"],
     tags: ["免費", "海邊", "戲沙"],
-    tips: "僅適合戲沙與踏浪，勿單獨讓幼童近水；風大時注意防曬與保暖。場內有沙灘、步道、沖洗區。",
+    tips: "以戲沙、踏浪為主，幼童近水要有人看著；風大時防曬也保暖。",
     sources: [
       {
         kind: "gov",
@@ -1323,7 +1323,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["觀鳥平台", "木棧道", "生態解說", "洗手間"],
     tags: ["免費", "賞鳥", "生態"],
-    tips: "潮間帶濕滑請牽好幼童；建議帶望遠鏡與防蚊液。場內有觀鳥平台、木棧道、生態解說。",
+    tips: "潮間帶濕滑，請牽好幼童；賞鳥可帶望遠鏡，防蚊液也記得帶。",
     sources: [
       {
         kind: "gov",
@@ -1513,7 +1513,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["文化展館", "廣場", "草地", "洗手間"],
     tags: ["免費", "客家文化", "散步"],
-    tips: "戶外廣場適合短時間放電；展館開放時間請先查詢。場內有文化展館、草地、洗手間。",
+    tips: "戶外廣場可以短時間放電；展館開不開放，出發前要另外查詢。",
     sources: [
       {
         kind: "gov",
@@ -1542,7 +1542,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["林業展示", "親子廁所", "周邊園區", "停車場"],
     tags: ["室內", "雨天備案", "免費"],
-    tips: "展館不大，可與竹東動漫園區周邊散步串遊；開放時間請先確認。場內有林業展示、親子廁所、周邊園區。",
+    tips: "展館不大，可與竹東動漫園區周邊走走；進館前先確認當日有沒有開。",
     sources: [
       {
         kind: "gov",
@@ -1600,7 +1600,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["直排輪場", "風雨球場", "槌球場", "停車場"],
     tags: ["免費", "運動", "社區公園"],
-    tips: "以直排輪、風雨球場與槌球草地為主。場內有直排輪場、槌球場、停車場。",
+    tips: "直排輪、風雨球場和槌球才是主角；幼童遊具請到現場再確認。",
     coverageNote: "以運動設施為主，幼童遊具待現場確認",
     sources: [
       {
@@ -1635,7 +1635,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["親水區", "步道", "休憩區", "洗手間"],
     tags: ["免費", "戲水", "老街串遊"],
-    tips: "可與內灣老街串遊；戲水後記得帶換洗衣物與防蚊液。場內有親水區、步道、休憩區。",
+    tips: "親水區玩完要有替換衣服；順路可走內灣老街，也記得防蚊液。",
     sources: [
       {
         kind: "gov",
@@ -1898,7 +1898,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["兒童遊戲場", "雕塑步道", "草地", "洗手間"],
     tags: ["免費", "雕塑", "放電"],
-    tips: "遊戲場設備豐富；雕塑區請提醒孩子勿攀爬作品。場內有兒童遊戲場、雕塑步道、草地。",
+    tips: "雕塑區的作品不能爬；想放電走遊戲場就好，兩邊要分開看顧。",
     sources: [
       {
         kind: "gov",
@@ -1994,7 +1994,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["木棧道", "觀景平台", "停車場", "洗手間"],
     tags: ["免費", "賞夕陽", "生態"],
-    tips: "請走木棧道、勿踩踏濕地；風大防曬，低潮／開放時段請先查公告。場內有觀景平台、停車場、洗手間。",
+    tips: "請走木棧道、不要踩濕地；風大要防曬，潮汐與開放時段先看公告。",
     sources: [
       {
         kind: "gov",
@@ -2054,7 +2054,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["步道", "觀景平台", "休憩區", "停車場"],
     tags: ["免費", "散步", "看夜景"],
-    tips: "主廣場與平緩步道較親子友善；部分登山步道坡度大。場內有觀景平台、休憩區、停車場。",
+    tips: "帶小孩可走主廣場與平緩步道；部分登山步道坡度較大，不必硬爬。",
     sources: [
       {
         kind: "gov",
@@ -2136,7 +2136,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["鐵道展示", "觀景平台", "洗手間", "停車場"],
     tags: ["免費", "火車", "親子"],
-    tips: "開放時段與導覽請先查臺鐵公告；現場請注意列車動線安全。場內有鐵道展示、觀景平台、洗手間。",
+    tips: "現場有列車動線，務必看顧孩子；開放與導覽看出發前臺鐵公告。",
     sources: [
       {
         kind: "gov",
@@ -2263,7 +2263,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["遊客中心", "環湖步道", "洗手間", "停車場"],
     tags: ["免費", "湖景", "雨天備案"],
-    tips: "建築內可避雨；周邊步道平緩，適合親子散步。場內有遊客中心、環湖步道、洗手間。",
+    tips: "建築內可以躲雨；周邊步道平緩，帶小孩來主要是散步看湖景。",
     sources: [
       {
         kind: "gov",
@@ -2292,7 +2292,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: true,
     facilities: ["木業展示", "親子廁所", "周邊老街", "停車場"],
     tags: ["室內", "雨天備案", "鐵道"],
-    tips: "可與車埕車站、貯木池散步串遊；開放時間請先確認。場內有木業展示、親子廁所、周邊老街。",
+    tips: "木業館可以跟車站、貯木池一起走；開館與否請先查當日資訊。",
     sources: [
       {
         kind: "gov",
@@ -2391,7 +2391,7 @@ const PLAYGROUNDS: readonly Playground[] = [
     indoor: false,
     facilities: ["林蔭步道", "自行車道", "休憩區", "停車場"],
     tags: ["免費", "散步", "遮蔭"],
-    tips: "樹蔭多適合散步；假日汽機車多，牽好幼童。場內有林蔭步道、自行車道、休憩區。",
+    tips: "走的是林蔭步道，不是遊具場；假日車流多，過路請牽好孩子。",
     sources: [
       {
         kind: "gov",

@@ -774,6 +774,129 @@ describe("A2 tips quality pilot", () => {
       expect(remaining.has(id), id).toBe(false);
     }
     expect(tipsDebt.count).toBeGreaterThan(0);
-    expect(tipsDebt.count).toBe(41);
+    expect(tipsDebt.count).toBe(26);
+  });
+});
+
+const A3_TIPS_ROUND2_IDS = [
+  "hcx-zhudong-forestry",
+  "nto-xiangshan",
+  "nto-checheng",
+  "ch-fan-garage",
+  "hc-xiangshan-wetland",
+  "tc-gaomei",
+  "hcx-xinwaya",
+  "nt-tamsui-shalun",
+  "hcx-neiwan",
+  "hcx-hukou-sports",
+  "tc-fengle",
+  "nt-metro-park",
+  "tp-rongxing",
+  "ch-baguashan",
+  "yl-gukeng-tunnel",
+] as const;
+
+/** A2 成稿開頭；A3 不得回寫這 15 筆。 */
+const A2_TIP_OPENINGS = {
+  "ty-casti": "室內球池",
+  "ty-xpark": "平日或剛",
+  "tp-children-park": "入園票不",
+  "tp-zoo": "坡道多，",
+  "tp-water-museum": "博物館與",
+  "nt-yingge-ceramic": "陶藝體驗",
+  "nt-juming": "以戶外雕",
+  "kl-nmmst": "主題館分",
+  "kl-heping-island": "岩石區濕",
+  "tc-lihpao": "樂園與 ",
+  "ty-kids-museum": "部分創作",
+  "nt-435": "常設展多",
+  "tp-shilin-residence": "戶外公園",
+  "nt-sanchong-floodway": "親水設施",
+  "hc-qingqing": "草原開闊",
+} as const;
+
+const A3_COPY_ONLY_LAST_VERIFIED = {
+  "hcx-zhudong-forestry": "2026-08-13",
+  "nto-xiangshan": "2026-08-13",
+  "nto-checheng": "2026-08-13",
+  "ch-fan-garage": "2026-08-13",
+  "hc-xiangshan-wetland": "2026-08-13",
+  "tc-gaomei": "2026-08-13",
+  "hcx-xinwaya": "2026-08-13",
+  "nt-tamsui-shalun": "2026-08-13",
+  "hcx-neiwan": "2026-08-13",
+  "hcx-hukou-sports": "2026-08-13",
+  "tc-fengle": "2026-08-13",
+  "nt-metro-park": "2026-08-13",
+  "tp-rongxing": "2026-08-09",
+  "ch-baguashan": "2026-08-13",
+  "yl-gukeng-tunnel": "2026-08-09",
+} as const;
+
+describe("A3 tips quality round 2", () => {
+  it("不與 A2 試點重疊", () => {
+    const overlap = A3_TIPS_ROUND2_IDS.filter((id) =>
+      (A2_TIPS_PILOT_IDS as readonly string[]).includes(id),
+    );
+    expect(overlap).toEqual([]);
+  });
+
+  it("A2 成稿開頭維持不變", () => {
+    for (const [id, opening] of Object.entries(A2_TIP_OPENINGS)) {
+      expect(getPlayground(id)?.tips.slice(0, 4), id).toBe(opening);
+    }
+  });
+
+  it("第二輪 tips 非空，且不再使用設施列舉尾句", () => {
+    for (const id of A3_TIPS_ROUND2_IDS) {
+      const place = getPlayground(id);
+      expect(place, id).toBeDefined();
+      if (!place) continue;
+      expect(place.tips.trim().length, id).toBeGreaterThan(8);
+      expect(
+        FACILITY_LIST_TAIL_PATTERN.test(place.tips),
+        `${id} 仍是「場／園／館內有…」尾句：${place.tips}`,
+      ).toBe(false);
+      expect(
+        /(?:場|園|館)內有/.test(place.tips),
+        `${id} 仍把設施清單寫進 tips：${place.tips}`,
+      ).toBe(false);
+      expect(
+        SALESY_TIP_PATTERN.test(place.tips),
+        `${id} tips 含推銷用語：${place.tips}`,
+      ).toBe(false);
+      expect(place.relatedEpisodes, id).toBeUndefined();
+      expect(place.free, id).toBe(true);
+    }
+  });
+
+  it("第二輪沒有改成同一句開頭", () => {
+    const openings = A3_TIPS_ROUND2_IDS.map((id) => {
+      const tips = getPlayground(id)?.tips ?? "";
+      return tips.slice(0, 4);
+    });
+    expect(new Set(openings).size).toBeGreaterThan(10);
+  });
+
+  it("第二輪不更新 lastVerified", () => {
+    for (const [id, verified] of Object.entries(A3_COPY_ONLY_LAST_VERIFIED)) {
+      expect(getPlayground(id)?.lastVerified, id).toBe(verified);
+    }
+  });
+
+  it("王爺壟 coverageNote 不因改 tips 而變動", () => {
+    expect(getPlayground("hcx-hukou-sports")?.coverageNote).toBe(
+      "以運動設施為主，幼童遊具待現場確認",
+    );
+  });
+
+  it("第二輪已離開 tipsDebt，全庫尾句債仍未清完", () => {
+    const { tipsDebt } = computePlaygroundBaseline();
+    const remaining = new Set(tipsDebt.placeIds);
+    for (const id of A3_TIPS_ROUND2_IDS) {
+      expect(remaining.has(id), id).toBe(false);
+    }
+    expect(tipsDebt.count).toBeGreaterThan(0);
+    expect(tipsDebt.count).toBe(26);
   });
 });
