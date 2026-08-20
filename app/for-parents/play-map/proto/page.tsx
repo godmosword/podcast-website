@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import PlayMapProtoApp from "@/components/play-map-proto/PlayMapProtoApp";
 import styles from "./page.module.css";
 
 /**
@@ -26,20 +27,9 @@ export default function PlayMapProtoPage() {
         這是內部比較頁，用來決定全國未縮小範圍該用縣市 cluster 還是縣市卡片。不是正式功能。
       </p>
       <p className={styles.note} role="status">
-        Phase 1 只建環境。A／B／C2 切換器在 Phase 2 才會出現。
+        三個 variant 只在全國層的呈現不同；選定縣市後進入同一畫面。篩選與定位不在 Phase 2。
       </p>
-      <section className={styles.section} aria-labelledby="proto-gates-heading">
-        <h2 id="proto-gates-heading" className={styles.sectionHeading}>
-          已鎖定的約束
-        </h2>
-        <ul className={styles.list}>
-          <li>視窗西緣不得小於 120.35（framing 契約，不是可比較指標）。</li>
-          <li>C2 完成定義：15／15 縣市入口中心都在首屏內，不必 pan。</li>
-          <li>
-            C1 不實作：現役 spatial marker 點擊只放大區域，不能選定縣市。
-          </li>
-        </ul>
-      </section>
+      <PlayMapProtoApp />
     </main>
   );
 }

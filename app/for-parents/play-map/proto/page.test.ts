@@ -24,6 +24,10 @@ describe("play-map proto route guards", () => {
     expect(source).not.toContain("CITY_AGGREGATE_MAX_ZOOM");
   });
 
+  it("variant 切換不得影響 metadata.robots", () => {
+    expect(metadata.robots).toEqual({ index: false, follow: false });
+  });
+
   it("sitemap 白名單不含 proto", () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
     const urls = sitemap().map((entry) => entry.url);
