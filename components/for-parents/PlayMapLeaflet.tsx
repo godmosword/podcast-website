@@ -34,8 +34,8 @@ import {
   TAIWAN_MAX_BOUNDS_VISCOSITY,
   TAIWAN_NATIONAL_MAX_ZOOM,
   TAIWAN_SOFT_MIN_ZOOM,
-  nationalViewForClusters,
   taiwanMapBoundsCorners,
+  taiwanNationalView,
 } from "@/lib/play-map-camera";
 import { pickNearest } from "@/lib/playground-distance";
 import { NEAR_ME_FIT_COUNT } from "./PlayMapContract";
@@ -60,8 +60,6 @@ type FitBoundsProps = {
   selectedPad: [number, number];
   /** 全國未縮小範圍：用台灣框，不用 fit 縣市聚合點（會把福建放進主畫面）。 */
   nationalFrame: boolean;
-  /** 全國鏡頭要框住的縣市聚合點；空集合時退回寬度感知的後備鏡頭。 */
-  nationalPoints: readonly { lat: number; lng: number }[];
   /**
    * 鏡頭重算的唯一觸發鍵。涵蓋 clusterMode、縣市範圍、命中筆數、selectedId、
    * splitLayout（選中 padding 隨並排／堆疊切換）。
@@ -136,7 +134,6 @@ function FitBounds({
   markProgrammaticCamera,
   selectedPad,
   nationalFrame,
-  nationalPoints,
   fitKey,
 }: FitBoundsProps) {
   const map = useMap();
@@ -149,7 +146,6 @@ function FitBounds({
     preserveViewport,
     selectedPad,
     nationalFrame,
-    nationalPoints,
   });
   // 無依賴陣列：每次 commit 都寫入最新快照。宣告在主 effect 之前，
   // 同一次 commit 內主 effect 讀到的已是本輪 props。
@@ -163,7 +159,6 @@ function FitBounds({
       preserveViewport,
       selectedPad,
       nationalFrame,
-      nationalPoints,
     };
   });
 
@@ -192,18 +187,7 @@ function FitBounds({
       markProgrammaticCamera();
       const applyNational = () => {
         map.invalidateSize();
-        const size = map.getSize();
-        /*
-         * 鏡頭要框住實際的縣市聚合，不是一組寫死的經緯度。舊版把西緣釘在
-         * 120.35（資料只收到雲林時訂的），南部進資料後台南與高雄的 marker
-         * 被推出畫面，等於兩個縣市點不到。高度也要傳：城市名標籤浮在圓的
-         * 上方，只看寬度會把最北的縣市裁掉。
-         */
-        const view = nationalViewForClusters({
-          widthPx: size.x,
-          heightPx: size.y,
-          points: snap.nationalPoints,
-        });
+        const view = taiwanNationalView(map.getSize().x);
         map.setView(view.center, view.zoom, { animate: false });
       };
       applyNational();
@@ -704,7 +688,6 @@ export default function PlayMapLeaflet({
           markProgrammaticCamera={markProgrammaticCamera}
           selectedPad={selectedPad}
           nationalFrame={clusterMode && selectedId === null && !nearMeCamera}
-          nationalPoints={cityClusters}
           fitKey={fitKey}
         />
         {markerMode === "city"

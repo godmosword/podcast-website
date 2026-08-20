@@ -8,7 +8,7 @@ import {
   clusterPlaygroundsByZoom,
 } from "@/lib/playground-clusters";
 import { DEFAULT_PLAY_MAP_CENTER } from "@/lib/playground-coverage";
-import { nationalViewForClusters } from "@/lib/play-map-camera";
+import { taiwanNationalView } from "@/lib/play-map-camera";
 import { playgroundTypeGlyphSvg } from "@/lib/playground-type-glyph";
 import { playgroundTypeVisualKey } from "@/lib/playground-type-visual";
 import PlayMapLeaflet, { playMapFitKey } from "./PlayMapLeaflet";
@@ -210,7 +210,7 @@ describe("PlayMapLeaflet FitBounds", () => {
     expect(fitBounds).toHaveBeenCalledTimes(1);
   });
 
-  it("全國未縮小範圍用容器感知 setView 框住所有縣市聚合", () => {
+  it("全國未縮小範圍用寬度感知 setView，西緣不把福建當主體", () => {
     const places = [...listPlaygrounds()];
     render(
       <PlayMapLeaflet
@@ -223,11 +223,7 @@ describe("PlayMapLeaflet FitBounds", () => {
     );
     expect(setView).toHaveBeenCalled();
     const last = setView.mock.calls.at(-1);
-    const expected = nationalViewForClusters({
-      widthPx: 720,
-      heightPx: 512,
-      points: clusterPlaygroundsByCity(places),
-    });
+    const expected = taiwanNationalView(720);
     expect(last?.[0]).toEqual(expected.center);
     expect(last?.[1]).toBe(expected.zoom);
     expect(fitBounds).not.toHaveBeenCalled();
