@@ -53,7 +53,7 @@
 
 | ID | 說明 |
 |----|------|
-| fix(sync): notify-live 接受 report.gitHead 為 HEAD 近期祖先（GHA 先寫 report 再 commit 不再漏開待生圖 Issue） | 見本 commit |
+| fix(sync): notify-live 接受 report.gitHead 為 HEAD 近期祖先（GHA 先寫 report 再 commit 不再漏開待生圖 Issue） | `2e19cea` |
 
 ### 本輪已完成（2026-08-19）
 
