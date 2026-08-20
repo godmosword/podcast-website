@@ -9,7 +9,8 @@
  * 紅線：失敗 Issue 只做去重告警與 run 連結，詳細錯誤仍以 Actions logs 為準；
  * Issue 另保留人工動作：待生圖與 RSS stale。
  *
- * notify-live 路徑：dryRun／過期 report 拒絕開單；gh 缺失時 fail-soft（GHA 預設 exit 0）；
+ * notify-live 路徑：dryRun／過期 report 拒絕開單；gitHead 須為目前 HEAD 或其近期祖先
+ * （GHA 先寫 report 再 commit，不得要求完全相等）；gh 缺失時 fail-soft（GHA 預設 exit 0）；
  * 本機 `--strict` 且全數 gh 失敗時可 exit 1。可選 `--reconcile` 從 catalog 補開（≤3）。
  *
  * 環境變數：
@@ -24,7 +25,7 @@ import { getStories } from "../data/content";
 import {
   createEmptyReport,
   isIllustrateSlug,
-  resolveGitHeadShort,
+  isReportGitHeadAcceptable,
   resolveSyncReportPath,
   type SyncRunReport,
 } from "./lib/sync-report";
@@ -562,11 +563,11 @@ export function notifyLive(
     }
 
     if (report.gitHead) {
-      const current = resolveGitHeadShort(process.cwd());
-      if (current && report.gitHead !== current) {
+      const check = isReportGitHeadAcceptable(report.gitHead);
+      if (!check.ok) {
         warn(
           deps,
-          `sync report gitHead=${report.gitHead} 與目前 HEAD=${current} 不符，拒絕開 Issue（請在對應 commit／push 後再 notify）。`,
+          `sync report ${check.reason}，拒絕開 Issue（請在對應 commit／push 後再 notify）。`,
         );
         if (flags.strict) process.exitCode = 1;
         return { ok: 0, skipped: 0, failed: 0 };

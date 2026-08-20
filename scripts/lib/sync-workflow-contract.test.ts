@@ -257,6 +257,17 @@ describe("sync workflow contract", () => {
     expect(yaml).toContain("scripts/check-sync-fresh.ts");
   });
 
+  it("notify-live 必須接受 report.gitHead 為 HEAD 祖先（GHA 先寫 report 再 commit）", () => {
+    const alertSrc = readFileSync(join(ROOT, "scripts/sync-alert.ts"), "utf8");
+    const reportSrc = readFileSync(join(ROOT, "scripts/lib/sync-report.ts"), "utf8");
+    expect(reportSrc).toContain("isReportGitHeadAcceptable");
+    expect(reportSrc).toContain("MAX_NOTIFY_GIT_HEAD_AHEAD");
+    expect(alertSrc).toContain("isReportGitHeadAcceptable");
+    expect(alertSrc).not.toMatch(
+      /report\.gitHead\s*!==\s*current/,
+    );
+  });
+
   it("package.json 必須含本機 sync:notify 腳本", () => {
     const scripts = readPackageJson().scripts ?? {};
     expect(scripts["sync:notify"]).toBe("tsx scripts/sync-alert.ts notify-live");
