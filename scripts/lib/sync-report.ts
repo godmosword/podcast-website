@@ -31,6 +31,17 @@ export type SyncRunReport = {
   gitHead?: string;
 };
 
+/**
+ * GHA／本機都是「先 `sync:apple` 寫 report（gitHead＝當時 HEAD）再 commit」。
+ * notify 時 HEAD 會比 report.gitHead 新一顆（或 rebase 後再多幾顆），
+ * 嚴格相等會讓 push 成功卻拒絕開待生圖 Issue（ep-25／ep-26 即因此漏單）。
+ */
+export const MAX_NOTIFY_GIT_HEAD_AHEAD = 20;
+
+export type ReportGitHeadCheck =
+  | { ok: true }
+  | { ok: false; current?: string; reason: string };
+
 /** 讀取目前 HEAD short sha；失敗回傳 undefined（不捏造 0000000）。 */
 export function resolveGitHeadShort(
   rootDir: string = process.cwd(),
@@ -43,6 +54,50 @@ export function resolveGitHeadShort(
     return sha || undefined;
   } catch {
     return undefined;
+  }
+}
+
+/**
+ * report.gitHead 是否仍代表「這次 sync 之後、尚未跑太遠」的 repo。
+ * 接受：相同 HEAD，或 report.gitHead 是 HEAD 祖先且距離 ≤ MAX_NOTIFY_GIT_HEAD_AHEAD。
+ * 讀不到目前 HEAD 時不擋（與舊行為一致）。
+ */
+export function isReportGitHeadAcceptable(
+  reportGitHead: string,
+  rootDir: string = process.cwd(),
+): ReportGitHeadCheck {
+  const current = resolveGitHeadShort(rootDir);
+  if (!current) return { ok: true };
+
+  const report = reportGitHead.trim();
+  if (!report) return { ok: true };
+  if (report === current) return { ok: true };
+
+  try {
+    execFileSync("git", ["merge-base", "--is-ancestor", report, "HEAD"], {
+      cwd: rootDir,
+      stdio: "pipe",
+    });
+    const countRaw = execFileSync(
+      "git",
+      ["rev-list", "--count", `${report}..HEAD`],
+      { cwd: rootDir, encoding: "utf8", stdio: "pipe" },
+    ).trim();
+    const count = Number(countRaw);
+    if (!Number.isFinite(count) || count > MAX_NOTIFY_GIT_HEAD_AHEAD) {
+      return {
+        ok: false,
+        current,
+        reason: `gitHead=${report} 落後 HEAD=${current} ${countRaw} commit（上限 ${MAX_NOTIFY_GIT_HEAD_AHEAD}）`,
+      };
+    }
+    return { ok: true };
+  } catch {
+    return {
+      ok: false,
+      current,
+      reason: `gitHead=${report} 與目前 HEAD=${current} 不符（非祖先）`,
+    };
   }
 }
 

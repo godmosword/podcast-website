@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { buildCommitMessage, buildIssueBody } from "../post-sync-notify";
+import { execFileSync } from "node:child_process";
 import {
   DEFAULT_SYNC_REPORT_RELATIVE,
+  isReportGitHeadAcceptable,
+  resolveGitHeadShort,
   resolveSyncReportPath,
   type SyncRunReport,
 } from "./sync-report";
@@ -66,6 +69,31 @@ describe("resolveSyncReportPath", () => {
   it("SYNC_REPORT_PATH 為空字串時視為未設定", () => {
     const resolved = resolveSyncReportPath({ SYNC_REPORT_PATH: "  " }, "/repo/root");
     expect(resolved.endsWith(".cache/sync-run-report.json")).toBe(true);
+  });
+});
+
+describe("isReportGitHeadAcceptable", () => {
+  it("接受目前 HEAD（GHA 無新 commit 時）", () => {
+    const head = resolveGitHeadShort();
+    expect(head).toBeTruthy();
+    expect(isReportGitHeadAcceptable(head!)).toEqual({ ok: true });
+  });
+
+  it("接受 HEAD 的近期祖先（sync 先寫 report 再 commit）", () => {
+    const parent = execFileSync("git", ["rev-parse", "--short", "HEAD~1"], {
+      encoding: "utf8",
+    }).trim();
+    expect(parent).toBeTruthy();
+    expect(isReportGitHeadAcceptable(parent)).toEqual({ ok: true });
+  });
+
+  it("拒絕無關 sha", () => {
+    const result = isReportGitHeadAcceptable("deadbeef");
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toMatch(/gitHead=deadbeef/);
+      expect(result.reason).toMatch(/HEAD=/);
+    }
   });
 });
 

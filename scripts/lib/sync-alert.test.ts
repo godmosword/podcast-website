@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 import { buildIssueBody } from "../post-sync-notify";
 import {
@@ -196,6 +197,31 @@ describe("sync-alert notify-live", () => {
         calls.some((args) => args[0] === "issue" && args[1] === "create"),
       ).toBe(false);
     }
+  });
+
+  it("gitHead 為目前 HEAD 的祖先時仍開單（GHA 先寫 report 再 commit）", () => {
+    const parent = execFileSync("git", ["rev-parse", "--short", "HEAD~1"], {
+      encoding: "utf8",
+    }).trim();
+    const { deps, calls } = makeDeps({
+      "issue list --search in:title ep-18 待生圖 --state open --json number,title,url,labels --limit 20":
+        "[]",
+    });
+    const result = notifyLive(
+      {
+        ...deps,
+        readFile: () =>
+          JSON.stringify({
+            ...sampleReport,
+            gitHead: parent,
+          }),
+      },
+      {},
+    );
+    expect(result.ok).toBe(1);
+    expect(calls.some((args) => args[0] === "issue" && args[1] === "create")).toBe(
+      true,
+    );
   });
 
   it("gh issue list 失敗時計入 FAILED 且不 create", () => {
