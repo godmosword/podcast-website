@@ -8,7 +8,7 @@ import { listPlaygrounds } from "@/data/playgrounds";
 import {
   collectNamedRects,
   clientRectToBox,
-  type NamedRect,
+  type ProtoMapSample,
 } from "@/lib/play-map-proto-metrics";
 import {
   TAIWAN_MAP_CENTER,
@@ -24,12 +24,6 @@ import {
   type CityCluster,
 } from "@/lib/playground-clusters";
 import styles from "./ProtoNationalMap.module.css";
-
-export type ProtoMapSample = {
-  items: NamedRect[];
-  westEdge: number;
-  c2Unsolved: readonly string[];
-};
 
 export type ProtoNationalMapProps = {
   mode: "A";

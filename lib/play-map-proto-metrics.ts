@@ -50,6 +50,12 @@ export type ProtoMetrics = {
   c2Unsolved: readonly string[];
 };
 
+export type ProtoMapSample = {
+  items: NamedRect[];
+  westEdge: number | null;
+  c2Unsolved: readonly string[];
+};
+
 export function unionRect(a: RectBox, b: RectBox): RectBox {
   return {
     left: Math.min(a.left, b.left),

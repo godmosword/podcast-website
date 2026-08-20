@@ -12,7 +12,8 @@ import {
   type ProtoMetrics,
   type ProtoVariant,
 } from "@/lib/play-map-proto-metrics";
-import type { ProtoMapSample } from "./ProtoNationalMap";
+import type { ProtoMapSample } from "@/lib/play-map-proto-metrics";
+import ProtoCityGrid from "./ProtoCityGrid";
 import styles from "./PlayMapProtoApp.module.css";
 
 const ProtoNationalMap = dynamic(() => import("./ProtoNationalMap"), {
@@ -211,6 +212,12 @@ export default function PlayMapProtoApp({
             <ProtoNationalMap
               key={`${preset.id}-A`}
               mode="A"
+              onSelectCity={handleSelectCity}
+              onSample={handleSample}
+            />
+          ) : variant === "B" ? (
+            <ProtoCityGrid
+              key={`${preset.id}-B`}
               onSelectCity={handleSelectCity}
               onSample={handleSample}
             />
