@@ -91,6 +91,15 @@ test("全部故事頁 → 詳情 → 播放頁 smoke", async ({ page }) => {
   await expect(page.getByRole("button", { name: /^字幕：/ })).toBeVisible();
 });
 
+test("單集出場角色條連到圖鑑", async ({ page }) => {
+  await page.goto("/story/ep-3");
+  await expect(page.getByRole("heading", { name: "出場角色" })).toBeVisible();
+  const cast = page.locator("section[aria-labelledby='characters-heading']");
+  const firstCast = cast.getByRole("link").first();
+  await expect(firstCast).toBeVisible();
+  await expect(firstCast).toHaveAttribute("href", /\/characters#/);
+});
+
 test("404 頁面", async ({ page }) => {
   const response = await page.goto("/story/not-real-slug", {
     waitUntil: "networkidle",
@@ -160,6 +169,15 @@ test("節目數據中心 /studio", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "節目數據中心" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "平台後台捷徑" })).toBeVisible();
   await expect(page.getByRole("link", { name: "開啟後台" }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: "打開 Logo 驗收頁" })).toBeVisible();
+});
+
+test("角色 Logo 驗收 /studio/logo-audit", async ({ page }) => {
+  await page.goto("/studio/logo-audit");
+  await expect(page.getByRole("heading", { name: "角色 Logo 驗收" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Grid 縮圖" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "撞型並排" })).toBeVisible();
+  await expect(page.getByText("小紅 · 單一尾翼")).toBeVisible();
 });
 
 test("首頁 Hero 不含節目數據入口", async ({ page }) => {

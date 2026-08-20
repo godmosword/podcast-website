@@ -78,8 +78,16 @@
   padding: 14px;
 }
 
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
 .cardTitle {
   margin: 0;
+  min-width: 0;
   color: var(--warm-heading);
   font-size: 1.35rem;
   line-height: 1.2;

@@ -21,6 +21,7 @@ import JsonLd from "@/components/JsonLd";
 import PlayButton from "@/components/PlayButton";
 import ShareButton from "@/components/ShareButton";
 import RelatedStories from "@/components/RelatedStories";
+import CharacterCastBar from "@/components/characters/CharacterCastBar";
 import ZoneBadge from "@/components/story/ZoneBadge";
 import SiteFooter from "@/components/SiteFooter";
 import StoryCoverMorph from "@/components/story/StoryCoverMorph";
@@ -64,7 +65,6 @@ export default async function StoryDetailPage({
   const outlineItems = storyOutlineItems(story);
   const hasFullOutline = outlineItems.length > outlinePreviewItems.length;
   const characters = getCharactersForStory(story.slug);
-  const charactersTeaser = storyCharactersTeaser(characters);
   const faqs = storyFaqs(story);
   const storyHasFullTranscript = hasFullTranscript(story);
   const showOutlineDetails = hasFullOutline;
@@ -190,7 +190,11 @@ export default async function StoryDetailPage({
           <h2 id="characters-heading" className={styles.sectionHeading}>
             出場角色
           </h2>
-          <p className={styles.teaser}>{charactersTeaser}</p>
+          {characters.length > 0 ? (
+            <CharacterCastBar characters={characters} />
+          ) : (
+            <p className={styles.teaser}>{storyCharactersTeaser(characters)}</p>
+          )}
         </section>
 
         <RelatedStories

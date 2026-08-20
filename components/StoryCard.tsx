@@ -1,8 +1,10 @@
 import Link from "next/link";
 import type { Story } from "@/data/content";
+import { getCharactersForStory } from "@/data/characters";
 import { formatDate, storyCoverPath } from "@/lib/story-utils";
 import StoryCoverMorph from "@/components/story/StoryCoverMorph";
 import StoryProgressBadge from "@/components/story/StoryProgressBadge";
+import { CharacterLogoStrip } from "@/components/characters/CharacterLogoMark";
 import StoryImage from "./StoryImage";
 import { TagChip } from "./Chip";
 import StoryAge from "./StoryAge";
@@ -30,6 +32,7 @@ export default function StoryCard({
 }: StoryCardProps) {
   const isGrid = variant === "grid";
   const staggerClass = `scrollEnterStagger${(index % 3) + 1}`;
+  const cast = getCharactersForStory(story.slug);
 
   return (
     <Link
@@ -86,6 +89,7 @@ export default function StoryCard({
         </span>
 
         <span className={styles.title}>{story.title}</span>
+        <CharacterLogoStrip characters={cast} size={24} />
 
         {story.summary && <span className={styles.summary}>{story.summary}</span>}
 

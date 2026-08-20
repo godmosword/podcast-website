@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Character } from "@/data/characters";
 import { getStory } from "@/data/content";
+import CharacterLogoMark from "./CharacterLogoMark";
 import CharacterPortraitTilt from "./CharacterPortraitTilt";
 import styles from "./CharacterCard.module.css";
 
@@ -50,7 +51,14 @@ export default function CharacterCard({
         </span>
       )}
       <div className={styles.cardBody}>
-        <h2 className={styles.cardTitle}>{character.name}</h2>
+        <div className={styles.titleRow}>
+          <CharacterLogoMark
+            slug={character.id}
+            name={character.name}
+            size={32}
+          />
+          <h2 className={styles.cardTitle}>{character.name}</h2>
+        </div>
         <p className={styles.vehicle}>{character.vehicle}</p>
         <p className={styles.personality}>{character.personality}</p>
         {character.appearsIn.length > 0 && (
