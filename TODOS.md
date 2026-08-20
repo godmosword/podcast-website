@@ -53,7 +53,7 @@
 
 | ID | 說明 |
 |----|------|
-| chore(play-map): 內部 proto 路由（noindex、不進 sitemap） | 見本 commit |
+| chore(play-map): 內部 proto 路由（noindex、不進 sitemap） | `436e5db` |
 
 ### 本輪已完成（2026-08-19）
 
