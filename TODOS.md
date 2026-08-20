@@ -49,6 +49,12 @@
 - [x] 層接 LOD＋關巡邏＋稀有跨島  `ddeed40`
 - [x] Art Bible §12.8／TODOS 對齊  `8ce39f6`
 
+### 本輪已完成（2026-08-20）
+
+| ID | 說明 |
+|----|------|
+| fix(sync): notify-live 接受 report.gitHead 為 HEAD 近期祖先（GHA 先寫 report 再 commit 不再漏開待生圖 Issue） | 見本 commit |
+
 ### 本輪已完成（2026-08-19）
 
 | ID | 說明 |

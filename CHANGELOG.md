@@ -26,7 +26,7 @@
 
 ### Fixed
 
-- **親子遊樂地圖 V3 收尾**：手機「返回名單」會關掉 compact preview 並清掉地圖選取，不再讓預覽蓋住名單；卡片收費／室內外改為明示「免費／需購票」「室內／戶外」，不靠缺席推導。拿掉地圖操作說明（點縣市／雙指縮放），保留「搜尋此區域」。桌面 hover／選取契約不變。
+- **同步 notify-live gitHead 誤擋**：GHA 與本機都是先跑 `sync:apple` 寫入 report（`gitHead`＝當時 HEAD）再 commit，先前要求 gitHead 必須等於目前 HEAD，導致新集 push 成功卻拒絕開「待生圖」Issue（`ep-25`／`ep-26` 即因此漏單）。改為接受目前 HEAD 或其近期祖先（最多落後 20 commit）。無關 sha 仍拒絕。取代已衝突的 Draft #76。
 - **GHA sync 單元測試找不到 `@testing-library/dom`**：Wave B 把 RTL peer 當 knip 死依賴刪掉，`npm ci` 不裝 peer，sync 一跑 `npm test` 就 18 套件失敗（#82）。恢復直接 devDependency，knip 忽略此 peer，並加契約測試。
 - **親子遊樂地圖 FitBounds 旗標**：移除 `userMovedRef`／`programmaticRef`——`fitKey` 不變時 effect 本來就不會跑，那些旗標是不可達邏輯。
 - **親子遊樂地圖 name／mapsQuery 身分**：`hcx-hukou-sports` 顯示名改回「王爺壟運動公園」並移除多餘 `mapsQuery`；`hc-nanliao` 顯示名改回「南寮親子沙灘」，導航仍指向旅遊服務中心。編輯守則新增「name 與 mapsQuery 的分工」。
