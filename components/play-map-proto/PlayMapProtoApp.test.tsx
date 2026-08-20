@@ -7,6 +7,13 @@ import { metadata } from "@/app/for-parents/play-map/proto/page";
 
 vi.stubGlobal("React", React);
 
+vi.mock("next/dynamic", () => ({
+  default: () =>
+    function MockProtoNationalMap() {
+      return <div data-testid="proto-map-stub">地圖載入中…</div>;
+    },
+}));
+
 afterEach(() => {
   cleanup();
 });

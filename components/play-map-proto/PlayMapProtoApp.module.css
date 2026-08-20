@@ -73,6 +73,20 @@
   box-shadow: var(--shadow-sm);
 }
 
+.viewport[data-proto-variant="A"],
+.viewport[data-proto-variant="C2"] {
+  overflow: hidden;
+}
+
+.selectedList {
+  margin: 0;
+  padding-left: 1.2em;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
 .placeholder,
 .selected {
   display: grid;

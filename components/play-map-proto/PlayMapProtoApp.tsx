@@ -1,6 +1,8 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useCallback, useMemo, useState } from "react";
+import { listPlaygrounds } from "@/data/playgrounds";
 import {
   PROTO_CONTAINER_PRESETS,
   PROTO_VARIANTS,
@@ -10,7 +12,17 @@ import {
   type ProtoMetrics,
   type ProtoVariant,
 } from "@/lib/play-map-proto-metrics";
+import type { ProtoMapSample } from "./ProtoNationalMap";
 import styles from "./PlayMapProtoApp.module.css";
+
+const ProtoNationalMap = dynamic(() => import("./ProtoNationalMap"), {
+  ssr: false,
+  loading: () => (
+    <p className={styles.placeholder} role="status">
+      地圖載入中…
+    </p>
+  ),
+});
 
 export type PlayMapProtoAppProps = {
   /** 測試用：與畫面共用同一個選定縣市 handler。 */
@@ -59,6 +71,20 @@ export default function PlayMapProtoApp({
       onSelectCityProp?.(next);
     },
     [onSelectCityProp],
+  );
+
+  const handleSample = useCallback((sample: ProtoMapSample) => {
+    setEntranceItems(sample.items);
+    setWestEdge(sample.westEdge);
+    setC2Unsolved(sample.c2Unsolved);
+  }, []);
+
+  const selectedPlaces = useMemo(
+    () =>
+      selectedCity
+        ? listPlaygrounds().filter((place) => place.city === selectedCity)
+        : [],
+    [selectedCity],
   );
 
   const metrics = useMemo(() => {
@@ -168,6 +194,11 @@ export default function PlayMapProtoApp({
               <p className={styles.selectedNote}>
                 三個 variant 選定後都進入同一畫面。Phase 2 只比較全國層呈現。
               </p>
+              <ul className={styles.selectedList}>
+                {selectedPlaces.map((place) => (
+                  <li key={place.id}>{place.name}</li>
+                ))}
+              </ul>
               <button
                 type="button"
                 className={styles.reset}
@@ -176,6 +207,13 @@ export default function PlayMapProtoApp({
                 清除選定
               </button>
             </section>
+          ) : variant === "A" ? (
+            <ProtoNationalMap
+              key={`${preset.id}-A`}
+              mode="A"
+              onSelectCity={handleSelectCity}
+              onSample={handleSample}
+            />
           ) : (
             <p className={styles.placeholder} role="status">
               {VARIANT_LABEL[variant]}
