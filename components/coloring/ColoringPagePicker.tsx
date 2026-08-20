@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import type { ColoringPage } from "@/data/coloring-pages";
+import CharacterLogoMark from "@/components/characters/CharacterLogoMark";
+import { characterForPortraitRef } from "@/lib/character-logo-query";
 import { listColoringDrafts, type ColoringDraft } from "@/lib/coloring/draft-storage";
 import {
   COLORING_BACK_TO_COVER,
@@ -101,27 +103,38 @@ export function ColoringPagePicker({
             定裝人物
           </h2>
           <ul className={styles.grid}>
-            {characters.map((page) => (
-              <li key={page.id}>
-                <button
-                  type="button"
-                  className={styles.card}
-                  onClick={() => onSelect(page)}
-                  aria-label={`著色：${page.title}`}
-                >
-                  <span className={styles.thumb}>
-                    <Image
-                      src={page.previewSrc}
-                      alt=""
-                      fill
-                      sizes="(max-width: 640px) 46vw, 200px"
-                      className={styles.thumbImg}
-                    />
-                  </span>
-                  <span className={styles.cardTitle}>{page.title}</span>
-                </button>
-              </li>
-            ))}
+            {characters.map((page) => {
+              const character = characterForPortraitRef(page.sourcePath);
+              return (
+                <li key={page.id}>
+                  <button
+                    type="button"
+                    className={styles.card}
+                    onClick={() => onSelect(page)}
+                    aria-label={`著色：${page.title}`}
+                  >
+                    <span className={styles.thumb}>
+                      <Image
+                        src={page.previewSrc}
+                        alt=""
+                        fill
+                        sizes="(max-width: 640px) 46vw, 200px"
+                        className={styles.thumbImg}
+                      />
+                      {character ? (
+                        <CharacterLogoMark
+                          slug={character.id}
+                          name={character.name}
+                          size={32}
+                          variant="overlay"
+                        />
+                      ) : null}
+                    </span>
+                    <span className={styles.cardTitle}>{page.title}</span>
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         </section>
         <section className={styles.spread} aria-labelledby="coloring-scenes">

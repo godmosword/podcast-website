@@ -91,6 +91,15 @@ test("全部故事頁 → 詳情 → 播放頁 smoke", async ({ page }) => {
   await expect(page.getByRole("button", { name: /^字幕：/ })).toBeVisible();
 });
 
+test("單集出場角色條連到圖鑑", async ({ page }) => {
+  await page.goto("/story/ep-3");
+  await expect(page.getByRole("heading", { name: "出場角色" })).toBeVisible();
+  const cast = page.locator("section[aria-labelledby='characters-heading']");
+  const firstCast = cast.getByRole("link").first();
+  await expect(firstCast).toBeVisible();
+  await expect(firstCast).toHaveAttribute("href", /\/characters#/);
+});
+
 test("404 頁面", async ({ page }) => {
   const response = await page.goto("/story/not-real-slug", {
     waitUntil: "networkidle",

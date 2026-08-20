@@ -232,7 +232,7 @@ Pilot 定案後必須回填本 SPEC：
 | `tier` | `1` 或 `2` |
 | `status` | 目前皆 `pending` |
 
-新增角色（Phase 4）必須先歸 `logoFamily`、先定 `logoFeature`，否則 lint／build-time check 報錯。
+`Character.logoFamily` / `Character.logoFeature` 由 `data/characters.ts` 從本表解析，**不**在 `characters.json` 重複一份。新增角色必須先寫 `character-logos.json`（`family` + 非空白 `feature`），否則 `requireCharacterLogo` 在模組載入時丟錯，vitest／`next build` 失敗。
 
 ---
 
@@ -247,3 +247,17 @@ Pilot 定案後必須回填本 SPEC：
 - 恆定層原文：[`docs/logo-prompts/_shared.md`](./logo-prompts/_shared.md)
 - 每角色可整段貼的英文：`docs/logo-prompts/{slug}.md`
 - 改共用區塊後執行 `npx tsx scripts/generate-logo-prompts.ts` 重產 35 份，不要只改其中幾份恆定句。
+
+---
+
+## 13. 站內 24–32px 使用點
+
+Logo **不取代**定裝大圖。缺 `public/characters/logo/{slug}-32.webp` 時不佔版面（`img` onError 卸下），不在 runtime 掃 `public/`。
+
+| 位置 | 尺寸 | 行為 |
+|---|---|---|
+| 故事列表 `StoryCard` | 24px（吃 32.webp） | 標題下出場列；有檔才插入 |
+| 單集「出場角色」`CharacterCastBar` | 32px | 名稱 chip 連 `/characters#{id}`；logo 有檔才出現在名前 |
+| 角色圖鑑 `CharacterCard` 標題列 | 32px | 定裝照維持大圖；小標在名前 |
+| 著色本「定裝人物」選卡 | 32px overlay | 角標疊在預覽圖上，不取代線稿／定裝預覽 |
+

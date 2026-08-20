@@ -12,6 +12,7 @@ import {
   familyBackgroundHex,
   getCharacterLogo,
   getCharacterLogos,
+  requireCharacterLogo,
 } from "./character-logos";
 
 const ASSIGNMENT: Record<
@@ -170,5 +171,11 @@ describe("character logos", () => {
     for (const slug of NON_VEHICLE_SLUGS) {
       expect(getCharacterLogo(slug), slug).toBeDefined();
     }
+  });
+
+  it("缺 logo 資料的新角色會在 schema 閘門丟錯", () => {
+    expect(() => requireCharacterLogo("not-a-character")).toThrow(
+      /缺少 logoFamily／logoFeature/,
+    );
   });
 });

@@ -56,16 +56,17 @@
 
 - [x] Phase 0 盤點／Gate 1 A：slug = `Character.id`；小南名稱「小南」；紅爸眉線為血緣例外
 - [x] Phase 1 規範＋色票＋35 筆資料＋vitest  `238ae0d`
-- [x] Phase 2 `docs/logo-prompts/` 35 份＋`_shared.md`  見本 commit
-- [x] Phase 3 `/studio/logo-audit` 驗收頁＋`docs/CHARACTER-LOGO-AUDIT.md`  見本 commit
-- [ ] Phase 4 schema `logoFamily`／`logoFeature`；24–32px 使用點改掛 logo
+- [x] Phase 2 `docs/logo-prompts/` 35 份＋`_shared.md`  `c29e095`
+- [x] Phase 3 `/studio/logo-audit` 驗收頁＋`docs/CHARACTER-LOGO-AUDIT.md`  `c29e095`
+- [x] Phase 4 schema `logoFamily`／`logoFeature`；24–32px 使用點改掛 logo  見本 commit
 
 ### 本輪已完成（2026-08-19）
 
 | ID | 說明 |
 |----|------|
 | docs(data): 角色 Logo 系統 Phase 1 規範／色票／35 筆 roster | `238ae0d` |
-| feat(studio): 角色 Logo Phase 2 prompt 與 Phase 3 驗收頁 | 見本 commit |
+| feat(studio): 角色 Logo Phase 2 prompt 與 Phase 3 驗收頁 | `c29e095` |
+| feat(characters): 角色 Logo Phase 4 schema 與 24–32px 掛點 | 見本 commit |
 | test(play-map): 鎖定 playground／合輯 A0 baseline census | `28ae3c1` |
 | docs/data(play-map): A1 付費 feeNote／官網、A1.1 卡司蒂菈蘆竹座標、A2 15 筆 tips 試點 | `637fef2` |
 | docs/data(play-map): A3 第二輪 15 筆 tips 品質改寫 | `03cdd05` |

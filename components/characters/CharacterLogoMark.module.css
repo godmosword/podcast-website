@@ -1,0 +1,38 @@
+.preload {
+  display: none;
+}
+
+.strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.mark {
+  display: none;
+  object-fit: cover;
+  width: var(--logo-size);
+  height: var(--logo-size);
+  border-radius: 6px;
+  flex: 0 0 auto;
+}
+
+.overlay {
+  display: block;
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  z-index: 1;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.ready {
+  display: block;
+}
+
+.overlay.ready {
+  opacity: 1;
+}

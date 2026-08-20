@@ -1,4 +1,3 @@
-import { getCharacters } from "@/data/characters";
 import rawLogos from "./character-logos.json";
 
 /** 七個 logo 家族。OKLCH 為權威，hex 為生圖／CSS 參考。 */
@@ -149,6 +148,9 @@ function parseLogo(raw: RawCharacterLogo, index: number): CharacterLogo {
   if (!HEX_PATTERN.test(raw.ipColorPrimary) || !HEX_PATTERN.test(raw.ipColorSecondary)) {
     throw new Error(`character-logos.json[${index}] IP 色必須是 #RRGGBB`);
   }
+  if (!raw.feature.trim()) {
+    throw new Error(`character-logos.json[${index}] feature 不可空白`);
+  }
   return {
     slug: raw.slug,
     name: raw.name,
@@ -221,13 +223,25 @@ export function faceSurfaceHex(logo: CharacterLogo): string {
     : logo.ipColorSecondary;
 }
 
-/** 啟動時核對 logo slug 與角色名冊 1:1。 */
-export function assertCharacterLogoRoster(): void {
-  const characterIds = getCharacters()
-    .map((character) => character.id)
-    .sort();
+/** 角色 schema 必填：缺檔或 feature 空白則模組載入／build 失敗。 */
+export function requireCharacterLogo(slug: string): CharacterLogo {
+  const logo = getCharacterLogo(slug);
+  if (!logo) {
+    throw new Error(
+      `角色 ${slug} 缺少 logoFamily／logoFeature。請先在 data/character-logos.json 建檔。`,
+    );
+  }
+  if (!logo.feature.trim()) {
+    throw new Error(`角色 ${slug} 的 logoFeature 不可空白`);
+  }
+  return logo;
+}
+
+/** 核對 logo slug 與角色名冊 1:1（由 data/characters.ts 在組完名冊後呼叫）。 */
+export function assertCharacterLogoRoster(characterIds: readonly string[]): void {
+  const ids = [...characterIds].sort();
   const logoSlugs = LOGOS.map((logo) => logo.slug).sort();
-  if (characterIds.join("\n") !== logoSlugs.join("\n")) {
+  if (ids.join("\n") !== logoSlugs.join("\n")) {
     throw new Error("character-logos.json slug 必須與 getCharacters() id 1:1 對齊");
   }
 }

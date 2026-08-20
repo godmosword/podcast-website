@@ -5,6 +5,10 @@ import {
   type LogoFamilyKey,
   relativeLuminance,
 } from "@/data/character-logos";
+import {
+  characterLogoAssetPath,
+  type CharacterLogoPx,
+} from "@/lib/character-logo-query";
 
 export const LOGO_PREVIEW_SIZES = [32, 64, 128, 512] as const;
 
@@ -32,14 +36,14 @@ export const LOGO_COLLISION_LABELS: Record<
   "taxis": "兩台計程車",
 };
 
-export function logoSourceSize(preview: LogoPreviewSize): 32 | 128 | 512 {
+export function logoSourceSize(preview: LogoPreviewSize): CharacterLogoPx {
   if (preview <= 32) return 32;
   if (preview <= 128) return 128;
   return 512;
 }
 
 export function logoAssetPath(slug: string, preview: LogoPreviewSize): string {
-  return `/characters/logo/${slug}-${logoSourceSize(preview)}.webp`;
+  return characterLogoAssetPath(slug, logoSourceSize(preview));
 }
 
 export function familyOnDark(family: LogoFamilyKey): boolean {
