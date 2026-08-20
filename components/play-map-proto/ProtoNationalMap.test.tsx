@@ -38,6 +38,8 @@ const mapStub = {
   whenReady: vi.fn((cb: () => void) => cb()),
   on: vi.fn(),
   off: vi.fn(),
+  latLngToContainerPoint: vi.fn(() => ({ x: 100, y: 100 })),
+  containerPointToLatLng: vi.fn(() => ({ lat: 23.75, lng: 121 })),
 };
 
 vi.mock("react-leaflet", () => ({
@@ -50,6 +52,8 @@ vi.mock("react-leaflet", () => ({
       marker
     </button>
   ),
+  Polyline: () => null,
+  CircleMarker: () => null,
   useMap: () => mapStub,
 }));
 

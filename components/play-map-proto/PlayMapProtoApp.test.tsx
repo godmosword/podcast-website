@@ -9,8 +9,19 @@ vi.stubGlobal("React", React);
 
 vi.mock("next/dynamic", () => ({
   default: () =>
-    function MockProtoNationalMap() {
-      return <div data-testid="proto-map-stub">地圖載入中…</div>;
+    function MockProtoNationalMap(props: {
+      onSelectCity: (next: string | null) => void;
+    }) {
+      return (
+        <div data-testid="proto-map-stub">
+          <button
+            type="button"
+            onClick={() => props.onSelectCity("基隆市")}
+          >
+            選定基隆市（地圖）
+          </button>
+        </div>
+      );
     },
 }));
 
@@ -35,7 +46,6 @@ describe("PlayMapProtoApp 量測殼", () => {
 
     render(<PlayMapProtoApp />);
     const viewport = screen.getByTestId("proto-viewport");
-    expect(viewport).toHaveProperty("style");
     expect(viewport.getAttribute("style")).toContain("width: 366px");
 
     fireEvent.click(screen.getByRole("radio", { name: "桌機 split 600×512" }));
@@ -56,5 +66,26 @@ describe("PlayMapProtoApp 量測殼", () => {
     fireEvent.click(screen.getByRole("radio", { name: "B 縣市卡片" }));
     fireEvent.click(screen.getByRole("radio", { name: "C2 修好的 city marker" }));
     expect(metadata.robots).toEqual({ index: false, follow: false });
+  });
+
+  it("三個 variant 的選定縣市 handler 為同一個參考", () => {
+    const spy = vi.fn();
+    render(<PlayMapProtoApp onSelectCity={spy} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "選定基隆市（地圖）" }));
+    fireEvent.click(screen.getByRole("button", { name: "清除選定" }));
+
+    fireEvent.click(screen.getByRole("radio", { name: "B 縣市卡片" }));
+    fireEvent.click(screen.getByRole("button", { name: /選定基隆市/ }));
+    fireEvent.click(screen.getByRole("button", { name: "清除選定" }));
+
+    fireEvent.click(screen.getByRole("radio", { name: "C2 修好的 city marker" }));
+    fireEvent.click(screen.getByRole("button", { name: "選定基隆市（地圖）" }));
+
+    expect(spy.mock.calls.filter((call) => call[0] === "基隆市")).toHaveLength(
+      3,
+    );
+    expect(spy).toHaveBeenCalledWith("基隆市");
+    expect(spy).toHaveBeenCalledWith(null);
   });
 });

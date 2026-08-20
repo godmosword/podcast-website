@@ -1,8 +1,15 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import L from "leaflet";
-import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
+import {
+  CircleMarker,
+  MapContainer,
+  Marker,
+  Polyline,
+  TileLayer,
+  useMap,
+} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { listPlaygrounds } from "@/data/playgrounds";
 import {
@@ -23,10 +30,16 @@ import {
   clusterPlaygroundsByCity,
   type CityCluster,
 } from "@/lib/playground-clusters";
+import {
+  clusterPlaygroundsByCityBbox,
+  displaceCityMarkers,
+  type C2Layout,
+} from "@/lib/play-map-proto-c2";
+import { nationalWebMercatorProjector } from "@/lib/play-map-proto-project";
 import styles from "./ProtoNationalMap.module.css";
 
 export type ProtoNationalMapProps = {
-  mode: "A";
+  mode: "A" | "C2";
   onSelectCity: (next: string | null) => void;
   onSample: (sample: ProtoMapSample) => void;
 };
@@ -73,8 +86,10 @@ function NationalCamera() {
 
 function MetricsSampler({
   onSample,
+  c2Unsolved,
 }: {
   onSample: (sample: ProtoMapSample) => void;
+  c2Unsolved: readonly string[];
 }) {
   const map = useMap();
 
@@ -88,7 +103,7 @@ function MetricsSampler({
       onSample({
         items,
         westEdge: map.getBounds().getWest(),
-        c2Unsolved: [],
+        c2Unsolved,
       });
     };
 
@@ -106,9 +121,99 @@ function MetricsSampler({
       map.off("moveend", run);
       observer.disconnect();
     };
-  }, [map, onSample]);
+  }, [c2Unsolved, map, onSample]);
 
   return null;
+}
+
+function C2Layers({
+  onSelectCity,
+  onSample,
+}: {
+  onSelectCity: (next: string | null) => void;
+  onSample: (sample: ProtoMapSample) => void;
+}) {
+  const map = useMap();
+  const [layout, setLayout] = useState<C2Layout | null>(null);
+
+  useEffect(() => {
+    const applyCamera = () => {
+      map.invalidateSize();
+      const view = taiwanNationalView(map.getSize().x);
+      map.setView(view.center, view.zoom, { animate: false });
+    };
+    const compute = () => {
+      applyCamera();
+      const size = map.getSize();
+      setLayout(
+        displaceCityMarkers({
+          clusters: clusterPlaygroundsByCityBbox(listPlaygrounds()),
+          width: size.x,
+          height: size.y,
+          projector: nationalWebMercatorProjector(size.x, size.y),
+        }),
+      );
+    };
+    applyCamera();
+    let nested = 0;
+    const raf = window.requestAnimationFrame(() => {
+      compute();
+      nested = window.requestAnimationFrame(compute);
+    });
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.cancelAnimationFrame(nested);
+    };
+  }, [map]);
+
+  if (!layout) return null;
+
+  return (
+    <>
+      <MetricsSampler onSample={onSample} c2Unsolved={layout.unsolved} />
+      {layout.markers.map((marker) =>
+        marker.leaderPx > 1 ? (
+          <Fragment key={`leader-${marker.city}`}>
+            <Polyline
+              positions={[
+                [marker.trueLat, marker.trueLng],
+                [marker.displayLat, marker.displayLng],
+              ]}
+              pathOptions={{
+                color: "#34302b",
+                weight: 1,
+                opacity: 0.55,
+              }}
+              interactive={false}
+            />
+            <CircleMarker
+              center={[marker.trueLat, marker.trueLng]}
+              radius={3}
+              pathOptions={{
+                color: "#34302b",
+                fillColor: "#34302b",
+                fillOpacity: 0.9,
+                weight: 1,
+              }}
+              interactive={false}
+            />
+          </Fragment>
+        ) : null,
+      )}
+      {layout.markers.map((marker) => (
+        <ClusterMarker
+          key={marker.city}
+          cluster={{
+            city: marker.city,
+            count: marker.count,
+            lat: marker.displayLat,
+            lng: marker.displayLng,
+          }}
+          onSelectCity={onSelectCity}
+        />
+      ))}
+    </>
+  );
 }
 
 function ClusterMarker({
@@ -142,6 +247,7 @@ function ClusterMarker({
 }
 
 export default function ProtoNationalMap({
+  mode,
   onSelectCity,
   onSample,
 }: ProtoNationalMapProps) {
@@ -171,15 +277,21 @@ export default function ProtoNationalMap({
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <NationalCamera />
-      <MetricsSampler onSample={onSample} />
-      {clusters.map((cluster) => (
-        <ClusterMarker
-          key={cluster.city}
-          cluster={cluster}
-          onSelectCity={onSelectCity}
-        />
-      ))}
+      {mode === "C2" ? (
+        <C2Layers onSelectCity={onSelectCity} onSample={onSample} />
+      ) : (
+        <>
+          <NationalCamera />
+          <MetricsSampler onSample={onSample} c2Unsolved={[]} />
+          {clusters.map((cluster) => (
+            <ClusterMarker
+              key={cluster.city}
+              cluster={cluster}
+              onSelectCity={onSelectCity}
+            />
+          ))}
+        </>
+      )}
     </MapContainer>
   );
 }

@@ -9,10 +9,10 @@ import {
   computeProtoMetrics,
   formatProtoMetricsReport,
   type NamedRect,
+  type ProtoMapSample,
   type ProtoMetrics,
   type ProtoVariant,
 } from "@/lib/play-map-proto-metrics";
-import type { ProtoMapSample } from "@/lib/play-map-proto-metrics";
 import ProtoCityGrid from "./ProtoCityGrid";
 import styles from "./PlayMapProtoApp.module.css";
 
@@ -208,13 +208,6 @@ export default function PlayMapProtoApp({
                 清除選定
               </button>
             </section>
-          ) : variant === "A" ? (
-            <ProtoNationalMap
-              key={`${preset.id}-A`}
-              mode="A"
-              onSelectCity={handleSelectCity}
-              onSample={handleSample}
-            />
           ) : variant === "B" ? (
             <ProtoCityGrid
               key={`${preset.id}-B`}
@@ -222,10 +215,12 @@ export default function PlayMapProtoApp({
               onSample={handleSample}
             />
           ) : (
-            <p className={styles.placeholder} role="status">
-              {VARIANT_LABEL[variant]}
-              尚未接入。量測面板已可運作。
-            </p>
+            <ProtoNationalMap
+              key={`${preset.id}-${variant}`}
+              mode={variant}
+              onSelectCity={handleSelectCity}
+              onSample={handleSample}
+            />
           )}
         </div>
       </div>
