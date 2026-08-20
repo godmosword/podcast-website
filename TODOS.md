@@ -54,6 +54,11 @@
 | ID | 說明 |
 |----|------|
 | fix(sync): notify-live 接受 report.gitHead 為 HEAD 近期祖先（GHA 先寫 report 再 commit 不再漏開待生圖 Issue） | `2e19cea` |
+| chore(play-map): 內部 proto 路由（noindex、不進 sitemap） | `436e5db` |
+| feat(play-map): Phase 2 量測面板與容器切換器 | `a7f7417` |
+| feat(play-map): Phase 2 variant A 現役 city cluster | `5d85d90` |
+| feat(play-map): Phase 2 variant B 縣市卡片 | `2076b9b` |
+| feat(play-map): Phase 2 variant C2 位移 city marker | `c0810b1` |
 
 ### 本輪已完成（2026-08-19）
 
