@@ -4,8 +4,8 @@ import { formatAgeRangeLabel } from "@/lib/playground-distance";
 import { clipParentVoice } from "@/lib/playground-parent-voice";
 import { getSiteUrl } from "@/lib/site-url";
 
-/** Reserved child routes under /for-parents/play-map for future collections. */
-export const RESERVED_PLAY_MAP_SEGMENTS = new Set(["collections"]);
+/** Reserved child routes under /for-parents/play-map（靜態段優先於 [placeId]）。 */
+export const RESERVED_PLAY_MAP_SEGMENTS = new Set(["collections", "proto"]);
 
 export function playgroundDetailPath(placeId: string): string {
   return `/for-parents/play-map/${encodeURIComponent(placeId)}`;

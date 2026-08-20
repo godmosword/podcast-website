@@ -49,6 +49,12 @@
 - [x] 層接 LOD＋關巡邏＋稀有跨島  `ddeed40`
 - [x] Art Bible §12.8／TODOS 對齊  `8ce39f6`
 
+### 本輪已完成（2026-08-20）
+
+| ID | 說明 |
+|----|------|
+| chore(play-map): 內部 proto 路由（noindex、不進 sitemap） | 見本 commit |
+
 ### 本輪已完成（2026-08-19）
 
 | ID | 說明 |
