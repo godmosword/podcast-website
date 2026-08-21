@@ -7,14 +7,14 @@
 ```
 Create one highly simplified IP mascot logo, not a character illustration.
 
-Background: fully opaque edge-to-edge solid OKLCH(L 0.60 C 0.09 H 145) / #5C9070 (fantasy family, 奇幻夥伴). Use this color for the background only. Background stays visually flat: no vignette, spotlight, or directional wash.
+Background: fully opaque edge-to-edge solid OKLCH(L 0.44 C 0.07 H 150) / #345D3E (fantasy family, 奇幻夥伴). Use this color for the background only. Background stays visually flat: no vignette, spotlight, or directional wash.
 
 Subject: 小怪獸 the 小怪獸, reduced to one continuous rounded silhouette with exactly one defining feature: 一對圓鈍角.
 One pair of blunt round horns, both visible. Cream belly/face is the eye surface. Single creature, not a swarm.
 
 Complexity: 6–10 basic shapes, at most two internal color regions, exactly two eyes and one mouth, readable at 32×32. One continuous rounded outer silhouette.
 
-Color: exactly three semantic colors total — two IP base colors (#3A342E primary, #F8E8D0 secondary) plus the background. Keep the secondary color as one large continuous region. Silhouette-to-background contrast >= 3:1; facial marks on the lighter IP region >= 4.5:1.
+Color: exactly three semantic colors total — two IP base colors (#DCCDB4 primary, #F8E8D0 secondary) plus the background. Keep the secondary color as one large continuous region. Silhouette-to-background contrast >= 3.6:1 with margin >= 0.2; facial marks on the lighter IP region >= 5:1.
 
 Composition: upright, horizontally centered, cropped flush at the bottom edge, filling 75–85% of canvas height with 15–25% headroom. Canvas is not rotated or tilted. Silhouette may differ from the vehicle cast, but eye style, canvas rules, and the three-color system stay identical. Both members of every paired feature fully visible and uncropped.
 
