@@ -57,7 +57,14 @@ async function main(): Promise<void> {
   const model = getImageModel();
 
   if (args.mode === "dry-run") {
-    process.stdout.write(`${formatDryRunReport({ args, jobs, model })}\n`);
+    process.stdout.write(
+      `${formatDryRunReport({
+        args,
+        jobs,
+        model,
+        stagingRoot: logoPathsFor(ROOT).stagingRoot,
+      })}\n`,
+    );
     return;
   }
 
@@ -82,7 +89,7 @@ async function main(): Promise<void> {
   process.stderr.write(
     `生圖 ${jobs.length} 角 × 候選，共 ${jobs.reduce((sum, job) => sum + job.candidates, 0)} 張（${model} ${LOGO_NATIVE_SIZE} ${args.quality}）…\n`,
   );
-  const written = await generateJobsToStaging({
+  const result = await generateJobsToStaging({
     paths: logoPathsFor(ROOT),
     jobs,
     args,
@@ -90,7 +97,7 @@ async function main(): Promise<void> {
     generatePng: (prompt) => generateLogoPng(prompt, args.quality),
   });
   process.stdout.write(
-    `staging ${written.length} 張。審 public/.logo-staging/<slug>/contact.html 後：\n` +
+    `staging 新寫 ${result.generated} 張、沿用 ${result.skippedExisting}、審核跳過 ${result.blocked}。審 public/.logo-staging/<slug>/contact.html 後：\n` +
       "  npm run generate:character-logos -- --approve --slug <slug> --pick N\n",
   );
 }

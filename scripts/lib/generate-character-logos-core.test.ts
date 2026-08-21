@@ -29,6 +29,8 @@ import {
   estimateLogoCostUsd,
   formatDryRunReport,
   isRetryableImageError,
+  isModerationBlockedError,
+  formatImageGenerationError,
   logoPathsFor,
   parseLogoCliArgs,
   remainingTier1Slugs,
@@ -151,6 +153,7 @@ describe("dry-run 報價", () => {
     expect(report).toContain("【dry-run】不呼叫 API");
     expect(report).toContain(LOGO_NATIVE_SIZE);
     expect(report).toContain("影像呼叫次數：12");
+    expect(report).toContain("不含 timeout／審核重試");
     expect(report).toContain(`約 US$${estimateLogoCostUsd(12, "high").toFixed(2)}`);
     expect(report).toContain("xiao-hong");
     expect(report).not.toContain(CLAY_STYLE_PREFIX);
@@ -159,6 +162,26 @@ describe("dry-run 報價", () => {
   it("估價用 medium／high 單價", () => {
     expect(estimateLogoCostUsd(10, "medium")).toBeCloseTo(0.53, 5);
     expect(estimateLogoCostUsd(10, "high")).toBeCloseTo(2.11, 5);
+  });
+
+  it("dry-run 扣除已有 staging，不把沿用檔算進估價", () => {
+    const repo = mkdtempSync(join(tmpdir(), "logo-dry-"));
+    const stagingRoot = join(repo, "public/.logo-staging");
+    mkdirSync(join(stagingRoot, "xiao-hong"), { recursive: true });
+    writeFileSync(join(stagingRoot, "xiao-hong/01.png"), "png");
+    writeFileSync(join(stagingRoot, "xiao-hong/02.png"), "png");
+    const args = parseLogoCliArgs(["--pilot", "--dry-run"]);
+    const jobs = buildLogoJobs(args);
+    const report = formatDryRunReport({
+      args,
+      jobs,
+      model: "gpt-image-2",
+      stagingRoot,
+    });
+    expect(report).toContain("影像呼叫次數：10");
+    expect(report).toContain("已有 2 張 staging 將跳過");
+    expect(report).toContain("xiao-hong  小紅  ×4（沿用 2，待生 2）");
+    expect(report).toContain(`約 US$${estimateLogoCostUsd(10, "high").toFixed(2)}`);
   });
 });
 
@@ -219,10 +242,37 @@ describe("approve 契約", () => {
 });
 
 describe("retry 與檔名", () => {
-  it("5xx／timeout 可重試一次，4xx 不重試", () => {
+  it("5xx／timeout／審核擋可重試一次，其他 4xx 不重試", () => {
     expect(isRetryableImageError({ status: 503 })).toBe(true);
     expect(isRetryableImageError({ code: "ETIMEDOUT" })).toBe(true);
     expect(isRetryableImageError({ status: 400 })).toBe(false);
+    expect(
+      isRetryableImageError({ status: 400, code: "moderation_blocked" }),
+    ).toBe(true);
+    expect(
+      isModerationBlockedError({
+        status: 400,
+        code: "moderation_blocked",
+        error: {
+          code: "moderation_blocked",
+          moderation_details: {
+            moderation_stage: "output",
+            categories: ["violence"],
+          },
+        },
+      }),
+    ).toBe(true);
+    expect(
+      formatImageGenerationError({
+        code: "moderation_blocked",
+        error: {
+          moderation_details: {
+            moderation_stage: "output",
+            categories: ["violence"],
+          },
+        },
+      }),
+    ).toBe('moderation_blocked stage=output categories=["violence"]');
   });
 
   it("withOneRetry：第一次失敗且可重試則再呼叫一次", async () => {
@@ -255,6 +305,7 @@ describe("contact html 與路徑", () => {
     });
     expect(html).toContain("01.png");
     expect(html).toContain("04.png");
+    expect(html).not.toContain("現有");
     expect(html).toContain("32px");
     expect(html).toContain("小紅");
   });
@@ -383,6 +434,140 @@ describe("staging round-trip（fake generator，不連網）", () => {
       readFileSync(join(repo, "data/character-logos.json"), "utf8"),
     ) as Array<{ status: string }>;
     expect(roster[0]?.status).toBe("accepted");
+  });
+
+  it("既有 PNG 跳過不呼叫 generator", async () => {
+    const { default: sharp } = await import("sharp");
+    const repo = mkdtempSync(join(tmpdir(), "logo-skip-"));
+    mkdirSync(join(repo, "data"), { recursive: true });
+    const paths = logoPathsFor(repo);
+    writeFileSync(paths.rosterPath, "[]\n");
+    const png = await sharp({
+      create: {
+        width: 16,
+        height: 16,
+        channels: 3,
+        background: { r: 10, g: 20, b: 30 },
+      },
+    })
+      .png()
+      .toBuffer();
+    mkdirSync(join(paths.stagingRoot, "xiao-hong"), { recursive: true });
+    writeFileSync(join(paths.stagingRoot, "xiao-hong/01.png"), png);
+    const generatePng = vi.fn(async () => png);
+    const result = await generateJobsToStaging({
+      paths,
+      jobs: [
+        {
+          slug: "xiao-hong",
+          name: "小紅",
+          candidates: 2,
+          prompt: "Create one highly simplified IP mascot logo\nForbid: clay",
+        },
+      ],
+      args: parseLogoCliArgs(["--slug", "an-an", "--candidates", "2"]),
+      model: "gpt-image-2",
+      generatePng,
+      log: () => undefined,
+    });
+    expect(generatePng).toHaveBeenCalledTimes(1);
+    expect(result.skippedExisting).toBe(1);
+    expect(result.generated).toBe(1);
+    expect(existsSync(join(paths.stagingRoot, "xiao-hong/02.png"))).toBe(true);
+  });
+
+  it("審核擋單張留下空號並繼續，不中止整批", async () => {
+    const { default: sharp } = await import("sharp");
+    const repo = mkdtempSync(join(tmpdir(), "logo-mod-"));
+    mkdirSync(join(repo, "data"), { recursive: true });
+    const paths = logoPathsFor(repo);
+    writeFileSync(paths.rosterPath, "[]\n");
+    const png = await sharp({
+      create: {
+        width: 16,
+        height: 16,
+        channels: 3,
+        background: { r: 40, g: 50, b: 60 },
+      },
+    })
+      .png()
+      .toBuffer();
+    const moderation = {
+      status: 400,
+      code: "moderation_blocked",
+      error: {
+        code: "moderation_blocked",
+        moderation_details: {
+          moderation_stage: "output",
+          categories: ["violence"],
+        },
+      },
+    };
+    const generatePng = vi
+      .fn<() => Promise<Buffer>>()
+      .mockRejectedValueOnce(moderation)
+      .mockRejectedValueOnce(moderation)
+      .mockResolvedValue(png);
+    const logs: string[] = [];
+    const result = await generateJobsToStaging({
+      paths,
+      jobs: [
+        {
+          slug: "xiao-hong",
+          name: "小紅",
+          candidates: 2,
+          prompt: "Create one highly simplified IP mascot logo\nForbid: clay",
+        },
+      ],
+      args: parseLogoCliArgs(["--slug", "an-an", "--candidates", "2"]),
+      model: "gpt-image-2",
+      generatePng,
+      log: (line) => logs.push(line),
+    });
+    expect(generatePng).toHaveBeenCalledTimes(3);
+    expect(result.blocked).toBe(1);
+    expect(result.generated).toBe(1);
+    expect(existsSync(join(paths.stagingRoot, "xiao-hong/01.png"))).toBe(false);
+    expect(existsSync(join(paths.stagingRoot, "xiao-hong/02.png"))).toBe(true);
+    expect(logs.some((line) => line.includes("審核跳過 xiao-hong/01.png"))).toBe(
+      true,
+    );
+    expect(logs.some((line) => line.includes('categories=["violence"]'))).toBe(
+      true,
+    );
+    const contact = readFileSync(
+      join(paths.stagingRoot, "xiao-hong/contact.html"),
+      "utf8",
+    );
+    expect(contact).toContain("現有 1／計劃 2");
+    expect(contact).toContain("02.png");
+    expect(contact).not.toContain("01.png");
+  });
+
+  it("非審核 4xx 仍中止整批", async () => {
+    const repo = mkdtempSync(join(tmpdir(), "logo-400-"));
+    mkdirSync(join(repo, "data"), { recursive: true });
+    const paths = logoPathsFor(repo);
+    writeFileSync(paths.rosterPath, "[]\n");
+    await expect(
+      generateJobsToStaging({
+        paths,
+        jobs: [
+          {
+            slug: "xiao-hong",
+            name: "小紅",
+            candidates: 2,
+            prompt: "Create one highly simplified IP mascot logo\nForbid: clay",
+          },
+        ],
+        args: parseLogoCliArgs(["--slug", "an-an", "--candidates", "2"]),
+        model: "gpt-image-2",
+        generatePng: async () => {
+          throw { status: 400, code: "invalid_prompt", message: "bad" };
+        },
+        log: () => undefined,
+      }),
+    ).rejects.toMatchObject({ status: 400, code: "invalid_prompt" });
   });
 });
 

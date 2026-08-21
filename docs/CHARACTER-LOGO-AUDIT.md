@@ -42,7 +42,7 @@
 
 ## 操作
 
-0. 先 `npm run generate:character-logos -- --pilot --dry-run` 看張數與估價；准許後才拿掉 `--dry-run`。候選在 `public/.logo-staging/<slug>/contact.html`。
+0. 先 `npm run generate:character-logos -- --pilot --dry-run` 看張數與估價（已有 staging 會從估價扣除）；准許後才拿掉 `--dry-run`。候選在 `public/.logo-staging/<slug>/contact.html`。單張 `moderation_blocked` 會留下空號並繼續，不整批中止。
 1. `--approve --slug <id> --pick N` 後才會寫 `public/characters/logo/{slug}-512.webp`、`-128.webp`、`-32.webp`（64px 預覽吃 128 檔）。
 2. 打開 `/studio/logo-audit`，先 32px Grid（無正式檔時改載 `public/.logo-staging/<slug>/NN.png`），再剪影，再撞型（血緣四位有最高風險提示），再家族分群，再取色比對，再對比檢查。
 3. 缺件顯示斜紋佔位框，背景仍是家族色，方便檢查色塊群集。

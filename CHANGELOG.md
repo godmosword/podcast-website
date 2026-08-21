@@ -23,7 +23,7 @@
 - **角色 Logo 家族背景壓深**：`construction`／`speed`／`fantasy`／`transit` 改較深 OKLCH，拉開與中明度車身的亮度帶；`rescue`／`joy`／`people` 不變。
 - **角色 Logo IP 主色重取樣**：定裝照取樣後只在剪影餘裕不足時沿色相微調；血緣四位共用珊瑚紅；清潔車／暖暖／小怪獸撤回深補償；消防車提亮；噗噗臉部次色提一階。
 - **角色 Logo prompt 重產**：35 份 `docs/logo-prompts/` 對齊新家族背景與 IP 色；`_shared.md` 的 style／forbid 區塊未改。
-- **角色 Logo 產圖色彩閘門**：`generate-character-logos-core` 產圖前跑 `auditEntry`，任一目標角色未過即中止並列違規；寫入 SPEC。
+- **角色 Logo 產圖 CLI 可續跑**：既有 staging PNG 跳過不重畫；`moderation_blocked` 同張再試 1 次，仍擋則留下空號並繼續，不再整批 `exit 1`。dry-run 估價扣除已有檔。
 - **角色 Logo 對比驗證器雙軌**：剪影可走軌道 1（亮度 ≥ 3.6 且 margin ≥ 0.2）或軌道 2（≥ 2.8 且色相距離 ≥ 60° 且 primary 彩度 ≥ 0.12）。軌道 2 只給高彩度識別色。臉部仍 ≥ 5.0。
 - **角色 Logo 對比驗證器單軌加權**：廢除軌道 2。剪影門檻依色相距離：≥ 60° 為 2.8、30–60° 為 3.6、＜ 30° 為 4.5；margin 相對該門檻 ≥ 0.2。背景不得呼應成員識別色相。
 - **角色 Logo 家族背景色相分離**：`speed` 改深青 `L 0.30 C 0.05 H 200`／`#023538`；`construction` 改深藍紫 `L 0.32 C 0.06 H 300`／`#382B4D`（不用 H 285，對 rescue 只有 35°）；`fantasy` 維持 H 150、壓到 `L 0.32`／`#193B22`。`rescue`／`transit`／`people` 不動。

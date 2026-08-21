@@ -67,6 +67,13 @@ export type LogoCandidate = {
   file: string;
 };
 
+export type LogoGenerateResult = {
+  written: string[];
+  generated: number;
+  skippedExisting: number;
+  blocked: number;
+};
+
 export type LogoStagingManifest = {
   slug: string;
   name: string;
@@ -313,20 +320,64 @@ export function estimateLogoCostUsd(
   return imageCalls * COST_USD_PER_IMAGE[quality];
 }
 
+export function countPendingImageCalls(
+  jobs: readonly LogoJob[],
+  stagingRoot: string,
+): { total: number; existing: number; pending: number } {
+  let existing = 0;
+  const total = jobs.reduce((sum, job) => sum + job.candidates, 0);
+  for (const job of jobs) {
+    for (let index = 1; index <= job.candidates; index += 1) {
+      if (
+        existsSync(join(stagingRoot, job.slug, candidateFileName(index)))
+      ) {
+        existing += 1;
+      }
+    }
+  }
+  return { total, existing, pending: total - existing };
+}
+
 export function formatDryRunReport(input: {
   args: LogoCliArgs;
   jobs: LogoJob[];
   model: string;
+  stagingRoot?: string;
 }): string {
-  const calls = input.jobs.reduce((sum, job) => sum + job.candidates, 0);
+  const tally = input.stagingRoot
+    ? countPendingImageCalls(input.jobs, input.stagingRoot)
+    : {
+        total: input.jobs.reduce((sum, job) => sum + job.candidates, 0),
+        existing: 0,
+        pending: input.jobs.reduce((sum, job) => sum + job.candidates, 0),
+      };
+  const retryNote =
+    tally.existing > 0
+      ? `不含 timeout／審核重試；已有 ${tally.existing} 張 staging 將跳過`
+      : "不含 timeout／審核重試";
   const lines = [
     `【dry-run】不呼叫 API。模型 ${input.model}、尺寸 ${LOGO_NATIVE_SIZE}、quality ${input.args.quality}。`,
-    `影像呼叫次數：${calls}（不含 timeout 重試）`,
-    `估價：約 US$${estimateLogoCostUsd(calls, input.args.quality).toFixed(2)}（${input.args.quality} 單價 ${COST_USD_PER_IMAGE[input.args.quality]}）`,
+    `影像呼叫次數：${tally.pending}（${retryNote}）`,
+    `估價：約 US$${estimateLogoCostUsd(tally.pending, input.args.quality).toFixed(2)}（${input.args.quality} 單價 ${COST_USD_PER_IMAGE[input.args.quality]}）`,
     "",
   ];
   for (const job of input.jobs) {
-    lines.push(`  ${job.slug}  ${job.name}  ×${job.candidates}`);
+    if (!input.stagingRoot) {
+      lines.push(`  ${job.slug}  ${job.name}  ×${job.candidates}`);
+      continue;
+    }
+    let existing = 0;
+    for (let index = 1; index <= job.candidates; index += 1) {
+      if (
+        existsSync(join(input.stagingRoot, job.slug, candidateFileName(index)))
+      ) {
+        existing += 1;
+      }
+    }
+    const pending = job.candidates - existing;
+    const reuse =
+      existing > 0 ? `（沿用 ${existing}，待生 ${pending}）` : "";
+    lines.push(`  ${job.slug}  ${job.name}  ×${job.candidates}${reuse}`);
   }
   lines.push("");
   lines.push("通過後才准許生圖：拿掉 --dry-run。審圖後：");
@@ -394,15 +445,25 @@ export function buildContactHtml(input: {
   slug: string;
   name: string;
   candidateCount: number;
+  present?: readonly LogoCandidate[];
 }): string {
-  const cards = Array.from({ length: input.candidateCount }, (_, offset) => {
-    const file = candidateFileName(offset + 1);
-    return `<figure>
-  <img src="./${file}" alt="${input.name} 候選 ${offset + 1}" width="256" height="256" />
-  <img src="./${file}" alt="" width="32" height="32" class="px32" />
-  <figcaption>${file} · --pick ${offset + 1}</figcaption>
-</figure>`;
-  });
+  const present =
+    input.present ??
+    Array.from({ length: input.candidateCount }, (_, offset) => ({
+      index: offset + 1,
+      file: candidateFileName(offset + 1),
+    }));
+  const cards = present.map(
+    (candidate) => `<figure>
+  <img src="./${candidate.file}" alt="${input.name} 候選 ${candidate.index}" width="256" height="256" />
+  <img src="./${candidate.file}" alt="" width="32" height="32" class="px32" />
+  <figcaption>${candidate.file} · --pick ${candidate.index}</figcaption>
+</figure>`,
+  );
+  const missingNote =
+    present.length < input.candidateCount
+      ? `<p>現有 ${present.length}／計劃 ${input.candidateCount} 張。缺號不重用。</p>`
+      : "";
   return `<!doctype html>
 <html lang="zh-Hant">
 <head>
@@ -418,7 +479,7 @@ export function buildContactHtml(input: {
 <body>
   <h1>${input.name}（${input.slug}）</h1>
   <p>硬性驗收 32px。審完：<code>npm run generate:character-logos -- --approve --slug ${input.slug} --pick N</code></p>
-  <div class="row">
+${missingNote}  <div class="row">
 ${cards.join("\n")}
   </div>
 </body>
@@ -426,15 +487,54 @@ ${cards.join("\n")}
 `;
 }
 
-export function isRetryableImageError(error: unknown): boolean {
-  if (!error || typeof error !== "object") return false;
-  const record = error as {
-    status?: number;
-    statusCode?: number;
+type ImageErrorRecord = {
+  status?: number;
+  statusCode?: number;
+  code?: string;
+  message?: string;
+  cause?: { code?: string };
+  error?: {
     code?: string;
     message?: string;
-    cause?: { code?: string };
+    moderation_details?: {
+      moderation_stage?: string;
+      categories?: unknown;
+    };
   };
+};
+
+function asImageErrorRecord(error: unknown): ImageErrorRecord | null {
+  if (!error || typeof error !== "object") return null;
+  return error as ImageErrorRecord;
+}
+
+export function isModerationBlockedError(error: unknown): boolean {
+  const record = asImageErrorRecord(error);
+  if (!record) return false;
+  return (
+    record.code === "moderation_blocked" ||
+    record.error?.code === "moderation_blocked"
+  );
+}
+
+export function formatImageGenerationError(error: unknown): string {
+  const record = asImageErrorRecord(error);
+  if (!record) return String(error);
+  const details = record.error?.moderation_details;
+  const stage = details?.moderation_stage ?? "unknown";
+  const categories = JSON.stringify(details?.categories ?? []);
+  if (isModerationBlockedError(error)) {
+    return `moderation_blocked stage=${stage} categories=${categories}`;
+  }
+  const code = record.code ?? record.error?.code ?? "error";
+  const message = record.message ?? record.error?.message ?? "";
+  return message ? `${code}: ${message}` : code;
+}
+
+export function isRetryableImageError(error: unknown): boolean {
+  if (isModerationBlockedError(error)) return true;
+  const record = asImageErrorRecord(error);
+  if (!record) return false;
   const status = record.status ?? record.statusCode;
   if (typeof status === "number" && status >= 500) return true;
   const code = record.code ?? record.cause?.code;
@@ -502,9 +602,14 @@ export async function generateJobsToStaging(input: {
   model: string;
   generatePng: (prompt: string) => Promise<Buffer>;
   now?: string;
-}): Promise<string[]> {
+  log?: (line: string) => void;
+}): Promise<LogoGenerateResult> {
   assertGenerationAllowed(input.args);
+  const log = input.log ?? ((line: string) => process.stderr.write(`${line}\n`));
   const written: string[] = [];
+  let generated = 0;
+  let skippedExisting = 0;
+  let blocked = 0;
   for (const job of input.jobs) {
     const dir = join(input.paths.stagingRoot, job.slug);
     mkdirSync(dir, { recursive: true });
@@ -512,10 +617,28 @@ export async function generateJobsToStaging(input: {
     for (let index = 1; index <= job.candidates; index += 1) {
       const file = candidateFileName(index);
       const dest = join(dir, file);
-      const png = await withOneRetry(() => input.generatePng(job.prompt));
+      if (existsSync(dest)) {
+        candidates.push({ index, file });
+        written.push(dest);
+        skippedExisting += 1;
+        log(`沿用 ${job.slug}/${file}`);
+        continue;
+      }
+      let png: Buffer;
+      try {
+        png = await withOneRetry(() => input.generatePng(job.prompt));
+      } catch (error) {
+        if (isModerationBlockedError(error)) {
+          blocked += 1;
+          log(`審核跳過 ${job.slug}/${file}：${formatImageGenerationError(error)}`);
+          continue;
+        }
+        throw error;
+      }
       await writeStagingMaster(png, dest);
       candidates.push({ index, file });
       written.push(dest);
+      generated += 1;
     }
     writeLogoManifest(join(dir, "manifest.json"), {
       slug: job.slug,
@@ -532,10 +655,11 @@ export async function generateJobsToStaging(input: {
         slug: job.slug,
         name: job.name,
         candidateCount: job.candidates,
+        present: candidates,
       }),
     );
   }
-  return written;
+  return { written, generated, skippedExisting, blocked };
 }
 
 export async function approveLogoFromStaging(input: {

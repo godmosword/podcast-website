@@ -295,7 +295,7 @@ npm run generate:character-logos -- --approve --slug xiao-hong --pick 2
 - 原生尺寸 `1024×1024`（不為湊 1536 重採樣）；落地才縮成 512／128／32 webp。
 - Prompt 禁止 `CLAY_STYLE_PREFIX`；`--approve` 禁止寫入 `public/characters/*.jpg`。
 - Pilot 預設 4 候選／high；Tier 1 其餘 7 位預設 2 候選；未回填 SPEC 三參數前 `--tier 2` 生圖會被擋。
-- Timeout／5xx：同張最多再試 1 次。CI 不放 key。
+- Timeout／5xx／`moderation_blocked`：同張最多再試 1 次。既有 `public/.logo-staging/<slug>/NN.png` 跳過不重畫。單張審核仍擋則留下空號、繼續下一張，不中止整批。CI 不放 key。
 
 ---
 
