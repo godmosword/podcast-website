@@ -6,6 +6,8 @@
 
 ### Added
 
+- **角色 Logo 次色對主色可辨閘門**：`auditEntry` 對 35 筆要求次色對主色對比 ≥ 1.6 或色相差 ≥ 30（擇一）。識別特徵不得是車身暗一階同色。
+- **角色 Logo 對比檢查全欄**：`/studio/logo-audit` 對比表列出 silhouette／hueDist／sil 門檻與 margin／face 與 margin／touches／次色數值與 margin／次色對主色與色相差；單欄未達標標紅。
 - **角色 Logo 對比驗證器**：`lib/character-logo-contrast.ts` 以 WCAG 相對亮度計算剪影（primary 對家族背景，硬閘門 3.6）與臉部標記（`#1A1410` 對較亮 IP 色，硬閘門 5.0）。不檢查 secondary 對背景。
 - **角色 Logo Phase 5 產圖管線**：`npm run generate:character-logos` 支援 `--pilot`／`--tier`／`--slug`、`--dry-run` 報價、staging contact、`--approve --pick` 寫 512／128／32 webp。預設不呼叫 API；禁止黏土前綴與定裝照路徑；未回填 Pilot 參數前擋 `--tier 2` 生圖。
 - **親子遊樂地圖 PR6 editorial recommendation**：新增與景點事實資料分離的 `play-map-editorial-picks` sidecar 與 deterministic resolver；只有在附近／縣市／已提交地圖視野且至少兩筆結果時，依目前意圖、附近距離、編輯優先序與既有結果順序顯示最多一筆「媽米先幫你看」。僅出現在 mobile Card tab 與 desktop 結果欄，點擊沿用既有完整詳情互動，不改 96 筆景點資料、Leaflet、SEO 或其他頁面。
@@ -24,7 +26,8 @@
 - **角色 Logo 產圖色彩閘門**：`generate-character-logos-core` 產圖前跑 `auditEntry`，任一目標角色未過即中止並列違規；寫入 SPEC。
 - **角色 Logo 對比驗證器雙軌**：剪影可走軌道 1（亮度 ≥ 3.6 且 margin ≥ 0.2）或軌道 2（≥ 2.8 且色相距離 ≥ 60° 且 primary 彩度 ≥ 0.12）。軌道 2 只給高彩度識別色。臉部仍 ≥ 5.0。
 - **角色 Logo 對比驗證器單軌加權**：廢除軌道 2。剪影門檻依色相距離：≥ 60° 為 2.8、30–60° 為 3.6、＜ 30° 為 4.5；margin 相對該門檻 ≥ 0.2。背景不得呼應成員識別色相。
-- **角色 Logo 家族背景色相分離**：`speed` 改深青 `L 0.30 C 0.05 H 200`／`#023538`；`construction` 改深藍紫 `L 0.32 C 0.06 H 300`／`#382B4D`（不用 H 285，對 rescue 只有 35°）；`fantasy` 維持 H 150、壓到 `L 0.32`／`#193B22`。`rescue`／`transit`／`joy`／`people` 不動。
+- **角色 Logo 家族背景色相分離**：`speed` 改深青 `L 0.30 C 0.05 H 200`／`#023538`；`construction` 改深藍紫 `L 0.32 C 0.06 H 300`／`#382B4D`（不用 H 285，對 rescue 只有 35°）；`fantasy` 維持 H 150、壓到 `L 0.32`／`#193B22`。`rescue`／`transit`／`people` 不動。
+- **角色 Logo joy 底改深橄欖**：奶油白 `#F7EEDC` 改 `L 0.30 C 0.06 H 100`／`#352E02`，與其他六家族色相 ≥ 45°。不用暖褐（會呼應粉紅／紅車身）。六位主色沿取樣色相只推到臉部 5.2；次色回歸識別物真實色。
 - **角色 Logo IP 色回歸取樣**：色相分離後血緣四位共用真紅 `#E4402E`；工程黃系與玲玲、多多撤回推淺補償。廢 `#FF8A72`／`#FFC9B8`。
 - **角色 Logo 臉部也要 margin**：`auditEntry` 要求 face ≥ 5.0 且 faceMargin ≥ +0.2。不改色票；現役僅 a-ku（5.02）未過。
 - **角色 Logo 驗收頁**：32px Grid 可載 staging 候選；新增取色比對（產出圖主色 vs `ipColorPrimary` 的 hueDist／silhouette）；撞型並排強調血緣四位共用真紅。

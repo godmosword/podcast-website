@@ -42,15 +42,15 @@ const EXTRA: Record<string, string> = {
   "dong-dong":
     "Only feature: the digging bucket. Do not add tracks or a detailed cab. Pale window band is the large secondary region and the eye surface.",
   "diao-che":
-    "Only feature: the hook boom. Orange body is the silhouette; dark brown is the boom. Eyes sit on the lighter orange region. Do not add outriggers.",
+    "Only feature: the hook boom. Orange body is the silhouette; copper-brown is the boom. Eyes sit on the orange body. Do not add outriggers.",
   "a-ku":
-    "Only feature: a blunt drill bit. Do not add tracks or a bucket. Distinct from Dongdong.",
+    "Only feature: a blunt drill bit in the secondary brass. Eyes sit on the orange-yellow body. Do not add tracks or a bucket. Distinct from Dongdong.",
   "a-ni":
     "Only feature: the mixing drum. Do not add a chute. Distinct from Dongdong's bucket.",
   "xiao-hong":
     "Bloodline race-car template (baseline proportions). Single rear spoiler. True-red body; pale blue windshield band is the eye surface. No digits, no number 2.",
   "xiao-chong":
-    "Rival, not a blood relative. Longer, lower silhouette than the red family. Two intake scoops are the only feature. Primary IP color must be yellow or orange, never red.",
+    "Rival, not a blood relative. Longer, lower silhouette than the red family. Two intake scoops in the dark secondary are cut into the yellow body — they do not form the outer contour. Primary IP color must be yellow or orange, never red. Eyes sit on the yellow body.",
   "xiao-hong-dad":
     "Same bloodline template as Xiao Hong, slightly longer, smaller windshield ratio. Spoiler is the machine feature. Add one short blunt brow-line in the eye color, smaller than the spoiler — generation mark only, not detailed eyebrows, not a third color, no mustache.",
   "xiao-hong-baby":
@@ -72,20 +72,20 @@ const EXTRA: Record<string, string> = {
   "xiao-fei":
     "Propeller ring is the only feature. Four rotors read as one ring, not thin arms.",
   "xiang-xiang":
-    "Diagonal awning: the top edge MUST be a slanted line, unlike Huacan's circle. Cream window band is the eye surface.",
+    "Diagonal awning: the top edge MUST be a slanted line, unlike Huacan's circle. Awning stripe is the secondary color and touches the background. Eyes sit on the pink body, not the awning.",
   "popcorn-truck":
-    "Popcorn kettle: the top edge MUST be a circle, unlike Xiangxiang's slant. Cream face/window is the eye surface.",
+    "Popcorn kettle: the top edge MUST be a circle, unlike Xiangxiang's slant. The kettle is the secondary color and protrudes. Eyes sit on the red body, not the kettle.",
   "pu-pu-pig":
-    "Blunt pig snout is the only feature. Pink snout is the secondary region and the eye surface. Do not add a second feature such as a water cannon.",
+    "Blunt pig snout is the only feature and protrudes. Pink snout is the secondary region. Eyes sit on the blue body, not the snout. Do not add a second feature such as a water cannon.",
   "xiao-rou":
-    "Roof tent is the only feature. Cream window is the eye surface. Do not add a striped side awning.",
+    "Roof tent is the only feature and sits on the roof edge. Eyes sit on the pink body, not the tent. Do not add a striped side awning or a cream window.",
   "gao-gao":
-    "Rim and spokes are the only feature. Cream hub is the face and eye surface. No extra gondola colors.",
-  dudu: "Arched roof is the only feature — not a race-car spoiler. Cream windshield is the eye surface.",
+    "Rim and spokes are the only feature and form the outer wheel. Gold spokes are the secondary color. Eyes sit on the blue hub/body, not the spokes. No extra gondola colors.",
+  dudu: "Arched roof is the only feature and forms the top edge — not a race-car spoiler. Eyes sit on the red body, not the roof.",
   "duo-duo":
     "Back fins are the only feature. Tips must be blunt, not a sawtooth row. No arms, hands, or teeth.",
   "monster-truck":
-    "Giant wheels are the only feature. Dark wheels are the secondary region. No roof light bar.",
+    "Giant wheels are the only feature and form the lower contour. Warm brown wheels are the secondary region. Eyes sit on the yellow body. No roof light bar.",
   "dirty-germs":
     "One pair of blunt round horns, both visible. Cream belly/face is the eye surface. Single creature, not a swarm.",
   "nuan-nuan-turtle":
@@ -137,7 +137,7 @@ export function buildLogoPrompt(
     "",
     blocks.complexity,
     "",
-    `Color: exactly three semantic colors total — two IP base colors (${logo.ipColorPrimary} primary, ${logo.ipColorSecondary} secondary) plus the background. Keep the secondary color as one large continuous region. Silhouette-to-background contrast uses the hue-weighted gate (2.8 / 3.6 / 4.5) with margin >= 0.2; facial marks on the lighter IP region >= 5:1.`,
+    `Color: exactly three semantic colors total — two IP base colors (${logo.ipColorPrimary} primary, ${logo.ipColorSecondary} secondary) plus the background. Keep the secondary color as one large continuous region. Eyes sit on the ${logo.faceSurface} IP color. Silhouette-to-background contrast uses the hue-weighted gate (2.8 / 3.6 / 4.5) with margin >= 0.2. If the secondary region forms the outer contour, secondary-to-background >= 3.6 with margin >= 0.2; otherwise secondary-to-primary >= 1.8 with margin >= 0.2. Secondary must also be distinguishable from primary at 32px: contrast >= 1.6 or hue distance >= 30. Facial marks on the faceSurface region >= 5:1 with margin >= 0.2.`,
     "",
     composition,
     "",

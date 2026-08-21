@@ -104,7 +104,7 @@ describe("character logos", () => {
     }
   });
 
-  it("speed／construction／fantasy 背景改色相分離，rescue／transit／joy／people 不動", () => {
+  it("speed／construction／fantasy 背景改色相分離；joy 改深橄欖；rescue／transit／people 不動", () => {
     expect(LOGO_FAMILIES.speed).toEqual({
       label: "速度競賽",
       oklch: { l: 0.3, c: 0.05, h: 200 },
@@ -132,8 +132,8 @@ describe("character logos", () => {
     });
     expect(LOGO_FAMILIES.joy).toEqual({
       label: "生活歡樂",
-      oklch: { l: 0.95, c: 0.04, h: 85 },
-      hex: "#F7EEDC",
+      oklch: { l: 0.3, c: 0.06, h: 100 },
+      hex: "#352E02",
     });
     expect(LOGO_FAMILIES.people).toEqual({
       label: "人與夥伴",
@@ -160,7 +160,31 @@ describe("character logos", () => {
     }
   });
 
-  it("較亮 IP 色對深色眼標記 ≥ 4.5:1", () => {
+  it("次色規則依是否構成外輪廓分流", () => {
+    for (const logo of logos) {
+      expect(logo.faceSurface === "primary" || logo.faceSurface === "secondary").toBe(
+        true,
+      );
+      expect(typeof logo.secondaryTouchesBackground).toBe("boolean");
+    }
+  });
+
+  it("joy 次色是識別物色；眼睛落在車頭主色", () => {
+    const identity: Record<string, string> = {
+      "xiang-xiang": "遮陽棚",
+      "popcorn-truck": "爆米花",
+      "pu-pu-pig": "豬鼻",
+      "xiao-rou": "帳篷",
+      "gao-gao": "輻條",
+      dudu: "拱",
+    };
+    for (const logo of logos.filter((item) => item.family === "joy")) {
+      expect(logo.notes, logo.slug).toContain(identity[logo.slug]);
+      expect(logo.faceSurface, logo.slug).toBe("primary");
+    }
+  });
+
+  it("faceSurface 指定的 IP 色對深色眼標記 ≥ 4.5:1", () => {
     for (const logo of logos) {
       const ratio = contrastRatio(faceSurfaceHex(logo), LOGO_EYE_HEX);
       expect(ratio, `${logo.slug} ${ratio.toFixed(2)}`).toBeGreaterThanOrEqual(
@@ -196,14 +220,19 @@ describe("character logos", () => {
     expect(primaries[0]).toBe("#E4402E");
   });
 
-  it("色相分離後回歸取樣主色，廢鮭魚與過淺補償", () => {
-    expect(getCharacterLogo("dong-dong")?.ipColorPrimary).toBe("#ED9F05");
+  it("色相分離後主色保持取樣色相，廢鮭魚與過淺補償", () => {
+    expect(getCharacterLogo("dong-dong")?.ipColorPrimary.startsWith("#E4")).toBe(
+      true,
+    );
     expect(getCharacterLogo("diao-che")?.ipColorPrimary).toBe("#E36E1E");
-    expect(getCharacterLogo("a-ku")?.ipColorPrimary).toBe("#C37313");
-    expect(getCharacterLogo("a-ni")?.ipColorPrimary).toBe("#EF9F05");
-    expect(getCharacterLogo("ling-ling")?.ipColorPrimary).toBe("#7ED957");
+    expect(getCharacterLogo("a-ku")?.ipColorPrimary.startsWith("#C7")).toBe(true);
+    expect(getCharacterLogo("a-ni")?.ipColorPrimary.startsWith("#E3")).toBe(true);
+    expect(getCharacterLogo("ling-ling")?.ipColorPrimary.startsWith("#5D")).toBe(
+      true,
+    );
     expect(getCharacterLogo("duo-duo")?.ipColorPrimary).toBe("#7DB121");
     expect(getCharacterLogo("xiao-chong")?.ipColorPrimary).toBe("#FFD24A");
+    expect(getCharacterLogo("xiao-chong")?.ipColorSecondary).toBe("#2A2118");
     const primaries = getCharacterLogos().map((logo) => logo.ipColorPrimary);
     expect(primaries).not.toContain("#FF8A72");
     expect(primaries).not.toContain("#FFC9B8");

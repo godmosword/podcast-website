@@ -10,9 +10,11 @@ import {
   logoAuditTiles,
   resolveCollisionSets,
   logosByFamily,
+  auditLogoContrast,
   type LogoAuditView,
   type LogoPreviewSize,
 } from "@/lib/studio/logo-audit";
+import { MARGIN_MIN } from "@/lib/character-logo-contrast";
 import styles from "./LogoAuditBoard.module.css";
 
 export type LogoAuditPreferred = {
@@ -58,6 +60,7 @@ export default function LogoAuditBoard({
   const displaySize: LogoPreviewSize = view === "collisions" ? 32 : size;
   const collisions = useMemo(() => resolveCollisionSets(logos), [logos]);
   const families = useMemo(() => logosByFamily(logos), [logos]);
+  const contrastRows = useMemo(() => auditLogoContrast(logos), [logos]);
 
   function markMissing(key: string) {
     setMissing((current) => {
@@ -100,7 +103,9 @@ export default function LogoAuditBoard({
               type="button"
               className={styles.toggle}
               aria-pressed={displaySize === value}
-              disabled={view === "collisions" && value !== 32}
+              disabled={
+                (view === "collisions" && value !== 32) || view === "contrast"
+              }
               onClick={() => setSize(value)}
             >
               {value}px
@@ -291,6 +296,95 @@ export default function LogoAuditBoard({
               </tbody>
             </table>
           )}
+        </div>
+      )}
+
+      {view === "contrast" && (
+        <div className={styles.sampleWrap}>
+          <p className={styles.hint}>
+            主色剪影門檻隨色相距離（2.8／3.6／4.5），餘裕 ≥ 0.2。次色構成外輪廓則對背景 ≥
+            3.6，否則對主色 ≥ 1.8，餘裕 ≥ 0.2。次色對主色還須對比 ≥ 1.6 或色相差 ≥
+            30（擇一）。臉部對 `faceSurface` 指定色 ≥ 5.0，餘裕 ≥ 0.2。任一欄未達標標紅。
+          </p>
+          <table className={styles.sampleTable}>
+            <caption className="sr-only">角色 Logo 對比檢查</caption>
+            <thead>
+              <tr>
+                <th scope="col">角色</th>
+                <th scope="col">slug</th>
+                <th scope="col">family</th>
+                <th scope="col">silhouette</th>
+                <th scope="col">hueDist(主色對底)</th>
+                <th scope="col">sil門檻</th>
+                <th scope="col">sil margin</th>
+                <th scope="col">faceSurface</th>
+                <th scope="col">face</th>
+                <th scope="col">face margin</th>
+                <th scope="col">touches</th>
+                <th scope="col">次色數值</th>
+                <th scope="col">次色 margin</th>
+                <th scope="col">次色對主色</th>
+                <th scope="col">次色對主色色相差</th>
+                <th scope="col">結果</th>
+              </tr>
+            </thead>
+            <tbody>
+              {contrastRows.map((row) => {
+                const silFail = row.silMargin < MARGIN_MIN;
+                const faceFail = row.faceMargin < MARGIN_MIN;
+                const secFail = row.secondaryMargin < MARGIN_MIN;
+                const distFail = !row.secondaryDistinguishable;
+                return (
+                  <tr
+                    key={row.slug}
+                    className={row.passes ? undefined : styles.failRow}
+                  >
+                    <th scope="row">{row.name}</th>
+                    <td>{row.slug}</td>
+                    <td>{row.family}</td>
+                    <td className={silFail ? styles.failCell : undefined}>
+                      {row.silhouette.toFixed(2)}
+                    </td>
+                    <td>{row.hueDist.toFixed(1)}</td>
+                    <td className={silFail ? styles.failCell : undefined}>
+                      {row.gate.toFixed(1)}
+                    </td>
+                    <td className={silFail ? styles.failCell : undefined}>
+                      {row.silMargin >= 0 ? "+" : ""}
+                      {row.silMargin.toFixed(2)}
+                    </td>
+                    <td>{row.faceSurface}</td>
+                    <td className={faceFail ? styles.failCell : undefined}>
+                      {row.face.toFixed(2)}
+                    </td>
+                    <td className={faceFail ? styles.failCell : undefined}>
+                      {row.faceMargin >= 0 ? "+" : ""}
+                      {row.faceMargin.toFixed(2)}
+                    </td>
+                    <td>{row.secondaryTouchesBackground ? "true" : "false"}</td>
+                    <td className={secFail ? styles.failCell : undefined}>
+                      {row.secondaryContrast.toFixed(2)}
+                      <span className={styles.gateHint}>
+                        {" "}
+                        / {row.secondaryGate.toFixed(1)}
+                      </span>
+                    </td>
+                    <td className={secFail ? styles.failCell : undefined}>
+                      {row.secondaryMargin >= 0 ? "+" : ""}
+                      {row.secondaryMargin.toFixed(2)}
+                    </td>
+                    <td className={distFail ? styles.failCell : undefined}>
+                      {row.secondaryVsPrimary.toFixed(2)}
+                    </td>
+                    <td className={distFail ? styles.failCell : undefined}>
+                      {row.secondaryVsPrimaryHueDist.toFixed(1)}
+                    </td>
+                    <td>{row.passes ? "通過" : "未達標"}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

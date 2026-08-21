@@ -35,6 +35,26 @@ describe("LogoAuditBoard", () => {
     fireEvent.click(screen.getByRole("button", { name: "取色比對" }));
     expect(screen.getByText(/從產出圖取樣非背景主色/)).toBeTruthy();
 
+    fireEvent.click(screen.getByRole("button", { name: "對比檢查" }));
+    expect(screen.getByRole("columnheader", { name: "slug" })).toBeTruthy();
+    expect(screen.getByRole("columnheader", { name: "family" })).toBeTruthy();
+    expect(screen.getByRole("columnheader", { name: "silhouette" })).toBeTruthy();
+    expect(
+      screen.getByRole("columnheader", { name: "hueDist(主色對底)" }),
+    ).toBeTruthy();
+    expect(screen.getByRole("columnheader", { name: "sil門檻" })).toBeTruthy();
+    expect(screen.getByRole("columnheader", { name: "sil margin" })).toBeTruthy();
+    expect(screen.getByRole("columnheader", { name: "faceSurface" })).toBeTruthy();
+    expect(screen.getByRole("columnheader", { name: "face" })).toBeTruthy();
+    expect(screen.getByRole("columnheader", { name: "face margin" })).toBeTruthy();
+    expect(screen.getByRole("columnheader", { name: "touches" })).toBeTruthy();
+    expect(screen.getByRole("columnheader", { name: "次色數值" })).toBeTruthy();
+    expect(screen.getByRole("columnheader", { name: "次色 margin" })).toBeTruthy();
+    expect(screen.getByRole("columnheader", { name: "次色對主色" })).toBeTruthy();
+    expect(
+      screen.getByRole("columnheader", { name: "次色對主色色相差" }),
+    ).toBeTruthy();
+
     fireEvent.click(screen.getByRole("button", { name: "黑白剪影模式" }));
     expect(
       screen.getByRole("button", { name: "黑白剪影模式" }).getAttribute("aria-pressed"),

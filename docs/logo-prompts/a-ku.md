@@ -10,11 +10,11 @@ Create one highly simplified IP mascot logo, not a character illustration.
 Background: fully opaque edge-to-edge solid OKLCH(L 0.32 C 0.06 H 300) / #382B4D (construction family, 工程建設). Use this color for the background only. Background stays visually flat: no vignette, spotlight, or directional wash.
 
 Subject: 阿酷 the 鑽地車, reduced to one continuous rounded silhouette with exactly one defining feature: 鑽頭. Front three-quarter-low view; the vehicle's front IS the face — grille as mouth, headlights as eyes.
-Only feature: a blunt drill bit. Do not add tracks or a bucket. Distinct from Dongdong.
+Only feature: a blunt drill bit in the secondary brass. Eyes sit on the orange-yellow body. Do not add tracks or a bucket. Distinct from Dongdong.
 
 Complexity: 6–10 basic shapes, at most two internal color regions, exactly two eyes and one mouth, readable at 32×32. One continuous rounded outer silhouette.
 
-Color: exactly three semantic colors total — two IP base colors (#C37313 primary, #2A2118 secondary) plus the background. Keep the secondary color as one large continuous region. Silhouette-to-background contrast uses the hue-weighted gate (2.8 / 3.6 / 4.5) with margin >= 0.2; facial marks on the lighter IP region >= 5:1.
+Color: exactly three semantic colors total — two IP base colors (#C7771A primary, #C8B445 secondary) plus the background. Keep the secondary color as one large continuous region. Eyes sit on the primary IP color. Silhouette-to-background contrast uses the hue-weighted gate (2.8 / 3.6 / 4.5) with margin >= 0.2. If the secondary region forms the outer contour, secondary-to-background >= 3.6 with margin >= 0.2; otherwise secondary-to-primary >= 1.8 with margin >= 0.2. Secondary must also be distinguishable from primary at 32px: contrast >= 1.6 or hue distance >= 30. Facial marks on the faceSurface region >= 5:1 with margin >= 0.2.
 
 Composition: front three-quarter-low view; the vehicle's front IS the face — grille as mouth, headlights as eyes. Upright, horizontally centered, cropped flush at the bottom edge, filling 75–85% of canvas height with 15–25% headroom. Canvas is not rotated or tilted. Both members of every paired feature fully visible and uncropped.
 

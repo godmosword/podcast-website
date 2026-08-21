@@ -7,14 +7,14 @@
 ```
 Create one highly simplified IP mascot logo, not a character illustration.
 
-Background: fully opaque edge-to-edge solid OKLCH(L 0.95 C 0.04 H 85) / #F7EEDC (joy family, 生活歡樂). Use this color for the background only. Background stays visually flat: no vignette, spotlight, or directional wash.
+Background: fully opaque edge-to-edge solid OKLCH(L 0.30 C 0.06 H 100) / #352E02 (joy family, 生活歡樂). Use this color for the background only. Background stays visually flat: no vignette, spotlight, or directional wash.
 
 Subject: 噗噗 the 遊園車, reduced to one continuous rounded silhouette with exactly one defining feature: 豬鼻. Front three-quarter-low view; the vehicle's front IS the face — grille as mouth, headlights as eyes.
-Blunt pig snout is the only feature. Pink snout is the secondary region and the eye surface. Do not add a second feature such as a water cannon.
+Blunt pig snout is the only feature and protrudes. Pink snout is the secondary region. Eyes sit on the blue body, not the snout. Do not add a second feature such as a water cannon.
 
 Complexity: 6–10 basic shapes, at most two internal color regions, exactly two eyes and one mouth, readable at 32×32. One continuous rounded outer silhouette.
 
-Color: exactly three semantic colors total — two IP base colors (#1A6A9A primary, #D08080 secondary) plus the background. Keep the secondary color as one large continuous region. Silhouette-to-background contrast uses the hue-weighted gate (2.8 / 3.6 / 4.5) with margin >= 0.2; facial marks on the lighter IP region >= 5:1.
+Color: exactly three semantic colors total — two IP base colors (#4590C2 primary, #C37474 secondary) plus the background. Keep the secondary color as one large continuous region. Eyes sit on the primary IP color. Silhouette-to-background contrast uses the hue-weighted gate (2.8 / 3.6 / 4.5) with margin >= 0.2. If the secondary region forms the outer contour, secondary-to-background >= 3.6 with margin >= 0.2; otherwise secondary-to-primary >= 1.8 with margin >= 0.2. Secondary must also be distinguishable from primary at 32px: contrast >= 1.6 or hue distance >= 30. Facial marks on the faceSurface region >= 5:1 with margin >= 0.2.
 
 Composition: front three-quarter-low view; the vehicle's front IS the face — grille as mouth, headlights as eyes. Upright, horizontally centered, cropped flush at the bottom edge, filling 75–85% of canvas height with 15–25% headroom. Canvas is not rotated or tilted. Both members of every paired feature fully visible and uncropped.
 

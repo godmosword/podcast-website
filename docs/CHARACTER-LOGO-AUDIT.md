@@ -21,7 +21,7 @@
 9. 離散高光、色帶分層、黏土／塑膠／絨毛／玩具感／強烈 3D，或完全無微體積的純平塗。
 10. 透明、白邊、外框、圓角遮罩、App icon mask、文字或數字。
 11. 背景有暈影、聚光或方向性漸層，或明顯偏離該家族 OKLCH（亮度 |ΔL|＞0.02、彩度 |ΔC|＞0.01）。
-12. 剪影未過加權門檻（hueDist ≥ 60° 須 ≥ 2.8、30–60° 須 ≥ 3.6、＜ 30° 須 ≥ 4.5，且 margin ≥ 0.2），或臉部小標記對其下方表面 ＜ 5.0:1，或 faceMargin ＜ 0.2。
+12. 剪影未過加權門檻（hueDist ≥ 60° 須 ≥ 2.8、30–60° 須 ≥ 3.6、＜ 30° 須 ≥ 4.5，且 margin ≥ 0.2），或臉部小標記對其下方表面 ＜ 5.0:1，或 faceMargin ＜ 0.2，或次色未過條件閘門，或次色對主色既 ＜ 1.6 且色相差 ＜ 30。
 13. 落在撞型組裡卻無法在 32px 與對應角色分辨（見下方集合層）。
 
 ---
@@ -44,7 +44,8 @@
 
 0. 先 `npm run generate:character-logos -- --pilot --dry-run` 看張數與估價；准許後才拿掉 `--dry-run`。候選在 `public/.logo-staging/<slug>/contact.html`。
 1. `--approve --slug <id> --pick N` 後才會寫 `public/characters/logo/{slug}-512.webp`、`-128.webp`、`-32.webp`（64px 預覽吃 128 檔）。
-2. 打開 `/studio/logo-audit`，先 32px Grid（無正式檔時改載 `public/.logo-staging/<slug>/NN.png`），再剪影，再撞型（血緣四位有最高風險提示），再家族分群，再取色比對。
+2. 打開 `/studio/logo-audit`，先 32px Grid（無正式檔時改載 `public/.logo-staging/<slug>/NN.png`），再剪影，再撞型（血緣四位有最高風險提示），再家族分群，再取色比對，再對比檢查。
 3. 缺件顯示斜紋佔位框，背景仍是家族色，方便檢查色塊群集。
 4. 「取色比對」從產出圖取樣非背景主色，對 `ipColorPrimary` 算 hueDist（漂色），對家族底算實際 silhouette。
-5. Pilot（小紅、東東、暖暖）過關後先回填 SPEC 的眼睛半徑比與圓角比，再量產 Tier 1／2。
+5. 「對比檢查」列出 35 筆完整欄位：slug／family／silhouette／hueDist(主色對底)／sil門檻／sil margin／faceSurface／face／face margin／touches／次色數值／次色 margin／次色對主色／次色對主色色相差。任一欄未達標標紅。所有剪影／臉部／條件次色門檻須 margin ≥ +0.2；次色對主色須對比 ≥ 1.6 或色相差 ≥ 30。
+6. Pilot（小紅、東東、暖暖）過關後先回填 SPEC 的眼睛半徑比與圓角比，再量產 Tier 1／2。
