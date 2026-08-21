@@ -192,7 +192,9 @@ public/characters/logo/{slug}-32.webp
 |---|---|---|---|
 | **Pilot** | 小紅、東東、暖暖 | 每位 3 方向 × 6 候選 | 鎖定系統參數（眼睛半徑比、剪影圓角比、識別特徵佔比），**不是**出成品 |
 | **Tier 1** | 小紅、多多、東東、安安、亮亮、噗噗、暖暖、阿蹦、媽咪、沃特 | 每位 2 候選 | 覆蓋三層變數與非車類 |
-| **Tier 2** | 其餘 22 位 | 每位 1 次 + audit | 系統鎖定後應一次即中，失敗才重跑 |
+| **Tier 2** | 其餘 25 位 | 每位 1 次 + audit | 系統鎖定後應一次即中，失敗才重跑 |
+
+CLI 預設採縮小 Pilot（同一構圖 × 4 候選＝12 張）。原文 54 張僅在明確 `--candidates 6` 且另准許時使用。
 
 Pilot 與 Tier 1 重疊的三位，Pilot 定案後才算 Tier 1 成品。  
 `data/character-logos.json` 的 `tier`：Tier 1 十位為 `1`，其餘 `2`。`status` 產圖前皆 `pending`。
@@ -247,6 +249,22 @@ Pilot 定案後必須回填本 SPEC：
 - 恆定層原文：[`docs/logo-prompts/_shared.md`](./logo-prompts/_shared.md)
 - 每角色可整段貼的英文：`docs/logo-prompts/{slug}.md`
 - 改共用區塊後執行 `npx tsx scripts/generate-logo-prompts.ts` 重產 35 份，不要只改其中幾份恆定句。
+
+CLI（Phase 5；**預設不呼叫 API**）：
+
+```bash
+npm run generate:character-logos -- --pilot --dry-run
+npm run generate:character-logos -- --tier 1 --dry-run
+npm run generate:character-logos -- --slug xiao-hong --candidates 4 --dry-run
+# 准許後才拿掉 --dry-run；審 public/.logo-staging/<slug>/contact.html
+npm run generate:character-logos -- --approve --slug xiao-hong --pick 2
+```
+
+- 必須指定 `--pilot`／`--tier`／`--slug`，拒絕空手生 35 張。
+- 原生尺寸 `1024×1024`（不為湊 1536 重採樣）；落地才縮成 512／128／32 webp。
+- Prompt 禁止 `CLAY_STYLE_PREFIX`；`--approve` 禁止寫入 `public/characters/*.jpg`。
+- Pilot 預設 4 候選／high；Tier 1 其餘 7 位預設 2 候選；未回填 SPEC 三參數前 `--tier 2` 生圖會被擋。
+- Timeout／5xx：同張最多再試 1 次。CI 不放 key。
 
 ---
 

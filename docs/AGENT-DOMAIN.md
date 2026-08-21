@@ -64,7 +64,7 @@
 | **素材禁止再散布** | `public/stories/`、`public/characters/` 音訊／插圖／字幕屬 Bonbon & 馬米；禁止複製到外站、CDN 或第三方 repo |
 | **illustrate 前必校對字幕** | 未 `--mark` 不得跑 `npm run illustrate`（兒童產品、專名正確性） |
 | **AI 插圖須人工審圖** | 暫存 → 審 contact sheet → 才 `--approve` 上線；CI **不放** `OPENAI_API_KEY`、不自動生圖 |
-| **生圖／重抽禁止自行連抽** | 圖像 API 付費。使用者准許的整集出圖＝**一輪**；之後任何 `--scene`／`--char`／定裝重生／自寫 regen，須先在聊天列出幕號＋張數，等文字確認才可呼叫。Timeout 同幕最多重試 1 次。「修正／檢查」≠ 准許重抽。見 alwaysApply `podcast.mdc`、[`EPISODE-WORKFLOW.md`](EPISODE-WORKFLOW.md) |
+| **生圖／重抽禁止自行連抽** | 圖像 API 付費。使用者准許的整集出圖＝**一輪**；之後任何 `--scene`／`--char`／定裝重生／`generate:character-logos`（非 `--dry-run`）／自寫 regen，須先在聊天列出幕號或 slug＋張數，等文字確認才可呼叫。Timeout 同張最多重試 1 次。「修正／檢查」≠ 准許重抽。見 alwaysApply `podcast.mdc`、[`EPISODE-WORKFLOW.md`](EPISODE-WORKFLOW.md) |
 | **音檔不外送** | 轉錄／生圖管線只送**已公開劇本文字**（字幕側車），不送 `audio.mp3` |
 | **全幕集對齊 ep-9／ep-10** | `pageCount`、`captions`、`captionTimes`、插圖數、scenes 幕數必須一致；不得跳步 |
 | **保留 Apple 封面** | 重抽單幕時勿用 `--approve` 覆蓋 `01.jpg`；單張 `cp` 進 `public/stories/<slug>/` |

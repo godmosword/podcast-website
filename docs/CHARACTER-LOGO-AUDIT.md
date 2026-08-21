@@ -42,7 +42,8 @@
 
 ## 操作
 
-1. 產圖後縮成 `public/characters/logo/{slug}-512.webp`、`-128.webp`、`-32.webp`（64px 預覽吃 128 檔）。
+0. 先 `npm run generate:character-logos -- --pilot --dry-run` 看張數與估價；准許後才拿掉 `--dry-run`。候選在 `public/.logo-staging/<slug>/contact.html`。
+1. `--approve --slug <id> --pick N` 後才會寫 `public/characters/logo/{slug}-512.webp`、`-128.webp`、`-32.webp`（64px 預覽吃 128 檔）。
 2. 打開 `/studio/logo-audit`，先 32px Grid，再剪影，再撞型，再家族分群。
 3. 缺件顯示斜紋佔位框，背景仍是家族色，方便檢查色塊群集。
 4. Pilot（小紅、東東、暖暖）過關後先回填 SPEC 的眼睛半徑比與圓角比，再量產 Tier 1／2。

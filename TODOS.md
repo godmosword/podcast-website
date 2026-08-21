@@ -58,7 +58,18 @@
 - [x] Phase 1 規範＋色票＋35 筆資料＋vitest  `238ae0d`
 - [x] Phase 2 `docs/logo-prompts/` 35 份＋`_shared.md`  `c29e095`
 - [x] Phase 3 `/studio/logo-audit` 驗收頁＋`docs/CHARACTER-LOGO-AUDIT.md`  `c29e095`
-- [x] Phase 4 schema `logoFamily`／`logoFeature`；24–32px 使用點改掛 logo  見本 commit
+- [x] Phase 4 schema `logoFamily`／`logoFeature`；24–32px 使用點改掛 logo  `0db5a2d`
+- [x] Phase 5 產圖 CLI（`--dry-run`／staging／`--approve`；零預設生圖、不呼叫 API）  見本 commit
+- [ ] Phase 6 Pilot 生圖（小紅／東東／暖暖；待文字准許 API）
+- [ ] Phase 7 人工審圖＋回填 SPEC 眼睛比／圓角比／特徵佔比
+- [ ] Phase 8 Tier 1 其餘 7 位成品
+- [ ] Phase 9 Tier 2 量產（未回填參數前 CLI 硬擋）
+
+### 本輪已完成（2026-08-21）
+
+| ID | 說明 |
+|----|------|
+| feat(characters): 角色 Logo Phase 5 產圖 CLI（dry-run／staging／approve） | 見本 commit |
 
 ### 本輪已完成（2026-08-20）
 

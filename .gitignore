@@ -53,6 +53,9 @@ next-env.d.ts
 # 五島夜間點燈生圖暫存（人工審圖前的草稿，勿入庫）
 /public/.zone-night-staging/
 
+# 角色 Logo 生圖暫存（人工審圖前的草稿，勿入庫）
+/public/.logo-staging/
+
 # 著色 AI 線稿暫存（人工審圖前的草稿，勿入庫）
 /public/.coloring-staging/
 

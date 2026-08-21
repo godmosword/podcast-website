@@ -6,6 +6,7 @@
 
 ### Added
 
+- **角色 Logo Phase 5 產圖管線**：`npm run generate:character-logos` 支援 `--pilot`／`--tier`／`--slug`、`--dry-run` 報價、staging contact、`--approve --pick` 寫 512／128／32 webp。預設不呼叫 API；禁止黏土前綴與定裝照路徑；未回填 Pilot 參數前擋 `--tier 2` 生圖。
 - **親子遊樂地圖 PR6 editorial recommendation**：新增與景點事實資料分離的 `play-map-editorial-picks` sidecar 與 deterministic resolver；只有在附近／縣市／已提交地圖視野且至少兩筆結果時，依目前意圖、附近距離、編輯優先序與既有結果順序顯示最多一筆「媽米先幫你看」。僅出現在 mobile Card tab 與 desktop 結果欄，點擊沿用既有完整詳情互動，不改 96 筆景點資料、Leaflet、SEO 或其他頁面。
 - **親子遊樂地圖 PR5 UX subtraction**：首屏收斂為「附近／雨天／免費／放電／室內」五個主要快捷；好停車／推車 OK／室內外移入進階篩選；全台初始狀態明確標示資料庫與 coverage，行動地圖結果列預設 half，地圖卡片改開 compact preview。保留原有 query 相容性、96 筆資料、SSR hidden-card、SEO 與桌面版行為。
 - **親子遊樂地圖 mobile results bottom sheet**：行動版 Map tab 新增 collapsed／half／expanded 三段式景點結果列；沿用既有卡片與 Place Sheet 語意，拖曳只作用於把手，snap 後通知 Leaflet 重算尺寸，不改 URL／SEO／景點資料或桌面並排版面。
