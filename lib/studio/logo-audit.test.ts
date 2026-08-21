@@ -53,7 +53,7 @@ describe("logo audit helpers", () => {
     ]);
     expect(groups.reduce((sum, group) => sum + group.logos.length, 0)).toBe(35);
     expect(familyOnDark("rescue")).toBe(true);
-    expect(familyOnDark("joy")).toBe(false);
+    expect(familyOnDark("joy")).toBe(true);
   });
 
   it("驗收頁不進 sitemap", () => {
@@ -83,7 +83,7 @@ describe("logo audit helpers", () => {
     expect(familyOnDark("construction")).toBe(true);
     expect(familyOnDark("speed")).toBe(true);
     expect(familyOnDark("fantasy")).toBe(true);
-    expect(familyOnDark("joy")).toBe(false);
+    expect(familyOnDark("joy")).toBe(true);
     expect(rows.filter((row) => !row.passes).map((row) => row.slug)).toEqual([]);
     expect(rows.every((row) => row.faceSurface === "primary" || row.faceSurface === "secondary")).toBe(
       true,

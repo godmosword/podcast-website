@@ -14,7 +14,7 @@ Shell is the only feature. Coral shell is the silhouette; peach face/belly is th
 
 Complexity: 6–10 basic shapes, at most two internal color regions, exactly two eyes and one mouth, readable at 32×32. One continuous rounded outer silhouette.
 
-Color: exactly three semantic colors total — two IP base colors (#E09574 primary, #F8E8D0 secondary) plus the background. Keep the secondary color as one large continuous region. Eyes sit on the secondary IP color. Silhouette-to-background contrast uses the hue-weighted gate (2.8 / 3.6 / 4.5) with margin >= 0.2. If the secondary region forms the outer contour, secondary-to-background >= 3.6 with margin >= 0.2; otherwise secondary-to-primary >= 1.8 with margin >= 0.2. Facial marks on the faceSurface region >= 5:1 with margin >= 0.2.
+Color: exactly three semantic colors total — two IP base colors (#E09574 primary, #F8E8D0 secondary) plus the background. Keep the secondary color as one large continuous region. Eyes sit on the secondary IP color. Silhouette-to-background contrast uses the hue-weighted gate (2.8 / 3.6 / 4.5) with margin >= 0.2. If the secondary region forms the outer contour, secondary-to-background >= 3.6 with margin >= 0.2; otherwise secondary-to-primary >= 1.8 with margin >= 0.2. Secondary must also be distinguishable from primary at 32px: contrast >= 1.6 or hue distance >= 30. Facial marks on the faceSurface region >= 5:1 with margin >= 0.2.
 
 Composition: upright, horizontally centered, cropped flush at the bottom edge, filling 75–85% of canvas height with 15–25% headroom. Canvas is not rotated or tilted. Silhouette may differ from the vehicle cast, but eye style, canvas rules, and the three-color system stay identical. Both members of every paired feature fully visible and uncropped.
 

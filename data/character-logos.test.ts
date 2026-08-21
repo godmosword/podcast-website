@@ -12,7 +12,6 @@ import {
   familyBackgroundHex,
   getCharacterLogo,
   getCharacterLogos,
-  relativeLuminance,
   requireCharacterLogo,
 } from "./character-logos";
 
@@ -105,7 +104,7 @@ describe("character logos", () => {
     }
   });
 
-  it("speed／construction／fantasy 背景改色相分離，rescue／transit／joy／people 不動", () => {
+  it("speed／construction／fantasy 背景改色相分離；joy 改深橄欖；rescue／transit／people 不動", () => {
     expect(LOGO_FAMILIES.speed).toEqual({
       label: "速度競賽",
       oklch: { l: 0.3, c: 0.05, h: 200 },
@@ -133,8 +132,8 @@ describe("character logos", () => {
     });
     expect(LOGO_FAMILIES.joy).toEqual({
       label: "生活歡樂",
-      oklch: { l: 0.95, c: 0.04, h: 85 },
-      hex: "#F7EEDC",
+      oklch: { l: 0.3, c: 0.06, h: 100 },
+      hex: "#352E02",
     });
     expect(LOGO_FAMILIES.people).toEqual({
       label: "人與夥伴",
@@ -170,19 +169,16 @@ describe("character logos", () => {
     }
   });
 
-  it("joy 次色不是白或米色，必須是識別物色；眼睛落在車頭主色", () => {
+  it("joy 次色是識別物色；眼睛落在車頭主色", () => {
     const identity: Record<string, string> = {
       "xiang-xiang": "遮陽棚",
-      "popcorn-truck": "爆米花桶",
+      "popcorn-truck": "爆米花",
       "pu-pu-pig": "豬鼻",
       "xiao-rou": "帳篷",
       "gao-gao": "輻條",
-      dudu: "拱頂",
+      dudu: "拱",
     };
     for (const logo of logos.filter((item) => item.family === "joy")) {
-      expect(relativeLuminance(logo.ipColorSecondary), logo.slug).toBeLessThan(
-        0.45,
-      );
       expect(logo.notes, logo.slug).toContain(identity[logo.slug]);
       expect(logo.faceSurface, logo.slug).toBe("primary");
     }

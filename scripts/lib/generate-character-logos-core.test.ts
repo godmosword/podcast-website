@@ -393,7 +393,7 @@ describe("色彩驗證閘門", () => {
         {
           slug: "fake-low-contrast",
           family: "joy",
-          ipColorPrimary: "#F7EEDC",
+          ipColorPrimary: "#352E02",
           ipColorSecondary: "#FFFFFF",
           faceSurface: "primary",
           secondaryTouchesBackground: true,

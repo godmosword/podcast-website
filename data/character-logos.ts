@@ -24,8 +24,8 @@ export const LOGO_FAMILIES = {
   },
   joy: {
     label: "生活歡樂",
-    oklch: { l: 0.95, c: 0.04, h: 85 },
-    hex: "#F7EEDC",
+    oklch: { l: 0.3, c: 0.06, h: 100 },
+    hex: "#352E02",
   },
   fantasy: {
     label: "奇幻夥伴",

@@ -137,7 +137,7 @@ export function buildLogoPrompt(
     "",
     blocks.complexity,
     "",
-    `Color: exactly three semantic colors total — two IP base colors (${logo.ipColorPrimary} primary, ${logo.ipColorSecondary} secondary) plus the background. Keep the secondary color as one large continuous region. Eyes sit on the ${logo.faceSurface} IP color. Silhouette-to-background contrast uses the hue-weighted gate (2.8 / 3.6 / 4.5) with margin >= 0.2. If the secondary region forms the outer contour, secondary-to-background >= 3.6 with margin >= 0.2; otherwise secondary-to-primary >= 1.8 with margin >= 0.2. Facial marks on the faceSurface region >= 5:1 with margin >= 0.2.`,
+    `Color: exactly three semantic colors total — two IP base colors (${logo.ipColorPrimary} primary, ${logo.ipColorSecondary} secondary) plus the background. Keep the secondary color as one large continuous region. Eyes sit on the ${logo.faceSurface} IP color. Silhouette-to-background contrast uses the hue-weighted gate (2.8 / 3.6 / 4.5) with margin >= 0.2. If the secondary region forms the outer contour, secondary-to-background >= 3.6 with margin >= 0.2; otherwise secondary-to-primary >= 1.8 with margin >= 0.2. Secondary must also be distinguishable from primary at 32px: contrast >= 1.6 or hue distance >= 30. Facial marks on the faceSurface region >= 5:1 with margin >= 0.2.`,
     "",
     composition,
     "",

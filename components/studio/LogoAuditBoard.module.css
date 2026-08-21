@@ -232,6 +232,11 @@
   color: #8a1f16;
 }
 
+.failCell {
+  background: color-mix(in srgb, #c0392b 32%, transparent);
+  font-weight: 700;
+}
+
 .gateHint {
   color: var(--ink-soft);
   font-size: 0.78em;

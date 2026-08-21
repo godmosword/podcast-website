@@ -28,6 +28,10 @@ export const FACE_CONTRAST_GATE = 5;
 export const SECONDARY_BG_GATE = 3.6;
 /** 次色被主色包住時，對主色的內部可辨門檻（再加 margin）。 */
 export const SECONDARY_INTERNAL_GATE = 1.8;
+/** 次色對主色：對比下限（與色相閘門擇一）。35 筆全套用。 */
+export const SECONDARY_VS_PRIMARY_CONTRAST_MIN = 1.6;
+/** 次色對主色：色相距離下限（與對比閘門擇一）。 */
+export const SECONDARY_VS_PRIMARY_HUE_MIN = 30;
 
 export type { FaceSurface };
 
@@ -45,6 +49,8 @@ export type ContrastAuditResult = {
   secondaryVsPrimary: number;
   secondaryGate: number;
   secondaryMargin: number;
+  secondaryVsPrimaryHueDist: number;
+  secondaryDistinguishable: boolean;
   face: number;
   passes: boolean;
   margin: number;
@@ -124,11 +130,23 @@ export function secondaryGateFor(touchesBackground: boolean): number {
   return touchesBackground ? SECONDARY_BG_GATE : SECONDARY_INTERNAL_GATE;
 }
 
+/** 識別特徵在 32px 必須從車身分得出來：對比 ≥ 1.6 或色相差 ≥ 30，擇一。 */
+export function secondaryDistinguishableFromPrimary(
+  contrastVsPrimary: number,
+  hueDistVsPrimary: number,
+): boolean {
+  return (
+    contrastVsPrimary >= SECONDARY_VS_PRIMARY_CONTRAST_MIN ||
+    hueDistVsPrimary >= SECONDARY_VS_PRIMARY_HUE_MIN
+  );
+}
+
 /**
  * 剪影 = primary 對家族背景（hue 加權）。
  * 次色：構成外輪廓則對背景 ≥ 3.6；否則對主色 ≥ 1.8。
+ * 另查次色對主色可辨：對比 ≥ 1.6 或色相差 ≥ 30（擇一；無額外 margin）。
  * 臉部 = 眼標記對 `faceSurface` 指定的那塊，不用較亮者推測。
- * 所有門檻皆須 margin ≥ 0.2。
+ * 剪影／臉部／條件次色門檻皆須 margin ≥ 0.2。
  */
 export function auditEntry(
   entry: ContrastAuditEntry,
@@ -154,13 +172,22 @@ export function auditEntry(
   const margin = silhouette - gate;
   const faceMargin = face - FACE_CONTRAST_GATE;
   const secondaryMargin = secondary - secondaryGate;
+  const secondaryVsPrimaryHueDist = hueDistance(
+    entry.ipColorSecondary,
+    entry.ipColorPrimary,
+  );
+  const secondaryDistinguishable = secondaryDistinguishableFromPrimary(
+    secondaryVsPrimary,
+    secondaryVsPrimaryHueDist,
+  );
   const passes =
     face >= FACE_CONTRAST_GATE &&
     faceMargin >= MARGIN_MIN &&
     silhouette >= gate &&
     margin >= MARGIN_MIN &&
     secondary >= secondaryGate &&
-    secondaryMargin >= MARGIN_MIN;
+    secondaryMargin >= MARGIN_MIN &&
+    secondaryDistinguishable;
   return {
     silhouette,
     secondary,
@@ -168,6 +195,8 @@ export function auditEntry(
     secondaryVsPrimary,
     secondaryGate,
     secondaryMargin,
+    secondaryVsPrimaryHueDist,
+    secondaryDistinguishable,
     face,
     passes,
     margin,

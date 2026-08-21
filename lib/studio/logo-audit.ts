@@ -112,10 +112,17 @@ export type LogoContrastRow = {
   faceSurface: CharacterLogo["faceSurface"];
   secondaryTouchesBackground: boolean;
   silhouette: number;
+  hueDist: number;
+  gate: number;
+  silMargin: number;
+  face: number;
+  faceMargin: number;
   secondaryContrast: number;
   secondaryGate: number;
-  face: number;
-  gate: number;
+  secondaryMargin: number;
+  secondaryVsPrimary: number;
+  secondaryVsPrimaryHueDist: number;
+  secondaryDistinguishable: boolean;
   passes: boolean;
 };
 
@@ -135,10 +142,17 @@ export function auditLogoContrast(
       faceSurface: logo.faceSurface,
       secondaryTouchesBackground: logo.secondaryTouchesBackground,
       silhouette: audit.silhouette,
+      hueDist: audit.hueDist,
+      gate: audit.gate,
+      silMargin: audit.margin,
+      face: audit.face,
+      faceMargin: audit.faceMargin,
       secondaryContrast: audit.secondary,
       secondaryGate: audit.secondaryGate,
-      face: audit.face,
-      gate: audit.gate,
+      secondaryMargin: audit.secondaryMargin,
+      secondaryVsPrimary: audit.secondaryVsPrimary,
+      secondaryVsPrimaryHueDist: audit.secondaryVsPrimaryHueDist,
+      secondaryDistinguishable: audit.secondaryDistinguishable,
       passes: audit.passes,
     };
   });
