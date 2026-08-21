@@ -104,6 +104,44 @@ describe("character logos", () => {
     }
   });
 
+  it("speed／construction／fantasy 背景改色相分離，rescue／transit／joy／people 不動", () => {
+    expect(LOGO_FAMILIES.speed).toEqual({
+      label: "速度競賽",
+      oklch: { l: 0.3, c: 0.05, h: 200 },
+      hex: "#023538",
+    });
+    expect(LOGO_FAMILIES.construction).toEqual({
+      label: "工程建設",
+      oklch: { l: 0.32, c: 0.06, h: 300 },
+      hex: "#382B4D",
+    });
+    expect(LOGO_FAMILIES.fantasy).toEqual({
+      label: "奇幻夥伴",
+      oklch: { l: 0.32, c: 0.06, h: 150 },
+      hex: "#193B22",
+    });
+    expect(LOGO_FAMILIES.rescue).toEqual({
+      label: "緊急救援",
+      oklch: { l: 0.28, c: 0.06, h: 250 },
+      hex: "#1B2A44",
+    });
+    expect(LOGO_FAMILIES.transit).toEqual({
+      label: "大眾運輸",
+      oklch: { l: 0.45, c: 0.09, h: 235 },
+      hex: "#0F5C80",
+    });
+    expect(LOGO_FAMILIES.joy).toEqual({
+      label: "生活歡樂",
+      oklch: { l: 0.95, c: 0.04, h: 85 },
+      hex: "#F7EEDC",
+    });
+    expect(LOGO_FAMILIES.people).toEqual({
+      label: "人與夥伴",
+      oklch: { l: 0.52, c: 0.1, h: 320 },
+      hex: "#8A5C82",
+    });
+  });
+
   it("IP 色為大寫 #RRGGBB", () => {
     const hex = /^#[0-9A-F]{6}$/;
     for (const logo of logos) {

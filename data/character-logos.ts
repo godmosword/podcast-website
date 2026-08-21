@@ -9,13 +9,13 @@ export const LOGO_FAMILIES = {
   },
   construction: {
     label: "工程建設",
-    oklch: { l: 0.45, c: 0.08, h: 70 },
-    hex: "#714D1D",
+    oklch: { l: 0.32, c: 0.06, h: 300 },
+    hex: "#382B4D",
   },
   speed: {
     label: "速度競賽",
-    oklch: { l: 0.42, c: 0.09, h: 30 },
-    hex: "#76382E",
+    oklch: { l: 0.3, c: 0.05, h: 200 },
+    hex: "#023538",
   },
   transit: {
     label: "大眾運輸",
@@ -29,8 +29,8 @@ export const LOGO_FAMILIES = {
   },
   fantasy: {
     label: "奇幻夥伴",
-    oklch: { l: 0.44, c: 0.07, h: 150 },
-    hex: "#345D3E",
+    oklch: { l: 0.32, c: 0.06, h: 150 },
+    hex: "#193B22",
   },
   people: {
     label: "人與夥伴",

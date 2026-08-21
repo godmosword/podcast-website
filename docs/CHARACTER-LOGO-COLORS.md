@@ -11,14 +11,18 @@
 | 家族 key | 中文名 | OKLCH | hex 參考 |
 |---|---|---|---|
 | `rescue` | 緊急救援 | `L 0.28 C 0.06 H 250` | `#1B2A44` |
-| `construction` | 工程建設 | `L 0.45 C 0.08 H 70` | `#714D1D` |
-| `speed` | 速度競賽 | `L 0.42 C 0.09 H 30` | `#76382E` |
+| `construction` | 工程建設 | `L 0.32 C 0.06 H 300` | `#382B4D` |
+| `speed` | 速度競賽 | `L 0.30 C 0.05 H 200` | `#023538` |
 | `transit` | 大眾運輸 | `L 0.45 C 0.09 H 235` | `#0F5C80` |
 | `joy` | 生活歡樂 | `L 0.95 C 0.04 H 85` | `#F7EEDC` |
-| `fantasy` | 奇幻夥伴 | `L 0.44 C 0.07 H 150` | `#345D3E` |
+| `fantasy` | 奇幻夥伴 | `L 0.32 C 0.06 H 150` | `#193B22` |
 | `people` | 人與夥伴 | `L 0.52 C 0.10 H 320` | `#8A5C82` |
 
 程式常數：`data/character-logos.ts` 的 `LOGO_FAMILIES`。
+
+四個暗底（rescue／speed／construction／fantasy）WCAG 亮度擠在 0.023–0.035，grid 上靠色相分群：藏青 250／青 200／藍紫 300／森綠 150，兩兩最短距離 ≥ 45°。construction 用 H 300 而非 285，因為 H 285 對 rescue H 250 只有 35°。people H 320 與 construction 只差 20°，但亮度 0.147 vs 0.031，grid 分得開。`transit`／`joy`／`people` 與 `rescue` 本輪不動。
+
+fantasy 是混色家族（綠恐龍、黃卡車、珊瑚海龜、米色小怪獸），沒有單一色相能同時遠離四者，所以走亮度路線壓到 L 0.32、色相維持 150。
 
 ## 每角色三語意色
 

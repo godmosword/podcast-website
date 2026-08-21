@@ -130,7 +130,7 @@ public/characters/logo/{slug}-32.webp
 
 中明度家族背景（`construction`／`speed`／`transit`／`fantasy`／`people`）與取樣 IP 常落在同一明度帶，3:1 會失敗。規則：
 
-1. **先壓深中明度家族背景**（`construction`／`speed`／`fantasy`／`transit` 已調；`rescue`／`joy`／`people` 不動），讓識別色能靠近定裝照。
+1. **先拉開背景與識別色的色相**（`speed`／`construction`／`fantasy` 已改；`rescue`／`transit`／`joy`／`people` 不動）。不得把家族底做成成員識別色的同色相深淺。
 2. 仍不夠時**沿取樣色相調整 IP 明度**，做最小幅度推淺／推深。
 3. 因眼睛是深色實心點，**優先把主體或臉面推淺**，讓眼對臉面 ≥ 5.0:1。
 4. 僅 `joy`（極淺奶油底）改把車身／軀幹推深；眼睛改落在淺的第二 IP 色（車窗／臉面）。

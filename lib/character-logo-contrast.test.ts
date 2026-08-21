@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  LOGO_FAMILIES,
   familyBackgroundHex,
   getCharacterLogos,
 } from "@/data/character-logos";
@@ -104,8 +105,29 @@ describe("auditEntry", () => {
   });
 });
 
+describe("家族背景色相分群", () => {
+  it("四個暗底兩兩 hueDist ≥ 45，亮度擠在 0.023–0.035", () => {
+    const dark = ["rescue", "speed", "construction", "fantasy"] as const;
+    const hues = dark.map((key) => LOGO_FAMILIES[key].oklch.h);
+    for (let i = 0; i < hues.length; i += 1) {
+      for (let j = i + 1; j < hues.length; j += 1) {
+        const delta = Math.abs(hues[i]! - hues[j]!);
+        const dist = Math.min(delta, 360 - delta);
+        expect(dist, `${dark[i]} vs ${dark[j]}`).toBeGreaterThanOrEqual(45);
+      }
+    }
+    const luminances = dark.map((key) =>
+      relativeLuminance(LOGO_FAMILIES[key].hex),
+    );
+    for (const lum of luminances) {
+      expect(lum).toBeGreaterThanOrEqual(0.02);
+      expect(lum).toBeLessThanOrEqual(0.04);
+    }
+  });
+});
+
 describe("35 筆角色 logo 對比閘門", () => {
-  it("列出未過加權門檻的 slug，供任務 I 對帳", () => {
+  it("現役 35 筆皆過加權門檻", () => {
     const logos = getCharacterLogos();
     expect(logos).toHaveLength(35);
 
@@ -118,19 +140,6 @@ describe("35 筆角色 logo 對比閘門", () => {
       .map((row) => row.slug)
       .sort();
 
-    // 任務 I：預期同色相呼應的 9 筆。J／K 改背景後此陣列應為空。
-    expect(failed).toEqual(
-      [
-        "a-ku",
-        "a-ni",
-        "diao-che",
-        "dong-dong",
-        "duo-duo",
-        "xiao-hong",
-        "xiao-hong-baby",
-        "xiao-hong-dad",
-        "xiao-hong-dad-young",
-      ].sort(),
-    );
+    expect(failed).toEqual([]);
   });
 });

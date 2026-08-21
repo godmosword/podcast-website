@@ -14,7 +14,7 @@ One ahoge hair tuft is the only feature. Pale teal hoodie is the large secondary
 
 Complexity: 6–10 basic shapes, at most two internal color regions, exactly two eyes and one mouth, readable at 32×32. One continuous rounded outer silhouette.
 
-Color: exactly three semantic colors total — two IP base colors (#F3D5B0 primary, #B8E4DE secondary) plus the background. Keep the secondary color as one large continuous region. Silhouette-to-background contrast >= 3.6:1 with margin >= 0.2; facial marks on the lighter IP region >= 5:1.
+Color: exactly three semantic colors total — two IP base colors (#F3D5B0 primary, #B8E4DE secondary) plus the background. Keep the secondary color as one large continuous region. Silhouette-to-background contrast uses the hue-weighted gate (2.8 / 3.6 / 4.5) with margin >= 0.2; facial marks on the lighter IP region >= 5:1.
 
 Composition: upright, horizontally centered, cropped flush at the bottom edge, filling 75–85% of canvas height with 15–25% headroom. Canvas is not rotated or tilted. Silhouette may differ from the vehicle cast, but eye style, canvas rules, and the three-color system stay identical. Both members of every paired feature fully visible and uncropped.
 

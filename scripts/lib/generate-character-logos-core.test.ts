@@ -392,8 +392,8 @@ describe("色彩驗證閘門", () => {
       assertLogoContrastForTargets([
         {
           slug: "fake-low-contrast",
-          family: "speed",
-          ipColorPrimary: "#808080",
+          family: "joy",
+          ipColorPrimary: "#F7EEDC",
           ipColorSecondary: "#FFFFFF",
         },
       ]),
@@ -408,8 +408,15 @@ describe("色彩驗證閘門", () => {
 
   it("同色相未過加權門檻的角色擋生圖", () => {
     expect(() =>
-      assertGenerationAllowed(parseLogoCliArgs(["--slug", "xiao-hong"])),
-    ).toThrow(/色彩驗證未過，不得生圖：[\s\S]*xiao-hong/);
+      assertLogoContrastForTargets([
+        {
+          slug: "fake-same-hue",
+          family: "speed",
+          ipColorPrimary: "#023538",
+          ipColorSecondary: "#C5D8F0",
+        },
+      ]),
+    ).toThrow(/色彩驗證未過，不得生圖：[\s\S]*fake-same-hue/);
   });
 });
 

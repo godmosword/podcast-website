@@ -137,7 +137,7 @@ export function buildLogoPrompt(
     "",
     blocks.complexity,
     "",
-    `Color: exactly three semantic colors total — two IP base colors (${logo.ipColorPrimary} primary, ${logo.ipColorSecondary} secondary) plus the background. Keep the secondary color as one large continuous region. Silhouette-to-background contrast >= 3.6:1 with margin >= 0.2; facial marks on the lighter IP region >= 5:1.`,
+    `Color: exactly three semantic colors total — two IP base colors (${logo.ipColorPrimary} primary, ${logo.ipColorSecondary} secondary) plus the background. Keep the secondary color as one large continuous region. Silhouette-to-background contrast uses the hue-weighted gate (2.8 / 3.6 / 4.5) with margin >= 0.2; facial marks on the lighter IP region >= 5:1.`,
     "",
     composition,
     "",
