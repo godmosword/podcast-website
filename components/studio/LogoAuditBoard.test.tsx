@@ -35,6 +35,10 @@ describe("LogoAuditBoard", () => {
     fireEvent.click(screen.getByRole("button", { name: "取色比對" }));
     expect(screen.getByText(/從產出圖取樣非背景主色/)).toBeTruthy();
 
+    fireEvent.click(screen.getByRole("button", { name: "對比檢查" }));
+    expect(screen.getByText(/未達標列紅底/)).toBeTruthy();
+    expect(screen.getByRole("columnheader", { name: "結果" })).toBeTruthy();
+
     fireEvent.click(screen.getByRole("button", { name: "黑白剪影模式" }));
     expect(
       screen.getByRole("button", { name: "黑白剪影模式" }).getAttribute("aria-pressed"),

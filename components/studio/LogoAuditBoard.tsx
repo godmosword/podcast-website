@@ -10,6 +10,7 @@ import {
   logoAuditTiles,
   resolveCollisionSets,
   logosByFamily,
+  auditLogoContrast,
   type LogoAuditView,
   type LogoPreviewSize,
 } from "@/lib/studio/logo-audit";
@@ -58,6 +59,7 @@ export default function LogoAuditBoard({
   const displaySize: LogoPreviewSize = view === "collisions" ? 32 : size;
   const collisions = useMemo(() => resolveCollisionSets(logos), [logos]);
   const families = useMemo(() => logosByFamily(logos), [logos]);
+  const contrastRows = useMemo(() => auditLogoContrast(logos), [logos]);
 
   function markMissing(key: string) {
     setMissing((current) => {
@@ -100,7 +102,9 @@ export default function LogoAuditBoard({
               type="button"
               className={styles.toggle}
               aria-pressed={displaySize === value}
-              disabled={view === "collisions" && value !== 32}
+              disabled={
+                (view === "collisions" && value !== 32) || view === "contrast"
+              }
               onClick={() => setSize(value)}
             >
               {value}px
@@ -291,6 +295,54 @@ export default function LogoAuditBoard({
               </tbody>
             </table>
           )}
+        </div>
+      )}
+
+      {view === "contrast" && (
+        <div className={styles.sampleWrap}>
+          <p className={styles.hint}>
+            主色剪影門檻隨色相距離（2.8／3.6／4.5）；次色對背景 ≥ 3:1；臉部對較亮
+            IP ≥ 5.0 且餘裕 ≥ 0.2。未達標列紅底。
+          </p>
+          <table className={styles.sampleTable}>
+            <caption className="sr-only">角色 Logo 對比檢查</caption>
+            <thead>
+              <tr>
+                <th scope="col">角色</th>
+                <th scope="col">家族</th>
+                <th scope="col">主色</th>
+                <th scope="col">次色</th>
+                <th scope="col">主色剪影</th>
+                <th scope="col">次色對比</th>
+                <th scope="col">臉部</th>
+                <th scope="col">結果</th>
+              </tr>
+            </thead>
+            <tbody>
+              {contrastRows.map((row) => (
+                <tr
+                  key={row.slug}
+                  className={row.passes ? undefined : styles.failRow}
+                >
+                  <th scope="row">{row.name}</th>
+                  <td>{row.familyLabel}</td>
+                  <td>
+                    <Swatch hex={row.primary} />
+                  </td>
+                  <td>
+                    <Swatch hex={row.secondary} />
+                  </td>
+                  <td>
+                    {row.silhouette.toFixed(2)}
+                    <span className={styles.gateHint}> / {row.gate.toFixed(1)}</span>
+                  </td>
+                  <td>{row.secondaryContrast.toFixed(2)}</td>
+                  <td>{row.face.toFixed(2)}</td>
+                  <td>{row.passes ? "通過" : "未達標"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

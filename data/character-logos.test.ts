@@ -12,6 +12,7 @@ import {
   familyBackgroundHex,
   getCharacterLogo,
   getCharacterLogos,
+  relativeLuminance,
   requireCharacterLogo,
 } from "./character-logos";
 
@@ -157,6 +158,33 @@ describe("character logos", () => {
         familyBackgroundHex(logo.family),
       );
       expect(ratio, `${logo.slug} ${ratio.toFixed(2)}`).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it("次色對家族背景 ≥ 3:1", () => {
+    for (const logo of logos) {
+      const ratio = contrastRatio(
+        logo.ipColorSecondary,
+        familyBackgroundHex(logo.family),
+      );
+      expect(ratio, `${logo.slug} ${ratio.toFixed(2)}`).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it("joy 次色不是白或米色，必須是識別物色", () => {
+    const identity: Record<string, string> = {
+      "xiang-xiang": "遮陽棚",
+      "popcorn-truck": "爆米花桶",
+      "pu-pu-pig": "豬鼻",
+      "xiao-rou": "帳篷",
+      "gao-gao": "輻條",
+      dudu: "拱頂",
+    };
+    for (const logo of logos.filter((item) => item.family === "joy")) {
+      expect(relativeLuminance(logo.ipColorSecondary), logo.slug).toBeLessThan(
+        0.45,
+      );
+      expect(logo.notes, logo.slug).toContain(identity[logo.slug]);
     }
   });
 

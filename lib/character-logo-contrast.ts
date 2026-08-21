@@ -23,6 +23,8 @@ export const HUE_MID_MIN = 30;
 export const FACE_CONTRAST_MIN = 4.5;
 /** 產圖硬閘門：臉部標記對較亮 IP 色。 */
 export const FACE_CONTRAST_GATE = 5;
+/** 次色對家族背景（WCAG，不隨 hue 加權）。 */
+export const SECONDARY_CONTRAST_MIN = 3;
 
 export type ContrastAuditEntry = {
   ipColorPrimary: string;
@@ -31,6 +33,7 @@ export type ContrastAuditEntry = {
 
 export type ContrastAuditResult = {
   silhouette: number;
+  secondary: number;
   face: number;
   passes: boolean;
   margin: number;
@@ -108,8 +111,8 @@ function lighterIpHex(entry: ContrastAuditEntry): string {
 }
 
 /**
- * 剪影 = primary 對家族背景；臉部 = 眼標記對兩 IP 色中較亮者。
- * 不檢查 secondary 對背景。單軌：門檻隨 hueDist 加權。
+ * 剪影 = primary 對家族背景（hue 加權）；次色對背景 ≥ 3:1；
+ * 臉部 = 眼標記對兩 IP 色中較亮者。
  * margin = silhouette − 適用門檻；faceMargin = face − 5.0；皆須 ≥ 0.2。
  */
 export function auditEntry(
@@ -117,6 +120,7 @@ export function auditEntry(
   familyBg: string,
 ): ContrastAuditResult {
   const silhouette = contrastRatio(entry.ipColorPrimary, familyBg);
+  const secondary = contrastRatio(entry.ipColorSecondary, familyBg);
   const face = contrastRatio(LOGO_EYE_HEX, lighterIpHex(entry));
   const hueDist = hueDistance(entry.ipColorPrimary, familyBg);
   const chromaPrimary = chroma(entry.ipColorPrimary);
@@ -127,9 +131,11 @@ export function auditEntry(
     face >= FACE_CONTRAST_GATE &&
     faceMargin >= MARGIN_MIN &&
     silhouette >= gate &&
-    margin >= MARGIN_MIN;
+    margin >= MARGIN_MIN &&
+    secondary >= SECONDARY_CONTRAST_MIN;
   return {
     silhouette,
+    secondary,
     face,
     passes,
     margin,

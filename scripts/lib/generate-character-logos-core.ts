@@ -209,7 +209,7 @@ export function contrastFailureLines(
     const audit = auditEntry(logo, familyBackgroundHex(logo.family));
     if (audit.passes) return [];
     return [
-      `${logo.slug} sil=${audit.silhouette.toFixed(2)} face=${audit.face.toFixed(2)} faceMargin=${audit.faceMargin.toFixed(2)} gate=${audit.gate.toFixed(1)} margin=${audit.margin.toFixed(2)} hueDist=${audit.hueDist.toFixed(1)}`,
+      `${logo.slug} sil=${audit.silhouette.toFixed(2)} sec=${audit.secondary.toFixed(2)} face=${audit.face.toFixed(2)} faceMargin=${audit.faceMargin.toFixed(2)} gate=${audit.gate.toFixed(1)} margin=${audit.margin.toFixed(2)} hueDist=${audit.hueDist.toFixed(1)}`,
     ];
   });
 }

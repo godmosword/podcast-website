@@ -7,6 +7,7 @@ import {
 import {
   FACE_CONTRAST_GATE,
   MARGIN_MIN,
+  SECONDARY_CONTRAST_MIN,
   auditEntry,
   chroma,
   contrastRatio,
@@ -61,13 +62,13 @@ describe("silhouetteGate", () => {
 });
 
 describe("auditEntry", () => {
-  it("剪影只用 primary 對背景，不看 secondary", () => {
+  it("次色溶進背景時 secondary 不合格", () => {
     const result = auditEntry(
-      { ipColorPrimary: "#808080", ipColorSecondary: "#FFFFFF" },
-      "#808080",
+      { ipColorPrimary: "#A33A48", ipColorSecondary: "#F4E6D0" },
+      "#F7EEDC",
     );
-    expect(result.silhouette).toBeCloseTo(1, 2);
-    expect(result.gate).toBe(4.5);
+    expect(result.silhouette).toBeGreaterThan(5);
+    expect(result.secondary).toBeLessThan(SECONDARY_CONTRAST_MIN);
     expect(result.passes).toBe(false);
   });
 
@@ -152,7 +153,17 @@ describe("35 筆角色 logo 對比閘門", () => {
       .map((row) => row.slug)
       .sort();
 
-    // 任務 N：face 也要 margin ≥ 0.2。a-ku 臉部 5.02 掉線。不改色票。
+    // a-ku 臉部 5.02 掉線（faceMargin）。不改其主色。
     expect(failed).toEqual(["a-ku"]);
+  });
+
+  it("次色對家族背景皆 ≥ 3:1", () => {
+    for (const logo of getCharacterLogos()) {
+      const audit = auditEntry(logo, familyBackgroundHex(logo.family));
+      expect(
+        audit.secondary,
+        `${logo.slug} secondary ${audit.secondary.toFixed(2)}`,
+      ).toBeGreaterThanOrEqual(SECONDARY_CONTRAST_MIN);
+    }
   });
 });

@@ -90,10 +90,10 @@
     "family": "construction",
     "feature": "吊鉤臂",
     "ipColorPrimary": "#E36E1E",
-    "ipColorSecondary": "#2E1C12",
+    "ipColorSecondary": "#8E776B",
     "tier": 2,
     "status": "pending",
-    "notes": "色相分離後回歸取樣橙 #E36E1E。舊 #FFA35C／奶油主色是赭底補償；吊鉤臂用深褐次色承接特徵。"
+    "notes": "取樣橙吊臂 #E36E1E → #E36E1E。深褐吊鉤對紫底過不了，#2E1C12 → #8E776B 沿色相推淺承接吊鉤臂。"
   },
   {
     "slug": "a-ku",
@@ -102,10 +102,10 @@
     "family": "construction",
     "feature": "鑽頭",
     "ipColorPrimary": "#C37313",
-    "ipColorSecondary": "#2A2118",
+    "ipColorSecondary": "#857A6F",
     "tier": 2,
     "status": "pending",
-    "notes": "色相分離後回歸取樣黃橙。取樣 #C1710F 臉部 4.90 未過 5.0，沿色相微提至 #C37313。舊 #FAA654／#FBE7A0 是推淺補償；鑽頭用深褐次色。"
+    "notes": "取樣黃橙車身 #C37313 → #C37313（臉部貼線不改主色）。鑽頭深褐 #2A2118 → #857A6F 沿色相推淺，對紫底過 3:1。"
   },
   {
     "slug": "a-ni",
@@ -138,10 +138,10 @@
     "family": "speed",
     "feature": "雙進氣口",
     "ipColorPrimary": "#FFD24A",
-    "ipColorSecondary": "#2A2118",
+    "ipColorSecondary": "#82776C",
     "tier": 2,
     "status": "pending",
-    "notes": "對手。色相分離後維持黃系 #FFD24A（定裝亮黃）。主色必須黃／橘，禁止紅。次色為深色雙進氣口／車窗帶。"
+    "notes": "取樣亮黃 #FFD24A → #FFD24A。黑進氣口對青底過不了，#2A2118 → #82776C 沿色相推淺承接雙進氣口。主色必須黃／橘，禁止紅。"
   },
   {
     "slug": "xiao-hong-dad",
@@ -270,10 +270,10 @@
     "family": "joy",
     "feature": "斜向遮陽棚",
     "ipColorPrimary": "#A33A48",
-    "ipColorSecondary": "#F4E6D0",
+    "ipColorSecondary": "#C3737B",
     "tier": 2,
     "status": "pending",
-    "notes": "joy 極淺底。取樣淺粉對比不足，沿色相推深車身；次色奶油窗帶供眼睛落點（窗帶可接近背景，因不構成外輪廓）。"
+    "notes": "取樣粉車身 #A33A48 → #A33A48。joy 次色禁白／米色；遮陽棚條紋 #C07078 → #C3737B 作眼睛落點。"
   },
   {
     "slug": "popcorn-truck",
@@ -282,10 +282,10 @@
     "family": "joy",
     "feature": "爆米花桶",
     "ipColorPrimary": "#B23A25",
-    "ipColorSecondary": "#F4E6D0",
+    "ipColorSecondary": "#DE634A",
     "tier": 2,
     "status": "pending",
-    "notes": "取樣深紅已過 3:1，作圓桶剪影。奶油窗／臉面為次色供眼睛。上緣必須是圓，對香香的斜線。"
+    "notes": "取樣深紅車身 #B23A25 → #B23A25。次色爆米花桶 #C04830 → #DE634A，不用奶油窗。上緣必須是圓，對香香的斜線。"
   },
   {
     "slug": "pu-pu-pig",
@@ -294,10 +294,10 @@
     "family": "joy",
     "feature": "豬鼻",
     "ipColorPrimary": "#1A6A9A",
-    "ipColorSecondary": "#D08080",
+    "ipColorSecondary": "#C37474",
     "tier": 1,
     "status": "pending",
-    "notes": "取樣豬鼻粉 #C96A6A → #D08080 提一階，臉部對眼標記過 5.0。車身深藍未改。"
+    "notes": "取樣豬鼻粉 #D08080 → #C37474 略推深，次色對 joy 底過 3:1。車身深藍未改。"
   },
   {
     "slug": "xiao-rou",
@@ -306,10 +306,10 @@
     "family": "joy",
     "feature": "車頂帳篷",
     "ipColorPrimary": "#BF556E",
-    "ipColorSecondary": "#F4E6D0",
+    "ipColorSecondary": "#B77888",
     "tier": 2,
     "status": "pending",
-    "notes": "取樣淺粉推深 #C45A72 → #BF556E，過剪影餘裕 0.2。次色奶油窗／帳篷內側供眼睛落點。"
+    "notes": "取樣粉車身 #BF556E → #BF556E。次色帳篷 #C08090 → #B77888，不用奶油窗。"
   },
   {
     "slug": "gao-gao",
@@ -318,10 +318,10 @@
     "family": "joy",
     "feature": "輪圈輻條",
     "ipColorPrimary": "#2A6CB0",
-    "ipColorSecondary": "#F4E6D0",
+    "ipColorSecondary": "#AB8400",
     "tier": 2,
     "status": "pending",
-    "notes": "取樣黃輪框對 joy 底不足。改深藍輪圈為剪影、奶油輪轂臉面為次色。彩艙不開第三色。"
+    "notes": "取樣藍輪圈 #2A6CB0 → #2A6CB0。次色輻條黃 #E8C030 → #AB8400，不用奶油輪轂。彩艙不開第三色。"
   },
   {
     "slug": "dudu",
@@ -330,10 +330,10 @@
     "family": "joy",
     "feature": "圓拱車頂",
     "ipColorPrimary": "#D42A22",
-    "ipColorSecondary": "#F4E6D0",
+    "ipColorSecondary": "#D76668",
     "tier": 2,
     "status": "pending",
-    "notes": "取樣紅車身已過 3:1。次色奶油擋風供眼睛落點。禁止畫成賽車尾翼。"
+    "notes": "取樣紅車身 #D42A22 → #D42A22。次色拱頂 #8B1E2A → #D76668，不用奶油擋風。禁止畫成賽車尾翼。"
   },
   {
     "slug": "duo-duo",
@@ -354,10 +354,10 @@
     "family": "fantasy",
     "feature": "巨型輪",
     "ipColorPrimary": "#ECAE29",
-    "ipColorSecondary": "#3A342E",
+    "ipColorSecondary": "#847D76",
     "tier": 2,
     "status": "pending",
-    "notes": "取樣黃車身 #DDA005 → #ECAE29 沿色相推淺過 3.8。舊 #FFEF9A 是亮綠底補償；巨型輪深褐次色。"
+    "notes": "取樣黃車身 #ECAE29 → #ECAE29。黑巨型輪對森綠底過不了，#3A342E → #847D76 沿色相推淺成暖灰褐輪胎。巨型輪仍是唯一特徵。"
   },
   {
     "slug": "dirty-germs",

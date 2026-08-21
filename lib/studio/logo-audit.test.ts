@@ -12,6 +12,7 @@ import {
   logoSourceSize,
   logosByFamily,
   resolveCollisionSets,
+  auditLogoContrast,
 } from "./logo-audit";
 
 describe("logo audit helpers", () => {
@@ -58,8 +59,9 @@ describe("logo audit helpers", () => {
   it("驗收頁不進 sitemap", () => {
     const urls = sitemap().map((entry) => entry.url);
     expect(urls.some((url) => url.includes("/studio"))).toBe(false);
-    expect(LOGO_AUDIT_VIEWS).toHaveLength(4);
+    expect(LOGO_AUDIT_VIEWS).toHaveLength(5);
     expect(LOGO_AUDIT_VIEWS.map((view) => view.id)).toContain("sample");
+    expect(LOGO_AUDIT_VIEWS.map((view) => view.id)).toContain("contrast");
     expect(BLOODLINE_COLLISION_HINT).toContain("#E4402E");
   });
 
@@ -73,5 +75,17 @@ describe("logo audit helpers", () => {
     expect(tiles).toHaveLength(2);
     expect(tiles.every((tile) => tile.kind === "staging")).toBe(true);
     expect(tiles[0]?.src).toBe("/studio/logo-staging/xiao-hong/01.png");
+  });
+
+  it("對比檢查列出 35 列，construction／speed／fantasy 為暗底", () => {
+    const rows = auditLogoContrast(getCharacterLogos());
+    expect(rows).toHaveLength(35);
+    expect(familyOnDark("construction")).toBe(true);
+    expect(familyOnDark("speed")).toBe(true);
+    expect(familyOnDark("fantasy")).toBe(true);
+    expect(familyOnDark("joy")).toBe(false);
+    expect(rows.filter((row) => !row.passes).map((row) => row.slug)).toEqual([
+      "a-ku",
+    ]);
   });
 });

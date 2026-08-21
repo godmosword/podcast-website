@@ -9,12 +9,18 @@ import {
   characterLogoAssetPath,
   type CharacterLogoPx,
 } from "@/lib/character-logo-query";
+import { auditEntry } from "@/lib/character-logo-contrast";
 
 export const LOGO_PREVIEW_SIZES = [32, 64, 128, 512] as const;
 
 export type LogoPreviewSize = (typeof LOGO_PREVIEW_SIZES)[number];
 
-export type LogoAuditView = "grid" | "collisions" | "families" | "sample";
+export type LogoAuditView =
+  | "grid"
+  | "collisions"
+  | "families"
+  | "sample"
+  | "contrast";
 
 export const LOGO_AUDIT_VIEWS: readonly {
   id: LogoAuditView;
@@ -24,6 +30,7 @@ export const LOGO_AUDIT_VIEWS: readonly {
   { id: "collisions", label: "撞型並排" },
   { id: "families", label: "家族分群" },
   { id: "sample", label: "取色比對" },
+  { id: "contrast", label: "對比檢查" },
 ];
 
 export const BLOODLINE_COLLISION_HINT =
@@ -93,6 +100,42 @@ export function logoAssetPath(slug: string, preview: LogoPreviewSize): string {
 
 export function familyOnDark(family: LogoFamilyKey): boolean {
   return relativeLuminance(LOGO_FAMILIES[family].hex) < 0.45;
+}
+
+export type LogoContrastRow = {
+  slug: string;
+  name: string;
+  family: LogoFamilyKey;
+  familyLabel: string;
+  primary: string;
+  secondary: string;
+  silhouette: number;
+  secondaryContrast: number;
+  face: number;
+  gate: number;
+  passes: boolean;
+};
+
+export function auditLogoContrast(
+  logos: readonly CharacterLogo[],
+): LogoContrastRow[] {
+  return logos.map((logo) => {
+    const family = LOGO_FAMILIES[logo.family];
+    const audit = auditEntry(logo, family.hex);
+    return {
+      slug: logo.slug,
+      name: logo.name,
+      family: logo.family,
+      familyLabel: family.label,
+      primary: logo.ipColorPrimary,
+      secondary: logo.ipColorSecondary,
+      silhouette: audit.silhouette,
+      secondaryContrast: audit.secondary,
+      face: audit.face,
+      gate: audit.gate,
+      passes: audit.passes,
+    };
+  });
 }
 
 export function logosByFamily(

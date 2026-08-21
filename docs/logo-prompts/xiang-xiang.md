@@ -10,11 +10,11 @@ Create one highly simplified IP mascot logo, not a character illustration.
 Background: fully opaque edge-to-edge solid OKLCH(L 0.95 C 0.04 H 85) / #F7EEDC (joy family, 生活歡樂). Use this color for the background only. Background stays visually flat: no vignette, spotlight, or directional wash.
 
 Subject: 香香 the 餐車, reduced to one continuous rounded silhouette with exactly one defining feature: 斜向遮陽棚. Front three-quarter-low view; the vehicle's front IS the face — grille as mouth, headlights as eyes.
-Diagonal awning: the top edge MUST be a slanted line, unlike Huacan's circle. Cream window band is the eye surface.
+Diagonal awning: the top edge MUST be a slanted line, unlike Huacan's circle. Awning stripe is the secondary color and the eye surface — never a cream or white window band.
 
 Complexity: 6–10 basic shapes, at most two internal color regions, exactly two eyes and one mouth, readable at 32×32. One continuous rounded outer silhouette.
 
-Color: exactly three semantic colors total — two IP base colors (#A33A48 primary, #F4E6D0 secondary) plus the background. Keep the secondary color as one large continuous region. Silhouette-to-background contrast uses the hue-weighted gate (2.8 / 3.6 / 4.5) with margin >= 0.2; facial marks on the lighter IP region >= 5:1.
+Color: exactly three semantic colors total — two IP base colors (#A33A48 primary, #C3737B secondary) plus the background. Keep the secondary color as one large continuous region. Silhouette-to-background contrast uses the hue-weighted gate (2.8 / 3.6 / 4.5) with margin >= 0.2; secondary-to-background >= 3:1; facial marks on the lighter IP region >= 5:1.
 
 Composition: front three-quarter-low view; the vehicle's front IS the face — grille as mouth, headlights as eyes. Upright, horizontally centered, cropped flush at the bottom edge, filling 75–85% of canvas height with 15–25% headroom. Canvas is not rotated or tilted. Both members of every paired feature fully visible and uncropped.
 
