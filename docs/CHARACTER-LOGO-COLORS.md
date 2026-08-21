@@ -11,11 +11,11 @@
 | 家族 key | 中文名 | OKLCH | hex 參考 |
 |---|---|---|---|
 | `rescue` | 緊急救援 | `L 0.28 C 0.06 H 250` | `#1B2A44` |
-| `construction` | 工程建設 | `L 0.62 C 0.12 H 75` | `#A8783A` |
-| `speed` | 速度競賽 | `L 0.58 C 0.14 H 35` | `#B85C43` |
-| `transit` | 大眾運輸 | `L 0.55 C 0.09 H 235` | `#3F7595` |
+| `construction` | 工程建設 | `L 0.45 C 0.08 H 70` | `#714D1D` |
+| `speed` | 速度競賽 | `L 0.42 C 0.09 H 30` | `#76382E` |
+| `transit` | 大眾運輸 | `L 0.45 C 0.09 H 235` | `#0F5C80` |
 | `joy` | 生活歡樂 | `L 0.95 C 0.04 H 85` | `#F7EEDC` |
-| `fantasy` | 奇幻夥伴 | `L 0.60 C 0.09 H 145` | `#5C9070` |
+| `fantasy` | 奇幻夥伴 | `L 0.44 C 0.07 H 150` | `#345D3E` |
 | `people` | 人與夥伴 | `L 0.52 C 0.10 H 320` | `#8A5C82` |
 
 程式常數：`data/character-logos.ts` 的 `LOGO_FAMILIES`。

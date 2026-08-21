@@ -61,7 +61,8 @@
 - [x] Phase 4 schema `logoFamily`／`logoFeature`；24–32px 使用點改掛 logo  `0db5a2d`
 - [x] Phase 5 產圖 CLI（`--dry-run`／staging／`--approve`；零預設生圖、不呼叫 API）  `2699c3f`
 - [x] 對比驗證器 `lib/character-logo-contrast.ts`（剪影硬閘門 3.6／臉部 5.0；次色不對背景）  `09d445d`
-- [ ] 家族背景壓深（construction／speed／fantasy）＋ 14 筆 IP 主色重取樣
+- [x] 家族背景壓深（construction／speed／fantasy／transit）  見本 commit
+- [ ] IP 主色重取樣（血緣紅、清潔車／暖暖／小怪獸回淺、消防車提亮）
 - [ ] Phase 6 Pilot 生圖（小紅／東東／暖暖；待文字准許 API；色彩閘門全綠後才開）
 - [ ] Phase 7 人工審圖＋回填 SPEC 眼睛比／圓角比／特徵佔比
 - [ ] Phase 8 Tier 1 其餘 7 位成品
@@ -71,6 +72,7 @@
 
 | ID | 說明 |
 |----|------|
+| feat(characters): 角色 Logo 家族背景壓深（construction／speed／fantasy／transit） | 見本 commit |
 | feat(characters): 角色 Logo 對比驗證器（silhouette ≥ 3.6／face ≥ 5.0） | `09d445d` |
 | feat(characters): 角色 Logo Phase 5 產圖 CLI（dry-run／staging／approve） | `2699c3f` |
 
