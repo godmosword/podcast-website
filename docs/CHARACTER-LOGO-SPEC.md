@@ -136,7 +136,7 @@ public/characters/logo/{slug}-32.webp
 4. 僅 `joy`（極淺奶油底）改把車身／軀幹推深；眼睛改落在淺的第二 IP 色（車窗／臉面）。
 5. 若取樣色相就是家族背景色相（藍色巴士 vs `transit`、深藍警車 vs `rescue`），放棄該色相，改用定裝照裡另一大面積色（奶油飾帶、白車門、金星）。
 
-產圖硬閘門是**單軌加權**，不是雙軌擇一。臉部一律 ≥ 5.0:1。`auditEntry` 未過不得生圖。
+產圖硬閘門是**單軌加權**，不是雙軌擇一。臉部一律 ≥ 5.0:1 且 faceMargin ≥ +0.2。`auditEntry` 未過不得生圖。
 
 **色票設計原則：背景色相必須遠離家族成員的識別色相，不得呼應。** 第一版把 speed／construction／fantasy 底做成成員色的同色相深淺，32px 會糊成一坨；rescue 健康是巧合（藏青離消防紅 128–175°）。
 
@@ -149,6 +149,7 @@ public/characters/logo/{slug}-32.webp
 | ＜ 30° | 4.5:1 | 同色相呼應，必須靠更大亮度差 |
 
 `margin` = silhouette − 該筆適用門檻，仍須 ≥ +0.2（貼線視同未過）。
+`faceMargin` = face − 5.0，同樣須 ≥ +0.2。
 
 `data/character-logos.json` 的 IP hex 已依此調整；`notes` 記錄「取樣值 → 最終值 → 理由」。
 
@@ -275,7 +276,7 @@ npm run generate:character-logos -- --approve --slug xiao-hong --pick 2
 ```
 
 - 必須指定 `--pilot`／`--tier`／`--slug`，拒絕空手生 35 張。
-- **色彩驗證未過不得生圖**：產圖前對每個目標角色跑 `auditEntry`（臉部 ≥ 5.0；剪影門檻依色相距離 2.8／3.6／4.5，margin ≥ 0.2）；任一筆失敗即中止並列出違規項。`--dry-run` 不擋。
+- **色彩驗證未過不得生圖**：產圖前對每個目標角色跑 `auditEntry`（臉部 ≥ 5.0 且 faceMargin ≥ 0.2；剪影門檻依色相距離 2.8／3.6／4.5，margin ≥ 0.2）；任一筆失敗即中止並列出違規項。`--dry-run` 不擋。
 - 原生尺寸 `1024×1024`（不為湊 1536 重採樣）；落地才縮成 512／128／32 webp。
 - Prompt 禁止 `CLAY_STYLE_PREFIX`；`--approve` 禁止寫入 `public/characters/*.jpg`。
 - Pilot 預設 4 候選／high；Tier 1 其餘 7 位預設 2 候選；未回填 SPEC 三參數前 `--tier 2` 生圖會被擋。

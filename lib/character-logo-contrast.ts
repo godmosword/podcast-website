@@ -34,6 +34,7 @@ export type ContrastAuditResult = {
   face: number;
   passes: boolean;
   margin: number;
+  faceMargin: number;
   hueDist: number;
   chroma: number;
   gate: number;
@@ -108,7 +109,8 @@ function lighterIpHex(entry: ContrastAuditEntry): string {
 
 /**
  * 剪影 = primary 對家族背景；臉部 = 眼標記對兩 IP 色中較亮者。
- * 不檢查 secondary 對背景。單軌：門檻隨 hueDist 加權，margin 相對該門檻 ≥ 0.2。
+ * 不檢查 secondary 對背景。單軌：門檻隨 hueDist 加權。
+ * margin = silhouette − 適用門檻；faceMargin = face − 5.0；皆須 ≥ 0.2。
  */
 export function auditEntry(
   entry: ContrastAuditEntry,
@@ -120,8 +122,10 @@ export function auditEntry(
   const chromaPrimary = chroma(entry.ipColorPrimary);
   const gate = silhouetteGate(hueDist);
   const margin = silhouette - gate;
+  const faceMargin = face - FACE_CONTRAST_GATE;
   const passes =
     face >= FACE_CONTRAST_GATE &&
+    faceMargin >= MARGIN_MIN &&
     silhouette >= gate &&
     margin >= MARGIN_MIN;
   return {
@@ -129,6 +133,7 @@ export function auditEntry(
     face,
     passes,
     margin,
+    faceMargin,
     hueDist,
     chroma: chromaPrimary,
     gate,

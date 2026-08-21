@@ -88,7 +88,19 @@ describe("auditEntry", () => {
     expect(result.gate).toBe(2.8);
     expect(result.margin).toBeCloseTo(result.silhouette - 2.8, 5);
     expect(result.face).toBeGreaterThanOrEqual(FACE_CONTRAST_GATE);
+    expect(result.faceMargin).toBeGreaterThanOrEqual(MARGIN_MIN);
     expect(result.passes).toBe(true);
+  });
+
+  it("臉部貼 5.0 線視同未過，faceMargin 須 ≥ 0.2", () => {
+    const result = auditEntry(
+      { ipColorPrimary: "#C1710F", ipColorSecondary: "#2A2118" },
+      "#382B4D",
+    );
+    expect(result.face).toBeGreaterThan(FACE_CONTRAST_GATE - 0.15);
+    expect(result.face).toBeLessThan(FACE_CONTRAST_GATE + MARGIN_MIN);
+    expect(result.faceMargin).toBeLessThan(MARGIN_MIN);
+    expect(result.passes).toBe(false);
   });
 
   it("同色相近距即使過 3.6 也要過 4.5", () => {
@@ -127,7 +139,7 @@ describe("家族背景色相分群", () => {
 });
 
 describe("35 筆角色 logo 對比閘門", () => {
-  it("現役 35 筆皆過加權門檻", () => {
+  it("列出 face margin 未過的 slug，供任務 N 對帳", () => {
     const logos = getCharacterLogos();
     expect(logos).toHaveLength(35);
 
@@ -140,6 +152,7 @@ describe("35 筆角色 logo 對比閘門", () => {
       .map((row) => row.slug)
       .sort();
 
-    expect(failed).toEqual([]);
+    // 任務 N：face 也要 margin ≥ 0.2。a-ku 臉部 5.02 掉線。不改色票。
+    expect(failed).toEqual(["a-ku"]);
   });
 });
