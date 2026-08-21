@@ -7,14 +7,14 @@
 ```
 Create one highly simplified IP mascot logo, not a character illustration.
 
-Background: fully opaque edge-to-edge solid OKLCH(L 0.55 C 0.09 H 235) / #3F7595 (transit family, 大眾運輸). Use this color for the background only. Background stays visually flat: no vignette, spotlight, or directional wash.
+Background: fully opaque edge-to-edge solid OKLCH(L 0.45 C 0.09 H 235) / #0F5C80 (transit family, 大眾運輸). Use this color for the background only. Background stays visually flat: no vignette, spotlight, or directional wash.
 
 Subject: 無人機 the 無人機, reduced to one continuous rounded silhouette with exactly one defining feature: 螺旋槳環.
 Propeller ring is the only feature. Four rotors read as one ring, not thin arms.
 
 Complexity: 6–10 basic shapes, at most two internal color regions, exactly two eyes and one mouth, readable at 32×32. One continuous rounded outer silhouette.
 
-Color: exactly three semantic colors total — two IP base colors (#F3E6CC primary, #F5D020 secondary) plus the background. Keep the secondary color as one large continuous region. Silhouette-to-background contrast >= 3:1; facial marks on the lighter IP region >= 4.5:1.
+Color: exactly three semantic colors total — two IP base colors (#F3E6CC primary, #F5D020 secondary) plus the background. Keep the secondary color as one large continuous region. Silhouette-to-background contrast uses the hue-weighted gate (2.8 / 3.6 / 4.5) with margin >= 0.2; facial marks on the lighter IP region >= 5:1.
 
 Composition: upright, horizontally centered, cropped flush at the bottom edge, filling 75–85% of canvas height with 15–25% headroom. Canvas is not rotated or tilted. Silhouette may differ from the vehicle cast, but eye style, canvas rules, and the three-color system stay identical. Both members of every paired feature fully visible and uncropped.
 

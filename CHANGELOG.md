@@ -6,6 +6,7 @@
 
 ### Added
 
+- **角色 Logo 對比驗證器**：`lib/character-logo-contrast.ts` 以 WCAG 相對亮度計算剪影（primary 對家族背景，硬閘門 3.6）與臉部標記（`#1A1410` 對較亮 IP 色，硬閘門 5.0）。不檢查 secondary 對背景。
 - **角色 Logo Phase 5 產圖管線**：`npm run generate:character-logos` 支援 `--pilot`／`--tier`／`--slug`、`--dry-run` 報價、staging contact、`--approve --pick` 寫 512／128／32 webp。預設不呼叫 API；禁止黏土前綴與定裝照路徑；未回填 Pilot 參數前擋 `--tier 2` 生圖。
 - **親子遊樂地圖 PR6 editorial recommendation**：新增與景點事實資料分離的 `play-map-editorial-picks` sidecar 與 deterministic resolver；只有在附近／縣市／已提交地圖視野且至少兩筆結果時，依目前意圖、附近距離、編輯優先序與既有結果順序顯示最多一筆「媽米先幫你看」。僅出現在 mobile Card tab 與 desktop 結果欄，點擊沿用既有完整詳情互動，不改 96 筆景點資料、Leaflet、SEO 或其他頁面。
 - **親子遊樂地圖 PR5 UX subtraction**：首屏收斂為「附近／雨天／免費／放電／室內」五個主要快捷；好停車／推車 OK／室內外移入進階篩選；全台初始狀態明確標示資料庫與 coverage，行動地圖結果列預設 half，地圖卡片改開 compact preview。保留原有 query 相容性、96 筆資料、SSR hidden-card、SEO 與桌面版行為。
@@ -17,6 +18,16 @@
 
 ### Changed
 
+- **角色 Logo 家族背景壓深**：`construction`／`speed`／`fantasy`／`transit` 改較深 OKLCH，拉開與中明度車身的亮度帶；`rescue`／`joy`／`people` 不變。
+- **角色 Logo IP 主色重取樣**：定裝照取樣後只在剪影餘裕不足時沿色相微調；血緣四位共用珊瑚紅；清潔車／暖暖／小怪獸撤回深補償；消防車提亮；噗噗臉部次色提一階。
+- **角色 Logo prompt 重產**：35 份 `docs/logo-prompts/` 對齊新家族背景與 IP 色；`_shared.md` 的 style／forbid 區塊未改。
+- **角色 Logo 產圖色彩閘門**：`generate-character-logos-core` 產圖前跑 `auditEntry`，任一目標角色未過即中止並列違規；寫入 SPEC。
+- **角色 Logo 對比驗證器雙軌**：剪影可走軌道 1（亮度 ≥ 3.6 且 margin ≥ 0.2）或軌道 2（≥ 2.8 且色相距離 ≥ 60° 且 primary 彩度 ≥ 0.12）。軌道 2 只給高彩度識別色。臉部仍 ≥ 5.0。
+- **角色 Logo 對比驗證器單軌加權**：廢除軌道 2。剪影門檻依色相距離：≥ 60° 為 2.8、30–60° 為 3.6、＜ 30° 為 4.5；margin 相對該門檻 ≥ 0.2。背景不得呼應成員識別色相。
+- **角色 Logo 家族背景色相分離**：`speed` 改深青 `L 0.30 C 0.05 H 200`／`#023538`；`construction` 改深藍紫 `L 0.32 C 0.06 H 300`／`#382B4D`（不用 H 285，對 rescue 只有 35°）；`fantasy` 維持 H 150、壓到 `L 0.32`／`#193B22`。`rescue`／`transit`／`joy`／`people` 不動。
+- **角色 Logo IP 色回歸取樣**：色相分離後血緣四位共用真紅 `#E4402E`；工程黃系與玲玲、多多撤回推淺補償。廢 `#FF8A72`／`#FFC9B8`。
+- **角色 Logo 臉部也要 margin**：`auditEntry` 要求 face ≥ 5.0 且 faceMargin ≥ +0.2。不改色票；現役僅 a-ku（5.02）未過。
+- **角色 Logo 驗收頁**：32px Grid 可載 staging 候選；新增取色比對（產出圖主色 vs `ipColorPrimary` 的 hueDist／silhouette）；撞型並排強調血緣四位共用真紅。
 - **親子遊樂地圖 V3 產品簡化**：手機改名單優先（「看地圖」／「返回名單」），拿掉 Cards/Map tabs 與 MobileMapResultsSheet 三段 snap；地圖模式全幅且篩選留在名單。全國鏡頭依容器寬度 `setView`，西緣釘在台灣海峽東側，避免寬圖把福建當主畫面。地圖針改圓形黏土容器＋正向類型剪影；卡片改 Name／區·類型／旗標／家長一句。桌面並排名單約 44%。不改 96 筆資料、URL query、Nearby、搜尋此區域、SSR hidden-card、手機 Leaflet lazy load、PR7/PR8/PR9。
 - **親子遊樂地圖探索基礎**：保留全台縣市 aggregate，依 zoom 轉 deterministic spatial clusters／individual markers；新增 client-only「搜尋此區域」commit／清除流程，結果以 structured filters AND committed bounds 收斂，URL／SSR／SEO／Leaflet library 不變。
 - **親子遊樂地圖卡片／地圖針互動**：桌面卡片 hover／focus 與 individual marker 互相高亮；marker click 選取對應卡片並在 desktop 名單容器內定位，沿用 full／compact Sheet 與既有 Leaflet／aggregate marker 行為。

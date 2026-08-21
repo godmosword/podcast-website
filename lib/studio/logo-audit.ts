@@ -14,7 +14,7 @@ export const LOGO_PREVIEW_SIZES = [32, 64, 128, 512] as const;
 
 export type LogoPreviewSize = (typeof LOGO_PREVIEW_SIZES)[number];
 
-export type LogoAuditView = "grid" | "collisions" | "families";
+export type LogoAuditView = "grid" | "collisions" | "families" | "sample";
 
 export const LOGO_AUDIT_VIEWS: readonly {
   id: LogoAuditView;
@@ -23,7 +23,52 @@ export const LOGO_AUDIT_VIEWS: readonly {
   { id: "grid", label: "Grid 縮圖" },
   { id: "collisions", label: "撞型並排" },
   { id: "families", label: "家族分群" },
+  { id: "sample", label: "取色比對" },
 ];
+
+export const BLOODLINE_COLLISION_HINT =
+  "賽車血緣四位共用 #E4402E，剪影差異只剩高寬比與識別記號，是最高風險組。";
+
+export type LogoAuditTileSource = {
+  key: string;
+  src: string;
+  caption: string;
+  kind: "approved" | "staging" | "missing";
+};
+
+export function logoAuditTiles(
+  logo: CharacterLogo,
+  size: LogoPreviewSize,
+  preferred: { src: string; kind: "approved" | "staging" } | null,
+  staging: readonly { src: string; file: string }[] = [],
+): LogoAuditTileSource[] {
+  if (preferred?.kind === "approved") {
+    return [
+      {
+        key: `${logo.slug}-approved`,
+        src: logoAssetPath(logo.slug, size),
+        caption: `${logo.name} · ${logo.feature}`,
+        kind: "approved",
+      },
+    ];
+  }
+  if (staging.length > 0) {
+    return staging.map((item) => ({
+      key: `${logo.slug}-${item.file}`,
+      src: item.src,
+      caption: `${logo.name} · ${item.file}`,
+      kind: "staging",
+    }));
+  }
+  return [
+    {
+      key: logo.slug,
+      src: logoAssetPath(logo.slug, size),
+      caption: `${logo.name} · ${logo.feature}`,
+      kind: "missing",
+    },
+  ];
+}
 
 export const LOGO_COLLISION_LABELS: Record<
   (typeof LOGO_COLLISION_SETS)[number]["id"],

@@ -23,11 +23,17 @@ describe("LogoAuditBoard", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "撞型並排" }));
     expect(screen.getByRole("heading", { name: /賽車血緣/ })).toBeTruthy();
+    expect(
+      screen.getByText(/賽車血緣四位共用 #E4402E/),
+    ).toBeTruthy();
     expect(screen.getByRole("heading", { name: /兩台餐車/ })).toBeTruthy();
     expect(screen.getByRole("button", { name: "64px" })).toHaveProperty(
       "disabled",
       true,
     );
+
+    fireEvent.click(screen.getByRole("button", { name: "取色比對" }));
+    expect(screen.getByText(/從產出圖取樣非背景主色/)).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "黑白剪影模式" }));
     expect(

@@ -193,3 +193,36 @@
   color: var(--ink-soft);
   overflow-wrap: anywhere;
 }
+
+.sampleWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-x: auto;
+}
+
+.sampleTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.sampleTable th,
+.sampleTable td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--hairline);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.sampleTable thead th {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+.hexPair {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-variant-numeric: tabular-nums;
+}

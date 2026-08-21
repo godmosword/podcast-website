@@ -42,13 +42,13 @@ const EXTRA: Record<string, string> = {
   "dong-dong":
     "Only feature: the digging bucket. Do not add tracks or a detailed cab. Pale window band is the large secondary region and the eye surface.",
   "diao-che":
-    "Only feature: the hook boom. Cream cab is the face; dark brown is the boom. Do not add outriggers.",
+    "Only feature: the hook boom. Orange body is the silhouette; dark brown is the boom. Eyes sit on the lighter orange region. Do not add outriggers.",
   "a-ku":
     "Only feature: a blunt drill bit. Do not add tracks or a bucket. Distinct from Dongdong.",
   "a-ni":
     "Only feature: the mixing drum. Do not add a chute. Distinct from Dongdong's bucket.",
   "xiao-hong":
-    "Bloodline race-car template (baseline proportions). Single rear spoiler. Pale cherry body; pale blue windshield band is the eye surface. No digits, no number 2.",
+    "Bloodline race-car template (baseline proportions). Single rear spoiler. True-red body; pale blue windshield band is the eye surface. No digits, no number 2.",
   "xiao-chong":
     "Rival, not a blood relative. Longer, lower silhouette than the red family. Two intake scoops are the only feature. Primary IP color must be yellow or orange, never red.",
   "xiao-hong-dad":
@@ -89,7 +89,7 @@ const EXTRA: Record<string, string> = {
   "dirty-germs":
     "One pair of blunt round horns, both visible. Cream belly/face is the eye surface. Single creature, not a swarm.",
   "nuan-nuan-turtle":
-    "Shell is the only feature. Peach face/belly is the eye surface. No bow, no skateboard, no car body.",
+    "Shell is the only feature. Coral shell is the silhouette; peach face/belly is the eye surface. No bow, no skateboard, no car body.",
   "bong-bong":
     "One ahoge hair tuft is the only feature. Pale teal hoodie is the large secondary region. No backpack.",
   mami: "Microphone is the only feature. Apricot headphones/mic mass is the large secondary region. No beauty mark.",
@@ -137,7 +137,7 @@ export function buildLogoPrompt(
     "",
     blocks.complexity,
     "",
-    `Color: exactly three semantic colors total — two IP base colors (${logo.ipColorPrimary} primary, ${logo.ipColorSecondary} secondary) plus the background. Keep the secondary color as one large continuous region. Silhouette-to-background contrast >= 3:1; facial marks on the lighter IP region >= 4.5:1.`,
+    `Color: exactly three semantic colors total — two IP base colors (${logo.ipColorPrimary} primary, ${logo.ipColorSecondary} secondary) plus the background. Keep the secondary color as one large continuous region. Silhouette-to-background contrast uses the hue-weighted gate (2.8 / 3.6 / 4.5) with margin >= 0.2; facial marks on the lighter IP region >= 5:1.`,
     "",
     composition,
     "",

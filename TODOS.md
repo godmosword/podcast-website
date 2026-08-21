@@ -60,7 +60,18 @@
 - [x] Phase 3 `/studio/logo-audit` 驗收頁＋`docs/CHARACTER-LOGO-AUDIT.md`  `c29e095`
 - [x] Phase 4 schema `logoFamily`／`logoFeature`；24–32px 使用點改掛 logo  `0db5a2d`
 - [x] Phase 5 產圖 CLI（`--dry-run`／staging／`--approve`；零預設生圖、不呼叫 API）  `2699c3f`
-- [ ] Phase 6 Pilot 生圖（小紅／東東／暖暖；待文字准許 API）
+- [x] 對比驗證器 `lib/character-logo-contrast.ts`（剪影硬閘門 3.6／臉部 5.0；次色不對背景）  `09d445d`
+- [x] 家族背景壓深（construction／speed／fantasy／transit）  `ea9a102`
+- [x] IP 主色重取樣（血緣紅、清潔車／暖暖／小怪獸回淺、消防車提亮）  `eef1581`
+- [x] 重產 35 份 `docs/logo-prompts/`（`_shared.md` style／forbid 未動）  `3000b00`
+- [x] CLI 產前 `auditEntry`（色彩驗證未過不得生圖）  `64196db`
+- [x] 對比驗證器雙軌（軌道 1 亮度／軌道 2 高彩度色相分離）  `def6418`
+- [x] 對比驗證器改單軌加權（hueDist 門檻 2.8／3.6／4.5）  `6103778`
+- [x] 三家族背景改色相分離（speed 青／construction 藍紫 H300／fantasy 森綠壓深）  `6101978`
+- [x] IP 主色回歸取樣（血緣真紅／工程黃系／玲玲／多多）  `77c2e2a`
+- [x] 臉部對比也要 margin ≥ +0.2  `895af1b`
+- [x] Logo 驗收頁：staging 縮圖＋取色比對＋血緣撞型提示  `fe3bca1`
+- [ ] Phase 6 Pilot 生圖（小紅／東東／暖暖；待文字准許 API；色彩閘門全綠後才開）
 - [ ] Phase 7 人工審圖＋回填 SPEC 眼睛比／圓角比／特徵佔比
 - [ ] Phase 8 Tier 1 其餘 7 位成品
 - [ ] Phase 9 Tier 2 量產（未回填參數前 CLI 硬擋）
@@ -69,6 +80,17 @@
 
 | ID | 說明 |
 |----|------|
+| feat(characters): Logo 驗收頁載 staging 並加取色比對 | `fe3bca1` |
+| feat(characters): Logo 臉部對比也要 margin ≥ +0.2 | `895af1b` |
+| feat(characters): Logo IP 色回歸取樣（真紅／飽和黃綠） | `77c2e2a` |
+| feat(characters): Logo 三家族背景改色相分離（construction H300） | `6101978` |
+| feat(characters): Logo 對比改單軌加權（同色相門檻 4.5） | `6103778` |
+| feat(characters): Logo 對比驗證器加色相距離雙軌 | `def6418` |
+| feat(characters): Logo CLI 產前色彩驗證閘門 | `64196db` |
+| feat(characters): 重產角色 Logo 35 份 prompt（對齊新背景與 IP 色） | `3000b00` |
+| feat(characters): 角色 Logo IP 主色重取樣與 3.8 餘裕閘門 | `eef1581` |
+| feat(characters): 角色 Logo 家族背景壓深（construction／speed／fantasy／transit） | `ea9a102` |
+| feat(characters): 角色 Logo 對比驗證器（silhouette ≥ 3.6／face ≥ 5.0） | `09d445d` |
 | feat(characters): 角色 Logo Phase 5 產圖 CLI（dry-run／staging／approve） | `2699c3f` |
 
 ### 本輪已完成（2026-08-20）

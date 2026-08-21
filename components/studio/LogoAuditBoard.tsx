@@ -3,22 +3,53 @@
 import { useMemo, useState } from "react";
 import { LOGO_FAMILIES, type CharacterLogo } from "@/data/character-logos";
 import {
+  BLOODLINE_COLLISION_HINT,
   LOGO_AUDIT_VIEWS,
   LOGO_PREVIEW_SIZES,
   familyOnDark,
-  logoAssetPath,
-  logosByFamily,
+  logoAuditTiles,
   resolveCollisionSets,
+  logosByFamily,
   type LogoAuditView,
   type LogoPreviewSize,
 } from "@/lib/studio/logo-audit";
 import styles from "./LogoAuditBoard.module.css";
 
-type LogoAuditBoardProps = {
-  logos: CharacterLogo[];
+export type LogoAuditPreferred = {
+  src: string;
+  kind: "approved" | "staging";
+} | null;
+
+export type LogoAuditStagingFile = {
+  src: string;
+  file: string;
 };
 
-export default function LogoAuditBoard({ logos }: LogoAuditBoardProps) {
+export type LogoAuditSampleRow = {
+  slug: string;
+  name: string;
+  source: "approved" | "staging";
+  file: string;
+  intended: string;
+  sampled: string | null;
+  hueDist: number | null;
+  silhouette: number | null;
+  gate: number | null;
+};
+
+type LogoAuditBoardProps = {
+  logos: CharacterLogo[];
+  preferred?: Record<string, LogoAuditPreferred>;
+  staging?: Record<string, LogoAuditStagingFile[]>;
+  samples?: LogoAuditSampleRow[];
+};
+
+export default function LogoAuditBoard({
+  logos,
+  preferred = {},
+  staging = {},
+  samples = [],
+}: LogoAuditBoardProps) {
   const [view, setView] = useState<LogoAuditView>("grid");
   const [size, setSize] = useState<LogoPreviewSize>(32);
   const [silhouette, setSilhouette] = useState(false);
@@ -28,14 +59,22 @@ export default function LogoAuditBoard({ logos }: LogoAuditBoardProps) {
   const collisions = useMemo(() => resolveCollisionSets(logos), [logos]);
   const families = useMemo(() => logosByFamily(logos), [logos]);
 
-  function markMissing(slug: string, preview: LogoPreviewSize) {
-    const key = `${slug}:${preview}`;
+  function markMissing(key: string) {
     setMissing((current) => {
       if (current.has(key)) return current;
       const next = new Set(current);
       next.add(key);
       return next;
     });
+  }
+
+  function tilesFor(logo: CharacterLogo) {
+    return logoAuditTiles(
+      logo,
+      displaySize,
+      preferred[logo.slug] ?? null,
+      staging[logo.slug] ?? [],
+    );
   }
 
   return (
@@ -93,17 +132,22 @@ export default function LogoAuditBoard({ logos }: LogoAuditBoardProps) {
           className={styles.grid}
           style={{ ["--tile" as string]: `${displaySize}px` }}
         >
-          {logos.map((logo) => (
-            <li key={logo.slug}>
-              <LogoAuditTile
-                logo={logo}
-                size={displaySize}
-                silhouette={silhouette}
-                missing={missing.has(`${logo.slug}:${displaySize}`)}
-                onMissing={() => markMissing(logo.slug, displaySize)}
-              />
-            </li>
-          ))}
+          {logos.flatMap((logo) =>
+            tilesFor(logo).map((tile) => (
+              <li key={tile.key}>
+                <LogoAuditTile
+                  logo={logo}
+                  size={displaySize}
+                  src={tile.src}
+                  caption={tile.caption}
+                  kind={tile.kind}
+                  silhouette={silhouette}
+                  missing={missing.has(tile.key)}
+                  onMissing={() => markMissing(tile.key)}
+                />
+              </li>
+            )),
+          )}
         </ul>
       )}
 
@@ -119,21 +163,31 @@ export default function LogoAuditBoard({ logos }: LogoAuditBoardProps) {
                 {set.label}
                 <span className={styles.groupMeta}>32px</span>
               </h3>
+              {set.id === "speed-bloodline" && (
+                <p className={styles.hint}>{BLOODLINE_COLLISION_HINT}</p>
+              )}
               <ul
                 className={styles.row}
                 style={{ ["--tile" as string]: "32px" }}
               >
-                {set.logos.map((logo) => (
-                  <li key={logo.slug}>
-                    <LogoAuditTile
-                      logo={logo}
-                      size={32}
-                      silhouette={silhouette}
-                      missing={missing.has(`${logo.slug}:32`)}
-                      onMissing={() => markMissing(logo.slug, 32)}
-                    />
-                  </li>
-                ))}
+                {set.logos.map((logo) => {
+                  const tile = tilesFor(logo)[0];
+                  if (!tile) return null;
+                  return (
+                    <li key={logo.slug}>
+                      <LogoAuditTile
+                        logo={logo}
+                        size={32}
+                        src={tile.src}
+                        caption={`${logo.name} · ${logo.feature}`}
+                        kind={tile.kind}
+                        silhouette={silhouette}
+                        missing={missing.has(tile.key)}
+                        onMissing={() => markMissing(tile.key)}
+                      />
+                    </li>
+                  );
+                })}
               </ul>
             </section>
           ))}
@@ -166,20 +220,77 @@ export default function LogoAuditBoard({ logos }: LogoAuditBoardProps) {
                 className={styles.grid}
                 style={{ ["--tile" as string]: `${displaySize}px` }}
               >
-                {group.logos.map((logo) => (
-                  <li key={logo.slug}>
-                    <LogoAuditTile
-                      logo={logo}
-                      size={displaySize}
-                      silhouette={silhouette}
-                      missing={missing.has(`${logo.slug}:${displaySize}`)}
-                      onMissing={() => markMissing(logo.slug, displaySize)}
-                    />
-                  </li>
-                ))}
+                {group.logos.flatMap((logo) =>
+                  tilesFor(logo).map((tile) => (
+                    <li key={tile.key}>
+                      <LogoAuditTile
+                        logo={logo}
+                        size={displaySize}
+                        src={tile.src}
+                        caption={tile.caption}
+                        kind={tile.kind}
+                        silhouette={silhouette}
+                        missing={missing.has(tile.key)}
+                        onMissing={() => markMissing(tile.key)}
+                      />
+                    </li>
+                  )),
+                )}
               </ul>
             </section>
           ))}
+        </div>
+      )}
+
+      {view === "sample" && (
+        <div className={styles.sampleWrap}>
+          <p className={styles.hint}>
+            從產出圖取樣非背景主色，對資料 `ipColorPrimary` 算漂色 hueDist，對家族底算實際
+            silhouette。沒有正式檔或 staging 的角色不列。
+          </p>
+          {samples.length === 0 ? (
+            <p className={styles.hint}>目前沒有可取樣的產出圖。</p>
+          ) : (
+            <table className={styles.sampleTable}>
+              <caption className="sr-only">取色比對</caption>
+              <thead>
+                <tr>
+                  <th scope="col">角色</th>
+                  <th scope="col">來源</th>
+                  <th scope="col">資料主色</th>
+                  <th scope="col">取樣主色</th>
+                  <th scope="col">hueDist</th>
+                  <th scope="col">silhouette</th>
+                  <th scope="col">門檻</th>
+                </tr>
+              </thead>
+              <tbody>
+                {samples.map((row) => (
+                  <tr key={`${row.slug}-${row.file}`}>
+                    <th scope="row">{row.name}</th>
+                    <td>
+                      {row.source === "approved" ? "正式" : "staging"} {row.file}
+                    </td>
+                    <td>
+                      <Swatch hex={row.intended} />
+                    </td>
+                    <td>
+                      {row.sampled ? <Swatch hex={row.sampled} /> : "取樣失敗"}
+                    </td>
+                    <td>
+                      {row.hueDist === null ? "—" : row.hueDist.toFixed(1)}
+                    </td>
+                    <td>
+                      {row.silhouette === null
+                        ? "—"
+                        : row.silhouette.toFixed(2)}
+                    </td>
+                    <td>{row.gate === null ? "—" : row.gate.toFixed(1)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
     </div>
@@ -189,6 +300,9 @@ export default function LogoAuditBoard({ logos }: LogoAuditBoardProps) {
 type LogoAuditTileProps = {
   logo: CharacterLogo;
   size: LogoPreviewSize;
+  src: string;
+  caption: string;
+  kind: "approved" | "staging" | "missing";
   silhouette: boolean;
   missing: boolean;
   onMissing: () => void;
@@ -197,15 +311,16 @@ type LogoAuditTileProps = {
 function LogoAuditTile({
   logo,
   size,
+  src,
+  caption,
+  kind,
   silhouette,
   missing,
   onMissing,
 }: LogoAuditTileProps) {
   const family = LOGO_FAMILIES[logo.family];
-  const src = logoAssetPath(logo.slug, size);
   const onDark = familyOnDark(logo.family);
-  const pending = logo.status === "pending" || missing;
-  const caption = `${logo.name} · ${logo.feature}`;
+  const pending = logo.status === "pending" || missing || kind === "staging";
 
   return (
     <figure
@@ -240,11 +355,24 @@ function LogoAuditTile({
         )}
         {pending && (
           <span className={styles.badge} aria-hidden>
-            pending
+            {kind === "staging" ? "staging" : "pending"}
           </span>
         )}
       </div>
       <figcaption className={styles.caption}>{caption}</figcaption>
     </figure>
+  );
+}
+
+function Swatch({ hex }: { hex: string }) {
+  return (
+    <span className={styles.hexPair}>
+      <span
+        className={styles.swatch}
+        style={{ background: hex }}
+        aria-hidden
+      />
+      {hex}
+    </span>
   );
 }

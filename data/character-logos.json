@@ -29,11 +29,11 @@
     "vehicle": "消防車",
     "family": "rescue",
     "feature": "雲梯",
-    "ipColorPrimary": "#F7290F",
+    "ipColorPrimary": "#F45242",
     "ipColorSecondary": "#55CAF0",
     "tier": 2,
     "status": "pending",
-    "notes": "取樣鮮紅＋淺藍擋風。與點點共用色相，靠雲梯剪影分開。"
+    "notes": "取樣 #F22B11 → #F45242。與點點同區間提亮，舊 3.61 貼線不夠漂移餘裕；靠雲梯剪影分開。"
   },
   {
     "slug": "dian-dian",
@@ -41,11 +41,11 @@
     "vehicle": "消防車",
     "family": "rescue",
     "feature": "水砲",
-    "ipColorPrimary": "#EA2514",
+    "ipColorPrimary": "#F45242",
     "ipColorSecondary": "#59C9F0",
     "tier": 2,
     "status": "pending",
-    "notes": "取樣與圈圈同族。主色略深一階，水砲對雲梯。"
+    "notes": "取樣 #CF1F11 → #F45242。舊 #EA2514 對 rescue 底 3.27，提亮後與圈圈同區間；水砲對雲梯。"
   },
   {
     "slug": "pen-pen",
@@ -65,11 +65,11 @@
     "vehicle": "清潔車",
     "family": "construction",
     "feature": "旋轉刷",
-    "ipColorPrimary": "#0F3D1C",
+    "ipColorPrimary": "#7ED957",
     "ipColorSecondary": "#F3E6D0",
     "tier": 2,
     "status": "pending",
-    "notes": "取樣奶油駕駛艙＋翠綠下盤。翠綠對赭底對比不足，沿色相推深成 #0F3D1C；臉面用奶油次色。"
+    "notes": "色相分離後回歸取樣翠綠 #7ED957。舊 #A8E86B 是赭底餘裕推淺；#0F3D1C 是更早的深補償。次色奶油駕駛艙。"
   },
   {
     "slug": "dong-dong",
@@ -77,11 +77,11 @@
     "vehicle": "挖土機",
     "family": "construction",
     "feature": "挖斗",
-    "ipColorPrimary": "#FFE566",
+    "ipColorPrimary": "#ED9F05",
     "ipColorSecondary": "#D4EEF4",
     "tier": 1,
     "status": "pending",
-    "notes": "Pilot。取樣飽和黃對赭底只有 ~1.5:1，沿色相推淺成香蕉黃；次色取淺藍駕駛窗。"
+    "notes": "Pilot。色相分離後回歸取樣黃 #ED9F05。舊 #F7A921／#FFE566 是赭底補償。次色淺藍駕駛窗。"
   },
   {
     "slug": "diao-che",
@@ -89,11 +89,11 @@
     "vehicle": "吊車",
     "family": "construction",
     "feature": "吊鉤臂",
-    "ipColorPrimary": "#F6E4C8",
+    "ipColorPrimary": "#E36E1E",
     "ipColorSecondary": "#2E1C12",
     "tier": 2,
     "status": "pending",
-    "notes": "取樣橙吊臂與赭底同明度帶。駕駛艙推淺奶油為剪影主色；吊鉤臂用深褐次色承接特徵。"
+    "notes": "色相分離後回歸取樣橙 #E36E1E。舊 #FFA35C／奶油主色是赭底補償；吊鉤臂用深褐次色承接特徵。"
   },
   {
     "slug": "a-ku",
@@ -101,11 +101,11 @@
     "vehicle": "鑽地車",
     "family": "construction",
     "feature": "鑽頭",
-    "ipColorPrimary": "#FBE7A0",
+    "ipColorPrimary": "#C37313",
     "ipColorSecondary": "#2A2118",
     "tier": 2,
     "status": "pending",
-    "notes": "取樣黃車身對赭底不足，推淺。鑽頭用深褐次色，勿再加履帶色。"
+    "notes": "色相分離後回歸取樣黃橙。取樣 #C1710F 臉部 4.90 未過 5.0，沿色相微提至 #C37313。舊 #FAA654／#FBE7A0 是推淺補償；鑽頭用深褐次色。"
   },
   {
     "slug": "a-ni",
@@ -113,11 +113,11 @@
     "vehicle": "水泥車",
     "family": "construction",
     "feature": "滾筒",
-    "ipColorPrimary": "#FFE566",
+    "ipColorPrimary": "#EF9F05",
     "ipColorSecondary": "#D4EEF4",
     "tier": 2,
     "status": "pending",
-    "notes": "取樣黃車身同樣推淺。次色取滾筒藍白螺旋的淺青，靠滾筒剪影與東東分開。"
+    "notes": "色相分離後回歸取樣黃 #EF9F05。舊 #F9A921／香蕉黃是赭底補償；次色滾筒淺青，靠滾筒剪影與東東分開。"
   },
   {
     "slug": "xiao-hong",
@@ -125,11 +125,11 @@
     "vehicle": "賽車",
     "family": "speed",
     "feature": "單一尾翼",
-    "ipColorPrimary": "#FFC9B8",
+    "ipColorPrimary": "#E4402E",
     "ipColorSecondary": "#C5D8F0",
     "tier": 1,
     "status": "pending",
-    "notes": "Pilot。取樣鮮紅 #EC4633 對陶土底 1.18:1，沿色相推淺。次色取定裝淺藍擋風帶（眼睛落點）。禁止畫編號 2。"
+    "notes": "Pilot。色相分離後回歸取樣紅。主色共用 #E4402E（鄰近取樣 #ED4230）。廢 #FF8A72 與 #FFC9B8。次色淺藍擋風。禁止畫編號 2。"
   },
   {
     "slug": "xiao-chong",
@@ -141,7 +141,7 @@
     "ipColorSecondary": "#2A2118",
     "tier": 2,
     "status": "pending",
-    "notes": "對手。取樣亮黃，略推淺以過 3:1。主色必須黃／橘，禁止紅。次色為深色雙進氣口／車窗帶。"
+    "notes": "對手。色相分離後維持黃系 #FFD24A（定裝亮黃）。主色必須黃／橘，禁止紅。次色為深色雙進氣口／車窗帶。"
   },
   {
     "slug": "xiao-hong-dad",
@@ -149,11 +149,11 @@
     "vehicle": "賽車",
     "family": "speed",
     "feature": "尾翼 + 一道眉線",
-    "ipColorPrimary": "#FFC9B8",
+    "ipColorPrimary": "#E4402E",
     "ipColorSecondary": "#C5D8F0",
     "tier": 2,
     "status": "pending",
-    "notes": "血緣模板同小紅。眉線是世代記號不是第二機具特徵，併入深色臉部標記、不開第三色。定裝翹鬍子不進 logo。"
+    "notes": "血緣模板同小紅，主色共用 #E4402E。色相分離後回歸取樣紅。眉線是世代記號不是第二機具特徵，併入深色臉部標記、不開第三色。定裝翹鬍子不進 logo。"
   },
   {
     "slug": "xiao-hong-baby",
@@ -161,11 +161,11 @@
     "vehicle": "Baby 賽車",
     "family": "speed",
     "feature": "奶嘴",
-    "ipColorPrimary": "#FFC9B8",
+    "ipColorPrimary": "#E4402E",
     "ipColorSecondary": "#C5D8F0",
     "tier": 2,
     "status": "pending",
-    "notes": "血緣模板最方最矮。定裝青綠奶嘴不開第三色，奶嘴用主色或次色塑造外形。"
+    "notes": "血緣模板最方最矮，主色共用 #E4402E。色相分離後回歸取樣紅。定裝青綠奶嘴不開第三色，奶嘴用主色或次色塑造外形。"
   },
   {
     "slug": "xiao-hong-dad-young",
@@ -173,11 +173,11 @@
     "vehicle": "年輕賽車",
     "family": "speed",
     "feature": "小尾翼",
-    "ipColorPrimary": "#FFC9B8",
+    "ipColorPrimary": "#E4402E",
     "ipColorSecondary": "#C5D8F0",
     "tier": 2,
     "status": "pending",
-    "notes": "血緣模板。定裝眉與翹鬍不進 logo；只留小尾翼。"
+    "notes": "血緣模板，主色共用 #E4402E。色相分離後回歸取樣紅。定裝眉與翹鬍不進 logo；只留小尾翼。"
   },
   {
     "slug": "lan-ba-shi",
@@ -294,10 +294,10 @@
     "family": "joy",
     "feature": "豬鼻",
     "ipColorPrimary": "#1A6A9A",
-    "ipColorSecondary": "#C96A6A",
+    "ipColorSecondary": "#D08080",
     "tier": 1,
     "status": "pending",
-    "notes": "取樣淺藍對 joy 底不足，推深藍車身。豬鼻取樣粉推到 #C96A6A（對底 3.17、對深色眼 5.0）。"
+    "notes": "取樣豬鼻粉 #C96A6A → #D08080 提一階，臉部對眼標記過 5.0。車身深藍未改。"
   },
   {
     "slug": "xiao-rou",
@@ -305,11 +305,11 @@
     "vehicle": "露營車",
     "family": "joy",
     "feature": "車頂帳篷",
-    "ipColorPrimary": "#C45A72",
+    "ipColorPrimary": "#BF556E",
     "ipColorSecondary": "#F4E6D0",
     "tier": 2,
     "status": "pending",
-    "notes": "取樣淺粉推深。次色奶油窗／帳篷內側供眼睛落點。"
+    "notes": "取樣淺粉推深 #C45A72 → #BF556E，過剪影餘裕 0.2。次色奶油窗／帳篷內側供眼睛落點。"
   },
   {
     "slug": "gao-gao",
@@ -341,11 +341,11 @@
     "vehicle": "恐龍車",
     "family": "fantasy",
     "feature": "背鰭",
-    "ipColorPrimary": "#E8F0B4",
+    "ipColorPrimary": "#7DB121",
     "ipColorSecondary": "#FBE8C8",
     "tier": 1,
     "status": "pending",
-    "notes": "取樣綠車身與 fantasy 綠底同色相，沿色相推淺成萊姆。背鰭橙推淺成杏，尖端必須鈍圓。"
+    "notes": "色相分離後回歸取樣綠 #7DB121。舊 #94C941／萊姆 #E8F0B4 是同色相推淺。背鰭杏次色，尖端鈍圓。"
   },
   {
     "slug": "monster-truck",
@@ -353,11 +353,11 @@
     "vehicle": "怪獸卡車",
     "family": "fantasy",
     "feature": "巨型輪",
-    "ipColorPrimary": "#FFEF9A",
+    "ipColorPrimary": "#ECAE29",
     "ipColorSecondary": "#3A342E",
     "tier": 2,
     "status": "pending",
-    "notes": "取樣黃車身推淺過 3:1。巨型輪用深褐次色，這就是唯一特徵。"
+    "notes": "取樣黃車身 #DDA005 → #ECAE29 沿色相推淺過 3.8。舊 #FFEF9A 是亮綠底補償；巨型輪深褐次色。"
   },
   {
     "slug": "dirty-germs",
@@ -365,11 +365,11 @@
     "vehicle": "小怪獸",
     "family": "fantasy",
     "feature": "一對圓鈍角",
-    "ipColorPrimary": "#3A342E",
+    "ipColorPrimary": "#DCCDB4",
     "ipColorSecondary": "#F8E8D0",
     "tier": 2,
     "status": "pending",
-    "notes": "取樣灰黑糊成一團且對綠底不足。主色深褐灰剪影、次色淺腹／臉面。角必須成對鈍圓。"
+    "notes": "取樣深褐灰 → #DCCDB4。舊 #3A342E 是亮綠底逼出的深補償，背景壓深後往淺；次色淺腹／臉面。角必須成對鈍圓。"
   },
   {
     "slug": "nuan-nuan-turtle",
@@ -377,11 +377,11 @@
     "vehicle": "海龜",
     "family": "fantasy",
     "feature": "龜殼",
-    "ipColorPrimary": "#4A281C",
+    "ipColorPrimary": "#F5A882",
     "ipColorSecondary": "#F8E8D0",
     "tier": 1,
     "status": "pending",
-    "notes": "Pilot。取樣珊瑚殼與桃膚對綠底不足。殼沿暖色推深成剪影；臉／腹用淺桃供眼睛。蝴蝶結不進 logo。"
+    "notes": "Pilot。取樣珊瑚殼；#F0906B 僅 3.20，採 #F5A882 得 3.89。舊 #4A281C 是亮綠底補償。臉／腹淺桃次色供眼睛。蝴蝶結不進 logo。"
   },
   {
     "slug": "bong-bong",

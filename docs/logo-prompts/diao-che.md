@@ -7,14 +7,14 @@
 ```
 Create one highly simplified IP mascot logo, not a character illustration.
 
-Background: fully opaque edge-to-edge solid OKLCH(L 0.62 C 0.12 H 75) / #A8783A (construction family, 工程建設). Use this color for the background only. Background stays visually flat: no vignette, spotlight, or directional wash.
+Background: fully opaque edge-to-edge solid OKLCH(L 0.32 C 0.06 H 300) / #382B4D (construction family, 工程建設). Use this color for the background only. Background stays visually flat: no vignette, spotlight, or directional wash.
 
 Subject: 老爺爺 the 吊車, reduced to one continuous rounded silhouette with exactly one defining feature: 吊鉤臂. Front three-quarter-low view; the vehicle's front IS the face — grille as mouth, headlights as eyes.
-Only feature: the hook boom. Cream cab is the face; dark brown is the boom. Do not add outriggers.
+Only feature: the hook boom. Orange body is the silhouette; dark brown is the boom. Eyes sit on the lighter orange region. Do not add outriggers.
 
 Complexity: 6–10 basic shapes, at most two internal color regions, exactly two eyes and one mouth, readable at 32×32. One continuous rounded outer silhouette.
 
-Color: exactly three semantic colors total — two IP base colors (#F6E4C8 primary, #2E1C12 secondary) plus the background. Keep the secondary color as one large continuous region. Silhouette-to-background contrast >= 3:1; facial marks on the lighter IP region >= 4.5:1.
+Color: exactly three semantic colors total — two IP base colors (#E36E1E primary, #2E1C12 secondary) plus the background. Keep the secondary color as one large continuous region. Silhouette-to-background contrast uses the hue-weighted gate (2.8 / 3.6 / 4.5) with margin >= 0.2; facial marks on the lighter IP region >= 5:1.
 
 Composition: front three-quarter-low view; the vehicle's front IS the face — grille as mouth, headlights as eyes. Upright, horizontally centered, cropped flush at the bottom edge, filling 75–85% of canvas height with 15–25% headroom. Canvas is not rotated or tilted. Both members of every paired feature fully visible and uncropped.
 

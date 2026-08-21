@@ -7,14 +7,14 @@
 ```
 Create one highly simplified IP mascot logo, not a character illustration.
 
-Background: fully opaque edge-to-edge solid OKLCH(L 0.58 C 0.14 H 35) / #B85C43 (speed family, 速度競賽). Use this color for the background only. Background stays visually flat: no vignette, spotlight, or directional wash.
+Background: fully opaque edge-to-edge solid OKLCH(L 0.30 C 0.05 H 200) / #023538 (speed family, 速度競賽). Use this color for the background only. Background stays visually flat: no vignette, spotlight, or directional wash.
 
 Subject: 紅爸 the 賽車, reduced to one continuous rounded silhouette with exactly one defining feature: 尾翼 + 一道眉線. Front three-quarter-low view; the vehicle's front IS the face — grille as mouth, headlights as eyes.
 Same bloodline template as Xiao Hong, slightly longer, smaller windshield ratio. Spoiler is the machine feature. Add one short blunt brow-line in the eye color, smaller than the spoiler — generation mark only, not detailed eyebrows, not a third color, no mustache.
 
 Complexity: 6–10 basic shapes, at most two internal color regions, exactly two eyes and one mouth, readable at 32×32. One continuous rounded outer silhouette.
 
-Color: exactly three semantic colors total — two IP base colors (#FFC9B8 primary, #C5D8F0 secondary) plus the background. Keep the secondary color as one large continuous region. Silhouette-to-background contrast >= 3:1; facial marks on the lighter IP region >= 4.5:1.
+Color: exactly three semantic colors total — two IP base colors (#E4402E primary, #C5D8F0 secondary) plus the background. Keep the secondary color as one large continuous region. Silhouette-to-background contrast uses the hue-weighted gate (2.8 / 3.6 / 4.5) with margin >= 0.2; facial marks on the lighter IP region >= 5:1.
 
 Composition: front three-quarter-low view; the vehicle's front IS the face — grille as mouth, headlights as eyes. Upright, horizontally centered, cropped flush at the bottom edge, filling 75–85% of canvas height with 15–25% headroom. Canvas is not rotated or tilted. Both members of every paired feature fully visible and uncropped.
 

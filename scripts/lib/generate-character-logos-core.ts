@@ -14,11 +14,13 @@ import { join } from "node:path";
 import {
   PILOT_SLUGS,
   TIER1_SLUGS,
+  familyBackgroundHex,
   getCharacterLogo,
   getCharacterLogos,
   type CharacterLogo,
   type CharacterLogoStatus,
 } from "@/data/character-logos";
+import { auditEntry } from "@/lib/character-logo-contrast";
 import { CLAY_STYLE_PREFIX } from "./illustrate-core";
 import {
   buildLogoPrompt,
@@ -197,6 +199,33 @@ export function parseLogoCliArgs(argv: string[]): LogoCliArgs {
   };
 }
 
+export function contrastFailureLines(
+  targets: readonly Pick<
+    CharacterLogo,
+    "slug" | "ipColorPrimary" | "ipColorSecondary" | "family"
+  >[],
+): string[] {
+  return targets.flatMap((logo) => {
+    const audit = auditEntry(logo, familyBackgroundHex(logo.family));
+    if (audit.passes) return [];
+    return [
+      `${logo.slug} sil=${audit.silhouette.toFixed(2)} face=${audit.face.toFixed(2)} faceMargin=${audit.faceMargin.toFixed(2)} gate=${audit.gate.toFixed(1)} margin=${audit.margin.toFixed(2)} hueDist=${audit.hueDist.toFixed(1)}`,
+    ];
+  });
+}
+
+/** 色彩驗證未過不得生圖。 */
+export function assertLogoContrastForTargets(
+  targets: readonly Pick<
+    CharacterLogo,
+    "slug" | "ipColorPrimary" | "ipColorSecondary" | "family"
+  >[],
+): void {
+  const failed = contrastFailureLines(targets);
+  if (failed.length === 0) return;
+  throw new Error(`色彩驗證未過，不得生圖：\n${failed.join("\n")}`);
+}
+
 export function assertGenerationAllowed(args: LogoCliArgs): void {
   if (args.mode === "dry-run") return;
   if (
@@ -206,6 +235,13 @@ export function assertGenerationAllowed(args: LogoCliArgs): void {
   ) {
     throw new Error("未回填 Pilot 系統參數前不得開 Tier 2 量產");
   }
+  const slugs = resolveSlugs(args.selection);
+  const targets = slugs.map((slug) => {
+    const logo = getCharacterLogo(slug);
+    if (!logo) throw new Error(`未知 slug：${slug}`);
+    return logo;
+  });
+  assertLogoContrastForTargets(targets);
 }
 
 function resolveSlugs(selection: LogoSelection): string[] {
