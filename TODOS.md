@@ -74,6 +74,7 @@
 - [x] 次色對背景 ≥ 3:1；joy 禁白／米色窗帶，改識別物色  `25dcc4f`
 - [x] `/studio/logo-audit` 對比檢查分頁（35 列主色／次色／臉部）  `25dcc4f`
 - [x] faceSurface 顯式欄位＋次色外輪廓條件閘門＋margin 0.2；阿酷臉部一併過  `080ff76`
+- [x] joy 底改深橄欖 H100；次色對主色可辨閘門（≥1.6 或色相≥30）；對比表全欄  `8cae4ea`
 - [ ] Phase 6 Pilot 生圖（小紅／東東／暖暖；待文字准許 API；色彩閘門全綠後才開）
 - [ ] Phase 7 人工審圖＋回填 SPEC 眼睛比／圓角比／特徵佔比
 - [ ] Phase 8 Tier 1 其餘 7 位成品
@@ -83,6 +84,7 @@
 
 | ID | 說明 |
 |----|------|
+| feat(characters): joy 底改深橄欖、次色對主色可辨閘門 | `8cae4ea` |
 | feat(characters): faceSurface 顯式欄位與次色條件閘門 | `080ff76` |
 | feat(characters): joy 次色禁米色、次色 ≥ 3:1、對比檢查分頁 | `25dcc4f` |
 | feat(characters): Logo 驗收頁載 staging 並加取色比對 | `fe3bca1` |
