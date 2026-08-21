@@ -70,7 +70,7 @@
 - [x] 三家族背景改色相分離（speed 青／construction 藍紫 H300／fantasy 森綠壓深）  `6101978`
 - [x] IP 主色回歸取樣（血緣真紅／工程黃系／玲玲／多多）  `77c2e2a`
 - [x] 臉部對比也要 margin ≥ +0.2  `895af1b`
-- [x] Logo 驗收頁：staging 縮圖＋取色比對＋血緣撞型提示  見本 commit
+- [x] Logo 驗收頁：staging 縮圖＋取色比對＋血緣撞型提示  `fe3bca1`
 - [ ] Phase 6 Pilot 生圖（小紅／東東／暖暖；待文字准許 API；色彩閘門全綠後才開）
 - [ ] Phase 7 人工審圖＋回填 SPEC 眼睛比／圓角比／特徵佔比
 - [ ] Phase 8 Tier 1 其餘 7 位成品
@@ -80,7 +80,7 @@
 
 | ID | 說明 |
 |----|------|
-| feat(characters): Logo 驗收頁載 staging 並加取色比對 | 見本 commit |
+| feat(characters): Logo 驗收頁載 staging 並加取色比對 | `fe3bca1` |
 | feat(characters): Logo 臉部對比也要 margin ≥ +0.2 | `895af1b` |
 | feat(characters): Logo IP 色回歸取樣（真紅／飽和黃綠） | `77c2e2a` |
 | feat(characters): Logo 三家族背景改色相分離（construction H300） | `6101978` |
