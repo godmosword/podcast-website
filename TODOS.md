@@ -63,7 +63,7 @@
 - [x] 對比驗證器 `lib/character-logo-contrast.ts`（剪影硬閘門 3.6／臉部 5.0；次色不對背景）  `09d445d`
 - [x] 家族背景壓深（construction／speed／fantasy／transit）  `ea9a102`
 - [x] IP 主色重取樣（血緣紅、清潔車／暖暖／小怪獸回淺、消防車提亮）  `eef1581`
-- [x] 重產 35 份 `docs/logo-prompts/`（`_shared.md` style／forbid 未動）  見本 commit
+- [x] 重產 35 份 `docs/logo-prompts/`（`_shared.md` style／forbid 未動）  `3000b00`
 - [ ] Phase 6 Pilot 生圖（小紅／東東／暖暖；待文字准許 API；色彩閘門全綠後才開）
 - [ ] Phase 7 人工審圖＋回填 SPEC 眼睛比／圓角比／特徵佔比
 - [ ] Phase 8 Tier 1 其餘 7 位成品
@@ -73,7 +73,7 @@
 
 | ID | 說明 |
 |----|------|
-| feat(characters): 重產角色 Logo 35 份 prompt（對齊新背景與 IP 色） | 見本 commit |
+| feat(characters): 重產角色 Logo 35 份 prompt（對齊新背景與 IP 色） | `3000b00` |
 | feat(characters): 角色 Logo IP 主色重取樣與 3.8 餘裕閘門 | `eef1581` |
 | feat(characters): 角色 Logo 家族背景壓深（construction／speed／fantasy／transit） | `ea9a102` |
 | feat(characters): 角色 Logo 對比驗證器（silhouette ≥ 3.6／face ≥ 5.0） | `09d445d` |
