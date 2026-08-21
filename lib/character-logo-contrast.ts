@@ -5,18 +5,20 @@ import {
   relativeLuminance as wcagRelativeLuminance,
 } from "@/data/character-logos";
 
-/** WCAG 剪影下限。硬閘門另加模型漂移餘裕。 */
-export const SILHOUETTE_CONTRAST_MIN = 3;
-/** 軌道 1：產圖硬閘門（image model 不會精準命中 hex）。 */
-export const SILHOUETTE_CONTRAST_GATE = 3.6;
-/** 貼線視同未過；margin = silhouette − 3.6。 */
+/** 色相遠離時的剪影門檻。 */
+export const SILHOUETTE_GATE_FAR = 2.8;
+/** 色相中距時的剪影門檻。 */
+export const SILHOUETTE_GATE_MID = 3.6;
+/** 色相呼應（同色相）時的剪影門檻。 */
+export const SILHOUETTE_GATE_NEAR = 4.5;
+/** 與舊稱對齊：中距門檻。 */
+export const SILHOUETTE_CONTRAST_GATE = SILHOUETTE_GATE_MID;
+/** 貼線視同未過；margin = silhouette − 該筆適用門檻。 */
 export const MARGIN_MIN = 0.2;
-/** 軌道 2：高彩度識別色的剪影下限。 */
-export const SILHOUETTE_HUE_TRACK_MIN = 2.8;
-/** 軌道 2：primary 對背景的 OKLCH 色相最短距離。 */
-export const HUE_DISTANCE_MIN = 60;
-/** 軌道 2：只給高彩度識別色，不是通用放寬。 */
-export const CHROMA_TRACK_MIN = 0.12;
+/** hueDist ≥ 此值視為遠離，門檻 2.8。 */
+export const HUE_FAR_MIN = 60;
+/** hueDist ≥ 此值且 ＜ 60 視為中距，門檻 3.6。 */
+export const HUE_MID_MIN = 30;
 /** WCAG 臉部標記下限。 */
 export const FACE_CONTRAST_MIN = 4.5;
 /** 產圖硬閘門：臉部標記對較亮 IP 色。 */
@@ -27,8 +29,6 @@ export type ContrastAuditEntry = {
   ipColorSecondary: string;
 };
 
-export type ContrastTrack = 1 | 2;
-
 export type ContrastAuditResult = {
   silhouette: number;
   face: number;
@@ -36,9 +36,7 @@ export type ContrastAuditResult = {
   margin: number;
   hueDist: number;
   chroma: number;
-  track1: boolean;
-  track2: boolean;
-  track: ContrastTrack | null;
+  gate: number;
 };
 
 export function relativeLuminance(hex: string): number {
@@ -94,6 +92,13 @@ export function chroma(hex: string): number {
   return Math.hypot(a, b);
 }
 
+/** 依色相距離決定剪影門檻：遠離 2.8、中距 3.6、呼應 4.5。 */
+export function silhouetteGate(hueDist: number): number {
+  if (hueDist >= HUE_FAR_MIN) return SILHOUETTE_GATE_FAR;
+  if (hueDist >= HUE_MID_MIN) return SILHOUETTE_GATE_MID;
+  return SILHOUETTE_GATE_NEAR;
+}
+
 function lighterIpHex(entry: ContrastAuditEntry): string {
   return relativeLuminance(entry.ipColorPrimary) >=
     relativeLuminance(entry.ipColorSecondary)
@@ -101,17 +106,9 @@ function lighterIpHex(entry: ContrastAuditEntry): string {
     : entry.ipColorSecondary;
 }
 
-export function trackLabel(result: Pick<ContrastAuditResult, "track1" | "track2">): string {
-  if (result.track1 && result.track2) return "1+2";
-  if (result.track1) return "1";
-  if (result.track2) return "2";
-  return "—";
-}
-
 /**
  * 剪影 = primary 對家族背景；臉部 = 眼標記對兩 IP 色中較亮者。
- * 不檢查 secondary 對背景（內部色，不接觸背景）。
- * 雙軌擇一：軌道 1 亮度分離，或軌道 2 高彩度色相分離。
+ * 不檢查 secondary 對背景。單軌：門檻隨 hueDist 加權，margin 相對該門檻 ≥ 0.2。
  */
 export function auditEntry(
   entry: ContrastAuditEntry,
@@ -119,18 +116,14 @@ export function auditEntry(
 ): ContrastAuditResult {
   const silhouette = contrastRatio(entry.ipColorPrimary, familyBg);
   const face = contrastRatio(LOGO_EYE_HEX, lighterIpHex(entry));
-  const margin = silhouette - SILHOUETTE_CONTRAST_GATE;
   const hueDist = hueDistance(entry.ipColorPrimary, familyBg);
   const chromaPrimary = chroma(entry.ipColorPrimary);
-  const track1 =
-    silhouette >= SILHOUETTE_CONTRAST_GATE && margin >= MARGIN_MIN;
-  const track2 =
-    silhouette >= SILHOUETTE_HUE_TRACK_MIN &&
-    hueDist >= HUE_DISTANCE_MIN &&
-    chromaPrimary >= CHROMA_TRACK_MIN;
-  const facePass = face >= FACE_CONTRAST_GATE;
-  const passes = facePass && (track1 || track2);
-  const track: ContrastTrack | null = track1 ? 1 : track2 ? 2 : null;
+  const gate = silhouetteGate(hueDist);
+  const margin = silhouette - gate;
+  const passes =
+    face >= FACE_CONTRAST_GATE &&
+    silhouette >= gate &&
+    margin >= MARGIN_MIN;
   return {
     silhouette,
     face,
@@ -138,8 +131,6 @@ export function auditEntry(
     margin,
     hueDist,
     chroma: chromaPrimary,
-    track1,
-    track2,
-    track,
+    gate,
   };
 }

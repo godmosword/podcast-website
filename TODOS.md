@@ -66,6 +66,7 @@
 - [x] 重產 35 份 `docs/logo-prompts/`（`_shared.md` style／forbid 未動）  `3000b00`
 - [x] CLI 產前 `auditEntry`（色彩驗證未過不得生圖）  `64196db`
 - [x] 對比驗證器雙軌（軌道 1 亮度／軌道 2 高彩度色相分離）  `def6418`
+- [x] 對比驗證器改單軌加權（hueDist 門檻 2.8／3.6／4.5）  見本 commit
 - [ ] Phase 6 Pilot 生圖（小紅／東東／暖暖；待文字准許 API；色彩閘門全綠後才開）
 - [ ] Phase 7 人工審圖＋回填 SPEC 眼睛比／圓角比／特徵佔比
 - [ ] Phase 8 Tier 1 其餘 7 位成品
@@ -75,6 +76,7 @@
 
 | ID | 說明 |
 |----|------|
+| feat(characters): Logo 對比改單軌加權（同色相門檻 4.5） | 見本 commit |
 | feat(characters): Logo 對比驗證器加色相距離雙軌 | `def6418` |
 | feat(characters): Logo CLI 產前色彩驗證閘門 | `64196db` |
 | feat(characters): 重產角色 Logo 35 份 prompt（對齊新背景與 IP 色） | `3000b00` |

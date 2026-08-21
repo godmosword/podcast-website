@@ -362,7 +362,8 @@ describe("staging round-trip（fake generator，不連網）", () => {
     await generateJobsToStaging({
       paths,
       jobs,
-      args: parseLogoCliArgs(["--slug", "xiao-hong", "--candidates", "2"]),
+      // 假名冊可用 xiao-hong；對比閘門讀現役資料，任務 I 下該 slug 未過，改用仍過的 an-an。
+      args: parseLogoCliArgs(["--slug", "an-an", "--candidates", "2"]),
       model: "gpt-image-2",
       generatePng,
     });
@@ -399,10 +400,16 @@ describe("色彩驗證閘門", () => {
     ).toThrow(/色彩驗證未過，不得生圖：[\s\S]*fake-low-contrast/);
   });
 
-  it("現役名冊通過時不擋生圖", () => {
+  it("現役通過的角色不擋生圖", () => {
     expect(() =>
-      assertGenerationAllowed(parseLogoCliArgs(["--pilot"])),
+      assertGenerationAllowed(parseLogoCliArgs(["--slug", "an-an"])),
     ).not.toThrow();
+  });
+
+  it("同色相未過加權門檻的角色擋生圖", () => {
+    expect(() =>
+      assertGenerationAllowed(parseLogoCliArgs(["--slug", "xiao-hong"])),
+    ).toThrow(/色彩驗證未過，不得生圖：[\s\S]*xiao-hong/);
   });
 });
 
