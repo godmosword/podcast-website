@@ -38,6 +38,7 @@ import {
   writeApprovedWebpPyramid,
   generateJobsToStaging,
   approveLogoFromStaging,
+  assertLogoContrastForTargets,
 } from "./generate-character-logos-core";
 
 const PILOT_REMAINING_TIER1 = TIER1_SLUGS.filter(
@@ -381,6 +382,27 @@ describe("staging round-trip（fake generator，不連網）", () => {
       readFileSync(join(repo, "data/character-logos.json"), "utf8"),
     ) as Array<{ status: string }>;
     expect(roster[0]?.status).toBe("accepted");
+  });
+});
+
+describe("色彩驗證閘門", () => {
+  it("目標角色對比未過就中止並列違規", () => {
+    expect(() =>
+      assertLogoContrastForTargets([
+        {
+          slug: "fake-low-contrast",
+          family: "speed",
+          ipColorPrimary: "#808080",
+          ipColorSecondary: "#FFFFFF",
+        },
+      ]),
+    ).toThrow(/色彩驗證未過，不得生圖：[\s\S]*fake-low-contrast/);
+  });
+
+  it("現役名冊通過時不擋生圖", () => {
+    expect(() =>
+      assertGenerationAllowed(parseLogoCliArgs(["--pilot"])),
+    ).not.toThrow();
   });
 });
 
