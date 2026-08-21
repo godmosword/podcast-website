@@ -8,6 +8,8 @@ import {
 export const SILHOUETTE_CONTRAST_MIN = 3;
 /** 產圖硬閘門：image model 不會精準命中 hex。 */
 export const SILHOUETTE_CONTRAST_GATE = 3.6;
+/** 貼線視同未過；margin = silhouette − 3.6。 */
+export const MARGIN_MIN = 0.2;
 /** WCAG 臉部標記下限。 */
 export const FACE_CONTRAST_MIN = 4.5;
 /** 產圖硬閘門：臉部標記對較亮 IP 色。 */
@@ -52,6 +54,8 @@ export function auditEntry(
   const face = contrastRatio(LOGO_EYE_HEX, lighterIpHex(entry));
   const margin = silhouette - SILHOUETTE_CONTRAST_GATE;
   const passes =
-    silhouette >= SILHOUETTE_CONTRAST_GATE && face >= FACE_CONTRAST_GATE;
+    silhouette >= SILHOUETTE_CONTRAST_GATE &&
+    margin >= MARGIN_MIN &&
+    face >= FACE_CONTRAST_GATE;
   return { silhouette, face, passes, margin };
 }

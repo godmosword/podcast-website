@@ -5,6 +5,7 @@ import {
 } from "@/data/character-logos";
 import {
   FACE_CONTRAST_GATE,
+  MARGIN_MIN,
   SILHOUETTE_CONTRAST_GATE,
   auditEntry,
   contrastRatio,
@@ -53,10 +54,20 @@ describe("auditEntry", () => {
     expect(result.face).toBeGreaterThanOrEqual(FACE_CONTRAST_GATE);
     expect(result.passes).toBe(true);
   });
+
+  it("margin < 0.2 即使過 3.6 也視同未過", () => {
+    const result = auditEntry(
+      { ipColorPrimary: "#C45A72", ipColorSecondary: "#F4E6D0" },
+      "#F7EEDC",
+    );
+    expect(result.silhouette).toBeGreaterThanOrEqual(SILHOUETTE_CONTRAST_GATE);
+    expect(result.margin).toBeLessThan(MARGIN_MIN);
+    expect(result.passes).toBe(false);
+  });
 });
 
 describe("35 筆角色 logo 對比閘門", () => {
-  it("每位 silhouette ≥ 3.6 且 face ≥ 5.0，否則列出違規", () => {
+  it("每位 silhouette ≥ 3.6、margin ≥ 0.2、face ≥ 5.0，否則列出違規", () => {
     const logos = getCharacterLogos();
     expect(logos).toHaveLength(35);
 
@@ -65,7 +76,13 @@ describe("35 筆角色 logo 對比閘門", () => {
       return { slug: logo.slug, family: logo.family, ...audit };
     });
 
-    const failed = rows.filter((row) => !row.passes);
+    const failed = rows.filter(
+      (row) =>
+        !row.passes ||
+        row.margin < MARGIN_MIN ||
+        row.face < FACE_CONTRAST_GATE ||
+        row.silhouette < SILHOUETTE_CONTRAST_GATE,
+    );
     expect(
       failed.map(
         (row) =>

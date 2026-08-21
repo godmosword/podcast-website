@@ -146,6 +146,18 @@ describe("character logos", () => {
     }
   });
 
+  it("賽車血緣四位共用同一主色", () => {
+    const slugs = [
+      "xiao-hong",
+      "xiao-hong-dad",
+      "xiao-hong-baby",
+      "xiao-hong-dad-young",
+    ];
+    const primaries = slugs.map((slug) => getCharacterLogo(slug)?.ipColorPrimary);
+    expect(new Set(primaries).size).toBe(1);
+    expect(primaries[0]).toBeDefined();
+  });
+
   it("小衝主色不得偏紅", () => {
     const chong = getCharacterLogo("xiao-chong");
     expect(chong).toBeDefined();
