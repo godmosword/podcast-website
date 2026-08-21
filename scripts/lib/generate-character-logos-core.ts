@@ -20,7 +20,7 @@ import {
   type CharacterLogo,
   type CharacterLogoStatus,
 } from "@/data/character-logos";
-import { auditEntry } from "@/lib/character-logo-contrast";
+import { auditEntry, trackLabel } from "@/lib/character-logo-contrast";
 import { CLAY_STYLE_PREFIX } from "./illustrate-core";
 import {
   buildLogoPrompt,
@@ -209,7 +209,7 @@ export function contrastFailureLines(
     const audit = auditEntry(logo, familyBackgroundHex(logo.family));
     if (audit.passes) return [];
     return [
-      `${logo.slug} sil=${audit.silhouette.toFixed(2)} face=${audit.face.toFixed(2)} margin=${audit.margin.toFixed(2)}`,
+      `${logo.slug} sil=${audit.silhouette.toFixed(2)} face=${audit.face.toFixed(2)} margin=${audit.margin.toFixed(2)} hueDist=${audit.hueDist.toFixed(1)} track=${trackLabel(audit)}`,
     ];
   });
 }

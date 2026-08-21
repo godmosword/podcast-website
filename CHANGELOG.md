@@ -22,6 +22,7 @@
 - **角色 Logo IP 主色重取樣**：定裝照取樣後只在剪影餘裕不足時沿色相微調；血緣四位共用珊瑚紅；清潔車／暖暖／小怪獸撤回深補償；消防車提亮；噗噗臉部次色提一階。
 - **角色 Logo prompt 重產**：35 份 `docs/logo-prompts/` 對齊新家族背景與 IP 色；`_shared.md` 的 style／forbid 區塊未改。
 - **角色 Logo 產圖色彩閘門**：`generate-character-logos-core` 產圖前跑 `auditEntry`，任一目標角色未過即中止並列違規；寫入 SPEC。
+- **角色 Logo 對比驗證器雙軌**：剪影可走軌道 1（亮度 ≥ 3.6 且 margin ≥ 0.2）或軌道 2（≥ 2.8 且色相距離 ≥ 60° 且 primary 彩度 ≥ 0.12）。軌道 2 只給高彩度識別色。臉部仍 ≥ 5.0。
 - **親子遊樂地圖 V3 產品簡化**：手機改名單優先（「看地圖」／「返回名單」），拿掉 Cards/Map tabs 與 MobileMapResultsSheet 三段 snap；地圖模式全幅且篩選留在名單。全國鏡頭依容器寬度 `setView`，西緣釘在台灣海峽東側，避免寬圖把福建當主畫面。地圖針改圓形黏土容器＋正向類型剪影；卡片改 Name／區·類型／旗標／家長一句。桌面並排名單約 44%。不改 96 筆資料、URL query、Nearby、搜尋此區域、SSR hidden-card、手機 Leaflet lazy load、PR7/PR8/PR9。
 - **親子遊樂地圖探索基礎**：保留全台縣市 aggregate，依 zoom 轉 deterministic spatial clusters／individual markers；新增 client-only「搜尋此區域」commit／清除流程，結果以 structured filters AND committed bounds 收斂，URL／SSR／SEO／Leaflet library 不變。
 - **親子遊樂地圖卡片／地圖針互動**：桌面卡片 hover／focus 與 individual marker 互相高亮；marker click 選取對應卡片並在 desktop 名單容器內定位，沿用 full／compact Sheet 與既有 Leaflet／aggregate marker 行為。
