@@ -36,8 +36,11 @@ describe("LogoAuditBoard", () => {
     expect(screen.getByText(/從產出圖取樣非背景主色/)).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "對比檢查" }));
-    expect(screen.getByText(/未達標列紅底/)).toBeTruthy();
-    expect(screen.getByRole("columnheader", { name: "結果" })).toBeTruthy();
+    expect(screen.getByRole("columnheader", { name: "faceSurface" })).toBeTruthy();
+    expect(
+      screen.getByRole("columnheader", { name: "secondaryTouchesBackground" }),
+    ).toBeTruthy();
+    expect(screen.getByRole("columnheader", { name: "次色數值" })).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "黑白剪影模式" }));
     expect(

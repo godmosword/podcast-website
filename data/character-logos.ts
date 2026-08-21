@@ -43,6 +43,8 @@ export type LogoFamilyKey = keyof typeof LOGO_FAMILIES;
 
 export type CharacterLogoStatus = "pending" | "pilot" | "accepted" | "rejected";
 
+export type FaceSurface = "primary" | "secondary";
+
 export type CharacterLogo = {
   slug: string;
   name: string;
@@ -51,6 +53,8 @@ export type CharacterLogo = {
   feature: string;
   ipColorPrimary: string;
   ipColorSecondary: string;
+  faceSurface: FaceSurface;
+  secondaryTouchesBackground: boolean;
   tier: 1 | 2;
   status: CharacterLogoStatus;
   notes: string;
@@ -64,6 +68,8 @@ type RawCharacterLogo = {
   feature: string;
   ipColorPrimary: string;
   ipColorSecondary: string;
+  faceSurface: string;
+  secondaryTouchesBackground: boolean;
   tier: number;
   status: string;
   notes: string;
@@ -151,6 +157,16 @@ function parseLogo(raw: RawCharacterLogo, index: number): CharacterLogo {
   if (!raw.feature.trim()) {
     throw new Error(`character-logos.json[${index}] feature 不可空白`);
   }
+  if (raw.faceSurface !== "primary" && raw.faceSurface !== "secondary") {
+    throw new Error(
+      `character-logos.json[${index}] faceSurface 必須是 primary 或 secondary`,
+    );
+  }
+  if (typeof raw.secondaryTouchesBackground !== "boolean") {
+    throw new Error(
+      `character-logos.json[${index}] secondaryTouchesBackground 必須是 boolean`,
+    );
+  }
   return {
     slug: raw.slug,
     name: raw.name,
@@ -159,6 +175,8 @@ function parseLogo(raw: RawCharacterLogo, index: number): CharacterLogo {
     feature: raw.feature,
     ipColorPrimary: raw.ipColorPrimary,
     ipColorSecondary: raw.ipColorSecondary,
+    faceSurface: raw.faceSurface,
+    secondaryTouchesBackground: raw.secondaryTouchesBackground,
     tier: raw.tier,
     status: raw.status as CharacterLogoStatus,
     notes: raw.notes,
@@ -215,10 +233,9 @@ export function contrastRatio(hexA: string, hexB: string): number {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-/** 兩個 IP 色中較亮者：眼睛應落在這塊。 */
+/** 眼睛落點：由資料 `faceSurface` 指定，不用較亮者推測。 */
 export function faceSurfaceHex(logo: CharacterLogo): string {
-  return relativeLuminance(logo.ipColorPrimary) >=
-    relativeLuminance(logo.ipColorSecondary)
+  return logo.faceSurface === "primary"
     ? logo.ipColorPrimary
     : logo.ipColorSecondary;
 }

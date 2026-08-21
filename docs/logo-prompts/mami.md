@@ -14,7 +14,7 @@ Microphone is the only feature. Apricot headphones/mic mass is the large seconda
 
 Complexity: 6–10 basic shapes, at most two internal color regions, exactly two eyes and one mouth, readable at 32×32. One continuous rounded outer silhouette.
 
-Color: exactly three semantic colors total — two IP base colors (#F3D5B0 primary, #F3C090 secondary) plus the background. Keep the secondary color as one large continuous region. Silhouette-to-background contrast uses the hue-weighted gate (2.8 / 3.6 / 4.5) with margin >= 0.2; secondary-to-background >= 3:1; facial marks on the lighter IP region >= 5:1.
+Color: exactly three semantic colors total — two IP base colors (#F3D5B0 primary, #FFD2A1 secondary) plus the background. Keep the secondary color as one large continuous region. Eyes sit on the primary IP color. Silhouette-to-background contrast uses the hue-weighted gate (2.8 / 3.6 / 4.5) with margin >= 0.2. If the secondary region forms the outer contour, secondary-to-background >= 3.6 with margin >= 0.2; otherwise secondary-to-primary >= 1.8 with margin >= 0.2. Facial marks on the faceSurface region >= 5:1 with margin >= 0.2.
 
 Composition: upright, horizontally centered, cropped flush at the bottom edge, filling 75–85% of canvas height with 15–25% headroom. Canvas is not rotated or tilted. Silhouette may differ from the vehicle cast, but eye style, canvas rules, and the three-color system stay identical. Both members of every paired feature fully visible and uncropped.
 

@@ -109,8 +109,11 @@ export type LogoContrastRow = {
   familyLabel: string;
   primary: string;
   secondary: string;
+  faceSurface: CharacterLogo["faceSurface"];
+  secondaryTouchesBackground: boolean;
   silhouette: number;
   secondaryContrast: number;
+  secondaryGate: number;
   face: number;
   gate: number;
   passes: boolean;
@@ -129,8 +132,11 @@ export function auditLogoContrast(
       familyLabel: family.label,
       primary: logo.ipColorPrimary,
       secondary: logo.ipColorSecondary,
+      faceSurface: logo.faceSurface,
+      secondaryTouchesBackground: logo.secondaryTouchesBackground,
       silhouette: audit.silhouette,
       secondaryContrast: audit.secondary,
+      secondaryGate: audit.secondaryGate,
       face: audit.face,
       gate: audit.gate,
       passes: audit.passes,

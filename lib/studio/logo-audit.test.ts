@@ -84,8 +84,9 @@ describe("logo audit helpers", () => {
     expect(familyOnDark("speed")).toBe(true);
     expect(familyOnDark("fantasy")).toBe(true);
     expect(familyOnDark("joy")).toBe(false);
-    expect(rows.filter((row) => !row.passes).map((row) => row.slug)).toEqual([
-      "a-ku",
-    ]);
+    expect(rows.filter((row) => !row.passes).map((row) => row.slug)).toEqual([]);
+    expect(rows.every((row) => row.faceSurface === "primary" || row.faceSurface === "secondary")).toBe(
+      true,
+    );
   });
 });

@@ -301,8 +301,9 @@ export default function LogoAuditBoard({
       {view === "contrast" && (
         <div className={styles.sampleWrap}>
           <p className={styles.hint}>
-            主色剪影門檻隨色相距離（2.8／3.6／4.5）；次色對背景 ≥ 3:1；臉部對較亮
-            IP ≥ 5.0 且餘裕 ≥ 0.2。未達標列紅底。
+            主色剪影門檻隨色相距離（2.8／3.6／4.5）。次色構成外輪廓則對背景 ≥
+            3.6，否則對主色 ≥ 1.8。臉部對 `faceSurface` 指定色 ≥ 5.0。所有門檻餘裕 ≥
+            0.2。未達標列紅底。
           </p>
           <table className={styles.sampleTable}>
             <caption className="sr-only">角色 Logo 對比檢查</caption>
@@ -312,8 +313,10 @@ export default function LogoAuditBoard({
                 <th scope="col">家族</th>
                 <th scope="col">主色</th>
                 <th scope="col">次色</th>
+                <th scope="col">faceSurface</th>
+                <th scope="col">secondaryTouchesBackground</th>
                 <th scope="col">主色剪影</th>
-                <th scope="col">次色對比</th>
+                <th scope="col">次色數值</th>
                 <th scope="col">臉部</th>
                 <th scope="col">結果</th>
               </tr>
@@ -332,11 +335,19 @@ export default function LogoAuditBoard({
                   <td>
                     <Swatch hex={row.secondary} />
                   </td>
+                  <td>{row.faceSurface}</td>
+                  <td>{row.secondaryTouchesBackground ? "true" : "false"}</td>
                   <td>
                     {row.silhouette.toFixed(2)}
                     <span className={styles.gateHint}> / {row.gate.toFixed(1)}</span>
                   </td>
-                  <td>{row.secondaryContrast.toFixed(2)}</td>
+                  <td>
+                    {row.secondaryContrast.toFixed(2)}
+                    <span className={styles.gateHint}>
+                      {" "}
+                      / {row.secondaryGate.toFixed(1)}
+                    </span>
+                  </td>
                   <td>{row.face.toFixed(2)}</td>
                   <td>{row.passes ? "通過" : "未達標"}</td>
                 </tr>

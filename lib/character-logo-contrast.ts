@@ -3,6 +3,7 @@ import {
   contrastRatio as wcagContrastRatio,
   parseHexColor,
   relativeLuminance as wcagRelativeLuminance,
+  type FaceSurface,
 } from "@/data/character-logos";
 
 /** 色相遠離時的剪影門檻。 */
@@ -21,19 +22,29 @@ export const HUE_FAR_MIN = 60;
 export const HUE_MID_MIN = 30;
 /** WCAG 臉部標記下限。 */
 export const FACE_CONTRAST_MIN = 4.5;
-/** 產圖硬閘門：臉部標記對較亮 IP 色。 */
+/** 產圖硬閘門：臉部標記對 faceSurface 指定的 IP 色。 */
 export const FACE_CONTRAST_GATE = 5;
-/** 次色對家族背景（WCAG，不隨 hue 加權）。 */
-export const SECONDARY_CONTRAST_MIN = 3;
+/** 次色構成外輪廓時，對家族背景的門檻（再加 margin）。 */
+export const SECONDARY_BG_GATE = 3.6;
+/** 次色被主色包住時，對主色的內部可辨門檻（再加 margin）。 */
+export const SECONDARY_INTERNAL_GATE = 1.8;
+
+export type { FaceSurface };
 
 export type ContrastAuditEntry = {
   ipColorPrimary: string;
   ipColorSecondary: string;
+  faceSurface: FaceSurface;
+  secondaryTouchesBackground: boolean;
 };
 
 export type ContrastAuditResult = {
   silhouette: number;
   secondary: number;
+  secondaryVsBackground: number;
+  secondaryVsPrimary: number;
+  secondaryGate: number;
+  secondaryMargin: number;
   face: number;
   passes: boolean;
   margin: number;
@@ -103,39 +114,60 @@ export function silhouetteGate(hueDist: number): number {
   return SILHOUETTE_GATE_NEAR;
 }
 
-function lighterIpHex(entry: ContrastAuditEntry): string {
-  return relativeLuminance(entry.ipColorPrimary) >=
-    relativeLuminance(entry.ipColorSecondary)
+export function faceSurfaceHex(entry: ContrastAuditEntry): string {
+  return entry.faceSurface === "primary"
     ? entry.ipColorPrimary
     : entry.ipColorSecondary;
 }
 
+export function secondaryGateFor(touchesBackground: boolean): number {
+  return touchesBackground ? SECONDARY_BG_GATE : SECONDARY_INTERNAL_GATE;
+}
+
 /**
- * 剪影 = primary 對家族背景（hue 加權）；次色對背景 ≥ 3:1；
- * 臉部 = 眼標記對兩 IP 色中較亮者。
- * margin = silhouette − 適用門檻；faceMargin = face − 5.0；皆須 ≥ 0.2。
+ * 剪影 = primary 對家族背景（hue 加權）。
+ * 次色：構成外輪廓則對背景 ≥ 3.6；否則對主色 ≥ 1.8。
+ * 臉部 = 眼標記對 `faceSurface` 指定的那塊，不用較亮者推測。
+ * 所有門檻皆須 margin ≥ 0.2。
  */
 export function auditEntry(
   entry: ContrastAuditEntry,
   familyBg: string,
 ): ContrastAuditResult {
   const silhouette = contrastRatio(entry.ipColorPrimary, familyBg);
-  const secondary = contrastRatio(entry.ipColorSecondary, familyBg);
-  const face = contrastRatio(LOGO_EYE_HEX, lighterIpHex(entry));
+  const secondaryVsBackground = contrastRatio(
+    entry.ipColorSecondary,
+    familyBg,
+  );
+  const secondaryVsPrimary = contrastRatio(
+    entry.ipColorSecondary,
+    entry.ipColorPrimary,
+  );
+  const secondaryGate = secondaryGateFor(entry.secondaryTouchesBackground);
+  const secondary = entry.secondaryTouchesBackground
+    ? secondaryVsBackground
+    : secondaryVsPrimary;
+  const face = contrastRatio(LOGO_EYE_HEX, faceSurfaceHex(entry));
   const hueDist = hueDistance(entry.ipColorPrimary, familyBg);
   const chromaPrimary = chroma(entry.ipColorPrimary);
   const gate = silhouetteGate(hueDist);
   const margin = silhouette - gate;
   const faceMargin = face - FACE_CONTRAST_GATE;
+  const secondaryMargin = secondary - secondaryGate;
   const passes =
     face >= FACE_CONTRAST_GATE &&
     faceMargin >= MARGIN_MIN &&
     silhouette >= gate &&
     margin >= MARGIN_MIN &&
-    secondary >= SECONDARY_CONTRAST_MIN;
+    secondary >= secondaryGate &&
+    secondaryMargin >= MARGIN_MIN;
   return {
     silhouette,
     secondary,
+    secondaryVsBackground,
+    secondaryVsPrimary,
+    secondaryGate,
+    secondaryMargin,
     face,
     passes,
     margin,

@@ -47,5 +47,5 @@
 2. 打開 `/studio/logo-audit`，先 32px Grid（無正式檔時改載 `public/.logo-staging/<slug>/NN.png`），再剪影，再撞型（血緣四位有最高風險提示），再家族分群，再取色比對，再對比檢查。
 3. 缺件顯示斜紋佔位框，背景仍是家族色，方便檢查色塊群集。
 4. 「取色比對」從產出圖取樣非背景主色，對 `ipColorPrimary` 算 hueDist（漂色），對家族底算實際 silhouette。
-5. 「對比檢查」列出 35 筆主色剪影／次色／臉部；未達標列紅底並標「未達標」。
+5. 「對比檢查」列出 35 筆：`faceSurface`、`secondaryTouchesBackground`、次色數值（對背景或對主色，依欄位）、主色剪影、臉部。未達標列紅底並標「未達標」。所有門檻須 margin ≥ +0.2。
 6. Pilot（小紅、東東、暖暖）過關後先回填 SPEC 的眼睛半徑比與圓角比，再量產 Tier 1／2。

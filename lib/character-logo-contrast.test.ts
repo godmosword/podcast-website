@@ -7,7 +7,8 @@ import {
 import {
   FACE_CONTRAST_GATE,
   MARGIN_MIN,
-  SECONDARY_CONTRAST_MIN,
+  SECONDARY_BG_GATE,
+  SECONDARY_INTERNAL_GATE,
   auditEntry,
   chroma,
   contrastRatio,
@@ -62,27 +63,43 @@ describe("silhouetteGate", () => {
 });
 
 describe("auditEntry", () => {
-  it("次色溶進背景時 secondary 不合格", () => {
+  it("次色構成外輪廓且溶進背景時不合格", () => {
     const result = auditEntry(
-      { ipColorPrimary: "#A33A48", ipColorSecondary: "#F4E6D0" },
+      {
+        ipColorPrimary: "#A33A48",
+        ipColorSecondary: "#F4E6D0",
+        faceSurface: "primary",
+        secondaryTouchesBackground: true,
+      },
       "#F7EEDC",
     );
     expect(result.silhouette).toBeGreaterThan(5);
-    expect(result.secondary).toBeLessThan(SECONDARY_CONTRAST_MIN);
+    expect(result.secondary).toBeLessThan(SECONDARY_BG_GATE);
     expect(result.passes).toBe(false);
   });
 
-  it("臉部對比較亮的那塊 IP 色與眼標記", () => {
+  it("臉部對 faceSurface 指定的那塊，不用較亮者", () => {
     const result = auditEntry(
-      { ipColorPrimary: "#4A281C", ipColorSecondary: "#F8E8D0" },
+      {
+        ipColorPrimary: "#4A281C",
+        ipColorSecondary: "#F8E8D0",
+        faceSurface: "primary",
+        secondaryTouchesBackground: false,
+      },
       "#5C9070",
     );
-    expect(result.face).toBeCloseTo(contrastRatio("#1A1410", "#F8E8D0"), 5);
+    expect(result.face).toBeCloseTo(contrastRatio("#1A1410", "#4A281C"), 5);
+    expect(result.face).toBeLessThan(4);
   });
 
   it("色相遠離時剪影門檻 2.8，margin 相對該門檻", () => {
     const result = auditEntry(
-      { ipColorPrimary: "#E4402E", ipColorSecondary: "#C5D8F0" },
+      {
+        ipColorPrimary: "#E4402E",
+        ipColorSecondary: "#C5D8F0",
+        faceSurface: "secondary",
+        secondaryTouchesBackground: false,
+      },
       "#003737",
     );
     expect(result.hueDist).toBeGreaterThanOrEqual(60);
@@ -95,7 +112,12 @@ describe("auditEntry", () => {
 
   it("臉部貼 5.0 線視同未過，faceMargin 須 ≥ 0.2", () => {
     const result = auditEntry(
-      { ipColorPrimary: "#C1710F", ipColorSecondary: "#2A2118" },
+      {
+        ipColorPrimary: "#C1710F",
+        ipColorSecondary: "#2A2118",
+        faceSurface: "primary",
+        secondaryTouchesBackground: false,
+      },
       "#382B4D",
     );
     expect(result.face).toBeGreaterThan(FACE_CONTRAST_GATE - 0.15);
@@ -106,7 +128,12 @@ describe("auditEntry", () => {
 
   it("同色相近距即使過 3.6 也要過 4.5", () => {
     const result = auditEntry(
-      { ipColorPrimary: "#FF8A72", ipColorSecondary: "#C5D8F0" },
+      {
+        ipColorPrimary: "#FF8A72",
+        ipColorSecondary: "#C5D8F0",
+        faceSurface: "secondary",
+        secondaryTouchesBackground: false,
+      },
       "#76382E",
     );
     expect(result.hueDist).toBeLessThan(30);
@@ -115,6 +142,22 @@ describe("auditEntry", () => {
     expect(result.silhouette).toBeLessThan(4.5);
     expect(result.margin).toBeLessThan(MARGIN_MIN);
     expect(result.passes).toBe(false);
+  });
+
+  it("次色不構成外輪廓時改查對主色，不查對背景", () => {
+    const result = auditEntry(
+      {
+        ipColorPrimary: "#FFD24A",
+        ipColorSecondary: "#2A2118",
+        faceSurface: "primary",
+        secondaryTouchesBackground: false,
+      },
+      "#023538",
+    );
+    expect(result.secondaryVsBackground).toBeLessThan(1.5);
+    expect(result.secondaryGate).toBe(SECONDARY_INTERNAL_GATE);
+    expect(result.secondary).toBeGreaterThan(result.secondaryVsBackground);
+    expect(result.passes).toBe(true);
   });
 });
 
@@ -140,30 +183,41 @@ describe("家族背景色相分群", () => {
 });
 
 describe("35 筆角色 logo 對比閘門", () => {
-  it("列出 face margin 未過的 slug，供任務 N 對帳", () => {
+  it("35 筆全過，且每道門檻都有 margin ≥ 0.2", () => {
     const logos = getCharacterLogos();
     expect(logos).toHaveLength(35);
-
     const failed = logos
       .map((logo) => {
         const audit = auditEntry(logo, familyBackgroundHex(logo.family));
         return { slug: logo.slug, ...audit };
       })
       .filter((row) => !row.passes)
-      .map((row) => row.slug)
-      .sort();
-
-    // a-ku 臉部 5.02 掉線（faceMargin）。不改其主色。
-    expect(failed).toEqual(["a-ku"]);
+      .map((row) => row.slug);
+    expect(failed).toEqual([]);
+    for (const logo of logos) {
+      const audit = auditEntry(logo, familyBackgroundHex(logo.family));
+      expect(audit.margin, logo.slug).toBeGreaterThanOrEqual(MARGIN_MIN);
+      expect(audit.faceMargin, logo.slug).toBeGreaterThanOrEqual(MARGIN_MIN);
+      expect(audit.secondaryMargin, logo.slug).toBeGreaterThanOrEqual(MARGIN_MIN);
+    }
   });
 
-  it("次色對家族背景皆 ≥ 3:1", () => {
-    for (const logo of getCharacterLogos()) {
-      const audit = auditEntry(logo, familyBackgroundHex(logo.family));
-      expect(
-        audit.secondary,
-        `${logo.slug} secondary ${audit.secondary.toFixed(2)}`,
-      ).toBeGreaterThanOrEqual(SECONDARY_CONTRAST_MIN);
+  it("joy 六位眼睛落在 primary", () => {
+    for (const logo of getCharacterLogos().filter((item) => item.family === "joy")) {
+      expect(logo.faceSurface, logo.slug).toBe("primary");
     }
+  });
+
+  it("四個識別特徵次色不再收成同一泥灰", () => {
+    const diao = getCharacterLogos().find((logo) => logo.slug === "diao-che")!;
+    const aku = getCharacterLogos().find((logo) => logo.slug === "a-ku")!;
+    const chong = getCharacterLogos().find((logo) => logo.slug === "xiao-chong")!;
+    const monster = getCharacterLogos().find((logo) => logo.slug === "monster-truck")!;
+    expect(chong.ipColorSecondary).toBe("#2A2118");
+    expect(chroma(diao.ipColorSecondary)).toBeGreaterThan(0.1);
+    expect(chroma(aku.ipColorSecondary)).toBeGreaterThan(0.1);
+    expect(chroma(monster.ipColorSecondary)).toBeGreaterThan(0.08);
+    expect(diao.ipColorSecondary).not.toEqual(aku.ipColorSecondary);
+    expect(diao.ipColorSecondary).not.toEqual(monster.ipColorSecondary);
   });
 });

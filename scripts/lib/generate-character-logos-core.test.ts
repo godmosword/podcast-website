@@ -395,6 +395,8 @@ describe("色彩驗證閘門", () => {
           family: "joy",
           ipColorPrimary: "#F7EEDC",
           ipColorSecondary: "#FFFFFF",
+          faceSurface: "primary",
+          secondaryTouchesBackground: true,
         },
       ]),
     ).toThrow(/色彩驗證未過，不得生圖：[\s\S]*fake-low-contrast/);
@@ -414,6 +416,8 @@ describe("色彩驗證閘門", () => {
           family: "speed",
           ipColorPrimary: "#023538",
           ipColorSecondary: "#C5D8F0",
+          faceSurface: "secondary",
+          secondaryTouchesBackground: false,
         },
       ]),
     ).toThrow(/色彩驗證未過，不得生圖：[\s\S]*fake-same-hue/);

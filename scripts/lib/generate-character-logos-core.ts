@@ -202,14 +202,19 @@ export function parseLogoCliArgs(argv: string[]): LogoCliArgs {
 export function contrastFailureLines(
   targets: readonly Pick<
     CharacterLogo,
-    "slug" | "ipColorPrimary" | "ipColorSecondary" | "family"
+    | "slug"
+    | "ipColorPrimary"
+    | "ipColorSecondary"
+    | "family"
+    | "faceSurface"
+    | "secondaryTouchesBackground"
   >[],
 ): string[] {
   return targets.flatMap((logo) => {
     const audit = auditEntry(logo, familyBackgroundHex(logo.family));
     if (audit.passes) return [];
     return [
-      `${logo.slug} sil=${audit.silhouette.toFixed(2)} sec=${audit.secondary.toFixed(2)} face=${audit.face.toFixed(2)} faceMargin=${audit.faceMargin.toFixed(2)} gate=${audit.gate.toFixed(1)} margin=${audit.margin.toFixed(2)} hueDist=${audit.hueDist.toFixed(1)}`,
+      `${logo.slug} sil=${audit.silhouette.toFixed(2)} sec=${audit.secondary.toFixed(2)} secGate=${audit.secondaryGate.toFixed(1)} face=${audit.face.toFixed(2)} faceMargin=${audit.faceMargin.toFixed(2)} gate=${audit.gate.toFixed(1)} margin=${audit.margin.toFixed(2)} hueDist=${audit.hueDist.toFixed(1)}`,
     ];
   });
 }
@@ -218,7 +223,12 @@ export function contrastFailureLines(
 export function assertLogoContrastForTargets(
   targets: readonly Pick<
     CharacterLogo,
-    "slug" | "ipColorPrimary" | "ipColorSecondary" | "family"
+    | "slug"
+    | "ipColorPrimary"
+    | "ipColorSecondary"
+    | "family"
+    | "faceSurface"
+    | "secondaryTouchesBackground"
   >[],
 ): void {
   const failed = contrastFailureLines(targets);

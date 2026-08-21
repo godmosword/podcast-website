@@ -10,11 +10,11 @@ Create one highly simplified IP mascot logo, not a character illustration.
 Background: fully opaque edge-to-edge solid OKLCH(L 0.30 C 0.05 H 200) / #023538 (speed family, 速度競賽). Use this color for the background only. Background stays visually flat: no vignette, spotlight, or directional wash.
 
 Subject: 小衝 the 賽車, reduced to one continuous rounded silhouette with exactly one defining feature: 雙進氣口. Front three-quarter-low view; the vehicle's front IS the face — grille as mouth, headlights as eyes.
-Rival, not a blood relative. Longer, lower silhouette than the red family. Two intake scoops in the secondary taupe are the only feature. Primary IP color must be yellow or orange, never red.
+Rival, not a blood relative. Longer, lower silhouette than the red family. Two intake scoops in the dark secondary are cut into the yellow body — they do not form the outer contour. Primary IP color must be yellow or orange, never red. Eyes sit on the yellow body.
 
 Complexity: 6–10 basic shapes, at most two internal color regions, exactly two eyes and one mouth, readable at 32×32. One continuous rounded outer silhouette.
 
-Color: exactly three semantic colors total — two IP base colors (#FFD24A primary, #82776C secondary) plus the background. Keep the secondary color as one large continuous region. Silhouette-to-background contrast uses the hue-weighted gate (2.8 / 3.6 / 4.5) with margin >= 0.2; secondary-to-background >= 3:1; facial marks on the lighter IP region >= 5:1.
+Color: exactly three semantic colors total — two IP base colors (#FFD24A primary, #2A2118 secondary) plus the background. Keep the secondary color as one large continuous region. Eyes sit on the primary IP color. Silhouette-to-background contrast uses the hue-weighted gate (2.8 / 3.6 / 4.5) with margin >= 0.2. If the secondary region forms the outer contour, secondary-to-background >= 3.6 with margin >= 0.2; otherwise secondary-to-primary >= 1.8 with margin >= 0.2. Facial marks on the faceSurface region >= 5:1 with margin >= 0.2.
 
 Composition: front three-quarter-low view; the vehicle's front IS the face — grille as mouth, headlights as eyes. Upright, horizontally centered, cropped flush at the bottom edge, filling 75–85% of canvas height with 15–25% headroom. Canvas is not rotated or tilted. Both members of every paired feature fully visible and uncropped.
 
