@@ -48,7 +48,7 @@ const EXTRA: Record<string, string> = {
   "a-ni":
     "Only feature: the mixing drum. Do not add a chute. Distinct from Dongdong's bucket.",
   "xiao-hong":
-    "Bloodline race-car template (baseline proportions). Single rear spoiler. Coral-red body; pale blue windshield band is the eye surface. No digits, no number 2.",
+    "Bloodline race-car template (baseline proportions). Single rear spoiler. True-red body; pale blue windshield band is the eye surface. No digits, no number 2.",
   "xiao-chong":
     "Rival, not a blood relative. Longer, lower silhouette than the red family. Two intake scoops are the only feature. Primary IP color must be yellow or orange, never red.",
   "xiao-hong-dad":

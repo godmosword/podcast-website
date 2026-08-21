@@ -193,7 +193,20 @@ describe("character logos", () => {
     ];
     const primaries = slugs.map((slug) => getCharacterLogo(slug)?.ipColorPrimary);
     expect(new Set(primaries).size).toBe(1);
-    expect(primaries[0]).toBeDefined();
+    expect(primaries[0]).toBe("#E4402E");
+  });
+
+  it("色相分離後回歸取樣主色，廢鮭魚與過淺補償", () => {
+    expect(getCharacterLogo("dong-dong")?.ipColorPrimary).toBe("#ED9F05");
+    expect(getCharacterLogo("diao-che")?.ipColorPrimary).toBe("#E36E1E");
+    expect(getCharacterLogo("a-ku")?.ipColorPrimary).toBe("#C37313");
+    expect(getCharacterLogo("a-ni")?.ipColorPrimary).toBe("#EF9F05");
+    expect(getCharacterLogo("ling-ling")?.ipColorPrimary).toBe("#7ED957");
+    expect(getCharacterLogo("duo-duo")?.ipColorPrimary).toBe("#7DB121");
+    expect(getCharacterLogo("xiao-chong")?.ipColorPrimary).toBe("#FFD24A");
+    const primaries = getCharacterLogos().map((logo) => logo.ipColorPrimary);
+    expect(primaries).not.toContain("#FF8A72");
+    expect(primaries).not.toContain("#FFC9B8");
   });
 
   it("小衝主色不得偏紅", () => {
