@@ -14,15 +14,15 @@ Complexity: 6–10 basic shapes, at most two internal color regions, exactly two
 <!-- /BLOCK:complexity -->
 
 <!-- BLOCK:eyes -->
-Eyes: two identical solid dark circles near #1A1410, no highlights, no iris, no white outline. Inter-eye distance divided by eye radius is exactly 3.0 for every character. Place both eyes on the lighter of the two IP colors, slightly above the canvas horizontal midline. Mouth is one rounded mark using an existing IP color, not a third color. No eyebrows, nostrils, blush, screws, digits, or letters.
+Eyes: two identical solid dark circles near #1A1410, no highlights, no iris, no white outline. Inter-eye distance divided by eye radius is exactly 3.0 for every character. Place both eyes on the face surface named in the Color section, slightly above the canvas horizontal midline; never infer the surface by picking the lighter of the two IP colors. Mouth is one rounded mark using an existing IP color, not a third color. No eyebrows, nostrils, blush, screws, digits, or letters.
 <!-- /BLOCK:eyes -->
 
 <!-- BLOCK:composition-vehicle -->
-Composition: front three-quarter-low view; the vehicle's front IS the face — grille as mouth, headlights as eyes. Upright, horizontally centered, cropped flush at the bottom edge, filling 75–85% of canvas height with 15–25% headroom. Canvas is not rotated or tilted. Both members of every paired feature fully visible and uncropped.
+Composition: front three-quarter-low view; the vehicle's front IS the face — the grille is the mouth. Headlights are never the eyes and are never a separate color region: draw them as blunt rounded shapes in the body color, or omit them. The eyes follow the eye rule and sit on the specified face surface. Unless wheels are this character's defining feature, draw two blunt rounded wheels in the body color tucked under the body so they shape the lower contour; they are structural, not a defining feature, and add no color region. Upright, horizontally centered, filling 75–85% of canvas height with 15–25% headroom. The lowest body pixels meet the bottom canvas edge directly: no gap, no ground plane, no contact shadow, no cast shadow between the subject and that edge. Canvas is not rotated or tilted. Both members of every paired feature fully visible and uncropped.
 <!-- /BLOCK:composition-vehicle -->
 
 <!-- BLOCK:composition-non-vehicle -->
-Composition: upright, horizontally centered, cropped flush at the bottom edge, filling 75–85% of canvas height with 15–25% headroom. Canvas is not rotated or tilted. Silhouette may differ from the vehicle cast, but eye style, canvas rules, and the three-color system stay identical. Both members of every paired feature fully visible and uncropped.
+Composition: upright, horizontally centered, filling 75–85% of canvas height with 15–25% headroom. The lowest body pixels meet the bottom canvas edge directly: no gap, no ground plane, no contact shadow, no cast shadow between the subject and that edge. Canvas is not rotated or tilted. Silhouette may differ from the vehicle cast, but eye style, canvas rules, and the three-color system stay identical. Both members of every paired feature fully visible and uncropped.
 <!-- /BLOCK:composition-non-vehicle -->
 
 <!-- BLOCK:style -->

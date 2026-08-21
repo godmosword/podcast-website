@@ -125,7 +125,7 @@ export function buildLogoPrompt(
   }
   const subject = NON_VEHICLE.has(logo.slug)
     ? `Subject: ${logo.name} the ${logo.vehicle}, reduced to one continuous rounded silhouette with exactly one defining feature: ${logo.feature}.`
-    : `Subject: ${logo.name} the ${logo.vehicle}, reduced to one continuous rounded silhouette with exactly one defining feature: ${logo.feature}. Front three-quarter-low view; the vehicle's front IS the face — grille as mouth, headlights as eyes.`;
+    : `Subject: ${logo.name} the ${logo.vehicle}, reduced to one continuous rounded silhouette with exactly one defining feature: ${logo.feature}. Front three-quarter-low view; the vehicle's front IS the face — the grille is the mouth; headlights are not the eyes.`;
 
   return [
     blocks.lead,
