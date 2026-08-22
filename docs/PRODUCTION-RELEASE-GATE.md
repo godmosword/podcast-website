@@ -29,8 +29,8 @@ status checks 成功後才能 merge：
 - `Vercel`
 
 這不是只存在於 YAML 的宣告：直接 push `main` 已被 GitHub `GH013` 拒絕，PR #95
-則在上述 checks 通過後 merge。`5cf696b` 的 Production deployment 及部署後
-`verify-geo-live` 也都成功。
+及後續 PR 都在上述 checks 通過後 merge。最新 `f448a98` 的 Production deployment
+及部署後 `verify-geo-live` 也都成功。
 
 GitHub ruleset 已可阻止未通過檢查的 merge；但 Vercel dashboard 的 Production
 deployment protection／Ignored Build Step 不在 repository 內，仍需由 Vercel 專案
@@ -63,6 +63,23 @@ Sentry 負責 client/server exception 與 request error；演練應在本機或 
 - Upstash Redis：production fail-closed 行為與測試已完成；Production REST URL/token
   尚未有可驗證的 repository 證據。
 - Uptime monitor：尚未配置。
+
+## Operator checklist before release
+
+以下項目必須由具備對應服務權限的人完成；repository 內的測試不能替代這些外部
+操作。完成時請保留設定頁截圖或服務事件連結，填入團隊維運紀錄：
+
+| Gate | 必做操作 | 完成證據 |
+| --- | --- | --- |
+| Vercel production protection | 確認 Production deploy 會等待 `quality`、`build-and-public-e2e`、`Vercel`；確認 Production environment 具有 canonical `NEXT_PUBLIC_SITE_URL` | Vercel protection 設定或一次失敗 PR 的阻擋紀錄 |
+| Sentry | 設定 Production DSN 與 environment，建立 client/server exception、unhandled rejection 告警；確認 scrubber 不送 email、token、家庭資料、進度 | 一筆 staging/local 演練事件與告警通知 |
+| Upstash | 在 Vercel Production 設定 `UPSTASH_REDIS_REST_URL`、`UPSTASH_REDIS_REST_TOKEN`；確認公開表單限流在 Redis 失敗時回 503，而非 memory fallback | Upstash key/TTL 觀測或 staging 契約測試 |
+| Uptime | 每 5 分鐘 GET canonical `/robots.txt`，預期 HTTP 200 與 `text/plain`，通知送至團隊告警通道 | Monitor 設定與一次成功探測 |
+| Episode content | 人工校對 `ep-26` 270 句字幕後執行 `npm run proofread:subtitles -- ep-26 --mark`；再確認 `npm run verify:release-content` 無 blocker | proofread marker、release-content exit 0 |
+| Physical device QA | 依 `GAME_PHYSICAL_DEVICE_QA.md` 在真實 iPhone、iPad 執行 Safari、旋轉、切 app、畫線、音效與 mute 檢查 | QA checklist 與裝置/OS/日期紀錄 |
+
+P2 的 stories/play-map URL state cache 調查不列入本次 release gate；若日後實作，必須
+保留 `?tag=`、`?city=`、返回鍵與 `/topic`、地圖 collection SEO，並以獨立 PR 驗證。
 
 ## API safety
 
