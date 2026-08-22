@@ -158,3 +158,44 @@ describe("samplePrimaryHex 漸層主色區", () => {
     expect(b).toBeLessThan(80);
   });
 });
+
+describe("samplePrimaryHex 平塗次色 vs 漸層主色", () => {
+  it("面積較大的漸層主色勝過集中在單一 bucket 的平塗次色", async () => {
+    const { default: sharp } = await import("sharp");
+    // 主色區帶漸層（被打散成多個 bucket），次色區平塗（集中在單一 bucket）。
+    const base = await gradientFixture({
+      bg: [2, 53, 56],
+      from: [190, 30, 16],
+      to: [246, 66, 42],
+      size: 128,
+      inset: 8,
+    });
+    const png = await sharp(base.png)
+      .composite([
+        {
+          input: await sharp({
+            create: {
+              width: 74,
+              height: 46,
+              channels: 3,
+              background: { r: 197, g: 216, b: 240 },
+            },
+          })
+            .png()
+            .toBuffer(),
+          left: 27,
+          top: 24,
+        },
+      ])
+      .png()
+      .toBuffer();
+
+    const sampled = await samplePrimaryHex(png, "#023538");
+    const r = parseInt(sampled!.slice(1, 3), 16);
+    const g = parseInt(sampled!.slice(3, 5), 16);
+    const b = parseInt(sampled!.slice(5, 7), 16);
+    expect(r, `取樣 ${sampled} 應為紅系主色`).toBeGreaterThan(150);
+    expect(g).toBeLessThan(90);
+    expect(b).toBeLessThan(80);
+  });
+});
