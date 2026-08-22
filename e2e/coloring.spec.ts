@@ -44,6 +44,21 @@ async function countRedOnRow(page: Page, fx0: number, fx1: number, fy: number) {
 }
 
 test.describe("coloring book", () => {
+  test("picker 不請求尚未上線的角色 logo asset", async ({ page }) => {
+    const logoRequests: string[] = [];
+    page.on("request", (request) => {
+      if (request.url().includes("/characters/logo/")) logoRequests.push(request.url());
+    });
+
+    await page.goto("/games/coloring-book");
+    await page.waitForLoadState("networkidle");
+    await page.getByRole("button", { name: "打開著色本" }).click();
+    await expect(page.getByRole("heading", { name: "定裝人物" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /^著色：/ }).first()).toBeVisible();
+
+    expect(logoRequests).toEqual([]);
+  });
+
   test("蠟筆塗色在畫面上可見（multiply 合成）且可復原", async ({ page }) => {
     await openFirstColoringPage(page);
 
