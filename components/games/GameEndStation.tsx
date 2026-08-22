@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import { getNextGame } from "@/data/games";
 import styles from "./GameEndStation.module.css";
 
@@ -80,12 +81,48 @@ export function GameEndStation({
 
   const starCount =
     stars == null ? null : Math.max(0, Math.min(3, Math.floor(stars)));
+  const stationRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const previous =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const station = stationRef.current;
+    const focusables = () =>
+      station?.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
+      ) ?? [];
+
+    focusables()[0]?.focus();
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Tab" || !station?.contains(document.activeElement)) return;
+      const items = focusables();
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      if (previous?.isConnected) previous.focus();
+    };
+  }, []);
 
   return (
     <div
+      ref={stationRef}
       className={`${styles.station}${className ? ` ${className}` : ""}`}
       data-mood={mood}
       role="dialog"
+      aria-modal="true"
       aria-label={resolvedTitle}
     >
       <p className={styles.moodEmoji} aria-hidden>
@@ -109,10 +146,6 @@ export function GameEndStation({
       )}
 
       <div className={styles.actions}>
-        <button type="button" className={styles.replayBtn} onClick={onReplay}>
-          {replayLabel}
-        </button>
-
         {mainAction ? (
           <button
             type="button"
@@ -127,6 +160,10 @@ export function GameEndStation({
             {nextGame.title} ▶
           </Link>
         ) : null}
+
+        <button type="button" className={styles.replayBtn} onClick={onReplay}>
+          {replayLabel}
+        </button>
 
         {mainAction && nextGame ? (
           <Link href={nextGame.href} className={styles.nextSoft}>

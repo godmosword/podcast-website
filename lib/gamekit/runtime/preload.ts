@@ -27,10 +27,14 @@ function preloadGameAssetsSync(gameId: GameKitGameId): void {
 /** 讓出主執行緒後預載，避免阻塞首次繪製。 */
 export function preloadGameAssets(gameId: GameKitGameId): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const run = () => {
-      preloadGameAssetsSync(gameId);
-      resolve();
+      try {
+        preloadGameAssetsSync(gameId);
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
     };
     if ("requestIdleCallback" in window) {
       window.requestIdleCallback(() => run(), { timeout: 120 });

@@ -3,6 +3,7 @@
 import {
   createContext,
   useContext,
+  useCallback,
   useEffect,
   useId,
   useRef,
@@ -132,7 +133,26 @@ function SettingsDialog({
     const prev = document.activeElement as HTMLElement | null;
     dialogRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+      const focusables = dialog.querySelectorAll<HTMLElement>(
+        'button, input, [href], [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === dialog)) {
+        e.preventDefault();
+        last?.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first?.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => {
@@ -183,7 +203,8 @@ function SettingsDialog({
                 key={option.id}
                 type="button"
                 className={styles.segmentBtn}
-                aria-pressed={blockDropDifficulty === option.id}
+                role="radio"
+                aria-checked={blockDropDifficulty === option.id}
                 data-active={blockDropDifficulty === option.id}
                 onClick={() => setBlockDropDifficulty(option.id)}
                 title={option.hint}
@@ -224,7 +245,8 @@ function SettingsDialog({
                 key={id}
                 type="button"
                 className={styles.segmentBtn}
-                aria-pressed={motionPreference === id}
+                role="radio"
+                aria-checked={motionPreference === id}
                 data-active={motionPreference === id}
                 onClick={() => setMotionPreference(id)}
               >
@@ -245,7 +267,8 @@ function SettingsDialog({
                 key={option.id}
                 type="button"
                 className={styles.segmentBtn}
-                aria-pressed={blockDropSpecialMode === option.id}
+                role="radio"
+                aria-checked={blockDropSpecialMode === option.id}
                 data-active={blockDropSpecialMode === option.id}
                 onClick={() => setBlockDropSpecialMode(option.id)}
                 title={option.hint}
@@ -277,6 +300,7 @@ export default function GameChrome({
   gameId,
 }: GameChromeProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const closeSettings = useCallback(() => setSettingsOpen(false), []);
 
   return (
     <ChromeContext.Provider value={{ openSettings: () => setSettingsOpen(true) }}>
@@ -287,7 +311,7 @@ export default function GameChrome({
         {children}
         <SettingsDialog
           open={settingsOpen}
-          onClose={() => setSettingsOpen(false)}
+          onClose={closeSettings}
           gameId={gameId}
         />
       </div>

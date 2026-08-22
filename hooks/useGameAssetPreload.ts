@@ -35,6 +35,9 @@ export function useGameAssetPreload(
     }
     preloadGameAssets(gameId).then(() => {
       if (!cancelled) markReady();
+    }).catch(() => {
+      // 暖機資源不是遊戲本體；失敗時放行，避免把可玩的遊戲卡在載入閘門。
+      if (!cancelled) markReady();
     });
     return () => {
       cancelled = true;

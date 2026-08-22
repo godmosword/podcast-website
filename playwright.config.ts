@@ -19,7 +19,9 @@ export default defineConfig({
       NEXT_PUBLIC_SITE_URL: "https://podcast-website-mu.vercel.app",
     },
     url: "http://127.0.0.1:3000",
-    reuseExistingServer: !process.env.CI,
+    // 只有明確指定 production server 才重用；避免把 `next dev` 當成 E2E
+    // server，導致 client hydration／互動測試默默 timeout。
+    reuseExistingServer: process.env.PW_REUSE_SERVER === "1",
     timeout: 120_000,
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],

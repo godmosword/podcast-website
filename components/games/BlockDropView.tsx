@@ -10,7 +10,6 @@ import {
   type ReactNode,
 } from "react";
 import Link from "next/link";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useDomJuice } from "@/hooks/useDomJuice";
 import { useGameLoop } from "@/lib/gamekit/react/useGameLoop";
@@ -926,6 +925,7 @@ export function BlockDropView({
   score: hostScore,
   best,
   kidsMode,
+  reducedMotion,
   onStart,
   onResume,
   onRestart,
@@ -937,7 +937,7 @@ export function BlockDropView({
 
   const G = useRef<GameState>(freshGame());
   const dasRef = useRef({ dir: 0, nextAt: 0 });
-  const reduced = useReducedMotion();
+  const reduced = reducedMotion;
   const { useKeyboardInput } = useTouchControls();
   const isCoarse = useCoarsePointer();
   const {
@@ -2321,7 +2321,8 @@ export function BlockDropView({
                         <button
                           key={option.id}
                           type="button"
-                          aria-pressed={blockDropDifficulty === option.id}
+                          role="radio"
+                          aria-checked={blockDropDifficulty === option.id}
                           title={option.hint}
                           onClick={() => setBlockDropDifficulty(option.id)}
                           style={{
@@ -2352,7 +2353,8 @@ export function BlockDropView({
                         <button
                           key={option.id}
                           type="button"
-                          aria-pressed={blockDropSpecialMode === option.id}
+                          role="radio"
+                          aria-checked={blockDropSpecialMode === option.id}
                           title={option.hint}
                           onClick={() => setBlockDropSpecialMode(option.id)}
                           style={{
