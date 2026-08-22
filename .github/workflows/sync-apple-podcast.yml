@@ -28,7 +28,7 @@ jobs:
     # 首次需下載 ~3GB 模型 + 編譯 whisper + 轉錄，預留較長時間。
     timeout-minutes: 180
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       # job-level env 不可用 runner context；改用 runner 內建 $RUNNER_TEMP 寫入 GITHUB_ENV
       - name: Set sync report paths
@@ -36,7 +36,7 @@ jobs:
           echo "SYNC_REPORT_PATH=$RUNNER_TEMP/sync-run-report.json" >> "$GITHUB_ENV"
           echo "SYNC_COMMIT_MSG_PATH=$RUNNER_TEMP/sync-commit-msg.txt" >> "$GITHUB_ENV"
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "22"
           cache: npm
@@ -44,7 +44,7 @@ jobs:
       - run: npm ci
 
       - name: Cache whisper.cpp build + model
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: |
             .cache/whisper-cpp
