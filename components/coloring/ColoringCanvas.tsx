@@ -684,6 +684,7 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
           <GameEndStation
             mood="win"
             title="塗好了！"
+            summary={`${page.title} · 可以繼續調色或換一張`}
             gameSlug="coloring-book"
             onReplay={() => setDoneOpen(false)}
             replayLabel="再塗這一張"

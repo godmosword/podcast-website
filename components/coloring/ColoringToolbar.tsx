@@ -39,62 +39,72 @@ export function ColoringToolbar({
   onResetView,
 }: ColoringToolbarProps) {
   return (
-    <div className={styles.bar} role="toolbar" aria-label="著色工具">
-      <div className={styles.group}>
-        {TOOLS.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            className={`${styles.btn} ${tool === item.id ? styles.active : ""}`}
-            aria-pressed={tool === item.id}
-            onClick={() => onToolChange(item.id)}
-          >
-            {item.label}
+    <div className={styles.wrap}>
+      <div
+        className={styles.bar}
+        role="toolbar"
+        aria-label="著色工具"
+        aria-describedby="coloring-toolbar-hint"
+      >
+        <div className={styles.group}>
+          {TOOLS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={`${styles.btn} ${tool === item.id ? styles.active : ""}`}
+              aria-pressed={tool === item.id}
+              onClick={() => onToolChange(item.id)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+        <div className={styles.group} role="group" aria-label="筆刷大小">
+          {BRUSH_SIZES.map((size) => (
+            <button
+              key={size.id}
+              type="button"
+              className={`${styles.btn} ${brushSize === size.id ? styles.active : ""}`}
+              aria-pressed={brushSize === size.id}
+              aria-label={`筆刷${size.name}`}
+              disabled={tool === "bucket"}
+              onClick={() => onBrushSizeChange(size.id)}
+            >
+              {size.name}
+            </button>
+          ))}
+        </div>
+        <div className={styles.group}>
+          <button type="button" className={styles.btn} onClick={onUndo} disabled={!canUndo}>
+            復原
           </button>
-        ))}
-      </div>
-      <div className={styles.group} role="group" aria-label="筆刷大小">
-        {BRUSH_SIZES.map((size) => (
-          <button
-            key={size.id}
-            type="button"
-            className={`${styles.btn} ${brushSize === size.id ? styles.active : ""}`}
-            aria-pressed={brushSize === size.id}
-            aria-label={`筆刷${size.name}`}
-            disabled={tool === "bucket"}
-            onClick={() => onBrushSizeChange(size.id)}
-          >
-            {size.name}
+          <button type="button" className={styles.btn} onClick={onClear}>
+            清空
           </button>
-        ))}
+          <button
+            type="button"
+            className={styles.btn}
+            onClick={onResetView}
+            disabled={!viewActive}
+          >
+            縮放還原
+          </button>
+          <button
+            type="button"
+            className={`${styles.btn} ${showPreview ? styles.active : ""}`}
+            aria-pressed={showPreview}
+            onClick={onTogglePreview}
+          >
+            看原圖
+          </button>
+          <button type="button" className={`${styles.btn} ${styles.primary}`} onClick={onDownload}>
+            下載
+          </button>
+        </div>
       </div>
-      <div className={styles.group}>
-        <button type="button" className={styles.btn} onClick={onUndo} disabled={!canUndo}>
-          復原
-        </button>
-        <button type="button" className={styles.btn} onClick={onClear}>
-          清空
-        </button>
-        <button
-          type="button"
-          className={styles.btn}
-          onClick={onResetView}
-          disabled={!viewActive}
-        >
-          縮放還原
-        </button>
-        <button
-          type="button"
-          className={`${styles.btn} ${showPreview ? styles.active : ""}`}
-          aria-pressed={showPreview}
-          onClick={onTogglePreview}
-        >
-          看原圖
-        </button>
-        <button type="button" className={`${styles.btn} ${styles.primary}`} onClick={onDownload}>
-          下載
-        </button>
-      </div>
+      <p id="coloring-toolbar-hint" className={styles.scrollHint}>
+        手機可左右滑動查看更多工具 →
+      </p>
     </div>
   );
 }

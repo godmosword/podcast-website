@@ -255,6 +255,7 @@ export function CandyMatchBoard({
             aria-label={`第 ${Math.floor(i / cols) + 1} 列第 ${(i % cols) + 1} 格，${pieceName}${specialName ? `，${specialName}` : ""}`}
             aria-pressed={isSelected}
             data-selected={isSelected ? "true" : undefined}
+            data-hint={isHint ? "true" : undefined}
             data-special={specialKind ?? undefined}
             data-sweep={isPopping && sweep ? sweep : undefined}
             data-swap={swapOff ? "true" : undefined}

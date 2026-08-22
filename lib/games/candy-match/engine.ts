@@ -516,7 +516,12 @@ export function createBoard(
   rows: number,
   kinds: number,
   rng: Rng,
-  options: { dirtCount?: number; dropCount?: number } = {},
+  options: {
+    dirtCount?: number;
+    dropCount?: number;
+    /** Replay 時避免直接重播上一盤完全相同的盤面。 */
+    avoidBoard?: Pick<BoardState, "pieces" | "dirt">;
+  } = {},
 ): BoardState {
   let guard = 64;
   while (guard-- > 0) {
@@ -537,9 +542,6 @@ export function createBoard(
       const c = Math.floor(rng() * cols);
       pieces[idx(c, 0, cols)] = DROP_ITEM;
     }
-    if (findMatches(pieces, cols, rows).size > 0) continue;
-    if (!findHintMove(pieces, cols, rows)) continue;
-
     const dirt = Array<boolean>(cols * rows).fill(false);
     const dirtCount = options.dirtCount ?? 0;
     let placed = 0;
@@ -550,6 +552,18 @@ export function createBoard(
         dirt[i] = true;
         placed += 1;
       }
+    }
+    if (findMatches(pieces, cols, rows).size > 0) continue;
+    if (!findHintMove(pieces, cols, rows)) continue;
+    const previous = options.avoidBoard;
+    if (
+      previous &&
+      previous.pieces.length === pieces.length &&
+      previous.dirt.length === dirt.length &&
+      previous.pieces.every((piece, i) => piece === pieces[i]) &&
+      previous.dirt.every((isDirty, i) => isDirty === dirt[i])
+    ) {
+      continue;
     }
     return { cols, rows, pieces, dirt, specials: emptySpecials(cols * rows) };
   }

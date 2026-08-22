@@ -179,6 +179,7 @@ export function CandyMatchView({
   const [sweepMotion, setSweepMotion] = useState<"row" | "color" | null>(null);
   const [medals, setMedals] = useState<number[]>([]);
   const [cellPx, setCellPx] = useState(56);
+  const lastBoardsRef = useRef<Record<number, BoardState | undefined>>({});
 
   const processingRef = useRef(false);
   const usedPropRef = useRef(false);
@@ -262,14 +263,15 @@ export function CandyMatchView({
       ensureAudio();
       const base = CANDY_MATCH_LEVELS[index];
       const lv = kidsMode ? kidsModeLevel(base) : base;
+      const nextBoard = createBoard(lv.cols, lv.rows, lv.pieceKinds, Math.random, {
+        dirtCount: lv.dirtCount,
+        dropCount: lv.dropCount,
+        avoidBoard: lastBoardsRef.current[index],
+      });
+      lastBoardsRef.current[index] = nextBoard;
       setLevelIndex(index);
       setLevel(lv);
-      setBoard(
-        createBoard(lv.cols, lv.rows, lv.pieceKinds, Math.random, {
-          dirtCount: lv.dirtCount,
-          dropCount: lv.dropCount,
-        }),
-      );
+      setBoard(nextBoard);
       setMovesLeft(lv.moves);
       setProgress(freshProgress());
       setPropsLeft({ ...PROPS_PER_LEVEL });
@@ -675,7 +677,8 @@ export function CandyMatchView({
         currentGoals.reduce((sum, goal) => sum + Math.min(goal.got, goal.need), 0) /
           currentGoals.reduce((sum, goal) => sum + goal.need, 0),
       )
-    : 0;
+      : 0;
+  const nearComplete = goalProgress >= 0.75 && goalProgress < 1;
 
   return (
     <div
@@ -794,6 +797,7 @@ export function CandyMatchView({
           <div
             className={styles.taskBar}
             aria-label="本關任務進度"
+            data-near-complete={nearComplete ? "true" : undefined}
             style={{
               display: "grid",
               gap: 7,
@@ -805,7 +809,10 @@ export function CandyMatchView({
             }}
           >
             <div className={styles.taskHeading}>
-              <span className={styles.taskKicker}>第 {levelIndex + 1}/{CANDY_MATCH_LEVELS.length} 關 · {level.name}</span>
+              <span className={styles.taskKicker}>
+                第 {levelIndex + 1}/{CANDY_MATCH_LEVELS.length} 關 · {level.name}
+                {nearComplete ? " · 快完成了！" : ""}
+              </span>
               <strong>{taskIntro(level.task)}</strong>
               {level.moves > 0 ? (
                 <span className={movesLeft <= 5 ? styles.movesWarning : styles.movesLabel}>
@@ -934,6 +941,7 @@ export function CandyMatchView({
           {overlay && (
             <div
               className={styles.resultOverlay}
+              data-testid="candy-match-result"
               style={{
                 position: "absolute",
                 inset: 0,

@@ -195,6 +195,17 @@ describe("createBoard", () => {
     expect(b.dirt.filter(Boolean).length).toBe(5);
     expect(b.pieces.filter((v) => v === DROP_ITEM).length).toBe(1);
   });
+
+  it("replay 可避開上一盤完全相同的盤面", () => {
+    const rng = seededRng(17);
+    const first = createBoard(5, 5, 4, rng);
+    const replay = createBoard(5, 5, 4, rng, {
+      avoidBoard: first,
+    });
+    expect(replay.pieces).not.toEqual(first.pieces);
+    expect(findMatches(replay.pieces, 5, 5).size).toBe(0);
+    expect(findHintMove(replay.pieces, 5, 5, replay.specials)).not.toBeNull();
+  });
 });
 
 describe("planGravity", () => {

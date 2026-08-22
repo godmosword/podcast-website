@@ -1830,6 +1830,7 @@ export function BlockDropView({
   return (
     <div
       data-layout={layoutMode}
+      data-status={g.status}
       data-theme="macaron-clay"
       style={{
         fontFamily: font,
@@ -2066,8 +2067,8 @@ export function BlockDropView({
                     width: "100%",
                     height: "100%",
                     borderRadius: 6,
-                    border: `2px dashed color-mix(in srgb, ${ghostColor} 70%, #8f6f86)`,
-                    background: `color-mix(in srgb, ${ghostColor} 22%, transparent)`,
+                    border: `2px dashed color-mix(in srgb, ${ghostColor} 78%, ${MACARON_THEME.ink})`,
+                    background: `color-mix(in srgb, ${ghostColor} 28%, ${MACARON_THEME.board})`,
                     boxSizing: "border-box",
                   }}
                 />
@@ -2250,6 +2251,11 @@ export function BlockDropView({
                       ? `分數 ${g.score} · 新紀錄！`
                       : `分數 ${g.score}`
                   }
+                  summary={
+                    g.lines > 0
+                      ? `消除 ${g.lines} 行 · 到達 Lv ${g.level}`
+                      : "先熟悉落下與旋轉，再來一局"
+                  }
                   onReplay={onRestart}
                   replayLabel="再玩一次"
                   gameSlug="block-drop"
@@ -2293,7 +2299,23 @@ export function BlockDropView({
                   />
                 )}
                 {g.status === "ready" && (
-                  <div
+                  <GameResultActions
+                    onReplay={onStart}
+                    replayLabel={
+                      <>
+                        <IconPlay size={19} /> 開始
+                      </>
+                    }
+                    replayStyle={{
+                      ...primaryBtn(font),
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                  />
+                )}
+                {g.status === "ready" && (
+                  <details
                     data-testid="block-drop-ready-options"
                     style={{
                       display: "grid",
@@ -2301,6 +2323,25 @@ export function BlockDropView({
                       width: "min(100%, 280px)",
                     }}
                   >
+                    <summary
+                      style={{
+                        minHeight: 44,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: "6px 12px",
+                        borderRadius: 999,
+                        color: MACARON_THEME.ink,
+                        background: "rgba(255,255,255,.62)",
+                        border: "1px solid rgba(93,74,103,.12)",
+                        fontWeight: 800,
+                        cursor: "pointer",
+                        listStyle: "none",
+                      }}
+                    >
+                      調整難度與模式
+                    </summary>
+                    <div style={{ display: "grid", gap: 8, paddingTop: 2 }}>
                     <div
                       className="sr-only"
                       id="block-drop-ready-diff-label"
@@ -2371,7 +2412,8 @@ export function BlockDropView({
                         </button>
                       ))}
                     </div>
-                  </div>
+                    </div>
+                  </details>
                 )}
                 {g.status === "ready" && (
                   <button
@@ -2415,22 +2457,7 @@ export function BlockDropView({
                       回遊樂園
                     </Link>
                   </>
-                ) : (
-                  <GameResultActions
-                    onReplay={onRestart}
-                    replayLabel={
-                      <>
-                        <IconPlay size={19} /> 開始
-                      </>
-                    }
-                    replayStyle={{
-                      ...primaryBtn(font),
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 8,
-                    }}
-                  />
-                )}
+                ) : null}
               </>
             )}
           </div>
