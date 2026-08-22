@@ -8,7 +8,7 @@ public suite。
 
 CI 的兩個 required check 名稱是：
 
-- `quality`：lint、typecheck、Vitest
+- `quality`：production dependency audit、lint、typecheck、Vitest
 - `build-and-public-e2e`：production build、public smoke、public axe
 
 public suite 包含首頁、故事、主題、角色、家長頁、訂閱、法律頁、故事播放、地圖入口，
@@ -75,6 +75,7 @@ no-store`。不要把 email、token、家庭儀表板或故事進度送進 Sentr
 
 ```sh
 npm run lint
+npm run audit:production
 npm run typecheck
 npm test
 npm run verify:episodes
