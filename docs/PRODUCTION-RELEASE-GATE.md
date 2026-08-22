@@ -21,16 +21,21 @@ timeout 混進 required quality check；地圖 public smoke/a11y 仍在 required
 
 ## GitHub ruleset / Vercel 外部設定
 
-YAML 只能產生 check，不能自行建立 GitHub required-check ruleset，也不能阻止 Vercel
-在 check 紅時部署。第一次啟用 gate 時需在 repository settings 完成：
+目前 GitHub repository ruleset `protect-main-web` 已針對 `main` 啟用，要求以下三個
+status checks 成功後才能 merge：
 
-1. 建立針對 `main` 的 ruleset，要求 `quality` 與 `build-and-public-e2e` 成功後才能 merge。
-2. 在 Vercel Production deployment protection 中等待上述 GitHub checks；或用 Vercel
-   Ignored Build Step / deploy gate，使 production 不會繞過失敗的 checks。
-3. 以一個故意失敗的非 production branch PR 演練一次，確認 GitHub merge 與 Vercel
-   production 都確實被擋住，再把 ruleset 設為 active。
+- `quality`
+- `build-and-public-e2e`
+- `Vercel`
 
-沒有完成這三步前，不應宣稱「CI 已禁止 merge/deploy」。
+這不是只存在於 YAML 的宣告：直接 push `main` 已被 GitHub `GH013` 拒絕，PR #95
+則在上述 checks 通過後 merge。`5cf696b` 的 Production deployment 及部署後
+`verify-geo-live` 也都成功。
+
+GitHub ruleset 已可阻止未通過檢查的 merge；但 Vercel dashboard 的 Production
+deployment protection／Ignored Build Step 不在 repository 內，仍需由 Vercel 專案
+管理者確認 production deploy 是否也會等待同一組檢查。不能只用 CI YAML 推論這項
+外部設定已完成。
 
 ## Post-deploy health
 
@@ -48,6 +53,16 @@ Sentry 負責 client/server exception 與 request error；演練應在本機或 
 建議另設一個 uptime monitor：每 5 分鐘 GET production `/robots.txt`（預期 200、
 `text/plain`），再把通知目的地（Sentry email、GitHub、或團隊既有告警通道）填入
 維運清單。這是外部服務設定，不由 repository 假裝完成。
+
+目前外部配置狀態：
+
+- GitHub required checks：已完成並以實際拒絕 direct push／成功 merge 驗證。
+- Vercel production deployment protection：尚未能由 repository 或本機 CLI 驗證。
+- Sentry DSN：程式碼與 PII scrubber 已就緒；Production DSN、通知規則與告警收件人
+  尚未有可驗證的 repository 證據。
+- Upstash Redis：production fail-closed 行為與測試已完成；Production REST URL/token
+  尚未有可驗證的 repository 證據。
+- Uptime monitor：尚未配置。
 
 ## API safety
 
