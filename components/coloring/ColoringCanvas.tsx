@@ -14,6 +14,10 @@ import {
   loadColoringDraft,
   saveColoringDraft,
 } from "@/lib/coloring/draft-storage";
+import {
+  coloringCompletionCopy,
+  type ColoringCompletionActivity,
+} from "@/lib/coloring/completion";
 import { COLORING_DONE_CTA } from "@/lib/coloring/flow";
 import {
   BRUSH_SIZES,
@@ -110,6 +114,23 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
   const [viewActive, setViewActive] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [doneOpen, setDoneOpen] = useState(false);
+  const [completionActivity, setCompletionActivity] = useState<ColoringCompletionActivity>({
+    operations: 0,
+    colors: 0,
+  });
+  const completionActivityRef = useRef(completionActivity);
+  completionActivityRef.current = completionActivity;
+  const usedColorsRef = useRef<Set<string>>(new Set());
+
+  const recordCompletionAction = useCallback((color: string | null) => {
+    if (color) usedColorsRef.current.add(color);
+    const next = {
+      operations: completionActivityRef.current.operations + 1,
+      colors: usedColorsRef.current.size,
+    };
+    completionActivityRef.current = next;
+    setCompletionActivity(next);
+  }, []);
 
   const composite = useCallback(() => {
     const display = displayRef.current;
@@ -280,12 +301,13 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
     const dirty = strokeDirtyRef.current;
     if (base && dirty) {
       pushUndoPatch({ rect: dirty, pixels: cropImageDataRect(base, dirty) });
+      recordCompletionAction(tool === "eraser" ? null : colorHex);
       scheduleSave();
     }
     strokeImgRef.current = null;
     strokeBaseRef.current = null;
     strokeDirtyRef.current = null;
-  }, [pushUndoPatch, scheduleSave]);
+  }, [colorHex, pushUndoPatch, recordCompletionAction, scheduleSave, tool]);
 
   const runBucket = useCallback(
     (pt: Point) => {
@@ -307,11 +329,12 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
       );
       if (!rect) return;
       pushUndoPatch({ rect, pixels: cropImageDataRect(base, rect) });
+      recordCompletionAction(colorHex);
       ctx.putImageData(img, 0, 0, rect.x, rect.y, rect.width, rect.height);
       requestComposite();
       scheduleSave();
     },
-    [colorHex, pushUndoPatch, requestComposite, scheduleSave],
+    [colorHex, pushUndoPatch, recordCompletionAction, requestComposite, scheduleSave],
   );
 
   const startGestureIfTwoPointers = useCallback(() => {
@@ -386,6 +409,9 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
     saveSeqRef.current += 1;
     setReady(false);
     setSaveError(null);
+    usedColorsRef.current.clear();
+    completionActivityRef.current = { operations: 0, colors: 0 };
+    setCompletionActivity(completionActivityRef.current);
     undoStackRef.current = [];
     setCanUndo(false);
     applyView(DEFAULT_VIEW);
@@ -436,6 +462,11 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
           const draftImg = new Image();
           draftImg.onload = () => {
             if (!cancelled) paintCtx.drawImage(draftImg, 0, 0, w, h);
+            if (!cancelled) {
+              const restoredActivity = { operations: 1, colors: 0 };
+              completionActivityRef.current = restoredActivity;
+              setCompletionActivity(restoredActivity);
+            }
             if (objectUrl) URL.revokeObjectURL(objectUrl);
             finishLoad();
           };
@@ -570,6 +601,9 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveSeqRef.current += 1;
     void clearColoringDraft(page.id);
+    usedColorsRef.current.clear();
+    completionActivityRef.current = { operations: 0, colors: 0 };
+    setCompletionActivity(completionActivityRef.current);
     composite();
   };
 
@@ -611,6 +645,16 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
     setDoneOpen(true);
   };
 
+  const completionFeedback = coloringCompletionCopy(completionActivity);
+  const completionSummary = [
+    page.title,
+    completionActivity.colors > 0 ? `用了 ${completionActivity.colors} 種顏色` : null,
+    `${completionActivity.operations} 次創作操作`,
+    "完成由你決定",
+  ]
+    .filter((part): part is string => Boolean(part))
+    .join(" · ");
+
   return (
     <div className={styles.root}>
       <div className={styles.topBar}>
@@ -631,6 +675,17 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
       <p className={styles.guide}>
         先選顏色，再用蠟筆塗一塗；想填滿一大片就用油漆桶。兩指可以放大找細節！
       </p>
+
+      <div
+        className={styles.completionHint}
+        data-testid="coloring-completion-hint"
+        data-tone={completionFeedback.tone}
+        role="status"
+        aria-live="polite"
+      >
+        <strong>{completionFeedback.label}</strong>
+        <span>{completionFeedback.detail}</span>
+      </div>
 
       <div className={styles.stage} ref={stageRef}>
         <canvas
@@ -684,7 +739,7 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
           <GameEndStation
             mood="win"
             title="塗好了！"
-            summary={`${page.title} · 可以繼續調色或換一張`}
+            summary={completionSummary}
             gameSlug="coloring-book"
             onReplay={() => setDoneOpen(false)}
             replayLabel="再塗這一張"

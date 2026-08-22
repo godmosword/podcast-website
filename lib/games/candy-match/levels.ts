@@ -35,6 +35,10 @@ export type CandyMatchLevel = {
   /** 主題色（背景漸層） */
   themeA: string;
   themeB: string;
+  /** 本局從 curated challenge pool 選出的挑戰識別。地圖基準關卡沒有此欄。 */
+  challengeId?: string;
+  /** 本局挑戰的短標籤，不改變地圖上的關卡名稱。 */
+  challengeLabel?: string;
 };
 
 export const CANDY_MATCH_LEVELS: CandyMatchLevel[] = [

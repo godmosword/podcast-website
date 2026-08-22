@@ -78,6 +78,8 @@ test.describe("遊戲完整 lifecycle", () => {
     await page.getByRole("button", { name: /開始/ }).click();
     await page.getByRole("button", { name: "下一關" }).click();
     await expect(page.getByTestId("candy-match-board")).toBeVisible();
+    const firstChallenge = await page.locator("[data-challenge]").getAttribute("data-challenge");
+    expect(firstChallenge).toBeTruthy();
 
     const firstBoard = await page
       .locator('[data-testid="candy-match-board"] button')
@@ -88,6 +90,9 @@ test.describe("遊戲完整 lifecycle", () => {
     await page.getByRole("button", { name: "再玩這一關" }).click();
     await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(page.getByTestId("candy-match-board")).toBeVisible();
+    const replayChallenge = await page.locator("[data-challenge]").getAttribute("data-challenge");
+    expect(replayChallenge).toBeTruthy();
+    expect(replayChallenge).not.toBe(firstChallenge);
     const replayBoard = await page
       .locator('[data-testid="candy-match-board"] button')
       .evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")));
@@ -103,11 +108,18 @@ test.describe("遊戲完整 lifecycle", () => {
     await page.goto("/games/block-drop");
     await page.getByRole("button", { name: /開始/ }).click();
     await expect(page.locator('[data-status="playing"]')).toBeVisible();
+    const tutorial = page.getByTestId("block-drop-tutorial");
+    await expect(tutorial).toHaveAttribute("data-step", "move");
+    await page.keyboard.press("ArrowLeft");
+    await expect(tutorial).toHaveAttribute("data-step", "rotate");
+    await page.keyboard.press("ArrowUp");
+    await expect(tutorial).toHaveCount(0);
     await topOutBlock(page);
     await expect(page.getByRole("dialog")).toBeVisible();
 
     await page.getByRole("button", { name: "再玩一次" }).click();
     await expect(page.locator('[data-status="playing"]')).toBeVisible();
+    await expect(page.getByTestId("block-drop-tutorial")).toHaveCount(0);
     await topOutBlock(page);
     await expect(page.getByRole("dialog")).toBeVisible();
 
@@ -120,6 +132,7 @@ test.describe("遊戲完整 lifecycle", () => {
     await page.setViewportSize(MOBILE);
     await openColoringCanvas(page);
     await expect(page.getByRole("button", { name: "我塗好了" })).toBeVisible();
+    await expect(page.getByTestId("coloring-completion-hint")).toContainText("準備開始");
 
     await page.getByRole("button", { name: "我塗好了" }).click();
     await expect(page.getByRole("dialog", { name: "塗好了！" })).toBeVisible();

@@ -78,6 +78,27 @@
   line-height: 1.45;
 }
 
+.completionHint {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.65rem 0.8rem;
+  border: 2px solid color-mix(in srgb, #f0b84a 30%, transparent);
+  border-radius: 14px;
+  color: #5d4a67;
+  background: color-mix(in srgb, #fff 88%, #fff2c4);
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.completionHint strong {
+  font-size: 0.95rem;
+}
+
+.completionHint[data-tone="rich"] {
+  border-color: color-mix(in srgb, #7bc47f 42%, transparent);
+  background: color-mix(in srgb, #fff 86%, #dff0e4);
+}
+
 .stage {
   position: relative;
   width: min(100%, 720px);

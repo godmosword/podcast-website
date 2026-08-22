@@ -45,6 +45,10 @@ import {
   type CandyMatchLevel,
   type CandyMatchTask,
 } from "@/lib/games/candy-match/levels";
+import {
+  applyCandyChallenge,
+  selectCandyChallenge,
+} from "@/lib/games/candy-match/challenges";
 import type { CandyMatchInstance } from "@/lib/gamekit/games/candy-match/adapter";
 import { candyMatchCellPx } from "@/lib/games/candy-match/cell-size";
 import styles from "./CandyMatchView.module.css";
@@ -180,6 +184,7 @@ export function CandyMatchView({
   const [medals, setMedals] = useState<number[]>([]);
   const [cellPx, setCellPx] = useState(56);
   const lastBoardsRef = useRef<Record<number, BoardState | undefined>>({});
+  const lastChallengesRef = useRef<Record<number, string | undefined>>({});
 
   const processingRef = useRef(false);
   const usedPropRef = useRef(false);
@@ -262,7 +267,14 @@ export function CandyMatchView({
     (index: number) => {
       ensureAudio();
       const base = CANDY_MATCH_LEVELS[index];
-      const lv = kidsMode ? kidsModeLevel(base) : base;
+      const challenge = selectCandyChallenge(
+        index,
+        lastChallengesRef.current[index],
+        Math.random,
+      );
+      const configured = applyCandyChallenge(base, challenge);
+      const lv = kidsMode ? kidsModeLevel(configured) : configured;
+      lastChallengesRef.current[index] = challenge.id;
       const nextBoard = createBoard(lv.cols, lv.rows, lv.pieceKinds, Math.random, {
         dirtCount: lv.dirtCount,
         dropCount: lv.dropCount,
@@ -686,6 +698,7 @@ export function CandyMatchView({
       className={styles.surface}
       data-screen={screen}
       data-task={level.task.kind}
+      data-challenge={level.challengeId}
       aria-live="polite"
     >
       <div
@@ -811,6 +824,7 @@ export function CandyMatchView({
             <div className={styles.taskHeading}>
               <span className={styles.taskKicker}>
                 第 {levelIndex + 1}/{CANDY_MATCH_LEVELS.length} 關 · {level.name}
+                {level.challengeLabel ? ` · ${level.challengeLabel}` : ""}
                 {nearComplete ? " · 快完成了！" : ""}
               </span>
               <strong>{taskIntro(level.task)}</strong>

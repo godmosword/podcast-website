@@ -58,6 +58,7 @@ test.describe("coloring book", () => {
     await page.mouse.up();
 
     expect(await countRedOnRow(page, 0.5, 0.62, 0.55)).toBeGreaterThan(0);
+    await expect(page.getByTestId("coloring-completion-hint")).toHaveAttribute("data-tone", "growing");
 
     await page.getByRole("button", { name: "復原" }).click();
     expect(await countRedOnRow(page, 0.5, 0.62, 0.55)).toBe(0);

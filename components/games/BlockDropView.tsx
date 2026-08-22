@@ -26,6 +26,17 @@ import {
 } from "@/lib/gamekit/progress/settings";
 import type { BlockDropInstance } from "@/lib/gamekit/games/block-drop/adapter";
 import {
+  BLOCK_DROP_TUTORIAL_COPY,
+  BLOCK_DROP_TUTORIAL_STORAGE_KEY,
+  EMPTY_BLOCK_DROP_TUTORIAL,
+  completeBlockDropTutorialStep,
+  isBlockDropBoardNearLine,
+  skipBlockDropTutorial,
+  stepAfterBlockDropAction,
+  type BlockDropTutorialProgress,
+  type BlockDropTutorialStep,
+} from "@/lib/games/block-drop/tutorial";
+import {
   IconBox,
   IconCandy,
   IconChevronLeft,
@@ -228,6 +239,30 @@ const CLAY_BLOCK_COLORS: Record<PieceType, string> = {
 const COLORS: Record<PieceType, string> = {
   ...CLAY_BLOCK_COLORS,
 };
+
+function readBlockDropTutorialProgress(): BlockDropTutorialProgress {
+  if (typeof window === "undefined") return { ...EMPTY_BLOCK_DROP_TUTORIAL };
+  try {
+    const raw = window.localStorage.getItem(BLOCK_DROP_TUTORIAL_STORAGE_KEY);
+    if (!raw) return { ...EMPTY_BLOCK_DROP_TUTORIAL };
+    const parsed = JSON.parse(raw) as Partial<BlockDropTutorialProgress>;
+    return {
+      move: parsed.move === true,
+      rotate: parsed.rotate === true,
+      line: parsed.line === true,
+    };
+  } catch {
+    return { ...EMPTY_BLOCK_DROP_TUTORIAL };
+  }
+}
+
+function saveBlockDropTutorialProgress(progress: BlockDropTutorialProgress): void {
+  try {
+    window.localStorage.setItem(BLOCK_DROP_TUTORIAL_STORAGE_KEY, JSON.stringify(progress));
+  } catch {
+    // 私密瀏覽或 storage quota 不可用時，仍保留本局教學。
+  }
+}
 
 // UX-T6：色盲／低對比友善的非顏色標記——七種方塊各配一個低調內嵌符號
 // （圓／方／三角／菱形／十字／半月／星），以 data-URI SVG 疊加在方塊底色
@@ -1039,6 +1074,45 @@ export function BlockDropView({
 
   const newBestRef = useRef(false);
 
+  const [tutorialProgress, setTutorialProgress] = useState<BlockDropTutorialProgress>(
+    () => readBlockDropTutorialProgress(),
+  );
+  const tutorialProgressRef = useRef(tutorialProgress);
+  tutorialProgressRef.current = tutorialProgress;
+  const [tutorialStep, setTutorialStep] = useState<BlockDropTutorialStep | null>(null);
+  const tutorialStepRef = useRef<BlockDropTutorialStep | null>(null);
+
+  const setVisibleTutorialStep = (step: BlockDropTutorialStep | null) => {
+    tutorialStepRef.current = step;
+    setTutorialStep(step);
+  };
+
+  const recordTutorialStep = (step: BlockDropTutorialStep) => {
+    const current = tutorialProgressRef.current;
+    if (current[step]) return;
+    const next = completeBlockDropTutorialStep(current, step);
+    tutorialProgressRef.current = next;
+    setTutorialProgress(next);
+    saveBlockDropTutorialProgress(next);
+    setVisibleTutorialStep(
+      step === "move" ? stepAfterBlockDropAction(next, "move") : null,
+    );
+  };
+
+  const showLineTutorialIfNeeded = (board: readonly (readonly Cell[])[]) => {
+    const current = tutorialProgressRef.current;
+    if (current.line || tutorialStepRef.current || !current.move || !current.rotate) return;
+    if (isBlockDropBoardNearLine(board)) setVisibleTutorialStep("line");
+  };
+
+  const skipTutorial = () => {
+    const next = skipBlockDropTutorial();
+    tutorialProgressRef.current = next;
+    setTutorialProgress(next);
+    saveBlockDropTutorialProgress(next);
+    setVisibleTutorialStep(null);
+  };
+
   // ── 落地擠壓（squash）：剛鎖定的格子做一拍 Q 彈動畫 ──
   const lockFxRef = useRef<{ cells: Set<number>; until: number }>({
     cells: new Set(),
@@ -1168,6 +1242,7 @@ export function BlockDropView({
     while (nb.length < ROWS) nb.unshift(Array<Cell>(COLS).fill(null));
     g.board = nb;
     const n = g.clearRows.length;
+    if (n > 0) recordTutorialStep("line");
     g.lines += n;
     const lineScore = scoreValue(LINE_SCORE[n] * g.level);
     g.score += lineScore;
@@ -1218,6 +1293,7 @@ export function BlockDropView({
     }
     triggerLockSquash(g.active);
     g.board = merge(g.active, g.board);
+    showLineTutorialIfNeeded(g.board);
     sLock();
     const full: number[] = [];
     g.board.forEach((row, y) => {
@@ -1259,6 +1335,7 @@ export function BlockDropView({
     updateGrounded(g);
     resetLock(g);
     sMove();
+    recordTutorialStep("move");
     g.dirty = true;
     repaint();
     return true;
@@ -1280,6 +1357,7 @@ export function BlockDropView({
         updateGrounded(g);
         resetLock(g);
         sRotate();
+        recordTutorialStep("rotate");
         g.dirty = true;
         repaint();
         return;
@@ -1336,6 +1414,16 @@ export function BlockDropView({
     audio?.ensureAudio();
     const g = freshGame();
     g.status = "playing";
+    const savedTutorial = readBlockDropTutorialProgress();
+    tutorialProgressRef.current = savedTutorial;
+    setTutorialProgress(savedTutorial);
+    const initialTutorialStep: BlockDropTutorialStep | null = savedTutorial.move
+      ? savedTutorial.rotate
+        ? null
+        : "rotate"
+      : "move";
+    tutorialStepRef.current = initialTutorialStep;
+    setTutorialStep(initialTutorialStep);
     newBestRef.current = false;
     refill(g);
     liveFnsRef.current.spawnNext(g);
@@ -1673,6 +1761,57 @@ export function BlockDropView({
     />
   ) : null;
 
+  const tutorialCard =
+    tutorialStep && g.status === "playing" ? (
+      <div
+        role="status"
+        aria-live="polite"
+        data-testid="block-drop-tutorial"
+        data-step={tutorialStep}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          width: "min(100%, 420px)",
+          margin: "0 auto 8px",
+          padding: "8px 10px",
+          boxSizing: "border-box",
+          border: "2px solid rgba(255,216,102,.8)",
+          borderRadius: 14,
+          color: MACARON_THEME.ink,
+          background: "rgba(255,255,255,.88)",
+          boxShadow: "0 6px 14px rgba(126,96,112,.12)",
+          fontSize: 12,
+          lineHeight: 1.35,
+        }}
+      >
+        <span aria-hidden style={{ fontSize: 20 }}>💡</span>
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <strong style={{ display: "block", fontSize: 13 }}>
+            {BLOCK_DROP_TUTORIAL_COPY[tutorialStep].title}
+          </strong>
+          {BLOCK_DROP_TUTORIAL_COPY[tutorialStep].body}
+        </span>
+        <button
+          type="button"
+          onClick={skipTutorial}
+          style={{
+            minHeight: 44,
+            flexShrink: 0,
+            padding: "4px 9px",
+            border: "1px solid rgba(93,74,103,.18)",
+            borderRadius: 999,
+            color: MACARON_THEME.ink,
+            background: "rgba(255,255,255,.72)",
+            fontWeight: 800,
+            cursor: "pointer",
+          }}
+        >
+          略過教學
+        </button>
+      </div>
+    ) : null;
+
   const holdButton = (cell: number) => (
     <button
       type="button"
@@ -1966,6 +2105,8 @@ export function BlockDropView({
           {nextPanel(layout.hud.nextFirst, layout.hud.nextRest, isCoarse)}
         </div>
       )}
+
+      {tutorialCard}
 
       {/* 寬螢幕（iPad／桌機）：左欄資訊、中間棋盤、右欄預覽＋觸控鍵 */}
       <div
