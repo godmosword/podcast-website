@@ -28,6 +28,7 @@ export default function LandingHub() {
 
   return (
     <>
+      <h1 className="sr-only">車車遊樂園：親子故事與手作</h1>
       <JsonLd data={podcastSeriesJsonLd()} />
       <LandingScrollView className={scrollStyles.root}>
         <LandingBedtimeLayer

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { isPublishedCharacterLogo } from "@/data/character-logos";
 import { characterLogoAssetPath } from "@/lib/character-logo-query";
 import styles from "./CharacterLogoMark.module.css";
 
@@ -25,6 +26,7 @@ function LogoMarkInner({
   const [status, setStatus] = useState<"pending" | "ready" | "missing">(
     "pending",
   );
+  if (!isPublishedCharacterLogo(slug)) return null;
   if (status === "missing") return null;
 
   return (
@@ -64,10 +66,15 @@ export function CharacterLogoStrip({
   characters,
   size,
 }: CharacterLogoStripProps) {
+  const publishedCharacters = characters.filter((character) =>
+    isPublishedCharacterLogo(character.id),
+  );
   const [readyIds, setReadyIds] = useState<ReadonlySet<string>>(() => new Set());
-  if (characters.length === 0) return null;
+  if (publishedCharacters.length === 0) return null;
 
-  const ready = characters.filter((character) => readyIds.has(character.id));
+  const ready = publishedCharacters.filter((character) =>
+    readyIds.has(character.id),
+  );
 
   function markReady(id: string) {
     setReadyIds((current) => {
@@ -81,7 +88,7 @@ export function CharacterLogoStrip({
   return (
     <>
       <span className={styles.preload} aria-hidden>
-        {characters.map((character) => (
+        {publishedCharacters.map((character) => (
           // eslint-disable-next-line @next/next/no-img-element -- 預載缺件不進 next/image
           <img
             key={character.id}

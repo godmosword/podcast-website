@@ -195,6 +195,16 @@ export function getCharacterLogo(slug: string): CharacterLogo | undefined {
   return LOGO_BY_SLUG.get(slug);
 }
 
+/**
+ * 公開 UI 只掛已經 approve、且理論上伴隨 public asset 的 Logo。
+ * pending／rejected 仍可供 studio 驗收與生圖管線使用，但不應在正式頁面
+ * 先發出必然 404 的圖片請求。
+ */
+export function isPublishedCharacterLogo(slug: string): boolean {
+  const status = getCharacterLogo(slug)?.status;
+  return status === "pilot" || status === "accepted";
+}
+
 export function familyBackgroundHex(family: LogoFamilyKey): string {
   return LOGO_FAMILIES[family].hex;
 }

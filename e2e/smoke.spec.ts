@@ -4,6 +4,11 @@ test.describe.configure({ mode: "serial" });
 
 test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await page.goto("/");
+  await expect(page.locator("h1")).toHaveText("車車遊樂園：親子故事與手作");
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    "href",
+    /podcast-website-mu\.vercel\.app\/?$/,
+  );
   // 品牌在 sticky 頂欄；桌面（≥980px）走 1c 膠囊內嵌導覽，漢堡僅行動版
   await expect(page.getByRole("link", { name: /車車遊樂園/ })).toBeVisible();
   const capsuleNav = page.getByRole("navigation", { name: "主要分區" });
@@ -221,6 +226,21 @@ test("角色圖鑑與親子指南不含內頁 hero", async ({ page, request }) =
   const toolsBox = await tools.boundingBox();
   const podcastBox = await podcastFaq.boundingBox();
   expect(toolsBox?.y).toBeLessThan(podcastBox?.y ?? Number.POSITIVE_INFINITY);
+});
+
+test("未 publish 的角色 Logo 不產生 failed asset request", async ({ page }) => {
+  const failedLogoRequests: string[] = [];
+  page.on("response", (response) => {
+    if (response.url().includes("/characters/logo/") && response.status() >= 400) {
+      failedLogoRequests.push(`${response.status()} ${response.url()}`);
+    }
+  });
+
+  for (const route of ["/stories", "/characters", "/story/ep-26"]) {
+    await page.goto(route);
+  }
+
+  expect(failedLogoRequests).toEqual([]);
 });
 
 test("家庭儀表板頁面可載入", async ({ page }) => {

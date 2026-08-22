@@ -12,6 +12,7 @@ import {
   familyBackgroundHex,
   getCharacterLogo,
   getCharacterLogos,
+  isPublishedCharacterLogo,
   requireCharacterLogo,
 } from "./character-logos";
 
@@ -96,6 +97,11 @@ describe("character logos", () => {
 
   it("小南名稱用分配表短名，不是圖鑑顯示名", () => {
     expect(getCharacterLogo("xiao-nan")?.name).toBe("小南");
+  });
+
+  it("只有 pilot／accepted logo 才能進公開 UI", () => {
+    expect(isPublishedCharacterLogo("xiao-hong")).toBe(false);
+    expect(isPublishedCharacterLogo("not-a-character")).toBe(false);
   });
 
   it("家族 key 皆在七色表內", () => {

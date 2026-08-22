@@ -714,6 +714,10 @@
   white-space: nowrap;
 }
 
+:global([data-theme="night"]) .storyCardTitle {
+  color: var(--ink-soft);
+}
+
 /* 已聽完標記：卡片右側大星，與島嶼星章同語彙 */
 .storyCardDone {
   margin-left: auto;
