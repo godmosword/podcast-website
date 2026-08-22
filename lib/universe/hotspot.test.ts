@@ -69,6 +69,16 @@ describe("hotspot helpers（M2/M3）", () => {
     );
   });
 
+  it("不為外部動作建立 Next router prefetch 目標", () => {
+    const zone = zoneById("car-park")!;
+    const hrefs = hotspotPrefetchHrefs(zone);
+
+    expect(hrefs.every((href) => href.startsWith("/"))).toBe(true);
+    expect(hrefs).not.toContain(
+      "https://www.youtube.com/playlist?list=PLVbyl20K8lOeuJ2ky6dEsmpew7xAxZDhF",
+    );
+  });
+
   it("精選地標與探索列排序不改動原始資料", () => {
     const zone = zoneById("dino")!;
     const featured = getFeaturedHotspots(zone.hotspots);

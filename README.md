@@ -74,6 +74,7 @@ npm run dev
 | `npm run build` | 正式建置（`prebuild` 自動跑 `generate:llms-full`） |
 | `npm run start` | 執行建置結果 |
 | `npm run lint` | ESLint（零 warnings） |
+| `npm run typecheck` | TypeScript strict 型別檢查 |
 | `npm test` | Vitest 單元測試 |
 | `npm run test:e2e` | Playwright E2E（需先 build） |
 | `npm run test:visual` | D2 視覺回歸（**預設 skip**，VIS-DEBT-1；見 `test:visual:trusted`） |

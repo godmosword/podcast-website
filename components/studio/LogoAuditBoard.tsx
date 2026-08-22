@@ -438,6 +438,7 @@ function LogoAuditTile({
           </div>
         ) : (
           // 缺檔時 next/image 會在建置失敗；驗收頁用 img + onError 顯示佔位。
+          // eslint-disable-next-line @next/next/no-img-element -- intentional fallback for missing audit assets
           <img
             src={src}
             alt={`${logo.name} logo ${size}px`}

@@ -88,7 +88,15 @@ export function hotspotPrefetchHrefs(zone: Zone): string[] {
   const hrefs = new Set<string>();
   for (const hotspot of zone.hotspots) {
     hrefs.add(hotspotDetailHref(zone.id, hotspot));
-    if (hotspot.action.type === "link") hrefs.add(hotspot.action.href);
+    // Next's router prefetch only applies to same-origin app routes. External
+    // actions (for example the YouTube playlist) are opened from the detail
+    // page and must not trigger a speculative navigation request here.
+    if (
+      hotspot.action.type === "link" &&
+      hotspot.action.href.startsWith("/")
+    ) {
+      hrefs.add(hotspot.action.href);
+    }
     if (hotspot.action.type === "story") {
       hrefs.add(`/story/${hotspot.action.slug}`);
     }

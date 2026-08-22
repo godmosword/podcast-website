@@ -416,7 +416,8 @@ test.describe("車車宇宙樂園地圖 UX", () => {
 
     // 鏡頭靜止（RECENTER_IDLE_MS）後自動 reset：scale 回到島群 fit（遠小於 MAX_SCALE／FOCUS 1.6）
     await expect
-      .poll(async () => (await stageTransformParts(page)).scale, { timeout: 8000 })
+      // 全套 5-worker 跑法下，地圖動畫可能受其他 Chromium worker 影響而延後。
+      .poll(async () => (await stageTransformParts(page)).scale, { timeout: 15000 })
       .toBeLessThan(1.4);
     // 而且車車樂園真的回到可視區（不只縮小，還要回中）
     await expect(

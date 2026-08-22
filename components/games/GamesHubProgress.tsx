@@ -49,6 +49,7 @@ export default function GamesHubProgress() {
           <li key={vehicle.id}>
             <span
               className={vehicle.unlocked ? styles.vehicleOn : styles.vehicleOff}
+              role="img"
               aria-label={
                 vehicle.unlocked
                   ? `認識${vehicle.name}`

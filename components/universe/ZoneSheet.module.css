@@ -141,11 +141,9 @@
 @keyframes sheet-rise {
   from {
     transform: translateY(24px);
-    opacity: 0;
   }
   to {
     transform: translateY(0);
-    opacity: 1;
   }
 }
 
@@ -709,7 +707,8 @@
 .storyCardTitle {
   font-size: 0.82rem;
   font-weight: 600;
-  color: var(--ink-soft);
+  /* Keep the secondary title subdued while meeting 4.5:1 on the light card. */
+  color: #70685f;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

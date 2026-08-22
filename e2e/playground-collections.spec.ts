@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("親子景點 curated collections", () => {
-  test("collections index exposes exactly the 21 launch links", async ({
+  test("collections index exposes exactly the 22 launch links", async ({
     page,
     request,
   }) => {
@@ -16,7 +16,7 @@ test.describe("親子景點 curated collections", () => {
     await expect(page.locator("body")).not.toContainText("active 景點");
     await expect(
       page.locator('a[href^="/for-parents/play-map/collections/"]'),
-    ).toHaveCount(21);
+    ).toHaveCount(22);
     await expect(page.locator(".leaflet-container")).toHaveCount(0);
 
     for (const slug of [

@@ -298,7 +298,7 @@
 
   /* 第一張遊戲卡必須進首屏：hero 讓出高度。 */
   .hero {
-    min-height: min(48svh, 340px);
+    min-height: min(45svh, 320px);
     margin-bottom: 20px;
   }
 
@@ -321,7 +321,7 @@
 
   .heroContent {
     justify-content: flex-end;
-    min-height: min(48svh, 340px);
+    min-height: min(45svh, 320px);
     padding: 20px 18px 20px;
   }
 

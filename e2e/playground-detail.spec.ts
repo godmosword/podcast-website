@@ -9,7 +9,7 @@ test.describe("親子景點 detail pages", () => {
     expect(response.ok()).toBeTruthy();
     const html = await response.text();
     expect(html).toContain("桃園市立兒童美術館");
-    expect(html).toContain("部分體驗活動需現場登記或另收費");
+    expect(html).toContain("部分創作體驗要現場登記或另收費");
     expect(html).toContain("創作體驗");
     expect(html).not.toContain("leaflet-container");
 

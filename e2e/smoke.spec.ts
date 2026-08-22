@@ -177,7 +177,9 @@ test("角色 Logo 驗收 /studio/logo-audit", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "角色 Logo 驗收" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Grid 縮圖" })).toBeVisible();
   await expect(page.getByRole("button", { name: "撞型並排" })).toBeVisible();
-  await expect(page.getByText("小紅 · 單一尾翼")).toBeVisible();
+  // staging assets are intentionally local/ignored; the caption is either the
+  // data feature or the staged filename, but must always identify 小紅.
+  await expect(page.getByText(/^小紅 ·/).first()).toBeVisible();
 });
 
 test("首頁 Hero 不含節目數據入口", async ({ page }) => {
@@ -235,7 +237,7 @@ test("繽紛消消樂：標題 → 地圖 → 第 1 關棋盤", async ({ page })
   await expect(page.getByRole("heading", { name: "繽紛消消樂" })).toBeVisible();
   await page.getByRole("button", { name: /開始/ }).click();
   await expect(page.getByText("遊樂園地圖")).toBeVisible();
-  await page.getByRole("button", { name: /第 1 關/ }).click();
+  await page.locator('button[data-next="true"]').click();
   await expect(page.getByTestId("candy-match-board")).toBeVisible();
   await expect(page.getByRole("progressbar", { name: "任務完成度" })).toBeVisible();
   // 任務列與道具列存在
