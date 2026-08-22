@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { requireCharacterLogo } from "./character-logos";
 import { getCharacterName, getCharacters, getCharactersForStory } from "./characters";
 
 describe("getCharacters", () => {
@@ -10,15 +9,6 @@ describe("getCharacters", () => {
     expect(characters.every((c) => c.name && c.vehicle && c.personality)).toBe(
       true,
     );
-  });
-
-  it("每位角色都帶 logoFamily／logoFeature，且與 logo 名冊一致", () => {
-    for (const character of getCharacters()) {
-      const logo = requireCharacterLogo(character.id);
-      expect(character.logoFamily).toBe(logo.family);
-      expect(character.logoFeature).toBe(logo.feature);
-      expect(character.logoFeature.trim().length).toBeGreaterThan(0);
-    }
   });
 });
 

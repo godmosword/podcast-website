@@ -39,7 +39,6 @@
     "fix:map-art": "tsx scripts/fix-map-art.ts",
     "fix:forest-zone": "tsx scripts/fix-forest-zone-art.ts",
     "generate:character-portraits": "tsx --env-file-if-exists=.env.local scripts/generate-character-portraits.ts",
-    "generate:character-logos": "tsx --env-file-if-exists=.env.local scripts/generate-character-logos.ts",
     "generate:landing-art": "tsx --env-file-if-exists=.env.local scripts/generate-landing-art.ts",
     "generate:roamer-assets": "tsx --env-file-if-exists=.env.local scripts/generate-roamer-assets.ts",
     "generate:llms-full": "tsx scripts/generate-llms-full.ts",

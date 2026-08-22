@@ -42,7 +42,7 @@ alwaysApply: true
 
 ## 生圖／重抽成本紅線（付費 API，違反＝嚴重越權）
 
-`OPENAI_API_KEY` 的圖像呼叫（`npm run illustrate`、`--from-scenes`、`--scene N`、`--char`、`generate-character-portraits`、`generate:character-logos`、任何直接呼叫 `generateSceneImage`／`generateCharacterPortrait`）**每一輪都要錢**。
+`OPENAI_API_KEY` 的圖像呼叫（`npm run illustrate`、`--from-scenes`、`--scene N`、`--char`、`generate-character-portraits`、任何直接呼叫 `generateSceneImage`／`generateCharacterPortrait`）**每一輪都要錢**。
 
 | 規則 | 說明 |
 |------|------|
@@ -51,6 +51,5 @@ alwaysApply: true
 | **禁止自行連抽** | 不得因「還不夠好／還有 3 線道／再試一次」自動再跑第 2、3…輪 `--scene` 或自寫 regen 腳本。Timeout／失敗可**同幕最多重試 1 次**，仍失敗就停下來報告。 |
 | **「修正／檢查／對齊」≠ 准許燒額度** | 這類指令＝審圖＋列問題清單；**不是**授權重抽。 |
 | **定裝照同規** | `--char`／`generate-character-portraits` 每次重生也要先問；不得連抽到滿意為止。 |
-| **角色 Logo 同規** | `generate:character-logos` 先 `--dry-run` 報價；未文字准許不得拿掉 `--dry-run`。重抽須 `--slug`＋張數先問。 |
 
 細節見 [`docs/AGENT-DOMAIN.md`](docs/AGENT-DOMAIN.md) 紅線、[`docs/EPISODE-WORKFLOW.md`](docs/EPISODE-WORKFLOW.md)「審圖與重抽」。

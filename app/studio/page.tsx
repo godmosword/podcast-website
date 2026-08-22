@@ -30,18 +30,6 @@ export default function StudioPage() {
 
       <EngagementMetricsPanel />
 
-      <section className={styles.section} aria-labelledby="studio-logo-heading">
-        <h2 id="studio-logo-heading" className={styles.sectionHeading}>
-          角色 Logo
-        </h2>
-        <p className={styles.sectionLead}>
-          32px 可辨識、撞型與家族色塊驗收。資產未進檔時顯示缺件佔位。
-        </p>
-        <Link href="/studio/logo-audit" className={styles.toolLink}>
-          打開 Logo 驗收頁
-        </Link>
-      </section>
-
       <section className={styles.section} aria-labelledby="studio-platforms-heading">
         <h2 id="studio-platforms-heading" className={styles.sectionHeading}>
           平台後台捷徑

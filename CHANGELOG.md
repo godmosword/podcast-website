@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Removed
+
+- **角色 Logo 識別系統移除**：元件、驗收頁、產圖 CLI、色票與 35 份 prompt 全數移除；`Character` 不再帶 `logoFamily`／`logoFeature`。程式碼保存於 tag `archive/character-logo-system`。
+
 ### Added
 
 - **角色 Logo 次色對主色可辨閘門**：`auditEntry` 對 35 筆要求次色對主色對比 ≥ 1.6 或色相差 ≥ 30（擇一）。識別特徵不得是車身暗一階同色。

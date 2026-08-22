@@ -174,17 +174,6 @@ test("節目數據中心 /studio", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "節目數據中心" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "平台後台捷徑" })).toBeVisible();
   await expect(page.getByRole("link", { name: "開啟後台" }).first()).toBeVisible();
-  await expect(page.getByRole("link", { name: "打開 Logo 驗收頁" })).toBeVisible();
-});
-
-test("角色 Logo 驗收 /studio/logo-audit", async ({ page }) => {
-  await page.goto("/studio/logo-audit");
-  await expect(page.getByRole("heading", { name: "角色 Logo 驗收" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Grid 縮圖" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "撞型並排" })).toBeVisible();
-  // staging assets are intentionally local/ignored; the caption is either the
-  // data feature or the staged filename, but must always identify 小紅.
-  await expect(page.getByText(/^小紅 ·/).first()).toBeVisible();
 });
 
 test("首頁 Hero 不含節目數據入口", async ({ page }) => {
@@ -226,21 +215,6 @@ test("角色圖鑑與親子指南不含內頁 hero", async ({ page, request }) =
   const toolsBox = await tools.boundingBox();
   const podcastBox = await podcastFaq.boundingBox();
   expect(toolsBox?.y).toBeLessThan(podcastBox?.y ?? Number.POSITIVE_INFINITY);
-});
-
-test("未 publish 的角色 Logo 不產生 failed asset request", async ({ page }) => {
-  const failedLogoRequests: string[] = [];
-  page.on("response", (response) => {
-    if (response.url().includes("/characters/logo/") && response.status() >= 400) {
-      failedLogoRequests.push(`${response.status()} ${response.url()}`);
-    }
-  });
-
-  for (const route of ["/stories", "/characters", "/story/ep-26"]) {
-    await page.goto(route);
-  }
-
-  expect(failedLogoRequests).toEqual([]);
 });
 
 test("家庭儀表板頁面可載入", async ({ page }) => {

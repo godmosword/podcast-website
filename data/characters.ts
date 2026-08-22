@@ -1,12 +1,6 @@
 import { canonicalStorySlug } from "@/lib/story-slug-aliases";
 import rawCharacters from "./characters.json";
-import {
-  assertCharacterLogoRoster,
-  requireCharacterLogo,
-  type LogoFamilyKey,
-} from "./character-logos";
-
-/** 角色一級資料（canonical 來源：data/characters.json；logo 欄位來自 character-logos.json）。 */
+/** 角色一級資料（canonical 來源：data/characters.json）。 */
 export type Character = {
   id: string;
   name: string;
@@ -15,8 +9,6 @@ export type Character = {
   appearsIn: string[];
   ref?: string;
   unlockCondition?: string;
-  logoFamily: LogoFamilyKey;
-  logoFeature: string;
 };
 
 type RawCharacter = {
@@ -176,7 +168,6 @@ function toCharacter(entry: RawCharacter): Character {
   if (!id) {
     throw new Error(`Unknown character in characters.json: ${entry.name}`);
   }
-  const logo = requireCharacterLogo(id);
   return {
     id,
     name: shortName(entry, id),
@@ -184,16 +175,12 @@ function toCharacter(entry: RawCharacter): Character {
     personality: PERSONALITY_BY_ID[id] ?? "車車好朋友",
     appearsIn: appearsInFor(entry),
     ref: entry.ref,
-    logoFamily: logo.family,
-    logoFeature: logo.feature,
   };
 }
 
 const CHARACTERS: Character[] = (rawCharacters as RawCharacter[]).map(
   toCharacter,
 );
-
-assertCharacterLogoRoster(CHARACTERS.map((character) => character.id));
 
 const CHARACTER_NAME_BY_ID = new Map(
   (rawCharacters as RawCharacter[]).map((entry) => [
