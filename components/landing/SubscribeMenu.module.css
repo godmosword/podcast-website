@@ -20,6 +20,18 @@
   box-shadow: 0 1px 0 rgba(120, 80, 40, 0.12);
   white-space: nowrap;
   cursor: pointer;
+  transition: transform var(--motion-press), background var(--motion-press),
+    opacity var(--motion-press);
+}
+
+.trigger:active {
+  transform: scale(0.98);
+}
+
+@media (hover: hover) {
+  .trigger:hover {
+    background: color-mix(in srgb, var(--landing-nav-cta-bg, #fff8f2) 72%, #ffe0c2);
+  }
 }
 
 .chevron {

@@ -1,7 +1,8 @@
-# 部署後 GEO live 煙霧測試（僅手動觸發）
+# 部署後 GEO live 煙霧測試；production deployment 成功後自動觸發，也保留手動入口。
 name: verify-geo-live
 
 on:
+  deployment_status:
   workflow_dispatch:
     inputs:
       base_url:
@@ -9,9 +10,17 @@ on:
         required: true
         default: "https://podcast-website-mu.vercel.app"
 
+permissions:
+  contents: read
+
 jobs:
   smoke:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.deployment_status.state == 'success' &&
+      github.event.deployment_status.environment == 'production')
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -21,5 +30,6 @@ jobs:
       - run: npm ci
       - name: verify:geo-live
         env:
-          BASE_URL: ${{ inputs.base_url }}
-        run: npm run verify:geo-live -- --base-url="$BASE_URL"
+          BASE_URL: ${{ inputs.base_url || vars.PRODUCTION_URL || 'https://podcast-website-mu.vercel.app' }}
+          NEXT_PUBLIC_SITE_URL: ${{ vars.PRODUCTION_URL || 'https://podcast-website-mu.vercel.app' }}
+        run: npm run verify:geo-live -- --base-url="$BASE_URL" --production

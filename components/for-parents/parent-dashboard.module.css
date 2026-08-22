@@ -123,7 +123,8 @@
 }
 
 .notPlayed {
-  opacity: 0.72;
+  /* 不用整個區塊降 opacity，避免子文字的對比被再次削弱。 */
+  opacity: 1;
 }
 
 .stickerList {

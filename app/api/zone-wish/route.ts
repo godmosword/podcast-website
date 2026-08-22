@@ -1,17 +1,9 @@
 import { NextResponse } from "next/server";
+import { requestIp } from "@/lib/request-ip";
 import { LEGAL_POLICY_VERSION } from "@/lib/legal-policy";
 import { insertZoneWish, isZoneWishDbConfigured } from "@/lib/zone-wish-db";
 import { checkZoneWishRateLimit } from "@/lib/zone-wish-rate-limit";
 import { zoneWishBodySchema } from "@/lib/zone-wish-schema";
-
-function clientIp(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) {
-    const first = forwarded.split(",")[0]?.trim();
-    if (first) return first;
-  }
-  return request.headers.get("x-real-ip")?.trim() || "unknown";
-}
 
 export async function GET(): Promise<NextResponse> {
   return NextResponse.json({ available: isZoneWishDbConfigured() });
@@ -20,15 +12,6 @@ export async function GET(): Promise<NextResponse> {
 export async function POST(request: Request): Promise<NextResponse> {
   if (!isZoneWishDbConfigured()) {
     return NextResponse.json({ ok: false, reason: "db_unavailable" }, { status: 503 });
-  }
-
-  const ip = clientIp(request);
-  const rate = checkZoneWishRateLimit(ip);
-  if (!rate.ok) {
-    return NextResponse.json(
-      { ok: false, reason: "rate_limited", retryAfterSec: rate.retryAfterSec },
-      { status: 429 },
-    );
   }
 
   let body: unknown;
@@ -41,6 +24,17 @@ export async function POST(request: Request): Promise<NextResponse> {
   const parsed = zoneWishBodySchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ ok: false, reason: "validation_error" }, { status: 400 });
+  }
+
+  const rate = await checkZoneWishRateLimit(requestIp(request));
+  if (!rate.ok) {
+    if (rate.reason === "unavailable") {
+      return NextResponse.json({ ok: false, reason: "db_unavailable" }, { status: 503 });
+    }
+    return NextResponse.json(
+      { ok: false, reason: "rate_limited", retryAfterSec: rate.retryAfterSec },
+      { status: 429, headers: { "Retry-After": String(rate.retryAfterSec) } },
+    );
   }
 
   try {

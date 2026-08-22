@@ -53,6 +53,12 @@
 
 角色 Logo 系統已移除，程式碼保存於 tag `archive/character-logo-system`。
 
+### 本輪已完成（2026-08-22）
+
+| ID | 說明 |
+|----|------|
+| polish(ui): Design Review — 對比／44px 觸控／標題層級／互動狀態與空狀態回饋 | 見本 commit |
+
 ### 本輪已完成（2026-08-20）
 
 | ID | 說明 |

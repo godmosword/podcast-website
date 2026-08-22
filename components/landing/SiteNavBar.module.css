@@ -192,6 +192,10 @@
   background: rgba(120, 80, 40, 0.08);
 }
 
+.menuLink:active {
+  background: rgba(120, 80, 40, 0.14);
+}
+
 .menuLink:focus-visible {
   position: relative;
   z-index: 1;

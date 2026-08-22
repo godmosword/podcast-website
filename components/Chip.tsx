@@ -11,7 +11,10 @@ export function TagChip({ children, color, variant = "tag" }: TagChipProps) {
     return (
       <span
         className={styles.vehicle}
-        style={{ color, backgroundColor: `${color}1f` }}
+        style={{
+          backgroundColor: `${color}1f`,
+          borderColor: color,
+        }}
       >
         {children}
       </span>
@@ -22,7 +25,10 @@ export function TagChip({ children, color, variant = "tag" }: TagChipProps) {
     return (
       <span
         className={styles.tag}
-        style={{ color, backgroundColor: `${color}1f` }}
+        style={{
+          backgroundColor: `${color}1f`,
+          borderColor: `${color}55`,
+        }}
       >
         {children}
       </span>

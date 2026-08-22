@@ -29,11 +29,12 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
+      - run: npm run verify:service-worker
       - run: npm test
 
-  build:
+  build-and-public-e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -42,3 +43,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - name: Install Chromium for public release gate
+        run: npx playwright install --with-deps chromium
+      - name: Run public smoke and accessibility gate
+        env:
+          PW_REUSE_SERVER: "1"
+        run: npm run test:e2e:public

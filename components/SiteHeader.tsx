@@ -53,7 +53,7 @@ export default function SiteHeader() {
         </picture>
       </div>
 
-      <h1 className="sr-only">車車遊樂園</h1>
+      <p className="sr-only">車車遊樂園</p>
 
       {actions.length > 0 && (
         <nav className={styles.actions} aria-label="聯絡與互動">

@@ -149,6 +149,7 @@
 .cta {
   display: inline-flex;
   align-items: center;
+  min-height: 44px;
   gap: 6px;
   padding: 12px 22px;
   border-radius: 999px;
@@ -172,6 +173,20 @@
 .cta:active {
   transform: scale(0.98);
   opacity: 0.92;
+}
+
+@media (hover: hover) {
+  .cta:hover {
+    box-shadow: 0 8px 22px rgba(120, 80, 40, 0.26), var(--gloss);
+  }
+
+  .playCta:hover {
+    box-shadow: 0 10px 26px rgba(120, 70, 20, 0.3), var(--gloss);
+  }
+
+  .subscribeCta:hover {
+    background: rgba(255, 255, 255, 0.24);
+  }
 }
 
 .subscribeCta {
@@ -298,6 +313,7 @@
   }
 
   .cta {
+    min-height: 44px;
     padding: 10px 18px;
     font-size: 0.9rem;
   }
@@ -345,6 +361,7 @@
   }
 
   .cta {
+    min-height: 44px;
     padding: 9px 16px;
     font-size: 0.86rem;
   }

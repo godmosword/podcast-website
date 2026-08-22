@@ -197,11 +197,6 @@
   text-align: center;
 }
 
-.privacyLine .metaLink {
-  min-height: 36px;
-  padding: 4px 6px;
-}
-
 @media (hover: hover) {
   .metaLink:hover {
     text-decoration: underline;

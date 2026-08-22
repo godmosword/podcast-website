@@ -3,7 +3,7 @@
   --ctrl-size: 60px;
   --time-size: 0.88rem;
   --seek-track: 7px;
-  --seek-thumb: 18px;
+  --seek-thumb: 22px;
   --seek-hit: 28px;
   --transport-gap: 14px;
   --top-tool-size: 48px;
@@ -41,7 +41,7 @@
     --ctrl-size: 64px;
     --time-size: 0.95rem;
     --seek-track: 8px;
-    --seek-thumb: 20px;
+    --seek-thumb: 24px;
     --seek-hit: 30px;
     --transport-gap: 18px;
     --top-tool-size: 52px;
@@ -56,7 +56,7 @@
     --ctrl-size: 68px;
     --time-size: 1.02rem;
     --seek-track: 8px;
-    --seek-thumb: 22px;
+    --seek-thumb: 26px;
     --seek-hit: 32px;
     --transport-gap: 22px;
   }
@@ -224,12 +224,14 @@
 }
 
 .endBtn {
+  min-height: 48px;
   padding: 15px 20px;
   border-radius: var(--radius-lg);
   color: #fff;
   font-size: 1.05rem;
   font-weight: 700;
   z-index: 2;
+  background-color: color-mix(in srgb, var(--play-bg, #888) 56%, black);
   background-image: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.22),
@@ -562,7 +564,7 @@
 .nightPromptYes,
 .nightPromptNo {
   flex: 1;
-  min-height: 40px;
+  min-height: 44px;
   padding: 6px 10px;
   border-radius: 8px;
   font-size: 0.82rem;

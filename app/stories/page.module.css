@@ -1,8 +1,10 @@
 .main {
   max-width: 640px;
   margin: 0 auto;
-  padding: calc(24px + var(--safe-top)) calc(20px + var(--safe-right))
-    calc(40px + var(--safe-bottom)) calc(20px + var(--safe-left));
+  padding: calc(var(--space-6) + var(--safe-top))
+    calc(var(--space-page) + var(--safe-right))
+    calc(var(--space-section) + var(--safe-bottom))
+    calc(var(--space-page) + var(--safe-left));
   background: linear-gradient(
     180deg,
     var(--page-warm-from) 0%,
@@ -20,8 +22,8 @@
 
 @media (max-width: 480px) {
   .main {
-    padding-left: calc(16px + var(--safe-left));
-    padding-right: calc(16px + var(--safe-right));
+    padding-left: calc(var(--space-4) + var(--safe-left));
+    padding-right: calc(var(--space-4) + var(--safe-right));
   }
 }
 

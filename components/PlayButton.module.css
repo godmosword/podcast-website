@@ -4,6 +4,7 @@
   justify-content: center;
   gap: 8px;
   width: 100%;
+  min-height: 48px;
   text-align: center;
   color: var(--on-dark);
   font-size: 1.2rem;
@@ -11,7 +12,8 @@
   letter-spacing: 0.02em;
   padding: 16px;
   border-radius: var(--radius-lg);
-  /* 疊在 inline backgroundColor 之上的光澤層 */
+  /* 單集色壓暗後再疊光澤：淺色票（#f59f00 / #0ea5e9）白字才能過 AA。 */
+  background-color: color-mix(in srgb, var(--play-bg, var(--accent)) 56%, black);
   background-image: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.18),

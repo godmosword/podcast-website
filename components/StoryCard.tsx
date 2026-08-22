@@ -85,7 +85,9 @@ export default function StoryCard({
           )}
         </span>
 
-        <span className={styles.title}>{story.title}</span>
+        <span className={styles.title} role="heading" aria-level={3}>
+          {story.title}
+        </span>
 
         {story.summary && <span className={styles.summary}>{story.summary}</span>}
 

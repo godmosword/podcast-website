@@ -25,7 +25,7 @@ export default function PlayButton({
       href={href}
       aria-label={label}
       className={`${styles.button} press-squash ${inline ? styles.inline : ""} ${className}`.trim()}
-      style={{ backgroundColor: color }}
+      style={{ ["--play-bg" as string]: color }}
     >
       {children ?? (
         <>

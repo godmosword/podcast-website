@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { getSiteUrl } from "./lib/site-url";
 
 export default defineConfig({
   testDir: "./e2e",
@@ -14,9 +15,14 @@ export default defineConfig({
       : {}),
   },
   webServer: {
-    command: "npm run build && npm run start",
+    // CI builds once in the build job, then starts that artifact here. Local
+    // runs keep the existing convenience behavior when no server is reused.
+    command:
+      process.env.PW_REUSE_SERVER === "1"
+        ? "npm run start"
+        : "npm run build && npm run start",
     env: {
-      NEXT_PUBLIC_SITE_URL: "https://podcast-website-mu.vercel.app",
+      NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? getSiteUrl(),
     },
     url: "http://127.0.0.1:3000",
     // 只有明確指定 production server 才重用；避免把 `next dev` 當成 E2E

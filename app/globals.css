@@ -146,7 +146,8 @@
   --warm-surface: color-mix(in srgb, var(--mix-base) 92%, var(--c-sky) 8%);
   --warm-surface-2: color-mix(in srgb, var(--c-teal) 10%, var(--card));
   --warm-accent: var(--landing-heading);
-  --warm-highlight: color-mix(in srgb, var(--c-pink) 70%, var(--ink));
+  /* 文字用粉色需與暖色頁面保持 WCAG AA；裝飾仍使用 --c-pink。 */
+  --warm-highlight: #9b385a;
   --warm-chip-bg: color-mix(in srgb, var(--c-teal) 12%, var(--mix-base));
   --warm-chip-hover: color-mix(in srgb, var(--c-teal) 22%, var(--mix-base));
   --warm-heading: color-mix(in srgb, var(--c-sky) 35%, var(--ink));
@@ -207,7 +208,7 @@
   --bg-2: #262d45;
   --bg-dot: #2e3652;
   --ink: #f0ead8;
-  --ink-soft: #b5ae9a;
+  --ink-soft: #bdb6a4;
   --card: #2c3450;
   --card-2: #353e5c;
   --hairline: rgba(255, 255, 255, 0.12);
@@ -263,7 +264,7 @@
   /* 夜間 --accent（#549890）對 --card 3.66:1、--card-2 3.14:1，同樣不過 AA。
      提亮版對四個夜間表面最差 4.94:1。 */
   --accent-ink: #7fbdb5;
-  --warm-highlight: var(--c-pink);
+  --warm-highlight: #e6a6b6;
   --warm-chip-bg: color-mix(in srgb, var(--c-teal) 18%, var(--card));
   --warm-chip-hover: color-mix(in srgb, var(--c-teal) 28%, var(--card-2));
   --warm-heading: color-mix(in srgb, var(--c-sky) 40%, var(--ink));

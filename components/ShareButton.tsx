@@ -61,22 +61,26 @@ export default function ShareButton({
   leading,
   className,
 }: ShareButtonProps) {
-  const [copied, setCopied] = useState(false);
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">(
+    "idle",
+  );
 
   async function copyLink() {
     try {
       await navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
+      setCopyState("copied");
       if (storySlug) trackShareClick(storySlug, "copy_link");
-      window.setTimeout(() => setCopied(false), 2000);
+      window.setTimeout(() => setCopyState("idle"), 2000);
     } catch {
-      // 剪貼簿不可用時靜默；使用者仍可長按選取。
+      setCopyState("failed");
+      window.setTimeout(() => setCopyState("idle"), 2500);
     }
   }
 
   return (
     <div
       className={[styles.row, className].filter(Boolean).join(" ")}
+      role="group"
       aria-label={leading ? "故事操作" : "分享這集"}
     >
       {leading}
@@ -89,7 +93,13 @@ export default function ShareButton({
         <span className={styles.icon}>
           <LinkIcon />
         </span>
-        <span>{copied ? "已複製連結" : "複製連結"}</span>
+        <span>
+          {copyState === "copied"
+            ? "已複製連結"
+            : copyState === "failed"
+              ? "請長按複製"
+              : "複製連結"}
+        </span>
       </button>
       <a
         href={lineUrl}

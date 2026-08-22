@@ -6,7 +6,9 @@
 }
 
 .back {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--ink-soft);
@@ -36,7 +38,7 @@
 .toc a {
   display: inline-flex;
   align-items: center;
-  min-height: 40px;
+  min-height: 44px;
   padding: 7px 11px;
   border: 1px solid var(--hairline);
   border-radius: 999px;

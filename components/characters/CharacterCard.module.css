@@ -110,11 +110,11 @@
 
 .storyLink {
   display: inline-flex;
-  min-height: 32px;
+  min-height: 44px;
   align-items: center;
   border: 1px solid color-mix(in srgb, var(--warm-accent) 28%, var(--line));
   border-radius: var(--radius-sm);
-  padding: 4px 10px;
+  padding: 8px 12px;
   background: var(--warm-chip-bg);
   color: var(--accent-ink);
   font-size: 0.86rem;

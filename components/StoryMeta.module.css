@@ -17,12 +17,14 @@
   padding: 2px 10px;
   border-radius: 999px;
   font-weight: 700;
-  border: 1.5px solid currentColor;
-  /* 文字顏色由 inline style 指定 */
-}
-
-:global([data-theme="night"]) .ep {
-  color: var(--ink) !important;
+  color: var(--ink);
+  background: color-mix(
+    in srgb,
+    var(--ep-color, var(--accent)) 16%,
+    transparent
+  );
+  border: 1.5px solid
+    color-mix(in srgb, var(--ep-color, var(--accent)) 42%, var(--hairline));
 }
 
 .durationValue {

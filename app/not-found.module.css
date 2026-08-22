@@ -27,8 +27,19 @@
   line-height: 1.5;
 }
 
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
 .cta {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 10rem;
   padding: 14px 28px;
   border-radius: var(--radius-md);
   background: var(--card);
@@ -36,9 +47,27 @@
   box-shadow: var(--shadow-card);
   font-size: 1.05rem;
   font-weight: 700;
+  transition: transform var(--motion-press), box-shadow var(--motion-press);
+}
+
+.ctaSecondary {
+  border-width: 1.5px;
+  box-shadow: none;
+  font-weight: 600;
+  color: var(--ink-soft);
 }
 
 .cta:active {
-  transform: translateY(4px);
-  box-shadow: none;
+  transform: scale(0.98);
+}
+
+@media (hover: hover) {
+  .cta:hover {
+    box-shadow: var(--shadow-md);
+  }
+
+  .ctaSecondary:hover {
+    box-shadow: none;
+    color: var(--ink);
+  }
 }

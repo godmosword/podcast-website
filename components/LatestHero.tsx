@@ -40,7 +40,9 @@ export default function LatestHero({ story }: LatestHeroProps) {
         />
       </div>
 
-      <span className={styles.title}>{story.title}</span>
+      <span className={styles.title} role="heading" aria-level={2}>
+        {story.title}
+      </span>
       {story.summary && (
         <span className={styles.summary}>{story.summary}</span>
       )}

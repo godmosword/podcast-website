@@ -77,7 +77,7 @@ export default function StoryEndScreen({
         <button
           type="button"
           className={styles.endBtn}
-          style={{ backgroundColor: color }}
+          style={{ ["--play-bg" as string]: color }}
           onClick={onReplay}
         >
           再聽一次

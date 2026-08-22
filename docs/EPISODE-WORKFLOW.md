@@ -109,6 +109,7 @@ npm run verify:episodes              # error 才 exit 1，warn 列出待辦
 npm run verify:episodes -- --strict  # warn 也視為失敗（approve 前最後把關）
 npm run --silent verify:episodes -- --json  # 給 agent/evaluator 的純 JSON report
 npm run --silent verify:episodes -- --json --strict  # 純 JSON，且 warn 也影響 exit code
+npm run verify:release-content       # 發布前分開檢查 release blocker 與 accepted MVP warning
 npm run verify:browse-index          # 找車車／主題索引與目錄一致（warn 不擋 CI）
 npm run check                        # test + verify + build，與 CI 同一套
 ```
@@ -116,6 +117,11 @@ npm run check                        # test + verify + build，與 CI 同一套
 - **全幕集**（`pageCount > 1`）：插圖數、scenes 幕數、subtitles、`captionTimes`、`captions` 必須與 `pageCount` 一致，否則 **error**。
 - **MVP**（`pageCount = 1`）：至少 `01.jpg` + 字幕側車；一律列 **warn**（`illustrate-pending`，或已切場景未 approve 的 `illustrate-incomplete`），不會靜默通過。
 - **Legacy**（ep-2–6 allowlist，6 頁 placeholder、無 scenes）：列 **warn**（`legacy-placeholder`），需依本 workflow 重做。allowlist 以外的多頁集缺 scenes 一律 **error**。
+
+`verify:release-content` 不改變 Apple sync 的 warning 語意：`pageCount = 1` 且只有
+`illustrate-pending` 會列為 accepted MVP warning；未校對字幕、缺資產、未完成場景與
+其他 warning 會列為 release blocker。這個檢查適合正式內容發布前執行，不綁進每次
+Apple sync 的工程 CI。
 
 ### CI 行為（每次 sync 一致）
 

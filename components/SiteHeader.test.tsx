@@ -17,7 +17,8 @@ describe("SiteHeader", () => {
     expect(html).not.toContain("用車車故事陪伴孩子成長");
     // 主題切換已移到頁尾，不應再出現在 header
     expect(html).not.toContain("主題模式");
-    // 仍保留無障礙標題
+    // 品牌名改為 sr-only 段落，避免與頁面 h1 重複
     expect(html).toContain('class="sr-only"');
+    expect(html).not.toMatch(/<h1/);
   });
 });

@@ -11,7 +11,12 @@ import styles from "./StoryPlayer.module.css";
 const StoryPlayer = dynamic(() => import("./StoryPlayer"), {
   ssr: false,
   loading: () => (
-    <div className={styles.player} aria-busy="true" aria-label="載入播放器中">
+    <div
+      className={styles.player}
+      role="region"
+      aria-busy="true"
+      aria-label="載入播放器中"
+    >
       <div className={styles.stage} />
     </div>
   ),
@@ -41,7 +46,12 @@ export default function StoryPlayerClient(props: StoryPlayerProps) {
 
   if (adoptLandingPlayback === null) {
     return (
-      <div className={styles.player} aria-busy="true" aria-label="載入播放器中">
+      <div
+        className={styles.player}
+        role="region"
+        aria-busy="true"
+        aria-label="載入播放器中"
+      >
         <div className={styles.stage} />
       </div>
     );

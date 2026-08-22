@@ -54,7 +54,7 @@ export default function CharacterCard({
         <p className={styles.vehicle}>{character.vehicle}</p>
         <p className={styles.personality}>{character.personality}</p>
         {character.appearsIn.length > 0 && (
-          <div className={styles.storyLinks} aria-label="出場故事">
+          <div className={styles.storyLinks} role="group" aria-label="出場故事">
             {character.appearsIn.map((slug) => {
               const story = getStory(slug);
               if (!story) return null;

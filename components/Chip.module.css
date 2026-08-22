@@ -53,12 +53,9 @@
 .vehicle {
   font-size: 0.85rem;
   font-weight: 700;
+  color: var(--ink);
   padding: 4px 13px;
   border-radius: 999px;
-  border: 1px solid currentColor;
+  border: 1px solid var(--line);
   box-shadow: var(--shadow-sm);
-}
-
-:global([data-theme="night"]) .vehicle {
-  color: var(--ink) !important;
 }

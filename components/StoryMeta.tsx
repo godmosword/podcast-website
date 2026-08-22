@@ -18,7 +18,10 @@ export default function StoryMeta({
       <div
         className={`${styles.meta} ${align === "left" ? styles.metaLeft : ""}`}
       >
-        <span className={styles.ep} style={{ color: story.color }}>
+        <span
+          className={styles.ep}
+          style={{ ["--ep-color" as string]: story.color }}
+        >
           EP {story.ep}
         </span>
         {story.duration && (

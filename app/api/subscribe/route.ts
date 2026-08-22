@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { checkDistributedRateLimit } from "@/lib/distributed-rate-limit";
+import { requestIp } from "@/lib/request-ip";
 import { LEGAL_POLICY_VERSION } from "@/lib/legal-policy";
 import {
   isSubscribeDbConfigured,
@@ -11,15 +13,6 @@ import {
   sendSubscribeConfirmation,
 } from "@/lib/subscribe-email";
 import { createSubscribeToken } from "@/lib/subscribe-tokens";
-
-function clientIp(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) {
-    const first = forwarded.split(",")[0]?.trim();
-    if (first) return first;
-  }
-  return request.headers.get("x-real-ip")?.trim() || "unknown";
-}
 
 export async function GET(): Promise<NextResponse> {
   return NextResponse.json({
@@ -35,15 +28,6 @@ export async function POST(request: Request): Promise<NextResponse> {
     );
   }
 
-  const ip = clientIp(request);
-  const rate = checkSubscribeRateLimit(ip);
-  if (!rate.ok) {
-    return NextResponse.json(
-      { ok: false, reason: "rate_limited", retryAfterSec: rate.retryAfterSec },
-      { status: 429 },
-    );
-  }
-
   let body: unknown;
   try {
     body = await request.json();
@@ -54,6 +38,41 @@ export async function POST(request: Request): Promise<NextResponse> {
   const parsed = subscribeBodySchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ ok: false, reason: "validation_error" }, { status: 400 });
+  }
+
+  const rate = await checkSubscribeRateLimit(requestIp(request));
+  if (!rate.ok) {
+    if (rate.reason === "unavailable") {
+      return NextResponse.json(
+        { ok: false, reason: "subscribe_unavailable" },
+        { status: 503 },
+      );
+    }
+    return NextResponse.json(
+      { ok: false, reason: "rate_limited", retryAfterSec: rate.retryAfterSec },
+      { status: 429, headers: { "Retry-After": String(rate.retryAfterSec) } },
+    );
+  }
+
+  // A per-IP limit alone cannot prevent the same address from being targeted
+  // through many rotating IPs. Keep confirmation resends on a short email
+  // cooldown while still returning the generic 202 response.
+  const emailCooldown = await checkDistributedRateLimit(
+    parsed.data.email.trim().toLowerCase(),
+    {
+      keyPrefix: "subscribe-email",
+      limit: 1,
+      windowSeconds: 15 * 60,
+    },
+  );
+  if (!emailCooldown.ok) {
+    if (emailCooldown.reason === "unavailable") {
+      return NextResponse.json(
+        { ok: false, reason: "subscribe_unavailable" },
+        { status: 503 },
+      );
+    }
+    return NextResponse.json({ ok: true, requiresConfirmation: true }, { status: 202 });
   }
 
   try {

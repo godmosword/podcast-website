@@ -19,12 +19,14 @@ import {
   parseJsonLdBlocks,
 } from "../lib/geo-live-html";
 import { validateRobotsTxtPolicy } from "../lib/robots-policy";
-import { CANONICAL_SITE_URL } from "../lib/site-url";
+import { CANONICAL_SITE_URL, getSiteUrl } from "../lib/site-url";
+import { storyAudioPath, storyCoverPath } from "../lib/story-utils";
 
 const FETCH_TIMEOUT_MS = 45_000;
 const RETRIEVAL_UA_SAMPLES = ["Claude-SearchBot", "PerplexityBot"] as const;
 
 type Result = { ok: boolean; label: string; detail?: string };
+type CliOptions = { baseUrl: string; productionOnly: boolean };
 
 const results: Result[] = [];
 
@@ -42,6 +44,7 @@ function printHelp(): void {
 
 選項：
   --base-url   必填（部署後站點根網址，不含尾斜線）
+  --production 只允許驗證目前 production canonical origin，拒絕 preview URL
   --help       顯示說明
 
 預設參考網域（未帶參數時僅提示）：${CANONICAL_SITE_URL}
@@ -54,24 +57,42 @@ function isAllowedGeoLiveBaseUrl(url: URL): boolean {
   return url.hostname === "localhost" || url.hostname === "127.0.0.1";
 }
 
-function parseBaseUrl(argv: string[]): string | null {
+function parseOptions(argv: string[]): CliOptions | null {
+  let baseUrl: string | null = null;
+  let productionOnly = false;
   for (const arg of argv) {
     if (arg === "--help" || arg === "-h") {
       printHelp();
       process.exit(0);
+    }
+    if (arg === "--production") {
+      productionOnly = true;
+      continue;
     }
     if (arg.startsWith("--base-url=")) {
       const raw = arg.slice("--base-url=".length).trim();
       try {
         const url = new URL(raw);
         if (!isAllowedGeoLiveBaseUrl(url)) return null;
-        return url.origin;
+        baseUrl = url.origin;
       } catch {
         return null;
       }
     }
   }
-  return null;
+  return baseUrl ? { baseUrl, productionOnly } : null;
+}
+
+function isConfiguredProductionOrigin(baseUrl: string): boolean {
+  try {
+    const canonicalOrigin = new URL(CANONICAL_SITE_URL).origin;
+    return (
+      new URL(baseUrl).origin === canonicalOrigin &&
+      new URL(getSiteUrl()).origin === canonicalOrigin
+    );
+  } catch {
+    return false;
+  }
 }
 
 function assertFinalUrlOrigin(baseUrl: string, finalUrl: string, label: string): boolean {
@@ -92,7 +113,13 @@ function assertFinalUrlOrigin(baseUrl: string, finalUrl: string, label: string):
 async function fetchLive(
   url: string,
   userAgent?: string,
-): Promise<{ status: number; contentType: string | null; body: string; finalUrl: string }> {
+): Promise<{
+  status: number;
+  contentType: string | null;
+  body: string;
+  finalUrl: string;
+  headers: Headers;
+}> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
@@ -107,10 +134,61 @@ async function fetchLive(
       contentType: res.headers.get("content-type"),
       body,
       finalUrl: res.url,
+      headers: res.headers,
     };
   } finally {
     clearTimeout(timer);
   }
+}
+
+async function checkProductionHeaders(baseUrl: string): Promise<void> {
+  let res: Awaited<ReturnType<typeof fetchLive>>;
+  try {
+    res = await fetchLive(baseUrl);
+  } catch (e) {
+    fail("production security headers", `首頁請求失敗：${(e as Error).message}`);
+    return;
+  }
+
+  const required = [
+    ["x-content-type-options", "nosniff"],
+    ["referrer-policy", "strict-origin-when-cross-origin"],
+    ["x-frame-options", "SAMEORIGIN"],
+  ] as const;
+  const missing = required.filter(([name, expected]) => res.headers.get(name) !== expected);
+  if (missing.length > 0) {
+    fail(
+      "production security headers",
+      missing.map(([name, expected]) => `${name} 應為 ${expected}`).join("; "),
+    );
+  } else if (!/^max-age=31536000; includeSubDomains$/i.test(res.headers.get("strict-transport-security") ?? "")) {
+    fail("production security headers", "缺少 production HSTS：max-age=31536000; includeSubDomains");
+  } else {
+    pass("production security headers");
+  }
+}
+
+async function checkNotFoundPage(baseUrl: string): Promise<void> {
+  let res: Awaited<ReturnType<typeof fetchLive>>;
+  try {
+    res = await fetchLive(`${baseUrl}/story/not-real-slug`);
+  } catch (e) {
+    fail("GET 404 頁面", (e as Error).message);
+    return;
+  }
+  if (res.status !== 404) {
+    fail("GET 404 頁面", `預期 HTTP 404，實際 ${res.status}`);
+    return;
+  }
+  if (!contentTypeMatches(/^text\/html/i, res.contentType)) {
+    fail("GET 404 頁面", `Content-Type：${res.contentType ?? "(無)"}`);
+    return;
+  }
+  if (isLikelyEdgeOrWafErrorPage(res.body, res.contentType)) {
+    fail("GET 404 頁面", "疑似 WAF／邊緣錯誤頁");
+    return;
+  }
+  pass("GET 404 頁面");
 }
 
 type AssetCheck = {
@@ -195,10 +273,17 @@ function checkJsonLdParseable(html: string, label: string): void {
 }
 
 async function main(): Promise<void> {
-  const baseUrl = parseBaseUrl(process.argv.slice(2));
-  if (!baseUrl) {
+  const options = parseOptions(process.argv.slice(2));
+  if (!options) {
     console.error("錯誤：請提供 --base-url=https://...");
     console.error(`範例：npm run verify:geo-live -- --base-url=${CANONICAL_SITE_URL}`);
+    process.exit(1);
+  }
+  const { baseUrl, productionOnly } = options;
+  if (productionOnly && !isConfiguredProductionOrigin(baseUrl)) {
+    console.error(
+      `錯誤：--production 只能驗證 canonical production origin ${CANONICAL_SITE_URL}，實際為 ${baseUrl}`,
+    );
     process.exit(1);
   }
 
@@ -213,6 +298,8 @@ async function main(): Promise<void> {
   const vehiclePath = `/vehicles/${encodeURIComponent(vehicle)}`;
   const storyPath = `/story/${latest.slug}`;
   const transcriptPath = `${storyPath}/transcript.vtt`;
+  const latestImagePath = storyCoverPath(latest.slug);
+  const latestAudioPath = storyAudioPath(latest.slug, latest.audio);
 
   console.log(`=== 車車遊樂園 · GEO Live 煙霧測試 ===\nbase: ${baseUrl}\n`);
 
@@ -323,6 +410,19 @@ async function main(): Promise<void> {
 
   const homeHtml = await checkHtmlPage(baseUrl, "/", "GET 首頁");
   if (homeHtml) checkJsonLdParseable(homeHtml, "首頁 JSON-LD 可解析");
+  if (productionOnly) await checkProductionHeaders(baseUrl);
+  await checkNotFoundPage(baseUrl);
+
+  await checkAsset(baseUrl, {
+    label: "GET 最新集主要圖片",
+    path: latestImagePath,
+    contentType: /^image\/(jpeg|jpg|webp|avif)/i,
+  });
+  await checkAsset(baseUrl, {
+    label: "GET 最新集音檔",
+    path: latestAudioPath,
+    contentType: /^(audio\/mpeg|audio\/mp4|application\/octet-stream)/i,
+  });
 
   const storyHtml = await checkHtmlPage(baseUrl, storyPath, "GET 最新單集頁");
   if (storyHtml) {

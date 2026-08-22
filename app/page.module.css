@@ -8,8 +8,8 @@
 
 @media (max-width: 768px) {
   .main {
-    /* 28px 指示列 + safe area，供 segment／Dudu 對齊 */
-    --landing-mobile-nav-h: calc(28px + var(--safe-bottom));
+    /* 44px 指示列 + safe area，供 segment／Dudu 對齊 */
+    --landing-mobile-nav-h: calc(44px + var(--safe-bottom));
   }
 }
 

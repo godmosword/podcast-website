@@ -333,9 +333,16 @@ export default function StoryPlayer({
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
+    const urls = [audio, ...images];
     void navigator.serviceWorker.ready.then((reg) => {
-      reg.active?.postMessage({ type: "CACHE_STORY", urls: [audio, ...images] });
+      reg.active?.postMessage({ type: "PLAYBACK_ACTIVE", urls });
+      reg.active?.postMessage({ type: "CACHE_STORY", urls });
     });
+    return () => {
+      void navigator.serviceWorker.ready.then((reg) => {
+        reg.active?.postMessage({ type: "PLAYBACK_INACTIVE", urls });
+      });
+    };
   }, [audio, images]);
 
   useEffect(() => {
