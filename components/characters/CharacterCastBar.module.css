@@ -31,3 +31,11 @@
   border-color: var(--warm-accent, var(--accent-ink));
   background: var(--warm-chip-hover, var(--bg-2));
 }
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: none;
+}

@@ -101,29 +101,27 @@ export function ColoringPagePicker({
             定裝人物
           </h2>
           <ul className={styles.grid}>
-            {characters.map((page) => {
-              return (
-                <li key={page.id}>
-                  <button
-                    type="button"
-                    className={styles.card}
-                    onClick={() => onSelect(page)}
-                    aria-label={`著色：${page.title}`}
-                  >
-                    <span className={styles.thumb}>
-                      <Image
-                        src={page.previewSrc}
-                        alt=""
-                        fill
-                        sizes="(max-width: 640px) 46vw, 200px"
-                        className={styles.thumbImg}
-                      />
-                    </span>
-                    <span className={styles.cardTitle}>{page.title}</span>
-                  </button>
-                </li>
-              );
-            })}
+            {characters.map((page) => (
+              <li key={page.id}>
+                <button
+                  type="button"
+                  className={styles.card}
+                  onClick={() => onSelect(page)}
+                  aria-label={`著色：${page.title}`}
+                >
+                  <span className={styles.thumb}>
+                    <Image
+                      src={page.previewSrc}
+                      alt=""
+                      fill
+                      sizes="(max-width: 640px) 46vw, 200px"
+                      className={styles.thumbImg}
+                    />
+                  </span>
+                  <span className={styles.cardTitle}>{page.title}</span>
+                </button>
+              </li>
+            ))}
           </ul>
         </section>
         <section className={styles.spread} aria-labelledby="coloring-scenes">
