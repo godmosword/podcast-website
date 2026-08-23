@@ -29,6 +29,7 @@ import {
   getZoneArtSrcSet,
   getZoneNightArtSrcSet,
 } from "../../lib/universe/zone-art-src";
+import { modernRasterPaths } from "../../lib/modern-image-src";
 import { storyCoverPath } from "../../lib/story-utils";
 
 /** PR／CI 警示：超過此大小的 tracked JPG 列入 largeFiles。 */
@@ -164,7 +165,10 @@ export function collectDynamicReferencePaths(): string[] {
     for (let page = 1; page <= story.pageCount; page++) {
       refs.add(storyCoverPath(story.slug, page));
     }
-    refs.add(storyCoverPath(story.slug));
+    const cover = modernRasterPaths(storyCoverPath(story.slug));
+    refs.add(cover.jpg);
+    refs.add(cover.webp);
+    refs.add(cover.avif);
   }
 
   for (const seg of LANDING_SEGMENTS) {

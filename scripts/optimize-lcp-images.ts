@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * D1：首頁 segment hero + 內頁 hero-home 預生成 WebP／AVIF。
+ * D1：首頁 segment hero + 內頁 hero-home + 故事 01.jpg 封面預生成 WebP／AVIF。
  *
  *   npm run optimize:lcp-images
  *   npm run optimize:lcp-images -- --verify

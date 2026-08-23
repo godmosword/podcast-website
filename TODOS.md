@@ -57,7 +57,8 @@
 
 | ID | 說明 |
 |----|------|
-| perf: Web Performance Audit v3 — StoryCard sizes、games picture hero、adventures webp preload、SW AVIF shell（維持 v6） | 見本 commit |
+| perf: 故事列表可快取殼＋播放頁封面 AVIF／WebP | 見本 commit |
+| perf: Web Performance Audit v3 — StoryCard sizes、games picture hero、adventures webp preload、SW AVIF shell（維持 v6） | `986ac33` |
 | polish(ui): Design Review — 返回鏈結／展開摘要／訂閱回饋／行動搜尋提交／focus 與觸控 | `0622dbd` |
 
 ### 本輪已完成（2026-08-22）
