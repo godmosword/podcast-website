@@ -9,6 +9,8 @@ import type { RefObject } from "react";
 import type { Playground, PlaygroundType } from "@/data/playgrounds";
 import type { LatLng } from "@/lib/playground-distance";
 import type { PlayMapCityTile } from "@/lib/play-map-city-tiles";
+import type { PlayMapResultSentenceView } from "@/lib/play-map-copy";
+import type { PlayMapResultGroup } from "@/lib/play-map-groups";
 import type { PlayMapView } from "@/lib/playgrounds-query";
 
 export type BrowseView = PlayMapView;
@@ -109,7 +111,10 @@ export type PlayMapCardProps = {
 };
 
 export type PlayMapCardListProps = {
-  matched: readonly Playground[];
+  /** 已分組的命中結果；渲染順序即 displayIndex 順序。 */
+  groups: readonly PlayMapResultGroup[];
+  /** 命中總數。「一組都沒有」與「全部被批次遮住」是兩件事，必須分辨。 */
+  matchedCount: number;
   unmatched: readonly Playground[];
   selectedId: string | null;
   hoveredPlaceId: string | null;
@@ -123,7 +128,9 @@ export type PlayMapCardListProps = {
   onBlur: (id: string) => void;
   onSelect: (id: string, trigger: HTMLElement) => void;
   registerCardRef: (id: string, element: HTMLLIElement | null) => void;
-  resultTitle: string;
+  resultSentence: PlayMapResultSentenceView;
+  /** 車程分組時的粗估免責文字；其他分組為 null。 */
+  groupNote: string | null;
   /** 手機名單模式顯示「看地圖」；桌面並排不需要。 */
   showMapAction: boolean;
   onOpenMap: () => void;
@@ -133,9 +140,9 @@ export type PlayMapCardListProps = {
     place: Playground;
     reason: string;
   } | null;
-  /** 本批可見筆數；超出者收 hidden，**不得** slice 陣列。 */
+  /** 本批可見筆數；以 displayIndex 判定，超出者收 hidden，**不得** slice 陣列。 */
   visibleCount: number;
-  /** 相對於「篩選後命中數」而非全站 73，否則會出現無效按鈕。 */
+  /** 相對於「篩選後命中數」而非全站 99，否則會出現無效按鈕。 */
   canLoadMore: boolean;
   visibleCountLabel: string;
   onLoadMore: () => void;

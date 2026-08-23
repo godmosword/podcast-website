@@ -109,9 +109,15 @@
   font-weight: 800;
 }
 
-/* 已收錄但這組條件 0 筆：磚還在、可以點回去，只是淡。 */
+/*
+ * 已收錄但這組條件 0 筆：磚還在、可以點回去，只是退到背景。
+ * 這裡刻意**不用 opacity 降階**——透明度會連文字對比一起吃掉，
+ * 改成明寫底色與文字色，對比才守得住。
+ */
 .tile[data-status="empty"] {
-  opacity: 0.55;
+  background: var(--card);
+  border-color: color-mix(in srgb, var(--hairline) 60%, transparent);
+  color: var(--ink-soft);
 }
 
 /*
@@ -125,15 +131,25 @@
   cursor: not-allowed;
 }
 
+.tile[data-status="empty"] .tileCount,
+.tile[data-status="uncatalogued"] .tileCount {
+  color: var(--ink-soft);
+}
+
 .tileCity {
   font-size: 0.8rem;
   font-weight: 700;
   text-align: center;
 }
 
+/*
+ * 命中數是這塊磚的主資訊，不能因為字小就降成 --ink-soft：
+ * --ink-soft 疊在最深的著色磚上只有 3.07:1（日）／4.29:1（夜），過不了 AA。
+ * 用 --ink 並靠字級與字重做層級，不靠顏色。
+ */
 .tileCount {
   font-size: var(--fs-meta);
-  color: var(--ink-soft);
+  color: var(--ink);
 }
 
 .tile[aria-pressed="true"] .tileCount {

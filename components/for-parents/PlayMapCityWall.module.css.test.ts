@@ -35,10 +35,20 @@ describe("PlayMapCityWall.module.css 契約", () => {
   });
 
   it("三種磚狀態各有可分辨的視覺，不只靠色深", () => {
-    expect(css).toMatch(/\.tile\[data-status="empty"\]\s*\{[^}]*opacity/s);
+    expect(css).toMatch(
+      /\.tile\[data-status="empty"\]\s*\{[^}]*border-color/s,
+    );
     expect(css).toMatch(
       /\.tile\[data-status="uncatalogued"\]\s*\{[^}]*border-style:\s*dashed/s,
     );
+  });
+
+  it("磚狀態不靠 opacity 降階，避免連文字對比一起吃掉", () => {
+    expect(css).not.toMatch(/\.tile\[data-status[^}]*opacity/s);
+  });
+
+  it("命中數不用 --ink-soft，那在最深的著色磚上過不了 AA", () => {
+    expect(css).toMatch(/\.tileCount\s*\{[^}]*color:\s*var\(--ink\)/s);
   });
 
   it("手機選定縣市後磚牆收合，桌面不收合", () => {

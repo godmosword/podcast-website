@@ -253,7 +253,8 @@ export default function PlayMap({
           className={styles.cardsPanel}
         >
           <PlayMapCardList
-            matched={map.filtered}
+            groups={map.groups}
+            matchedCount={map.filtered.length}
             unmatched={map.unmatchedPlaces}
             selectedId={map.selectedId}
             hoveredPlaceId={map.hoveredPlaceId}
@@ -267,7 +268,8 @@ export default function PlayMap({
             onBlur={map.handleBlurPlace}
             onSelect={map.handleSelectFromCard}
             registerCardRef={registerCardRef}
-            resultTitle={map.resultTitle}
+            resultSentence={map.resultSentence}
+            groupNote={map.groupNote}
             showMapAction={!map.splitLayout}
             onOpenMap={() => map.handleSelectView("map")}
             coverageLabel={map.coverageLabel}

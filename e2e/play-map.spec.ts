@@ -2,16 +2,29 @@ import { test, expect } from "@playwright/test";
 
 const PHONE = { width: 390, height: 844 };
 
+/**
+ * 結果列 h2 視覺上拆成「在 X 找 Y」＋放大的數字，內層 span 都 aria-hidden，
+ * accessible name 由 srText 提供（「在全台找免費的地方，共 12 個地方」）。
+ * 用 role + name 查詢可同時避開磚牆的「選一個縣市」h2。
+ */
+function resultSummary(
+  page: import("@playwright/test").Page,
+  scope?: string,
+) {
+  return page.getByRole("heading", {
+    level: 2,
+    name: scope
+      ? new RegExp(`^在${scope}.*共 \\d+ 個地方$`)
+      : /^在.+，共 \d+ 個地方$/,
+  });
+}
+
 /** 等待 PlayMap 意圖列與結果摘要就緒（Leaflet 僅「看地圖」後才載入）。 */
 async function waitForPlayMapReady(page: import("@playwright/test").Page) {
   await expect(page.getByRole("button", { name: "附近" })).toBeVisible({
     timeout: 8_000,
   });
-  await expect(
-    page.getByText(
-      /・\d+ 個適合的地方|目前沒有符合條件的地點/,
-    ),
-  ).toBeVisible({ timeout: 5_000 });
+  await expect(resultSummary(page)).toBeVisible({ timeout: 5_000 });
 }
 
 test.describe("親子遊樂地圖", () => {
@@ -47,7 +60,7 @@ test.describe("親子遊樂地圖", () => {
 
     await expect(page.getByRole("button", { name: "看地圖" })).toBeVisible();
     await expect(page.getByRole("button", { name: "免費" })).toBeVisible();
-    await expect(page.getByText(/全台・\d+ 個適合的地方/)).toBeVisible();
+    await expect(resultSummary(page, "全台")).toBeVisible();
 
     const cardsPanel = page.locator("#play-map-panel-cards");
     const firstCardButton = cardsPanel
@@ -85,7 +98,7 @@ test.describe("親子遊樂地圖", () => {
     await waitForPlayMapReady(page);
 
     await page.getByRole("button", { name: "免費" }).click();
-    await expect(page.getByText(/全台・\d+ 個適合的地方/)).toBeVisible();
+    await expect(resultSummary(page, "全台")).toBeVisible();
     await expect(page).toHaveURL(/free=1/);
   });
 
@@ -168,7 +181,7 @@ test.describe("親子遊樂地圖", () => {
 
     await expect(rain).toHaveAttribute("aria-pressed", "true");
     await expect(outdoor).toHaveAttribute("aria-pressed", "true");
-    await expect(page.getByText(/全台・\d+ 個適合的地方/)).toBeVisible();
+    await expect(resultSummary(page, "全台")).toBeVisible();
     await expect(page).toHaveURL(/outdoor=1&rain=1/);
   });
 
@@ -273,9 +286,7 @@ test.describe("親子遊樂地圖", () => {
     await expect(searchArea).toBeVisible({ timeout: 10_000 });
     await searchArea.click();
     await page.getByRole("button", { name: "返回名單" }).click();
-    await expect(
-      page.getByText(/這個區域・\d+ 個適合的地方|這個區域目前沒有符合條件的景點/),
-    ).toBeVisible();
+    await expect(resultSummary(page, "這個區域")).toBeVisible();
     await expect(page.getByRole("button", { name: "看全台" })).toBeVisible();
   });
 
@@ -310,17 +321,17 @@ test.describe("親子遊樂地圖", () => {
     await expect(searchArea).toBeVisible();
     await searchArea.click();
 
-    await expect(page.getByText(/這個區域・\d+ 個適合的地方|這個區域目前沒有符合條件的景點/)).toBeVisible();
+    await expect(resultSummary(page, "這個區域")).toBeVisible();
     await expect(searchArea).toHaveCount(0);
     await expect(
       page.getByRole("button", { name: "看全台" }).first(),
     ).toBeVisible();
 
     await page.getByRole("button", { name: "免費" }).click();
-    await expect(page.getByText(/這個區域・\d+ 個適合的地方|這個區域目前沒有符合條件的景點/)).toBeVisible();
+    await expect(resultSummary(page, "這個區域")).toBeVisible();
 
     await page.getByRole("button", { name: "看全台" }).first().click();
-    await expect(page.getByText(/・\d+ 個適合的地方/)).toBeVisible();
+    await expect(resultSummary(page)).toBeVisible();
   });
 
   test("桌面 card 與 individual marker 互相同步，marker 維持 compact Sheet", async ({

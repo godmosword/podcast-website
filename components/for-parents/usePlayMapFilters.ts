@@ -36,7 +36,6 @@ import {
   DEFAULT_PLAY_MAP_CENTER,
   listCityCoverage,
 } from "@/lib/playground-coverage";
-import { playMapResultTitle } from "@/lib/play-map-copy";
 import { usePlayMapBrowseModel } from "./usePlayMapBrowseModel";
 import {
   SPLIT_MIN_WIDTH_PX,
@@ -324,13 +323,6 @@ export function usePlayMapFilters({
     parkingOnly ||
     strollerFriendlyOnly ||
     highEnergyOnly;
-
-  const resultTitle = playMapResultTitle({
-    count: filtered.length,
-    city,
-    nearbyActive: userLatLng !== null,
-    viewportSearchActive: viewportBounds !== null,
-  });
 
   /** 磚牆／分組／結果句都是篩選狀態的純投影，統一在 browse model 算。 */
   const browse = usePlayMapBrowseModel({
@@ -754,7 +746,6 @@ export function usePlayMapFilters({
     allCityCount,
     cityCenter,
     hasExtraFilters,
-    resultTitle,
     ...browse,
     visibleCount,
     canLoadMore,

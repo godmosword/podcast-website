@@ -4,19 +4,6 @@
  */
 import type { PlaygroundType } from "@/data/playgrounds";
 
-export function playMapResultTitle(args: {
-  count: number;
-  city: string | null;
-  nearbyActive: boolean;
-  viewportSearchActive: boolean;
-}): string {
-  const { count, city, nearbyActive, viewportSearchActive } = args;
-  if (viewportSearchActive) return `這個區域・${count} 個適合的地方`;
-  if (nearbyActive) return `附近・${count} 個適合的地方`;
-  if (city) return `${city}・${count} 個適合的地方`;
-  return `全台・${count} 個適合的地方`;
-}
-
 /**
  * 句子式結果列的檢視模型。結果數是家長最先要的資訊，所以拆成獨立欄位
  * 讓消費端可以單獨放大，不必從整串字裡挖數字。
