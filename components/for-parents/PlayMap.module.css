@@ -1117,6 +1117,29 @@
   margin-top: var(--space-4);
 }
 
+/*
+ * full sheet 的次要出口（在地圖看／顯示位置／官網）：降成文字連結，
+ * 不跟導航與完整資訊搶點擊。仍維持 44px 觸控高度。
+ */
+.sheetSecondaryActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+}
+
+.sheetSecondaryActions .moreButton,
+.sheetSecondaryActions .placeLink,
+.sheetSecondaryActions .officialLink {
+  padding: 10px 0;
+  border: none;
+  border-radius: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .sheetTagList {
   display: flex;
   flex-wrap: wrap;
