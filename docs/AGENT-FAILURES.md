@@ -50,6 +50,7 @@
 
 | 日期 | 命令／模型 | 症狀（exit code／timeout／額度／輸出品質） | 處置 |
 |------|------------|---------------------------------------------|------|
+| 2026-08-23 | Task `architect` + `claude-opus-5-thinking-high`（diff 設計審） | 前兩次只留下 user prompt、無產出；第三次成功（無 CRITICAL，HIGH：SW v7 會清離線故事） | 第三次產出完整設計審 → **已解除**。本輪依 HIGH 退回 `chechecar-v6`。不計 30 天缺席（stall 後成功，非 slug 拒收） |
 | 2026-08-15 | `cursor-agent -p --model cursor-grok-4.5-high-fast --mode ask`（Claude Code 對抗審主路徑） | `Error: Authentication required. Please run 'agent login' first, or set CURSOR_API_KEY environment variable.`（exit 0，須看輸出內容）。`CURSOR_API_KEY` 未設定 | 與 2026-08-10 同症狀 → **30 天內第 2 筆未解除，`cursor-grok-4.5-high-fast` 正式構成缺席**，本輪不再重試該 slug。依探活表轉備援 grok CLI（見下列，成功）。請使用者執行 `cursor-agent login` 或設 `CURSOR_API_KEY` 以恢復主路徑 |
 | 2026-08-15 | `grok models`／`grok -p -m grok-4.5`（對抗審備援） | CLI 已登入（`You are logged in with grok.com.`），但**允許清單已漂移**：`Default model: grok-4.6`，可用清單僅 `grok-4.6`，`grok-4.5` 已不在列 | 依 07-13／07-16 slug 漂移先例（改用當前允許值並記錄，非降級頂替）改 **`-m grok-4.6`**，配 08-12 配方（prompt 開頭禁用工具＋內嵌 context ＋ `--no-plan --max-turns 20`）→ 對抗審成功，輸出 158 行、12 項發現、六個指定攻擊點全答。**已於同日收斂**：探活表、`.claude/commands/*` 備援命令改 `-m grok-4.6`；`AGENT-WORKFLOW.md` § 模型 slug 對照表補上「grok CLI 備援」列（原本 SSOT 只列 Cursor slug，**缺 CLI model id**，才會讓漂移無處可查）；契約測試同步改守 `-m grok-4.6` → **已解除** |
 | 2026-08-15 | Agent tool `architect` + `model: "opus"`（設計審） | 第一次呼叫中途失敗：`API Error: Your computer went to sleep mid-response`（環境錯誤，非模型缺席） | 直接重派一次即成功（輸出完整設計審，3×[CRITICAL]）。**不計入缺席判定**——本機休眠不是 model-call 失敗 |

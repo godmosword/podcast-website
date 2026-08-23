@@ -24,6 +24,7 @@
 
 ### Changed
 
+- **效能（Web Performance Audit v3）**：故事列表卡 `sizes` 對齊 80／96px 縮圖；`/games` hub 改 `<picture>`（viewport + AVIF／WebP）；`/adventures` 只 preload car-park WebP；SW shell 改 precache `hero-home.avif`（**維持 v6**，避免 activate 清空離線故事）。未改播放器、地圖相機、Sentry／Analytics。
 - **角色 Logo 家族背景壓深**：`construction`／`speed`／`fantasy`／`transit` 改較深 OKLCH，拉開與中明度車身的亮度帶；`rescue`／`joy`／`people` 不變。
 - **角色 Logo IP 主色重取樣**：定裝照取樣後只在剪影餘裕不足時沿色相微調；血緣四位共用珊瑚紅；清潔車／暖暖／小怪獸撤回深補償；消防車提亮；噗噗臉部次色提一階。
 - **角色 Logo prompt 重產**：35 份 `docs/logo-prompts/` 對齊新家族背景與 IP 色；`_shared.md` 的 style／forbid 區塊未改。

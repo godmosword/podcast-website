@@ -1,5 +1,6 @@
-// v6：故事資源使用有上限的 LRU，避免長期 cache-first 把裝置儲存塞滿。
-// activate 會回收 v5 與其他舊 cache；目前播放中的資源由頁面標記，不會被驅逐。
+// v6：故事資源與 shell 共用同一 cache。禁止只為換 shell 檔而升版——
+// activate 會刪掉非 CACHE_NAME 的整個 cache，回訪者最多 120MB 離線故事會被清光。
+// shell 改 precache AVIF：SW 檔有 byte 差異就會重裝，install 補上新 URL 即可。
 const CACHE_NAME = "chechecar-v6";
 const CACHE_META_DB = "chechecar-cache-meta";
 const CACHE_META_STORE = "story-assets";
@@ -8,7 +9,7 @@ const MAX_STORY_CACHE_ENTRIES = 96;
 const SHELL = [
   "/",
   "/manifest.json",
-  "/hero-home.jpg",
+  "/hero-home.avif",
   "/icon-192.png",
   "/icon-512.png",
 ];
@@ -123,7 +124,12 @@ async function cacheStoryAsset(cache, request, response) {
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(SHELL)),
+    caches.open(CACHE_NAME).then(async (cache) => {
+      await cache.addAll(SHELL);
+      // 清掉舊 shell JPG；新瀏覽器走 SiteHeader picture 的 AVIF。
+      await cache.delete("/hero-home.jpg");
+      await cache.delete(new URL("/hero-home.jpg", self.location.origin).href);
+    }),
   );
   self.skipWaiting();
 });

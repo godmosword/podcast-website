@@ -29,6 +29,10 @@ export default function StoryCard({
   sharedCoverMorph = true,
 }: StoryCardProps) {
   const isGrid = variant === "grid";
+  // 列表縮圖 96×96（≤480px 為 80×80）；grid 約 220px。避免預設 640px sizes。
+  const thumbSizes = isGrid
+    ? "(max-width: 640px) 46vw, 220px"
+    : "(max-width: 480px) 80px, 96px";
   const staggerClass = `scrollEnterStagger${(index % 3) + 1}`;
 
   return (
@@ -52,6 +56,7 @@ export default function StoryCard({
               src={storyCoverPath(story.slug)}
               alt=""
               fill
+              sizes={thumbSizes}
               className={styles.thumb}
             />
           </StoryCoverMorph>
@@ -60,6 +65,7 @@ export default function StoryCard({
             src={storyCoverPath(story.slug)}
             alt=""
             fill
+            sizes={thumbSizes}
             className={styles.thumb}
           />
         )}
