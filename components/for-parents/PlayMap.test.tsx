@@ -1000,6 +1000,7 @@ describe("PlayMap", () => {
   it("桌面卡片 hover 與 focus 會同步對應 marker，離開後清除", () => {
     mockDesktopMatchMedia();
     render(<PlayMap initialCity="台北市" />);
+    openMap();
     const place = filterPlaygrounds({ city: "台北市" })[0];
     expect(place).toBeDefined();
     if (!place) return;
@@ -1031,6 +1032,7 @@ describe("PlayMap", () => {
   it("桌面選取與 hover 相關性不因手機返回名單清理而改變", () => {
     mockDesktopMatchMedia();
     render(<PlayMap initialCity="台北市" />);
+    openMap();
     const place = filterPlaygrounds({ city: "台北市" })[0];
     expect(place).toBeDefined();
     if (!place) return;
@@ -1056,6 +1058,7 @@ describe("PlayMap", () => {
   it("桌面 marker click 開 compact Sheet 並只捲動可見 card list", () => {
     mockDesktopMatchMedia();
     render(<PlayMap initialCity="台北市" />);
+    openMap();
     const place = filterPlaygrounds({ city: "台北市" })[5];
     expect(place).toBeDefined();
     if (!place) return;
@@ -1103,6 +1106,7 @@ describe("PlayMap", () => {
   it("selected state 優先於 hover，且 filter 會清除失效 selection／hover", () => {
     mockDesktopMatchMedia();
     render(<PlayMap initialCity="台北市" />);
+    openMap();
     const place = filterPlaygrounds({ city: "台北市" })[0];
     expect(place).toBeDefined();
     if (!place) return;
@@ -1140,6 +1144,7 @@ describe("PlayMap", () => {
       east: 122.0,
     };
     render(<PlayMap />);
+    openMap();
 
     act(() => {
       leafletPropsRef.current?.onViewportSettled(
@@ -1181,6 +1186,7 @@ describe("PlayMap", () => {
   it("明確切換縣市會清除 stale viewport bounds", () => {
     mockDesktopMatchMedia();
     render(<PlayMap />);
+    openMap();
     const bounds = {
       south: 24.9,
       west: 121.0,
@@ -1210,7 +1216,7 @@ describe("PlayMap", () => {
     expectResultScopeCount("高雄市", filterPlaygrounds({ city: "高雄市" }).length);
   });
 
-  it("桌面並排時名單與地圖同時可見、不顯示互斥分頁", () => {
+  it("桌面預設只看名單且不掛地圖，看地圖後才並排", () => {
     Object.defineProperty(window, "matchMedia", {
       writable: true,
       configurable: true,
@@ -1230,7 +1236,17 @@ describe("PlayMap", () => {
     });
 
     const { container } = render(<PlayMap />);
-    expect(screen.queryByRole("button", { name: "看地圖" })).toBeNull();
+
+    // 桌面首屏也是名單：Leaflet 根本沒掛載，零 tile 請求。
+    expect(screen.queryByTestId("map-container")).toBeNull();
+    expect(screen.getByRole("button", { name: "看地圖" })).toBeTruthy();
+    expect(
+      container.querySelector("#play-map-panel-map")?.hasAttribute("hidden"),
+    ).toBe(true);
+
+    openMap();
+
+    // 切到地圖分頁才並排；名單留著，「看地圖」因為已同框而消失。
     expect(screen.getByRole("region", { name: "地點名單" })).toBeTruthy();
     expect(screen.getByRole("region", { name: "地點地圖" })).toBeTruthy();
     expect(
@@ -1240,5 +1256,6 @@ describe("PlayMap", () => {
       container.querySelector("#play-map-panel-map")?.hasAttribute("hidden"),
     ).toBe(false);
     expect(screen.getByTestId("map-container")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "看地圖" })).toBeNull();
   });
 });

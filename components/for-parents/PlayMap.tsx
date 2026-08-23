@@ -89,7 +89,8 @@ export default function PlayMap({
 
   const scrollCardIntoView = useCallback(
     (id: string) => {
-      if (!map.splitLayout) return;
+      // 只有並排時名單與地圖同框，才需要把卡片捲進視野。
+      if (!map.splitActive) return;
       const card = cardRefs.current.get(id);
       const panel = cardPanelRef.current;
       if (!card || card.hidden || !panel || panel.clientHeight <= 0) return;
@@ -116,7 +117,7 @@ export default function PlayMap({
         panel.scrollTop = Math.max(0, nextTop);
       }
     },
-    [map.reduceMotion, map.splitLayout],
+    [map.reduceMotion, map.splitActive],
   );
 
   const selectFromMap = map.handleSelectFromMap;
@@ -194,7 +195,7 @@ export default function PlayMap({
   return (
     <div
       className={styles.root}
-      data-split={map.splitLayout ? "true" : "false"}
+      data-split={map.splitActive ? "true" : "false"}
       data-mobile-map={mobileMap ? "true" : "false"}
     >
       <PlayMapToolbar compact={mobileMap} />
@@ -234,7 +235,8 @@ export default function PlayMap({
         />
       </div>
 
-      <div hidden={!map.showCards}>
+      {/* 磚牆是名單視圖的縣市導航器；地圖視圖有自己的 cluster，留著只會把地圖擠到摺線下。 */}
+      <div hidden={map.showMap}>
         <PlayMapCityWall
           tiles={map.cityTiles}
           selectedCity={map.city}
@@ -258,7 +260,7 @@ export default function PlayMap({
             unmatched={map.unmatchedPlaces}
             selectedId={map.selectedId}
             hoveredPlaceId={map.hoveredPlaceId}
-            hoverCorrelationEnabled={map.splitLayout}
+            hoverCorrelationEnabled={map.splitActive}
             userLatLng={map.userLatLng}
             hasExtraFilters={map.hasExtraFilters}
             onClearFilters={map.handleClearFilters}
@@ -270,7 +272,7 @@ export default function PlayMap({
             registerCardRef={registerCardRef}
             resultSentence={map.resultSentence}
             groupNote={map.groupNote}
-            showMapAction={!map.splitLayout}
+            showMapAction={!map.splitActive}
             onOpenMap={() => map.handleSelectView("map")}
             coverageLabel={map.coverageLabel}
             editorialPick={map.showCards ? map.editorialPick : null}
@@ -316,7 +318,7 @@ export default function PlayMap({
               emptyCenter={map.cityCenter}
               selectedId={map.selectedId}
               hoveredPlaceId={map.hoveredPlaceId}
-              hoverCorrelationEnabled={map.splitLayout}
+              hoverCorrelationEnabled={map.splitActive}
               onHover={map.handleHoverPlace}
               onBlur={map.handleBlurPlace}
               onSelect={handleSelectFromMap}

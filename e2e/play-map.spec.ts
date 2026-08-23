@@ -290,14 +290,29 @@ test.describe("親子遊樂地圖", () => {
     await expect(page.getByRole("button", { name: "看全台" })).toBeVisible();
   });
 
-  test("桌面並排直接載入地圖", async ({ page }) => {
+  test("桌面首屏不載入 Leaflet，看地圖後才並排（效能回歸）", async ({ page }) => {
     test.setTimeout(45_000);
+    // 桌面 view=cards 也不該碰 Leaflet 或 OSM tile——這是本次改版的效能承諾。
+    const mapRequests: string[] = [];
+    page.on("request", (request) => {
+      if (/leaflet|tile\.openstreetmap/i.test(request.url())) {
+        mapRequests.push(request.url());
+      }
+    });
+
     await page.goto("/for-parents/play-map");
     await waitForPlayMapReady(page);
-    await expect(page.getByRole("button", { name: "看地圖" })).toHaveCount(0);
+    await expect(page.getByRole("group", { name: "依縣市瀏覽" })).toBeVisible();
+    await expect(page.locator(".leaflet-container")).toHaveCount(0);
+    expect(mapRequests).toEqual([]);
+
+    await page.getByRole("button", { name: "看地圖" }).click();
     await expect(page.locator(".leaflet-container")).toBeVisible({
       timeout: 15_000,
     });
+    // 並排：地圖出現後名單仍在，且「看地圖」因為已同框而消失。
+    await expect(page.locator("#play-map-panel-cards")).toBeVisible();
+    await expect(page.getByRole("button", { name: "看地圖" })).toHaveCount(0);
     await expect(
       page.getByRole("button", { name: "搜尋此區域" }),
     ).toHaveCount(0);
@@ -307,6 +322,7 @@ test.describe("親子遊樂地圖", () => {
     test.setTimeout(45_000);
     await page.goto("/for-parents/play-map");
     await waitForPlayMapReady(page);
+    await page.getByRole("button", { name: "看地圖" }).click();
     await expect(page.locator(".leaflet-container")).toBeVisible({
       timeout: 15_000,
     });
@@ -340,6 +356,8 @@ test.describe("親子遊樂地圖", () => {
     test.setTimeout(45_000);
     await page.goto("/for-parents/play-map?city=%E5%8F%B0%E5%8C%97%E5%B8%82");
     await waitForPlayMapReady(page);
+    // hover 關聯只在並排時成立，桌面也要先切到地圖分頁。
+    await page.getByRole("button", { name: "看地圖" }).click();
     await expect(page.getByRole("button", { name: "看地圖" })).toHaveCount(0);
 
     const card = page.locator("#play-map-panel-cards li:not([hidden])").first();

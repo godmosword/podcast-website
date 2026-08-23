@@ -1399,20 +1399,30 @@
 }
 
 @media (min-width: 980px) {
-  .content {
+  /*
+   * 並排只在 view=map 生效（data-split="true"）。view=cards 是名單滿版，
+   * 若不 scope，.cardsPanel 會被 max-height:64dvh 夾住，名單只剩一小塊可捲——
+   * 這個 bug 在 jsdom 測不到，所以 CSS 契約測試把 scope 寫成斷言。
+   */
+  .root[data-split="true"] .content {
     grid-template-columns: minmax(300px, 44%) minmax(0, 1fr);
     align-items: stretch;
     min-height: 64dvh;
   }
 
-  .cardsPanel {
+  .root[data-split="true"] .cardsPanel {
     max-height: 64dvh;
     overflow: auto;
     padding-right: 2px;
   }
 
-  .cardGrid {
+  .root[data-split="true"] .cardGrid {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* 名單滿版時卡片走三欄，別讓一欄卡片在 1100px 寬裡拉成長條。 */
+  .root[data-split="false"] .cardGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .map {

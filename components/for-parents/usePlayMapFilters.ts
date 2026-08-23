@@ -557,16 +557,11 @@ export function usePlayMapFilters({
       }
       setSelectedId(id);
       setSheetVariant("compact");
-      if (!splitLayout) {
-        setBrowseView("map");
-        syncUrl({ city: nextCity, view: "map" });
-        return;
-      }
-      if (nextCity !== city) {
-        syncUrl({ city: nextCity });
-      }
+      // 「在地圖看」一律切到地圖分頁；桌面並排會同時留著名單，視覺結果不變。
+      setBrowseView("map");
+      syncUrl({ city: nextCity, view: "map" });
     },
-    [allPlaces, city, splitLayout, syncUrl],
+    [allPlaces, city, syncUrl],
   );
 
   const handleCloseSheet = useCallback(() => {
@@ -697,8 +692,13 @@ export function usePlayMapFilters({
     () => clusterPlaygroundsByCity(filtered),
     [filtered],
   );
-  const showCards = splitLayout || browseView === "cards";
-  const showMap = splitLayout || browseView === "map";
+  /**
+   * v2 起地圖是**次要分頁**：view=cards（預設，含桌面）任何寬度都不掛 Leaflet，
+   * 首屏零 tile 請求。桌面並排只在 view=map 時成立，hover 關聯也跟著它走。
+   */
+  const splitActive = splitLayout && browseView === "map";
+  const showMap = browseView === "map";
+  const showCards = browseView === "cards" || splitActive;
   const selectedDistanceLabel = selected
     ? formatPlaceDistanceLabel(selected, userLatLng)
     : null;
@@ -711,6 +711,7 @@ export function usePlayMapFilters({
     editorialPick,
     reduceMotion,
     splitLayout,
+    splitActive,
     clusterMode,
     viewportSearchActive: viewportBounds !== null,
     cityClusters,
