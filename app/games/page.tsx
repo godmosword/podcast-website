@@ -124,14 +124,29 @@ export default function GamesHubPage() {
   return (
     <main className={styles.main} aria-label="車車遊樂園小遊戲">
       <header className={styles.hero}>
-        <Image
-          src="/games/v2/hub/hero-desktop.webp"
-          alt="黏土車車在遊樂園入口與摩天輪旁準備開始遊戲"
-          fill
-          priority
-          sizes="(max-width: 640px) 100vw, 960px"
-          className={styles.heroImage}
-        />
+        {/* picture 依 viewport 只下載一張 hero，避免 mobile 先抓 desktop 再被 CSS 換圖 */}
+        <picture className={styles.heroPicture}>
+          <source
+            media="(max-width: 640px)"
+            type="image/avif"
+            srcSet="/games/v2/hub/hero-mobile.avif"
+          />
+          <source
+            media="(max-width: 640px)"
+            type="image/webp"
+            srcSet="/games/v2/hub/hero-mobile.webp"
+          />
+          <source type="image/avif" srcSet="/games/v2/hub/hero-desktop.avif" />
+          <img
+            src="/games/v2/hub/hero-desktop.webp"
+            alt="黏土車車在遊樂園入口與摩天輪旁準備開始遊戲"
+            width={1672}
+            height={941}
+            fetchPriority="high"
+            decoding="async"
+            className={styles.heroImage}
+          />
+        </picture>
         <div className={styles.heroShade} aria-hidden />
         <Doodle
           kind="burst"

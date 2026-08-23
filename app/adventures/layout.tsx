@@ -28,13 +28,6 @@ export default function AdventuresLayout({
         imageSrcSet={carParkTilePreload.webpSrcSet}
         imageSizes={carParkTilePreload.sizes}
       />
-      <link
-        rel="preload"
-        as="image"
-        href={carParkTilePreload.src}
-        imageSrcSet={carParkTilePreload.srcSet}
-        imageSizes={carParkTilePreload.sizes}
-      />
       <UniverseMap zoneStoryPreviewsMap={zoneStoryPreviewsMap}>
         {children}
       </UniverseMap>
