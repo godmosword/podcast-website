@@ -1,15 +1,23 @@
 import { describe, expect, it } from "vitest";
 import {
   isStoryCoverRaster,
+  isStoryPlayRaster,
   storyPlayCacheUrls,
   storyPlayImageSources,
 } from "./story-play-image";
 
 describe("story-play-image", () => {
-  it("只把 01.jpg 當封面現代格式", () => {
+  it("只把 01.jpg 當封面現代格式（SW extras）", () => {
     expect(isStoryCoverRaster("/stories/ep-3/01.jpg")).toBe(true);
     expect(isStoryCoverRaster("/stories/ep-3/02.jpg")).toBe(false);
     expect(isStoryCoverRaster("/games/v2/hub/hero-desktop.webp")).toBe(false);
+  });
+
+  it("播放頁所有 NN.jpg 都走 picture 現代格式", () => {
+    expect(isStoryPlayRaster("/stories/ep-3/01.jpg")).toBe(true);
+    expect(isStoryPlayRaster("/stories/ep-3/02.jpg")).toBe(true);
+    expect(isStoryPlayRaster("/stories/ep-23/26.jpg")).toBe(true);
+    expect(isStoryPlayRaster("/games/v2/hub/hero-desktop.webp")).toBe(false);
   });
 
   it("封面來源對齊同目錄 avif／webp", () => {
@@ -17,6 +25,11 @@ describe("story-play-image", () => {
       jpg: "/stories/ep-3/01.jpg",
       webp: "/stories/ep-3/01.webp",
       avif: "/stories/ep-3/01.avif",
+    });
+    expect(storyPlayImageSources("/stories/ep-3/02.jpg")).toEqual({
+      jpg: "/stories/ep-3/02.jpg",
+      webp: "/stories/ep-3/02.webp",
+      avif: "/stories/ep-3/02.avif",
     });
   });
 

@@ -1,11 +1,20 @@
 import { modernRasterPaths, type ModernRasterPaths } from "./modern-image-src";
 
 const STORY_COVER_RE = /\/stories\/[^/]+\/01\.jpe?g$/i;
+const STORY_PLAY_RE = /\/stories\/[^/]+\/\d{2}\.jpe?g$/i;
 
-/** 播放頁 LCP 封面（01.jpg）才有預生成 AVIF／WebP；其餘幕維持 JPG。 */
+function storyRasterPath(src: string): string {
+  return src.split("?")[0] ?? "";
+}
+
+/** SW CACHE_STORY extras：只加封面現代格式，其餘幕離線仍走 JPG fallback。 */
 export function isStoryCoverRaster(src: string): boolean {
-  const path = src.split("?")[0] ?? "";
-  return STORY_COVER_RE.test(path);
+  return STORY_COVER_RE.test(storyRasterPath(src));
+}
+
+/** 播放頁插圖（01.jpg 與後續幕）都有預生成 AVIF／WebP。 */
+export function isStoryPlayRaster(src: string): boolean {
+  return STORY_PLAY_RE.test(storyRasterPath(src));
 }
 
 export function storyPlayImageSources(src: string): ModernRasterPaths {

@@ -17,7 +17,7 @@ import { trackStoryCompleted, trackStoryPlayStart } from "@/lib/analytics";
 import { takeLandingPlayback } from "@/lib/landing-playback";
 import { playSfx, isSfxEnabled } from "@/lib/sfx";
 import {
-  isStoryCoverRaster,
+  isStoryPlayRaster,
   storyPlayCacheUrls,
   storyPlayImageSources,
 } from "@/lib/story-play-image";
@@ -639,7 +639,7 @@ export default function StoryPlayer({
           if (Math.abs(i - page) > 1) return null;
           const visible = i === page && !hasEnded;
           const sources = storyPlayImageSources(src);
-          const modern = isStoryCoverRaster(src);
+          const modern = isStoryPlayRaster(src);
           return (
             <div
               key={i}

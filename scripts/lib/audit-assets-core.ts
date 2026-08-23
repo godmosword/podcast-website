@@ -163,12 +163,12 @@ export function collectDynamicReferencePaths(): string[] {
 
   for (const story of getStories()) {
     for (let page = 1; page <= story.pageCount; page++) {
-      refs.add(storyCoverPath(story.slug, page));
+      const jpg = storyCoverPath(story.slug, page);
+      const modern = modernRasterPaths(jpg);
+      refs.add(modern.jpg);
+      refs.add(modern.webp);
+      refs.add(modern.avif);
     }
-    const cover = modernRasterPaths(storyCoverPath(story.slug));
-    refs.add(cover.jpg);
-    refs.add(cover.webp);
-    refs.add(cover.avif);
   }
 
   for (const seg of LANDING_SEGMENTS) {
