@@ -24,6 +24,7 @@
 
 ### Changed
 
+- **效能（Sentry client first-load）**：瀏覽器改用 `@sentry/browser` 同步 init（保留 GlobalHandlers／unhandled error／unhandled rejection 與 error boundary 上報），拿掉 client BrowserTracing。首頁 first-load JS gzip 約 238.1KB → 188.6KB（約 −49.4KB）。Server Sentry、DSN、scrubber 不變；server `tracesSampleRate` 仍為 0.1。
 - **效能（StoryPlayer 插圖傳送）**：播放頁所有幕 JPG 預生成 AVIF／WebP（品質 62／84），`<picture>` 依序 AVIF → WebP → JPG；原始 JPG 保留。SW CACHE_STORY 仍只加封面現代格式。未改字幕／音訊／換頁架構、地圖、Sentry。
 - **效能（宇宙地圖 client bundle）**：`data/universe.ts` 不再 import Zod；契約改到 `universe.schema.ts` 僅測試／CI 驗證。靜態島嶼資料以 typed 常數進 client。未改座標、相機、ZoneSheet、路由、preload、SW。
 - **效能（Play Map 靜態殼實驗）**：`/for-parents/play-map` 改靜態殼＋`PlayMapClient` island（對齊 `/stories`）。page 不再 await `searchParams`，可分享 URL 改由 client 解讀；SSR fallback 仍輸出全台名單與 ItemList。未改座標、Leaflet lazy、相機、Sheet、SW。

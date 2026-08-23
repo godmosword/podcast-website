@@ -1,6 +1,6 @@
 "use client";
 
-import * as Sentry from "@sentry/nextjs";
+import { reportClientBoundaryError } from "@/lib/sentry-client";
 import Link from "next/link";
 import { useEffect } from "react";
 
@@ -12,12 +12,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    Sentry.captureException(error, {
-      tags: {
-        boundary: "global",
-        error_digest: error.digest ?? "unknown",
-      },
-    });
+    reportClientBoundaryError(error, "global");
   }, [error]);
 
   return (
