@@ -6,10 +6,12 @@ import {
   listCities,
   listPlaygrounds,
   playgroundMapsSearchQuery,
-  playgroundSchema,
   type Playground,
   type PlaygroundType,
 } from "./playgrounds";
+import { playgroundSchema } from "./playgrounds.schema";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import {
   computePlaygroundBaseline,
   FACILITY_LIST_TAIL_PATTERN,
@@ -310,6 +312,12 @@ describe("playgrounds sidecar", () => {
     const sample = listPlaygrounds()[0];
     const bad = { ...sample, type: "遊樂場" };
     expect(playgroundSchema.safeParse(bad).success).toBe(false);
+  });
+
+  it("runtime module 不 import zod，避免 Play Map client 帶進驗證庫", () => {
+    const src = readFileSync(join(process.cwd(), "data/playgrounds.ts"), "utf8");
+    expect(src).not.toMatch(/from\s+["']zod["']/);
+    expect(src).not.toContain("playgroundSchema");
   });
 
   it("buildGoogleMapsNavUrl 以頁面名稱＋縣市為 destination，不是座標圖釘", () => {
