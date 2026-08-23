@@ -1,6 +1,6 @@
 /**
  * 車車宇宙：園區（島）相容層。
- * 權威資料在 `data/universe.ts`（0–1 世界座標 + zod）；
+ * 權威資料在 `data/universe.ts`（0–1 世界座標；Zod 契約在 universe.schema.ts）；
  * 本檔把 Zone 轉成既有 `ZoneDef`（MAP_STAGE px），供地圖／sheet／e2e 零差消費。
  */
 import {

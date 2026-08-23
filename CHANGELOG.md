@@ -24,6 +24,7 @@
 
 ### Changed
 
+- **效能（宇宙地圖 client bundle）**：`data/universe.ts` 不再 import Zod；契約改到 `universe.schema.ts` 僅測試／CI 驗證。靜態島嶼資料以 typed 常數進 client。未改座標、相機、ZoneSheet、路由、preload、SW。
 - **效能（Play Map 靜態殼實驗）**：`/for-parents/play-map` 改靜態殼＋`PlayMapClient` island（對齊 `/stories`）。page 不再 await `searchParams`，可分享 URL 改由 client 解讀；SSR fallback 仍輸出全台名單與 ItemList。未改座標、Leaflet lazy、相機、Sheet、SW。
 - **效能（Play Map client bundle）**：`data/playgrounds.ts` 不再 import Zod；契約改到 `playgrounds.schema.ts` 僅測試／CI 驗證。靜態 POI 以 typed 常數進 client。
 - **效能（故事列表與播放傳送）**：`/stories` 改靜態殼＋client filter island（保留可分享 URL、canonical 仍為 `/stories`）；LatestHero 不再與 SiteHeader 搶 priority；播放頁封面 `01.jpg` 走 AVIF／WebP（品質 62／84），其餘幕維持 JPG。未改 02+ 全幕轉檔、地圖相機、Sentry。
