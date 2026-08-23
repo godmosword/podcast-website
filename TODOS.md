@@ -57,6 +57,11 @@
 
 | ID | 說明 |
 |----|------|
+| feat(play-map): v2 純函式地基（縣市磚位表、分組策略、句子式結果列） | `c629c3a` |
+| feat(play-map): v2 縣市磚牆入口（22 縣市三態＋誠實聲明） | `b014d17` |
+| feat(play-map): v2 分組名單＋句子式結果列（含磚牆對比修正） | `662bd8e` |
+| feat(play-map): v2 Leaflet 降為次要分頁（桌面首屏零 tile 請求） | `72b5002` |
+| feat(play-map): v2 詳情面板事實 chip＋兩層出口 | `a3858df` |
 | perf: 播放頁漸進快取（不預抓整集 MP3／全幕 JPG；CACHE_STORY 改 current±1 外 AVIF idle） | `0420445` |
 | perf: Sentry client 改 `@sentry/browser`、拿掉 BrowserTracing（first-load JS 約 −49KB） | `1ab6fc7` |
 | fix: Landing autoplay 與 SW 音檔 Range 206（只快取完整 200） | `866164a` |

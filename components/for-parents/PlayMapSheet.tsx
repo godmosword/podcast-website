@@ -32,6 +32,25 @@ function needsCommercialNotice(place: Playground): boolean {
   return !place.free;
 }
 
+/**
+ * full sheet 的關鍵事實。**車程放第一格**——那是家長打開詳情後最先要的決定依據；
+ * 原本擠在一行 meta 的最後面，實際上最難掃到。
+ */
+function listFullSheetFacts(
+  place: Playground,
+  distanceLabel: string | null,
+): string[] {
+  const area = place.district ? `${place.city} ${place.district}` : place.city;
+  return [
+    ...(distanceLabel ? [distanceLabel] : []),
+    area,
+    place.type,
+    formatAgeRangeLabel(place.ageRange),
+    place.free ? "免費" : "需購票",
+    place.indoor ? "室內" : "戶外",
+  ];
+}
+
 function CoverageNote({ text }: { text: string }) {
   return (
     <p className={styles.coverageNote}>
@@ -143,19 +162,13 @@ export function PlayMapSheet({
         </>
       ) : (
         <>
-          <p className={styles.meta}>
-            {place.city}
-            {place.district ? ` · ${place.district}` : ""}
-            {" · "}
-            {place.type}
-            {" · "}
-            {formatAgeRangeLabel(place.ageRange)}
-            {" · "}
-            {place.free ? "免費" : "需購票"}
-            {" · "}
-            {place.indoor ? "室內" : "戶外"}
-            {distanceLabel ? ` · ${distanceLabel}` : ""}
-          </p>
+          <ul className={styles.sheetTagList} aria-label="關鍵資訊">
+            {listFullSheetFacts(place, distanceLabel).map((fact) => (
+              <li key={fact} className={styles.flag}>
+                {fact}
+              </li>
+            ))}
+          </ul>
 
           {place.tips ? (
             <p className={styles.tips}>
@@ -210,6 +223,11 @@ export function PlayMapSheet({
             </details>
           ) : null}
 
+          {/*
+            出口分兩層：導航與完整資訊是家長真正要走的路，
+            在地圖看／顯示位置／官網降成文字連結，不跟主要出口搶點擊。
+            所有 aria-label 維持原字串（e2e 契約）。
+          */}
           <div className={styles.actions}>
             <a
               className={styles.navButton}
@@ -220,6 +238,15 @@ export function PlayMapSheet({
             >
               導航
             </a>
+            <Link
+              className={styles.moreButton}
+              href={`/for-parents/play-map/${encodeURIComponent(place.id)}`}
+            >
+              查看完整資訊
+            </Link>
+          </div>
+
+          <div className={styles.sheetSecondaryActions}>
             <button
               type="button"
               className={styles.moreButton}
@@ -237,12 +264,6 @@ export function PlayMapSheet({
             >
               顯示位置
             </a>
-            <Link
-              className={styles.officialLink}
-              href={`/for-parents/play-map/${encodeURIComponent(place.id)}`}
-            >
-              查看完整資訊
-            </Link>
             {place.officialUrl ? (
               <a
                 className={styles.officialLink}

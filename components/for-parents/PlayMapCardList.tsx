@@ -7,6 +7,7 @@ import { PlayMapCard } from "./PlayMapCard";
 import { PlayMapEditorialPick } from "./PlayMapEditorialPick";
 import { OPEN_MAP_BUTTON_ID, type PlayMapCardListProps } from "./PlayMapContract";
 import styles from "./PlayMap.module.css";
+import results from "./PlayMapResults.module.css";
 
 function distanceLabelFor(
   place: Playground,
@@ -16,7 +17,8 @@ function distanceLabelFor(
 }
 
 export function PlayMapCardList({
-  matched,
+  groups,
+  matchedCount,
   unmatched,
   selectedId,
   hoveredPlaceId,
@@ -30,7 +32,8 @@ export function PlayMapCardList({
   onBlur,
   onSelect,
   registerCardRef,
-  resultTitle,
+  resultSentence,
+  groupNote,
   showMapAction,
   onOpenMap,
   coverageLabel,
@@ -45,7 +48,29 @@ export function PlayMapCardList({
     <>
       <div ref={topRef} aria-hidden />
       <div className={styles.resultHeader}>
-        <h2 className={styles.resultTitle}>{resultTitle}</h2>
+        {/*
+          視覺上拆成「在 X 找 Y」＋放大的結果數；讀屏要讀成一句完整的話，
+          所以 accessible name 由 srText 提供。
+        */}
+        <h2 className={results.sentence} aria-label={resultSentence.srText}>
+          <span className={results.sentenceLead} aria-hidden>
+            在 <b className={results.sentenceScope}>{resultSentence.scopeLabel}</b>
+            {resultSentence.facetLabels.length > 0 ? (
+              <>
+                {" 找 "}
+                <b className={results.sentenceFacet}>
+                  {resultSentence.facetLabels.join("・")}
+                </b>
+              </>
+            ) : null}
+          </span>
+          <span className={results.sentenceResult} aria-hidden>
+            <strong className={results.sentenceCount}>
+              {resultSentence.count}
+            </strong>
+            <span className={results.sentenceUnit}>個地方</span>
+          </span>
+        </h2>
         <div className={styles.resultHeaderActions}>
           {viewportSearchActive ? (
             <button
@@ -83,7 +108,7 @@ export function PlayMapCardList({
           onSelect={onSelect}
         />
       ) : null}
-      {matched.length === 0 ? (
+      {matchedCount === 0 ? (
         <div className={styles.listEmpty}>
           <span className={styles.brandAnchor} aria-hidden>
             <DuduSprite emotion="surprised" decorative />
@@ -113,25 +138,47 @@ export function PlayMapCardList({
         </div>
       ) : null}
 
+      {groupNote ? <p className={results.groupNote}>{groupNote}</p> : null}
+
       {/*
-        命中者依排序輸出；未命中者仍掛 hidden，保留 SSR／索引可發現性。
+        命中者依分組輸出；批次遮蔽以跨組連續的 displayIndex 判定，
+        組內編號連續，所以整組是否可見看第一筆就夠。
       */}
+      {groups.map((group) => (
+        <section
+          key={group.key}
+          className={results.group}
+          hidden={(group.items[0]?.displayIndex ?? 0) >= visibleCount}
+          aria-labelledby={`play-map-group-${group.key}`}
+        >
+          <h3
+            id={`play-map-group-${group.key}`}
+            className={results.groupHeadline}
+          >
+            {group.headline}
+          </h3>
+          <ul className={styles.cardGrid}>
+            {group.items.map(({ place, displayIndex }) => (
+              <PlayMapCard
+                key={place.id}
+                place={place}
+                hidden={displayIndex >= visibleCount}
+                distanceLabel={distanceLabelFor(place, userLatLng)}
+                selected={selectedId === place.id}
+                hovered={hoveredPlaceId === place.id}
+                hoverCorrelationEnabled={hoverCorrelationEnabled}
+                onHover={onHover}
+                onBlur={onBlur}
+                onSelect={onSelect}
+                registerCardRef={registerCardRef}
+              />
+            ))}
+          </ul>
+        </section>
+      ))}
+
+      {/* 未命中者仍全量掛 hidden，保留 SSR／索引可發現性——不得 slice。 */}
       <ul className={styles.cardGrid}>
-        {matched.map((place, index) => (
-          <PlayMapCard
-            key={place.id}
-            place={place}
-            hidden={index >= visibleCount}
-            distanceLabel={distanceLabelFor(place, userLatLng)}
-            selected={selectedId === place.id}
-            hovered={hoveredPlaceId === place.id}
-            hoverCorrelationEnabled={hoverCorrelationEnabled}
-            onHover={onHover}
-            onBlur={onBlur}
-            onSelect={onSelect}
-            registerCardRef={registerCardRef}
-          />
-        ))}
         {unmatched.map((place) => (
           <PlayMapCard
             key={`hidden-${place.id}`}
@@ -149,7 +196,7 @@ export function PlayMapCardList({
         ))}
       </ul>
 
-      {matched.length > 0 ? (
+      {matchedCount > 0 ? (
         <div className={styles.loadMoreBar}>
           <p className={styles.loadMoreStatus} role="status" aria-live="polite">
             {visibleCountLabel}

@@ -10,6 +10,7 @@ import {
   type BrowseView,
 } from "./PlayMapContract";
 import { PlayMapCardList } from "./PlayMapCardList";
+import { PlayMapCityWall } from "./PlayMapCityWall";
 import { PlayMapControlBar } from "./PlayMapControlBar";
 import { PlayMapSheet } from "./PlayMapSheet";
 import { PlayMapToolbar } from "./PlayMapToolbar";
@@ -88,7 +89,8 @@ export default function PlayMap({
 
   const scrollCardIntoView = useCallback(
     (id: string) => {
-      if (!map.splitLayout) return;
+      // 只有並排時名單與地圖同框，才需要把卡片捲進視野。
+      if (!map.splitActive) return;
       const card = cardRefs.current.get(id);
       const panel = cardPanelRef.current;
       if (!card || card.hidden || !panel || panel.clientHeight <= 0) return;
@@ -115,7 +117,7 @@ export default function PlayMap({
         panel.scrollTop = Math.max(0, nextTop);
       }
     },
-    [map.reduceMotion, map.splitLayout],
+    [map.reduceMotion, map.splitActive],
   );
 
   const selectFromMap = map.handleSelectFromMap;
@@ -158,6 +160,29 @@ export default function PlayMap({
     ],
   );
 
+  /**
+   * 手機收合磚牆後，取消縣市要把焦點還給原本那塊磚，否則焦點會掉到 body。
+   * 收合列自己的焦點由 PlayMapCityWall 內部負責。
+   */
+  const lastTileCityRef = useRef<string | null>(null);
+  const handleToggleCityTile = useCallback(
+    (next: string | null) => {
+      handleSelectCity(next);
+      if (next === null) {
+        const previous = lastTileCityRef.current;
+        if (previous) {
+          document
+            .querySelector<HTMLElement>(`[data-city="${previous}"]`)
+            ?.focus();
+        }
+        lastTileCityRef.current = null;
+        return;
+      }
+      lastTileCityRef.current = next;
+    },
+    [handleSelectCity],
+  );
+
   const mobileMap = !map.splitLayout && map.showMap;
   const wasMobileMapRef = useRef(mobileMap);
   useEffect(() => {
@@ -170,7 +195,7 @@ export default function PlayMap({
   return (
     <div
       className={styles.root}
-      data-split={map.splitLayout ? "true" : "false"}
+      data-split={map.splitActive ? "true" : "false"}
       data-mobile-map={mobileMap ? "true" : "false"}
     >
       <PlayMapToolbar compact={mobileMap} />
@@ -210,6 +235,16 @@ export default function PlayMap({
         />
       </div>
 
+      {/* 磚牆是名單視圖的縣市導航器；地圖視圖有自己的 cluster，留著只會把地圖擠到摺線下。 */}
+      <div hidden={map.showMap}>
+        <PlayMapCityWall
+          tiles={map.cityTiles}
+          selectedCity={map.city}
+          uncataloguedCities={map.uncataloguedCities}
+          onToggleCity={handleToggleCityTile}
+        />
+      </div>
+
       <div className={styles.content}>
         <section
           id={CARDS_PANEL_ID}
@@ -220,11 +255,12 @@ export default function PlayMap({
           className={styles.cardsPanel}
         >
           <PlayMapCardList
-            matched={map.filtered}
+            groups={map.groups}
+            matchedCount={map.filtered.length}
             unmatched={map.unmatchedPlaces}
             selectedId={map.selectedId}
             hoveredPlaceId={map.hoveredPlaceId}
-            hoverCorrelationEnabled={map.splitLayout}
+            hoverCorrelationEnabled={map.splitActive}
             userLatLng={map.userLatLng}
             hasExtraFilters={map.hasExtraFilters}
             onClearFilters={map.handleClearFilters}
@@ -234,8 +270,9 @@ export default function PlayMap({
             onBlur={map.handleBlurPlace}
             onSelect={map.handleSelectFromCard}
             registerCardRef={registerCardRef}
-            resultTitle={map.resultTitle}
-            showMapAction={!map.splitLayout}
+            resultSentence={map.resultSentence}
+            groupNote={map.groupNote}
+            showMapAction={!map.splitActive}
             onOpenMap={() => map.handleSelectView("map")}
             coverageLabel={map.coverageLabel}
             editorialPick={map.showCards ? map.editorialPick : null}
@@ -281,7 +318,7 @@ export default function PlayMap({
               emptyCenter={map.cityCenter}
               selectedId={map.selectedId}
               hoveredPlaceId={map.hoveredPlaceId}
-              hoverCorrelationEnabled={map.splitLayout}
+              hoverCorrelationEnabled={map.splitActive}
               onHover={map.handleHoverPlace}
               onBlur={map.handleBlurPlace}
               onSelect={handleSelectFromMap}

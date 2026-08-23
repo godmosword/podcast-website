@@ -3207,7 +3207,7 @@ export function listPlaygrounds(): readonly Playground[] {
  * 字典序（台中→台北→南投→苗栗…）對家長沒有意義，改用地理直覺排列；
  * 未列入者退回字典序排在最後（新縣市進資料時不會消失）。
  */
-const CITY_DISPLAY_ORDER: readonly string[] = [
+export const CITY_DISPLAY_ORDER: readonly string[] = [
   "基隆市",
   "台北市",
   "新北市",

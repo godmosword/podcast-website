@@ -71,6 +71,14 @@ describe("PlayMap.module.css map-chip 用量", () => {
     );
   });
 
+  it("並排版型只在 data-split=\"true\" 生效，名單滿版不被 64dvh 夾住", () => {
+    expect(css).toMatch(
+      /@media\s*\(min-width:\s*980px\)\s*\{[\s\S]*?\.root\[data-split="true"\] \.content/,
+    );
+    expect(css).toMatch(/\.root\[data-split="true"\] \.cardsPanel/);
+    expect(css).toMatch(/\.root\[data-split="false"\] \.cardGrid/);
+  });
+
   it("卡片導航只視覺降噪而不移除 DOM", () => {
     expect(css).toMatch(
       /@media\s*\(max-width:\s*979px\)\s*\{[^}]*\.cardsPanel \.cardActions\s*\{[^}]*display:\s*none/s,

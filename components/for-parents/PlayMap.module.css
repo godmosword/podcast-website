@@ -358,14 +358,6 @@
   opacity: 0.94;
 }
 
-.resultTitle {
-  margin: 0;
-  color: var(--ink);
-  font-size: 1.05rem;
-  font-weight: 800;
-  line-height: 1.3;
-}
-
 .cardsPanel {
   min-width: 0;
 }
@@ -938,13 +930,6 @@
   opacity: 0.94;
 }
 
-.meta {
-  margin: 10px 0 0;
-  color: var(--ink-soft);
-  font-size: 0.95rem;
-  line-height: 1.55;
-}
-
 .tips {
   margin: 14px 0 0;
   color: var(--ink);
@@ -1115,6 +1100,29 @@
   flex-wrap: wrap;
   gap: var(--space-3);
   margin-top: var(--space-4);
+}
+
+/*
+ * full sheet 的次要出口（在地圖看／顯示位置／官網）：降成文字連結，
+ * 不跟導航與完整資訊搶點擊。仍維持 44px 觸控高度。
+ */
+.sheetSecondaryActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+}
+
+.sheetSecondaryActions .moreButton,
+.sheetSecondaryActions .placeLink,
+.sheetSecondaryActions .officialLink {
+  padding: 10px 0;
+  border: none;
+  border-radius: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .sheetTagList {
@@ -1399,20 +1407,30 @@
 }
 
 @media (min-width: 980px) {
-  .content {
+  /*
+   * 並排只在 view=map 生效（data-split="true"）。view=cards 是名單滿版，
+   * 若不 scope，.cardsPanel 會被 max-height:64dvh 夾住，名單只剩一小塊可捲——
+   * 這個 bug 在 jsdom 測不到，所以 CSS 契約測試把 scope 寫成斷言。
+   */
+  .root[data-split="true"] .content {
     grid-template-columns: minmax(300px, 44%) minmax(0, 1fr);
     align-items: stretch;
     min-height: 64dvh;
   }
 
-  .cardsPanel {
+  .root[data-split="true"] .cardsPanel {
     max-height: 64dvh;
     overflow: auto;
     padding-right: 2px;
   }
 
-  .cardGrid {
+  .root[data-split="true"] .cardGrid {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* 名單滿版時卡片走三欄，別讓一欄卡片在 1100px 寬裡拉成長條。 */
+  .root[data-split="false"] .cardGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .map {
