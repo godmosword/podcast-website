@@ -1,6 +1,6 @@
 "use client";
 
-import * as Sentry from "@sentry/nextjs";
+import { reportClientBoundaryError } from "@/lib/sentry-client";
 import Link from "next/link";
 import { useEffect } from "react";
 import DuduMoment from "@/components/dudu/DuduMoment";
@@ -17,12 +17,7 @@ export default function Error({
 }) {
   // An error boundary instance is mounted once per error; report that error once.
   useEffect(() => {
-    Sentry.captureException(error, {
-      tags: {
-        boundary: "route",
-        error_digest: error.digest ?? "unknown",
-      },
-    });
+    reportClientBoundaryError(error, "route");
   }, [error]);
 
   return (

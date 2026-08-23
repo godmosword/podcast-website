@@ -27,9 +27,9 @@ Bonbon & 馬米親子 Podcast《車車遊樂園》的官方 **看圖聽故事** 
 | 區塊 | 路由 | 說明 |
 |------|------|------|
 | Landing Hub | `/` | Storyline 式四段 scroll-snap 入口（故事／睡前／黏土／衛教） |
-| 全部故事頁 | `/stories` | 最新集 Hero、收藏區、車種／主題篩選（`?vehicle=`、`?tag=`） |
+| 全部故事頁 | `/stories` | 靜態殼＋client 篩選 island；最新集 Hero、收藏區、車種／主題篩選（`?vehicle=`、`?tag=`，可分享） |
 | 故事詳情 | `/story/[slug]` | SEO 落地頁、分享、收藏、訂閱收聽 CTA、ShowNotes、親子延伸、完播反思、地圖島徽章 |
-| 播放器 | `/story/[slug]/play` | 全螢幕翻頁、逐字字幕、進度條、字幕字級 |
+| 播放器 | `/story/[slug]/play` | 全螢幕翻頁、逐字字幕、進度條、字幕字級；插圖 AVIF → WebP → JPG；音訊 `preload="none"`（Range 隨播） |
 | 逐字稿 | `/story/[slug]/transcript.vtt` | 完整音檔逐字稿 WebVTT（來自 `data/subtitles/`，非翻頁場景字幕；無障礙／GEO） |
 | 新集通知 | `/subscribe` | Email 訂閱表單（Neon；未設 DB 時引導至收聽平台） |
 | 主題 | `/topic`、`/topic/[tag]` | 主題索引與分類頁（SSG + FAQ schema） |
@@ -37,12 +37,13 @@ Bonbon & 馬米親子 Podcast《車車遊樂園》的官方 **看圖聽故事** 
 | 宇宙地圖 | `/adventures` | 五島滿版海洋、pan/zoom/fly-to（點島飛抵島心、再點同島回全景）、島上探索點 `/adventures/[zone]/[hotspot]`、漫遊 NPC、`?zone=` deep link |
 | 角色圖鑑 | `/characters` | `data/characters.json` 定裝照與出場故事 |
 | 親子指南 | `/for-parents` | answer-first FAQ、代表性集數、Threads 育兒小筆記外連（GEO／STEM-P3） |
+| 親子遊樂地圖 | `/for-parents/play-map` | 靜態殼＋`PlayMapClient` island；15 縣市景點、可分享篩選 URL、SSR 全台名單＋ItemList |
 | 家庭儀表板 | `/for-parents/dashboard` | 本機 localStorage 收聽／遊戲摘要（不上傳） |
 | 小遊戲 | `/games` | 街機兩款 hub + 繪本著色；遊戲資產按需預載 |
 | 節目數據 | `/studio` | 製作團隊專用（`noindex`、不在 sitemap） |
 | 關於／法律 | `/about`、`/legal` | 關於我們、使用條款 |
 | RSS | `/feed.xml` | Podcast feed（含 Podcasting 2.0 擴充） |
-| PWA | `manifest.json`、`sw.js` | 主畫面圖示；收藏、繼續收聽、遊戲進度、主題偏好（`cheche:progress` localStorage） |
+| PWA | `manifest.json`、`sw.js` | 主畫面圖示；收藏、繼續收聽、遊戲進度、主題偏好（`cheche:progress` localStorage）。CACHE_STORY 只排 current±1 以外的 AVIF idle、不預抓整集 MP3；只快取完整 200（Range 206 不入庫，避免 Landing autoplay 壞掉）。**維持 v6** |
 | GEO | `public/llms.txt`、`llms-full.txt` | AI 引用語料（build 前 `prebuild` 自動生成 `llms-full`）；`robots.ts` 分流檢索／訓練爬蟲 |
 
 ### 遊樂園活動（`data/games.ts`）
@@ -95,6 +96,7 @@ npm run dev
 | `npm run verify:episodes` | 對照 ep-9／ep-10 標準驗證集數接線 |
 | `npm run verify:browse-index` | 驗證 `browse-index.json` 與故事資料一致 |
 | `npm run generate:story-blurs` | 故事圖 blur placeholder |
+| `npm run optimize:lcp-images` | 預生成 landing／hero-home／**故事全幕** WebP／AVIF（`--verify` 只檢查不寫檔） |
 | `npm run generate:coloring-lineart` | 由定裝／場景 JPG 產生著色線稿 PNG（演算法版；`--only <id>`／`--kind`／`--verify`） |
 | `npm run generate:coloring-cover` | 繪本著色 hero cover（黏土風 1448×1086 webp；寫入 `public/.games-staging/<run>/`，人工審後 `--approve`；需 `OPENAI_API_KEY`，CI 不跑） |
 | `npm run generate:coloring-ai-lineart` | AI 重生著色線稿（images.edit＋定裝 ref；character／scene 分流 prompt；gate 含構圖 edgeIou；寫入 `public/.coloring-staging/<run>/`，人工審 contact sheet＋清單後 `--approve <id>` 才上線；硬閘 16 calls/run，需 `OPENAI_API_KEY`，CI 不跑） |
@@ -145,6 +147,7 @@ NEXT_PUBLIC_SITE_URL=https://你的網域
 | `DATABASE_URL` | 樂園許願 + email 訂閱 API（Neon）；未設則表單降級（許願→mailto、訂閱→`#connect`） |
 | `RESEND_API_KEY` / `SUBSCRIBE_FROM_EMAIL` | 新集通知 double opt-in 寄信；任一未設時訂閱 API 安全降級為不可用 |
 | `OPENAI_API_KEY` | 僅本機 `illustrate`／地圖資產生成；**CI 不放** |
+| `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN` | 可選錯誤上報。瀏覽器走 `@sentry/browser`（無 BrowserTracing）；未設則不上報 |
 | `SYNC_ISSUE_*` | GHA 同步後 GitHub Issue 通知（見 `.env.example`） |
 
 完整說明見 [`.env.example`](./.env.example)。
@@ -158,14 +161,16 @@ Neon／`DATABASE_URL` 為選配。未設定時不需要執行 migration，許願
 1. **建立資料夾** `public/stories/<slug>/`（slug 英文小寫，與網址一致；現階段同步／轉錄仍以此為 staging source）
 2. **放入** `audio.mp3`、`01.jpg`（多頁：`02.jpg`…）；公開音檔上線後可由 `NEXT_PUBLIC_AUDIO_BASE_URL` 將瀏覽器／RSS 指向外部 origin
 3. **編輯** `data/stories.ts` — 在 `manualStories` 加一筆（`pageCount` 與插圖張數一致）
-4. **字型** — 有新中文 → `npm run font:subset`
-5. **驗證** — `npm test && npm run build`
-6. **部署** — push 後 CI 自動建置
+4. **現代格式** — `npm run optimize:lcp-images`（為每張 `NN.jpg` 產同名 `.avif`／`.webp`；播放頁 `<picture>` 依序採用）
+5. **字型** — 有新中文 → `npm run font:subset`
+6. **驗證** — `npm test && npm run build`
+7. **部署** — push 後 CI 自動建置
 
 ### 檢查清單
 
 - [ ] `slug` 與資料夾名稱一致
 - [ ] `audio.mp3` 可播放、`01.jpg` 存在
+- [ ] 每張 `NN.jpg` 有同名 `.avif`／`.webp`（`npm run optimize:lcp-images -- --verify`）
 - [ ] `ep` 為目前最大集數 + 1
 - [ ] `pageCount` 與插圖張數一致
 - [ ] 分享預覽正常（title／描述／封面）
@@ -242,7 +247,7 @@ app/
   story/[slug]/               故事詳情 + play 播放器 + transcript.vtt
   adventures/page.tsx         車車宇宙地圖
   characters/page.tsx         角色圖鑑
-  for-parents/                親子指南 + dashboard
+  for-parents/                親子指南 + dashboard + play-map（靜態殼）
   subscribe/page.tsx          新集 email 訂閱
   games/                      街機兩款 + 繪本著色
   topic/、vehicles/           主題／車種索引
@@ -262,13 +267,16 @@ data/
   stories.ts                  手動維護集（完整繪本）
   apple-synced.json           GHA 同步集
   characters.json、scenes/、subtitles/
-  universe-zones.ts 等        地圖五島、漫遊、故事↔島對應
+  playgrounds.ts              親子景點（Zod 契約在 playgrounds.schema.ts，僅測試／CI）
+  universe.ts、universe-zones.ts  地圖五島（Zod 契約在 universe.schema.ts，僅測試／CI）
   reflection-prompts.ts、family-activities.ts、parent-guides.ts
 hooks/                        遊戲、地圖、無障礙、家長儀表板 hooks
 lib/
   gamekit/                    遊戲 runtime、進度、React hooks
   universe/                   地圖美術、deep link、OG
   story-geo.ts、for-parents.ts  GEO／家長端 resolver
+  story-play-image.ts         播放頁插圖 AVIF／WebP 路徑與 CACHE_STORY idle 清單
+  sentry-client.ts            瀏覽器 Sentry 輕量 init
   progress-store.ts           localStorage 收藏、繼續收聽、遊戲進度
   platform-utm.ts             收聽平台外連 UTM 歸因
   zone-wish-*.ts              許願 schema／DB／rate limit
@@ -324,6 +332,7 @@ OPENAI_API_KEY=sk-... npm run illustrate -- ep-9 --segment-only  # 只切場景
 OPENAI_API_KEY=sk-... npm run illustrate -- ep-9                 # 生圖到暫存
 open public/.illustrate-staging/ep-9/contact.html                  # 審圖
 npm run illustrate -- ep-9 --approve                               # 上線
+npm run optimize:lcp-images                                        # 為新 JPG 補 AVIF／WebP
 ```
 
 | 旗標 | 作用 |

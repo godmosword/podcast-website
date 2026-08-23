@@ -17,8 +17,9 @@ import { trackStoryCompleted, trackStoryPlayStart } from "@/lib/analytics";
 import { takeLandingPlayback } from "@/lib/landing-playback";
 import { playSfx, isSfxEnabled } from "@/lib/sfx";
 import {
-  isStoryCoverRaster,
-  storyPlayCacheUrls,
+  isStoryPlayRaster,
+  storyIdleCacheUrls,
+  storyPlaybackProtectUrls,
   storyPlayImageSources,
 } from "@/lib/story-play-image";
 import SfxToggle from "./SfxToggle";
@@ -338,15 +339,41 @@ export default function StoryPlayer({
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
-    const urls = storyPlayCacheUrls(audio, images);
+    const protectUrls = storyPlaybackProtectUrls(audio, images);
+    const idleUrls = storyIdleCacheUrls(images, 0);
+    let cancelled = false;
+    let idleHandle: number | undefined;
     void navigator.serviceWorker.ready.then((reg) => {
-      reg.active?.postMessage({ type: "PLAYBACK_ACTIVE", urls });
-      reg.active?.postMessage({ type: "CACHE_STORY", urls });
+      if (cancelled) return;
+      reg.active?.postMessage({ type: "PLAYBACK_ACTIVE", urls: protectUrls });
+      if (idleUrls.length === 0) return;
+      const startIdle = () => {
+        if (cancelled) return;
+        reg.active?.postMessage({ type: "CACHE_STORY", urls: idleUrls });
+      };
+      if (typeof requestIdleCallback === "function") {
+        idleHandle = requestIdleCallback(startIdle);
+      } else {
+        idleHandle = window.setTimeout(startIdle, 1);
+      }
     });
     return () => {
-      void navigator.serviceWorker.ready.then((reg) => {
-        reg.active?.postMessage({ type: "PLAYBACK_INACTIVE", urls });
-      });
+      cancelled = true;
+      if (idleHandle !== undefined) {
+        if (typeof cancelIdleCallback === "function") {
+          cancelIdleCallback(idleHandle);
+        } else {
+          window.clearTimeout(idleHandle);
+        }
+      }
+      const worker = navigator.serviceWorker.controller;
+      if (worker) {
+        worker.postMessage({ type: "PLAYBACK_INACTIVE", urls: protectUrls });
+      } else {
+        void navigator.serviceWorker.ready.then((reg) => {
+          reg.active?.postMessage({ type: "PLAYBACK_INACTIVE", urls: protectUrls });
+        });
+      }
     };
   }, [audio, images]);
 
@@ -620,7 +647,7 @@ export default function StoryPlayer({
       <audio
         ref={setNativeAudioRef}
         src={audio}
-        preload="metadata"
+        preload="none"
         onError={() => setMediaError("audio")}
       />
       <div className={styles.stage}>
@@ -639,7 +666,7 @@ export default function StoryPlayer({
           if (Math.abs(i - page) > 1) return null;
           const visible = i === page && !hasEnded;
           const sources = storyPlayImageSources(src);
-          const modern = isStoryCoverRaster(src);
+          const modern = isStoryPlayRaster(src);
           return (
             <div
               key={i}

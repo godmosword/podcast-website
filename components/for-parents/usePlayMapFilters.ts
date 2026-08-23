@@ -346,7 +346,14 @@ export function usePlayMapFilters({
         view: browseView,
         ...next,
       });
-      window.history.replaceState(null, "", qs ? `${pathname}?${qs}` : pathname);
+      // Keep App Router history.state (`__NA`). Passing `null` lets Next.js 16
+      // patch replaceState into ACTION_RESTORE, which would refresh
+      // useSearchParams and re-run the initial* sync effect.
+      window.history.replaceState(
+        window.history.state,
+        "",
+        qs ? `${pathname}?${qs}` : pathname,
+      );
     },
     [
       city,
@@ -617,8 +624,9 @@ export function usePlayMapFilters({
   }, [selected]);
 
   /*
-   * 網址由 history.replaceState 就地更新，不會觸發 server component 重繪，
-   * 所以這個 effect 只在「真的換頁」時才會跑（例如從導覽列再點一次親子景點）。
+   * 網址由 history.replaceState 就地更新；syncUrl 會原樣寫回 history.state
+   * （含 Next App Router 的 __NA），所以不會觸發 useSearchParams restore。
+   * 這個 effect 只在「真的換頁」時才會跑（例如從導覽列再點一次親子景點）。
    * 五個值同源於一次 parsePlayMapQuery 快照，一起同步才不會出現半套狀態。
    */
   useEffect(() => {

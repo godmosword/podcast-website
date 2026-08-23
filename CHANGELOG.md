@@ -24,8 +24,13 @@
 
 ### Changed
 
+- **效能（故事播放頁快取）**：進 `/story/[slug]/play` 不再背景下載完整 MP3 與全幕 JPG。音訊 `preload="none"`，由 Range／206 隨播放抓取；CACHE_STORY 改 current±1 以外的 AVIF idle queue，離開頁面取消。SW 仍只快取完整 200、維持 v6。Landing autoplay 與 866164a Range 契約不變。
+- **效能（Sentry client first-load）**：瀏覽器改用 `@sentry/browser` 同步 init（保留 GlobalHandlers／unhandled error／unhandled rejection 與 error boundary 上報），拿掉 client BrowserTracing。首頁 first-load JS gzip 約 238.1KB → 188.6KB（約 −49.4KB）。Server Sentry、DSN、scrubber 不變；server `tracesSampleRate` 仍為 0.1。
+- **效能（StoryPlayer 插圖傳送）**：播放頁所有幕 JPG 預生成 AVIF／WebP（品質 62／84），`<picture>` 依序 AVIF → WebP → JPG；原始 JPG 保留。`npm run optimize:lcp-images` 現含 `public/stories/**/NN.jpg`。SW 背景佇列改見上方「故事播放頁快取」。未改字幕／音訊／換頁架構、地圖、Sentry。
+- **效能（宇宙地圖 client bundle）**：`data/universe.ts` 不再 import Zod；契約改到 `universe.schema.ts` 僅測試／CI 驗證。靜態島嶼資料以 typed 常數進 client。未改座標、相機、ZoneSheet、路由、preload、SW。
+- **效能（Play Map 靜態殼實驗）**：`/for-parents/play-map` 改靜態殼＋`PlayMapClient` island（對齊 `/stories`）。page 不再 await `searchParams`，可分享 URL 改由 client 解讀；SSR fallback 仍輸出全台名單與 ItemList。未改座標、Leaflet lazy、相機、Sheet、SW。
 - **效能（Play Map client bundle）**：`data/playgrounds.ts` 不再 import Zod；契約改到 `playgrounds.schema.ts` 僅測試／CI 驗證。靜態 POI 以 typed 常數進 client。
-- **效能（故事列表與播放傳送）**：`/stories` 改靜態殼＋client filter island（保留可分享 URL、canonical 仍為 `/stories`）；LatestHero 不再與 SiteHeader 搶 priority；播放頁封面 `01.jpg` 走 AVIF／WebP（品質 62／84），其餘幕維持 JPG。未改 02+ 全幕轉檔、地圖相機、Sentry。
+- **效能（故事列表與播放傳送）**：`/stories` 改靜態殼＋client filter island（保留可分享 URL、canonical 仍為 `/stories`）；LatestHero 不再與 SiteHeader 搶 priority；播放頁封面先走 AVIF／WebP（品質 62／84）。02+ 全幕轉檔見上方「StoryPlayer 插圖傳送」。未改地圖相機、Sentry。
 - **效能（Web Performance Audit v3）**：故事列表卡 `sizes` 對齊 80／96px 縮圖；`/games` hub 改 `<picture>`（viewport + AVIF／WebP）；`/adventures` 只 preload car-park WebP；SW shell 改 precache `hero-home.avif`（**維持 v6**，避免 activate 清空離線故事）。未改播放器、地圖相機、Sentry／Analytics。
 - **角色 Logo 家族背景壓深**：`construction`／`speed`／`fantasy`／`transit` 改較深 OKLCH，拉開與中明度車身的亮度帶；`rescue`／`joy`／`people` 不變。
 - **角色 Logo IP 主色重取樣**：定裝照取樣後只在剪影餘裕不足時沿色相微調；血緣四位共用珊瑚紅；清潔車／暖暖／小怪獸撤回深補償；消防車提亮；噗噗臉部次色提一階。
@@ -48,6 +53,7 @@
 
 ### Fixed
 
+- **Landing 聽最新一集 autoplay**：Service Worker 把音檔 Range 206 寫進 Cache Storage 後，`new Audio().play()` 在手勢內以 `NotSupportedError`（Format error）失敗。改為只快取完整 200，cache 失敗不擋播放回應。CACHE_NAME 維持 v6。
 - **同步 notify-live gitHead 誤擋**：GHA 與本機都是先跑 `sync:apple` 寫入 report（`gitHead`＝當時 HEAD）再 commit，先前要求 gitHead 必須等於目前 HEAD，導致新集 push 成功卻拒絕開「待生圖」Issue（`ep-25`／`ep-26` 即因此漏單）。改為接受目前 HEAD 或其近期祖先（最多落後 20 commit）。無關 sha 仍拒絕。取代已衝突的 Draft #76。
 - **GHA sync 單元測試找不到 `@testing-library/dom`**：Wave B 把 RTL peer 當 knip 死依賴刪掉，`npm ci` 不裝 peer，sync 一跑 `npm test` 就 18 套件失敗（#82）。恢復直接 devDependency，knip 忽略此 peer，並加契約測試。
 - **親子遊樂地圖 FitBounds 旗標**：移除 `userMovedRef`／`programmaticRef`——`fitKey` 不變時 effect 本來就不會跑，那些旗標是不可達邏輯。

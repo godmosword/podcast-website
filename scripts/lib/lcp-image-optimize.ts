@@ -1,4 +1,10 @@
-import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  readFileSync,
+  readdirSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { join } from "node:path";
 import sharp from "sharp";
 
@@ -8,7 +14,7 @@ const LCP_AVIF_QUALITY = 50;
 const STORY_COVER_WEBP_QUALITY = 84;
 const STORY_COVER_AVIF_QUALITY = 62;
 
-const STORY_COVER_JPG_RE = /\/stories\/[^/]+\/01\.jpe?g$/i;
+const STORY_ILLUSTRATION_JPG_RE = /\/stories\/[^/]+\/\d{2}\.jpe?g$/i;
 
 function jpgSiblingPaths(jpgPath: string): { webp: string; avif: string } {
   const base = jpgPath.replace(/\.jpe?g$/i, "");
@@ -16,7 +22,7 @@ function jpgSiblingPaths(jpgPath: string): { webp: string; avif: string } {
 }
 
 function qualityFor(jpgPath: string): { webp: number; avif: number } {
-  if (STORY_COVER_JPG_RE.test(jpgPath.replace(/\\/g, "/"))) {
+  if (STORY_ILLUSTRATION_JPG_RE.test(jpgPath.replace(/\\/g, "/"))) {
     return { webp: STORY_COVER_WEBP_QUALITY, avif: STORY_COVER_AVIF_QUALITY };
   }
   return { webp: LCP_WEBP_QUALITY, avif: LCP_AVIF_QUALITY };
@@ -46,6 +52,20 @@ export async function writeModernSiblings(jpgPath: string): Promise<void> {
   );
 }
 
+export function listStoryIllustrationJpgTargets(publicDir: string): string[] {
+  const storiesDir = join(publicDir, "stories");
+  if (!existsSync(storiesDir)) return [];
+  const files: string[] = [];
+  for (const slug of readdirSync(storiesDir)) {
+    const dir = join(storiesDir, slug);
+    if (!statSync(dir).isDirectory()) continue;
+    for (const name of readdirSync(dir)) {
+      if (/^\d{2}\.jpe?g$/i.test(name)) files.push(join(dir, name));
+    }
+  }
+  return files.sort();
+}
+
 export function listLcpJpgTargets(publicDir: string): string[] {
   const landingDir = join(publicDir, "landing");
   const landing = existsSync(landingDir)
@@ -55,13 +75,11 @@ export function listLcpJpgTargets(publicDir: string): string[] {
     : [];
 
   const hero = join(publicDir, "hero-home.jpg");
-  const storiesDir = join(publicDir, "stories");
-  const covers = existsSync(storiesDir)
-    ? readdirSync(storiesDir)
-        .map((slug) => join(storiesDir, slug, "01.jpg"))
-        .filter((file) => existsSync(file))
-    : [];
-  return [...landing, ...(existsSync(hero) ? [hero] : []), ...covers].sort();
+  return [
+    ...landing,
+    ...(existsSync(hero) ? [hero] : []),
+    ...listStoryIllustrationJpgTargets(publicDir),
+  ].sort();
 }
 
 export async function verifyModernSiblings(jpgPath: string): Promise<boolean> {

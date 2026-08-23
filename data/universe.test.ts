@@ -1,5 +1,7 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { universeSchema } from "./universe";
+import { universeSchema } from "./universe.schema";
 import {
   ISLAND_FOCUS_ZOOM,
   MAP_STAGE,
@@ -13,10 +15,17 @@ import {
 
 describe("data/universe（M0 單一資料來源）", () => {
   it("zod parse 成功且五島齊全", () => {
+    expect(universeSchema.safeParse(universe).success).toBe(true);
     expect(universe.zones.map((z) => z.id).sort()).toEqual(
       [...ZONE_IDS].sort(),
     );
     expect(universe.zones).toHaveLength(5);
+  });
+
+  it("runtime module 不 import zod，避免 adventures client 帶進驗證庫", () => {
+    const src = readFileSync(join(process.cwd(), "data/universe.ts"), "utf8");
+    expect(src).not.toMatch(/from\s+["']zod["']/);
+    expect(src).not.toContain("universeSchema");
   });
 
   it("故意打錯 status 時 zod parse 失敗（build 期可抓）", () => {

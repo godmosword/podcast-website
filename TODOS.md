@@ -57,7 +57,13 @@
 
 | ID | 說明 |
 |----|------|
-| perf: Play Map client 不再帶 Zod（schema 改測試邊界） | 見本 commit |
+| perf: 播放頁漸進快取（不預抓整集 MP3／全幕 JPG；CACHE_STORY 改 current±1 外 AVIF idle） | `0420445` |
+| perf: Sentry client 改 `@sentry/browser`、拿掉 BrowserTracing（first-load JS 約 −49KB） | `1ab6fc7` |
+| fix: Landing autoplay 與 SW 音檔 Range 206（只快取完整 200） | `866164a` |
+| perf: StoryPlayer 全幕插圖 AVIF／WebP（品質 62／84） | `45bf010` |
+| perf: 宇宙地圖 client 不再帶 Zod（`universe.schema.ts` 改測試邊界） | `8444a4e` |
+| perf: Play Map 靜態殼＋`PlayMapClient` island（可分享 URL 改 client 解讀） | `2d4a26a` |
+| perf: Play Map client 不再帶 Zod（schema 改測試邊界） | `4e19bf5` |
 | perf: 故事列表可快取殼＋播放頁封面 AVIF／WebP | `987745b` |
 | perf: Web Performance Audit v3 — StoryCard sizes、games picture hero、adventures webp preload、SW AVIF shell（維持 v6） | `986ac33` |
 | polish(ui): Design Review — 返回鏈結／展開摘要／訂閱回饋／行動搜尋提交／focus 與觸控 | `0622dbd` |
@@ -888,6 +894,7 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 - **(a) 首頁 `/`：** `segment-stories*.jpg`／portrait，原生 `<picture>` + 預生成 WebP/AVIF（`LandingSegment`、`lib/modern-image-src.ts`）；`npm run optimize:lcp-images`
 - **(b) 內頁 header：** `SiteHeader` `hero-home` 同管線 `<picture>` + WebP/AVIF
 - **(c) Next `Image`：** `next.config.ts` `images.formats` AVIF；`StoryImage` + `data/story-image-blurs.json` blur-up（`npm run generate:story-blurs`）
+- **(d) 播放頁全幕：** `01.jpg`～`NN.jpg` 同管線 `<picture>`（AVIF 62／WebP 84）；`lib/story-play-image.ts` `45bf010`。CACHE_STORY 不預抓整集 MP3／全幕 JPG `0420445`
 - ~~landing hero jpg 小項~~ 併入本項
 
 #### D14 圖示與控制一致性　`design · S–M · 無`　〔design+a11y〕 ✅ `50f3885`

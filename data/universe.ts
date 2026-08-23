@@ -1,8 +1,8 @@
 /**
  * 車車宇宙地圖 — 單一資料來源（M0）。
  * 世界座標為 0–1；runtime 經 worldToStage 轉回 MAP_STAGE px，視覺與既有契約不變。
+ * Zod 契約在 `universe.schema.ts`，不進 client bundle。
  */
-import { z } from "zod";
 import {
   LANDING_SEGMENT_IDS,
   type LandingSegmentId,
@@ -23,85 +23,71 @@ export const ZONE_IDS = [
 ] as const;
 export type ZoneId = (typeof ZONE_IDS)[number];
 
-export const zoneStatusSchema = z.enum([
+export const ZONE_STATUSES = [
   "open",
   "building",
   "coming",
   "planned",
-]);
-export type ZoneStatus = z.infer<typeof zoneStatusSchema>;
+] as const;
+export type ZoneStatus = (typeof ZONE_STATUSES)[number];
 
-export const hotspotSchema = z.object({
-  id: z.string().regex(/^[a-z0-9-]+$/),
-  name: z.string(),
+export type HotspotAction =
+  | { type: "link"; href: string }
+  | { type: "story"; slug: string }
+  | { type: "locked"; hint: string };
+
+export type Hotspot = {
+  id: string;
+  name: string;
   /** 島圖上優先呈現的 3 個精選地標；完整清單仍在島嶼 sheet。 */
-  featured: z.boolean().default(false),
-  pos: z.object({
-    x: z.number().min(0).max(1),
-    y: z.number().min(0).max(1),
-  }),
-  action: z.discriminatedUnion("type", [
-    z.object({ type: z.literal("link"), href: z.string() }),
-    z.object({ type: z.literal("story"), slug: z.string() }),
-    z.object({ type: z.literal("locked"), hint: z.string() }),
-  ]),
-});
-export type Hotspot = z.infer<typeof hotspotSchema>;
+  featured: boolean;
+  pos: { x: number; y: number };
+  action: HotspotAction;
+};
 
-const softLinkSchema = z.object({
-  label: z.string(),
-  href: z.string(),
-  external: z.boolean().optional(),
-});
+export type ZoneLink = {
+  label: string;
+  href: string;
+  external?: boolean;
+};
 
-const landingSegmentIdSchema = z.enum(
-  LANDING_SEGMENT_IDS as [LandingSegmentId, ...LandingSegmentId[]],
-);
-
-export const zoneSchema = z.object({
-  id: z.enum(ZONE_IDS),
-  name: z.string(),
+export type Zone = {
+  id: ZoneId;
+  name: string;
   /** 卡片／清單副標（舊稱 teaser） */
-  tagline: z.string(),
-  status: zoneStatusSchema,
+  tagline: string;
+  status: ZoneStatus;
   /** 世界地圖座標 0–1 */
-  world: z.object({
-    x: z.number().min(0).max(1),
-    y: z.number().min(0).max(1),
-  }),
+  world: { x: number; y: number };
   /** 進島相機目標（center 為 0–1；zoom 對齊既有 scale） */
-  camera: z.object({
-    center: z.tuple([z.number().min(0).max(1), z.number().min(0).max(1)]),
-    zoom: z.number().positive(),
-  }),
+  camera: {
+    center: [number, number];
+    zoom: number;
+  };
   /** 島 tile 路徑（舊稱 artTile） */
-  sprite: z.string(),
+  sprite: string;
   /** 溫和導向連結（舊稱 softLinks） */
-  links: z.array(softLinkSchema).default([]),
-  hotspots: z.array(hotspotSchema).default([]),
+  links: ZoneLink[];
+  hotspots: Hotspot[];
   /** R0 emoji 摘要（資料／fallback） */
-  landmark: z.string(),
-  shortName: z.string().optional(),
-  childHint: z.string().optional(),
-  exploreNote: z.string().optional(),
-  buildProgress: z.number().min(0).max(100).optional(),
-  bridgeFrom: z.enum(ZONE_IDS).optional(),
-  route: z
-    .object({ href: z.string(), external: z.boolean().optional() })
-    .optional(),
-  subSegmentIds: z.array(landingSegmentIdSchema).optional(),
-});
-export type Zone = z.infer<typeof zoneSchema>;
+  landmark: string;
+  shortName?: string;
+  childHint?: string;
+  exploreNote?: string;
+  buildProgress?: number;
+  bridgeFrom?: ZoneId;
+  route?: { href: string; external?: boolean };
+  subSegmentIds?: LandingSegmentId[];
+};
 
-export const universeSchema = z.object({
-  camera: z.object({
-    worldZoom: z.number().positive(),
-    minZoom: z.number().positive(),
-    maxZoom: z.number().positive(),
-  }),
-  zones: z.array(zoneSchema).min(1),
-});
-export type Universe = z.infer<typeof universeSchema>;
+export type Universe = {
+  camera: {
+    worldZoom: number;
+    minZoom: number;
+    maxZoom: number;
+  };
+  zones: Zone[];
+};
 
 /** 0–1 → MAP_STAGE px（整數，對齊既有 coord 快照）。 */
 export function worldToStage(world: { x: number; y: number }): {
@@ -125,13 +111,17 @@ export function stageToWorld(coord: { x: number; y: number }): {
   };
 }
 
+type HotspotDraft = Omit<Hotspot, "featured"> & { featured?: boolean };
+
 function zoneFromLegacyPx(
-  partial: Omit<z.input<typeof zoneSchema>, "world" | "camera" | "sprite"> & {
+  partial: Omit<Zone, "world" | "camera" | "sprite" | "links" | "hotspots"> & {
     coord: { x: number; y: number };
     sprite: string;
     zoom?: number;
+    links?: Zone["links"];
+    hotspots?: HotspotDraft[];
   },
-): z.input<typeof zoneSchema> {
+): Zone {
   const world = stageToWorld(partial.coord);
   const zoom = partial.zoom ?? ISLAND_FOCUS_ZOOM;
   return {
@@ -143,7 +133,10 @@ function zoneFromLegacyPx(
     camera: { center: [world.x, world.y], zoom },
     sprite: partial.sprite,
     links: partial.links ?? [],
-    hotspots: partial.hotspots ?? [],
+    hotspots: (partial.hotspots ?? []).map((hotspot) => ({
+      ...hotspot,
+      featured: hotspot.featured ?? false,
+    })),
     landmark: partial.landmark,
     shortName: partial.shortName,
     childHint: partial.childHint,
@@ -475,9 +468,9 @@ const raw = {
       bridgeFrom: "car-park",
     }),
   ],
-} satisfies z.input<typeof universeSchema>;
+} satisfies Universe;
 
-export const universe: Universe = universeSchema.parse(raw);
+export const universe: Universe = raw;
 
 export const zoneById = (id: string): Zone | undefined =>
   universe.zones.find((z) => z.id === id);
