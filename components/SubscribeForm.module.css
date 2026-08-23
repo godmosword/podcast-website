@@ -63,11 +63,28 @@
   color: var(--landing-brand-ink);
   background: var(--landing-brand);
   box-shadow: var(--shadow-sm);
+  transition: transform var(--motion-press), box-shadow var(--motion-press),
+    opacity var(--motion-press);
 }
 
 .submit:disabled {
-  opacity: 0.72;
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.submit[aria-busy="true"] {
   cursor: wait;
+}
+
+@media (hover: hover) {
+  .submit:hover:not(:disabled) {
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.submit:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 .submit:focus-visible {
@@ -94,6 +111,11 @@
   margin: 0;
   font-size: 0.95rem;
   line-height: 1.6;
+}
+
+.hint {
+  min-height: 3.2em;
+  color: var(--ink-soft);
 }
 
 .success {

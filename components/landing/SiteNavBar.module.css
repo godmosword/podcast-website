@@ -145,6 +145,48 @@
   outline-offset: 1px;
 }
 
+.searchSubmit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--accent-ink);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform var(--motion-press), opacity var(--motion-press),
+    background var(--motion-press);
+}
+
+.searchSubmit:active {
+  transform: scale(0.98);
+  opacity: 0.94;
+}
+
+@media (hover: hover) {
+  .searchSubmit:hover {
+    background: var(--bg-2);
+  }
+}
+
+.searchSubmit:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .searchSubmit,
+  .searchSubmit:active {
+    transform: none;
+    transition: none;
+  }
+}
+
 .menuList {
   list-style: none;
   margin: 12px 0 0;
@@ -251,6 +293,12 @@
 
 :global(html[data-theme="night"]) .searchInput::placeholder {
   opacity: 0.9;
+}
+
+:global(html[data-theme="night"]) .searchSubmit {
+  background: var(--card-2);
+  color: var(--accent-ink);
+  border-color: color-mix(in srgb, var(--ink) 18%, transparent);
 }
 
 :global(html[data-theme="night"]) .menuEmoji {

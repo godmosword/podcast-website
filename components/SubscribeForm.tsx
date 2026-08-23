@@ -76,7 +76,11 @@ export default function SubscribeForm({ source = "subscribe_page" }: Props) {
   }
 
   if (state === "loading") {
-    return <p className={styles.hint}>載入中…</p>;
+    return (
+      <p className={styles.hint} role="status">
+        正在準備訂閱表單…
+      </p>
+    );
   }
 
   if (state === "unavailable") {
@@ -137,6 +141,7 @@ export default function SubscribeForm({ source = "subscribe_page" }: Props) {
         className={styles.submit}
         type="submit"
         disabled={submitting || !parentConsent}
+        aria-busy={submitting || undefined}
       >
         {submitting ? "送出中…" : "訂閱新集通知"}
       </button>

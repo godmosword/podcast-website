@@ -281,11 +281,19 @@
   font-weight: 800;
   text-decoration: none;
   box-shadow: var(--shadow-md);
-  transition: transform var(--motion-press), opacity var(--motion-press);
+  transition: transform var(--motion-press), opacity var(--motion-press),
+    box-shadow var(--motion-press);
 }
 
-.toolCta:hover {
-  filter: brightness(1.02);
+.toolCta:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .toolCta:hover {
+    box-shadow: var(--elev-3);
+  }
 }
 
 .toolCta:active {

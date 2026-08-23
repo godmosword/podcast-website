@@ -43,13 +43,19 @@
 }
 
 .btn:active {
-  transform: scale(0.96);
+  transform: scale(0.98);
 }
 
 @media (hover: hover) {
   .btn:hover {
     transform: translateY(-1px);
+    background: var(--bg-2);
   }
+}
+
+.btn:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {

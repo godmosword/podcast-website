@@ -53,6 +53,12 @@
 
 角色 Logo 系統已移除，程式碼保存於 tag `archive/character-logo-system`。
 
+### 本輪已完成（2026-08-23）
+
+| ID | 說明 |
+|----|------|
+| polish(ui): Design Review — 返回鏈結／展開摘要／訂閱回饋／行動搜尋提交／focus 與觸控 | `0622dbd` |
+
 ### 本輪已完成（2026-08-22）
 
 | ID | 說明 |
@@ -733,7 +739,7 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 | UX-P0-2 | P0 | ✅ `964f418` | **Footer 觸控 ≥44px**（= W27-2 後半） | `SiteFooter.module.css` | CSS 契約 + 手動 |
 | UX-P0-3 | P0 | ✅ `964f418` | **許願隱私一句話**（= W27-2 前半）：送出鈕下 inline 說明、message placeholder 勿含個資 | `ZoneWishForm.tsx` | vitest |
 | UX-P0-4 | P0 | ✅ `1c1ca1b` | **Challenge 遊戲家長提示**：列表卡加「建議 6 歲以上 · 家長陪同」（僅文案，不隱藏入口） | `data/games.ts`、`app/games/page.tsx` | `npm test` + build ✅ |
-| UX-P1-1 | P1 | 部分完成 | **補齊 &lt;44px 按鈕**（只改 CSS）：~~ZoneSheet 關閉／wishToggle~~ → MAP-UX-P1a；StoryPlayer 定時、Landing 箭頭待做 | 各 `*.module.css` | 手動＋e2e |
+| UX-P1-1 | P1 | 部分完成 | **補齊 &lt;44px 按鈕**（只改 CSS）：~~ZoneSheet 關閉／wishToggle~~ → MAP-UX-P1a；~~Landing 箭頭~~ → 44×44（本輪 Design Review）；StoryPlayer 定時待做 | 各 `*.module.css` | 手動＋e2e |
 | UX-P1-2 | P1 | ✅ `42a9d38` | **詳情頁反思收合**：比照 `StoryEndScreen`，家長句不預設露出 | `StoryDetailReflection.tsx`、`app/story/[slug]/page.tsx` | `npm test` |
 | UX-P1-3 | P1 | 待做 | **共讀 sidecar 擴至全集**：`parent-guides`／`family-activities` 從 ep-1/ep-5 擴充（內容營運，可分批） | `data/parent-guides.ts`、`data/family-activities.ts` | 同名 `*.test.ts` |
 | UX-P1-4 | P1 | 待做 | **播放進度條拇指加大**（CSS 變數，不動控制列 layout） | `StoryPlayer.module.css` | 手動播放頁 |

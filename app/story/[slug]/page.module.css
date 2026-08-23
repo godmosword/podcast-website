@@ -17,6 +17,27 @@
   border-radius: 999px;
   background: var(--surface-elevated);
   border: 1px solid var(--hairline);
+  transition: transform var(--motion-press), color var(--motion-press),
+    background var(--motion-press);
+}
+
+@media (hover: hover) {
+  .back:hover {
+    color: var(--ink);
+    background: var(--bg-2);
+  }
+}
+
+.back:active {
+  transform: scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .back,
+  .back:active {
+    transform: none;
+    transition: none;
+  }
 }
 
 .hero {
@@ -93,6 +114,9 @@
 }
 
 .parentCta a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   color: var(--accent-ink);
   text-decoration-thickness: 0.12em;
   text-underline-offset: 0.18em;
@@ -154,7 +178,7 @@
 .definition {
   margin: 0;
   font-size: 1.04rem;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.85;
   color: var(--ink-soft);
 }
@@ -209,7 +233,9 @@
 }
 
 .inlineLink {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   margin-top: 12px;
   color: var(--accent-ink);
   font-weight: 800;
@@ -229,11 +255,29 @@
 }
 
 .expandable > summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 10px;
+  margin: 0 -10px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--accent-ink);
   list-style: none;
+  transition: background var(--motion-press);
+}
+
+@media (hover: hover) {
+  .expandable > summary:hover {
+    background: var(--bg-2);
+  }
+}
+
+.expandable > summary:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .expandable > summary::-webkit-details-marker {

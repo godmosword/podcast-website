@@ -117,6 +117,7 @@ describe("SiteNavBar", () => {
     expect(view.container.querySelector('input[name="q"]')).toBeTruthy();
     // 搜尋標籤改為視覺隱藏但保留可及性
     expect(view.getByLabelText("搜尋故事或主題")).toBeTruthy();
+    expect(view.getByRole("button", { name: "搜尋" })).toBeTruthy();
     // 主題切換縮成圖示段控，仍具 aria-label
     expect(view.getAllByRole("group", { name: "主題模式" }).length).toBeGreaterThan(0);
   });
