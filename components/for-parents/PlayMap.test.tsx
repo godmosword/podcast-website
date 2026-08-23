@@ -287,9 +287,10 @@ describe("PlayMap", () => {
   it("結果區說明卡片可開啟家長筆記，篩選按鈕顯示已套用條件數", () => {
     render(<PlayMap />);
 
-    expect(screen.getByRole("heading", { level: 2 }).textContent).toMatch(
-      /全台・\d+ 個適合的地方/,
-    );
+    expect(
+      screen.getByRole("heading", { level: 2, name: /個適合的地方/ })
+        .textContent,
+    ).toMatch(/全台・\d+ 個適合的地方/);
     expect(screen.getByRole("button", { name: "看地圖" })).toBeTruthy();
 
     openFilters();

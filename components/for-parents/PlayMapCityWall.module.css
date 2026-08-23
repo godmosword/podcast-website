@@ -1,0 +1,178 @@
+/*
+ * 縣市磚牆。這裡刻意**不借用 --map-chip***（那組印刷色只屬於 Leaflet overlay：
+ * 縮放鍵、cluster、mapHint）。磚牆是頁面層元件，走 --accent（邊框／底色）
+ * 與 --accent-ink（文字／圖示）。
+ *
+ * 也**不使用 backdrop-filter 或 CSS blur()**：iOS 合成成本過高，本頁曾因此 OOM。
+ *
+ * 曾經在磚後疊過一張台灣外框 SVG 當襯底，實機看起來像一道污漬而不是台灣，
+ * 已移除。北到南的堆疊本身就足以承擔地理直覺，不需要第二層裝飾。
+ */
+
+.wall {
+  margin: var(--space-4) 0 var(--space-6);
+}
+
+.heading {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-h3-compact);
+  color: var(--ink);
+}
+
+.collapsed {
+  display: none;
+}
+
+.collapsedChip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  /* 觸控紅線：兒童向頁面 48px。 */
+  min-height: 48px;
+  padding: 0 var(--space-4);
+  border: 2px solid var(--accent);
+  border-radius: 999px;
+  background: var(--card);
+  /* 文字用 --accent-ink（對 --card 5.54:1）；--accent 只出現在邊框。 */
+  color: var(--accent-ink);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform var(--motion-press);
+}
+
+.collapsedChip:active {
+  transform: scale(0.98);
+}
+
+.collapsedChip:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.gridWrap {
+  position: relative;
+  max-width: 460px;
+}
+
+.grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: minmax(52px, auto);
+  gap: 6px;
+}
+
+.tile {
+  grid-row: var(--tile-row);
+  grid-column: var(--tile-col);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  /* 兩行字（縣市名 + 數量）需要比 48px 再高一點才不擠。 */
+  min-height: 52px;
+  padding: 6px 4px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-sm);
+  /*
+   * 色深是 choropleth，但**不是唯一編碼**——同一塊磚上永遠有可讀的數字文字。
+   * 最深階 = color-mix(--accent 34%, #fff) ≈ #a8d9d3，對 --ink #34302b ≈ 9.1:1。
+   */
+  background: color-mix(
+    in srgb,
+    var(--accent) calc(var(--tile-density, 0) * 8.5%),
+    var(--card)
+  );
+  color: var(--ink);
+  font-family: inherit;
+  line-height: 1.25;
+  cursor: pointer;
+  transition:
+    transform var(--motion-press),
+    border-color var(--motion-press);
+}
+
+.tile:active {
+  transform: scale(0.98);
+}
+
+.tile:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.tile[aria-pressed="true"] {
+  border: 2px solid var(--accent);
+  color: var(--accent-ink);
+  font-weight: 800;
+}
+
+/* 已收錄但這組條件 0 筆：磚還在、可以點回去，只是淡。 */
+.tile[data-status="empty"] {
+  opacity: 0.55;
+}
+
+/*
+ * 尚未收錄：虛線框＋「未收錄」文字雙重編碼，和「0 筆」明確區分。
+ * 沒收錄不代表當地沒地方玩，這句話在 .legend 裡重述。
+ */
+.tile[data-status="uncatalogued"] {
+  background: var(--card);
+  border-style: dashed;
+  color: var(--ink-soft);
+  cursor: not-allowed;
+}
+
+.tileCity {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.tileCount {
+  font-size: var(--fs-meta);
+  color: var(--ink-soft);
+}
+
+.tile[aria-pressed="true"] .tileCount {
+  color: var(--accent-ink);
+}
+
+.legend {
+  margin: var(--space-3) 0 0;
+  max-width: 460px;
+  font-size: var(--fs-meta);
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+/* 夜間降一階飽和：最深 ≈ #38505a，對 --ink #f0ead8 ≈ 8.0:1。 */
+:global([data-theme="night"]) .tile {
+  background: color-mix(
+    in srgb,
+    var(--accent) calc(var(--tile-density, 0) * 6.5%),
+    var(--card)
+  );
+}
+
+/* 手機選定縣市後收成一行，把畫面讓給名單（漸進式揭露）。 */
+@media (max-width: 639px) {
+  .wall[data-selected="true"] .heading,
+  .wall[data-selected="true"] .gridWrap,
+  .wall[data-selected="true"] .legend {
+    display: none;
+  }
+
+  .wall[data-selected="true"] .collapsed {
+    display: flex;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile,
+  .collapsedChip {
+    transition: none;
+  }
+}

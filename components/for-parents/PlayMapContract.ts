@@ -8,6 +8,7 @@
 import type { RefObject } from "react";
 import type { Playground, PlaygroundType } from "@/data/playgrounds";
 import type { LatLng } from "@/lib/playground-distance";
+import type { PlayMapCityTile } from "@/lib/play-map-city-tiles";
 import type { PlayMapView } from "@/lib/playgrounds-query";
 
 export type BrowseView = PlayMapView;
@@ -19,24 +20,40 @@ export type GeoStatus = "idle" | "pending" | "ready" | "denied";
 export const SHEET_BG_HINT_ID = "play-map-sheet-bg-hint";
 
 /**
- * 每批可見卡片數。**只遮蔽、不裁切陣列**——73 筆恆在 DOM。
+ * 每批可見卡片數。**只遮蔽、不裁切陣列**——99 筆恆在 DOM。
  * slice 會把未顯示的卡連同其導航連結一起移出 DOM，破壞 SSR 索引契約與導航紅線。
  */
 export const VISIBLE_STEP = 24;
 
 /**
  * 「附近」未選縣市時，鏡頭只框使用者位置＋距離最近的這幾筆。
- * 地圖針仍畫篩選全集，避免 73 根針把 fitBounds 拉成全台。
+ * 地圖針仍畫篩選全集，避免 99 根針把 fitBounds 拉成全台。
  */
 export const NEAR_ME_FIT_COUNT = 8;
 
-/** 桌面並排名單＋地圖（對齊全站 980 導覽斷點）。 */
+/**
+ * 桌面並排名單＋地圖（對齊全站 980 導覽斷點）。
+ * v2 起**僅在 view=map 生效**：view=cards 是縣市磚牆滿版，任何寬度都不掛 Leaflet。
+ */
 export const SPLIT_MIN_WIDTH_PX = 980;
 
 export const CARDS_PANEL_ID = "play-map-panel-cards";
 export const MAP_PANEL_ID = "play-map-panel-map";
 /** 手機「看地圖」；離開地圖模式時把 focus 還給這個鈕。 */
 export const OPEN_MAP_BUTTON_ID = "play-map-open-map";
+
+/**
+ * 縣市磚牆。22 縣市中僅 15 個有資料，其餘必須顯性標示「未收錄」——
+ * 把「這組條件 0 筆」與「整個縣市沒收錄」混成同一種灰色會誤導家長。
+ */
+export type PlayMapCityWallProps = {
+  tiles: readonly PlayMapCityTile[];
+  selectedCity: string | null;
+  /** 點同一塊磚兩次＝取消，呼叫端負責傳 null。 */
+  onToggleCity: (next: string | null) => void;
+  /** 尚未收錄的縣市名，用於磚牆下方的**可見**誠實聲明，不得只放進 aria-label。 */
+  uncataloguedCities: readonly string[];
+};
 
 export type PlayMapToolbarProps = {
   /** 手機地圖模式隱藏頁首裝飾，把畫面讓給地圖。 */
