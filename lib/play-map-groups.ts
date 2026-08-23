@@ -17,7 +17,7 @@ import {
 
 export type PlayMapGroupMode = "drive" | "city" | "type";
 
-export const DRIVE_BANDS = [
+const DRIVE_BANDS = [
   { key: "d20", maxMinutes: 20, label: "20 分鐘內" },
   { key: "d40", maxMinutes: 40, label: "20–40 分鐘" },
   { key: "d60", maxMinutes: 60, label: "40–60 分鐘" },

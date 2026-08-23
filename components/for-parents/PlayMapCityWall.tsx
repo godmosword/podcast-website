@@ -5,7 +5,7 @@ import { uncataloguedNotice } from "@/lib/play-map-city-tiles";
 import type { PlayMapCityWallProps } from "./PlayMapContract";
 import styles from "./PlayMapCityWall.module.css";
 
-export const CITY_WALL_HEADING_ID = "play-map-city-wall-heading";
+const CITY_WALL_HEADING_ID = "play-map-city-wall-heading";
 
 export function PlayMapCityWall({
   tiles,

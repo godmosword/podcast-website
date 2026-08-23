@@ -10,6 +10,15 @@
 
 ### Added
 
+- **親子遊樂地圖 v2 縣市磚牆＋分組名單**：主瀏覽改成「22 縣市色塊圖＋分組名單」，取代 OSM 底圖當入口。磚牆用 CSS Grid 手排近似台灣地理（不用 GeoJSON），每塊磚同時顯示縣市名與命中數（色深不是唯一編碼）；`covered`／`empty`／`uncatalogued` 三態用邊框與文字雙重編碼，7 個未收錄縣市顯性標示且不可點選，磚牆下方永遠顯示「示意排列，非實際地理位置」與「不代表當地沒有好去處」。手機 <640px 選定縣市後磚牆收合成一行並帶著焦點走。名單依狀態三選一分組（有定位→車程帶／未選縣市→縣市／已選縣市→類型），車程分組必掛直線距離粗估免責。結果列改成句子式「在 全台 → 99 個地方」，結果數放大為主資訊，h2 的 accessible name 由 `srText` 提供。
+
+### Changed
+
+- **親子遊樂地圖 Leaflet 降為次要分頁**：`view=cards`（預設，含桌面）任何寬度都不掛 Leaflet，實測 1280px 首屏 `leaflet`／`tile.openstreetmap` 請求數為 0（e2e 有正向回歸）。桌面 ≥980px 並排只在 `view=map` 生效，CSS 的 980 規則 scope 到 `.root[data-split="true"]`；名單滿版時卡片走三欄。地圖視圖收起磚牆。
+- **親子遊樂地圖詳情面板資訊層級**：full 變體把一行 meta 拆成事實 chip 並把**車程放第一格**；出口分兩層（導航／查看完整資訊為主，在地圖看／顯示位置／官網降為文字連結）。compact 變體與所有 `aria-label` 未改。
+
+### Added
+
 - **角色 Logo 次色對主色可辨閘門**：`auditEntry` 對 35 筆要求次色對主色對比 ≥ 1.6 或色相差 ≥ 30（擇一）。識別特徵不得是車身暗一階同色。
 - **角色 Logo 對比檢查全欄**：`/studio/logo-audit` 對比表列出 silhouette／hueDist／sil 門檻與 margin／face 與 margin／touches／次色數值與 margin／次色對主色與色相差；單欄未達標標紅。
 - **角色 Logo 對比驗證器**：`lib/character-logo-contrast.ts` 以 WCAG 相對亮度計算剪影（primary 對家族背景，硬閘門 3.6）與臉部標記（`#1A1410` 對較亮 IP 色，硬閘門 5.0）。不檢查 secondary 對背景。
