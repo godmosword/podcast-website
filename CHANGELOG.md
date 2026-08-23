@@ -24,6 +24,7 @@
 
 ### Changed
 
+- **效能（故事播放頁快取）**：進 `/story/[slug]/play` 不再背景下載完整 MP3 與全幕 JPG。音訊 `preload="none"`，由 Range／206 隨播放抓取；CACHE_STORY 改 current±1 以外的 AVIF idle queue，離開頁面取消。SW 仍只快取完整 200、維持 v6。Landing autoplay 與 866164a Range 契約不變。
 - **效能（Sentry client first-load）**：瀏覽器改用 `@sentry/browser` 同步 init（保留 GlobalHandlers／unhandled error／unhandled rejection 與 error boundary 上報），拿掉 client BrowserTracing。首頁 first-load JS gzip 約 238.1KB → 188.6KB（約 −49.4KB）。Server Sentry、DSN、scrubber 不變；server `tracesSampleRate` 仍為 0.1。
 - **效能（StoryPlayer 插圖傳送）**：播放頁所有幕 JPG 預生成 AVIF／WebP（品質 62／84），`<picture>` 依序 AVIF → WebP → JPG；原始 JPG 保留。SW CACHE_STORY 仍只加封面現代格式。未改字幕／音訊／換頁架構、地圖、Sentry。
 - **效能（宇宙地圖 client bundle）**：`data/universe.ts` 不再 import Zod；契約改到 `universe.schema.ts` 僅測試／CI 驗證。靜態島嶼資料以 typed 常數進 client。未改座標、相機、ZoneSheet、路由、preload、SW。

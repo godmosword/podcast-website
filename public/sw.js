@@ -17,6 +17,22 @@ const SHELL = [
 // 這個 Set 只保護目前 client 明確宣告的播放資源；service worker 重啟後
 // 會自然清空，下一次播放頁載入時會重新宣告。
 const activeStoryUrls = new Set();
+// CACHE_STORY 背景佇列：離開播放頁就作廢，避免進頁 2 秒後仍下載整集。
+let storyCacheEpoch = 0;
+let storyCacheAllowed = false;
+
+function isStoryPlayClientUrl(url) {
+  try {
+    return /\/story\/[^/]+\/play\/?$/.test(new URL(url).pathname);
+  } catch {
+    return false;
+  }
+}
+
+async function hasStoryPlayClient() {
+  const windows = await self.clients.matchAll({ type: "window" });
+  return windows.some((client) => isStoryPlayClientUrl(client.url));
+}
 
 function normalizeAssetUrl(raw) {
   try {
@@ -158,7 +174,10 @@ self.addEventListener("fetch", (event) => {
 
   const isStoryAsset =
     url.pathname.startsWith("/stories/") &&
-    (url.pathname.endsWith(".jpg") || url.pathname.endsWith(".mp3"));
+    (url.pathname.endsWith(".jpg") ||
+      url.pathname.endsWith(".mp3") ||
+      url.pathname.endsWith(".avif") ||
+      url.pathname.endsWith(".webp"));
 
   if (isStoryAsset) {
     event.respondWith(
@@ -191,20 +210,32 @@ self.addEventListener("message", (event) => {
 
   const urls = data.urls.map(normalizeAssetUrl).filter(Boolean);
   if (data.type === "PLAYBACK_ACTIVE") {
+    storyCacheAllowed = true;
     urls.forEach((url) => activeStoryUrls.add(url));
     return;
   }
   if (data.type === "PLAYBACK_INACTIVE") {
+    storyCacheAllowed = false;
+    storyCacheEpoch += 1;
     urls.forEach((url) => activeStoryUrls.delete(url));
     return;
   }
   if (data.type !== "CACHE_STORY") return;
 
+  const epoch = storyCacheEpoch;
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
       for (const url of urls) {
+        if (!storyCacheAllowed || epoch !== storyCacheEpoch) return;
+        if (!(await hasStoryPlayClient())) return;
+        await new Promise((resolve) => setTimeout(resolve, 250));
+        if (!storyCacheAllowed || epoch !== storyCacheEpoch) return;
+        if (!(await hasStoryPlayClient())) return;
         try {
+          const existing = await cache.match(url);
+          if (existing && existing.status === 200) continue;
           const response = await fetch(url);
+          if (!storyCacheAllowed || epoch !== storyCacheEpoch) return;
           if (response.status === 200) {
             await cacheStoryAsset(cache, new Request(url), response);
           }

@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   isStoryCoverRaster,
   isStoryPlayRaster,
-  storyPlayCacheUrls,
+  storyIdleCacheUrls,
+  storyPlaybackProtectUrls,
   storyPlayImageSources,
 } from "./story-play-image";
 
@@ -33,9 +34,9 @@ describe("story-play-image", () => {
     });
   });
 
-  it("CACHE_STORY URL 含音檔、全部 JPG、封面 AVIF／WebP", () => {
+  it("PLAYBACK_ACTIVE 保護音檔與所有現代格式，但不表示要立刻下載", () => {
     expect(
-      storyPlayCacheUrls("/stories/ep-3/audio.mp3", [
+      storyPlaybackProtectUrls("/stories/ep-3/audio.mp3", [
         "/stories/ep-3/01.jpg",
         "/stories/ep-3/02.jpg",
       ]),
@@ -45,6 +46,23 @@ describe("story-play-image", () => {
       "/stories/ep-3/02.jpg",
       "/stories/ep-3/01.avif",
       "/stories/ep-3/01.webp",
+      "/stories/ep-3/02.avif",
+      "/stories/ep-3/02.webp",
     ]);
+  });
+
+  it("CACHE_STORY idle 只排 current±1 以外的 AVIF，不含 MP3／JPG", () => {
+    expect(
+      storyIdleCacheUrls(
+        [
+          "/stories/ep-3/01.jpg",
+          "/stories/ep-3/02.jpg",
+          "/stories/ep-3/03.jpg",
+          "/stories/ep-3/04.jpg",
+        ],
+        0,
+      ),
+    ).toEqual(["/stories/ep-3/03.avif", "/stories/ep-3/04.avif"]);
+    expect(storyIdleCacheUrls(["/stories/ep-26/01.jpg"], 0)).toEqual([]);
   });
 });

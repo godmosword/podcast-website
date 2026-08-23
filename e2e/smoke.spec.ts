@@ -83,13 +83,7 @@ async function expectLandingAutoplay(page: import("@playwright/test").Page) {
   await expect(page).toHaveURL(/\/story\/ep-\d+\/play/);
   const play = page.getByRole("button", { name: "播放", exact: true });
   await play.waitFor();
-  await expect
-    .poll(
-      async () =>
-        page.locator("audio").evaluate((el) => (el as HTMLAudioElement).readyState),
-      { timeout: 10_000 },
-    )
-    .toBeGreaterThanOrEqual(1);
+  // preload="none"：進頁不抓完整 MP3，readyState 可維持 0，點播放後才開始 Range。
   await play.click();
   await expect(page.getByRole("button", { name: "暫停", exact: true })).toBeVisible({
     timeout: 10_000,
