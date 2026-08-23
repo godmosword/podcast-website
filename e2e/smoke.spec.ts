@@ -63,14 +63,47 @@ test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /陪孩子建立好習慣/ })).toBeVisible();
 });
 
-test("Landing 播放直達鈕一次點擊即開始播放", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+async function expectLandingAutoplay(page: import("@playwright/test").Page) {
   await page.goto("/");
   await page.getByRole("link", { name: /聽最新一集/ }).click();
   await expect(page).toHaveURL(/\/story\/[^/]+\/play\?autoplay=1&from=landing/);
   await expect(
     page.getByRole("button", { name: "暫停", exact: true }),
   ).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText("無法播放，請再按一次播放鈕")).toHaveCount(0);
+
+  await page.getByRole("button", { name: "暫停", exact: true }).click();
+  await expect(page.getByRole("button", { name: "播放", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "播放", exact: true }).click();
+  await expect(page.getByRole("button", { name: "暫停", exact: true })).toBeVisible();
+
+  await page.getByRole("link", { name: "關閉" }).click();
+  await expect(page).toHaveURL(/\/story\/ep-\d+$/);
+  await page.getByRole("link", { name: /開始看故事/ }).click();
+  await expect(page).toHaveURL(/\/story\/ep-\d+\/play/);
+  const play = page.getByRole("button", { name: "播放", exact: true });
+  await play.waitFor();
+  await expect
+    .poll(
+      async () =>
+        page.locator("audio").evaluate((el) => (el as HTMLAudioElement).readyState),
+      { timeout: 10_000 },
+    )
+    .toBeGreaterThanOrEqual(1);
+  await play.click();
+  await expect(page.getByRole("button", { name: "暫停", exact: true })).toBeVisible({
+    timeout: 10_000,
+  });
+}
+
+test("Landing 播放直達鈕一次點擊即開始播放（390）", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expectLandingAutoplay(page);
+});
+
+test("Landing 播放直達鈕一次點擊即開始播放（桌面）", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await expectLandingAutoplay(page);
 });
 
 test("全部故事頁 → 詳情 → 播放頁 smoke", async ({ page }) => {

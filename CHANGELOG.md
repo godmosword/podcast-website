@@ -51,6 +51,7 @@
 
 ### Fixed
 
+- **Landing 聽最新一集 autoplay**：Service Worker 把音檔 Range 206 寫進 Cache Storage 後，`new Audio().play()` 在手勢內以 `NotSupportedError`（Format error）失敗。改為只快取完整 200，cache 失敗不擋播放回應。CACHE_NAME 維持 v6。
 - **同步 notify-live gitHead 誤擋**：GHA 與本機都是先跑 `sync:apple` 寫入 report（`gitHead`＝當時 HEAD）再 commit，先前要求 gitHead 必須等於目前 HEAD，導致新集 push 成功卻拒絕開「待生圖」Issue（`ep-25`／`ep-26` 即因此漏單）。改為接受目前 HEAD 或其近期祖先（最多落後 20 commit）。無關 sha 仍拒絕。取代已衝突的 Draft #76。
 - **GHA sync 單元測試找不到 `@testing-library/dom`**：Wave B 把 RTL peer 當 knip 死依賴刪掉，`npm ci` 不裝 peer，sync 一跑 `npm test` 就 18 套件失敗（#82）。恢復直接 devDependency，knip 忽略此 peer，並加契約測試。
 - **親子遊樂地圖 FitBounds 旗標**：移除 `userMovedRef`／`programmaticRef`——`fitKey` 不變時 effect 本來就不會跑，那些旗標是不可達邏輯。

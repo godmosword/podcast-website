@@ -117,9 +117,15 @@ async function trimStoryCache(cache) {
 }
 
 async function cacheStoryAsset(cache, request, response) {
-  await cache.put(request, response.clone());
-  await putAssetMeta(request.url, response);
-  await trimStoryCache(cache);
+  // Cache API rejects opaque/partial (206) bodies. Never let that fail playback.
+  if (response.status !== 200) return;
+  try {
+    await cache.put(request, response.clone());
+    await putAssetMeta(request.url, response);
+    await trimStoryCache(cache);
+  } catch {
+    // 快取失敗時仍把網路回應交給頁面。
+  }
 }
 
 self.addEventListener("install", (event) => {
@@ -158,12 +164,14 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       caches.open(CACHE_NAME).then(async (cache) => {
         const cached = await cache.match(request);
-        if (cached) {
+        // 只重用完整 200。若先前誤存 206 Partial，Audio() 會報
+        // NotSupportedError / MEDIA_ELEMENT_ERROR: Format error，且看不到網路 206。
+        if (cached && cached.status === 200) {
           void putAssetMeta(request.url, cached);
           return cached;
         }
         const response = await fetch(request);
-        if (response.ok) {
+        if (response.status === 200) {
           await cacheStoryAsset(cache, request, response);
         }
         return response;
@@ -197,7 +205,9 @@ self.addEventListener("message", (event) => {
       for (const url of urls) {
         try {
           const response = await fetch(url);
-          if (response.ok) await cacheStoryAsset(cache, new Request(url), response);
+          if (response.status === 200) {
+            await cacheStoryAsset(cache, new Request(url), response);
+          }
         } catch {
           // 略過單一資源快取失敗
         }
