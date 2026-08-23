@@ -3,8 +3,8 @@
  * 供 /for-parents/play-map 地圖篩選與標記使用；與虛構宇宙地圖無關。
  * Google Maps 導航／定位連結由 buildGoogleMaps* helper 以 playgroundMapsSearchQuery
  * （mapsQuery 或場館名＋縣市）動態產生，不用 lat,lng 圖釘；可選 placeId。
+ * Zod 契約在 `playgrounds.schema.ts`，不進 client bundle。
  */
-import { z } from "zod";
 
 /** 類型 chip 的顯示順序；同時作為 URL `type` 參數的合法值白名單。 */
 export const PLAYGROUND_TYPES = [
@@ -77,40 +77,6 @@ export type Playground = {
    */
   mapsQuery?: string;
 };
-
-export const playgroundSourceSchema = z.object({
-  kind: z.enum(["official", "gov", "editorial"]),
-  name: z.string().min(1),
-  url: z.string().min(1),
-});
-
-/** 僅測試用 safeParse；頁面 runtime 不因 schema 丟例外。 */
-export const playgroundSchema = z.object({
-  id: z.string().min(1),
-  name: z.string().min(1),
-  city: z.string().min(1),
-  district: z.string().min(1).optional(),
-  region: z.string().min(1).optional(),
-  lat: z.number(),
-  lng: z.number(),
-  address: z.string().min(1),
-  type: z.enum(PLAYGROUND_TYPES),
-  ageRange: z.tuple([z.number(), z.number()]),
-  free: z.boolean(),
-  feeNote: z.string().min(1).optional(),
-  indoor: z.boolean(),
-  facilities: z.array(z.string()),
-  tags: z.array(z.string()),
-  tips: z.string().min(1),
-  officialUrl: z.string().min(1).optional(),
-  relatedEpisodes: z.array(z.string()).optional(),
-  sources: z.array(playgroundSourceSchema).min(1),
-  lastVerified: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  coverageNote: z.string().min(1).optional(),
-  status: z.literal("temporarily-closed").optional(),
-  placeId: z.string().min(1).optional(),
-  mapsQuery: z.string().min(1).optional(),
-});
 
 export type PlaygroundMapsFields = Pick<
   Playground,

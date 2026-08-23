@@ -57,7 +57,8 @@
 
 | ID | 說明 |
 |----|------|
-| perf: 故事列表可快取殼＋播放頁封面 AVIF／WebP | 見本 commit |
+| perf: Play Map client 不再帶 Zod（schema 改測試邊界） | 見本 commit |
+| perf: 故事列表可快取殼＋播放頁封面 AVIF／WebP | `987745b` |
 | perf: Web Performance Audit v3 — StoryCard sizes、games picture hero、adventures webp preload、SW AVIF shell（維持 v6） | `986ac33` |
 | polish(ui): Design Review — 返回鏈結／展開摘要／訂閱回饋／行動搜尋提交／focus 與觸控 | `0622dbd` |
 
