@@ -98,6 +98,10 @@
   pointer-events: none;
 }
 
+.imagePicture {
+  display: contents;
+}
+
 .imageKenBurns .image {
   animation: kenBurnsDrift 26s ease-in-out infinite alternate;
 }

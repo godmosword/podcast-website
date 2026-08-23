@@ -27,12 +27,12 @@ export default function LatestHero({ story }: LatestHeroProps) {
       </div>
 
       <div className={styles.coverWrap}>
+        {/* /stories LCP 是 SiteHeader hero-home；這裡不再 priority，避免雙 hero preload。 */}
         <StoryImage
           src={storyCoverPath(story.slug)}
           alt={`${story.title} 封面`}
           fill
           className={styles.cover}
-          priority
         />
         <Sparkle
           className={`${styles.sparkle} ${decor.sparkleAnim}`}

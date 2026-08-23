@@ -717,7 +717,7 @@ function checkEpisodeFaqCoverage(stories: Story[]): void {
   }
 }
 
-/** `/stories` 含 searchParams，build 常無獨立 prerender HTML；改驗資料層契約（對齊 generateMetadata）。verify:geo 無 stories.html 時不驗證 body DOM。 */
+/** `/stories` 靜態殼（filter 在 client island）。有 stories.html 就驗 DOM；缺檔時退回 metadata 契約。 */
 function checkStoriesListingPage(stories: Story[]): void {
   const tags = allTags();
   const vehicles = allVehicles();

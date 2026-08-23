@@ -1,81 +1,64 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useMemo } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Story } from "@/data/content";
 import StoryCard from "./StoryCard";
 import VehicleSelect from "./VehicleSelect";
 import TopicSelect from "./TopicSelect";
 import { filterStories } from "./story-filtering";
 import { playSfx } from "@/lib/sfx";
+import {
+  parseStoriesSearchParams,
+  storiesSearchQuery,
+} from "@/lib/stories-search";
 import styles from "./StoryFilter.module.css";
 
-type StoryFilterProps = {
+export type StoryFilterDataProps = {
   stories: Story[];
   vehicles: string[];
   tags: string[];
   featuredStorySlug?: string | null;
-  initialVehicle?: string | null;
-  initialTag?: string | null;
-  initialQuery?: string;
 };
 
-export default function StoryFilter({
+type StoryFilterProps = StoryFilterDataProps & {
+  vehicle: string | null;
+  tag: string | null;
+  query: string;
+};
+
+export function StoryFilter({
   stories,
   vehicles,
   tags,
   featuredStorySlug = null,
-  initialVehicle = null,
-  initialTag = null,
-  initialQuery = "",
+  vehicle,
+  tag,
+  query,
 }: StoryFilterProps) {
   const router = useRouter();
   const pathname = usePathname();
   const filterBase = pathname === "/stories" ? "/stories" : "/";
-  const [vehicle, setVehicle] = useState<string | null>(initialVehicle);
-  const [tag, setTag] = useState<string | null>(initialTag);
-  const [query, setQuery] = useState(initialQuery);
-
-  useEffect(() => {
-    setVehicle(initialVehicle);
-  }, [initialVehicle]);
-
-  useEffect(() => {
-    setTag(initialTag);
-  }, [initialTag]);
-
-  useEffect(() => {
-    setQuery(initialQuery);
-  }, [initialQuery]);
 
   function pushFilters(
     nextVehicle: string | null,
     nextTag: string | null,
     nextQuery: string,
   ) {
-    const params = new URLSearchParams();
-    if (nextVehicle) params.set("vehicle", nextVehicle);
-    if (nextTag) params.set("tag", nextTag);
-    if (nextQuery.trim()) params.set("q", nextQuery.trim());
-    const qs = params.toString();
+    const qs = storiesSearchQuery(nextVehicle, nextTag, nextQuery);
     router.replace(qs ? `${filterBase}?${qs}` : filterBase, { scroll: false });
   }
 
   function updateVehicle(nextVehicle: string | null) {
-    setVehicle(nextVehicle);
     pushFilters(nextVehicle, tag, query);
   }
 
   function updateTag(nextTag: string | null) {
-    setTag(nextTag);
     pushFilters(vehicle, nextTag, query);
   }
 
   function clearFilters() {
     playSfx("tap");
-    setVehicle(null);
-    setTag(null);
-    setQuery("");
     router.replace(filterBase, { scroll: false });
   }
 
@@ -157,3 +140,21 @@ export default function StoryFilter({
     </section>
   );
 }
+
+/** 靜態殼 fallback：不讀 URL，避免 searchParams 把整頁打成 dynamic。 */
+export function StoryFilterFallback(props: StoryFilterDataProps) {
+  return <StoryFilter {...props} vehicle={null} tag={null} query="" />;
+}
+
+/** 小型 client island：只在這裡解讀可分享的 filter URL。 */
+export function StoryFilterFromUrl(props: StoryFilterDataProps) {
+  const searchParams = useSearchParams();
+  const parsed = parseStoriesSearchParams(
+    searchParams,
+    props.vehicles,
+    props.tags,
+  );
+  return <StoryFilter {...props} {...parsed} />;
+}
+
+export default StoryFilterFromUrl;

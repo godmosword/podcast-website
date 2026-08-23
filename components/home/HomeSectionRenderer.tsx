@@ -1,9 +1,12 @@
-import { Fragment } from "react";
+import { Fragment, Suspense } from "react";
 import type { Story } from "@/data/content";
 import { HOME_SECTION_IDS, type HomeSectionId } from "@/data/home-sections";
 import FavoritesSection from "@/components/FavoritesSection";
 import LatestHero from "@/components/LatestHero";
-import StoryFilter from "@/components/StoryFilter";
+import {
+  StoryFilterFallback,
+  StoryFilterFromUrl,
+} from "@/components/StoryFilter";
 
 export type HomeSectionProps = {
   latest: Story | undefined;
@@ -11,10 +14,16 @@ export type HomeSectionProps = {
   featuredStorySlug: string | null;
   vehicles: string[];
   tags: string[];
-  initialVehicle: string | null;
-  initialTag: string | null;
-  initialQuery: string;
 };
+
+function storyFilterProps(props: HomeSectionProps) {
+  return {
+    stories: props.listStories,
+    vehicles: props.vehicles,
+    tags: props.tags,
+    featuredStorySlug: props.featuredStorySlug,
+  };
+}
 
 function renderSection(id: HomeSectionId, props: HomeSectionProps) {
   switch (id) {
@@ -22,18 +31,14 @@ function renderSection(id: HomeSectionId, props: HomeSectionProps) {
       return props.latest ? <LatestHero story={props.latest} /> : null;
     case "favorites":
       return <FavoritesSection />;
-    case "storyFilter":
+    case "storyFilter": {
+      const filterProps = storyFilterProps(props);
       return (
-        <StoryFilter
-          stories={props.listStories}
-          vehicles={props.vehicles}
-          tags={props.tags}
-          featuredStorySlug={props.featuredStorySlug}
-          initialVehicle={props.initialVehicle}
-          initialTag={props.initialTag}
-          initialQuery={props.initialQuery}
-        />
+        <Suspense fallback={<StoryFilterFallback {...filterProps} />}>
+          <StoryFilterFromUrl {...filterProps} />
+        </Suspense>
       );
+    }
     default:
       return null;
   }

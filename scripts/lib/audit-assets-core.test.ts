@@ -26,6 +26,7 @@ describe("audit-assets-core (D0)", () => {
     const paths = collectDynamicReferencePaths();
     const first = getStories()[0];
     expect(paths).toContain(storyCoverPath(first.slug));
+    expect(paths).toContain(storyCoverPath(first.slug).replace(/\.jpe?g$/i, ".avif"));
     expect(paths).toContain("/landing/segment-stories.jpg");
     expect(paths).toContain("/hero-home.jpg");
   });

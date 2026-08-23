@@ -30,22 +30,9 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-type StoriesPageProps = {
-  searchParams: Promise<{ vehicle?: string; tag?: string; q?: string }>;
-};
-
-export default async function StoriesPage({ searchParams }: StoriesPageProps) {
-  const {
-    vehicle: vehicleParam,
-    tag: tagParam,
-    q: queryParam,
-  } = await searchParams;
+export default function StoriesPage() {
   const vehicles = allVehicles();
   const tags = allTags();
-  const initialVehicle =
-    vehicleParam && vehicles.includes(vehicleParam) ? vehicleParam : null;
-  const initialTag = tagParam && tags.includes(tagParam) ? tagParam : null;
-
   const stories = storiesByNewest();
   const latest = stories[0];
   const lede = storiesCatalogSummary(stories, tags.length, vehicles.length);
@@ -56,9 +43,6 @@ export default async function StoriesPage({ searchParams }: StoriesPageProps) {
     featuredStorySlug: latest?.slug ?? null,
     vehicles,
     tags,
-    initialVehicle,
-    initialTag,
-    initialQuery: queryParam ?? "",
   };
 
   return (

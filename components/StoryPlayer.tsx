@@ -16,6 +16,11 @@ import { LIGHT_THEME, NIGHT_THEME } from "@/lib/theme";
 import { trackStoryCompleted, trackStoryPlayStart } from "@/lib/analytics";
 import { takeLandingPlayback } from "@/lib/landing-playback";
 import { playSfx, isSfxEnabled } from "@/lib/sfx";
+import {
+  isStoryCoverRaster,
+  storyPlayCacheUrls,
+  storyPlayImageSources,
+} from "@/lib/story-play-image";
 import SfxToggle from "./SfxToggle";
 import StoryEndScreen from "./StoryEndScreen";
 import StoryCaptionStack from "./StoryCaptionStack";
@@ -333,7 +338,7 @@ export default function StoryPlayer({
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
-    const urls = [audio, ...images];
+    const urls = storyPlayCacheUrls(audio, images);
     void navigator.serviceWorker.ready.then((reg) => {
       reg.active?.postMessage({ type: "PLAYBACK_ACTIVE", urls });
       reg.active?.postMessage({ type: "CACHE_STORY", urls });
@@ -621,8 +626,6 @@ export default function StoryPlayer({
       <div className={styles.stage}>
         {isLoading && (
           <div className={styles.skeleton} aria-hidden>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={images[0]} alt="" className={styles.skeletonImage} />
             <Wheel
               size={52}
               color="#fff"
@@ -635,6 +638,8 @@ export default function StoryPlayer({
           // 翻頁多為循序，相鄰預掛載即可保留淡入淡出；遠距跳頁時靠 loading 骨架過渡。
           if (Math.abs(i - page) > 1) return null;
           const visible = i === page && !hasEnded;
+          const sources = storyPlayImageSources(src);
+          const modern = isStoryCoverRaster(src);
           return (
             <div
               key={i}
@@ -642,17 +647,25 @@ export default function StoryPlayer({
               style={{ opacity: visible ? 1 : 0 }}
               aria-hidden={!visible}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={src}
-                alt={`${title} 第 ${i + 1} 頁`}
-                className={styles.image}
-                draggable={false}
-                loading={i === page ? "eager" : "lazy"}
-                decoding="async"
-                onLoad={() => i === page && setIsLoading(false)}
-                onError={() => setMediaError("image")}
-              />
+              <picture className={styles.imagePicture}>
+                {modern ? (
+                  <>
+                    <source type="image/avif" srcSet={sources.avif} />
+                    <source type="image/webp" srcSet={sources.webp} />
+                  </>
+                ) : null}
+                <img
+                  src={sources.jpg}
+                  alt={`${title} 第 ${i + 1} 頁`}
+                  className={styles.image}
+                  draggable={false}
+                  loading={i === page ? "eager" : "lazy"}
+                  fetchPriority={i === page ? "high" : "low"}
+                  decoding="async"
+                  onLoad={() => i === page && setIsLoading(false)}
+                  onError={() => setMediaError("image")}
+                />
+              </picture>
             </div>
           );
         })}
