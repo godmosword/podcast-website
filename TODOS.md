@@ -57,7 +57,7 @@
 
 | ID | 說明 |
 |----|------|
-| polish(ui): Design Review — 返回鏈結／展開摘要／訂閱回饋／行動搜尋提交／focus 與觸控 | 見本 commit |
+| polish(ui): Design Review — 返回鏈結／展開摘要／訂閱回饋／行動搜尋提交／focus 與觸控 | `0622dbd` |
 
 ### 本輪已完成（2026-08-22）
 
