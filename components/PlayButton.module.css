@@ -32,7 +32,15 @@
 
 @media (hover: hover) {
   .button:hover {
-    box-shadow: var(--shadow-card), var(--shadow-md);
+    box-shadow: var(--elev-3), var(--gloss);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button,
+  .button:active {
+    transform: none;
+    transition: none;
   }
 }
 

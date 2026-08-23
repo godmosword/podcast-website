@@ -114,7 +114,9 @@
   text-align: center;
   color: var(--ink-soft);
   font-weight: 600;
-  padding: var(--space-8) 0;
+  padding: var(--space-8) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--bg-2);
 }
 
 .emptyText {

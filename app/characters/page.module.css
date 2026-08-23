@@ -84,6 +84,6 @@
 
 @media (max-width: 640px) {
   .main {
-    padding-inline: 12px;
+    padding-inline: var(--space-4);
   }
 }

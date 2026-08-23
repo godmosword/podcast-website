@@ -17,6 +17,9 @@
 }
 
 .nextLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   color: var(--accent-ink);
   font-weight: 800;
   text-decoration-thickness: 0.12em;

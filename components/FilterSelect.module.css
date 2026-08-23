@@ -22,10 +22,16 @@
   transition: border-color var(--motion-press), background var(--motion-press);
 }
 
+@media (hover: hover) {
+  .trigger:hover {
+    background: var(--bg-2);
+  }
+}
+
 .trigger:focus-visible {
-  outline: none;
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
   border-color: var(--ink);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ink) 12%, transparent);
 }
 
 .triggerInner {
@@ -125,6 +131,6 @@
 }
 
 .option:focus-visible {
-  outline: none;
-  background: color-mix(in srgb, var(--ink) 7%, transparent);
+  outline: 3px solid var(--focus-ring);
+  outline-offset: -2px;
 }

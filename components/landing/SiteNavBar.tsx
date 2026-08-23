@@ -203,6 +203,9 @@ export default function SiteNavBar() {
               placeholder="搜尋故事或主題..."
               autoComplete="off"
             />
+            <button type="submit" className={styles.searchSubmit}>
+              搜尋
+            </button>
           </form>
 
           <ul className={styles.menuList}>

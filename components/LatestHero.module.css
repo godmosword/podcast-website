@@ -19,6 +19,11 @@
   opacity: 0.96;
 }
 
+.hero:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
 @media (hover: hover) {
   .hero:hover {
     transform: translateY(-2px);

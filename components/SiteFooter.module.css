@@ -242,6 +242,20 @@
 }
 
 .support:active {
-  transform: translateY(3px);
-  box-shadow: none;
+  transform: scale(0.98);
+  opacity: 0.94;
+}
+
+@media (hover: hover) {
+  .support:hover {
+    box-shadow: var(--elev-2), var(--gloss);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .support,
+  .support:active {
+    transform: none;
+    transition: none;
+  }
 }

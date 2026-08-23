@@ -257,8 +257,8 @@
   z-index: 3;
   display: grid;
   place-items: center;
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   border-radius: 999px;
   color: var(--landing-nav-cta-fg, #8b4510);
   text-decoration: none;

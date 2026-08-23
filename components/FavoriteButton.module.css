@@ -14,7 +14,12 @@
 }
 
 .btn:active {
-  transform: scale(0.94);
+  transform: scale(0.98);
+}
+
+.btn:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .active {
