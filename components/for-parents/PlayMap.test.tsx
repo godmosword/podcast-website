@@ -93,6 +93,10 @@ afterEach(() => {
   replaceStateSpy.mockRestore();
 });
 
+function replaceStateUrls(): string[] {
+  return replaceStateSpy.mock.calls.map(([, , url]) => String(url ?? ""));
+}
+
 /*
  * 期望值必須取自 UI 實際使用的來源 countByCity（＝篩選會列出幾張卡），
  * 不是 listCityCoverage（＝有幾個地方帶得成小孩去，休園者不計）。
@@ -641,25 +645,30 @@ describe("PlayMap", () => {
     render(<PlayMap />);
 
     fireEvent.click(screen.getByRole("button", { name: "免費" }));
-    expect(replaceStateSpy).toHaveBeenCalledWith(
-      null,
-      "",
-      "/for-parents/play-map?free=1",
-    );
+    expect(replaceStateUrls()).toContain("/for-parents/play-map?free=1");
 
     openMap();
-    expect(replaceStateSpy).toHaveBeenCalledWith(
-      null,
-      "",
+    expect(replaceStateUrls()).toContain(
       "/for-parents/play-map?free=1&view=map",
     );
 
     backToList();
     fireEvent.click(screen.getByRole("button", { name: "免費" }));
-    expect(replaceStateSpy).toHaveBeenLastCalledWith(
-      null,
+    expect(replaceStateUrls().at(-1)).toBe("/for-parents/play-map");
+  });
+
+  it("replaceState 保留 App Router history.state，避免 filter 寫回觸發 useSearchParams restore", () => {
+    const appRouterState = { __NA: true, keep: "tree" };
+    window.history.replaceState(appRouterState, "", "/for-parents/play-map");
+    replaceStateSpy.mockClear();
+
+    render(<PlayMap />);
+    fireEvent.click(screen.getByRole("button", { name: "免費" }));
+
+    expect(replaceStateSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ __NA: true, keep: "tree" }),
       "",
-      "/for-parents/play-map",
+      "/for-parents/play-map?free=1",
     );
   });
 

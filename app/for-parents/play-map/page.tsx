@@ -3,17 +3,15 @@ import Link from "next/link";
 import { Suspense } from "react";
 import SiteFooter from "@/components/SiteFooter";
 import JsonLd from "@/components/JsonLd";
-import PlayMap from "@/components/for-parents/PlayMap";
+import PlayMapClient, {
+  PlayMapFallback,
+} from "@/components/for-parents/PlayMapClient";
 import { listPlaygrounds } from "@/data/playgrounds";
 import {
   breadcrumbListJsonLd,
   playgroundItemListJsonLd,
 } from "@/lib/json-ld";
 import { STATIC_PAGE_MODIFIED_DATES } from "@/lib/page-freshness";
-import {
-  parsePlayMapQuery,
-  type RawPlayMapParams,
-} from "@/lib/playgrounds-query";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
@@ -33,13 +31,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function PlayMapPage({
-  searchParams,
-}: {
-  searchParams: Promise<RawPlayMapParams>;
-}) {
-  const query = parsePlayMapQuery(await searchParams);
-
+export default function PlayMapPage() {
   return (
     <main className={styles.main}>
       <JsonLd
@@ -51,19 +43,8 @@ export default async function PlayMapPage({
       />
       <JsonLd data={playgroundItemListJsonLd(listPlaygrounds())} />
       {/* SiteNavBar（app/layout.tsx）已顯示品牌，此處不再放第二個字標。 */}
-      <Suspense fallback={null}>
-        <PlayMap
-          initialCity={query.city}
-          initialType={query.type}
-          initialIndoorOnly={query.indoorOnly}
-          initialOutdoorOnly={query.outdoorOnly}
-          initialFreeOnly={query.freeOnly}
-          initialRainyDayOnly={query.rainyDayOnly}
-          initialParkingOnly={query.parkingOnly}
-          initialStrollerFriendlyOnly={query.strollerFriendlyOnly}
-          initialHighEnergyOnly={query.highEnergyOnly}
-          initialView={query.view}
-        />
+      <Suspense fallback={<PlayMapFallback />}>
+        <PlayMapClient />
       </Suspense>
       <div className={styles.collectionsLinkWrap}>
         <Link className={styles.collectionsLink} href="/for-parents/play-map/collections">
