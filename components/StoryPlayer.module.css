@@ -460,10 +460,12 @@
 
 .subtitlesBtn {
   composes: glassPill;
+  background: rgba(20, 20, 24, 0.92);
 }
 
 .subtitlesBtnOn {
   composes: glassPill glassPillOn;
+  background: rgba(20, 20, 24, 0.92);
   border-color: rgba(255, 255, 255, 0.45);
 }
 

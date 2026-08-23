@@ -799,7 +799,6 @@ export default function StoryPlayer({
           </button>
           <button
             className={subtitlesOn ? styles.subtitlesBtnOn : styles.subtitlesBtn}
-            style={subtitlesOn ? { backgroundColor: color } : undefined}
             onClick={() => setSubtitlesOn((v) => !v)}
             aria-pressed={subtitlesOn}
             aria-label={subtitlesOn ? "字幕：開" : "字幕：關"}
