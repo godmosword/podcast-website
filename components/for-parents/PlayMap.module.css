@@ -71,6 +71,15 @@
  * Contextual quick filters stay in one touch-scroll row on narrow screens.
  * The existing filter button remains beside the row and keeps the facet panel.
  */
+/*
+ * 意圖列在 ≤360px 裝不下五顆 chip，一定會切邊；契約要求維持 nowrap，
+ * 不能改成換行。所以要讓「還有更多」這件事看得見，否則小螢幕的家長
+ * 可能永遠不知道「室內」存在。
+ *
+ * 用經典的 scroll-shadow：local 層跟著內容捲動，捲到底時剛好蓋住
+ * 固定在容器邊緣的陰影層——純 CSS，不需要偵測是否溢出，也不用 JS。
+ * 陰影用 radial-gradient 而非 blur()（本頁禁用 CSS blur）。
+ */
 .intentGrid {
   display: flex;
   flex-wrap: nowrap;
@@ -82,6 +91,40 @@
   scroll-padding-inline: 12px;
   scrollbar-width: thin;
   -webkit-overflow-scrolling: touch;
+  background:
+    linear-gradient(to right, var(--bg) 40%, transparent) 0 0 / 26px 100%
+      no-repeat local,
+    linear-gradient(to left, var(--bg) 40%, transparent) 100% 0 / 26px 100%
+      no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgba(52, 48, 43, 0.18), transparent)
+      0 0 / 14px 100% no-repeat,
+    radial-gradient(
+        farthest-side at 100% 50%,
+        rgba(52, 48, 43, 0.18),
+        transparent
+      )
+      100% 0 / 14px 100% no-repeat;
+}
+
+/* 夜間底色深，暖黑陰影看不見，改用亮色描出邊緣。 */
+:global([data-theme="night"]) .intentGrid {
+  background:
+    linear-gradient(to right, var(--bg) 40%, transparent) 0 0 / 26px 100%
+      no-repeat local,
+    linear-gradient(to left, var(--bg) 40%, transparent) 100% 0 / 26px 100%
+      no-repeat local,
+    radial-gradient(
+        farthest-side at 0 50%,
+        rgba(255, 255, 255, 0.22),
+        transparent
+      )
+      0 0 / 14px 100% no-repeat,
+    radial-gradient(
+        farthest-side at 100% 50%,
+        rgba(255, 255, 255, 0.22),
+        transparent
+      )
+      100% 0 / 14px 100% no-repeat;
 }
 
 .intentGrid .intentChip {
