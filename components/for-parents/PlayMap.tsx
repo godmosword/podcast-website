@@ -235,110 +235,116 @@ export default function PlayMap({
         />
       </div>
 
-      {/* 磚牆是名單視圖的縣市導航器；地圖視圖有自己的 cluster，留著只會把地圖擠到摺線下。 */}
-      <div hidden={map.showMap}>
-        <PlayMapCityWall
-          tiles={map.cityTiles}
-          selectedCity={map.city}
-          uncataloguedCities={map.uncataloguedCities}
-          onToggleCity={handleToggleCityTile}
-        />
-      </div>
-
-      <div className={styles.content}>
-        <section
-          id={CARDS_PANEL_ID}
-          ref={cardPanelRef}
-          role="region"
-          aria-label="地點名單"
-          hidden={!map.showCards}
-          className={styles.cardsPanel}
-        >
-          <PlayMapCardList
-            groups={map.groups}
-            matchedCount={map.filtered.length}
-            unmatched={map.unmatchedPlaces}
-            selectedId={map.selectedId}
-            hoveredPlaceId={map.hoveredPlaceId}
-            hoverCorrelationEnabled={map.splitActive}
-            userLatLng={map.userLatLng}
-            hasExtraFilters={map.hasExtraFilters}
-            onClearFilters={map.handleClearFilters}
-            viewportSearchActive={map.viewportSearchActive}
-            onClearViewportSearch={viewport.handleClearViewportSearch}
-            onHover={map.handleHoverPlace}
-            onBlur={map.handleBlurPlace}
-            onSelect={map.handleSelectFromCard}
-            registerCardRef={registerCardRef}
-            resultSentence={map.resultSentence}
-            groupNote={map.groupNote}
-            showMapAction={!map.splitActive}
-            onOpenMap={() => map.handleSelectView("map")}
-            coverageLabel={map.coverageLabel}
-            editorialPick={map.showCards ? map.editorialPick : null}
-            visibleCount={map.visibleCount}
-            canLoadMore={map.canLoadMore}
-            visibleCountLabel={map.visibleCountLabel}
-            onLoadMore={map.handleLoadMore}
-            topRef={map.cardListTopRef}
+      {/*
+        桌面名單模式把磚牆與結果並排（.browse 兩欄）：磚牆是主要導航器，
+        單獨佔一整條橫幅會在 1100px 內容欄右側留下半欄空白，而且捲到名單後
+        就再也構不到。地圖視圖有自己的 cluster，磚牆整個收起來。
+      */}
+      <div className={styles.browse}>
+        <div className={styles.wallSlot} hidden={map.showMap}>
+          <PlayMapCityWall
+            tiles={map.cityTiles}
+            selectedCity={map.city}
+            uncataloguedCities={map.uncataloguedCities}
+            onToggleCity={handleToggleCityTile}
           />
-        </section>
+        </div>
 
-        <div
-          id={MAP_PANEL_ID}
-          role="region"
-          aria-label="地點地圖"
-          hidden={!map.showMap}
-          className={styles.mapShell}
-        >
-          {mobileMap ? (
-            <div className={styles.mapChrome}>
-              <button
-                type="button"
-                className={styles.backToListButton}
-                onClick={() => map.handleSelectView("cards")}
-              >
-                返回名單
-              </button>
-            </div>
-          ) : null}
-          {viewport.hasPendingViewportSearch ? (
-            <button
-              type="button"
-              className={styles.viewportSearchButton}
-              onClick={viewport.handleCommitViewportSearch}
-            >
-              搜尋此區域
-            </button>
-          ) : null}
-          {mapMountedRef.current ? (
-            <PlayMapLeaflet
-              places={map.filtered}
-              points={map.points}
-              emptyCenter={map.cityCenter}
+        <div className={styles.content}>
+          <section
+            id={CARDS_PANEL_ID}
+            ref={cardPanelRef}
+            role="region"
+            aria-label="地點名單"
+            hidden={!map.showCards}
+            className={styles.cardsPanel}
+          >
+            <PlayMapCardList
+              groups={map.groups}
+              matchedCount={map.filtered.length}
+              unmatched={map.unmatchedPlaces}
               selectedId={map.selectedId}
               hoveredPlaceId={map.hoveredPlaceId}
               hoverCorrelationEnabled={map.splitActive}
+              userLatLng={map.userLatLng}
+              hasExtraFilters={map.hasExtraFilters}
+              onClearFilters={map.handleClearFilters}
+              viewportSearchActive={map.viewportSearchActive}
+              onClearViewportSearch={viewport.handleClearViewportSearch}
               onHover={map.handleHoverPlace}
               onBlur={map.handleBlurPlace}
-              onSelect={handleSelectFromMap}
-              reduceMotion={map.reduceMotion}
-              active={map.showMap}
-              clusterMode={map.clusterMode}
-              cityClusters={map.cityClusters}
-              onSelectCity={handleSelectCity}
-              userLatLng={map.userLatLng}
-              viewportZoom={viewport.zoom}
-              preserveViewport={
-                map.viewportSearchActive &&
-                !(map.city === null && map.userLatLng !== null)
-              }
-              onViewportSettled={viewport.handleViewportSettled}
-              resizeRequest={0}
-              splitLayout={map.splitLayout}
-              nearMeCamera={map.city === null && map.userLatLng !== null}
+              onSelect={map.handleSelectFromCard}
+              registerCardRef={registerCardRef}
+              resultSentence={map.resultSentence}
+              groupNote={map.groupNote}
+              showMapAction={!map.splitActive}
+              onOpenMap={() => map.handleSelectView("map")}
+              coverageLabel={map.coverageLabel}
+              editorialPick={map.showCards ? map.editorialPick : null}
+              visibleCount={map.visibleCount}
+              canLoadMore={map.canLoadMore}
+              visibleCountLabel={map.visibleCountLabel}
+              onLoadMore={map.handleLoadMore}
+              topRef={map.cardListTopRef}
             />
-          ) : null}
+          </section>
+
+          <div
+            id={MAP_PANEL_ID}
+            role="region"
+            aria-label="地點地圖"
+            hidden={!map.showMap}
+            className={styles.mapShell}
+          >
+            {mobileMap ? (
+              <div className={styles.mapChrome}>
+                <button
+                  type="button"
+                  className={styles.backToListButton}
+                  onClick={() => map.handleSelectView("cards")}
+                >
+                  返回名單
+                </button>
+              </div>
+            ) : null}
+            {viewport.hasPendingViewportSearch ? (
+              <button
+                type="button"
+                className={styles.viewportSearchButton}
+                onClick={viewport.handleCommitViewportSearch}
+              >
+                搜尋此區域
+              </button>
+            ) : null}
+            {mapMountedRef.current ? (
+              <PlayMapLeaflet
+                places={map.filtered}
+                points={map.points}
+                emptyCenter={map.cityCenter}
+                selectedId={map.selectedId}
+                hoveredPlaceId={map.hoveredPlaceId}
+                hoverCorrelationEnabled={map.splitActive}
+                onHover={map.handleHoverPlace}
+                onBlur={map.handleBlurPlace}
+                onSelect={handleSelectFromMap}
+                reduceMotion={map.reduceMotion}
+                active={map.showMap}
+                clusterMode={map.clusterMode}
+                cityClusters={map.cityClusters}
+                onSelectCity={handleSelectCity}
+                userLatLng={map.userLatLng}
+                viewportZoom={viewport.zoom}
+                preserveViewport={
+                  map.viewportSearchActive &&
+                  !(map.city === null && map.userLatLng !== null)
+                }
+                onViewportSettled={viewport.handleViewportSettled}
+                resizeRequest={0}
+                splitLayout={map.splitLayout}
+                nearMeCamera={map.city === null && map.userLatLng !== null}
+              />
+            ) : null}
+          </div>
         </div>
       </div>
 

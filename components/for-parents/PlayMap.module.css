@@ -322,6 +322,19 @@
  * 的節點都要留出 --nav-h 的餘裕，否則結果列／卡片標題會被切掉一半。
  * 補 --space-3 是為了不要剛好貼著頂欄下緣。
  */
+/*
+ * 行動版：磚牆在名單之上，單欄堆疊（維持既有行為）。
+ * 桌面名單模式改為兩欄並排——規則在檔尾的 980 區塊。
+ */
+.browse {
+  display: grid;
+  gap: 0;
+}
+
+.wallSlot[hidden] {
+  display: none;
+}
+
 .cardListTop,
 .resultHeader,
 .cardGrid > li {
@@ -1439,9 +1452,25 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  /* 名單滿版時卡片走三欄，別讓一欄卡片在 1100px 寬裡拉成長條。 */
+  /*
+   * 名單模式：磚牆變成常駐左欄，結果在右。
+   * 磚牆是這頁的主要導航器——單獨佔一整條橫幅會在右側留下半欄無主空白，
+   * 而且家長捲到名單之後就再也構不到它。sticky 讓它一直在手邊。
+   */
+  .root[data-split="false"] .browse {
+    grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+    gap: var(--space-8);
+    align-items: start;
+  }
+
+  .root[data-split="false"] .wallSlot {
+    position: sticky;
+    top: calc(var(--nav-h) + var(--space-3));
+  }
+
+  /* 右欄剩約 690px，三欄會把每張卡壓到 220px；兩欄才讀得下家長筆記。 */
   .root[data-split="false"] .cardGrid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .map {

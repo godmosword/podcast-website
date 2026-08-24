@@ -27,10 +27,25 @@ describe("PlayMapCityWall.module.css 契約", () => {
     expect(css).toMatch(/\.collapsedChip\s*\{[^}]*min-height:\s*48px/s);
   });
 
-  it("色深靠 --tile-density 階梯，選中態文字用 accent-ink 而非 accent", () => {
+  it("色深靠 --tile-density 階梯", () => {
     expect(css).toMatch(/--tile-density/);
+  });
+
+  it("選中態用實心底，不把文字疊在浮動的密度底色上", () => {
+    // --accent-ink 疊在最深的密度底上只有 3.71:1，而 axe 掃不到這個組合
+    // （預設狀態沒有磚被選中）。實心底把選中態與密度階梯解耦。
     expect(css).toMatch(
-      /\.tile\[aria-pressed="true"\]\s*\{[^}]*color:\s*var\(--accent-ink\)/s,
+      /\.tile\[aria-pressed="true"\]\s*\{[^}]*background:\s*var\(--accent-ink\)/s,
+    );
+    // (?<![-\w]) 避免把 border-color 誤判成 color。
+    expect(css).not.toMatch(
+      /\.tile\[aria-pressed="true"\]\s*\{[^}]*(?<![-\w])color:\s*var\(--accent-ink\)/s,
+    );
+  });
+
+  it("夜間的實心選中底另給深色前景（--accent-ink 在夜間是淺色）", () => {
+    expect(css).toMatch(
+      /\[data-theme="night"\]\)?\s*\.tile\[aria-pressed="true"\]\s*\{[^}]*color:\s*var\(--bg\)/s,
     );
   });
 

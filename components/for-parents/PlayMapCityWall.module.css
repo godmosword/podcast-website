@@ -52,7 +52,15 @@
 
 .gridWrap {
   position: relative;
+  /* 行動版限寬避免磚被拉成扁長條；桌面由 PlayMap 的側欄寬度決定。 */
   max-width: 460px;
+}
+
+@media (min-width: 980px) {
+  .gridWrap,
+  .legend {
+    max-width: none;
+  }
 }
 
 .grid {
@@ -78,11 +86,14 @@
   border-radius: var(--radius-sm);
   /*
    * 色深是 choropleth，但**不是唯一編碼**——同一塊磚上永遠有可讀的數字文字。
-   * 最深階 = color-mix(--accent 34%, #fff) ≈ #a8d9d3，對 --ink #34302b ≈ 9.1:1。
+   *
+   * 每階 13%（原本 8.5%）：8.5 的階梯在日間白底上，density 2 與 4 肉眼分不出來，
+   * 等於色深這個設計元素沒在傳遞任何資訊。拉開到 13/26/39/52% 才真的看得出深淺。
+   * 最深階 = color-mix(--accent 52%, #fff) ≈ #90ccc5，對 --ink #34302b ≈ 7.25:1。
    */
   background: color-mix(
     in srgb,
-    var(--accent) calc(var(--tile-density, 0) * 8.5%),
+    var(--accent) calc(var(--tile-density, 0) * 13%),
     var(--card)
   );
   color: var(--ink);
@@ -103,9 +114,18 @@
   outline-offset: 2px;
 }
 
+/*
+ * 選中態改成實心底。
+ *
+ * 原本是「--accent 邊框 + --accent-ink 文字」疊在密度底色上，最深階時
+ * --accent-ink 對 #a8d9d3 只有 3.71:1，過不了 AA——而 axe 掃不到這個組合，
+ * 因為預設狀態沒有任何磚被選中。實心底把選中態與密度階梯完全解耦，
+ * 對比不再隨命中數浮動。#fff 對 --accent-ink #1f7268 ＝ 5.77:1。
+ */
 .tile[aria-pressed="true"] {
-  border: 2px solid var(--accent);
-  color: var(--accent-ink);
+  background: var(--accent-ink);
+  border: 2px solid var(--accent-ink);
+  color: #fff;
   font-weight: 800;
 }
 
@@ -153,7 +173,7 @@
 }
 
 .tile[aria-pressed="true"] .tileCount {
-  color: var(--accent-ink);
+  color: inherit;
 }
 
 .legend {
@@ -164,13 +184,20 @@
   color: var(--ink-soft);
 }
 
-/* 夜間降一階飽和：最深 ≈ #38505a，對 --ink #f0ead8 ≈ 8.0:1。 */
+/* 夜間同樣拉開階梯但留一檔餘裕：最深 ≈ #3c5c6a，對 --ink #f0ead8 ≈ 5.96:1。 */
 :global([data-theme="night"]) .tile {
   background: color-mix(
     in srgb,
-    var(--accent) calc(var(--tile-density, 0) * 6.5%),
+    var(--accent) calc(var(--tile-density, 0) * 10%),
     var(--card)
   );
+}
+
+/* 夜間 --accent-ink 是淺色（#7fbdb5），實心底上的文字要換成深色：7.21:1。 */
+:global([data-theme="night"]) .tile[aria-pressed="true"] {
+  background: var(--accent-ink);
+  border-color: var(--accent-ink);
+  color: var(--bg);
 }
 
 /* 手機選定縣市後收成一行，把畫面讓給名單（漸進式揭露）。 */

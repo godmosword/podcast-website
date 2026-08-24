@@ -20,12 +20,16 @@ export type CityTileSlot = {
 /**
  * 22 縣市的固定磚位。row/col 不得重複（有測試把關）。
  * 縣市名稱必須與 CITY_DISPLAY_ORDER 完全一致，否則磚牆會漏縣市。
+ *
+ * 空格只能落在每一列的**邊緣**。夾在兩塊磚中間的洞會被讀成「少了一塊磚」
+ * 而不是「這裡沒有陸地」——宜蘭縣放 col3 而非 col4 就是為了填掉這種洞
+ * （而且宜蘭本來就與新北接壤，放 col3 反而更接近實際）。
  */
 export const CITY_WALL_SLOTS: readonly CityTileSlot[] = [
   { city: "台北市", row: 1, col: 2 },
   { city: "基隆市", row: 1, col: 3 },
   { city: "新北市", row: 2, col: 2 },
-  { city: "宜蘭縣", row: 2, col: 4 },
+  { city: "宜蘭縣", row: 2, col: 3 },
   { city: "桃園市", row: 3, col: 1 },
   { city: "新竹市", row: 3, col: 2 },
   { city: "新竹縣", row: 3, col: 3 },
