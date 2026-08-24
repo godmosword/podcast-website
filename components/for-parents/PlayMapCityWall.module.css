@@ -87,13 +87,15 @@
   /*
    * 色深是 choropleth，但**不是唯一編碼**——同一塊磚上永遠有可讀的數字文字。
    *
-   * 每階 13%（原本 8.5%）：8.5 的階梯在日間白底上，density 2 與 4 肉眼分不出來，
-   * 等於色深這個設計元素沒在傳遞任何資訊。拉開到 13/26/39/52% 才真的看得出深淺。
-   * 最深階 = color-mix(--accent 52%, #fff) ≈ #90ccc5，對 --ink #34302b ≈ 7.25:1。
+   * 每階 17%：8.5 的階梯在日間白底上 density 2 與 4 肉眼分不出來，等於色深
+   * 這個設計元素沒在傳遞任何資訊；13 看得出深淺但偏淡。17/34/51/68% 才夠鮮明。
+   *
+   * 上限卡在對比：最深階 color-mix(--accent 68%, #fff) ≈ #6ebcb2，
+   * 對 --ink #34302b ＝ 5.92:1。再往上就開始吃掉磚上文字的 AA 餘裕。
    */
   background: color-mix(
     in srgb,
-    var(--accent) calc(var(--tile-density, 0) * 13%),
+    var(--accent) calc(var(--tile-density, 0) * 17%),
     var(--card)
   );
   color: var(--ink);
@@ -184,11 +186,15 @@
   color: var(--ink-soft);
 }
 
-/* 夜間同樣拉開階梯但留一檔餘裕：最深 ≈ #3c5c6a，對 --ink #f0ead8 ≈ 5.96:1。 */
+/*
+ * 夜間的階梯必須比日間保守：底色越亮、淺色文字的對比越差（跟日間相反）。
+ * 每階 12%，最深 ≈ #3f6470 對 --ink #f0ead8 ＝ 5.35:1；
+ * 拉到跟日間一樣的 17% 會掉到 4.37:1，過不了 AA。
+ */
 :global([data-theme="night"]) .tile {
   background: color-mix(
     in srgb,
-    var(--accent) calc(var(--tile-density, 0) * 10%),
+    var(--accent) calc(var(--tile-density, 0) * 12%),
     var(--card)
   );
 }
