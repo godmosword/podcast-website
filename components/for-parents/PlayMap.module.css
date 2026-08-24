@@ -317,6 +317,17 @@
   min-height: 48dvh;
 }
 
+/*
+ * sticky 頂欄會蓋住捲進來的錨點。凡是「會被 scrollIntoView 或錨點跳轉命中」
+ * 的節點都要留出 --nav-h 的餘裕，否則結果列／卡片標題會被切掉一半。
+ * 補 --space-3 是為了不要剛好貼著頂欄下緣。
+ */
+.cardListTop,
+.resultHeader,
+.cardGrid > li {
+  scroll-margin-top: calc(var(--nav-h) + var(--space-3));
+}
+
 .resultHeader {
   display: flex;
   align-items: flex-end;

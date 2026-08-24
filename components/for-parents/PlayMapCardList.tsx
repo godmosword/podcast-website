@@ -46,7 +46,7 @@ export function PlayMapCardList({
 }: PlayMapCardListProps) {
   return (
     <>
-      <div ref={topRef} aria-hidden />
+      <div ref={topRef} className={styles.cardListTop} aria-hidden />
       <div className={styles.resultHeader}>
         {/*
           視覺上拆成「在 X 找 Y」＋放大的結果數；讀屏要讀成一句完整的話，

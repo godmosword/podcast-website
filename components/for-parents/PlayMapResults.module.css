@@ -76,6 +76,8 @@
 }
 
 .groupHeadline {
+  /* 讀屏的標題導覽會直接跳到這裡，同樣要避開 sticky 頂欄。 */
+  scroll-margin-top: calc(var(--nav-h) + var(--space-3));
   margin: 0 2px var(--space-3);
   padding-bottom: var(--space-2);
   border-bottom: 1px solid var(--hairline);
