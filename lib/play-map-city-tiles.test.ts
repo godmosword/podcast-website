@@ -21,6 +21,21 @@ describe("CITY_WALL_SLOTS", () => {
     );
   });
 
+  it("空格只落在列的邊緣，不留夾在兩塊磚中間的洞", () => {
+    const byRow = new Map<number, number[]>();
+    for (const slot of CITY_WALL_SLOTS) {
+      byRow.set(slot.row, [...(byRow.get(slot.row) ?? []), slot.col]);
+    }
+    for (const [row, cols] of byRow) {
+      const sorted = [...cols].sort((a, b) => a - b);
+      const span = sorted[sorted.length - 1]! - sorted[0]! + 1;
+      expect(
+        span,
+        `第 ${row} 列在 ${sorted.join("/")} 之間有洞`,
+      ).toBe(sorted.length);
+    }
+  });
+
   it("每個磚位唯一，且落在 4 欄 7 列之內", () => {
     const seen = new Set<string>();
     for (const slot of CITY_WALL_SLOTS) {

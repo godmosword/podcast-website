@@ -1,4 +1,14 @@
 .root {
+  /*
+   * 意圖列黏在 --nav-h + 4px 且高 98px（1024／1280／1440 量測值一致）。
+   * 桌面側欄必須黏在它「底下」，否則會滑到它後面被切掉。
+   * 這是一個刻意的耦合：意圖列的內容若改動，這個值要跟著改——
+   * e2e 斷言側欄頂端不得高於意圖列底端，會擋住漂移。
+   */
+  --play-map-controls-h: 98px;
+  --play-map-sticky-top: calc(
+    var(--nav-h) + 4px + var(--play-map-controls-h) + var(--space-3)
+  );
   position: relative;
   display: grid;
   gap: var(--space-4);
@@ -71,6 +81,15 @@
  * Contextual quick filters stay in one touch-scroll row on narrow screens.
  * The existing filter button remains beside the row and keeps the facet panel.
  */
+/*
+ * 意圖列在 ≤360px 裝不下五顆 chip，一定會切邊；契約要求維持 nowrap，
+ * 不能改成換行。所以要讓「還有更多」這件事看得見，否則小螢幕的家長
+ * 可能永遠不知道「室內」存在。
+ *
+ * 用經典的 scroll-shadow：local 層跟著內容捲動，捲到底時剛好蓋住
+ * 固定在容器邊緣的陰影層——純 CSS，不需要偵測是否溢出，也不用 JS。
+ * 陰影用 radial-gradient 而非 blur()（本頁禁用 CSS blur）。
+ */
 .intentGrid {
   display: flex;
   flex-wrap: nowrap;
@@ -82,10 +101,60 @@
   scroll-padding-inline: 12px;
   scrollbar-width: thin;
   -webkit-overflow-scrolling: touch;
+  background:
+    linear-gradient(to right, var(--bg) 40%, transparent) 0 0 / 26px 100%
+      no-repeat local,
+    linear-gradient(to left, var(--bg) 40%, transparent) 100% 0 / 26px 100%
+      no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgba(52, 48, 43, 0.18), transparent)
+      0 0 / 14px 100% no-repeat,
+    radial-gradient(
+        farthest-side at 100% 50%,
+        rgba(52, 48, 43, 0.18),
+        transparent
+      )
+      100% 0 / 14px 100% no-repeat;
+}
+
+/* 夜間底色深，暖黑陰影看不見，改用亮色描出邊緣。 */
+:global([data-theme="night"]) .intentGrid {
+  background:
+    linear-gradient(to right, var(--bg) 40%, transparent) 0 0 / 26px 100%
+      no-repeat local,
+    linear-gradient(to left, var(--bg) 40%, transparent) 100% 0 / 26px 100%
+      no-repeat local,
+    radial-gradient(
+        farthest-side at 0 50%,
+        rgba(255, 255, 255, 0.22),
+        transparent
+      )
+      0 0 / 14px 100% no-repeat,
+    radial-gradient(
+        farthest-side at 100% 50%,
+        rgba(255, 255, 255, 0.22),
+        transparent
+      )
+      100% 0 / 14px 100% no-repeat;
 }
 
 .intentGrid .intentChip {
   flex: 0 0 auto;
+}
+
+/*
+ * 意圖列的 sticky 一直沒生效：包住它的 wrapper 高度剛好等於工具列本身，
+ * sticky 沒有任何可移動的空間，捲兩下就跟著內容離開畫面——而它是這頁
+ * 主要的篩選控制，家長得整路捲回頂端才改得了條件。
+ *
+ * display: contents 拿掉 wrapper 的框，讓工具列直接以 .root 為定位參考。
+ * 隱藏時要明寫 display: none——author 樣式會蓋過 UA 的 [hidden]{display:none}。
+ */
+.controlSlot {
+  display: contents;
+}
+
+.controlSlot[hidden] {
+  display: none;
 }
 
 .controlBar {
@@ -315,6 +384,30 @@
   display: grid;
   gap: var(--space-4);
   min-height: 48dvh;
+}
+
+/*
+ * sticky 頂欄會蓋住捲進來的錨點。凡是「會被 scrollIntoView 或錨點跳轉命中」
+ * 的節點都要留出 --nav-h 的餘裕，否則結果列／卡片標題會被切掉一半。
+ * 補 --space-3 是為了不要剛好貼著頂欄下緣。
+ */
+/*
+ * 行動版：磚牆在名單之上，單欄堆疊（維持既有行為）。
+ * 桌面名單模式改為兩欄並排——規則在檔尾的 980 區塊。
+ */
+.browse {
+  display: grid;
+  gap: 0;
+}
+
+.wallSlot[hidden] {
+  display: none;
+}
+
+.cardListTop,
+.resultHeader,
+.cardGrid > li {
+  scroll-margin-top: calc(var(--nav-h) + var(--space-3));
 }
 
 .resultHeader {
@@ -1428,9 +1521,39 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  /* 名單滿版時卡片走三欄，別讓一欄卡片在 1100px 寬裡拉成長條。 */
+  /*
+   * 名單模式：磚牆變成常駐左欄，結果在右。
+   * 磚牆是這頁的主要導航器——單獨佔一整條橫幅會在右側留下半欄無主空白，
+   * 而且家長捲到名單之後就再也構不到它。sticky 讓它一直在手邊。
+   */
+  .root[data-split="false"] .browse {
+    grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+    gap: var(--space-8);
+    align-items: start;
+  }
+
+  .root[data-split="false"] .wallSlot {
+    position: sticky;
+    top: var(--play-map-sticky-top);
+    /* 矮螢幕上磚牆可能比剩餘高度還高，讓側欄自己捲，不要把聲明文字吃掉。 */
+    max-height: calc(100dvh - var(--play-map-sticky-top) - var(--space-4));
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
+
+  /* 右欄剩約 690px，三欄會把每張卡壓到 220px；兩欄才讀得下家長筆記。 */
   .root[data-split="false"] .cardGrid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /*
+     * 卡片依內容高度排列，不跟同列拉齊。等高會讓家長筆記短的卡片在
+     * 「導航」之上撐出一塊無主空白——參差的卡底比卡片內的空洞好讀。
+     */
+    align-items: start;
+  }
+
+  /* 兩欄的卡片有寬度了，家長筆記多給一行——那是這份資料唯一的差異化內容。 */
+  .root[data-split="false"] .cardBlurb {
+    -webkit-line-clamp: 3;
   }
 
   .map {

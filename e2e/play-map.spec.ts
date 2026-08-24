@@ -460,6 +460,73 @@ test.describe("親子遊樂地圖", () => {
     ).toHaveCount(0);
   });
 
+  test("意圖列捲動後仍黏在頂欄下方，改條件不必捲回頁頂", async ({ page }) => {
+    await page.setViewportSize(PHONE);
+    await page.goto("/for-parents/play-map");
+    await waitForPlayMapReady(page);
+
+    await page.evaluate(() => window.scrollTo(0, 1500));
+    const bar = page.locator('[data-quick-filter="free"]');
+    const box = await bar.boundingBox();
+    expect(box, "意圖列應留在畫面內").not.toBeNull();
+    if (!box) return;
+    // 黏住的話 chip 會落在頂欄下方；沒黏住時 boundingBox 會是大負數。
+    expect(box.y).toBeGreaterThan(0);
+    expect(box.y).toBeLessThan(200);
+
+    // 用真實座標點擊，避開 Playwright 的 actionability 捲動。
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+    await expect(bar).toHaveAttribute("aria-pressed", "true");
+    // 條件套用後仍留在原處附近，不會被彈回頁頂。
+    expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(800);
+  });
+
+  test("桌面側欄黏在意圖列底下，不會滑到它後面被切掉", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto("/for-parents/play-map");
+    await waitForPlayMapReady(page);
+
+    await page.evaluate(() => window.scrollTo(0, 1400));
+    const geo = await page.evaluate(() => {
+      const bar = document
+        .querySelector("[class*=controlBar]")!
+        .getBoundingClientRect();
+      const slot = document
+        .querySelector("[class*=wallSlot]")!
+        .getBoundingClientRect();
+      return { barBottom: bar.bottom, slotTop: slot.top };
+    });
+
+    // 兩者都是 sticky，側欄的 top 偏移必須把意圖列的高度算進去。
+    // 意圖列內容改動導致高度變化時，這條會擋下來。
+    expect(geo.slotTop).toBeGreaterThanOrEqual(geo.barBottom);
+  });
+
+  test("手機磚牆收合與展開都把焦點交出去，且不搶別處的焦點", async ({
+    page,
+  }) => {
+    await page.setViewportSize(PHONE);
+    await page.goto("/for-parents/play-map");
+    await waitForPlayMapReady(page);
+
+    // 選定：磚牆收合，焦點要落在收合鍵上，不能掉到 body。
+    await page.locator('[data-city="桃園市"]').click();
+    await expect(
+      page.getByRole("button", { name: "取消桃園市，改看全台" }),
+    ).toBeFocused();
+
+    // 取消：磚牆展開，焦點要還給原本那塊磚。
+    // 兩個方向都必須等重繪之後才交出去——按下去的當下目標還是 display:none。
+    await page.getByRole("button", { name: "取消桃園市，改看全台" }).click();
+    await expect(page.locator('[data-city="桃園市"]')).toBeFocused();
+
+    // 從篩選面板選縣市時磚牆同樣會收合，但焦點應該留在原地。
+    await page.getByRole("button", { name: /篩選條件/ }).click();
+    const chip = page.locator('[data-city-chip="台北市"]');
+    await chip.click();
+    await expect(chip).toBeFocused();
+  });
+
   test("名單卡片明示免費／需購票與室內／戶外", async ({ page }) => {
     test.setTimeout(30_000);
     await page.setViewportSize(PHONE);

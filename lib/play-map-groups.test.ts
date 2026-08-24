@@ -80,13 +80,13 @@ describe("groupPlayMapResults：車程分組", () => {
     expect(byKey.get("d61")).toEqual(["g"]);
   });
 
-  it("標題是「label · N 個」，且 count 不受遮蔽影響", () => {
+  it("label 與 count 分開輸出，count 不受遮蔽影響", () => {
     const groups = groupPlayMapResults({
       places,
       mode: "drive",
       userLatLng: USER,
     });
-    expect(groups[0]!.headline).toBe("20 分鐘內 · 2 個");
+    expect(groups[0]!.label).toBe("20 分鐘內");
     expect(groups[0]!.count).toBe(2);
   });
 
