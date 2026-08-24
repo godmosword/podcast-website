@@ -39,11 +39,10 @@ export type PlayMapGroupItem = {
 
 export type PlayMapResultGroup = {
   key: string;
+  /** 「20 分鐘內」「台北市」「公園」——標題的主體，視覺上要壓過數量。 */
   label: string;
   /** 該組總數，**不受 visibleCount 影響**。 */
   count: number;
-  /** 「20 分鐘內 · 4 個」 */
-  headline: string;
   items: readonly PlayMapGroupItem[];
 };
 
@@ -137,12 +136,10 @@ export function groupPlayMapResults(args: {
       place,
       displayIndex: displayIndex++,
     }));
-    const label = plan.labelOf(key);
     return {
       key,
-      label,
+      label: plan.labelOf(key),
       count: items.length,
-      headline: `${label} · ${items.length} 個`,
       items,
     };
   });

@@ -155,7 +155,8 @@ export function PlayMapCardList({
             id={`play-map-group-${group.key}`}
             className={results.groupHeadline}
           >
-            {group.headline}
+            <span className={results.groupLabel}>{group.label}</span>
+            <span className={results.groupCount}>{group.count} 個</span>
           </h3>
           <ul className={styles.cardGrid}>
             {group.items.map(({ place, displayIndex }) => (

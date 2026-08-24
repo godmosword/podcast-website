@@ -1471,6 +1471,16 @@
   /* 右欄剩約 690px，三欄會把每張卡壓到 220px；兩欄才讀得下家長筆記。 */
   .root[data-split="false"] .cardGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    /*
+     * 卡片依內容高度排列，不跟同列拉齊。等高會讓家長筆記短的卡片在
+     * 「導航」之上撐出一塊無主空白——參差的卡底比卡片內的空洞好讀。
+     */
+    align-items: start;
+  }
+
+  /* 兩欄的卡片有寬度了，家長筆記多給一行——那是這份資料唯一的差異化內容。 */
+  .root[data-split="false"] .cardBlurb {
+    -webkit-line-clamp: 3;
   }
 
   .map {
