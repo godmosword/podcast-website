@@ -131,6 +131,22 @@
   flex: 0 0 auto;
 }
 
+/*
+ * 意圖列的 sticky 一直沒生效：包住它的 wrapper 高度剛好等於工具列本身，
+ * sticky 沒有任何可移動的空間，捲兩下就跟著內容離開畫面——而它是這頁
+ * 主要的篩選控制，家長得整路捲回頂端才改得了條件。
+ *
+ * display: contents 拿掉 wrapper 的框，讓工具列直接以 .root 為定位參考。
+ * 隱藏時要明寫 display: none——author 樣式會蓋過 UA 的 [hidden]{display:none}。
+ */
+.controlSlot {
+  display: contents;
+}
+
+.controlSlot[hidden] {
+  display: none;
+}
+
 .controlBar {
   position: sticky;
   top: calc(var(--nav-h, 56px) + 4px);

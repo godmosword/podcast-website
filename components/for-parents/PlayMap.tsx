@@ -177,7 +177,7 @@ export default function PlayMap({
     >
       <PlayMapToolbar compact={mobileMap} />
 
-      <div hidden={mobileMap}>
+      <div className={styles.controlSlot} hidden={mobileMap}>
         <PlayMapControlBar
           nearMeActive={map.userLatLng !== null}
           geoStatus={map.geoStatus}

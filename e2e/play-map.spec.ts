@@ -460,6 +460,27 @@ test.describe("親子遊樂地圖", () => {
     ).toHaveCount(0);
   });
 
+  test("意圖列捲動後仍黏在頂欄下方，改條件不必捲回頁頂", async ({ page }) => {
+    await page.setViewportSize(PHONE);
+    await page.goto("/for-parents/play-map");
+    await waitForPlayMapReady(page);
+
+    await page.evaluate(() => window.scrollTo(0, 1500));
+    const bar = page.locator('[data-quick-filter="free"]');
+    const box = await bar.boundingBox();
+    expect(box, "意圖列應留在畫面內").not.toBeNull();
+    if (!box) return;
+    // 黏住的話 chip 會落在頂欄下方；沒黏住時 boundingBox 會是大負數。
+    expect(box.y).toBeGreaterThan(0);
+    expect(box.y).toBeLessThan(200);
+
+    // 用真實座標點擊，避開 Playwright 的 actionability 捲動。
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+    await expect(bar).toHaveAttribute("aria-pressed", "true");
+    // 條件套用後仍留在原處附近，不會被彈回頁頂。
+    expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(800);
+  });
+
   test("手機磚牆收合與展開都把焦點交出去，且不搶別處的焦點", async ({
     page,
   }) => {
