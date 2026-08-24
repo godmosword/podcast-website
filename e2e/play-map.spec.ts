@@ -481,6 +481,27 @@ test.describe("親子遊樂地圖", () => {
     expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(800);
   });
 
+  test("桌面側欄黏在意圖列底下，不會滑到它後面被切掉", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto("/for-parents/play-map");
+    await waitForPlayMapReady(page);
+
+    await page.evaluate(() => window.scrollTo(0, 1400));
+    const geo = await page.evaluate(() => {
+      const bar = document
+        .querySelector("[class*=controlBar]")!
+        .getBoundingClientRect();
+      const slot = document
+        .querySelector("[class*=wallSlot]")!
+        .getBoundingClientRect();
+      return { barBottom: bar.bottom, slotTop: slot.top };
+    });
+
+    // 兩者都是 sticky，側欄的 top 偏移必須把意圖列的高度算進去。
+    // 意圖列內容改動導致高度變化時，這條會擋下來。
+    expect(geo.slotTop).toBeGreaterThanOrEqual(geo.barBottom);
+  });
+
   test("手機磚牆收合與展開都把焦點交出去，且不搶別處的焦點", async ({
     page,
   }) => {

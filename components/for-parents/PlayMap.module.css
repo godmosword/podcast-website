@@ -1,4 +1,14 @@
 .root {
+  /*
+   * 意圖列黏在 --nav-h + 4px 且高 98px（1024／1280／1440 量測值一致）。
+   * 桌面側欄必須黏在它「底下」，否則會滑到它後面被切掉。
+   * 這是一個刻意的耦合：意圖列的內容若改動，這個值要跟著改——
+   * e2e 斷言側欄頂端不得高於意圖列底端，會擋住漂移。
+   */
+  --play-map-controls-h: 98px;
+  --play-map-sticky-top: calc(
+    var(--nav-h) + 4px + var(--play-map-controls-h) + var(--space-3)
+  );
   position: relative;
   display: grid;
   gap: var(--space-4);
@@ -1524,7 +1534,11 @@
 
   .root[data-split="false"] .wallSlot {
     position: sticky;
-    top: calc(var(--nav-h) + var(--space-3));
+    top: var(--play-map-sticky-top);
+    /* 矮螢幕上磚牆可能比剩餘高度還高，讓側欄自己捲，不要把聲明文字吃掉。 */
+    max-height: calc(100dvh - var(--play-map-sticky-top) - var(--space-4));
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
   }
 
   /* 右欄剩約 690px，三欄會把每張卡壓到 220px；兩欄才讀得下家長筆記。 */
