@@ -160,29 +160,6 @@ export default function PlayMap({
     ],
   );
 
-  /**
-   * 手機收合磚牆後，取消縣市要把焦點還給原本那塊磚，否則焦點會掉到 body。
-   * 收合列自己的焦點由 PlayMapCityWall 內部負責。
-   */
-  const lastTileCityRef = useRef<string | null>(null);
-  const handleToggleCityTile = useCallback(
-    (next: string | null) => {
-      handleSelectCity(next);
-      if (next === null) {
-        const previous = lastTileCityRef.current;
-        if (previous) {
-          document
-            .querySelector<HTMLElement>(`[data-city="${previous}"]`)
-            ?.focus();
-        }
-        lastTileCityRef.current = null;
-        return;
-      }
-      lastTileCityRef.current = next;
-    },
-    [handleSelectCity],
-  );
-
   const mobileMap = !map.splitLayout && map.showMap;
   const wasMobileMapRef = useRef(mobileMap);
   useEffect(() => {
@@ -246,7 +223,7 @@ export default function PlayMap({
             tiles={map.cityTiles}
             selectedCity={map.city}
             uncataloguedCities={map.uncataloguedCities}
-            onToggleCity={handleToggleCityTile}
+            onToggleCity={handleSelectCity}
           />
         </div>
 

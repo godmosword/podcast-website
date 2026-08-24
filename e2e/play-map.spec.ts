@@ -460,6 +460,31 @@ test.describe("親子遊樂地圖", () => {
     ).toHaveCount(0);
   });
 
+  test("手機磚牆收合與展開都把焦點交出去，且不搶別處的焦點", async ({
+    page,
+  }) => {
+    await page.setViewportSize(PHONE);
+    await page.goto("/for-parents/play-map");
+    await waitForPlayMapReady(page);
+
+    // 選定：磚牆收合，焦點要落在收合鍵上，不能掉到 body。
+    await page.locator('[data-city="桃園市"]').click();
+    await expect(
+      page.getByRole("button", { name: "取消桃園市，改看全台" }),
+    ).toBeFocused();
+
+    // 取消：磚牆展開，焦點要還給原本那塊磚。
+    // 兩個方向都必須等重繪之後才交出去——按下去的當下目標還是 display:none。
+    await page.getByRole("button", { name: "取消桃園市，改看全台" }).click();
+    await expect(page.locator('[data-city="桃園市"]')).toBeFocused();
+
+    // 從篩選面板選縣市時磚牆同樣會收合，但焦點應該留在原地。
+    await page.getByRole("button", { name: /篩選條件/ }).click();
+    const chip = page.locator('[data-city-chip="台北市"]');
+    await chip.click();
+    await expect(chip).toBeFocused();
+  });
+
   test("名單卡片明示免費／需購票與室內／戶外", async ({ page }) => {
     test.setTimeout(30_000);
     await page.setViewportSize(PHONE);
