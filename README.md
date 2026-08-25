@@ -78,8 +78,8 @@ npm run dev
 | `npm run typecheck` | TypeScript strict 型別檢查 |
 | `npm test` | Vitest 單元測試 |
 | `npm run test:e2e` | Playwright E2E（自動 build／啟動 production server；不要先用 `next dev` 佔用 3000） |
-| `npm run test:visual` | D2 視覺回歸（**預設 skip**，VIS-DEBT-1；見 `test:visual:trusted`） |
-| `npm run test:visual:trusted` | 設 `VISUAL_BASELINE_TRUSTED=1` 後跑 visual spec（重產／對環境前用）。註：`adventures-*` 已於 2026-07-27 重產；其餘 8 頁基準仍是 07-12～07-17，落差 7–44%（多為期間 UI 演進，非環境差異——`home-390` 三張仍逐像素相符），待逐頁審圖重產 |
+| `npm run test:visual` | D2 視覺回歸（**預設 skip**；本機 pre-push 工具，刻意不進 CI。見 `test:visual:trusted`） |
+| `npm run test:visual:trusted` | 設 `VISUAL_BASELINE_TRUSTED=1` 後跑 visual spec。基準已於 **2026-08-24 全面重產**（59 張，含新增的 `play-map`／`place`）。重產再加 `-- --update-snapshots`，並**逐張人工目檢**後才提交 |
 | `npm run check` | 品質閘門：test + verify:episodes + verify:zone-art + verify:map-art + build |
 | `npm run font:subset` | 重新子集化中文字型（新增文案後） |
 

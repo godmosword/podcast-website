@@ -489,7 +489,25 @@ Plan 經 Codex 工程審 + Grok 對抗審 + Opus 設計審**三審退回修訂**
 
 Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫寫的 $0.2）、卡片塞 `reflection-prompts`（違反 `DESIGN.md:147`，且已用於 `StoryEndScreen`）、新增 stagger（已存在）、全域紙紋 noise（iOS 合成風險 + 污染宇宙地圖）、重生 filter icon（已存在）、獎項 badge（無素材來源）。
 
-### VIS-DEBT-1　視覺 baseline 全面失效　`eng · M · 無`　已隔離
+### VIS-DEBT-2　視覺測試跑在活資料上（mask 兩難的上游）　`eng · L · VIS-DEBT-1`　待做
+
+只要資料會長，mask 就只能在「盲掉內容」與「每月紅一次」之間二選一，兩邊都輸。
+正解是**釘住資料**：加一個 `VISUAL_FIXTURE=1`（與 `VISUAL_BASELINE_TRUSTED` 同層的本機 env），
+讓 `data/stories.ts`、`data/playgrounds.ts` 在該旗標下回傳**凍結子集**（例如前 6 集、前 12 個景點）。
+
+好處：所有 mask 可以歸零 → 拿回 CTA `--gloss`、`.marker`、結果數、coverage footnote 的完整覆蓋；
+`fullPage: true` 重新可用且圖不會失控長高；characters 的 62 顆 chip 也自動解決。
+每月出新集不再動 baseline，重產只發生在**真的改了樣式**時——那正是你要它紅的時機。
+
+⚠️ `data/stories.ts` 在 AGENT-DOMAIN Protected paths 內，改動必跑 `verify:episodes`，且只能 Leader／Opus 處理。
+
+### VIS-GAP-1　兒童主路徑至今無視覺 baseline　`eng · M · 無`　待做
+
+`/story/[slug]` 單集頁與 `StoryPlayer`（DESIGN.md §播放器狀態 四態）、`/games/coloring-book`
+到現在都沒有任何視覺 baseline。這是既存債，但 2026-08-24 那輪花預算加的兩頁
+（`play-map`、`place`）都是**家長向**——優先序倒置，該補回兒童動線。
+
+### VIS-DEBT-1　視覺 baseline 全面失效　`eng · M · 無`　✅ 已結案（見本 commit）
 
 `npm run test:visual` 的 baseline 已與當前渲染環境脫節（乾淨 HEAD 上抽樣多頁全 fail）。**預設 skip**（`e2e/visual.spec.ts` 需 `VISUAL_BASELINE_TRUSTED=1` 才跑）；`npm run test:visual:trusted` 為 opt-in 重跑。刻意未盲 `--update-snapshots`。
 
@@ -710,7 +728,7 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 
 `adventures-*` 四張已重產並逐張審圖（刪小抄／奶油鈕／新構圖）。
 
-順手釐清 **VIS-DEBT-1**：它的理由寫「baseline 與本機渲染環境脫節」，但 `home-390` 三張在本機**逐像素相符**——字型／OS 若不同不可能全等。逐頁量到的落差（全部故事 21%、遊樂園 44%、宇宙地圖 25%、家長指南 19%、角色圖鑑 23%、關於 9%、訂閱 7%）主要是 07-12～07-17 產基準後兩週的 UI 演進沒有重新基準（例：`adventures-390-night` 舊圖還有探險小抄與「👆點點看！」）。**待辦：** 其餘 8 頁逐頁審圖重產後，再評估是否解除 `test.beforeEach` 的預設 skip。
+**VIS-DEBT-1 結案（2026-08-24）**：先前推測「07-12～07-17 產基準後兩週的 UI 演進沒有重新基準」方向正確，但只講了一半。真正的根因是 `visual.spec.ts` 自己：`fullPage: true` 且完全沒有 `mask`，把隨每次上新集就改寫的內容一起拍進 baseline（首頁 diff 圖是「EP 18 vs EP 26」），於是每出一集就失效、最後被放棄維護。修法＝先穩定化（`GROWING_PAGE_IDS` 改拍 viewport、`volatileMasks` 遮易變文字）再重產，否則下一集上線又會死一次。同時把 `play-map`／`place` 納入覆蓋（59 張），並明文記為本機 pre-push 工具、刻意不進 CI。
 
 ---
 
@@ -730,7 +748,7 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 | PLAY-IA-6 | P2 | ✅ `4224442` | **暫停覆蓋層補「回遊樂園」**：sticky 抬頭已保證出口可達，但「暫停 → 我要離開」仍是最自然的兒童動線 | `BlockDropView.tsx`、`car-adventure/CarAdventureMenu.tsx` | 手動 390×844 |
 | PLAY-IA-7 | P2 | ✅ `4224442` | **抬頭與 `GameHost` 工具列合成單列**（portal + context，約 30 行，不動 GameKit 對外契約）：目前遊戲上方仍是 52+48 兩列 | `GamePageShell.tsx`、`lib/gamekit/host/GameHost.tsx` | 手動 + e2e |
 | PLAY-IA-8 | P2 | ✅ `4224442` | **遊戲頁無法切換日／夜**：`ThemeToggle` 只掛在已隱藏的 `SiteNavBar` | `GamePageShell.tsx` | 手動 |
-| PLAY-IA-9 | P2 | 待做 | **視覺基準線重拍**：本次改動會推翻 `games-*` 4 張快照，但 `e2e/visual.spec.ts` 明文禁止在未對齊環境盲跑 `--update-snapshots`（VIS-DEBT-1） | `e2e/visual.spec.ts-snapshots/` | 對齊產生環境後 `npm run test:visual:trusted` |
+| PLAY-IA-9 | P2 | ✅ 已解（VIS-DEBT-1 結案時一併重產） | **視覺基準線重拍**：本次改動會推翻 `games-*` 4 張快照，但 `e2e/visual.spec.ts` 明文禁止在未對齊環境盲跑 `--update-snapshots`（VIS-DEBT-1） | `e2e/visual.spec.ts-snapshots/` | 對齊產生環境後 `npm run test:visual:trusted` |
 
 ---
 
@@ -764,7 +782,7 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 | UX-P2-4 | P2 | 待做 | Dudu 鍵盤可及（內層 `tabIndex={0}`） | `DuduCompanion.tsx` | a11y |
 | UX-P2-5 | P2 | 待做 | `reflectionShown` 加 `source: detail \| end-screen` 精準量測 | `progress-store.ts`、`ReflectionPrompt.tsx` | test |
 | UX-P2-6 | P2 | 待做 | **car-adventure 封面重製 4:3**：現 16:9 素材於 4:3 卡框置中裁切可用（太陽／主角車／終點旗完整），重製走生圖 SOP＋人工審圖，對齊其他四款 1448×1086 | `public/games/v2/car-adventure/cover.webp` | 人工審圖 |
-| UX-P2-7 | P2 | 待做（併 VIS-DEBT-1） | **`/stories` visual baseline 既存 drift**：trusted 跑時 `visual：全部故事 390 light` 即 fail——目檢 diff 後對齊環境再刷新 baselines；**預設 `test:visual` 為 skip≠通過** | `e2e/visual.spec.ts-snapshots/stories*` | `npm run test:visual:trusted`（勿用預設 `test:visual` 當通過證明） |
+| UX-P2-7 | P2 | ✅ 已解（VIS-DEBT-1 結案時一併重產） | **`/stories` visual baseline 既存 drift**：trusted 跑時 `visual：全部故事 390 light` 即 fail——目檢 diff 後對齊環境再刷新 baselines；**預設 `test:visual` 為 skip≠通過** | `e2e/visual.spec.ts-snapshots/stories*` | `npm run test:visual:trusted`（勿用預設 `test:visual` 當通過證明） |
 
 ### Task DAG（建議 `/agent-action` 順序）
 

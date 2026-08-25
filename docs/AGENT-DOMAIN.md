@@ -87,6 +87,7 @@
 | **上線前完整檢查** | `npm run check`（test + verify + build，與 CI 同一套） |
 | **新增中文文案** | `npm run font:subset`（需 `/tmp/huninn.ttf`） |
 | **E2E（若改關鍵 UI 流程）** | `npm run test:e2e` |
+| **視覺回歸（改樣式／版面時）** | `npm run test:visual:trusted`（**本機 pre-push 工具，刻意不進 CI**：baseline 為 `-chromium-darwin`，CI 跑 ubuntu，像素不可能相符）。預設 `npm run test:visual` 會 skip，**skip ≠ 通過**；重產須 `-- --update-snapshots` 並逐張人工目檢 |
 | **Production build** | `npm run build` |
 
 對齊 CI：`.github/workflows/sync-apple-podcast.yml` — sync 有變更時跑 `npm test` + `npm run build`；每次 sync 後跑 `npm run verify:episodes`（error 擋 push，warn 寫 Job Summary）。
@@ -165,3 +166,4 @@
 | 2026-07-12 | 反模式補「小型視覺／樣式微調硬開固定三審」（中間級工程單審，對齊 agent-plan §1） |
 | 2026-07-17 | 反模式補「呼叫 AskQuestion／AUQ MCP」；專案 hook + alwaysApply 規則硬擋 |
 | 2026-07-31 | 紅線「生圖／重抽禁止自行連抽」；alwaysApply `podcast.mdc` + EPISODE-WORKFLOW 審圖閘門（ep-23 越權連抽） |
+| 2026-08-24 | 驗證矩陣補「視覺回歸」列；VIS-DEBT-1 結案（根因是 baseline 拍進隨集數變動的內容，非環境漂移） |
