@@ -7,9 +7,9 @@
 
 > 格式：每項一段，行末標 `優先序 · 工時(人工) · 依賴`。工時 S/M/L。
 > **紀律：** 條目打 ✅ 時必須附 commit hash。
-> **資料基準（2026-07-29）：** `storiesByNewest()` **23 集**、最新 **`ep-23`**（2026-07-28）。
-> **出圖落後：** 多頁插圖 **23/23** 集（含 **`ep-23`（26 頁）**）；最新全幕含 **`ep-21`（18 頁）**／**`ep-22`（24 頁）**／**`ep-23`（26 頁）**。
-> 完整逐字稿與 episode FAQ 覆蓋皆 **23/23**（`verify:geo`）。`data/games.ts` 見下表。
+> **資料基準（2026-08-26）：** `storiesByNewest()` **27 集**、最新 **`ep-27`**（2026-08-26，MVP 單封面）。
+> **出圖落後：** 多頁插圖至 **`ep-24`（19 頁）**；`ep-25`／`ep-26`／`ep-27` 仍為 `pageCount=1` MVP。最新全幕含 **`ep-21`（18 頁）**／**`ep-22`（24 頁）**／**`ep-23`（26 頁）**／**`ep-24`（19 頁）**。
+> 完整逐字稿覆蓋至已校對集；`ep-27` 本機 sync 未跑 Whisper（無 sidecar）。`data/games.ts` 見下表。
 >
 > **現役遊戲（canon，對齊 `data/games.ts`）：** `candy-match` 繽紛消消樂 · `block-drop` 繽紛樂園 · `coloring-book` 繪本著色。
 > **歷史 slug：** `kart`／`pirate-kart`／`car-star`／`car-mission` 已退役，見 [archive](./docs/archive/TODOS-completed-2026-07-11.md)。
@@ -53,6 +53,12 @@
 
 角色 Logo 系統已移除，程式碼保存於 tag `archive/character-logo-system`。
 
+### 本輪已完成（2026-08-26）
+
+| ID | 說明 |
+|----|------|
+| chore(sync): 上架 ep-27 小紅豆汽車勇敢上學 MVP（本機 resync；字幕待 GHA 補轉錄） | 見本 commit |
+
 ### 本輪已完成（2026-08-23）
 
 | ID | 說明 |
@@ -85,7 +91,7 @@
 |----|------|
 | fix(sync): notify-live 接受 report.gitHead 為 HEAD 近期祖先（GHA 先寫 report 再 commit 不再漏開待生圖 Issue） | `2e19cea` |
 | test(sync): 淺 clone 不以工作區 `HEAD~1` 測 gitHead 祖先（Apple sync `npm test`） | `261ac00` |
-| test(studio): 待生圖面板不綁 live catalog（sync 新 MVP 不再擋 GHA） | 見本 commit |
+| test(studio): 待生圖面板不綁 live catalog（sync 新 MVP 不再擋 GHA） | `96ab2c3` |
 | chore(play-map): 內部 proto 路由（noindex、不進 sitemap） | `436e5db` |
 | feat(play-map): Phase 2 量測面板與容器切換器 | `a7f7417` |
 | feat(play-map): Phase 2 variant A 現役 city cluster | `5d85d90` |
