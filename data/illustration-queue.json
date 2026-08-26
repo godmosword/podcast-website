@@ -1,0 +1,16 @@
+[
+  {
+    "slug": "ep-26",
+    "ep": 26,
+    "syncedAt": "2026-08-19T00:00:00+08:00",
+    "subtitleReady": false,
+    "status": "awaiting-illustrate"
+  },
+  {
+    "slug": "ep-25",
+    "ep": 25,
+    "syncedAt": "2026-08-12T00:00:00+08:00",
+    "subtitleReady": true,
+    "status": "awaiting-illustrate"
+  }
+]

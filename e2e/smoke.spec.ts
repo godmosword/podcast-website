@@ -199,6 +199,7 @@ test("車車宇宙樂園地圖 smoke", async ({ page }) => {
 test("節目數據中心 /studio", async ({ page }) => {
   await page.goto("/studio");
   await expect(page.getByRole("heading", { name: "節目數據中心" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "待生圖佇列" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "平台後台捷徑" })).toBeVisible();
   await expect(page.getByRole("link", { name: "開啟後台" }).first()).toBeVisible();
 });

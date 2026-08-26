@@ -75,7 +75,8 @@ npm run verify:browse-index
 # 6. 建置與推送
 npm run sync:apple && npm run build
 git add public/stories/ data/scenes/ data/subtitles/ data/subtitles/_proofread/ \
-  data/apple-synced.json data/apple-sync.defaults.json data/stories.ts data/characters.json
+  data/apple-synced.json data/apple-sync.defaults.json data/stories.ts data/characters.json \
+  data/illustration-queue.json
 git commit -m "feat(stories): illustrate <slug> full scenes"
 git push
 npm run sync:notify   # 務必先 push 成功再跑；走 GHA 同一路徑補開／去重「待生圖」Issue（見 README「同步通知」）

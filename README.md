@@ -40,7 +40,7 @@ Bonbon & 馬米親子 Podcast《車車遊樂園》的官方 **看圖聽故事** 
 | 親子遊樂地圖 | `/for-parents/play-map` | 靜態殼＋`PlayMapClient` island；主瀏覽為 22 縣市磚牆＋分組名單（首屏不掛 Leaflet），地圖為 `view=map` 次要分頁；15 縣市景點、可分享篩選 URL、SSR 全台名單＋ItemList |
 | 家庭儀表板 | `/for-parents/dashboard` | 本機 localStorage 收聽／遊戲摘要（不上傳） |
 | 小遊戲 | `/games` | 街機兩款 hub + 繪本著色；遊戲資產按需預載 |
-| 節目數據 | `/studio` | 製作團隊專用（`noindex`、不在 sitemap） |
+| 節目數據 | `/studio` | 製作團隊專用（`noindex`、不在 sitemap）；含待生圖佇列 |
 | 關於／法律 | `/about`、`/legal` | 關於我們、使用條款 |
 | RSS | `/feed.xml` | Podcast feed（含 Podcasting 2.0 擴充） |
 | PWA | `manifest.json`、`sw.js` | 主畫面圖示；收藏、繼續收聽、遊戲進度、主題偏好（`cheche:progress` localStorage）。CACHE_STORY 只排 current±1 以外的 AVIF idle、不預抓整集 MP3；只快取完整 200（Range 206 不入庫，避免 Landing autoplay 壞掉）。**維持 v6** |
@@ -185,6 +185,8 @@ Neon／`DATABASE_URL` 為選配。未設定時不需要執行 migration，許願
 | `app/studio/page.tsx` | 節目數據中心 |
 | `lib/studio/platforms.ts` | 各平台後台 URL（含 SoundOn，不進公開 ConnectHub） |
 | `components/studio/EngagementMetricsPanel.tsx` | 本機 localStorage 互動驗收 |
+| `components/studio/IllustrationQueuePanel.tsx` | 待生圖佇列（catalog `pageCount=1`） |
+| `data/illustration-queue.json` | 生圖佇列 overlay（本機 notify／`--approve` 寫入） |
 
 ## Apple Podcasts 自動同步
 

@@ -1394,8 +1394,11 @@ GHA 同步新集並 push 成功後，`scripts/sync-alert.ts notify-live` 會開 
 ### ~~同步 commit 訊息帶生圖提示~~　`P2 · S · 無`　〔eng+ops〕 ✅
 GHA commit body 已由 `scripts/post-sync-notify.ts` 產生，列出本輪新 slug、字幕狀態、`npm run illustrate -- ep-N` 與完整生圖 checklist。`95ba69a`
 
-### 生圖佇列 `data/illustration-queue.json`　`P3 · S · 通知基建`　〔eng+ops〕
-`sync-apple-podcast.ts` 新集寫入 `{ slug, ep, syncedAt, subtitleReady, status: awaiting-illustrate }`；`illustrate --approve` 改 `approved` 或移除。Issue／webhook／未來 Studio 儀表板共用單一真相來源。
+### 生圖佇列 `data/illustration-queue.json`　`P3 · S · 通知基建`　〔eng+ops〕　✅ 見本 commit
+
+機器可讀 overlay：`{ slug, ep, syncedAt, subtitleReady, status }`。Studio `/studio` 以 **catalog `pageCount` 為準** 列出待生圖（MVP 單圖），overlay 保留 `syncedAt`。`illustrationStatus` 由 `pageCount` 衍生（不掛上 `Story`，以免進 JSON-LD／RSS）。
+
+寫入點：**本機** `npm run sync:notify`（GHA／vitest／dry-run 不寫檔，避免動 Apple sync `git add` 白名單）、`illustrate --approve` 標 `approved`。**未改** `scripts/sync-apple-podcast.ts` 與 sync workflow。不自動生圖、CI 不放 OpenAI key。
 
 ### Game Kit 歷史路線（Phase 0–8） ✅
 
@@ -1529,7 +1532,7 @@ T+2d    社群貼文（B 戰場）
 | 期 | 方案 | 說明 |
 |----|------|------|
 | **一期** | D commit 訊息強化 + A GitHub Issue | 已實作，零／低依賴，可追蹤 checklist |
-| **二期** | C `illustration-queue.json` + Studio 顯示 | 機器可讀佇列 |
+| **二期** | C `illustration-queue.json` + Studio 顯示 | ✅ 見本 commit（機器可讀 overlay + `/studio`；不自動生圖） |
 
 **已砍：** 外部 webhook 即時推播。LINE 舊推播服務已於 2025-03-31 終止；現行 GitHub Issue + GitHub App 手機通知已足夠，不再新增 secret 或 webhook 維護面。
 
@@ -1607,8 +1610,8 @@ T+2d    社群貼文（B 戰場）
 
 ### 現況缺口（勿忘）
 
-- 同步與 `illustrate` **完全脫鉤**；腳本僅 log「請視需要補 overrides」。
-- 無 `illustrationStatus` 欄位；`ep-8`（1 頁）vs `ep-9`（8 頁）即典型落差。
+- 同步與 `illustrate` 以 catalog `pageCount` + `data/illustration-queue.json` overlay 對齊；GHA sync **不寫**佇列檔（不動 workflow 白名單）。本機 `sync:notify`／`--approve` 才寫入。
+- `illustrationStatus` 由 `pageCount` 衍生（`awaiting-illustrate`／`approved`），見 `data/illustration-queue.ts`。
 - CI **不放** `OPENAI_API_KEY`；生圖永遠本機手動 + 人工審圖（設計如此）。
 
 ---

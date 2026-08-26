@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import EngagementMetricsPanel from "@/components/studio/EngagementMetricsPanel";
+import IllustrationQueuePanel from "@/components/studio/IllustrationQueuePanel";
 import PlatformStudioCard from "@/components/studio/PlatformStudioCard";
 import { studioPlatforms } from "@/lib/studio/platforms";
 import styles from "./page.module.css";
@@ -25,10 +26,12 @@ export default function StudioPage() {
 
       <h1 className={styles.title}>節目數據中心</h1>
       <p className={styles.subtitle}>
-        製作團隊專用：集中各平台後台捷徑與此瀏覽器的互動驗收數據。
+        製作團隊專用：平台捷徑、本機互動量測，與待生圖佇列。
       </p>
 
       <EngagementMetricsPanel />
+
+      <IllustrationQueuePanel />
 
       <section className={styles.section} aria-labelledby="studio-platforms-heading">
         <h2 id="studio-platforms-heading" className={styles.sectionHeading}>

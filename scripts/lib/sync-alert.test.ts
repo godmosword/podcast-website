@@ -85,6 +85,31 @@ describe("sync-alert notify-live", () => {
     expect(logs.some((line) => line.startsWith("NOTIFY_SKIPPED"))).toBe(true);
   });
 
+  it("notify-live 會呼叫 persistIllustrationQueue（本機寫入生圖佇列）", () => {
+    const persisted: Array<{ slugs: string[] }> = [];
+    const { deps } = makeDeps(
+      {
+        "issue list --search in:title ep-18 待生圖 --state open --json number,title,url,labels --limit 20":
+          JSON.stringify([
+            {
+              number: 40,
+              title: "[illustrate] 新集待生圖：ep-18",
+              url: "https://github.com/example/repo/issues/40",
+              labels: [{ name: "illustration" }],
+            },
+          ]),
+      },
+      {
+        persistIllustrationQueue: (_report, slugs) => {
+          persisted.push({ slugs });
+        },
+      },
+    );
+
+    notifyLiveFromReport(sampleReport, deps);
+    expect(persisted).toEqual([{ slugs: ["ep-18"] }]);
+  });
+
   it("labels an existing unlabeled illustration issue instead of creating a duplicate", () => {
     const { deps, calls } = makeDeps({
       "issue list --search in:title ep-18 待生圖 --state open --json number,title,url,labels --limit 20":

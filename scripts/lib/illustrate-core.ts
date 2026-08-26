@@ -24,6 +24,11 @@ import {
 import { join } from "node:path";
 import sharp from "sharp";
 import { z } from "zod";
+import { episodeNumberFromSlug } from "../../data/illustration-queue";
+import {
+  canWriteIllustrationQueue,
+  markIllustrationApproved,
+} from "./illustration-queue-store";
 import { ROOT, STORIES_DIR, subtitleSidecarPath } from "./transcribe-core";
 
 // ── 型別 ────────────────────────────────────────────────
@@ -739,7 +744,21 @@ export function approve(slug: string): ApproveResult {
   const captionTimes = scenes.map((s) => s.start);
   const captions = buildSceneCaptions(scenes, readSubtitlesForSlug(slug));
   const wiredVia = writeWiring(slug, scenes.length, captionTimes, captions);
+  persistApprovedIllustration(slug);
   return { copied: scenes.length, registered, publicDir: pub, captionTimes, wiredVia };
+}
+
+function persistApprovedIllustration(slug: string): void {
+  if (!canWriteIllustrationQueue()) return;
+  const ep = episodeNumberFromSlug(slug);
+  if (ep === null) return;
+  try {
+    markIllustrationApproved(slug, ep);
+  } catch (err) {
+    console.warn(
+      `⚠ 生圖佇列寫入失敗（插圖已核准）：${(err as Error).message}`,
+    );
+  }
 }
 
 /** 把本集新角色定裝照存進 public/characters 並 upsert 名冊（已存在則略過）。 */

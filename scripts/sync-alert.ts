@@ -30,6 +30,10 @@ import {
   type SyncRunReport,
 } from "./lib/sync-report";
 import { buildIssueBody } from "./post-sync-notify";
+import {
+  enqueueFromSyncReport,
+  shouldPersistIllustrationQueue,
+} from "./lib/illustration-queue-store";
 
 export type AlertKind = "sync-job-failure" | "sync-stale-rss";
 export type GhRunner = (args: string[]) => string;
@@ -46,6 +50,8 @@ export type SyncAlertDeps = {
     date: string;
     ep: number;
   }>;
+  /** 測試用：覆寫本機寫入生圖佇列（GHA 預設不寫檔） */
+  persistIllustrationQueue?: (report: SyncRunReport, slugs: string[]) => void;
 };
 
 export type NotifyLiveOptions = {
@@ -509,7 +515,27 @@ export function notifyLiveFromReport(
     deps,
     `NOTIFY 摘要：OK=${result.ok} SKIPPED=${result.skipped} FAILED=${result.failed}`,
   );
+  persistIllustrationQueueAfterNotify(report, slugs, env, deps);
   return result;
+}
+
+function persistIllustrationQueueAfterNotify(
+  report: SyncRunReport,
+  slugs: string[],
+  env: NodeJS.ProcessEnv,
+  deps: SyncAlertDeps,
+): void {
+  if (deps.persistIllustrationQueue) {
+    deps.persistIllustrationQueue(report, slugs);
+    return;
+  }
+  if (!shouldPersistIllustrationQueue(env)) return;
+  try {
+    enqueueFromSyncReport(report, slugs);
+    log(deps, `生圖佇列已更新：${slugs.join("、")}`);
+  } catch (err) {
+    warn(deps, `生圖佇列寫入失敗：${(err as Error).message}`);
+  }
 }
 
 export type NotifyLiveFlags = {

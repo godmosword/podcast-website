@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- **生圖佇列（P3）**：`data/illustration-queue.json` 為機器可讀 overlay；Studio `/studio` 列出 `pageCount=1` 的待生圖集。`illustrate --approve` 與本機 `sync:notify` 寫入狀態。**不改** Apple sync workflow／`sync-apple-podcast.ts`，也不自動生圖。
+
 ### Changed
 
 - **LIST-2 訂閱文案誠實化**：`/subscribe` 改為「加入新集通知名單」——目前只收名單、不寄新集上線信或電子報；確認信只用來驗證信箱。`/legal`、`DISCLAIMER.md` 同步，政策版本 `2026-08-26`。ESP／新集上線信另案。
