@@ -15,11 +15,11 @@
 | 序 | TODOS ID | 狀態 | 本輪要做 |
 |----|----------|------|----------|
 | 1 | UX-P0-1 家長閘門 | 待做（待決策） | 先擋 `/for-parents/dashboard`；算術題 + session |
-| 2 | UX-P1-5 全站 e2e | ✅ 見本 commit | `/for-parents`、播放頁觸控；CI `e2e-child-path` |
+| 2 | UX-P1-5 全站 e2e | ✅ `99cf197` | `/for-parents`、播放頁觸控；CI `e2e-child-path` |
 | 3 | UX-P1-1、UX-P1-4 | 部分／待做 | StoryPlayer 定時、Landing 箭頭、進度條拇指（只改 CSS） |
 | 4 | LIST-2 後續 | ✅ `289fbc4` | 文案對齊「只收名單、不寄新集上線信」；SubscribeForm e2e；ESP 另案 |
 | 5 | P3 生圖佇列 + illustrationStatus 缺口 | ✅ `3a0176f` | `data/illustration-queue.json`；approve／本機 notify 寫入；Studio 只讀；不自動生圖 |
-| 6 | P3 Playwright E2E CI | ✅ 見本 commit | `ci.yml` `e2e-child-path`；UX-P1-5 觸控；不動 Apple sync workflow |
+| 6 | P3 Playwright E2E CI | ✅ `99cf197` | `ci.yml` `e2e-child-path`；UX-P1-5 觸控；不動 Apple sync workflow |
 | 7 | P3 錯誤／上線監控、ESLint CI | 待做 | 輕量 client error + uptime；eslint 非互動 CI |
 
 ## 並行（不擋主線）
@@ -41,7 +41,7 @@
 2. UX-P1-1／UX-P1-4
 3. ~~LIST-2 文案誠實化 + SubscribeForm e2e~~ ✅ `289fbc4`（ESP／新集上線信另案）
 4. ~~P3 `illustration-queue.json`~~ ✅ `3a0176f`（不自動生圖；不動 Apple sync 主脚本）
-5. ~~P3 E2E CI~~ ✅ 見本 commit → 監控 → ESLint CI
+5. ~~P3 E2E CI~~ ✅ `99cf197` → 監控 → ESLint CI
 
 ## 驗證
 
