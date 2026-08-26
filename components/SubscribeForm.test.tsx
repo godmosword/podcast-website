@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import SubscribeForm from "./SubscribeForm";
 import {
+  SUBSCRIBE_EMAIL_LABEL,
   SUBSCRIBE_LOADING_LABEL,
   SUBSCRIBE_PRIVACY_NOTE,
   SUBSCRIBE_SUBMIT_LABEL,
@@ -84,7 +85,7 @@ describe("SubscribeForm", () => {
       }),
     );
     render(<SubscribeForm />);
-    fireEvent.change(await screen.findByLabelText("Email"), {
+    fireEvent.change(await screen.findByRole("textbox", { name: SUBSCRIBE_EMAIL_LABEL }), {
       target: { value: "parent@example.com" },
     });
     fireEvent.click(screen.getByRole("checkbox"));

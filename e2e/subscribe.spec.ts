@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import {
+  SUBSCRIBE_EMAIL_LABEL,
   SUBSCRIBE_PAGE_TITLE,
   SUBSCRIBE_PRIVACY_NOTE,
   SUBSCRIBE_SUBMIT_LABEL,
@@ -54,7 +55,9 @@ test.describe("SubscribeForm LIST-2", () => {
     const submit = page.getByRole("button", { name: SUBSCRIBE_SUBMIT_LABEL });
     await expect(submit).toBeDisabled();
 
-    await page.getByLabel("Email").fill("parent@example.com");
+    await page.getByRole("textbox", { name: SUBSCRIBE_EMAIL_LABEL }).fill(
+      "parent@example.com",
+    );
     await page.getByRole("checkbox").check();
     await expect(submit).toBeEnabled();
     await submit.click();

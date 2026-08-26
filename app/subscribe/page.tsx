@@ -36,7 +36,7 @@ export default function SubscribePage() {
         </p>
       </header>
 
-      <section className={styles.formSection} aria-label="Email 名單表單">
+      <section className={styles.formSection} aria-label="新集通知名單表單">
         <SubscribeForm source="subscribe_page" />
       </section>
 
