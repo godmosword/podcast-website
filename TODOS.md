@@ -63,6 +63,7 @@
 | test(geo): live 煙霧只看最新 RSS item、VTT 404 不接受 redirect | `60a2def` |
 | test(geo): VTT 直接 404 用 Fetch `redirected` 旗標（擋同 pathname query redirect） | `e5f1317` |
 | chore(sync): ep-27 Whisper 草稿字幕側車上架（GHA 轉錄因 GH013 改走 PR） | 見本 commit |
+| content(subtitles): ep-25 字幕複校（修「玩到忘記」「小綠人」兩處誤聽，139 句重跑 `--mark`） | 見本 commit |
 
 ### 本輪已完成（2026-08-23）
 
