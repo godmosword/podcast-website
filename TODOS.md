@@ -9,7 +9,7 @@
 > **紀律：** 條目打 ✅ 時必須附 commit hash。
 > **資料基準（2026-08-26）：** `storiesByNewest()` **27 集**、最新 **`ep-27`**（2026-08-26，MVP 單封面）。
 > **出圖落後：** 多頁插圖至 **`ep-24`（19 頁）**；`ep-25`／`ep-26`／`ep-27` 仍為 `pageCount=1` MVP。最新全幕含 **`ep-21`（18 頁）**／**`ep-22`（24 頁）**／**`ep-23`（26 頁）**／**`ep-24`（19 頁）**。
-> 完整逐字稿覆蓋至已校對集；`ep-27` 有 Whisper 草稿 sidecar（未 `--mark`）。`data/games.ts` 見下表。
+> 完整逐字稿覆蓋至 `ep-26`（已 `--mark`）；僅 `ep-27` 仍是 Whisper 草稿 sidecar（未 `--mark`）。`data/games.ts` 見下表。
 >
 > **現役遊戲（canon，對齊 `data/games.ts`）：** `candy-match` 繽紛消消樂 · `block-drop` 繽紛樂園 · `coloring-book` 繪本著色。
 > **歷史 slug：** `kart`／`pirate-kart`／`car-star`／`car-mission` 已退役，見 [archive](./docs/archive/TODOS-completed-2026-07-11.md)。
@@ -64,6 +64,7 @@
 | test(geo): VTT 直接 404 用 Fetch `redirected` 旗標（擋同 pathname query redirect） | `e5f1317` |
 | chore(sync): ep-27 Whisper 草稿字幕側車上架（GHA 轉錄因 GH013 改走 PR） | 見本 commit |
 | content(subtitles): ep-25 字幕複校（修「玩到忘記」「小綠人」兩處誤聽，139 句重跑 `--mark`） | 見本 commit |
+| content(subtitles): ep-26 中元節字幕人工校對（噗噗豬／海龜老師暖暖／吉普車正名、刪 3 句重複，167 → 164 句 `--mark`） | 見本 commit |
 
 ### 本輪已完成（2026-08-23）
 
