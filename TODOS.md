@@ -31,6 +31,7 @@
 | 3 | [UX-P0-4](#兒童-ux-與親子互動稽核2026-07-11) challenge 遊戲提示 | trust | S | ✅ `1c1ca1b` |
 | 4 | [Growth-Measure-1](#growth-measure-1-成長量測) SoundOn 回鏈 | ops/growth | S | ✅ `42a9d38` |
 | 5 | [UX-P1-2](#兒童-ux-與親子互動稽核2026-07-11) 詳情頁反思收合 | ux | S | ✅ `42a9d38` |
+| 6 | [VIS-LOCAL-1](#vis-local-1darwin-重產-visual-snapshots) darwin 重產 visual PNG | ops | S | 待本機 |
 
 ### 宇宙巢狀導覽（M0–M3）
 
@@ -498,6 +499,18 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 ### VIS-GAP-1　兒童主路徑至今無視覺 baseline　`eng · M · 無`　✅ `6be6de4`
 
 `/story/ep-1`、`/games/coloring-book` 納入頁面矩陣；StoryPlayer DESIGN.md 四態（字幕跟讀／手動翻頁／播放完成／載入中）以 `?vp=` 釘住，僅 fixture build 承認。播放器截 390 × light/night。
+
+### VIS-LOCAL-1 darwin 重產 visual snapshots　`ops · S · VIS-DEBT-2`　待本機
+
+程式（fixture + 兒童主路徑 spec）已合入 `6be6de4`，但 **PNG baseline 仍是舊的活資料／viewport 圖**。Linux／CI 不得 `--update-snapshots`（檔名是 `-chromium-darwin`，ubuntu 像素對不上）。
+
+請在對齊的 **macOS + 本機 Chromium**（與 2026-08-24 產基準同一環境）：
+
+```bash
+npm run test:visual:trusted -- --update-snapshots
+```
+
+逐張目檢後把 `e2e/visual.spec.ts-snapshots/` 推進 visual fixture 分支。沒有這步，VIS-DEBT-2／VIS-GAP-1 的測試碼已在、baseline 卻對不齊凍結資料與 `fullPage`。
 
 ### VIS-DEBT-1　視覺 baseline 全面失效　`eng · M · 無`　✅ 已結案（見本 commit）
 
