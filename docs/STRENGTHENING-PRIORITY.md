@@ -14,9 +14,9 @@
 
 | 序 | TODOS ID | 狀態 | 本輪要做 |
 |----|----------|------|----------|
-| 1 | UX-P0-1 家長閘門 | ✅ 見本 commit | 僅擋 `/for-parents/dashboard`；算術題 + session |
-| 2 | UX-P1-5 全站 e2e | ✅ 見本 commit | `/for-parents`、播放頁、閘門已補 |
-| 3 | UX-P1-1、UX-P1-4 | ✅ 見本 commit | StoryPlayer 定時選項／進度條命中區 44px |
+| 1 | UX-P0-1 家長閘門 | ✅ `a824dd8` `304e6b9` | 僅擋 `/for-parents/dashboard`；算術題 + session |
+| 2 | UX-P1-5 全站 e2e | ✅ `a824dd8` | `/for-parents`、播放頁、閘門已補 |
+| 3 | UX-P1-1、UX-P1-4 | ✅ `a824dd8` | StoryPlayer 定時選項／進度條命中區 44px |
 | 4 | LIST-2 後續 | API ✅；寄信未做 | 文案對齊「僅收名單、不寄信」；SubscribeForm e2e；ESP 另案 |
 | 5 | P3 生圖佇列 + illustrationStatus 缺口 | 待做 | `data/illustration-queue.json`；approve 更新狀態 |
 | 6 | P3 Playwright E2E CI | 待做 | CI 接入；擴充依賴 UX-P1-5；不動 Apple sync workflow |
@@ -37,7 +37,7 @@
 
 ## 建議 `/agent-action` 順序
 
-1. ~~UX-P0-1／UX-P1-5／UX-P1-1／UX-P1-4~~ ✅ 見本 commit
+1. ~~UX-P0-1／UX-P1-5／UX-P1-1／UX-P1-4~~ ✅ `a824dd8`
 2. LIST-2 文案誠實化 + SubscribeForm e2e
 3. P3 `illustration-queue.json`（對齊現況缺口；不自動生圖）
 4. P3 E2E CI → 監控 → ESLint CI
