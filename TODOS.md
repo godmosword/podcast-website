@@ -58,7 +58,8 @@
 | ID | 說明 |
 |----|------|
 | chore(sync): 上架 ep-27 小紅豆汽車勇敢上學 MVP（本機 resync；字幕待 GHA 補轉錄） | `19fe909` |
-| fix(stories): ep-27 封面補 AVIF／WebP（播放頁 picture 不再 404） | 見本 commit |
+| fix(stories): ep-27 封面補 AVIF／WebP（播放頁 picture 不再 404） | `887a412` |
+| test(geo): live 煙霧對齊 MVP 無字幕（不強制最新集 VTT 200） | 見本 commit |
 
 ### 本輪已完成（2026-08-23）
 

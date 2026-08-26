@@ -2,6 +2,7 @@
 /**
  * 部署後 GEO 煙霧測試：對 live base URL 檢查 robots／sitemap／feed／llms、
  * 重點頁 HTTP 200、JSON-LD 可解析、最新一集 canonical 與 sitemap 涵蓋度。
+ * 最新集逐字稿：有字幕側車才要求 VTT 200／RSS transcript；MVP 無側車則確認未宣告。
  *
  * 不在 npm run check 內；需網路。
  *
@@ -11,6 +12,7 @@
 
 import { allVehicles, getStories, storiesByNewest } from "../data/content";
 import { getSubtitles } from "../lib/subtitles";
+import { hasFullTranscript } from "../lib/transcript";
 import {
   contentTypeMatches,
   extractCanonicalHref,
@@ -21,6 +23,11 @@ import {
 import { validateRobotsTxtPolicy } from "../lib/robots-policy";
 import { CANONICAL_SITE_URL, getSiteUrl } from "../lib/site-url";
 import { storyAudioPath, storyCoverPath } from "../lib/story-utils";
+import {
+  associatedMediaHasVtt,
+  rssHasPodcastTranscript,
+  transcriptLiveMode,
+} from "./lib/geo-live-transcript";
 
 const FETCH_TIMEOUT_MS = 45_000;
 const RETRIEVAL_UA_SAMPLES = ["Claude-SearchBot", "PerplexityBot"] as const;
@@ -228,6 +235,25 @@ async function checkAsset(baseUrl: string, spec: AssetCheck): Promise<string | n
   return res.body;
 }
 
+async function checkMissingTranscript(baseUrl: string, transcriptPath: string): Promise<void> {
+  const url = `${baseUrl}${transcriptPath}`;
+  let res: Awaited<ReturnType<typeof fetchLive>>;
+  try {
+    res = await fetchLive(url);
+  } catch (e) {
+    fail("GET 最新單集 transcript.vtt（無側車）", `${url} 請求失敗：${(e as Error).message}`);
+    return;
+  }
+  if (res.status === 404) {
+    pass("GET 最新單集 transcript.vtt 缺側車為 404", transcriptPath);
+    return;
+  }
+  fail(
+    "GET 最新單集 transcript.vtt 缺側車為 404",
+    `${url} 預期 HTTP 404（本地無字幕），實際 ${res.status}`,
+  );
+}
+
 async function checkHtmlPage(baseUrl: string, path: string, label: string): Promise<string | null> {
   const url = `${baseUrl}${path}`;
   let res: Awaited<ReturnType<typeof fetchLive>>;
@@ -360,34 +386,50 @@ async function main(): Promise<void> {
     contentType: /^(application\/rss\+xml|application\/xml|text\/xml)/i,
   });
 
+  const transcriptUrl = `${baseUrl}${transcriptPath}`;
+  const transcriptMode = transcriptLiveMode(hasFullTranscript(latest));
+
   if (feedBody) {
-    const feedTranscriptPrefix = `<podcast:transcript url="${baseUrl}${transcriptPath}"`;
-    if (feedBody.includes(feedTranscriptPrefix)) {
-      pass("RSS 含最新一集 podcast:transcript", latest.slug);
+    const inRss = rssHasPodcastTranscript(feedBody, transcriptUrl);
+    if (transcriptMode === "require") {
+      if (inRss) {
+        pass("RSS 含最新一集 podcast:transcript", latest.slug);
+      } else {
+        fail("RSS 含最新一集 podcast:transcript", `找不到 ${transcriptPath}`);
+      }
+    } else if (inRss) {
+      fail(
+        "RSS 最新一集無 podcast:transcript",
+        `本地無字幕側車卻宣告 ${transcriptPath}`,
+      );
     } else {
-      fail("RSS 含最新一集 podcast:transcript", `找不到 ${transcriptPath}`);
+      pass("RSS 最新一集無 podcast:transcript", `${latest.slug} MVP 無側車`);
     }
   }
 
-  const transcriptBody = await checkAsset(baseUrl, {
-    label: "GET 最新單集 transcript.vtt",
-    path: transcriptPath,
-    contentType: /^text\/vtt/i,
-  });
+  if (transcriptMode === "require") {
+    const transcriptBody = await checkAsset(baseUrl, {
+      label: "GET 最新單集 transcript.vtt",
+      path: transcriptPath,
+      contentType: /^text\/vtt/i,
+    });
 
-  if (transcriptBody) {
-    if (!transcriptBody.startsWith("WEBVTT")) {
-      fail("最新單集 transcript.vtt 格式", "內容不是 WEBVTT");
-    } else {
-      const firstText = getSubtitles(latest.slug)?.[0]?.text;
-      if (!firstText) {
-        fail("最新單集 transcript.vtt 內容", "本地字幕側車缺少第一句，無法驗證 live cue");
-      } else if (!transcriptBody.includes(firstText)) {
-        fail("最新單集 transcript.vtt 內容", "缺少本地字幕側車的第一句");
+    if (transcriptBody) {
+      if (!transcriptBody.startsWith("WEBVTT")) {
+        fail("最新單集 transcript.vtt 格式", "內容不是 WEBVTT");
       } else {
-        pass("最新單集 transcript.vtt 內容", `${latest.slug} cue 可讀`);
+        const firstText = getSubtitles(latest.slug)?.[0]?.text;
+        if (!firstText) {
+          fail("最新單集 transcript.vtt 內容", "本地字幕側車缺少第一句，無法驗證 live cue");
+        } else if (!transcriptBody.includes(firstText)) {
+          fail("最新單集 transcript.vtt 內容", "缺少本地字幕側車的第一句");
+        } else {
+          pass("最新單集 transcript.vtt 內容", `${latest.slug} cue 可讀`);
+        }
       }
     }
+  } else {
+    await checkMissingTranscript(baseUrl, transcriptPath);
   }
 
   await checkAsset(baseUrl, {
@@ -433,24 +475,28 @@ async function main(): Promise<void> {
       fail("最新單集含 PodcastEpisode", storyPath);
     } else {
       pass("最新單集含 PodcastEpisode");
-      const media = Array.isArray(episode.associatedMedia)
-        ? episode.associatedMedia
-        : episode.associatedMedia
-          ? [episode.associatedMedia]
-          : [];
-      const transcriptMedia = media.find(
-        (item) =>
-          item &&
-          typeof item === "object" &&
-          (item as Record<string, unknown>).encodingFormat === "text/vtt",
-      ) as Record<string, unknown> | undefined;
-      if (transcriptMedia?.contentUrl === `${baseUrl}${transcriptPath}`) {
-        pass("最新單集 JSON-LD transcript MediaObject", latest.slug);
-      } else {
+      const transcriptMediaUrl = `${baseUrl}${transcriptPath}`;
+      const hasMatchingVtt = associatedMediaHasVtt(
+        episode.associatedMedia,
+        transcriptMediaUrl,
+      );
+      const hasAnyVtt = associatedMediaHasVtt(episode.associatedMedia);
+      if (transcriptMode === "require") {
+        if (hasMatchingVtt) {
+          pass("最新單集 JSON-LD transcript MediaObject", latest.slug);
+        } else {
+          fail(
+            "最新單集 JSON-LD transcript MediaObject",
+            `contentUrl 應為 ${transcriptMediaUrl}`,
+          );
+        }
+      } else if (hasAnyVtt) {
         fail(
-          "最新單集 JSON-LD transcript MediaObject",
-          `contentUrl 應為 ${baseUrl}${transcriptPath}`,
+          "最新單集 JSON-LD 無 transcript MediaObject",
+          `本地無字幕側車卻宣告 ${transcriptMediaUrl}`,
         );
+      } else {
+        pass("最新單集 JSON-LD 無 transcript MediaObject", `${latest.slug} MVP 無側車`);
       }
     }
     const faq = types.find((t) => t["@type"] === "FAQPage");
