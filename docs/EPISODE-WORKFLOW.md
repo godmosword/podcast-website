@@ -46,6 +46,9 @@ Metadata 寫入位置：
 # 0. GHA 或本機 sync 後為 MVP（pageCount=1、01.jpg、Whisper **草稿**字幕；
 #    並自動補 story-zones／reflection-prompts／story-dates）
 
+# 0b. 封面現代格式（播放頁 <picture> 先要 AVIF；缺檔會 404、不會退回 JPG）
+npm run optimize:lcp-images
+
 # 1. 字幕校對（**illustrate 前必做**，見 docs/SUBTITLE-PROOFREAD.md）
 npm run proofread:subtitles -- <slug>          # lint
 npm run proofread:subtitles -- <slug> --fix    # 自動修正品牌名

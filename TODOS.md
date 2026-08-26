@@ -57,7 +57,8 @@
 
 | ID | 說明 |
 |----|------|
-| chore(sync): 上架 ep-27 小紅豆汽車勇敢上學 MVP（本機 resync；字幕待 GHA 補轉錄） | 見本 commit |
+| chore(sync): 上架 ep-27 小紅豆汽車勇敢上學 MVP（本機 resync；字幕待 GHA 補轉錄） | `19fe909` |
+| fix(stories): ep-27 封面補 AVIF／WebP（播放頁 picture 不再 404） | 見本 commit |
 
 ### 本輪已完成（2026-08-23）
 
