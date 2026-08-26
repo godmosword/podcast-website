@@ -1,5 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
-import { getSiteUrl } from "./lib/site-url";
+import { CANONICAL_SITE_URL } from "./lib/site-url";
 
 export default defineConfig({
   testDir: "./e2e",
@@ -22,7 +22,8 @@ export default defineConfig({
         ? "npm run start"
         : "npm run build && npm run start",
     env: {
-      NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? getSiteUrl(),
+      NEXT_PUBLIC_SITE_URL:
+        process.env.NEXT_PUBLIC_SITE_URL ?? CANONICAL_SITE_URL,
     },
     url: "http://127.0.0.1:3000",
     // 只有明確指定 production server 才重用；避免把 `next dev` 當成 E2E

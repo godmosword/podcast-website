@@ -41,6 +41,14 @@ describe("P3 Playwright E2E CI 契約", () => {
     expect(script).not.toContain("e2e/visual");
   });
 
+  it("Playwright webServer 預設用正式 canonical，避免本機 bake localhost 讓 smoke 失敗", () => {
+    const config = readFileSync(join(ROOT, "playwright.config.ts"), "utf8");
+    expect(config).toContain("CANONICAL_SITE_URL");
+    expect(config).toContain(
+      "process.env.NEXT_PUBLIC_SITE_URL ?? CANONICAL_SITE_URL",
+    );
+  });
+
   it("Apple sync／watchdog workflow 不得接入 Playwright（紅線）", () => {
     const sync = readWorkflow("sync-apple-podcast.yml");
     const watchdog = readWorkflow("sync-watchdog.yml");
