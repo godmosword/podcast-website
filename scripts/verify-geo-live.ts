@@ -129,6 +129,7 @@ async function fetchLive(
   body: string;
   finalUrl: string;
   headers: Headers;
+  redirected: boolean;
 }> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
@@ -145,6 +146,7 @@ async function fetchLive(
       body,
       finalUrl: res.url,
       headers: res.headers,
+      redirected: res.redirected,
     };
   } finally {
     clearTimeout(timer);
@@ -248,7 +250,7 @@ async function checkMissingTranscript(baseUrl: string, transcriptPath: string): 
     return;
   }
   if (res.status === 404) {
-    if (!isDirectHttp404(url, res.finalUrl, res.status)) {
+    if (!isDirectHttp404(url, res.finalUrl, res.status, res.redirected)) {
       fail(
         "GET 最新單集 transcript.vtt 缺側車為 404",
         `${url} 跟隨 redirect 至 ${res.finalUrl}（須直接 404，不可落到泛用錯誤頁）`,

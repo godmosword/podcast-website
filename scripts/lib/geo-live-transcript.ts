@@ -54,19 +54,21 @@ export function associatedMediaHasVtt(
   });
 }
 
-/** 404 必須落在請求的 origin＋pathname，不可是跟隨 redirect 後的泛用 404 頁。 */
+/** 直接 404：未跟隨 redirect，且最終 URL 的 origin／pathname／search 與請求相同。 */
 export function isDirectHttp404(
   requestedUrl: string,
   finalUrl: string,
   status: number,
+  redirected: boolean,
 ): boolean {
-  if (status !== 404) return false;
+  if (redirected || status !== 404) return false;
   try {
     const requested = new URL(requestedUrl);
     const final = new URL(finalUrl);
     return (
       requested.origin === final.origin &&
-      requested.pathname === final.pathname
+      requested.pathname === final.pathname &&
+      requested.search === final.search
     );
   } catch {
     return false;

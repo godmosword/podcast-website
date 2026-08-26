@@ -104,8 +104,8 @@ describe("isDirectHttp404", () => {
   const requested =
     "https://podcast-website-mu.vercel.app/story/ep-27/transcript.vtt";
 
-  it("同 pathname 的 404 通過", () => {
-    expect(isDirectHttp404(requested, requested, 404)).toBe(true);
+  it("同 URL、未 redirect 的 404 通過", () => {
+    expect(isDirectHttp404(requested, requested, 404, false)).toBe(true);
   });
 
   it("跟隨 redirect 到泛用 404 頁不通過", () => {
@@ -114,11 +114,23 @@ describe("isDirectHttp404", () => {
         requested,
         "https://podcast-website-mu.vercel.app/404",
         404,
+        true,
+      ),
+    ).toBe(false);
+  });
+
+  it("同 pathname 加上 query 的 redirect 不通過", () => {
+    expect(
+      isDirectHttp404(
+        requested,
+        `${requested}?error=404`,
+        404,
+        true,
       ),
     ).toBe(false);
   });
 
   it("200 不通過", () => {
-    expect(isDirectHttp404(requested, requested, 200)).toBe(false);
+    expect(isDirectHttp404(requested, requested, 200, false)).toBe(false);
   });
 });
