@@ -276,6 +276,12 @@ describe("sync workflow contract", () => {
     );
   });
 
+  it("sync／watchdog 與 sync 腳本不得設 VISUAL_FIXTURE（禁止把凍結子集部署出去）", () => {
+    expect(readWorkflow("sync-apple-podcast.yml")).not.toMatch(/VISUAL_FIXTURE/);
+    expect(readWorkflow("sync-watchdog.yml")).not.toMatch(/VISUAL_FIXTURE/);
+    expect(readSyncScript()).not.toMatch(/VISUAL_FIXTURE/);
+  });
+
   it("預設 sync report 路徑必須落在 .cache 且被 gitignore", () => {
     const reportSrc = readFileSync(
       join(ROOT, "scripts/lib/sync-report.ts"),

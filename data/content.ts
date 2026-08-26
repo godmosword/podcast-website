@@ -11,6 +11,7 @@ import { getStoryZoneId } from "./story-zones";
 import { manualStories, type ManualStory } from "./stories";
 import { canonicalStorySlug } from "@/lib/story-slug-aliases";
 import { storyCoverPath } from "@/lib/story-utils";
+import { applyStoryFixture, isVisualFixtureEnabled } from "@/lib/visual-fixture";
 import type { ZoneId } from "./universe-zones";
 
 const DEFAULT_STORY_AGE_RANGE = "約 3–7 歲";
@@ -124,12 +125,13 @@ const storyList: Story[] = sortByEp([
 ]);
 
 export function getStories(): Story[] {
-  return storyList;
+  if (!isVisualFixtureEnabled()) return storyList;
+  return [...applyStoryFixture(storyList)];
 }
 
 export function getStory(slug: string): Story | undefined {
   const canonical = canonicalStorySlug(slug);
-  return storyList.find((story) => story.slug === canonical);
+  return getStories().find((story) => story.slug === canonical);
 }
 
 export function getNextStory(slug: string): Story | undefined {
@@ -145,21 +147,21 @@ export function getStoriesByVehicle(vehicle: string): Story[] {
 }
 
 export function storiesByNewest(): Story[] {
-  return [...storyList].sort((a, b) => b.ep - a.ep);
+  return [...getStories()].sort((a, b) => b.ep - a.ep);
 }
 
 export function allVehicles(): string[] {
-  return Array.from(new Set(storyList.map((s) => s.vehicle)));
+  return Array.from(new Set(getStories().map((s) => s.vehicle)));
 }
 
 export function getVehicleCoverPath(vehicle: string): string | null {
-  const slug = storyList.find((s) => s.vehicle === vehicle)?.slug;
+  const slug = getStories().find((s) => s.vehicle === vehicle)?.slug;
   return slug ? storyCoverPath(slug) : null;
 }
 
 export function allTags(): string[] {
-  return Array.from(new Set(storyList.flatMap((s) => s.tags ?? []))).sort((a, b) =>
-    a.localeCompare(b, "zh-Hant"),
+  return Array.from(new Set(getStories().flatMap((s) => s.tags ?? []))).sort(
+    (a, b) => a.localeCompare(b, "zh-Hant"),
   );
 }
 
@@ -174,7 +176,7 @@ export function getRelated(slug: string, limit = 3): Story[] {
   const canonical = canonicalStorySlug(slug);
   const currentTags = new Set(current.tags ?? []);
 
-  return storyList
+  return getStories()
     .filter((s) => s.slug !== canonical)
     .map((s) => {
       const sharedTags = (s.tags ?? []).filter((t) => currentTags.has(t)).length;

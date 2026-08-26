@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- **視覺回歸凍結資料（VIS-DEBT-2）**：本機 `test:visual:trusted` 以 `VISUAL_FIXTURE=1` 重建 SSG，catalog 釘在 EP1–6 與前 12 景點。Vercel 禁止開啟。mask 歸零、頁面截圖改回 fullPage。
+- **兒童主路徑視覺 baseline（VIS-GAP-1）**：`/story/ep-1`、繪本著色、StoryPlayer 四態（僅 fixture 承認 `?vp=`）。darwin 上重產 snapshots 後才算對齊。
+
 ### Removed
 
 - **角色 Logo 識別系統移除**：元件、驗收頁、產圖 CLI、色票與 35 份 prompt 全數移除；`Character` 不再帶 `logoFamily`／`logoFeature`。程式碼保存於 tag `archive/character-logo-system`。

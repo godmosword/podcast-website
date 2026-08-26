@@ -20,7 +20,7 @@
 
 ## 現役隊列（2026-07-11）
 
-> **加強優先序（2026-07-16）：** 見 [docs/STRENGTHENING-PRIORITY.md](./docs/STRENGTHENING-PRIORITY.md)（對齊本檔 UX-P0-1／UX-P1-5／LIST-2／P3，不另開任務系統）。
+> **加強優先序（2026-07-16）：** 見 [docs/STRENGTHENING-PRIORITY.md](./docs/STRENGTHENING-PRIORITY.md)（對齊本檔 UX／VIS／LIST-2／P3，不另開任務系統）。
 >
 > 單一執行優先序；詳情連結各章。Growth-P1a/b、LIST-2、MAP-UX-P1 已於本日收尾。
 
@@ -489,23 +489,15 @@ Plan 經 Codex 工程審 + Grok 對抗審 + Opus 設計審**三審退回修訂**
 
 Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫寫的 $0.2）、卡片塞 `reflection-prompts`（違反 `DESIGN.md:147`，且已用於 `StoryEndScreen`）、新增 stagger（已存在）、全域紙紋 noise（iOS 合成風險 + 污染宇宙地圖）、重生 filter icon（已存在）、獎項 badge（無素材來源）。
 
-### VIS-DEBT-2　視覺測試跑在活資料上（mask 兩難的上游）　`eng · L · VIS-DEBT-1`　待做
+### VIS-DEBT-2　視覺測試跑在活資料上（mask 兩難的上游）　`eng · L · VIS-DEBT-1`　✅ 見本 commit
 
-只要資料會長，mask 就只能在「盲掉內容」與「每月紅一次」之間二選一，兩邊都輸。
-正解是**釘住資料**：加一個 `VISUAL_FIXTURE=1`（與 `VISUAL_BASELINE_TRUSTED` 同層的本機 env），
-讓 `data/stories.ts`、`data/playgrounds.ts` 在該旗標下回傳**凍結子集**（例如前 6 集、前 12 個景點）。
+`VISUAL_FIXTURE=1`（及 client 用的 `NEXT_PUBLIC_VISUAL_FIXTURE=1`）讓 `getStories()`／`listPlaygrounds()`／`getCharacters()` 回傳凍結子集（EP1–6、前 12 景點且必含 `ty-kids-museum`、登場集裁到 EP1–6）。不改 Protected 的 `data/stories.ts` 陣列。
 
-好處：所有 mask 可以歸零 → 拿回 CTA `--gloss`、`.marker`、結果數、coverage footnote 的完整覆蓋；
-`fullPage: true` 重新可用且圖不會失控長高；characters 的 62 顆 chip 也自動解決。
-每月出新集不再動 baseline，重產只發生在**真的改了樣式**時——那正是你要它紅的時機。
+`npm run test:visual:trusted` 以 fixture 重建 SSG；`html[data-visual-fixture=1]` 防呆。Vercel 上若誤設旗標會 throw。`generate:audio-lengths` 在 fixture 下略過寫檔，避免把 tracked 全集表寫成子集。mask 歸零、頁面截圖改回 `fullPage`。**darwin 上 `--update-snapshots` 並逐張目檢**後才算 baseline 對齊；Linux agent 不重產 PNG。
 
-⚠️ `data/stories.ts` 在 AGENT-DOMAIN Protected paths 內，改動必跑 `verify:episodes`，且只能 Leader／Opus 處理。
+### VIS-GAP-1　兒童主路徑至今無視覺 baseline　`eng · M · 無`　✅ 見本 commit
 
-### VIS-GAP-1　兒童主路徑至今無視覺 baseline　`eng · M · 無`　待做
-
-`/story/[slug]` 單集頁與 `StoryPlayer`（DESIGN.md §播放器狀態 四態）、`/games/coloring-book`
-到現在都沒有任何視覺 baseline。這是既存債，但 2026-08-24 那輪花預算加的兩頁
-（`play-map`、`place`）都是**家長向**——優先序倒置，該補回兒童動線。
+`/story/ep-1`、`/games/coloring-book` 納入頁面矩陣；StoryPlayer DESIGN.md 四態（字幕跟讀／手動翻頁／播放完成／載入中）以 `?vp=` 釘住，僅 fixture build 承認。播放器截 390 × light/night。
 
 ### VIS-DEBT-1　視覺 baseline 全面失效　`eng · M · 無`　✅ 已結案（見本 commit）
 

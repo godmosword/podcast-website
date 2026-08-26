@@ -1,3 +1,5 @@
+import { applyPlaygroundFixture } from "@/lib/visual-fixture";
+
 /**
  * 真實世界親子遊樂地點（sidecar）。
  * 供 /for-parents/play-map 地圖篩選與標記使用；與虛構宇宙地圖無關。
@@ -3195,11 +3197,11 @@ const PLAYGROUNDS: readonly Playground[] = [
 ];
 
 export function getPlayground(id: string): Playground | undefined {
-  return PLAYGROUNDS.find((item) => item.id === id);
+  return listPlaygrounds().find((item) => item.id === id);
 }
 
 export function listPlaygrounds(): readonly Playground[] {
-  return PLAYGROUNDS;
+  return applyPlaygroundFixture(PLAYGROUNDS);
 }
 
 /**
@@ -3233,7 +3235,7 @@ export const CITY_DISPLAY_ORDER: readonly string[] = [
 ];
 
 export function listCities(): string[] {
-  return [...new Set(PLAYGROUNDS.map((item) => item.city))].sort((a, b) => {
+  return [...new Set(listPlaygrounds().map((item) => item.city))].sort((a, b) => {
     const ai = CITY_DISPLAY_ORDER.indexOf(a);
     const bi = CITY_DISPLAY_ORDER.indexOf(b);
     if (ai !== -1 && bi !== -1) return ai - bi;

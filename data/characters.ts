@@ -1,4 +1,5 @@
 import { canonicalStorySlug } from "@/lib/story-slug-aliases";
+import { applyCharacterFixture } from "@/lib/visual-fixture";
 import rawCharacters from "./characters.json";
 /** 角色一級資料（canonical 來源：data/characters.json）。 */
 export type Character = {
@@ -190,12 +191,12 @@ const CHARACTER_NAME_BY_ID = new Map(
 );
 
 export function getCharacters(): Character[] {
-  return CHARACTERS;
+  return applyCharacterFixture(CHARACTERS) as Character[];
 }
 
 export function getCharactersForStory(slug: string): Character[] {
   const canonical = canonicalStorySlug(slug);
-  return CHARACTERS.filter((c) => c.appearsIn.includes(canonical));
+  return getCharacters().filter((c) => c.appearsIn.includes(canonical));
 }
 
 export function getCharacterName(id: string): string | null {

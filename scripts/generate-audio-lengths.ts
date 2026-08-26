@@ -13,6 +13,7 @@ import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { getStories } from "../data/content";
 import { storyAudioPath } from "../lib/story-utils";
+import { isVisualFixtureEnabled } from "../lib/visual-fixture";
 
 const OUT_PATH = resolve(process.cwd(), "data/audio-lengths.json");
 
@@ -51,6 +52,11 @@ export function writeAudioLengthsJson(
 }
 
 function main(): void {
+  // 視覺 fixture build 不得改寫 tracked 的全集 audio-lengths。
+  if (isVisualFixtureEnabled()) {
+    console.log("generate-audio-lengths: skipped（VISUAL_FIXTURE 開啟，避免寫入子集）");
+    return;
+  }
   const lengths = buildAudioLengthBySlug();
   writeAudioLengthsJson(lengths);
   console.log(

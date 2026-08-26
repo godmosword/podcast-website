@@ -44,6 +44,8 @@ export async function stabilizeVisualPage(
   // reload 讓 ThemeProvider 在 mount 前讀到固定主題，避免當地 bedtime 污染截圖。
   await page.reload();
 
+  await assertVisualFixtureActive(page);
+
   await page.addStyleTag({
     content: `
       *, *::before, *::after {
@@ -86,4 +88,18 @@ export async function stabilizeVisualPage(
       el.removeAttribute("data-bedtime");
     }
   }, theme);
+}
+
+/**
+ * VIS-DEBT-2：截圖必須打在凍結資料的 SSG 產物上。
+ * 重用沒帶 VISUAL_FIXTURE 建置的 server 會讓 baseline 又跟活資料綁死。
+ */
+export async function assertVisualFixtureActive(page: Page): Promise<void> {
+  const flag = await page.locator("html").getAttribute("data-visual-fixture");
+  if (flag !== "1") {
+    throw new Error(
+      "視覺測試必須對 VISUAL_FIXTURE=1 的 production build 截圖。" +
+        "請用 npm run test:visual:trusted，且不要 PW_REUSE_SERVER 重用沒有 fixture 的 server。",
+    );
+  }
 }

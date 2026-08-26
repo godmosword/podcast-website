@@ -23,6 +23,13 @@ export default defineConfig({
         : "npm run build && npm run start",
     env: {
       NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? getSiteUrl(),
+      ...(process.env.VISUAL_FIXTURE === "1" ||
+      process.env.NEXT_PUBLIC_VISUAL_FIXTURE === "1"
+        ? {
+            VISUAL_FIXTURE: "1",
+            NEXT_PUBLIC_VISUAL_FIXTURE: "1",
+          }
+        : {}),
     },
     url: "http://127.0.0.1:3000",
     // 只有明確指定 production server 才重用；避免把 `next dev` 當成 E2E

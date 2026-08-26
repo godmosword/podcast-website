@@ -10,6 +10,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { siteIdentityJsonLd } from "@/lib/json-ld";
 import { getSiteUrl } from "@/lib/site-url";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
+import { isVisualFixtureEnabled } from "@/lib/visual-fixture";
 import "./globals.css";
 
 // 童趣圓潤字型，避免使用 Inter/Arial 等通用字型。
@@ -102,6 +103,7 @@ export default function RootLayout({
       lang="zh-Hant"
       suppressHydrationWarning
       className={`${baloo.variable} ${huninn.variable} ${gochi.variable}`}
+      {...(isVisualFixtureEnabled() ? { "data-visual-fixture": "1" } : {})}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />

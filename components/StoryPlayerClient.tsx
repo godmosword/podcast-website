@@ -4,6 +4,10 @@ import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import type { StoryPlayerProps } from "./StoryPlayer";
+import {
+  visualPlayerStateFromSearch,
+  type VisualPlayerState,
+} from "@/lib/visual-fixture";
 import styles from "./StoryPlayer.module.css";
 
 // 播放器是全站最大的互動元件，且只用於 noindex 的播放頁。
@@ -27,6 +31,11 @@ export default function StoryPlayerClient(props: StoryPlayerProps) {
   const [adoptLandingPlayback, setAdoptLandingPlayback] = useState<
     boolean | null
   >(props.adoptLandingPlayback ?? null);
+  const fixtureOn = process.env.NEXT_PUBLIC_VISUAL_FIXTURE === "1";
+  const [visualState, setVisualState] = useState<VisualPlayerState | undefined>(
+    props.visualState,
+  );
+  const [visualReady, setVisualReady] = useState(!fixtureOn);
 
   // Next can prefetch this client component while the browser is still on the
   // landing page. Resolve the query after navigation, and rerun when the
@@ -44,7 +53,15 @@ export default function StoryPlayerClient(props: StoryPlayerProps) {
     );
   }, [pathname, props.adoptLandingPlayback]);
 
-  if (adoptLandingPlayback === null) {
+  useEffect(() => {
+    if (!fixtureOn) return;
+    setVisualState(
+      props.visualState ?? visualPlayerStateFromSearch(window.location.search),
+    );
+    setVisualReady(true);
+  }, [fixtureOn, pathname, props.visualState]);
+
+  if (adoptLandingPlayback === null || !visualReady) {
     return (
       <div
         className={styles.player}
@@ -57,5 +74,11 @@ export default function StoryPlayerClient(props: StoryPlayerProps) {
     );
   }
 
-  return <StoryPlayer {...props} adoptLandingPlayback={adoptLandingPlayback} />;
+  return (
+    <StoryPlayer
+      {...props}
+      adoptLandingPlayback={adoptLandingPlayback}
+      visualState={visualState}
+    />
+  );
 }

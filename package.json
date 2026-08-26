@@ -14,7 +14,7 @@
     "test:e2e": "playwright test",
     "test:e2e:public": "playwright test e2e/public-smoke.spec.ts e2e/public-a11y.spec.ts",
     "test:visual": "playwright test e2e/visual.spec.ts",
-    "test:visual:trusted": "VISUAL_BASELINE_TRUSTED=1 playwright test e2e/visual.spec.ts",
+    "test:visual:trusted": "VISUAL_BASELINE_TRUSTED=1 VISUAL_FIXTURE=1 NEXT_PUBLIC_VISUAL_FIXTURE=1 playwright test e2e/visual.spec.ts",
     "font:subset": "python3 scripts/subset_font.py",
     "sync:apple": "tsx scripts/sync-apple-podcast.ts",
     "sync:notify": "tsx scripts/sync-alert.ts notify-live",

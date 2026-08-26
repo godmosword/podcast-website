@@ -32,6 +32,7 @@ import {
   resolveCaptionStackState,
 } from "@/lib/subtitle-cue";
 import { shouldRunKenBurns } from "@/lib/player-stage";
+import type { VisualPlayerState } from "@/lib/visual-fixture";
 
 // 結尾才出現的反思卡 / 僅 ?cue=1 的對時面板：動態載入，縮小播放器主 chunk。
 const ReflectionPrompt = dynamic(
@@ -72,6 +73,11 @@ export type StoryPlayerProps = {
   };
   /** Landing CTA 已在同一次 click gesture 啟播；播放器掛載後接管該音訊。 */
   adoptLandingPlayback?: boolean;
+  /**
+   * 僅視覺 fixture build 由 `?vp=` 傳入，用來釘住 DESIGN.md 四態。
+   * 正式站不會傳這個 prop。
+   */
+  visualState?: VisualPlayerState;
 };
 
 const SWIPE_THRESHOLD = 50;
@@ -115,14 +121,15 @@ export default function StoryPlayer({
   nextStoryTitle,
   reflectionPrompt,
   adoptLandingPlayback = false,
+  visualState,
 }: StoryPlayerProps) {
   const [page, setPage] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [mediaError, setMediaError] = useState<"audio" | "image" | null>(null);
   const [playBlocked, setPlayBlocked] = useState(false);
-  const [subtitlesOn, setSubtitlesOn] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasEnded, setHasEnded] = useState(false);
+  const [subtitlesOn, setSubtitlesOn] = useState(visualState !== "manual-page");
+  const [isLoading, setIsLoading] = useState(visualState !== "ended");
+  const [hasEnded, setHasEnded] = useState(visualState === "ended");
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -154,6 +161,8 @@ export default function StoryPlayer({
   const timerWrapRef = useRef<HTMLDivElement>(null);
   const completionRecorded = useRef(false);
   const playStartRecorded = useRef(false);
+  const visualStateRef = useRef(visualState);
+  visualStateRef.current = visualState;
 
   const recordPlayStart = useCallback(
     (source: "story_page" | "landing") => {
@@ -378,6 +387,7 @@ export default function StoryPlayer({
   }, [audio, images]);
 
   useEffect(() => {
+    if (visualState) return;
     const saved = loadContinue();
     if (saved?.slug === slug && saved.page < total) {
       setPage(saved.page);
@@ -386,7 +396,7 @@ export default function StoryPlayer({
         el.currentTime = saved.time;
       }
     }
-  }, [slug, total]);
+  }, [slug, total, visualState]);
 
   useEffect(() => {
     if (!isPlaying && !hasEnded) return;
@@ -643,6 +653,7 @@ export default function StoryPlayer({
       style={{ ["--ambient" as string]: color }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
+      {...(visualState ? { "data-visual-player-state": visualState } : {})}
     >
       <audio
         ref={setNativeAudioRef}
@@ -689,7 +700,10 @@ export default function StoryPlayer({
                   loading={i === page ? "eager" : "lazy"}
                   fetchPriority={i === page ? "high" : "low"}
                   decoding="async"
-                  onLoad={() => i === page && setIsLoading(false)}
+                  onLoad={() => {
+                    if (visualStateRef.current === "loading") return;
+                    if (i === page) setIsLoading(false);
+                  }}
                   onError={() => setMediaError("image")}
                 />
               </picture>

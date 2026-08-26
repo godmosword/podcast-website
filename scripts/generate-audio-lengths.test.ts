@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { existsSync, statSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { getStories } from "../data/content";
 import { storyAudioPath } from "../lib/story-utils";
@@ -35,5 +35,14 @@ describe("buildAudioLengthBySlug", () => {
       },
     ]);
     expect(lengths).toEqual({});
+  });
+
+  it("VISUAL_FIXTURE 開啟時略過寫檔（防 prebuild 把全集表寫成子集）", () => {
+    const src = readFileSync(
+      join(import.meta.dirname, "generate-audio-lengths.ts"),
+      "utf8",
+    );
+    expect(src).toContain("isVisualFixtureEnabled()");
+    expect(src).toMatch(/skipped（VISUAL_FIXTURE/);
   });
 });

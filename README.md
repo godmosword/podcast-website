@@ -79,7 +79,7 @@ npm run dev
 | `npm test` | Vitest 單元測試 |
 | `npm run test:e2e` | Playwright E2E（自動 build／啟動 production server；不要先用 `next dev` 佔用 3000） |
 | `npm run test:visual` | D2 視覺回歸（**預設 skip**；本機 pre-push 工具，刻意不進 CI。見 `test:visual:trusted`） |
-| `npm run test:visual:trusted` | 設 `VISUAL_BASELINE_TRUSTED=1` 後跑 visual spec。基準已於 **2026-08-24 全面重產**（59 張，含新增的 `play-map`／`place`）。重產再加 `-- --update-snapshots`，並**逐張人工目檢**後才提交 |
+| `npm run test:visual:trusted` | 設 `VISUAL_BASELINE_TRUSTED=1` + `VISUAL_FIXTURE=1` 後重建 SSG 再跑 visual spec（凍結 EP1–6／12 景點）。重產須在 **darwin** 加 `-- --update-snapshots`，並**逐張人工目檢**後才提交。Linux／CI 不要重產 PNG |
 | `npm run check` | 品質閘門：test + verify:episodes + verify:zone-art + verify:map-art + build |
 | `npm run font:subset` | 重新子集化中文字型（新增文案後） |
 
