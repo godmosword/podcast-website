@@ -27,6 +27,7 @@
 - /adventures：車車宇宙樂園地圖，含故事與遊戲入口；互動地圖另有純文字 fallback。
 - /games：親子小遊戲入口。
 - /legal：使用條款、版權、隱私與第三方服務說明。
+- /subscribe：家長 Email 新集通知名單（目前只收名單，不寄新集上線信）。
 - /feed.xml：Podcast RSS feed。
 - /sitemap.xml：搜尋引擎 sitemap。
 - /robots.txt：搜尋引擎與 AI crawler 存取規則。

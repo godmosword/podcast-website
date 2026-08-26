@@ -17,7 +17,7 @@
 | 1 | UX-P0-1 家長閘門 | 待做（待決策） | 先擋 `/for-parents/dashboard`；算術題 + session |
 | 2 | UX-P1-5 全站 e2e | 部分完成 | 補 `/for-parents`、播放頁（地圖／a11y 已 ✅） |
 | 3 | UX-P1-1、UX-P1-4 | 部分／待做 | StoryPlayer 定時、Landing 箭頭、進度條拇指（只改 CSS） |
-| 4 | LIST-2 後續 | API ✅；寄信未做 | 文案對齊「僅收名單、不寄信」；SubscribeForm e2e；ESP 另案 |
+| 4 | LIST-2 後續 | ✅ 見本 commit | 文案對齊「只收名單、不寄新集上線信」；SubscribeForm e2e；ESP 另案 |
 | 5 | P3 生圖佇列 + illustrationStatus 缺口 | 待做 | `data/illustration-queue.json`；approve 更新狀態 |
 | 6 | P3 Playwright E2E CI | 待做 | CI 接入；擴充依賴 UX-P1-5；不動 Apple sync workflow |
 | 7 | P3 錯誤／上線監控、ESLint CI | 待做 | 輕量 client error + uptime；eslint 非互動 CI |
@@ -39,7 +39,7 @@
 
 1. UX-P0-1（決策後）∥ 持續補 UX-P1-5
 2. UX-P1-1／UX-P1-4
-3. LIST-2 文案誠實化 + SubscribeForm e2e
+3. ~~LIST-2 文案誠實化 + SubscribeForm e2e~~ ✅ 見本 commit（ESP／新集上線信另案）
 4. P3 `illustration-queue.json`（對齊現況缺口；不自動生圖）
 5. P3 E2E CI → 監控 → ESLint CI
 

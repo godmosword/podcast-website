@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { LEGAL_POLICY_VERSION } from "@/lib/legal-policy";
 import { GET, POST } from "./route";
 
 vi.mock("@/lib/subscribe-db", () => ({
@@ -85,7 +86,7 @@ describe("/api/subscribe", () => {
       source: "subscribe_page",
       tokenHash: "token-hash",
       expiresAt: expect.any(Date),
-      consentVersion: "2026-07-22",
+      consentVersion: LEGAL_POLICY_VERSION,
       consentedAt: expect.any(Date),
     });
     expect(sendSubscribeConfirmation).toHaveBeenCalledWith({

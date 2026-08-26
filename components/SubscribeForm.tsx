@@ -3,6 +3,22 @@
 import Link from "next/link";
 import { useEffect, useId, useState, type FormEvent } from "react";
 import { trackSubscribeSubmit } from "@/lib/analytics";
+import {
+  SUBSCRIBE_CONSENT_AFTER_PRIVACY,
+  SUBSCRIBE_CONSENT_BEFORE_PRIVACY,
+  SUBSCRIBE_EMAIL_LABEL,
+  SUBSCRIBE_EMAIL_PLACEHOLDER,
+  SUBSCRIBE_ERROR,
+  SUBSCRIBE_LOADING_LABEL,
+  SUBSCRIBE_PRIVACY_LINK_LABEL,
+  SUBSCRIBE_PRIVACY_NOTE,
+  SUBSCRIBE_SUBMIT_LABEL,
+  SUBSCRIBE_SUBMITTING_LABEL,
+  SUBSCRIBE_SUCCESS,
+  SUBSCRIBE_UNAVAILABLE_LINK,
+  SUBSCRIBE_UNAVAILABLE_PREFIX,
+  SUBSCRIBE_UNAVAILABLE_SUFFIX,
+} from "@/lib/subscribe-copy";
 import styles from "./SubscribeForm.module.css";
 
 type FormState = "loading" | "form" | "success" | "error" | "unavailable";
@@ -78,7 +94,7 @@ export default function SubscribeForm({ source = "subscribe_page" }: Props) {
   if (state === "loading") {
     return (
       <p className={styles.hint} role="status">
-        正在準備訂閱表單…
+        {SUBSCRIBE_LOADING_LABEL}
       </p>
     );
   }
@@ -86,8 +102,9 @@ export default function SubscribeForm({ source = "subscribe_page" }: Props) {
   if (state === "unavailable") {
     return (
       <p className={styles.unavailable}>
-        訂閱名單暫時無法線上登記，請改從頁尾的{" "}
-        <Link href="/#connect">收聽平台</Link> 訂閱節目。
+        {SUBSCRIBE_UNAVAILABLE_PREFIX}{" "}
+        <Link href="/#connect">{SUBSCRIBE_UNAVAILABLE_LINK}</Link>{" "}
+        {SUBSCRIBE_UNAVAILABLE_SUFFIX}
       </p>
     );
   }
@@ -95,7 +112,7 @@ export default function SubscribeForm({ source = "subscribe_page" }: Props) {
   if (state === "success") {
     return (
       <p className={styles.success} role="status">
-        確認信已寄出，請到信箱點擊連結；完成確認後才會收到新集通知。
+        {SUBSCRIBE_SUCCESS}
       </p>
     );
   }
@@ -103,7 +120,7 @@ export default function SubscribeForm({ source = "subscribe_page" }: Props) {
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
       <label className={styles.label} htmlFor={emailId}>
-        Email
+        {SUBSCRIBE_EMAIL_LABEL}
       </label>
       <input
         id={emailId}
@@ -111,7 +128,7 @@ export default function SubscribeForm({ source = "subscribe_page" }: Props) {
         type="email"
         inputMode="email"
         autoComplete="email"
-        placeholder="家長的 Email"
+        placeholder={SUBSCRIBE_EMAIL_PLACEHOLDER}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         disabled={submitting}
@@ -129,11 +146,11 @@ export default function SubscribeForm({ source = "subscribe_page" }: Props) {
           required
         />
         <span>
-          我是家長／照顧者，已閱讀並同意
+          {SUBSCRIBE_CONSENT_BEFORE_PRIVACY}
           <Link href="/legal#privacy" aria-label="閱讀隱私說明">
-            隱私說明
+            {SUBSCRIBE_PRIVACY_LINK_LABEL}
           </Link>
-          ，同意留下 Email 以接收新集通知
+          {SUBSCRIBE_CONSENT_AFTER_PRIVACY}
         </span>
       </label>
 
@@ -143,20 +160,20 @@ export default function SubscribeForm({ source = "subscribe_page" }: Props) {
         disabled={submitting || !parentConsent}
         aria-busy={submitting || undefined}
       >
-        {submitting ? "送出中…" : "訂閱新集通知"}
+        {submitting ? SUBSCRIBE_SUBMITTING_LABEL : SUBSCRIBE_SUBMIT_LABEL}
       </button>
 
       <p className={styles.privacyNote}>
-        僅用於新集數通知，不會公開或轉售。詳見{" "}
+        {SUBSCRIBE_PRIVACY_NOTE} 詳見{" "}
         <Link className={styles.privacyLink} href="/legal#privacy">
-          隱私說明
+          {SUBSCRIBE_PRIVACY_LINK_LABEL}
         </Link>
         。
       </p>
 
       {state === "error" ? (
         <p className={styles.error} role="alert">
-          送出失敗，請再試一次。
+          {SUBSCRIBE_ERROR}
         </p>
       ) : null}
     </form>

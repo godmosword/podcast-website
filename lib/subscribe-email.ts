@@ -1,4 +1,5 @@
 import { getSiteUrl } from "@/lib/site-url";
+import { SUBSCRIBE_CONFIRM_EMAIL_SUBJECT } from "@/lib/subscribe-copy";
 
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
 
@@ -9,7 +10,7 @@ export function isSubscribeEmailConfigured(): boolean {
 }
 
 /**
- * 寄送新集通知確認信。provider 只負責寄信，會員登入／付款驗證另列 STEM-P4。
+ * 寄送名單確認信（驗證信箱）。不是新集上線通知；ESP 另案。
  */
 export async function sendSubscribeConfirmation(input: {
   email: string;
@@ -31,9 +32,9 @@ export async function sendSubscribeConfirmation(input: {
     body: JSON.stringify({
       from,
       to: [input.email],
-      subject: "請確認訂閱《車車遊樂園》新集通知",
-      text: `請點擊以下連結確認訂閱：${confirmUrl.toString()}\n\n若不是你申請的，可忽略這封信。`,
-      html: `<p>請點擊以下連結確認訂閱《車車遊樂園》新集通知：</p><p><a href="${confirmUrl.toString()}">確認訂閱</a></p><p>若不是你申請的，可忽略這封信。</p>`,
+      subject: SUBSCRIBE_CONFIRM_EMAIL_SUBJECT,
+      text: `請點擊以下連結完成信箱確認（目前只收名單，不寄新集上線信）：${confirmUrl.toString()}\n\n若不是你申請的，可忽略這封信。`,
+      html: `<p>請點擊以下連結完成信箱確認。目前只收名單，不寄新集上線信：</p><p><a href="${confirmUrl.toString()}">確認加入名單</a></p><p>若不是你申請的，可忽略這封信。</p>`,
     }),
   });
 

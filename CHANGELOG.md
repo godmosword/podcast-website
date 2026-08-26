@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **LIST-2 訂閱文案誠實化**：`/subscribe` 改為「加入新集通知名單」——目前只收名單、不寄新集上線信或電子報；確認信只用來驗證信箱。`/legal`、`DISCLAIMER.md` 同步，政策版本 `2026-08-26`。ESP／新集上線信另案。
+
 ### Removed
 
 - **角色 Logo 識別系統移除**：元件、驗收頁、產圖 CLI、色票與 35 份 prompt 全數移除；`Character` 不再帶 `logoFamily`／`logoFeature`。程式碼保存於 tag `archive/character-logo-system`。

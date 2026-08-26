@@ -31,7 +31,7 @@ Bonbon & 馬米親子 Podcast《車車遊樂園》的官方 **看圖聽故事** 
 | 故事詳情 | `/story/[slug]` | SEO 落地頁、分享、收藏、訂閱收聽 CTA、ShowNotes、親子延伸、完播反思、地圖島徽章 |
 | 播放器 | `/story/[slug]/play` | 全螢幕翻頁、逐字字幕、進度條、字幕字級；插圖 AVIF → WebP → JPG；音訊 `preload="none"`（Range 隨播） |
 | 逐字稿 | `/story/[slug]/transcript.vtt` | 完整音檔逐字稿 WebVTT（來自 `data/subtitles/`，非翻頁場景字幕；無障礙／GEO） |
-| 新集通知 | `/subscribe` | Email 訂閱表單（Neon；未設 DB 時引導至收聽平台） |
+| 新集通知名單 | `/subscribe` | 家長 Email 登記（目前只收名單、不寄新集上線信；未設 DB／寄信時引導至收聽平台） |
 | 主題 | `/topic`、`/topic/[tag]` | 主題索引與分類頁（SSG + FAQ schema） |
 | 車種 | `/vehicles/[vehicle]` | 車種分類頁（SSG + GEO FAQ） |
 | 宇宙地圖 | `/adventures` | 五島滿版海洋、pan/zoom/fly-to（點島飛抵島心、再點同島回全景）、島上探索點 `/adventures/[zone]/[hotspot]`、漫遊 NPC、`?zone=` deep link |
@@ -145,7 +145,7 @@ NEXT_PUBLIC_SITE_URL=https://你的網域
 | `NEXT_PUBLIC_SITE_URL` | 站點 canonical URL（**必填於 production**） |
 | `NEXT_PUBLIC_AUDIO_BASE_URL` | 可選的公開音檔 CDN／物件儲存 origin；未設定時 fallback 至 `/stories/`。外部 origin 須支援音檔 Range request；跨網域播放請允許本站來源（會員私有音檔不在本輪） |
 | `DATABASE_URL` | 樂園許願 + email 訂閱 API（Neon）；未設則表單降級（許願→mailto、訂閱→`#connect`） |
-| `RESEND_API_KEY` / `SUBSCRIBE_FROM_EMAIL` | 新集通知 double opt-in 寄信；任一未設時訂閱 API 安全降級為不可用 |
+| `RESEND_API_KEY` / `SUBSCRIBE_FROM_EMAIL` | 名單確認信（只用來驗證信箱；目前不寄新集上線信）；任一未設時訂閱 API 安全降級為不可用 |
 | `OPENAI_API_KEY` | 僅本機 `illustrate`／地圖資產生成；**CI 不放** |
 | `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN` | 可選錯誤上報。瀏覽器走 `@sentry/browser`（無 BrowserTracing）；未設則不上報 |
 | `SYNC_ISSUE_*` | GHA 同步後 GitHub Issue 通知（見 `.env.example`） |

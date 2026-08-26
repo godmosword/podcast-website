@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { LEGAL_POLICY_VERSION } from "@/lib/legal-policy";
 import { GET, POST } from "./route";
 
 vi.mock("@/lib/zone-wish-db", () => ({
@@ -66,7 +67,7 @@ describe("/api/zone-wish", () => {
       message: null,
       email: "a@b.co",
       nickname: "星星",
-      consentVersion: "2026-07-22",
+      consentVersion: LEGAL_POLICY_VERSION,
       consentedAt: expect.any(Date),
     });
   });
@@ -99,7 +100,7 @@ describe("/api/zone-wish", () => {
       message: "垃圾車半夜去哪裡？",
       email: null,
       nickname: null,
-      consentVersion: "2026-07-22",
+      consentVersion: LEGAL_POLICY_VERSION,
       consentedAt: expect.any(Date),
     });
   });
