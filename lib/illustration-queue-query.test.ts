@@ -22,7 +22,9 @@ describe("pendingIllustrationsForStudio", () => {
     expect(ep25?.subtitleReady).toBe(true);
     expect(ep25?.title).toContain("雪山隧道");
     const ep26 = pending.find((item) => item.slug === "ep-26");
-    expect(ep26?.subtitleReady).toBe(false);
+    expect(ep26?.subtitleReady).toBe(true);
     expect(ep26?.title).toContain("零食派對");
+    const ep27 = pending.find((item) => item.slug === "ep-27");
+    expect(ep27?.subtitleReady).toBe(false);
   });
 });
