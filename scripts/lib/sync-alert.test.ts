@@ -1,4 +1,6 @@
 import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { buildIssueBody } from "../post-sync-notify";
 import {
@@ -108,6 +110,24 @@ describe("sync-alert notify-live", () => {
 
     notifyLiveFromReport(sampleReport, deps);
     expect(persisted).toEqual([{ slugs: ["ep-18"] }]);
+  });
+
+  it("vitest 程序即使 deps.env 為空也不寫倉儲 JSON", () => {
+    const queuePath = join(process.cwd(), "data/illustration-queue.json");
+    const before = readFileSync(queuePath, "utf8");
+    const { deps } = makeDeps({
+      "issue list --search in:title ep-18 待生圖 --state open --json number,title,url,labels --limit 20":
+        JSON.stringify([
+          {
+            number: 40,
+            title: "[illustrate] 新集待生圖：ep-18",
+            url: "https://github.com/example/repo/issues/40",
+            labels: [{ name: "illustration" }],
+          },
+        ]),
+    });
+    notifyLiveFromReport(sampleReport, deps);
+    expect(readFileSync(queuePath, "utf8")).toBe(before);
   });
 
   it("labels an existing unlabeled illustration issue instead of creating a duplicate", () => {

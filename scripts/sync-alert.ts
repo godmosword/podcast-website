@@ -31,6 +31,7 @@ import {
 } from "./lib/sync-report";
 import { buildIssueBody } from "./post-sync-notify";
 import {
+  canWriteIllustrationQueue,
   enqueueFromSyncReport,
   shouldPersistIllustrationQueue,
 } from "./lib/illustration-queue-store";
@@ -529,6 +530,8 @@ function persistIllustrationQueueAfterNotify(
     deps.persistIllustrationQueue(report, slugs);
     return;
   }
+  // deps.env 可能是測試空物件；vitest／GHA 程序本身仍不得寫倉儲。
+  if (!canWriteIllustrationQueue(process.env)) return;
   if (!shouldPersistIllustrationQueue(env)) return;
   try {
     enqueueFromSyncReport(report, slugs);
