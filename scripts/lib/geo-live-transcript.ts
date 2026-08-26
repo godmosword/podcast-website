@@ -10,11 +10,25 @@ export function transcriptLiveMode(hasSidecar: boolean): TranscriptLiveMode {
   return hasSidecar ? "require" : "forbid";
 }
 
+/** 取 RSS 第一個 `<item>`（本站 feed 依最新集排序）。 */
+export function firstRssItemXml(feedXml: string): string | null {
+  const start = feedXml.indexOf("<item>");
+  if (start < 0) return null;
+  const end = feedXml.indexOf("</item>", start);
+  if (end < 0) return null;
+  return feedXml.slice(start, end + "</item>".length);
+}
+
 export function rssHasPodcastTranscript(
-  feedXml: string,
+  xml: string,
   transcriptUrl: string,
 ): boolean {
-  return feedXml.includes(`<podcast:transcript url="${transcriptUrl}"`);
+  return xml.includes(`<podcast:transcript url="${transcriptUrl}"`);
+}
+
+/** 該 RSS 片段是否宣告任何 podcast:transcript（不限 URL）。 */
+export function rssItemDeclaresPodcastTranscript(itemXml: string): boolean {
+  return /<podcast:transcript[\s/>]/.test(itemXml);
 }
 
 export function associatedMediaHasVtt(
@@ -38,4 +52,23 @@ export function associatedMediaHasVtt(
     }
     return true;
   });
+}
+
+/** 404 必須落在請求的 origin＋pathname，不可是跟隨 redirect 後的泛用 404 頁。 */
+export function isDirectHttp404(
+  requestedUrl: string,
+  finalUrl: string,
+  status: number,
+): boolean {
+  if (status !== 404) return false;
+  try {
+    const requested = new URL(requestedUrl);
+    const final = new URL(finalUrl);
+    return (
+      requested.origin === final.origin &&
+      requested.pathname === final.pathname
+    );
+  } catch {
+    return false;
+  }
 }

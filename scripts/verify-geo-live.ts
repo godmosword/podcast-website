@@ -25,7 +25,10 @@ import { CANONICAL_SITE_URL, getSiteUrl } from "../lib/site-url";
 import { storyAudioPath, storyCoverPath } from "../lib/story-utils";
 import {
   associatedMediaHasVtt,
+  firstRssItemXml,
+  isDirectHttp404,
   rssHasPodcastTranscript,
+  rssItemDeclaresPodcastTranscript,
   transcriptLiveMode,
 } from "./lib/geo-live-transcript";
 
@@ -245,6 +248,13 @@ async function checkMissingTranscript(baseUrl: string, transcriptPath: string): 
     return;
   }
   if (res.status === 404) {
+    if (!isDirectHttp404(url, res.finalUrl, res.status)) {
+      fail(
+        "GET 最新單集 transcript.vtt 缺側車為 404",
+        `${url} 跟隨 redirect 至 ${res.finalUrl}（須直接 404，不可落到泛用錯誤頁）`,
+      );
+      return;
+    }
     pass("GET 最新單集 transcript.vtt 缺側車為 404", transcriptPath);
     return;
   }
@@ -390,17 +400,19 @@ async function main(): Promise<void> {
   const transcriptMode = transcriptLiveMode(hasFullTranscript(latest));
 
   if (feedBody) {
-    const inRss = rssHasPodcastTranscript(feedBody, transcriptUrl);
-    if (transcriptMode === "require") {
-      if (inRss) {
+    const latestItem = firstRssItemXml(feedBody);
+    if (!latestItem) {
+      fail("RSS 最新一集 item", "feed 找不到 <item>");
+    } else if (transcriptMode === "require") {
+      if (rssHasPodcastTranscript(latestItem, transcriptUrl)) {
         pass("RSS 含最新一集 podcast:transcript", latest.slug);
       } else {
-        fail("RSS 含最新一集 podcast:transcript", `找不到 ${transcriptPath}`);
+        fail("RSS 含最新一集 podcast:transcript", `最新 <item> 找不到 ${transcriptPath}`);
       }
-    } else if (inRss) {
+    } else if (rssItemDeclaresPodcastTranscript(latestItem)) {
       fail(
         "RSS 最新一集無 podcast:transcript",
-        `本地無字幕側車卻宣告 ${transcriptPath}`,
+        `本地無字幕側車，但最新 <item> 宣告了 podcast:transcript`,
       );
     } else {
       pass("RSS 最新一集無 podcast:transcript", `${latest.slug} MVP 無側車`);

@@ -12,7 +12,7 @@
 
 ### Fixed
 
-- **GEO live 煙霧 vs MVP 無字幕**：`verify:geo-live` 不再要求最新集一定有 `transcript.vtt` 200。無 `data/subtitles` 側車時改確認 RSS／JSON-LD **未**宣告逐字稿，且 VTT 為 404（ep-27 本機 sync 未跑 Whisper）。有側車仍走原契約。**未改** Apple sync workflow。
+- **GEO live 煙霧 vs MVP 無字幕**：`verify:geo-live` 不再要求最新集一定有 `transcript.vtt` 200。無 `data/subtitles` 側車時改確認**最新 RSS `<item>`** 未宣告任何 `podcast:transcript`、JSON-LD 無 VTT MediaObject，且 VTT 為**直接** 404（不接受 redirect 到泛用錯誤頁）。有側車仍走原契約。**未改** Apple sync workflow。
 - **ep-27 播放頁封面**：補 `01.avif`／`01.webp`。StoryPlayer `<picture>` 在 AVIF 瀏覽器會先要 `.avif`，缺檔會 404 且**不會**退回 JPG。`npm run optimize:lcp-images`；**未改** Apple sync workflow。
 - **Apple sync `npm test` 淺 clone**：`isReportGitHeadAcceptable` 相關測試不再對工作區跑未保護的 `HEAD~1`（GHA `actions/checkout` 預設 fetch-depth:1 會 `fatal: Needed a single revision`）。改以暫存 git repo 測祖先；**未改** sync workflow／`sync-apple-podcast.ts`。
 - **Studio 待生圖面板測試**：改 mock `pendingIllustrationsForStudio`，不再對 live catalog 用 `getByText("字幕尚未校對")`（sync 新 MVP 集會出現第二筆，擋 GHA 無法上架）。**未改** Apple sync workflow。
