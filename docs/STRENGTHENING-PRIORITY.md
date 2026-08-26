@@ -17,8 +17,8 @@
 | 1 | UX-P0-1 家長閘門 | 待做（待決策） | 先擋 `/for-parents/dashboard`；算術題 + session |
 | 2 | UX-P1-5 全站 e2e | 部分完成 | 補 `/for-parents`、播放頁（地圖／a11y 已 ✅） |
 | 3 | UX-P1-1、UX-P1-4 | 部分／待做 | StoryPlayer 定時、Landing 箭頭、進度條拇指（只改 CSS） |
-| 4 | VIS-DEBT-2 資料凍結 | ✅ 見本 commit | `VISUAL_FIXTURE` 釘 EP1–6／12 景點；mask 歸零；darwin 重產 PNG |
-| 5 | VIS-GAP-1 兒童主路徑 visual | ✅ 見本 commit | `/story/ep-1`、著色本、播放器四態 |
+| 4 | VIS-DEBT-2 資料凍結 | ✅ `6be6de4` | `VISUAL_FIXTURE` 釘 EP1–6／12 景點；mask 歸零；darwin 重產 PNG |
+| 5 | VIS-GAP-1 兒童主路徑 visual | ✅ `6be6de4` | `/story/ep-1`、著色本、播放器四態 |
 | 6 | LIST-2 後續 | API ✅；寄信未做 | 文案對齊「僅收名單、不寄信」；SubscribeForm e2e；ESP 另案 |
 | 7 | P3 生圖佇列 + illustrationStatus 缺口 | 待做 | `data/illustration-queue.json`；approve 更新狀態 |
 | 8 | P3 Playwright E2E CI | 待做 | CI 接入；擴充依賴 UX-P1-5；不動 Apple sync workflow |
@@ -41,7 +41,7 @@
 
 1. UX-P0-1（決策後）∥ 持續補 UX-P1-5
 2. UX-P1-1／UX-P1-4
-3. ~~VIS-DEBT-2／VIS-GAP-1~~ ✅ 見本 commit（darwin 重產 snapshots 仍須本機目檢）
+3. ~~VIS-DEBT-2／VIS-GAP-1~~ ✅ `6be6de4`（darwin 重產 snapshots 仍須本機目檢）
 4. LIST-2 文案誠實化 + SubscribeForm e2e
 5. P3 `illustration-queue.json`（對齊現況缺口；不自動生圖）
 6. P3 E2E CI → 監控 → ESLint CI

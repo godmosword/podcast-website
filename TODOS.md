@@ -489,13 +489,13 @@ Plan 經 Codex 工程審 + Grok 對抗審 + Opus 設計審**三審退回修訂**
 
 Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫寫的 $0.2）、卡片塞 `reflection-prompts`（違反 `DESIGN.md:147`，且已用於 `StoryEndScreen`）、新增 stagger（已存在）、全域紙紋 noise（iOS 合成風險 + 污染宇宙地圖）、重生 filter icon（已存在）、獎項 badge（無素材來源）。
 
-### VIS-DEBT-2　視覺測試跑在活資料上（mask 兩難的上游）　`eng · L · VIS-DEBT-1`　✅ 見本 commit
+### VIS-DEBT-2　視覺測試跑在活資料上（mask 兩難的上游）　`eng · L · VIS-DEBT-1`　✅ `6be6de4`
 
 `VISUAL_FIXTURE=1`（及 client 用的 `NEXT_PUBLIC_VISUAL_FIXTURE=1`）讓 `getStories()`／`listPlaygrounds()`／`getCharacters()` 回傳凍結子集（EP1–6、前 12 景點且必含 `ty-kids-museum`、登場集裁到 EP1–6）。不改 Protected 的 `data/stories.ts` 陣列。
 
 `npm run test:visual:trusted` 以 fixture 重建 SSG；`html[data-visual-fixture=1]` 防呆。Vercel 上若誤設旗標會 throw。`generate:audio-lengths` 在 fixture 下略過寫檔，避免把 tracked 全集表寫成子集。mask 歸零、頁面截圖改回 `fullPage`。**darwin 上 `--update-snapshots` 並逐張目檢**後才算 baseline 對齊；Linux agent 不重產 PNG。
 
-### VIS-GAP-1　兒童主路徑至今無視覺 baseline　`eng · M · 無`　✅ 見本 commit
+### VIS-GAP-1　兒童主路徑至今無視覺 baseline　`eng · M · 無`　✅ `6be6de4`
 
 `/story/ep-1`、`/games/coloring-book` 納入頁面矩陣；StoryPlayer DESIGN.md 四態（字幕跟讀／手動翻頁／播放完成／載入中）以 `?vp=` 釘住，僅 fixture build 承認。播放器截 390 × light/night。
 
