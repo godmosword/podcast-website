@@ -43,12 +43,11 @@ test.describe("家長閘門 UX-P0-1", () => {
 
   test("答錯仍鎖定；答對後放行", async ({ page }) => {
     await page.goto("/for-parents/dashboard");
-    const question = page.getByText(/等於多少？/);
-    await expect(question).toBeVisible();
+    await expect(page.getByText(/等於多少？/)).toBeVisible();
 
     await page.getByRole("textbox").fill("0");
     await page.getByRole("button", { name: "打開儀表板" }).click();
-    await expect(page.getByRole("alert")).toContainText("答案不對");
+    await expect(page.getByText("答案不對，換一題再試。")).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "家庭儀表板" }),
     ).toHaveCount(0);

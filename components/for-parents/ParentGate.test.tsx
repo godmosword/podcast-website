@@ -20,7 +20,7 @@ describe("ParentGate", () => {
     sessionStorage.clear();
   });
 
-  it("答對後呼叫 onPass 並寫入 session", () => {
+  it("答對後呼叫 onPass 並寫入 session", async () => {
     const onPass = vi.fn();
     render(
       <ParentGate
@@ -30,7 +30,8 @@ describe("ParentGate", () => {
     );
 
     expect(screen.getByRole("heading", { name: "先確認是家長" })).toBeTruthy();
-    fireEvent.change(screen.getByLabelText("8 + 13 等於多少？"), {
+    const input = await screen.findByLabelText("8 + 13 等於多少？");
+    fireEvent.change(input, {
       target: { value: "21" },
     });
     fireEvent.click(screen.getByRole("button", { name: "打開儀表板" }));
@@ -39,7 +40,7 @@ describe("ParentGate", () => {
     expect(sessionStorage.getItem(PARENT_GATE_SESSION_KEY)).toBe("1");
   });
 
-  it("答錯顯示提示且不放行", () => {
+  it("答錯顯示提示且不放行", async () => {
     const onPass = vi.fn();
     let calls = 0;
     render(
@@ -54,7 +55,8 @@ describe("ParentGate", () => {
       />,
     );
 
-    fireEvent.change(screen.getByLabelText("8 + 13 等於多少？"), {
+    const input = await screen.findByLabelText("8 + 13 等於多少？");
+    fireEvent.change(input, {
       target: { value: "1" },
     });
     fireEvent.click(screen.getByRole("button", { name: "打開儀表板" }));

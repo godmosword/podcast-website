@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, type FormEvent } from "react";
+import { useEffect, useId, useState, type FormEvent } from "react";
 import Link from "next/link";
 import {
   createParentGateChallenge,
@@ -23,12 +23,17 @@ export default function ParentGate({
 }: ParentGateProps) {
   const questionId = useId();
   const errorId = useId();
-  const [challenge, setChallenge] = useState(createChallenge);
+  const [challenge, setChallenge] = useState<ParentGateChallenge | null>(null);
   const [value, setValue] = useState("");
   const [error, setError] = useState(false);
 
+  useEffect(() => {
+    setChallenge(createChallenge());
+  }, [createChallenge]);
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!challenge) return;
     if (isParentGateAnswerCorrect(challenge, value)) {
       writeParentGatePassed();
       onPass();
@@ -49,7 +54,7 @@ export default function ParentGate({
 
       <form className={styles.form} onSubmit={handleSubmit}>
         <label className={styles.question} id={questionId} htmlFor={`${questionId}-input`}>
-          {challenge.prompt} 等於多少？
+          {challenge ? `${challenge.prompt} 等於多少？` : "算術題載入中"}
         </label>
         <input
           id={`${questionId}-input`}
@@ -62,6 +67,7 @@ export default function ParentGate({
           spellCheck={false}
           maxLength={3}
           value={value}
+          disabled={!challenge}
           onChange={(event) => {
             setValue(event.target.value);
             if (error) setError(false);
@@ -74,7 +80,7 @@ export default function ParentGate({
             答案不對，換一題再試。
           </p>
         ) : null}
-        <button type="submit" className={styles.submit}>
+        <button type="submit" className={styles.submit} disabled={!challenge}>
           打開儀表板
         </button>
       </form>
