@@ -6,6 +6,7 @@
 
 ### Added
 
+- **ep-27 草稿字幕**：`data/subtitles/ep-27.json`（Whisper large-v3 草稿、未 `--mark`）。GHA run 32964051895 已轉錄並通過 `npm test`／build，但 `protect-main-web` 無 github-actions bypass，直推 `main` 被 GH013（缺 quality／build-and-public-e2e／Vercel）。本機重跑 `npm run transcribe -- ep-27` 後走 PR 上架。**未改** Apple sync workflow。
 - **ep-27 MVP**：本機 `sync:apple` 上架「小紅豆汽車勇敢上學｜想媽媽的時候怎麼辦？」（單封面、`pageCount=1`）。本機無 Whisper，字幕 sidecar 未寫入；GHA 後續可補轉錄。對應 #117（RSS 已有新集、站上未上架）。**未改** Apple sync workflow，也**不**自動生圖。
 - **生圖佇列（P3）**：`data/illustration-queue.json` 為機器可讀 overlay；Studio `/studio` 列出 `pageCount=1` 的待生圖集。`illustrate --approve` 與本機 `sync:notify` 寫入狀態。**不改** Apple sync workflow／`sync-apple-podcast.ts`，也不自動生圖。
 - **Playwright E2E CI（P3）**：`.github/workflows/ci.yml` 新增 `e2e-child-path`（`npm run test:e2e:ci`：smoke／a11y／宇宙地圖／遊戲／訂閱／UX-P1-5 觸控）。視覺回歸仍不進 CI。**不改** Apple sync workflow。GitHub required merge check 名稱仍是 `build-and-public-e2e`。
