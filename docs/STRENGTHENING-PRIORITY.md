@@ -18,7 +18,7 @@
 | 2 | UX-P1-5 全站 e2e | 部分完成 | 補 `/for-parents`、播放頁（地圖／a11y 已 ✅） |
 | 3 | UX-P1-1、UX-P1-4 | 部分／待做 | StoryPlayer 定時、Landing 箭頭、進度條拇指（只改 CSS） |
 | 4 | LIST-2 後續 | ✅ `289fbc4` | 文案對齊「只收名單、不寄新集上線信」；SubscribeForm e2e；ESP 另案 |
-| 5 | P3 生圖佇列 + illustrationStatus 缺口 | ✅ 見本 commit | `data/illustration-queue.json`；approve／本機 notify 寫入；Studio 只讀；不自動生圖 |
+| 5 | P3 生圖佇列 + illustrationStatus 缺口 | ✅ `3a0176f` | `data/illustration-queue.json`；approve／本機 notify 寫入；Studio 只讀；不自動生圖 |
 | 6 | P3 Playwright E2E CI | 待做 | CI 接入；擴充依賴 UX-P1-5；不動 Apple sync workflow |
 | 7 | P3 錯誤／上線監控、ESLint CI | 待做 | 輕量 client error + uptime；eslint 非互動 CI |
 
@@ -40,7 +40,7 @@
 1. UX-P0-1（決策後）∥ 持續補 UX-P1-5
 2. UX-P1-1／UX-P1-4
 3. ~~LIST-2 文案誠實化 + SubscribeForm e2e~~ ✅ `289fbc4`（ESP／新集上線信另案）
-4. ~~P3 `illustration-queue.json`~~ ✅ 見本 commit（不自動生圖；不動 Apple sync 主脚本）
+4. ~~P3 `illustration-queue.json`~~ ✅ `3a0176f`（不自動生圖；不動 Apple sync 主脚本）
 5. P3 E2E CI → 監控 → ESLint CI
 
 ## 驗證

@@ -1394,7 +1394,7 @@ GHA 同步新集並 push 成功後，`scripts/sync-alert.ts notify-live` 會開 
 ### ~~同步 commit 訊息帶生圖提示~~　`P2 · S · 無`　〔eng+ops〕 ✅
 GHA commit body 已由 `scripts/post-sync-notify.ts` 產生，列出本輪新 slug、字幕狀態、`npm run illustrate -- ep-N` 與完整生圖 checklist。`95ba69a`
 
-### 生圖佇列 `data/illustration-queue.json`　`P3 · S · 通知基建`　〔eng+ops〕　✅ 見本 commit
+### 生圖佇列 `data/illustration-queue.json`　`P3 · S · 通知基建`　〔eng+ops〕　✅ `3a0176f`
 
 機器可讀 overlay：`{ slug, ep, syncedAt, subtitleReady, status }`。Studio `/studio` 以 **catalog `pageCount` 為準** 列出待生圖（MVP 單圖），overlay 保留 `syncedAt`。`illustrationStatus` 由 `pageCount` 衍生（不掛上 `Story`，以免進 JSON-LD／RSS）。
 
@@ -1532,7 +1532,7 @@ T+2d    社群貼文（B 戰場）
 | 期 | 方案 | 說明 |
 |----|------|------|
 | **一期** | D commit 訊息強化 + A GitHub Issue | 已實作，零／低依賴，可追蹤 checklist |
-| **二期** | C `illustration-queue.json` + Studio 顯示 | ✅ 見本 commit（機器可讀 overlay + `/studio`；不自動生圖） |
+| **二期** | C `illustration-queue.json` + Studio 顯示 | ✅ `3a0176f`（機器可讀 overlay + `/studio`；不自動生圖） |
 
 **已砍：** 外部 webhook 即時推播。LINE 舊推播服務已於 2025-03-31 終止；現行 GitHub Issue + GitHub App 手機通知已足夠，不再新增 secret 或 webhook 維護面。
 
