@@ -14,9 +14,9 @@
 
 | 序 | TODOS ID | 狀態 | 本輪要做 |
 |----|----------|------|----------|
-| 1 | UX-P0-1 家長閘門 | 待做（待決策） | 先擋 `/for-parents/dashboard`；算術題 + session |
-| 2 | UX-P1-5 全站 e2e | 部分完成 | 補 `/for-parents`、播放頁（地圖／a11y 已 ✅） |
-| 3 | UX-P1-1、UX-P1-4 | 部分／待做 | StoryPlayer 定時、Landing 箭頭、進度條拇指（只改 CSS） |
+| 1 | UX-P0-1 家長閘門 | ✅ 見本 commit | 僅擋 `/for-parents/dashboard`；算術題 + session |
+| 2 | UX-P1-5 全站 e2e | ✅ 見本 commit | `/for-parents`、播放頁、閘門已補 |
+| 3 | UX-P1-1、UX-P1-4 | ✅ 見本 commit | StoryPlayer 定時選項／進度條命中區 44px |
 | 4 | LIST-2 後續 | API ✅；寄信未做 | 文案對齊「僅收名單、不寄信」；SubscribeForm e2e；ESP 另案 |
 | 5 | P3 生圖佇列 + illustrationStatus 缺口 | 待做 | `data/illustration-queue.json`；approve 更新狀態 |
 | 6 | P3 Playwright E2E CI | 待做 | CI 接入；擴充依賴 UX-P1-5；不動 Apple sync workflow |
@@ -26,22 +26,21 @@
 
 - **UX-P1-3** 共讀 sidecar 擴至全集（內容營運，可分批）
 - **LIST-1** LINE OA CTA（BLOCKED：等 `NEXT_PUBLIC_LINE_OA_URL`）
-- **UX-P2-*** 擇機（儀表板文案、Dudu a11y、reflection source、car-adventure 4:3 封面、stories visual baseline）
+- **UX-P2-6** car-adventure 4:3 封面（生圖 SOP，另准）
 
 ## 待決策（實作前）
 
-1. UX-P0-1：僅 dashboard，或含 GameKit 兒童模式開關？
+1. ~~UX-P0-1：僅 dashboard，或含 GameKit 兒童模式開關？~~ → **僅 dashboard**（2026-08-26）
 2. UX-P1-3：一次全集 vs 每週 3 集？
 
 預設：先做 dashboard-only（與 STEM-P3／稽核「先擋 dashboard」一致）。
 
 ## 建議 `/agent-action` 順序
 
-1. UX-P0-1（決策後）∥ 持續補 UX-P1-5
-2. UX-P1-1／UX-P1-4
-3. LIST-2 文案誠實化 + SubscribeForm e2e
-4. P3 `illustration-queue.json`（對齊現況缺口；不自動生圖）
-5. P3 E2E CI → 監控 → ESLint CI
+1. ~~UX-P0-1／UX-P1-5／UX-P1-1／UX-P1-4~~ ✅ 見本 commit
+2. LIST-2 文案誠實化 + SubscribeForm e2e
+3. P3 `illustration-queue.json`（對齊現況缺口；不自動生圖）
+4. P3 E2E CI → 監控 → ESLint CI
 
 ## 驗證
 

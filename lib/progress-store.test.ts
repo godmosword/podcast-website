@@ -238,3 +238,92 @@ describe("progress-store v1 to v2 migration", () => {
     });
   });
 });
+
+describe("reflectionShown 正規化", () => {
+  beforeEach(() => {
+    vi.unstubAllGlobals();
+    mockLocalStorage();
+  });
+
+  it("舊版 string[] 視為 end-screen，並遷移 slug 別名", () => {
+    localStorage.setItem(
+      "cheche:progress",
+      JSON.stringify({
+        schemaVersion: 2,
+        favorites: [],
+        continue: null,
+        sfxEnabled: true,
+        preferences: {
+          captionSize: "md",
+          gameKit: { kidsMode: true },
+          theme: "light",
+        },
+        bestScores: {},
+        gameProfile: {
+          version: 2,
+          stars: 0,
+          unlockedVehicles: ["小黃"],
+          bests: {},
+          medals: {},
+          stickers: [],
+          gamesPlayed: {},
+        },
+        unlocks: { characters: [], vehicles: [] },
+        engagement: {
+          storiesCompleted: [],
+          reflectionShown: ["ep-9", "ambulance"],
+          platformClicks: {},
+        },
+      }),
+    );
+
+    const p = migrateProgress();
+    expect(p.engagement.reflectionShown).toEqual([
+      { slug: "ep-9", source: "end-screen" },
+      { slug: "ep-6", source: "end-screen" },
+    ]);
+  });
+
+  it("同 slug 不同 source 都保留，重複 source 去重", () => {
+    localStorage.setItem(
+      "cheche:progress",
+      JSON.stringify({
+        schemaVersion: 2,
+        favorites: [],
+        continue: null,
+        sfxEnabled: true,
+        preferences: {
+          captionSize: "md",
+          gameKit: { kidsMode: true },
+          theme: "light",
+        },
+        bestScores: {},
+        gameProfile: {
+          version: 2,
+          stars: 0,
+          unlockedVehicles: ["小黃"],
+          bests: {},
+          medals: {},
+          stickers: [],
+          gamesPlayed: {},
+        },
+        unlocks: { characters: [], vehicles: [] },
+        engagement: {
+          storiesCompleted: [],
+          reflectionShown: [
+            { slug: "ep-1", source: "detail" },
+            { slug: "ep-1", source: "end-screen" },
+            { slug: "ep-1", source: "detail" },
+          ],
+          platformClicks: {},
+        },
+      }),
+    );
+
+    const p = migrateProgress();
+    expect(p.engagement.reflectionShown).toEqual([
+      { slug: "ep-1", source: "detail" },
+      { slug: "ep-1", source: "end-screen" },
+    ]);
+  });
+});

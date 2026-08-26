@@ -57,7 +57,9 @@ function GameProgressSummary() {
                 {game.played
                   ? [
                       game.medalStars > 0 ? `${game.medalStars} 顆關卡星` : null,
-                      game.bestScore != null ? `最佳 ${game.bestScore}` : null,
+                      game.bestScore != null
+                        ? `探索紀錄 ${game.bestScore}`
+                        : null,
                     ]
                       .filter(Boolean)
                       .join(" · ") || "已開始探索"

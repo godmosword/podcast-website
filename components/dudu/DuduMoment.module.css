@@ -18,6 +18,8 @@
   background: transparent;
   cursor: pointer;
   border-radius: 12px;
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .interactive:focus-visible {

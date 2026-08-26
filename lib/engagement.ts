@@ -2,6 +2,7 @@ import {
   getProgressSync,
   updateProgress,
   type ProgressStore,
+  type ReflectionShownSource,
 } from "@/lib/progress-store";
 
 export type EngagementMetrics = ProgressStore["engagement"];
@@ -20,11 +21,20 @@ export function recordStoryCompleted(slug: string): void {
   });
 }
 
-export function recordReflectionShown(slug: string): void {
+export function recordReflectionShown(
+  slug: string,
+  source: ReflectionShownSource,
+): void {
   void updateProgress((prev) => {
     const engagement = { ...prev.engagement };
-    if (!engagement.reflectionShown.includes(slug)) {
-      engagement.reflectionShown = [...engagement.reflectionShown, slug];
+    const exists = engagement.reflectionShown.some(
+      (event) => event.slug === slug && event.source === source,
+    );
+    if (!exists) {
+      engagement.reflectionShown = [
+        ...engagement.reflectionShown,
+        { slug, source },
+      ];
     }
     return { engagement };
   });

@@ -131,8 +131,8 @@ export function buildRecentStoryRows(
     if (rows.length >= limit) return rows;
   }
 
-  for (const slug of progress.engagement.reflectionShown) {
-    push(slug, "reflection");
+  for (const event of progress.engagement.reflectionShown) {
+    push(event.slug, "reflection");
     if (rows.length >= limit) return rows;
   }
 
@@ -184,7 +184,11 @@ export function buildParentDashboardSnapshot(
     games,
     recentStories: buildRecentStoryRows(progress),
     recommendedStories: recommendStoriesForParent(progress),
-    reflectionSlugs: progress.engagement.reflectionShown,
+    reflectionSlugs: [
+      ...new Set(
+        progress.engagement.reflectionShown.map((event) => event.slug),
+      ),
+    ],
     favoritesCount: progress.favorites.length,
     completedCount: progress.engagement.storiesCompleted.length,
     continueListening: progress.continue,

@@ -20,6 +20,7 @@ const PAGES: { name: string; path: string; exclude?: string }[] = [
     exclude: "canvas, iframe, [class*=titleScreen], [class*=gameTitle]",
   },
   { name: "宇宙地圖", path: "/adventures" },
+  { name: "親子指南", path: "/for-parents" },
   { name: "親子遊樂地圖", path: "/for-parents/play-map" },
   {
     name: "親子景點詳情",

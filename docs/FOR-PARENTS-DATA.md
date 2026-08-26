@@ -21,7 +21,7 @@
 | 繼續收聽 | `continue` | slug、頁碼、時間、updatedAt |
 | 收藏 | `favorites` | 故事 slug 陣列 |
 | 聽完標記 | `engagement.storiesCompleted` | 播放完畢寫入 |
-| Reflection 已顯示 | `engagement.reflectionShown` | 互動提問已出現過的集數 |
+| Reflection 已顯示 | `engagement.reflectionShown` | `{ slug, source: "detail" \| "end-screen" }[]`；舊版 string[] 讀取時視為 end-screen |
 
 ## Reflection Prompt（靜態文案）
 

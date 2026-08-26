@@ -41,6 +41,7 @@ export default function StoryDetailReflection({
         <div id={panelId}>
           <ReflectionPrompt
             slug={slug}
+            source="detail"
             child={child}
             parentFollowUp={parentFollowUp}
             accent={accent}

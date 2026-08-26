@@ -244,13 +244,13 @@ test("角色圖鑑與親子指南不含內頁 hero", async ({ page, request }) =
   expect(toolsBox?.y).toBeLessThan(podcastBox?.y ?? Number.POSITIVE_INFINITY);
 });
 
-test("家庭儀表板頁面可載入", async ({ page }) => {
+test("家庭儀表板頁面先顯示家長閘門", async ({ page }) => {
   await page.goto("/for-parents/dashboard");
   const main = page.getByRole("main");
-  await expect(main.getByRole("heading", { name: "家庭儀表板" })).toBeVisible();
-  await expect(main.getByRole("heading", { name: "小遊戲探索摘要" })).toBeVisible();
-  await expect(main.getByRole("heading", { name: "推薦共讀故事" })).toBeVisible();
-  await expect(main.getByLabel("家長安心資訊")).toBeVisible();
+  await expect(main.getByRole("heading", { name: "先確認是家長" })).toBeVisible();
+  await expect(main.getByRole("heading", { name: "小遊戲探索摘要" })).toHaveCount(
+    0,
+  );
 });
 
 test("繽紛消消樂：標題 → 地圖 → 第 1 關棋盤", async ({ page }) => {

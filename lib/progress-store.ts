@@ -37,9 +37,16 @@ export type ContinueState = {
   updatedAt: number;
 };
 
-type EngagementStore = {
+export type ReflectionShownSource = "detail" | "end-screen";
+
+export type ReflectionShownEvent = {
+  slug: string;
+  source: ReflectionShownSource;
+};
+
+export type EngagementStore = {
   storiesCompleted: string[];
-  reflectionShown: string[];
+  reflectionShown: ReflectionShownEvent[];
   platformClicks: Record<string, number>;
 };
 
@@ -314,6 +321,41 @@ function migrateStorySlug(slug: string): string {
   return canonicalStorySlug(slug);
 }
 
+function isReflectionShownSource(value: unknown): value is ReflectionShownSource {
+  return value === "detail" || value === "end-screen";
+}
+
+/** 舊版 string[] 視為 end-screen；同 slug＋source 去重。 */
+export function normalizeReflectionShown(raw: unknown): ReflectionShownEvent[] {
+  if (!Array.isArray(raw)) return [];
+  const out: ReflectionShownEvent[] = [];
+  const seen = new Set<string>();
+
+  const push = (slug: string, source: ReflectionShownSource) => {
+    const migrated = migrateStorySlug(slug);
+    if (!migrated) return;
+    const key = `${migrated}:${source}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push({ slug: migrated, source });
+  };
+
+  for (const item of raw) {
+    if (typeof item === "string") {
+      push(item, "end-screen");
+      continue;
+    }
+    if (typeof item !== "object" || item === null || !("slug" in item)) {
+      continue;
+    }
+    const slug = item.slug;
+    if (typeof slug !== "string") continue;
+    const sourceRaw = "source" in item ? item.source : undefined;
+    push(slug, isReflectionShownSource(sourceRaw) ? sourceRaw : "end-screen");
+  }
+  return out;
+}
+
 function normalizeProgress(raw: Partial<ProgressStore>): ProgressStore {
   const favorites = (raw.favorites ?? DEFAULT_PROGRESS.favorites).map(
     migrateStorySlug,
@@ -324,8 +366,8 @@ function normalizeProgress(raw: Partial<ProgressStore>): ProgressStore {
   const storiesCompleted = (raw.engagement?.storiesCompleted ?? []).map(
     migrateStorySlug,
   );
-  const reflectionShown = (raw.engagement?.reflectionShown ?? []).map(
-    migrateStorySlug,
+  const reflectionShown = normalizeReflectionShown(
+    raw.engagement?.reflectionShown,
   );
 
   const bestScores = {

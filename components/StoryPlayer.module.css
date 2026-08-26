@@ -3,8 +3,8 @@
   --ctrl-size: 60px;
   --time-size: 0.88rem;
   --seek-track: 7px;
-  --seek-thumb: 22px;
-  --seek-hit: 28px;
+  --seek-thumb: 28px;
+  --seek-hit: 44px;
   --transport-gap: 14px;
   --top-tool-size: 48px;
   --top-tool-gap: 8px;
@@ -41,8 +41,8 @@
     --ctrl-size: 64px;
     --time-size: 0.95rem;
     --seek-track: 8px;
-    --seek-thumb: 24px;
-    --seek-hit: 30px;
+    --seek-thumb: 30px;
+    --seek-hit: 44px;
     --transport-gap: 18px;
     --top-tool-size: 52px;
     --top-tool-gap: 10px;
@@ -56,8 +56,8 @@
     --ctrl-size: 68px;
     --time-size: 1.02rem;
     --seek-track: 8px;
-    --seek-thumb: 26px;
-    --seek-hit: 32px;
+    --seek-thumb: 32px;
+    --seek-hit: 44px;
     --transport-gap: 22px;
   }
 }
@@ -300,7 +300,8 @@
 .seekBar {
   flex: 1 1 auto;
   min-width: 0;
-  height: var(--seek-hit, 28px);
+  height: var(--seek-hit, 44px);
+  margin-block: calc((var(--seek-track, 7px) - var(--seek-hit, 44px)) / 2);
   -webkit-appearance: none;
   appearance: none;
   background: transparent;
@@ -527,7 +528,9 @@
 }
 
 .timerOpt {
-  padding: 9px 18px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px 18px;
   border-radius: 8px;
   color: #fff;
   font-size: 0.85rem;

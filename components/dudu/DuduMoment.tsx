@@ -23,7 +23,7 @@ type DuduMomentProps = {
 
 /**
  * 嘟嘟情境 wrapper：404／載入／完播／角落夥伴等共用。
- * 互動時 tabIndex=0（UX-P2-4）。
+ * 互動時用真正的 <button>（UX-P2-4）。
  */
 export default function DuduMoment({
   emotion,

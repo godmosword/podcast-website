@@ -26,8 +26,8 @@
 
 | # | ID | 類型 | 工時 | 狀態 |
 |---|-----|------|------|------|
-| 1 | [UX-P0-1](#兒童-ux-與親子互動稽核2026-07-11) 家長閘門 | trust | M | 待做（待決策） |
-| 2 | [UX-P1-5](#兒童-ux-與親子互動稽核2026-07-11) 全站 e2e | eng | S | 部分完成 |
+| 1 | [UX-P0-1](#兒童-ux-與親子互動稽核2026-07-11) 家長閘門 | trust | M | ✅ 見本 commit |
+| 2 | [UX-P1-5](#兒童-ux-與親子互動稽核2026-07-11) 全站 e2e | eng | S | ✅ 見本 commit |
 | 3 | [UX-P0-4](#兒童-ux-與親子互動稽核2026-07-11) challenge 遊戲提示 | trust | S | ✅ `1c1ca1b` |
 | 4 | [Growth-Measure-1](#growth-measure-1-成長量測) SoundOn 回鏈 | ops/growth | S | ✅ `42a9d38` |
 | 5 | [UX-P1-2](#兒童-ux-與親子互動稽核2026-07-11) 詳情頁反思收合 | ux | S | ✅ `42a9d38` |
@@ -431,7 +431,7 @@
 
 ### 待決策隊列（不進 Top 5）
 
-- **UX-P0-1** 家長閘門範圍（dashboard only vs 含 GameKit）
+- ~~**UX-P0-1** 家長閘門範圍~~ → **僅 dashboard**（2026-08-26）
 - **UX-P0-4** challenge 遊戲提示：~~僅文案 vs 隱藏入口~~ → **已採僅文案**（challenge 卡顯示家長陪同提示，不隱藏入口）
 
 ### 封存索引
@@ -767,30 +767,30 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 
 | ID | 優先 | 狀態 | 摘要 | 主要檔案 | 驗證 |
 |----|------|------|------|----------|------|
-| UX-P0-1 | P0 | 待做 | **家長閘門**：進 `/for-parents/dashboard`（或切兒童模式）前簡單算術題；session 通過後放行 | 新 `ParentGate.tsx`；`dashboard/page.tsx` | 手動 375px；`npm test` |
+| UX-P0-1 | P0 | ✅ 見本 commit | **家長閘門**：進 `/for-parents/dashboard` 前簡單算術題；session 通過後放行（決策 A：不含 GameKit 設定） | 新 `ParentGate.tsx`；`ParentDashboardScreen.tsx` | 手動 375px；`npm test`；`e2e/parent-gate.spec.ts` |
 | UX-P0-2 | P0 | ✅ `964f418` | **Footer 觸控 ≥44px**（= W27-2 後半） | `SiteFooter.module.css` | CSS 契約 + 手動 |
 | UX-P0-3 | P0 | ✅ `964f418` | **許願隱私一句話**（= W27-2 前半）：送出鈕下 inline 說明、message placeholder 勿含個資 | `ZoneWishForm.tsx` | vitest |
 | UX-P0-4 | P0 | ✅ `1c1ca1b` | **Challenge 遊戲家長提示**：列表卡加「建議 6 歲以上 · 家長陪同」（僅文案，不隱藏入口） | `data/games.ts`、`app/games/page.tsx` | `npm test` + build ✅ |
-| UX-P1-1 | P1 | 部分完成 | **補齊 &lt;44px 按鈕**（只改 CSS）：~~ZoneSheet 關閉／wishToggle~~ → MAP-UX-P1a；~~Landing 箭頭~~ → 44×44（本輪 Design Review）；StoryPlayer 定時待做 | 各 `*.module.css` | 手動＋e2e |
+| UX-P1-1 | P1 | ✅ 見本 commit | **補齊 &lt;44px 按鈕**（只改 CSS）：~~ZoneSheet 關閉／wishToggle~~ → MAP-UX-P1a；~~Landing 箭頭~~ → 44×44（本輪 Design Review）；StoryPlayer 定時選項 min-height 44px | 各 `*.module.css` | 手動＋e2e |
 | UX-P1-2 | P1 | ✅ `42a9d38` | **詳情頁反思收合**：比照 `StoryEndScreen`，家長句不預設露出 | `StoryDetailReflection.tsx`、`app/story/[slug]/page.tsx` | `npm test` |
 | UX-P1-3 | P1 | 待做 | **共讀 sidecar 擴至全集**：`parent-guides`／`family-activities` 從 ep-1/ep-5 擴充（內容營運，可分批） | `data/parent-guides.ts`、`data/family-activities.ts` | 同名 `*.test.ts` |
-| UX-P1-4 | P1 | 待做 | **播放進度條拇指加大**（CSS 變數，不動控制列 layout） | `StoryPlayer.module.css` | 手動播放頁 |
-| UX-P1-5 | P1 | 部分完成 | **e2e 兒童 UX 回歸**：`/adventures` a11y + 地圖觸控 e2e ✅（MAP-UX-P1c）；遊樂園 hub + 五款遊戲頁首屏／heading／返回動線 ✅（PLAY-IA-1）；`/for-parents`、播放頁待補 | `e2e/a11y.spec.ts`、`e2e/universe-map.spec.ts`、`e2e/games.spec.ts` | `npm run test:e2e` |
+| UX-P1-4 | P1 | ✅ 見本 commit | **播放進度條拇指加大**（CSS 變數，不動控制列 layout）：`--seek-hit: 44px` | `StoryPlayer.module.css` | 手動播放頁；`e2e/story-player-ux.spec.ts` |
+| UX-P1-5 | P1 | ✅ 見本 commit | **e2e 兒童 UX 回歸**：`/adventures` a11y + 地圖觸控 e2e ✅（MAP-UX-P1c）；遊樂園 hub + 五款遊戲頁首屏／heading／返回動線 ✅（PLAY-IA-1）；`/for-parents` a11y；播放頁 a11y＋44px；家長閘門鎖定／放行 | `e2e/a11y.spec.ts`、`e2e/universe-map.spec.ts`、`e2e/games.spec.ts`、`e2e/parent-gate.spec.ts`、`e2e/story-player-ux.spec.ts` | `npm run test:e2e` |
 | UX-P2-1 | P2 | ✅ `eb19c86` | 方塊／卡丁車接 `kidsMode` 或標「挑戰模式」：kidsMode 預設＝relaxed 耦合鎖定（回歸測試）；GameIntro 統一 challenge 家長提示 | `BlockDropGame.tsx`、`GameIntro.tsx`、`settings.ts` | test + 手動 |
-| UX-P2-2 | P2 | 待做 | 儀表板「最佳分數」改低壓文案（「探索紀錄」等） | `ParentDashboard.tsx` | 手動 |
+| UX-P2-2 | P2 | ✅ 見本 commit | 儀表板「最佳分數」改低壓文案（「探索紀錄」） | `ParentDashboard.tsx` | 手動 |
 | UX-P2-3 | P2 | ✅ `eb19c86` | 遊戲頁年齡標示一致（metadata vs chip）：五款稽核無矛盾；challenge 提示由 GameIntro 統一呈現 | `app/games/page.tsx` | build |
-| UX-P2-4 | P2 | 待做 | Dudu 鍵盤可及（內層 `tabIndex={0}`） | `DuduCompanion.tsx` | a11y |
-| UX-P2-5 | P2 | 待做 | `reflectionShown` 加 `source: detail \| end-screen` 精準量測 | `progress-store.ts`、`ReflectionPrompt.tsx` | test |
+| UX-P2-4 | P2 | ✅ 見本 commit | Dudu 鍵盤可及：互動夥伴已是真正 `<button>`（非內層 tabIndex） | `DuduMoment.tsx` | a11y 單測 |
+| UX-P2-5 | P2 | ✅ 見本 commit | `reflectionShown` 加 `source: detail \| end-screen` 精準量測；舊 string[] 視為 end-screen | `progress-store.ts`、`ReflectionPrompt.tsx` | test |
 | UX-P2-6 | P2 | 待做 | **car-adventure 封面重製 4:3**：現 16:9 素材於 4:3 卡框置中裁切可用（太陽／主角車／終點旗完整），重製走生圖 SOP＋人工審圖，對齊其他四款 1448×1086 | `public/games/v2/car-adventure/cover.webp` | 人工審圖 |
 | UX-P2-7 | P2 | ✅ 已解（VIS-DEBT-1 結案時一併重產） | **`/stories` visual baseline 既存 drift**：trusted 跑時 `visual：全部故事 390 light` 即 fail——目檢 diff 後對齊環境再刷新 baselines；**預設 `test:visual` 為 skip≠通過** | `e2e/visual.spec.ts-snapshots/stories*` | `npm run test:visual:trusted`（勿用預設 `test:visual` 當通過證明） |
 
 ### Task DAG（建議 `/agent-action` 順序）
 
-1. ~~**UX-P0-2 + UX-P0-3**~~ ✅ `964f418`（W27-2）→ ~~**MAP-UX-P1a/b/c／P2a**~~ ✅ `80457c4` → **UX-P1-5**（全站 e2e）
-2. **UX-P0-1** 可並行（新元件，需使用者決策：是否含 GameKit 兒童模式開關）
-3. **UX-P1-1**（ZoneSheet 部分併入 MAP-UX-P1a）、P1-2、P1-4 CSS／元件微調
+1. ~~**UX-P0-2 + UX-P0-3**~~ ✅ `964f418`（W27-2）→ ~~**MAP-UX-P1a/b/c／P2a**~~ ✅ `80457c4` → ~~**UX-P1-5**~~ ✅ 見本 commit
+2. ~~**UX-P0-1**~~ ✅ 見本 commit（決策 A：僅 dashboard）
+3. ~~**UX-P1-1**／**UX-P1-4**~~ ✅ 見本 commit
 4. **UX-P1-3** 內容分批，不擋工程項
-5. **UX-P2-\*** 擇機
+5. **UX-P2-6** 擇機（生圖）；其餘 P2 見本 commit
 
 ### 宇宙地圖 UX（2026-07-11，`/tmp/agent-plan-1783730484.md`）
 
@@ -810,7 +810,7 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 
 ### 待使用者決策（實作前）
 
-1. **家長閘門範圍**：僅 dashboard，或含 GameKit「兒童模式」開關？
+1. ~~**家長閘門範圍**~~ → **僅 dashboard**（2026-08-26 決策 A；不含 GameKit 設定）
 2. **UX-P1-3 節奏**：一次寫完全集，或每週 3 集？
 3. ~~**UX-P0-4**：僅文案提示 vs 對幼兒隱藏 challenge 入口~~ → **已採僅文案**（`gameParentTip` + 列表卡）
 
@@ -1126,10 +1126,10 @@ D0 → D2-A(smoke) → D1 → D13-剩餘 → D3 → D14 → D6 ∥ D12
 **地圖進度中樞已上線（2026-07-06）**：18 集全數對映 zone（`data/story-zones.ts` `00feab9`）＋`useZoneProgress`/`useCompletedSlugs` hook（`ba7fd7e`）＋**可見層**（島嶼木牌 `⭐ n/N` 星章＋淡暖光暈＋sheet 已聽打星，`cbbe28d`）。「聽完」口徑由 `recordStoryCompleted` 單點定義——STEM-P1 完播口徑定案後只動寫入端，地圖不用改。圖鑑本體（車款解鎖 UI）仍待 P3。
 
 #### 家長簡易儀表板　`STEM-P3 · M · localStorage 或帳號決策`　〔stem+design〕
-用星星／笑臉呈現「聽了哪幾集、玩了什麼、解鎖了幾台車」，不做成績單。可先讀現有收藏／繼續播放／遊戲 best 分／圖鑑解鎖（localStorage）。**MVP 已上線**（`/for-parents/dashboard`）；文案 polish 見 [UX-P2-2](#兒童-ux-與親子互動稽核2026-07-11)。
+用星星／笑臉呈現「聽了哪幾集、玩了什麼、解鎖了幾台車」，不做成績單。可先讀現有收藏／繼續播放／遊戲 best 分／圖鑑解鎖（localStorage）。**MVP 已上線**（`/for-parents/dashboard`）；文案 polish ✅ 見本 commit（UX-P2-2）。
 
 #### 家長閘門（parent gate）　`STEM-P3 · S · 付費／設定頁`　〔stem+eng〕
-設定、未來付費頁前簡單算術題，防孩子誤觸（對齊 Sago Mini）。**實作任務：** [UX-P0-1](#兒童-ux-與親子互動稽核2026-07-11)（2026-07-11 稽核具體化：先擋 `/for-parents/dashboard`）。
+設定、未來付費頁前簡單算術題，防孩子誤觸（對齊 Sago Mini）。**✅ 見本 commit：** 先擋 `/for-parents/dashboard`（決策 A，不含 GameKit）。
 
 #### 每集「家長共讀指引」　`STEM-P3 · S · P2 parentGuide 上線`　〔stem+content〕
 REUSE-2 試點已完成 `dbfe7b3`；**擴充全集：** [UX-P1-3](#兒童-ux-與親子互動稽核2026-07-11)。P3 階段另評估儀表板摘要、列印物連結。
@@ -1374,7 +1374,7 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 接輕量 client error 上報（Sentry free / Vercel）+ uptime（UptimeRobot），至少涵蓋首頁與一個播放頁。站掛了、播放器某機型崩了要有人知道。純 SSG，client error 為主要風險（播放器、iOS 合成破圖回歸）。
 
 ### Playwright E2E CI 接入 + 擴充　`P3 · M · 無`　〔eng〕
-本地已有 `e2e/smoke.spec.ts`、`e2e/a11y.spec.ts`、`e2e/universe-map.spec.ts`（25 tests）。待做：CI workflow 接入 + [UX-P1-5](#兒童-ux-與親子互動稽核2026-07-11) 觸控 assertion 擴充。
+本地已有 `e2e/smoke.spec.ts`、`e2e/a11y.spec.ts`、`e2e/universe-map.spec.ts`、`e2e/parent-gate.spec.ts`、`e2e/story-player-ux.spec.ts`。待做：CI workflow 接入。UX-P1-5 觸控 assertion 已補。
 
 ### ESLint CI 設定　`P3 · S · 無`　〔eng〕
 `next lint` 改非互動設定（`eslint.config.mjs` + `@next/eslint-plugin-next`）以接 CI。目前會跳首次設定精靈，無法在 CI 用。

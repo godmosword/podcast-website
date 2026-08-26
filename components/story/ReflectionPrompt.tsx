@@ -2,10 +2,12 @@
 
 import { useEffect } from "react";
 import { recordReflectionShown } from "@/lib/engagement";
+import type { ReflectionShownSource } from "@/lib/progress-store";
 import styles from "./ReflectionPrompt.module.css";
 
 type Props = {
   slug: string;
+  source: ReflectionShownSource;
   child: string;
   parentFollowUp: string;
   accent?: string;
@@ -14,14 +16,15 @@ type Props = {
 
 export default function ReflectionPrompt({
   slug,
+  source,
   child,
   parentFollowUp,
   accent,
   compact = false,
 }: Props) {
   useEffect(() => {
-    recordReflectionShown(slug);
-  }, [slug]);
+    recordReflectionShown(slug, source);
+  }, [slug, source]);
 
   return (
     <section

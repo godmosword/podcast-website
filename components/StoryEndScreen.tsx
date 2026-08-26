@@ -4,6 +4,7 @@ import { useEffect, useState, type ComponentType } from "react";
 import Link from "next/link";
 import DuduMoment from "@/components/dudu/DuduMoment";
 import { requestCelebration } from "@/lib/celebration";
+import type { ReflectionShownSource } from "@/lib/progress-store";
 import Sparkle from "./decor/Sparkle";
 import decor from "./decor/decor.module.css";
 import styles from "./StoryPlayer.module.css";
@@ -15,6 +16,7 @@ export type StoryEndReflectionPrompt = {
 
 export type StoryEndReflectionComponentProps = {
   slug: string;
+  source: ReflectionShownSource;
   child: string;
   parentFollowUp: string;
   accent?: string;
@@ -113,6 +115,7 @@ export default function StoryEndScreen({
             <div id={reflectionPanelId} className={styles.endReflection}>
               <ReflectionComponent
                 slug={slug}
+                source="end-screen"
                 child={reflectionPrompt.child}
                 parentFollowUp={reflectionPrompt.parentFollowUp}
                 accent={color}

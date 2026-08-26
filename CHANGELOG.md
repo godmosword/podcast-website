@@ -4,6 +4,16 @@
 
 ## [Unreleased]
 
+### Added
+
+- **家長閘門（UX-P0-1）**：進 `/for-parents/dashboard` 前須通過簡單加法題；`sessionStorage` 通過後放行。不含 GameKit 遊戲設定。指南頁 `/for-parents` 不擋。
+
+### Changed
+
+- **播放器觸控（UX-P1-1／UX-P1-4）**：睡前定時選項與進度條命中區改為 ≥44px；控制列區塊高度不變。
+- **儀表板文案（UX-P2-2）**：遊戲列「最佳 N」改為「探索紀錄 N」。
+- **反思量測（UX-P2-5）**：`reflectionShown` 改為 `{ slug, source }`，區分詳情頁與完播畫面。
+
 ### Removed
 
 - **角色 Logo 識別系統移除**：元件、驗收頁、產圖 CLI、色票與 35 份 prompt 全數移除；`Character` 不再帶 `logoFamily`／`logoFeature`。程式碼保存於 tag `archive/character-logo-system`。

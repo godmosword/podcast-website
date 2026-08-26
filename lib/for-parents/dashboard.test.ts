@@ -27,7 +27,7 @@ describe("buildParentDashboardSnapshot", () => {
       },
       engagement: {
         storiesCompleted: ["ep-14"],
-        reflectionShown: ["ep-9"],
+        reflectionShown: [{ slug: "ep-9", source: "end-screen" as const }],
         platformClicks: {},
       },
     };
