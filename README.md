@@ -78,6 +78,8 @@ npm run dev
 | `npm run typecheck` | TypeScript strict 型別檢查 |
 | `npm test` | Vitest 單元測試 |
 | `npm run test:e2e` | Playwright E2E（自動 build／啟動 production server；不要先用 `next dev` 佔用 3000） |
+| `npm run test:e2e:public` | 上線 gate：public smoke + public axe（CI `build-and-public-e2e`） |
+| `npm run test:e2e:ci` | 兒童主路徑 e2e（smoke／a11y／地圖／遊戲／訂閱／UX-P1-5 觸控；CI `e2e-child-path`；不含 visual） |
 | `npm run test:visual` | D2 視覺回歸（**預設 skip**；本機 pre-push 工具，刻意不進 CI。見 `test:visual:trusted`） |
 | `npm run test:visual:trusted` | 設 `VISUAL_BASELINE_TRUSTED=1` 後跑 visual spec。基準已於 **2026-08-24 全面重產**（59 張，含新增的 `play-map`／`place`）。重產再加 `-- --update-snapshots`，並**逐張人工目檢**後才提交 |
 | `npm run check` | 品質閘門：test + verify:episodes + verify:zone-art + verify:map-art + build |

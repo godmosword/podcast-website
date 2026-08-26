@@ -6,14 +6,21 @@ public suite。
 
 ## Repository checks
 
-CI 的兩個 required check 名稱是：
+CI 的 required check 名稱是：
 
 - `quality`：production dependency audit、lint、typecheck、Vitest
 - `build-and-public-e2e`：production build、public smoke、public axe
 
+另有 `e2e-child-path`（`npm run test:e2e:ci`）會在 PR／`main` 跑兒童主路徑 Playwright；
+**不是** ruleset required check 名稱。視覺回歸不進 CI。
+
 public suite 包含首頁、故事、主題、角色、家長頁、訂閱、法律頁、故事播放、地圖入口，
 以及 branded 404 與 mobile viewport。它只把未處理 `pageerror`、同源 4xx/5xx resource
 與明確頁面錯誤當成 blocking signal；analytics warning 不會單獨擋版。
+
+PR／`main` 另跑 `e2e-child-path`（smoke、axe 兒童路徑、宇宙地圖、遊戲頁、訂閱、
+UX-P1-5 觸控）。這份 job **不是** GitHub ruleset `protect-main-web` 目前列出的
+required check 名稱；合併阻擋仍以 `quality`／`build-and-public-e2e`／`Vercel` 為準。
 
 `components/for-parents/PlayMap.test.tsx` 是 53 個 jsdom 互動測試的長跑回歸，獨立用
 `npm run test:play-map` 執行（fork、single worker），不把它的 Vitest worker RPC
@@ -99,6 +106,7 @@ npm run verify:episodes
 npm run verify:release-content   # 目前會指出 ep-26 未校對字幕這個內容 blocker
 npm run build
 PW_REUSE_SERVER=1 npm run test:e2e:public
+PW_REUSE_SERVER=1 npm run test:e2e:ci   # 兒童主路徑；非 ruleset required check
 NEXT_PUBLIC_SITE_URL=https://podcast-website-mu.vercel.app \
   npm run verify:geo-live -- --base-url=https://podcast-website-mu.vercel.app --production
 ```

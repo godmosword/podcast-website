@@ -54,3 +54,25 @@ jobs:
         env:
           PW_REUSE_SERVER: "1"
         run: npm run test:e2e:public
+
+  # 兒童主路徑／地圖觸控 e2e。不是 GitHub ruleset 的 required check 名稱
+  #（仍為 build-and-public-e2e）；視覺回歸刻意不進 CI。不動 Apple sync workflow。
+  e2e-child-path:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Install Chromium for child-path e2e
+        run: npx playwright install --with-deps chromium
+      - name: Run child-path Playwright e2e
+        env:
+          PW_REUSE_SERVER: "1"
+        run: npm run test:e2e:ci

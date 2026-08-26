@@ -27,7 +27,7 @@
 | # | ID | 類型 | 工時 | 狀態 |
 |---|-----|------|------|------|
 | 1 | [UX-P0-1](#兒童-ux-與親子互動稽核2026-07-11) 家長閘門 | trust | M | 待做（待決策） |
-| 2 | [UX-P1-5](#兒童-ux-與親子互動稽核2026-07-11) 全站 e2e | eng | S | 部分完成 |
+| 2 | [UX-P1-5](#兒童-ux-與親子互動稽核2026-07-11) 全站 e2e | eng | S | ✅ 見本 commit |
 | 3 | [UX-P0-4](#兒童-ux-與親子互動稽核2026-07-11) challenge 遊戲提示 | trust | S | ✅ `1c1ca1b` |
 | 4 | [Growth-Measure-1](#growth-measure-1-成長量測) SoundOn 回鏈 | ops/growth | S | ✅ `42a9d38` |
 | 5 | [UX-P1-2](#兒童-ux-與親子互動稽核2026-07-11) 詳情頁反思收合 | ux | S | ✅ `42a9d38` |
@@ -776,7 +776,7 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 | UX-P1-2 | P1 | ✅ `42a9d38` | **詳情頁反思收合**：比照 `StoryEndScreen`，家長句不預設露出 | `StoryDetailReflection.tsx`、`app/story/[slug]/page.tsx` | `npm test` |
 | UX-P1-3 | P1 | 待做 | **共讀 sidecar 擴至全集**：`parent-guides`／`family-activities` 從 ep-1/ep-5 擴充（內容營運，可分批） | `data/parent-guides.ts`、`data/family-activities.ts` | 同名 `*.test.ts` |
 | UX-P1-4 | P1 | 待做 | **播放進度條拇指加大**（CSS 變數，不動控制列 layout） | `StoryPlayer.module.css` | 手動播放頁 |
-| UX-P1-5 | P1 | 部分完成 | **e2e 兒童 UX 回歸**：`/adventures` a11y + 地圖觸控 e2e ✅（MAP-UX-P1c）；遊樂園 hub + 五款遊戲頁首屏／heading／返回動線 ✅（PLAY-IA-1）；`/for-parents`、播放頁待補 | `e2e/a11y.spec.ts`、`e2e/universe-map.spec.ts`、`e2e/games.spec.ts` | `npm run test:e2e` |
+| UX-P1-5 | P1 | ✅ 見本 commit | **e2e 兒童 UX 回歸**：`/adventures` a11y + 地圖觸控；遊樂園 hub；`/for-parents` 與播放頁觸控 ≥44px；CI `e2e-child-path` | `e2e/a11y.spec.ts`、`e2e/universe-map.spec.ts`、`e2e/games.spec.ts`、`e2e/child-ux.spec.ts` | `npm run test:e2e:ci` |
 | UX-P2-1 | P2 | ✅ `eb19c86` | 方塊／卡丁車接 `kidsMode` 或標「挑戰模式」：kidsMode 預設＝relaxed 耦合鎖定（回歸測試）；GameIntro 統一 challenge 家長提示 | `BlockDropGame.tsx`、`GameIntro.tsx`、`settings.ts` | test + 手動 |
 | UX-P2-2 | P2 | 待做 | 儀表板「最佳分數」改低壓文案（「探索紀錄」等） | `ParentDashboard.tsx` | 手動 |
 | UX-P2-3 | P2 | ✅ `eb19c86` | 遊戲頁年齡標示一致（metadata vs chip）：五款稽核無矛盾；challenge 提示由 GameIntro 統一呈現 | `app/games/page.tsx` | build |
@@ -1374,8 +1374,8 @@ ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–
 ### 錯誤／上線監控　`P3 · S · 無`　〔ceo〕
 接輕量 client error 上報（Sentry free / Vercel）+ uptime（UptimeRobot），至少涵蓋首頁與一個播放頁。站掛了、播放器某機型崩了要有人知道。純 SSG，client error 為主要風險（播放器、iOS 合成破圖回歸）。
 
-### Playwright E2E CI 接入 + 擴充　`P3 · M · 無`　〔eng〕
-本地已有 `e2e/smoke.spec.ts`、`e2e/a11y.spec.ts`、`e2e/universe-map.spec.ts`（25 tests）。待做：CI workflow 接入 + [UX-P1-5](#兒童-ux-與親子互動稽核2026-07-11) 觸控 assertion 擴充。
+### Playwright E2E CI 接入 + 擴充　`P3 · M · 無`　〔eng〕　✅ 見本 commit
+`.github/workflows/ci.yml` 的 `e2e-child-path` 跑 `npm run test:e2e:ci`（smoke／a11y／宇宙地圖／遊戲／訂閱／`e2e/child-ux.spec.ts`）。視覺回歸仍不進 CI。**未改** Apple sync workflow。GitHub required merge check 名稱維持 `build-and-public-e2e`（public suite）。
 
 ### ESLint CI 設定　`P3 · S · 無`　〔eng〕
 `next lint` 改非互動設定（`eslint.config.mjs` + `@next/eslint-plugin-next`）以接 CI。目前會跳首次設定精靈，無法在 CI 用。

@@ -7,6 +7,7 @@
 ### Added
 
 - **生圖佇列（P3）**：`data/illustration-queue.json` 為機器可讀 overlay；Studio `/studio` 列出 `pageCount=1` 的待生圖集。`illustrate --approve` 與本機 `sync:notify` 寫入狀態。**不改** Apple sync workflow／`sync-apple-podcast.ts`，也不自動生圖。
+- **Playwright E2E CI（P3）**：`.github/workflows/ci.yml` 新增 `e2e-child-path`（`npm run test:e2e:ci`：smoke／a11y／宇宙地圖／遊戲／訂閱／UX-P1-5 觸控）。視覺回歸仍不進 CI。**不改** Apple sync workflow。GitHub required merge check 名稱仍是 `build-and-public-e2e`。
 
 ### Changed
 
