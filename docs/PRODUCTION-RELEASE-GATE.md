@@ -89,7 +89,7 @@ Sentry 負責 client/server exception 與 request error；演練應在本機或 
 | Sentry | 設定 Production DSN 與 environment，建立 client/server exception、unhandled rejection 告警；確認 scrubber 不送 email、token、家庭資料、進度 | 一筆 staging/local 演練事件與告警通知 |
 | Upstash | 在 Vercel Production 設定 `UPSTASH_REDIS_REST_URL`、`UPSTASH_REDIS_REST_TOKEN`；確認公開表單限流在 Redis 失敗時回 503，而非 memory fallback | Upstash key/TTL 觀測或 staging 契約測試 |
 | Uptime | 每 5 分鐘 GET canonical `/robots.txt`，預期 HTTP 200 與 `text/plain`，通知送至團隊告警通道 | Monitor 設定與一次成功探測 |
-| Episode content | 人工校對 `ep-26` 270 句字幕後執行 `npm run proofread:subtitles -- ep-26 --mark`；再確認 `npm run verify:release-content` 無 blocker | proofread marker、release-content exit 0 |
+| Episode content | 人工校對所有 `subtitle-unproofread` 集（目前 `ep-27`、`ep-26`）後分別執行 `npm run proofread:subtitles -- ep-27 --mark` 與 `npm run proofread:subtitles -- ep-26 --mark`；再確認 `npm run verify:release-content` 無 blocker | proofread marker、release-content exit 0 |
 | Physical device QA | 依 `GAME_PHYSICAL_DEVICE_QA.md` 在真實 iPhone、iPad 執行 Safari、旋轉、切 app、畫線、音效與 mute 檢查 | QA checklist 與裝置/OS/日期紀錄 |
 
 P2 的 stories/play-map URL state cache 調查不列入本次 release gate；若日後實作，必須
@@ -110,7 +110,7 @@ npm run audit:production
 npm run typecheck
 npm test
 npm run verify:episodes
-npm run verify:release-content   # 目前會指出 ep-26 未校對字幕這個內容 blocker
+npm run verify:release-content   # 目前會指出 ep-27、ep-26 未校對字幕這個內容 blocker
 npm run build
 PW_REUSE_SERVER=1 npm run test:e2e:public
 PW_REUSE_SERVER=1 npm run test:e2e:ci   # 兒童主路徑；非 ruleset required check
@@ -120,4 +120,4 @@ NEXT_PUBLIC_SITE_URL=https://podcast-website-mu.vercel.app \
 
 `verify:episodes` 的 warning 不等於 release blocker：Apple sync 可保留已知的
 `illustrate-pending` MVP warning；正式內容發布前則用 `verify:release-content` 分類，
-目前 ep-26 的 `subtitle-unproofread` 必須先處理。
+目前 ep-27、ep-26 的 `subtitle-unproofread` 必須先處理。

@@ -1,5 +1,8 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { getStory } from "../../data/content";
+import { getStories, getStory } from "../../data/content";
+import { verifyStoryWorkflow } from "./episode-workflow";
 import { classifyReleaseIssues } from "./release-content";
 
 describe("classifyReleaseIssues", () => {
@@ -42,5 +45,44 @@ describe("classifyReleaseIssues", () => {
       "legacy-placeholder",
     ]);
     expect(result.acceptedWarnings).toEqual([]);
+  });
+
+  it("PRODUCTION-RELEASE-GATE 必須為每個 subtitle-unproofread 寫 --mark 命令", () => {
+    const stories = getStories();
+    const issues = stories.flatMap((story) => verifyStoryWorkflow(story));
+    const report = classifyReleaseIssues(stories, issues);
+    const slugs = [
+      ...new Set(
+        report.blockers
+          .filter((issue) => issue.code === "subtitle-unproofread")
+          .map((issue) => issue.slug),
+      ),
+    ];
+    const gate = readFileSync(
+      join(process.cwd(), "docs/PRODUCTION-RELEASE-GATE.md"),
+      "utf8",
+    );
+    const episodeRow =
+      gate.match(/\| Episode content \|[^|\n]+\|/)?.[0] ?? "";
+    const verifyNote =
+      gate.match(/npm run verify:release-content\s+#[^\n]+/)?.[0] ?? "";
+    const closing = gate.match(/目前[^\n]*subtitle-unproofread[^\n]+/)?.[0] ?? "";
+
+    expect(episodeRow, "找不到 Episode content 列").not.toBe("");
+    expect(verifyNote, "找不到 verify:release-content 註解").not.toBe("");
+    expect(closing, "找不到 subtitle-unproofread 收尾句").not.toBe("");
+
+    for (const slug of slugs) {
+      expect(
+        episodeRow,
+        `Episode content 列未含 ${slug}`,
+      ).toContain(slug);
+      expect(
+        episodeRow,
+        `Episode content 列缺少 ${slug} 的 --mark 命令`,
+      ).toContain(`proofread:subtitles -- ${slug} --mark`);
+      expect(verifyNote, `verify 註解未含 ${slug}`).toContain(slug);
+      expect(closing, `收尾句未含 ${slug}`).toContain(slug);
+    }
   });
 });
