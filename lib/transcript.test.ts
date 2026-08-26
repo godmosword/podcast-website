@@ -59,6 +59,12 @@ describe("hasFullTranscript", () => {
     expect(hasFullTranscript(story({ slug: "ep-1" }))).toBe(true);
   });
 
+  it("ep-27 有草稿字幕側車（完整逐字稿來源）", () => {
+    expect(hasFullTranscript("ep-27")).toBe(true);
+    const validation = validateFullTranscript("ep-27");
+    expect(validation.ok).toBe(true);
+  });
+
   it("hasTranscript／hasVtt／hasTranscriptVtt 與完整逐字稿對齊", () => {
     const withSubs = story({ slug: "ep-1" });
     const withoutSubs = story({

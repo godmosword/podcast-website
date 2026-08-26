@@ -39,6 +39,13 @@ status checks 成功後才能 merge：
 及後續 PR 都在上述 checks 通過後 merge。最新 `f448a98` 的 Production deployment
 及部署後 `verify-geo-live` 也都成功。
 
+`protect-main-web` 目前沒有 `github-actions[bot]` bypass。因此
+`.github/workflows/sync-apple-podcast.yml` 在「有變更 → commit → `git push` main」
+時會被同一條 GH013 擋下（3 of 3 required status checks are expected），即使
+job 內 `npm test`／`npm run build` 已綠。無工作樹變更的排程仍可成功並 resolve
+sync-failure issue。有新產物時改走 PR 上架（見 ep-27 字幕 sidecar），或由倉庫
+管理者把 GitHub Actions 加進 ruleset bypass。**不要**為了繞過而改 Apple sync YAML。
+
 GitHub ruleset 已可阻止未通過檢查的 merge；但 Vercel dashboard 的 Production
 deployment protection／Ignored Build Step 不在 repository 內，仍需由 Vercel 專案
 管理者確認 production deploy 是否也會等待同一組檢查。不能只用 CI YAML 推論這項
@@ -82,7 +89,7 @@ Sentry 負責 client/server exception 與 request error；演練應在本機或 
 | Sentry | 設定 Production DSN 與 environment，建立 client/server exception、unhandled rejection 告警；確認 scrubber 不送 email、token、家庭資料、進度 | 一筆 staging/local 演練事件與告警通知 |
 | Upstash | 在 Vercel Production 設定 `UPSTASH_REDIS_REST_URL`、`UPSTASH_REDIS_REST_TOKEN`；確認公開表單限流在 Redis 失敗時回 503，而非 memory fallback | Upstash key/TTL 觀測或 staging 契約測試 |
 | Uptime | 每 5 分鐘 GET canonical `/robots.txt`，預期 HTTP 200 與 `text/plain`，通知送至團隊告警通道 | Monitor 設定與一次成功探測 |
-| Episode content | 人工校對 `ep-26` 270 句字幕後執行 `npm run proofread:subtitles -- ep-26 --mark`；再確認 `npm run verify:release-content` 無 blocker | proofread marker、release-content exit 0 |
+| Episode content | 人工校對所有 `subtitle-unproofread` 集（目前 `ep-27`、`ep-26`）後分別執行 `npm run proofread:subtitles -- ep-27 --mark` 與 `npm run proofread:subtitles -- ep-26 --mark`；再確認 `npm run verify:release-content` 無 blocker | proofread marker、release-content exit 0 |
 | Physical device QA | 依 `GAME_PHYSICAL_DEVICE_QA.md` 在真實 iPhone、iPad 執行 Safari、旋轉、切 app、畫線、音效與 mute 檢查 | QA checklist 與裝置/OS/日期紀錄 |
 
 P2 的 stories/play-map URL state cache 調查不列入本次 release gate；若日後實作，必須
@@ -103,7 +110,7 @@ npm run audit:production
 npm run typecheck
 npm test
 npm run verify:episodes
-npm run verify:release-content   # 目前會指出 ep-26 未校對字幕這個內容 blocker
+npm run verify:release-content   # 目前會指出 ep-27、ep-26 未校對字幕這個內容 blocker
 npm run build
 PW_REUSE_SERVER=1 npm run test:e2e:public
 PW_REUSE_SERVER=1 npm run test:e2e:ci   # 兒童主路徑；非 ruleset required check
@@ -113,4 +120,4 @@ NEXT_PUBLIC_SITE_URL=https://podcast-website-mu.vercel.app \
 
 `verify:episodes` 的 warning 不等於 release blocker：Apple sync 可保留已知的
 `illustrate-pending` MVP warning；正式內容發布前則用 `verify:release-content` 分類，
-目前 ep-26 的 `subtitle-unproofread` 必須先處理。
+目前 ep-27、ep-26 的 `subtitle-unproofread` 必須先處理。
