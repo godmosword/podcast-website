@@ -9,6 +9,10 @@
 - **生圖佇列（P3）**：`data/illustration-queue.json` 為機器可讀 overlay；Studio `/studio` 列出 `pageCount=1` 的待生圖集。`illustrate --approve` 與本機 `sync:notify` 寫入狀態。**不改** Apple sync workflow／`sync-apple-podcast.ts`，也不自動生圖。
 - **Playwright E2E CI（P3）**：`.github/workflows/ci.yml` 新增 `e2e-child-path`（`npm run test:e2e:ci`：smoke／a11y／宇宙地圖／遊戲／訂閱／UX-P1-5 觸控）。視覺回歸仍不進 CI。**不改** Apple sync workflow。GitHub required merge check 名稱仍是 `build-and-public-e2e`。
 
+### Fixed
+
+- **Apple sync `npm test` 淺 clone**：`isReportGitHeadAcceptable` 相關測試不再對工作區跑未保護的 `HEAD~1`（GHA `actions/checkout` 預設 fetch-depth:1 會 `fatal: Needed a single revision`）。改以暫存 git repo 測祖先；**未改** sync workflow／`sync-apple-podcast.ts`。
+
 ### Changed
 
 - **LIST-2 訂閱文案誠實化**：`/subscribe` 改為「加入新集通知名單」——目前只收名單、不寄新集上線信或電子報；確認信只用來驗證信箱。`/legal`、`DISCLAIMER.md` 同步，政策版本 `2026-08-26`。ESP／新集上線信另案。

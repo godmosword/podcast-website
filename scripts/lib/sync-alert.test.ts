@@ -14,6 +14,21 @@ import {
 } from "../sync-alert";
 import type { SyncRunReport } from "./sync-report";
 
+function tryGitShortRev(rev: string): string | undefined {
+  try {
+    const sha = execFileSync("git", ["rev-parse", "--short", rev], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    }).trim();
+    return sha || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Apple sync GHA checkout 預設 fetch-depth:1，沒有 HEAD~1。 */
+const headParentShort = tryGitShortRev("HEAD~1");
+
 const freshRunAt = new Date().toISOString();
 
 const sampleReport: SyncRunReport = {
@@ -244,30 +259,30 @@ describe("sync-alert notify-live", () => {
     }
   });
 
-  it("gitHead 為目前 HEAD 的祖先時仍開單（GHA 先寫 report 再 commit）", () => {
-    const parent = execFileSync("git", ["rev-parse", "--short", "HEAD~1"], {
-      encoding: "utf8",
-    }).trim();
-    const { deps, calls } = makeDeps({
-      "issue list --search in:title ep-18 待生圖 --state open --json number,title,url,labels --limit 20":
-        "[]",
-    });
-    const result = notifyLive(
-      {
-        ...deps,
-        readFile: () =>
-          JSON.stringify({
-            ...sampleReport,
-            gitHead: parent,
-          }),
-      },
-      {},
-    );
-    expect(result.ok).toBe(1);
-    expect(calls.some((args) => args[0] === "issue" && args[1] === "create")).toBe(
-      true,
-    );
-  });
+  it.skipIf(!headParentShort)(
+    "gitHead 為目前 HEAD 的祖先時仍開單（GHA 先寫 report 再 commit）",
+    () => {
+      const { deps, calls } = makeDeps({
+        "issue list --search in:title ep-18 待生圖 --state open --json number,title,url,labels --limit 20":
+          "[]",
+      });
+      const result = notifyLive(
+        {
+          ...deps,
+          readFile: () =>
+            JSON.stringify({
+              ...sampleReport,
+              gitHead: headParentShort,
+            }),
+        },
+        {},
+      );
+      expect(result.ok).toBe(1);
+      expect(
+        calls.some((args) => args[0] === "issue" && args[1] === "create"),
+      ).toBe(true);
+    },
+  );
 
   it("gh issue list 失敗時計入 FAILED 且不 create", () => {
     const { deps, calls, warns } = makeDeps({});

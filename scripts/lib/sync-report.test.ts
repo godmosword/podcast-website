@@ -1,6 +1,9 @@
-import { describe, expect, it } from "vitest";
-import { buildCommitMessage, buildIssueBody } from "../post-sync-notify";
 import { execFileSync } from "node:child_process";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterEach, describe, expect, it } from "vitest";
+import { buildCommitMessage, buildIssueBody } from "../post-sync-notify";
 import {
   DEFAULT_SYNC_REPORT_RELATIVE,
   isReportGitHeadAcceptable,
@@ -8,6 +11,40 @@ import {
   resolveSyncReportPath,
   type SyncRunReport,
 } from "./sync-report";
+
+const tempRepos: string[] = [];
+
+afterEach(() => {
+  for (const dir of tempRepos.splice(0)) {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+/** Apple sync GHA checkout 預設 fetch-depth:1，工作區可能沒有 HEAD~1。 */
+function initTempRepo(commitCount: number): string {
+  const dir = mkdtempSync(join(tmpdir(), "sync-report-git-"));
+  tempRepos.push(dir);
+  execFileSync("git", ["init", "-b", "main"], { cwd: dir });
+  execFileSync("git", ["config", "user.email", "sync-test@example.com"], {
+    cwd: dir,
+  });
+  execFileSync("git", ["config", "user.name", "sync-test"], { cwd: dir });
+  execFileSync("git", ["config", "commit.gpgsign", "false"], { cwd: dir });
+  for (let i = 0; i < commitCount; i += 1) {
+    writeFileSync(join(dir, "note.txt"), `commit ${i}\n`);
+    execFileSync("git", ["add", "note.txt"], { cwd: dir });
+    execFileSync("git", ["commit", "-m", `c${i}`], { cwd: dir });
+  }
+  return dir;
+}
+
+function gitShort(rev: string, cwd: string): string {
+  return execFileSync("git", ["rev-parse", "--short", rev], {
+    cwd,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  }).trim();
+}
 
 const sampleReport: SyncRunReport = {
   runAt: "2026-06-11T12:00:00.000Z",
@@ -80,11 +117,16 @@ describe("isReportGitHeadAcceptable", () => {
   });
 
   it("接受 HEAD 的近期祖先（sync 先寫 report 再 commit）", () => {
-    const parent = execFileSync("git", ["rev-parse", "--short", "HEAD~1"], {
-      encoding: "utf8",
-    }).trim();
+    const root = initTempRepo(2);
+    const parent = gitShort("HEAD~1", root);
     expect(parent).toBeTruthy();
-    expect(isReportGitHeadAcceptable(parent)).toEqual({ ok: true });
+    expect(isReportGitHeadAcceptable(parent, root)).toEqual({ ok: true });
+  });
+
+  it("單顆 commit（淺 clone）仍接受相同 HEAD", () => {
+    const root = initTempRepo(1);
+    const head = gitShort("HEAD", root);
+    expect(isReportGitHeadAcceptable(head, root)).toEqual({ ok: true });
   });
 
   it("拒絕無關 sha", () => {
