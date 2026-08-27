@@ -101,6 +101,15 @@ describe("sync workflow contract", () => {
     );
     expect(yaml).toContain("git diff --name-only");
     expect(yaml).toContain("git ls-files --others --exclude-standard");
+    expect(yaml).toContain("pull-requests: write");
+  });
+
+  it("Commit and push 遇 GH013 必須改開 PR（個人倉無法給 Actions Integration bypass）", () => {
+    const yaml = readWorkflow("sync-apple-podcast.yml");
+    expect(yaml).toContain("GH013");
+    expect(yaml).toContain("gh pr create");
+    expect(yaml).toContain("gh pr merge");
+    expect(yaml).toContain("--squash --auto");
   });
 
   it("git add 必須含 catalog 完備測試所需的四 sidecar（防 #46／#60 回歸）", () => {
@@ -166,6 +175,12 @@ describe("sync workflow contract", () => {
     expect(src).toMatch(
       /if\s*\(\s*hasNewEpisodes\s*\)\s*\{[\s\S]*?upsertCatalogSidecars\s*\(/,
     );
+  });
+
+  it("字幕再處理必須跳過已 --mark 的側車（防 OpenCC 覆寫校對）", () => {
+    const src = readSyncScript();
+    expect(src).toContain("isSubtitleProofreadMarked");
+    expect(src).toMatch(/!isSubtitleProofreadMarked/);
   });
 
   it("sync report 必須保留 FAQ MVP 待人工改寫清單", () => {

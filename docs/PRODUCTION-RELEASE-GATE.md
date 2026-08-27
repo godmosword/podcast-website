@@ -39,12 +39,15 @@ status checks 成功後才能 merge：
 及後續 PR 都在上述 checks 通過後 merge。最新 `f448a98` 的 Production deployment
 及部署後 `verify-geo-live` 也都成功。
 
-`protect-main-web` 目前沒有 `github-actions[bot]` bypass。因此
+`protect-main-web` 的 bypass 目前只有 Admin 角色（`RepositoryRole` id 5）。個人倉
+無法把 GitHub Actions **Integration**（app id `15368`）加進 bypass（API 422：
+must be part of the ruleset source or owner organization）。把
+`github-actions[bot]` 加為 `User` id `41898282` 也無法讓 `GITHUB_TOKEN` 直推
+`main`（#129 重跑仍 GH013）。因此
 `.github/workflows/sync-apple-podcast.yml` 在「有變更 → commit → `git push` main」
-時會被同一條 GH013 擋下（3 of 3 required status checks are expected），即使
-job 內 `npm test`／`npm run build` 已綠。無工作樹變更的排程仍可成功並 resolve
-sync-failure issue。有新產物時改走 PR 上架（見 ep-27 字幕 sidecar），或由倉庫
-管理者把 GitHub Actions 加進 ruleset bypass。**不要**為了繞過而改 Apple sync YAML。
+撞到 GH013 時，改推 `sync/apple-<run_id>` 並開 PR，等 required checks 通過後
+squash auto-merge。無工作樹變更的排程本來就會成功並 resolve sync-failure issue。
+已 `--mark` 的字幕側車不再跑 OpenCC 簡轉繁（避免「支持」被改成「支援」）。
 
 GitHub ruleset 已可阻止未通過檢查的 merge；但 Vercel dashboard 的 Production
 deployment protection／Ignored Build Step 不在 repository 內，仍需由 Vercel 專案

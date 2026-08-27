@@ -61,6 +61,7 @@
 | chore(play-map): 移除內部全國地圖 proto | `07d3bcf` |
 | feat(play-map): 地圖改為僅服務已選縣市或附近 | `e97858e` |
 | fix(play-map): 磚牆欄語意註解與 coverage 可造訪文案 | `d01906f` |
+| fix(sync): GH013 改開 PR；略過已 --mark 字幕再處理（#129） | 見本 commit |
 
 ### 本輪已完成（2026-08-26）
 

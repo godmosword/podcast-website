@@ -54,7 +54,10 @@ import {
   transcribeToSidecar,
   whisperAvailable,
 } from "./lib/transcribe-core";
-import { autoProofreadFixSlug } from "./lib/subtitle-proofread";
+import {
+  autoProofreadFixSlug,
+  isSubtitleProofreadMarked,
+} from "./lib/subtitle-proofread";
 import { upsertCatalogSidecars } from "./lib/sync-catalog-sidecars";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -331,10 +334,12 @@ function backfillMissingSubtitles(catalog: Story[]): void {
 function relocalizeCatalogSubtitles(catalog: Story[]): void {
   if (dryRun) return;
 
-  const slugs = listSidecarSlugs(catalog.map((s) => s.slug));
+  const slugs = listSidecarSlugs(catalog.map((s) => s.slug)).filter(
+    (slug) => !isSubtitleProofreadMarked(slug),
+  );
   if (slugs.length === 0) return;
 
-  console.log(`字幕再處理：簡轉繁 + 過濾（${slugs.length} 集）…`);
+  console.log(`字幕再處理：簡轉繁 + 過濾（${slugs.length} 集，已 --mark 者略過）…`);
   const { ok, failed } = relocalizeSidecars(slugs);
   console.log(`字幕再處理：完成 ${ok}/${slugs.length} 集`);
   if (failed.length > 0) {

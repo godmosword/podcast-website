@@ -21,6 +21,7 @@ permissions:
   contents: write
   issues: write
   actions: read
+  pull-requests: write
 
 jobs:
   sync:
@@ -105,6 +106,8 @@ jobs:
 
       - name: Commit and push
         if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -125,9 +128,47 @@ jobs:
           # main 在本 run 期間可能被人為 push 推進（sync 跑 2 分鐘以上就有機率撞上），
           # 直接 push 會被 non-fast-forward 拒絕 → 誤發「同步失敗」告警（見 issue #36）。
           # sync 只動 data/ 與 public/stories/，與人為 commit 幾乎不重疊，rebase 重試即可。
+          # 個人倉的 GITHUB_TOKEN 另會撞 protect-main-web GH013（required checks）；
+          # 那不是 non-fast-forward，rebase 無效，改推 sync/* 分支並開 PR auto-merge。
+          open_sync_pr() {
+            local branch="sync/apple-${GITHUB_RUN_ID}"
+            echo "::notice::protect-main-web GH013：改開 PR ${branch}"
+            git checkout -b "$branch"
+            git push -u origin "$branch"
+            local title
+            title=$(head -n 1 "$SYNC_COMMIT_MSG_PATH")
+            local pr
+            pr=$(gh pr create --base main --head "$branch" --title "$title" --body "Apple sync 因 protect-main-web GH013（required status checks）無法直推 main。個人倉不能把 GitHub Actions Integration 加進 ruleset bypass。此 PR 等 quality／build-and-public-e2e／Vercel 通過後 squash auto-merge。
+
+Run：https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}")
+            gh pr merge "$pr" --squash --auto
+            local i state
+            for i in $(seq 1 80); do
+              state=$(gh pr view "$pr" --json state --jq .state)
+              if [ "$state" = "MERGED" ]; then
+                return 0
+              fi
+              if [ "$state" = "CLOSED" ]; then
+                echo "::error::sync PR 未合併就被關閉：$pr"
+                return 1
+              fi
+              sleep 15
+            done
+            echo "::error::等待 sync PR merge 逾時：$pr"
+            return 1
+          }
           for attempt in 1 2 3; do
-            if git push; then
+            set +e
+            push_output=$(git push 2>&1)
+            push_status=$?
+            set -e
+            echo "$push_output"
+            if [ "$push_status" -eq 0 ]; then
               exit 0
+            fi
+            if echo "$push_output" | grep -q "GH013"; then
+              open_sync_pr
+              exit $?
             fi
             echo "push 被拒（remote 有新 commit），rebase 後重試（$attempt/3）"
             git pull --rebase origin main

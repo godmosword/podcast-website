@@ -18,6 +18,7 @@
 
 ### Fixed
 
+- **Apple sync GH013（#129）**：個人倉無法給 GitHub Actions Integration bypass；`Commit and push` 撞 required checks 時改開 `sync/apple-*` PR 並 squash auto-merge。已 `--mark` 字幕不再被 OpenCC 簡轉繁覆寫。**有改** `sync-apple-podcast.yml`（僅 push 失敗路徑）與 `sync-apple-podcast.ts`（略過已校對側車）。
 - **release-content 清單含 ep-27**：`docs/PRODUCTION-RELEASE-GATE.md` 的 Episode content／`verify:release-content` 註解改列目前所有 `subtitle-unproofread`（`ep-27`、`ep-26`）。契約測試防止只寫舊集。不 `--mark`、不生圖。
 - **GEO live 煙霧 vs MVP 無字幕**：`verify:geo-live` 不再要求最新集一定有 `transcript.vtt` 200。無 `data/subtitles` 側車時改確認**最新 RSS `<item>`** 未宣告任何 `podcast:transcript`、JSON-LD 無 VTT MediaObject，且 VTT 為**直接** 404（`redirected === false`，不接受同 pathname 帶 query 的 redirect）。有側車仍走原契約。**未改** Apple sync workflow。
 - **ep-27 播放頁封面**：補 `01.avif`／`01.webp`。StoryPlayer `<picture>` 在 AVIF 瀏覽器會先要 `.avif`，缺檔會 404 且**不會**退回 JPG。`npm run optimize:lcp-images`；**未改** Apple sync workflow。
