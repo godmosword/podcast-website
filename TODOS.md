@@ -57,7 +57,8 @@
 
 | ID | 說明 |
 |----|------|
-| docs(play-map): 記錄全國視角地圖退役結論（proto／cluster 調查，避免重跑） | 見本 commit |
+| docs(play-map): 記錄全國視角地圖退役結論（proto／cluster 調查，避免重跑） | `0dfefd9` |
+| chore(play-map): 移除內部全國地圖 proto | 見本 commit |
 
 ### 本輪已完成（2026-08-26）
 

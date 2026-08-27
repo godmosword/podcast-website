@@ -33,9 +33,9 @@ describe("playground detail route helpers", () => {
     );
   });
 
-  it("reserves collections and the internal proto namespace", () => {
+  it("reserves collections under /play-map", () => {
     expect(RESERVED_PLAY_MAP_SEGMENTS.has("collections")).toBe(true);
-    expect(RESERVED_PLAY_MAP_SEGMENTS.has("proto")).toBe(true);
+    expect([...RESERVED_PLAY_MAP_SEGMENTS]).toEqual(["collections"]);
   });
 
   it("uses the short city name only in the title", () => {

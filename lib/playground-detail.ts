@@ -5,7 +5,7 @@ import { clipParentVoice } from "@/lib/playground-parent-voice";
 import { getSiteUrl } from "@/lib/site-url";
 
 /** Reserved child routes under /for-parents/play-map（靜態段優先於 [placeId]）。 */
-export const RESERVED_PLAY_MAP_SEGMENTS = new Set(["collections", "proto"]);
+export const RESERVED_PLAY_MAP_SEGMENTS = new Set(["collections"]);
 
 export function playgroundDetailPath(placeId: string): string {
   return `/for-parents/play-map/${encodeURIComponent(placeId)}`;
