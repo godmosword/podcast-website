@@ -254,7 +254,10 @@ export default function PlayMap({
               registerCardRef={registerCardRef}
               resultSentence={map.resultSentence}
               groupNote={map.groupNote}
-              showMapAction={!map.splitActive}
+              showMapAction={
+                !map.splitActive &&
+                (map.city !== null || map.userLatLng !== null)
+              }
               onOpenMap={() => map.handleSelectView("map")}
               coverageLabel={map.coverageLabel}
               editorialPick={map.showCards ? map.editorialPick : null}
@@ -306,9 +309,6 @@ export default function PlayMap({
                 onSelect={handleSelectFromMap}
                 reduceMotion={map.reduceMotion}
                 active={map.showMap}
-                clusterMode={map.clusterMode}
-                cityClusters={map.cityClusters}
-                onSelectCity={handleSelectCity}
                 userLatLng={map.userLatLng}
                 viewportZoom={viewport.zoom}
                 preserveViewport={

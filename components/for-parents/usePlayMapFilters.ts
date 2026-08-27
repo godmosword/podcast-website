@@ -20,10 +20,6 @@ import {
   type LatLng,
 } from "@/lib/playground-distance";
 import {
-  clusterPlaygroundsByCity,
-  isNationwideUnscoped,
-} from "@/lib/playground-clusters";
-import {
   buildPlayMapQueryString,
   countByCity,
   countByType,
@@ -149,7 +145,9 @@ export function usePlayMapFilters({
   const [highEnergyOnly, setHighEnergyOnly] = useState(initialHighEnergyOnly);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoveredPlaceId, setHoveredPlaceId] = useState<string | null>(null);
-  const [browseView, setBrowseView] = useState<BrowseView>(initialView);
+  const [browseView, setBrowseView] = useState<BrowseView>(() =>
+    initialView === "map" && initialCity === null ? "cards" : initialView,
+  );
   const [sheetVariant, setSheetVariant] = useState<SheetVariant>("full");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [userLatLng, setUserLatLng] = useState<LatLng | null>(null);
@@ -379,6 +377,14 @@ export function usePlayMapFilters({
       pathname,
     ],
   );
+
+  const didNormalizeUnscopedMapRef = useRef(false);
+  useEffect(() => {
+    if (didNormalizeUnscopedMapRef.current) return;
+    didNormalizeUnscopedMapRef.current = true;
+    if (initialView !== "map" || initialCity !== null) return;
+    syncUrl({ view: "cards" });
+  }, [initialCity, initialView, syncUrl]);
 
   const handleSelectCity = useCallback(
     (nextCity: string | null) => {
@@ -644,7 +650,9 @@ export function usePlayMapFilters({
     setParkingOnly(initialParkingOnly);
     setStrollerFriendlyOnly(initialStrollerFriendlyOnly);
     setHighEnergyOnly(initialHighEnergyOnly);
-    setBrowseView(initialView);
+    setBrowseView(
+      initialView === "map" && initialCity === null ? "cards" : initialView,
+    );
   }, [
     initialCity,
     initialType,
@@ -687,11 +695,6 @@ export function usePlayMapFilters({
     highEnergyOnly,
   ].filter(Boolean).length;
 
-  const clusterMode = isNationwideUnscoped(city, userLatLng !== null);
-  const cityClusters = useMemo(
-    () => clusterPlaygroundsByCity(filtered),
-    [filtered],
-  );
   /**
    * v2 起地圖是**次要分頁**：view=cards（預設，含桌面）任何寬度都不掛 Leaflet，
    * 首屏零 tile 請求。桌面並排只在 view=map 時成立，hover 關聯也跟著它走。
@@ -712,9 +715,7 @@ export function usePlayMapFilters({
     reduceMotion,
     splitLayout,
     splitActive,
-    clusterMode,
     viewportSearchActive: viewportBounds !== null,
-    cityClusters,
     showCards,
     showMap,
     selectedDistanceLabel,

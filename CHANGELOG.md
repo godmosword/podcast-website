@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **親子遊樂地圖退役全國視角地圖**：未選縣市且未定位時不再提供「看地圖」；無縣市的 `?view=map` 進頁改為名單並清掉該參數。地圖只服務已選縣市或「附近」。縣市內 z9–12 仍用 spatial cluster。**未改** Apple sync workflow。
+
 ### Added
 
 - **ep-27 草稿字幕**：`data/subtitles/ep-27.json`（Whisper large-v3 草稿、未 `--mark`）。GHA run 32964051895 已轉錄並通過 `npm test`／build，但 `protect-main-web` 無 github-actions bypass，直推 `main` 被 GH013（缺 quality／build-and-public-e2e／Vercel）。本機重跑 `npm run transcribe -- ep-27` 後走 PR 上架。**未改** Apple sync workflow。

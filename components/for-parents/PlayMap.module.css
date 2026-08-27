@@ -1418,14 +1418,14 @@
   opacity: 0.92;
 }
 
-:global(.playMapClusterButton) {
+:global(.playMapSpatialClusterButton) {
   position: relative;
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   padding: 0;
-  border: 2px solid var(--map-chip-ink);
+  border: 3px solid var(--map-chip-ink);
   border-radius: 50%;
   background: linear-gradient(var(--map-chip), var(--map-chip-2));
   color: var(--map-chip-ink);
@@ -1438,13 +1438,7 @@
   transition: transform var(--motion-press), opacity var(--motion-press);
 }
 
-:global(.playMapSpatialClusterButton) {
-  width: 48px;
-  height: 48px;
-  border-width: 3px;
-}
-
-:global(.playMapClusterButton:active) {
+:global(.playMapSpatialClusterButton:active) {
   transform: scale(0.96);
   opacity: 0.92;
 }
@@ -1670,7 +1664,7 @@
   .loadMore,
   .viewportSearchButton,
   :global(.playMapMarkerButton),
-  :global(.playMapClusterButton) {
+  :global(.playMapSpatialClusterButton) {
     transition: none;
   }
 
@@ -1696,7 +1690,7 @@
   }
 
   :global(.playMapMarkerButton:active),
-  :global(.playMapClusterButton:active) {
+  :global(.playMapSpatialClusterButton:active) {
     transform: none;
     opacity: 1;
   }

@@ -153,11 +153,14 @@ function first(value: string | string[] | undefined): string | undefined {
 export function parsePlayMapQuery(params: RawPlayMapParams): PlayMapQuery {
   const rawCity = first(params.city);
   const rawType = first(params.type);
-  const view = first(params.view) === "map" ? "map" : "cards";
+  const city =
+    rawCity !== undefined && listCities().includes(rawCity) ? rawCity : null;
+  const rawView = first(params.view) === "map" ? "map" : "cards";
+  // 無縣市的 view=map 不再是全國地圖入口；解析成 cards，避免首屏閃地圖。
+  const view = rawView === "map" && city === null ? "cards" : rawView;
 
   return {
-    city:
-      rawCity !== undefined && listCities().includes(rawCity) ? rawCity : null,
+    city,
     type:
       rawType !== undefined &&
       (PLAYGROUND_TYPES as readonly string[]).includes(rawType)

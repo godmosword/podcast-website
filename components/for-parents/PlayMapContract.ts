@@ -131,7 +131,7 @@ export type PlayMapCardListProps = {
   resultSentence: PlayMapResultSentenceView;
   /** 車程分組時的粗估免責文字；其他分組為 null。 */
   groupNote: string | null;
-  /** 手機名單模式顯示「看地圖」；桌面並排不需要。 */
+  /** 手機名單模式：已選縣市或已定位時顯示「看地圖」；桌面並排不需要。 */
   showMapAction: boolean;
   onOpenMap: () => void;
   /** 低於主要結果摘要顯示的 coverage/editorial 狀態。 */

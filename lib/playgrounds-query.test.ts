@@ -41,6 +41,14 @@ describe("play-map 網址狀態", () => {
     });
   });
 
+  test("parsePlayMapQuery 無縣市的 view=map 軟著陸 cards", () => {
+    expect(parsePlayMapQuery({ view: "map", free: "1" })).toMatchObject({
+      city: null,
+      freeOnly: true,
+      view: "cards",
+    });
+  });
+
   test("parsePlayMapQuery 無參數時 city 為 null（全部）", () => {
     expect(parsePlayMapQuery({})).toEqual({
       city: null,

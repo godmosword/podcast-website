@@ -18,11 +18,9 @@ import {
 import "leaflet/dist/leaflet.css";
 import type { Playground } from "@/data/playgrounds";
 import {
-  CITY_AGGREGATE_MAX_ZOOM,
   INDIVIDUAL_MARKER_MIN_ZOOM,
   clusterPlaygroundsByZoom,
   playMapMarkerMode,
-  type CityCluster,
   type SpatialCluster,
 } from "@/lib/playground-clusters";
 import type { LatLng } from "@/lib/playground-distance";
@@ -34,7 +32,6 @@ import {
   TAIWAN_MAX_BOUNDS_VISCOSITY,
   TAIWAN_NATIONAL_MAX_ZOOM,
   TAIWAN_SOFT_MIN_ZOOM,
-  nationalViewForClusters,
   taiwanMapBoundsCorners,
 } from "@/lib/play-map-camera";
 import { pickNearest } from "@/lib/playground-distance";
@@ -58,12 +55,8 @@ type FitBoundsProps = {
   markProgrammaticCamera: () => void;
   /** 選中時把針抬出 sheet 覆蓋區：[right, bottom] */
   selectedPad: [number, number];
-  /** 全國未縮小範圍：用台灣框，不用 fit 縣市聚合點（會把福建放進主畫面）。 */
-  nationalFrame: boolean;
-  /** 全國鏡頭要框住的縣市聚合點；空集合時退回寬度感知的後備鏡頭。 */
-  nationalPoints: readonly { lat: number; lng: number }[];
   /**
-   * 鏡頭重算的唯一觸發鍵。涵蓋 clusterMode、縣市範圍、命中筆數、selectedId、
+   * 鏡頭重算的唯一觸發鍵。涵蓋縣市範圍、命中筆數、selectedId、
    * splitLayout（選中 padding 隨並排／堆疊切換）。
    * 其餘鏡頭參數由 ref 讀最新快照，避免 parent 重繪把使用者平移／縮放拉回去。
    */
@@ -72,7 +65,6 @@ type FitBoundsProps = {
 
 /** 組出 FitBounds 的 fitKey；城市名排序後拼接，避免集合相同但順序不同。 */
 export function playMapFitKey(args: {
-  clusterMode: boolean;
   cities: readonly string[];
   filteredCount: number;
   selectedId: string | null;
@@ -84,7 +76,7 @@ export function playMapFitKey(args: {
   const cityScope = [...new Set(args.cities)].sort().join(",");
   const near = args.nearMeToken ? `|near:${args.nearMeToken}` : "";
   const split = args.splitLayout ? "|split" : "|stack";
-  return `${args.clusterMode ? "cluster" : "pins"}|${cityScope}|${args.filteredCount}|${args.selectedId ?? ""}${near}${split}`;
+  return `pins|${cityScope}|${args.filteredCount}|${args.selectedId ?? ""}${near}${split}`;
 }
 
 function escapeAttr(value: string): string {
@@ -135,8 +127,6 @@ function FitBounds({
   preserveViewport,
   markProgrammaticCamera,
   selectedPad,
-  nationalFrame,
-  nationalPoints,
   fitKey,
 }: FitBoundsProps) {
   const map = useMap();
@@ -148,8 +138,6 @@ function FitBounds({
     selectedId,
     preserveViewport,
     selectedPad,
-    nationalFrame,
-    nationalPoints,
   });
   // 無依賴陣列：每次 commit 都寫入最新快照。宣告在主 effect 之前，
   // 同一次 commit 內主 effect 讀到的已是本輪 props。
@@ -162,8 +150,6 @@ function FitBounds({
       selectedId,
       preserveViewport,
       selectedPad,
-      nationalFrame,
-      nationalPoints,
     };
   });
 
@@ -188,34 +174,6 @@ function FitBounds({
       return;
     } else if (snap.preserveViewport) {
       return;
-    } else if (snap.nationalFrame) {
-      markProgrammaticCamera();
-      const applyNational = () => {
-        map.invalidateSize();
-        const size = map.getSize();
-        /*
-         * 鏡頭要框住實際的縣市聚合，不是一組寫死的經緯度。舊版把西緣釘在
-         * 120.35（資料只收到雲林時訂的），南部進資料後台南與高雄的 marker
-         * 被推出畫面，等於兩個縣市點不到。高度也要傳：城市名標籤浮在圓的
-         * 上方，只看寬度會把最北的縣市裁掉。
-         */
-        const view = nationalViewForClusters({
-          widthPx: size.x,
-          heightPx: size.y,
-          points: snap.nationalPoints,
-        });
-        map.setView(view.center, view.zoom, { animate: false });
-      };
-      applyNational();
-      let nestedRaf = 0;
-      const raf = window.requestAnimationFrame(() => {
-        applyNational();
-        nestedRaf = window.requestAnimationFrame(applyNational);
-      });
-      return () => {
-        window.cancelAnimationFrame(raf);
-        window.cancelAnimationFrame(nestedRaf);
-      };
     } else if (snap.points.length === 0) {
       markProgrammaticCamera();
       map.setView(snap.emptyCenter, DEFAULT_ZOOM, motion);
@@ -389,43 +347,6 @@ const AccessibleMarker = memo(function AccessibleMarker({
   );
 });
 
-type ClusterMarkerProps = {
-  cluster: CityCluster;
-  onSelectCity: (city: string, trigger: HTMLElement) => void;
-};
-
-function ClusterMarker({ cluster, onSelectCity }: ClusterMarkerProps) {
-  const icon = useMemo(() => {
-    const label = escapeAttr(`${cluster.city}，${cluster.count} 處`);
-    const count = escapeAttr(String(cluster.count));
-    const city = escapeAttr(cluster.city);
-    return L.divIcon({
-      className: "playMapMarkerHost",
-      html: `<button type="button" class="playMapClusterButton" aria-label="${label}"><span class="playMapMarkerName">${city}</span><span class="playMapClusterCount">${count}</span></button>`,
-      iconSize: [44, 44],
-      iconAnchor: [22, 22],
-    });
-  }, [cluster.city, cluster.count]);
-
-  return (
-    <Marker
-      position={[cluster.lat, cluster.lng]}
-      icon={icon}
-      keyboard={false}
-      eventHandlers={{
-        click: (event) => {
-          const target = event.originalEvent.target;
-          if (target instanceof HTMLElement) {
-            onSelectCity(cluster.city, target);
-            return;
-          }
-          onSelectCity(cluster.city, document.body);
-        },
-      }}
-    />
-  );
-}
-
 type SpatialClusterMarkerProps = {
   cluster: SpatialCluster;
   animate: boolean;
@@ -443,7 +364,7 @@ function SpatialClusterMarker({
     const count = escapeAttr(String(cluster.count));
     return L.divIcon({
       className: "playMapMarkerHost",
-      html: `<button type="button" class="playMapClusterButton playMapSpatialClusterButton" aria-label="${label}"><span class="playMapClusterCount">${count}</span></button>`,
+      html: `<button type="button" class="playMapSpatialClusterButton" aria-label="${label}"><span class="playMapClusterCount">${count}</span></button>`,
       iconSize: [48, 48],
       iconAnchor: [24, 24],
     });
@@ -515,9 +436,6 @@ export type PlayMapLeafletProps = {
   onSelect: (id: string, trigger: HTMLElement) => void;
   reduceMotion: boolean;
   active: boolean;
-  clusterMode: boolean;
-  cityClusters: readonly CityCluster[];
-  onSelectCity: (city: string) => void;
   userLatLng: LatLng | null;
   viewportZoom: number | null;
   preserveViewport: boolean;
@@ -548,9 +466,6 @@ export default function PlayMapLeaflet({
   onSelect,
   reduceMotion,
   active,
-  clusterMode,
-  cityClusters,
-  onSelectCity,
   userLatLng,
   viewportZoom,
   preserveViewport,
@@ -588,13 +503,8 @@ export default function PlayMapLeaflet({
     },
     [],
   );
-  const effectiveZoom =
-    viewportZoom ??
-    (clusterMode ? CITY_AGGREGATE_MAX_ZOOM : INDIVIDUAL_MARKER_MIN_ZOOM);
-  const markerMode = playMapMarkerMode({
-    nationwideUnscoped: clusterMode,
-    zoom: effectiveZoom,
-  });
+  const effectiveZoom = viewportZoom ?? INDIVIDUAL_MARKER_MIN_ZOOM;
+  const markerMode = playMapMarkerMode(effectiveZoom);
   const spatialClusters = useMemo(
     () =>
       markerMode === "spatial"
@@ -621,11 +531,6 @@ export default function PlayMapLeaflet({
   const selectedPoint: [number, number] | null = selected
     ? [selected.lat, selected.lng]
     : null;
-  const cityClusterPoints = useMemo(
-    (): Array<[number, number]> =>
-      cityClusters.map((row) => [row.lat, row.lng]),
-    [cityClusters],
-  );
   const spatialClusterPoints = useMemo(
     (): Array<[number, number]> => [
       ...visibleSpatialClusters.map(
@@ -650,13 +555,8 @@ export default function PlayMapLeaflet({
     ];
   }, [nearMeCamera, places, userLatLng]);
   const fitPoints =
-    markerMode === "city"
-      ? cityClusterPoints
-      : markerMode === "spatial"
-        ? spatialClusterPoints
-        : (nearMePoints ?? points);
+    markerMode === "spatial" ? spatialClusterPoints : (nearMePoints ?? points);
   const fitKey = playMapFitKey({
-    clusterMode,
     cities: places.map((place) => place.city),
     filteredCount: places.length,
     selectedId,
@@ -703,42 +603,19 @@ export default function PlayMapLeaflet({
           preserveViewport={preserveViewport}
           markProgrammaticCamera={markProgrammaticCamera}
           selectedPad={selectedPad}
-          nationalFrame={clusterMode && selectedId === null && !nearMeCamera}
-          nationalPoints={cityClusters}
           fitKey={fitKey}
         />
-        {markerMode === "city"
-          ? cityClusters.map((cluster) => (
-              <ClusterMarker
-                key={cluster.city}
+        {markerMode === "spatial" ? (
+          <>
+            {visibleSpatialClusters.map((cluster) => (
+              <SpatialClusterMarker
+                key={cluster.id}
                 cluster={cluster}
-                onSelectCity={(city) => onSelectCity(city)}
+                animate={!reduceMotion}
+                markProgrammaticCamera={markProgrammaticCamera}
               />
-            ))
-          : markerMode === "spatial"
-            ? [
-                ...visibleSpatialClusters.map((cluster) => (
-                  <SpatialClusterMarker
-                    key={cluster.id}
-                    cluster={cluster}
-                    animate={!reduceMotion}
-                    markProgrammaticCamera={markProgrammaticCamera}
-                  />
-                )),
-                ...spatialSingletons.map((place) => (
-                  <AccessibleMarker
-                    key={place.id}
-                    place={place}
-                    selected={selectedId === place.id}
-                    hovered={hoveredPlaceId === place.id}
-                    hoverCorrelationEnabled={hoverCorrelationEnabled}
-                    onHover={onHover}
-                    onBlur={onBlur}
-                    onSelect={onSelect}
-                  />
-                )),
-              ]
-            : places.map((place) => (
+            ))}
+            {spatialSingletons.map((place) => (
               <AccessibleMarker
                 key={place.id}
                 place={place}
@@ -750,6 +627,21 @@ export default function PlayMapLeaflet({
                 onSelect={onSelect}
               />
             ))}
+          </>
+        ) : (
+          places.map((place) => (
+            <AccessibleMarker
+              key={place.id}
+              place={place}
+              selected={selectedId === place.id}
+              hovered={hoveredPlaceId === place.id}
+              hoverCorrelationEnabled={hoverCorrelationEnabled}
+              onHover={onHover}
+              onBlur={onBlur}
+              onSelect={onSelect}
+            />
+          ))
+        )}
         {userLatLng ? <MeMarker position={userLatLng} /> : null}
       </MapContainer>
 

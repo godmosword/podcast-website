@@ -1,14 +1,8 @@
 /**
- * 全國視角把地點收成縣市聚合，避免 73 根針糊成一團。
+ * 縣市／附近地圖的 zoom 感知標記：z9–12 網格聚合，z13+ 單點針。
+ * 全國縣市 aggregate 已退役；全國層入口是縣市磚牆。
  */
 import type { Playground } from "@/data/playgrounds";
-
-export type CityCluster = {
-  city: string;
-  count: number;
-  lat: number;
-  lng: number;
-};
 
 export type SpatialCluster = {
   id: string;
@@ -20,63 +14,19 @@ export type SpatialCluster = {
 
 /**
  * 以台灣全台 overview 的現有 fit 行為為基準：
- * - 8 級以下仍維持縣市 aggregate
  * - 9–12 級以區域網格聚合
  * - 13 級以上讓單點針接手
  *
  * DEFAULT_ZOOM 是 11，既有 FitBounds 的 maxZoom 是 14；這組邊界讓
- * 初始全台視角保留縣市語意，放大到區域後才逐步拆解，不依賴外部套件。
+ * 縣市／附近地圖放大到區域後才逐步拆解，不依賴外部套件。
  */
-export const CITY_AGGREGATE_MAX_ZOOM = 8;
 export const INDIVIDUAL_MARKER_MIN_ZOOM = 13;
 
-export type PlayMapMarkerMode = "city" | "spatial" | "individual";
+export type PlayMapMarkerMode = "spatial" | "individual";
 
-export function playMapMarkerMode(args: {
-  nationwideUnscoped: boolean;
-  zoom: number;
-}): PlayMapMarkerMode {
-  // 明確縣市／附近已是 local scope，保留 PR2 的 individual marker 行為；
-  // spatial transition 只發生在全台探索逐步放大的過程。
-  if (!args.nationwideUnscoped) return "individual";
-  if (args.nationwideUnscoped && args.zoom <= CITY_AGGREGATE_MAX_ZOOM) {
-    return "city";
-  }
-  if (args.zoom < INDIVIDUAL_MARKER_MIN_ZOOM) return "spatial";
+export function playMapMarkerMode(zoom: number): PlayMapMarkerMode {
+  if (zoom < INDIVIDUAL_MARKER_MIN_ZOOM) return "spatial";
   return "individual";
-}
-
-export function clusterPlaygroundsByCity(
-  places: readonly Playground[],
-): CityCluster[] {
-  const buckets = new Map<
-    string,
-    { count: number; latSum: number; lngSum: number }
-  >();
-
-  for (const place of places) {
-    const prev = buckets.get(place.city);
-    if (prev) {
-      prev.count += 1;
-      prev.latSum += place.lat;
-      prev.lngSum += place.lng;
-    } else {
-      buckets.set(place.city, {
-        count: 1,
-        latSum: place.lat,
-        lngSum: place.lng,
-      });
-    }
-  }
-
-  return [...buckets.entries()]
-    .map(([city, bucket]) => ({
-      city,
-      count: bucket.count,
-      lat: bucket.latSum / bucket.count,
-      lng: bucket.lngSum / bucket.count,
-    }))
-    .sort((a, b) => a.city.localeCompare(b.city, "zh-Hant"));
 }
 
 /**
@@ -108,12 +58,4 @@ export function clusterPlaygroundsByZoom(
       places: [...bucket].sort((a, b) => a.id.localeCompare(b.id)),
     }))
     .sort((a, b) => a.id.localeCompare(b.id));
-}
-
-/** 未選縣市且未定位：地圖走縣市聚合，名單提示先縮小範圍。 */
-export function isNationwideUnscoped(
-  city: string | null,
-  hasUserLocation: boolean,
-): boolean {
-  return city === null && !hasUserLocation;
 }

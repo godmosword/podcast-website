@@ -20,7 +20,7 @@ describe("PlayMap.module.css map-chip 用量", () => {
     expect(selectors.length).toBeGreaterThanOrEqual(3);
     for (const selector of selectors) {
       expect(selector).toMatch(
-        /viewportSearchButton|leaflet-control-zoom|playMapClusterButton/,
+        /viewportSearchButton|leaflet-control-zoom|playMapSpatialClusterButton/,
       );
     }
   });

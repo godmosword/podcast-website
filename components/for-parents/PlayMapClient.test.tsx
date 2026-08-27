@@ -56,6 +56,13 @@ describe("PlayMapClient", () => {
     expect(html).toContain('data-rain="0"');
   });
 
+  test("無縣市的 view=map 傳給 PlayMap 時已是 cards", () => {
+    searchParamsRef.current = new URLSearchParams("view=map&free=1");
+    const html = renderToStaticMarkup(<PlayMapClient />);
+    expect(html).toContain('data-view="cards"');
+    expect(html).toContain('data-free="1"');
+  });
+
   test("從 URL 解析 rain contextual filter", () => {
     searchParamsRef.current = new URLSearchParams("rain=1");
     const html = renderToStaticMarkup(<PlayMapClient />);

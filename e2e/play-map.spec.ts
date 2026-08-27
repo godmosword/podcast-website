@@ -27,6 +27,23 @@ async function waitForPlayMapReady(page: import("@playwright/test").Page) {
   await expect(resultSummary(page)).toBeVisible({ timeout: 5_000 });
 }
 
+async function selectCoveredCity(
+  page: import("@playwright/test").Page,
+  city = "台北市",
+) {
+  await page
+    .getByRole("group", { name: "依縣市瀏覽" })
+    .getByRole("button", { name: new RegExp(`^${city}，\\d+ 個地點$`) })
+    .click();
+}
+
+async function openMap(page: import("@playwright/test").Page) {
+  if ((await page.getByRole("button", { name: "看地圖" }).count()) === 0) {
+    await selectCoveredCity(page);
+  }
+  await page.getByRole("button", { name: "看地圖" }).click();
+}
+
 test.describe("親子遊樂地圖", () => {
   test("play-map 回應允許同源定位（P0 回歸）", async ({ request }) => {
     const response = await request.get("/for-parents/play-map");
@@ -58,6 +75,8 @@ test.describe("親子遊樂地圖", () => {
 
     await waitForPlayMapReady(page);
 
+    await expect(page.getByRole("button", { name: "看地圖" })).toHaveCount(0);
+    await selectCoveredCity(page);
     await expect(page.getByRole("button", { name: "看地圖" })).toBeVisible();
     await expect(page.getByRole("button", { name: "免費" })).toBeVisible();
     await expect(resultSummary(page, "全台")).toBeVisible();
@@ -185,6 +204,16 @@ test.describe("親子遊樂地圖", () => {
     await expect(page).toHaveURL(/outdoor=1&rain=1/);
   });
 
+  test("無縣市的 view=map 不掛 Leaflet，並把網址改回名單", async ({ page }) => {
+    test.setTimeout(30_000);
+    await page.goto("/for-parents/play-map?view=map&free=1");
+    await waitForPlayMapReady(page);
+    await expect(page.locator(".leaflet-container")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "看地圖" })).toHaveCount(0);
+    await expect(page).not.toHaveURL(/view=map/);
+    await expect(page).toHaveURL(/free=1/);
+  });
+
   test("地圖 tab 才載入 Leaflet（行動互斥）", async ({ page }) => {
     test.setTimeout(45_000);
     await page.setViewportSize(PHONE);
@@ -201,7 +230,7 @@ test.describe("親子遊樂地圖", () => {
     await expect(page.locator(".leaflet-container")).toHaveCount(0);
     expect(leafletRequests.length).toBe(0);
 
-    await page.getByRole("button", { name: "看地圖" }).click();
+    await openMap(page);
     await expect(page.locator(".leaflet-container")).toBeVisible({
       timeout: 15_000,
     });
@@ -214,7 +243,7 @@ test.describe("親子遊樂地圖", () => {
     await page.goto("/for-parents/play-map");
     await waitForPlayMapReady(page);
 
-    await page.getByRole("button", { name: "看地圖" }).click();
+    await openMap(page);
     const map = page.locator(".leaflet-container");
     await expect(map).toBeVisible({ timeout: 15_000 });
 
@@ -243,7 +272,7 @@ test.describe("親子遊樂地圖", () => {
     await expect(page.locator("#play-map-panel-map")).toBeHidden();
     await expect(map).toHaveCount(1);
 
-    await page.getByRole("button", { name: "看地圖" }).click();
+    await openMap(page);
     await expect(map).toBeVisible();
     const leafletIdAgain = await map.evaluate((el) => {
       return (el as HTMLElement & { _leaflet_id?: number })._leaflet_id;
@@ -262,7 +291,7 @@ test.describe("親子遊樂地圖", () => {
     await expect(page.locator(".leaflet-container")).toHaveCount(0);
     await expect(page.getByRole("region", { name: "地圖結果" })).toHaveCount(0);
 
-    await page.getByRole("button", { name: "看地圖" }).click();
+    await openMap(page);
     const map = page.locator(".leaflet-container");
     await expect(map).toBeVisible({ timeout: 15_000 });
     await expect(page.getByRole("region", { name: "地圖結果" })).toHaveCount(0);
@@ -306,7 +335,7 @@ test.describe("親子遊樂地圖", () => {
     await expect(page.locator(".leaflet-container")).toHaveCount(0);
     expect(mapRequests).toEqual([]);
 
-    await page.getByRole("button", { name: "看地圖" }).click();
+    await openMap(page);
     await expect(page.locator(".leaflet-container")).toBeVisible({
       timeout: 15_000,
     });
@@ -322,7 +351,7 @@ test.describe("親子遊樂地圖", () => {
     test.setTimeout(45_000);
     await page.goto("/for-parents/play-map");
     await waitForPlayMapReady(page);
-    await page.getByRole("button", { name: "看地圖" }).click();
+    await openMap(page);
     await expect(page.locator(".leaflet-container")).toBeVisible({
       timeout: 15_000,
     });
@@ -357,7 +386,7 @@ test.describe("親子遊樂地圖", () => {
     await page.goto("/for-parents/play-map?city=%E5%8F%B0%E5%8C%97%E5%B8%82");
     await waitForPlayMapReady(page);
     // hover 關聯只在並排時成立，桌面也要先切到地圖分頁。
-    await page.getByRole("button", { name: "看地圖" }).click();
+    await openMap(page);
     await expect(page.getByRole("button", { name: "看地圖" })).toHaveCount(0);
 
     const card = page.locator("#play-map-panel-cards li:not([hidden])").first();
@@ -545,7 +574,7 @@ test.describe("親子遊樂地圖", () => {
     await page.goto("/for-parents/play-map");
     await waitForPlayMapReady(page);
 
-    await page.getByRole("button", { name: "看地圖" }).click();
+    await openMap(page);
     const map = page.locator(".leaflet-container");
     await expect(map).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText("點縣市看該區地點，或先點附近")).toHaveCount(0);

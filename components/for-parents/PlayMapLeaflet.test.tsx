@@ -3,12 +3,8 @@ import React from "react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { listPlaygrounds } from "@/data/playgrounds";
-import {
-  clusterPlaygroundsByCity,
-  clusterPlaygroundsByZoom,
-} from "@/lib/playground-clusters";
+import { clusterPlaygroundsByZoom } from "@/lib/playground-clusters";
 import { DEFAULT_PLAY_MAP_CENTER } from "@/lib/playground-coverage";
-import { nationalViewForClusters } from "@/lib/play-map-camera";
 import { playgroundTypeGlyphSvg } from "@/lib/playground-type-glyph";
 import { playgroundTypeVisualKey } from "@/lib/playground-type-visual";
 import PlayMapLeaflet, { playMapFitKey } from "./PlayMapLeaflet";
@@ -107,9 +103,6 @@ function leafletProps(
     onSelect: vi.fn(),
     reduceMotion: true,
     active: true,
-    clusterMode: false,
-    cityClusters: clusterPlaygroundsByCity(places),
-    onSelectCity: vi.fn(),
     userLatLng: null,
     viewportZoom: null,
     preserveViewport: false,
@@ -125,14 +118,12 @@ describe("playMapFitKey", () => {
   it("縣市範圍去重排序，不因傳入順序改變", () => {
     expect(
       playMapFitKey({
-        clusterMode: false,
         cities: ["桃園市", "台北市", "桃園市"],
         filteredCount: 3,
         selectedId: null,
       }),
     ).toBe(
       playMapFitKey({
-        clusterMode: false,
         cities: ["台北市", "桃園市"],
         filteredCount: 3,
         selectedId: null,
@@ -140,16 +131,12 @@ describe("playMapFitKey", () => {
     );
   });
 
-  it("clusterMode、筆數、selectedId、splitLayout 任一改變都會換鍵", () => {
+  it("筆數、selectedId、splitLayout 任一改變都會換鍵", () => {
     const base = {
-      clusterMode: false,
       cities: ["台北市"],
       filteredCount: 8,
       selectedId: null as string | null,
     };
-    expect(playMapFitKey(base)).not.toBe(
-      playMapFitKey({ ...base, clusterMode: true }),
-    );
     expect(playMapFitKey(base)).not.toBe(
       playMapFitKey({ ...base, filteredCount: 9 }),
     );
@@ -208,29 +195,6 @@ describe("PlayMapLeaflet FitBounds", () => {
       <PlayMapLeaflet {...leafletProps({ onSelect: vi.fn() })} />,
     );
     expect(fitBounds).toHaveBeenCalledTimes(1);
-  });
-
-  it("全國未縮小範圍用容器感知 setView 框住所有縣市聚合", () => {
-    const places = [...listPlaygrounds()];
-    render(
-      <PlayMapLeaflet
-        {...leafletProps({
-          places,
-          clusterMode: true,
-          viewportZoom: 8,
-        })}
-      />,
-    );
-    expect(setView).toHaveBeenCalled();
-    const last = setView.mock.calls.at(-1);
-    const expected = nationalViewForClusters({
-      widthPx: 720,
-      heightPx: 512,
-      points: clusterPlaygroundsByCity(places),
-    });
-    expect(last?.[0]).toEqual(expected.center);
-    expect(last?.[1]).toBe(expected.zoom);
-    expect(fitBounds).not.toHaveBeenCalled();
   });
 
   it("mobile results sheet snap 變更時只要求 Leaflet 重算尺寸", () => {
@@ -311,7 +275,6 @@ describe("PlayMapLeaflet FitBounds", () => {
           places,
           nearMeCamera: true,
           userLatLng: user,
-          clusterMode: false,
         })}
       />,
     );
@@ -323,7 +286,7 @@ describe("PlayMapLeaflet FitBounds", () => {
     expect(boundsArg[0].points[0]).toEqual([user.lat, user.lng]);
   });
 
-  it("全台 zoom 由 city aggregate 轉 spatial cluster，再到 individual", () => {
+  it("zoom 由 spatial cluster 轉 individual", () => {
     const places = [
       { ...samplePlaces[0], id: "cluster-a", lat: 25.02, lng: 121.52 },
       { ...samplePlaces[1], id: "cluster-b", lat: 25.04, lng: 121.54 },
@@ -331,18 +294,7 @@ describe("PlayMapLeaflet FitBounds", () => {
     ];
     const { rerender } = render(
       <PlayMapLeaflet
-        {...leafletProps({ places, clusterMode: true, viewportZoom: 8 })}
-      />,
-    );
-    expect(markerSpy.mock.calls).toHaveLength(
-      clusterPlaygroundsByCity(places).length,
-    );
-
-    markerSpy.mockClear();
-    divIconSpy.mockClear();
-    rerender(
-      <PlayMapLeaflet
-        {...leafletProps({ places, clusterMode: true, viewportZoom: 11 })}
+        {...leafletProps({ places, viewportZoom: 11 })}
       />,
     );
     expect(
@@ -354,7 +306,7 @@ describe("PlayMapLeaflet FitBounds", () => {
     markerSpy.mockClear();
     rerender(
       <PlayMapLeaflet
-        {...leafletProps({ places, clusterMode: true, viewportZoom: 13 })}
+        {...leafletProps({ places, viewportZoom: 13 })}
       />,
     );
     expect(markerSpy.mock.calls).toHaveLength(places.length);
@@ -370,15 +322,12 @@ describe("PlayMapLeaflet FitBounds", () => {
       { ...samplePlaces[2], id: "single-c", lat: 24.8, lng: 120.96 },
     ];
     const onSelect = vi.fn();
-    const onSelectCity = vi.fn();
     render(
       <PlayMapLeaflet
         {...leafletProps({
           places,
-          clusterMode: true,
           viewportZoom: 11,
           onSelect,
-          onSelectCity,
         })}
       />,
     );
@@ -391,7 +340,6 @@ describe("PlayMapLeaflet FitBounds", () => {
     clusterMarker?.eventHandlers?.click?.(undefined as never);
     expect(fitBounds).toHaveBeenCalled();
     expect(onSelect).not.toHaveBeenCalled();
-    expect(onSelectCity).not.toHaveBeenCalled();
   });
 
   it("selected place 在 zoom-out 進入 cluster 後仍不被 Leaflet 清除", () => {
@@ -405,7 +353,6 @@ describe("PlayMapLeaflet FitBounds", () => {
         {...leafletProps({
           places,
           selectedId,
-          clusterMode: true,
           viewportZoom: 13,
         })}
       />,
@@ -422,7 +369,6 @@ describe("PlayMapLeaflet FitBounds", () => {
         {...leafletProps({
           places,
           selectedId,
-          clusterMode: true,
           viewportZoom: 8,
         })}
       />,
@@ -435,7 +381,7 @@ describe("PlayMapLeaflet FitBounds", () => {
   it("每根針都帶對應類型的剪影，且 glyph 掛在 pin 內", () => {
     divIconSpy.mockClear();
     const places = listPlaygrounds().slice(0, 6);
-    render(<PlayMapLeaflet {...leafletProps({ places, clusterMode: false })} />);
+    render(<PlayMapLeaflet {...leafletProps({ places })} />);
 
     const htmls = divIconSpy.mock.calls
       .map((call) => call[0]?.html ?? "")
@@ -549,34 +495,11 @@ describe("PlayMapLeaflet FitBounds", () => {
     );
   });
 
-  it("city aggregate marker 不接 individual card hover synchronization", () => {
-    const onHover = vi.fn();
-    render(
-      <PlayMapLeaflet
-        {...leafletProps({
-          clusterMode: true,
-          onHover,
-          hoveredPlaceId: samplePlaces[0]?.id ?? null,
-        })}
-      />,
-    );
-
-    expect(markerSpy.mock.calls).toHaveLength(
-      clusterPlaygroundsByCity(samplePlaces).length,
-    );
-    for (const [props] of markerSpy.mock.calls) {
-      expect(props.eventHandlers?.mouseover).toBeUndefined();
-      expect(props.eventHandlers?.mouseout).toBeUndefined();
-    }
-    expect(onHover).not.toHaveBeenCalled();
-  });
-
   it("不再渲染過時的地圖操作說明", () => {
     render(
       <PlayMapLeaflet
         {...leafletProps({
           places: [...listPlaygrounds()],
-          clusterMode: true,
           viewportZoom: 8,
         })}
       />,
@@ -590,7 +513,6 @@ describe("PlayMapLeaflet FitBounds", () => {
     render(
       <PlayMapLeaflet
         {...leafletProps({
-          clusterMode: false,
           viewportZoom: 14,
         })}
       />,
