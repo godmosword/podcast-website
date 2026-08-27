@@ -7,7 +7,11 @@
  */
 import { CITY_DISPLAY_ORDER, listCities } from "@/data/playgrounds";
 
-/** 磚牆欄位語意：1 西岸／離島、2 西部、3 中線、4 東部。近似值，非精確經度。 */
+/**
+ * 磚牆欄數。四欄語意（1 西岸／離島、2 西部、3 中線、4 東部）適用 row1–4 與 row6。
+ * row5 的 col4（嘉義縣）是為了填滿該列、不表示東部；row7 是離島列，不套用欄語意。
+ * 近似值，非精確經度。不要為了「對齊欄語意」去挪磚——空格只能落在列的邊緣。
+ */
 export const CITY_WALL_COLUMNS = 4;
 export const CITY_WALL_ROWS = 7;
 

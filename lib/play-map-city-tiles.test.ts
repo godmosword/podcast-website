@@ -36,6 +36,17 @@ describe("CITY_WALL_SLOTS", () => {
     }
   });
 
+  it("嘉義縣在 col4、離島在 row7，不為了欄語意挪磚", () => {
+    expect(CITY_WALL_SLOTS.find((slot) => slot.city === "嘉義縣")).toEqual({
+      city: "嘉義縣",
+      row: 5,
+      col: 4,
+    });
+    expect(
+      CITY_WALL_SLOTS.filter((slot) => slot.row === 7).map((slot) => slot.city),
+    ).toEqual(["澎湖縣", "金門縣", "連江縣"]);
+  });
+
   it("每個磚位唯一，且落在 4 欄 7 列之內", () => {
     const seen = new Set<string>();
     for (const slot of CITY_WALL_SLOTS) {

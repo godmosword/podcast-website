@@ -15,7 +15,7 @@ Schema **沒有** `open` / `closed`。
 | `status` 省略 | 營業中（baseline 稱 operating / active） |
 | `status: "temporarily-closed"` | 休園／整修中（目前 1 筆：`ty-puhsin` 埔心牧場） |
 
-合輯 `activeCount`、覆蓋 headline、nearby 都排除 `temporarily-closed`。`filterPlaygrounds()` 本身**不**排除休園；Play Map 列表仍看得到休園標記。
+合輯 `activeCount`、覆蓋 headline、nearby 都排除 `temporarily-closed`。headline 寫「共 M 處可造訪」，休園數 > 0 時再接「（另 K 處休園整修中）」。`filterPlaygrounds()` 本身**不**排除休園；Play Map 列表仍看得到休園標記。
 
 ## Global
 

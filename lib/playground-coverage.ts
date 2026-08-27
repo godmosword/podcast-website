@@ -2,7 +2,7 @@
  * 親子遊樂地圖縣市覆蓋分級（editorial 契約）。
  * 門檻見 docs/PLAY-MAP-EDITORIAL.md。
  */
-import { listPlaygrounds } from "@/data/playgrounds";
+import { listPlaygrounds, type Playground } from "@/data/playgrounds";
 
 export type CoverageTier = "A" | "B" | "C";
 
@@ -72,7 +72,7 @@ export function normalizeCityKey(city: string): string {
  * 覆蓋只計「家長現在真的帶得成小孩去」的場館。
  *
  * 休園整修中的場館仍留在資料裡（會重開，且卡片與 sheet 需要顯示休園警告），
- * 但計進覆蓋等於對外宣稱一個去不了的地方——`coverageHeadline` 會說「共 N 處」，
+ * 但計進覆蓋等於對外宣稱一個去不了的地方——`coverageHeadline` 會說「共 N 處可造訪」，
  * tier 門檻也會被墊高一格。門檻的用途是判斷「這個縣市收得夠不夠用」，
  * 把去不了的場館算進去就失去意義。
  */
@@ -97,13 +97,19 @@ export function listCityCoverage(): CityCoverage[] {
     .sort((a, b) => a.city.localeCompare(b.city, "zh-Hant"));
 }
 
-/** 從縣市覆蓋表產生短摘要文案（不含波次硬編名單）。 */
+/** 從縣市覆蓋表產生短摘要文案（不含波次硬編名單）。休園筆數從資料現算，不得硬編。 */
 export function coverageHeadline(
   rows: CityCoverage[] = listCityCoverage(),
+  places: readonly Playground[] = listPlaygrounds(),
 ): string {
   const cityCount = rows.length;
   const placeCount = rows.reduce((sum, row) => sum + row.count, 0);
-  return `已收錄 ${cityCount} 縣市、共 ${placeCount} 處`;
+  const closedCount = places.filter(
+    (place) => place.status === "temporarily-closed",
+  ).length;
+  const closedNote =
+    closedCount > 0 ? `（另 ${closedCount} 處休園整修中）` : "";
+  return `已收錄 ${cityCount} 縣市、共 ${placeCount} 處可造訪${closedNote}`;
 }
 
 /** Wave 1 必達縣市（北北基桃）。 */
