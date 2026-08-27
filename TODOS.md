@@ -53,6 +53,12 @@
 
 角色 Logo 系統已移除，程式碼保存於 tag `archive/character-logo-system`。
 
+### 本輪已完成（2026-08-27）
+
+| ID | 說明 |
+|----|------|
+| docs(play-map): 記錄全國視角地圖退役結論（proto／cluster 調查，避免重跑） | 見本 commit |
+
 ### 本輪已完成（2026-08-26）
 
 | ID | 說明 |
