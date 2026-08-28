@@ -573,7 +573,7 @@
   min-height: 44px;
   padding: 6px 10px;
   border-radius: 8px;
-  font-size: 0.82rem;
+  font-size: var(--fs-meta);
   font-weight: 700;
   border: none;
   cursor: pointer;
@@ -947,7 +947,7 @@
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.1);
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 0.8rem;
+  font-size: var(--fs-meta);
   line-height: 1.4;
   word-break: break-all;
   white-space: pre-wrap;

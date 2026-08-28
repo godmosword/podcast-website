@@ -141,7 +141,7 @@
 
 .facts dt {
   color: var(--accent-ink);
-  font-size: 0.82rem;
+  font-size: var(--fs-meta);
   font-weight: 800;
 }
 
@@ -206,7 +206,7 @@
 
 .storyMeta {
   color: var(--warm-highlight);
-  font-size: 0.82rem;
+  font-size: var(--fs-meta);
   font-weight: 900;
 }
 

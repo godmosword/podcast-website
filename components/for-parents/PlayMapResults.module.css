@@ -94,7 +94,7 @@
 
 .groupLabel {
   color: var(--ink);
-  font-size: 1.1rem;
+  font-size: var(--fs-h3-compact);
   font-weight: 800;
 }
 

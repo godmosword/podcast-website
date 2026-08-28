@@ -216,7 +216,7 @@
 
 .facts dt {
   color: var(--accent-ink);
-  font-size: 0.82rem;
+  font-size: var(--fs-meta);
   font-weight: 800;
 }
 
@@ -334,7 +334,7 @@
 
 .sources a span {
   color: var(--ink);
-  font-size: 0.82rem;
+  font-size: var(--fs-meta);
 }
 
 @media (min-width: 680px) {

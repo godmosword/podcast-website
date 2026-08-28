@@ -130,7 +130,7 @@
 }
 
 .playgroundSub {
-  font-size: 0.78rem;
+  font-size: var(--fs-meta);
   font-weight: 600;
   color: var(--ink-soft);
   line-height: 1.2;
@@ -167,14 +167,14 @@
   justify-content: center;
   min-height: 44px;
   padding: 8px 6px;
-  font-size: 0.78rem;
+  font-size: var(--fs-meta);
   font-weight: 500;
   color: var(--ink);
   text-decoration: none;
 }
 
 .metaSep {
-  font-size: 0.78rem;
+  font-size: var(--fs-meta);
   font-weight: 600;
   color: var(--ink-soft);
   opacity: 0.55;
@@ -190,7 +190,7 @@
   gap: 4px 6px;
   max-width: min(100%, 520px);
   margin: 0;
-  font-size: 0.78rem;
+  font-size: var(--fs-meta);
   font-weight: 600;
   line-height: 1.45;
   color: var(--ink-soft);
@@ -206,7 +206,7 @@
 
 .copyright {
   margin: 0;
-  font-size: 0.8rem;
+  font-size: var(--fs-meta);
   color: var(--ink-soft);
 }
 

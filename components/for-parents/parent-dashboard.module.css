@@ -32,7 +32,7 @@
 
 .cardTitle {
   margin: 0 0 12px;
-  font-size: 1.15rem;
+  font-size: var(--fs-h3-compact);
   font-weight: 900;
   color: var(--warm-heading);
 }
@@ -75,7 +75,7 @@
 .statLabel {
   display: block;
   margin-top: 4px;
-  font-size: 0.78rem;
+  font-size: var(--fs-meta);
   font-weight: 700;
   color: var(--ink-soft);
 }
@@ -118,7 +118,7 @@
 .gameDetail {
   display: block;
   margin-top: 2px;
-  font-size: 0.82rem;
+  font-size: var(--fs-meta);
   color: var(--ink-soft);
 }
 
@@ -140,7 +140,7 @@
   padding: 6px 12px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--c-yellow) 35%, var(--mix-base));
-  font-size: 0.82rem;
+  font-size: var(--fs-meta);
   font-weight: 800;
   color: var(--cta-warm-fg);
 }
@@ -174,7 +174,7 @@
 
 .storyEp {
   flex-shrink: 0;
-  font-size: 0.78rem;
+  font-size: var(--fs-meta);
   font-weight: 800;
   color: var(--accent-ink);
 }
@@ -214,7 +214,7 @@
 .settingHint {
   display: block;
   margin-top: 2px;
-  font-size: 0.78rem;
+  font-size: var(--fs-meta);
   font-weight: 600;
   color: var(--ink-soft);
 }

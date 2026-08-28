@@ -3,7 +3,7 @@
 }
 
 .heading {
-  font-size: 1.25rem;
+  font-size: var(--fs-h3);
   margin: 0 0 0.5rem;
 }
 
@@ -62,10 +62,10 @@
 
 .command {
   margin: 0.55rem 0 0;
-  font-size: 0.82rem;
+  font-size: var(--fs-meta);
 }
 
 .command code {
-  font-size: 0.82rem;
+  font-size: var(--fs-meta);
   word-break: break-all;
 }

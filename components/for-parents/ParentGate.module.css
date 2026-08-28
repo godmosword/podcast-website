@@ -25,7 +25,7 @@
 
 .title {
   margin: 0 0 8px;
-  font-size: 1.15rem;
+  font-size: var(--fs-h3-compact);
   font-weight: 900;
   color: var(--warm-heading);
 }
@@ -64,7 +64,7 @@
   border-radius: var(--radius-md);
   background: var(--card);
   color: var(--ink);
-  font-size: 1.1rem;
+  font-size: var(--fs-h3-compact);
   font-weight: 700;
 }
 

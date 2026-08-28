@@ -52,7 +52,7 @@
 
 .hint {
   margin: 4px 0 0;
-  font-size: 0.82rem;
+  font-size: var(--fs-meta);
   line-height: 1.45;
   color: var(--ink-soft);
 }
@@ -64,7 +64,7 @@
   padding: 10px 12px;
   background: var(--bg-2);
   border-radius: var(--radius-sm);
-  font-size: 0.8rem;
+  font-size: var(--fs-meta);
 }
 
 .statLabel {

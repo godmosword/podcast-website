@@ -141,7 +141,7 @@
   border-radius: 999px;
   color: var(--ink);
   background: color-mix(in srgb, var(--c-sky) 16%, var(--card));
-  font-size: 0.82rem;
+  font-size: var(--fs-meta);
   font-weight: 800;
 }
 

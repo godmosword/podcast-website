@@ -93,7 +93,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.8rem;
+  font-size: var(--fs-meta);
   font-weight: 700;
   color: var(--on-dark);
   background: var(--ink);

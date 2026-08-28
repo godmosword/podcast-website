@@ -80,7 +80,7 @@
 
 .eyebrow {
   color: var(--ink-soft);
-  font-size: 0.8rem;
+  font-size: var(--fs-meta);
   font-weight: 900;
   letter-spacing: 0.08em;
 }
@@ -133,7 +133,7 @@
   border-radius: 999px;
   color: var(--ink);
   background: color-mix(in srgb, var(--mix-base) 82%, transparent);
-  font-size: 0.8rem;
+  font-size: var(--fs-meta);
   font-weight: 800;
 }
 
@@ -230,7 +230,7 @@
   color: var(--on-dark);
   background: rgba(47, 41, 54, 0.76);
   backdrop-filter: blur(6px);
-  font-size: 0.8rem;
+  font-size: var(--fs-meta);
   font-weight: 900;
 }
 
@@ -260,7 +260,7 @@
   border-radius: 999px;
   color: var(--ink-soft);
   background: color-mix(in srgb, var(--card) 92%, transparent);
-  font-size: 0.8rem;
+  font-size: var(--fs-meta);
   font-weight: 800;
   line-height: 1.25;
 }
@@ -293,7 +293,7 @@
   gap: 4px 10px;
   margin-top: 2px;
   color: var(--ink-soft);
-  font-size: 0.8rem;
+  font-size: var(--fs-meta);
   font-weight: 600;
 }
 

@@ -29,7 +29,7 @@
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  font-size: 1.25rem;
+  font-size: var(--fs-h3);
   background: var(--card, #fff);
   box-shadow: 0 1px 0 var(--hairline, rgba(0, 0, 0, 0.08));
 }
@@ -50,7 +50,7 @@
 .sticker {
   border-radius: 999px;
   padding: 4px 10px;
-  font-size: 0.78rem;
+  font-size: var(--fs-meta);
   font-weight: 800;
   color: var(--ink-soft);
   background: color-mix(in srgb, var(--c-yellow, #ffd34d) 28%, var(--card, #fff));

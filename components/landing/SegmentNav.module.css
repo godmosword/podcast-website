@@ -67,7 +67,7 @@
 }
 
 .dotLabel {
-  font-size: 0.78rem;
+  font-size: var(--fs-meta);
   font-weight: 700;
   color: var(--ink);
   background: color-mix(in srgb, var(--bg) 94%, transparent);

@@ -14,7 +14,7 @@
   background: var(--landing-nav-cta-bg, #fff8f2);
   color: var(--landing-nav-cta-fg, #8b4510);
   font-weight: 800;
-  font-size: 0.78rem;
+  font-size: var(--fs-meta);
   text-decoration: none;
   border: 1.5px solid rgba(180, 120, 60, 0.28);
   box-shadow: 0 1px 0 rgba(120, 80, 40, 0.12);

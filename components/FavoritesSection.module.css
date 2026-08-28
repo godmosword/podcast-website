@@ -6,7 +6,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 1.15rem;
+  font-size: var(--fs-h3-compact);
   font-weight: 700;
   margin: 0 0 var(--space-4);
   color: var(--ink);

@@ -116,7 +116,7 @@
 
 .aggregateSummary {
   margin-top: 6px;
-  font-size: 0.82rem;
+  font-size: var(--fs-meta);
 }
 
 .editorialInline {
@@ -295,7 +295,7 @@
   }
 
   .sectionHeading h2 {
-    font-size: 1.2rem;
+    font-size: var(--fs-h3);
   }
 
   .cardGrid {

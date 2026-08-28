@@ -39,7 +39,7 @@
   flex-direction: column;
   gap: 6px;
   padding: 9px 10px;
-  font-size: 0.8rem;
+  font-size: var(--fs-meta);
 }
 
 .dark {

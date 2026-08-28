@@ -169,7 +169,7 @@
 }
 
 .sectionHeading {
-  font-size: 1.15rem;
+  font-size: var(--fs-h3-compact);
   font-weight: 700;
   margin: 0 0 8px;
   color: var(--ink);

@@ -41,7 +41,7 @@
 }
 
 .title {
-  font-size: 1.85rem;
+  font-size: var(--fs-h1);
   font-weight: 800;
   margin: 0 0 var(--space-8);
   line-height: 1.2;
@@ -52,7 +52,7 @@
 }
 
 .heading {
-  font-size: 1.15rem;
+  font-size: var(--fs-h3-compact);
   font-weight: 700;
   margin: 0 0 10px;
 }
@@ -115,7 +115,7 @@
 }
 
 .chipCount {
-  font-size: 0.78rem;
+  font-size: var(--fs-meta);
   font-weight: 600;
   color: var(--ink-soft);
 }

@@ -56,7 +56,7 @@
 
 .eyebrow {
   margin: 0;
-  font-size: 0.82rem;
+  font-size: var(--fs-meta);
   font-weight: 800;
   letter-spacing: 0.06em;
   color: color-mix(in srgb, var(--coloring-ink, #2a3a4a) 62%, transparent);

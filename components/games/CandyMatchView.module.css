@@ -167,7 +167,7 @@
   margin: 0 0 12px;
   text-align: center;
   color: #7c6886;
-  font-size: 0.82rem;
+  font-size: var(--fs-meta);
   font-weight: 800;
   line-height: 1.4;
 }

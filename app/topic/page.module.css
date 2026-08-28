@@ -43,7 +43,7 @@
 .title {
   font-family: var(--font-baloo), var(--font-huninn), "PingFang TC",
     "Microsoft JhengHei", sans-serif;
-  font-size: 1.85rem;
+  font-size: var(--fs-h1);
   font-weight: 800;
   margin: 0 0 6px;
   line-height: 1.2;
@@ -121,7 +121,7 @@
 
 .count {
   flex: none;
-  font-size: 0.8rem;
+  font-size: var(--fs-meta);
   font-weight: 700;
   color: var(--ink-soft);
   white-space: nowrap;

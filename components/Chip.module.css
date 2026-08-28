@@ -41,7 +41,7 @@
 }
 
 .tag {
-  font-size: 0.82rem;
+  font-size: var(--fs-meta);
   font-weight: 700;
   color: var(--ink);
   padding: 3px 11px;

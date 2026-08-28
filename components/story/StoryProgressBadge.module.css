@@ -5,7 +5,7 @@
   right: 4px;
   z-index: 2;
   /* 兒童向：圖示是唯一可讀資訊，不套用標籤型小字豁免 */
-  font-size: 1.15rem;
+  font-size: var(--fs-h3-compact);
   line-height: 1;
   pointer-events: none;
   /* 封面色彩不可預期，加描邊確保星章在任何底圖上都看得見 */

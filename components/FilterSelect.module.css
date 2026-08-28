@@ -120,7 +120,7 @@
 
 .check {
   flex: none;
-  font-size: 0.8rem;
+  font-size: var(--fs-meta);
   font-weight: 800;
 }
 

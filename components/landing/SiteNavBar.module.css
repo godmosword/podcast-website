@@ -224,7 +224,7 @@
 .menuEmoji {
   flex: none;
   width: 32px;
-  font-size: 1.35rem;
+  font-size: var(--fs-h2);
   line-height: 1;
   text-align: center;
 }

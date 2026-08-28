@@ -3,7 +3,7 @@
 }
 
 .heading {
-  font-size: 1.25rem;
+  font-size: var(--fs-h3);
   margin: 0 0 0.5rem;
 }
 
@@ -29,7 +29,7 @@
 }
 
 .card dt {
-  font-size: 0.82rem;
+  font-size: var(--fs-meta);
   color: var(--ink-soft);
   margin-bottom: 0.25rem;
 }

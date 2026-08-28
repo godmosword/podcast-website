@@ -82,7 +82,7 @@
   margin: 0;
   min-width: 0;
   color: var(--warm-heading);
-  font-size: 1.35rem;
+  font-size: var(--fs-h2);
   line-height: 1.2;
 }
 
@@ -134,7 +134,7 @@
   }
 
   .cardTitle {
-    font-size: 1.12rem;
+    font-size: var(--fs-h3-compact);
   }
 
   .personality {

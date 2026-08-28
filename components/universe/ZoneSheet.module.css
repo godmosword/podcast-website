@@ -66,7 +66,7 @@
 }
 
 .summonHandleGlyph {
-  font-size: 1.25rem;
+  font-size: var(--fs-h3);
   line-height: 1;
 }
 
@@ -163,7 +163,7 @@
   border-radius: 12px;
   background: color-mix(in srgb, var(--ink) 7%, var(--card));
   color: var(--ink);
-  font-size: 1.1rem;
+  font-size: var(--fs-h3-compact);
   cursor: pointer;
   padding: 0;
 }
@@ -489,7 +489,7 @@
   display: grid;
   place-items: center;
   height: 100%;
-  font-size: 0.8rem;
+  font-size: var(--fs-meta);
   font-weight: 800;
   color: var(--marker-ink);
 }
@@ -705,7 +705,7 @@
 
 /* 標題弱化為次要：小字、降對比、單行 ellipsis，讓 emoji＋EP 成為視覺主體 */
 .storyCardTitle {
-  font-size: 0.82rem;
+  font-size: var(--fs-meta);
   font-weight: 600;
   /* Keep the secondary title subdued while meeting 4.5:1 on the light card. */
   color: #70685f;
