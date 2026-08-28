@@ -136,19 +136,14 @@ const GROWING_PAGE_IDS = new Set<VisualPageId>([
  * 錨定 `^…$` 是為了避免整張卡片被吞進 mask：`getByRole("link", { name: /EP/ })`
  * 會命中整張故事卡，把封面與標題一起塗掉，那就等於關掉這頁的視覺測試。
  */
-const LATEST_EPISODE_CTA = /聽最新一集\s*EP\s*\d+/;
 const NEW_EPISODE_RIBBON = /NEW\s*[·•‧]\s*EP\s*\d+/;
 const EP_LABEL_ONLY = /^EP\s*\d+$/;
 const EPISODE_COUNT_ONLY = /^\d+\s*集$/;
 
-function latestEpisodeCtaMasks(page: Page): Locator[] {
-  return [page.getByRole("link", { name: LATEST_EPISODE_CTA })];
-}
-
 function volatileMasks(page: Page, pageId: VisualPageId): Locator[] {
   switch (pageId) {
     case "home":
-      return latestEpisodeCtaMasks(page);
+      return [];
     case "stories":
       return [
         page.getByText(NEW_EPISODE_RIBBON),
@@ -385,9 +380,6 @@ for (const viewportId of Object.keys(VIEWPORTS) as VisualViewportId[]) {
       await page.goto("/");
       await stabilizeVisualPage(page, { theme });
 
-      const ctaMasks = latestEpisodeCtaMasks(page);
-      await assertMasksResolve(ctaMasks, "home");
-
       for (const segment of LANDING_SEGMENTS) {
         await page.locator(`#${segment.anchorId}`).scrollIntoViewIfNeeded();
         await page.waitForTimeout(80);
@@ -397,7 +389,6 @@ for (const viewportId of Object.keys(VIEWPORTS) as VisualViewportId[]) {
             fullPage: false,
             maxDiffPixelRatio: theme === "night" ? 0.03 : 0.02,
             animations: "disabled",
-            mask: ctaMasks,
           },
         );
       }

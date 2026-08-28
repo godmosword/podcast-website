@@ -42,7 +42,6 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
     heroImage: "/landing/segment-stories.jpg",
     heroImagePortrait: "/landing/segment-stories-portrait.jpg",
     cta: { label: "全部故事", href: "/stories" },
-    playCta: "latest",
   },
   {
     id: "bedtime",
@@ -51,7 +50,6 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
     heroImage: "/landing/segment-bedtime.jpg",
     heroImagePortrait: "/landing/segment-bedtime-portrait.jpg",
     cta: { label: "睡前故事", href: "/topic/睡前" },
-    playCta: "bedtime",
     hideBedtimeMoon: true,
   },
   {

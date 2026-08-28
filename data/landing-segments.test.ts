@@ -70,4 +70,13 @@ describe("landing-segments", () => {
       else expect(seg.cta.external ?? false).toBe(false);
     }
   });
+
+  it("四段都不掛播放直達鈕（hero 只留分區 CTA）", () => {
+    for (const seg of LANDING_SEGMENTS) {
+      expect(seg.playCta).toBeUndefined();
+    }
+    for (const seg of resolveLandingSegments()) {
+      expect(seg.play).toBeUndefined();
+    }
+  });
 });

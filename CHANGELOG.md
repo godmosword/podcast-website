@@ -6,6 +6,7 @@
 
 ### Changed
 
+- **Landing 拿掉疊圖主標與聽最新一集**：四段 hero 標題改 CSS module 視覺隱藏（不用全域 `.sr-only`，以免跟首段 siteIntro 契約撞車）；不再渲染「聽最新一集／播一集睡前故事」直達鈕，只留分區 CTA（全部故事／睡前故事等）。頂欄品牌「車車遊樂園」不動。**未改** Apple sync workflow。
 - **親子遊樂地圖退役全國視角地圖**：未選縣市且未定位時不再提供「看地圖」；無縣市的 `?view=map` 進頁改為名單並清掉該參數。地圖只服務已選縣市或「附近」。縣市內 z9–12 仍用 spatial cluster。**未改** Apple sync workflow。
 - **親子遊樂地圖 coverage 文案**：`coverageHeadline` 改為「已收錄 N 縣市、共 M 處可造訪」，有休園時再接「（另 K 處休園整修中）」；K 從資料現算。親子指南工具卡與地圖頁共用。**未改** Apple sync workflow。
 

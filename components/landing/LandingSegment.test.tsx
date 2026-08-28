@@ -45,7 +45,7 @@ describe("LandingSegment", () => {
     expect(html).not.toContain("訂閱收聽");
   });
 
-  test("首段顯示播放直達鈕與網站導言", async () => {
+  test("首段顯示網站導言，不顯示播放直達鈕", async () => {
     const { default: LandingSegment } = await import("./LandingSegment");
     const { homeSiteIntro } = await import("@/lib/home-geo");
     const segment = resolveLandingSegments()[0]!;
@@ -59,8 +59,10 @@ describe("LandingSegment", () => {
         nextAnchorId="segment-bedtime"
       />,
     );
-    expect(html).toContain("聽最新一集");
-    expect(html).toMatch(/href="\/story\/[^"]+\/play\?autoplay=1&amp;from=landing"/);
+    expect(html).not.toContain("聽最新一集");
+    expect(html).not.toMatch(/\/play\?autoplay=1/);
+    expect(html).toContain("全部故事");
+    expect(html).toContain("車車與遊樂園的故事");
     expect(html).toContain(intro);
     expect(html).toMatch(
       new RegExp(
@@ -70,19 +72,24 @@ describe("LandingSegment", () => {
     expect(html).not.toContain("5–10 分鐘");
   });
 
-  test("睡前段顯示播一集睡前故事直達鈕", async () => {
+  test("四段都不渲染播放直達，段標題視覺隱藏", async () => {
     const { default: LandingSegment } = await import("./LandingSegment");
-    const segment = resolveLandingSegments()[1]!;
-    const html = renderToStaticMarkup(
-      <LandingSegment
-        segment={segment}
-        index={1}
-        total={4}
-        nextAnchorId="segment-clay"
-      />,
-    );
-    expect(html).toContain("播一集睡前故事");
-    expect(html).toMatch(/href="\/story\/[^"]+\/play\?autoplay=1&amp;from=landing"/);
+    const segments = resolveLandingSegments();
+    for (const [index, segment] of segments.entries()) {
+      const html = renderToStaticMarkup(
+        <LandingSegment
+          segment={segment}
+          index={index}
+          total={4}
+          nextAnchorId="segment-clay"
+        />,
+      );
+      expect(html).not.toContain("聽最新一集");
+      expect(html).not.toContain("播一集睡前故事");
+      expect(html).not.toMatch(/\/play\?autoplay=1/);
+      expect(html).toContain(`id="${segment.anchorId}-title"`);
+      expect(html).toMatch(/titleHidden/);
+    }
   });
 
 });

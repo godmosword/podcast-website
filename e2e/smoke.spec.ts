@@ -30,12 +30,20 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await expect(capsuleNav.getByText("指南首頁")).toHaveCount(0);
 
   await expect(page.getByRole("button", { name: "開啟選單" })).toBeHidden();
-  // 第一段（車車故事）標題與 CTA、以及四段標題都存在
-  await expect(page.getByRole("heading", { name: /車車與\s?遊樂園的故事/ })).toBeVisible();
+  // 第一段標題視覺隱藏（clip 1px，給 aria-labelledby）；四段 accessible name 仍在
+  const storiesHeading = page.getByRole("heading", {
+    name: /車車與\s?遊樂園的故事/,
+  });
+  await expect(storiesHeading).toBeAttached();
+  const storiesBox = await storiesHeading.boundingBox();
+  expect(
+    storiesBox === null || (storiesBox.width <= 1 && storiesBox.height <= 1),
+  ).toBe(true);
   await expect(page.getByRole("link", { name: "全部故事 →" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: /數綿羊/ })).toBeVisible();
-  await expect(page.getByRole("heading", { name: /捏黏土/ })).toBeVisible();
-  await expect(page.getByRole("heading", { name: /陪孩子建立好習慣/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /聽最新一集/ })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: /數綿羊/ })).toBeAttached();
+  await expect(page.getByRole("heading", { name: /捏黏土/ })).toBeAttached();
+  await expect(page.getByRole("heading", { name: /陪孩子建立好習慣/ })).toBeAttached();
   // 往下箭頭錨點存在
   await expect(
     page.getByRole("link", { name: "捲動到下一個專區" }).first(),
@@ -60,45 +68,25 @@ test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   await expect(drawerPlayMap).toHaveAttribute("href", /\/for-parents\/play-map/);
   await expect(drawerNav.getByRole("link", { name: "關於我們" })).toHaveCount(0);
   await expect(drawerNav.getByRole("link", { name: "聯絡我們" })).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: /車車與\s?遊樂園的故事/ })).toBeVisible();
-  await expect(page.getByRole("heading", { name: /陪孩子建立好習慣/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /車車與\s?遊樂園的故事/ })).toBeAttached();
+  await expect(page.getByRole("heading", { name: /陪孩子建立好習慣/ })).toBeAttached();
 });
 
-async function expectLandingAutoplay(page: import("@playwright/test").Page) {
+async function expectStoriesFromLanding(page: import("@playwright/test").Page) {
   await page.goto("/");
-  await page.getByRole("link", { name: /聽最新一集/ }).click();
-  await expect(page).toHaveURL(/\/story\/[^/]+\/play\?autoplay=1&from=landing/);
-  await expect(
-    page.getByRole("button", { name: "暫停", exact: true }),
-  ).toBeVisible({ timeout: 10_000 });
-  await expect(page.getByText("無法播放，請再按一次播放鈕")).toHaveCount(0);
-
-  await page.getByRole("button", { name: "暫停", exact: true }).click();
-  await expect(page.getByRole("button", { name: "播放", exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "播放", exact: true }).click();
-  await expect(page.getByRole("button", { name: "暫停", exact: true })).toBeVisible();
-
-  await page.getByRole("link", { name: "關閉" }).click();
-  await expect(page).toHaveURL(/\/story\/ep-\d+$/);
-  await page.getByRole("link", { name: /開始看故事/ }).click();
-  await expect(page).toHaveURL(/\/story\/ep-\d+\/play/);
-  const play = page.getByRole("button", { name: "播放", exact: true });
-  await play.waitFor();
-  // preload="none"：進頁不抓完整 MP3，readyState 可維持 0，點播放後才開始 Range。
-  await play.click();
-  await expect(page.getByRole("button", { name: "暫停", exact: true })).toBeVisible({
-    timeout: 10_000,
-  });
+  await page.getByRole("link", { name: "全部故事 →" }).click();
+  await expect(page).toHaveURL(/\/stories/);
+  await expect(page.getByRole("heading", { name: "找故事" })).toBeVisible();
 }
 
-test("Landing 播放直達鈕一次點擊即開始播放（390）", async ({ page }) => {
+test("Landing 分區 CTA 進全部故事（390）", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await expectLandingAutoplay(page);
+  await expectStoriesFromLanding(page);
 });
 
-test("Landing 播放直達鈕一次點擊即開始播放（桌面）", async ({ page }) => {
+test("Landing 分區 CTA 進全部故事（桌面）", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
-  await expectLandingAutoplay(page);
+  await expectStoriesFromLanding(page);
 });
 
 test("全部故事頁 → 詳情 → 播放頁 smoke", async ({ page }) => {

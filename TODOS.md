@@ -53,6 +53,12 @@
 
 角色 Logo 系統已移除，程式碼保存於 tag `archive/character-logo-system`。
 
+### 本輪已完成（2026-08-28）
+
+| ID | 說明 |
+|----|------|
+| polish(landing): 四段 hero 拿掉疊圖主標與聽最新一集 | 見本 commit |
+
 ### 本輪已完成（2026-08-27）
 
 | ID | 說明 |

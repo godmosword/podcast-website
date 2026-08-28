@@ -83,12 +83,8 @@ test.describe("public production smoke · mobile emulation", () => {
 
   test("mobile public navigation and story playback entry render", async ({ page }) => {
     await expectPublicRoute(page, "/");
-    await page.getByRole("link", { name: /聽最新一集/ }).click();
-    await expect(page).toHaveURL(/\/story\/[^/]+\/play\?autoplay=1&from=landing/);
-    // Mobile/browser autoplay policy may leave the player paused even after a
-    // navigation click; the release gate checks that the transport is present.
-    await expect(page.getByRole("button", { name: /^(播放|暫停)$/ })).toBeVisible({
-      timeout: 10_000,
-    });
+    await page.getByRole("link", { name: "全部故事 →" }).click();
+    await expect(page).toHaveURL(/\/stories/);
+    await expect(page.getByRole("heading", { name: "找故事" })).toBeVisible();
   });
 });

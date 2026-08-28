@@ -123,9 +123,9 @@ export default function LandingSegment({
           >{`0${index + 1} / 0${total}`}</span>
           <h2
             id={`${segment.anchorId}-title`}
-            className={`${styles.title} scrollEnter scrollEnterStagger2`}
+            className={styles.titleHidden}
           >
-            {segment.title}
+            {segment.title.replace(/\n/g, " ").replace(/\s+/g, " ").trim()}
           </h2>
           {segment.subtitle ? (
             <p className={`${styles.subtitle} scrollEnter scrollEnterStagger2`}>
