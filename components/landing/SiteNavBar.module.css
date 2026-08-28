@@ -78,9 +78,11 @@
 .menuBtn {
   width: 44px;
   height: 44px;
-  border: 1px solid rgba(120, 80, 40, 0.18);
+  border: 0;
   border-radius: var(--radius-sm);
-  background: var(--surface-glass);
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -270,11 +272,6 @@
     box-shadow:
       inset 0 1px 0 color-mix(in srgb, var(--c-yellow) 10%, transparent),
       0 1px 0 color-mix(in srgb, var(--bg) 40%, transparent);
-  }
-
-  :global(html[data-theme="night"]) .bar[data-menu-open="true"] .menuBtn {
-    border-color: color-mix(in srgb, var(--ink) 16%, transparent);
-    background: color-mix(in srgb, var(--card) 55%, transparent);
   }
 }
 
