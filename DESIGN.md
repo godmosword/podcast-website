@@ -163,12 +163,20 @@ meta `theme-color`（夜）對齊 `--bg`：`lib/theme.ts` 的 `NIGHT_THEME_COLOR
 
 ## 圓角與陰影
 
+圓角 token（`app/globals.css`）。舊政策「只在觸碰處換用」結構上無法收斂——多數 CSS 行不會再被碰。圓角改為全面收斂：`999px`／`50%` 是膠囊與圓形的慣用寫法（不是漂移），給它們名字；其餘數值對到階梯。`--radius-pill` 沿用既有 `999px`，不改成別的膠囊寫法。
+
+| Token | 值 | 角色 |
+|-------|-----|------|
+| `--radius-xs` | 8px | 小圓角（小控制項、內嵌區塊） |
+| `--radius-sm` | 14px | 小卡片、輸入框 |
+| `--radius-md` | 20px | 卡片、面板 |
+| `--radius-lg` | 28px | 大卡片、對話框 |
+| `--radius-xl` | 32px | 頁級 hero、封面 |
+| `--radius-pill` | 999px | 膠囊形（chip、按鈕、標籤） |
+| `--radius-circle` | 50% | 圓形（頭像、圖示底、圓點） |
+
 | Token | 值 |
 |-------|-----|
-| `--radius-sm` | 14px |
-| `--radius-md` | 20px |
-| `--radius-lg` | 28px |
-| `--radius-xl` | 32px |
 | `--elev-1` | 高度階梯第一階：貼地卡片（列表 `StoryCard` resting）。夜間由 token 覆寫 |
 | `--elev-2` | 第二階：sticky／焦點面（首頁 hero、精選 `LatestHero` resting、列表卡 hover） |
 | `--elev-3` | 第三階：浮層／精選卡 hover。**不**用於 dropdown／`MapControls` 等已有暖色調手調陰影者 |
@@ -188,7 +196,8 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 - 純文字段落 max-width ≤ 640px。
 - 文案密度：兒童動線頁不放超過一行的家長散文（家長說明歸戶 `/for-parents` 與 footer）；標題 ≤ 8 字、CTA ≤ 6 字。`/legal` 精簡不得刪改具法律效力語句。
 - **字級（2026-08 起全面收斂）**：舊政策「既有硬寫僅在觸碰該宣告時順手換 token」結構上無法收斂——多數 CSS 行寫完就不會再被碰。字級改為按角色整批對到 `--fs-*`（見上表），不再等下次改到那一行。階梯用角色命名（`--fs-control` 而不是「0.95rem」），才擋得住之後再漂移。
-- **間距／圓角／色彩**：新宣告仍優先用 token；既有硬寫 px 仍僅在觸碰該宣告時順手換 token（±4px 內就近取整）。這三維尚未全面收斂。
+- **圓角（2026-08 起全面收斂）**：舊政策把圓角跟間距綁在「觸碰時順手換」。膠囊 `999px` 與圓形 `50%` 其實全站寫法一致，缺的是名字；小於 `--radius-sm` 的 6／8／10／12px 也沒有階。圓角改為整批對到 `--radius-*`（見上表）。不對稱多值（島嶼有機形、單邊膠囊）不拆 token。
+- **間距／色彩**：新宣告仍優先用 token；既有硬寫 px 仍僅在觸碰該宣告時順手換 token（±4px 內就近取整）。這兩維尚未全面收斂。
 
 ## 互動
 

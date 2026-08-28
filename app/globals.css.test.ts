@@ -13,3 +13,13 @@ describe("globals.css font-size tokens", () => {
     expect(css).toMatch(/--fs-h4:\s*1\.05rem\s*;/);
   });
 });
+
+describe("globals.css radius tokens", () => {
+  const css = readFileSync(join(import.meta.dirname, "globals.css"), "utf8");
+
+  it("定義 --radius-pill／--radius-circle／--radius-xs 且值對齊角色階梯", () => {
+    expect(css).toMatch(/--radius-pill:\s*999px\s*;/);
+    expect(css).toMatch(/--radius-circle:\s*50%\s*;/);
+    expect(css).toMatch(/--radius-xs:\s*8px\s*;/);
+  });
+});

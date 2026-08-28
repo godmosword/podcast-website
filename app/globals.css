@@ -63,11 +63,17 @@
   --leaf: #b7df9b;
   --sky-blue: #8fcde8;
 
-  /* 圓角（連續圓角感，對齊 Apple 式產品曲面） */
+  /* 圓角（連續圓角感，對齊 Apple 式產品曲面）。
+     舊政策是「只在觸碰處換用」。那結構上無法收斂：多數 CSS 行寫完就不會再被碰。
+     圓角改為全面收斂——膠囊／圓形是同一件事做了 137 次卻沒名字，不是漂移。
+     --radius-pill 沿用專案既有 999px，不改 9999px／100vmax。 */
+  --radius-xs: 8px; /* 小圓角（小控制項、內嵌區塊） */
   --radius-sm: 14px;
   --radius-md: 20px;
   --radius-lg: 28px;
   --radius-xl: 32px;
+  --radius-pill: 999px; /* 膠囊形（chip、按鈕、標籤） */
+  --radius-circle: 50%; /* 圓形（頭像、圖示底、圓點） */
 
   /* 陰影與表面（柔層次；取代厚底影實體鈕）
      VIS-W3 高度階梯（elevation）：同一光源方向，越高偏移／模糊越大。
@@ -87,7 +93,7 @@
   /* 字階（VIS-W1）：對齊 DESIGN.md「標題 1.8–2.3rem」。
      舊政策是「只在觸碰的元件換用，不做全站機械替換」。那結構上無法收斂：
      多數 CSS 行寫完就不會再被碰，裸 rem 會一直堆。字級改為按角色全面收斂
-     （--fs-label／control／body／h4 與既有標題／meta）；圓角／間距／色彩仍走後續輪次。
+     （--fs-label／control／body／h4 與既有標題／meta）；間距／色彩仍走後續輪次。
      不用 clamp() + vw：內容欄固定 max-width 640px，字隨 viewport 長大而欄寬
      不變會使每行字數在桌面反而變少（量測基準錯配）。定值較誠實。
      階梯須與同頁既有標題共存：SiteHeader 2.3rem > --fs-h1 1.85rem >
