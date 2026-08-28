@@ -14,7 +14,7 @@
 
 | 序 | TODOS ID | 狀態 | 本輪要做 |
 |----|----------|------|----------|
-| 1 | UX-P0-1 家長閘門 | 待做（待決策） | 先擋 `/for-parents/dashboard`；算術題 + session |
+| 1 | UX-P0-1 家長閘門 | ✅ `4c0ea22` | 僅擋 `/for-parents/dashboard`；算術題 + `sessionStorage`；不含 GameKit |
 | 2 | UX-P1-5 全站 e2e | ✅ `99cf197` | `/for-parents`、播放頁觸控；CI `e2e-child-path` |
 | 3 | UX-P1-1、UX-P1-4 | 部分／待做 | StoryPlayer 定時、Landing 箭頭、進度條拇指（只改 CSS） |
 | 4 | LIST-2 後續 | ✅ `289fbc4` | 文案對齊「只收名單、不寄新集上線信」；SubscribeForm e2e；ESP 另案 |
@@ -30,14 +30,14 @@
 
 ## 待決策（實作前）
 
-1. UX-P0-1：僅 dashboard，或含 GameKit 兒童模式開關？
+1. ~~UX-P0-1：僅 dashboard，或含 GameKit 兒童模式開關？~~ → **已採僅 dashboard**（`4c0ea22`）
 2. UX-P1-3：一次全集 vs 每週 3 集？
 
 預設：先做 dashboard-only（與 STEM-P3／稽核「先擋 dashboard」一致）。
 
 ## 建議 `/agent-action` 順序
 
-1. UX-P0-1（決策後）
+1. ~~UX-P0-1（決策後）~~ ✅ `4c0ea22`
 2. UX-P1-1／UX-P1-4
 3. ~~LIST-2 文案誠實化 + SubscribeForm e2e~~ ✅ `289fbc4`（ESP／新集上線信另案）
 4. ~~P3 `illustration-queue.json`~~ ✅ `3a0176f`（不自動生圖；不動 Apple sync 主脚本）

@@ -1,3 +1,6 @@
+/* 375px 實測：閘門卡片 280px、儀表板 1359px。佔位對齊閘門，
+   避免首次進頁 checking→locked 跳動；session 已通過時
+   checking→open 會從 280 長到儀表板，僅一幀。 */
 .placeholder,
 .panel {
   width: min(920px, 100%);

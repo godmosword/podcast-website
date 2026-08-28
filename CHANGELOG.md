@@ -11,6 +11,7 @@
 
 ### Added
 
+- **家長閘門（UX-P0-1）**：`/for-parents/dashboard` 的 `<ParentDashboard />` 前需解兩位數×一位數算術題（`sessionStorage` per-tab）。頁首、h1、lede、回指南連結與 sitemap 仍可索引。不含 GameKit／`kidsMode`。這是減速帶不是安全機制。**未改** Apple sync workflow。
 - **ep-27 草稿字幕**：`data/subtitles/ep-27.json`（Whisper large-v3 草稿、未 `--mark`）。GHA run 32964051895 已轉錄並通過 `npm test`／build，但 `protect-main-web` 無 github-actions bypass，直推 `main` 被 GH013（缺 quality／build-and-public-e2e／Vercel）。本機重跑 `npm run transcribe -- ep-27` 後走 PR 上架。**未改** Apple sync workflow。
 - **ep-27 MVP**：本機 `sync:apple` 上架「小紅豆汽車勇敢上學｜想媽媽的時候怎麼辦？」（單封面、`pageCount=1`）。本機無 Whisper，字幕 sidecar 未寫入；GHA 後續可補轉錄。對應 #117（RSS 已有新集、站上未上架）。**未改** Apple sync workflow，也**不**自動生圖。
 - **生圖佇列（P3）**：`data/illustration-queue.json` 為機器可讀 overlay；Studio `/studio` 列出 `pageCount=1` 的待生圖集。`illustrate --approve` 與本機 `sync:notify` 寫入狀態。**不改** Apple sync workflow／`sync-apple-podcast.ts`，也不自動生圖。

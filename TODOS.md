@@ -26,7 +26,7 @@
 
 | # | ID | 類型 | 工時 | 狀態 |
 |---|-----|------|------|------|
-| 1 | [UX-P0-1](#兒童-ux-與親子互動稽核2026-07-11) 家長閘門 | trust | M | 待做（待決策） |
+| 1 | [UX-P0-1](#兒童-ux-與親子互動稽核2026-07-11) 家長閘門 | trust | M | ✅ `4c0ea22` |
 | 2 | [UX-P1-5](#兒童-ux-與親子互動稽核2026-07-11) 全站 e2e | eng | S | ✅ `99cf197` |
 | 3 | [UX-P0-4](#兒童-ux-與親子互動稽核2026-07-11) challenge 遊戲提示 | trust | S | ✅ `1c1ca1b` |
 | 4 | [Growth-Measure-1](#growth-measure-1-成長量測) SoundOn 回鏈 | ops/growth | S | ✅ `42a9d38` |
@@ -457,7 +457,7 @@
 
 ### 待決策隊列（不進 Top 5）
 
-- **UX-P0-1** 家長閘門範圍（dashboard only vs 含 GameKit）
+- ~~**UX-P0-1** 家長閘門範圍（dashboard only vs 含 GameKit）~~ → **已採僅 dashboard**（`4c0ea22`；不含 GameKit／`kidsMode`）
 - **UX-P0-4** challenge 遊戲提示：~~僅文案 vs 隱藏入口~~ → **已採僅文案**（challenge 卡顯示家長陪同提示，不隱藏入口）
 
 ### 封存索引
@@ -794,7 +794,7 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 
 | ID | 優先 | 狀態 | 摘要 | 主要檔案 | 驗證 |
 |----|------|------|------|----------|------|
-| UX-P0-1 | P0 | 待做 | **家長閘門**：進 `/for-parents/dashboard`（或切兒童模式）前簡單算術題；session 通過後放行 | 新 `ParentGate.tsx`；`dashboard/page.tsx` | 手動 375px；`npm test` |
+| UX-P0-1 | P0 | ✅ `4c0ea22` | **家長閘門**：進 `/for-parents/dashboard` 前兩位數×一位數算術題；`sessionStorage` 通過後放行。不含 GameKit | 新 `ParentGate.tsx`；`lib/parent-gate.ts`；`dashboard/page.tsx` | 手動 375px；`npm test`；`e2e/parent-gate.spec.ts` |
 | UX-P0-2 | P0 | ✅ `964f418` | **Footer 觸控 ≥44px**（= W27-2 後半） | `SiteFooter.module.css` | CSS 契約 + 手動 |
 | UX-P0-3 | P0 | ✅ `964f418` | **許願隱私一句話**（= W27-2 前半）：送出鈕下 inline 說明、message placeholder 勿含個資 | `ZoneWishForm.tsx` | vitest |
 | UX-P0-4 | P0 | ✅ `1c1ca1b` | **Challenge 遊戲家長提示**：列表卡加「建議 6 歲以上 · 家長陪同」（僅文案，不隱藏入口） | `data/games.ts`、`app/games/page.tsx` | `npm test` + build ✅ |
@@ -814,7 +814,7 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 ### Task DAG（建議 `/agent-action` 順序）
 
 1. ~~**UX-P0-2 + UX-P0-3**~~ ✅ `964f418`（W27-2）→ ~~**MAP-UX-P1a/b/c／P2a**~~ ✅ `80457c4` → **UX-P1-5**（全站 e2e）
-2. **UX-P0-1** 可並行（新元件，需使用者決策：是否含 GameKit 兒童模式開關）
+2. ~~**UX-P0-1**~~ ✅ `4c0ea22`（僅 dashboard，不含 GameKit）
 3. **UX-P1-1**（ZoneSheet 部分併入 MAP-UX-P1a）、P1-2、P1-4 CSS／元件微調
 4. **UX-P1-3** 內容分批，不擋工程項
 5. **UX-P2-\*** 擇機
@@ -837,7 +837,7 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 
 ### 待使用者決策（實作前）
 
-1. **家長閘門範圍**：僅 dashboard，或含 GameKit「兒童模式」開關？
+1. ~~**家長閘門範圍**：僅 dashboard，或含 GameKit「兒童模式」開關？~~ → **已採僅 dashboard**（`4c0ea22`）
 2. **UX-P1-3 節奏**：一次寫完全集，或每週 3 集？
 3. ~~**UX-P0-4**：僅文案提示 vs 對幼兒隱藏 challenge 入口~~ → **已採僅文案**（`gameParentTip` + 列表卡）
 
@@ -1156,7 +1156,7 @@ D0 → D2-A(smoke) → D1 → D13-剩餘 → D3 → D14 → D6 ∥ D12
 用星星／笑臉呈現「聽了哪幾集、玩了什麼、解鎖了幾台車」，不做成績單。可先讀現有收藏／繼續播放／遊戲 best 分／圖鑑解鎖（localStorage）。**MVP 已上線**（`/for-parents/dashboard`）；文案 polish 見 [UX-P2-2](#兒童-ux-與親子互動稽核2026-07-11)。
 
 #### 家長閘門（parent gate）　`STEM-P3 · S · 付費／設定頁`　〔stem+eng〕
-設定、未來付費頁前簡單算術題，防孩子誤觸（對齊 Sago Mini）。**實作任務：** [UX-P0-1](#兒童-ux-與親子互動稽核2026-07-11)（2026-07-11 稽核具體化：先擋 `/for-parents/dashboard`）。
+設定、未來付費頁前簡單算術題，防孩子誤觸（對齊 Sago Mini）。**實作任務：** [UX-P0-1](#兒童-ux-與親子互動稽核2026-07-11) ✅ `4c0ea22`（僅擋 `/for-parents/dashboard`，不含 GameKit）。
 
 #### 每集「家長共讀指引」　`STEM-P3 · S · P2 parentGuide 上線`　〔stem+content〕
 REUSE-2 試點已完成 `dbfe7b3`；**擴充全集：** [UX-P1-3](#兒童-ux-與親子互動稽核2026-07-11)。P3 階段另評估儀表板摘要、列印物連結。
