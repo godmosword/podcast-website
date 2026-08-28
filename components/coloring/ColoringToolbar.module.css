@@ -75,7 +75,7 @@
   }
 
   .group + .group {
-    padding-left: var(--space-2);
+    padding-left: 0.5rem;
     border-left: 1px solid color-mix(in srgb, #2a3a4a 18%, transparent);
   }
 
