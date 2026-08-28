@@ -124,9 +124,17 @@ export type CssAudit = {
   remBareOccurrences: number;
 };
 
+export type VarFallbackMismatch = {
+  token: string;
+  defined: string;
+  fallback: string;
+  file?: string;
+};
+
 export type DesignTokenReport = CssAudit & {
   fileCount: number;
   files: FileStat[];
+  fallbackMismatches: VarFallbackMismatch[];
 };
 
 function emptyStat(): DimensionStat {
@@ -221,6 +229,145 @@ function replaceFunctionCalls(
     }
   }
   return out;
+}
+
+function normalizeCssValue(value: string): string {
+  return value.replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+/**
+ * 解析 CSS 自訂屬性。同一個名字出現多次時保留第一次
+ * （:root 優先於後續的 night 主題覆寫）。
+ */
+export function parseCssCustomProperties(source: string): Map<string, string> {
+  const stripped = source.replace(/\/\*[\s\S]*?\*\//g, " ");
+  const defs = new Map<string, string>();
+  const re = /(--[A-Za-z0-9-]+)\s*:\s*([^;]+);/g;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(stripped)) !== null) {
+    const name = match[1];
+    const value = match[2]?.replace(/\s+/g, " ").trim();
+    if (!name || !value || defs.has(name)) continue;
+    defs.set(name, value);
+  }
+  return defs;
+}
+
+function splitVarArgs(inner: string): { token: string; fallback: string | null } {
+  let depth = 0;
+  let quote: string | null = null;
+  for (let i = 0; i < inner.length; i += 1) {
+    const ch = inner[i];
+    if (quote) {
+      if (ch === "\\") {
+        i += 1;
+        continue;
+      }
+      if (ch === quote) quote = null;
+      continue;
+    }
+    if (ch === '"' || ch === "'") {
+      quote = ch;
+      continue;
+    }
+    if (ch === "(") depth += 1;
+    else if (ch === ")") depth -= 1;
+    else if (ch === "," && depth === 0) {
+      const token = inner.slice(0, i).trim();
+      const fallback = inner.slice(i + 1).trim();
+      return { token, fallback: fallback.length > 0 ? fallback : null };
+    }
+  }
+  return { token: inner.trim(), fallback: null };
+}
+
+type VarCall = { token: string; fallback: string | null };
+
+function extractVarCalls(source: string): VarCall[] {
+  const calls: VarCall[] = [];
+  const needle = "var(";
+  let i = 0;
+  while (i < source.length) {
+    const idx = source.indexOf(needle, i);
+    if (idx === -1) break;
+    if (isIdentChar(source[idx - 1])) {
+      i = idx + needle.length;
+      continue;
+    }
+    let depth = 1;
+    let quote: string | null = null;
+    let j = idx + needle.length;
+    while (j < source.length && depth > 0) {
+      const ch = source[j];
+      if (quote) {
+        if (ch === "\\") {
+          j += 2;
+          continue;
+        }
+        if (ch === quote) quote = null;
+        j += 1;
+        continue;
+      }
+      if (ch === '"' || ch === "'") {
+        quote = ch;
+        j += 1;
+        continue;
+      }
+      if (ch === "(") depth += 1;
+      else if (ch === ")") depth -= 1;
+      j += 1;
+    }
+    const inner = source.slice(idx + needle.length, depth === 0 ? j - 1 : j);
+    calls.push(splitVarArgs(inner));
+    i = idx + needle.length;
+  }
+  return calls;
+}
+
+/**
+ * `var(--token, fallback)` 的 fallback 與 globals 定義不符。
+ * 未出現在 definitions 的名字（元件區域變數）略過。
+ */
+export function findVarFallbackMismatches(
+  source: string,
+  definitions: Map<string, string>,
+): VarFallbackMismatch[] {
+  const stripped = source.replace(/\/\*[\s\S]*?\*\//g, " ");
+  const hits: VarFallbackMismatch[] = [];
+  for (const call of extractVarCalls(stripped)) {
+    if (!call.fallback) continue;
+    const defined = definitions.get(call.token);
+    if (defined == null) continue;
+    if (normalizeCssValue(defined) === normalizeCssValue(call.fallback)) continue;
+    hits.push({
+      token: call.token,
+      defined,
+      fallback: call.fallback,
+    });
+  }
+  return hits;
+}
+
+export function formatFallbackMismatchWarnings(
+  hits: VarFallbackMismatch[],
+): string {
+  if (hits.length === 0) return "";
+  const lines: string[] = [
+    "## 警告：var() fallback 與 globals.css 不符",
+    "",
+    "token 有定義時 fallback 不會生效，但會誤導讀者，也會騙過採用率統計。",
+    "",
+    `| 檔案 | token | globals 定義 | fallback |`,
+    `|---|---|---|---|`,
+  ];
+  for (const hit of hits) {
+    const file = hit.file ? `\`${hit.file}\`` : "—";
+    lines.push(
+      `| ${file} | \`${hit.token}\` | \`${hit.defined}\` | \`${hit.fallback}\` |`,
+    );
+  }
+  lines.push("");
+  return `\n${lines.join("\n")}`;
 }
 
 /** 移除註解、url() 內容、var() 本體（含 fallback）、@media 條件。 */
@@ -407,10 +554,16 @@ export function auditDesignTokens(repoRoot: string): DesignTokenReport {
   const totals = emptyAudit();
   const fileStats: FileStat[] = [];
   const fontSizeCounts = new Map<string, number>();
+  const globalsSource = readFileSync(join(repoRoot, "app/globals.css"), "utf8");
+  const tokenDefinitions = parseCssCustomProperties(globalsSource);
+  const fallbackMismatches: VarFallbackMismatch[] = [];
 
   for (const file of files) {
     const source = readFileSync(join(repoRoot, file), "utf8");
     const local = auditCssSource(source);
+    for (const hit of findVarFallbackMismatches(source, tokenDefinitions)) {
+      fallbackMismatches.push({ ...hit, file });
+    }
     addStat(totals.fontSize, local.fontSize);
     addStat(totals.radius, local.radius);
     addStat(totals.color, local.color);
@@ -449,6 +602,7 @@ export function auditDesignTokens(repoRoot: string): DesignTokenReport {
     remBareOccurrences: totals.remBareOccurrences,
     fontSizes: bucketsFromCounts(fontSizeCounts),
     files: fileStats,
+    fallbackMismatches,
   };
 }
 
@@ -535,7 +689,7 @@ export function formatDesignTokenReport(report: DesignTokenReport): string {
   }
 
   lines.push("");
-  return lines.join("\n");
+  return `${lines.join("\n")}${formatFallbackMismatchWarnings(report.fallbackMismatches)}`;
 }
 
 export function designTokenReportToJson(report: DesignTokenReport): string {
@@ -572,6 +726,7 @@ export function designTokenReportToJson(report: DesignTokenReport): string {
         bareTotal: file.bareTotal,
       })),
       fontSizes: report.fontSizes,
+      fallbackMismatches: report.fallbackMismatches,
     },
     null,
     2,

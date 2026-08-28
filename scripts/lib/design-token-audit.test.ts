@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   auditCssSource,
+  findVarFallbackMismatches,
+  formatFallbackMismatchWarnings,
   nearestFontSizeToken,
+  parseCssCustomProperties,
   stripDesignCssNoise,
 } from "./design-token-audit";
 
@@ -164,5 +167,100 @@ describe("nearestFontSizeToken", () => {
     expect(
       nearestFontSizeToken("clamp(0.98rem, 0.9rem + 0.6vw, 1.12rem)"),
     ).toBeNull();
+  });
+});
+
+describe("parseCssCustomProperties", () => {
+  it("讀取 :root 裡的 token 定義", () => {
+    const defs = parseCssCustomProperties(`
+      :root {
+        --radius-md: 20px;
+        --radius-sm: 14px;
+      }
+    `);
+    expect(defs.get("--radius-md")).toBe("20px");
+    expect(defs.get("--radius-sm")).toBe("14px");
+  });
+});
+
+describe("findVarFallbackMismatches", () => {
+  const definitions = parseCssCustomProperties(`
+    :root {
+      --radius-md: 20px;
+      --radius-sm: 14px;
+      --nav-h: calc(64px + var(--safe-top));
+    }
+  `);
+
+  it("fallback 與 globals 定義不符時列出警告", () => {
+    const hits = findVarFallbackMismatches(
+      `
+        .x { border-radius: var(--radius-md, 18px); }
+        .y { border-radius: var(--radius-sm, 12px); }
+      `,
+      definitions,
+    );
+    expect(hits).toEqual([
+      { token: "--radius-md", defined: "20px", fallback: "18px" },
+      { token: "--radius-sm", defined: "14px", fallback: "12px" },
+    ]);
+  });
+
+  it("fallback 與定義相同時不警告", () => {
+    expect(
+      findVarFallbackMismatches(
+        ".x { border-radius: var(--radius-md, 20px); }",
+        definitions,
+      ),
+    ).toEqual([]);
+  });
+
+  it("globals 未定義的區域變數不警告", () => {
+    expect(
+      findVarFallbackMismatches(
+        ".x { animation-delay: var(--delay, 0s); }",
+        definitions,
+      ),
+    ).toEqual([]);
+  });
+
+  it("沒有 fallback 的 var() 不警告", () => {
+    expect(
+      findVarFallbackMismatches(
+        ".x { border-radius: var(--radius-md); }",
+        definitions,
+      ),
+    ).toEqual([]);
+  });
+
+  it("註解內的 var() 不警告", () => {
+    expect(
+      findVarFallbackMismatches(
+        "/* border-radius: var(--radius-md, 18px); */ .x { color: red; }",
+        definitions,
+      ),
+    ).toEqual([]);
+  });
+});
+
+describe("formatFallbackMismatchWarnings", () => {
+  it("無不符時不輸出警告段", () => {
+    expect(formatFallbackMismatchWarnings([])).toBe("");
+  });
+
+  it("有不符時列檔案／token／定義／fallback", () => {
+    const text = formatFallbackMismatchWarnings([
+      {
+        file: "components/StoryPlayer.module.css",
+        token: "--radius-md",
+        defined: "20px",
+        fallback: "18px",
+      },
+    ]);
+    expect(text).toMatch(/警告/);
+    expect(text).toContain("components/StoryPlayer.module.css");
+    expect(text).toContain("--radius-md");
+    expect(text).toContain("20px");
+    expect(text).toContain("18px");
   });
 });
