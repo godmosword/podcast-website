@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { seedParentGatePassed } from "./parent-gate";
 
 /**
  * 無障礙回歸：用 axe-core 掃描主要頁面，只擋下 critical / serious 等級的問題，
@@ -42,6 +43,7 @@ const BLOCKING_IMPACTS = new Set(["critical", "serious"]);
 
 for (const pageDef of PAGES) {
   test(`a11y：${pageDef.name} 無 critical/serious 違規`, async ({ page }) => {
+    await seedParentGatePassed(page);
     await page.goto(pageDef.path);
     let builder = new AxeBuilder({ page }).withTags([
       "wcag2a",

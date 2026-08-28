@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { seedParentGatePassed } from "./parent-gate";
 
 /**
  * Production release gate for the public site. Keep this suite deliberately
@@ -52,6 +53,7 @@ async function expectPublicRoute(page: Page, path: string): Promise<void> {
 
 test.describe("public production smoke", () => {
   test("public routes render without app errors or same-origin failed resources", async ({ page }) => {
+    await seedParentGatePassed(page);
     for (const path of PUBLIC_ROUTES) {
       await expectPublicRoute(page, path);
     }

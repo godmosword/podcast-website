@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { seedParentGatePassed } from "./parent-gate";
 
 /**
  * Public-site accessibility gate. Gameplay and map interaction scans remain
@@ -30,6 +31,7 @@ const BLOCKING_IMPACTS = new Set(["critical", "serious"]);
 test.use({ colorScheme: "light" });
 
 async function expectAccessible(page: Page, path: string): Promise<void> {
+  await seedParentGatePassed(page);
   await page.addInitScript(() => {
     localStorage.setItem(
       "cheche:progress",
