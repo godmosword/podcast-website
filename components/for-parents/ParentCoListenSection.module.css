@@ -6,7 +6,7 @@
 .lede {
   margin: 8px 0 0;
   color: var(--ink-soft);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   line-height: 1.75;
 }
 
@@ -35,7 +35,7 @@
   cursor: pointer;
   list-style: none;
   padding: 12px 0;
-  font-size: 1.02rem;
+  font-size: var(--fs-body);
   font-weight: 800;
   color: var(--ink);
 }
@@ -69,7 +69,7 @@
 
 .reflectionChild {
   margin: 0;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   font-weight: 700;
   line-height: 1.6;
   color: var(--ink);

@@ -9,7 +9,7 @@
   padding: 0.55rem 0.85rem;
   border-radius: var(--radius-sm);
   border: 2px solid color-mix(in srgb, var(--ink) 14%, var(--card));
-  font-size: 1rem;
+  font-size: var(--fs-body);
   color: var(--ink);
   background: var(--card);
 }
@@ -27,7 +27,7 @@
   padding: 0.65rem 1rem;
   border: none;
   border-radius: var(--radius-sm);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   font-weight: 800;
   cursor: pointer;
   color: var(--landing-brand-ink);
@@ -52,7 +52,7 @@
   min-height: 52px;
   padding: 0.65rem 1rem;
   border-radius: var(--radius-sm);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   font-weight: 800;
   text-decoration: none;
   color: var(--landing-brand-ink);
@@ -188,7 +188,7 @@
   padding: 0.55rem 0.85rem;
   border-radius: var(--radius-sm);
   border: 2px solid color-mix(in srgb, var(--ink) 14%, var(--card));
-  font-size: 1rem;
+  font-size: var(--fs-body);
   font-family: inherit;
   line-height: 1.45;
   color: var(--ink);

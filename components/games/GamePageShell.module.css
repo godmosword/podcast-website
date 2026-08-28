@@ -166,7 +166,7 @@
   }
 
   .playTitle {
-    font-size: 1rem;
+    font-size: var(--fs-body);
   }
 }
 

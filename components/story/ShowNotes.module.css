@@ -34,7 +34,7 @@
 
 .lede {
   margin: 0 0 10px;
-  font-size: 0.98rem;
+  font-size: var(--fs-body);
   line-height: 1.75;
   color: var(--ink);
 }

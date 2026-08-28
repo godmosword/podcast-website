@@ -177,7 +177,7 @@
 
 .definition {
   margin: 0;
-  font-size: 1.04rem;
+  font-size: var(--fs-body);
   font-weight: 600;
   line-height: 1.85;
   color: var(--ink-soft);
@@ -185,7 +185,7 @@
 
 .summary {
   margin: 10px 0 0;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   line-height: 1.75;
   color: var(--ink-soft);
 }
@@ -245,7 +245,7 @@
 
 .teaser {
   margin: 0;
-  font-size: 0.98rem;
+  font-size: var(--fs-body);
   line-height: 1.7;
   color: var(--ink-soft);
 }

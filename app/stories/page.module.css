@@ -39,7 +39,7 @@
 
 .lede {
   margin: 0 0 var(--space-6);
-  font-size: 0.98rem;
+  font-size: var(--fs-body);
   line-height: 1.75;
   color: var(--ink-soft);
   font-weight: 600;

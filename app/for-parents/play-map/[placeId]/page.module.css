@@ -107,7 +107,7 @@
 
 .closedNotice strong {
   color: var(--warm-heading);
-  font-size: 1rem;
+  font-size: var(--fs-body);
 }
 
 .sectionTitle {

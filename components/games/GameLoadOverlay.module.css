@@ -118,7 +118,7 @@
   background: linear-gradient(180deg, var(--cta-warm-from), var(--cta-warm-to));
   color: var(--cta-warm-fg);
   font-weight: 900;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   padding: 10px 26px;
   border-radius: 999px;
   cursor: pointer;

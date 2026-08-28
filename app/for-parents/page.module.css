@@ -44,7 +44,7 @@
   max-width: 720px;
   margin: 10px 0 0;
   color: var(--ink-soft);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   line-height: 1.7;
 }
 
@@ -70,7 +70,7 @@
 .storySection p {
   margin: 10px 0 0;
   color: var(--ink-soft);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   line-height: 1.78;
 }
 
@@ -157,7 +157,7 @@
   margin: 12px 0 0;
   padding-left: 1.2rem;
   color: var(--ink-soft);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   line-height: 1.75;
 }
 
@@ -213,7 +213,7 @@
 .storyTitle {
   display: block;
   margin-top: 6px;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   font-weight: 800;
   line-height: 1.45;
   color: var(--ink);
@@ -258,7 +258,7 @@
 .toolCard p {
   margin: 0;
   color: var(--ink-soft);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   line-height: 1.78;
 }
 

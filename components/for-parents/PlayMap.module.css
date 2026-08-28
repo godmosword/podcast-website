@@ -781,7 +781,7 @@
   grid-column: 1;
   margin: 0;
   color: var(--ink);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   font-weight: 800;
   line-height: 1.35;
 }
@@ -1026,7 +1026,7 @@
 .tips {
   margin: 14px 0 0;
   color: var(--ink);
-  font-size: 0.98rem;
+  font-size: var(--fs-body);
   line-height: 1.7;
 }
 

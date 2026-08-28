@@ -130,7 +130,7 @@
   background: var(--card);
   color: var(--ink);
   font: inherit;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   outline: none;
 }
 
@@ -156,7 +156,7 @@
   background: var(--card);
   color: var(--accent-ink);
   font: inherit;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   font-weight: 700;
   cursor: pointer;
   transition: transform var(--motion-press), opacity var(--motion-press),

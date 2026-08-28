@@ -274,7 +274,7 @@
 
 .cardTitle {
   color: var(--ink);
-  font-size: 1.02rem;
+  font-size: var(--fs-body);
   font-weight: 900;
   line-height: 1.3;
 }

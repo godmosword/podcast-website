@@ -59,7 +59,7 @@
   border-radius: 999px;
   background: linear-gradient(var(--map-chip), var(--map-chip-2));
   color: var(--map-chip-ink);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   font-weight: 800;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(120, 90, 40, 0.22);
@@ -428,7 +428,7 @@
   min-height: 52px;
   padding: 0.6rem 0.8rem;
   border-radius: var(--radius-sm);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   font-weight: 800;
   text-align: center;
   text-decoration: none;
@@ -745,7 +745,7 @@
   min-height: 52px;
   padding: 0.65rem 1rem;
   border-radius: var(--radius-sm);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   font-weight: 800;
   text-decoration: none;
   color: var(--landing-brand-ink);

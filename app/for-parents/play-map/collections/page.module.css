@@ -78,7 +78,7 @@
   max-width: 620px;
   margin: 18px 0 0;
   color: var(--ink-soft);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   line-height: 1.8;
 }
 
@@ -134,7 +134,7 @@
 }
 
 .collectionLink strong {
-  font-size: 1rem;
+  font-size: var(--fs-body);
   line-height: 1.4;
 }
 

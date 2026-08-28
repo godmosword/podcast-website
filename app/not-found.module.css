@@ -23,7 +23,7 @@
 .message {
   margin: 0 0 24px;
   color: var(--ink-soft);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   line-height: 1.5;
 }
 

@@ -90,7 +90,7 @@
   border-radius: 999px;
   color: var(--ink);
   font-weight: 700;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   line-height: 1.2;
   text-decoration: none;
   /* 柔色膠囊：細邊 + 柔陰影 */

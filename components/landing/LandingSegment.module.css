@@ -160,7 +160,7 @@
   );
   color: var(--landing-cta-fg, #7a4012);
   font-weight: 800;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   text-decoration: none;
   border: 1px solid rgba(180, 120, 60, 0.22);
   /* CTA 加 --gloss 上緣高光：做出「打光的黏土表面」，強化主要行動鈕的重量。
@@ -226,7 +226,7 @@
   background: linear-gradient(180deg, #ffa14d 0%, var(--landing-brand, #ff8c2b) 100%);
   color: var(--landing-brand-ink, #3a2410);
   font-weight: 800;
-  font-size: 1.02rem;
+  font-size: var(--fs-body);
   text-decoration: none;
   border: 1px solid rgba(120, 60, 10, 0.2);
   /* 主要播放鈕同 .cta 加 --gloss 上緣高光（實心黏土鈕才加；玻璃 subscribeCta 不加）。 */

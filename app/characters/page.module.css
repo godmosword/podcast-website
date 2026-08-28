@@ -35,7 +35,7 @@
   max-width: 640px;
   margin: 10px 0 0;
   color: var(--ink-soft);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   line-height: 1.7;
 }
 
@@ -78,7 +78,7 @@
 .faqItem p {
   margin: 6px 0 0;
   color: var(--ink-soft);
-  font-size: 0.98rem;
+  font-size: var(--fs-body);
   line-height: 1.7;
 }
 

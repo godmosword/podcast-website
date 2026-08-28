@@ -91,7 +91,7 @@
   border-radius: 999px;
   background: linear-gradient(180deg, var(--cta-warm-from), var(--cta-warm-to));
   color: var(--cta-warm-fg);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   font-weight: 800;
   cursor: pointer;
   box-shadow: var(--shadow-md);
