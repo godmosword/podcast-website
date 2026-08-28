@@ -186,7 +186,20 @@ meta `theme-color`（夜）對齊 `--bg`：`lib/theme.ts` 的 `NIGHT_THEME_COLOR
 
 ## 間距
 
-Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--space-4: 16px`、`--space-6: 24px`、`--space-8: 32px`、`--space-section: 40px`、`--space-page: 20px`。
+Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--space-4: 16px`、`--space-6: 24px`、`--space-8: 32px`、`--space-section: 40px`、`--space-page: 20px`。**全部是 px 值**，不是 rem。
+
+### rem 不得換成 space token（無障礙）
+
+`--space-*` 是固定像素。`0.5rem` 會隨使用者根字級縮放，`var(--space-2)`（8px）不會。把 rem 間距改成現有 space token，在預設 16px 根字級看起來一樣，但放大瀏覽器字級時版面會擠——字變大、間距不跟著長。
+
+因此：
+
+1. **任何 rem 單位的間距宣告一律不得轉換成現有 `--space-*`。**這不是風格偏好，是無障礙行為差異。
+2. 新增間距宣告**預設使用 px token**（`--space-2` 等）。
+3. 若某處確實需要隨字級縮放（例如緊貼文字的內距），可以用 rem，但**必須在該宣告旁留一行註解說明為什麼**。沒有註解的 rem 間距視為待清理，不是漏轉 token。
+4. **不要另立一套 rem 版的 space 階梯。**每則新宣告都會多一個「該用哪套」的問題，成本大於收益。
+
+`7325770` 還原了 20 處 `rem → var(--space-*)`，理由同上。看到「rem 間距沒有 token 化」時，那是本政策，不是遺漏。稽核腳本的 spacing 採用率只計 px 宣告；rem 間距另列為政策豁免。
 
 密度底線（兒童向頁面取括號內較大值）：
 
