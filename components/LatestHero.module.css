@@ -72,8 +72,12 @@
   text-wrap: balance;
 }
 
+/* clamp 為 ingest 截斷的保險，與動效無關，勿併入 reduced-motion 區塊。 */
 .summary {
-  display: block;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   font-size: var(--fs-control);
   line-height: 1.5;
   color: var(--ink-soft);

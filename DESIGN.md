@@ -208,6 +208,7 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 - section 垂直間距 mobile ≥ 24px；內文 line-height ≥ 1.5（標籤型小字豁免）。
 - 純文字段落 max-width ≤ 640px。
 - 文案密度：兒童動線頁不放超過一行的家長散文（家長說明歸戶 `/for-parents` 與 footer）；標題 ≤ 8 字、CTA ≤ 6 字。`/legal` 精簡不得刪改具法律效力語句。
+- 卡片／hero 型摘要：可見上限 2–3 行，且**來源在 ingest 就截到行數對應的字數**（約 68 字 CJK，對齊 390px `--fs-label` 三行），`-webkit-line-clamp` 只是保險而非主要手段。理由：整卡為單一 `<a>` 時，摘要屬連結可及名稱，clamp 對螢幕閱讀器與分享文案（`lib/share-story.ts`）無效。摘要內不得夾帶宣傳／營運訴求（IG、五星好評、linktr.ee），這類文案歸戶 footer 與 `/for-parents`。clamp 區塊不得因此新增「展開更多」控制項（會在 `<a>` 內嵌套互動元素）。`data/apple-sync.defaults.json` 的 overrides **不要放 `summary`**，除非刻意凍結、繞過 RSS 清洗。
 - **字級（2026-08 起全面收斂）**：舊政策「既有硬寫僅在觸碰該宣告時順手換 token」結構上無法收斂——多數 CSS 行寫完就不會再被碰。字級改為按角色整批對到 `--fs-*`（見上表），不再等下次改到那一行。階梯用角色命名（`--fs-control` 而不是「0.95rem」），才擋得住之後再漂移。
 - **圓角（2026-08 起全面收斂）**：舊政策把圓角跟間距綁在「觸碰時順手換」。膠囊 `999px` 與圓形 `50%` 其實全站寫法一致，缺的是名字；小於 `--radius-sm` 的 6／8／10／12px 也沒有階。圓角改為整批對到 `--radius-*`（見上表）。不對稱多值（島嶼有機形、單邊膠囊）不拆 token。
 - **間距／色彩**：新宣告仍優先用 token；既有硬寫 **px** 仍僅在觸碰該宣告時順手換 token（±4px 內就近取整）。**rem 間距不換成 `--space-*`**（見上節）。這兩維尚未全面收斂。
@@ -231,7 +232,7 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 | 元件 | 說明 |
 |------|------|
 | `SiteHeader` | 吉祥物 + 標題（首頁完整版 / 內頁精簡版） |
-| `StoryCard` | 封面、EP meta、elevated surface + 極淡主題色邊／柔陰影 |
+| `StoryCard` | 封面、EP meta、elevated surface + 極淡主題色邊／柔陰影；摘要 clamp 桌面 2 行、≤480px 3 行 |
 | `Chip` | 篩選與標籤 pill，`aria-pressed` |
 | `PlayButton` | 全寬 CTA，主題色底 |
 | `StoryMeta` | EP / 時長（標註） / 車種 chip |
@@ -285,6 +286,7 @@ Hero 圖走 `images.edit` + `public/characters/` 定裝照參考圖，與單集�
 
 1. **SiteHeader** 大 Hero 黏土插畫
 2. **LatestHero** 最新一集
+   LatestHero 說明最多 3 行（`StoryCard` 桌面 2 行、≤480px 3 行）；來源摘要於 Apple／SoundOn ingest 階段即截斷至約 68 字（CJK），clamp 為保險層。
 3. **FavoritesSection** 精選
 4. **StoryFilter** 找故事（車種／主題篩選）
 
