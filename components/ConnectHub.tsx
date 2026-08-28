@@ -70,7 +70,7 @@ function IconLink({
   );
 }
 
-/** 頁尾收聽與訂閱追蹤：分兩區塊，圓形圖示。 */
+/** 頁尾頻道與訂閱追蹤：分兩區塊，圓形圖示。 */
 export default function ConnectHub({
   id = "connect",
   className,
@@ -94,11 +94,8 @@ export default function ConnectHub({
               className={`${styles.dot} ${styles.dotPlatform}`}
               aria-hidden
             />
-            收聽
+            頻道
           </h2>
-          <p className={styles.blockBlurb}>
-            訂閱後，新集會自動出現在你的 Podcast App
-          </p>
           <nav className={styles.row} aria-label="收聽平台">
             {platforms.map((p) => (
               <IconLink

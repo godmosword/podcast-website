@@ -6,6 +6,8 @@
 
 ### Changed
 
+- **ConnectHub「收聽」改「頻道」**：拿掉「訂閱後，新集會自動出現在你的 Podcast App」副標。**未改** Apple sync workflow。
+- **頁尾遊樂園入口拿掉副標**：首頁 footer「去遊樂園玩」不再顯示「小遊戲 · 免下載」。**未改** Apple sync workflow。
 - **行動漢堡拿掉外框**：`SiteNavBar` 漢堡鈕改透明底、無邊框，只留 44px 線條 icon，貼齊桃色頂欄；夜間開啟選單時也不再另加玻璃底板。**未改** Apple sync workflow。
 - **Landing 拿掉疊圖主標與聽最新一集**：四段 hero 標題改 CSS module 視覺隱藏（不用全域 `.sr-only`，以免跟首段 siteIntro 契約撞車）；不再渲染「聽最新一集／播一集睡前故事」直達鈕，只留分區 CTA（全部故事／睡前故事等）。頂欄品牌「車車遊樂園」不動。**未改** Apple sync workflow。
 - **親子遊樂地圖退役全國視角地圖**：未選縣市且未定位時不再提供「看地圖」；無縣市的 `?view=map` 進頁改為名單並清掉該參數。地圖只服務已選縣市或「附近」。縣市內 z9–12 仍用 spatial cluster。**未改** Apple sync workflow。

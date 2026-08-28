@@ -31,6 +31,7 @@ describe("SiteFooter", () => {
     expect(html).toContain("無廣告");
     expect(html).toContain("不收孩子帳號");
     expect(html).toContain("去遊樂園玩");
+    expect(html).not.toContain("小遊戲 · 免下載");
   });
 
   test("NEXT_PUBLIC_CONTACT_FORM_URL 設定時聯絡我們為外連表單", async () => {

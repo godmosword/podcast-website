@@ -57,6 +57,8 @@
 
 | ID | 說明 |
 |----|------|
+| polish(connect): 「收聽」改「頻道」、拿掉 Podcast App 副標 | 見本 commit |
+| polish(footer): 去遊樂園玩拿掉「小遊戲 · 免下載」 | 見本 commit |
 | polish(nav): 行動漢堡拿掉玻璃外框 | `2377074` |
 | polish(landing): 四段 hero 拿掉疊圖主標與聽最新一集 | `784f728` |
 

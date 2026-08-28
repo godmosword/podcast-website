@@ -73,7 +73,6 @@ export default function SiteFooter({
             </span>
             <span className={styles.playgroundCopy}>
               <span className={styles.playgroundTitle}>去遊樂園玩</span>
-              <span className={styles.playgroundSub}>小遊戲 · 免下載</span>
             </span>
           </Link>
         )}
