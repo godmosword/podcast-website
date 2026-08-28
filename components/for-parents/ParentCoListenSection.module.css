@@ -16,7 +16,7 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .item {
@@ -56,8 +56,8 @@
 .body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding-bottom: 8px;
+  gap: var(--space-3);
+  padding-bottom: var(--space-2);
 }
 
 .reflection {

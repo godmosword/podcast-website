@@ -34,7 +34,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
+  gap: var(--space-2);
   /* 桌面操作區高於 WCAG 2.5.8 的 24px 下限；視覺指示為 ::after 膠囊。 */
   width: 34px;
   height: 30px;

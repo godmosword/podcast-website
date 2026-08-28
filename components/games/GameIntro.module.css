@@ -87,7 +87,7 @@
 .parentTip {
   display: inline-block;
   align-self: flex-start;
-  margin-top: 8px;
+  margin-top: var(--space-2);
   padding: 2px 0;
   color: var(--ink-soft);
   font-size: var(--fs-meta);
@@ -116,7 +116,7 @@
 @media (max-width: 640px) {
   .intro {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: var(--space-3);
   }
 
   .cover {

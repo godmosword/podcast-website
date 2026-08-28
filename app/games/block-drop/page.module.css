@@ -13,5 +13,5 @@
   font-size: var(--fs-control);
   font-weight: 600;
   color: var(--ink-soft);
-  margin-bottom: 16px;
+  margin-bottom: var(--space-4);
 }

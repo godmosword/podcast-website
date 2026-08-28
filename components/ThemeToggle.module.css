@@ -18,7 +18,7 @@
 
 .compact {
   min-width: 44px;
-  padding: 8px;
+  padding: var(--space-2);
 }
 
 .iconOnly {

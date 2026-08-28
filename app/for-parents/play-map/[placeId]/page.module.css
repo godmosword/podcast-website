@@ -51,7 +51,7 @@
   display: inline-flex;
   min-height: 44px;
   align-items: center;
-  margin-top: 8px;
+  margin-top: var(--space-2);
 }
 
 .article {
@@ -120,7 +120,7 @@
 .flags {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
   margin: var(--space-3) 0 0;
   padding: 0;
   list-style: none;
@@ -200,12 +200,12 @@
 
 .facts {
   display: grid;
-  gap: 12px;
+  gap: var(--space-3);
   margin: var(--space-4) 0 0;
 }
 
 .facts div {
-  padding-bottom: 12px;
+  padding-bottom: var(--space-3);
   border-bottom: 1px solid var(--hairline);
 }
 
@@ -236,7 +236,7 @@
 .facilities {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
   margin: var(--space-4) 0 0;
   padding: 0;
   list-style: none;
@@ -316,7 +316,7 @@
 
 .sources ul {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
   margin: 8px 0 0;
   padding: 0;
   list-style: none;

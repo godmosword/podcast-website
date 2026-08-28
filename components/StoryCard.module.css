@@ -57,7 +57,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   font-size: var(--fs-meta);
   font-weight: 600;
   color: var(--ink-soft);
@@ -92,7 +92,7 @@
   padding-top: 4px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .tags {
@@ -117,7 +117,7 @@
 .cardGrid {
   flex-direction: column;
   align-items: stretch;
-  gap: 12px;
+  gap: var(--space-3);
   height: 100%;
   padding: var(--space-3);
 }
@@ -129,7 +129,7 @@
 }
 
 .bodyGrid {
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .cardGrid .title {
@@ -150,7 +150,7 @@
 
 @media (max-width: 480px) {
   .card {
-    gap: 12px;
+    gap: var(--space-3);
     padding: 14px;
   }
 

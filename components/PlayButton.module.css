@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2);
   width: 100%;
   min-height: 48px;
   text-align: center;
@@ -10,7 +10,7 @@
   font-size: var(--fs-h3);
   font-weight: 700;
   letter-spacing: 0.02em;
-  padding: 16px;
+  padding: var(--space-4);
   border-radius: var(--radius-lg);
   /* 單集色壓暗後再疊光澤：淺色票（#f59f00 / #0ea5e9）白字才能過 AA。 */
   background-color: color-mix(in srgb, var(--play-bg, var(--accent)) 56%, black);

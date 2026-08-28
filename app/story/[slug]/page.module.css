@@ -236,7 +236,7 @@
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  margin-top: 12px;
+  margin-top: var(--space-3);
   color: var(--accent-ink);
   font-weight: 800;
   text-decoration-thickness: 0.12em;
@@ -251,7 +251,7 @@
 }
 
 .expandable {
-  margin-top: 12px;
+  margin-top: var(--space-3);
 }
 
 .expandable > summary {

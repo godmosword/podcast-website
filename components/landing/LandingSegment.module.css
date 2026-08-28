@@ -219,7 +219,7 @@
 .playCta {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   min-height: 48px;
   padding: 12px 24px;
   border-radius: var(--radius-pill);
@@ -303,7 +303,7 @@
   }
 
   .headline {
-    margin-bottom: 12px;
+    margin-bottom: var(--space-3);
     /* 預留右側 Dudu 夥伴空間；斷行同樣由資料 \n 控制 */
     max-width: calc(100% - 72px);
   }
@@ -334,7 +334,7 @@
     grid-template-columns: minmax(0, 1fr) 68px;
     align-items: end;
     column-gap: 4px;
-    row-gap: 12px;
+    row-gap: var(--space-3);
     padding-bottom: calc(var(--landing-mobile-nav-h) + 6px);
   }
 

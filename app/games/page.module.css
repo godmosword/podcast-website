@@ -117,7 +117,7 @@
 .highlights {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
   margin: 18px 0 0;
   padding: 0;
   list-style: none;
@@ -177,7 +177,7 @@
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
   min-width: 0;
   padding: 10px;
   border: 1px solid color-mix(in srgb, var(--card-accent) 30%, var(--hairline));

@@ -133,7 +133,7 @@
 }
 
 .facts div {
-  padding: 12px;
+  padding: var(--space-3);
   border: 1px solid color-mix(in srgb, var(--warm-accent) 18%, var(--line));
   border-radius: var(--radius-sm);
   background: var(--warm-chip-bg);

@@ -72,8 +72,8 @@
 .links {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 12px;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
 }
 
 .links a {
@@ -100,7 +100,7 @@
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   padding: 10px 14px;
   min-height: 44px;
   border-radius: var(--radius-pill);

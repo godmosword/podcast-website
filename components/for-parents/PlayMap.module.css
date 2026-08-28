@@ -334,7 +334,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2);
   flex: 0 0 auto;
   min-height: 44px;
   padding: 8px 14px;
@@ -592,7 +592,7 @@
 .cardHead {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px;
+  gap: var(--space-2);
   align-items: start;
 }
 
@@ -670,7 +670,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 8px;
+  gap: var(--space-2);
   margin-inline: var(--space-3);
   padding: 8px 0 var(--space-3);
   border-top: 1px solid color-mix(in srgb, var(--hairline) 72%, transparent);
@@ -1032,7 +1032,7 @@
 
 .tipsLabel {
   display: inline-block;
-  margin-right: 8px;
+  margin-right: var(--space-2);
   color: var(--accent-ink);
   font-weight: 700;
 }
@@ -1064,7 +1064,7 @@
 
 .feeNoteLabel {
   display: inline-block;
-  margin-right: 8px;
+  margin-right: var(--space-2);
   color: var(--accent-ink);
   font-weight: 700;
 }
@@ -1077,7 +1077,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   margin: 0 0 12px;
   padding: 10px 12px;
   border: 1px solid color-mix(in srgb, var(--status-error) 32%, transparent);
@@ -1156,7 +1156,7 @@
 
 .sourcesList {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
   margin: 8px 0 0;
   padding: 0;
   list-style: none;
@@ -1169,7 +1169,7 @@
   /* 觸控目標 ≥44px：來源連結原本只有約 20px 高，列間距又只有 8px。 */
   min-height: 44px;
   padding-block: 10px;
-  gap: 8px;
+  gap: var(--space-2);
   color: var(--ink);
   font-size: var(--fs-control);
   font-weight: 600;
@@ -1581,7 +1581,7 @@
   }
 
   .filterToggle {
-    padding-inline: 12px;
+    padding-inline: var(--space-3);
   }
 
   .toolbar {

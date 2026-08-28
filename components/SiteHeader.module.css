@@ -34,7 +34,7 @@
 
 @media (max-height: 700px), (max-width: 390px) {
   .header {
-    margin-bottom: 16px;
+    margin-bottom: var(--space-4);
   }
 
   .title {

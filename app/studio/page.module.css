@@ -10,7 +10,7 @@
   font-size: var(--fs-control);
   font-weight: 600;
   color: var(--ink-soft);
-  margin-bottom: 16px;
+  margin-bottom: var(--space-4);
   text-decoration: none;
 }
 
@@ -28,7 +28,7 @@
 }
 
 .section {
-  margin-bottom: 32px;
+  margin-bottom: var(--space-8);
 }
 
 .sectionHeading {
