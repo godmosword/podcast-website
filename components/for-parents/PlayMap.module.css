@@ -283,7 +283,7 @@
 .chipCompact {
   min-height: 36px;
   padding: 4px 12px;
-  font-size: 0.84rem;
+  font-size: var(--fs-label);
 }
 
 .chip[aria-pressed="true"] {
@@ -343,7 +343,7 @@
   background: transparent;
   color: var(--ink);
   font: inherit;
-  font-size: 0.88rem;
+  font-size: var(--fs-label);
   font-weight: 600;
   cursor: pointer;
   transition: transform var(--motion-press), opacity var(--motion-press);
@@ -689,7 +689,7 @@
   background: transparent;
   color: var(--ink);
   font: inherit;
-  font-size: 0.88rem;
+  font-size: var(--fs-label);
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
@@ -919,7 +919,7 @@
   background: linear-gradient(var(--map-chip), var(--map-chip-2));
   color: var(--map-chip-ink);
   font: inherit;
-  font-size: 0.88rem;
+  font-size: var(--fs-label);
   font-weight: 800;
   transform: translateX(-50%);
   cursor: pointer;
@@ -1136,7 +1136,7 @@
 .verified {
   margin: 10px 0 0;
   color: var(--ink-soft);
-  font-size: 0.85rem;
+  font-size: var(--fs-label);
   font-weight: 600;
 }
 
@@ -1149,7 +1149,7 @@
   display: flex;
   align-items: center;
   color: var(--accent-ink);
-  font-size: 0.88rem;
+  font-size: var(--fs-label);
   font-weight: 700;
   cursor: pointer;
 }

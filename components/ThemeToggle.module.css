@@ -10,7 +10,7 @@
   border: 1.5px solid var(--line);
   background: var(--card);
   color: var(--ink);
-  font-size: 0.85rem;
+  font-size: var(--fs-label);
   font-weight: 700;
   box-shadow: var(--shadow-sm);
   transition: transform var(--motion-press), box-shadow var(--motion-press);

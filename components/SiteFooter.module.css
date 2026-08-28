@@ -43,7 +43,7 @@
 
 .home .parentNote {
   margin-bottom: 14px;
-  font-size: 0.84rem;
+  font-size: var(--fs-label);
 }
 
 .home .footerConnect {
@@ -69,7 +69,7 @@
 .parentNote {
   margin: 0 auto 20px;
   max-width: 460px;
-  font-size: 0.88rem;
+  font-size: var(--fs-label);
   line-height: 1.6;
   color: var(--ink-soft);
 }

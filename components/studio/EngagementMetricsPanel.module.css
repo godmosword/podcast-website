@@ -52,6 +52,6 @@
 
 .note {
   margin: 0.75rem 0 0;
-  font-size: 0.88rem;
+  font-size: var(--fs-label);
   color: var(--ink-soft);
 }

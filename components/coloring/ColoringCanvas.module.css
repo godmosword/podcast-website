@@ -73,7 +73,7 @@
   border-radius: 14px;
   color: color-mix(in srgb, #2a3a4a 78%, transparent);
   background: color-mix(in srgb, #fff 78%, #dff0e4);
-  font-size: 0.88rem;
+  font-size: var(--fs-label);
   font-weight: 700;
   line-height: 1.45;
 }
@@ -86,7 +86,7 @@
   border-radius: 14px;
   color: #5d4a67;
   background: color-mix(in srgb, #fff 88%, #fff2c4);
-  font-size: 0.86rem;
+  font-size: var(--fs-label);
   line-height: 1.4;
 }
 
@@ -179,7 +179,7 @@
   margin: 0;
   min-height: 1.2em;
   text-align: center;
-  font-size: 0.85rem;
+  font-size: var(--fs-label);
   font-weight: 700;
   color: #b3402f;
 }

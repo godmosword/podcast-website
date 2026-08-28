@@ -31,7 +31,7 @@
 
 .blockBlurb {
   margin: 0 0 14px;
-  font-size: 0.86rem;
+  font-size: var(--fs-label);
   line-height: 1.5;
   font-weight: 600;
   color: var(--ink-soft);

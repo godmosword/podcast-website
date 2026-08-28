@@ -49,7 +49,7 @@
 
 .updated {
   margin: 0 0 var(--space-8);
-  font-size: 0.88rem;
+  font-size: var(--fs-label);
   color: var(--ink-soft);
 }
 
@@ -68,7 +68,7 @@
   border: 1px solid var(--hairline);
   border-radius: 999px;
   color: var(--accent-ink);
-  font-size: 0.84rem;
+  font-size: var(--fs-label);
   font-weight: 800;
   text-decoration: none;
   background: var(--surface-elevated);

@@ -51,7 +51,7 @@
 .summary {
   margin: 0;
   color: var(--ink-soft, #5c564f);
-  font-size: 0.88rem;
+  font-size: var(--fs-label);
   font-weight: 700;
   line-height: 1.4;
 }
@@ -136,7 +136,7 @@
   margin-top: 2px;
   padding-inline: 12px;
   color: var(--ink-soft, #5c564f);
-  font-size: 0.86rem;
+  font-size: var(--fs-label);
   font-weight: 700;
   text-decoration: underline;
   text-underline-offset: 3px;

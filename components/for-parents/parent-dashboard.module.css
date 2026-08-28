@@ -39,7 +39,7 @@
 
 .cardHint {
   margin: 0 0 14px;
-  font-size: 0.88rem;
+  font-size: var(--fs-label);
   line-height: 1.6;
   color: var(--ink-soft);
 }

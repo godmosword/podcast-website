@@ -167,7 +167,7 @@
   }
 
   .summary {
-    font-size: 0.86rem;
+    font-size: var(--fs-label);
     -webkit-line-clamp: 3;
   }
 }

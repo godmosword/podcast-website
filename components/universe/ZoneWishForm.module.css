@@ -83,7 +83,7 @@
 
 .error {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: var(--fs-label);
   color: var(--ink-soft);
   line-height: 1.45;
 }
@@ -95,7 +95,7 @@
 
 .hint {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: var(--fs-label);
   color: var(--ink-soft);
 }
 
@@ -103,7 +103,7 @@
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
-  font-size: 0.85rem;
+  font-size: var(--fs-label);
   line-height: 1.45;
   color: var(--ink-soft);
   cursor: pointer;
@@ -163,7 +163,7 @@
   padding: 0.45rem 0.6rem;
   border: 2px solid color-mix(in srgb, var(--ink) 14%, var(--card));
   border-radius: var(--radius-sm);
-  font-size: 0.88rem;
+  font-size: var(--fs-label);
   font-weight: 700;
   line-height: 1.25;
   text-align: center;

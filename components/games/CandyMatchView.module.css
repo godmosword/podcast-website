@@ -145,7 +145,7 @@
   border-radius: 999px;
   color: #5d4a67;
   background: color-mix(in srgb, var(--c-yellow) 24%, white);
-  font-size: 0.87rem;
+  font-size: var(--fs-label);
   font-weight: 900;
 }
 

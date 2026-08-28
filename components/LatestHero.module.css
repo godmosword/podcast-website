@@ -101,7 +101,7 @@
   /* .title 不再覆寫：--fs-h2 的 clamp() 已負責縮放（390px → 下限 1.45rem）。
      此處硬寫 1.15rem 會蓋掉 token，等於抵銷字階升級。 */
   .summary {
-    font-size: 0.88rem;
+    font-size: var(--fs-label);
   }
 }
 
