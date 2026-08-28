@@ -140,7 +140,7 @@
 .parentNote p {
   margin: 12px 0 0;
   color: var(--ink);
-  font-size: 1.06rem;
+  font-size: var(--fs-h4);
   line-height: 1.8;
 }
 

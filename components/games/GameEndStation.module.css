@@ -44,7 +44,7 @@
 .scoreLabel {
   margin: 0;
   color: var(--ink-soft, #5c564f);
-  font-size: 1.05rem;
+  font-size: var(--fs-h4);
   font-weight: 800;
 }
 
@@ -98,7 +98,7 @@
   box-shadow:
     0 5px 0 color-mix(in srgb, var(--cta-warm-to, #f0b84a) 70%, #4a2e14),
     inset 0 2px 0 color-mix(in srgb, #fff 70%, transparent);
-  font-size: 1.05rem;
+  font-size: var(--fs-h4);
 }
 
 .replayBtn:hover,

@@ -74,7 +74,7 @@
 .lead {
   margin: 0 0 0.35rem;
   max-width: 28ch;
-  font-size: 1.05rem;
+  font-size: var(--fs-h4);
   font-weight: 600;
   line-height: 1.5;
   color: color-mix(in srgb, var(--coloring-ink, #2a3a4a) 78%, transparent);
@@ -91,7 +91,7 @@
   border-radius: 14px;
   background: var(--coloring-accent, #e85d4c);
   color: #fff;
-  font-size: 1.05rem;
+  font-size: var(--fs-h4);
   font-weight: 800;
   letter-spacing: 0.02em;
   cursor: pointer;

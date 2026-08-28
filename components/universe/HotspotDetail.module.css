@@ -63,7 +63,7 @@
   border: none;
   box-shadow: var(--shadow-sm);
   color: var(--cta-warm-fg);
-  font-size: 1.05rem;
+  font-size: var(--fs-h4);
   font-weight: 800;
   text-decoration: none;
 }

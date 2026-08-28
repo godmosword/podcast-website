@@ -24,7 +24,7 @@
   justify-content: center;
   gap: 8px;
   margin: 0 0 8px;
-  font-size: 1.05rem;
+  font-size: var(--fs-h4);
   font-weight: 700;
   color: var(--ink);
 }

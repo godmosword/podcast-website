@@ -28,7 +28,7 @@
 .pageTitle {
   margin: 0;
   font-weight: 800;
-  font-size: 1.05rem;
+  font-size: var(--fs-h4);
   flex: 1;
   min-width: 0;
 }

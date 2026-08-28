@@ -14,7 +14,7 @@
 
 .child {
   margin: 0 0 0.75rem;
-  font-size: 1.05rem;
+  font-size: var(--fs-h4);
   line-height: 1.5;
 }
 

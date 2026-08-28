@@ -219,7 +219,7 @@
 
 .comingSoon {
   margin: 0 0 0.5rem;
-  font-size: 1.05rem;
+  font-size: var(--fs-h4);
   font-weight: 800;
   color: var(--ink);
 }
@@ -335,7 +335,7 @@
 
 .childHint {
   margin: 0 0 0.65rem;
-  font-size: 1.05rem;
+  font-size: var(--fs-h4);
   font-weight: 800;
   line-height: 1.45;
   color: var(--ink);
@@ -677,7 +677,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 1.05rem;
+  font-size: var(--fs-h4);
   font-weight: 900;
   color: var(--landing-brand-ink);
 }
