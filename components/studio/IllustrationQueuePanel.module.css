@@ -10,13 +10,13 @@
 .lead {
   margin: 0 0 1rem;
   color: var(--ink-soft);
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   line-height: 1.5;
 }
 
 .empty {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   color: var(--ink-soft);
 }
 

@@ -36,7 +36,7 @@
   /* 文字用 --accent-ink（對 --card 5.54:1）；--accent 只出現在邊框。 */
   color: var(--accent-ink);
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   cursor: pointer;
   transition: transform var(--motion-press);
 }

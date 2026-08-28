@@ -21,7 +21,7 @@
   border: 1px solid var(--hairline);
   background: var(--surface-elevated);
   color: var(--accent-ink);
-  font-size: 0.92rem;
+  font-size: var(--fs-control);
   font-weight: 800;
   text-decoration: none;
 }

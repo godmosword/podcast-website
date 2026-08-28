@@ -91,7 +91,7 @@
 }
 
 .completionHint strong {
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
 }
 
 .completionHint[data-tone="rich"] {

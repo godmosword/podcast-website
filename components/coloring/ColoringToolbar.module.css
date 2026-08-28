@@ -30,7 +30,7 @@
   background: #fff;
   color: #2a3a4a;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: var(--fs-control);
   cursor: pointer;
 }
 

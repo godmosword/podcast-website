@@ -46,7 +46,7 @@
 
 .empty {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   color: var(--ink-soft);
 }
 

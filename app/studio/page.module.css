@@ -7,7 +7,7 @@
 
 .back {
   display: inline-block;
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   font-weight: 600;
   color: var(--ink-soft);
   margin-bottom: 16px;
@@ -22,7 +22,7 @@
 
 .subtitle {
   margin: 0 0 28px;
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   line-height: 1.55;
   color: var(--ink-soft);
 }
@@ -39,7 +39,7 @@
 
 .sectionLead {
   margin: 0 0 16px;
-  font-size: 0.9rem;
+  font-size: var(--fs-control);
   line-height: 1.55;
   color: var(--ink-soft);
 }

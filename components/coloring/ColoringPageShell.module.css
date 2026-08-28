@@ -33,7 +33,7 @@
   align-items: center;
   min-height: 44px;
   margin-bottom: 0.35rem;
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   font-weight: 600;
   color: var(--coloring-ink);
   text-decoration: none;

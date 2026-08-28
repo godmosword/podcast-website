@@ -47,7 +47,7 @@
 }
 
 .sentenceUnit {
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   font-weight: 700;
   color: var(--ink-soft);
 }

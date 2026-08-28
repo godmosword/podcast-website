@@ -139,7 +139,7 @@
   background: transparent;
   color: var(--ink, #34302b);
   font-weight: 800;
-  font-size: 0.9375rem;
+  font-size: var(--fs-control);
   padding: 8px 22px;
   border-radius: 999px;
   cursor: pointer;

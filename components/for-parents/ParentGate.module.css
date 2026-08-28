@@ -32,7 +32,7 @@
 
 .hint {
   margin: 0 0 16px;
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   line-height: 1.6;
   color: var(--ink-soft);
 }
@@ -76,7 +76,7 @@
 
 .retry {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   font-weight: 700;
   color: var(--accent-ink);
 }

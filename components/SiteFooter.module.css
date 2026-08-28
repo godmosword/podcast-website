@@ -231,7 +231,7 @@
 .support {
   display: inline-block;
   margin-top: 18px;
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   font-weight: 700;
   color: var(--support-fg);
   background: linear-gradient(180deg, var(--support-from), var(--support-to));

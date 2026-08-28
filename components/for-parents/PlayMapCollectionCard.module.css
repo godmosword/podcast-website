@@ -79,7 +79,7 @@
 .excerpt {
   margin: 14px 0 0;
   color: var(--ink);
-  font-size: 0.94rem;
+  font-size: var(--fs-control);
   line-height: 1.7;
 }
 

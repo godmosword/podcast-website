@@ -9,7 +9,7 @@
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   font-weight: 700;
   color: var(--ink-soft);
   margin-bottom: var(--space-4);
@@ -105,7 +105,7 @@
   min-height: 44px;
   border-radius: 999px;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: var(--fs-control);
   color: var(--ink);
   background: var(--surface-elevated);
   border: 1px solid var(--hairline);

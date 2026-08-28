@@ -10,7 +10,7 @@
 .lead {
   margin: 0 0 1rem;
   color: var(--ink-soft);
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   line-height: 1.5;
 }
 
@@ -42,7 +42,7 @@
 
 .details {
   margin-top: 0.75rem;
-  font-size: 0.9rem;
+  font-size: var(--fs-control);
 }
 
 .details ul {

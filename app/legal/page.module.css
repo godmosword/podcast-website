@@ -9,7 +9,7 @@
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   font-weight: 700;
   color: var(--ink-soft);
   margin-bottom: var(--space-4);
@@ -87,7 +87,7 @@
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   color: var(--ink-soft);
   background: var(--surface-elevated);
-  font-size: 0.9rem;
+  font-size: var(--fs-control);
   line-height: 1.65;
 }
 

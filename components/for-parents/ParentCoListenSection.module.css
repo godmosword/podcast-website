@@ -77,14 +77,14 @@
 
 .reflectionParent {
   margin: 8px 0 0;
-  font-size: 0.92rem;
+  font-size: var(--fs-control);
   line-height: 1.65;
   color: var(--ink-soft);
 }
 
 .storyLink {
   align-self: flex-start;
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   font-weight: 800;
   color: var(--accent-ink);
   text-decoration-thickness: 0.12em;

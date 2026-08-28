@@ -212,7 +212,7 @@
 
 .tagline {
   margin: 0 0 0.75rem;
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   line-height: 1.45;
   color: color-mix(in srgb, var(--ink) 72%, transparent);
 }
@@ -232,7 +232,7 @@
   min-height: 48px;
   padding: 0.55rem 0.8rem;
   border-radius: var(--radius-sm);
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   font-weight: 700;
   text-decoration: none;
   color: var(--ink);
@@ -251,7 +251,7 @@
 
 .hotspotsHeading {
   margin: 0 0 0.5rem;
-  font-size: 0.92rem;
+  font-size: var(--fs-control);
   font-weight: 800;
   letter-spacing: 0.02em;
 }
@@ -313,7 +313,7 @@
   height: 22px;
   border-radius: 50%;
   background: color-mix(in srgb, currentColor 12%, transparent);
-  font-size: 0.9rem;
+  font-size: var(--fs-control);
   font-weight: 900;
   line-height: 1;
 }
@@ -414,7 +414,7 @@
 }
 
 .segmentLabel {
-  font-size: 0.9rem;
+  font-size: var(--fs-control);
   font-weight: 800;
   line-height: 1.3;
 }
@@ -464,7 +464,7 @@
   border-radius: 8px;
   background: color-mix(in srgb, var(--landing-brand) 9%, var(--card));
   color: var(--ink);
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   font-weight: 700;
   line-height: 1.55;
 }
@@ -516,7 +516,7 @@
   border: 1.5px solid color-mix(in srgb, var(--landing-brand) 32%, transparent);
   background: color-mix(in srgb, var(--landing-brand) 12%, var(--card));
   color: var(--landing-brand-ink);
-  font-size: 0.9rem;
+  font-size: var(--fs-control);
   font-weight: 800;
   text-align: center;
   text-decoration: none;
@@ -543,7 +543,7 @@
   border-radius: 8px;
   background: color-mix(in srgb, var(--landing-brand) 10%, var(--card));
   color: var(--landing-brand-ink);
-  font-size: 0.92rem;
+  font-size: var(--fs-control);
   font-weight: 800;
   cursor: pointer;
 }
@@ -604,7 +604,7 @@
 
 .wishHeading {
   margin: 0 0 0.5rem;
-  font-size: 0.9rem;
+  font-size: var(--fs-control);
   font-weight: 800;
   color: var(--ink);
 }
@@ -621,7 +621,7 @@
 
 .storiesHeading {
   margin: 0 0 0.45rem;
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   font-weight: 800;
 }
 

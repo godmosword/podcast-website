@@ -333,7 +333,7 @@
   min-height: 44px;
   box-sizing: border-box;
   border-radius: 999px;
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   font-weight: 700;
   color: inherit;
   text-decoration: none;

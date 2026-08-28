@@ -16,7 +16,7 @@
   border: none;
   background: transparent;
   color: var(--coloring-ink, #2a3a4a);
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   font-weight: 700;
   cursor: pointer;
 }
@@ -124,7 +124,7 @@
 
 .cardTitle {
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   padding: 0 0.2rem 0.25rem;
   line-height: 1.3;
 }

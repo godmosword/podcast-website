@@ -31,7 +31,7 @@
 
 .caption {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: var(--fs-control);
   color: var(--ink-soft);
   line-height: 1.5;
 }

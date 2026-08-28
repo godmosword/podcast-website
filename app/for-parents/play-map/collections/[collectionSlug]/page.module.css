@@ -110,7 +110,7 @@
 .aggregateSummary {
   margin: 12px 0 0;
   color: var(--ink-soft);
-  font-size: 0.92rem;
+  font-size: var(--fs-control);
   line-height: 1.6;
 }
 
@@ -128,7 +128,7 @@
   padding: 9px 12px;
   margin: 14px 0 0;
   color: var(--ink);
-  font-size: 0.92rem;
+  font-size: var(--fs-control);
   line-height: 1.55;
   background: var(--warm-surface-2);
   border-left: 3px solid var(--accent);
@@ -283,7 +283,7 @@
   .mapAction {
     min-height: 38px;
     padding: 8px 12px;
-    font-size: 0.9rem;
+    font-size: var(--fs-control);
   }
 
   .aggregateSummary {
