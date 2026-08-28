@@ -389,7 +389,7 @@
 .island:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 4px;
-  border-radius: 18px;
+  border-radius: var(--radius-md);
 }
 
 .landmark {
@@ -437,7 +437,7 @@
   letter-spacing: 0.15px;
   white-space: nowrap;
   padding: 3px 12px;
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   /* 木牌風：固定色，不隨日夜反轉 */
   color: #fff6e6;
   background: linear-gradient(#caa063, #a5773c);

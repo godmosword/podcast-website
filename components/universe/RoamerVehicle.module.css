@@ -90,7 +90,7 @@
 .placeholder {
   position: absolute;
   inset: 12% 6%;
-  border-radius: 6px;
+  border-radius: var(--radius-xs);
   background: rgba(239, 71, 111, 0.55);
 }
 

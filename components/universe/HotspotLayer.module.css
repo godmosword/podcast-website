@@ -31,7 +31,7 @@
 .pinLocked:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 3px;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
 }
 
 /* 小型立體地標牌：牌面、旗桿、接地底座，比圓點更像「島上的地方」。 */

@@ -18,7 +18,7 @@
   min-height: 48px;
   padding: 0 12px;
   border: 1.5px solid color-mix(in srgb, var(--ink) 12%, var(--line));
-  border-radius: 15px;
+  border-radius: var(--radius-sm);
   background: color-mix(in srgb, var(--card) 90%, var(--c-sky));
   font-size: var(--fs-h3);
   line-height: 1;
@@ -90,7 +90,7 @@
   justify-content: center;
   min-height: 48px;
   padding: 0.65rem 1rem;
-  border-radius: 0.75rem;
+  border-radius: var(--radius-xs);
   font-size: var(--fs-control);
   font-weight: 700;
   text-decoration: none;
@@ -175,14 +175,14 @@
   gap: 0.35rem;
   margin-top: 0.65rem;
   padding: 0.25rem;
-  border-radius: 0.85rem;
+  border-radius: var(--radius-sm);
   background: color-mix(in srgb, var(--ink) 7%, var(--card));
 }
 
 .segmentBtn {
   min-height: 52px;
   border: 1px solid transparent;
-  border-radius: 0.65rem;
+  border-radius: var(--radius-xs);
   background: transparent;
   color: var(--ink);
   font: inherit;

@@ -17,7 +17,7 @@
   border: 0;
   background: transparent;
   cursor: pointer;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
 }
 
 .interactive:focus-visible {

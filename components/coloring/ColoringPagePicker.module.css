@@ -28,7 +28,7 @@
 .backCover:focus-visible {
   outline: 3px solid var(--coloring-accent, #e85d4c);
   outline-offset: 2px;
-  border-radius: 6px;
+  border-radius: var(--radius-xs);
 }
 
 .lead {
@@ -43,7 +43,7 @@
   display: grid;
   gap: 1rem;
   padding: 0.85rem 0.75rem 1rem;
-  border-radius: 18px;
+  border-radius: var(--radius-md);
   background:
     linear-gradient(
       90deg,
@@ -91,7 +91,7 @@
   min-height: 44px;
   padding: 0.35rem;
   border: none;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   background: color-mix(in srgb, #fff 92%, transparent);
   box-shadow: 0 1px 0 color-mix(in srgb, #2a3a4a 8%, transparent);
   cursor: pointer;
@@ -113,7 +113,7 @@
   position: relative;
   display: block;
   aspect-ratio: 1;
-  border-radius: 10px;
+  border-radius: var(--radius-xs);
   overflow: hidden;
   background: #f7f1e8;
 }
@@ -151,7 +151,7 @@
   min-width: 96px;
   padding: 0.3rem;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   background: color-mix(in srgb, #fff 92%, transparent);
   cursor: pointer;
   color: inherit;
@@ -168,7 +168,7 @@
   width: 88px;
   height: 88px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   background: #f7f1e8;
 }
 

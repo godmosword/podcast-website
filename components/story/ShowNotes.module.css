@@ -2,7 +2,7 @@
   margin: 1.25rem 0;
   padding: 14px 16px;
   border: 1.5px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   background: linear-gradient(180deg, var(--card-2), var(--card));
   box-shadow: var(--shadow-sm);
   text-align: left;

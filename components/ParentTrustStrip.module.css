@@ -5,7 +5,7 @@
   gap: 10px;
   padding: 10px 12px;
   border: 1.5px solid color-mix(in srgb, var(--line) 82%, var(--ink) 18%);
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   background: color-mix(in srgb, var(--card) 92%, var(--c-mint) 8%);
   color: var(--ink-soft);
   font-size: var(--fs-label);

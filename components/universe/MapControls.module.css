@@ -15,7 +15,7 @@
   width: 56px;
   height: 56px;
   border: 2px solid var(--map-chip-line);
-  border-radius: 18px;
+  border-radius: var(--radius-md);
   /* 奶油／木質暖底，呼應全站手繪黏土風與木牌名牌，不用扁平白卡。
      色票走 --map-chip*（日夜不反轉）：原本的 --card／--cta-warm-fg 在夜間是
      深靛底＋深棕字，壓在深靛夜海上輪廓與字都不見了。 */
@@ -89,7 +89,7 @@
     /* 手機／小平板：加大 hit area，方便小朋友按 */
     width: 56px;
     height: 56px;
-    border-radius: 16px;
+    border-radius: var(--radius-sm);
     font-size: 1.45rem;
   }
 }
@@ -104,7 +104,7 @@
   .btn {
     width: 60px;
     height: 60px;
-    border-radius: 18px;
+    border-radius: var(--radius-md);
     font-size: 1.6rem;
   }
 }

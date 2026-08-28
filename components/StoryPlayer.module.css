@@ -263,7 +263,7 @@
 .endPromptToggle {
   padding: 8px 12px;
   border: 1.5px solid rgba(255, 255, 255, 0.22);
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   background: rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.78);
   font-size: var(--fs-control);
@@ -528,7 +528,7 @@
 
 .timerOpt {
   padding: 9px 18px;
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   color: #fff;
   font-size: var(--fs-label);
   font-weight: 600;
@@ -572,7 +572,7 @@
   flex: 1;
   min-height: 44px;
   padding: 6px 10px;
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   font-size: var(--fs-meta);
   font-weight: 700;
   border: none;
@@ -838,7 +838,7 @@
   transform: translateX(-50%);
   max-width: min(92vw, 420px);
   padding: 10px 14px;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   background: rgba(0, 0, 0, 0.78);
   color: #fff;
   font-size: var(--fs-control);
@@ -944,7 +944,7 @@
 .cueOut {
   display: block;
   padding: 8px 10px;
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   background: rgba(255, 255, 255, 0.1);
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
   font-size: var(--fs-meta);
@@ -962,7 +962,7 @@
   flex: 1;
   padding: 8px;
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   background: rgba(255, 255, 255, 0.08);
   color: #fff;
   font-size: var(--fs-control);

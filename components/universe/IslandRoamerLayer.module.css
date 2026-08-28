@@ -79,7 +79,7 @@
 .placeholder {
   position: absolute;
   inset: 12% 6%;
-  border-radius: 6px;
+  border-radius: var(--radius-xs);
   background: color-mix(in srgb, var(--c-pink) 55%, transparent);
 }
 

@@ -160,7 +160,7 @@
   width: 48px;
   height: 48px;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   background: color-mix(in srgb, var(--ink) 7%, var(--card));
   color: var(--ink);
   font-size: var(--fs-h3-compact);
@@ -274,7 +274,7 @@
   gap: 0.42rem;
   padding: 0.42rem 0.55rem;
   border: 1.5px solid transparent;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   font-size: var(--fs-label);
   font-weight: 700;
   text-decoration: none;
@@ -461,7 +461,7 @@
   margin: 0;
   padding: 12px 14px;
   border: 1.5px solid color-mix(in srgb, var(--landing-brand) 24%, var(--line));
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   background: color-mix(in srgb, var(--landing-brand) 9%, var(--card));
   color: var(--ink);
   font-size: var(--fs-control);
@@ -512,7 +512,7 @@
   justify-content: center;
   min-height: 46px;
   padding: 0.55rem 0.7rem;
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   border: 1.5px solid color-mix(in srgb, var(--landing-brand) 32%, transparent);
   background: color-mix(in srgb, var(--landing-brand) 12%, var(--card));
   color: var(--landing-brand-ink);
@@ -540,7 +540,7 @@
   min-height: 48px;
   padding: 0.5rem 0.9rem;
   border: 1.5px solid color-mix(in srgb, var(--landing-brand) 28%, var(--line));
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   background: color-mix(in srgb, var(--landing-brand) 10%, var(--card));
   color: var(--landing-brand-ink);
   font-size: var(--fs-control);
@@ -579,7 +579,7 @@
   min-height: 44px;
   padding: 0.5rem 0.85rem;
   border: 1.5px solid color-mix(in srgb, var(--ink) 18%, transparent);
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   background: color-mix(in srgb, var(--card) 86%, var(--ink) 5%);
   color: var(--ink-soft);
   font-size: var(--fs-label);
