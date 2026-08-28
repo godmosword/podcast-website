@@ -120,6 +120,8 @@ export type CssAudit = {
   radius: DimensionStat;
   color: DimensionStat;
   spacing: DimensionStat;
+  /** rem 單位間距宣告數（政策豁免，不進 spacing 採用率分母） */
+  spacingRem: number;
   fontSizes: FontSizeBucket[];
   remBareOccurrences: number;
 };
@@ -147,6 +149,7 @@ function emptyAudit(): CssAudit {
     radius: emptyStat(),
     color: emptyStat(),
     spacing: emptyStat(),
+    spacingRem: 0,
     fontSizes: [],
     remBareOccurrences: 0,
   };
@@ -395,6 +398,10 @@ function extractDeclarations(css: string): { property: string; value: string }[]
   return decls;
 }
 
+function containsRemUnit(value: string): boolean {
+  return /-?[\d.]+rem\b/i.test(value);
+}
+
 function containsVar(value: string): boolean {
   return /var\(/i.test(value);
 }
@@ -513,6 +520,11 @@ function classify(
 
   if (isSpacingProperty(property)) {
     if (isSkippedSpacing(value)) return;
+    // rem 隨根字級縮放，--space-* 是 px；依 DESIGN.md 不進採用率分母。
+    if (containsRemUnit(value)) {
+      audit.spacingRem += 1;
+      return;
+    }
     if (containsVar(value)) audit.spacing.token += 1;
     else audit.spacing.bare += 1;
   }
@@ -568,6 +580,7 @@ export function auditDesignTokens(repoRoot: string): DesignTokenReport {
     addStat(totals.radius, local.radius);
     addStat(totals.color, local.color);
     addStat(totals.spacing, local.spacing);
+    totals.spacingRem += local.spacingRem;
     totals.remBareOccurrences += local.remBareOccurrences;
     for (const bucket of local.fontSizes) {
       fontSizeCounts.set(
@@ -599,6 +612,7 @@ export function auditDesignTokens(repoRoot: string): DesignTokenReport {
     radius: totals.radius,
     color: totals.color,
     spacing: totals.spacing,
+    spacingRem: totals.spacingRem,
     remBareOccurrences: totals.remBareOccurrences,
     fontSizes: bucketsFromCounts(fontSizeCounts),
     files: fileStats,
@@ -660,6 +674,7 @@ export function formatDesignTokenReport(report: DesignTokenReport): string {
     `border-radius：${formatStat(report.radius)}`,
     `color：${formatStat(report.color)}`,
     `spacing：${formatStat(report.spacing)}`,
+    `另有 ${report.spacingRem} 處 rem 間距（政策豁免，見 DESIGN.md）`,
     "",
     "## 各檔案明細（依裸值總數降序）",
     "",
@@ -714,6 +729,7 @@ export function designTokenReportToJson(report: DesignTokenReport): string {
           adoptionPercent: adoptionPercent(report.spacing),
         },
       },
+      spacingRem: report.spacingRem,
       remBareOccurrences: report.remBareOccurrences,
       remNearTokenOccurrences: remNearTokenOccurrences(report),
       uniqueBareFontSizes: report.fontSizes.length,

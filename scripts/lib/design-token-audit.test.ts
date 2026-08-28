@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   auditCssSource,
   findVarFallbackMismatches,
+  formatDesignTokenReport,
   formatFallbackMismatchWarnings,
   nearestFontSizeToken,
   parseCssCustomProperties,
@@ -262,5 +263,51 @@ describe("formatFallbackMismatchWarnings", () => {
     expect(text).toContain("--radius-md");
     expect(text).toContain("20px");
     expect(text).toContain("18px");
+  });
+});
+
+describe("spacing rem 政策豁免", () => {
+  it("rem 間距不計入 spacing 分母；px 與 token 照常計入", () => {
+    const report = auditCssSource(`
+      .a { padding: 0.5rem; }
+      .b { gap: 8px; }
+      .c { margin: var(--space-4); }
+    `);
+    expect(report.spacing).toEqual({ token: 1, bare: 1 });
+    expect(report.spacingRem).toBe(1);
+  });
+
+  it("多值含 rem 整筆豁免，夾著的 px 不計裸值", () => {
+    const report = auditCssSource(`
+      .x { padding: 8px 0.5rem; }
+    `);
+    expect(report.spacing).toEqual({ token: 0, bare: 0 });
+    expect(report.spacingRem).toBe(1);
+  });
+
+  it("calc 含 rem 豁免；純 px calc 仍為裸值", () => {
+    const report = auditCssSource(`
+      .a { padding: calc(0.5rem + 8px); }
+      .b { padding: calc(8px * 2); }
+    `);
+    expect(report.spacing).toEqual({ token: 0, bare: 1 });
+    expect(report.spacingRem).toBe(1);
+  });
+
+  it("報告另列 rem 豁免處數，不把豁免算進採用率", () => {
+    const text = formatDesignTokenReport({
+      fileCount: 1,
+      fontSize: { token: 0, bare: 0 },
+      radius: { token: 0, bare: 0 },
+      color: { token: 0, bare: 0 },
+      spacing: { token: 344, bare: 479 },
+      fontSizes: [],
+      remBareOccurrences: 0,
+      files: [],
+      fallbackMismatches: [],
+      spacingRem: 165,
+    });
+    expect(text).toMatch(/spacing.*344 token \/ 479 裸值 → 42%/);
+    expect(text).toMatch(/另有 165 處 rem 間距（政策豁免，見 DESIGN\.md）/);
   });
 });
