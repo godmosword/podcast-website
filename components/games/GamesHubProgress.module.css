@@ -48,7 +48,7 @@
 }
 
 .sticker {
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 4px 10px;
   font-size: var(--fs-meta);
   font-weight: 800;

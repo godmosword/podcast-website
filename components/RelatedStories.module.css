@@ -40,7 +40,7 @@
   content: "";
   width: 6px;
   height: 22px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--sky-blue);
 }
 

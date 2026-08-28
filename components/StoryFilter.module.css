@@ -78,7 +78,7 @@
   min-height: 44px;
   padding: 8px 14px;
   border: 1px solid var(--hairline);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
   font-size: var(--fs-meta);
   font-weight: 700;

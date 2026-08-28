@@ -11,7 +11,7 @@
 .eyebrow {
   margin: 0;
   padding: 2px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--map-chip-2);
   color: var(--map-chip-ink);
   font-size: 0.72rem;
@@ -41,7 +41,7 @@
 .coming {
   margin: 0;
   padding: 3px 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--ink) 8%, transparent);
   color: var(--ink-soft);
   font-size: var(--fs-meta);
@@ -58,7 +58,7 @@
   min-height: 56px;
   margin-top: 0.35rem;
   padding: 0.6rem 1.1rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: linear-gradient(var(--cta-warm-from), var(--cta-warm-to));
   border: none;
   box-shadow: var(--shadow-sm);

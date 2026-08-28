@@ -23,7 +23,7 @@
   width: min(60%, 220px);
   height: 2px;
   margin: 0 auto 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: linear-gradient(
     90deg,
     transparent,
@@ -110,7 +110,7 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   background: color-mix(in srgb, var(--c-sky) 18%, var(--card));
   border: 1.5px solid var(--line);
 }
@@ -236,7 +236,7 @@
   color: var(--support-fg);
   background: linear-gradient(180deg, var(--support-from), var(--support-to));
   padding: 11px 22px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   box-shadow: var(--shadow-md), var(--gloss);
   transition: transform var(--motion-press), box-shadow var(--motion-press);
 }

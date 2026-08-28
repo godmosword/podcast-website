@@ -130,7 +130,7 @@
 .facilities li {
   padding: 7px 11px;
   border: 1px solid color-mix(in srgb, var(--warm-accent) 30%, var(--hairline));
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--warm-chip-bg);
   color: var(--accent-ink);
   font-size: var(--fs-control);
@@ -157,7 +157,7 @@
   align-items: center;
   justify-content: center;
   padding: 10px 20px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-weight: 800;
   text-decoration: none;
   transition: transform var(--motion-press), opacity var(--motion-press);

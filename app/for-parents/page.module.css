@@ -108,7 +108,7 @@
   min-height: 44px;
   padding: 8px 16px;
   border: 1px solid var(--warm-accent);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   color: var(--accent-ink);
   font-weight: 800;
   text-decoration: none;
@@ -275,7 +275,7 @@
   min-height: 44px;
   margin-top: auto;
   padding: 12px 20px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: linear-gradient(180deg, var(--cta-warm-from), var(--cta-warm-to));
   color: var(--cta-warm-fg);
   font-weight: 800;

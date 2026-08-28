@@ -80,7 +80,7 @@
 .spinner {
   width: 44px;
   height: 44px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   border: 5px solid color-mix(in srgb, var(--c-sky) 50%, transparent);
   border-top-color: var(--c-sky);
   animation: gameLoadSpin 0.9s linear infinite;
@@ -89,7 +89,7 @@
 .progressTrack {
   width: min(280px, 80%);
   height: 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--c-sky) 35%, var(--mix-base));
   overflow: hidden;
 }
@@ -120,7 +120,7 @@
   font-weight: 900;
   font-size: var(--fs-body);
   padding: 10px 26px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   cursor: pointer;
   box-shadow:
     0 6px 0 rgba(203, 128, 52, 0.42),
@@ -141,7 +141,7 @@
   font-weight: 800;
   font-size: var(--fs-control);
   padding: 8px 22px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   cursor: pointer;
 }
 

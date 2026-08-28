@@ -152,7 +152,7 @@
   min-height: 44px;
   gap: 6px;
   padding: 12px 22px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: linear-gradient(
     180deg,
     var(--landing-cta-from, #ff9500) 0%,
@@ -195,7 +195,7 @@
   justify-content: center;
   min-height: 44px;
   padding: 10px 18px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid rgba(255, 255, 255, 0.55);
   background: rgba(255, 255, 255, 0.16);
   color: #fff;
@@ -222,7 +222,7 @@
   gap: 8px;
   min-height: 48px;
   padding: 12px 24px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: linear-gradient(180deg, #ffa14d 0%, var(--landing-brand, #ff8c2b) 100%);
   color: var(--landing-brand-ink, #3a2410);
   font-weight: 800;
@@ -259,7 +259,7 @@
   place-items: center;
   width: 44px;
   height: 44px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   color: var(--landing-nav-cta-fg, #8b4510);
   text-decoration: none;
   background: color-mix(in srgb, var(--landing-cta-from, #ffe7cf) 88%, transparent);

@@ -3,7 +3,7 @@
   align-items: center;
   margin-left: 6px;
   padding: 1px 7px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   color: var(--ink);
   background: color-mix(in srgb, var(--c-mint) 42%, var(--card));
   font-size: 0.68rem;

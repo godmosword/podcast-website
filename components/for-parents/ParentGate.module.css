@@ -88,7 +88,7 @@
   align-self: flex-start;
   padding: 12px 20px;
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: linear-gradient(180deg, var(--cta-warm-from), var(--cta-warm-to));
   color: var(--cta-warm-fg);
   font-size: var(--fs-body);

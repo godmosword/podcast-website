@@ -31,7 +31,7 @@
   height: 16%;
   transform: translateX(-50%) scale(1);
   transform-origin: center;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   background: radial-gradient(
     ellipse at center,
     rgba(72, 58, 44, 0.42) 0%,

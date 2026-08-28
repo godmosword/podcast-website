@@ -75,7 +75,7 @@
   gap: 4px;
   min-height: 52px;
   padding: 0 var(--space-3);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-weight: 800;
   font-size: var(--fs-label);
   color: var(--ink-soft);
@@ -138,7 +138,7 @@
 /* 對比：--ink-soft 疊在 c-sky 淡底上於夜間僅 4.43:1，未達 WCAG AA，故用 --ink。 */
 .playHints li {
   padding: 6px 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   color: var(--ink);
   background: color-mix(in srgb, var(--c-sky) 16%, var(--card));
   font-size: var(--fs-meta);

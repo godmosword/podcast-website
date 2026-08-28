@@ -40,7 +40,7 @@
 .dot {
   width: 10px;
   height: 10px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   box-shadow: var(--shadow-sm);
 }
 
@@ -76,7 +76,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   color: var(--on-dark);
   border: 2.5px solid var(--card);
   box-shadow: var(--shadow-sm), var(--gloss);

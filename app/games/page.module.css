@@ -87,7 +87,7 @@
 
 .eyebrow {
   padding: 6px 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   color: var(--ink);
   background: color-mix(in srgb, var(--c-yellow) 36%, var(--card));
   border: 1px solid color-mix(in srgb, var(--c-yellow) 54%, var(--hairline));
@@ -130,7 +130,7 @@
   min-height: 34px;
   padding: 5px 11px;
   border: 1px solid var(--hairline);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   color: var(--ink);
   background: color-mix(in srgb, var(--mix-base) 82%, transparent);
   font-size: var(--fs-meta);
@@ -226,7 +226,7 @@
   left: 8px;
   bottom: 8px;
   padding: 4px 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   color: var(--on-dark);
   background: rgba(47, 41, 54, 0.76);
   backdrop-filter: blur(6px);
@@ -244,7 +244,7 @@
   justify-content: center;
   width: 34px;
   height: 34px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   color: var(--ink);
   background: color-mix(in srgb, var(--card) 92%, var(--card-accent));
   box-shadow: var(--shadow-sm);
@@ -257,7 +257,7 @@
   right: 8px;
   max-width: 70%;
   padding: 4px 9px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   color: var(--ink-soft);
   background: color-mix(in srgb, var(--card) 92%, transparent);
   font-size: var(--fs-meta);

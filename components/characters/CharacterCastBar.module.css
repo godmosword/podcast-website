@@ -17,7 +17,7 @@
   gap: 8px;
   min-height: 44px;
   padding: 4px 12px 4px 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid var(--hairline);
   background: var(--surface-elevated);
   color: var(--accent-ink);
@@ -35,7 +35,7 @@
 .avatar {
   width: 32px;
   height: 32px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   object-fit: cover;
   flex: none;
 }

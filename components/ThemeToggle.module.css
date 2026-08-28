@@ -6,7 +6,7 @@
   min-width: 44px;
   min-height: 44px;
   padding: 8px 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1.5px solid var(--line);
   background: var(--card);
   color: var(--ink);
@@ -46,7 +46,7 @@
   align-items: stretch;
   gap: 4px;
   padding: 4px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1.5px solid var(--line);
   background: var(--card);
   box-shadow: var(--shadow-sm);
@@ -60,7 +60,7 @@
   min-width: 44px;
   min-height: 44px;
   padding: 6px 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: none;
   background: transparent;
   color: var(--ink);

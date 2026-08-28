@@ -42,7 +42,7 @@
   left: 12px;
   bottom: 12px;
   padding: 6px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   color: var(--on-dark);
   background: rgba(47, 41, 54, 0.76);
   backdrop-filter: blur(8px);
@@ -106,7 +106,7 @@
 .playFacts span {
   padding: 5px 8px;
   border: 1px solid color-mix(in srgb, var(--c-mint) 38%, var(--hairline));
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   color: var(--ink);
   background: color-mix(in srgb, var(--c-mint) 15%, var(--card));
   font-size: var(--fs-meta);

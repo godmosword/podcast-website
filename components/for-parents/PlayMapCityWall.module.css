@@ -31,7 +31,7 @@
   min-height: 48px;
   padding: 0 var(--space-4);
   border: 2px solid var(--accent);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--card);
   /* 文字用 --accent-ink（對 --card 5.54:1）；--accent 只出現在邊框。 */
   color: var(--accent-ink);

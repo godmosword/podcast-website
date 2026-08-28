@@ -22,7 +22,7 @@
 .dot {
   width: 12px;
   height: 12px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   background: var(--sun);
   box-shadow: var(--shadow-sm);
 }
@@ -50,7 +50,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   color: var(--on-dark);
   border: 2px solid var(--card);
   box-shadow: var(--shadow-sm);

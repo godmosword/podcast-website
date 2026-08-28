@@ -87,7 +87,7 @@
   min-height: 48px;
   margin-top: var(--space-4);
   padding: var(--space-3) var(--space-6);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: var(--fs-control);
   font-weight: 700;
 }

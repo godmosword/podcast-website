@@ -309,7 +309,7 @@
 
 .seekBar::-webkit-slider-runnable-track {
   height: var(--seek-track, 7px);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: linear-gradient(
     to right,
     var(--seek-color, #fff) var(--seek, 0%),
@@ -319,13 +319,13 @@
 
 .seekBar::-moz-range-track {
   height: var(--seek-track, 7px);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.28);
 }
 
 .seekBar::-moz-range-progress {
   height: var(--seek-track, 7px);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--seek-color, #fff);
 }
 
@@ -335,7 +335,7 @@
   width: var(--seek-thumb, 18px);
   height: var(--seek-thumb, 18px);
   margin-top: calc((var(--seek-track, 7px) - var(--seek-thumb, 18px)) / 2);
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   background: #fff;
   border: 2px solid var(--seek-color, #fff);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
@@ -344,7 +344,7 @@
 .seekBar::-moz-range-thumb {
   width: var(--seek-thumb, 18px);
   height: var(--seek-thumb, 18px);
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   background: #fff;
   border: 2px solid var(--seek-color, #fff);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
@@ -421,7 +421,7 @@
   min-width: var(--top-tool-size);
   min-height: var(--top-tool-size);
   padding: 0 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   color: #fff;
   font-size: var(--top-tool-font);
   font-weight: 600;
@@ -736,7 +736,7 @@
   justify-content: center;
   width: var(--ctrl-size);
   height: var(--ctrl-size);
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   color: rgba(255, 255, 255, 0.95);
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
@@ -797,7 +797,7 @@
   transform: translateX(-50%);
   width: 5px;
   height: 5px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
 }
 
 .playGlyph {
@@ -808,7 +808,7 @@
   flex: 0 0 auto;
   width: var(--ctrl-size);
   height: var(--ctrl-size);
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   display: flex;
   align-items: center;
   justify-content: center;

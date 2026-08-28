@@ -65,7 +65,7 @@
 
 .ep {
   padding: 1px 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-weight: 700;
 }
 
@@ -110,7 +110,7 @@
   align-items: center;
   justify-content: center;
   font-size: 0.72rem;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
 }
 
 /* ---- 網格版型（首頁故事卡片） ---- */

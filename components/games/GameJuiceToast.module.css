@@ -4,7 +4,7 @@
   font-size: 14px;
   font-weight: 900;
   padding: 7px 16px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid rgba(255, 255, 255, 0.95);
   box-shadow: 0 8px 18px rgba(146, 106, 121, 0.16);
   white-space: nowrap;

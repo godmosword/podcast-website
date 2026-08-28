@@ -17,7 +17,7 @@
   position: absolute;
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   background: radial-gradient(
     circle at 50% 50%,
     color-mix(in srgb, var(--light-color, #ffd98a) 40%, #fffdf4) 0%,

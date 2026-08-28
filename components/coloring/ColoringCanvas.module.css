@@ -12,7 +12,7 @@
 .backPage {
   min-height: 44px;
   padding: 0.35rem 0.75rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 2px solid color-mix(in srgb, #2a3a4a 20%, transparent);
   background: #fff;
   font-weight: 700;
@@ -38,7 +38,7 @@
   min-height: 48px;
   padding: 0.35rem 1rem;
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-weight: 800;
   cursor: pointer;
   color: var(--cta-warm-fg, #4a2e14);
@@ -125,7 +125,7 @@
   display: none;
   border: 2px solid color-mix(in srgb, #2a3a4a 75%, transparent);
   box-shadow: 0 0 0 1px color-mix(in srgb, #fff 85%, transparent);
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   transform: translate(-50%, -50%);
   pointer-events: none;
 }

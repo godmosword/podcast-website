@@ -315,7 +315,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 10px 10px 18px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: #fff8ea;
   border: 2px solid #f0b64e;
   color: #7a5410;
@@ -341,7 +341,7 @@
   margin: -6px -4px -6px 0;
   padding: 0;
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
   color: #7a5410;
   font-size: 24px;

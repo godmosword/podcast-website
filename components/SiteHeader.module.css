@@ -87,7 +87,7 @@
   justify-content: center;
   min-height: 46px;
   padding: 11px 22px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   color: var(--ink);
   font-weight: 700;
   font-size: var(--fs-body);

@@ -5,7 +5,7 @@
   font-weight: 700;
   color: var(--ink-soft);
   padding: 2px 9px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--bg-dot);
   border: 1px solid var(--line);
   white-space: nowrap;

@@ -27,7 +27,7 @@
   bottom: 2%;
   width: 64%;
   height: 16%;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   background: radial-gradient(
     ellipse at center,
     rgba(72, 58, 44, 0.42) 0%,

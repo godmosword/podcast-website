@@ -9,7 +9,7 @@
   gap: 4px;
   min-height: 44px;
   padding: 6px 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   /* 淡 peach pill：與淡橘頂欄一致、暖深棕字 */
   background: var(--landing-nav-cta-bg, #fff8f2);
   color: var(--landing-nav-cta-fg, #8b4510);
@@ -81,7 +81,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   color: var(--on-dark);
 }
 

@@ -9,7 +9,7 @@
 .swatch {
   width: 44px;
   height: 44px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   border: 3px solid color-mix(in srgb, #2a3a4a 18%, transparent);
   cursor: pointer;
   box-shadow: 0 2px 0 color-mix(in srgb, #2a3a4a 12%, transparent);
