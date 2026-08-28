@@ -147,6 +147,20 @@ meta `theme-color`（夜）對齊 `--bg`：`lib/theme.ts` 的 `NIGHT_THEME_COLOR
 - Fallback：`PingFang TC`、`Microsoft JhengHei`、`Noto Sans TC`
 - 標題 1.8–2.3rem / 內文 1rem / 播放器字幕 1.15rem
 
+字級 token（`app/globals.css`，按角色分階；**新宣告與既有裸 rem 都對到這張表**）：
+
+| Token | 值 | 角色 |
+|-------|-----|------|
+| `--fs-meta` | 0.78rem | 最小註記 |
+| `--fs-label` | 0.85rem | 標籤、eyebrow、更新時間、驗證徽章 |
+| `--fs-control` | 0.94rem | 按鈕、chip、返回連結、觸發器 |
+| `--fs-body` | 1rem | 內文、導言、段落 |
+| `--fs-h4` | 1.05rem | 小標題（h3/h2 級但視覺較小） |
+| `--fs-h3-compact` | 1.15rem | 卡片標題密集變體 |
+| `--fs-h3` | 1.25rem | 卡片標題 |
+| `--fs-h2` | 1.35rem | 頁內 hero |
+| `--fs-h1` | 1.85rem | 頁標題 |
+
 ## 圓角與陰影
 
 | Token | 值 |
@@ -173,7 +187,8 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 - section 垂直間距 mobile ≥ 24px；內文 line-height ≥ 1.5（標籤型小字豁免）。
 - 純文字段落 max-width ≤ 640px。
 - 文案密度：兒童動線頁不放超過一行的家長散文（家長說明歸戶 `/for-parents` 與 footer）；標題 ≤ 8 字、CTA ≤ 6 字。`/legal` 精簡不得刪改具法律效力語句。
-- 新宣告優先用 token；既有硬寫 px 僅在觸碰該宣告時順手換 token（±4px 內就近取整）。
+- **字級（2026-08 起全面收斂）**：舊政策「既有硬寫僅在觸碰該宣告時順手換 token」結構上無法收斂——多數 CSS 行寫完就不會再被碰。字級改為按角色整批對到 `--fs-*`（見上表），不再等下次改到那一行。階梯用角色命名（`--fs-control` 而不是「0.95rem」），才擋得住之後再漂移。
+- **間距／圓角／色彩**：新宣告仍優先用 token；既有硬寫 px 仍僅在觸碰該宣告時順手換 token（±4px 內就近取整）。這三維尚未全面收斂。
 
 ## 互動
 

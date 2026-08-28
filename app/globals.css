@@ -85,7 +85,9 @@
   --surface-glass: color-mix(in srgb, var(--card) 78%, transparent);
 
   /* 字階（VIS-W1）：對齊 DESIGN.md「標題 1.8–2.3rem」。
-     只在觸碰的元件換用，不做全站機械替換。
+     舊政策是「只在觸碰的元件換用，不做全站機械替換」。那結構上無法收斂：
+     多數 CSS 行寫完就不會再被碰，裸 rem 會一直堆。字級改為按角色全面收斂
+     （--fs-label／control／body／h4 與既有標題／meta）；圓角／間距／色彩仍走後續輪次。
      不用 clamp() + vw：內容欄固定 max-width 640px，字隨 viewport 長大而欄寬
      不變會使每行字數在桌面反而變少（量測基準錯配）。定值較誠實。
      階梯須與同頁既有標題共存：SiteHeader 2.3rem > --fs-h1 1.85rem >
@@ -94,7 +96,11 @@
   --fs-h2: 1.35rem; /* 頁內 hero（LatestHero，注意其為 span 非 heading） */
   --fs-h3: 1.25rem; /* 卡片標題（StoryCard 列表） */
   --fs-h3-compact: 1.15rem; /* 卡片標題（grid 變體與手機密度） */
-  --fs-meta: 0.78rem; /* 對齊全站既有 21 處 meta 字級，不另立新值 */
+  --fs-h4: 1.05rem; /* 小標題（h3/h2 級但視覺較小） */
+  --fs-body: 1rem; /* 內文、導言、段落 */
+  --fs-control: 0.94rem; /* 按鈕、chip、返回連結、觸發器 */
+  --fs-label: 0.85rem; /* 標籤、eyebrow、更新時間、驗證徽章 */
+  --fs-meta: 0.78rem; /* 最小註記 */
 
   /* 間距（token 階梯：只在觸碰處換用，不做全站機械替換） */
   --space-2: 8px;
