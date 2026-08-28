@@ -35,6 +35,7 @@
     "verify:geo-live": "tsx scripts/verify-geo-live.ts",
     "audit:assets": "tsx scripts/audit-assets.ts",
     "audit:colors": "tsx scripts/audit-colors.ts",
+    "audit:design-tokens": "tsx scripts/audit-design-tokens.ts",
     "proofread:subtitles": "tsx scripts/proofread-subtitles.ts",
     "check": "npm test && npm run typecheck && npm run verify:episodes && npm run verify:zone-art && npm run verify:map-art && npm run verify:no-public-fs && npm run build && npm run verify:function-size && npm run verify:geo",
     "generate:audio-lengths": "tsx scripts/generate-audio-lengths.ts",
