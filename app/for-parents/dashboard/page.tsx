@@ -3,6 +3,7 @@ import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import { ParentDashboard } from "@/components/for-parents/ParentDashboard";
+import { ParentGate } from "@/components/for-parents/ParentGate";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
@@ -32,7 +33,9 @@ export default function ParentDashboardPage() {
           ← 回到親子指南
         </Link>
       </header>
-      <ParentDashboard />
+      <ParentGate>
+        <ParentDashboard />
+      </ParentGate>
       <SiteFooter compact showPlatformSubscribe={false} />
     </main>
   );
