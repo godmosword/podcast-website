@@ -3,9 +3,10 @@
 > **這是分類，不是遷移清單。** 本輪不改任何 `.module.css`、不新增 token、不改稽核腳本。
 >
 > - 產出日期：2026-08-28
-> - 量測對象：`origin/main` `7325770`
+> - 量測對象：`origin/main` `7325770`（列號在後續 main 與 CSS 未改的前提下仍對得上）
 > - 分母：設計 token 稽核的色彩維度裸值 **182 筆**／**117 種值**／**34 檔**
 > - 指令：與 `npm run audit:design-tokens` 同一套色彩屬性與「含 `var(` = token」規則
+> - 列號：對齊原始 `.module.css`。註解與 `url()` 以**等長空白**取代後定位；不可把 `url(...)` 收成 `url()`，否則後面的列號會往前偏。
 
 ---
 
@@ -214,22 +215,22 @@
 | 67 | `components/coloring/ColoringToolbar.module.css`:50 | `.active` | `border-color` | `#2a3a4a` | 4 | 既有 --coloring-ink 遺漏 |
 | 68 | `components/coloring/ColoringToolbar.module.css`:56 | `.primary` | `color` | `#fff` | 29 | 既有白 token 遺漏 |
 | 69 | `components/coloring/ColoringToolbar.module.css`:89 | `.scrollHint` | `color` | `color-mix(in srgb, #2a3a4a 70%, transparent)` | 1 | 既有 --coloring-ink 遺漏 |
-| 70 | `components/for-parents/PlayMapCityWall.module.css`:106 | `.tile[aria-pressed="true"]` | `color` | `#fff` | 29 | 既有白 token 遺漏 |
-| 71 | `components/games/CandyMatchView.module.css`:89 | `.taskHeading` | `color` | `#5d4a67` | 3 | ≥3 遊戲／著色本墨色 |
-| 72 | `components/games/CandyMatchView.module.css`:141 | `.taskGoal` | `color` | `#5d4a67` | 3 | ≥3 遊戲／著色本墨色 |
-| 73 | `components/landing/LandingSegment.module.css`:98 | `.content` | `color` | `#fff` | 29 | 既有白 token 遺漏 |
-| 74 | `components/landing/LandingSegment.module.css`:185 | `.subscribeCta:hover` | `background` | `rgba(255, 255, 255, 0.24)` | 3 | ≥3 rgba 疊層 |
-| 75 | `components/landing/LandingSegment.module.css`:198 | `.subscribeCta` | `color` | `#fff` | 29 | 既有白 token 遺漏 |
-| 76 | `components/landing/LandingSegment.module.css`:212 | `.subscribeCta:active` | `background` | `rgba(255, 255, 255, 0.24)` | 3 | ≥3 rgba 疊層 |
+| 70 | `components/for-parents/PlayMapCityWall.module.css`:130 | `.tile[aria-pressed="true"]` | `color` | `#fff` | 29 | 既有白 token 遺漏 |
+| 71 | `components/games/CandyMatchView.module.css`:94 | `.taskHeading` | `color` | `#5d4a67` | 3 | ≥3 遊戲／著色本墨色 |
+| 72 | `components/games/CandyMatchView.module.css`:146 | `.taskGoal` | `color` | `#5d4a67` | 3 | ≥3 遊戲／著色本墨色 |
+| 73 | `components/landing/LandingSegment.module.css`:100 | `.content` | `color` | `#fff` | 29 | 既有白 token 遺漏 |
+| 74 | `components/landing/LandingSegment.module.css`:188 | `.subscribeCta:hover` | `background` | `rgba(255, 255, 255, 0.24)` | 3 | ≥3 rgba 疊層 |
+| 75 | `components/landing/LandingSegment.module.css`:201 | `.subscribeCta` | `color` | `#fff` | 29 | 既有白 token 遺漏 |
+| 76 | `components/landing/LandingSegment.module.css`:215 | `.subscribeCta:active` | `background` | `rgba(255, 255, 255, 0.24)` | 3 | ≥3 rgba 疊層 |
 | 77 | `components/landing/SegmentNav.module.css`:28 | `.list::before` | `background` | `rgba(255, 255, 255, 0.28)` | 3 | ≥3 rgba 疊層 |
 | 78 | `components/story/FamilyActivityCard.module.css`:6 | `.wrap` | `background` | `rgba(255, 255, 255, 0.72)` | 3 | ≥3 rgba 疊層 |
 | 79 | `components/story/ReflectionPrompt.module.css`:6 | `.wrap` | `background` | `rgba(255, 255, 255, 0.72)` | 3 | ≥3 rgba 疊層 |
 | 80 | `components/universe/HotspotLayer.module.css`:86 | `.signIcon` | `background` | `rgba(255, 255, 255, 0.72)` | 3 | ≥3 rgba 疊層 |
-| 81 | `components/universe/UniverseMap.module.css`:306 | `.tapHint` | `color` | `#7a5410` | 3 | 既有 --map-chip-ink 遺漏 |
-| 82 | `components/universe/UniverseMap.module.css`:331 | `.tapHintClose` | `color` | `#7a5410` | 3 | 既有 --map-chip-ink 遺漏 |
-| 83 | `components/universe/ZoneIsland.module.css`:589 | `.progressChip` | `color` | `#7a5410` | 3 | 既有 --map-chip-ink 遺漏 |
-| 84 | `components/universe/ZoneSheet.module.css`:689 | `.storyCardNew` | `color` | `#7a4012` | 1 | 既有 --landing-cta-fg 遺漏 |
-| 85 | `components/universe/ZoneSheet.module.css`:695 | `:global([data-theme="night"]) .storyCardNew` | `color` | `#3a2410` | 1 | 既有 --landing-brand-ink 遺漏 |
+| 81 | `components/universe/UniverseMap.module.css`:321 | `.tapHint` | `color` | `#7a5410` | 3 | 既有 --map-chip-ink 遺漏 |
+| 82 | `components/universe/UniverseMap.module.css`:346 | `.tapHintClose` | `color` | `#7a5410` | 3 | 既有 --map-chip-ink 遺漏 |
+| 83 | `components/universe/ZoneIsland.module.css`:602 | `.progressChip` | `color` | `#7a5410` | 3 | 既有 --map-chip-ink 遺漏 |
+| 84 | `components/universe/ZoneSheet.module.css`:692 | `.storyCardNew` | `color` | `#7a4012` | 1 | 既有 --landing-cta-fg 遺漏 |
+| 85 | `components/universe/ZoneSheet.module.css`:698 | `:global([data-theme="night"]) .storyCardNew` | `color` | `#3a2410` | 1 | 既有 --landing-brand-ink 遺漏 |
 
 ---
 
@@ -302,26 +303,26 @@
 | 15 | `components/universe/HotspotLayer.module.css`:156 | `.pinLocked .signStem` | `background` | `linear-gradient(90deg, #9f9487, #ded5c8 48%, #9f9487)` | 1 | 一次性地圖／著色本美術 |
 | 16 | `components/universe/HotspotLayer.module.css`:160 | `.pinLocked .signBase` | `background` | `#aaa092` | 1 | 一次性地圖／著色本美術 |
 | 17 | `components/universe/IslandPickerStrip.module.css`:11 | `.strip` | `background` | `linear-gradient( 180deg, rgba(255, 248, 232, 0) 0%, rgba(255, 248, 232, 0.92) 28%, rgba(255, 244, 220, 0.97) 100% )` | 1 | 一次性地圖／著色本美術 |
-| 18 | `components/universe/StatusOverlay.module.css`:17 | `.dust` | `background` | `radial-gradient(circle at 40% 60%, rgba(180, 150, 90, 0.08), transparent 55%)` | 1 | 一次性地圖／著色本美術 |
-| 19 | `components/universe/UniverseMap.module.css`:14 | `.map` | `background` | `#bfe0ef` | 1 | 一次性地圖／著色本美術 |
-| 20 | `components/universe/UniverseMap.module.css`:20 | `:global(html[data-theme="night"]) .map` | `background` | `#2a4468` | 1 | 一次性地圖／著色本美術 |
-| 21 | `components/universe/UniverseMap.module.css`:73 | `.moonGlitter` | `background` | `radial-gradient( ellipse 46% 92% at 50% 0%, rgba(214, 232, 255, 0.34) 0%, rgba(196, 220, 252, 0.13) 32%, transparent 72% )` | 1 | 一次性地圖／著色本美術 |
-| 22 | `components/universe/UniverseMap.module.css`:136 | `.bridgeSvg:hover .bridgePlank` | `stroke` | `#ecd0a5` | 1 | 一次性地圖／著色本美術 |
-| 23 | `components/universe/UniverseMap.module.css`:182 | `.nightSeaOverlay` | `background` | `linear-gradient( 180deg, rgba(30, 55, 95, 0.04) 0%, rgba(25, 50, 90, 0.1) 55%, rgba(20, 45, 85, 0.14) 100% )` | 1 | 一次性地圖／著色本美術 |
-| 24 | `components/universe/UniverseMap.module.css`:202 | `.atmosphere` | `background` | `radial-gradient( ellipse 78% 68% at 50% 46%, transparent 52%, rgba(42, 68, 104, 0.1) 100% ), linear-gradient( 180deg, rgba(255, 253, 246, 0.16) 0%, transparent 34%, rgba(58, 96, 140, 0.07) 100% )` | 1 | 一次性地圖／著色本美術 |
-| 25 | `components/universe/UniverseMap.module.css`:218 | `:global(html[data-theme="night"]) .atmosphere` | `background` | `radial-gradient( ellipse 74% 64% at 50% 46%, transparent 46%, rgba(8, 20, 44, 0.28) 100% ), linear-gradient( 180deg, rgba(168, 196, 236, 0.08) 0%, transparent 32%, rgba(6, 18, 40, 0.16) 100% )` | 1 | 一次性地圖／著色本美術 |
-| 26 | `components/universe/UniverseMap.module.css`:304 | `.tapHint` | `background` | `#fff8ea` | 1 | 一次性地圖／著色本美術 |
-| 27 | `components/universe/ZoneIsland.module.css`:118 | `.islandTile[data-status="open"]::before` | `background` | `radial-gradient( ellipse at 50% 55%, rgba(255, 241, 194, 0.6) 0%, rgba(255, 236, 178, 0.26) 38%, transparent 68% )` | 1 | 一次性地圖／著色本美術 |
-| 28 | `components/universe/ZoneIsland.module.css`:242 | `:global(html[data-theme="night"]) .islandTile[data-status="open"]::before` | `background` | `radial-gradient( ellipse at 50% 55%, rgba(255, 214, 140, 0.5) 0%, rgba(255, 200, 110, 0.22) 40%, transparent 68% )` | 1 | 一次性地圖／著色本美術 |
-| 29 | `components/universe/ZoneIsland.module.css`:396 | `.landmark` | `background` | `radial-gradient(circle at 38% 30%, #f7ead0, #e6cb98 72%, #dcbf86)` | 1 | 一次性地圖／著色本美術 |
-| 30 | `components/universe/ZoneIsland.module.css`:413 | `.island[data-status="building"] .landmark` | `background` | `radial-gradient(circle at 35% 30%, #fdf0c4, #f0d68a)` | 1 | 一次性地圖／著色本美術 |
-| 31 | `components/universe/ZoneIsland.module.css`:417 | `.island[data-status="coming"] .landmark` | `background` | `radial-gradient(circle at 35% 30%, #e6f2fb, #bcd9ee)` | 1 | 一次性地圖／著色本美術 |
-| 32 | `components/universe/ZoneIsland.module.css`:421 | `.island[data-status="planned"] .landmark` | `background` | `radial-gradient(circle at 35% 30%, #eef0fb, #cfd6ef)` | 1 | 一次性地圖／著色本美術 |
-| 33 | `components/universe/ZoneIsland.module.css`:588 | `.progressChip` | `background` | `rgba(255, 233, 179, 0.92)` | 1 | 一次性地圖／著色本美術 |
-| 34 | `components/universe/ZoneIsland.module.css`:598 | `.progressChip[data-full-stars]` | `background` | `rgba(255, 220, 120, 0.96)` | 1 | 一次性地圖／著色本美術 |
-| 35 | `components/universe/ZoneIsland.module.css`:599 | `.progressChip[data-full-stars]` | `color` | `#6b4808` | 1 | 一次性地圖／著色本美術 |
-| 36 | `components/universe/ZoneIsland.module.css`:638 | `.islandTile[data-progress] .tileStack::before` | `background` | `radial-gradient( ellipse at 50% 62%, rgba(255, 214, 140, 0.3) 0%, rgba(255, 214, 140, 0.12) 48%, transparent 72% )` | 1 | 一次性地圖／著色本美術 |
-| 37 | `components/universe/ZoneSheet.module.css`:188 | `.landmark` | `background` | `radial-gradient(circle at 35% 30%, #fbe9c8, #e9c98f)` | 1 | 一次性地圖／著色本美術 |
+| 18 | `components/universe/StatusOverlay.module.css`:18 | `.dust` | `background` | `radial-gradient(circle at 40% 60%, rgba(180, 150, 90, 0.08), transparent 55%)` | 1 | 一次性地圖／著色本美術 |
+| 19 | `components/universe/UniverseMap.module.css`:15 | `.map` | `background` | `#bfe0ef` | 1 | 一次性地圖／著色本美術 |
+| 20 | `components/universe/UniverseMap.module.css`:21 | `:global(html[data-theme="night"]) .map` | `background` | `#2a4468` | 1 | 一次性地圖／著色本美術 |
+| 21 | `components/universe/UniverseMap.module.css`:79 | `.moonGlitter` | `background` | `radial-gradient( ellipse 46% 92% at 50% 0%, rgba(214, 232, 255, 0.34) 0%, rgba(196, 220, 252, 0.13) 32%, transparent 72% )` | 1 | 一次性地圖／著色本美術 |
+| 22 | `components/universe/UniverseMap.module.css`:144 | `.bridgeSvg:hover .bridgePlank` | `stroke` | `#ecd0a5` | 1 | 一次性地圖／著色本美術 |
+| 23 | `components/universe/UniverseMap.module.css`:191 | `.nightSeaOverlay` | `background` | `linear-gradient( 180deg, rgba(30, 55, 95, 0.04) 0%, rgba(25, 50, 90, 0.1) 55%, rgba(20, 45, 85, 0.14) 100% )` | 1 | 一次性地圖／著色本美術 |
+| 24 | `components/universe/UniverseMap.module.css`:217 | `.atmosphere` | `background` | `radial-gradient( ellipse 78% 68% at 50% 46%, transparent 52%, rgba(42, 68, 104, 0.1) 100% ), linear-gradient( 180deg, rgba(255, 253, 246, 0.16) 0%, transparent 34%, rgba(58, 96, 140, 0.07) 100% )` | 1 | 一次性地圖／著色本美術 |
+| 25 | `components/universe/UniverseMap.module.css`:233 | `:global(html[data-theme="night"]) .atmosphere` | `background` | `radial-gradient( ellipse 74% 64% at 50% 46%, transparent 46%, rgba(8, 20, 44, 0.28) 100% ), linear-gradient( 180deg, rgba(168, 196, 236, 0.08) 0%, transparent 32%, rgba(6, 18, 40, 0.16) 100% )` | 1 | 一次性地圖／著色本美術 |
+| 26 | `components/universe/UniverseMap.module.css`:319 | `.tapHint` | `background` | `#fff8ea` | 1 | 一次性地圖／著色本美術 |
+| 27 | `components/universe/ZoneIsland.module.css`:122 | `.islandTile[data-status="open"]::before` | `background` | `radial-gradient( ellipse at 50% 55%, rgba(255, 241, 194, 0.6) 0%, rgba(255, 236, 178, 0.26) 38%, transparent 68% )` | 1 | 一次性地圖／著色本美術 |
+| 28 | `components/universe/ZoneIsland.module.css`:247 | `:global(html[data-theme="night"]) .islandTile[data-status="open"]::before` | `background` | `radial-gradient( ellipse at 50% 55%, rgba(255, 214, 140, 0.5) 0%, rgba(255, 200, 110, 0.22) 40%, transparent 68% )` | 1 | 一次性地圖／著色本美術 |
+| 29 | `components/universe/ZoneIsland.module.css`:404 | `.landmark` | `background` | `radial-gradient(circle at 38% 30%, #f7ead0, #e6cb98 72%, #dcbf86)` | 1 | 一次性地圖／著色本美術 |
+| 30 | `components/universe/ZoneIsland.module.css`:421 | `.island[data-status="building"] .landmark` | `background` | `radial-gradient(circle at 35% 30%, #fdf0c4, #f0d68a)` | 1 | 一次性地圖／著色本美術 |
+| 31 | `components/universe/ZoneIsland.module.css`:425 | `.island[data-status="coming"] .landmark` | `background` | `radial-gradient(circle at 35% 30%, #e6f2fb, #bcd9ee)` | 1 | 一次性地圖／著色本美術 |
+| 32 | `components/universe/ZoneIsland.module.css`:429 | `.island[data-status="planned"] .landmark` | `background` | `radial-gradient(circle at 35% 30%, #eef0fb, #cfd6ef)` | 1 | 一次性地圖／著色本美術 |
+| 33 | `components/universe/ZoneIsland.module.css`:601 | `.progressChip` | `background` | `rgba(255, 233, 179, 0.92)` | 1 | 一次性地圖／著色本美術 |
+| 34 | `components/universe/ZoneIsland.module.css`:611 | `.progressChip[data-full-stars]` | `background` | `rgba(255, 220, 120, 0.96)` | 1 | 一次性地圖／著色本美術 |
+| 35 | `components/universe/ZoneIsland.module.css`:612 | `.progressChip[data-full-stars]` | `color` | `#6b4808` | 1 | 一次性地圖／著色本美術 |
+| 36 | `components/universe/ZoneIsland.module.css`:652 | `.islandTile[data-progress] .tileStack::before` | `background` | `radial-gradient( ellipse at 50% 62%, rgba(255, 214, 140, 0.3) 0%, rgba(255, 214, 140, 0.12) 48%, transparent 72% )` | 1 | 一次性地圖／著色本美術 |
+| 37 | `components/universe/ZoneSheet.module.css`:191 | `.landmark` | `background` | `radial-gradient(circle at 35% 30%, #fbe9c8, #e9c98f)` | 1 | 一次性地圖／著色本美術 |
 
 ---
 
@@ -391,7 +392,7 @@
 
 | # | 檔案 | 選擇器 | 屬性 | 值 | 全域次數 | 短註 |
 |--:|---|---|---|---|--:|---|
-| 1 | `app/games/page.module.css`:221 | `.ageBadge` | `background` | `rgba(47, 41, 54, 0.76)` | 2 | 猶豫 |
+| 1 | `app/games/page.module.css`:231 | `.ageBadge` | `background` | `rgba(47, 41, 54, 0.76)` | 2 | 猶豫 |
 | 2 | `components/coloring/ColoringCanvas.module.css`:66 | `.doneOverlay` | `background` | `color-mix(in srgb, #fffaf2 88%, transparent)` | 1 | 猶豫 |
 | 3 | `components/coloring/ColoringCanvas.module.css`:75 | `.guide` | `background` | `color-mix(in srgb, #fff 78%, #dff0e4)` | 1 | 猶豫 |
 | 4 | `components/coloring/ColoringCanvas.module.css`:88 | `.completionHint` | `background` | `color-mix(in srgb, #fff 88%, #fff2c4)` | 1 | 猶豫 |
@@ -405,18 +406,18 @@
 | 12 | `components/coloring/ColoringPagePicker.module.css`:172 | `.galleryThumb` | `background` | `#f7f1e8` | 2 | 猶豫 |
 | 13 | `components/coloring/ColoringToolbar.module.css`:54 | `.primary` | `background` | `#e85d4c` | 2 | 猶豫 |
 | 14 | `components/coloring/ColoringToolbar.module.css`:55 | `.primary` | `border-color` | `#e85d4c` | 2 | 猶豫 |
-| 15 | `components/games/CandyMatchView.module.css`:106 | `.taskKicker, .movesLabel` | `color` | `#7c6886` | 2 | 猶豫 |
-| 16 | `components/games/CandyMatchView.module.css`:110 | `.movesWarning` | `color` | `#a5567a` | 1 | 猶豫 |
-| 17 | `components/games/CandyMatchView.module.css`:164 | `.starLegend` | `color` | `#7c6886` | 2 | 猶豫 |
+| 15 | `components/games/CandyMatchView.module.css`:111 | `.taskKicker, .movesLabel` | `color` | `#7c6886` | 2 | 猶豫 |
+| 16 | `components/games/CandyMatchView.module.css`:115 | `.movesWarning` | `color` | `#a5567a` | 1 | 猶豫 |
+| 17 | `components/games/CandyMatchView.module.css`:169 | `.starLegend` | `color` | `#7c6886` | 2 | 猶豫 |
 | 18 | `components/games/GameChrome.module.css`:59 | `.overlay` | `background` | `rgba(15, 23, 42, 0.55)` | 1 | 猶豫 |
 | 19 | `components/games/GameIntro.module.css`:31 | `.cover::after` | `background` | `linear-gradient(0deg, rgba(31, 27, 45, 0.25), transparent 60%)` | 1 | 猶豫 |
 | 20 | `components/games/GameIntro.module.css`:47 | `.coverLabel` | `background` | `rgba(47, 41, 54, 0.76)` | 2 | 猶豫 |
 | 21 | `components/games/GameJuiceToast.module.css`:2 | `.toast` | `background` | `rgba(255, 255, 255, 0.88)` | 2 | 猶豫 |
 | 22 | `components/games/GameLoadOverlay.module.css`:59 | `:global([data-theme="night"]) .artShade` | `background` | `linear-gradient( 180deg, color-mix(in srgb, #18203d 62%, transparent), color-mix(in srgb, #18203d 94%, transparent) )` | 1 | 猶豫 |
 | 23 | `components/landing/LandingBedtimeLayer.module.css`:28 | `.veilWarm` | `background` | `linear-gradient( 180deg, rgba(37, 42, 104, 0.36) 0%, rgba(74, 58, 112, 0.17) 48%, rgba(255, 166, 92, 0.045) 100% )` | 1 | 猶豫 |
-| 24 | `components/landing/LandingSegment.module.css`:55 | `.scrim` | `background` | `radial-gradient( 120% 90% at 14% 100%, rgba(38, 20, 8, 0.52) 0%, rgba(38, 20, 8, 0.28) 42%, rgba(38, 20, 8, 0) 70% ), linear-gradient( to top, rgba(38, 20, 8, 0.48) 0%, rgba(38, 20, 8, 0.3) 28%, rgba(38, 20, 8, 0.12) 52%, rgba(38, 20, 8, 0) 78% )` | 1 | 猶豫 |
-| 25 | `components/landing/LandingSegment.module.css`:79 | `.visual::after` | `background` | `linear-gradient( to bottom, rgba(38, 20, 8, 0.2) 0%, rgba(38, 20, 8, 0) 100% )` | 1 | 猶豫 |
-| 26 | `components/landing/LandingSegment.module.css`:197 | `.subscribeCta` | `background` | `rgba(255, 255, 255, 0.16)` | 1 | 猶豫 |
+| 24 | `components/landing/LandingSegment.module.css`:57 | `.scrim` | `background` | `radial-gradient( 120% 90% at 14% 100%, rgba(38, 20, 8, 0.52) 0%, rgba(38, 20, 8, 0.28) 42%, rgba(38, 20, 8, 0) 70% ), linear-gradient( to top, rgba(38, 20, 8, 0.48) 0%, rgba(38, 20, 8, 0.3) 28%, rgba(38, 20, 8, 0.12) 52%, rgba(38, 20, 8, 0) 78% )` | 1 | 猶豫 |
+| 25 | `components/landing/LandingSegment.module.css`:81 | `.visual::after` | `background` | `linear-gradient( to bottom, rgba(38, 20, 8, 0.2) 0%, rgba(38, 20, 8, 0) 100% )` | 1 | 猶豫 |
+| 26 | `components/landing/LandingSegment.module.css`:200 | `.subscribeCta` | `background` | `rgba(255, 255, 255, 0.16)` | 1 | 猶豫 |
 | 27 | `components/landing/SegmentNav.module.css`:51 | `.dot::after` | `background` | `rgba(255, 255, 255, 0.55)` | 1 | 猶豫 |
 | 28 | `components/landing/SegmentNav.module.css`:65 | `.active.dot::after` | `border-color` | `rgba(255, 255, 255, 0.85)` | 2 | 猶豫 |
 | 29 | `components/landing/SegmentNav.module.css`:102 | `.nav` | `background` | `rgba(38, 20, 8, 0.86)` | 1 | 猶豫 |
@@ -427,30 +428,30 @@
 | 34 | `components/landing/SiteNavBar.module.css`:238 | `.menuLink:active` | `background` | `rgba(120, 80, 40, 0.14)` | 1 | 猶豫 |
 | 35 | `components/landing/SiteNavBar.module.css`:345 | `.navLink:hover` | `background` | `rgba(107, 63, 30, 0.09)` | 1 | 猶豫 |
 | 36 | `components/landing/SiteNavBar.module.css`:354 | `.navLinkActive` | `background` | `rgba(107, 63, 30, 0.12)` | 1 | 猶豫 |
-| 37 | `components/landing/SiteNavBar.module.css`:420 | `:global(html:has([data-landing-root])) .bar[data-nav-solid="true"] .inner` | `border-color` | `rgba(255, 255, 255, 0.85)` | 2 | 猶豫 |
+| 37 | `components/landing/SiteNavBar.module.css`:423 | `:global(html:has([data-landing-root])) .bar[data-nav-solid="true"] .inner` | `border-color` | `rgba(255, 255, 255, 0.85)` | 2 | 猶豫 |
 | 38 | `components/studio/EngagementMetricsPanel.module.css`:27 | `.card` | `background` | `rgba(255, 255, 255, 0.8)` | 2 | 猶豫 |
 | 39 | `components/studio/IllustrationQueuePanel.module.css`:35 | `.item` | `background` | `rgba(255, 255, 255, 0.8)` | 2 | 猶豫 |
 | 40 | `components/universe/HotspotLayer.module.css`:61 | `.signPlate` | `color` | `#704817` | 2 | 猶豫 |
 | 41 | `components/universe/HotspotModal.module.css`:10 | `.overlay` | `background` | `rgba(15, 23, 42, 0.38)` | 1 | 猶豫 |
 | 42 | `components/universe/IslandPickerStrip.module.css`:89 | `.thumb` | `background` | `rgba(255, 255, 255, 0.35)` | 1 | 猶豫 |
-| 43 | `components/universe/IslandRoamerLayer.module.css`:30 | `.shadow` | `background` | `radial-gradient( ellipse at center, rgba(72, 58, 44, 0.42) 0%, rgba(72, 58, 44, 0.28) 45%, rgba(72, 58, 44, 0) 72% )` | 2 | 猶豫 |
-| 44 | `components/universe/IslandRoamerLayer.module.css`:106 | `.devPathLine` | `stroke` | `rgba(239, 71, 111, 0.55)` | 3 | 開發路徑／placeholder |
+| 43 | `components/universe/IslandRoamerLayer.module.css`:31 | `.shadow` | `background` | `radial-gradient( ellipse at center, rgba(72, 58, 44, 0.42) 0%, rgba(72, 58, 44, 0.28) 45%, rgba(72, 58, 44, 0) 72% )` | 2 | 猶豫 |
+| 44 | `components/universe/IslandRoamerLayer.module.css`:107 | `.devPathLine` | `stroke` | `rgba(239, 71, 111, 0.55)` | 3 | 開發路徑／placeholder |
 | 45 | `components/universe/MapRoamerLayer.module.css`:21 | `.devPathLine` | `stroke` | `rgba(239, 71, 111, 0.55)` | 3 | 開發路徑／placeholder |
 | 46 | `components/universe/RoamerGreeting.module.css`:9 | `.bubble` | `background` | `rgba(255, 255, 255, 0.96)` | 1 | 猶豫 |
 | 47 | `components/universe/RoamerVehicle.module.css`:35 | `.shadow` | `background` | `radial-gradient( ellipse at center, rgba(72, 58, 44, 0.42) 0%, rgba(72, 58, 44, 0.28) 45%, rgba(72, 58, 44, 0) 72% )` | 2 | 猶豫 |
 | 48 | `components/universe/RoamerVehicle.module.css`:94 | `.placeholder` | `background` | `rgba(239, 71, 111, 0.55)` | 3 | 開發路徑／placeholder |
-| 49 | `components/universe/UniverseMap.module.css`:250 | `.titleText` | `color` | `#fff6e6` | 2 | 猶豫 |
-| 50 | `components/universe/UniverseMap.module.css`:251 | `.titleText` | `background` | `linear-gradient(#caa063, #a5773c)` | 2 | 猶豫 |
-| 51 | `components/universe/ZoneIsland.module.css`:434 | `.name` | `color` | `#fff6e6` | 2 | 猶豫 |
-| 52 | `components/universe/ZoneIsland.module.css`:435 | `.name` | `background` | `linear-gradient(#caa063, #a5773c)` | 2 | 猶豫 |
+| 49 | `components/universe/UniverseMap.module.css`:265 | `.titleText` | `color` | `#fff6e6` | 2 | 猶豫 |
+| 50 | `components/universe/UniverseMap.module.css`:266 | `.titleText` | `background` | `linear-gradient(#caa063, #a5773c)` | 2 | 猶豫 |
+| 51 | `components/universe/ZoneIsland.module.css`:442 | `.name` | `color` | `#fff6e6` | 2 | 猶豫 |
+| 52 | `components/universe/ZoneIsland.module.css`:443 | `.name` | `background` | `linear-gradient(#caa063, #a5773c)` | 2 | 猶豫 |
 | 53 | `components/universe/ZoneSheet.module.css`:15 | `.overlayScrim` | `background` | `linear-gradient( 180deg, rgba(15, 23, 42, 0.08) 0%, rgba(15, 23, 42, 0.22) 100% )` | 1 | 猶豫 |
-| 54 | `components/universe/ZoneSheet.module.css`:299 | `.hotspotFeatured` | `color` | `#704817` | 2 | 猶豫 |
-| 55 | `components/universe/ZoneSheet.module.css`:300 | `.hotspotFeatured` | `background` | `linear-gradient(180deg, #fff4d6, #f4dc9d)` | 1 | 猶豫 |
-| 56 | `components/universe/ZoneSheet.module.css`:301 | `.hotspotFeatured` | `border-color` | `#e2b565` | 1 | 猶豫 |
-| 57 | `components/universe/ZoneSheet.module.css`:312 | `.hotspotIcon` | `background` | `color-mix(in srgb, currentColor 12%, transparent)` | 1 | 猶豫 |
-| 58 | `components/universe/ZoneSheet.module.css`:389 | `.segmentTilePrimary` | `border-color` | `rgba(180, 120, 60, 0.32)` | 1 | 猶豫 |
-| 59 | `components/universe/ZoneSheet.module.css`:690 | `.storyCardNew` | `background` | `linear-gradient(180deg, #ffd27a, #ffb347)` | 1 | 猶豫 |
-| 60 | `components/universe/ZoneSheet.module.css`:708 | `.storyCardTitle` | `color` | `#70685f` | 1 | 猶豫 |
+| 54 | `components/universe/ZoneSheet.module.css`:302 | `.hotspotFeatured` | `color` | `#704817` | 2 | 猶豫 |
+| 55 | `components/universe/ZoneSheet.module.css`:303 | `.hotspotFeatured` | `background` | `linear-gradient(180deg, #fff4d6, #f4dc9d)` | 1 | 猶豫 |
+| 56 | `components/universe/ZoneSheet.module.css`:304 | `.hotspotFeatured` | `border-color` | `#e2b565` | 1 | 猶豫 |
+| 57 | `components/universe/ZoneSheet.module.css`:315 | `.hotspotIcon` | `background` | `color-mix(in srgb, currentColor 12%, transparent)` | 1 | 猶豫 |
+| 58 | `components/universe/ZoneSheet.module.css`:392 | `.segmentTilePrimary` | `border-color` | `rgba(180, 120, 60, 0.32)` | 1 | 猶豫 |
+| 59 | `components/universe/ZoneSheet.module.css`:693 | `.storyCardNew` | `background` | `linear-gradient(180deg, #ffd27a, #ffb347)` | 1 | 猶豫 |
+| 60 | `components/universe/ZoneSheet.module.css`:711 | `.storyCardTitle` | `color` | `#70685f` | 1 | 猶豫 |
 
 ---
 
