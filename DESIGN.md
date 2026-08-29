@@ -238,7 +238,7 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 | `StoryMeta` | EP / 時長（標註） / 車種 chip |
 | `StoryProgressBadge` | 「已聽完」星章，貼封面右上角。語彙與宇宙地圖一致（`⭐` + `aria-label="已聽完"`）；只表達聽完單一狀態，不做「聽到一半」（progress store 的 `continue` 為全站單一欄位，標記會無預警消失） |
 | `StoryPlayer` | 全螢幕黑底、字幕底板、底部控制列 |
-| `SiteFooter` | 家長說明 + 平台連結；不放遊樂園入口（`/games` 走導覽） |
+| `SiteFooter` | 家長說明 + 平台連結；不放遊樂園入口（`/games` 走導覽）、不放安心訊號列 |
 | `GamePageShell` | 街機兩款遊戲共同外框，負責返回導覽、可及性與資產預載 |
 | `ColoringPageShell` | 繪本著色活動外框（不掛 GameKit） |
 | `GameChrome` | 遊戲內暫停、音效與設定對話框 |

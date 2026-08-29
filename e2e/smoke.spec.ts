@@ -94,6 +94,7 @@ test("全部故事頁 → 詳情 → 播放頁 smoke", async ({ page }) => {
   await page.goto("/stories");
   await expect(page.getByRole("heading", { name: "找故事" })).toBeVisible();
   await expect(page.locator("footer").getByRole("link", { name: "去遊樂園玩" })).toHaveCount(0);
+  await expect(page.locator("footer").getByText("無廣告")).toHaveCount(0);
 
   const firstStory = page.locator('main a[href^="/story/"]').first();
   await expect(firstStory).toBeVisible();

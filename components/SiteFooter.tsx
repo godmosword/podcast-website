@@ -1,7 +1,6 @@
 import Link from "next/link";
 import ConnectHub from "@/components/ConnectHub";
 import { contactHref, isContactExternal } from "@/lib/contact";
-import { PARENT_TRUST_TEXT } from "@/components/ParentTrustStrip";
 import Doodle from "@/components/decor/Doodle";
 import decor from "@/components/decor/decor.module.css";
 import styles from "./SiteFooter.module.css";
@@ -106,7 +105,6 @@ export default function SiteFooter({
             使用條款與免責聲明
           </Link>
         </nav>
-        <p className={styles.privacyLine}>{PARENT_TRUST_TEXT}</p>
         <p className={styles.copyright}>© 車車遊樂園™ · Bonbon &amp; 馬米</p>
         <p className={styles.redistribution}>
           「車車遊樂園」「看圖聽故事」為 Bonbon &amp; 馬米之品牌名稱。

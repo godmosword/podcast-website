@@ -11,7 +11,7 @@ describe("SiteFooter", () => {
     vi.unstubAllEnvs();
   });
 
-  test("不含 ThemeModeSwitch；頁尾 meta 含關於／聯絡／節目數據／條款，隱私列含安心訊號", async () => {
+  test("不含 ThemeModeSwitch；頁尾 meta 含關於／聯絡／節目數據／條款，不含安心訊號列", async () => {
     vi.stubEnv("NEXT_PUBLIC_CONTACT_FORM_URL", "");
     const { default: SiteFooter } = await import("./SiteFooter");
     const html = renderToStaticMarkup(<SiteFooter layout="home" />);
@@ -28,8 +28,9 @@ describe("SiteFooter", () => {
     expect(html).toContain("使用條款與免責聲明");
     expect(html).not.toContain('href="/legal#privacy"');
     expect(html).not.toContain("隱私說明");
-    expect(html).toContain("無廣告");
-    expect(html).toContain("不收孩子帳號");
+    expect(html).not.toContain("無廣告");
+    expect(html).not.toContain("不收孩子帳號");
+    expect(html).not.toContain("進度留在這台裝置");
     expect(html).not.toContain("去遊樂園玩");
     expect(html).not.toContain("小遊戲 · 免下載");
     expect(html).not.toContain('href="/games"');

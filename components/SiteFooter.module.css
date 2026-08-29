@@ -123,21 +123,6 @@
   line-height: 1;
 }
 
-.privacyLine {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 4px 6px;
-  max-width: min(100%, 520px);
-  margin: 0;
-  font-size: var(--fs-meta);
-  font-weight: 600;
-  line-height: 1.45;
-  color: var(--ink-soft);
-  text-align: center;
-}
-
 @media (hover: hover) {
   .metaLink:hover {
     text-decoration: underline;
