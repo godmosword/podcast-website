@@ -10,7 +10,7 @@ Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範
 |------|------|
 | Clarity（清晰） | 字階分明、對比足夠、裝飾不搶內容 |
 | Deference（讓位） | UI 退讓給黏土插畫／故事封面 |
-| Depth（深度） | 柔陰影、`--elev-*` 高度階梯、半透明層；`--hairline` 用於分隔線**與無影像抬升塊**（`ConnectHub.block`、`StoryFilter.filterBar`）；有封面的內容卡（`StoryCard`／`LatestHero`）不用盒子描邊，靠 `--elev-*`。壓在影像上的 chrome 必須有**自身底色或描邊**（不得只靠 scrim）：Landing 分區 CTA 用深色玻璃 `rgba(0,0,0,0.32)`；SegmentNav dot 仍可留邊。鍵盤 focus 必須用淺色環（Landing `.cta`／`.next` 用 `var(--on-dark)` outline），不得只靠日間 `--focus-ring`（深墨） |
+| Depth（深度） | 柔陰影、`--elev-*` 高度階梯、半透明層；`--hairline` 用於分隔線**與無影像抬升塊**（`ConnectHub.block`、`StoryFilter.filterBar`）；有封面的內容卡（`StoryCard`／`LatestHero`）不用盒子描邊，靠 `--elev-*`。壓在影像上的 chrome 必須有**自身底色或描邊**（不得只靠 scrim）：Landing 分區 CTA 用深色玻璃 `rgba(0,0,0,0.38)`＋白邊＋`--c-yellow` 字；SegmentNav dot 仍可留邊。鍵盤 focus 必須用淺色環（Landing `.cta`／`.next` 用 `var(--on-dark)` outline），不得只靠日間 `--focus-ring`（深墨） |
 | Consistency（一致） | 導覽、卡片、CTA、內容頁同一節奏 |
 | Feedback（回饋） | 輕 `scale(0.98)`／opacity；取消歪斜 rotate 與厚底影下沉 |
 | Aesthetic Integrity | 童趣靠插畫與色彩，不靠麥克筆描邊 |
@@ -270,7 +270,7 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 
 ### Landing Hub（`/`）
 
-Storyline 式**全螢幕分段捲動**：每段一張滿版黏土 hero（桌面 `segment-{id}.jpg` 16:9；行動 ≤768px `segment-{id}-portrait.jpg` 9:16），大圖主導 + 底部漸層遮罩 + 左下分區 CTA。**不**顯示段編號（如 01/04）。段標題仍視覺隱藏（CSS module `titleHidden`，給輔助科技／`aria-labelledby`），不疊在美術上；可見 CTA 為長句段名（本輪 Landing 例外，可超過「CTA ≤ 6 字」）；`href` 不變。分區 CTA 走**深色玻璃 ghost**（`min-height: 48px`、`rgba(0,0,0,0.32)`），字級桌面 `--fs-h3`、≤768 `--fs-h4`（不再縮成 control／label），**非**橘色實心 pill；段內 `.next` 往下箭點視覺降權（極淡深色玻璃底）。不放「聽最新一集」播放直達鈕。首段 GEO 導言仍用全域 `.sr-only`。
+Storyline 式**全螢幕分段捲動**：每段一張滿版黏土 hero（桌面 `segment-{id}.jpg` 16:9；行動 ≤768px `segment-{id}-portrait.jpg` 9:16），大圖主導 + 底部漸層遮罩 + 左下分區 CTA。**不**顯示段編號（如 01/04）。段標題仍視覺隱藏（CSS module `titleHidden`，給輔助科技／`aria-labelledby`），不疊在美術上；可見 CTA 為長句段名（本輪 Landing 例外，可超過「CTA ≤ 6 字」）；`href` 不變。分區 CTA 走**深色玻璃 ghost**（`min-height: 56px`、`rgba(0,0,0,0.38)`、白邊），字色 `--c-yellow`，字級桌面 `--fs-h2`、≤768 `--fs-h3`、≤640 `--fs-h4`，**非**橘色實心 pill；段內 `.next` 往下箭點視覺降權（極淡深色玻璃底）。不放「聽最新一集」播放直達鈕。首段 GEO 導言仍用全域 `.sr-only`。
 
 1. **SiteNavBar**（全站橘色頂欄 + 訂閱 CTA）
    - **桌面（≥980px）**懸浮膠囊主列：全部故事／角色圖鑑／遊樂園／宇宙地圖／**親子景點**／**親子指南**。「親子景點」直連 `/for-parents/play-map`（路徑不另開頂層路由）；「親子指南」直連 `/for-parents`。無「更多」下拉。Threads 育兒分享仍由 `/for-parents` 頁內「育兒小筆記」外連卡承接（Threads 缺席時整卡不渲染）。主題切換與訂閱膠囊常駐。**成長主題（`/topic`）不佔導覽**（屬家長取向且與 /stories 篩選重疊），頁面仍可直達。主列 6 項時維持 980 斷點與既有密度調整，不縮觸控區。

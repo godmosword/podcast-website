@@ -11,6 +11,7 @@
 ### Changed
 
 - **Landing CTA 改標題字級**：分區 CTA 桌面 `--fs-h3`、手機 `--fs-h4`，明確套 Baloo／Huninn，不再用內文／標籤字。**未改** Apple sync workflow。
+- **Landing CTA 加大並改奶油黃字**：桌面 `--fs-h2`、膠囊 56px、白邊、玻璃 `0.38`；字色 `--c-yellow`。**未改** Apple sync workflow。
 - **頁尾拿掉「給家長：點播放鈕…」導讀**。親子遊樂地圖的資料提醒仍可顯示。**未改** Apple sync workflow。
 - **Landing 刪段編號、CTA 改長句＋深色玻璃 ghost**：四段 hero 不再顯示 01/04；可見 CTA 改為長句段名（車車遊樂園的故事／數綿羊123．睡前故事／好好玩的捏黏土／好習慣故事），`href` 不變；SegmentNav 與宇宙地圖 `getCarParkLinks` 用 `navLabel` 短標。分區 CTA 改深色玻璃 ghost（48px、`rgba(0,0,0,0.32)`），非橘 pill；`.next` 往下箭點降權並加極淡深色底；深色玻璃 CTA／往下箭補 `focus-visible`（`--on-dark`）；宇宙地圖黏土外連 `aria-label`「另開 YouTube」。**未改** Apple sync workflow。
 - **去框 A′（stories／ConnectHub）**：`StoryCard`、`LatestHero` 等有封面卡移除盒子描邊與 1px 色環，改靠 `--elev-*`；無影像塊（`ConnectHub.block`、`StoryFilter.filterBar`）保留 `--hairline` + elevated surface。`SiteFooter`／`SiteNavBar` 膠囊白邊未動。**未改** Apple sync workflow。

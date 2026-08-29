@@ -152,19 +152,20 @@
 .cta {
   display: inline-flex;
   align-items: center;
-  min-height: 48px;
+  min-height: 56px;
   gap: 6px;
-  padding: 14px 24px;
+  padding: 14px 26px;
   border-radius: var(--radius-pill);
-  background: rgba(0, 0, 0, 0.32);
-  color: #fff;
+  border: 1px solid color-mix(in srgb, var(--on-dark) 65%, transparent);
+  background: rgba(0, 0, 0, 0.38);
+  color: var(--c-yellow);
   font-family: var(--font-baloo), var(--font-huninn), "PingFang TC",
     "Microsoft JhengHei", sans-serif;
   font-weight: 700;
-  font-size: var(--fs-h3);
+  font-size: var(--fs-h2);
   letter-spacing: 0.02em;
   text-decoration: none;
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.38);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(10px) saturate(140%);
   -webkit-backdrop-filter: blur(10px) saturate(140%);
   transition: transform var(--motion-press), background var(--motion-press),
@@ -174,7 +175,7 @@
 .cta:active {
   transform: scale(0.98);
   opacity: 0.92;
-  background: rgba(0, 0, 0, 0.42);
+  background: rgba(0, 0, 0, 0.48);
 }
 
 .cta:focus-visible,
@@ -186,7 +187,7 @@
 
 @media (hover: hover) {
   .cta:hover {
-    background: rgba(0, 0, 0, 0.42);
+    background: rgba(0, 0, 0, 0.48);
   }
 
   .playCta:hover {
@@ -316,9 +317,9 @@
   }
 
   .cta {
-    min-height: 48px;
-    padding: 12px 20px;
-    font-size: var(--fs-h4);
+    min-height: 56px;
+    padding: 12px 22px;
+    font-size: var(--fs-h3);
   }
 
   /* 平板／手機用 SegmentNav 貼底細條，隱藏向下箭頭 */
@@ -359,8 +360,8 @@
   }
 
   .cta {
-    min-height: 48px;
-    padding: 10px 18px;
+    min-height: 56px;
+    padding: 12px 20px;
     font-size: var(--fs-h4);
   }
 }
