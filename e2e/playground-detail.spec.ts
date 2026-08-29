@@ -91,4 +91,28 @@ test.describe("親子景點 detail pages", () => {
     await page.getByText("查看資料來源").click();
     await expect(page.locator('[aria-labelledby="verification-heading"] li')).toHaveCount(3);
   });
+
+  test("keeps detail sections separated in normal flow across responsive widths", async ({
+    page,
+  }) => {
+    for (const width of [320, 375, 390, 430, 640, 768, 980, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto("/for-parents/play-map/ty-kids-museum");
+      const flow = await page.locator("article").evaluate((article) => {
+        const style = getComputedStyle(article);
+        const boxes = Array.from(article.children).map((child) => {
+          const rect = child.getBoundingClientRect();
+          return { top: rect.top, bottom: rect.bottom };
+        });
+        return {
+          gap: style.gap,
+          minGap: Math.min(
+            ...boxes.slice(1).map((box, index) => box.top - boxes[index]!.bottom),
+          ),
+        };
+      });
+      expect(flow.gap, `article gap at ${width}px`).toBe("24px");
+      expect(flow.minGap, `section gap at ${width}px`).toBeGreaterThanOrEqual(24);
+    }
+  });
 });
