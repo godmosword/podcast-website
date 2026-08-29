@@ -109,8 +109,8 @@ function scaleFromTransform(transform: string) {
 async function blankViewportPoint(viewport: Locator) {
   return viewport.evaluate((el) => {
     const rect = el.getBoundingClientRect();
-    const xs = [0.12, 0.22, 0.78, 0.88, 0.5];
-    const ys = [0.14, 0.26, 0.74, 0.86, 0.5];
+    const xs = [0.04, 0.1, 0.18, 0.28, 0.72, 0.82, 0.9, 0.96];
+    const ys = [0.06, 0.12, 0.2, 0.8, 0.88, 0.94];
     for (const y of ys) {
       for (const x of xs) {
         const point = {
@@ -274,6 +274,9 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     await page.keyboard.press("ArrowRight");
     await expect.poll(() => stageTransform(page)).not.toBe(beforeArrow);
 
+    for (let i = 0; i < 6 && (await zoomOut.isEnabled()); i += 1) {
+      await zoomOut.click();
+    }
     const beforeClickScale = scaleFromTransform(await stageTransform(page));
     const point = await blankViewportPoint(viewport);
     await page.mouse.click(point.x, point.y);

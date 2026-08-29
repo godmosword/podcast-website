@@ -87,7 +87,16 @@ test.describe("UX-P1-5 親子指南與播放頁觸控", () => {
   });
 
   test("睡前定時選單支援觸控尺寸、方向鍵、Esc 與提示焦點", async ({ page }) => {
-    await page.addInitScript(() => localStorage.clear());
+    // 鎖定日間：system + UTC 睡前窗（19–06）會解析成夜晚，提示對話框不會出現。
+    await page.addInitScript(() => {
+      localStorage.clear();
+      localStorage.setItem(
+        "cheche:progress",
+        JSON.stringify({
+          preferences: { theme: "light", nightPromptDismissed: false },
+        }),
+      );
+    });
     await page.goto("/story/ep-3/play");
     const timer = page.getByRole("button", { name: "睡前定時" });
     await timer.click();

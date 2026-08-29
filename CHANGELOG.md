@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- **CI e2e 睡前定時提示受 UTC 睡前窗影響**：`child-ux` 鎖定 `theme: light`，避免 GitHub runner 在 19–06 UTC 把 system 解析成夜晚、對話框不出現。宇宙地圖空白海取點改掃邊緣並在 click-zoom 斷言前略縮，降低島面蓋滿取樣點的 flake。**未改** Apple sync workflow。
+
 ### Changed
 
 - **Landing 刪段編號、CTA 改長句＋深色玻璃 ghost**：四段 hero 不再顯示 01/04；可見 CTA 改為長句段名（車車遊樂園的故事／數綿羊123．睡前故事／好好玩的捏黏土／好習慣故事），`href` 不變；SegmentNav 與宇宙地圖 `getCarParkLinks` 用 `navLabel` 短標。分區 CTA 改深色玻璃 ghost（48px、`rgba(0,0,0,0.32)`），非橘 pill；`.next` 往下箭點降權並加極淡深色底；深色玻璃 CTA／往下箭補 `focus-visible`（`--on-dark`）；宇宙地圖黏土外連 `aria-label`「另開 YouTube」。**未改** Apple sync workflow。
