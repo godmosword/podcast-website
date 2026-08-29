@@ -62,7 +62,7 @@
 | polish(footer): 頁尾拿掉安心訊號列 | `ee80d3f` |
 | polish(landing): 刪 01/04、CTA 長句＋深色玻璃 ghost；宇宙短標 navLabel | `de9d969` |
 | polish(ui): 有封面卡去描邊；無影像塊留 hairline | `de9d969` |
-| test(e2e): 睡前定時提示鎖定日間；宇宙地圖空白海取點抗 flake | 見本 commit |
+| test(e2e): 睡前定時提示鎖定日間；宇宙地圖空白海取點抗 flake | `702c096` |
 
 ### 本輪已完成（2026-08-28）
 
