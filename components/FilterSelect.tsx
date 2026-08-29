@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { playSfx } from "@/lib/sfx";
 import styles from "./FilterSelect.module.css";
 
@@ -32,16 +32,26 @@ export default function FilterSelect({
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const listId = `filter-list-${useId()}`;
 
   const current = options.find((o) => o.value === value) ?? options[0];
+
+  const closeMenu = useCallback(() => {
+    setOpen(false);
+    window.requestAnimationFrame(() => triggerRef.current?.focus());
+  }, []);
 
   useEffect(() => {
     if (!open) return;
     const onDown = (e: PointerEvent) => {
-      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
+      if (!wrapRef.current?.contains(e.target as Node)) closeMenu();
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeMenu();
+      }
     };
     document.addEventListener("pointerdown", onDown);
     document.addEventListener("keydown", onKey);
@@ -49,7 +59,7 @@ export default function FilterSelect({
       document.removeEventListener("pointerdown", onDown);
       document.removeEventListener("keydown", onKey);
     };
-  }, [open]);
+  }, [closeMenu, open]);
 
   useEffect(() => {
     if (!open) return;
@@ -61,7 +71,7 @@ export default function FilterSelect({
   function select(next: string) {
     playSfx("tap");
     onChange(next);
-    setOpen(false);
+    closeMenu();
   }
 
   function onListKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
@@ -104,10 +114,15 @@ export default function FilterSelect({
       <button
         type="button"
         className={styles.trigger}
+        ref={triggerRef}
         aria-haspopup="listbox"
         aria-expanded={open}
+        aria-controls={listId}
         aria-label={ariaLabel}
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => {
+          if (open) closeMenu();
+          else setOpen(true);
+        }}
       >
         <span className={styles.triggerInner}>
           {current.icon != null && renderIcon(current.icon)}
@@ -121,6 +136,7 @@ export default function FilterSelect({
       {open && (
         <div
           className={styles.panel}
+          id={listId}
           role="listbox"
           aria-label={listLabel}
           tabIndex={-1}

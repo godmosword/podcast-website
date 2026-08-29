@@ -71,6 +71,22 @@ test.describe("/stories 可分享篩選", () => {
     );
   });
 
+  test("下拉選單關閉後把焦點還給觸發器並關聯 listbox", async ({ page }) => {
+    await page.goto("/stories");
+    const trigger = page.getByRole("button", { name: "選擇車車" });
+    await trigger.click();
+    const listId = await trigger.getAttribute("aria-controls");
+    expect(listId).toBeTruthy();
+    await expect(page.locator(`#${listId}`)).toHaveRole("listbox");
+
+    await page.keyboard.press("Escape");
+    await expect(trigger).toBeFocused();
+
+    await trigger.click();
+    await page.getByRole("option", { name: "救護車" }).click();
+    await expect(trigger).toBeFocused();
+  });
+
   test("篩選 URL 的 canonical 仍是 /stories（不複製內容）", async ({
     page,
   }) => {

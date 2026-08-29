@@ -89,6 +89,16 @@ function isEditableKeyboardTarget(target: EventTarget | null): boolean {
   );
 }
 
+function isInteractiveKeyboardTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  if (isEditableKeyboardTarget(target)) return true;
+  return Boolean(
+    target.closest(
+      "button, a, [role='button'], [role='option'], [role='menuitem'], [role='menuitemradio']",
+    ),
+  );
+}
+
 // 字幕字級偏好（跨集保留於 progress-store）。
 const CAPTION_SIZES = ["sm", "md", "lg"] as const;
 const CAPTION_SIZE_LABEL: Record<CaptionSize, string> = {
@@ -152,6 +162,8 @@ export default function StoryPlayer({
   const touchStartX = useRef<number | null>(null);
   const bedtimeEndRef = useRef<number | null>(null);
   const timerWrapRef = useRef<HTMLDivElement>(null);
+  const timerButtonRef = useRef<HTMLButtonElement>(null);
+  const nightPromptRef = useRef<HTMLDivElement>(null);
   const completionRecorded = useRef(false);
   const playStartRecorded = useRef(false);
 
@@ -301,14 +313,78 @@ export default function StoryPlayer({
     return () => window.clearInterval(id);
   }, [cueMode]);
 
+  const closeTimer = useCallback(() => {
+    setShowTimer(false);
+    window.requestAnimationFrame(() => timerButtonRef.current?.focus());
+  }, []);
+
+  const closeNightPrompt = useCallback(() => {
+    setShowNightPrompt(false);
+    window.requestAnimationFrame(() => timerButtonRef.current?.focus());
+  }, []);
+
+  function handleTimerMenuKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    const items = Array.from(
+      e.currentTarget.querySelectorAll<HTMLButtonElement>("button"),
+    );
+    const index = items.indexOf(document.activeElement as HTMLButtonElement);
+    if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+      e.preventDefault();
+      items[(index + 1 + items.length) % items.length]?.focus();
+    } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+      e.preventDefault();
+      items[(index - 1 + items.length) % items.length]?.focus();
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      items[0]?.focus();
+    } else if (e.key === "End") {
+      e.preventDefault();
+      items.at(-1)?.focus();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      closeTimer();
+    }
+  }
+
+  function handleNightPromptKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      closeNightPrompt();
+      return;
+    }
+    if (e.key !== "Tab") return;
+    const buttons = Array.from(
+      e.currentTarget.querySelectorAll<HTMLButtonElement>("button"),
+    );
+    if (buttons.length < 2) return;
+    const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
+    if (e.shiftKey && index <= 0) {
+      e.preventDefault();
+      buttons.at(-1)?.focus();
+    } else if (!e.shiftKey && index === buttons.length - 1) {
+      e.preventDefault();
+      buttons[0]?.focus();
+    }
+  }
+
+  useEffect(() => {
+    if (!showNightPrompt) return;
+    window.requestAnimationFrame(() => {
+      nightPromptRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+    });
+  }, [showNightPrompt]);
+
   // 睡前定時選單：點選單外或按 Esc 自動收起。
   useEffect(() => {
     if (!showTimer) return;
     const onDown = (e: PointerEvent) => {
-      if (!timerWrapRef.current?.contains(e.target as Node)) setShowTimer(false);
+      if (!timerWrapRef.current?.contains(e.target as Node)) closeTimer();
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setShowTimer(false);
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeTimer();
+      }
     };
     document.addEventListener("pointerdown", onDown);
     document.addEventListener("keydown", onKey);
@@ -316,7 +392,19 @@ export default function StoryPlayer({
       document.removeEventListener("pointerdown", onDown);
       document.removeEventListener("keydown", onKey);
     };
-  }, [showTimer]);
+  }, [closeTimer, showTimer]);
+
+  useEffect(() => {
+    if (!showNightPrompt) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeNightPrompt();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [closeNightPrompt, showNightPrompt]);
 
   function goTo(next: number) {
     setPage(() => Math.max(0, Math.min(total - 1, next)));
@@ -564,7 +652,7 @@ export default function StoryPlayer({
   // 鍵盤：空白鍵播放/暫停，左右方向鍵 ±10 秒（與控制列一致）。
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (isEditableKeyboardTarget(e.target)) return;
+      if (isInteractiveKeyboardTarget(e.target)) return;
 
       if (e.key === " " || e.code === "Space") {
         e.preventDefault();
@@ -748,9 +836,11 @@ export default function StoryPlayer({
             <button
               type="button"
               className={`${styles.timerBtn} ${bedtimeMinutes ? styles.timerBtnOn : ""}`}
+              ref={timerButtonRef}
               onClick={() => setShowTimer((v) => !v)}
               aria-label="睡前定時"
               aria-expanded={showTimer}
+              aria-controls="story-timer-menu"
             >
               <Icon name="timer" size={18} />
               {bedtimeRemaining !== null ? (
@@ -758,7 +848,12 @@ export default function StoryPlayer({
               ) : null}
             </button>
             {showTimer && (
-              <div className={styles.timerMenu} role="menu">
+              <div
+                id="story-timer-menu"
+                className={styles.timerMenu}
+                role="menu"
+                onKeyDown={handleTimerMenuKeyDown}
+              >
                 {BEDTIME_OPTIONS.map((min) => (
                   <button
                     key={min}
@@ -779,7 +874,7 @@ export default function StoryPlayer({
                         }
                         return next;
                       });
-                      setShowTimer(false);
+                      closeTimer();
                     }}
                   >
                     睡前 {min} 分
@@ -791,7 +886,7 @@ export default function StoryPlayer({
                     className={styles.timerOpt}
                     onClick={() => {
                       setBedtimeMinutes(null);
-                      setShowTimer(false);
+                      closeTimer();
                     }}
                   >
                     取消定時
@@ -800,7 +895,14 @@ export default function StoryPlayer({
               </div>
             )}
             {showNightPrompt && (
-              <div className={styles.nightPrompt} role="dialog" aria-label="夜晚模式提示">
+              <div
+                className={styles.nightPrompt}
+                role="dialog"
+                aria-label="夜晚模式提示"
+                aria-modal="true"
+                ref={nightPromptRef}
+                onKeyDown={handleNightPromptKeyDown}
+              >
                 <p className={styles.nightPromptText}>要進入夜晚模式嗎？</p>
                 <div className={styles.nightPromptActions}>
                   <button
@@ -809,7 +911,7 @@ export default function StoryPlayer({
                     onClick={() => {
                       setMode(NIGHT_THEME);
                       setNightPromptDismissedInStore(true);
-                      setShowNightPrompt(false);
+                      closeNightPrompt();
                     }}
                   >
                     好呀
@@ -819,7 +921,7 @@ export default function StoryPlayer({
                     className={styles.nightPromptNo}
                     onClick={() => {
                       setNightPromptDismissedInStore(true);
-                      setShowNightPrompt(false);
+                      closeNightPrompt();
                     }}
                   >
                     不用了

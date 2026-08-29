@@ -527,6 +527,7 @@
 }
 
 .timerOpt {
+  min-height: 44px;
   padding: 9px 18px;
   border-radius: var(--radius-xs);
   color: #fff;
