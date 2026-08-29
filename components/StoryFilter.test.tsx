@@ -87,4 +87,24 @@ describe("StoryFilter", () => {
     expect(html).toContain("搜尋「賽車」");
     expect(html).toContain("ep-11");
   });
+
+  test("找故事下拉不另放車車／主題副標", () => {
+    const html = renderToStaticMarkup(
+      <StoryFilter
+        stories={stories}
+        vehicles={["警車", "賽車"]}
+        tags={["合作", "勇氣"]}
+        featuredStorySlug="ep-12"
+        vehicle={null}
+        tag={null}
+        query=""
+      />,
+    );
+    expect(html).toContain("找故事");
+    expect(html).toContain('aria-label="選擇車車"');
+    expect(html).toContain('aria-label="選擇主題"');
+    expect(html).not.toContain("filter-vehicle-label");
+    expect(html).not.toContain("filter-topic-label");
+    expect(html).not.toMatch(/fieldLabel|>車車<|>主題</);
+  });
 });

@@ -53,6 +53,12 @@
 
 角色 Logo 系統已移除，程式碼保存於 tag `archive/character-logo-system`。
 
+### 本輪已完成（2026-08-29）
+
+| ID | 說明 |
+|----|------|
+| polish(stories): 找故事拿掉「車車」「主題」欄位副標 | 見本 commit |
+
 ### 本輪已完成（2026-08-28）
 
 | ID | 說明 |

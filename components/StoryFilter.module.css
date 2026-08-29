@@ -30,17 +30,7 @@
 }
 
 .filterField {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
   min-width: 0;
-}
-
-.fieldLabel {
-  font-size: var(--fs-meta);
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  color: var(--ink-soft);
 }
 
 .footer {

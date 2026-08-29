@@ -76,9 +76,6 @@ export function StoryFilter({
 
         <div className={styles.filterGrid}>
           <div className={styles.filterField}>
-            <span className={styles.fieldLabel} id="filter-vehicle-label">
-              車車
-            </span>
             <VehicleSelect
               vehicles={vehicles}
               value={vehicle}
@@ -86,9 +83,6 @@ export function StoryFilter({
             />
           </div>
           <div className={styles.filterField}>
-            <span className={styles.fieldLabel} id="filter-topic-label">
-              主題
-            </span>
             <TopicSelect tags={tags} value={tag} onChange={updateTag} />
           </div>
         </div>

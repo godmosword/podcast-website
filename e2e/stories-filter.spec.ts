@@ -80,4 +80,14 @@ test.describe("/stories 可分享篩選", () => {
     const href = await canonical.getAttribute("href");
     expect(href).not.toContain("vehicle=");
   });
+
+  test("找故事不顯示車車／主題欄位副標", async ({ page }) => {
+    await page.goto("/stories");
+    const bar = page.getByRole("region", { name: "找故事" });
+    await expect(bar.getByRole("heading", { name: "找故事" })).toBeVisible();
+    await expect(bar.getByRole("button", { name: "選擇車車" })).toBeVisible();
+    await expect(bar.getByRole("button", { name: "選擇主題" })).toBeVisible();
+    await expect(bar.getByText("車車", { exact: true })).toHaveCount(0);
+    await expect(bar.getByText("主題", { exact: true })).toHaveCount(0);
+  });
 });

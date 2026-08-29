@@ -288,6 +288,6 @@ Hero 圖走 `images.edit` + `public/characters/` 定裝照參考圖，與單集�
 2. **LatestHero** 最新一集
    LatestHero 說明最多 3 行（`StoryCard` 桌面 2 行、≤480px 3 行）；來源摘要於 Apple／SoundOn ingest 階段即截斷至約 68 字（CJK），clamp 為保險層。
 3. **FavoritesSection** 精選
-4. **StoryFilter** 找故事（車種／主題篩選）
+4. **StoryFilter** 找故事（車種／主題下拉，不另放「車車」「主題」欄位副標；觸發鈕 `aria-label` 已足夠）
 
 Landing segment hero 生圖：`npm run generate:landing-art -- --dry-run`（橫版）；直版 `--portrait`；approve 後覆蓋 `public/landing/`。
