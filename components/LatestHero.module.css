@@ -30,6 +30,10 @@
   }
 }
 
+.info {
+  min-width: 0;
+}
+
 .topRow {
   display: flex;
   align-items: center;
@@ -104,6 +108,37 @@
      此處硬寫 1.15rem 會蓋掉 token，等於抵銷字階升級。 */
   .summary {
     font-size: var(--fs-label);
+  }
+}
+
+/* 桌面把封面與文案並置，保留插畫主導但讓最新集更快被理解。 */
+@media (min-width: 768px) {
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(200px, 0.8fr);
+    align-items: center;
+    gap: var(--space-6);
+  }
+
+  .topRow {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+    margin-bottom: 0;
+  }
+
+  .coverWrap {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    margin-bottom: 0;
+  }
+
+  .info {
+    grid-column: 2;
+    grid-row: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 

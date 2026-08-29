@@ -95,16 +95,6 @@ export default async function StoryDetailPage({
         <div className={styles.hero}>
           <h1 className={styles.title}>{story.title}</h1>
 
-          <section
-            className={styles.introSection}
-            aria-labelledby="story-intro-heading"
-          >
-            <h2 id="story-intro-heading" className={styles.sectionHeading}>
-              本集介紹
-            </h2>
-            <p className={styles.definition}>{definitionSummary}</p>
-          </section>
-
           <div className={styles.coverWrap} style={{ borderColor: story.color }}>
             <StoryCoverMorph slug={story.slug}>
               <StoryImage
@@ -153,6 +143,16 @@ export default async function StoryDetailPage({
             <Link href="/for-parents#co-listen">家長共讀與延伸 →</Link>
           </p>
         ) : null}
+
+        <section
+          className={styles.introSection}
+          aria-labelledby="story-intro-heading"
+        >
+          <h2 id="story-intro-heading" className={styles.sectionHeading}>
+            本集介紹
+          </h2>
+          <p className={styles.definition}>{definitionSummary}</p>
+        </section>
 
         <section className={styles.contentSection} aria-labelledby="outline-heading">
           <h2 id="outline-heading" className={styles.sectionHeading}>

@@ -154,8 +154,8 @@
   }
 
   .thumbWrap {
-    width: 80px;
-    height: 80px;
+    width: 88px;
+    height: 88px;
   }
 
   /* 手機密度：較 --fs-h3 略收（不低於原 1.1rem，DESIGN.md 只加不減）。
