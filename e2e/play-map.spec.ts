@@ -79,7 +79,7 @@ test.describe("親子遊樂地圖", () => {
     await selectCoveredCity(page);
     await expect(page.getByRole("button", { name: "看地圖" })).toBeVisible();
     await expect(page.getByRole("button", { name: "免費" })).toBeVisible();
-    await expect(resultSummary(page, "全台")).toBeVisible();
+    await expect(resultSummary(page, "台北市")).toBeVisible();
 
     const cardsPanel = page.locator("#play-map-panel-cards");
     const firstCardButton = cardsPanel
@@ -316,7 +316,9 @@ test.describe("親子遊樂地圖", () => {
     await searchArea.click();
     await page.getByRole("button", { name: "返回名單" }).click();
     await expect(resultSummary(page, "這個區域")).toBeVisible();
-    await expect(page.getByRole("button", { name: "看全台" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "看全台", exact: true }),
+    ).toBeVisible();
   });
 
   test("桌面首屏不載入 Leaflet，看地圖後才並排（效能回歸）", async ({ page }) => {
@@ -389,15 +391,23 @@ test.describe("親子遊樂地圖", () => {
     await openMap(page);
     await expect(page.getByRole("button", { name: "看地圖" })).toHaveCount(0);
 
-    const card = page.locator("#play-map-panel-cards li:not([hidden])").first();
-    const placeId = await card.getAttribute("id");
+    // Individual markers intentionally appear only after zooming past the
+    // spatial-cluster threshold. Keep this test about the card/marker
+    // contract, not the initial zoom level.
+    const zoomIn = page.locator(".leaflet-control-zoom-in");
+    for (let i = 0; i < 6; i += 1) {
+      if (await page.locator(".playMapMarkerButton").count()) break;
+      await zoomIn.click();
+      await page.waitForTimeout(150);
+    }
+    const marker = page.locator(".playMapMarkerButton").first();
+    await expect(marker).toBeVisible({ timeout: 15_000 });
+    const placeId = await marker.getAttribute("data-playground-id");
     expect(placeId).toBeTruthy();
     if (!placeId) return;
+    const card = page.locator(`#${placeId}`);
+    await expect(card).toBeVisible();
     await expect(card.getByRole("link", { name: /導航前往/ })).toBeVisible();
-    const marker = page.locator(
-      `.playMapMarkerButton[data-playground-id="${placeId}"]`,
-    );
-    await expect(marker).toBeVisible({ timeout: 15_000 });
 
     await card.locator("article").hover();
     await expect(marker).toHaveAttribute("data-hovered", "true");
