@@ -31,6 +31,8 @@ describe("SiteFooter", () => {
     expect(html).not.toContain("無廣告");
     expect(html).not.toContain("不收孩子帳號");
     expect(html).not.toContain("進度留在這台裝置");
+    expect(html).not.toContain("點播放鈕");
+    expect(html).not.toContain("給家長：");
     expect(html).not.toContain("去遊樂園玩");
     expect(html).not.toContain("小遊戲 · 免下載");
     expect(html).not.toContain('href="/games"');

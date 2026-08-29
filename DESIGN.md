@@ -238,7 +238,7 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 | `StoryMeta` | EP / 時長（標註） / 車種 chip |
 | `StoryProgressBadge` | 「已聽完」星章，貼封面右上角。語彙與宇宙地圖一致（`⭐` + `aria-label="已聽完"`）；只表達聽完單一狀態，不做「聽到一半」（progress store 的 `continue` 為全站單一欄位，標記會無預警消失） |
 | `StoryPlayer` | 全螢幕黑底、字幕底板、底部控制列 |
-| `SiteFooter` | 家長說明 + 平台連結；不放遊樂園入口（`/games` 走導覽）、不放安心訊號列；`ConnectHub` 區塊用 `--hairline` + `--elev-1`（頂欄膠囊白邊未改） |
+| `SiteFooter` | 平台連結；不放「給家長：點播放鈕…」導讀、不放遊樂園入口（`/games` 走導覽）、不放安心訊號列；`ConnectHub` 區塊用 `--hairline` + `--elev-1`（頂欄膠囊白邊未改）。親子遊樂地圖仍可傳 `parentNote` |
 | `GamePageShell` | 街機兩款遊戲共同外框，負責返回導覽、可及性與資產預載 |
 | `ColoringPageShell` | 繪本著色活動外框（不掛 GameKit） |
 | `GameChrome` | 遊戲內暫停、音效與設定對話框 |
@@ -270,7 +270,7 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 
 ### Landing Hub（`/`）
 
-Storyline 式**全螢幕分段捲動**：每段一張滿版黏土 hero（桌面 `segment-{id}.jpg` 16:9；行動 ≤768px `segment-{id}-portrait.jpg` 9:16），大圖主導 + 底部漸層遮罩 + 左下分區 CTA。**不**顯示段編號（如 01/04）。段標題仍視覺隱藏（CSS module `titleHidden`，給輔助科技／`aria-labelledby`），不疊在美術上；可見 CTA 為長句段名（本輪 Landing 例外，可超過「CTA ≤ 6 字」）；`href` 不變。分區 CTA 走**深色玻璃 ghost**（`min-height: 48px`、`rgba(0,0,0,0.32)`），**非**橘色實心 pill；段內 `.next` 往下箭點視覺降權（極淡深色玻璃底）。不放「聽最新一集」播放直達鈕。首段 GEO 導言仍用全域 `.sr-only`。
+Storyline 式**全螢幕分段捲動**：每段一張滿版黏土 hero（桌面 `segment-{id}.jpg` 16:9；行動 ≤768px `segment-{id}-portrait.jpg` 9:16），大圖主導 + 底部漸層遮罩 + 左下分區 CTA。**不**顯示段編號（如 01/04）。段標題仍視覺隱藏（CSS module `titleHidden`，給輔助科技／`aria-labelledby`），不疊在美術上；可見 CTA 為長句段名（本輪 Landing 例外，可超過「CTA ≤ 6 字」）；`href` 不變。分區 CTA 走**深色玻璃 ghost**（`min-height: 48px`、`rgba(0,0,0,0.32)`），字級桌面 `--fs-h3`、≤768 `--fs-h4`（不再縮成 control／label），**非**橘色實心 pill；段內 `.next` 往下箭點視覺降權（極淡深色玻璃底）。不放「聽最新一集」播放直達鈕。首段 GEO 導言仍用全域 `.sr-only`。
 
 1. **SiteNavBar**（全站橘色頂欄 + 訂閱 CTA）
    - **桌面（≥980px）**懸浮膠囊主列：全部故事／角色圖鑑／遊樂園／宇宙地圖／**親子景點**／**親子指南**。「親子景點」直連 `/for-parents/play-map`（路徑不另開頂層路由）；「親子指南」直連 `/for-parents`。無「更多」下拉。Threads 育兒分享仍由 `/for-parents` 頁內「育兒小筆記」外連卡承接（Threads 缺席時整卡不渲染）。主題切換與訂閱膠囊常駐。**成長主題（`/topic`）不佔導覽**（屬家長取向且與 /stories 篩選重疊），頁面仍可直達。主列 6 項時維持 980 斷點與既有密度調整，不縮觸控區。

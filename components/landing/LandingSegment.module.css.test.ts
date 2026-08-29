@@ -36,6 +36,14 @@ describe("LandingSegment.module.css touch targets", () => {
     expect(ctaBlock).not.toMatch(/rgba\(255,\s*255,\s*255,\s*0\.16\)/);
   });
 
+  it("CTA 字級為標題階、不用內文／標籤字", () => {
+    const ctaBlock = css.match(/\.cta\s*\{[\s\S]*?\}/)?.[0] ?? "";
+    expect(ctaBlock).toMatch(/font-size:\s*var\(--fs-h3\)/);
+    expect(ctaBlock).not.toMatch(/--fs-body/);
+    expect(css).not.toMatch(/\.cta\s*\{[^}]*font-size:\s*var\(--fs-label\)/);
+    expect(css).not.toMatch(/\.cta\s*\{[^}]*font-size:\s*var\(--fs-control\)/);
+  });
+
   it("深色玻璃 CTA／往下箭 focus 用 var(--on-dark) outline", () => {
     expect(css).toMatch(/\.cta:focus-visible/);
     expect(css).toMatch(/\.next:focus-visible/);
