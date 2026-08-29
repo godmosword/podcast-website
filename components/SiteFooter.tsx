@@ -2,7 +2,6 @@ import Link from "next/link";
 import ConnectHub from "@/components/ConnectHub";
 import { contactHref, isContactExternal } from "@/lib/contact";
 import { PARENT_TRUST_TEXT } from "@/components/ParentTrustStrip";
-import PlaygroundHubBadge from "@/components/games/PlaygroundHubBadge";
 import Doodle from "@/components/decor/Doodle";
 import decor from "@/components/decor/decor.module.css";
 import styles from "./SiteFooter.module.css";
@@ -12,7 +11,7 @@ const SUPPORT_URL = "";
 
 type SiteFooterProps = {
   compact?: boolean;
-  /** 首頁：遊樂園入口置於頁尾訂閱區上方 */
+  /** 首頁：較緊的頁尾間距（遊樂園改走導覽，不再放頁尾入口） */
   layout?: "default" | "home";
   /** 非首頁：頁尾是否顯示收聽平台 */
   showPlatformSubscribe?: boolean;
@@ -66,17 +65,6 @@ export default function SiteFooter({
       ) : null}
 
       <div className={styles.footerConnect}>
-        {isHome && (
-          <Link href="/games" className={`${styles.playgroundLink} press-squash`}>
-            <span className={styles.playgroundIcon} aria-hidden>
-              <PlaygroundHubBadge size={32} />
-            </span>
-            <span className={styles.playgroundCopy}>
-              <span className={styles.playgroundTitle}>去遊樂園玩</span>
-            </span>
-          </Link>
-        )}
-
         <ConnectHub
           id={showPlatforms ? "connect" : undefined}
           showPlatforms={showPlatforms}

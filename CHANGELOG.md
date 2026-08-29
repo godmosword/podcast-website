@@ -6,6 +6,7 @@
 
 ### Changed
 
+- **頁尾拿掉遊樂園入口**：首頁／全部故事 footer 不再放「去遊樂園玩」；遊樂園仍從頂欄與漢堡進。**未改** Apple sync workflow。
 - **找故事拿掉欄位副標**：篩選列不再顯示「車車」「主題」小標；下拉觸發鈕仍有 `aria-label`。**未改** Apple sync workflow。
 - **單集摘要 ingest 截短**：Apple／SoundOn ingest 截掉宣傳尾段（IG／五星／linktr.ee／👶 家長註），摘要約 68 字；`LatestHero` 說明最多 3 行。**未改** Apple sync workflow。
 - **行動漢堡拿掉搜尋列**：抽屜只留分區連結；故事搜尋仍在 `/stories`。**未改** Apple sync workflow。

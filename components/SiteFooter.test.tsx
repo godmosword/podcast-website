@@ -30,8 +30,9 @@ describe("SiteFooter", () => {
     expect(html).not.toContain("隱私說明");
     expect(html).toContain("無廣告");
     expect(html).toContain("不收孩子帳號");
-    expect(html).toContain("去遊樂園玩");
+    expect(html).not.toContain("去遊樂園玩");
     expect(html).not.toContain("小遊戲 · 免下載");
+    expect(html).not.toContain('href="/games"');
   });
 
   test("NEXT_PUBLIC_CONTACT_FORM_URL 設定時聯絡我們為外連表單", async () => {

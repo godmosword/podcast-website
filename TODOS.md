@@ -57,7 +57,8 @@
 
 | ID | 說明 |
 |----|------|
-| polish(stories): 找故事拿掉「車車」「主題」欄位副標 | 見本 commit |
+| polish(stories): 找故事拿掉「車車」「主題」欄位副標 | `1f6bfc5` |
+| polish(footer): 頁尾拿掉「去遊樂園玩」入口 | 見本 commit |
 
 ### 本輪已完成（2026-08-28）
 
