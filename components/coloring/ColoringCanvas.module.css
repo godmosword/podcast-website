@@ -13,15 +13,15 @@
   min-height: 44px;
   padding: 0.35rem 0.75rem;
   border-radius: var(--radius-pill);
-  border: 2px solid color-mix(in srgb, #2a3a4a 20%, transparent);
-  background: #fff;
+  border: 2px solid color-mix(in srgb, var(--coloring-ink) 20%, transparent);
+  background: var(--coloring-ui-surface);
   font-weight: 700;
   cursor: pointer;
   color: inherit;
 }
 
 .backPage:focus-visible {
-  outline: 3px solid #e85d4c;
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -41,9 +41,9 @@
   border-radius: var(--radius-pill);
   font-weight: 800;
   cursor: pointer;
-  color: var(--cta-warm-fg, #4a2e14);
-  background: linear-gradient(180deg, var(--cta-warm-from, #ffd866), var(--cta-warm-to, #f0b84a));
-  box-shadow: 0 3px 0 color-mix(in srgb, var(--cta-warm-to, #f0b84a) 70%, #4a2e14);
+  color: var(--coloring-accent-fg);
+  background: var(--coloring-accent);
+  box-shadow: 0 3px 0 var(--coloring-accent-shadow);
 }
 
 .doneBtn:disabled {
@@ -52,7 +52,7 @@
 }
 
 .doneBtn:focus-visible {
-  outline: 3px solid #e85d4c;
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -63,16 +63,16 @@
   display: grid;
   place-items: center;
   padding: 1.25rem;
-  background: color-mix(in srgb, #fffaf2 88%, transparent);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
 }
 
 .guide {
   margin: 0;
   padding: 0.7rem 0.85rem;
-  border: 2px solid color-mix(in srgb, #7bc47f 28%, transparent);
+  border: 2px solid color-mix(in srgb, var(--coloring-grass) 28%, transparent);
   border-radius: var(--radius-sm);
-  color: color-mix(in srgb, #2a3a4a 78%, transparent);
-  background: color-mix(in srgb, #fff 78%, #dff0e4);
+  color: color-mix(in srgb, var(--coloring-ink) 78%, transparent);
+  background: color-mix(in srgb, var(--coloring-ui-surface) 78%, var(--coloring-grass));
   font-size: var(--fs-label);
   font-weight: 700;
   line-height: 1.45;
@@ -82,10 +82,10 @@
   display: grid;
   gap: 0.15rem;
   padding: 0.65rem 0.8rem;
-  border: 2px solid color-mix(in srgb, #f0b84a 30%, transparent);
+  border: 2px solid color-mix(in srgb, var(--coloring-accent) 30%, transparent);
   border-radius: var(--radius-sm);
-  color: #5d4a67;
-  background: color-mix(in srgb, #fff 88%, #fff2c4);
+  color: var(--coloring-ink);
+  background: color-mix(in srgb, var(--coloring-ui-surface) 88%, var(--coloring-accent));
   font-size: var(--fs-label);
   line-height: 1.4;
 }
@@ -95,8 +95,8 @@
 }
 
 .completionHint[data-tone="rich"] {
-  border-color: color-mix(in srgb, #7bc47f 42%, transparent);
-  background: color-mix(in srgb, #fff 86%, #dff0e4);
+  border-color: color-mix(in srgb, var(--coloring-grass) 42%, transparent);
+  background: color-mix(in srgb, var(--coloring-ui-surface) 86%, var(--coloring-grass));
 }
 
 .stage {
@@ -106,8 +106,9 @@
   aspect-ratio: 1;
   border-radius: var(--radius-md);
   overflow: hidden;
-  background: #fff;
-  box-shadow: 0 10px 28px color-mix(in srgb, #2a3a4a 12%, transparent);
+  /* Keep the artwork surface white so the line art and palette retain their intended colors. */
+  background: var(--coloring-canvas-surface);
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--coloring-ink) 12%, transparent);
   touch-action: none;
 }
 
@@ -123,8 +124,8 @@
 .cursorRing {
   position: absolute;
   display: none;
-  border: 2px solid color-mix(in srgb, #2a3a4a 75%, transparent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, #fff 85%, transparent);
+  border: 2px solid color-mix(in srgb, var(--coloring-ink) 75%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--coloring-canvas-surface) 85%, transparent);
   border-radius: var(--radius-circle);
   transform: translate(-50%, -50%);
   pointer-events: none;
@@ -136,11 +137,11 @@
   aspect-ratio: 1;
   padding: 0;
   border-radius: var(--radius-sm);
-  border: 3px solid #fff;
-  box-shadow: 0 4px 14px color-mix(in srgb, #2a3a4a 25%, transparent);
+  border: 3px solid var(--coloring-canvas-surface);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--coloring-ink) 25%, transparent);
   overflow: hidden;
   cursor: pointer;
-  background: #fff;
+  background: var(--coloring-canvas-surface);
 }
 
 .preview img {
@@ -151,7 +152,7 @@
 }
 
 .preview:focus-visible {
-  outline: 3px solid #e85d4c;
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -181,7 +182,7 @@
   text-align: center;
   font-size: var(--fs-label);
   font-weight: 700;
-  color: #b3402f;
+  color: var(--coloring-accent);
 }
 
 .loading {
@@ -190,6 +191,6 @@
   display: grid;
   place-items: center;
   margin: 0;
-  background: color-mix(in srgb, #fff 80%, transparent);
+  background: color-mix(in srgb, var(--coloring-canvas-surface) 80%, transparent);
   font-weight: 700;
 }

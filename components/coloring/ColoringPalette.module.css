@@ -10,9 +10,9 @@
   width: 44px;
   height: 44px;
   border-radius: var(--radius-circle);
-  border: 3px solid color-mix(in srgb, #2a3a4a 18%, transparent);
+  border: 3px solid color-mix(in srgb, var(--coloring-ink) 18%, transparent);
   cursor: pointer;
-  box-shadow: 0 2px 0 color-mix(in srgb, #2a3a4a 12%, transparent);
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--coloring-ink) 12%, transparent);
   transition: transform 120ms ease;
 }
 
@@ -21,13 +21,13 @@
 }
 
 .swatch:focus-visible {
-  outline: 3px solid #2a3a4a;
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
 .selected {
-  border-color: #2a3a4a;
-  box-shadow: 0 0 0 3px #fff, 0 0 0 5px #2a3a4a;
+  border-color: var(--coloring-ink);
+  box-shadow: 0 0 0 3px var(--coloring-ui-surface), 0 0 0 5px var(--coloring-ink);
 }
 
 @media (prefers-reduced-motion: reduce) {

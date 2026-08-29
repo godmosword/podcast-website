@@ -26,9 +26,9 @@
   min-width: 44px;
   padding: 0.45rem 0.85rem;
   border-radius: var(--radius-pill);
-  border: 2px solid color-mix(in srgb, #2a3a4a 22%, transparent);
-  background: #fff;
-  color: #2a3a4a;
+  border: 2px solid color-mix(in srgb, var(--coloring-ink) 22%, transparent);
+  background: var(--coloring-ui-surface);
+  color: var(--coloring-ink);
   font-weight: 700;
   font-size: var(--fs-control);
   cursor: pointer;
@@ -40,20 +40,20 @@
 }
 
 .btn:focus-visible {
-  outline: 3px solid #e85d4c;
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
 .active {
-  background: #2a3a4a;
-  color: #fff;
-  border-color: #2a3a4a;
+  background: var(--coloring-ink);
+  color: var(--bg);
+  border-color: var(--coloring-ink);
 }
 
 .primary {
-  background: #e85d4c;
-  border-color: #e85d4c;
-  color: #fff;
+  background: var(--coloring-accent);
+  border-color: var(--coloring-accent);
+  color: var(--coloring-accent-fg);
 }
 
 @media (max-width: 640px) {
@@ -65,7 +65,7 @@
     -webkit-overflow-scrolling: touch;
     padding: 0.25rem 0.4rem 0.5rem;
     margin-inline: -0.4rem;
-    scrollbar-color: #2a3a4a #fff;
+    scrollbar-color: var(--coloring-ink) var(--coloring-ui-surface);
     scrollbar-width: thin;
   }
 
@@ -76,7 +76,7 @@
 
   .group + .group {
     padding-left: 0.5rem;
-    border-left: 1px solid color-mix(in srgb, #2a3a4a 18%, transparent);
+    border-left: 1px solid color-mix(in srgb, var(--coloring-ink) 18%, transparent);
   }
 
   .btn {
@@ -86,7 +86,7 @@
   .scrollHint {
     display: block;
     margin: 0.15rem 0 0;
-    color: color-mix(in srgb, #2a3a4a 70%, transparent);
+    color: color-mix(in srgb, var(--coloring-ink) 70%, transparent);
     font-size: 0.75rem;
     font-weight: 700;
     text-align: right;

@@ -1,16 +1,27 @@
 .main {
-  --coloring-ink: #2a3a4a;
-  --coloring-paper: #fff8f0;
-  --coloring-sky: #7ec8e8;
-  --coloring-grass: #7bc47f;
-  --coloring-accent: #e85d4c;
+  /* UI chrome follows the site theme; the canvas and inline swatches remain artwork. */
+  --coloring-ink: var(--ink);
+  --coloring-paper: var(--card);
+  --coloring-sky: var(--c-sky);
+  --coloring-grass: var(--c-mint);
+  --coloring-accent: var(--support-from);
+  --coloring-accent-fg: var(--support-fg);
+  --coloring-accent-shadow: color-mix(in srgb, var(--support-to) 70%, var(--ink));
+  --coloring-ui-surface: var(--card);
+  --coloring-ui-surface-strong: var(--card-2);
+  --coloring-canvas-surface: #fff;
   min-height: 100dvh;
   padding: 0.75rem 1rem 1.5rem;
   color: var(--coloring-ink);
   background:
     radial-gradient(ellipse 80% 50% at 10% 0%, color-mix(in srgb, var(--coloring-sky) 35%, transparent), transparent 55%),
     radial-gradient(ellipse 70% 45% at 90% 100%, color-mix(in srgb, var(--coloring-grass) 28%, transparent), transparent 50%),
-    linear-gradient(165deg, #fff8f0 0%, #e8f4fc 48%, #dff0e4 100%);
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--coloring-paper) 90%, var(--coloring-sky) 10%) 0%,
+      color-mix(in srgb, var(--bg) 78%, var(--coloring-sky) 22%) 48%,
+      color-mix(in srgb, var(--bg) 80%, var(--coloring-grass) 20%) 100%
+    );
 }
 
 .skip {
@@ -19,7 +30,7 @@
   top: 0;
   z-index: 10;
   padding: 0.5rem 0.75rem;
-  background: #fff;
+  background: var(--coloring-ui-surface);
   color: var(--coloring-ink);
 }
 
@@ -44,7 +55,7 @@
 }
 
 .back:focus-visible {
-  outline: 3px solid var(--coloring-accent);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
   border-radius: var(--radius-xs);
 }

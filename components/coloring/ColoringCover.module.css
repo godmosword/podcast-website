@@ -11,10 +11,10 @@
   aspect-ratio: 4 / 3;
   border-radius: 0;
   overflow: hidden;
-  background: color-mix(in srgb, var(--coloring-sky, #7ec8e8) 22%, #fff8f0);
+  background: color-mix(in srgb, var(--coloring-sky) 22%, var(--coloring-paper));
   box-shadow:
-    0 1px 0 color-mix(in srgb, #2a3a4a 8%, transparent),
-    0 18px 36px color-mix(in srgb, #2a3a4a 12%, transparent);
+    0 1px 0 color-mix(in srgb, var(--coloring-ink) 8%, transparent),
+    0 18px 36px color-mix(in srgb, var(--coloring-ink) 12%, transparent);
   animation: cover-rise 520ms ease both;
 }
 
@@ -29,7 +29,7 @@
   z-index: 1;
   width: clamp(3.2rem, 14vw, 4.5rem);
   height: auto;
-  color: color-mix(in srgb, #2a3a4a 55%, transparent);
+  color: color-mix(in srgb, var(--coloring-ink) 55%, transparent);
   pointer-events: none;
   opacity: 0.72;
 }
@@ -59,7 +59,7 @@
   font-size: var(--fs-meta);
   font-weight: 800;
   letter-spacing: 0.06em;
-  color: color-mix(in srgb, var(--coloring-ink, #2a3a4a) 62%, transparent);
+  color: color-mix(in srgb, var(--coloring-ink) 62%, transparent);
 }
 
 .title {
@@ -68,7 +68,7 @@
   font-weight: 900;
   letter-spacing: 0.02em;
   line-height: 1.15;
-  color: var(--coloring-ink, #2a3a4a);
+  color: var(--coloring-ink);
 }
 
 .lead {
@@ -77,7 +77,7 @@
   font-size: var(--fs-h4);
   font-weight: 600;
   line-height: 1.5;
-  color: color-mix(in srgb, var(--coloring-ink, #2a3a4a) 78%, transparent);
+  color: color-mix(in srgb, var(--coloring-ink) 78%, transparent);
 }
 
 .cta {
@@ -89,28 +89,28 @@
   padding: 0.7rem 1.35rem;
   border: none;
   border-radius: var(--radius-sm);
-  background: var(--coloring-accent, #e85d4c);
-  color: #fff;
+  background: var(--coloring-accent);
+  color: var(--coloring-accent-fg);
   font-size: var(--fs-h4);
   font-weight: 800;
   letter-spacing: 0.02em;
   cursor: pointer;
-  box-shadow: 0 6px 0 color-mix(in srgb, #c44536 70%, #2a3a4a);
+  box-shadow: 0 6px 0 var(--coloring-accent-shadow);
   transition: transform 160ms ease, box-shadow 160ms ease;
 }
 
 .cta:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 0 color-mix(in srgb, #c44536 70%, #2a3a4a);
+  box-shadow: 0 8px 0 var(--coloring-accent-shadow);
 }
 
 .cta:active {
   transform: translateY(2px);
-  box-shadow: 0 2px 0 color-mix(in srgb, #c44536 70%, #2a3a4a);
+  box-shadow: 0 2px 0 var(--coloring-accent-shadow);
 }
 
 .cta:focus-visible {
-  outline: 3px solid var(--coloring-accent, #e85d4c);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 3px;
 }
 
@@ -148,6 +148,6 @@
   .cta:hover,
   .cta:active {
     transform: none;
-    box-shadow: 0 6px 0 color-mix(in srgb, #c44536 70%, #2a3a4a);
+    box-shadow: 0 6px 0 var(--coloring-accent-shadow);
   }
 }
