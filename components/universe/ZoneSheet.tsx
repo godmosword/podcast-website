@@ -365,7 +365,11 @@ export default function ZoneSheet({
                           trackUniverseSheetLink(zone.id, link.href)
                         }
                         {...(link.external
-                          ? { target: "_blank", rel: "noopener noreferrer" }
+                          ? {
+                              target: "_blank",
+                              rel: "noopener noreferrer",
+                              "aria-label": `${link.label}（另開 YouTube）`,
+                            }
                           : {})}
                       >
                         <span className={styles.segmentEmoji} aria-hidden="true">

@@ -14,12 +14,14 @@ vi.mock("next/link", () => ({
     href,
     children,
     className,
+    "aria-label": ariaLabel,
   }: {
     href: string;
     children: React.ReactNode;
     className?: string;
+    "aria-label"?: string;
   }) => (
-    <a href={href} className={className}>
+    <a href={href} className={className} aria-label={ariaLabel}>
       {children}
     </a>
   ),
@@ -37,7 +39,6 @@ describe("LandingSegment", () => {
       <LandingSegment
         segment={segment}
         index={0}
-        total={4}
         nextAnchorId="segment-bedtime"
       />,
     );
@@ -54,14 +55,15 @@ describe("LandingSegment", () => {
       <LandingSegment
         segment={segment}
         index={0}
-        total={4}
         siteIntro={intro}
         nextAnchorId="segment-bedtime"
       />,
     );
     expect(html).not.toContain("聽最新一集");
     expect(html).not.toMatch(/\/play\?autoplay=1/);
-    expect(html).toContain("全部故事");
+    expect(html).toContain("車車遊樂園的故事");
+    expect(html).not.toContain("全部故事");
+    expect(html).not.toContain("01 / 04");
     expect(html).toContain("車車與遊樂園的故事");
     expect(html).toContain(intro);
     expect(html).toMatch(
@@ -72,7 +74,7 @@ describe("LandingSegment", () => {
     expect(html).not.toContain("5–10 分鐘");
   });
 
-  test("四段都不渲染播放直達，段標題視覺隱藏", async () => {
+  test("四段都不渲染播放直達，段標題視覺隱藏，無可見編號", async () => {
     const { default: LandingSegment } = await import("./LandingSegment");
     const segments = resolveLandingSegments();
     for (const [index, segment] of segments.entries()) {
@@ -80,16 +82,29 @@ describe("LandingSegment", () => {
         <LandingSegment
           segment={segment}
           index={index}
-          total={4}
           nextAnchorId="segment-clay"
         />,
       );
       expect(html).not.toContain("聽最新一集");
       expect(html).not.toContain("播一集睡前故事");
       expect(html).not.toMatch(/\/play\?autoplay=1/);
+      expect(html).not.toMatch(/0\d \/ 0\d/);
       expect(html).toContain(`id="${segment.anchorId}-title"`);
       expect(html).toMatch(/titleHidden/);
     }
   });
 
+  test("外連捏黏土 CTA 含另開視窗 aria-label", async () => {
+    const { default: LandingSegment } = await import("./LandingSegment");
+    const segment = resolveLandingSegments().find((s) => s.id === "clay")!;
+    const html = renderToStaticMarkup(
+      <LandingSegment
+        segment={segment}
+        index={2}
+        nextAnchorId="segment-health"
+      />,
+    );
+    expect(html).toContain('aria-label="好好玩的捏黏土（另開視窗）"');
+    expect(html).toContain("好好玩的捏黏土");
+  });
 });

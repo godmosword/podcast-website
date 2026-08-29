@@ -19,7 +19,7 @@ export default function LandingHub() {
   const segments = resolveLandingSegments();
   const navItems = segments.map((s) => ({
     anchorId: s.anchorId,
-    label: s.cta.label,
+    label: s.navLabel,
   }));
   const duduItems = segments.map((s) => ({
     anchorId: s.anchorId,
@@ -45,7 +45,6 @@ export default function LandingHub() {
             key={segment.id}
             segment={segment}
             index={index}
-            total={segments.length}
             siteIntro={index === 0 ? siteIntro : undefined}
             nextAnchorId={
               segments[index + 1]?.anchorId ??

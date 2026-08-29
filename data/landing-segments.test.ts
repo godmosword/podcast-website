@@ -79,4 +79,35 @@ describe("landing-segments", () => {
       expect(seg.play).toBeUndefined();
     }
   });
+
+  it("四段 CTA label、href、external 與 navLabel", () => {
+    expect(LANDING_SEGMENTS).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "stories",
+          cta: { label: "車車遊樂園的故事", href: "/stories" },
+          navLabel: "車車故事",
+        }),
+        expect.objectContaining({
+          id: "bedtime",
+          cta: { label: "數綿羊123．睡前故事", href: "/topic/睡前" },
+          navLabel: "睡前",
+        }),
+        expect.objectContaining({
+          id: "clay",
+          cta: {
+            label: "好好玩的捏黏土",
+            href: "https://www.youtube.com/playlist?list=PLVbyl20K8lOeuJ2ky6dEsmpew7xAxZDhF",
+            external: true,
+          },
+          navLabel: "捏黏土",
+        }),
+        expect.objectContaining({
+          id: "health",
+          cta: { label: "好習慣故事", href: "/topic/安全" },
+          navLabel: "好習慣",
+        }),
+      ]),
+    );
+  });
 });

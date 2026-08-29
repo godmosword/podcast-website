@@ -203,7 +203,7 @@ export function getCarParkLinks(): CarParkLink[] {
     return [
       {
         id: seg.id,
-        label: seg.cta.label,
+        label: seg.navLabel,
         href: seg.cta.href,
         external: seg.cta.external,
       },

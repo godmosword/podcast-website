@@ -6,6 +6,8 @@
 
 ### Changed
 
+- **Landing 刪段編號、CTA 改長句＋深色玻璃 ghost**：四段 hero 不再顯示 01/04；可見 CTA 改為長句段名（車車遊樂園的故事／數綿羊123．睡前故事／好好玩的捏黏土／好習慣故事），`href` 不變；SegmentNav 與宇宙地圖 `getCarParkLinks` 用 `navLabel` 短標。分區 CTA 改深色玻璃 ghost（48px、`rgba(0,0,0,0.32)`），非橘 pill；`.next` 往下箭點降權並加極淡深色底；深色玻璃 CTA／往下箭補 `focus-visible`（`--on-dark`）；宇宙地圖黏土外連 `aria-label`「另開 YouTube」。**未改** Apple sync workflow。
+- **去框 A′（stories／ConnectHub）**：`StoryCard`、`LatestHero` 等有封面卡移除盒子描邊與 1px 色環，改靠 `--elev-*`；無影像塊（`ConnectHub.block`、`StoryFilter.filterBar`）保留 `--hairline` + elevated surface。`SiteFooter`／`SiteNavBar` 膠囊白邊未動。**未改** Apple sync workflow。
 - **頁尾拿掉安心訊號列**：不再顯示「無廣告 · 不收孩子帳號 · …」；宇宙地圖／家長儀表的 ParentTrustStrip 仍在。**未改** Apple sync workflow。
 - **頁尾拿掉遊樂園入口**：首頁／全部故事 footer 不再放「去遊樂園玩」；遊樂園仍從頂欄與漢堡進。**未改** Apple sync workflow。
 - **找故事拿掉欄位副標**：篩選列不再顯示「車車」「主題」小標；下拉觸發鈕仍有 `aria-label`。**未改** Apple sync workflow。

@@ -16,11 +16,6 @@ export default function LatestHero({ story }: LatestHeroProps) {
     <Link
       href={`/story/${story.slug}`}
       className={styles.hero}
-      style={{
-        borderColor: `${story.color}33`,
-        // 色環走 CSS 變數，讓 elev 階梯回到 stylesheet（見 .hero / .hero:hover）。
-        ["--hero-ring" as string]: `${story.color}14`,
-      }}
     >
       <div className={styles.topRow}>
         <Ribbon color={story.color}>NEW · EP {story.ep}</Ribbon>

@@ -83,7 +83,7 @@ test.describe("public production smoke · mobile emulation", () => {
 
   test("mobile public navigation and story playback entry render", async ({ page }) => {
     await expectPublicRoute(page, "/");
-    await page.getByRole("link", { name: "全部故事 →" }).click();
+    await page.getByRole("link", { name: "車車遊樂園的故事 →" }).click();
     await expect(page).toHaveURL(/\/stories/);
     await expect(page.getByRole("heading", { name: "找故事" })).toBeVisible();
   });

@@ -5,11 +5,9 @@
   padding: var(--space-6);
   border-radius: var(--radius-xl);
   background: var(--surface-elevated);
-  border: 1px solid var(--hairline);
   color: inherit;
-  /* 精選最新集 elev-2：浮於下方 elev-1 列表卡之上（VIS-W3 建立層級）。
-     色環由 --hero-ring（inline）帶入。 */
-  box-shadow: var(--elev-2), 0 0 0 1px var(--hero-ring, transparent);
+  /* 精選最新集 elev-2：浮於下方 elev-1 列表卡之上（VIS-W3 建立層級）。 */
+  box-shadow: var(--elev-2);
   transition: transform var(--motion-press), box-shadow var(--motion-press),
     opacity var(--motion-press);
 }
@@ -28,7 +26,7 @@
   .hero:hover {
     transform: translateY(-2px);
     /* hover 升 elev-3；原 shadow-md 因 inline 覆蓋而永不生效，VIS-W3 修復。 */
-    box-shadow: var(--elev-3), 0 0 0 1px var(--hero-ring, transparent);
+    box-shadow: var(--elev-3);
   }
 }
 

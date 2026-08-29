@@ -11,8 +11,6 @@ import styles from "./LandingSegment.module.css";
 type LandingSegmentProps = {
   segment: ResolvedLandingSegment;
   index: number;
-  /** segment 總數（編號「01 / 04」用）。 */
-  total: number;
   /** 首段 answer-first 網站導言：視覺隱藏（sr-only），仍留在 SSR HTML 供 GEO／輔助科技。 */
   siteIntro?: string;
   /** 下一段錨點；最後一段指向 landing-foot（頁尾 snap pane）。 */
@@ -25,7 +23,6 @@ const FOOTER_ANCHOR = "landing-foot";
 export default function LandingSegment({
   segment,
   index,
-  total,
   siteIntro,
   nextAnchorId,
 }: LandingSegmentProps) {
@@ -117,10 +114,6 @@ export default function LandingSegment({
 
       <div className={styles.content}>
         <div className={styles.headline}>
-          <span
-            className={`${styles.index} scrollEnter scrollEnterStagger1`}
-            aria-hidden="true"
-          >{`0${index + 1} / 0${total}`}</span>
           <h2
             id={`${segment.anchorId}-title`}
             className={styles.titleHidden}
@@ -149,6 +142,11 @@ export default function LandingSegment({
           <Link
             href={segment.cta.href}
             className={segment.play ? styles.subscribeCta : styles.cta}
+            aria-label={
+              segment.cta.external
+                ? `${segment.cta.label}（另開視窗）`
+                : undefined
+            }
             {...(segment.cta.external
               ? { target: "_blank", rel: "noopener noreferrer" }
               : {})}

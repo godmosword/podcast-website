@@ -118,7 +118,6 @@ describe("首頁 siteIntro sr-only 同元素契約", () => {
       <LandingSegment
         segment={segment}
         index={0}
-        total={4}
         siteIntro={intro}
         nextAnchorId="segment-bedtime"
       />,

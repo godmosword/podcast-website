@@ -5,10 +5,9 @@
   gap: 14px;
   background: var(--surface-elevated);
   border-radius: var(--radius-xl);
-  border: 1px solid var(--hairline);
   padding: var(--space-4);
-  /* 列表卡 elev-1；色環由 --card-ring（inline）帶入。 */
-  box-shadow: var(--elev-1), 0 0 0 1px var(--card-ring, transparent);
+  /* 列表卡 elev-1；hover 升 elev-2。 */
+  box-shadow: var(--elev-1);
   transition: transform var(--motion-press), box-shadow var(--motion-press),
     opacity var(--motion-press);
 }
@@ -27,7 +26,7 @@
   .card:hover {
     transform: translateY(-2px);
     /* hover 升一階 elev-2（原 shadow-md 因 inline 覆蓋而永不生效，VIS-W3 修復）。 */
-    box-shadow: var(--elev-2), 0 0 0 1px var(--card-ring, transparent);
+    box-shadow: var(--elev-2);
   }
 }
 

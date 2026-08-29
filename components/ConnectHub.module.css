@@ -12,9 +12,13 @@
 .block {
   padding: 16px 18px 18px;
   border-radius: var(--radius-md);
-  background: linear-gradient(180deg, var(--card-2), var(--card));
   border: 1.5px solid var(--line);
-  box-shadow: var(--shadow-sm);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg-2) 12%, var(--card-2)),
+    var(--card)
+  );
+  box-shadow: var(--elev-1);
   text-align: center;
 }
 

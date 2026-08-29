@@ -59,7 +59,9 @@
 |----|------|
 | polish(stories): 找故事拿掉「車車」「主題」欄位副標 | `1f6bfc5` |
 | polish(footer): 頁尾拿掉「去遊樂園玩」入口 | `ac128f4` |
-| polish(footer): 頁尾拿掉安心訊號列 | 見本 commit |
+| polish(footer): 頁尾拿掉安心訊號列 | `ee80d3f` |
+| polish(landing): 刪 01/04、CTA 長句＋深色玻璃 ghost；宇宙短標 navLabel | 見本 commit |
+| polish(ui): 有封面卡去描邊；無影像塊留 hairline | 見本 commit |
 
 ### 本輪已完成（2026-08-28）
 

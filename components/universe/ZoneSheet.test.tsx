@@ -200,6 +200,29 @@ describe("ZoneSheet", () => {
     expect(html).not.toContain("想留一句話");
   });
 
+  it("car-park 黏土外連展開後 aria-label 告知另開 YouTube，內部連結不含", () => {
+    const zone = ZONES.find((item) => item.id === "car-park")!;
+    render(<ZoneSheet zone={zone} {...sheetProps} />);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "看看這座島有什麼" }),
+    );
+
+    const clayLink = screen.getByRole("link", {
+      name: "捏黏土（另開 YouTube）",
+    });
+    expect(clayLink).toBeTruthy();
+    expect(clayLink.textContent).toContain("捏黏土");
+
+    for (const link of getCarParkLinks()) {
+      if (link.external) continue;
+      const internalLink = screen.getByRole("link", { name: link.label });
+      expect(internalLink.getAttribute("aria-label") ?? "").not.toMatch(
+        /另開 YouTube/,
+      );
+    }
+  });
+
   it("展開「看看這座島有什麼」後列出全部地點，且精選地標優先排列", () => {
     const zone = ZONES.find((item) => item.id === "dino")!;
     const source = zoneById("dino")!;

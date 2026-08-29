@@ -10,7 +10,7 @@ Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範
 |------|------|
 | Clarity（清晰） | 字階分明、對比足夠、裝飾不搶內容 |
 | Deference（讓位） | UI 退讓給黏土插畫／故事封面 |
-| Depth（深度） | 柔陰影、半透明層、`--hairline`；不用厚塗鴉框 |
+| Depth（深度） | 柔陰影、`--elev-*` 高度階梯、半透明層；`--hairline` 用於分隔線**與無影像抬升塊**（`ConnectHub.block`、`StoryFilter.filterBar`）；有封面的內容卡（`StoryCard`／`LatestHero`）不用盒子描邊，靠 `--elev-*`。壓在影像上的 chrome 必須有**自身底色或描邊**（不得只靠 scrim）：Landing 分區 CTA 用深色玻璃 `rgba(0,0,0,0.32)`；SegmentNav dot 仍可留邊。鍵盤 focus 必須用淺色環（Landing `.cta`／`.next` 用 `var(--on-dark)` outline），不得只靠日間 `--focus-ring`（深墨） |
 | Consistency（一致） | 導覽、卡片、CTA、內容頁同一節奏 |
 | Feedback（回饋） | 輕 `scale(0.98)`／opacity；取消歪斜 rotate 與厚底影下沉 |
 | Aesthetic Integrity | 童趣靠插畫與色彩，不靠麥克筆描邊 |
@@ -86,7 +86,7 @@ Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範
 | `--c-lilac` | `#c5b3e6` |
 
 頁面背景為純白（`--bg`），四角極淡多彩柔光由獨立節點 `.site-backdrop`（`position: fixed`）繪製，內容包在 `.site-root` 內；**不在 `body::before` 上畫 gradient**，避免 iOS Safari 上 sticky／合成層白塊跑版。柔光飽和度刻意偏低。實作見 `app/globals.css`、`app/layout.tsx`。
-每則故事另有 `story.color`（hex），用於極淡色邊、CTA、播放鈕。
+每則故事另有 `story.color`（hex），用於 CTA、播放鈕（卡片本身不再用極淡色邊）。
 
 ### 夜間色票原則（暖夜靛）
 
@@ -128,7 +128,7 @@ meta `theme-color`（夜）對齊 `--bg`：`lib/theme.ts` 的 `NIGHT_THEME_COLOR
 
 ### 麥克筆式粗糙外框（已全站移除）
 - `RoughFrame` 與 `SvgDefs`（`#rough-1/2/3` 濾鏡）**已刪除**；`/games` 於 v0.2 收斂後不再是例外，全站無粗糙描邊。
-- 卡片一律 elevated surface + `--hairline`／極淡主題色邊（`story.color` 或 `--card-accent`）。
+- 卡片一律 elevated surface，靠 `--elev-*` 建立高度；**有封面**的內容卡（`StoryCard`／`LatestHero`）**無**盒子描邊；**無影像**抬升塊（`ConnectHub.block`、`StoryFilter.filterBar`）用 `--hairline` + elevated surface。
 - 若日後要恢復手繪描邊，須先在本節登記使用範圍與理由，不得直接復活死碼。
 
 ### 塗鴉散布
@@ -207,7 +207,7 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 - 相鄰互動元素 gap ≥ 8px（12px）；卡片 grid gap ≥ 12px。
 - section 垂直間距 mobile ≥ 24px；內文 line-height ≥ 1.5（標籤型小字豁免）。
 - 純文字段落 max-width ≤ 640px。
-- 文案密度：兒童動線頁不放超過一行的家長散文（家長說明歸戶 `/for-parents` 與 footer）；標題 ≤ 8 字、CTA ≤ 6 字。`/legal` 精簡不得刪改具法律效力語句。
+- 文案密度：兒童動線頁不放超過一行的家長散文（家長說明歸戶 `/for-parents` 與 footer）；標題 ≤ 8 字、CTA ≤ 6 字。Landing 四段分區 CTA 本輪改長句當可見段名（見首頁 IA），其餘兒童 CTA 仍 ≤6 字。`/legal` 精簡不得刪改具法律效力語句。
 - 卡片／hero 型摘要：可見上限 2–3 行，且**來源在 ingest 就截到行數對應的字數**（約 68 字 CJK，對齊 390px `--fs-label` 三行），`-webkit-line-clamp` 只是保險而非主要手段。理由：整卡為單一 `<a>` 時，摘要屬連結可及名稱，clamp 對螢幕閱讀器與分享文案（`lib/share-story.ts`）無效。摘要內不得夾帶宣傳／營運訴求（IG、五星好評、linktr.ee），這類文案歸戶 footer 與 `/for-parents`。clamp 區塊不得因此新增「展開更多」控制項（會在 `<a>` 內嵌套互動元素）。`data/apple-sync.defaults.json` 的 overrides **不要放 `summary`**，除非刻意凍結、繞過 RSS 清洗。
 - **字級（2026-08 起全面收斂）**：舊政策「既有硬寫僅在觸碰該宣告時順手換 token」結構上無法收斂——多數 CSS 行寫完就不會再被碰。字級改為按角色整批對到 `--fs-*`（見上表），不再等下次改到那一行。階梯用角色命名（`--fs-control` 而不是「0.95rem」），才擋得住之後再漂移。
 - **圓角（2026-08 起全面收斂）**：舊政策把圓角跟間距綁在「觸碰時順手換」。膠囊 `999px` 與圓形 `50%` 其實全站寫法一致，缺的是名字；小於 `--radius-sm` 的 6／8／10／12px 也沒有階。圓角改為整批對到 `--radius-*`（見上表）。不對稱多值（島嶼有機形、單邊膠囊）不拆 token。
@@ -216,7 +216,7 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 ## 互動
 
 - **按壓回饋**：`:active { transform: scale(0.98) }` 或微降 opacity；避免厚底影下沉與 hover 歪斜 rotate
-- **Focus**：`:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px }`；日間為主文字色，夜間為黃色。
+- **Focus**：`:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px }`；日間為主文字色，夜間為黃色。壓在影像上的深色玻璃 chrome 在元件內覆寫為 `var(--on-dark)` outline，不要改全域 token。
 - **動效 token**：`--motion-press`（按鈕）、`--motion-page`（翻頁淡入）；另見全域 `.press-squash`
 - **`prefers-reduced-motion: reduce`**：關閉吉祥物 bounce 等非必要動畫
 - **遊戲虛擬鍵 pointer capture（3–7 歲）**：`TouchControls`（`GridTouchButton`／`BarTouchButton`）與 BlockDrop 左右移鍵按下時 `setPointerCapture`；**手指滑出按鈕仍視為按住**，僅在 `pointerup`／`pointercancel`／`lostpointercapture` 放開（不再用 `pointerleave` 當放開）。契約測須 shim 並斷言 capture API。棋盤類（消消樂／方塊拖移層）同樣以 capture 避免粗指標跨格吞 tap。BlockDrop `HintChips` 長按路徑仍為既有 leave 放開（未納本輪）。
@@ -232,13 +232,13 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 | 元件 | 說明 |
 |------|------|
 | `SiteHeader` | 吉祥物 + 標題（首頁完整版 / 內頁精簡版） |
-| `StoryCard` | 封面、EP meta、elevated surface + 極淡主題色邊／柔陰影；摘要 clamp 桌面 2 行、≤480px 3 行 |
+| `StoryCard` | 封面、EP meta、elevated surface（`--elev-*`）；摘要 clamp 桌面 2 行、≤480px 3 行 |
 | `Chip` | 篩選與標籤 pill，`aria-pressed` |
 | `PlayButton` | 全寬 CTA，主題色底 |
 | `StoryMeta` | EP / 時長（標註） / 車種 chip |
 | `StoryProgressBadge` | 「已聽完」星章，貼封面右上角。語彙與宇宙地圖一致（`⭐` + `aria-label="已聽完"`）；只表達聽完單一狀態，不做「聽到一半」（progress store 的 `continue` 為全站單一欄位，標記會無預警消失） |
 | `StoryPlayer` | 全螢幕黑底、字幕底板、底部控制列 |
-| `SiteFooter` | 家長說明 + 平台連結；不放遊樂園入口（`/games` 走導覽）、不放安心訊號列 |
+| `SiteFooter` | 家長說明 + 平台連結；不放遊樂園入口（`/games` 走導覽）、不放安心訊號列；`ConnectHub` 區塊用 `--hairline` + `--elev-1`（頂欄膠囊白邊未改） |
 | `GamePageShell` | 街機兩款遊戲共同外框，負責返回導覽、可及性與資產預載 |
 | `ColoringPageShell` | 繪本著色活動外框（不掛 GameKit） |
 | `GameChrome` | 遊戲內暫停、音效與設定對話框 |
@@ -270,24 +270,24 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 
 ### Landing Hub（`/`）
 
-Storyline 式**全螢幕分段捲動**：每段一張滿版黏土 hero（桌面 `segment-{id}.jpg` 16:9；行動 ≤768px `segment-{id}-portrait.jpg` 9:16），大圖主導 + 底部漸層遮罩 + 左下分區 CTA。段標題視覺隱藏（CSS module `titleHidden`，給輔助科技／`aria-labelledby`），不疊在美術上；不放「聽最新一集」播放直達鈕。首段 GEO 導言仍用全域 `.sr-only`。
+Storyline 式**全螢幕分段捲動**：每段一張滿版黏土 hero（桌面 `segment-{id}.jpg` 16:9；行動 ≤768px `segment-{id}-portrait.jpg` 9:16），大圖主導 + 底部漸層遮罩 + 左下分區 CTA。**不**顯示段編號（如 01/04）。段標題仍視覺隱藏（CSS module `titleHidden`，給輔助科技／`aria-labelledby`），不疊在美術上；可見 CTA 為長句段名（本輪 Landing 例外，可超過「CTA ≤ 6 字」）；`href` 不變。分區 CTA 走**深色玻璃 ghost**（`min-height: 48px`、`rgba(0,0,0,0.32)`），**非**橘色實心 pill；段內 `.next` 往下箭點視覺降權（極淡深色玻璃底）。不放「聽最新一集」播放直達鈕。首段 GEO 導言仍用全域 `.sr-only`。
 
 1. **SiteNavBar**（全站橘色頂欄 + 訂閱 CTA）
    - **桌面（≥980px）**懸浮膠囊主列：全部故事／角色圖鑑／遊樂園／宇宙地圖／**親子景點**／**親子指南**。「親子景點」直連 `/for-parents/play-map`（路徑不另開頂層路由）；「親子指南」直連 `/for-parents`。無「更多」下拉。Threads 育兒分享仍由 `/for-parents` 頁內「育兒小筆記」外連卡承接（Threads 缺席時整卡不渲染）。主題切換與訂閱膠囊常駐。**成長主題（`/topic`）不佔導覽**（屬家長取向且與 /stories 篩選重疊），頁面仍可直達。主列 6 項時維持 980 斷點與既有密度調整，不縮觸控區。
    - **行動（＜980px）**漢堡抽屜：單欄依 **探索**（故事／角色圖鑑／遊樂園／繪本著色／宇宙地圖）→ **家長**（親子指南、**📍 親子景點**）分組；不含搜尋列（故事搜尋仍在 `/stories`）。「親子景點」連 `/for-parents/play-map`，與「親子指南」並列於家長組。與桌面一致不列「主題分類」。繪本著色雖為 `/games` 子路徑，仍在探索組獨立列出（兒童動線不應只能從遊樂園內層進入）；active 判定採**最長匹配獨佔**，`/games/coloring-book` 不得讓「遊樂園」同時高亮；`/for-parents/play-map` 僅「親子景點」高亮。
    - 關於我們／聯絡我們在頁尾 meta（聯絡另有 ConnectHub Email icon）。
-2. 四段 **LandingSegment** 全螢幕面板（資料：`data/landing-segments.ts`）：車車故事／睡前數綿羊／捏黏土／衛教宣導
-3. **SegmentNav**：桌面右側垂直進度點；**≤768px** 改為底部水平指示列（含 safe area）。每段往下箭點錨點於平板／手機隱藏（改由底列承擔）。document scroll-snap，reduced-motion 自動停用
-4. Segment 1 CTA → **`/stories`**（完整 Podcast 主頁）
+2. 四段 **LandingSegment** 全螢幕面板（資料：`data/landing-segments.ts`）；可見 CTA：`車車遊樂園的故事`／`數綿羊123．睡前故事`／`好好玩的捏黏土`／`好習慣故事`
+3. **SegmentNav**：桌面右側垂直進度點；**≤768px** 改為底部水平指示列（含 safe area）。導覽點用 `navLabel` 短標（車車故事／睡前／捏黏土／好習慣），避免長 CTA 灌進指示列。每段往下箭點錨點於平板／手機隱藏（改由底列承擔）。document scroll-snap，reduced-motion 自動停用
+4. Segment 1 CTA「車車遊樂園的故事」→ **`/stories`**（完整 Podcast 主頁）
 
 Hero 圖走 `images.edit` + `public/characters/` 定裝照參考圖，與單集插畫同流程以維持 on-model。
 
 ### 全部故事（`/stories`）
 
 1. **SiteHeader** 大 Hero 黏土插畫
-2. **LatestHero** 最新一集
+2. **LatestHero** 最新一集（elevated surface，`--elev-2` resting；無盒子描邊／1px 色環）
    LatestHero 說明最多 3 行（`StoryCard` 桌面 2 行、≤480px 3 行）；來源摘要於 Apple／SoundOn ingest 階段即截斷至約 68 字（CJK），clamp 為保險層。
 3. **FavoritesSection** 精選
-4. **StoryFilter** 找故事（車種／主題下拉，不另放「車車」「主題」欄位副標；觸發鈕 `aria-label` 已足夠）
+4. **StoryFilter** 找故事（車種／主題下拉，不另放「車車」「主題」欄位副標；觸發鈕 `aria-label` 已足夠）；`filterBar` 用 `--surface-elevated` + `--hairline` + `--elev-1`
 
 Landing segment hero 生圖：`npm run generate:landing-art -- --dry-run`（橫版）；直版 `--portrait`；approve 後覆蓋 `public/landing/`。

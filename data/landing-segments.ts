@@ -17,6 +17,8 @@ export type LandingSegmentDef = {
     href: string;
     external?: boolean;
   };
+  /** SegmentNav 短標（aria-label／hover，避免長 CTA 灌進導覽點）。 */
+  navLabel: string;
   /** 標題下一行副標（≤18 字；僅需要說明身分的段落使用）。 */
   subtitle?: string;
   /** 播放直達鈕：latest＝最新一集、bedtime＝睡前主題一集（resolve 時決定目標）。 */
@@ -41,7 +43,8 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
     title: "車車與遊樂園的故事",
     heroImage: "/landing/segment-stories.jpg",
     heroImagePortrait: "/landing/segment-stories-portrait.jpg",
-    cta: { label: "全部故事", href: "/stories" },
+    cta: { label: "車車遊樂園的故事", href: "/stories" },
+    navLabel: "車車故事",
   },
   {
     id: "bedtime",
@@ -49,7 +52,8 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
     title: "數綿羊 ·\n睡前收聽好好睡",
     heroImage: "/landing/segment-bedtime.jpg",
     heroImagePortrait: "/landing/segment-bedtime-portrait.jpg",
-    cta: { label: "睡前故事", href: "/topic/睡前" },
+    cta: { label: "數綿羊123．睡前故事", href: "/topic/睡前" },
+    navLabel: "睡前",
     hideBedtimeMoon: true,
   },
   {
@@ -59,10 +63,11 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
     heroImage: "/landing/segment-clay.jpg",
     heroImagePortrait: "/landing/segment-clay-portrait.jpg",
     cta: {
-      label: "YouTube 捏黏土",
+      label: "好好玩的捏黏土",
       href: "https://www.youtube.com/playlist?list=PLVbyl20K8lOeuJ2ky6dEsmpew7xAxZDhF",
       external: true,
     },
+    navLabel: "捏黏土",
     hideBedtimeMoon: true,
   },
   {
@@ -71,7 +76,8 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
     title: "陪孩子建立好習慣",
     heroImage: "/landing/segment-health.jpg",
     heroImagePortrait: "/landing/segment-health-portrait.jpg",
-    cta: { label: "安全與習慣", href: "/topic/安全" },
+    cta: { label: "好習慣故事", href: "/topic/安全" },
+    navLabel: "好習慣",
     bedtimeVeil: "warm-bottom",
   },
 ];

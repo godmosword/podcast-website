@@ -110,17 +110,6 @@
   max-width: 100%;
 }
 
-.index {
-  flex: none;
-  font-family: var(--font-baloo), var(--font-huninn), sans-serif;
-  font-size: clamp(0.88rem, 2.4vw, 1.05rem);
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  line-height: 1;
-  opacity: 0.82;
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.36);
-}
-
 /* 段標題改視覺隱藏：給 aria-labelledby／輔助科技，不疊在 hero 上。
    不用全域 .sr-only，以免跟首段 siteIntro 的單一 sr-only 契約撞車。 */
 .titleHidden {
@@ -163,35 +152,38 @@
 .cta {
   display: inline-flex;
   align-items: center;
-  min-height: 44px;
+  min-height: 48px;
   gap: 6px;
   padding: 12px 22px;
   border-radius: var(--radius-pill);
-  background: linear-gradient(
-    180deg,
-    var(--landing-cta-from, #ff9500) 0%,
-    var(--landing-cta-to, #ff7a00) 100%
-  );
-  color: var(--landing-cta-fg, #7a4012);
-  font-weight: 800;
+  background: rgba(0, 0, 0, 0.32);
+  color: #fff;
+  font-weight: 700;
   font-size: var(--fs-body);
   text-decoration: none;
-  border: 1px solid rgba(180, 120, 60, 0.22);
-  /* CTA 加 --gloss 上緣高光：做出「打光的黏土表面」，強化主要行動鈕的重量。
-     Opus 裁定 gloss 僅限 CTA，不擴散到內容卡（違反 Content over chrome）。 */
-  box-shadow: 0 6px 18px rgba(120, 80, 40, 0.2), var(--gloss);
-  transition: transform var(--motion-press), opacity var(--motion-press),
-    box-shadow var(--motion-press);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  transition: transform var(--motion-press), background var(--motion-press),
+    opacity var(--motion-press);
 }
 
 .cta:active {
   transform: scale(0.98);
   opacity: 0.92;
+  background: rgba(0, 0, 0, 0.42);
+}
+
+.cta:focus-visible,
+.next:focus-visible {
+  outline: 3px solid var(--on-dark);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px rgba(0, 0, 0, 0.45);
 }
 
 @media (hover: hover) {
   .cta:hover {
-    box-shadow: 0 8px 22px rgba(120, 80, 40, 0.26), var(--gloss);
+    background: rgba(0, 0, 0, 0.42);
   }
 
   .playCta:hover {
@@ -274,15 +266,13 @@
   width: 44px;
   height: 44px;
   border-radius: var(--radius-pill);
-  color: var(--landing-nav-cta-fg, #8b4510);
+  color: rgba(255, 255, 255, 0.88);
   text-decoration: none;
-  background: color-mix(in srgb, var(--landing-cta-from, #ffe7cf) 88%, transparent);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(180, 120, 60, 0.22);
-  box-shadow: 0 6px 16px rgba(48, 28, 12, 0.14);
-  animation: nudge 1.8s ease-in-out infinite;
+  background: rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   pointer-events: auto;
+  transition: opacity var(--motion-press);
 }
 
 .nextChevron {
@@ -293,21 +283,17 @@
   border-right: 2.5px solid currentColor;
   border-bottom: 2.5px solid currentColor;
   transform: rotate(45deg);
-}
-
-@keyframes nudge {
-  0%,
-  100% {
-    transform: translateX(-50%) translateY(0);
-  }
-  50% {
-    transform: translateX(-50%) translateY(4px);
-  }
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .next {
-    animation: none;
+  .cta:active {
+    transform: none;
+  }
+
+  .playCta:active,
+  .subscribeCta:active {
+    transform: none;
   }
 }
 
@@ -327,7 +313,7 @@
   }
 
   .cta {
-    min-height: 44px;
+    min-height: 48px;
     padding: 10px 18px;
     font-size: var(--fs-control);
   }
@@ -365,17 +351,12 @@
     align-items: flex-start;
   }
 
-  .index {
-    font-size: var(--fs-label);
-    letter-spacing: 0.12em;
-  }
-
   .title {
     font-size: clamp(1.12rem, 5.2vw, 1.45rem);
   }
 
   .cta {
-    min-height: 44px;
+    min-height: 48px;
     padding: 9px 16px;
     font-size: var(--fs-label);
   }

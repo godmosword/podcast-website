@@ -90,13 +90,15 @@ describe("resolveUniverseMap", () => {
 });
 
 describe("getCarParkLinks", () => {
-  it("連結與 LANDING_SEGMENTS CTA 完全一致", () => {
+  it("短標用 navLabel；href／external 仍對 CTA", () => {
     const links = getCarParkLinks();
     expect(links.length).toBe(LANDING_SEGMENTS.length);
     links.forEach((link, i) => {
-      const cta = LANDING_SEGMENTS[i]!.cta;
+      const seg = LANDING_SEGMENTS[i]!;
+      const cta = seg.cta;
       expect(link.href).toBe(cta.href);
-      expect(link.label).toBe(cta.label);
+      expect(link.label).toBe(seg.navLabel);
+      expect(link.label).not.toBe(cta.label);
       expect(link.external).toBe(cta.external);
     });
   });

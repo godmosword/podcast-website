@@ -11,7 +11,9 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
     /podcast-website-mu\.vercel\.app\/?$/,
   );
   // 品牌在 sticky 頂欄；桌面（≥980px）走 1c 膠囊內嵌導覽，漢堡僅行動版
-  await expect(page.getByRole("link", { name: /車車遊樂園/ })).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "車車遊樂園", exact: true }),
+  ).toBeVisible();
   const capsuleNav = page.getByRole("navigation", { name: "主要分區" });
   await expect(capsuleNav.getByRole("link", { name: "全部故事" })).toBeVisible();
   await expect(capsuleNav.getByRole("link", { name: "遊樂園" })).toBeVisible();
@@ -39,7 +41,10 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   expect(
     storiesBox === null || (storiesBox.width <= 1 && storiesBox.height <= 1),
   ).toBe(true);
-  await expect(page.getByRole("link", { name: "全部故事 →" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "車車遊樂園的故事 →" })).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "車車遊樂園的故事 →" }),
+  ).toHaveAttribute("href", "/stories");
   await expect(page.getByRole("link", { name: /聽最新一集/ })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: /數綿羊/ })).toBeAttached();
   await expect(page.getByRole("heading", { name: /捏黏土/ })).toBeAttached();
@@ -75,10 +80,26 @@ test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
 
 async function expectStoriesFromLanding(page: import("@playwright/test").Page) {
   await page.goto("/");
-  await page.getByRole("link", { name: "全部故事 →" }).click();
+  await page.getByRole("link", { name: "車車遊樂園的故事 →" }).click();
   await expect(page).toHaveURL(/\/stories/);
   await expect(page.getByRole("heading", { name: "找故事" })).toBeVisible();
 }
+
+test("Landing 四段 CTA href", async ({ page }) => {
+  await page.goto("/");
+  const expected = [
+    { label: "車車遊樂園的故事 →", href: "/stories" },
+    { label: "數綿羊123．睡前故事 →", href: "/topic/睡前" },
+    { label: "好好玩的捏黏土（另開視窗）", href: /youtube\.com/ },
+    { label: "好習慣故事 →", href: "/topic/安全" },
+  ] as const;
+  for (const { label, href } of expected) {
+    const link = page.getByRole("link", { name: label }).first();
+    await link.scrollIntoViewIfNeeded();
+    await expect(link).toBeVisible();
+    await expect(link).toHaveAttribute("href", href);
+  }
+});
 
 test("Landing 分區 CTA 進全部故事（390）", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
