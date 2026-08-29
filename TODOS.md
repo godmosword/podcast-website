@@ -65,7 +65,7 @@
 | test(e2e): 睡前定時提示鎖定日間；宇宙地圖空白海取點抗 flake | `702c096` |
 | polish(footer): 頁尾拿掉「給家長：點播放鈕…」導讀 | `63f96c7` |
 | polish(landing): 分區 CTA 改標題字級 Baloo／Huninn | `63f96c7` |
-| polish(landing): CTA 加大、白邊、奶油黃字 | 見本 commit |
+| polish(landing): CTA 加大、白邊、奶油黃字 | `2008a46` |
 
 ### 本輪已完成（2026-08-28）
 
