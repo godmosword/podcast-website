@@ -26,8 +26,8 @@ describe("SiteFooter", () => {
     expect(html).toContain("節目數據");
     expect(html).toContain('href="/legal"');
     expect(html).toContain("使用條款與免責聲明");
-    expect(html).toContain('href="/legal#privacy"');
-    expect(html).toContain("隱私說明");
+    expect(html).not.toContain('href="/legal#privacy"');
+    expect(html).not.toContain("隱私說明");
     expect(html).toContain("無廣告");
     expect(html).toContain("不收孩子帳號");
     expect(html).toContain("去遊樂園玩");

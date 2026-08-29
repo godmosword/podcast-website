@@ -57,7 +57,10 @@
 
 | ID | 說明 |
 |----|------|
-| polish(stories): 單集摘要 ingest 截短為三行以內（ep-7–ep-27） | 見本 commit |
+| polish(stories): 單集摘要 ingest 截短為三行以內（ep-7–ep-27） | `a3bd623` |
+| polish(nav): 行動漢堡拿掉搜尋列 | 見本 commit |
+| polish(footer): 頁尾拿掉「隱私說明」連結 | 見本 commit |
+| polish(connect): 「訂閱追蹤」改「社群」 | 見本 commit |
 | polish(connect): 「收聽」改「頻道」、拿掉 Podcast App 副標 | `2483bd3` |
 | polish(footer): 去遊樂園玩拿掉「小遊戲 · 免下載」 | `2483bd3` |
 | polish(nav): 行動漢堡拿掉玻璃外框 | `2377074` |

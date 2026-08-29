@@ -57,6 +57,7 @@ test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   await expect(page.getByRole("button", { name: "開啟選單" })).toBeVisible();
   await page.getByRole("button", { name: "開啟選單" }).click();
   const drawerNav = page.getByRole("navigation", { name: "網站選單" });
+  await expect(drawerNav.getByRole("button", { name: "搜尋" })).toHaveCount(0);
   await expect(drawerNav.getByRole("link", { name: "主題分類" })).toHaveCount(0);
   await expect(drawerNav.getByRole("link", { name: "角色圖鑑" })).toBeVisible();
   await expect(drawerNav.getByRole("link", { name: "繪本著色" })).toBeVisible();

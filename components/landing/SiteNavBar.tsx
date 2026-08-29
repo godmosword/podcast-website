@@ -97,7 +97,6 @@ export default function SiteNavBar() {
   const pathname = usePathname();
   const playMode = isImmersiveRoute(pathname);
   const menuId = useId();
-  const searchId = useId();
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLElement>(null);
   const items = navItems();
@@ -186,28 +185,6 @@ export default function SiteNavBar() {
           aria-label="網站選單"
           tabIndex={-1}
         >
-          <form
-            className={styles.searchForm}
-            action="/stories"
-            method="get"
-            onSubmit={() => setOpen(false)}
-          >
-            <label className="sr-only" htmlFor={searchId}>
-              搜尋故事或主題
-            </label>
-            <input
-              id={searchId}
-              className={styles.searchInput}
-              name="q"
-              type="search"
-              placeholder="搜尋故事或主題..."
-              autoComplete="off"
-            />
-            <button type="submit" className={styles.searchSubmit}>
-              搜尋
-            </button>
-          </form>
-
           <ul className={styles.menuList}>
             {(() => {
               const firstParentId = MOBILE_MENU_ROWS.find(

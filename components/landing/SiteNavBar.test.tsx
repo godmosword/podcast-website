@@ -83,7 +83,7 @@ describe("SiteNavBar", () => {
     expect(view.queryByRole("menu")).toBeNull();
   });
 
-  test("行動版選單提供搜尋與單欄清單連結", async () => {
+  test("行動版選單提供單欄清單連結，不含搜尋列", async () => {
     const view = await renderNavBar();
     fireEvent.click(view.getByRole("button", { name: "開啟選單" }));
 
@@ -113,11 +113,9 @@ describe("SiteNavBar", () => {
     expect(playMapLink).toBeTruthy();
     expect(playMapLink?.textContent).toContain("親子景點");
 
-    expect(view.container.querySelector('form[action="/stories"]')).toBeTruthy();
-    expect(view.container.querySelector('input[name="q"]')).toBeTruthy();
-    // 搜尋標籤改為視覺隱藏但保留可及性
-    expect(view.getByLabelText("搜尋故事或主題")).toBeTruthy();
-    expect(view.getByRole("button", { name: "搜尋" })).toBeTruthy();
+    expect(view.container.querySelector('form[action="/stories"]')).toBeNull();
+    expect(view.container.querySelector('input[name="q"]')).toBeNull();
+    expect(view.queryByRole("button", { name: "搜尋" })).toBeNull();
     // 主題切換縮成圖示段控，仍具 aria-label
     expect(view.getAllByRole("group", { name: "主題模式" }).length).toBeGreaterThan(0);
   });

@@ -7,6 +7,9 @@
 ### Changed
 
 - **單集摘要 ingest 截短**：Apple／SoundOn ingest 截掉宣傳尾段（IG／五星／linktr.ee／👶 家長註），摘要約 68 字；`LatestHero` 說明最多 3 行。**未改** Apple sync workflow。
+- **行動漢堡拿掉搜尋列**：抽屜只留分區連結；故事搜尋仍在 `/stories`。**未改** Apple sync workflow。
+- **頁尾拿掉「隱私說明」連結**：安心訊號列只留「無廣告 · 不收孩子帳號 · …」；條款仍從「使用條款與免責聲明」進 `/legal`。**未改** Apple sync workflow。
+- **ConnectHub「訂閱追蹤」改「社群」**。**未改** Apple sync workflow。
 - **ConnectHub「收聽」改「頻道」**：拿掉「訂閱後，新集會自動出現在你的 Podcast App」副標。**未改** Apple sync workflow。
 - **頁尾遊樂園入口拿掉副標**：首頁 footer「去遊樂園玩」不再顯示「小遊戲 · 免下載」。**未改** Apple sync workflow。
 - **行動漢堡拿掉外框**：`SiteNavBar` 漢堡鈕改透明底、無邊框，只留 44px 線條 icon，貼齊桃色頂欄；夜間開啟選單時也不再另加玻璃底板。**未改** Apple sync workflow。

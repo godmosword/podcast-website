@@ -118,15 +118,7 @@ export default function SiteFooter({
             使用條款與免責聲明
           </Link>
         </nav>
-        <p className={styles.privacyLine}>
-          <span>{PARENT_TRUST_TEXT}</span>
-          <span className={styles.metaSep} aria-hidden>
-            ·
-          </span>
-          <Link href="/legal#privacy" className={styles.metaLink}>
-            隱私說明
-          </Link>
-        </p>
+        <p className={styles.privacyLine}>{PARENT_TRUST_TEXT}</p>
         <p className={styles.copyright}>© 車車遊樂園™ · Bonbon &amp; 馬米</p>
         <p className={styles.redistribution}>
           「車車遊樂園」「看圖聽故事」為 Bonbon &amp; 馬米之品牌名稱。

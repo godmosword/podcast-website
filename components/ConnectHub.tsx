@@ -70,7 +70,7 @@ function IconLink({
   );
 }
 
-/** 頁尾頻道與訂閱追蹤：分兩區塊，圓形圖示。 */
+/** 頁尾頻道與社群：分兩區塊，圓形圖示。 */
 export default function ConnectHub({
   id = "connect",
   className,
@@ -122,7 +122,7 @@ export default function ConnectHub({
         <section className={styles.block} aria-labelledby={`${id}-follow`}>
           <h2 id={`${id}-follow`} className={styles.blockTitle}>
             <span className={`${styles.dot} ${styles.dotSocial}`} aria-hidden />
-            訂閱追蹤
+            社群
           </h2>
           <nav className={styles.row} aria-label="社群連結">
             {socials.map((s) => (
