@@ -124,7 +124,7 @@
 
 | ID | 說明 |
 |----|------|
-| polish(nav): 標題列同構＋內頁 KidsPlayDock 三顆 | 見本 commit |
+| polish(nav): 標題列同構＋內頁 KidsPlayDock 三顆 | `cd21fd3` |
 | polish(nav): 頂欄分流 1=C 2=A 3=A | `30423bd` |
 | polish(landing): 首段拿掉可見網站簡介 | `82fff4d` |
 | polish(landing): 首段拿掉可見標題 lockup | `671af5b` |
