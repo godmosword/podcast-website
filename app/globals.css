@@ -136,7 +136,9 @@
   --landing-brand-ink: #3a2410;
   /* sticky 頂欄高度：按鈕 44 + 上下 padding 20 + 瀏海安全區 */
   --nav-h: calc(64px + var(--safe-top));
-  /* ≥980px 改 1c 懸浮膠囊（與 SiteNavBar.desktopNav 斷點對齊），landing pane／地圖高度共用 */
+  /* 內頁左下 KidsPlayDock 佔高（含 bottom 間距＋safe）；首頁／沉浸路由不掛 dock 故不生效 */
+  --kids-dock-h: calc(88px + var(--safe-bottom));
+  /* ≥980px 改 1c 懸浮膠囊（與 SiteNavBar 桌面斷點對齊），landing pane／地圖高度共用 */
   --landing-heading: #2a9d8f;
 
   /* Landing nav 與 segment CTA（全部故事／睡前故事）統一淡蜜桃橘；字暖深棕（非黑） */
@@ -347,6 +349,12 @@ body {
   position: relative;
   z-index: 1;
   min-height: 100%;
+}
+
+/* dock 在 .site-root 內（子孫），用 body:has 補底距。滿版地圖頁（data-kids-dock-flush）
+   不補——那些頁高度已是 100dvh - --nav-h，再加 88px 會多出白帶並可捲。 */
+body:has([data-kids-dock]:not([data-kids-dock-flush])) .site-root {
+  padding-bottom: var(--kids-dock-h);
 }
 
 /* skip link 目標為容器，程式化聚焦時不顯示外框 */

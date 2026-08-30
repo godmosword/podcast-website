@@ -105,7 +105,7 @@ describe("SiteNavBar", () => {
     expect(view.queryByRole("button", { name: /更多/ })).toBeNull();
   });
 
-  test("桌面主列只有兒童三入口；家長項在抽屜（D0=C）", async () => {
+  test("兩斷點標題列同構：品牌＋選單＋常用組；站內入口只在抽屜", async () => {
     const html = await renderNavBarHtml();
     for (const label of [
       "全部故事",
@@ -124,21 +124,45 @@ describe("SiteNavBar", () => {
     expect(html).not.toContain("育兒專欄");
 
     const view = await renderNavBar();
-    const desktopNav = view.getByRole("navigation", { name: "主要分區" });
+    expect(view.queryByRole("navigation", { name: "主要分區" })).toBeNull();
+    expect(view.queryByRole("menu")).toBeNull();
 
+    const topRow = view.container.querySelector("header > div")!;
+    const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
+
+    // 標題列（抽屜外）不含兒童三入口直接連結
+    const topRowOutsidePanel = Array.from(topRow.querySelectorAll("a")).filter(
+      (a) => !panel.contains(a),
+    );
     for (const href of ["/stories", "/games", "/adventures"]) {
-      expect(desktopNav.querySelector(`a[href="${href}"]`)).toBeTruthy();
+      expect(
+        topRowOutsidePanel.some((a) => a.getAttribute("href") === href),
+      ).toBe(false);
     }
+
+    // 抽屜內仍有完整站內入口
     for (const href of [
+      "/stories",
+      "/games",
+      "/adventures",
       "/for-parents",
       "/for-parents/play-map",
       "/characters",
       "/games/coloring-book",
     ]) {
-      expect(desktopNav.querySelector(`a[href="${href}"]`)).toBeNull();
+      expect(panel.querySelector(`a[href="${href}"]`)).toBeTruthy();
     }
-    expect(desktopNav.querySelectorAll("a").length).toBe(3);
-    expect(view.queryByRole("menu")).toBeNull();
+
+    // 兩斷點同構：品牌＋選單觸發器＋常用組（含可見首頁 homeAction）
+    const brand = topRow.querySelector('a[href="/"]');
+    expect(brand?.textContent).toContain("車車遊樂園");
+    expect(view.getByRole("button", { name: "開啟選單" })).toBeTruthy();
+
+    const actions = view.getByRole("group", { name: "常用" });
+    expect(topRow.contains(actions)).toBe(true);
+    const homeAction = actions.querySelector("a[class*='homeAction']");
+    expect(homeAction?.textContent).toContain("首頁");
+    expect(homeAction?.getAttribute("href")).toBe("/");
   });
 
   test("主題切換移出頂欄，只在抽屜底部", async () => {
@@ -428,11 +452,9 @@ describe("SiteNavBar active 狀態", () => {
     expect(parentMobile?.hasAttribute("aria-current")).toBe(false);
   });
 
-  test("/adventures 僅宇宙地圖 active（桌面主列＋抽屜同步）", async () => {
+  test("/adventures 僅抽屜宇宙地圖 active", async () => {
     const view = await renderNavBarAt("/adventures");
-    const desktopNav = view.getByRole("navigation", { name: "主要分區" });
-    const adventuresLink = desktopNav.querySelector('a[href="/adventures"]');
-    expect(adventuresLink?.getAttribute("aria-current")).toBe("page");
+    expect(view.queryByRole("navigation", { name: "主要分區" })).toBeNull();
 
     const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
     expect(
@@ -440,6 +462,28 @@ describe("SiteNavBar active 狀態", () => {
     ).toBe("page");
     expect(
       panel.querySelector('a[href="/for-parents"]')?.hasAttribute("aria-current"),
+    ).toBe(false);
+  });
+
+  test("/games/coloring-book 僅抽屜繪本著色 active，標題列無 /games 連結", async () => {
+    const view = await renderNavBarAt("/games/coloring-book");
+    const topRow = view.container.querySelector("header > div")!;
+    const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
+
+    const topRowOutsidePanel = Array.from(topRow.querySelectorAll("a")).filter(
+      (a) => !panel.contains(a),
+    );
+    expect(
+      topRowOutsidePanel.some((a) => a.getAttribute("href") === "/games"),
+    ).toBe(false);
+
+    expect(
+      panel
+        .querySelector('a[href="/games/coloring-book"]')
+        ?.getAttribute("aria-current"),
+    ).toBe("page");
+    expect(
+      panel.querySelector('a[href="/games"]')?.hasAttribute("aria-current"),
     ).toBe(false);
   });
 

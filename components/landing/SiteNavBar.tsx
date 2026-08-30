@@ -29,18 +29,6 @@ type NavItem = {
   href: string;
 };
 
-/** 桌面常駐主列（≥980px）。
- *
- * **只留兒童三入口**（Approved Plan D0=C）。3–7 歲不識字兒童辨識靠圖像與位置，
- * 把入口收進「先點抽象觸發器、再讀文字清單」的兩段式互動等於入口消失；
- * 家長取向的親子指南／親子景點沒有這個問題，收進抽屜換取頂欄水平預算。
- * 角色圖鑑與繪本著色亦在抽屜（首頁探索磁貼牆另有大圖入口）。 */
-const PRIMARY_ORDER: readonly NavItemId[] = [
-  "stories",
-  "games",
-  "adventures",
-] as const;
-
 /** 抽屜家長組 id（小標「給爸媽」落在實際首個可見項）。 */
 const MOBILE_PARENT_GROUP_IDS = new Set<NavItemId>([
   "for-parents",
@@ -142,10 +130,6 @@ export default function SiteNavBar() {
   const internalHrefs = items
     .filter((item) => item.href.startsWith("/"))
     .map((item) => item.href);
-  const primaryItems = PRIMARY_ORDER.map((id) => byId.get(id)).filter(
-    (item): item is NavItem => item !== undefined,
-  );
-  const primaryHrefs = primaryItems.map((item) => item.href);
   const feedbackItem = byId.get("feedback");
 
   useFocusTrap(open, panelRef, { initialFocus: "first" });
@@ -274,26 +258,8 @@ export default function SiteNavBar() {
           <span className={styles.menuBtnText}>選單</span>
         </button>
 
-        {/* 桌面常駐兒童三入口（D0=C）；家長項在抽屜 */}
-        <nav className={styles.desktopNav} aria-label="主要分區">
-          {primaryItems.map((item) => {
-            const active = isInternalPathActive(pathname, item.href, primaryHrefs);
-            return (
-              <Link
-                key={item.id}
-                href={item.href}
-                className={styles.navLink}
-                aria-current={active ? "page" : undefined}
-                onClick={closeAll}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-
         <div className={styles.actions} role="group" aria-label="常用">
-          {/* ＜980：首頁文字入口（窄屏品牌字 sr-only 後仍有一個可見「回家」詞） */}
+          {/* 兩斷點同構：首頁文字入口（窄屏品牌字 sr-only 後仍有一個可見「回家」詞） */}
           <Link
             href="/"
             className={`${styles.navLink} ${styles.homeAction}`}

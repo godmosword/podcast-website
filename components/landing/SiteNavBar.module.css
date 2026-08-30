@@ -295,17 +295,9 @@
   border-top-color: color-mix(in srgb, var(--ink) 14%, transparent);
 }
 
-/* ---- 桌面膠囊內嵌導覽（1c）：<980px 隱藏，走漢堡 ---- */
-
-.desktopNav {
-  display: none;
-}
-
-/* 選擇器必須比 .navLink 更具體，否則 display:inline-flex 會蓋掉桌面隱藏。 */
-@media (min-width: 980px) {
-  .actions .homeAction {
-    display: none;
-  }
+/* 契約錨點：兩斷點皆顯示「首頁」。禁止再 display:none（否則 CSS module 會是 undefined）。 */
+.homeAction {
+  display: inline-flex;
 }
 
 .navLink {
@@ -368,8 +360,8 @@
 }
 
 /*
- * 桌面膠囊斷點：主列多了「宇宙地圖／親子指南」後 920 易溢位，
- * 先靠 padding／gap／字級密度；仍緊則將斷點略提高至 980，提早漢堡，不縮觸控區。
+ * 桌面膠囊斷點：兩斷點同構（品牌＋選單＋首頁／訂閱／留言），
+ * 980 起改懸浮膠囊；兒童三入口改抽屜＋內頁 dock，不縮觸控區。
  */
 @media (min-width: 980px) {
   /* 1c 懸浮膠囊：外層透明，膠囊本體浮在內容上 */
@@ -381,7 +373,7 @@
   }
 
   .inner {
-    max-width: 1160px;
+    max-width: 960px;
     height: 56px;
     padding: 0 8px 0 16px;
     justify-content: flex-start;
@@ -394,19 +386,7 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
-  .desktopNav {
-    align-items: center;
-    gap: 2px;
-    margin-left: var(--space-2);
-    margin-right: auto;
-  }
-
-  /* 桌面仍有漢堡：家長項與角色圖鑑／繪本著色都在抽屜裡（D0=C） */
-  .desktopNav {
-    display: flex;
-  }
-
-  /* 面板錨定膠囊本體（.inner），而非整條 .bar——否則會掉出 1160px 全寬下拉 */
+  /* 面板錨定膠囊本體（.inner），而非整條 .bar——否則會掉出 960px 全寬下拉 */
   .panel {
     top: calc(100% + 8px);
     left: 8px;

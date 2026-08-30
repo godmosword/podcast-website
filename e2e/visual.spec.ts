@@ -69,7 +69,7 @@ const VIEWPORTS: Record<
   desktop: { width: 1280, height: 720, label: "1280" },
 };
 
-/** SiteNavBar desktopNav 斷點 980：頂欄 clip 回歸（漢堡／膠囊交界）。 */
+/** 頂欄 980 斷點（已無 desktopNav）：頂欄 clip 回歸（漢堡／膠囊交界）。 */
 const NAV_BREAKPOINT_VIEWPORTS = [
   { width: 979, height: 720, label: "979" },
   { width: 980, height: 720, label: "980" },
@@ -415,3 +415,69 @@ for (const viewport of NAV_BREAKPOINT_VIEWPORTS) {
     );
   });
 }
+
+/**
+ * ── KidsPlayDock clip（T7）+ Leader 須刪後重拍的 baseline ──
+ *
+ * 本任務只加 spec，不刪不重拍 PNG。Leader 統一 `--update-snapshots` 前先刪舊檔：
+ *
+ * - `site-nav-*-light.png`：標題列多了桌面「首頁」、少了兒童三入口
+ * - `home-*.png`／`landing-*.png`：頂欄變了
+ * - 內頁全頁：stories／games／adventures／for-parents／characters／about／subscribe（左下多 dock）
+ * - play-map／place 若 viewport 看得到左下也要
+ *
+ * 本輪 spec 新增、Leader 重拍時一併建立：
+ * - `kids-dock-390-light.png`
+ * - `kids-dock-1280-light.png`
+ * - `kids-dock-390-night.png`（可選）
+ */
+const KIDS_DOCK_CLIP_VIEWPORTS = [
+  { width: 390, height: 844, label: "390" },
+  { width: 1280, height: 720, label: "1280" },
+] as const;
+
+for (const viewport of KIDS_DOCK_CLIP_VIEWPORTS) {
+  test(`visual：KidsPlayDock ${viewport.label} light`, async ({ page }) => {
+    await page.setViewportSize({
+      width: viewport.width,
+      height: viewport.height,
+    });
+    await page.goto("/stories");
+    await stabilizeVisualPage(page, { theme: "light" });
+    const dock = page.getByRole("navigation", { name: "去玩" });
+    await expect(dock).toHaveCount(1);
+    await expect(dock).toHaveScreenshot(
+      `kids-dock-${viewport.label}-light.png`,
+      {
+        maxDiffPixelRatio: 0.02,
+        animations: "disabled",
+      },
+    );
+  });
+}
+
+test("visual：KidsPlayDock 390 night", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/stories");
+  await stabilizeVisualPage(page, { theme: "night" });
+  const dock = page.getByRole("navigation", { name: "去玩" });
+  await expect(dock).toHaveCount(1);
+  await expect(dock).toHaveScreenshot("kids-dock-390-night.png", {
+    maxDiffPixelRatio: 0.03,
+    animations: "disabled",
+  });
+});
+
+test("visual：首頁不顯示 KidsPlayDock", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await stabilizeVisualPage(page, { theme: "light" });
+  await expect(page.getByRole("navigation", { name: "去玩" })).toHaveCount(0);
+});
+
+test("visual：沉浸式遊戲不顯示 KidsPlayDock", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/games/candy-match");
+  await stabilizeVisualPage(page, { theme: "light" });
+  await expect(page.getByRole("navigation", { name: "去玩" })).toHaveCount(0);
+});

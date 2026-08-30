@@ -1,0 +1,129 @@
+/* 內頁左下固定三入口；語彙對齊 ExploreGrid 磁貼，非桃色玻璃頂欄。 */
+
+.dock {
+  position: fixed;
+  left: calc(12px + var(--safe-left));
+  bottom: calc(12px + var(--safe-bottom));
+  z-index: 15;
+  max-width: min(480px, calc(100vw - 24px - var(--safe-left) - var(--safe-right)));
+  pointer-events: none;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: var(--space-2);
+  pointer-events: auto;
+}
+
+.item {
+  flex: 0 1 auto;
+}
+
+.link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  /* 兒童觸控底線 48px（與 ExploreGrid 磁貼一致） */
+  min-height: 48px;
+  min-width: 48px;
+  padding: var(--space-2) var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--surface-elevated);
+  box-shadow: var(--elev-1);
+  color: inherit;
+  text-decoration: none;
+  text-align: center;
+  transition: transform var(--motion-press), box-shadow var(--motion-press);
+}
+
+@media (hover: hover) {
+  .link:hover {
+    box-shadow: var(--elev-2);
+  }
+}
+
+.link:active {
+  transform: scale(0.98);
+}
+
+.link:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* 目前頁：accent 底線＋字重，與桌面頂欄 navLink 同規則 */
+.link[aria-current="page"] {
+  font-weight: 800;
+  box-shadow: var(--elev-1), inset 0 -3px 0 var(--accent);
+}
+
+:global(html[data-theme="night"]) .link[aria-current="page"] {
+  background: color-mix(in srgb, var(--c-teal) 12%, var(--surface-elevated));
+}
+
+.emoji {
+  font-size: var(--fs-h3);
+  line-height: 1;
+}
+
+.label {
+  font-size: var(--fs-label);
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* 夜間：emoji 降飽和，與 ExploreGrid／行動抽屜同一處理 */
+:global(html[data-theme="night"]) .emoji {
+  filter: saturate(0.55) brightness(0.92);
+}
+
+/* ≤480 宇宙地圖世界層：島選擇列高 72px（MAP_PICKER_HEIGHT），dock 抬到列上方 */
+@media (max-width: 480px) {
+  .dock[data-lift="picker"] {
+    bottom: calc(12px + var(--safe-bottom) + 72px + 8px);
+  }
+}
+
+@media (min-width: 768px) {
+  .dock {
+    left: calc(16px + var(--safe-left));
+    bottom: calc(16px + var(--safe-bottom));
+    max-width: min(520px, calc(100vw - 32px - var(--safe-left) - var(--safe-right)));
+  }
+
+  .link {
+    min-height: 56px;
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .emoji {
+    font-size: var(--fs-h2);
+  }
+
+  .label {
+    font-size: var(--fs-control);
+  }
+}
+
+.dock[data-paused="true"] .link {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link {
+    transition: none;
+  }
+
+  .link:active {
+    transform: none;
+  }
+}

@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/react";
 import JsonLd from "@/components/JsonLd";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import ReturnVisitPing from "@/components/ReturnVisitPing";
+import KidsPlayDock from "@/components/landing/KidsPlayDock";
 import SiteNavBar from "@/components/landing/SiteNavBar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { siteIdentityJsonLd } from "@/lib/json-ld";
@@ -116,6 +117,7 @@ export default function RootLayout({
           <SiteNavBar />
           <div id="main-content" tabIndex={-1} className="site-root">
             {children}
+            <KidsPlayDock />
           </div>
           <ServiceWorkerRegister />
           <ReturnVisitPing />

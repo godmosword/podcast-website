@@ -10,6 +10,7 @@
 
 ### Changed
 
+- **標題列同構拿掉桌面兒童三；內頁 KidsPlayDock 三顆；首頁不掛**。**未改** Apple sync workflow。
 - **Landing 首段拿掉可見標題 lockup**：刪 `#segment-stories .titleHidden` 例外；四段標題一律 clip。GEO 標題與導言留在 SSR HTML，畫面只留分區 CTA。**未改** Apple sync workflow。
 - **Landing 首段拿掉可見網站簡介**：`#segment-stories` 不再解除 `.sr-only`；GEO 導言留在 SSR HTML。**未改** Apple sync workflow。
 - **頂欄分流（CRITICAL 1=C／2=A／3=A）**：窄屏 `[品牌][選單]……[首頁][訂閱][留言]`；桌面 `[品牌][選單][全部故事][遊樂園][宇宙地圖]……[訂閱][留言]`（品牌即首頁，桌面不另列「首頁」）。`.inner` flex-start、`.actions` margin-left auto；常用組 `role="group"` `aria-label="常用"`。留言回到頂欄（`feedbackHref()` 恆有目的地；未設 env 時 mailto 可與頁尾／ConnectHub 同信箱，CRITICAL-2=A）。抽屜縮為 7 列（探索 5、無首頁；家長 2、無留言）；container 420px 品牌字、240px「選單」二字以 `.sr-only` clip 收合。**未改** Apple sync workflow。

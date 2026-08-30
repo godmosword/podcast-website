@@ -12,20 +12,22 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
     "href",
     /podcast-website-mu\.vercel\.app\/?$/,
   );
-  // 品牌在 sticky 頂欄；桌面（≥980px）走膠囊內嵌導覽，漢堡**所有寬度都在**
+  // 品牌在 sticky 頂欄；漢堡**所有寬度都在**；兒童三入口改在左下 dock／抽屜
   await expect(
     page.getByRole("link", { name: "車車遊樂園", exact: true }),
   ).toBeVisible();
-  // 桌面主列只留兒童三入口（D0=C）；家長項與角色圖鑑／繪本著色收在抽屜
-  const capsuleNav = page.getByRole("navigation", { name: "主要分區" });
-  await expect(capsuleNav.getByRole("link", { name: "全部故事" })).toBeVisible();
-  await expect(capsuleNav.getByRole("link", { name: "遊樂園" })).toBeVisible();
-  await expect(capsuleNav.getByRole("link", { name: "宇宙地圖" })).toBeVisible();
-  await expect(capsuleNav.getByRole("link")).toHaveCount(3);
-  await expect(capsuleNav.getByRole("link", { name: "主題分類" })).toHaveCount(0);
-  await expect(capsuleNav.getByRole("link", { name: /育兒專欄/ })).toHaveCount(0);
-  await expect(capsuleNav.getByRole("button", { name: /更多/ })).toHaveCount(0);
-  await expect(capsuleNav.getByRole("menu")).toHaveCount(0);
+  // 1280 標題列無「主要分區」；header 直接列不含兒童三入口（抽屜內仍有）
+  await expect(page.getByRole("navigation", { name: "主要分區" })).toHaveCount(0);
+  const headerTopRow = page.locator("header > div").first();
+  for (const href of ["/stories", "/games", "/adventures"] as const) {
+    const directCount = await headerTopRow.locator(`a[href="${href}"]`).evaluateAll(
+      (anchors) => {
+        const panel = document.querySelector('header nav[aria-label="網站選單"]');
+        return anchors.filter((a) => !panel?.contains(a)).length;
+      },
+    );
+    expect(directCount).toBe(0);
+  }
 
   // 頂欄常駐列：品牌（首頁）＋選單觸發器＋首頁文字（窄屏才見）＋訂閱＋留言
   // 多平台時「訂閱」是 dropdown button，單平台／空清單時才是 link
@@ -34,10 +36,10 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
       page.getByRole("link", { name: "訂閱" }),
     ).first(),
   ).toBeVisible();
-  // 首頁文字 pill 在頂欄「常用」組（DOM 常駐；桌面 CSS 隱藏，窄屏才見）
+  // 首頁文字 pill 在頂欄「常用」組；兩斷點都有首頁文字
   const homeAction = page.getByRole("group", { name: "常用" }).locator('a[href="/"]');
   await expect(homeAction).toHaveCount(1);
-  await expect(homeAction).toBeHidden();
+  await expect(homeAction).toBeVisible();
   const topFeedback = page.getByRole("link", { name: "留言" });
   await expect(topFeedback).toBeVisible();
   await expect(topFeedback).toHaveAttribute("href", /^(mailto:|https?:)/);
@@ -149,10 +151,8 @@ test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   const mobileFeedback = page.getByRole("link", { name: "留言" });
   await expect(mobileFeedback).toBeVisible();
   await expect(mobileFeedback).toHaveAttribute("href", /^(mailto:|https?:)/);
-  // 行動版桌面主列收起，全部分區都走抽屜
-  await expect(
-    page.getByRole("navigation", { name: "主要分區" }),
-  ).not.toBeVisible();
+  // 行動版無「主要分區」膠囊；全部分區都走抽屜
+  await expect(page.getByRole("navigation", { name: "主要分區" })).toHaveCount(0);
   // 頂欄不得橫向溢出（允許 1px 捲動誤差）
   const headerOverflow = await page.locator("header > div").first().evaluate((el) => ({
     scrollWidth: el.scrollWidth,
@@ -382,6 +382,67 @@ test("繽紛消消樂：標題 → 地圖 → 第 1 關棋盤", async ({ page })
   // 任務列與道具列存在
   await expect(page.getByText(/泡泡/)).toBeVisible();
   await expect(page.getByRole("button", { name: /提示/ })).toBeVisible();
+});
+
+test.describe("KidsPlayDock 契約", () => {
+  async function expectNoPlayDock(page: import("@playwright/test").Page) {
+    await expect(page.getByRole("navigation", { name: "去玩" })).toHaveCount(0);
+  }
+
+  async function expectPlayDockWithThreeLinks(
+    page: import("@playwright/test").Page,
+  ) {
+    const dock = page.getByRole("navigation", { name: "去玩" });
+    await expect(dock).toHaveCount(1);
+    for (const { label, href } of [
+      { label: "全部故事", href: "/stories" },
+      { label: "遊樂園", href: "/games" },
+      { label: "宇宙地圖", href: "/adventures" },
+    ] as const) {
+      const link = dock.getByRole("link", { name: label });
+      await expect(link).toBeVisible();
+      await expect(link).toHaveAttribute("href", href);
+    }
+  }
+
+  test("首頁不掛 dock（1280）", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/");
+    await expectNoPlayDock(page);
+  });
+
+  test("首頁不掛 dock（390）", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    await expectNoPlayDock(page);
+  });
+
+  test("/stories 有 dock 三連且與 header 不重疊", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/stories");
+    await expectPlayDockWithThreeLinks(page);
+
+    const headerBox = await page.getByRole("banner").boundingBox();
+    const dockBox = await page.getByRole("navigation", { name: "去玩" }).boundingBox();
+    expect(headerBox).toBeTruthy();
+    expect(dockBox).toBeTruthy();
+    expect(dockBox!.y).toBeGreaterThanOrEqual(headerBox!.y + headerBox!.height - 1);
+  });
+
+  test("/story/ep-27/play 沉浸頁不掛 dock", async ({ page }) => {
+    await page.goto("/story/ep-27/play");
+    await expectNoPlayDock(page);
+  });
+
+  test("/games/candy-match 沉浸頁不掛 dock", async ({ page }) => {
+    await page.goto("/games/candy-match");
+    await expectNoPlayDock(page);
+  });
+
+  test("/games/coloring-book 仍顯示 dock", async ({ page }) => {
+    await page.goto("/games/coloring-book");
+    await expectPlayDockWithThreeLinks(page);
+  });
 });
 
 test.describe("首頁探索區（PR1）", () => {

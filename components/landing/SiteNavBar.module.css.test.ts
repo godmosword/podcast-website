@@ -65,11 +65,21 @@ describe("SiteNavBar.module.css 漢堡與抽屜", () => {
     expect(css).not.toContain(".navLinkActive");
   });
 
-  it("≥980 時 .homeAction display:none（DOM 仍在）", () => {
+  it("≥980 時桌面仍顯示 .homeAction（兩斷點同構）", () => {
+    expect(css).toMatch(/\.homeAction\s*\{/);
     const desktopBlock = css.slice(css.indexOf("@media (min-width: 980px)"));
-    expect(desktopBlock).toMatch(
+    expect(desktopBlock).not.toMatch(
       /\.actions\s+\.homeAction\s*\{[\s\S]*?display:\s*none/,
     );
+  });
+
+  it("已移除 .desktopNav（兒童三入口改抽屜）", () => {
+    expect(css).not.toContain(".desktopNav");
+  });
+
+  it("≥980 膠囊 .inner max-width 為 960px", () => {
+    const desktopBlock = css.slice(css.indexOf("@media (min-width: 980px)"));
+    expect(desktopBlock).toMatch(/\.inner\s*\{[\s\S]*?max-width:\s*960px/);
   });
 
   it("極窄容器不得把觸發器變成 icon-only（DESIGN §99 禁止）", () => {
@@ -103,7 +113,13 @@ describe("SiteNavBar.tsx 結構契約", () => {
     expect(tsx.slice(panel, innerClose)).toContain("</div>");
   });
 
-  it("品牌、桌面主列、首頁與留言點擊都要關閉抽屜", () => {
+  it("已移除 PRIMARY_ORDER 與 aria-label=\"主要分區\"（T3 再補 SiteNavBar.test）", () => {
+    expect(tsx).not.toContain("PRIMARY_ORDER");
+    expect(tsx).not.toContain('aria-label="主要分區"');
+    expect(tsx).not.toContain("desktopNav");
+  });
+
+  it("品牌、首頁與留言點擊都要關閉抽屜", () => {
     const brand = tsx.slice(tsx.indexOf("className={styles.brand}"));
     expect(brand.slice(0, 200)).toContain("onClick={closeAll}");
 

@@ -204,9 +204,9 @@ test("a11y：桌面抽屜展開態（含親子指南）無 critical/serious 違�
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/");
 
-  // 桌面主列只有兒童三入口；家長項在抽屜（D0=C）
-  const capsuleNav = page.getByRole("navigation", { name: "主要分區" });
-  await expect(capsuleNav.getByRole("link", { name: "親子指南" })).toHaveCount(0);
+  // 1280 標題列無「主要分區」；首頁不掛去玩 dock；家長項在抽屜
+  await expect(page.getByRole("navigation", { name: "主要分區" })).toHaveCount(0);
+  await expect(page.getByRole("navigation", { name: "去玩" })).toHaveCount(0);
 
   await page.getByRole("button", { name: "開啟選單" }).click();
   const drawer = page.getByRole("navigation", { name: "網站選單" });
@@ -226,4 +226,9 @@ test("a11y：桌面抽屜展開態（含親子指南）無 critical/serious 違�
     blocking,
     blocking.map((v) => `[${v.impact}] ${v.id}: ${v.help}`).join("\n"),
   ).toEqual([]);
+});
+
+test("a11y：/stories 去玩 landmark 存在", async ({ page }) => {
+  await page.goto("/stories");
+  await expect(page.getByRole("navigation", { name: "去玩" })).toHaveCount(1);
 });
