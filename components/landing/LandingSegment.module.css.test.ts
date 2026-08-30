@@ -61,12 +61,8 @@ describe("LandingSegment.module.css touch targets", () => {
     );
   });
 
-  it("首段標題可見 lockup，不得解除 siteIntro 的 sr-only", () => {
-    expect(css).toMatch(
-      /:global\(#segment-stories\)\s+\.titleHidden\s*\{[\s\S]*?position:\s*static/,
-    );
-    expect(css).not.toMatch(
-      /:global\(#segment-stories\)\s+:global\(\.sr-only\)/,
-    );
+  it("不得用 #segment-stories 解除 titleHidden 或 siteIntro sr-only", () => {
+    expect(css).not.toMatch(/:global\(#segment-stories\)\s+\.titleHidden/);
+    expect(css).not.toMatch(/:global\(#segment-stories\)\s+:global\(\.sr-only\)/);
   });
 });

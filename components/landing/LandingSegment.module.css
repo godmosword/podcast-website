@@ -110,9 +110,8 @@
   max-width: 100%;
 }
 
-/* 其餘段標題給 aria-labelledby／輔助科技，維持視覺隱藏，不疊在 hero 上。
-   首段 titleHidden 由下方 #segment-stories 規則轉為可見標題；GEO 導言
-   必須維持全域 .sr-only，禁止在此解除隱藏。 */
+/* 四段標題一律視覺隱藏（aria-labelledby／輔助科技）。禁止用 #segment-stories
+   把 .titleHidden 或全域 .sr-only 解除隱藏。可見前景只留分區 CTA。 */
 .titleHidden {
   position: absolute;
   width: 1px;
@@ -123,22 +122,6 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
-}
-
-/* 首段可見標題 lockup；siteIntro 走全域 .sr-only，此處不得覆寫。 */
-:global(#segment-stories) .titleHidden {
-  position: static;
-  width: auto;
-  height: auto;
-  padding: 0;
-  margin: 0;
-  overflow: visible;
-  clip: auto;
-  white-space: pre-line;
-  color: var(--on-dark);
-  font-size: clamp(1.55rem, 4.2vw, 2.35rem);
-  line-height: 1.2;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.46), 0 1px 2px rgba(0, 0, 0, 0.42);
 }
 
 .title {

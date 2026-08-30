@@ -66,10 +66,15 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await desktopDrawer.getByRole("link", { name: "親子指南" }).click();
   await expect(page).toHaveURL(/\/for-parents$/);
   await page.goto("/");
-  // 首段標題可見；GEO 導言維持 clip，不得再被 #segment-stories 解除隱藏
-  await expect(
-    page.getByRole("heading", { name: /車車與\s?遊樂園的故事/ }),
-  ).toBeVisible();
+  // 首段標題與 GEO 導言都維持 clip，不得再被 #segment-stories 解除隱藏
+  const storiesHeading = page.getByRole("heading", {
+    name: /車車與\s?遊樂園的故事/,
+  });
+  await expect(storiesHeading).toBeAttached();
+  const headingBox = await storiesHeading.boundingBox();
+  expect(headingBox, "段標題應在 DOM").toBeTruthy();
+  expect(headingBox!.width).toBeLessThanOrEqual(2);
+  expect(headingBox!.height).toBeLessThanOrEqual(2);
   const siteIntro = page.locator("#segment-stories p.sr-only");
   await expect(siteIntro).toContainText("Bonbon 與馬米");
   const introBox = await siteIntro.boundingBox();
