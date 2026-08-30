@@ -40,7 +40,7 @@
 - [x] **PR1 首頁探索區**　`landing · M · 無`　地圖大卡＋六格磁貼牆，放頁尾 snap pane 之上、不新增第五段；首頁 HTML 常駐 7 個內容頁入口  `b9de774`
 - [x] **PR2 Header／Subscribe／contact**　`nav · L · PR1`　頂欄收斂為品牌 pill＋帶文字「選單」觸發器＋單一 CTA「訂閱」（留言移入抽屜「給爸媽」組）；桌機常駐兒童三入口（D0=C）；抽屜連結改常駐 DOM＋`inert`；`feedbackHref()` env→mailto；訂閱空清單退 `/subscribe`；主題切換移入抽屜底部；`openMenu` 浮層互斥＋斷點 reset＋outside click。DESIGN §53／§99／§276／§277 已改寫（§241 未動——D8=B 不改 footer）  `b9de774`
 - [ ] **PR2 後續（設計審建議，未做）**　`nav · S · PR2`　(1) 觸發器文字「選單」對 3–7 歲仍抽象——但**現在不能改「給爸媽」**（抽屜 8 列中 6 列是兒童項，標籤會說謊）；正解是先把角色圖鑑／繪本著色移出抽屜、交給首頁磁貼牆承接，抽屜縮為純家長清單後再一次改標籤＋`aria-label`。(2) 「留言」是家長取向**動作**卻常駐頂欄，而家長取向**導覽**已降到抽屜，層級規則不一致；設計審建議移入抽屜「給爸媽」組，頂欄只留「訂閱」單一轉換 CTA——**需使用者裁決**（會動到原始需求的三入口）。(3) 觸發器 `aria-label` 隨開闔改寫可及名稱與 `aria-expanded` 重複播報，建議固定為「選單」（會動到四支 e2e 契約）。(4) 抽屜是半模態（有 focus trap 但無 scroll lock／背景 inert）；建議改為非模態 popover 或補齊模態語意。
-- [x] **PR3 Footer／效能／文件**　`perf · M · PR2`　footer 不補 7 連結（D8=B，標 N/A）；`.env.example` 修正 `NEXT_PUBLIC_FEEDBACK_FORM_URL` 的雙消費點契約；Lighthouse baseline 實測入帳；既有 17 處裸 `<img>` 維持（D9=A）  見本 commit
+- [x] **PR3 Footer／效能／文件**　`perf · M · PR2`　footer 不補 7 連結（D8=B，標 N/A）；`.env.example` 修正 `NEXT_PUBLIC_FEEDBACK_FORM_URL` 的雙消費點契約；Lighthouse baseline 實測入帳；既有 17 處裸 `<img>` 維持（D9=A）  `99e5739`
   - **ConnectHub Email 與頁尾「聯絡我們」不是漏洞**：DESIGN 首頁 IA 已明文登記「關於我們／聯絡我們在頁尾 meta（聯絡另有 ConnectHub Email icon）」——這是刻意的雙管道。PR2 移除的是**第三個**（頂欄留言），非既有兩個。前一版待辦寫「建議擇一」是我讀規範不全，已撤回。
 
 > **Lighthouse mobile baseline（2026-08-30 實測，本機 `npm run start` ＋ Lighthouse 13.4.1 預設 mobile 節流，各 3–6 次取中位數）：**
