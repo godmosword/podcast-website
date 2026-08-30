@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+### Added
+
+- **首頁新增探索區（`ExploreGrid`）**：在頁尾 snap pane 之上、**不新增第五個 scroll-snap 段**。左側地圖大卡連 `/adventures`（沿用既有島嶼美術，非新生圖），右側六格磁貼牆——兒童組（全部故事／遊樂園／繪本著色／角色圖鑑）在前且權重較大，家長組（親子指南／親子景點）在後降一階。磁貼一律 `<Link>`、標籤為可見 HTML 文字、圖徽沿用行動抽屜同一批 emoji（零新圖片位元組）。首頁 HTML 因此常駐 7 個內容頁入口。**未改** Apple sync workflow。
+
+### Changed
+
+- **頂欄收斂為三入口**：品牌 pill（即首頁）＋帶文字的「選單」觸發器（緊接品牌右側）＋右側「訂閱」「留言」。桌面膠囊主列只留兒童三入口（全部故事／遊樂園／宇宙地圖）；角色圖鑑、繪本著色、親子指南、親子景點改由抽屜承接。主題切換移出頂欄、改在抽屜底部。「訂閱收聽」精簡為「訂閱」，平台清單為空時退為站內 `/subscribe` 而非整顆消失。新增「留言」入口（`feedbackHref()`：`NEXT_PUBLIC_FEEDBACK_FORM_URL` → 未設定降級 mailto，恆有目的地），**放在抽屜「給爸媽」組而非頂欄**——env 未設時它與頁尾「聯絡我們」、ConnectHub Email 指向同一信箱，頂欄再放一個等於首頁有三個同信箱入口。**未改** Apple sync workflow。
+- **漢堡抽屜連結改常駐 DOM**：關閉時以 `display: none` ＋ `inert` 隱藏，不再 `{open && …}`——關閉態的 HTML 現在含全部站內連結（爬蟲可讀）。抽屜在所有寬度都可開；新增「首頁」列、「留言」列與家長組小標「給爸媽」（探索組維持無標題），共 9 列。同時只允許一個浮層開著，跨 980 斷點自動關閉，開啟時焦點移入第一個連結、關閉還給觸發器，點外部亦可關閉。目前頁不再與 hover 共用底色（改加 accent bar ＋加粗）。**未改** Apple sync workflow。
+
 ### Fixed
 
 - **CI e2e 睡前定時提示受 UTC 睡前窗影響**：`child-ux` 鎖定 `theme: light`，避免 GitHub runner 在 19–06 UTC 把 system 解析成夜晚、對話框不出現。宇宙地圖空白海取點改掃邊緣並在 click-zoom 斷言前略縮，降低島面蓋滿取樣點的 flake。**未改** Apple sync workflow。

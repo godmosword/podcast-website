@@ -32,6 +32,20 @@
 | 4 | [Growth-Measure-1](#growth-measure-1-成長量測) SoundOn 回鏈 | ops/growth | S | ✅ `42a9d38` |
 | 5 | [UX-P1-2](#兒童-ux-與親子互動稽核2026-07-11) 詳情頁反思收合 | ux | S | ✅ `42a9d38` |
 
+### Top Bar 改版（2026-08-29，三段 PR）
+
+> Approved Plan：`/tmp/agent-plan-1788007764.md`（`/agent-plan` 兩輪委員會：Codex 工程審 ×2、Opus 設計審 ×2；Grok 對抗審缺席）。
+> 決策 D0=C（桌機常駐兒童三入口、家長項收抽屜）／D1=A／D2=A／D5=A／D6=A／D7=B／D8=B／D9=A／D10=A。
+
+- [x] **PR1 首頁探索區**　`landing · M · 無`　地圖大卡＋六格磁貼牆，放頁尾 snap pane 之上、不新增第五段；首頁 HTML 常駐 7 個內容頁入口  見本 commit
+- [x] **PR2 Header／Subscribe／contact**　`nav · L · PR1`　頂欄收斂為品牌 pill＋帶文字「選單」觸發器＋訂閱／留言；桌機常駐兒童三入口（D0=C）；抽屜連結改常駐 DOM＋`inert`；`feedbackHref()` env→mailto；訂閱空清單退 `/subscribe`；主題切換移入抽屜底部；`openMenu` 浮層互斥＋斷點 reset＋outside click。DESIGN §53／§99／§276／§277 已改寫（§241 未動——D8=B 不改 footer）  見本 commit
+- [ ] **PR2 後續（設計審建議，未做）**　`nav · S · PR2`　(1) 觸發器文字「選單」對 3–7 歲仍抽象——但**現在不能改「給爸媽」**（抽屜 8 列中 6 列是兒童項，標籤會說謊）；正解是先把角色圖鑑／繪本著色移出抽屜、交給首頁磁貼牆承接，抽屜縮為純家長清單後再一次改標籤＋`aria-label`。(2) 「留言」是家長取向**動作**卻常駐頂欄，而家長取向**導覽**已降到抽屜，層級規則不一致；設計審建議移入抽屜「給爸媽」組，頂欄只留「訂閱」單一轉換 CTA——**需使用者裁決**（會動到原始需求的三入口）。(3) 觸發器 `aria-label` 隨開闔改寫可及名稱與 `aria-expanded` 重複播報，建議固定為「選單」（會動到四支 e2e 契約）。(4) 抽屜是半模態（有 focus trap 但無 scroll lock／背景 inert）；建議改為非模態 popover 或補齊模態語意。
+- [ ] **PR3 Footer／效能／文件**　`perf · M · PR2`　footer 不補 7 連結（D8=B，標 N/A）；**釐清三個同信箱入口**（ConnectHub Email 與頁尾「聯絡我們」重複，建議擇一）；既有 17 處裸 `<img>` 維持（D9=A，`SiteHeader` 手控 LCP、`LandingSegment` art direction 各附理由）；Lighthouse 門檻改 `max(85, main baseline)`
+
+> **頂欄背景既有事實（PR2 發現）：** landing 桌面的 `.bar` **從來就不是透明的**——`html:has([data-landing-root]) .bar`（特異性 0,2,1）壓過 `@media (min-width: 980px) .bar { background: transparent }`（0,1,0），實測 1440px 下日夜皆為 86% 桃色。「1c 懸浮膠囊」的視覺其實由 `.inner` 承擔。這不是本輪造成的，但規範敘述與實作不一致，值得另案釐清。
+
+> **視覺 baseline 債（PR1 發現）：** `npm run test:visual:trusted` 在**乾淨 main** 上就有 **44 張** baseline 失敗（已驗證：stash 掉本次變更後同樣紅）。這使本輪拿不到乾淨的視覺回歸訊號。**不得**併進功能 PR 一起重產——須另開一次「baseline 重產＋逐張人工目檢」的獨立 commit。
+
 ### 宇宙巢狀導覽（M0–M3）
 
 > URL 為導覽唯一來源：世界地圖 → `/adventures/[zone]`。座標 0–1（runtime 轉 px）。

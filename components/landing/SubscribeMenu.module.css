@@ -28,6 +28,11 @@
   transform: scale(0.98);
 }
 
+.trigger:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
 @media (hover: hover) {
   .trigger:hover {
     background: color-mix(in srgb, var(--landing-nav-cta-bg, #fff8f2) 72%, #ffe0c2);
@@ -100,4 +105,21 @@
     padding: 8px 12px;
     font-size: var(--fs-label);
   }
+}
+
+/* 與 SiteNavBar 同一列的三顆鈕須有一致的動態與焦點對比標準 */
+@media (prefers-reduced-motion: reduce) {
+  .trigger {
+    transition: none;
+  }
+
+  .trigger:active {
+    transform: none;
+  }
+}
+
+/* Landing 桌面膠囊浮在深色 hero 上，日間 --focus-ring（深墨）對比不足 */
+:global(html:has([data-landing-root])) .trigger:focus-visible {
+  outline: 3px solid var(--on-dark);
+  outline-offset: 2px;
 }

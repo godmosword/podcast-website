@@ -32,7 +32,7 @@ vi.mock("./LandingScrollContext", () => ({
 }));
 
 describe("LandingSegment", () => {
-  test("首段 Hero 不重複顯示訂閱收聽入口", async () => {
+  test("首段 Hero 不重複顯示訂閱入口", async () => {
     const { default: LandingSegment } = await import("./LandingSegment");
     const segment = resolveLandingSegments()[0]!;
     const html = renderToStaticMarkup(
@@ -43,7 +43,9 @@ describe("LandingSegment", () => {
       />,
     );
     expect(html).not.toContain('href="#connect"');
-    expect(html).not.toContain("訂閱收聽");
+    // 訂閱入口只在頂欄（文案已由「訂閱收聽」精簡為「訂閱」）
+    expect(html).not.toContain("訂閱");
+    expect(html).not.toContain('href="/subscribe"');
   });
 
   test("首段顯示網站導言，不顯示播放直達鈕", async () => {

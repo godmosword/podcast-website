@@ -1,0 +1,187 @@
+.root {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--space-8) clamp(16px, 4vw, 32px) var(--space-6);
+}
+
+.heading {
+  margin: 0 0 var(--space-4);
+  font-size: var(--fs-h2);
+  font-weight: 800;
+  color: var(--ink);
+  text-align: center;
+}
+
+.layout {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: 1fr;
+}
+
+/* ---- 地圖大卡 ---- */
+
+.mapCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--surface-elevated);
+  box-shadow: var(--elev-2);
+  color: inherit;
+  text-decoration: none;
+  transition: transform var(--motion-press), box-shadow var(--motion-press);
+}
+
+/* 觸控裝置上 :hover 會黏著（點完返回陰影不退），限定真正有 hover 的裝置 */
+@media (hover: hover) {
+  .mapCard:hover {
+    box-shadow: var(--elev-3);
+  }
+
+  .tile:hover {
+    box-shadow: var(--elev-2);
+  }
+}
+
+.mapCard:active {
+  transform: scale(0.98);
+}
+
+.mapCard:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.mapArt {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  /* 骨架：不用 placeholder="blur"（8 張 blurDataURL 會膨脹首頁 SSR HTML） */
+  aspect-ratio: 1 / 1;
+  /* 同心圓角：外框 --radius-lg(28) − 內距 --space-4(16) ≈ 12–14 */
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+  overflow: hidden;
+}
+
+.mapImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.mapLabel {
+  font-size: var(--fs-h3);
+  font-weight: 800;
+}
+
+/* ---- 磁貼牆 ---- */
+
+.tiles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.tileRow {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  /* 手機 2 欄 */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  /* 兒童動線觸控底線 48px（DESIGN 密度底線；不得為了通過 44px 清單而降回） */
+  min-height: 96px;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--surface-elevated);
+  box-shadow: var(--elev-1);
+  color: inherit;
+  text-decoration: none;
+  text-align: center;
+  transition: transform var(--motion-press), box-shadow var(--motion-press);
+}
+
+.tile:active {
+  transform: scale(0.98);
+}
+
+.tile:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.tileEmoji {
+  /* 對到字階；同一批圖徽在 SiteNavBar 用 --fs-h2，此處大一階作為首頁權重 */
+  font-size: var(--fs-h1);
+  line-height: 1;
+}
+
+.tileLabel {
+  font-size: var(--fs-control);
+  font-weight: 700;
+}
+
+/* 家長組：視覺權重降一階（非等權網格）；觸控 56px，仍高於 44px 底線 */
+.tileRow[data-audience="parent"] .tile {
+  flex-direction: row;
+  min-height: 56px;
+  gap: var(--space-3);
+}
+
+.tileRow[data-audience="parent"] .tileEmoji {
+  font-size: var(--fs-h3);
+}
+
+.tileRow[data-audience="parent"] .tileLabel {
+  font-size: var(--fs-label);
+}
+
+/* 夜間：emoji 降飽和，與行動抽屜同一處理 */
+:global(html[data-theme="night"]) .tileEmoji {
+  filter: saturate(0.55) brightness(0.92);
+}
+
+/* 行動首屏：大卡不獨佔，讓兒童磁貼至少半數進入首屏 */
+@media (max-width: 640px) {
+  .mapArt {
+    max-width: 200px;
+  }
+}
+
+@media (min-width: 768px) {
+  .layout {
+    grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .tileRow[data-audience="child"] {
+    /* 桌機 4 欄 */
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mapCard,
+  .tile {
+    transition: none;
+  }
+
+  .mapCard:active,
+  .tile:active {
+    transform: none;
+  }
+}

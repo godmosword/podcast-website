@@ -200,11 +200,17 @@ test("a11y：親子遊樂地圖（地圖檢視、地點詳情）無 critical/ser
   ).toEqual([]);
 });
 
-test("a11y：桌面親子指南直連可見且無 critical/serious 違規", async ({ page }) => {
+test("a11y：桌面抽屜展開態（含親子指南）無 critical/serious 違規", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/");
+
+  // 桌面主列只有兒童三入口；家長項在抽屜（D0=C）
   const capsuleNav = page.getByRole("navigation", { name: "主要分區" });
-  const parentGuideLink = capsuleNav.getByRole("link", { name: "親子指南" });
+  await expect(capsuleNav.getByRole("link", { name: "親子指南" })).toHaveCount(0);
+
+  await page.getByRole("button", { name: "開啟選單" }).click();
+  const drawer = page.getByRole("navigation", { name: "網站選單" });
+  const parentGuideLink = drawer.getByRole("link", { name: "親子指南" });
   await expect(parentGuideLink).toBeVisible();
   await expect(parentGuideLink).toHaveAttribute("href", /\/for-parents/);
 

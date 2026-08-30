@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { seedParentGatePassed } from "./parent-gate";
+import { PROGRESS_STORAGE_KEY } from "../lib/progress-store";
 
 test.describe.configure({ mode: "serial" });
 
@@ -10,28 +11,57 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
     "href",
     /podcast-website-mu\.vercel\.app\/?$/,
   );
-  // 品牌在 sticky 頂欄；桌面（≥980px）走 1c 膠囊內嵌導覽，漢堡僅行動版
+  // 品牌在 sticky 頂欄；桌面（≥980px）走膠囊內嵌導覽，漢堡**所有寬度都在**
   await expect(
     page.getByRole("link", { name: "車車遊樂園", exact: true }),
   ).toBeVisible();
+  // 桌面主列只留兒童三入口（D0=C）；家長項與角色圖鑑／繪本著色收在抽屜
   const capsuleNav = page.getByRole("navigation", { name: "主要分區" });
   await expect(capsuleNav.getByRole("link", { name: "全部故事" })).toBeVisible();
   await expect(capsuleNav.getByRole("link", { name: "遊樂園" })).toBeVisible();
   await expect(capsuleNav.getByRole("link", { name: "宇宙地圖" })).toBeVisible();
+  await expect(capsuleNav.getByRole("link")).toHaveCount(3);
   await expect(capsuleNav.getByRole("link", { name: "主題分類" })).toHaveCount(0);
-  // 育兒專欄（Threads）已整併進 /for-parents 頁內區塊
   await expect(capsuleNav.getByRole("link", { name: /育兒專欄/ })).toHaveCount(0);
-  const parentGuideLink = capsuleNav.getByRole("link", { name: "親子指南" });
-  await expect(parentGuideLink).toBeVisible();
-  await expect(parentGuideLink).toHaveAttribute("href", /\/for-parents/);
-  const playMapLink = capsuleNav.getByRole("link", { name: "親子景點" });
-  await expect(playMapLink).toBeVisible();
-  await expect(playMapLink).toHaveAttribute("href", /\/for-parents\/play-map/);
   await expect(capsuleNav.getByRole("button", { name: /更多/ })).toHaveCount(0);
   await expect(capsuleNav.getByRole("menu")).toHaveCount(0);
-  await expect(capsuleNav.getByText("指南首頁")).toHaveCount(0);
 
-  await expect(page.getByRole("button", { name: "開啟選單" })).toBeHidden();
+  // 頂欄常駐列：品牌（首頁）＋選單觸發器＋單一 CTA「訂閱」
+  // 多平台時「訂閱」是 dropdown button，單平台／空清單時才是 link
+  await expect(
+    page.getByRole("button", { name: "訂閱" }).or(
+      page.getByRole("link", { name: "訂閱" }),
+    ).first(),
+  ).toBeVisible();
+  // 「留言」已移入抽屜「給爸媽」組，頂欄不再有
+  await expect(page.getByRole("link", { name: "留言" })).toHaveCount(0);
+
+  // 桌面同樣有帶文字的選單觸發器（家長項只在抽屜，桌面隱藏＝入口消失）
+  const menuBtn = page.getByRole("button", { name: "開啟選單" });
+  await expect(menuBtn).toBeVisible();
+  await expect(menuBtn).toContainText("選單");
+
+  await menuBtn.click();
+  const desktopDrawer = page.getByRole("navigation", { name: "網站選單" });
+  await expect(desktopDrawer.getByRole("link", { name: "親子指南" })).toBeVisible();
+  await expect(desktopDrawer.getByRole("link", { name: "親子景點" })).toBeVisible();
+  await expect(desktopDrawer.getByRole("link", { name: "首頁" })).toBeVisible();
+  await expect(desktopDrawer.getByText("給爸媽")).toBeVisible();
+  // 「留言」在家長組，且為 mailto／外部表單
+  const drawerFeedback = desktopDrawer.getByRole("link", { name: "留言" });
+  await expect(drawerFeedback).toBeVisible();
+  await expect(drawerFeedback).toHaveAttribute("href", /^(mailto:|https?:)/);
+  // 面板必須錨定膠囊本體（.inner），不是整條 .bar——否則會掉出全寬下拉
+  const capsuleBox = await page.locator("header > div").first().boundingBox();
+  const panelBox = await desktopDrawer.boundingBox();
+  expect(panelBox!.x).toBeGreaterThanOrEqual(capsuleBox!.x - 1);
+  expect(panelBox!.width).toBeLessThan(capsuleBox!.width);
+  expect(panelBox!.width).toBeLessThanOrEqual(380);
+
+  // 面板必須真的可點（landing 桌面 .bar 為 pointer-events: none）
+  await desktopDrawer.getByRole("link", { name: "親子指南" }).click();
+  await expect(page).toHaveURL(/\/for-parents$/);
+  await page.goto("/");
   // 第一段標題視覺隱藏（clip 1px，給 aria-labelledby）；四段 accessible name 仍在
   const storiesHeading = page.getByRole("heading", {
     name: /車車與\s?遊樂園的故事/,
@@ -55,11 +85,55 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   ).toBeVisible();
 });
 
+test("夜間桌面開抽屜：微暗只套膠囊，外層 .bar 不因開闔改變（不得出現全寬色帶）", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  // 直接寫 data-theme 會被 ThemeProvider 的 effect 覆寫回持久化值；
+  // 改在 navigation 前種下偏好，讓 ThemeProvider mount 時就是 night。
+  await page.addInitScript(
+    ({ storageKey }: { storageKey: string }) => {
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify({ preferences: { theme: "night" } }),
+      );
+    },
+    { storageKey: PROGRESS_STORAGE_KEY },
+  );
+  await page.goto("/");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "night");
+
+  const bar = page.locator("header").first();
+  const capsule = page.locator("header > div").first();
+  const bg = (loc: typeof bar) =>
+    loc.evaluate((el) => getComputedStyle(el).backgroundColor);
+
+  const barClosed = await bg(bar);
+  const capsuleClosed = await bg(capsule);
+
+  await page.getByRole("button", { name: "開啟選單" }).click();
+
+  // 外層必須不隨開闔改變——否則膠囊外會多出一條橫貫視窗的色帶。
+  // （註：landing 桌面的 .bar 本來就不是透明的，見 SiteNavBar.module.css 的
+  //  `html:has([data-landing-root]) .bar` 規則；此處鎖的是「開闔不得改變它」。）
+  expect(await bg(bar)).toBe(barClosed);
+
+  // 微暗確實套在膠囊本體上（背景走 transition，需輪詢等它到位）
+  await expect.poll(() => bg(capsule)).not.toBe(capsuleClosed);
+
+  await page.getByRole("button", { name: "關閉選單" }).click();
+  await expect.poll(() => bg(capsule)).toBe(capsuleClosed);
+});
+
 test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   // 行動版漢堡選單；主題分類與桌面一致不進導覽（頁面仍可直達 /topic）
   await expect(page.getByRole("button", { name: "開啟選單" })).toBeVisible();
+  // 行動版桌面主列收起，全部分區都走抽屜
+  await expect(
+    page.getByRole("navigation", { name: "主要分區" }),
+  ).not.toBeVisible();
   await page.getByRole("button", { name: "開啟選單" }).click();
   const drawerNav = page.getByRole("navigation", { name: "網站選單" });
   await expect(drawerNav.getByRole("button", { name: "搜尋" })).toHaveCount(0);
@@ -279,4 +353,145 @@ test("繽紛消消樂：標題 → 地圖 → 第 1 關棋盤", async ({ page })
   // 任務列與道具列存在
   await expect(page.getByText(/泡泡/)).toBeVisible();
   await expect(page.getByRole("button", { name: /提示/ })).toBeVisible();
+});
+
+test.describe("首頁探索區（PR1）", () => {
+  const EXPLORE_HREFS = [
+    "/stories",
+    "/characters",
+    "/games",
+    "/games/coloring-book",
+    "/adventures",
+    "/for-parents",
+    "/for-parents/play-map",
+  ];
+
+  test("7 個內容頁入口在首頁 HTML 內且可見", async ({ page }) => {
+    await page.goto("/");
+    const explore = page.getByRole("region", { name: "都去哪裡玩？" });
+    await explore.scrollIntoViewIfNeeded();
+    await expect(explore).toBeVisible();
+
+    for (const href of EXPLORE_HREFS) {
+      await expect(explore.locator(`a[href="${href}"]`)).toBeVisible();
+    }
+  });
+
+  test("標題與磁貼標籤為 HTML 文字（非燒進圖片）", async ({ page }) => {
+    await page.goto("/");
+    const html = await page.content();
+    for (const label of [
+      "都去哪裡玩？",
+      "全部故事",
+      "遊樂園",
+      "繪本著色",
+      "角色圖鑑",
+      "宇宙地圖",
+      "親子指南",
+      "親子景點",
+    ]) {
+      expect(html).toContain(label);
+    }
+  });
+
+  test("375px 下探索區不造成橫向溢出", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto("/");
+    await page
+      .getByRole("region", { name: "都去哪裡玩？" })
+      .scrollIntoViewIfNeeded();
+    const scrollWidth = await page.evaluate(
+      () => document.documentElement.scrollWidth,
+    );
+    expect(scrollWidth).toBeLessThanOrEqual(375);
+  });
+
+  test("磁貼可點並跳轉；兒童入口觸控 ≥48px", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto("/");
+    const explore = page.getByRole("region", { name: "都去哪裡玩？" });
+    await explore.scrollIntoViewIfNeeded();
+
+    const tile = explore.locator('a[href="/stories"]');
+    const box = await tile.boundingBox();
+    expect(box!.height).toBeGreaterThanOrEqual(48);
+
+    await tile.click();
+    await expect(page).toHaveURL(/\/stories$/);
+  });
+
+  test("探索區之後仍可捲到頁尾版權列（mandatory snap 超高 pane）", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto("/");
+    // 不用 scrollIntoViewIfNeeded()——那是程式化定位，會繞過 snap 攔截而假性通過。
+    // 改為從 footer pane 頂端起，以連續 wheel 事件模擬使用者滑動。
+    await page.locator("#landing-foot").scrollIntoViewIfNeeded();
+
+    // 捲動容器是 LandingScrollView（`[data-landing-root]` 內）；hover 到頁尾區塊即可
+    // 讓 wheel 事件落在該容器上。
+    await page.locator("#landing-foot").hover();
+
+    for (let i = 0; i < 12; i += 1) {
+      await page.mouse.wheel(0, 600);
+      await page.waitForTimeout(80);
+    }
+
+    // 捲動確實抵達容器底部（非只是元素被程式化拉進視窗）
+    const atBottom = await page.evaluate(() => {
+      const el = document.scrollingElement!;
+      const candidates: Element[] = [el, ...document.querySelectorAll("*")];
+      for (const node of candidates) {
+        const c = node as HTMLElement;
+        if (c.scrollHeight - c.clientHeight < 200) continue;
+        if (c.scrollTop + c.clientHeight >= c.scrollHeight - 4) return true;
+      }
+      return false;
+    });
+    expect(atBottom).toBe(true);
+
+    // 註：首頁的 <footer> 仍不具 contentinfo——它位於 app/page.tsx 的
+    // `<main data-landing-root>` 之內，而 <main> 本身就是 contentinfo 隱含角色的
+    // 排除祖先（與 #landing-foot 用 section 或 div 無關）。以版權列當可見性錨點。
+    const copyright = page.getByText("© 車車遊樂園™ · Bonbon & 馬米");
+    await expect(copyright).toBeInViewport();
+
+    // 版權列不得被 ≤768px 貼底的 SegmentNav 實心列壓住
+    const copyrightBox = await copyright.boundingBox();
+    const segmentNav = page.getByRole("navigation", { name: /分區|段落/ });
+    if (await segmentNav.count()) {
+      const navBox = await segmentNav.first().boundingBox();
+      if (navBox) {
+        expect(copyrightBox!.y + copyrightBox!.height).toBeLessThanOrEqual(
+          navBox.y + 1,
+        );
+      }
+    }
+  });
+  test("≥768px 為左地圖大卡＋右磁貼牆並排，兒童組 4 欄", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/");
+    const explore = page.getByRole("region", { name: "都去哪裡玩？" });
+    await explore.scrollIntoViewIfNeeded();
+
+    const mapBox = await explore.locator('a[href="/adventures"]').boundingBox();
+    const firstTile = await explore.locator('a[href="/stories"]').boundingBox();
+    // 地圖大卡在左、磁貼在右（並排而非上下堆疊）
+    expect(mapBox!.x + mapBox!.width).toBeLessThanOrEqual(firstTile!.x + 1);
+
+    // 兒童組四格同一列（y 座標相同）
+    const childHrefs = [
+      "/stories",
+      "/games",
+      "/games/coloring-book",
+      "/characters",
+    ];
+    const ys: number[] = [];
+    for (const href of childHrefs) {
+      const box = await explore.locator(`a[href="${href}"]`).boundingBox();
+      ys.push(Math.round(box!.y));
+    }
+    expect(new Set(ys).size).toBe(1);
+  });
 });

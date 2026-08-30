@@ -4,6 +4,7 @@ import LandingScrollView from "@/components/landing/LandingScrollView";
 import LandingSegment from "@/components/landing/LandingSegment";
 import SegmentNav from "@/components/landing/SegmentNav";
 import DuduCompanion from "@/components/landing/DuduCompanion";
+import ExploreGrid from "@/components/landing/ExploreGrid";
 import LandingBedtimeLayer from "@/components/landing/LandingBedtimeLayer";
 import { DUDU_EMOTION_BY_SEGMENT } from "@/data/dudu-emotions";
 import { homeSiteIntro } from "@/lib/home-geo";
@@ -53,11 +54,16 @@ export default function LandingHub() {
           />
         ))}
 
-        <section id={FOOTER_ANCHOR} className={hubStyles.footerPane}>
+        {/* 探索區在 footer pane 之上、與頁尾同一個 snap 停駐點（不新增第五段）。
+            用 <div> 而非無名 <section>：錨點 id 與 snap 樣式都不需要 sectioning content。
+            （注意：這**不會**讓 SiteFooter 取得 contentinfo——首頁整頁包在
+            `app/page.tsx` 的 `<main data-landing-root>` 內，<main> 本身即排除祖先。） */}
+        <div id={FOOTER_ANCHOR} className={hubStyles.footerPane}>
+          <ExploreGrid />
           <div className={hubStyles.footer}>
             <SiteFooter layout="home" />
           </div>
-        </section>
+        </div>
 
         <DuduCompanion items={duduItems} footerId={FOOTER_ANCHOR} />
       </LandingScrollView>

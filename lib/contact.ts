@@ -13,6 +13,18 @@ export function contactHref(): string {
   return `mailto:${CONTACT_EMAIL}`;
 }
 
+/**
+ * 頂欄「留言」入口（`SiteNavBar`）。與 `contactHref()` 刻意分開：
+ * 「聯絡我們」是頁尾的一般聯絡管道，「留言」是給節目的回饋，兩者可指向不同表單。
+ * 未設定 `NEXT_PUBLIC_FEEDBACK_FORM_URL` 時降級為 mailto——**恆有目的地**，
+ * 不像 `SiteHeader` 的圓鈕那樣整顆消失（頂欄三入口是版面契約，不可被 env 掀桌）。
+ */
+export function feedbackHref(): string {
+  const formUrl = process.env.NEXT_PUBLIC_FEEDBACK_FORM_URL?.trim();
+  if (formUrl) return formUrl;
+  return `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("留言給車車遊樂園")}`;
+}
+
 /** 是否為外連（http/https）；mailto 等不算外連。 */
 export function isContactExternal(href: string): boolean {
   return /^https?:\/\//i.test(href);

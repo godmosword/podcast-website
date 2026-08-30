@@ -1,24 +1,46 @@
-/* Footer snap pane：最後一段 hero 下捲可穩定停駐，不再彈回 */
+/* Footer snap pane：最後一段 hero 下捲可穩定停駐，不再彈回。
+ * 探索區進駐後此 pane 會高於一屏——`min-height` 保留為「至少一屏」的下限，
+ * `justify-content` 改 flex-start：內容超過一屏時 flex-end 會把頂部推出可視範圍。
+ * mandatory snap 下的超高 pane 需 iOS 實機驗證可捲到版權列。 */
 .footerPane {
   scroll-snap-align: start;
-  scroll-snap-stop: always;
+  /* 探索區進駐後本 pane 高於一屏：mandatory snap ＋ `scroll-snap-stop: always`
+   * 會攔截滑動，使溢出內容（頁尾／版權列）難以抵達（MDN scroll snap 已知風險）。
+   * 保留 `snap-align: start`（抵達時仍穩定停駐、不彈回），但**移除強制停駐**，
+   * 讓較長的一次滑動可以直接帶過 pane 頂端繼續往下。 */
   min-height: var(--landing-pane-h, calc(100svh - var(--nav-h)));
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: flex-start;
   flex: none;
-  background: var(--bg);
-}
-
-/* 最後一段 hero → 頁尾：跟隨主題的淺色漸層銜接 */
-.footer {
-  width: 100%;
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 8px clamp(16px, 4vw, 32px) calc(4px + var(--safe-bottom));
+  /* 最後一段 hero → 探索區：暖色漸層橋接移到 **pane 頂緣**。
+   * 探索區進駐後，原本掛在 `.footer` 上的漸層被推到 pane 中段，
+   * 滿版黏土 hero 會直接硬切到白面。 */
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--bg) 82%, var(--surface-game-warm)) 0%,
     var(--bg) 72px
   );
+}
+
+/* ≤768px 的 SegmentNav 是貼底 fixed 實心列（44px + safe-area），
+ * 探索區讓本 pane 從「掃過去」變成「會停留操作」，需為它留位避免壓住頁尾文字。 */
+@media (max-width: 768px) {
+  .footerPane {
+    padding-bottom: calc(44px + var(--safe-bottom));
+  }
+}
+
+/* 內容不足一屏時（極寬螢幕），頁尾仍貼底 */
+.footerPane > .footer {
+  margin-top: auto;
+}
+
+/* 頁尾本體：漸層橋接已上移到 `.footerPane` 頂緣，此處回歸純底色 */
+.footer {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 8px clamp(16px, 4vw, 32px) calc(4px + var(--safe-bottom));
+  background: var(--bg);
 }

@@ -33,6 +33,8 @@
 }
 
 .inner {
+  /* 桌面面板 absolute 錨定於膠囊本體；不設此行會回落到 .bar，變成全寬下拉 */
+  position: relative;
   max-width: 960px;
   margin: 0 auto;
   padding: calc(10px + var(--safe-top)) calc(16px + var(--safe-right))
@@ -76,8 +78,13 @@
 }
 
 .menuBtn {
-  width: 44px;
+  /* icon + 可見文字；仍維持無底板（夜間桃色頂欄上不出現深色塊） */
+  min-width: 44px;
   height: 44px;
+  gap: 6px;
+  /* 與品牌之間的視覺區隔：觸發器不可與字標黏在一起 */
+  margin-left: var(--space-2);
+  padding: 0 10px;
   border: 0;
   border-radius: var(--radius-sm);
   background: transparent;
@@ -88,18 +95,28 @@
   align-items: center;
   justify-content: center;
   color: inherit;
-  padding: 0;
+  font-weight: 800;
+  font-size: var(--fs-control);
+  font-family: inherit;
   transition: transform var(--motion-press), opacity var(--motion-press);
 }
 
-.menuBtn:active {
-  transform: scale(0.98);
-  opacity: 0.9;
+.menuBtnText {
+  white-space: nowrap;
 }
 
-.menuBtn:focus-visible {
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 2px;
+/* 極窄容器：先收品牌字標（見下方 300px 區塊）。
+ * 「選單」二字**不在 300px 收**——那會讓觸發器變成 DESIGN §99 明文禁止的
+ * icon-only，且該寬度下頂欄只剩 mascot 圖，兒童完全沒有文字線索。
+ * 只有極端窄（240px）才讓位。 */
+@container nav-inner (max-width: 240px) {
+  .menuBtnText {
+    display: none;
+  }
+}
+
+.panel[data-open="false"] {
+  display: none;
 }
 
 .panel {
@@ -121,14 +138,26 @@
 .menuList {
   list-style: none;
   margin: 0;
-
   padding: 0;
 }
 
-/* 換組（探索 → 家長）：內縮短分隔線＋間距，不用文字標題 */
+/* 換組（探索 → 家長）：內縮短分隔線＋間距。
+ * 不對稱分組——探索組不加標題（對不識字兒童零資訊），家長組才有小標。 */
+.menuGroupLabel {
+  margin: 0 0 var(--space-2);
+  padding-left: 10px;
+  font-size: var(--fs-label);
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
 .menuGroupStart {
   margin-top: 20px;
   position: relative;
+}
+
+.menuGroupStart .menuList {
+  margin: 0;
 }
 
 .menuGroupStart::before {
@@ -161,9 +190,17 @@
   text-align: center;
 }
 
-.menuLink:hover,
+@media (hover: hover) {
+  .menuLink:hover {
+    background: rgba(120, 80, 40, 0.08);
+  }
+}
+
+/* 目前頁與「滑過」必須可區分，且不得只靠顏色 */
 .menuLink[aria-current="page"] {
-  background: rgba(120, 80, 40, 0.08);
+  background: rgba(120, 80, 40, 0.12);
+  font-weight: 800;
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 .menuLink:active {
@@ -185,7 +222,12 @@
 
 /* ---- 夜間：行動漢堡面板質感（頂欄預設不反轉；開啟選單時微暗銜接） ---- */
 
-/* 僅行動斷點：選單開啟時頂欄混入夜底，緩和桃色×深藍斷層 */
+/* 選單開啟時混入夜底，緩和桃色×深藍斷層；**僅在開啟時**套用、關閉即恢復，
+ * 因此不違反 DESIGN「頂欄不反轉」。
+ *
+ * **必須分斷點**：`html[data-theme="night"] .bar[data-menu-open]`（0,3,1）特異性高於
+ * `@media (min-width: 980px) .bar { background: transparent }`（0,1,0），媒體查詢不加權重，
+ * 若不限斷點，桌面夜間一開抽屜就會在懸浮膠囊外畫出一條橫貫視窗的色帶。 */
 @media (max-width: 979px) {
   :global(html[data-theme="night"]) .bar[data-menu-open="true"] {
     background: color-mix(
@@ -205,6 +247,18 @@
   }
 }
 
+/* ≥980：外層 .bar 保持透明（懸浮膠囊），微暗只套在膠囊本體 */
+@media (min-width: 980px) {
+  :global(html[data-theme="night"]) .bar[data-menu-open="true"] .inner {
+    background: color-mix(
+      in srgb,
+      var(--landing-nav-cta-bg) 38%,
+      color-mix(in srgb, var(--bg) 72%, var(--c-yellow) 8%)
+    );
+    color: color-mix(in srgb, var(--landing-nav-ink) 48%, var(--ink));
+  }
+}
+
 :global(html[data-theme="night"]) .panel {
   /* 頂緣暖色 hairline 銜接（含開啟時微暗頂欄）；陰影改夜色 */
   border-top: 1px solid color-mix(in srgb, var(--landing-nav-border) 55%, var(--hairline));
@@ -217,9 +271,12 @@
   filter: saturate(0.55) brightness(0.92);
 }
 
-:global(html[data-theme="night"]) .menuLink:hover,
-:global(html[data-theme="night"]) .menuLink[aria-current="page"] {
+:global(html[data-theme="night"]) .menuLink:hover {
   background: color-mix(in srgb, var(--c-teal) 14%, transparent);
+}
+
+:global(html[data-theme="night"]) .menuLink[aria-current="page"] {
+  background: color-mix(in srgb, var(--c-teal) 22%, transparent);
 }
 
 :global(html[data-theme="night"]) .menuGroupStart::before {
@@ -229,10 +286,6 @@
 /* ---- 桌面膠囊內嵌導覽（1c）：<980px 隱藏，走漢堡 ---- */
 
 .desktopNav {
-  display: none;
-}
-
-.themeDesktop {
   display: none;
 }
 
@@ -253,8 +306,10 @@
   transition: background var(--motion-press);
 }
 
-.navLink:hover {
-  background: rgba(107, 63, 30, 0.09);
+@media (hover: hover) {
+  .navLink:hover {
+    background: rgba(107, 63, 30, 0.09);
+  }
 }
 
 .navLink:focus-visible {
@@ -262,13 +317,33 @@
   outline-offset: 2px;
 }
 
-.navLinkActive {
-  background: rgba(107, 63, 30, 0.12);
+/* 目前頁與 hover 不得共用同一底色，且色彩不可為唯一編碼（同抽屜規則） */
+.navLink[aria-current="page"] {
+  background: rgba(107, 63, 30, 0.14);
+  font-weight: 800;
+  box-shadow: inset 0 -3px 0 var(--accent);
+}
+
+:global(html[data-theme="night"]) .navLink[aria-current="page"] {
+  background: color-mix(in srgb, var(--c-teal) 22%, transparent);
+}
+
+/* Landing 桌面膠囊浮在深色 hero 上，日間 --focus-ring（深墨）對比不足 */
+:global(html:has([data-landing-root])) .menuBtn:focus-visible,
+:global(html:has([data-landing-root])) .navLink:focus-visible {
+  outline-color: var(--on-dark);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bar {
+  .bar,
+  .menuBtn,
+  .menuLink,
+  .navLink {
     transition: none;
+  }
+
+  .menuBtn:active {
+    transform: none;
   }
 }
 
@@ -300,29 +375,37 @@
   }
 
   .desktopNav {
-    display: flex;
     align-items: center;
-    gap: 0;
-    margin-left: 4px;
+    gap: 2px;
+    margin-left: var(--space-2);
     margin-right: auto;
   }
 
-  .themeDesktop {
-    display: inline-flex;
+  /* 桌面仍有漢堡：家長項與角色圖鑑／繪本著色都在抽屜裡（D0=C） */
+  .desktopNav {
+    display: flex;
   }
 
-  .menuBtn {
-    display: none;
-  }
-
-  /* 桌面選單全數內嵌，漢堡面板僅屬行動版 */
+  /* 面板錨定膠囊本體（.inner），而非整條 .bar——否則會掉出 1160px 全寬下拉 */
   .panel {
-    display: none;
+    top: calc(100% + 8px);
+    left: 8px;
+    right: auto;
+    width: min(360px, calc(100vw - 40px));
+    max-height: min(70dvh, 560px);
+    border-radius: var(--radius-lg);
+    border-top: none;
+    border: 1px solid var(--line);
   }
 
   /* 首頁 hero 滿版時，透明外層不攔截 hero 頂部點擊；互動全在膠囊本體 */
   :global(html:has([data-landing-root])) .bar {
     pointer-events: none;
+  }
+
+  /* `.panel` 是 `.inner` 的兄弟節點：不一併還原就會整片不可點 */
+  :global(html:has([data-landing-root])) .bar .panel {
+    pointer-events: auto;
   }
 
   :global(html:has([data-landing-root])) .bar .inner {

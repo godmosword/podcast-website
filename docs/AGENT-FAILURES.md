@@ -50,6 +50,7 @@
 
 | 日期 | 命令／模型 | 症狀（exit code／timeout／額度／輸出品質） | 處置 |
 |------|------------|---------------------------------------------|------|
+| 2026-08-29 | `grok models`／`grok -p ... -m grok-4.6`（Claude Code 對抗審**備援**） | `You are not authenticated.`（可用清單仍列 `grok-4.6` default、`grok-4.5`）。主路徑 `cursor-grok-4.5-high-fast` 依 30 天規則（08-10／08-15 兩列未解除）已構成缺席、本輪未重試 | 兩路皆斷 → 本輪（top bar 精簡 plan）標**對抗審缺席／對抗性降級**；未用其他模型頂替。請使用者執行 `grok login --device-auth`，或 `cursor-agent login`／設 `CURSOR_API_KEY` 恢復主路徑 |
 | 2026-08-29 | Task `typescript-reviewer` + `gpt-5.6-luna-max-fast`（CRITICAL-4/5 diff 工程審） | Cursor Task **Aborted**，無產出；主線乾等子 agent 完成通知，對話看起來卡住 | 本輪標**缺席**，不重派。Opus／Composer 已回 Approve with nits。之後 Task abort 立刻用已回的審收斂，勿乾等 |
 | 2026-08-23 | Task `architect` + `claude-opus-5-thinking-high`（diff 設計審） | 前兩次只留下 user prompt、無產出；第三次成功（無 CRITICAL，HIGH：SW v7 會清離線故事） | 第三次產出完整設計審 → **已解除**。本輪依 HIGH 退回 `chechecar-v6`。不計 30 天缺席（stall 後成功，非 slug 拒收） |
 | 2026-08-15 | `cursor-agent -p --model cursor-grok-4.5-high-fast --mode ask`（Claude Code 對抗審主路徑） | `Error: Authentication required. Please run 'agent login' first, or set CURSOR_API_KEY environment variable.`（exit 0，須看輸出內容）。`CURSOR_API_KEY` 未設定 | 與 2026-08-10 同症狀 → **30 天內第 2 筆未解除，`cursor-grok-4.5-high-fast` 正式構成缺席**，本輪不再重試該 slug。依探活表轉備援 grok CLI（見下列，成功）。請使用者執行 `cursor-agent login` 或設 `CURSOR_API_KEY` 以恢復主路徑 |

@@ -50,7 +50,7 @@ Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範
 
 ## 響應式斷點
 
-- viewport 只使用四層：`480px`（手機／小尺寸控制）、`640px`（內容欄與手機版型）、`768px`（平板雙欄）、`980px`（全站膠囊導覽＋Landing 桌面版）。內容欄最大寬（如家長頁 `min(920px, 100%)`）不屬 viewport 切版斷點。
+- viewport 只使用四層：`480px`（手機／小尺寸控制）、`640px`（內容欄與手機版型）、`768px`（平板雙欄）、`980px`（全站膠囊導覽＋Landing 桌面版；**漢堡不隨此斷點消失**，見首頁 IA）。內容欄最大寬（如家長頁 `min(920px, 100%)`）不屬 viewport 切版斷點。
 - 導覽內部依父容器寬度使用 `@container nav-inner (max-width: 300px)`；元件尺寸受父容器影響時優先用 container query，不新增任意 viewport breakpoint。
 - 新頁面先用 fluid `clamp()` 與現有 token；只有整體版型切換才使用上述斷點。
 
@@ -96,7 +96,7 @@ Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範
 |------|------|
 | 暖底＋可讀層次 | `--bg` `#1e2438`；`--bg-2`／`--card`／`--card-2` 拉開明度，搜尋與卡片有浮層 |
 | Accent 降飽和 | `--c-*`、`--night-link`、`--landing-heading` 比日間／舊夜版低一檔 chroma |
-| 頂欄不反轉 | `SiteNavBar` 桃色玻璃頂欄預設維持日間色；行動漢堡為無底板 icon（避免夜色 `--surface-glass` 在桃色頂欄上成一塊深底）；漢堡開啟時（行動＋night）頂欄微暗混入 `--bg` 銜接面板，關閉即恢復；不改 ThemeProvider |
+| 頂欄不反轉 | `SiteNavBar` 桃色玻璃頂欄預設維持日間色；漢堡為**無底板 icon ＋ 可見文字「選單」**（不加底板，避免夜色 `--surface-glass` 在桃色頂欄上成一塊深底；不用 icon-only，辨識度不足）；漢堡**在所有寬度都在**，開啟時（含桌面＋night）頂欄微暗混入 `--bg` 銜接面板、**關閉即恢復**——只在 `[data-menu-open]` 為真時套用，故不違反「不反轉」；不改 ThemeProvider |
 | Emoji 降飽和 | 行動選單／主題切換 glyph 用 `filter: saturate(0.55) brightness(0.92)`，不換成線稿 icon |
 | 地圖不反轉 | 宇宙地圖場景色固定印刷淺色（見紅線）。地圖 chrome（縮放鍵／探索點標籤／召喚把手）走 `--map-chip`／`--map-chip-2`／`--map-chip-ink`／`--map-chip-line`，`[data-theme="night"]` **不覆寫**——用 `--card`／`--ink` 會在深靛夜海上失去輪廓。**真實世界地圖**（`/for-parents/play-map`）的 OSM tile 同樣**禁止 invert**；該頁篩選 chip、Sheet 等頁面層 chrome **不**共用 `--map-chip*`（改 ghost／`--accent-ink`），僅縮放鍵、cluster、mapHint 保留 |
 
@@ -273,12 +273,22 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 Storyline 式**全螢幕分段捲動**：每段一張滿版黏土 hero（桌面 `segment-{id}.jpg` 16:9；行動 ≤768px `segment-{id}-portrait.jpg` 9:16），大圖主導 + 底部漸層遮罩 + 左下分區 CTA。**不**顯示段編號（如 01/04）。段標題仍視覺隱藏（CSS module `titleHidden`，給輔助科技／`aria-labelledby`），不疊在美術上；可見 CTA 為長句段名（本輪 Landing 例外，可超過「CTA ≤ 6 字」）；`href` 不變。分區 CTA 走**深色玻璃 ghost**（`min-height: 56px`、`rgba(0,0,0,0.38)`、白邊），字色 `--c-yellow`，字級桌面 `--fs-h2`、≤768 `--fs-h3`、≤640 `--fs-h4`，**非**橘色實心 pill；段內 `.next` 往下箭點視覺降權（極淡深色玻璃底）。不放「聽最新一集」播放直達鈕。首段 GEO 導言仍用全域 `.sr-only`。
 
 1. **SiteNavBar**（全站橘色頂欄 + 訂閱 CTA）
-   - **桌面（≥980px）**懸浮膠囊主列：全部故事／角色圖鑑／遊樂園／宇宙地圖／**親子景點**／**親子指南**。「親子景點」直連 `/for-parents/play-map`（路徑不另開頂層路由）；「親子指南」直連 `/for-parents`。無「更多」下拉。Threads 育兒分享仍由 `/for-parents` 頁內「育兒小筆記」外連卡承接（Threads 缺席時整卡不渲染）。主題切換與訂閱膠囊常駐。**成長主題（`/topic`）不佔導覽**（屬家長取向且與 /stories 篩選重疊），頁面仍可直達。主列 6 項時維持 980 斷點與既有密度調整，不縮觸控區。
-   - **行動（＜980px）**漢堡抽屜：單欄依 **探索**（故事／角色圖鑑／遊樂園／繪本著色／宇宙地圖）→ **家長**（親子指南、**📍 親子景點**）分組；不含搜尋列（故事搜尋仍在 `/stories`）。「親子景點」連 `/for-parents/play-map`，與「親子指南」並列於家長組。與桌面一致不列「主題分類」。繪本著色雖為 `/games` 子路徑，仍在探索組獨立列出（兒童動線不應只能從遊樂園內層進入）；active 判定採**最長匹配獨佔**，`/games/coloring-book` 不得讓「遊樂園」同時高亮；`/for-parents/play-map` 僅「親子景點」高亮。
+   - **頂欄常駐列（2026-08-29 起）**：品牌 pill（**即首頁入口**，不另放「首頁」文字 pill）→ **選單觸發器**（緊接品牌右側、非最右，與字標之間留視覺區隔）→ 右側**只有 `訂閱`** 這唯一一個轉換型 CTA。**主題切換移出頂欄**，改在抽屜底部。訂閱文案由「訂閱收聽」精簡為「**訂閱**」；`visiblePlatforms()` 為空時**不得整顆消失**，退為站內 `/subscribe`（頂欄入口是版面契約，不可被資料狀態掀桌）。
+   - **「留言」不在頂欄**，在抽屜「給爸媽」組。兩個理由：(1) 家長取向的**導覽**（親子指南／親子景點）既然收進抽屜，家長取向的**動作**留在頂欄會讓層級規則自相矛盾；(2) `NEXT_PUBLIC_FEEDBACK_FORM_URL` 未設定時 `feedbackHref()` 降級 mailto，會與頁尾「聯絡我們」、`ConnectHub` 的 Email icon **指向同一信箱**——2026-08-29 實測首頁曾同時有三個同信箱入口。若日後接上真正的回饋表單（與「聯絡我們」語意分開），可再議是否回到頂欄。`feedbackHref()` 恆有目的地（與 `SiteHeader` 那組 env-gated 圓鈕不同）；外連才加 `target="_blank" rel="noopener noreferrer"`，mailto 不加。
+   - **桌面（≥980px）**懸浮膠囊主列**只留兒童三入口**：全部故事／遊樂園／宇宙地圖。理由：3–7 歲不識字兒童辨識靠圖像與位置，把入口收進「先點抽象觸發器、再讀文字清單」的兩段式互動等於**入口消失**；家長取向的親子指南／親子景點沒有這個問題，收進抽屜換取頂欄水平預算。角色圖鑑與繪本著色亦在抽屜（首頁探索磁貼牆另有大圖入口）。無「更多」下拉。Threads 育兒分享仍由 `/for-parents` 頁內「育兒小筆記」外連卡承接。**成長主題（`/topic`）不佔導覽**，頁面仍可直達。
+   - **漢堡在所有寬度都在**（桌面不得 `display: none`——家長項只在抽屜，隱藏即入口消失）。桌面面板**錨定膠囊本體 `.inner`**——面板的 JSX **必須巢狀在 `.inner` 之內**（`.inner` 有 `container-type: inline-size`，本身即 containing block；只加 `position: relative` 但把面板放在 `.inner` 外面**無效**，會退回錨定 `.bar` 變成全寬下拉。已在 1440px 實測：膠囊 x=140、面板 x=149），`width: min(360px, calc(100vw - 40px))` 靠左對齊觸發器。Landing 桌面 `.bar` 為 `pointer-events: none`，**`.panel` 必須一併還原 `auto`**（它是 `.inner` 的兄弟節點，否則整片不可點）。
+   - **漢堡抽屜**（所有寬度）：單欄依 **首頁** → **探索**（故事／角色圖鑑／遊樂園／繪本著色／宇宙地圖）→ **家長**（親子指南、**📍 親子景點**、**✉️ 留言**）分組，共 9 列；底部放主題切換。**不對稱分組**：探索組**不加**文字標題（第一組是預設，文字標題對不識字兒童是零資訊，只多兩行噪音並把觸控目標下推），**家長組上方加一行 `--fs-label` 小標「給爸媽」**（家長需要快速判斷「下面是給我的」）。**連結常駐 DOM、以 CSS `display: none` 隱藏**——`{open && …}` 會讓爬蟲在關閉態讀不到任何站內連結；關閉時另加 `inert`（只靠 `opacity: 0` 不足，只靠 `inert` 也不足）。目前頁與 hover **不得共用同一底色**（色彩不可為唯一編碼）：`[aria-current="page"]` 另加 `inset` accent bar ＋加粗，**桌面主列與抽屜同一規則**（`.navLink[aria-current]` 與 `.menuLink[aria-current]`，皆有 night override）。抽屜為**兩個 `role="list"`**（`list-style: none` 在 Safari/VoiceOver 會移除清單語意），家長組以 `aria-labelledby` 綁「給爸媽」小標，讓 AT 拿到與視覺分組對等的語意。同時只允許一個浮層開著（`openMenu: "none" | "subscribe" | "nav"`）——兩個 focus trap 同時 active 會互搶 Tab；跨越 980 斷點時關閉抽屜（舊碼會留下 `open=true` 卻不可見的面板，焦點掉到 body）。開啟時焦點移入第一個連結、關閉時還給觸發器；Esc 與點浮層外部皆可關閉。**頂欄內的品牌／桌面主列／留言連結也必須 `closeAll`**——它們在 `.bar` 內，outside-click 判定不會關閉，client navigation 又保留元件 instance，漏掉會讓抽屜跨頁殘留、focus trap 持續作用。`Shift+Tab` 目前無法從面板回到觸發器（Escape 與點外部可關閉），若日後升級為 modal drawer 再補面板內關閉鈕與 scroll lock。點浮層外部關閉走 `closeFromOutside()`（先 blur 再關）——`pointerdown` 早於 `click`，否則 focus trap 會把焦點從使用者正要點的元素搶回觸發器。
+   - **`/games/coloring-book` 會有兩個 `aria-current="page"`**，這是刻意的：桌面主列只有三項、用 `primaryHrefs` 做最長匹配，因此高亮「遊樂園」（分區層級）；抽屜用完整 `internalHrefs`，因此高亮「繪本著色」（頁面層級）。兩者服務不同粒度，不是 bug。不含搜尋列（故事搜尋仍在 `/stories`）。「親子景點」連 `/for-parents/play-map`，與「親子指南」並列於家長組。與桌面一致不列「主題分類」。繪本著色雖為 `/games` 子路徑，仍在探索組獨立列出（兒童動線不應只能從遊樂園內層進入）；active 判定採**最長匹配獨佔**，`/games/coloring-book` 不得讓「遊樂園」同時高亮；`/for-parents/play-map` 僅「親子景點」高亮。
    - 關於我們／聯絡我們在頁尾 meta（聯絡另有 ConnectHub Email icon）。
 2. 四段 **LandingSegment** 全螢幕面板（資料：`data/landing-segments.ts`）；可見 CTA：`車車遊樂園的故事`／`數綿羊123．睡前故事`／`好好玩的捏黏土`／`好習慣故事`
 3. **SegmentNav**：桌面右側垂直進度點；**≤768px** 改為底部水平指示列（含 safe area）。導覽點用 `navLabel` 短標（車車故事／睡前／捏黏土／好習慣），避免長 CTA 灌進指示列。每段往下箭點錨點於平板／手機隱藏（改由底列承擔）。document scroll-snap，reduced-motion 自動停用
 4. Segment 1 CTA「車車遊樂園的故事」→ **`/stories`**（完整 Podcast 主頁）
+5. **ExploreGrid 探索區**（`components/landing/ExploreGrid.tsx`，資料 `data/explore-tiles.ts`）：在 **footer snap pane 之內、頁尾之上**，**不新增第五個 snap 段**——`SegmentNav`／`DuduCompanion`／`LandingBedtimeLayer` 三者皆以 `resolveLandingSegments()` 的四段為唯一來源，插入第五段會同時打破三份映射。區塊標題為**可見 HTML 文字**「都去哪裡玩？」；**刻意不叫「探索」**——該詞已是行動抽屜的分組語彙，同名會混淆兩個層級。左側**地圖大卡**連 `/adventures`（美術沿用既有 `public/adventures/zones/` 島嶼資產，非新生圖）；右側**磁貼牆**六格，兒童組（全部故事／遊樂園／繪本著色／角色圖鑑）在前、視覺權重較大，家長組（親子指南／親子景點）在後、降一階，**非等權網格**。宇宙地圖只出現在地圖大卡，不在磁貼重複。磁貼一律 `<Link>`（非 `div` + onClick），標籤為可見 HTML 文字；圖徽沿用**行動抽屜同一批 emoji**（`aria-hidden` 裝飾，可及名稱由文字承擔），使抽屜與磁貼牆是同一套視覺語言且不新增任何圖片位元組。手機 2 欄、≥768px 兒童組 4 欄。兒童磁貼觸控 **≥48px**（沿用密度底線，不因外部 44px 清單降階），家長磁貼 ≥44px。圖片一律 `loading="lazy"` ＋ CSS 骨架，**不用 `placeholder="blur"`**（多張 blurDataURL 會膨脹首頁 SSR HTML）。
+   - `.footerPane` 因此高於一屏，連帶四項調整：(1) `justify-content` 由 `flex-end` 改 `flex-start`（超過一屏時 flex-end 會把頂部推出可視範圍），頁尾改以 `margin-top: auto` 貼底；`min-height` 保留為「至少一屏」下限。(2) **移除 `scroll-snap-stop: always`**——mandatory snap 加強制停駐會攔截滑動，使溢出內容難以抵達（MDN 已知風險）；保留 `scroll-snap-align: start` 讓抵達時仍穩定停駐。(3) 「最後一段 hero → 頁尾」的暖色漸層橋接**上移到 `.footerPane` 頂緣**，`.footer` 回歸純 `--bg`；否則探索區進駐後漸層被推到 pane 中段，滿版 hero 會直接硬切到白面。(4) ≤768px 加 `padding-bottom: calc(44px + var(--safe-bottom))` 為貼底的 `SegmentNav` 實心列留位——本 pane 由「掃過去」變成「會停留操作」。
+   - **未關閉風險**：mandatory snap ＋ 超高 pane 的攔截行為**只有 iOS Safari 實機能驗**。Chromium e2e 在移除 `scroll-snap-stop` 前後皆通過，證明該測試對此風險**沒有鑑別力**；Playwright mobile WebKit 亦不支援 `mouse.wheel`。上線前須人工實機驗證可捲到版權列。
+   - 地圖大卡素材取 `car-park@3x.webp`（792×780，比例 ~1.015:1，見 `car-park.tile.json` `intrinsicPx`）；**不可**用 x1（264×260）或宣告成 512 方圖——在 280px CSS 寬 ×2–3 DPR 下會被放大糊掉且比例失真。`sizes` 精確宣告 `280px`（CSS 已 `max-width: 280px` 封頂）。
+   - 磁貼圖徽字級用 `--fs-h1`（同一批 emoji 在 `SiteNavBar` 為 `--fs-h2`，首頁大一階作為權重差）；兩個 `<ul>` 顯式補 `role="list"`（Safari/VoiceOver 會因 `list-style: none` 移除清單語意）與 `aria-label`（「小朋友的入口」／「給家長」），使 AT 取得與行動抽屜分組對等的語意。
+   - **首頁 `<footer>` 不具 `contentinfo` landmark**：整頁包在 `app/page.tsx` 的 `<main data-landing-root>` 內，`<main>` 是該隱含角色的排除祖先——與 `#landing-foot` 用 `section` 或 `div` 無關。這是既有結構事實，e2e 以版權列文字為錨點。
 
 Hero 圖走 `images.edit` + `public/characters/` 定裝照參考圖，與單集插畫同流程以維持 on-model。
 

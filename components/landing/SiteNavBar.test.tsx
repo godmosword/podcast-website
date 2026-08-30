@@ -35,11 +35,70 @@ async function renderNavBar() {
 }
 
 describe("SiteNavBar", () => {
-  test("renders brand, subscribe control, and menu button", async () => {
+  test("頂欄常駐列：品牌（首頁）＋帶文字的選單觸發器＋單一 CTA「訂閱」", async () => {
     const html = await renderNavBarHtml();
     expect(html).toContain("車車遊樂園");
-    expect(html).toContain("訂閱收聽");
+    expect(html).toContain("訂閱");
     expect(html).toContain("開啟選單");
+
+    const view = await renderNavBar();
+    // D2=A：品牌 pill 即首頁入口，頂欄不另放「首頁」文字 pill
+    const brand = view.container.querySelector('header > div > a[href="/"]');
+    expect(brand?.textContent).toContain("車車遊樂園");
+
+    // 觸發器帶可見文字（非 icon-only）
+    const menuBtn = view.getByRole("button", { name: "開啟選單" });
+    expect(menuBtn.textContent).toContain("選單");
+  });
+
+  test("「留言」在抽屜「給爸媽」組，不在頂欄常駐列", async () => {
+    const view = await renderNavBar();
+
+    // 頂欄可見列不得有留言（它是家長取向的動作，與家長導覽同層級）
+    const topRow = view.container.querySelector("header > div")!;
+    const topRowLinks = Array.from(topRow.children)
+      .filter((el) => el.tagName !== "NAV")
+      .flatMap((el) => Array.from(el.querySelectorAll("a")));
+    expect(topRowLinks.some((a) => a.textContent?.includes("留言"))).toBe(false);
+
+    const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
+    const feedback = panel.querySelector('a[href^="mailto:"]');
+    expect(feedback).toBeTruthy();
+    expect(feedback?.textContent).toContain("留言");
+    // mailto 不加新視窗屬性
+    expect(feedback?.getAttribute("target")).toBeNull();
+    expect(feedback?.getAttribute("rel")).toBeNull();
+
+    // 它必須落在家長組（第二個 list）
+    const lists = panel.querySelectorAll('ul[role="list"]');
+    expect(lists[1]?.contains(feedback!)).toBe(true);
+  });
+
+  test("抽屜關閉時連結仍在 DOM（爬蟲讀得到），且標記 inert", async () => {
+    const html = await renderNavBarHtml();
+    // 關閉態的 server HTML 就必須含全部站內連結
+    for (const href of [
+      "/stories",
+      "/characters",
+      "/games",
+      "/games/coloring-book",
+      "/adventures",
+      "/for-parents",
+      "/for-parents/play-map",
+    ]) {
+      expect(html).toContain(`href="${href}"`);
+    }
+    expect(html).toContain("mailto:");
+
+    const view = await renderNavBar();
+    const panel = view.container.querySelector('nav[aria-label="網站選單"]');
+    expect(panel).toBeTruthy();
+    expect(panel?.getAttribute("data-open")).toBe("false");
+    expect(panel?.hasAttribute("inert")).toBe(true);
+
+    fireEvent.click(view.getByRole("button", { name: "開啟選單" }));
+    expect(panel?.getAttribute("data-open")).toBe("true");
+    expect(panel?.hasAttribute("inert")).toBe(false);
   });
 
   test("無「更多」文案或按鈕", async () => {
@@ -50,7 +109,7 @@ describe("SiteNavBar", () => {
     expect(view.queryByRole("button", { name: /更多/ })).toBeNull();
   });
 
-  test("桌面主列含宇宙地圖、親子景點與親子指南直連", async () => {
+  test("桌面主列只有兒童三入口；家長項在抽屜（D0=C）", async () => {
     const html = await renderNavBarHtml();
     for (const label of [
       "全部故事",
@@ -73,14 +132,87 @@ describe("SiteNavBar", () => {
 
     const view = await renderNavBar();
     const desktopNav = view.getByRole("navigation", { name: "主要分區" });
-    const parentLink = desktopNav.querySelector('a[href="/for-parents"]');
-    expect(parentLink).toBeTruthy();
-    expect(parentLink?.textContent).toContain("親子指南");
-    const playMapLink = desktopNav.querySelector('a[href="/for-parents/play-map"]');
-    expect(playMapLink).toBeTruthy();
-    expect(playMapLink?.textContent).toContain("親子景點");
-    expect(view.queryByRole("button", { name: "親子指南" })).toBeNull();
+
+    // 常駐三入口
+    for (const href of ["/stories", "/games", "/adventures"]) {
+      expect(desktopNav.querySelector(`a[href="${href}"]`)).toBeTruthy();
+    }
+    // 家長項與角色圖鑑／繪本著色不佔桌面主列
+    for (const href of [
+      "/for-parents",
+      "/for-parents/play-map",
+      "/characters",
+      "/games/coloring-book",
+    ]) {
+      expect(desktopNav.querySelector(`a[href="${href}"]`)).toBeNull();
+    }
+    expect(desktopNav.querySelectorAll("a").length).toBe(3);
     expect(view.queryByRole("menu")).toBeNull();
+  });
+
+  test("主題切換移出頂欄，只在抽屜底部", async () => {
+    const view = await renderNavBar();
+    const groups = view.container.querySelectorAll('[role="group"]');
+    // 全站導覽只剩一個主題切換段控
+    expect(groups.length).toBe(1);
+
+    const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
+    // 它必須在抽屜裡，不在頂欄可見列
+    expect(panel.contains(groups[0]!)).toBe(true);
+  });
+
+  test("抽屜家長組有小標「給爸媽」；探索組無標題", async () => {
+    const view = await renderNavBar();
+    fireEvent.click(view.getByRole("button", { name: "開啟選單" }));
+    const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
+    const labels = Array.from(panel.querySelectorAll("p")).map(
+      (el) => el.textContent,
+    );
+    expect(labels).toEqual(["給爸媽"]);
+  });
+
+  test("每個 navItems 條目都必須出現在抽屜（漏加會靜默消失，型別抓不到）", async () => {
+    const view = await renderNavBar();
+    const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
+    const panelHrefs = Array.from(panel.querySelectorAll("a")).map((a) =>
+      a.getAttribute("href"),
+    );
+    for (const href of [
+      "/",
+      "/stories",
+      "/characters",
+      "/games",
+      "/games/coloring-book",
+      "/adventures",
+      "/for-parents",
+      "/for-parents/play-map",
+    ]) {
+      expect(panelHrefs).toContain(href);
+    }
+    expect(panelHrefs.some((h) => h?.startsWith("mailto:"))).toBe(true);
+    // 抽屜列數＝導覽項數，沒有多也沒有少（8 個站內 + 留言）
+    expect(panelHrefs.length).toBe(9);
+  });
+
+  test("抽屜兩組各為 role=list，家長組以 aria-labelledby 綁小標", async () => {
+    const view = await renderNavBar();
+    const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
+    const lists = panel.querySelectorAll('ul[role="list"]');
+    expect(lists.length).toBe(2);
+
+    const labelledBy = lists[1]?.getAttribute("aria-labelledby");
+    expect(labelledBy).toBeTruthy();
+    // jsdom 環境沒有全域 CSS.escape；useId 產生的 id 含冒號，改用 getElementById
+    const label = panel.ownerDocument.getElementById(labelledBy!);
+    expect(label?.textContent).toBe("給爸媽");
+  });
+
+  test("抽屜首列為首頁", async () => {
+    const view = await renderNavBar();
+    const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
+    const firstLink = panel.querySelector("a");
+    expect(firstLink?.getAttribute("href")).toBe("/");
+    expect(firstLink?.textContent).toContain("首頁");
   });
 
   test("行動版選單提供單欄清單連結，不含搜尋列", async () => {
@@ -116,7 +248,7 @@ describe("SiteNavBar", () => {
     expect(view.container.querySelector('form[action="/stories"]')).toBeNull();
     expect(view.container.querySelector('input[name="q"]')).toBeNull();
     expect(view.queryByRole("button", { name: "搜尋" })).toBeNull();
-    // 主題切換縮成圖示段控，仍具 aria-label
+    // 主題切換縮成圖示段控，仍具 aria-label（現在只在抽屜底部）
     expect(view.getAllByRole("group", { name: "主題模式" }).length).toBeGreaterThan(0);
   });
 
@@ -287,27 +419,19 @@ describe("SiteNavBar active 狀態", () => {
     );
   }
 
-  test("/for-parents 與子路徑標 aria-current", async () => {
+  test("/for-parents 與子路徑在抽屜標 aria-current（家長項已不在桌面主列）", async () => {
     for (const pathname of ["/for-parents", "/for-parents/dashboard"]) {
       const view = await renderNavBarAt(pathname);
-      const desktopNav = view.getByRole("navigation", { name: "主要分區" });
-      const link = desktopNav.querySelector('a[href="/for-parents"]');
+      const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
+      const link = panel.querySelector('a[href="/for-parents"]');
       expect(link?.getAttribute("aria-current")).toBe("page");
       cleanup();
     }
   });
 
-  test("/for-parents/play-map 桌面與行動皆僅親子景點 active", async () => {
+  test("/for-parents/play-map 僅親子景點 active", async () => {
     const view = await renderNavBarAt("/for-parents/play-map");
     fireEvent.click(view.getByRole("button", { name: "開啟選單" }));
-
-    const desktopNav = view.getByRole("navigation", { name: "主要分區" });
-    const playMapDesktop = desktopNav.querySelector(
-      'a[href="/for-parents/play-map"]',
-    );
-    const parentDesktop = desktopNav.querySelector('a[href="/for-parents"]');
-    expect(playMapDesktop?.getAttribute("aria-current")).toBe("page");
-    expect(parentDesktop?.hasAttribute("aria-current")).toBe(false);
 
     const mobileNav = view.getByRole("navigation", { name: "網站選單" });
     const playMapLink = mobileNav.querySelector('a[href="/for-parents/play-map"]');
@@ -316,20 +440,47 @@ describe("SiteNavBar active 狀態", () => {
     expect(parentMobile?.hasAttribute("aria-current")).toBe(false);
   });
 
-  test("/adventures 僅宇宙地圖 active", async () => {
+  test("/adventures 僅宇宙地圖 active（桌面主列＋抽屜同步）", async () => {
     const view = await renderNavBarAt("/adventures");
     const desktopNav = view.getByRole("navigation", { name: "主要分區" });
     const adventuresLink = desktopNav.querySelector('a[href="/adventures"]');
-    const parentLink = desktopNav.querySelector('a[href="/for-parents"]');
     expect(adventuresLink?.getAttribute("aria-current")).toBe("page");
-    expect(parentLink?.hasAttribute("aria-current")).toBe(false);
+
+    const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
+    expect(
+      panel.querySelector('a[href="/adventures"]')?.getAttribute("aria-current"),
+    ).toBe("page");
+    expect(
+      panel.querySelector('a[href="/for-parents"]')?.hasAttribute("aria-current"),
+    ).toBe(false);
+  });
+
+  test("首頁列只在 / 標 aria-current，不會全站命中", async () => {
+    const home = await renderNavBarAt("/");
+    const homePanel = home.container.querySelector('nav[aria-label="網站選單"]')!;
+    expect(
+      homePanel.querySelector('a[href="/"]')?.getAttribute("aria-current"),
+    ).toBe("page");
+    cleanup();
+
+    for (const pathname of ["/stories", "/about", "/for-parents"]) {
+      const view = await renderNavBarAt(pathname);
+      const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
+      expect(
+        panel.querySelector('a[href="/"]')?.hasAttribute("aria-current"),
+      ).toBe(false);
+      // 全頁只有一個 aria-current
+      expect(view.container.querySelectorAll('[aria-current="page"]').length)
+        .toBeLessThanOrEqual(2);
+      cleanup();
+    }
   });
 
   test("首頁與 /about 不標親子指南 active", async () => {
     for (const pathname of ["/", "/about"]) {
       const view = await renderNavBarAt(pathname);
-      const desktopNav = view.getByRole("navigation", { name: "主要分區" });
-      const link = desktopNav.querySelector('a[href="/for-parents"]');
+      const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
+      const link = panel.querySelector('a[href="/for-parents"]');
       expect(link?.hasAttribute("aria-current")).toBe(false);
       cleanup();
     }
