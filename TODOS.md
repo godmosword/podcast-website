@@ -126,7 +126,7 @@
 |----|------|
 | polish(nav): 頂欄分流 1=C 2=A 3=A | `30423bd` |
 | polish(landing): 首段拿掉可見網站簡介 | `82fff4d` |
-| polish(landing): 首段拿掉可見標題 lockup | 見本 commit |
+| polish(landing): 首段拿掉可見標題 lockup | `671af5b` |
 
 ### 本輪已完成（2026-08-29）
 
