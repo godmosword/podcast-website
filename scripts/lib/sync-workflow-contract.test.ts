@@ -167,6 +167,7 @@ describe("sync workflow contract", () => {
     expect(yaml).toContain("git diff --name-only");
     expect(yaml).toContain("git ls-files --others --exclude-standard");
     expect(yaml).toContain("pull-requests: write");
+    expect(yaml).toContain("actions: write");
   });
 
   it("Commit and push 遇 GH013 必須改開 PR（個人倉無法給 Actions Integration bypass）", () => {
@@ -175,6 +176,17 @@ describe("sync workflow contract", () => {
     expect(yaml).toContain("gh pr create");
     expect(yaml).toContain("gh pr merge");
     expect(yaml).toContain("--squash --auto");
+    expect(yaml).toContain("gh workflow run ci.yml --ref \"$branch\"");
+  });
+
+  it("GH013 fallback 的 rerun 必須可重用既有 sync branch", () => {
+    const yaml = readWorkflow("sync-apple-podcast.yml");
+    expect(yaml).toContain('git checkout -B "$branch"');
+    expect(yaml).toContain('git fetch origin "$branch"');
+    expect(yaml).toContain("--force-with-lease=\"refs/heads/$branch:$remote_branch_sha\"");
+    expect(yaml).toContain(
+      'gh pr list --base main --head "$branch" --state open --json url',
+    );
   });
 
   it("git add 必須含 catalog 完備測試所需的四 sidecar（防 #46／#60 回歸）", () => {

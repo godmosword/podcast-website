@@ -20,7 +20,9 @@ concurrency:
 permissions:
   contents: write
   issues: write
-  actions: read
+  # GH013 fallback 會以 workflow_dispatch 觸發 PR 分支上的 CI；GITHUB_TOKEN
+  # 需要 actions:write，且 repo Actions 設定也必須允許建立／核准 PR。
+  actions: write
   pull-requests: write
 
 jobs:
@@ -133,20 +135,37 @@ jobs:
           open_sync_pr() {
             local branch="sync/apple-${GITHUB_RUN_ID}"
             echo "::notice::protect-main-web GH013：改開 PR ${branch}"
-            git checkout -b "$branch"
-            git push -u origin "$branch"
+            # rerun 會沿用同一個 GITHUB_RUN_ID；若前一次已留下分支，必須
+            # 以 lease 安全更新，不能讓 fetch-first 把整個 sync job 再打成 failure。
+            git checkout -B "$branch"
+            if git ls-remote --exit-code origin "refs/heads/$branch" >/dev/null 2>&1; then
+              git fetch origin "$branch"
+              local remote_branch_sha
+              remote_branch_sha=$(git rev-parse "refs/remotes/origin/$branch")
+              git push --force-with-lease="refs/heads/$branch:$remote_branch_sha" -u origin "$branch"
+            else
+              git push -u origin "$branch"
+            fi
             local title
             title=$(head -n 1 "$SYNC_COMMIT_MSG_PATH")
             local pr
-            # body 用 printf 組出換行，**不要**讓 shell 字串跨行：
+            pr=$(gh pr list --base main --head "$branch" --state open --json url --jq '.[0].url // ""')
+            if [ -z "$pr" ]; then
+              # body 用 printf 組出換行，**不要**讓 shell 字串跨行：
             # 這裡是 `run: |` 的 block scalar，任何回到第 0 欄的續行都會提前終止該區塊，
             # 整支 workflow 就變成無法解析的 YAML（2026-08-27 `01a4047` 即因此讓
             # sync 停擺三天；GitHub 只回「workflow file issue」且沒有 log）。
-            local body
-            body=$(printf '%s\n\n%s\n' \
-              "Apple sync 因 protect-main-web GH013（required status checks）無法直推 main。個人倉不能把 GitHub Actions Integration 加進 ruleset bypass。此 PR 等 quality／build-and-public-e2e／Vercel 通過後 squash auto-merge。" \
-              "Run：https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}")
-            pr=$(gh pr create --base main --head "$branch" --title "$title" --body "$body")
+              local body
+              body=$(printf '%s\n\n%s\n' \
+                "Apple sync 因 protect-main-web GH013（required status checks）無法直推 main。個人倉不能把 GitHub Actions Integration 加進 ruleset bypass。此 PR 等 quality／build-and-public-e2e／Vercel 通過後 squash auto-merge。" \
+                "Run：https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}")
+              pr=$(gh pr create --base main --head "$branch" --title "$title" --body "$body")
+            else
+              echo "::notice::沿用既有 sync PR ${pr}"
+            fi
+            # GITHUB_TOKEN 產生的 push／PR event 不會再觸發 pull_request CI；
+            # workflow_dispatch 是例外，明確在同一個 sync branch 上補跑 required checks。
+            gh workflow run ci.yml --ref "$branch"
             gh pr merge "$pr" --squash --auto
             local i state
             for i in $(seq 1 80); do
