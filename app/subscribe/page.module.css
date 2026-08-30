@@ -45,3 +45,38 @@
   background: var(--surface-elevated);
   box-shadow: var(--shadow-sm);
 }
+
+/* 桌面 Option A：現有 artwork 與現有名單狀態左右配對；不裁切 hero 內文字。 */
+@media (min-width: 980px) {
+  .main {
+    max-width: 980px;
+    display: grid;
+    grid-template-columns: minmax(360px, 1fr) minmax(360px, 0.95fr);
+    column-gap: clamp(36px, 6vw, 72px);
+    align-items: start;
+  }
+
+  .main > :global([class*="SiteHeader-module"]) {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    margin: var(--space-6) 0 0;
+  }
+
+  .main > :global([class*="SiteHeader-module"]) :global([class*="__scene"]) {
+    max-width: 100%;
+    margin: 0;
+  }
+
+  .main > :global([class*="page-module"]) {
+    grid-column: 2;
+    margin: var(--space-6) 0 var(--space-5);
+  }
+
+  .main > :global([class*="__formSection"]) {
+    grid-column: 2;
+  }
+
+  .main > :global([class*="SiteFooter-module"]) {
+    grid-column: 1 / -1;
+  }
+}
