@@ -5,6 +5,7 @@ import { PROGRESS_STORAGE_KEY } from "../lib/progress-store";
 test.describe.configure({ mode: "serial" });
 
 test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/");
   await expect(page.locator("h1")).toHaveText("車車遊樂園：親子故事與手作");
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
@@ -26,15 +27,20 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await expect(capsuleNav.getByRole("button", { name: /更多/ })).toHaveCount(0);
   await expect(capsuleNav.getByRole("menu")).toHaveCount(0);
 
-  // 頂欄常駐列：品牌（首頁）＋選單觸發器＋單一 CTA「訂閱」
+  // 頂欄常駐列：品牌（首頁）＋選單觸發器＋首頁文字（窄屏才見）＋訂閱＋留言
   // 多平台時「訂閱」是 dropdown button，單平台／空清單時才是 link
   await expect(
     page.getByRole("button", { name: "訂閱" }).or(
       page.getByRole("link", { name: "訂閱" }),
     ).first(),
   ).toBeVisible();
-  // 「留言」已移入抽屜「給爸媽」組，頂欄不再有
-  await expect(page.getByRole("link", { name: "留言" })).toHaveCount(0);
+  // 首頁文字 pill 在頂欄「常用」組（DOM 常駐；桌面 CSS 隱藏，窄屏才見）
+  const homeAction = page.getByRole("group", { name: "常用" }).locator('a[href="/"]');
+  await expect(homeAction).toHaveCount(1);
+  await expect(homeAction).toBeHidden();
+  const topFeedback = page.getByRole("link", { name: "留言" });
+  await expect(topFeedback).toBeVisible();
+  await expect(topFeedback).toHaveAttribute("href", /^(mailto:|https?:)/);
 
   // 桌面同樣有帶文字的選單觸發器（家長項只在抽屜，桌面隱藏＝入口消失）
   const menuBtn = page.getByRole("button", { name: "開啟選單" });
@@ -45,12 +51,10 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   const desktopDrawer = page.getByRole("navigation", { name: "網站選單" });
   await expect(desktopDrawer.getByRole("link", { name: "親子指南" })).toBeVisible();
   await expect(desktopDrawer.getByRole("link", { name: "親子景點" })).toBeVisible();
-  await expect(desktopDrawer.getByRole("link", { name: "首頁" })).toBeVisible();
+  await expect(desktopDrawer.getByRole("link", { name: "首頁" })).toHaveCount(0);
   await expect(desktopDrawer.getByText("給爸媽")).toBeVisible();
-  // 「留言」在家長組，且為 mailto／外部表單
-  const drawerFeedback = desktopDrawer.getByRole("link", { name: "留言" });
-  await expect(drawerFeedback).toBeVisible();
-  await expect(drawerFeedback).toHaveAttribute("href", /^(mailto:|https?:)/);
+  // 首頁與留言在頂欄「常用」組，不在抽屜
+  await expect(desktopDrawer.getByRole("link", { name: "留言" })).toHaveCount(0);
   // 面板必須錨定膠囊本體（.inner），不是整條 .bar——否則會掉出全寬下拉
   const capsuleBox = await page.locator("header > div").first().boundingBox();
   const panelBox = await desktopDrawer.boundingBox();
@@ -62,15 +66,10 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await desktopDrawer.getByRole("link", { name: "親子指南" }).click();
   await expect(page).toHaveURL(/\/for-parents$/);
   await page.goto("/");
-  // 第一段標題視覺隱藏（clip 1px，給 aria-labelledby）；四段 accessible name 仍在
-  const storiesHeading = page.getByRole("heading", {
-    name: /車車與\s?遊樂園的故事/,
-  });
-  await expect(storiesHeading).toBeAttached();
-  const storiesBox = await storiesHeading.boundingBox();
-  expect(
-    storiesBox === null || (storiesBox.width <= 1 && storiesBox.height <= 1),
-  ).toBe(true);
+  // 首段 Option A：#segment-stories 標題可見；其餘段仍為 titleHidden（DOM 可及名稱在）
+  await expect(
+    page.getByRole("heading", { name: /車車與\s?遊樂園的故事/ }),
+  ).toBeVisible();
   await expect(page.getByRole("link", { name: "車車遊樂園的故事 →" })).toBeVisible();
   await expect(
     page.getByRole("link", { name: "車車遊樂園的故事 →" }),
@@ -130,10 +129,27 @@ test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   await page.goto("/");
   // 行動版漢堡選單；主題分類與桌面一致不進導覽（頁面仍可直達 /topic）
   await expect(page.getByRole("button", { name: "開啟選單" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "首頁" })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "訂閱" }).or(
+      page.getByRole("link", { name: "訂閱" }),
+    ).first(),
+  ).toBeVisible();
+  const mobileFeedback = page.getByRole("link", { name: "留言" });
+  await expect(mobileFeedback).toBeVisible();
+  await expect(mobileFeedback).toHaveAttribute("href", /^(mailto:|https?:)/);
   // 行動版桌面主列收起，全部分區都走抽屜
   await expect(
     page.getByRole("navigation", { name: "主要分區" }),
   ).not.toBeVisible();
+  // 頂欄不得橫向溢出（允許 1px 捲動誤差）
+  const headerOverflow = await page.locator("header > div").first().evaluate((el) => ({
+    scrollWidth: el.scrollWidth,
+    clientWidth: el.clientWidth,
+  }));
+  expect(headerOverflow.scrollWidth).toBeLessThanOrEqual(
+    headerOverflow.clientWidth + 1,
+  );
   await page.getByRole("button", { name: "開啟選單" }).click();
   const drawerNav = page.getByRole("navigation", { name: "網站選單" });
   await expect(drawerNav.getByRole("button", { name: "搜尋" })).toHaveCount(0);
@@ -148,6 +164,8 @@ test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   await expect(drawerPlayMap).toHaveAttribute("href", /\/for-parents\/play-map/);
   await expect(drawerNav.getByRole("link", { name: "關於我們" })).toHaveCount(0);
   await expect(drawerNav.getByRole("link", { name: "聯絡我們" })).toHaveCount(0);
+  await expect(drawerNav.getByRole("link", { name: "首頁" })).toHaveCount(0);
+  await expect(drawerNav.getByRole("link", { name: "留言" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: /車車與\s?遊樂園的故事/ })).toBeAttached();
   await expect(page.getByRole("heading", { name: /陪孩子建立好習慣/ })).toBeAttached();
 });

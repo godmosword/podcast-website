@@ -30,6 +30,11 @@ describe("SiteNavBar.module.css 漢堡與抽屜", () => {
     expect(css).toMatch(/\.inner\s*\{[\s\S]*?position:\s*relative/);
   });
 
+  it(".inner 以 flex-start 對齊，.actions 以 margin-left: auto 靠右", () => {
+    expect(css).toMatch(/\.inner\s*\{[\s\S]*?justify-content:\s*flex-start/);
+    expect(css).toMatch(/\.actions\s*\{[\s\S]*?margin-left:\s*auto/);
+  });
+
   it("landing 桌面 pointer-events 需一併還原給 .panel（它是 .inner 的兄弟節點）", () => {
     expect(css).toMatch(/\.bar \.panel\s*\{[\s\S]*?pointer-events:\s*auto/);
   });
@@ -45,12 +50,9 @@ describe("SiteNavBar.module.css 漢堡與抽屜", () => {
   });
 
   it("夜間 data-menu-open 微暗必須分斷點，否則會蓋掉桌面 .bar 的 transparent", () => {
-    // 規則特異性 (0,3,1) > @media 內的 .bar { background: transparent } (0,1,0)，
-    // 媒體查詢不加權重；不限斷點就會在懸浮膠囊外畫出一條橫貫視窗的色帶。
     const nightOpen = css.indexOf('.bar[data-menu-open="true"] {');
     const before = css.slice(0, nightOpen);
     expect(before).toContain("@media (max-width: 979px)");
-    // 桌面版微暗改套在膠囊本體
     expect(css).toMatch(
       /@media \(min-width: 980px\)[\s\S]*?\.bar\[data-menu-open="true"\] \.inner/,
     );
@@ -63,18 +65,25 @@ describe("SiteNavBar.module.css 漢堡與抽屜", () => {
     expect(css).not.toContain(".navLinkActive");
   });
 
+  it("≥980 時 .homeAction display:none（DOM 仍在）", () => {
+    const desktopBlock = css.slice(css.indexOf("@media (min-width: 980px)"));
+    expect(desktopBlock).toMatch(
+      /\.actions\s+\.homeAction\s*\{[\s\S]*?display:\s*none/,
+    );
+  });
+
   it("極窄容器不得把觸發器變成 icon-only（DESIGN §99 禁止）", () => {
-    // 「選單」文字只在 240px 以下讓位，300px 收的是品牌字標
     expect(css).toMatch(
       /@container nav-inner \(max-width: 240px\)\s*\{[\s\S]*?\.menuBtnText/,
     );
-    // 只檢查 300px 區塊自身的內容（[^}] 不跨出該區塊）
-    const block300 = /@container nav-inner \(max-width: 300px\)\s*\{([^@]*?)\n\}/.exec(
+    const block420 = /@container nav-inner \(max-width: 420px\)\s*\{([^@]*?)\n\}/.exec(
       css,
     );
-    expect(block300).toBeTruthy();
-    expect(block300![1]).toContain("brandText");
-    expect(block300![1]).not.toContain("menuBtnText");
+    expect(block420).toBeTruthy();
+    expect(block420![1]).toContain("brandText");
+    expect(block420![1]).toContain("clip: rect");
+    expect(block420![1]).not.toContain("display: none");
+    expect(block420![1]).not.toContain("menuBtnText");
   });
 });
 
@@ -91,32 +100,26 @@ describe("SiteNavBar.tsx 結構契約", () => {
     expect(innerOpen).toBeGreaterThan(-1);
     expect(panel).toBeGreaterThan(innerOpen);
     expect(panel).toBeLessThan(innerClose);
-    // panel 之後、</header> 之前必須先關掉 .inner 的 <div>
     expect(tsx.slice(panel, innerClose)).toContain("</div>");
   });
 
-  it("品牌與桌面主列點擊都要關閉抽屜（client navigation 會保留 instance）", () => {
+  it("品牌、桌面主列、首頁與留言點擊都要關閉抽屜", () => {
     const brand = tsx.slice(tsx.indexOf("className={styles.brand}"));
     expect(brand.slice(0, 200)).toContain("onClick={closeAll}");
+
     const navLink = tsx.slice(tsx.indexOf("styles.navLink}"));
     expect(navLink.slice(0, 300)).toContain("onClick={closeAll}");
-  });
 
-  it("頂欄常駐列不得再有「留言」pill（它已移入抽屜「給爸媽」組）", () => {
-    const navCss = readFileSync(
-      join(import.meta.dirname, "SiteNavBar.module.css"),
-      "utf8",
-    );
-    expect(navCss).not.toContain("feedback");
-    // 頂欄 actions 內只剩訂閱
+    const homeAction = tsx.slice(tsx.indexOf("styles.homeAction"));
+    expect(homeAction.slice(0, 300)).toContain("onClick={closeAll}");
+
     const actions = tsx.slice(
       tsx.indexOf("className={styles.actions}"),
       tsx.indexOf("className={styles.panel}"),
     );
+    expect(actions).toContain("renderFeedbackLink");
+    expect(actions).toContain("feedbackItem");
+    expect(actions).toContain("feedbackItem.label");
     expect(actions).toContain("SubscribeMenu");
-    // 去掉註解後，actions 內不得再有任何 <a>／feedback 參照
-    const code = actions.replace(/\{\/\*[\s\S]*?\*\/\}/g, "");
-    expect(code).not.toContain("feedback");
-    expect(code).not.toContain("<a");
   });
 });

@@ -10,6 +10,7 @@
 
 ### Changed
 
+- **頂欄分流（CRITICAL 1=C／2=A／3=A）**：窄屏 `[品牌][選單]……[首頁][訂閱][留言]`；桌面 `[品牌][選單][全部故事][遊樂園][宇宙地圖]……[訂閱][留言]`（品牌即首頁，桌面不另列「首頁」）。`.inner` flex-start、`.actions` margin-left auto；常用組 `role="group"` `aria-label="常用"`。留言回到頂欄（`feedbackHref()` 恆有目的地；未設 env 時 mailto 可與頁尾／ConnectHub 同信箱，CRITICAL-2=A）。抽屜縮為 7 列（探索 5、無首頁；家長 2、無留言）；container 420px 品牌字、240px「選單」二字以 `.sr-only` clip 收合。**未改** Apple sync workflow。
 - **頂欄收斂為三入口**：品牌 pill（即首頁）＋帶文字的「選單」觸發器（緊接品牌右側）＋右側「訂閱」「留言」。桌面膠囊主列只留兒童三入口（全部故事／遊樂園／宇宙地圖）；角色圖鑑、繪本著色、親子指南、親子景點改由抽屜承接。主題切換移出頂欄、改在抽屜底部。「訂閱收聽」精簡為「訂閱」，平台清單為空時退為站內 `/subscribe` 而非整顆消失。新增「留言」入口（`feedbackHref()`：`NEXT_PUBLIC_FEEDBACK_FORM_URL` → 未設定降級 mailto，恆有目的地），**放在抽屜「給爸媽」組而非頂欄**——env 未設時它與頁尾「聯絡我們」、ConnectHub Email 指向同一信箱，頂欄再放一個等於首頁有三個同信箱入口。**未改** Apple sync workflow。
 - **漢堡抽屜連結改常駐 DOM**：關閉時以 `display: none` ＋ `inert` 隱藏，不再 `{open && …}`——關閉態的 HTML 現在含全部站內連結（爬蟲可讀）。抽屜在所有寬度都可開；新增「首頁」列、「留言」列與家長組小標「給爸媽」（探索組維持無標題），共 9 列。同時只允許一個浮層開著，跨 980 斷點自動關閉，開啟時焦點移入第一個連結、關閉還給觸發器，點外部亦可關閉。目前頁不再與 hover 共用底色（改加 accent bar ＋加粗）。**未改** Apple sync workflow。
 

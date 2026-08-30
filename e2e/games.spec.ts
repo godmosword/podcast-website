@@ -100,6 +100,9 @@ test.describe("遊樂園 hub", () => {
   test("hub 保留全站導覽（非沉浸路由）", async ({ page }) => {
     await page.goto("/games");
     await expect(page.getByRole("navigation", { name: "主要分區" })).toBeVisible();
+    const hubFeedback = page.getByRole("link", { name: "留言" });
+    await expect(hubFeedback).toBeVisible();
+    await expect(hubFeedback).toHaveAttribute("href", /^(mailto:|https?:)/);
     // 漢堡是家長項的唯一入口，必須可開
     const menuBtn = page.getByRole("button", { name: "開啟選單" });
     await expect(menuBtn).toBeVisible();

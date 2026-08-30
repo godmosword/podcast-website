@@ -45,15 +45,13 @@ const PRIMARY_ORDER: readonly NavItemId[] = [
 const MOBILE_PARENT_GROUP_IDS = new Set<NavItemId>([
   "for-parents",
   "play-map",
-  "feedback",
 ]);
 
-/** 抽屜單欄：首頁 → 探索 → 家長；lookup 一律用 id。 */
+/** 抽屜：探索 → 家長（7 列；首頁在頂欄、留言在頂欄 .actions）。 */
 const MENU_ROWS: readonly {
   id: NavItemId;
   emoji: string;
 }[] = [
-  { id: "home", emoji: "🏠" },
   { id: "stories", emoji: "📖" },
   { id: "characters", emoji: "🚗" },
   { id: "games", emoji: "🎡" },
@@ -62,10 +60,6 @@ const MENU_ROWS: readonly {
   { id: "adventures", emoji: "🗺️" },
   { id: "for-parents", emoji: "🧭" },
   { id: "play-map", emoji: "📍" },
-  // 「留言」是家長取向的**動作**；家長取向的**導覽**既然收進抽屜，
-  // 它留在頂欄會讓層級規則自相矛盾。且在 env 未設時它與頁尾「聯絡我們」、
-  // ConnectHub Email 指向同一信箱——首頁曾同時有三個同信箱入口。
-  { id: "feedback", emoji: "✉️" },
 ] as const;
 
 /** 桌面常駐主列的斷點，與 CSS `@media (min-width: 980px)` 必須一致。 */
@@ -108,6 +102,26 @@ export function isInternalPathActive(
   );
 }
 
+/** 頂欄「留言」：與抽屜外連分支同一套規則（非 `/` 不走 next/link）。 */
+function renderFeedbackLink(
+  href: string,
+  label: string,
+  className: string,
+  onClose: () => void,
+) {
+  const external = isContactExternal(href);
+  return (
+    <a
+      href={href}
+      className={className}
+      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      onClick={onClose}
+    >
+      {label}
+    </a>
+  );
+}
+
 /** 同時只允許一個浮層開著——兩個 focus trap 同時 active 會互搶 Tab。 */
 type OpenMenu = "none" | "subscribe" | "nav";
 
@@ -132,6 +146,7 @@ export default function SiteNavBar() {
     (item): item is NavItem => item !== undefined,
   );
   const primaryHrefs = primaryItems.map((item) => item.href);
+  const feedbackItem = byId.get("feedback");
 
   useFocusTrap(open, panelRef, { initialFocus: "first" });
 
@@ -277,12 +292,32 @@ export default function SiteNavBar() {
           })}
         </nav>
 
-        <div className={styles.actions}>
-          {/* 頂欄只留「訂閱」這唯一一個轉換型 CTA；「留言」在抽屜「給爸媽」組 */}
+        <div className={styles.actions} role="group" aria-label="常用">
+          {/* ＜980：首頁文字入口（窄屏品牌字 sr-only 後仍有一個可見「回家」詞） */}
+          <Link
+            href="/"
+            className={`${styles.navLink} ${styles.homeAction}`}
+            aria-current={
+              isInternalPathActive(pathname, "/", internalHrefs)
+                ? "page"
+                : undefined
+            }
+            onClick={closeAll}
+          >
+            首頁
+          </Link>
           <SubscribeMenu
             open={openMenu === "subscribe"}
             onOpenChange={(next) => setOpenMenu(next ? "subscribe" : "none")}
           />
+          {feedbackItem
+            ? renderFeedbackLink(
+                feedbackItem.href,
+                feedbackItem.label,
+                styles.navLink,
+                closeAll,
+              )
+            : null}
         </div>
 
         {/* 抽屜連結**常駐 DOM**、以 CSS `display: none` 隱藏：`{open && …}` 會讓
