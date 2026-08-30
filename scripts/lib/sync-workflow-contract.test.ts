@@ -176,7 +176,9 @@ describe("sync workflow contract", () => {
     expect(yaml).toContain("gh pr create");
     expect(yaml).toContain("gh pr merge");
     expect(yaml).toContain("--squash --auto");
-    expect(yaml).toContain("gh workflow run ci.yml --ref \"$branch\"");
+    expect(yaml).toContain(
+      'gh workflow run ci.yml --ref "$branch" -f required_only=true',
+    );
   });
 
   it("GH013 fallback 的 rerun 必須可重用既有 sync branch", () => {

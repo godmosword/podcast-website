@@ -164,8 +164,9 @@ jobs:
               echo "::notice::沿用既有 sync PR ${pr}"
             fi
             # GITHUB_TOKEN 產生的 push／PR event 不會再觸發 pull_request CI；
-            # workflow_dispatch 是例外，明確在同一個 sync branch 上補跑 required checks。
-            gh workflow run ci.yml --ref "$branch"
+            # workflow_dispatch 是例外，明確在同一個 sync branch 上只補跑 required checks；
+            # 完整 child-path e2e 仍由正常 push／PR CI 執行，不讓非 required job 阻塞 sync。
+            gh workflow run ci.yml --ref "$branch" -f required_only=true
             gh pr merge "$pr" --squash --auto
             local i state
             for i in $(seq 1 80); do
