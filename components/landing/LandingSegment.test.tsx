@@ -48,7 +48,7 @@ describe("LandingSegment", () => {
     expect(html).not.toContain('href="/subscribe"');
   });
 
-  test("首段顯示網站導言，不顯示播放直達鈕", async () => {
+  test("首段 GEO 導言留在 sr-only，不顯示播放直達鈕", async () => {
     const { default: LandingSegment } = await import("./LandingSegment");
     const { homeSiteIntro } = await import("@/lib/home-geo");
     const segment = resolveLandingSegments()[0]!;

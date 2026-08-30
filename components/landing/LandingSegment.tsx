@@ -11,7 +11,7 @@ import styles from "./LandingSegment.module.css";
 type LandingSegmentProps = {
   segment: ResolvedLandingSegment;
   index: number;
-  /** 首段 answer-first 網站導言：在首段 hero lockup 顯示，也留在 SSR HTML 供 GEO／輔助科技。 */
+  /** 首段 answer-first 網站導言：DOM 留 sr-only 供 GEO／輔助科技，畫面不顯示。 */
   siteIntro?: string;
   /** 下一段錨點；最後一段指向 landing-foot（頁尾 snap pane）。 */
   nextAnchorId: string | null;

@@ -111,8 +111,8 @@
 }
 
 /* 其餘段標題給 aria-labelledby／輔助科技，維持視覺隱藏，不疊在 hero 上。
-   首段的 titleHidden 由下方 #segment-stories 規則轉為可見 lockup，讓首次
-   進站的家長先理解產品，再往下探索。 */
+   首段 titleHidden 由下方 #segment-stories 規則轉為可見標題；GEO 導言
+   必須維持全域 .sr-only，禁止在此解除隱藏。 */
 .titleHidden {
   position: absolute;
   width: 1px;
@@ -125,7 +125,7 @@
   border: 0;
 }
 
-/* 首段 Option A：沿用既有標題與 siteIntro，不新增行銷卡片或插畫。 */
+/* 首段可見標題 lockup；siteIntro 走全域 .sr-only，此處不得覆寫。 */
 :global(#segment-stories) .titleHidden {
   position: static;
   width: auto;
@@ -139,24 +139,6 @@
   font-size: clamp(1.55rem, 4.2vw, 2.35rem);
   line-height: 1.2;
   text-shadow: 0 2px 14px rgba(0, 0, 0, 0.46), 0 1px 2px rgba(0, 0, 0, 0.42);
-}
-
-:global(#segment-stories) :global(.sr-only) {
-  position: static;
-  width: auto;
-  height: auto;
-  padding: 0;
-  margin: 0;
-  overflow: visible;
-  clip: auto;
-  white-space: normal;
-  border: 0;
-  max-width: 580px;
-  color: color-mix(in srgb, var(--on-dark) 90%, transparent);
-  font-size: clamp(0.92rem, 2.4vw, 1.05rem);
-  font-weight: 700;
-  line-height: 1.55;
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.38);
 }
 
 .title {
