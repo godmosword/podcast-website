@@ -40,7 +40,7 @@
 - [x] **PR1 首頁探索區**　`landing · M · 無`　地圖大卡＋六格磁貼牆，放頁尾 snap pane 之上、不新增第五段；首頁 HTML 常駐 7 個內容頁入口  `b9de774`
 - [x] **PR2 Header／Subscribe／contact**　`nav · L · PR1`　頂欄收斂為品牌 pill＋帶文字「選單」觸發器＋單一 CTA「訂閱」（~~留言移入抽屜「給爸媽」組~~ → **2026-08-30 CRITICAL-2=A 覆寫，留言回到頂欄**）；桌機常駐兒童三入口（D0=C）；抽屜連結改常駐 DOM＋`inert`；`feedbackHref()` env→mailto；訂閱空清單退 `/subscribe`；主題切換移入抽屜底部；`openMenu` 浮層互斥＋斷點 reset＋outside click。DESIGN §53／§99／§276／§277 已改寫（§241 未動——D8=B 不改 footer）  `b9de774`
 - [ ] **PR2 後續（設計審建議）**　`nav · S · PR2`
-  - **(1) 觸發器文字「選單」— ✅ 已覆寫（2026-08-30）**：改最右 icon-only（`aria-label` 仍為開啟／關閉選單）。兒童主路徑改走內頁 `KidsPlayDock`／首頁 `ExploreGrid`，抽屜 7 列仍保留兒童項當備援。見本 commit。
+  - **(1) 觸發器文字「選單」— ✅ 已覆寫（2026-08-30）**：改最右 icon-only（`aria-label` 仍為開啟／關閉選單）。兒童主路徑改走內頁 `KidsPlayDock`／首頁 `ExploreGrid`，抽屜 7 列仍保留兒童項當備援。`91dfb25`。
   - **(2) 「留言」移入抽屜 — ✅ 已完成**（使用者裁決 B，見 `b9de774`）。決策關鍵是實測首頁曾同時有三個指向同一信箱的入口。**2026-08-30 CRITICAL-2=A 覆寫，留言回到頂欄**（接受與頁尾／ConnectHub 可能同信箱）。
   - (3) 觸發器 `aria-label` 隨開闔改寫可及名稱，與 `aria-expanded` 重複播報；建議固定為「選單」（會動到四支 e2e 契約）。
   - (4) 抽屜是半模態（有 focus trap 但無 scroll lock／背景 `inert`）；建議改為非模態 popover 或補齊模態語意，二擇一並寫進 DESIGN。
@@ -123,7 +123,7 @@
 
 | ID | 說明 |
 |----|------|
-| polish(nav): 漢堡最右 icon-only、首頁／訂閱去框、三詞撐滿中間 | 見本 commit |
+| polish(nav): 漢堡最右 icon-only、首頁／訂閱去框、三詞撐滿中間 | `91dfb25` |
 | polish(nav): 標題列同構＋內頁 KidsPlayDock 三顆 | `cd21fd3` |
 | polish(nav): 頂欄分流 1=C 2=A 3=A | `30423bd` |
 | polish(landing): 首段拿掉可見網站簡介 | `82fff4d` |
