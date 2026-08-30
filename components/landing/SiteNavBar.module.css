@@ -41,19 +41,21 @@
     10px calc(16px + var(--safe-left));
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: var(--space-3);
   container-type: inline-size;
   container-name: nav-inner;
 }
 
 .brand {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
   text-decoration: none;
   color: inherit;
   min-width: 0;
+  min-height: 44px;
 }
 
 .brandText {
@@ -69,11 +71,21 @@
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
-@container nav-inner (max-width: 300px) {
+/* 容器 ≤420px：品牌字標視覺收合，可及名稱仍為「車車遊樂園」（同 globals .sr-only clip） */
+@container nav-inner (max-width: 420px) {
   .brandText {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 }
 
@@ -105,8 +117,8 @@
   white-space: nowrap;
 }
 
-/* 極窄容器：先收品牌字標（見下方 300px 區塊）。
- * 「選單」二字**不在 300px 收**——那會讓觸發器變成 DESIGN §99 明文禁止的
+/* 極窄容器：品牌字標已在 420px 改 sr-only clip（見上方）。
+ * 「選單」二字**不在 420px 收**——那會讓觸發器變成 DESIGN §99 明文禁止的
  * icon-only，且該寬度下頂欄只剩 mascot 圖，兒童完全沒有文字線索。
  * 只有極端窄（240px）才讓位。 */
 @container nav-inner (max-width: 240px) {
@@ -289,6 +301,13 @@
   display: none;
 }
 
+/* 選擇器必須比 .navLink 更具體，否則 display:inline-flex 會蓋掉桌面隱藏。 */
+@media (min-width: 980px) {
+  .actions .homeAction {
+    display: none;
+  }
+}
+
 .navLink {
   display: inline-flex;
   align-items: center;
@@ -330,6 +349,7 @@
 
 /* Landing 桌面膠囊浮在深色 hero 上，日間 --focus-ring（深墨）對比不足 */
 :global(html:has([data-landing-root])) .menuBtn:focus-visible,
+:global(html:has([data-landing-root])) .brand:focus-visible,
 :global(html:has([data-landing-root])) .navLink:focus-visible {
   outline-color: var(--on-dark);
 }

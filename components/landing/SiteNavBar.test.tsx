@@ -35,48 +35,44 @@ async function renderNavBar() {
 }
 
 describe("SiteNavBar", () => {
-  test("頂欄常駐列：品牌（首頁）＋帶文字的選單觸發器＋單一 CTA「訂閱」", async () => {
+  test("頂欄常駐列：品牌＋選單觸發器＋常用組（首頁／訂閱／留言）", async () => {
     const html = await renderNavBarHtml();
     expect(html).toContain("車車遊樂園");
     expect(html).toContain("訂閱");
     expect(html).toContain("開啟選單");
+    expect(html).toContain("首頁");
+    expect(html).toContain("留言");
 
     const view = await renderNavBar();
-    // D2=A：品牌 pill 即首頁入口，頂欄不另放「首頁」文字 pill
     const brand = view.container.querySelector('header > div > a[href="/"]');
     expect(brand?.textContent).toContain("車車遊樂園");
 
-    // 觸發器帶可見文字（非 icon-only）
     const menuBtn = view.getByRole("button", { name: "開啟選單" });
     expect(menuBtn.textContent).toContain("選單");
+
+    const actions = view.getByRole("group", { name: "常用" });
+    const homeAction = actions.querySelector("a.homeAction, a[class*='homeAction']");
+    expect(homeAction?.textContent).toContain("首頁");
+    expect(homeAction?.getAttribute("href")).toBe("/");
   });
 
-  test("「留言」在抽屜「給爸媽」組，不在頂欄常駐列", async () => {
+  test("「留言」在頂欄常用組，不在抽屜", async () => {
     const view = await renderNavBar();
 
-    // 頂欄可見列不得有留言（它是家長取向的動作，與家長導覽同層級）
-    const topRow = view.container.querySelector("header > div")!;
-    const topRowLinks = Array.from(topRow.children)
-      .filter((el) => el.tagName !== "NAV")
-      .flatMap((el) => Array.from(el.querySelectorAll("a")));
-    expect(topRowLinks.some((a) => a.textContent?.includes("留言"))).toBe(false);
-
-    const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
-    const feedback = panel.querySelector('a[href^="mailto:"]');
+    const actions = view.getByRole("group", { name: "常用" });
+    const feedback = actions.querySelector('a[href^="mailto:"]');
     expect(feedback).toBeTruthy();
     expect(feedback?.textContent).toContain("留言");
-    // mailto 不加新視窗屬性
     expect(feedback?.getAttribute("target")).toBeNull();
     expect(feedback?.getAttribute("rel")).toBeNull();
 
-    // 它必須落在家長組（第二個 list）
-    const lists = panel.querySelectorAll('ul[role="list"]');
-    expect(lists[1]?.contains(feedback!)).toBe(true);
+    const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
+    expect(panel.querySelector('a[href^="mailto:"]')).toBeNull();
+    expect(panel.textContent).not.toContain("留言");
   });
 
   test("抽屜關閉時連結仍在 DOM（爬蟲讀得到），且標記 inert", async () => {
     const html = await renderNavBarHtml();
-    // 關閉態的 server HTML 就必須含全部站內連結
     for (const href of [
       "/stories",
       "/characters",
@@ -121,23 +117,18 @@ describe("SiteNavBar", () => {
     ]) {
       expect(html).toContain(label);
     }
-    // 成長主題不佔導覽（桌面膠囊與行動抽屜皆無；頁面仍可直達 /topic）
     expect(html).not.toContain("主題分類");
-    // 導覽內不再輸出 about／contact
     expect(html).not.toContain("指南首頁");
     expect(html).not.toContain("關於我們");
     expect(html).not.toContain("聯絡我們");
-    // 育兒專欄（Threads）已整併進 /for-parents 頁內區塊
     expect(html).not.toContain("育兒專欄");
 
     const view = await renderNavBar();
     const desktopNav = view.getByRole("navigation", { name: "主要分區" });
 
-    // 常駐三入口
     for (const href of ["/stories", "/games", "/adventures"]) {
       expect(desktopNav.querySelector(`a[href="${href}"]`)).toBeTruthy();
     }
-    // 家長項與角色圖鑑／繪本著色不佔桌面主列
     for (const href of [
       "/for-parents",
       "/for-parents/play-map",
@@ -152,13 +143,14 @@ describe("SiteNavBar", () => {
 
   test("主題切換移出頂欄，只在抽屜底部", async () => {
     const view = await renderNavBar();
-    const groups = view.container.querySelectorAll('[role="group"]');
-    // 全站導覽只剩一個主題切換段控
-    expect(groups.length).toBe(1);
-
+    const themeGroup = view.getByRole("group", { name: "主題模式" });
     const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
-    // 它必須在抽屜裡，不在頂欄可見列
-    expect(panel.contains(groups[0]!)).toBe(true);
+    expect(panel.contains(themeGroup)).toBe(true);
+
+    const topRow = view.container.querySelector("header > div")!;
+    expect(topRow.contains(themeGroup)).toBe(true);
+    const actions = view.getByRole("group", { name: "常用" });
+    expect(actions.contains(themeGroup)).toBe(false);
   });
 
   test("抽屜家長組有小標「給爸媽」；探索組無標題", async () => {
@@ -171,14 +163,13 @@ describe("SiteNavBar", () => {
     expect(labels).toEqual(["給爸媽"]);
   });
 
-  test("每個 navItems 條目都必須出現在抽屜（漏加會靜默消失，型別抓不到）", async () => {
+  test("抽屜恰好 7 個站內 href，不含首頁／mailto", async () => {
     const view = await renderNavBar();
     const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
     const panelHrefs = Array.from(panel.querySelectorAll("a")).map((a) =>
       a.getAttribute("href"),
     );
     for (const href of [
-      "/",
       "/stories",
       "/characters",
       "/games",
@@ -189,9 +180,9 @@ describe("SiteNavBar", () => {
     ]) {
       expect(panelHrefs).toContain(href);
     }
-    expect(panelHrefs.some((h) => h?.startsWith("mailto:"))).toBe(true);
-    // 抽屜列數＝導覽項數，沒有多也沒有少（8 個站內 + 留言）
-    expect(panelHrefs.length).toBe(9);
+    expect(panelHrefs).not.toContain("/");
+    expect(panelHrefs.some((h) => h?.startsWith("mailto:"))).toBe(false);
+    expect(panelHrefs.length).toBe(7);
   });
 
   test("抽屜兩組各為 role=list，家長組以 aria-labelledby 綁小標", async () => {
@@ -202,17 +193,16 @@ describe("SiteNavBar", () => {
 
     const labelledBy = lists[1]?.getAttribute("aria-labelledby");
     expect(labelledBy).toBeTruthy();
-    // jsdom 環境沒有全域 CSS.escape；useId 產生的 id 含冒號，改用 getElementById
     const label = panel.ownerDocument.getElementById(labelledBy!);
     expect(label?.textContent).toBe("給爸媽");
   });
 
-  test("抽屜首列為首頁", async () => {
+  test("抽屜首列為全部故事", async () => {
     const view = await renderNavBar();
     const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
     const firstLink = panel.querySelector("a");
-    expect(firstLink?.getAttribute("href")).toBe("/");
-    expect(firstLink?.textContent).toContain("首頁");
+    expect(firstLink?.getAttribute("href")).toBe("/stories");
+    expect(firstLink?.textContent).toContain("全部故事");
   });
 
   test("行動版選單提供單欄清單連結，不含搜尋列", async () => {
@@ -248,7 +238,6 @@ describe("SiteNavBar", () => {
     expect(view.container.querySelector('form[action="/stories"]')).toBeNull();
     expect(view.container.querySelector('input[name="q"]')).toBeNull();
     expect(view.queryByRole("button", { name: "搜尋" })).toBeNull();
-    // 主題切換縮成圖示段控，仍具 aria-label（現在只在抽屜底部）
     expect(view.getAllByRole("group", { name: "主題模式" }).length).toBeGreaterThan(0);
   });
 
@@ -334,7 +323,6 @@ describe("isInternalPathActive 最長匹配", () => {
 
   test("在 /games/coloring-book 時遊樂園不得同時 active", async () => {
     const { isInternalPathActive } = await import("./SiteNavBar");
-    // 未修正前 /games 也會回 true，導致兩個 aria-current="page"
     expect(isInternalPathActive("/games/coloring-book", "/games", hrefs)).toBe(
       false,
     );
@@ -455,21 +443,24 @@ describe("SiteNavBar active 狀態", () => {
     ).toBe(false);
   });
 
-  test("首頁列只在 / 標 aria-current，不會全站命中", async () => {
+  test("首頁 aria-current 在常用組 .homeAction，抽屜無首頁列", async () => {
     const home = await renderNavBarAt("/");
+    const actions = home.getByRole("group", { name: "常用" });
+    const homeAction = actions.querySelector("a[class*='homeAction']");
+    expect(homeAction?.getAttribute("aria-current")).toBe("page");
+
     const homePanel = home.container.querySelector('nav[aria-label="網站選單"]')!;
-    expect(
-      homePanel.querySelector('a[href="/"]')?.getAttribute("aria-current"),
-    ).toBe("page");
+    expect(homePanel.querySelector('a[href="/"]')).toBeNull();
     cleanup();
 
     for (const pathname of ["/stories", "/about", "/for-parents"]) {
       const view = await renderNavBarAt(pathname);
+      const actionsGroup = view.getByRole("group", { name: "常用" });
+      const link = actionsGroup.querySelector("a[class*='homeAction']");
+      expect(link?.hasAttribute("aria-current")).toBe(false);
+
       const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
-      expect(
-        panel.querySelector('a[href="/"]')?.hasAttribute("aria-current"),
-      ).toBe(false);
-      // 全頁只有一個 aria-current
+      expect(panel.querySelector('a[href="/"]')).toBeNull();
       expect(view.container.querySelectorAll('[aria-current="page"]').length)
         .toBeLessThanOrEqual(2);
       cleanup();
