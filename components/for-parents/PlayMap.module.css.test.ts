@@ -79,6 +79,14 @@ describe("PlayMap.module.css map-chip 用量", () => {
     expect(css).toMatch(/\.root\[data-split="false"\] \.cardGrid/);
   });
 
+  it("名單模式 900px 起使用 Play Map 區域並排，不改全站 980px 契約", () => {
+    expect(css).toMatch(
+      /@media\s*\(min-width:\s*900px\)[\s\S]*?\.root\[data-split="false"\] \.browse/,
+    );
+    expect(css).toMatch(/\.root\[data-split="false"\] \.wallSlot/);
+    expect(css).toMatch(/\.root\[data-split="false"\] \.cardGrid/);
+  });
+
   it("卡片導航只視覺降噪而不移除 DOM", () => {
     expect(css).toMatch(
       /@media\s*\(max-width:\s*979px\)\s*\{[^}]*\.cardsPanel \.cardActions\s*\{[^}]*display:\s*none/s,
