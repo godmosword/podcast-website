@@ -69,9 +69,9 @@
 .actions {
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-  margin-left: auto;
+  justify-content: space-evenly;
+  flex: 1;
+  min-width: 0;
 }
 
 /* 容器 ≤420px：品牌字標視覺收合，可及名稱仍為「車車遊樂園」（同 globals .sr-only clip） */
@@ -90,15 +90,14 @@
 }
 
 .menuBtn {
-  /* icon + 可見文字；仍維持無底板（夜間桃色頂欄上不出現深色塊） */
+  /* 最右 icon-only；靜止無框。左距大於舊 .actions gap 10px，勿讀成第四個連結 */
+  flex-shrink: 0;
   min-width: 44px;
   height: 44px;
-  gap: 6px;
-  /* 與品牌之間的視覺區隔：觸發器不可與字標黏在一起 */
-  margin-left: var(--space-2);
-  padding: 0 10px;
+  margin-left: 16px;
+  padding: 0;
   border: 0;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-circle);
   background: transparent;
   appearance: none;
   -webkit-appearance: none;
@@ -107,24 +106,24 @@
   align-items: center;
   justify-content: center;
   color: inherit;
-  font-weight: 800;
-  font-size: var(--fs-control);
-  font-family: inherit;
-  transition: transform var(--motion-press), opacity var(--motion-press);
+  transition:
+    transform var(--motion-press),
+    background var(--motion-press),
+    opacity var(--motion-press);
 }
 
-.menuBtnText {
-  white-space: nowrap;
-}
-
-/* 極窄容器：品牌字標已在 420px 改 sr-only clip（見上方）。
- * 「選單」二字**不在 420px 收**——那會讓觸發器變成 DESIGN §99 明文禁止的
- * icon-only，且該寬度下頂欄只剩 mascot 圖，兒童完全沒有文字線索。
- * 只有極端窄（240px）才讓位。 */
-@container nav-inner (max-width: 240px) {
-  .menuBtnText {
-    display: none;
+@media (hover: hover) {
+  .menuBtn:hover {
+    background: rgba(107, 63, 30, 0.09);
   }
+}
+
+.menuBtn:active {
+  transform: scale(0.98);
+}
+
+:global(html[data-theme="night"]) .menuBtn:hover {
+  background: color-mix(in srgb, var(--c-teal) 14%, transparent);
 }
 
 .panel[data-open="false"] {
@@ -339,6 +338,17 @@
   background: color-mix(in srgb, var(--c-teal) 22%, transparent);
 }
 
+/* 首頁去框：權重須高於 .navLink[aria-current]，不改後者本體（抽屜列仍用）。 */
+.actions .homeAction[aria-current="page"] {
+  background: transparent;
+  font-weight: 800;
+  box-shadow: inset 0 -3px 0 var(--accent);
+}
+
+:global(html[data-theme="night"]) .actions .homeAction[aria-current="page"] {
+  background: transparent;
+}
+
 /* Landing 桌面膠囊浮在深色 hero 上，日間 --focus-ring（深墨）對比不足 */
 :global(html:has([data-landing-root])) .menuBtn:focus-visible,
 :global(html:has([data-landing-root])) .brand:focus-visible,
@@ -360,7 +370,7 @@
 }
 
 /*
- * 桌面膠囊斷點：兩斷點同構（品牌＋選單＋首頁／訂閱／留言），
+ * 桌面膠囊斷點：兩斷點同構（品牌＋首頁／訂閱／留言＋最右漢堡），
  * 980 起改懸浮膠囊；兒童三入口改抽屜＋內頁 dock，不縮觸控區。
  */
 @media (min-width: 980px) {
@@ -375,7 +385,8 @@
   .inner {
     max-width: 960px;
     height: 56px;
-    padding: 0 8px 0 16px;
+    /* padding-right 與下方 .panel right 必須同一數字，漢堡才不掉出圓角 */
+    padding: 0 16px 0 16px;
     justify-content: flex-start;
     background: color-mix(in srgb, var(--landing-nav-cta-bg) 72%, transparent);
     backdrop-filter: blur(18px) saturate(150%);
@@ -386,11 +397,11 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
-  /* 面板錨定膠囊本體（.inner），而非整條 .bar——否則會掉出 960px 全寬下拉 */
+  /* 漢堡在最右：面板右錨膠囊，勿再 left:8px（會假綠「在膠囊內」） */
   .panel {
     top: calc(100% + 8px);
-    left: 8px;
-    right: auto;
+    left: auto;
+    right: 16px;
     width: min(360px, calc(100vw - 40px));
     max-height: min(70dvh, 560px);
     border-radius: var(--radius-lg);

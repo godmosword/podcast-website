@@ -30,9 +30,42 @@ describe("SiteNavBar.module.css 漢堡與抽屜", () => {
     expect(css).toMatch(/\.inner\s*\{[\s\S]*?position:\s*relative/);
   });
 
-  it(".inner 以 flex-start 對齊，.actions 以 margin-left: auto 靠右", () => {
+  it(".inner 以 flex-start 對齊，.actions 撐滿中間（flex:1 space-evenly，無 margin-left:auto）", () => {
     expect(css).toMatch(/\.inner\s*\{[\s\S]*?justify-content:\s*flex-start/);
-    expect(css).toMatch(/\.actions\s*\{[\s\S]*?margin-left:\s*auto/);
+    expect(css).toMatch(/\.actions\s*\{[\s\S]*?flex:\s*1/);
+    expect(css).toMatch(/\.actions\s*\{[\s\S]*?justify-content:\s*space-evenly/);
+    expect(css).not.toMatch(/\.actions\s*\{[\s\S]*?margin-left:\s*auto/);
+  });
+
+  it("漢堡 hover／active 與 reduced-motion 關掉 scale", () => {
+    expect(css).toMatch(/\.menuBtn:hover\s*\{[\s\S]*?background:\s*rgba\(107,\s*63,\s*30,\s*0\.09\)/);
+    expect(css).toMatch(/\.menuBtn:active\s*\{[\s\S]*?transform:\s*scale\(0\.98\)/);
+    expect(css).toMatch(
+      /@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\.menuBtn:active\s*\{[\s\S]*?transform:\s*none/,
+    );
+  });
+
+  it(".navLink 目前頁底色仍在，.homeAction 目前頁底色透明", () => {
+    expect(css).toMatch(
+      /\.navLink\[aria-current="page"\]\s*\{[\s\S]*?background:\s*rgba\(107,\s*63,\s*30,\s*0\.14\)/,
+    );
+    expect(css).toMatch(
+      /\.actions \.homeAction\[aria-current="page"\]\s*\{[\s\S]*?background:\s*transparent/,
+    );
+    expect(css).toMatch(
+      /html\[data-theme="night"\]\) \.actions \.homeAction\[aria-current="page"\]\s*\{[\s\S]*?background:\s*transparent/,
+    );
+  });
+
+  it("≥980 膠囊 padding-right 與 .panel right 同一數字；＜980 全寬 sheet", () => {
+    const desktopBlock = css.slice(css.indexOf("@media (min-width: 980px)"));
+    expect(desktopBlock).toMatch(/\.inner\s*\{[\s\S]*?padding:\s*0 16px 0 16px/);
+    expect(desktopBlock).toMatch(/\.panel\s*\{[\s\S]*?right:\s*16px/);
+    expect(desktopBlock).toMatch(/\.panel\s*\{[\s\S]*?left:\s*auto/);
+
+    const basePanel = css.slice(0, css.indexOf("@media (min-width: 980px)"));
+    expect(basePanel).toMatch(/\.panel\s*\{[\s\S]*?left:\s*0/);
+    expect(basePanel).toMatch(/\.panel\s*\{[\s\S]*?right:\s*0/);
   });
 
   it("landing 桌面 pointer-events 需一併還原給 .panel（它是 .inner 的兄弟節點）", () => {
@@ -82,10 +115,9 @@ describe("SiteNavBar.module.css 漢堡與抽屜", () => {
     expect(desktopBlock).toMatch(/\.inner\s*\{[\s\S]*?max-width:\s*960px/);
   });
 
-  it("極窄容器不得把觸發器變成 icon-only（DESIGN §99 禁止）", () => {
-    expect(css).toMatch(
-      /@container nav-inner \(max-width: 240px\)\s*\{[\s\S]*?\.menuBtnText/,
-    );
+  it("已刪可見「選單」與 240px 收字規則；420px 仍 clip 品牌字", () => {
+    expect(css).not.toContain("menuBtnText");
+    expect(css).not.toContain("max-width: 240px");
     const block420 = /@container nav-inner \(max-width: 420px\)\s*\{([^@]*?)\n\}/.exec(
       css,
     );
@@ -93,7 +125,6 @@ describe("SiteNavBar.module.css 漢堡與抽屜", () => {
     expect(block420![1]).toContain("brandText");
     expect(block420![1]).toContain("clip: rect");
     expect(block420![1]).not.toContain("display: none");
-    expect(block420![1]).not.toContain("menuBtnText");
   });
 });
 

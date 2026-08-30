@@ -10,6 +10,7 @@
 
 ### Changed
 
+- **漢堡最右 icon-only、首頁／訂閱去框、常用三詞撐滿中間**：兩斷點 `[品牌] [首頁] [訂閱] [留言] [☰]`；刪可見「選單」二字；`.actions` 改 `flex: 1; space-evenly`；桌面抽屜右錨膠囊。兒童三入口仍在抽屜＋內頁 dock。**未改** Apple sync workflow。
 - **標題列同構拿掉桌面兒童三；內頁 KidsPlayDock 三顆；首頁不掛**。**未改** Apple sync workflow。
 - **Landing 首段拿掉可見標題 lockup**：刪 `#segment-stories .titleHidden` 例外；四段標題一律 clip。GEO 標題與導言留在 SSR HTML，畫面只留分區 CTA。**未改** Apple sync workflow。
 - **Landing 首段拿掉可見網站簡介**：`#segment-stories` 不再解除 `.sr-only`；GEO 導言留在 SSR HTML。**未改** Apple sync workflow。

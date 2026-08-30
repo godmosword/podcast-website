@@ -10,14 +10,14 @@
   min-height: 44px;
   padding: 6px 12px;
   border-radius: var(--radius-pill);
-  /* 淡 peach pill：與淡橘頂欄一致、暖深棕字 */
-  background: var(--landing-nav-cta-bg, #fff8f2);
-  color: var(--landing-nav-cta-fg, #8b4510);
+  /* 去框：透明底＋繼承頂欄字色，疊 landing hero 才不會對比崩 */
+  background: transparent;
+  color: inherit;
   font-weight: 800;
   font-size: var(--fs-meta);
   text-decoration: none;
-  border: 1.5px solid rgba(180, 120, 60, 0.28);
-  box-shadow: 0 1px 0 rgba(120, 80, 40, 0.12);
+  border: 0;
+  box-shadow: none;
   white-space: nowrap;
   cursor: pointer;
   transition: transform var(--motion-press), background var(--motion-press),
@@ -35,8 +35,12 @@
 
 @media (hover: hover) {
   .trigger:hover {
-    background: color-mix(in srgb, var(--landing-nav-cta-bg, #fff8f2) 72%, #ffe0c2);
+    background: rgba(107, 63, 30, 0.09);
   }
+}
+
+:global(html[data-theme="night"]) .trigger:hover {
+  background: color-mix(in srgb, var(--c-teal) 14%, transparent);
 }
 
 .chevron {

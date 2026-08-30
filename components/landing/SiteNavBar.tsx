@@ -243,21 +243,6 @@ export default function SiteNavBar() {
           <span className={styles.brandText}>車車遊樂園</span>
         </Link>
 
-        {/* 觸發器緊接品牌右側（非最右），與品牌之間留出視覺區隔 */}
-        <button
-          type="button"
-          ref={menuBtnRef}
-          className={styles.menuBtn}
-          aria-expanded={open}
-          aria-controls={menuId}
-          aria-label={open ? "關閉選單" : "開啟選單"}
-          onClick={() => setOpenMenu(open ? "none" : "nav")}
-        >
-          <Icon name={open ? "menu-close" : "menu"} size={20} />
-          {/* icon-only 觸發器辨識度差；帶可見文字。不用「更多」——語意空洞且撞規範 */}
-          <span className={styles.menuBtnText}>選單</span>
-        </button>
-
         <div className={styles.actions} role="group" aria-label="常用">
           {/* 兩斷點同構：首頁文字入口（窄屏品牌字 sr-only 後仍有一個可見「回家」詞） */}
           <Link
@@ -285,6 +270,19 @@ export default function SiteNavBar() {
               )
             : null}
         </div>
+
+        {/* 最右、不進「常用」組；可見文字已刪，可及名稱只靠 aria-label */}
+        <button
+          type="button"
+          ref={menuBtnRef}
+          className={styles.menuBtn}
+          aria-expanded={open}
+          aria-controls={menuId}
+          aria-label={open ? "關閉選單" : "開啟選單"}
+          onClick={() => setOpenMenu(open ? "none" : "nav")}
+        >
+          <Icon name={open ? "menu-close" : "menu"} size={20} />
+        </button>
 
         {/* 抽屜連結**常駐 DOM**、以 CSS `display: none` 隱藏：`{open && …}` 會讓
             關閉態的 server HTML 完全沒有站內連結。常駐後 HTML 一定含這些連結

@@ -48,9 +48,12 @@ describe("SiteNavBar", () => {
     expect(brand?.textContent).toContain("車車遊樂園");
 
     const menuBtn = view.getByRole("button", { name: "開啟選單" });
-    expect(menuBtn.textContent).toContain("選單");
+    expect(menuBtn.textContent).not.toContain("選單");
 
     const actions = view.getByRole("group", { name: "常用" });
+    expect(actions.contains(menuBtn)).toBe(false);
+    expect(actions.nextElementSibling).toBe(menuBtn);
+
     const homeAction = actions.querySelector("a.homeAction, a[class*='homeAction']");
     expect(homeAction?.textContent).toContain("首頁");
     expect(homeAction?.getAttribute("href")).toBe("/");
@@ -153,10 +156,13 @@ describe("SiteNavBar", () => {
       expect(panel.querySelector(`a[href="${href}"]`)).toBeTruthy();
     }
 
-    // 兩斷點同構：品牌＋選單觸發器＋常用組（含可見首頁 homeAction）
+    // 兩斷點同構：品牌＋常用組＋最右漢堡（含可見首頁 homeAction）
     const brand = topRow.querySelector('a[href="/"]');
     expect(brand?.textContent).toContain("車車遊樂園");
     expect(view.getByRole("button", { name: "開啟選單" })).toBeTruthy();
+    expect(view.getByRole("button", { name: "開啟選單" }).textContent).not.toContain(
+      "選單",
+    );
 
     const actions = view.getByRole("group", { name: "常用" });
     expect(topRow.contains(actions)).toBe(true);

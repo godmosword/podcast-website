@@ -29,14 +29,13 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
     expect(directCount).toBe(0);
   }
 
-  // 頂欄常駐列：品牌（首頁）＋選單觸發器＋首頁文字（窄屏才見）＋訂閱＋留言
+  // 頂欄常駐列：品牌＋常用三詞撐滿中間＋最右漢堡
   // 多平台時「訂閱」是 dropdown button，單平台／空清單時才是 link
   await expect(
     page.getByRole("button", { name: "訂閱" }).or(
       page.getByRole("link", { name: "訂閱" }),
     ).first(),
   ).toBeVisible();
-  // 首頁文字 pill 在頂欄「常用」組；兩斷點都有首頁文字
   const homeAction = page.getByRole("group", { name: "常用" }).locator('a[href="/"]');
   await expect(homeAction).toHaveCount(1);
   await expect(homeAction).toBeVisible();
@@ -44,10 +43,12 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await expect(topFeedback).toBeVisible();
   await expect(topFeedback).toHaveAttribute("href", /^(mailto:|https?:)/);
 
-  // 桌面同樣有帶文字的選單觸發器（家長項只在抽屜，桌面隱藏＝入口消失）
   const menuBtn = page.getByRole("button", { name: "開啟選單" });
   await expect(menuBtn).toBeVisible();
-  await expect(menuBtn).toContainText("選單");
+  await expect(menuBtn).not.toContainText("選單");
+  const feedbackBox = await topFeedback.boundingBox();
+  const menuBox = await menuBtn.boundingBox();
+  expect(menuBox!.x).toBeGreaterThan(feedbackBox!.x);
 
   await menuBtn.click();
   const desktopDrawer = page.getByRole("navigation", { name: "網站選單" });
@@ -55,14 +56,16 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await expect(desktopDrawer.getByRole("link", { name: "親子景點" })).toBeVisible();
   await expect(desktopDrawer.getByRole("link", { name: "首頁" })).toHaveCount(0);
   await expect(desktopDrawer.getByText("給爸媽")).toBeVisible();
-  // 首頁與留言在頂欄「常用」組，不在抽屜
   await expect(desktopDrawer.getByRole("link", { name: "留言" })).toHaveCount(0);
-  // 面板必須錨定膠囊本體（.inner），不是整條 .bar——否則會掉出全寬下拉
   const capsuleBox = await page.locator("header > div").first().boundingBox();
   const panelBox = await desktopDrawer.boundingBox();
-  expect(panelBox!.x).toBeGreaterThanOrEqual(capsuleBox!.x - 1);
+  expect(panelBox!.x).toBeGreaterThan(capsuleBox!.x);
   expect(panelBox!.width).toBeLessThan(capsuleBox!.width);
   expect(panelBox!.width).toBeLessThanOrEqual(380);
+  const capsuleRight = capsuleBox!.x + capsuleBox!.width;
+  const panelRight = panelBox!.x + panelBox!.width;
+  expect(panelRight).toBeLessThanOrEqual(capsuleRight + 1);
+  expect(capsuleRight - panelRight).toBeLessThanOrEqual(20);
 
   // 面板必須真的可點（landing 桌面 .bar 為 pointer-events: none）
   await desktopDrawer.getByRole("link", { name: "親子指南" }).click();
@@ -153,14 +156,19 @@ test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   await expect(mobileFeedback).toHaveAttribute("href", /^(mailto:|https?:)/);
   // 行動版無「主要分區」膠囊；全部分區都走抽屜
   await expect(page.getByRole("navigation", { name: "主要分區" })).toHaveCount(0);
-  // 頂欄不得橫向溢出（允許 1px 捲動誤差）
-  const headerOverflow = await page.locator("header > div").first().evaluate((el) => ({
-    scrollWidth: el.scrollWidth,
-    clientWidth: el.clientWidth,
-  }));
-  expect(headerOverflow.scrollWidth).toBeLessThanOrEqual(
-    headerOverflow.clientWidth + 1,
-  );
+  // 頂欄不得橫向溢出（允許 1px 捲動誤差）；980／1024 同契約
+  for (const width of [390, 980, 1024] as const) {
+    await page.setViewportSize({ width, height: 844 });
+    const headerOverflow = await page.locator("header > div").first().evaluate((el) => ({
+      scrollWidth: el.scrollWidth,
+      clientWidth: el.clientWidth,
+    }));
+    expect(
+      headerOverflow.scrollWidth,
+      `${width}px 頂欄不得橫向溢出`,
+    ).toBeLessThanOrEqual(headerOverflow.clientWidth + 1);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("button", { name: "開啟選單" }).click();
   const drawerNav = page.getByRole("navigation", { name: "網站選單" });
   await expect(drawerNav.getByRole("button", { name: "搜尋" })).toHaveCount(0);
