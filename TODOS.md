@@ -59,6 +59,20 @@
 
 > **頂欄背景既有事實（PR2 發現）：** landing 桌面的 `.bar` **從來就不是透明的**——`html:has([data-landing-root]) .bar`（特異性 0,2,1）壓過 `@media (min-width: 980px) .bar { background: transparent }`（0,1,0），實測 1440px 下日夜皆為 86% 桃色。「1c 懸浮膠囊」的視覺其實由 `.inner` 承擔。這不是本輪造成的，但規範敘述與實作不一致，值得另案釐清。
 
+### SYNC-DEBT-1　Apple 同步 workflow 停擺 3 天（YAML 語法）　`ops · S · 無`　✅ 已修
+
+**症狀：** `sync-apple-podcast.yml` 每次 push 都產生立刻失敗、**無 log** 的 run（`log not found`），GitHub 顯示「This run likely failed because of a workflow file issue」，run 名稱是檔案路徑而非 `Sync Apple Podcast`。
+
+**根因：** 逐 commit 驗證 YAML 可解析性 → `1c96c33` OK、`95641a1` OK、**`01a4047`（2026-08-27「fix(sync): GH013 改開 PR」）FAIL @178**，之後一路壞到 `68ae241`。該 commit 在 `run: |` 的 block scalar 裡讓 `gh pr create --body "…"` 的 shell 雙引號字串跨三行，**續行落在第 0 欄**——block scalar 內容縮排是 12 空格，任何回到第 0 欄的行都會終止該區塊，YAML 於是把後面當 mapping 解析並在 178 行爆掉。shell 本身合法，但 YAML 先看到檔案。
+
+**影響：** `repository_dispatch`／`schedule`／`workflow_dispatch` 三個觸發器全部失效 → **Apple Podcast 新集自動同步停擺 2026-08-27～08-30**。
+
+**為什麼契約測試沒抓到：** `sync-workflow-contract.test.ts` 全是 `readFileSync` + 正則字串比對，**從不 parse YAML**，所以那三天 `npm test` 一直全綠。
+
+**處置：** body 改 `printf '%s\n\n%s\n'` 組合、不再跨行（並就地留下註解說明為什麼不能跨行）；契約測試新增「workflow YAML 可解析性（語法閘門）」共 6 條，涵蓋四支 workflow 並斷言 sync 的三個觸發器仍在；`js-yaml` 由 transitive 提升為明確 devDependency。**鑑別力已驗證**：對壞掉的檔案回 2 failed，對修好的檔案全綠。
+
+> 修好後 `01a4047` 原本要解的 GH013 問題會重新浮現（sync bot 直推 main 撞 required checks）——那段邏輯本身是對的，只是寫壞了，應可正常走 sync/* PR auto-merge。**下次新集上架時需觀察**。
+
 ### VIS-DEBT-3　視覺 baseline 再度全面過期（根因＝沒人跑）　`eng · M · VIS-DEBT-1`　✅ 已結案
 
 **症狀（PR1 發現）：** `npm run test:visual:trusted` 在**乾淨 `7e70c1c`** 上就有 **44 張** baseline 失敗（stash 掉本輪變更後同樣紅，故與本輪無關）。

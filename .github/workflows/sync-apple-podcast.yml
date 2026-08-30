@@ -138,9 +138,15 @@ jobs:
             local title
             title=$(head -n 1 "$SYNC_COMMIT_MSG_PATH")
             local pr
-            pr=$(gh pr create --base main --head "$branch" --title "$title" --body "Apple sync 因 protect-main-web GH013（required status checks）無法直推 main。個人倉不能把 GitHub Actions Integration 加進 ruleset bypass。此 PR 等 quality／build-and-public-e2e／Vercel 通過後 squash auto-merge。
-
-Run：https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}")
+            # body 用 printf 組出換行，**不要**讓 shell 字串跨行：
+            # 這裡是 `run: |` 的 block scalar，任何回到第 0 欄的續行都會提前終止該區塊，
+            # 整支 workflow 就變成無法解析的 YAML（2026-08-27 `01a4047` 即因此讓
+            # sync 停擺三天；GitHub 只回「workflow file issue」且沒有 log）。
+            local body
+            body=$(printf '%s\n\n%s\n' \
+              "Apple sync 因 protect-main-web GH013（required status checks）無法直推 main。個人倉不能把 GitHub Actions Integration 加進 ruleset bypass。此 PR 等 quality／build-and-public-e2e／Vercel 通過後 squash auto-merge。" \
+              "Run：https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}")
+            pr=$(gh pr create --base main --head "$branch" --title "$title" --body "$body")
             gh pr merge "$pr" --squash --auto
             local i state
             for i in $(seq 1 80); do

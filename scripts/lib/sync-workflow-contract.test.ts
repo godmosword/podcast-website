@@ -1,5 +1,6 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { load as parseYaml } from "js-yaml";
 import { describe, expect, it } from "vitest";
 import { CANONICAL_SITE_URL } from "../../lib/site-url";
 
@@ -45,6 +46,12 @@ function readWorkflow(name: string): string {
   return readFileSync(join(ROOT, ".github/workflows", name), "utf8");
 }
 
+function workflowFilenames(): string[] {
+  return readdirSync(join(ROOT, ".github/workflows")).filter((f) =>
+    /\.ya?ml$/.test(f),
+  );
+}
+
 function readSyncScript(): string {
   return readFileSync(join(ROOT, "scripts/sync-apple-podcast.ts"), "utf8");
 }
@@ -82,6 +89,64 @@ function productionBuildBlock(yaml: string): string {
   expect(buildBlock, "找不到 Production build 步驟").toBeDefined();
   return buildBlock!;
 }
+
+/**
+ * 每支 workflow 都必須是**可解析的 YAML**。
+ *
+ * 教訓（2026-08-27 `01a4047` → 2026-08-30 修復）：該 commit 在 `run: |` 的 block scalar
+ * 裡讓 `gh pr create --body "…"` 的 shell 字串跨行，續行落在第 0 欄，提前終止了 block
+ * scalar，整支 `sync-apple-podcast.yml` 變成無法解析。GitHub 只回
+ * 「This run likely failed because of a workflow file issue」且**沒有 log**，
+ * 三個觸發器（repository_dispatch／schedule／workflow_dispatch）全部失效，
+ * Apple 新集自動同步停擺三天。
+ *
+ * 本檔其餘測試全是**正則字串比對**，語法壞掉照樣全綠——那三天 `npm test` 一直是綠的。
+ * 這組測試就是補上這個洞：先確定檔案真的能 parse，再談內容契約。
+ */
+describe("workflow YAML 可解析性（語法閘門）", () => {
+  const names = workflowFilenames();
+
+  it("至少涵蓋四支現役 workflow", () => {
+    expect(names).toEqual(
+      expect.arrayContaining([
+        "ci.yml",
+        "sync-apple-podcast.yml",
+        "sync-watchdog.yml",
+        "verify-geo-live.yml",
+      ]),
+    );
+  });
+
+  for (const name of names) {
+    it(`${name} 是合法 YAML，且有 on／jobs`, () => {
+      let doc: unknown;
+      expect(() => {
+        doc = parseYaml(readWorkflow(name));
+      }, `${name} YAML 解析失敗`).not.toThrow();
+
+      // YAML 1.1 會把裸 `on:` 讀成布林 true，兩種 key 都接受
+      const obj = doc as Record<string, unknown> & { true?: unknown };
+      const triggers = obj.on ?? obj[true as unknown as keyof typeof obj];
+      expect(triggers, `${name} 缺少 on:`).toBeDefined();
+      expect(obj.jobs, `${name} 缺少 jobs:`).toBeDefined();
+    });
+  }
+
+  it("sync-apple-podcast 的三個觸發器仍在（block scalar 壞掉時會整組消失）", () => {
+    const doc = parseYaml(readWorkflow("sync-apple-podcast.yml")) as Record<
+      string,
+      unknown
+    > & { true?: unknown };
+    const triggers = (doc.on ?? doc[true as unknown as keyof typeof doc]) as
+      | Record<string, unknown>
+      | undefined;
+    expect(Object.keys(triggers ?? {}).sort()).toEqual([
+      "repository_dispatch",
+      "schedule",
+      "workflow_dispatch",
+    ]);
+  });
+});
 
 describe("sync workflow contract", () => {
   it("sync-apple-podcast.yml 必須保留同步管線關鍵步驟（禁止無意刪改）", () => {

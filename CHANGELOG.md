@@ -15,6 +15,8 @@
 
 ### Fixed
 
+- **修復 Apple Podcast 同步 workflow（停擺 3 天）**：`.github/workflows/sync-apple-podcast.yml` 自 2026-08-27 `01a4047` 起是**無法解析的 YAML**——該 commit 在 `run: |` 的 block scalar 內讓 `gh pr create --body "…"` 的 shell 字串跨行，續行落在第 0 欄而提前終止 block scalar。GitHub 只回「workflow file issue」且無 log，`repository_dispatch`／`schedule`／`workflow_dispatch` 三個觸發器全失效，新集自動同步停擺。body 改以 `printf` 組出換行。同時在 `sync-workflow-contract.test.ts` 補「所有 workflow 必須是可解析 YAML 且有 on／jobs」——原本全是正則字串比對，語法壞掉照樣全綠，那三天 `npm test` 一直是綠的。`js-yaml` 由 transitive 提升為明確 devDependency。
+
 - **視覺 baseline 重錄並加機械閘門（VIS-DEBT-3）**：45 張 baseline 停留在 2026-08-25 的 UI，根因是其後 4 天約 20 個 UI commit 沒有人在 push 前跑 `test:visual:trusted`（非 VIS-DEBT-1 的集數漂移復發——遮罩修法運作正常）。除重錄外新增 `.githooks/pre-push`：動到 `components/`／`app/` 的 tsx／css 但零 baseline 變更即擋下 push（逃生門 `SKIP_VISUAL_GATE=1`），`npm run prepare` 自動設定 `core.hooksPath`，並以契約測試守住閘門不被靜默移除。**未改** Apple sync workflow。
 
 - **`.env.example` 修正 `NEXT_PUBLIC_FEEDBACK_FORM_URL` 的契約敘述**：原本只寫「未設定則不顯示該按鈕」，但該變數現有**兩個行為不同的消費點**——`SiteHeader` 圓鈕是 env-gated（未設定不渲染），`SiteNavBar` 抽屜的「留言」走 `feedbackHref()` **恆有目的地**（降級 mailto）。已分別說明，並註記未設定時該 mailto 會與頁尾「聯絡我們」、ConnectHub Email 指向同一信箱。**未改** Apple sync workflow。
