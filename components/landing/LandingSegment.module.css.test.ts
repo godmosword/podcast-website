@@ -60,4 +60,13 @@ describe("LandingSegment.module.css touch targets", () => {
       /\.next:focus-visible[\s\S]*?outline:\s*3px\s+solid\s+var\(--on-dark\)/,
     );
   });
+
+  it("首段顯示既有 title 與 siteIntro lockup", () => {
+    expect(css).toMatch(
+      /:global\(#segment-stories\)\s+\.titleHidden\s*\{[\s\S]*?position:\s*static/,
+    );
+    expect(css).toMatch(
+      /:global\(#segment-stories\)\s+:global\(\.sr-only\)\s*\{[\s\S]*?position:\s*static/,
+    );
+  });
 });

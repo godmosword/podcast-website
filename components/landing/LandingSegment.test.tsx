@@ -76,7 +76,7 @@ describe("LandingSegment", () => {
     expect(html).not.toContain("5–10 分鐘");
   });
 
-  test("四段都不渲染播放直達，段標題視覺隱藏，無可見編號", async () => {
+  test("四段都不渲染播放直達，保留段標題語意且無可見編號", async () => {
     const { default: LandingSegment } = await import("./LandingSegment");
     const segments = resolveLandingSegments();
     for (const [index, segment] of segments.entries()) {
