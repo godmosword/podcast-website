@@ -1,0 +1,54 @@
+#!/bin/sh
+# 視覺 baseline 閘門（VIS-DEBT-3）
+#
+# 背景：`npm run test:visual:trusted` 是**本機 pre-push 工具**，刻意不進 CI
+# （baseline 為 -chromium-darwin，CI 跑 ubuntu，像素不可能相符）。
+# 它失效的方式不是壞掉，而是**沒有人在 push 前跑它**：
+# 2026-08-25 重錄後的 4 天內約 20 個 UI commit 直接 ship，44 張 baseline 全數過期。
+# 純文件規範（AGENT-DOMAIN 驗證矩陣早就寫了這一列）已證實擋不住，故加機械閘門。
+#
+# 規則：本次 push 若動到 UI 檔，但 `e2e/visual.spec.ts-snapshots/` 一張都沒動 → 擋下。
+# 逃生門：`SKIP_VISUAL_GATE=1 git push`（請在 commit message 或 PR 說明理由）。
+
+[ "$SKIP_VISUAL_GATE" = "1" ] && exit 0
+
+ZERO=0000000000000000000000000000000000000000
+
+while read -r _local_ref local_sha _remote_ref remote_sha; do
+  [ "$local_sha" = "$ZERO" ] && continue
+
+  if [ "$remote_sha" = "$ZERO" ]; then
+    first=$(git rev-list --max-count=50 "$local_sha" | tail -1)
+    range="$first..$local_sha"
+  else
+    range="$remote_sha..$local_sha"
+  fi
+
+  changed=$(git diff --name-only "$range" 2>/dev/null) || continue
+  [ -z "$changed" ] && continue
+
+  ui=$(printf '%s\n' "$changed" | grep -E '^(components|app)/.*\.(tsx|css)$|^e2e/visual\.spec\.ts$|^e2e/visual-helpers\.ts$')
+  [ -z "$ui" ] && continue
+
+  snaps=$(printf '%s\n' "$changed" | grep -E '^e2e/visual\.spec\.ts-snapshots/')
+  [ -n "$snaps" ] && continue
+
+  echo "" >&2
+  echo "✗ 視覺 baseline 閘門：本次 push 動到 UI，但沒有任何 baseline 變更。" >&2
+  echo "" >&2
+  echo "  動到的 UI 檔（前 10 個）：" >&2
+  printf '%s\n' "$ui" | head -10 | sed 's/^/    /' >&2
+  echo "" >&2
+  echo "  請擇一：" >&2
+  echo "    1) 跑 npm run test:visual:trusted 確認全綠" >&2
+  echo "       （全綠＝視覺真的沒動）→ 確認後 SKIP_VISUAL_GATE=1 git push" >&2
+  echo "    2) 有預期中的視覺變更 →" >&2
+  echo "       npm run test:visual:trusted -- --update-snapshots" >&2
+  echo "       逐張人工目檢後把 baseline 一起 commit" >&2
+  echo "" >&2
+  echo "  歷史：2026-08-25 重錄後 4 天內 20 個 UI commit 沒重錄，44 張 baseline 全過期。" >&2
+  echo "" >&2
+  exit 1
+done
+
+exit 0

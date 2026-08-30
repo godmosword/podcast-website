@@ -87,7 +87,7 @@
 | **上線前完整檢查** | `npm run check`（test + verify + build，與 CI 同一套） |
 | **新增中文文案** | `npm run font:subset`（需 `/tmp/huninn.ttf`） |
 | **E2E（若改關鍵 UI 流程）** | `npm run test:e2e` |
-| **視覺回歸（改樣式／版面時）** | `npm run test:visual:trusted`（**本機 pre-push 工具，刻意不進 CI**：baseline 為 `-chromium-darwin`，CI 跑 ubuntu，像素不可能相符）。預設 `npm run test:visual` 會 skip，**skip ≠ 通過**；重產須 `-- --update-snapshots` 並逐張人工目檢 |
+| **視覺回歸（改樣式／版面時）** | `npm run test:visual:trusted`（**本機 pre-push 工具，刻意不進 CI**：baseline 為 `-chromium-darwin`，CI 跑 ubuntu，像素不可能相符）。預設 `npm run test:visual` 會 skip，**skip ≠ 通過**；重產須 `-- --update-snapshots` 並逐張人工目檢。**已加機械閘門**（VIS-DEBT-3）：`.githooks/pre-push` 會在「動到 `components/`／`app/` 的 tsx／css 但零 baseline 變更」時擋下 push，逃生門 `SKIP_VISUAL_GATE=1`；`npm run prepare` 負責把 `core.hooksPath` 指到 `.githooks`，契約測試 `scripts/lib/visual-baseline-gate.test.ts` 守住它不被靜默拿掉 |
 | **Production build** | `npm run build` |
 
 對齊 CI：`.github/workflows/sync-apple-podcast.yml` — sync 有變更時跑 `npm test` + `npm run build`；每次 sync 後跑 `npm run verify:episodes`（error 擋 push，warn 寫 Job Summary）。
@@ -167,3 +167,4 @@
 | 2026-07-17 | 反模式補「呼叫 AskQuestion／AUQ MCP」；專案 hook + alwaysApply 規則硬擋 |
 | 2026-07-31 | 紅線「生圖／重抽禁止自行連抽」；alwaysApply `podcast.mdc` + EPISODE-WORKFLOW 審圖閘門（ep-23 越權連抽） |
 | 2026-08-24 | 驗證矩陣補「視覺回歸」列；VIS-DEBT-1 結案（根因是 baseline 拍進隨集數變動的內容，非環境漂移） |
+| 2026-08-30 | VIS-DEBT-3：視覺回歸加 `.githooks/pre-push` 機械閘門。根因不是 VIS-DEBT-1 復發（遮罩修法有效），而是**沒有人在 push 前跑它**——2026-08-25 重錄後 4 天內約 20 個 UI commit 直接 ship，44 張 baseline 全過期。文件規範已證實擋不住，故改硬擋 |

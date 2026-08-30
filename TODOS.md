@@ -59,7 +59,25 @@
 
 > **頂欄背景既有事實（PR2 發現）：** landing 桌面的 `.bar` **從來就不是透明的**——`html:has([data-landing-root]) .bar`（特異性 0,2,1）壓過 `@media (min-width: 980px) .bar { background: transparent }`（0,1,0），實測 1440px 下日夜皆為 86% 桃色。「1c 懸浮膠囊」的視覺其實由 `.inner` 承擔。這不是本輪造成的，但規範敘述與實作不一致，值得另案釐清。
 
-> **視覺 baseline 債（PR1 發現）：** `npm run test:visual:trusted` 在**乾淨 main** 上就有 **44 張** baseline 失敗（已驗證：stash 掉本次變更後同樣紅）。這使本輪拿不到乾淨的視覺回歸訊號。**不得**併進功能 PR 一起重產——須另開一次「baseline 重產＋逐張人工目檢」的獨立 commit。
+### VIS-DEBT-3　視覺 baseline 再度全面過期（根因＝沒人跑）　`eng · M · VIS-DEBT-1`　✅ 已結案
+
+**症狀（PR1 發現）：** `npm run test:visual:trusted` 在**乾淨 `7e70c1c`** 上就有 **44 張** baseline 失敗（stash 掉本輪變更後同樣紅，故與本輪無關）。
+
+**根因（2026-08-30 調查，兩項獨立證據）：**
+
+1. **首頁 diff 圖**：紅色差異區精準落在四處，每處都對得上一個 commit——「01 / 04」段編號（`de9d969` 刪段編號）、疊圖主標與「聽最新一集」（`784f728`）、CTA 膠囊（`de9d969`＋`63f96c7`＋`2008a46`）。**baseline 裡還留著三天前就刪掉的段編號與疊圖主標**。故事卡與集數內容**未**出現在差異區 → VIS-DEBT-1 的 `GROWING_PAGE_IDS`＋`volatileMasks` 修法**正常運作**，不是它復發。
+2. **`/about` 高度差**：`Expected 390x2164, received 390x2002`，矮 162px；diff 圖上半頁全灰、**從「給家長：點播放鈕…」以下整片紅**。對應四個頁尾移除 commit（`63f96c7` 去家長導讀、`ee80d3f` 去安心訊號列、`ac128f4` 去遊樂園入口、`f23fc66` 去隱私說明）。
+
+**為什麼是 44 張：** `157111e`（2026-08-25 最後一次重錄）之後 4 天內約 **20 個 UI commit** 直接 ship，且都改在共用元件上——`SiteFooter`／`ConnectHub` 影響每一頁的頁尾、`SiteNavBar` 影響每一頁的頂欄、design-token 遷移系列造成全站微幅位移。一個頁尾改動就能同時打掉 30+ 張快照。
+
+**真正的問題不是「要不要重錄」，而是這個本機 pre-push 工具沒有任何機制強制被執行**——`docs/AGENT-DOMAIN.md` 驗證矩陣早就寫了「視覺回歸（改樣式／版面時）」這一列，仍然擋不住。
+
+**處置（本 commit）：**
+- 全部 59 張 baseline 重錄（45 張實際變更）。抽樣目檢 4 張：`site-nav-980-light`（頂欄三入口＋選單，無留言無主題鈕）、`home-390-light`（無段編號／無疊圖主標，深色玻璃 CTA）、`about-390-light`（頁尾四項移除已反映，高度 2002px）、`stories-390-night`（頂欄不反轉，維持日間桃色）。**其餘 41 張未逐張目檢**——這是本次的已知缺口。
+- 新增 `.githooks/pre-push` 機械閘門：push 若動到 `components/`／`app/` 的 tsx／css（或 `visual.spec.ts`／`visual-helpers.ts`）而 `e2e/visual.spec.ts-snapshots/` 零變更 → 擋下，逃生門 `SKIP_VISUAL_GATE=1`。
+- `package.json` 加 `prepare: git config core.hooksPath .githooks`（`npm install` 時自動裝）。
+- 契約測試 `scripts/lib/visual-baseline-gate.test.ts` 守住閘門不被靜默拿掉（hook 本身只在本機 push 執行，這是唯一會進 `npm test`／CI 的守點）。
+- **閘門鑑別力已驗證**：對真實歷史區間 `157111e..7e70c1c`（20 個 UI commit、零 baseline 變更）回 exit 1；對 `157111e`（有重錄）與純 docs commit 回 exit 0；逃生門回 exit 0。
 
 ### 宇宙巢狀導覽（M0–M3）
 

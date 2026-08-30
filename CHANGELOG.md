@@ -15,6 +15,8 @@
 
 ### Fixed
 
+- **視覺 baseline 重錄並加機械閘門（VIS-DEBT-3）**：45 張 baseline 停留在 2026-08-25 的 UI，根因是其後 4 天約 20 個 UI commit 沒有人在 push 前跑 `test:visual:trusted`（非 VIS-DEBT-1 的集數漂移復發——遮罩修法運作正常）。除重錄外新增 `.githooks/pre-push`：動到 `components/`／`app/` 的 tsx／css 但零 baseline 變更即擋下 push（逃生門 `SKIP_VISUAL_GATE=1`），`npm run prepare` 自動設定 `core.hooksPath`，並以契約測試守住閘門不被靜默移除。**未改** Apple sync workflow。
+
 - **`.env.example` 修正 `NEXT_PUBLIC_FEEDBACK_FORM_URL` 的契約敘述**：原本只寫「未設定則不顯示該按鈕」，但該變數現有**兩個行為不同的消費點**——`SiteHeader` 圓鈕是 env-gated（未設定不渲染），`SiteNavBar` 抽屜的「留言」走 `feedbackHref()` **恆有目的地**（降級 mailto）。已分別說明，並註記未設定時該 mailto 會與頁尾「聯絡我們」、ConnectHub Email 指向同一信箱。**未改** Apple sync workflow。
 
 - **CI e2e 睡前定時提示受 UTC 睡前窗影響**：`child-ux` 鎖定 `theme: light`，避免 GitHub runner 在 19–06 UTC 把 system 解析成夜晚、對話框不出現。宇宙地圖空白海取點改掃邊緣並在 click-zoom 斷言前略縮，降低島面蓋滿取樣點的 flake。**未改** Apple sync workflow。
