@@ -49,12 +49,15 @@
 
 .section {
   margin-bottom: var(--space-8);
+  padding-inline-start: 22px;
+  border-inline-start: 2px solid color-mix(in srgb, var(--c-mint) 62%, var(--line));
 }
 
 .heading {
   font-size: var(--fs-h3-compact);
   font-weight: 700;
   margin: 0 0 10px;
+  color: var(--accent-ink);
 }
 
 .text {
