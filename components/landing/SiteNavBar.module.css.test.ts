@@ -57,6 +57,47 @@ describe("SiteNavBar.module.css 漢堡與抽屜", () => {
     );
   });
 
+  it("homeAction 目前頁必須顯式 box-shadow: none（不可只刪該行）", () => {
+    // `.navLink[aria-current="page"]`(0,2,1) 自己帶 inset 底線；若 homeAction 這條
+    // 只是「沒寫 box-shadow」，低權重規則會接手，弧形假邊框原封不動留著。
+    // 必須切出區塊比對：`[\s\S]*?` 會跨越 `}`，命中檔案後段 `.bar` 的 box-shadow: none
+    const start = css.indexOf('.actions .homeAction[aria-current="page"] {');
+    expect(start).toBeGreaterThan(-1);
+    const block = css.slice(start, css.indexOf("}", start));
+    expect(block).toMatch(/box-shadow:\s*none/);
+  });
+
+  it("頂欄字級：品牌 --fs-h4、控制項 --fs-body，且品牌不得用 clamp()+vw", () => {
+    // 以 `}` 為界切出區塊——`[\s\S]*?` 會跨越 block，整檔比對會誤命中別處的 clamp()
+    const block = (sel: string) => {
+      const start = css.indexOf(`${sel} {`);
+      expect(start).toBeGreaterThan(-1);
+      // 去註解：說明文字本身會提到 token 名或 clamp()，否則會誤命中自己的註解
+      return css
+        .slice(start, css.indexOf("}", start))
+        .replace(/\/\*[\s\S]*?\*\//g, "");
+    };
+    expect(block(".brandText")).toMatch(/font-size:\s*var\(--fs-h4\)/);
+    expect(block(".brandText")).not.toMatch(/clamp\(/);
+    expect(block(".navLink")).toMatch(/font-size:\s*var\(--fs-body\)/);
+  });
+
+  it("夜間抽屜底走 --nav-panel-bg，且開啟態頂欄文字用純 --ink", () => {
+    // 舊值 color-mix(--landing-nav-ink 48%, --ink) 對開啟態底僅 1.48:1。
+    expect(css).toMatch(
+      /html\[data-theme="night"\]\) \.panel\s*\{[\s\S]*?background:\s*var\(--nav-panel-bg\)/,
+    );
+    expect(css).not.toMatch(/color:\s*color-mix\(in srgb, var\(--landing-nav-ink\)/);
+    const openStates = css.match(
+      /\.bar\[data-menu-open="true"\][^{]*\{[\s\S]*?\n\s{2,4}\}/g,
+    );
+    expect(openStates?.length).toBe(2);
+    for (const block of openStates ?? []) {
+      expect(block).toMatch(/var\(--nav-panel-bg\)/);
+      expect(block).toMatch(/color:\s*var\(--ink\)/);
+    }
+  });
+
   it("≥980 膠囊 padding-right 與 .panel right 同一數字；＜980 全寬 sheet", () => {
     const desktopBlock = css.slice(css.indexOf("@media (min-width: 980px)"));
     expect(desktopBlock).toMatch(/\.inner\s*\{[\s\S]*?padding:\s*0 16px 0 16px/);

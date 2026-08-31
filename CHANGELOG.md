@@ -10,6 +10,11 @@
 
 ### Changed
 
+- **標題列去框＋字級收斂＋夜間抽屜暖化（2026-08-31）**：
+  1. **「首頁」的弧形假邊框**——`.actions .homeAction[aria-current]` 的 `inset 0 -3px 0` 被 `--radius-pill`(999px) 裁切，3px 底線沿 22px 圓角往兩側爬成碗狀。依使用者裁決 **不再畫任何線**，active 僅以字重 800 編碼（`box-shadow` 須**顯式** `none`，只刪該行會讓 `.navLink[aria-current]` 的 inset 接手）。
+  2. **字級收斂**——原本同一列有三種字級兩種字重（品牌 1.05rem/700、首頁留言 0.94rem/700、訂閱 **0.85rem/800**）。品牌改 `--fs-h4`（移除 `clamp()+vw`），三個控制項統一 `--fs-body` 1rem/700；一併刪除 `SubscribeMenu` 在 `@media (min-width: 480px)` 的字級二次覆寫（不刪的話 base 修正在幾乎所有桌面失效）。
+  3. **夜間抽屜不再是深靛藍**——新增 `--nav-panel-bg`（`--card` 50% + `--landing-brand-ink` 50% = rgb(43,38,44)，暖深褐、b−r 由 +26 收到 +1）。開啟態頂欄混色基底同步改用它、`--landing-nav-cta-bg` 佔比 38%→10%，頂欄↔面板階差由 **3.78:1 降到 1.35:1**。同時修掉一個既有 a11y 破口：開啟態頂欄文字原為 `color-mix(--landing-nav-ink 48%, --ink)`，對開啟態底僅 **1.48:1**（抽屜一開頂欄四個詞幾乎看不見），改純 `--ink` 後實測 **9.11:1**。抽屜內 `ThemeToggle` 軌道就地覆寫，否則會變成暖底上唯一的藍色島。
+  實測（真實合成像素）：面板正文 12.33:1、「給爸媽」小標 7.34:1、8 個寬度（360–1280）無溢出且觸控區維持 44px。**未改** Apple sync workflow。
 - **漢堡最右 icon-only、首頁／訂閱去框、常用三詞撐滿中間**：兩斷點 `[品牌] [首頁] [訂閱] [留言] [☰]`；刪可見「選單」二字；`.actions` 改 `flex: 1; space-evenly`；桌面抽屜右錨膠囊。兒童三入口仍在抽屜＋內頁 dock。**未改** Apple sync workflow。
 - **標題列同構拿掉桌面兒童三；內頁 KidsPlayDock 三顆；首頁不掛**。**未改** Apple sync workflow。
 - **Landing 首段拿掉可見標題 lockup**：刪 `#segment-stories .titleHidden` 例外；四段標題一律 clip。GEO 標題與導言留在 SSR HTML，畫面只留分區 CTA。**未改** Apple sync workflow。

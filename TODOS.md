@@ -32,6 +32,37 @@
 | 4 | [Growth-Measure-1](#growth-measure-1-成長量測) SoundOn 回鏈 | ops/growth | S | ✅ `42a9d38` |
 | 5 | [UX-P1-2](#兒童-ux-與親子互動稽核2026-07-11) 詳情頁反思收合 | ux | S | ✅ `42a9d38` |
 
+### 標題列去框／字級／夜間抽屜（2026-08-31）　✅ 已完成
+
+> Approved Plan：`/tmp/agent-plan-1788104186.md`（`/agent-plan` 委員會：Codex 工程審、Opus 設計審；**Grok 對抗審缺席**——`cursor-agent` 與 `grok` CLI 兩路皆回未認證）。
+> 決策 D1=A（品牌 `--fs-h4`／三控制項 `--fs-body`）／D2=B（移除底線，只留字重 800）／D3=B1（`--nav-panel-bg` = `--card` 50% + `--landing-brand-ink` 50%）。
+
+- [x] 三項使用者回報全修，見 CHANGELOG「標題列去框＋字級收斂＋夜間抽屜暖化」　`<待回填>`
+
+**過程中抓到兩次自己寫的假綠測試**（都已修正並重驗鑑別力，記在此避免再犯）：
+1. CSS 契約用 `\.selector\s*\{[\s\S]*?prop` 比對——`[\s\S]*?` **會跨越 `}`**，命中檔案後段別處的同名宣告。`box-shadow: none` 那條因此原本恆綠。修法：以 `css.indexOf("}", start)` 切出區塊再比對，且**要先去掉註解**（註解本身會提到 token 名或 `clamp(`）。
+2. e2e 讀 `getComputedStyle().backgroundColor`，但 `color-mix()` 在 Chromium 回傳 `color(srgb 0.54 …)`——**0–1 浮點非 0–255**。當成 0–255 讀會讓每個色都近黑、任意兩色對比恆為 ~1:1，色帶斷言永遠不可能失敗。已改為截圖 + `sharp` 取真實合成像素。
+
+### VIS-DEBT-4　視覺容差對「只改頂欄」幾乎沒有解析度　`eng · S · VIS-DEBT-3`
+
+本輪實測（**以 Playwright 自己的度量**，把 `maxDiffPixelRatio` 暫時設 0 逼它吐出實際值）：
+頂欄字級 0.94rem→1rem ＋拿掉一條 accent 底線，在 clip 到 header 的 `site-nav-980-light` 上
+是 **582 px / ratio 0.01**，門檻 0.02 → 只用掉一半預算，靜默通過。
+fullPage 快照更沒解析度，頂欄只佔總像素極小比例，`visual.spec.ts:107` 的註解自己就寫了
+「0.02 在 1280×4448 上等於容許 11.4 萬像素不同」。
+
+> 量測方法注意：自寫的「逐通道差 >12 即計入」比 Playwright 的 pixelmatch（YIQ 色距、
+> 預設 `threshold: 0.2`）**嚴得多**，同一組圖前者算出 1.93%、後者 1%。兩者不可互相代入；
+> 要談「離門檻多遠」只能用 Playwright 的數字。
+
+已驗證視覺套件本身沒壞（把 navLink 改成 `2rem`，`home-390-light` 確實紅）。
+問題是**容差對頂欄這類小面積 chrome 沒有解析度**，VIS-DEBT-3 裝的 pre-push 閘門
+也因此擋不住（它只看「有沒有 snapshot 變更」，而這種改動不會產生變更）。
+
+建議：`site-nav-*` 這類 clip 快照改用更嚴的門檻（如 `maxDiffPixelRatio: 0.002`），
+fullPage 維持 0.02 吸收字體 hinting 噪音。未做——超出本輪 scope，需另案評估三張
+clip 快照在不同 macOS／Chromium 版本上的自然噪音底線。
+
 ### Top Bar 改版（2026-08-29，三段 PR）
 
 > Approved Plan：`/tmp/agent-plan-1788007764.md`（`/agent-plan` 兩輪委員會：Codex 工程審 ×2、Opus 設計審 ×2；Grok 對抗審缺席）。

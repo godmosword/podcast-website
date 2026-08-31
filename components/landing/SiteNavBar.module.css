@@ -60,7 +60,8 @@
 
 .brandText {
   font-weight: 700;
-  font-size: clamp(0.95rem, 1.8vw, 1.05rem);
+  /* 禁 clamp()+vw（globals.css 97-98）；品牌比控制項大一階，保住字標層級 */
+  font-size: var(--fs-h4);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -241,12 +242,17 @@
  * 若不限斷點，桌面夜間一開抽屜就會在懸浮膠囊外畫出一條橫貫視窗的色帶。 */
 @media (max-width: 979px) {
   :global(html[data-theme="night"]) .bar[data-menu-open="true"] {
+    /* 基底＝面板色，佔比 10%：舊式 38% + `--bg` 會讓頂欄變 rgb(127,125,129)、
+     * 與面板 rgb(30,36,56) 階差 3.78:1——那是一條灰帶壓在深藍板上，不是接縫。
+     * 10% → rgb(60,55,60)，與面板階差 1.27:1。 */
     background: color-mix(
       in srgb,
-      var(--landing-nav-cta-bg) 38%,
-      color-mix(in srgb, var(--bg) 72%, var(--c-yellow) 8%)
+      var(--landing-nav-cta-bg) 10%,
+      var(--nav-panel-bg)
     );
-    color: color-mix(in srgb, var(--landing-nav-ink) 48%, var(--ink));
+    /* 舊值 color-mix(--landing-nav-ink 48%, --ink) = rgb(176,152,127)，
+     * 對開啟態底僅 **1.48:1**——抽屜一開，頂欄四個詞幾乎看不見。改純 --ink → 9.68:1。 */
+    color: var(--ink);
     border-bottom-color: color-mix(
       in srgb,
       var(--landing-nav-border) 35%,
@@ -263,19 +269,34 @@
   :global(html[data-theme="night"]) .bar[data-menu-open="true"] .inner {
     background: color-mix(
       in srgb,
-      var(--landing-nav-cta-bg) 38%,
-      color-mix(in srgb, var(--bg) 72%, var(--c-yellow) 8%)
+      var(--landing-nav-cta-bg) 10%,
+      var(--nav-panel-bg)
     );
-    color: color-mix(in srgb, var(--landing-nav-ink) 48%, var(--ink));
+    color: var(--ink);
   }
 }
 
 :global(html[data-theme="night"]) .panel {
+  /* 夜間抽屜底改暖深褐（見 globals `--nav-panel-bg` 註解）；日間仍是 var(--bg)。
+   * ThemeToggle 軌道是 `--card` rgb(44,52,80)，仍比本底亮 → 維持「浮起」不需覆寫。 */
+  background: var(--nav-panel-bg);
   /* 頂緣暖色 hairline 銜接（含開啟時微暗頂欄）；陰影改夜色 */
   border-top: 1px solid color-mix(in srgb, var(--landing-nav-border) 55%, var(--hairline));
   box-shadow:
     inset 0 1px 0 color-mix(in srgb, var(--c-yellow) 12%, transparent),
     0 18px 32px rgba(8, 12, 28, 0.45);
+}
+
+/* 抽屜內的 ThemeToggle 軌道底是 `--card`(#2c3450，靛藍)。面板暖化後它會變成
+ * 暖褐板上唯一的藍色島（也是使用者要求去掉的那個藍）。就地抬一階＝面板色 + 白 8%，
+ * 維持「比面板亮＝浮起」的高度階梯，且不動 ThemeToggle 元件本身（他處仍用 --card）。
+ *
+ * 以 `.themeSlot > *` 定位，**不要**用 `[class*="compact"]` 之類的 class 子字串比對：
+ * 那既過寬（面板內任何日後含該字串的元件都會被改底），又脆——ThemeToggle 的
+ * icon-only 變體用 `.toggle`、compact 變體用 `.group .compact`，猜哪個會中是碰運氣。
+ * `.themeSlot` 是本檔自有的 class，直接子元素就是 ThemeToggle 的根節點。 */
+:global(html[data-theme="night"]) .themeSlot > * {
+  background: color-mix(in srgb, #ffffff 8%, var(--nav-panel-bg));
 }
 
 :global(html[data-theme="night"]) .menuEmoji {
@@ -308,7 +329,8 @@
   min-height: 44px;
   box-sizing: border-box;
   border-radius: var(--radius-pill);
-  font-size: var(--fs-control);
+  /* 頂欄主控制項一律 --fs-body；--fs-meta／--fs-label 是註記／標籤級，不得用於此列 */
+  font-size: var(--fs-body);
   font-weight: 700;
   color: inherit;
   text-decoration: none;
@@ -338,11 +360,18 @@
   background: color-mix(in srgb, var(--c-teal) 22%, transparent);
 }
 
-/* 首頁去框：權重須高於 .navLink[aria-current]，不改後者本體（抽屜列仍用）。 */
+/* 首頁去框：權重須高於 .navLink[aria-current]，不改後者本體（抽屜列仍用）。
+ *
+ * `box-shadow` **必須顯式 `none`**，不可只刪這行——`.navLink[aria-current="page"]`
+ * (0,2,1) 自己就帶同一條 inset，刪掉後低權重規則會接手、弧線原封不動留著。
+ *
+ * 為什麼不畫底線：inset 底線會被 `--radius-pill`(999px) 裁切，沿 22px 圓角往兩側
+ * 爬升成碗狀假邊框（使用者回報的「首頁的邊框」）。產品決定改為**不畫任何線**，
+ * active 只以字重 800 編碼。a11y 仍成立——DESIGN 禁的是「色彩為唯一編碼」，字重非色彩。 */
 .actions .homeAction[aria-current="page"] {
   background: transparent;
   font-weight: 800;
-  box-shadow: inset 0 -3px 0 var(--accent);
+  box-shadow: none;
 }
 
 :global(html[data-theme="night"]) .actions .homeAction[aria-current="page"] {

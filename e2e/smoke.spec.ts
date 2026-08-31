@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { seedParentGatePassed } from "./parent-gate";
 import { PROGRESS_STORAGE_KEY } from "../lib/progress-store";
+import sharp from "sharp";
 
 test.describe.configure({ mode: "serial" });
 
@@ -592,4 +593,109 @@ test.describe("首頁探索區（PR1）", () => {
     }
     expect(new Set(ys).size).toBe(1);
   });
+});
+
+/**
+ * 夜間抽屜（2026-08-31）。純 CSS 契約測試擋不住這一輪的兩個真實破口：
+ * 開啟態頂欄文字曾經只有 1.48:1、頂欄與面板曾有 3.78:1 的色帶，
+ * 兩者都要「合成後的實際像素」才量得到（backdrop-filter、color-mix 皆是渲染期才解析）。
+ */
+test.describe("夜間漢堡抽屜", () => {
+  /** 從截圖 buffer 取「出現最多次的顏色」＝該區域的底色（合成後的真實像素）。 */
+  const sampleBg = async (buf: Buffer): Promise<number[]> => {
+    const { data } = await sharp(buf)
+      .removeAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const counts = new Map<string, number>();
+    for (let i = 0; i < data.length; i += 3) {
+      const k = `${data[i]},${data[i + 1]},${data[i + 2]}`;
+      counts.set(k, (counts.get(k) ?? 0) + 1);
+    }
+    const top = [...counts].sort((a, b) => b[1] - a[1])[0][0];
+    return top.split(",").map(Number);
+  };
+
+  const srgb = (c: number) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  const lum = ([r, g, b]: number[]) =>
+    0.2126 * srgb(r / 255) + 0.7152 * srgb(g / 255) + 0.0722 * srgb(b / 255);
+  const contrast = (a: number[], b: number[]) => {
+    const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x);
+    return (hi + 0.05) / (lo + 0.05);
+  };
+
+  for (const width of [390, 1280]) {
+    test(`${width}px：頂欄↔面板無色帶，且開啟態頂欄文字過 AA`, async ({ page }) => {
+      await page.addInitScript(() => {
+        try {
+          localStorage.setItem(
+            "chechecar.progress.v1",
+            JSON.stringify({ preferences: { theme: "night" } }),
+          );
+        } catch {}
+      });
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto("/");
+      await page.evaluate(() =>
+        document.documentElement.setAttribute("data-theme", "night"),
+      );
+      await page.getByRole("button", { name: "開啟選單" }).click();
+      await page.waitForTimeout(600);
+
+      // **真的**取合成後像素：頂欄是半透明毛玻璃（backdrop-filter + alpha 0.87），
+      // 讀 getComputedStyle().backgroundColor 拿到的是宣告值、不含它疊在頁面上的實際結果。
+      const box = await page.evaluate((w: number) => {
+        const bar = document.querySelector("header")!;
+        const surface = w >= 980 ? bar.querySelector("div")! : bar;
+        const panel = bar.querySelector("nav")!;
+        const r = (el: Element) => {
+          const b = el.getBoundingClientRect();
+          return { x: b.x, y: b.y, width: b.width, height: b.height };
+        };
+        return { surface: r(surface), panel: r(panel) };
+      }, width);
+
+      // 取樣：頂欄右段空白（漢堡左側）、面板最下緣空白
+      const [surfacePx, panelPx] = await Promise.all([
+        sampleBg(
+          await page.screenshot({
+            clip: {
+              x: box.surface.x + box.surface.width * 0.62,
+              y: box.surface.y + 6,
+              width: 40,
+              height: Math.max(6, box.surface.height - 12),
+            },
+          }),
+        ),
+        sampleBg(
+          await page.screenshot({
+            clip: {
+              x: box.panel.x + 8,
+              y: box.panel.y + box.panel.height - 14,
+              width: Math.min(200, box.panel.width - 16),
+              height: 8,
+            },
+          }),
+        ),
+      ]);
+      // 文字色不受 alpha 影響（純色），直接讀 computed 即可
+      const textPx = await page.evaluate((w: number) => {
+        const bar = document.querySelector("header")!;
+        const surface = w >= 980 ? bar.querySelector("div")! : bar;
+        const css = getComputedStyle(surface).color;
+        const n = (css.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number);
+        // `color-mix()` 在 Chromium 解析成 `color(srgb 0.54 …)`——**0–1 浮點**，
+        // 當成 0–255 讀會讓每個色都近黑、任意兩色對比恆為 ~1:1（本測試曾因此假綠）。
+        return css.startsWith("color(") ? n.map((v) => v * 255) : n;
+      }, width);
+      const rgb = { surface: surfacePx, panel: panelPx, text: textPx };
+
+      // 色帶：舊式 38%+--bg 是 3.78:1；現行 10%+--nav-panel-bg 實測 1.35:1
+      expect(contrast(rgb.surface, rgb.panel)).toBeLessThan(2);
+      // 開啟態頂欄文字：舊值 color-mix(--landing-nav-ink 48%, --ink) 僅 1.48:1
+      expect(contrast(rgb.text, rgb.surface)).toBeGreaterThanOrEqual(4.5);
+      // 面板不得再是深靛藍：--bg #1e2438 的 b−r = +26
+      expect(rgb.panel[2] - rgb.panel[0]).toBeLessThan(10);
+    });
+  }
 });

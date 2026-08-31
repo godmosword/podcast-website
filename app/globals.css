@@ -273,6 +273,13 @@
   --page-warm-mid: color-mix(in srgb, var(--c-teal) 10%, var(--bg));
   --page-warm-to: color-mix(in srgb, var(--c-yellow) 4%, var(--bg-2));
   --warm-surface: color-mix(in srgb, var(--card) 88%, var(--c-yellow) 12%);
+  /* 漢堡抽屜面板底。刻意**不**用 `--bg`（#1e2438 深靛）也不用 `--warm-surface`：
+     前者是使用者反映的「深藍底色」；後者站內已有 8 處消費（for-parents ×3、
+     play-map/[placeId] ×4、CharacterCard ×1），改它會波及那些頁。
+     往 `--c-yellow` 加暖是死路——黃是亮色，加到 16% 抽屜「給爸媽」小標就掉出 AA(4.49)，
+     而藍要到 24% 才中和掉。改摻深暖褐 `--landing-brand-ink`：暖且暗，
+     rgb(43,38,44)、b−r=+1（藍已中和），--ink 12.33:1、--ink-soft 7.34:1。 */
+  --nav-panel-bg: color-mix(in srgb, var(--card) 50%, var(--landing-brand-ink) 50%);
   --warm-surface-2: color-mix(in srgb, var(--c-teal) 14%, var(--card));
   --warm-accent: var(--c-teal);
   /* 夜間 --accent（#549890）對 --card 3.66:1、--card-2 3.14:1，同樣不過 AA。

@@ -22,9 +22,18 @@ describe("SubscribeMenu.module.css trigger 去框", () => {
     expect(triggerBlock).not.toContain("--landing-nav-cta-bg");
   });
 
-  it("trigger 維持 44px 與字重 800", () => {
+  it("trigger 維持 44px；字級／字重與 SiteNavBar .navLink 同級", () => {
     expect(triggerBlock).toMatch(/min-height:\s*44px/);
-    expect(triggerBlock).toMatch(/font-weight:\s*800/);
+    // 舊契約鎖 800＋--fs-meta，那正是「同一列三種字級兩種字重」的來源。
+    expect(triggerBlock).toMatch(/font-weight:\s*700/);
+    expect(triggerBlock).toMatch(/font-size:\s*var\(--fs-body\)/);
+  });
+
+  it("≥480px 不得二次覆寫字級（覆寫會讓 base 修正在桌面失效）", () => {
+    const block = css.slice(css.indexOf("@media (min-width: 480px)"));
+    const trigger = block.slice(0, block.indexOf("@media", 1));
+    expect(trigger).toMatch(/\.trigger/);
+    expect(trigger).not.toMatch(/font-size:/);
   });
 
   it("trigger hover 規則在，dropdown 仍有框", () => {
