@@ -36,6 +36,15 @@ describe("SubscribeMenu.module.css trigger 去框", () => {
     expect(trigger).not.toMatch(/font-size:/);
   });
 
+  it("夜間下拉底與漢堡抽屜同底（不得留在偏藍的 --card）", () => {
+    // 兩者都是頂欄浮層；抽屜暖化後下拉若留 --card(#2c3450 靛藍)，
+    // 同一列會出現兩個浮層兩種底色。快照拍不到（下拉要點開才出現）。
+    const start = css.indexOf('html[data-theme="night"]) .dropdown {');
+    expect(start).toBeGreaterThan(-1);
+    const block = css.slice(start, css.indexOf("}", start));
+    expect(block).toMatch(/background:\s*var\(--nav-panel-bg\)/);
+  });
+
   it("trigger hover 規則在，dropdown 仍有框", () => {
     expect(css).toMatch(/\.trigger:hover\s*\{[\s\S]*?background:/);
     expect(css).toMatch(/\.dropdown\s*\{[\s\S]*?border:\s*1\.5px solid var\(--line\)/);

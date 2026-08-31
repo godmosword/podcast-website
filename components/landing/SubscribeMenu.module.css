@@ -41,6 +41,12 @@
   }
 }
 
+/* 夜間：與漢堡抽屜同底。兩者都是頂欄浮層，抽屜改暖深褐後，下拉若留在
+ * `--card`(#2c3450 靛藍) 會出現「同一列的兩個浮層兩種底色」。 */
+:global(html[data-theme="night"]) .dropdown {
+  background: var(--nav-panel-bg);
+}
+
 :global(html[data-theme="night"]) .trigger:hover {
   background: color-mix(in srgb, var(--c-teal) 14%, transparent);
 }
