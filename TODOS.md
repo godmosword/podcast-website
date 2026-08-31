@@ -37,7 +37,7 @@
 > Approved Plan：`/tmp/agent-plan-1788104186.md`（`/agent-plan` 委員會：Codex 工程審、Opus 設計審；**Grok 對抗審缺席**——`cursor-agent` 與 `grok` CLI 兩路皆回未認證）。
 > 決策 D1=A（品牌 `--fs-h4`／三控制項 `--fs-body`）／D2=B（移除底線，只留字重 800）／D3=B1（`--nav-panel-bg` = `--card` 50% + `--landing-brand-ink` 50%）。
 
-- [x] 三項使用者回報全修，見 CHANGELOG「標題列去框＋字級收斂＋夜間抽屜暖化」　`<待回填>`
+- [x] 三項使用者回報全修，見 CHANGELOG「標題列去框＋字級收斂＋夜間抽屜暖化」　`fafb72f`
 
 **過程中抓到兩次自己寫的假綠測試**（都已修正並重驗鑑別力，記在此避免再犯）：
 1. CSS 契約用 `\.selector\s*\{[\s\S]*?prop` 比對——`[\s\S]*?` **會跨越 `}`**，命中檔案後段別處的同名宣告。`box-shadow: none` 那條因此原本恆綠。修法：以 `css.indexOf("}", start)` 切出區塊再比對，且**要先去掉註解**（註解本身會提到 token 名或 `clamp(`）。
