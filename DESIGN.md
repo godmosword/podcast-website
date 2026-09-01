@@ -10,7 +10,7 @@ Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範
 |------|------|
 | Clarity（清晰） | 字階分明、對比足夠、裝飾不搶內容 |
 | Deference（讓位） | UI 退讓給黏土插畫／故事封面 |
-| Depth（深度） | 柔陰影、`--elev-*` 高度階梯、半透明層；`--hairline` 用於分隔線**與無影像抬升塊**（`ConnectHub.block`、`StoryFilter.filterBar`）；有封面的內容卡（`StoryCard`／`LatestHero`）不用盒子描邊，靠 `--elev-*`。壓在影像上的 chrome 必須有**自身底色或描邊**（不得只靠 scrim）：Landing 分區 CTA 用深色玻璃 `rgba(0,0,0,0.38)`＋白邊＋`--c-yellow` 字；SegmentNav dot 仍可留邊。鍵盤 focus 必須用淺色環（Landing `.cta`／`.next` 用 `var(--on-dark)` outline），不得只靠日間 `--focus-ring`（深墨） |
+| Depth（深度） | 柔陰影、`--elev-*` 高度階梯、半透明層；`--hairline` 用於分隔線**與無影像抬升塊**（`ConnectHub.block`、`StoryFilter.filterBar`）；有封面的內容卡（`StoryCard`／`LatestHero`）不用盒子描邊，靠 `--elev-*`。壓在影像上的 chrome 必須有**自身底色或描邊**（不得只靠 scrim）：Landing 分區 CTA 用不透明 `var(--landing-brand-ink)` 底板＋`var(--on-dark)` 白字；**分離度主要由 2px 淺邊＋外圈深棕 ring 承擔**（夜間板身與 scrim 同色族，`--gloss`／`--elev-2` 是黏土語彙而非夜間輪廓主力）；刻意不用 backdrop-filter。SegmentNav dot 仍可留邊。鍵盤 focus 必須用淺色環（Landing `.cta`／`.next` 用 `var(--on-dark)` outline），不得只靠日間 `--focus-ring`（深墨） |
 | Consistency（一致） | 導覽、卡片、CTA、內容頁同一節奏 |
 | Feedback（回饋） | 輕 `scale(0.98)`／opacity；取消歪斜 rotate 與厚底影下沉 |
 | Aesthetic Integrity | 童趣靠插畫與色彩，不靠麥克筆描邊 |
@@ -182,7 +182,7 @@ meta `theme-color`（夜）對齊 `--bg`：`lib/theme.ts` 的 `NIGHT_THEME_COLOR
 | `--elev-3` | 第三階：浮層／精選卡 hover。**不**用於 dropdown／`MapControls` 等已有暖色調手調陰影者 |
 | `--shadow-card` | `--elev-1` 的相容別名（既有消費點沿用；新元件請直接用 elev 階梯） |
 | `--shadow-sm` / `--shadow-md` | 元件互動態陰影（非高度階梯詞彙；量級落在 elev-1～elev-2 間，勿與 elev-* 混用於同一面的層級判斷） |
-| `--gloss` | inset 上緣高光（「打光黏土」）；僅用於**實心** CTA／鈕，不加於內容卡（Content over chrome） |
+| `--gloss` | inset 上緣高光（「打光黏土」）；適用 Landing 分區 `.cta` 與 `.playCta`；不加於內容卡（Content over chrome） |
 
 ## 間距
 
@@ -216,7 +216,7 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 ## 互動
 
 - **按壓回饋**：`:active { transform: scale(0.98) }` 或微降 opacity；避免厚底影下沉與 hover 歪斜 rotate
-- **Focus**：`:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px }`；日間為主文字色，夜間為黃色。壓在影像上的深色玻璃 chrome 在元件內覆寫為 `var(--on-dark)` outline，不要改全域 token。
+- **Focus**：`:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px }`；日間為主文字色，夜間為黃色。壓在影像上的 chrome（Landing `.cta`／`.next` 等）在元件內覆寫為 `var(--on-dark)` outline，不要改全域 token。
 - **動效 token**：`--motion-press`（按鈕）、`--motion-page`（翻頁淡入）；另見全域 `.press-squash`
 - **`prefers-reduced-motion: reduce`**：關閉吉祥物 bounce 等非必要動畫
 - **遊戲虛擬鍵 pointer capture（3–7 歲）**：`TouchControls`（`GridTouchButton`／`BarTouchButton`）與 BlockDrop 左右移鍵按下時 `setPointerCapture`；**手指滑出按鈕仍視為按住**，僅在 `pointerup`／`pointercancel`／`lostpointercapture` 放開（不再用 `pointerleave` 當放開）。契約測須 shim 並斷言 capture API。棋盤類（消消樂／方塊拖移層）同樣以 capture 避免粗指標跨格吞 tap。BlockDrop `HintChips` 長按路徑仍為既有 leave 放開（未納本輪）。
@@ -272,7 +272,7 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 
 四段標題一律視覺隱藏（CSS module `titleHidden`，給輔助科技／`aria-labelledby`）。禁止用 `#segment-stories` 把 `.titleHidden` 或全域 `.sr-only` 解除隱藏。可見前景只留分區 CTA；GEO 導言維持全域 `.sr-only`。不新增行銷卡片或插畫。
 
-Storyline 式**全螢幕分段捲動**：每段一張滿版黏土 hero（桌面 `segment-{id}.jpg` 16:9；行動 ≤768px `segment-{id}-portrait.jpg` 9:16），大圖主導 + 底部漸層遮罩 + 左下分區 CTA。**不**顯示段編號（如 01/04）。段標題仍視覺隱藏（CSS module `titleHidden`，給輔助科技／`aria-labelledby`），不疊在美術上；可見 CTA 為長句段名（本輪 Landing 例外，可超過「CTA ≤ 6 字」）；`href` 不變。分區 CTA 走**深色玻璃 ghost**（`min-height: 56px`、`rgba(0,0,0,0.38)`、白邊），字色 `--c-yellow`，字級桌面 `--fs-h2`、≤768 `--fs-h3`、≤640 `--fs-h4`，**非**橘色實心 pill；段內 `.next` 往下箭點視覺降權（極淡深色玻璃底）。不放「聽最新一集」播放直達鈕。首段 GEO 導言仍用全域 `.sr-only`。
+Storyline 式**全螢幕分段捲動**：每段一張滿版黏土 hero（桌面 `segment-{id}.jpg` 16:9；行動 ≤768px `segment-{id}-portrait.jpg` 9:16），大圖主導 + 底部漸層遮罩 + 左下分區 CTA。**不**顯示段編號（如 01/04）。段標題仍視覺隱藏（CSS module `titleHidden`，給輔助科技／`aria-labelledby`），不疊在美術上；可見 CTA 為長句段名（本輪 Landing 例外，可超過「CTA ≤ 6 字」）；`href` 不變。分區 CTA 走**不透明暖深墨板**（`min-height: 56px`、`var(--landing-brand-ink)` 底板、`var(--on-dark)` 白字、`--elev-2`＋`--gloss`），字級桌面 `--fs-h2`、≤768 `--fs-h3`、≤640 `--fs-h4`，**非**橘色實心 pill、**非**玻璃 ghost；刻意不用 backdrop-filter。CTA `white-space: nowrap`（「 →」是獨立文字節點，換行會孤行）；<348px 可能與 Dudu 略疊，正解是另開任務把半形空白改成不斷行空白後再拿掉 nowrap。段內 `.next` 往下箭點視覺降權（極淡玻璃底）。不放「聽最新一集」播放直達鈕。首段 GEO 導言仍用全域 `.sr-only`。
 
 1. **SiteNavBar**（全站橘色頂欄 + 訂閱 CTA）
    - **頂欄常駐列（2026-08-30 同構＋漢堡最右）**：`.inner` 用 `justify-content: flex-start`。**兩斷點同構**——**所有寬度**皆為 `[品牌] [首頁] [訂閱] [留言] [☰]`。`.actions`（`role="group"` `aria-label="常用"`，只含首頁／訂閱／留言）以 `flex: 1; justify-content: space-evenly` 撐滿品牌與漢堡之間，**禁止** `margin-left: auto`（會把三詞推到右側、中間再空一塊）。漢堡 **icon-only、置最右**，是 `.actions` 的下一個兄弟、**不**進常用組；左距 16px（大於舊 gap 10px）。品牌 pill **即首頁入口**（連 `/`），**`.actions` 內另列「首頁」文字連結**（去框：`.homeAction[aria-current]` 底透明，**僅字重 800、不畫任何線**）。**紅線：頂欄 active 不得用 `inset box-shadow`**——`.navLink` 是 `--radius-pill`(999px)，inset 底線會被圓角裁切、沿 22px 圓角往兩側爬升成**碗狀假邊框**（2026-08-31 使用者回報的「首頁的邊框」即此）。且 `.homeAction` 必須**顯式** `box-shadow: none`，只刪該行會讓 `.navLink[aria-current]`(0,2,1) 的 inset 接手、弧線原封不動。「訂閱」trigger 同樣去 border／實心底，`color: inherit`。**選單觸發器所有寬度都在**（桌面不得 `display: none`）。**主題切換移出頂欄**，改在抽屜底部。**頂欄字級角色（2026-08-31）**：品牌 `.brandText` 用 `--fs-h4`（**禁 `clamp()`+vw**，見 `globals.css` 97–98），比控制項大一階以保住字標層級；`.navLink` 與訂閱 `.trigger` 一律 `--fs-body`。**`--fs-meta`／`--fs-label` 不得用於頂欄主控制項**——它們的角色是「最小註記／標籤」，舊碼訂閱用 `--fs-meta`(+`--fs-label` @≥480px) 且字重 800，是同一列出現三種字級兩種字重的來源。`SubscribeMenu` 的 `@media (min-width: 480px)` **不得再覆寫 `font-size`**（會讓 base 修正在幾乎所有桌面失效）。訂閱文案「**訂閱**」；`visiblePlatforms()` 為空時**不得整顆消失**，退為站內 `/subscribe`。

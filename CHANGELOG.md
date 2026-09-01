@@ -10,6 +10,7 @@
 
 ### Changed
 
+- **Landing 分區 CTA 改不透明暖深墨黏土鈕**：四段左下 `.cta` 底板改 100% 不透明 `var(--landing-brand-ink)`、字色改 `var(--on-dark)` 白字；拿掉 backdrop-filter 與 `--c-yellow` 黃字；加 2px 淺邊、外圈深棕 ring、`--elev-2` 與 `--gloss` 黏土高光；hover／active 在墨板上加亮而非半透明黑。`.next` 仍極淡玻璃。**未改** Apple sync workflow。
 - **標題列去框＋字級收斂＋夜間抽屜暖化（2026-08-31）**：
   1. **「首頁」的弧形假邊框**——`.actions .homeAction[aria-current]` 的 `inset 0 -3px 0` 被 `--radius-pill`(999px) 裁切，3px 底線沿 22px 圓角往兩側爬成碗狀。依使用者裁決 **不再畫任何線**，active 僅以字重 800 編碼（`box-shadow` 須**顯式** `none`，只刪該行會讓 `.navLink[aria-current]` 的 inset 接手）。
   2. **字級收斂**——原本同一列有三種字級兩種字重（品牌 1.05rem/700、首頁留言 0.94rem/700、訂閱 **0.85rem/800**）。品牌改 `--fs-h4`（移除 `clamp()+vw`），三個控制項統一 `--fs-body` 1rem/700；一併刪除 `SubscribeMenu` 在 `@media (min-width: 480px)` 的字級二次覆寫（不刪的話 base 修正在幾乎所有桌面失效）。

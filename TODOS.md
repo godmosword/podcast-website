@@ -20,6 +20,18 @@
 
 ## 現役隊列（2026-07-11）
 
+### pending
+
+- **後續（本輪不做）**：`.scrim` 左下 0.52 可調淡。
+- **後續：拿掉 CTA `nowrap`**：把 `LandingSegment.tsx` 的 `" →"` 半形空白改不斷行空白，箭頭才不會孤行；同時避開 <348px Dudu 遮箭頭、文字級 200% 被 `.panel` 裁尾。
+- **後續：勿靜默啟用 `playCta`**：`LandingSegment.tsx` 三元式會讓主 CTA 從 56px／`--fs-h2`／不透明墨板退回 44px／玻璃 `.subscribeCta`，契約測不會紅。啟用前須讓 `.subscribeCta` 脫離玻璃語言。
+
+### 本輪已完成（2026-09-01）
+
+| ID | 說明 |
+|----|------|
+| polish(landing): 分區 CTA 改不透明暖深墨板＋白字 | 見本 commit |
+
 > **加強優先序（2026-07-16）：** 見 [docs/STRENGTHENING-PRIORITY.md](./docs/STRENGTHENING-PRIORITY.md)（對齊本檔 UX-P0-1／UX-P1-5／LIST-2／P3，不另開任務系統）。
 >
 > 單一執行優先序；詳情連結各章。Growth-P1a/b、LIST-2、MAP-UX-P1 已於本日收尾。

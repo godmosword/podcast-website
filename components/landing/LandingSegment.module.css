@@ -156,29 +156,41 @@
   gap: 6px;
   padding: 14px 26px;
   border-radius: var(--radius-pill);
-  border: 1px solid color-mix(in srgb, var(--on-dark) 65%, transparent);
-  background: rgba(0, 0, 0, 0.38);
-  color: var(--c-yellow);
+  /* 白字 vs 日 --landing-brand-ink 14.6:1、夜 17.0:1 */
+  border: 2px solid color-mix(in srgb, var(--on-dark) 88%, transparent);
+  background: var(--landing-brand-ink);
+  color: var(--on-dark);
   font-family: var(--font-baloo), var(--font-huninn), "PingFang TC",
     "Microsoft JhengHei", sans-serif;
   font-weight: 700;
   font-size: var(--fs-h2);
   letter-spacing: 0.02em;
   text-decoration: none;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(10px) saturate(140%);
-  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  /* 最窄 320px 長句若換行，「 →」會孤行；nowrap 讓鈕維持單行 56px */
+  white-space: nowrap;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--landing-brand-ink) 55%, #000),
+    var(--elev-2),
+    var(--gloss);
   transition: transform var(--motion-press), background var(--motion-press),
-    opacity var(--motion-press);
+    box-shadow var(--motion-press);
 }
 
 .cta:active {
   transform: scale(0.98);
-  opacity: 0.92;
-  background: rgba(0, 0, 0, 0.48);
+  background: color-mix(in srgb, var(--on-dark) 8%, var(--landing-brand-ink));
 }
 
-.cta:focus-visible,
+.cta:focus-visible {
+  outline: 3px solid var(--on-dark);
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--landing-brand-ink) 55%, #000),
+    var(--elev-2),
+    var(--gloss),
+    0 0 0 6px rgba(0, 0, 0, 0.45);
+}
+
 .next:focus-visible {
   outline: 3px solid var(--on-dark);
   outline-offset: 3px;
@@ -187,7 +199,7 @@
 
 @media (hover: hover) {
   .cta:hover {
-    background: rgba(0, 0, 0, 0.48);
+    background: color-mix(in srgb, var(--on-dark) 8%, var(--landing-brand-ink));
   }
 
   .playCta:hover {
@@ -239,7 +251,7 @@
   font-size: var(--fs-body);
   text-decoration: none;
   border: 1px solid rgba(120, 60, 10, 0.2);
-  /* 主要播放鈕同 .cta 加 --gloss 上緣高光（實心黏土鈕才加；玻璃 subscribeCta 不加）。 */
+  /* 分區 .cta 與本鈕皆為實心黏土鈕，加 --gloss 上緣高光；玻璃 subscribeCta 不加。 */
   box-shadow: 0 8px 22px rgba(120, 70, 20, 0.26), var(--gloss);
   transition: transform var(--motion-press), opacity var(--motion-press),
     box-shadow var(--motion-press);
