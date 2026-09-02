@@ -136,3 +136,37 @@
   outline: 3px solid var(--on-dark);
   outline-offset: 2px;
 }
+
+/**
+ * ≤480：下拉改錨定 `SiteNavBar` 的 `.inner`，不再錨定觸發鍵。
+ *
+ * 缺陷：`.wrap` 是 `position: relative`，`.dropdown` 的 `right: 0` 因此對齊
+ * 只有 67px 寬的觸發鍵；240px 面板向左展開，在 390/375/360 下左緣分別跑到
+ * −23／−31／−38px，左圓角被切、貼齊螢幕邊。頁面 `scrollWidth` 不變（靜默
+ * 裁切），所以橫向溢出偵測抓不到。
+ * `min-width: min(240px, calc(100vw - 24px))` 攔不住——360px 時 `100vw−24px`
+ * 是 336 > 240，那條要到 264px 以下才生效；真正的問題是**錨點**不是寬度。
+ *
+ * 修法：`.wrap` 改 `position: static`，讓 `.dropdown` 落到 `.inner` 的
+ * containing block（`SiteNavBar.module.css` 的 `container-type: inline-size`
+ * 對**所有後代**建立 containing block，故毋須搬 DOM，`wrapRef.contains()`
+ * 的外部點擊判定也不受影響）。
+ *
+ * 只限 ≤480：≥980 時 `.inner` 是 960px 懸浮膠囊、`.panel` 是 `right: 16px`，
+ * 全域套用會讓訂閱下拉開在與漢堡抽屜**完全相同的位置**——同一列兩個觸發鍵
+ * 開出同一個浮層位置才是真正的語彙崩壞。實測失效區間為觸發鍵右緣 < 248px
+ * （約 W ≲ 445px），480 完全覆蓋。
+ *
+ * `right` **必須顯式寫**：containing block 是 padding box，`right: 0` 會對齊
+ * 視窗右緣（這正是 `.panel` 在 <980 變滿版的原因），照抄會讓卡片右圓角貼死
+ * 螢幕邊，比原缺陷更糟。
+ */
+@media (max-width: 480px) {
+  .wrap {
+    position: static;
+  }
+
+  .dropdown {
+    right: calc(16px + var(--safe-right));
+  }
+}
