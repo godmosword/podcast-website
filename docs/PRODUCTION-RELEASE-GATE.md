@@ -92,7 +92,7 @@ Sentry 負責 client/server exception 與 request error；演練應在本機或 
 | Sentry | 設定 Production DSN 與 environment，建立 client/server exception、unhandled rejection 告警；確認 scrubber 不送 email、token、家庭資料、進度 | 一筆 staging/local 演練事件與告警通知 |
 | Upstash | 在 Vercel Production 設定 `UPSTASH_REDIS_REST_URL`、`UPSTASH_REDIS_REST_TOKEN`；確認公開表單限流在 Redis 失敗時回 503，而非 memory fallback | Upstash key/TTL 觀測或 staging 契約測試 |
 | Uptime | 每 5 分鐘 GET canonical `/robots.txt`，預期 HTTP 200 與 `text/plain`，通知送至團隊告警通道 | Monitor 設定與一次成功探測 |
-| Episode content | 目前沒有 `subtitle-unproofread` 集；若再出現，人工校對後執行 `npm run proofread:subtitles -- <slug> --mark`，再確認 `npm run verify:release-content` 無 blocker | proofread marker、release-content exit 0 |
+| Episode content | 目前沒有 `subtitle-unproofread` 集；若再出現，人工校對後執行 `npm run proofread:subtitles -- <slug> --mark`，再確認 `npm run verify:release-content` 無 blocker。此列刻意維持 `<slug>` 模板、不列當下 live slug，避免 Apple sync 新集時 vitest 擋下 sync | proofread marker、release-content exit 0 |
 | Physical device QA | 依 `GAME_PHYSICAL_DEVICE_QA.md` 在真實 iPhone、iPad 執行 Safari、旋轉、切 app、畫線、音效與 mute 檢查 | QA checklist 與裝置/OS/日期紀錄 |
 
 P2 的 stories/play-map URL state cache 調查不列入本次 release gate；若日後實作，必須

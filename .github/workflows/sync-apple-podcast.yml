@@ -166,11 +166,44 @@ jobs:
             # GITHUB_TOKEN 產生的 push／PR event 不會再觸發 pull_request CI；
             # workflow_dispatch 是例外，明確在同一個 sync branch 上只補跑 required checks；
             # 完整 child-path e2e 仍由正常 push／PR CI 執行，不讓非 required job 阻塞 sync。
+            # waiter 必須觀測「本次 SHA 的 dispatch run」與獨立 Vercel commit status；
+            # 禁止把 PR checks 的 required 過濾當唯一依據（PR #140：quality 已紅仍假綠）。
+            local sha ci_run_id existing_ids list_out wait_i
+            sha=$(git rev-parse HEAD)
+            list_out=$(gh run list --workflow=ci.yml --branch="$branch" --event=workflow_dispatch --limit=20 --json databaseId,headSha,createdAt 2>&1) || {
+              echo "::error::gh run list 失敗（branch=${branch}）"
+              echo "$list_out"
+              return 1
+            }
+            existing_ids=$(printf '%s' "$list_out" | jq -r --arg sha "$sha" '[.[] | select(.headSha == $sha) | .databaseId | tostring] | join(",")')
             gh workflow run ci.yml --ref "$branch" -f required_only=true
             gh pr merge "$pr" --squash --auto
-            local i state
+            ci_run_id=""
+            for wait_i in $(seq 1 12); do
+              list_out=$(gh run list --workflow=ci.yml --branch="$branch" --event=workflow_dispatch --limit=20 --json databaseId,headSha,createdAt 2>&1) || {
+                echo "::error::gh run list 失敗（branch=${branch}）"
+                echo "$list_out"
+                return 1
+              }
+              ci_run_id=$(printf '%s' "$list_out" | jq -r --arg sha "$sha" --arg ids "$existing_ids" '($ids | split(",") | map(select(length > 0))) as $old | [.[] | select(.headSha == $sha) | select((.databaseId | tostring) as $id | ($old | index($id) | not))] | sort_by(.createdAt) | last | .databaseId // empty')
+              if [ -n "$ci_run_id" ] && [ "$ci_run_id" != "null" ]; then
+                break
+              fi
+              sleep 5
+            done
+            if [ -z "$ci_run_id" ] || [ "$ci_run_id" = "null" ]; then
+              echo "::error::找不到 workflow_dispatch CI run（branch=${branch} sha=${sha}）"
+              return 1
+            fi
+            echo "::notice::GH013 waiter 觀測 CI run ${ci_run_id}（sha=${sha}）"
+            local i state jobs_out quality_conc build_conc status_out vercel_state
+            local quality_ok build_ok vercel_ok
             for i in $(seq 1 80); do
-              state=$(gh pr view "$pr" --json state --jq .state)
+              state=$(gh pr view "$pr" --json state --jq .state 2>&1) || {
+                echo "::error::gh pr view 失敗（pr=${pr}）"
+                echo "$state"
+                return 1
+              }
               if [ "$state" = "MERGED" ]; then
                 return 0
               fi
@@ -178,9 +211,56 @@ jobs:
                 echo "::error::sync PR 未合併就被關閉：$pr"
                 return 1
               fi
+              jobs_out=$(gh run view "$ci_run_id" --json jobs 2>&1) || {
+                echo "::error::gh run view 失敗（run=${ci_run_id}）"
+                echo "$jobs_out"
+                return 1
+              }
+              quality_conc=$(printf '%s' "$jobs_out" | jq -r '(.jobs[] | select(.name == "quality") | .conclusion // .status // "pending") // "pending"')
+              build_conc=$(printf '%s' "$jobs_out" | jq -r '(.jobs[] | select(.name == "build-and-public-e2e") | .conclusion // .status // "pending") // "pending"')
+              case "$quality_conc" in
+                failure|cancelled)
+                  echo "::error::CI job 失敗：quality（conclusion=${quality_conc}）"
+                  return 1
+                  ;;
+              esac
+              case "$build_conc" in
+                failure|cancelled)
+                  echo "::error::CI job 失敗：build-and-public-e2e（conclusion=${build_conc}）"
+                  return 1
+                  ;;
+              esac
+              quality_ok=false
+              build_ok=false
+              if [ "$quality_conc" = "success" ]; then
+                quality_ok=true
+              fi
+              if [ "$build_conc" = "success" ]; then
+                build_ok=true
+              fi
+              status_out=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${sha}/status" 2>&1) || {
+                echo "::error::commit status API 失敗（sha=${sha}）"
+                echo "$status_out"
+                return 1
+              }
+              vercel_state=$(printf '%s' "$status_out" | jq -r '[.statuses[]? | select(.context == "Vercel")] | sort_by(.updated_at) | last | .state // empty')
+              vercel_ok=false
+              if [ -z "$vercel_state" ]; then
+                vercel_state="pending"
+              elif [ "$vercel_state" = "failure" ] || [ "$vercel_state" = "error" ]; then
+                echo "::error::Vercel commit status 失敗（state=${vercel_state}）"
+                return 1
+              elif [ "$vercel_state" = "success" ]; then
+                vercel_ok=true
+              fi
+              if [ "$quality_ok" = true ] && [ "$build_ok" = true ] && [ "$vercel_ok" = true ]; then
+                echo "::notice::quality、build-and-public-e2e、Vercel 皆成功，等待 auto-merge（${i}/80）"
+              else
+                echo "::notice::等待 checks（${i}/80）：quality=${quality_conc} build-and-public-e2e=${build_conc} Vercel=${vercel_state}"
+              fi
               sleep 15
             done
-            echo "::error::等待 sync PR merge 逾時：$pr"
+            echo "::error::等待 sync PR merge 逾時：$pr（run=${ci_run_id} sha=${sha}）"
             return 1
           }
           for attempt in 1 2 3; do

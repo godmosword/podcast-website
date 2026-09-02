@@ -98,5 +98,8 @@
     "tsx": "^4.20.3",
     "typescript": "^5.7.0",
     "vitest": "^3.2.4"
+  },
+  "overrides": {
+    "browserslist": "^4.28.7"
   }
 }

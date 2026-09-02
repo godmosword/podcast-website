@@ -17,7 +17,7 @@ const appleSyncedPath = path.join(
   "../../data/apple-synced.json",
 );
 
-type AppleSyncedEpisode = { slug: string; summary: string };
+type AppleSyncedEpisode = { slug: string; summary: string; ep: number; title: string };
 
 function loadAppleSynced(): AppleSyncedEpisode[] {
   return JSON.parse(fs.readFileSync(appleSyncedPath, "utf8")) as AppleSyncedEpisode[];
@@ -160,10 +160,18 @@ describe("cleanEpisodeSummary", () => {
     }
   });
 
-  it("apple-synced.json 儲存值本身已是清洗結果（21 筆）", () => {
+  it("apple-synced.json 儲存值本身已是清洗結果，且 slug 唯一、必要欄位完整", () => {
     const episodes = loadAppleSynced();
-    expect(episodes).toHaveLength(21);
+    expect(episodes.length, "apple-synced 至少應有 21 筆歷史集數").toBeGreaterThanOrEqual(21);
+
+    const slugs = episodes.map((ep) => ep.slug);
+    expect(new Set(slugs).size, "slug 不得重複").toBe(slugs.length);
+
     for (const ep of episodes) {
+      expect(ep.slug, `${ep.slug} slug 不得為空`).toBeTruthy();
+      expect(ep.summary, `${ep.slug} summary 不得為空`).toBeTruthy();
+      expect(ep.ep, `${ep.slug} ep 不得為空`).toBeGreaterThan(0);
+      expect(ep.title, `${ep.slug} title 不得為空`).toBeTruthy();
       expect(ep.summary, `${ep.slug} 儲存值應冪等`).toBe(cleanEpisodeSummary(ep.summary));
       expect(ep.summary, `${ep.slug} 儲存值含 promo`).not.toMatch(PROMO_PATTERN);
       expect(ep.summary, `${ep.slug} 儲存值含 👶`).not.toContain("👶");

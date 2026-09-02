@@ -32,6 +32,7 @@
 |----|------|
 | fix(universe): `/adventures` 首訪提示 ≤480 改錨天象帶之下（原被 strip／dock／MapControls 三層遮死＋固定 459px 溢出）；色票改 `--map-chip*`；文案縮為「點一座島，飛過去玩」 | `2824430` |
 | fix(nav): 訂閱下拉 ≤480 改錨定 `.inner`，修左緣溢出 −23／−31／−38px；新增 `e2e/nav-subscribe.spec.ts` | `08ba718` |
+| fix(sync): #141 quality CVE／新集 vitest／GH013 fail-fast | 見本 commit |
 
 > **稽核來源：** 2026-09-02 桌機／手機對等稽核（8 頁 × 6 尺寸）。內容對等本身**全綠**——8 頁在 D1／M1 的 DOM 連結、文字節點、標題階層逐字相同；這兩項是純版面缺陷。
 >
@@ -143,6 +144,18 @@ clip 快照在不同 macOS／Chromium 版本上的自然噪音底線。
 **處置：** body 改 `printf '%s\n\n%s\n'` 組合、不再跨行（並就地留下註解說明為什麼不能跨行）；契約測試新增「workflow YAML 可解析性（語法閘門）」共 6 條，涵蓋四支 workflow 並斷言 sync 的三個觸發器仍在；`js-yaml` 由 transitive 提升為明確 devDependency。**鑑別力已驗證**：對壞掉的檔案回 2 failed，對修好的檔案全綠。
 
 > 修好後 `01a4047` 原本要解的 GH013 問題會重新浮現（sync bot 直推 main 撞 required checks）——那段邏輯本身是對的，只是寫壞了，應可正常走 sync/* PR auto-merge。**下次新集上架時需觀察**。
+
+### SYNC-DEBT-2　#141 工程修復已落地，ep-28 尚未上架　`ops · S · SYNC-DEBT-1`　📋 pending
+
+**背景：** #141 已修三條根因——`browserslist` high CVE 擋 `quality`、`apple-rss.test.ts`／`release-content.test.ts` 硬編碼 21 集與 live slug gate、`sync-apple-podcast.yml` GH013 waiter 空等（改觀測 dispatch CI run ＋ Vercel commit status）。**工程修復不含 ep-28 內容**；該集**尚未**由 sync 上架至 `main`。
+
+**上架後須走 EPISODE-WORKFLOW 1–4（依序、不可跳步）：**
+1. sync 合併後確認站上 MVP（單封面、`pageCount=1`）
+2. 人工 `npm run proofread:subtitles -- ep-28 --mark`
+3. 審稿通過後才 `npm run illustrate`（須另文字准許 API）
+4. `--approve` 後更新 `pageCount`／角色圖鑑等
+
+> ep-28 字幕 sidecar 若已存在仍為 Whisper 草稿，**未 `--mark`、未校對、未出圖**。資料基準仍為 27 集／`ep-27`，勿在 sync 合併前寫成已上架。
 
 ### VIS-DEBT-3　視覺 baseline 再度全面過期（根因＝沒人跑）　`eng · M · VIS-DEBT-1`　✅ 已結案
 

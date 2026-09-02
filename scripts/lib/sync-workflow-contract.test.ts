@@ -74,6 +74,21 @@ function parsePrebuildScripts(prebuild: string): string[] {
     });
 }
 
+/** 從 sync workflow YAML 抽出 open_sync_pr 函式區塊（source-level 契約用）。 */
+function extractOpenSyncPrBlock(yaml: string): string {
+  const match = yaml.match(/open_sync_pr\(\)\s*\{[\s\S]*?\n          \}/);
+  expect(match, "找不到 open_sync_pr 函式").toBeTruthy();
+  return match![0];
+}
+
+/** open_sync_pr 函式本體各行（不含外層 `open_sync_pr() {`／`}`）。 */
+function openSyncPrBodyLines(block: string): string[] {
+  const inner = block
+    .replace(/^[^\n]*\{\n?/, "")
+    .replace(/\n[^\n]*\}$/, "");
+  return inner.split("\n");
+}
+
 function gitAddBlock(yaml: string): string {
   const addBlock = yaml.match(
     /git add[\s\S]*?(?=\n          if |\n          git )/,
@@ -179,6 +194,56 @@ describe("sync workflow contract", () => {
     expect(yaml).toContain(
       'gh workflow run ci.yml --ref "$branch" -f required_only=true',
     );
+  });
+
+  it("GH013 open_sync_pr waiter 必須觀測 dispatch CI run 與 Vercel commit status", () => {
+    const yaml = readWorkflow("sync-apple-podcast.yml");
+    const block = extractOpenSyncPrBlock(yaml);
+
+    expect(block).toMatch(
+      /gh run list[\s\S]*--workflow=ci\.yml[\s\S]*--branch="\$branch"/,
+    );
+    expect(block).toMatch(/gh run view[\s\S]*\$ci_run_id[\s\S]*--json jobs/);
+    expect(block).toContain("quality");
+    expect(block).toContain("build-and-public-e2e");
+    expect(block).toMatch(
+      /gh api[\s\S]*repos\/\$\{GITHUB_REPOSITORY\}\/commits\/\$\{sha\}\/status/,
+    );
+    expect(block).toMatch(/context == "Vercel"/);
+    expect(block).toMatch(/::error::CI job 失敗：quality/);
+    expect(block).toMatch(/::error::CI job 失敗：build-and-public-e2e/);
+    expect(block).toMatch(/::error::Vercel commit status 失敗/);
+    expect(block).toContain("existing_ids");
+    expect(block).toMatch(/index\(\$id\)/);
+    expect(block).toContain("--limit=20");
+    expect(block).toMatch(/sort_by\(\.updated_at\)/);
+    // PR #140：`gh pr checks --required` 會漏掉 workflow_dispatch 的 quality
+    expect(block).not.toMatch(/^\s*gh pr checks\b/m);
+    expect(block).toMatch(/gh run list 失敗/);
+    expect(block).toMatch(/gh run view 失敗/);
+    expect(block).toMatch(/commit status API 失敗/);
+  });
+
+  it("open_sync_pr 函式體不得有過淺縮排（SYNC-DEBT-1 source-level）", () => {
+    const yaml = readWorkflow("sync-apple-podcast.yml");
+    const block = extractOpenSyncPrBlock(yaml);
+
+    for (const line of openSyncPrBodyLines(block)) {
+      if (line.trim() === "") {
+        continue;
+      }
+      expect(line, `過淺縮排：${JSON.stringify(line)}`).not.toMatch(
+        /^[ ]{0,9}[^ \n]/,
+      );
+    }
+  });
+
+  it("package.json 必須釘 overrides.browserslist 為 ^4.28.7（修補 GHSA-c83g-rgw3-j3cx）", () => {
+    const pkg = JSON.parse(
+      readFileSync(join(ROOT, "package.json"), "utf8"),
+    ) as { overrides?: Record<string, string> };
+
+    expect(pkg.overrides?.browserslist).toBe("^4.28.7");
   });
 
   it("GH013 fallback 的 rerun 必須可重用既有 sync branch", () => {
