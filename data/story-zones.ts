@@ -38,6 +38,7 @@ const STORY_ZONES: Record<string, ZoneId> = {
   "ep-25": "car-park", // 小紅賽車進雪山隧道的闖關任務
   "ep-26": "car-park", // 流浪小車車的零食派對
   "ep-27": "car-park", // 小紅豆汽車勇敢上學
+  "ep-28": "car-park", // 小紅豆汽車故事
 };
 
 export function getStoryZoneId(slug: string): ZoneId | undefined {
