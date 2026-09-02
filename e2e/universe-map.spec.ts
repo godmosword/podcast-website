@@ -368,8 +368,8 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     await expect(page.getByRole("region", { name: "車車宇宙樂園地圖" })).toBeVisible();
 
     const hint = page.getByRole("status");
-    await expect(hint).toContainText("點一座島飛過去");
-    await expect(hint).toContainText("來這裡逛逛");
+    // 用最短的穩定子字串，降低下次改文案的脆性
+    await expect(hint).toContainText("點一座島");
 
     await page.getByRole("button", { name: "關閉提示" }).click();
     await expect(hint).toHaveCount(0);
@@ -378,7 +378,7 @@ test.describe("車車宇宙樂園地圖 UX", () => {
   test("首訪 tap hint 點島後消失", async ({ page }) => {
     await openMap(page, "light");
     const hint = page.getByRole("status");
-    await expect(hint).toContainText("點一座島飛過去");
+    await expect(hint).toContainText("點一座島");
 
     await page.locator('button[data-zone="car-park"]').click();
     await expect(hint).toHaveCount(0);
@@ -626,5 +626,112 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     const visibleTop = Math.max(islandBox.y, frame.y);
     const visibleBottom = Math.min(islandBottom, frame.y + frame.height);
     expect(visibleBottom - visibleTop).toBeGreaterThan(48);
+  });
+});
+
+/**
+ * ≤480px 首訪提示的幾何契約。
+ *
+ * 這一組存在的理由：`openMap()` 預設 1280×800，本檔原有三個 tap hint 測試
+ * 全跑桌機寬，而 `IslandPickerStrip` 只在 `@media (max-width: 480px)` 才
+ * `display: block`——手機情境從未被執行過。加上 Playwright 的可見性判定
+ * **不偵測遮蔽**，即使把既有測試改跑 390px 也照樣綠。
+ * 2026-09-02 稽核實測：提示在 360/375/390 被島選擇列（z 6）、KidsPlayDock
+ * （z 15）與 MapControls（z 5）三者同時蓋住，且固定 459px 寬左右溢出。
+ */
+const HINT_NARROW_VIEWPORTS = [
+  // 320＝真實裝置下限（iPhone SE 1）。240px 以下 `.tapHintText` 的 nowrap 會讓
+  // 關閉鍵被擠掉約 5px，但那已低於任何在售裝置，刻意不列入契約。
+  { width: 320, height: 640 },
+  { width: 360, height: 800 },
+  { width: 375, height: 667 },
+  { width: 390, height: 844 },
+] as const;
+
+test.describe("首訪 tap hint：窄屏幾何", () => {
+  for (const vp of HINT_NARROW_VIEWPORTS) {
+    test(`${vp.width}px：不出界、不被任何底部浮層遮住`, async ({ page }) => {
+      await openMap(page, "light", vp.width, vp.height);
+
+      const hint = page.getByRole("status");
+      await expect(hint).toContainText("點一座島");
+
+      const geo = await page.evaluate(() => {
+        const el = document.querySelector('[class*="tapHint"]');
+        if (!el) throw new Error("tapHint 不存在");
+        const r = el.getBoundingClientRect();
+        const at = document.elementFromPoint(
+          r.left + r.width / 2,
+          r.top + r.height / 2,
+        );
+        const box = (selector: string) => {
+          const node = document.querySelector(selector);
+          if (!node) return null;
+          const b = node.getBoundingClientRect();
+          if (b.width <= 0 || b.height <= 0) return null;
+          return { top: b.top, bottom: b.bottom, left: b.left, right: b.right };
+        };
+        return {
+          hint: { top: r.top, bottom: r.bottom, left: r.left, right: r.right },
+          covered: !(at && el.contains(at)),
+          strip: box('[data-testid="island-picker-strip"]'),
+          dock: box("[data-kids-dock]"),
+          controls: box('[class*="MapControls"]'),
+          sky: box('[class*="skyLayer"] img'),
+          innerWidth: window.innerWidth,
+          scrollWidth: document.documentElement.scrollWidth,
+          // 內部擠壓：max-width 夾制後，nowrap 文字＋48px 關閉鍵是否還塞得下
+          hintScrollWidth: el.scrollWidth,
+          hintClientWidth: el.clientWidth,
+        };
+      });
+
+      // 唯一能抓到遮蔽的斷言——toBeVisible() 對這個 bug 是綠的
+      expect(geo.covered).toBe(false);
+      // 地圖 chrome 邊距慣例（MapControls 10px、KidsPlayDock 12px）；
+      // DESIGN §206-209 沒有螢幕邊距條款，勿再誤引
+      expect(geo.hint.left).toBeGreaterThanOrEqual(12);
+      expect(geo.hint.right).toBeLessThanOrEqual(geo.innerWidth - 12);
+      expect(geo.scrollWidth).toBeLessThanOrEqual(geo.innerWidth);
+      // 夾制不得把自己的內容擠出去（關閉鍵被裁掉就點不到了）
+      expect(geo.hintScrollWidth).toBeLessThanOrEqual(geo.hintClientWidth + 1);
+
+      // 日／月是裝飾但不透明蓋住會讓月亮看起來缺一角（提示 z 4 > skyLayer z 3）
+      if (geo.sky) {
+        const skyOverlap =
+          geo.hint.bottom > geo.sky.top &&
+          geo.sky.bottom > geo.hint.top &&
+          geo.hint.right > geo.sky.left &&
+          geo.sky.right > geo.hint.left;
+        expect(skyOverlap, "tapHint 不得蓋住日／月").toBe(false);
+      }
+
+      for (const [name, other] of [
+        ["IslandPickerStrip", geo.strip],
+        ["KidsPlayDock", geo.dock],
+        ["MapControls", geo.controls],
+      ] as const) {
+        if (!other) continue;
+        const overlaps =
+          geo.hint.bottom > other.top &&
+          other.bottom > geo.hint.top &&
+          geo.hint.right > other.left &&
+          other.right > geo.hint.left;
+        expect(overlaps, `tapHint 不得與 ${name} 重疊`).toBe(false);
+      }
+    });
+  }
+
+  test("360px：關閉鍵觸控目標 ≥48×48 且可點掉提示", async ({ page }) => {
+    await openMap(page, "light", 360, 800);
+    const close = page.getByRole("button", { name: "關閉提示" });
+    const box = (await close.boundingBox())!;
+    // 取整：提示改頂部錨定後父層位移帶小數，實測會落在 47.99998。CSS 宣告的
+    // `min-width/height: 48px` 由 UniverseMap.module.css.test.ts 逐字守住，
+    // 這裡守的是「實際 render 出來仍是 48 級距」，不需次像素精度。
+    expect(Math.round(box.width)).toBeGreaterThanOrEqual(48);
+    expect(Math.round(box.height)).toBeGreaterThanOrEqual(48);
+    await close.click();
+    await expect(page.getByRole("status")).toHaveCount(0);
   });
 });

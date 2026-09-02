@@ -650,7 +650,7 @@ function UniverseMapContent({
       {tapHintPhase === "visible" ? (
         <div className={styles.tapHint} role="status" aria-live="polite">
           <span className={styles.tapHintText}>
-            點一座島飛過去；要看故事／探索點可點「來這裡逛逛」
+            點一座島，飛過去玩
           </span>
           <button
             type="button"

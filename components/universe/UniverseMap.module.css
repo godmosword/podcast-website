@@ -316,13 +316,22 @@
   gap: var(--space-2);
   padding: 10px 10px 10px 18px;
   border-radius: var(--radius-pill);
-  background: #fff8ea;
-  border: 2px solid #f0b64e;
-  color: #7a5410;
-  box-shadow: 0 4px 12px rgba(120, 90, 40, 0.22);
+  /* 地圖 chrome 一律走 --map-chip*（DESIGN §101）：舊值 #fff8ea／#f0b64e／#7a5410
+     是 --map-chip／--map-chip-line／--map-chip-ink 的手抄近似（#7a5410 更是逐字
+     相同），同一條帶上與 MapControls 並排時會出現兩套奶油＋兩套琥珀。 */
+  background: var(--map-chip);
+  border: 2px solid var(--map-chip-line);
+  color: var(--map-chip-ink);
+  /* 第二層深藍外陰影對齊 MapControls（同檔 .btn）：夜間才壓得住淺底浮層在
+     深靛夜海上的邊界，只有暖棕陰影會讓它比旁邊的控制鈕「平」一階。
+     **刻意不跟 MapControls／IslandPickerStrip 用 cream→sand 漸層與 `0 4px 0`
+     黏土立面**：那組語彙讀作「可按下」，但本體只有 ✕ 可按，提示本身是 toast。
+     平底＋柔陰影是這個區別的編碼，不是漏改。 */
+  box-shadow: 0 4px 12px rgba(123, 83, 35, 0.22),
+    0 8px 18px rgba(24, 40, 70, 0.24);
   pointer-events: auto;
   opacity: 0;
-  transform: translateX(-50%) translateY(8px);
+  transform: translateX(var(--tap-hint-x, -50%)) translateY(8px);
   animation: tapHintEnter 400ms ease forwards;
 }
 
@@ -343,7 +352,7 @@
   border: none;
   border-radius: var(--radius-pill);
   background: transparent;
-  color: #7a5410;
+  color: var(--map-chip-ink);
   font-size: 24px;
   font-weight: 700;
   line-height: 1;
@@ -364,10 +373,62 @@
   outline-offset: 2px;
 }
 
+/**
+ * ≤480：提示改頂部錨定。
+ *
+ * **必須是獨立的一個 480 區塊、且排在 `.tapHint` 基礎規則之後**——媒體查詢
+ * 不加權重，`.tapHint` 在兩處都是 (0,1,0)，寫進本檔上方那個 480 區塊
+ * （`.map`／`.titleSign`／`.compass` 那塊）會被下方的基礎規則覆蓋回去。
+ *
+ * 為什麼不是「抬高到島選擇列之上」：底部帶在 ≤480 同時有三個常駐浮層——
+ * IslandPickerStrip（z 6）、KidsPlayDock（z 15，`data-lift="picker"` 抬到
+ * 92px）、MapControls（184px 高的直排，z 5）。提示是 z 4，抬多少都撞、
+ * 撞了都輸；且 `map-camera-utils.ts` 的 `fitAvailableViewport` 已把底部
+ * 148px 寫進相機保留區，再擠一層會與鏡頭數學打架。
+ * 頂部反而是空的：上方 480 區塊已把 .titleSign 收 sr-only、.compass 隱藏。
+ */
+@media (max-width: 480px) {
+  .tapHint {
+    /* **不加 `var(--safe-top)`**：`.map` 在 sticky 頂欄「之下」的正常流中，
+       而 `--nav-h: calc(64px + var(--safe-top))`（globals.css）已經付過一次。
+       再加一次在瀏海機上會把提示往下推 47–59px（實測 --safe-top:59 時距
+       map 頂變成 71px 而非 12px），桌機模擬永遠看不出來。
+       全樹佐證：`--safe-top` 在 components/universe/ 只此一處，其餘一律用
+       `--safe-bottom`——因為地圖的下緣才真的是螢幕邊。 */
+    /* 錨在天象帶「之下」，用同一組 --sky-* token 推導：日／月是 `right` 定位，
+       視窗一窄就往左移進提示範圍（320px 時太陽 x[184,248]、提示 x[12,231]），
+       左錨在 375／390 有效但 320／360 仍撞。改移動提示而非移動天象——天象是
+       永久美術，提示只活 8 秒；這與「提示該讓位給常駐 chrome」是同一個原則。 */
+    top: calc(var(--sky-top, 36px) + var(--sky-size, 64px) + 24px);
+    bottom: auto;
+    /* 左錨而非置中：置中時 219px 的膠囊會壓到右上的日／月（--sky-top: 36px、
+       --sky-right: 72px、--sky-size: 64px），實測交疊 47×17px 且提示 z-index 4
+       高於 .skyLayer 的 3，是不透明蓋住。左緣在 ≤480 是空的（同檔上方 480 區塊
+       已把 .titleSign 收 sr-only、.compass 隱藏）。
+       水平位移走 --tap-hint-x 變數，keyframes 與 reduced-motion 共用同一式子，
+       毋須複製一份 @keyframes。 */
+    left: calc(12px + var(--safe-left));
+    --tap-hint-x: 0px;
+    /* 24px＝與左錨的 12px 對稱（地圖 chrome 慣例：MapControls 10px、
+       KidsPlayDock 12px；DESIGN §206-209 並無螢幕邊距條款，勿再誤引）。
+       不可用 100vw：含捲軸寬且吃不到 safe inset。 */
+    max-width: calc(100% - 24px - var(--safe-left) - var(--safe-right));
+    /* 入場方向跟著錨點翻轉：由上而下。keyframes 的 from 取自本規則。 */
+    transform: translateX(var(--tap-hint-x)) translateY(-8px);
+  }
+
+  /* max-width 若配 nowrap 等於白設：flex item 的 min-width: auto 會被 nowrap
+     的 min-content（＝整串文字寬）撐住，超長文案會直接溢出膠囊，正是本輪要
+     殺掉的失效模式。允許換行讓夾制真的生效；頂部錨定不怕長高。 */
+  .tapHintText {
+    white-space: normal;
+  }
+}
+
 @keyframes tapHintEnter {
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translateX(var(--tap-hint-x, -50%)) translateY(0);
   }
 }
 
@@ -375,7 +436,7 @@
   .tapHint {
     animation: none;
     opacity: 1;
-    transform: translateX(-50%);
+    transform: translateX(var(--tap-hint-x, -50%));
   }
 
   .tapHintClose {

@@ -286,8 +286,7 @@ test("車車宇宙樂園地圖 smoke", async ({ page }) => {
   await expect(
     page.getByRole("region", { name: "車車宇宙樂園地圖" }),
   ).toBeVisible();
-  await expect(page.getByRole("status")).toContainText("點一座島飛過去");
-  await expect(page.getByRole("status")).toContainText("來這裡逛逛");
+  await expect(page.getByRole("status")).toContainText("點一座島");
 
   await expect(
     page.getByRole("button", { name: /恐龍島/ }),
