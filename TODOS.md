@@ -26,11 +26,34 @@
 - **後續：拿掉 CTA `nowrap`**：把 `LandingSegment.tsx` 的 `" →"` 半形空白改不斷行空白，箭頭才不會孤行；同時避開 <348px Dudu 遮箭頭、文字級 200% 被 `.panel` 裁尾。
 - **後續：勿靜默啟用 `playCta`**：`LandingSegment.tsx` 三元式會讓主 CTA 從 56px／`--fs-h2`／不透明墨板退回 44px／玻璃 `.subscribeCta`，契約測不會紅。啟用前須讓 `.subscribeCta` 脫離玻璃語言。
 
+### 本輪已完成（2026-09-02）
+
+| ID | 說明 |
+|----|------|
+| fix(universe): `/adventures` 首訪提示 ≤480 改錨天象帶之下（原被 strip／dock／MapControls 三層遮死＋固定 459px 溢出）；色票改 `--map-chip*`；文案縮為「點一座島，飛過去玩」 | `2824430` |
+| fix(nav): 訂閱下拉 ≤480 改錨定 `.inner`，修左緣溢出 −23／−31／−38px；新增 `e2e/nav-subscribe.spec.ts` | `08ba718` |
+
+> **稽核來源：** 2026-09-02 桌機／手機對等稽核（8 頁 × 6 尺寸）。內容對等本身**全綠**——8 頁在 D1／M1 的 DOM 連結、文字節點、標題階層逐字相同；這兩項是純版面缺陷。
+>
+> **CI 盲點已一併修掉：** `e2e/universe-map.spec.ts` 的 `openMap()` 預設 1280×800，三個既有 tap hint 測試全跑桌機寬，而島選擇列只在 ≤480 渲染；`toBeVisible()` 又不偵測遮蔽。已補 320／360／375／390 的 `elementFromPoint` 遮蔽偵測與矩形不重疊斷言。
+>
+> **稽核列出但刻意不改（理由見 CHANGELOG）：** 漢堡 icon-only（DESIGN §99 產品覆寫）、首頁四段標題入圖、島選擇列 chip ellipsis、`car-park@3x`（稽核腳本誤報，實檔 792×780 正確）。
+>
+> **另開任務（已知落差，本輪不做）：**
+> 1. `.next` chevron 僅 ≥980 顯示，手機以四點指示列承接——**不是功能對等**：chevron 講「還有更多」，圓點講「有四個位置」，是不同可供性；且 `SegmentNav.module.css` 在 ≤768 把 `.dotLabel` 設 `display: none`，手機上是四顆 7px **無標籤**圓點，與 DESIGN §288 描述的「短標指示列」不符，inactive 對比約 3:1 落在 WCAG 1.4.11 邊界。
+> 2. `.tapHint` 的 `role="status" aria-live="polite"` 與 `#universe-map-guide` 內容重複，且 live region 連同內容一起插入 DOM，多數 AT 不會播報——建議移除，但會連帶改兩支測試。
+> 3. `SegmentNav.tsx` 的 `<ul>` 缺顯式 `role="list"`（Safari/VoiceOver 會因 `list-style: none` 移除清單語意）；抽屜與 ExploreGrid 都已補。
+> 4. DESIGN.md §54 寫 `@container nav-inner (max-width: 300px)`，實作與 §99／§281 都是 **420px**，文件內部不一致。
+> 5. DESIGN.md 未登記「地圖首訪提示」的定位與色彩歸屬；本輪已改其位置與色票，宜補一行進 §101 或 §245。另 §282 已登記 `.panel` 的錨定陷阱，本輪 `.dropdown` 的姊妹案（≤480 `.wrap: static` ＋顯式 `right`）也該登記在旁。
+> 6. **相機頂部保留區僅 28px**（`map-camera-utils.ts` 的 `LABEL_SCREEN_PAD`），而底部保留 148px。提示現在錨在天象帶之下（約 map-y 124），理論上仍可能與最上方島嶼的木牌在 8 秒內重疊；新 e2e 只測 z>4 的三個 chrome 浮層，`elementFromPoint` 對畫在 z 4 之下的場景元素是看不見的。宜實測 360／375／390 的實際間距並決定要不要加頂部保留。
+> 7. `.tapHintText` 仍是硬編碼 `font-size: 15px`（DESIGN §212 已把字級收斂為 role token）；`SubscribeMenu.module.css` 的 `min-width: min(240px, calc(100vw - 24px))` 與新的 16px 右錨不再一致，且 `100vw` 含捲軸寬。兩者皆不影響現行行為。
+> 8. 提示在 DOM 中排在地圖與島嶼按鈕之後，但 ≤480 視覺上排最前 → Tab 焦點會從畫面中段跳到頂部（2.4.3／1.3.2 輕微落差，且僅存在 8 秒）。
+
 ### 本輪已完成（2026-09-01）
 
 | ID | 說明 |
 |----|------|
-| polish(landing): 分區 CTA 改不透明暖深墨板＋白字 | 見本 commit |
+| polish(landing): 分區 CTA 改不透明暖深墨板＋白字 | `b1ff674` |
 
 > **加強優先序（2026-07-16）：** 見 [docs/STRENGTHENING-PRIORITY.md](./docs/STRENGTHENING-PRIORITY.md)（對齊本檔 UX-P0-1／UX-P1-5／LIST-2／P3，不另開任務系統）。
 >
