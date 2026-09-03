@@ -56,15 +56,19 @@ export default function SegmentNav({ items }: SegmentNavProps) {
 
   return (
     <nav className={styles.nav} aria-label="專區導覽">
-      <ul className={styles.list}>
+      {/* `list-style: none` 在 Safari/VoiceOver 會移除清單語意，故顯式 role
+          （抽屜已是這個範式，這裡先前漏了）。 */}
+      <ul className={styles.list} role="list">
         {items.map((it) => {
           const active = it.anchorId === activeId;
           return (
             <li key={it.anchorId}>
+              {/* 刻意**不加** `aria-label`：≤768 起短標已是可見文字，`aria-label`
+                  會覆寫它。兩者同源時無害，但日後只改其一就會靜默漂移
+                  （WCAG 2.5.3 label-in-name）。可及名稱交給內層 span。 */}
               <a
                 href={`#${it.anchorId}`}
                 className={`${styles.dot} ${active ? styles.active : ""}`}
-                aria-label={it.label}
                 aria-current={active ? "true" : undefined}
                 onClick={(e) => {
                   e.preventDefault();

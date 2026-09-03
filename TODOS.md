@@ -35,7 +35,8 @@
 | fix(sync): #141 quality CVE／新集 vitest／GH013 fail-fast | `341f060` |
 | chore(sync): T5 合入 ep-28 MVP（#145 squash；字幕仍為草稿） | `11f6d67` |
 | fix(sync): GH013 waiter 鏡射 quality／build-and-public-e2e commit status | `fc419be` |
-| content(ep-28): 字幕校對 `--mark` + 手切 17 幕（尚未出圖） | 見本 commit |
+| content(ep-28): 字幕校對 `--mark` + 手切 17 幕（尚未出圖） | `874d4dd` |
+| fix(landing): 刪除與漢堡抽屜重疊的 ExploreGrid；≤768 SegmentNav 短標常駐；地圖提示不再當 live region；共讀區觸控 ≥44px | 見本 commit |
 
 > **稽核來源：** 2026-09-02 桌機／手機對等稽核（8 頁 × 6 尺寸）。內容對等本身**全綠**——8 頁在 D1／M1 的 DOM 連結、文字節點、標題階層逐字相同；這兩項是純版面缺陷。
 >
@@ -43,15 +44,15 @@
 >
 > **稽核列出但刻意不改（理由見 CHANGELOG）：** 漢堡 icon-only（DESIGN §99 產品覆寫）、首頁四段標題入圖、島選擇列 chip ellipsis、`car-park@3x`（稽核腳本誤報，實檔 792×780 正確）。
 >
+> **本輪已收（稽核後續）：** ≤768 SegmentNav 短標常駐＋`role="list"`；`.tapHint` 不再當 live region（改 `data-testid`，說明由 `#universe-map-guide` 承擔）。
+>
 > **另開任務（已知落差，本輪不做）：**
-> 1. `.next` chevron 僅 ≥980 顯示，手機以四點指示列承接——**不是功能對等**：chevron 講「還有更多」，圓點講「有四個位置」，是不同可供性；且 `SegmentNav.module.css` 在 ≤768 把 `.dotLabel` 設 `display: none`，手機上是四顆 7px **無標籤**圓點，與 DESIGN §288 描述的「短標指示列」不符，inactive 對比約 3:1 落在 WCAG 1.4.11 邊界。
-> 2. `.tapHint` 的 `role="status" aria-live="polite"` 與 `#universe-map-guide` 內容重複，且 live region 連同內容一起插入 DOM，多數 AT 不會播報——建議移除，但會連帶改兩支測試。
-> 3. `SegmentNav.tsx` 的 `<ul>` 缺顯式 `role="list"`（Safari/VoiceOver 會因 `list-style: none` 移除清單語意）；抽屜與 ExploreGrid 都已補。
-> 4. DESIGN.md §54 寫 `@container nav-inner (max-width: 300px)`，實作與 §99／§281 都是 **420px**，文件內部不一致。
-> 5. DESIGN.md 未登記「地圖首訪提示」的定位與色彩歸屬；本輪已改其位置與色票，宜補一行進 §101 或 §245。另 §282 已登記 `.panel` 的錨定陷阱，本輪 `.dropdown` 的姊妹案（≤480 `.wrap: static` ＋顯式 `right`）也該登記在旁。
-> 6. **相機頂部保留區僅 28px**（`map-camera-utils.ts` 的 `LABEL_SCREEN_PAD`），而底部保留 148px。提示現在錨在天象帶之下（約 map-y 124），理論上仍可能與最上方島嶼的木牌在 8 秒內重疊；新 e2e 只測 z>4 的三個 chrome 浮層，`elementFromPoint` 對畫在 z 4 之下的場景元素是看不見的。宜實測 360／375／390 的實際間距並決定要不要加頂部保留。
-> 7. `.tapHintText` 仍是硬編碼 `font-size: 15px`（DESIGN §212 已把字級收斂為 role token）；`SubscribeMenu.module.css` 的 `min-width: min(240px, calc(100vw - 24px))` 與新的 16px 右錨不再一致，且 `100vw` 含捲軸寬。兩者皆不影響現行行為。
-> 8. 提示在 DOM 中排在地圖與島嶼按鈕之後，但 ≤480 視覺上排最前 → Tab 焦點會從畫面中段跳到頂部（2.4.3／1.3.2 輕微落差，且僅存在 8 秒）。
+> 1. `.next` chevron 僅 ≥980 顯示，手機以底列短標承接——**不是功能對等**：chevron 講「還有更多」，底列講「有四個位置」，是不同可供性。
+> 2. DESIGN.md §54 寫 `@container nav-inner (max-width: 300px)`，實作與 §99／§281 都是 **420px**，文件內部不一致。
+> 3. DESIGN.md §282 已登記 `.panel` 的錨定陷阱，`.dropdown` 的姊妹案（≤480 `.wrap: static` ＋顯式 `right`）也該登記在旁。
+> 4. **相機頂部保留區僅 28px**（`map-camera-utils.ts` 的 `LABEL_SCREEN_PAD`），而底部保留 148px。提示現在錨在天象帶之下（約 map-y 124），理論上仍可能與最上方島嶼的木牌在 8 秒內重疊；新 e2e 只測 z>4 的三個 chrome 浮層，`elementFromPoint` 對畫在 z 4 之下的場景元素是看不見的。宜實測 360／375／390 的實際間距並決定要不要加頂部保留。
+> 5. `.tapHintText` 仍是硬編碼 `font-size: 15px`（DESIGN §212 已把字級收斂為 role token）；`SubscribeMenu.module.css` 的 `min-width: min(240px, calc(100vw - 24px))` 與新的 16px 右錨不再一致，且 `100vw` 含捲軸寬。兩者皆不影響現行行為。
+> 6. 提示在 DOM 中排在地圖與島嶼按鈕之後，但 ≤480 視覺上排最前 → Tab 焦點會從畫面中段跳到頂部（2.4.3／1.3.2 輕微落差，且僅存在 8 秒）。
 
 ### 本輪已完成（2026-09-01）
 
@@ -110,7 +111,7 @@ clip 快照在不同 macOS／Chromium 版本上的自然噪音底線。
 - [x] **PR1 首頁探索區**　`landing · M · 無`　地圖大卡＋六格磁貼牆，放頁尾 snap pane 之上、不新增第五段；首頁 HTML 常駐 7 個內容頁入口  `b9de774`
 - [x] **PR2 Header／Subscribe／contact**　`nav · L · PR1`　頂欄收斂為品牌 pill＋帶文字「選單」觸發器＋單一 CTA「訂閱」（~~留言移入抽屜「給爸媽」組~~ → **2026-08-30 CRITICAL-2=A 覆寫，留言回到頂欄**）；桌機常駐兒童三入口（D0=C）；抽屜連結改常駐 DOM＋`inert`；`feedbackHref()` env→mailto；訂閱空清單退 `/subscribe`；主題切換移入抽屜底部；`openMenu` 浮層互斥＋斷點 reset＋outside click。DESIGN §53／§99／§276／§277 已改寫（§241 未動——D8=B 不改 footer）  `b9de774`
 - [ ] **PR2 後續（設計審建議）**　`nav · S · PR2`
-  - **(1) 觸發器文字「選單」— ✅ 已覆寫（2026-08-30）**：改最右 icon-only（`aria-label` 仍為開啟／關閉選單）。兒童主路徑改走內頁 `KidsPlayDock`／首頁 `ExploreGrid`，抽屜 7 列仍保留兒童項當備援。`91dfb25`。
+  - **(1) 觸發器文字「選單」— ✅ 已覆寫（2026-08-30）**：改最右 icon-only（`aria-label` 仍為開啟／關閉選單）。兒童主路徑改走內頁 `KidsPlayDock`／漢堡抽屜，抽屜 7 列仍保留兒童項。`91dfb25`。
   - **(2) 「留言」移入抽屜 — ✅ 已完成**（使用者裁決 B，見 `b9de774`）。決策關鍵是實測首頁曾同時有三個指向同一信箱的入口。**2026-08-30 CRITICAL-2=A 覆寫，留言回到頂欄**（接受與頁尾／ConnectHub 可能同信箱）。
   - (3) 觸發器 `aria-label` 隨開闔改寫可及名稱，與 `aria-expanded` 重複播報；建議固定為「選單」（會動到四支 e2e 契約）。
   - (4) 抽屜是半模態（有 focus trap 但無 scroll lock／背景 `inert`）；建議改為非模態 popover 或補齊模態語意，二擇一並寫進 DESIGN。

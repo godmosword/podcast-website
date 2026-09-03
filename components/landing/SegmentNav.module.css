@@ -80,10 +80,13 @@
   pointer-events: none;
 }
 
-.dot:hover .dotLabel,
-.dot:focus-visible .dotLabel {
-  opacity: 1;
-  transform: translateX(0);
+/* tooltip 的 hover/focus 提升只屬桌面：≤768 短標常駐可見，這兩條會變死碼 */
+@media (min-width: 769px) {
+  .dot:hover .dotLabel,
+  .dot:focus-visible .dotLabel {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* 平板／手機：實底貼齊螢幕底緣（含 safe area） */
@@ -122,28 +125,111 @@
     display: none;
   }
 
-  .dot {
+  /* 等寬四格：`.list` 的 flex 子項是 `<li>`，不是 `.dot`（`<a>` 在 li 之內）。
+     舊碼把 `flex: 1 1 0` 寫在 `.dot` 上**一直是死碼**——四格從來沒有等寬，
+     只是內容寬度置中成一叢。短標上場後這會讓「捏黏土」與「好習慣」黏在一起。 */
+  .list > li {
     flex: 1 1 0;
-    width: auto;
+    min-width: 0;
+  }
+
+  .dot {
+    width: 100%;
     min-width: 44px;
     height: 44px;
     justify-content: center;
   }
 
+  /* 圓點在 ≤768 讓位給短標，改成頂緣指示條。
+     不能並排：7(點) + 8(gap) + 60(4 字 @--fs-control) + 16(pill padding) = 91px，
+     而 320px 下 `.list` 扣掉 padding 只剩 304／4 = **76px**，必溢出。
+     指示條畫在**頂緣**而非底緣——底緣會被 `--safe-bottom` 吃掉。
+
+     **這一塊是 ≤768 唯一的 `.dot::after`／`.active.dot::after`**：舊碼在同一個
+     媒體查詢內另有一組只改 background／border-color／box-shadow 的規則，全部被
+     這裡逐條蓋掉。留著等於埋一顆地雷——日後有人刪掉「新的這塊」，10px 發光橘點
+     會靜默復活。已合併。 */
   .dot::after {
-    background: rgba(255, 255, 255, 0.32);
-    border-color: rgba(255, 255, 255, 0.45);
+    position: absolute;
+    top: 0;
+    left: 8px;
+    right: 8px;
+    width: auto;
+    height: 3px;
+    border: 0;
+    border-radius: 0 0 var(--radius-pill) var(--radius-pill);
+    background: transparent;
     box-shadow: none;
   }
 
   .active.dot::after {
+    /* **width／height／border-color 必須在這裡重寫**：`.active.dot::after` 是
+       (0,2,1)、高於上面 `.dot::after` 的 (0,1,1)，媒體查詢不加權重，桌面那組
+       `width/height: 10px` 會蓋掉手機的 3px 指示條（實測拍到 10px 橘點）。
+       `border-color` 同理會漏過來——今天因 `border: 0` 無害，但只要日後有人給
+       指示條補 border-width，白邊就會憑空從 100 行外的桌面規則長出來。
+       非文字對比（1.4.11 門檻 3:1，量的是**疊上淺色 hero 後的合成底**）：
+       日 ≈5.05:1、夜 `#d9701a` ≈3.51:1——夜間餘裕只有 0.51，
+       **必須實色且 opacity: 1**，做成漸淡或半透明就會跌破。 */
+    width: auto;
+    height: 3px;
+    border-color: transparent;
     background: var(--landing-brand, #ff8c2b);
-    border-color: rgba(255, 255, 255, 0.88);
-    box-shadow: 0 0 8px rgba(255, 140, 43, 0.45);
+    opacity: 1;
+    box-shadow: none;
   }
 
+  /* Landing 底列浮在深色／淺色 hero 上，日間 `--focus-ring`（深墨 #34302b）
+     對 `rgba(38,20,8,0.86)` 僅 1.35:1、疊淺色 hero 更掉到 1.12:1，遠低於
+     1.4.11 的 3:1。範式同 SiteNavBar `.trigger:focus-visible` 與
+     SubscribeMenu。命中情境：iPad 直式恰為 768px ＋ 藍牙鍵盤。 */
+  .dot:focus-visible {
+    outline: 3px solid var(--on-dark);
+    outline-offset: -3px;
+  }
+
+  /* 桌面 tooltip 的屬性要顯式歸零，少一個就壞：
+     `opacity: 0` → 什麼都看不見；`background` → 奶油 pill 壓在深底上；
+     `color: var(--ink)` → 深色字疊深底；`transform` → 位移；`padding` → 擠格。 */
   .dotLabel {
-    display: none;
+    opacity: 0.72;
+    transform: none;
+    padding: 0;
+    background: none;
+    /* `--on-dark` 日夜同值 #ffffff；對底列合成色最不利端 ≈6.9:1（AA 過） */
+    color: var(--on-dark);
+    /* **不用 `--fs-meta`／`--fs-label`**：DESIGN §278 已定調兩者是「最小註記／
+       標籤」、不給主控制項用（該條字面只綁頂欄，此處是角色本位的推廣）。
+       也不用 `--fs-body`——那是站台主導覽的級別，底列是次級分段指示，
+       同級會壓平階梯。`--fs-control` 登記角色正是「按鈕、chip、觸發器」。 */
+    font-size: var(--fs-control);
+    font-weight: 600;
+    /* nowrap 由 base 繼承：`navLabel` 由 data/landing-segments.test.ts 逐字釘死，
+       4 字 60px 落在 76px 格內。**加長標前必須先加 max-width／ellipsis 護欄** */
+  }
+
+  .active .dotLabel {
+    /* active 的視覺編碼（色彩不可為唯一編碼）：
+       ① 頂緣 3px 指示條（形狀有／無）② **底色塊**（面積）③ 亮度 0.72→1
+       ＋ 程式化的 `aria-current`。
+
+       **不能靠 font-weight**：huninn 是單一字重 master（`layout.tsx` 宣告
+       400–700）且 `globals.css` 全域設了 `font-synthesis-weight: none`，
+       而這四個短標全是 CJK ⇒ 600 與 800 **渲染出來像素完全相同**。
+       下面那行 800 只對拉丁 fallback 有效，**不得計入編碼數**。
+       這也是為什麼要補 ②：否則扣掉字重後，明眼使用者只剩一條最劣 3.51:1
+       的 3px 細條，冗餘度歸零。
+
+       **字色刻意不用品牌橘**——夜間 #d9701a 對底列僅 ≈3.51:1，作為文字違反
+       1.4.3（需 4.5:1）。品牌橘只出現在非文字的指示條上。 */
+    opacity: 1;
+    font-weight: 800;
+  }
+
+  .active.dot {
+    /* ② 面積編碼：白 8% 疊在底列上，白字對比僅由 ≈6.9:1 微降到 ≈6.4:1，
+       仍遠高於 4.5:1。 */
+    background: rgba(255, 255, 255, 0.08);
   }
 }
 

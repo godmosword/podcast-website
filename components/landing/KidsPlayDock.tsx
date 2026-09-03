@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { isImmersiveRoute } from "@/lib/is-story-play-route";
 import styles from "./KidsPlayDock.module.css";
 
-/** 內頁左下三入口：與 ExploreGrid／行動抽屜同一批 emoji 與標籤。 */
+/** 內頁左下三入口：與行動抽屜同一批 emoji 與標籤。 */
 const DOCK_LINKS = [
   { id: "stories", label: "全部故事", href: "/stories", emoji: "📖" },
   { id: "games", label: "遊樂園", href: "/games", emoji: "🎡" },

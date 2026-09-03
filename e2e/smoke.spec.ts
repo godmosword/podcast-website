@@ -286,13 +286,13 @@ test("車車宇宙樂園地圖 smoke", async ({ page }) => {
   await expect(
     page.getByRole("region", { name: "車車宇宙樂園地圖" }),
   ).toBeVisible();
-  await expect(page.getByRole("status")).toContainText("點一座島");
+  await expect(page.getByTestId("universe-tap-hint")).toContainText("點一座島");
 
   await expect(
     page.getByRole("button", { name: /恐龍島/ }),
   ).toBeVisible();
   await page.getByRole("button", { name: /恐龍島/ }).click();
-  await expect(page.getByRole("status")).toHaveCount(0);
+  await expect(page.getByTestId("universe-tap-hint")).toHaveCount(0);
   await expect(page).toHaveURL(/\/adventures\/dino$/);
   await expect(page.getByText("還在蓋喔！")).toHaveCount(0);
   await expect(page.locator("[data-hotspot-id]").first()).toBeVisible({
@@ -453,82 +453,15 @@ test.describe("KidsPlayDock 契約", () => {
   });
 });
 
-test.describe("首頁探索區（PR1）", () => {
-  const EXPLORE_HREFS = [
-    "/stories",
-    "/characters",
-    "/games",
-    "/games/coloring-book",
-    "/adventures",
-    "/for-parents",
-    "/for-parents/play-map",
-  ];
-
-  test("7 個內容頁入口在首頁 HTML 內且可見", async ({ page }) => {
-    await page.goto("/");
-    const explore = page.getByRole("region", { name: "都去哪裡玩？" });
-    await explore.scrollIntoViewIfNeeded();
-    await expect(explore).toBeVisible();
-
-    for (const href of EXPLORE_HREFS) {
-      await expect(explore.locator(`a[href="${href}"]`)).toBeVisible();
-    }
-  });
-
-  test("標題與磁貼標籤為 HTML 文字（非燒進圖片）", async ({ page }) => {
-    await page.goto("/");
-    const html = await page.content();
-    for (const label of [
-      "都去哪裡玩？",
-      "全部故事",
-      "遊樂園",
-      "繪本著色",
-      "角色圖鑑",
-      "宇宙地圖",
-      "親子指南",
-      "親子景點",
-    ]) {
-      expect(html).toContain(label);
-    }
-  });
-
-  test("375px 下探索區不造成橫向溢出", async ({ page }) => {
+test.describe("首頁頁尾 snap pane", () => {
+  test("可捲到頁尾版權列，且不被貼底 SegmentNav 壓住", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto("/");
-    await page
-      .getByRole("region", { name: "都去哪裡玩？" })
-      .scrollIntoViewIfNeeded();
-    const scrollWidth = await page.evaluate(
-      () => document.documentElement.scrollWidth,
-    );
-    expect(scrollWidth).toBeLessThanOrEqual(375);
-  });
+    await expect(
+      page.getByRole("region", { name: "都去哪裡玩？" }),
+    ).toHaveCount(0);
 
-  test("磁貼可點並跳轉；兒童入口觸控 ≥48px", async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 667 });
-    await page.goto("/");
-    const explore = page.getByRole("region", { name: "都去哪裡玩？" });
-    await explore.scrollIntoViewIfNeeded();
-
-    const tile = explore.locator('a[href="/stories"]');
-    const box = await tile.boundingBox();
-    expect(box!.height).toBeGreaterThanOrEqual(48);
-
-    await tile.click();
-    await expect(page).toHaveURL(/\/stories$/);
-  });
-
-  test("探索區之後仍可捲到頁尾版權列（mandatory snap 超高 pane）", async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 375, height: 667 });
-    await page.goto("/");
-    // 不用 scrollIntoViewIfNeeded()——那是程式化定位，會繞過 snap 攔截而假性通過。
-    // 改為從 footer pane 頂端起，以連續 wheel 事件模擬使用者滑動。
     await page.locator("#landing-foot").scrollIntoViewIfNeeded();
-
-    // 捲動容器是 LandingScrollView（`[data-landing-root]` 內）；hover 到頁尾區塊即可
-    // 讓 wheel 事件落在該容器上。
     await page.locator("#landing-foot").hover();
 
     for (let i = 0; i < 12; i += 1) {
@@ -536,7 +469,6 @@ test.describe("首頁探索區（PR1）", () => {
       await page.waitForTimeout(80);
     }
 
-    // 捲動確實抵達容器底部（非只是元素被程式化拉進視窗）
     const atBottom = await page.evaluate(() => {
       const el = document.scrollingElement!;
       const candidates: Element[] = [el, ...document.querySelectorAll("*")];
@@ -549,13 +481,10 @@ test.describe("首頁探索區（PR1）", () => {
     });
     expect(atBottom).toBe(true);
 
-    // 註：首頁的 <footer> 仍不具 contentinfo——它位於 app/page.tsx 的
-    // `<main data-landing-root>` 之內，而 <main> 本身就是 contentinfo 隱含角色的
-    // 排除祖先（與 #landing-foot 用 section 或 div 無關）。以版權列當可見性錨點。
+    // 首頁 <footer> 仍不具 contentinfo（包在 `<main data-landing-root>` 內）。
     const copyright = page.getByText("© 車車遊樂園™ · Bonbon & 馬米");
     await expect(copyright).toBeInViewport();
 
-    // 版權列不得被 ≤768px 貼底的 SegmentNav 實心列壓住
     const copyrightBox = await copyright.boundingBox();
     const segmentNav = page.getByRole("navigation", { name: /分區|段落/ });
     if (await segmentNav.count()) {
@@ -566,31 +495,6 @@ test.describe("首頁探索區（PR1）", () => {
         );
       }
     }
-  });
-  test("≥768px 為左地圖大卡＋右磁貼牆並排，兒童組 4 欄", async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/");
-    const explore = page.getByRole("region", { name: "都去哪裡玩？" });
-    await explore.scrollIntoViewIfNeeded();
-
-    const mapBox = await explore.locator('a[href="/adventures"]').boundingBox();
-    const firstTile = await explore.locator('a[href="/stories"]').boundingBox();
-    // 地圖大卡在左、磁貼在右（並排而非上下堆疊）
-    expect(mapBox!.x + mapBox!.width).toBeLessThanOrEqual(firstTile!.x + 1);
-
-    // 兒童組四格同一列（y 座標相同）
-    const childHrefs = [
-      "/stories",
-      "/games",
-      "/games/coloring-book",
-      "/characters",
-    ];
-    const ys: number[] = [];
-    for (const href of childHrefs) {
-      const box = await explore.locator(`a[href="${href}"]`).boundingBox();
-      ys.push(Math.round(box!.y));
-    }
-    expect(new Set(ys).size).toBe(1);
   });
 });
 
@@ -697,4 +601,90 @@ test.describe("夜間漢堡抽屜", () => {
       expect(rgb.panel[2] - rgb.panel[0]).toBeLessThan(10);
     });
   }
+});
+
+/**
+ * ≤768 底列分段導覽：短標可見（原本是四顆 7px 無標籤圓點）。
+ *
+ * 兩個歷史坑，這組都要守住：
+ * 1. `.dotLabel` 是桌面 hover tooltip 樣式（`opacity: 0`、`--ink` 深字、奶油 pill
+ *    底、`transform`），少覆寫任一個在深色底列上就是「看不見」。
+ * 2. `.active.dot::after`(0,2,1) 特異性高於 `.dot::after`(0,1,1)，媒體查詢不加
+ *    權重——桌面的 `height: 10px` 會蓋掉手機 3px 指示條（實測拍到過 10px 橘點）。
+ */
+test.describe("Landing 底列短標（≤768）", () => {
+  const NAV_LABELS = ["車車故事", "睡前", "捏黏土", "好習慣"] as const;
+
+  for (const width of [320, 375, 767] as const) {
+    test(`${width}px：四個短標可見、等寬、不換行不溢出`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 760 });
+      await page.goto("/");
+      const nav = page.getByRole("navigation", { name: "專區導覽" });
+      await expect(nav).toBeVisible();
+
+      const geo = await page.evaluate(() => {
+        const n = document.querySelector('nav[aria-label="專區導覽"]')!;
+        return {
+          listRole: n.querySelector("ul")!.getAttribute("role"),
+          cells: [...n.querySelectorAll("a")].map((a) => {
+            const cell = a.getBoundingClientRect();
+            const span = a.querySelector("span")!;
+            const sb = span.getBoundingClientRect();
+            const cs = getComputedStyle(span);
+            return {
+              text: span.textContent!.trim(),
+              cellW: Math.round(cell.width),
+              labelH: Math.round(sb.height),
+              lineH: parseFloat(cs.fontSize),
+              opacity: parseFloat(cs.opacity),
+              overflow: sb.right > cell.right + 0.5 || sb.left < cell.left - 0.5,
+            };
+          }),
+          scrollWidth: document.documentElement.scrollWidth,
+          innerWidth: window.innerWidth,
+        };
+      });
+
+      // Safari/VoiceOver 會因 list-style: none 移除清單語意
+      expect(geo.listRole).toBe("list");
+      expect(geo.cells.map((c) => c.text)).toEqual([...NAV_LABELS]);
+
+      const widths = new Set(geo.cells.map((c) => c.cellW));
+      expect(widths.size, "四格必須等寬（flex 子項是 li 不是 a）").toBeLessThanOrEqual(2);
+
+      for (const c of geo.cells) {
+        expect(c.opacity, `${c.text} 必須可見（桌面 tooltip 的 opacity:0 要被覆寫）`)
+          .toBeGreaterThan(0.5);
+        expect(c.labelH, `${c.text} 不得換行`).toBeLessThan(c.lineH * 1.8);
+        expect(c.overflow, `${c.text} 不得溢出格子`).toBe(false);
+      }
+      expect(geo.scrollWidth).toBeLessThanOrEqual(geo.innerWidth);
+    });
+  }
+
+  test("320px：active 指示條是 3px 實色（非桌面的 10px 圓點）", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 760 });
+    await page.goto("/");
+    const bar = await page.evaluate(() => {
+      const a = document.querySelector('nav[aria-label="專區導覽"] a[aria-current="true"]')!;
+      const cs = getComputedStyle(a, "::after");
+      return { height: cs.height, opacity: cs.opacity, bg: cs.backgroundColor };
+    });
+    expect(bar.height).toBe("3px");
+    // 漸淡／半透明會讓非文字對比掉到 1.4.11 的 3:1 以下
+    expect(parseFloat(bar.opacity)).toBe(1);
+    expect(bar.bg).not.toBe("rgba(0, 0, 0, 0)");
+  });
+
+  test("320px：點短標真的換段（pointer-events 未被 tooltip 殘留擋住）", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 760 });
+    await page.goto("/");
+    // exact:true 必要——「捏黏土」同屏另有段內 CTA「好好玩的捏黏土」（已知重名，刻意接受）
+    await page.getByRole("link", { name: "捏黏土", exact: true }).click();
+    await expect(
+      page.locator('nav[aria-label="專區導覽"] a[aria-current="true"] span'),
+    ).toHaveText("捏黏土");
+  });
 });

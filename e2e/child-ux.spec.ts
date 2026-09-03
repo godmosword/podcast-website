@@ -121,3 +121,42 @@ test.describe("UX-P1-5 親子指南與播放頁觸控", () => {
     await expect(timer).toBeFocused();
   });
 });
+
+/**
+ * 每集共讀區的兩個文字型觸控目標。
+ *
+ * 2026-09-02 稽核實測：`.storyLink`（打開這一集）93×24、ShowNotes 的
+ * `<summary>` 298×24，都是純文字沒有 min-height／padding 撐高。這頁是家長
+ * 單手滑的主要工具頁，兩個都是主要動作。
+ *
+ * 逐個檢查而非 `.first()`——每集都有自己的一組，只驗第一個等於沒驗。
+ */
+test.describe("每集共讀區觸控目標", () => {
+  for (const width of [360, 375, 390] as const) {
+    test(`${width}px：打開這一集／家長共讀指引皆 ≥44px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto("/for-parents");
+
+      // 兩個目標都在收合的 <details> 裡，必須先展開每一集
+      const outer = page.locator("#co-listen > ul > li > details");
+      const count = await outer.count();
+      expect(count).toBeGreaterThan(0);
+
+      for (let i = 0; i < count; i += 1) {
+        const item = outer.nth(i);
+        await item.locator("> summary").click();
+
+        const storyLink = item.getByRole("link", { name: "打開這一集 →" });
+        await expectTouchTarget(storyLink, `第 ${i + 1} 集「打開這一集」`);
+
+        // ShowNotes 是巢在內層的另一個 <details>，只有 parentGuide 存在時才渲染
+        const guide = item.locator("details > summary", {
+          hasText: "這集可以聊什麼",
+        });
+        if (await guide.count()) {
+          await expectTouchTarget(guide, `第 ${i + 1} 集「家長共讀指引」`);
+        }
+      }
+    });
+  }
+});

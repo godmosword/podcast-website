@@ -643,12 +643,21 @@ function UniverseMapContent({
       <p id="universe-map-guide" className="sr-only">
         點一座島就會飛過去；要看故事或探索點，可點島下方的「來這裡逛逛」。
         再點同一座島可以回到整片樂園。
+        手機上畫面底部有一排島嶼縮圖，點其中一張也能直接前往那座島。
         拖曳可以移動地圖，右下角的加號減號可以放大縮小；鍵盤可用方向鍵移動、加減鍵縮放。
       </p>
 
-      {/* 首訪底部提示：screen-space，不擋地圖拖曳；dismiss 才寫 session key */}
+      {/* 首訪底部提示：screen-space，不擋地圖拖曳；dismiss 才寫 session key。
+          **刻意不是 live region**：舊碼的 `role="status" aria-live="polite"` 從未真正
+          播報過——live region 必須先存在、之後內容變更才觸發，而這個節點是連同內容
+          一起插入 DOM（規格層面的已知限制）。移除它沒有從 AT 拿走任何文字：底下的
+          span 與關閉鍵都是普通節點，滑動探索照樣讀得到。
+          不補救的另外兩個理由：本節點在 DOM 中排在整張地圖之後（滑動要走完所有島才
+          碰得到），且受 TAP_HINT_TTL_MS 限時自動收合。操作說明由上方
+          `#universe-map-guide` 承擔。若日後真要做 AT 對等，正解是常駐一個空的
+          `role="status"` sr-only 節點、在 phase 轉 visible 時才填字。 */}
       {tapHintPhase === "visible" ? (
-        <div className={styles.tapHint} role="status" aria-live="polite">
+        <div className={styles.tapHint} data-testid="universe-tap-hint">
           <span className={styles.tapHintText}>
             點一座島，飛過去玩
           </span>

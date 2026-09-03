@@ -232,6 +232,7 @@ export default function SiteNavBar() {
     <header
       ref={barRef}
       className={styles.bar}
+      data-testid="site-nav-bar"
       {...(open ? { "data-menu-open": "true" as const } : {})}
       {...(navSolid ? { "data-nav-solid": "true" as const } : {})}
     >

@@ -1,4 +1,9 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
+import {
+  expectHitTestable,
+  expectNoOverlap,
+  expectWithinViewport,
+} from "./overlay-geometry";
 
 type ThemeMode = "light" | "night";
 
@@ -367,7 +372,7 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     await page.goto("/adventures");
     await expect(page.getByRole("region", { name: "車車宇宙樂園地圖" })).toBeVisible();
 
-    const hint = page.getByRole("status");
+    const hint = page.getByTestId("universe-tap-hint");
     // 用最短的穩定子字串，降低下次改文案的脆性
     await expect(hint).toContainText("點一座島");
 
@@ -375,9 +380,33 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     await expect(hint).toHaveCount(0);
   });
 
+  /**
+   * `#universe-map-guide` 是 `aria-describedby` 的目標，也是移除 tapHint
+   * `role="status"` 之後 AT 使用者唯一的完整操作說明。
+   *
+   * 這組存在的理由：`CHANGELOG.md` 已**刻意解除**可見文案必須提到「來這裡逛逛」
+   * 的契約，解除後這段承諾在全庫沒有任何測試看守；而它又是一段 sr-only 文字，
+   * 視覺回歸與人工目檢都看不到它漂掉。
+   */
+  test("sr-only 操作說明涵蓋四條路徑（AT 唯一完整說明）", async ({ page }) => {
+    await openMap(page, "light");
+    const guide = page.locator("#universe-map-guide");
+
+    // 被 aria-describedby 指向，否則這段文字對 AT 等於不存在
+    await expect(
+      page.getByRole("application", { name: /車車樂園互動地圖/ }),
+    ).toHaveAttribute("aria-describedby", "universe-map-guide");
+
+    await expect(guide).toContainText("點一座島");        // 進島
+    await expect(guide).toContainText("來這裡逛逛");      // 探索點／故事（ZoneSheet 把手）
+    await expect(guide).toContainText("回到整片樂園");    // 再點同島回世界層
+    await expect(guide).toContainText("島嶼縮圖");        // ≤480 IslandPickerStrip
+    await expect(guide).toContainText("方向鍵");          // 鍵盤操作
+  });
+
   test("首訪 tap hint 點島後消失", async ({ page }) => {
     await openMap(page, "light");
-    const hint = page.getByRole("status");
+    const hint = page.getByTestId("universe-tap-hint");
     await expect(hint).toContainText("點一座島");
 
     await page.locator('button[data-zone="car-park"]').click();
@@ -396,7 +425,7 @@ test.describe("車車宇宙樂園地圖 UX", () => {
     await expect(page.locator("[data-hotspot-id]").first()).toBeVisible({
       timeout: 5_000,
     });
-    await expect(page.getByRole("status")).toHaveCount(0);
+    await expect(page.getByTestId("universe-tap-hint")).toHaveCount(0);
     await waitForIslandReady(page);
     await expect(zoneSheetRegion(page, /恐龍島/)).toHaveCount(0);
   });
@@ -653,71 +682,26 @@ test.describe("首訪 tap hint：窄屏幾何", () => {
     test(`${vp.width}px：不出界、不被任何底部浮層遮住`, async ({ page }) => {
       await openMap(page, "light", vp.width, vp.height);
 
-      const hint = page.getByRole("status");
+      const hint = page.getByTestId("universe-tap-hint");
       await expect(hint).toContainText("點一座島");
 
-      const geo = await page.evaluate(() => {
-        const el = document.querySelector('[class*="tapHint"]');
-        if (!el) throw new Error("tapHint 不存在");
-        const r = el.getBoundingClientRect();
-        const at = document.elementFromPoint(
-          r.left + r.width / 2,
-          r.top + r.height / 2,
-        );
-        const box = (selector: string) => {
-          const node = document.querySelector(selector);
-          if (!node) return null;
-          const b = node.getBoundingClientRect();
-          if (b.width <= 0 || b.height <= 0) return null;
-          return { top: b.top, bottom: b.bottom, left: b.left, right: b.right };
-        };
-        return {
-          hint: { top: r.top, bottom: r.bottom, left: r.left, right: r.right },
-          covered: !(at && el.contains(at)),
-          strip: box('[data-testid="island-picker-strip"]'),
-          dock: box("[data-kids-dock]"),
-          controls: box('[class*="MapControls"]'),
-          sky: box('[class*="skyLayer"] img'),
-          innerWidth: window.innerWidth,
-          scrollWidth: document.documentElement.scrollWidth,
-          // 內部擠壓：max-width 夾制後，nowrap 文字＋48px 關閉鍵是否還塞得下
-          hintScrollWidth: el.scrollWidth,
-          hintClientWidth: el.clientWidth,
-        };
-      });
+      // hit-test（多點取樣）：使用者真的點得到嗎
+      await expectHitTestable(page, hint, "tapHint");
+      // 邊距＋不得把自己的內容擠出去
+      await expectWithinViewport(page, hint, "tapHint");
 
-      // 唯一能抓到遮蔽的斷言——toBeVisible() 對這個 bug 是綠的
-      expect(geo.covered).toBe(false);
-      // 地圖 chrome 邊距慣例（MapControls 10px、KidsPlayDock 12px）；
-      // DESIGN §206-209 沒有螢幕邊距條款，勿再誤引
-      expect(geo.hint.left).toBeGreaterThanOrEqual(12);
-      expect(geo.hint.right).toBeLessThanOrEqual(geo.innerWidth - 12);
-      expect(geo.scrollWidth).toBeLessThanOrEqual(geo.innerWidth);
-      // 夾制不得把自己的內容擠出去（關閉鍵被裁掉就點不到了）
-      expect(geo.hintScrollWidth).toBeLessThanOrEqual(geo.hintClientWidth + 1);
-
-      // 日／月是裝飾但不透明蓋住會讓月亮看起來缺一角（提示 z 4 > skyLayer z 3）
-      if (geo.sky) {
-        const skyOverlap =
-          geo.hint.bottom > geo.sky.top &&
-          geo.sky.bottom > geo.hint.top &&
-          geo.hint.right > geo.sky.left &&
-          geo.sky.right > geo.hint.left;
-        expect(skyOverlap, "tapHint 不得蓋住日／月").toBe(false);
-      }
-
-      for (const [name, other] of [
-        ["IslandPickerStrip", geo.strip],
-        ["KidsPlayDock", geo.dock],
-        ["MapControls", geo.controls],
+      // 矩形不相交：抓 pointer-events: none 的視覺遮蔽（hit-test 對它是透明的）。
+      // `optional` 只給**真的**條件渲染的浮層——其餘標 present，這樣 selector
+      // 打錯或元件回歸會紅，而不是靜默通過。
+      for (const [name, other, presence] of [
+        // 島選擇列只在 ≤480 渲染；本組跑到 390 為止，但 767 之類的呼叫端會缺席
+        ["IslandPickerStrip", page.getByTestId("island-picker-strip"), "optional"],
+        ["KidsPlayDock", page.locator("[data-kids-dock]"), "present"],
+        ["MapControls", page.getByRole("group", { name: "地圖控制" }), "present"],
+        // 日／月是裝飾，但不透明蓋住會讓月亮看起來缺一角（提示 z 4 > skyLayer z 3）
+        ["日／月", page.locator('[class*="skyLayer"] img').first(), "present"],
       ] as const) {
-        if (!other) continue;
-        const overlaps =
-          geo.hint.bottom > other.top &&
-          other.bottom > geo.hint.top &&
-          geo.hint.right > other.left &&
-          other.right > geo.hint.left;
-        expect(overlaps, `tapHint 不得與 ${name} 重疊`).toBe(false);
+        await expectNoOverlap(hint, other, `tapHint 與 ${name}`, { b: presence });
       }
     });
   }
@@ -732,6 +716,6 @@ test.describe("首訪 tap hint：窄屏幾何", () => {
     expect(Math.round(box.width)).toBeGreaterThanOrEqual(48);
     expect(Math.round(box.height)).toBeGreaterThanOrEqual(48);
     await close.click();
-    await expect(page.getByRole("status")).toHaveCount(0);
+    await expect(page.getByTestId("universe-tap-hint")).toHaveCount(0);
   });
 });

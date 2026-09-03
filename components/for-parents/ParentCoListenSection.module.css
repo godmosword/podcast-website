@@ -84,6 +84,13 @@
 
 .storyLink {
   align-self: flex-start;
+  /* 觸控底線（DESIGN §206：只加不減）。範式同 RelatedStories .nextLink——
+     inline-flex + align-items 讓 min-height 對純文字連結真的生效。
+     **只改這個具名 class**：全域對 `a` 套 inline-flex 會撐開行盒、改變中文
+     斷行，波及所有文字密集區。 */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   font-size: var(--fs-control);
   font-weight: 800;
   color: var(--accent-ink);

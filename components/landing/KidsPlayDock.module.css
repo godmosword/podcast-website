@@ -1,4 +1,4 @@
-/* 內頁左下固定三入口；語彙對齊 ExploreGrid 磁貼，非桃色玻璃頂欄。 */
+/* 內頁左下固定三入口；語彙對齊行動抽屜，非桃色玻璃頂欄。 */
 
 .dock {
   position: fixed;
@@ -31,7 +31,7 @@
   justify-content: center;
   gap: var(--space-2);
   width: 100%;
-  /* 兒童觸控底線 48px（與 ExploreGrid 磁貼一致） */
+  /* 兒童觸控底線 48px（與行動抽屜列一致） */
   min-height: 48px;
   min-width: 48px;
   padding: var(--space-2) var(--space-2);
@@ -81,7 +81,7 @@
   white-space: nowrap;
 }
 
-/* 夜間：emoji 降飽和，與 ExploreGrid／行動抽屜同一處理 */
+/* 夜間：emoji 降飽和，與行動抽屜同一處理 */
 :global(html[data-theme="night"]) .emoji {
   filter: saturate(0.55) brightness(0.92);
 }

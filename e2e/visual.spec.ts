@@ -251,6 +251,9 @@ const COMPONENT_SHOTS: {
   path: string;
   locator: (page: Page) => Locator;
   masks?: (page: Page) => Locator[];
+  /** 預設 1280×900。**改動只在某個斷點內生效的元件必須指定**——否則拍到的是
+   *  另一套 CSS 分支，快照看似增加覆蓋、實際完全驗不到那個改動。 */
+  viewport?: { width: number; height: number };
 }[] = [
   {
     id: "stories-filter",
@@ -305,6 +308,34 @@ const COMPONENT_SHOTS: {
     path: "/for-parents/play-map",
     locator: (page) => page.locator("li#ty-kids-museum"),
   },
+  /**
+   * ≤768 底列分段導覽（短標）。
+   *
+   * **必須指定 viewport**：這是 `@media (max-width: 768px)` 專屬的 layout，
+   * 預設的 1280×900 走的是桌面右側 tooltip 分支，拍再多張也驗不到這裡。
+   * 三個寬度各留一張：320 最擠、375 主力、767 斷點邊界。
+   *
+   * 拍的是「文字密集區」——頁面級快照的 2% 容差在 1280×720 上等於 18,432px，
+   * 一整句文案改掉都吞得下（2026-09-02 桌機 baseline 就是這樣存了舊文案還全綠）。
+   * 元件級取樣讓容差不被面積稀釋。
+   */
+  ...([320, 375, 767] as const).map((width) => ({
+    id: "landing-segment-nav",
+    name: `Landing 底列短標 ${width}`,
+    path: "/",
+    viewport: { width, height: 760 },
+    locator: (page: Page) =>
+      page.getByRole("navigation", { name: "專區導覽" }),
+  })),
+  {
+    id: "landing-cta-row",
+    name: "Landing 首段 CTA 文字塊",
+    path: "/",
+    viewport: { width: 390, height: 844 },
+    // 錨在第一段（`data/landing-segments.ts` 的 stories），文案固定不隨集數變動
+    locator: (page: Page) =>
+      page.locator("#segment-stories [class*='ctaRow']"),
+  },
 ];
 
 test.setTimeout(120_000);
@@ -348,7 +379,7 @@ for (const pageDef of VISUAL_PAGES) {
 for (const shot of COMPONENT_SHOTS) {
   for (const theme of THEMES) {
     test(`visual：${shot.name} ${theme}`, async ({ page }) => {
-      await page.setViewportSize({ width: 1280, height: 900 });
+      await page.setViewportSize(shot.viewport ?? { width: 1280, height: 900 });
       await page.goto(shot.path);
       await stabilizeVisualPage(page, { theme });
       const target = shot.locator(page);
@@ -358,7 +389,10 @@ for (const shot of COMPONENT_SHOTS) {
       ).toHaveCount(1);
       const masks = shot.masks?.(page) ?? [];
       if (masks.length) await assertMasksResolve(masks, shot.id);
-      await expect(target).toHaveScreenshot(`${shot.id}-${theme}.png`, {
+      const shotName = shot.viewport
+        ? `${shot.id}-${shot.viewport.width}-${theme}.png`
+        : `${shot.id}-${theme}.png`;
+      await expect(target).toHaveScreenshot(shotName, {
         maxDiffPixelRatio: theme === "night" ? 0.03 : 0.02,
         animations: "disabled",
         mask: masks,

@@ -4,12 +4,12 @@
 
 ## [Unreleased]
 
-### Added
-
-- **首頁新增探索區（`ExploreGrid`）**：在頁尾 snap pane 之上、**不新增第五個 scroll-snap 段**。左側地圖大卡連 `/adventures`（沿用既有島嶼美術，非新生圖），右側六格磁貼牆——兒童組（全部故事／遊樂園／繪本著色／角色圖鑑）在前且權重較大，家長組（親子指南／親子景點）在後降一階。磁貼一律 `<Link>`、標籤為可見 HTML 文字、圖徽沿用行動抽屜同一批 emoji（零新圖片位元組）。首頁 HTML 因此常駐 7 個內容頁入口。**未改** Apple sync workflow。
-
 ### Changed
 
+- **首頁刪除 ExploreGrid 探索區**：與漢堡抽屜 7 列（全部故事／角色圖鑑／遊樂園／繪本著色／宇宙地圖＋親子指南／親子景點）完全重疊。`#landing-foot` 只留 `SiteFooter`，不新增第五個 snap 段。入口改由抽屜（全站）與內頁 `KidsPlayDock` 承接。**未改** Apple sync workflow。
+- **≤768 SegmentNav 短標常駐**：底列四格等寬掛在 `<li>`，`navLabel` 不再 `display: none`；active 改頂緣 3px 指示條＋底色塊（huninn 單字重，不得只靠 `font-weight`）；字色 `--on-dark`、不加 `aria-label`（WCAG 2.5.3）；`<ul role="list">`。補契約測與 320／375／767 × light／night 元件快照。**未改** Apple sync workflow。
+- **地圖首訪提示不再當 live region**：拿掉 `role="status" aria-live="polite"`（連同內容插入從不播報）；改 `data-testid="universe-tap-hint"`，說明由 `#universe-map-guide` 承擔。e2e 幾何改走 `overlay-geometry.ts`（`elementFromPoint`，因 `toBeVisible()` 不偵測遮蔽）。**未改** Apple sync workflow。
+- **共讀區觸控 ≥44px**：`ParentCoListenSection`「打開這一集」改 `inline-flex`＋`min-height: 44px`；`ShowNotes`「這集可以聊什麼」加 `padding: 12px 0`（不用 flex，避免 Safari 破壞 `details`）。`e2e/child-ux` 在 360／375／390 斷言。**未改** Apple sync workflow。
 - **ep-28 字幕校對 + 手切 17 幕**：《小紅豆汽車故事｜畫得很醜也沒關係》人工校對 131→130 句並 `--mark`（刪 Whisper 英文幻覺、蹦蹦→Bonbon、吃吃遊樂園→車車遊樂園、想象力→想像力）。官方 `illustrate --segment-only` 因 OpenAI 429 未跑，依契約手寫 `data/scenes/ep-28.json`（主角金龜車小紅豆 ≠ 名冊小紅賽車；幕 1 `keepCover`）。`pageCount` 仍為 1，**尚未出圖**。**未改** Apple sync workflow。
 - **Landing 分區 CTA 改不透明暖深墨黏土鈕**：四段左下 `.cta` 底板改 100% 不透明 `var(--landing-brand-ink)`、字色改 `var(--on-dark)` 白字；拿掉 backdrop-filter 與 `--c-yellow` 黃字；加 2px 淺邊、外圈深棕 ring、`--elev-2` 與 `--gloss` 黏土高光；hover／active 在墨板上加亮而非半透明黑。`.next` 仍極淡玻璃。**未改** Apple sync workflow。
 - **標題列去框＋字級收斂＋夜間抽屜暖化（2026-08-31）**：

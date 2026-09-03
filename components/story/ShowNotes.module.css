@@ -10,6 +10,12 @@
 
 .summary {
   cursor: pointer;
+  /* 觸控底線：`--fs-control` 行高約 24px，上下各 12px → 48px（DESIGN §206）。
+     範式同外層 ParentCoListenSection 的 `.summary`（本元件就巢在它裡面）。
+     **刻意不用 `display: flex`**——Safari 對 `<summary>` 改 display 會破壞
+     `<details>` 的開合；本檔已用 `list-style: none` ＋ 隱藏 webkit marker
+     ＋ `::before` 自繪箭頭，走 padding 是唯一安全解。 */
+  padding: 12px 0;
   font-size: var(--fs-control);
   font-weight: 700;
   color: var(--accent-ink);
