@@ -34,7 +34,7 @@
 | fix(nav): 訂閱下拉 ≤480 改錨定 `.inner`，修左緣溢出 −23／−31／−38px；新增 `e2e/nav-subscribe.spec.ts` | `08ba718` |
 | fix(sync): #141 quality CVE／新集 vitest／GH013 fail-fast | `341f060` |
 | chore(sync): T5 合入 ep-28 MVP（#145 squash；字幕仍為草稿） | `11f6d67` |
-| fix(sync): GH013 waiter 鏡射 quality／build-and-public-e2e commit status | 見本 commit |
+| fix(sync): GH013 waiter 鏡射 quality／build-and-public-e2e commit status | `fc419be` |
 
 > **稽核來源：** 2026-09-02 桌機／手機對等稽核（8 頁 × 6 尺寸）。內容對等本身**全綠**——8 頁在 D1／M1 的 DOM 連結、文字節點、標題階層逐字相同；這兩項是純版面缺陷。
 >
