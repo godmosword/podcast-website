@@ -36,7 +36,7 @@
 | chore(sync): T5 合入 ep-28 MVP（#145 squash；字幕仍為草稿） | `11f6d67` |
 | fix(sync): GH013 waiter 鏡射 quality／build-and-public-e2e commit status | `fc419be` |
 | content(ep-28): 字幕校對 `--mark` + 手切 17 幕（尚未出圖） | `874d4dd` |
-| fix(landing): 刪除與漢堡抽屜重疊的 ExploreGrid；≤768 SegmentNav 短標常駐；地圖提示不再當 live region；共讀區觸控 ≥44px | 見本 commit |
+| fix(landing): 刪除與漢堡抽屜重疊的 ExploreGrid；≤768 SegmentNav 短標常駐；地圖提示不再當 live region；共讀區觸控 ≥44px | `f6b29fe` |
 
 > **稽核來源：** 2026-09-02 桌機／手機對等稽核（8 頁 × 6 尺寸）。內容對等本身**全綠**——8 頁在 D1／M1 的 DOM 連結、文字節點、標題階層逐字相同；這兩項是純版面缺陷。
 >
