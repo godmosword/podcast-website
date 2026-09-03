@@ -46,7 +46,12 @@ must be part of the ruleset source or owner organization）。把
 `main`（#129 重跑仍 GH013）。因此
 `.github/workflows/sync-apple-podcast.yml` 在「有變更 → commit → `git push` main」
 撞到 GH013 時，改推 `sync/apple-<run_id>` 並開 PR，等 required checks 通過後
-squash auto-merge。無工作樹變更的排程本來就會成功並 resolve sync-failure issue。
+squash auto-merge。`GITHUB_TOKEN` 開的 PR 不會觸發 `pull_request` CI，因此改
+`workflow_dispatch` 補跑 required jobs；那些 Check Run **不會**進入 PR
+mergeability。waiter 在確認 job 真正 `success` 後，把 `quality`／
+`build-and-public-e2e` 鏡射成同名 commit status（與 `Vercel` 同一條 Status
+API），ruleset 才看得到。禁止在 job 未成功時寫 success。無工作樹變更的排程
+本來就會成功並 resolve sync-failure issue。
 已 `--mark` 的字幕側車不再跑 OpenCC 簡轉繁（避免「支持」被改成「支援」）。
 
 GitHub ruleset 已可阻止未通過檢查的 merge；但 Vercel dashboard 的 Production

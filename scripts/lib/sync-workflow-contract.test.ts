@@ -183,6 +183,7 @@ describe("sync workflow contract", () => {
     expect(yaml).toContain("git ls-files --others --exclude-standard");
     expect(yaml).toContain("pull-requests: write");
     expect(yaml).toContain("actions: write");
+    expect(yaml).toContain("statuses: write");
   });
 
   it("Commit and push 遇 GH013 必須改開 PR（個人倉無法給 Actions Integration bypass）", () => {
@@ -222,6 +223,15 @@ describe("sync workflow contract", () => {
     expect(block).toMatch(/gh run list 失敗/);
     expect(block).toMatch(/gh run view 失敗/);
     expect(block).toMatch(/commit status API 失敗/);
+    // #145：dispatch Check Run 在 SHA 上是綠的，但 PR mergeability 看不見；
+    // 只在真實 job success 後鏡射同名 commit status（與 Vercel 同一條 Status API）。
+    expect(block).toContain("quality_mirrored");
+    expect(block).toMatch(/\/statuses\/\$\{sha\}/);
+    expect(block).toMatch(/-f context=quality/);
+    expect(block).toMatch(/-f context=build-and-public-e2e/);
+    expect(block).toMatch(/-f state=success/);
+    expect(block).toMatch(/寫入 quality commit status 失敗/);
+    expect(block).toMatch(/寫入 build-and-public-e2e commit status 失敗/);
   });
 
   it("open_sync_pr 函式體不得有過淺縮排（SYNC-DEBT-1 source-level）", () => {

@@ -24,6 +24,9 @@ permissions:
   # 需要 actions:write，且 repo Actions 設定也必須允許建立／核准 PR。
   actions: write
   pull-requests: write
+  # workflow_dispatch 的 Check Run 不會進入 PR mergeability；ruleset 認的是
+  # commit status context（與 Vercel 相同）。waiter 在真實 job 成功後鏡射。
+  statuses: write
 
 jobs:
   sync:
@@ -197,7 +200,9 @@ jobs:
             fi
             echo "::notice::GH013 waiter 觀測 CI run ${ci_run_id}（sha=${sha}）"
             local i state jobs_out quality_conc build_conc status_out vercel_state
-            local quality_ok build_ok vercel_ok
+            local quality_ok build_ok vercel_ok quality_mirrored build_mirrored
+            quality_mirrored=false
+            build_mirrored=false
             for i in $(seq 1 80); do
               state=$(gh pr view "$pr" --json state --jq .state 2>&1) || {
                 echo "::error::gh pr view 失敗（pr=${pr}）"
@@ -252,6 +257,22 @@ jobs:
                 return 1
               elif [ "$vercel_state" = "success" ]; then
                 vercel_ok=true
+              fi
+              if [ "$quality_ok" = true ] && [ "$quality_mirrored" != true ]; then
+                gh api "repos/${GITHUB_REPOSITORY}/statuses/${sha}" -f state=success -f context=quality -f description="mirror workflow_dispatch quality" -f target_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${ci_run_id}" >/dev/null || {
+                  echo "::error::寫入 quality commit status 失敗（sha=${sha}）"
+                  return 1
+                }
+                quality_mirrored=true
+                echo "::notice::已鏡射 quality 為 commit status（ruleset context）"
+              fi
+              if [ "$build_ok" = true ] && [ "$build_mirrored" != true ]; then
+                gh api "repos/${GITHUB_REPOSITORY}/statuses/${sha}" -f state=success -f context=build-and-public-e2e -f description="mirror workflow_dispatch build-and-public-e2e" -f target_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${ci_run_id}" >/dev/null || {
+                  echo "::error::寫入 build-and-public-e2e commit status 失敗（sha=${sha}）"
+                  return 1
+                }
+                build_mirrored=true
+                echo "::notice::已鏡射 build-and-public-e2e 為 commit status（ruleset context）"
               fi
               if [ "$quality_ok" = true ] && [ "$build_ok" = true ] && [ "$vercel_ok" = true ]; then
                 echo "::notice::quality、build-and-public-e2e、Vercel 皆成功，等待 auto-merge（${i}/80）"

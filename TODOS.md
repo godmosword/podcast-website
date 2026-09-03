@@ -7,9 +7,9 @@
 
 > 格式：每項一段，行末標 `優先序 · 工時(人工) · 依賴`。工時 S/M/L。
 > **紀律：** 條目打 ✅ 時必須附 commit hash。
-> **資料基準（2026-08-26）：** `storiesByNewest()` **27 集**、最新 **`ep-27`**（2026-08-26，MVP 單封面）。
-> **出圖落後：** 多頁插圖至 **`ep-24`（19 頁）**；`ep-25`／`ep-26`／`ep-27` 仍為 `pageCount=1` MVP。最新全幕含 **`ep-21`（18 頁）**／**`ep-22`（24 頁）**／**`ep-23`（26 頁）**／**`ep-24`（19 頁）**。
-> 完整逐字稿覆蓋至 `ep-27`（含 `ep-27`，已 `--mark`）；目前沒有未校對的草稿 sidecar。`data/games.ts` 見下表。
+> **資料基準（2026-09-02）：** `storiesByNewest()` **28 集**、最新 **`ep-28`**（2026-09-02，MVP 單封面，#145 `11f6d67`）。
+> **出圖落後：** 多頁插圖至 **`ep-24`（19 頁）**；`ep-25`／`ep-26`／`ep-27`／`ep-28` 仍為 `pageCount=1` MVP。最新全幕含 **`ep-21`（18 頁）**／**`ep-22`（24 頁）**／**`ep-23`（26 頁）**／**`ep-24`（19 頁）**。
+> 完整逐字稿覆蓋至 `ep-27`（含 `ep-27`，已 `--mark`）；`ep-28` 為 Whisper 草稿，**未 `--mark`**。`data/games.ts` 見下表。
 >
 > **現役遊戲（canon，對齊 `data/games.ts`）：** `candy-match` 繽紛消消樂 · `block-drop` 繽紛樂園 · `coloring-book` 繪本著色。
 > **歷史 slug：** `kart`／`pirate-kart`／`car-star`／`car-mission` 已退役，見 [archive](./docs/archive/TODOS-completed-2026-07-11.md)。
@@ -33,6 +33,8 @@
 | fix(universe): `/adventures` 首訪提示 ≤480 改錨天象帶之下（原被 strip／dock／MapControls 三層遮死＋固定 459px 溢出）；色票改 `--map-chip*`；文案縮為「點一座島，飛過去玩」 | `2824430` |
 | fix(nav): 訂閱下拉 ≤480 改錨定 `.inner`，修左緣溢出 −23／−31／−38px；新增 `e2e/nav-subscribe.spec.ts` | `08ba718` |
 | fix(sync): #141 quality CVE／新集 vitest／GH013 fail-fast | `341f060` |
+| chore(sync): T5 合入 ep-28 MVP（#145 squash；字幕仍為草稿） | `11f6d67` |
+| fix(sync): GH013 waiter 鏡射 quality／build-and-public-e2e commit status | 見本 commit |
 
 > **稽核來源：** 2026-09-02 桌機／手機對等稽核（8 頁 × 6 尺寸）。內容對等本身**全綠**——8 頁在 D1／M1 的 DOM 連結、文字節點、標題階層逐字相同；這兩項是純版面缺陷。
 >
@@ -145,17 +147,17 @@ clip 快照在不同 macOS／Chromium 版本上的自然噪音底線。
 
 > 修好後 `01a4047` 原本要解的 GH013 問題會重新浮現（sync bot 直推 main 撞 required checks）——那段邏輯本身是對的，只是寫壞了，應可正常走 sync/* PR auto-merge。**下次新集上架時需觀察**。
 
-### SYNC-DEBT-2　#141 工程修復已落地，ep-28 尚未上架　`ops · S · SYNC-DEBT-1`　📋 pending
+### SYNC-DEBT-2　#141 ep-28 已上架，待校對／出圖　`ops · S · SYNC-DEBT-1`　📋 pending
 
-**背景：** #141 已修三條根因——`browserslist` high CVE 擋 `quality`、`apple-rss.test.ts`／`release-content.test.ts` 硬編碼 21 集與 live slug gate、`sync-apple-podcast.yml` GH013 waiter 空等（改觀測 dispatch CI run ＋ Vercel commit status）。**工程修復不含 ep-28 內容**；該集**尚未**由 sync 上架至 `main`。
+**背景：** #141 三條工程根因已修（`341f060`）；ep-28 MVP 已由 sync 上架至 `main`（#145 `11f6d67`）。**字幕仍為 Whisper 草稿**，未 `--mark`、未校對、未出圖。GH013 auto-merge 假等另見 waiter 鏡射 commit status 修復。
 
 **上架後須走 EPISODE-WORKFLOW 1–4（依序、不可跳步）：**
-1. sync 合併後確認站上 MVP（單封面、`pageCount=1`）
+1. ✅ sync 合併後確認站上 MVP（單封面、`pageCount=1`）
 2. 人工 `npm run proofread:subtitles -- ep-28 --mark`
 3. 審稿通過後才 `npm run illustrate`（須另文字准許 API）
 4. `--approve` 後更新 `pageCount`／角色圖鑑等
 
-> ep-28 字幕 sidecar 若已存在仍為 Whisper 草稿，**未 `--mark`、未校對、未出圖**。資料基準仍為 27 集／`ep-27`，勿在 sync 合併前寫成已上架。
+> 資料基準為 28 集／`ep-28`。勿把「已上架」寫成已校對。
 
 ### VIS-DEBT-3　視覺 baseline 再度全面過期（根因＝沒人跑）　`eng · M · VIS-DEBT-1`　✅ 已結案
 
