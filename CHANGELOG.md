@@ -10,6 +10,7 @@
 
 ### Changed
 
+- **ep-28 字幕校對 + 手切 17 幕**：《小紅豆汽車故事｜畫得很醜也沒關係》人工校對 131→130 句並 `--mark`（刪 Whisper 英文幻覺、蹦蹦→Bonbon、吃吃遊樂園→車車遊樂園、想象力→想像力）。官方 `illustrate --segment-only` 因 OpenAI 429 未跑，依契約手寫 `data/scenes/ep-28.json`（主角金龜車小紅豆 ≠ 名冊小紅賽車；幕 1 `keepCover`）。`pageCount` 仍為 1，**尚未出圖**。**未改** Apple sync workflow。
 - **Landing 分區 CTA 改不透明暖深墨黏土鈕**：四段左下 `.cta` 底板改 100% 不透明 `var(--landing-brand-ink)`、字色改 `var(--on-dark)` 白字；拿掉 backdrop-filter 與 `--c-yellow` 黃字；加 2px 淺邊、外圈深棕 ring、`--elev-2` 與 `--gloss` 黏土高光；hover／active 在墨板上加亮而非半透明黑。`.next` 仍極淡玻璃。**未改** Apple sync workflow。
 - **標題列去框＋字級收斂＋夜間抽屜暖化（2026-08-31）**：
   1. **「首頁」的弧形假邊框**——`.actions .homeAction[aria-current]` 的 `inset 0 -3px 0` 被 `--radius-pill`(999px) 裁切，3px 底線沿 22px 圓角往兩側爬成碗狀。依使用者裁決 **不再畫任何線**，active 僅以字重 800 編碼（`box-shadow` 須**顯式** `none`，只刪該行會讓 `.navLink[aria-current]` 的 inset 接手）。

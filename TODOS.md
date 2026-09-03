@@ -9,7 +9,7 @@
 > **紀律：** 條目打 ✅ 時必須附 commit hash。
 > **資料基準（2026-09-02）：** `storiesByNewest()` **28 集**、最新 **`ep-28`**（2026-09-02，MVP 單封面，#145 `11f6d67`）。
 > **出圖落後：** 多頁插圖至 **`ep-24`（19 頁）**；`ep-25`／`ep-26`／`ep-27`／`ep-28` 仍為 `pageCount=1` MVP。最新全幕含 **`ep-21`（18 頁）**／**`ep-22`（24 頁）**／**`ep-23`（26 頁）**／**`ep-24`（19 頁）**。
-> 完整逐字稿覆蓋至 `ep-27`（含 `ep-27`，已 `--mark`）；`ep-28` 為 Whisper 草稿，**未 `--mark`**。`data/games.ts` 見下表。
+> 完整逐字稿覆蓋至 `ep-28`（含 `ep-28`，已 `--mark`）。`data/games.ts` 見下表。
 >
 > **現役遊戲（canon，對齊 `data/games.ts`）：** `candy-match` 繽紛消消樂 · `block-drop` 繽紛樂園 · `coloring-book` 繪本著色。
 > **歷史 slug：** `kart`／`pirate-kart`／`car-star`／`car-mission` 已退役，見 [archive](./docs/archive/TODOS-completed-2026-07-11.md)。
@@ -35,6 +35,7 @@
 | fix(sync): #141 quality CVE／新集 vitest／GH013 fail-fast | `341f060` |
 | chore(sync): T5 合入 ep-28 MVP（#145 squash；字幕仍為草稿） | `11f6d67` |
 | fix(sync): GH013 waiter 鏡射 quality／build-and-public-e2e commit status | `fc419be` |
+| content(ep-28): 字幕校對 `--mark` + 手切 17 幕（尚未出圖） | 見本 commit |
 
 > **稽核來源：** 2026-09-02 桌機／手機對等稽核（8 頁 × 6 尺寸）。內容對等本身**全綠**——8 頁在 D1／M1 的 DOM 連結、文字節點、標題階層逐字相同；這兩項是純版面缺陷。
 >
@@ -147,17 +148,18 @@ clip 快照在不同 macOS／Chromium 版本上的自然噪音底線。
 
 > 修好後 `01a4047` 原本要解的 GH013 問題會重新浮現（sync bot 直推 main 撞 required checks）——那段邏輯本身是對的，只是寫壞了，應可正常走 sync/* PR auto-merge。**下次新集上架時需觀察**。
 
-### SYNC-DEBT-2　#141 ep-28 已上架，待校對／出圖　`ops · S · SYNC-DEBT-1`　📋 pending
+### SYNC-DEBT-2　#141 ep-28 已上架，待出圖　`ops · S · SYNC-DEBT-1`　📋 pending
 
-**背景：** #141 三條工程根因已修（`341f060`）；ep-28 MVP 已由 sync 上架至 `main`（#145 `11f6d67`）。**字幕仍為 Whisper 草稿**，未 `--mark`、未校對、未出圖。GH013 auto-merge 假等另見 waiter 鏡射 commit status 修復。
+**背景：** #141 三條工程根因已修（`341f060`）；ep-28 MVP 已由 sync 上架至 `main`（#145 `11f6d67`）。**字幕已人工校對並 `--mark`**（131→130 句）；**17 幕已手切**（OpenAI 429，未跑官方 `--segment-only`）。**尚未出圖**。GH013 auto-merge 假等另見 waiter 鏡射 commit status 修復。
 
 **上架後須走 EPISODE-WORKFLOW 1–4（依序、不可跳步）：**
 1. ✅ sync 合併後確認站上 MVP（單封面、`pageCount=1`）
-2. 人工 `npm run proofread:subtitles -- ep-28 --mark`
-3. 審稿通過後才 `npm run illustrate`（須另文字准許 API）
-4. `--approve` 後更新 `pageCount`／角色圖鑑等
+2. ✅ 人工 `npm run proofread:subtitles -- ep-28 --mark`（見本 commit）
+3. ✅ `data/scenes/ep-28.json` 手切 17 幕（見本 commit；官方 `--segment-only` 因 429 未跑）
+4. 審稿通過後才 `npm run illustrate`（須另文字准許 API；額度須先補上）
+5. `--approve` 後更新 `pageCount`／角色圖鑑等
 
-> 資料基準為 28 集／`ep-28`。勿把「已上架」寫成已校對。
+> 資料基準為 28 集／`ep-28`。勿把「已校對／已切幕」寫成已出圖。
 
 ### VIS-DEBT-3　視覺 baseline 再度全面過期（根因＝沒人跑）　`eng · M · VIS-DEBT-1`　✅ 已結案
 
@@ -1817,6 +1819,14 @@ T+2d    社群貼文（B 戰場）
 | 字幕校對 + `--mark` | ✅ | 137 句；阿妮→阿尼、觀景台／TOMICA／玩完；`_proofread/ep-20.json` |
 | 定裝照 | ✅ | 水泥車阿尼（封面 ref）；吊車阿公別名→吊車老爺爺；東東 alsoIn |
 | `illustrate` → 審圖 → `--approve` | ✅ | 18 幕全幕繪本；重抽 06／11／14／15／18（去手臂、彩虹 101）；`verify:episodes` 全過 → `0e352f9` |
+
+### ep-28 上架進度（2026-09-03）
+
+| 步驟 | 狀態 | 備註 |
+|------|------|------|
+| 字幕校對 + `--mark` | ✅ | 131→130 句；刪英文幻覺；蹦蹦→Bonbon、吃吃→車車遊樂園、想象力→想像力、畫得、嗨 我是 Bonbon → `_proofread/ep-28.json` → 見本 commit |
+| `illustrate --segment-only` | ✅ 手切 | OpenAI 429 改手寫 17 幕；`金龜車小紅豆` coverPage 1（≠小紅賽車）；爸爸不進 newCharacters → 見本 commit |
+| 生圖 → `--approve` | 📋 | 須另文字准許；帳戶額度須先補上 |
 
 ### 現況缺口（勿忘）
 

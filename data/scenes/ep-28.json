@@ -1,0 +1,154 @@
+{
+  "slug": "ep-28",
+  "audioDuration": 336,
+  "model": "manual-semantic-15-20s",
+  "generatedAt": "2026-09-03T12:19:00.000Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 0,
+      "end": 36.1,
+      "summary": "主持人開場閒聊與故事預告",
+      "prompt": "",
+      "characters": [],
+      "keepCover": true
+    },
+    {
+      "index": 2,
+      "start": 36.1,
+      "end": 51.2,
+      "summary": "幼兒園要上美術課，暖暖拿出一大盒蠟筆",
+      "prompt": "A sunny clay kindergarten art classroom for little cars, low wooden tables with sheets of drawing paper laid flat, the sea turtle teacher on her skateboard lifting a big open box of colorful crayons with her flipper and announcing today's lesson, the small cherry-red beetle car waiting eagerly among classmate cars, cheerful anticipation mood",
+      "characters": ["海龜老師暖暖", "金龜車小紅豆"]
+    },
+    {
+      "index": 3,
+      "start": 51.2,
+      "end": 66.9,
+      "summary": "要畫最喜歡的車車，小紅豆拿起紅蠟筆",
+      "prompt": "Rows of little classmate cars with their front ends lowered over their drawing paper, crayons resting flat on the low tables; the cherry-red beetle car leaning down close to a red crayon on the paper, nudging it with the tip of its front bumper to start drawing, focused excited mood, no arms and no hands on any car",
+      "characters": ["金龜車小紅豆"]
+    },
+    {
+      "index": 4,
+      "start": 66.9,
+      "end": 82.3,
+      "summary": "宣布要畫 F1 賽車，先畫車身再畫輪胎",
+      "prompt": "The cherry-red beetle car proudly announcing its plan with a bright confident smile, on the paper a child-like crayon drawing of a big wobbly race-car body with the first tiny lopsided tire, crayons scattered flat on the table, no arms and no hands",
+      "characters": ["金龜車小紅豆"]
+    },
+    {
+      "index": 5,
+      "start": 82.3,
+      "end": 95.9,
+      "summary": "三個輪胎一個扁一個超大，覺得怪怪的",
+      "prompt": "Close view of the crayon drawing: one flat squashed tire, one tire drawn bigger than the window, all uneven and crooked; the cherry-red beetle car tilting its whole body sideways to study it with a puzzled frown, confused wondering mood",
+      "characters": ["金龜車小紅豆"]
+    },
+    {
+      "index": 6,
+      "start": 95.9,
+      "end": 112.1,
+      "summary": "越看越不喜歡，放下筆說不要畫了",
+      "prompt": "The cherry-red beetle car turning away from its crooked drawing with drooping sad eyes and a downturned mouth, the red crayon left lying still on the paper, giving-up disappointed mood, soft grey-blue classroom light",
+      "characters": ["金龜車小紅豆"]
+    },
+    {
+      "index": 7,
+      "start": 112.1,
+      "end": 129.7,
+      "summary": "暖暖走過來關心，小紅豆說覺得自己畫得很醜",
+      "prompt": "The sea turtle teacher rolling gently over on her skateboard and crouching beside the little cherry-red beetle car, one flipper resting kindly near it; the beetle car lowers its front end shyly with downcast embarrassed eyes, warm caring mood",
+      "characters": ["海龜老師暖暖", "金龜車小紅豆"]
+    },
+    {
+      "index": 8,
+      "start": 129.7,
+      "end": 151.5,
+      "summary": "暖暖問大小輪胎可以有什麼功能，小紅豆想到了",
+      "prompt": "The sea turtle teacher pointing a flipper at the big tire and the small tire in the drawing and asking a curious question, the cherry-red beetle car's eyes suddenly widening with a bright idea and an open delighted mouth, thoughtful turning to excited mood, gentle classroom sunlight",
+      "characters": ["海龜老師暖暖", "金龜車小紅豆"]
+    },
+    {
+      "index": 9,
+      "start": 151.5,
+      "end": 167.6,
+      "summary": "想像 F1 去冒險，加上山和小山洞",
+      "prompt": "The crayon drawing growing on the paper: a mountain beside the big tire, a little cave for the small tire, chunky boulders along a path; the cherry-red beetle car bent low over the page pushing a crayon along with its bumper, imaginative adventurous mood",
+      "characters": ["金龜車小紅豆"]
+    },
+    {
+      "index": 10,
+      "start": 167.6,
+      "end": 185.1,
+      "summary": "越畫越起勁，畫上彩虹山和車頂小旗子",
+      "prompt": "The cherry-red beetle car drawing faster and faster with sparkling happy eyes, the page now full of a big tire, a small tire, wobbly windows, a cave, a rainbow-striped mountain and a tiny flag on the drawn car's roof, joyful energetic mood, crayons of many colors lying flat around the paper",
+      "characters": ["金龜車小紅豆"]
+    },
+    {
+      "index": 11,
+      "start": 185.1,
+      "end": 207.6,
+      "summary": "暖暖稱讚畫得豐富有特色，不一定要最像最漂亮",
+      "prompt": "The sea turtle teacher beaming with both flippers raised in delight beside the finished colorful drawing, the cherry-red beetle car glowing with shy pride, nearby classmate cars' papers showing very different styles with round shapes and wobbly lines, encouraging uplifting mood",
+      "characters": ["海龜老師暖暖", "金龜車小紅豆"]
+    },
+    {
+      "index": 12,
+      "start": 207.6,
+      "end": 230.4,
+      "summary": "每個人畫法不同，這張全世界只有小紅豆畫得出來",
+      "prompt": "The sea turtle teacher pointing her flipper right at the beetle car's picture as if it were the only one of its kind, other papers around showing one-color and many-color styles, the cherry-red beetle car's eyes lighting up with sparkles, proud amazed mood",
+      "characters": ["海龜老師暖暖", "金龜車小紅豆"]
+    },
+    {
+      "index": 13,
+      "start": 230.4,
+      "end": 251.5,
+      "summary": "放學後拿畫給爸爸看，解釋大小輪胎的功能",
+      "prompt": "Late afternoon outside the clay kindergarten gate, the little cherry-red beetle car excitedly showing its drawing to a larger red beetle dad car, the paper propped upright leaning against the dad car's front bumper, the little car chattering with a wide open smile; both are pure cars with four wheels, eyes and mouth only, no arms and no hands, golden after-school light",
+      "characters": ["金龜車小紅豆"]
+    },
+    {
+      "index": 14,
+      "start": 251.5,
+      "end": 271.5,
+      "summary": "爸爸誇很有創意，小紅豆抱著畫開心大笑",
+      "prompt": "The larger red beetle dad car leaning in with impressed wide eyes and a warm smile, the drawing resting against the little cherry-red beetle car's front so it looks hugged close, the little car laughing out loud with squeezed-shut happy eyes, proud loving mood, both pure cars with no arms and no hands",
+      "characters": ["金龜車小紅豆"]
+    },
+    {
+      "index": 15,
+      "start": 271.5,
+      "end": 291.5,
+      "summary": "問小朋友畫得不好看時是不是也會難過",
+      "prompt": "A quiet gentle moment: a drawing with a slightly crumpled corner lying on the floor and the cherry-red beetle car sitting beside it with soft watery eyes and a small wobbly mouth, empathetic tender mood, warm dim room light",
+      "characters": ["金龜車小紅豆"]
+    },
+    {
+      "index": 16,
+      "start": 291.5,
+      "end": 311.2,
+      "summary": "難過可以說出來或留言，想想歪歪的地方能變成什麼",
+      "prompt": "The clay boy host sitting cross-legged on the floor beside the cherry-red beetle car, both looking at a wobbly crayon line on the paper while playful thought bubbles show that line turning into a hill and a winding road, curious imaginative mood, cozy shared moment",
+      "characters": ["Bonbon", "金龜車小紅豆"]
+    },
+    {
+      "index": 17,
+      "start": 311.2,
+      "end": 336,
+      "summary": "不一樣也可以很特別，結尾道別",
+      "prompt": "Warm sunset ending: the finished colorful crayon drawing displayed proudly on a small easel, the cherry-red beetle car beaming beside it while the sea turtle teacher waves a friendly flipper goodbye, classmates' very different drawings pinned around them, celebratory encouraging farewell mood",
+      "characters": ["金龜車小紅豆", "海龜老師暖暖"]
+    }
+  ],
+  "newCharacters": [
+    {
+      "name": "金龜車小紅豆",
+      "aliases": ["小紅豆"],
+      "vehicle": "beetle",
+      "desc": "a cute claymation rounded cherry-red Volkswagen Beetle car named Xiaohongdou, compact dome body, big round eyes, cheerful smile, tiny chrome-like bumpers, chunky black wheels; a PURE car — body, four wheels, eyes and mouth ONLY, NO arms NO hands NO limbs",
+      "coverPage": 1
+    }
+  ]
+}
