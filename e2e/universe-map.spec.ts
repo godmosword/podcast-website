@@ -665,8 +665,9 @@ test.describe("車車宇宙樂園地圖 UX", () => {
  * 全跑桌機寬，而 `IslandPickerStrip` 只在 `@media (max-width: 480px)` 才
  * `display: block`——手機情境從未被執行過。加上 Playwright 的可見性判定
  * **不偵測遮蔽**，即使把既有測試改跑 390px 也照樣綠。
- * 2026-09-02 稽核實測：提示在 360/375/390 被島選擇列（z 6）、KidsPlayDock
- * （z 15）與 MapControls（z 5）三者同時蓋住，且固定 459px 寬左右溢出。
+ * 2026-09-02 稽核實測：提示在 360/375/390 被島選擇列（z 6）、當時的
+ * KidsPlayDock（z 15，2026-09-05 已刪）與 MapControls（z 5）蓋住，且固定
+ * 459px 寬左右溢出。
  */
 const HINT_NARROW_VIEWPORTS = [
   // 320＝真實裝置下限（iPhone SE 1）。240px 以下 `.tapHintText` 的 nowrap 會讓
@@ -696,7 +697,6 @@ test.describe("首訪 tap hint：窄屏幾何", () => {
       for (const [name, other, presence] of [
         // 島選擇列只在 ≤480 渲染；本組跑到 390 為止，但 767 之類的呼叫端會缺席
         ["IslandPickerStrip", page.getByTestId("island-picker-strip"), "optional"],
-        ["KidsPlayDock", page.locator("[data-kids-dock]"), "present"],
         ["MapControls", page.getByRole("group", { name: "地圖控制" }), "present"],
         // 日／月是裝飾，但不透明蓋住會讓月亮看起來缺一角（提示 z 4 > skyLayer z 3）
         ["日／月", page.locator('[class*="skyLayer"] img').first(), "present"],

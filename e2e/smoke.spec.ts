@@ -392,65 +392,25 @@ test("繽紛消消樂：標題 → 地圖 → 第 1 關棋盤", async ({ page })
   await expect(page.getByRole("button", { name: /提示/ })).toBeVisible();
 });
 
-test.describe("KidsPlayDock 契約", () => {
-  async function expectNoPlayDock(page: import("@playwright/test").Page) {
-    await expect(page.getByRole("navigation", { name: "去玩" })).toHaveCount(0);
+test.describe("內頁不掛 KidsPlayDock", () => {
+  for (const { path, width, height } of [
+    { path: "/", width: 1280, height: 800 },
+    { path: "/", width: 390, height: 844 },
+    { path: "/stories", width: 1280, height: 800 },
+    { path: "/games", width: 390, height: 844 },
+    { path: "/games/coloring-book", width: 390, height: 844 },
+    { path: "/adventures", width: 390, height: 844 },
+    { path: "/story/ep-27/play", width: 390, height: 844 },
+    { path: "/games/candy-match", width: 390, height: 844 },
+  ] as const) {
+    test(`${path}（${width}）不掛去玩 dock`, async ({ page }) => {
+      await page.setViewportSize({ width, height });
+      await page.goto(path);
+      await expect(page.getByRole("navigation", { name: "去玩" })).toHaveCount(
+        0,
+      );
+    });
   }
-
-  async function expectPlayDockWithThreeLinks(
-    page: import("@playwright/test").Page,
-  ) {
-    const dock = page.getByRole("navigation", { name: "去玩" });
-    await expect(dock).toHaveCount(1);
-    for (const { label, href } of [
-      { label: "全部故事", href: "/stories" },
-      { label: "遊樂園", href: "/games" },
-      { label: "宇宙地圖", href: "/adventures" },
-    ] as const) {
-      const link = dock.getByRole("link", { name: label });
-      await expect(link).toBeVisible();
-      await expect(link).toHaveAttribute("href", href);
-    }
-  }
-
-  test("首頁不掛 dock（1280）", async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/");
-    await expectNoPlayDock(page);
-  });
-
-  test("首頁不掛 dock（390）", async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/");
-    await expectNoPlayDock(page);
-  });
-
-  test("/stories 有 dock 三連且與 header 不重疊", async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/stories");
-    await expectPlayDockWithThreeLinks(page);
-
-    const headerBox = await page.getByRole("banner").boundingBox();
-    const dockBox = await page.getByRole("navigation", { name: "去玩" }).boundingBox();
-    expect(headerBox).toBeTruthy();
-    expect(dockBox).toBeTruthy();
-    expect(dockBox!.y).toBeGreaterThanOrEqual(headerBox!.y + headerBox!.height - 1);
-  });
-
-  test("/story/ep-27/play 沉浸頁不掛 dock", async ({ page }) => {
-    await page.goto("/story/ep-27/play");
-    await expectNoPlayDock(page);
-  });
-
-  test("/games/candy-match 沉浸頁不掛 dock", async ({ page }) => {
-    await page.goto("/games/candy-match");
-    await expectNoPlayDock(page);
-  });
-
-  test("/games/coloring-book 仍顯示 dock", async ({ page }) => {
-    await page.goto("/games/coloring-book");
-    await expectPlayDockWithThreeLinks(page);
-  });
 });
 
 test.describe("首頁頁尾 snap pane", () => {

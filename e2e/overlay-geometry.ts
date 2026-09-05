@@ -18,7 +18,7 @@ import { expect, type Locator, type Page } from "@playwright/test";
  * 只用後者會漏掉「重疊但我在上面」的正常情況被誤判。
  */
 
-/** 地圖 chrome 的邊距慣例（MapControls 10px、KidsPlayDock 12px）。
+/** 地圖 chrome 的邊距慣例（MapControls 10px、其餘浮層 12px）。
  *  注意：DESIGN §206-209 是**觸控密度**條款，**沒有**螢幕邊距規定，勿再誤引。 */
 export const OVERLAY_MIN_INSET = 12;
 

@@ -380,11 +380,11 @@
  * 不加權重，`.tapHint` 在兩處都是 (0,1,0)，寫進本檔上方那個 480 區塊
  * （`.map`／`.titleSign`／`.compass` 那塊）會被下方的基礎規則覆蓋回去。
  *
- * 為什麼不是「抬高到島選擇列之上」：底部帶在 ≤480 同時有三個常駐浮層——
- * IslandPickerStrip（z 6）、KidsPlayDock（z 15，`data-lift="picker"` 抬到
- * 92px）、MapControls（184px 高的直排，z 5）。提示是 z 4，抬多少都撞、
- * 撞了都輸；且 `map-camera-utils.ts` 的 `fitAvailableViewport` 已把底部
- * 148px 寫進相機保留區，再擠一層會與鏡頭數學打架。
+ * 為什麼不是「抬高到島選擇列之上」：底部帶在 ≤480 仍有 IslandPickerStrip
+ * （z 6）與 MapControls（184px 高的直排，z 5）；提示是 z 4，抬多少都撞。
+ * （2026-09-05 已刪 KidsPlayDock，不再佔 z 15。）`map-camera-utils.ts` 的
+ * `fitAvailableViewport` 已把底部 148px 寫進相機保留區，再擠一層會與鏡頭
+ * 數學打架。
  * 頂部反而是空的：上方 480 區塊已把 .titleSign 收 sr-only、.compass 隱藏。
  */
 @media (max-width: 480px) {
@@ -410,7 +410,7 @@
     left: calc(12px + var(--safe-left));
     --tap-hint-x: 0px;
     /* 24px＝與左錨的 12px 對稱（地圖 chrome 慣例：MapControls 10px、
-       KidsPlayDock 12px；DESIGN §206-209 並無螢幕邊距條款，勿再誤引）。
+       其餘浮層 12px；DESIGN §206-209 並無螢幕邊距條款，勿再誤引）。
        不可用 100vw：含捲軸寬且吃不到 safe inset。 */
     max-width: calc(100% - 24px - var(--safe-left) - var(--safe-right));
     /* 入場方向跟著錨點翻轉：由上而下。keyframes 的 from 取自本規則。 */

@@ -26,6 +26,12 @@
 - **後續：拿掉 CTA `nowrap`**：把 `LandingSegment.tsx` 的 `" →"` 半形空白改不斷行空白，箭頭才不會孤行；同時避開 <348px Dudu 遮箭頭、文字級 200% 被 `.panel` 裁尾。
 - **後續：勿靜默啟用 `playCta`**：`LandingSegment.tsx` 三元式會讓主 CTA 從 56px／`--fs-h2`／不透明墨板退回 44px／玻璃 `.subscribeCta`，契約測不會紅。啟用前須讓 `.subscribeCta` 脫離玻璃語言。
 
+### 本輪已完成（2026-09-05）
+
+| ID | 說明 |
+|----|------|
+| polish(nav): 整站拿掉內頁左下 KidsPlayDock；兒童三入口只留漢堡抽屜 | 見本 commit |
+
 ### 本輪已完成（2026-09-02）
 
 | ID | 說明 |

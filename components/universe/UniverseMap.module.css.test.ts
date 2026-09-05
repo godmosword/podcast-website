@@ -42,8 +42,8 @@ describe("UniverseMap.module.css tap hint", () => {
   });
 
   /**
-   * ≤480 的底部帶同時有 IslandPickerStrip（z 6）、KidsPlayDock（z 15）與
-   * MapControls（184px 高、z 5）；提示是 z 4，留在底部無論抬多高都被蓋住。
+   * ≤480 的底部帶仍有 IslandPickerStrip（z 6）與 MapControls（184px 高、
+   * z 5）；提示是 z 4，留在底部無論抬多高都被蓋住。
    * 這組守住「改頂部錨定」不被後人改回底部。
    */
   const narrowBlock = (() => {

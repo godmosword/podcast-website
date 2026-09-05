@@ -46,7 +46,7 @@ test.describe("遊戲頁：兒童主路徑優先", () => {
       await page.setViewportSize(PHONE);
       await page.goto(`/games/${slug}`);
 
-      // 整個 SiteNavBar 都不渲染：主列、抽屜、觸發器皆不存在；去玩 dock 也不掛
+      // 整個 SiteNavBar 都不渲染：主列、抽屜、觸發器皆不存在；去玩 dock 全站已刪
       await expect(page.getByRole("navigation", { name: "主要分區" })).toHaveCount(0);
       await expect(page.getByRole("navigation", { name: "去玩" })).toHaveCount(0);
       await expect(page.getByRole("navigation", { name: "網站選單" })).toHaveCount(0);
@@ -105,11 +105,7 @@ test.describe("遊樂園 hub", () => {
     await expect(
       header.getByRole("link", { name: "車車遊樂園", exact: true }),
     ).toBeVisible();
-    const playDock = page.getByRole("navigation", { name: "去玩" });
-    await expect(playDock).toHaveCount(1);
-    await expect(playDock.getByRole("link", { name: "全部故事" })).toBeVisible();
-    await expect(playDock.getByRole("link", { name: "遊樂園" })).toBeVisible();
-    await expect(playDock.getByRole("link", { name: "宇宙地圖" })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "去玩" })).toHaveCount(0);
     const hubFeedback = page.getByRole("link", { name: "留言" });
     await expect(hubFeedback).toBeVisible();
     await expect(hubFeedback).toHaveAttribute("href", /^(mailto:|https?:)/);
