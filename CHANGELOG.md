@@ -6,6 +6,7 @@
 
 ### Changed
 
+- **漢堡抽屜加「關於我們」**：探索組最後一列（宇宙地圖與「給爸媽」之間）連 `/about`；頁首放馬米原稿，下方保留這是什麼／怎麼使用／用車種找故事。**未改** Apple sync workflow。
 - **整站拿掉內頁左下 KidsPlayDock**：不再渲染「全部故事／遊樂園／宇宙地圖」三連與 `--kids-dock-h` 底距；兒童三入口只由漢堡抽屜承接。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **首頁刪除 ExploreGrid 探索區**：與漢堡抽屜 7 列（全部故事／角色圖鑑／遊樂園／繪本著色／宇宙地圖＋親子指南／親子景點）完全重疊。`#landing-foot` 只留 `SiteFooter`，不新增第五個 snap 段。入口改由漢堡抽屜承接。**未改** Apple sync workflow。
 - **≤768 SegmentNav 短標常駐**：底列四格等寬掛在 `<li>`，`navLabel` 不再 `display: none`；active 改頂緣 3px 指示條＋底色塊（huninn 單字重，不得只靠 `font-weight`）；字色 `--on-dark`、不加 `aria-label`（WCAG 2.5.3）；`<ul role="list">`。補契約測與 320／375／767 × light／night 元件快照。**未改** Apple sync workflow。

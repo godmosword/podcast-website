@@ -182,7 +182,9 @@ test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   const drawerPlayMap = drawerNav.getByRole("link", { name: "親子景點" });
   await expect(drawerPlayMap).toBeVisible();
   await expect(drawerPlayMap).toHaveAttribute("href", /\/for-parents\/play-map/);
-  await expect(drawerNav.getByRole("link", { name: "關於我們" })).toHaveCount(0);
+  const drawerAbout = drawerNav.getByRole("link", { name: "關於我們" });
+  await expect(drawerAbout).toBeVisible();
+  await expect(drawerAbout).toHaveAttribute("href", "/about");
   await expect(drawerNav.getByRole("link", { name: "聯絡我們" })).toHaveCount(0);
   await expect(drawerNav.getByRole("link", { name: "首頁" })).toHaveCount(0);
   await expect(drawerNav.getByRole("link", { name: "留言" })).toHaveCount(0);
@@ -276,6 +278,7 @@ test("遊樂園 v2 入口與遊戲卡片", async ({ page }) => {
 test("關於頁面", async ({ page }) => {
   await page.goto("/about");
   await expect(page.getByRole("heading", { name: "關於車車遊樂園" })).toBeVisible();
+  await expect(page.getByText("嗨嗨，我是馬米")).toBeVisible();
 });
 
 test("車車宇宙樂園地圖 smoke", async ({ page }) => {

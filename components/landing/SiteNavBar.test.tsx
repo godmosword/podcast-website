@@ -82,6 +82,7 @@ describe("SiteNavBar", () => {
       "/games",
       "/games/coloring-book",
       "/adventures",
+      "/about",
       "/for-parents",
       "/for-parents/play-map",
     ]) {
@@ -115,6 +116,7 @@ describe("SiteNavBar", () => {
       "角色圖鑑",
       "遊樂園",
       "宇宙地圖",
+      "關於我們",
       "親子景點",
       "親子指南",
     ]) {
@@ -122,7 +124,6 @@ describe("SiteNavBar", () => {
     }
     expect(html).not.toContain("主題分類");
     expect(html).not.toContain("指南首頁");
-    expect(html).not.toContain("關於我們");
     expect(html).not.toContain("聯絡我們");
     expect(html).not.toContain("育兒專欄");
 
@@ -148,6 +149,7 @@ describe("SiteNavBar", () => {
       "/stories",
       "/games",
       "/adventures",
+      "/about",
       "/for-parents",
       "/for-parents/play-map",
       "/characters",
@@ -193,7 +195,7 @@ describe("SiteNavBar", () => {
     expect(labels).toEqual(["給爸媽"]);
   });
 
-  test("抽屜恰好 7 個站內 href，不含首頁／mailto", async () => {
+  test("抽屜恰好 8 個站內 href，不含首頁／mailto", async () => {
     const view = await renderNavBar();
     const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
     const panelHrefs = Array.from(panel.querySelectorAll("a")).map((a) =>
@@ -205,6 +207,7 @@ describe("SiteNavBar", () => {
       "/games",
       "/games/coloring-book",
       "/adventures",
+      "/about",
       "/for-parents",
       "/for-parents/play-map",
     ]) {
@@ -212,7 +215,7 @@ describe("SiteNavBar", () => {
     }
     expect(panelHrefs).not.toContain("/");
     expect(panelHrefs.some((h) => h?.startsWith("mailto:"))).toBe(false);
-    expect(panelHrefs.length).toBe(7);
+    expect(panelHrefs.length).toBe(8);
   });
 
   test("抽屜兩組各為 role=list，家長組以 aria-labelledby 綁小標", async () => {
@@ -235,6 +238,17 @@ describe("SiteNavBar", () => {
     expect(firstLink?.textContent).toContain("全部故事");
   });
 
+  test("探索組最後一列為關於我們，不進給爸媽組", async () => {
+    const view = await renderNavBar();
+    const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
+    const lists = panel.querySelectorAll('ul[role="list"]');
+    const exploreLinks = Array.from(lists[0]!.querySelectorAll("a"));
+    const lastExplore = exploreLinks.at(-1);
+    expect(lastExplore?.getAttribute("href")).toBe("/about");
+    expect(lastExplore?.textContent).toContain("關於我們");
+    expect(lists[1]!.querySelector('a[href="/about"]')).toBeNull();
+  });
+
   test("行動版選單提供單欄清單連結，不含搜尋列", async () => {
     const view = await renderNavBar();
     fireEvent.click(view.getByRole("button", { name: "開啟選單" }));
@@ -245,6 +259,7 @@ describe("SiteNavBar", () => {
       "遊樂園",
       "繪本著色",
       "宇宙地圖",
+      "關於我們",
       "親子指南",
       "親子景點",
     ]) {
@@ -252,7 +267,6 @@ describe("SiteNavBar", () => {
     }
     expect(view.queryByText("主題分類")).toBeNull();
     expect(view.queryByText("育兒專欄")).toBeNull();
-    expect(view.queryByText("關於我們")).toBeNull();
     expect(view.queryByText("聯絡我們")).toBeNull();
     expect(view.queryByText("指南首頁")).toBeNull();
 
@@ -339,6 +353,7 @@ describe("isInternalPathActive 最長匹配", () => {
     "/games",
     "/games/coloring-book",
     "/adventures",
+    "/about",
     "/for-parents",
     "/for-parents/play-map",
   ];
@@ -456,6 +471,20 @@ describe("SiteNavBar active 狀態", () => {
     const parentMobile = mobileNav.querySelector('a[href="/for-parents"]');
     expect(playMapLink?.getAttribute("aria-current")).toBe("page");
     expect(parentMobile?.hasAttribute("aria-current")).toBe(false);
+  });
+
+  test("/about 僅抽屜關於我們 active", async () => {
+    const view = await renderNavBarAt("/about");
+    const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
+    expect(
+      panel.querySelector('a[href="/about"]')?.getAttribute("aria-current"),
+    ).toBe("page");
+    expect(
+      panel.querySelector('a[href="/adventures"]')?.hasAttribute("aria-current"),
+    ).toBe(false);
+    expect(
+      panel.querySelector('a[href="/for-parents"]')?.hasAttribute("aria-current"),
+    ).toBe(false);
   });
 
   test("/adventures 僅抽屜宇宙地圖 active", async () => {
