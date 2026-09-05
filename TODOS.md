@@ -31,7 +31,8 @@
 | ID | 說明 |
 |----|------|
 | polish(nav): 整站拿掉內頁左下 KidsPlayDock；兒童三入口只留漢堡抽屜 | `ffd7489` |
-| feat(nav): 抽屜加「關於我們」＋`/about` 寫入馬米原稿 | 見本 commit |
+| feat(nav): 抽屜加「關於我們」＋`/about` 寫入馬米原稿 | `20e8df3` |
+| polish(about): `/about` 拿掉這是什麼／怎麼使用／用車種找故事，只留馬米原稿 | 見本 commit |
 
 ### 本輪已完成（2026-09-02）
 

@@ -279,6 +279,9 @@ test("關於頁面", async ({ page }) => {
   await page.goto("/about");
   await expect(page.getByRole("heading", { name: "關於車車遊樂園" })).toBeVisible();
   await expect(page.getByText("嗨嗨，我是馬米")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "這是什麼？" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "怎麼使用？" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "用車種找故事" })).toHaveCount(0);
 });
 
 test("車車宇宙樂園地圖 smoke", async ({ page }) => {
