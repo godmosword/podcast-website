@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Story } from "@/data/content";
+import StoriesViewToggle from "./StoriesViewToggle";
 import StoryCard from "./StoryCard";
 import VehicleSelect from "./VehicleSelect";
 import TopicSelect from "./TopicSelect";
@@ -72,7 +73,10 @@ export function StoryFilter({
   return (
     <section className={styles.section} aria-label="找故事">
       <div className={styles.filterBar}>
-        <h2 className={styles.filterTitle}>找故事</h2>
+        <div className={styles.titleRow}>
+          <h2 className={styles.filterTitle}>找故事</h2>
+          <StoriesViewToggle />
+        </div>
 
         <div className={styles.filterGrid}>
           <div className={styles.filterField}>
@@ -107,10 +111,10 @@ export function StoryFilter({
       </div>
 
       {filtered.length > 0 ? (
-        <ul className={styles.list}>
+        <ul className={`${styles.list} ${styles.catalog}`}>
           {filtered.map((story, i) => (
-            <li key={story.slug}>
-              <StoryCard story={story} index={i} hideMeta />
+            <li key={story.slug} className={styles.listItem}>
+              <StoryCard story={story} index={i} hideMeta catalog />
             </li>
           ))}
         </ul>

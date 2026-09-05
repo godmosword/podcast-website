@@ -9,6 +9,7 @@ import SiteNavBar from "@/components/landing/SiteNavBar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { siteIdentityJsonLd } from "@/lib/json-ld";
 import { getSiteUrl } from "@/lib/site-url";
+import { STORIES_VIEW_INIT_SCRIPT } from "@/lib/stories-view";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
@@ -105,6 +106,7 @@ export default function RootLayout({
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: STORIES_VIEW_INIT_SCRIPT }} />
         <JsonLd data={siteIdentityJsonLd()} />
       </head>
       <body>

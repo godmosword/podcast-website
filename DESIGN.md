@@ -41,16 +41,17 @@ Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範
 
 - **Mobile-first**，內容欄寬 `max-width: 640px` 置中
 - **地圖／儀表板工具頁**（如 `/for-parents/play-map`、`/for-parents/dashboard`、`/studio/feedback`）豁免 640px 單欄限制，內容區 `max-width: 1100px` 置中，以容納地圖與並排控制
+- **全部故事（`/stories`）桌機 ≥768**：整頁 `.main` 同樣放到 `1100px`（含標題、SiteHeader、LatestHero、收藏、找故事），以容納縮圖網格。`<768` 維持 640。這是欄寬豁免，不是新的全站 chrome 斷點。
 - **角色圖鑑／親子指南**（`/characters`、`/for-parents`）：不掛 `SiteHeader`（無 `hero-home` 行銷圖）；緊湊頁首用 `--fs-h1`，圖鑑網格／家長工具接在標題下。
 - **親子景點頁（`/for-parents/play-map`）— 版型與瀏覽**：不掛 `SiteHeader`（全域 `SiteNavBar` 已顯示品牌，再放一次會出現兩個字標與重複 h1）；工具殼無行銷 hero／長 lede；H1「親子遊樂地圖」在工具頂列。**主瀏覽介面是「縣市色塊圖＋分組名單」，不是 OSM 底圖**：`view=cards`（預設，含桌面）滿版呈現 22 縣市磚牆與分組名單，**任何寬度都不掛 Leaflet**（首屏零 tile 請求，e2e 有正向回歸）。磚牆用 CSS Grid 手排 row/column 近似台灣地理（基隆在上、高屏在下、宜花東在右欄）；**不用 GeoJSON、不用精確縣市界**，磚牆下方須有**可見**文字「示意排列，非實際地理位置」，不得只放進 `aria-label`。色深是 choropleth 但**不得是唯一編碼**，命中數必須同時是可見文字，且不得用 `--ink-soft`（疊在最深的著色磚上只有 3.07:1／夜 4.29:1）。三態（`covered`／`empty` 此條件 0 筆／`uncatalogued` 尚未收錄）必須用邊框樣式＋文字雙重編碼，**不得用 `opacity` 降階**（透明度會連文字對比一起吃掉）。**資料誠實紅線**：資料僅涵蓋 15 縣市，宜蘭／花蓮／台東／屏東／澎湖／金門／連江的磚必須顯性標示「未收錄」且不可點選，並在下方句子重述「不代表當地沒有好去處」。點磚＝選縣市，再點一次取消；**手機 <640px 選定後磚牆收合成一行「桃園市 ✕」**（漸進式揭露），收合時焦點移到該收合鍵，取消時還給原本那塊磚。地圖視圖收起磚牆（地圖有自己的 cluster）。名單依狀態三選一分組（有定位→車程帶 ≤20／20–40／40–60／60 分以上；無定位且未選縣市→縣市，北到南；已選縣市→類型，沿用 `PLAYGROUND_TYPES` 順序），組標題為「20 分鐘內 · 4 個」，空組略過；**車程是直線距離粗估，分組時必須附免責文字，且渲染在第一組標題之上而非頁尾小字**。結果列為句子式「在〔全台〕找〔免費〕→ **12 個地方**」，結果數放大為主資訊；內層 span 全部 `aria-hidden`，h2 的 accessible name 由 `srText` 提供。未顯示卡片一律 `hidden` 遮蔽（以跨組連續的 `displayIndex` 判定），**不得 slice 陣列**（SSR 索引契約）。
 - **親子景點頁（`/for-parents/play-map`）— 地圖分頁與美術**：Leaflet + OSM 為**次要分頁**（`view=map`），僅在已選縣市或已定位後按「看地圖」才動態載入，返回名單不重建容器；未選縣市且未定位時不渲染「看地圖」，無縣市的 `?view=map` 進頁軟著陸名單並清掉該參數。手機地圖模式全幅，篩選列留在名單，沒有 bottom sheet snap。縣市／附近地圖走 `fitBounds`；`minZoom` 維持 `TAIWAN_SOFT_MIN_ZOOM`（7），本輪不改。**桌面 ≥980px 名單與地圖並排（名單約 44%）只在 `view=map` 生效**；`view=cards` 為滿版名單（卡片走三欄）。CSS 的 980 並排規則必須 scope 到 `.root[data-split="true"]`，否則名單模式會被 `max-height: 64dvh` 夾住。一列主控制（附近／雨天／免費／放電／室內＋次要「篩選」），`data-quick-filter` 屬性為 e2e 契約不得更名；縣市／類型仍留在可收合篩選面板作為鍵盤／進階備援。無場館照片時以**類型縮圖 plate**（7 種手繪 SVG，置左）與家長筆記構成卡片；Google 導航／顯示位置用頁面場館名＋縣市，不用 lat,lng 圖釘。詳情 sheet 的 full 變體用事實 chip（**車程放第一格**）＋兩層出口（導航／查看完整資訊為主，在地圖看／顯示位置／官網降為文字連結）；compact 變體不動。頁面層篩選 chip 與**縣市色塊圖**一律走 ghost／`--accent`（邊框、底色）／`--accent-ink`（文字、圖示）；`--map-chip*` 只留給地圖 overlay（縮放鍵、spatial cluster、mapHint），色塊圖**不得**借用。**七類型母題有兩個消費點**：卡片 plate（彩色，96 viewBox，`components/for-parents/type-scenes/`）與**地圖針中心剪影**（單色 `currentColor`，24 viewBox，`lib/playground-type-glyph.ts`）。針用圓形黏土容器＋較大剪影（色相＋形狀雙重編碼）。剪影色為**固定美術色** `#34302b`（不隨主題翻轉）；「其他」類的針與卡片 accent 用固定淺沙 `#cfcac2`，不用 `--ink-soft`。針**不**共用 `--map-chip*`。柔化一律用 SVG `feGaussianBlur`，**禁用 `backdrop-filter` 與 CSS `blur()`**。
-- 桌面端維持單欄，兩側留白
+- 桌面端維持單欄，兩側留白。**例外：** `/stories` 找故事目錄在桌機縮圖模式為兩／三欄網格（見「全部故事」）。主題／車種／相關／收藏卡仍是橫式單欄。
 - PWA：`manifest.json` + Apple Web App meta
 - Viewport 允許使用者縮放（未設 `maximum-scale` / `user-scalable=no`），方便家長放大閱讀
 
 ## 響應式斷點
 
-- viewport 只使用四層：`480px`（手機／小尺寸控制）、`640px`（內容欄與手機版型）、`768px`（平板雙欄）、`980px`（全站膠囊導覽＋Landing 桌面版；**漢堡不隨此斷點消失**，見首頁 IA）。內容欄最大寬（如家長頁 `min(920px, 100%)`）不屬 viewport 切版斷點。
+- viewport 只使用四層：`480px`（手機／小尺寸控制）、`640px`（內容欄與手機版型）、`768px`（平板雙欄）、`980px`（全站膠囊導覽＋Landing 桌面版；**漢堡不隨此斷點消失**，見首頁 IA）。內容欄最大寬（如家長頁 `min(920px, 100%)`、`/stories` 桌機 `1100px`、找故事完整模式 `56rem`）不屬 viewport 切版斷點。`/stories` 縮圖欄數在 `1280px` 從兩欄改三欄，只影響找故事目錄。
 - 導覽內部依父容器寬度使用 `@container nav-inner (max-width: 300px)`；元件尺寸受父容器影響時優先用 container query，不新增任意 viewport breakpoint。
 - 新頁面先用 fluid `clamp()` 與現有 token；只有整體版型切換才使用上述斷點。
 
@@ -299,5 +300,6 @@ Hero 圖走 `images.edit` + `public/characters/` 定裝照參考圖，與單集�
    LatestHero 說明最多 3 行（`StoryCard` 桌面 2 行、≤480px 3 行）；來源摘要於 Apple／SoundOn ingest 階段即截斷至約 68 字（CJK），clamp 為保險層。
 3. **FavoritesSection** 精選
 4. **StoryFilter** 找故事（車種／主題下拉，不另放「車車」「主題」欄位副標；觸發鈕 `aria-label` 已足夠）；`filterBar` 用 `--surface-elevated` + `--hairline` + `--elev-1`
+5. **桌機列表顯示（僅 ≥768）**：預設「縮圖」——≥768 兩欄、≥1280 三欄直式卡（封面在上、標題最多 2 行、tag 靠底）。「完整」維持橫式一列，列表 `max-width: 56rem` 置中。切換鈕文案「縮圖／完整」，群組 `aria-label="故事列表顯示方式"`，`<768` `display: none`。旗標掛 `<html data-stories-view="list">`（有＝完整，沒有＝縮圖）；偏好 `localStorage` key `cheche:stories-view`。卡片 markup 共用，**不**用 React `variant` 切換。1280 只決定目錄欄數，不是新的全站 viewport 層。
 
 Landing segment hero 生圖：`npm run generate:landing-art -- --dry-run`（橫版）；直版 `--portrait`；approve 後覆蓋 `public/landing/`。

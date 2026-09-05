@@ -1,0 +1,78 @@
+/* 手機完全隱藏；桌機才出現。display:none 一併移出無障礙樹。 */
+.wrap {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .wrap {
+    display: inline-flex;
+    align-items: stretch;
+    flex: none;
+    gap: 4px;
+    padding: 4px;
+    border-radius: var(--radius-pill);
+    border: 1.5px solid var(--line);
+    background: var(--card);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+.segment {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--ink);
+  font-size: var(--fs-meta);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--motion-press), color var(--motion-press),
+    transform var(--motion-press);
+}
+
+.segmentActive {
+  background: var(
+    --accent-soft,
+    color-mix(in srgb, var(--accent) 18%, transparent)
+  );
+  color: var(--accent-ink);
+}
+
+.segment:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.segment:active {
+  transform: scale(0.96);
+}
+
+@media (hover: hover) {
+  .segment:not(.segmentActive):hover {
+    background: color-mix(in srgb, var(--ink) 6%, transparent);
+  }
+}
+
+:global(html[data-theme="night"]) .wrap {
+  background: var(--card-2);
+  border-color: color-mix(in srgb, var(--ink) 16%, transparent);
+}
+
+:global(html[data-theme="night"]) .segmentActive {
+  background: color-mix(in srgb, var(--c-teal) 28%, var(--card));
+  color: color-mix(in srgb, var(--c-teal) 35%, var(--ink));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .segment,
+  .segment:hover,
+  .segment:active {
+    transform: none;
+    transition: none;
+  }
+}

@@ -3,6 +3,7 @@ import type { Story } from "@/data/content";
 import { formatDate, storyCoverPath } from "@/lib/story-utils";
 import StoryCoverMorph from "@/components/story/StoryCoverMorph";
 import StoryProgressBadge from "@/components/story/StoryProgressBadge";
+import { STORIES_CATALOG_COVER_SIZES } from "@/lib/stories-view";
 import StoryImage from "./StoryImage";
 import { TagChip } from "./Chip";
 import StoryAge from "./StoryAge";
@@ -19,6 +20,13 @@ type StoryCardProps = {
   hideMeta?: boolean;
   /** D4 fallback：列表封面 DOM 標記；同頁可能重複 slug 時關閉 */
   sharedCoverMorph?: boolean;
+  /**
+   * `/stories` 找故事目錄。桌機縮圖／完整只靠 `<html>` 旗標切 CSS，
+   * 不走 variant，避免切換 remount。
+   */
+  catalog?: boolean;
+  /** 覆寫封面 sizes；目錄卡預設用 `STORIES_CATALOG_COVER_SIZES` */
+  coverSizes?: string;
 };
 
 export default function StoryCard({
@@ -27,18 +35,24 @@ export default function StoryCard({
   variant = "list",
   hideMeta = false,
   sharedCoverMorph = true,
+  catalog = false,
+  coverSizes,
 }: StoryCardProps) {
   const isGrid = variant === "grid";
   // 列表縮圖 96×96（≤480px 為 80×80）；grid 約 220px。避免預設 640px sizes。
-  const thumbSizes = isGrid
-    ? "(max-width: 640px) 46vw, 220px"
-    : "(max-width: 480px) 80px, 96px";
+  const thumbSizes =
+    coverSizes ??
+    (catalog
+      ? STORIES_CATALOG_COVER_SIZES
+      : isGrid
+        ? "(max-width: 640px) 46vw, 220px"
+        : "(max-width: 480px) 80px, 96px");
   const staggerClass = `scrollEnterStagger${(index % 3) + 1}`;
 
   return (
     <Link
       href={`/story/${story.slug}`}
-      className={`${styles.card} ${isGrid ? styles.cardGrid : ""} scrollEnter ${staggerClass} press-squash`}
+      className={`${styles.card} ${isGrid ? styles.cardGrid : ""} ${catalog ? styles.catalogCard : ""} scrollEnter ${staggerClass} press-squash`}
     >
       <div
         className={`${styles.thumbWrap} ${isGrid ? styles.thumbWrapGrid : ""}`}

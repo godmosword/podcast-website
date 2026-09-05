@@ -27,6 +27,12 @@
   }
 }
 
+@media (min-width: 768px) {
+  .main {
+    max-width: 1100px;
+  }
+}
+
 .title {
   font-family: var(--font-baloo), var(--font-huninn), "PingFang TC",
     "Microsoft JhengHei", sans-serif;

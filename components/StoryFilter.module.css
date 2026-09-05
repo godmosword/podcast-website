@@ -14,6 +14,13 @@
   box-shadow: var(--elev-1);
 }
 
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
 .filterTitle {
   margin: 0;
   font-family: var(--font-baloo), var(--font-huninn), "PingFang TC",
@@ -95,6 +102,34 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+}
+
+.listItem {
+  min-width: 0;
+}
+
+/* 桌機縮圖網格／完整限寬：只吃找故事目錄清單，且只在 ≥768。 */
+@media (min-width: 768px) {
+  :global(html:not([data-stories-view="list"])) .catalog {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+
+  :global(html:not([data-stories-view="list"])) .listItem {
+    display: flex;
+  }
+
+  :global(html[data-stories-view="list"]) .catalog {
+    max-width: 56rem;
+    margin-inline: auto;
+  }
+}
+
+@media (min-width: 1280px) {
+  :global(html:not([data-stories-view="list"])) .catalog {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 .empty {

@@ -65,5 +65,18 @@ describe("StoryCard", () => {
     const html = renderToStaticMarkup(<StoryCard story={listStory} />);
 
     expect(html).toContain('sizes="(max-width: 480px) 80px, 96px"');
+    expect(html).not.toContain("46vw");
+  });
+
+  test("目錄卡用較大的桌機 sizes，且不靠 grid variant class", async () => {
+    const { default: StoryCard } = await import("./StoryCard");
+    const { STORIES_CATALOG_COVER_SIZES } = await import("@/lib/stories-view");
+
+    const html = renderToStaticMarkup(
+      <StoryCard story={listStory} catalog />,
+    );
+
+    expect(html).toContain(`sizes="${STORIES_CATALOG_COVER_SIZES}"`);
+    expect(html).not.toContain("cardGrid");
   });
 });

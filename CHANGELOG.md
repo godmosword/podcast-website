@@ -6,6 +6,7 @@
 
 ### Added
 
+- **`/stories` 桌機縮圖網格＋縮圖／完整切換**：≥768 整頁放到 1100px；找故事預設兩欄直式卡、≥1280 三欄。桌機可切「完整」回橫式列（列表限寬 56rem 置中）。偏好存在 `cheche:stories-view`，`<html data-stories-view="list">` 在 paint 前還原，避免先閃縮圖。切換鈕只在 ≥768 出現。主題／車種／相關／收藏維持橫式；手機 &lt;768 零位移。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **站內留言牆 `/feedback`**：頂欄「留言」改站內頁（馬米邀請小卡、家長雙同意、信箱蒐集但不公開、先審後發）。公開列只顯示已核准的暱稱／日期／正文；示範卡獨立、不進 list。後台 `/studio/feedback` 以 `FEEDBACK_MODERATION_SECRET` 密語保護，可核准／隱藏／硬刪。無 `DATABASE_URL` 時頁面仍 200、表單降級 mailto。法律頁新增「公開留言牆」專章，政策版本 `2026-09-05`。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、`SiteHeader`「留言給我」圓鈕（仍 env-gated）。
 
 ### Changed

@@ -97,6 +97,78 @@ test.describe("/stories 可分享篩選", () => {
     expect(href).not.toContain("vehicle=");
   });
 
+  test("桌機可切換縮圖／完整，重整維持完整且不先閃縮圖", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/stories");
+    const group = page.getByRole("group", { name: "故事列表顯示方式" });
+    await expect(group).toBeVisible();
+    const gridBtn = page.getByRole("button", { name: "縮圖" });
+    const listBtn = page.getByRole("button", { name: "完整" });
+    await expect(gridBtn).toHaveAttribute("aria-pressed", "true");
+
+    const firstCatalog = page
+      .locator('section[aria-label="找故事"] a[href^="/story/"]')
+      .first();
+    await expect(firstCatalog).toBeVisible();
+    await expect(firstCatalog).toHaveCSS("flex-direction", "column");
+
+    const items = page.locator('section[aria-label="找故事"] li');
+    const first = await items.nth(0).boundingBox();
+    const third = await items.nth(2).boundingBox();
+    expect(first && third).toBeTruthy();
+    expect(Math.abs((first?.y ?? 0) - (third?.y ?? 0))).toBeLessThan(8);
+
+    await listBtn.click();
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-stories-view",
+      "list",
+    );
+    await expect(firstCatalog).toHaveCSS("flex-direction", "row");
+    await expect(listBtn).toHaveAttribute("aria-pressed", "true");
+
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-stories-view",
+      "list",
+    );
+    await expect(
+      page.locator('section[aria-label="找故事"] a[href^="/story/"]').first(),
+    ).toHaveCSS("flex-direction", "row");
+  });
+
+  test("390 與 767 不顯示切換鈕，列表維持橫式", async ({ page }) => {
+    for (const width of [390, 767] as const) {
+      await page.setViewportSize({ width, height: 844 });
+      await page.goto("/stories");
+      await expect(
+        page.getByRole("group", { name: "故事列表顯示方式" }),
+      ).toBeHidden();
+      await expect(page.locator("html")).not.toHaveAttribute(
+        "data-stories-view",
+      );
+      await expect(
+        page.locator('section[aria-label="找故事"] a[href^="/story/"]').first(),
+      ).toHaveCSS("flex-direction", "row");
+    }
+  });
+
+  test("768 起兩欄縮圖，切換鈕可見", async ({ page }) => {
+    await page.setViewportSize({ width: 768, height: 800 });
+    await page.goto("/stories");
+    await expect(
+      page.getByRole("group", { name: "故事列表顯示方式" }),
+    ).toBeVisible();
+    const items = page.locator('section[aria-label="找故事"] li');
+    const first = await items.nth(0).boundingBox();
+    const second = await items.nth(1).boundingBox();
+    const third = await items.nth(2).boundingBox();
+    expect(first && second && third).toBeTruthy();
+    expect(Math.abs((first?.y ?? 0) - (second?.y ?? 0))).toBeLessThan(8);
+    expect((third?.y ?? 0) - (first?.y ?? 0)).toBeGreaterThan(40);
+  });
+
   test("找故事不顯示車車／主題欄位副標", async ({ page }) => {
     await page.goto("/stories");
     const bar = page.getByRole("region", { name: "找故事" });

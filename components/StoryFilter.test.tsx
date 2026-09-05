@@ -107,4 +107,23 @@ describe("StoryFilter", () => {
     expect(html).not.toContain("filter-topic-label");
     expect(html).not.toMatch(/fieldLabel|>車車<|>主題</);
   });
+
+  test("找故事列出縮圖／完整切換，卡片走 catalog", () => {
+    const html = renderToStaticMarkup(
+      <StoryFilter
+        stories={stories}
+        vehicles={["警車", "賽車"]}
+        tags={["合作", "勇氣"]}
+        featuredStorySlug="ep-12"
+        vehicle={null}
+        tag={null}
+        query=""
+      />,
+    );
+    expect(html).toContain('aria-label="故事列表顯示方式"');
+    expect(html).toContain("縮圖");
+    expect(html).toContain("完整");
+    expect(html).toContain('aria-pressed="true"');
+    expect(html).toContain("/story/ep-11");
+  });
 });
