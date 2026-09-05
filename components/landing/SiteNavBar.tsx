@@ -19,6 +19,7 @@ type NavItemId =
   | "games"
   | "coloring"
   | "adventures"
+  | "about"
   | "for-parents"
   | "play-map"
   | "feedback";
@@ -29,13 +30,13 @@ type NavItem = {
   href: string;
 };
 
-/** 抽屜家長組 id（小標「給爸媽」落在實際首個可見項）。 */
+/** 抽屆家長組 id（小標「給爸媽」落在實際首個可見項）。 */
 const MOBILE_PARENT_GROUP_IDS = new Set<NavItemId>([
   "for-parents",
   "play-map",
 ]);
 
-/** 抽屜：探索 → 家長（7 列；首頁在頂欄、留言在頂欄 .actions）。 */
+/** 抽屆：探索 → 家長（8 列；首頁在頂欄、留言在頂欄 .actions）。 */
 const MENU_ROWS: readonly {
   id: NavItemId;
   emoji: string;
@@ -43,9 +44,10 @@ const MENU_ROWS: readonly {
   { id: "stories", emoji: "📖" },
   { id: "characters", emoji: "🚗" },
   { id: "games", emoji: "🎡" },
-  // 著色本原本只能從遊樂園子頁進入；對不識字的兒童而言等於不存在。
+  // 著色本原本只能從遊樂園子頁進入；對不識字的兒童而訙等於不存在。
   { id: "coloring", emoji: "🎨" },
   { id: "adventures", emoji: "🗺️" },
+  { id: "about", emoji: "💛" },
   { id: "for-parents", emoji: "🧭" },
   { id: "play-map", emoji: "📍" },
 ] as const;
@@ -54,7 +56,6 @@ const MENU_ROWS: readonly {
 const DESKTOP_QUERY = "(min-width: 980px)";
 
 function navItems(): NavItem[] {
-  // 全站一致的次級導覽；filter／key 一律用穩定 id。
   return [
     { id: "home", label: "首頁", href: "/" },
     { id: "stories", label: "全部故事", href: "/stories" },
@@ -62,6 +63,7 @@ function navItems(): NavItem[] {
     { id: "games", label: "遊樂園", href: "/games" },
     { id: "coloring", label: "繪本著色", href: "/games/coloring-book" },
     { id: "adventures", label: "宇宙地圖", href: "/adventures" },
+    { id: "about", label: "關於我們", href: "/about" },
     { id: "for-parents", label: "親子指南", href: "/for-parents" },
     { id: "play-map", label: "親子景點", href: "/for-parents/play-map" },
     { id: "feedback", label: "留言", href: feedbackHref() },
@@ -72,12 +74,6 @@ function matchesPath(pathname: string, href: string): boolean {
   return href.startsWith("/") && (pathname === href || pathname.startsWith(`${href}/`));
 }
 
-/**
- * 最長匹配獨佔 active。`/games/coloring-book` 同時被 `/games` 與著色本自身命中，
- * 若不排除會出現兩個高亮與兩個 `aria-current="page"`。
- *
- * `href="/"` 不需特判：`matchesPath("/x", "/")` 比對的是 `"//"`，不會全站誤命中。
- */
 export function isInternalPathActive(
   pathname: string,
   href: string,
@@ -90,7 +86,6 @@ export function isInternalPathActive(
   );
 }
 
-/** 頂欄「留言」：與抽屜外連分支同一套規則（非 `/` 不走 next/link）。 */
 function renderFeedbackLink(
   href: string,
   label: string,
@@ -110,7 +105,6 @@ function renderFeedbackLink(
   );
 }
 
-/** 同時只允許一個浮層開著——兩個 focus trap 同時 active 會互搶 Tab。 */
 type OpenMenu = "none" | "subscribe" | "nav";
 
 export default function SiteNavBar() {
@@ -126,7 +120,6 @@ export default function SiteNavBar() {
 
   const items = navItems();
   const byId = new Map(items.map((item) => [item.id, item]));
-  // 供 active 判定做最長匹配（如 /games 與 /games/coloring-book 互斥）
   const internalHrefs = items
     .filter((item) => item.href.startsWith("/"))
     .map((item) => item.href);
@@ -139,15 +132,11 @@ export default function SiteNavBar() {
 
   const closeAll = useCallback(() => setOpenMenu("none"), []);
 
-  /** 點浮層外部關閉：`pointerdown` 早於 `click`，若讓 focus trap 把焦點歸還觸發器，
-   * 會從使用者正要點的元素手上搶走。先把焦點移出面板再關，trap 的歸還就不會生效
-   * （`previouslyFocused.focus()` 仍會執行，但此時使用者的點擊會在其後接手）。 */
   const closeFromOutside = useCallback(() => {
     (document.activeElement as HTMLElement | null)?.blur?.();
     setOpenMenu("none");
   }, []);
 
-  // Esc 關閉
   useEffect(() => {
     if (openMenu === "none") return;
     function onKey(e: KeyboardEvent) {
@@ -157,7 +146,6 @@ export default function SiteNavBar() {
     return () => window.removeEventListener("keydown", onKey);
   }, [openMenu, closeAll]);
 
-  // 點浮層外部關閉（與 SubscribeMenu 行為一致；原本只有訂閱有）
   useEffect(() => {
     if (openMenu === "none") return;
     function onPointerDown(e: PointerEvent) {
@@ -167,8 +155,6 @@ export default function SiteNavBar() {
     return () => document.removeEventListener("pointerdown", onPointerDown);
   }, [openMenu, closeFromOutside]);
 
-  // 跨越桌面斷點時關閉抽屜。舊碼在 979→980 會留下 open=true 卻不可見的面板，
-  // focus trap 抓到空陣列、焦點掉到 body，且 data-menu-open 卡住。
   useEffect(() => {
     if (typeof window === "undefined" || !window.matchMedia) return;
     const mql = window.matchMedia(DESKTOP_QUERY);
@@ -195,7 +181,6 @@ export default function SiteNavBar() {
       </>
     );
 
-    // 非站內路徑（留言可能是 mailto 或外部表單）不走 next/link 預抓
     if (!item.href.startsWith("/")) {
       const external = isContactExternal(item.href);
       return (
@@ -237,7 +222,6 @@ export default function SiteNavBar() {
       {...(navSolid ? { "data-nav-solid": "true" as const } : {})}
     >
       <div className={styles.inner}>
-        {/* 不加 aria-label：可見字標即可及名稱，加了會覆寫並破壞既有 e2e 契約 */}
         <Link href="/" className={styles.brand} onClick={closeAll}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/mascot.png" alt="" width={36} height={28} aria-hidden />
@@ -245,7 +229,6 @@ export default function SiteNavBar() {
         </Link>
 
         <div className={styles.actions} role="group" aria-label="常用">
-          {/* 兩斷點同構：首頁文字入口（窄屏品牌字 sr-only 後仍有一個可見「回家」詞） */}
           <Link
             href="/"
             className={`${styles.navLink} ${styles.homeAction}`}
@@ -272,7 +255,6 @@ export default function SiteNavBar() {
             : null}
         </div>
 
-        {/* 最右、不進「常用」組；可見文字已刪，可及名稱只靠 aria-label */}
         <button
           type="button"
           ref={menuBtnRef}
@@ -285,13 +267,6 @@ export default function SiteNavBar() {
           <Icon name={open ? "menu-close" : "menu"} size={20} />
         </button>
 
-        {/* 抽屜連結**常駐 DOM**、以 CSS `display: none` 隱藏：`{open && …}` 會讓
-            關閉態的 server HTML 完全沒有站內連結。常駐後 HTML 一定含這些連結
-            （搜尋引擎是否採計 hidden link 由它決定，這裡只保證連結存在）。
-            關閉時另加 `inert`：`display: none` 已排除聚焦與 AT，`inert` 是
-            防止日後有人把隱藏手法改成 opacity／visibility 時破口重開的保險。
-            **必須是 `.inner` 的子節點**——`.inner` 有 `container-type: inline-size`
-            （即 containing block），放在外面會改錨定到 `.bar`，桌面就變全寬下拉。 */}
         <nav
           id={menuId}
           ref={panelRef}
@@ -300,9 +275,6 @@ export default function SiteNavBar() {
           data-open={open ? "true" : "false"}
           {...(open ? {} : { inert: true })}
         >
-          {/* 兩個 list：`list-style: none` 在 Safari/VoiceOver 會移除清單語意，
-            故顯式 `role="list"`；家長組另以 `aria-labelledby` 綁小標，
-            讓 AT 拿到與視覺分組對等的語意（磁貼牆同一作法）。 */}
         <ul className={styles.menuList} role="list">
           {exploreRows.map((row) => renderRow(row))}
         </ul>
