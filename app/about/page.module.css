@@ -47,6 +47,23 @@
   line-height: 1.2;
 }
 
+.lede {
+  display: grid;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+
+.lede .text + .text {
+  margin-top: 0;
+}
+
+.tagline {
+  margin: var(--space-2) 0 0;
+  line-height: 1.7;
+  font-weight: 700;
+  color: var(--ink);
+}
+
 .section {
   margin-bottom: var(--space-8);
   padding-inline-start: 22px;
