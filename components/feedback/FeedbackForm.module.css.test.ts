@@ -12,6 +12,12 @@ describe("FeedbackForm.module.css", () => {
     expect(css).toMatch(/\.submit\s*\{[\s\S]*?min-height:\s*44px/);
   });
 
+  it("蜜罐移出畫面，不用 display:none", () => {
+    expect(css).toMatch(/\.honeypot\s*\{[\s\S]*?position:\s*absolute/);
+    expect(css).toMatch(/\.honeypot\s*\{[\s\S]*?left:\s*-9999px/);
+    expect(css).not.toMatch(/\.honeypot\s*\{[\s\S]*?display:\s*none/);
+  });
+
   it("動畫只動 transform／opacity，reduced-motion 全關", () => {
     expect(css).toMatch(
       /\.submit:active:not\(:disabled\)\s*\{[\s\S]*?transform:\s*scale\(0\.98\)/,

@@ -4,6 +4,10 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { afterEach, describe, expect, test, vi } from "vitest";
 import FeedbackForm from "./FeedbackForm";
 import {
+  FEEDBACK_HONEYPOT_FIELD,
+  type FeedbackActionState,
+} from "@/lib/feedback-action";
+import {
   FEEDBACK_LOADING_LABEL,
   FEEDBACK_MAILTO_LINK,
   FEEDBACK_NICKNAME_LABEL,
@@ -15,55 +19,70 @@ import { feedbackMailtoHref } from "@/lib/contact";
 
 vi.stubGlobal("React", React);
 
+const { submitFeedback } = vi.hoisted(() => ({
+  submitFeedback: vi.fn(async (): Promise<FeedbackActionState> => ({
+    status: "success",
+    message: FEEDBACK_SUCCESS,
+  })),
+}));
+
+vi.mock("@/app/feedback/actions", () => ({
+  submitFeedback,
+}));
+
 afterEach(() => {
   cleanup();
-  vi.unstubAllGlobals();
+  submitFeedback.mockReset();
+  submitFeedback.mockResolvedValue({
+    status: "success",
+    message: FEEDBACK_SUCCESS,
+  });
 });
 
 describe("FeedbackForm", () => {
-  test("載入中以 status 告知", () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(() => new Promise<Response>(() => {})),
-    );
-    render(<FeedbackForm />);
-    expect(screen.getByRole("status").textContent).toContain(
-      FEEDBACK_LOADING_LABEL,
-    );
+  test("available 時立刻有欄位，沒有載入中", () => {
+    render(<FeedbackForm available />);
+    expect(screen.queryByText(FEEDBACK_LOADING_LABEL)).toBeNull();
+    expect(screen.getByRole("textbox", { name: FEEDBACK_NICKNAME_LABEL })).toBeTruthy();
+    expect(screen.getByRole("button", { name: FEEDBACK_SUBMIT_LABEL })).toBeTruthy();
   });
 
-  test("未勾兩項同意時送出鈕 disabled 並顯示提示", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({ available: true }),
-      }),
-    );
-    render(<FeedbackForm />);
-    const submit = await screen.findByRole("button", {
-      name: FEEDBACK_SUBMIT_LABEL,
+  test("unavailable 時顯示 mailto 降級", () => {
+    render(<FeedbackForm available={false} />);
+    const link = screen.getByRole("link", { name: FEEDBACK_MAILTO_LINK });
+    expect(link.getAttribute("href")).toBe(feedbackMailtoHref());
+    expect(screen.queryByRole("textbox", { name: FEEDBACK_NICKNAME_LABEL })).toBeNull();
+  });
+
+  test("蜜罐在 DOM 但不進可及樹", () => {
+    render(<FeedbackForm available />);
+    const honey = document.querySelector(`input[name="${FEEDBACK_HONEYPOT_FIELD}"]`);
+    expect(honey).toBeTruthy();
+    expect(honey?.closest("[aria-hidden='true']")).toBeTruthy();
+    expect(screen.queryByRole("textbox", { name: "網站" })).toBeNull();
+  });
+
+  test("hydration 後未勾兩項同意時送出鈕 disabled 並顯示提示", async () => {
+    render(<FeedbackForm available />);
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: FEEDBACK_SUBMIT_LABEL }).hasAttribute("disabled"),
+      ).toBe(true);
     });
-    expect(submit.hasAttribute("disabled")).toBe(true);
     expect(screen.getByText(FEEDBACK_SUBMIT_DISABLED_HINT)).toBeTruthy();
   });
 
-  test("503 時改顯示 mailto 降級", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn((_input: RequestInfo | URL, init?: RequestInit) => {
-        const method = init?.method ?? "GET";
-        if (method === "GET") {
-          return Promise.resolve({
-            ok: true,
-            json: async () => ({ available: true }),
-          });
-        }
-        return Promise.resolve({ ok: false, status: 503 });
-      }),
-    );
-    render(<FeedbackForm />);
-    await screen.findByRole("button", { name: FEEDBACK_SUBMIT_LABEL });
+  test("Action 回 unavailable 時改顯示 mailto", async () => {
+    submitFeedback.mockResolvedValue({
+      status: "unavailable",
+      message: "送出失敗，請再試一次。",
+    });
+    render(<FeedbackForm available />);
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: FEEDBACK_SUBMIT_LABEL }).hasAttribute("disabled"),
+      ).toBe(true);
+    });
 
     fireEvent.change(screen.getByRole("textbox", { name: FEEDBACK_NICKNAME_LABEL }), {
       target: { value: "Bonbon" },
@@ -82,25 +101,13 @@ describe("FeedbackForm", () => {
     expect(link.getAttribute("href")).toBe(feedbackMailtoHref());
   });
 
-  test("成功 POST 含兩項 consent 並顯示慶祝態", async () => {
-    const fetchMock = vi.fn((_input: RequestInfo | URL, init?: RequestInit) => {
-      const method = init?.method ?? "GET";
-      if (method === "GET") {
-        return Promise.resolve({
-          ok: true,
-          json: async () => ({ available: true }),
-        });
-      }
-      return Promise.resolve({
-        ok: true,
-        status: 201,
-        json: async () => ({ ok: true }),
-      });
+  test("成功後表單仍在、欄位清空、status 讀成功句", async () => {
+    render(<FeedbackForm available />);
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: FEEDBACK_SUBMIT_LABEL }).hasAttribute("disabled"),
+      ).toBe(true);
     });
-    vi.stubGlobal("fetch", fetchMock);
-
-    render(<FeedbackForm />);
-    await screen.findByRole("button", { name: FEEDBACK_SUBMIT_LABEL });
 
     fireEvent.change(screen.getByRole("textbox", { name: FEEDBACK_NICKNAME_LABEL }), {
       target: { value: "Bonbon" },
@@ -116,21 +123,16 @@ describe("FeedbackForm", () => {
     fireEvent.click(screen.getByRole("button", { name: FEEDBACK_SUBMIT_LABEL }));
 
     await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledWith(
-        "/api/feedback",
-        expect.objectContaining({
-          method: "POST",
-          body: JSON.stringify({
-            nickname: "Bonbon",
-            email: "parent@example.com",
-            message: "謝謝馬米",
-            parentConsent: true,
-            publishConsent: true,
-          }),
-        }),
-      );
+      expect(submitFeedback).toHaveBeenCalled();
     });
 
     expect((await screen.findByRole("status")).textContent).toBe(FEEDBACK_SUCCESS);
+    await waitFor(() => {
+      expect(
+        (screen.getByRole("textbox", { name: FEEDBACK_NICKNAME_LABEL }) as HTMLInputElement)
+          .value,
+      ).toBe("");
+    });
+    expect(screen.getByRole("button", { name: FEEDBACK_SUBMIT_LABEL })).toBeTruthy();
   });
 });

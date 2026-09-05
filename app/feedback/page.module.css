@@ -81,23 +81,18 @@
   min-width: 0;
 }
 
-.inviteLines {
-  margin: 0;
-  display: grid;
-  gap: 2px;
-}
-
-.inviteLine {
+.inviteChild {
   margin: 0;
   font-size: var(--fs-body);
-  line-height: 1.55;
+  line-height: 1.7;
   color: var(--ink);
 }
 
-.inviteHint {
+.inviteParent,
+.inviteReview {
   margin: var(--space-3) 0 0;
   font-size: var(--fs-label);
-  line-height: 1.55;
+  line-height: 1.65;
   color: var(--ink-soft);
 }
 

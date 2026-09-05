@@ -28,4 +28,14 @@ describe("FeedbackWall.module.css", () => {
     expect(css).toMatch(/\.emptyCta\s*\{[\s\S]*?min-height:\s*44px/);
     expect(css).toMatch(/\.message\s*\{[\s\S]*?overflow-wrap:\s*anywhere/);
   });
+
+  it("牆骨架只動 opacity，且受 reduced-motion 預設關閉", () => {
+    expect(css).toMatch(/\.skeleton\s*\{[\s\S]*?opacity:\s*0\.7/);
+    expect(css).toMatch(
+      /@media \(prefers-reduced-motion: no-preference\)\s*\{[\s\S]*?\.skeleton\s*\{[\s\S]*?animation:/,
+    );
+    const pulse = css.match(/@keyframes wallPulse\s*\{[\s\S]*?\n\}/);
+    expect(pulse?.[0]).toMatch(/opacity:/);
+    expect(pulse?.[0]).not.toMatch(/width:|height:|margin:|padding:/);
+  });
 });

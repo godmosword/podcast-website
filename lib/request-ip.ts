@@ -4,6 +4,10 @@ import { ipAddress } from "@vercel/functions";
  * Use Vercel's trusted x-real-ip value in production. The x-forwarded-for
  * fallback exists only for local/test requests, where no Vercel proxy exists.
  */
+export function requestIpFromHeaders(headerList: Headers): string {
+  return requestIp(new Request("https://placeholder.local/", { headers: headerList }));
+}
+
 export function requestIp(request: Request): string {
   const trustedIp = ipAddress(request)?.trim();
   if (trustedIp) return trustedIp;

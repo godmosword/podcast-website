@@ -1,16 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useId, useState, type FormEvent } from "react";
+import { useActionState, useEffect, useId, useState } from "react";
+import { submitFeedback } from "@/app/feedback/actions";
+import {
+  FEEDBACK_ACTION_IDLE,
+  FEEDBACK_HONEYPOT_FIELD,
+  FEEDBACK_STARTED_AT_FIELD,
+} from "@/lib/feedback-action";
 import { feedbackMailtoHref } from "@/lib/contact";
 import {
   FEEDBACK_CHAR_REMAINING,
   FEEDBACK_EMAIL_HINT,
   FEEDBACK_EMAIL_LABEL,
-  FEEDBACK_ERROR,
-  FEEDBACK_LOADING_LABEL,
   FEEDBACK_MAILTO_LEAD,
   FEEDBACK_MAILTO_LINK,
+  FEEDBACK_MESSAGE_FIELD_ID,
   FEEDBACK_MESSAGE_HINT,
   FEEDBACK_MESSAGE_LABEL,
   FEEDBACK_NICKNAME_LABEL,
@@ -18,121 +23,53 @@ import {
   FEEDBACK_PARENT_CONSENT_BEFORE,
   FEEDBACK_PARENT_CONSENT_LINK,
   FEEDBACK_PUBLISH_CONSENT,
-  FEEDBACK_RATE_LIMITED,
   FEEDBACK_SUBMIT_DISABLED_HINT,
   FEEDBACK_SUBMIT_LABEL,
-  FEEDBACK_SUCCESS,
-  FEEDBACK_VALIDATION_ERROR,
 } from "@/lib/feedback-copy";
 import { FEEDBACK_MESSAGE_MAX } from "@/lib/feedback-schema";
 import styles from "./FeedbackForm.module.css";
 
-export const FEEDBACK_MESSAGE_FIELD_ID = "feedback-message";
+type Props = {
+  available: boolean;
+};
 
-type FormState = "loading" | "form" | "success" | "error" | "unavailable";
-
-export default function FeedbackForm() {
+export default function FeedbackForm({ available }: Props) {
   const nicknameId = useId();
   const emailId = useId();
   const messageId = FEEDBACK_MESSAGE_FIELD_ID;
   const parentConsentId = useId();
   const publishConsentId = useId();
+  const honeypotId = useId();
 
-  const [state, setState] = useState<FormState>("loading");
+  const [state, formAction, pending] = useActionState(submitFeedback, FEEDBACK_ACTION_IDLE);
   const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [parentConsent, setParentConsent] = useState(false);
   const [publishConsent, setPublishConsent] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [errorCopy, setErrorCopy] = useState(FEEDBACK_ERROR);
+  const [startedAt, setStartedAt] = useState("");
+  const [hydrated, setHydrated] = useState(false);
 
   const remaining = FEEDBACK_MESSAGE_MAX - message.length;
   const bothConsented = parentConsent && publishConsent;
+  const showMailto = !available || state.status === "unavailable";
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function probe() {
-      try {
-        const res = await fetch("/api/feedback", { method: "GET" });
-        if (!res.ok) throw new Error("probe failed");
-        const data = (await res.json()) as { available?: boolean };
-        if (!cancelled) {
-          setState(data.available ? "form" : "unavailable");
-        }
-      } catch {
-        if (!cancelled) setState("unavailable");
-      }
-    }
-
-    void probe();
-    return () => {
-      cancelled = true;
-    };
+    setHydrated(true);
+    setStartedAt(String(Date.now()));
   }, []);
 
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    if (!bothConsented) return;
+  useEffect(() => {
+    if (state.status !== "success") return;
+    setNickname("");
+    setEmail("");
+    setMessage("");
+    setParentConsent(false);
+    setPublishConsent(false);
+    setStartedAt(String(Date.now()));
+  }, [state]);
 
-    setSubmitting(true);
-    setState("form");
-    setErrorCopy(FEEDBACK_ERROR);
-
-    try {
-      const res = await fetch("/api/feedback", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nickname,
-          email,
-          message,
-          parentConsent: true,
-          publishConsent: true,
-        }),
-      });
-
-      if (res.status === 503) {
-        setState("unavailable");
-        return;
-      }
-
-      if (res.status === 429) {
-        setErrorCopy(FEEDBACK_RATE_LIMITED);
-        setState("error");
-        return;
-      }
-
-      if (res.status === 400) {
-        setErrorCopy(FEEDBACK_VALIDATION_ERROR);
-        setState("error");
-        return;
-      }
-
-      if (res.status !== 201) {
-        setState("error");
-        return;
-      }
-
-      setMessage("");
-      setState("success");
-    } catch {
-      setState("error");
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  if (state === "loading") {
-    return (
-      <p className={styles.loading} role="status">
-        {FEEDBACK_LOADING_LABEL}
-      </p>
-    );
-  }
-
-  if (state === "unavailable") {
+  if (showMailto) {
     return (
       <p className={styles.unavailable}>
         {FEEDBACK_MAILTO_LEAD}{" "}
@@ -141,16 +78,28 @@ export default function FeedbackForm() {
     );
   }
 
-  if (state === "success") {
-    return (
-      <p className={styles.success} role="status">
-        {FEEDBACK_SUCCESS}
-      </p>
-    );
-  }
+  const submitDisabled = pending || (hydrated && !bothConsented);
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit} noValidate>
+    <form className={styles.form} action={formAction}>
+      <div className={styles.honeypot} aria-hidden="true">
+        <label htmlFor={honeypotId}>網站</label>
+        <input
+          id={honeypotId}
+          name={FEEDBACK_HONEYPOT_FIELD}
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </div>
+      <input type="hidden" name={FEEDBACK_STARTED_AT_FIELD} value={startedAt} />
+
+      {state.status === "success" ? (
+        <p className={styles.success} role="status" aria-live="polite">
+          {state.message}
+        </p>
+      ) : null}
+
       <label className={styles.label} htmlFor={nicknameId}>
         {FEEDBACK_NICKNAME_LABEL}
       </label>
@@ -158,10 +107,11 @@ export default function FeedbackForm() {
         id={nicknameId}
         className={styles.input}
         type="text"
+        name="nickname"
         autoComplete="nickname"
         value={nickname}
         onChange={(e) => setNickname(e.target.value)}
-        disabled={submitting}
+        disabled={pending}
         required
         maxLength={40}
       />
@@ -173,11 +123,12 @@ export default function FeedbackForm() {
         id={emailId}
         className={styles.input}
         type="email"
+        name="email"
         inputMode="email"
         autoComplete="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        disabled={submitting}
+        disabled={pending}
         required
       />
       <p className={styles.hint}>{FEEDBACK_EMAIL_HINT}</p>
@@ -188,9 +139,10 @@ export default function FeedbackForm() {
       <textarea
         id={messageId}
         className={styles.textarea}
+        name="message"
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        disabled={submitting}
+        disabled={pending}
         required
         maxLength={FEEDBACK_MESSAGE_MAX}
       />
@@ -209,9 +161,11 @@ export default function FeedbackForm() {
           id={parentConsentId}
           className={styles.consentCheckbox}
           type="checkbox"
+          name="parentConsent"
+          value="on"
           checked={parentConsent}
           onChange={(e) => setParentConsent(e.target.checked)}
-          disabled={submitting}
+          disabled={pending}
           required
         />
         <span>
@@ -228,9 +182,11 @@ export default function FeedbackForm() {
           id={publishConsentId}
           className={styles.consentCheckbox}
           type="checkbox"
+          name="publishConsent"
+          value="on"
           checked={publishConsent}
           onChange={(e) => setPublishConsent(e.target.checked)}
-          disabled={submitting}
+          disabled={pending}
           required
         />
         <span>{FEEDBACK_PUBLISH_CONSENT}</span>
@@ -239,8 +195,8 @@ export default function FeedbackForm() {
       <button
         className={styles.submit}
         type="submit"
-        disabled={submitting || !bothConsented}
-        aria-busy={submitting || undefined}
+        disabled={submitDisabled}
+        aria-busy={pending || undefined}
       >
         {FEEDBACK_SUBMIT_LABEL}
       </button>
@@ -249,9 +205,9 @@ export default function FeedbackForm() {
         <p className={styles.disabledHint}>{FEEDBACK_SUBMIT_DISABLED_HINT}</p>
       ) : null}
 
-      {state === "error" ? (
+      {state.status === "error" ? (
         <p className={styles.error} role="alert">
-          {errorCopy}
+          {state.message}
         </p>
       ) : null}
     </form>

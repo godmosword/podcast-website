@@ -1,12 +1,8 @@
 import { NextResponse } from "next/server";
 import { isFeedbackDbConfigured, type FeedbackPublicDto } from "@/lib/feedback-db";
-import {
-  checkFeedbackEmailRateLimit,
-  checkFeedbackIpRateLimit,
-} from "@/lib/feedback-rate-limit";
-import { createFeedbackMessage, listPublishedFeedback } from "@/lib/feedback-query";
+import { listPublishedFeedback } from "@/lib/feedback-query";
+import { persistFeedbackSubmission } from "@/lib/feedback-submit";
 import { feedbackBodySchema } from "@/lib/feedback-schema";
-import { LEGAL_POLICY_VERSION } from "@/lib/legal-policy";
 import { requestIp } from "@/lib/request-ip";
 
 // 公開牆是使用者投稿內容，且審核狀態隨時變動：一律不快取。
@@ -69,22 +65,29 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
 
   // IP 先擋洗版，再用 sha256(email) 擋換 IP 重送；production 無 Upstash 一律 fail closed。
-  const ipRate = await checkFeedbackIpRateLimit(requestIp(request));
-  if (!ipRate.ok) return rateLimitResponse(ipRate);
+  const persisted = await persistFeedbackSubmission({
+    nickname: parsed.data.nickname,
+    email: parsed.data.email,
+    message: parsed.data.message,
+    ip: requestIp(request),
+  });
 
-  const emailRate = await checkFeedbackEmailRateLimit(parsed.data.email);
-  if (!emailRate.ok) return rateLimitResponse(emailRate);
-
-  try {
-    await createFeedbackMessage({
-      nickname: parsed.data.nickname,
-      email: parsed.data.email,
-      message: parsed.data.message,
-      // 同意版本與時間由 server 寫入，不採信 client。
-      consentVersion: LEGAL_POLICY_VERSION,
-      consentedAt: new Date(),
-    });
-  } catch {
+  if (!persisted.ok) {
+    if (persisted.reason === "unavailable") {
+      return NextResponse.json(
+        { ok: false, reason: "db_unavailable" },
+        { status: 503, headers: NO_STORE },
+      );
+    }
+    if (persisted.reason === "rate_limited") {
+      return NextResponse.json(
+        { ok: false, reason: "rate_limited", retryAfterSec: persisted.retryAfterSec },
+        {
+          status: 429,
+          headers: { ...NO_STORE, "Retry-After": String(persisted.retryAfterSec) },
+        },
+      );
+    }
     return NextResponse.json(
       { ok: false, reason: "db_error" },
       { status: 500, headers: NO_STORE },
@@ -93,26 +96,4 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   // 先審後發：回 201 只代表收件成功，尚未上牆。
   return NextResponse.json({ ok: true }, { status: 201, headers: NO_STORE });
-}
-
-type RateLimitFailure = Exclude<
-  Awaited<ReturnType<typeof checkFeedbackIpRateLimit>>,
-  { ok: true }
->;
-
-function rateLimitResponse(rate: RateLimitFailure): NextResponse {
-  if (rate.reason === "unavailable") {
-    return NextResponse.json(
-      { ok: false, reason: "db_unavailable" },
-      { status: 503, headers: NO_STORE },
-    );
-  }
-
-  return NextResponse.json(
-    { ok: false, reason: "rate_limited", retryAfterSec: rate.retryAfterSec },
-    {
-      status: 429,
-      headers: { ...NO_STORE, "Retry-After": String(rate.retryAfterSec) },
-    },
-  );
 }

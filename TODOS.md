@@ -35,6 +35,7 @@
 | polish(about): `/about` 拿掉這是什麼／怎麼使用／用車種找故事，只留馬米原稿 | `490fe1c` |
 | feat(feedback): 站內留言牆 `/feedback`＋密語後台 `/studio/feedback`（先審後發、信箱不公開） | `806915c` |
 | feat(stories): 桌機找故事縮圖網格＋縮圖／完整切換（≥768 兩欄、≥1280 三欄） | `c9a50fd` |
+| polish(feedback): 表單 SSR／Server Action＋牆滿 3 則才列、示範文案 | 見本 commit |
 
 ### 本輪已完成（2026-09-02）
 

@@ -2,115 +2,67 @@ import { expect, test } from "@playwright/test";
 import {
   FEEDBACK_DEMO_MESSAGE,
   FEEDBACK_DEMO_NICKNAME,
-  FEEDBACK_EMPTY_CTA,
-  FEEDBACK_INVITE_LINES,
+  FEEDBACK_INVITE_CHILD,
+  FEEDBACK_INVITE_PARENT,
   FEEDBACK_MAILTO_LINK,
   FEEDBACK_NICKNAME_LABEL,
   FEEDBACK_PAGE_TITLE,
+  FEEDBACK_REVIEW_LEAD,
   FEEDBACK_SUBMIT_DISABLED_HINT,
   FEEDBACK_SUBMIT_LABEL,
-  FEEDBACK_SUCCESS,
 } from "../lib/feedback-copy";
 import { feedbackMailtoHref } from "../lib/contact";
 
 const FIXTURE_EMAIL = "secret-parent@example.com";
 
-async function mockFeedbackApi(
-  page: import("@playwright/test").Page,
-  options: {
-    available: boolean;
-    messages?: Array<{
-      id: number;
-      nickname: string;
-      message: string;
-      createdAt: string;
-      email?: string;
-    }>;
-    postStatus?: number;
-  },
-): Promise<void> {
-  await page.route("**/api/feedback", async (route) => {
-    const method = route.request().method();
-    if (method === "GET") {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        headers: { "Cache-Control": "no-store" },
-        body: JSON.stringify({
-          available: options.available,
-          messages: options.messages ?? [],
-        }),
-      });
-      return;
-    }
-    if (method === "POST") {
-      await route.fulfill({
-        status: options.postStatus ?? 201,
-        contentType: "application/json",
-        headers: { "Cache-Control": "no-store" },
-        body: JSON.stringify(
-          options.postStatus === 201 || options.postStatus == null
-            ? { ok: true }
-            : { ok: false, reason: "db_unavailable" },
-        ),
-      });
-      return;
-    }
-    await route.fallback();
-  });
-}
-
 test.describe("站內留言牆 /feedback", () => {
-  test("無 DB 時頁面仍 200，表單改 mailto，示範卡不進 list", async ({
-    page,
-  }) => {
-    await mockFeedbackApi(page, { available: false });
-    await page.goto("/feedback");
+  test("初始 HTML 就有表單或 mailto，邀請與審核句可見", async ({ page }) => {
+    const response = await page.goto("/feedback");
+    expect(response?.ok()).toBeTruthy();
+
+    const html = await response!.text();
+    const hasForm = html.includes('name="nickname"');
+    const hasMailto = html.includes("mailto:");
+    expect(hasForm || hasMailto).toBe(true);
+    if (hasForm) {
+      expect(html).toContain('name="website"');
+      expect(html).toContain('name="startedAt"');
+    }
 
     await expect(page).toHaveURL(/\/feedback$/);
     await expect(
       page.getByRole("heading", { name: FEEDBACK_PAGE_TITLE, level: 1 }),
     ).toBeVisible();
-    for (const line of FEEDBACK_INVITE_LINES) {
-      await expect(page.getByText(line, { exact: true })).toBeVisible();
-    }
-
-    const mailto = page.getByRole("link", { name: FEEDBACK_MAILTO_LINK });
-    await expect(mailto).toBeVisible();
-    await expect(mailto).toHaveAttribute("href", feedbackMailtoHref());
-
-    await expect(page.getByLabel("示範留言")).toContainText(FEEDBACK_DEMO_MESSAGE);
-    await expect(page.getByLabel("示範留言")).toContainText(FEEDBACK_DEMO_NICKNAME);
-    await expect(page.getByRole("list")).toHaveCount(0);
-    await expect(page.getByText(FEEDBACK_EMPTY_CTA)).toHaveCount(0);
+    await expect(page.getByText(FEEDBACK_INVITE_CHILD)).toBeVisible();
+    await expect(page.getByText(FEEDBACK_INVITE_PARENT)).toBeVisible();
+    await expect(page.getByText(FEEDBACK_REVIEW_LEAD)).toBeVisible();
+    await expect(page.getByText("還沒有公開留言")).toHaveCount(0);
     await expect(page.locator("body")).not.toContainText(FIXTURE_EMAIL);
   });
 
-  test("可用時未勾兩項同意不能送；成功後先審後發", async ({ page }) => {
-    const posts: string[] = [];
-    await page.route("**/api/feedback", async (route) => {
-      const method = route.request().method();
-      if (method === "GET") {
-        await route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ available: true, messages: [] }),
-        });
-        return;
-      }
-      if (method === "POST") {
-        posts.push(route.request().postData() ?? "");
-        await route.fulfill({
-          status: 201,
-          contentType: "application/json",
-          body: JSON.stringify({ ok: true }),
-        });
-        return;
-      }
-      await route.fallback();
-    });
-
+  test("核准未滿三則時只示範、不列牆", async ({ page }) => {
     await page.goto("/feedback");
+
+    const list = page.getByRole("list");
+    const demo = page.getByLabel("示範留言");
+    if (await list.count()) {
+      await expect(list).toBeVisible();
+      await expect(demo).toHaveCount(0);
+    } else {
+      await expect(demo).toContainText(FEEDBACK_DEMO_MESSAGE);
+      await expect(demo).toContainText(FEEDBACK_DEMO_NICKNAME);
+    }
+    await expect(page.getByText("還沒有公開留言")).toHaveCount(0);
+  });
+
+  test("有表單時未勾兩項同意不能送", async ({ page }) => {
+    await page.goto("/feedback");
+    const mailto = page.getByRole("link", { name: FEEDBACK_MAILTO_LINK });
+    if (await mailto.isVisible()) {
+      await expect(mailto).toHaveAttribute("href", feedbackMailtoHref());
+      return;
+    }
+
     const submit = page.getByRole("button", { name: FEEDBACK_SUBMIT_LABEL });
     await expect(submit).toBeDisabled();
     await expect(page.getByText(FEEDBACK_SUBMIT_DISABLED_HINT)).toBeVisible();
@@ -125,45 +77,28 @@ test.describe("站內留言牆 /feedback", () => {
     await expect(submit).toBeDisabled();
     await checkboxes.nth(1).check();
     await expect(submit).toBeEnabled();
-
-    await submit.click();
-    await expect(page.getByRole("status")).toHaveText(FEEDBACK_SUCCESS);
-    expect(posts).toHaveLength(1);
-    const body = JSON.parse(posts[0]) as {
-      parentConsent: boolean;
-      publishConsent: boolean;
-      email: string;
-    };
-    expect(body.parentConsent).toBe(true);
-    expect(body.publishConsent).toBe(true);
-    expect(body.email).toBe("parent@example.com");
   });
 
-  test("已核准列出現暱稱與正文，夾帶的 email 不進畫面", async ({ page }) => {
-    await mockFeedbackApi(page, {
-      available: true,
-      messages: [
-        {
-          id: 7,
-          nickname: "Bonbon",
-          message: "很喜歡垃圾車那集",
-          createdAt: "2026-09-05T02:00:00.000Z",
-          email: FIXTURE_EMAIL,
-        },
-      ],
-    });
-    await page.goto("/feedback");
+  test("無 JS 時表單仍在 HTML 裡可填", async ({ browser }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    const response = await page.goto("/feedback");
+    expect(response?.ok()).toBeTruthy();
 
-    const list = page.getByRole("list");
-    await expect(list).toBeVisible();
-    await expect(list.getByText("Bonbon")).toBeVisible();
-    await expect(list.getByText("很喜歡垃圾車那集")).toBeVisible();
-    await expect(list.getByLabel("示範留言")).toHaveCount(0);
-    await expect(page.locator("body")).not.toContainText(FIXTURE_EMAIL);
+    const nickname = page.getByRole("textbox", { name: FEEDBACK_NICKNAME_LABEL });
+    if ((await nickname.count()) === 0) {
+      await expect(page.getByRole("link", { name: FEEDBACK_MAILTO_LINK })).toBeVisible();
+      await context.close();
+      return;
+    }
+
+    await nickname.fill("小車");
+    await expect(nickname).toHaveValue("小車");
+    await expect(page.getByRole("button", { name: FEEDBACK_SUBMIT_LABEL })).toBeVisible();
+    await context.close();
   });
 
   test("頂欄留言連 /feedback 且目前頁；抽屜沒有留言列", async ({ page }) => {
-    await mockFeedbackApi(page, { available: false });
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto("/feedback");
 

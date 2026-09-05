@@ -365,11 +365,16 @@ for (const pageDef of VISUAL_PAGES) {
         await page.goto(pageDef.path);
         await stabilizeVisualPage(page, { theme });
         if (pageDef.id === "feedback") {
-          // 無 DATABASE_URL 時表單降級 mailto；等殼＋示範卡再截，避免 loading 抖動。
+          // 表單在初始 HTML；牆可能是示範卡或 ≥3 則列表，等殼穩定再截。
           await expect(
             page.getByRole("heading", { name: "留言給馬米", level: 1 }),
           ).toBeVisible();
-          await expect(page.getByLabel("示範留言")).toBeVisible();
+          await expect(
+            page.getByRole("heading", { name: "大家的留言", level: 2 }),
+          ).toBeVisible();
+          await expect(
+            page.getByLabel("示範留言").or(page.getByRole("list")),
+          ).toBeVisible();
         }
         const masks = volatileMasks(page, pageDef.id);
         await assertMasksResolve(masks, pageDef.id);

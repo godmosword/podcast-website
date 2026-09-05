@@ -9,16 +9,16 @@ export const FEEDBACK_PAGE_DESCRIPTION =
 
 export const FEEDBACK_EYEBROW = "給家長";
 
-export const FEEDBACK_INVITE_LINES = [
-  "嗨嗨",
-  "很謝謝你的收聽與支持",
-  "來來來",
-  "告訴我們",
-  "你最想說的話",
-  "也歡迎留言想聽的故事哦",
-] as const;
+export const FEEDBACK_INVITE_CHILD =
+  "嗨嗨，謝謝你來聽故事！告訴馬米你最想說的話，也歡迎許願下一集想聽什麼。";
 
-export const FEEDBACK_INVITE_HINT = "可以讓孩子說、爸媽幫忙打。";
+export const FEEDBACK_INVITE_PARENT = "可以讓孩子說、爸媽幫忙打字。";
+
+export const FEEDBACK_REVIEW_LEAD =
+  "留言經家長同意，且馬米看過之後，才會出現在下面的留言牆。";
+
+/** textarea id，空牆 CTA 用 hash 對準（無 JS 也能跳）。 */
+export const FEEDBACK_MESSAGE_FIELD_ID = "feedback-message";
 
 export const FEEDBACK_NICKNAME_LABEL = "名字或暱稱";
 
@@ -63,8 +63,7 @@ export const FEEDBACK_LOADING_LABEL = "正在準備留言牆…";
 
 export const FEEDBACK_WALL_HEADING = "大家的留言";
 
-export const FEEDBACK_WALL_COUNT = (count: number): string =>
-  count === 0 ? "還沒有公開留言" : `共 ${count} 則留言`;
+export const FEEDBACK_WALL_COUNT = (count: number): string => `共 ${count} 則留言`;
 
 export const FEEDBACK_DEMO_MARKER = "範例";
 
@@ -73,7 +72,10 @@ export const FEEDBACK_DEMO_NICKNAME = "馬米";
 export const FEEDBACK_DEMO_MESSAGE =
   "謝謝你來聽故事。最想說的話、想聽的故事，都歡迎跟我們說。";
 
-export const FEEDBACK_DEMO_NOTE = "這是馬米自己寫的示範，還沒有人留言。";
+export const FEEDBACK_DEMO_NOTE =
+  "上面是馬米寫的示範。你可以當第一個跟馬米說話的人。";
+
+export const FEEDBACK_TOO_FAST = "再檢查一下留言內容，然後重新送出。";
 
 export const FEEDBACK_EMPTY_CTA = "當第一個留言";
 

@@ -1,16 +1,23 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import FeedbackForm from "@/components/feedback/FeedbackForm";
 import FeedbackWall from "@/components/feedback/FeedbackWall";
+import FeedbackWallSkeleton from "@/components/feedback/FeedbackWallSkeleton";
 import SiteFooter from "@/components/SiteFooter";
 import {
   FEEDBACK_EYEBROW,
-  FEEDBACK_INVITE_HINT,
-  FEEDBACK_INVITE_LINES,
+  FEEDBACK_INVITE_CHILD,
+  FEEDBACK_INVITE_PARENT,
   FEEDBACK_PAGE_DESCRIPTION,
   FEEDBACK_PAGE_TITLE,
+  FEEDBACK_REVIEW_LEAD,
 } from "@/lib/feedback-copy";
+import { isFeedbackDbConfigured } from "@/lib/feedback-db";
 import styles from "./page.module.css";
+
+// 公開牆是投稿內容，審核狀態隨時變；與 GET /api/feedback 一樣不快取。
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: FEEDBACK_PAGE_TITLE,
@@ -25,6 +32,8 @@ export const metadata: Metadata = {
 };
 
 export default function FeedbackPage() {
+  const available = isFeedbackDbConfigured();
+
   return (
     <main className={styles.main}>
       <Link href="/" className={styles.back}>
@@ -47,23 +56,20 @@ export default function FeedbackPage() {
           aria-hidden
         />
         <div className={styles.inviteBody}>
-          <div className={styles.inviteLines}>
-            {FEEDBACK_INVITE_LINES.map((line) => (
-              <p key={line} className={styles.inviteLine}>
-                {line}
-              </p>
-            ))}
-          </div>
-          <p className={styles.inviteHint}>{FEEDBACK_INVITE_HINT}</p>
+          <p className={styles.inviteChild}>{FEEDBACK_INVITE_CHILD}</p>
+          <p className={styles.inviteParent}>{FEEDBACK_INVITE_PARENT}</p>
+          <p className={styles.inviteReview}>{FEEDBACK_REVIEW_LEAD}</p>
         </div>
       </section>
 
       <section className={styles.formSection} aria-label="留言表單">
-        <FeedbackForm />
+        <FeedbackForm available={available} />
       </section>
 
       <section className={styles.wallSection} aria-label="公開留言牆">
-        <FeedbackWall />
+        <Suspense fallback={<FeedbackWallSkeleton />}>
+          <FeedbackWall available={available} />
+        </Suspense>
       </section>
 
       <SiteFooter compact />
