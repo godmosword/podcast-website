@@ -368,6 +368,12 @@
  * 為什麼不畫底線：inset 底線會被 `--radius-pill`(999px) 裁切，沿 22px 圓角往兩側
  * 爬升成碗狀假邊框（使用者回報的「首頁的邊框」）。產品決定改為**不畫任何線**，
  * active 只以字重 800 編碼。a11y 仍成立——DESIGN 禁的是「色彩為唯一編碼」，字重非色彩。 */
+/* 頂欄站內「留言」active：用底色塊，禁止 inset 底線沿 pill 爬成碗狀假邊框。
+ * 中文不得只靠 font-weight（huninn 單字重＋font-synthesis-weight: none）。 */
+.actions .navLink[aria-current="page"] {
+  box-shadow: none;
+}
+
 .actions .homeAction[aria-current="page"] {
   background: transparent;
   font-weight: 800;

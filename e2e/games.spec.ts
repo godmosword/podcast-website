@@ -108,7 +108,7 @@ test.describe("遊樂園 hub", () => {
     await expect(page.getByRole("navigation", { name: "去玩" })).toHaveCount(0);
     const hubFeedback = page.getByRole("link", { name: "留言" });
     await expect(hubFeedback).toBeVisible();
-    await expect(hubFeedback).toHaveAttribute("href", /^(mailto:|https?:)/);
+    await expect(hubFeedback).toHaveAttribute("href", "/feedback");
     // 漢堡是家長項的唯一入口，必須可開
     const menuBtn = page.getByRole("button", { name: "開啟選單" });
     await expect(menuBtn).toBeVisible();

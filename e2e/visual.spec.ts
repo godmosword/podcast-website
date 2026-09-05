@@ -45,6 +45,7 @@ const VISUAL_PAGES = [
   { id: "characters", name: "角色圖鑑", path: "/characters" },
   { id: "about", name: "關於", path: "/about" },
   { id: "subscribe", name: "訂閱", path: "/subscribe" },
+  { id: "feedback", name: "留言", path: "/feedback" },
   // T0.2：play-map 是 --cta-warm token 的消費者、D3 語彙來源、D5 拆檔對象，
   // 卻一直不在視覺回歸內——那是動它之前最需要的安全網。
   {
@@ -173,6 +174,7 @@ function volatileMasks(page: Page, pageId: VisualPageId): Locator[] {
     case "adventures":
     case "about":
     case "subscribe":
+    case "feedback":
     case "place":
       // 有易變內容（「資料於 2026 年 8 月核對」、附近景點的距離與排序），
       // 但同樣依 MASK_DOCTRINE 不遮：那些是該被看見的內容變更。
@@ -362,6 +364,13 @@ for (const pageDef of VISUAL_PAGES) {
         });
         await page.goto(pageDef.path);
         await stabilizeVisualPage(page, { theme });
+        if (pageDef.id === "feedback") {
+          // 無 DATABASE_URL 時表單降級 mailto；等殼＋示範卡再截，避免 loading 抖動。
+          await expect(
+            page.getByRole("heading", { name: "留言給馬米", level: 1 }),
+          ).toBeVisible();
+          await expect(page.getByLabel("示範留言")).toBeVisible();
+        }
         const masks = volatileMasks(page, pageDef.id);
         await assertMasksResolve(masks, pageDef.id);
         await expect(page).toHaveScreenshot(snapshotName, {
@@ -451,6 +460,20 @@ for (const viewport of NAV_BREAKPOINT_VIEWPORTS) {
 }
 
 /** 2026-09-05 產品覆寫：內頁左下 KidsPlayDock 已刪，clip baseline 一併移除。 */
+test("visual：留言頁頂欄 active 1280 light", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto("/feedback");
+  await stabilizeVisualPage(page, { theme: "light" });
+  await expect(
+    page.getByRole("link", { name: "留言", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
+  const header = page.locator("header").first();
+  await expect(header).toHaveScreenshot("site-nav-feedback-1280-light.png", {
+    animations: "disabled",
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
 test("visual：內頁不顯示 KidsPlayDock", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/stories");

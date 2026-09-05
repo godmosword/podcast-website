@@ -31,6 +31,7 @@ export default function LegalPage() {
           <a href="#copyright">智慧財產權</a>
           <a href="#takedown">侵權通知</a>
           <a href="#privacy">隱私說明</a>
+          <a href="#guestbook">公開留言牆</a>
           <a href="#children">兒少與家長</a>
           <a href="#contact">聯絡</a>
         </nav>
@@ -110,7 +111,7 @@ export default function LegalPage() {
           <h2 className={styles.heading}>許願、建議與投稿內容</h2>
           <ul className={styles.list}>
             <li>
-              樂園地圖的許願與故事建議僅供節目製作、需求統計與開幕通知；不會直接公開留言，也不保證採用、回覆或提供報酬。
+              樂園地圖的許願與故事建議僅供節目製作、需求統計與開幕通知；<strong>不會</strong>直接公開，也不保證採用、回覆或提供報酬。這與站內「留言」牆不同，見下方「公開留言牆」。
             </li>
             <li>
               請只提交您有權提供的文字，勿貼上孩子姓名、電話、地址、學校、照片、聲音或其他可識別資料，也勿貼上第三方受著作權保護的完整作品。
@@ -180,6 +181,24 @@ export default function LegalPage() {
           </ul>
         </section>
 
+        <section className={styles.section} id="guestbook">
+          <h2 className={styles.heading}>公開留言牆</h2>
+          <ul className={styles.list}>
+            <li>
+              頂欄「留言」連到站內留言牆。送出前須由<strong>家長或照顧者</strong>勾選同意，並確認理解：審核通過後，<strong>暱稱與正文可能公開</strong>；信箱不會公開。
+            </li>
+            <li>
+              請勿在暱稱或正文留下孩子的真名、學校、班級、電話、地址或其他可識別資料。我們可能拒絕、隱藏或刪除含有疑似個資或不適宜內容的留言。
+            </li>
+            <li>
+              送出留言即授權本站在審核後於本網站公開顯示該則暱稱與正文，並用於節目製作參考與匿名則數統計。不保證採用為故事、回覆每一則，或提供報酬。
+            </li>
+            <li>
+              製作端可隱藏（仍保留統計）或刪除（不再保留原文）任何留言。家長可用原先留下的信箱來信要求撤回。
+            </li>
+          </ul>
+        </section>
+
         <section className={styles.section} id="privacy">
           <h2 className={styles.heading}>資料收集與隱私</h2>
           <ul className={styles.list}>
@@ -198,8 +217,11 @@ export default function LegalPage() {
               <strong>新集 Email 名單</strong>：若您使用訂閱表單，本站會先將 Email 暫存為待確認狀態，並寄出一次性確認連結，<strong>只用來驗證信箱</strong>。完成點擊後才會加入名單。確認連結 24 小時後失效。目前尚未寄發新集上線通知或電子報；開通後才會使用這份名單。未確認的資料不會用來寄信。
             </li>
             <li>
+              <strong>公開留言牆</strong>：若您使用站內「留言」頁（<Link href="/feedback">/feedback</Link>），本站會收集暱稱、信箱與留言正文。信箱<strong>只供</strong>節目製作聯絡、去重與防濫用，<strong>不會</strong>顯示在公開頁面。暱稱與正文須經人工審核後才可能公開；未核准、已隱藏或已刪除的內容不會出現在留言牆。信箱<strong>不做</strong>訂閱確認信驗證。
+            </li>
+            <li>
               <strong>保留與刪除</strong>：許願資料保留至通知目的完成（對應園區上線後 90
-              天內刪除）。家長可隨時來信{" "}
+              天內刪除）。公開留言牆的已核准留言會保留至您要求刪除或我們依審核政策撤下；已刪除列不再保留原文。家長可隨時來信{" "}
               <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>{" "}
               要求查詢、更正或刪除所提供的資料，我們將於收到請求後 30 天內處理。
             </li>
@@ -251,7 +273,7 @@ export default function LegalPage() {
               本站提供親子共讀內容，但不建立兒童帳號、不要求孩子直接提供個人資料，也不在播放器中放置個人化廣告追蹤。
             </li>
             <li>
-              許願與 Email 訂閱表單只接受家長或照顧者勾選同意；請由成人代為填寫，並避免在自由文字中留下孩子的個資。
+              許願、Email 訂閱與公開留言牆只接受家長或照顧者勾選同意；請由成人代為填寫，並避免在自由文字中留下孩子的個資。
             </li>
             <li>
               若家長發現孩子的資料被提交，或希望查詢、更正、刪除相關資料，請寄信至{" "}

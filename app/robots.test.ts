@@ -22,6 +22,10 @@ describe("robots", () => {
     }
 
     expect(rules).toContainEqual({ userAgent: "*", allow: "/" });
+    expect(rules).toContainEqual({
+      userAgent: "*",
+      disallow: ["/studio/feedback", "/api/studio/"],
+    });
     expect(data.sitemap).toBe("https://example.com/sitemap.xml");
 
     const policy = verifyRobotsPolicy(data.rules);

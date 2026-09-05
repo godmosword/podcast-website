@@ -16,6 +16,7 @@ const PUBLIC_PAGES = [
   { name: "親子指南", path: "/for-parents" },
   { name: "家庭儀表板", path: "/for-parents/dashboard" },
   { name: "訂閱", path: "/subscribe" },
+  { name: "留言牆", path: "/feedback" },
   { name: "法律頁", path: "/legal" },
   { name: "故事詳情", path: "/story/ep-3" },
   { name: "故事播放", path: "/story/ep-3/play" },

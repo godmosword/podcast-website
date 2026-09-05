@@ -33,6 +33,7 @@ describe("P3 Playwright E2E CI 契約", () => {
       "e2e/universe-map.spec.ts",
       "e2e/games.spec.ts",
       "e2e/subscribe.spec.ts",
+      "e2e/feedback.spec.ts",
       "e2e/child-ux.spec.ts",
       "e2e/parent-gate.spec.ts",
     ]) {

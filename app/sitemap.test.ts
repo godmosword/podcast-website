@@ -21,6 +21,8 @@ describe("sitemap freshness", () => {
     expect(urls).toContain("https://example.com/for-parents");
     expect(urls).toContain("https://example.com/for-parents/play-map");
     expect(urls).toContain("https://example.com/subscribe");
+    expect(urls).toContain("https://example.com/feedback");
+    expect(urls).not.toContain("https://example.com/studio/feedback");
     expect(urls).toContain("https://example.com/characters");
     for (const story of getStories()) {
       expect(urls).toContain(`https://example.com/story/${story.slug}`);

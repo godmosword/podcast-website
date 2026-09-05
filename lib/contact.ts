@@ -15,13 +15,16 @@ export function contactHref(): string {
 
 /**
  * 頂欄「留言」入口（`SiteNavBar`）。與 `contactHref()` 刻意分開：
- * 「聯絡我們」是頁尾的一般聯絡管道，「留言」是給節目的回饋，兩者可指向不同表單。
- * 未設定 `NEXT_PUBLIC_FEEDBACK_FORM_URL` 時降級為 mailto——**恆有目的地**，
- * 不像 `SiteHeader` 的圓鈕那樣整顆消失（頂欄三入口是版面契約，不可被 env 掀桌）。
+ * 「聯絡我們」是頁尾的一般聯絡管道，「留言」是站內 `/feedback` 留言牆。
+ * **恆有目的地**（頁面本身），不再被 `NEXT_PUBLIC_FEEDBACK_FORM_URL` 覆寫。
+ * SiteHeader「留言給我」圓鈕仍走該 env，未設定就不渲染。
  */
 export function feedbackHref(): string {
-  const formUrl = process.env.NEXT_PUBLIC_FEEDBACK_FORM_URL?.trim();
-  if (formUrl) return formUrl;
+  return "/feedback";
+}
+
+/** 資料庫未設定時，公開表單改走 mailto 的降級連結。 */
+export function feedbackMailtoHref(): string {
   return `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("留言給車車遊樂園")}`;
 }
 

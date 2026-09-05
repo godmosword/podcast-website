@@ -93,13 +93,26 @@ export function isInternalPathActive(
   );
 }
 
-/** 頂欄「留言」：與抽屜外連分支同一套規則（非 `/` 不走 next/link）。 */
+/** 頂欄「留言」：站內 `/feedback` 走 next/link＋aria-current。 */
 function renderFeedbackLink(
   href: string,
   label: string,
   className: string,
   onClose: () => void,
+  current: boolean,
 ) {
+  if (href.startsWith("/")) {
+    return (
+      <Link
+        href={href}
+        className={className}
+        aria-current={current ? "page" : undefined}
+        onClick={onClose}
+      >
+        {label}
+      </Link>
+    );
+  }
   const external = isContactExternal(href);
   return (
     <a
@@ -271,6 +284,7 @@ export default function SiteNavBar() {
                 feedbackItem.label,
                 styles.navLink,
                 closeAll,
+                isInternalPathActive(pathname, feedbackItem.href, internalHrefs),
               )
             : null}
         </div>

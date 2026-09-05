@@ -1,0 +1,49 @@
+/*
+ * 工具頁豁免：後台審核要並排看正文＋信箱＋按鈕，
+ * 內容欄放寬到 1100px（DESIGN 640px 是閱讀頁規範，不含 /studio 工具頁）。
+ */
+.main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: calc(20px + var(--safe-top)) calc(20px + var(--safe-right))
+    calc(40px + var(--safe-bottom)) calc(20px + var(--safe-left));
+}
+
+.back {
+  display: inline-block;
+  min-height: 44px;
+  line-height: 44px;
+  font-size: var(--fs-control);
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+
+.title {
+  font-size: var(--fs-h1);
+  font-weight: 700;
+  margin: var(--space-2) 0 8px;
+}
+
+.subtitle {
+  margin: 0 0 var(--space-8);
+  font-size: var(--fs-control);
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.notice {
+  margin: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-sm);
+  background: var(--card-2);
+  font-size: var(--fs-control);
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.noticeCode {
+  font-size: var(--fs-meta);
+  overflow-wrap: anywhere;
+}

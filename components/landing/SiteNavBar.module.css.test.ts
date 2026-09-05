@@ -57,6 +57,13 @@ describe("SiteNavBar.module.css 漢堡與抽屜", () => {
     );
   });
 
+  it("頂欄 .navLink 目前頁必須顯式 box-shadow: none（留言站內化後會觸發）", () => {
+    const start = css.indexOf('.actions .navLink[aria-current="page"] {');
+    expect(start).toBeGreaterThan(-1);
+    const block = css.slice(start, css.indexOf("}", start));
+    expect(block).toMatch(/box-shadow:\s*none/);
+  });
+
   it("homeAction 目前頁必須顯式 box-shadow: none（不可只刪該行）", () => {
     // `.navLink[aria-current="page"]`(0,2,1) 自己帶 inset 底線；若 homeAction 這條
     // 只是「沒寫 box-shadow」，低權重規則會接手，弧形假邊框原封不動留著。

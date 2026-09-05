@@ -63,14 +63,14 @@ describe("SiteNavBar", () => {
     const view = await renderNavBar();
 
     const actions = view.getByRole("group", { name: "常用" });
-    const feedback = actions.querySelector('a[href^="mailto:"]');
+    const feedback = actions.querySelector('a[href="/feedback"]');
     expect(feedback).toBeTruthy();
     expect(feedback?.textContent).toContain("留言");
     expect(feedback?.getAttribute("target")).toBeNull();
     expect(feedback?.getAttribute("rel")).toBeNull();
 
     const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
-    expect(panel.querySelector('a[href^="mailto:"]')).toBeNull();
+    expect(panel.querySelector('a[href="/feedback"]')).toBeNull();
     expect(panel.textContent).not.toContain("留言");
   });
 
@@ -88,7 +88,7 @@ describe("SiteNavBar", () => {
     ]) {
       expect(html).toContain(`href="${href}"`);
     }
-    expect(html).toContain("mailto:");
+    expect(html).toContain('href="/feedback"');
 
     const view = await renderNavBar();
     const panel = view.container.querySelector('nav[aria-label="網站選單"]');
@@ -471,6 +471,17 @@ describe("SiteNavBar active 狀態", () => {
     const parentMobile = mobileNav.querySelector('a[href="/for-parents"]');
     expect(playMapLink?.getAttribute("aria-current")).toBe("page");
     expect(parentMobile?.hasAttribute("aria-current")).toBe(false);
+  });
+
+  test("/feedback 僅頂欄留言 active，抽屜無留言列", async () => {
+    const view = await renderNavBarAt("/feedback");
+    const actions = view.getByRole("group", { name: "常用" });
+    expect(
+      actions.querySelector('a[href="/feedback"]')?.getAttribute("aria-current"),
+    ).toBe("page");
+    const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
+    expect(panel.querySelector('a[href="/feedback"]')).toBeNull();
+    expect(panel.textContent).not.toContain("留言");
   });
 
   test("/about 僅抽屜關於我們 active", async () => {

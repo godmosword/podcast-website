@@ -22,6 +22,10 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: "*",
         allow: "/",
       },
+      {
+        userAgent: "*",
+        disallow: ["/studio/feedback", "/api/studio/"],
+      },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
   };

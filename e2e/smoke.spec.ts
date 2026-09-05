@@ -42,7 +42,7 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await expect(homeAction).toBeVisible();
   const topFeedback = page.getByRole("link", { name: "留言" });
   await expect(topFeedback).toBeVisible();
-  await expect(topFeedback).toHaveAttribute("href", /^(mailto:|https?:)/);
+  await expect(topFeedback).toHaveAttribute("href", "/feedback");
 
   const menuBtn = page.getByRole("button", { name: "開啟選單" });
   await expect(menuBtn).toBeVisible();
@@ -154,7 +154,7 @@ test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   ).toBeVisible();
   const mobileFeedback = page.getByRole("link", { name: "留言" });
   await expect(mobileFeedback).toBeVisible();
-  await expect(mobileFeedback).toHaveAttribute("href", /^(mailto:|https?:)/);
+  await expect(mobileFeedback).toHaveAttribute("href", "/feedback");
   // 行動版無「主要分區」膠囊；全部分區都走抽屜
   await expect(page.getByRole("navigation", { name: "主要分區" })).toHaveCount(0);
   // 頂欄不得橫向溢出（允許 1px 捲動誤差）；980／1024 同契約

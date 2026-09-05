@@ -146,7 +146,9 @@ NEXT_PUBLIC_SITE_URL=https://你的網域
 |------|------|
 | `NEXT_PUBLIC_SITE_URL` | 站點 canonical URL（**必填於 production**） |
 | `NEXT_PUBLIC_AUDIO_BASE_URL` | 可選的公開音檔 CDN／物件儲存 origin；未設定時 fallback 至 `/stories/`。外部 origin 須支援音檔 Range request；跨網域播放請允許本站來源（會員私有音檔不在本輪） |
-| `DATABASE_URL` | 樂園許願 + email 訂閱 API（Neon）；未設則表單降級（許願→mailto、訂閱→`#connect`） |
+| `DATABASE_URL` | 樂園許願 + email 訂閱 + 站內留言牆（Neon）；未設則表單降級（許願→mailto、訂閱→`#connect`、`/feedback` 仍 200 但改 mailto） |
+| `FEEDBACK_MODERATION_SECRET` | `/studio/feedback` 審核密語（server-only）。未設則後台顯示提示、審核 API 503。**不要**加 `NEXT_PUBLIC_` |
+| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | 公開表單與審核登入的分散式節流；production 未設時 POST／登入 fail-closed 503，GET 牆仍可空狀態 |
 | `RESEND_API_KEY` / `SUBSCRIBE_FROM_EMAIL` | 名單確認信（只用來驗證信箱；目前不寄新集上線信）；任一未設時訂閱 API 安全降級為不可用 |
 | `OPENAI_API_KEY` | 僅本機 `illustrate`／地圖資產生成；**CI 不放** |
 | `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN` | 可選錯誤上報。瀏覽器走 `@sentry/browser`（無 BrowserTracing）；未設則不上報 |
@@ -154,7 +156,12 @@ NEXT_PUBLIC_SITE_URL=https://你的網域
 
 完整說明見 [`.env.example`](./.env.example)。
 
-Neon／`DATABASE_URL` 為選配。未設定時不需要執行 migration，許願與 Email 訂閱會維持既有的降級行為；只有未來決定啟用資料庫時，才需先執行 `npm run migrate -- 005_legal_consent_audit.sql`，新增家長同意政策版本與伺服器收到時間欄位。舊資料不回填、不推定同意版本。
+Neon／`DATABASE_URL` 為選配。未設定時不需要執行 migration，許願、Email 訂閱與留言牆會維持降級（`/feedback` 頁面仍在，表單改 mailto）。啟用資料庫時依序跑：
+
+1. `npm run migrate -- 005_legal_consent_audit.sql`（家長同意政策版本）
+2. `npm run migrate -- 006_feedback_messages.sql`（留言牆）
+
+舊資料不回填、不推定同意版本。審核後台另需 `FEEDBACK_MODERATION_SECRET`。
 
 ## 新增一集故事（SOP）
 

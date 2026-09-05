@@ -41,6 +41,11 @@ const ROUTE_SOURCES: Record<string, string[]> = {
   ],
   "/games/candy-match": ["app/games/candy-match/page.tsx"],
   "/legal": ["app/legal/page.tsx", "app/legal/page.module.css"],
+  "/feedback": [
+    "app/feedback/page.tsx",
+    "app/feedback/page.module.css",
+    "lib/feedback-copy.ts",
+  ],
 };
 
 const OUTPUT_PATH = resolve(process.cwd(), "data/page-freshness-dates.ts");
