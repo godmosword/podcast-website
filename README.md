@@ -119,16 +119,16 @@ npm run dev
 
 | 指令 | 用途 | 指令檔 |
 |------|------|--------|
-| `/agent-plan` | 規劃 + 分級委員會審核 → **Approved Plan**（預設不實作） | [`.cursor/commands/agent-plan.md`](./.cursor/commands/agent-plan.md) · [`.claude/commands/agent-plan.md`](./.claude/commands/agent-plan.md) |
+| `/agent-plan` | 依 L2/L3 風險分級規劃；必要時安排工程、設計或對抗審 → **Approved Plan**（預設不實作） | [`.cursor/commands/agent-plan.md`](./.cursor/commands/agent-plan.md) · [`.claude/commands/agent-plan.md`](./.claude/commands/agent-plan.md) |
 | `/agent-action` | 依 Plan **Task 派工** → 整合 → Verify →（可選）Ship | [`.cursor/commands/agent-action.md`](./.cursor/commands/agent-action.md) · [`.claude/commands/agent-action.md`](./.claude/commands/agent-action.md) |
 
-**收尾必附 [Agent 執行分配表](docs/AGENT-WORKFLOW.md#收尾輸出agent-執行分配表)：** 各 agent 做了什麼 + `model slug` + 狀態。
+**收尾依風險列出 [Agent 執行分配表](docs/AGENT-WORKFLOW.md#收尾輸出agent-執行分配表)：** L0/L1 可省略；L2/L3 列實際 agent、`model slug`、產出與狀態。
 
 | 文件 | 內容 |
 |------|------|
 | [docs/AGENT-WORKFLOW.md](./docs/AGENT-WORKFLOW.md) | Meta：模型分工、L0–L3、Plan 模板 |
 | [docs/AGENT-DOMAIN.md](./docs/AGENT-DOMAIN.md) | Domain：紅線、驗證矩陣、Protected paths |
-| [docs/AGENT-FAILURES.md](./docs/AGENT-FAILURES.md) | 模型呼叫失敗案例簿 |
+| [docs/AGENT-FAILURES.md](./docs/AGENT-FAILURES.md) | 目前模型呼叫協議與未解除記錄；歷史案例見 [`docs/archive/AGENT-FAILURES-2026.md`](./docs/archive/AGENT-FAILURES-2026.md) |
 
 ## 部署與環境變數
 

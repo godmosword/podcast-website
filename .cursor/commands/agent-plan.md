@@ -1,117 +1,52 @@
-# Agent Plan（規劃 + 委員會審核）
+# Agent Plan（風險分級）
 
-**本 slash command 啟用 Agent Orchestration workflow**（一般對話不會自動套用）。
+本命令只有使用者明確要求規劃、或任務依 [`docs/AGENT-WORKFLOW.md`](../../docs/AGENT-WORKFLOW.md) 判定為 L2/L3 時使用；只產生 Approved Plan，不實作、不 commit。
 
-依 [`docs/AGENT-WORKFLOW.md`](../../docs/AGENT-WORKFLOW.md) 的 **`/agent-plan` 流程**執行。本指令**只規劃、不實作**（除非使用者明確要求跳過審核直接做）。
-typo 級小事不進本命令——直接做即可。
+## 0. Bootstrap
 
-**Domain（Bootstrap、紅線、驗證矩陣）：** [`docs/AGENT-DOMAIN.md`](../../docs/AGENT-DOMAIN.md)
-**失敗案例簿：** [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md)
+- 讀 [`docs/AGENT-WORKFLOW.md`](../../docs/AGENT-WORKFLOW.md) 的分級、審查與完成邊界。
+- 依任務需要讀 [`docs/AGENT-DOMAIN.md`](../../docs/AGENT-DOMAIN.md) 對應段落。
+- 只有實際要呼叫外部模型時才讀 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md) active 區段。
+- 大型、跨模組或不熟悉模組才讀 README、TODOS、CHANGELOG、DISCLAIMER；不要每次完整載入。
 
-## 你要做的事
+## 1. 判級
 
-**執行期追蹤：** 從 Bootstrap 起維護 **Agent 執行分配表**（見 §7）。**固定全表 #0–#5 必列**；缺席必寫；**Composer 對抗審／Opus 列禁止標 `跳過`**。
+- L0/L1：不建立本 Plan；直接處理並執行最小驗證。
+- L2：建立 Goal、Scope、Task DAG、Files、Verification、Risks；至少安排一個未撰寫 Plan 的 readonly 工程審，審查逐條反駁 DAG ≥3 點並附檔名或命令證據。
+- L3／Protected／schema／sync／發布／外部模型／付費 API：安排工程、對抗、設計三審與 Leader 綜合。
+- UI 風險（Opus 設計審不可跳過）包含 `StoryPlayer`、`PlayButton`、`StoryCard`、`Chip`、`GamePageShell`、`LandingSegment`、`SiteNavBar`，以及 `padding`、`gap`、`animation`、`transition`、`transform`、`z-index`、`prefers-reduced-motion`。
+- 字幕、scenes、illustrate 依內容 SOP 直接處理或使用 `/agent-action`，不建立完整委員會 Plan。
 
-### 0. Bootstrap
+## 2. Draft 與審查
 
-- 讀 [`docs/AGENT-WORKFLOW.md`](../../docs/AGENT-WORKFLOW.md)（Meta：委員會分工、對標表）
-- 讀 [`docs/AGENT-DOMAIN.md`](../../docs/AGENT-DOMAIN.md)（Bootstrap 表、紅線、驗證矩陣）
-- 讀 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md)（30 天內連續 2+ fail 的委員 → 本次直接標缺席，不重試）
-- 依 Domain「依任務加讀」表補充 context
-- **Opus 設計審必讀：** [`DESIGN.md`](../../DESIGN.md)（設計 token、觸控、動畫、兒童 UX 原則）
+Leader 先寫範圍骨架，再補齊：
 
-### 1. 先判斷要不要開委員會
+```markdown
+## Goal
+## Scope / Out of scope
+## Task DAG
+## Files likely touched
+## Verification
+## Risks & rollback
+## Review decision
+```
 
-| 任務 | 做法 |
-|------|------|
-| typo／&lt;10 行 | **直接做**，不進本命令 |
-| 字幕／scenes／illustrate（SOP 內） | **跳過本命令**；直做或 `/agent-action` + Domain verify |
-| 純 docs／命令對齊 | 可進本命令；審核可降級 Leader + GPT，但 **§7 固定全表 Composer 對抗審／Opus 列仍須列出** |
-| **視覺／樣式微調**（預估 diff &lt;80 行、不碰 Protected paths、不觸發 WORKFLOW UI 風險規則） | **中間級**：GPT 工程單審 + 落地後截圖目檢；Composer 對抗審／Opus 標 `按級距免派`（仍須列出） |
-| 一般 L1／L2 工程 | 本命令 + **固定三審**（GPT + Composer 對抗審 + Opus 設計） |
-| 跨模組／紅線／Protected／L3 | 固定三審；Opus 設計審**加強**架構／紅線視角；Leader 自審可行性 |
+- Plan 細節／工程審：`gpt-5.6-luna-max-fast`。
+- UI 設計審：`claude-opus-5-thinking-high`，readonly，附 DESIGN.md 要點。
+- 對抗審：`composer-2.5-fast`，只在風險分級要求時派出。
+- 每個審查 prompt 必須寫明：「你未撰寫此 Plan」，並要求只讀、不改檔。
+- 委員缺席時記錄原因；仍須保留 Domain 驗證矩陣必要項，不因缺席直接批准高風險 Plan。
 
-### 2. Draft Plan（Leader 骨架 + Task 填細節）
+## 3. Approved Plan
 
-**Leader 節流：** Leader（**Grok 4.5 High Fast**／`cursor-grok-4.5-high-fast`）只寫 **Goal、Scope／Out of scope、Risks 骨架**；其餘派 Task。
+Leader 綜合實際審查意見，標記 Approved 或待決策，列出模型路由與最小驗證命令，然後提示 `/agent-action`。收尾只列實際派出的角色；L2 不建立固定空白委員表，L3 列所有實際委員和缺席原因。
 
-| 區塊 | 誰寫 | model slug |
-|------|------|------------|
-| Goal、Scope、Risks 骨架 | Leader | `cursor-grok-4.5-high-fast`（當前 session） |
-| Task DAG、Files、Verification、Model routing | Task | `gpt-5.6-luna-max-fast` |
-| 每個子任務 L0–L3 + slug | Task（同上） | 預設 L2→Composer 2.5、L1→Composer、L0→shell |
+## 模型與安全
 
-- 使用 AGENT-WORKFLOW 的 **Plan 模板**合併成 Draft Plan
-- **Plan 產物：** Cursor Plan 檔，或 `/tmp/agent-plan-<unix_ts>.md`（`date +%s`）
-
-**Plan 工程審分離（必守）：** 工程審須為**另一個** readonly Task（同 slug、不同 prompt），prompt 明寫「你未撰寫此 Plan」；須逐條反駁 Task DAG **≥3 點**並附檔名／命令證據。不可與 Plan 細節草稿共用同一 Task 或 prompt。
-
-### 3. 委員會審查（固定三審，全部唯讀）
-
-> 模型 slug 以 [`docs/AGENT-WORKFLOW.md`](../../docs/AGENT-WORKFLOW.md) § 模型 slug 對照表為**單一來源**；本檔 slug 為快照，衝突時以對照表為準。
-
-**三委員可並行派工。**
-
-| 委員 | 角度 | Cursor 派工 |
-|------|------|-------------|
-| **GPT 5.6 Luna MAX fast** | 工程可行性／驗證命令／漏檔／測試 | Task（`readonly: true`）+ `gpt-5.6-luna-max-fast` |
-| **Composer 2.5 對抗審** | 對抗審：漏洞、edge case、失敗模式 | Task（`readonly: true`）+ `composer-2.5-fast` |
-| **Opus 5 設計審** | **設計／UX**：`DESIGN.md` 對齊、兒童主路徑、親子互動、觸控 ≥44px、`prefers-reduced-motion`、資訊層級、視覺一致性；L3 時加架構／紅線 | Task `architect`（`readonly: true`）+ `claude-opus-5-thinking-high`；prompt 附 `DESIGN.md` 要點 |
-
-**純文件／命令檔對齊：** 可降級 Leader + GPT；**§7 表 Composer 對抗審／Opus 列仍須出現**（標 `未派` 或嘗試派工後標 `缺席`）。
-
-**審查紅線：**
-
-- 審查委員一律 `readonly: true`，不改檔
-- 中文文案品質不由對抗審定稿（Domain：中文 → Sonnet）
-- Opus 設計審不取代工程驗證矩陣
-- Plan 違反 Domain 紅線 → 標 **CRITICAL**
-- 委員失敗 → 追加 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md)
-
-### 4. Leader 綜合
-
-| 來源 | 關鍵意見 | 採納決定 |
-|------|----------|----------|
-| Leader（可行性自審，L3） | … | — |
-| GPT 5.6 Luna MAX fast 工程審 | … | 採納 / 不採納 |
-| Composer 2.5 對抗審 | …／缺席 | … |
-| Opus 5 設計審 | …／缺席 | … |
-
-產出 **Approved Plan** → 覆寫 plan 檔 → **下一步請用 `/agent-action`**
-
-### 5. 缺席規則
-
-- **工程審（GPT）必須成功**才可標 Approved；GPT 缺席時由 Opus 頂工程審（readonly Task，工程視角 prompt），**不得未審直接過**；全滅 → 回報使用者
-- **Composer 對抗審缺席**：工程審仍成功即可 Approved，標 **「對抗審缺席／對抗性降級」**
-- **Opus 缺席**：工程審仍成功即可 Approved，分配表標缺席
-
-### 6. CRITICAL 與 Plan mode
-
-- **CRITICAL**：A/B/C；僅 **A** 改檔
-- **Cursor Plan mode**：以系統 plan confirm 為準
-
-### 7. 最終輸出：固定 Agent 執行分配表（必附）
-
-**固定列出 #0–#5 全行，不得省略 Composer 對抗審／Opus 列。**
-
-| # | 角色 | 執行方式 | subagent_type | model slug | 做了什麼 | 產出 | 狀態 |
-|---|------|----------|---------------|------------|----------|------|------|
-| 0 | Leader | 當前 session | — | `cursor-grok-4.5-high-fast` | 寫骨架、綜合委員意見 | Approved Plan | 完成 |
-| 1 | Plan 細節 | Task | `generalPurpose` | `gpt-5.6-luna-max-fast` | 填 DAG、Files、Verification | plan 區塊 | 完成／未派 |
-| 2 | GPT 5.6 Luna MAX fast 工程審 | Task（readonly） | `generalPurpose` | `gpt-5.6-luna-max-fast` | 審可行性、驗證、漏檔 | 審查意見 | 完成／缺席 |
-| 3 | Composer 2.5 對抗審 | Task（readonly） | `generalPurpose` | `composer-2.5-fast` | 找漏洞、edge case | 審查意見 | 完成／缺席 |
-| 4 | Opus 5 設計審 | Task（readonly） | `architect` | `claude-opus-5-thinking-high` | 審 UX／DESIGN.md／兒童體驗／a11y 視覺 | 審查意見 | 完成／缺席 |
-| 5 | Leader 可行性自審 | Leader 自審 | — | `cursor-grok-4.5-high-fast` | L3 成本／範圍 | 自審結論 | 完成／未派 |
-
-**狀態欄：** `完成`｜`未派`｜`缺席`｜`對抗審缺席／對抗性降級`｜`按級距免派`（中間級視覺／樣式微調）。**#3 Composer 對抗審、#4 Opus 禁止標 `跳過`**。
-
-## 禁止
-
-- **禁止呼叫 Fable 5**（`claude-fable-5-thinking-medium` 及任何 `claude-fable-5-*`／「Fable 5」顯示名）— 設計審／Claude Code Leader 用 `claude-opus-5-thinking-high`；機械閘門：`.cursor/hooks/block-fable.mjs`
-- 不要 commit / push
-- 不要跳過 Review 直接實作（使用者說「直接做」除外）
-- 收尾分配表省略 Composer 對抗審／Opus 列
-
-## 輸出語言
-
-依 [`docs/AGENT-DOMAIN.md`](../../docs/AGENT-DOMAIN.md) § 專案識別。
+- Cursor Leader：`cursor-grok-4.5-high-fast`
+- Claude Code CLI 工程審：`codex exec -m gpt-5.6-luna`
+- Cursor 工程審／Plan 細節：`gpt-5.6-luna-max-fast`
+- L1/L2 實作與對抗審：`composer-2.5-fast`
+- 設計審：`claude-opus-5-thinking-high`
+- 禁止 Fable 5（`claude-fable-5-*`）；hook `.cursor/hooks/block-fable.mjs` 仍硬擋。
+- 不使用 workflow SSOT 以外的舊路由；模型 slug 以 workflow SSOT 為準。

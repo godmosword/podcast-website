@@ -1,34 +1,23 @@
 ---
-description: 禁止 AskQuestion／AUQ 阻塞式提問（alwaysApply）— 改用聊天文字選項
+description: 禁止會阻塞整輪 agent 的 AskQuestion／AUQ；改用聊天文字選項
 alwaysApply: true
 ---
 
-# 禁止 Ask User Questions（AUQ／AskQuestion）
+# 禁止 Ask User Questions
 
-本專案**禁止**使用會卡住整輪 agent 的阻塞式提問工具。
+本專案禁止使用會卡住整輪 agent 的阻塞式提問工具；機械閘門由 `.cursor/hooks/block-auq.mjs` fail-closed 執行。
 
 ## 禁止呼叫
 
 - 內建／別名：`AskQuestion`
 - MCP：`ask_user_questions`、`get_answered_questions`
 - Server／plugin：`ask-user-questions`、`user-ask-user-questions`、`auq-mcp-server`
-- `CallMcpTool` 指向上述任一者（含 `nonBlocking: true`——本專案一律不用）
-
-機械閘門：[`.cursor/hooks.json`](../hooks.json) → [`block-auq.mjs`](../hooks/block-auq.mjs)（`beforeMCPExecution` + `preToolUse`）。
+- `CallMcpTool` 指向上述任一者，包括 `nonBlocking: true`。
 
 ## 正確做法
 
-需要使用者選擇時，**直接在聊天訊息**列出選項，等文字回覆：
+需要使用者選擇時，直接在聊天訊息列出 A/B/C 文字選項，等待文字回覆；不要呼叫 AUQ。
 
-```
-請回覆其中一個：
-A) …
-B) …（建議）
-C) …
-```
+CRITICAL 決策依 [`docs/AGENT-WORKFLOW.md`](../../docs/AGENT-WORKFLOW.md) 的格式處理：`CRITICAL-n` + Fix +「請回覆 CRITICAL-n 選 A／B／C」。
 
-CRITICAL 決策對齊 [`docs/AGENT-WORKFLOW.md`](../../docs/AGENT-WORKFLOW.md)「CRITICAL 互動」：`CRITICAL-n` + Fix +「請回覆 CRITICAL-n 選 A / B / C」。
-
-## 已知失敗
-
-Grok 4.5 等模型常自動呼叫 AUQ；預設 blocking 會乾等 UI，整輪看似卡住。見 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md)。
+已知失敗與 hook 測試見 [`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md) 與 `.cursor/hooks/block-auq.test.ts`。

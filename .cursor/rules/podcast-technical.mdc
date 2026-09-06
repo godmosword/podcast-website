@@ -1,0 +1,18 @@
+---
+description: Podcast 網站技術、互動與無障礙規範（修改 app/components/lib/data 時載入）
+globs:
+  - app/**/*
+  - components/**/*
+  - lib/**/*
+  - data/**/*
+alwaysApply: false
+---
+
+# 技術規範
+
+- Next.js 16 App Router、React 19、TypeScript strict；禁止 `any`。
+- 使用 CSS Modules；資料型別與常數放 `data/`，查詢 resolver 放 `lib/*-query.ts`，UI 放 `components/<area>/`。
+- 動畫只使用 transform、opacity、stroke-dashoffset 或 offset-distance；一律支援 `prefers-reduced-motion`，元素離開視窗或分頁隱藏時暫停。
+- 互動元素使用真正的 `<button>`／`<a>`，提供可理解的 accessible name；純裝飾 SVG 使用 `aria-hidden`。
+- 兒童主要操作觸控目標至少 44px；維持既有地圖、播放器、故事資料契約與 Protected path 約束。
+- 中文內容遵守 `docs/AGENT-DOMAIN.md` 的內容與模型規則；不要用 Grok 校對字幕或中文文案。

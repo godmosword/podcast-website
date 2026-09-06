@@ -1,112 +1,23 @@
 ---
-description: 依 Approved Plan 實作＋驗證（podcast-website）；Leader＝Opus 5 Thinking High；L1／L2 對齊 Grok 4.5 High Fast；外部顧問唯讀；小 diff 可跳過 diff 審。
+description: podcast-website Agent Action；依 canonical workflow 風險分級，Claude Code 僅保留模型呼叫適配
 ---
 
-# Agent Action（podcast-website 行動小組版）
+# Agent Action（Claude Code 適配）
 
-你扮演 **Leader（Claude Code：Opus 5 Thinking High）** 主持這次執行。任務或 plan 路徑：
+本命令依 [`docs/AGENT-WORKFLOW.md`](../../docs/AGENT-WORKFLOW.md) 執行 Approved Plan；字幕、scenes、illustrate 等內容 SOP 可依 Domain 直接落地。不重做完整 Plan，不 commit，除非使用者明確要求。
 
-$ARGUMENTS
+## 分級與執行
 
-**執行期追蹤：** 從讀 Plan 起維護 **Agent 執行分配表**（見 §9）。每派子 agent／顧問審／Verify／Ship，記下：任務 ID、`subagent_type`、`model slug`、做了什麼、產出、狀態。Leader 親手改檔也須入表。
+- L0：Bash／Leader 直接執行最小命令。
+- L1：單一執行者；路徑不明才先只讀 explore。
+- L2：`cursor-agent --model cursor-grok-4.5-high-fast` 產生建議，Leader 落檔；必要時配一次獨立 readonly Codex 工程審。
+- L3／Protected／schema／sync／發布／付費 API：Leader 或 Opus 實作，工程、對抗、設計三審。
+- 同一檔案禁止多 agent 同時修改；顧問建議由 Leader 落檔；中文 Protected path 依 Domain 使用 Sonnet。
 
-## 0. Bootstrap
+每個子任務 prompt 必須包含 Goal、Context paths、Constraints、Do NOT、Verification、Deliverable。禁止派工 Fable 5（`claude-fable-5-*`）；hook `.cursor/hooks/block-fable.mjs` 仍硬擋。
 
-同 [`agent-plan.md`](agent-plan.md) §0：讀 [`docs/AGENT-DOMAIN.md`](../../docs/AGENT-DOMAIN.md)（紅線、驗證矩陣、Protected paths）、[`docs/AGENT-FAILURES.md`](../../docs/AGENT-FAILURES.md)（失敗案例＋探活協議）、依任務加讀表。
+Claude Code 顧問適配：工程審使用 `codex exec -m gpt-5.6-luna -c model_reasoning_effort="medium" "<prompt>" </dev/null`；Grok slug 拒收或認證失敗時依 active 表使用 `grok -m grok-4.6` 備援；設計審使用 Agent tool `model: "opus"`，全部 readonly。
 
-## 1. 載入 Approved Plan（或 Domain SOP）
+## Verify、收尾與 Ship
 
-尋找順位：**使用者貼上的路徑／內容** → **`~/.claude/plans/`**（Claude Code plan mode 產物，取最新）→ **`/tmp/agent-plan-*.md`**（取最新）。非使用者明示的 plan，取用前先摘要向使用者確認是本次任務的 plan（防過期誤用）。無 plan → 簡短列出缺什麼，建議 `/agent-plan`。
-**內容管線例外：** 字幕／scenes／illustrate（SOP 內）可無 Plan，依 Domain § 內容管線與 [`EPISODE-WORKFLOW.md`](../../docs/EPISODE-WORKFLOW.md) 直做。
-
-## 2. 分級執行
-
-**改檔路徑（對齊 Claude Code group）：**
-
-| 級別 | 判準 | 執行者 |
-|------|------|--------|
-| **L3** | Protected paths、跨模組、schema | **Leader 親自**（`scripts/illustrate*`、sync workflows、`app/legal/` 依 Domain 只能 leader／Opus） |
-| **L2** | 多檔、模式固定 | **Grok 4.5 High Fast**：`cursor-agent -p --model cursor-grok-4.5-high-fast --mode ask` 出 patch → **Leader 落檔**；**中文文案一律 Sonnet** Agent tool |
-| **L1** | 單檔 routine | 同 L2（Grok patch＋Leader 落檔）；中文 → Sonnet；&lt;10 行 → leader 直接做 |
-| **L0** | 純命令 | Bash |
-
-**行動小組（外部顧問，全部唯讀）**：卡關要第二意見、或實作後需 diff 審查時呼叫；先依 FAILURES 探活，失敗即記錄＋標缺席。
-
-> 模型 slug 以 [`docs/AGENT-WORKFLOW.md`](../../docs/AGENT-WORKFLOW.md) § 模型 slug 對照表為**單一來源**；下表為快照，衝突時以對照表為準。
-
-| 顧問 | 用途 | 呼叫方式 |
-|------|------|----------|
-| Opus 5 設計審 | UX／設計／a11y 視覺 | Agent tool `architect` + `model: "opus"` |
-| Codex CLI 工程審 | TS/React diff 審、工程第二意見 | `codex exec -m gpt-5.6-luna -c model_reasoning_effort="medium" "<prompt + diff>" </dev/null`（**Claude Code 專用**；Cursor 對標 `gpt-5.6-luna-max-fast`） |
-| Grok 4.5 High Fast 對抗審 | 對抗審：找 diff 的 edge case | `cursor-agent -p --model cursor-grok-4.5-high-fast --mode ask "<prompt>"`；slug 拒收或認證失敗 → 備援 `grok -p "<prompt>" -m grok-4.6 --effort high --no-plan`（見 FAILURES 探活）；兩路皆不可用 → 缺席 |
-
-**執行紅線：**
-- 禁止用 `codex exec`／`grok`／`cursor-agent` **直接**改 repo 檔案——顧問／Grok 實作建議只出 patch，由 leader 落檔
-- 中文校對、字幕、scenes → **Sonnet**（Domain Protected）
-- Haiku 等小模型不碰 Domain **Protected paths**
-- 禁止多執行路徑同時改同一檔
-- 每個子 agent prompt 必含：Goal、Context paths、Constraints（含 Domain 紅線）、Do NOT、Verification、Deliverable
-
-## 3. Leader 整合
-
-合併結果、解衝突、**最小 diff**；對外介面行為不變（除非 Plan 明確要求）。
-
-## 4. Verify（必跑）
-
-依 [`docs/AGENT-DOMAIN.md`](../../docs/AGENT-DOMAIN.md) § 驗證矩陣挑最小集合：
-
-- 預設：`npm test`
-- 故事／插圖／字幕／metadata：`npm run verify:episodes`
-- 找車車／主題索引：`npm run verify:browse-index`
-- 關鍵 UI 流程：`npm run test:e2e`
-- 上線前：`npm run check`
-
-**未全綠不得宣稱完成**；回報逐項對照。委員缺席不可省驗證矩陣。
-
-## 5. Diff 委員審（分級、唯讀，可跳過）
-
-- **可跳過**：已有 Approved Plan、diff 約 &lt;80 行、未碰 Protected paths／紅線 → 只跑 Verify
-- **一般**：Codex CLI 工程審 + Opus 5 設計審
-- **L3／觸紅線／Protected**：再加 Grok 4.5 High Fast 對抗審
-- 呼叫失敗 → 追加 `docs/AGENT-FAILURES.md`，摘要表註明缺席
-
-## 6. Docs sync（可見行為變更時）
-
-依 Domain § Docs sync：可見行為 → `CHANGELOG.md`；待辦 → `TODOS.md`；指令／SOP → `README.md`；插圖 workflow → `docs/EPISODE-WORKFLOW.md`。
-
-## 7. Ship（僅使用者要求）
-
-- 預設**不** commit／push
-- 使用者說「commit」→ 只 stage 本次相關檔；**禁止 `git add -A`**
-- 使用者說「ship／push」→ `npm run check` 全綠後依 Domain § Ship
-- 完整 VERSION + CHANGELOG ship → gstack `/ship`
-
-## 8. CRITICAL
-
-`CRITICAL-n` + Fix + A/B/C；**僅 A** 改檔。
-
-## 9. 最終輸出：Agent 執行分配表（必附）
-
-收尾回覆**必須**附此表（繁中；slug 保留英文）。須涵蓋：實作子 agent、Leader 整合、Verify、diff 委員審（或標跳過）、Ship（若有）。
-
-| # | 任務 ID | subagent_type | model slug | 做了什麼 | 產出（檔案／命令結果） | 狀態 |
-|---|---------|---------------|------------|----------|------------------------|------|
-| 0 | Leader | — | `claude-opus-5-thinking-high` | 讀 Plan、派工、整合 diff | 合併後變更摘要 | 完成 |
-| 1 | T1 | Grok／Sonnet | `cursor-grok-4.5-high-fast`／`sonnet` | （依 Plan 填寫；中文用 sonnet） | `path/to/file` | 完成／缺席 |
-| 2 | Verify | Bash | — | `npm test` 等 | 逐項對照結果 | 完成 |
-| 3 | Codex CLI diff 審 | `code-reviewer` | `gpt-5.6-luna`（CLI model） | 審 diff 工程面 | 意見摘要 | 完成／跳過／缺席 |
-| 4 | Opus 設計審 | `architect` | `opus` | 審 UX／設計 | 意見摘要 | 完成／跳過／缺席 |
-| 5 | Grok 對抗審 | `cursor-agent` | `cursor-grok-4.5-high-fast` | 找 edge case | 審查意見 | 完成／跳過／缺席 |
-| 6 | Ship | — | Leader：`claude-opus-5-thinking-high` | commit／push | commit hash | 完成／未執行 |
-
-**狀態欄：** `完成`｜`跳過`｜`缺席`｜`對抗審缺席／對抗性降級`｜`未執行`。
-
-## 禁止
-
-- **禁止呼叫 Fable 5**（`claude-fable-5-thinking-medium`／`claude-fable-5-*`／「Fable 5」顯示名）— Leader／設計審用 Opus；L1／L2 用 Grok／Sonnet（Cursor 對標另有 `block-fable` hook）
-- 無 Plan 擅自擴大 scope（內容管線 SOP 內除外）
-- 跳過 Verify 宣稱完成
-
-## 輸出語言
-
-繁體中文（技術 slug／路徑保留英文）。
+依 Domain 驗證矩陣挑最小集合；規則／命令契約跑 `npx vitest run scripts/check-agent-docs-contract.test.ts`，hook 變更跑對應 hook tests，L3 或發布才追加完整 `npm run check`。只列實際執行的角色：L0/L1 可省略分配表，L2 列實作與工程審，L3 列所有委員和缺席原因。預設不 commit／push；使用者明確要求時只 stage 本次相關檔案，禁止 `git add -A`。

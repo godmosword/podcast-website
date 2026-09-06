@@ -1,55 +1,16 @@
 ---
-description: 車車故事 podcast 網站 — 技術慣例、工作流、品質閘門（alwaysApply）
+description: 車車遊樂園全域安全入口；技術、驗證與生圖細節依任務載入
 alwaysApply: true
 ---
 
-# 車車故事 Podcast 網站
+# 車車遊樂園 Podcast
 
-## 技術與慣例
+本檔只放跨任務安全與路由入口；技術規範見 `podcast-technical.mdc`，驗證見 `podcast-verification.mdc`，生圖紅線見 `podcast-image-cost.mdc`。
 
-- Next.js 15 App Router、TypeScript strict（禁止 any）、CSS Modules（無 Tailwind）、Vercel。
-- 註解與使用者文案一律 zh-TW（繁中）。
-- 架構分層：`data/*.ts`（型別＋常數＋同名 `*.test.ts`）→ `lib/*-query.ts`（resolver）→ `components/<area>/*.tsx` + 同名 `.module.css`。新功能照這個長法。
-
-## 工作流（每個任務都遵守）
-
-- **Agent Orchestration 優先**：使用者打出 `/agent-plan` 或 `/agent-action` 時，以 [`docs/AGENT-WORKFLOW.md`](docs/AGENT-WORKFLOW.md) 與 [`.cursor/rules/agent-orchestration.mdc`](.cursor/rules/agent-orchestration.mdc) 為準；**commit／push 僅在使用者明確要求時**。
-- **禁止 AskQuestion／AUQ**：不得呼叫 `AskQuestion`、`ask_user_questions` 等阻塞式提問（見 [`.cursor/rules/no-ask-user-questions.mdc`](.cursor/rules/no-ask-user-questions.mdc)；hook 硬擋）。選項用聊天文字 A/B/C，等我回覆。
-- **先計畫後動手**（一般 chat）：先輸出實作計畫＋將異動的檔案清單，等我確認再改 code。
-- 完成後更新 `TODOS.md`（完成標記與功能／chore **一併**；短 hash 可緊接一次僅回填例外，見 `docs/AGENT-DOMAIN.md` § Ship）；commit 用 conventional commit 訊息（**僅在使用者明確要求時**）。
-- **不要自動 push**，停在可檢視的 commit。
-- 一次只做一個任務範圍，不要順手改無關的東西。
-
-## 品質閘門（完成前必跑、必須全綠）
-
-- `npm test`、`npm run build`、`npx tsc --noEmit`
-- 受影響的既有測試要一起更新；新邏輯要補 vitest。
-
-## 動畫／效能
-
-- 動畫只用 transform / opacity（含 stroke-dashoffset / offset-distance），不得觸發 layout。
-- 一律受 `prefers-reduced-motion` 控管；分頁隱藏或元素捲出視窗時暫停。
-
-## 無障礙
-
-- 互動元素用真正的 `<button>` / `<a>` + `aria-label`；純裝飾 SVG 標 `aria-hidden`。
-
-## 未經同意不要動
-
-- 日／夜主題系統、`useMapCamera` / `ZoneSheet` 互動邏輯、zone-art-tile 契約、zones 座標。
-- 地圖場景色是「印刷地圖」固定淺色，日夜兩態都不反轉。
-- **Apple 同步 workflow**（`.github/workflows/sync-apple-podcast.yml`、`.github/workflows/sync-watchdog.yml`）及 `scripts/sync-apple-podcast.ts`：屬營運關鍵路徑，非同步任務不得改。若 build／site-url／llms 等改動可能影響 CI，須跑 `npm test -- scripts/lib/sync-workflow-contract.test.ts` 並確認 sync workflow 的 `NEXT_PUBLIC_SITE_URL` 仍對齊 `lib/site-url.ts` 的 `CANONICAL_SITE_URL`。
-
-## 生圖／重抽成本紅線（付費 API，違反＝嚴重越權）
-
-`OPENAI_API_KEY` 的圖像呼叫（`npm run illustrate`、`--from-scenes`、`--scene N`、`--char`、`generate-character-portraits`、任何直接呼叫 `generateSceneImage`／`generateCharacterPortrait`）**每一輪都要錢**。
-
-| 規則 | 說明 |
-|------|------|
-| **首輪才可整集生圖** | 使用者明確說「出圖／illustrate／--from-scenes」→ 只允許**一輪**整集（或指定範圍）生圖，然後**停**。 |
-| **重抽須先報價再等回覆** | 審圖後若要修：只准在聊天列出「建議重抽幕號＋原因＋大約張數」，用 A/B/C 等文字確認；**未收到明確幕號／「准許重抽」前，禁止再呼叫生圖 API**。 |
-| **禁止自行連抽** | 不得因「還不夠好／還有 3 線道／再試一次」自動再跑第 2、3…輪 `--scene` 或自寫 regen 腳本。Timeout／失敗可**同幕最多重試 1 次**，仍失敗就停下來報告。 |
-| **「修正／檢查／對齊」≠ 准許燒額度** | 這類指令＝審圖＋列問題清單；**不是**授權重抽。 |
-| **定裝照同規** | `--char`／`generate-character-portraits` 每次重生也要先問；不得連抽到滿意為止。 |
-
-細節見 [`docs/AGENT-DOMAIN.md`](docs/AGENT-DOMAIN.md) 紅線、[`docs/EPISODE-WORKFLOW.md`](docs/EPISODE-WORKFLOW.md)「審圖與重抽」。
+- 使用者文案與註解使用 zh-TW；一般對話不自動派子 agent。
+- 未經使用者明確要求，不 commit、不 push、不擴大修改範圍。
+- `OPENAI_API_KEY` 生圖每輪只跑一輪；重抽先列幕號、原因與張數，等明確確認；timeout 同幕最多重試一次。
+- 禁止 AskQuestion／AUQ；依 [`no-ask-user-questions.mdc`](./no-ask-user-questions.mdc) 使用聊天文字選項。
+- 只有使用者要求 `/agent-plan`、`/agent-action`，或風險分級達到門檻時才載入 [`agent-orchestration.mdc`](./agent-orchestration.mdc)。
+- 風險分級、Bootstrap、審查門檻與完成邊界以 [`docs/AGENT-WORKFLOW.md`](../../docs/AGENT-WORKFLOW.md) 為唯一來源。
+- 內容 SOP（字幕、scenes、illustrate）依 [`docs/AGENT-DOMAIN.md`](../../docs/AGENT-DOMAIN.md) 與 [`docs/EPISODE-WORKFLOW.md`](../../docs/EPISODE-WORKFLOW.md) 直接處理或使用 `/agent-action`。

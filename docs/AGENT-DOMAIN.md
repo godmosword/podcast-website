@@ -16,9 +16,9 @@
 
 ---
 
-## Bootstrap（Plan / Action 必讀）
+## Bootstrap（依風險與熟悉度載入）
 
-大任務或不熟模組時依序讀：
+所有任務先讀 [`AGENT-WORKFLOW.md`](AGENT-WORKFLOW.md) 的分級。只有大型、跨模組或不熟模組時，才依序讀以下文件：
 
 | 優先 | 檔案 | 用途 |
 |------|------|------|
@@ -27,7 +27,9 @@
 | 3 | [`CHANGELOG.md`](../CHANGELOG.md) | 已 ship 事實 |
 | 4 | [`DISCLAIMER.md`](../DISCLAIMER.md) | 內容版權、兒童產品、素材禁止散布 |
 
-呼叫任何外部 model（委員審／Task 派工）前，另讀 [`AGENT-FAILURES.md`](AGENT-FAILURES.md)（探活協議＋缺席判定）。
+只有實際要呼叫外部 model（委員審／Task 派工）時，才讀 [`AGENT-FAILURES.md`](AGENT-FAILURES.md) 的 active 區段；不要因每次 plan/action 重複載入歷史案例。
+
+Skill／Agent 發現只掃描 repository 受版本控制的檔案；排除 `node_modules`、`.next`、`out`、build 產物與第三方套件內的 `SKILL.md`／`AGENTS.md`。
 
 ### 依任務加讀
 
@@ -64,7 +66,7 @@
 | **素材禁止再散布** | `public/stories/`、`public/characters/` 音訊／插圖／字幕屬 Bonbon & 馬米；禁止複製到外站、CDN 或第三方 repo |
 | **illustrate 前必校對字幕** | 未 `--mark` 不得跑 `npm run illustrate`（兒童產品、專名正確性） |
 | **AI 插圖須人工審圖** | 暫存 → 審 contact sheet → 才 `--approve` 上線；CI **不放** `OPENAI_API_KEY`、不自動生圖 |
-| **生圖／重抽禁止自行連抽** | 圖像 API 付費。使用者准許的整集出圖＝**一輪**；之後任何 `--scene`／`--char`／定裝重生／自寫 regen，須先在聊天列出幕號或 slug＋張數，等文字確認才可呼叫。Timeout 同張最多重試 1 次。「修正／檢查」≠ 准許重抽。見 alwaysApply `podcast.mdc`、[`EPISODE-WORKFLOW.md`](EPISODE-WORKFLOW.md) |
+| **生圖／重抽禁止自行連抽** | 圖像 API 付費。使用者准許的整集出圖＝**一輪**；之後任何 `--scene`／`--char`／定裝重生／自寫 regen，須先在聊天列出幕號或 slug＋張數，等文字確認才可呼叫。Timeout 同張最多重試 1 次。「修正／檢查」≠ 准許重抽。見 `.cursor/rules/podcast-image-cost.mdc`、[`EPISODE-WORKFLOW.md`](EPISODE-WORKFLOW.md) |
 | **音檔不外送** | 轉錄／生圖管線只送**已公開劇本文字**（字幕側車），不送 `audio.mp3` |
 | **全幕集對齊 ep-9／ep-10** | `pageCount`、`captions`、`captionTimes`、插圖數、scenes 幕數必須一致；不得跳步 |
 | **保留 Apple 封面** | 重抽單幕時勿用 `--approve` 覆蓋 `01.jpg`；單張 `cp` 進 `public/stories/<slug>/` |
@@ -79,7 +81,8 @@
 
 | 觸及 | 必跑（最小） |
 |------|----------------|
-| **全 repo 預設** | `npm test` |
+| **規則／命令契約** | `npx vitest run scripts/check-agent-docs-contract.test.ts` |
+| **全 repo（L3、發布或明確要求）** | `npm test` |
 | **Lint** | `npm run lint` |
 | **故事／插圖／字幕／metadata** | `npm run verify:episodes` |
 | **找車車／主題索引** | `npm run verify:browse-index` |
@@ -150,8 +153,10 @@
 | MVP（`pageCount=1`）靜默當完成 | `verify:episodes` 會列 warn，須依 EPISODE-WORKFLOW 升級 |
 | 每個 typo 都跑 `/agent-plan` 雙審 | 太慢；typo 直接做 |
 | SOP 內單集字幕／出圖硬開完整委員會 | 成本浪費；應走內容管線 + verify |
-| 一般 L1／L2 預設 Opus+GPT 雙審 | 已改為 **GPT + Composer 對抗審 + Opus 設計固定三審**；Leader＝Grok High Fast；L1／L2 實作＝Composer |
-| 小型視覺／樣式微調硬開固定三審 | 成本浪費；&lt;80 行、不碰 Protected、不觸發 UI 風險規則 → **中間級**工程單審 + 截圖目檢（見 agent-plan §1、WORKFLOW） |
+| 一般 L0／L1 硬開委員會或讀完整 Bootstrap | 成本浪費；依 `AGENT-WORKFLOW.md` 直接處理並跑最小驗證 |
+| 一般 L2 預設三審 | 成本浪費；L2 先做一次工程審，只有 UI、外部模型或安全風險才追加對應審查 |
+| L3／Protected path 省略必要審查 | 風險過高；依 `AGENT-WORKFLOW.md` 啟用工程、對抗、設計三審 |
+| 每次 plan/action 重複探活同一模型 | 浪費額度；同一會話首次使用、缺席解除或配置變更時才探活 |
 | 呼叫 AskQuestion／AUQ MCP | 預設 blocking 乾等 UI，整輪卡住（Grok 尤甚）；改聊天文字 A/B/C；hook 見 `.cursor/hooks/block-auq.mjs` |
 
 ---
@@ -160,6 +165,7 @@
 
 | 日期 | 說明 |
 |------|------|
+| 2026-09-06 | Agent 流程改為 L0–L3 風險分級；Bootstrap、模型探活與驗證按需載入；生圖成本規則移至場景規則；AUQ／Fable／Protected path 紅線保留 |
 | 2026-06-19 | 初版 Domain sheet（bootstrap 後填寫） |
 | 2026-07-09 | Bootstrap 掛接 `AGENT-FAILURES.md`（model-call 探活＋缺席判定） |
 | 2026-07-09 | 內容管線跳過委員會；反模式補「SOP 內出圖硬開委員會」「預設雙審」 |

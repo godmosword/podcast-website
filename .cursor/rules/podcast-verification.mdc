@@ -1,0 +1,18 @@
+---
+description: Podcast 驗證矩陣（修改測試、腳本或 e2e 時載入）
+globs:
+  - '**/*.test.*'
+  - '**/*.spec.*'
+  - scripts/**/*
+  - e2e/**/*
+alwaysApply: false
+---
+
+# 按風險選擇驗證
+
+- L0：執行受影響的命令或契約檢查。
+- L1：執行受影響的單元測試或 lint；不因小改動自動跑完整 suite。
+- L2：執行受影響測試與 `npm run typecheck`；若是 UI 風險再跑相關 e2e 或視覺檢查。
+- L3、Protected path、sync workflow、schema、發布：依 Domain 驗證矩陣執行必要檢查；上線前才跑 `npm run check`。
+- Agent 規則或命令變更：至少執行 `npx vitest run scripts/check-agent-docs-contract.test.ts`，若動到 hook 再執行對應 hook tests。
+- 驗證失敗時修正或回報，不以未執行測試宣稱完成。

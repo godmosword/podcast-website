@@ -1,0 +1,21 @@
+---
+description: 付費生圖與角色定裝成本紅線（illustrate、角色肖像或場景資產任務載入）
+globs:
+  - scripts/illustrate.ts
+  - scripts/generate-character-portraits.ts
+  - scripts/lib/illustrate-core.ts
+  - data/scenes/**/*
+  - data/characters.json
+  - public/stories/**/*
+  - public/characters/**/*
+alwaysApply: false
+---
+
+# 生圖成本紅線
+
+- 使用者明確要求整集或指定範圍生圖時，只允許首輪一次呼叫，完成後停止並等待審圖。
+- 審圖後若要修改，先列出幕號或角色、原因與預估張數；收到明確確認、幕號或「准許重抽」前不得再次呼叫生圖 API。
+- 不得因「不夠好」「再試一次」或 timeout 自動連抽；同幕 timeout 最多重試一次，仍失敗就停下回報。
+- 「修正／檢查／對齊」不等於授權燒額度；`--scene`、`--char`、`generate-character-portraits` 與直接呼叫生成函式都適用本紅線。
+- 角色與場景資產上線前需人工審圖；禁止 bulk approve 或以 `--approve` 覆蓋 Apple 封面 `01.jpg`。
+- 詳細內容管線與驗證依 `docs/AGENT-DOMAIN.md`、`docs/EPISODE-WORKFLOW.md`。
