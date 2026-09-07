@@ -1,0 +1,470 @@
+{
+  "greetingAndExit": {
+    "sceneState": "ready",
+    "phases": [
+      {
+        "atMs": 48,
+        "phase": "approach",
+        "state": "poster"
+      },
+      {
+        "atMs": 9677,
+        "phase": "decelerate",
+        "state": "ready"
+      },
+      {
+        "atMs": 10717,
+        "phase": "settle",
+        "state": "ready"
+      },
+      {
+        "atMs": 11137,
+        "phase": "acknowledge",
+        "state": "ready"
+      },
+      {
+        "atMs": 12531,
+        "phase": "continue",
+        "state": "ready"
+      }
+    ],
+    "video": "recordings/greeting-and-exit-desktop.webm"
+  },
+  "firstVisitRedirect_cpu1x": {
+    "cpuThrottling": "1x",
+    "redirectedAfterMs": 87,
+    "navigations": [
+      {
+        "atMs": 5,
+        "url": "http://127.0.0.1:3000/"
+      },
+      {
+        "atMs": 68,
+        "url": "http://127.0.0.1:3000/"
+      },
+      {
+        "atMs": 87,
+        "url": "http://127.0.0.1:3000/intro"
+      }
+    ],
+    "video": "recordings/first-visit-redirect-cpu1x.webm"
+  },
+  "firstVisitRedirect_cpu6x": {
+    "cpuThrottling": "6x",
+    "redirectedAfterMs": 463,
+    "navigations": [
+      {
+        "atMs": 7,
+        "url": "http://127.0.0.1:3000/"
+      },
+      {
+        "atMs": 357,
+        "url": "http://127.0.0.1:3000/"
+      },
+      {
+        "atMs": 463,
+        "url": "http://127.0.0.1:3000/intro"
+      }
+    ],
+    "video": "recordings/first-visit-redirect-cpu6x.webm"
+  },
+  "landingWaterfall": {
+    "url": "/?enter=1",
+    "totalRequests": 43,
+    "glbRequests": [],
+    "modelPathRequests": [],
+    "scriptsContainingThree": [],
+    "requests": [
+      {
+        "atMs": 7,
+        "type": "document",
+        "status": 200,
+        "bytes": 27715,
+        "url": "/"
+      },
+      {
+        "atMs": 8,
+        "type": "stylesheet",
+        "status": 200,
+        "bytes": 2527,
+        "url": "/_next/static/chunks/3nq44f10zdla_.css"
+      },
+      {
+        "atMs": 10,
+        "type": "stylesheet",
+        "status": 200,
+        "bytes": 3476,
+        "url": "/_next/static/chunks/3fqvr05cqris6.css"
+      },
+      {
+        "atMs": 11,
+        "type": "font",
+        "status": 200,
+        "bytes": 33056,
+        "url": "/_next/static/media/d7d9c82e455b419c-s.p.2zp15__9k16__.woff2"
+      },
+      {
+        "atMs": 12,
+        "type": "font",
+        "status": 200,
+        "bytes": 19648,
+        "url": "/_next/static/media/bb80282eab4f8549-s.p.3rkrels9g7w9t.woff2"
+      },
+      {
+        "atMs": 12,
+        "type": "stylesheet",
+        "status": 200,
+        "bytes": 555,
+        "url": "/_next/static/chunks/15-7pvzlwiuia.css"
+      },
+      {
+        "atMs": 12,
+        "type": "stylesheet",
+        "status": 200,
+        "bytes": 19219,
+        "url": "/_next/static/chunks/1io_d_pxupi_9.css"
+      },
+      {
+        "atMs": 12,
+        "type": "image",
+        "status": 200,
+        "bytes": 74848,
+        "url": "/landing/segment-stories.avif"
+      },
+      {
+        "atMs": 12,
+        "type": "image",
+        "status": 200,
+        "bytes": 19272,
+        "url": "/landing/mascot/dudu-star.webp"
+      },
+      {
+        "atMs": 13,
+        "type": "image",
+        "status": 200,
+        "bytes": 15432,
+        "url": "/mascot.png"
+      },
+      {
+        "atMs": 41,
+        "type": "font",
+        "status": 200,
+        "bytes": 382628,
+        "url": "/_next/static/media/huninn_subset-s.p.1hhbbs4knpy2u.woff2"
+      },
+      {
+        "atMs": 41,
+        "type": "image",
+        "status": 200,
+        "bytes": 5404,
+        "url": "/adventures/map/moon.webp"
+      },
+      {
+        "atMs": 42,
+        "type": "script",
+        "status": 200,
+        "bytes": 2028,
+        "url": "/_next/static/chunks/2rpw_mf-w-x7q.js"
+      },
+      {
+        "atMs": 42,
+        "type": "script",
+        "status": 200,
+        "bytes": 8521,
+        "url": "/_next/static/chunks/0j04tdp9xlz1_.js"
+      },
+      {
+        "atMs": 42,
+        "type": "script",
+        "status": 200,
+        "bytes": 4339,
+        "url": "/_next/static/chunks/turbopack-2im--f_wip_7k.js"
+      },
+      {
+        "atMs": 42,
+        "type": "script",
+        "status": 200,
+        "bytes": 3677,
+        "url": "/_next/static/chunks/0e9bjhlh9-ar7.js"
+      },
+      {
+        "atMs": 42,
+        "type": "script",
+        "status": 200,
+        "bytes": 4212,
+        "url": "/_next/static/chunks/3o_igbl6rtg88.js"
+      },
+      {
+        "atMs": 42,
+        "type": "script",
+        "status": 200,
+        "bytes": 27908,
+        "url": "/_next/static/chunks/2v5wi-0b8hr1l.js"
+      },
+      {
+        "atMs": 42,
+        "type": "script",
+        "status": 200,
+        "bytes": 16946,
+        "url": "/_next/static/chunks/19y-y2ap5dnh0.js"
+      },
+      {
+        "atMs": 42,
+        "type": "script",
+        "status": 200,
+        "bytes": 42779,
+        "url": "/_next/static/chunks/1hq6j1epu_6x0.js"
+      },
+      {
+        "atMs": 42,
+        "type": "script",
+        "status": 200,
+        "bytes": 2138,
+        "url": "/_next/static/chunks/2g8e8_s-0fxes.js"
+      },
+      {
+        "atMs": 42,
+        "type": "script",
+        "status": 200,
+        "bytes": 992,
+        "url": "/_next/static/chunks/3djkluz4j_epj.js"
+      },
+      {
+        "atMs": 42,
+        "type": "script",
+        "status": 200,
+        "bytes": 5625,
+        "url": "/_next/static/chunks/328deoiw5l9mh.js"
+      },
+      {
+        "atMs": 42,
+        "type": "script",
+        "status": 200,
+        "bytes": 73428,
+        "url": "/_next/static/chunks/3qykvueq-7nkf.js"
+      },
+      {
+        "atMs": 66,
+        "type": "image",
+        "status": 200,
+        "bytes": 34148,
+        "url": "/landing/segment-health.avif"
+      },
+      {
+        "atMs": 66,
+        "type": "image",
+        "status": 200,
+        "bytes": 30049,
+        "url": "/landing/segment-clay.avif"
+      },
+      {
+        "atMs": 66,
+        "type": "image",
+        "status": 200,
+        "bytes": 28471,
+        "url": "/landing/segment-bedtime.avif"
+      },
+      {
+        "atMs": 75,
+        "type": "script",
+        "status": 404,
+        "bytes": 0,
+        "url": "/_vercel/insights/script.js"
+      },
+      {
+        "atMs": 75,
+        "type": "image",
+        "status": 200,
+        "bytes": 18590,
+        "url": "/landing/mascot/dudu-happy.webp"
+      },
+      {
+        "atMs": 75,
+        "type": "image",
+        "status": 200,
+        "bytes": 18556,
+        "url": "/landing/mascot/dudu-surprised.webp"
+      },
+      {
+        "atMs": 75,
+        "type": "image",
+        "status": 200,
+        "bytes": 18336,
+        "url": "/landing/mascot/dudu-angry.webp"
+      },
+      {
+        "atMs": 76,
+        "type": "image",
+        "status": 200,
+        "bytes": 19222,
+        "url": "/landing/mascot/dudu-laugh.webp"
+      },
+      {
+        "atMs": 76,
+        "type": "image",
+        "status": 200,
+        "bytes": 17376,
+        "url": "/landing/mascot/dudu-bye.webp"
+      },
+      {
+        "atMs": 83,
+        "type": "fetch",
+        "status": 200,
+        "bytes": 378,
+        "url": "/"
+      },
+      {
+        "atMs": 84,
+        "type": "fetch",
+        "status": 200,
+        "bytes": 0,
+        "url": "/feedback"
+      },
+      {
+        "atMs": 85,
+        "type": "fetch",
+        "status": 200,
+        "bytes": 391,
+        "url": "/stories"
+      },
+      {
+        "atMs": 90,
+        "type": "fetch",
+        "status": 200,
+        "bytes": 2754,
+        "url": "/"
+      },
+      {
+        "atMs": 90,
+        "type": "stylesheet",
+        "status": 200,
+        "bytes": 2368,
+        "url": "/_next/static/chunks/227g5ocf9a8h2.css"
+      },
+      {
+        "atMs": 90,
+        "type": "fetch",
+        "status": 200,
+        "bytes": 18407,
+        "url": "/"
+      },
+      {
+        "atMs": 90,
+        "type": "fetch",
+        "status": 200,
+        "bytes": 0,
+        "url": "/feedback"
+      },
+      {
+        "atMs": 92,
+        "type": "fetch",
+        "status": 200,
+        "bytes": 27935,
+        "url": "/stories"
+      },
+      {
+        "atMs": 96,
+        "type": "script",
+        "status": 200,
+        "bytes": -619,
+        "url": "/_next/static/chunks/0u7mturn8vv8x.js"
+      },
+      {
+        "atMs": 96,
+        "type": "script",
+        "status": 200,
+        "bytes": -619,
+        "url": "/_next/static/chunks/2ng7tnjf7xato.js"
+      }
+    ]
+  },
+  "autoInviteFlicker": {
+    "note": "Landing FCP vs the replace() to /intro. visibleLandingMs is how long a real Landing frame is on screen before it is swapped.",
+    "samples": [
+      {
+        "cpu": "1x",
+        "run": 0,
+        "landingFcpMs": 64,
+        "redirectAfterMs": 92,
+        "visibleLandingMs": 28
+      },
+      {
+        "cpu": "1x",
+        "run": 1,
+        "landingFcpMs": 64,
+        "redirectAfterMs": 87,
+        "visibleLandingMs": 23
+      },
+      {
+        "cpu": "1x",
+        "run": 2,
+        "landingFcpMs": 64,
+        "redirectAfterMs": 91,
+        "visibleLandingMs": 27
+      },
+      {
+        "cpu": "4x",
+        "run": 0,
+        "landingFcpMs": 132,
+        "redirectAfterMs": 284,
+        "visibleLandingMs": 152
+      },
+      {
+        "cpu": "4x",
+        "run": 1,
+        "landingFcpMs": 132,
+        "redirectAfterMs": 295,
+        "visibleLandingMs": 163
+      },
+      {
+        "cpu": "4x",
+        "run": 2,
+        "landingFcpMs": 132,
+        "redirectAfterMs": 280,
+        "visibleLandingMs": 148
+      },
+      {
+        "cpu": "6x",
+        "run": 0,
+        "landingFcpMs": 192,
+        "redirectAfterMs": 435,
+        "visibleLandingMs": 243
+      },
+      {
+        "cpu": "6x",
+        "run": 1,
+        "landingFcpMs": 188,
+        "redirectAfterMs": 433,
+        "visibleLandingMs": 245
+      },
+      {
+        "cpu": "6x",
+        "run": 2,
+        "landingFcpMs": 188,
+        "redirectAfterMs": 429,
+        "visibleLandingMs": 241
+      },
+      {
+        "cpu": "10x",
+        "run": 0,
+        "landingFcpMs": 316,
+        "redirectAfterMs": 747,
+        "visibleLandingMs": 431
+      },
+      {
+        "cpu": "10x",
+        "run": 1,
+        "landingFcpMs": 304,
+        "redirectAfterMs": 728,
+        "visibleLandingMs": 424
+      },
+      {
+        "cpu": "10x",
+        "run": 2,
+        "landingFcpMs": 312,
+        "redirectAfterMs": 722,
+        "visibleLandingMs": 410
+      }
+    ]
+  }
+}

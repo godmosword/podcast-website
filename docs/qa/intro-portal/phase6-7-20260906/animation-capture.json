@@ -1,0 +1,18 @@
+{
+  "viewport": {
+    "name": "desktop-1440x900",
+    "width": 1440,
+    "height": 900
+  },
+  "zero": "scene ready; each screenshot captured on first observation of the runtime active-time phase",
+  "stages": [
+    { "phase": "approach", "scene": "ready", "greeting": "false", "active": "true", "capture": "desktop-1440x900-approach.png" },
+    { "phase": "decelerate", "scene": "ready", "greeting": "false", "active": "true", "capture": "desktop-1440x900-decelerate.png" },
+    { "phase": "stop", "scene": "ready", "greeting": "false", "active": "true", "capture": "desktop-1440x900-stop.png" },
+    { "phase": "settle", "scene": "ready", "greeting": "false", "active": "true", "capture": "desktop-1440x900-settle.png" },
+    { "phase": "acknowledge", "scene": "ready", "greeting": "true", "active": "true", "capture": "desktop-1440x900-acknowledge.png" },
+    { "phase": "continue", "scene": "ready", "greeting": "false", "active": "true", "capture": "desktop-1440x900-continue.png" }
+  ],
+  "missing": ["settled"],
+  "settledCapture": "desktop-1440x900-settled.png (captured after the 18s main motion; auto-sleep may set active=false)"
+}

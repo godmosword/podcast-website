@@ -1,0 +1,27 @@
+{
+  "date": "2026-09-06",
+  "commit": "f6ea724",
+  "branch": "main",
+  "workingTree": "dirty",
+  "scope": "Intro Portal Phase 1 baseline before Phase 4/5 verification",
+  "trackedModified": [
+    "app/layout.tsx",
+    "components/landing/SiteNavBar.tsx",
+    "e2e/public-smoke.spec.ts",
+    "package.json",
+    "package-lock.json"
+  ],
+  "completeV1Assets": {
+    "environment.glb": 254428,
+    "little-red.glb": 83924,
+    "tree.glb": 10696,
+    "poster.webp": 45302,
+    "poster-mobile.webp": 33888
+  },
+  "incompleteV2Assets": ["poster.png"],
+  "unmeasured": [
+    "real-device Safari/Android performance",
+    "field INP",
+    "production immutable asset release"
+  ]
+}

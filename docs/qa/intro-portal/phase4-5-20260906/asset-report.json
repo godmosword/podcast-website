@@ -1,0 +1,18 @@
+{
+  "releaseUsed": "hero-world-v1-existing",
+  "basePath": "/models/hero-world",
+  "assets": [
+    { "path": "environment.glb", "bytes": 254428, "status": "present" },
+    { "path": "little-red.glb", "bytes": 83924, "status": "present" },
+    { "path": "tree.glb", "bytes": 10696, "status": "present" },
+    { "path": "poster.webp", "bytes": 45302, "status": "present" },
+    { "path": "poster-mobile.webp", "bytes": 33888, "status": "present" }
+  ],
+  "v2": {
+    "basePath": "/models/hero-world/v2",
+    "present": ["poster.png"],
+    "missing": ["environment.glb", "little-red.glb", "tree.glb", "poster.webp", "poster-mobile.webp", "manifest.json"],
+    "status": "blocked-until-phase-6"
+  },
+  "note": "No Blender source or geometry was modified in Phase 4/5."
+}

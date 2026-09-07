@@ -1,0 +1,32 @@
+[
+  {
+    "name": "desktop-1440x900",
+    "width": 1440,
+    "height": 900,
+    "status": 200,
+    "readyState": "ready",
+    "canvasCount": 1,
+    "greeting": "false",
+    "models": [
+      "http://127.0.0.1:3000/models/hero-world/v2/environment.glb",
+      "http://127.0.0.1:3000/models/hero-world/v2/little-red.glb",
+      "http://127.0.0.1:3000/models/hero-world/v2/tree.glb"
+    ],
+    "metrics": null
+  },
+  {
+    "name": "mobile-390x844",
+    "width": 390,
+    "height": 844,
+    "status": 200,
+    "readyState": "ready",
+    "canvasCount": 1,
+    "greeting": "true",
+    "models": [
+      "http://127.0.0.1:3000/models/hero-world/v2/environment.glb",
+      "http://127.0.0.1:3000/models/hero-world/v2/little-red.glb",
+      "http://127.0.0.1:3000/models/hero-world/v2/tree.glb"
+    ],
+    "metrics": "{\"fps\":46,\"calls\":51,\"triangles\":19555,\"geometries\":39,\"textures\":4,\"quality\":\"medium\",\"dpr\":1.25}"
+  }
+]

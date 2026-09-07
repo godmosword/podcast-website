@@ -1,0 +1,38 @@
+[
+  {
+    "name": "desktop",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "controlledPoseSeconds": {
+      "approach": 0.65,
+      "decelerate": 4,
+      "stop": 4.54,
+      "settle": 4.72,
+      "acknowledge": 5.55,
+      "continue": 8
+    },
+    "runtimeMetrics": null,
+    "performanceSampled": false,
+    "errors": []
+  },
+  {
+    "name": "mobile",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "controlledPoseSeconds": {
+      "approach": 0.65,
+      "decelerate": 4,
+      "stop": 4.54,
+      "settle": 4.72,
+      "acknowledge": 5.55,
+      "continue": 8
+    },
+    "runtimeMetrics": null,
+    "performanceSampled": false,
+    "errors": []
+  }
+]

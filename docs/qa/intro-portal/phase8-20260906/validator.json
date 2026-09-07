@@ -1,0 +1,355 @@
+
+> chechecar@1.3.0 validate:hero-world
+> node scripts/validate-hero-world.mjs
+
+{
+  "pass": true,
+  "checks": [
+    {
+      "ok": true,
+      "message": "environment.glb exists"
+    },
+    {
+      "ok": true,
+      "message": "environment: glTF validator errors=0"
+    },
+    {
+      "ok": true,
+      "message": "environment: under 1MB"
+    },
+    {
+      "ok": true,
+      "message": "GLB magic header"
+    },
+    {
+      "ok": true,
+      "message": "environment: node Environment"
+    },
+    {
+      "ok": true,
+      "message": "environment: node FerrisRotor"
+    },
+    {
+      "ok": true,
+      "message": "environment: node GondolaPivot0"
+    },
+    {
+      "ok": true,
+      "message": "environment: node GondolaPivot1"
+    },
+    {
+      "ok": true,
+      "message": "environment: node GondolaPivot2"
+    },
+    {
+      "ok": true,
+      "message": "environment: node GondolaPivot3"
+    },
+    {
+      "ok": true,
+      "message": "environment: node GondolaPivot4"
+    },
+    {
+      "ok": true,
+      "message": "environment: node GondolaPivot5"
+    },
+    {
+      "ok": true,
+      "message": "environment: node GondolaPivot6"
+    },
+    {
+      "ok": true,
+      "message": "environment: node GondolaPivot7"
+    },
+    {
+      "ok": true,
+      "message": "environment: FerrisRotor parent"
+    },
+    {
+      "ok": true,
+      "message": "environment: GondolaPivot0 parent"
+    },
+    {
+      "ok": true,
+      "message": "environment: GondolaPivot1 parent"
+    },
+    {
+      "ok": true,
+      "message": "environment: GondolaPivot2 parent"
+    },
+    {
+      "ok": true,
+      "message": "environment: GondolaPivot3 parent"
+    },
+    {
+      "ok": true,
+      "message": "environment: GondolaPivot4 parent"
+    },
+    {
+      "ok": true,
+      "message": "environment: GondolaPivot5 parent"
+    },
+    {
+      "ok": true,
+      "message": "environment: GondolaPivot6 parent"
+    },
+    {
+      "ok": true,
+      "message": "environment: GondolaPivot7 parent"
+    },
+    {
+      "ok": true,
+      "message": "environment: manifest entry"
+    },
+    {
+      "ok": true,
+      "message": "environment: manifest byte count"
+    },
+    {
+      "ok": true,
+      "message": "environment: manifest SHA-256"
+    },
+    {
+      "ok": true,
+      "message": "little-red.glb exists"
+    },
+    {
+      "ok": true,
+      "message": "little-red: glTF validator errors=0"
+    },
+    {
+      "ok": true,
+      "message": "little-red: under 1MB"
+    },
+    {
+      "ok": true,
+      "message": "GLB magic header"
+    },
+    {
+      "ok": true,
+      "message": "little-red: node Vehicle"
+    },
+    {
+      "ok": true,
+      "message": "little-red: node Body"
+    },
+    {
+      "ok": true,
+      "message": "little-red: node Wheel_0"
+    },
+    {
+      "ok": true,
+      "message": "little-red: node Wheel_1"
+    },
+    {
+      "ok": true,
+      "message": "little-red: node Wheel_2"
+    },
+    {
+      "ok": true,
+      "message": "little-red: node Wheel_3"
+    },
+    {
+      "ok": true,
+      "message": "little-red: Body parent"
+    },
+    {
+      "ok": true,
+      "message": "little-red: Wheel_0 parent"
+    },
+    {
+      "ok": true,
+      "message": "little-red: Wheel_1 parent"
+    },
+    {
+      "ok": true,
+      "message": "little-red: Wheel_2 parent"
+    },
+    {
+      "ok": true,
+      "message": "little-red: Wheel_3 parent"
+    },
+    {
+      "ok": true,
+      "message": "little-red: Drive clip"
+    },
+    {
+      "ok": true,
+      "message": "little-red: Drive targets wheels"
+    },
+    {
+      "ok": true,
+      "message": "little-red: manifest entry"
+    },
+    {
+      "ok": true,
+      "message": "little-red: manifest byte count"
+    },
+    {
+      "ok": true,
+      "message": "little-red: manifest SHA-256"
+    },
+    {
+      "ok": true,
+      "message": "tree.glb exists"
+    },
+    {
+      "ok": true,
+      "message": "tree: glTF validator errors=0"
+    },
+    {
+      "ok": true,
+      "message": "tree: under 1MB"
+    },
+    {
+      "ok": true,
+      "message": "GLB magic header"
+    },
+    {
+      "ok": true,
+      "message": "tree: node Tree"
+    },
+    {
+      "ok": true,
+      "message": "tree: node Trunk"
+    },
+    {
+      "ok": true,
+      "message": "tree: node Crown"
+    },
+    {
+      "ok": true,
+      "message": "tree: Trunk parent"
+    },
+    {
+      "ok": true,
+      "message": "tree: Crown parent"
+    },
+    {
+      "ok": true,
+      "message": "tree: manifest entry"
+    },
+    {
+      "ok": true,
+      "message": "tree: manifest byte count"
+    },
+    {
+      "ok": true,
+      "message": "tree: manifest SHA-256"
+    },
+    {
+      "ok": true,
+      "message": "poster.webp exists"
+    },
+    {
+      "ok": true,
+      "message": "poster.webp: WebP format"
+    },
+    {
+      "ok": true,
+      "message": "poster.webp: expected dimensions"
+    },
+    {
+      "ok": true,
+      "message": "poster.webp: manifest byte count"
+    },
+    {
+      "ok": true,
+      "message": "poster.webp: manifest SHA-256"
+    },
+    {
+      "ok": true,
+      "message": "poster.webp: poster budget"
+    },
+    {
+      "ok": true,
+      "message": "poster-mobile.webp exists"
+    },
+    {
+      "ok": true,
+      "message": "poster-mobile.webp: WebP format"
+    },
+    {
+      "ok": true,
+      "message": "poster-mobile.webp: expected dimensions"
+    },
+    {
+      "ok": true,
+      "message": "poster-mobile.webp: manifest byte count"
+    },
+    {
+      "ok": true,
+      "message": "poster-mobile.webp: manifest SHA-256"
+    },
+    {
+      "ok": true,
+      "message": "poster-mobile.webp: poster budget"
+    },
+    {
+      "ok": true,
+      "message": "poster.png lossless master exists"
+    },
+    {
+      "ok": true,
+      "message": "poster.png: expected PNG dimensions"
+    },
+    {
+      "ok": true,
+      "message": "poster.png: manifest byte count"
+    },
+    {
+      "ok": true,
+      "message": "poster.png: manifest SHA-256"
+    },
+    {
+      "ok": true,
+      "message": "total triangles under 40k (16343)"
+    },
+    {
+      "ok": true,
+      "message": "manifest version v3"
+    },
+    {
+      "ok": true,
+      "message": "v3 declares NodeIO derivation, not Blender rebuild"
+    }
+  ],
+  "failures": [],
+  "manifest": {
+    "version": "v3",
+    "generatedAt": "2026-09-07T11:34:55.310Z",
+    "assets": [
+      {
+        "name": "environment",
+        "bytes": 287120,
+        "triangles": 12111
+      },
+      {
+        "name": "little-red",
+        "bytes": 84968,
+        "triangles": 3740
+      },
+      {
+        "name": "tree",
+        "bytes": 12232,
+        "triangles": 492
+      },
+      {
+        "name": "poster.png",
+        "bytes": 490291
+      },
+      {
+        "name": "poster.webp",
+        "bytes": 71332
+      },
+      {
+        "name": "poster-mobile.png",
+        "bytes": 117274
+      },
+      {
+        "name": "poster-mobile.webp",
+        "bytes": 23040
+      }
+    ]
+  }
+}

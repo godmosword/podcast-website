@@ -1,0 +1,65 @@
+# 車車遊樂園 Intro / Portal 實作與驗收
+
+狀態：Phase 1、4、5、6、7 已實作並在本機驗證；Phase 8–13 尚待驗收。依 2026-09-05 最新 Ultimate Prompt 全部 48 節驗收；舊 Hero 文件中的歷史數值不代表新版測量。
+
+本輪 Phase 6/7 證據集中於 [`docs/qa/intro-portal/phase6-7-20260906/`](./qa/intro-portal/phase6-7-20260906/)：v2 manifest／asset report、validator output、desktop/mobile poster／ready／greeting captures、動畫時間線與測試結果。前端已切換至 `/models/hero-world/v2/`；v1 目錄保留作回退。
+
+## Repository findings
+
+Next.js 16 App Router、React 19、TypeScript strict、CSS Modules。首頁由 LandingHub、四個 LandingSegment、專用捲動容器、SegmentNav、BedtimeLayer 和 DuduCompanion 組成。全域 SiteNavBar 提供故事、遊戲、角色、宇宙地圖與家長景點；各功能頁直接以 App Router URL 進入。首頁保留原 metadata、canonical `/`、Podcast JSON-LD、可索引導言與 SSR 連結。故事播放有獨立沉浸式介面，音訊須由使用者啟動。Intro 不引入 Audio 或改寫播放器。
+
+視覺沿用粉圓中文字、Baloo、圓角陶土與暖奶油／紅／薄荷綠。ThemeProvider 含夜間與睡前時間規則；Intro 使用自主美術色，Landing 的主題與睡前層保持原狀。既有 service worker、版本化 Next chunks、圖片最佳化及 Vercel analytics 保留。GLB 已拆成環境、車、實例化樹；SceneLoader 管理 abort 與 dispose，QualityManager 降級，CameraRig 處理手機構圖。先保留這些架構，再改善美術与生命週期細節。
+
+本輪開始前重新檢視路由、layout、首頁、導覽、全域設計規範、字型設定、素材／建模腳本、3D 元件、metadata、sitemap、Next 設定、service worker、package scripts 和 Playwright 設定。修改前桌面與手機實拍已存於 `docs/qa/intro-portal/before-*.png`，可見右下浮動 PNG 與世界內的小紅重複，摩天輪靜止，前庭缺乏明確形狀。
+
+## 三個方向（實作前評估）
+
+| 項目 | A 書封裡的小樂園 | B 故事群島的早晨 | C 小紅的送書路 |
+|---|---|---|---|
+| 情緒 | 開門迎接、親近 | 好奇、遠方故事 | 期待、抵達 |
+| 構圖 | 既有故事屋／環路／慢轉摩天輪，放大 8% | 三個地景、微型橋與車站 | 縱深彎路串起三個故事片段 |
+| 相機 | 克制正交、輕微入園推進 | 高俯角降落至中央站 | 沿路少量前進 |
+| 小紅 | 放慢、懸吊收穩、望向訪客再出發 | 從橋進站、點頭 | 送書後出發 |
+| 環境生命 | 窗光、慢輪、兩株樹微擺 | 遠近兩層樹影、火車煙 | 逐站亮窗 |
+| Blender 資產 | 保留既有模組，拆出輪盤與車廂軸心 | 新增三種地景／橋 | 新增長路與三個分鏡 |
+| 複雜度 | 中，沿用現有架構 | 高 | 高 |
+| 估計 GLB | 0.4–0.7 MB | 1.5–2.5 MB | 1–2 MB |
+| 手機 | 更正面鏡頭，前景車與屋優先 | 單島裁切 | 單一分鏡 |
+| GPU 預算 | <40k triangles、<70 calls | 60k triangles、90 calls | 50k triangles、80 calls |
+| 優勢 | 延续品牌、場景容易讀懂、較少新增資產 | 世界感強 | 敘事清楚 |
+| 風險 | 需靠節奏與材質脫離模型展示感 | 重複既有宇宙地圖產品 | 較易強迫觀看動畫 |
+
+選 A：以現有場景做微敘事與光材質改善，最符合保留架構、低載入成本、立即入站和安靜世界感。煙霧只在確有視覺收益且預算充足時加入；不為增加物件而加細節。
+
+## 路由決策
+
+`/intro` 是獨立書封體驗；`/` 保留原 Landing、canonical、SSR 內容與所有內部連結。首次在本分頁開啟首頁時，引導到 Intro；進入／略過回到 `/?enter=1`，此 URL 永遠可直接訪問 Landing（canonical 仍為 `/`）。sessionStorage 記錄本分頁已訪問，內部深連結訪客不會再被攔截。沒有 JavaScript 或儲存權限時保留可用網站；不利用 user-agent 區分搜尋機器人。Intro 有自己的 metadata，noindex/follow，避免薄內容入口取代主網站搜尋結果。進入使用 replace，Back 不會困在 Intro ↔ Landing 的循環。
+
+## 預算（驗收前設定）
+
+| 項目 | 目標 |
+|---|---|
+| Intro 額外初始 JS | ≤15 KB gzip，不含既有 Next／React 共用殼 |
+| 延遲 3D JS | ≤300 KB gzip |
+| 三個 GLB | <1 MB，優先 <500 KB |
+| Poster | 桌面 <180 KB、手機 <100 KB |
+| 紋理 | 優先無 GLB 紋理；不增 4K 資產 |
+| 場景 | <40k visible triangles、<70 calls |
+| 記憶體 | 離頁卸載 canvas／停止動畫；反覆進入不累積模型、材質與紋理 |
+| DPR | 高 1.5、中 1.25、低 1 |
+| FPS | 能力足夠裝置 60；低階降級維持 30+ 或靜態 |
+| LCP / CLS | 本機冷啟動目標 <2.5s／<0.05；另標註測試條件 |
+| 互動 | Enter 立即可用，轉場 ≤450ms；記錄合成互動延遲，不把實驗室測量稱為真實訪客 INP |
+
+## 待驗收清單
+
+- [ ] 獨立 Intro、最小 HTML UI、原 Landing 吉祥物與內容完整。
+- [ ] 首次／回訪、直接 Landing、深連結、Back、無 JS 行為。
+- [ ] Blender 輪盤慢轉、直立車廂、暖窗、前庭、小紅問候、材質深度、樹擺。
+- [ ] 入園轉場與立即 Enter／略過、reduced motion。
+- [ ] 版本化資產、GLB validator、資源清理與 pause。
+- [ ] 320/360/375/390/414/430、tablet、1440、large desktop 與橫向實拍。
+- [ ] Poster → WebGL 光色／相機一致性。
+- [ ] 全部既有驗證與新 Intro E2E／a11y／fallback 測試。
+- [ ] WebKit 與可用的實體裝置測試；不能執行的項目明確記錄，不冒稱完成。
+- [ ] 前後性能／視覺對照、18 項最終報告與原始碼文件更新。

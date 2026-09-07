@@ -1,0 +1,131 @@
+[
+  {
+    "name": "environment",
+    "bytes": 285676,
+    "gzipBytes": 107642,
+    "sha256": "b06df9e2de8bd7b3e11bc853891d4eae3793f7e9e626048319dc85b7b2ef45d1",
+    "triangles": 12111,
+    "materials": 3,
+    "primitives": 25,
+    "animations": [],
+    "animationDetails": [],
+    "hierarchy": {
+      "required": [
+        "Environment",
+        "FerrisRotor",
+        "GondolaPivot0",
+        "GondolaPivot1",
+        "GondolaPivot2",
+        "GondolaPivot3",
+        "GondolaPivot4",
+        "GondolaPivot5",
+        "GondolaPivot6",
+        "GondolaPivot7"
+      ],
+      "missing": [],
+      "relationships": {
+        "Environment": "Environment",
+        "GondolaPivots": [
+          "FerrisRotor",
+          "FerrisRotor",
+          "FerrisRotor",
+          "FerrisRotor",
+          "FerrisRotor",
+          "FerrisRotor",
+          "FerrisRotor",
+          "FerrisRotor"
+        ]
+      },
+      "animations": [],
+      "nodeCount": 41
+    },
+    "errors": 0,
+    "warnings": 0
+  },
+  {
+    "name": "little-red",
+    "bytes": 84472,
+    "gzipBytes": 27613,
+    "sha256": "03053551c5f398fbedb06a87b9383eff29bee3be6a950d2df79f221c21cf21ce",
+    "triangles": 3740,
+    "materials": 4,
+    "primitives": 12,
+    "animations": [
+      "Drive"
+    ],
+    "animationDetails": [
+      {
+        "name": "Drive",
+        "duration": 2.0416667461395264,
+        "channels": [
+          "Wheel_0",
+          "Wheel_1",
+          "Wheel_2",
+          "Wheel_3"
+        ]
+      }
+    ],
+    "hierarchy": {
+      "required": [
+        "Vehicle",
+        "Body",
+        "Wheel_0",
+        "Wheel_1",
+        "Wheel_2",
+        "Wheel_3"
+      ],
+      "missing": [],
+      "relationships": {
+        "Body": "Vehicle",
+        "Wheels": [
+          "Vehicle",
+          "Vehicle",
+          "Vehicle",
+          "Vehicle"
+        ]
+      },
+      "animations": [
+        {
+          "name": "Drive",
+          "duration": 2.0416667461395264,
+          "channels": [
+            "Wheel_0",
+            "Wheel_1",
+            "Wheel_2",
+            "Wheel_3"
+          ]
+        }
+      ],
+      "nodeCount": 16
+    },
+    "errors": 0,
+    "warnings": 0
+  },
+  {
+    "name": "tree",
+    "bytes": 10716,
+    "gzipBytes": 5309,
+    "sha256": "71ed46069fba279c9ffd33993f3e28db243b23ad746e96879593d8182aa8ddcc",
+    "triangles": 492,
+    "materials": 2,
+    "primitives": 2,
+    "animations": [],
+    "animationDetails": [],
+    "hierarchy": {
+      "required": [
+        "Tree",
+        "Trunk",
+        "Crown"
+      ],
+      "missing": [],
+      "relationships": {
+        "Trunk": "Tree",
+        "Crown": "Tree"
+      },
+      "animations": [],
+      "nodeCount": 3
+    },
+    "errors": 0,
+    "warnings": 0
+  }
+]

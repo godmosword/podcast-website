@@ -1,0 +1,32 @@
+{
+  "version": "v2",
+  "clock": "active frame delta",
+  "arrivalSeconds": 18,
+  "timeline": [
+    { "from": 0, "to": 3.5, "phase": "approach", "behavior": "smooth elliptical approach" },
+    { "from": 3.5, "to": 4.5, "phase": "decelerate", "behavior": "ease-out speed reaches zero continuously" },
+    { "from": 4.5, "to": 4.58, "phase": "stop", "behavior": "grounded stop; wheel clip is held at distance pose" },
+    { "from": 4.58, "to": 4.9, "phase": "settle", "behavior": "subtle Body-only suspension settle; wheels stay grounded" },
+    { "from": 4.9, "to": 6.2, "phase": "acknowledge", "behavior": "single brief body yaw; no eye-tracking claim" },
+    { "from": 6.2, "to": 18, "phase": "continue", "behavior": "smooth-step restart and one remaining loop" },
+    { "from": 18, "to": 24, "phase": "settled", "behavior": "main motion complete; environment may remain active until sleep" }
+  ],
+  "path": {
+    "shape": "ellipse",
+    "semiAxes": { "x": 3.98, "z": 2.48 },
+    "arcLength": 20.569175,
+    "arcSamples": 128,
+    "wheelRadius": 0.275,
+    "wheelCircumference": 1.727876,
+    "fullLoopWheelRotations": 11.904312,
+    "driveClipDurationSeconds": 2.041667,
+    "wheelTimeAtFullLoopSeconds": 24.304639,
+    "mapping": "arc-length lookup → distance / circumference × Drive duration"
+  },
+  "pauseResume": {
+    "hidden": "active clock does not advance",
+    "userPause": "active clock and demand invalidation stop; resume continues from the same elapsed pose",
+    "autoSleep": "24 seconds of cumulative foreground/visible active time, never wall-clock time"
+  },
+  "evidence": "animation-capture.json and desktop-1440x900-{approach,decelerate,settle,acknowledge,continue}.png"
+}

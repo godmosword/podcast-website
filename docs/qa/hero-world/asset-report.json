@@ -1,0 +1,37 @@
+[
+  {
+    "name": "environment",
+    "bytes": 254428,
+    "gzipBytes": 102005,
+    "triangles": 11215,
+    "materials": 2,
+    "primitives": 12,
+    "animations": [],
+    "errors": 0,
+    "warnings": 0
+  },
+  {
+    "name": "little-red",
+    "bytes": 83924,
+    "gzipBytes": 27503,
+    "triangles": 3740,
+    "materials": 1,
+    "primitives": 12,
+    "animations": [
+      "Drive"
+    ],
+    "errors": 0,
+    "warnings": 0
+  },
+  {
+    "name": "tree",
+    "bytes": 10696,
+    "gzipBytes": 5310,
+    "triangles": 492,
+    "materials": 2,
+    "primitives": 2,
+    "animations": [],
+    "errors": 0,
+    "warnings": 0
+  }
+]

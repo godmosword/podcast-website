@@ -1,0 +1,183 @@
+{
+  "version": "v2",
+  "sourceValidation": [
+    {
+      "name": "environment",
+      "bytes": 490236,
+      "warnings": 0,
+      "errors": 0
+    },
+    {
+      "name": "little-red",
+      "bytes": 136176,
+      "warnings": 0,
+      "errors": 0
+    },
+    {
+      "name": "tree",
+      "bytes": 16440,
+      "warnings": 0,
+      "errors": 0
+    }
+  ],
+  "assets": [
+    {
+      "name": "environment",
+      "bytes": 280352,
+      "gzipBytes": 108097,
+      "sha256": "3a41a3f7270cdcfcb300e0820db4905bf11ce6dd9bb1711857b94cae6def2cf7",
+      "triangles": 11897,
+      "materials": 3,
+      "primitives": 23,
+      "animations": [],
+      "animationDetails": [],
+      "hierarchy": {
+        "required": [
+          "Environment",
+          "FerrisRotor",
+          "GondolaPivot0",
+          "GondolaPivot1",
+          "GondolaPivot2",
+          "GondolaPivot3",
+          "GondolaPivot4",
+          "GondolaPivot5",
+          "GondolaPivot6",
+          "GondolaPivot7"
+        ],
+        "missing": [],
+        "relationships": {
+          "Environment": "Environment",
+          "GondolaPivots": [
+            "FerrisRotor",
+            "FerrisRotor",
+            "FerrisRotor",
+            "FerrisRotor",
+            "FerrisRotor",
+            "FerrisRotor",
+            "FerrisRotor",
+            "FerrisRotor"
+          ]
+        },
+        "animations": [],
+        "nodeCount": 41
+      },
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "name": "little-red",
+      "bytes": 84472,
+      "gzipBytes": 27542,
+      "sha256": "b264523e5a555a06d445f5f12374c7c2932d8f495985fb2d3f8adf41430a51d9",
+      "triangles": 3740,
+      "materials": 4,
+      "primitives": 12,
+      "animations": [
+        "Drive"
+      ],
+      "animationDetails": [
+        {
+          "name": "Drive",
+          "duration": 2.0416667461395264,
+          "channels": [
+            "Wheel_0",
+            "Wheel_1",
+            "Wheel_2",
+            "Wheel_3"
+          ]
+        }
+      ],
+      "hierarchy": {
+        "required": [
+          "Vehicle",
+          "Body",
+          "Wheel_0",
+          "Wheel_1",
+          "Wheel_2",
+          "Wheel_3"
+        ],
+        "missing": [],
+        "relationships": {
+          "Body": "Vehicle",
+          "Wheels": [
+            "Vehicle",
+            "Vehicle",
+            "Vehicle",
+            "Vehicle"
+          ]
+        },
+        "animations": [
+          {
+            "name": "Drive",
+            "duration": 2.0416667461395264,
+            "channels": [
+              "Wheel_0",
+              "Wheel_1",
+              "Wheel_2",
+              "Wheel_3"
+            ]
+          }
+        ],
+        "nodeCount": 16
+      },
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "name": "tree",
+      "bytes": 10720,
+      "gzipBytes": 5326,
+      "sha256": "25eb19f75da19adae274ac9dcf9d673447a346cfbe1d6077de565a71e8fbc90b",
+      "triangles": 492,
+      "materials": 2,
+      "primitives": 2,
+      "animations": [],
+      "animationDetails": [],
+      "hierarchy": {
+        "required": [
+          "Tree",
+          "Trunk",
+          "Crown"
+        ],
+        "missing": [],
+        "relationships": {
+          "Trunk": "Tree",
+          "Crown": "Tree"
+        },
+        "animations": [],
+        "nodeCount": 3
+      },
+      "errors": 0,
+      "warnings": 0
+    }
+  ],
+  "posters": [
+    {
+      "name": "poster.png",
+      "role": "lossless-master",
+      "bytes": 966611,
+      "sha256": "73b9c1bc28efc49118929ce9c4fa12a137b0bb9a50397c068ff1b60fc75f534f",
+      "width": 1400,
+      "height": 1000,
+      "format": "png"
+    },
+    {
+      "name": "poster.webp",
+      "role": "wire-poster",
+      "bytes": 46766,
+      "sha256": "b4b096ce55b47135b953f4bc7c98ebf063aae369ee14f602df3ad41400e6c7b0",
+      "width": 1400,
+      "height": 1000,
+      "format": "webp"
+    },
+    {
+      "name": "poster-mobile.webp",
+      "role": "wire-poster",
+      "bytes": 34420,
+      "sha256": "30c2c90cd5d0f88dcab3fb3a57895c8af034ce07d6df2f6910e66422b7a212de",
+      "width": 840,
+      "height": 600,
+      "format": "webp"
+    }
+  ]
+}

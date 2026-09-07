@@ -1,0 +1,5 @@
+# /private/tmp/claude-501/-Users-godmosword-eth-Downloads-podcast-website/0470f729-d92e-472f-9822-1d113b9e8306/scratchpad/optcheck/out/tree.glb
+nodes=3 meshes=2 materials=2 animations=0
+Tree
+  Crown  [mesh=Sphere.030 prims=1 tris=448 T0.035,1.15,0 S0.65,0.65,0.65]
+  Trunk  [mesh=Cylinder.026 prims=1 tris=44 T0,0.55,0 S0.55,0.55,0.55]
