@@ -5,11 +5,13 @@ import { describe, expect, it } from "vitest";
 describe("FeedbackForm.module.css", () => {
   const css = readFileSync(join(import.meta.dirname, "FeedbackForm.module.css"), "utf8");
 
-  it("textarea 滿欄且 min-height ≥120px；同意列與送出鍵 ≥44px", () => {
+  it("textarea 滿欄且 min-height ≥120px；同意列、送出鍵與起頭 chip ≥44px", () => {
     expect(css).toMatch(/\.textarea\s*\{[\s\S]*?width:\s*100%/);
     expect(css).toMatch(/\.textarea\s*\{[\s\S]*?min-height:\s*120px/);
     expect(css).toMatch(/\.consent\s*\{[\s\S]*?min-height:\s*44px/);
     expect(css).toMatch(/\.submit\s*\{[\s\S]*?min-height:\s*44px/);
+    expect(css).toMatch(/\.starter\s*\{[\s\S]*?min-height:\s*44px/);
+    expect(css).toMatch(/\.mailtoButton\s*\{[\s\S]*?min-height:\s*44px/);
   });
 
   it("蜜罐移出畫面，不用 display:none", () => {
@@ -24,6 +26,9 @@ describe("FeedbackForm.module.css", () => {
     );
     expect(css).toMatch(
       /@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\.submit:active[\s\S]*?transform:\s*none/,
+    );
+    expect(css).toMatch(
+      /@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\.starter:active[\s\S]*?transform:\s*none/,
     );
   });
 });

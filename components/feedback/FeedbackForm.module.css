@@ -53,6 +53,61 @@
   outline-offset: 2px;
 }
 
+.startersLabel {
+  margin: 0;
+  font-size: var(--fs-label);
+  color: var(--ink-soft);
+}
+
+.starters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: -4px;
+}
+
+.starter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--hairline);
+  background: var(--warm-chip-bg);
+  color: var(--ink);
+  font-size: var(--fs-control);
+  cursor: pointer;
+  transition: transform var(--motion-press), background var(--motion-press),
+    opacity var(--motion-press);
+}
+
+.starter[aria-pressed="true"] {
+  background: var(--warm-chip-hover);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--hairline));
+  color: var(--accent-ink);
+}
+
+@media (hover: hover) {
+  .starter:hover:not(:disabled) {
+    background: var(--warm-chip-hover);
+  }
+}
+
+.starter:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.starter:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.starter:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
 .messageMeta {
   display: flex;
   justify-content: flex-end;
@@ -63,6 +118,21 @@
   margin: 0;
   font-size: var(--fs-label);
   color: var(--ink-soft);
+}
+
+.parentNote {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-label);
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: 4px;
+  font-size: var(--fs-label);
+  letter-spacing: 0.08em;
+  color: var(--accent-ink);
 }
 
 .consent {
@@ -88,7 +158,8 @@
   flex: none;
 }
 
-.submit {
+.submit,
+.mailtoButton {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -97,12 +168,22 @@
   border: none;
   border-radius: var(--radius-sm);
   font-size: var(--fs-body);
-  cursor: pointer;
   color: var(--landing-brand-ink);
   background: var(--landing-brand);
   box-shadow: var(--shadow-sm);
   transition: transform var(--motion-press), box-shadow var(--motion-press),
     opacity var(--motion-press);
+}
+
+.submit {
+  cursor: pointer;
+}
+
+.mailtoButton {
+  width: fit-content;
+  max-width: 100%;
+  min-height: 44px;
+  text-decoration: none;
 }
 
 .submit:disabled {
@@ -116,7 +197,8 @@
 }
 
 @media (hover: hover) {
-  .submit:hover:not(:disabled) {
+  .submit:hover:not(:disabled),
+  .mailtoButton:hover {
     box-shadow: var(--shadow-md);
   }
 }
@@ -125,7 +207,12 @@
   transform: scale(0.98);
 }
 
-.submit:focus-visible {
+.mailtoButton:active {
+  transform: scale(0.98);
+}
+
+.submit:focus-visible,
+.mailtoButton:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
@@ -146,6 +233,20 @@
   line-height: 1.6;
 }
 
+.unavailable {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.unavailableLead {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  color: var(--ink);
+}
+
 .loading {
   min-height: 3.2em;
   color: var(--ink-soft);
@@ -160,12 +261,6 @@
   transition: opacity var(--motion-enter), transform var(--motion-enter);
 }
 
-.unavailable a {
-  color: var(--accent-ink);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
 .error {
   color: var(--status-error);
 }
@@ -173,6 +268,10 @@
 @media (prefers-reduced-motion: reduce) {
   .submit,
   .submit:active,
+  .mailtoButton,
+  .mailtoButton:active,
+  .starter,
+  .starter:active,
   .success {
     transform: none;
     transition: none;

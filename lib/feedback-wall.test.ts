@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FEEDBACK_WALL_COUNT } from "./feedback-copy";
+import { FEEDBACK_STARTERS, FEEDBACK_WALL_COUNT } from "./feedback-copy";
 import { canShowPublicFeedbackList, FEEDBACK_MIN_PUBLIC_MESSAGES } from "./feedback-wall";
 
 describe("feedback wall 公開門檻", () => {
@@ -21,5 +21,14 @@ describe("feedback wall 公開門檻", () => {
   it("計數文案永不寫「還沒有公開留言」", () => {
     expect(FEEDBACK_WALL_COUNT(0)).not.toContain("還沒有公開留言");
     expect(FEEDBACK_WALL_COUNT(3)).toBe("共 3 則留言");
+  });
+
+  it("起頭句是三句可改的靜態文案", () => {
+    expect(FEEDBACK_STARTERS).toHaveLength(3);
+    expect(FEEDBACK_STARTERS.map((item) => item.label)).toEqual([
+      "想聽挖土機",
+      "最喜歡小紅賽車",
+      "謝謝馬米說故事",
+    ]);
   });
 });

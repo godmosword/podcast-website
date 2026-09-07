@@ -8,9 +8,15 @@ import {
   type FeedbackActionState,
 } from "@/lib/feedback-action";
 import {
+  FEEDBACK_EYEBROW,
+  FEEDBACK_INVITE_PARENT,
   FEEDBACK_LOADING_LABEL,
+  FEEDBACK_MAILTO_LEAD,
   FEEDBACK_MAILTO_LINK,
+  FEEDBACK_MESSAGE_LABEL,
   FEEDBACK_NICKNAME_LABEL,
+  FEEDBACK_REVIEW_LEAD,
+  FEEDBACK_STARTERS,
   FEEDBACK_SUBMIT_DISABLED_HINT,
   FEEDBACK_SUBMIT_LABEL,
   FEEDBACK_SUCCESS,
@@ -47,10 +53,33 @@ describe("FeedbackForm", () => {
     expect(screen.getByRole("button", { name: FEEDBACK_SUBMIT_LABEL })).toBeTruthy();
   });
 
-  test("unavailable 時顯示 mailto 降級", () => {
+  test("起頭 chip 寫進留言欄，可改", () => {
+    render(<FeedbackForm available />);
+    const starter = FEEDBACK_STARTERS[0];
+    fireEvent.click(screen.getByRole("button", { name: starter.label }));
+    expect(
+      (screen.getByRole("textbox", { name: FEEDBACK_MESSAGE_LABEL }) as HTMLTextAreaElement)
+        .value,
+    ).toBe(starter.text);
+    expect(
+      screen.getByRole("button", { name: starter.label }).getAttribute("aria-pressed"),
+    ).toBe("true");
+
+    fireEvent.click(screen.getByRole("button", { name: FEEDBACK_STARTERS[1].label }));
+    expect(
+      (screen.getByRole("textbox", { name: FEEDBACK_MESSAGE_LABEL }) as HTMLTextAreaElement)
+        .value,
+    ).toBe(FEEDBACK_STARTERS[1].text);
+  });
+
+  test("unavailable 時顯示 mailto 降級與家長註記", () => {
     render(<FeedbackForm available={false} />);
     const link = screen.getByRole("link", { name: FEEDBACK_MAILTO_LINK });
     expect(link.getAttribute("href")).toBe(feedbackMailtoHref());
+    expect(screen.getByText(FEEDBACK_MAILTO_LEAD)).toBeTruthy();
+    expect(screen.getByText(FEEDBACK_EYEBROW)).toBeTruthy();
+    expect(screen.getByText(FEEDBACK_INVITE_PARENT, { exact: false })).toBeTruthy();
+    expect(screen.getByText(FEEDBACK_REVIEW_LEAD, { exact: false })).toBeTruthy();
     expect(screen.queryByRole("textbox", { name: FEEDBACK_NICKNAME_LABEL })).toBeNull();
   });
 

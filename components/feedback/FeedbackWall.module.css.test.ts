@@ -18,10 +18,16 @@ describe("FeedbackWall.module.css", () => {
     );
   });
 
-  it("真留言是 hairline 列，示範卡是虛線獨立容器", () => {
+  it("真留言是 hairline 列，示範卡是實線暖面", () => {
     expect(css).toMatch(/\.item\s*\{[\s\S]*?border-bottom:\s*1px solid var\(--hairline\)/);
-    expect(css).toMatch(/\.demo\s*\{[\s\S]*?border:\s*1\.5px dashed/);
-    expect(css).toMatch(/\.demo\s*\{[\s\S]*?background:\s*var\(--bg-2\)/);
+    expect(css).toMatch(/\.demo\s*\{[\s\S]*?border:\s*1px solid var\(--hairline\)/);
+    expect(css).toMatch(/\.demo\s*\{[\s\S]*?background:\s*var\(--warm-surface\)/);
+    expect(css).not.toMatch(/\.demo\s*\{[\s\S]*?dashed/);
+  });
+
+  it("圓章混色約 40%，讓粉嫩色在夜間看得見", () => {
+    expect(css).toMatch(/--c-pink\) 40%/);
+    expect(css).toMatch(/--c-yellow\) 40%/);
   });
 
   it("空牆 CTA 觸控區 ≥44px，正文可折行", () => {

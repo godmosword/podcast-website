@@ -12,6 +12,7 @@
 ### Changed
 
 - **`/feedback` 表單立刻可填＋牆先示範**：表單改 SSR／Server Action（蜜罐、最短填寫時間），不再等 `GET /api/feedback` 才畫欄位。邀請改兩段＋頁面可見審核句。核准少於 3 則只顯示馬米示範，不寫「還沒有公開留言」。信箱仍必填、永不公開；資料續寫 Neon。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
+- **`/feedback` 馬米信箱**：首屏改馬米定裝身份層＋對話泡泡；「給家長」與審核句移到同意列；表單改信紙暖面與起頭 chip；mailto 關站態改大觸控鈕；示範卡改實線暖面。公開契約不變（先審後發、信箱不公開、真留言 hairline 列）。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、Vercel `DATABASE_URL`。
 - **`/about` 只留馬米原稿**：拿掉「這是什麼？」「怎麼使用？」「用車種找故事」三區塊。漢堡抽屜「關於我們」仍連此頁。**未改** Apple sync workflow。
 - **漢堡抽屜加「關於我們」**：探索組最後一列（宇宙地圖與「給爸媽」之間）連 `/about`；頁首放馬米原稿。**未改** Apple sync workflow。
 - **整站拿掉內頁左下 KidsPlayDock**：不再渲染「全部故事／遊樂園／宇宙地圖」三連與 `--kids-dock-h` 底距；兒童三入口只由漢堡抽屜承接。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。

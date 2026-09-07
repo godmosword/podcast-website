@@ -10,4 +10,12 @@ describe("feedback page.module.css", () => {
     expect(css).not.toContain(".inviteLines");
     expect(css).not.toContain(".inviteLine");
   });
+
+  it("頁底暖色帶、馬米相框與對話泡泡", () => {
+    expect(css).toMatch(/\.main\s*\{[\s\S]*?--page-warm-from/);
+    expect(css).toContain(".portraitMat");
+    expect(css).toContain(".bubble");
+    expect(css).not.toContain(".mascot");
+    expect(css).toMatch(/\.formSection\s*\{[\s\S]*?background:\s*var\(--warm-surface\)/);
+  });
 });

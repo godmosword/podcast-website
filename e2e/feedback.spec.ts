@@ -5,9 +5,11 @@ import {
   FEEDBACK_INVITE_CHILD,
   FEEDBACK_INVITE_PARENT,
   FEEDBACK_MAILTO_LINK,
+  FEEDBACK_MESSAGE_LABEL,
   FEEDBACK_NICKNAME_LABEL,
   FEEDBACK_PAGE_TITLE,
   FEEDBACK_REVIEW_LEAD,
+  FEEDBACK_STARTERS,
   FEEDBACK_SUBMIT_DISABLED_HINT,
   FEEDBACK_SUBMIT_LABEL,
 } from "../lib/feedback-copy";
@@ -53,6 +55,21 @@ test.describe("站內留言牆 /feedback", () => {
       await expect(demo).toContainText(FEEDBACK_DEMO_NICKNAME);
     }
     await expect(page.getByText("還沒有公開留言")).toHaveCount(0);
+  });
+
+  test("有表單時起頭 chip 寫進留言欄", async ({ page }) => {
+    await page.goto("/feedback");
+    const starter = FEEDBACK_STARTERS[0];
+    const chip = page.getByRole("button", { name: starter.label });
+    if ((await chip.count()) === 0) {
+      await expect(page.getByRole("link", { name: FEEDBACK_MAILTO_LINK })).toBeVisible();
+      return;
+    }
+
+    await chip.click();
+    await expect(page.getByRole("textbox", { name: FEEDBACK_MESSAGE_LABEL })).toHaveValue(
+      starter.text,
+    );
   });
 
   test("有表單時未勾兩項同意不能送", async ({ page }) => {

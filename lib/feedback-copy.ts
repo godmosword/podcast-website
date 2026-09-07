@@ -14,8 +14,7 @@ export const FEEDBACK_INVITE_CHILD =
 
 export const FEEDBACK_INVITE_PARENT = "可以讓孩子說、爸媽幫忙打字。";
 
-export const FEEDBACK_REVIEW_LEAD =
-  "留言經家長同意，且馬米看過之後，才會出現在下面的留言牆。";
+export const FEEDBACK_REVIEW_LEAD = "家長同意、馬米看過之後，才會貼上牆。";
 
 /** textarea id，空牆 CTA 用 hash 對準（無 JS 也能跳）。 */
 export const FEEDBACK_MESSAGE_FIELD_ID = "feedback-message";
@@ -29,6 +28,14 @@ export const FEEDBACK_EMAIL_HINT = "這個當做蒐集資料，不會顯示在�
 export const FEEDBACK_MESSAGE_LABEL = "你最想說的話";
 
 export const FEEDBACK_MESSAGE_HINT = "也歡迎寫下想聽的故事。";
+
+export const FEEDBACK_STARTERS_LABEL = "先選一句試試看";
+
+export const FEEDBACK_STARTERS = [
+  { id: "excavator", label: "想聽挖土機", text: "我想聽挖土機的故事。" },
+  { id: "xiao-hong", label: "最喜歡小紅賽車", text: "我最喜歡小紅賽車。" },
+  { id: "thanks", label: "謝謝馬米說故事", text: "謝謝馬米說故事。" },
+] as const;
 
 export const FEEDBACK_SUBMIT_LABEL = "我要留言";
 
@@ -53,9 +60,9 @@ export const FEEDBACK_VALIDATION_ERROR = "請檢查必填欄位與信箱格式�
 
 export const FEEDBACK_RATE_LIMITED = "留言有點多，請稍後再試。";
 
-export const FEEDBACK_MAILTO_LEAD = "線上留言暫時關起來了，請改用";
+export const FEEDBACK_MAILTO_LEAD = "馬米暫時用 email 收信。";
 
-export const FEEDBACK_MAILTO_LINK = "email 留言";
+export const FEEDBACK_MAILTO_LINK = "用 email 留言";
 
 export const FEEDBACK_MAILTO_SUBJECT = "留言給車車遊樂園";
 

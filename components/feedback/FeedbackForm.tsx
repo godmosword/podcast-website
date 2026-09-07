@@ -13,6 +13,8 @@ import {
   FEEDBACK_CHAR_REMAINING,
   FEEDBACK_EMAIL_HINT,
   FEEDBACK_EMAIL_LABEL,
+  FEEDBACK_EYEBROW,
+  FEEDBACK_INVITE_PARENT,
   FEEDBACK_MAILTO_LEAD,
   FEEDBACK_MAILTO_LINK,
   FEEDBACK_MESSAGE_FIELD_ID,
@@ -23,6 +25,9 @@ import {
   FEEDBACK_PARENT_CONSENT_BEFORE,
   FEEDBACK_PARENT_CONSENT_LINK,
   FEEDBACK_PUBLISH_CONSENT,
+  FEEDBACK_REVIEW_LEAD,
+  FEEDBACK_STARTERS,
+  FEEDBACK_STARTERS_LABEL,
   FEEDBACK_SUBMIT_DISABLED_HINT,
   FEEDBACK_SUBMIT_LABEL,
 } from "@/lib/feedback-copy";
@@ -40,6 +45,7 @@ export default function FeedbackForm({ available }: Props) {
   const parentConsentId = useId();
   const publishConsentId = useId();
   const honeypotId = useId();
+  const startersId = useId();
 
   const [state, formAction, pending] = useActionState(submitFeedback, FEEDBACK_ACTION_IDLE);
   const [nickname, setNickname] = useState("");
@@ -71,10 +77,16 @@ export default function FeedbackForm({ available }: Props) {
 
   if (showMailto) {
     return (
-      <p className={styles.unavailable}>
-        {FEEDBACK_MAILTO_LEAD}{" "}
-        <Link href={feedbackMailtoHref()}>{FEEDBACK_MAILTO_LINK}</Link>
-      </p>
+      <div className={styles.unavailable}>
+        <p className={styles.unavailableLead}>{FEEDBACK_MAILTO_LEAD}</p>
+        <Link className={styles.mailtoButton} href={feedbackMailtoHref()}>
+          {FEEDBACK_MAILTO_LINK}
+        </Link>
+        <p className={styles.parentNote}>
+          <span className={styles.eyebrow}>{FEEDBACK_EYEBROW}</span>
+          {FEEDBACK_INVITE_PARENT} {FEEDBACK_REVIEW_LEAD}
+        </p>
+      </div>
     );
   }
 
@@ -136,6 +148,26 @@ export default function FeedbackForm({ available }: Props) {
       <label className={styles.label} htmlFor={messageId}>
         {FEEDBACK_MESSAGE_LABEL}
       </label>
+      <p id={startersId} className={styles.startersLabel}>
+        {FEEDBACK_STARTERS_LABEL}
+      </p>
+      <div className={styles.starters} role="group" aria-labelledby={startersId}>
+        {FEEDBACK_STARTERS.map((starter) => {
+          const pressed = message === starter.text;
+          return (
+            <button
+              key={starter.id}
+              type="button"
+              className={styles.starter}
+              aria-pressed={pressed}
+              disabled={pending}
+              onClick={() => setMessage(starter.text)}
+            >
+              {starter.label}
+            </button>
+          );
+        })}
+      </div>
       <textarea
         id={messageId}
         className={styles.textarea}
@@ -155,6 +187,11 @@ export default function FeedbackForm({ available }: Props) {
           {FEEDBACK_CHAR_REMAINING(remaining)}
         </p>
       </div>
+
+      <p className={styles.parentNote}>
+        <span className={styles.eyebrow}>{FEEDBACK_EYEBROW}</span>
+        {FEEDBACK_INVITE_PARENT} {FEEDBACK_REVIEW_LEAD}
+      </p>
 
       <label className={styles.consent} htmlFor={parentConsentId}>
         <input
