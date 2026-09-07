@@ -193,7 +193,7 @@ export default function SiteNavBar() {
     return () => mql.removeEventListener("change", onChange);
   }, [closeAll]);
 
-  if (playMode) return null;
+  if (playMode || pathname === "/intro") return null;
 
   const exploreRows = MENU_ROWS.filter((r) => !MOBILE_PARENT_GROUP_IDS.has(r.id));
   const parentRows = MENU_ROWS.filter((r) => MOBILE_PARENT_GROUP_IDS.has(r.id));

@@ -18,3 +18,13 @@ Bonbon & 馬米的親子 podcast「看圖聽故事」網站（Next.js App Router
 - QA、review、design、ship 等命令只在使用者明確要求或任務風險達到相應門檻時使用。
 
 命令檔是環境適配層；風險分級、審查門檻、Bootstrap 與完成邊界以 `docs/AGENT-WORKFLOW.md` 為準。
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

@@ -56,6 +56,8 @@
     "generate:page-freshness": "tsx scripts/generate-page-freshness.ts",
     "optimize:roamer-assets": "tsx scripts/optimize-roamer-assets.ts",
     "optimize:adventures": "tsx scripts/optimize-adventure-assets.ts",
+    "optimize:hero-world": "node scripts/optimize-hero-world.mjs",
+    "validate:hero-world": "node scripts/validate-hero-world.mjs",
     "optimize:lcp-images": "tsx scripts/optimize-lcp-images.ts",
     "generate:story-blurs": "tsx scripts/generate-story-blurs.ts",
     "generate:coloring-lineart": "tsx scripts/generate-coloring-lineart.ts",

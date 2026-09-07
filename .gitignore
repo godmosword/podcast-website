@@ -74,3 +74,17 @@ next-env.d.ts
 /docs/metrics/*.png
 /docs/metrics/*.csv
 /docs/metrics/weekly-*.md
+
+# Cursor 本機計畫檔（編輯器產物，勿入庫）
+/.cursor/
+
+# Blender 自動備份（每次存檔重產，勿入庫）
+*.blend1
+
+# build.py 的中間產物；由 `blender -b -P assets/blender/hero-world/build.py`
+# 重新產生，入庫只會留下比腳本還舊的誤導性來源證據
+/assets/blender/hero-world/export/
+
+# QA 截圖與錄影（體積大，人工判讀用；文字報告與 JSON 量測仍入庫）
+/docs/qa/**/*.png
+/docs/qa/**/*.webm
