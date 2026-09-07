@@ -42,7 +42,11 @@ function collectRuntimeFailures(page: Page): string[] {
 
 async function expectPublicRoute(page: Page, path: string): Promise<void> {
   const failures = collectRuntimeFailures(page);
-  const response = await page.goto(path, { waitUntil: "domcontentloaded" });
+  // The public smoke suite validates Landing itself. Bypass the optional
+  // first-session invitation so the route loop does not turn this regression
+  // suite into an Intro test.
+  const target = path === "/" ? "/?enter=1" : path;
+  const response = await page.goto(target, { waitUntil: "domcontentloaded" });
   expect(response?.status(), `${path} response`).toBe(200);
   // Story playback and the landing hub intentionally control document
   // scrolling; the visible h1 below is the content assertion we need here.

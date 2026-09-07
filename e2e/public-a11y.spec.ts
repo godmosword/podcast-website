@@ -39,7 +39,10 @@ async function expectAccessible(page: Page, path: string): Promise<void> {
       JSON.stringify({ preferences: { theme: "light" } }),
     );
   });
-  await page.goto(path, { waitUntil: "domcontentloaded" });
+  // Keep this gate focused on Landing. The optional first-session invitation
+  // has its own Intro Portal coverage.
+  const target = path === "/" ? "/?enter=1" : path;
+  await page.goto(target, { waitUntil: "domcontentloaded" });
   await expect(page.locator("html")).toBeVisible();
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
