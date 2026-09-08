@@ -5,7 +5,6 @@ import { Analytics } from "@vercel/analytics/react";
 import JsonLd from "@/components/JsonLd";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import ReturnVisitPing from "@/components/ReturnVisitPing";
-import IntroVisit from "@/components/intro/IntroVisit";
 import SiteNavBar from "@/components/landing/SiteNavBar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { siteIdentityJsonLd } from "@/lib/json-ld";
@@ -116,7 +115,6 @@ export default function RootLayout({
             跳到主內容
           </a>
           <div className="site-backdrop" aria-hidden />
-          <IntroVisit />
           <SiteNavBar />
           <div id="main-content" tabIndex={-1} className="site-root">
             {children}

@@ -32,43 +32,67 @@ test.describe("Intro Portal · Phase 4 route and entry", () => {
     await expect(page.locator("[data-landing-root]")).toBeVisible();
   });
 
-  test("invites a fresh bare home visit once, while direct and deep links bypass", async ({ browser }) => {
+  // ADR-0003: `/` is always Landing. R09 (opening /intro on purpose) and the
+  // opt-in entry link replace the retired first-visit redirect (R01-R07/R12).
+  test("R09: a fresh visit stays on Landing and offers an SSR link into the intro", async ({ browser }) => {
     const context = await browser.newContext();
     const page = await context.newPage();
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    await expect(page).toHaveURL(/\/intro$/);
-    await page.goto("/stories", { waitUntil: "domcontentloaded" });
-    await expect(page).toHaveURL(/\/stories$/);
-    await page.goto("/", { waitUntil: "domcontentloaded" });
     await expect(page).toHaveURL(/\/$/);
-    await page.goto("/?enter=1", { waitUntil: "domcontentloaded" });
     await expect(page.locator("[data-landing-root]")).toBeVisible();
-    await page.goto("/stories", { waitUntil: "domcontentloaded" });
-    await page.goBack({ waitUntil: "domcontentloaded" });
-    await expect(page).toHaveURL(/\/\?enter=1$/);
-    await expect(page.locator("[data-landing-root]")).toBeVisible();
+    // The link must be in the server response, not only after hydration.
+    const html = await (await context.request.get("/")).text();
+    expect(html).toContain('href="/intro"');
+    const entry = page.getByRole("link", { name: /看小紅開進遊樂園/ });
+    await expect(entry).toHaveAttribute("href", "/intro");
+    await entry.click();
+    await expect(page).toHaveURL(/\/intro$/);
+    await expect(page.getByRole("heading", { name: "車車遊樂園" })).toBeVisible();
     await context.close();
   });
 
-  test("fails open when session storage is blocked", async ({ page }) => {
-    await page.addInitScript(() => {
-      Object.defineProperty(window, "sessionStorage", {
-        configurable: true,
-        get() {
-          throw new DOMException("blocked", "SecurityError");
-        },
-      });
-    });
+  test("R08: Back and Forward move between Landing and Intro without a redirect loop", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
+    await page.getByRole("link", { name: /看小紅開進遊樂園/ }).click();
+    await expect(page).toHaveURL(/\/intro$/);
+    await page.goBack({ waitUntil: "domcontentloaded" });
     await expect(page).toHaveURL(/\/$/);
     await expect(page.locator("[data-landing-root]")).toBeVisible();
+    await page.goForward({ waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/intro$/);
+    await page.goBack({ waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/$/);
   });
 
-  test("keeps both content and the native intro link usable without JavaScript", async ({ browser }) => {
+  test("R11: a modifier click on Enter keeps native link semantics", async ({ page }) => {
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    const enter = page.getByRole("link", { name: /進入車車遊樂園/ });
+    await enter.click({ modifiers: ["Shift"] });
+    await expect(page).toHaveURL(/\/intro$/);
+  });
+
+  test("deep links and Landing never download the hero models", async ({ page }) => {
+    const requests: string[] = [];
+    page.on("request", (request) => {
+      if (MODEL_URL.test(request.url())) requests.push(request.url());
+    });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("[data-landing-root]")).toBeVisible();
+    await page.goto("/stories", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/stories$/);
+    await page.goto("/?enter=1", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("[data-landing-root]")).toBeVisible();
+    // canonical stays the bare Landing URL; `?enter=1` is only an entry marker.
+    await expect(page.locator("link[rel='canonical']")).toHaveAttribute("href", /^https?:\/\/[^?#]+\/?$/);
+    await expect.poll(() => requests.length, { timeout: 1_500 }).toBe(0);
+  });
+
+  test("R10: keeps both content and the native intro links usable without JavaScript", async ({ browser }) => {
     const context = await browser.newContext({ javaScriptEnabled: false });
     const page = await context.newPage();
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await expect(page.locator("[data-landing-root]")).toBeVisible();
+    await expect(page.getByRole("link", { name: /看小紅開進遊樂園/ })).toHaveAttribute("href", "/intro");
     await page.goto("/intro", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: "車車遊樂園" })).toBeVisible();
     await expect(page.getByRole("link", { name: "略過動畫" })).toHaveAttribute("href", "/?enter=1");
