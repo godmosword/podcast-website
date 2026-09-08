@@ -338,6 +338,16 @@ const COMPONENT_SHOTS: {
     locator: (page: Page) =>
       page.locator("#segment-stories [class*='ctaRow']"),
   },
+  {
+    id: "landing-intro-entry",
+    name: "Landing IntroEntry",
+    path: "/",
+    viewport: { width: 390, height: 844 },
+    // ADR-0003 的唯一 Intro 入口。元素級截圖讓文案、縮圖裁切、觸控尺寸
+    // 的回歸不會被 Landing 全頁的像素容差稀釋。
+    locator: (page: Page) =>
+      page.getByRole("link", { name: "看小紅開進遊樂園" }),
+  },
 ];
 
 test.setTimeout(120_000);
@@ -365,7 +375,7 @@ for (const pageDef of VISUAL_PAGES) {
         await page.goto(pageDef.path);
         await stabilizeVisualPage(page, { theme });
         if (pageDef.id === "feedback") {
-          // 表單在初始 HTML；牆可能是示範卡或 ≥3 則列表，等殼穩定再截。
+          // 表單在初始 HTML；牆可能是空牆 CTA 或已核准列表，等殼穩定再截。
           await expect(
             page.getByRole("heading", { name: "留言給馬米", level: 1 }),
           ).toBeVisible();
@@ -373,7 +383,7 @@ for (const pageDef of VISUAL_PAGES) {
             page.getByRole("heading", { name: "大家的留言", level: 2 }),
           ).toBeVisible();
           await expect(
-            page.getByLabel("示範留言").or(page.getByRole("list")),
+            page.getByRole("link", { name: "當第一個留言" }).or(page.getByLabel("公開留言牆").getByRole("list")),
           ).toBeVisible();
         }
         const masks = volatileMasks(page, pageDef.id);
@@ -485,3 +495,55 @@ test("visual：內頁不顯示 KidsPlayDock", async ({ page }) => {
   await stabilizeVisualPage(page, { theme: "light" });
   await expect(page.getByRole("navigation", { name: "去玩" })).toHaveCount(0);
 });
+
+/**
+ * Intro 核心畫面 baseline：poster、ready、greeting 各自固定在批准的
+ * desktop／mobile viewport。`heroQa=1` 讓 Vehicle 讀取注入的時間點，
+ * 因此 ready 與 greeting 不依賴某一幀剛好落在截圖前；poster 則走
+ * reduced-motion 的靜態路徑，保證不會因 900ms warm-up race 而誤拍 live scene。
+ */
+const INTRO_VISUAL_VIEWPORTS = [
+  { width: 1440, height: 900, label: "1440x900" },
+  { width: 390, height: 844, label: "390x844" },
+] as const;
+const INTRO_VISUAL_STATES = ["poster", "ready", "greeting"] as const;
+
+for (const viewport of INTRO_VISUAL_VIEWPORTS) {
+  for (const state of INTRO_VISUAL_STATES) {
+    test(`visual：Intro ${viewport.label} ${state}`, async ({ page }) => {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      if (state === "poster") {
+        await page.emulateMedia({ reducedMotion: "reduce" });
+      } else {
+        await page.emulateMedia({ reducedMotion: "no-preference" });
+        await page.addInitScript((seconds: number) => {
+          (window as unknown as { __HERO_WORLD_QA_TIME?: number }).__HERO_WORLD_QA_TIME = seconds;
+        }, state === "greeting" ? 5.55 : 0);
+      }
+
+      await page.goto(state === "poster" ? "/intro" : "/intro?heroQa=1");
+      await stabilizeVisualPage(page, { theme: "light" });
+      const hero = page.locator("[data-hero-world]");
+      if (state === "poster") {
+        await expect(hero).toHaveAttribute("data-scene-state", "poster");
+        await expect(hero.locator("canvas")).toHaveCount(0);
+      } else {
+        await expect(hero).toHaveAttribute("data-scene-state", "ready", { timeout: 20_000 });
+        await expect(hero).toHaveAttribute(
+          "data-motion-phase",
+          state === "greeting" ? "acknowledge" : "approach",
+          { timeout: 5_000 },
+        );
+        if (state === "greeting") await expect(hero).toHaveAttribute("data-greeting", "true");
+      }
+      await expect(page).toHaveScreenshot(
+        `intro-${state}-${viewport.label}-light.png`,
+        {
+          fullPage: false,
+          maxDiffPixelRatio: 0.02,
+          animations: "disabled",
+        },
+      );
+    });
+  }
+}

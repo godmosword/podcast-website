@@ -6,7 +6,9 @@
 - 測試檔：[`e2e/intro-portal.spec.ts`](../../../e2e/intro-portal.spec.ts)（53 個 test）、[`components/landing/hero-world/active-clock.test.ts`](../../../components/landing/hero-world/active-clock.test.ts)（`IntroVisit.test.ts` 已隨自動邀請一起刪除）
 - 執行環境（2026-09-08 首次驗收）：Claude Code 遠端容器 Linux、Chromium（Playwright 1.60，**軟體算圖**）、`npm run build` 後 `next start -p 3000`，`--workers=1`
 - 執行環境（2026-09-08 合併 main 後複驗）：本機 macOS（Darwin 25.6.0）、Chromium、預設平行 workers（`fullyParallel: true`）
-- 結果：**52 passed / 1 failed**（macOS 全檔平行）。唯一失敗是 `F11: five Intro↔Landing round trips…`：五輪來回中某一輪的 `data-scene-state` 未在 12 秒內轉為 `ready`。**單獨執行同一條測試穩定通過**（25.2s），且在**合併前的分支**（`5245be6`）上以同樣方式執行也會失敗，因此是既有的負載敏感 flake，不是本次合併造成的迴歸。CI 有 `retries: 2`，容器內 `--workers=1` 時 70 條全綠。**尚未修**：待決定是放寬該輪的 poll timeout 還是把 F11 序列化。
+- 執行環境（2026-09-08 最終乾淨複驗）：獨立 clean worktree、本機 macOS、Chromium；Intro E2E 以 `--workers=1`，再補 F11 重複平行壓測
+- 最終結果：Intro E2E **53 passed / 0 failed**；F11 單獨與重複平行執行皆通過。另有 public smoke／a11y **17 passed**，trusted visual **81 passed**（含 Intro poster／ready／greeting 與 Landing Intro 入口 baseline）。
+- 先前 macOS 全檔平行的 **52 passed / 1 failed** 是 F11 在 CPU 競爭下的既有 flake；同一條測試單獨執行穩定通過，且在合併前的 `5245be6` 也可重現。這次以本地 v3 fixture、`heroQa` 時鐘與 lifecycle signal 固定場景後，F11 的場景請求、page error 與 listener／canvas 清理都納入斷言。CI 有 `retries: 2`。
 - 舊結果（容器、`--workers=1`）：**20 passed / 0 failed**。驗收當下 `runs the signature phases once and pauses active time` 曾在軟體算圖下失敗，追查為既有缺陷（動畫以 `Math.min(delta, .05)` 累加 render delta，低幀率把時間軸拉長），已於 2026-09-08 修正並補回歸測試，見 [`v3-clean-rebuild-20260908/frame-rate-timeline.md`](./v3-clean-rebuild-20260908/frame-rate-timeline.md)
 
 ## 狀態定義
@@ -29,7 +31,7 @@
 |---|---|---|---|
 | R08 | Back／Forward 在 Landing↔Intro 間正常往返，無 redirect 迴圈 | PASS | `R08: Back and Forward move between Landing and Intro without a redirect loop` |
 | R09 | 新訪客停在 Landing，首段有 SSR `/intro` 連結可點進 Intro | PASS | `R09: a fresh visit stays on Landing and offers an SSR link into the intro`（另檢查 server HTML 內含 `href="/intro"`） |
-| R10 | JS disabled：Landing 內容與兩個 Intro 連結都可用 | PASS | `R10: keeps both content and the native intro links usable without JavaScript` |
+| R10 | JS disabled：Landing 內容與首段 Intro 入口都可用 | PASS | `R10: keeps Landing content and the native intro entry usable without JavaScript` |
 | R11 | 修飾鍵點 Enter 保留原生連結語意 | PASS | `R11: a modifier click on Enter keeps native link semantics` |
 | － | `/`、深連結、`/?enter=1` 都不下載 GLB，且 canonical 仍是 `/` | PASS | `deep links and Landing never download the hero models` |
 

@@ -1,7 +1,15 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
 const MODEL_URL = /\/models\/hero-world\/(?:v[23]\/)?[^/]+\.glb(?:\?.*)?$/;
+const MODEL_FIXTURES = new Map(
+  ["environment.glb", "tree.glb", "little-red.glb"].map((name) => [
+    name,
+    readFileSync(join(process.cwd(), "public/models/hero-world/v3", name)),
+  ]),
+);
 
 test.describe("Intro Portal · Phase 4 route and entry", () => {
   test("serves a semantic, poster-first intro without the Landing chrome", async ({ page }) => {
@@ -53,11 +61,11 @@ test.describe("Intro Portal · Phase 4 route and entry", () => {
     await context.close();
   });
 
-  test("keeps a fresh bare home visit on Landing and exposes an SSR intro link", async ({ page }) => {
+  test("keeps a fresh bare home visit on Landing and exposes the SSR intro entry", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await expect(page).toHaveURL(/\/$/);
     await expect(page.locator("[data-landing-root]")).toBeVisible();
-    const introLink = page.getByRole("link", { name: "走進車車遊樂園" });
+    const introLink = page.getByRole("link", { name: "看小紅開進遊樂園" });
     await expect(introLink).toHaveAttribute("href", "/intro");
     await introLink.click();
     await expect(page).toHaveURL(/\/intro$/);
@@ -113,7 +121,7 @@ test.describe("Intro Portal · Phase 4 route and entry", () => {
     await expect.poll(() => requests.length, { timeout: 1_500 }).toBe(0);
   });
 
-  test("R10: keeps both content and the native intro links usable without JavaScript", async ({ browser }) => {
+  test("R10: keeps Landing content and the native intro entry usable without JavaScript", async ({ browser }) => {
     const context = await browser.newContext({ javaScriptEnabled: false });
     const page = await context.newPage();
     await page.goto("/", { waitUntil: "domcontentloaded" });
@@ -407,6 +415,29 @@ test.describe("Intro Portal · active-time budgets (F05/F09/F10/F11)", () => {
   });
 
   test("F11: five Intro↔Landing round trips leak no canvas, context or visibility listener", async ({ page }) => {
+    test.setTimeout(90_000);
+    const pageErrors: string[] = [];
+    const modelRequests: string[] = [];
+    page.on("pageerror", (error) => pageErrors.push(error.message));
+    page.on("request", (request) => {
+      if (MODEL_URL.test(request.url())) modelRequests.push(request.url());
+    });
+    // Serve the approved v3 models from the checkout. This keeps scene-ready a
+    // deterministic lifecycle signal even when five workers are parsing the
+    // same assets in parallel; the real GLB parser, WebGL canvas and cleanup
+    // path still run on every round trip.
+    await page.route(MODEL_URL, async (route) => {
+      const name = new URL(route.request().url()).pathname.split("/").pop() ?? "";
+      const body = MODEL_FIXTURES.get(name);
+      if (!body) return route.continue();
+      await route.fulfill({ status: 200, contentType: "model/gltf-binary", body });
+    });
+    // Freeze the live scene at the beginning of its approved timeline. The
+    // scene still mounts and parses normally, but no round waits for a moving
+    // animation to reach a coincidental frame while workers are busy.
+    await page.addInitScript(() => {
+      (window as unknown as { __HERO_WORLD_QA_TIME?: number }).__HERO_WORLD_QA_TIME = 0;
+    });
     await page.addInitScript(() => {
       const instrumentation = { webglContexts: 0, visibilityListeners: 0 };
       window.__heroInstrumentation = instrumentation;
@@ -428,13 +459,15 @@ test.describe("Intro Portal · active-time budgets (F05/F09/F10/F11)", () => {
       }) as typeof document.removeEventListener;
     });
 
-    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    await page.goto("/intro?heroQa=1", { waitUntil: "domcontentloaded" });
     const hero = page.locator("[data-hero-world]");
     await expect.poll(() => hero.getAttribute("data-scene-state"), { timeout: 12_000 }).toMatch(/ready|fallback/);
     test.skip(await hero.getAttribute("data-scene-state") !== "ready", "WebGL unavailable in this browser host");
 
     for (let round = 0; round < 5; round += 1) {
-      await expect.poll(() => hero.getAttribute("data-scene-state"), { timeout: 12_000 }).toBe("ready");
+      // data-scene-state is the component's lifecycle-ready signal; unlike a
+      // fixed sleep it waits exactly for the mounted scene on this round.
+      await expect(hero).toHaveAttribute("data-scene-state", "ready", { timeout: 12_000 });
       await expect(page.locator("[data-hero-world] canvas")).toHaveCount(1);
       await page.getByRole("link", { name: "略過動畫" }).click();
       await expect(page).toHaveURL(/\/$/);
@@ -442,12 +475,25 @@ test.describe("Intro Portal · active-time budgets (F05/F09/F10/F11)", () => {
       const listeners = await page.evaluate(() => window.__heroInstrumentation?.visibilityListeners ?? 0);
       // One live HeroWorld keeps one visibility listener; a leak grows per round.
       expect(listeners, `round ${round}: visibility listeners`).toBeLessThanOrEqual(2);
-      await page.goto("/intro", { waitUntil: "domcontentloaded" });
+      await page.goto("/intro?heroQa=1", { waitUntil: "domcontentloaded" });
     }
 
     await expect(page.locator("[data-hero-world] canvas")).toHaveCount(1);
     const instrumentation = await page.evaluate(() => window.__heroInstrumentation);
     expect(instrumentation?.visibilityListeners ?? 0).toBeLessThanOrEqual(2);
+    // Each live mount needs the three approved models. A browser may issue one
+    // duplicate fetch while replacing a just-unmounted document, but it must
+    // never grow with every round or turn into an unbounded retry loop.
+    expect(modelRequests.length).toBeGreaterThanOrEqual(15);
+    expect(modelRequests.length).toBeLessThanOrEqual(18);
+    const modelCounts = new Map<string, number>();
+    for (const url of modelRequests) {
+      const name = new URL(url).pathname.split("/").pop() ?? "";
+      modelCounts.set(name, (modelCounts.get(name) ?? 0) + 1);
+    }
+    expect(modelCounts.size).toBe(3);
+    for (const count of modelCounts.values()) expect(count).toBeGreaterThanOrEqual(5);
+    expect(pageErrors).toEqual([]);
   });
 });
 

@@ -320,7 +320,7 @@ triangles／materials 與 `validate:hero-world` 結果。兩者共用同一版 P
 |---|---|---|
 | R08 | Back／Forward 在 Landing↔Intro 之間正常往返，不出現 redirect 迴圈 | `R08: Back and Forward move between Landing and Intro without a redirect loop` |
 | R09 | 新訪客停在 Landing，且首段有 SSR 的 `/intro` 連結可點進 Intro | `R09: a fresh visit stays on Landing and offers an SSR link into the intro` |
-| R10 | 關閉 JavaScript 時，Landing 內容與兩個 Intro 連結都可用 | `R10: keeps both content and the native intro links usable without JavaScript` |
+| R10 | 關閉 JavaScript 時，Landing 內容與首段 Intro 入口都可用 | `R10: keeps Landing content and the native intro entry usable without JavaScript` |
 | R11 | 修飾鍵點 Enter 保留原生連結語意，不被動畫攔截 | `R11: a modifier click on Enter keeps native link semantics` |
 
 另補一條非 R 編號的迴歸：`deep links and Landing never download the hero models` 驗證 `/`、
