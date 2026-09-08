@@ -897,3 +897,70 @@ test.describe("Intro Portal · Phase 11 failure paths", () => {
     expect(errors, "a late parse must not throw into the new page").toEqual([]);
   });
 });
+
+// PLAN §12 的**模擬**部分。這些是版面契約，不是真機驗收：Chromium 模擬不能
+// 代替實體 iPhone Safari 或 Android Chrome（見 phase12 報告的 NOT-RUN 清單）。
+test.describe("Intro Portal · Phase 12 cross-viewport layout (emulated)", () => {
+  test.use({ serviceWorkers: "block" });
+
+  const viewports: [number, number, string][] = [
+    [320, 568, "narrow phone"],
+    [360, 800, "phone"],
+    [390, 844, "phone"],
+    [430, 932, "large phone"],
+    [844, 390, "short landscape"],
+    [768, 1024, "tablet portrait"],
+  ];
+
+  for (const [width, height, kind] of viewports) {
+    test(`${width}x${height} (${kind}): both exits usable, nothing scrolls sideways`, async ({ page }) => {
+      await page.setViewportSize({ width, height });
+      await page.goto("/intro", { waitUntil: "domcontentloaded" });
+      await expect(page.getByRole("heading", { name: "車車遊樂園" })).toBeVisible();
+
+      const enter = page.getByRole("link", { name: /進入車車遊樂園/ });
+      const skip = page.getByRole("link", { name: "略過動畫" });
+      for (const [label, control] of [["Enter", enter], ["Skip", skip]] as const) {
+        await expect(control, `${label} must be visible at ${width}x${height}`).toBeVisible();
+        const box = await control.boundingBox();
+        expect(box, `${label} box`).not.toBeNull();
+        expect(box!.height, `${label} height at ${width}x${height}`).toBeGreaterThanOrEqual(44);
+        // Exits must sit inside the first screen, not below a fold the child has
+        // to find; 100svh layouts are the usual way this breaks.
+        expect(box!.y + box!.height, `${label} bottom at ${width}x${height}`).toBeLessThanOrEqual(height + 1);
+      }
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth),
+        `horizontal overflow at ${width}x${height}`,
+      ).toBeLessThanOrEqual(1);
+
+      await enter.click();
+      await expect(page).toHaveURL(/\/$/, { timeout: 5_000 });
+      await expect(page.locator("[data-landing-root]")).toBeVisible();
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth),
+        `Landing horizontal overflow at ${width}x${height}`,
+      ).toBeLessThanOrEqual(1);
+    });
+  }
+
+  test("rotating from portrait to landscape keeps one canvas and both exits", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    const hero = page.locator("[data-hero-world]");
+    await expect.poll(() => hero.getAttribute("data-scene-state"), { timeout: 20_000 }).toMatch(/ready|fallback/);
+    const live = await hero.getAttribute("data-scene-state") === "ready";
+    await page.setViewportSize({ width: 844, height: 390 });
+    await page.waitForTimeout(600);
+    // A resize must reframe the same canvas, never mount a second one.
+    await expect(page.locator("[data-hero-world] canvas")).toHaveCount(live ? 1 : 0);
+    await expect(page.getByRole("link", { name: /進入車車遊樂園/ })).toBeVisible();
+    await expect(page.getByRole("link", { name: "略過動畫" })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.waitForTimeout(600);
+    await expect(page.locator("[data-hero-world] canvas")).toHaveCount(live ? 1 : 0);
+    await page.getByRole("link", { name: /進入車車遊樂園/ }).click();
+    await expect(page).toHaveURL(/\/$/, { timeout: 5_000 });
+  });
+});

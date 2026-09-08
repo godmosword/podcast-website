@@ -61,6 +61,7 @@
     "release:hero-world": "npm run optimize:hero-world && npm run render:hero-posters && npm run validate:hero-world",
     "validate:hero-world": "node scripts/validate-hero-world.mjs",
     "measure:intro-performance": "node scripts/measure-intro-performance.mjs",
+    "qa:intro-viewports": "node scripts/qa-intro-viewports.mjs",
     "optimize:lcp-images": "tsx scripts/optimize-lcp-images.ts",
     "generate:story-blurs": "tsx scripts/generate-story-blurs.ts",
     "generate:coloring-lineart": "tsx scripts/generate-coloring-lineart.ts",
