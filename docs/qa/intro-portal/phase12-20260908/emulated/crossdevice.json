@@ -1,0 +1,1536 @@
+{
+  "meta": {
+    "base": "http://127.0.0.1:3000",
+    "engine": "Chromium 141.0.7390.37 (Playwright, headless, SwiftShader)",
+    "emulated": true,
+    "note": "Chromium emulation only. Not a substitute for physical iPhone Safari or Android Chrome.",
+    "measuredAt": "2026-09-08T08:51:48.301Z"
+  },
+  "viewports": [
+    {
+      "name": "320x568",
+      "width": 320,
+      "height": 568,
+      "dpr": 2,
+      "kind": "narrow phone",
+      "engine": "Chromium 141.0.7390.37 (Playwright, headless, SwiftShader)",
+      "emulated": true,
+      "poster": {
+        "state": "poster",
+        "canvases": 0,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 16,
+          "y": 39.8,
+          "w": 288,
+          "h": 41
+        },
+        "enter": {
+          "x": 16,
+          "y": 444,
+          "w": 186.3,
+          "h": 52,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 116.8,
+          "y": 512.6,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": null,
+        "stage": {
+          "x": -54.4,
+          "y": 130.6,
+          "w": 428.8,
+          "h": 329.4
+        },
+        "canvasCss": null,
+        "renderDpr": null,
+        "viewport": {
+          "innerWidth": 320,
+          "innerHeight": 568,
+          "devicePixelRatio": 2
+        }
+      },
+      "ready": {
+        "state": "ready",
+        "canvases": 1,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 16,
+          "y": 39.8,
+          "w": 288,
+          "h": 41
+        },
+        "enter": {
+          "x": 16,
+          "y": 444,
+          "w": 186.3,
+          "h": 52,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 116.8,
+          "y": 512.6,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": {
+          "x": 214.3,
+          "y": 448,
+          "w": 84.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "stage": {
+          "x": -54.4,
+          "y": 130.6,
+          "w": 428.8,
+          "h": 329.4
+        },
+        "canvasCss": {
+          "w": 428.8,
+          "h": 329.4
+        },
+        "renderDpr": 1.248,
+        "viewport": {
+          "innerWidth": 320,
+          "innerHeight": 568,
+          "devicePixelRatio": 2
+        }
+      },
+      "rotated": {
+        "state": "ready",
+        "canvases": 1,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 28.4,
+          "y": 33.6,
+          "w": 511.2,
+          "h": 58.2
+        },
+        "enter": {
+          "x": 28.4,
+          "y": 356,
+          "w": 186.3,
+          "h": 52,
+          "inViewport": false
+        },
+        "skip": {
+          "x": 240.8,
+          "y": 426.4,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": false
+        },
+        "pause": {
+          "x": 226.6,
+          "y": 360,
+          "w": 84.4,
+          "h": 44,
+          "inViewport": false
+        },
+        "stage": {
+          "x": -96.6,
+          "y": 110.4,
+          "w": 761.1,
+          "h": 278.4
+        },
+        "canvasCss": {
+          "w": 761.1,
+          "h": 278.4
+        },
+        "renderDpr": 1.249,
+        "viewport": {
+          "innerWidth": 568,
+          "innerHeight": 320,
+          "devicePixelRatio": 2
+        }
+      },
+      "landing": {
+        "url": "/",
+        "horizontalOverflowPx": 0,
+        "landingRoot": true,
+        "activeElement": "main-content",
+        "heroCanvases": 0
+      }
+    },
+    {
+      "name": "360x800",
+      "width": 360,
+      "height": 800,
+      "dpr": 3,
+      "kind": "phone",
+      "engine": "Chromium 141.0.7390.37 (Playwright, headless, SwiftShader)",
+      "emulated": true,
+      "poster": {
+        "state": "poster",
+        "canvases": 0,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 18,
+          "y": 56,
+          "w": 324,
+          "h": 41
+        },
+        "enter": {
+          "x": 18,
+          "y": 660,
+          "w": 186.3,
+          "h": 52,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 136.8,
+          "y": 740,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": null,
+        "stage": {
+          "x": -61.2,
+          "y": 184,
+          "w": 482.4,
+          "h": 464
+        },
+        "canvasCss": null,
+        "renderDpr": null,
+        "viewport": {
+          "innerWidth": 360,
+          "innerHeight": 800,
+          "devicePixelRatio": 3
+        }
+      },
+      "ready": {
+        "state": "ready",
+        "canvases": 1,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 18,
+          "y": 56,
+          "w": 324,
+          "h": 41
+        },
+        "enter": {
+          "x": 18,
+          "y": 660,
+          "w": 186.3,
+          "h": 52,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 136.8,
+          "y": 740,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": {
+          "x": 216.3,
+          "y": 664,
+          "w": 84.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "stage": {
+          "x": -61.2,
+          "y": 184,
+          "w": 482.4,
+          "h": 464
+        },
+        "canvasCss": {
+          "w": 482.4,
+          "h": 464
+        },
+        "renderDpr": 1.248,
+        "viewport": {
+          "innerWidth": 360,
+          "innerHeight": 800,
+          "devicePixelRatio": 3
+        }
+      },
+      "rotated": {
+        "state": "ready",
+        "canvases": 1,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 40,
+          "y": 68.4,
+          "w": 165.6,
+          "h": 41
+        },
+        "enter": {
+          "x": 40,
+          "y": 224.8,
+          "w": 204.3,
+          "h": 56,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 40,
+          "y": 305.2,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": {
+          "x": 256.3,
+          "y": 230.8,
+          "w": 84.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "stage": {
+          "x": 264,
+          "y": -14.4,
+          "w": 600,
+          "h": 381.6
+        },
+        "canvasCss": {
+          "w": 600,
+          "h": 381.6
+        },
+        "renderDpr": 1.25,
+        "viewport": {
+          "innerWidth": 800,
+          "innerHeight": 360,
+          "devicePixelRatio": 3
+        }
+      },
+      "landing": {
+        "url": "/",
+        "horizontalOverflowPx": 0,
+        "landingRoot": true,
+        "activeElement": "main-content",
+        "heroCanvases": 0
+      }
+    },
+    {
+      "name": "375x812",
+      "width": 375,
+      "height": 812,
+      "dpr": 3,
+      "kind": "phone",
+      "engine": "Chromium 141.0.7390.37 (Playwright, headless, SwiftShader)",
+      "emulated": true,
+      "poster": {
+        "state": "poster",
+        "canvases": 0,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 18.8,
+          "y": 56.8,
+          "w": 337.5,
+          "h": 41
+        },
+        "enter": {
+          "x": 18.8,
+          "y": 670.7,
+          "w": 186.3,
+          "h": 52,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 144.3,
+          "y": 751.8,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": null,
+        "stage": {
+          "x": -63.8,
+          "y": 186.8,
+          "w": 502.5,
+          "h": 471
+        },
+        "canvasCss": null,
+        "renderDpr": null,
+        "viewport": {
+          "innerWidth": 375,
+          "innerHeight": 812,
+          "devicePixelRatio": 3
+        }
+      },
+      "ready": {
+        "state": "ready",
+        "canvases": 1,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 18.8,
+          "y": 56.8,
+          "w": 337.5,
+          "h": 41
+        },
+        "enter": {
+          "x": 18.8,
+          "y": 670.7,
+          "w": 186.3,
+          "h": 52,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 144.3,
+          "y": 751.8,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": {
+          "x": 217,
+          "y": 674.7,
+          "w": 84.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "stage": {
+          "x": -63.8,
+          "y": 186.8,
+          "w": 502.5,
+          "h": 471
+        },
+        "canvasCss": {
+          "w": 502.5,
+          "h": 471
+        },
+        "renderDpr": 1.25,
+        "viewport": {
+          "innerWidth": 375,
+          "innerHeight": 812,
+          "devicePixelRatio": 3
+        }
+      },
+      "rotated": {
+        "state": "ready",
+        "canvases": 1,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 40.6,
+          "y": 71.3,
+          "w": 165.6,
+          "h": 41
+        },
+        "enter": {
+          "x": 40.6,
+          "y": 236.5,
+          "w": 204.3,
+          "h": 56,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 40.6,
+          "y": 319.8,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": {
+          "x": 256.8,
+          "y": 242.5,
+          "w": 84.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "stage": {
+          "x": 268,
+          "y": -15,
+          "w": 609,
+          "h": 397.5
+        },
+        "canvasCss": {
+          "w": 609,
+          "h": 397.5
+        },
+        "renderDpr": 1.25,
+        "viewport": {
+          "innerWidth": 812,
+          "innerHeight": 375,
+          "devicePixelRatio": 3
+        }
+      },
+      "landing": {
+        "url": "/",
+        "horizontalOverflowPx": 0,
+        "landingRoot": true,
+        "activeElement": "main-content",
+        "heroCanvases": 0
+      }
+    },
+    {
+      "name": "390x844",
+      "width": 390,
+      "height": 844,
+      "dpr": 3,
+      "kind": "phone",
+      "engine": "Chromium 141.0.7390.37 (Playwright, headless, SwiftShader)",
+      "emulated": true,
+      "poster": {
+        "state": "poster",
+        "canvases": 0,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 19.5,
+          "y": 59.1,
+          "w": 351,
+          "h": 41
+        },
+        "enter": {
+          "x": 19.5,
+          "y": 699.2,
+          "w": 186.3,
+          "h": 52,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 151.8,
+          "y": 783.1,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": null,
+        "stage": {
+          "x": -66.3,
+          "y": 194.1,
+          "w": 522.6,
+          "h": 489.5
+        },
+        "canvasCss": null,
+        "renderDpr": null,
+        "viewport": {
+          "innerWidth": 390,
+          "innerHeight": 844,
+          "devicePixelRatio": 3
+        }
+      },
+      "ready": {
+        "state": "ready",
+        "canvases": 1,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 19.5,
+          "y": 59.1,
+          "w": 351,
+          "h": 41
+        },
+        "enter": {
+          "x": 19.5,
+          "y": 699.2,
+          "w": 186.3,
+          "h": 52,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 151.8,
+          "y": 783.1,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": {
+          "x": 217.8,
+          "y": 703.2,
+          "w": 84.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "stage": {
+          "x": -66.3,
+          "y": 194.1,
+          "w": 522.6,
+          "h": 489.5
+        },
+        "canvasCss": {
+          "w": 522.6,
+          "h": 489.5
+        },
+        "renderDpr": 1.25,
+        "viewport": {
+          "innerWidth": 390,
+          "innerHeight": 844,
+          "devicePixelRatio": 3
+        }
+      },
+      "rotated": {
+        "state": "ready",
+        "canvases": 1,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 42.2,
+          "y": 74.1,
+          "w": 165.6,
+          "h": 41
+        },
+        "enter": {
+          "x": 42.2,
+          "y": 248.2,
+          "w": 204.3,
+          "h": 56,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 42.2,
+          "y": 334.3,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": {
+          "x": 258.4,
+          "y": 254.2,
+          "w": 84.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "stage": {
+          "x": 278.5,
+          "y": -15.6,
+          "w": 633,
+          "h": 413.4
+        },
+        "canvasCss": {
+          "w": 633,
+          "h": 413.4
+        },
+        "renderDpr": 1.25,
+        "viewport": {
+          "innerWidth": 844,
+          "innerHeight": 390,
+          "devicePixelRatio": 3
+        }
+      },
+      "landing": {
+        "url": "/",
+        "horizontalOverflowPx": 0,
+        "landingRoot": true,
+        "activeElement": "main-content",
+        "heroCanvases": 0
+      }
+    },
+    {
+      "name": "414x896",
+      "width": 414,
+      "height": 896,
+      "dpr": 2,
+      "kind": "phone",
+      "engine": "Chromium 141.0.7390.37 (Playwright, headless, SwiftShader)",
+      "emulated": true,
+      "poster": {
+        "state": "poster",
+        "canvases": 0,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 20.7,
+          "y": 62.7,
+          "w": 372.6,
+          "h": 42.4
+        },
+        "enter": {
+          "x": 20.7,
+          "y": 745.5,
+          "w": 186.3,
+          "h": 52,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 163.8,
+          "y": 834.1,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": null,
+        "stage": {
+          "x": -70.4,
+          "y": 206.1,
+          "w": 554.8,
+          "h": 519.7
+        },
+        "canvasCss": null,
+        "renderDpr": null,
+        "viewport": {
+          "innerWidth": 414,
+          "innerHeight": 896,
+          "devicePixelRatio": 2
+        }
+      },
+      "ready": {
+        "state": "ready",
+        "canvases": 1,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 20.7,
+          "y": 62.7,
+          "w": 372.6,
+          "h": 42.4
+        },
+        "enter": {
+          "x": 20.7,
+          "y": 745.5,
+          "w": 186.3,
+          "h": 52,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 163.8,
+          "y": 834.1,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": {
+          "x": 218.9,
+          "y": 749.5,
+          "w": 84.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "stage": {
+          "x": -70.4,
+          "y": 206.1,
+          "w": 554.8,
+          "h": 519.7
+        },
+        "canvasCss": {
+          "w": 554.8,
+          "h": 519.7
+        },
+        "renderDpr": 1.249,
+        "viewport": {
+          "innerWidth": 414,
+          "innerHeight": 896,
+          "devicePixelRatio": 2
+        }
+      },
+      "rotated": {
+        "state": "ready",
+        "canvases": 1,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 44.8,
+          "y": 78.7,
+          "w": 165.6,
+          "h": 41
+        },
+        "enter": {
+          "x": 44.8,
+          "y": 266.9,
+          "w": 204.3,
+          "h": 56,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 44.8,
+          "y": 357.6,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": {
+          "x": 261,
+          "y": 272.9,
+          "w": 84.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "stage": {
+          "x": 295.7,
+          "y": -16.5,
+          "w": 672,
+          "h": 438.8
+        },
+        "canvasCss": {
+          "w": 672,
+          "h": 438.8
+        },
+        "renderDpr": 1.25,
+        "viewport": {
+          "innerWidth": 896,
+          "innerHeight": 414,
+          "devicePixelRatio": 2
+        }
+      },
+      "landing": {
+        "url": "/",
+        "horizontalOverflowPx": 0,
+        "landingRoot": true,
+        "activeElement": "main-content",
+        "heroCanvases": 0
+      }
+    },
+    {
+      "name": "430x932",
+      "width": 430,
+      "height": 932,
+      "dpr": 3,
+      "kind": "phone",
+      "engine": "Chromium 141.0.7390.37 (Playwright, headless, SwiftShader)",
+      "emulated": true,
+      "poster": {
+        "state": "poster",
+        "canvases": 0,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 21.5,
+          "y": 65.2,
+          "w": 387,
+          "h": 44
+        },
+        "enter": {
+          "x": 21.5,
+          "y": 777.5,
+          "w": 186.3,
+          "h": 52,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 171.8,
+          "y": 869.4,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": null,
+        "stage": {
+          "x": -73.1,
+          "y": 214.4,
+          "w": 576.2,
+          "h": 540.5
+        },
+        "canvasCss": null,
+        "renderDpr": null,
+        "viewport": {
+          "innerWidth": 430,
+          "innerHeight": 932,
+          "devicePixelRatio": 3
+        }
+      },
+      "ready": {
+        "state": "ready",
+        "canvases": 1,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 21.5,
+          "y": 65.2,
+          "w": 387,
+          "h": 44
+        },
+        "enter": {
+          "x": 21.5,
+          "y": 777.5,
+          "w": 186.3,
+          "h": 52,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 171.8,
+          "y": 869.4,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": {
+          "x": 219.8,
+          "y": 781.5,
+          "w": 84.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "stage": {
+          "x": -73.1,
+          "y": 214.4,
+          "w": 576.2,
+          "h": 540.5
+        },
+        "canvasCss": {
+          "w": 576.2,
+          "h": 540.5
+        },
+        "renderDpr": 1.25,
+        "viewport": {
+          "innerWidth": 430,
+          "innerHeight": 932,
+          "devicePixelRatio": 3
+        }
+      },
+      "rotated": {
+        "state": "ready",
+        "canvases": 1,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 46.6,
+          "y": 81.7,
+          "w": 165.6,
+          "h": 41
+        },
+        "enter": {
+          "x": 46.6,
+          "y": 279.4,
+          "w": 204.3,
+          "h": 56,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 46.6,
+          "y": 373.1,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": {
+          "x": 262.8,
+          "y": 285.4,
+          "w": 84.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "stage": {
+          "x": 307.5,
+          "y": -17.2,
+          "w": 699,
+          "h": 455.8
+        },
+        "canvasCss": {
+          "w": 699,
+          "h": 455.8
+        },
+        "renderDpr": 1.249,
+        "viewport": {
+          "innerWidth": 932,
+          "innerHeight": 430,
+          "devicePixelRatio": 3
+        }
+      },
+      "landing": {
+        "url": "/",
+        "horizontalOverflowPx": 0,
+        "landingRoot": true,
+        "activeElement": "main-content",
+        "heroCanvases": 0
+      }
+    },
+    {
+      "name": "844x390",
+      "width": 844,
+      "height": 390,
+      "dpr": 3,
+      "kind": "short landscape",
+      "engine": "Chromium 141.0.7390.37 (Playwright, headless, SwiftShader)",
+      "emulated": true,
+      "poster": {
+        "state": "poster",
+        "canvases": 0,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 42.2,
+          "y": 74.1,
+          "w": 165.6,
+          "h": 41
+        },
+        "enter": {
+          "x": 42.2,
+          "y": 248.2,
+          "w": 204.3,
+          "h": 56,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 42.2,
+          "y": 334.3,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": null,
+        "stage": {
+          "x": 278.5,
+          "y": -15.6,
+          "w": 633,
+          "h": 413.4
+        },
+        "canvasCss": null,
+        "renderDpr": null,
+        "viewport": {
+          "innerWidth": 844,
+          "innerHeight": 390,
+          "devicePixelRatio": 3
+        }
+      },
+      "ready": {
+        "state": "ready",
+        "canvases": 1,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 42.2,
+          "y": 74.1,
+          "w": 165.6,
+          "h": 41
+        },
+        "enter": {
+          "x": 42.2,
+          "y": 248.2,
+          "w": 204.3,
+          "h": 56,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 42.2,
+          "y": 334.3,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": {
+          "x": 258.4,
+          "y": 254.2,
+          "w": 84.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "stage": {
+          "x": 278.5,
+          "y": -15.6,
+          "w": 633,
+          "h": 413.4
+        },
+        "canvasCss": {
+          "w": 633,
+          "h": 413.4
+        },
+        "renderDpr": 1.25,
+        "viewport": {
+          "innerWidth": 844,
+          "innerHeight": 390,
+          "devicePixelRatio": 3
+        }
+      },
+      "rotated": {
+        "state": "ready",
+        "canvases": 1,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 19.5,
+          "y": 59.1,
+          "w": 351,
+          "h": 41
+        },
+        "enter": {
+          "x": 19.5,
+          "y": 699.2,
+          "w": 186.3,
+          "h": 52,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 151.8,
+          "y": 783.1,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": {
+          "x": 217.8,
+          "y": 703.2,
+          "w": 84.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "stage": {
+          "x": -66.3,
+          "y": 194.1,
+          "w": 522.6,
+          "h": 489.5
+        },
+        "canvasCss": {
+          "w": 522.6,
+          "h": 489.5
+        },
+        "renderDpr": 1.25,
+        "viewport": {
+          "innerWidth": 390,
+          "innerHeight": 844,
+          "devicePixelRatio": 3
+        }
+      },
+      "landing": {
+        "url": "/",
+        "horizontalOverflowPx": 0,
+        "landingRoot": true,
+        "activeElement": "main-content",
+        "heroCanvases": 0
+      }
+    },
+    {
+      "name": "768x1024",
+      "width": 768,
+      "height": 1024,
+      "dpr": 2,
+      "kind": "tablet portrait",
+      "engine": "Chromium 141.0.7390.37 (Playwright, headless, SwiftShader)",
+      "emulated": true,
+      "poster": {
+        "state": "poster",
+        "canvases": 0,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 38.4,
+          "y": 71.7,
+          "w": 691.2,
+          "h": 61.4
+        },
+        "enter": {
+          "x": 38.4,
+          "y": 859.4,
+          "w": 186.3,
+          "h": 52,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 340.8,
+          "y": 959.5,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": null,
+        "stage": {
+          "x": -130.6,
+          "y": 235.5,
+          "w": 1029.1,
+          "h": 593.9
+        },
+        "canvasCss": null,
+        "renderDpr": null,
+        "viewport": {
+          "innerWidth": 768,
+          "innerHeight": 1024,
+          "devicePixelRatio": 2
+        }
+      },
+      "ready": {
+        "state": "ready",
+        "canvases": 1,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 38.4,
+          "y": 71.7,
+          "w": 691.2,
+          "h": 61.4
+        },
+        "enter": {
+          "x": 38.4,
+          "y": 859.4,
+          "w": 186.3,
+          "h": 52,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 340.8,
+          "y": 959.5,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": {
+          "x": 236.6,
+          "y": 863.4,
+          "w": 84.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "stage": {
+          "x": -130.6,
+          "y": 235.5,
+          "w": 1029.1,
+          "h": 593.9
+        },
+        "canvasCss": {
+          "w": 1029.1,
+          "h": 593.9
+        },
+        "renderDpr": 1.25,
+        "viewport": {
+          "innerWidth": 768,
+          "innerHeight": 1024,
+          "devicePixelRatio": 2
+        }
+      },
+      "rotated": {
+        "state": "ready",
+        "canvases": 1,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 61.4,
+          "y": 184.3,
+          "w": 211.9,
+          "h": 52.4
+        },
+        "enter": {
+          "x": 61.4,
+          "y": 535.4,
+          "w": 204.3,
+          "h": 56,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 896.7,
+          "y": 700,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": {
+          "x": 277.7,
+          "y": 541.4,
+          "w": 84.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "stage": {
+          "x": 286.7,
+          "y": 84.5,
+          "w": 819.2,
+          "h": 691.2
+        },
+        "canvasCss": {
+          "w": 819.2,
+          "h": 691.2
+        },
+        "renderDpr": 1.249,
+        "viewport": {
+          "innerWidth": 1024,
+          "innerHeight": 768,
+          "devicePixelRatio": 2
+        }
+      },
+      "landing": {
+        "url": "/",
+        "horizontalOverflowPx": 0,
+        "landingRoot": true,
+        "activeElement": "main-content",
+        "heroCanvases": 0
+      }
+    },
+    {
+      "name": "1024x768",
+      "width": 1024,
+      "height": 768,
+      "dpr": 2,
+      "kind": "tablet landscape",
+      "engine": "Chromium 141.0.7390.37 (Playwright, headless, SwiftShader)",
+      "emulated": true,
+      "poster": {
+        "state": "poster",
+        "canvases": 0,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 61.4,
+          "y": 184.3,
+          "w": 211.9,
+          "h": 52.4
+        },
+        "enter": {
+          "x": 61.4,
+          "y": 535.4,
+          "w": 204.3,
+          "h": 56,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 896.7,
+          "y": 700,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": null,
+        "stage": {
+          "x": 286.7,
+          "y": 84.5,
+          "w": 819.2,
+          "h": 691.2
+        },
+        "canvasCss": null,
+        "renderDpr": null,
+        "viewport": {
+          "innerWidth": 1024,
+          "innerHeight": 768,
+          "devicePixelRatio": 2
+        }
+      },
+      "ready": {
+        "state": "ready",
+        "canvases": 1,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 61.4,
+          "y": 184.3,
+          "w": 211.9,
+          "h": 52.4
+        },
+        "enter": {
+          "x": 61.4,
+          "y": 535.4,
+          "w": 204.3,
+          "h": 56,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 896.7,
+          "y": 700,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": {
+          "x": 277.7,
+          "y": 541.4,
+          "w": 84.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "stage": {
+          "x": 286.7,
+          "y": 84.5,
+          "w": 819.2,
+          "h": 691.2
+        },
+        "canvasCss": {
+          "w": 819.2,
+          "h": 691.2
+        },
+        "renderDpr": 1.249,
+        "viewport": {
+          "innerWidth": 1024,
+          "innerHeight": 768,
+          "devicePixelRatio": 2
+        }
+      },
+      "rotated": {
+        "state": "ready",
+        "canvases": 1,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 38.4,
+          "y": 71.7,
+          "w": 691.2,
+          "h": 61.4
+        },
+        "enter": {
+          "x": 38.4,
+          "y": 859.4,
+          "w": 186.3,
+          "h": 52,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 340.8,
+          "y": 959.5,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": {
+          "x": 236.6,
+          "y": 863.4,
+          "w": 84.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "stage": {
+          "x": -130.6,
+          "y": 235.5,
+          "w": 1029.1,
+          "h": 593.9
+        },
+        "canvasCss": {
+          "w": 1029.1,
+          "h": 593.9
+        },
+        "renderDpr": 1.25,
+        "viewport": {
+          "innerWidth": 768,
+          "innerHeight": 1024,
+          "devicePixelRatio": 2
+        }
+      },
+      "landing": {
+        "url": "/",
+        "horizontalOverflowPx": 0,
+        "landingRoot": true,
+        "activeElement": "main-content",
+        "heroCanvases": 0
+      }
+    },
+    {
+      "name": "1440x900",
+      "width": 1440,
+      "height": 900,
+      "dpr": 2,
+      "kind": "desktop",
+      "engine": "Chromium 141.0.7390.37 (Playwright, headless, SwiftShader)",
+      "emulated": true,
+      "poster": {
+        "state": "poster",
+        "canvases": 0,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 86.4,
+          "y": 216,
+          "w": 298.1,
+          "h": 73.7
+        },
+        "enter": {
+          "x": 86.4,
+          "y": 637,
+          "w": 204.3,
+          "h": 56,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 1296,
+          "y": 832,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": null,
+        "stage": {
+          "x": 403.2,
+          "y": 99,
+          "w": 1152,
+          "h": 810
+        },
+        "canvasCss": null,
+        "renderDpr": null,
+        "viewport": {
+          "innerWidth": 1440,
+          "innerHeight": 900,
+          "devicePixelRatio": 2
+        }
+      },
+      "ready": {
+        "state": "ready",
+        "canvases": 1,
+        "horizontalOverflowPx": 0,
+        "heading": {
+          "x": 86.4,
+          "y": 216,
+          "w": 298.1,
+          "h": 73.7
+        },
+        "enter": {
+          "x": 86.4,
+          "y": 637,
+          "w": 204.3,
+          "h": 56,
+          "inViewport": true
+        },
+        "skip": {
+          "x": 1296,
+          "y": 832,
+          "w": 86.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "pause": {
+          "x": 302.6,
+          "y": 643,
+          "w": 84.4,
+          "h": 44,
+          "inViewport": true
+        },
+        "stage": {
+          "x": 403.2,
+          "y": 99,
+          "w": 1152,
+          "h": 810
+        },
+        "canvasCss": {
+          "w": 1152,
+          "h": 810
+        },
+        "renderDpr": 1.25,
+        "viewport": {
+          "innerWidth": 1440,
+          "innerHeight": 900,
+          "devicePixelRatio": 2
+        }
+      },
+      "rotated": null,
+      "landing": {
+        "url": "/",
+        "horizontalOverflowPx": 0,
+        "landingRoot": true,
+        "activeElement": "main-content",
+        "heroCanvases": 0
+      }
+    }
+  ],
+  "networks": [
+    {
+      "name": "wifi (no throttling)",
+      "engine": "Chromium 141.0.7390.37 (Playwright, headless, SwiftShader)",
+      "emulated": true,
+      "earlyState": "poster",
+      "settledState": "ready",
+      "modelRequests": 3,
+      "uniqueModels": 3,
+      "enterOk": true,
+      "enterMs": 77,
+      "pageErrors": []
+    },
+    {
+      "name": "slow (400kbps, 400ms RTT)",
+      "engine": "Chromium 141.0.7390.37 (Playwright, headless, SwiftShader)",
+      "emulated": true,
+      "earlyState": "poster",
+      "settledState": "ready",
+      "modelRequests": 3,
+      "uniqueModels": 3,
+      "enterOk": true,
+      "enterMs": 121,
+      "pageErrors": []
+    },
+    {
+      "name": "offline",
+      "engine": "Chromium 141.0.7390.37 (Playwright, headless, SwiftShader)",
+      "emulated": true,
+      "earlyState": "poster",
+      "settledState": "poster",
+      "modelRequests": 0,
+      "uniqueModels": 0,
+      "enterOk": true,
+      "enterMs": 79,
+      "pageErrors": []
+    },
+    {
+      "name": "Save-Data",
+      "engine": "Chromium 141.0.7390.37 (Playwright, headless, SwiftShader)",
+      "emulated": true,
+      "earlyState": "poster",
+      "settledState": "poster",
+      "modelRequests": 0,
+      "uniqueModels": 0,
+      "enterOk": true,
+      "enterMs": 81,
+      "pageErrors": []
+    },
+    {
+      "name": "GLB 404 (failure fallback)",
+      "engine": "Chromium 141.0.7390.37 (Playwright, headless, SwiftShader)",
+      "emulated": true,
+      "earlyState": "poster",
+      "settledState": "fallback",
+      "modelRequests": 1,
+      "uniqueModels": 1,
+      "enterOk": true,
+      "enterMs": 79,
+      "pageErrors": []
+    }
+  ]
+}

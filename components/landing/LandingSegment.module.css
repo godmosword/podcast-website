@@ -149,6 +149,13 @@
   gap: 10px;
 }
 
+/* 次要入口自成一列，不與主要 CTA 搶同一排的視線。 */
+.entryRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 .cta {
   display: inline-flex;
   align-items: center;

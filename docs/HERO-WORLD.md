@@ -38,19 +38,25 @@ Large unrelated feedback/navigation/legal changes were already present in the wo
 
 ## Blender asset pipeline
 
-The editable source is `assets/blender/hero-world/hero-world.blend`; the procedural rebuild is `build.py`. It uses only Principled materials that survive glTF export, shared flat colors, low-poly rounded geometry, and named parts (`Environment`, `FerrisRotor`, `GondolaPivot0..7`, `Vehicle`, `Body`, `Wheel_0..3`, `Tree`, `Trunk`, `Crown`, `Drive`). Blender 4.5 LTS exports the three raw modules into `assets/blender/hero-world/export/`:
+The editable source is `assets/blender/hero-world/hero-world.blend`; the procedural rebuild is `build.py`. It uses only Principled materials that survive glTF export, shared flat colors, low-poly rounded geometry, and named parts (`Environment`, `FerrisRotor`, `GondolaPivot0..7`, `Vehicle`, `Body`, `Wheel_0..3`, `Tree`, `Trunk`, `Crown`, `Drive`). Since the v3 convergence (2026-09-08) the shipped release has exactly one source chain — there is no post-export script that edits a previous release:
 
 ```text
-blender -b --python assets/blender/hero-world/build.py
-npm run optimize:hero-world
+blender -b --python assets/blender/hero-world/build.py   # → export/*.raw.glb + build-info.json
+npm run optimize:hero-world                              # → public/models/hero-world/v3/*.glb
+npm run render:hero-posters                              # → posters + manifest.json
+npm run validate:hero-world                              # → 88 checks, 0 failures
+# or all three at once: npm run release:hero-world
 assets/blender/hero-world/export/*.raw.glb
-  → gltf-transform optimize (quantize, dedup, weld)
+  → gltf-transform optimize (quantize, dedup, weld; palette atlas off)
   → gltf-transform simplify environment --ratio 0.76 --error 0.002
   → gltf-transform semantic hierarchy pass
-  → public/models/hero-world/v2/*.glb + manifest.json
+  → public/models/hero-world/v3/*.glb + asset-report.json
+  → scripts/render-hero-posters.mjs (real R3F scene) → poster WebP + manifest.json
 ```
 
-The repeatable optimizer validates raw and final output with `gltf-validator`, preserves dynamic parents, writes the v2 hash manifest and QA report, and creates the desktop/mobile WebP posters. `npm run validate:hero-world` independently checks file existence, hashes, dimensions, budgets and required parents. To replace a model, update the Blender source or generator, export, run the two commands above, and keep the node names and `Drive` clip stable. Camera composition is owned by `CameraRig.tsx`; quality tiers are in `config.ts`.
+`build.py` owns the whole art direction: the v3 palette and roughness, the warm-window emissive, the two ground offsets (the sand biscuit sits below the meadow, the courtyard paving above its rim), and the contact shading, which is baked as a linear `COLOR_0` attribute on the four surfaces that actually vary (meadow, house walls, red volumes, tree crown). The Ferris cabins and the tyres keep the brighter toy palette in their own materials. GLBs carry no texture at all: the optimizer runs with `--palette false` and fails the build if an image reappears.
+
+The optimizer validates raw and final output with `gltf-validator` (0 errors **and** 0 warnings), preserves dynamic parents, and records the Blender version, build seed, `build.py` hash and raw-export hashes in the manifest. `npm run validate:hero-world` independently checks file existence, hashes, dimensions, budgets, required parents and that the manifest still declares a Blender clean rebuild. To replace a model, edit the Blender source or generator, then rerun the chain above and keep the node names and `Drive` clip stable. Camera composition is owned by `CameraRig.tsx`; quality tiers are in `config.ts`.
 
 ## Frontend architecture and behavior
 
@@ -58,7 +64,10 @@ The repeatable optimizer validates raw and final output with `gltf-validator`, p
 
 If WebGL is unavailable, the model load fails, the 15-second timeout expires, reduced motion is enabled, or the user has Save-Data/2G, the poster and HTML remain in place. `NEXT_PUBLIC_HERO_3D=0` is also a deployment kill switch. The fallback is not a blank state: it is the same miniature world rendered as the transparent poster.
 
-## Measured QA
+## Measured QA (v2 release, 2026-09-06)
+
+> v3 clean-rebuild numbers and the before/after comparison are in
+> [`docs/qa/intro-portal/v3-clean-rebuild-20260908/report.md`](./qa/intro-portal/v3-clean-rebuild-20260908/report.md).
 
 Validated on the local production server at 1440×900 and 390×844 with headless Chromium. Captures and the machine-readable summary are in `docs/qa/intro-portal/phase6-7-20260906/`.
 
@@ -73,4 +82,4 @@ Validated on the local production server at 1440×900 and 390×844 with headless
 
 The welcome heading, description, CTA, section heading, and all existing navigation remain semantic DOM. The WebGL layer is `aria-hidden`; canvas interactions never gate story discovery. Keyboard focus styles use the existing token language, the pause control is a real button with a stateful accessible name, and reduced motion removes camera/parallax/vehicle motion. The existing four-pane navigation, audio gesture requirement, theme, metadata, JSON-LD, service worker and story routes remain unchanged.
 
-Known limitations: model files are intentionally untextured flat-color GLBs rather than KTX2-compressed textures; the poster is generated from Blender Cycles and does not share realtime shadow maps; and browser evidence uses headless Chromium rather than physical Safari/Android devices. A future pass can add a production RUM sample for low-tier frame rate after real-device QA.
+Known limitations: model files are intentionally untextured flat-color GLBs rather than KTX2-compressed textures (v2 still carried a generated palette atlas; v3 dropped it); the poster is generated from Blender Cycles and does not share realtime shadow maps; and browser evidence uses headless Chromium rather than physical Safari/Android devices. A future pass can add a production RUM sample for low-tier frame rate after real-device QA.

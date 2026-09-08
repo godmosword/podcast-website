@@ -1,8 +1,8 @@
 # 車車遊樂園 Intro / Portal 實作與驗收
 
-狀態：Phase 1、4、5、6、7 已實作並在本機驗證；Phase 8–13 尚待驗收。依 2026-09-05 最新 Ultimate Prompt 全部 48 節驗收；舊 Hero 文件中的歷史數值不代表新版測量。
+狀態：Phase 1、4、5、6、7 已實作並在本機驗證，Phase 8 已完成 v3 的視覺驗收，Phase 9 的進站轉場已實作並驗證，Phase 10／11 已完成本機效能量測與可及性驗證；Phase 12 的模擬部分（跨 viewport 版面、旋轉、網路）已完成，真機部分全部 NOT-RUN（無實體裝置，見 `docs/qa/intro-portal/phase12-20260908/`）；Phase 13 尚待驗收。依 2026-09-05 最新 Ultimate Prompt 全部 48 節驗收；舊 Hero 文件中的歷史數值不代表新版測量。
 
-本輪 Phase 6/7 證據集中於 [`docs/qa/intro-portal/phase6-7-20260906/`](./qa/intro-portal/phase6-7-20260906/)：v2 manifest／asset report、validator output、desktop/mobile poster／ready／greeting captures、動畫時間線與測試結果。前端已切換至 `/models/hero-world/v2/`；v1 目錄保留作回退。
+2026-09-08：前端引用的 v3 已改由 `assets/blender/hero-world/build.py` 乾淨重建（本輪以 PyPI `bpy` 4.5.0 模組實跑，實體 Blender CLI 複驗列為 Phase 13 前必做），後製腳本 `polish-hero-world.mjs` 刪除，`manifest.json` 記載 `blenderCleanRebuild: true`。重建報告、hierarchy 對照、before／after 擷取與影像差分見 [`docs/qa/intro-portal/v3-clean-rebuild-20260908/`](./qa/intro-portal/v3-clean-rebuild-20260908/)；較早的 v2 證據仍留在 [`phase6-7-20260906/`](./qa/intro-portal/phase6-7-20260906/)。v1、v2 目錄保留作回退。
 
 ## Repository findings
 
@@ -31,9 +31,11 @@ Next.js 16 App Router、React 19、TypeScript strict、CSS Modules。首頁由 L
 
 選 A：以現有場景做微敘事與光材質改善，最符合保留架構、低載入成本、立即入站和安靜世界感。煙霧只在確有視覺收益且預算充足時加入；不為增加物件而加細節。
 
-## 路由決策
+## 路由決策（2026-09-08 依 ADR-0003 更新）
 
-`/intro` 是獨立書封體驗；`/` 保留原 Landing、canonical、SSR 內容與所有內部連結。依 [ADR-0003](./adr/0003-intro-auto-invite.md)，`/` 不再自動導向 Intro；頁尾 SSR 連結「走進車車遊樂園」進入 `/intro`。進入／略過回到 `/?enter=1`，此 URL 永遠可直接訪問 Landing（canonical 仍為 `/`）。沒有 JavaScript 時首頁與 Intro 出口都可用；不利用 user-agent 區分搜尋機器人。Intro 有自己的 metadata，noindex/follow，避免薄內容入口取代主網站搜尋結果。進入使用 replace，Back 不會困在 Intro ↔ Landing 的循環。
+`/intro` 是獨立書封體驗；`/` 保留原 Landing、canonical、SSR 內容與所有內部連結，而且**永遠停在 Landing**——沒有首次自動導向、沒有 client redirect、不使用 sessionStorage。Intro 改成 opt-in：Landing 首段有一個 SSR 連結（`components/landing/IntroEntry.tsx`，用 v3 的 mobile poster 當縮圖）。進入／略過回到 `/?enter=1`，此 URL 永遠可直接訪問 Landing（canonical 仍為 `/`）。沒有 JavaScript 時連結照樣可用；不利用 user-agent 區分搜尋機器人。Intro 有自己的 metadata，noindex/follow，避免薄內容入口取代主網站搜尋結果。進入使用 replace，Back 不會困在 Intro ↔ Landing 的循環。
+
+取消自動導向的理由、實測到的閃爍數據與被否決的替代方案見 [ADR-0003](./adr/0003-intro-auto-invite.md)。
 
 ## 預算（驗收前設定）
 
@@ -56,10 +58,10 @@ Next.js 16 App Router、React 19、TypeScript strict、CSS Modules。首頁由 L
 - [ ] 獨立 Intro、最小 HTML UI、原 Landing 吉祥物與內容完整。
 - [ ] 首次／回訪、直接 Landing、深連結、Back、無 JS 行為。
 - [ ] Blender 輪盤慢轉、直立車廂、暖窗、前庭、小紅問候、材質深度、樹擺。
-- [ ] 入園轉場與立即 Enter／略過、reduced motion。
-- [ ] 版本化資產、GLB validator、資源清理與 pause。
-- [ ] 320/360/375/390/414/430、tablet、1440、large desktop 與橫向實拍。
+- [x] 入園轉場與立即 Enter／略過、reduced motion。（2026-09-08，Phase 9：導航先發生、動畫 ≤360ms 由 CSS 完成、五種時刻都可 Enter）
+- [x] 版本化資產、GLB validator、資源清理與 pause。（2026-09-08，Phase 10：五次往返無累積、hidden／pause／離頁 rAF 為 1／0／0）
+- [~] 320/360/375/390/414/430、tablet、1440、短橫向：**模擬**擷取與版面檢查已完成（2026-09-08，Chromium）；**真機實拍仍 NOT-RUN**。
 - [ ] Poster → WebGL 光色／相機一致性。
-- [ ] 全部既有驗證與新 Intro E2E／a11y／fallback 測試。
-- [ ] WebKit 與可用的實體裝置測試；不能執行的項目明確記錄，不冒稱完成。
+- [x] 全部既有驗證與新 Intro E2E／a11y／fallback 測試。（2026-09-08，Phase 11：F04／F07／F08／F12／F13 補齊，axe、鍵盤、縮放、reduced motion 皆有具名測試）
+- [ ] WebKit 與可用的實體裝置測試；不能執行的項目明確記錄，不冒稱完成。（2026-09-08：容器無 WebKit engine、無實體裝置 → 全部 NOT-RUN，runbook 見 `docs/qa/intro-portal/phase12-20260908/real-device-runbook.md`）
 - [ ] 前後性能／視覺對照、18 項最終報告與原始碼文件更新。

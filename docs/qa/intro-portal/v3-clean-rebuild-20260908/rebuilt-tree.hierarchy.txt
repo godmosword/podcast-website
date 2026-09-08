@@ -1,0 +1,5 @@
+# rebuilt v3 (build.py Blender 4.5.0 → optimize) tree.glb
+nodes=3 meshes=2 materials=2 textures=0 animations=0
+Tree
+  Crown  [prims=1 tris=448 mat=leaf COLOR_0 T0.035,1.15,0 S0.65,0.65,0.65]
+  Trunk  [prims=1 tris=44 mat=wood T0,0.55,0 S0.55,0.55,0.55]

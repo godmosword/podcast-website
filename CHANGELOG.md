@@ -6,11 +6,21 @@
 
 ### Added
 
+- **跨 viewport QA 工具 `npm run qa:intro-viewports`**：在十個尺寸（320–1440、短橫向、平板）量 `/intro` 的水平溢出、兩個出口的尺寸與是否在首屏內、render DPR、旋轉後版面、進站後的 focus 與 canvas 歸零，另外跑五種網路情境（Wi-Fi／400kbps 節流／離線／Save-Data／GLB 404），輸出截圖與 JSON。**這是 Chromium 模擬，不能代替真機**，輸出的每一列都標 `emulated: true`。**未改** Apple sync workflow。
+- **Intro 效能量測工具 `npm run measure:intro-performance`**：對正在跑的 production build 量載入（`/` 的 3D 請求、初始 JS、延遲 3D chunk gzip、GLB／poster 傳輸、waterfall）、三個 quality tier 的 DPR／frame time 分佈、五次往返的資源與 rAF 行為、LCP／CLS 與 Enter 回饋延遲，輸出附條件的 JSON（build id、瀏覽器、OS、viewport、DPR、tier、cold/warm、網路／CPU）。`render-hero-posters.mjs` 加 `--quality=<tier>`，讓 draw call 的 main／shadow 拆分可以逐階量。**未改** Apple sync workflow。
+- **Intro trusted visual baseline**：新增 Landing 首段 Intro 入口的元素截圖，以及 desktop／mobile 的 poster、ready、greeting 六組核心畫面；以固定 viewport、reduced motion 與 `heroQa` 時鐘穩定取樣，完整 trusted visual suite 81 張通過。**未改** Apple sync workflow。
 - **`/stories` 桌機縮圖網格＋縮圖／完整切換**：≥768 整頁放到 1100px；找故事預設兩欄直式卡、≥1280 三欄。桌機可切「完整」回橫式列（列表限寬 56rem 置中）。偏好存在 `cheche:stories-view`，`<html data-stories-view="list">` 在 paint 前還原，避免先閃縮圖。切換鈕只在 ≥768 出現。主題／車種／相關／收藏維持橫式；手機 &lt;768 零位移。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **站內留言牆 `/feedback`**：頂欄「留言」改站內頁（馬米邀請小卡、家長雙同意、信箱蒐集但不公開、先審後發）。公開列只顯示已核准的暱稱／日期／正文；示範卡獨立、不進 list。後台 `/studio/feedback` 以 `FEEDBACK_MODERATION_SECRET` 密語保護，可核准／隱藏／硬刪。無 `DATABASE_URL` 時頁面仍 200、表單降級 mailto。法律頁新增「公開留言牆」專章，政策版本 `2026-09-05`。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、`SiteHeader`「留言給我」圓鈕（仍 env-gated）。
 
 ### Changed
 
+- **Intro 入口收斂為單一首段 SSR 連結**：依 ADR-0003 保留 Landing 首段「看小紅開進遊樂園」作為唯一 `/intro` 入口，移除 SiteFooter 的重複連結；`/` 仍永遠直接呈現 Landing，未恢復首次訪問自動導向。
+- **Intro 補齊 Phase 11 的可及性與失效路徑測試**：新增語意結構、原生 `<a>`／`<button>`、鍵盤 Tab 順序與 Enter／Space、可見 focus ring、≥44×44、200% 頁面／文字縮放、axe（intro 與進站後的 Landing）、無自動播放音訊、reduced motion 不建立 canvas／不下載 GLB／不載 3D chunk，以及 runtime 由 no-preference → reduce 的安全卸載；失效路徑補上 F04（二進位截斷的 GLB）、F07（context lost）、F08（runtime reduced motion）、F12（poster 404）、F13（離頁後才到的模型）。`runs the signature phases` 改用頁面內 `MutationObserver` 記錄順序（真實時間下 `stop` 80ms／`settle` 320ms 可能整段落在兩幀之間），並加上「phase 不得倒退、問候只發生一次」的斷言。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
+- **Intro → Landing 進站轉場（Phase 9）**：`進入車車遊樂園` 與 `略過動畫` 現在**先導航、動畫同時播**（原本是等 360ms 淡出跑完才 `router.replace`）。決策集中在 `enter-transition.ts` 的 `resolveEnterAction()`：修飾鍵／中鍵完全不攔截原生 `<a href="/?enter=1">`、重複觸發只吃掉不重複導航、live 場景播 ≤360ms 淡出＋推近、poster／載入中／fallback／reduced motion 直接進站。推近改由 CSS `transform: scale(1.065)` 做（合成器），按下當下就停止 3D 算繪——實測軟體算圖環境下，點擊到換頁由 1.3 秒降到 ~0.3 秒。JS 可用時兩個連結都落在乾淨的 `/`，`?enter=1` 留在 href 當無 JS 入口，canonical 不變。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
+- **補回 ADR-0003 之後遺失的進站 focus**：新增 `LandingEntryFocus`，從 Intro 進站（分頁內意圖，不用 storage）或無 JS 的 `?enter=1` 才把 focus 交給 `#main-content`，且 `preventScroll`；Back／Forward 還原與直接開 `/` 都不搶焦點，每個 document 最多一次。**未改** Apple sync workflow。
+- **v3 微型樂園改由 Blender 乾淨重建**（本輪以 PyPI `bpy` 4.5.0 模組實跑，實體 `blender -b` CLI 複驗列為 Phase 13 前必做）：`build.py` 現在自己定義 v3 的世界色、roughness、暖窗自發光、餅乾底座／前庭高低差與接觸陰影（烘進 `COLOR_0`），吊艙與輪胎另立玩具色材質；`optimize:hero-world` 以 `--palette false` 輸出完全無貼圖的 GLB，manifest 記錄 Blender 版本、seed、`build.py` 與 raw export 的雜湊。後製腳本 `scripts/polish-hero-world.mjs` 刪除，`v2 → polish → v3` 的斷裂來源鏈消失。重建後三個 GLB 由 384,320 降到 291,484 bytes、triangles 16,343→16,373、貼圖 3→0，validator 0 errors／0 warnings，`validate:hero-world` 88 項通過；before／after 擷取的平均像素差 ≤0.39/255。新增 `npm run render:hero-posters` 與 `npm run release:hero-world`。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、v1／v2 回退目錄。
+- **Intro 改成 opt-in 入口（[ADR-0003](docs/adr/0003-intro-auto-invite.md)）**：`/` 永遠直接是 Landing，移除首次訪問自動導向、`components/intro/IntroVisit.tsx` 與 `cheche-intro-visited-v1` session key；Landing 首段改放一個 SSR 連結「看小紅開進遊樂園」（用 v3 mobile poster 當縮圖）進 `/intro`。`/?enter=1` 仍是 Intro 的出口、canonical 仍是 `/`。E2E 由 R01–R12 收斂成 R08–R11 加一條不下載 GLB 的迴歸。**未改** Apple sync workflow、`/intro` 自身的 poster-first 與 fallback 行為。
+- **Intro 相機定稿**：desktop scale 1.16→1.20、mobile 0.94→1.15，讓底座在兩端出框、世界佔滿舞台（原本整座島浮在奶油底色中央）；屋頂、摩天輪輪圈、小紅的眼睛與 CTA 都仍完整。沒有新增物件、shader、particle 或相依套件。**未改** Apple sync workflow。
 - **`/feedback` 信紙表單恆可填**：不再因無 `DATABASE_URL` 整份換成 mailto。頁面初始 HTML 一律有「寫給馬米」欄位、蜜罐與起頭 chip；關站或送出 unavailable 時表單留下，mailto 改文字連結備援並可帶入已填暱稱／正文。空牆 CTA 恆指向留言欄。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、Vercel `DATABASE_URL`（站內收件仍需 Neon）。
 - **`/feedback` 表單立刻可填＋牆先示範**：表單改 SSR／Server Action（蜜罐、最短填寫時間），不再等 `GET /api/feedback` 才畫欄位。邀請改兩段＋頁面可見審核句。核准少於 3 則只顯示馬米示範，不寫「還沒有公開留言」。信箱仍必填、永不公開；資料續寫 Neon。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **`/feedback` 馬米信箱**：首屏改馬米定裝身份層＋對話泡泡；「給家長」與審核句移到同意列；表單改信紙暖面與起頭 chip；mailto 關站態改大觸控鈕；示範卡改實線暖面。公開契約不變（先審後發、信箱不公開、真留言 hairline 列）。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、Vercel `DATABASE_URL`。
@@ -40,6 +50,7 @@
 
 ### Fixed
 
+- **Intro 動畫時間改用真實 active 時間，不再隨 FPS 變慢**：小紅時間軸、摩天輪 56 秒週期、樹擺與入園推近原本以 `Math.min(delta, .05)` 累加 render delta，10 FPS 下 18 秒的旅程要跑 36 秒、問候大幅遲到。改用 `ActiveTimeline`（`active-clock.ts`）每幀讀時鐘：低幀率不影響速度，hidden／pause 以 `suspend()` 切段所以不累積、恢復也不跳時間，單幀最多推進 1 秒以擋住系統休眠後的大跳。新增 16 個決定性回歸測試（60／30／10／5 FPS、hidden、pause、reset、單幀上限，外加禁止再用 render delta 的來源檢查）。**未改** reduced motion、24 秒次要動態休眠、`frameloop="demand"`、QualityManager 的 FPS 取樣（那裡本來就該看幀）。
 - **首頁不再自動導向 `/intro`**：依 ADR-0003 拿掉 `IntroVisit` 的 client `replace`。CI `test:e2e:ci` 的 Landing smoke／桌面抽屜 a11y 會在 hydration 後找不到「訂閱」「開啟選單」（導覽列隨 `/intro` 卸載）。`/` 永遠停在 Landing；頁尾新增 SSR「走進車車遊樂園」連 `/intro`。`/?enter=1` 仍是 Intro 出口。首屏 poster 入口位置留待 Phase 8。**未改** Apple sync workflow。
 
 - **Apple sync GH013 auto-merge 假等（#145）**：`workflow_dispatch` 的 `quality`／`build-and-public-e2e` Check Run 在 SHA 上已綠，但 `protect-main-web` 的 required context 只認 commit status（與 `Vercel` 同一條 Status API），PR `mergeStateStatus` 一直 `BLOCKED`、waiter 空等 80 輪。waiter 改為**只在真實 job `success` 之後**把同名 context 鏡射成 commit status（`statuses: write`）；失敗仍 fail-fast，不造假綠。**有改** `sync-apple-podcast.yml`（僅 `open_sync_pr` waiter）。不改 ruleset、不加 Actions bypass。

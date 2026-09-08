@@ -1,0 +1,63 @@
+/* 與分區的玻璃次要鈕同語言，但更小：這是邀請，不是本段的主要行動。 */
+.entry {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  margin-top: 10px;
+  padding: 6px 16px 6px 6px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-weight: 700;
+  font-size: var(--fs-control);
+  text-decoration: none;
+  transition: transform var(--motion-press), opacity var(--motion-press),
+    background var(--motion-press);
+}
+
+.thumbFrame {
+  display: flex;
+  flex: none;
+}
+
+.thumb {
+  flex: none;
+  width: 52px;
+  height: 38px;
+  border-radius: calc(var(--radius-pill) / 2);
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.label {
+  line-height: 1.2;
+}
+
+.arrow {
+  opacity: 0.85;
+}
+
+.entry:active {
+  transform: scale(0.98);
+  opacity: 0.92;
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.entry:focus-visible {
+  outline: 3px solid var(--on-dark);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .entry:hover {
+    background: rgba(255, 255, 255, 0.24);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entry:active {
+    transform: none;
+  }
+}

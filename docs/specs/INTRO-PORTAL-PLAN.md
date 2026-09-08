@@ -1,6 +1,6 @@
 # 車車遊樂園 3D Intro / Portal — 詳細執行計畫
 
-版本：1.0 · 日期：2026-09-06（狀態於 2026-09-07 依工作樹重新核對） · 狀態：Phase 1、4、5 已執行並驗證；Phase 6／7 產出 v2 並通過 validator，build.py 已實跑證明可重建 v2（Blender 4.5.9／5.2.1，證據見 `docs/qa/intro-portal/phase6-rebuild-20260907/`）；但前端已改引用未經 Blender 重建的 v3，該版本的可重建性仍未證明；Phase 2、3、8–13 為後續計畫
+版本：1.0 · 日期：2026-09-06（狀態於 2026-09-08 依工作樹重新核對） · 狀態：Phase 1、4、5 已執行並驗證；Phase 6／7 已對前端實際引用的 **v3** 成立——v3 由 `build.py` 在 Blender 4.5 乾淨重建（以 PyPI `bpy` 模組實跑；實體 Blender CLI 複驗列為 Phase 13 前必做。證據見 `docs/qa/intro-portal/v3-clean-rebuild-20260908/`），`polish-hero-world.mjs` 已刪除；ADR-0003 的 opt-in 入口已實作；Phase 8 已完成 v3 的視覺驗收與 before／after 對照；Phase 9 的進站轉場與 focus 交接已實作並驗證；Phase 10／11 已完成本機量測與可及性驗證（FPS 與螢幕閱讀器待真機）；Phase 2、3、12–13 為後續計畫
 
 配套文件：[產品與技術 SPEC](INTRO-PORTAL-SPEC.md)。本文件把規格拆成可執行的工作、相依關係、測試及交付證據；Phase 1、4、5、6、7 的證據位於 `docs/qa/intro-portal/phase1-20260906/`、`phase4-5-20260906/` 與 `phase6-7-20260906/`。`docs/qa/intro-portal/phase8-20260906/` 已有 v3 的 capture、四角度 poster 與 validator 輸出，但 `capture-report.json` 的 `runtimeMetrics` 為 null、`performanceSampled` 為 false，且無 test-results.md，因此不算 Phase 8 驗收。其餘 checkbox 仍是後續驗收項目。
 
@@ -18,7 +18,7 @@
 |---|---|---|---|
 | 未驗收工作樹 | 路由、場景與 Blender 有前次草稿 | 記錄完整 diff 與資產清單，再決定沿用部分 | 基線 commit＋dirty patch＋untracked inventory |
 | ~~v2 資產不完整~~（已解除） | 基線只有 poster.png；Phase 6 已補齊完整 v2 | — | v2 manifest、hash 與 validator 通過 |
-| 上線資產無 Blender 來源鏈 | build.py 已實跑並證明可重建 v2；但前端引用的是 v3，v3 由 NodeIO 加工 v2 而來，`build.py` 的 `PROD` 仍指向 v2 | 讓 v3 也能由 build.py（或 build.py＋明示的 polish 階段）重建，或把前端切回可重建的版本 | `docs/qa/intro-portal/phase6-rebuild-20260907/`：Blender 4.5.9／5.2.1 執行 log 與 hierarchy 對照表（v2 已通過） |
+| ~~上線資產無 Blender 來源鏈~~（已解除，2026-09-08） | v3 的美術（色彩、roughness、暖窗自發光、接觸陰影、地面高低差）已回寫進 `build.py`；`PROD` 指向 v3，後製腳本刪除 | 尚缺：以實體 Blender CLI（`blender -b --python`）複跑一次，確認與 `bpy` 模組結果一致（Phase 13 前必做） | `docs/qa/intro-portal/v3-clean-rebuild-20260908/report.md`：Blender 4.5 執行 log、hierarchy 對照、bytes／triangles／materials／clip 差異表與 before／after 影像差分 |
 | 現有 Hero 測試 | 仍有依舊首頁設計的斷言 | 區分移至 Intro 的斷言與保留 Landing 的斷言 | 測試契約變更說明 |
 | 字型子集 | 新短句可能缺字 | 檢查 glyph coverage，必要時再生子集 | 目視及字元比對 |
 | 真機 | 未確認實體 iPhone／Android 可用 | 執行時確認測試資源；不足標 blocked | 真機型號、OS、瀏覽器與錄影 |
@@ -98,14 +98,14 @@ artifact-id 應可追溯版本與時間；若有 dirty tree，用 diff hash 或�
 
 1. `app/intro/page.tsx` 作 server shell：metadata、標題、短句、poster、Enter／Skip。若拆 client boundary，確認初始 HTML 仍有連結。
 2. `/` 保持內容、canonical 與 JSON-LD；`/intro` noindex、follow，不放進主 sitemap。不得全站 middleware 強制 Intro。
-3. **已由 ADR-0003 取代：** 不再掛 IntroVisit；`/` 零 client redirect。
-4. **已由 ADR-0003 取代：** 裸 `/`、`enter=1`、hash、deep link 都停在所請求的內容。
-5. **已由 ADR-0003 取代：** 不再寫 session；storage 錯誤也不再影響路由。
+3. 輕量 IntroVisit 只處理 session 與 navigation eligibility，不 import Three、不讀完整模型。
+4. 首次裸 `/` 可 replace 至 Intro；query `enter=1`、hash、deep link、已訪問、history restore、storage error、離線均直接內容。
+5. 首次邀請前寫 session；storage 讀／寫 throw 則留 Landing。React Strict Mode effect 重跑仍只導向一次。
 6. Enter 為原生 `<a href="/?enter=1">`。正常主鍵點擊可增強；modifier、中鍵、下載／新視窗語意不得被動畫攔截。
 7. 只在 Intro 隱藏 SiteNavBar、DuduCompanion、bedtime 視覺層；Landing 保持原位與行為。不能全域卸掉 ThemeProvider。
 8. JS disabled 時 `/` 可探索內容、`/intro` 可直接 Enter。不要用 CSS 預設隱藏全站等 hydration。
 
-**驗證：** 執行本文件 R08–R11；檢查原始 response HTML 與 hydration 後 DOM；確認 `/` 無 client redirect。
+**驗證：** 執行本文件 R01–R12；檢查原始 response HTML 與 hydration 後 DOM；測 storage throw、雙 effect、BFCache、外站→首頁→Intro→Landing→Back。
 
 **退出條件：** 不載模型就能完整使用；無回圈、無 deep-link 攔截、Intro 不疊浮動小紅、首頁保留內容與索引能力。
 
@@ -142,7 +142,7 @@ artifact-id 應可追溯版本與時間；若有 dirty tree，用 diff hash 或�
 
 **退出條件：** 無 validator error；所有必需 node／clip 存在；實際GLB <1MB；poster 可用；程式引用與產物一致；可重建得到語意一致資產。二進位不一定逐 byte 相同，差異需能解釋。
 
-**現況（2026-09-07，已實跑驗證）：** 對 **v2** 全部成立——`build.py` 已在 Blender 4.5.9 LTS 與 5.2.1 LTS 實跑，經 `optimize-hero-world.mjs` 後可重建出與上線 v2 語意階層完全一致的資產（節點名稱集合與節點數一致，`Drive` 4 channels／2.0417s 一致），bytes 與 SHA 差異可解釋。證據見 `docs/qa/intro-portal/phase6-rebuild-20260907/`。對 **v3** 仍不成立：v3 由 `polish-hero-world.mjs` 後製 v2 而來，`build.py` 的 `PROD` 仍指向 v2。Phase 6 對 v2 可關閉，對前端實際引用的 v3 未關閉。
+**現況（2026-09-08，已實跑驗證）：** 對前端實際引用的 **v3** 成立（本輪以 PyPI `bpy` 4.5.0 模組實跑；`blender -b --python` 這條 CLI 路徑的複驗仍未做，列為 Phase 13 前必做）。`build.py` 現在自己產出 v3 的美術：世界色與 roughness、暖窗 emissive、餅乾底座／前庭鋪面的高低差，以及以世界座標烘進 `COLOR_0` 的接觸陰影（只在草地、屋牆、紅色量體、樹冠這四處有濃淡）；摩天輪吊艙與輪胎保留原本的玩具色，另立材質。optimize 以 `--palette false` 執行，因此 GLB 完全不帶貼圖。重建結果：語意階層與節點名稱集合和上線 v3 完全一致，`Drive` 4 channels／2.0417s 一致，COLOR_0 與原後製公式的最大偏差 0.002（＝量化級距），bytes 由 384,320 降到 291,484、triangles 16,343→16,373、materials +5（atlas 拆回實體材質）。raw 與 final GLB 皆 0 errors／0 warnings。證據見 `docs/qa/intro-portal/v3-clean-rebuild-20260908/`。
 
 ## 7. Phase 7 — 小紅角色動畫
 
@@ -182,7 +182,19 @@ hidden／pause 不累積時間；回來從原姿態繼續。Enter 從任何動�
 
 到 Landing 後清理 scene、移除覆蓋層、恢復內容捲動，初次 Enter 可將 focus 移到 main／標題。Back 還原既有頁面時不搶焦點、不重設原捲動位置。
 
+實作：進站意圖是一個分頁內的模組變數（`markEnterIntent()` / `consumeEnterIntent()`），
+不使用 storage——ADR-0003 之後 Intro 不再碰 sessionStorage。Landing 的 `LandingEntryFocus`
+依 `shouldFocusLandingMain()` 決定是否把 focus 交給 `#main-content`：從 Intro 進來（意圖）
+或無 JS 的 `?enter=1` 才做；`back_forward` 還原與直接開 `/` 都不做，且每個 document 最多一次。
+`focus({ preventScroll: true })` 確保 Landing 的捲動容器不被拉走。
+
 **退出條件：** 在 poster、loading、greeting、paused、fallback 五種時刻都可 Enter；慢 CPU／hidden／雙點擊不死鎖；頁面沒有退出後殘留 canvas。
+
+**現況（2026-09-08，已實作並驗證）：** 全部成立。導航一律先發生、動畫同時播；
+五種時刻各有 E2E、修飾鍵與中鍵維持原生語意、雙擊只導航一次且不增加 history、
+進站後 focus 交給 `#main-content`、Back／Forward 不搶焦點、離開後
+canvas／model request／visibilitychange listener 都歸零且無 late parse 例外。
+證據見 `docs/qa/intro-portal/phase9-20260908/report.md`。
 
 ## 10. Phase 10 — 效能與資源收斂
 
@@ -200,6 +212,13 @@ hidden／pause 不累積時間；回來從原姿態繼續。Enter 從任何動�
 
 **退出條件：** 硬限制通過；目標未達有量測差異與修正決定；沒有無情境的「60FPS」宣稱；Landing無可歸因於Intro的重大回歸。
 
+**現況（2026-09-08）：** 除 FPS 外全部通過，證據見 `docs/qa/intro-portal/phase10-20260908/`。
+`/` 零 3D 請求；Intro 在 `/` 的初始 JS 增量 +462 bytes gzip（雙 build 對照）；延遲 3D chunk
+255,448 bytes gzip；GLB 傳輸 133 KB；poster 74 KB；High main pass 52 calls／shadow 29（SPEC 分開計，
+未超標，因此不動場景）；五次往返 canvas／context／listener／請求都不成長；hidden／pause／離頁的
+rAF 為 1／0／0；LCP 136–228ms、CLS 0；Enter 回饋 6–65ms；INP not measured。
+**FPS 無法在本容器判定**（無 GPU，軟體光柵化：high 2.1、medium 20），列為 Phase 12 真機必測。
+
 ## 11. Phase 11 — 可及性與靜態體驗
 
 **相依：** Phase 9 完成互動；基礎要求已從Phase4開始。
@@ -213,6 +232,14 @@ hidden／pause 不累積時間；回來從原姿態繼續。Enter 從任何動�
 7. 音訊預設靜音，無AudioContext自動建立、無干擾故事播放器。
 
 **退出條件：** 完全不看動畫、無WebGL、鍵盤或screen reader都能完成相同進站任務；pause狀態名稱與真實動態一致。
+
+**現況（2026-09-08）：** 自動化部分全部通過，證據見 `docs/qa/intro-portal/phase11-20260908/`。
+語意結構、原生 `<a>`／`<button>`、鍵盤 Tab 順序與 Enter／Space、可見 focus ring、≥44×44、
+200% 頁面與文字縮放、axe（intro 與進站後的 Landing）、無自動播放音訊、reduced motion 不建立
+canvas／不下載 GLB／不載 3D chunk／不顯示 Pause／Enter 立即可用、runtime 由 no-preference →
+reduce 安全卸載，均有具名測試。F04（二進位截斷）、F07（context lost）、F08（runtime reduced
+motion）、F12（poster 失敗）、F13（late parse）補齊。**VoiceOver／實體 Safari／TalkBack 仍為
+NOT-RUN**，不以 axe 代替。
 
 ## 12. Phase 12 — Cross-device QA
 
@@ -235,6 +262,15 @@ hidden／pause 不累積時間；回來從原姿態繼續。Enter 從任何動�
 
 **退出條件：** 無P0／P1；所有未測平台明列限制，不能以空白當pass。需要修正時回到對應phase，之後只重跑受影響項與必要整合回歸。
 
+**現況（2026-09-08）：未通過，受阻於硬體。** 自動化環境沒有實體 iPhone／Android、沒有
+`adb`／`xcrun`、也沒有 WebKit engine，因此真機效能、VoiceOver／TalkBack、發熱、Safari 專屬
+行為（safe-area／100svh／工具列／BFCache／背景恢復）與 Dynamic Type 全部 **NOT-RUN**，
+且不以 desktop emulation 冒充。可誠實用模擬完成的部分已完成並獨立列出：十個 viewport
+（320–1440＋短橫向＋平板）版面與旋轉全部 0 水平溢出、出口在首屏內且 ≥44px、進站後 focus
+落在 `#main-content`、canvas 歸零；五種網路情境（Wi-Fi／400kbps／離線／Save-Data／GLB 404）
+都是 poster-first、Enter 不等 3D、無重試風暴。證據與可照著跑的真機 runbook 見
+`docs/qa/intro-portal/phase12-20260908/`。
+
 ## 13. Phase 13 — 最終視覺、報告與交付
 
 **相依：** Phase12完成，所有必要證據可追溯。
@@ -245,7 +281,14 @@ hidden／pause 不累積時間；回來從原姿態繼續。Enter 從任何動�
 
 本輪只執行 Phase 1、4、5，不做 Blender 美術、不 commit、不 push、不部署。未來進入發布階段時，以當時授權與專案實際 hosting 流程執行；先有可審查 Preview 與證據，再處理 production。不能把 Phase 4／5 完成等同 production-ready。
 
-**退出條件：** 視覺、敘事、產品、工程、效能、手機、可及性、Landing保留八項分別有證據；已知阻擋事項未被藏在「完成」措辭下。
+**Phase 13 前必做（2026-09-08 新增）：** 以實體 Blender CLI 執行
+`blender -b --python assets/blender/hero-world/build.py`（Blender 4.5 LTS）重跑一次乾淨重建，
+與 2026-09-08 用 PyPI `bpy` 模組得到的結果比對節點階層、`Drive` clip、COLOR_0、bytes／
+triangles／materials 與 `validate:hero-world` 結果。兩者共用同一版 Python API，但 CLI 會走
+完整的應用程式啟動與 addon 集合（glTF 匯出器在 CLI 是預設 addon），因此不能互相取代。
+在此之前，交付文件只能宣稱「以 `bpy` 4.5.0 模組可乾淨重建」。
+
+**退出條件：** 視覺、敘事、產品、工程、效能、手機、可及性、Landing保留八項分別有證據；已知阻擋事項未被藏在「完成」措辭下；上述 Blender CLI 複驗已完成並附 log。
 
 ## 14. 變更檔案藍圖與責任邊界
 
@@ -271,16 +314,33 @@ hidden／pause 不累積時間；回來從原姿態繼續。Enter 從任何動�
 
 ### 15.1 路由與入口
 
-> **[ADR-0003](../adr/0003-intro-auto-invite.md) 已實作：取消自動邀請。**
-> 本表只留 R08、R09、R10、R11。R01–R07 與 R12 的 redirect 部分已刪除，不是 skip。
+> **[ADR-0003](../adr/0003-intro-auto-invite.md) 取消自動邀請，已於 2026-09-08 實作。** R01–R07 與 R12 的 redirect 部分已刪除，不是 skip。
+
+| ID | 應有結果 | 對應 test |
+|---|---|---|
+| R08 | Back／Forward 在 Landing↔Intro 之間正常往返，不出現 redirect 迴圈 | `R08: Back and Forward move between Landing and Intro without a redirect loop` |
+| R09 | 新訪客停在 Landing，且首段有 SSR 的 `/intro` 連結可點進 Intro | `R09: a fresh visit stays on Landing and offers an SSR link into the intro` |
+| R10 | 關閉 JavaScript 時，Landing 內容與首段 Intro 入口都可用 | `R10: keeps Landing content and the native intro entry usable without JavaScript` |
+| R11 | 修飾鍵點 Enter 保留原生連結語意，不被動畫攔截 | `R11: a modifier click on Enter keeps native link semantics` |
+
+另補一條非 R 編號的迴歸：`deep links and Landing never download the hero models` 驗證 `/`、
+深連結與 `/?enter=1` 都不下載 GLB，且 `/?enter=1` 的 canonical 仍是 `/`。
 > 目前狀態見 [route-matrix.md](../qa/intro-portal/route-matrix.md)。
 
 | ID | 設定／動作 | 應有結果 | 方法 |
 |---|---|---|---|
+| R01 | 新session開裸首頁 | 邀請一次到Intro，Enter立即存在 | E2E＋錄影 |
+| R02 | 已訪問session開首頁 | Landing直接顯示，無3D下載 | E2E＋network |
+| R03 | 新session開/?enter=1 | 留Landing，canonical為/ | E2E＋HTML |
+| R04 | 新session開首頁hash | 留目標段、不跳Intro | E2E |
+| R05 | 新session開story／game／兩種map | 直接內容，再回首頁不攔截 | 參數化E2E |
+| R06 | storage get／set throw | 首頁留內容，Intro Enter仍可用 | init-script故障注入 |
+| R07 | 外部頁→首頁→Intro→Enter→Back | 返回外部頁，无Intro loop | E2E真實history |
 | R08 | Landing→story→Back／Forward | 正常內容與既有捲動，無重播 | E2E＋手測 |
-| R09 | 主動開/intro | 可重看且可直接進站 | E2E |
-| R10 | JS disabled | /有内容與 Intro 連結，/intro有原生Enter | browser context |
+| R09 | 已訪問時主動開/intro | 可重看且可直接進站 | E2E |
+| R10 | JS disabled | /有内容，/intro有原生Enter | browser context |
 | R11 | 中鍵／Cmd或Ctrl點Enter | 原生新頁語意，不錯導當前tab | 瀏覽器手測 |
+| R12 | BFCache還原、offline、StrictMode | 不重定向／重播／雙canvas | lifecycle觀測 |
 
 ### 15.2 載入與生命周期
 

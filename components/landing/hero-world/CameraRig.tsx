@@ -3,9 +3,10 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { WORLD_CAMERA } from "./art-direction";
 import { OrthographicCamera, Vector2 } from "three";
 
-export default function CameraRig({ active, entering = false }: { active: boolean; entering?: boolean }) {
+// 進站的推近改由 CSS transform 完成（見 HeroWorld.module.css）：那是合成器的
+// 工作，不需要 WebGL 再畫一輪，路由切換也就不必和算繪搶主執行緒。
+export default function CameraRig({ active }: { active: boolean }) {
   const { camera, size, gl, invalidate } = useThree();
-  const entry = useRef(0);
   const baseZoom = useRef(55);
   const target = useRef(new Vector2());
   const offset = useRef(new Vector2());
@@ -31,13 +32,7 @@ export default function CameraRig({ active, entering = false }: { active: boolea
     canvas.addEventListener("pointermove", move, { passive: true }); canvas.addEventListener("pointerleave", reset);
     return () => { canvas.removeEventListener("pointermove", move); canvas.removeEventListener("pointerleave", reset); };
   }, [gl, active, mobile, invalidate]);
-  useEffect(() => { if (entering) invalidate(); }, [entering, invalidate]);
-  useFrame((_, delta) => {
-    if (entering && camera instanceof OrthographicCamera) {
-      entry.current = Math.min(1, entry.current + Math.min(delta, .05) / .36);
-      camera.zoom = baseZoom.current * (1 + .065 * entry.current);
-      camera.updateProjectionMatrix(); invalidate();
-    }
+  useFrame(() => {
     if (!active) return;
     offset.current.lerp(target.current, .08);
     camera.position.x = (mobile ? 5 : 7) + offset.current.x;

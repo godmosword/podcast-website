@@ -7,6 +7,7 @@ import { Component, useCallback, useEffect, useRef, useState, type ReactNode } f
 import { MODEL_PATH, chooseQuality, type MotionPhase, type Quality } from "./config";
 import styles from "./HeroWorld.module.css";
 import { getActiveClock, LOAD_TIMEOUT_MS, MAX_TICK_DELTA_MS, SLEEP_AFTER_MS, TICK_MS } from "./active-clock";
+import { EXIT_TRANSITION_MS, TRANSITION_RESET_MS, markEnterIntent, resolveEnterAction } from "./enter-transition";
 
 const Scene = dynamic(() => import("./HeroScene"), { ssr: false });
 
@@ -40,10 +41,13 @@ export default function HeroWorld() {
   const router = useRouter();
   const [entering, setEntering] = useState(false);
   const [greeting, setGreeting] = useState(false);
-  const exitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const navigating = useRef(false);
+  // 按下進入的當下就停止算繪，把主執行緒完整讓給路由切換。實測（軟體算圖的
+  // 容器）：讓場景繼續畫，網址要 1.3 秒才換；停掉之後 80ms。推近改由 CSS
+  // transform 做，所以停算繪不會犧牲視覺。
+  const [exited, setExited] = useState(false);
   const transitionResetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => {
-    if (exitTimer.current) clearTimeout(exitTimer.current);
     if (transitionResetTimer.current) clearTimeout(transitionResetTimer.current);
   }, []);
   const root = useRef<HTMLElement>(null);
@@ -152,26 +156,40 @@ export default function HeroWorld() {
   }, [eligible, visible, ready, failed, pageVisible]);
 
   const mounted = eligible && !failed && (visible || ready);
-  const active = visible && pageVisible && !paused;
+  const active = visible && pageVisible && !paused && !exited;
   const enter = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
-    if (!ready || !eligible || failed || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const action = resolveEnterAction({
+      button: event.button, metaKey: event.metaKey, ctrlKey: event.ctrlKey,
+      shiftKey: event.shiftKey, altKey: event.altKey,
+      ready, eligible, failed,
+      reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
+      navigating: navigating.current,
+    });
+    // 修飾鍵／中鍵：原生 `<a href="/?enter=1">` 語意原封不動（新分頁、新視窗、
+    // 複製連結），這個分頁不做任何事，也不留下進站意圖。
+    if (action === "native") return;
     event.preventDefault();
-    if (exitTimer.current || entering) return;
-    setEntering(true);
-    exitTimer.current = setTimeout(() => {
-      exitTimer.current = null;
-      router.replace("/?enter=1");
-    }, 360);
-    // If a client route chunk fails, restore the native links instead of
-    // leaving an opaque transition overlay permanently over the page.
+    // 第二次觸發（雙擊、鍵盤重複）只被吃掉，不會產生第二次導航。
+    if (action === "ignore") return;
+    navigating.current = true;
+    markEnterIntent();
+    // 導航立刻開始。淡出與相機推近是**同時**發生的裝飾，不是導航的前置條件，
+    // 所以慢裝置或提早就緒的路由都不會被動畫拖住。
+    // 兩條路徑都立刻停止 3D；差別只在有沒有那層 ≤360ms 的淡出與推近。
+    setExited(true);
+    if (action === "transition") setEntering(true);
+    router.replace("/");
+    // route chunk 失敗時把原生連結還給使用者，不留住不透明的覆蓋層。
     transitionResetTimer.current = setTimeout(() => {
       transitionResetTimer.current = null;
+      navigating.current = false;
       setEntering(false);
-    }, 1_500);
+      setExited(false);
+    }, TRANSITION_RESET_MS);
   };
   return (
       <section ref={root} className={styles.hero} aria-labelledby="intro-title" data-hero-world
+      style={{ "--exit-transition-ms": `${EXIT_TRANSITION_MS}ms` } as React.CSSProperties}
       data-scene-state={failed ? "fallback" : ready && eligible ? "ready" : "poster"}
       data-scene-active={mounted && active} data-entering={entering} data-greeting={greeting} data-motion-phase={phase}>
       <div className={styles.copy}>
@@ -185,7 +203,7 @@ export default function HeroWorld() {
         </picture>
         {mounted ? <div className={styles.canvas} data-ready={ready}>
           <SceneBoundary onFailure={fail}>
-            <Scene active={active} quality={quality} run={0} entering={entering}
+            <Scene active={active} quality={quality} run={0}
               onReady={() => setReady(true)} onFailure={fail} onPhase={setPhase}
               onFinish={() => setGreeting(false)} onGreeting={setGreeting} onQuality={setQuality} />
           </SceneBoundary>
@@ -204,7 +222,9 @@ export default function HeroWorld() {
           </button>
         ) : null}
       </div>
-      <Link href="/?enter=1" replace className={styles.skip}>略過動畫</Link>
+      {/* href 維持 `/?enter=1`：那是無 JS 與深連結的語意入口。JS 可用時兩個連結
+          都改由 router 送到乾淨的 `/`，canonical 不變。 */}
+      <Link href="/?enter=1" replace className={styles.skip} onClick={enter}>略過動畫</Link>
     </section>
   );
 }

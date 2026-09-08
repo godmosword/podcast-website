@@ -67,6 +67,25 @@ export async function stabilizeVisualPage(
     window.scrollTo(0, 0);
   });
 
+  // Next/Image may first render a small lazy candidate, then replace it with
+  // the final responsive URL during hydration. In a long page Chromium can
+  // abort that first request while the scroll sweep is moving, leaving the
+  // final candidate permanently incomplete and making a full visual run hang.
+  // Run the sweep first so every image has its final candidate, then lock each
+  // one to that URL and make it eager for the test capture; pixels and source
+  // art remain unchanged.
+  await page.evaluate(() => {
+    for (const source of document.querySelectorAll("picture source[srcset]")) {
+      source.removeAttribute("srcset");
+    }
+    for (const image of document.images) {
+      const source = image.currentSrc || image.src;
+      image.removeAttribute("srcset");
+      image.loading = "eager";
+      if (source) image.src = source;
+    }
+  });
+
   await page.waitForFunction(
     () =>
       [...document.images].every((img) => {

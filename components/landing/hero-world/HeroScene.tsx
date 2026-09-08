@@ -12,7 +12,7 @@ import CameraRig from "./CameraRig";
 import QualityManager from "./QualityManager";
 import type { MotionPhase } from "./config";
 
-type Props = { entering?: boolean; onGreeting?: (greeting: boolean) => void; onPhase?: (phase: MotionPhase) => void; active: boolean; quality: Quality; run: number; onReady: () => void; onFailure: () => void; onFinish: () => void; onQuality: (q: Quality) => void };
+type Props = { onGreeting?: (greeting: boolean) => void; onPhase?: (phase: MotionPhase) => void; active: boolean; quality: Quality; run: number; onReady: () => void; onFailure: () => void; onFinish: () => void; onQuality: (q: Quality) => void };
 
 function Contents(props: Props) {
   const callbacks = useRef(props); callbacks.current = props;
@@ -44,7 +44,7 @@ function Contents(props: Props) {
       shadow-mapSize={[1024, 1024]} shadow-camera-left={-7} shadow-camera-right={7}
       shadow-camera-top={6} shadow-camera-bottom={-6} shadow-camera-near={.5} shadow-camera-far={25}
       shadow-bias={-.001} shadow-normalBias={.035} />
-    <CameraRig active={props.active} entering={props.entering} />
+    <CameraRig active={props.active} />
     <QualityManager active={props.active} quality={props.quality} onQuality={props.onQuality} />
     {assets ? <>
       <World environment={assets.environment} tree={assets.tree} quality={props.quality} active={props.active && sceneReady} />
