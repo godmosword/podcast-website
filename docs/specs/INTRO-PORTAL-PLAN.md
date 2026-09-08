@@ -98,14 +98,14 @@ artifact-id 應可追溯版本與時間；若有 dirty tree，用 diff hash 或�
 
 1. `app/intro/page.tsx` 作 server shell：metadata、標題、短句、poster、Enter／Skip。若拆 client boundary，確認初始 HTML 仍有連結。
 2. `/` 保持內容、canonical 與 JSON-LD；`/intro` noindex、follow，不放進主 sitemap。不得全站 middleware 強制 Intro。
-3. 輕量 IntroVisit 只處理 session 與 navigation eligibility，不 import Three、不讀完整模型。
-4. 首次裸 `/` 可 replace 至 Intro；query `enter=1`、hash、deep link、已訪問、history restore、storage error、離線均直接內容。
-5. 首次邀請前寫 session；storage 讀／寫 throw 則留 Landing。React Strict Mode effect 重跑仍只導向一次。
+3. **已由 ADR-0003 取代：** 不再掛 IntroVisit；`/` 零 client redirect。
+4. **已由 ADR-0003 取代：** 裸 `/`、`enter=1`、hash、deep link 都停在所請求的內容。
+5. **已由 ADR-0003 取代：** 不再寫 session；storage 錯誤也不再影響路由。
 6. Enter 為原生 `<a href="/?enter=1">`。正常主鍵點擊可增強；modifier、中鍵、下載／新視窗語意不得被動畫攔截。
 7. 只在 Intro 隱藏 SiteNavBar、DuduCompanion、bedtime 視覺層；Landing 保持原位與行為。不能全域卸掉 ThemeProvider。
 8. JS disabled 時 `/` 可探索內容、`/intro` 可直接 Enter。不要用 CSS 預設隱藏全站等 hydration。
 
-**驗證：** 執行本文件 R01–R12；檢查原始 response HTML 與 hydration 後 DOM；測 storage throw、雙 effect、BFCache、外站→首頁→Intro→Landing→Back。
+**驗證：** 執行本文件 R08–R11；檢查原始 response HTML 與 hydration 後 DOM；確認 `/` 無 client redirect。
 
 **退出條件：** 不載模型就能完整使用；無回圈、無 deep-link 攔截、Intro 不疊浮動小紅、首頁保留內容與索引能力。
 
@@ -271,24 +271,16 @@ hidden／pause 不累積時間；回來從原姿態繼續。Enter 從任何動�
 
 ### 15.1 路由與入口
 
-> **[ADR-0003](../adr/0003-intro-auto-invite.md) 已決定取消自動邀請（2026-09-07，尚未實作）。**
-> 實作後本表縮為 R08、R09、R10、R11 四條；R01–R07 與 R12 的 redirect 部分直接刪除，不標成 skip。
+> **[ADR-0003](../adr/0003-intro-auto-invite.md) 已實作：取消自動邀請。**
+> 本表只留 R08、R09、R10、R11。R01–R07 與 R12 的 redirect 部分已刪除，不是 skip。
 > 目前狀態見 [route-matrix.md](../qa/intro-portal/route-matrix.md)。
 
 | ID | 設定／動作 | 應有結果 | 方法 |
 |---|---|---|---|
-| R01 | 新session開裸首頁 | 邀請一次到Intro，Enter立即存在 | E2E＋錄影 |
-| R02 | 已訪問session開首頁 | Landing直接顯示，無3D下載 | E2E＋network |
-| R03 | 新session開/?enter=1 | 留Landing，canonical為/ | E2E＋HTML |
-| R04 | 新session開首頁hash | 留目標段、不跳Intro | E2E |
-| R05 | 新session開story／game／兩種map | 直接內容，再回首頁不攔截 | 參數化E2E |
-| R06 | storage get／set throw | 首頁留內容，Intro Enter仍可用 | init-script故障注入 |
-| R07 | 外部頁→首頁→Intro→Enter→Back | 返回外部頁，无Intro loop | E2E真實history |
 | R08 | Landing→story→Back／Forward | 正常內容與既有捲動，無重播 | E2E＋手測 |
-| R09 | 已訪問時主動開/intro | 可重看且可直接進站 | E2E |
-| R10 | JS disabled | /有内容，/intro有原生Enter | browser context |
+| R09 | 主動開/intro | 可重看且可直接進站 | E2E |
+| R10 | JS disabled | /有内容與 Intro 連結，/intro有原生Enter | browser context |
 | R11 | 中鍵／Cmd或Ctrl點Enter | 原生新頁語意，不錯導當前tab | 瀏覽器手測 |
-| R12 | BFCache還原、offline、StrictMode | 不重定向／重播／雙canvas | lifecycle觀測 |
 
 ### 15.2 載入與生命周期
 

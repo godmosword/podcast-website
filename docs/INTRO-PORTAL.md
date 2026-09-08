@@ -33,7 +33,7 @@ Next.js 16 App Router、React 19、TypeScript strict、CSS Modules。首頁由 L
 
 ## 路由決策
 
-`/intro` 是獨立書封體驗；`/` 保留原 Landing、canonical、SSR 內容與所有內部連結。首次在本分頁開啟首頁時，引導到 Intro；進入／略過回到 `/?enter=1`，此 URL 永遠可直接訪問 Landing（canonical 仍為 `/`）。sessionStorage 記錄本分頁已訪問，內部深連結訪客不會再被攔截。沒有 JavaScript 或儲存權限時保留可用網站；不利用 user-agent 區分搜尋機器人。Intro 有自己的 metadata，noindex/follow，避免薄內容入口取代主網站搜尋結果。進入使用 replace，Back 不會困在 Intro ↔ Landing 的循環。
+`/intro` 是獨立書封體驗；`/` 保留原 Landing、canonical、SSR 內容與所有內部連結。依 [ADR-0003](./adr/0003-intro-auto-invite.md)，`/` 不再自動導向 Intro；頁尾 SSR 連結「走進車車遊樂園」進入 `/intro`。進入／略過回到 `/?enter=1`，此 URL 永遠可直接訪問 Landing（canonical 仍為 `/`）。沒有 JavaScript 時首頁與 Intro 出口都可用；不利用 user-agent 區分搜尋機器人。Intro 有自己的 metadata，noindex/follow，避免薄內容入口取代主網站搜尋結果。進入使用 replace，Back 不會困在 Intro ↔ Landing 的循環。
 
 ## 預算（驗收前設定）
 

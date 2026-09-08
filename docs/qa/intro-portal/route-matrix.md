@@ -1,11 +1,11 @@
 # Intro / Portal 測試矩陣對照表
 
-對照 [PLAN §15](../../specs/INTRO-PORTAL-PLAN.md) 的 R01–R12（路由與入口）與 F01–F13（載入與生命周期），共 25 個必測 ID。
+對照 [PLAN §15](../../specs/INTRO-PORTAL-PLAN.md) 的 R08–R11（路由與入口，ADR-0003 之後）與 F01–F13（載入與生命周期），共 17 個必測 ID。
 
 - 產生日期：2026-09-07
-- 測試檔：[`e2e/intro-portal.spec.ts`](../../../e2e/intro-portal.spec.ts)（18 個 test）、[`components/landing/hero-world/active-clock.test.ts`](../../../components/landing/hero-world/active-clock.test.ts)、[`components/intro/IntroVisit.test.ts`](../../../components/intro/IntroVisit.test.ts)
+- 測試檔：[`e2e/intro-portal.spec.ts`](../../../e2e/intro-portal.spec.ts)、[`components/landing/hero-world/active-clock.test.ts`](../../../components/landing/hero-world/active-clock.test.ts)
 - 執行環境：本機 macOS 26.6、Chromium（Playwright）、`npm run build` 後 `next start -p 3000`，`--workers=1`
-- 結果：18 passed / 0 failed（serial）
+- 結果：自動邀請測試已依 ADR-0003 改寫；以本次實作後的 e2e／單元為準
 
 ## 狀態定義
 
@@ -15,25 +15,16 @@
 | PARTIAL | 有 test 覆蓋部分應有結果；未覆蓋的部分逐列寫明 |
 | NOT-RUN | 沒有任何自動或人工證據。**空白不算 pass** |
 
-## R01–R12 路由與入口
+## R08–R11 路由與入口
 
-> [ADR-0003](../../adr/0003-intro-auto-invite.md) 已決定取消自動邀請。實作後本段只剩 R08–R11；
-> 下表記錄的是**目前程式（仍會自動導向）**的實測狀態。
+> [ADR-0003](../../adr/0003-intro-auto-invite.md) 已實作：取消自動邀請。R01–R07 與 R12 的 redirect 部分已刪除。
 
 | ID | 應有結果 | 狀態 | 對應 test／缺口 |
 |---|---|---|---|
-| R01 | 新 session 開裸首頁邀請一次到 Intro，Enter 立即存在 | PARTIAL | `invites a fresh bare home visit once, while direct and deep links bypass`（spec:35）驗證 `/` → `/intro` 一次。Enter 立即可用由 `serves a semantic, poster-first intro without the Landing chrome`（spec:7）驗證。**缺**：PLAN 要求的錄影未產出（見第 5 項） |
-| R02 | 已訪問 session 開首頁，Landing 直接顯示且無 3D 下載 | PARTIAL | spec:35 驗證第二次開 `/` 停在 Landing。**缺**：沒有斷言此時 `/` 沒有 GLB 請求（network 斷言只在 `/intro` 測試裡做） |
-| R03 | 新 session 開 `/?enter=1` 留 Landing，canonical 為 `/` | PARTIAL | spec:35 驗證停在 Landing。**缺**：未斷言 `/?enter=1` 的 canonical 是 `/` |
-| R04 | 新 session 開首頁 hash，留目標段不跳 Intro | NOT-RUN | 無 test。`IntroVisit` 有 hash 判定邏輯但只有單元層 |
-| R05 | 新 session 開 story／game／兩種 map，直接內容且回首頁不攔截 | PARTIAL | spec:35 只涵蓋 `/stories`。**缺**：`/games/*`、`/adventures`、`/for-parents/play-map` 三種深連結未參數化測試 |
-| R06 | storage get／set throw 時首頁留內容、Intro Enter 仍可用 | PARTIAL | `fails open when session storage is blocked`（spec:53）只注入 getter throw。**缺**：setter throw 未測；未接著驗證 `/intro` 的 Enter |
-| R07 | 外部頁→首頁→Intro→Enter→Back 回到外部頁，無 Intro loop | NOT-RUN | spec:35 的 Back 只在同站 `/stories` ↔ `/?enter=1`，起點不是外部 origin |
-| R08 | Landing→story→Back／Forward 正常且無重播 | PARTIAL | spec:35 驗證 goBack。**缺**：goForward 未測；捲動位置與「無重播」未斷言 |
-| R09 | 已訪問時主動開 `/intro` 可重看且可直接進站 | PASS | `F11: five Intro↔Landing round trips…`（spec:323）在 session 已標記後連續五次 `goto('/intro')` 都拿到可用場景與可用出口 |
-| R10 | JS disabled 時 `/` 有內容、`/intro` 有原生 Enter | PASS | `keeps both content and the native intro link usable without JavaScript`（spec:67） |
+| R08 | Landing→story→Back／Forward 正常且無重播 | PARTIAL | `Landing to story back and forward stays on content` 驗證 goBack／goForward。**缺**：捲動位置與「無重播」未斷言 |
+| R09 | 主動開 `/intro` 可重看且可直接進站 | PASS | `serves a semantic, poster-first intro…` 與 `F11: five Intro↔Landing round trips…` 連續 `goto('/intro')` 都拿到可用場景與可用出口 |
+| R10 | JS disabled 時 `/` 有內容與 Intro 連結、`/intro` 有原生 Enter | PASS | `keeps both content and the native intro link usable without JavaScript` |
 | R11 | 中鍵／Cmd／Ctrl 點 Enter 走原生新頁語意 | NOT-RUN | `HeroWorld.tsx` 的 `enter()` 有 `metaKey/ctrlKey/shiftKey/altKey/button` 早退，但無 test 覆蓋 |
-| R12 | BFCache 還原、offline、StrictMode 不重導／重播／雙 canvas | PARTIAL | offline 由 `offline and slow connections stay on the poster path`（spec:109）覆蓋。**缺**：BFCache（`pageshow.persisted`）還原與 React StrictMode 雙掛載未測 |
 
 ## F01–F13 載入與生命周期
 
@@ -57,9 +48,9 @@
 
 | 狀態 | R | F | 合計 |
 |---|---|---|---|
-| PASS | 2 | 6 | **8 / 25** |
-| PARTIAL | 7 | 3 | **10 / 25** |
-| NOT-RUN | 3 | 4 | **7 / 25** |
+| PASS | 2 | 6 | **8 / 17**（R 只計 ADR 後的 4 條） |
+| PARTIAL | 1 | 3 | **4 / 17** |
+| NOT-RUN | 1 | 4 | **5 / 17** |
 
 ## 本輪為了關掉 F05／F09／F10 所做的變更
 

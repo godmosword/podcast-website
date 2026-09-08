@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { INTRO_VISIT_KEY } from "@/components/intro/IntroVisit";
 import { Component, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { MODEL_PATH, chooseQuality, type MotionPhase, type Quality } from "./config";
 import styles from "./HeroWorld.module.css";
@@ -47,7 +46,6 @@ export default function HeroWorld() {
     if (exitTimer.current) clearTimeout(exitTimer.current);
     if (transitionResetTimer.current) clearTimeout(transitionResetTimer.current);
   }, []);
-  const remember = () => { try { sessionStorage.setItem(INTRO_VISIT_KEY, "1"); } catch {} };
   const root = useRef<HTMLElement>(null);
   const [eligible, setEligible] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -156,7 +154,6 @@ export default function HeroWorld() {
   const mounted = eligible && !failed && (visible || ready);
   const active = visible && pageVisible && !paused;
   const enter = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    remember();
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
     if (!ready || !eligible || failed || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     event.preventDefault();
@@ -207,7 +204,7 @@ export default function HeroWorld() {
           </button>
         ) : null}
       </div>
-      <Link href="/?enter=1" replace className={styles.skip} onClick={remember}>略過動畫</Link>
+      <Link href="/?enter=1" replace className={styles.skip}>略過動畫</Link>
     </section>
   );
 }

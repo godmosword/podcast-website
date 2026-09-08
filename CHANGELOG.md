@@ -39,6 +39,8 @@
 
 ### Fixed
 
+- **首頁不再自動導向 `/intro`**：依 ADR-0003 拿掉 `IntroVisit` 的 client `replace`。CI `test:e2e:ci` 的 Landing smoke／桌面抽屜 a11y 會在 hydration 後找不到「訂閱」「開啟選單」（導覽列隨 `/intro` 卸載）。`/` 永遠停在 Landing；頁尾新增 SSR「走進車車遊樂園」連 `/intro`。`/?enter=1` 仍是 Intro 出口。首屏 poster 入口位置留待 Phase 8。**未改** Apple sync workflow。
+
 - **Apple sync GH013 auto-merge 假等（#145）**：`workflow_dispatch` 的 `quality`／`build-and-public-e2e` Check Run 在 SHA 上已綠，但 `protect-main-web` 的 required context 只認 commit status（與 `Vercel` 同一條 Status API），PR `mergeStateStatus` 一直 `BLOCKED`、waiter 空等 80 輪。waiter 改為**只在真實 job `success` 之後**把同名 context 鏡射成 commit status（`statuses: write`）；失敗仍 fail-fast，不造假綠。**有改** `sync-apple-podcast.yml`（僅 `open_sync_pr` waiter）。不改 ruleset、不加 Actions bypass。
 
 - **Apple sync #141 工程修復（quality CVE／新集 vitest／GH013 fail-fast）**：三條根因疊加，讓 sync bot 開 PR 後卡在 GH013 空等、新集無法合併。**（1）`browserslist` high CVE**——transitive 版本擋住 `quality` required check（含 `main`）；`package.json` 加 `overrides.browserslist ^4.28.7`（lock 解析 4.28.8），`npm run audit:production` 恢復綠。**（2）新集 vitest 硬編碼**——`apple-rss.test.ts` 下限改 `>=21` 並斷言 slug 唯一、保留全量清洗迴圈；`release-content.test.ts` 改通用 `<slug>` gate 模板、不再點名 live slug；`docs/PRODUCTION-RELEASE-GATE.md` 註明刻意不列 live slug。**（3）GH013 waiter 空等**——禁止把 `gh pr checks --required` 當唯一依據（PR #140：quality 已紅仍只列 Vercel）；改觀測本次 SHA 的 `workflow_dispatch` CI run（dispatch 前快照既有 run id，只鎖差集裡的新 run 的 `quality`／`build-and-public-e2e`）＋獨立 Vercel commit status（取最新一筆），`sync-workflow-contract.test.ts` 補 waiter／縮排／override 契約。**有改** `sync-apple-podcast.yml`（僅 `open_sync_pr` waiter）。**本修復僅恢復 sync 管線，不含 ep-28 內容工作**——該集字幕 sidecar 若已寫入仍為 Whisper 草稿、待人工 `proofread:subtitles --mark`，尚未校對、尚未出圖。

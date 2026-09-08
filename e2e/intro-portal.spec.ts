@@ -32,22 +32,28 @@ test.describe("Intro Portal · Phase 4 route and entry", () => {
     await expect(page.locator("[data-landing-root]")).toBeVisible();
   });
 
-  test("invites a fresh bare home visit once, while direct and deep links bypass", async ({ browser }) => {
-    const context = await browser.newContext();
-    const page = await context.newPage();
-    await page.goto("/", { waitUntil: "domcontentloaded" });
-    await expect(page).toHaveURL(/\/intro$/);
-    await page.goto("/stories", { waitUntil: "domcontentloaded" });
-    await expect(page).toHaveURL(/\/stories$/);
+  test("keeps a fresh bare home visit on Landing and exposes an SSR intro link", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await expect(page).toHaveURL(/\/$/);
-    await page.goto("/?enter=1", { waitUntil: "domcontentloaded" });
     await expect(page.locator("[data-landing-root]")).toBeVisible();
-    await page.goto("/stories", { waitUntil: "domcontentloaded" });
-    await page.goBack({ waitUntil: "domcontentloaded" });
+    const introLink = page.getByRole("link", { name: "走進車車遊樂園" });
+    await expect(introLink).toHaveAttribute("href", "/intro");
+    await introLink.click();
+    await expect(page).toHaveURL(/\/intro$/);
+    await page.getByRole("link", { name: "略過動畫" }).click();
     await expect(page).toHaveURL(/\/\?enter=1$/);
     await expect(page.locator("[data-landing-root]")).toBeVisible();
-    await context.close();
+  });
+
+  test("Landing to story back and forward stays on content", async ({ page }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await page.getByRole("link", { name: "車車遊樂園的故事 →" }).click();
+    await expect(page).toHaveURL(/\/stories/);
+    await page.goBack({ waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator("[data-landing-root]")).toBeVisible();
+    await page.goForward({ waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/stories/);
   });
 
   test("fails open when session storage is blocked", async ({ page }) => {
@@ -69,6 +75,7 @@ test.describe("Intro Portal · Phase 4 route and entry", () => {
     const page = await context.newPage();
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await expect(page.locator("[data-landing-root]")).toBeVisible();
+    await expect(page.getByRole("link", { name: "走進車車遊樂園" })).toHaveAttribute("href", "/intro");
     await page.goto("/intro", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: "車車遊樂園" })).toBeVisible();
     await expect(page.getByRole("link", { name: "略過動畫" })).toHaveAttribute("href", "/?enter=1");

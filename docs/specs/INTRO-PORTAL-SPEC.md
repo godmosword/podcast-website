@@ -22,9 +22,9 @@
 | 概念 | A「書封裡的小樂園」：延續現有故事屋、環路、摩天輪、小紅 |
 | Intro URL | `/intro`，獨立頁面 |
 | Landing URL | `/`，保留既有內容、canonical 與內部連結 |
-| 強制直達 Landing | `/?enter=1`，不論 session 是否存在均直達 |
-| 自動邀請 | 僅符合條件的本分頁首次首頁訪問；深連結不經 Intro |
-| 返回策略 | 自動邀請與 Enter 使用 replace，避免循環；使用者主動重看可 push |
+| 強制直達 Landing | `/?enter=1`，Intro 出口；canonical 仍為 `/` |
+| 自動邀請 | 無（ADR-0003）。`/` 永遠停在 Landing |
+| 返回策略 | Enter 使用 replace 至 `/?enter=1`；使用者主動重看可再開 `/intro` |
 | 最小 UI | 一個 h1、一句短文、一個 Enter、可選「略過動畫」 |
 | 吉祥物 | Intro 僅保留世界內的小紅；Landing 保留既有 DuduCompanion |
 | 3D 架構 | Blender → GLB → 現有 R3F／Three 元件與品質系統 |
@@ -149,55 +149,48 @@ Intro 不是選關、角色圖鑑、遊戲 hub、故事目錄或可自由探索�
 
 選 A。其餘兩案的主要收益是拓展場景，而本次最重要的收益來自角色節奏、空間意圖與材質深度。A 能保留既有架構與素材，以最小必要新增改善品牌感、手機可讀性和維護成本。這是實作方向選擇，不需額外概念核准。
 
-## 4. 路由、Session、History 與 SEO
+## 4. 路由、History 與 SEO
 
-> **本節的自動邀請部分已被 [ADR-0003](../adr/0003-intro-auto-invite.md) 取代（2026-09-07 決定，尚未實作）。**
-> 決策為：`/` 永遠停在 Landing，`/intro` 改由 Landing 上的明確連結進入。下列 §4.1 路由表的 replace 一列、§4.2 整節與 §4.4 的閃爍缺陷，將在實作該 ADR 時一併移除。
-> 在實作完成前，程式仍為自動邀請行為；閱讀本節時以 ADR 為準。
+> **自動邀請已依 [ADR-0003](../adr/0003-intro-auto-invite.md) 取消並實作。**
+> `/` 永遠停在 Landing，零 client redirect；`/intro` 由頁尾 SSR 連結「走進車車遊樂園」進入。首屏 poster 入口位置仍由 Phase 8 美術定稿。舊的 session key 與自動 `replace` 已刪除。
 
 ### 4.1 路由契約
 
 | 位置 | Server response／內容 | Client 行為 | Canonical |
 |---|---|---|---|
-| `/` | 200、完整 Landing SSR／SSG | 符合首次邀請條件才 replace `/intro` | `/` |
-| `/?enter=1` | 同一 Landing、200 | 直接進入，記錄 session | `/` |
-| `/#segment-*` | Landing + anchor | 保留該段定位，不開 Intro | `/` |
+| `/` | 200、完整 Landing SSR／SSG | 停在 Landing；無 redirect | `/` |
+| `/?enter=1` | 同一 Landing、200 | Intro 出口；直接進入 | `/` |
+| `/#segment-*` | Landing + anchor | 保留該段定位 | `/` |
 | `/intro` | 200、標題／poster／Enter SSR | 優先載入靜態，再漸進增強 | `/intro` |
-| story／games／maps | 原路由 response | 直接進入；記錄已訪問，之後回首頁不攔截 | 原 canonical |
+| story／games／maps | 原路由 response | 直接進入，不攔截 | 原 canonical |
 | 不存在 URL | 原品牌 404 | 不先轉 Intro | 原 404 規則 |
 
-首選保留 `/`，避免把所有既有品牌回家連結改成 `/landing`。不建立第二份內容相同的 Landing 路由。未來若要求完全無首次 client redirect，需另做 routing ADR，不在實作中悄悄改掉本契約。
+首選保留 `/`，避免把所有既有品牌回家連結改成 `/landing`。不建立第二份內容相同的 Landing 路由。要改回自動導向必須寫新的 ADR，不得在實作中悄悄改掉本契約。
 
 ### 4.2 Session 規則
 
-採 `sessionStorage`，key `cheche-intro-visited-v1`，值 `1`；僅記錄一個布林意義，不存兒童資料、精確時間或識別碼。正常新分頁會有自己的 session；瀏覽器「複製分頁」可能複製 session，允許沿用已訪問狀態。
-
-自動邀請條件全部成立才觸發：pathname 是 `/`、沒有 `enter=1`、沒有 hash、session 未訪問、非 history restore、不是內部內容導覽、目前在線。儲存讀寫失敗時直接保留 Landing，避免 loop。使用者進任何內容頁即可視為已訪問，不再以回首頁為由攔截。
-
-`navigator.onLine` 只是保守跳過條件，不能當作網路一定可用的證明。離線、portal route chunk 下載失敗或 service worker 舊 shell 時，必須保留直接內容出口。
+**作廢。** 不再使用 `sessionStorage` 或 `cheche-intro-visited-v1`。首次訪問不再寫入、讀取或依 session 決定路由。
 
 ### 4.3 動作與 Back 行為
 
 | 情境 | 應有歷史行為 |
 |---|---|
-| 外站→首次 `/`→自動 Intro→Enter | replace 邀請與進入，Back 回外站，不回片頭 |
-| `/intro` 直接開啟→Enter | replace 至 Landing；不在 Back 建立強制重看 |
-| Landing→story→Back | 回原 Landing，保留既有捲動處理，沒有 Intro |
-| 深連結→首頁 | 首頁直達；已訪問標記阻止首次邀請 |
-| 使用者主動打開 `/intro` 重看 | 允許重看，即使 session 已訪問；不自動跳走 |
+| 外站→`/` | 停在 Landing；Back 回外站 |
+| `/intro` 直接開啟→Enter | replace 至 `/?enter=1`；不在 Back 建立強制重看 |
+| Landing→story→Back／Forward | 回原 Landing／再進故事，沒有 Intro |
+| 深連結→首頁 | 首頁直達 |
+| 使用者主動打開 `/intro` 重看 | 允許重看；不自動跳走 |
 | Ctrl／Cmd／中鍵 Enter | 尊重原生 link 開新頁；不攔截成當前頁動畫 |
-| Storage 被封鎖 | `enter=1` URL 保底，不做反覆重定向 |
+| Storage 被封鎖 | `/` 與 `/intro` 都可直接使用 |
 | Back／forward cache 還原 | 不重播迎賓，不重置內容位置；僅恢復可見性生命周期 |
 
-### 4.4 SSR、搜尋與首次閃爍
+### 4.4 SSR 與搜尋
 
-SSR 的 `/` 應包含 Landing 標題、內文、故事／其他內容連結及現有 JSON-LD。不能只輸出 Intro 再把所有內容留給 JavaScript。不能以 crawler user-agent 特判送不同產品內容。
+SSR 的 `/` 應包含 Landing 標題、內文、故事／其他內容連結、頁尾 Intro 連結及現有 JSON-LD。不能只輸出 Intro 再把所有內容留給 JavaScript。不能以 crawler user-agent 特判送不同產品內容。
 
 Intro 設 noindex、follow；不以 robots.txt 封鎖 `/intro`，否則搜尋引擎無法讀到 noindex；不加入主 sitemap。`/?enter=1` 與 `/` canonical 相同，不能在每次導航累積更多參數。既有 sitemap 的內容 URL 保持不變。
 
-需實拍首次 `/`→Intro：不得用長時間白屏遮住 redirect，也不能為無閃爍將 Landing SSR 永久隱藏。以低成本早期判定、預先可用的路由殼與可恢復狀態減少雙畫面閃現。若慢速裝置仍明顯閃爍，列為待修問題，不能宣稱「polished transition」完成。
-
-Client redirect 仍可能影響會執行 JS 的索引工具，因此 SEO 驗收必須同時看 server HTML 與 rendered HTML；noindex 是 Intro 的屬性，不能污染 `/`。
+不再對 `/` 做 client redirect，因此也不再有首次訪問閃爍缺陷。noindex 是 Intro 的屬性，不能污染 `/`。
 
 ## 5. Intro HTML、文案與互動
 
@@ -386,7 +379,7 @@ Service worker 不預抓所有 Intro 模型、不替換故事快取、不為此�
 | 元件 | 責任 | 不應負責 |
 |---|---|---|
 | Intro page server shell | metadata、HTML 語意、poster入口 | server 對 deep link 強制 redirect |
-| IntroVisit | session、首次首頁邀請、history 條件 | 載入 Three、隱藏全站內容 |
+| Landing 頁尾連結 | SSR 進入 `/intro` | 自動 redirect、session 記錄 |
 | HeroWorld／Intro shell | eligibility、ready/fallback、Enter、pause、transition | 模型幾何每幀運算 |
 | HeroScene | Canvas、燈光、children、context-loss | 全站導覽、內容資料 |
 | SceneLoader | fetch／parse／abort／dispose | 無限重試、長期無 owner 全域模型 cache |
