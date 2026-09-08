@@ -1,25 +1,36 @@
 import { expect, test } from "@playwright/test";
 import {
-  FEEDBACK_DEMO_MESSAGE,
-  FEEDBACK_DEMO_NICKNAME,
+  FEEDBACK_EMPTY_CTA,
   FEEDBACK_FORM_HEADING,
   FEEDBACK_INVITE_CHILD,
   FEEDBACK_ERROR,
-  FEEDBACK_INVITE_PARENT,
   FEEDBACK_MAILTO_LINK,
   FEEDBACK_MESSAGE_LABEL,
   FEEDBACK_NICKNAME_LABEL,
+  FEEDBACK_EMAIL_LABEL,
   FEEDBACK_PAGE_TITLE,
-  FEEDBACK_REVIEW_LEAD,
-  FEEDBACK_STARTERS,
-  FEEDBACK_SUBMIT_DISABLED_HINT,
   FEEDBACK_SUBMIT_LABEL,
 } from "../lib/feedback-copy";
 
 const FIXTURE_EMAIL = "secret-parent@example.com";
 
+const REMOVED_COPY = [
+  "這個當做蒐集資料，不會顯示在畫面上。",
+  "你最想說的話",
+  "先選一句試試看",
+  "也歡迎寫下想聽的故事。",
+  "給家長",
+  "可以讓孩子說、爸媽幫忙打字。",
+  "家長同意、馬米看過之後，才會貼上牆。",
+  "請先勾選兩項同意，才能送出。",
+  "馬米暫時用 email 收信。",
+  "想聽挖土機",
+  "最喜歡小紅賽車",
+  "謝謝馬米說故事",
+];
+
 test.describe("站內留言牆 /feedback", () => {
-  test("初始 HTML 就有表單，邀請與審核句可見", async ({ page }) => {
+  test("初始 HTML 就有表單，已刪文案不出現", async ({ page }) => {
     const response = await page.goto("/feedback");
     expect(response?.ok()).toBeTruthy();
 
@@ -36,50 +47,42 @@ test.describe("站內留言牆 /feedback", () => {
       page.getByRole("heading", { name: FEEDBACK_FORM_HEADING, level: 2 }),
     ).toBeVisible();
     await expect(page.getByText(FEEDBACK_INVITE_CHILD)).toBeVisible();
-    await expect(page.getByText(FEEDBACK_INVITE_PARENT)).toBeVisible();
-    await expect(page.getByText(FEEDBACK_REVIEW_LEAD)).toBeVisible();
     await expect(page.getByRole("textbox", { name: FEEDBACK_NICKNAME_LABEL })).toBeVisible();
+    await expect(page.getByRole("textbox", { name: FEEDBACK_EMAIL_LABEL })).toBeVisible();
+    await expect(page.getByRole("textbox", { name: FEEDBACK_MESSAGE_LABEL })).toBeVisible();
     await expect(page.getByRole("button", { name: FEEDBACK_SUBMIT_LABEL })).toBeVisible();
     await expect(page.getByText("還沒有公開留言")).toHaveCount(0);
     await expect(page.locator("body")).not.toContainText(FIXTURE_EMAIL);
+    const form = page.locator("form");
+    for (const copy of REMOVED_COPY) {
+      await expect(form).not.toContainText(copy);
+    }
   });
 
-  test("核准未滿三則時只示範、不列牆", async ({ page }) => {
+  test("空牆沒有範例卡；有核准則列牆", async ({ page }) => {
     await page.goto("/feedback");
 
-    const list = page.getByRole("list");
-    const demo = page.getByLabel("示範留言");
+    const wall = page.getByLabel("公開留言牆");
+    await expect(wall.getByLabel("示範留言")).toHaveCount(0);
+    await expect(wall).not.toContainText("範例");
+
+    const list = wall.getByRole("list");
     if (await list.count()) {
       await expect(list).toBeVisible();
-      await expect(demo).toHaveCount(0);
     } else {
-      await expect(demo).toContainText(FEEDBACK_DEMO_MESSAGE);
-      await expect(demo).toContainText(FEEDBACK_DEMO_NICKNAME);
+      await expect(page.getByRole("link", { name: FEEDBACK_EMPTY_CTA })).toBeVisible();
     }
     await expect(page.getByText("還沒有公開留言")).toHaveCount(0);
   });
 
-  test("起頭 chip 寫進留言欄", async ({ page }) => {
-    await page.goto("/feedback");
-    const starter = FEEDBACK_STARTERS[0];
-    const chip = page.getByRole("button", { name: starter.label });
-    await expect(chip).toBeVisible();
-    await chip.click();
-    await expect(page.getByRole("textbox", { name: FEEDBACK_MESSAGE_LABEL })).toHaveValue(
-      starter.text,
-    );
-  });
-
-  test("未勾兩項同意不能送", async ({ page }) => {
+  test("未勾兩項同意不能送；信箱可不填", async ({ page }) => {
     await page.goto("/feedback");
 
     const submit = page.getByRole("button", { name: FEEDBACK_SUBMIT_LABEL });
     await expect(submit).toBeDisabled();
-    await expect(page.getByText(FEEDBACK_SUBMIT_DISABLED_HINT)).toBeVisible();
 
     await page.getByRole("textbox", { name: FEEDBACK_NICKNAME_LABEL }).fill("小車");
-    await page.getByRole("textbox", { name: "信箱" }).fill("parent@example.com");
-    await page.getByRole("textbox", { name: "你最想說的話" }).fill("想聽挖土機");
+    await page.getByRole("textbox", { name: FEEDBACK_MESSAGE_LABEL }).fill("謝謝馬米");
 
     const checkboxes = page.getByRole("checkbox");
     await expect(checkboxes).toHaveCount(2);

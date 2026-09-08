@@ -11,27 +11,18 @@ import {
 import { feedbackMailtoHref } from "@/lib/contact";
 import {
   FEEDBACK_CHAR_REMAINING,
-  FEEDBACK_EMAIL_HINT,
   FEEDBACK_EMAIL_LABEL,
-  FEEDBACK_EYEBROW,
   FEEDBACK_FORM_HEADING,
   FEEDBACK_FORM_HEADING_ID,
   FEEDBACK_FORM_LEAD,
-  FEEDBACK_INVITE_PARENT,
-  FEEDBACK_MAILTO_LEAD,
   FEEDBACK_MAILTO_LINK,
   FEEDBACK_MESSAGE_FIELD_ID,
-  FEEDBACK_MESSAGE_HINT,
   FEEDBACK_MESSAGE_LABEL,
   FEEDBACK_NICKNAME_LABEL,
   FEEDBACK_PARENT_CONSENT_AFTER,
   FEEDBACK_PARENT_CONSENT_BEFORE,
   FEEDBACK_PARENT_CONSENT_LINK,
   FEEDBACK_PUBLISH_CONSENT,
-  FEEDBACK_REVIEW_LEAD,
-  FEEDBACK_STARTERS,
-  FEEDBACK_STARTERS_LABEL,
-  FEEDBACK_SUBMIT_DISABLED_HINT,
   FEEDBACK_SUBMIT_LABEL,
 } from "@/lib/feedback-copy";
 import { FEEDBACK_MESSAGE_MAX } from "@/lib/feedback-schema";
@@ -48,7 +39,6 @@ export default function FeedbackForm({ available }: Props) {
   const parentConsentId = useId();
   const publishConsentId = useId();
   const honeypotId = useId();
-  const startersId = useId();
 
   const [state, formAction, pending] = useActionState(submitFeedback, FEEDBACK_ACTION_IDLE);
   const [nickname, setNickname] = useState("");
@@ -141,33 +131,11 @@ export default function FeedbackForm({ available }: Props) {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         disabled={pending}
-        required
       />
-      <p className={styles.hint}>{FEEDBACK_EMAIL_HINT}</p>
 
-      <label className={styles.label} htmlFor={messageId}>
+      <label className="sr-only" htmlFor={messageId}>
         {FEEDBACK_MESSAGE_LABEL}
       </label>
-      <p id={startersId} className={styles.startersLabel}>
-        {FEEDBACK_STARTERS_LABEL}
-      </p>
-      <div className={styles.starters} role="group" aria-labelledby={startersId}>
-        {FEEDBACK_STARTERS.map((starter) => {
-          const pressed = message === starter.text;
-          return (
-            <button
-              key={starter.id}
-              type="button"
-              className={styles.starter}
-              aria-pressed={pressed}
-              disabled={pending}
-              onClick={() => setMessage(starter.text)}
-            >
-              {starter.label}
-            </button>
-          );
-        })}
-      </div>
       <textarea
         id={messageId}
         className={styles.textarea}
@@ -178,7 +146,6 @@ export default function FeedbackForm({ available }: Props) {
         required
         maxLength={FEEDBACK_MESSAGE_MAX}
       />
-      <p className={styles.hint}>{FEEDBACK_MESSAGE_HINT}</p>
       <div className={styles.messageMeta}>
         <p
           className={styles.charCount}
@@ -187,11 +154,6 @@ export default function FeedbackForm({ available }: Props) {
           {FEEDBACK_CHAR_REMAINING(remaining)}
         </p>
       </div>
-
-      <p className={styles.parentNote}>
-        <span className={styles.eyebrow}>{FEEDBACK_EYEBROW}</span>
-        {FEEDBACK_INVITE_PARENT} {FEEDBACK_REVIEW_LEAD}
-      </p>
 
       <label className={styles.consent} htmlFor={parentConsentId}>
         <input
@@ -238,10 +200,6 @@ export default function FeedbackForm({ available }: Props) {
         {FEEDBACK_SUBMIT_LABEL}
       </button>
 
-      {!bothConsented ? (
-        <p className={styles.disabledHint}>{FEEDBACK_SUBMIT_DISABLED_HINT}</p>
-      ) : null}
-
       {state.status === "error" || state.status === "unavailable" ? (
         <p className={styles.error} role="alert">
           {state.message}
@@ -249,14 +207,9 @@ export default function FeedbackForm({ available }: Props) {
       ) : null}
 
       {showMailtoFallback ? (
-        <div className={styles.fallback}>
-          {state.status !== "unavailable" ? (
-            <p className={styles.fallbackLead}>{FEEDBACK_MAILTO_LEAD}</p>
-          ) : null}
-          <Link className={styles.mailtoButton} href={mailtoHref}>
-            {FEEDBACK_MAILTO_LINK}
-          </Link>
-        </div>
+        <Link className={styles.mailtoButton} href={mailtoHref}>
+          {FEEDBACK_MAILTO_LINK}
+        </Link>
       ) : null}
     </form>
   );

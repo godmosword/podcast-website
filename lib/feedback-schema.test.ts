@@ -52,11 +52,14 @@ describe("feedbackBodySchema", () => {
     expect(parsed.success && parsed.data.email).toBe("parent@example.com");
   });
 
-  it("email 必填且需符合格式", () => {
+  it("email 選填；有填才檢查格式", () => {
     expect(feedbackBodySchema.safeParse({ ...validBody, email: undefined }).success).toBe(
-      false,
+      true,
     );
-    expect(feedbackBodySchema.safeParse({ ...validBody, email: "" }).success).toBe(false);
+    expect(feedbackBodySchema.safeParse({ ...validBody, email: "" }).success).toBe(true);
+    expect(feedbackBodySchema.safeParse({ ...validBody, email: "   " }).success).toBe(true);
+    const empty = feedbackBodySchema.safeParse({ ...validBody, email: undefined });
+    expect(empty.success && empty.data.email).toBe("");
     expect(feedbackBodySchema.safeParse({ ...validBody, email: "not-an-email" }).success).toBe(
       false,
     );

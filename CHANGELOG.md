@@ -14,6 +14,7 @@
 
 ### Changed
 
+- **`/feedback` 表單收斂**：欄位改「暱稱」、信箱改選填；拿掉蒐集說明、起頭 chip、家長旁白、送出提示、mailto 導言與空牆範例卡。核准留言從第一則就上牆。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、法律頁政策版本。
 - **Intro 入口收斂為單一首段 SSR 連結**：依 ADR-0003 保留 Landing 首段「看小紅開進遊樂園」作為唯一 `/intro` 入口，移除 SiteFooter 的重複連結；`/` 仍永遠直接呈現 Landing，未恢復首次訪問自動導向。
 - **Intro 補齊 Phase 11 的可及性與失效路徑測試**：新增語意結構、原生 `<a>`／`<button>`、鍵盤 Tab 順序與 Enter／Space、可見 focus ring、≥44×44、200% 頁面／文字縮放、axe（intro 與進站後的 Landing）、無自動播放音訊、reduced motion 不建立 canvas／不下載 GLB／不載 3D chunk，以及 runtime 由 no-preference → reduce 的安全卸載；失效路徑補上 F04（二進位截斷的 GLB）、F07（context lost）、F08（runtime reduced motion）、F12（poster 404）、F13（離頁後才到的模型）。`runs the signature phases` 改用頁面內 `MutationObserver` 記錄順序（真實時間下 `stop` 80ms／`settle` 320ms 可能整段落在兩幀之間），並加上「phase 不得倒退、問候只發生一次」的斷言。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **Intro → Landing 進站轉場（Phase 9）**：`進入車車遊樂園` 與 `略過動畫` 現在**先導航、動畫同時播**（原本是等 360ms 淡出跑完才 `router.replace`）。決策集中在 `enter-transition.ts` 的 `resolveEnterAction()`：修飾鍵／中鍵完全不攔截原生 `<a href="/?enter=1">`、重複觸發只吃掉不重複導航、live 場景播 ≤360ms 淡出＋推近、poster／載入中／fallback／reduced motion 直接進站。推近改由 CSS `transform: scale(1.065)` 做（合成器），按下當下就停止 3D 算繪——實測軟體算圖環境下，點擊到換頁由 1.3 秒降到 ~0.3 秒。JS 可用時兩個連結都落在乾淨的 `/`，`?enter=1` 留在 href 當無 JS 入口，canonical 不變。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。

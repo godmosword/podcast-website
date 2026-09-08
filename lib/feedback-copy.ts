@@ -7,14 +7,8 @@ export const FEEDBACK_PAGE_TITLE = "留言給馬米";
 export const FEEDBACK_PAGE_DESCRIPTION =
   "跟馬米說你最想說的話，也歡迎許願下一集想聽的故事。留言經家長同意與審核後才會公開。";
 
-export const FEEDBACK_EYEBROW = "給家長";
-
 export const FEEDBACK_INVITE_CHILD =
   "嗨嗨，謝謝你來聽故事！告訴馬米你最想說的話，也歡迎許願下一集想聽什麼。";
-
-export const FEEDBACK_INVITE_PARENT = "可以讓孩子說、爸媽幫忙打字。";
-
-export const FEEDBACK_REVIEW_LEAD = "家長同意、馬米看過之後，才會貼上牆。";
 
 /** 信紙表單標題；與頁面 H1「留言給馬米」分開，標示可填區。 */
 export const FEEDBACK_FORM_HEADING = "寫給馬米";
@@ -26,27 +20,14 @@ export const FEEDBACK_FORM_LEAD = "寫下想聽的故事再送出。";
 /** textarea id，空牆 CTA 用 hash 對準（無 JS 也能跳）。 */
 export const FEEDBACK_MESSAGE_FIELD_ID = "feedback-message";
 
-export const FEEDBACK_NICKNAME_LABEL = "名字或暱稱";
+export const FEEDBACK_NICKNAME_LABEL = "暱稱";
 
-export const FEEDBACK_EMAIL_LABEL = "信箱";
+export const FEEDBACK_EMAIL_LABEL = "信箱（選填）";
 
-export const FEEDBACK_EMAIL_HINT = "這個當做蒐集資料，不會顯示在畫面上。";
-
-export const FEEDBACK_MESSAGE_LABEL = "你最想說的話";
-
-export const FEEDBACK_MESSAGE_HINT = "也歡迎寫下想聽的故事。";
-
-export const FEEDBACK_STARTERS_LABEL = "先選一句試試看";
-
-export const FEEDBACK_STARTERS = [
-  { id: "excavator", label: "想聽挖土機", text: "我想聽挖土機的故事。" },
-  { id: "xiao-hong", label: "最喜歡小紅賽車", text: "我最喜歡小紅賽車。" },
-  { id: "thanks", label: "謝謝馬米說故事", text: "謝謝馬米說故事。" },
-] as const;
+/** textarea 的可及名稱；畫面只留信紙欄，不另標可見標題。 */
+export const FEEDBACK_MESSAGE_LABEL = "留言";
 
 export const FEEDBACK_SUBMIT_LABEL = "我要留言";
-
-export const FEEDBACK_SUBMIT_DISABLED_HINT = "請先勾選兩項同意，才能送出。";
 
 export const FEEDBACK_PARENT_CONSENT_BEFORE = "我是家長／照顧者，已閱讀並同意";
 
@@ -67,8 +48,6 @@ export const FEEDBACK_VALIDATION_ERROR = "請檢查必填欄位與信箱格式�
 
 export const FEEDBACK_RATE_LIMITED = "留言有點多，請稍後再試。";
 
-export const FEEDBACK_MAILTO_LEAD = "馬米暫時用 email 收信。";
-
 export const FEEDBACK_MAILTO_LINK = "用 email 留言";
 
 export const FEEDBACK_MAILTO_SUBJECT = "留言給車車遊樂園";
@@ -78,16 +57,6 @@ export const FEEDBACK_LOADING_LABEL = "正在準備留言牆…";
 export const FEEDBACK_WALL_HEADING = "大家的留言";
 
 export const FEEDBACK_WALL_COUNT = (count: number): string => `共 ${count} 則留言`;
-
-export const FEEDBACK_DEMO_MARKER = "範例";
-
-export const FEEDBACK_DEMO_NICKNAME = "馬米";
-
-export const FEEDBACK_DEMO_MESSAGE =
-  "謝謝你來聽故事。最想說的話、想聽的故事，都歡迎跟我們說。";
-
-export const FEEDBACK_DEMO_NOTE =
-  "上面是馬米寫的示範。你可以當第一個跟馬米說話的人。";
 
 export const FEEDBACK_TOO_FAST = "再檢查一下留言內容，然後重新送出。";
 

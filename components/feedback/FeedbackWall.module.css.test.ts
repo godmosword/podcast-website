@@ -18,11 +18,9 @@ describe("FeedbackWall.module.css", () => {
     );
   });
 
-  it("真留言是 hairline 列，示範卡是實線暖面", () => {
+  it("真留言是 hairline 列，沒有範例卡樣式", () => {
     expect(css).toMatch(/\.item\s*\{[\s\S]*?border-bottom:\s*1px solid var\(--hairline\)/);
-    expect(css).toMatch(/\.demo\s*\{[\s\S]*?border:\s*1px solid var\(--hairline\)/);
-    expect(css).toMatch(/\.demo\s*\{[\s\S]*?background:\s*var\(--warm-surface\)/);
-    expect(css).not.toMatch(/\.demo\s*\{[\s\S]*?dashed/);
+    expect(css).not.toMatch(/\.demo\s*\{/);
   });
 
   it("圓章混色約 40%，讓粉嫩色在夜間看得見", () => {

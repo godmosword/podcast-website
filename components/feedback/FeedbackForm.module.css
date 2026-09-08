@@ -32,13 +32,6 @@
   color: var(--ink-soft);
 }
 
-.hint {
-  margin: -4px 0 0;
-  font-size: var(--fs-label);
-  line-height: 1.5;
-  color: var(--ink-soft);
-}
-
 .input,
 .textarea {
   width: 100%;
@@ -77,61 +70,6 @@
   outline-offset: 2px;
 }
 
-.startersLabel {
-  margin: 0;
-  font-size: var(--fs-label);
-  color: var(--ink-soft);
-}
-
-.starters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin-top: -4px;
-}
-
-.starter {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-  padding: 8px 14px;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--hairline);
-  background: var(--warm-chip-bg);
-  color: var(--ink);
-  font-size: var(--fs-control);
-  cursor: pointer;
-  transition: transform var(--motion-press), background var(--motion-press),
-    opacity var(--motion-press);
-}
-
-.starter[aria-pressed="true"] {
-  background: var(--warm-chip-hover);
-  border-color: color-mix(in srgb, var(--accent) 40%, var(--hairline));
-  color: var(--accent-ink);
-}
-
-@media (hover: hover) {
-  .starter:hover:not(:disabled) {
-    background: var(--warm-chip-hover);
-  }
-}
-
-.starter:active:not(:disabled) {
-  transform: scale(0.98);
-}
-
-.starter:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.starter:focus-visible {
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-
 .messageMeta {
   display: flex;
   justify-content: flex-end;
@@ -142,21 +80,6 @@
   margin: 0;
   font-size: var(--fs-label);
   color: var(--ink-soft);
-}
-
-.parentNote {
-  margin: var(--space-2) 0 0;
-  font-size: var(--fs-label);
-  line-height: 1.6;
-  color: var(--ink-soft);
-}
-
-.eyebrow {
-  display: block;
-  margin-bottom: 4px;
-  font-size: var(--fs-label);
-  letter-spacing: 0.08em;
-  color: var(--accent-ink);
 }
 
 .consent {
@@ -248,13 +171,6 @@
   outline-offset: 2px;
 }
 
-.disabledHint {
-  margin: 0;
-  font-size: var(--fs-label);
-  line-height: 1.5;
-  color: var(--ink-soft);
-}
-
 .loading,
 .unavailable,
 .success,
@@ -264,20 +180,11 @@
   line-height: 1.6;
 }
 
-.unavailable,
-.fallback {
+.unavailable {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-3);
-}
-
-.unavailableLead,
-.fallbackLead {
-  margin: 0;
-  font-size: var(--fs-label);
-  line-height: 1.6;
-  color: var(--ink-soft);
 }
 
 .loading {
@@ -302,8 +209,6 @@
   .submit,
   .submit:active,
   .mailtoButton,
-  .starter,
-  .starter:active,
   .success {
     transform: none;
     transition: none;

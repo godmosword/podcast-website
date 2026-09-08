@@ -5,10 +5,6 @@ import {
   type FeedbackAvatarColor,
 } from "@/lib/feedback-avatar";
 import {
-  FEEDBACK_DEMO_MARKER,
-  FEEDBACK_DEMO_MESSAGE,
-  FEEDBACK_DEMO_NICKNAME,
-  FEEDBACK_DEMO_NOTE,
   FEEDBACK_EMPTY_CTA,
   FEEDBACK_MESSAGE_FIELD_ID,
   FEEDBACK_WALL_COUNT,
@@ -29,8 +25,6 @@ const AVATAR_CLASS: Record<FeedbackAvatarColor, string> = {
   teal: styles.avatarTeal,
   lilac: styles.avatarLilac,
 };
-
-const DEMO_CREATED_AT = "2026-09-01T00:00:00.000Z";
 
 function formatZhTwDate(iso: string): string {
   return new Date(iso).toLocaleDateString("zh-TW");
@@ -95,20 +89,9 @@ export default function FeedbackWallView({ messages }: FeedbackWallViewProps) {
           ))}
         </ul>
       ) : (
-        <div className={styles.demo} aria-label="示範留言">
-          <p className={styles.demoMarker}>{FEEDBACK_DEMO_MARKER}</p>
-          <div className={styles.demoBody}>
-            <MessageRow
-              nickname={FEEDBACK_DEMO_NICKNAME}
-              message={FEEDBACK_DEMO_MESSAGE}
-              createdAt={DEMO_CREATED_AT}
-            />
-          </div>
-          <p className={styles.demoNote}>{FEEDBACK_DEMO_NOTE}</p>
-          <a className={styles.emptyCta} href={`#${FEEDBACK_MESSAGE_FIELD_ID}`}>
-            {FEEDBACK_EMPTY_CTA}
-          </a>
-        </div>
+        <a className={styles.emptyCta} href={`#${FEEDBACK_MESSAGE_FIELD_ID}`}>
+          {FEEDBACK_EMPTY_CTA}
+        </a>
       )}
     </section>
   );

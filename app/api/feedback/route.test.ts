@@ -184,6 +184,23 @@ describe("POST /api/feedback", () => {
     });
   });
 
+  it("未填信箱仍回 201", async () => {
+    await mockDbAvailable(true);
+    const { createFeedbackMessage } = await import("@/lib/feedback-query");
+    vi.mocked(createFeedbackMessage).mockResolvedValue({ needsReview: false, reasons: [] });
+
+    const res = await POST(postRequest({ ...validBody, email: "" }));
+
+    expect(res.status).toBe(201);
+    expect(createFeedbackMessage).toHaveBeenCalledWith({
+      nickname: "馬米",
+      email: "",
+      message: "很喜歡垃圾車那集！",
+      consentVersion: LEGAL_POLICY_VERSION,
+      consentedAt: expect.any(Date),
+    });
+  });
+
   it("201 回應不回吐 email 或狀態", async () => {
     await mockDbAvailable(true);
     const { createFeedbackMessage } = await import("@/lib/feedback-query");

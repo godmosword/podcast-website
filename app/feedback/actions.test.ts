@@ -144,6 +144,23 @@ describe("submitFeedback", () => {
     expect(createFeedbackMessage).not.toHaveBeenCalled();
   });
 
+  it("未填信箱仍可收件", async () => {
+    await mockDbAvailable(true);
+    const { createFeedbackMessage } = await import("@/lib/feedback-query");
+    vi.mocked(createFeedbackMessage).mockResolvedValue({ needsReview: false, reasons: [] });
+
+    const state = await submitFeedback(FEEDBACK_ACTION_IDLE, filledForm({ email: "" }));
+
+    expect(state).toEqual({ status: "success", message: FEEDBACK_SUCCESS });
+    expect(createFeedbackMessage).toHaveBeenCalledWith({
+      nickname: "Bonbon",
+      email: "",
+      message: "謝謝馬米",
+      consentVersion: LEGAL_POLICY_VERSION,
+      consentedAt: expect.any(Date),
+    });
+  });
+
   it("有效留言寫 pending 並 revalidate", async () => {
     await mockDbAvailable(true);
     const { createFeedbackMessage } = await import("@/lib/feedback-query");

@@ -20,19 +20,18 @@ export const feedbackBodySchema = z
     nickname: z
       .string()
       .trim()
-      .min(1, "請填名字或暱稱")
-      .max(FEEDBACK_NICKNAME_MAX, "名字或暱稱太長"),
-    // email 必填（回覆與濫用防治用），但永不公開。
-    email: z
-      .string()
-      .trim()
-      .toLowerCase()
-      .pipe(z.email("Email 格式不正確")),
+      .min(1, "請填暱稱")
+      .max(FEEDBACK_NICKNAME_MAX, "暱稱太長"),
+    // email 選填（回覆與濫用防治用），但永不公開。空字串寫入 DB 以符合 NOT NULL。
+    email: z.preprocess(
+      (value) => (typeof value === "string" ? value.trim().toLowerCase() : ""),
+      z.union([z.literal(""), z.email("Email 格式不正確")]),
+    ),
     message: z
       .string()
       .trim()
-      .min(1, "請寫下你最想說的話")
-      .max(FEEDBACK_MESSAGE_MAX, "想說的話太長"),
+      .min(1, "請寫下留言")
+      .max(FEEDBACK_MESSAGE_MAX, "留言太長"),
     // 兒童個資保護：須由家長／照顧者勾選同意才收件（COPPA / 個資法）。
     parentConsent: z.literal(true, { error: "請由家長或照顧者勾選同意" }),
     // 公開授權：理解審核後可能公開暱稱與正文。

@@ -28,11 +28,14 @@ export async function persistFeedbackSubmission(input: {
       : { ok: false, reason: "rate_limited", retryAfterSec: ipRate.retryAfterSec };
   }
 
-  const emailRate = await checkFeedbackEmailRateLimit(input.email);
-  if (!emailRate.ok) {
-    return emailRate.reason === "unavailable"
-      ? { ok: false, reason: "unavailable" }
-      : { ok: false, reason: "rate_limited", retryAfterSec: emailRate.retryAfterSec };
+  // 未填信箱不走 email 桶，避免所有匿名留言共用同一個 24h 上限。
+  if (input.email) {
+    const emailRate = await checkFeedbackEmailRateLimit(input.email);
+    if (!emailRate.ok) {
+      return emailRate.reason === "unavailable"
+        ? { ok: false, reason: "unavailable" }
+        : { ok: false, reason: "rate_limited", retryAfterSec: emailRate.retryAfterSec };
+    }
   }
 
   try {
