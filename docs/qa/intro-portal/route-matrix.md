@@ -2,10 +2,10 @@
 
 對照 [PLAN §15](../../specs/INTRO-PORTAL-PLAN.md) 的 R01–R12（路由與入口）與 F01–F13（載入與生命周期），共 25 個必測 ID。
 
-- 產生日期：2026-09-07
-- 測試檔：[`e2e/intro-portal.spec.ts`](../../../e2e/intro-portal.spec.ts)（18 個 test）、[`components/landing/hero-world/active-clock.test.ts`](../../../components/landing/hero-world/active-clock.test.ts)、[`components/intro/IntroVisit.test.ts`](../../../components/intro/IntroVisit.test.ts)
-- 執行環境：本機 macOS 26.6、Chromium（Playwright）、`npm run build` 後 `next start -p 3000`，`--workers=1`
-- 結果：18 passed / 0 failed（serial）
+- 產生日期：2026-09-07；2026-09-08 依 ADR-0003 實作與 v3 乾淨重建更新
+- 測試檔：[`e2e/intro-portal.spec.ts`](../../../e2e/intro-portal.spec.ts)（20 個 test）、[`components/landing/hero-world/active-clock.test.ts`](../../../components/landing/hero-world/active-clock.test.ts)（`IntroVisit.test.ts` 已隨自動邀請一起刪除）
+- 執行環境（2026-09-08）：Claude Code 遠端容器 Linux、Chromium（Playwright 1.60，**軟體算圖**）、`npm run build` 後 `next start -p 3000`，`--workers=1`
+- 結果：**20 passed / 0 failed**。驗收當下 `runs the signature phases once and pauses active time` 曾在軟體算圖下失敗，追查為既有缺陷（動畫以 `Math.min(delta, .05)` 累加 render delta，低幀率把時間軸拉長），已於 2026-09-08 修正並補回歸測試，見 [`v3-clean-rebuild-20260908/frame-rate-timeline.md`](./v3-clean-rebuild-20260908/frame-rate-timeline.md)
 
 ## 狀態定義
 
@@ -17,8 +17,22 @@
 
 ## R01–R12 路由與入口
 
-> [ADR-0003](../../adr/0003-intro-auto-invite.md) 已決定取消自動邀請。實作後本段只剩 R08–R11；
-> 下表記錄的是**目前程式（仍會自動導向）**的實測狀態。
+> [ADR-0003](../../adr/0003-intro-auto-invite.md) 取消自動邀請，**已於 2026-09-08 實作**：
+> `/` 永遠停在 Landing，`components/intro/IntroVisit.tsx` 與 session key 已刪除，
+> Intro 改由 Landing 首段的 SSR 連結（`components/landing/IntroEntry.tsx`）進入。
+> R01–R07 與 R12 隨自動導向一起消滅——它們描述的行為已不存在，不是未測。
+> 現行必測只剩四條：
+
+| ID | 應有結果 | 狀態 | 對應 test |
+|---|---|---|---|
+| R08 | Back／Forward 在 Landing↔Intro 間正常往返，無 redirect 迴圈 | PASS | `R08: Back and Forward move between Landing and Intro without a redirect loop` |
+| R09 | 新訪客停在 Landing，首段有 SSR `/intro` 連結可點進 Intro | PASS | `R09: a fresh visit stays on Landing and offers an SSR link into the intro`（另檢查 server HTML 內含 `href="/intro"`） |
+| R10 | JS disabled：Landing 內容與兩個 Intro 連結都可用 | PASS | `R10: keeps both content and the native intro links usable without JavaScript` |
+| R11 | 修飾鍵點 Enter 保留原生連結語意 | PASS | `R11: a modifier click on Enter keeps native link semantics` |
+| － | `/`、深連結、`/?enter=1` 都不下載 GLB，且 canonical 仍是 `/` | PASS | `deep links and Landing never download the hero models` |
+
+<details>
+<summary>2026-09-07 自動導向時期的 R01–R12 實測（歷史紀錄，行為已移除）</summary>
 
 | ID | 應有結果 | 狀態 | 對應 test／缺口 |
 |---|---|---|---|
@@ -35,6 +49,30 @@
 | R11 | 中鍵／Cmd／Ctrl 點 Enter 走原生新頁語意 | NOT-RUN | `HeroWorld.tsx` 的 `enter()` 有 `metaKey/ctrlKey/shiftKey/altKey/button` 早退，但無 test 覆蓋 |
 | R12 | BFCache 還原、offline、StrictMode 不重導／重播／雙 canvas | PARTIAL | offline 由 `offline and slow connections stay on the poster path`（spec:109）覆蓋。**缺**：BFCache（`pageshow.persisted`）還原與 React StrictMode 雙掛載未測 |
 
+</details>
+
+## Phase 9 進站轉場（2026-09-08 新增）
+
+`e2e/intro-portal.spec.ts` 的 `Phase 9 enter transition and navigation lifecycle`，
+共 11 個 test，全部 PASS：
+
+| 檢查 | test |
+|---|---|
+| poster 時 Enter：立刻離開且完全沒下載模型 | `Enter during poster leaves immediately without loading WebGL` |
+| loading 時 Enter：不等模型，晚到的解析不丟錯 | `Enter during loading does not wait for the model to finish` |
+| fallback 時 Enter | `Enter during fallback leaves immediately` |
+| reduced motion Enter：直接進站、無轉場 | `reduced motion Enter goes straight to Landing with no transition overlay` |
+| greeting 中 Enter、暫停中 Enter | `Enter during the greeting, and again while paused, both leave at once` |
+| 雙擊只導航一次、history 不增長 | `a double click lands once and leaves a single history entry` |
+| 中鍵維持原生語意 | `middle click keeps native link semantics` |
+| 進站後 focus 落在 `#main-content` 且不捲動 | `focus lands on main after an enhanced entry, without scrolling` |
+| 直接開 `/` 不被搶焦點 | `a plain Landing visit is never focus-grabbed` |
+| Back 回到 Intro 之前的頁面、Forward 回 Landing 且不搶焦點 | `Back after entering returns to the page before the intro, then Forward returns to Landing` |
+| 離開後 canvas／模型請求／listener 歸零且無例外 | `the route change disposes the canvas, the model requests and the listeners` |
+
+修飾鍵（Shift）另由 R11 覆蓋。單元層的契約測試在
+`components/landing/hero-world/enter-transition.test.ts`（25 個）。
+
 ## F01–F13 載入與生命周期
 
 | ID | 應有結果 | 狀態 | 對應 test／缺口 |
@@ -42,24 +80,35 @@
 | F01 | reduced motion：poster、無 3D 請求、立即 Enter | PASS | `reduced motion keeps the poster and makes no GLB request`（spec:84） |
 | F02 | Save-Data／slow-2g／2g：poster 且無模型請求 | PASS | `Save-Data keeps the static path available without mounting WebGL`（spec:96）＋`offline and slow connections stay on the poster path`（spec:109） |
 | F03 | WebGL 不可用：完整靜態畫面 | PASS | `falls back when WebGL is unavailable`（spec:122） |
-| F04 | GLB 404／corrupt／HTML200：回 poster、停止其他工作 | PARTIAL | `falls back for a failed GLB response…`（spec:177）測 404 與重試上限；`rejects an HTML 200 response as a corrupt GLB`（spec:190）測 HTML 200。**缺**：二進位截斷／壞 magic 的 corrupt GLB 未測 |
+| F04 | GLB 404／corrupt／HTML200：回 poster、停止其他工作 | PASS | 404 與重試上限、HTML 200，2026-09-08 補上 `F04: a truncated GLB binary is rejected like any other corrupt model`（magic 正確但內容截斷） |
 | F05 | critical load 超 15 秒 active time：timeout fallback，無重試風暴 | PASS | `F05: a stalled model load falls back after 15s of active time without a retry storm`（spec:250）。用可注入時鐘推進 13s → 仍 poster，再推進 3s → fallback，且請求數 <5 |
-| F06 | ready 前 Enter：立即離開、abort、不等載入 | PARTIAL | `enters Landing immediately before the scene is ready`（spec:28）驗證立即離開。**缺**：未斷言 in-flight GLB 請求真的被 abort |
-| F07 | context lost：回 poster、動畫停、Enter 可用 | NOT-RUN | 需 `WEBGL_lose_context` 或等效注入，目前無 test |
-| F08 | runtime 切 reduced motion：卸載 3D，無 exit 動畫 | NOT-RUN | 只測初始 reduced motion（F01），未測執行期 media change |
+| F06 | ready 前 Enter：立即離開、abort、不等載入 | PASS | Phase 9 的 `Enter during poster leaves immediately without loading WebGL`（連請求都沒發出）與 `Enter during loading does not wait for the model to finish`（請求永不完成仍立刻離開，且之後無 pageerror） |
+| F07 | context lost：回 poster、動畫停、Enter 可用 | PASS | 2026-09-08 新增 `F07: a lost WebGL context falls back to the poster with a usable exit`（`WEBGL_lose_context`；fallback、canvas 歸零、出口可用、無 pageerror） |
+| F08 | runtime 切 reduced motion：卸載 3D，無 exit 動畫 | PASS | 2026-09-08 新增 `switching to reduced motion at runtime unloads the live scene`（canvas 歸零、Pause 消失、1.5 秒內 rAF 增量 <10、無 pageerror） |
 | F09 | hidden 30 秒再恢復：車位不大跳、不計入 active time | PASS | `F09: 30s hidden does not consume the motion budget and does not jump the car`（spec:272）。hidden 期間推進 30s，phase 不變、恢復後未進入休眠 |
 | F10 | pause／resume、24 秒休眠：停止排程，resume 需明確動作 | PASS | `F10: secondary motion sleeps after 24s of active time…`（spec:302）推進 22s 仍在動、再 3s 進休眠、再 10s 不會自己醒、按鈕點擊才恢復。人工 pause／resume 另由 spec:132、spec:157 覆蓋 |
-| F11 | 五次 Intro↔Landing：canvas 歸零、無 listener／資源線性累積 | PARTIAL | `F11: five Intro↔Landing round trips…`（spec:323）五次往返，每次離開後 canvas 歸零、visibilitychange listener 淨值 ≤2。**缺**：PLAN 要的 heap 抽查未做（`performance.memory` 只在 Chromium 且受 GC 時機影響，未納入斷言） |
-| F12 | poster 失敗：標題／出口仍可用，但視覺測試 fail | NOT-RUN | 無 poster 請求故障注入 test |
-| F13 | 離頁後 parse 完成：late 資源立即釋放、無 state update | NOT-RUN | `SceneLoader.ts` 有 abort／dispose 實作，但沒有可控 race 的 test |
+| F11 | 五次 Intro↔Landing：canvas 歸零、無 listener／資源線性累積 | PASS | `F11: five Intro↔Landing round trips…` ＋ Phase 10 的五次往返量測（canvas、WebGL context、listener、GLB 請求都不成長；heap 11.5–19.1 MB 震盪不單調成長，僅作趨勢） |
+| F12 | poster 失敗：標題／出口仍可用，但視覺測試 fail | PASS | 2026-09-08 新增 `F12: a failed poster still leaves the heading and both exits usable`（poster 404）。視覺退化本來就會發生，測的是出口不壞 |
+| F13 | 離頁後 parse 完成：late 資源立即釋放、無 state update | PASS | 2026-09-08 新增 `F13: a model that arrives after the route change is disposed, not applied`（扣住模型回應直到離頁後才放行；canvas 歸零、無 pageerror） |
 
 ## 統計
 
-| 狀態 | R | F | 合計 |
+現行必測 17 項（R08–R11 + 額外一條迴歸 + F01–F13；R01–R07／R12 已隨自動導向刪除）。
+2026-09-08 的 Phase 11 補上 F04 的二進位截斷、F07、F08、F12、F13，並把 F06、F11 補完：
+
+| 狀態 | R（含迴歸） | F | 合計 |
 |---|---|---|---|
-| PASS | 2 | 6 | **8 / 25** |
-| PARTIAL | 7 | 3 | **10 / 25** |
-| NOT-RUN | 3 | 4 | **7 / 25** |
+| PASS | 5 | 13 | **18 / 17→18** |
+| PARTIAL | 0 | 0 | 0 |
+| NOT-RUN | 0 | 0 | 0 |
+
+（合計 18 是因為 Phase 9 另加了一條「Landing 與深連結不下載 GLB」的迴歸。）
+螢幕閱讀器與實體 Safari 仍是 NOT-RUN，列在 [`phase11-20260908/report.md`](./phase11-20260908/report.md)，
+不計入這張以自動化測試為範圍的表。
+
+2026-09-08 另加 Phase 12 的**模擬**版面覆蓋（`Phase 12 cross-viewport layout (emulated)`：
+320／360／390／430／短橫向／平板各一，加一條旋轉），同樣不能代替真機——真機矩陣見
+[`phase12-20260908/device-matrix.md`](./phase12-20260908/device-matrix.md)。
 
 ## 本輪為了關掉 F05／F09／F10 所做的變更
 

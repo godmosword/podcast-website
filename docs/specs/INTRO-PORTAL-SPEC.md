@@ -1,6 +1,6 @@
 # 車車遊樂園 3D Intro / Portal — 詳細產品與技術規格
 
-版本：1.0 · 日期：2026-09-06（狀態於 2026-09-07 依工作樹重新核對） · 狀態：設計規格；Phase 1、4、5 已實作並驗證。Phase 6／7 的 v2 release 已產出並通過 validator，但**前端目前引用的是 v3**，v3 由 `scripts/polish-hero-world.mjs` 以 NodeIO 修改 v2 幾何而來，未經 Blender 乾淨重建。Phase 6 的「可重建」退出條件已對 v2 實跑證明（Blender 4.5.9／5.2.1），但對前端實際引用的 v3 尚未滿足。Phase 8–13 待驗收；`docs/qa/intro-portal/phase8-20260906/` 只有部分擷取與 validator 輸出，不構成 Phase 8 驗收
+版本：1.0 · 日期：2026-09-06（狀態於 2026-09-08 依工作樹重新核對） · 狀態：設計規格；Phase 1、4、5 已實作並驗證。Phase 6／7 對**前端實際引用的 v3** 已成立：v3 現在由 `assets/blender/hero-world/build.py` 在 Blender 4.5（PyPI `bpy` 模組；實體 Blender CLI 驗證列為 Phase 13 前必做）乾淨重建，經 `optimize-hero-world.mjs`／`render-hero-posters.mjs` 產出，`polish-hero-world.mjs` 已刪除，manifest 記載 `blenderCleanRebuild: true`（證據見 `docs/qa/intro-portal/v3-clean-rebuild-20260908/`）。ADR-0003 的 opt-in 入口已實作。Phase 8 已就 v3 做視覺驗收（同上目錄的 before／after 對照）；Phase 9 的進站轉場與 focus 交接已實作並驗證（`docs/qa/intro-portal/phase9-20260908/`）；Phase 10（效能）與 Phase 11（可及性）已在無 GPU 的容器上量測與驗證（`phase10-20260908/`、`phase11-20260908/`），FPS 與螢幕閱讀器仍待真機；Phase 12 的模擬部分（跨 viewport 版面、旋轉、網路情境）已完成，真機部分因無實體裝置全部 NOT-RUN（`phase12-20260908/`）；Phase 13 待驗收
 
 本次交付遵循最新指示「把 SPEC／PLAN 寫給我就好，越細節越好」。文件中的「應」「必須」「驗收」均表示未來實作要求，不表示目前程式已達成。本文與 [執行計畫](INTRO-PORTAL-PLAN.md) 配套使用。
 
@@ -77,7 +77,7 @@
 
 基線時（Phase 1）`public/models/hero-world/v2/` **只有 `poster.png`**；因此當時 Phase 5 改用已有完整模型與 poster 的 `/models/hero-world` 資產。Phase 6 已產出完整 v2 release（environment／little-red／tree／desktop 與 mobile poster／manifest 皆存在），manifest、validator 與 capture 證據見 `docs/qa/intro-portal/phase6-7-20260906/`。
 
-工作樹現況（2026-09-07 核對）：`components/landing/hero-world/config.ts` 的 `MODEL_PATH` 已是 `/models/hero-world/v3`，不是 v2。v3 由 `scripts/polish-hero-world.mjs`（gltf-transform NodeIO）在 v2 幾何上加工、再以 `scripts/render-hero-posters.mjs` 重出 poster；`public/models/hero-world/v3/manifest.json` 自己記載 `blenderCleanRebuild: false` 與「build.py and .blend have NOT been clean rebuilt」。`build.py` 已於 2026-09-07 在 Blender 4.5.9 LTS 與 5.2.1 LTS 實跑驗證，可重建出與 v2 語意階層完全一致的資產（見 `docs/qa/intro-portal/phase6-rebuild-20260907/`），但 v3 不在該來源鏈上：`build.py` 的 `PROD` 仍指向 v2。因此上線資產（v3）與 Blender source 之間仍缺一段可重建的環節，這是目前最大的未結案項目。v1 與 v2 目錄保留作回退。新路由在基線前沒有完整 E2E、跨裝置與性能結果；既有 public smoke 的 Hero 斷言也已改為明確測 Landing。
+工作樹現況（2026-09-08 核對）：`components/landing/hero-world/config.ts` 的 `MODEL_PATH` 是 `/models/hero-world/v3`。v3 的來源鏈已閉合——`assets/blender/hero-world/build.py`（Blender 4.5）→ `export/*.raw.glb` + `build-info.json` → `scripts/optimize-hero-world.mjs` → `scripts/render-hero-posters.mjs`；`polish-hero-world.mjs` 已刪除，manifest 記載 `blenderCleanRebuild: true` 以及 Blender 版本、build seed、build.py 雜湊與 raw export 雜湊。重建後三個 GLB 合計 291,484 bytes（原 384,320）、16,373 triangles（原 16,343）、0 貼圖（原有 palette atlas），validator 0 errors／0 warnings，`npm run validate:hero-world` 88 項全通過。證據見 `docs/qa/intro-portal/v3-clean-rebuild-20260908/`。v1 與 v2 目錄保留作回退。跨裝置與真機量測仍未完成。
 
 本次不自動撤銷工作樹、不提交、不部署，也不把未驗收草稿當成需求依據。未來執行時先建立隔離快照，逐項決定沿用或修正。
 
@@ -151,42 +151,41 @@ Intro 不是選關、角色圖鑑、遊戲 hub、故事目錄或可自由探索�
 
 ## 4. 路由、Session、History 與 SEO
 
-> **本節的自動邀請部分已被 [ADR-0003](../adr/0003-intro-auto-invite.md) 取代（2026-09-07 決定，尚未實作）。**
-> 決策為：`/` 永遠停在 Landing，`/intro` 改由 Landing 上的明確連結進入。下列 §4.1 路由表的 replace 一列、§4.2 整節與 §4.4 的閃爍缺陷，將在實作該 ADR 時一併移除。
-> 在實作完成前，程式仍為自動邀請行為；閱讀本節時以 ADR 為準。
+> **自動邀請已依 [ADR-0003](../adr/0003-intro-auto-invite.md) 取消並於 2026-09-08 實作完成。**
+> `/` 永遠停在 Landing、零 client redirect；`/intro` 由 Landing 首段的 SSR 連結
+> （`components/landing/IntroEntry.tsx`）進入。§4.2 已作廢，§4.1 的 replace 一列與
+> §4.4 的首次閃爍段落一併移除。要改回自動導向必須另寫 ADR。
 
 ### 4.1 路由契約
 
 | 位置 | Server response／內容 | Client 行為 | Canonical |
 |---|---|---|---|
-| `/` | 200、完整 Landing SSR／SSG | 符合首次邀請條件才 replace `/intro` | `/` |
-| `/?enter=1` | 同一 Landing、200 | 直接進入，記錄 session | `/` |
+| `/` | 200、完整 Landing SSR／SSG | 停在 Landing；不做任何 client redirect | `/` |
+| `/?enter=1` | 同一 Landing、200 | 直接進入（Intro 的出口，舊連結不壞） | `/` |
 | `/#segment-*` | Landing + anchor | 保留該段定位，不開 Intro | `/` |
 | `/intro` | 200、標題／poster／Enter SSR | 優先載入靜態，再漸進增強 | `/intro` |
-| story／games／maps | 原路由 response | 直接進入；記錄已訪問，之後回首頁不攔截 | 原 canonical |
+| story／games／maps | 原路由 response | 直接進入；沒有任何入口攔截 | 原 canonical |
 | 不存在 URL | 原品牌 404 | 不先轉 Intro | 原 404 規則 |
 
-首選保留 `/`，避免把所有既有品牌回家連結改成 `/landing`。不建立第二份內容相同的 Landing 路由。未來若要求完全無首次 client redirect，需另做 routing ADR，不在實作中悄悄改掉本契約。
+首選保留 `/`，避免把所有既有品牌回家連結改成 `/landing`。不建立第二份內容相同的 Landing 路由。
 
-### 4.2 Session 規則
+### 4.2 Session 規則（已作廢）
 
-採 `sessionStorage`，key `cheche-intro-visited-v1`，值 `1`；僅記錄一個布林意義，不存兒童資料、精確時間或識別碼。正常新分頁會有自己的 session；瀏覽器「複製分頁」可能複製 session，允許沿用已訪問狀態。
-
-自動邀請條件全部成立才觸發：pathname 是 `/`、沒有 `enter=1`、沒有 hash、session 未訪問、非 history restore、不是內部內容導覽、目前在線。儲存讀寫失敗時直接保留 Landing，避免 loop。使用者進任何內容頁即可視為已訪問，不再以回首頁為由攔截。
-
-`navigator.onLine` 只是保守跳過條件，不能當作網路一定可用的證明。離線、portal route chunk 下載失敗或 service worker 舊 shell 時，必須保留直接內容出口。
+ADR-0003 取消自動邀請後，Intro 不再需要任何 session 狀態：`cheche-intro-visited-v1`、
+`components/intro/IntroVisit.tsx` 與其掛載點都已刪除，`sessionStorage` 不再被 Intro 使用。
+Landing 的入口是一個純 SSR 連結，storage 被封鎖時行為完全不變。
 
 ### 4.3 動作與 Back 行為
 
 | 情境 | 應有歷史行為 |
 |---|---|
-| 外站→首次 `/`→自動 Intro→Enter | replace 邀請與進入，Back 回外站，不回片頭 |
+| 外站→`/`→點入口→Intro→Enter | `/` 不 redirect；Enter 以 replace 回 Landing，Back 不回片頭 |
 | `/intro` 直接開啟→Enter | replace 至 Landing；不在 Back 建立強制重看 |
 | Landing→story→Back | 回原 Landing，保留既有捲動處理，沒有 Intro |
-| 深連結→首頁 | 首頁直達；已訪問標記阻止首次邀請 |
+| 深連結→首頁 | 首頁直達；沒有任何入口攔截 |
 | 使用者主動打開 `/intro` 重看 | 允許重看，即使 session 已訪問；不自動跳走 |
 | Ctrl／Cmd／中鍵 Enter | 尊重原生 link 開新頁；不攔截成當前頁動畫 |
-| Storage 被封鎖 | `enter=1` URL 保底，不做反覆重定向 |
+| Storage 被封鎖 | 行為不變：Intro 不使用 storage |
 | Back／forward cache 還原 | 不重播迎賓，不重置內容位置；僅恢復可見性生命周期 |
 
 ### 4.4 SSR、搜尋與首次閃爍
@@ -195,9 +194,9 @@ SSR 的 `/` 應包含 Landing 標題、內文、故事／其他內容連結及�
 
 Intro 設 noindex、follow；不以 robots.txt 封鎖 `/intro`，否則搜尋引擎無法讀到 noindex；不加入主 sitemap。`/?enter=1` 與 `/` canonical 相同，不能在每次導航累積更多參數。既有 sitemap 的內容 URL 保持不變。
 
-需實拍首次 `/`→Intro：不得用長時間白屏遮住 redirect，也不能為無閃爍將 Landing SSR 永久隱藏。以低成本早期判定、預先可用的路由殼與可恢復狀態減少雙畫面閃現。若慢速裝置仍明顯閃爍，列為待修問題，不能宣稱「polished transition」完成。
-
-Client redirect 仍可能影響會執行 JS 的索引工具，因此 SEO 驗收必須同時看 server HTML 與 rendered HTML；noindex 是 Intro 的屬性，不能污染 `/`。
+首次 `/` 的閃爍問題連同自動 redirect 一起消失：`/` 的 server HTML 就是最終畫面，沒有
+client 端換頁。SEO 驗收仍須同時看 server HTML 與 rendered HTML；noindex 是 Intro 的屬性，
+不能污染 `/`。Landing 上的入口連結是普通 `<a href="/intro">`，follow 但目標 noindex。
 
 ## 5. Intro HTML、文案與互動
 
@@ -230,7 +229,16 @@ Client redirect 仍可能影響會執行 JS 的索引工具，因此 SEO 驗收�
 
 Enter 初始可操作；未載入、fallback、低動態、WebGL 失敗時直接導航。3D 已 ready 時，立即開始路由切換，最多 360ms 的視覺入園效果與導航並行，不等待車走完或鏡頭到點才建立導航請求。不得讓 360ms fade 後出現等待 route chunk 的白屏。
 
-Skip 永遠直接導航，不播放 exit 動畫。兩者同目的地、同 session 記錄；在重複點击、鍵盤 Enter、觸控雙擊時只觸發一次。保留原生連結 fallback，無 JavaScript 仍可用。
+Skip 永遠直接導航，不播放 exit 動畫。兩者同目的地；在重複點击、鍵盤 Enter、觸控雙擊時只觸發一次。保留原生連結 fallback，無 JavaScript 仍可用。
+
+**實作（2026-09-08，Phase 9）：** 決策集中在 `components/landing/hero-world/enter-transition.ts`
+的 `resolveEnterAction()`：修飾鍵／中鍵回 `native`（完全不攔截 `<a href="/?enter=1">`）、
+重複觸發回 `ignore`、live 場景回 `transition`、其餘（poster／載入中／fallback／
+reduced motion）回 `direct`。`transition` 與 `direct` 都**先呼叫 `router.replace("/")`**，
+淡出與相機推近只是同時發生的裝飾；`EXIT_TRANSITION_MS = 360` 同時餵給 CSS custom property
+與 `CameraRig`，兩邊不會各自漂移。轉場沒能完成（route chunk 失敗）時，1.5 秒後解除
+`data-entering` 並把原生連結還給使用者。JS 可用時兩個連結都落在乾淨的 `/`；`?enter=1`
+留在 href 作為無 JS 與深連結的語意入口，canonical 仍是 `/`。ADR-0003 之後不再有 session 記錄。
 
 ## 6. 視覺構圖與響應式規格
 
@@ -386,7 +394,7 @@ Service worker 不預抓所有 Intro 模型、不替換故事快取、不為此�
 | 元件 | 責任 | 不應負責 |
 |---|---|---|
 | Intro page server shell | metadata、HTML 語意、poster入口 | server 對 deep link 強制 redirect |
-| IntroVisit | session、首次首頁邀請、history 條件 | 載入 Three、隱藏全站內容 |
+| IntroEntry | Landing 首段的 SSR opt-in 入口連結 | session、redirect、載入 Three |
 | HeroWorld／Intro shell | eligibility、ready/fallback、Enter、pause、transition | 模型幾何每幀運算 |
 | HeroScene | Canvas、燈光、children、context-loss | 全站導覽、內容資料 |
 | SceneLoader | fetch／parse／abort／dispose | 無限重試、長期無 owner 全域模型 cache |
