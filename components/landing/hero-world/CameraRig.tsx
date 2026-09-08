@@ -1,16 +1,12 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { WORLD_CAMERA } from "./art-direction";
-import { ActiveTimeline } from "./active-clock";
 import { OrthographicCamera, Vector2 } from "three";
 
-/** SPEC §5.3：入園效果最多 360ms，且不得延後導航。 */
-const ENTRY_SECONDS = .36;
-
-export default function CameraRig({ active, entering = false }: { active: boolean; entering?: boolean }) {
+// 進站的推近改由 CSS transform 完成（見 HeroWorld.module.css）：那是合成器的
+// 工作，不需要 WebGL 再畫一輪，路由切換也就不必和算繪搶主執行緒。
+export default function CameraRig({ active }: { active: boolean }) {
   const { camera, size, gl, invalidate } = useThree();
-  // 入園推近是 360ms 的真實時間，不是 N 幀。
-  const entryTimeline = useMemo(() => new ActiveTimeline(), []);
   const baseZoom = useRef(55);
   const target = useRef(new Vector2());
   const offset = useRef(new Vector2());
@@ -36,17 +32,7 @@ export default function CameraRig({ active, entering = false }: { active: boolea
     canvas.addEventListener("pointermove", move, { passive: true }); canvas.addEventListener("pointerleave", reset);
     return () => { canvas.removeEventListener("pointermove", move); canvas.removeEventListener("pointerleave", reset); };
   }, [gl, active, mobile, invalidate]);
-  useEffect(() => {
-    if (entering) { entryTimeline.reset(); invalidate(); }
-    else entryTimeline.suspend();
-  }, [entering, entryTimeline, invalidate]);
   useFrame(() => {
-    if (entering && camera instanceof OrthographicCamera) {
-      entryTimeline.advance(ENTRY_SECONDS);
-      const entry = Math.min(1, entryTimeline.seconds / ENTRY_SECONDS);
-      camera.zoom = baseZoom.current * (1 + .065 * entry);
-      camera.updateProjectionMatrix(); invalidate();
-    }
     if (!active) return;
     offset.current.lerp(target.current, .08);
     camera.position.x = (mobile ? 5 : 7) + offset.current.x;

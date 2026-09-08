@@ -5,6 +5,7 @@ import LandingSegment from "@/components/landing/LandingSegment";
 import SegmentNav from "@/components/landing/SegmentNav";
 import DuduCompanion from "@/components/landing/DuduCompanion";
 import IntroEntry from "@/components/landing/IntroEntry";
+import LandingEntryFocus from "@/components/landing/LandingEntryFocus";
 import LandingBedtimeLayer from "@/components/landing/LandingBedtimeLayer";
 import { DUDU_EMOTION_BY_SEGMENT } from "@/data/dudu-emotions";
 import { homeSiteIntro } from "@/lib/home-geo";
@@ -31,6 +32,7 @@ export default function LandingHub() {
     <>
       <h1 className="sr-only">車車遊樂園：親子故事與手作</h1>
       <JsonLd data={podcastSeriesJsonLd()} />
+      <LandingEntryFocus />
       <LandingScrollView className={scrollStyles.root}>
         <LandingBedtimeLayer
           segmentEffects={segments.map((segment) => ({

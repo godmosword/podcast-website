@@ -28,7 +28,9 @@ test.describe("Intro Portal · Phase 4 route and entry", () => {
   test("enters Landing immediately before the scene is ready", async ({ page }) => {
     await page.goto("/intro", { waitUntil: "domcontentloaded" });
     await page.getByRole("link", { name: "略過動畫" }).click();
-    await expect(page).toHaveURL(/\/\?enter=1$/);
+    // Enhanced navigation lands on the clean canonical URL; `?enter=1` stays in
+    // the href as the no-JS entry point.
+    await expect(page).toHaveURL(/\/$/);
     await expect(page.locator("[data-landing-root]")).toBeVisible();
   });
 
@@ -174,7 +176,7 @@ test.describe("Intro Portal · Phase 5 poster, fallback, and lifecycle", () => {
     await expect(page.getByRole("button", { name: "繼續小紅的旅程" })).toBeVisible();
     await page.getByRole("button", { name: "繼續小紅的旅程" }).click();
     await page.getByRole("link", { name: /進入車車遊樂園/ }).click();
-    await expect(page).toHaveURL(/\/\?enter=1$/, { timeout: 1_500 });
+    await expect(page).toHaveURL(/\/$/, { timeout: 1_500 });
     await expect(page.locator("[data-hero-world] canvas")).toHaveCount(0);
   });
 
@@ -375,7 +377,7 @@ test.describe("Intro Portal · active-time budgets (F05/F09/F10/F11)", () => {
       await expect.poll(() => hero.getAttribute("data-scene-state"), { timeout: 12_000 }).toBe("ready");
       await expect(page.locator("[data-hero-world] canvas")).toHaveCount(1);
       await page.getByRole("link", { name: "略過動畫" }).click();
-      await expect(page).toHaveURL(/\/\?enter=1$/);
+      await expect(page).toHaveURL(/\/$/);
       await expect(page.locator("[data-hero-world] canvas")).toHaveCount(0);
       const listeners = await page.evaluate(() => window.__heroInstrumentation?.visibilityListeners ?? 0);
       // One live HeroWorld keeps one visibility listener; a leak grows per round.
@@ -386,5 +388,192 @@ test.describe("Intro Portal · active-time budgets (F05/F09/F10/F11)", () => {
     await expect(page.locator("[data-hero-world] canvas")).toHaveCount(1);
     const instrumentation = await page.evaluate(() => window.__heroInstrumentation);
     expect(instrumentation?.visibilityListeners ?? 0).toBeLessThanOrEqual(2);
+  });
+});
+
+// PLAN §9 / SPEC §5.3. Enter must work from every moment of the intro, must not
+// wait for the decorative transition, and must leave nothing behind on Landing.
+test.describe("Intro Portal · Phase 9 enter transition and navigation lifecycle", () => {
+  test.use({ serviceWorkers: "block" });
+
+  const enterLink = /進入車車遊樂園/;
+
+  async function waitForScene(page: import("@playwright/test").Page) {
+    const hero = page.locator("[data-hero-world]");
+    await expect.poll(() => hero.getAttribute("data-scene-state"), { timeout: 12_000 }).toMatch(/ready|fallback/);
+    return hero;
+  }
+
+  test("Enter during poster leaves immediately without loading WebGL", async ({ page }) => {
+    const modelRequests: string[] = [];
+    page.on("request", (request) => { if (MODEL_URL.test(request.url())) modelRequests.push(request.url()); });
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("[data-hero-world]")).toHaveAttribute("data-scene-state", "poster");
+    // The scene chunk only starts after a 900ms warm-up; clicking before that
+    // must not wait for it.
+    await page.getByRole("link", { name: enterLink }).click();
+    await expect(page).toHaveURL(/\/$/, { timeout: 2_000 });
+    await expect(page.locator("[data-landing-root]")).toBeVisible();
+    expect(modelRequests, "leaving during the poster must not start model downloads").toHaveLength(0);
+  });
+
+  test("Enter during loading does not wait for the model to finish", async ({ page }) => {
+    // Hold the first model open for the whole test: the click must not block on it.
+    await page.route(MODEL_URL, async () => { /* never fulfilled */ });
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("[data-hero-world]")).toHaveAttribute("data-scene-state", "poster");
+    await page.getByRole("link", { name: enterLink }).click();
+    await expect(page).toHaveURL(/\/$/, { timeout: 2_000 });
+    await expect(page.locator("[data-hero-world] canvas")).toHaveCount(0);
+    // A load that resolves (or aborts) after the route change must not throw.
+    await page.waitForTimeout(500);
+    expect(errors).toEqual([]);
+  });
+
+  test("Enter during fallback leaves immediately", async ({ page }) => {
+    await page.addInitScript(() => {
+      HTMLCanvasElement.prototype.getContext = (() => null) as typeof HTMLCanvasElement.prototype.getContext;
+    });
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("[data-hero-world]")).toHaveAttribute("data-scene-state", "fallback");
+    await page.getByRole("link", { name: enterLink }).click();
+    await expect(page).toHaveURL(/\/$/, { timeout: 2_000 });
+    await expect(page.locator("[data-landing-root]")).toBeVisible();
+  });
+
+  test("reduced motion Enter goes straight to Landing with no transition overlay", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    const hero = page.locator("[data-hero-world]");
+    await expect(hero).toHaveAttribute("data-scene-state", "poster");
+    await page.getByRole("link", { name: enterLink }).click();
+    // data-entering must never turn on: reduced motion gets no fade or camera push.
+    await expect(page).toHaveURL(/\/$/, { timeout: 2_000 });
+    await expect(page.locator("[data-landing-root]")).toBeVisible();
+  });
+
+  test("Enter during the greeting, and again while paused, both leave at once", async ({ page }) => {
+    await page.goto("/intro?heroQa=1", { waitUntil: "domcontentloaded" });
+    const hero = await waitForScene(page);
+    test.skip(await hero.getAttribute("data-scene-state") !== "ready", "WebGL unavailable in this browser host");
+    // Park the story on the greeting through the QA-only time hook.
+    await page.evaluate(() => { (window as unknown as { __HERO_WORLD_QA_TIME?: number }).__HERO_WORLD_QA_TIME = 5.55; });
+    await expect.poll(() => hero.getAttribute("data-motion-phase"), { timeout: 20_000 }).toBe("acknowledge");
+    await expect(hero).toHaveAttribute("data-greeting", "true");
+    await page.getByRole("link", { name: enterLink }).click();
+    await expect(page).toHaveURL(/\/$/, { timeout: 2_000 });
+    await expect(page.locator("[data-hero-world] canvas")).toHaveCount(0);
+
+    // Paused is a separate moment: motion is stopped but the scene is live.
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    const paused = await waitForScene(page);
+    test.skip(await paused.getAttribute("data-scene-state") !== "ready", "WebGL unavailable in this browser host");
+    await page.getByRole("button", { name: "暫停小紅的旅程" }).click();
+    await expect(page.getByRole("button", { name: "繼續小紅的旅程" })).toBeVisible();
+    await page.getByRole("link", { name: enterLink }).click();
+    await expect(page).toHaveURL(/\/$/, { timeout: 2_000 });
+    await expect(page.locator("[data-landing-root]")).toBeVisible();
+  });
+
+  test("a double click lands once and leaves a single history entry", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.goto("/stories", { waitUntil: "domcontentloaded" });
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    const hero = await waitForScene(page);
+    const depthBefore = await page.evaluate(() => history.length);
+    await page.getByRole("link", { name: enterLink }).dblclick();
+    await expect(page).toHaveURL(/\/$/, { timeout: 2_000 });
+    await expect(page.locator("[data-landing-root]")).toBeVisible();
+    await expect(hero).toHaveCount(0);
+    // Enter replaces the intro entry; a second navigation would grow history.
+    expect(await page.evaluate(() => history.length)).toBe(depthBefore);
+    await page.goBack({ waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/stories$/);
+    expect(errors).toEqual([]);
+  });
+
+  test("middle click keeps native link semantics", async ({ page }) => {
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    const box = await page.getByRole("link", { name: enterLink }).boundingBox();
+    expect(box).not.toBeNull();
+    await page.mouse.click(box!.x + box!.width / 2, box!.y + box!.height / 2, { button: "middle" });
+    await page.waitForTimeout(300);
+    // The current tab stays on the intro; the browser owns what a middle click does.
+    await expect(page).toHaveURL(/\/intro$/);
+  });
+
+  test("focus lands on main after an enhanced entry, without scrolling", async ({ page }) => {
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    await waitForScene(page);
+    await page.getByRole("link", { name: enterLink }).click();
+    await expect(page).toHaveURL(/\/$/, { timeout: 2_000 });
+    await expect(page.locator("[data-landing-root]")).toBeVisible();
+    await expect.poll(() => page.evaluate(() => document.activeElement?.id ?? ""), { timeout: 3_000 }).toBe("main-content");
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  });
+
+  test("a plain Landing visit is never focus-grabbed", async ({ page }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("[data-landing-root]")).toBeVisible();
+    await page.waitForTimeout(300);
+    expect(await page.evaluate(() => document.activeElement?.id ?? "")).not.toBe("main-content");
+  });
+
+  test("Back after entering returns to the page before the intro, then Forward returns to Landing", async ({ page }) => {
+    await page.goto("/stories", { waitUntil: "domcontentloaded" });
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    await waitForScene(page);
+    await page.getByRole("link", { name: enterLink }).click();
+    await expect(page).toHaveURL(/\/$/, { timeout: 2_000 });
+    // Enter replaces the intro entry, so Back skips it instead of looping.
+    await page.goBack({ waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/stories$/);
+    await page.goForward({ waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator("[data-landing-root]")).toBeVisible();
+    // A restored Landing must not steal focus from the reader.
+    expect(await page.evaluate(() => document.activeElement?.id ?? "")).not.toBe("main-content");
+  });
+
+  test("the route change disposes the canvas, the model requests and the listeners", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.addInitScript(() => {
+      const instrumentation = { webglContexts: 0, visibilityListeners: 0 };
+      window.__heroInstrumentation = instrumentation;
+      const getContext = HTMLCanvasElement.prototype.getContext;
+      HTMLCanvasElement.prototype.getContext = function patched(this: HTMLCanvasElement, ...args: unknown[]) {
+        const type = String(args[0] ?? "");
+        if (type.startsWith("webgl")) instrumentation.webglContexts += 1;
+        return (getContext as (...a: unknown[]) => unknown).apply(this, args);
+      } as typeof HTMLCanvasElement.prototype.getContext;
+      const add = document.addEventListener.bind(document);
+      const remove = document.removeEventListener.bind(document);
+      document.addEventListener = ((type: string, ...rest: unknown[]) => {
+        if (type === "visibilitychange") instrumentation.visibilityListeners += 1;
+        return (add as (...a: unknown[]) => unknown)(type, ...rest);
+      }) as typeof document.addEventListener;
+      document.removeEventListener = ((type: string, ...rest: unknown[]) => {
+        if (type === "visibilitychange") instrumentation.visibilityListeners -= 1;
+        return (remove as (...a: unknown[]) => unknown)(type, ...rest);
+      }) as typeof document.removeEventListener;
+    });
+    const modelRequests: string[] = [];
+    page.on("request", (request) => { if (MODEL_URL.test(request.url())) modelRequests.push(request.url()); });
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    await waitForScene(page);
+    const loaded = modelRequests.length;
+    await page.getByRole("link", { name: enterLink }).click();
+    await expect(page).toHaveURL(/\/$/, { timeout: 2_000 });
+    await expect(page.locator("[data-hero-world]")).toHaveCount(0);
+    await expect(page.locator("canvas")).toHaveCount(0);
+    // Two seconds is well past the 360ms transition and any late GLB parse.
+    await page.waitForTimeout(2_000);
+    expect(modelRequests.length, "no model refetch after leaving").toBe(loaded);
+    expect(await page.evaluate(() => window.__heroInstrumentation?.visibilityListeners ?? 0)).toBeLessThanOrEqual(1);
+    expect(errors, "a leaked frame or late parse would throw here").toEqual([]);
   });
 });
