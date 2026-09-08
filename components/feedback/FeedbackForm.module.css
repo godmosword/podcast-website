@@ -51,17 +51,7 @@
 .textarea {
   min-height: 140px;
   resize: vertical;
-  /* 信紙橫線對齊：固定 28px 行高，才能跟 background 線重合 */
-  line-height: 28px;
-  background-color: var(--card);
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent 27px,
-    color-mix(in srgb, var(--ink) 10%, transparent) 27px,
-    color-mix(in srgb, var(--ink) 10%, transparent) 28px
-  );
-  background-attachment: local;
+  line-height: 1.6;
 }
 
 .input:focus-visible,

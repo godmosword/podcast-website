@@ -12,6 +12,7 @@ import {
   FEEDBACK_FORM_HEADING,
   FEEDBACK_LOADING_LABEL,
   FEEDBACK_MAILTO_LINK,
+  FEEDBACK_MESSAGE_FIELD_ID,
   FEEDBACK_MESSAGE_LABEL,
   FEEDBACK_NICKNAME_LABEL,
   FEEDBACK_SUBMIT_LABEL,
@@ -64,6 +65,9 @@ describe("FeedbackForm", () => {
     expect(screen.getByRole("textbox", { name: FEEDBACK_NICKNAME_LABEL })).toBeTruthy();
     expect(screen.getByRole("textbox", { name: FEEDBACK_EMAIL_LABEL })).toBeTruthy();
     expect(screen.getByRole("textbox", { name: FEEDBACK_MESSAGE_LABEL })).toBeTruthy();
+    const messageLabel = document.querySelector(`label[for="${FEEDBACK_MESSAGE_FIELD_ID}"]`);
+    expect(messageLabel?.textContent).toBe(FEEDBACK_MESSAGE_LABEL);
+    expect(messageLabel?.className).not.toMatch(/sr-only/);
     expect(screen.getByRole("button", { name: FEEDBACK_SUBMIT_LABEL })).toBeTruthy();
     expect(screen.queryByRole("link", { name: FEEDBACK_MAILTO_LINK })).toBeNull();
   });

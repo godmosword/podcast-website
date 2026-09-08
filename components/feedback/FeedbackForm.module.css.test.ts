@@ -13,6 +13,8 @@ describe("FeedbackForm.module.css", () => {
     expect(css).toMatch(/\.submit\s*\{[\s\S]*?min-height:\s*44px/);
     expect(css).toMatch(/\.mailtoButton\s*\{[\s\S]*?min-height:\s*44px/);
     expect(css).not.toMatch(/\.starter\s*\{/);
+    expect(css).not.toMatch(/\.textarea\s*\{[\s\S]*?background-image:/);
+    expect(css).not.toMatch(/repeating-linear-gradient/);
   });
 
   it("mailto 備援是文字連結，不是第二顆實心主鈕", () => {

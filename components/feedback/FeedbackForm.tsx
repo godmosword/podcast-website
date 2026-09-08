@@ -133,7 +133,7 @@ export default function FeedbackForm({ available }: Props) {
         disabled={pending}
       />
 
-      <label className="sr-only" htmlFor={messageId}>
+      <label className={styles.label} htmlFor={messageId}>
         {FEEDBACK_MESSAGE_LABEL}
       </label>
       <textarea

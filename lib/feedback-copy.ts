@@ -24,7 +24,6 @@ export const FEEDBACK_NICKNAME_LABEL = "暱稱";
 
 export const FEEDBACK_EMAIL_LABEL = "信箱（選填）";
 
-/** textarea 的可及名稱；畫面只留信紙欄，不另標可見標題。 */
 export const FEEDBACK_MESSAGE_LABEL = "留言";
 
 export const FEEDBACK_SUBMIT_LABEL = "我要留言";
