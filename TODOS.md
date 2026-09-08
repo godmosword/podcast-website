@@ -30,7 +30,7 @@
 
 | ID | 說明 |
 |----|------|
-| polish(feedback): `/feedback` 信紙表單恆可填，mailto 改備援 | 見本 commit |
+| polish(feedback): `/feedback` 信紙表單恆可填，mailto 改備援 | 見後續 commit |
 
 ### 本輪已完成（2026-09-05）
 

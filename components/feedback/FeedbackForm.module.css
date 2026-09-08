@@ -182,8 +182,7 @@
   flex: none;
 }
 
-.submit,
-.mailtoButton {
+.submit {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -195,19 +194,28 @@
   color: var(--landing-brand-ink);
   background: var(--landing-brand);
   box-shadow: var(--shadow-sm);
+  cursor: pointer;
   transition: transform var(--motion-press), box-shadow var(--motion-press),
     opacity var(--motion-press);
 }
 
-.submit {
-  cursor: pointer;
-}
-
 .mailtoButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: fit-content;
   max-width: 100%;
   min-height: 44px;
-  text-decoration: none;
+  padding: 8px 4px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  box-shadow: none;
+  color: var(--accent-ink);
+  font-size: var(--fs-control);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: opacity var(--motion-press);
 }
 
 .submit:disabled {
@@ -221,17 +229,16 @@
 }
 
 @media (hover: hover) {
-  .submit:hover:not(:disabled),
-  .mailtoButton:hover {
+  .submit:hover:not(:disabled) {
     box-shadow: var(--shadow-md);
+  }
+
+  .mailtoButton:hover {
+    opacity: 0.82;
   }
 }
 
 .submit:active:not(:disabled) {
-  transform: scale(0.98);
-}
-
-.mailtoButton:active {
   transform: scale(0.98);
 }
 
@@ -295,7 +302,6 @@
   .submit,
   .submit:active,
   .mailtoButton,
-  .mailtoButton:active,
   .starter,
   .starter:active,
   .success {

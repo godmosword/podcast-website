@@ -15,6 +15,11 @@ describe("FeedbackForm.module.css", () => {
     expect(css).toMatch(/\.mailtoButton\s*\{[\s\S]*?min-height:\s*44px/);
   });
 
+  it("mailto 備援是文字連結，不是第二顆實心主鈕", () => {
+    expect(css).toMatch(/\.mailtoButton\s*\{[\s\S]*?background:\s*transparent/);
+    expect(css).toMatch(/\.mailtoButton\s*\{[\s\S]*?text-decoration:\s*underline/);
+  });
+
   it("蜜罐移出畫面，不用 display:none", () => {
     expect(css).toMatch(/\.honeypot\s*\{[\s\S]*?position:\s*absolute/);
     expect(css).toMatch(/\.honeypot\s*\{[\s\S]*?left:\s*-9999px/);

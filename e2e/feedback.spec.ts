@@ -4,7 +4,9 @@ import {
   FEEDBACK_DEMO_NICKNAME,
   FEEDBACK_FORM_HEADING,
   FEEDBACK_INVITE_CHILD,
+  FEEDBACK_ERROR,
   FEEDBACK_INVITE_PARENT,
+  FEEDBACK_MAILTO_LINK,
   FEEDBACK_MESSAGE_LABEL,
   FEEDBACK_NICKNAME_LABEL,
   FEEDBACK_PAGE_TITLE,
@@ -85,6 +87,16 @@ test.describe("站內留言牆 /feedback", () => {
     await expect(submit).toBeDisabled();
     await checkboxes.nth(1).check();
     await expect(submit).toBeEnabled();
+
+    const mailto = page.getByRole("link", { name: FEEDBACK_MAILTO_LINK });
+    if (await mailto.count()) {
+      // startedAt 在 hydration 寫入；最短填寫 3 秒，避免誤觸 FEEDBACK_TOO_FAST
+      await page.waitForTimeout(3200);
+      await submit.click();
+      await expect(page.locator("form").getByRole("alert")).toContainText(FEEDBACK_ERROR);
+      await expect(page.getByRole("textbox", { name: FEEDBACK_NICKNAME_LABEL })).toBeVisible();
+      await expect(mailto).toBeVisible();
+    }
   });
 
   test("無 JS 時表單仍在 HTML 裡可填", async ({ browser }) => {
