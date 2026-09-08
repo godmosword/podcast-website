@@ -51,9 +51,12 @@ for (const name of ['environment', 'little-red', 'tree']) {
   const bytes = await readFile(file);
   const result = await validator.validateBytes(new Uint8Array(bytes), { uri: file.pathname });
   check(result.issues.numErrors === 0, `${name}: glTF validator errors=${result.issues.numErrors}`);
+  check(result.issues.numWarnings === 0, `${name}: glTF validator warnings=${result.issues.numWarnings}`);
   check(bytes.length < 1_000_000, `${name}: under 1MB`);
   const json = parseGlb(bytes);
   hierarchy(name, json);
+  // v3 是無貼圖的平色資產；出現 image 代表 palette atlas 又被打開了。
+  if (version === 'v3') check((json.images ?? []).length === 0, `${name}: no embedded texture`);
   const manifestAsset = manifest.assets.find(asset => asset.name === name);
   check(Boolean(manifestAsset), `${name}: manifest entry`);
   check(manifestAsset?.bytes === bytes.length, `${name}: manifest byte count`);
@@ -90,6 +93,14 @@ const totalTriangles = manifest.assets.filter(asset => asset.triangles).reduce((
 check(totalTriangles < 40_000, `total triangles under 40k (${totalTriangles})`);
 check(manifest.version === version, `manifest version ${version}`);
 if (version === 'v2') check(manifest.buildSeed === 20260906, 'manifest build seed');
-else check(manifest.blenderCleanRebuild === false && manifest.sourceRelease === 'v2', 'v3 declares NodeIO derivation, not Blender rebuild');
+else {
+  // v3 的來源鏈必須指回 .blend／build.py，不得再是「後製既有 GLB」。
+  check(manifest.blenderCleanRebuild === true, 'v3 declares a Blender clean rebuild');
+  check(manifest.buildScript === 'assets/blender/hero-world/build.py', 'v3 names its build script');
+  check(manifest.blenderSource === 'assets/blender/hero-world/hero-world.blend', 'v3 names its Blender source');
+  check(manifest.buildSeed === 20260906, 'v3 manifest build seed');
+  check(Boolean(manifest.blender) && Boolean(manifest.rawExportSha256), 'v3 records Blender version and raw export hashes');
+  check(manifest.assets.every(asset => asset.triangles === undefined || asset.textures === 0), 'v3 assets are untextured');
+}
 console.log(JSON.stringify({ pass: failures.length === 0, checks, failures, manifest: { version: manifest.version, generatedAt: manifest.generatedAt, assets: manifest.assets.map(asset => ({ name: asset.name, bytes: asset.bytes, triangles: asset.triangles, animations: asset.animations })) } }, null, 2));
 if (failures.length > 0) process.exitCode = 1;

@@ -1,0 +1,19 @@
+# rebuilt v3 (build.py Blender 4.5.0 → optimize) little-red.glb
+nodes=16 meshes=8 materials=9 textures=0 animations=1
+anim "Drive" channels=4 dur=2.0416667461395264 targets=Wheel_0.rotation,Wheel_1.rotation,Wheel_2.rotation,Wheel_3.rotation
+Vehicle
+  Body
+    Vehicle_blue  [prims=1 tris=556 mat=blue T0,0.646,0.571 S0.46,0.46,0.46]
+    Vehicle_dark  [prims=1 tris=512 mat=dark T0.012,0.692,0.603 S0.338,0.338,0.338]
+    Vehicle_ivory  [prims=1 tris=660 mat=ivory T0,0.9,0.504 S0.36,0.36,0.36]
+    Vehicle_red  [prims=1 tris=988 mat=red COLOR_0 T0,0.67,-0.032 S0.857,0.857,0.857]
+    Vehicle_sky  [prims=1 tris=216 mat=sky T0,0.89,-0.2 S0.475,0.475,0.475]
+    Vehicle_yellow  [prims=1 tris=448 mat=yellow T0,0.48,0.81 S0.463,0.463,0.463]
+  Wheel_0  [T-0.51,0.28,0.48]
+    <unnamed>  [prims=3 tris=180 mat=wheel_tire+wheel_cream+wheel_red T-0.011,0,0 S0.275,0.275,0.275]
+  Wheel_1  [T0.51,0.28,0.48]
+    <unnamed>  [prims=3 tris=180 mat=wheel_tire+wheel_cream+wheel_red T0.011,0,0 S0.275,0.275,0.275]
+  Wheel_2  [T-0.51,0.28,-0.5]
+    <unnamed>  [prims=3 tris=180 mat=wheel_tire+wheel_cream+wheel_red T-0.011,0,0 S0.275,0.275,0.275]
+  Wheel_3  [T0.51,0.28,-0.5]
+    <unnamed>  [prims=3 tris=180 mat=wheel_tire+wheel_cream+wheel_red T0.011,0,0 S0.275,0.275,0.275]

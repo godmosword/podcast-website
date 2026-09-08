@@ -1,7 +1,10 @@
 # 車車遊樂園 3D Hero｜原始檔與設計理念
 
 > 這份文件整理本次 3D 首頁 Hero 的設計決策、技術架構、效能與無障礙策略，以及可重建場景的原始檔內容。  
-> 生成日期：2026-09-05
+> 生成日期：2026-09-05  
+> **注意：下方的原始碼快照停在 2026-09-05（v2 時期），檔案路徑與數值可能已經不同。**
+> 目前上線的是 v3，資產管線與最新量測以 [HERO-WORLD.md](./HERO-WORLD.md) 與
+> [`docs/qa/intro-portal/v3-clean-rebuild-20260908/report.md`](./qa/intro-portal/v3-clean-rebuild-20260908/report.md) 為準。
 
 ## 文件用途
 
@@ -84,14 +87,14 @@ LandingSegment (首段)
 - [public-smoke.spec.ts](../e2e/public-smoke.spec.ts)：Save-Data、reduced-motion、場景 ready 與暫停控制測試。
 - [HERO-WORLD.md](./HERO-WORLD.md)：較短的實作報告與 QA 結果。
 
-## Blender 重建流程
+## Blender 重建流程（2026-09-08 更新）
 
 ```bash
 blender -b --python assets/blender/hero-world/build.py
-npm run optimize:hero-world
+npm run release:hero-world   # optimize → posters/manifest → validate
 ```
 
-產物會先寫入 `assets/blender/hero-world/export/*.raw.glb`，再輸出到 `public/models/hero-world/v2/`。請保留 `Environment → FerrisRotor → GondolaPivot0..7`、`Vehicle → Body/Wheel_0..3`、`Tree → Trunk/Crown` 與動畫 clip `Drive`；`npm run validate:hero-world` 會阻止缺失或錯誤的語意節點。
+產物會先寫入 `assets/blender/hero-world/export/*.raw.glb`（另含 `build-info.json` 記錄 Blender 版本、seed 與 build.py 雜湊），再輸出到 `public/models/hero-world/v3/`。v3 的色彩、roughness、暖窗自發光與接觸陰影（COLOR_0）全部由 `build.py` 定義，沒有任何後製既有 GLB 的步驟。請保留 `Environment → FerrisRotor → GondolaPivot0..7`、`Vehicle → Body/Wheel_0..3`、`Tree → Trunk/Crown` 與動畫 clip `Drive`；`npm run validate:hero-world` 會阻止缺失或錯誤的語意節點，也會擋下重新出現的內嵌貼圖與非乾淨重建的 manifest。
 
 ## 原始檔快照
 

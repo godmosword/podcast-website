@@ -1,12 +1,13 @@
 [
   {
     "name": "environment",
-    "bytes": 285676,
-    "gzipBytes": 107642,
-    "sha256": "b06df9e2de8bd7b3e11bc853891d4eae3793f7e9e626048319dc85b7b2ef45d1",
-    "triangles": 12111,
-    "materials": 3,
-    "primitives": 25,
+    "bytes": 216428,
+    "gzipBytes": 101705,
+    "sha256": "804e815c9f2f5d99ec2766de30805c964cab39b44cf39ff49065831aa016b688",
+    "triangles": 12141,
+    "materials": 18,
+    "primitives": 23,
+    "textures": 0,
     "animations": [],
     "animationDetails": [],
     "hierarchy": {
@@ -40,16 +41,19 @@
       "nodeCount": 41
     },
     "errors": 0,
-    "warnings": 0
+    "warnings": 0,
+    "sourceRaw": "environment.raw.glb",
+    "sourceSha256": "a44b5334eb60b541d5bf7bdcafe5c83eaa30bb5a67d0b49c4e8dfdd8bd98dcf6"
   },
   {
     "name": "little-red",
-    "bytes": 84472,
-    "gzipBytes": 27613,
-    "sha256": "03053551c5f398fbedb06a87b9383eff29bee3be6a950d2df79f221c21cf21ce",
+    "bytes": 64924,
+    "gzipBytes": 25467,
+    "sha256": "a40e0433a21f5758d8d6ec4cad0cab5c515037c3383fd1492c7391a56d76808c",
     "triangles": 3740,
-    "materials": 4,
+    "materials": 9,
     "primitives": 12,
+    "textures": 0,
     "animations": [
       "Drive"
     ],
@@ -99,16 +103,19 @@
       "nodeCount": 16
     },
     "errors": 0,
-    "warnings": 0
+    "warnings": 0,
+    "sourceRaw": "little-red.raw.glb",
+    "sourceSha256": "2cdbdac89065e740821b19dc0d073bcafedbb6eb8ff3b7630f74a37cee0e2618"
   },
   {
     "name": "tree",
-    "bytes": 10716,
-    "gzipBytes": 5309,
-    "sha256": "71ed46069fba279c9ffd33993f3e28db243b23ad746e96879593d8182aa8ddcc",
+    "bytes": 10132,
+    "gzipBytes": 5373,
+    "sha256": "c76c3f9dc7b1863cbcbaf2905ddf9ec7832e2809b9146b6732c59d1bf0ecf542",
     "triangles": 492,
     "materials": 2,
     "primitives": 2,
+    "textures": 0,
     "animations": [],
     "animationDetails": [],
     "hierarchy": {
@@ -126,6 +133,8 @@
       "nodeCount": 3
     },
     "errors": 0,
-    "warnings": 0
+    "warnings": 0,
+    "sourceRaw": "tree.raw.glb",
+    "sourceSha256": "339a7ce0d8cea5a3930eb7d801459bd1e1ec02de9d4a1e168a6ccdfe90f1c680"
   }
 ]

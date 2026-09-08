@@ -57,6 +57,8 @@
     "optimize:roamer-assets": "tsx scripts/optimize-roamer-assets.ts",
     "optimize:adventures": "tsx scripts/optimize-adventure-assets.ts",
     "optimize:hero-world": "node scripts/optimize-hero-world.mjs",
+    "render:hero-posters": "node scripts/render-hero-posters.mjs",
+    "release:hero-world": "npm run optimize:hero-world && npm run render:hero-posters && npm run validate:hero-world",
     "validate:hero-world": "node scripts/validate-hero-world.mjs",
     "optimize:lcp-images": "tsx scripts/optimize-lcp-images.ts",
     "generate:story-blurs": "tsx scripts/generate-story-blurs.ts",

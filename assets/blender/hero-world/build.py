@@ -1,15 +1,23 @@
-"""重建原創微型樂園。Blender 4.5 LTS：blender -b --python assets/blender/hero-world/build.py"""
-import bpy, math, os, random
+"""重建原創微型樂園（v3 定稿）。Blender 4.5 LTS：blender -b --python assets/blender/hero-world/build.py
+
+這支腳本是上線資產唯一的來源：v3 的色彩、roughness、暖窗自發光、接觸陰影
+（COLOR_0）與地面高低差都在這裡定義，不再由任何後製腳本改寫既有 GLB。
+輸出 raw GLB 後由 `npm run optimize:hero-world` 產生 public/models/hero-world/v3。
+
+可選參數（`blender -b --python build.py -- --preview`）：另外算一張 Cycles 預覽圖
+到 export/preview.png。上線 poster 由 scripts/render-hero-posters.mjs 以正式 R3F
+場景輸出，Cycles 圖只是編輯來源的參考，不進 public/，也不覆蓋 v2 的既有 master。
+"""
+import bpy, json, math, os, random, sys
+from hashlib import sha256
 from mathutils import Vector
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 OUT = ROOT / 'assets/blender/hero-world/export'
-PROD = ROOT / 'public/models/hero-world/v2'
-# 無損 poster master 留在 assets/，不進 public/，避免部署一張沒人下載的 957KB PNG。
-POSTER_MASTER = ROOT / 'assets/hero-world/posters/v2'
+PROD = ROOT / 'public/models/hero-world/v3'
+RENDER_PREVIEW = '--preview' in sys.argv
 OUT.mkdir(parents=True, exist_ok=True)
 PROD.mkdir(parents=True, exist_ok=True)
-POSTER_MASTER.mkdir(parents=True, exist_ok=True)
 # The scene is currently authored without stochastic geometry, but keeping a
 # documented seed makes future procedural additions reproducible.
 BUILD_SEED = 20260906
@@ -20,21 +28,38 @@ bpy.ops.object.select_all(action='SELECT')
 bpy.ops.object.delete(use_global=False)
 for item in list(bpy.data.materials): bpy.data.materials.remove(item)
 M = {}
-def mat(name, color):
+# 色值在線性色彩空間；柔霧陶土質感不依賴 Blender 專屬材質節點。
+# v3 定稿的世界色與 roughness。這組數值原本由 scripts/polish-hero-world.mjs 在
+# 匯出後改寫 GLB，現在回到唯一來源，讓 v3 可以從 .blend／build.py 乾淨重建。
+WORLD_PALETTE = dict(
+    sand=(.43,.29,.19), grass=(.30,.43,.26), road=(.43,.34,.26), ivory=(.83,.76,.61),
+    cream=(.72,.57,.38), red=(.58,.14,.095), pink=(.72,.33,.28), blue=(.10,.30,.32),
+    sky=(.30,.52,.53), yellow=(.85,.53,.17), wood=(.25,.14,.08), leaf=(.26,.42,.29),
+    mint=(.16,.32,.22), paving=(.61,.47,.33), warmglass=(.94,.49,.13), dark=(.025,.037,.03))
+WORLD_ROUGHNESS = {'red':.77,'ivory':.92,'leaf':.88,'paving':.94,'road':.96,'warmglass':.58,'sky':.62}
+# 摩天輪吊艙與輪胎維持原本的明亮玩具色，和世界的霧面色分開；v3 的美術定稿
+# 刻意讓這兩組並存（吊艙是場景裡唯一的高彩度節奏）。
+TOY_PALETTE = dict(
+    cabin_blue=((.10,.38,.48),.84), cabin_yellow=((.95,.59,.13),.84),
+    cabin_mint=((.19,.40,.22),.84), cabin_red=((.78,.115,.07),.72),
+    cabin_wood=((.32,.16,.07),.88), wheel_tire=((.065,.078,.07),.84),
+    wheel_cream=((.83,.65,.40),.84), wheel_red=((.78,.115,.07),.72))
+
+def mat(name, color, roughness):
     m = bpy.data.materials.new(name); m.diffuse_color = (*color, 1)
     m.use_nodes = True
     p = m.node_tree.nodes.get('Principled BSDF'); p.inputs['Base Color'].default_value = (*color, 1)
-    p.inputs['Roughness'].default_value = {'red':.72,'pink':.78,'ivory':.92,'wood':.88,'sky':.62}.get(name,.84)
+    p.inputs['Roughness'].default_value = roughness
+    p.inputs['Metallic'].default_value = 0
     M[name] = m
     return m
-# 色值在線性色彩空間；柔霧陶土質感不依賴 Blender 專屬材質節點。
-for n,c in dict(cream=(.83,.65,.40),sand=(.66,.43,.22),grass=(.39,.57,.23),mint=(.19,.40,.22),leaf=(.32,.53,.28),road=(.49,.36,.25),ivory=(.96,.86,.65),red=(.78,.115,.07),pink=(.88,.36,.32),blue=(.10,.38,.48),sky=(.29,.61,.66),yellow=(.95,.59,.13),wood=(.32,.16,.07),tire=(.065,.078,.07),dark=(.025,.037,.03)).items(): mat(n,c)
-mat('warmglass',(.94,.57,.22))
+for n,c in WORLD_PALETTE.items(): mat(n,c,WORLD_ROUGHNESS.get(n,.86))
+for n,(c,r) in TOY_PALETTE.items(): mat(n,c,r)
+# 暖窗：低強度自發光，不新增 realtime light；strength 1 讓 glTF emissiveFactor
+# 就是這個顏色本身。
 p=M['warmglass'].node_tree.nodes['Principled BSDF']
-p.inputs['Emission Color'].default_value=(1,.46,.12,1)
-p.inputs['Emission Strength'].default_value=.32
-p.inputs['Roughness'].default_value=.56
-mat('paving',(.76,.62,.43))
+p.inputs['Emission Color'].default_value=(.27,.10,.018,1)
+p.inputs['Emission Strength'].default_value=1
 current = 'Environment'
 def finish(o,n,m):
     o.name=n; o.data.materials.append(M[m]); o['part']=current
@@ -99,11 +124,51 @@ def merge(part):
         bpy.context.view_layer.objects.active=objects[0];bpy.ops.object.join();objects[0].name=f'{part}_{material.name}'
         bpy.context.scene.cursor.location=(0,0,0);bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
 
+# v3 的接觸陰影：以世界座標寫進 COLOR_0（線性），在 glTF 裡就是 baseColor 的
+# 乘數。這是廣義的手繪暗部，不是 ray-baked AO；沒有濃淡變化的面不建立屬性，
+# 免得每個網格都背一組全白的頂點色。
+CONTACT_SHADE = {
+    # 故事屋落在草地上的一片柔和暗部。
+    'grass': lambda x,y,z: 1-.13*math.exp(-(((x+1.6)/1.5)**2+((.65-y)/1.4)**2)),
+    # 屋身自下而上收乾，屋簷再壓一階。
+    'ivory': lambda x,y,z: (1-.11*math.exp(-max(0,z-.25)*2.5)-(.06 if z>1.7 else 0)) if (z>.45 and x<-.45 and y>-.15) else 1,
+    # 樹冠底部暗、頂部亮。
+    'leaf': lambda x,y,z: .86+.14*min(1,max(0,(z-.55)/1.05)),
+    # 紅色量體（書封屋頂、小紅車身）給極輕微的高度提亮。
+    'red': lambda x,y,z: .94+.06*min(1,max(0,z/2.4)),
+}
+CONTACT_ATTRIBUTE = 'Contact'
+
+def bake_contact_colors(obj):
+    mesh=obj.data
+    if not mesh.materials or CONTACT_ATTRIBUTE in mesh.color_attributes: return
+    shade=CONTACT_SHADE.get(mesh.materials[0].name)
+    # 屋身的暗部只屬於環境模組；小紅的米色（擋風玻璃、車頭線）不套用。
+    if shade is None or (mesh.materials[0].name=='ivory' and not obj.name.startswith('Environment')): return
+    matrix=obj.matrix_world
+    values=[shade(*(matrix @ v.co)) for v in mesh.vertices]
+    if min(values)>1-1e-6: return
+    layer=mesh.color_attributes.new(name=CONTACT_ATTRIBUTE,type='FLOAT_COLOR',domain='POINT')
+    for i,value in enumerate(values): layer.data[i].color=(value,value,value,1)
+    index=mesh.color_attributes.find(CONTACT_ATTRIBUTE)
+    mesh.color_attributes.active_color_index=index
+    mesh.color_attributes.render_color_index=index
+
+def prepare_for_export(objects):
+    for o in objects:
+        if o.type!='MESH': continue
+        bake_contact_colors(o)
+        # 沒有任何貼圖，UV 只會變成匯出後要再刪一次的死重量。
+        while o.data.uv_layers: o.data.uv_layers.remove(o.data.uv_layers[0])
+
 def export(part,filename):
     bpy.ops.object.select_all(action='DESELECT')
+    selected=[]
     for o in bpy.context.scene.objects:
-        if o.get('part')==part or (part=='Environment' and o.get('part')=='Ferris'):o.select_set(True)
-    bpy.ops.export_scene.gltf(filepath=str(OUT/filename),export_format='GLB',use_selection=True,export_cameras=False,export_lights=False,export_animations=True,export_animation_mode='NLA_TRACKS',export_force_sampling=False,export_extras=False,export_yup=True)
+        if o.get('part')==part or (part=='Environment' and o.get('part')=='Ferris'):
+            o.select_set(True);selected.append(o)
+    prepare_for_export(selected)
+    bpy.ops.export_scene.gltf(filepath=str(OUT/filename),export_format='GLB',use_selection=True,export_cameras=False,export_lights=False,export_animations=True,export_animation_mode='NLA_TRACKS',export_force_sampling=False,export_extras=False,export_yup=True,export_vertex_color='NAME',export_vertex_color_name=CONTACT_ATTRIBUTE,export_all_vertex_colors=False)
 
 def semantic_root(name, part, children):
     """Create an identity semantic root without changing child world poses."""
@@ -113,8 +178,8 @@ def semantic_root(name, part, children):
         matrix=child.matrix_world.copy();child.parent=root;child.matrix_world=matrix
     return root
 
-# 扁平橢圓陶土底座及同心道路。
-ball('Island biscuit',(0,0,-.24),(5.65,4.0,.55),'sand',48)
+# 扁平橢圓陶土底座及同心道路。餅乾底座壓在草地下方，避免中央從草皮冒出來。
+ball('Island biscuit',(0,0,-.325),(5.65,4.0,.55),'sand',48)
 ball('Meadow',(0,0,-.05),(5.6,3.96,.35),'grass',48)
 ringroad()
 for i in range(36):
@@ -137,7 +202,8 @@ box('Doorstep',(-1.6,-.24,.34),(.8,.45,.16),'cream',.07)
 box('Chimney',(-2.2,1.5,2.25),(.3,.35,.8),'pink',.06)
 # 明確的橢圓故事前庭與通向環路的石階；保留草地留白。
 ball('Courtyard rim',(-1.35,-.80,.23),(1.19,.81,.055),'cream',32)
-ball('Courtyard clay',(-1.35,-.80,.27),(1.09,.72,.035),'paving',32)
+# 前庭鋪面略高於外框，門前的鋪地才有厚度。
+ball('Courtyard clay',(-1.35,-.80,.302),(1.09,.72,.035),'paving',32)
 for i in range(3):
     o=box('Path stone',(-1.22+i*.09,-1.43-i*.22,.29),(.49,.18,.055),'ivory',.045)
     o.rotation_euler.z=-.06+i*.035
@@ -163,8 +229,8 @@ for o in [o for o in bpy.context.scene.objects if o.get('part')=='FerrisRotor']:
 for i in range(8):
     a=i*math.tau/8;x=cx+1.26*math.cos(a);z=cz+1.26*math.sin(a)
     current=f'Gondola{i}'
-    rod('Cabin hanger',(x,cy,z),(x,cy,z-.21),.027,'wood')
-    box('Gondola',(x,cy,z-.30),(.38,.39,.26),['blue','yellow','mint','red'][i%4],.09)
+    rod('Cabin hanger',(x,cy,z),(x,cy,z-.21),.027,'cabin_wood')
+    box('Gondola',(x,cy,z-.30),(.38,.39,.26),['cabin_blue','cabin_yellow','cabin_mint','cabin_red'][i%4],.09)
     pivot=bpy.data.objects.new(f'GondolaPivot{i}',None);bpy.context.collection.objects.link(pivot)
     pivot.parent=rotor;pivot.location=(x-cx,0,z-cz);pivot['part']='Ferris'
     bpy.context.view_layer.update()
@@ -230,10 +296,10 @@ merge('Vehicle')
 # 四個模組化輪子各自保留原點；Drive 只包含輪軸旋轉。
 for i,(x,y) in enumerate([(-.51,-.48),(.51,-.48),(-.51,.5),(.51,.5)]):
     current=f'Wheel{i}'
-    rod('Tire',(x-.10,y,.28),(x+.10,y,.28),.275,'tire',20)
+    rod('Tire',(x-.10,y,.28),(x+.10,y,.28),.275,'wheel_tire',20)
     side=1 if x>0 else -1
-    rod('Hub',(x+side*.095,y,.28),(x+side*.112,y,.28),.16,'cream',16)
-    rod('Hub center',(x+side*.113,y,.28),(x+side*.122,y,.28),.068,'red',12)
+    rod('Hub',(x+side*.095,y,.28),(x+side*.112,y,.28),.16,'wheel_cream',16)
+    rod('Hub center',(x+side*.113,y,.28),(x+side*.122,y,.28),.068,'wheel_red',12)
     pieces=[o for o in bpy.context.scene.objects if o.get('part')==current]
     bpy.ops.object.select_all(action='DESELECT')
     for o in pieces:o.select_set(True)
@@ -274,8 +340,20 @@ bpy.ops.object.light_add(type='AREA',location=(-3,-5,10));bpy.context.object.dat
 bpy.ops.object.camera_add(location=(7,-12,10));cam=bpy.context.object;cam.rotation_euler=(Vector((0,0,.6))-cam.location).to_track_quat('-Z','Y').to_euler();cam.data.type='ORTHO';cam.data.ortho_scale=14;scene.camera=cam
 scene.render.engine='CYCLES';scene.cycles.samples=32;scene.cycles.use_denoising=True
 scene.render.resolution_x=1400;scene.render.resolution_y=1000;scene.render.resolution_percentage=100
-scene.render.film_transparent=True;scene.render.image_settings.file_format='PNG';scene.render.filepath=str(POSTER_MASTER/'poster.png')
+scene.render.film_transparent=True;scene.render.image_settings.file_format='PNG';scene.render.filepath=str(OUT/'preview.png')
 scene.view_settings.view_transform='AgX'
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'assets/blender/hero-world/hero-world.blend'))
-bpy.ops.render.render(write_still=True)
-print(f'HERO_WORLD_EXPORT_COMPLETE seed={BUILD_SEED} blender={bpy.app.version_string}')
+# 來源鏈證據：optimize 會把這份 build-info 併進 v3 的 asset report 與 manifest，
+# 讓上線資產可以指回產生它的 Blender 版本、種子與這支腳本的雜湊。
+BUILD_INFO = {
+    'buildScript': 'assets/blender/hero-world/build.py',
+    'buildScriptSha256': sha256(Path(__file__).read_bytes()).hexdigest(),
+    'blenderSource': 'assets/blender/hero-world/hero-world.blend',
+    'blender': bpy.app.version_string,
+    'buildSeed': BUILD_SEED,
+    'target': 'public/models/hero-world/v3',
+    'rawExports': sorted(f.name for f in OUT.glob('*.raw.glb')),
+}
+(OUT/'build-info.json').write_text(json.dumps(BUILD_INFO,indent=2)+'\n')
+if RENDER_PREVIEW: bpy.ops.render.render(write_still=True)
+print(f'HERO_WORLD_EXPORT_COMPLETE seed={BUILD_SEED} blender={bpy.app.version_string} preview={RENDER_PREVIEW}')

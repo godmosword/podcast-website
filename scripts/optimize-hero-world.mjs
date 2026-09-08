@@ -1,20 +1,26 @@
+// v3 資產管線的第二段：把 build.py 匯出的 raw GLB 最佳化成 public/models/hero-world/v3。
+// 來源鏈只有一條：hero-world.blend / build.py → export/*.raw.glb → 這支腳本。
+// 沒有任何步驟讀取既有的上線 GLB，因此 v3 可以從來源乾淨重建。
 import { execFileSync } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { renameSync } from 'node:fs';
 import { gzipSync } from 'node:zlib';
 import { createHash } from 'node:crypto';
-import sharp from 'sharp';
 import validator from 'gltf-validator';
 import { NodeIO } from '@gltf-transform/core';
 import { KHRMeshQuantization } from '@gltf-transform/extensions';
 
-const root = new URL('../public/models/hero-world/v2/', import.meta.url);
+const root = new URL('../public/models/hero-world/v3/', import.meta.url);
 const sourceRoot = new URL('../assets/blender/hero-world/export/', import.meta.url);
-const masterRoot = new URL('../assets/hero-world/posters/v2/', import.meta.url);
-const qaRoot = new URL('../docs/qa/intro-portal/phase6-7-20260906/', import.meta.url);
+const qaRoot = new URL('../docs/qa/intro-portal/v3-clean-rebuild-20260908/', import.meta.url);
+await mkdir(root, { recursive: true });
 await mkdir(qaRoot, { recursive: true });
 const report = [];
 const io = new NodeIO().registerExtensions([KHRMeshQuantization]);
+
+const buildInfo = JSON.parse(await readFile(new URL('build-info.json', sourceRoot), 'utf8').catch(() => {
+  throw new Error('Missing export/build-info.json — run `blender -b --python assets/blender/hero-world/build.py` first');
+}));
 
 function parseGlb(bytes) {
   const jsonSize = bytes.readUInt32LE(12);
@@ -24,7 +30,10 @@ function parseGlb(bytes) {
 async function validate(file) {
   const bytes = await readFile(file);
   const result = await validator.validateBytes(new Uint8Array(bytes), { uri: file });
-  if (result.issues.numErrors > 0) throw new Error(`GLB validator errors in ${file}: ${JSON.stringify(result.issues)}`);
+  // 0 errors 是硬限制；warnings 也一併擋下，避免「通過但有雜訊」的資產上線。
+  if (result.issues.numErrors > 0 || result.issues.numWarnings > 0) {
+    throw new Error(`glTF validator issues in ${file}: ${JSON.stringify(result.issues)}`);
+  }
   return { bytes, result, json: parseGlb(bytes) };
 }
 
@@ -107,9 +116,15 @@ for (const name of ['environment', 'little-red', 'tree']) {
   const input = new URL(`${name}.raw.glb`, sourceRoot);
   const output = new URL(`${name}.glb`, root);
   const raw = await validate(input.pathname);
-  sourceValidation.push({ name, bytes: raw.bytes.length, warnings: raw.result.issues.numWarnings, errors: raw.result.issues.numErrors });
-  // 共用材質已在 Blender 合併。保留動態節點和 Drive，不使用破壞階層的 flatten。
-  execFileSync('node_modules/.bin/gltf-transform', ['optimize', input.pathname, output.pathname, '--compress', 'quantize', '--texture-compress', 'false', '--simplify', 'false', '--flatten', 'false', '--join', 'false'], {stdio: 'inherit'});
+  sourceValidation.push({
+    name, file: `${name}.raw.glb`, bytes: raw.bytes.length,
+    sha256: createHash('sha256').update(raw.bytes).digest('hex'),
+    warnings: raw.result.issues.numWarnings, errors: raw.result.issues.numErrors,
+  });
+  // 共用材質已在 Blender 合併；保留動態節點與 Drive，不使用破壞階層的 flatten。
+  // palette 關掉：v3 的顏色是美術定稿的一部分，留在各自的材質裡比壓成 atlas
+  // 貼圖更容易改，也讓 GLB 完全不帶紋理。
+  execFileSync('node_modules/.bin/gltf-transform', ['optimize', input.pathname, output.pathname, '--compress', 'quantize', '--texture-compress', 'false', '--simplify', 'false', '--flatten', 'false', '--join', 'false', '--palette', 'false'], {stdio: 'inherit'});
   if (name === 'environment') {
     const simplified = new URL(`${name}.simplified.glb`, root);
     execFileSync('node_modules/.bin/gltf-transform', ['simplify', output.pathname, simplified.pathname, '--ratio', '0.76', '--error', '0.002'], {stdio: 'inherit'});
@@ -120,22 +135,22 @@ for (const name of ['environment', 'little-red', 'tree']) {
   const triangles = json.meshes.reduce((sum, mesh) => sum + mesh.primitives.reduce((n, p) => n + (p.indices === undefined ? json.accessors[p.attributes.POSITION].count : json.accessors[p.indices].count) / 3, 0), 0);
   const hierarchy = hierarchyReport(name, json);
   if (hierarchy.missing.length > 0) throw new Error(`${name}: missing semantic nodes ${hierarchy.missing.join(', ')}`);
-  report.push({name, bytes: bytes.length, gzipBytes: gzipSync(bytes).length, sha256: createHash('sha256').update(bytes).digest('hex'), triangles, materials: (json.materials ?? []).length, primitives: json.meshes.reduce((sum,m) => sum+m.primitives.length,0), animations: hierarchy.animations.map(a=>a.name), animationDetails: hierarchy.animations, hierarchy, errors: result.issues.numErrors, warnings: result.issues.numWarnings});
+  if ((json.images ?? []).length > 0) throw new Error(`${name}: unexpected texture in an untextured release`);
+  report.push({name, bytes: bytes.length, gzipBytes: gzipSync(bytes).length, sha256: createHash('sha256').update(bytes).digest('hex'), triangles, materials: (json.materials ?? []).length, primitives: json.meshes.reduce((sum,m) => sum+m.primitives.length,0), textures: (json.textures ?? []).length, animations: hierarchy.animations.map(a=>a.name), animationDetails: hierarchy.animations, hierarchy, errors: result.issues.numErrors, warnings: result.issues.numWarnings, sourceRaw: `${name}.raw.glb`, sourceSha256: sourceValidation.at(-1).sha256});
 }
-await sharp(new URL('poster.png', masterRoot).pathname).webp({quality: 85}).toFile(new URL('poster.webp', root).pathname);
-await sharp(new URL('poster.png', masterRoot).pathname).resize(840).webp({quality: 82}).toFile(new URL('poster-mobile.webp', root).pathname);
-const posters = [];
-for (const file of ['poster.png', 'poster.webp', 'poster-mobile.webp']) {
-  // poster.png is the lossless master in assets/; only the WebP wire posters ship in public/.
-  const base = file === 'poster.png' ? masterRoot : root;
-  const bytes = await readFile(new URL(file, base));
-  const metadata = await sharp(new URL(file, base).pathname).metadata();
-  posters.push({ name: file, role: file === 'poster.png' ? 'lossless-master' : 'wire-poster', bytes: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex'), width: metadata.width, height: metadata.height, format: metadata.format });
-}
-const manifest = { version: 'v2', generatedAt: new Date().toISOString(), generator: 'Blender 4.5 LTS build.py + gltf-transform 4.5.0', blenderSource: 'assets/blender/hero-world/hero-world.blend', buildScript: 'assets/blender/hero-world/build.py', buildSeed: 20260906, camera: { type: 'orthographic', position: [7, -12, 10], lookAt: [0, 0, 0.6], orthoScale: 14, resolution: [1400, 1000] }, lighting: { areaPosition: [-3, -5, 10], energy: 1600, size: 7 }, assets: [...report, ...posters] };
-await writeFile(new URL('manifest.json', root), JSON.stringify(manifest,null,2)+'\n');
-await writeFile(new URL('asset-report.json', qaRoot), JSON.stringify({ version: 'v2', sourceValidation, assets: report, posters, manifest: 'public/models/hero-world/v2/manifest.json' },null,2)+'\n');
-await writeFile(new URL('asset-report.json', root), JSON.stringify({ version: 'v2', sourceValidation, assets: report, posters },null,2)+'\n');
-await writeFile(new URL('asset-report.json', new URL('../docs/qa/intro-portal/', import.meta.url)), JSON.stringify(report,null,2)+'\n');
-console.log(JSON.stringify({ sourceValidation, assets: report, posters }, null, 2));
+
+const assetReport = {
+  version: 'v3',
+  generator: 'assets/blender/hero-world/build.py + scripts/optimize-hero-world.mjs',
+  blenderCleanRebuild: true,
+  build: buildInfo,
+  generatedAt: new Date().toISOString(),
+  sourceValidation,
+  assets: report,
+};
+await writeFile(new URL('asset-report.json', root), JSON.stringify(assetReport, null, 2)+'\n');
+await writeFile(new URL('asset-report.json', qaRoot), JSON.stringify(assetReport, null, 2)+'\n');
+await writeFile(new URL('asset-report.json', new URL('../docs/qa/intro-portal/', import.meta.url)), JSON.stringify(report, null, 2)+'\n');
+console.log(JSON.stringify({ build: buildInfo, sourceValidation, assets: report.map(asset => ({ ...asset, hierarchy: undefined, animationDetails: undefined })) }, null, 2));
+console.log('Next: node scripts/render-hero-posters.mjs   # posters + manifest.json');
 if (report.reduce((n, r) => n + r.bytes, 0) > 1_000_000 || report.reduce((n,r) => n+r.triangles,0) > 40_000) throw new Error('Hero asset budget exceeded');
