@@ -1,11 +1,16 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { WORLD_CAMERA } from "./art-direction";
+import { ActiveTimeline } from "./active-clock";
 import { OrthographicCamera, Vector2 } from "three";
+
+/** SPEC §5.3：入園效果最多 360ms，且不得延後導航。 */
+const ENTRY_SECONDS = .36;
 
 export default function CameraRig({ active, entering = false }: { active: boolean; entering?: boolean }) {
   const { camera, size, gl, invalidate } = useThree();
-  const entry = useRef(0);
+  // 入園推近是 360ms 的真實時間，不是 N 幀。
+  const entryTimeline = useMemo(() => new ActiveTimeline(), []);
   const baseZoom = useRef(55);
   const target = useRef(new Vector2());
   const offset = useRef(new Vector2());
@@ -31,11 +36,15 @@ export default function CameraRig({ active, entering = false }: { active: boolea
     canvas.addEventListener("pointermove", move, { passive: true }); canvas.addEventListener("pointerleave", reset);
     return () => { canvas.removeEventListener("pointermove", move); canvas.removeEventListener("pointerleave", reset); };
   }, [gl, active, mobile, invalidate]);
-  useEffect(() => { if (entering) invalidate(); }, [entering, invalidate]);
-  useFrame((_, delta) => {
+  useEffect(() => {
+    if (entering) { entryTimeline.reset(); invalidate(); }
+    else entryTimeline.suspend();
+  }, [entering, entryTimeline, invalidate]);
+  useFrame(() => {
     if (entering && camera instanceof OrthographicCamera) {
-      entry.current = Math.min(1, entry.current + Math.min(delta, .05) / .36);
-      camera.zoom = baseZoom.current * (1 + .065 * entry.current);
+      entryTimeline.advance(ENTRY_SECONDS);
+      const entry = Math.min(1, entryTimeline.seconds / ENTRY_SECONDS);
+      camera.zoom = baseZoom.current * (1 + .065 * entry);
       camera.updateProjectionMatrix(); invalidate();
     }
     if (!active) return;
