@@ -26,6 +26,12 @@
 - **後續：拿掉 CTA `nowrap`**：把 `LandingSegment.tsx` 的 `" →"` 半形空白改不斷行空白，箭頭才不會孤行；同時避開 <348px Dudu 遮箭頭、文字級 200% 被 `.panel` 裁尾。
 - **後續：勿靜默啟用 `playCta`**：`LandingSegment.tsx` 三元式會讓主 CTA 從 56px／`--fs-h2`／不透明墨板退回 44px／玻璃 `.subscribeCta`，契約測不會紅。啟用前須讓 `.subscribeCta` 脫離玻璃語言。
 
+### 本輪已完成（2026-09-08）
+
+| ID | 說明 |
+|----|------|
+| polish(feedback): `/feedback` 信紙表單恆可填，mailto 改備援 | `a1874234` |
+
 ### 本輪已完成（2026-09-05）
 
 | ID | 說明 |
@@ -36,6 +42,7 @@
 | feat(feedback): 站內留言牆 `/feedback`＋密語後台 `/studio/feedback`（先審後發、信箱不公開） | `806915c` |
 | feat(stories): 桌機找故事縮圖網格＋縮圖／完整切換（≥768 兩欄、≥1280 三欄） | `c9a50fd` |
 | polish(feedback): 表單 SSR／Server Action＋牆滿 3 則才列、示範文案 | `38c8a09` |
+| fix(intro): 依 ADR-0003 取消首頁自動導向 `/intro`，頁尾加 SSR 入口 | `ef494c28` |
 
 ### 本輪已完成（2026-09-02）
 

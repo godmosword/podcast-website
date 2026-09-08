@@ -203,6 +203,8 @@ test("a11y：親子遊樂地圖（地圖檢視、地點詳情）無 critical/ser
 test("a11y：桌面抽屜展開態（含親子指南）無 critical/serious 違規", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/");
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.locator("[data-landing-root]")).toBeVisible();
 
   // 1280 標題列無「主要分區」；全站不掛去玩 dock；家長項在抽屜
   await expect(page.getByRole("navigation", { name: "主要分區" })).toHaveCount(0);

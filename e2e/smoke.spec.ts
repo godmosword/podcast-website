@@ -8,7 +8,13 @@ test.describe.configure({ mode: "serial" });
 test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/");
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.locator("[data-landing-root]")).toBeVisible();
   await expect(page.locator("h1")).toHaveText("車車遊樂園：親子故事與手作");
+  await expect(page.getByRole("link", { name: "走進車車遊樂園" })).toHaveAttribute(
+    "href",
+    "/intro",
+  );
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
     /podcast-website-mu\.vercel\.app\/?$/,

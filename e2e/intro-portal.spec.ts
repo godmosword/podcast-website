@@ -53,6 +53,30 @@ test.describe("Intro Portal · Phase 4 route and entry", () => {
     await context.close();
   });
 
+  test("keeps a fresh bare home visit on Landing and exposes an SSR intro link", async ({ page }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator("[data-landing-root]")).toBeVisible();
+    const introLink = page.getByRole("link", { name: "走進車車遊樂園" });
+    await expect(introLink).toHaveAttribute("href", "/intro");
+    await introLink.click();
+    await expect(page).toHaveURL(/\/intro$/);
+    await page.getByRole("link", { name: "略過動畫" }).click();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator("[data-landing-root]")).toBeVisible();
+  });
+
+  test("Landing to story back and forward stays on content", async ({ page }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await page.getByRole("link", { name: "車車遊樂園的故事 →" }).click();
+    await expect(page).toHaveURL(/\/stories/);
+    await page.goBack({ waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator("[data-landing-root]")).toBeVisible();
+    await page.goForward({ waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/stories/);
+  });
+
   test("R08: Back and Forward move between Landing and Intro without a redirect loop", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await page.getByRole("link", { name: /看小紅開進遊樂園/ }).click();

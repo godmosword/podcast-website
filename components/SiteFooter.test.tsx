@@ -18,6 +18,8 @@ describe("SiteFooter", () => {
 
     expect(html).not.toContain('aria-label="主題模式"');
     expect(html).not.toContain('aria-label="家長安心資訊"');
+    expect(html).toContain('href="/intro"');
+    expect(html).toContain("走進車車遊樂園");
     expect(html).toContain('href="/about"');
     expect(html).toContain("關於我們");
     expect(html).toContain("聯絡我們");

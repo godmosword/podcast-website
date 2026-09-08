@@ -66,7 +66,7 @@ export default function FeedbackPage() {
         </div>
       </section>
 
-      <section className={styles.formSection} aria-label="留言表單">
+      <section className={styles.formSection} aria-labelledby="feedback-form-heading">
         <FeedbackForm available={available} />
       </section>
 

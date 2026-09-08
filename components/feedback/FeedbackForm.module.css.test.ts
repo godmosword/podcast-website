@@ -5,13 +5,19 @@ import { describe, expect, it } from "vitest";
 describe("FeedbackForm.module.css", () => {
   const css = readFileSync(join(import.meta.dirname, "FeedbackForm.module.css"), "utf8");
 
-  it("textarea 滿欄且 min-height ≥120px；同意列、送出鍵與起頭 chip ≥44px", () => {
+  it("有信紙標題；textarea 滿欄且 min-height ≥140px；同意列、送出鍵與起頭 chip ≥44px", () => {
+    expect(css).toMatch(/\.heading\s*\{[\s\S]*?font-size:\s*var\(--fs-h3\)/);
     expect(css).toMatch(/\.textarea\s*\{[\s\S]*?width:\s*100%/);
-    expect(css).toMatch(/\.textarea\s*\{[\s\S]*?min-height:\s*120px/);
+    expect(css).toMatch(/\.textarea\s*\{[\s\S]*?min-height:\s*140px/);
     expect(css).toMatch(/\.consent\s*\{[\s\S]*?min-height:\s*44px/);
     expect(css).toMatch(/\.submit\s*\{[\s\S]*?min-height:\s*44px/);
     expect(css).toMatch(/\.starter\s*\{[\s\S]*?min-height:\s*44px/);
     expect(css).toMatch(/\.mailtoButton\s*\{[\s\S]*?min-height:\s*44px/);
+  });
+
+  it("mailto 備援是文字連結，不是第二顆實心主鈕", () => {
+    expect(css).toMatch(/\.mailtoButton\s*\{[\s\S]*?background:\s*transparent/);
+    expect(css).toMatch(/\.mailtoButton\s*\{[\s\S]*?text-decoration:\s*underline/);
   });
 
   it("蜜罐移出畫面，不用 display:none", () => {

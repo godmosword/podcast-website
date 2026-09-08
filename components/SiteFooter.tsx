@@ -70,6 +70,12 @@ export default function SiteFooter({
 
       <div className={styles.bottomBar}>
         <nav className={styles.metaStrip} aria-label="頁尾連結">
+          <Link href="/intro" className={styles.metaLink}>
+            走進車車遊樂園
+          </Link>
+          <span className={styles.metaSep} aria-hidden>
+            ·
+          </span>
           <Link href="/about" className={styles.metaLink}>
             關於我們
           </Link>

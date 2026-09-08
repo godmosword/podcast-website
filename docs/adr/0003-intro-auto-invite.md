@@ -1,6 +1,6 @@
 # ADR-0003：取消首次訪問自動導向 Intro，改為 opt-in 入口
 
-- **狀態**：已決定（2026-09-07）。取代 [INTRO-PORTAL-SPEC](../specs/INTRO-PORTAL-SPEC.md) §4.1／§4.2／§4.4 的自動邀請契約。
+- **狀態**：已實作（2026-09-08）。取代 [INTRO-PORTAL-SPEC](../specs/INTRO-PORTAL-SPEC.md) §4.1／§4.2／§4.4 的自動邀請契約。首屏 poster 入口位置仍待 Phase 8 美術定稿；目前入口是頁尾 SSR 連結。
 - **決策**：**砍掉自動邀請。** `/` 永遠直接是 Landing，零 client redirect；`/intro` 改由 Landing 上一個明確的 SSR 連結進入。
 - **本 ADR 的目的是終結反覆討論**：要改回自動導向，必須寫新的 ADR 並附上真機證據，不得在實作中悄悄改掉。
 
