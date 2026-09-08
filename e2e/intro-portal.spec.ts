@@ -182,22 +182,58 @@ test.describe("Intro Portal · Phase 5 poster, fallback, and lifecycle", () => {
 
   test("runs the signature phases once and pauses active time", async ({ page }) => {
     test.setTimeout(75_000);
+    // The phases are wall-clock windows, and `stop` (80ms) and `settle` (320ms)
+    // are narrower than one frame on a slow renderer. Polling from the test
+    // runner would miss them, so record every attribute change in the page and
+    // assert the *order*: the story must move forward and greet exactly once.
+    await page.addInitScript(() => {
+      const w = window as unknown as { __phases: string[]; __greetings: string[] };
+      w.__phases = [];
+      w.__greetings = [];
+      const observe = () => {
+        const hero = document.querySelector("[data-hero-world]");
+        if (!hero) return void requestAnimationFrame(observe);
+        const push = () => {
+          const phase = hero.getAttribute("data-motion-phase") ?? "";
+          const greeting = hero.getAttribute("data-greeting") ?? "";
+          if (w.__phases.at(-1) !== phase) w.__phases.push(phase);
+          if (w.__greetings.at(-1) !== greeting) w.__greetings.push(greeting);
+        };
+        push();
+        new MutationObserver(push).observe(hero, { attributes: true, attributeFilter: ["data-motion-phase", "data-greeting"] });
+      };
+      observe();
+    });
     await page.goto("/intro", { waitUntil: "domcontentloaded" });
     const hero = page.locator("[data-hero-world]");
     await expect.poll(() => hero.getAttribute("data-scene-state"), { timeout: 12_000 }).toMatch(/ready|fallback/);
     test.skip(await hero.getAttribute("data-scene-state") !== "ready", "WebGL unavailable in this browser host");
     await expect(hero).toHaveAttribute("data-motion-phase", "approach");
-    await expect.poll(() => hero.getAttribute("data-motion-phase"), { timeout: 20_000 }).toBe("decelerate");
-    await expect.poll(() => hero.getAttribute("data-motion-phase"), { timeout: 20_000 }).toBe("settle");
-    await expect.poll(() => hero.getAttribute("data-motion-phase"), { timeout: 20_000 }).toBe("acknowledge");
-    await expect(hero).toHaveAttribute("data-greeting", "true");
+
+    // The greeting is 1.3s wide and is the moment the whole scene exists for.
+    await expect.poll(() => hero.getAttribute("data-greeting"), { timeout: 25_000 }).toBe("true");
+    await expect(hero).toHaveAttribute("data-motion-phase", "acknowledge");
+
     await page.getByRole("button", { name: "暫停小紅的旅程" }).click();
     const pausedPhase = await hero.getAttribute("data-motion-phase");
     await page.waitForTimeout(900);
     await expect(hero).toHaveAttribute("data-motion-phase", pausedPhase ?? "acknowledge");
     await page.getByRole("button", { name: "繼續小紅的旅程" }).click();
-    await expect.poll(() => hero.getAttribute("data-motion-phase"), { timeout: 12_000 }).toMatch(/continue|settled/);
+    await expect.poll(() => hero.getAttribute("data-motion-phase"), { timeout: 25_000 }).toMatch(/continue|settled/);
     await expect.poll(() => hero.getAttribute("data-greeting"), { timeout: 8_000 }).toBe("false");
+
+    const order = ["approach", "decelerate", "stop", "settle", "acknowledge", "continue", "settled"];
+    const { phases, greetings } = await page.evaluate(() => {
+      const w = window as unknown as { __phases: string[]; __greetings: string[] };
+      return { phases: w.__phases, greetings: w.__greetings };
+    });
+    expect(phases[0]).toBe("approach");
+    expect(phases).toContain("acknowledge");
+    // Never backwards, never a repeat: no teleporting car, no second greeting.
+    const seen = phases.map(phase => order.indexOf(phase));
+    expect(seen.every(index => index >= 0), `unknown phase in ${phases.join(",")}`).toBe(true);
+    expect(seen.every((index, i) => i === 0 || index > seen[i - 1]), `phases went backwards: ${phases.join(",")}`).toBe(true);
+    expect(greetings.filter(value => value === "true"), `greeted more than once: ${greetings.join(",")}`).toHaveLength(1);
   });
 
   test("falls back for a failed GLB response and does not retry indefinitely", async ({ page }) => {
@@ -575,5 +611,289 @@ test.describe("Intro Portal · Phase 9 enter transition and navigation lifecycle
     expect(modelRequests.length, "no model refetch after leaving").toBe(loaded);
     expect(await page.evaluate(() => window.__heroInstrumentation?.visibilityListeners ?? 0)).toBeLessThanOrEqual(1);
     expect(errors, "a leaked frame or late parse would throw here").toEqual([]);
+  });
+});
+
+// PLAN §11 / SPEC §14. The intro must be completable without ever seeing the
+// animation: keyboard only, screen-reader semantics, zoom, reduced motion.
+test.describe("Intro Portal · Phase 11 accessibility", () => {
+  test.use({ serviceWorkers: "block" });
+
+  test("semantic structure: one h1, a real main, decorative canvas hidden", async ({ page }) => {
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("h1")).toHaveCount(1);
+    await expect(page.locator("h1")).toHaveText("車車遊樂園");
+    await expect(page.locator("main[data-intro-root]")).toHaveCount(1);
+    // The stage is decoration: it must not add anything to the accessibility tree.
+    await expect(page.locator("[data-hero-stage]")).toHaveAttribute("aria-hidden", "true");
+    await expect(page.locator("section[data-hero-world]")).toHaveAttribute("aria-labelledby", "intro-title");
+  });
+
+  test("controls are native elements, not div soup", async ({ page }) => {
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    const enter = page.getByRole("link", { name: /進入車車遊樂園/ });
+    const skip = page.getByRole("link", { name: "略過動畫" });
+    expect(await enter.evaluate(node => node.tagName)).toBe("A");
+    expect(await skip.evaluate(node => node.tagName)).toBe("A");
+    await expect(enter).toHaveAttribute("href", "/?enter=1");
+    const hero = page.locator("[data-hero-world]");
+    await expect.poll(() => hero.getAttribute("data-scene-state"), { timeout: 12_000 }).toMatch(/ready|fallback/);
+    if (await hero.getAttribute("data-scene-state") === "ready") {
+      const pause = page.getByRole("button", { name: "暫停小紅的旅程" });
+      expect(await pause.evaluate(node => node.tagName)).toBe("BUTTON");
+      expect(await pause.evaluate(node => (node as HTMLButtonElement).type)).toBe("button");
+    }
+  });
+
+  test("every control is focusable, visibly focused and at least 44x44", async ({ page }) => {
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    const hero = page.locator("[data-hero-world]");
+    await expect.poll(() => hero.getAttribute("data-scene-state"), { timeout: 12_000 }).toMatch(/ready|fallback/);
+    const live = await hero.getAttribute("data-scene-state") === "ready";
+    const controls = [
+      page.getByRole("link", { name: /進入車車遊樂園/ }),
+      ...(live ? [page.getByRole("button", { name: "暫停小紅的旅程" })] : []),
+      page.getByRole("link", { name: "略過動畫" }),
+    ];
+    for (const control of controls) {
+      const box = await control.boundingBox();
+      expect(box, "control must be rendered").not.toBeNull();
+      expect(box!.width, `${await control.innerText()} width`).toBeGreaterThanOrEqual(44);
+      expect(box!.height, `${await control.innerText()} height`).toBeGreaterThanOrEqual(44);
+    }
+    // Focus rings are :focus-visible, so the focus has to arrive by keyboard —
+    // getComputedStyle cannot query a pseudo-class, and a mouse focus would not
+    // paint the ring at all.
+    const rings: { label: string; outlineStyle: string; outlineWidth: number }[] = [];
+    for (let i = 0; i < 6; i++) {
+      await page.keyboard.press("Tab");
+      const ring = await page.evaluate(() => {
+        const node = document.activeElement as HTMLElement | null;
+        if (!node) return null;
+        const style = getComputedStyle(node);
+        return { label: node.textContent?.trim().slice(0, 12) ?? "", outlineStyle: style.outlineStyle, outlineWidth: parseFloat(style.outlineWidth) || 0 };
+      });
+      if (ring && /進入車車遊樂園|略過動畫|暫停動態/.test(ring.label)) rings.push(ring);
+    }
+    expect(rings.length, "the three intro controls must be tabbable").toBeGreaterThanOrEqual(live ? 3 : 2);
+    for (const ring of rings) {
+      expect(ring.outlineStyle, `${ring.label} focus ring style`).not.toBe("none");
+      expect(ring.outlineWidth, `${ring.label} focus ring width`).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  test("keyboard only: tab order follows reading order and Enter/Space activate", async ({ page }) => {
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    const hero = page.locator("[data-hero-world]");
+    await expect.poll(() => hero.getAttribute("data-scene-state"), { timeout: 12_000 }).toMatch(/ready|fallback/);
+    const live = await hero.getAttribute("data-scene-state") === "ready";
+    const order: string[] = [];
+    for (let i = 0; i < 6; i++) {
+      await page.keyboard.press("Tab");
+      order.push(await page.evaluate(() => document.activeElement?.textContent?.trim().slice(0, 12) ?? ""));
+    }
+    const enterIndex = order.findIndex(label => label.includes("進入車車遊樂園"));
+    const skipIndex = order.findIndex(label => label.includes("略過動畫"));
+    expect(enterIndex, "Enter must be reachable by Tab").toBeGreaterThanOrEqual(0);
+    expect(skipIndex, "Skip must be reachable by Tab").toBeGreaterThan(enterIndex);
+    if (live) {
+      const pauseIndex = order.findIndex(label => label.includes("暫停動態"));
+      expect(pauseIndex).toBeGreaterThan(enterIndex);
+      expect(pauseIndex).toBeLessThan(skipIndex);
+      // Space toggles the pause button, exactly like a native button.
+      await page.getByRole("button", { name: "暫停小紅的旅程" }).focus();
+      await page.keyboard.press("Space");
+      await expect(page.getByRole("button", { name: "繼續小紅的旅程" })).toBeVisible();
+      await page.keyboard.press("Space");
+      await expect(page.getByRole("button", { name: "暫停小紅的旅程" })).toBeVisible();
+    }
+    // Keyboard Enter on the link navigates once, like a real anchor.
+    await page.getByRole("link", { name: /進入車車遊樂園/ }).focus();
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(/\/$/, { timeout: 3_000 });
+    await expect(page.locator("[data-landing-root]")).toBeVisible();
+  });
+
+  test("stays usable at 200% page zoom and 200% text zoom", async ({ page }) => {
+    // 200% page zoom on a 1280x800 desktop is the same layout as 640x400 CSS px.
+    await page.setViewportSize({ width: 640, height: 400 });
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    const enter = page.getByRole("link", { name: /進入車車遊樂園/ });
+    await expect(enter).toBeVisible();
+    await expect(page.getByRole("link", { name: "略過動畫" })).toBeVisible();
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(overflow, "no horizontal scrollbar at 200% zoom").toBeLessThanOrEqual(1);
+
+    // Text-only zoom: the root font size doubles, the layout must not trap the exits.
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.evaluate(() => { document.documentElement.style.fontSize = "32px"; });
+    await page.waitForTimeout(200);
+    await expect(enter).toBeVisible();
+    await expect(page.getByRole("link", { name: "略過動畫" })).toBeVisible();
+    const textOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(textOverflow, "no horizontal scrollbar at 200% text zoom").toBeLessThanOrEqual(1);
+    await enter.click();
+    await expect(page).toHaveURL(/\/$/, { timeout: 3_000 });
+  });
+
+  test("no audio is created or played by the intro", async ({ page }) => {
+    await page.addInitScript(() => {
+      const w = window as unknown as { __audio: number };
+      w.__audio = 0;
+      const Original = window.AudioContext;
+      if (Original) {
+        window.AudioContext = class extends Original { constructor(...args: ConstructorParameters<typeof Original>) { w.__audio += 1; super(...args); } };
+      }
+      const play = HTMLMediaElement.prototype.play;
+      HTMLMediaElement.prototype.play = function patched(this: HTMLMediaElement) { w.__audio += 1; return play.call(this); };
+    });
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    await expect.poll(() => page.locator("[data-hero-world]").getAttribute("data-scene-state"), { timeout: 12_000 }).toMatch(/ready|fallback/);
+    await page.waitForTimeout(1_000);
+    expect(await page.locator("audio, video").count()).toBe(0);
+    expect(await page.evaluate(() => (window as unknown as { __audio: number }).__audio)).toBe(0);
+  });
+
+  test("axe finds no serious violation on the intro or on Landing after entering", async ({ page }) => {
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    await expect.poll(() => page.locator("[data-hero-world]").getAttribute("data-scene-state"), { timeout: 12_000 }).toMatch(/ready|fallback/);
+    const intro = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+    expect(intro.violations.filter(v => v.impact === "critical" || v.impact === "serious")
+      .map(v => `${v.id}: ${v.help}`)).toEqual([]);
+    await page.getByRole("link", { name: /進入車車遊樂園/ }).click();
+    await expect(page).toHaveURL(/\/$/, { timeout: 3_000 });
+    const landing = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+    expect(landing.violations.filter(v => v.impact === "critical" || v.impact === "serious")
+      .map(v => `${v.id}: ${v.help}`)).toEqual([]);
+  });
+});
+
+test.describe("Intro Portal · Phase 11 reduced motion", () => {
+  test.use({ serviceWorkers: "block" });
+
+  test("reduced motion loads no 3D at all and still enters instantly", async ({ page }) => {
+    const scripts: string[] = [];
+    const models: string[] = [];
+    page.on("request", (request) => {
+      if (MODEL_URL.test(request.url())) models.push(request.url());
+      if (request.resourceType() === "script") scripts.push(request.url());
+    });
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/intro", { waitUntil: "load" });
+    await page.waitForTimeout(2_000);
+    const hero = page.locator("[data-hero-world]");
+    await expect(hero).toHaveAttribute("data-scene-state", "poster");
+    await expect(page.locator("[data-hero-world] canvas")).toHaveCount(0);
+    expect(models, "no GLB may be fetched").toEqual([]);
+    // The 3D runtime chunk is only imported by HeroScene; nothing may pull it in.
+    const threeChunks = await page.evaluate((urls) => urls.filter(url => url.includes("three") || url.includes("react-three")), scripts);
+    expect(threeChunks).toEqual([]);
+    // No pause control: there is no motion to pause.
+    await expect(page.getByRole("button", { name: /小紅的旅程/ })).toHaveCount(0);
+    // Enter is immediate and plays no transition.
+    await page.getByRole("link", { name: /進入車車遊樂園/ }).click();
+    await expect(page).toHaveURL(/\/$/, { timeout: 2_000 });
+    await expect(page.locator("[data-landing-root]")).toBeVisible();
+  });
+
+  test("switching to reduced motion at runtime unloads the live scene", async ({ page }) => {
+    await page.addInitScript(() => {
+      const w = window as unknown as { __raf: number };
+      w.__raf = 0;
+      const raf = window.requestAnimationFrame.bind(window);
+      window.requestAnimationFrame = (cb) => { w.__raf += 1; return raf(cb); };
+    });
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    const hero = page.locator("[data-hero-world]");
+    await expect.poll(() => hero.getAttribute("data-scene-state"), { timeout: 12_000 }).toMatch(/ready|fallback/);
+    test.skip(await hero.getAttribute("data-scene-state") !== "ready", "WebGL unavailable in this browser host");
+    await expect(hero.locator("canvas")).toHaveCount(1);
+
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await expect(hero).toHaveAttribute("data-scene-state", "poster");
+    await expect(hero.locator("canvas")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /小紅的旅程/ })).toHaveCount(0);
+    // No animation frames may keep being scheduled once the scene is gone.
+    const before = await page.evaluate(() => (window as unknown as { __raf: number }).__raf);
+    await page.waitForTimeout(1_500);
+    const after = await page.evaluate(() => (window as unknown as { __raf: number }).__raf);
+    expect(after - before, "a disposed scene must not keep animating").toBeLessThan(10);
+    expect(errors).toEqual([]);
+    await page.getByRole("link", { name: /進入車車遊樂園/ }).click();
+    await expect(page).toHaveURL(/\/$/, { timeout: 2_000 });
+  });
+});
+
+test.describe("Intro Portal · Phase 11 failure paths", () => {
+  test.use({ serviceWorkers: "block" });
+
+  test("F07: a lost WebGL context falls back to the poster with a usable exit", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    const hero = page.locator("[data-hero-world]");
+    await expect.poll(() => hero.getAttribute("data-scene-state"), { timeout: 12_000 }).toMatch(/ready|fallback/);
+    test.skip(await hero.getAttribute("data-scene-state") !== "ready", "WebGL unavailable in this browser host");
+    await page.evaluate(() => {
+      const canvas = document.querySelector("[data-hero-world] canvas") as HTMLCanvasElement;
+      const lose = (canvas.getContext("webgl2") ?? canvas.getContext("webgl") as WebGLRenderingContext)
+        ?.getExtension("WEBGL_lose_context");
+      if (lose) lose.loseContext();
+      else canvas.dispatchEvent(new Event("webglcontextlost", { cancelable: true }));
+    });
+    await expect(hero).toHaveAttribute("data-scene-state", "fallback", { timeout: 8_000 });
+    await expect(hero.locator("canvas")).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /進入車車遊樂園/ })).toBeVisible();
+    await page.getByRole("link", { name: /進入車車遊樂園/ }).click();
+    await expect(page).toHaveURL(/\/$/, { timeout: 3_000 });
+    expect(errors).toEqual([]);
+  });
+
+  test("F12: a failed poster still leaves the heading and both exits usable", async ({ page }) => {
+    await page.route(/poster.*\.webp$/, (route) => route.fulfill({ status: 404, contentType: "text/plain", body: "gone" }));
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: "車車遊樂園" })).toBeVisible();
+    await expect(page.getByRole("link", { name: /進入車車遊樂園/ })).toBeVisible();
+    await expect(page.getByRole("link", { name: "略過動畫" })).toBeVisible();
+    // Visual regression is expected here; the exit must not be.
+    await page.getByRole("link", { name: "略過動畫" }).click();
+    await expect(page).toHaveURL(/\/$/, { timeout: 3_000 });
+  });
+
+  test("F04: a truncated GLB binary is rejected like any other corrupt model", async ({ page }) => {
+    await page.route(MODEL_URL, (route) => route.fulfill({
+      status: 200,
+      contentType: "model/gltf-binary",
+      // Correct magic, then garbage: the parser must fail without hanging.
+      body: Buffer.concat([Buffer.from("glTF"), Buffer.alloc(64, 7)]),
+    }));
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("[data-hero-world]")).toHaveAttribute("data-scene-state", "fallback", { timeout: 12_000 });
+    await expect(page.getByRole("link", { name: /進入車車遊樂園/ })).toBeVisible();
+  });
+
+  test("F13: a model that arrives after the route change is disposed, not applied", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    let release: (() => void) | null = null;
+    const held = new Promise<void>((resolve) => { release = resolve; });
+    await page.route(MODEL_URL, async (route) => {
+      await held;
+      // The owner aborted this request when it unmounted; continuing an aborted
+      // route is a no-op we do not want to fail the test on.
+      await route.continue().catch(() => {});
+    });
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("[data-hero-world]")).toHaveAttribute("data-scene-state", "poster");
+    await page.getByRole("link", { name: "略過動畫" }).click();
+    await expect(page).toHaveURL(/\/$/, { timeout: 3_000 });
+    // Now let the models arrive: the owner is gone, so they must be dropped.
+    release!();
+    await page.waitForTimeout(1_500);
+    await expect(page.locator("canvas")).toHaveCount(0);
+    await expect(page.locator("[data-hero-world]")).toHaveCount(0);
+    expect(errors, "a late parse must not throw into the new page").toEqual([]);
   });
 });
