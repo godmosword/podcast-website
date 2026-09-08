@@ -17,5 +17,6 @@ describe("feedback page.module.css", () => {
     expect(css).toContain(".bubble");
     expect(css).not.toContain(".mascot");
     expect(css).toMatch(/\.formSection\s*\{[\s\S]*?background:\s*var\(--warm-surface\)/);
+    expect(css).toMatch(/\.formSection::before\s*\{[\s\S]*?width:\s*2px/);
   });
 });

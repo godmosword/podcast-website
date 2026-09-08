@@ -16,6 +16,13 @@ export const FEEDBACK_INVITE_PARENT = "可以讓孩子說、爸媽幫忙打字�
 
 export const FEEDBACK_REVIEW_LEAD = "家長同意、馬米看過之後，才會貼上牆。";
 
+/** 信紙表單標題；與頁面 H1「留言給馬米」分開，標示可填區。 */
+export const FEEDBACK_FORM_HEADING = "寫給馬米";
+
+export const FEEDBACK_FORM_HEADING_ID = "feedback-form-heading";
+
+export const FEEDBACK_FORM_LEAD = "寫下想聽的故事再送出。";
+
 /** textarea id，空牆 CTA 用 hash 對準（無 JS 也能跳）。 */
 export const FEEDBACK_MESSAGE_FIELD_ID = "feedback-message";
 

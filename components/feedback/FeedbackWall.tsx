@@ -16,5 +16,5 @@ export default async function FeedbackWall({ available }: Props) {
     }
   }
 
-  return <FeedbackWallView messages={messages} available={available} />;
+  return <FeedbackWallView messages={messages} />;
 }

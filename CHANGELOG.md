@@ -11,6 +11,7 @@
 
 ### Changed
 
+- **`/feedback` 信紙表單恆可填**：不再因無 `DATABASE_URL` 整份換成 mailto。頁面初始 HTML 一律有「寫給馬米」欄位、蜜罐與起頭 chip；關站或送出 unavailable 時表單留下，mailto 只當次要備援並可帶入已填暱稱／正文。空牆 CTA 恆指向留言欄。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、Vercel `DATABASE_URL`（站內收件仍需 Neon）。
 - **`/feedback` 表單立刻可填＋牆先示範**：表單改 SSR／Server Action（蜜罐、最短填寫時間），不再等 `GET /api/feedback` 才畫欄位。邀請改兩段＋頁面可見審核句。核准少於 3 則只顯示馬米示範，不寫「還沒有公開留言」。信箱仍必填、永不公開；資料續寫 Neon。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **`/feedback` 馬米信箱**：首屏改馬米定裝身份層＋對話泡泡；「給家長」與審核句移到同意列；表單改信紙暖面與起頭 chip；mailto 關站態改大觸控鈕；示範卡改實線暖面。公開契約不變（先審後發、信箱不公開、真留言 hairline 列）。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、Vercel `DATABASE_URL`。
 - **`/about` 只留馬米原稿**：拿掉「這是什麼？」「怎麼使用？」「用車種找故事」三區塊。漢堡抽屜「關於我們」仍連此頁。**未改** Apple sync workflow。

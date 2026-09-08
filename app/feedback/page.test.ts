@@ -9,6 +9,7 @@ describe("feedback page 契約", () => {
     const source = readFileSync(PAGE, "utf8");
     expect(source).toContain('export const dynamic = "force-dynamic"');
     expect(source).toContain("FeedbackForm available={available}");
+    expect(source).toContain('aria-labelledby="feedback-form-heading"');
     expect(source).toContain("FEEDBACK_INVITE_CHILD");
     expect(source).toContain("next/image");
     expect(source).toContain("getCharacters");

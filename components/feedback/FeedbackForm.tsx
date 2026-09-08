@@ -14,6 +14,9 @@ import {
   FEEDBACK_EMAIL_HINT,
   FEEDBACK_EMAIL_LABEL,
   FEEDBACK_EYEBROW,
+  FEEDBACK_FORM_HEADING,
+  FEEDBACK_FORM_HEADING_ID,
+  FEEDBACK_FORM_LEAD,
   FEEDBACK_INVITE_PARENT,
   FEEDBACK_MAILTO_LEAD,
   FEEDBACK_MAILTO_LINK,
@@ -58,7 +61,10 @@ export default function FeedbackForm({ available }: Props) {
 
   const remaining = FEEDBACK_MESSAGE_MAX - message.length;
   const bothConsented = parentConsent && publishConsent;
-  const showMailto = !available || state.status === "unavailable";
+  const showMailtoFallback = !available || state.status === "unavailable";
+  const mailtoHref = feedbackMailtoHref(
+    showMailtoFallback ? { nickname, message } : undefined,
+  );
 
   useEffect(() => {
     setHydrated(true);
@@ -75,25 +81,14 @@ export default function FeedbackForm({ available }: Props) {
     setStartedAt(String(Date.now()));
   }, [state]);
 
-  if (showMailto) {
-    return (
-      <div className={styles.unavailable}>
-        <p className={styles.unavailableLead}>{FEEDBACK_MAILTO_LEAD}</p>
-        <Link className={styles.mailtoButton} href={feedbackMailtoHref()}>
-          {FEEDBACK_MAILTO_LINK}
-        </Link>
-        <p className={styles.parentNote}>
-          <span className={styles.eyebrow}>{FEEDBACK_EYEBROW}</span>
-          {FEEDBACK_INVITE_PARENT} {FEEDBACK_REVIEW_LEAD}
-        </p>
-      </div>
-    );
-  }
-
   const submitDisabled = pending || (hydrated && !bothConsented);
 
   return (
-    <form className={styles.form} action={formAction}>
+    <form
+      className={styles.form}
+      action={formAction}
+      aria-labelledby={FEEDBACK_FORM_HEADING_ID}
+    >
       <div className={styles.honeypot} aria-hidden="true">
         <label htmlFor={honeypotId}>網站</label>
         <input
@@ -105,6 +100,11 @@ export default function FeedbackForm({ available }: Props) {
         />
       </div>
       <input type="hidden" name={FEEDBACK_STARTED_AT_FIELD} value={startedAt} />
+
+      <h2 id={FEEDBACK_FORM_HEADING_ID} className={styles.heading}>
+        {FEEDBACK_FORM_HEADING}
+      </h2>
+      <p className={styles.lead}>{FEEDBACK_FORM_LEAD}</p>
 
       {state.status === "success" ? (
         <p className={styles.success} role="status" aria-live="polite">
@@ -242,10 +242,21 @@ export default function FeedbackForm({ available }: Props) {
         <p className={styles.disabledHint}>{FEEDBACK_SUBMIT_DISABLED_HINT}</p>
       ) : null}
 
-      {state.status === "error" ? (
+      {state.status === "error" || state.status === "unavailable" ? (
         <p className={styles.error} role="alert">
           {state.message}
         </p>
+      ) : null}
+
+      {showMailtoFallback ? (
+        <div className={styles.fallback}>
+          {state.status !== "unavailable" ? (
+            <p className={styles.fallbackLead}>{FEEDBACK_MAILTO_LEAD}</p>
+          ) : null}
+          <Link className={styles.mailtoButton} href={mailtoHref}>
+            {FEEDBACK_MAILTO_LINK}
+          </Link>
+        </div>
       ) : null}
     </form>
   );

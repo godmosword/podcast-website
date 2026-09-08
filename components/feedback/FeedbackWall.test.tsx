@@ -27,7 +27,7 @@ function published(count: number) {
 
 describe("FeedbackWallView", () => {
   test("示範卡不在 role=list 內，也不寫還沒有公開留言", () => {
-    render(<FeedbackWallView messages={[]} available />);
+    render(<FeedbackWallView messages={[]} />);
 
     expect(screen.queryByRole("list")).toBeNull();
     expect(screen.getByLabelText("示範留言").textContent).toContain(FEEDBACK_DEMO_MESSAGE);
@@ -37,7 +37,7 @@ describe("FeedbackWallView", () => {
   });
 
   test("1–2 則核准仍只示範、不列真留言", () => {
-    render(<FeedbackWallView messages={published(2)} available />);
+    render(<FeedbackWallView messages={published(2)} />);
 
     expect(screen.queryByRole("list")).toBeNull();
     expect(screen.queryByText("小車")).toBeNull();
@@ -45,19 +45,14 @@ describe("FeedbackWallView", () => {
     expect(document.body.textContent).not.toContain("共 2 則");
   });
 
-  test("不可用時不渲染空牆 CTA", () => {
-    render(<FeedbackWallView messages={[]} available={false} />);
-    expect(screen.queryByRole("link", { name: FEEDBACK_EMPTY_CTA })).toBeNull();
-  });
-
-  test("可用時空牆 CTA 用 hash 對準表單", () => {
-    render(<FeedbackWallView messages={[]} available />);
+  test("空牆 CTA 用 hash 對準表單", () => {
+    render(<FeedbackWallView messages={[]} />);
     const cta = screen.getByRole("link", { name: FEEDBACK_EMPTY_CTA });
     expect(cta.getAttribute("href")).toBe(`#${FEEDBACK_MESSAGE_FIELD_ID}`);
   });
 
   test("≥3 則列出暱稱與正文，不再顯示示範卡", () => {
-    render(<FeedbackWallView messages={published(3)} available />);
+    render(<FeedbackWallView messages={published(3)} />);
 
     expect(screen.getByRole("list")).toBeTruthy();
     expect(screen.getByText("小車")).toBeTruthy();
@@ -70,7 +65,6 @@ describe("FeedbackWallView", () => {
   test("不得渲染 email（即使 DTO 夾帶多餘欄位）", () => {
     render(
       <FeedbackWallView
-        available
         messages={[
           {
             id: 2,

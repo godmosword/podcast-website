@@ -5,6 +5,20 @@
   gap: var(--space-3);
 }
 
+.heading {
+  margin: 0;
+  font-size: var(--fs-h3);
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.lead {
+  margin: 0 0 var(--space-2);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
 .honeypot {
   position: absolute;
   left: -9999px;
@@ -42,9 +56,19 @@
 }
 
 .textarea {
-  min-height: 120px;
+  min-height: 140px;
   resize: vertical;
-  line-height: 1.65;
+  /* 信紙橫線對齊：固定 28px 行高，才能跟 background 線重合 */
+  line-height: 28px;
+  background-color: var(--card);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 27px,
+    color-mix(in srgb, var(--ink) 10%, transparent) 27px,
+    color-mix(in srgb, var(--ink) 10%, transparent) 28px
+  );
+  background-attachment: local;
 }
 
 .input:focus-visible,
@@ -233,18 +257,20 @@
   line-height: 1.6;
 }
 
-.unavailable {
+.unavailable,
+.fallback {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--space-4);
+  gap: var(--space-3);
 }
 
-.unavailableLead {
+.unavailableLead,
+.fallbackLead {
   margin: 0;
-  font-size: var(--fs-body);
+  font-size: var(--fs-label);
   line-height: 1.6;
-  color: var(--ink);
+  color: var(--ink-soft);
 }
 
 .loading {

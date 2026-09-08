@@ -51,6 +51,16 @@ describe("feedbackMailtoHref", () => {
       `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("留言給車車遊樂園")}`,
     );
   });
+
+  it("有草稿時帶入暱稱與正文，不寫信箱", () => {
+    const href = feedbackMailtoHref({
+      nickname: "小車",
+      message: "想聽挖土機",
+    });
+    expect(href).toContain(`subject=${encodeURIComponent("留言給車車遊樂園")}`);
+    expect(href).toContain(`body=${encodeURIComponent("暱稱：小車\n\n想聽挖土機")}`);
+    expect(href).not.toMatch(/body=.*%40|body=.*@/);
+  });
 });
 
 describe("isContactExternal", () => {

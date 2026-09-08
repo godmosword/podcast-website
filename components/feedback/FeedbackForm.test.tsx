@@ -9,6 +9,7 @@ import {
 } from "@/lib/feedback-action";
 import {
   FEEDBACK_EYEBROW,
+  FEEDBACK_FORM_HEADING,
   FEEDBACK_INVITE_PARENT,
   FEEDBACK_LOADING_LABEL,
   FEEDBACK_MAILTO_LEAD,
@@ -49,8 +50,10 @@ describe("FeedbackForm", () => {
   test("available 時立刻有欄位，沒有載入中", () => {
     render(<FeedbackForm available />);
     expect(screen.queryByText(FEEDBACK_LOADING_LABEL)).toBeNull();
+    expect(screen.getByRole("heading", { name: FEEDBACK_FORM_HEADING, level: 2 })).toBeTruthy();
     expect(screen.getByRole("textbox", { name: FEEDBACK_NICKNAME_LABEL })).toBeTruthy();
     expect(screen.getByRole("button", { name: FEEDBACK_SUBMIT_LABEL })).toBeTruthy();
+    expect(screen.queryByRole("link", { name: FEEDBACK_MAILTO_LINK })).toBeNull();
   });
 
   test("起頭 chip 寫進留言欄，可改", () => {
@@ -72,15 +75,26 @@ describe("FeedbackForm", () => {
     ).toBe(FEEDBACK_STARTERS[1].text);
   });
 
-  test("unavailable 時顯示 mailto 降級與家長註記", () => {
+  test("unavailable 時仍畫欄位，mailto 只當備援", () => {
     render(<FeedbackForm available={false} />);
+    expect(screen.getByRole("textbox", { name: FEEDBACK_NICKNAME_LABEL })).toBeTruthy();
+    expect(screen.getByRole("button", { name: FEEDBACK_SUBMIT_LABEL })).toBeTruthy();
     const link = screen.getByRole("link", { name: FEEDBACK_MAILTO_LINK });
     expect(link.getAttribute("href")).toBe(feedbackMailtoHref());
     expect(screen.getByText(FEEDBACK_MAILTO_LEAD)).toBeTruthy();
     expect(screen.getByText(FEEDBACK_EYEBROW)).toBeTruthy();
     expect(screen.getByText(FEEDBACK_INVITE_PARENT, { exact: false })).toBeTruthy();
     expect(screen.getByText(FEEDBACK_REVIEW_LEAD, { exact: false })).toBeTruthy();
-    expect(screen.queryByRole("textbox", { name: FEEDBACK_NICKNAME_LABEL })).toBeNull();
+
+    fireEvent.change(screen.getByRole("textbox", { name: FEEDBACK_NICKNAME_LABEL }), {
+      target: { value: "小車" },
+    });
+    fireEvent.change(screen.getByRole("textbox", { name: FEEDBACK_MESSAGE_LABEL }), {
+      target: { value: "想聽挖土機" },
+    });
+    expect(link.getAttribute("href")).toBe(
+      feedbackMailtoHref({ nickname: "小車", message: "想聽挖土機" }),
+    );
   });
 
   test("蜜罐在 DOM 但不進可及樹", () => {
@@ -101,7 +115,7 @@ describe("FeedbackForm", () => {
     expect(screen.getByText(FEEDBACK_SUBMIT_DISABLED_HINT)).toBeTruthy();
   });
 
-  test("Action 回 unavailable 時改顯示 mailto", async () => {
+  test("Action 回 unavailable 時表單仍在，mailto 帶入草稿", async () => {
     submitFeedback.mockResolvedValue({
       status: "unavailable",
       message: "送出失敗，請再試一次。",
@@ -127,7 +141,10 @@ describe("FeedbackForm", () => {
     fireEvent.click(screen.getByRole("button", { name: FEEDBACK_SUBMIT_LABEL }));
 
     const link = await screen.findByRole("link", { name: FEEDBACK_MAILTO_LINK });
-    expect(link.getAttribute("href")).toBe(feedbackMailtoHref());
+    expect(link.getAttribute("href")).toBe(
+      feedbackMailtoHref({ nickname: "Bonbon", message: "謝謝馬米" }),
+    );
+    expect(screen.getByRole("textbox", { name: FEEDBACK_NICKNAME_LABEL })).toBeTruthy();
   });
 
   test("成功後表單仍在、欄位清空、status 讀成功句", async () => {

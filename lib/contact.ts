@@ -23,9 +23,25 @@ export function feedbackHref(): string {
   return "/feedback";
 }
 
-/** 資料庫未設定時，公開表單改走 mailto 的降級連結。 */
-export function feedbackMailtoHref(): string {
-  return `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("留言給車車遊樂園")}`;
+type FeedbackMailtoDraft = {
+  nickname?: string;
+  message?: string;
+};
+
+/**
+ * 表單備援 mailto。無草稿時只帶主旨；有暱稱／正文時一併帶入，避免關站態重打。
+ * 不把信箱寫進 URL。
+ */
+export function feedbackMailtoHref(draft?: FeedbackMailtoDraft): string {
+  const subject = encodeURIComponent("留言給車車遊樂園");
+  const nickname = draft?.nickname?.trim() ?? "";
+  const message = draft?.message?.trim() ?? "";
+  if (!nickname && !message) {
+    return `mailto:${CONTACT_EMAIL}?subject=${subject}`;
+  }
+
+  const lines = [nickname ? `暱稱：${nickname}` : "", message].filter(Boolean);
+  return `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${encodeURIComponent(lines.join("\n\n"))}`;
 }
 
 /** 是否為外連（http/https）；mailto 等不算外連。 */

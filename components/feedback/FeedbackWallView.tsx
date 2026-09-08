@@ -19,7 +19,6 @@ import styles from "./FeedbackWall.module.css";
 
 export type FeedbackWallViewProps = {
   messages: readonly FeedbackPublicDto[];
-  available: boolean;
 };
 
 const AVATAR_CLASS: Record<FeedbackAvatarColor, string> = {
@@ -63,10 +62,7 @@ function MessageRow({
   );
 }
 
-export default function FeedbackWallView({
-  messages,
-  available,
-}: FeedbackWallViewProps) {
+export default function FeedbackWallView({ messages }: FeedbackWallViewProps) {
   const publicMessages = messages.map((item) => ({
     id: item.id,
     nickname: item.nickname,
@@ -109,11 +105,9 @@ export default function FeedbackWallView({
             />
           </div>
           <p className={styles.demoNote}>{FEEDBACK_DEMO_NOTE}</p>
-          {available ? (
-            <a className={styles.emptyCta} href={`#${FEEDBACK_MESSAGE_FIELD_ID}`}>
-              {FEEDBACK_EMPTY_CTA}
-            </a>
-          ) : null}
+          <a className={styles.emptyCta} href={`#${FEEDBACK_MESSAGE_FIELD_ID}`}>
+            {FEEDBACK_EMPTY_CTA}
+          </a>
         </div>
       )}
     </section>
