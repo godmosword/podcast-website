@@ -1,10 +1,10 @@
 {
   "version": "v3",
-  "generatedAt": "2026-09-08T15:09:37.997Z",
+  "generatedAt": "2026-09-09T13:59:17.207Z",
   "generator": "assets/blender/hero-world/build.py + scripts/optimize-hero-world.mjs + scripts/render-hero-posters.mjs",
   "blenderCleanRebuild": true,
   "buildScript": "assets/blender/hero-world/build.py",
-  "buildScriptSha256": "b930ecc45ca839a1fd00c57996068155318f1b6d940c9f1c49cf6735713a01cf",
+  "buildScriptSha256": "4222d9e74b538fc0c24abffb35ca0f800e01aef5ebf7d4ca1192ed8fb1b7ca84",
   "blenderSource": "assets/blender/hero-world/hero-world.blend",
   "blender": "5.2.1 LTS",
   "buildSeed": 20260906,
@@ -15,9 +15,9 @@
     "tree.raw.glb"
   ],
   "rawExportSha256": {
-    "environment.raw.glb": "9496b3e98908b9113abda0ceed00ca1d8e4672250d635921790bcc5ff70c14f6",
-    "little-red.raw.glb": "f71bb2cafeed35c9455d8e91b6de32abca23569ff01242cd3ea066ea70efca0f",
-    "tree.raw.glb": "8b710fc51d874f23b3b5219d0d76d13cb1703300f3bc1222d97a2de69b5d8990"
+    "environment.raw.glb": "e2120da781d57e517013778ebbb69f0662aad5c772a32e5335e073d3df87f76a",
+    "little-red.raw.glb": "257d0f7b38e4e48395eb5fb8c43e77ac1e5ee2b1a2d420b48f08eee39ca1a844",
+    "tree.raw.glb": "659c8979196f58e4d6a833d735e3df0c21be65020652780f8ab9604117c08c09"
   },
   "artDirection": "components/landing/hero-world/art-direction.ts",
   "camera": {
@@ -84,8 +84,8 @@
     {
       "name": "environment",
       "bytes": 216424,
-      "gzipBytes": 101615,
-      "sha256": "d6b7e0e481a797aeed63a28fd63372bdfc979311064e7491bdd7cd6d0c8dac5f",
+      "gzipBytes": 101572,
+      "sha256": "82f073baefbfc1412798540a6790e61373ef4ccd76ba0eea48ab4afdd41ab700",
       "triangles": 12141,
       "materials": 18,
       "primitives": 23,
@@ -94,14 +94,14 @@
       "errors": 0,
       "warnings": 0,
       "sourceRaw": "environment.raw.glb",
-      "sourceSha256": "9496b3e98908b9113abda0ceed00ca1d8e4672250d635921790bcc5ff70c14f6"
+      "sourceSha256": "e2120da781d57e517013778ebbb69f0662aad5c772a32e5335e073d3df87f76a"
     },
     {
       "name": "little-red",
-      "bytes": 70228,
-      "gzipBytes": 26783,
-      "sha256": "0adf45a134b2e8057f5dd6e7d56190a5e681d243486c2a66fc8a4a23c2e81356",
-      "triangles": 4188,
+      "bytes": 80864,
+      "gzipBytes": 32675,
+      "sha256": "1947dc74eb36c003a3601e5071ff69d261acd58fe54138d58bd05c3ce5f00d74",
+      "triangles": 4924,
       "materials": 11,
       "primitives": 14,
       "textures": 0,
@@ -111,13 +111,13 @@
       "errors": 0,
       "warnings": 0,
       "sourceRaw": "little-red.raw.glb",
-      "sourceSha256": "f71bb2cafeed35c9455d8e91b6de32abca23569ff01242cd3ea066ea70efca0f"
+      "sourceSha256": "257d0f7b38e4e48395eb5fb8c43e77ac1e5ee2b1a2d420b48f08eee39ca1a844"
     },
     {
       "name": "tree",
       "bytes": 10132,
-      "gzipBytes": 5351,
-      "sha256": "7abe60429910f6ff6c8e15ac45176c91820353b5f90c0f4ebd4cfbd5981aa9e4",
+      "gzipBytes": 5358,
+      "sha256": "ad8774a33c9f1c30d6b5957f45df3fc252d77a3072ff1ad6641a17830a52e003",
       "triangles": 492,
       "materials": 2,
       "primitives": 2,
@@ -126,36 +126,36 @@
       "errors": 0,
       "warnings": 0,
       "sourceRaw": "tree.raw.glb",
-      "sourceSha256": "8b710fc51d874f23b3b5219d0d76d13cb1703300f3bc1222d97a2de69b5d8990"
+      "sourceSha256": "659c8979196f58e4d6a833d735e3df0c21be65020652780f8ab9604117c08c09"
     },
     {
       "name": "poster.png",
-      "bytes": 503680,
-      "sha256": "b3fff870602cccce68bd315704a511b244b7352a2ac10167accb7e65ec606f3a",
+      "bytes": 503500,
+      "sha256": "de150efd52b3c984b507cee29cddbcf10951765f66403b51b2e23b88a3a2e35d",
       "width": 1380,
       "height": 980,
       "quality": "high"
     },
     {
       "name": "poster.webp",
-      "bytes": 76778,
-      "sha256": "6f3da75a17530d60897140704c5659a2a1a18e9b1ea590ec0f80137dd4848839",
+      "bytes": 76916,
+      "sha256": "72683788aacbc0fbc096c62b4910da00e74c261327077daa40b62742053800cf",
       "width": 1380,
       "height": 980,
       "quality": "high"
     },
     {
       "name": "poster-mobile.png",
-      "bytes": 125974,
-      "sha256": "a4fbff7238ea137eb38a2471504a9087e770f762b2fb3b3750490124260691bf",
+      "bytes": 125737,
+      "sha256": "f38d2ddf58c878df5cc82f55600448646928ea4f015fa54e8875d821e7c43caa",
       "width": 615,
       "height": 308,
       "quality": "medium"
     },
     {
       "name": "poster-mobile.webp",
-      "bytes": 24446,
-      "sha256": "7d93534dea9c01eb77305f613da584cdbb815bfcfc2d7f924e68566379d102a2",
+      "bytes": 24566,
+      "sha256": "0c122c7f70c7b281be540e5315c17528282aa2f25cd532e1a087da9b2f22ef83",
       "width": 615,
       "height": 308,
       "quality": "medium"
