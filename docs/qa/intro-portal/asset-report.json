@@ -1,9 +1,9 @@
 [
   {
     "name": "environment",
-    "bytes": 216428,
-    "gzipBytes": 101705,
-    "sha256": "804e815c9f2f5d99ec2766de30805c964cab39b44cf39ff49065831aa016b688",
+    "bytes": 216424,
+    "gzipBytes": 101615,
+    "sha256": "d6b7e0e481a797aeed63a28fd63372bdfc979311064e7491bdd7cd6d0c8dac5f",
     "triangles": 12141,
     "materials": 18,
     "primitives": 23,
@@ -43,16 +43,16 @@
     "errors": 0,
     "warnings": 0,
     "sourceRaw": "environment.raw.glb",
-    "sourceSha256": "a44b5334eb60b541d5bf7bdcafe5c83eaa30bb5a67d0b49c4e8dfdd8bd98dcf6"
+    "sourceSha256": "9496b3e98908b9113abda0ceed00ca1d8e4672250d635921790bcc5ff70c14f6"
   },
   {
     "name": "little-red",
-    "bytes": 64924,
-    "gzipBytes": 25467,
-    "sha256": "a40e0433a21f5758d8d6ec4cad0cab5c515037c3383fd1492c7391a56d76808c",
-    "triangles": 3740,
-    "materials": 9,
-    "primitives": 12,
+    "bytes": 70228,
+    "gzipBytes": 26783,
+    "sha256": "0adf45a134b2e8057f5dd6e7d56190a5e681d243486c2a66fc8a4a23c2e81356",
+    "triangles": 4188,
+    "materials": 11,
+    "primitives": 14,
     "textures": 0,
     "animations": [
       "Drive"
@@ -100,18 +100,18 @@
           ]
         }
       ],
-      "nodeCount": 16
+      "nodeCount": 18
     },
     "errors": 0,
     "warnings": 0,
     "sourceRaw": "little-red.raw.glb",
-    "sourceSha256": "2cdbdac89065e740821b19dc0d073bcafedbb6eb8ff3b7630f74a37cee0e2618"
+    "sourceSha256": "f71bb2cafeed35c9455d8e91b6de32abca23569ff01242cd3ea066ea70efca0f"
   },
   {
     "name": "tree",
     "bytes": 10132,
-    "gzipBytes": 5373,
-    "sha256": "c76c3f9dc7b1863cbcbaf2905ddf9ec7832e2809b9146b6732c59d1bf0ecf542",
+    "gzipBytes": 5351,
+    "sha256": "7abe60429910f6ff6c8e15ac45176c91820353b5f90c0f4ebd4cfbd5981aa9e4",
     "triangles": 492,
     "materials": 2,
     "primitives": 2,
@@ -135,6 +135,6 @@
     "errors": 0,
     "warnings": 0,
     "sourceRaw": "tree.raw.glb",
-    "sourceSha256": "339a7ce0d8cea5a3930eb7d801459bd1e1ec02de9d4a1e168a6ccdfe90f1c680"
+    "sourceSha256": "8b710fc51d874f23b3b5219d0d76d13cb1703300f3bc1222d97a2de69b5d8990"
   }
 ]

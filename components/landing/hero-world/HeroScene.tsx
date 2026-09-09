@@ -10,6 +10,7 @@ import World from "./World";
 import Vehicle from "./Vehicle";
 import CameraRig from "./CameraRig";
 import QualityManager from "./QualityManager";
+import WorldEnvironment from "./WorldEnvironment";
 import type { MotionPhase } from "./config";
 
 type Props = { onGreeting?: (greeting: boolean) => void; onPhase?: (phase: MotionPhase) => void; active: boolean; quality: Quality; run: number; onReady: () => void; onFailure: () => void; onFinish: () => void; onQuality: (q: Quality) => void };
@@ -40,10 +41,13 @@ function Contents(props: Props) {
   });
   return <>
     <hemisphereLight args={[WORLD_LIGHT.sky, WORLD_LIGHT.ground, WORLD_LIGHT.fill]} />
+    <WorldEnvironment intensity={WORLD_LIGHT.envIntensity} />
     <directionalLight position={WORLD_LIGHT.position} intensity={WORLD_LIGHT.intensity} color={WORLD_LIGHT.key} castShadow={QUALITY[props.quality].shadows}
-      shadow-mapSize={[1024, 1024]} shadow-camera-left={-7} shadow-camera-right={7}
+      shadow-mapSize={QUALITY[props.quality].shadowMap} shadow-camera-left={-7} shadow-camera-right={7}
       shadow-camera-top={6} shadow-camera-bottom={-6} shadow-camera-near={.5} shadow-camera-far={25}
       shadow-bias={-.001} shadow-normalBias={.035} />
+    {/* 逆光只做輪廓，不投影：陰影預算留給主光。 */}
+    <directionalLight position={WORLD_LIGHT.rim.position} intensity={WORLD_LIGHT.rim.intensity} color={WORLD_LIGHT.rim.color} />
     <CameraRig active={props.active} />
     <QualityManager active={props.active} quality={props.quality} onQuality={props.onQuality} />
     {assets ? <>

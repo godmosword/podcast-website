@@ -35,8 +35,17 @@ WORLD_PALETTE = dict(
     sand=(.43,.29,.19), grass=(.30,.43,.26), road=(.43,.34,.26), ivory=(.83,.76,.61),
     cream=(.72,.57,.38), red=(.58,.14,.095), pink=(.72,.33,.28), blue=(.10,.30,.32),
     sky=(.30,.52,.53), yellow=(.85,.53,.17), wood=(.25,.14,.08), leaf=(.26,.42,.29),
-    mint=(.16,.32,.22), paving=(.61,.47,.33), warmglass=(.94,.49,.13), dark=(.025,.037,.03))
-WORLD_ROUGHNESS = {'red':.77,'ivory':.92,'leaf':.88,'paving':.94,'road':.96,'warmglass':.58,'sky':.62}
+    mint=(.16,.32,.22), paving=(.61,.47,.33), warmglass=(.94,.49,.13), dark=(.025,.037,.03),
+    # 小紅的車殼與屋瓦不共用同一個紅。定裝照（public/characters/小紅賽車.jpg）
+    # 是飽和正紅，而 `red` 是赭紅——共用時車子會變成鮭魚色，認不出是同一台車。
+    car_red=(.80,.022,.012), car_white=(.95,.93,.88), car_eye=(.03,.13,.55))
+# 有了程序式環境光（components/landing/hero-world/WorldEnvironment.tsx）之後，
+# roughness 的差異才真的看得出來。舊表七個值全擠在 .58–.96、其餘一律 .86，
+# 等於整個世界同一種表面。這裡把「軟陶土（車殼、屋瓦）」與「粗糙地面」拉開，
+# 玻璃另外一段——地面維持高 roughness，否則島會反光成塑膠。
+WORLD_ROUGHNESS = {'red':.62,'car_red':.5,'car_white':.72,'car_eye':.45,'pink':.66,'cream':.78,'ivory':.84,'leaf':.9,'grass':.95,
+                   'sand':.96,'paving':.94,'road':.96,'warmglass':.4,'sky':.32,'mint':.9,
+                   'yellow':.7,'blue':.62,'wood':.9,'dark':.75}
 # 摩天輪吊艙與輪胎維持原本的明亮玩具色，和世界的霧面色分開；v3 的美術定稿
 # 刻意讓這兩組並存（吊艙是場景裡唯一的高彩度節奏）。
 TOY_PALETTE = dict(
@@ -134,8 +143,10 @@ CONTACT_SHADE = {
     'ivory': lambda x,y,z: (1-.11*math.exp(-max(0,z-.25)*2.5)-(.06 if z>1.7 else 0)) if (z>.45 and x<-.45 and y>-.15) else 1,
     # 樹冠底部暗、頂部亮。
     'leaf': lambda x,y,z: .86+.14*min(1,max(0,(z-.55)/1.05)),
-    # 紅色量體（書封屋頂、小紅車身）給極輕微的高度提亮。
+    # 紅色量體（書封屋頂）給極輕微的高度提亮。
     'red': lambda x,y,z: .94+.06*min(1,max(0,z/2.4)),
+    # 車殼獨立一條：車身矮，用整個世界的高度尺度會幾乎沒有效果。
+    'car_red': lambda x,y,z: .90+.10*min(1,max(0,z/1.1)),
 }
 CONTACT_ATTRIBUTE = 'Contact'
 
@@ -276,22 +287,27 @@ export('Tree','tree.raw.glb')
 for o in [o for o in bpy.context.scene.objects if o.get('part')=='Tree']:o.hide_render=True;o.hide_set(True)
 # 小紅：自製圓車身、米色眼眶、藍窗、奶油輪轂與兩條車頭線。
 current='Vehicle'
-box('Body',(0,0,.47),(1.03,1.65,.51),'red',.23)
-box('Cabin',(0,.16,.84),(.90,.84,.57),'red',.22)
+# 平面定裝照（public/characters/小紅賽車.jpg）的比例比這裡短胖、車頂更圓。
+# 車身縮短加高、bevel 加大，才不會像一塊長方積木。
+box('Body',(0,0,.48),(1.06,1.52,.56),'car_red',.26)
+box('Cabin',(0,.14,.86),(.92,.80,.60),'car_red',.26)
 box('Windshield',(0,-.274,.90),(.72,.08,.39),'ivory',.13)
 for x in [-.23,.23]:
-    ball('Eye',(x,-.323,.92),(.125,.035,.147),'blue')
-    ball('Pupil',(x+.012,-.350,.925),(.078,.025,.105),'dark')
-    ball('Eye glint',(x-.018,-.372,.97),(.031,.014,.036),'ivory',12)
+    # 眼睛原本 Y 只有 .035，等於貼在車頭上的貼紙。加厚成真的突出來的
+    # googly eye，並讓瞳孔與高光跟著往外，側面才看得出立體。
+    ball('Eye white',(x,-.300,.92),(.152,.080,.172),'car_white')
+    ball('Eye',(x,-.330,.918),(.104,.070,.120),'car_eye')
+    ball('Pupil',(x+.010,-.366,.921),(.062,.052,.076),'dark')
+    ball('Eye glint',(x-.026,-.392,.960),(.030,.020,.034),'car_white',12)
     ball('Headlight',(x*1.6,-.81,.48),(.095,.047,.095),'yellow')
     box('Hood stripe',(x*.33,-.58,.746),(.057,.39,.024),'ivory',.016)
 for x in [-.456,.456]:
     box('Side window',(x,.2,.89),(.037,.54,.31),'sky',.12)
-    ball('Mirror',(x*1.14,-.25,.76),(.11,.10,.085),'red')
+    ball('Mirror',(x*1.14,-.25,.76),(.11,.10,.085),'car_red')
 box('Bumper',(0,-.78,.29),(.92,.15,.13),'blue',.06)
 tube('Smile',[(-.17,-.836,.47),(-.10,-.853,.40),(0,-.856,.38),(.10,-.853,.40),(.17,-.836,.47)],.026,'dark')
-box('Spoiler',(0,.78,.86),(1.12,.22,.11),'red',.055)
-for x in [-.34,.34]:box('Spoiler stem',(x,.73,.71),(.06,.08,.22),'red',.025)
+box('Spoiler',(0,.78,.86),(1.12,.22,.11),'car_red',.055)
+for x in [-.34,.34]:box('Spoiler stem',(x,.73,.71),(.06,.08,.22),'car_red',.025)
 merge('Vehicle')
 # 四個模組化輪子各自保留原點；Drive 只包含輪軸旋轉。
 for i,(x,y) in enumerate([(-.51,-.48),(.51,-.48),(-.51,.5),(.51,.5)]):

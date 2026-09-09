@@ -1,12 +1,12 @@
 {
   "version": "v3",
-  "generatedAt": "2026-09-08T02:55:43.556Z",
+  "generatedAt": "2026-09-08T15:09:37.997Z",
   "generator": "assets/blender/hero-world/build.py + scripts/optimize-hero-world.mjs + scripts/render-hero-posters.mjs",
   "blenderCleanRebuild": true,
   "buildScript": "assets/blender/hero-world/build.py",
-  "buildScriptSha256": "65f076f5f677be8e359f56bf084b73bb522efb81ac60c41de321ec0eb3ab3431",
+  "buildScriptSha256": "b930ecc45ca839a1fd00c57996068155318f1b6d940c9f1c49cf6735713a01cf",
   "blenderSource": "assets/blender/hero-world/hero-world.blend",
-  "blender": "4.5.0",
+  "blender": "5.2.1 LTS",
   "buildSeed": 20260906,
   "target": "public/models/hero-world/v3",
   "rawExports": [
@@ -15,9 +15,9 @@
     "tree.raw.glb"
   ],
   "rawExportSha256": {
-    "environment.raw.glb": "a44b5334eb60b541d5bf7bdcafe5c83eaa30bb5a67d0b49c4e8dfdd8bd98dcf6",
-    "little-red.raw.glb": "2cdbdac89065e740821b19dc0d073bcafedbb6eb8ff3b7630f74a37cee0e2618",
-    "tree.raw.glb": "339a7ce0d8cea5a3930eb7d801459bd1e1ec02de9d4a1e168a6ccdfe90f1c680"
+    "environment.raw.glb": "9496b3e98908b9113abda0ceed00ca1d8e4672250d635921790bcc5ff70c14f6",
+    "little-red.raw.glb": "f71bb2cafeed35c9455d8e91b6de32abca23569ff01242cd3ea066ea70efca0f",
+    "tree.raw.glb": "8b710fc51d874f23b3b5219d0d76d13cb1703300f3bc1222d97a2de69b5d8990"
   },
   "artDirection": "components/landing/hero-world/art-direction.ts",
   "camera": {
@@ -29,7 +29,12 @@
       ],
       "width": 13.8,
       "height": 9.8,
-      "scale": 1.2
+      "scale": 1.2,
+      "fit": "contain",
+      "pan": [
+        0,
+        0
+      ]
     },
     "mobile": {
       "position": [
@@ -37,9 +42,14 @@
         10.5,
         14
       ],
-      "width": 12.3,
+      "width": 11.9,
       "height": 9.8,
-      "scale": 1.15
+      "scale": 1,
+      "fit": "width",
+      "pan": [
+        -0.17,
+        0.3
+      ]
     },
     "lookAt": [
       0.18,
@@ -57,14 +67,25 @@
       -3,
       8,
       5
-    ]
+    ],
+    "horizon": "#f6e4cd",
+    "envIntensity": 0.38,
+    "rim": {
+      "color": "#cfe3d2",
+      "intensity": 0.55,
+      "position": [
+        4.5,
+        3.2,
+        -6
+      ]
+    }
   },
   "assets": [
     {
       "name": "environment",
-      "bytes": 216428,
-      "gzipBytes": 101705,
-      "sha256": "804e815c9f2f5d99ec2766de30805c964cab39b44cf39ff49065831aa016b688",
+      "bytes": 216424,
+      "gzipBytes": 101615,
+      "sha256": "d6b7e0e481a797aeed63a28fd63372bdfc979311064e7491bdd7cd6d0c8dac5f",
       "triangles": 12141,
       "materials": 18,
       "primitives": 23,
@@ -73,16 +94,16 @@
       "errors": 0,
       "warnings": 0,
       "sourceRaw": "environment.raw.glb",
-      "sourceSha256": "a44b5334eb60b541d5bf7bdcafe5c83eaa30bb5a67d0b49c4e8dfdd8bd98dcf6"
+      "sourceSha256": "9496b3e98908b9113abda0ceed00ca1d8e4672250d635921790bcc5ff70c14f6"
     },
     {
       "name": "little-red",
-      "bytes": 64924,
-      "gzipBytes": 25467,
-      "sha256": "a40e0433a21f5758d8d6ec4cad0cab5c515037c3383fd1492c7391a56d76808c",
-      "triangles": 3740,
-      "materials": 9,
-      "primitives": 12,
+      "bytes": 70228,
+      "gzipBytes": 26783,
+      "sha256": "0adf45a134b2e8057f5dd6e7d56190a5e681d243486c2a66fc8a4a23c2e81356",
+      "triangles": 4188,
+      "materials": 11,
+      "primitives": 14,
       "textures": 0,
       "animations": [
         "Drive"
@@ -90,13 +111,13 @@
       "errors": 0,
       "warnings": 0,
       "sourceRaw": "little-red.raw.glb",
-      "sourceSha256": "2cdbdac89065e740821b19dc0d073bcafedbb6eb8ff3b7630f74a37cee0e2618"
+      "sourceSha256": "f71bb2cafeed35c9455d8e91b6de32abca23569ff01242cd3ea066ea70efca0f"
     },
     {
       "name": "tree",
       "bytes": 10132,
-      "gzipBytes": 5373,
-      "sha256": "c76c3f9dc7b1863cbcbaf2905ddf9ec7832e2809b9146b6732c59d1bf0ecf542",
+      "gzipBytes": 5351,
+      "sha256": "7abe60429910f6ff6c8e15ac45176c91820353b5f90c0f4ebd4cfbd5981aa9e4",
       "triangles": 492,
       "materials": 2,
       "primitives": 2,
@@ -105,38 +126,38 @@
       "errors": 0,
       "warnings": 0,
       "sourceRaw": "tree.raw.glb",
-      "sourceSha256": "339a7ce0d8cea5a3930eb7d801459bd1e1ec02de9d4a1e168a6ccdfe90f1c680"
+      "sourceSha256": "8b710fc51d874f23b3b5219d0d76d13cb1703300f3bc1222d97a2de69b5d8990"
     },
     {
       "name": "poster.png",
-      "bytes": 512957,
-      "sha256": "6e8e8443e3b04b0ab0389fcccb6e4b3483e7b5b2034069b3cd26ec00b6172b0d",
+      "bytes": 503680,
+      "sha256": "b3fff870602cccce68bd315704a511b244b7352a2ac10167accb7e65ec606f3a",
       "width": 1380,
       "height": 980,
       "quality": "high"
     },
     {
       "name": "poster.webp",
-      "bytes": 74032,
-      "sha256": "4cb7002d888b49e977f794486cc346deae8a4ebc7a0e69ddc27931e2e0c59e77",
+      "bytes": 76778,
+      "sha256": "6f3da75a17530d60897140704c5659a2a1a18e9b1ea590ec0f80137dd4848839",
       "width": 1380,
       "height": 980,
       "quality": "high"
     },
     {
       "name": "poster-mobile.png",
-      "bytes": 151881,
-      "sha256": "e208814b3d936bbe23bdeb138989aba84fbeb7ad48f1d48110eed9e587712ed1",
+      "bytes": 125974,
+      "sha256": "a4fbff7238ea137eb38a2471504a9087e770f762b2fb3b3750490124260691bf",
       "width": 615,
-      "height": 490,
+      "height": 308,
       "quality": "medium"
     },
     {
       "name": "poster-mobile.webp",
-      "bytes": 28206,
-      "sha256": "789801b7983937c9165838324453ec344a5982d370e032d2b1f373fdbcfd3d96",
+      "bytes": 24446,
+      "sha256": "7d93534dea9c01eb77305f613da584cdbb815bfcfc2d7f924e68566379d102a2",
       "width": 615,
-      "height": 490,
+      "height": 308,
       "quality": "medium"
     }
   ]
