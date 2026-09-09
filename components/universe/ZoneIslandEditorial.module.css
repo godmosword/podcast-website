@@ -1,0 +1,149 @@
+/* 世界層 editorial label：保留既有 tileLabel 的幾何／反縮放契約，只替換視覺語彙。 */
+.label {
+  min-width: 96px;
+  max-width: 112px;
+  gap: 1px;
+  color: #433d36;
+  text-align: center;
+  transition:
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 180ms ease;
+}
+
+.metaLine {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 9px;
+  font-size: 7px;
+  line-height: 1;
+  font-weight: 760;
+  letter-spacing: 0.14em;
+  color: rgba(67, 61, 54, 0.62);
+  white-space: nowrap;
+}
+
+.index {
+  font-variant-numeric: tabular-nums;
+}
+
+.englishName {
+  overflow: hidden;
+  max-width: 88px;
+  text-overflow: ellipsis;
+}
+
+.name {
+  padding: 1px 4px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #3f3932;
+  font-size: 16px;
+  line-height: 1.08;
+  font-weight: 850;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.kicker {
+  max-width: 108px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 6.5px;
+  line-height: 1.15;
+  font-weight: 720;
+  letter-spacing: 0.12em;
+  color: rgba(67, 61, 54, 0.52);
+  white-space: nowrap;
+}
+
+.label[data-editorial-featured] .kicker {
+  color: #5f774c;
+}
+
+.progressChip {
+  margin-top: 2px;
+  border: 0;
+  background: rgba(255, 252, 244, 0.72);
+  box-shadow: none;
+  color: #5a5148;
+  backdrop-filter: blur(3px);
+}
+
+.islandTile:not([data-status="open"]):hover + .label {
+  opacity: 1;
+  transform: translate(-50%, calc(var(--label-offset-y, 6px) - 4px))
+    scale(calc(1 / var(--map-scale, 1)));
+}
+
+.islandTile:not([data-status="open"]):hover .tileStack {
+  transform: scale(1.025);
+}
+
+.tileStack {
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:global(html[data-theme="night"]) .label {
+  color: #f1eadf;
+}
+
+:global(html[data-theme="night"]) .metaLine,
+:global(html[data-theme="night"]) .kicker {
+  color: rgba(241, 234, 223, 0.62);
+}
+
+:global(html[data-theme="night"]) .name {
+  color: #fff6e9;
+  text-shadow: 0 1px 6px rgba(10, 22, 42, 0.6);
+}
+
+:global(html[data-theme="night"]) .label[data-editorial-featured] .kicker {
+  color: #cfe3b7;
+}
+
+@media (max-width: 480px) {
+  .label {
+    min-width: 84px;
+    max-width: 96px;
+  }
+
+  .metaLine {
+    gap: 4px;
+    font-size: 6.5px;
+    letter-spacing: 0.1em;
+  }
+
+  .englishName {
+    max-width: 72px;
+  }
+
+  .name {
+    font-size: 15px;
+  }
+
+  .kicker {
+    max-width: 92px;
+    font-size: 6px;
+    letter-spacing: 0.09em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .label,
+  .tileStack {
+    transition: none;
+  }
+
+  .islandTile:not([data-status="open"]):hover + .label {
+    transform: translate(-50%, var(--label-offset-y, 6px))
+      scale(calc(1 / var(--map-scale, 1)));
+  }
+
+  .islandTile:not([data-status="open"]):hover .tileStack {
+    transform: none;
+  }
+}
