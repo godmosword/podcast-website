@@ -67,10 +67,9 @@
 .progressChip {
   margin-top: 2px;
   border: 0;
-  background: rgba(255, 252, 244, 0.72);
+  background: rgba(255, 252, 244, 0.82);
   box-shadow: none;
   color: #5a5148;
-  backdrop-filter: blur(3px);
 }
 
 .islandTile:not([data-status="open"]):hover + .label {
@@ -79,7 +78,7 @@
     scale(calc(1 / var(--map-scale, 1)));
 }
 
-.islandTile:not([data-status="open"]):hover .tileStack {
+.islandTile:not([data-status="open"]):not([data-transition]):hover .tileStack {
   transform: scale(1.025);
 }
 
@@ -143,7 +142,7 @@
       scale(calc(1 / var(--map-scale, 1)));
   }
 
-  .islandTile:not([data-status="open"]):hover .tileStack {
+  .islandTile:not([data-status="open"]):not([data-transition]):hover .tileStack {
     transform: none;
   }
 }
