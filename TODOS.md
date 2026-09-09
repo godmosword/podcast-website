@@ -23,6 +23,7 @@
 ### pending
 
 - **後續（本輪不做）**：`.scrim` 左下 0.52 可調淡。
+- **Hero 橫向 2.5D 改版（規格已定，實作未開始）**：等距 diorama → 橫向視差帶；規格見 [Hero 橫向 2.5D 視差帶](./docs/specs/HERO-PARALLAX-SPEC.md)。四個 Phase、阻擋項與跨角色眼位決策（A/B/C）見該文 §5／§6／§2.5。`design · L · 需先決 §2.5`
 - **後續：拿掉 CTA `nowrap`**：把 `LandingSegment.tsx` 的 `" →"` 半形空白改不斷行空白，箭頭才不會孤行；同時避開 <348px Dudu 遮箭頭、文字級 200% 被 `.panel` 裁尾。
 - **後續：勿靜默啟用 `playCta`**：`LandingSegment.tsx` 三元式會讓主 CTA 從 56px／`--fs-h2`／不透明墨板退回 44px／玻璃 `.subscribeCta`，契約測不會紅。啟用前須讓 `.subscribeCta` 脫離玻璃語言。
 
@@ -216,6 +217,19 @@ clip 快照在不同 macOS／Chromium 版本上的自然噪音底線。
 - [x] useRoamerSim idle／joyride／crossing  `0206042`
 - [x] 層接 LOD＋關巡邏＋稀有跨島  `ddeed40`
 - [x] Art Bible §12.8／TODOS 對齊  `8ce39f6`
+
+### Hero 橫向 2.5D 改版（2026-09-09）
+
+> 規格：[`docs/specs/HERO-PARALLAX-SPEC.md`](./docs/specs/HERO-PARALLAX-SPEC.md)。**尚未實作**，本輪只交付規格。
+
+- [x] 規格 v1：診斷、角色設定書、六層分層規格、實作路徑、阻擋項  `見本 commit`
+- [ ] §2.5 跨角色眼位決策（A 只約束小紅家族／B 全站重抽／C 放棄眼位區隔） — 阻擋 Phase 1
+- [ ] Phase 1 角色設定書入庫：`generate-roamer-assets.ts` ＋ `data/characters.json` 掛 Do-NOT 清單（不跑生圖）
+- [ ] Phase 2 `build.py` 小紅幾何補齊：眼睛移大燈、號碼 2、星星天線、黃條紋（需 Blender CLI）
+- [ ] Phase 3 `components/landing/hero-parallax/` 六層視差前端（UI 風險 → Opus 設計審）
+- [ ] Phase 4 六層 tile 素材（付費生圖，須先報張數取得文字確認）
+
+> **核對出的四項落差**（實作前必讀，見規格 §0.2）：Hero 的車是 `build.py` 程序化建模不是生圖；微笑線存在只是太細；角色 Logo 系統已移除故該論證前提失效；缺 Do-NOT 的是 roamer 生圖管線不是 Hero。
 
 ### 角色 Logo 識別系統（已移除）
 
