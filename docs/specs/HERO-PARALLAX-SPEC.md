@@ -23,9 +23,12 @@
 | 1 | Hero 的車是生圖產物，根因是 prompt 太短（「`red race car, clay style`」） | Hero 的車是 **Blender 程序化建模**，來源為 [`assets/blender/hero-world/build.py`](../../assets/blender/hero-world/build.py)（`box('Body')`／`ball('Eye')`／`tube('Smile')`…），非 AI 生圖 | **根因判斷需改寫**。Hero 角色偏移的修法是改 `build.py` 幾何，不是 prompt 工程；Do-NOT 清單對 Hero 無效 |
 | 2 | 現版車「沒有嘴，只有一根深色橫桿」 | `build.py:292` 有 `tube('Smile', …, .026, 'dark')`，且位於下保險桿（`box('Bumper')` 在 `build.py:291`）上方，弧線中央下凹＝微笑 | 嘴**存在且位置正確**。問題是**線徑 .026 太細、色票 `dark` 太重**，遠看塌成一根橫桿。屬「可讀性」而非「缺件」 |
 | 3 | 尾翼「對應 logo 系統中 小紅 的識別特徵」 | 角色 Logo 識別系統**已移除**，程式保存於 tag `archive/character-logo-system`（見 [`TODOS.md`](../../TODOS.md) §角色 Logo 識別系統） | §3.1「與 logo 系統講同一種語言」的論證前提已不存在。橫向構圖的理由改以 §3.2／§3.3／§3.4 承擔即可，結論不變 |
-| 4 | 生圖 prompt 缺 Do-NOT 清單是 Hero 的問題 | 真正缺 Do-NOT 的是**地圖 roamer sprite**：[`scripts/generate-roamer-assets.ts`](../../scripts/generate-roamer-assets.ts) 的 `xiao-hong` prompt 寫「a friendly face with two big round eyes and a cheerful smile on the front」，未鎖眼睛位置、無星星天線、無黃條紋、無車門號碼；negative 只有 `Pixar Cars, Lightning McQueen` | §2.4 的對策**該掛在 roamer／character 生圖管線上**，不是 Hero |
+| 4 | 生圖 prompt 缺 Do-NOT 清單是 Hero 的問題 | 真正缺 Do-NOT 的是**地圖 roamer sprite**：[`scripts/generate-roamer-assets.ts`](../../scripts/generate-roamer-assets.ts) 的 `xiao-hong` prompt 寫「a friendly face with two big round eyes and a cheerful smile on the front」，未鎖眼睛位置與車身剪影、無星星天線、無黃條紋（號碼 2 與白條紋原本就有）；negative 只有 `Pixar Cars, Lightning McQueen`，沒有號碼 95／閃電貼紙／低趴車身等項 | §2.4 的對策**該掛在 roamer／character 生圖管線上**，不是 Hero |
+| 5 | §2.1 是「既有規格，不可變動」 | 設定書九項中有**三項與既有 canon 牴觸**：定裝照 [`public/characters/小紅賽車.jpg`](../../public/characters/小紅賽車.jpg) 是**擋風玻璃眼**（另有分離的黃色圓大燈）、**白色**雙條紋、**無**車頂天線 | 「眼睛放大燈／加黃條紋／加星星天線」不是回歸規格，而是**推翻既有 canon**。見 §2.5 |
 
 ### 0.3 逐項核對現版 Hero 車（`build.py` v3）
+
+> 兩個基準要分開看：**canon** 是定裝照 `public/characters/小紅賽車.jpg`（生圖管線的 `ref`），**Hero** 是 `build.py` 的程序化幾何。下表比對的是 Hero 對設定書；Hero 對 canon 的落差另見 §2.5。
 
 | 設定書項目 | `build.py` 實況 | 判定 |
 |---|---|---|
@@ -119,17 +122,42 @@
 
 **驗收：瞇眼測試。** 剪影與眼睛位置需明顯不同於麥坤，小朋友要能認成「車車遊樂園的賽車」而非麥坤。
 
-### 2.5 跨角色一致性衝突（待人工決策）
+### 2.5 設定書與既有 canon 的衝突
 
-`data/characters.json:432` 的「小紅賽車的爸爸」明文寫 `big warm mature round eyes ONLY on the windshield`，與 §2.1「眼睛放大燈」直接牴觸。已上線的 34 張角色定裝照（`public/characters/`）多半也是擋風玻璃眼。
+#### 已落地（2026-09-09）
 
-因此 §2.1 若要成為全站規範，等於宣告既有角色圖庫全面過期，牽涉**付費重抽**與**人工審圖**兩條紅線（見 [`AGENT-DOMAIN.md`](../AGENT-DOMAIN.md)）。本文**不擅自改** `characters.json`。三個選項供決策：
+設定書中**與既有 canon 不衝突**的部分已寫成單一來源 [`scripts/lib/character-sheet.ts`](../../scripts/lib/character-sheet.ts)，並掛進兩條生圖管線：
 
-- **A. 只約束小紅賽車家族**：小紅／小紅爸爸／年幼版／年輕爸改大燈眼，其餘角色維持現狀。範圍最小，但同一畫面中兩種眼位並存。
-- **B. 全站改大燈眼**：一致性最高，需重抽整個角色圖庫，成本最大。
-- **C. 維持擋風玻璃眼，改用其他手段做版權區隔**：靠圓潤高車身剪影＋號碼 2 ＋星星天線＋單一尾翼區隔，放棄眼位這一項。成本最低，但放棄了原設定書認定「最關鍵」的區隔點。
+- `data/characters.json` 的 `小紅賽車` `desc`（該管線無獨立 negative 欄位，故內嵌）
+- `scripts/generate-roamer-assets.ts` 的 `xiao-hong` front／rear（正向掛設定書、負向掛 Do-NOT）
 
----
+內容為「鎖定既有樣貌」而非變更：圓潤高車身剪影、車門號碼 2、白色引擎蓋條紋、與眼睛分離的黃色圓大燈、下保險桿微笑線、單一尾翼、藍色飾件；Do-NOT 清單涵蓋規格 §2.4 全部五項（號碼 95、閃電貼紙、低趴流線車身、格柵嘴、一眼聯想《Cars》）。契約由 [`scripts/lib/character-sheet.test.ts`](../../scripts/lib/character-sheet.test.ts) 守住。
+
+`desc` 只被生圖腳本讀取（`illustrate-core`／`generate-character-portraits`／`generate-landing-art`／roamer），**網站 UI 完全不渲染**，所以本次改動沒有動到任何一個像素，只影響下一次生圖——而生圖本身仍受付費紅線的逐次確認閘門管制。
+
+#### 待維護者裁決：三項會推翻既有 canon 的設定
+
+設定書有三項**不是**回歸規格，而是宣告既有圖庫過期，因此刻意未寫入 SSOT：
+
+| 設定書項目 | 既有 canon（定裝照 `public/characters/小紅賽車.jpg`） |
+|---|---|
+| 眼睛在大燈位置、擋風玻璃淨空 | 大眼在**擋風玻璃**面板上；黃色圓大燈另外分離存在於車頭 |
+| 白 ＋ **黃**賽車條紋 | 引擎蓋只有**白色**雙條紋 |
+| 車頂**星星天線** | **無**天線 |
+
+改動代價不只一張定裝照：
+
+1. `public/characters/` 已上線 35 個角色條目，同族三個變體的 `desc` 明文寫死臉部配置作為**對 ep-23／ep-24 已出圖的連貫性鎖** — `小紅賽車的爸爸`「eyes ONLY on the windshield」、`小紅賽車年幼版`「eyes are NOT headlights on the bumper」、`小紅賽車的爸爸年輕版`「copy reference dad 1:1」。
+2. 小紅賽車出現於 ep-3／15／16／18／23／24，改臉等於讓同一角色在故事庫中前後不一致——兒童繪本產品裡角色恆常性的代價很高。
+3. 生圖管線會把 `ref` 定裝照連同文字一起送出；文字與參考圖牴觸時結果不可預期，等於必須連定裝照一起重抽。
+
+三個選項：
+
+- **A. 只改小紅賽車家族**：四個條目改大燈眼＋黃條紋＋天線，其餘角色不動。需重抽 4 張定裝照＋回頭處理 ep-23／ep-24 的連貫性鎖。
+- **B. 全站改**：一致性最高，重抽整個角色圖庫，成本最大。
+- **C. 維持既有 canon**：靠圓潤高車身剪影＋號碼 2 ＋單一尾翼＋分離大燈＋Do-NOT 清單做版權區隔，放棄眼位這一項。零重抽成本；已落地的部分正是這條路線的完整實作。
+
+**目前狀態為 C 的實作**，但這是「未裁決前不製造破壞」的預設值，不是代替維護者做的決定。要走 A 或 B 請直接指示，屆時須列出重抽張數並取得文字確認（付費紅線）。
 
 ## 3. 為什麼改橫向 2.5D
 
@@ -205,8 +233,8 @@
 
 | Phase | 內容 | 主要檔案 | 風險級 | 驗證 |
 |---|---|---|---|---|
-| **1. 角色設定書入庫** | 把 §2.1／§2.4 寫成單一 SSOT 常數，`generate-roamer-assets.ts` 與 `characters.json` 的小紅家族 `desc` 引用之；**不跑生圖** | `scripts/generate-roamer-assets.ts`、`data/characters.json` | L2（改生圖 prompt，需 §2.5 決策先落地） | `npx vitest run data/characters.test.ts` |
-| **2. Hero 車幾何補齊** | 依 §0.3 修 `build.py`：眼睛移到大燈、擋風玻璃清空、加號碼 2／星星天線／黃條紋、微笑線加粗提亮 | `assets/blender/hero-world/build.py` | L3（Protected：改動 v3 發布鏈） | `npm run release:hero-world`（需 Blender CLI）＋ `npm run validate:hero-world` ＋ 視覺 baseline 重錄 |
+| **1. 角色設定書入庫** | ✅ **已落地（2026-09-09）**。與 canon 不衝突的部分寫成 SSOT，掛進 roamer prompt 與 `小紅賽車` `desc`；三項推翻 canon 的設定留待裁決（§2.5） | `scripts/lib/character-sheet.ts`、`scripts/generate-roamer-assets.ts`、`data/characters.json` | L2 | `npx vitest run scripts/lib/character-sheet.test.ts`＋`npm run verify:episodes` |
+| **2. Hero 車幾何補齊** | 依 §0.3 修 `build.py`（範圍受 §2.5 裁決約束）；**須與 Blender 重建同一輪完成** — manifest 記有 `buildScriptSha256`，只改腳本不重建會讓來源雜湊與出貨 GLB 不同步 | `assets/blender/hero-world/build.py` | L3（Protected：改動 v3 發布鏈） | `npm run release:hero-world`（需 Blender CLI）＋ `npm run validate:hero-world` ＋ 視覺 baseline 重錄 |
 | **3. 橫向分層帶前端** | 新增 `components/landing/hero-parallax/`，六層 `transform` 視差；`/intro` 改用之或並存 A/B | `components/landing/hero-parallax/*`、`app/intro/` | L3（UI 風險：`transform`／`animation`／`prefers-reduced-motion` 強制 Opus 設計審） | `npm run test:visual:trusted`＋`npm run test:e2e`＋`npm run build` |
 | **4. 分層素材產出** | 六層 tile 出圖與接縫驗證 | `public/landing/hero-parallax/` | L3（付費生圖，需逐張人工審） | 人工審 contact sheet；接縫左右對接目檢 |
 
@@ -219,9 +247,9 @@ Phase 3 若成立，現版 R3F／Three 依賴（`HeroScene`／`World`／`Vehicle
 | 阻擋 | 說明 |
 |---|---|
 | **付費生圖紅線** | §4.3 的六層 tile 與任何角色重抽都是付費 API。依 [`AGENT-DOMAIN.md`](../AGENT-DOMAIN.md) 紅線，須先在對話列出張數並取得文字確認，且暫存 → 人工審 contact sheet → 才 `--approve` |
-| **無 Blender CLI** | Phase 2 需 `blender -b --python assets/blender/hero-world/build.py`；本容器未安裝，無法產出 GLB 或重錄 poster |
+| **無 Blender CLI** | Phase 2 需 `blender -b --python assets/blender/hero-world/build.py`；本容器未安裝，無法產出 GLB 或重錄 poster。且 `public/models/hero-world/v3/manifest.json` 記著 `buildScriptSha256`，單改 `build.py` 會讓它與實檔不符——這正是 v3 乾淨重建要消滅的漂移，故本輪不動 `build.py` |
 | **視覺 baseline 為 darwin** | Phase 2／3 動到 `components/` 樣式時，`.githooks/pre-push` 會擋下零 baseline 變更的 push；baseline 只能在 macOS 本機重錄 |
-| **§2.5 跨角色決策未定** | Phase 1 的 prompt 改動範圍取決於選 A／B／C，未決前不動 `characters.json` |
+| **§2.5 canon 裁決未定** | 走 A／B 需重抽定裝照並回頭處理 ep-23／ep-24 的連貫性鎖；未裁決前維持 C（零重抽），不動同族三個變體的 `desc` |
 
 ---
 
@@ -246,4 +274,5 @@ Phase 3 若成立，現版 R3F／Three 依賴（`HeroScene`／`World`／`Vehicle
 
 | 日期 | 說明 |
 |---|---|
+| 2026-09-09 | Phase 1 落地：新增 `scripts/lib/character-sheet.ts` SSOT ＋契約測試，掛進 roamer prompt 與 `小紅賽車` `desc`。核對定裝照後新增第 5 項落差（設定書三項與既有 canon 牴觸），§2.5 改寫為「已落地／待裁決」兩段 |
 | 2026-09-09 | v1 初版。收錄等距版診斷、角色設定書、橫向 2.5D 分層規格；新增 §0 現況核對（四項落差）、§2.5 跨角色衝突、§4.3 輪子旋轉互斥、§5 實作路徑、§6 阻擋項 |
