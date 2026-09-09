@@ -2,6 +2,8 @@
 
 完整的設計理念、架構說明與原始檔快照請參閱：[HERO-WORLD-SOURCE.md](./HERO-WORLD-SOURCE.md)。
 
+> **改版規格（未實作）：** 等距 diorama → 橫向 2.5D 視差帶的規格見 [`specs/HERO-PARALLAX-SPEC.md`](./specs/HERO-PARALLAX-SPEC.md)。該文 §0.3 逐項核對了現版 `build.py` 小紅幾何與角色設定書的落差。
+
 ## Repository inspection / implementation decision
 
 Inspected App Router routes, LandingHub/Segment/ScrollView/SegmentNav, theme and global tokens, DESIGN.md, landing art and 小紅 portrait, universe/character asset organization, landing playback, service worker, analytics, next.config, metadata/JSON-LD, font subsets, Vitest and Playwright suites. Next 16.3.2 + React 19.2.7, strict TypeScript, CSS Modules. Homepage is statically rendered with four full-height panes inside a dedicated scroll container. It has a hidden H1, hidden section headings, existing story links, companion and bedtime overlay. Route content, canonical and podcast JSON-LD live outside WebGL. Audio starts only after a deliberate play action. Existing art uses soft red/blue toy vehicles, warm cream, rounded clay shapes, mint trees. Preserve the four-pane navigation, story discovery links, parent navigation, themes, audio semantics and child-friendly typography. Only the opening pane becomes spatial.

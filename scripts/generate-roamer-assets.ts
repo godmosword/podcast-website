@@ -26,6 +26,12 @@ import {
 } from "./lib/illustrate-core";
 import { ROOT } from "./lib/transcribe-core";
 import { removeBorderBackground } from "./lib/roamer-alpha";
+import {
+  XIAO_HONG_DO_NOT,
+  XIAO_HONG_FACE_LAYOUT,
+  XIAO_HONG_IDENTITY,
+  XIAO_HONG_SILHOUETTE_TEST,
+} from "./lib/character-sheet";
 import { pngBufferToWebp, pngPathToWebpPath } from "./lib/roamer-webp";
 
 const STAGING = join(ROOT, "public/.roamer-staging");
@@ -114,8 +120,10 @@ const ROAMER_SPECS: RoamerSpec[] = [
         "diorama. Handmade matte polymer clay, soft rounded pressed edges, subtle thumbprint " +
         "texture, no gloss. Soft even diffuse lighting, low contrast, short soft contact shadow. " +
         "Pastel storybook palette, bright and friendly for kids. Stop-motion / claymation " +
-        "aesthetic. Isolated on a transparent background, single object, centered.",
+        "aesthetic. Isolated on a transparent background, single object, centered. " +
+        `${XIAO_HONG_FACE_LAYOUT} ${XIAO_HONG_IDENTITY} ${XIAO_HONG_SILHOUETTE_TEST}`,
       negative:
+        `${XIAO_HONG_DO_NOT}, ` +
         "tilted, leaning, motion blur, perspective distortion, flat orthographic side profile, " +
         "top-down, glossy, plastic shine, hard directional shadow, long cast shadow, " +
         "photorealistic, extra text, words, watermark, neon, oversaturated, sharp hard edges, " +
@@ -134,8 +142,10 @@ const ROAMER_SPECS: RoamerSpec[] = [
         "subtle thumbprint texture, no gloss. Soft even diffuse lighting, low contrast, short " +
         "soft contact shadow. Pastel storybook palette, bright and friendly for kids. " +
         "Stop-motion / claymation aesthetic. Isolated on a transparent background, single " +
-        "object, centered.",
+        "object, centered. " +
+        `${XIAO_HONG_IDENTITY} ${XIAO_HONG_SILHOUETTE_TEST}`,
       negative:
+        `${XIAO_HONG_DO_NOT}, ` +
         "front face visible, eyes facing camera, smile facing camera, tilted, leaning, motion " +
         "blur, perspective distortion, flat orthographic side profile, top-down, glossy, plastic " +
         "shine, hard directional shadow, long cast shadow, photorealistic, extra text, words, " +
