@@ -12,7 +12,7 @@
 
 ### 0.1 本輪交付
 
-本輪**只交付規格文件**，不改 `components/`、不改 `public/` 素材、不呼叫任何生圖 API。理由見 §6 阻擋項。
+規格 v1 撰寫時只交付文件（無 Blender CLI 的容器）。**2026-09-09 在有 Blender 的 macOS 本機上，Phase 1 與 Phase 2 皆已落地**，`build.py` 與 GLB／poster／manifest 同輪重建。Phase 3／4 仍未動，理由見 §6 阻擋項。
 
 ### 0.2 規格與 repo 現況的四項落差
 
@@ -30,20 +30,38 @@
 
 > 基準是**定裝照** `public/characters/小紅賽車.jpg`（§2.5 裁決），不是原稿設定書。
 
+> 行號與座標為 **Phase 2 落地後**（2026-09-09）的現況。v1 初版的數值見修訂紀錄。
+
 | canon 項目 | `build.py` 實況 | 判定 |
 |---|---|---|
-| 擋風玻璃大眼 | `ball('Eye',(x,-.323,.92))` 貼在 `box('Windshield',(0,-.274,.90))` 上，含瞳孔與高光 | ✅ 符合（`build.py:281`／`283`／`285`） |
-| 分離的黃色圓大燈 | `ball('Headlight',(x*1.6,-.81,.48),…,'yellow')`，與眼睛分屬不同高度與前後位置 | ✅ 符合（`build.py:286`） |
-| 下保險桿微笑線 | `tube('Smile')` 在 `build.py:292`，位於 `box('Bumper')`（`:291`）上方，弧線中央下凹 | ⚠️ 位置正確，但線徑 `.026`＋色票 `dark` 過重，遠看塌成橫桿 |
-| 白色引擎蓋條紋 | `box('Hood stripe', …, 'ivory')`（`build.py:287`） | ✅ 符合 |
-| 白圓底車門號碼「2」 | 無任何號碼幾何 | ❌ 缺 — canon 的主要自有識別 |
-| 圓潤高車身 Q 版 | `Body` 1.03×1.65×0.51 ＋ `Cabin` 0.90×0.84×0.57；輪半徑 0.275 | ⚠️ 車身尚可，輪徑相對車高偏大，剪影比 canon 更像越野車 |
-| 單一尾翼 | `box('Spoiler')` ＋兩支 `Spoiler stem`（`build.py:293`） | ✅ 符合 |
+| 擋風玻璃大眼 | `ball('Eye white')`／`ball('Eye')`／`Pupil`／`Eye glint` 疊在 `box('Windshield',(0,-.274,.90))` 上 | ✅ 符合（`build.py:298`–`301`）。白眼白＋深藍虹膜＋黑瞳＋白高光與定裝照逐項對得上 |
+| 分離的黃色圓大燈 | `ball('Headlight',(x*1.6,-.745,.48),…,'yellow')`，與眼睛分屬不同高度與前後位置 | ✅ 符合（`build.py:302`） |
+| 下保險桿微笑線 | `tube('Smile')` 在 `build.py:310`，線徑 `.036`，嘴角埋入車頭、嘴心落在 `box('Bumper')`（`:307`）前緣 | ✅ 符合（Phase 2 加粗加寬並重新錨定） |
+| 白色引擎蓋條紋 | `box('Hood stripe',(x*.33,-.515,.746),…,'ivory')`（`build.py:303`） | ⚠️ 存在且貼合，但長度只有 `.39`，遠比定裝照貫穿引擎蓋的長雙條短 |
+| 白圓底車門號碼「2」 | `ball('Door badge',…,'car_white')`＋`tube('Door number',…,'blue')`，兩側鏡射（`build.py:315`–`320`） | ✅ 符合（Phase 2 補上） |
+| 圓潤高車身 Q 版 | `Body` 1.06×1.52×0.56（bevel `.26`）＋ `Cabin` 0.92×0.80×0.60；輪半徑 0.275 | ⚠️ 車身已依定裝照短胖化，輪徑相對車高仍偏大 |
+| 單一尾翼 | `box('Spoiler')` ＋兩支 `Spoiler stem`（`build.py:321`–`322`） | ✅ 符合 |
 | 無車頂天線 | 無 | ✅ 符合 |
 | 無黃色條紋 | 無 | ✅ 符合 |
-| 紅色主色 | `'red'` 色票 | ✅ 符合 |
+| 紅色主色 | `'car_red'` 專屬色票，不再與屋瓦共用赭紅 `'red'` | ✅ 符合 |
 
-**結論：Phase 2 的實際範圍只剩三項** — 補車門號碼「2」、微笑線加粗提亮、輪徑對車高的比例收斂。原稿判定的「眼睛違規」不成立。前兩項的 patch 已備妥於 [`assets/blender/hero-world/PHASE2-CANON-ALIGNMENT.md`](../../assets/blender/hero-world/PHASE2-CANON-ALIGNMENT.md)；第三項因與 `components/landing/hero-world/config.ts` 的 `WHEEL_RADIUS` 耦合（輪子轉速換算基準）而另案處理。
+**Phase 2 已落地（2026-09-09）**：補上車門號碼「2」、微笑線加粗加寬，並修好縮短車身後車頭零件仍釘在舊座標的錨定破綻（見 §0.4）。原稿判定的「眼睛違規」不成立。
+
+**仍未處理，各自另案：**
+
+| 項目 | 為什麼沒做 |
+|---|---|
+| 輪徑對車高偏大 | `WHEEL_RADIUS = .275` 同時是 `components/landing/hero-world/config.ts` 裡 `wheelAnimationTime()` 的換算基準；改動會讓輪子轉速與路面前進距離脫鉤，且須連帶重調輪心高度與相機取景 |
+| 引擎蓋條紋過短、缺引擎蓋大「2」 | 定裝照的引擎蓋是貫穿的長白雙條紋中間夾一個藍色大「2」。這是構圖尺度的改動，不是確定性修補 |
+| 大燈缺白色外環 | 定裝照的黃大燈外圈有一環白底 |
+| `blue` 色票偏青 | `blue=(.10,.30,.32)` 轉 sRGB 約 `(.35,.57,.59)`，是青灰不是定裝照的鈷藍。保險桿、車門號碼與側窗飾條都吃這個色票，改動會動到整車配色 |
+| 後照鏡紅球浮空 | `ball('Mirror',(x*1.14,-.25,.76))` 在 `Body` 頂緣的重 bevel 區外側，與車身之間有可見縫隙。v3 既有問題，非 Phase 2 造成 |
+
+### 0.4 Phase 2 順帶修好的錨定破綻
+
+`Body` 的 Y 由 `1.65` 縮到 `1.52` 時，車頭面從 `y=-.825` 退到 `-.760`，但 `Bumper`（`-.78`）／`Headlight`（`-.81`）／`Smile`（`-.836`～`-.856`）／`Hood stripe`（`-.58`）四者仍釘在舊車頭座標。Cycles 預覽可見微笑線變成一條懸空的深色線、黃大燈是浮在車頭前的兩顆球。四者一律 `+.065` 重新錨定後全段貼合。
+
+**教訓：改 `Body` 尺寸必須同時檢查所有以車頭／車尾面為錨的零件。** `validate:hero-world` 只驗三角面預算與 glTF 合規，抓不到浮空幾何——目前唯一的偵測手段是 `blender -b --python build.py -- --preview` 後目視。
 
 ## 1. 現版等距圖的問題診斷
 
@@ -97,13 +115,14 @@
 
 基準是定裝照，不是原稿設定書。逐項見 §0.3。
 
-**偏移：**
+**已修（Phase 2，2026-09-09）：**
 
-- **缺車門號碼「2」** — canon 的主要自有識別，`build.py` 完全沒有對應幾何
-- **微笑線過細過深** — `tube('Smile')` 線徑 `.026`＋色票 `dark`，遠看塌成一根橫桿
-- **輪徑相對車高偏大** — 輪半徑 `.275` 對車身高 `.51`，剪影比 canon 更像越野車
+- **缺車門號碼「2」** — 已補 `Door badge`（白圓底扁球）＋`Door number`（`blue` tube），兩側鏡射
+- **微笑線過細過深** — 線徑 `.026` → `.036`、嘴角 ±`.17` → ±`.21`，並重新錨定到縮短後的車頭
 
-**符合 canon：** 擋風玻璃大眼、分離的黃色圓大燈、白色引擎蓋條紋、單一尾翼、紅色主色、無天線、黏土質感。
+**仍未修，各自另案（理由見 §0.3）：** 輪徑相對車高偏大、引擎蓋條紋過短且缺引擎蓋大「2」、大燈缺白色外環、`blue` 色票偏青、後照鏡紅球浮空。
+
+**符合 canon：** 擋風玻璃大眼（白眼白＋深藍虹膜＋黑瞳＋高光）、分離的黃色圓大燈、白色引擎蓋條紋、單一尾翼、紅色主色（`car_red` 專屬色票）、無天線、黏土質感。
 
 **核對修正：** 原稿列的「眼睛跑到擋風玻璃區域 — 最嚴重」與「沒有嘴，只有一根深色橫桿」兩項皆不成立 — 擋風玻璃眼正是 canon；嘴存在且位置正確，只是可讀性衰減。
 
@@ -228,7 +247,7 @@ canon 已寫成單一來源 [`scripts/lib/character-sheet.ts`](../../scripts/lib
 | Phase | 內容 | 主要檔案 | 風險級 | 驗證 |
 |---|---|---|---|---|
 | **1. 角色設定書入庫** | ✅ **已落地（2026-09-09）**。與 canon 不衝突的部分寫成 SSOT，掛進 roamer prompt 與 `小紅賽車` `desc`；三項推翻 canon 的設定留待裁決（§2.5） | `scripts/lib/character-sheet.ts`、`scripts/generate-roamer-assets.ts`、`data/characters.json` | L2 | `npx vitest run scripts/lib/character-sheet.test.ts`＋`npm run verify:episodes` |
-| **2. Hero 車幾何補齊** | 📋 **patch 已備妥待執行** — 見 [`assets/blender/hero-world/PHASE2-CANON-ALIGNMENT.md`](../../assets/blender/hero-world/PHASE2-CANON-ALIGNMENT.md)。補車門白圓底號碼「2」＋微笑線加粗加寬；輪徑刻意不動（與 `config.ts` 的 `WHEEL_RADIUS` 耦合）。**須與 Blender 重建同一輪完成** — manifest 記有 `buildScriptSha256` | `assets/blender/hero-world/build.py` | L3（Protected：改動 v3 發布鏈） | `npm run release:hero-world`（需 Blender CLI）＋ `npm run validate:hero-world` ＋ 視覺 baseline 重錄 |
+| **2. Hero 車幾何補齊** | ✅ **已落地（2026-09-09）**。補車門白圓底號碼「2」＋微笑線加粗加寬＋修好車頭零件錨定（§0.4）；輪徑刻意不動（與 `config.ts` 的 `WHEEL_RADIUS` 耦合）。與 `npm run release:hero-world` 同一個 commit 落地，`buildScriptSha256` 一致。runbook 見 [`PHASE2-CANON-ALIGNMENT.md`](../../assets/blender/hero-world/PHASE2-CANON-ALIGNMENT.md) | `assets/blender/hero-world/build.py` | L3（Protected：改動 v3 發布鏈） | `npm run release:hero-world`（需 Blender CLI）＋ `npm run validate:hero-world` ＋ 視覺 baseline 重錄 |
 | **3. 橫向分層帶前端** | 新增 `components/landing/hero-parallax/`，六層 `transform` 視差；`/intro` 改用之或並存 A/B | `components/landing/hero-parallax/*`、`app/intro/` | L3（UI 風險：`transform`／`animation`／`prefers-reduced-motion` 強制 Opus 設計審） | `npm run test:visual:trusted`＋`npm run test:e2e`＋`npm run build` |
 | **4. 分層素材產出** | 六層 tile 出圖與接縫驗證 | `public/landing/hero-parallax/` | L3（付費生圖，需逐張人工審） | 人工審 contact sheet；接縫左右對接目檢 |
 
@@ -241,9 +260,9 @@ Phase 3 若成立，現版 R3F／Three 依賴（`HeroScene`／`World`／`Vehicle
 | 阻擋 | 說明 |
 |---|---|
 | **付費生圖紅線** | §4.3 的六層 tile 與任何角色重抽都是付費 API。依 [`AGENT-DOMAIN.md`](../AGENT-DOMAIN.md) 紅線，須先在對話列出張數並取得文字確認，且暫存 → 人工審 contact sheet → 才 `--approve` |
-| **無 Blender CLI** | Phase 2 需 `blender -b --python assets/blender/hero-world/build.py`；本容器未安裝，無法產出 GLB 或重錄 poster。且 `public/models/hero-world/v3/manifest.json` 記著 `buildScriptSha256`，單改 `build.py` 會讓它與實檔不符——這正是 v3 乾淨重建要消滅的漂移，故本輪不動 `build.py` |
+| ~~**無 Blender CLI**~~ **已解除（2026-09-09）** | 撰寫規格的容器沒有 Blender，故 v1 不動 `build.py`。維護者的 macOS 本機有 `blender` 5.2.1 LTS，Phase 2 已在該機執行並與 `npm run release:hero-world` 同輪落地，`buildScriptSha256` 與實檔一致 |
 | **視覺 baseline 為 darwin** | Phase 2／3 動到 `components/` 樣式時，`.githooks/pre-push` 會擋下零 baseline 變更的 push；baseline 只能在 macOS 本機重錄 |
-| **§2.5 canon 裁決未定** | 走 A／B 需重抽定裝照並回頭處理 ep-23／ep-24 的連貫性鎖；未裁決前維持 C（零重抽），不動同族三個變體的 `desc` |
+| ~~**§2.5 canon 裁決未定**~~ **已裁決（2026-09-09）** | 定案走 C：定裝照為唯一基準、零重抽，同族三個變體的 `desc` 不動。見 §2.5 |
 
 ---
 
@@ -269,6 +288,7 @@ Phase 3 若成立，現版 R3F／Three 依賴（`HeroScene`／`World`／`Vehicle
 
 | 日期 | 說明 |
 |---|---|
+| 2026-09-09 | **Phase 2 落地**。§0.3 核對表改寫為落地後現況（行號、座標、色票全部重核），未處理項目改列獨立表格並各自附理由；新增 §0.4 記錄縮短車身造成的錨定破綻與教訓；§0.1 交付邊界、§5 Phase 2 列、§6「無 Blender CLI」與「canon 裁決未定」兩項阻擋同步更新 |
 | 2026-09-09 | **canon 裁決定案：follow 定裝照**（§2.5 的 C 案）。§2.1 改為以定裝照為準並作廢「大燈眼／黃條紋／星星天線」三項；§2.2／§0.3 基準改為 canon，Phase 2 範圍縮為三項；§2.4 與附錄檢查表同步；SSOT 正向加鎖 canon 臉部配置，負向加擋大燈眼／天線／黃條紋 |
 | 2026-09-09 | Phase 1 落地：新增 `scripts/lib/character-sheet.ts` SSOT ＋契約測試，掛進 roamer prompt 與 `小紅賽車` `desc`。核對定裝照後新增第 5 項落差（設定書三項與既有 canon 牴觸），§2.5 改寫為「已落地／待裁決」兩段 |
 | 2026-09-09 | v1 初版。收錄等距版診斷、角色設定書、橫向 2.5D 分層規格；新增 §0 現況核對（四項落差）、§2.5 跨角色衝突、§4.3 輪子旋轉互斥、§5 實作路徑、§6 阻擋項 |
