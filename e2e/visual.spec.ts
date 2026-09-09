@@ -4,12 +4,20 @@ import {
   type VisualTheme,
   type VisualViewportId,
 } from "./visual-helpers";
+import { skipIntroOverlay } from "./intro-gate";
 
 /**
  * D2 視覺回歸：Phase A smoke（5 頁 × 1280 light）+ Phase B 完整組合。
  * 主頁 × 390/1280 × light/night。
  */
 test.describe.configure({ mode: "serial" });
+
+// ADR-0004：首次進 `/` 會被 3D 開場覆蓋層蓋住。這支規格測的是 Landing 本身，
+// 所以先表明這個分頁看過開場了，否則量到的是覆蓋層。
+test.beforeEach(async ({ page }) => {
+  await skipIntroOverlay(page);
+});
+
 
 /**
  * 視覺回歸是**本機 pre-push 工具**，刻意不進 CI——baseline 是 `-chromium-darwin`，
@@ -310,25 +318,6 @@ const COMPONENT_SHOTS: {
     path: "/for-parents/play-map",
     locator: (page) => page.locator("li#ty-kids-museum"),
   },
-  /**
-   * ≤768 底列分段導覽（短標）。
-   *
-   * **必須指定 viewport**：這是 `@media (max-width: 768px)` 專屬的 layout，
-   * 預設的 1280×900 走的是桌面右側 tooltip 分支，拍再多張也驗不到這裡。
-   * 三個寬度各留一張：320 最擠、375 主力、767 斷點邊界。
-   *
-   * 拍的是「文字密集區」——頁面級快照的 2% 容差在 1280×720 上等於 18,432px，
-   * 一整句文案改掉都吞得下（2026-09-02 桌機 baseline 就是這樣存了舊文案還全綠）。
-   * 元件級取樣讓容差不被面積稀釋。
-   */
-  ...([320, 375, 767] as const).map((width) => ({
-    id: "landing-segment-nav",
-    name: `Landing 底列短標 ${width}`,
-    path: "/",
-    viewport: { width, height: 760 },
-    locator: (page: Page) =>
-      page.getByRole("navigation", { name: "專區導覽" }),
-  })),
   {
     id: "landing-cta-row",
     name: "Landing 首段 CTA 文字塊",
@@ -337,16 +326,6 @@ const COMPONENT_SHOTS: {
     // 錨在第一段（`data/landing-segments.ts` 的 stories），文案固定不隨集數變動
     locator: (page: Page) =>
       page.locator("#segment-stories [class*='ctaRow']"),
-  },
-  {
-    id: "landing-intro-entry",
-    name: "Landing IntroEntry",
-    path: "/",
-    viewport: { width: 390, height: 844 },
-    // ADR-0003 的唯一 Intro 入口。元素級截圖讓文案、縮圖裁切、觸控尺寸
-    // 的回歸不會被 Landing 全頁的像素容差稀釋。
-    locator: (page: Page) =>
-      page.getByRole("link", { name: "看小紅開進遊樂園" }),
   },
 ];
 

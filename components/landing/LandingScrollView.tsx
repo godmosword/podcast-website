@@ -53,7 +53,8 @@ export default function LandingScrollView({
       }}
     >
       {/* 首頁鎖定文件捲動，改由此容器負責 snap；tabIndex 讓鍵盤使用者
-          可聚焦並用方向鍵/PageUp-Down 捲動，作為 SegmentNav 之外的退路。 */}
+          可聚焦並用方向鍵/PageUp-Down 捲動。ADR-0004 移除底列導覽之後，
+          視覺上的換段控制是各段的向下箭頭（LandingSegment 的 .next）。 */}
       <div
         ref={scrollRef}
         className={className}

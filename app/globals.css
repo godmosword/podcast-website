@@ -535,3 +535,10 @@ html:has([data-landing-root]) body {
   overflow: hidden;
   height: 100%;
 }
+
+/* 首頁 3D 開場覆蓋層（ADR-0004）。預設隱藏，由 <head> 的同步 script 在首次
+   繪製前決定要不要打開——無 JS 或 script 出錯時直接看到 Landing，而不是被一層
+   關不掉的覆蓋層鎖死。用 data 屬性而不是 CSS Modules 的 class，因為 inline
+   script 拿不到雜湊後的名字。 */
+[data-intro-overlay] { display: none; }
+html[data-intro-gate="on"] [data-intro-overlay] { display: block; }

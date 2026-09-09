@@ -1,16 +1,8 @@
 .main {
   width: 100%;
   --landing-pane-h: calc(100svh - var(--nav-h));
-  --landing-mobile-nav-h: 0px;
   height: var(--landing-pane-h);
   overflow: hidden;
-}
-
-@media (max-width: 768px) {
-  .main {
-    /* 44px 指示列 + safe area，供 segment／Dudu 對齊 */
-    --landing-mobile-nav-h: calc(44px + var(--safe-bottom));
-  }
 }
 
 /* 桌面（1c 懸浮膠囊）：hero 滿版到視窗頂，膠囊真正浮在圖上。

@@ -1,4 +1,10 @@
 import { test, expect } from "@playwright/test";
+import { skipIntroOverlay } from "./intro-gate";
+
+// ADR-0004：這支規格測的是 Landing／內容頁本身，先跳過首頁的 3D 開場覆蓋層。
+test.beforeEach(async ({ page }) => {
+  await skipIntroOverlay(page);
+});
 
 const PHONE = { width: 390, height: 844 };
 

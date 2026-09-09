@@ -6,7 +6,7 @@
 
 ## Repository findings
 
-Next.js 16 App Router、React 19、TypeScript strict、CSS Modules。首頁由 LandingHub、四個 LandingSegment、專用捲動容器、SegmentNav、BedtimeLayer 和 DuduCompanion 組成。全域 SiteNavBar 提供故事、遊戲、角色、宇宙地圖與家長景點；各功能頁直接以 App Router URL 進入。首頁保留原 metadata、canonical `/`、Podcast JSON-LD、可索引導言與 SSR 連結。故事播放有獨立沉浸式介面，音訊須由使用者啟動。Intro 不引入 Audio 或改寫播放器。
+Next.js 16 App Router、React 19、TypeScript strict、CSS Modules。首頁由 LandingHub、四個 LandingSegment、專用捲動容器、BedtimeLayer 和 DuduCompanion 組成（ADR-0004 移除了 SegmentNav 底列，換段改由各段的向下箭頭承擔）。全域 SiteNavBar 提供故事、遊戲、角色、宇宙地圖與家長景點；各功能頁直接以 App Router URL 進入。首頁保留原 metadata、canonical `/`、Podcast JSON-LD、可索引導言與 SSR 連結。故事播放有獨立沉浸式介面，音訊須由使用者啟動。Intro 不引入 Audio 或改寫播放器。
 
 視覺沿用粉圓中文字、Baloo、圓角陶土與暖奶油／紅／薄荷綠。ThemeProvider 含夜間與睡前時間規則；Intro 使用自主美術色，Landing 的主題與睡前層保持原狀。既有 service worker、版本化 Next chunks、圖片最佳化及 Vercel analytics 保留。GLB 已拆成環境、車、實例化樹；SceneLoader 管理 abort 與 dispose，QualityManager 降級，CameraRig 處理手機構圖。先保留這些架構，再改善美術与生命週期細節。
 
@@ -33,7 +33,7 @@ Next.js 16 App Router、React 19、TypeScript strict、CSS Modules。首頁由 L
 
 ## 路由決策（2026-09-08 依 ADR-0003 更新）
 
-`/intro` 是獨立書封體驗；`/` 保留原 Landing、canonical、SSR 內容與所有內部連結，而且**永遠停在 Landing**——沒有首次自動導向、沒有 client redirect、不使用 sessionStorage。Intro 改成 opt-in：Landing 首段有一個 SSR 連結（`components/landing/IntroEntry.tsx`，用 v3 的 mobile poster 當縮圖）。進入／略過回到 `/?enter=1`，此 URL 永遠可直接訪問 Landing（canonical 仍為 `/`）。沒有 JavaScript 時連結照樣可用；不利用 user-agent 區分搜尋機器人。Intro 有自己的 metadata，noindex/follow，避免薄內容入口取代主網站搜尋結果。進入使用 replace，Back 不會困在 Intro ↔ Landing 的循環。
+`/` 永遠回傳完整的 Landing HTML——canonical、Podcast JSON-LD、SSR 內容與所有內部連結一字未改，而且**沒有任何 client redirect**。3D 開場是蓋在它上面的**同頁覆蓋層**（ADR-0004）：`<head>` 的同步 script（`lib/intro-gate.ts`）在首次繪製前決定要不要打開，所以既沒有導航可以閃爍，也不需要 middleware 或 cookie。覆蓋層每個瀏覽分頁出現一次（sessionStorage `cheche:intro-seen-v1`），按「進入車車遊樂園」就地淡出、焦點交給 `#main-content`，網址全程是 `/`。閘門同時檢查 reduced motion、Save-Data 與 2G：明確表達限制偏好的人根本不會遇到覆蓋層，第一眼就是 Landing。無 JavaScript 或 script 出錯時覆蓋層依設計不出現（CSS 預設隱藏），Landing 直接可用。`/intro` 保留為獨立路由：無 JS 時的入口、可分享的深連結、想重看的人的去處，noindex/follow，與覆蓋層共用同一個 `HeroWorld` 元件。從 `/intro` 進站會先寫入閘門標記，回到 `/` 不會再被蓋一次。
 
 取消自動導向的理由、實測到的閃爍數據與被否決的替代方案見 [ADR-0003](./adr/0003-intro-auto-invite.md)。
 

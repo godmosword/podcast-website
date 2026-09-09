@@ -2,8 +2,16 @@ import { test, expect } from "@playwright/test";
 import { seedParentGatePassed } from "./parent-gate";
 import { PROGRESS_STORAGE_KEY } from "../lib/progress-store";
 import sharp from "sharp";
+import { skipIntroOverlay } from "./intro-gate";
 
 test.describe.configure({ mode: "serial" });
+
+// ADR-0004：首次進 `/` 會被 3D 開場覆蓋層蓋住。這支規格測的是 Landing 本身，
+// 所以先表明這個分頁看過開場了，否則量到的是覆蓋層。
+test.beforeEach(async ({ page }) => {
+  await skipIntroOverlay(page);
+});
+
 
 test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
@@ -11,10 +19,6 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await expect(page).toHaveURL(/\/$/);
   await expect(page.locator("[data-landing-root]")).toBeVisible();
   await expect(page.locator("h1")).toHaveText("車車遊樂園：親子故事與手作");
-  await expect(page.getByRole("link", { name: "看小紅開進遊樂園" })).toHaveAttribute(
-    "href",
-    "/intro",
-  );
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
     /podcast-website-mu\.vercel\.app\/?$/,
@@ -426,7 +430,7 @@ test.describe("內頁不掛 KidsPlayDock", () => {
 });
 
 test.describe("首頁頁尾 snap pane", () => {
-  test("可捲到頁尾版權列，且不被貼底 SegmentNav 壓住", async ({ page }) => {
+  test("可捲到頁尾版權列", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto("/");
     await expect(
@@ -457,16 +461,7 @@ test.describe("首頁頁尾 snap pane", () => {
     const copyright = page.getByText("© 車車遊樂園™ · Bonbon & 馬米");
     await expect(copyright).toBeInViewport();
 
-    const copyrightBox = await copyright.boundingBox();
-    const segmentNav = page.getByRole("navigation", { name: /分區|段落/ });
-    if (await segmentNav.count()) {
-      const navBox = await segmentNav.first().boundingBox();
-      if (navBox) {
-        expect(copyrightBox!.y + copyrightBox!.height).toBeLessThanOrEqual(
-          navBox.y + 1,
-        );
-      }
-    }
+    // ADR-0004 之後首頁沒有貼底導覽列了，版權列不再需要跟它讓位。
   });
 });
 
@@ -575,88 +570,31 @@ test.describe("夜間漢堡抽屜", () => {
   }
 });
 
-/**
- * ≤768 底列分段導覽：短標可見（原本是四顆 7px 無標籤圓點）。
- *
- * 兩個歷史坑，這組都要守住：
- * 1. `.dotLabel` 是桌面 hover tooltip 樣式（`opacity: 0`、`--ink` 深字、奶油 pill
- *    底、`transform`），少覆寫任一個在深色底列上就是「看不見」。
- * 2. `.active.dot::after`(0,2,1) 特異性高於 `.dot::after`(0,1,1)，媒體查詢不加
- *    權重——桌面的 `height: 10px` 會蓋掉手機 3px 指示條（實測拍到過 10px 橘點）。
- */
-test.describe("Landing 底列短標（≤768）", () => {
-  const NAV_LABELS = ["車車故事", "睡前", "捏黏土", "好習慣"] as const;
 
-  for (const width of [320, 375, 767] as const) {
-    test(`${width}px：四個短標可見、等寬、不換行不溢出`, async ({ page }) => {
+/**
+ * ADR-0004 移除了首頁底列導覽（SegmentNav）。那條細列原本是手機唯一可見的
+ * 換段控制——`LandingSegment` 的向下箭頭在 ≤768 是被 CSS 藏起來的，理由就寫在
+ * 「平板／手機用 SegmentNav 貼底細條」那行註解裡。移除底列而不放出箭頭，手機
+ * 上的四個 snap pane 之間就只剩盲滑。這支守住那個出口。
+ */
+test.describe("首頁手機換段出口", () => {
+  for (const width of [320, 390, 767] as const) {
+    test(`${width}px：向下箭頭可見且真的換段`, async ({ page }) => {
       await page.setViewportSize({ width, height: 760 });
       await page.goto("/");
-      const nav = page.getByRole("navigation", { name: "專區導覽" });
-      await expect(nav).toBeVisible();
-
-      const geo = await page.evaluate(() => {
-        const n = document.querySelector('nav[aria-label="專區導覽"]')!;
-        return {
-          listRole: n.querySelector("ul")!.getAttribute("role"),
-          cells: [...n.querySelectorAll("a")].map((a) => {
-            const cell = a.getBoundingClientRect();
-            const span = a.querySelector("span")!;
-            const sb = span.getBoundingClientRect();
-            const cs = getComputedStyle(span);
-            return {
-              text: span.textContent!.trim(),
-              cellW: Math.round(cell.width),
-              labelH: Math.round(sb.height),
-              lineH: parseFloat(cs.fontSize),
-              opacity: parseFloat(cs.opacity),
-              overflow: sb.right > cell.right + 0.5 || sb.left < cell.left - 0.5,
-            };
-          }),
-          scrollWidth: document.documentElement.scrollWidth,
-          innerWidth: window.innerWidth,
-        };
-      });
-
-      // Safari/VoiceOver 會因 list-style: none 移除清單語意
-      expect(geo.listRole).toBe("list");
-      expect(geo.cells.map((c) => c.text)).toEqual([...NAV_LABELS]);
-
-      const widths = new Set(geo.cells.map((c) => c.cellW));
-      expect(widths.size, "四格必須等寬（flex 子項是 li 不是 a）").toBeLessThanOrEqual(2);
-
-      for (const c of geo.cells) {
-        expect(c.opacity, `${c.text} 必須可見（桌面 tooltip 的 opacity:0 要被覆寫）`)
-          .toBeGreaterThan(0.5);
-        expect(c.labelH, `${c.text} 不得換行`).toBeLessThan(c.lineH * 1.8);
-        expect(c.overflow, `${c.text} 不得溢出格子`).toBe(false);
-      }
-      expect(geo.scrollWidth).toBeLessThanOrEqual(geo.innerWidth);
+      const next = page.getByRole("link", { name: "捲動到下一個專區" }).first();
+      await expect(next).toBeVisible();
+      const box = await next.boundingBox();
+      expect(box, "箭頭沒有版面盒").not.toBeNull();
+      // 觸控尺寸：藏了很久的控制放出來時，最容易忘記它還要能按得到。
+      expect(box!.width).toBeGreaterThanOrEqual(44);
+      expect(box!.height).toBeGreaterThanOrEqual(44);
+      await next.click();
+      await expect
+        .poll(async () => (await page.getByRole("region", { name: /睡前/ }).first().boundingBox())?.y ?? Infinity, {
+          timeout: 5_000,
+        })
+        .toBeLessThan(760);
     });
   }
-
-  test("320px：active 指示條是 3px 實色（非桌面的 10px 圓點）", async ({ page }) => {
-    await page.setViewportSize({ width: 320, height: 760 });
-    await page.goto("/");
-    const bar = await page.evaluate(() => {
-      const a = document.querySelector('nav[aria-label="專區導覽"] a[aria-current="true"]')!;
-      const cs = getComputedStyle(a, "::after");
-      return { height: cs.height, opacity: cs.opacity, bg: cs.backgroundColor };
-    });
-    expect(bar.height).toBe("3px");
-    // 漸淡／半透明會讓非文字對比掉到 1.4.11 的 3:1 以下
-    expect(parseFloat(bar.opacity)).toBe(1);
-    expect(bar.bg).not.toBe("rgba(0, 0, 0, 0)");
-  });
-
-  test("320px：點短標真的換段（pointer-events 未被 tooltip 殘留擋住）", async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 320, height: 760 });
-    await page.goto("/");
-    // exact:true 必要——「捏黏土」同屏另有段內 CTA「好好玩的捏黏土」（已知重名，刻意接受）
-    await page.getByRole("link", { name: "捏黏土", exact: true }).click();
-    await expect(
-      page.locator('nav[aria-label="專區導覽"] a[aria-current="true"] span'),
-    ).toHaveText("捏黏土");
-  });
 });

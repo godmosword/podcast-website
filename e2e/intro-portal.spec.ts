@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { skipIntroOverlay } from "./intro-gate";
 
 const MODEL_URL = /\/models\/hero-world\/(?:v[23]\/)?[^/]+\.glb(?:\?.*)?$/;
 const MODEL_FIXTURES = new Map(
@@ -42,39 +43,21 @@ test.describe("Intro Portal · Phase 4 route and entry", () => {
     await expect(page.locator("[data-landing-root]")).toBeVisible();
   });
 
-  // ADR-0003: `/` is always Landing. R09 (opening /intro on purpose) and the
-  // opt-in entry link replace the retired first-visit redirect (R01-R07/R12).
-  test("R09: a fresh visit stays on Landing and offers an SSR link into the intro", async ({ browser }) => {
-    const context = await browser.newContext();
-    const page = await context.newPage();
-    await page.goto("/", { waitUntil: "domcontentloaded" });
-    await expect(page).toHaveURL(/\/$/);
-    await expect(page.locator("[data-landing-root]")).toBeVisible();
-    // The link must be in the server response, not only after hydration.
-    const html = await (await context.request.get("/")).text();
-    expect(html).toContain('href="/intro"');
-    const entry = page.getByRole("link", { name: /看小紅開進遊樂園/ });
-    await expect(entry).toHaveAttribute("href", "/intro");
-    await entry.click();
-    await expect(page).toHaveURL(/\/intro$/);
+  // ADR-0004: `/` still serves the full Landing HTML; the 3D opening is a
+  // same-page overlay on top of it. R09 is now "opening /intro on purpose
+  // still works", because the overlay has no URL of its own.
+  test("R09: /intro stays reachable on its own and hands back to Landing", async ({ page }) => {
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: "車車遊樂園" })).toBeVisible();
-    await context.close();
-  });
-
-  test("keeps a fresh bare home visit on Landing and exposes the SSR intro entry", async ({ page }) => {
-    await page.goto("/", { waitUntil: "domcontentloaded" });
-    await expect(page).toHaveURL(/\/$/);
-    await expect(page.locator("[data-landing-root]")).toBeVisible();
-    const introLink = page.getByRole("link", { name: "看小紅開進遊樂園" });
-    await expect(introLink).toHaveAttribute("href", "/intro");
-    await introLink.click();
-    await expect(page).toHaveURL(/\/intro$/);
     await page.getByRole("link", { name: "略過動畫" }).click();
     await expect(page).toHaveURL(/\/$/);
     await expect(page.locator("[data-landing-root]")).toBeVisible();
+    // 從 /intro 進站的人已經看過開場，回到 `/` 不該再被覆蓋層蓋一次。
+    await expect(page.locator("[data-intro-overlay]")).toHaveCount(0);
   });
 
   test("Landing to story back and forward stays on content", async ({ page }) => {
+    await skipIntroOverlay(page);
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await page.getByRole("link", { name: "車車遊樂園的故事 →" }).click();
     await expect(page).toHaveURL(/\/stories/);
@@ -86,8 +69,9 @@ test.describe("Intro Portal · Phase 4 route and entry", () => {
   });
 
   test("R08: Back and Forward move between Landing and Intro without a redirect loop", async ({ page }) => {
+    await skipIntroOverlay(page);
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    await page.getByRole("link", { name: /看小紅開進遊樂園/ }).click();
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
     await expect(page).toHaveURL(/\/intro$/);
     await page.goBack({ waitUntil: "domcontentloaded" });
     await expect(page).toHaveURL(/\/$/);
@@ -105,11 +89,14 @@ test.describe("Intro Portal · Phase 4 route and entry", () => {
     await expect(page).toHaveURL(/\/intro$/);
   });
 
-  test("deep links and Landing never download the hero models", async ({ page }) => {
+  // ADR-0004 之後這條必須分成兩半：閘門關著的 `/` 仍然一個模型都不下載，
+  // 閘門開著的 `/` 會下載（那正是覆蓋層的用途），後者由 overlay 那組守。
+  test("deep links and a gated Landing never download the hero models", async ({ page }) => {
     const requests: string[] = [];
     page.on("request", (request) => {
       if (MODEL_URL.test(request.url())) requests.push(request.url());
     });
+    await skipIntroOverlay(page);
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await expect(page.locator("[data-landing-root]")).toBeVisible();
     await page.goto("/stories", { waitUntil: "domcontentloaded" });
@@ -121,12 +108,13 @@ test.describe("Intro Portal · Phase 4 route and entry", () => {
     await expect.poll(() => requests.length, { timeout: 1_500 }).toBe(0);
   });
 
-  test("R10: keeps Landing content and the native intro entry usable without JavaScript", async ({ browser }) => {
+  test("R10: keeps Landing content usable and the overlay absent without JavaScript", async ({ browser }) => {
     const context = await browser.newContext({ javaScriptEnabled: false });
     const page = await context.newPage();
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await expect(page.locator("[data-landing-root]")).toBeVisible();
-    await expect(page.getByRole("link", { name: /看小紅開進遊樂園/ })).toHaveAttribute("href", "/intro");
+    // 無 JS 時閘門 script 跑不了，覆蓋層依設計不會出現——Landing 直接可用。
+    await expect(page.locator("html")).not.toHaveAttribute("data-intro-gate", "on");
     await page.goto("/intro", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: "車車遊樂園" })).toBeVisible();
     await expect(page.getByRole("link", { name: "略過動畫" })).toHaveAttribute("href", "/?enter=1");
@@ -622,6 +610,7 @@ test.describe("Intro Portal · Phase 9 enter transition and navigation lifecycle
   });
 
   test("a plain Landing visit is never focus-grabbed", async ({ page }) => {
+    await skipIntroOverlay(page);
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await expect(page.locator("[data-landing-root]")).toBeVisible();
     await page.waitForTimeout(300);
@@ -1032,5 +1021,175 @@ test.describe("Intro Portal · Phase 12 cross-viewport layout (emulated)", () =>
     await expect(page.locator("[data-hero-world] canvas")).toHaveCount(live ? 1 : 0);
     await page.getByRole("link", { name: /進入車車遊樂園/ }).click();
     await expect(page).toHaveURL(/\/$/, { timeout: 5_000 });
+  });
+});
+
+// Phase 1 構圖契約。3D 內容有沒有被切到由 `scripts/qa-hero-framing.mjs` 用投影
+// 量測（那需要 WebGL）；這裡守的是更上游、poster 路徑也成立的那一層：stage
+// 不准溢出 hero 框。stage 一旦靠負 offset 撐大，`.hero{overflow:hidden}` 就會
+// 直接吃掉島的左右兩端，而這正是使用者在 iPhone 上實際看到的。
+test.describe("Intro Portal · stage geometry", () => {
+  for (const [width, height] of [[320, 568], [390, 844], [430, 932], [768, 1024]] as const) {
+    test(`stage stays inside the hero frame at ${width}x${height}`, async ({ page }) => {
+      await page.setViewportSize({ width, height });
+      await page.goto("/intro", { waitUntil: "domcontentloaded" });
+      const hero = page.locator("[data-hero-world]");
+      await expect(hero).toBeVisible();
+      const boxes = await page.evaluate(() => {
+        const heroEl = document.querySelector("[data-hero-world]");
+        const stageEl = document.querySelector("[data-hero-stage]");
+        if (!heroEl || !stageEl) return null;
+        const h = heroEl.getBoundingClientRect();
+        const s = stageEl.getBoundingClientRect();
+        return { hero: { left: h.left, right: h.right }, stage: { left: s.left, right: s.right } };
+      });
+      expect(boxes, "hero 或 stage 不存在").not.toBeNull();
+      expect(boxes!.stage.left, "stage 左緣溢出 hero 框").toBeGreaterThanOrEqual(boxes!.hero.left - 1);
+      expect(boxes!.stage.right, "stage 右緣溢出 hero 框").toBeLessThanOrEqual(boxes!.hero.right + 1);
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth),
+        "頁面出現水平捲動",
+      ).toBeLessThanOrEqual(1);
+    });
+  }
+});
+
+/**
+ * ADR-0004：3D 開場是首頁的同頁覆蓋層，不是導航。
+ *
+ * 這組守住三件事：Landing 的 HTML 沒有因此變薄（SEO 零損失）、覆蓋層在 SSR
+ * 時就存在（所以不會出現「先看到 Landing 再被蓋上」的閃爍），以及明確表達
+ * 限制偏好的使用者根本不會遇到它。
+ */
+test.describe("Intro Portal · home overlay (ADR-0004)", () => {
+  test.use({ serviceWorkers: "block" });
+
+  test("the server HTML carries both the full Landing and the overlay", async ({ request }) => {
+    const html = await (await request.get("/")).text();
+    // Landing 的內容與結構化資料必須一字不少地留在 `/` 的原始 HTML 裡。
+    expect(html).toContain("data-landing-root");
+    expect(html).toContain("PodcastSeries");
+    expect(html).toContain("車車遊樂園的故事");
+    // 覆蓋層是 SSR 出來的，不是 mount 之後才插進去的。
+    expect(html).toContain("data-intro-overlay");
+  });
+
+  test("a first visit opens the overlay without changing the URL", async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator("html")).toHaveAttribute("data-intro-gate", "on");
+    await expect(page.locator("[data-intro-overlay]")).toBeVisible();
+    await expect(page.locator("link[rel='canonical']")).toHaveAttribute("href", /^https?:\/\/[^?#]+\/?$/);
+    // 背後的 Landing 被 inert 圍住，鍵盤與指標都進不去。
+    await expect(page.locator("[data-landing-root]")).toHaveAttribute("inert", "");
+    await context.close();
+  });
+
+  test("entering dismisses the overlay, hands focus to main, and adds no history entry", async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.goto("/stories", { waitUntil: "domcontentloaded" });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("[data-intro-overlay]")).toBeVisible();
+    await page.getByRole("button", { name: /進入車車遊樂園/ }).click();
+    await expect(page.locator("[data-intro-overlay]")).toHaveCount(0);
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator("[data-landing-root]")).not.toHaveAttribute("inert", "");
+    await expect.poll(() => page.evaluate(() => document.activeElement?.id ?? ""), { timeout: 3_000 }).toBe("main-content");
+    // 關掉覆蓋層不是導航，所以 Back 應該回到 /stories，不是回到覆蓋層。
+    await page.goBack({ waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/stories$/);
+    await context.close();
+  });
+
+  test("the overlay is a once-per-tab moment", async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await page.getByRole("button", { name: "略過動畫" }).click();
+    await expect(page.locator("[data-intro-overlay]")).toHaveCount(0);
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await expect(page.locator("html")).not.toHaveAttribute("data-intro-gate", "on");
+    await expect(page.locator("[data-intro-overlay]")).toHaveCount(0);
+    // 新分頁是新的 session，開場會再出現一次。
+    const fresh = await context.newPage();
+    await fresh.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(fresh.locator("[data-intro-overlay]")).toBeVisible();
+    await context.close();
+  });
+
+  test("Escape closes the overlay", async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("[data-intro-overlay]")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.locator("[data-intro-overlay]")).toHaveCount(0);
+    await context.close();
+  });
+
+  test("focus stays inside the overlay while it is open", async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("[data-intro-overlay]")).toBeVisible();
+    for (let i = 0; i < 8; i += 1) {
+      await page.keyboard.press("Tab");
+      const inside = await page.evaluate(() =>
+        Boolean(document.activeElement?.closest("[data-intro-overlay]")),
+      );
+      expect(inside, `Tab #${i + 1} escaped the overlay`).toBe(true);
+    }
+    await context.close();
+  });
+
+  // ADR-0003 最有力的那段證據：舊的自動導向把「我不要動畫／不要花流量」的人
+  // 推去看一張靜態圖。覆蓋層對他們也只會是多一次點擊，所以閘門在繪製前就擋掉。
+  for (const [label, options] of [
+    ["reduced motion", { reducedMotion: "reduce" as const }],
+    ["Save-Data", {}],
+  ] as const) {
+    test(`${label} never sees the overlay and downloads no model`, async ({ browser }) => {
+      const context = await browser.newContext(options);
+      if (label === "Save-Data") {
+        await context.addInitScript(() => {
+          Object.defineProperty(navigator, "connection", {
+            configurable: true,
+            value: { saveData: true, effectiveType: "4g", addEventListener() {}, removeEventListener() {} },
+          });
+        });
+      }
+      const page = await context.newPage();
+      const requests: string[] = [];
+      page.on("request", (request) => {
+        if (MODEL_URL.test(request.url())) requests.push(request.url());
+      });
+      await page.goto("/", { waitUntil: "domcontentloaded" });
+      await expect(page.locator("html")).not.toHaveAttribute("data-intro-gate", "on");
+      await expect(page.locator("[data-intro-overlay]")).toHaveCount(0);
+      await expect(page.locator("[data-landing-root]")).toBeVisible();
+      await expect(page.locator("[data-landing-root]")).not.toHaveAttribute("inert", "");
+      await expect.poll(() => requests.length, { timeout: 1_500 }).toBe(0);
+      await context.close();
+    });
+  }
+
+  test("a blocked sessionStorage still leaves Landing usable", async ({ browser }) => {
+    const context = await browser.newContext();
+    await context.addInitScript(() => {
+      Object.defineProperty(window, "sessionStorage", {
+        configurable: true,
+        get() { throw new DOMException("blocked", "SecurityError"); },
+      });
+    });
+    const page = await context.newPage();
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    // fail-safe 的方向是「不開覆蓋層」，而不是留下一層關不掉的東西。
+    await expect(page.locator("html")).not.toHaveAttribute("data-intro-gate", "on");
+    await expect(page.locator("[data-landing-root]")).toBeVisible();
+    await expect(page.locator("[data-landing-root]")).not.toHaveAttribute("inert", "");
+    await context.close();
   });
 });

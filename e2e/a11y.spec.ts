@@ -1,6 +1,12 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { seedParentGatePassed } from "./parent-gate";
+import { skipIntroOverlay } from "./intro-gate";
+
+// ADR-0004：這支規格測的是 Landing／內容頁本身，先跳過首頁的 3D 開場覆蓋層。
+test.beforeEach(async ({ page }) => {
+  await skipIntroOverlay(page);
+});
 
 /**
  * 無障礙回歸：用 axe-core 掃描主要頁面，只擋下 critical / serious 等級的問題，

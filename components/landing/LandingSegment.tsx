@@ -1,6 +1,5 @@
 "use client";
 
-import type { ReactNode } from "react";
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
 import LandingPlayLink from "./LandingPlayLink";
@@ -17,7 +16,6 @@ type LandingSegmentProps = {
   /** 下一段錨點；最後一段指向 landing-foot（頁尾 snap pane）。 */
   nextAnchorId: string | null;
   /** 首段的次要入口（ADR-0003 的 Intro opt-in 連結）；由 server 端傳入。 */
-  entry?: ReactNode;
 };
 
 const FOOTER_ANCHOR = "landing-foot";
@@ -28,7 +26,6 @@ export default function LandingSegment({
   index,
   siteIntro,
   nextAnchorId,
-  entry,
 }: LandingSegmentProps) {
   const landingScroll = useLandingScroll();
   const eager = index === 0;
@@ -163,7 +160,6 @@ export default function LandingSegment({
             )}
           </Link>
         </div>
-        {entry ? <div className={`${styles.entryRow} scrollEnter scrollEnterStagger3`}>{entry}</div> : null}
       </div>
     </section>
   );

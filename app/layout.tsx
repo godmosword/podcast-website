@@ -7,6 +7,7 @@ import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import ReturnVisitPing from "@/components/ReturnVisitPing";
 import SiteNavBar from "@/components/landing/SiteNavBar";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { INTRO_GATE_INIT_SCRIPT } from "@/lib/intro-gate";
 import { siteIdentityJsonLd } from "@/lib/json-ld";
 import { getSiteUrl } from "@/lib/site-url";
 import { STORIES_VIEW_INIT_SCRIPT } from "@/lib/stories-view";
@@ -107,6 +108,9 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: STORIES_VIEW_INIT_SCRIPT }} />
+        {/* 首頁 3D 開場的閘門：必須在首次繪製前決定，否則就會出現
+            ADR-0003 量到的那種「先看到內容再被蓋掉」的閃爍。 */}
+        <script dangerouslySetInnerHTML={{ __html: INTRO_GATE_INIT_SCRIPT }} />
         <JsonLd data={siteIdentityJsonLd()} />
       </head>
       <body>

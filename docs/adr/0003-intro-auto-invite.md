@@ -1,6 +1,10 @@
 # ADR-0003：取消首次訪問自動導向 Intro，改為 opt-in 入口
 
-- **狀態**：已實作（2026-09-08）。取代 [INTRO-PORTAL-SPEC](../specs/INTRO-PORTAL-SPEC.md) §4.1／§4.2／§4.4 的自動邀請契約。入口已由 Phase 8 定稿為 Landing 首段的 SSR 連結；頁尾不重複放置入口。
+- **狀態**：已實作（2026-09-08），其後**被 [ADR-0004](./0004-intro-overlay-on-home.md) 部分取代**（2026-09-08）。
+  取代 [INTRO-PORTAL-SPEC](../specs/INTRO-PORTAL-SPEC.md) §4.1／§4.2／§4.4 的自動邀請契約。
+  **仍然有效**：第 1、2、4、5、6 條，以及「不要用 redirect／middleware／cookie」的結論。
+  **已被取代**：第 3 條的 Landing opt-in SSR 連結（`IntroEntry`）改為同頁覆蓋層；
+  下方「被否決的替代方案 B」的否決理由只在有導航時成立，ADR-0004 說明為何它不適用於同頁覆蓋層。
 - **決策**：**砍掉自動邀請。** `/` 永遠直接是 Landing，零 client redirect；`/intro` 改由 Landing 上一個明確的 SSR 連結進入。
 - **本 ADR 的目的是終結反覆討論**：要改回自動導向，必須寫新的 ADR 並附上真機證據，不得在實作中悄悄改掉。
 

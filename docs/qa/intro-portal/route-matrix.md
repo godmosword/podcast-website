@@ -2,7 +2,7 @@
 
 對照 [PLAN §15](../../specs/INTRO-PORTAL-PLAN.md) 的 R01–R12（路由與入口）與 F01–F13（載入與生命周期），共 25 個必測 ID。
 
-- 產生日期：2026-09-07；2026-09-08 依 ADR-0003 實作與 v3 乾淨重建更新
+- 產生日期：2026-09-07；2026-09-08 依 ADR-0003 實作與 v3 乾淨重建更新；2026-09-08 再依 [ADR-0004](../../adr/0004-intro-overlay-on-home.md)（3D 開場改為首頁同頁覆蓋層）與手機構圖修正更新
 - 測試檔：[`e2e/intro-portal.spec.ts`](../../../e2e/intro-portal.spec.ts)（53 個 test）、[`components/landing/hero-world/active-clock.test.ts`](../../../components/landing/hero-world/active-clock.test.ts)（`IntroVisit.test.ts` 已隨自動邀請一起刪除）
 - 執行環境（2026-09-08 首次驗收）：Claude Code 遠端容器 Linux、Chromium（Playwright 1.60，**軟體算圖**）、`npm run build` 後 `next start -p 3000`，`--workers=1`
 - 執行環境（2026-09-08 合併 main 後複驗）：本機 macOS（Darwin 25.6.0）、Chromium、預設平行 workers（`fullyParallel: true`）
@@ -10,6 +10,21 @@
 - 最終結果：Intro E2E **53 passed / 0 failed**；F11 單獨與重複平行執行皆通過。另有 public smoke／a11y **17 passed**，trusted visual **81 passed**（含 Intro poster／ready／greeting 與 Landing Intro 入口 baseline）。
 - 先前 macOS 全檔平行的 **52 passed / 1 failed** 是 F11 在 CPU 競爭下的既有 flake；同一條測試單獨執行穩定通過，且在合併前的 `5245be6` 也可重現。這次以本地 v3 fixture、`heroQa` 時鐘與 lifecycle signal 固定場景後，F11 的場景請求、page error 與 listener／canvas 清理都納入斷言。CI 有 `retries: 2`。
 - 舊結果（容器、`--workers=1`）：**20 passed / 0 failed**。驗收當下 `runs the signature phases once and pauses active time` 曾在軟體算圖下失敗，追查為既有缺陷（動畫以 `Math.min(delta, .05)` 累加 render delta，低幀率把時間軸拉長），已於 2026-09-08 修正並補回歸測試，見 [`v3-clean-rebuild-20260908/frame-rate-timeline.md`](./v3-clean-rebuild-20260908/frame-rate-timeline.md)
+
+## 2026-09-08 覆蓋層與構圖這一輪
+
+| 項目 | 結果 |
+|---|---|
+| Intro E2E | **65 passed / 0 failed**（`--workers=1`），含 9 條覆蓋層新契約與 4 條 stage 幾何 |
+| smoke／a11y／public | **65 passed / 0 failed** |
+| 單元測試 | **1877 passed**（新增 `lib/intro-gate.test.ts` 16 條、`HeroWorld.module.css.test.ts` 4 條） |
+| 構圖量測 | `npm run qa:hero-framing` 六個 stage 尺寸全 PASS |
+| `/` 初始 JS | 231,084 → 235,716 bytes gzip（**+4,632 bytes**）。**0 個** chunk 含 three.js／r3f——3D runtime 仍在 `next/dynamic` 後面 |
+
+構圖修正前後（390×844）：舊設定的可見世界寬只有 8.0 世界單位，島本身寬 11.34，
+**左右各有約 1.68 世界單位（約 30% 島寬）落在畫面外**。成因是 `.stage` 的
+`width:134%; right:-17%` 搭配 `.hero{overflow:hidden}`，再加相機 `scale:1.15`。
+修正後可見寬 11.9、島佔 ±0.924 NDC，左右對稱且完整，只有島的前緣在下沿微出血。
 
 ## 狀態定義
 
@@ -21,19 +36,28 @@
 
 ## R01–R12 路由與入口
 
-> [ADR-0003](../../adr/0003-intro-auto-invite.md) 取消自動邀請，**已於 2026-09-08 實作**：
-> `/` 永遠停在 Landing，`components/intro/IntroVisit.tsx` 與 session key 已刪除，
-> Intro 改由 Landing 首段的 SSR 連結（`components/landing/IntroEntry.tsx`）進入。
+> [ADR-0003](../../adr/0003-intro-auto-invite.md) 取消自動邀請（2026-09-08 實作），
+> 隨後 [ADR-0004](../../adr/0004-intro-overlay-on-home.md) 把 3D 開場改成**首頁的同頁覆蓋層**：
+> `/` 仍然回傳完整 Landing HTML、零 redirect、canonical 不變，覆蓋層由 `<head>` 的同步
+> script 在首次繪製前決定。`IntroEntry` 已移除，`IntroVisit` 與舊 session key 早已刪除。
 > R01–R07 與 R12 隨自動導向一起消滅——它們描述的行為已不存在，不是未測。
-> 現行必測只剩四條：
+> R13–R19 是覆蓋層的新契約（2026-09-08 補）：
 
 | ID | 應有結果 | 狀態 | 對應 test |
 |---|---|---|---|
 | R08 | Back／Forward 在 Landing↔Intro 間正常往返，無 redirect 迴圈 | PASS | `R08: Back and Forward move between Landing and Intro without a redirect loop` |
-| R09 | 新訪客停在 Landing，首段有 SSR `/intro` 連結可點進 Intro | PASS | `R09: a fresh visit stays on Landing and offers an SSR link into the intro`（另檢查 server HTML 內含 `href="/intro"`） |
-| R10 | JS disabled：Landing 內容與首段 Intro 入口都可用 | PASS | `R10: keeps Landing content and the native intro entry usable without JavaScript` |
+| R09 | `/intro` 仍可單獨開啟並交還 Landing，且不會再被覆蓋層蓋一次 | PASS | `R09: /intro stays reachable on its own and hands back to Landing` |
+| R10 | JS disabled：Landing 可用、覆蓋層不出現、`/intro` 仍可直接開 | PASS | `R10: keeps Landing content usable and the overlay absent without JavaScript` |
 | R11 | 修飾鍵點 Enter 保留原生連結語意 | PASS | `R11: a modifier click on Enter keeps native link semantics` |
-| － | `/`、深連結、`/?enter=1` 都不下載 GLB，且 canonical 仍是 `/` | PASS | `deep links and Landing never download the hero models` |
+| R13 | `/` 的 server HTML 同時含完整 Landing、PodcastSeries JSON-LD 與覆蓋層 markup | PASS | `the server HTML carries both the full Landing and the overlay` |
+| R14 | 首次到訪打開覆蓋層，網址與 canonical 不變，背後 Landing 被 `inert` 圍住 | PASS | `a first visit opens the overlay without changing the URL` |
+| R15 | 按進入就地關閉、焦點交給 `#main-content`、不新增 history entry | PASS | `entering dismisses the overlay, hands focus to main, and adds no history entry` |
+| R16 | 每個瀏覽分頁一次；同分頁重整不再出現，新分頁會再出現 | PASS | `the overlay is a once-per-tab moment` |
+| R17 | Esc 可關閉；開啟期間 Tab 不會跑到覆蓋層背後 | PASS | `Escape closes the overlay`、`focus stays inside the overlay while it is open` |
+| R18 | reduced motion／Save-Data 從不遇到覆蓋層，且不下載任何模型 | PASS | `reduced motion never sees the overlay and downloads no model`、`Save-Data never sees…` |
+| R19 | sessionStorage 被封鎖時 fail-safe 成「不打開」，Landing 仍可用 | PASS | `a blocked sessionStorage still leaves Landing usable` |
+| － | 閘門關著的 `/`、深連結、`/?enter=1` 都不下載 GLB，且 canonical 仍是 `/` | PASS | `deep links and a gated Landing never download the hero models` |
+| － | 直式手機的 stage 不溢出 hero 框、頁面不橫向捲動（320／390／430／768） | PASS | `stage stays inside the hero frame at …`（4 條） |
 
 <details>
 <summary>2026-09-07 自動導向時期的 R01–R12 實測（歷史紀錄，行為已移除）</summary>

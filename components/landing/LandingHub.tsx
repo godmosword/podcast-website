@@ -2,9 +2,7 @@ import SiteFooter from "@/components/SiteFooter";
 import JsonLd from "@/components/JsonLd";
 import LandingScrollView from "@/components/landing/LandingScrollView";
 import LandingSegment from "@/components/landing/LandingSegment";
-import SegmentNav from "@/components/landing/SegmentNav";
 import DuduCompanion from "@/components/landing/DuduCompanion";
-import IntroEntry from "@/components/landing/IntroEntry";
 import LandingEntryFocus from "@/components/landing/LandingEntryFocus";
 import LandingBedtimeLayer from "@/components/landing/LandingBedtimeLayer";
 import { DUDU_EMOTION_BY_SEGMENT } from "@/data/dudu-emotions";
@@ -19,10 +17,6 @@ const FOOTER_ANCHOR = "landing-foot";
 export default function LandingHub() {
   const siteIntro = homeSiteIntro();
   const segments = resolveLandingSegments();
-  const navItems = segments.map((s) => ({
-    anchorId: s.anchorId,
-    label: s.navLabel,
-  }));
   const duduItems = segments.map((s) => ({
     anchorId: s.anchorId,
     emotion: DUDU_EMOTION_BY_SEGMENT[s.id],
@@ -41,7 +35,6 @@ export default function LandingHub() {
             veil: segment.bedtimeVeil,
           }))}
         />
-        <SegmentNav items={navItems} />
 
         {segments.map((segment, index) => (
           <LandingSegment
@@ -49,7 +42,6 @@ export default function LandingHub() {
             segment={segment}
             index={index}
             siteIntro={index === 0 ? siteIntro : undefined}
-            entry={index === 0 ? <IntroEntry /> : undefined}
             nextAnchorId={
               segments[index + 1]?.anchorId ??
               (index === segments.length - 1 ? FOOTER_ANCHOR : null)

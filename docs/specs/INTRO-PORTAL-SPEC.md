@@ -151,16 +151,19 @@ Intro 不是選關、角色圖鑑、遊戲 hub、故事目錄或可自由探索�
 
 ## 4. 路由、Session、History 與 SEO
 
-> **自動邀請已依 [ADR-0003](../adr/0003-intro-auto-invite.md) 取消並於 2026-09-08 實作完成。**
-> `/` 永遠停在 Landing、零 client redirect；`/intro` 由 Landing 首段的 SSR 連結
-> （`components/landing/IntroEntry.tsx`）進入。§4.2 已作廢，§4.1 的 replace 一列與
-> §4.4 的首次閃爍段落一併移除。要改回自動導向必須另寫 ADR。
+> **自動邀請依 [ADR-0003](../adr/0003-intro-auto-invite.md) 取消（2026-09-08 實作），
+> 隨後 [ADR-0004](../adr/0004-intro-overlay-on-home.md) 把 3D 開場改成首頁的同頁覆蓋層。**
+> `/` 仍然永遠回傳完整 Landing HTML、零 client redirect、零 middleware、canonical 不變；
+> 差別是首次到訪時有一層蓋在 Landing 上的 3D 開場，由 `<head>` 的同步 script
+> （`lib/intro-gate.ts`）在首次繪製前決定，按「進入」就地淡出，網址全程是 `/`。
+> Landing 首段的 opt-in 連結（`IntroEntry`）已移除。§4.2 的舊 session 規則仍然作廢——
+> 覆蓋層用的是新的 key 與新的判斷，不是把舊機制接回來。
 
 ### 4.1 路由契約
 
 | 位置 | Server response／內容 | Client 行為 | Canonical |
 |---|---|---|---|
-| `/` | 200、完整 Landing SSR／SSG | 停在 Landing；不做任何 client redirect | `/` |
+| `/` | 200、完整 Landing SSR／SSG（含 3D 覆蓋層的 markup） | 停在 `/`；首次到訪由閘門開啟覆蓋層，按進入就地關閉，不做任何 client redirect | `/` |
 | `/?enter=1` | 同一 Landing、200 | 直接進入（Intro 的出口，舊連結不壞） | `/` |
 | `/#segment-*` | Landing + anchor | 保留該段定位，不開 Intro | `/` |
 | `/intro` | 200、標題／poster／Enter SSR | 優先載入靜態，再漸進增強 | `/intro` |
@@ -169,10 +172,16 @@ Intro 不是選關、角色圖鑑、遊戲 hub、故事目錄或可自由探索�
 
 首選保留 `/`，避免把所有既有品牌回家連結改成 `/landing`。不建立第二份內容相同的 Landing 路由。
 
-### 4.2 Session 規則（已作廢）
+### 4.2 Session 規則（舊機制已作廢；ADR-0004 的閘門是另一套）
 
-ADR-0003 取消自動邀請後，Intro 不再需要任何 session 狀態：`cheche-intro-visited-v1`、
-`components/intro/IntroVisit.tsx` 與其掛載點都已刪除，`sessionStorage` 不再被 Intro 使用。
+ADR-0003 取消自動邀請時，`cheche-intro-visited-v1` 與 `components/intro/IntroVisit.tsx`
+連同掛載點一起刪除，那套 session 機制不會回來。
+
+ADR-0004 的覆蓋層另用一個 key：`cheche:intro-seen-v1`，語意是「這個分頁看過開場了」，
+只影響覆蓋層要不要打開，不影響任何路由。判斷寫在 `lib/intro-gate.ts` 的
+`shouldOpenIntroGate()` 純函式裡，`<head>` 的同步 script 是它的字串鏡像，兩者由
+`lib/intro-gate.test.ts` 交叉驗證。讀寫失敗時一律 fail-safe 成「不打開覆蓋層」——
+方向刻意選在這一邊，因為反向失效會讓 Landing 被一層關不掉的覆蓋層鎖死。
 Landing 的入口是一個純 SSR 連結，storage 被封鎖時行為完全不變。
 
 ### 4.3 動作與 Back 行為

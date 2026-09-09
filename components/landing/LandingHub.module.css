@@ -16,13 +16,6 @@
   );
 }
 
-/* ≤768px 的 SegmentNav 是貼底 fixed 實心列（44px + safe-area），避免壓住頁尾文字。 */
-@media (max-width: 768px) {
-  .footerPane {
-    padding-bottom: calc(44px + var(--safe-bottom));
-  }
-}
-
 /* 內容不足一屏時（極寬螢幕），頁尾仍貼底 */
 .footerPane > .footer {
   margin-top: auto;

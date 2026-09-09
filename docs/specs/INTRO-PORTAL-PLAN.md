@@ -314,17 +314,28 @@ triangles／materials 與 `validate:hero-world` 結果。兩者共用同一版 P
 
 ### 15.1 路由與入口
 
-> **[ADR-0003](../adr/0003-intro-auto-invite.md) 取消自動邀請，已於 2026-09-08 實作。** R01–R07 與 R12 的 redirect 部分已刪除，不是 skip。
+> **[ADR-0003](../adr/0003-intro-auto-invite.md) 取消自動邀請（2026-09-08 實作）；
+> [ADR-0004](../adr/0004-intro-overlay-on-home.md) 再把 3D 開場改成首頁的同頁覆蓋層。**
+> R01–R07 與 R12 描述的 redirect 行為已刪除，不是 skip——覆蓋層沒有導航，那些情境不存在。
+> R13–R19 是覆蓋層帶來的新契約。
 
 | ID | 應有結果 | 對應 test |
 |---|---|---|
 | R08 | Back／Forward 在 Landing↔Intro 之間正常往返，不出現 redirect 迴圈 | `R08: Back and Forward move between Landing and Intro without a redirect loop` |
-| R09 | 新訪客停在 Landing，且首段有 SSR 的 `/intro` 連結可點進 Intro | `R09: a fresh visit stays on Landing and offers an SSR link into the intro` |
-| R10 | 關閉 JavaScript 時，Landing 內容與首段 Intro 入口都可用 | `R10: keeps Landing content and the native intro entry usable without JavaScript` |
-| R11 | 修飾鍵點 Enter 保留原生連結語意，不被動畫攔截 | `R11: a modifier click on Enter keeps native link semantics` |
+| R09 | `/intro` 仍可單獨開啟並交還 Landing，且不會再被覆蓋層蓋一次 | `R09: /intro stays reachable on its own and hands back to Landing` |
+| R10 | 關閉 JavaScript 時 Landing 可用、覆蓋層不出現、`/intro` 仍可直接開 | `R10: keeps Landing content usable and the overlay absent without JavaScript` |
+| R11 | 修飾鍵點 Enter 保留原生連結語意，不被動畫攔截（`/intro` 的連結語意） | `R11: a modifier click on Enter keeps native link semantics` |
+| R13 | `/` 的 server HTML 同時含完整 Landing、PodcastSeries JSON-LD 與覆蓋層 markup | `the server HTML carries both the full Landing and the overlay` |
+| R14 | 首次到訪打開覆蓋層，網址與 canonical 不變，背後 Landing 被 `inert` 圍住 | `a first visit opens the overlay without changing the URL` |
+| R15 | 按進入就地關閉、焦點交給 `#main-content`、不新增 history entry | `entering dismisses the overlay, hands focus to main, and adds no history entry` |
+| R16 | 每個瀏覽分頁只出現一次；同分頁重整不再出現，新分頁會再出現 | `the overlay is a once-per-tab moment` |
+| R17 | Esc 可關閉；開啟期間 Tab 不會跑到覆蓋層背後 | `Escape closes the overlay`、`focus stays inside the overlay while it is open` |
+| R18 | reduced motion／Save-Data 從不遇到覆蓋層，且不下載任何模型 | `reduced motion never sees the overlay and downloads no model`、`Save-Data …` |
+| R19 | sessionStorage 被封鎖時 fail-safe 成「不打開」，Landing 仍可用 | `a blocked sessionStorage still leaves Landing usable` |
 
-另補一條非 R 編號的迴歸：`deep links and Landing never download the hero models` 驗證 `/`、
-深連結與 `/?enter=1` 都不下載 GLB，且 `/?enter=1` 的 canonical 仍是 `/`。
+另補一條非 R 編號的迴歸：`deep links and a gated Landing never download the hero models`
+驗證閘門關著的 `/`、深連結與 `/?enter=1` 都不下載 GLB，且 `/?enter=1` 的 canonical 仍是 `/`。
+閘門開著的 `/` **會**下載模型——那正是覆蓋層的用途，由 R18 從反面守住邊界。
 > 目前狀態見 [route-matrix.md](../qa/intro-portal/route-matrix.md)。
 
 | ID | 設定／動作 | 應有結果 | 方法 |

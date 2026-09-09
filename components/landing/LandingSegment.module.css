@@ -149,13 +149,6 @@
   gap: 10px;
 }
 
-/* 次要入口自成一列，不與主要 CTA 搶同一排的視線。 */
-.entryRow {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
 .cta {
   display: inline-flex;
   align-items: center;
@@ -341,13 +334,8 @@
     font-size: var(--fs-h3);
   }
 
-  /* 平板／手機用 SegmentNav 貼底細條，隱藏向下箭頭 */
-  .next {
-    display: none;
-  }
-
   .content {
-    padding-bottom: calc(var(--landing-mobile-nav-h) + 6px);
+    padding-bottom: calc(var(--safe-bottom) + 6px);
   }
 }
 
@@ -358,7 +346,7 @@
     align-items: end;
     column-gap: 4px;
     row-gap: var(--space-3);
-    padding-bottom: calc(var(--landing-mobile-nav-h) + 6px);
+    padding-bottom: calc(var(--safe-bottom) + 6px);
   }
 
   .headline {

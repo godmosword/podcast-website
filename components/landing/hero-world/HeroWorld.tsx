@@ -8,6 +8,7 @@ import { MODEL_PATH, chooseQuality, type MotionPhase, type Quality } from "./con
 import styles from "./HeroWorld.module.css";
 import { getActiveClock, LOAD_TIMEOUT_MS, MAX_TICK_DELTA_MS, SLEEP_AFTER_MS, TICK_MS } from "./active-clock";
 import { EXIT_TRANSITION_MS, TRANSITION_RESET_MS, markEnterIntent, resolveEnterAction } from "./enter-transition";
+import { dismissIntroGate } from "@/lib/intro-gate";
 
 const Scene = dynamic(() => import("./HeroScene"), { ssr: false });
 
@@ -37,7 +38,15 @@ export function canUseWebGL(): boolean {
   }
 }
 
-export default function HeroWorld() {
+export type HeroWorldMode = "page" | "overlay";
+
+/**
+ * `page` 是 `/intro` 獨立頁；`overlay` 是首頁上的同頁覆蓋層（ADR-0004）。
+ * 兩者共用同一份場景與生命周期，差別只在標題階層與出口語意：覆蓋層已經在
+ * `/` 上，所以出口是按鈕與 `onDismiss`，不是連結與導航。
+ */
+export default function HeroWorld({ mode = "page", onDismiss }: { mode?: HeroWorldMode; onDismiss?: () => void } = {}) {
+  const overlay = mode === "overlay";
   const router = useRouter();
   const [entering, setEntering] = useState(false);
   const [greeting, setGreeting] = useState(false);
@@ -157,13 +166,14 @@ export default function HeroWorld() {
 
   const mounted = eligible && !failed && (visible || ready);
   const active = visible && pageVisible && !paused && !exited;
-  const enter = (event: React.MouseEvent<HTMLAnchorElement>) => {
+  const enter = (event: React.MouseEvent<HTMLElement>) => {
     const action = resolveEnterAction({
       button: event.button, metaKey: event.metaKey, ctrlKey: event.ctrlKey,
       shiftKey: event.shiftKey, altKey: event.altKey,
       ready, eligible, failed,
       reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
       navigating: navigating.current,
+      mode,
     });
     // 修飾鍵／中鍵：原生 `<a href="/?enter=1">` 語意原封不動（新分頁、新視窗、
     // 複製連結），這個分頁不做任何事，也不留下進站意圖。
@@ -172,12 +182,23 @@ export default function HeroWorld() {
     // 第二次觸發（雙擊、鍵盤重複）只被吃掉，不會產生第二次導航。
     if (action === "ignore") return;
     navigating.current = true;
-    markEnterIntent();
-    // 導航立刻開始。淡出與相機推近是**同時**發生的裝飾，不是導航的前置條件，
-    // 所以慢裝置或提早就緒的路由都不會被動畫拖住。
     // 兩條路徑都立刻停止 3D；差別只在有沒有那層 ≤360ms 的淡出與推近。
     setExited(true);
     if (action === "transition") setEntering(true);
+    if (overlay) {
+      // 覆蓋層沒有導航可以等：淡出跑完就把它拿掉，露出底下本來就在的 Landing。
+      transitionResetTimer.current = setTimeout(() => {
+        transitionResetTimer.current = null;
+        onDismiss?.();
+      }, action === "transition" ? EXIT_TRANSITION_MS : 0);
+      return;
+    }
+    markEnterIntent();
+    // 從 `/intro` 進站的人已經看過開場了，先記下來，否則回到 `/` 會再被首頁的
+    // 覆蓋層蓋一次（ADR-0004）。
+    dismissIntroGate();
+    // 導航立刻開始。淡出與相機推近是**同時**發生的裝飾，不是導航的前置條件，
+    // 所以慢裝置或提早就緒的路由都不會被動畫拖住。
     router.replace("/");
     // route chunk 失敗時把原生連結還給使用者，不留住不透明的覆蓋層。
     transitionResetTimer.current = setTimeout(() => {
@@ -188,12 +209,16 @@ export default function HeroWorld() {
     }, TRANSITION_RESET_MS);
   };
   return (
-      <section ref={root} className={styles.hero} aria-labelledby="intro-title" data-hero-world
+      <section ref={root} className={styles.hero}
+      {...(overlay ? { "aria-label": "車車遊樂園開場" } : { "aria-labelledby": "intro-title" })} data-hero-world
       style={{ "--exit-transition-ms": `${EXIT_TRANSITION_MS}ms` } as React.CSSProperties}
       data-scene-state={failed ? "fallback" : ready && eligible ? "ready" : "poster"}
       data-scene-active={mounted && active} data-entering={entering} data-greeting={greeting} data-motion-phase={phase}>
       <div className={styles.copy}>
-        <h1 id="intro-title" className={styles.title}>車車遊樂園</h1>
+        {/* 首頁已經有自己的 h1，覆蓋層不能再開一個第二層級標題。 */}
+        {overlay
+          ? <p className={styles.title}>車車遊樂園</p>
+          : <h1 id="intro-title" className={styles.title}>車車遊樂園</h1>}
         <p className={styles.description}>故事，就從這裡出發。</p>
       </div>
       <div className={styles.stage} aria-hidden="true" data-hero-stage>
@@ -210,7 +235,9 @@ export default function HeroWorld() {
         </div> : null}
       </div>
       <div className={styles.actions}>
-        <Link href="/?enter=1" replace className={styles.cta} onClick={enter}>進入車車遊樂園 <span aria-hidden="true">→</span></Link>
+        {overlay
+          ? <button type="button" className={styles.cta} data-intro-dismiss onClick={enter}>進入車車遊樂園 <span aria-hidden="true">→</span></button>
+          : <Link href="/?enter=1" replace className={styles.cta} onClick={enter}>進入車車遊樂園 <span aria-hidden="true">→</span></Link>}
         {ready && !failed && quality !== "low" ? (
           <button
             type="button"
@@ -223,8 +250,11 @@ export default function HeroWorld() {
         ) : null}
       </div>
       {/* href 維持 `/?enter=1`：那是無 JS 與深連結的語意入口。JS 可用時兩個連結
-          都改由 router 送到乾淨的 `/`，canonical 不變。 */}
-      <Link href="/?enter=1" replace className={styles.skip} onClick={enter}>略過動畫</Link>
+          都改由 router 送到乾淨的 `/`，canonical 不變。覆蓋層已經在 `/` 上，
+          所以那裡的出口是按鈕。 */}
+      {overlay
+        ? <button type="button" className={styles.skip} data-intro-dismiss onClick={enter}>略過動畫</button>
+        : <Link href="/?enter=1" replace className={styles.skip} onClick={enter}>略過動畫</Link>}
     </section>
   );
 }

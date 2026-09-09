@@ -1,0 +1,15 @@
+/* 顯隱由 app/globals.css 的 [data-intro-overlay] 規則決定——inline script 拿不到
+   CSS Modules 的雜湊 class 名，只能靠 data 屬性。這支只管版面。 */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60; /* 高於 SiteNavBar */
+  background: #fff8ef;
+  /* 手指在覆蓋層上滑動不能穿透到底下的 Landing snap 容器。 */
+  touch-action: none;
+  overscroll-behavior: contain;
+}
+
+.overlay:focus-visible {
+  outline: none;
+}

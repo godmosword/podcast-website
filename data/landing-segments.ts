@@ -17,7 +17,8 @@ export type LandingSegmentDef = {
     href: string;
     external?: boolean;
   };
-  /** SegmentNav 短標（aria-label／hover，避免長 CTA 灌進導覽點）。 */
+  /** 段落短標。ADR-0004 移除首頁底列導覽後，消費者是宇宙地圖的車庫連結
+   *  （lib/universe-map.ts 的 getCarParkLinks），不是 Landing 自己。 */
   navLabel: string;
   /** 標題下一行副標（≤18 字；僅需要說明身分的段落使用）。 */
   subtitle?: string;

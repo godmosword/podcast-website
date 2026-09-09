@@ -24,10 +24,16 @@ export type EnterActivation = {
   reducedMotion: boolean;
   /** 這次點擊之前已經開始導航。 */
   navigating: boolean;
+  /**
+   * `page` 是 `/intro` 獨立頁；`overlay` 是首頁上的同頁覆蓋層（ADR-0004）。
+   * 覆蓋層已經在 `/` 上了，沒有導航可言，所以原生連結語意在那裡不成立。
+   */
+  mode?: "page" | "overlay";
 };
 
 /**
  * - `native`：修飾鍵、中鍵、非主鍵 → 完全不攔截，交給 `<a href="/?enter=1">`。
+ *   只在 `page` 模式成立：覆蓋層的出口是按鈕，Cmd／中鍵開新分頁沒有意義。
  * - `ignore`：重複觸發（雙擊、鍵盤重複）→ 吃掉，不產生第二次導航。
  * - `transition`：live 場景 → 立刻導航，同時播 ≤360ms 的淡出與相機推近。
  * - `direct`：poster／載入中／fallback／reduced motion → 立刻導航，不做任何動畫。
@@ -36,7 +42,9 @@ export type EnterAction = "native" | "ignore" | "transition" | "direct";
 
 export function resolveEnterAction(activation: EnterActivation): EnterAction {
   const { button, metaKey, ctrlKey, shiftKey, altKey } = activation;
-  if (button !== 0 || metaKey || ctrlKey || shiftKey || altKey) return "native";
+  const modified = button !== 0 || metaKey || ctrlKey || shiftKey || altKey;
+  if (modified && (activation.mode ?? "page") === "page") return "native";
+  if (modified) return "ignore";
   if (activation.navigating) return "ignore";
   const live = activation.ready && activation.eligible && !activation.failed && !activation.reducedMotion;
   return live ? "transition" : "direct";

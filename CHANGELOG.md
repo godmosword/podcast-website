@@ -6,6 +6,8 @@
 
 ### Added
 
+- **3D 開場改為首頁的同頁覆蓋層（ADR-0004）**：`/` 仍然回傳完整 Landing HTML——canonical、Podcast JSON-LD、內容與內部連結一字未改、零 client redirect、零 middleware——3D 蓋在它上面。要不要蓋由 `<head>` 的同步 script（`lib/intro-gate.ts`）在**首次繪製前**決定，所以沒有導航可以閃爍。每個瀏覽分頁出現一次（`cheche:intro-seen-v1`），按「進入車車遊樂園」就地淡出、焦點交給 `#main-content`、不新增 history entry。閘門同時擋掉 reduced motion／Save-Data／2G：這些人第一眼就是 Landing，也不會下載任何模型。CSS 預設隱藏、script 才打開——無 JS 或 script 出錯時直接看到 Landing，而不是被一層關不掉的覆蓋層鎖死。`/` 初始 JS +4,632 bytes gzip，**0 個** chunk 含 three.js（3D runtime 仍在 `next/dynamic` 後面）。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
+
 - **跨 viewport QA 工具 `npm run qa:intro-viewports`**：在十個尺寸（320–1440、短橫向、平板）量 `/intro` 的水平溢出、兩個出口的尺寸與是否在首屏內、render DPR、旋轉後版面、進站後的 focus 與 canvas 歸零，另外跑五種網路情境（Wi-Fi／400kbps 節流／離線／Save-Data／GLB 404），輸出截圖與 JSON。**這是 Chromium 模擬，不能代替真機**，輸出的每一列都標 `emulated: true`。**未改** Apple sync workflow。
 - **Intro 效能量測工具 `npm run measure:intro-performance`**：對正在跑的 production build 量載入（`/` 的 3D 請求、初始 JS、延遲 3D chunk gzip、GLB／poster 傳輸、waterfall）、三個 quality tier 的 DPR／frame time 分佈、五次往返的資源與 rAF 行為、LCP／CLS 與 Enter 回饋延遲，輸出附條件的 JSON（build id、瀏覽器、OS、viewport、DPR、tier、cold/warm、網路／CPU）。`render-hero-posters.mjs` 加 `--quality=<tier>`，讓 draw call 的 main／shadow 拆分可以逐階量。**未改** Apple sync workflow。
 - **Intro trusted visual baseline**：新增 Landing 首段 Intro 入口的元素截圖，以及 desktop／mobile 的 poster、ready、greeting 六組核心畫面；以固定 viewport、reduced motion 與 `heroQa` 時鐘穩定取樣，完整 trusted visual suite 81 張通過。**未改** Apple sync workflow。
@@ -13,6 +15,8 @@
 - **站內留言牆 `/feedback`**：頂欄「留言」改站內頁（馬米邀請小卡、家長雙同意、信箱蒐集但不公開、先審後發）。公開列只顯示已核准的暱稱／日期／正文；示範卡獨立、不進 list。後台 `/studio/feedback` 以 `FEEDBACK_MODERATION_SECRET` 密語保護，可核准／隱藏／硬刪。無 `DATABASE_URL` 時頁面仍 200、表單降級 mailto。法律頁新增「公開留言牆」專章，政策版本 `2026-09-05`。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、`SiteHeader`「留言給我」圓鈕（仍 env-gated）。
 
 ### Changed
+
+- **移除首頁底列分段導覽（SegmentNav）與 Landing 的 Intro 入口膠囊（IntroEntry）**：3D 開場接手首頁第一印象後，底列在四段內容上再疊一層水平導覽只是重複，膠囊入口也不再需要。手機的換段控制改回各段右下的**向下箭頭**——它原本因為「平板／手機用 SegmentNav 貼底細條」被 CSS 藏起來，底列一走若不放出來，四個 snap pane 之間就只剩盲滑；新增 320／390／767 三個寬度的 e2e 守住它可見、≥44×44 且真的換段。`--landing-mobile-nav-h` 四個使用點一併清掉。`navLabel` 欄位保留（`lib/universe-map.ts` 的車庫連結仍在用）。**未改** `LandingScrollView`／`LandingScrollContext`／`scrollToSegment`、DuduCompanion、Apple sync workflow。
 
 - **`/feedback` 留言欄加可見標籤、拿掉信紙橫線**：欄位標「留言」，底色與暱稱／信箱同為實色 `--card`。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、法律頁政策版本。
 - **`/feedback` 表單收斂**：欄位改「暱稱」、信箱改選填；拿掉蒐集說明、起頭 chip、家長旁白、送出提示、mailto 導言與空牆範例卡。核准留言從第一則就上牆。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、法律頁政策版本。
