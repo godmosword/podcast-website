@@ -43,7 +43,7 @@
 | 無黃色條紋 | 無 | ✅ 符合 |
 | 紅色主色 | `'red'` 色票 | ✅ 符合 |
 
-**結論：Phase 2 的實際範圍只剩三項** — 補車門號碼「2」、微笑線加粗提亮、輪徑對車高的比例收斂。原稿判定的「眼睛違規」不成立。
+**結論：Phase 2 的實際範圍只剩三項** — 補車門號碼「2」、微笑線加粗提亮、輪徑對車高的比例收斂。原稿判定的「眼睛違規」不成立。前兩項的 patch 已備妥於 [`assets/blender/hero-world/PHASE2-CANON-ALIGNMENT.md`](../../assets/blender/hero-world/PHASE2-CANON-ALIGNMENT.md)；第三項因與 `components/landing/hero-world/config.ts` 的 `WHEEL_RADIUS` 耦合（輪子轉速換算基準）而另案處理。
 
 ## 1. 現版等距圖的問題診斷
 
@@ -228,7 +228,7 @@ canon 已寫成單一來源 [`scripts/lib/character-sheet.ts`](../../scripts/lib
 | Phase | 內容 | 主要檔案 | 風險級 | 驗證 |
 |---|---|---|---|---|
 | **1. 角色設定書入庫** | ✅ **已落地（2026-09-09）**。與 canon 不衝突的部分寫成 SSOT，掛進 roamer prompt 與 `小紅賽車` `desc`；三項推翻 canon 的設定留待裁決（§2.5） | `scripts/lib/character-sheet.ts`、`scripts/generate-roamer-assets.ts`、`data/characters.json` | L2 | `npx vitest run scripts/lib/character-sheet.test.ts`＋`npm run verify:episodes` |
-| **2. Hero 車幾何補齊** | 依 §0.3 修 `build.py`（範圍受 §2.5 裁決約束）；**須與 Blender 重建同一輪完成** — manifest 記有 `buildScriptSha256`，只改腳本不重建會讓來源雜湊與出貨 GLB 不同步 | `assets/blender/hero-world/build.py` | L3（Protected：改動 v3 發布鏈） | `npm run release:hero-world`（需 Blender CLI）＋ `npm run validate:hero-world` ＋ 視覺 baseline 重錄 |
+| **2. Hero 車幾何補齊** | 📋 **patch 已備妥待執行** — 見 [`assets/blender/hero-world/PHASE2-CANON-ALIGNMENT.md`](../../assets/blender/hero-world/PHASE2-CANON-ALIGNMENT.md)。補車門白圓底號碼「2」＋微笑線加粗加寬；輪徑刻意不動（與 `config.ts` 的 `WHEEL_RADIUS` 耦合）。**須與 Blender 重建同一輪完成** — manifest 記有 `buildScriptSha256` | `assets/blender/hero-world/build.py` | L3（Protected：改動 v3 發布鏈） | `npm run release:hero-world`（需 Blender CLI）＋ `npm run validate:hero-world` ＋ 視覺 baseline 重錄 |
 | **3. 橫向分層帶前端** | 新增 `components/landing/hero-parallax/`，六層 `transform` 視差；`/intro` 改用之或並存 A/B | `components/landing/hero-parallax/*`、`app/intro/` | L3（UI 風險：`transform`／`animation`／`prefers-reduced-motion` 強制 Opus 設計審） | `npm run test:visual:trusted`＋`npm run test:e2e`＋`npm run build` |
 | **4. 分層素材產出** | 六層 tile 出圖與接縫驗證 | `public/landing/hero-parallax/` | L3（付費生圖，需逐張人工審） | 人工審 contact sheet；接縫左右對接目檢 |
 
