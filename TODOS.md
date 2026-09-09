@@ -224,12 +224,12 @@ clip 快照在不同 macOS／Chromium 版本上的自然噪音底線。
 
 - [x] 規格 v1：診斷、角色設定書、六層分層規格、實作路徑、阻擋項  `見本 commit`
 - [x] Phase 1 角色設定書入庫：`scripts/lib/character-sheet.ts` SSOT ＋契約測試，掛進 roamer prompt 與 `小紅賽車` `desc`（未跑生圖；`desc` 不被 UI 渲染，零像素影響）  `見本 commit`
-- [ ] §2.5 canon 裁決：設定書的「大燈眼／黃條紋／星星天線」三項與定裝照牴觸，且同族三變體有 ep-23／ep-24 連貫性鎖。A 只改小紅家族（重抽 4 張）／B 全站重抽／C 維持 canon（現況）
-- [ ] Phase 2 `build.py` 小紅幾何補齊 — 範圍待 §2.5 裁決；**須與 Blender 重建同輪完成**（manifest 有 `buildScriptSha256`，只改腳本會造成來源漂移）
+- [x] §2.5 canon 裁決：**必須 follow 定裝照**（C 案）。設定書的「大燈眼／黃條紋／星星天線」三項作廢；SSOT 正向鎖 canon 臉部配置、負向擋這三種漂移  `見本 commit`
+- [ ] Phase 2 `build.py` 小紅幾何補齊 — 裁決後範圍縮為**三項**：補車門白圓底號碼「2」、微笑線加粗提亮、輪徑對車高比例收斂（眼位已符合 canon，非違規）。**須與 Blender 重建同輪完成**（manifest 有 `buildScriptSha256`，只改腳本會造成來源漂移）
 - [ ] Phase 3 `components/landing/hero-parallax/` 六層視差前端（UI 風險 → Opus 設計審）
 - [ ] Phase 4 六層 tile 素材（付費生圖，須先報張數取得文字確認）
 
-> **核對出的五項落差**（實作前必讀，見規格 §0.2）：Hero 的車是 `build.py` 程序化建模不是生圖；微笑線存在只是太細；角色 Logo 系統已移除故該論證前提失效；缺 Do-NOT 的是 roamer 生圖管線不是 Hero；設定書的「大燈眼／黃條紋／星星天線」三項與定裝照 canon 牴觸，屬推翻既有圖庫而非回歸規格。
+> **核對出的五項落差**（實作前必讀，見規格 §0.2）：Hero 的車是 `build.py` 程序化建模不是生圖；微笑線存在只是太細；角色 Logo 系統已移除故該論證前提失效；缺 Do-NOT 的是 roamer 生圖管線不是 Hero；設定書的「大燈眼／黃條紋／星星天線」三項與定裝照 canon 牴觸——**已裁決 follow 定裝照，該三項作廢**。
 
 ### 角色 Logo 識別系統（已移除）
 

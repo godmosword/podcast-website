@@ -28,6 +28,7 @@ import { ROOT } from "./lib/transcribe-core";
 import { removeBorderBackground } from "./lib/roamer-alpha";
 import {
   XIAO_HONG_DO_NOT,
+  XIAO_HONG_FACE_LAYOUT,
   XIAO_HONG_IDENTITY,
   XIAO_HONG_SILHOUETTE_TEST,
 } from "./lib/character-sheet";
@@ -120,7 +121,7 @@ const ROAMER_SPECS: RoamerSpec[] = [
         "texture, no gloss. Soft even diffuse lighting, low contrast, short soft contact shadow. " +
         "Pastel storybook palette, bright and friendly for kids. Stop-motion / claymation " +
         "aesthetic. Isolated on a transparent background, single object, centered. " +
-        `${XIAO_HONG_IDENTITY} ${XIAO_HONG_SILHOUETTE_TEST}`,
+        `${XIAO_HONG_FACE_LAYOUT} ${XIAO_HONG_IDENTITY} ${XIAO_HONG_SILHOUETTE_TEST}`,
       negative:
         `${XIAO_HONG_DO_NOT}, ` +
         "tilted, leaning, motion blur, perspective distortion, flat orthographic side profile, " +
