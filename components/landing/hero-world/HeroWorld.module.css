@@ -42,8 +42,11 @@
   .copy { top: max(7%, env(safe-area-inset-top)); left: 5%; right: 5%; text-align: center; }
   .title { font-size: clamp(2rem, 8vw, 3rem); }
   .description { margin-top: 10px; font-size: var(--fs-control); }
-  .stage { top: 23%; bottom: auto; height: 58%; width: 134%; right: -17%; }
-  .actions { left: 5%; right: 5%; bottom: max(11%, 72px); text-align: center; }
+  /* 直式手機綁寬度：島的左右兩端必須完整，出血只留在下緣。aspect-ratio 與
+     art-direction.ts 的 HERO_STAGE_ASPECT.mobile 同源，poster 與 canvas 因此
+     不會有構圖落差。 */
+  .stage { top: 36%; bottom: auto; height: auto; aspect-ratio: 11.9 / 5.95; width: 100%; right: 0; left: 0; }
+  .actions { left: 5%; right: 5%; bottom: max(13%, 84px); text-align: center; }
   .cta { font-size: var(--fs-control); min-height: 52px; padding: 12px 24px; }
   .pause { font-size: var(--fs-label); }
   .skip { left: 50%; right: auto; transform: translateX(-50%); bottom: max(2%, env(safe-area-inset-bottom)); white-space: nowrap; }

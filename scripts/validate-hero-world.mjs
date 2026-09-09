@@ -1,8 +1,22 @@
 import { createHash } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { build } from 'esbuild';
 import sharp from 'sharp';
 import validator from 'gltf-validator';
+
+// poster 尺寸的期待值取自 art-direction，與 CSS stage 及 render-hero-posters
+// 同源；寫死在這裡只會讓構圖一改就得三個地方對數字。
+const artTemp = await mkdtemp(join(tmpdir(), 'hero-validate-art-'));
+await build({
+  entryPoints: [new URL('../components/landing/hero-world/art-direction.ts', import.meta.url).pathname],
+  bundle: true, format: 'esm', outfile: join(artTemp, 'art.mjs'),
+});
+const { HERO_POSTER_SIZE } = await import(pathToFileURL(join(artTemp, 'art.mjs')).href);
+await rm(artTemp, { recursive: true, force: true });
 
 const version = process.argv[2] ?? 'v3';
 if (!['v2', 'v3'].includes(version)) throw new Error('Expected v2 or v3');
@@ -69,7 +83,8 @@ for (const name of ['poster.webp', 'poster-mobile.webp']) {
   const bytes = await readFile(file);
   const metadata = await sharp(file.pathname).metadata();
   check(metadata.format === 'webp', `${name}: WebP format`);
-  const dimensions = version === 'v2' ? (name === 'poster.webp' ? [1400,1000] : [840,600]) : (name === 'poster.webp' ? [1380,980] : [615,490]);
+  const expected = name === 'poster.webp' ? HERO_POSTER_SIZE.desktop : HERO_POSTER_SIZE.mobile;
+  const dimensions = version === 'v2' ? (name === 'poster.webp' ? [1400,1000] : [840,600]) : [expected.width, expected.height];
   check(metadata.width === dimensions[0] && metadata.height === dimensions[1], `${name}: expected dimensions`);
   const asset = manifest.assets.find(entry => entry.name === name);
   check(asset?.bytes === bytes.length, `${name}: manifest byte count`);
@@ -84,7 +99,8 @@ if (existsSync(master)) {
   const bytes = await readFile(master);
   const metadata = await sharp(master.pathname).metadata();
   const asset = manifest.assets.find(entry => entry.name === 'poster.png');
-  check(metadata.format === 'png' && metadata.width === (version === 'v2' ? 1400 : 1380) && metadata.height === (version === 'v2' ? 1000 : 980), 'poster.png: expected PNG dimensions');
+  const masterSize = version === 'v2' ? { width: 1400, height: 1000 } : HERO_POSTER_SIZE.desktop;
+  check(metadata.format === 'png' && metadata.width === masterSize.width && metadata.height === masterSize.height, 'poster.png: expected PNG dimensions');
   check(asset?.bytes === bytes.length, 'poster.png: manifest byte count');
   check(asset?.sha256 === createHash('sha256').update(bytes).digest('hex'), 'poster.png: manifest SHA-256');
 }

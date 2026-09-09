@@ -2,9 +2,11 @@ export type Quality = "high" | "medium" | "low";
 // Complete Phase 8 release; v1 and v2 remain available for rollback.
 export const MODEL_PATH = "/models/hero-world/v3";
 export const QUALITY = {
-  high: { dpr: 1.5, trees: 8, shadows: true },
-  medium: { dpr: 1.25, trees: 6, shadows: false },
-  low: { dpr: 1, trees: 4, shadows: false },
+  // shadowMap 只在 high 有意義（另兩階不投影），2048 讓屋簷與車底的陰影邊緣
+  // 不再是階梯狀——1024 在 1.5 DPR 下看得出鋸齒。
+  high: { dpr: 1.5, trees: 8, shadows: true, shadowMap: [2048, 2048] as [number, number] },
+  medium: { dpr: 1.25, trees: 6, shadows: false, shadowMap: [1024, 1024] as [number, number] },
+  low: { dpr: 1, trees: 4, shadows: false, shadowMap: [1024, 1024] as [number, number] },
 } as const;
 
 export function chooseQuality(cores: number, memory: number, mobile: boolean): Quality {

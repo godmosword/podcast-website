@@ -7,6 +7,7 @@
 ### Added
 
 - **3D 開場改為首頁的同頁覆蓋層（ADR-0004）**：`/` 仍然回傳完整 Landing HTML——canonical、Podcast JSON-LD、內容與內部連結一字未改、零 client redirect、零 middleware——3D 蓋在它上面。要不要蓋由 `<head>` 的同步 script（`lib/intro-gate.ts`）在**首次繪製前**決定，所以沒有導航可以閃爍。每個瀏覽分頁出現一次（`cheche:intro-seen-v1`），按「進入車車遊樂園」就地淡出、焦點交給 `#main-content`、不新增 history entry。閘門同時擋掉 reduced motion／Save-Data／2G：這些人第一眼就是 Landing，也不會下載任何模型。CSS 預設隱藏、script 才打開——無 JS 或 script 出錯時直接看到 Landing，而不是被一層關不掉的覆蓋層鎖死。`/` 初始 JS +4,632 bytes gzip，**0 個** chunk 含 three.js（3D runtime 仍在 `next/dynamic` 後面）。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
+- **構圖 QA 工具 `npm run qa:hero-framing`**：用正式的 R3F 場景與 CameraRig，把每個具名節點的頂點投影成螢幕座標，逐一斷言有沒有被畫面邊緣切掉；地面允許只在下緣出血，其餘一律必須完整入鏡。六個 stage 尺寸（320／375／390／414／430 直式＋桌機）。這把 `art-direction.ts` 註解裡「Roof, ferris rim and Little Red's eyes stay inside」從註解升級成可執行的斷言。**未改** Apple sync workflow。
 
 - **跨 viewport QA 工具 `npm run qa:intro-viewports`**：在十個尺寸（320–1440、短橫向、平板）量 `/intro` 的水平溢出、兩個出口的尺寸與是否在首屏內、render DPR、旋轉後版面、進站後的 focus 與 canvas 歸零，另外跑五種網路情境（Wi-Fi／400kbps 節流／離線／Save-Data／GLB 404），輸出截圖與 JSON。**這是 Chromium 模擬，不能代替真機**，輸出的每一列都標 `emulated: true`。**未改** Apple sync workflow。
 - **Intro 效能量測工具 `npm run measure:intro-performance`**：對正在跑的 production build 量載入（`/` 的 3D 請求、初始 JS、延遲 3D chunk gzip、GLB／poster 傳輸、waterfall）、三個 quality tier 的 DPR／frame time 分佈、五次往返的資源與 rAF 行為、LCP／CLS 與 Enter 回饋延遲，輸出附條件的 JSON（build id、瀏覽器、OS、viewport、DPR、tier、cold/warm、網路／CPU）。`render-hero-posters.mjs` 加 `--quality=<tier>`，讓 draw call 的 main／shadow 拆分可以逐階量。**未改** Apple sync workflow。
@@ -16,6 +17,7 @@
 
 ### Changed
 
+- **修正直式手機把島的左右兩端切掉**：`.stage` 原本是 `width:134%; right:-17%`，配上 `.hero{overflow:hidden}`，再加相機 `scale:1.15`——390px 上可見世界寬只有 8.0 單位，而島本身寬 11.34，**左右各約 1.68 單位（約 30% 島寬）在畫面外**。現在直式手機綁寬度（`fit:"width"`）、`.stage` 滿版並用 `aspect-ratio` 綁高度，島完整入鏡且左右對稱（±0.924 NDC），只有前緣在下沿微出血。`CameraRig` 三個獨立缺陷一併修掉：`useFrame` 不再抄一份硬編碼相機座標（改 art-direction 才會生效）、斷點改成 state（轉向不再用桌機 framing 配手機 size）、平移改走相機自身的 right／up 軸。poster 尺寸改由 `HERO_STAGE_ASPECT` 單一來源推導，poster→canvas 交接不再跳構圖。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **移除首頁底列分段導覽（SegmentNav）與 Landing 的 Intro 入口膠囊（IntroEntry）**：3D 開場接手首頁第一印象後，底列在四段內容上再疊一層水平導覽只是重複，膠囊入口也不再需要。手機的換段控制改回各段右下的**向下箭頭**——它原本因為「平板／手機用 SegmentNav 貼底細條」被 CSS 藏起來，底列一走若不放出來，四個 snap pane 之間就只剩盲滑；新增 320／390／767 三個寬度的 e2e 守住它可見、≥44×44 且真的換段。`--landing-mobile-nav-h` 四個使用點一併清掉。`navLabel` 欄位保留（`lib/universe-map.ts` 的車庫連結仍在用）。**未改** `LandingScrollView`／`LandingScrollContext`／`scrollToSegment`、DuduCompanion、Apple sync workflow。
 
 - **`/feedback` 留言欄加可見標籤、拿掉信紙橫線**：欄位標「留言」，底色與暱稱／信箱同為實色 `--card`。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、法律頁政策版本。

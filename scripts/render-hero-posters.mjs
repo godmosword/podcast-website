@@ -7,12 +7,18 @@ import { mkdtemp, readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve, extname, join } from 'node:path';
 import { createServer } from 'node:http';
+import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
 import sharp from 'sharp';
 const root=resolve('.');
 const output=join(root,'public/models/hero-world/v3');
 // PNG masters stay out of public/ so they are never deployed; only WebP ships.
 const masterOutput=join(root,'assets/hero-world/posters/v3');
+// poster 尺寸取自 art-direction 的 HERO_STAGE_ASPECT，與 CSS 的 .stage 同源；
+// 長寬比一旦漂移，poster→canvas 交接就會跳構圖。
+const artTemp=await mkdtemp(join(tmpdir(),'intro-art-'));
+await build({entryPoints:[join(root,'components/landing/hero-world/art-direction.ts')],bundle:true,format:'esm',outfile:join(artTemp,'art.mjs')});
+const {HERO_POSTER_SIZE}=await import(pathToFileURL(join(artTemp,'art.mjs')).href);
 const temp=await mkdtemp(join(tmpdir(),'intro-posters-'));
 await mkdir(output,{recursive:true});
 await mkdir(masterOutput,{recursive:true});
@@ -34,7 +40,7 @@ const qaOnly=process.argv.includes('--qa-only');
 const posters=[];const rendererReports=[];let worldArt=null;const qa=join(root,qaOutArg?qaOutArg.slice('--qa-out='.length):'docs/qa/intro-portal/phase8-20260906');
 await mkdir(qa,{recursive:true});
 try{
-for(const c of [{name:'poster',width:1380,height:980,quality:'high'},{name:'poster-mobile',width:615,height:490,quality:'medium'}]){
+for(const c of [{name:'poster',...HERO_POSTER_SIZE.desktop,quality:'high'},{name:'poster-mobile',...HERO_POSTER_SIZE.mobile,quality:'medium'}]){
  const page=await browser.newPage({viewport:{width:c.width,height:c.height},deviceScaleFactor:1});
  await page.goto(`http://127.0.0.1:${server.address().port}`);
  await page.waitForSelector('html[data-ready="true"]');
@@ -66,4 +72,4 @@ await writeFile(join(output,'manifest.json'),JSON.stringify(manifest,null,2)+'\n
 }
 if(rendererReports.length)await writeFile(join(qa,'renderer-report.json'),JSON.stringify(rendererReports,null,2)+'\n');
 console.log(qaOnly?{qaOnly:true,qa,rendererReports:rendererReports.length}:posters);
-}finally{await browser.close();server.close();await rm(temp,{recursive:true,force:true});}
+}finally{await browser.close();server.close();await rm(temp,{recursive:true,force:true});await rm(artTemp,{recursive:true,force:true});}
