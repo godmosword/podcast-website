@@ -4,6 +4,7 @@ import { memo, useEffect, useRef, useState, type CSSProperties } from "react";
 import type { ZoneDef, ZoneStatus } from "@/data/universe-zones";
 import { islandHaze, mapDepthZ } from "@/lib/universe-depth";
 import type { ResolvedZone } from "@/lib/universe-map";
+import { EDITORIAL_ZONE_META } from "@/lib/universe/editorial-zone-meta";
 import { getZoneArtTile, getZoneArtSrcSet } from "@/lib/universe/zone-art-tile";
 import { getZoneNightArtSrcSet } from "@/lib/universe/zone-art-src";
 import { playSfx } from "@/lib/sfx";
@@ -19,6 +20,7 @@ import ZoneIslandTileArt from "./ZoneIslandTileArt";
 import ZoneNightLights from "./ZoneNightLights";
 import type { ZoneProgress } from "@/hooks/useZoneProgress";
 import styles from "./ZoneIsland.module.css";
+import editorial from "./ZoneIslandEditorial.module.css";
 
 /** 點島慶祝動畫長度（毫秒），與 CSS islandBounce／star-burst-particle 對齊。 */
 const CELEBRATE_MS = 640;
@@ -67,6 +69,7 @@ function ZoneIsland({
     progress!.completed === progress!.total &&
     progress!.total > 0;
   const tile = getZoneArtTile(zone.id);
+  const editorialMeta = EDITORIAL_ZONE_META[zone.id];
   const { transition, onTransitionEnd } = useZoneTransition(effectiveStatus, reduced);
 
   const [burst, setBurst] = useState(0);
@@ -157,7 +160,7 @@ function ZoneIsland({
       <>
         <button
           type="button"
-          className={styles.islandTile}
+          className={`${styles.islandTile} ${editorial.islandTile}`}
           style={{
             left: `${zone.px.x}px`,
             top: `${zone.px.y}px`,
@@ -178,7 +181,7 @@ function ZoneIsland({
           onClick={handleActivate}
           onAnimationEnd={onTransitionEnd}
         >
-          <div className={styles.tileStack}>
+          <div className={`${styles.tileStack} ${editorial.tileStack}`}>
             {/* 大氣透視層：只掛靜態 filter、零 transform。
                 刻意不把 filter 加在已有 transform 的 .tileArt／.tileStack 上——
                 同層 filter＋子層 scale 會在 iOS 造成重影（見 .tileArt 註解）。 */}
@@ -225,29 +228,32 @@ function ZoneIsland({
             )}
           </div>
         </button>
-        {/* 木牌欄：島名（裝飾，島 button 已含同名 aria-label）。
-            狀態字樣已移除；反縮放由舞台 --map-scale／--label-offset-y 驅動。 */}
+        {/* Editorial label：保留 tileLabel 的定位與層深，拿掉木牌語彙。 */}
         <span
-          className={styles.tileLabel}
+          className={`${styles.tileLabel} ${editorial.label}`}
           data-zone={zone.id}
+          data-editorial-featured={editorialMeta.featured || undefined}
           style={{
             left: `${zone.px.x}px`,
             top: `${zone.px.y}px`,
             zIndex: mapDepthZ(zone.depthY, "label"),
           }}
         >
-          <span className={styles.name} aria-hidden="true">
-            {isOpen ? (
-              <span className={styles.openBeacon} aria-hidden="true">
-                🎈
-              </span>
-            ) : null}
+          <span className={editorial.metaLine} aria-hidden="true">
+            <span className={editorial.index}>{editorialMeta.index}</span>
+            <span aria-hidden="true">/</span>
+            <span className={editorial.englishName}>{editorialMeta.englishName}</span>
+          </span>
+          <span className={`${styles.name} ${editorial.name}`} aria-hidden="true">
             {zone.name}
+          </span>
+          <span className={editorial.kicker} aria-hidden="true">
+            {editorialMeta.kicker}
           </span>
           {hasProgress ? (
             <span className={styles.pillRow}>
               <span
-                className={styles.progressChip}
+                className={`${styles.progressChip} ${editorial.progressChip}`}
                 data-full-stars={isFullStars || undefined}
                 aria-hidden="true"
               >
