@@ -1,7 +1,6 @@
 import { expect, test } from "@playwright/test";
 import {
   FEEDBACK_EMPTY_CTA,
-  FEEDBACK_FORM_HEADING,
   FEEDBACK_INVITE_CHILD,
   FEEDBACK_ERROR,
   FEEDBACK_MAILTO_LINK,
@@ -43,9 +42,8 @@ test.describe("站內留言牆 /feedback", () => {
     await expect(
       page.getByRole("heading", { name: FEEDBACK_PAGE_TITLE, level: 1 }),
     ).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: FEEDBACK_FORM_HEADING, level: 2 }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "寫給馬米", level: 2 })).toHaveCount(0);
+    await expect(page.getByText("寫下想聽的故事再送出。")).toHaveCount(0);
     await expect(page.getByText(FEEDBACK_INVITE_CHILD)).toBeVisible();
     await expect(page.getByRole("textbox", { name: FEEDBACK_NICKNAME_LABEL })).toBeVisible();
     await expect(page.getByRole("textbox", { name: FEEDBACK_EMAIL_LABEL })).toBeVisible();
@@ -75,20 +73,15 @@ test.describe("站內留言牆 /feedback", () => {
     await expect(page.getByText("還沒有公開留言")).toHaveCount(0);
   });
 
-  test("未勾兩項同意不能送；信箱可不填", async ({ page }) => {
+  test("填暱稱與留言就能送；信箱可不填", async ({ page }) => {
     await page.goto("/feedback");
 
     const submit = page.getByRole("button", { name: FEEDBACK_SUBMIT_LABEL });
-    await expect(submit).toBeDisabled();
+    await expect(submit).toBeEnabled();
+    await expect(page.getByRole("checkbox")).toHaveCount(0);
 
     await page.getByRole("textbox", { name: FEEDBACK_NICKNAME_LABEL }).fill("小車");
     await page.getByRole("textbox", { name: FEEDBACK_MESSAGE_LABEL }).fill("謝謝馬米");
-
-    const checkboxes = page.getByRole("checkbox");
-    await expect(checkboxes).toHaveCount(2);
-    await checkboxes.nth(0).check();
-    await expect(submit).toBeDisabled();
-    await checkboxes.nth(1).check();
     await expect(submit).toBeEnabled();
 
     const mailto = page.getByRole("link", { name: FEEDBACK_MAILTO_LINK });

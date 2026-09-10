@@ -12,17 +12,11 @@ import { feedbackMailtoHref } from "@/lib/contact";
 import {
   FEEDBACK_CHAR_REMAINING,
   FEEDBACK_EMAIL_LABEL,
-  FEEDBACK_FORM_HEADING,
-  FEEDBACK_FORM_HEADING_ID,
-  FEEDBACK_FORM_LEAD,
   FEEDBACK_MAILTO_LINK,
   FEEDBACK_MESSAGE_FIELD_ID,
   FEEDBACK_MESSAGE_LABEL,
   FEEDBACK_NICKNAME_LABEL,
-  FEEDBACK_PARENT_CONSENT_AFTER,
-  FEEDBACK_PARENT_CONSENT_BEFORE,
-  FEEDBACK_PARENT_CONSENT_LINK,
-  FEEDBACK_PUBLISH_CONSENT,
+  FEEDBACK_PAGE_TITLE_ID,
   FEEDBACK_SUBMIT_LABEL,
 } from "@/lib/feedback-copy";
 import { FEEDBACK_MESSAGE_MAX } from "@/lib/feedback-schema";
@@ -36,28 +30,21 @@ export default function FeedbackForm({ available }: Props) {
   const nicknameId = useId();
   const emailId = useId();
   const messageId = FEEDBACK_MESSAGE_FIELD_ID;
-  const parentConsentId = useId();
-  const publishConsentId = useId();
   const honeypotId = useId();
 
   const [state, formAction, pending] = useActionState(submitFeedback, FEEDBACK_ACTION_IDLE);
   const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [parentConsent, setParentConsent] = useState(false);
-  const [publishConsent, setPublishConsent] = useState(false);
   const [startedAt, setStartedAt] = useState("");
-  const [hydrated, setHydrated] = useState(false);
 
   const remaining = FEEDBACK_MESSAGE_MAX - message.length;
-  const bothConsented = parentConsent && publishConsent;
   const showMailtoFallback = !available || state.status === "unavailable";
   const mailtoHref = feedbackMailtoHref(
     showMailtoFallback ? { nickname, message } : undefined,
   );
 
   useEffect(() => {
-    setHydrated(true);
     setStartedAt(String(Date.now()));
   }, []);
 
@@ -66,18 +53,14 @@ export default function FeedbackForm({ available }: Props) {
     setNickname("");
     setEmail("");
     setMessage("");
-    setParentConsent(false);
-    setPublishConsent(false);
     setStartedAt(String(Date.now()));
   }, [state]);
-
-  const submitDisabled = pending || (hydrated && !bothConsented);
 
   return (
     <form
       className={styles.form}
       action={formAction}
-      aria-labelledby={FEEDBACK_FORM_HEADING_ID}
+      aria-labelledby={FEEDBACK_PAGE_TITLE_ID}
     >
       <div className={styles.honeypot} aria-hidden="true">
         <label htmlFor={honeypotId}>網站</label>
@@ -90,11 +73,6 @@ export default function FeedbackForm({ available }: Props) {
         />
       </div>
       <input type="hidden" name={FEEDBACK_STARTED_AT_FIELD} value={startedAt} />
-
-      <h2 id={FEEDBACK_FORM_HEADING_ID} className={styles.heading}>
-        {FEEDBACK_FORM_HEADING}
-      </h2>
-      <p className={styles.lead}>{FEEDBACK_FORM_LEAD}</p>
 
       {state.status === "success" ? (
         <p className={styles.success} role="status" aria-live="polite">
@@ -155,46 +133,10 @@ export default function FeedbackForm({ available }: Props) {
         </p>
       </div>
 
-      <label className={styles.consent} htmlFor={parentConsentId}>
-        <input
-          id={parentConsentId}
-          className={styles.consentCheckbox}
-          type="checkbox"
-          name="parentConsent"
-          value="on"
-          checked={parentConsent}
-          onChange={(e) => setParentConsent(e.target.checked)}
-          disabled={pending}
-          required
-        />
-        <span>
-          {FEEDBACK_PARENT_CONSENT_BEFORE}
-          <Link href="/legal#privacy" aria-label="閱讀隱私說明">
-            {FEEDBACK_PARENT_CONSENT_LINK}
-          </Link>
-          {FEEDBACK_PARENT_CONSENT_AFTER}
-        </span>
-      </label>
-
-      <label className={styles.consent} htmlFor={publishConsentId}>
-        <input
-          id={publishConsentId}
-          className={styles.consentCheckbox}
-          type="checkbox"
-          name="publishConsent"
-          value="on"
-          checked={publishConsent}
-          onChange={(e) => setPublishConsent(e.target.checked)}
-          disabled={pending}
-          required
-        />
-        <span>{FEEDBACK_PUBLISH_CONSENT}</span>
-      </label>
-
       <button
         className={styles.submit}
         type="submit"
-        disabled={submitDisabled}
+        disabled={pending}
         aria-busy={pending || undefined}
       >
         {FEEDBACK_SUBMIT_LABEL}

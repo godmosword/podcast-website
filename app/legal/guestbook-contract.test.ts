@@ -7,8 +7,8 @@ describe("公開留言牆 legal 契約", () => {
   const legal = readFileSync(join(import.meta.dirname, "page.tsx"), "utf8");
 
   it("政策版本已因留言牆用途 bump，不是沿用 2026-08-26", () => {
-    expect(LEGAL_POLICY_VERSION).toBe("2026-09-05");
-    expect(LEGAL_POLICY_VERSION).not.toBe("2026-08-26");
+    expect(LEGAL_POLICY_VERSION).toBe("2026-09-10");
+    expect(LEGAL_POLICY_VERSION).not.toBe("2026-09-05");
   });
 
   it("有 #guestbook 專章，且許願仍寫明不直接公開", () => {

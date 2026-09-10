@@ -5,17 +5,12 @@
 export const FEEDBACK_PAGE_TITLE = "留言給馬米";
 
 export const FEEDBACK_PAGE_DESCRIPTION =
-  "跟馬米說你最想說的話，也歡迎許願下一集想聽的故事。留言經家長同意與審核後才會公開。";
+  "跟馬米說你最想說的話，也歡迎許願下一集想聽的故事。留言經審核後才會公開。";
+
+export const FEEDBACK_PAGE_TITLE_ID = "feedback-page-title";
 
 export const FEEDBACK_INVITE_CHILD =
   "嗨嗨，謝謝你來聽故事！告訴馬米你最想說的話，也歡迎許願下一集想聽什麼。";
-
-/** 信紙表單標題；與頁面 H1「留言給馬米」分開，標示可填區。 */
-export const FEEDBACK_FORM_HEADING = "寫給馬米";
-
-export const FEEDBACK_FORM_HEADING_ID = "feedback-form-heading";
-
-export const FEEDBACK_FORM_LEAD = "寫下想聽的故事再送出。";
 
 /** textarea id，空牆 CTA 用 hash 對準（無 JS 也能跳）。 */
 export const FEEDBACK_MESSAGE_FIELD_ID = "feedback-message";
@@ -27,16 +22,6 @@ export const FEEDBACK_EMAIL_LABEL = "信箱（選填）";
 export const FEEDBACK_MESSAGE_LABEL = "留言";
 
 export const FEEDBACK_SUBMIT_LABEL = "我要留言";
-
-export const FEEDBACK_PARENT_CONSENT_BEFORE = "我是家長／照顧者，已閱讀並同意";
-
-export const FEEDBACK_PARENT_CONSENT_LINK = "隱私說明";
-
-export const FEEDBACK_PARENT_CONSENT_AFTER =
-  "。請勿填寫孩子的真名、學校、電話或地址。";
-
-export const FEEDBACK_PUBLISH_CONSENT =
-  "我了解留言經審核後，可能公開暱稱與正文（信箱不會公開）。";
 
 export const FEEDBACK_SUCCESS =
   "馬米收到了。看過以後會貼上牆，不會馬上出現喔。";

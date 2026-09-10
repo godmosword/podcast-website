@@ -19,8 +19,6 @@ const validBody = {
   nickname: "馬米",
   email: FIXTURE_EMAIL,
   message: "很喜歡垃圾車那集！",
-  parentConsent: true,
-  publishConsent: true,
 };
 
 function postRequest(body: unknown, ip = "203.0.113.20", raw?: string): Request {
@@ -147,21 +145,13 @@ describe("POST /api/feedback", () => {
     await expect(res.json()).resolves.toEqual({ ok: false, reason: "invalid_json" });
   });
 
-  it("缺少家長同意回 400 validation_error", async () => {
+  it("缺少暱稱回 400 validation_error", async () => {
     await mockDbAvailable(true);
 
-    const res = await POST(postRequest({ ...validBody, parentConsent: false }));
+    const res = await POST(postRequest({ ...validBody, nickname: "" }));
 
     expect(res.status).toBe(400);
     await expect(res.json()).resolves.toEqual({ ok: false, reason: "validation_error" });
-  });
-
-  it("缺少公開授權回 400 validation_error", async () => {
-    await mockDbAvailable(true);
-
-    const res = await POST(postRequest({ ...validBody, publishConsent: undefined }));
-
-    expect(res.status).toBe(400);
   });
 
   it("有效 payload 回 201，consent 由 server 寫入", async () => {

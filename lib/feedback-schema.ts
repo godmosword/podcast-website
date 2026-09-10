@@ -32,10 +32,6 @@ export const feedbackBodySchema = z
       .trim()
       .min(1, "請寫下留言")
       .max(FEEDBACK_MESSAGE_MAX, "留言太長"),
-    // 兒童個資保護：須由家長／照顧者勾選同意才收件（COPPA / 個資法）。
-    parentConsent: z.literal(true, { error: "請由家長或照顧者勾選同意" }),
-    // 公開授權：理解審核後可能公開暱稱與正文。
-    publishConsent: z.literal(true, { error: "請勾選同意審核後可能公開" }),
   })
   // 政策版本與同意時間一律由 server 寫入，這裡不接受 client 欄位。
   .strip();

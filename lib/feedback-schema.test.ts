@@ -11,8 +11,6 @@ const validBody = {
   nickname: "馬米",
   email: "parent@example.com",
   message: "很喜歡垃圾車那集！",
-  parentConsent: true,
-  publishConsent: true,
 };
 
 describe("feedback 狀態與類型常數", () => {
@@ -87,22 +85,20 @@ describe("feedbackBodySchema", () => {
     ).toBe(false);
   });
 
-  it("未勾家長同意就退件（兒童個資保護）", () => {
+  it("不要求同意勾選；多餘 consent 欄位會被丟掉", () => {
     expect(
       feedbackBodySchema.safeParse({ ...validBody, parentConsent: false }).success,
-    ).toBe(false);
-    expect(
-      feedbackBodySchema.safeParse({ ...validBody, parentConsent: undefined }).success,
-    ).toBe(false);
-  });
-
-  it("未勾公開授權就退件", () => {
-    expect(
-      feedbackBodySchema.safeParse({ ...validBody, publishConsent: false }).success,
-    ).toBe(false);
-    expect(
-      feedbackBodySchema.safeParse({ ...validBody, publishConsent: undefined }).success,
-    ).toBe(false);
+    ).toBe(true);
+    const parsed = feedbackBodySchema.safeParse({
+      ...validBody,
+      parentConsent: true,
+      publishConsent: true,
+    });
+    expect(parsed.success && Object.keys(parsed.data).sort()).toEqual([
+      "email",
+      "message",
+      "nickname",
+    ]);
   });
 
   it("不採信 client 的 kind／status／needsReview／consent 欄位", () => {
@@ -119,8 +115,6 @@ describe("feedbackBodySchema", () => {
       "email",
       "message",
       "nickname",
-      "parentConsent",
-      "publishConsent",
     ]);
   });
 

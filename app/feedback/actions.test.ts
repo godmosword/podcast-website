@@ -38,8 +38,6 @@ function filledForm(overrides: Record<string, string | null> = {}): FormData {
   data.set("nickname", "Bonbon");
   data.set("email", "parent@example.com");
   data.set("message", "謝謝馬米");
-  data.set("parentConsent", "on");
-  data.set("publishConsent", "on");
   data.set(FEEDBACK_HONEYPOT_FIELD, "");
   data.set(FEEDBACK_STARTED_AT_FIELD, String(Date.now() - FEEDBACK_MIN_FILL_MS - 50));
 
@@ -87,13 +85,13 @@ describe("submitFeedback", () => {
     expect(revalidatePath).not.toHaveBeenCalled();
   });
 
-  it("未勾同意退件", async () => {
+  it("未填暱稱退件", async () => {
     await mockDbAvailable(true);
     const { createFeedbackMessage } = await import("@/lib/feedback-query");
 
     const state = await submitFeedback(
       FEEDBACK_ACTION_IDLE,
-      filledForm({ parentConsent: null }),
+      filledForm({ nickname: "" }),
     );
 
     expect(state).toEqual({ status: "error", message: FEEDBACK_VALIDATION_ERROR });

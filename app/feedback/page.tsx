@@ -1,16 +1,15 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import FeedbackForm from "@/components/feedback/FeedbackForm";
 import FeedbackWall from "@/components/feedback/FeedbackWall";
 import FeedbackWallSkeleton from "@/components/feedback/FeedbackWallSkeleton";
 import SiteFooter from "@/components/SiteFooter";
-import { getCharacters } from "@/data/characters";
 import {
   FEEDBACK_INVITE_CHILD,
   FEEDBACK_PAGE_DESCRIPTION,
   FEEDBACK_PAGE_TITLE,
+  FEEDBACK_PAGE_TITLE_ID,
 } from "@/lib/feedback-copy";
 import { isFeedbackDbConfigured } from "@/lib/feedback-db";
 import styles from "./page.module.css";
@@ -30,11 +29,6 @@ export const metadata: Metadata = {
   },
 };
 
-function mamiPortraitSrc(): string {
-  const mami = getCharacters().find((character) => character.id === "mami");
-  return mami?.ref ? `/${mami.ref}` : "/mascot.png";
-}
-
 export default function FeedbackPage() {
   const available = isFeedbackDbConfigured();
 
@@ -45,28 +39,13 @@ export default function FeedbackPage() {
       </Link>
 
       <header className={styles.header}>
-        <h1 className={styles.title}>{FEEDBACK_PAGE_TITLE}</h1>
+        <h1 id={FEEDBACK_PAGE_TITLE_ID} className={styles.title}>
+          {FEEDBACK_PAGE_TITLE}
+        </h1>
+        <p className={styles.invite}>{FEEDBACK_INVITE_CHILD}</p>
       </header>
 
-      <section className={styles.invite} aria-label="馬米邀請">
-        <div className={styles.portraitMat}>
-          <Image
-            src={mamiPortraitSrc()}
-            alt=""
-            fill
-            sizes="(max-width: 479px) 120px, 160px"
-            className={styles.portrait}
-            priority
-            aria-hidden
-          />
-        </div>
-        <div className={styles.bubble}>
-          <span className={styles.bubbleTail} aria-hidden />
-          <p className={styles.inviteChild}>{FEEDBACK_INVITE_CHILD}</p>
-        </div>
-      </section>
-
-      <section className={styles.formSection} aria-labelledby="feedback-form-heading">
+      <section className={styles.formSection}>
         <FeedbackForm available={available} />
       </section>
 

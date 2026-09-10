@@ -31,7 +31,8 @@
 
 | ID | 說明 |
 |----|------|
-| polish(player): 快進／倒退改依插圖換頁 | 見本 commit |
+| polish(feedback): 留言板拿掉照片、信紙格線與同意勾選 | 見本 commit |
+| polish(player): 快進／倒退改依插圖換頁 | `4b53c16c` |
 
 ### 本輪已完成（2026-09-08）
 

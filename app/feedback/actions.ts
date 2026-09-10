@@ -48,8 +48,6 @@ export async function submitFeedback(
     nickname: formData.get("nickname"),
     email: formData.get("email"),
     message: formData.get("message"),
-    parentConsent: formData.get("parentConsent") === "on",
-    publishConsent: formData.get("publishConsent") === "on",
   });
 
   if (!parsed.success) {

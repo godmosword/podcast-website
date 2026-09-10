@@ -5,13 +5,13 @@ import { describe, expect, it } from "vitest";
 describe("FeedbackForm.module.css", () => {
   const css = readFileSync(join(import.meta.dirname, "FeedbackForm.module.css"), "utf8");
 
-  it("有信紙標題；textarea 滿欄且 min-height ≥140px；同意列、送出鍵 ≥44px", () => {
-    expect(css).toMatch(/\.heading\s*\{[\s\S]*?font-size:\s*var\(--fs-h3\)/);
+  it("textarea 滿欄且 min-height ≥140px；送出鍵 ≥44px", () => {
     expect(css).toMatch(/\.textarea\s*\{[\s\S]*?width:\s*100%/);
     expect(css).toMatch(/\.textarea\s*\{[\s\S]*?min-height:\s*140px/);
-    expect(css).toMatch(/\.consent\s*\{[\s\S]*?min-height:\s*44px/);
     expect(css).toMatch(/\.submit\s*\{[\s\S]*?min-height:\s*44px/);
     expect(css).toMatch(/\.mailtoButton\s*\{[\s\S]*?min-height:\s*44px/);
+    expect(css).not.toMatch(/\.heading\s*\{/);
+    expect(css).not.toMatch(/\.consent\s*\{/);
     expect(css).not.toMatch(/\.starter\s*\{/);
     expect(css).not.toMatch(/\.textarea\s*\{[\s\S]*?background-image:/);
     expect(css).not.toMatch(/repeating-linear-gradient/);

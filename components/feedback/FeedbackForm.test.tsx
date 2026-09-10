@@ -9,7 +9,6 @@ import {
 } from "@/lib/feedback-action";
 import {
   FEEDBACK_EMAIL_LABEL,
-  FEEDBACK_FORM_HEADING,
   FEEDBACK_LOADING_LABEL,
   FEEDBACK_MAILTO_LINK,
   FEEDBACK_MESSAGE_FIELD_ID,
@@ -61,7 +60,9 @@ describe("FeedbackForm", () => {
   test("available 時立刻有欄位，沒有載入中", () => {
     render(<FeedbackForm available />);
     expect(screen.queryByText(FEEDBACK_LOADING_LABEL)).toBeNull();
-    expect(screen.getByRole("heading", { name: FEEDBACK_FORM_HEADING, level: 2 })).toBeTruthy();
+    expect(screen.queryByRole("heading", { level: 2 })).toBeNull();
+    expect(document.body.textContent).not.toContain("寫給馬米");
+    expect(document.body.textContent).not.toContain("寫下想聽的故事再送出。");
     expect(screen.getByRole("textbox", { name: FEEDBACK_NICKNAME_LABEL })).toBeTruthy();
     expect(screen.getByRole("textbox", { name: FEEDBACK_EMAIL_LABEL })).toBeTruthy();
     expect(screen.getByRole("textbox", { name: FEEDBACK_MESSAGE_LABEL })).toBeTruthy();
@@ -112,14 +113,16 @@ describe("FeedbackForm", () => {
     expect(screen.queryByRole("textbox", { name: "網站" })).toBeNull();
   });
 
-  test("hydration 後未勾兩項同意時送出鈕 disabled", async () => {
+  test("沒有同意勾選，hydration 後即可送出", async () => {
     render(<FeedbackForm available />);
+    expect(screen.queryAllByRole("checkbox")).toHaveLength(0);
+    expect(document.body.textContent).not.toContain("我是家長／照顧者");
+    expect(document.body.textContent).not.toContain("請先勾選兩項同意，才能送出。");
     await waitFor(() => {
       expect(
         screen.getByRole("button", { name: FEEDBACK_SUBMIT_LABEL }).hasAttribute("disabled"),
-      ).toBe(true);
+      ).toBe(false);
     });
-    expect(document.body.textContent).not.toContain("請先勾選兩項同意，才能送出。");
   });
 
   test("Action 回 unavailable 時表單仍在，mailto 帶入草稿", async () => {
@@ -128,12 +131,6 @@ describe("FeedbackForm", () => {
       message: "送出失敗，請再試一次。",
     });
     render(<FeedbackForm available />);
-    await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: FEEDBACK_SUBMIT_LABEL }).hasAttribute("disabled"),
-      ).toBe(true);
-    });
-
     fireEvent.change(screen.getByRole("textbox", { name: FEEDBACK_NICKNAME_LABEL }), {
       target: { value: "Bonbon" },
     });
@@ -143,8 +140,6 @@ describe("FeedbackForm", () => {
     fireEvent.change(screen.getByRole("textbox", { name: FEEDBACK_MESSAGE_LABEL }), {
       target: { value: "謝謝馬米" },
     });
-    fireEvent.click(screen.getAllByRole("checkbox")[0]);
-    fireEvent.click(screen.getAllByRole("checkbox")[1]);
     fireEvent.click(screen.getByRole("button", { name: FEEDBACK_SUBMIT_LABEL }));
 
     const link = await screen.findByRole("link", { name: FEEDBACK_MAILTO_LINK });
@@ -156,20 +151,12 @@ describe("FeedbackForm", () => {
 
   test("成功後表單仍在、欄位清空、status 讀成功句", async () => {
     render(<FeedbackForm available />);
-    await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: FEEDBACK_SUBMIT_LABEL }).hasAttribute("disabled"),
-      ).toBe(true);
-    });
-
     fireEvent.change(screen.getByRole("textbox", { name: FEEDBACK_NICKNAME_LABEL }), {
       target: { value: "Bonbon" },
     });
     fireEvent.change(screen.getByRole("textbox", { name: FEEDBACK_MESSAGE_LABEL }), {
       target: { value: "謝謝馬米" },
     });
-    fireEvent.click(screen.getAllByRole("checkbox")[0]);
-    fireEvent.click(screen.getAllByRole("checkbox")[1]);
     fireEvent.click(screen.getByRole("button", { name: FEEDBACK_SUBMIT_LABEL }));
 
     await waitFor(() => {
