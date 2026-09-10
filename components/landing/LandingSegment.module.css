@@ -334,8 +334,13 @@
     font-size: var(--fs-h3);
   }
 
+  /* 長句 CTA 會佔到畫面中線；箭點改與 CTA 垂直錯開，底距預留 44×44。 */
+  .next {
+    bottom: calc(var(--safe-bottom) + 8px);
+  }
+
   .content {
-    padding-bottom: calc(var(--safe-bottom) + 6px);
+    padding-bottom: calc(var(--safe-bottom) + 8px + 44px + 12px);
   }
 }
 
@@ -346,7 +351,6 @@
     align-items: end;
     column-gap: 4px;
     row-gap: var(--space-3);
-    padding-bottom: calc(var(--safe-bottom) + 6px);
   }
 
   .headline {

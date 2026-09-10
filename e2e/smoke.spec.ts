@@ -3,6 +3,7 @@ import { seedParentGatePassed } from "./parent-gate";
 import { PROGRESS_STORAGE_KEY } from "../lib/progress-store";
 import sharp from "sharp";
 import { skipIntroOverlay } from "./intro-gate";
+import { expectHitTestable, expectNoOverlap } from "./overlay-geometry";
 
 test.describe.configure({ mode: "serial" });
 
@@ -583,12 +584,17 @@ test.describe("首頁手機換段出口", () => {
       await page.setViewportSize({ width, height: 760 });
       await page.goto("/");
       const next = page.getByRole("link", { name: "捲動到下一個專區" }).first();
+      const cta = page
+        .locator("#segment-stories")
+        .getByRole("link", { name: /車車遊樂園的故事/ });
       await expect(next).toBeVisible();
       const box = await next.boundingBox();
       expect(box, "箭頭沒有版面盒").not.toBeNull();
       // 觸控尺寸：藏了很久的控制放出來時，最容易忘記它還要能按得到。
       expect(box!.width).toBeGreaterThanOrEqual(44);
       expect(box!.height).toBeGreaterThanOrEqual(44);
+      await expectNoOverlap(next, cta, `${width}px 向下箭頭不得蓋住分區 CTA`);
+      await expectHitTestable(page, next, `${width}px 向下箭頭`);
       await next.click();
       await expect
         .poll(async () => (await page.getByRole("region", { name: /睡前/ }).first().boundingBox())?.y ?? Infinity, {

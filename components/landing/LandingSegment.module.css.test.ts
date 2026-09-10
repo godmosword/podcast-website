@@ -33,6 +33,18 @@ describe("LandingSegment.module.css touch targets", () => {
     expect(css).toMatch(/\.next\s*\{[\s\S]*?height:\s*44px/);
   });
 
+  it("≤768 為箭點預留底距，不與 CTA 同列", () => {
+    const start = css.indexOf("@media (max-width: 768px)");
+    expect(start, "缺少 ≤768 區塊").toBeGreaterThan(-1);
+    const mobile = css.slice(start);
+    expect(mobile).toMatch(
+      /\.content\s*\{[\s\S]*?padding-bottom:\s*calc\(var\(--safe-bottom\) \+ 8px \+ 44px \+ 12px\)/,
+    );
+    expect(mobile).toMatch(
+      /\.next\s*\{[\s\S]*?bottom:\s*calc\(var\(--safe-bottom\) \+ 8px\)/,
+    );
+  });
+
   it("CTA min-height 56px", () => {
     const base = extractBlocks(".cta")[0] ?? "";
     expect(base).toMatch(/min-height:\s*56px/);
