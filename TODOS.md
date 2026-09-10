@@ -236,7 +236,7 @@ clip 快照在不同 macOS／Chromium 版本上的自然噪音底線。
 - [ ] Phase 2c 引擎蓋長雙條紋＋引擎蓋大「2」、大燈白色外環、`blue` 色票偏青（轉 sRGB 約 `(.35,.57,.59)`，不是定裝照的鈷藍）、後照鏡紅球浮空 — 四項皆為構圖／配色尺度的改動，非確定性修補，另案
 - [ ] Phase 2b 輪徑對車高比例收斂 — 另案：`WHEEL_RADIUS` 同時在 `build.py` 與 `config.ts:24`，是輪速與行進距離的換算基準，改動會連帶輪心高度、接地與取景
 - [ ] Phase 3 `components/landing/hero-parallax/` 六層視差前端（UI 風險 → Opus 設計審）
-- [ ] Phase 4 六層 tile 素材（付費生圖，須先報張數取得文字確認）
+- [ ] Phase 4 六層 tile 素材 — **prompts 已備妥**：[`assets/landing/hero-parallax/PHASE4-ASSET-PROMPTS.md`](./assets/landing/hero-parallax/PHASE4-ASSET-PROMPTS.md)。生圖工具指定 ChatGPT Images 2.5（維護者手動執行）。實際只需 4 張（L0 走 CSS、L4 沿用既有 roamer sprite），不生 1920px 全景條而是「零件表 → Sharp 合成 tile，左右留 120px 空白」，接縫靠構造保證
 
 > **核對出的五項落差**（實作前必讀，見規格 §0.2）：Hero 的車是 `build.py` 程序化建模不是生圖；微笑線存在只是太細；角色 Logo 系統已移除故該論證前提失效；缺 Do-NOT 的是 roamer 生圖管線不是 Hero；設定書的「大燈眼／黃條紋／星星天線」三項與定裝照 canon 牴觸——**已裁決 follow 定裝照，該三項作廢**。
 
