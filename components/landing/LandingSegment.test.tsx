@@ -74,6 +74,8 @@ describe("LandingSegment", () => {
       ),
     );
     expect(html).not.toContain("5–10 分鐘");
+    expect(html).toContain("data-landing-more-hint");
+    expect(html).toContain('aria-label="捲動到下一個專區"');
   });
 
   test("四段都不渲染播放直達，保留段標題語意且無可見編號", async () => {

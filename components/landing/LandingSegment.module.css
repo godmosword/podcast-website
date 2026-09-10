@@ -14,6 +14,10 @@
   background: var(--bg);
   --landing-gutter: clamp(20px, 5vw, 56px);
   --landing-bottom-ui-h: 0px;
+  /* 底列 chrome 高度：指引停在這條線之上，不進 CTA／嘟嘟列。 */
+  --landing-chrome-h: calc(
+    56px + clamp(20px, 3.5vh, 56px) + var(--landing-bottom-ui-h)
+  );
 }
 
 .visual {
@@ -191,7 +195,20 @@
     0 0 0 6px rgba(0, 0, 0, 0.45);
 }
 
-.next:focus-visible {
+.moreSkip:focus-visible {
+  clip: auto;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  overflow: visible;
+  transform: translateX(-50%);
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--landing-brand-ink);
+  color: var(--on-dark);
+  text-decoration: none;
   outline: 3px solid var(--on-dark);
   outline-offset: 3px;
   box-shadow: 0 0 0 6px rgba(0, 0, 0, 0.45);
@@ -271,35 +288,74 @@
   margin-left: 2px;
 }
 
-.next {
+/* 美術裡的「還有下面」：不進文件流、不可點、沒有玻璃底板。 */
+.moreHint {
   position: absolute;
   left: 50%;
-  bottom: clamp(14px, 2.8vh, 24px);
-  transform: translateX(-50%);
-  z-index: 3;
+  bottom: calc(var(--landing-chrome-h) + 18px);
+  z-index: 2;
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-pill);
-  color: rgba(255, 255, 255, 0.88);
-  text-decoration: none;
-  background: rgba(0, 0, 0, 0.22);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  pointer-events: auto;
-  transition: opacity var(--motion-press);
+  width: 24px;
+  height: 20px;
+  transform: translateX(-50%);
+  color: var(--on-dark);
+  opacity: 0.62;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.45));
+  animation: moreHintDrift 2.4s ease-in-out infinite;
 }
 
-.nextChevron {
+.moreHint svg {
   display: block;
+}
+
+.panel:has(.moreSkip:focus-visible) .moreHint {
+  opacity: 0;
+  animation: none;
+}
+
+/* 鍵盤／AT 換段：平時 clip，聚焦才變成 44px 控制。 */
+.moreSkip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--landing-chrome-h) + 8px);
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+  color: var(--on-dark);
+  text-decoration: none;
+}
+
+.moreSkipGlyph {
+  display: none;
   width: 10px;
   height: 10px;
   margin-top: -3px;
   border-right: 2.5px solid currentColor;
   border-bottom: 2.5px solid currentColor;
   transform: rotate(45deg);
-  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
+}
+
+.moreSkip:focus-visible .moreSkipGlyph {
+  display: block;
+}
+
+@keyframes moreHintDrift {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+    opacity: 0.48;
+  }
+  50% {
+    transform: translateX(-50%) translateY(4px);
+    opacity: 0.82;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -310,6 +366,12 @@
   .playCta:active,
   .subscribeCta:active {
     transform: none;
+  }
+
+  .moreHint {
+    animation: none;
+    opacity: 0.62;
+    transform: translateX(-50%);
   }
 }
 
@@ -336,7 +398,11 @@
     font-size: var(--fs-h3);
   }
 
-  /* 底列一條線：CTA 左、箭點靠該列右緣、Dudu 佔右欄。不抬 CTA。 */
+  .panel {
+    --landing-chrome-h: calc(56px + var(--safe-bottom) + 6px);
+  }
+
+  /* 右欄留給嘟嘟；底列只留 CTA，不再塞實體箭點。 */
   .content {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 80px;
@@ -348,35 +414,7 @@
   .ctaRow {
     grid-column: 1;
     width: 100%;
-    flex-wrap: nowrap;
-    flex-direction: row;
-    align-items: center;
     justify-self: stretch;
-  }
-
-  .next {
-    position: static;
-    left: auto;
-    right: auto;
-    bottom: auto;
-    transform: none;
-    margin-left: auto;
-    flex: none;
-    flex-shrink: 0;
-    width: 44px;
-    min-width: 44px;
-    z-index: auto;
-  }
-}
-
-/* 極窄：CTA＋箭點＋Dudu 同一列放不下，箭點改停在右欄、Dudu 頭頂上 10px。 */
-@media (max-width: 374px) {
-  .next {
-    position: absolute;
-    margin-left: 0;
-    left: auto;
-    right: calc(clamp(20px, 5vw, 56px) + var(--safe-right) + 18px);
-    bottom: calc(var(--safe-bottom) + 12px + 72px + 10px);
   }
 }
 

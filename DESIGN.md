@@ -10,7 +10,7 @@ Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範
 |------|------|
 | Clarity（清晰） | 字階分明、對比足夠、裝飾不搶內容 |
 | Deference（讓位） | UI 退讓給黏土插畫／故事封面 |
-| Depth（深度） | 柔陰影、`--elev-*` 高度階梯、半透明層；`--hairline` 用於分隔線**與無影像抬升塊**（`ConnectHub.block`、`StoryFilter.filterBar`）；有封面的內容卡（`StoryCard`／`LatestHero`）不用盒子描邊，靠 `--elev-*`。壓在影像上的 chrome 必須有**自身底色或描邊**（不得只靠 scrim）：Landing 分區 CTA 用不透明 `var(--landing-brand-ink)` 底板＋`var(--on-dark)` 白字；**分離度主要由 2px 淺邊＋外圈深棕 ring 承擔**（夜間板身與 scrim 同色族，`--gloss`／`--elev-2` 是黏土語彙而非夜間輪廓主力）；刻意不用 backdrop-filter。鍵盤 focus 必須用淺色環（Landing `.cta`／`.next` 用 `var(--on-dark)` outline），不得只靠日間 `--focus-ring`（深墨） |
+| Depth（深度） | 柔陰影、`--elev-*` 高度階梯、半透明層；`--hairline` 用於分隔線**與無影像抬升塊**（`ConnectHub.block`、`StoryFilter.filterBar`）；有封面的內容卡（`StoryCard`／`LatestHero`）不用盒子描邊，靠 `--elev-*`。壓在影像上的 chrome 必須有**自身底色或描邊**（不得只靠 scrim）：Landing 分區 CTA 用不透明 `var(--landing-brand-ink)` 底板＋`var(--on-dark)` 白字；**分離度主要由 2px 淺邊＋外圈深棕 ring 承擔**（夜間板身與 scrim 同色族，`--gloss`／`--elev-2` 是黏土語彙而非夜間輪廓主力）；刻意不用 backdrop-filter。鍵盤 focus 必須用淺色環（Landing `.cta`／`.moreSkip` 用 `var(--on-dark)` outline），不得只靠日間 `--focus-ring`（深墨） |
 | Consistency（一致） | 導覽、卡片、CTA、內容頁同一節奏 |
 | Feedback（回饋） | 輕 `scale(0.98)`／opacity；取消歪斜 rotate 與厚底影下沉 |
 | Aesthetic Integrity | 童趣靠插畫與色彩，不靠麥克筆描邊 |
@@ -218,7 +218,7 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 ## 互動
 
 - **按壓回饋**：`:active { transform: scale(0.98) }` 或微降 opacity；避免厚底影下沉與 hover 歪斜 rotate
-- **Focus**：`:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px }`；日間為主文字色，夜間為黃色。壓在影像上的 chrome（Landing `.cta`／`.next` 等）在元件內覆寫為 `var(--on-dark)` outline，不要改全域 token。
+- **Focus**：`:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px }`；日間為主文字色，夜間為黃色。壓在影像上的 chrome（Landing `.cta`／`.moreSkip` 等）在元件內覆寫為 `var(--on-dark)` outline，不要改全域 token。
 - **動效 token**：`--motion-press`（按鈕）、`--motion-page`（翻頁淡入）；另見全域 `.press-squash`
 - **`prefers-reduced-motion: reduce`**：關閉吉祥物 bounce 等非必要動畫
 - **遊戲虛擬鍵 pointer capture（3–7 歲）**：`TouchControls`（`GridTouchButton`／`BarTouchButton`）與 BlockDrop 左右移鍵按下時 `setPointerCapture`；**手指滑出按鈕仍視為按住**，僅在 `pointerup`／`pointercancel`／`lostpointercapture` 放開（不再用 `pointerleave` 當放開）。契約測須 shim 並斷言 capture API。棋盤類（消消樂／方塊拖移層）同樣以 capture 避免粗指標跨格吞 tap。BlockDrop `HintChips` 長按路徑仍為既有 leave 放開（未納本輪）。
@@ -274,7 +274,7 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 
 四段標題一律視覺隱藏（CSS module `titleHidden`，給輔助科技／`aria-labelledby`）。禁止用 `#segment-stories` 把 `.titleHidden` 或全域 `.sr-only` 解除隱藏。可見前景只留分區 CTA；GEO 導言維持全域 `.sr-only`。不新增行銷卡片或插畫。
 
-Storyline 式**全螢幕分段捲動**：每段一張滿版黏土 hero（桌面 `segment-{id}.jpg` 16:9；行動 ≤768px `segment-{id}-portrait.jpg` 9:16），大圖主導 + 底部漸層遮罩 + 左下分區 CTA。**不**顯示段編號（如 01/04）。段標題仍視覺隱藏（CSS module `titleHidden`，給輔助科技／`aria-labelledby`），不疊在美術上；可見 CTA 為長句段名（本輪 Landing 例外，可超過「CTA ≤ 6 字」）；`href` 不變。分區 CTA 走**不透明暖深墨板**（`min-height: 56px`、`var(--landing-brand-ink)` 底板、`var(--on-dark)` 白字、`--elev-2`＋`--gloss`），字級桌面 `--fs-h2`、≤768 `--fs-h3`、≤640 `--fs-h4`，**非**橘色實心 pill、**非**玻璃 ghost；刻意不用 backdrop-filter。CTA `white-space: nowrap`（「 →」是獨立文字節點，換行會孤行）；<348px 可能與 Dudu 略疊，正解是另開任務把半形空白改成不斷行空白後再拿掉 nowrap。段內 `.next` 往下箭點視覺降權（極淡玻璃底）。不放「聽最新一集」播放直達鈕。首段 GEO 導言仍用全域 `.sr-only`。
+Storyline 式**全螢幕分段捲動**：每段一張滿版黏土 hero（桌面 `segment-{id}.jpg` 16:9；行動 ≤768px `segment-{id}-portrait.jpg` 9:16），大圖主導 + 底部漸層遮罩 + 左下分區 CTA。**不**顯示段編號（如 01/04）。段標題仍視覺隱藏（CSS module `titleHidden`，給輔助科技／`aria-labelledby`），不疊在美術上；可見 CTA 為長句段名（本輪 Landing 例外，可超過「CTA ≤ 6 字」）；`href` 不變。分區 CTA 走**不透明暖深墨板**（`min-height: 56px`、`var(--landing-brand-ink)` 底板、`var(--on-dark)` 白字、`--elev-2`＋`--gloss`），字級桌面 `--fs-h2`、≤768 `--fs-h3`、≤640 `--fs-h4`，**非**橘色實心 pill、**非**玻璃 ghost；刻意不用 backdrop-filter。CTA `white-space: nowrap`（「 →」是獨立文字節點，換行會孤行）；<348px 可能與 Dudu 略疊，正解是另開任務把半形空白改成不斷行空白後再拿掉 nowrap。段內**不**放實體往下箭點（玻璃底板會跟左下 CTA、右下嘟嘟搶同一條底列）。換段指引是美術裡一枚極淡雙折線（`moreHint`：絕對定位、`pointer-events: none`、不進文件流），停在底列 chrome 之上；鍵盤／輔助科技走捲動容器方向鍵與平時 clip 的 `moreSkip`（`:focus-visible` 才出現 44px）。不放「聽最新一集」播放直達鈕。首段 GEO 導言仍用全域 `.sr-only`。
 
 1. **SiteNavBar**（全站橘色頂欄 + 訂閱 CTA）
    - **頂欄常駐列（2026-08-30 同構＋漢堡最右）**：`.inner` 用 `justify-content: flex-start`。**兩斷點同構**——**所有寬度**皆為 `[品牌] [首頁] [訂閱] [留言] [☰]`。`.actions`（`role="group"` `aria-label="常用"`，只含首頁／訂閱／留言）以 `flex: 1; justify-content: space-evenly` 撐滿品牌與漢堡之間，**禁止** `margin-left: auto`（會把三詞推到右側、中間再空一塊）。漢堡 **icon-only、置最右**，是 `.actions` 的下一個兄弟、**不**進常用組；左距 16px（大於舊 gap 10px）。品牌 pill **即首頁入口**（連 `/`），**`.actions` 內另列「首頁」文字連結**（去框：`.homeAction[aria-current]` 底透明，**僅字重 800、不畫任何線**）。**紅線：頂欄 active 不得用 `inset box-shadow`**——`.navLink` 是 `--radius-pill`(999px)，inset 底線會被圓角裁切、沿 22px 圓角往兩側爬升成**碗狀假邊框**（2026-08-31 使用者回報的「首頁的邊框」即此）。且 `.homeAction` 必須**顯式** `box-shadow: none`，只刪該行會讓 `.navLink[aria-current]`(0,2,1) 的 inset 接手、弧線原封不動。「訂閱」trigger 同樣去 border／實心底，`color: inherit`。**選單觸發器所有寬度都在**（桌面不得 `display: none`）。**主題切換移出頂欄**，改在抽屜底部。**頂欄字級角色（2026-08-31）**：品牌 `.brandText` 用 `--fs-h4`（**禁 `clamp()`+vw**，見 `globals.css` 97–98），比控制項大一階以保住字標層級；`.navLink` 與訂閱 `.trigger` 一律 `--fs-body`。**`--fs-meta`／`--fs-label` 不得用於頂欄主控制項**——它們的角色是「最小註記／標籤」，舊碼訂閱用 `--fs-meta`(+`--fs-label` @≥480px) 且字重 800，是同一列出現三種字級兩種字重的來源。`SubscribeMenu` 的 `@media (min-width: 480px)` **不得再覆寫 `font-size`**（會讓 base 修正在幾乎所有桌面失效）。訂閱文案「**訂閱**」；`visiblePlatforms()` 為空時**不得整顆消失**，退為站內 `/subscribe`。
@@ -287,7 +287,7 @@ Storyline 式**全螢幕分段捲動**：每段一張滿版黏土 hero（桌面 
    - **KidsPlayDock 已刪（2026-09-05）**：內頁左下不再掛「去玩」三連；兒童三入口（全部故事／遊樂園／宇宙地圖）只由漢堡抽屜承接。不再有 `--kids-dock-h` 底距、`data-kids-dock`／`data-kids-dock-flush`／`data-lift="picker"`。
    - 關於我們／聯絡我們在頁尾 meta（聯絡另有 ConnectHub Email icon）。**未改** Apple sync workflow、ThemeProvider API。
 2. 四段 **LandingSegment** 全螢幕面板（資料：`data/landing-segments.ts`）；可見 CTA：`車車遊樂園的故事`／`數綿羊123．睡前故事`／`好好玩的捏黏土`／`好習慣故事`
-3. **段落切換**：首頁沒有獨立的分段導覽列。桌面右側垂直進度點與 ≤768px 貼底短標列（SegmentNav）已於 ADR-0004 移除——3D 開場接手了首頁的第一印象，底列在四段內容上方再疊一層水平導覽只是重複。換段控制是各段的**向下箭頭**（`LandingSegment.next`，全尺寸常駐，不再於 ≤768 隱藏）。桌面置底中；≤768 不移動左下 CTA，箭點改進同一條底列、靠該列右緣（右欄 80px 留給 Dudu）。極窄 ≤374 同一列放不下時，箭點才改停在右欄、Dudu 上方 10px。外加捲動容器本身的 snap 與方向鍵。箭頭壓在影像上時仍適用上方 Depth 條款：焦點環用 `var(--on-dark)`。document scroll-snap，reduced-motion 自動停用
+3. **段落切換**：首頁沒有獨立的分段導覽列。桌面右側垂直進度點與 ≤768px 貼底短標列（SegmentNav）已於 ADR-0004 移除——3D 開場接手了首頁的第一印象，底列在四段內容上方再疊一層水平導覽只是重複。換段**不靠實體箭點**（會擠 CTA／嘟嘟）。視覺指引是各段 `moreHint`（美術裡的淡雙折線，不佔版面、不可點）；操作是捲動容器的 snap、觸控滑、方向鍵，以及各段平時隱藏的 `moreSkip`。≤768 左下 CTA 不移動，右欄 80px 仍留給 Dudu。`moreSkip` 聚焦時適用上方 Depth 條款：焦點環用 `var(--on-dark)`。document scroll-snap，reduced-motion 自動停用（指引改靜止）
 4. Segment 1 CTA「車車遊樂園的故事」→ **`/stories`**（完整 Podcast 主頁）
 5. **頁尾 snap pane**（`#landing-foot`）：只承 `SiteFooter`，**不新增第五個 snap 段**。原 `ExploreGrid`（「都去哪裡玩？」地圖大卡＋六格磁貼）與漢堡抽屜 7 列完全重疊，**已刪**；入口改由漢堡抽屜承接。`.footerPane` 維持至少一屏、`flex-start`＋頁尾 `margin-top: auto` 貼底；暖色漸層橋接在 pane 頂緣。≤768px 不再為貼底導覽列預留 padding（ADR-0004 移除 SegmentNav 後該列不存在）。
    - **首頁 `<footer>` 不具 `contentinfo` landmark**：整頁包在 `app/page.tsx` 的 `<main data-landing-root>` 內，`<main>` 是該隱含角色的排除祖先——與 `#landing-foot` 用 `section` 或 `div` 無關。這是既有結構事實，e2e 以版權列文字為錨點。

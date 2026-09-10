@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-/** UX-P1-1：Landing 往下箭點觸控區 ≥44px；分區 CTA min-height 56px。 */
+/** UX-P1-1：分區 CTA min-height 56px；換段指引不佔 44px 底列。 */
 describe("LandingSegment.module.css touch targets", () => {
   const css = readFileSync(
     join(import.meta.dirname, "LandingSegment.module.css"),
@@ -28,22 +28,20 @@ describe("LandingSegment.module.css touch targets", () => {
     return blocks;
   };
 
-  it("往下箭點 44×44", () => {
-    expect(css).toMatch(/\.next\s*\{[\s\S]*?width:\s*44px/);
-    expect(css).toMatch(/\.next\s*\{[\s\S]*?height:\s*44px/);
+  it("美術指引不可點、不進文件流", () => {
+    const hint = extractBlocks(".moreHint")[0] ?? "";
+    expect(hint).toMatch(/pointer-events:\s*none/);
+    expect(hint).toMatch(/position:\s*absolute/);
+    expect(hint).not.toMatch(/width:\s*44px/);
+    expect(hint).not.toMatch(/height:\s*44px/);
+    expect(hint).not.toMatch(/backdrop-filter/);
   });
 
-  it("≤768 箭點進底列、不抬 CTA", () => {
+  it("≤768 底列只留 CTA，不抬 CTA", () => {
     const start = css.indexOf("@media (max-width: 768px)");
     expect(start, "缺少 ≤768 區塊").toBeGreaterThan(-1);
     const mobile = stripComments(css.slice(start));
-    const next768 = mobile.slice(
-      mobile.indexOf(".next {"),
-      mobile.indexOf("}", mobile.indexOf(".next {")) + 1,
-    );
-    expect(next768).toMatch(/position:\s*static/);
-    expect(next768).toMatch(/margin-left:\s*auto/);
-    expect(mobile).toMatch(/@media \(max-width: 374px\)/);
+    expect(mobile).not.toMatch(/\.next\s*\{/);
     expect(mobile).toMatch(
       /\.content\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) 80px/,
     );
@@ -63,10 +61,10 @@ describe("LandingSegment.module.css touch targets", () => {
     expect(ctaBlock).not.toMatch(/--landing-cta-from/);
   });
 
-  it("往下箭無 nudge 動畫", () => {
+  it("沒有實體 .next 箭點，也不用 nudge 關鍵幀名", () => {
     expect(css).not.toMatch(/@keyframes nudge/);
-    const nextBlock = css.match(/\.next\s*\{[\s\S]*?\}/)?.[0] ?? "";
-    expect(nextBlock).not.toMatch(/animation:/);
+    expect(css).not.toMatch(/\.next\s*\{/);
+    expect(css).toMatch(/@keyframes moreHintDrift/);
   });
 
   it("分區 CTA 為不透明暖深墨板＋白字＋黏土 gloss／elev-2", () => {
@@ -121,14 +119,14 @@ describe("LandingSegment.module.css touch targets", () => {
     expect(css).not.toMatch(/\.cta\s*\{[^}]*font-size:\s*var\(--fs-control\)/);
   });
 
-  it("分區 CTA／往下箭 focus 用 var(--on-dark) outline", () => {
+  it("分區 CTA／換段 skip focus 用 var(--on-dark) outline", () => {
     expect(css).toMatch(/\.cta:focus-visible/);
-    expect(css).toMatch(/\.next:focus-visible/);
+    expect(css).toMatch(/\.moreSkip:focus-visible/);
     expect(css).toMatch(
       /\.cta:focus-visible[\s\S]*?outline:\s*3px\s+solid\s+var\(--on-dark\)/,
     );
     expect(css).toMatch(
-      /\.next:focus-visible[\s\S]*?outline:\s*3px\s+solid\s+var\(--on-dark\)/,
+      /\.moreSkip:focus-visible[\s\S]*?outline:\s*3px\s+solid\s+var\(--on-dark\)/,
     );
   });
 

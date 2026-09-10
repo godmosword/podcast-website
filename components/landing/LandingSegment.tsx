@@ -144,22 +144,53 @@ export default function LandingSegment({
               " →"
             )}
           </Link>
-          {nextAnchorId ? (
-            <a
-              href={`#${nextAnchorId}`}
-              className={styles.next}
-              aria-label={
-                nextAnchorId === FOOTER_ANCHOR
-                  ? "捲動到頁尾"
-                  : "捲動到下一個專區"
-              }
-              onClick={goToNext}
-            >
-              <span className={styles.nextChevron} aria-hidden />
-            </a>
-          ) : null}
         </div>
       </div>
+      {nextAnchorId ? (
+        <>
+          <span
+            className={styles.moreHint}
+            data-landing-more-hint
+            aria-hidden
+          >
+            <svg
+              viewBox="0 0 24 20"
+              width="24"
+              height="20"
+              focusable="false"
+            >
+              <path
+                d="M5 4.5 L12 10.5 L19 4.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M5 11 L12 17 L19 11"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+          <a
+            href={`#${nextAnchorId}`}
+            className={styles.moreSkip}
+            aria-label={
+              nextAnchorId === FOOTER_ANCHOR
+                ? "捲動到頁尾"
+                : "捲動到下一個專區"
+            }
+            onClick={goToNext}
+          >
+            <span className={styles.moreSkipGlyph} aria-hidden />
+          </a>
+        </>
+      ) : null}
     </section>
   );
 }

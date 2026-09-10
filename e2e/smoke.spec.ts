@@ -106,9 +106,12 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /數綿羊/ })).toBeAttached();
   await expect(page.getByRole("heading", { name: /捏黏土/ })).toBeAttached();
   await expect(page.getByRole("heading", { name: /陪孩子建立好習慣/ })).toBeAttached();
-  // 往下箭頭錨點存在
+  // 換段 skip 在 a11y 樹，平時不佔可見版面；美術指引可見
   await expect(
     page.getByRole("link", { name: "捲動到下一個專區" }).first(),
+  ).toBeAttached();
+  await expect(
+    page.locator("#segment-stories [data-landing-more-hint]"),
   ).toBeVisible();
 });
 
@@ -573,34 +576,43 @@ test.describe("夜間漢堡抽屜", () => {
 
 
 /**
- * ADR-0004 移除了首頁底列導覽（SegmentNav）。那條細列原本是手機唯一可見的
- * 換段控制——`LandingSegment` 的向下箭頭在 ≤768 是被 CSS 藏起來的，理由就寫在
- * 「平板／手機用 SegmentNav 貼底細條」那行註解裡。移除底列而不放出箭頭，手機
- * 上的四個 snap pane 之間就只剩盲滑。這支守住那個出口。
+ * ADR-0004 移除底列後，換段不再靠實體 44px 箭點（會跟 CTA／嘟嘟搶位）。
+ * 守住：美術指引可見但不擋點、底列 CTA 可點、方向鍵真的換段。
  */
 test.describe("首頁手機換段出口", () => {
   for (const width of [320, 390, 767] as const) {
-    test(`${width}px：向下箭頭可見且真的換段`, async ({ page }) => {
+    test(`${width}px：下滑指引不佔底列，方向鍵可換段`, async ({ page }) => {
       await page.setViewportSize({ width, height: 760 });
       await page.goto("/");
-      const next = page.getByRole("link", { name: "捲動到下一個專區" }).first();
+      const hint = page.locator("#segment-stories [data-landing-more-hint]");
       const cta = page
         .locator("#segment-stories")
         .getByRole("link", { name: /車車遊樂園的故事/ });
-      await expect(next).toBeVisible();
-      const box = await next.boundingBox();
-      expect(box, "箭頭沒有版面盒").not.toBeNull();
-      // 觸控尺寸：藏了很久的控制放出來時，最容易忘記它還要能按得到。
-      expect(box!.width).toBeGreaterThanOrEqual(44);
-      expect(box!.height).toBeGreaterThanOrEqual(44);
-      await expectNoOverlap(next, cta, `${width}px 向下箭頭不得蓋住分區 CTA`);
+      const skip = page.getByRole("link", { name: "捲動到下一個專區" }).first();
+      await expect(hint).toBeVisible();
+      const hintBox = await hint.boundingBox();
+      expect(hintBox, "指引沒有版面盒").not.toBeNull();
+      expect(hintBox!.width).toBeLessThan(40);
+      expect(hintBox!.height).toBeLessThan(40);
+      await expectNoOverlap(hint, cta, `${width}px 下滑指引不得蓋住分區 CTA`);
       await expectNoOverlap(
-        next,
+        hint,
         page.getByRole("button", { name: "嘟嘟小紅車" }),
-        `${width}px 向下箭頭不得蓋住嘟嘟`,
+        `${width}px 下滑指引不得蓋住嘟嘟`,
       );
-      await expectHitTestable(page, next, `${width}px 向下箭頭`);
-      await next.click();
+      await expectHitTestable(page, cta, `${width}px 分區 CTA`);
+      await expect(skip).toBeAttached();
+      const skipBox = await skip.boundingBox();
+      expect(
+        skipBox === null || skipBox.width <= 2 || skipBox.height <= 2,
+        "換段 skip 平時不應佔可見版面",
+      ).toBeTruthy();
+
+      const scroller = page.getByRole("region", {
+        name: "主題專區，可用方向鍵捲動瀏覽",
+      });
+      await scroller.focus();
+      await page.keyboard.press("PageDown");
       await expect
         .poll(async () => (await page.getByRole("region", { name: /睡前/ }).first().boundingBox())?.y ?? Infinity, {
           timeout: 5_000,

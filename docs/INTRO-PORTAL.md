@@ -6,7 +6,7 @@
 
 ## Repository findings
 
-Next.js 16 App Router、React 19、TypeScript strict、CSS Modules。首頁由 LandingHub、四個 LandingSegment、專用捲動容器、BedtimeLayer 和 DuduCompanion 組成（ADR-0004 移除了 SegmentNav 底列，換段改由各段的向下箭頭承擔）。全域 SiteNavBar 提供故事、遊戲、角色、宇宙地圖與家長景點；各功能頁直接以 App Router URL 進入。首頁保留原 metadata、canonical `/`、Podcast JSON-LD、可索引導言與 SSR 連結。故事播放有獨立沉浸式介面，音訊須由使用者啟動。Intro 不引入 Audio 或改寫播放器。
+Next.js 16 App Router、React 19、TypeScript strict、CSS Modules。首頁由 LandingHub、四個 LandingSegment、專用捲動容器、BedtimeLayer 和 DuduCompanion 組成（ADR-0004 移除了 SegmentNav 底列，換段改由 snap／方向鍵與各段美術指引承擔）。全域 SiteNavBar 提供故事、遊戲、角色、宇宙地圖與家長景點；各功能頁直接以 App Router URL 進入。首頁保留原 metadata、canonical `/`、Podcast JSON-LD、可索引導言與 SSR 連結。故事播放有獨立沉浸式介面，音訊須由使用者啟動。Intro 不引入 Audio 或改寫播放器。
 
 視覺沿用粉圓中文字、Baloo、圓角陶土與暖奶油／紅／薄荷綠。ThemeProvider 含夜間與睡前時間規則；Intro 使用自主美術色，Landing 的主題與睡前層保持原狀。既有 service worker、版本化 Next chunks、圖片最佳化及 Vercel analytics 保留。GLB 已拆成環境、車、實例化樹；SceneLoader 管理 abort 與 dispose，QualityManager 降級，CameraRig 處理手機構圖。先保留這些架構，再改善美術与生命週期細節。
 

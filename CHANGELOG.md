@@ -17,8 +17,7 @@
 
 ### Changed
 
-- **Landing 手機下一頁改進底列**：不抬 CTA。≤768 箭點與分區 CTA 同一條基線、靠右停在 Dudu 欄左側（右欄 80px），不再浮在畫上或疊在嘟嘟頭頂。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、DuduCompanion。
-- **Landing 手機向下箭頭不再蓋住分區 CTA**：≤768 長句 CTA 會佔到畫面中線，與置底中的 `.next` 矩形重疊且箭點 z-index 較高會搶點。content 底距改預留 `8px + 44px + 12px`，箭點改吃 `--safe-bottom`，兩者垂直錯開。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、DuduCompanion。
+- **Landing 換段改美術指引、拿掉實體箭點**：玻璃往下鈕會跟左下 CTA、右下嘟嘟搶同一條底列。改在 hero 裡放一枚極淡雙折線（不進文件流、不可點），鍵盤／AT 走捲動區方向鍵與平時隱藏的 skip。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、DuduCompanion。
 - **`/feedback` 送出鈕改暖深墨、拿掉空牆 CTA**：「我要留言」對齊 Landing CTA 色票（`--landing-brand-ink` 底板、`--on-dark` 白字），不再用橘色實心。空牆只留「大家的留言」標題，刪除「當第一個留言」。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、法律頁政策版本。
 - **`/feedback` 留言板收成暖底表單**：拿掉馬米定裝照與對話泡泡、信紙卡／左緣尺線、「寫給馬米」標題與雙同意勾選；填暱稱與留言即可送出。政策版本 `2026-09-10`：送出即表示理解審核後可能公開暱稱與正文。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、許願／訂閱的勾選同意。
 - **播放器快進／倒退改依插圖換頁**：控制列與左右方向鍵從 ±10 秒改為跳到下一張／上一張插圖（對齊 `captionTimes`；單封面集倒退回開頭、快進維持原時間）。圖示改雙箭頭、可及名稱改「上一張插圖／下一張插圖」。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
