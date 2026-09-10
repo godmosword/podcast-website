@@ -98,21 +98,6 @@ export default function LandingSegment({
         <div className={styles.scrim} />
       </div>
 
-      {nextAnchorId ? (
-        <a
-          href={`#${nextAnchorId}`}
-          className={styles.next}
-          aria-label={
-            nextAnchorId === FOOTER_ANCHOR
-              ? "捲動到頁尾"
-              : "捲動到下一個專區"
-          }
-          onClick={goToNext}
-        >
-          <span className={styles.nextChevron} aria-hidden />
-        </a>
-      ) : null}
-
       <div className={styles.content}>
         <div className={styles.headline}>
           <h2
@@ -128,13 +113,13 @@ export default function LandingSegment({
           ) : null}
           {siteIntro ? <p className="sr-only">{siteIntro}</p> : null}
         </div>
-        <div className={`${styles.ctaRow} scrollEnter scrollEnterStagger3`}>
+        <div className={styles.ctaRow}>
           {segment.play ? (
             <LandingPlayLink
               href={segment.play.href}
               slug={segment.play.slug}
               audioSrc={segment.play.audioSrc}
-              className={styles.playCta}
+              className={`${styles.playCta} scrollEnter scrollEnterStagger3`}
             >
               <Icon name="play" size={18} className={styles.playIcon} />
               {segment.play.label}
@@ -142,7 +127,7 @@ export default function LandingSegment({
           ) : null}
           <Link
             href={segment.cta.href}
-            className={segment.play ? styles.subscribeCta : styles.cta}
+            className={`${segment.play ? styles.subscribeCta : styles.cta} scrollEnter scrollEnterStagger3`}
             aria-label={
               segment.cta.external
                 ? `${segment.cta.label}（另開視窗）`
@@ -159,6 +144,20 @@ export default function LandingSegment({
               " →"
             )}
           </Link>
+          {nextAnchorId ? (
+            <a
+              href={`#${nextAnchorId}`}
+              className={styles.next}
+              aria-label={
+                nextAnchorId === FOOTER_ANCHOR
+                  ? "捲動到頁尾"
+                  : "捲動到下一個專區"
+              }
+              onClick={goToNext}
+            >
+              <span className={styles.nextChevron} aria-hidden />
+            </a>
+          ) : null}
         </div>
       </div>
     </section>

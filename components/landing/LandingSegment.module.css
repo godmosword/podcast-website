@@ -320,6 +320,7 @@
 
   .headline {
     margin-bottom: var(--space-3);
+    grid-column: 1 / -1;
     /* 預留右側 Dudu 夥伴空間；斷行同樣由資料 \n 控制 */
     max-width: calc(100% - 72px);
   }
@@ -329,43 +330,57 @@
   }
 
   .cta {
+    flex: none;
     min-height: 56px;
     padding: 12px 22px;
     font-size: var(--fs-h3);
   }
 
-  /* 長句 CTA 會佔到畫面中線；箭點改與 CTA 垂直錯開，底距預留 44×44。 */
-  .next {
-    bottom: calc(var(--safe-bottom) + 8px);
-  }
-
-  .content {
-    padding-bottom: calc(var(--safe-bottom) + 8px + 44px + 12px);
-  }
-}
-
-@media (max-width: 640px) {
+  /* 底列一條線：CTA 左、箭點靠該列右緣、Dudu 佔右欄。不抬 CTA。 */
   .content {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 68px;
+    grid-template-columns: minmax(0, 1fr) 80px;
     align-items: end;
-    column-gap: 4px;
-    row-gap: var(--space-3);
-  }
-
-  .headline {
-    grid-column: 1 / -1;
-    margin-bottom: 0;
+    column-gap: 8px;
+    padding-bottom: calc(var(--safe-bottom) + 6px);
   }
 
   .ctaRow {
     grid-column: 1;
-    justify-self: start;
-    align-self: end;
-    flex-direction: column;
-    align-items: flex-start;
+    width: 100%;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    align-items: center;
+    justify-self: stretch;
   }
 
+  .next {
+    position: static;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    transform: none;
+    margin-left: auto;
+    flex: none;
+    flex-shrink: 0;
+    width: 44px;
+    min-width: 44px;
+    z-index: auto;
+  }
+}
+
+/* 極窄：CTA＋箭點＋Dudu 同一列放不下，箭點改停在右欄、Dudu 頭頂上 10px。 */
+@media (max-width: 374px) {
+  .next {
+    position: absolute;
+    margin-left: 0;
+    left: auto;
+    right: calc(clamp(20px, 5vw, 56px) + var(--safe-right) + 18px);
+    bottom: calc(var(--safe-bottom) + 12px + 72px + 10px);
+  }
+}
+
+@media (max-width: 640px) {
   .title {
     font-size: clamp(1.12rem, 5.2vw, 1.45rem);
   }

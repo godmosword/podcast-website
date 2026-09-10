@@ -33,15 +33,22 @@ describe("LandingSegment.module.css touch targets", () => {
     expect(css).toMatch(/\.next\s*\{[\s\S]*?height:\s*44px/);
   });
 
-  it("≤768 為箭點預留底距，不與 CTA 同列", () => {
+  it("≤768 箭點進底列、不抬 CTA", () => {
     const start = css.indexOf("@media (max-width: 768px)");
     expect(start, "缺少 ≤768 區塊").toBeGreaterThan(-1);
-    const mobile = css.slice(start);
+    const mobile = stripComments(css.slice(start));
+    const next768 = mobile.slice(
+      mobile.indexOf(".next {"),
+      mobile.indexOf("}", mobile.indexOf(".next {")) + 1,
+    );
+    expect(next768).toMatch(/position:\s*static/);
+    expect(next768).toMatch(/margin-left:\s*auto/);
+    expect(mobile).toMatch(/@media \(max-width: 374px\)/);
     expect(mobile).toMatch(
-      /\.content\s*\{[\s\S]*?padding-bottom:\s*calc\(var\(--safe-bottom\) \+ 8px \+ 44px \+ 12px\)/,
+      /\.content\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) 80px/,
     );
     expect(mobile).toMatch(
-      /\.next\s*\{[\s\S]*?bottom:\s*calc\(var\(--safe-bottom\) \+ 8px\)/,
+      /\.content\s*\{[\s\S]*?padding-bottom:\s*calc\(var\(--safe-bottom\) \+ 6px\)/,
     );
   });
 

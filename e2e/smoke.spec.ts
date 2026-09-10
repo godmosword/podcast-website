@@ -594,6 +594,11 @@ test.describe("首頁手機換段出口", () => {
       expect(box!.width).toBeGreaterThanOrEqual(44);
       expect(box!.height).toBeGreaterThanOrEqual(44);
       await expectNoOverlap(next, cta, `${width}px 向下箭頭不得蓋住分區 CTA`);
+      await expectNoOverlap(
+        next,
+        page.getByRole("button", { name: "嘟嘟小紅車" }),
+        `${width}px 向下箭頭不得蓋住嘟嘟`,
+      );
       await expectHitTestable(page, next, `${width}px 向下箭頭`);
       await next.click();
       await expect
