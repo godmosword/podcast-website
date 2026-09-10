@@ -773,24 +773,6 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
-.skip {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.skipNum {
-  position: absolute;
-  top: 53%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 0.72rem;
-  font-weight: 800;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-
 .onDot {
   position: absolute;
   bottom: 10px;

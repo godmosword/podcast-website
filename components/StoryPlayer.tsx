@@ -32,6 +32,12 @@ import {
   resolveCaptionStackState,
 } from "@/lib/subtitle-cue";
 import { shouldRunKenBurns } from "@/lib/player-stage";
+import {
+  illustrationIndexAt,
+  illustrationSkipTarget,
+  illustrationStartTimes,
+  type IllustrationSkipDirection,
+} from "@/lib/player-skip";
 
 // 結尾才出現的反思卡 / 僅 ?cue=1 的對時面板：動態載入，縮小播放器主 chunk。
 const ReflectionPrompt = dynamic(
@@ -75,7 +81,6 @@ export type StoryPlayerProps = {
 };
 
 const SWIPE_THRESHOLD = 50;
-const SKIP_SECONDS = 10;
 const BEDTIME_OPTIONS = [15, 30, 45] as const;
 
 function isEditableKeyboardTarget(target: EventTarget | null): boolean {
@@ -157,8 +162,8 @@ export default function StoryPlayer({
   const adoptedReleaseTimerRef = useRef<number | null>(null);
   const transportRef = useRef<{
     togglePlay: () => void;
-    skip: (delta: number) => void;
-  }>({ togglePlay: () => {}, skip: () => {} });
+    skipIllustration: (direction: IllustrationSkipDirection) => void;
+  }>({ togglePlay: () => {}, skipIllustration: () => {} });
   const touchStartX = useRef<number | null>(null);
   const bedtimeEndRef = useRef<number | null>(null);
   const timerWrapRef = useRef<HTMLDivElement>(null);
@@ -601,11 +606,28 @@ export default function StoryPlayer({
     return `${m}:${String(s).padStart(2, "0")}`;
   }
 
-  function skip(delta: number) {
+  function skipIllustration(direction: IllustrationSkipDirection) {
     const el = audioRef.current;
-    if (!el) return;
-    const dur = Number.isFinite(el.duration) ? el.duration : el.currentTime + delta;
-    el.currentTime = Math.max(0, Math.min(dur, el.currentTime + delta));
+    if (!el || mediaError === "audio") return;
+    const duration = Number.isFinite(el.duration) ? el.duration : 0;
+    const times = illustrationStartTimes({
+      pageCount: total,
+      captionTimes: hasCueTimes ? captionTimes : undefined,
+      duration,
+    });
+    const target = illustrationSkipTarget({
+      currentTime: el.currentTime,
+      duration,
+      pageCount: total,
+      captionTimes: hasCueTimes ? captionTimes : undefined,
+      direction,
+    });
+    if (Math.abs(target - el.currentTime) < 0.05) return;
+    playSfx("flip");
+    el.currentTime = target;
+    setCurrentTime(target);
+    if (duration > 0) setProgress((target / duration) * 100);
+    setPage(illustrationIndexAt(times, target));
   }
 
   function stop() {
@@ -639,7 +661,7 @@ export default function StoryPlayer({
     }
   }
 
-  transportRef.current = { togglePlay, skip };
+  transportRef.current = { togglePlay, skipIllustration };
 
   useEffect(() => {
     if (!hasEnded) return;
@@ -649,7 +671,7 @@ export default function StoryPlayer({
     trackStoryCompleted(slug);
   }, [hasEnded, slug]);
 
-  // 鍵盤：空白鍵播放/暫停，左右方向鍵 ±10 秒（與控制列一致）。
+  // 鍵盤：空白鍵播放/暫停，左右方向鍵跳上一張／下一張插圖（與控制列一致）。
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (isInteractiveKeyboardTarget(e.target)) return;
@@ -661,12 +683,12 @@ export default function StoryPlayer({
       }
       if (e.key === "ArrowLeft") {
         e.preventDefault();
-        transportRef.current.skip(-SKIP_SECONDS);
+        transportRef.current.skipIllustration(-1);
         return;
       }
       if (e.key === "ArrowRight") {
         e.preventDefault();
-        transportRef.current.skip(SKIP_SECONDS);
+        transportRef.current.skipIllustration(1);
       }
     };
 
@@ -1024,14 +1046,11 @@ export default function StoryPlayer({
               <button
                 type="button"
                 className={styles.ctrlBtn}
-                onClick={() => skip(-SKIP_SECONDS)}
-                aria-label="倒退 10 秒"
+                onClick={() => skipIllustration(-1)}
+                aria-label="上一張插圖"
                 disabled={mediaError === "audio"}
               >
-                <span className={styles.skip}>
-                  <RewindIcon size={36} />
-                  <span className={styles.skipNum}>10</span>
-                </span>
+                <RewindIcon size={36} />
               </button>
               <button
                 className={styles.playBtn}
@@ -1050,14 +1069,11 @@ export default function StoryPlayer({
               <button
                 type="button"
                 className={styles.ctrlBtn}
-                onClick={() => skip(SKIP_SECONDS)}
-                aria-label="快進 10 秒"
+                onClick={() => skipIllustration(1)}
+                aria-label="下一張插圖"
                 disabled={mediaError === "audio"}
               >
-                <span className={styles.skip}>
-                  <ForwardIcon size={36} />
-                  <span className={styles.skipNum}>10</span>
-                </span>
+                <ForwardIcon size={36} />
               </button>
               <button
                 type="button"

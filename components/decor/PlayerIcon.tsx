@@ -40,25 +40,25 @@ export function RepeatIcon({ size = 22, className }: IconProps) {
   );
 }
 
-/** 倒退 N 秒（逆時針弧 + 數字另外疊在元件上）。 */
+/** 上一張插圖（雙向左箭頭）。 */
 export function RewindIcon({ size = 22, className }: IconProps) {
   return (
     <svg {...base(size, className)}>
       <g {...STROKE}>
-        <path d="M4.5 12a7.5 7.5 0 1 0 2.6-5.7" />
-        <path d="M4 4v3.2h3.2" />
+        <path d="M11.5 6.5 5 12l6.5 5.5" />
+        <path d="M19 6.5 12.5 12 19 17.5" />
       </g>
     </svg>
   );
 }
 
-/** 快進 N 秒（順時針弧 + 數字另外疊在元件上）。 */
+/** 下一張插圖（雙向右箭頭）。 */
 export function ForwardIcon({ size = 22, className }: IconProps) {
   return (
     <svg {...base(size, className)}>
       <g {...STROKE}>
-        <path d="M19.5 12a7.5 7.5 0 1 1-2.6-5.7" />
-        <path d="M20 4v3.2h-3.2" />
+        <path d="M12.5 6.5 19 12l-6.5 5.5" />
+        <path d="M5 6.5 11.5 12 5 17.5" />
       </g>
     </svg>
   );

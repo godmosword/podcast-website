@@ -46,12 +46,12 @@ test.describe("UX-P1-5 親子指南與播放頁觸控", () => {
     await expectTouchTarget(page.getByRole("link", { name: "關閉" }), "關閉");
     await expectTouchTarget(play, "播放／暫停");
     await expectTouchTarget(
-      page.getByRole("button", { name: "倒退 10 秒" }),
-      "倒退 10 秒",
+      page.getByRole("button", { name: "上一張插圖" }),
+      "上一張插圖",
     );
     await expectTouchTarget(
-      page.getByRole("button", { name: "快進 10 秒" }),
-      "快進 10 秒",
+      page.getByRole("button", { name: "下一張插圖" }),
+      "下一張插圖",
     );
     await expectTouchTarget(page.getByRole("button", { name: "停止" }), "停止");
     await expectTouchTarget(
@@ -83,7 +83,34 @@ test.describe("UX-P1-5 親子指南與播放頁觸控", () => {
     await stage.click({ position: { x: 200, y: 300 }, force: true });
     await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
     await page.keyboard.press("ArrowRight");
-    await expect.poll(() => audio.evaluate((el) => (el as HTMLAudioElement).currentTime)).toBe(10);
+    await expect
+      .poll(() => audio.evaluate((el) => (el as HTMLAudioElement).currentTime))
+      .toBe(20);
+  });
+
+  test("快進倒退依插圖換頁，而不是跳 10 秒", async ({ page }) => {
+    await page.goto("/story/ep-3/play");
+    const audio = page.locator("audio");
+    await audio.evaluate((el) => {
+      const media = el as HTMLAudioElement;
+      media.pause();
+      media.currentTime = 0;
+    });
+
+    await page.getByRole("button", { name: "下一張插圖" }).click();
+    await expect
+      .poll(() => audio.evaluate((el) => (el as HTMLAudioElement).currentTime))
+      .toBe(20);
+
+    await page.getByRole("button", { name: "下一張插圖" }).click();
+    await expect
+      .poll(() => audio.evaluate((el) => (el as HTMLAudioElement).currentTime))
+      .toBeCloseTo(42.4, 1);
+
+    await page.getByRole("button", { name: "上一張插圖" }).click();
+    await expect
+      .poll(() => audio.evaluate((el) => (el as HTMLAudioElement).currentTime))
+      .toBe(20);
   });
 
   test("睡前定時選單支援觸控尺寸、方向鍵、Esc 與提示焦點", async ({ page }) => {
