@@ -2,11 +2,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test } from "vitest";
 import FeedbackWallView from "./FeedbackWallView";
-import {
-  FEEDBACK_EMPTY_CTA,
-  FEEDBACK_MESSAGE_FIELD_ID,
-  FEEDBACK_WALL_HEADING,
-} from "@/lib/feedback-copy";
+import { FEEDBACK_WALL_HEADING } from "@/lib/feedback-copy";
 
 const FIXTURE_EMAIL = "secret@example.com";
 
@@ -32,6 +28,8 @@ describe("FeedbackWallView", () => {
     expect(document.body.textContent).not.toContain("範例");
     expect(document.body.textContent).not.toContain("還沒有公開留言");
     expect(document.body.textContent).not.toContain("共 0 則");
+    expect(document.body.textContent).not.toContain("當第一個留言");
+    expect(screen.queryByRole("link")).toBeNull();
   });
 
   test("1 則核准就列真留言", () => {
@@ -42,12 +40,6 @@ describe("FeedbackWallView", () => {
     expect(screen.getByText("很喜歡垃圾車那集")).toBeTruthy();
     expect(screen.getByText("共 1 則留言")).toBeTruthy();
     expect(screen.queryByLabelText("示範留言")).toBeNull();
-  });
-
-  test("空牆 CTA 用 hash 對準表單", () => {
-    render(<FeedbackWallView messages={[]} />);
-    const cta = screen.getByRole("link", { name: FEEDBACK_EMPTY_CTA });
-    expect(cta.getAttribute("href")).toBe(`#${FEEDBACK_MESSAGE_FIELD_ID}`);
   });
 
   test("多則列出暱稱與正文", () => {

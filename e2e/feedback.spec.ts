@@ -1,6 +1,5 @@
 import { expect, test } from "@playwright/test";
 import {
-  FEEDBACK_EMPTY_CTA,
   FEEDBACK_INVITE_CHILD,
   FEEDBACK_ERROR,
   FEEDBACK_MAILTO_LINK,
@@ -9,6 +8,7 @@ import {
   FEEDBACK_EMAIL_LABEL,
   FEEDBACK_PAGE_TITLE,
   FEEDBACK_SUBMIT_LABEL,
+  FEEDBACK_WALL_HEADING,
 } from "../lib/feedback-copy";
 
 const FIXTURE_EMAIL = "secret-parent@example.com";
@@ -68,7 +68,10 @@ test.describe("站內留言牆 /feedback", () => {
     if (await list.count()) {
       await expect(list).toBeVisible();
     } else {
-      await expect(page.getByRole("link", { name: FEEDBACK_EMPTY_CTA })).toBeVisible();
+      await expect(
+        wall.getByRole("heading", { name: FEEDBACK_WALL_HEADING, level: 2 }),
+      ).toBeVisible();
+      await expect(page.getByRole("link", { name: "當第一個留言" })).toHaveCount(0);
     }
     await expect(page.getByText("還沒有公開留言")).toHaveCount(0);
   });

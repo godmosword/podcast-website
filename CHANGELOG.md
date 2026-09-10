@@ -17,6 +17,7 @@
 
 ### Changed
 
+- **`/feedback` 送出鈕改暖深墨、拿掉空牆 CTA**：「我要留言」對齊 Landing CTA 色票（`--landing-brand-ink` 底板、`--on-dark` 白字），不再用橘色實心。空牆只留「大家的留言」標題，刪除「當第一個留言」。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、法律頁政策版本。
 - **`/feedback` 留言板收成暖底表單**：拿掉馬米定裝照與對話泡泡、信紙卡／左緣尺線、「寫給馬米」標題與雙同意勾選；填暱稱與留言即可送出。政策版本 `2026-09-10`：送出即表示理解審核後可能公開暱稱與正文。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、許願／訂閱的勾選同意。
 - **播放器快進／倒退改依插圖換頁**：控制列與左右方向鍵從 ±10 秒改為跳到下一張／上一張插圖（對齊 `captionTimes`；單封面集倒退回開頭、快進維持原時間）。圖示改雙箭頭、可及名稱改「上一張插圖／下一張插圖」。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **修正直式手機把島的左右兩端切掉**：`.stage` 原本是 `width:134%; right:-17%`，配上 `.hero{overflow:hidden}`，再加相機 `scale:1.15`——390px 上可見世界寬只有 8.0 單位，而島本身寬 11.34，**左右各約 1.68 單位（約 30% 島寬）在畫面外**。現在直式手機綁寬度（`fit:"width"`）、`.stage` 滿版並用 `aspect-ratio` 綁高度，島完整入鏡且左右對稱（±0.924 NDC），只有前緣在下沿微出血。`CameraRig` 三個獨立缺陷一併修掉：`useFrame` 不再抄一份硬編碼相機座標（改 art-direction 才會生效）、斷點改成 state（轉向不再用桌機 framing 配手機 size）、平移改走相機自身的 right／up 軸。poster 尺寸改由 `HERO_STAGE_ASPECT` 單一來源推導，poster→canvas 交接不再跳構圖。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。

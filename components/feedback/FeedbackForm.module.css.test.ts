@@ -9,6 +9,9 @@ describe("FeedbackForm.module.css", () => {
     expect(css).toMatch(/\.textarea\s*\{[\s\S]*?width:\s*100%/);
     expect(css).toMatch(/\.textarea\s*\{[\s\S]*?min-height:\s*140px/);
     expect(css).toMatch(/\.submit\s*\{[\s\S]*?min-height:\s*44px/);
+    expect(css).toMatch(/\.submit\s*\{[\s\S]*?background:\s*var\(--landing-brand-ink\)/);
+    expect(css).toMatch(/\.submit\s*\{[\s\S]*?color:\s*var\(--on-dark\)/);
+    expect(css).not.toMatch(/\.submit\s*\{[\s\S]*?background:\s*var\(--landing-brand\)/);
     expect(css).toMatch(/\.mailtoButton\s*\{[\s\S]*?min-height:\s*44px/);
     expect(css).not.toMatch(/\.heading\s*\{/);
     expect(css).not.toMatch(/\.consent\s*\{/);

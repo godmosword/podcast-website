@@ -12,7 +12,7 @@ export const FEEDBACK_PAGE_TITLE_ID = "feedback-page-title";
 export const FEEDBACK_INVITE_CHILD =
   "嗨嗨，謝謝你來聽故事！告訴馬米你最想說的話，也歡迎許願下一集想聽什麼。";
 
-/** textarea id，空牆 CTA 用 hash 對準（無 JS 也能跳）。 */
+/** textarea id，給 label htmlFor 與測試定位。 */
 export const FEEDBACK_MESSAGE_FIELD_ID = "feedback-message";
 
 export const FEEDBACK_NICKNAME_LABEL = "暱稱";
@@ -43,7 +43,5 @@ export const FEEDBACK_WALL_HEADING = "大家的留言";
 export const FEEDBACK_WALL_COUNT = (count: number): string => `共 ${count} 則留言`;
 
 export const FEEDBACK_TOO_FAST = "再檢查一下留言內容，然後重新送出。";
-
-export const FEEDBACK_EMPTY_CTA = "當第一個留言";
 
 export const FEEDBACK_CHAR_REMAINING = (n: number): string => `還可以寫 ${n} 字`;

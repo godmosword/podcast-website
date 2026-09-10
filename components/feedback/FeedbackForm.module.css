@@ -64,15 +64,15 @@
   justify-content: center;
   min-height: 44px;
   padding: 0.65rem 1rem;
-  border: none;
+  border: 2px solid color-mix(in srgb, var(--on-dark) 88%, transparent);
   border-radius: var(--radius-sm);
   font-size: var(--fs-body);
-  color: var(--landing-brand-ink);
-  background: var(--landing-brand);
-  box-shadow: var(--shadow-sm);
+  color: var(--on-dark);
+  background: var(--landing-brand-ink);
+  box-shadow: var(--shadow-sm), var(--gloss);
   cursor: pointer;
-  transition: transform var(--motion-press), box-shadow var(--motion-press),
-    opacity var(--motion-press);
+  transition: transform var(--motion-press), background var(--motion-press),
+    box-shadow var(--motion-press), opacity var(--motion-press);
 }
 
 .mailtoButton {
@@ -106,7 +106,8 @@
 
 @media (hover: hover) {
   .submit:hover:not(:disabled) {
-    box-shadow: var(--shadow-md);
+    background: color-mix(in srgb, var(--on-dark) 8%, var(--landing-brand-ink));
+    box-shadow: var(--shadow-md), var(--gloss);
   }
 
   .mailtoButton:hover {
@@ -116,9 +117,14 @@
 
 .submit:active:not(:disabled) {
   transform: scale(0.98);
+  background: color-mix(in srgb, var(--on-dark) 8%, var(--landing-brand-ink));
 }
 
-.submit:focus-visible,
+.submit:focus-visible {
+  outline: 3px solid var(--on-dark);
+  outline-offset: 2px;
+}
+
 .mailtoButton:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;

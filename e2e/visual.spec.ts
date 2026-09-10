@@ -354,15 +354,12 @@ for (const pageDef of VISUAL_PAGES) {
         await page.goto(pageDef.path);
         await stabilizeVisualPage(page, { theme });
         if (pageDef.id === "feedback") {
-          // 表單在初始 HTML；牆可能是空牆 CTA 或已核准列表，等殼穩定再截。
+          // 表單在初始 HTML；牆可能是空標題或已核准列表，等殼穩定再截。
           await expect(
             page.getByRole("heading", { name: "留言給馬米", level: 1 }),
           ).toBeVisible();
           await expect(
             page.getByRole("heading", { name: "大家的留言", level: 2 }),
-          ).toBeVisible();
-          await expect(
-            page.getByRole("link", { name: "當第一個留言" }).or(page.getByLabel("公開留言牆").getByRole("list")),
           ).toBeVisible();
         }
         const masks = volatileMasks(page, pageDef.id);

@@ -40,7 +40,7 @@ Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範
 ## 裝置
 
 - **Mobile-first**，內容欄寬 `max-width: 640px` 置中
-- **留言牆（`/feedback`）**：維持 640 單欄、不掛 `SiteHeader`。首屏是頁面標題「留言給馬米」＋邀請段落，不放定裝照、不畫對話泡泡。頁底 `--page-warm-*`。表單**一律**在初始 HTML：直接落在頁面暖底上（無信紙卡、無左緣尺線）＋蜜罐 `website`＋可見「暱稱／信箱（選填）／留言」標籤；無雙同意勾選，填完即可送出。留言欄底為實色、不畫橫線。無 `DATABASE_URL` 或送出回 unavailable 時，表單仍在，mailto「用 email 留言」只當次要備援（可帶入已填暱稱／正文）。牆用 Suspense；空牆只留 CTA 指向 `#feedback-message`，不放範例卡、不寫「還沒有公開留言」；有核准留言即列牆。真留言 `--hairline` 列。夜間圓章 `--c-*` 混色約 40%。蜜罐移出畫面，不用 `display: none`。
+- **留言牆（`/feedback`）**：維持 640 單欄、不掛 `SiteHeader`。首屏是頁面標題「留言給馬米」＋邀請段落，不放定裝照、不畫對話泡泡。頁底 `--page-warm-*`。表單**一律**在初始 HTML：直接落在頁面暖底上（無信紙卡、無左緣尺線）＋蜜罐 `website`＋可見「暱稱／信箱（選填）／留言」標籤；無雙同意勾選，填完即可送出。留言欄底為實色、不畫橫線。送出「我要留言」用暖深墨底板＋白字（對齊 Landing CTA 色票，非橘色實心）。無 `DATABASE_URL` 或送出回 unavailable 時，表單仍在，mailto「用 email 留言」只當次要備援（可帶入已填暱稱／正文）。牆用 Suspense；空牆只留標題，不放 CTA、不放範例卡、不寫「還沒有公開留言」；有核准留言即列牆。真留言 `--hairline` 列。夜間圓章 `--c-*` 混色約 40%。蜜罐移出畫面，不用 `display: none`。
 - **地圖／儀表板工具頁**（如 `/for-parents/play-map`、`/for-parents/dashboard`、`/studio/feedback`）豁免 640px 單欄限制，內容區 `max-width: 1100px` 置中，以容納地圖與並排控制
 - **全部故事（`/stories`）桌機 ≥768**：整頁 `.main` 同樣放到 `1100px`（含標題、SiteHeader、LatestHero、收藏、找故事），以容納縮圖網格。`<768` 維持 640。這是欄寬豁免，不是新的全站 chrome 斷點。
 - **角色圖鑑／親子指南**（`/characters`、`/for-parents`）：不掛 `SiteHeader`（無 `hero-home` 行銷圖）；緊湊頁首用 `--fs-h1`，圖鑑網格／家長工具接在標題下。

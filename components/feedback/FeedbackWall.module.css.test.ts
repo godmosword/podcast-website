@@ -28,8 +28,8 @@ describe("FeedbackWall.module.css", () => {
     expect(css).toMatch(/--c-yellow\) 40%/);
   });
 
-  it("空牆 CTA 觸控區 ≥44px，正文可折行", () => {
-    expect(css).toMatch(/\.emptyCta\s*\{[\s\S]*?min-height:\s*44px/);
+  it("沒有空牆 CTA；正文可折行", () => {
+    expect(css).not.toMatch(/\.emptyCta\s*\{/);
     expect(css).toMatch(/\.message\s*\{[\s\S]*?overflow-wrap:\s*anywhere/);
   });
 

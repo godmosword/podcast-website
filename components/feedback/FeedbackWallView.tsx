@@ -4,12 +4,7 @@ import {
   feedbackAvatarInitial,
   type FeedbackAvatarColor,
 } from "@/lib/feedback-avatar";
-import {
-  FEEDBACK_EMPTY_CTA,
-  FEEDBACK_MESSAGE_FIELD_ID,
-  FEEDBACK_WALL_COUNT,
-  FEEDBACK_WALL_HEADING,
-} from "@/lib/feedback-copy";
+import { FEEDBACK_WALL_COUNT, FEEDBACK_WALL_HEADING } from "@/lib/feedback-copy";
 import { canShowPublicFeedbackList } from "@/lib/feedback-wall";
 import styles from "./FeedbackWall.module.css";
 
@@ -88,11 +83,7 @@ export default function FeedbackWallView({ messages }: FeedbackWallViewProps) {
             </li>
           ))}
         </ul>
-      ) : (
-        <a className={styles.emptyCta} href={`#${FEEDBACK_MESSAGE_FIELD_ID}`}>
-          {FEEDBACK_EMPTY_CTA}
-        </a>
-      )}
+      ) : null}
     </section>
   );
 }
