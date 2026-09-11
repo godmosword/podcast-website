@@ -55,4 +55,9 @@ describe("HeroWorld.module.css 直式手機 stage", () => {
     const hero = css.slice(css.indexOf(".hero {"), css.indexOf("}", css.indexOf(".hero {")));
     expect(hero).toMatch(/overflow:\s*hidden/);
   });
+
+  it("直向視差改兩列 grid，場景列才有完整高度", () => {
+    expect(narrow).toMatch(/\[data-stage="parallax"\]\s*\{[^}]*display:\s*grid/);
+    expect(narrow).toMatch(/grid-template-rows:\s*auto minmax\(0,\s*1fr\)/);
+  });
 });

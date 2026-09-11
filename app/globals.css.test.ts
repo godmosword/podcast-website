@@ -23,3 +23,14 @@ describe("globals.css radius tokens", () => {
     expect(css).toMatch(/--radius-xs:\s*8px\s*;/);
   });
 });
+
+describe("globals.css intro overlay stacking", () => {
+  const css = readFileSync(join(import.meta.dirname, "globals.css"), "utf8");
+
+  it("閘門打開時覆蓋層讓出頂欄高度，不把 .site-root 抬過導覽", () => {
+    expect(css).toMatch(
+      /html\[data-intro-gate="on"\]\s+\[data-intro-overlay\]\s*\{[^}]*padding-top:\s*var\(--nav-h\)/,
+    );
+    expect(css).not.toMatch(/html\[data-intro-gate="on"\]\s+\.site-root\s*\{[^}]*z-index:\s*60/);
+  });
+});

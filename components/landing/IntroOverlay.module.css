@@ -3,11 +3,18 @@
 .overlay {
   position: fixed;
   inset: 0;
-  z-index: 60; /* 高於 SiteNavBar */
+  z-index: 1; /* 蓋住 Landing；頂欄是 site-root 外的 sticky 40，開場期間仍可點 */
   background: #fff8ef;
   /* 手指在覆蓋層上滑動不能穿透到底下的 Landing snap 容器。 */
   touch-action: none;
   overscroll-behavior: contain;
+}
+/* 跟著 fixed overlay 的 inset 盒子長，不要用 100svh——iPhone 會在主畫面指示條
+   上面露出 Landing，近景石頭／草叢看起來像被卡斷。 */
+.overlay :global([data-hero-world]) {
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
 }
 
 .overlay:focus-visible {

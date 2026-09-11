@@ -552,4 +552,16 @@ html:has([data-landing-root]) body {
    關不掉的覆蓋層鎖死。用 data 屬性而不是 CSS Modules 的 class，因為 inline
    script 拿不到雜湊後的名字。 */
 [data-intro-overlay] { display: none; }
-html[data-intro-gate="on"] [data-intro-overlay] { display: block; }
+html[data-intro-gate="on"] [data-intro-overlay] {
+  display: flex;
+  flex-direction: column;
+  /* 頂欄留在覆蓋層之上可點；內容從 --nav-h 起排，標題才不會卡在導覽後面。
+     奶油底仍滿版，毛玻璃頂欄會透出開場色。 */
+  padding-top: var(--nav-h);
+  box-sizing: border-box;
+}
+html[data-intro-gate="on"] [data-intro-overlay] [data-hero-world] {
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
+}

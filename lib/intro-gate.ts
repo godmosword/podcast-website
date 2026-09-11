@@ -75,16 +75,16 @@ document.documentElement.setAttribute("${INTRO_GATE_ATTRIBUTE}","${INTRO_GATE_ON
  * 而把 `inert` 留給 React effect 會在「首次繪製 → hydration 完成」之間讓鍵盤
  * 使用者 Tab 到覆蓋層背後——那個窗口在慢裝置上就是 ADR-0003 量到的量級。
  *
- * 只設 `inert`，不設 `aria-hidden`：`role="dialog" aria-modal="true"` 已足以讓
- * 螢幕閱讀器忽略背景，也避開「對可索引內容加 aria-hidden」的疑慮。
+ * 只設 `inert`，不設 `aria-hidden`：`role="dialog"` 已足以標開場，Landing
+ * 用 inert 擋掉。頂欄刻意不封——開場期間訂閱／留言／漢堡仍要能點。
  */
 export const INTRO_GATE_INERT_MARK = "data-intro-inert";
 
 export const INTRO_GATE_INERT_SCRIPT = `(function(){try{
-if(document.documentElement.getAttribute("${INTRO_GATE_ATTRIBUTE}")!=="${INTRO_GATE_ON}")return;
-// 覆蓋層每一層祖先的兄弟節點都要 inert，不能只蓋 Landing：skip link 與
-// SiteNavBar 是 layout 的節點，不在 [data-landing-root] 裡面，只擋 Landing
-// 的話 Tab 一樣會跑到覆蓋層背後的頂欄。只清自己標記過的，不動別人設的 inert。
+var heroDisabled=${process.env.NEXT_PUBLIC_HERO_3D === "0" ? "true" : "false"};
+// 覆蓋層每一層祖先的兄弟節點都要 inert，不能只蓋 Landing：skip link 是
+// layout 的節點，不在 [data-landing-root] 裡面。頂欄（site-nav-bar）留下，
+// 開場期間訂閱／留言／漢堡要能用。只清自己標記過的，不動別人設的 inert。
 var seal=function(){
   var overlay=document.querySelector("[data-intro-overlay]");
   if(!overlay)return;
@@ -93,15 +93,12 @@ var seal=function(){
     for(var i=0;i<siblings.length;i++){
       var sibling=siblings[i];
       if(sibling===node||sibling.hasAttribute("inert"))continue;
+      if(sibling.getAttribute&&sibling.getAttribute("data-testid")==="site-nav-bar")continue;
       sibling.setAttribute("inert","");
       sibling.setAttribute("${INTRO_GATE_INERT_MARK}","");
     }
   }
 };
-seal();
-// hydration 之前，覆蓋層的按鈕還沒有 React handler——那段時間如果沒有出口，
-// 慢裝置上使用者會被一層按不掉的東西擋住。這個 capture 階段的保底讓 Esc 與
-// 出口按鈕從**繪製當下**就能用；React 掛載後讀 <html> 屬性即可同步狀態。
 var close=function(){
   document.documentElement.removeAttribute("${INTRO_GATE_ATTRIBUTE}");
   // 在關閉當下重新查詢，不是沿用閉包變數：DOM 可能已經換過。
@@ -114,6 +111,15 @@ var close=function(){
   var target=document.getElementById("main-content");
   if(target&&target.focus)target.focus({preventScroll:true});
 };
+var reopen=function(){
+  document.documentElement.setAttribute("${INTRO_GATE_ATTRIBUTE}","${INTRO_GATE_ON}");
+  seal();
+};
+if(document.documentElement.getAttribute("${INTRO_GATE_ATTRIBUTE}")==="${INTRO_GATE_ON}")seal();
+// hydration 之前，覆蓋層的按鈕還沒有 React handler——那段時間如果沒有出口，
+// 慢裝置上使用者會被一層按不掉的東西擋住。這個 capture 階段的保底讓 Esc 與
+// 出口按鈕從**繪製當下**就能用；React 掛載後讀 <html> 屬性即可同步狀態。
+// 監聽器在閘門關著時也要掛著：Landing 的「看小紅開進遊樂園」靠它重開覆蓋層。
 document.addEventListener("keydown",function(event){
   if(event.key==="Escape"&&document.documentElement.getAttribute("${INTRO_GATE_ATTRIBUTE}")==="${INTRO_GATE_ON}")close();
 },true);
@@ -121,6 +127,12 @@ document.addEventListener("click",function(event){
   var node=event.target;
   while(node&&node!==document){
     if(node.hasAttribute&&node.hasAttribute("data-intro-dismiss")){close();return;}
+    if(node.getAttribute&&node.getAttribute("data-testid")==="replay-intro"){
+      if(heroDisabled||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||event.button!==0)return;
+      event.preventDefault();
+      reopen();
+      return;
+    }
     node=node.parentNode;
   }
 },true);
@@ -145,4 +157,57 @@ export function dismissIntroGate(): void {
   } catch {
     // 隱私模式寫不進去時，至少這次瀏覽的覆蓋層已經關掉了。
   }
+}
+
+/**
+ * 把覆蓋層以外的節點封住。邏輯與 `INTRO_GATE_INERT_SCRIPT` 的 seal 對齊：
+ * skip-link 與 Landing 都 inert，頂欄留下。覆蓋層還沒掛上時是 no-op。
+ */
+export function sealIntroBackground(): void {
+  if (typeof document === "undefined") return;
+  const overlay = document.querySelector("[data-intro-overlay]");
+  if (!overlay) return;
+  for (
+    let node: Element | null = overlay;
+    node && node.parentNode && node !== document.body;
+    node = node.parentNode instanceof Element ? node.parentNode : null
+  ) {
+    for (const sibling of Array.from(node.parentNode.children)) {
+      if (sibling === node || sibling.hasAttribute("inert")) continue;
+      if (sibling.getAttribute("data-testid") === "site-nav-bar") continue;
+      sibling.setAttribute("inert", "");
+      sibling.setAttribute(INTRO_GATE_INERT_MARK, "");
+    }
+  }
+}
+
+/**
+ * 使用者在 Landing 明確要再看開場。不讀 `shouldOpenIntroGate`：reduced motion／
+ * Save-Data／這個分頁已經看過，點了就開。不清 `cheche:intro-seen-v1`，重新整理
+ * 仍不會自動再播。
+ */
+export function reopenIntroGate(): void {
+  if (typeof document === "undefined") return;
+  document.documentElement.setAttribute(INTRO_GATE_ATTRIBUTE, INTRO_GATE_ON);
+  sealIntroBackground();
+}
+
+/** 一般點擊重開同頁覆蓋層；修飾鍵／中鍵／部署關掉 3D 時走原生 `/intro`。 */
+export function shouldReplayIntroOverlay({
+  heroDisabled,
+  button,
+  metaKey,
+  ctrlKey,
+  shiftKey,
+  altKey,
+}: {
+  heroDisabled: boolean;
+  button: number;
+  metaKey: boolean;
+  ctrlKey: boolean;
+  shiftKey: boolean;
+  altKey: boolean;
+}): boolean {
+  if (heroDisabled) return false;
+  return button === 0 && !metaKey && !ctrlKey && !shiftKey && !altKey;
 }

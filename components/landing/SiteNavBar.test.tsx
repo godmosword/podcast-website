@@ -80,7 +80,6 @@ describe("SiteNavBar", () => {
       "/stories",
       "/characters",
       "/games",
-      "/games/coloring-book",
       "/adventures",
       "/about",
       "/for-parents",
@@ -88,6 +87,7 @@ describe("SiteNavBar", () => {
     ]) {
       expect(html).toContain(`href="${href}"`);
     }
+    expect(html).not.toContain('href="/games/coloring-book"');
     expect(html).toContain('href="/feedback"');
 
     const view = await renderNavBar();
@@ -122,6 +122,7 @@ describe("SiteNavBar", () => {
     ]) {
       expect(html).toContain(label);
     }
+    expect(html).not.toContain("繪本著色");
     expect(html).not.toContain("主題分類");
     expect(html).not.toContain("指南首頁");
     expect(html).not.toContain("聯絡我們");
@@ -153,10 +154,10 @@ describe("SiteNavBar", () => {
       "/for-parents",
       "/for-parents/play-map",
       "/characters",
-      "/games/coloring-book",
     ]) {
       expect(panel.querySelector(`a[href="${href}"]`)).toBeTruthy();
     }
+    expect(panel.querySelector('a[href="/games/coloring-book"]')).toBeNull();
 
     // 兩斷點同構：品牌＋常用組＋最右漢堡（含可見首頁 homeAction）
     const brand = topRow.querySelector('a[href="/"]');
@@ -195,7 +196,7 @@ describe("SiteNavBar", () => {
     expect(labels).toEqual(["給爸媽"]);
   });
 
-  test("抽屜恰好 8 個站內 href，不含首頁／mailto", async () => {
+  test("抽屜恰好 7 個站內 href，不含首頁／著色本／mailto", async () => {
     const view = await renderNavBar();
     const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
     const panelHrefs = Array.from(panel.querySelectorAll("a")).map((a) =>
@@ -205,7 +206,6 @@ describe("SiteNavBar", () => {
       "/stories",
       "/characters",
       "/games",
-      "/games/coloring-book",
       "/adventures",
       "/about",
       "/for-parents",
@@ -214,8 +214,9 @@ describe("SiteNavBar", () => {
       expect(panelHrefs).toContain(href);
     }
     expect(panelHrefs).not.toContain("/");
+    expect(panelHrefs).not.toContain("/games/coloring-book");
     expect(panelHrefs.some((h) => h?.startsWith("mailto:"))).toBe(false);
-    expect(panelHrefs.length).toBe(8);
+    expect(panelHrefs.length).toBe(7);
   });
 
   test("抽屜兩組各為 role=list，家長組以 aria-labelledby 綁小標", async () => {
@@ -257,7 +258,6 @@ describe("SiteNavBar", () => {
       "全部故事",
       "角色圖鑑",
       "遊樂園",
-      "繪本著色",
       "宇宙地圖",
       "關於我們",
       "親子指南",
@@ -265,6 +265,7 @@ describe("SiteNavBar", () => {
     ]) {
       expect(view.getAllByText(label).length).toBeGreaterThan(0);
     }
+    expect(view.queryByText("繪本著色")).toBeNull();
     expect(view.queryByText("主題分類")).toBeNull();
     expect(view.queryByText("育兒專欄")).toBeNull();
     expect(view.queryByText("聯絡我們")).toBeNull();
@@ -351,7 +352,6 @@ describe("isInternalPathActive 最長匹配", () => {
     "/characters",
     "/topic",
     "/games",
-    "/games/coloring-book",
     "/adventures",
     "/about",
     "/for-parents",
@@ -366,13 +366,25 @@ describe("isInternalPathActive 最長匹配", () => {
     ).toBe(false);
   });
 
-  test("在 /games/coloring-book 時遊樂園不得同時 active", async () => {
+  test("在 /games/coloring-book 時遊樂園 active（著色本已收進園內）", async () => {
     const { isInternalPathActive } = await import("./SiteNavBar");
     expect(isInternalPathActive("/games/coloring-book", "/games", hrefs)).toBe(
-      false,
+      true,
     );
+  });
+
+  test("siblings 含更長路徑時仍獨佔（helper 契約）", async () => {
+    const { isInternalPathActive } = await import("./SiteNavBar");
+    const nested = ["/games", "/games/coloring-book"];
     expect(
-      isInternalPathActive("/games/coloring-book", "/games/coloring-book", hrefs),
+      isInternalPathActive("/games/coloring-book", "/games", nested),
+    ).toBe(false);
+    expect(
+      isInternalPathActive(
+        "/games/coloring-book",
+        "/games/coloring-book",
+        nested,
+      ),
     ).toBe(true);
   });
 
@@ -511,7 +523,7 @@ describe("SiteNavBar active 狀態", () => {
     ).toBe(false);
   });
 
-  test("/games/coloring-book 僅抽屜繪本著色 active，標題列無 /games 連結", async () => {
+  test("/games/coloring-book 抽屜遊樂園 active，無獨立著色本列", async () => {
     const view = await renderNavBarAt("/games/coloring-book");
     const topRow = view.container.querySelector("header > div")!;
     const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
@@ -523,14 +535,10 @@ describe("SiteNavBar active 狀態", () => {
       topRowOutsidePanel.some((a) => a.getAttribute("href") === "/games"),
     ).toBe(false);
 
+    expect(panel.querySelector('a[href="/games/coloring-book"]')).toBeNull();
     expect(
-      panel
-        .querySelector('a[href="/games/coloring-book"]')
-        ?.getAttribute("aria-current"),
+      panel.querySelector('a[href="/games"]')?.getAttribute("aria-current"),
     ).toBe("page");
-    expect(
-      panel.querySelector('a[href="/games"]')?.hasAttribute("aria-current"),
-    ).toBe(false);
   });
 
   test("首頁 aria-current 在常用組 .homeAction，抽屜無首頁列", async () => {

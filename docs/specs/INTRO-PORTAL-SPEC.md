@@ -156,7 +156,7 @@ Intro 不是選關、角色圖鑑、遊戲 hub、故事目錄或可自由探索�
 > `/` 仍然永遠回傳完整 Landing HTML、零 client redirect、零 middleware、canonical 不變；
 > 差別是首次到訪時有一層蓋在 Landing 上的 3D 開場，由 `<head>` 的同步 script
 > （`lib/intro-gate.ts`）在首次繪製前決定，按「進入」就地淡出，網址全程是 `/`。
-> Landing 首段的 opt-in 連結（`IntroEntry`）已移除。§4.2 的舊 session 規則仍然作廢——
+> Landing 首段的 opt-in 膠囊（`IntroEntry`）已移除；改在首段 CTA 旁放次要連結「看小紅開進遊樂園」——有 JS 時重開同頁覆蓋層，無 JS 走進 `/intro`。§4.2 的舊 session 規則仍然作廢——
 > 覆蓋層用的是新的 key 與新的判斷，不是把舊機制接回來。
 
 ### 4.1 路由契約

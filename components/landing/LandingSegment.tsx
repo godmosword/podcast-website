@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
 import LandingPlayLink from "./LandingPlayLink";
+import ReplayIntroLink from "./ReplayIntroLink";
 import type { ResolvedLandingSegment } from "@/lib/landing-query";
 import { landingHeroPictureSources } from "@/lib/modern-image-src";
 import { useLandingScroll } from "./LandingScrollContext";
@@ -15,7 +16,6 @@ type LandingSegmentProps = {
   siteIntro?: string;
   /** 下一段錨點；最後一段指向 landing-foot（頁尾 snap pane）。 */
   nextAnchorId: string | null;
-  /** 首段的次要入口（ADR-0003 的 Intro opt-in 連結）；由 server 端傳入。 */
 };
 
 const FOOTER_ANCHOR = "landing-foot";
@@ -144,6 +144,11 @@ export default function LandingSegment({
               " →"
             )}
           </Link>
+          {index === 0 ? (
+            <ReplayIntroLink
+              className={`${styles.replayIntro} scrollEnter scrollEnterStagger3`}
+            />
+          ) : null}
         </div>
       </div>
       {nextAnchorId ? (

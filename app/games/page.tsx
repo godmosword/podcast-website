@@ -58,7 +58,9 @@ function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
   ].filter(Boolean);
 
   return (
-    <li className={styles.gridItem}>
+    <li
+      className={`${styles.gridItem} ${game.slug === "coloring-book" ? styles.lead : ""}`}
+    >
       <Link
         href={game.href}
         className={`${styles.gameCard} scrollEnter press-squash`}
@@ -73,7 +75,11 @@ function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
             alt={game.art.alt}
             fill
             /* 每張卡同寬，sizes 必須貼齊實際渲染寬度，否則會下載到過小的檔再放大。 */
-            sizes="(max-width: 640px) calc(100vw - 32px), 300px"
+            sizes={
+              game.slug === "coloring-book"
+                ? "(max-width: 640px) calc(100vw - 32px), 300px"
+                : "(max-width: 640px) calc(50vw - 24px), 300px"
+            }
             className={styles.thumbImage}
             style={{ objectPosition: game.art.position ?? "50% 50%" }}
             /* 只有 3 張卡：首張 preload（LCP），其餘 eager 但不佔 preload 預算。
@@ -107,18 +113,20 @@ function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
 }
 
 /**
- * 單一均等網格：3 個活動不足以撐起兩個年齡分區，
- * 分區只會把版面切碎（其中一區永遠只有一張卡）。年齡改由卡上徽章與 meta 行承擔。
- * 3–7 歲的活動排前面；同齡層維持 `data/games.ts` 的順序（sort 穩定）。
+ * 著色本從漢堡收進遊樂園後當第一站，後面才是兩款街機。
+ * 年齡徽章與 meta 行仍標 3–7／6–12，不再另切分區。
  */
-const AGE_BAND_ORDER: Record<GameMeta["ageBand"], number> = {
-  explore: 0,
-  challenge: 1,
-};
+const HUB_STATION_ORDER: readonly GameMeta["slug"][] = [
+  "coloring-book",
+  "candy-match",
+  "block-drop",
+];
 
-const ORDERED_GAMES: GameMeta[] = [...GAMES].sort(
-  (a, b) => AGE_BAND_ORDER[a.ageBand] - AGE_BAND_ORDER[b.ageBand],
-);
+const ORDERED_GAMES: GameMeta[] = HUB_STATION_ORDER.map((slug) => {
+  const game = GAMES.find((entry) => entry.slug === slug);
+  if (!game) throw new Error(`missing hub station: ${slug}`);
+  return game;
+});
 
 export default function GamesHubPage() {
   return (
@@ -159,7 +167,7 @@ export default function GamesHubPage() {
           <span className={styles.eyebrow}>今天想玩哪一站？</span>
           <h1 className={styles.title}>車車遊樂園</h1>
           <p className={styles.subtitle}>
-            和故事裡的車車朋友一起玩，找糖果、塗顏色、堆方塊！
+            塗繪本、找糖果、堆方塊，都在這一座園裡。
           </p>
           <ul className={styles.highlights} aria-label="遊樂園特色">
             <li className={styles.chip}>
@@ -180,7 +188,7 @@ export default function GamesHubPage() {
 
       <section className={styles.zone} aria-labelledby="games-all">
         <h2 id="games-all" className={styles.zoneTitle}>
-          全部遊戲
+          園裡的站
         </h2>
         <GamesHubProgress />
         <ul className={styles.cardGrid}>

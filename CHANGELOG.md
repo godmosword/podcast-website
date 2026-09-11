@@ -6,6 +6,7 @@
 
 ### Added
 
+- **Landing 可重回 3D 開場**：首段次要連結「看小紅開進遊樂園」（真 `<a href="/intro">`）。有 JS 時重開同頁覆蓋層、網址留在 `/`、頂欄仍可點；無 JS、修飾鍵或 `NEXT_PUBLIC_HERO_3D=0` 走進 `/intro`。不是自動導向，也不清 session 標記——重新整理仍不會自動再播。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **Hero 橫向 2.5D 視差舞台（Phase 3，與 3D 並存 A/B）**：新增 `components/landing/hero-parallax/`，四層黏土 tile 以純 CSS `transform` 平鋪捲動（三份並排位移一份，百分比位移不讀 custom property）、小紅沿用地圖 roamer 的同一份 sprite 做定點主角，背景往右捲讓面朝左的車讀成一直往前開。`prefers-reduced-motion` 直接停成靜態圖、暫停與頁面隱藏凍結動畫、不釋放 layer。HeroWorld 以 `HERO_STAGE` 選舞台（同日 Phase 3b 已把預設切為視差帶，見下）。視差舞台沒有 WebGL 資格判定、沒有載入逾時——四張靜態圖載不出來就是破圖，跟站上任何一張圖一樣。路面 tile 改回生圖原色（不再校到 Art Bible 步道色）並裁到內容高度。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、intro-portal e2e 的任何既有契約。
 - **3D 開場改為首頁的同頁覆蓋層（ADR-0004）**：`/` 仍然回傳完整 Landing HTML——canonical、Podcast JSON-LD、內容與內部連結一字未改、零 client redirect、零 middleware——3D 蓋在它上面。要不要蓋由 `<head>` 的同步 script（`lib/intro-gate.ts`）在**首次繪製前**決定，所以沒有導航可以閃爍。每個瀏覽分頁出現一次（`cheche:intro-seen-v1`），按「進入車車遊樂園」就地淡出、焦點交給 `#main-content`、不新增 history entry。閘門同時擋掉 reduced motion／Save-Data／2G：這些人第一眼就是 Landing，也不會下載任何模型。CSS 預設隱藏、script 才打開——無 JS 或 script 出錯時直接看到 Landing，而不是被一層關不掉的覆蓋層鎖死。`/` 初始 JS +4,632 bytes gzip，**0 個** chunk 含 three.js（3D runtime 仍在 `next/dynamic` 後面）。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **構圖 QA 工具 `npm run qa:hero-framing`**：用正式的 R3F 場景與 CameraRig，把每個具名節點的頂點投影成螢幕座標，逐一斷言有沒有被畫面邊緣切掉；地面允許只在下緣出血，其餘一律必須完整入鏡。六個 stage 尺寸（320／375／390／414／430 直式＋桌機）。這把 `art-direction.ts` 註解裡「Roof, ferris rim and Little Red's eyes stay inside」從註解升級成可執行的斷言。**未改** Apple sync workflow。
@@ -18,11 +19,16 @@
 
 ### Fixed
 
+- **角色圖鑑「出場故事」統一釘在卡片框底**：個性文案長短不再把下拉推高，同一列卡片的選單齊底。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
+- **手機開場舞台不再被頂欄與薄帶裁切**：覆蓋層內容從 `--nav-h` 起排，標題不再卡在導覽後面；直向視差改為文案／按鈕一列、場景吃剩餘高度並加大縮放。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **播放器關掉字幕後插圖仍跟音檔換頁**：`字幕` 鈕以前連帶關掉跟讀，看圖時只剩手動翻頁。現在插圖一律跟 `captionTimes`（無則等分），字幕只開關文字；關閉字幕時的左右 tap／swipe 改跳插圖並帶時間。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **ep-16 場景摘要簡體誤植**：`認識新朋友三步骤` 改為「驟」（`data/scenes/ep-16.json` 與 `apple-sync.defaults.json` overrides）。線上 `apple-synced.json` 仍待下次 `sync:apple` 覆寫。**未改** Apple sync workflow。
+- **故事卡／最新一集／Intro／遊戲卡標題補上源泉圓體**：這些標題是 `span`／`p` 不是 `h1–h3`，上一筆字型改版沒套到 display 堆疊。留言牆 UGC 仍用系統字。**未改** Apple sync workflow。
 
 ### Changed
 
+- **3D 開場期間頂欄仍可點**：覆蓋層讓出 `--nav-h`，不再 inert 頂欄、不再把 `.site-root` 抬過導覽；Landing 仍 inert。標題排在頂欄下方。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
+- **繪本著色收進遊樂園**：漢堡抽屜不再獨立列「繪本著色」（探索改為全部故事／角色圖鑑／遊樂園／宇宙地圖／關於我們）；`/games/coloring-book` 高亮「遊樂園」。Hub 第一站為著色本，手機全寬、另外兩款並排。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、著色本路由與引擎。
 - **全站字型改源泉圓體標題＋Fredoka 英數**：內文維持粉圓子集；中文標題改自託管源泉圓體 TW Bold 子集（真字重，保留 `font-synthesis-weight: none`）；英數 Baloo 2 換成 Fredoka。Gochi Hand 點綴保留。留言牆 UGC 仍用系統字。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 
 - **視差舞台的文字安全區改為結構性保證（Astra 視覺審查）**：遠景與中景在文案側做透明漸層遮罩（`--text-clear` 之前全透明、`--text-fade` 才全顯），路牌、摩天輪任何一幀都不會頂進副標——之前在 1280×720 會直接穿過。副標與 CTA 收攏到標題正下方成一個閱讀區塊，全部在地平線之上，不再壓在路面虛線上。近景縮 0.7 並下沉 36px，右下石頭不再搶小紅。新增 e2e「text safe zone」六個尺寸：文案與按鈕列必須整個在透明段內或整個在會動的層之上（桌機／短橫向），或與任何一層都不相交（手機）——與動畫相位無關。實測透明段本來只到 16%，按鈕列右緣在 26%（1440）／45%（844 橫向），是這條測試抓出來的。**未改** 3D 舞台、Apple sync workflow。

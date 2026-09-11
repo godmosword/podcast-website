@@ -258,12 +258,29 @@ export default function HeroWorld({ mode = "page", onDismiss }: { mode?: HeroWor
       data-stage={stage}
       data-scene-state={failed ? "fallback" : ready && eligible ? "ready" : "poster"}
       data-scene-active={mounted && active} data-entering={entering} data-greeting={greeting} data-motion-phase={phase}>
+      <div className={styles.content} data-hero-content>
       <div className={styles.copy}>
         {/* 首頁已經有自己的 h1，覆蓋層不能再開一個第二層級標題。 */}
         {overlay
           ? <p className={styles.title}>車車遊樂園</p>
           : <h1 id="intro-title" className={styles.title}>車車遊樂園</h1>}
         <p className={styles.description}>故事，就從這裡出發。</p>
+      </div>
+      <div className={styles.actions}>
+        {overlay
+          ? <button type="button" className={styles.cta} data-intro-dismiss onClick={enter}>進入車車遊樂園 <span aria-hidden="true">→</span></button>
+          : <Link href="/?enter=1" replace className={styles.cta} onClick={enter}>進入車車遊樂園 <span aria-hidden="true">→</span></Link>}
+        {ready && !failed && (parallax ? !reducedMotion : quality !== "low") ? (
+          <button
+            type="button"
+            className={styles.pause}
+            aria-label={paused ? "繼續小紅的旅程" : "暫停小紅的旅程"}
+            onClick={() => setPaused((current) => !current)}
+          >
+            {paused ? "繼續動態" : "暫停動態"}
+          </button>
+        ) : null}
+      </div>
       </div>
       {parallax ? (
         <HeroParallax running={active} deferImages={overlay} onReady={() => setReady(true)} />
@@ -282,21 +299,6 @@ export default function HeroWorld({ mode = "page", onDismiss }: { mode?: HeroWor
         </div> : null}
       </div>
       )}
-      <div className={styles.actions}>
-        {overlay
-          ? <button type="button" className={styles.cta} data-intro-dismiss onClick={enter}>進入車車遊樂園 <span aria-hidden="true">→</span></button>
-          : <Link href="/?enter=1" replace className={styles.cta} onClick={enter}>進入車車遊樂園 <span aria-hidden="true">→</span></Link>}
-        {ready && !failed && (parallax ? !reducedMotion : quality !== "low") ? (
-          <button
-            type="button"
-            className={styles.pause}
-            aria-label={paused ? "繼續小紅的旅程" : "暫停小紅的旅程"}
-            onClick={() => setPaused((current) => !current)}
-          >
-            {paused ? "繼續動態" : "暫停動態"}
-          </button>
-        ) : null}
-      </div>
       {/* href 維持 `/?enter=1`：那是無 JS 與深連結的語意入口。JS 可用時兩個連結
           都改由 router 送到乾淨的 `/`，canonical 不變。覆蓋層已經在 `/` 上，
           所以那裡的出口是按鈕。 */}

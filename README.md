@@ -39,7 +39,7 @@ Bonbon & 馬米親子 Podcast《車車遊樂園》的官方 **看圖聽故事** 
 | 親子指南 | `/for-parents` | answer-first FAQ、代表性集數、Threads 育兒小筆記外連（GEO／STEM-P3） |
 | 親子遊樂地圖 | `/for-parents/play-map` | 靜態殼＋`PlayMapClient` island；主瀏覽為 22 縣市磚牆＋分組名單（首屏不掛 Leaflet），地圖為已選縣市／附近後的 `view=map` 次要分頁；15 縣市景點、可分享篩選 URL、SSR 全台名單＋ItemList |
 | 家庭儀表板 | `/for-parents/dashboard` | 本機 localStorage 收聽／遊戲摘要（不上傳） |
-| 小遊戲 | `/games` | 街機兩款 hub + 繪本著色；遊戲資產按需預載 |
+| 小遊戲 | `/games` | 著色本為第一站，與街機兩款同園；遊戲資產按需預載 |
 | 節目數據 | `/studio` | 製作團隊專用（`noindex`、不在 sitemap）；含待生圖佇列 |
 | 關於／法律 | `/about`、`/legal` | 關於我們、使用條款 |
 | RSS | `/feed.xml` | Podcast feed（含 Podcasting 2.0 擴充） |

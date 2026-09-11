@@ -3,14 +3,17 @@
   position: relative;
   width: 100%;
   height: 100svh;
+  height: 100dvh;
   min-height: 480px;
   isolation: isolate;
   overflow: hidden;
   background: radial-gradient(ellipse at 65% 50%, #f2ecd8, #faf1e4 65%, #fff8ef);
   color: #453021;
 }
+/* world 與桌機視差：包裝不佔盒，copy／actions 維持原本的 absolute。 */
+.content { display: contents; }
 .copy { position: absolute; z-index: 2; top: 24%; left: 6%; pointer-events: none; }
-.title { margin: 0; font-size: clamp(2.4rem, 4vw, 4.8rem); line-height: 1.28; letter-spacing: .035em; color: #28776e; font-weight: 700; }
+.title { margin: 0; font-size: clamp(2.4rem, 4vw, 4.8rem); line-height: 1.28; letter-spacing: .035em; color: #28776e; font-weight: 700; font-family: var(--font-stack-display); }
 .description { margin: 18px 0 0; line-height: 1.8; font-size: var(--fs-h4); color: #78553c; }
 .stage { position: absolute; width: 80%; height: 90%; right: -8%; bottom: -1%; }
 .poster, .canvas { position: absolute; inset: 0; display: block; }
@@ -50,6 +53,33 @@
   .cta { font-size: var(--fs-control); min-height: 52px; padding: 12px 24px; }
   .pause { font-size: var(--fs-label); }
   .skip { left: 50%; right: auto; transform: translateX(-50%); bottom: max(2%, env(safe-area-inset-bottom)); white-space: nowrap; }
+  /*
+   * 視差直向：文案＋按鈕一列、場景吃剩餘高度。band 不再跟標題／CTA 搶同一塊
+   * 100svh，才不會變成中間一條被上下卡斷的薄片。
+   */
+  .hero[data-stage="parallax"] {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .hero[data-stage="parallax"] .content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    z-index: 2;
+    padding: max(12px, env(safe-area-inset-top)) 5% 16px;
+    text-align: center;
+  }
+  .hero[data-stage="parallax"] .copy,
+  .hero[data-stage="parallax"] .actions {
+    position: static;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    text-align: center;
+  }
+  .hero[data-stage="parallax"] .actions { justify-content: center; }
 }
 @media (max-height: 560px) and (min-width: 600px) {
   .hero { min-height: 320px; }
@@ -59,17 +89,21 @@
   .stage { width: 75%; right: -8%; top: -4%; height: 106%; }
   .actions { left: 5%; right: auto; bottom: 22%; }
   .skip { left: 5%; right: auto; transform: none; bottom: 3%; }
+  /* 600–768 會同時命中直向 grid；短橫向改回左右配置。 */
+  .hero[data-stage="parallax"] { display: block; }
+  .hero[data-stage="parallax"] .content { display: contents; }
+  .hero[data-stage="parallax"] .copy,
+  .hero[data-stage="parallax"] .actions { position: absolute; text-align: left; }
 }
 /* 視差舞台的近景層會捲到略過鍵底下；壓在影像上的 chrome 必須有自身底色（DESIGN.md Depth）。 */
 .hero[data-stage="parallax"] .skip { background: rgba(250, 241, 228, .88); border-radius: 999px; }
 /*
  * 視差舞台：CTA 收到副標正下方，標題→副標→按鈕是一個閱讀區塊，全部在地平線之上。
  * 3D 舞台的 CTA 在 bottom 23%（島的左下角），視差帶那個位置是路面，按鈕會壓在
- * 虛線上、跟文案隔著一整段景物。
+ * 虛線上、跟文案隔著一整段景物。直向手機改走 grid，不走這組 top。
  */
-.hero[data-stage="parallax"] .actions { top: calc(24% + 9.5rem); bottom: auto; }
+@media (min-width: 769px) { .hero[data-stage="parallax"] .actions { top: calc(24% + 9.5rem); bottom: auto; } }
 @media (max-width: 980px) and (min-width: 769px) { .hero[data-stage="parallax"] .actions { top: calc(13% + 8rem); bottom: auto; } }
-@media (max-width: 768px) { .hero[data-stage="parallax"] .actions { top: auto; bottom: max(13%, 84px); } }
 @media (max-height: 560px) and (min-width: 600px) { .hero[data-stage="parallax"] .actions { top: calc(19% + 6rem); bottom: auto; } }
 
 @media (prefers-reduced-motion: reduce) {

@@ -71,6 +71,7 @@
 .title {
   font-size: var(--fs-h3);
   font-weight: 700;
+  font-family: var(--font-stack-display);
   color: var(--ink);
   line-height: 1.25;
 }

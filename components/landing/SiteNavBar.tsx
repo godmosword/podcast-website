@@ -10,6 +10,7 @@ import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useLandingFooterNavSolid } from "@/hooks/useLandingFooterNavSolid";
 import { feedbackHref, isContactExternal } from "@/lib/contact";
 import { isImmersiveRoute } from "@/lib/is-story-play-route";
+import { dismissIntroGate, isIntroGateOpen } from "@/lib/intro-gate";
 import styles from "./SiteNavBar.module.css";
 
 type NavItemId =
@@ -17,7 +18,6 @@ type NavItemId =
   | "stories"
   | "characters"
   | "games"
-  | "coloring"
   | "adventures"
   | "about"
   | "for-parents"
@@ -36,7 +36,7 @@ const MOBILE_PARENT_GROUP_IDS = new Set<NavItemId>([
   "play-map",
 ]);
 
-/** 抽屜：探索 → 家長（8 列；首頁在頂欄、留言在頂欄 .actions）。 */
+/** 抽屜：探索 → 家長（7 列；著色本在遊樂園內，不佔獨立列）。 */
 const MENU_ROWS: readonly {
   id: NavItemId;
   emoji: string;
@@ -44,8 +44,6 @@ const MENU_ROWS: readonly {
   { id: "stories", emoji: "📖" },
   { id: "characters", emoji: "🚗" },
   { id: "games", emoji: "🎡" },
-  // 著色本原本只能從遊樂園子頁進入；對不識字的兒童而言等於不存在。
-  { id: "coloring", emoji: "🎨" },
   { id: "adventures", emoji: "🗺️" },
   { id: "about", emoji: "💛" },
   { id: "for-parents", emoji: "🧭" },
@@ -62,7 +60,6 @@ function navItems(): NavItem[] {
     { id: "stories", label: "全部故事", href: "/stories" },
     { id: "characters", label: "角色圖鑑", href: "/characters" },
     { id: "games", label: "遊樂園", href: "/games" },
-    { id: "coloring", label: "繪本著色", href: "/games/coloring-book" },
     { id: "adventures", label: "宇宙地圖", href: "/adventures" },
     { id: "about", label: "關於我們", href: "/about" },
     { id: "for-parents", label: "親子指南", href: "/for-parents" },
@@ -76,10 +73,11 @@ function matchesPath(pathname: string, href: string): boolean {
 }
 
 /**
- * 最長匹配獨佔 active。`/games/coloring-book` 同時被 `/games` 與著色本自身命中，
+ * 最長匹配獨佔 active。`/for-parents/play-map` 同時被親子指南與景點命中，
  * 若不排除會出現兩個高亮與兩個 `aria-current="page"`。
  *
  * `href="/"` 不需特判：`matchesPath("/x", "/")` 比對的是 `"//"`，不會全站誤命中。
+ * 著色本是遊樂園子頁，不再佔獨立導覽列，因此 `/games/coloring-book` 歸「遊樂園」。
  */
 export function isInternalPathActive(
   pathname: string,
@@ -142,7 +140,7 @@ export default function SiteNavBar() {
 
   const items = navItems();
   const byId = new Map(items.map((item) => [item.id, item]));
-  // 供 active 判定做最長匹配（如 /games 與 /games/coloring-book 互斥）
+  // 供 active 判定做最長匹配（如 /for-parents 與 /for-parents/play-map 互斥）
   const internalHrefs = items
     .filter((item) => item.href.startsWith("/"))
     .map((item) => item.href);
@@ -153,7 +151,11 @@ export default function SiteNavBar() {
   const onLandingHome = pathname === "/";
   const navSolid = useLandingFooterNavSolid(onLandingHome);
 
-  const closeAll = useCallback(() => setOpenMenu("none"), []);
+  const closeAll = useCallback(() => {
+    setOpenMenu("none");
+    // 開場期間點頂欄連結＝離開開場；否則閘門屬性會留在下一頁。
+    if (isIntroGateOpen()) dismissIntroGate();
+  }, []);
 
   /** 點浮層外部關閉：`pointerdown` 早於 `click`，若讓 focus trap 把焦點歸還觸發器，
    * 會從使用者正要點的元素手上搶走。先把焦點移出面板再關，trap 的歸還就不會生效

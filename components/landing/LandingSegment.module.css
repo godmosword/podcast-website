@@ -194,6 +194,33 @@
     0 0 0 6px rgba(0, 0, 0, 0.45);
 }
 
+/* 首段重回開場：次要入口，比分區 CTA 矮一階、不加 gloss／elev，避免第二顆主鈕。 */
+.replayIntro {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  border: 2px solid color-mix(in srgb, var(--on-dark) 72%, transparent);
+  background: var(--landing-brand-ink);
+  color: var(--on-dark);
+  font-family: var(--font-stack-display);
+  font-weight: 700;
+  font-size: var(--fs-control);
+  letter-spacing: 0.02em;
+  text-decoration: none;
+}
+
+.replayIntro:active {
+  transform: scale(0.98);
+  background: color-mix(in srgb, var(--on-dark) 8%, var(--landing-brand-ink));
+}
+
+.replayIntro:focus-visible {
+  outline: 3px solid var(--on-dark);
+  outline-offset: 3px;
+}
+
 .moreSkip:focus-visible {
   clip: auto;
   width: 44px;
@@ -215,6 +242,10 @@
 
 @media (hover: hover) {
   .cta:hover {
+    background: color-mix(in srgb, var(--on-dark) 8%, var(--landing-brand-ink));
+  }
+
+  .replayIntro:hover {
     background: color-mix(in srgb, var(--on-dark) 8%, var(--landing-brand-ink));
   }
 

@@ -10,7 +10,10 @@ import {
   INTRO_GATE_STORAGE_KEY,
   dismissIntroGate,
   isIntroGateOpen,
+  reopenIntroGate,
+  sealIntroBackground,
   shouldOpenIntroGate,
+  shouldReplayIntroOverlay,
   type IntroGateInput,
 } from "./intro-gate";
 
@@ -152,6 +155,64 @@ describe("dismissIntroGate", () => {
   });
 });
 
+describe("shouldReplayIntroOverlay", () => {
+  it("一般主鍵點擊才攔截成同頁重開", () => {
+    const click = {
+      heroDisabled: false,
+      button: 0,
+      metaKey: false,
+      ctrlKey: false,
+      shiftKey: false,
+      altKey: false,
+    };
+    expect(shouldReplayIntroOverlay(click)).toBe(true);
+    expect(shouldReplayIntroOverlay({ ...click, heroDisabled: true })).toBe(false);
+    expect(shouldReplayIntroOverlay({ ...click, metaKey: true })).toBe(false);
+    expect(shouldReplayIntroOverlay({ ...click, ctrlKey: true })).toBe(false);
+    expect(shouldReplayIntroOverlay({ ...click, shiftKey: true })).toBe(false);
+    expect(shouldReplayIntroOverlay({ ...click, button: 1 })).toBe(false);
+  });
+});
+
+describe("reopenIntroGate", () => {
+  afterEach(() => {
+    document.documentElement.removeAttribute(INTRO_GATE_ATTRIBUTE);
+    document.body.innerHTML = "";
+    sessionStorage.clear();
+  });
+
+  const chrome = (withOverlay = true) => {
+    document.body.innerHTML = `
+      <a class="skip-link" href="#main-content">跳到主內容</a>
+      <nav data-testid="site-nav-bar"></nav>
+      <div id="main-content">
+        ${withOverlay ? '<div data-intro-overlay></div>' : ""}
+        <main data-landing-root></main>
+      </div>`;
+  };
+
+  it("即使這個分頁已經看過，仍打開閘門並封住 Landing、不封頂欄", () => {
+    chrome();
+    sessionStorage.setItem(INTRO_GATE_STORAGE_KEY, "1");
+    reopenIntroGate();
+    expect(isIntroGateOpen()).toBe(true);
+    expect(sessionStorage.getItem(INTRO_GATE_STORAGE_KEY)).toBe("1");
+    expect(document.querySelector("[data-landing-root]")?.hasAttribute("inert")).toBe(true);
+    expect(document.querySelector(".skip-link")?.hasAttribute("inert")).toBe(true);
+    expect(document.querySelector("[data-testid='site-nav-bar']")?.hasAttribute("inert")).toBe(false);
+    expect(document.querySelector("[data-intro-overlay]")?.hasAttribute("inert")).toBe(false);
+  });
+
+  it("覆蓋層還沒掛上時仍打開閘門，seal 是 no-op", () => {
+    chrome(false);
+    reopenIntroGate();
+    expect(isIntroGateOpen()).toBe(true);
+    expect(document.querySelector("[data-landing-root]")?.hasAttribute("inert")).toBe(false);
+    sealIntroBackground();
+    expect(document.querySelector("[data-landing-root]")?.hasAttribute("inert")).toBe(false);
+  });
+});
+
 describe("INTRO_GATE_INERT_SCRIPT", () => {
   afterEach(() => {
     document.documentElement.removeAttribute(INTRO_GATE_ATTRIBUTE);
@@ -176,9 +237,10 @@ describe("INTRO_GATE_INERT_SCRIPT", () => {
     document.documentElement.setAttribute(INTRO_GATE_ATTRIBUTE, INTRO_GATE_ON);
     new Function(INTRO_GATE_INERT_SCRIPT)();
     expect(document.querySelector("[data-landing-root]")?.hasAttribute("inert")).toBe(true);
-    // skip link 與頂欄不在 [data-landing-root] 裡，只擋 Landing 會讓 Tab 跑到背後。
+    // skip link 不在 [data-landing-root] 裡，只擋 Landing 會讓 Tab 跑到背後。
+    // 頂欄留下：開場期間訂閱／留言／漢堡要能點。
     expect(document.querySelector(".skip-link")?.hasAttribute("inert")).toBe(true);
-    expect(document.querySelector("[data-testid='site-nav-bar']")?.hasAttribute("inert")).toBe(true);
+    expect(document.querySelector("[data-testid='site-nav-bar']")?.hasAttribute("inert")).toBe(false);
     expect(document.querySelector("[data-intro-overlay]")?.hasAttribute("inert")).toBe(false);
   });
 
@@ -202,5 +264,28 @@ describe("INTRO_GATE_INERT_SCRIPT", () => {
     // 點在按鈕內的 <span> 上，保底必須往上找到帶標記的祖先。
     document.querySelector("span")?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     expect(isIntroGateOpen()).toBe(false);
+  });
+
+  it("閘門關著時點重回連結會打開覆蓋層，修飾鍵不攔截", () => {
+    chrome();
+    const landing = document.querySelector("[data-landing-root]")!;
+    landing.innerHTML = `<a data-testid="replay-intro" href="/intro">看小紅開進遊樂園</a>`;
+    new Function(INTRO_GATE_INERT_SCRIPT)();
+    const link = document.querySelector("[data-testid='replay-intro']")!;
+    const shift = new MouseEvent("click", {
+      bubbles: true,
+      cancelable: true,
+      button: 0,
+      shiftKey: true,
+    });
+    link.dispatchEvent(shift);
+    expect(isIntroGateOpen()).toBe(false);
+    expect(shift.defaultPrevented).toBe(false);
+    const click = new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 });
+    link.dispatchEvent(click);
+    expect(click.defaultPrevented).toBe(true);
+    expect(isIntroGateOpen()).toBe(true);
+    expect(landing.hasAttribute("inert")).toBe(true);
+    expect(document.querySelector("[data-testid='site-nav-bar']")?.hasAttribute("inert")).toBe(false);
   });
 });

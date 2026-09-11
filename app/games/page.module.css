@@ -148,9 +148,9 @@
 }
 
 /*
- * 固定 3 欄而非 auto-fit：auto-fit 會摺疊空軌道，
+ * 桌機固定 3 欄而非 auto-fit：auto-fit 會摺疊空軌道，
  * 單卡分類時那張卡會撐成整條 928px，跟同頁其他卡差了 2.5 倍。
- * 活動數量少且固定，明確欄數才保證每張卡等寬等高。
+ * ≤640 改兩欄，著色本 `.lead` 全寬當第一站。
  */
 .cardGrid {
   display: grid;
@@ -274,6 +274,7 @@
 
 .cardTitle {
   color: var(--ink);
+  font-family: var(--font-stack-display);
   font-size: var(--fs-h3-compact);
   font-weight: 900;
   line-height: 1.3;
@@ -348,8 +349,12 @@
   }
 
   .cardGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-3);
+  }
+
+  .lead {
+    grid-column: 1 / -1;
   }
 }
 

@@ -76,6 +76,29 @@ describe("LandingSegment", () => {
     expect(html).not.toContain("5–10 分鐘");
     expect(html).toContain("data-landing-more-hint");
     expect(html).toContain('aria-label="捲動到下一個專區"');
+    expect(html).toContain('href="/intro"');
+    expect(html).toContain("看小紅開進遊樂園");
+    expect(html).toContain('data-testid="replay-intro"');
+  });
+
+  test("只有首段有重回開場連結", async () => {
+    const { default: LandingSegment } = await import("./LandingSegment");
+    const segments = resolveLandingSegments();
+    for (const [index, segment] of segments.entries()) {
+      const html = renderToStaticMarkup(
+        <LandingSegment
+          segment={segment}
+          index={index}
+          nextAnchorId="segment-clay"
+        />,
+      );
+      if (index === 0) {
+        expect(html).toContain('data-testid="replay-intro"');
+      } else {
+        expect(html).not.toContain('data-testid="replay-intro"');
+        expect(html).not.toContain("看小紅開進遊樂園");
+      }
+    }
   });
 
   test("四段都不渲染播放直達，保留段標題語意且無可見編號", async () => {

@@ -168,7 +168,9 @@ test.describe("Intro Portal · Phase 4 route and entry", () => {
     await expect(page.locator("[data-landing-root]")).toBeVisible();
     // 無 JS 時閘門 script 跑不了，覆蓋層依設計不會出現——Landing 直接可用。
     await expect(page.locator("html")).not.toHaveAttribute("data-intro-gate", "on");
-    await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("replay-intro")).toHaveAttribute("href", "/intro");
+    await page.getByRole("link", { name: "看小紅開進遊樂園" }).click();
+    await expect(page).toHaveURL(/\/intro$/);
     await expect(page.getByRole("heading", { name: "車車遊樂園" })).toBeVisible();
     await expect(page.getByRole("link", { name: "略過動畫" })).toHaveAttribute("href", "/?enter=1");
     await context.close();
@@ -820,7 +822,7 @@ test.describe("Intro Portal · band geometry", () => {
 
 // 文字安全區（規格 §4.4）。背景會動，所以契約不能是「某一幀沒撞到」，而是結構性的：
 // 桌機與短橫向靠 L1／L2 左側的透明遮罩，遮罩的全透明段必須蓋過文案與按鈕列的右緣；
-// 手機文案在頂、band 在下，文案與按鈕列不得與任何一層的框相交。兩者都與相位無關。
+// 手機文案與按鈕在上、band 在下，文案與按鈕列不得與任何一層的框相交。兩者都與相位無關。
 test.describe("Intro Portal · text safe zone", () => {
   const cases: [number, number, "mask" | "stack"][] = [
     [1440, 900, "mask"],
@@ -897,6 +899,10 @@ test.describe("Intro Portal · home overlay (ADR-0004)", () => {
     expect(html).toContain("車車遊樂園的故事");
     // 覆蓋層是 SSR 出來的，不是 mount 之後才插進去的。
     expect(html).toContain("data-intro-overlay");
+    // Landing 首段有重回開場的真連結；無 JS 時走進 /intro。
+    expect(html).toContain('data-testid="replay-intro"');
+    expect(html).toContain('href="/intro"');
+    expect(html).toContain("看小紅開進遊樂園");
   });
 
   test("a first visit opens the overlay without changing the URL", async ({ browser }) => {
@@ -907,8 +913,45 @@ test.describe("Intro Portal · home overlay (ADR-0004)", () => {
     await expect(page.locator("html")).toHaveAttribute("data-intro-gate", "on");
     await expect(page.locator("[data-intro-overlay]")).toBeVisible();
     await expect(page.locator("link[rel='canonical']")).toHaveAttribute("href", /^https?:\/\/[^?#]+\/?$/);
-    // 背後的 Landing 被 inert 圍住，鍵盤與指標都進不去。
+    // 背後的 Landing 被 inert 圍住，鍵盤與指標都進不去。頂欄留下可點。
     await expect(page.locator("[data-landing-root]")).toHaveAttribute("inert", "");
+    await expect(page.locator("[data-testid='site-nav-bar']")).not.toHaveAttribute("inert");
+    await context.close();
+  });
+
+  test("mobile overlay title sits below the site nav", async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("[data-intro-overlay]")).toBeVisible();
+    const title = page.locator("[data-intro-overlay]").getByText("車車遊樂園", { exact: true });
+    await expect(title).toBeVisible();
+    const box = await title.boundingBox();
+    expect(box, "標題沒有排版盒").not.toBeNull();
+    const hit = await page.evaluate(({ x, y }) => {
+      const el = document.elementFromPoint(x, y);
+      return Boolean(el?.closest("[data-intro-overlay]"));
+    }, { x: box!.x + box!.width / 2, y: box!.y + Math.min(12, box!.height / 2) });
+    expect(hit, "標題中心被頂欄蓋住").toBe(true);
+    await context.close();
+  });
+
+  test("top bar stays clickable while the overlay is open", async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("[data-intro-overlay]")).toBeVisible();
+    const menuBtn = page.getByRole("button", { name: "開啟選單" });
+    await expect(menuBtn).toBeVisible();
+    await menuBtn.click();
+    const drawer = page.getByRole("navigation", { name: "網站選單" });
+    await expect(drawer).toBeVisible();
+    await expect(drawer.getByRole("link", { name: "遊樂園" })).toBeVisible();
+    await drawer.getByRole("link", { name: "遊樂園" }).click();
+    await expect(page).toHaveURL(/\/games/);
+    await expect(page.locator("html")).not.toHaveAttribute("data-intro-gate", "on");
     await context.close();
   });
 
@@ -945,6 +988,37 @@ test.describe("Intro Portal · home overlay (ADR-0004)", () => {
     await context.close();
   });
 
+  test("Landing can reopen the overlay without leaving /", async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await page.getByRole("button", { name: "略過動畫" }).click();
+    await expect(page.locator("html")).not.toHaveAttribute("data-intro-gate", "on");
+    const replay = page.getByRole("link", { name: "看小紅開進遊樂園" });
+    await expect(replay).toBeVisible();
+    await expect(replay).toHaveAttribute("href", "/intro");
+    await replay.click();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator("html")).toHaveAttribute("data-intro-gate", "on");
+    await expect(page.locator("[data-intro-overlay]")).toBeVisible();
+    await expect(page.locator("[data-landing-root]")).toHaveAttribute("inert", "");
+    await expect(page.locator("[data-testid='site-nav-bar']")).not.toHaveAttribute("inert");
+    await expect(page.locator("[data-testid='site-nav-bar']")).toBeVisible();
+    await context.close();
+  });
+
+  test("reduced motion can still opt in to the overlay from Landing", async ({ browser }) => {
+    const context = await browser.newContext({ reducedMotion: "reduce" });
+    const page = await context.newPage();
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("[data-intro-overlay]")).toHaveCount(0);
+    await page.getByRole("link", { name: "看小紅開進遊樂園" }).click();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator("[data-intro-overlay]")).toBeVisible();
+    await expect(page.locator("[data-testid='site-nav-bar']")).toBeVisible();
+    await context.close();
+  });
+
   test("Escape closes the overlay", async ({ browser }) => {
     const context = await browser.newContext();
     const page = await context.newPage();
@@ -955,20 +1029,23 @@ test.describe("Intro Portal · home overlay (ADR-0004)", () => {
     await context.close();
   });
 
-  test("focus stays inside the overlay while it is open", async ({ browser }) => {
+  test("Tab can reach the top bar, but not the Landing behind the overlay", async ({ browser }) => {
     const context = await browser.newContext();
     const page = await context.newPage();
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await expect(page.locator("[data-intro-overlay]")).toBeVisible();
-    // 陷阱是 hydration 後才掛上的；hydration 前 Landing 由同步 script 設的 inert
-    // 擋著（另一條測試守）。等 React 接手的訊號再開始 Tab。
     await expect(page.locator("[data-intro-overlay] [data-hero-parallax]")).toHaveAttribute("data-running", "true");
-    for (let i = 0; i < 8; i += 1) {
+    for (let i = 0; i < 12; i += 1) {
       await page.keyboard.press("Tab");
-      const inside = await page.evaluate(() =>
-        Boolean(document.activeElement?.closest("[data-intro-overlay]")),
-      );
-      expect(inside, `Tab #${i + 1} escaped the overlay`).toBe(true);
+      const place = await page.evaluate(() => {
+        const el = document.activeElement;
+        if (!el || el === document.body) return "chrome";
+        if (el.closest("[data-landing-root]")) return "landing";
+        if (el.closest("[data-intro-overlay]")) return "overlay";
+        if (el.closest("[data-testid='site-nav-bar']")) return "nav";
+        return "other";
+      });
+      expect(place, `Tab #${i + 1} reached the inert Landing`).not.toBe("landing");
     }
     await context.close();
   });

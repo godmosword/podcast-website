@@ -124,14 +124,41 @@
 @media (max-width: 1280px) { .band { --s: 0.8; --hero-left: 56%; --text-clear: 30%; --text-fade: 52%; } }
 @media (max-width: 980px) and (min-width: 769px) { .band { --s: 0.68; --horizon: 60%; --hero-left: 54%; } }
 @media (max-width: 768px) {
-  .band { --s: 0.55; --horizon: 55%; --hero-left: 50%; --text-clear: 0%; --text-fade: 0%; }
+  /*
+   * 直向：band 改吃 Hero 第二列的剩餘高度，不再 absolute 鋪滿後把景物縮成薄片。
+   * --s 0.5 會讓 390 上的路面只剩 ~120px，摩天輪／房子像被裁掉的一條。
+   */
+  .band {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    --s: 0.78;
+    --horizon: 46%;
+    --hero-left: 50%;
+    --text-clear: 0%;
+    --text-fade: 0%;
+  }
   /* 手機：文案在頂、按鈕在底，主角置中。置中放在外層 slot，浮動留在 img 上，
      兩個 transform 才不會互相覆蓋。 */
   .heroSlot { transform: translateX(-50%); }
 }
-@media (max-width: 430px) { .band { --s: 0.5; } }
+@media (max-width: 430px) { .band { --s: 0.7; } }
 /* 短橫向（手機橫拿）：地平線抬高、素材再縮一階，才塞得下文案與按鈕。 */
 @media (max-height: 560px) and (min-width: 600px) {
   /* 實測按鈕列右緣在 45% 寬，透明段要蓋過它；主角在 60%，漸層在它之前結束。 */
-  .band { --s: 0.5; --horizon: 66%; --hero-left: 60%; --text-clear: 47%; --text-fade: 59%; }
+  .band {
+    position: absolute;
+    inset: 0;
+    width: auto;
+    height: auto;
+    min-height: 0;
+    --s: 0.5;
+    --horizon: 66%;
+    --hero-left: 60%;
+    --text-clear: 47%;
+    --text-fade: 59%;
+  }
+  .heroSlot { transform: none; }
 }

@@ -130,6 +130,19 @@ describe("LandingSegment.module.css touch targets", () => {
     );
   });
 
+  it("重回開場連結 ≥44px，不是第二顆 gloss 主 CTA", () => {
+    const replay = extractBlocks(".replayIntro")[0] ?? "";
+    expect(replay).toMatch(/min-height:\s*44px/);
+    expect(replay).toMatch(/background:\s*var\(--landing-brand-ink\)/);
+    expect(replay).toMatch(/color:\s*var\(--on-dark\)/);
+    expect(replay).not.toMatch(/var\(--gloss\)/);
+    expect(replay).not.toMatch(/var\(--elev-2\)/);
+    expect(replay).not.toMatch(/backdrop-filter/);
+    expect(css).toMatch(
+      /\.replayIntro:focus-visible[\s\S]*?outline:\s*3px\s+solid\s*var\(--on-dark\)/,
+    );
+  });
+
   it("不得用 #segment-stories 解除 titleHidden 或 siteIntro sr-only", () => {
     expect(css).not.toMatch(/:global\(#segment-stories\)\s+\.titleHidden/);
     expect(css).not.toMatch(/:global\(#segment-stories\)\s+:global\(\.sr-only\)/);

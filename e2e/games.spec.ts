@@ -91,8 +91,8 @@ test.describe("遊樂園 hub", () => {
     await page.setViewportSize(PHONE);
     await page.goto("/games");
 
-    // 抽屜連結改常駐 DOM 後，未 scope 的選擇器會先命中隱藏的 /games/coloring-book
     const firstCard = page.locator('main a[href^="/games/"]').first();
+    await expect(firstCard).toHaveAttribute("href", "/games/coloring-book");
     const box = await firstCard.boundingBox();
     expect(box).not.toBeNull();
     expect(box!.y).toBeLessThan(560);

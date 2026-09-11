@@ -102,6 +102,11 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await expect(
     page.getByRole("link", { name: "車車遊樂園的故事 →" }),
   ).toHaveAttribute("href", "/stories");
+  await expect(page.getByRole("link", { name: "看小紅開進遊樂園" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "看小紅開進遊樂園" })).toHaveAttribute(
+    "href",
+    "/intro",
+  );
   await expect(page.getByRole("link", { name: /聽最新一集/ })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: /數綿羊/ })).toBeAttached();
   await expect(page.getByRole("heading", { name: /捏黏土/ })).toBeAttached();
@@ -189,7 +194,8 @@ test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   await expect(drawerNav.getByRole("button", { name: "搜尋" })).toHaveCount(0);
   await expect(drawerNav.getByRole("link", { name: "主題分類" })).toHaveCount(0);
   await expect(drawerNav.getByRole("link", { name: "角色圖鑑" })).toBeVisible();
-  await expect(drawerNav.getByRole("link", { name: "繪本著色" })).toBeVisible();
+  await expect(drawerNav.getByRole("link", { name: "遊樂園" })).toBeVisible();
+  await expect(drawerNav.getByRole("link", { name: "繪本著色" })).toHaveCount(0);
   const drawerParentGuide = drawerNav.getByRole("link", { name: "親子指南" });
   await expect(drawerParentGuide).toBeVisible();
   await expect(drawerParentGuide).toHaveAttribute("href", /\/for-parents/);
@@ -283,7 +289,7 @@ test("404 頁面", async ({ page }) => {
 test("遊樂園 v2 入口與遊戲卡片", async ({ page }) => {
   await page.goto("/games");
   await expect(page.getByRole("heading", { name: "車車遊樂園" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "全部遊戲" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "園裡的站" })).toBeVisible();
   await expect(page.getByRole("link", { name: /繽紛消消樂.*開始玩/ })).toBeVisible();
   await expect(page.getByRole("link", { name: /繽紛樂園.*開始玩/ })).toBeVisible();
   await expect(page.getByRole("link", { name: /繪本著色.*開始玩/ })).toBeVisible();
