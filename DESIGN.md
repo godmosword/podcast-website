@@ -143,8 +143,9 @@ meta `theme-color`（夜）對齊 `--bg`：`lib/theme.ts` 的 `NIGHT_THEME_COLOR
 
 ## 字型
 
-- **Baloo 2**（Google Fonts，`next/font`）— 拉丁/數字內文
-- **jf-open 粉圓 huninn**（`next/font/local`，子集化）— 中文字
+- **Fredoka**（Google Fonts，`next/font`）— 拉丁/數字內文
+- **jf-open 粉圓 huninn**（`next/font/local`，子集化）— 中文內文
+- **源泉圓體 TW Bold**（`next/font/local`，子集化）— 中文標題真字重
 - **Gochi Hand**（Google Fonts，`--font-marker`）— 可點綴拉丁標誌；標題以字重／字級建立層次，**不再**使用 `-webkit-text-stroke` 仿麥克筆描邊。
 - Fallback：`PingFang TC`、`Microsoft JhengHei`、`Noto Sans TC`
 - 標題 1.8–2.3rem / 內文 1rem / 播放器字幕 1.15rem

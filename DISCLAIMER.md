@@ -46,7 +46,8 @@
 ## 字型
 
 - 中文圓體使用 [justfont 粉圓（jf-open huninn）](https://github.com/justfont/open-huninn-font) 之子集檔（SIL OFL 1.1），條款見 [app/fonts/OFL-huninn.txt](./app/fonts/OFL-huninn.txt) 與 [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)。
-- 拉丁字母與數字使用 [Baloo 2](https://fonts.google.com/specimen/Baloo+2)、[Gochi Hand](https://fonts.google.com/specimen/Gochi+Hand)（SIL Open Font License，經 Google Fonts 自託管）。
+- 中文標題使用 [源泉圓體 TW Bold](https://github.com/ButTaiwan/gensen-font) 之子集檔（SIL OFL 1.1），條款見 [app/fonts/OFL-gensen-rounded.txt](./app/fonts/OFL-gensen-rounded.txt)。
+- 拉丁字母與數字使用 [Fredoka](https://fonts.google.com/specimen/Fredoka)、[Gochi Hand](https://fonts.google.com/specimen/Gochi+Hand)（SIL Open Font License，經 Google Fonts 自託管）。
 
 ## 資料收集與隱私
 

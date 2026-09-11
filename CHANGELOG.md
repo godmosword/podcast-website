@@ -19,8 +19,11 @@
 ### Fixed
 
 - **播放器關掉字幕後插圖仍跟音檔換頁**：`字幕` 鈕以前連帶關掉跟讀，看圖時只剩手動翻頁。現在插圖一律跟 `captionTimes`（無則等分），字幕只開關文字；關閉字幕時的左右 tap／swipe 改跳插圖並帶時間。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
+- **ep-16 場景摘要簡體誤植**：`認識新朋友三步骤` 改為「驟」（`data/scenes/ep-16.json` 與 `apple-sync.defaults.json` overrides）。線上 `apple-synced.json` 仍待下次 `sync:apple` 覆寫。**未改** Apple sync workflow。
 
 ### Changed
+
+- **全站字型改源泉圓體標題＋Fredoka 英數**：內文維持粉圓子集；中文標題改自託管源泉圓體 TW Bold 子集（真字重，保留 `font-synthesis-weight: none`）；英數 Baloo 2 換成 Fredoka。Gochi Hand 點綴保留。留言牆 UGC 仍用系統字。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 
 - **視差舞台的文字安全區改為結構性保證（Astra 視覺審查）**：遠景與中景在文案側做透明漸層遮罩（`--text-clear` 之前全透明、`--text-fade` 才全顯），路牌、摩天輪任何一幀都不會頂進副標——之前在 1280×720 會直接穿過。副標與 CTA 收攏到標題正下方成一個閱讀區塊，全部在地平線之上，不再壓在路面虛線上。近景縮 0.7 並下沉 36px，右下石頭不再搶小紅。新增 e2e「text safe zone」六個尺寸：文案與按鈕列必須整個在透明段內或整個在會動的層之上（桌機／短橫向），或與任何一層都不相交（手機）——與動畫相位無關。實測透明段本來只到 16%，按鈕列右緣在 26%（1440）／45%（844 橫向），是這條測試抓出來的。**未改** 3D 舞台、Apple sync workflow。
 - **`/feedback` 標題前放客廳錄音室首圖**：馬米與 Bonbon 揮手黏土圖作為頁面 hero（`/feedback/hero.jpg`＋WebP／AVIF），不畫對話泡泡、不引用角色名冊。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、表單契約與法律頁政策版本。

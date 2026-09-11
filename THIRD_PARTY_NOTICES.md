@@ -8,7 +8,8 @@
 | 字型 | 用途 | 授權 | 條款全文 |
 |------|------|------|----------|
 | jf-open 粉圓（huninn）子集 | 中文內文（`app/fonts/huninn-subset.woff2`） | SIL Open Font License 1.1 | [app/fonts/OFL-huninn.txt](./app/fonts/OFL-huninn.txt) |
-| Baloo 2 | 拉丁字母與數字 | SIL OFL 1.1 | [Google Fonts](https://fonts.google.com/specimen/Baloo+2) |
+| 源泉圓體 TW Bold 子集 | 中文標題（`app/fonts/gensen-rounded-tw-bold-subset.woff2`） | SIL OFL 1.1 | [app/fonts/OFL-gensen-rounded.txt](./app/fonts/OFL-gensen-rounded.txt) |
+| Fredoka | 拉丁字母與數字 | SIL OFL 1.1 | [Google Fonts](https://fonts.google.com/specimen/Fredoka) |
 | Gochi Hand | 手繪風拉丁標題 | SIL OFL 1.1 | [Google Fonts](https://fonts.google.com/specimen/Gochi+Hand) |
 
 ## 內嵌圖形資產

@@ -37,6 +37,11 @@
 }
 
 :root {
+  --font-stack-body: var(--font-latin), var(--font-huninn), "PingFang TC",
+    "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  --font-stack-display: var(--font-latin), var(--font-gensen), var(--font-huninn),
+    "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+
   /* 多彩粉嫩配色（純白底） */
   --bg: #ffffff;
   --bg-2: #fbfbfd;
@@ -335,19 +340,25 @@ body {
 }
 
 body {
-  /* Baloo 先供拉丁/數字，huninn 供中文字，其餘回退系統圓體 */
-  font-family: var(--font-baloo), var(--font-huninn), "PingFang TC",
-    "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  font-family: var(--font-stack-body);
   color: var(--ink);
   background-color: var(--bg);
   overflow-x: clip;
   max-width: 100%;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  /* huninn 是單一字重（宣告 400–700）；全站約 90 處 font-weight:800 會超範圍觸發
-     合成假粗，把密集字（鬱/龍/邊）內部留白糊成一團，傷初學識字兒童的字形辨識
-     （VIS-W4 A/B 實測）。關閉字重合成 → 中文落回 master、拉丁用 Baloo 真 800。 */
+  /* huninn 是單一字重；全站約 90 處 font-weight:800 會超範圍觸發合成假粗，
+     把密集字（鬱/龍/邊）內部留白糊成一團，傷初學識字兒童的字形辨識
+     （VIS-W4 A/B 實測）。關閉字重合成 → 中文內文落回粉圓 master、拉丁用 Fredoka
+     真 700（Fredoka 最粗 700，故 800/900 對應到 700）；標題粗細改由源泉圓體 Bold 提供。 */
   font-synthesis-weight: none;
+}
+
+/* module CSS 自行指定 font-family 時會覆蓋此規則，需要標題字的元件請改用 var(--font-stack-display)。 */
+h1,
+h2,
+h3 {
+  font-family: var(--font-stack-display);
 }
 
 .site-root {

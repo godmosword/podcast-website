@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Baloo_2, Gochi_Hand } from "next/font/google";
+import { Fredoka, Gochi_Hand } from "next/font/google";
 import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/react";
 import JsonLd from "@/components/JsonLd";
@@ -15,16 +15,13 @@ import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
 // 童趣圓潤字型，避免使用 Inter/Arial 等通用字型。
-const baloo = Baloo_2({
+const fredoka = Fredoka({
   subsets: ["latin"],
-  // 補 800：標題／標籤大量用 font-weight:800，拉丁/數字需真字重，
-  // 否則搭配全域 font-synthesis-weight:none 會落回 700（見 globals.css）。
-  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
-  variable: "--font-baloo",
+  variable: "--font-latin",
 });
 
-// 手繪麥克筆風字型（僅含拉丁/數字）。中文字會回退到 huninn。
+// 手繪麥克筆風字型（僅含拉丁/數字）。中文字會回退到後面的字型堆疊。
 // 用於標題的拉丁字符與英文標誌，營造參考圖的手寫塗鴉感。
 const gochi = Gochi_Hand({
   subsets: ["latin"],
@@ -33,14 +30,21 @@ const gochi = Gochi_Hand({
   variable: "--font-marker",
 });
 
-// jf-open 粉圓（huninn）— 已子集化成站內用到的中文字（~100KB）。
-// 拉丁/數字交給 Baloo（字型堆疊在前），中文字由此提供。
+// jf-open 粉圓（huninn）— 已子集化成站內用到的中文字（~420KB）。
+// 拉丁/數字交給 Fredoka（字型堆疊在前），中文內文由此提供。
 // 新增文案後重跑：npm run font:subset
 const huninn = localFont({
   src: "./fonts/huninn-subset.woff2",
   weight: "400 700",
   display: "swap",
   variable: "--font-huninn",
+});
+
+const gensenRounded = localFont({
+  src: "./fonts/gensen-rounded-tw-bold-subset.woff2",
+  weight: "700",
+  display: "swap",
+  variable: "--font-gensen",
 });
 
 export const metadata: Metadata = {
@@ -103,7 +107,7 @@ export default function RootLayout({
     <html
       lang="zh-Hant"
       suppressHydrationWarning
-      className={`${baloo.variable} ${huninn.variable} ${gochi.variable}`}
+      className={`${fredoka.variable} ${huninn.variable} ${gensenRounded.variable} ${gochi.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />

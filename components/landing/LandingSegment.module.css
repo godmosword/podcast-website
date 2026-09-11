@@ -164,8 +164,7 @@
   border: 2px solid color-mix(in srgb, var(--on-dark) 88%, transparent);
   background: var(--landing-brand-ink);
   color: var(--on-dark);
-  font-family: var(--font-baloo), var(--font-huninn), "PingFang TC",
-    "Microsoft JhengHei", sans-serif;
+  font-family: var(--font-stack-display);
   font-weight: 700;
   font-size: var(--fs-h2);
   letter-spacing: 0.02em;
@@ -262,6 +261,7 @@
   min-height: 48px;
   padding: 12px 24px;
   border-radius: var(--radius-pill);
+  font-family: var(--font-stack-display);
   background: linear-gradient(180deg, #ffa14d 0%, var(--landing-brand, #ff8c2b) 100%);
   color: var(--landing-brand-ink, #3a2410);
   font-weight: 800;

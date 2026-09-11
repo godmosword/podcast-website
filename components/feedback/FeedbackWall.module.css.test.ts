@@ -7,6 +7,7 @@ describe("FeedbackWall.module.css", () => {
 
   it("公開暱稱／正文／圓章排除 huninn，改系統中黑", () => {
     expect(css).not.toMatch(/--font-huninn/);
+    expect(css).not.toMatch(/--font-gensen/);
     expect(css).toMatch(
       /\.nickname\s*\{[\s\S]*?font-family:\s*"PingFang TC",\s*"Microsoft JhengHei",\s*"Noto Sans TC"/,
     );

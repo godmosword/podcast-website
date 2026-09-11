@@ -59,6 +59,7 @@
 }
 
 .brandText {
+  font-family: var(--font-stack-display);
   font-weight: 700;
   /* 禁 clamp()+vw（globals.css 97-98）；品牌比控制項大一階，保住字標層級 */
   font-size: var(--fs-h4);

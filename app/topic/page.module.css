@@ -41,8 +41,7 @@
 }
 
 .title {
-  font-family: var(--font-baloo), var(--font-huninn), "PingFang TC",
-    "Microsoft JhengHei", sans-serif;
+  font-family: var(--font-stack-display);
   font-size: var(--fs-h1);
   font-weight: 800;
   margin: 0 0 6px;

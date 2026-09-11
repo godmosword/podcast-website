@@ -174,8 +174,12 @@ export default function LegalPage() {
               <code>THIRD_PARTY_NOTICES.md</code>。
             </li>
             <li>
-              拉丁字母與數字：<a href="https://fonts.google.com/specimen/Baloo+2">Baloo
-              2</a>、<a href="https://fonts.google.com/specimen/Gochi+Hand">Gochi Hand</a>（SIL
+              中文標題：源泉圓體（TW Bold）子集，SIL OFL 1.1，條款見{" "}
+              <code>app/fonts/OFL-gensen-rounded.txt</code>。來源見{" "}
+              <a href="https://github.com/ButTaiwan/gensen-font">源泉圓體</a>。
+            </li>
+            <li>
+              拉丁字母與數字：<a href="https://fonts.google.com/specimen/Fredoka">Fredoka</a>、<a href="https://fonts.google.com/specimen/Gochi+Hand">Gochi Hand</a>（SIL
               Open Font License，經 Google Fonts 自託管）。
             </li>
           </ul>

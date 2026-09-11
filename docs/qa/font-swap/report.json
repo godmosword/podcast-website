@@ -1,0 +1,35 @@
+{
+  "fontChecks": {
+    "brand": "OK display (Fredoka → gensenRounded → huninn)",
+    "storiesH1": "OK display",
+    "homeCta": "OK display",
+    "gamesH1": "OK marker (Gochi Hand first)",
+    "aboutBody": "OK body (Fredoka → huninn, no gensen)",
+    "feedbackNicknameInput": "OK system PingFang TC / Microsoft JhengHei / Noto Sans TC",
+    "feedbackMessageTextarea": "OK system",
+    "document.fonts": [
+      "Fredoka",
+      "Gochi Hand",
+      "huninn",
+      "gensenRounded"
+    ],
+    "forbiddenNetwork": []
+  },
+  "layout390": {
+    "horizontalOverflow": "none on sampled routes",
+    "storyCardTitles1280": "first 8 cards ~45px tall; no third line observed",
+    "notes": [
+      "/for-parents 390px h1 wraps; last character 聽 sits on its own line (likely pre-existing long title)."
+    ]
+  },
+  "coverage": {
+    "gensenMissingCjk": 0,
+    "huninnMissingCjk": ["马", "骤"],
+    "huninnAllowedMissing": ["马"],
+    "huninnExtra": "骤 from data/apple-synced.json captions until next sync:apple"
+  },
+  "sizesKB": {
+    "huninn-subset.woff2": 420.3,
+    "gensen-rounded-tw-bold-subset.woff2": 474.7
+  }
+}

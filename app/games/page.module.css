@@ -97,8 +97,7 @@
 .title {
   margin: 14px 0 10px;
   color: var(--ink);
-  font-family: var(--font-marker), var(--font-baloo), var(--font-huninn),
-    "PingFang TC", sans-serif;
+  font-family: var(--font-marker), var(--font-stack-display);
   font-size: clamp(2.1rem, 5.5vw, 3.4rem);
   font-weight: 900;
   line-height: 1.08;

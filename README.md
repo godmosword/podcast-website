@@ -356,10 +356,11 @@ npm run optimize:lcp-images                                        # 為新 JPG 
 
 ## 字型維護
 
-中文用自託管 **jf-open 粉圓（huninn）** 子集（`app/fonts/huninn-subset.woff2`）。新增文案後：
+中文內文用自託管 **jf-open 粉圓（huninn）** 子集（`app/fonts/huninn-subset.woff2`），中文標題用 **源泉圓體 TW Bold** 子集（`app/fonts/gensen-rounded-tw-bold-subset.woff2`）。新增文案後：
 
 ```bash
 curl -sL https://github.com/justfont/open-huninn-font/releases/download/v2.1/jf-openhuninn-2.1.ttf -o /tmp/huninn.ttf
+curl -sL https://raw.githubusercontent.com/ButTaiwan/gensen-font/master/otf/TW/GenSenRounded2TW-B.otf -o /tmp/GenSenRounded2TW-B.otf
 npm run font:subset
 ```
 
