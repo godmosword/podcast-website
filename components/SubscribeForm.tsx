@@ -103,7 +103,7 @@ export default function SubscribeForm({ source = "subscribe_page" }: Props) {
     return (
       <p className={styles.unavailable}>
         {SUBSCRIBE_UNAVAILABLE_PREFIX}{" "}
-        <Link href="/#connect">{SUBSCRIBE_UNAVAILABLE_LINK}</Link>{" "}
+        <Link href="/subscribe#connect">{SUBSCRIBE_UNAVAILABLE_LINK}</Link>{" "}
         {SUBSCRIBE_UNAVAILABLE_SUFFIX}
       </p>
     );

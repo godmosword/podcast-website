@@ -3,7 +3,6 @@
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
 import LandingPlayLink from "./LandingPlayLink";
-import ReplayIntroLink from "./ReplayIntroLink";
 import type { ResolvedLandingSegment } from "@/lib/landing-query";
 import { landingHeroPictureSources } from "@/lib/modern-image-src";
 import { useLandingScroll } from "./LandingScrollContext";
@@ -14,12 +13,9 @@ type LandingSegmentProps = {
   index: number;
   /** 首段 answer-first 網站導言：DOM 留 sr-only 供 GEO／輔助科技，畫面不顯示。 */
   siteIntro?: string;
-  /** 下一段錨點；最後一段指向 landing-foot（頁尾 snap pane）。 */
+  /** 下一段錨點；最後一段沒有下一屏，不放換段指引。 */
   nextAnchorId: string | null;
 };
-
-const FOOTER_ANCHOR = "landing-foot";
-/** 首頁頁尾 ConnectHub 錨點（Growth-P1b） */
 
 export default function LandingSegment({
   segment,
@@ -144,11 +140,6 @@ export default function LandingSegment({
               " →"
             )}
           </Link>
-          {index === 0 ? (
-            <ReplayIntroLink
-              className={`${styles.replayIntro} scrollEnter scrollEnterStagger3`}
-            />
-          ) : null}
         </div>
       </div>
       {nextAnchorId ? (
@@ -156,11 +147,7 @@ export default function LandingSegment({
           href={`#${nextAnchorId}`}
           className={styles.moreSkip}
           data-landing-more-hint
-          aria-label={
-            nextAnchorId === FOOTER_ANCHOR
-              ? "捲動到頁尾"
-              : "捲動到下一個專區"
-          }
+          aria-label="捲動到下一個專區"
           onClick={goToNext}
         >
           <svg

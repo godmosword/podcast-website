@@ -77,30 +77,10 @@ describe("LandingSegment", () => {
     expect(html).toMatch(/<a[^>]*data-landing-more-hint/);
     expect(html).not.toMatch(/<span[^>]*data-landing-more-hint/);
     expect(html).toContain('aria-label="捲動到下一個專區"');
-    expect(html).toContain('href="/intro"');
-    expect(html).toContain('aria-label="看小紅開進遊樂園"');
-    expect(html).toContain("🚗");
-    expect(html).toContain('data-testid="replay-intro"');
-  });
-
-  test("只有首段有重回開場連結", async () => {
-    const { default: LandingSegment } = await import("./LandingSegment");
-    const segments = resolveLandingSegments();
-    for (const [index, segment] of segments.entries()) {
-      const html = renderToStaticMarkup(
-        <LandingSegment
-          segment={segment}
-          index={index}
-          nextAnchorId="segment-clay"
-        />,
-      );
-      if (index === 0) {
-        expect(html).toContain('data-testid="replay-intro"');
-      } else {
-        expect(html).not.toContain('data-testid="replay-intro"');
-        expect(html).not.toContain("看小紅開進遊樂園");
-      }
-    }
+    expect(html).not.toContain('href="/intro"');
+    expect(html).not.toContain("看小紅開進遊樂園");
+    expect(html).not.toContain("🚗");
+    expect(html).not.toContain('data-testid="replay-intro"');
   });
 
   test("四段都不渲染播放直達，保留段標題語意且無可見編號", async () => {
@@ -120,7 +100,25 @@ describe("LandingSegment", () => {
       expect(html).not.toMatch(/0\d \/ 0\d/);
       expect(html).toContain(`id="${segment.anchorId}-title"`);
       expect(html).toMatch(/titleHidden/);
+      expect(html).not.toContain('data-testid="replay-intro"');
+      expect(html).not.toContain("看小紅開進遊樂園");
     }
+  });
+
+  test("最後一段不放換段指引", async () => {
+    const { default: LandingSegment } = await import("./LandingSegment");
+    const segments = resolveLandingSegments();
+    const last = segments.at(-1)!;
+    const html = renderToStaticMarkup(
+      <LandingSegment
+        segment={last}
+        index={segments.length - 1}
+        nextAnchorId={null}
+      />,
+    );
+    expect(html).not.toMatch(/data-landing-more-hint/);
+    expect(html).not.toContain("捲動到頁尾");
+    expect(html).not.toContain("landing-foot");
   });
 
   test("外連捏黏土 CTA 含另開視窗 aria-label", async () => {

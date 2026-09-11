@@ -29,6 +29,8 @@
 
 ### Changed
 
+- **Landing 拿掉頁尾、頂欄訂閱改頻道＋社群**：刪 `#landing-foot` snap pane；頂欄「訂閱」改兩個下拉（頻道＝收聽平台、社群＝IG／Threads／Facebook／Email）。內頁 `SiteFooter` 不變。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
+- **Landing 拿掉重回開場鈕**：首段不再放 🚗 圓鈕或「看小紅開進遊樂園」連結。首次進站覆蓋層與 `/intro` 深連結不變。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **手機直向開場近景不再被切斷**：直向改三列（文案／場景／略過），地平線回到 62% 讓路面接到草叢，L5 貼齊場景底、縮放隨 band 高度夾住；覆蓋層不再把瀏海算兩次。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **遊樂園 hub 只留首圖＋三張遊戲卡**：拿掉「園裡的站」、星星／車庫／貼紙進度、頁尾句，以及卡上 emoji、「玩過」、爸媽提示。**未改** Apple sync workflow、遊戲進度存檔與站序。
 - **重回開場改成車車圓鈕**：首段不再放第二顆「看小紅開進遊樂園」長文案 pill，改 🚗 圓鈕；可及名稱與 `title` 仍是完整句子。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。

@@ -62,7 +62,7 @@ describe("SubscribeForm", () => {
     const link = await screen.findByRole("link", {
       name: SUBSCRIBE_UNAVAILABLE_LINK,
     });
-    expect(link.getAttribute("href")).toBe("/#connect");
+    expect(link.getAttribute("href")).toBe("/subscribe#connect");
   });
 
   test("送出成功後說明確認信，且不承諾立刻寄新集", async () => {

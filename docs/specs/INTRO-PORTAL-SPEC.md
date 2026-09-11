@@ -156,7 +156,7 @@ Intro 不是選關、角色圖鑑、遊戲 hub、故事目錄或可自由探索�
 > `/` 仍然永遠回傳完整 Landing HTML、零 client redirect、零 middleware、canonical 不變；
 > 差別是首次到訪時有一層蓋在 Landing 上的 3D 開場，由 `<head>` 的同步 script
 > （`lib/intro-gate.ts`）在首次繪製前決定，按「進入」就地淡出，網址全程是 `/`。
-> Landing 首段的 opt-in 膠囊（`IntroEntry`）已移除；改在首段 CTA 旁放 🚗 圓鈕（可及名稱「看小紅開進遊樂園」）——有 JS 時重開同頁覆蓋層，無 JS 走進 `/intro`。§4.2 的舊 session 規則仍然作廢——
+> Landing 首段的 opt-in 膠囊（`IntroEntry`）與之後的重回開場鈕都已移除。Landing **沒有**重回開場入口；首次進站覆蓋層仍在，之後要再看開場請開 `/intro`。§4.2 的舊 session 規則仍然作廢——
 > 覆蓋層用的是新的 key 與新的判斷，不是把舊機制接回來。
 
 ### 4.1 路由契約
@@ -182,7 +182,7 @@ ADR-0004 的覆蓋層另用一個 key：`cheche:intro-seen-v1`，語意是「這
 `shouldOpenIntroGate()` 純函式裡，`<head>` 的同步 script 是它的字串鏡像，兩者由
 `lib/intro-gate.test.ts` 交叉驗證。讀寫失敗時一律 fail-safe 成「不打開覆蓋層」——
 方向刻意選在這一邊，因為反向失效會讓 Landing 被一層關不掉的覆蓋層鎖死。
-Landing 的入口是一個純 SSR 連結，storage 被封鎖時行為完全不變。
+Landing 沒有重回開場入口。storage 被封鎖時覆蓋層依 fail-safe 不打開，行為與無 JS 相同：直接看到 Landing。
 
 ### 4.3 動作與 Back 行為
 
@@ -399,7 +399,7 @@ Service worker 不預抓所有 Intro 模型、不替換故事快取、不為此�
 | 元件 | 責任 | 不應負責 |
 |---|---|---|
 | Intro page server shell | metadata、HTML 語意、poster入口 | server 對 deep link 強制 redirect |
-| IntroEntry | Landing 首段的 SSR opt-in 入口連結 | session、redirect、載入 Three |
+| IntroEntry（已刪） | 舊 Landing opt-in／重回開場入口；現行 Landing 不再放此控制 | session、redirect、載入 Three |
 | HeroWorld／Intro shell | eligibility、ready/fallback、Enter、pause、transition | 模型幾何每幀運算 |
 | HeroScene | Canvas、燈光、children、context-loss | 全站導覽、內容資料 |
 | SceneLoader | fetch／parse／abort／dispose | 無限重試、長期無 owner 全域模型 cache |

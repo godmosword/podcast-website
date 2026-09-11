@@ -1,12 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { BrandSvg, PLATFORM_ICON_PATHS } from "@/lib/connect-icons";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
+import { BrandSvg, PLATFORM_ICON_PATHS, SOCIAL_ICON_PATHS } from "@/lib/connect-icons";
 import { trackPlatformClick } from "@/lib/analytics";
 import { appendPlatformUtm } from "@/lib/platform-utm";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { visiblePlatforms } from "@/lib/platforms";
+import { visibleSocials } from "@/lib/social";
 import styles from "./SubscribeMenu.module.css";
 
 /** 受控開闔：由 `SiteNavBar` 統一管理，確保同時只有一個浮層開著
@@ -14,14 +23,59 @@ import styles from "./SubscribeMenu.module.css";
  *
  * `open` 與 `onOpenChange` **必須成對**——只傳 `open` 會讓觸發器呼叫 setter
  * 卻永遠改不動受控值（半受控陷阱）；型別層直接禁止該組合。 */
-type SubscribeMenuProps =
+type ConnectMenuProps = {
+  kind: "channels" | "socials";
+} & (
   | { open: boolean; onOpenChange: (open: boolean) => void }
-  | { open?: undefined; onOpenChange?: undefined };
+  | { open?: undefined; onOpenChange?: undefined }
+);
 
-export default function SubscribeMenu({
+type ConnectItem = {
+  key: string;
+  label: string;
+  href: string;
+  ariaLabel: string;
+  badgeStyle?: CSSProperties;
+  icon: ReactNode;
+  onSelect?: () => void;
+};
+
+function connectItemsFor(kind: "channels" | "socials"): ConnectItem[] {
+  if (kind === "channels") {
+    return visiblePlatforms().map((platform) => ({
+      key: platform.label,
+      label: platform.label,
+      href: appendPlatformUtm(platform.url, { source: "nav-dropdown" }),
+      ariaLabel: `在 ${platform.label} 收聽`,
+      badgeStyle: { background: platform.color },
+      icon: (
+        <BrandSvg className={styles.icon}>
+          {PLATFORM_ICON_PATHS[platform.icon]}
+        </BrandSvg>
+      ),
+      onSelect: () => trackPlatformClick(platform.label, "nav-dropdown"),
+    }));
+  }
+  return visibleSocials().map((social) => ({
+    key: social.label,
+    label: social.label,
+    href: social.url,
+    ariaLabel: social.url.startsWith("mailto:")
+      ? `寄信到 ${social.url.replace(/^mailto:/, "")}`
+      : `前往 ${social.label}`,
+    badgeStyle: { background: social.background },
+    icon: (
+      <BrandSvg className={styles.icon}>{SOCIAL_ICON_PATHS[social.icon]}</BrandSvg>
+    ),
+  }));
+}
+
+/** 頂欄頻道／社群下拉。檔名沿用 SubscribeMenu：樣式契約與 ≤480 錨點測仍綁這份 CSS。 */
+export default function ConnectMenu({
+  kind,
   open: controlledOpen,
   onOpenChange,
-}: SubscribeMenuProps = {}) {
+}: ConnectMenuProps) {
   const menuId = useId();
   const wrapRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLUListElement>(null);
@@ -35,7 +89,8 @@ export default function SubscribeMenu({
     },
     [isControlled, onOpenChange],
   );
-  const platforms = visiblePlatforms();
+  const items = connectItemsFor(kind);
+  const label = kind === "channels" ? "頻道" : "社群";
 
   useFocusTrap(open, dropdownRef);
 
@@ -55,27 +110,14 @@ export default function SubscribeMenu({
     };
   }, [open, setOpen]);
 
-  // 平台清單為空時**不得整顆消失**——頂欄「訂閱」是版面契約，退為站內 /subscribe。
-  if (platforms.length === 0) {
+  if (items.length === 0) {
+    // 頻道是版面契約，清單空時不得整顆消失，退為站內 /subscribe。
+    // 社群沒有對等的站內頁，空清單就不渲染。
+    if (kind === "socials") return null;
     return (
       <Link href="/subscribe" className={styles.trigger}>
-        訂閱
+        {label}
       </Link>
-    );
-  }
-
-  if (platforms.length === 1) {
-    const platform = platforms[0]!;
-    return (
-      <a
-        href={appendPlatformUtm(platform.url, { source: "nav-bar" })}
-        className={styles.trigger}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={() => trackPlatformClick(platform.label, "nav-bar")}
-      >
-        訂閱
-      </a>
     );
   }
 
@@ -89,38 +131,39 @@ export default function SubscribeMenu({
         aria-haspopup="menu"
         onClick={() => setOpen(!open)}
       >
-        訂閱
+        {label}
         <span className={styles.chevron} aria-hidden>
           ▾
         </span>
       </button>
       {open ? (
         <ul id={menuId} ref={dropdownRef} className={styles.dropdown} role="menu">
-          {platforms.map((platform) => (
-            <li key={platform.label} role="none">
-              <a
-                href={appendPlatformUtm(platform.url, { source: "nav-dropdown" })}
-                className={styles.option}
-                role="menuitem"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => {
-                  trackPlatformClick(platform.label, "nav-dropdown");
-                  setOpen(false);
-                }}
-              >
-                <span
-                  className={styles.badge}
-                  style={{ background: platform.color }}
+          {items.map((item) => {
+            const opensNewTab =
+              item.href.startsWith("http://") || item.href.startsWith("https://");
+            return (
+              <li key={item.key} role="none">
+                <a
+                  href={item.href}
+                  className={styles.option}
+                  role="menuitem"
+                  aria-label={item.ariaLabel}
+                  {...(opensNewTab
+                    ? { target: "_blank", rel: "noopener noreferrer" }
+                    : {})}
+                  onClick={() => {
+                    item.onSelect?.();
+                    setOpen(false);
+                  }}
                 >
-                  <BrandSvg className={styles.icon}>
-                    {PLATFORM_ICON_PATHS[platform.icon]}
-                  </BrandSvg>
-                </span>
-                <span className={styles.label}>{platform.label}</span>
-              </a>
-            </li>
-          ))}
+                  <span className={styles.badge} style={item.badgeStyle}>
+                    {item.icon}
+                  </span>
+                  <span className={styles.label}>{item.label}</span>
+                </a>
+              </li>
+            );
+          })}
         </ul>
       ) : null}
     </div>

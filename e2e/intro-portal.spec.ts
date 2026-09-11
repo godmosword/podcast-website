@@ -168,8 +168,8 @@ test.describe("Intro Portal · Phase 4 route and entry", () => {
     await expect(page.locator("[data-landing-root]")).toBeVisible();
     // 無 JS 時閘門 script 跑不了，覆蓋層依設計不會出現——Landing 直接可用。
     await expect(page.locator("html")).not.toHaveAttribute("data-intro-gate", "on");
-    await expect(page.getByTestId("replay-intro")).toHaveAttribute("href", "/intro");
-    await page.getByRole("link", { name: "看小紅開進遊樂園" }).click();
+    await expect(page.getByRole("link", { name: "看小紅開進遊樂園" })).toHaveCount(0);
+    await page.goto("/intro", { waitUntil: "domcontentloaded" });
     await expect(page).toHaveURL(/\/intro$/);
     await expect(page.getByRole("heading", { name: "車車遊樂園" })).toBeVisible();
     await expect(page.getByRole("link", { name: "略過動畫" })).toHaveAttribute("href", "/?enter=1");
@@ -937,10 +937,8 @@ test.describe("Intro Portal · home overlay (ADR-0004)", () => {
     expect(html).toContain("車車遊樂園的故事");
     // 覆蓋層是 SSR 出來的，不是 mount 之後才插進去的。
     expect(html).toContain("data-intro-overlay");
-    // Landing 首段有重回開場的真連結；無 JS 時走進 /intro。
-    expect(html).toContain('data-testid="replay-intro"');
-    expect(html).toContain('href="/intro"');
-    expect(html).toContain("看小紅開進遊樂園");
+    expect(html).not.toContain('data-testid="replay-intro"');
+    expect(html).not.toContain("看小紅開進遊樂園");
   });
 
   test("a first visit opens the overlay without changing the URL", async ({ browser }) => {
@@ -1023,37 +1021,6 @@ test.describe("Intro Portal · home overlay (ADR-0004)", () => {
     const fresh = await context.newPage();
     await fresh.goto("/", { waitUntil: "domcontentloaded" });
     await expect(fresh.locator("[data-intro-overlay]")).toBeVisible();
-    await context.close();
-  });
-
-  test("Landing can reopen the overlay without leaving /", async ({ browser }) => {
-    const context = await browser.newContext();
-    const page = await context.newPage();
-    await page.goto("/", { waitUntil: "domcontentloaded" });
-    await page.getByRole("button", { name: "略過動畫" }).click();
-    await expect(page.locator("html")).not.toHaveAttribute("data-intro-gate", "on");
-    const replay = page.getByRole("link", { name: "看小紅開進遊樂園" });
-    await expect(replay).toBeVisible();
-    await expect(replay).toHaveAttribute("href", "/intro");
-    await replay.click();
-    await expect(page).toHaveURL(/\/$/);
-    await expect(page.locator("html")).toHaveAttribute("data-intro-gate", "on");
-    await expect(page.locator("[data-intro-overlay]")).toBeVisible();
-    await expect(page.locator("[data-landing-root]")).toHaveAttribute("inert", "");
-    await expect(page.locator("[data-testid='site-nav-bar']")).not.toHaveAttribute("inert");
-    await expect(page.locator("[data-testid='site-nav-bar']")).toBeVisible();
-    await context.close();
-  });
-
-  test("reduced motion can still opt in to the overlay from Landing", async ({ browser }) => {
-    const context = await browser.newContext({ reducedMotion: "reduce" });
-    const page = await context.newPage();
-    await page.goto("/", { waitUntil: "domcontentloaded" });
-    await expect(page.locator("[data-intro-overlay]")).toHaveCount(0);
-    await page.getByRole("link", { name: "看小紅開進遊樂園" }).click();
-    await expect(page).toHaveURL(/\/$/);
-    await expect(page.locator("[data-intro-overlay]")).toBeVisible();
-    await expect(page.locator("[data-testid='site-nav-bar']")).toBeVisible();
     await context.close();
   });
 

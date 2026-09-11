@@ -194,35 +194,6 @@
     0 0 0 6px rgba(0, 0, 0, 0.45);
 }
 
-/* 首段重回開場：44px 圓鈕，只放車車 emoji，不加 gloss／elev。 */
-.replayIntro {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  min-height: 44px;
-  padding: 0;
-  border-radius: 999px;
-  border: 2px solid color-mix(in srgb, var(--on-dark) 72%, transparent);
-  background: var(--landing-brand-ink);
-  color: var(--on-dark);
-  font-size: 1.25rem;
-  line-height: 1;
-  text-decoration: none;
-}
-
-.replayIntro:active {
-  transform: scale(0.98);
-  background: color-mix(in srgb, var(--on-dark) 8%, var(--landing-brand-ink));
-}
-
-.replayIntro:focus-visible {
-  outline: 3px solid var(--on-dark);
-  outline-offset: 3px;
-}
-
 .moreSkip:active {
   transform: translateX(-50%) scale(0.96);
 }
@@ -239,10 +210,6 @@
 
 @media (hover: hover) {
   .cta:hover {
-    background: color-mix(in srgb, var(--on-dark) 8%, var(--landing-brand-ink));
-  }
-
-  .replayIntro:hover {
     background: color-mix(in srgb, var(--on-dark) 8%, var(--landing-brand-ink));
   }
 
@@ -418,13 +385,6 @@
     grid-column: 1;
     width: 100%;
     justify-self: stretch;
-  }
-}
-
-/* ≤380：首段 CTA＋🚗 會折成兩列，chrome 要加高，雙折線才不會蓋住 CTA。 */
-@media (max-width: 380px) {
-  .panel {
-    --landing-chrome-h: calc(56px + 44px + 8px + var(--safe-bottom) + 6px);
   }
 }
 

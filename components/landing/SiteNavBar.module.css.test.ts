@@ -215,6 +215,9 @@ describe("SiteNavBar.tsx 結構契約", () => {
     expect(actions).toContain("renderFeedbackLink");
     expect(actions).toContain("feedbackItem");
     expect(actions).toContain("feedbackItem.label");
-    expect(actions).toContain("SubscribeMenu");
+    expect(actions).toContain("ConnectMenu");
+    expect(actions).toContain('kind="channels"');
+    expect(actions).toContain('kind="socials"');
+    expect(actions).not.toContain("SubscribeMenu");
   });
 });

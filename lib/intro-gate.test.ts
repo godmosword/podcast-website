@@ -265,27 +265,4 @@ describe("INTRO_GATE_INERT_SCRIPT", () => {
     document.querySelector("span")?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     expect(isIntroGateOpen()).toBe(false);
   });
-
-  it("閘門關著時點重回連結會打開覆蓋層，修飾鍵不攔截", () => {
-    chrome();
-    const landing = document.querySelector("[data-landing-root]")!;
-    landing.innerHTML = `<a data-testid="replay-intro" href="/intro">看小紅開進遊樂園</a>`;
-    new Function(INTRO_GATE_INERT_SCRIPT)();
-    const link = document.querySelector("[data-testid='replay-intro']")!;
-    const shift = new MouseEvent("click", {
-      bubbles: true,
-      cancelable: true,
-      button: 0,
-      shiftKey: true,
-    });
-    link.dispatchEvent(shift);
-    expect(isIntroGateOpen()).toBe(false);
-    expect(shift.defaultPrevented).toBe(false);
-    const click = new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 });
-    link.dispatchEvent(click);
-    expect(click.defaultPrevented).toBe(true);
-    expect(isIntroGateOpen()).toBe(true);
-    expect(landing.hasAttribute("inert")).toBe(true);
-    expect(document.querySelector("[data-testid='site-nav-bar']")?.hasAttribute("inert")).toBe(false);
-  });
 });

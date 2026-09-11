@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import ThemeToggle from "@/components/ThemeToggle";
-import SubscribeMenu from "@/components/landing/SubscribeMenu";
+import ConnectMenu from "@/components/landing/SubscribeMenu";
 import Icon from "@/components/ui/Icon";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useLandingFooterNavSolid } from "@/hooks/useLandingFooterNavSolid";
@@ -125,7 +125,7 @@ function renderFeedbackLink(
 }
 
 /** 同時只允許一個浮層開著——兩個 focus trap 同時 active 會互搶 Tab。 */
-type OpenMenu = "none" | "subscribe" | "nav";
+type OpenMenu = "none" | "channels" | "socials" | "nav";
 
 export default function SiteNavBar() {
   const pathname = usePathname();
@@ -175,7 +175,7 @@ export default function SiteNavBar() {
     return () => window.removeEventListener("keydown", onKey);
   }, [openMenu, closeAll]);
 
-  // 點浮層外部關閉（與 SubscribeMenu 行為一致；原本只有訂閱有）
+  // 點浮層外部關閉（與 ConnectMenu 行為一致；原本只有訂閱有）
   useEffect(() => {
     if (openMenu === "none") return;
     function onPointerDown(e: PointerEvent) {
@@ -276,9 +276,15 @@ export default function SiteNavBar() {
           >
             首頁
           </Link>
-          <SubscribeMenu
-            open={openMenu === "subscribe"}
-            onOpenChange={(next) => setOpenMenu(next ? "subscribe" : "none")}
+          <ConnectMenu
+            kind="channels"
+            open={openMenu === "channels"}
+            onOpenChange={(next) => setOpenMenu(next ? "channels" : "none")}
+          />
+          <ConnectMenu
+            kind="socials"
+            open={openMenu === "socials"}
+            onOpenChange={(next) => setOpenMenu(next ? "socials" : "none")}
           />
           {feedbackItem
             ? renderFeedbackLink(

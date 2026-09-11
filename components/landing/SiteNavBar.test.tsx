@@ -35,10 +35,12 @@ async function renderNavBar() {
 }
 
 describe("SiteNavBar", () => {
-  test("頂欄常駐列：品牌＋選單觸發器＋常用組（首頁／訂閱／留言）", async () => {
+  test("頂欄常駐列：品牌＋選單觸發器＋常用組（首頁／頻道／社群／留言）", async () => {
     const html = await renderNavBarHtml();
     expect(html).toContain("車車遊樂園");
-    expect(html).toContain("訂閱");
+    expect(html).toContain("頻道");
+    expect(html).toContain("社群");
+    expect(html).not.toContain(">訂閱<");
     expect(html).toContain("開啟選單");
     expect(html).toContain("首頁");
     expect(html).toContain("留言");
@@ -343,6 +345,8 @@ describe("SiteNavBar", () => {
     expect(html).not.toContain("育兒專欄");
     expect(html).toContain("宇宙地圖");
     expect(html).toContain("親子指南");
+    expect(html).toContain("頻道");
+    expect(html).not.toContain("社群");
   });
 });
 

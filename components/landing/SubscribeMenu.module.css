@@ -8,7 +8,7 @@
   justify-content: center;
   gap: 4px;
   min-height: 44px;
-  padding: 6px 12px;
+  padding: 6px 10px;
   border-radius: var(--radius-pill);
   /* 去框：透明底＋繼承頂欄字色，疊 landing hero 才不會對比崩 */
   background: transparent;
@@ -116,7 +116,14 @@
    * 會讓幾乎所有桌面寬度退回 0.85rem，base 的修正等於沒生效。 */
   .trigger {
     min-height: 44px;
-    padding: 8px 12px;
+    padding: 8px 10px;
+  }
+}
+
+@container nav-inner (max-width: 420px) {
+  .trigger {
+    padding: 6px 6px;
+    gap: 2px;
   }
 }
 

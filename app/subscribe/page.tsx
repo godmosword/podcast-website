@@ -32,7 +32,7 @@ export default function SubscribePage() {
         <h1 className={styles.title}>{SUBSCRIBE_PAGE_TITLE}</h1>
         <p className={styles.lede}>
           {SUBSCRIBE_PAGE_LEDE} 完整收聽請在{" "}
-          <Link href="/#connect">Spotify 或 Apple Podcasts</Link> 訂閱節目。
+          <Link href="#connect">Spotify 或 Apple Podcasts</Link> 訂閱節目。
         </p>
       </header>
 

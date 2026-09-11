@@ -81,7 +81,6 @@ document.documentElement.setAttribute("${INTRO_GATE_ATTRIBUTE}","${INTRO_GATE_ON
 export const INTRO_GATE_INERT_MARK = "data-intro-inert";
 
 export const INTRO_GATE_INERT_SCRIPT = `(function(){try{
-var heroDisabled=${process.env.NEXT_PUBLIC_HERO_3D === "0" ? "true" : "false"};
 // 覆蓋層每一層祖先的兄弟節點都要 inert，不能只蓋 Landing：skip link 是
 // layout 的節點，不在 [data-landing-root] 裡面。頂欄（site-nav-bar）留下，
 // 開場期間訂閱／留言／漢堡要能用。只清自己標記過的，不動別人設的 inert。
@@ -111,15 +110,10 @@ var close=function(){
   var target=document.getElementById("main-content");
   if(target&&target.focus)target.focus({preventScroll:true});
 };
-var reopen=function(){
-  document.documentElement.setAttribute("${INTRO_GATE_ATTRIBUTE}","${INTRO_GATE_ON}");
-  seal();
-};
 if(document.documentElement.getAttribute("${INTRO_GATE_ATTRIBUTE}")==="${INTRO_GATE_ON}")seal();
 // hydration 之前，覆蓋層的按鈕還沒有 React handler——那段時間如果沒有出口，
 // 慢裝置上使用者會被一層按不掉的東西擋住。這個 capture 階段的保底讓 Esc 與
 // 出口按鈕從**繪製當下**就能用；React 掛載後讀 <html> 屬性即可同步狀態。
-// 監聽器在閘門關著時也要掛著：Landing 的「看小紅開進遊樂園」靠它重開覆蓋層。
 document.addEventListener("keydown",function(event){
   if(event.key==="Escape"&&document.documentElement.getAttribute("${INTRO_GATE_ATTRIBUTE}")==="${INTRO_GATE_ON}")close();
 },true);
@@ -127,12 +121,6 @@ document.addEventListener("click",function(event){
   var node=event.target;
   while(node&&node!==document){
     if(node.hasAttribute&&node.hasAttribute("data-intro-dismiss")){close();return;}
-    if(node.getAttribute&&node.getAttribute("data-testid")==="replay-intro"){
-      if(heroDisabled||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||event.button!==0)return;
-      event.preventDefault();
-      reopen();
-      return;
-    }
     node=node.parentNode;
   }
 },true);

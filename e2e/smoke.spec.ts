@@ -41,13 +41,10 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
     expect(directCount).toBe(0);
   }
 
-  // 頂欄常駐列：品牌＋常用三詞撐滿中間＋最右漢堡
-  // 多平台時「訂閱」是 dropdown button，單平台／空清單時才是 link
-  await expect(
-    page.getByRole("button", { name: "訂閱" }).or(
-      page.getByRole("link", { name: "訂閱" }),
-    ).first(),
-  ).toBeVisible();
+  // 頂欄常駐列：品牌＋常用組（首頁／頻道／社群／留言）＋最右漢堡
+  await expect(page.getByRole("button", { name: "頻道" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "社群" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "訂閱" })).toHaveCount(0);
   const homeAction = page.getByRole("group", { name: "常用" }).locator('a[href="/"]');
   await expect(homeAction).toHaveCount(1);
   await expect(homeAction).toBeVisible();
@@ -102,11 +99,7 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await expect(
     page.getByRole("link", { name: "車車遊樂園的故事 →" }),
   ).toHaveAttribute("href", "/stories");
-  await expect(page.getByRole("link", { name: "看小紅開進遊樂園" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "看小紅開進遊樂園" })).toHaveAttribute(
-    "href",
-    "/intro",
-  );
+  await expect(page.getByRole("link", { name: "看小紅開進遊樂園" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: /聽最新一集/ })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: /數綿羊/ })).toBeAttached();
   await expect(page.getByRole("heading", { name: /捏黏土/ })).toBeAttached();
@@ -167,11 +160,9 @@ test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   // 行動版漢堡選單；主題分類與桌面一致不進導覽（頁面仍可直達 /topic）
   await expect(page.getByRole("button", { name: "開啟選單" })).toBeVisible();
   await expect(page.getByRole("link", { name: "首頁" })).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "訂閱" }).or(
-      page.getByRole("link", { name: "訂閱" }),
-    ).first(),
-  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "頻道" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "社群" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "訂閱" })).toHaveCount(0);
   const mobileFeedback = page.getByRole("link", { name: "留言" });
   await expect(mobileFeedback).toBeVisible();
   await expect(mobileFeedback).toHaveAttribute("href", "/feedback");
@@ -440,39 +431,18 @@ test.describe("內頁不掛 KidsPlayDock", () => {
   }
 });
 
-test.describe("首頁頁尾 snap pane", () => {
-  test("可捲到頁尾版權列", async ({ page }) => {
+test.describe("首頁沒有頁尾 snap pane", () => {
+  test("四段之後不再接 landing-foot", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto("/");
+    await expect(page.locator("#landing-foot")).toHaveCount(0);
+    await expect(page.locator("footer")).toHaveCount(0);
     await expect(
-      page.getByRole("region", { name: "都去哪裡玩？" }),
+      page.getByRole("link", { name: "捲動到頁尾" }),
     ).toHaveCount(0);
-
-    await page.locator("#landing-foot").scrollIntoViewIfNeeded();
-    await page.locator("#landing-foot").hover();
-
-    for (let i = 0; i < 12; i += 1) {
-      await page.mouse.wheel(0, 600);
-      await page.waitForTimeout(80);
-    }
-
-    const atBottom = await page.evaluate(() => {
-      const el = document.scrollingElement!;
-      const candidates: Element[] = [el, ...document.querySelectorAll("*")];
-      for (const node of candidates) {
-        const c = node as HTMLElement;
-        if (c.scrollHeight - c.clientHeight < 200) continue;
-        if (c.scrollTop + c.clientHeight >= c.scrollHeight - 4) return true;
-      }
-      return false;
-    });
-    expect(atBottom).toBe(true);
-
-    // 首頁 <footer> 仍不具 contentinfo（包在 `<main data-landing-root>` 內）。
-    const copyright = page.getByText("© 車車遊樂園™ · Bonbon & 馬米");
-    await expect(copyright).toBeInViewport();
-
-    // ADR-0004 之後首頁沒有貼底導覽列了，版權列不再需要跟它讓位。
+    await expect(
+      page.locator("#segment-health [data-landing-more-hint]"),
+    ).toHaveCount(0);
   });
 });
 
