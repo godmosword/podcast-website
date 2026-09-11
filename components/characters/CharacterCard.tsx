@@ -1,7 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 import type { Character } from "@/data/characters";
-import { getStory } from "@/data/content";
+import { catalogEpisodesFor } from "@/lib/character-catalog";
+import CharacterEpisodeSelect from "./CharacterEpisodeSelect";
 import CharacterPortraitTilt from "./CharacterPortraitTilt";
 import styles from "./CharacterCard.module.css";
 
@@ -10,22 +10,29 @@ type CharacterCardProps = {
   recognized: boolean;
 };
 
+function identityLabel(character: Character): string {
+  return character.vehicle === character.name
+    ? character.name
+    : `${character.name}，${character.vehicle}`;
+}
+
 export default function CharacterCard({
   character,
   recognized,
 }: CharacterCardProps) {
-  const statusLabel = recognized ? "已認識" : "待認識";
+  const episodes = catalogEpisodesFor(character.appearsIn);
+  const articleLabel = recognized
+    ? `${identityLabel(character)}，已認識`
+    : identityLabel(character);
 
   return (
     <article
       id={character.id}
       className={`${styles.card} ${recognized ? styles.cardRecognized : ""}`}
-      aria-label={`${character.name}，${statusLabel}`}
+      aria-label={articleLabel}
     >
       {character.ref ? (
-        <div
-          className={`${styles.portraitFrame} ${recognized ? "" : styles.portraitPending}`}
-        >
+        <div className={styles.portraitFrame}>
           <CharacterPortraitTilt className={styles.portraitMat}>
             <Image
               src={`/${character.ref}`}
@@ -35,41 +42,36 @@ export default function CharacterCard({
               className={styles.portrait}
             />
           </CharacterPortraitTilt>
-          <span
-            className={`${styles.statusSticker} ${recognized ? styles.stickerKnown : styles.stickerUnknown}`}
-            aria-hidden
-          >
-            {statusLabel}
-          </span>
+          {recognized && (
+            <span className={`${styles.statusSticker} ${styles.stickerKnown}`} aria-hidden>
+              已認識
+            </span>
+          )}
         </div>
       ) : (
-        <span
-          className={`${styles.statusSticker} ${styles.stickerStandalone} ${recognized ? styles.stickerKnown : styles.stickerUnknown}`}
-        >
-          {statusLabel}
-        </span>
+        recognized && (
+          <span
+            className={`${styles.statusSticker} ${styles.stickerStandalone} ${styles.stickerKnown}`}
+          >
+            已認識
+          </span>
+        )
       )}
       <div className={styles.cardBody}>
-        <h2 className={styles.cardTitle}>{character.name}</h2>
-        <p className={styles.vehicle}>{character.vehicle}</p>
+        <h2 className={styles.cardTitle}>
+          <span className={styles.name}>{character.name}</span>
+          {character.vehicle !== character.name && (
+            <>
+              {" "}
+              <span className={styles.vehicle}>{character.vehicle}</span>
+            </>
+          )}
+        </h2>
         <p className={styles.personality}>{character.personality}</p>
-        {character.appearsIn.length > 0 && (
-          <div className={styles.storyLinks} role="group" aria-label="出場故事">
-            {character.appearsIn.map((slug) => {
-              const story = getStory(slug);
-              if (!story) return null;
-              return (
-                <Link
-                  key={slug}
-                  href={`/story/${story.slug}`}
-                  className={styles.storyLink}
-                >
-                  EP {story.ep}
-                </Link>
-              );
-            })}
-          </div>
-        )}
+        <CharacterEpisodeSelect
+          characterName={character.name}
+          episodes={episodes}
+        />
       </div>
     </article>
   );

@@ -20,7 +20,7 @@ const characterFaqs = [
   {
     question: "這些角色會出現在哪些故事集數？",
     answer:
-      "每張角色卡都會列出出場故事；也可以到主題或車種頁，依角色喜歡的主題找到更多集數。",
+      "每張角色卡都能用下拉選單查看出場集數與該集標題；也可以到主題或車種頁，依角色喜歡的主題找到更多集數。",
   },
   {
     question: "孩子要怎麼認識這些角色？",
@@ -70,18 +70,6 @@ export default function CharactersPage() {
       </header>
 
       <CharacterCatalogGrid characters={characters} />
-
-      <section className={styles.faqSection} aria-labelledby="characters-faq-title">
-        <h2 id="characters-faq-title">
-          <span className="marker">關於角色圖鑑，家長常問</span>
-        </h2>
-        {characterFaqs.map((faq) => (
-          <div key={faq.question} className={styles.faqItem}>
-            <h3>{faq.question}</h3>
-            <p>{faq.answer}</p>
-          </div>
-        ))}
-      </section>
 
       <SiteFooter compact showPlatformSubscribe={false} />
     </main>

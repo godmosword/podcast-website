@@ -8,7 +8,7 @@ import { useCompletedSlugs } from "@/hooks/useZoneProgress";
 
 /**
  * 圖鑑已認識角色 id 集合。
- * SSR／hydration 前為空（全卡待認識），mount 後讀 progress-store。
+ * SSR／hydration 前為空（尚未套用進度），mount 後讀 progress-store。
  */
 export function useRecognizedCharacterIds(
   characters: Character[],

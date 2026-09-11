@@ -99,4 +99,11 @@ describe("repository architecture", () => {
       expect(src, file).not.toContain("hero-home");
     }
   });
+
+  it("角色圖鑑不渲染家長常問區塊，仍保留 FAQ JSON-LD", () => {
+    const src = readFileSync(join(ROOT, "app/characters/page.tsx"), "utf8");
+    expect(src).not.toContain("家長常問");
+    expect(src).not.toContain("faqSection");
+    expect(src).toContain("faqPageJsonLd");
+  });
 });

@@ -32,10 +32,6 @@
   box-shadow: var(--shadow-md);
 }
 
-.portraitPending .portraitMat {
-  filter: saturate(0.72);
-}
-
 .portrait {
   object-fit: cover;
 }
@@ -63,11 +59,6 @@
   border-color: color-mix(in srgb, var(--c-yellow) 50%, var(--line));
 }
 
-.stickerUnknown {
-  color: var(--ink-soft);
-  background: color-mix(in srgb, var(--mix-base) 88%, var(--card));
-}
-
 .stickerStandalone {
   position: static;
   display: inline-flex;
@@ -79,6 +70,9 @@
 }
 
 .cardTitle {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35em;
   margin: 0;
   min-width: 0;
   color: var(--warm-heading);
@@ -86,8 +80,16 @@
   line-height: 1.2;
 }
 
+.name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .vehicle {
-  margin: 6px 0 0;
+  flex: none;
+  margin: 0;
   color: var(--warm-highlight);
   font-size: var(--fs-control);
   font-weight: 800;
@@ -101,31 +103,47 @@
   line-height: 1.7;
 }
 
-.storyLinks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+.episodeSelect {
+  display: block;
   margin-top: 14px;
 }
 
-.storyLink {
-  display: inline-flex;
+.episodeSelectWrap {
+  position: relative;
+  display: block;
+}
+
+.episodeSelectControl {
+  display: block;
+  width: 100%;
   min-height: 44px;
-  align-items: center;
+  padding: 8px 36px 8px 12px;
   border: 1px solid color-mix(in srgb, var(--warm-accent) 28%, var(--line));
   border-radius: var(--radius-sm);
-  padding: 8px 12px;
-  background: var(--warm-chip-bg);
+  background-color: var(--warm-chip-bg);
   color: var(--accent-ink);
   font-size: var(--fs-label);
   font-weight: 800;
-  text-decoration: none;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
-.storyLink:focus-visible,
-.storyLink:hover {
+.episodeSelectControl:focus-visible,
+.episodeSelectControl:hover {
   border-color: var(--warm-accent);
-  background: var(--warm-chip-hover);
+  background-color: var(--warm-chip-hover);
+}
+
+.episodeSelectArrow {
+  position: absolute;
+  top: 0;
+  right: 12px;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  color: var(--accent-ink);
+  font-size: 0.75rem;
 }
 
 @media (max-width: 640px) {
@@ -144,10 +162,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .portraitPending .portraitMat {
-    filter: none;
-  }
-
   .portraitMat {
     transform: none !important;
     transition: none !important;
