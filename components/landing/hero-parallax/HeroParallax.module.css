@@ -12,6 +12,16 @@
   inset: 0;
   overflow: hidden;
   pointer-events: none;
+  /*
+   * 文字安全區（規格 §4.4：桌機左側約 40%）。背景會動，靠尺寸碰巧避開不算數——
+   * 任何一幀都不能有路牌頂進副標。做法是把會長高的兩層（L1 遠景、L2 中景）在
+   * 左側做透明漸層遮罩，讓它們「從霧裡浮出」；路面與近景維持全寬，文案區在
+   * 地平線之上本來就碰不到它們。--text-clear 之前完全透明（文案與按鈕列所在），
+   * 到 --text-fade 才全顯。
+   */
+  /* 實測 1440 的按鈕列右緣在 26%，透明段要蓋過它再留一點餘裕。 */
+  --text-clear: 29%;
+  --text-fade: 50%;
   /* 自成 stacking context，層內的 z-index 1–5 才不會壓過 HeroWorld 的文案（2）、
      CTA（2）與略過（3）。實測沒有這行時 CTA 整個被路面與近景蓋掉。 */
   z-index: 1;
@@ -64,7 +74,13 @@
 .l1 { --k: 0.8; bottom: calc(100% - var(--horizon)); z-index: 1; }
 .l2 { bottom: calc(100% - var(--horizon) - 14px * var(--s)); z-index: 2; }
 .l3 { top: calc(var(--horizon) - 8px * var(--s)); z-index: 3; }
-.l5 { bottom: calc(-12px * var(--s)); z-index: 5; }
+/* 近景減重：石頭與草叢會搶小紅的注意力，縮一階並往下沉。 */
+.l5 { --k: 0.7; bottom: calc(-36px * var(--s)); z-index: 5; }
+
+.l1, .l2 {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, transparent var(--text-clear), #000 var(--text-fade));
+  mask-image: linear-gradient(to right, transparent 0, transparent var(--text-clear), #000 var(--text-fade));
+}
 
 /*
  * L4 主角：定點，只有 ±3px／1.2s 的上下浮動（§4.2）。放棄輪子獨立旋轉，
@@ -104,11 +120,11 @@
   .strip { transform: translateX(-33.3333%); }
 }
 
-@media (min-width: 1800px) { .band { --s: 1.15; } }
-@media (max-width: 1280px) { .band { --s: 0.8; --hero-left: 56%; } }
+@media (min-width: 1800px) { .band { --s: 1.15; --text-clear: 32%; --text-fade: 52%; } }
+@media (max-width: 1280px) { .band { --s: 0.8; --hero-left: 56%; --text-clear: 30%; --text-fade: 52%; } }
 @media (max-width: 980px) and (min-width: 769px) { .band { --s: 0.68; --horizon: 60%; --hero-left: 54%; } }
 @media (max-width: 768px) {
-  .band { --s: 0.55; --horizon: 55%; --hero-left: 50%; }
+  .band { --s: 0.55; --horizon: 55%; --hero-left: 50%; --text-clear: 0%; --text-fade: 0%; }
   /* 手機：文案在頂、按鈕在底，主角置中。置中放在外層 slot，浮動留在 img 上，
      兩個 transform 才不會互相覆蓋。 */
   .heroSlot { transform: translateX(-50%); }
@@ -116,5 +132,6 @@
 @media (max-width: 430px) { .band { --s: 0.5; } }
 /* 短橫向（手機橫拿）：地平線抬高、素材再縮一階，才塞得下文案與按鈕。 */
 @media (max-height: 560px) and (min-width: 600px) {
-  .band { --s: 0.5; --horizon: 58%; --hero-left: 60%; }
+  /* 實測按鈕列右緣在 45% 寬，透明段要蓋過它；主角在 60%，漸層在它之前結束。 */
+  .band { --s: 0.5; --horizon: 66%; --hero-left: 60%; --text-clear: 47%; --text-fade: 59%; }
 }

@@ -282,6 +282,16 @@ visual baseline：`intro-poster`／`intro-ready`／`intro-greeting` 六張退役
 
 `world` 舞台現在只有單元測試守著，沒有 e2e。建議讓 parallax 上線幾天、確認實機沒問題後再下架：`HeroScene`／`World`／`Vehicle`／`CameraRig`／`QualityManager`／`SceneLoader`／`WorldEnvironment`、`three`／`@react-three/*` 依賴、`public/models/hero-world`、四支 hero-world 腳本與 `assets/blender`。這是本改版最大的效能與維護成本回收，也是不可逆的一步。
 
+### 5.1.2 文字安全區的實作（Astra 審查後，2026-09-11）
+
+§4.4 的「該區域內不得有高對比素材」在會動的背景上不能靠尺寸碰巧避開。實作：
+
+- L1／L2 在文案側做透明漸層遮罩（`HeroParallax.module.css` 的 `--text-clear`／`--text-fade`），路面與近景維持全寬——文案區在地平線之上本來就碰不到它們。
+- 視差舞台的 CTA 收到副標正下方（`HeroWorld.module.css` 的 `[data-stage="parallax"] .actions`），標題→副標→按鈕是一個區塊，全部在地平線之上。
+- 契約在 `e2e/intro-portal.spec.ts`「text safe zone」：六個尺寸，文案與按鈕列必須整個在透明段內或整個在會動的層之上（桌機／短橫向），或與任何一層都不相交（手機）。與相位無關。
+
+`--text-clear` 的數字是量出來的，不是設計值：1440 的按鈕列右緣在 26%、844 橫向在 45%。改按鈕文案或字級後要重跑這組測試。
+
 ### 5.2 與 §4.4 的落差
 
 §4.4 寫 Hero 高度改為桌機 520–600px。**沒有照做**：`/intro` 與首頁覆蓋層（ADR-0004）都是全螢幕，視差帶改成填滿 `100svh` 的 `.hero`。520–600px 是把 Hero 當頁面區塊時的數字，跟「開場覆蓋層」這個產品決定衝突。文字安全區與地平線比例（62%）照 §4.4，只是換算基準是視窗高而不是固定高。

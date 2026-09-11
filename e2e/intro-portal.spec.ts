@@ -82,7 +82,12 @@ test.describe("Intro Portal · Phase 4 route and entry", () => {
   });
 
   test("enters Landing immediately before the band is ready", async ({ page }) => {
+    // 扣住路面 tile，band 就真的到不了 ready；等 hydration 訊號再點，否則量到的是
+    // 「hydration 前的原生導航」——那是 R10 的無 JS 契約，不是這條。
+    await page.route(ROAD_URL, async () => { /* never fulfilled */ });
     await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("[data-hero-parallax]")).toHaveAttribute("data-running", "true");
+    await expect(page.locator("[data-hero-world]")).toHaveAttribute("data-scene-state", "poster");
     await page.getByRole("link", { name: "略過動畫" }).click();
     // Enhanced navigation lands on the clean canonical URL; `?enter=1` stays in
     // the href as the no-JS entry point.
@@ -96,6 +101,7 @@ test.describe("Intro Portal · Phase 4 route and entry", () => {
   test("R09: /intro stays reachable on its own and hands back to Landing", async ({ page }) => {
     await page.goto("/intro", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: "車車遊樂園" })).toBeVisible();
+    await expect(page.locator("[data-hero-parallax]")).toHaveAttribute("data-running", "true");
     await page.getByRole("link", { name: "略過動畫" }).click();
     await expect(page).toHaveURL(/\/$/);
     await expect(page.locator("[data-landing-root]")).toBeVisible();
@@ -812,6 +818,67 @@ test.describe("Intro Portal · band geometry", () => {
   }
 });
 
+// 文字安全區（規格 §4.4）。背景會動，所以契約不能是「某一幀沒撞到」，而是結構性的：
+// 桌機與短橫向靠 L1／L2 左側的透明遮罩，遮罩的全透明段必須蓋過文案與按鈕列的右緣；
+// 手機文案在頂、band 在下，文案與按鈕列不得與任何一層的框相交。兩者都與相位無關。
+test.describe("Intro Portal · text safe zone", () => {
+  const cases: [number, number, "mask" | "stack"][] = [
+    [1440, 900, "mask"],
+    [1280, 720, "mask"],
+    [1920, 1080, "mask"],
+    [844, 390, "mask"],
+    [390, 844, "stack"],
+    [360, 800, "stack"],
+  ];
+  for (const [width, height, mode] of cases) {
+    test(`copy and CTA never share pixels with a moving layer at ${width}x${height}`, async ({ page }) => {
+      await page.setViewportSize({ width, height });
+      await page.goto("/intro", { waitUntil: "domcontentloaded" });
+      await waitForBand(page);
+      const geometry = await page.evaluate(() => {
+        const rect = (el: Element | null) => {
+          if (!el) return null;
+          const r = el.getBoundingClientRect();
+          return { left: r.left, right: r.right, top: r.top, bottom: r.bottom };
+        };
+        const hero = document.querySelector("[data-hero-world]")!;
+        const band = document.querySelector("[data-hero-parallax]") as HTMLElement;
+        const clear = parseFloat(getComputedStyle(band).getPropertyValue("--text-clear")) || 0;
+        const heroRect = hero.getBoundingClientRect();
+        // 文案與按鈕列：h1／p 是 /intro 頁；覆蓋層用 p 當標題，這裡只跑 /intro。
+        const copy = rect(hero.querySelector("h1")?.parentElement ?? null);
+        const actions = rect(hero.querySelector("a[href='/?enter=1']")?.parentElement ?? null);
+        const layers = ["l1", "l2", "l3"].map((id) => rect(band.querySelector(`[data-layer='${id}']`)));
+        return { clearPx: heroRect.left + heroRect.width * clear / 100, heroLeft: heroRect.left, copy, actions, layers };
+      });
+      expect(geometry.copy, "copy block").not.toBeNull();
+      expect(geometry.actions, "actions row").not.toBeNull();
+      if (mode === "mask") {
+        // 一個文字元素安全的條件：水平整個在透明段內，或垂直整個在會動的兩層之上。
+        // 標題通常靠後者（它在遠景頂端之上），按鈕列靠前者。
+        const movingTop = Math.min(geometry.layers[0]!.top, geometry.layers[1]!.top);
+        for (const [label, box] of [["copy", geometry.copy!], ["actions", geometry.actions!]] as const) {
+          const inClearZone = box.right <= geometry.clearPx + 1;
+          const aboveLayers = box.bottom <= movingTop + 1;
+          expect(inClearZone || aboveLayers,
+            `${label} right=${Math.round(box.right)} bottom=${Math.round(box.bottom)} vs clear=${Math.round(geometry.clearPx)} layerTop=${Math.round(movingTop)}`)
+            .toBe(true);
+        }
+        // 路面不在遮罩裡，所以按鈕列還必須整個在路面之上。
+        const road = geometry.layers[2]!;
+        expect(geometry.actions!.bottom, "CTA must sit above the road").toBeLessThanOrEqual(road.top + 1);
+      } else {
+        const intersects = (a: NonNullable<typeof geometry.copy>, b: NonNullable<typeof geometry.copy>) =>
+          a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+        for (const [i, layer] of geometry.layers.entries()) {
+          expect(intersects(geometry.copy!, layer!), `copy intersects layer ${i}`).toBe(false);
+          expect(intersects(geometry.actions!, layer!), `actions intersect layer ${i}`).toBe(false);
+        }
+      }
+    });
+  }
+});
+
 /**
  * ADR-0004：開場是首頁的同頁覆蓋層，不是導航。
  *
@@ -893,6 +960,9 @@ test.describe("Intro Portal · home overlay (ADR-0004)", () => {
     const page = await context.newPage();
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await expect(page.locator("[data-intro-overlay]")).toBeVisible();
+    // 陷阱是 hydration 後才掛上的；hydration 前 Landing 由同步 script 設的 inert
+    // 擋著（另一條測試守）。等 React 接手的訊號再開始 Tab。
+    await expect(page.locator("[data-intro-overlay] [data-hero-parallax]")).toHaveAttribute("data-running", "true");
     for (let i = 0; i < 8; i += 1) {
       await page.keyboard.press("Tab");
       const inside = await page.evaluate(() =>
