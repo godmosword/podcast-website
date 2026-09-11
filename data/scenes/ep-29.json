@@ -10,7 +10,8 @@
       "end": 12,
       "summary": "我們一起出發去",
       "prompt": "Podcast opening, hosts heading out together, warm cheerful studio mood",
-      "characters": []
+      "characters": [],
+      "keepCover": true
     },
     {
       "index": 2,
