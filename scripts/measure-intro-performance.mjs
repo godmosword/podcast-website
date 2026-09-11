@@ -1,3 +1,6 @@
+// 2026-09-11：Intro 預設舞台已切為橫向 2.5D 視差帶（無 canvas、無 GLB）。這支腳本量的是
+// 3D 舞台的指標（DPR、frame time、GLB 傳輸），所以固定走 `?stage=world` 的回滾舞台。
+// 要量視差帶請直接用 e2e/intro-portal.spec.ts 的契約與 visual baseline。
 // Phase 10 量測工具：對「正在跑的 production build」實測載入、renderer、生命周期
 // 與 web vitals，輸出機器可讀的 JSON。所有數字都會附上 build id、瀏覽器、viewport、
 // DPR、quality tier、cold/warm 與網路／CPU 條件，避免變成沒有情境的宣稱。
@@ -85,7 +88,7 @@ const report = {
 {
   const context = await newPage('high');
   const page = await context.newPage();
-  await page.goto(`${BASE}/intro`, { waitUntil: 'load' });
+  await page.goto(`${BASE}/intro?stage=world`, { waitUntil: 'load' });
   const beforeScene = (await resources(page)).filter(r => r.name.endsWith('.js')).map(r => r.name);
   await page.waitForSelector('[data-scene-state="ready"], [data-scene-state="fallback"]', { timeout: 90_000 });
   await page.waitForTimeout(1_000);
@@ -98,7 +101,7 @@ const report = {
     catch { try { return gzipSync(await readFile(join('.next', pathname.replace(/^\/_next\//, '')))).length; } catch { return null; } }
   };
   report.loading.intro = {
-    url: '/intro',
+    url: '/intro?stage=world',
     initialScripts: beforeScene.length,
     initialScriptTransferBytes: all.filter(r => r.name.endsWith('.js') && beforeScene.includes(r.name)).reduce((n, r) => n + r.transferBytes, 0),
     lazyScripts: await Promise.all(lazyScripts.map(async r => ({ name: r.name, transferBytes: r.transferBytes, decodedBytes: r.decodedBytes, gzipBytes: await gzipOf(r.name) }))),
@@ -120,7 +123,7 @@ for (const tier of ['high', 'medium', 'low']) {
     const raf = window.requestAnimationFrame.bind(window);
     window.requestAnimationFrame = (cb) => raf((t) => { w.__frames.push(t); cb(t); });
   });
-  await page.goto(`${BASE}/intro`, { waitUntil: 'load' });
+  await page.goto(`${BASE}/intro?stage=world`, { waitUntil: 'load' });
   const state = await page.waitForSelector('[data-scene-state="ready"], [data-scene-state="fallback"]', { timeout: 90_000 })
     .then(() => page.locator('[data-hero-world]').getAttribute('data-scene-state'));
   if (state !== 'ready') {
@@ -180,7 +183,7 @@ for (const tier of ['high', 'medium', 'low']) {
   const rounds = [];
   const heap = async () => page.evaluate(() => performance.memory?.usedJSHeapSize ?? null);
   for (let round = 0; round < 5; round++) {
-    await page.goto(`${BASE}/intro`, { waitUntil: 'load' });
+    await page.goto(`${BASE}/intro?stage=world`, { waitUntil: 'load' });
     await page.waitForSelector('[data-scene-state="ready"], [data-scene-state="fallback"]', { timeout: 90_000 });
     const live = await page.evaluate(() => ({
       canvases: document.querySelectorAll('canvas').length,
@@ -194,7 +197,7 @@ for (const tier of ['high', 'medium', 'low']) {
     rounds.push({ round: round + 1, live, after, heapBytes: await heap(), modelRequests: modelRequests.length });
   }
   // hidden / paused / sleep must not keep rendering.
-  await page.goto(`${BASE}/intro`, { waitUntil: 'load' });
+  await page.goto(`${BASE}/intro?stage=world`, { waitUntil: 'load' });
   await page.waitForSelector('[data-scene-state="ready"], [data-scene-state="fallback"]', { timeout: 90_000 });
   const rafDelta = async (ms, prepare) => {
     if (prepare) await prepare();
@@ -251,14 +254,14 @@ async function vitals(url, { warmContext } = {}) {
 
 {
   const cold = [];
-  for (let i = 0; i < 3; i++) cold.push({ run: i + 1, ...await vitals(`${BASE}/intro`) });
+  for (let i = 0; i < 3; i++) cold.push({ run: i + 1, ...await vitals(`${BASE}/intro?stage=world`) });
   const warmContext = await newPage('high');
   const warmup = await warmContext.newPage();
-  await warmup.goto(`${BASE}/intro`, { waitUntil: 'load' });
+  await warmup.goto(`${BASE}/intro?stage=world`, { waitUntil: 'load' });
   await warmup.waitForTimeout(2_000);
   await warmup.close();
   const warm = [];
-  for (let i = 0; i < 3; i++) warm.push({ run: i + 1, ...await vitals(`${BASE}/intro`, { warmContext }) });
+  for (let i = 0; i < 3; i++) warm.push({ run: i + 1, ...await vitals(`${BASE}/intro?stage=world`, { warmContext }) });
   await warmContext.close();
 
   const interaction = [];
@@ -266,7 +269,7 @@ async function vitals(url, { warmContext } = {}) {
     for (let i = 0; i < 3; i++) {
       const context = await newPage('high');
       const page = await context.newPage();
-      await page.goto(`${BASE}/intro`, { waitUntil: 'load' });
+      await page.goto(`${BASE}/intro?stage=world`, { waitUntil: 'load' });
       if (scenario === 'ready') await page.waitForSelector('[data-scene-state="ready"]', { timeout: 90_000 });
       else await page.waitForSelector('[data-scene-state="poster"]');
       const measured = await page.evaluate(async () => {

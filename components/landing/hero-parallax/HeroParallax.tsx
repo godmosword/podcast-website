@@ -14,8 +14,15 @@ import {
 export interface HeroParallaxProps {
   /** false 時凍結所有動畫（暫停、頁面隱藏、捲出視窗、按下進入）。 */
   running: boolean;
-  /** 路面與主角兩張 LCP 關鍵圖都載好之後呼叫一次。 */
+  /** 路面與主角兩張 LCP 關鍵圖都 settled（載好或失敗）之後呼叫一次。 */
   onReady?: () => void;
+  /**
+   * true 時所有圖片一律 `loading="lazy"`。首頁覆蓋層（ADR-0004）是 SSR 出來、由
+   * CSS 決定顯隱的：閘門關著時它 `display:none`，而 eager 的 `<img>` 就算沒有
+   * layout box 瀏覽器也照抓——那會讓明確表達「不要動畫／不要花流量」的人白白
+   * 下載 290KB。lazy 圖片沒有 box 就不載；閘門開著時它在視窗內，一樣立刻載。
+   */
+  deferImages?: boolean;
 }
 
 type LayerStyle = CSSProperties & { "--w": string; "--h": string; "--dur": string };
@@ -35,7 +42,7 @@ const layerStyle = (layer: ParallaxLayer): LayerStyle => ({
  * 只把「路面」與「主角」當成 ready 的條件：這兩張決定畫面能不能讀，其餘三層
  * 晚到只是背景慢慢補上。
  */
-export default function HeroParallax({ running, onReady }: HeroParallaxProps) {
+export default function HeroParallax({ running, onReady, deferImages = false }: HeroParallaxProps) {
   const [loaded, setLoaded] = useState({ road: false, hero: false });
   const announced = useRef(false);
 
@@ -49,12 +56,14 @@ export default function HeroParallax({ running, onReady }: HeroParallaxProps) {
     onReady?.();
   }, [loaded, onReady]);
 
-  // 圖片若已在快取裡，onLoad 可能在 React 掛上 handler 之前就發生；掛載後補查 complete。
+  // SSR 的 <img> 常在 React 掛上 handler 之前就 load 或 error 完（快取命中、或
+  // 404 秒回）；掛載後補查 `complete`。失敗也算 settled——破圖就是破圖，不能留一個
+  // 永遠等不到的 poster 狀態把出口卡住。
   const roadImg = useRef<HTMLImageElement>(null);
   const heroImg = useRef<HTMLImageElement>(null);
   useEffect(() => {
-    if (roadImg.current?.complete && roadImg.current.naturalWidth > 0) markLoaded("road");
-    if (heroImg.current?.complete && heroImg.current.naturalWidth > 0) markLoaded("hero");
+    if (roadImg.current?.complete) markLoaded("road");
+    if (heroImg.current?.complete) markLoaded("hero");
   }, [markLoaded]);
 
   const ready = loaded.road && loaded.hero;
@@ -76,9 +85,11 @@ export default function HeroParallax({ running, onReady }: HeroParallaxProps) {
                 height={layer.height}
                 alt=""
                 decoding="async"
-                // 路面是 LCP 的一部分，先抓；其餘三層與後兩份副本延後。
+                // 只有路面第一份是 eager＋high：它與主角決定畫面能不能讀。其餘 11 張
+                // 一律 lazy——實測全部 eager 會跟 hydration 的 JS chunk 搶頻寬，
+                // 使用者在 hydration 前點「略過」就變成原生導航。
                 fetchPriority={layer.id === "l3" && copy === 0 ? "high" : "low"}
-                loading={copy === 0 ? "eager" : "lazy"}
+                loading={!deferImages && layer.id === "l3" && copy === 0 ? "eager" : "lazy"}
                 onLoad={layer.id === "l3" && copy === 0 ? () => markLoaded("road") : undefined}
                 onError={layer.id === "l3" && copy === 0 ? () => markLoaded("road") : undefined}
               />
@@ -97,7 +108,8 @@ export default function HeroParallax({ running, onReady }: HeroParallaxProps) {
           height={PARALLAX_HERO_SPRITE.height}
           alt=""
           decoding="async"
-          fetchPriority="high"
+          fetchPriority={deferImages ? "auto" : "high"}
+          loading={deferImages ? "lazy" : "eager"}
           onLoad={() => markLoaded("hero")}
           onError={() => markLoaded("hero")}
         />

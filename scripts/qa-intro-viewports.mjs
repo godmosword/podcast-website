@@ -1,3 +1,6 @@
+// 2026-09-11：Intro 預設舞台已切為橫向 2.5D 視差帶（無 canvas、無 GLB）。這支腳本量的是
+// 3D 舞台的指標（DPR、frame time、GLB 傳輸），所以固定走 `?stage=world` 的回滾舞台。
+// 要量視差帶請直接用 e2e/intro-portal.spec.ts 的契約與 visual baseline。
 // Phase 12 的**模擬**部分：跨 viewport 版面、旋轉與網路條件。
 // 這支腳本跑在 headless Chromium（軟體算圖）上，**不能代替實體 iPhone／Android**；
 // SPEC §15.1 要求模擬結果獨立列，所以輸出的每一列都標了 engine 與 emulated:true。
@@ -70,7 +73,7 @@ for (const viewport of VIEWPORTS) {
     hasTouch: viewport.width <= 500,
   });
   const page = await context.newPage();
-  await page.goto(`${BASE}/intro`, { waitUntil: 'load' });
+  await page.goto(`${BASE}/intro?stage=world`, { waitUntil: 'load' });
   await page.waitForTimeout(400);
   const poster = await inspect(page);
   await page.screenshot({ path: join(OUT, `${viewport.name}-poster.png`) });
@@ -116,7 +119,7 @@ async function networkCase(name, prepare, { expectModels = true } = {}) {
   page.on('request', r => { if (/\.glb$/.test(r.url())) models.push(r.url()); });
   page.on('pageerror', e => errors.push(e.message));
   await prepare({ context, page });
-  await page.goto(`${BASE}/intro`, { waitUntil: 'domcontentloaded' }).catch(() => {});
+  await page.goto(`${BASE}/intro?stage=world`, { waitUntil: 'domcontentloaded' }).catch(() => {});
   await page.waitForTimeout(1_200);
   const early = await inspect(page);
   await page.waitForTimeout(expectModels ? 30_000 : 4_000);

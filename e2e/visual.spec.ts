@@ -473,27 +473,21 @@ test("visual：內頁不顯示 KidsPlayDock", async ({ page }) => {
 });
 
 /**
- * Intro 核心畫面 baseline：poster、ready、greeting 各自固定在批准的
- * desktop／mobile viewport。`heroQa=1` 讓 Vehicle 讀取注入的時間點，
- * 因此 ready 與 greeting 不依賴某一幀剛好落在截圖前；poster 則走
- * reduced-motion 的靜態路徑，保證不會因 900ms warm-up race 而誤拍 live scene。
+ * Intro 核心畫面 baseline。舞台是橫向 2.5D 視差帶（Phase 3b 起為預設）：走
+ * reduced-motion 讓四層 strip 停在 translateX(-33.333%) 的起點、主角不浮動，
+ * 畫面才是確定的。舊的 poster／ready／greeting 三態是 3D 舞台的東西，已隨
+ * 預設切換一併退役。
  */
 const INTRO_VISUAL_VIEWPORTS = [
   { width: 1440, height: 900, label: "1440x900" },
   { width: 390, height: 844, label: "390x844" },
 ] as const;
-const INTRO_VISUAL_STATES = ["poster", "ready", "greeting"] as const;
 
-/**
- * 橫向 2.5D 視差舞台（Phase 3，與 3D 舞台並存 A/B）。走 reduced-motion 讓四層
- * strip 停在 translateX(-33.333%) 的起點、主角不浮動，畫面才是確定的。
- * `?stage=parallax` 是 hydration 後才生效的覆寫，所以要等 data-stage 翻過來。
- */
 for (const viewport of INTRO_VISUAL_VIEWPORTS) {
   test(`visual：Intro ${viewport.label} parallax`, async ({ page }) => {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("/intro?stage=parallax");
+    await page.goto("/intro");
     await stabilizeVisualPage(page, { theme: "light" });
     const hero = page.locator("[data-hero-world]");
     await expect(hero).toHaveAttribute("data-stage", "parallax");
@@ -506,44 +500,4 @@ for (const viewport of INTRO_VISUAL_VIEWPORTS) {
       animations: "disabled",
     });
   });
-}
-
-for (const viewport of INTRO_VISUAL_VIEWPORTS) {
-  for (const state of INTRO_VISUAL_STATES) {
-    test(`visual：Intro ${viewport.label} ${state}`, async ({ page }) => {
-      await page.setViewportSize({ width: viewport.width, height: viewport.height });
-      if (state === "poster") {
-        await page.emulateMedia({ reducedMotion: "reduce" });
-      } else {
-        await page.emulateMedia({ reducedMotion: "no-preference" });
-        await page.addInitScript((seconds: number) => {
-          (window as unknown as { __HERO_WORLD_QA_TIME?: number }).__HERO_WORLD_QA_TIME = seconds;
-        }, state === "greeting" ? 5.55 : 0);
-      }
-
-      await page.goto(state === "poster" ? "/intro" : "/intro?heroQa=1");
-      await stabilizeVisualPage(page, { theme: "light" });
-      const hero = page.locator("[data-hero-world]");
-      if (state === "poster") {
-        await expect(hero).toHaveAttribute("data-scene-state", "poster");
-        await expect(hero.locator("canvas")).toHaveCount(0);
-      } else {
-        await expect(hero).toHaveAttribute("data-scene-state", "ready", { timeout: 20_000 });
-        await expect(hero).toHaveAttribute(
-          "data-motion-phase",
-          state === "greeting" ? "acknowledge" : "approach",
-          { timeout: 5_000 },
-        );
-        if (state === "greeting") await expect(hero).toHaveAttribute("data-greeting", "true");
-      }
-      await expect(page).toHaveScreenshot(
-        `intro-${state}-${viewport.label}-light.png`,
-        {
-          fullPage: false,
-          maxDiffPixelRatio: 0.02,
-          animations: "disabled",
-        },
-      );
-    });
-  }
 }

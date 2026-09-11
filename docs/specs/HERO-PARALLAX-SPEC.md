@@ -248,22 +248,39 @@ canon 已寫成單一來源 [`scripts/lib/character-sheet.ts`](../../scripts/lib
 |---|---|---|---|---|
 | **1. 角色設定書入庫** | ✅ **已落地（2026-09-09）**。與 canon 不衝突的部分寫成 SSOT，掛進 roamer prompt 與 `小紅賽車` `desc`；三項推翻 canon 的設定留待裁決（§2.5） | `scripts/lib/character-sheet.ts`、`scripts/generate-roamer-assets.ts`、`data/characters.json` | L2 | `npx vitest run scripts/lib/character-sheet.test.ts`＋`npm run verify:episodes` |
 | **2. Hero 車幾何補齊** | ✅ **已落地（2026-09-09）**。補車門白圓底號碼「2」＋微笑線加粗加寬＋修好車頭零件錨定（§0.4）；輪徑刻意不動（與 `config.ts` 的 `WHEEL_RADIUS` 耦合）。與 `npm run release:hero-world` 同一個 commit 落地，`buildScriptSha256` 一致。runbook 見 [`PHASE2-CANON-ALIGNMENT.md`](../../assets/blender/hero-world/PHASE2-CANON-ALIGNMENT.md) | `assets/blender/hero-world/build.py` | L3（Protected：改動 v3 發布鏈） | `npm run release:hero-world`（需 Blender CLI）＋ `npm run validate:hero-world` ＋ 視覺 baseline 重錄 |
-| **3. 橫向分層帶前端** | ✅ **已落地，與 3D 舞台並存 A/B（2026-09-11）**。`components/landing/hero-parallax/HeroParallax.tsx` 純 CSS transform 四層 strip ＋定點主角；HeroWorld 以 `HERO_STAGE`（`config.ts`）選舞台，預設仍是 `world`，`NEXT_PUBLIC_HERO_STAGE=parallax` 全站切換、`?stage=parallax` 本機看效果。切預設前要先改寫 intro-portal e2e 的 Phase 5／F 系列（約 20 個綁 WebGL 生命週期的測試），見 §5.1 | `components/landing/hero-parallax/*`、`hero-world/HeroWorld.tsx`、`hero-world/config.ts` | L3 | `layers.test.ts`（與 compose manifest 對帳）＋ `intro-parallax-*` visual baseline ＋ intro-portal e2e 全綠 |
+| **3. 橫向分層帶前端** | ✅ **已落地，與 3D 舞台並存 A/B（2026-09-11）**。`components/landing/hero-parallax/HeroParallax.tsx` 純 CSS transform 四層 strip ＋定點主角；HeroWorld 以 `HERO_STAGE`（`config.ts`）選舞台。**Phase 3b（同日）預設已切為 `parallax`**，e2e 契約改寫完成，見 §5.1；`world` 只剩回滾用途 | `components/landing/hero-parallax/*`、`hero-world/HeroWorld.tsx`、`hero-world/config.ts` | L3 | `layers.test.ts`（與 compose manifest 對帳）＋ `intro-parallax-*` visual baseline ＋ intro-portal e2e 全綠 |
 | **4. 分層素材產出** | ✅ **已落地（2026-09-10）**。四張零件表 → `npm run compose:parallax` 合成；L3 路面裁整數虛線週期＋預乘 alpha 淡接。prompts 與後製紀錄見 [`PHASE4-ASSET-PROMPTS.md`](../../assets/landing/hero-parallax/PHASE4-ASSET-PROMPTS.md) | `public/landing/hero-parallax/`、`scripts/compose-parallax-tiles.mjs` | L3 | `verify/*-seam.png` 目檢；`layers.test.ts` 守 manifest 尺寸 |
 
 Phase 3 若成立，現版 R3F／Three 依賴（`HeroScene`／`World`／`Vehicle`／`CameraRig`／`QualityManager`／`SceneLoader`）即可下架，是本改版最大的一筆效能與維護成本回收。**但在 Phase 4 素材到位前不得移除**，否則 `/intro` 無可用畫面。
 
-### 5.1 切換預設舞台前要做的事
+### 5.1 預設舞台已切為 parallax（2026-09-11，Phase 3b）
 
-視差舞台已可用，但預設仍是 `world`。原因不是視差帶沒做完，而是 `e2e/intro-portal.spec.ts` 有一整批測試綁在 3D 生命週期上，切預設會讓它們失去意義：
+`HERO_STAGE_DEFAULT` 現在是 `parallax`；`world` 只剩回滾用途（`NEXT_PUBLIC_HERO_STAGE=world` 整站、`?stage=world` 單頁）。
 
-- Phase 5「poster, fallback, and lifecycle」：WebGL 不可用、GLB 404、HTML 200 當 GLB、reduced motion 不下載 GLB、Save-Data 不掛 WebGL
-- F05／F09／F10／F11：模型載入 15s 逾時、隱藏 30s 不消耗動態預算、24s 後次要動態休眠、五次往返不漏 canvas／context
-- Phase 9 的「Enter during loading」「the route change disposes the canvas」
+`e2e/intro-portal.spec.ts` 已改寫為視差帶自己的契約，**不是把 3D 測試 skip 掉**：
 
-視差帶沒有這些失效面——它是四張靜態圖加 CSS，載不出來就是破圖，跟站上任何一張圖一樣。切預設時這批測試要**刪除或改寫成視差帶自己的契約**（reduced motion 停在靜態、暫停凍結動畫、`data-ready` 只看路面與主角兩張），不是改成 skip。
+| 舊契約（3D） | 處置 | 新契約（視差帶） |
+|---|---|---|
+| WebGL 不可用／context lost → fallback | 刪除 | **永遠不請求 WebGL context**（instrumentation 計數必須為 0，五次往返後仍為 0） |
+| GLB 404／HTML 200／截斷 → fallback | 刪除 | tile 404 不阻擋 ready 與出口（`onError` 一樣算完成） |
+| F05 模型載入 15s 逾時 | 刪除 | — |
+| reduced motion 不下載 GLB、無 canvas | 改寫 | reduced motion 是靜態圖：`animation-name: none`、無暫停鈕、不載入任何 three chunk |
+| runtime 切 reduced motion 卸載場景 | 改寫 | runtime 切換動畫停、暫停鈕消失；切回來動畫恢復 |
+| poster → ready → pause/resume | 改寫 | 路面＋主角載好即 ready；暫停 → `data-running=false` 且 `animation-play-state: paused` |
+| signature phases（approach…settled）| 刪除 | — |
+| F09 隱藏 30s 不消耗預算 | 改寫 | 隱藏 → strip 凍結；回前景 → 恢復且未進入睡眠 |
+| F10 24s 睡眠 | 保留 | 睡眠邏輯在 HeroWorld，視差帶同樣適用 |
+| F11 往返不漏 canvas／listener | 改寫 | 往返不漏 band／listener，WebGL 計數維持 0 |
+| stage geometry（stage 不溢出 hero） | 改寫 | band 的四邊都在 hero 框內、無水平捲動 |
+| 其餘（路由、進站、無障礙、視窗、覆蓋層） | 保留 | 等待條件從 `ready\|fallback` 改為 `ready` |
 
-同時要重錄 `intro-poster`／`intro-ready`／`intro-greeting` 六張 baseline（改成視差帶的畫面），並讓 `qa:hero-framing`、`qa:intro-viewports`、`measure:intro-performance` 三支 QA 腳本知道舞台切了。
+visual baseline：`intro-poster`／`intro-ready`／`intro-greeting` 六張退役，`intro-parallax-1440x900`／`390x844` 兩張成為 Intro 的核心畫面。
+
+三支量 3D 指標的 QA 腳本（`qa:intro-viewports`、`measure:intro-performance`、`capture-intro-polish`）固定走 `?stage=world`，因為它們量的是 DPR、frame time 與 GLB 傳輸——視差帶沒有這些。
+
+### 5.1.1 下一步：Phase 3c 下架 R3F／Three
+
+`world` 舞台現在只有單元測試守著，沒有 e2e。建議讓 parallax 上線幾天、確認實機沒問題後再下架：`HeroScene`／`World`／`Vehicle`／`CameraRig`／`QualityManager`／`SceneLoader`／`WorldEnvironment`、`three`／`@react-three/*` 依賴、`public/models/hero-world`、四支 hero-world 腳本與 `assets/blender`。這是本改版最大的效能與維護成本回收，也是不可逆的一步。
 
 ### 5.2 與 §4.4 的落差
 
@@ -304,6 +321,7 @@ Phase 3 若成立，現版 R3F／Three 依賴（`HeroScene`／`World`／`Vehicle
 
 | 日期 | 說明 |
 |---|---|
+| 2026-09-11 | **Phase 3b：預設舞台切為 parallax**。§5.1 改為契約對照表；新增 §5.1.1 Phase 3c 下架計畫 |
 | 2026-09-11 | **Phase 3 落地（A/B 並存）**：§5 Phase 3／4 列更新；新增 §5.1「切換預設舞台前要做的事」與 §5.2「與 §4.4 的落差」 |
 | 2026-09-09 | **Phase 2 落地**。§0.3 核對表改寫為落地後現況（行號、座標、色票全部重核），未處理項目改列獨立表格並各自附理由；新增 §0.4 記錄縮短車身造成的錨定破綻與教訓；§0.1 交付邊界、§5 Phase 2 列、§6「無 Blender CLI」與「canon 裁決未定」兩項阻擋同步更新 |
 | 2026-09-09 | **canon 裁決定案：follow 定裝照**（§2.5 的 C 案）。§2.1 改為以定裝照為準並作廢「大燈眼／黃條紋／星星天線」三項；§2.2／§0.3 基準改為 canon，Phase 2 範圍縮為三項；§2.4 與附錄檢查表同步；SSOT 正向加鎖 canon 臉部配置，負向加擋大燈眼／天線／黃條紋 |

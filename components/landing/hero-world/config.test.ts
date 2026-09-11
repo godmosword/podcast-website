@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chooseQuality, distanceAtProgress, driveProgress, greetingPose, lowerQuality, motionPhase, ROAD_START_ANGLE, ROAD_LENGTH, wheelAnimationTime, resolveHeroStage } from "./config";
+import { chooseQuality, distanceAtProgress, driveProgress, greetingPose, lowerQuality, motionPhase, ROAD_START_ANGLE, ROAD_LENGTH, wheelAnimationTime, HERO_STAGE_DEFAULT, resolveHeroStage } from "./config";
 
 describe("hero world quality and arrival timing", () => {
   it("selects a conservative tier from runtime capabilities", () => {
@@ -56,6 +56,10 @@ describe("resolveHeroStage", () => {
   it("沒有 ?stage 時回傳 build 預設", () => {
     expect(resolveHeroStage("", "world")).toBe("world");
     expect(resolveHeroStage("?heroQa=1", "parallax")).toBe("parallax");
+  });
+
+  it("build 預設是 parallax；world 只剩回滾用途", () => {
+    expect(HERO_STAGE_DEFAULT).toBe("parallax");
   });
 
   it("?stage=parallax／world 覆寫預設", () => {

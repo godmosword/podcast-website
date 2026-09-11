@@ -8,11 +8,15 @@ export const MODEL_PATH = "/models/hero-world/v3";
  * HeroWorld 外殼（文案、CTA、進站轉場、覆蓋層語意）只換舞台。
  *
  * 預設由 build 時的 NEXT_PUBLIC_HERO_STAGE 決定；`?stage=` 只是本機／preview
- * 看效果用的覆寫，不進 canonical。
+ * 看效果或回滾比對用的覆寫，不進 canonical。
  */
 export type HeroStage = "world" | "parallax";
+/**
+ * 2026-09-11 起預設 parallax。`world` 只剩回滾用途：NEXT_PUBLIC_HERO_STAGE=world
+ * 整站切回，`?stage=world` 單頁看。e2e 契約只守 parallax（規格 §5.1）。
+ */
 export const HERO_STAGE_DEFAULT: HeroStage =
-  process.env.NEXT_PUBLIC_HERO_STAGE === "parallax" ? "parallax" : "world";
+  process.env.NEXT_PUBLIC_HERO_STAGE === "world" ? "world" : "parallax";
 
 export function resolveHeroStage(search: string, fallback: HeroStage = HERO_STAGE_DEFAULT): HeroStage {
   const value = new URLSearchParams(search).get("stage");

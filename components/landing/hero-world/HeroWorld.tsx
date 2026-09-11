@@ -82,6 +82,9 @@ export default function HeroWorld({ mode = "page", onDismiss }: { mode?: HeroWor
   const [ready, setReady] = useState(false);
   const [quality, setQuality] = useState<Quality>("medium");
   const [paused, setPaused] = useState(false);
+  // 視差舞台專用：reduced motion 下沒有動態可暫停，暫停鈕要跟著消失。
+  // 3D 舞台不用這個——它在 reduced motion 下根本不會 ready。
+  const [reducedMotion, setReducedMotion] = useState(false);
   const [phase, setPhase] = useState<MotionPhase>("approach");
   const loadActiveMs = useRef(0);
   const sleepActiveMs = useRef(0);
@@ -120,6 +123,10 @@ export default function HeroWorld({ mode = "page", onDismiss }: { mode?: HeroWor
       setEligible(true);
       setFailed(false);
       setVisible(true);
+      const motion = matchMedia("(prefers-reduced-motion: reduce)");
+      const syncMotion = () => setReducedMotion(motion.matches);
+      syncMotion();
+      motion.addEventListener("change", syncMotion);
       const visibility = () => setPageVisible(!document.hidden);
       visibility();
       document.addEventListener("visibilitychange", visibility);
@@ -129,6 +136,7 @@ export default function HeroWorld({ mode = "page", onDismiss }: { mode?: HeroWor
       if (observer && root.current) observer.observe(root.current);
       return () => {
         observer?.disconnect();
+        motion.removeEventListener("change", syncMotion);
         document.removeEventListener("visibilitychange", visibility);
       };
     }
@@ -258,7 +266,7 @@ export default function HeroWorld({ mode = "page", onDismiss }: { mode?: HeroWor
         <p className={styles.description}>故事，就從這裡出發。</p>
       </div>
       {parallax ? (
-        <HeroParallax running={active} onReady={() => setReady(true)} />
+        <HeroParallax running={active} deferImages={overlay} onReady={() => setReady(true)} />
       ) : (
       <div className={styles.stage} aria-hidden="true" data-hero-stage>
         <picture className={styles.poster}>
@@ -278,7 +286,7 @@ export default function HeroWorld({ mode = "page", onDismiss }: { mode?: HeroWor
         {overlay
           ? <button type="button" className={styles.cta} data-intro-dismiss onClick={enter}>進入車車遊樂園 <span aria-hidden="true">→</span></button>
           : <Link href="/?enter=1" replace className={styles.cta} onClick={enter}>進入車車遊樂園 <span aria-hidden="true">→</span></Link>}
-        {ready && !failed && (parallax || quality !== "low") ? (
+        {ready && !failed && (parallax ? !reducedMotion : quality !== "low") ? (
           <button
             type="button"
             className={styles.pause}

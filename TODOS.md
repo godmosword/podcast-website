@@ -23,7 +23,7 @@
 ### pending
 
 - **後續（本輪不做）**：`.scrim` 左下 0.52 可調淡。
-- **Hero 橫向 2.5D 改版（規格已定；Phase 1／2／3／4 已落地，視差帶可用、預設仍是 3D）**：等距 diorama → 橫向視差帶；規格見 [Hero 橫向 2.5D 視差帶](./docs/specs/HERO-PARALLAX-SPEC.md)。四個 Phase、阻擋項與跨角色眼位決策（A/B/C）見該文 §5／§6／§2.5。`design · L · 需先決 §2.5`
+- **Hero 橫向 2.5D 改版（規格已定；Phase 1／2／3／3b／4 已落地，視差帶已是預設、3D 只剩回滾）**：等距 diorama → 橫向視差帶；規格見 [Hero 橫向 2.5D 視差帶](./docs/specs/HERO-PARALLAX-SPEC.md)。四個 Phase、阻擋項與跨角色眼位決策（A/B/C）見該文 §5／§6／§2.5。`design · L · 需先決 §2.5`
 - **後續：拿掉 CTA `nowrap`**：把 `LandingSegment.tsx` 的 `" →"` 半形空白改不斷行空白，箭頭才不會孤行；同時避開 <348px Dudu 遮箭頭、文字級 200% 被 `.panel` 裁尾。
 - **後續：勿靜默啟用 `playCta`**：`LandingSegment.tsx` 三元式會讓主 CTA 從 56px／`--fs-h2`／不透明墨板退回 44px／玻璃 `.subscribeCta`，契約測不會紅。啟用前須讓 `.subscribeCta` 脫離玻璃語言。
 
@@ -227,7 +227,7 @@ clip 快照在不同 macOS／Chromium 版本上的自然噪音底線。
 
 ### Hero 橫向 2.5D 改版（2026-09-09）
 
-> 規格：[`docs/specs/HERO-PARALLAX-SPEC.md`](./docs/specs/HERO-PARALLAX-SPEC.md)。Phase 1、2、3（A/B）、4 已落地；Phase 2b／2c／3b／3c 未開始。
+> 規格：[`docs/specs/HERO-PARALLAX-SPEC.md`](./docs/specs/HERO-PARALLAX-SPEC.md)。Phase 1、2、3、3b、4 已落地；Phase 2b／2c／3c 未開始。
 
 - [x] 規格 v1：診斷、角色設定書、六層分層規格、實作路徑、阻擋項  `見本 commit`
 - [x] Phase 1 角色設定書入庫：`scripts/lib/character-sheet.ts` SSOT ＋契約測試，掛進 roamer prompt 與 `小紅賽車` `desc`（未跑生圖；`desc` 不被 UI 渲染，零像素影響）  `見本 commit`
@@ -237,7 +237,7 @@ clip 快照在不同 macOS／Chromium 版本上的自然噪音底線。
 - [ ] Phase 2b 輪徑對車高比例收斂 — 另案：`WHEEL_RADIUS` 同時在 `build.py` 與 `config.ts:24`，是輪速與行進距離的換算基準，改動會連帶輪心高度、接地與取景
 - [x] Phase 4 六層 tile 素材：四張零件表以 ChatGPT Images 2.5 生成（L0 走 CSS、L4 沿用既有 roamer sprite），由 `npm run compose:parallax` 合成為可平鋪 tile。零件表在 `assets/landing/hero-parallax/props/`、產物在 `public/landing/hero-parallax/`、接縫對照圖在 `verify/`。L3 路面另做色彩校正（`#a47846` → `#cfb789`，對齊 Art Bible 步道色）＋整數虛線週期裁切＋預乘 alpha 交叉淡接，左右邊緣 RGBA 平均差 11.9 → 3.6  `見本 commit`
 - [x] Phase 3 橫向視差帶前端：`components/landing/hero-parallax/HeroParallax.tsx` 純 CSS transform、reduced-motion 退靜態、暫停凍結動畫；HeroWorld 以 `HERO_STAGE` 選舞台，**預設仍是 world**（A/B 並存）。`NEXT_PUBLIC_HERO_STAGE=parallax` 全站切、`?stage=parallax` 本機看。visual baseline `intro-parallax-1440x900`／`390x844`  `見本 commit`
-- [ ] Phase 3b 切預設舞台為 parallax：改寫 intro-portal e2e 的 Phase 5／F05–F11／Phase 9 綁 WebGL 的約 20 個測試、重錄 intro-poster／ready／greeting 六張 baseline、更新三支 QA 腳本。見規格 §5.1
+- [x] Phase 3b 切預設舞台為 parallax：intro-portal e2e 改寫為視差帶契約（刪 3D 失效面、新增「永不請求 WebGL context／不載 three chunk」）、退役 intro-poster／ready／greeting 六張 baseline、三支 3D 指標 QA 腳本固定走 `?stage=world`。對照表見規格 §5.1  `見本 commit`
 - [ ] Phase 3c 下架 R3F／Three（`HeroScene`／`World`／`Vehicle`／`CameraRig`／`QualityManager`／`SceneLoader`）——3b 之後才做，這是本改版最大的效能與維護成本回收
 
 > **核對出的五項落差**（實作前必讀，見規格 §0.2）：Hero 的車是 `build.py` 程序化建模不是生圖；微笑線存在只是太細；角色 Logo 系統已移除故該論證前提失效；缺 Do-NOT 的是 roamer 生圖管線不是 Hero；設定書的「大燈眼／黃條紋／星星天線」三項與定裝照 canon 牴觸——**已裁決 follow 定裝照，該三項作廢**。

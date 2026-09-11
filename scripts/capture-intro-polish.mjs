@@ -1,3 +1,6 @@
+// 2026-09-11：Intro 預設舞台已切為橫向 2.5D 視差帶（無 canvas、無 GLB）。這支腳本量的是
+// 3D 舞台的指標（DPR、frame time、GLB 傳輸），所以固定走 `?stage=world` 的回滾舞台。
+// 要量視差帶請直接用 e2e/intro-portal.spec.ts 的契約與 visual baseline。
 import { chromium } from 'playwright';
 import { mkdir, writeFile } from 'node:fs/promises';
 // --out=<dir> 讓同一支腳本可以拍 before／after 兩組對照；預設仍是原本的目錄。
@@ -15,7 +18,7 @@ for(const viewport of [{width:1440,height:900},{width:390,height:844}]) {
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  // Capture a decoded poster with WebGL deliberately disabled, never an empty request-in-flight image.
  await page.emulateMedia({reducedMotion:'reduce'});
- await page.goto('http://127.0.0.1:3000/intro?heroQa=1');
+ await page.goto('http://127.0.0.1:3000/intro?stage=world&heroQa=1');
  await page.evaluate(()=>document.fonts.ready);
  await page.locator('[data-hero-world] picture img').evaluate(img=>img.decode());
  await page.screenshot({path:`${output}/${name}-poster.png`});
@@ -56,7 +59,7 @@ for(const viewport of [{width:1440,height:900},{width:390,height:844}]) {
  const measure=await browser.newContext({viewport,serviceWorkers:'block'});
  await measure.addInitScript(()=>Object.defineProperty(navigator,'hardwareConcurrency',{get:()=>8}));
  const measurePage=await measure.newPage();
- await measurePage.goto('http://127.0.0.1:3000/intro');
+ await measurePage.goto('http://127.0.0.1:3000/intro?stage=world');
  await measurePage.waitForSelector('[data-scene-state="ready"]',{timeout:30_000});
  const sampled=await measurePage.waitForFunction(()=>document.querySelector('canvas')?.dataset.worldMetrics??null,null,{timeout:60_000,polling:250}).then(h=>h.jsonValue()).catch(()=>null);
  await measure.close();
