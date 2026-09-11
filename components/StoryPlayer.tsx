@@ -411,18 +411,12 @@ export default function StoryPlayer({
     return () => document.removeEventListener("keydown", onKey);
   }, [closeNightPrompt, showNightPrompt]);
 
-  function goTo(next: number) {
-    setPage(() => Math.max(0, Math.min(total - 1, next)));
-  }
-
   function prev() {
-    playSfx("flip");
-    goTo(page - 1);
+    skipIllustration(-1);
   }
 
   function next() {
-    playSfx("flip");
-    goTo(page + 1);
+    skipIllustration(1);
   }
 
   useEffect(() => {
@@ -521,8 +515,7 @@ export default function StoryPlayer({
         const si = activeCueIndex(subTimes, t, subTimes.length - 1);
         setSubIndex((prev) => (prev === si ? prev : si));
       }
-      if (!subtitlesOn) return;
-      // 翻頁定位。
+      // 插圖一律跟音檔時間走；「字幕」鈕只開關文字，不關掉跟讀。
       let target: number | null = null;
       if (hasCueTimes) {
         target = activeCueIndex(captionTimes!, t, total - 1);
@@ -544,6 +537,7 @@ export default function StoryPlayer({
     el.addEventListener("pause", handlePause);
     el.addEventListener("play", handlePlay);
     el.addEventListener("timeupdate", handleTimeUpdate);
+    el.addEventListener("seeked", handleTimeUpdate);
     el.addEventListener("canplay", handleCanPlay);
     el.addEventListener("loadstart", handleLoadStart);
 
@@ -552,6 +546,7 @@ export default function StoryPlayer({
       el.removeEventListener("pause", handlePause);
       el.removeEventListener("play", handlePlay);
       el.removeEventListener("timeupdate", handleTimeUpdate);
+      el.removeEventListener("seeked", handleTimeUpdate);
       el.removeEventListener("canplay", handleCanPlay);
       el.removeEventListener("loadstart", handleLoadStart);
     };
@@ -563,7 +558,6 @@ export default function StoryPlayer({
     recordPlayStart,
     repeat,
     subtitles,
-    subtitlesOn,
     total,
   ]);
 

@@ -113,6 +113,46 @@ test.describe("UX-P1-5 親子指南與播放頁觸控", () => {
       .toBe(20);
   });
 
+  test("關閉字幕後，音檔時間仍會換插圖", async ({ page }) => {
+    await page.goto("/story/ep-3/play");
+    await expect(
+      page.getByRole("button", { name: /^(播放|暫停)$/ }),
+    ).toBeVisible({ timeout: 10_000 });
+    await page.getByRole("button", { name: "字幕：開" }).click();
+    await expect(page.getByRole("button", { name: "字幕：關" })).toBeVisible();
+
+    const audio = page.locator("audio");
+    await audio.evaluate(async (el) => {
+      const media = el as HTMLAudioElement;
+      media.muted = true;
+      if (media.readyState < HTMLMediaElement.HAVE_METADATA) {
+        await new Promise<void>((resolve, reject) => {
+          media.addEventListener("loadedmetadata", () => resolve(), { once: true });
+          media.addEventListener("error", () => reject(new Error("audio error")), {
+            once: true,
+          });
+          media.load();
+        });
+      }
+      await new Promise<void>((resolve, reject) => {
+        const timeout = window.setTimeout(() => reject(new Error("seek timeout")), 10_000);
+        media.addEventListener(
+          "seeked",
+          () => {
+            window.clearTimeout(timeout);
+            resolve();
+          },
+          { once: true },
+        );
+        media.currentTime = 21;
+      });
+    });
+
+    await expect
+      .poll(() => page.locator('[aria-hidden="false"] img').getAttribute("alt"))
+      .toMatch(/第 2 頁/);
+  });
+
   test("睡前定時選單支援觸控尺寸、方向鍵、Esc 與提示焦點", async ({ page }) => {
     // 鎖定日間：system + UTC 睡前窗（19–06）會解析成夜晚，提示對話框不會出現。
     await page.addInitScript(() => {
