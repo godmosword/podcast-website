@@ -7,7 +7,7 @@
 
 ## 0. 一句話現況
 
-**視差帶已是首頁覆蓋層與 `/intro` 的預設舞台**（main `02c34151`）。3D 等距 diorama 只剩回滾用途。Phase 1／2／3／3b／4 全部落地；**Phase 3c（下架 R3F／Three）刻意沒做**，等實機看過再拉。
+**視差帶已是首頁覆蓋層與 `/intro` 的預設舞台**（main `e7be2852`，含 Astra 視覺審查後的文字安全區修正）。3D 等距 diorama 只剩回滾用途。Phase 1／2／3／3b／4 全部落地；**Phase 3c（下架 R3F／Three）刻意沒做**，等實機看過再拉。
 
 ---
 
@@ -43,7 +43,7 @@ components/landing/hero-world/config.ts
 
 | 層 | 檔案 | 守什麼 |
 |---|---|---|
-| e2e | `e2e/intro-portal.spec.ts`（57 tests，~10s） | 永不請求 WebGL context、不載 three chunk、reduced motion 是靜態圖且無暫停鈕、暫停＝`animation-play-state: paused`、F09／F10 active-time 預算、tile 404 不擋出口、覆蓋層閘門關著不下載 tile |
+| e2e | `e2e/intro-portal.spec.ts`（63 tests，~13s） | 永不請求 WebGL context、不載 three chunk、reduced motion 是靜態圖且無暫停鈕、暫停＝`animation-play-state: paused`、F09／F10 active-time 預算、tile 404 不擋出口、覆蓋層閘門關著不下載 tile、**文字安全區**（六個尺寸，文案／按鈕列在透明遮罩段內或在會動的層之上，與相位無關） |
 | visual | `e2e/visual.spec.ts` → `intro-parallax-1440x900-light`／`390x844` | reduced-motion 定格畫面 |
 | unit | `components/landing/hero-parallax/layers.test.ts` | `PARALLAX_LAYERS` 尺寸與 `public/landing/hero-parallax/manifest.json` 對帳；速度遞增；三份 tile 蓋得住 2560 |
 | unit | `components/landing/hero-world/config.test.ts` | `resolveHeroStage`、預設是 parallax |
@@ -92,6 +92,8 @@ public/adventures/roamers/xiao-hong.webp   主角 sprite，與地圖 roamer 共�
 - **`.band` 必須自成 stacking context**（`z-index: 1; isolation: isolate`）。沒有這行，層內 z-index 3／5 會壓過 HeroWorld 的 CTA（2）與略過（3）——實測整顆 CTA 消失。
 - **動畫用 `translateX(-33.333%)`** 而不是 px：百分比對自身寬，就不用在 `@keyframes` 裡讀 custom property（瀏覽器支援參差）。
 - **背景往右捲、主角面朝左。** 不鏡像 sprite——鏡像會把車門與引擎蓋的「2」變反。
+- **文字安全區靠 L1／L2 左側的透明漸層遮罩**（`--text-clear`／`--text-fade`），不是靠尺寸碰巧避開。數字是量出來的（1440 按鈕列右緣 26%、844 橫向 45%）；改按鈕文案或字級後要重跑「text safe zone」測試。視差舞台的 CTA 在副標正下方，不在 3D 的 bottom 23%。
+- **三條 hydration 競速測試**（skip 進站 ×2、覆蓋層焦點陷阱）等 `[data-hero-parallax][data-running="true"]` 再操作——那是 React effect 才會寫的訊號。server 冷啟動＋機器負載時不等會偶發原生導航。
 - 沒照規格 §4.4 把 Hero 改成 520–600px：`/intro` 與覆蓋層都是全螢幕，視差帶填滿 `100svh`。見規格 §5.2。
 
 ### 5.2 素材管線
