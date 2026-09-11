@@ -1,5 +1,12 @@
 [
   {
+    "slug": "ep-29",
+    "ep": 29,
+    "syncedAt": "2026-09-11T11:51:25.025Z",
+    "subtitleReady": true,
+    "status": "approved"
+  },
+  {
     "slug": "ep-26",
     "ep": 26,
     "syncedAt": "2026-08-19T00:00:00+08:00",

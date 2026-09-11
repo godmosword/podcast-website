@@ -1,0 +1,159 @@
+{
+  "slug": "ep-29",
+  "audioDuration": 505,
+  "model": "manual-image-cues",
+  "generatedAt": "2026-09-11T11:51:17.800Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 0,
+      "end": 12,
+      "summary": "我們一起出發去",
+      "prompt": "Podcast opening, hosts heading out together, warm cheerful studio mood",
+      "characters": []
+    },
+    {
+      "index": 2,
+      "start": 12,
+      "end": 28.5,
+      "summary": "我們呢最近有去宜蘭的林場那邊啊",
+      "prompt": "Hosts chatting about a recent trip to a Yilan forest lumber yard, sunny woodland mood",
+      "characters": []
+    },
+    {
+      "index": 3,
+      "start": 28.5,
+      "end": 54.4,
+      "summary": "搬木材",
+      "prompt": "A yellow logging truck at a forest lumber yard moving timber, curious child-friendly mood",
+      "characters": []
+    },
+    {
+      "index": 4,
+      "start": 54.4,
+      "end": 132.4,
+      "summary": "那我們今天呢就來講",
+      "prompt": "Story title moment for yellow dump truck Dahuang and his delivery mission",
+      "characters": [
+        "大黃"
+      ]
+    },
+    {
+      "index": 5,
+      "start": 132.4,
+      "end": 167.5,
+      "summary": "他說嘿嘿我的大車斗這麼大",
+      "prompt": "Proud yellow clay dump truck showing off a huge long cargo bed",
+      "characters": [
+        "大黃"
+      ]
+    },
+    {
+      "index": 6,
+      "start": 167.5,
+      "end": 182.9,
+      "summary": "第一根木頭來咯",
+      "prompt": "Yellow dump truck loading the first of six big logs into its bed",
+      "characters": [
+        "大黃"
+      ]
+    },
+    {
+      "index": 7,
+      "start": 182.9,
+      "end": 204.5,
+      "summary": "這時候呢東東挖土機經過了",
+      "prompt": "Yellow excavator Dongdong passing by and checking on overloaded dump truck Dahuang",
+      "characters": [
+        "大黃",
+        "東東挖土機"
+      ]
+    },
+    {
+      "index": 8,
+      "start": 204.5,
+      "end": 248.8,
+      "summary": "車身突然沉下去了一點",
+      "prompt": "Yellow dump truck body sinking a little under heavy logs, tyres squashing",
+      "characters": [
+        "大黃",
+        "東東挖土機"
+      ]
+    },
+    {
+      "index": 9,
+      "start": 248.8,
+      "end": 299.7,
+      "summary": "大黃呢發動了引擎",
+      "prompt": "Yellow dump truck starting its engine, straining to move with too many logs",
+      "characters": [
+        "大黃",
+        "東東挖土機"
+      ]
+    },
+    {
+      "index": 10,
+      "start": 299.7,
+      "end": 321.2,
+      "summary": "東東呢突然想到了說",
+      "prompt": "Yellow excavator Dongdong getting an idea to split the logs into two trips",
+      "characters": [
+        "大黃",
+        "東東挖土機"
+      ]
+    },
+    {
+      "index": 11,
+      "start": 321.2,
+      "end": 353.2,
+      "summary": "多跑一次沒有關係",
+      "prompt": "Kind orange crane truck grandfather saying an extra trip is okay",
+      "characters": [
+        "大黃",
+        "吊車老爺爺",
+        "東東挖土機"
+      ]
+    },
+    {
+      "index": 12,
+      "start": 353.2,
+      "end": 387.8,
+      "summary": "大黃呢帶著第一批木頭穩穩的送到了目的地",
+      "prompt": "Yellow dump truck steadily delivering the first batch of logs to the destination",
+      "characters": [
+        "大黃"
+      ]
+    },
+    {
+      "index": 13,
+      "start": 387.8,
+      "end": 426,
+      "summary": "從那天開始",
+      "prompt": "Yellow dump truck still working in the forest but carrying fewer logs at a time",
+      "characters": [
+        "大黃"
+      ]
+    },
+    {
+      "index": 14,
+      "start": 426,
+      "end": 449,
+      "summary": "小朋友過了好多年以後",
+      "prompt": "Many years later, retired yellow dump truck resting at a Yilan lumber yard",
+      "characters": [
+        "大黃"
+      ]
+    },
+    {
+      "index": 15,
+      "start": 449,
+      "end": 505,
+      "summary": "有沒有一臺",
+      "prompt": "A yellow dump truck with a long cargo bed parked at the Yilan forest lumber yard",
+      "characters": [
+        "大黃"
+      ]
+    }
+  ],
+  "newCharacters": []
+}

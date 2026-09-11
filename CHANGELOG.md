@@ -18,6 +18,7 @@
 
 ### Changed
 
+- **ep-29 全幕繪本上線**：《大黃卡車的運送任務》字幕校對 170→169 句並 `--mark`；依人工指定的 15 句時間戳切場景、放入自備插圖後 `--approve`（`pageCount`／`captionTimes`／`captions` 皆 15）。未走 OpenAI 生圖。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **角色圖鑑卡片收斂**：名稱與職責同一排；只保留「已認識」貼紙、拿掉「待認識」；出場集數改下拉選單並附 10 字內標題；頁面拿掉「關於角色圖鑑，家長常問」可見區塊（FAQ 仍留 JSON-LD）。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **Landing 換段改美術指引、拿掉實體箭點**：玻璃往下鈕會跟左下 CTA、右下嘟嘟搶同一條底列。改在 hero 裡放一枚極淡雙折線（不進文件流、不可點），鍵盤／AT 走捲動區方向鍵與平時隱藏的 skip。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、DuduCompanion。
 - **`/feedback` 送出鈕改暖深墨、拿掉空牆 CTA**：「我要留言」對齊 Landing CTA 色票（`--landing-brand-ink` 底板、`--on-dark` 白字），不再用橘色實心。空牆只留「大家的留言」標題，刪除「當第一個留言」。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、法律頁政策版本。
