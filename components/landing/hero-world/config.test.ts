@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chooseQuality, distanceAtProgress, driveProgress, greetingPose, lowerQuality, motionPhase, ROAD_START_ANGLE, ROAD_LENGTH, wheelAnimationTime } from "./config";
+import { chooseQuality, distanceAtProgress, driveProgress, greetingPose, lowerQuality, motionPhase, ROAD_START_ANGLE, ROAD_LENGTH, wheelAnimationTime, resolveHeroStage } from "./config";
 
 describe("hero world quality and arrival timing", () => {
   it("selects a conservative tier from runtime capabilities", () => {
@@ -49,5 +49,23 @@ describe("hero world quality and arrival timing", () => {
     expect(greetingPose(4.6).greeting).toBe(false);
     expect(greetingPose(5.2).greeting).toBe(true);
     expect(greetingPose(6.2).greeting).toBe(false);
+  });
+});
+
+describe("resolveHeroStage", () => {
+  it("沒有 ?stage 時回傳 build 預設", () => {
+    expect(resolveHeroStage("", "world")).toBe("world");
+    expect(resolveHeroStage("?heroQa=1", "parallax")).toBe("parallax");
+  });
+
+  it("?stage=parallax／world 覆寫預設", () => {
+    expect(resolveHeroStage("?stage=parallax", "world")).toBe("parallax");
+    expect(resolveHeroStage("?stage=world", "parallax")).toBe("world");
+    expect(resolveHeroStage("?heroQa=1&stage=parallax", "world")).toBe("parallax");
+  });
+
+  it("不認識的值不會讓舞台變成 undefined", () => {
+    expect(resolveHeroStage("?stage=3d", "world")).toBe("world");
+    expect(resolveHeroStage("?stage=", "parallax")).toBe("parallax");
   });
 });

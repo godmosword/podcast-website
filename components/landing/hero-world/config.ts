@@ -1,6 +1,23 @@
 export type Quality = "high" | "medium" | "low";
 // Complete Phase 8 release; v1 and v2 remain available for rollback.
 export const MODEL_PATH = "/models/hero-world/v3";
+
+/**
+ * Hero 舞台：`world` 是現行 R3F 等距 diorama，`parallax` 是橫向 2.5D 視差帶
+ * （docs/specs/HERO-PARALLAX-SPEC.md Phase 3）。兩者並存做 A/B（§5），同一份
+ * HeroWorld 外殼（文案、CTA、進站轉場、覆蓋層語意）只換舞台。
+ *
+ * 預設由 build 時的 NEXT_PUBLIC_HERO_STAGE 決定；`?stage=` 只是本機／preview
+ * 看效果用的覆寫，不進 canonical。
+ */
+export type HeroStage = "world" | "parallax";
+export const HERO_STAGE_DEFAULT: HeroStage =
+  process.env.NEXT_PUBLIC_HERO_STAGE === "parallax" ? "parallax" : "world";
+
+export function resolveHeroStage(search: string, fallback: HeroStage = HERO_STAGE_DEFAULT): HeroStage {
+  const value = new URLSearchParams(search).get("stage");
+  return value === "parallax" || value === "world" ? value : fallback;
+}
 export const QUALITY = {
   // shadowMap 只在 high 有意義（另兩階不投影），2048 讓屋簷與車底的陰影邊緣
   // 不再是階梯狀——1024 在 1.5 DPR 下看得出鋸齒。

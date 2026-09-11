@@ -484,6 +484,30 @@ const INTRO_VISUAL_VIEWPORTS = [
 ] as const;
 const INTRO_VISUAL_STATES = ["poster", "ready", "greeting"] as const;
 
+/**
+ * 橫向 2.5D 視差舞台（Phase 3，與 3D 舞台並存 A/B）。走 reduced-motion 讓四層
+ * strip 停在 translateX(-33.333%) 的起點、主角不浮動，畫面才是確定的。
+ * `?stage=parallax` 是 hydration 後才生效的覆寫，所以要等 data-stage 翻過來。
+ */
+for (const viewport of INTRO_VISUAL_VIEWPORTS) {
+  test(`visual：Intro ${viewport.label} parallax`, async ({ page }) => {
+    await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/intro?stage=parallax");
+    await stabilizeVisualPage(page, { theme: "light" });
+    const hero = page.locator("[data-hero-world]");
+    await expect(hero).toHaveAttribute("data-stage", "parallax");
+    await expect(hero.locator("[data-hero-parallax]")).toHaveAttribute("data-ready", "true", { timeout: 15_000 });
+    await expect(hero).toHaveAttribute("data-scene-state", "ready");
+    await expect(hero.locator("canvas")).toHaveCount(0);
+    await expect(page).toHaveScreenshot(`intro-parallax-${viewport.label}-light.png`, {
+      fullPage: false,
+      maxDiffPixelRatio: 0.02,
+      animations: "disabled",
+    });
+  });
+}
+
 for (const viewport of INTRO_VISUAL_VIEWPORTS) {
   for (const state of INTRO_VISUAL_STATES) {
     test(`visual：Intro ${viewport.label} ${state}`, async ({ page }) => {

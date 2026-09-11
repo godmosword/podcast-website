@@ -4,7 +4,8 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Component, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { MODEL_PATH, chooseQuality, type MotionPhase, type Quality } from "./config";
+import { HERO_STAGE_DEFAULT, MODEL_PATH, chooseQuality, resolveHeroStage, type HeroStage, type MotionPhase, type Quality } from "./config";
+import HeroParallax from "../hero-parallax/HeroParallax";
 import styles from "./HeroWorld.module.css";
 import { getActiveClock, LOAD_TIMEOUT_MS, MAX_TICK_DELTA_MS, SLEEP_AFTER_MS, TICK_MS } from "./active-clock";
 import { EXIT_TRANSITION_MS, TRANSITION_RESET_MS, markEnterIntent, resolveEnterAction } from "./enter-transition";
@@ -38,6 +39,18 @@ export function canUseWebGL(): boolean {
   }
 }
 
+/**
+ * 舞台選擇。SSR 與首次繪製用 build 預設，hydration 後才讀 `?stage=` 覆寫——
+ * 這樣不會有 hydration 落差，代價是覆寫時舞台會在掛載後才切換，本機看效果可接受。
+ */
+function useHeroStage(): HeroStage {
+  const [stage, setStage] = useState<HeroStage>(HERO_STAGE_DEFAULT);
+  useEffect(() => {
+    setStage(resolveHeroStage(window.location.search));
+  }, []);
+  return stage;
+}
+
 export type HeroWorldMode = "page" | "overlay";
 
 /**
@@ -47,6 +60,8 @@ export type HeroWorldMode = "page" | "overlay";
  */
 export default function HeroWorld({ mode = "page", onDismiss }: { mode?: HeroWorldMode; onDismiss?: () => void } = {}) {
   const overlay = mode === "overlay";
+  const stage = useHeroStage();
+  const parallax = stage === "parallax";
   const router = useRouter();
   const [entering, setEntering] = useState(false);
   const [greeting, setGreeting] = useState(false);
@@ -99,6 +114,24 @@ export default function HeroWorld({ mode = "page", onDismiss }: { mode?: HeroWor
 
 
   useEffect(() => {
+    // 視差帶沒有 WebGL 可以失敗、沒有模型可以下載：reduced motion 由 CSS 直接
+    // 退成靜態圖（規格 §4.5），所以整套資格判定都不適用，直接視為可用。
+    if (parallax) {
+      setEligible(true);
+      setFailed(false);
+      setVisible(true);
+      const visibility = () => setPageVisible(!document.hidden);
+      visibility();
+      document.addEventListener("visibilitychange", visibility);
+      const observer = "IntersectionObserver" in window
+        ? new IntersectionObserver(([entry]) => setVisible(entry?.isIntersecting ?? true), { threshold: .05 })
+        : null;
+      if (observer && root.current) observer.observe(root.current);
+      return () => {
+        observer?.disconnect();
+        document.removeEventListener("visibilitychange", visibility);
+      };
+    }
     const motion = matchMedia("(prefers-reduced-motion: reduce)");
     const nav = navigator as Navigator & { deviceMemory?: number; connection?: Connection };
     const connection = nav.connection;
@@ -139,7 +172,7 @@ export default function HeroWorld({ mode = "page", onDismiss }: { mode?: HeroWor
       window.removeEventListener("offline", online);
       document.removeEventListener("visibilitychange", visibility);
     };
-  }, []);
+  }, [parallax]);
 
   // 上限避免慢速／卡住的模型讓空白 canvas 長期蓋住備用圖。只累計
   // active time；切到背景分頁時不把瀏覽器的 wall-clock 暫停算進來。
@@ -151,7 +184,7 @@ export default function HeroWorld({ mode = "page", onDismiss }: { mode?: HeroWor
   }, [eligible, ready, failed]);
 
   useEffect(() => {
-    if (!eligible || !visible || ready || failed) return;
+    if (parallax || !eligible || !visible || ready || failed) return;
     const clock = getActiveClock();
     let previous = clock.now();
     const timeout = clock.setInterval(() => {
@@ -162,7 +195,9 @@ export default function HeroWorld({ mode = "page", onDismiss }: { mode?: HeroWor
       if (loadActiveMs.current >= LOAD_TIMEOUT_MS) setFailed(true);
     }, TICK_MS);
     return () => clock.clearInterval(timeout);
-  }, [eligible, visible, ready, failed, pageVisible]);
+  }, [parallax, eligible, visible, ready, failed, pageVisible]);
+
+  useEffect(() => { setReady(false); }, [stage]);
 
   const mounted = eligible && !failed && (visible || ready);
   const active = visible && pageVisible && !paused && !exited;
@@ -212,6 +247,7 @@ export default function HeroWorld({ mode = "page", onDismiss }: { mode?: HeroWor
       <section ref={root} className={styles.hero}
       {...(overlay ? { "aria-label": "車車遊樂園開場" } : { "aria-labelledby": "intro-title" })} data-hero-world
       style={{ "--exit-transition-ms": `${EXIT_TRANSITION_MS}ms` } as React.CSSProperties}
+      data-stage={stage}
       data-scene-state={failed ? "fallback" : ready && eligible ? "ready" : "poster"}
       data-scene-active={mounted && active} data-entering={entering} data-greeting={greeting} data-motion-phase={phase}>
       <div className={styles.copy}>
@@ -221,6 +257,9 @@ export default function HeroWorld({ mode = "page", onDismiss }: { mode?: HeroWor
           : <h1 id="intro-title" className={styles.title}>車車遊樂園</h1>}
         <p className={styles.description}>故事，就從這裡出發。</p>
       </div>
+      {parallax ? (
+        <HeroParallax running={active} onReady={() => setReady(true)} />
+      ) : (
       <div className={styles.stage} aria-hidden="true" data-hero-stage>
         <picture className={styles.poster}>
           <source media="(max-width: 768px)" srcSet={`${MODEL_PATH}/poster-mobile.webp`} type="image/webp" />
@@ -234,11 +273,12 @@ export default function HeroWorld({ mode = "page", onDismiss }: { mode?: HeroWor
           </SceneBoundary>
         </div> : null}
       </div>
+      )}
       <div className={styles.actions}>
         {overlay
           ? <button type="button" className={styles.cta} data-intro-dismiss onClick={enter}>進入車車遊樂園 <span aria-hidden="true">→</span></button>
           : <Link href="/?enter=1" replace className={styles.cta} onClick={enter}>進入車車遊樂園 <span aria-hidden="true">→</span></Link>}
-        {ready && !failed && quality !== "low" ? (
+        {ready && !failed && (parallax || quality !== "low") ? (
           <button
             type="button"
             className={styles.pause}

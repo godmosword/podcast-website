@@ -248,10 +248,26 @@ canon 已寫成單一來源 [`scripts/lib/character-sheet.ts`](../../scripts/lib
 |---|---|---|---|---|
 | **1. 角色設定書入庫** | ✅ **已落地（2026-09-09）**。與 canon 不衝突的部分寫成 SSOT，掛進 roamer prompt 與 `小紅賽車` `desc`；三項推翻 canon 的設定留待裁決（§2.5） | `scripts/lib/character-sheet.ts`、`scripts/generate-roamer-assets.ts`、`data/characters.json` | L2 | `npx vitest run scripts/lib/character-sheet.test.ts`＋`npm run verify:episodes` |
 | **2. Hero 車幾何補齊** | ✅ **已落地（2026-09-09）**。補車門白圓底號碼「2」＋微笑線加粗加寬＋修好車頭零件錨定（§0.4）；輪徑刻意不動（與 `config.ts` 的 `WHEEL_RADIUS` 耦合）。與 `npm run release:hero-world` 同一個 commit 落地，`buildScriptSha256` 一致。runbook 見 [`PHASE2-CANON-ALIGNMENT.md`](../../assets/blender/hero-world/PHASE2-CANON-ALIGNMENT.md) | `assets/blender/hero-world/build.py` | L3（Protected：改動 v3 發布鏈） | `npm run release:hero-world`（需 Blender CLI）＋ `npm run validate:hero-world` ＋ 視覺 baseline 重錄 |
-| **3. 橫向分層帶前端** | 新增 `components/landing/hero-parallax/`，六層 `transform` 視差；`/intro` 改用之或並存 A/B | `components/landing/hero-parallax/*`、`app/intro/` | L3（UI 風險：`transform`／`animation`／`prefers-reduced-motion` 強制 Opus 設計審） | `npm run test:visual:trusted`＋`npm run test:e2e`＋`npm run build` |
-| **4. 分層素材產出** | 六層 tile 出圖與接縫驗證 | `public/landing/hero-parallax/` | L3（付費生圖，需逐張人工審） | 人工審 contact sheet；接縫左右對接目檢 |
+| **3. 橫向分層帶前端** | ✅ **已落地，與 3D 舞台並存 A/B（2026-09-11）**。`components/landing/hero-parallax/HeroParallax.tsx` 純 CSS transform 四層 strip ＋定點主角；HeroWorld 以 `HERO_STAGE`（`config.ts`）選舞台，預設仍是 `world`，`NEXT_PUBLIC_HERO_STAGE=parallax` 全站切換、`?stage=parallax` 本機看效果。切預設前要先改寫 intro-portal e2e 的 Phase 5／F 系列（約 20 個綁 WebGL 生命週期的測試），見 §5.1 | `components/landing/hero-parallax/*`、`hero-world/HeroWorld.tsx`、`hero-world/config.ts` | L3 | `layers.test.ts`（與 compose manifest 對帳）＋ `intro-parallax-*` visual baseline ＋ intro-portal e2e 全綠 |
+| **4. 分層素材產出** | ✅ **已落地（2026-09-10）**。四張零件表 → `npm run compose:parallax` 合成；L3 路面裁整數虛線週期＋預乘 alpha 淡接。prompts 與後製紀錄見 [`PHASE4-ASSET-PROMPTS.md`](../../assets/landing/hero-parallax/PHASE4-ASSET-PROMPTS.md) | `public/landing/hero-parallax/`、`scripts/compose-parallax-tiles.mjs` | L3 | `verify/*-seam.png` 目檢；`layers.test.ts` 守 manifest 尺寸 |
 
 Phase 3 若成立，現版 R3F／Three 依賴（`HeroScene`／`World`／`Vehicle`／`CameraRig`／`QualityManager`／`SceneLoader`）即可下架，是本改版最大的一筆效能與維護成本回收。**但在 Phase 4 素材到位前不得移除**，否則 `/intro` 無可用畫面。
+
+### 5.1 切換預設舞台前要做的事
+
+視差舞台已可用，但預設仍是 `world`。原因不是視差帶沒做完，而是 `e2e/intro-portal.spec.ts` 有一整批測試綁在 3D 生命週期上，切預設會讓它們失去意義：
+
+- Phase 5「poster, fallback, and lifecycle」：WebGL 不可用、GLB 404、HTML 200 當 GLB、reduced motion 不下載 GLB、Save-Data 不掛 WebGL
+- F05／F09／F10／F11：模型載入 15s 逾時、隱藏 30s 不消耗動態預算、24s 後次要動態休眠、五次往返不漏 canvas／context
+- Phase 9 的「Enter during loading」「the route change disposes the canvas」
+
+視差帶沒有這些失效面——它是四張靜態圖加 CSS，載不出來就是破圖，跟站上任何一張圖一樣。切預設時這批測試要**刪除或改寫成視差帶自己的契約**（reduced motion 停在靜態、暫停凍結動畫、`data-ready` 只看路面與主角兩張），不是改成 skip。
+
+同時要重錄 `intro-poster`／`intro-ready`／`intro-greeting` 六張 baseline（改成視差帶的畫面），並讓 `qa:hero-framing`、`qa:intro-viewports`、`measure:intro-performance` 三支 QA 腳本知道舞台切了。
+
+### 5.2 與 §4.4 的落差
+
+§4.4 寫 Hero 高度改為桌機 520–600px。**沒有照做**：`/intro` 與首頁覆蓋層（ADR-0004）都是全螢幕，視差帶改成填滿 `100svh` 的 `.hero`。520–600px 是把 Hero 當頁面區塊時的數字，跟「開場覆蓋層」這個產品決定衝突。文字安全區與地平線比例（62%）照 §4.4，只是換算基準是視窗高而不是固定高。
 
 ---
 
@@ -288,6 +304,7 @@ Phase 3 若成立，現版 R3F／Three 依賴（`HeroScene`／`World`／`Vehicle
 
 | 日期 | 說明 |
 |---|---|
+| 2026-09-11 | **Phase 3 落地（A/B 並存）**：§5 Phase 3／4 列更新；新增 §5.1「切換預設舞台前要做的事」與 §5.2「與 §4.4 的落差」 |
 | 2026-09-09 | **Phase 2 落地**。§0.3 核對表改寫為落地後現況（行號、座標、色票全部重核），未處理項目改列獨立表格並各自附理由；新增 §0.4 記錄縮短車身造成的錨定破綻與教訓；§0.1 交付邊界、§5 Phase 2 列、§6「無 Blender CLI」與「canon 裁決未定」兩項阻擋同步更新 |
 | 2026-09-09 | **canon 裁決定案：follow 定裝照**（§2.5 的 C 案）。§2.1 改為以定裝照為準並作廢「大燈眼／黃條紋／星星天線」三項；§2.2／§0.3 基準改為 canon，Phase 2 範圍縮為三項；§2.4 與附錄檢查表同步；SSOT 正向加鎖 canon 臉部配置，負向加擋大燈眼／天線／黃條紋 |
 | 2026-09-09 | Phase 1 落地：新增 `scripts/lib/character-sheet.ts` SSOT ＋契約測試，掛進 roamer prompt 與 `小紅賽車` `desc`。核對定裝照後新增第 5 項落差（設定書三項與既有 canon 牴觸），§2.5 改寫為「已落地／待裁決」兩段 |

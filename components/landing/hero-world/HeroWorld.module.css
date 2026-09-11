@@ -60,6 +60,9 @@
   .actions { left: 5%; right: auto; bottom: 22%; }
   .skip { left: 5%; right: auto; transform: none; bottom: 3%; }
 }
+/* 視差舞台的近景層會捲到略過鍵底下；壓在影像上的 chrome 必須有自身底色（DESIGN.md Depth）。 */
+.hero[data-stage="parallax"] .skip { background: rgba(250, 241, 228, .88); border-radius: 999px; }
+
 @media (prefers-reduced-motion: reduce) {
   .canvas, .cta, .hero::after { transition: none; }
   .hero[data-entering="true"] .canvas,

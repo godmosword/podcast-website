@@ -11,7 +11,7 @@
  * 無縫是靠構造保證而不是靠模型。
  *
  * L3 路面是唯一沒有空白緩衝的層（它必須連續），所以另外走三道處理：
- *   1. 色彩校正到 Art Bible 的步道色；
+ *   1. （可選）色彩校正到 Art Bible 的步道色，現行裁決為不校正；
  *   2. 裁成「間隙中點起算、整數個虛線週期」，否則首尾兩截半條虛線會併成雙倍長；
  *   3. 一個週期寬的預乘 alpha 交叉淡接，消掉手捏草皮上緣的輪廓階差。
  *
@@ -52,7 +52,11 @@ const LAYERS = {
 
 /**
  * L3 路面的目標色。`#d7c596` 是 UNIVERSE-ART-BIBLE.md §4 的步道色，也是既有
- * 宇宙地圖用的同一個色票；生圖給的是 `#a47846`，明顯更深更橘，與站上其他素材不同調。
+ * 宇宙地圖用的同一個色票；生圖給的是 `#a47846`，更深更橘。
+ *
+ * 2026-09-11 維護者裁決：**保留生圖原色，不校正。** 校正後路面偏淡，虛線對比跟著降，
+ * 原色自己看更有份量。視差帶是獨立畫面，與地圖步道不同調可以接受。
+ * 機制保留，把 RECOLOUR_STRENGTH 調回 0.78 就能重新對齊色票。
  */
 const ROAD_TARGET = { r: 0xd7, g: 0xc5, b: 0x96 };
 
@@ -97,9 +101,10 @@ const isRoadPixel = (r, g, b) => r > g && g > b && r - b > 40;
  */
 const HUE_WINDOW = 0.03;
 /**
- * 校正強度。1 = 完全對齊 ROAD_TARGET，實測會把質感洗得太平；0.78 保住手捏起伏。
+ * 校正強度。0 = 不校正（現行裁決）；1 = 完全對齊 ROAD_TARGET，實測會把質感洗得太平；
+ * 0.78 是對齊色票時保住手捏起伏的值。
  */
-const RECOLOUR_STRENGTH = 0.78;
+const RECOLOUR_STRENGTH = 0;
 
 /**
  * 把路面色移到 `ROAD_TARGET`。在 HSL 空間做，而不是直接乘增益——實測線性增益會
@@ -107,6 +112,8 @@ const RECOLOUR_STRENGTH = 0.78;
  * 位移量在亮部逐漸收斂以避免削頂。
  */
 function recolourRoad(data, width, height) {
+  // 強度 0 就完全不碰像素：HSL 來回轉換會帶 ±1 的捨入誤差，沒必要吃。
+  if (RECOLOUR_STRENGTH <= 0) return { moved: 0, skipped: true };
   let hs = 0, ss = 0, ls = 0, n = 0;
   for (let i = 0; i < width * height; i++) {
     if (data[i * 4 + 3] < 250) continue;
@@ -277,23 +284,25 @@ async function buildRoad() {
   const periods = Math.floor((width - cutStart) / period);
   const cutWidth = Math.round(periods * period);
 
+  // 同時裁到內容高度：原圖上下各有一大片透空，前端排版要的是路面本身的高度。
+  const roadTop = bounds.top, roadHeight = bounds.bottom - bounds.top + 1;
   const cropped = await sharp(data, { raw: { width, height, channels: 4 } })
-    .extract({ left: cutStart, top: 0, width: cutWidth, height })
+    .extract({ left: cutStart, top: roadTop, width: cutWidth, height: roadHeight })
     .raw().toBuffer({ resolveWithObject: true });
 
   // 淡接寬 = 剛好一個週期，混色區間內的虛線相位才對得上。
   const fade = Math.round(period);
-  const faded = crossFade(cropped.data, cutWidth, height, fade);
+  const faded = crossFade(cropped.data, cutWidth, roadHeight, fade);
 
   const outFile = path.join(OUT, "l3-road.webp");
-  await sharp(faded.buffer, { raw: { width: faded.width, height, channels: 4 } })
+  await sharp(faded.buffer, { raw: { width: faded.width, height: roadHeight, channels: 4 } })
     .webp({ quality: 92, alphaQuality: 100 }).toFile(outFile);
 
   return {
-    layer: "L3", file: outFile, width: faded.width, height,
+    layer: "L3", file: outFile, width: faded.width, height: roadHeight,
     period: period.toFixed(1), periods: periods - 1, cutStart, fade,
     recoloured: colour.moved,
-    edgeDelta: edgeDelta(faded.buffer, faded.width, height),
+    edgeDelta: edgeDelta(faded.buffer, faded.width, roadHeight),
   };
 }
 

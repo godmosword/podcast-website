@@ -12,12 +12,12 @@
       "layer": "L3",
       "file": "public/landing/hero-parallax/l3-road.webp",
       "width": 1630,
-      "height": 724,
+      "height": 237,
       "dashPeriod": "163.0",
       "fade": 163,
       "edgeDelta": {
-        "mean": 3.6,
-        "max": 256
+        "mean": 11.2,
+        "max": 207
       }
     },
     {
