@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import {
+  FEEDBACK_HERO_ALT,
   FEEDBACK_INVITE_CHILD,
   FEEDBACK_ERROR,
   FEEDBACK_MAILTO_LINK,
@@ -39,9 +40,11 @@ test.describe("站內留言牆 /feedback", () => {
     expect(html).toContain('name="startedAt"');
 
     await expect(page).toHaveURL(/\/feedback$/);
+    expect(html).toContain("/feedback/hero.avif");
     await expect(
       page.getByRole("heading", { name: FEEDBACK_PAGE_TITLE, level: 1 }),
     ).toBeVisible();
+    await expect(page.getByRole("img", { name: FEEDBACK_HERO_ALT })).toBeVisible();
     await expect(page.getByRole("heading", { name: "寫給馬米", level: 2 })).toHaveCount(0);
     await expect(page.getByText("寫下想聽的故事再送出。")).toHaveCount(0);
     await expect(page.getByText(FEEDBACK_INVITE_CHILD)).toBeVisible();

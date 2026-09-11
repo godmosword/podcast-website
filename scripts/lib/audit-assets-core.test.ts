@@ -29,6 +29,8 @@ describe("audit-assets-core (D0)", () => {
     expect(paths).toContain(storyCoverPath(first.slug).replace(/\.jpe?g$/i, ".avif"));
     expect(paths).toContain("/landing/segment-stories.jpg");
     expect(paths).toContain("/hero-home.jpg");
+    expect(paths).toContain("/feedback/hero.jpg");
+    expect(paths).toContain("/feedback/hero.avif");
   });
 
   it("部署資產含 git tracked 的 public 圖片", () => {

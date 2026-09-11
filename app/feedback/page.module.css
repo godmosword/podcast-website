@@ -50,6 +50,30 @@
   margin-bottom: var(--space-6);
 }
 
+.coverWrap {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto var(--space-6);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.coverWrap picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.cover {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .title {
   margin: 0 0 var(--space-3);
   font-size: var(--fs-h1);

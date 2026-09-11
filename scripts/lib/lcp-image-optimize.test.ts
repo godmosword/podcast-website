@@ -14,6 +14,9 @@ describe("listLcpJpgTargets", () => {
     const publicDir = join(process.cwd(), "public");
     const targets = listLcpJpgTargets(publicDir);
     expect(targets.some((p) => p.endsWith("hero-home.jpg"))).toBe(true);
+    expect(targets.some((p) => p.endsWith(`${join("feedback", "hero.jpg")}`))).toBe(
+      true,
+    );
     expect(targets.some((p) => p.includes("segment-stories"))).toBe(true);
     expect(targets.some((p) => p.endsWith(`${join("stories", "ep-3", "01.jpg")}`))).toBe(
       true,
@@ -44,6 +47,11 @@ describe("verifyModernSiblings / writeModernSiblings", () => {
 
   it("ep-27 封面有 AVIF／WebP（播放頁 picture 不會 404）", async () => {
     const jpg = join(process.cwd(), "public", "stories", "ep-27", "01.jpg");
+    expect(await verifyModernSiblings(jpg)).toBe(true);
+  });
+
+  it("留言牆首圖有 AVIF／WebP", async () => {
+    const jpg = join(process.cwd(), "public", "feedback", "hero.jpg");
     expect(await verifyModernSiblings(jpg)).toBe(true);
   });
 });

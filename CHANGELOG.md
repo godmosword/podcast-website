@@ -18,6 +18,7 @@
 
 ### Changed
 
+- **`/feedback` 標題前放客廳錄音室首圖**：馬米與 Bonbon 揮手黏土圖作為頁面 hero（`/feedback/hero.jpg`＋WebP／AVIF），不畫對話泡泡、不引用角色名冊。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、表單契約與法律頁政策版本。
 - **Intro 預設舞台切為橫向 2.5D 視差帶（Phase 3b）**：`HERO_STAGE_DEFAULT` 改為 `parallax`，3D 舞台只剩回滾（`NEXT_PUBLIC_HERO_STAGE=world`／`?stage=world`）。`e2e/intro-portal.spec.ts` 改寫為視差帶自己的契約而不是 skip：刪掉 WebGL 失效、GLB 404／截斷、模型逾時、signature phases 等 3D 專屬失效面；新增「永遠不請求 WebGL context、不載入任何 three chunk」；reduced motion 改為「靜態圖、無暫停鈕、runtime 切換動畫停」；暫停改為 `animation-play-state: paused`；F09／F10 的 active-time 預算保留（睡眠邏輯在 HeroWorld）。視差舞台在 reduced motion 下不再顯示暫停鈕（沒有動態可暫停）。首頁覆蓋層的 tile 與主角 sprite 改為 `loading="lazy"`——覆蓋層是 SSR 出來、閘門關著時 `display:none`，eager 的 `<img>` 沒有 layout box 也會被抓，等於讓明確表達「不要動畫／不要花流量」的人白白下載約 290KB；lazy 圖沒有 box 就不載，閘門開著時在視窗內一樣立刻載。`/intro` 直達頁只有路面第一份與主角是 eager，其餘 11 張 lazy——實測全部 eager 會跟 hydration 的 JS 搶頻寬，使用者在 hydration 前點「略過」會變成原生導航。SSR 圖片在 hydration 前就載完或失敗時，改以 `complete` 判定 settled（失敗也算），tile 404 不再把 Intro 卡在 poster 狀態。退役 `intro-poster`／`ready`／`greeting` 六張 baseline；`qa:intro-viewports`、`measure:intro-performance` 固定走 `?stage=world`。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、ADR-0004 覆蓋層行為。
 - **ep-29 全幕繪本上線**：《大黃卡車的運送任務》字幕校對 170→169 句並 `--mark`；依人工指定的 15 句時間戳切場景、放入自備插圖後 `--approve`（`pageCount`／`captionTimes`／`captions` 皆 15）。未走 OpenAI 生圖。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **角色圖鑑卡片收斂**：名稱與職責同一排；只保留「已認識」貼紙、拿掉「待認識」；出場集數改下拉選單並附 10 字內標題；頁面拿掉「關於角色圖鑑，家長常問」可見區塊（FAQ 仍留 JSON-LD）。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。

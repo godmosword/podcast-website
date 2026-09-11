@@ -49,6 +49,7 @@ const SOURCE_SCAN_DIRS = ["app", "components", "data", "lib", "scripts"] as cons
 
 const STATIC_PUBLIC_ASSETS = [
   "/hero-home.jpg",
+  "/feedback/hero.jpg",
   "/mascot.png",
   "/icon-192.png",
   "/icon-512.png",
@@ -160,6 +161,12 @@ function addSrcSetPaths(bucket: Set<string>, src: string, srcSet: string, webpSr
 /** 由資料層與 resolver 推導的引用路徑（動態）。 */
 export function collectDynamicReferencePaths(): string[] {
   const refs = new Set<string>(STATIC_PUBLIC_ASSETS);
+  for (const path of STATIC_PUBLIC_ASSETS) {
+    if (!/\.jpe?g$/i.test(path)) continue;
+    const modern = modernRasterPaths(path);
+    refs.add(modern.webp);
+    refs.add(modern.avif);
+  }
 
   for (const story of getStories()) {
     for (let page = 1; page <= story.pageCount; page++) {

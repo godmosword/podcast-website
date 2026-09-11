@@ -22,7 +22,11 @@ function jpgSiblingPaths(jpgPath: string): { webp: string; avif: string } {
 }
 
 function qualityFor(jpgPath: string): { webp: number; avif: number } {
-  if (STORY_ILLUSTRATION_JPG_RE.test(jpgPath.replace(/\\/g, "/"))) {
+  const normalized = jpgPath.replace(/\\/g, "/");
+  if (
+    STORY_ILLUSTRATION_JPG_RE.test(normalized) ||
+    normalized.endsWith("/feedback/hero.jpg")
+  ) {
     return { webp: STORY_COVER_WEBP_QUALITY, avif: STORY_COVER_AVIF_QUALITY };
   }
   return { webp: LCP_WEBP_QUALITY, avif: LCP_AVIF_QUALITY };
@@ -75,9 +79,11 @@ export function listLcpJpgTargets(publicDir: string): string[] {
     : [];
 
   const hero = join(publicDir, "hero-home.jpg");
+  const feedbackHero = join(publicDir, "feedback", "hero.jpg");
   return [
     ...landing,
     ...(existsSync(hero) ? [hero] : []),
+    ...(existsSync(feedbackHero) ? [feedbackHero] : []),
     ...listStoryIllustrationJpgTargets(publicDir),
   ].sort();
 }

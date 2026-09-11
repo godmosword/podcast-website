@@ -45,6 +45,7 @@ const ROUTE_SOURCES: Record<string, string[]> = {
     "app/feedback/page.tsx",
     "app/feedback/page.module.css",
     "lib/feedback-copy.ts",
+    "public/feedback/hero.jpg",
   ],
 };
 

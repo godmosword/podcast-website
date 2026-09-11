@@ -4,6 +4,13 @@
 
 export const FEEDBACK_PAGE_TITLE = "留言給馬米";
 
+export const FEEDBACK_HERO_SRC = "/feedback/hero.jpg";
+
+export const FEEDBACK_HERO_ALT = "馬米和 Bonbon 戴著耳機，在客廳錄音室向你揮手";
+
+/** 正規化後的正方形邊長；OG 與 `<img>` width／height 共用。 */
+export const FEEDBACK_HERO_SIZE = 1400;
+
 export const FEEDBACK_PAGE_DESCRIPTION =
   "跟馬米說你最想說的話，也歡迎許願下一集想聽的故事。留言經審核後才會公開。";
 
