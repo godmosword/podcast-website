@@ -14,13 +14,13 @@
 }
 
 /*
- * Hero 是身份層，不是行銷層：標題＋一句話＋兩顆 chip 就好。
+ * Hero 只放遊樂園底圖，不疊標題／導言／chip。
  * 主 CTA 已移除，第一張遊戲卡本身就是入口（見 plan D2-C）。
  */
 .hero {
   position: relative;
-  min-height: 360px;
-  margin-bottom: 28px;
+  aspect-ratio: 1672 / 941;
+  margin: 0 0 16px;
   border-radius: var(--radius-xl);
   overflow: hidden;
   isolation: isolate;
@@ -33,11 +33,9 @@
   box-shadow: var(--elev-2), var(--warm-card-glow);
 }
 
-/* z-index:-2 讓 picture 自己建 stacking context，標題可選字；勿再加 transform／filter。 */
 .heroPicture {
   position: absolute;
   inset: 0;
-  z-index: -2;
   display: block;
   width: 100%;
   height: 100%;
@@ -51,100 +49,6 @@
   object-fit: cover;
   object-position: center;
   color: transparent;
-}
-
-.heroShade {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background:
-    linear-gradient(90deg, color-mix(in srgb, var(--mix-base) 96%, transparent) 0%, color-mix(in srgb, var(--mix-base) 78%, transparent) 45%, transparent 86%),
-    linear-gradient(0deg, color-mix(in srgb, var(--mix-base) 58%, transparent), transparent 55%);
-}
-
-:global([data-theme="night"]) .heroShade {
-  background:
-    linear-gradient(90deg, color-mix(in srgb, var(--mix-base) 94%, transparent) 0%, color-mix(in srgb, var(--mix-base) 75%, transparent) 48%, color-mix(in srgb, var(--mix-base) 16%, transparent) 100%),
-    linear-gradient(0deg, color-mix(in srgb, var(--mix-base) 58%, transparent), transparent 62%);
-}
-
-.heroContent {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  min-height: 360px;
-  max-width: 500px;
-  padding: clamp(24px, 6vw, 56px);
-}
-
-.eyebrow {
-  color: var(--ink-soft);
-  font-size: var(--fs-meta);
-  font-weight: 900;
-  letter-spacing: 0.08em;
-}
-
-.eyebrow {
-  padding: 6px 12px;
-  border-radius: var(--radius-pill);
-  color: var(--ink);
-  background: color-mix(in srgb, var(--c-yellow) 36%, var(--card));
-  border: 1px solid color-mix(in srgb, var(--c-yellow) 54%, var(--hairline));
-}
-
-/* v0.2：標題靠字級與字重建立層次，不用麥克筆式硬陰影。 */
-.title {
-  margin: 14px 0 10px;
-  color: var(--ink);
-  font-family: var(--font-marker), var(--font-stack-display);
-  font-size: clamp(2.1rem, 5.5vw, 3.4rem);
-  font-weight: 900;
-  line-height: 1.08;
-  letter-spacing: 0.04em;
-}
-
-.subtitle {
-  max-width: 28rem;
-  margin: 0;
-  color: var(--ink-soft);
-  font-size: clamp(0.98rem, 2vw, 1.12rem);
-  font-weight: 600;
-  line-height: 1.7;
-}
-
-.highlights {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin: 18px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 34px;
-  padding: 5px 11px;
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius-pill);
-  color: var(--ink);
-  background: color-mix(in srgb, var(--mix-base) 82%, transparent);
-  font-size: var(--fs-meta);
-  font-weight: 800;
-}
-
-.zone {
-  margin-bottom: 36px;
-}
-
-.zoneTitle {
-  margin: 0 0 14px;
-  color: var(--ink);
-  font-size: clamp(1.35rem, 3vw, 1.65rem);
-  font-weight: 900;
 }
 
 /*
@@ -250,21 +154,6 @@
   box-shadow: var(--shadow-sm);
 }
 
-.parentCorner {
-  position: absolute;
-  z-index: 1;
-  top: 8px;
-  right: 8px;
-  max-width: 70%;
-  padding: 4px 9px;
-  border-radius: var(--radius-pill);
-  color: var(--ink-soft);
-  background: color-mix(in srgb, var(--card) 92%, transparent);
-  font-size: var(--fs-meta);
-  font-weight: 800;
-  line-height: 1.25;
-}
-
 .cardBody {
   display: flex;
   flex-direction: column;
@@ -298,54 +187,21 @@
   font-weight: 600;
 }
 
-.footerNote {
-  margin: 28px 0 0;
-  color: var(--ink-soft);
-  font-size: var(--fs-control);
-  font-weight: 600;
-  text-align: center;
-}
-
 @media (max-width: 640px) {
   .main {
     padding-top: calc(14px + var(--safe-top));
   }
 
-  /* 第一張遊戲卡必須進首屏：hero 讓出高度。 */
+  /* 第一張遊戲卡必須進首屏：直式底圖裁成橫帶，不讓整張 3:4 把卡片推下。 */
   .hero {
-    min-height: min(45svh, 320px);
-    margin-bottom: 20px;
+    aspect-ratio: auto;
+    height: min(45svh, 320px);
+    margin-bottom: 12px;
   }
 
   /* 保留直式構圖焦點；換圖改由 <picture>，不再用 content:url。 */
   .heroImage {
     object-position: 58% center;
-  }
-
-  .heroShade {
-    background:
-      linear-gradient(0deg, color-mix(in srgb, var(--mix-base) 95%, transparent) 0%, color-mix(in srgb, var(--mix-base) 70%, transparent) 53%, transparent 100%),
-      linear-gradient(90deg, color-mix(in srgb, var(--mix-base) 45%, transparent), transparent);
-  }
-
-  :global([data-theme="night"]) .heroShade {
-    background:
-      linear-gradient(0deg, color-mix(in srgb, var(--mix-base) 95%, transparent) 0%, color-mix(in srgb, var(--mix-base) 66%, transparent) 53%, transparent 100%),
-      linear-gradient(90deg, color-mix(in srgb, var(--mix-base) 44%, transparent), transparent);
-  }
-
-  .heroContent {
-    justify-content: flex-end;
-    min-height: min(45svh, 320px);
-    padding: 20px 18px 20px;
-  }
-
-  .title {
-    font-size: 2.1rem;
-  }
-
-  .subtitle {
-    font-size: var(--fs-control);
   }
 
   .cardGrid {

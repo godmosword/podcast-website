@@ -8,8 +8,8 @@ import { skipIntroOverlay } from "./intro-gate";
  * 沒有模型、沒有載入狀態機——這份 spec 守的契約也跟著改：
  *
  * - 永遠不請求 WebGL context、不載入任何 three chunk（改版的核心收益）
- * - reduced motion 直接是靜態圖，沒有暫停鈕；runtime 切換也一樣
- * - 暫停、隱藏分頁、離開視窗只是把動畫凍住，不釋放 layer
+ * - reduced motion 直接是靜態圖；runtime 切換也一樣
+ * - 沒有暫停鈕；看著頁面時動畫一直跑。隱藏分頁、離開視窗才凍住，不釋放 layer
  * - tile 載不出來不阻擋 ready 與出口；晚到的 tile 在路由切換後被丟掉
  *
  * 舊的 3D 舞台（`?stage=world`）只剩回滾用途，e2e 不再守它。
@@ -199,7 +199,7 @@ test.describe("Intro Portal · Phase 5 band, motion gating and lifecycle", () =>
     expect(threeChunks).toEqual([]);
   });
 
-  test("becomes ready once the road and the hero sprite load, then exposes real pause/resume", async ({ page }) => {
+  test("becomes ready once the road and the hero sprite load", async ({ page }) => {
     const tiles: string[] = [];
     page.on("request", (request) => { if (TILE_URL.test(request.url())) tiles.push(request.url()); });
     await page.goto("/intro", { waitUntil: "domcontentloaded" });
@@ -209,14 +209,8 @@ test.describe("Intro Portal · Phase 5 band, motion gating and lifecycle", () =>
     // 四層各一張 tile；三份副本是同一個 URL，瀏覽器只抓一次。
     expect(new Set(tiles.map((url) => url.split("/").pop()?.split("?")[0])).size).toBe(4);
     expect(await stripAnimation(page)).toMatchObject({ playState: "running" });
+    await expect(page.getByRole("button", { name: /小紅的旅程/ })).toHaveCount(0);
 
-    await page.getByRole("button", { name: "暫停小紅的旅程" }).click();
-    await expect(page.getByRole("button", { name: "繼續小紅的旅程" })).toBeVisible();
-    await expect(hero.locator("[data-hero-parallax]")).toHaveAttribute("data-running", "false");
-    expect(await stripAnimation(page)).toMatchObject({ playState: "paused" });
-
-    await page.getByRole("button", { name: "繼續小紅的旅程" }).click();
-    await expect(hero.locator("[data-hero-parallax]")).toHaveAttribute("data-running", "true");
     await page.getByRole("link", { name: /進入車車遊樂園/ }).click();
     await expect(page).toHaveURL(/\/$/, { timeout: 1_500 });
     await expect(page.locator("[data-hero-parallax]")).toHaveCount(0);
@@ -261,10 +255,8 @@ test.describe("Intro Portal · Phase 5 band, motion gating and lifecycle", () =>
   });
 });
 
-// PLAN §15.2 F09／F10／F11. These budgets are measured in active time, so they
-// are driven through the injectable clock in
-// components/landing/hero-world/active-clock.ts rather than by waiting 24–30
-// real seconds. F05（模型載入逾時）不再存在：視差舞台沒有模型。
+// PLAN §15.2 F09／F11 仍用 active-time 假時鐘。F10 改為斷言 24 秒後動畫
+// 不會自己停。F05（模型載入逾時）不再存在：視差舞台沒有模型。
 const CLOCK_GLOBAL = "__chechecarHeroActiveClock";
 const SLEEP_AFTER_MS = 24_000;
 const MAX_TICK_DELTA_MS = 1_000;
@@ -332,29 +324,18 @@ test.describe("Intro Portal · active-time budgets (F09/F10/F11)", () => {
     });
     await expect(hero).toHaveAttribute("data-scene-active", "true");
     await expect(hero.locator("[data-hero-parallax]")).toHaveAttribute("data-running", "true");
-    // 30 hidden seconds must not have spent the 24s sleep budget.
-    await expect(page.getByRole("button", { name: "暫停小紅的旅程" })).toBeVisible();
+    expect(await stripAnimation(page)).toMatchObject({ playState: "running" });
   });
 
-  test("F10: motion sleeps after 24s of active time and only an explicit action resumes it", async ({ page }) => {
+  test("F10: 24s of active time does not freeze the band", async ({ page }) => {
     await installFakeClock(page);
     await page.goto("/intro", { waitUntil: "domcontentloaded" });
     const hero = await waitForBand(page);
 
-    await expect(page.getByRole("button", { name: "暫停小紅的旅程" })).toBeVisible();
-    await page.evaluate((ms) => window.__advanceHeroClock?.(ms), SLEEP_AFTER_MS - 2_000);
-    await expect(page.getByRole("button", { name: "暫停小紅的旅程" })).toBeVisible();
-
-    await page.evaluate((ms) => window.__advanceHeroClock?.(ms), 3_000);
-    await expect(page.getByRole("button", { name: "繼續小紅的旅程" })).toBeVisible();
-    await expect(hero.locator("[data-hero-parallax]")).toHaveAttribute("data-running", "false");
-    // Sleeping must not resume by itself.
-    await page.evaluate((ms) => window.__advanceHeroClock?.(ms), 10_000);
-    await expect(page.getByRole("button", { name: "繼續小紅的旅程" })).toBeVisible();
-
-    await page.getByRole("button", { name: "繼續小紅的旅程" }).click();
-    await expect(page.getByRole("button", { name: "暫停小紅的旅程" })).toBeVisible();
+    await page.evaluate((ms) => window.__advanceHeroClock?.(ms), SLEEP_AFTER_MS + 3_000);
     await expect(hero.locator("[data-hero-parallax]")).toHaveAttribute("data-running", "true");
+    expect(await stripAnimation(page)).toMatchObject({ playState: "running" });
+    await expect(page.getByRole("button", { name: /小紅的旅程/ })).toHaveCount(0);
   });
 
   test("F11: five Intro↔Landing round trips leak no band, context or visibility listener", async ({ page }) => {
@@ -417,16 +398,6 @@ test.describe("Intro Portal · Phase 9 enter transition and navigation lifecycle
     await page.getByRole("link", { name: enterLink }).click();
     // data-entering must never turn on: reduced motion gets no fade or push.
     await expect(hero).not.toHaveAttribute("data-entering", "true");
-    await expect(page).toHaveURL(/\/$/, { timeout: 2_000 });
-    await expect(page.locator("[data-landing-root]")).toBeVisible();
-  });
-
-  test("Enter while paused leaves at once", async ({ page }) => {
-    await page.goto("/intro", { waitUntil: "domcontentloaded" });
-    await waitForBand(page);
-    await page.getByRole("button", { name: "暫停小紅的旅程" }).click();
-    await expect(page.getByRole("button", { name: "繼續小紅的旅程" })).toBeVisible();
-    await page.getByRole("link", { name: enterLink }).click();
     await expect(page).toHaveURL(/\/$/, { timeout: 2_000 });
     await expect(page.locator("[data-landing-root]")).toBeVisible();
   });
@@ -539,9 +510,7 @@ test.describe("Intro Portal · Phase 11 accessibility", () => {
     expect(await skip.evaluate(node => node.tagName)).toBe("A");
     await expect(enter).toHaveAttribute("href", "/?enter=1");
     await waitForBand(page);
-    const pause = page.getByRole("button", { name: "暫停小紅的旅程" });
-    expect(await pause.evaluate(node => node.tagName)).toBe("BUTTON");
-    expect(await pause.evaluate(node => (node as HTMLButtonElement).type)).toBe("button");
+    await expect(page.getByRole("button", { name: /小紅的旅程/ })).toHaveCount(0);
   });
 
   test("every control is focusable, visibly focused and at least 44x44", async ({ page }) => {
@@ -549,7 +518,6 @@ test.describe("Intro Portal · Phase 11 accessibility", () => {
     await waitForBand(page);
     const controls = [
       page.getByRole("link", { name: /進入車車遊樂園/ }),
-      page.getByRole("button", { name: "暫停小紅的旅程" }),
       page.getByRole("link", { name: "略過動畫" }),
     ];
     for (const control of controls) {
@@ -570,9 +538,9 @@ test.describe("Intro Portal · Phase 11 accessibility", () => {
         const style = getComputedStyle(node);
         return { label: node.textContent?.trim().slice(0, 12) ?? "", outlineStyle: style.outlineStyle, outlineWidth: parseFloat(style.outlineWidth) || 0 };
       });
-      if (ring && /進入車車遊樂園|略過動畫|暫停動態/.test(ring.label)) rings.push(ring);
+      if (ring && /進入車車遊樂園|略過動畫/.test(ring.label)) rings.push(ring);
     }
-    expect(rings.length, "the three intro controls must be tabbable").toBeGreaterThanOrEqual(3);
+    expect(rings.length, "the two intro controls must be tabbable").toBeGreaterThanOrEqual(2);
     for (const ring of rings) {
       expect(ring.outlineStyle, `${ring.label} focus ring style`).not.toBe("none");
       expect(ring.outlineWidth, `${ring.label} focus ring width`).toBeGreaterThanOrEqual(2);
@@ -589,16 +557,9 @@ test.describe("Intro Portal · Phase 11 accessibility", () => {
     }
     const enterIndex = order.findIndex(label => label.includes("進入車車遊樂園"));
     const skipIndex = order.findIndex(label => label.includes("略過動畫"));
-    const pauseIndex = order.findIndex(label => label.includes("暫停動態"));
     expect(enterIndex, "Enter must be reachable by Tab").toBeGreaterThanOrEqual(0);
-    expect(pauseIndex).toBeGreaterThan(enterIndex);
-    expect(skipIndex, "Skip must come after Pause").toBeGreaterThan(pauseIndex);
-    // Space toggles the pause button, exactly like a native button.
-    await page.getByRole("button", { name: "暫停小紅的旅程" }).focus();
-    await page.keyboard.press("Space");
-    await expect(page.getByRole("button", { name: "繼續小紅的旅程" })).toBeVisible();
-    await page.keyboard.press("Space");
-    await expect(page.getByRole("button", { name: "暫停小紅的旅程" })).toBeVisible();
+    expect(skipIndex, "Skip must come after Enter").toBeGreaterThan(enterIndex);
+    await expect(page.getByRole("button", { name: /小紅的旅程/ })).toHaveCount(0);
     // Keyboard Enter on the link navigates once, like a real anchor.
     await page.getByRole("link", { name: /進入車車遊樂園/ }).focus();
     await page.keyboard.press("Enter");
@@ -663,24 +624,23 @@ test.describe("Intro Portal · Phase 11 accessibility", () => {
 test.describe("Intro Portal · Phase 11 reduced motion", () => {
   test.use({ serviceWorkers: "block" });
 
-  test("switching to reduced motion at runtime stops the band and removes the pause control", async ({ page }) => {
+  test("switching to reduced motion at runtime stops the band", async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto("/intro", { waitUntil: "domcontentloaded" });
     await waitForBand(page);
     expect(await stripAnimation(page)).toMatchObject({ playState: "running" });
-    await expect(page.getByRole("button", { name: "暫停小紅的旅程" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /小紅的旅程/ })).toHaveCount(0);
 
     await page.emulateMedia({ reducedMotion: "reduce" });
     await expect.poll(() => stripAnimation(page)).toMatchObject({ name: "none" });
-    await expect(page.getByRole("button", { name: /小紅的旅程/ })).toHaveCount(0);
     // The picture stays; only the motion goes.
     await expect(page.locator("[data-hero-parallax]")).toHaveCount(1);
 
-    // And back: the strip resumes and the control returns.
+    // And back: the strip resumes.
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await expect.poll(() => stripAnimation(page)).toMatchObject({ playState: "running" });
-    await expect(page.getByRole("button", { name: "暫停小紅的旅程" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /小紅的旅程/ })).toHaveCount(0);
     expect(errors).toEqual([]);
     await page.getByRole("link", { name: /進入車車遊樂園/ }).click();
     await expect(page).toHaveURL(/\/$/, { timeout: 2_000 });
@@ -818,6 +778,84 @@ test.describe("Intro Portal · band geometry", () => {
       ).toBeLessThanOrEqual(1);
     });
   }
+});
+
+function dioramaBoxes() {
+  const rect = (el: Element | null) => {
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return { top: r.top, bottom: r.bottom };
+  };
+  const bandEl = document.querySelector("[data-hero-parallax]");
+  const heroEl = document.querySelector("[data-hero-world]");
+  const carEl = document.querySelector("[data-hero-parallax] img[src*='xiao-hong']");
+  return {
+    hero: rect(heroEl),
+    band: rect(bandEl),
+    l1: rect(bandEl?.querySelector("[data-layer='l1']") ?? null),
+    l3: rect(bandEl?.querySelector("[data-layer='l3']") ?? null),
+    l5: rect(bandEl?.querySelector("[data-layer='l5']") ?? null),
+    car: rect(carEl),
+  };
+}
+
+// 手機直向：路面、小紅、近景必須整組落在 band 裡，路要接到草叢，略過在場景列下面。
+// 先前 --horizon:46% 加 L5 沉出 + 略過 absolute，會在路與草之間空一截、底緣被切掉。
+test.describe("Intro Portal · portrait diorama fits the frame", () => {
+  test.use({ serviceWorkers: "block" });
+
+  const phones: [number, number][] = [[320, 568], [390, 844], [430, 932]];
+
+  for (const [width, height] of phones) {
+    test(`road, car and foreground stay inside the band at ${width}x${height}`, async ({ page }) => {
+      await page.setViewportSize({ width, height });
+      await page.goto("/intro", { waitUntil: "domcontentloaded" });
+      await waitForBand(page);
+      const geometry = await page.evaluate(dioramaBoxes);
+      expect(geometry.band, "band").not.toBeNull();
+      expect(geometry.l1, "L1").not.toBeNull();
+      expect(geometry.l3, "L3").not.toBeNull();
+      expect(geometry.l5, "L5").not.toBeNull();
+      expect(geometry.car, "car").not.toBeNull();
+      const slack = 2;
+      const bob = 4;
+      expect(geometry.l1!.top, "L1 top clipped").toBeGreaterThanOrEqual(geometry.band!.top - slack);
+      expect(geometry.l3!.bottom, "road clipped").toBeLessThanOrEqual(geometry.band!.bottom + slack);
+      expect(geometry.l5!.bottom, "foreground clipped").toBeLessThanOrEqual(geometry.band!.bottom + slack);
+      expect(geometry.car!.top, "car top clipped").toBeGreaterThanOrEqual(geometry.band!.top - slack);
+      expect(geometry.car!.bottom, "car clipped").toBeLessThanOrEqual(geometry.band!.bottom + bob);
+      expect(geometry.l3!.bottom, "road must meet the grass").toBeGreaterThanOrEqual(geometry.l5!.top - slack);
+      const skip = await page.getByRole("link", { name: "略過動畫" }).boundingBox();
+      expect(skip, "skip box").not.toBeNull();
+      expect(skip!.y, "skip must sit below the stage").toBeGreaterThanOrEqual(geometry.band!.bottom - slack);
+      expect(skip!.y + skip!.height, "skip below the fold").toBeLessThanOrEqual(height + 1);
+    });
+  }
+
+  test("home overlay at 390 keeps the foreground inside the stage", async ({ browser }) => {
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const page = await context.newPage();
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("[data-intro-overlay]")).toBeVisible();
+    // 覆蓋層 tile 是 lazy，不走 waitForBand 的 ready；有 CSS 高度就可以量裁切。
+    await expect(page.locator("[data-intro-overlay] [data-hero-parallax]")).toBeVisible();
+    await expect.poll(async () => {
+      return page.locator("[data-intro-overlay] [data-layer='l3']").evaluate((el) => el.getBoundingClientRect().height);
+    }).toBeGreaterThan(40);
+    const geometry = await page.evaluate(dioramaBoxes);
+    expect(geometry.band, "band").not.toBeNull();
+    expect(geometry.l5, "L5").not.toBeNull();
+    expect(geometry.l3, "L3").not.toBeNull();
+    expect(geometry.car, "car").not.toBeNull();
+    const slack = 2;
+    expect(geometry.l5!.bottom, "overlay foreground clipped").toBeLessThanOrEqual(geometry.band!.bottom + slack);
+    expect(geometry.l3!.bottom, "overlay road must meet the grass").toBeGreaterThanOrEqual(geometry.l5!.top - slack);
+    expect(geometry.car!.bottom, "overlay car clipped").toBeLessThanOrEqual(geometry.band!.bottom + 4);
+    const skip = await page.getByRole("button", { name: "略過動畫" }).boundingBox();
+    expect(skip, "overlay skip").not.toBeNull();
+    expect(skip!.y, "overlay skip must sit below the stage").toBeGreaterThanOrEqual(geometry.band!.bottom - slack);
+    await context.close();
+  });
 });
 
 // 文字安全區（規格 §4.4）。背景會動，所以契約不能是「某一幀沒撞到」，而是結構性的：

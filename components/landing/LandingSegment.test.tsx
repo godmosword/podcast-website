@@ -74,10 +74,12 @@ describe("LandingSegment", () => {
       ),
     );
     expect(html).not.toContain("5–10 分鐘");
-    expect(html).toContain("data-landing-more-hint");
+    expect(html).toMatch(/<a[^>]*data-landing-more-hint/);
+    expect(html).not.toMatch(/<span[^>]*data-landing-more-hint/);
     expect(html).toContain('aria-label="捲動到下一個專區"');
     expect(html).toContain('href="/intro"');
-    expect(html).toContain("看小紅開進遊樂園");
+    expect(html).toContain('aria-label="看小紅開進遊樂園"');
+    expect(html).toContain("🚗");
     expect(html).toContain('data-testid="replay-intro"');
   });
 

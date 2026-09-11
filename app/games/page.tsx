@@ -1,14 +1,9 @@
 import Image from "next/image";
 import type { Metadata } from "next";
 import Link from "next/link";
-import Doodle from "@/components/decor/Doodle";
-import Wheel from "@/components/decor/Wheel";
-import decor from "@/components/decor/decor.module.css";
 import Icon from "@/components/ui/Icon";
 import { GAMES, gameParentTip, type GameMeta } from "@/data/games";
 import { getSiteUrl } from "@/lib/site-url";
-import GamesHubProgress from "@/components/games/GamesHubProgress";
-import GamePlayedMark from "@/components/games/GamePlayedMark";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
@@ -39,7 +34,7 @@ function ageShort(ageRange: string): string {
  * 否則各卡文字基線會參差（見 /design-review 2026-08-12）。
  */
 function paceLabel(game: GameMeta): string {
-  return game.hasTimer ? "⏱ 有計時" : "🌿 不趕時間";
+  return game.hasTimer ? "有計時" : "不趕時間";
 }
 
 function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
@@ -91,15 +86,9 @@ function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
           <span className={styles.playFab} aria-hidden>
             <Icon name="play" size={16} />
           </span>
-          {parentTip ? (
-            <span className={styles.parentCorner}>{parentTip}</span>
-          ) : null}
         </div>
         <span className={styles.cardBody}>
-          <span className={styles.cardTitle}>
-            <span aria-hidden>{game.emoji}</span> {game.title}
-            <GamePlayedMark slug={game.slug} />
-          </span>
+          <span className={styles.cardTitle}>{game.title}</span>
           <span className={styles.cardTeaser}>{game.teaser}</span>
           <span className={styles.cardMeta}>
             <span>{game.ageRange}</span>
@@ -132,6 +121,7 @@ export default function GamesHubPage() {
   return (
     <main className={styles.main} aria-label="車車遊樂園小遊戲">
       <header className={styles.hero}>
+        <h1 className="sr-only">車車遊樂園</h1>
         {/* picture 依 viewport 只下載一張 hero，避免 mobile 先抓 desktop 再被 CSS 換圖 */}
         <picture className={styles.heroPicture}>
           <source
@@ -155,50 +145,13 @@ export default function GamesHubPage() {
             className={styles.heroImage}
           />
         </picture>
-        <div className={styles.heroShade} aria-hidden />
-        <Doodle
-          kind="burst"
-          size={36}
-          color="var(--c-yellow)"
-          className={`${decor.doodle} ${decor.tiltA}`}
-          style={{ left: "4%", top: "8px" }}
-        />
-        <div className={styles.heroContent}>
-          <span className={styles.eyebrow}>今天想玩哪一站？</span>
-          <h1 className={styles.title}>車車遊樂園</h1>
-          <p className={styles.subtitle}>
-            塗繪本、找糖果、堆方塊，都在這一座園裡。
-          </p>
-          <ul className={styles.highlights} aria-label="遊樂園特色">
-            <li className={styles.chip}>
-              <Wheel size={18} color="var(--c-lilac)" />
-              {GAMES.length} 款遊戲
-            </li>
-            <li className={styles.chip}>免下載 · 手機也能玩</li>
-          </ul>
-        </div>
-        <Doodle
-          kind="dots"
-          size={28}
-          color="var(--c-mint)"
-          className={decor.doodle}
-          style={{ left: "12%", bottom: "18px" }}
-        />
       </header>
 
-      <section className={styles.zone} aria-labelledby="games-all">
-        <h2 id="games-all" className={styles.zoneTitle}>
-          園裡的站
-        </h2>
-        <GamesHubProgress />
-        <ul className={styles.cardGrid}>
-          {ORDERED_GAMES.map((game, index) => (
-            <GameCard key={game.slug} game={game} eager={index === 0} />
-          ))}
-        </ul>
-      </section>
-
-      <p className={styles.footerNote}>玩完一站，還有下一站等你發現 🎡</p>
+      <ul className={styles.cardGrid} aria-label="小遊戲">
+        {ORDERED_GAMES.map((game, index) => (
+          <GameCard key={game.slug} game={game} eager={index === 0} />
+        ))}
+      </ul>
     </main>
   );
 }

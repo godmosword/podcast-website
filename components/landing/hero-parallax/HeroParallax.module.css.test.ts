@@ -38,4 +38,11 @@ describe("HeroParallax.module.css 直式手機 band", () => {
     expect(scale, "≤430 必須宣告 --s").not.toBeNull();
     expect(Number(scale?.[1])).toBeGreaterThanOrEqual(0.65);
   });
+
+  it("直向地平線接到近景，L5 不沉出裁切", () => {
+    expect(narrow).toMatch(/--horizon:\s*62%/);
+    expect(narrow).toMatch(/\.l5\s*\{[^}]*bottom:\s*0/);
+    expect(narrow).toMatch(/container-type:\s*size/);
+    expect(narrow).toMatch(/100cqh\s*\/\s*680px/);
+  });
 });

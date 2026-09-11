@@ -32,10 +32,9 @@
 .cta { display: inline-flex; gap: 14px; align-items: center; justify-content: center; min-height: 56px; padding: 12px 26px; border: 2px solid #fff7e8; border-radius: var(--radius-pill); background: #315e52; color: #fff; font-size: var(--fs-h4); font-weight: 700; text-decoration: none; box-shadow: 0 5px 18px #315e521a; transition: transform 220ms, box-shadow 500ms; }
 .cta:hover { transform: translateY(-2px); }
 .cta:active { transform: scale(.98); }
-.pause { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px 14px; border: 1px solid #315e5266; border-radius: var(--radius-pill); background: #fff8efcc; color: #315e52; font-size: var(--fs-label); font-weight: 700; text-decoration: underline; text-underline-offset: 4px; }
 .hero[data-greeting="true"] .cta { box-shadow: 0 0 0 5px #315e5214, 0 6px 24px #315e5226; }
 .skip { position: absolute; z-index: 3; right: max(4%, env(safe-area-inset-right)); bottom: max(24px, env(safe-area-inset-bottom)); display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px 16px; color: #71583f; font-size: var(--fs-label); text-underline-offset: 5px; }
-.cta:focus-visible, .pause:focus-visible, .skip:focus-visible { outline: 3px solid #28776e; outline-offset: 5px; }
+.cta:focus-visible, .skip:focus-visible { outline: 3px solid #28776e; outline-offset: 5px; }
 /* 淡出時長與 EXIT_TRANSITION_MS 同源（由 HeroWorld 以 inline custom property 傳入）。 */
 .hero::after { content: ""; position: absolute; inset: 0; z-index: 4; pointer-events: none; background: #fff8ef; opacity: 0; transition: opacity var(--exit-transition-ms, 360ms) ease; }
 .hero[data-entering="true"]::after { opacity: 1; }
@@ -51,23 +50,27 @@
   .stage { top: 36%; bottom: auto; height: auto; aspect-ratio: 11.9 / 5.95; width: 100%; right: 0; left: 0; }
   .actions { left: 5%; right: 5%; bottom: max(13%, 84px); text-align: center; }
   .cta { font-size: var(--fs-control); min-height: 52px; padding: 12px 24px; }
-  .pause { font-size: var(--fs-label); }
   .skip { left: 50%; right: auto; transform: translateX(-50%); bottom: max(2%, env(safe-area-inset-bottom)); white-space: nowrap; }
   /*
-   * 視差直向：文案＋按鈕一列、場景吃剩餘高度。band 不再跟標題／CTA 搶同一塊
-   * 100svh，才不會變成中間一條被上下卡斷的薄片。
+   * 視差直向三列：文案、場景、略過。略過若繼續 absolute，就不佔 grid，
+   * 近景會沉到螢幕底被 overflow 切掉，路與草叢中間還會空一截奶油。
+   * 覆蓋層已付 --nav-h（含瀏海）；獨立頁高度扣掉頂欄，兩邊都不再重複算 safe-top。
    */
   .hero[data-stage="parallax"] {
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    min-height: 0;
+  }
+  .hero[data-stage="parallax"][data-hero-mode="page"] {
+    height: calc(100dvh - var(--nav-h));
   }
   .hero[data-stage="parallax"] .content {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 14px;
     z-index: 2;
-    padding: max(12px, env(safe-area-inset-top)) 5% 16px;
+    padding: 12px 5% 8px;
     text-align: center;
   }
   .hero[data-stage="parallax"] .copy,
@@ -80,6 +83,16 @@
     text-align: center;
   }
   .hero[data-stage="parallax"] .actions { justify-content: center; }
+  .hero[data-stage="parallax"] .skip {
+    position: static;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    transform: none;
+    justify-self: center;
+    width: max-content;
+    margin: 4px 0 max(12px, env(safe-area-inset-bottom));
+  }
 }
 @media (max-height: 560px) and (min-width: 600px) {
   .hero { min-height: 320px; }
@@ -90,12 +103,22 @@
   .actions { left: 5%; right: auto; bottom: 22%; }
   .skip { left: 5%; right: auto; transform: none; bottom: 3%; }
   /* 600–768 會同時命中直向 grid；短橫向改回左右配置。 */
-  .hero[data-stage="parallax"] { display: block; }
+  .hero[data-stage="parallax"] { display: block; height: 100svh; height: 100dvh; }
   .hero[data-stage="parallax"] .content { display: contents; }
   .hero[data-stage="parallax"] .copy,
   .hero[data-stage="parallax"] .actions { position: absolute; text-align: left; }
+  .hero[data-stage="parallax"] .skip {
+    position: absolute;
+    left: 5%;
+    right: auto;
+    bottom: 3%;
+    transform: none;
+    justify-self: auto;
+    width: auto;
+    margin: 0;
+  }
 }
-/* 視差舞台的近景層會捲到略過鍵底下；壓在影像上的 chrome 必須有自身底色（DESIGN.md Depth）。 */
+/* 桌機／短橫向近景會捲到略過底下；壓在影像上的 chrome 必須有自身底色（DESIGN.md Depth）。直向略過改在第三列，不再壓圖。 */
 .hero[data-stage="parallax"] .skip { background: rgba(250, 241, 228, .88); border-radius: 999px; }
 /*
  * 視差舞台：CTA 收到副標正下方，標題→副標→按鈕是一個閱讀區塊，全部在地平線之上。

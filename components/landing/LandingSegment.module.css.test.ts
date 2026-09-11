@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-/** UX-P1-1：分區 CTA min-height 56px；換段指引不佔 44px 底列。 */
+/** UX-P1-1：分區 CTA min-height 56px；換段雙折線 44px 可點、不進 CTA 底列。 */
 describe("LandingSegment.module.css touch targets", () => {
   const css = readFileSync(
     join(import.meta.dirname, "LandingSegment.module.css"),
@@ -28,13 +28,32 @@ describe("LandingSegment.module.css touch targets", () => {
     return blocks;
   };
 
-  it("美術指引不可點、不進文件流", () => {
-    const hint = extractBlocks(".moreHint")[0] ?? "";
-    expect(hint).toMatch(/pointer-events:\s*none/);
-    expect(hint).toMatch(/position:\s*absolute/);
-    expect(hint).not.toMatch(/width:\s*44px/);
-    expect(hint).not.toMatch(/height:\s*44px/);
-    expect(hint).not.toMatch(/backdrop-filter/);
+  it("換段雙折線是 44px 可點控制，無玻璃底板", () => {
+    const skip = extractBlocks(".moreSkip")[0] ?? "";
+    expect(skip).toMatch(/position:\s*absolute/);
+    expect(skip).toMatch(/width:\s*44px/);
+    expect(skip).toMatch(/height:\s*44px/);
+    expect(skip).toMatch(/min-width:\s*44px/);
+    expect(skip).toMatch(/min-height:\s*44px/);
+    expect(skip).toMatch(/cursor:\s*pointer/);
+    expect(skip).not.toMatch(/animation:/);
+    expect(skip).not.toMatch(/pointer-events:\s*none/);
+    expect(skip).not.toMatch(/clip:/);
+    expect(skip).not.toMatch(/backdrop-filter/);
+    expect(skip).not.toMatch(/var\(--gloss\)/);
+    expect(css).not.toMatch(/\.moreHint\s*\{/);
+    expect(css).toMatch(
+      /\.moreSkip svg[\s\S]*?animation:\s*moreHintDrift/,
+    );
+  });
+
+  it("≤380 加高底列 chrome，避免雙折線蓋住折行 CTA", () => {
+    const start = css.indexOf("@media (max-width: 380px)");
+    expect(start, "缺少 ≤380 區塊").toBeGreaterThan(-1);
+    const narrow = stripComments(css.slice(start));
+    expect(narrow).toMatch(
+      /--landing-chrome-h:\s*calc\(56px \+ 44px \+ 8px \+ var\(--safe-bottom\) \+ 6px\)/,
+    );
   });
 
   it("≤768 底列只留 CTA，不抬 CTA", () => {
@@ -130,9 +149,12 @@ describe("LandingSegment.module.css touch targets", () => {
     );
   });
 
-  it("重回開場連結 ≥44px，不是第二顆 gloss 主 CTA", () => {
+  it("重回開場是 44px 圓鈕，不是第二顆 gloss 主 CTA", () => {
     const replay = extractBlocks(".replayIntro")[0] ?? "";
+    expect(replay).toMatch(/width:\s*44px/);
+    expect(replay).toMatch(/height:\s*44px/);
     expect(replay).toMatch(/min-height:\s*44px/);
+    expect(replay).toMatch(/border-radius:\s*999px/);
     expect(replay).toMatch(/background:\s*var\(--landing-brand-ink\)/);
     expect(replay).toMatch(/color:\s*var\(--on-dark\)/);
     expect(replay).not.toMatch(/var\(--gloss\)/);

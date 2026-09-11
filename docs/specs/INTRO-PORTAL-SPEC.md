@@ -156,7 +156,7 @@ Intro 不是選關、角色圖鑑、遊戲 hub、故事目錄或可自由探索�
 > `/` 仍然永遠回傳完整 Landing HTML、零 client redirect、零 middleware、canonical 不變；
 > 差別是首次到訪時有一層蓋在 Landing 上的 3D 開場，由 `<head>` 的同步 script
 > （`lib/intro-gate.ts`）在首次繪製前決定，按「進入」就地淡出，網址全程是 `/`。
-> Landing 首段的 opt-in 膠囊（`IntroEntry`）已移除；改在首段 CTA 旁放次要連結「看小紅開進遊樂園」——有 JS 時重開同頁覆蓋層，無 JS 走進 `/intro`。§4.2 的舊 session 規則仍然作廢——
+> Landing 首段的 opt-in 膠囊（`IntroEntry`）已移除；改在首段 CTA 旁放 🚗 圓鈕（可及名稱「看小紅開進遊樂園」）——有 JS 時重開同頁覆蓋層，無 JS 走進 `/intro`。§4.2 的舊 session 規則仍然作廢——
 > 覆蓋層用的是新的 key 與新的判斷，不是把舊機制接回來。
 
 ### 4.1 路由契約
@@ -325,13 +325,9 @@ Blender 建立軸心與分組，GLB 保留 transforms。可以把輪盤旋轉導
 
 ## 8. 動態可及性與休眠
 
-動畫超過5秒且與文字／操作並行時，需有可達的停止机制。首選新增**僅針對動態**的低干擾「暫停動態／繼續動態」真實 button，僅在 live motion 存在時出現，放在 Skip 附近並避免成為第二 primary CTA。這是無障礙控制，不是新增內容導覽。
-
-若產品堅持畫面僅四個 UI 元素，替代方案是所有自動動態在5秒內結束；不能用「有 Skip」就直接認定暫停要求已滿足。首選方案保留較完整的小紅問候，接受必要的 pause button。
+產品選擇：開場**沒有**「暫停動態／繼續動態」鈕，看著頁面時視差一直跑，也不在 24 秒後自動休眠。離開開場靠「進入車車遊樂園」或「略過動畫」。`prefers-reduced-motion` 仍直接退成靜態圖（不建立 canvas、不載入 3D chunk、不播放 fade／camera exit／CTA pulse），偏好在 runtime 改變時也應生效。隱藏分頁或離開視窗時凍結 `animation-play-state`，不釋放 layer；回到前景從原位置繼續。
 
 Reduced motion：poster＋完整 HTML，不建立 canvas、不載入 3D chunk、不播放 fade／camera exit／CTA pulse。偏好在 runtime 改變時也應生效。
-
-活動時間暫停於 tab hidden、頁面不可見或使用者 pause；恢復時從原時間繼續，不以 wall clock 大跳。24 秒活動上限用累計 active delta，不可用反覆 reset 的 timeout 導致永遠不休眠。休眠後 pointer 不得偷偷持續刷新；若允許明確繼續，必須由使用者觸發。
 
 ## 9. Blender 資產規格
 

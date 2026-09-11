@@ -7,7 +7,7 @@ import { Component, useCallback, useEffect, useRef, useState, type ReactNode } f
 import { HERO_STAGE_DEFAULT, MODEL_PATH, chooseQuality, resolveHeroStage, type HeroStage, type MotionPhase, type Quality } from "./config";
 import HeroParallax from "../hero-parallax/HeroParallax";
 import styles from "./HeroWorld.module.css";
-import { getActiveClock, LOAD_TIMEOUT_MS, MAX_TICK_DELTA_MS, SLEEP_AFTER_MS, TICK_MS } from "./active-clock";
+import { getActiveClock, LOAD_TIMEOUT_MS, MAX_TICK_DELTA_MS, TICK_MS } from "./active-clock";
 import { EXIT_TRANSITION_MS, TRANSITION_RESET_MS, markEnterIntent, resolveEnterAction } from "./enter-transition";
 import { dismissIntroGate } from "@/lib/intro-gate";
 
@@ -81,40 +81,10 @@ export default function HeroWorld({ mode = "page", onDismiss }: { mode?: HeroWor
   const [failed, setFailed] = useState(false);
   const [ready, setReady] = useState(false);
   const [quality, setQuality] = useState<Quality>("medium");
-  const [paused, setPaused] = useState(false);
-  // 視差舞台專用：reduced motion 下沒有動態可暫停，暫停鈕要跟著消失。
-  // 3D 舞台不用這個——它在 reduced motion 下根本不會 ready。
-  const [reducedMotion, setReducedMotion] = useState(false);
   const [phase, setPhase] = useState<MotionPhase>("approach");
   const loadActiveMs = useRef(0);
-  const sleepActiveMs = useRef(0);
-  const autoPaused = useRef(false);
 
   const fail = useCallback(() => setFailed(true), []);
-
-  // Let the wheel breathe briefly after 24 seconds of active, foreground time;
-  // wall-clock time spent hidden or paused must not consume the motion budget.
-  useEffect(() => {
-    if (!ready) {
-      sleepActiveMs.current = 0;
-      autoPaused.current = false;
-      return;
-    }
-    if (autoPaused.current || !visible || !pageVisible || paused) return;
-    const clock = getActiveClock();
-    let previous = clock.now();
-    const timer = clock.setInterval(() => {
-      const now = clock.now();
-      sleepActiveMs.current += Math.min(Math.max(now - previous, 0), MAX_TICK_DELTA_MS);
-      previous = now;
-      if (sleepActiveMs.current >= SLEEP_AFTER_MS) {
-        autoPaused.current = true;
-        setPaused(true);
-      }
-    }, TICK_MS);
-    return () => clock.clearInterval(timer);
-  }, [ready, visible, pageVisible, paused]);
-
 
   useEffect(() => {
     // 視差帶沒有 WebGL 可以失敗、沒有模型可以下載：reduced motion 由 CSS 直接
@@ -123,10 +93,6 @@ export default function HeroWorld({ mode = "page", onDismiss }: { mode?: HeroWor
       setEligible(true);
       setFailed(false);
       setVisible(true);
-      const motion = matchMedia("(prefers-reduced-motion: reduce)");
-      const syncMotion = () => setReducedMotion(motion.matches);
-      syncMotion();
-      motion.addEventListener("change", syncMotion);
       const visibility = () => setPageVisible(!document.hidden);
       visibility();
       document.addEventListener("visibilitychange", visibility);
@@ -136,7 +102,6 @@ export default function HeroWorld({ mode = "page", onDismiss }: { mode?: HeroWor
       if (observer && root.current) observer.observe(root.current);
       return () => {
         observer?.disconnect();
-        motion.removeEventListener("change", syncMotion);
         document.removeEventListener("visibilitychange", visibility);
       };
     }
@@ -208,7 +173,7 @@ export default function HeroWorld({ mode = "page", onDismiss }: { mode?: HeroWor
   useEffect(() => { setReady(false); }, [stage]);
 
   const mounted = eligible && !failed && (visible || ready);
-  const active = visible && pageVisible && !paused && !exited;
+  const active = visible && pageVisible && !exited;
   const enter = (event: React.MouseEvent<HTMLElement>) => {
     const action = resolveEnterAction({
       button: event.button, metaKey: event.metaKey, ctrlKey: event.ctrlKey,
@@ -254,6 +219,7 @@ export default function HeroWorld({ mode = "page", onDismiss }: { mode?: HeroWor
   return (
       <section ref={root} className={styles.hero}
       {...(overlay ? { "aria-label": "車車遊樂園開場" } : { "aria-labelledby": "intro-title" })} data-hero-world
+      data-hero-mode={overlay ? "overlay" : "page"}
       style={{ "--exit-transition-ms": `${EXIT_TRANSITION_MS}ms` } as React.CSSProperties}
       data-stage={stage}
       data-scene-state={failed ? "fallback" : ready && eligible ? "ready" : "poster"}
@@ -270,16 +236,6 @@ export default function HeroWorld({ mode = "page", onDismiss }: { mode?: HeroWor
         {overlay
           ? <button type="button" className={styles.cta} data-intro-dismiss onClick={enter}>進入車車遊樂園 <span aria-hidden="true">→</span></button>
           : <Link href="/?enter=1" replace className={styles.cta} onClick={enter}>進入車車遊樂園 <span aria-hidden="true">→</span></Link>}
-        {ready && !failed && (parallax ? !reducedMotion : quality !== "low") ? (
-          <button
-            type="button"
-            className={styles.pause}
-            aria-label={paused ? "繼續小紅的旅程" : "暫停小紅的旅程"}
-            onClick={() => setPaused((current) => !current)}
-          >
-            {paused ? "繼續動態" : "暫停動態"}
-          </button>
-        ) : null}
       </div>
       </div>
       {parallax ? (

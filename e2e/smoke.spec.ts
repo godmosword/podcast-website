@@ -111,13 +111,14 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /數綿羊/ })).toBeAttached();
   await expect(page.getByRole("heading", { name: /捏黏土/ })).toBeAttached();
   await expect(page.getByRole("heading", { name: /陪孩子建立好習慣/ })).toBeAttached();
-  // 換段 skip 在 a11y 樹，平時不佔可見版面；美術指引可見
-  await expect(
-    page.getByRole("link", { name: "捲動到下一個專區" }).first(),
-  ).toBeAttached();
+  const moreSkip = page
+    .locator("#segment-stories")
+    .getByRole("link", { name: "捲動到下一個專區" });
+  await expect(moreSkip).toBeVisible();
   await expect(
     page.locator("#segment-stories [data-landing-more-hint]"),
   ).toBeVisible();
+  await expectHitTestable(page, moreSkip, "桌面往下捲動");
 });
 
 test("夜間桌面開抽屜：微暗只套膠囊，外層 .bar 不因開闔改變（不得出現全寬色帶）", async ({
@@ -288,8 +289,8 @@ test("404 頁面", async ({ page }) => {
 
 test("遊樂園 v2 入口與遊戲卡片", async ({ page }) => {
   await page.goto("/games");
-  await expect(page.getByRole("heading", { name: "車車遊樂園" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "園裡的站" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "車車遊樂園" })).toBeAttached();
+  await expect(page.getByRole("heading", { name: "園裡的站" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: /繽紛消消樂.*開始玩/ })).toBeVisible();
   await expect(page.getByRole("link", { name: /繽紛樂園.*開始玩/ })).toBeVisible();
   await expect(page.getByRole("link", { name: /繪本著色.*開始玩/ })).toBeVisible();
@@ -582,43 +583,35 @@ test.describe("夜間漢堡抽屜", () => {
 
 
 /**
- * ADR-0004 移除底列後，換段不再靠實體 44px 箭點（會跟 CTA／嘟嘟搶位）。
- * 守住：美術指引可見但不擋點、底列 CTA 可點、方向鍵真的換段。
+ * 段底中央淡雙折線是可點換段控制，但不跟 CTA／嘟嘟同一底列。
+ * 守住：可見、≥44×44、點得到、點了真的換段。
  */
 test.describe("首頁手機換段出口", () => {
   for (const width of [320, 390, 767] as const) {
-    test(`${width}px：下滑指引不佔底列，方向鍵可換段`, async ({ page }) => {
+    test(`${width}px：往下鍵可點且換段`, async ({ page }) => {
       await page.setViewportSize({ width, height: 760 });
       await page.goto("/");
-      const hint = page.locator("#segment-stories [data-landing-more-hint]");
+      const skip = page
+        .locator("#segment-stories")
+        .getByRole("link", { name: "捲動到下一個專區" });
       const cta = page
         .locator("#segment-stories")
         .getByRole("link", { name: /車車遊樂園的故事/ });
-      const skip = page.getByRole("link", { name: "捲動到下一個專區" }).first();
-      await expect(hint).toBeVisible();
-      const hintBox = await hint.boundingBox();
-      expect(hintBox, "指引沒有版面盒").not.toBeNull();
-      expect(hintBox!.width).toBeLessThan(40);
-      expect(hintBox!.height).toBeLessThan(40);
-      await expectNoOverlap(hint, cta, `${width}px 下滑指引不得蓋住分區 CTA`);
+      await expect(skip).toBeVisible();
+      const skipBox = await skip.boundingBox();
+      expect(skipBox, "往下鍵沒有版面盒").not.toBeNull();
+      expect(skipBox!.width).toBeGreaterThanOrEqual(44);
+      expect(skipBox!.height).toBeGreaterThanOrEqual(44);
+      await expectNoOverlap(skip, cta, `${width}px 往下鍵不得蓋住分區 CTA`);
       await expectNoOverlap(
-        hint,
-        page.getByRole("button", { name: "嘟嘟小紅車" }),
-        `${width}px 下滑指引不得蓋住嘟嘟`,
+        skip,
+        page.getByRole("button", { name: /嘟嘟小紅車/ }),
+        `${width}px 往下鍵不得蓋住嘟嘟`,
       );
       await expectHitTestable(page, cta, `${width}px 分區 CTA`);
-      await expect(skip).toBeAttached();
-      const skipBox = await skip.boundingBox();
-      expect(
-        skipBox === null || skipBox.width <= 2 || skipBox.height <= 2,
-        "換段 skip 平時不應佔可見版面",
-      ).toBeTruthy();
+      await expectHitTestable(page, skip, `${width}px 往下鍵`);
 
-      const scroller = page.getByRole("region", {
-        name: "主題專區，可用方向鍵捲動瀏覽",
-      });
-      await scroller.focus();
-      await page.keyboard.press("PageDown");
+      await skip.click();
       await expect
         .poll(async () => (await page.getByRole("region", { name: /睡前/ }).first().boundingBox())?.y ?? Infinity, {
           timeout: 5_000,

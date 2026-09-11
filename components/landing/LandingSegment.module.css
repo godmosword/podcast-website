@@ -194,20 +194,22 @@
     0 0 0 6px rgba(0, 0, 0, 0.45);
 }
 
-/* 首段重回開場：次要入口，比分區 CTA 矮一階、不加 gloss／elev，避免第二顆主鈕。 */
+/* 首段重回開場：44px 圓鈕，只放車車 emoji，不加 gloss／elev。 */
 .replayIntro {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
   min-height: 44px;
-  padding: 8px 14px;
-  border-radius: var(--radius-pill);
+  padding: 0;
+  border-radius: 999px;
   border: 2px solid color-mix(in srgb, var(--on-dark) 72%, transparent);
   background: var(--landing-brand-ink);
   color: var(--on-dark);
-  font-family: var(--font-stack-display);
-  font-weight: 700;
-  font-size: var(--fs-control);
-  letter-spacing: 0.02em;
+  font-size: 1.25rem;
+  line-height: 1;
   text-decoration: none;
 }
 
@@ -221,23 +223,18 @@
   outline-offset: 3px;
 }
 
+.moreSkip:active {
+  transform: translateX(-50%) scale(0.96);
+}
+
+.moreSkip:active svg,
+.moreSkip:focus-visible svg {
+  animation: none;
+}
+
 .moreSkip:focus-visible {
-  clip: auto;
-  width: 44px;
-  height: 44px;
-  margin: 0;
-  overflow: visible;
-  transform: translateX(-50%);
-  z-index: 4;
-  display: grid;
-  place-items: center;
-  border-radius: var(--radius-pill);
-  background: var(--landing-brand-ink);
-  color: var(--on-dark);
-  text-decoration: none;
   outline: 3px solid var(--on-dark);
   outline-offset: 3px;
-  box-shadow: 0 0 0 6px rgba(0, 0, 0, 0.45);
 }
 
 @media (hover: hover) {
@@ -319,72 +316,43 @@
   margin-left: 2px;
 }
 
-/* 美術裡的「還有下面」：不進文件流、不可點、沒有玻璃底板。 */
-.moreHint {
-  position: absolute;
-  left: 50%;
-  bottom: calc(var(--landing-chrome-h) + 18px);
-  z-index: 2;
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 20px;
-  transform: translateX(-50%);
-  color: var(--on-dark);
-  opacity: 0.62;
-  pointer-events: none;
-  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.45));
-  animation: moreHintDrift 2.4s ease-in-out infinite;
-}
-
-.moreHint svg {
-  display: block;
-}
-
-.panel:has(.moreSkip:focus-visible) .moreHint {
-  opacity: 0;
-  animation: none;
-}
-
-/* 鍵盤／AT 換段：平時 clip，聚焦才變成 44px 控制。 */
+/* 段底中央淡雙折線：可點換段，無玻璃／黏土底板，停在 CTA／嘟嘟列之上。 */
 .moreSkip {
   position: absolute;
   left: 50%;
   bottom: calc(var(--landing-chrome-h) + 8px);
-  width: 1px;
-  height: 1px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
   border: 0;
+  background: transparent;
   color: var(--on-dark);
   text-decoration: none;
+  cursor: pointer;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.45));
 }
 
-.moreSkipGlyph {
-  display: none;
-  width: 10px;
-  height: 10px;
-  margin-top: -3px;
-  border-right: 2.5px solid currentColor;
-  border-bottom: 2.5px solid currentColor;
-  transform: rotate(45deg);
-}
-
-.moreSkip:focus-visible .moreSkipGlyph {
+.moreSkip svg {
   display: block;
+  pointer-events: none;
+  opacity: 0.62;
+  animation: moreHintDrift 2.4s ease-in-out infinite;
 }
 
 @keyframes moreHintDrift {
   0%,
   100% {
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(0);
     opacity: 0.48;
   }
   50% {
-    transform: translateX(-50%) translateY(4px);
+    transform: translateY(4px);
     opacity: 0.82;
   }
 }
@@ -399,9 +367,13 @@
     transform: none;
   }
 
-  .moreHint {
+  .moreSkip svg {
     animation: none;
     opacity: 0.62;
+    transform: none;
+  }
+
+  .moreSkip:active {
     transform: translateX(-50%);
   }
 }
@@ -433,7 +405,7 @@
     --landing-chrome-h: calc(56px + var(--safe-bottom) + 6px);
   }
 
-  /* 右欄留給嘟嘟；底列只留 CTA，不再塞實體箭點。 */
+  /* 右欄留給嘟嘟；底列只留 CTA，往下雙折線仍絕對定位在 chrome 之上。 */
   .content {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 80px;
@@ -446,6 +418,13 @@
     grid-column: 1;
     width: 100%;
     justify-self: stretch;
+  }
+}
+
+/* ≤380：首段 CTA＋🚗 會折成兩列，chrome 要加高，雙折線才不會蓋住 CTA。 */
+@media (max-width: 380px) {
+  .panel {
+    --landing-chrome-h: calc(56px + 44px + 8px + var(--safe-bottom) + 6px);
   }
 }
 

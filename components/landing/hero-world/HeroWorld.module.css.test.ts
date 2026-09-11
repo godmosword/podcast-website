@@ -56,8 +56,14 @@ describe("HeroWorld.module.css 直式手機 stage", () => {
     expect(hero).toMatch(/overflow:\s*hidden/);
   });
 
-  it("直向視差改兩列 grid，場景列才有完整高度", () => {
+  it("直向視差改三列 grid，略過佔底列才不會蓋住近景", () => {
     expect(narrow).toMatch(/\[data-stage="parallax"\]\s*\{[^}]*display:\s*grid/);
-    expect(narrow).toMatch(/grid-template-rows:\s*auto minmax\(0,\s*1fr\)/);
+    expect(narrow).toMatch(/grid-template-rows:\s*auto minmax\(0,\s*1fr\) auto/);
+    expect(narrow).toMatch(/\[data-stage="parallax"\]\s+\.skip\s*\{[^}]*position:\s*static/);
+  });
+
+  it("覆蓋層與獨立頁都不再把 safe-top 算兩次", () => {
+    expect(narrow).not.toMatch(/padding:\s*max\(12px,\s*env\(safe-area-inset-top\)\)/);
+    expect(narrow).toMatch(/\[data-hero-mode="page"\]\s*\{[^}]*height:\s*calc\(100dvh - var\(--nav-h\)\)/);
   });
 });

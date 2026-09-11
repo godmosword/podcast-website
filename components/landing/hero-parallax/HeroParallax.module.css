@@ -126,7 +126,11 @@
 @media (max-width: 768px) {
   /*
    * 直向：band 改吃 Hero 第二列的剩餘高度，不再 absolute 鋪滿後把景物縮成薄片。
-   * --s 0.5 會讓 390 上的路面只剩 ~120px，摩天輪／房子像被裁掉的一條。
+   * --horizon 跟桌機一樣踩在 62%，路面才會接到近景；46% 會讓路浮在上半、
+   * 草叢貼底，中間空一截奶油，下緣再被 overflow 切掉。
+   * --s 用容器高度夾住：L3 底 = 0.62H + 229s 必須 ≤ H，所以 s ≤ H/603；
+   * 100cqh/680px 留一點餘裕（兩個運算元都必須無單位，min() 才合法）。
+   * cqh 讀的是祖先容器，故 size container 在 .band、縮放寫在子層。
    */
   .band {
     position: relative;
@@ -134,17 +138,24 @@
     width: 100%;
     height: 100%;
     min-height: 0;
+    container-type: size;
     --s: 0.78;
-    --horizon: 46%;
+    --horizon: 62%;
     --hero-left: 50%;
     --text-clear: 0%;
     --text-fade: 0%;
   }
+  .band > * { --s: min(0.78, 100cqh / 680px); }
+  /* 近景貼齊 band 底，不要再沉出裁切。 */
+  .l5 { bottom: 0; }
   /* 手機：文案在頂、按鈕在底，主角置中。置中放在外層 slot，浮動留在 img 上，
      兩個 transform 才不會互相覆蓋。 */
   .heroSlot { transform: translateX(-50%); }
 }
-@media (max-width: 430px) { .band { --s: 0.7; } }
+@media (max-width: 430px) {
+  .band { --s: 0.7; }
+  .band > * { --s: min(0.7, 100cqh / 680px); }
+}
 /* 短橫向（手機橫拿）：地平線抬高、素材再縮一階，才塞得下文案與按鈕。 */
 @media (max-height: 560px) and (min-width: 600px) {
   /* 實測按鈕列右緣在 45% 寬，透明段要蓋過它；主角在 60%，漸層在它之前結束。 */
@@ -159,6 +170,9 @@
     --hero-left: 60%;
     --text-clear: 47%;
     --text-fade: 59%;
+    container-type: normal;
   }
   .heroSlot { transform: none; }
+  .band > * { --s: inherit; }
+  .l5 { bottom: calc(-36px * var(--s)); }
 }

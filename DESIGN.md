@@ -257,6 +257,7 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 ## 遊戲架構規範
 
 - `/games` 呈現可玩活動，站序固定為 **繪本著色** → Candy Match（繽紛消消樂）→ Block Drop（繽紛樂園）；不放「製作中」或未承諾 placeholder。著色本是園內第一站，不佔漢堡獨立列。
+- Hub 首圖只放遊樂園底圖，其下直接三張遊戲卡；不疊標題／導言／chip，也不放「園裡的站」、星星進度、車庫或頁尾句。頁面 `h1` 走 sr-only。
 - Hub 排版：≥641px 三欄等寬；≤640px 著色本全寬（`.lead`）、另外兩款並排。
 - 繪本著色為 explore 活動：線稿來自既有定裝／場景圖，不併入 `GameKitGameId` 分數進度；路由仍為 `/games/coloring-book`。
 - Game Kit 只保留單一 `lib/gamekit/` 樹，分為 `react/`、`runtime/`、`progress/`、`games/` 與 `types.ts`（街機兩款）。
@@ -274,9 +275,9 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 
 ### Landing Hub（`/`）
 
-四段標題一律視覺隱藏（CSS module `titleHidden`，給輔助科技／`aria-labelledby`）。禁止用 `#segment-stories` 把 `.titleHidden` 或全域 `.sr-only` 解除隱藏。可見前景留分區 CTA，以及首段次要連結「看小紅開進遊樂園」（有 JS 時重開同頁 3D 開場，無 JS 走進 `/intro`）。GEO 導言維持全域 `.sr-only`。不新增行銷卡片或插畫。
+四段標題一律視覺隱藏（CSS module `titleHidden`，給輔助科技／`aria-labelledby`）。禁止用 `#segment-stories` 把 `.titleHidden` 或全域 `.sr-only` 解除隱藏。可見前景留分區 CTA，以及首段次要 🚗 圓鈕（`aria-label`「看小紅開進遊樂園」；有 JS 時重開同頁 3D 開場，無 JS 走進 `/intro`）。GEO 導言維持全域 `.sr-only`。不新增行銷卡片或插畫。
 
-Storyline 式**全螢幕分段捲動**：每段一張滿版黏土 hero（桌面 `segment-{id}.jpg` 16:9；行動 ≤768px `segment-{id}-portrait.jpg` 9:16），大圖主導 + 底部漸層遮罩 + 左下分區 CTA。**不**顯示段編號（如 01/04）。段標題仍視覺隱藏（CSS module `titleHidden`，給輔助科技／`aria-labelledby`），不疊在美術上；可見 CTA 為長句段名（本輪 Landing 例外，可超過「CTA ≤ 6 字」）；`href` 不變。分區 CTA 走**不透明暖深墨板**（`min-height: 56px`、`var(--landing-brand-ink)` 底板、`var(--on-dark)` 白字、`--elev-2`＋`--gloss`），字級桌面 `--fs-h2`、≤768 `--fs-h3`、≤640 `--fs-h4`，**非**橘色實心 pill、**非**玻璃 ghost；刻意不用 backdrop-filter。CTA `white-space: nowrap`（「 →」是獨立文字節點，換行會孤行）；<348px 可能與 Dudu 略疊，正解是另開任務把半形空白改成不斷行空白後再拿掉 nowrap。段內**不**放實體往下箭點（玻璃底板會跟左下 CTA、右下嘟嘟搶同一條底列）。換段指引是美術裡一枚極淡雙折線（`moreHint`：絕對定位、`pointer-events: none`、不進文件流），停在底列 chrome 之上；鍵盤／輔助科技走捲動容器方向鍵與平時 clip 的 `moreSkip`（`:focus-visible` 才出現 44px）。不放「聽最新一集」播放直達鈕。首段 GEO 導言仍用全域 `.sr-only`。
+Storyline 式**全螢幕分段捲動**：每段一張滿版黏土 hero（桌面 `segment-{id}.jpg` 16:9；行動 ≤768px `segment-{id}-portrait.jpg` 9:16），大圖主導 + 底部漸層遮罩 + 左下分區 CTA。**不**顯示段編號（如 01/04）。段標題仍視覺隱藏（CSS module `titleHidden`，給輔助科技／`aria-labelledby`），不疊在美術上；可見 CTA 為長句段名（本輪 Landing 例外，可超過「CTA ≤ 6 字」）；`href` 不變。分區 CTA 走**不透明暖深墨板**（`min-height: 56px`、`var(--landing-brand-ink)` 底板、`var(--on-dark)` 白字、`--elev-2`＋`--gloss`），字級桌面 `--fs-h2`、≤768 `--fs-h3`、≤640 `--fs-h4`，**非**橘色實心 pill、**非**玻璃 ghost；刻意不用 backdrop-filter。CTA `white-space: nowrap`（「 →」是獨立文字節點，換行會孤行）；<348px 可能與 Dudu 略疊，正解是另開任務把半形空白改成不斷行空白後再拿掉 nowrap。段內換段控制是中央一枚極淡雙折線（`moreSkip`：44×44 可點、無玻璃／黏土底板、絕對定位停在底列 chrome 之上，不跟左下 CTA、右下嘟嘟同一列）；鍵盤／輔助科技同一顆連結（可及名稱「捲動到下一個專區」／最後一段「捲動到頁尾」），`:focus-visible` 才加上 `var(--on-dark)` 焦點環。不放「聽最新一集」播放直達鈕。首段 GEO 導言仍用全域 `.sr-only`。
 
 1. **SiteNavBar**（全站橘色頂欄 + 訂閱 CTA）
    - **頂欄常駐列（2026-08-30 同構＋漢堡最右）**：`.inner` 用 `justify-content: flex-start`。**兩斷點同構**——**所有寬度**皆為 `[品牌] [首頁] [訂閱] [留言] [☰]`。`.actions`（`role="group"` `aria-label="常用"`，只含首頁／訂閱／留言）以 `flex: 1; justify-content: space-evenly` 撐滿品牌與漢堡之間，**禁止** `margin-left: auto`（會把三詞推到右側、中間再空一塊）。漢堡 **icon-only、置最右**，是 `.actions` 的下一個兄弟、**不**進常用組；左距 16px（大於舊 gap 10px）。品牌 pill **即首頁入口**（連 `/`），**`.actions` 內另列「首頁」文字連結**（去框：`.homeAction[aria-current]` 底透明，**僅字重 800、不畫任何線**）。**紅線：頂欄 active 不得用 `inset box-shadow`**——`.navLink` 是 `--radius-pill`(999px)，inset 底線會被圓角裁切、沿 22px 圓角往兩側爬升成**碗狀假邊框**（2026-08-31 使用者回報的「首頁的邊框」即此）。且 `.homeAction` 必須**顯式** `box-shadow: none`，只刪該行會讓 `.navLink[aria-current]`(0,2,1) 的 inset 接手、弧線原封不動。「訂閱」trigger 同樣去 border／實心底，`color: inherit`。**選單觸發器所有寬度都在**（桌面不得 `display: none`）。**主題切換移出頂欄**，改在抽屜底部。**頂欄字級角色（2026-08-31）**：品牌 `.brandText` 用 `--fs-h4`（**禁 `clamp()`+vw**，見 `globals.css` 97–98），比控制項大一階以保住字標層級；`.navLink` 與訂閱 `.trigger` 一律 `--fs-body`。**`--fs-meta`／`--fs-label` 不得用於頂欄主控制項**——它們的角色是「最小註記／標籤」，舊碼訂閱用 `--fs-meta`(+`--fs-label` @≥480px) 且字重 800，是同一列出現三種字級兩種字重的來源。`SubscribeMenu` 的 `@media (min-width: 480px)` **不得再覆寫 `font-size`**（會讓 base 修正在幾乎所有桌面失效）。訂閱文案「**訂閱**」；`visiblePlatforms()` 為空時**不得整顆消失**，退為站內 `/subscribe`。
@@ -288,8 +289,8 @@ Storyline 式**全螢幕分段捲動**：每段一張滿版黏土 hero（桌面 
    - **著色本頁 active 態**：抽屜用完整 `internalHrefs` 做**最長匹配獨佔**。`/games/coloring-book` 歸「遊樂園」（不再獨立列）。不含搜尋列（故事搜尋仍在 `/stories`）。「親子景點」連 `/for-parents/play-map`，與「親子指南」並列於家長組。不列「主題分類」。`/for-parents/play-map` 僅「親子景點」高亮。
    - **KidsPlayDock 已刪（2026-09-05）**：內頁左下不再掛「去玩」三連；兒童三入口（全部故事／遊樂園／宇宙地圖）只由漢堡抽屜承接。不再有 `--kids-dock-h` 底距、`data-kids-dock`／`data-kids-dock-flush`／`data-lift="picker"`。
    - 關於我們／聯絡我們在頁尾 meta（聯絡另有 ConnectHub Email icon）。**未改** Apple sync workflow、ThemeProvider API。
-2. 四段 **LandingSegment** 全螢幕面板（資料：`data/landing-segments.ts`）；可見 CTA：`車車遊樂園的故事`／`數綿羊123．睡前故事`／`好好玩的捏黏土`／`好習慣故事`。首段 CTA 旁另有次要「看小紅開進遊樂園」（`href="/intro"`；JS 重開同頁覆蓋層）
-3. **段落切換**：首頁沒有獨立的分段導覽列。桌面右側垂直進度點與 ≤768px 貼底短標列（SegmentNav）已於 ADR-0004 移除——3D 開場接手了首頁的第一印象，底列在四段內容上方再疊一層水平導覽只是重複。換段**不靠實體箭點**（會擠 CTA／嘟嘟）。視覺指引是各段 `moreHint`（美術裡的淡雙折線，不佔版面、不可點）；操作是捲動容器的 snap、觸控滑、方向鍵，以及各段平時隱藏的 `moreSkip`。≤768 左下 CTA 不移動，右欄 80px 仍留給 Dudu。`moreSkip` 聚焦時適用上方 Depth 條款：焦點環用 `var(--on-dark)`。document scroll-snap，reduced-motion 自動停用（指引改靜止）
+2. 四段 **LandingSegment** 全螢幕面板（資料：`data/landing-segments.ts`）；可見 CTA：`車車遊樂園的故事`／`數綿羊123．睡前故事`／`好好玩的捏黏土`／`好習慣故事`。首段 CTA 旁另有 🚗 圓鈕（`href="/intro"`、`aria-label`「看小紅開進遊樂園」；JS 重開同頁覆蓋層）
+3. **段落切換**：首頁沒有獨立的分段導覽列。桌面右側垂直進度點與 ≤768px 貼底短標列（SegmentNav）已於 ADR-0004 移除——3D 開場接手了首頁的第一印象，底列在四段內容上方再疊一層水平導覽只是重複。換段靠各段中央淡雙折線 `moreSkip`（可點、44×44、不佔 CTA／嘟嘟底列）以及捲動容器的 snap、觸控滑、方向鍵。≤768 左下 CTA 不移動，右欄 80px 仍留給 Dudu。`moreSkip` 聚焦時適用上方 Depth 條款：焦點環用 `var(--on-dark)`。document scroll-snap，reduced-motion 自動停用（指引改靜止）
 4. Segment 1 CTA「車車遊樂園的故事」→ **`/stories`**（完整 Podcast 主頁）
 5. **頁尾 snap pane**（`#landing-foot`）：只承 `SiteFooter`，**不新增第五個 snap 段**。原 `ExploreGrid`（「都去哪裡玩？」地圖大卡＋六格磁貼）與漢堡抽屜 7 列完全重疊，**已刪**；入口改由漢堡抽屜承接。`.footerPane` 維持至少一屏、`flex-start`＋頁尾 `margin-top: auto` 貼底；暖色漸層橋接在 pane 頂緣。≤768px 不再為貼底導覽列預留 padding（ADR-0004 移除 SegmentNav 後該列不存在）。
    - **首頁 `<footer>` 不具 `contentinfo` landmark**：整頁包在 `app/page.tsx` 的 `<main data-landing-root>` 內，`<main>` 是該隱含角色的排除祖先——與 `#landing-foot` 用 `section` 或 `div` 無關。這是既有結構事實，e2e 以版權列文字為錨點。

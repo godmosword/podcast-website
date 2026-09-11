@@ -17,6 +17,8 @@
 - **`/stories` 桌機縮圖網格＋縮圖／完整切換**：≥768 整頁放到 1100px；找故事預設兩欄直式卡、≥1280 三欄。桌機可切「完整」回橫式列（列表限寬 56rem 置中）。偏好存在 `cheche:stories-view`，`<html data-stories-view="list">` 在 paint 前還原，避免先閃縮圖。切換鈕只在 ≥768 出現。主題／車種／相關／收藏維持橫式；手機 &lt;768 零位移。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **站內留言牆 `/feedback`**：頂欄「留言」改站內頁（馬米邀請小卡、家長雙同意、信箱蒐集但不公開、先審後發）。公開列只顯示已核准的暱稱／日期／正文；示範卡獨立、不進 list。後台 `/studio/feedback` 以 `FEEDBACK_MODERATION_SECRET` 密語保護，可核准／隱藏／硬刪。無 `DATABASE_URL` 時頁面仍 200、表單降級 mailto。法律頁新增「公開留言牆」專章，政策版本 `2026-09-05`。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、`SiteHeader`「留言給我」圓鈕（仍 env-gated）。
 
+- **Landing 往下雙折線可點換段**：段底中央淡雙折線改為 44×44 真連結（可及名稱「捲動到下一個專區」），不再只是不可點的美術指引。無玻璃／黏土底板，仍停在 CTA／嘟嘟列之上。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、DuduCompanion。
+
 ### Fixed
 
 - **角色圖鑑「出場故事」統一釘在卡片框底**：個性文案長短不再把下拉推高，同一列卡片的選單齊底。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
@@ -27,6 +29,10 @@
 
 ### Changed
 
+- **手機直向開場近景不再被切斷**：直向改三列（文案／場景／略過），地平線回到 62% 讓路面接到草叢，L5 貼齊場景底、縮放隨 band 高度夾住；覆蓋層不再把瀏海算兩次。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
+- **遊樂園 hub 只留首圖＋三張遊戲卡**：拿掉「園裡的站」、星星／車庫／貼紙進度、頁尾句，以及卡上 emoji、「玩過」、爸媽提示。**未改** Apple sync workflow、遊戲進度存檔與站序。
+- **重回開場改成車車圓鈕**：首段不再放第二顆「看小紅開進遊樂園」長文案 pill，改 🚗 圓鈕；可及名稱與 `title` 仍是完整句子。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
+- **開場拿掉暫停動態**：不再顯示「暫停動態／繼續動態」，也不在 24 秒後自動睡去；看著頁面時視差一直跑。隱藏分頁、離開視窗與 `prefers-reduced-motion` 仍凍住。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **3D 開場期間頂欄仍可點**：覆蓋層讓出 `--nav-h`，不再 inert 頂欄、不再把 `.site-root` 抬過導覽；Landing 仍 inert。標題排在頂欄下方。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **繪本著色收進遊樂園**：漢堡抽屜不再獨立列「繪本著色」（探索改為全部故事／角色圖鑑／遊樂園／宇宙地圖／關於我們）；`/games/coloring-book` 高亮「遊樂園」。Hub 第一站為著色本，手機全寬、另外兩款並排。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、著色本路由與引擎。
 - **全站字型改源泉圓體標題＋Fredoka 英數**：內文維持粉圓子集；中文標題改自託管源泉圓體 TW Bold 子集（真字重，保留 `font-synthesis-weight: none`）；英數 Baloo 2 換成 Fredoka。Gochi Hand 點綴保留。留言牆 UGC 仍用系統字。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。

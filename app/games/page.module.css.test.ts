@@ -38,6 +38,8 @@ describe("games hub 站序", () => {
       /HUB_STATION_ORDER[\s\S]*"coloring-book"[\s\S]*"candy-match"[\s\S]*"block-drop"/,
     );
     expect(tsx).toContain("styles.lead");
-    expect(tsx).toContain("園裡的站");
+    expect(tsx).not.toContain("園裡的站");
+    expect(tsx).not.toContain("GamesHubProgress");
+    expect(tsx).not.toContain("玩完一站");
   });
 });

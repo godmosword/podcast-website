@@ -135,9 +135,12 @@ test.describe("遊樂園 hub", () => {
     await expect(firstCard).toContainText(/不趕時間|有計時/);
   });
 
-  test("低壓進度文案可見（無存檔也不崩潰）", async ({ page }) => {
+  test("hub 只留三張遊戲卡，不顯示車庫進度", async ({ page }) => {
     await page.goto("/games");
-    await expect(page.getByText(/收集了 \d+ 顆星星/)).toBeVisible();
-    await expect(page.getByRole("list", { name: "車庫" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "園裡的站" })).toHaveCount(0);
+    await expect(page.getByText(/收集了 \d+ 顆星星/)).toHaveCount(0);
+    await expect(page.getByRole("list", { name: "車庫" })).toHaveCount(0);
+    await expect(page.getByRole("list", { name: "小遊戲" })).toBeVisible();
+    await expect(page.locator('main a[href^="/games/"]')).toHaveCount(3);
   });
 });
