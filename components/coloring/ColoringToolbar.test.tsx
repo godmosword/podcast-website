@@ -1,8 +1,10 @@
 // @vitest-environment jsdom
 import type { ComponentProps } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ColoringToolbar } from "./ColoringToolbar";
+import { BucketIcon, CrayonIcon, EraserIcon } from "./ColoringToolbarIcons";
 
 afterEach(() => {
   cleanup();
@@ -62,6 +64,12 @@ describe("ColoringToolbar", () => {
       "true",
     );
     expect(screen.getByRole("button", { name: "下載" }).querySelector("svg")).toBeTruthy();
+  });
+
+  it("畫具圖示用色盤色，不是單色剪影", () => {
+    expect(renderToStaticMarkup(<CrayonIcon />)).toContain("#f2c94c");
+    expect(renderToStaticMarkup(<BucketIcon />)).toContain("#2d9cdb");
+    expect(renderToStaticMarkup(<EraserIcon />)).toContain("#f781c6");
   });
 
   it("點油漆桶會切工具，筆刷三檔此時不可按", () => {

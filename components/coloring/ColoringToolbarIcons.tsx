@@ -1,4 +1,4 @@
-/** 著色工具列圖示：小孩認得出的實心工具，家長操作列用線性圖。 */
+/** 著色工具列圖示：小孩認得出的實物畫具，家長操作列用線性圖。 */
 
 type IconProps = {
   className?: string;
@@ -6,8 +6,8 @@ type IconProps = {
 
 const BOX = {
   viewBox: "0 0 24 24",
-  width: 24,
-  height: 24,
+  width: 26,
+  height: 26,
   "aria-hidden": true as const,
   focusable: "false" as const,
 };
@@ -20,45 +20,84 @@ const STROKE = {
   strokeLinejoin: "round" as const,
 };
 
-/** 蠟筆：尖頭＋筆身＋包裝紙缺口。 */
+/** 與著色色盤同色，選中時靠 currentColor 描邊維持輪廓。 */
+const CRAYON_TIP = "#f4a261";
+const CRAYON_BODY = "#f2c94c";
+const CRAYON_BAND = "#e85d4c";
+const BUCKET_BODY = "#2d9cdb";
+const BUCKET_LIP = "#56ccf2";
+const PAINT_DRIP = "#e85d4c";
+const ERASER_RUBBER = "#f781c6";
+const ERASER_SLEEVE = "#9b9b9b";
+
+const GLYPH_STROKE = {
+  stroke: "currentColor",
+  strokeWidth: 1.25,
+  strokeLinejoin: "round" as const,
+};
+
+/** 蠟筆：橘尖、黃身、紅包裝帶。 */
 export function CrayonIcon({ className }: IconProps) {
   return (
     <svg {...BOX} className={className}>
+      <path d="M12 2.3 16.2 8.5H7.8Z" fill={CRAYON_TIP} {...GLYPH_STROKE} />
       <path
-        fill="currentColor"
-        fillRule="evenodd"
-        d="M12 2.1 16.4 8.2H7.6L12 2.1Zm-4 6.8h8v9.4A1.8 1.8 0 0 1 14.2 20.1H9.8A1.8 1.8 0 0 1 8 18.3V8.9Zm.9 3.3h6.2v2.3H8.9V12.2Z"
+        d="M8.15 8.7h7.7v9.5A1.7 1.7 0 0 1 14.15 19.9H9.85A1.7 1.7 0 0 1 8.15 18.2V8.7Z"
+        fill={CRAYON_BODY}
+        {...GLYPH_STROKE}
       />
+      <path d="M8.35 12.3h7.3v2.35H8.35z" fill={CRAYON_BAND} />
     </svg>
   );
 }
 
-/** 油漆桶：提把＋桶身＋傾倒的一小滴。 */
+/** 油漆桶：提把＋藍桶＋傾倒的紅油漆。 */
 export function BucketIcon({ className }: IconProps) {
   return (
     <svg {...BOX} className={className}>
+      <path d="M8.3 8.7c0-2.15 1.55-3.55 3.7-3.55s3.7 1.4 3.7 3.55" {...STROKE} />
       <path
-        d="M8.2 8.8c0-2.2 1.6-3.7 3.8-3.7s3.8 1.5 3.8 3.7"
-        {...STROKE}
+        d="M5.15 9.15h13.7l-1.2 10.05A1.6 1.6 0 0 1 16.08 21.2H7.92A1.6 1.6 0 0 1 6.35 19.2Z"
+        fill={BUCKET_BODY}
+        {...GLYPH_STROKE}
       />
+      <path d="M6.45 10.55h11.1v1.7H6.45z" fill={BUCKET_LIP} />
       <path
-        fill="currentColor"
-        d="M5.1 9.3h13.8l-1.35 10.4A1.7 1.7 0 0 1 15.9 21.3H8.1a1.7 1.7 0 0 1-1.65-1.6L5.1 9.3Z"
+        d="M17.55 11.3c2.35.45 3.45 2.15 3.05 3.75"
+        fill="none"
+        stroke={PAINT_DRIP}
+        strokeWidth="1.8"
+        strokeLinecap="round"
       />
-      <circle cx="18.6" cy="12.4" r="1.35" fill="currentColor" />
+      <circle cx="20.15" cy="16.7" r="1.4" fill={PAINT_DRIP} />
     </svg>
   );
 }
 
-/** 橡皮擦：斜放橡皮＋金屬套。 */
+/** 橡皮擦：斜放的粉紅橡皮＋灰套。 */
 export function EraserIcon({ className }: IconProps) {
   return (
     <svg {...BOX} className={className}>
-      <path
-        fill="currentColor"
-        fillRule="evenodd"
-        d="M8.1 4.6 18.4 8.2a1.7 1.7 0 0 1 1.05 2.15l-3.3 9.1A1.7 1.7 0 0 1 14 20.5L3.7 16.9A1.7 1.7 0 0 1 2.65 14.75l3.3-9.1A1.7 1.7 0 0 1 8.1 4.6Zm.55 1.7-2.7 7.45 6.2 2.15 2.7-7.45-6.2-2.15Z"
-      />
+      <g transform="rotate(-20 12 12)">
+        <rect
+          x="3.5"
+          y="8.1"
+          width="10.3"
+          height="7.8"
+          rx="1.55"
+          fill={ERASER_RUBBER}
+          {...GLYPH_STROKE}
+        />
+        <rect
+          x="14.9"
+          y="8.1"
+          width="5.7"
+          height="7.8"
+          rx="1.25"
+          fill={ERASER_SLEEVE}
+          {...GLYPH_STROKE}
+        />
+      </g>
     </svg>
   );
 }
