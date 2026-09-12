@@ -54,3 +54,8 @@ const SOCIALS: Social[] = [
 export function visibleSocials(): Social[] {
   return SOCIALS.filter((s) => s.url.trim() !== "");
 }
+
+/** 頂欄社群下拉：不含 Email。聯絡仍走頁尾「聯絡我們」。 */
+export function visibleNavSocials(): Social[] {
+  return visibleSocials().filter((s) => s.icon !== "email");
+}

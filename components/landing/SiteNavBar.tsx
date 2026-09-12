@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type MouseEvent,
+} from "react";
 import ThemeToggle from "@/components/ThemeToggle";
 import ConnectMenu from "@/components/landing/SubscribeMenu";
 import Icon from "@/components/ui/Icon";
@@ -11,6 +18,10 @@ import { useLandingFooterNavSolid } from "@/hooks/useLandingFooterNavSolid";
 import { feedbackHref, isContactExternal } from "@/lib/contact";
 import { isImmersiveRoute } from "@/lib/is-story-play-route";
 import { dismissIntroGate, isIntroGateOpen } from "@/lib/intro-gate";
+import {
+  LANDING_SCROLL_ROOT_ATTR,
+  scrollLandingToFirstSegment,
+} from "@/lib/landing-scroll";
 import styles from "./SiteNavBar.module.css";
 
 type NavItemId =
@@ -157,6 +168,16 @@ export default function SiteNavBar() {
     if (isIntroGateOpen()) dismissIntroGate();
   }, []);
 
+  /** 品牌／首頁：關浮層，並把 Landing 內部 snap 捲回第一屏。
+   *  已在 `/` 時必須 preventDefault——`href="/"` 會被 Next 當成導航並還原
+   *  捲動位置，內部容器就停在後面幾段。 */
+  const goLandingHome = useCallback((e: MouseEvent<HTMLAnchorElement>) => {
+    closeAll();
+    if (!document.querySelector(`[${LANDING_SCROLL_ROOT_ATTR}]`)) return;
+    e.preventDefault();
+    scrollLandingToFirstSegment();
+  }, [closeAll]);
+
   /** 點浮層外部關閉：`pointerdown` 早於 `click`，若讓 focus trap 把焦點歸還觸發器，
    * 會從使用者正要點的元素手上搶走。先把焦點移出面板再關，trap 的歸還就不會生效
    * （`previouslyFocused.focus()` 仍會執行，但此時使用者的點擊會在其後接手）。 */
@@ -256,7 +277,7 @@ export default function SiteNavBar() {
     >
       <div className={styles.inner}>
         {/* 不加 aria-label：可見字標即可及名稱，加了會覆寫並破壞既有 e2e 契約 */}
-        <Link href="/" className={styles.brand} onClick={closeAll}>
+        <Link href="/" className={styles.brand} onClick={goLandingHome}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/mascot.png" alt="" width={36} height={28} aria-hidden />
           <span className={styles.brandText}>車車遊樂園</span>
@@ -272,7 +293,7 @@ export default function SiteNavBar() {
                 ? "page"
                 : undefined
             }
-            onClick={closeAll}
+            onClick={goLandingHome}
           >
             首頁
           </Link>

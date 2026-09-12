@@ -7,6 +7,7 @@ import {
   type ReactNode,
   type RefObject,
 } from "react";
+import { scrollLandingToAnchor } from "@/lib/landing-scroll";
 import { LandingScrollContext } from "./LandingScrollContext";
 
 type LandingScrollViewProps = {
@@ -22,20 +23,7 @@ export default function LandingScrollView({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scrollToSegment = useCallback((anchorId: string) => {
-    const root = scrollRef.current;
-    const el = document.getElementById(anchorId);
-    if (!root || !el) return;
-    const reduced = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    const targetTop =
-      el.getBoundingClientRect().top -
-      root.getBoundingClientRect().top +
-      root.scrollTop;
-    root.scrollTo({
-      top: targetTop,
-      behavior: reduced ? "auto" : "smooth",
-    });
+    scrollLandingToAnchor(anchorId);
   }, []);
 
   useEffect(() => {
@@ -61,6 +49,7 @@ export default function LandingScrollView({
         tabIndex={0}
         role="region"
         aria-label="主題專區，可用方向鍵捲動瀏覽"
+        data-landing-scroll=""
       >
         {children}
       </div>

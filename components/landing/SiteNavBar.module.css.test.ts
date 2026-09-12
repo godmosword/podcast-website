@@ -198,15 +198,12 @@ describe("SiteNavBar.tsx 結構契約", () => {
     expect(tsx).not.toContain("desktopNav");
   });
 
-  it("品牌、首頁與留言點擊都要關閉抽屜", () => {
+  it("品牌與首頁點擊回 Landing 第一屏；留言關抽屜", () => {
     const brand = tsx.slice(tsx.indexOf("className={styles.brand}"));
-    expect(brand.slice(0, 200)).toContain("onClick={closeAll}");
-
-    const navLink = tsx.slice(tsx.indexOf("styles.navLink}"));
-    expect(navLink.slice(0, 300)).toContain("onClick={closeAll}");
+    expect(brand.slice(0, 200)).toContain("onClick={goLandingHome}");
 
     const homeAction = tsx.slice(tsx.indexOf("styles.homeAction"));
-    expect(homeAction.slice(0, 300)).toContain("onClick={closeAll}");
+    expect(homeAction.slice(0, 300)).toContain("onClick={goLandingHome}");
 
     const actions = tsx.slice(
       tsx.indexOf("className={styles.actions}"),

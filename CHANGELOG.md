@@ -29,6 +29,8 @@
 
 ### Changed
 
+- **頂欄品牌／首頁回到 Landing 第一屏**：已在 `/` 時點左上 icon 或「首頁」，把內部 snap 捲回 `#segment-stories`，不再停在後面幾段。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
+- **頂欄社群下拉拿掉 Email**：只留 Instagram／Threads／Facebook。信箱仍在內頁頁尾「聯絡我們」。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **Landing 拿掉頁尾、頂欄訂閱改頻道＋社群**：刪 `#landing-foot` snap pane；頂欄「訂閱」改兩個下拉（頻道＝收聽平台、社群＝IG／Threads／Facebook／Email）。內頁 `SiteFooter` 不變。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **Landing 拿掉重回開場鈕**：首段不再放 🚗 圓鈕或「看小紅開進遊樂園」連結。首次進站覆蓋層與 `/intro` 深連結不變。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **手機直向開場近景不再被切斷**：直向改三列（文案／場景／略過），地平線回到 62% 讓路面接到草叢，L5 貼齊場景底、縮放隨 band 高度夾住；覆蓋層不再把瀏海算兩次。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。

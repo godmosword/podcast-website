@@ -431,6 +431,66 @@ test.describe("內頁不掛 KidsPlayDock", () => {
   }
 });
 
+test.describe("頂欄回到 Landing 第一屏", () => {
+  test("已在後面幾段時，點首頁捲回第一段", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    await page
+      .locator("#segment-stories")
+      .getByRole("link", { name: "捲動到下一個專區" })
+      .click();
+    await expect
+      .poll(
+        async () =>
+          (await page.locator("#segment-bedtime").boundingBox())?.y ?? Infinity,
+        { timeout: 5_000 },
+      )
+      .toBeLessThan(200);
+    await page.getByRole("group", { name: "常用" }).getByRole("link", { name: "首頁" }).click();
+    await expect
+      .poll(
+        async () =>
+          (await page.locator("#segment-stories").boundingBox())?.y ?? Infinity,
+        { timeout: 5_000 },
+      )
+      .toBeLessThan(120);
+  });
+
+  test("已在後面幾段時，點品牌捲回第一段", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    await page.locator("#segment-health").evaluate((el) => {
+      const root = document.querySelector<HTMLElement>("[data-landing-scroll]");
+      if (!root) return;
+      root.scrollTo({
+        top:
+          el.getBoundingClientRect().top -
+          root.getBoundingClientRect().top +
+          root.scrollTop,
+        behavior: "instant",
+      });
+    });
+    await expect
+      .poll(
+        async () =>
+          (await page.locator("#segment-health").boundingBox())?.y ?? Infinity,
+        { timeout: 5_000 },
+      )
+      .toBeLessThan(200);
+    await page
+      .getByTestId("site-nav-bar")
+      .getByRole("link", { name: "車車遊樂園", exact: true })
+      .click();
+    await expect
+      .poll(
+        async () =>
+          (await page.locator("#segment-stories").boundingBox())?.y ?? Infinity,
+        { timeout: 5_000 },
+      )
+      .toBeLessThan(120);
+  });
+});
+
 test.describe("首頁沒有頁尾 snap pane", () => {
   test("四段之後不再接 landing-foot", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });

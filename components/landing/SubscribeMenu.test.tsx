@@ -17,14 +17,17 @@ describe("ConnectMenu", () => {
     expect(html).not.toContain("訂閱收聽");
   });
 
-  test("社群觸發器帶下拉，含 Email 與外連", async () => {
+  test("社群觸發器帶下拉，只有 IG／Threads／Facebook", async () => {
     const { default: ConnectMenu } = await import("./SubscribeMenu");
     const html = renderToStaticMarkup(
       <ConnectMenu kind="socials" open onOpenChange={() => {}} />,
     );
     expect(html).toContain("社群");
     expect(html).toContain("Instagram");
-    expect(html).toContain("mailto:bonboncarstory@gmail.com");
+    expect(html).toContain("Threads");
+    expect(html).toContain("Facebook");
+    expect(html).not.toContain("mailto:");
+    expect(html).not.toContain("Email");
     expect(html).not.toContain("訂閱");
   });
 
@@ -41,7 +44,10 @@ describe("ConnectMenu", () => {
 
   test("社群清單為空時不渲染", async () => {
     vi.resetModules();
-    vi.doMock("@/lib/social", () => ({ visibleSocials: () => [] }));
+    vi.doMock("@/lib/social", () => ({
+      visibleSocials: () => [],
+      visibleNavSocials: () => [],
+    }));
     const { default: ConnectMenu } = await import("./SubscribeMenu");
     const html = renderToStaticMarkup(<ConnectMenu kind="socials" />);
     expect(html).toBe("");

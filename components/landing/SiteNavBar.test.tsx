@@ -61,6 +61,40 @@ describe("SiteNavBar", () => {
     expect(homeAction?.getAttribute("href")).toBe("/");
   });
 
+  test("點品牌或首頁會把 Landing 內部容器捲回第一屏", async () => {
+    const root = document.createElement("div");
+    root.setAttribute("data-landing-scroll", "");
+    const first = document.createElement("section");
+    first.id = "segment-stories";
+    root.append(first);
+    document.body.append(root);
+    Object.defineProperty(root, "scrollTop", { value: 1800, writable: true });
+    vi.spyOn(root, "getBoundingClientRect").mockReturnValue({
+      top: 64,
+    } as DOMRect);
+    vi.spyOn(first, "getBoundingClientRect").mockReturnValue({
+      top: -1736,
+    } as DOMRect);
+    const scrollTo = vi.fn();
+    root.scrollTo = scrollTo;
+
+    const view = await renderNavBar();
+    fireEvent.click(view.getByRole("link", { name: "首頁" }));
+    expect(scrollTo).toHaveBeenCalledWith({
+      top: 0,
+      behavior: "auto",
+    });
+
+    scrollTo.mockClear();
+    fireEvent.click(view.getByRole("link", { name: "車車遊樂園" }));
+    expect(scrollTo).toHaveBeenCalledWith({
+      top: 0,
+      behavior: "auto",
+    });
+    root.remove();
+    vi.restoreAllMocks();
+  });
+
   test("「留言」在頂欄常用組，不在抽屜", async () => {
     const view = await renderNavBar();
 
@@ -334,6 +368,7 @@ describe("SiteNavBar", () => {
     }));
     vi.doMock("@/lib/social", () => ({
       visibleSocials: () => [],
+      visibleNavSocials: () => [],
     }));
     const { default: SiteNavBar } = await import("./SiteNavBar");
     const { ThemeProvider } = await import("@/components/ThemeProvider");

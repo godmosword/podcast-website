@@ -15,7 +15,7 @@ import { trackPlatformClick } from "@/lib/analytics";
 import { appendPlatformUtm } from "@/lib/platform-utm";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { visiblePlatforms } from "@/lib/platforms";
-import { visibleSocials } from "@/lib/social";
+import { visibleNavSocials } from "@/lib/social";
 import styles from "./SubscribeMenu.module.css";
 
 /** 受控開闔：由 `SiteNavBar` 統一管理，確保同時只有一個浮層開著
@@ -56,13 +56,11 @@ function connectItemsFor(kind: "channels" | "socials"): ConnectItem[] {
       onSelect: () => trackPlatformClick(platform.label, "nav-dropdown"),
     }));
   }
-  return visibleSocials().map((social) => ({
+  return visibleNavSocials().map((social) => ({
     key: social.label,
     label: social.label,
     href: social.url,
-    ariaLabel: social.url.startsWith("mailto:")
-      ? `寄信到 ${social.url.replace(/^mailto:/, "")}`
-      : `前往 ${social.label}`,
+    ariaLabel: `前往 ${social.label}`,
     badgeStyle: { background: social.background },
     icon: (
       <BrandSvg className={styles.icon}>{SOCIAL_ICON_PATHS[social.icon]}</BrandSvg>
