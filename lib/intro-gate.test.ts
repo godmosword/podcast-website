@@ -8,7 +8,9 @@ import {
   INTRO_GATE_INIT_SCRIPT,
   INTRO_GATE_ON,
   INTRO_GATE_STORAGE_KEY,
+  INTRO_PORTAL_ENABLED,
   dismissIntroGate,
+  evaluateIntroGate,
   isIntroGateOpen,
   reopenIntroGate,
   sealIntroBackground,
@@ -28,27 +30,36 @@ const base: IntroGateInput = {
 };
 
 describe("shouldOpenIntroGate", () => {
-  it("只在首次進首頁時打開", () => {
-    expect(shouldOpenIntroGate(base)).toBe(true);
+  it("產品關掉開場時一律不打開", () => {
+    expect(INTRO_PORTAL_ENABLED).toBe(false);
+    expect(shouldOpenIntroGate(base)).toBe(false);
     expect(shouldOpenIntroGate({ ...base, seen: true })).toBe(false);
-    expect(shouldOpenIntroGate({ ...base, pathname: "/stories" })).toBe(false);
+    expect(shouldOpenIntroGate({ ...base, search: "?enter=1" })).toBe(false);
+  });
+});
+
+describe("evaluateIntroGate", () => {
+  it("只在首次進首頁時打開", () => {
+    expect(evaluateIntroGate(base)).toBe(true);
+    expect(evaluateIntroGate({ ...base, seen: true })).toBe(false);
+    expect(evaluateIntroGate({ ...base, pathname: "/stories" })).toBe(false);
   });
 
   it("尊重使用者已表達的限制偏好——這正是 ADR-0003 指出舊自動導向的核心缺陷", () => {
-    expect(shouldOpenIntroGate({ ...base, reducedMotion: true })).toBe(false);
-    expect(shouldOpenIntroGate({ ...base, saveData: true })).toBe(false);
-    expect(shouldOpenIntroGate({ ...base, effectiveType: "2g" })).toBe(false);
-    expect(shouldOpenIntroGate({ ...base, effectiveType: "slow-2g" })).toBe(false);
-    expect(shouldOpenIntroGate({ ...base, effectiveType: "3g" })).toBe(true);
+    expect(evaluateIntroGate({ ...base, reducedMotion: true })).toBe(false);
+    expect(evaluateIntroGate({ ...base, saveData: true })).toBe(false);
+    expect(evaluateIntroGate({ ...base, effectiveType: "2g" })).toBe(false);
+    expect(evaluateIntroGate({ ...base, effectiveType: "slow-2g" })).toBe(false);
+    expect(evaluateIntroGate({ ...base, effectiveType: "3g" })).toBe(true);
   });
 
   it("?enter=1 是已表達的進站意圖，不再攔一次", () => {
-    expect(shouldOpenIntroGate({ ...base, search: "?enter=1" })).toBe(false);
-    expect(shouldOpenIntroGate({ ...base, search: "?enter=0" })).toBe(true);
+    expect(evaluateIntroGate({ ...base, search: "?enter=1" })).toBe(false);
+    expect(evaluateIntroGate({ ...base, search: "?enter=0" })).toBe(true);
   });
 
   it("部署層關掉 3D 時完全不出現", () => {
-    expect(shouldOpenIntroGate({ ...base, heroDisabled: true })).toBe(false);
+    expect(evaluateIntroGate({ ...base, heroDisabled: true })).toBe(false);
   });
 });
 
@@ -94,7 +105,7 @@ describe("INTRO_GATE_INIT_SCRIPT 與純函式一致", () => {
 
   for (const input of cases) {
     it(`${input.pathname}${input.search} seen=${input.seen} rm=${input.reducedMotion} save=${input.saveData} net=${input.effectiveType}`, () => {
-      expect(run(input)).toBe(shouldOpenIntroGate({ ...input, heroDisabled: false }));
+      expect(run(input)).toBe(evaluateIntroGate({ ...input, heroDisabled: false }));
     });
   }
 

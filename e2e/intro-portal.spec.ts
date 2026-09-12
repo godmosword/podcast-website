@@ -1,6 +1,13 @@
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { skipIntroOverlay } from "./intro-gate";
+import { INTRO_PORTAL_ENABLED, skipIntroOverlay } from "./intro-gate";
+
+declare global {
+  interface Window {
+    __advanceHeroClock?: (ms: number) => void;
+    __heroInstrumentation?: { webglContexts: number; visibilityListeners: number };
+  }
+}
 
 /**
  * Intro 的舞台自 2026-09-11 起是橫向 2.5D 視差帶（規格 HERO-PARALLAX-SPEC.md
@@ -13,6 +20,9 @@ import { skipIntroOverlay } from "./intro-gate";
  * - tile 載不出來不阻擋 ready 與出口；晚到的 tile 在路由切換後被丟掉
  *
  * 舊的 3D 舞台（`?stage=world`）只剩回滾用途，e2e 不再守它。
+ *
+ * 2026-09-12：產品已下架開場（`INTRO_PORTAL_ENABLED`）。本檔契約全部保留，
+ * 旗標為 false 時只跑「訪客看不到開場」這組；改回 true 即重跑下面整份。
  */
 const TILE_URL = /\/landing\/hero-parallax\/[^/]+\.webp(?:\?.*)?$/;
 const MODEL_URL = /\/models\/hero-world\/(?:v[23]\/)?[^/]+\.glb(?:\?.*)?$/;
@@ -58,6 +68,39 @@ async function installInstrumentation(page: import("@playwright/test").Page) {
     }) as typeof document.removeEventListener;
   });
 }
+
+test.describe("Intro Portal · 產品已下架", () => {
+  test.skip(INTRO_PORTAL_ENABLED, "開場仍上線時不跑下架契約");
+
+  test("首次進站直接看 Landing，不蓋覆蓋層", async ({ page }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator("html")).not.toHaveAttribute("data-intro-gate", "on");
+    await expect(page.locator("[data-intro-overlay]")).toHaveCount(0);
+    await expect(page.locator("[data-landing-root]")).toBeVisible();
+    await expect(page.locator("[data-landing-root]")).not.toHaveAttribute("inert");
+  });
+
+  test("首頁 HTML 不再帶覆蓋層 markup", async ({ request }) => {
+    const html = await (await request.get("/")).text();
+    expect(html).toContain("data-landing-root");
+    expect(html).toContain("PodcastSeries");
+    expect(html).not.toContain("data-intro-overlay");
+    expect(html).not.toContain('data-testid="replay-intro"');
+  });
+
+  test("/intro 導回首頁", async ({ page }) => {
+    const response = await page.goto("/intro", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+    await expect(page).toHaveURL(/\/(\?.*)?$/);
+    await expect(page.locator("[data-intro-root]")).toHaveCount(0);
+    await expect(page.locator("[data-landing-root]")).toBeVisible();
+    await expect(page.locator("[data-intro-overlay]")).toHaveCount(0);
+  });
+});
+
+test.describe("Intro Portal · retained suite", () => {
+  test.skip(!INTRO_PORTAL_ENABLED, "產品已關掉開場；元件與規格仍保留");
 
 test.describe("Intro Portal · Phase 4 route and entry", () => {
   test("serves a semantic intro without the Landing chrome", async ({ page }) => {
@@ -260,13 +303,6 @@ test.describe("Intro Portal · Phase 5 band, motion gating and lifecycle", () =>
 const CLOCK_GLOBAL = "__chechecarHeroActiveClock";
 const SLEEP_AFTER_MS = 24_000;
 const MAX_TICK_DELTA_MS = 1_000;
-
-declare global {
-  interface Window {
-    __advanceHeroClock?: (ms: number) => void;
-    __heroInstrumentation?: { webglContexts: number; visibilityListeners: number };
-  }
-}
 
 async function installFakeClock(page: import("@playwright/test").Page) {
   await page.addInitScript(([clockGlobal, maxDelta]) => {
@@ -1102,4 +1138,5 @@ test.describe("Intro Portal · home overlay (ADR-0004)", () => {
     await expect(page.locator("[data-landing-root]")).not.toHaveAttribute("inert", "");
     await context.close();
   });
+});
 });

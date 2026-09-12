@@ -9,6 +9,8 @@
 
 **視差帶已是首頁覆蓋層與 `/intro` 的預設舞台**（main `e7be2852`，含 Astra 視覺審查後的文字安全區修正）。3D 等距 diorama 只剩回滾用途。Phase 1／2／3／3b／4 全部落地；**Phase 3c（下架 R3F／Three）刻意沒做**，等實機看過再拉。
 
+**2026-09-12：** 產品已下架開場（`INTRO_PORTAL_ENABLED = false`）。首頁不掛覆蓋層、`/intro` 導回 `/`。下列檔案與契約仍保留。
+
 ---
 
 ## 1. 這一輪推上 main 的 commit（由舊到新）

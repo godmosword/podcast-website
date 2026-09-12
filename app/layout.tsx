@@ -7,7 +7,7 @@ import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import ReturnVisitPing from "@/components/ReturnVisitPing";
 import SiteNavBar from "@/components/landing/SiteNavBar";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { INTRO_GATE_INIT_SCRIPT } from "@/lib/intro-gate";
+import { INTRO_GATE_INIT_SCRIPT, INTRO_PORTAL_ENABLED } from "@/lib/intro-gate";
 import { siteIdentityJsonLd } from "@/lib/json-ld";
 import { getSiteUrl } from "@/lib/site-url";
 import { STORIES_VIEW_INIT_SCRIPT } from "@/lib/stories-view";
@@ -37,6 +37,8 @@ const huninn = localFont({
   src: "./fonts/huninn-subset.woff2",
   weight: "400 700",
   display: "swap",
+  // 420KB 中文字型不應阻塞每個 route 的首屏圖片；swap 仍保留最終字型。
+  preload: false,
   variable: "--font-huninn",
 });
 
@@ -44,6 +46,8 @@ const gensenRounded = localFont({
   src: "./fonts/gensen-rounded-tw-bold-subset.woff2",
   weight: "700",
   display: "swap",
+  // 475KB 標題字型只在實際 glyph 需要時載入，避免與 LCP 圖片競爭。
+  preload: false,
   variable: "--font-gensen",
 });
 
@@ -113,8 +117,10 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: STORIES_VIEW_INIT_SCRIPT }} />
         {/* 首頁 3D 開場的閘門：必須在首次繪製前決定，否則就會出現
-            ADR-0003 量到的那種「先看到內容再被蓋掉」的閃爍。 */}
-        <script dangerouslySetInnerHTML={{ __html: INTRO_GATE_INIT_SCRIPT }} />
+            ADR-0003 量到的那種「先看到內容再被蓋掉」的閃爍。產品關掉時不掛。 */}
+        {INTRO_PORTAL_ENABLED ? (
+          <script dangerouslySetInnerHTML={{ __html: INTRO_GATE_INIT_SCRIPT }} />
+        ) : null}
         <JsonLd data={siteIdentityJsonLd()} />
       </head>
       <body>

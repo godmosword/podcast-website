@@ -38,6 +38,11 @@ export default function SiteHeader() {
     <header className={styles.header}>
       <div className={styles.scene}>
         <picture>
+          <source
+            media="(max-width: 640px)"
+            type="image/avif"
+            srcSet="/hero-home-mobile.avif 768w"
+          />
           <source type="image/avif" srcSet={HERO_PATHS.avif} />
           <source type="image/webp" srcSet={HERO_PATHS.webp} />
           <img

@@ -9,6 +9,7 @@ import VehicleSelect from "./VehicleSelect";
 import TopicSelect from "./TopicSelect";
 import { filterStories } from "./story-filtering";
 import { playSfx } from "@/lib/sfx";
+import { useCompletedStories } from "@/hooks/useCompletedStories";
 import {
   parseStoriesSearchParams,
   storiesSearchQuery,
@@ -40,6 +41,7 @@ export function StoryFilter({
   const router = useRouter();
   const pathname = usePathname();
   const filterBase = pathname === "/stories" ? "/stories" : "/";
+  const completedStories = useCompletedStories();
 
   function pushFilters(
     nextVehicle: string | null,
@@ -114,7 +116,13 @@ export function StoryFilter({
         <ul className={`${styles.list} ${styles.catalog}`}>
           {filtered.map((story, i) => (
             <li key={story.slug} className={styles.listItem}>
-              <StoryCard story={story} index={i} hideMeta catalog />
+              <StoryCard
+                story={story}
+                index={i}
+                hideMeta
+                catalog
+                completedStories={completedStories}
+              />
             </li>
           ))}
         </ul>

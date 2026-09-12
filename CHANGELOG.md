@@ -29,6 +29,7 @@
 
 ### Changed
 
+- **下架 3D／視差開場（程式保留）**：`INTRO_PORTAL_ENABLED = false`。首頁不再掛覆蓋層、閘門不開、`/intro` 導回 `/`。HeroWorld、視差帶、閘門與規格檔仍留著，改回 `true` 即可接回。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **頂欄品牌／首頁回到 Landing 第一屏**：已在 `/` 時點左上 icon 或「首頁」，把內部 snap 捲回 `#segment-stories`，不再停在後面幾段。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **頂欄社群下拉拿掉 Email**：只留 Instagram／Threads／Facebook。信箱仍在內頁頁尾「聯絡我們」。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **Landing 拿掉頁尾、頂欄訂閱改頻道＋社群**：刪 `#landing-foot` snap pane；頂欄「訂閱」改兩個下拉（頻道＝收聽平台、社群＝IG／Threads／Facebook／Email）。內頁 `SiteFooter` 不變。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。

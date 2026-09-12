@@ -33,6 +33,8 @@ Next.js 16 App Router、React 19、TypeScript strict、CSS Modules。首頁由 L
 
 ## 路由決策（2026-09-08 依 ADR-0003 更新）
 
+**現行產品（2026-09-12）：** 開場已下架。`INTRO_PORTAL_ENABLED === false`：`/` 直接是 Landing，不掛覆蓋層、不跑閘門 script；`/intro` 導回 `/`。HeroWorld／視差／`IntroOverlay`／閘門程式與本文件其餘契約仍保留，把旗標改回 `true` 即可接回。
+
 `/` 永遠回傳完整的 Landing HTML——canonical、Podcast JSON-LD、SSR 內容與所有內部連結一字未改，而且**沒有任何 client redirect**。3D 開場是蓋在它上面的**同頁覆蓋層**（ADR-0004）：`<head>` 的同步 script（`lib/intro-gate.ts`）在首次繪製前決定要不要打開，所以既沒有導航可以閃爍，也不需要 middleware 或 cookie。覆蓋層每個瀏覽分頁出現一次（sessionStorage `cheche:intro-seen-v1`），按「進入車車遊樂園」就地淡出、焦點交給 `#main-content`，網址全程是 `/`。閘門同時檢查 reduced motion、Save-Data 與 2G：明確表達限制偏好的人根本不會遇到覆蓋層，第一眼就是 Landing。無 JavaScript 或 script 出錯時覆蓋層依設計不出現（CSS 預設隱藏），Landing 直接可用。Landing **沒有**重回開場入口。首次進站覆蓋層仍在；之後要再看開場請開 `/intro`。`/intro` 保留為獨立路由：可分享的深連結與無 JS 時的開場頁，noindex/follow，與覆蓋層共用同一個 `HeroWorld` 元件。從 `/intro` 進站會先寫入閘門標記，回到 `/` 不會再被蓋一次。
 
 取消自動導向的理由、實測到的閃爍數據與被否決的替代方案見 [ADR-0003](./adr/0003-intro-auto-invite.md)。

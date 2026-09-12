@@ -275,7 +275,7 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 
 ### Landing Hub（`/`）
 
-四段標題一律視覺隱藏（CSS module `titleHidden`，給輔助科技／`aria-labelledby`）。禁止用 `#segment-stories` 把 `.titleHidden` 或全域 `.sr-only` 解除隱藏。可見前景只留分區 CTA。Landing **沒有**重回開場入口；首次進站覆蓋層仍在，之後要再看開場請開 `/intro`。GEO 導言維持全域 `.sr-only`。不新增行銷卡片或插畫。
+四段標題一律視覺隱藏（CSS module `titleHidden`，給輔助科技／`aria-labelledby`）。禁止用 `#segment-stories` 把 `.titleHidden` 或全域 `.sr-only` 解除隱藏。可見前景只留分區 CTA。Landing **沒有**重回開場入口；開場覆蓋層與 `/intro` 已從產品路徑下架（`INTRO_PORTAL_ENABLED`），元件與規格仍保留。GEO 導言維持全域 `.sr-only`。不新增行銷卡片或插畫。
 
 Storyline 式**全螢幕分段捲動**：每段一張滿版黏土 hero（桌面 `segment-{id}.jpg` 16:9；行動 ≤768px `segment-{id}-portrait.jpg` 9:16），大圖主導 + 底部漸層遮罩 + 左下分區 CTA。**不**顯示段編號（如 01/04）。段標題仍視覺隱藏（CSS module `titleHidden`，給輔助科技／`aria-labelledby`），不疊在美術上；可見 CTA 為長句段名（本輪 Landing 例外，可超過「CTA ≤ 6 字」）；`href` 不變。分區 CTA 走**不透明暖深墨板**（`min-height: 56px`、`var(--landing-brand-ink)` 底板、`var(--on-dark)` 白字、`--elev-2`＋`--gloss`），字級桌面 `--fs-h2`、≤768 `--fs-h3`、≤640 `--fs-h4`，**非**橘色實心 pill、**非**玻璃 ghost；刻意不用 backdrop-filter。CTA `white-space: nowrap`（「 →」是獨立文字節點，換行會孤行）；<348px 可能與 Dudu 略疊，正解是另開任務把半形空白改成不斷行空白後再拿掉 nowrap。段內換段控制是中央一枚極淡雙折線（`moreSkip`：44×44 可點、無玻璃／黏土底板、絕對定位停在底列 chrome 之上，不跟左下 CTA、右下嘟嘟同一列）；鍵盤／輔助科技同一顆連結（可及名稱「捲動到下一個專區」；最後一段不放換段指引），`:focus-visible` 才加上 `var(--on-dark)` 焦點環。不放「聽最新一集」播放直達鈕。首段 GEO 導言仍用全域 `.sr-only`。
 

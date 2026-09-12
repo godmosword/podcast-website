@@ -62,7 +62,11 @@ export default function LandingSegment({
                 <source
                   media="(max-width: 768px)"
                   type="image/avif"
-                  srcSet={heroSources.portrait.avif}
+                  srcSet={
+                    eager && heroSources.portrait.avif === "/landing/segment-stories-portrait.avif"
+                      ? "/landing/segment-stories-portrait-mobile.avif 1024w"
+                      : heroSources.portrait.avif
+                  }
                 />
                 <source
                   media="(max-width: 768px)"

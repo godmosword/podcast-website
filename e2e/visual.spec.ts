@@ -4,7 +4,7 @@ import {
   type VisualTheme,
   type VisualViewportId,
 } from "./visual-helpers";
-import { skipIntroOverlay } from "./intro-gate";
+import { INTRO_PORTAL_ENABLED, skipIntroOverlay } from "./intro-gate";
 
 /**
  * D2 視覺回歸：Phase A smoke（5 頁 × 1280 light）+ Phase B 完整組合。
@@ -483,6 +483,9 @@ const INTRO_VISUAL_VIEWPORTS = [
   { width: 390, height: 844, label: "390x844" },
 ] as const;
 
+test.describe("Intro visual baselines", () => {
+  test.skip(!INTRO_PORTAL_ENABLED, "產品已關掉開場；baseline 仍保留");
+
 for (const viewport of INTRO_VISUAL_VIEWPORTS) {
   test(`visual：Intro ${viewport.label} parallax`, async ({ page }) => {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
@@ -501,3 +504,4 @@ for (const viewport of INTRO_VISUAL_VIEWPORTS) {
     });
   });
 }
+});

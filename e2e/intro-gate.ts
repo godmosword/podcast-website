@@ -9,6 +9,9 @@ import type { BrowserContext, Page } from "@playwright/test";
  */
 export const INTRO_GATE_STORAGE_KEY = "cheche:intro-seen-v1";
 
+/** 與 `lib/intro-gate.ts` 同一把產品開關；開場下架時保留規格、不跑舊契約。 */
+export { INTRO_PORTAL_ENABLED } from "../lib/intro-gate";
+
 export async function skipIntroOverlay(target: Page | BrowserContext): Promise<void> {
   await target.addInitScript((key) => {
     try {

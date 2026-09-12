@@ -5,7 +5,23 @@ import styles from "./StoryProgressBadge.module.css";
 
 type StoryProgressBadgeProps = {
   slug: string;
+  /** 目錄頁由父層集中訂閱，避免每張卡各自建立 progress store listener。 */
+  completedStories?: ReadonlySet<string>;
 };
+
+function Badge() {
+  return (
+    <span className={styles.badge} role="img" aria-label="已聽完">
+      ⭐
+    </span>
+  );
+}
+
+function LiveStoryProgressBadge({ slug }: { slug: string }) {
+  const completed = useCompletedStories();
+  if (!completed.has(slug)) return null;
+  return <Badge />;
+}
 
 /**
  * 「已聽完」星章，貼在故事封面右上角。
@@ -17,14 +33,9 @@ type StoryProgressBadgeProps = {
  * 一集），做成「聽到一半」會導致標記至多出現一張、且因為改聽別集而無預警消失，
  * 對幼兒是反向學習訊號。「繼續聽」動線另由 `lib/continue-playback` 既有入口負責。
  */
-export default function StoryProgressBadge({ slug }: StoryProgressBadgeProps) {
-  const completed = useCompletedStories();
-
-  if (!completed.has(slug)) return null;
-
-  return (
-    <span className={styles.badge} role="img" aria-label="已聽完">
-      ⭐
-    </span>
-  );
+export default function StoryProgressBadge({ slug, completedStories }: StoryProgressBadgeProps) {
+  if (completedStories) {
+    return completedStories.has(slug) ? <Badge /> : null;
+  }
+  return <LiveStoryProgressBadge slug={slug} />;
 }

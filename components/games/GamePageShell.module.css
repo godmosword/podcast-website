@@ -117,6 +117,8 @@
  */
 .playArea {
   border-radius: var(--radius-lg);
+  /* GameHost 的 canvas 是 360×640；載入閘門先保留同一垂直空間，避免 ready swap 造成 CLS。 */
+  min-height: min(684px, calc((100vw - 24px) * 16 / 9 + 44px));
 }
 
 :global([data-theme="night"]) .playArea {

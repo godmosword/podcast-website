@@ -9,11 +9,20 @@
  * 使用者直接看到 Landing。反向設計在那兩種情況下會把 Landing 鎖死，
  * 而 `app/globals.css` 的 `html:has([data-landing-root]){overflow:hidden}`
  * 會讓那變成真正無法捲動的死頁。
+ *
+ * 產品開關見 `INTRO_PORTAL_ENABLED`：關掉後首頁不掛覆蓋層、`/intro` 導回 `/`。
+ * 本檔與 HeroWorld／視差元件仍留著，改回 `true` 即可接回。
  */
 
 export const INTRO_GATE_STORAGE_KEY = "cheche:intro-seen-v1";
 export const INTRO_GATE_ATTRIBUTE = "data-intro-gate";
 export const INTRO_GATE_ON = "on";
+
+/**
+ * 產品開關。`false`：訪客看不到開場（首頁不蓋覆蓋層、`/intro` 導回 `/`）。
+ * 元件、閘門、視差／3D 舞台與規格檔都不刪；改回 `true` 即接回。
+ */
+export const INTRO_PORTAL_ENABLED = false;
 
 /** 覆蓋層出現的頻率。切成 `always` 就是每次進首頁都播。 */
 export const INTRO_GATE_FREQUENCY: "session" | "always" = "session";
@@ -34,6 +43,8 @@ export type IntroGateInput = {
 };
 
 /**
+ * 閘門規則本身（不看產品開關）。`shouldOpenIntroGate` 在產品開啟時走這裡。
+ *
  * 純函式是唯一真相——它是產品契約，必須能在不啟動瀏覽器的情況下被測試。
  *
  * reduced motion／Save-Data／2G 三個條件放在這裡是刻意的：ADR-0003 最有力的
@@ -41,7 +52,7 @@ export type IntroGateInput = {
  * 靜態圖。覆蓋層對這些人也只會是一張 poster 加一顆按鈕，等於多一次點擊。
  * 在同頁覆蓋層下這三個檢查是免費的：同步、繪製前、而且沒有導航要閃。
  */
-export function shouldOpenIntroGate({
+export function evaluateIntroGate({
   pathname, search, seen, reducedMotion, saveData, effectiveType, heroDisabled,
 }: IntroGateInput): boolean {
   if (pathname !== "/") return false;
@@ -51,9 +62,15 @@ export function shouldOpenIntroGate({
   return !seen;
 }
 
+export function shouldOpenIntroGate(input: IntroGateInput): boolean {
+  if (!INTRO_PORTAL_ENABLED) return false;
+  return evaluateIntroGate(input);
+}
+
 /**
- * `<head>` 裡的同步 script。邏輯與 `shouldOpenIntroGate` 一一對應，並由
+ * `<head>` 裡的同步 script。邏輯與 `evaluateIntroGate` 一一對應，並由
  * `lib/intro-gate.test.ts` 交叉驗證兩者行為一致，避免兩份實作漂移。
+ * 產品關掉時 layout 不掛這支 script；字串本身仍是完整閘門規則。
  *
  * 整段包在 try/catch：storage 被封鎖、`matchMedia` 不存在等任何意外都只會讓
  * 覆蓋層不出現，永遠不會讓首頁壞掉。

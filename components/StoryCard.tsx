@@ -27,6 +27,8 @@ type StoryCardProps = {
   catalog?: boolean;
   /** 覆寫封面 sizes；目錄卡預設用 `STORIES_CATALOG_COVER_SIZES` */
   coverSizes?: string;
+  /** 目錄父層集中提供已完成集合，避免每張卡重複訂閱 progress store。 */
+  completedStories?: ReadonlySet<string>;
 };
 
 export default function StoryCard({
@@ -37,6 +39,7 @@ export default function StoryCard({
   sharedCoverMorph = true,
   catalog = false,
   coverSizes,
+  completedStories,
 }: StoryCardProps) {
   const isGrid = variant === "grid";
   // 列表縮圖 96×96（≤480px 為 80×80）；grid 約 220px。避免預設 640px sizes。
@@ -79,7 +82,7 @@ export default function StoryCard({
         )}
         {/* 星章不受 hideMeta 控制：它是圖形獎勵而非 meta 文字，且首頁精簡列表
             正是最需要「哪些聽過」的地方。 */}
-        <StoryProgressBadge slug={story.slug} />
+        <StoryProgressBadge slug={story.slug} completedStories={completedStories} />
       </div>
 
       <span className={`${styles.body} ${isGrid ? styles.bodyGrid : ""}`}>

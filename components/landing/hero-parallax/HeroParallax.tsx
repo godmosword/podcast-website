@@ -81,6 +81,12 @@ export default function HeroParallax({ running, onReady, deferImages = false }: 
                 key={copy}
                 ref={layer.id === "l3" && copy === 0 ? roadImg : undefined}
                 src={`${PARALLAX_ASSET_PATH}/${layer.file}`}
+                srcSet={
+                  layer.id === "l3"
+                    ? `${PARALLAX_ASSET_PATH}/l3-road-mobile.webp 1200w, ${PARALLAX_ASSET_PATH}/${layer.file} 1630w`
+                    : undefined
+                }
+                sizes={layer.id === "l3" ? "(max-width: 768px) 390px, 100vw" : undefined}
                 width={layer.width}
                 height={layer.height}
                 alt=""
