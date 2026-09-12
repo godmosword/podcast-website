@@ -42,7 +42,7 @@ export default function LandingScrollView({
     >
       {/* 首頁鎖定文件捲動，改由此容器負責 snap；tabIndex 讓鍵盤使用者
           可聚焦並用方向鍵/PageUp-Down 捲動。各段中央 moreSkip 淡雙折線
-          也可點換段，不佔 CTA／嘟嘟底列。 */}
+          也可點換段（最後一段捲回第一屏），不佔 CTA／嘟嘟底列。 */}
       <div
         ref={scrollRef}
         className={className}

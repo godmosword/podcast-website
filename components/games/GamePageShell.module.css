@@ -1,8 +1,62 @@
+/* Candy 的遊戲文案只需本頁字元；用同字形的 route-scoped subset，避免慢網路
+ * 下載全站 431KB／486KB 中文字型後才讓遊戲 loading text 完成。 */
+@font-face {
+  font-family: candyHuninn;
+  src: url("../../app/fonts/candy-huninn.woff2") format("woff2");
+  font-display: optional;
+  font-weight: 400 700;
+}
+
+@font-face {
+  font-family: candyGensen;
+  src: url("../../app/fonts/candy-gensen.woff2") format("woff2");
+  font-display: optional;
+  font-weight: 700;
+}
+
 .main {
   padding: 1rem 1rem 2.5rem;
   padding-top: clamp(0.75rem, 2vh, 1.25rem);
   max-width: 60rem;
   margin: 0 auto;
+}
+
+.main[data-game-id="candy-match"] {
+  /* 首屏先用系統中文字，避免 title screen 的 LCP 等待 route subset；
+   * 使用者開始遊戲後再由 :has() 切回品牌字型。 */
+  --font-stack-body: var(--font-latin), "PingFang TC",
+    "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  --font-stack-display: var(--font-latin), "PingFang TC", "Microsoft JhengHei",
+    "Noto Sans TC", sans-serif;
+  font-family: var(--font-stack-body);
+}
+
+.main[data-game-id="candy-match"]:has([data-candy-fonts="ready"]) {
+  --font-stack-body: var(--font-latin), candyHuninn, "PingFang TC",
+    "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  --font-stack-display: var(--font-latin), candyGensen, candyHuninn,
+    "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+}
+
+/* Root skip-link 在 main 外，需一起改用 subset，否則仍會觸發全站 huninn。 */
+:global(body:has(main[data-game-id="candy-match"])) {
+  --font-stack-body: var(--font-latin), "PingFang TC",
+    "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  --font-stack-display: var(--font-latin), "PingFang TC", "Microsoft JhengHei",
+    "Noto Sans TC", sans-serif;
+  font-family: var(--font-stack-body);
+}
+
+:global(body:has(main[data-game-id="candy-match"] [data-candy-fonts="ready"])) {
+  --font-stack-body: var(--font-latin), candyHuninn, "PingFang TC",
+    "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  --font-stack-display: var(--font-latin), candyGensen, candyHuninn,
+    "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  font-family: var(--font-stack-body);
+}
+
+.main[data-game-id="candy-match"] .titleScreen h2 {
+  line-height: 48px;
 }
 
 .skip {

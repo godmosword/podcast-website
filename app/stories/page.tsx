@@ -46,7 +46,7 @@ export default function StoriesPage() {
   };
 
   return (
-    <main className={styles.main}>
+    <main className={styles.main} data-deferred-brand-font="stories">
       <JsonLd data={podcastSeriesJsonLd()} />
       <SiteHeader />
       <StoriesIndexHeader lede={lede} titleClassName={styles.title} />

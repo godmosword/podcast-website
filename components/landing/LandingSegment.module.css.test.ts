@@ -45,6 +45,10 @@ describe("LandingSegment.module.css touch targets", () => {
     expect(css).toMatch(
       /\.moreSkip svg[\s\S]*?animation:\s*moreHintDrift/,
     );
+    expect(css).toMatch(
+      /\.moreSkip\[data-skip-direction="first"\] svg[\s\S]*?animation-name:\s*moreHintDriftUp/,
+    );
+    expect(css).toMatch(/@keyframes moreHintDriftUp/);
   });
 
   it("≤768 底列只留 CTA，不抬 CTA", () => {

@@ -38,7 +38,10 @@ export default function LandingHub() {
             segment={segment}
             index={index}
             siteIntro={index === 0 ? siteIntro : undefined}
-            nextAnchorId={segments[index + 1]?.anchorId ?? null}
+            nextAnchorId={
+              segments[index + 1]?.anchorId ?? segments[0]!.anchorId
+            }
+            loopToFirst={index === segments.length - 1}
           />
         ))}
 

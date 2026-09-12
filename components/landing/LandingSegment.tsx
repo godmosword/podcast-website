@@ -5,6 +5,10 @@ import Icon from "@/components/ui/Icon";
 import LandingPlayLink from "./LandingPlayLink";
 import type { ResolvedLandingSegment } from "@/lib/landing-query";
 import { landingHeroPictureSources } from "@/lib/modern-image-src";
+import {
+  LANDING_FIRST_ANCHOR_ID,
+  scrollLandingToFirstSegment,
+} from "@/lib/landing-scroll";
 import { useLandingScroll } from "./LandingScrollContext";
 import styles from "./LandingSegment.module.css";
 
@@ -13,8 +17,10 @@ type LandingSegmentProps = {
   index: number;
   /** 首段 answer-first 網站導言：DOM 留 sr-only 供 GEO／輔助科技，畫面不顯示。 */
   siteIntro?: string;
-  /** 下一段錨點；最後一段沒有下一屏，不放換段指引。 */
+  /** 換段錨點；最後一段指向第一屏。 */
   nextAnchorId: string | null;
+  /** 最後一段：雙折線朝上，捲回第一屏。 */
+  loopToFirst?: boolean;
 };
 
 export default function LandingSegment({
@@ -22,6 +28,7 @@ export default function LandingSegment({
   index,
   siteIntro,
   nextAnchorId,
+  loopToFirst = false,
 }: LandingSegmentProps) {
   const landingScroll = useLandingScroll();
   const eager = index === 0;
@@ -29,14 +36,23 @@ export default function LandingSegment({
     ? landingHeroPictureSources(segment.heroImage, segment.heroImagePortrait)
     : null;
 
-  function goToNext(e: React.MouseEvent<HTMLAnchorElement>) {
-    if (!nextAnchorId) return;
+  const skipAnchorId = loopToFirst
+    ? (nextAnchorId ?? LANDING_FIRST_ANCHOR_ID)
+    : nextAnchorId;
+
+  function goToSkip(e: React.MouseEvent<HTMLAnchorElement>) {
+    if (!skipAnchorId) return;
     e.preventDefault();
-    if (landingScroll) {
-      landingScroll.scrollToSegment(nextAnchorId);
+    if (loopToFirst) {
+      if (scrollLandingToFirstSegment()) return;
+      document.getElementById(skipAnchorId)?.scrollIntoView({ block: "start" });
       return;
     }
-    document.getElementById(nextAnchorId)?.scrollIntoView({ block: "start" });
+    if (landingScroll) {
+      landingScroll.scrollToSegment(skipAnchorId);
+      return;
+    }
+    document.getElementById(skipAnchorId)?.scrollIntoView({ block: "start" });
   }
 
   const imgProps = {
@@ -146,13 +162,14 @@ export default function LandingSegment({
           </Link>
         </div>
       </div>
-      {nextAnchorId ? (
+      {skipAnchorId ? (
         <a
-          href={`#${nextAnchorId}`}
+          href={`#${skipAnchorId}`}
           className={styles.moreSkip}
           data-landing-more-hint
-          aria-label="捲動到下一個專區"
-          onClick={goToNext}
+          data-skip-direction={loopToFirst ? "first" : "next"}
+          aria-label={loopToFirst ? "捲動回第一個專區" : "捲動到下一個專區"}
+          onClick={goToSkip}
         >
           <svg
             viewBox="0 0 24 20"

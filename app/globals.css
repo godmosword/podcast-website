@@ -216,6 +216,25 @@
   --map-chip-line: #e0a33f;
 }
 
+/* Stories／story 首屏：先用系統 CJK fallback 完成首次 layout，避免 6× CPU
+   把兩套品牌中文字型的首次解析與整頁 layout 綁在同一個 startup task。品牌字型
+   仍保留，待既有 client shell 的 idle callback 確認 fonts.load 完成後才切回。 */
+body:has(main[data-deferred-brand-font]) {
+  --font-stack-body: system-ui, -apple-system, "PingFang TC", "Microsoft JhengHei",
+    "Noto Sans TC", sans-serif;
+  --font-stack-display: var(--font-latin), var(--font-gensen), var(--font-huninn),
+    "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  font-size-adjust: none;
+}
+
+body:has(main[data-deferred-brand-font][data-brand-fonts="ready"]) {
+  --font-stack-body: var(--font-latin), var(--font-huninn), "PingFang TC",
+    "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  --font-stack-display: var(--font-latin), var(--font-gensen), var(--font-huninn),
+    "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  font-size-adjust: none;
+}
+
 /* ============ 夜晚模式（睡前・暖夜靛） ============ */
 [data-theme="night"] {
   color-scheme: dark;

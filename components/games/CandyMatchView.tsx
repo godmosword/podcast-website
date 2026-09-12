@@ -182,6 +182,7 @@ export function CandyMatchView({
   const [fallMotion, setFallMotion] = useState<readonly CandyFallMotion[] | null>(null);
   const [sweepMotion, setSweepMotion] = useState<"row" | "color" | null>(null);
   const [medals, setMedals] = useState<number[]>([]);
+  const [brandFontsEnabled, setBrandFontsEnabled] = useState(false);
   const [cellPx, setCellPx] = useState(56);
   const lastBoardsRef = useRef<Record<number, BoardState | undefined>>({});
   const lastChallengesRef = useRef<Record<number, string | undefined>>({});
@@ -307,11 +308,17 @@ export function CandyMatchView({
   );
 
   const goToMap = useCallback(() => {
+    setBrandFontsEnabled(true);
     setOverlay(null);
     setScreen("map");
     instance.notifyReady("map");
     syncHost();
   }, [instance, syncHost]);
+
+  const openTutorial = useCallback(() => {
+    setBrandFontsEnabled(true);
+    onOpenTutorial();
+  }, [onOpenTutorial]);
 
   const goToTitle = useCallback(() => {
     setOverlay(null);
@@ -699,6 +706,7 @@ export function CandyMatchView({
       data-screen={screen}
       data-task={level.task.kind}
       data-challenge={level.challengeId}
+      data-candy-fonts={brandFontsEnabled ? "ready" : undefined}
       aria-live="polite"
     >
       <div
@@ -735,7 +743,7 @@ export function CandyMatchView({
             <button type="button" style={bigBtn} onClick={goToMap}>
               ▶ 開始
             </button>
-            <button type="button" style={softBtn} onClick={onOpenTutorial}>
+            <button type="button" style={softBtn} onClick={openTutorial}>
               怎麼玩？
             </button>
           </div>
@@ -751,7 +759,7 @@ export function CandyMatchView({
             通關一顆星，沒用道具再一顆，步數還夠再一顆。做出特別糖更好玩
           </p>
           <div style={{ textAlign: "center", marginBottom: 12 }}>
-            <button type="button" style={softBtn} onClick={onOpenTutorial}>
+            <button type="button" style={softBtn} onClick={openTutorial}>
               怎麼玩？
             </button>
           </div>

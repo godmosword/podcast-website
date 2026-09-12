@@ -29,6 +29,7 @@
 
 ### Changed
 
+- **Landing 最後一段可捲回第一屏**：好習慣段中央淡雙折線改朝上，可及名稱「捲動回第一個專區」，點了用內部 snap 立刻回 `#segment-stories`。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **著色工具列改圖像鈕**：蠟筆／油漆桶／橡皮擦、筆刷三檔與復原／清空／縮放還原／看原圖／下載改為圖示，可及名稱與 e2e 契約不變，方便 3–7 歲認工具。**未改** Apple sync workflow、著色引擎與線稿。
 - **下架 3D／視差開場（程式保留）**：`INTRO_PORTAL_ENABLED = false`。首頁不再掛覆蓋層、閘門不開、`/intro` 導回 `/`。HeroWorld、視差帶、閘門與規格檔仍留著，改回 `true` 即可接回。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **頂欄品牌／首頁回到 Landing 第一屏**：已在 `/` 時點左上 icon 或「首頁」，把內部 snap 捲回 `#segment-stories`，不再停在後面幾段。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。

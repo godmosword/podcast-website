@@ -105,7 +105,7 @@ describe("LandingSegment", () => {
     }
   });
 
-  test("最後一段不放換段指引", async () => {
+  test("最後一段放回第一屏的換段指引", async () => {
     const { default: LandingSegment } = await import("./LandingSegment");
     const segments = resolveLandingSegments();
     const last = segments.at(-1)!;
@@ -113,10 +113,15 @@ describe("LandingSegment", () => {
       <LandingSegment
         segment={last}
         index={segments.length - 1}
-        nextAnchorId={null}
+        nextAnchorId={segments[0]!.anchorId}
+        loopToFirst
       />,
     );
-    expect(html).not.toMatch(/data-landing-more-hint/);
+    expect(html).toMatch(/data-landing-more-hint/);
+    expect(html).toContain('data-skip-direction="first"');
+    expect(html).toContain(`href="#${segments[0]!.anchorId}"`);
+    expect(html).toContain('aria-label="捲動回第一個專區"');
+    expect(html).not.toContain("捲動到下一個專區");
     expect(html).not.toContain("捲動到頁尾");
     expect(html).not.toContain("landing-foot");
   });

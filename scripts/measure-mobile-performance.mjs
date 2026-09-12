@@ -16,6 +16,7 @@ const OUT = resolve("docs/qa/mobile-performance");
 const RUNS = 3;
 const BASE_FROM_ENV = process.env.MOBILE_PERF_BASE ?? "";
 const INTRO_GATE_KEY = "cheche:intro-seen-v1";
+const PARALLAX_CSS_PATH = resolve("components/landing/hero-parallax/HeroParallax.module.css");
 
 const PAGES = [
   { id: "intro", label: "Intro", path: "/intro", bypassIntro: false },
@@ -742,6 +743,67 @@ function animationSnapshot(page) {
   });
 }
 
+async function measureParallaxCssContract(browser, profile) {
+  const css = await readFile(PARALLAX_CSS_PATH, "utf8");
+  const fixtureHtml = `
+    <style>${css}</style>
+    <div class="band" data-hero-parallax data-running="true"
+      style="position:relative;width:360px;height:800px;--h:100px;--w:100px">
+      <div class="layer l1"><div class="strip"></div></div>
+      <div class="heroSlot"><div class="hero"></div></div>
+    </div>`;
+
+  const measureState = async (reducedMotion) => {
+    const context = await browser.newContext({
+      viewport: profile.viewport,
+      deviceScaleFactor: profile.dpr,
+      reducedMotion,
+    });
+    const page = await context.newPage();
+    await page.setContent(fixtureHtml, { waitUntil: "load" });
+    const state = await page.evaluate(async () => {
+      const read = () => {
+        const targets = [".strip", ".hero"].map((selector) => document.querySelector(selector));
+        const animations = Array.from(document.getAnimations({ subtree: true })).filter((animation) =>
+          targets.includes(animation.effect?.target),
+        );
+        return {
+          computedPlayStates: targets.map((target) => getComputedStyle(target).animationPlayState),
+          playStates: animations.map((animation) => animation.playState),
+          animationCount: animations.length,
+          properties: [...new Set(animations.flatMap((animation) =>
+            (animation.effect?.getKeyframes?.() ?? []).flatMap((frame) => Object.keys(frame)),
+          ))].filter((property) =>
+            !["offset", "easing", "composite", "computedOffset"].includes(property),
+          ),
+        };
+      };
+      await new Promise((resolvePromise) => requestAnimationFrame(() => resolvePromise()));
+      const running = read();
+      document.querySelector(".band").setAttribute("data-running", "false");
+      await new Promise((resolvePromise) => requestAnimationFrame(() => resolvePromise()));
+      return { running, paused: read() };
+    });
+    await context.close();
+    return state;
+  };
+
+  const normal = await measureState("no-preference");
+  const reduced = await measureState("reduce");
+  return {
+    source: "components/landing/hero-parallax/HeroParallax.module.css",
+    normal,
+    reduced,
+    hiddenPausedOrReduced: normal.paused.computedPlayStates.every((state) => state !== "running") &&
+      normal.paused.playStates.every((state) => state !== "running"),
+    reducedMotionStopped: reduced.running.animationCount === 0 &&
+      reduced.paused.animationCount === 0,
+    compositorPropertiesOnly: normal.running.properties.every((property) =>
+      ["transform", "opacity"].includes(property),
+    ),
+  };
+}
+
 async function measureAnimation(base, browser, profile) {
   const pageDef = PAGES[0];
   const { context, page, client } = await makeContext(browser, pageDef, profile, NETWORKS[0]);
@@ -750,7 +812,11 @@ async function measureAnimation(base, browser, profile) {
   await page.waitForTimeout(1_000);
   const beforeMetrics = performanceMetricMap((await client.send("Performance.getMetrics")).metrics);
   const declarations = await animationSnapshot(page);
-  const cadence = await page.evaluate((duration) => window.__startMobileFrameSample(duration), 10_000);
+  const introAvailable = declarations.heroStage !== null || declarations.heroRunning !== null;
+  const cssContract = introAvailable ? null : await measureParallaxCssContract(browser, profile);
+  const cadence = introAvailable
+    ? await page.evaluate((duration) => window.__startMobileFrameSample(duration), 10_000)
+    : { intervals: [], note: "Intro is disabled and /intro redirected; cadence is not applicable." };
   const afterMetrics = performanceMetricMap((await client.send("Performance.getMetrics")).metrics);
   const intervals = cadence.intervals;
   const delayed = intervals.filter((value) => value > 25);
@@ -759,29 +825,35 @@ async function measureAnimation(base, browser, profile) {
     0,
   );
 
-  const beforeHidden = await animationSnapshot(page);
-  await page.evaluate(() => {
-    Object.defineProperty(document, "hidden", { configurable: true, get: () => true });
-    Object.defineProperty(document, "visibilityState", { configurable: true, get: () => "hidden" });
-    document.dispatchEvent(new Event("visibilitychange"));
-  });
-  await page.waitForTimeout(350);
-  const hidden = await animationSnapshot(page);
-  await page.evaluate(() => {
-    Object.defineProperty(document, "hidden", { configurable: true, get: () => false });
-    Object.defineProperty(document, "visibilityState", { configurable: true, get: () => "visible" });
-    document.dispatchEvent(new Event("visibilitychange"));
-  });
-  await page.waitForTimeout(350);
-  const visibleAgain = await animationSnapshot(page);
+  const beforeHidden = introAvailable ? await animationSnapshot(page) : null;
+  if (introAvailable) {
+    await page.evaluate(() => {
+      Object.defineProperty(document, "hidden", { configurable: true, get: () => true });
+      Object.defineProperty(document, "visibilityState", { configurable: true, get: () => "hidden" });
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+  }
+  await page.waitForTimeout(introAvailable ? 350 : 0);
+  const hidden = introAvailable
+    ? await animationSnapshot(page)
+    : { method: "css-contract-fixture", pausedOrReduced: cssContract.hiddenPausedOrReduced };
+  if (introAvailable) {
+    await page.evaluate(() => {
+      Object.defineProperty(document, "hidden", { configurable: true, get: () => false });
+      Object.defineProperty(document, "visibilityState", { configurable: true, get: () => "visible" });
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+  }
+  await page.waitForTimeout(introAvailable ? 350 : 0);
+  const visibleAgain = introAvailable ? await animationSnapshot(page) : null;
 
-  const beforeLeave = await page.evaluate(() => ({
+  const beforeLeave = introAvailable ? await page.evaluate(() => ({
     activeTimeouts: window.__mobilePerf?.activeTimeouts ?? null,
     activeIntervals: window.__mobilePerf?.activeIntervals ?? null,
-  }));
-  await page.getByRole("link", { name: "略過動畫" }).click({ noWaitAfter: true }).catch(() => {});
-  await page.waitForTimeout(1_200);
-  const afterLeave = await page.evaluate(() => ({
+  })) : null;
+  if (introAvailable) await page.getByRole("link", { name: "略過動畫" }).click({ noWaitAfter: true }).catch(() => {});
+  await page.waitForTimeout(introAvailable ? 1_200 : 0);
+  const afterLeave = introAvailable ? await page.evaluate(() => ({
     url: location.pathname,
     heroCount: document.querySelectorAll("[data-hero-parallax]").length,
     heroAnimationCount: document.querySelector("[data-hero-parallax]")?.getAnimations({ subtree: true }).length ?? 0,
@@ -795,7 +867,7 @@ async function measureAnimation(base, browser, profile) {
     animationCount: null,
     activeTimeouts: null,
     activeIntervals: null,
-  }));
+  })) : null;
 
   const reduced = await measureReducedMotion(base, browser, profile);
   const metricDelta = (name) =>
@@ -808,7 +880,9 @@ async function measureAnimation(base, browser, profile) {
     profileLabel: profile.label,
     simulated: true,
     durationMs: 10_000,
+    introAvailable,
     declarations,
+    cssContract,
     frameCadence: {
       samples: intervals.length,
       p50IntervalMs: round(percentile(intervals, 0.5), 3),
@@ -816,7 +890,7 @@ async function measureAnimation(base, browser, profile) {
       maxIntervalMs: round(maxFinite(intervals), 3),
       delayedIntervalsOver25ms: delayed.length,
       droppedFramesApprox: droppedApprox,
-      note: "Headless Chromium cadence approximation; not a real-device FPS claim.",
+      note: cadence.note ?? "Headless Chromium cadence approximation; not a real-device FPS claim.",
     },
     mainThreadDuringAnimation: {
       layoutCountDelta: metricDelta("LayoutCount"),
@@ -828,14 +902,17 @@ async function measureAnimation(base, browser, profile) {
       before: beforeHidden,
       hidden,
       visibleAgain,
-      pausedOrReduced: hidden.heroRunning === "false" ||
-        hidden.animations.every((animation) => animation.playState !== "running"),
+      pausedOrReduced: introAvailable
+        ? hidden.heroRunning === "false" || hidden.animations.every((animation) => animation.playState !== "running")
+        : cssContract.hiddenPausedOrReduced,
+      method: introAvailable ? "runtime-visibilitychange" : "css-contract-fixture",
     },
     routeLeave: {
+      available: introAvailable,
       before: beforeLeave,
       after: afterLeave,
-      noHeroAfterLeave: afterLeave.heroCount === 0,
-      noAnimationAfterLeave: afterLeave.heroAnimationCount === 0,
+      noHeroAfterLeave: introAvailable ? afterLeave.heroCount === 0 : null,
+      noAnimationAfterLeave: introAvailable ? afterLeave.heroAnimationCount === 0 : null,
     },
     reducedMotion: reduced,
     scrollListenerAdds: await page.evaluate(() => window.__mobilePerf?.scrollListenerAdds ?? null).catch(() => null),
@@ -985,6 +1062,18 @@ function introGate(rows, animations) {
     }
   }
   for (const animation of animations) {
+    if (!animation.introAvailable) {
+      if (!animation.cssContract?.hiddenPausedOrReduced) {
+        failures.push("Intro parallax CSS contract did not pause when data-running=false for " + animation.profile + ".");
+      }
+      if (!animation.cssContract?.reducedMotionStopped) {
+        failures.push("Intro parallax CSS contract did not stop for reduced motion for " + animation.profile + ".");
+      }
+      if (!animation.cssContract?.compositorPropertiesOnly) {
+        failures.push("Intro parallax CSS contract used a non-compositor property for " + animation.profile + ".");
+      }
+      continue;
+    }
     if (!animation.reducedMotion.mediaReduced || animation.reducedMotion.runningAnimations !== 0) {
       failures.push("Intro reduced-motion check did not stop running animation for " + animation.profile + ".");
     }
@@ -997,7 +1086,8 @@ function introGate(rows, animations) {
         ": " + [...new Set(disallowedProperties)].join(", ") + ".",
       );
     }
-    if (!animation.routeLeave.noHeroAfterLeave || !animation.routeLeave.noAnimationAfterLeave) {
+    if (animation.routeLeave.available &&
+      (!animation.routeLeave.noHeroAfterLeave || !animation.routeLeave.noAnimationAfterLeave)) {
       failures.push("Intro route-leave animation residue check failed for " + animation.profile + ".");
     }
   }
@@ -1040,23 +1130,35 @@ function gateResults(rows, cases, animations) {
     longTaskSources,
     animationChecks: animations.map((animation) => ({
       profile: animation.profile,
+      introAvailable: animation.introAvailable,
       p50FrameIntervalMs: animation.frameCadence.p50IntervalMs,
       p95FrameIntervalMs: animation.frameCadence.p95IntervalMs,
       droppedFramesApprox: animation.frameCadence.droppedFramesApprox,
       layoutCountDelta: animation.mainThreadDuringAnimation.layoutCountDelta,
       recalcStyleCountDelta: animation.mainThreadDuringAnimation.recalcStyleCountDelta,
       hiddenPausedOrReduced: animation.hiddenTab.pausedOrReduced,
-      reducedMotionStopped: animation.reducedMotion.runningAnimations === 0,
-      compositorPropertiesOnly: animation.declarations.animations
-        .flatMap((item) => item.properties)
-        .every((property) => ["transform", "opacity"].includes(property)),
-      routeLeaveClean: animation.routeLeave.noHeroAfterLeave && animation.routeLeave.noAnimationAfterLeave,
+      reducedMotionStopped: animation.introAvailable
+        ? animation.reducedMotion.runningAnimations === 0
+        : animation.cssContract?.reducedMotionStopped ?? null,
+      compositorPropertiesOnly: animation.introAvailable
+        ? animation.declarations.animations
+          .flatMap((item) => item.properties)
+          .every((property) => ["transform", "opacity"].includes(property))
+        : animation.cssContract?.compositorPropertiesOnly ?? null,
+      routeLeaveClean: animation.routeLeave.available
+        ? animation.routeLeave.noHeroAfterLeave && animation.routeLeave.noAnimationAfterLeave
+        : null,
+      hiddenCheckMethod: animation.hiddenTab.method,
     })),
   };
 }
 
 function mdNumber(value, digits = 0) {
   return value == null ? "n/a" : Number(value.toFixed(digits)).toString();
+}
+
+function mdBoolean(value) {
+  return value == null ? "n/a" : value ? "yes" : "no";
 }
 
 function buildReport(report) {
@@ -1119,6 +1221,7 @@ function buildReport(report) {
     "## Intro animation",
     "",
     "Frame interval numbers are simulated headless cadence approximations, not real-device FPS.",
+    "若 `/intro` 因 feature flag redirect 到 `/`，Intro runtime 不會拿 Landing DOM 充當證據；hidden/reduced/compositor 檢查改以同一份 parallax CSS 的 contract fixture 驗證。",
     "",
     "| Profile | p50 interval | p95 interval | dropped approx | layout delta | style recalc delta | hidden paused | reduced motion | route leave |",
     "| --- | ---: | ---: | ---: | ---: | ---: | --- | --- | --- |",
@@ -1131,9 +1234,9 @@ function buildReport(report) {
       " | " + mdNumber(animation.droppedFramesApprox) +
       " | " + mdNumber(animation.layoutCountDelta) +
       " | " + mdNumber(animation.recalcStyleCountDelta) +
-      " | " + (animation.hiddenPausedOrReduced ? "yes" : "no") +
-      " | " + (animation.reducedMotionStopped ? "yes" : "no") +
-      " | " + (animation.routeLeaveClean ? "yes" : "no") + " |",
+      " | " + mdBoolean(animation.hiddenPausedOrReduced) +
+      " | " + mdBoolean(animation.reducedMotionStopped) +
+      " | " + mdBoolean(animation.routeLeaveClean) + " |",
     );
   }
   lines.push("", "## Gate notes", "");

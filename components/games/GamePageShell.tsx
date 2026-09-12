@@ -42,7 +42,7 @@ export function GamePageShell({
 
   return (
     <GamePlayChromeProvider>
-      <main className={styles.main} aria-label={title}>
+      <main className={styles.main} aria-label={title} data-game-id={gameId}>
         <a href="#game-play" className={styles.skip}>
           跳到遊戲區域
         </a>

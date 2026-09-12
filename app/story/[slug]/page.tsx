@@ -77,7 +77,7 @@ export default async function StoryDetailPage({
     Boolean(story.reflectionPrompt);
 
   return (
-    <main className={styles.main}>
+    <main className={styles.main} data-deferred-brand-font="story-detail">
       <JsonLd data={podcastEpisodeJsonLd(story)} />
       <JsonLd data={faqPageJsonLd(jsonLdFaqs)} />
       <JsonLd

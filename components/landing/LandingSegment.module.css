@@ -312,6 +312,10 @@
   animation: moreHintDrift 2.4s ease-in-out infinite;
 }
 
+.moreSkip[data-skip-direction="first"] svg {
+  animation-name: moreHintDriftUp;
+}
+
 @keyframes moreHintDrift {
   0%,
   100% {
@@ -320,6 +324,18 @@
   }
   50% {
     transform: translateY(4px);
+    opacity: 0.82;
+  }
+}
+
+@keyframes moreHintDriftUp {
+  0%,
+  100% {
+    transform: rotate(180deg) translateY(0);
+    opacity: 0.48;
+  }
+  50% {
+    transform: rotate(180deg) translateY(4px);
     opacity: 0.82;
   }
 }
@@ -338,6 +354,10 @@
     animation: none;
     opacity: 0.62;
     transform: none;
+  }
+
+  .moreSkip[data-skip-direction="first"] svg {
+    transform: rotate(180deg);
   }
 
   .moreSkip:active {

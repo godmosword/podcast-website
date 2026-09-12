@@ -501,8 +501,8 @@ test.describe("首頁沒有頁尾 snap pane", () => {
       page.getByRole("link", { name: "捲動到頁尾" }),
     ).toHaveCount(0);
     await expect(
-      page.locator("#segment-health [data-landing-more-hint]"),
-    ).toHaveCount(0);
+      page.locator("#segment-health").getByRole("link", { name: "捲動回第一個專區" }),
+    ).toBeVisible();
   });
 });
 
@@ -649,4 +649,36 @@ test.describe("首頁手機換段出口", () => {
         .toBeLessThan(760);
     });
   }
+
+  test("最後一段往上鍵捲回第一屏", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 760 });
+    await page.goto("/");
+    await page.locator("#segment-health").evaluate((el) => {
+      const root = document.querySelector<HTMLElement>("[data-landing-scroll]");
+      if (!root) return;
+      root.scrollTo({
+        top:
+          el.getBoundingClientRect().top -
+          root.getBoundingClientRect().top +
+          root.scrollTop,
+        behavior: "instant",
+      });
+    });
+    const skip = page
+      .locator("#segment-health")
+      .getByRole("link", { name: "捲動回第一個專區" });
+    await expect(skip).toBeVisible();
+    const skipBox = await skip.boundingBox();
+    expect(skipBox, "往上鍵沒有版面盒").not.toBeNull();
+    expect(skipBox!.width).toBeGreaterThanOrEqual(44);
+    expect(skipBox!.height).toBeGreaterThanOrEqual(44);
+    await skip.click();
+    await expect
+      .poll(
+        async () =>
+          (await page.locator("#segment-stories").boundingBox())?.y ?? Infinity,
+        { timeout: 5_000 },
+      )
+      .toBeLessThan(120);
+  });
 });

@@ -216,6 +216,31 @@ export default function SiteNavBar() {
     return () => mql.removeEventListener("change", onChange);
   }, [closeAll]);
 
+  // Stories／story 的首屏先用 metric-compatible fallback；品牌字型在瀏覽器 idle
+  // 時預先完成，確認可用後才切換，避免把 font swap 與 startup layout 合併成長 task。
+  useEffect(() => {
+    const main = document.querySelector<HTMLElement>(
+      "main[data-deferred-brand-font]",
+    );
+    if (!main) return;
+
+    let cancelled = false;
+    const loadBrandFonts = () => {
+      void Promise.all([
+        document.fonts.load("400 1rem huninn"),
+        document.fonts.load("700 1rem gensenRounded"),
+      ]).then(() => {
+        if (!cancelled) main.dataset.brandFonts = "ready";
+      });
+    };
+
+    const idleId = window.requestIdleCallback(loadBrandFonts, { timeout: 1_200 });
+    return () => {
+      cancelled = true;
+      window.cancelIdleCallback(idleId);
+    };
+  }, [pathname]);
+
   if (playMode || pathname === "/intro") return null;
 
   const exploreRows = MENU_ROWS.filter((r) => !MOBILE_PARENT_GROUP_IDS.has(r.id));
