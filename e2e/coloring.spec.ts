@@ -89,8 +89,12 @@ test.describe("coloring book", () => {
     await openFirstColoringPage(page);
     await expect(page.getByText(/先選顏色，再用蠟筆/)).toBeVisible();
     for (const name of ["筆刷細", "筆刷中", "筆刷粗"]) {
-      await expect(page.getByRole("button", { name })).toBeVisible();
+      const sizeBtn = page.getByRole("button", { name });
+      await expect(sizeBtn).toBeVisible();
+      await expect(sizeBtn).not.toHaveText(name.replace("筆刷", ""));
     }
+    await expect(page.getByRole("button", { name: "蠟筆" })).not.toHaveText("蠟筆");
+    await expect(page.getByRole("button", { name: "蠟筆" }).locator("svg")).toBeVisible();
     await expect(page.getByRole("button", { name: "縮放還原" })).toBeDisabled();
   });
 

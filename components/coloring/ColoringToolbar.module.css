@@ -22,16 +22,24 @@
 }
 
 .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 44px;
   min-width: 44px;
-  padding: 0.45rem 0.85rem;
-  border-radius: var(--radius-pill);
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: var(--radius-circle);
   border: 2px solid color-mix(in srgb, var(--coloring-ink) 22%, transparent);
   background: var(--coloring-ui-surface);
   color: var(--coloring-ink);
-  font-weight: 700;
-  font-size: var(--fs-control);
   cursor: pointer;
+  transition: transform 120ms ease;
+}
+
+.btn:hover:not(:disabled) {
+  transform: scale(1.06);
 }
 
 .btn:disabled {
@@ -44,6 +52,18 @@
   outline-offset: 2px;
 }
 
+.icon {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+
+.sizeDot {
+  display: block;
+  border-radius: var(--radius-circle);
+  background: currentColor;
+}
+
 .active {
   background: var(--coloring-ink);
   color: var(--bg);
@@ -54,6 +74,16 @@
   background: var(--coloring-accent);
   border-color: var(--coloring-accent);
   color: var(--coloring-accent-fg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
+
+  .btn:hover:not(:disabled) {
+    transform: none;
+  }
 }
 
 @media (max-width: 640px) {
