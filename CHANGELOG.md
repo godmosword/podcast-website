@@ -21,6 +21,7 @@
 
 ### Fixed
 
+- **手機點 Landing「車車遊樂園的故事」不再掉進休息頁**：頂欄預載品牌字未先檢查 `requestIdleCallback`，部分行動 WebView／舊 Safari 進 `/stories` 會讓 root layout 拋錯、整頁變成「這一頁暫時休息中」。沒有 idle API 時改 `setTimeout`。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **角色圖鑑「出場故事」統一釘在卡片框底**：個性文案長短不再把下拉推高，同一列卡片的選單齊底。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **手機開場舞台不再被頂欄與薄帶裁切**：覆蓋層內容從 `--nav-h` 起排，標題不再卡在導覽後面；直向視差改為文案／按鈕一列、場景吃剩餘高度並加大縮放。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **播放器關掉字幕後插圖仍跟音檔換頁**：`字幕` 鈕以前連帶關掉跟讀，看圖時只剩手動翻頁。現在插圖一律跟 `captionTimes`（無則等分），字幕只開關文字；關閉字幕時的左右 tap／swipe 改跳插圖並帶時間。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
@@ -29,6 +30,8 @@
 
 ### Changed
 
+- **Landing 底列把分區 CTA、換段圓鈕與嘟嘟收成同一排**：圓鈕不再浮在中央偏上；左群組是 CTA 加圓鈕、右欄對齊小紅車，三者齊底、互不重疊。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
+- **Landing 滑鼠滾輪換段改走圓鈕同一套短轉場**：垂直滾輪／觸控板往下（或往上）先 120ms 淡出再 `auto` 對齊，接著 280ms 淡入＋微縮放；一格或一次明確手勢只換一段。手指滑與方向鍵仍只靠 snap。`prefers-reduced-motion` 不攔截。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **Landing 換段加短轉場**：點黏土圓鈕或頂欄回家時，先 120ms 淡出再 `auto` 對齊，接著 280ms 淡入＋微縮放；手指滑仍只靠 snap。`prefers-reduced-motion` 立刻到位。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **Landing 換段改黏土圓鈕**：段底淡雙折線改為 44×44 暖深墨圓鈕（單折線標、`--gloss`／`--elev-2`），語彙對齊分區 CTA；最後一段仍朝上回到第一屏。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **Landing 最後一段可捲回第一屏**：好習慣段中央淡雙折線改朝上，可及名稱「捲動回第一個專區」，點了用內部 snap 立刻回 `#segment-stories`。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。

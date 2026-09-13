@@ -114,6 +114,31 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await expectHitTestable(page, moreSkip, "桌面往下捲動");
 });
 
+test("Landing 滑鼠往下滾用與圓鈕相同的換段", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/");
+  const root = page.locator("[data-landing-scroll]");
+  await expect(root).toBeVisible();
+  const prevented = await root.evaluate((el) => {
+    const ev = new WheelEvent("wheel", {
+      deltaY: 120,
+      deltaMode: 0,
+      bubbles: true,
+      cancelable: true,
+    });
+    el.dispatchEvent(ev);
+    return ev.defaultPrevented;
+  });
+  expect(prevented, "滾輪應攔截並改走程式換段").toBe(true);
+  await expect
+    .poll(
+      async () =>
+        (await page.locator("#segment-bedtime").boundingBox())?.y ?? Infinity,
+      { timeout: 5_000 },
+    )
+    .toBeLessThan(200);
+});
+
 test("夜間桌面開抽屜：微暗只套膠囊，外層 .bar 不因開闔改變（不得出現全寬色帶）", async ({
   page,
 }) => {
@@ -613,8 +638,8 @@ test.describe("夜間漢堡抽屜", () => {
 
 
 /**
- * 段底中央黏土圓鈕是可點換段控制，但不跟 CTA／嘟嘟同一底列。
- * 守住：可見、≥44×44、點得到、點了真的換段（含短轉場後仍對齊）。
+ * 段底黏土圓鈕是可點換段控制，與 CTA／嘟嘟同一底列。
+ * 守住：可見、≥44×44、互不重疊、點得到、點了真的換段（含短轉場後仍對齊）。
  */
 test.describe("首頁手機換段出口", () => {
   for (const width of [320, 390, 767] as const) {

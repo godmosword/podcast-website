@@ -1,24 +1,11 @@
 .root {
   position: fixed;
-  right: clamp(10px, 2.5vw, 26px);
-  bottom: calc(clamp(12px, 3vh, 28px) + var(--safe-bottom));
+  right: calc(var(--landing-gutter, 20px) + var(--safe-right));
+  bottom: var(--landing-dock-bottom, calc(12px + var(--safe-bottom)));
   z-index: 25;
   pointer-events: none;
 }
 
 .companion {
   pointer-events: auto;
-}
-
-@media (max-width: 768px) {
-  .root {
-    right: calc(clamp(20px, 5vw, 56px) + var(--safe-right));
-    bottom: calc(var(--safe-bottom) + 12px);
-  }
-}
-
-@media (max-width: 640px) {
-  .root {
-    right: calc(clamp(20px, 5vw, 56px) + var(--safe-right));
-  }
 }

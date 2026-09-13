@@ -23,6 +23,7 @@ import {
   LANDING_SCROLL_ROOT_ATTR,
   transitionLandingToAnchor,
 } from "@/lib/landing-scroll";
+import { scheduleWhenIdle } from "@/lib/schedule-idle";
 import styles from "./SiteNavBar.module.css";
 
 type NavItemId =
@@ -227,6 +228,10 @@ export default function SiteNavBar() {
 
     let cancelled = false;
     const loadBrandFonts = () => {
+      if (typeof document.fonts?.load !== "function") {
+        if (!cancelled) main.dataset.brandFonts = "ready";
+        return;
+      }
       void Promise.all([
         document.fonts.load("400 1rem huninn"),
         document.fonts.load("700 1rem gensenRounded"),
@@ -235,10 +240,10 @@ export default function SiteNavBar() {
       });
     };
 
-    const idleId = window.requestIdleCallback(loadBrandFonts, { timeout: 1_200 });
+    const cancelIdle = scheduleWhenIdle(loadBrandFonts, 1_200);
     return () => {
       cancelled = true;
-      window.cancelIdleCallback(idleId);
+      cancelIdle();
     };
   }, [pathname]);
 

@@ -121,66 +121,69 @@ export default function LandingSegment({
           ) : null}
           {siteIntro ? <p className="sr-only">{siteIntro}</p> : null}
         </div>
-        <div className={styles.ctaRow}>
-          {segment.play ? (
-            <LandingPlayLink
-              href={segment.play.href}
-              slug={segment.play.slug}
-              audioSrc={segment.play.audioSrc}
-              className={`${styles.playCta} scrollEnter scrollEnterStagger3`}
+        <div className={styles.chrome} data-landing-chrome>
+          <div className={styles.ctaRow}>
+            {segment.play ? (
+              <LandingPlayLink
+                href={segment.play.href}
+                slug={segment.play.slug}
+                audioSrc={segment.play.audioSrc}
+                className={`${styles.playCta} scrollEnter scrollEnterStagger3`}
+              >
+                <Icon name="play" size={18} className={styles.playIcon} />
+                {segment.play.label}
+              </LandingPlayLink>
+            ) : null}
+            <Link
+              href={segment.cta.href}
+              className={`${segment.play ? styles.subscribeCta : styles.cta} scrollEnter scrollEnterStagger3`}
+              aria-label={
+                segment.cta.external
+                  ? `${segment.cta.label}（另開視窗）`
+                  : undefined
+              }
+              {...(segment.cta.external
+                ? { target: "_blank", rel: "noopener noreferrer" }
+                : {})}
             >
-              <Icon name="play" size={18} className={styles.playIcon} />
-              {segment.play.label}
-            </LandingPlayLink>
-          ) : null}
-          <Link
-            href={segment.cta.href}
-            className={`${segment.play ? styles.subscribeCta : styles.cta} scrollEnter scrollEnterStagger3`}
-            aria-label={
-              segment.cta.external
-                ? `${segment.cta.label}（另開視窗）`
-                : undefined
-            }
-            {...(segment.cta.external
-              ? { target: "_blank", rel: "noopener noreferrer" }
-              : {})}
-          >
-            {segment.cta.label}
-            {segment.cta.external ? (
-              <Icon name="external" size={15} className={styles.ctaIcon} />
-            ) : (
-              " →"
-            )}
-          </Link>
+              {segment.cta.label}
+              {segment.cta.external ? (
+                <Icon name="external" size={15} className={styles.ctaIcon} />
+              ) : (
+                " →"
+              )}
+            </Link>
+            {skipAnchorId ? (
+              <a
+                href={`#${skipAnchorId}`}
+                className={styles.moreSkip}
+                data-landing-more-hint
+                data-skip-direction={loopToFirst ? "first" : "next"}
+                aria-label={loopToFirst ? "捲動回第一個專區" : "捲動到下一個專區"}
+                onClick={goToSkip}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                  aria-hidden
+                  focusable="false"
+                >
+                  <path
+                    d="M7 9.5 L12 14.5 L17 9.5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </a>
+            ) : null}
+          </div>
+          <div className={styles.duduSlot} aria-hidden />
         </div>
       </div>
-      {skipAnchorId ? (
-        <a
-          href={`#${skipAnchorId}`}
-          className={styles.moreSkip}
-          data-landing-more-hint
-          data-skip-direction={loopToFirst ? "first" : "next"}
-          aria-label={loopToFirst ? "捲動回第一個專區" : "捲動到下一個專區"}
-          onClick={goToSkip}
-        >
-          <svg
-            viewBox="0 0 24 24"
-            width="18"
-            height="18"
-            aria-hidden
-            focusable="false"
-          >
-            <path
-              d="M7 9.5 L12 14.5 L17 9.5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </a>
-      ) : null}
     </section>
   );
 }

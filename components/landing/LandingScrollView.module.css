@@ -6,6 +6,33 @@
   scroll-behavior: auto;
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
+  --landing-gutter: clamp(20px, 5vw, 56px);
+  --landing-bottom-ui-h: 0px;
+  --landing-dock-bottom: calc(
+    clamp(20px, 3.5vh, 56px) + var(--landing-bottom-ui-h) + var(--safe-bottom)
+  );
+  --landing-skip: 56px;
+  --landing-dudu-slot: clamp(80px, 11vw, 118px);
+}
+
+@media (max-width: 768px) {
+  .root {
+    --landing-dock-bottom: calc(var(--safe-bottom) + 6px);
+  }
+}
+
+@media (max-width: 480px) {
+  .root {
+    --landing-gutter: 16px;
+    --landing-skip: 44px;
+  }
+}
+
+@media (max-width: 360px) {
+  .root {
+    --landing-gutter: 10px;
+    --landing-skip: 44px;
+  }
 }
 
 /* 鍵盤聚焦捲動區時給出可見指示（內縮避免被內容裁切） */

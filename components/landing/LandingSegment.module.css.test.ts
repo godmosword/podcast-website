@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-/** UX-P1-1：分區 CTA min-height 56px；換段黏土圓鈕 44px 可點、不進 CTA 底列。 */
+/** UX-P1-1：分區 CTA min-height 56px；換段黏土圓鈕 ≥44px，與 CTA／嘟嘟同一底列。 */
 describe("LandingSegment.module.css touch targets", () => {
   const css = readFileSync(
     join(import.meta.dirname, "LandingSegment.module.css"),
@@ -28,11 +28,11 @@ describe("LandingSegment.module.css touch targets", () => {
     return blocks;
   };
 
-  it("換段黏土圓鈕是 44px 可點控制，語彙對齊分區 CTA", () => {
+  it("換段黏土圓鈕是 ≥44px 可點控制，語彙對齊分區 CTA", () => {
     const skip = extractBlocks(".moreSkip")[0] ?? "";
-    expect(skip).toMatch(/position:\s*absolute/);
-    expect(skip).toMatch(/width:\s*44px/);
-    expect(skip).toMatch(/height:\s*44px/);
+    expect(skip).not.toMatch(/position:\s*absolute/);
+    expect(skip).toMatch(/width:\s*var\(--landing-skip\)/);
+    expect(skip).toMatch(/height:\s*var\(--landing-skip\)/);
     expect(skip).toMatch(/min-width:\s*44px/);
     expect(skip).toMatch(/min-height:\s*44px/);
     expect(skip).toMatch(/cursor:\s*pointer/);
@@ -55,16 +55,26 @@ describe("LandingSegment.module.css touch targets", () => {
     expect(css).toMatch(/@keyframes moreHintDriftUp/);
   });
 
-  it("≤768 底列只留 CTA，不抬 CTA", () => {
+  it("底列 chrome 與 CTA／圓鈕／嘟嘟佔位同一列", () => {
+    const chrome = extractBlocks(".chrome")[0] ?? "";
+    const row = extractBlocks(".ctaRow")[0] ?? "";
+    const slot = extractBlocks(".duduSlot")[0] ?? "";
+    expect(chrome).toMatch(/align-items:\s*flex-end/);
+    expect(chrome).toMatch(/justify-content:\s*space-between/);
+    expect(row).toMatch(/flex-wrap:\s*nowrap/);
+    expect(row).toMatch(/align-items:\s*flex-end/);
+    expect(slot).toMatch(/width:\s*var\(--landing-dudu-slot\)/);
+    expect(css).toMatch(/--landing-dudu-slot:\s*clamp\(80px,\s*11vw,\s*118px\)/);
+    expect(css).toMatch(
+      /--landing-dock-bottom:\s*calc\(\s*clamp\(20px,\s*3\.5vh,\s*56px\) \+ var\(--landing-bottom-ui-h\) \+ var\(--safe-bottom\)/,
+    );
     const start = css.indexOf("@media (max-width: 768px)");
     expect(start, "缺少 ≤768 區塊").toBeGreaterThan(-1);
     const mobile = stripComments(css.slice(start));
     expect(mobile).not.toMatch(/\.next\s*\{/);
+    expect(mobile).not.toMatch(/grid-template-columns:\s*minmax\(0, 1fr\) 80px/);
     expect(mobile).toMatch(
-      /\.content\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) 80px/,
-    );
-    expect(mobile).toMatch(
-      /\.content\s*\{[\s\S]*?padding-bottom:\s*calc\(var\(--safe-bottom\) \+ 6px\)/,
+      /\.content\s*\{[\s\S]*?padding-bottom:\s*var\(--landing-dock-bottom\)/,
     );
   });
 

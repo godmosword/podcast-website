@@ -14,10 +14,12 @@
   background: var(--bg);
   --landing-gutter: clamp(20px, 5vw, 56px);
   --landing-bottom-ui-h: 0px;
-  /* 底列 chrome 高度：指引停在這條線之上，不進 CTA／嘟嘟列。 */
-  --landing-chrome-h: calc(
-    56px + clamp(20px, 3.5vh, 56px) + var(--landing-bottom-ui-h)
+  --landing-dock-bottom: calc(
+    clamp(20px, 3.5vh, 56px) + var(--landing-bottom-ui-h) + var(--safe-bottom)
   );
+  --landing-skip: 56px;
+  /* 與 DuduMoment companion 畫框同寬，避免圓鈕被小紅車蓋住 */
+  --landing-dudu-slot: clamp(80px, 11vw, 118px);
 }
 
 .visual {
@@ -95,13 +97,28 @@
   position: relative;
   z-index: 2;
   width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
   padding: 0
     calc(var(--landing-gutter) + var(--safe-right))
-    calc(clamp(20px, 3.5vh, 56px) + var(--landing-bottom-ui-h))
+    var(--landing-dock-bottom)
     calc(var(--landing-gutter) + var(--safe-left));
   color: #fff;
+}
+
+.chrome {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+}
+
+.duduSlot {
+  flex: none;
+  width: var(--landing-dudu-slot);
+  height: var(--landing-skip);
+  pointer-events: none;
 }
 
 .headline {
@@ -148,9 +165,10 @@
 
 .ctaRow {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  flex-wrap: nowrap;
+  align-items: flex-end;
   gap: 10px;
+  min-width: 0;
 }
 
 .cta {
@@ -195,7 +213,7 @@
 }
 
 .moreSkip:active {
-  transform: translateX(-50%) scale(0.96);
+  transform: scale(0.96);
   background: color-mix(in srgb, var(--on-dark) 8%, var(--landing-brand-ink));
 }
 
@@ -293,16 +311,15 @@
   margin-left: 2px;
 }
 
-/* 段底中央黏土圓鈕：可點換段，語彙對齊分區 CTA，停在 CTA／嘟嘟列之上。 */
+/* 段底黏土圓鈕：與分區 CTA、嘟嘟同一底列，語彙對齊 CTA。 */
 .moreSkip {
-  position: absolute;
-  left: 50%;
-  bottom: calc(var(--landing-chrome-h) + 8px);
+  position: relative;
   z-index: 3;
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  flex: none;
+  width: var(--landing-skip);
+  height: var(--landing-skip);
   min-width: 44px;
   min-height: 44px;
   padding: 0;
@@ -312,7 +329,6 @@
   color: var(--on-dark);
   text-decoration: none;
   cursor: pointer;
-  transform: translateX(-50%);
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--landing-brand-ink) 55%, #000),
     var(--elev-2),
@@ -357,15 +373,14 @@
 }
 
 /* 程式換段：時長須與 lib/landing-scroll.ts 的 LEAVE/ENTER 同步。
-   只動 opacity／transform；手指滑仍走 snap，不在這裡播。 */
+   只動 opacity／transform；圓鈕與滑鼠滾輪走這裡，手指滑仍走 snap。 */
 .panel[data-landing-phase="leave"] .visual {
   opacity: 0.32;
   transform: scale(0.985);
   transition: opacity 120ms ease, transform 120ms ease;
 }
 
-.panel[data-landing-phase="leave"] .content,
-.panel[data-landing-phase="leave"] .moreSkip {
+.panel[data-landing-phase="leave"] .content {
   opacity: 0;
   transition: opacity 120ms ease;
 }
@@ -374,8 +389,7 @@
   animation: landingSegmentEnter 280ms ease-out both;
 }
 
-.panel[data-landing-phase="enter"] .content,
-.panel[data-landing-phase="enter"] .moreSkip {
+.panel[data-landing-phase="enter"] .content {
   animation: landingSegmentEnterChrome 280ms ease-out both;
 }
 
@@ -420,7 +434,7 @@
   }
 
   .moreSkip:active {
-    transform: translateX(-50%);
+    transform: none;
   }
 
   .panel[data-landing-phase="leave"] .visual,
@@ -432,9 +446,7 @@
   }
 
   .panel[data-landing-phase="leave"] .content,
-  .panel[data-landing-phase="leave"] .moreSkip,
-  .panel[data-landing-phase="enter"] .content,
-  .panel[data-landing-phase="enter"] .moreSkip {
+  .panel[data-landing-phase="enter"] .content {
     animation: none;
     transition: none;
     opacity: 1;
@@ -446,9 +458,12 @@
     object-position: center 35%;
   }
 
+  .panel {
+    --landing-dock-bottom: calc(var(--safe-bottom) + 6px);
+  }
+
   .headline {
     margin-bottom: var(--space-3);
-    grid-column: 1 / -1;
     /* 預留右側 Dudu 夥伴空間；斷行同樣由資料 \n 控制 */
     max-width: calc(100% - 72px);
   }
@@ -464,23 +479,8 @@
     font-size: var(--fs-h3);
   }
 
-  .panel {
-    --landing-chrome-h: calc(56px + var(--safe-bottom) + 6px);
-  }
-
-  /* 右欄留給嘟嘟；底列只留 CTA，換段圓鈕仍絕對定位在 chrome 之上。 */
   .content {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 80px;
-    align-items: end;
-    column-gap: 8px;
-    padding-bottom: calc(var(--safe-bottom) + 6px);
-  }
-
-  .ctaRow {
-    grid-column: 1;
-    width: 100%;
-    justify-self: stretch;
+    padding-bottom: var(--landing-dock-bottom);
   }
 }
 
@@ -493,5 +493,38 @@
     min-height: 56px;
     padding: 12px 20px;
     font-size: var(--fs-h4);
+  }
+}
+
+@media (max-width: 480px) {
+  .panel {
+    --landing-gutter: 16px;
+    --landing-skip: 44px;
+  }
+
+  .cta {
+    padding: 10px 14px;
+  }
+
+  .ctaRow {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 360px) {
+  .panel {
+    --landing-gutter: 10px;
+    --landing-skip: 44px;
+  }
+
+  .cta {
+    padding: 8px 8px;
+    font-size: 0.85rem;
+    letter-spacing: 0;
+  }
+
+  .ctaRow,
+  .chrome {
+    gap: 6px;
   }
 }

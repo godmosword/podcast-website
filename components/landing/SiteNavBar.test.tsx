@@ -12,6 +12,7 @@ vi.mock("next/navigation", () => ({
 
 afterEach(() => {
   cleanup();
+  vi.unstubAllGlobals();
 });
 
 async function renderNavBarHtml() {
@@ -93,6 +94,16 @@ describe("SiteNavBar", () => {
     });
     root.remove();
     vi.restoreAllMocks();
+  });
+
+  test("沒有 requestIdleCallback 時掛 deferred-brand-font 不會炸掉", async () => {
+    const main = document.createElement("main");
+    main.setAttribute("data-deferred-brand-font", "stories");
+    document.body.append(main);
+    vi.stubGlobal("requestIdleCallback", undefined);
+    vi.stubGlobal("cancelIdleCallback", undefined);
+    await expect(renderNavBar()).resolves.toBeTruthy();
+    main.remove();
   });
 
   test("「留言」在頂欄常用組，不在抽屜", async () => {
