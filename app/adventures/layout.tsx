@@ -19,7 +19,11 @@ export default function AdventuresLayout({
   const zoneStoryPreviewsMap = buildZoneStoryPreviewsMap();
 
   return (
-    <main>
+    // 宇宙地圖首屏幾乎沒有長文，卻要跟兩支合計 895KB 的中文字型搶頻寬——
+    // 在 1.6Mbps 量到 LCP 4468ms。沿用 /stories 既有的延後品牌字型機制：
+    // 先用系統 CJK 完成首次 layout，SiteNavBar 的 idle callback 確認 fonts.load
+    // 之後才切回品牌字（見 app/globals.css 的 data-deferred-brand-font 區塊）。
+    <main data-deferred-brand-font="universe-map">
       <link
         rel="preload"
         as="image"

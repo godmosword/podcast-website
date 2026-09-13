@@ -4,7 +4,7 @@ Status: **FAIL**
 
 測試為 production build + next start 的 headless Chromium lab/simulated 結果；不是實體 iPhone Safari、Android Chrome 或 CrUX field metrics。
 
-Build: mjkTOvRfcaKSHaHXA37uW  · 測量時間: 2026-09-13T09:26:35.290Z
+Build: dd0hvIeYh9tePhoDXriRp  · 測量時間: 2026-09-13T09:48:24.317Z
 
 ## Page summary
 
@@ -12,12 +12,12 @@ Build: mjkTOvRfcaKSHaHXA37uW  · 測量時間: 2026-09-13T09:26:35.290Z
 
 | Page | 條件 | LCP ms | CLS | interaction ms | longest task ms | transfer | JS | images |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Intro | iPhone-like / 1.6 Mbps down / 750 Kbps up / 150 ms | 1620 | 0 | 80 | 223 | 1618.86 KB | 258.3 KB | 308.7 KB |
-| Landing | iPhone-like / 1.6 Mbps down / 750 Kbps up / 150 ms | 1456 | 0 | 72 | 223 | 1618.85 KB | 258.3 KB | 308.7 KB |
-| Stories | iPhone-like / 1.6 Mbps down / 750 Kbps up / 150 ms | 1264 | 0 | 72 | 226 | 1621.54 KB | 268.3 KB | 296.8 KB |
-| Story detail | iPhone-like / 1.6 Mbps down / 750 Kbps up / 150 ms | 852 | 0 | 64 | 203 | 1637.27 KB | 385.4 KB | 162.7 KB |
-| Interactive main page | iPhone-like / 1.6 Mbps down / 750 Kbps up / 150 ms | 2440 | 0 | 56 | 172 | 393.7 KB | 229.8 KB | 72.5 KB |
-| Universe map | iPhone-like / 1.6 Mbps down / 750 Kbps up / 150 ms | 4468 | 0 | 96 | 269 | 2579.36 KB | 305.4 KB | 1220.67 KB |
+| Intro | iPhone-like / 1.6 Mbps down / 750 Kbps up / 150 ms | 1572 | 0 | 80 | 237 | 1618.84 KB | 258.3 KB | 308.7 KB |
+| Landing | iPhone-like / 1.6 Mbps down / 750 Kbps up / 150 ms | 1420 | 0 | 88 | 236 | 1618.83 KB | 258.3 KB | 308.7 KB |
+| Stories | iPhone-like / 1.6 Mbps down / 750 Kbps up / 150 ms | 1326 | 0 | 72 | 233 | 1621.52 KB | 268.3 KB | 296.8 KB |
+| Story detail | iPhone-like / 1.6 Mbps down / 750 Kbps up / 150 ms | 820 | 0 | 64 | 224 | 1641.07 KB | 388.4 KB | 162.7 KB |
+| Interactive main page | iPhone-like / 1.6 Mbps down / 750 Kbps up / 150 ms | 2468 | 0 | 64 | 187 | 395.5 KB | 231.6 KB | 72.5 KB |
+| Universe map | iPhone-like / 1.6 Mbps down / 750 Kbps up / 150 ms | 3776 | 0 | 80 | 191 | 2586.69 KB | 308.4 KB | 1220.67 KB |
 
 ## Before / after evidence
 
@@ -25,12 +25,12 @@ before.json 是初次 baseline；以下對照同一測試條件下的每頁最�
 
 | Page | before LCP | after LCP | before CLS | after CLS | before longest task | after longest task |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Intro | 3824 | 1620 | 0 | 0 | 147 | 223 |
-| Landing | 2860 | 1456 | 0 | 0 | 201 | 223 |
-| Stories | 3528 | 1264 | 0 | 0 | 368 | 226 |
-| Story detail | 964 | 852 | 0 | 0 | 273 | 203 |
-| Interactive main page | 2740 | 2440 | 0.9 | 0 | 143 | 172 |
-| Universe map | n/a | 4468 | n/a | 0 | n/a | 269 |
+| Intro | 3824 | 1572 | 0 | 0 | 147 | 237 |
+| Landing | 2860 | 1420 | 0 | 0 | 201 | 236 |
+| Stories | 3528 | 1326 | 0 | 0 | 368 | 233 |
+| Story detail | 964 | 820 | 0 | 0 | 273 | 224 |
+| Interactive main page | 2740 | 2468 | 0.9 | 0 | 143 | 187 |
+| Universe map | n/a | 3776 | n/a | 0 | n/a | 191 |
 
 Targets: LCP ≤ 2500ms · CLS ≤ 0.1 · representative Event Timing interaction ≤ 200ms · no main-thread task > 200ms.
 
@@ -53,7 +53,6 @@ FAIL:
 - Stories had a main-thread task over 200ms.
 - Story detail had a main-thread task over 200ms.
 - Universe map LCP median exceeded 2.5s.
-- Universe map had a main-thread task over 200ms.
 
 WARN:
 - Long tasks over 100ms require source review.
@@ -65,93 +64,96 @@ WARN:
 
 | Page | Profile | Network | Run | duration ms | source |
 | --- | --- | --- | ---: | ---: | --- |
-| intro | android-mid | local | 1 | 142 | unknown |
-| intro | android-mid | local | 1 | 113 | unknown |
-| intro | android-mid | local | 2 | 145 | unknown |
-| intro | android-mid | local | 2 | 112 | unknown |
-| intro | android-mid | local | 3 | 142 | unknown |
-| intro | android-mid | local | 3 | 112 | unknown |
-| intro | android-low | local | 1 | 220 | unknown |
-| intro | android-low | local | 1 | 170 | unknown |
-| intro | android-low | local | 2 | 223 | unknown |
-| intro | android-low | local | 2 | 171 | unknown |
-| intro | android-low | local | 3 | 226 | unknown |
-| intro | android-low | local | 3 | 171 | unknown |
-| landing | android-mid | local | 1 | 141 | unknown |
-| landing | android-mid | local | 1 | 113 | unknown |
-| landing | android-mid | local | 2 | 142 | unknown |
-| landing | android-mid | local | 2 | 113 | unknown |
-| landing | android-mid | local | 3 | 142 | unknown |
-| landing | android-mid | local | 3 | 112 | unknown |
-| landing | android-low | local | 1 | 221 | unknown |
-| landing | android-low | local | 1 | 169 | unknown |
-| landing | android-low | local | 2 | 223 | unknown |
-| landing | android-low | local | 2 | 169 | unknown |
-| landing | android-low | local | 3 | 224 | unknown |
-| landing | android-low | local | 3 | 168 | unknown |
-| stories | android-mid | local | 1 | 191 | unknown |
-| stories | android-mid | local | 1 | 113 | unknown |
-| stories | android-mid | local | 1 | 148 | unknown |
-| stories | android-mid | local | 2 | 197 | unknown |
-| stories | android-mid | local | 2 | 115 | unknown |
-| stories | android-mid | local | 2 | 149 | unknown |
-| stories | android-mid | local | 3 | 195 | unknown |
+| intro | android-mid | local | 1 | 155 | unknown |
+| intro | android-mid | local | 1 | 124 | unknown |
+| intro | android-mid | local | 2 | 151 | unknown |
+| intro | android-mid | local | 2 | 122 | unknown |
+| intro | android-mid | local | 3 | 152 | unknown |
+| intro | android-mid | local | 3 | 122 | unknown |
+| intro | android-low | local | 1 | 240 | unknown |
+| intro | android-low | local | 1 | 186 | unknown |
+| intro | android-low | local | 2 | 233 | unknown |
+| intro | android-low | local | 2 | 186 | unknown |
+| intro | android-low | local | 3 | 237 | unknown |
+| intro | android-low | local | 3 | 191 | unknown |
+| landing | android-mid | local | 1 | 151 | unknown |
+| landing | android-mid | local | 1 | 123 | unknown |
+| landing | android-mid | local | 2 | 154 | unknown |
+| landing | android-mid | local | 2 | 124 | unknown |
+| landing | android-mid | local | 3 | 156 | unknown |
+| landing | android-mid | local | 3 | 123 | unknown |
+| landing | android-low | local | 1 | 235 | unknown |
+| landing | android-low | local | 1 | 179 | unknown |
+| landing | android-low | local | 2 | 244 | unknown |
+| landing | android-low | local | 2 | 184 | unknown |
+| landing | android-low | local | 3 | 236 | unknown |
+| landing | android-low | local | 3 | 189 | unknown |
+| stories | android-mid | local | 1 | 195 | unknown |
+| stories | android-mid | local | 1 | 120 | unknown |
+| stories | android-mid | local | 1 | 184 | unknown |
+| stories | android-mid | local | 2 | 198 | unknown |
+| stories | android-mid | local | 2 | 117 | unknown |
+| stories | android-mid | local | 2 | 153 | unknown |
+| stories | android-mid | local | 3 | 194 | unknown |
 | stories | android-mid | local | 3 | 114 | unknown |
-| stories | android-mid | local | 3 | 145 | unknown |
-| stories | android-low | local | 1 | 214 | unknown |
-| stories | android-low | local | 1 | 161 | unknown |
-| stories | android-low | local | 1 | 134 | unknown |
-| stories | android-low | local | 1 | 225 | unknown |
-| stories | android-low | local | 2 | 233 | unknown |
-| stories | android-low | local | 2 | 152 | unknown |
-| stories | android-low | local | 2 | 173 | unknown |
-| stories | android-low | local | 2 | 223 | unknown |
-| stories | android-low | local | 3 | 226 | unknown |
-| stories | android-low | local | 3 | 158 | unknown |
-| stories | android-low | local | 3 | 135 | unknown |
-| stories | android-low | local | 3 | 221 | unknown |
-| story-detail | android-mid | local | 1 | 110 | unknown |
-| story-detail | android-mid | local | 1 | 112 | unknown |
-| story-detail | android-mid | local | 1 | 132 | unknown |
-| story-detail | android-mid | local | 2 | 112 | unknown |
-| story-detail | android-mid | local | 2 | 111 | unknown |
-| story-detail | android-mid | local | 2 | 135 | unknown |
-| story-detail | android-mid | local | 3 | 118 | unknown |
-| story-detail | android-mid | local | 3 | 113 | unknown |
-| story-detail | android-mid | local | 3 | 138 | unknown |
-| story-detail | android-low | local | 1 | 180 | unknown |
-| story-detail | android-low | local | 1 | 171 | unknown |
-| story-detail | android-low | local | 1 | 205 | unknown |
-| story-detail | android-low | local | 2 | 156 | unknown |
-| story-detail | android-low | local | 2 | 168 | unknown |
-| story-detail | android-low | local | 2 | 203 | unknown |
-| story-detail | android-low | local | 3 | 187 | unknown |
-| story-detail | android-low | local | 3 | 171 | unknown |
-| story-detail | android-low | local | 3 | 201 | unknown |
-| interactive | android-mid | local | 1 | 111 | unknown |
-| interactive | android-mid | local | 2 | 112 | unknown |
-| interactive | android-mid | local | 3 | 111 | unknown |
-| interactive | android-low | local | 1 | 172 | unknown |
-| interactive | android-low | local | 2 | 172 | unknown |
-| interactive | android-low | local | 3 | 171 | unknown |
-| universe-map | android-mid | local | 1 | 172 | unknown |
-| universe-map | android-mid | local | 1 | 121 | unknown |
-| universe-map | android-mid | local | 1 | 122 | unknown |
-| universe-map | android-mid | local | 2 | 176 | unknown |
-| universe-map | android-mid | local | 2 | 109 | unknown |
-| universe-map | android-mid | local | 2 | 116 | unknown |
-| universe-map | android-mid | local | 3 | 166 | unknown |
-| universe-map | android-mid | local | 3 | 120 | unknown |
-| universe-map | android-mid | local | 3 | 107 | unknown |
-| universe-map | android-low | local | 1 | 295 | unknown |
-| universe-map | android-low | local | 1 | 193 | unknown |
-| universe-map | android-low | local | 1 | 190 | unknown |
-| universe-map | android-low | local | 2 | 240 | unknown |
-| universe-map | android-low | local | 2 | 185 | unknown |
-| universe-map | android-low | local | 2 | 174 | unknown |
-| universe-map | android-low | local | 3 | 269 | unknown |
-| universe-map | android-low | local | 3 | 184 | unknown |
-| universe-map | android-low | local | 3 | 192 | unknown |
+| stories | android-mid | local | 3 | 147 | unknown |
+| stories | android-low | local | 1 | 231 | unknown |
+| stories | android-low | local | 1 | 155 | unknown |
+| stories | android-low | local | 1 | 178 | unknown |
+| stories | android-low | local | 1 | 233 | unknown |
+| stories | android-low | local | 2 | 235 | unknown |
+| stories | android-low | local | 2 | 158 | unknown |
+| stories | android-low | local | 2 | 171 | unknown |
+| stories | android-low | local | 2 | 227 | unknown |
+| stories | android-low | local | 3 | 224 | unknown |
+| stories | android-low | local | 3 | 172 | unknown |
+| stories | android-low | local | 3 | 138 | unknown |
+| stories | android-low | local | 3 | 222 | unknown |
+| story-detail | android-mid | local | 1 | 128 | unknown |
+| story-detail | android-mid | local | 1 | 123 | unknown |
+| story-detail | android-mid | local | 1 | 144 | unknown |
+| story-detail | android-mid | local | 2 | 125 | unknown |
+| story-detail | android-mid | local | 2 | 120 | unknown |
+| story-detail | android-mid | local | 2 | 148 | unknown |
+| story-detail | android-mid | local | 3 | 128 | unknown |
+| story-detail | android-mid | local | 3 | 123 | unknown |
+| story-detail | android-mid | local | 3 | 143 | unknown |
+| story-detail | android-low | local | 1 | 196 | unknown |
+| story-detail | android-low | local | 1 | 192 | unknown |
+| story-detail | android-low | local | 1 | 220 | unknown |
+| story-detail | android-low | local | 2 | 177 | unknown |
+| story-detail | android-low | local | 2 | 187 | unknown |
+| story-detail | android-low | local | 2 | 224 | unknown |
+| story-detail | android-low | local | 3 | 168 | unknown |
+| story-detail | android-low | local | 3 | 184 | unknown |
+| story-detail | android-low | local | 3 | 231 | unknown |
+| interactive | android-mid | local | 1 | 121 | unknown |
+| interactive | android-mid | local | 2 | 122 | unknown |
+| interactive | android-mid | local | 3 | 121 | unknown |
+| interactive | android-low | local | 1 | 188 | unknown |
+| interactive | android-low | local | 2 | 186 | unknown |
+| interactive | android-low | local | 3 | 187 | unknown |
+| universe-map | android-mid | local | 1 | 123 | unknown |
+| universe-map | android-mid | local | 1 | 112 | unknown |
+| universe-map | android-mid | local | 1 | 119 | unknown |
+| universe-map | android-mid | local | 2 | 123 | unknown |
+| universe-map | android-mid | local | 2 | 107 | unknown |
+| universe-map | android-mid | local | 2 | 118 | unknown |
+| universe-map | android-mid | local | 3 | 126 | unknown |
+| universe-map | android-mid | local | 3 | 111 | unknown |
+| universe-map | android-mid | local | 3 | 114 | unknown |
+| universe-map | android-low | local | 1 | 148 | unknown |
+| universe-map | android-low | local | 1 | 191 | unknown |
+| universe-map | android-low | local | 1 | 178 | unknown |
+| universe-map | android-low | local | 1 | 176 | unknown |
+| universe-map | android-low | local | 2 | 153 | unknown |
+| universe-map | android-low | local | 2 | 193 | unknown |
+| universe-map | android-low | local | 2 | 165 | unknown |
+| universe-map | android-low | local | 2 | 175 | unknown |
+| universe-map | android-low | local | 3 | 145 | unknown |
+| universe-map | android-low | local | 3 | 187 | unknown |
+| universe-map | android-low | local | 3 | 167 | unknown |
+| universe-map | android-low | local | 3 | 180 | unknown |
 
 ## Image audit
 
