@@ -196,6 +196,7 @@
 
 .moreSkip:active {
   transform: translateX(-50%) scale(0.96);
+  background: color-mix(in srgb, var(--on-dark) 8%, var(--landing-brand-ink));
 }
 
 .moreSkip:active svg,
@@ -206,6 +207,11 @@
 .moreSkip:focus-visible {
   outline: 3px solid var(--on-dark);
   outline-offset: 3px;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--landing-brand-ink) 55%, #000),
+    var(--elev-2),
+    var(--gloss),
+    0 0 0 6px rgba(0, 0, 0, 0.45);
 }
 
 @media (hover: hover) {
@@ -219,6 +225,10 @@
 
   .subscribeCta:hover {
     background: rgba(255, 255, 255, 0.24);
+  }
+
+  .moreSkip:hover {
+    background: color-mix(in srgb, var(--on-dark) 8%, var(--landing-brand-ink));
   }
 }
 
@@ -283,7 +293,7 @@
   margin-left: 2px;
 }
 
-/* 段底中央淡雙折線：可點換段，無玻璃／黏土底板，停在 CTA／嘟嘟列之上。 */
+/* 段底中央黏土圓鈕：可點換段，語彙對齊分區 CTA，停在 CTA／嘟嘟列之上。 */
 .moreSkip {
   position: absolute;
   left: 50%;
@@ -296,20 +306,26 @@
   min-width: 44px;
   min-height: 44px;
   padding: 0;
-  border: 0;
-  background: transparent;
+  border: 2px solid color-mix(in srgb, var(--on-dark) 88%, transparent);
+  border-radius: 50%;
+  background: var(--landing-brand-ink);
   color: var(--on-dark);
   text-decoration: none;
   cursor: pointer;
   transform: translateX(-50%);
-  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.45));
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--landing-brand-ink) 55%, #000),
+    var(--elev-2),
+    var(--gloss);
+  transition: transform var(--motion-press), background var(--motion-press),
+    box-shadow var(--motion-press);
 }
 
 .moreSkip svg {
   display: block;
   pointer-events: none;
-  opacity: 0.62;
-  animation: moreHintDrift 2.4s ease-in-out infinite;
+  opacity: 0.92;
+  animation: moreHintDrift 2.8s ease-in-out infinite;
 }
 
 .moreSkip[data-skip-direction="first"] svg {
@@ -320,11 +336,11 @@
   0%,
   100% {
     transform: translateY(0);
-    opacity: 0.48;
+    opacity: 0.78;
   }
   50% {
-    transform: translateY(4px);
-    opacity: 0.82;
+    transform: translateY(2px);
+    opacity: 1;
   }
 }
 
@@ -332,11 +348,54 @@
   0%,
   100% {
     transform: rotate(180deg) translateY(0);
-    opacity: 0.48;
+    opacity: 0.78;
   }
   50% {
-    transform: rotate(180deg) translateY(4px);
-    opacity: 0.82;
+    transform: rotate(180deg) translateY(2px);
+    opacity: 1;
+  }
+}
+
+/* 程式換段：時長須與 lib/landing-scroll.ts 的 LEAVE/ENTER 同步。
+   只動 opacity／transform；手指滑仍走 snap，不在這裡播。 */
+.panel[data-landing-phase="leave"] .visual {
+  opacity: 0.32;
+  transform: scale(0.985);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.panel[data-landing-phase="leave"] .content,
+.panel[data-landing-phase="leave"] .moreSkip {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.panel[data-landing-phase="enter"] .visual {
+  animation: landingSegmentEnter 280ms ease-out both;
+}
+
+.panel[data-landing-phase="enter"] .content,
+.panel[data-landing-phase="enter"] .moreSkip {
+  animation: landingSegmentEnterChrome 280ms ease-out both;
+}
+
+@keyframes landingSegmentEnter {
+  from {
+    opacity: 0.4;
+    transform: scale(1.03);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes landingSegmentEnterChrome {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
@@ -352,7 +411,7 @@
 
   .moreSkip svg {
     animation: none;
-    opacity: 0.62;
+    opacity: 0.92;
     transform: none;
   }
 
@@ -362,6 +421,23 @@
 
   .moreSkip:active {
     transform: translateX(-50%);
+  }
+
+  .panel[data-landing-phase="leave"] .visual,
+  .panel[data-landing-phase="enter"] .visual {
+    animation: none;
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .panel[data-landing-phase="leave"] .content,
+  .panel[data-landing-phase="leave"] .moreSkip,
+  .panel[data-landing-phase="enter"] .content,
+  .panel[data-landing-phase="enter"] .moreSkip {
+    animation: none;
+    transition: none;
+    opacity: 1;
   }
 }
 
@@ -392,7 +468,7 @@
     --landing-chrome-h: calc(56px + var(--safe-bottom) + 6px);
   }
 
-  /* 右欄留給嘟嘟；底列只留 CTA，往下雙折線仍絕對定位在 chrome 之上。 */
+  /* 右欄留給嘟嘟；底列只留 CTA，換段圓鈕仍絕對定位在 chrome 之上。 */
   .content {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 80px;

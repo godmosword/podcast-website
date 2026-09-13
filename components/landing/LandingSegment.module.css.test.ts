@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-/** UX-P1-1：分區 CTA min-height 56px；換段雙折線 44px 可點、不進 CTA 底列。 */
+/** UX-P1-1：分區 CTA min-height 56px；換段黏土圓鈕 44px 可點、不進 CTA 底列。 */
 describe("LandingSegment.module.css touch targets", () => {
   const css = readFileSync(
     join(import.meta.dirname, "LandingSegment.module.css"),
@@ -28,7 +28,7 @@ describe("LandingSegment.module.css touch targets", () => {
     return blocks;
   };
 
-  it("換段雙折線是 44px 可點控制，無玻璃底板", () => {
+  it("換段黏土圓鈕是 44px 可點控制，語彙對齊分區 CTA", () => {
     const skip = extractBlocks(".moreSkip")[0] ?? "";
     expect(skip).toMatch(/position:\s*absolute/);
     expect(skip).toMatch(/width:\s*44px/);
@@ -36,11 +36,15 @@ describe("LandingSegment.module.css touch targets", () => {
     expect(skip).toMatch(/min-width:\s*44px/);
     expect(skip).toMatch(/min-height:\s*44px/);
     expect(skip).toMatch(/cursor:\s*pointer/);
+    expect(skip).toMatch(/border-radius:\s*50%/);
+    expect(skip).toMatch(/background:\s*var\(--landing-brand-ink\)/);
+    expect(skip).toMatch(/var\(--gloss\)/);
+    expect(skip).toMatch(/var\(--elev-2\)/);
     expect(skip).not.toMatch(/animation:/);
     expect(skip).not.toMatch(/pointer-events:\s*none/);
     expect(skip).not.toMatch(/clip:/);
     expect(skip).not.toMatch(/backdrop-filter/);
-    expect(skip).not.toMatch(/var\(--gloss\)/);
+    expect(skip).not.toMatch(/background:[^;]*transparent/);
     expect(css).not.toMatch(/\.moreHint\s*\{/);
     expect(css).toMatch(
       /\.moreSkip svg[\s\S]*?animation:\s*moreHintDrift/,
@@ -141,6 +145,29 @@ describe("LandingSegment.module.css touch targets", () => {
     );
     expect(css).toMatch(
       /\.moreSkip:focus-visible[\s\S]*?outline:\s*3px\s+solid\s+var\(--on-dark\)/,
+    );
+  });
+
+  it("程式換段只動 transform／opacity，reduced-motion 立刻停", () => {
+    expect(css).toMatch(/@keyframes landingSegmentEnter/);
+    expect(css).toMatch(/@keyframes landingSegmentEnterChrome/);
+    expect(css).toMatch(
+      /\.panel\[data-landing-phase="leave"\] \.visual[\s\S]*?transition:\s*opacity 120ms ease,\s*transform 120ms ease/,
+    );
+    expect(css).toMatch(
+      /\.panel\[data-landing-phase="enter"\] \.visual[\s\S]*?animation:\s*landingSegmentEnter 280ms/,
+    );
+    const enterKf = css.match(
+      /@keyframes landingSegmentEnter \{[\s\S]*?\n\}/,
+    )?.[0];
+    expect(enterKf).toMatch(/opacity:\s*0\.4/);
+    expect(enterKf).toMatch(/transform:\s*scale\(1\.03\)/);
+    expect(enterKf).not.toMatch(/filter|clip-path|width:|height:/);
+    const reducedStart = css.indexOf("@media (prefers-reduced-motion: reduce)");
+    expect(reducedStart).toBeGreaterThan(-1);
+    const reduced = css.slice(reducedStart);
+    expect(reduced).toMatch(
+      /\[data-landing-phase="enter"\] \.visual[\s\S]*?animation:\s*none/,
     );
   });
 

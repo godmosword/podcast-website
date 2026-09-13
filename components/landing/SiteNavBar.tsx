@@ -19,8 +19,9 @@ import { feedbackHref, isContactExternal } from "@/lib/contact";
 import { isImmersiveRoute } from "@/lib/is-story-play-route";
 import { dismissIntroGate, isIntroGateOpen } from "@/lib/intro-gate";
 import {
+  LANDING_FIRST_ANCHOR_ID,
   LANDING_SCROLL_ROOT_ATTR,
-  scrollLandingToFirstSegment,
+  transitionLandingToAnchor,
 } from "@/lib/landing-scroll";
 import styles from "./SiteNavBar.module.css";
 
@@ -175,7 +176,7 @@ export default function SiteNavBar() {
     closeAll();
     if (!document.querySelector(`[${LANDING_SCROLL_ROOT_ATTR}]`)) return;
     e.preventDefault();
-    scrollLandingToFirstSegment();
+    void transitionLandingToAnchor(LANDING_FIRST_ANCHOR_ID);
   }, [closeAll]);
 
   /** 點浮層外部關閉：`pointerdown` 早於 `click`，若讓 focus trap 把焦點歸還觸發器，

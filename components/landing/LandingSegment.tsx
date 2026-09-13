@@ -7,9 +7,8 @@ import type { ResolvedLandingSegment } from "@/lib/landing-query";
 import { landingHeroPictureSources } from "@/lib/modern-image-src";
 import {
   LANDING_FIRST_ANCHOR_ID,
-  scrollLandingToFirstSegment,
+  transitionLandingToAnchor,
 } from "@/lib/landing-scroll";
-import { useLandingScroll } from "./LandingScrollContext";
 import styles from "./LandingSegment.module.css";
 
 type LandingSegmentProps = {
@@ -19,7 +18,7 @@ type LandingSegmentProps = {
   siteIntro?: string;
   /** 換段錨點；最後一段指向第一屏。 */
   nextAnchorId: string | null;
-  /** 最後一段：雙折線朝上，捲回第一屏。 */
+  /** 最後一段：圓鈕折線朝上，捲回第一屏。 */
   loopToFirst?: boolean;
 };
 
@@ -30,7 +29,6 @@ export default function LandingSegment({
   nextAnchorId,
   loopToFirst = false,
 }: LandingSegmentProps) {
-  const landingScroll = useLandingScroll();
   const eager = index === 0;
   const heroSources = segment.heroImage
     ? landingHeroPictureSources(segment.heroImage, segment.heroImagePortrait)
@@ -43,16 +41,10 @@ export default function LandingSegment({
   function goToSkip(e: React.MouseEvent<HTMLAnchorElement>) {
     if (!skipAnchorId) return;
     e.preventDefault();
-    if (loopToFirst) {
-      if (scrollLandingToFirstSegment()) return;
+    void transitionLandingToAnchor(skipAnchorId).then((ok) => {
+      if (ok) return;
       document.getElementById(skipAnchorId)?.scrollIntoView({ block: "start" });
-      return;
-    }
-    if (landingScroll) {
-      landingScroll.scrollToSegment(skipAnchorId);
-      return;
-    }
-    document.getElementById(skipAnchorId)?.scrollIntoView({ block: "start" });
+    });
   }
 
   const imgProps = {
@@ -172,25 +164,17 @@ export default function LandingSegment({
           onClick={goToSkip}
         >
           <svg
-            viewBox="0 0 24 20"
-            width="24"
-            height="20"
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
             aria-hidden
             focusable="false"
           >
             <path
-              d="M5 4.5 L12 10.5 L19 4.5"
+              d="M7 9.5 L12 14.5 L17 9.5"
               fill="none"
               stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M5 11 L12 17 L19 11"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
+              strokeWidth="2.4"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
