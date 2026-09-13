@@ -29,6 +29,14 @@ const PAGES = [
     path: "/games/candy-match",
     bypassIntro: true,
   },
+  // 宇宙地圖是全站最重的互動頁（SVG 舞台＋貼圖＋漫遊模擬），
+  // 卻一直不在這份閘門裡——2026-09-13 才發現它在送 1.9MB 的 sea.png。
+  {
+    id: "universe-map",
+    label: "Universe map",
+    path: "/adventures",
+    bypassIntro: true,
+  },
 ];
 
 const PROFILES = [

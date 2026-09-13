@@ -2,8 +2,7 @@ import type { CSSProperties, Ref } from "react";
 import { MAP_STAGE } from "@/data/universe-zones";
 import type { ThemePreference } from "@/lib/theme";
 import { cloudPath } from "@/lib/universe/map-art-src";
-import { resolveTextureHref } from "@/lib/universe/png-to-webp";
-import { useWebpSupported } from "@/hooks/useWebpSupported";
+import { pngToWebp } from "@/lib/universe/png-to-webp";
 import styles from "./UniverseMapParallax.module.css";
 
 /** 黏土雲團（透明 PNG），飄在島群上方的近景雲影。cx/cy＝中心、w＝寬（stage 單位）。
@@ -29,7 +28,6 @@ export default function UniverseMapParallax({
   paused,
   daylight,
 }: Props) {
-  const webpSupported = useWebpSupported();
   const isNight = daylight === "night";
   const layerClass = [
     styles.layer,
@@ -63,7 +61,7 @@ export default function UniverseMapParallax({
             <image
               key={`cloud-${i}`}
               className={styles.cloudImg}
-              href={resolveTextureHref(cloudPath(cloud.id), webpSupported)}
+              href={pngToWebp(cloudPath(cloud.id))}
               x={cloud.cx - cloud.w / 2}
               y={cloud.cy - h / 2}
               width={cloud.w}

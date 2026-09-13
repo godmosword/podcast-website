@@ -40,14 +40,13 @@ import { parseDevStatusOverrides } from "@/lib/universe/dev-map-flags";
 import type { ZoneStoriesBundle } from "@/lib/story-zone-query";
 import { mapDepthZ } from "@/lib/universe-depth";
 import { seaTexturePath } from "@/lib/universe/map-art-src";
-import { resolveTextureHref } from "@/lib/universe/png-to-webp";
+import { pngToWebp } from "@/lib/universe/png-to-webp";
 import { playSfx } from "@/lib/sfx";
 import {
   trackUniverseDayNightToggle,
   trackUniverseZoneTap,
 } from "@/lib/analytics";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { useWebpSupported } from "@/hooks/useWebpSupported";
 import { computeZoneProgress, useCompletedSlugs } from "@/hooks/useZoneProgress";
 import { useTheme } from "@/components/ThemeProvider";
 import { MapDecorBirds, MapDecorNearWater } from "./MapDecorLayer";
@@ -124,7 +123,6 @@ function UniverseMapContent({
     isInteracting,
   } = camera;
   const reduced = useReducedMotion();
-  const webpSupported = useWebpSupported();
   const { theme: daylight } = useTheme();
   const router = useRouter();
   const sectionRef = useRef<HTMLElement>(null);
@@ -190,8 +188,8 @@ function UniverseMapContent({
   // 夜海貼圖惰性載入：首次切到夜晚才掛 pattern，日間不下載 sea-night.png；
   // 掛上後保持常駐，讓日夜切換仍有 600ms crossfade。
   const [nightSeaMounted, setNightSeaMounted] = useState(false);
-  const seaDayHref = resolveTextureHref(seaTexturePath(false), webpSupported);
-  const seaNightHref = resolveTextureHref(seaTexturePath(true), webpSupported);
+  const seaDayHref = pngToWebp(seaTexturePath(false));
+  const seaNightHref = pngToWebp(seaTexturePath(true));
   const daylightTrackedRef = useRef(false);
 
   useEffect(() => {

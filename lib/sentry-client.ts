@@ -44,14 +44,20 @@ export function initClientSentry(): void {
   init(createClientSentryOptions());
 }
 
+/**
+ * `segment` 是區塊級邊界（地圖、遊戲、後台…），額外帶 `segment` tag 讓 Sentry
+ * 能把「宇宙地圖壞了」和「遊戲畫布壞了」分開看，而不是全部混進 route。
+ */
 export function reportClientBoundaryError(
   error: Error & { digest?: string },
-  boundary: "route" | "global",
+  boundary: "route" | "global" | "segment",
+  segment?: string,
 ): void {
   captureException(error, {
     tags: {
       boundary,
       error_digest: error.digest ?? "unknown",
+      ...(segment ? { segment } : {}),
     },
   });
 }
