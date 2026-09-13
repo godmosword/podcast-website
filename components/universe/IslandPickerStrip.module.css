@@ -71,7 +71,7 @@
 }
 
 .chip[data-active="true"] {
-  border-color: var(--accent, #e85d4c);
+  border-color: var(--accent);
   box-shadow: 0 3px 0 rgba(232, 93, 76, 0.28);
 }
 

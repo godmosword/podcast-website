@@ -170,8 +170,12 @@
   --warm-heading: color-mix(in srgb, var(--c-sky) 35%, var(--ink));
   --warm-portrait-bg: color-mix(in srgb, var(--c-teal) 14%, var(--mix-base));
   --warm-cover-bg: color-mix(in srgb, var(--c-sky) 16%, var(--mix-base));
-  --support-from: #f0744a;
-  --support-to: #e4572e;
+  /* 白字對 --support-from 必須 ≥4.5:1（AA 內文）。原本的 #f0744a／#e4572e
+     只有 2.88／3.68，頁尾「支持我們」與著色本主 CTA 都不合格；壓深到磚紅後
+     為 4.69／6.36，白字在暖色 CTA 上的既有語彙不變。門檻由
+     app/globals.css.contrast.test.ts 釘住。夜間那組用深墨字，本來就有 4.69。 */
+  --support-from: #c94a1e;
+  --support-to: #a93a12;
   --support-fg: #ffffff;
   --cta-warm-from: #ffe889;
   --cta-warm-to: #ffbd6f;

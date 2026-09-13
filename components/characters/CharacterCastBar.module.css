@@ -28,8 +28,8 @@
 
 .link:hover,
 .link:focus-visible {
-  border-color: var(--warm-accent, var(--accent-ink));
-  background: var(--warm-chip-hover, var(--bg-2));
+  border-color: var(--warm-accent);
+  background: var(--warm-chip-hover);
 }
 
 .avatar {

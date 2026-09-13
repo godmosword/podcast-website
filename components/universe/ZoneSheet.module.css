@@ -386,8 +386,8 @@
   color: var(--landing-cta-fg, #7a4012);
   background: linear-gradient(
     180deg,
-    var(--landing-cta-from, #ff9500) 0%,
-    var(--landing-cta-to, #ff7a00) 100%
+    var(--landing-cta-from) 0%,
+    var(--landing-cta-to) 100%
   );
   border-color: rgba(180, 120, 60, 0.32);
   box-shadow: 0 4px 0 var(--landing-cta-shadow, rgba(180, 110, 50, 0.32)),
@@ -398,8 +398,8 @@
   filter: brightness(1.05);
   background: linear-gradient(
     180deg,
-    var(--landing-cta-from, #ff9500) 0%,
-    var(--landing-cta-to, #ff7a00) 100%
+    var(--landing-cta-from) 0%,
+    var(--landing-cta-to) 100%
   );
 }
 
@@ -435,8 +435,8 @@
   color: var(--landing-cta-fg, #7a4012);
   background: linear-gradient(
     180deg,
-    var(--landing-cta-from, #ff9500) 0%,
-    var(--landing-cta-to, #ff7a00) 100%
+    var(--landing-cta-from) 0%,
+    var(--landing-cta-to) 100%
   );
   border: 2px solid rgba(180, 120, 60, 0.32);
   box-shadow: 0 4px 0 var(--landing-cta-shadow, rgba(180, 110, 50, 0.32)),

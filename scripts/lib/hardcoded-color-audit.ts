@@ -7,14 +7,45 @@ import { join, relative } from "node:path";
 const HEX_PATTERN = /#[0-9a-fA-F]{3,8}\b/g;
 
 /** 允許保留硬編色（播放器黑底、地圖海圖固定淺色等）。 */
+/**
+ * 固定美術色 allowlist。
+ *
+ * DESIGN.md §230：「遊戲載入器、地圖木牌、播放器黑底等固定美術色可保留為
+ * component-local／allowlist 色，不跨元件複製同一組 hex」；§110：這些色
+ * 「不吃主題 token，**皆不反轉**——夜間只調整強度，不換語意色」。
+ *
+ * 這份清單就是那條政策的機器可讀版本。**新增前請先確認該檔真的是美術色**
+ * （畫布、舞台、遮罩、已實測對比的固定前景），而不是懶得換 token。
+ */
 const HARDCODED_COLOR_ALLOWLIST = [
+  // 播放器黑底（DESIGN.md §110 明列）
   "components/StoryPlayer.module.css",
+  // 宇宙地圖場景與木牌：印刷淺色，夜間刻意不反轉（DESIGN.md §103）
   "components/universe/UniverseMap.module.css",
   "components/universe/ZoneIsland.module.css",
   "components/universe/ZoneSheet.module.css",
+  "components/universe/HotspotLayer.module.css",
+  "components/universe/ZoneNightLights.module.css",
+  // 遊戲畫布與載入器（DESIGN.md §230）
+  "components/games/CandyMatchView.module.css",
+  "components/games/GameLoadOverlay.module.css",
+  "components/games/GameEndStation.module.css",
+  // 著色畫布：底必須是純白，否則蠟筆顏色會被主題染色
+  "components/coloring/ColoringPageShell.module.css",
+  // 真實世界地圖：類型剪影 #34302b／「其他」淺沙 #cfcac2 為固定美術色
+  // （DESIGN.md §48）；另有遮罩用的 #000 與圖釘白環。
+  "components/for-parents/PlayMap.module.css",
+  // 縣市色塊圖白字：註解內已記實測 5.77:1，是刻意的固定前景
+  "components/for-parents/PlayMapCityWall.module.css",
+  // Landing／Hero 舞台美術
   "components/landing/LandingSegment.module.css",
-  "app/topic/page.module.css",
+  "components/landing/SiteNavBar.module.css",
+  "components/landing/IntroOverlay.module.css",
+  "components/landing/hero-world/HeroWorld.module.css",
+  "components/landing/hero-parallax/HeroParallax.module.css",
 ] as const;
+
+export { HARDCODED_COLOR_ALLOWLIST };
 
 /** D3 驗收頁：不得出現裸 hex（須改用 design token）。 */
 const D3_TOKENIZED_CSS_FILES = [

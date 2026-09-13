@@ -159,7 +159,7 @@
 
 .controlBar {
   position: sticky;
-  top: calc(var(--nav-h, 56px) + 4px);
+  top: calc(var(--nav-h) + 4px);
   z-index: 20;
   display: grid;
   gap: var(--space-2);
@@ -698,7 +698,7 @@
 }
 
 .cardNav {
-  border-color: var(--warm-accent, var(--accent));
+  border-color: var(--warm-accent);
   background: var(--warm-chip-bg);
   color: var(--accent-ink);
 }
@@ -764,7 +764,7 @@
   gap: 4px var(--space-3);
   margin: var(--space-4) 0 var(--space-3);
   padding: 12px 14px;
-  border: 1px solid color-mix(in srgb, var(--warm-accent, var(--accent)) 38%, var(--hairline));
+  border: 1px solid color-mix(in srgb, var(--warm-accent) 38%, var(--hairline));
   border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--warm-chip-bg) 68%, var(--card));
 }
@@ -801,7 +801,7 @@
   align-self: center;
   min-height: 44px;
   padding: 9px 13px;
-  border: 1px solid var(--warm-accent, var(--accent));
+  border: 1px solid var(--warm-accent);
   border-radius: var(--radius-pill);
   background: var(--card);
   color: var(--accent-ink);
@@ -877,8 +877,8 @@
 }
 
 .root[data-mobile-map="true"] .mapShell {
-  height: calc(100dvh - var(--nav-h, 56px));
-  min-height: calc(100dvh - var(--nav-h, 56px));
+  height: calc(100dvh - var(--nav-h));
+  min-height: calc(100dvh - var(--nav-h));
   border-radius: 0;
   border-left: none;
   border-right: none;
@@ -1016,7 +1016,7 @@
 
 .closeButton:hover,
 .closeButton:focus-visible {
-  border-color: var(--warm-accent, var(--accent));
+  border-color: var(--warm-accent);
 }
 
 .closeButton:active {
@@ -1255,7 +1255,7 @@
 .placeLink,
 .officialLink,
 .moreButton {
-  border: 1px solid var(--warm-accent, var(--accent));
+  border: 1px solid var(--warm-accent);
   color: var(--accent-ink);
   background: transparent;
 }
@@ -1469,9 +1469,9 @@
   width: 16px;
   height: 16px;
   border-radius: var(--radius-circle);
-  background: var(--warm-accent, #2a9d8f);
+  background: var(--warm-accent);
   border: 3px solid #fff;
-  box-shadow: 0 0 0 2px var(--warm-accent, #2a9d8f);
+  box-shadow: 0 0 0 2px var(--warm-accent);
 }
 
 @media (min-width: 640px) {

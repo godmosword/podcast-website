@@ -47,10 +47,53 @@ const PAGES: { name: string; path: string; exclude?: string }[] = [
 
 const BLOCKING_IMPACTS = new Set(["critical", "serious"]);
 
+/** iPhone 級寬度；桌面版面掃不到的行動端問題只在這個寬度才會出現。 */
+const MOBILE_VIEWPORT = { width: 390, height: 844 } as const;
+
 for (const pageDef of PAGES) {
   test(`a11y：${pageDef.name} 無 critical/serious 違規`, async ({ page }) => {
     await seedParentGatePassed(page);
     await page.goto(pageDef.path);
+    let builder = new AxeBuilder({ page }).withTags([
+      "wcag2a",
+      "wcag2aa",
+      "wcag21a",
+      "wcag21aa",
+    ]);
+    if (pageDef.exclude) builder = builder.exclude(pageDef.exclude);
+    const results = await builder.analyze();
+
+    const blocking = results.violations.filter(
+      (v) => v.impact != null && BLOCKING_IMPACTS.has(v.impact),
+    );
+
+    expect(
+      blocking,
+      blocking
+        .map((v) => `[${v.impact}] ${v.id}: ${v.help}`)
+        .join("\n"),
+    ).toEqual([]);
+  });
+
+  test(`a11y：${pageDef.name}（390px）無 critical/serious 違規`, async ({
+    page,
+  }) => {
+    await page.setViewportSize(MOBILE_VIEWPORT);
+    /*
+     * 掃描時關掉動效。`app/scroll-driven.css` 的進場用 `animation-timeline:
+     * view()`——時間軸是**捲動位置**而不是時間，所以折線以下的元素永遠停在
+     * 半透明的中途狀態，沒有「等它跑完」這回事（這點和 Leaflet 縮放動畫不同，
+     * 那個等得到靜止）。axe 掃到混色後的值，會把 `--ink-soft` 這種實際 4.72:1
+     * 的文字算成 3.74:1。
+     *
+     * 元素真正進到閱讀區時 opacity 已是 1，所以那不是使用者讀得到的狀態；
+     * 而 reduced-motion 分支（同檔 `animation: none; opacity: 1`）本來就是
+     * 本站對「不要動效」的正式答案，用它掃才是量靜態配色本身。
+     */
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await seedParentGatePassed(page);
+    await page.goto(pageDef.path);
+
     let builder = new AxeBuilder({ page }).withTags([
       "wcag2a",
       "wcag2aa",

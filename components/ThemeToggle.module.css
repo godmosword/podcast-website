@@ -134,7 +134,7 @@
 /* 選中段：實心膠囊，清楚標示目前模式 */
 .groupText .segmentActive {
   background: var(--ink);
-  color: var(--chip-active-fg, #fff);
+  color: var(--chip-active-fg);
   box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
