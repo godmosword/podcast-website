@@ -105,6 +105,11 @@
 
 .listItem {
   min-width: 0;
+  /* 每張卡只在接近視口時才 layout／paint。28 張全部在首次 layout 一起排，
+     6× CPU 下是 231ms 的單一長任務；contain-intrinsic-size 的 auto 會記住
+     實際高度，捲回去不會跳。 */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 200px;
 }
 
 /* 桌機縮圖網格／完整限寬：只吃找故事目錄清單，且只在 ≥768。 */

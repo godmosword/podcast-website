@@ -22,7 +22,10 @@ export default function HomePage() {
       {/* 3D 開場蓋在 Landing 上，不是導航（ADR-0004）。產品關掉時不掛覆蓋層，
           元件仍留著；Landing 的 HTML／canonical／JSON-LD 一字未改。 */}
       {INTRO_PORTAL_ENABLED ? <IntroOverlay /> : null}
-      <main className={styles.main} data-landing-root>
+      {/* 延後品牌字型：6× CPU 下首次 Layout 量到 214ms（123 個物件），與
+          BeginRemoteFontLoad 綁在同一個 task——就是 globals.css 註解裡那個問題。
+          /stories、/story、/adventures 都已掛此旗標，Landing 一直漏掉。 */}
+      <main className={styles.main} data-landing-root data-deferred-brand-font="landing">
         <LandingHub />
       </main>
       {/* 必須放在 <main> 之後且是同步的：<head> 執行時 <main> 還不存在，而交給

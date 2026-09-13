@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Story } from "@/data/content";
 import StoriesViewToggle from "./StoriesViewToggle";
@@ -147,20 +147,57 @@ export function StoryFilter({
   );
 }
 
-/** 靜態殼 fallback：不讀 URL，避免 searchParams 把整頁打成 dynamic。 */
-export function StoryFilterFallback(props: StoryFilterDataProps) {
-  return <StoryFilter {...props} vehicle={null} tag={null} query="" />;
-}
+type ParsedFilters = { vehicle: string | null; tag: string | null; query: string };
 
-/** 小型 client island：只在這裡解讀可分享的 filter URL。 */
-export function StoryFilterFromUrl(props: StoryFilterDataProps) {
+const EMPTY_FILTERS: ParsedFilters = { vehicle: null, tag: null, query: "" };
+
+/**
+ * 唯一讀 URL 的小島。`useSearchParams` 在靜態預渲染時會 suspend，所以它必須
+ * 在自己的 Suspense 裡；它什麼都不渲染，只把解析結果推給外層。
+ */
+function StoryFilterUrlSync({
+  vehicles,
+  tags,
+  onParams,
+}: Pick<StoryFilterDataProps, "vehicles" | "tags"> & {
+  onParams: (next: ParsedFilters) => void;
+}) {
   const searchParams = useSearchParams();
-  const parsed = parseStoriesSearchParams(
-    searchParams,
-    props.vehicles,
-    props.tags,
-  );
-  return <StoryFilter {...props} {...parsed} />;
+  const parsed = parseStoriesSearchParams(searchParams, vehicles, tags);
+  useEffect(() => {
+    onParams(parsed);
+    // parsed 每次 render 都是新物件；以三個欄位當依賴才不會無限觸發。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [parsed.vehicle, parsed.tag, parsed.query, onParams]);
+  return null;
 }
 
-export default StoryFilterFromUrl;
+/**
+ * 找故事區塊的宿主：頁面保持靜態，但**清單不放在 Suspense 裡**。
+ *
+ * 舊做法是 `<Suspense fallback={<未篩選清單>}><讀 URL 後渲染清單/></Suspense>`。
+ * Suspense 從 fallback 切到內容不是 reconcile 而是整棵換掉——28 張卡在 hydration
+ * 時被卸載再重新 mount，6× CPU 下是一次 187ms 的 layout（dirty 208/232），
+ * 也是 /stories 過不了 200ms 長任務門檻的主因。
+ *
+ * 現在清單由本元件的 state 驅動，SSR 與首次 hydration 都是未篩選（跟舊 fallback
+ * 一模一樣），URL 小島 resolve 後只更新 state，同一個 <StoryFilter> 實例原地
+ * re-render，卡片走 reconcile；沒有篩選參數時 DOM 一個節點都不動。
+ */
+export function StoryFilterHost(props: StoryFilterDataProps) {
+  const [params, setParams] = useState<ParsedFilters>(EMPTY_FILTERS);
+  return (
+    <>
+      <StoryFilter {...props} {...params} />
+      <Suspense fallback={null}>
+        <StoryFilterUrlSync
+          vehicles={props.vehicles}
+          tags={props.tags}
+          onParams={setParams}
+        />
+      </Suspense>
+    </>
+  );
+}
+
+export default StoryFilterHost;

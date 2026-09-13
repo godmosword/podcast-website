@@ -1,11 +1,10 @@
-import { Fragment, Suspense } from "react";
+import { Fragment } from "react";
 import type { Story } from "@/data/content";
 import { HOME_SECTION_IDS, type HomeSectionId } from "@/data/home-sections";
 import FavoritesSection from "@/components/FavoritesSection";
 import LatestHero from "@/components/LatestHero";
 import {
-  StoryFilterFallback,
-  StoryFilterFromUrl,
+  StoryFilterHost,
 } from "@/components/StoryFilter";
 
 export type HomeSectionProps = {
@@ -33,11 +32,7 @@ function renderSection(id: HomeSectionId, props: HomeSectionProps) {
       return <FavoritesSection />;
     case "storyFilter": {
       const filterProps = storyFilterProps(props);
-      return (
-        <Suspense fallback={<StoryFilterFallback {...filterProps} />}>
-          <StoryFilterFromUrl {...filterProps} />
-        </Suspense>
-      );
+      return <StoryFilterHost {...filterProps} />;
     }
     default:
       return null;

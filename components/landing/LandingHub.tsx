@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import JsonLd from "@/components/JsonLd";
 import LandingScrollView from "@/components/landing/LandingScrollView";
 import LandingSegment from "@/components/landing/LandingSegment";
@@ -32,20 +33,35 @@ export default function LandingHub() {
           }))}
         />
 
-        {segments.map((segment, index) => (
-          <LandingSegment
-            key={segment.id}
-            segment={segment}
-            index={index}
-            siteIntro={index === 0 ? siteIntro : undefined}
-            nextAnchorId={
-              segments[index + 1]?.anchorId ?? segments[0]!.anchorId
-            }
-            loopToFirst={index === segments.length - 1}
-          />
-        ))}
+        {/* 選擇性 hydration：首段之外的三段與嘟嘟各包一層 Suspense。
+            SSR HTML 一字不變（內容已在頁面裡，fallback 永遠不會顯示），差別是
+            React 會把每個邊界排成獨立 task 來 hydrate，而不是整棵樹一次做完——
+            6× CPU 下那一次做完是 178ms 的單一長任務。 */}
+        {segments.map((segment, index) => {
+          const node = (
+            <LandingSegment
+              key={segment.id}
+              segment={segment}
+              index={index}
+              siteIntro={index === 0 ? siteIntro : undefined}
+              nextAnchorId={
+                segments[index + 1]?.anchorId ?? segments[0]!.anchorId
+              }
+              loopToFirst={index === segments.length - 1}
+            />
+          );
+          return index === 0 ? (
+            node
+          ) : (
+            <Suspense key={segment.id} fallback={null}>
+              {node}
+            </Suspense>
+          );
+        })}
 
-        <DuduCompanion items={duduItems} />
+        <Suspense fallback={null}>
+          <DuduCompanion items={duduItems} />
+        </Suspense>
       </LandingScrollView>
     </>
   );

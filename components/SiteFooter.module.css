@@ -1,5 +1,9 @@
 .footer {
   position: relative;
+  /* 頁尾永遠在折線下：延後它的 layout／paint，別佔首次 layout 那個 task。
+     contain-intrinsic-size 給一個接近實際高度的佔位，避免捲軸長度跳動。 */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 640px;
   margin-top: var(--space-section);
   padding-top: var(--space-8);
   border-top: 1px solid var(--hairline);

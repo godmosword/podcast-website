@@ -141,6 +141,10 @@
 }
 
 .contentSection {
+  /* 大綱／逐句／FAQ 都在 CTA 之下：延後 layout，首次 layout 只算 hero 與 CTA。
+     6× CPU 下 story detail 的長任務停在 200ms 門檻邊緣（200／203）。 */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 480px;
   margin-top: var(--space-8);
   padding: var(--space-6) var(--space-4);
   border: 1px solid var(--hairline);
