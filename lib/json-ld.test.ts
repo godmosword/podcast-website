@@ -4,9 +4,13 @@ import { storiesByNewest } from "@/data/content";
 import { listPlaygrounds } from "@/data/playgrounds";
 import { storyDateModified } from "@/data/story-dates";
 import { hasFullTranscript, hasSceneCaptions } from "@/lib/transcript";
+import { GAMES, gameBySlug } from "@/data/games";
 import {
   breadcrumbListJsonLd,
   characterCreativeWorkJsonLd,
+  gameListJsonLd,
+  typicalAgeRange,
+  videoGameJsonLd,
   playgroundCollectionJsonLd,
   faqPageJsonLd,
   playgroundItemListJsonLd,
@@ -520,5 +524,74 @@ describe("playgroundCollectionJsonLd", () => {
     ]);
 
     vi.unstubAllEnvs();
+  });
+});
+
+describe("typicalAgeRange", () => {
+  it("拿掉「歲」並把全形連接號轉成 ASCII 連字號", () => {
+    expect(typicalAgeRange("3–7 歲")).toBe("3-7");
+    expect(typicalAgeRange("6–12 歲")).toBe("6-12");
+  });
+
+  it("已是 ASCII 的輸入維持不變", () => {
+    expect(typicalAgeRange("3-7")).toBe("3-7");
+  });
+});
+
+describe("videoGameJsonLd", () => {
+  it("輸出 VideoGame，網址與圖片皆為絕對路徑", () => {
+    const data = videoGameJsonLd(gameBySlug("candy-match"));
+    expect(data["@type"]).toBe("VideoGame");
+    expect(data.name).toBe("繽紛消消樂");
+    expect(String(data.url)).toMatch(/^https?:\/\/.+\/games\/candy-match$/);
+    expect(String(data.image)).toMatch(/^https?:\/\//);
+    expect(data.typicalAgeRange).toBe("3-7");
+    expect(data.isAccessibleForFree).toBe(true);
+    expect(data.gamePlatform).toBe("Web browser");
+  });
+
+  it("publisher 指回 siteIdentity 的 Organization @id", () => {
+    const identity = siteIdentityJsonLd();
+    const graph = identity["@graph"] as { "@type": string; "@id": string }[];
+    const organizationId = graph.find((n) => n["@type"] === "Organization")?.[
+      "@id"
+    ];
+    const data = videoGameJsonLd(gameBySlug("block-drop"));
+    expect(data.publisher).toEqual({ "@id": organizationId });
+  });
+
+  it("三款遊戲都輸出合法的 typicalAgeRange（無全形字元）", () => {
+    for (const game of GAMES) {
+      expect(String(videoGameJsonLd(game).typicalAgeRange)).toMatch(
+        /^\d+-\d+$/,
+      );
+    }
+  });
+});
+
+describe("gameListJsonLd", () => {
+  it("ItemList 依 GAMES 順序列出全部遊戲", () => {
+    const data = gameListJsonLd();
+    expect(data["@type"]).toBe("ItemList");
+    expect(data.numberOfItems).toBe(GAMES.length);
+
+    const items = data.itemListElement as {
+      position: number;
+      item: Record<string, unknown>;
+    }[];
+    expect(items.map((i) => i.position)).toEqual(
+      GAMES.map((_, index) => index + 1),
+    );
+    expect(items.map((i) => i.item.name)).toEqual(GAMES.map((g) => g.title));
+  });
+
+  it("每個項目都是完整的 VideoGame 節點", () => {
+    const items = gameListJsonLd().itemListElement as {
+      item: Record<string, unknown>;
+    }[];
+    for (const { item } of items) {
+      expect(item["@type"]).toBe("VideoGame");
+      expect(item["@id"]).toMatch(/#game$/);
+    }
   });
 });

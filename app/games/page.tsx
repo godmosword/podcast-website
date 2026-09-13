@@ -3,13 +3,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
 import { GAMES, gameParentTip, type GameMeta } from "@/data/games";
+import JsonLd from "@/components/JsonLd";
+import { gameListJsonLd } from "@/lib/json-ld";
 import { getSiteUrl } from "@/lib/site-url";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
-  title: "車車遊樂園",
+  // 根 layout 的 template 是 `%s · 車車遊樂園`，這裡再寫「車車遊樂園」會輸出
+  // 「車車遊樂園 · 車車遊樂園」。用導覽列同一個詞「遊樂園」。
+  title: "遊樂園",
   description:
     "和故事裡的車車朋友一起玩小遊戲：繽紛消消樂、繪本著色與繽紛樂園，適合 3–12 歲親子。",
+  alternates: { canonical: "/games" },
   openGraph: {
     title: "車車遊樂園 · 小遊戲",
     description: "黏土風親子小遊戲與繪本著色，一起探索車車遊樂園。",
@@ -120,6 +125,7 @@ const ORDERED_GAMES: GameMeta[] = HUB_STATION_ORDER.map((slug) => {
 export default function GamesHubPage() {
   return (
     <main className={styles.main} aria-label="車車遊樂園小遊戲">
+      <JsonLd data={gameListJsonLd()} />
       <header className={styles.hero}>
         <h1 className="sr-only">車車遊樂園</h1>
         {/* picture 依 viewport 只下載一張 hero，避免 mobile 先抓 desktop 再被 CSS 換圖 */}

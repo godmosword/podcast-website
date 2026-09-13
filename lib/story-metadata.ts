@@ -3,9 +3,8 @@ import type { Story } from "@/data/content";
 import { storyDateModified } from "@/data/story-dates";
 import { storyDefinitionSummary } from "@/lib/story-geo";
 import { storyOgImagePath } from "@/lib/story-og-path";
+import { SITE_NAME } from "@/lib/site-url";
 import { hasVtt } from "@/lib/transcript";
-
-const SITE_NAME = "車車遊樂園";
 
 export function storyDescription(story: Story): string {
   return storyDefinitionSummary(story);

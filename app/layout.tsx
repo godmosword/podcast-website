@@ -11,7 +11,11 @@ import { INTRO_GATE_INIT_SCRIPT, INTRO_PORTAL_ENABLED } from "@/lib/intro-gate";
 import { siteIdentityJsonLd } from "@/lib/json-ld";
 import { getSiteUrl } from "@/lib/site-url";
 import { STORIES_VIEW_INIT_SCRIPT } from "@/lib/stories-view";
-import { THEME_INIT_SCRIPT } from "@/lib/theme";
+import {
+  LIGHT_THEME_COLOR,
+  NIGHT_THEME_COLOR,
+  THEME_INIT_SCRIPT,
+} from "@/lib/theme";
 import "./globals.css";
 
 // 童趣圓潤字型，避免使用 Inter/Arial 等通用字型。
@@ -76,6 +80,9 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
+      // `.ico` 排第一：分頁圖示與部分爬蟲／RSS 閱讀器只認 /favicon.ico，
+      // 沒有這一筆就是每次載入一筆 404（由 npm run generate:favicon 產生）。
+      { url: "/favicon.ico", sizes: "16x16 32x32 48x48", type: "image/x-icon" },
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
       { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
     ],
@@ -99,7 +106,13 @@ export const viewport: Viewport = {
   // 開放縮放：家長共讀可放大文字／插圖，符合 WCAG 1.4.4（不鎖 maximumScale／userScalable）。
   // 處理瀏海 / 圓角螢幕，搭配 globals.css 的 env(safe-area-inset-*)。
   viewportFit: "cover",
-  themeColor: "#ffffff",
+  // 兩個 media-scoped 值只負責「首次繪製」不閃白；JS 解出真正的主題後，
+  // lib/theme.ts 的 updateThemeColorMeta 會移除它們並改由單一 meta 接管
+  // （夜間不只看 OS，睡前時段也算）。
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: LIGHT_THEME_COLOR },
+    { media: "(prefers-color-scheme: dark)", color: NIGHT_THEME_COLOR },
+  ],
 };
 
 export default function RootLayout({

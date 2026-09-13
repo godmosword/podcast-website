@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { getNextGame } from "@/data/games";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import styles from "./GameEndStation.module.css";
 
 export type GameEndMood = "win" | "retry" | "over";
@@ -83,38 +84,10 @@ export function GameEndStation({
     stars == null ? null : Math.max(0, Math.min(3, Math.floor(stars)));
   const stationRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const previous =
-      document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const station = stationRef.current;
-    const focusables = () =>
-      station?.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
-      ) ?? [];
-
-    focusables()[0]?.focus();
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Tab" || !station?.contains(document.activeElement)) return;
-      const items = focusables();
-      if (items.length === 0) return;
-      const first = items[0];
-      const last = items[items.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last?.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first?.focus();
-      }
-    };
-
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      if (previous?.isConnected) previous.focus();
-    };
-  }, []);
+  // 原本是手寫 trap，但守衛寫成「焦點不在站內就早退」——焦點一旦逸出
+  // （切到網址列再切回來、或落到 body）就再也圈不回來。共用 hook 對這個
+  // 情況會主動把焦點拉回容器，且 focusables 會濾掉隱藏元素。
+  useFocusTrap(true, stationRef);
 
   return (
     <div

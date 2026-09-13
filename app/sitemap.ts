@@ -116,6 +116,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
     },
     {
+      url: `${baseUrl}/games/coloring-book`,
+      lastModified: STATIC_PAGE_MODIFIED_DATES["/games/coloring-book"],
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
       url: `${baseUrl}/legal`,
       lastModified: STATIC_PAGE_MODIFIED_DATES["/legal"],
       changeFrequency: "yearly",

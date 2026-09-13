@@ -1,4 +1,5 @@
 import type { Character } from "@/data/characters";
+import { GAMES, type GameMeta } from "@/data/games";
 import type { Story } from "@/data/content";
 import type { Playground } from "@/data/playgrounds";
 import { storyDateModified } from "@/data/story-dates";
@@ -215,6 +216,81 @@ export function breadcrumbListJsonLd(
       position: index + 1,
       name: item.name,
       item: item.url.startsWith(siteUrl) ? item.url : absoluteUrl(item.url),
+    })),
+  };
+}
+
+/**
+ * `"3–7 歲"` → `"3-7"`。schema.org `typicalAgeRange` 只吃 ASCII 連字號，
+ * 且不接受單位；資料檔用的是全形連接號（en dash），這裡一併正規化。
+ */
+export function typicalAgeRange(ageRange: string): string {
+  return ageRange
+    .replace(/\s*歲\s*$/u, "")
+    .replace(/[\u2010-\u2015\u2212]/gu, "-")
+    .replace(/\s+/gu, "");
+}
+
+function gameId(game: GameMeta): string {
+  return `${getSiteUrl()}${game.href}#game`;
+}
+
+/**
+ * 單一小遊戲的 VideoGame 結構化資料。
+ *
+ * 用 `VideoGame` 而不是 `SoftwareApplication`：這幾頁是可直接遊玩的網頁遊戲，
+ * 不是可安裝的應用；`gamePlatform: "Web browser"` 讓爬蟲知道不需下載。
+ */
+export function videoGameJsonLd(game: GameMeta): Record<string, unknown> {
+  const siteUrl = getSiteUrl();
+  const modified = STATIC_PAGE_MODIFIED_DATES[game.href];
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "@id": gameId(game),
+    name: game.title,
+    description: game.desc,
+    url: `${siteUrl}${game.href}`,
+    image: absoluteUrl(game.art.cover),
+    inLanguage: LANGUAGE,
+    genre: "Casual",
+    gamePlatform: "Web browser",
+    applicationCategory: "GameApplication",
+    operatingSystem: "Any",
+    playMode: "SinglePlayer",
+    typicalAgeRange: typicalAgeRange(game.ageRange),
+    isAccessibleForFree: true,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "TWD",
+      availability: "https://schema.org/InStock",
+    },
+    publisher: { "@id": `${siteUrl}/#organization` },
+    ...(modified ? { dateModified: modified } : {}),
+  };
+}
+
+/** 遊戲 hub 的 ItemList：讓爬蟲一次看到三款遊戲與其排序。 */
+export function gameListJsonLd(
+  games: readonly GameMeta[] = GAMES,
+): Record<string, unknown> {
+  const siteUrl = getSiteUrl();
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "@id": `${siteUrl}/games#games`,
+    name: "車車遊樂園小遊戲",
+    description:
+      "車車遊樂園的親子小遊戲清單：繽紛消消樂、繪本著色與繽紛樂園。",
+    url: `${siteUrl}/games`,
+    numberOfItems: games.length,
+    itemListElement: games.map((game, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: videoGameJsonLd(game),
     })),
   };
 }

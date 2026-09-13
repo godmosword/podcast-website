@@ -132,6 +132,18 @@ export const GAME_NEXT: Record<string, string> = {
   "block-drop": "candy-match",
 };
 
+/**
+ * 依 slug 取遊戲；找不到就丟。
+ *
+ * 呼叫端（各遊戲頁的 JSON-LD）傳的是寫死的字面值，slug 打錯是編譯期就該炸的
+ * 錯誤，不是要在 runtime 悄悄降級的狀況——回 null 只會讓結構化資料無聲消失。
+ */
+export function gameBySlug(slug: string): GameMeta {
+  const game = GAMES.find((g) => g.slug === slug);
+  if (!game) throw new Error(`未知的遊戲 slug：${slug}`);
+  return game;
+}
+
 /** 依 slug 取下一站遊戲；找不到回 null。 */
 export function getNextGame(slug: string): GameMeta | null {
   const next = GAME_NEXT[slug];

@@ -14,8 +14,10 @@ describe("STATIC_PAGE_MODIFIED_DATES", () => {
         Number.isNaN(Date.parse(STATIC_PAGE_MODIFIED_DATES[route])),
         route,
       ).toBe(false);
+      // 生成器用 `git log --format=%h`，短雜湊長度會隨 repo 物件數自動變長
+      // （本 repo 已從 7 碼長到 8 碼），所以只能驗下限不能釘死長度。
       expect(STATIC_PAGE_MODIFIED_DATE_SOURCE[route], route).toMatch(
-        /^[0-9a-f]{7} /,
+        /^[0-9a-f]{7,40} /,
       );
     }
   });

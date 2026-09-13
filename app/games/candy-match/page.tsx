@@ -1,12 +1,16 @@
 import type { Metadata } from "next";
 import CandyMatchGameHost from "@/app/games/candy-match/CandyMatchGameHost";
 import { GamePageShell } from "@/components/games/GamePageShell";
+import JsonLd from "@/components/JsonLd";
+import { videoGameJsonLd } from "@/lib/json-ld";
+import { gameBySlug } from "@/data/games";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
   title: "繽紛消消樂",
   description:
     "小朋友的第一款消除遊戲：沒有時間壓力、沒有輸贏挫折，找一找、排一排、消一消，完成可愛的繽紛任務。適合 3–7 歲。",
+  alternates: { canonical: "/games/candy-match" },
   openGraph: {
     title: "繽紛消消樂 · 車車遊樂園",
     description:
@@ -18,6 +22,7 @@ export const metadata: Metadata = {
 export default function CandyMatchPage() {
   return (
     <GamePageShell title="繽紛消消樂小遊戲" gameId="candy-match">
+      <JsonLd data={videoGameJsonLd(gameBySlug("candy-match"))} />
       <CandyMatchGameHost />
     </GamePageShell>
   );

@@ -1,3 +1,6 @@
+/** 站名。metadata、JSON-LD 與 Media Session 共用同一個字面值。 */
+export const SITE_NAME = "車車遊樂園";
+
 /** 全站預設 Open Graph 圖（public 路徑）。 */
 export const DEFAULT_OG_IMAGE = "/mascot.png";
 

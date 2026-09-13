@@ -40,6 +40,12 @@ const ROUTE_SOURCES: Record<string, string[]> = {
     "app/games/block-drop/page.module.css",
   ],
   "/games/candy-match": ["app/games/candy-match/page.tsx"],
+  "/games/coloring-book": [
+    "app/games/coloring-book/page.tsx",
+    "components/coloring/ColoringBook.tsx",
+    "components/coloring/ColoringPageShell.module.css",
+    "data/coloring-pages.ts",
+  ],
   "/legal": ["app/legal/page.tsx", "app/legal/page.module.css"],
   "/feedback": [
     "app/feedback/page.tsx",

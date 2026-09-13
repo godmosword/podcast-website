@@ -12,7 +12,16 @@ import {
   setNightPromptDismissedInStore,
   type CaptionSize,
 } from "@/lib/progress-store";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { LIGHT_THEME, NIGHT_THEME } from "@/lib/theme";
+import { SITE_NAME } from "@/lib/site-url";
+import {
+  clearMediaSession,
+  setMediaSessionHandlers,
+  setMediaSessionMetadata,
+  setMediaSessionPlaybackState,
+  setMediaSessionPositionState,
+} from "@/lib/media-session";
 import { trackStoryCompleted, trackStoryPlayStart } from "@/lib/analytics";
 import { takeLandingPlayback } from "@/lib/landing-playback";
 import { playSfx, isSfxEnabled } from "@/lib/sfx";
@@ -328,6 +337,8 @@ export default function StoryPlayer({
     window.requestAnimationFrame(() => timerButtonRef.current?.focus());
   }, []);
 
+  useFocusTrap(showNightPrompt, nightPromptRef);
+
   function handleTimerMenuKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     const items = Array.from(
       e.currentTarget.querySelectorAll<HTMLButtonElement>("button"),
@@ -351,24 +362,13 @@ export default function StoryPlayer({
     }
   }
 
+  // Tab 圈禁交給 useFocusTrap（下方 useFocusTrap(showNightPrompt, ...)）：
+  // 原本寫在這裡的 Tab 分支永遠不會觸發——提示開啟時沒有把焦點移進對話框，
+  // 掛在容器上的 React onKeyDown 就收不到事件，等於宣告了 aria-modal 卻不是模態。
   function handleNightPromptKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     if (e.key === "Escape") {
       e.preventDefault();
       closeNightPrompt();
-      return;
-    }
-    if (e.key !== "Tab") return;
-    const buttons = Array.from(
-      e.currentTarget.querySelectorAll<HTMLButtonElement>("button"),
-    );
-    if (buttons.length < 2) return;
-    const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
-    if (e.shiftKey && index <= 0) {
-      e.preventDefault();
-      buttons.at(-1)?.focus();
-    } else if (!e.shiftKey && index === buttons.length - 1) {
-      e.preventDefault();
-      buttons[0]?.focus();
     }
   }
 
@@ -656,6 +656,48 @@ export default function StoryPlayer({
   }
 
   transportRef.current = { togglePlay, skipIllustration };
+
+  // ── Media Session：鎖屏／耳機／車機／通知列 ───────────────────────────
+  // 三個 effect 刻意分開：metadata 只隨故事換，handler 只掛一次（透過
+  // transportRef 讀最新 transport，避免每次 render 重掛），進度則跟著
+  // timeupdate 走。`lib/media-session.ts` 已吞掉不支援與越界的例外。
+  useEffect(() => {
+    const cover = images[0];
+    setMediaSessionMetadata({
+      title,
+      artist: SITE_NAME,
+      album: "看圖聽故事",
+      ...(cover
+        ? {
+            artwork: [
+              { src: cover, sizes: "512x512", type: "image/jpeg" },
+              { src: cover, sizes: "1024x1024", type: "image/jpeg" },
+            ],
+          }
+        : {}),
+    });
+    return () => clearMediaSession();
+  }, [images, title]);
+
+  useEffect(() => {
+    // 快進／倒退在本產品是「換插圖」而不是 ±10 秒（見 lib/player-skip.ts），
+    // 所以綁 previoustrack／nexttrack 而不是 seekbackward／seekforward：
+    // 鎖屏上的雙箭頭圖示才會對上實際行為。
+    return setMediaSessionHandlers({
+      play: () => transportRef.current.togglePlay(),
+      pause: () => transportRef.current.togglePlay(),
+      previoustrack: () => transportRef.current.skipIllustration(-1),
+      nexttrack: () => transportRef.current.skipIllustration(1),
+    });
+  }, []);
+
+  useEffect(() => {
+    setMediaSessionPlaybackState(isPlaying ? "playing" : "paused");
+  }, [isPlaying]);
+
+  useEffect(() => {
+    setMediaSessionPositionState({ duration, position: currentTime });
+  }, [duration, currentTime]);
 
   useEffect(() => {
     if (!hasEnded) return;
