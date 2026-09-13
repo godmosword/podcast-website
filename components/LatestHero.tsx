@@ -5,6 +5,7 @@ import StoryImage from "./StoryImage";
 import Ribbon from "./decor/Ribbon";
 import Sparkle from "./decor/Sparkle";
 import decor from "./decor/decor.module.css";
+import { storyDisplayTitle } from "@/lib/story-title";
 import styles from "./LatestHero.module.css";
 
 type LatestHeroProps = {
@@ -25,7 +26,7 @@ export default function LatestHero({ story }: LatestHeroProps) {
         {/* /stories LCP 是 SiteHeader hero-home；這裡不再 priority，避免雙 hero preload。 */}
         <StoryImage
           src={storyCoverPath(story.slug)}
-          alt={`${story.title} 封面`}
+          alt={`${storyDisplayTitle(story)} 封面`}
           fill
           className={styles.cover}
         />
@@ -37,7 +38,7 @@ export default function LatestHero({ story }: LatestHeroProps) {
 
       <div className={styles.info}>
         <span className={styles.title} role="heading" aria-level={2}>
-          {story.title}
+          {storyDisplayTitle(story)}
         </span>
         {story.summary && (
           <span className={styles.summary}>{story.summary}</span>

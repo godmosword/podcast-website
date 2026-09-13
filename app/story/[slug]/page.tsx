@@ -15,6 +15,7 @@ import {
 } from "@/lib/story-geo";
 import { storyDetailMetadata } from "@/lib/story-metadata";
 import { hasFullTranscript } from "@/lib/transcript";
+import { storyDisplayTitle, storySubtitle } from "@/lib/story-title";
 import { storyCoverPath } from "@/lib/story-utils";
 import FavoriteButton from "@/components/FavoriteButton";
 import JsonLd from "@/components/JsonLd";
@@ -76,6 +77,8 @@ export default async function StoryDetailPage({
     Boolean(story.parentGuide) ||
     Boolean(story.reflectionPrompt);
 
+  const subtitle = storySubtitle(story);
+
   return (
     <main className={styles.main} data-deferred-brand-font="story-detail">
       <JsonLd data={podcastEpisodeJsonLd(story)} />
@@ -91,15 +94,16 @@ export default async function StoryDetailPage({
         ← 回故事屋
       </Link>
 
-      <article>
+      <article className={styles.article}>
         <div className={styles.hero}>
-          <h1 className={styles.title}>{story.title}</h1>
+          <h1 className={styles.title}>{storyDisplayTitle(story)}</h1>
+          {subtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
 
           <div className={styles.coverWrap} style={{ borderColor: story.color }}>
             <StoryCoverMorph slug={story.slug}>
               <StoryImage
                 src={storyCoverPath(story.slug)}
-                alt={`${story.title} 封面`}
+                alt={`${storyDisplayTitle(story)} 封面`}
                 fill
                 className={styles.cover}
                 priority
@@ -107,7 +111,7 @@ export default async function StoryDetailPage({
             </StoryCoverMorph>
           </div>
 
-          <StoryMeta story={story} showTags={false} />
+          <StoryMeta story={story} showTags={false} className={styles.heroMeta} />
 
           <div className={styles.metaStack}>
             {story.zoneId ? <ZoneBadge zoneId={story.zoneId} /> : null}
@@ -120,7 +124,7 @@ export default async function StoryDetailPage({
             href={`/story/${story.slug}/play`}
             color={story.color}
             className={styles.playMain}
-            label={`開始看故事：${story.title}`}
+            label={`開始看故事：${storyDisplayTitle(story)}`}
           />
           <ShareButton
             storySlug={story.slug}

@@ -30,6 +30,7 @@ import {
 } from "@/lib/playground-nearby";
 import { formatVerifiedMonthLabel } from "@/lib/playground-parent-voice";
 import styles from "./page.module.css";
+import { storyDisplayTitle } from "@/lib/story-title";
 
 type PlaceDetailPageProps = {
   params: Promise<{ placeId: string }>;
@@ -319,7 +320,7 @@ export default async function PlaygroundDetailPage({
                 {relatedStories.map((story) => (
                   <li key={story.slug}>
                     <Link href={`/story/${encodeURIComponent(story.slug)}`}>
-                      {story.title}
+                      {storyDisplayTitle(story)}
                     </Link>
                   </li>
                 ))}

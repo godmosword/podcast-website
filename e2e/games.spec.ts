@@ -27,7 +27,7 @@ test.describe("遊戲頁：兒童主路徑優先", () => {
       // DOM 順序：遊戲區必須在家長說明之前
       const order = await page.evaluate(() => {
         const play = document.querySelector("#game-play");
-        const intro = document.querySelector("[data-game-id]");
+        const intro = document.querySelector('[data-testid="game-parent-intro"]');
         if (!play || !intro) return null;
         return play.compareDocumentPosition(intro) &
           Node.DOCUMENT_POSITION_FOLLOWING
@@ -58,7 +58,7 @@ test.describe("遊戲頁：兒童主路徑優先", () => {
   test("家長說明的 aria-labelledby 指向實際存在的標題", async ({ page }) => {
     await page.goto("/games/candy-match");
     const labelledBy = await page
-      .locator("[data-game-id]")
+      .getByTestId("game-parent-intro")
       .getAttribute("aria-labelledby");
     expect(labelledBy).toBeTruthy();
     await expect(page.locator(`#${labelledBy}`)).toHaveCount(1);
@@ -72,7 +72,7 @@ test.describe("遊戲頁：兒童主路徑優先", () => {
     await expect(hints).toBeVisible();
 
     const hintsBox = await hints.boundingBox();
-    const introBox = await page.locator("[data-game-id]").boundingBox();
+    const introBox = await page.getByTestId("game-parent-intro").boundingBox();
     expect(hintsBox!.y).toBeLessThan(introBox!.y);
   });
 

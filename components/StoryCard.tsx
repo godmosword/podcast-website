@@ -8,6 +8,7 @@ import StoryImage from "./StoryImage";
 import { TagChip } from "./Chip";
 import StoryAge from "./StoryAge";
 import Icon from "./ui/Icon";
+import { storyDisplayTitle } from "@/lib/story-title";
 import styles from "./StoryCard.module.css";
 
 type StoryCardProps = {
@@ -103,7 +104,7 @@ export default function StoryCard({
         </span>
 
         <span className={styles.title} role="heading" aria-level={3}>
-          {story.title}
+          {storyDisplayTitle(story)}
         </span>
 
         {story.summary && <span className={styles.summary}>{story.summary}</span>}

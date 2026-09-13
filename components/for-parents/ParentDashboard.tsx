@@ -8,6 +8,7 @@ import {
   saveGameKitSettingsToStore,
   setSfxEnabledInStore,
 } from "@/lib/progress-store";
+import { storyDisplayTitle } from "@/lib/story-title";
 import styles from "./parent-dashboard.module.css";
 
 const REASON_LABEL: Record<ParentStoryRow["reason"], string> = {
@@ -130,7 +131,7 @@ function RecommendedStoriesCard() {
                 href={`/story/${story.slug}`}
                 className={styles.storyLink}
               >
-                <span>{story.title}</span>
+                <span>{storyDisplayTitle(story)}</span>
                 <span className={styles.storyEp}>EP {story.ep}</span>
               </Link>
             </li>

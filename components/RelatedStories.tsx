@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Story } from "@/data/content";
 import StoryCard from "./StoryCard";
+import { storyDisplayTitle } from "@/lib/story-title";
 import styles from "./RelatedStories.module.css";
 
 type RelatedStoriesProps = {
@@ -30,7 +31,7 @@ export default function RelatedStories({
             className={styles.nextLink}
             style={accent ? { textDecorationColor: accent } : undefined}
           >
-            EP {nextStory.ep} {nextStory.title}
+            EP {nextStory.ep} {storyDisplayTitle(nextStory)}
           </Link>
         </p>
       ) : null}

@@ -18,6 +18,8 @@ const DEFAULT_STORY_AGE_RANGE = "約 3–7 歲";
 type StoryBase = {
   slug: string;
   title: string;
+  /** 可見主標覆寫；解析邏輯見 lib/story-title.ts。 */
+  displayTitle?: string;
   date: string;
   tags?: string[];
   ageRange?: string;
@@ -64,6 +66,7 @@ type ManualStoryOverride = Partial<
     | "vehicle"
     | "emoji"
     | "tags"
+    | "displayTitle"
     | "summary"
     | "duration"
   >
@@ -79,6 +82,9 @@ function applyStoryOverrides(raw: RawStory): RawStory {
   return {
     ...raw,
     ...(override.vehicle !== undefined ? { vehicle: override.vehicle } : {}),
+    ...(override.displayTitle !== undefined
+      ? { displayTitle: override.displayTitle }
+      : {}),
     ...(override.emoji !== undefined ? { emoji: override.emoji } : {}),
     ...(override.tags !== undefined ? { tags: override.tags } : {}),
     ...(override.summary !== undefined ? { summary: override.summary } : {}),

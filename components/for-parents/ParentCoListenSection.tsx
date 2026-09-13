@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Story } from "@/data/content";
 import FamilyActivityCard from "@/components/story/FamilyActivityCard";
 import ShowNotes from "@/components/story/ShowNotes";
+import { storyDisplayTitle } from "@/lib/story-title";
 import styles from "./ParentCoListenSection.module.css";
 
 type Props = {
@@ -27,7 +28,7 @@ export default function ParentCoListenSection({ stories }: Props) {
           <li key={story.slug} className={styles.item}>
             <details className={styles.details}>
               <summary className={styles.summary}>
-                EP {story.ep}　{story.title}
+                EP {story.ep}　{storyDisplayTitle(story)}
               </summary>
               <div className={styles.body}>
                 {story.familyActivity ? (

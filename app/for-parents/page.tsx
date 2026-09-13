@@ -16,6 +16,7 @@ import { STATIC_PAGE_MODIFIED_DATES } from "@/lib/page-freshness";
 import { visibleSocials } from "@/lib/social";
 import { storyCoverPath } from "@/lib/story-utils";
 import styles from "./page.module.css";
+import { storyDisplayTitle } from "@/lib/story-title";
 
 export const metadata: Metadata = {
   title: "親子指南：給家長的中文車車 Podcast",
@@ -176,13 +177,13 @@ export default function ForParentsPage() {
               <span className={styles.cover}>
                 <Image
                   src={storyCoverPath(story.slug)}
-                  alt={`${story.title} 封面`}
+                  alt={`${storyDisplayTitle(story)} 封面`}
                   fill
                   sizes="(max-width: 720px) 45vw, 220px"
                 />
               </span>
               <span className={styles.storyMeta}>EP {story.ep}</span>
-              <span className={styles.storyTitle}>{story.title}</span>
+              <span className={styles.storyTitle}>{storyDisplayTitle(story)}</span>
             </Link>
           ))}
         </div>

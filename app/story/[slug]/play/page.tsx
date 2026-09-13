@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getStory, getNextStory, getStories } from "@/data/content";
 import { storyPlayMetadata } from "@/lib/story-metadata";
+import { storyDisplayTitle } from "@/lib/story-title";
 import { getSubtitles } from "@/lib/subtitles";
 import { pad2, storyAudioUrl, storyCoverPath } from "@/lib/story-utils";
 import StoryPlayer from "@/components/StoryPlayerClient";
@@ -55,7 +56,9 @@ export default async function StoryPlayPage({
   return (
     <StoryPlayer
       slug={story.slug}
-      title={story.title}
+      // 可見主標：頂欄與鎖屏都塞不下目錄用的完整標題（會截成「大黃卡車的運…」）。
+      // 完整標題仍由 generateMetadata 供給 <title>／OG；播放頁本身是 noindex。
+      title={storyDisplayTitle(story)}
       color={story.color}
       images={images}
       audio={storyAudioUrl(story.slug, story.audio)}
@@ -64,7 +67,7 @@ export default async function StoryPlayPage({
       subtitles={subtitles ?? undefined}
       backHref={`/story/${story.slug}`}
       nextStorySlug={nextStory?.slug}
-      nextStoryTitle={nextStory?.title}
+      nextStoryTitle={nextStory ? storyDisplayTitle(nextStory) : undefined}
       reflectionPrompt={story.reflectionPrompt}
     />
   );

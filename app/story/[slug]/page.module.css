@@ -83,6 +83,16 @@
   line-height: 1.2;
 }
 
+/* 目錄標題主標之後的段落。關鍵字全部留在頁面上，只是降一個層級，
+   讓 h1 不再是三行置中的關鍵字串。 */
+.subtitle {
+  margin: var(--space-2) 0 0;
+  color: var(--ink-soft);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  line-height: 1.5;
+}
+
 .actions {
   display: flex;
   flex-direction: column;
@@ -202,6 +212,73 @@
   font-size: var(--fs-body);
   line-height: 1.75;
   color: var(--ink-soft);
+}
+
+/* ── 桌機兩欄（≥980，DESIGN.md 允許的第四層斷點）────────────────────────
+   單欄 640px 版面在 1280×720 的第一屏只放得下「回故事屋＋標題＋正方形封面」，
+   最重要的「開始看故事」被推到折線以下，左右各留約 430px 空白。改成封面在右、
+   標題／meta／CTA 在左，CTA 就回到第一屏。
+
+   `.hero` 與 `.actions` 是兄弟，所以 grid 開在 `article` 上，預設讓所有子元素
+   橫跨兩欄，再把 hero 內的元素以 `display: contents` 拉進同一個 grid 逐一定位。
+   ≤979 完全不套用，行動版一個像素都不動。 */
+@media (min-width: 980px) {
+  .main {
+    max-width: 980px;
+  }
+
+  .article {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+    grid-template-areas:
+      "title    cover"
+      "subtitle cover"
+      "meta     cover"
+      "metaStack cover"
+      "actions  cover";
+    column-gap: var(--space-8);
+    align-items: start;
+  }
+
+  /* article 的其餘子元素（共讀 CTA、Show notes、相關故事…）維持單欄橫跨 */
+  .article > * {
+    grid-column: 1 / -1;
+  }
+
+  .hero {
+    display: contents;
+    text-align: left;
+  }
+
+  .title {
+    grid-area: title;
+    align-self: end;
+  }
+
+  .subtitle {
+    grid-area: subtitle;
+  }
+
+  .heroMeta {
+    grid-area: meta;
+    justify-content: flex-start;
+  }
+
+  .metaStack {
+    grid-area: metaStack;
+    align-items: flex-start;
+  }
+
+  .coverWrap {
+    grid-area: cover;
+    max-width: 420px;
+    margin: 0;
+  }
+
+  .actions {
+    grid-area: actions;
+    margin-top: var(--space-6);
+  }
 }
 
 @media (max-width: 640px) {

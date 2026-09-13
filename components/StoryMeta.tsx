@@ -6,17 +6,26 @@ type StoryMetaProps = {
   story: Story;
   align?: "center" | "left";
   showTags?: boolean;
+  /** 供外層版面掛 grid-area 等定位用；只加在 EP／時長那一列。 */
+  className?: string;
 };
 
 export default function StoryMeta({
   story,
   align = "center",
   showTags = true,
+  className,
 }: StoryMetaProps) {
   return (
     <>
       <div
-        className={`${styles.meta} ${align === "left" ? styles.metaLeft : ""}`}
+        className={[
+          styles.meta,
+          align === "left" ? styles.metaLeft : "",
+          className ?? "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
       >
         <span
           className={styles.ep}

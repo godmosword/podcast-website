@@ -28,6 +28,9 @@ export function GameIntro({ gameId }: { gameId: GameKitGameId }) {
       className={styles.intro}
       aria-labelledby="game-parent-intro-title"
       data-game-id={game.slug}
+      // GamePageShell 的 <main> 也帶 data-game-id（candy-match 字型 scope 用），
+      // 所以 e2e 不能靠那個屬性定位家長說明，改用這個專屬 hook。
+      data-testid="game-parent-intro"
     >
       <div className={styles.cover}>
         <Image

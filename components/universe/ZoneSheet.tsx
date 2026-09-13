@@ -21,6 +21,7 @@ import ParentTrustStrip from "@/components/ParentTrustStrip";
 import IconButton from "@/components/ui/IconButton";
 import ZoneWishForm from "./ZoneWishForm";
 import { useUniverseCameraGate } from "./UniverseCameraGateContext";
+import { storyDisplayTitle } from "@/lib/story-title";
 import styles from "./ZoneSheet.module.css";
 
 type ZoneSheetProps = {
@@ -232,7 +233,7 @@ export default function ZoneSheet({
                           <span className={styles.storyCardNew}>最新</span>
                         ) : null}
                       </span>
-                      <span className={styles.storyCardTitle}>{story.title}</span>
+                      <span className={styles.storyCardTitle}>{storyDisplayTitle(story)}</span>
                     </span>
                     {completedSlugs?.has(story.slug) ? (
                       <span

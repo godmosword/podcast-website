@@ -17,7 +17,13 @@
 export type ManualStory = {
   slug: string;
   ep: number;
+  /** Podcast 目錄用的完整標題（`｜` 串接），供 <title>／OG／RSS／JSON-LD。 */
   title: string;
+  /**
+   * 可見主標覆寫。不給時由 `lib/story-title.ts` 取 `title` 的第一段；
+   * 只有在第一段不夠好時才填（例如 ep-28 的「小紅豆汽車故事」太泛）。
+   */
+  displayTitle?: string;
   date: string;
   duration?: string;
   vehicle: string;

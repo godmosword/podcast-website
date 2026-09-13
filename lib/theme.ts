@@ -69,7 +69,7 @@ export function syncBedtimeFromMode(mode: ThemeMode, hour?: number): void {
 }
 
 /** Blocking inline script — runs before paint to avoid FOUC. */
-export const THEME_INIT_SCRIPT = `(function(){try{var r=localStorage.getItem("${PROGRESS_STORAGE_KEY}");var m="system";if(r){var p=JSON.parse(r);m=(p.preferences&&p.preferences.theme)||"system";}var h=new Date().getHours();var bedtime=h>=${BEDTIME_START_HOUR}||h<${BEDTIME_END_HOUR};var dark=false;if(m==="night"){dark=true;}else if(m==="system"){var sys=window.matchMedia&&window.matchMedia("${DARK_SCHEME_QUERY}").matches;dark=sys||bedtime;}if(dark){document.documentElement.setAttribute("${THEME_ATTRIBUTE}","night");}if(bedtime&&m!=="light"){document.documentElement.setAttribute("${BEDTIME_ATTRIBUTE}","true");}}catch(e){}})();`;
+export const THEME_INIT_SCRIPT = `(function(){try{var r=localStorage.getItem("${PROGRESS_STORAGE_KEY}");var m="system";if(r){var p=JSON.parse(r);m=(p.preferences&&p.preferences.theme)||"system";}var h=new Date().getHours();var bedtime=h>=${BEDTIME_START_HOUR}||h<${BEDTIME_END_HOUR};var dark=false;if(m==="night"){dark=true;}else if(m==="system"){var sys=window.matchMedia&&window.matchMedia("${DARK_SCHEME_QUERY}").matches;dark=sys||bedtime;}if(dark){document.documentElement.setAttribute("${THEME_ATTRIBUTE}","night");}if(bedtime&&m!=="light"){document.documentElement.setAttribute("${BEDTIME_ATTRIBUTE}","true");}var mt=document.createElement("meta");mt.name="theme-color";mt.content=dark?"${NIGHT_THEME_COLOR}":"${LIGHT_THEME_COLOR}";document.head.appendChild(mt);}catch(e){}})();`;
 
 function isThemeMode(value: unknown): value is ThemeMode {
   return value === "light" || value === "night" || value === SYSTEM_THEME_MODE;
@@ -107,25 +107,22 @@ export function applyThemeToDocument(theme: ThemePreference): void {
 /**
  * 狀態列底色。
  *
- * `app/layout.tsx` 的 `viewport.themeColor` 會輸出兩個帶 `media` 的 meta
- * （light／dark），讓**首次繪製**就跟著 OS 配色走，不會閃白。但本站的夜間不
- * 只看 OS——睡前時段也算夜間（見 `resolveThemeFromMode`），所以 JS 解出真正的
- * 主題後，必須由單一不帶 `media` 的 meta 接管：帶 media 的那兩個留著會在
- * 「OS 亮色 + 睡前」這組合下把深色蓋掉。
+ * meta 由 `THEME_INIT_SCRIPT` 在首次繪製前建立，**不經 Next 的
+ * `viewport.themeColor`**。兩個理由：
+ *
+ *   1. 本站的夜間不只看 OS——睡前時段也算（見 `resolveThemeFromMode`），
+ *      所以 `prefers-color-scheme` 的 media-scoped meta 給不出正確答案，
+ *      而 init script 在同一個時間點就已經解出真正的主題了。
+ *   2. Next 產生的 meta 屬於 React 樹。在 React 之外把它移除，React 之後
+ *      卸載該節點時會撞到 `parentNode === null`，整棵路由切換會中斷
+ *      （網址換了但畫面停在原頁）。所以這裡**只新增與改寫自己建立的 meta，
+ *      永不移除別人的節點**。
  */
 function updateThemeColorMeta(theme: ThemePreference): void {
   if (typeof document === "undefined") return;
   const color = theme === NIGHT_THEME ? NIGHT_THEME_COLOR : LIGHT_THEME_COLOR;
 
-  for (const scoped of document.querySelectorAll(
-    'meta[name="theme-color"][media]',
-  )) {
-    scoped.remove();
-  }
-
-  let meta = document.querySelector<HTMLMetaElement>(
-    'meta[name="theme-color"]:not([media])',
-  );
+  let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
   if (!meta) {
     meta = document.createElement("meta");
     meta.name = "theme-color";

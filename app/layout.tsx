@@ -11,11 +11,7 @@ import { INTRO_GATE_INIT_SCRIPT, INTRO_PORTAL_ENABLED } from "@/lib/intro-gate";
 import { siteIdentityJsonLd } from "@/lib/json-ld";
 import { getSiteUrl } from "@/lib/site-url";
 import { STORIES_VIEW_INIT_SCRIPT } from "@/lib/stories-view";
-import {
-  LIGHT_THEME_COLOR,
-  NIGHT_THEME_COLOR,
-  THEME_INIT_SCRIPT,
-} from "@/lib/theme";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
 // 童趣圓潤字型，避免使用 Inter/Arial 等通用字型。
@@ -106,13 +102,9 @@ export const viewport: Viewport = {
   // 開放縮放：家長共讀可放大文字／插圖，符合 WCAG 1.4.4（不鎖 maximumScale／userScalable）。
   // 處理瀏海 / 圓角螢幕，搭配 globals.css 的 env(safe-area-inset-*)。
   viewportFit: "cover",
-  // 兩個 media-scoped 值只負責「首次繪製」不閃白；JS 解出真正的主題後，
-  // lib/theme.ts 的 updateThemeColorMeta 會移除它們並改由單一 meta 接管
-  // （夜間不只看 OS，睡前時段也算）。
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: LIGHT_THEME_COLOR },
-    { media: "(prefers-color-scheme: dark)", color: NIGHT_THEME_COLOR },
-  ],
+  // 這裡刻意不宣告 themeColor：狀態列底色由 THEME_INIT_SCRIPT 在首次繪製前
+  // 自己建 meta（夜間不只看 OS，睡前時段也算，media query 給不出正確答案），
+  // 且那個 meta 不屬於 React 樹——見 lib/theme.ts updateThemeColorMeta 的註解。
 };
 
 export default function RootLayout({
