@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 const PAGE = join(process.cwd(), "app/feedback/page.tsx");
 
 describe("feedback page 契約", () => {
-  it("表單與牆不快取，標題前放客廳錄音室首圖、不引用角色名冊", () => {
+  it("表單與牆不快取，標題前放卡丁車賽道首圖、不引用角色名冊", () => {
     const source = readFileSync(PAGE, "utf8");
     expect(source).toContain('export const dynamic = "force-dynamic"');
     expect(source).toContain("FeedbackForm available={available}");

@@ -2,22 +2,22 @@
  * 留言牆公開頁文案（非法務）。情感句依使用者指定斷行；欄位說明只當 label。
  */
 
-export const FEEDBACK_PAGE_TITLE = "留言給馬米";
+export const FEEDBACK_PAGE_TITLE = "留言給馬米跟Bonbon";
 
 export const FEEDBACK_HERO_SRC = "/feedback/hero.jpg";
 
-export const FEEDBACK_HERO_ALT = "馬米和 Bonbon 戴著耳機，在客廳錄音室向你揮手";
+export const FEEDBACK_HERO_ALT = "Bonbon 穿著綠色帽T，開著藍色卡丁車在遊樂園賽道上";
 
 /** 正規化後的正方形邊長；OG 與 `<img>` width／height 共用。 */
 export const FEEDBACK_HERO_SIZE = 1400;
 
 export const FEEDBACK_PAGE_DESCRIPTION =
-  "跟馬米說你最想說的話，也歡迎許願下一集想聽的故事。留言經審核後才會公開。";
+  "告訴我們你最想說的話，也歡迎許願下一集想聽什麼。留言經審核後才會公開。";
 
 export const FEEDBACK_PAGE_TITLE_ID = "feedback-page-title";
 
 export const FEEDBACK_INVITE_CHILD =
-  "嗨嗨，謝謝你來聽故事！告訴馬米你最想說的話，也歡迎許願下一集想聽什麼。";
+  "嗨嗨，謝謝你來聽故事！\n告訴我們你最想說的話，也歡迎許願下一集想聽什麼。";
 
 /** textarea id，給 label htmlFor 與測試定位。 */
 export const FEEDBACK_MESSAGE_FIELD_ID = "feedback-message";

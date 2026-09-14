@@ -7,6 +7,7 @@ describe("feedback page.module.css", () => {
 
   it("邀請是段落行高，不再一行一格", () => {
     expect(css).toMatch(/\.invite\s*\{[\s\S]*?line-height:\s*1\.7/);
+    expect(css).toMatch(/\.invite\s*\{[\s\S]*?white-space:\s*pre-line/);
     expect(css).not.toContain(".inviteLines");
     expect(css).not.toContain(".inviteLine");
     expect(css).not.toContain(".inviteChild");

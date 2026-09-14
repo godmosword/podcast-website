@@ -356,7 +356,7 @@ for (const pageDef of VISUAL_PAGES) {
         if (pageDef.id === "feedback") {
           // 表單在初始 HTML；牆可能是空標題或已核准列表，等殼穩定再截。
           await expect(
-            page.getByRole("heading", { name: "留言給馬米", level: 1 }),
+            page.getByRole("heading", { name: "留言給馬米跟Bonbon", level: 1 }),
           ).toBeVisible();
           await expect(
             page.getByRole("heading", { name: "大家的留言", level: 2 }),

@@ -30,6 +30,7 @@
 
 ### Changed
 
+- **`/feedback` hero 改卡丁車賽道實拍、標題改「留言給馬米跟Bonbon」**：邀請改兩行「告訴我們…」；alt／OG 描述同步。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、表單契約與法律頁政策版本。
 - **Landing 底列把分區 CTA、換段圓鈕與嘟嘟收成同一排**：圓鈕不再浮在中央偏上；左群組是 CTA 加圓鈕、右欄對齊小紅車，三者齊底、互不重疊。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **Landing 滑鼠滾輪換段改走圓鈕同一套短轉場**：垂直滾輪／觸控板往下（或往上）先 120ms 淡出再 `auto` 對齊，接著 280ms 淡入＋微縮放；一格或一次明確手勢只換一段。手指滑與方向鍵仍只靠 snap。`prefers-reduced-motion` 不攔截。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **Landing 換段加短轉場**：點黏土圓鈕或頂欄回家時，先 120ms 淡出再 `auto` 對齊，接著 280ms 淡入＋微縮放；手指滑仍只靠 snap。`prefers-reduced-motion` 立刻到位。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。

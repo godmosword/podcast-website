@@ -86,6 +86,7 @@
   font-size: var(--fs-body);
   line-height: 1.7;
   color: var(--ink);
+  white-space: pre-line;
 }
 
 .formSection,
