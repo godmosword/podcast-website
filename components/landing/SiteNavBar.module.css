@@ -209,11 +209,12 @@
   }
 }
 
-/* 目前頁與「滑過」必須可區分，且不得只靠顏色 */
+/* 目前頁與「滑過」必須可區分，且不得只靠顏色。
+ * 選中列是黏土片（頂緣高光 + 左 accent 條），不是整列反色。 */
 .menuLink[aria-current="page"] {
   background: rgba(120, 80, 40, 0.12);
   font-weight: 800;
-  box-shadow: inset 3px 0 0 var(--accent);
+  box-shadow: inset 3px 0 0 var(--accent), var(--gloss);
 }
 
 .menuLink:active {
@@ -305,11 +306,20 @@
 }
 
 :global(html[data-theme="night"]) .menuLink:hover {
-  background: color-mix(in srgb, var(--c-teal) 14%, transparent);
+  /* 與選中列同暖、較淡；不用薄荷洗底（暖褐板上會變成反色島）。 */
+  background: color-mix(in srgb, var(--on-dark) 6%, transparent);
 }
 
 :global(html[data-theme="night"]) .menuLink[aria-current="page"] {
-  background: color-mix(in srgb, var(--c-teal) 22%, transparent);
+  /* 面板色抬一階 + 微黃，對齊 ThemeToggle 軌道的「浮起」而不是反色。 */
+  background: color-mix(
+    in srgb,
+    var(--c-yellow) 8%,
+    color-mix(in srgb, var(--on-dark) 7%, var(--nav-panel-bg))
+  );
+  box-shadow:
+    inset 3px 0 0 var(--accent),
+    inset 0 1px 0 color-mix(in srgb, var(--on-dark) 16%, transparent);
 }
 
 :global(html[data-theme="night"]) .menuGroupStart::before {

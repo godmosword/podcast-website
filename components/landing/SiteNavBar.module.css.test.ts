@@ -126,6 +126,25 @@ describe("SiteNavBar.module.css 漢堡與抽屜", () => {
     );
   });
 
+  it("夜間抽屜目前頁用暖面板抬升，不用 teal 洗底", () => {
+    const marker =
+      ':global(html[data-theme="night"]) .menuLink[aria-current="page"] {';
+    const start = css.indexOf(marker);
+    expect(start).toBeGreaterThan(-1);
+    const block = css.slice(start, css.indexOf("}", start));
+    expect(block).toMatch(/--nav-panel-bg/);
+    expect(block).toMatch(/--c-yellow/);
+    expect(block).not.toMatch(/--c-teal/);
+    expect(block).toMatch(/box-shadow:\s*[\s\S]*inset 3px 0 0 var\(--accent\)/);
+    const hoverStart = css.indexOf(
+      ':global(html[data-theme="night"]) .menuLink:hover {',
+    );
+    expect(hoverStart).toBeGreaterThan(-1);
+    const hover = css.slice(hoverStart, css.indexOf("}", hoverStart));
+    expect(hover).not.toMatch(/--c-teal/);
+    expect(hover).not.toMatch(/--nav-panel-bg/);
+  });
+
   it("已退役的 themeDesktop 不留死碼（主題切換改在抽屜底部）", () => {
     expect(css).not.toContain("themeDesktop");
   });
