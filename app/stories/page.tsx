@@ -46,12 +46,14 @@ export default function StoriesPage() {
   };
 
   return (
-    <main className={styles.main} data-deferred-brand-font="stories">
-      <JsonLd data={podcastSeriesJsonLd()} />
-      <SiteHeader />
-      <StoriesIndexHeader lede={lede} titleClassName={styles.title} />
-      <HomeSectionList props={sectionProps} />
-      <SiteFooter layout="home" />
-    </main>
+    <div className={styles.page}>
+      <main className={styles.main} data-deferred-brand-font="stories">
+        <JsonLd data={podcastSeriesJsonLd()} />
+        <SiteHeader />
+        <StoriesIndexHeader lede={lede} titleClassName={styles.title} />
+        <HomeSectionList props={sectionProps} />
+        <SiteFooter layout="home" />
+      </main>
+    </div>
   );
 }

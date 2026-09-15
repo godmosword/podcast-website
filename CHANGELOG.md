@@ -21,6 +21,7 @@
 
 ### Fixed
 
+- **`/stories`、`/feedback` 桌機暖色底不再只鋪在內容欄**：兩頁的 `--page-warm-*` 漸層原本畫在 640／1100 置中的 `.main` 上，≥1280 欄外純白、欄內奶油色，兩條硬直邊從頂欄下方劃到底。改鋪在新的全出血 `.page` 包層（與 `/characters`、`/for-parents` 同一做法），`.main` 只剩欄寬與內距。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **手機點 Landing「車車遊樂園的故事」不再掉進休息頁**：頂欄預載品牌字未先檢查 `requestIdleCallback`，部分行動 WebView／舊 Safari 進 `/stories` 會讓 root layout 拋錯、整頁變成「這一頁暫時休息中」。沒有 idle API 時改 `setTimeout`。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **角色圖鑑「出場故事」統一釘在卡片框底**：個性文案長短不再把下拉推高，同一列卡片的選單齊底。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **手機開場舞台不再被頂欄與薄帶裁切**：覆蓋層內容從 `--nav-h` 起排，標題不再卡在導覽後面；直向視差改為文案／按鈕一列、場景吃剩餘高度並加大縮放。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。

@@ -1,15 +1,20 @@
-.main {
-  max-width: 640px;
-  margin: 0 auto;
+/* 暖色底鋪在全出血的 .page，不鋪在 640 置中欄：欄外純白會在桌機留下兩條
+   硬直邊（美術審 H2）。min-height 也跟著搬，漸層才鋪滿整個視口。 */
+.page {
   min-height: 100vh;
-  padding: calc(20px + var(--safe-top)) calc(20px + var(--safe-right))
-    calc(40px + var(--safe-bottom)) calc(20px + var(--safe-left));
   background: linear-gradient(
     180deg,
     var(--page-warm-from) 0%,
     var(--page-warm-mid) 52%,
     var(--page-warm-to) 100%
   );
+}
+
+.main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: calc(20px + var(--safe-top)) calc(20px + var(--safe-right))
+    calc(40px + var(--safe-bottom)) calc(20px + var(--safe-left));
 }
 
 .back {

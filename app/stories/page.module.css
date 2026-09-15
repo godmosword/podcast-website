@@ -1,10 +1,6 @@
-.main {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: calc(var(--space-6) + var(--safe-top))
-    calc(var(--space-page) + var(--safe-right))
-    calc(var(--space-section) + var(--safe-bottom))
-    calc(var(--space-page) + var(--safe-left));
+/* 暖色底鋪在全出血的 .page，不鋪在置中欄：欄寬 640／1100 之外若是純白，
+   ≥1280 會出現兩條硬直邊（美術審 H2）。/characters、/for-parents 同一做法。 */
+.page {
   background: linear-gradient(
     180deg,
     var(--page-warm-from) 0%,
@@ -12,12 +8,21 @@
   );
 }
 
-:global([data-theme="night"]) .main {
+:global([data-theme="night"]) .page {
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--c-yellow) 6%, var(--bg)) 0%,
     transparent 32%
   );
+}
+
+.main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: calc(var(--space-6) + var(--safe-top))
+    calc(var(--space-page) + var(--safe-right))
+    calc(var(--space-section) + var(--safe-bottom))
+    calc(var(--space-page) + var(--safe-left));
 }
 
 @media (max-width: 480px) {

@@ -51,45 +51,47 @@ export default function FeedbackPage() {
   const available = isFeedbackDbConfigured();
 
   return (
-    <main className={styles.main}>
-      <Link href="/" className={styles.back}>
-        ← 回故事屋
-      </Link>
+    <div className={styles.page}>
+      <main className={styles.main}>
+        <Link href="/" className={styles.back}>
+          ← 回故事屋
+        </Link>
 
-      <header className={styles.header}>
-        <div className={styles.coverWrap}>
-          <picture>
-            <source type="image/avif" srcSet={FEEDBACK_HERO.avif} />
-            <source type="image/webp" srcSet={FEEDBACK_HERO.webp} />
-            <img
-              src={FEEDBACK_HERO.jpg}
-              alt={FEEDBACK_HERO_ALT}
-              className={styles.cover}
-              width={FEEDBACK_HERO_SIZE}
-              height={FEEDBACK_HERO_SIZE}
-              fetchPriority="high"
-              decoding="async"
-              sizes="(max-width: 640px) calc(100vw - 40px), 420px"
-            />
-          </picture>
-        </div>
-        <h1 id={FEEDBACK_PAGE_TITLE_ID} className={styles.title}>
-          {FEEDBACK_PAGE_TITLE}
-        </h1>
-        <p className={styles.invite}>{FEEDBACK_INVITE_CHILD}</p>
-      </header>
+        <header className={styles.header}>
+          <div className={styles.coverWrap}>
+            <picture>
+              <source type="image/avif" srcSet={FEEDBACK_HERO.avif} />
+              <source type="image/webp" srcSet={FEEDBACK_HERO.webp} />
+              <img
+                src={FEEDBACK_HERO.jpg}
+                alt={FEEDBACK_HERO_ALT}
+                className={styles.cover}
+                width={FEEDBACK_HERO_SIZE}
+                height={FEEDBACK_HERO_SIZE}
+                fetchPriority="high"
+                decoding="async"
+                sizes="(max-width: 640px) calc(100vw - 40px), 420px"
+              />
+            </picture>
+          </div>
+          <h1 id={FEEDBACK_PAGE_TITLE_ID} className={styles.title}>
+            {FEEDBACK_PAGE_TITLE}
+          </h1>
+          <p className={styles.invite}>{FEEDBACK_INVITE_CHILD}</p>
+        </header>
 
-      <section className={styles.formSection}>
-        <FeedbackForm available={available} />
-      </section>
+        <section className={styles.formSection}>
+          <FeedbackForm available={available} />
+        </section>
 
-      <section className={styles.wallSection} aria-label="公開留言牆">
-        <Suspense fallback={<FeedbackWallSkeleton />}>
-          <FeedbackWall available={available} />
-        </Suspense>
-      </section>
+        <section className={styles.wallSection} aria-label="公開留言牆">
+          <Suspense fallback={<FeedbackWallSkeleton />}>
+            <FeedbackWall available={available} />
+          </Suspense>
+        </section>
 
-      <SiteFooter compact />
-    </main>
+        <SiteFooter compact />
+      </main>
+    </div>
   );
 }

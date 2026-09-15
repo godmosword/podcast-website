@@ -14,7 +14,9 @@ describe("feedback page.module.css", () => {
   });
 
   it("頁底暖色帶，表單不另做信紙卡或相框", () => {
-    expect(css).toMatch(/\.main\s*\{[\s\S]*?--page-warm-from/);
+    // 暖色帶在全出血的 .page 上，不在 640 置中欄（美術審 H2：桌機不留硬直邊）
+    expect(css).toMatch(/\.page\s*\{[\s\S]*?--page-warm-from/);
+    expect(css).not.toMatch(/\.main\s*\{[\s\S]*?--page-warm-from/);
     expect(css).not.toContain(".portraitMat");
     expect(css).not.toContain(".bubble");
     expect(css).not.toContain(".mascot");
