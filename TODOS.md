@@ -27,6 +27,15 @@
 - **後續：拿掉 CTA `nowrap`**：把 `LandingSegment.tsx` 的 `" →"` 半形空白改不斷行空白，箭頭才不會孤行；同時避開 <348px Dudu 遮箭頭、文字級 200% 被 `.panel` 裁尾。
 - **後續：勿靜默啟用 `playCta`**：`LandingSegment.tsx` 三元式會讓主 CTA 從 56px／`--fs-h2`／不透明墨板退回 44px／玻璃 `.subscribeCta`，契約測不會紅。啟用前須讓 `.subscribeCta` 脫離玻璃語言。
 
+### 本輪已完成（2026-09-15）
+
+| ID | 說明 |
+|----|------|
+| fix(ui): `/stories`、`/feedback` 桌機暖色底改全出血（美術審 H2） | `7d6f4e31` |
+| feat(universe): 宇宙地圖 ≤480 直向改直式舞台 720×1400（美術審 H3，Plan `docs/plans/2026-09-15-universe-map-portrait-layout.md`，C-1 (b)） | 見本 commit |
+
+> 美術審其餘 16 項（H1 CTA 語彙、M1–M8、L1–L7）記在看板，未動；下一個建議 H1（純 CSS，三階 CTA）。
+
 ### 本輪已完成（2026-09-10）
 
 | ID | 說明 |

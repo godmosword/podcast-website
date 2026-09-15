@@ -1,7 +1,7 @@
 # PLAN — 宇宙地圖手機直向專用排布（美術審 H3）
 
 日期：2026-09-15
-狀態：**Approved with changes（v2）**——已吸收工程審（codex `gpt-5.6-luna`）與設計審（Opus）意見；**C-1 待使用者拍板**後即可 `/agent-action`。尚未實作、不可據此宣稱可 release。
+狀態：**已實作（2026-09-15，T0 → T6 完成；C-1 (b)）**——實作偏差與量測結果記於文末「實作紀錄」。
 風險級別：**L2**（多檔、可見行為；UI 風險：`transform`／`padding`，Opus 設計審已完成）。
 
 ## Goal
@@ -124,7 +124,7 @@
 ## Review decision
 
 - 已完成的審查：工程審（codex `gpt-5.6-luna`，readonly；以臨時 `CODEX_HOME` 繞過 config.toml 相容問題，見 AGENT-FAILURES）；設計審（Opus，Agent tool readonly）。對抗審依 L2 條件不需派。
-- **Approved with changes**：v2 已吸收兩審全部必改項。**待決策：C-1（建議 (b)）**——拍板後以 `/agent-action` 依 T0 → T6 執行。
+- **Approved**：v2 已吸收兩審全部必改項；**C-1 使用者拍板 (b)**（2026-09-15）。以 `/agent-action` 依 T0 → T6 執行。
 
 ## Agent 執行分配表
 
@@ -133,5 +133,23 @@
 | Leader | — | Claude Code session（Opus） | 量測、草擬 v1、綜合兩審成 v2 | 本文件 | 完成 |
 | Review-Eng | shell readonly | `gpt-5.6-luna`（codex exec） | 反駁 DAG 5 點、列 MAP_STAGE consumer、e2e 衝突、最小 DAG | 已併入「審查結論摘要」 | 完成 |
 | Review-Design | Agent readonly | Opus | 座標實算、C-1 兩案、標牌語彙、動效與紅線 | 已併入「審查結論摘要」 | 完成 |
-| Verify | shell | — | `npx vitest run scripts/check-agent-docs-contract.test.ts` | 8 passed | 完成 |
-| Ship | — | Leader | 未 commit／push | — | 未執行 |
+| Impl T0–T6 | — | Leader（Cursor grok 依 AGENT-FAILURES 缺席，L2 由 Leader 接手） | 資料／resolver／相機／consumer／hotspot／e2e／文件 | 見「實作紀錄」 | 完成 |
+| Review-Eng-2 | shell readonly | `gpt-5.6-luna`（codex exec，臨時 CODEX_HOME） | 實作 diff 審：4 blocking（2 修、1 接受、1 刪檔） | 已併入「實作紀錄」 | 完成 |
+| Verify | shell | — | vitest／tsc／eslint／build／e2e／visual | 全綠（見「實作紀錄」） | 完成 |
+| Ship | — | Leader | 未 commit／push（使用者未要求） | — | 未執行 |
+
+## 實作紀錄（2026-09-15）
+
+- **T0–T4 依 v2 落地**；三處與 Plan 不同，皆為實測後的修正：
+  1. **世界層底部帶改 `MAP_PICKER_HEIGHT + 8`（不再多扣一顆鈕高）**：實機 map 視窗是 100dvh − 頂欄（390 寬約 779 高），照 Plan 的 148px 只到 0.429（113px 島）。控制鈕在右下角，ocean 偏左的構圖已把那個角空出來，幾何契約以「島身／木牌 ∩ MapControls = ∅」鎖住（含 320／360／375 扣頂欄的高度）。
+  2. **熱點標牌直式一律 icon 圓牌，不做 compact＋下移**：以 tile 幾何實算 390 進島（dino／car-park／rescue 三島各三張精選）：full／compact／下移三種擺法蓋掉島心 40% 區域分別 28–68%／23–58%／18–46%，且 dino 兩張互疊；icon 圓牌 4–17%、無互疊、不壓木牌。標牌語彙（牌面→桿→底座）與 48px 命中區不變，可及名稱在 `<a aria-label>`。
+  3. **`.tapHint` 直式改錨地圖最頂 8px**（Plan 只寫「補斷言」）：390 實測「天象帶之下」整顆蓋住森林小島木牌。寬度夾到日／月左緣再留 8px，320／360 兩行顯示。
+- 另補：`mapDepthZ` 帶寬改以最高舞台（1400）為準（直式 ocean y=1310 的 z 13106 > 橫式 LABEL_BASE 7210，e2e 抓到木牌被埋）；`islandHaze` 以該版面舞台高正規化。
+- **量測（production build，390×844 → map 390×779）**：scale 0.473，小島 125px、主島 156px（原 90／112）；進島 dino 島寬 298px（原 ~220）。1280／844×390／768×1024 舞台維持 1000×720、7 橋、pose 與舊算式零差；`adventures-1280-*` 視覺基線 byte-identical，只重錄 `adventures-390-{light,night}`。
+- **工程審（codex `gpt-5.6-luna`，readonly，實作後）**：4 項 blocking，處置——
+  1. `flyTo` 的 `instant`／reduced 路徑沒有收掉進行中的飛行（timer／`isAnimating`／transition）→ **已修**（`useMapCamera.ts` flyTo：清 `animTimerRef`、`animatingRef=false`；reduced 維持不動 idleEpoch）。
+  2. 旋轉時 hook 先以世界層 inset clamp，再等 `UniverseMap` effect 重套目標，會畫出一幀「直式舞台＋橫式鏡頭」→ **已修**：hook 新增 `onLayoutChange` 回呼，翻版面時**同一個 tick** 由消費端 instant 重套目前目標（進島 flyTo／世界 reset），與 `layout` state 同一次 commit；無回呼才退回只 clamp。單元測試鎖住。
+  3. `mapDepthZ` 帶寬改以 1400 為準，橫式 inline `z-index` 數值不再是舊值 → **接受，非 blocking**：`.stage` 自成 stacking context（z 1），外層 sky／tapHint／controls／picker 是 3／4／5／6，舞台內數值不越界；相對順序不變，`adventures-1280-*` 視覺基線 byte-identical。「零差」指視覺與行為，不指 inline 數值。
+  4. 刪除臨時 `playwright.tmp.config.ts` → **已刪**。
+  Non-blocking 採納：`fitAvailableViewport` 改呼叫 `isMobilePortrait()`。未採納（記為後續）：幾何契約測試改讀 DOM／CSS 真實尺寸、橋改 Bézier 交點——目前以 e2e 的真實 DOM 幾何（木牌矩形、控制鈕矩形、島 button）補足。
+- **驗證（最終）**：`vitest` universe 全套 47 檔 334 tests；`tsc` 乾淨；eslint 乾淨；`e2e/universe-map.spec.ts` 43/43（新增「直式版面」6 案＋390 木牌可讀案例）＋`public-a11y`／`child-ux` 66/66；`public-smoke`／`a11y`／`smoke` 全綠；`adventures-390-{light,night}` 視覺基線重錄（逐張目檢）、`adventures-1280-*` 不變。

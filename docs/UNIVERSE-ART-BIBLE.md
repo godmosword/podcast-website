@@ -97,6 +97,7 @@
 
 ## 5. 比例與版位（接 R0 座標系）— v2 微調
 - 座標空間＝ `MAP_STAGE` **1000 × 720**（解析度無關）。
+- **v7（2026-09-15，美術審 H3）：** ≤480 直向手機另有第二套舞台 `MAP_STAGE_PORTRAIT` **720 × 1400**，五島各有一組直式座標 `Zone.worldPortrait`（`coordPortrait` 沙岸底中心，同一錨點語意），**不是橫式座標的縮放**：群島較高較窄（森林頂、恐龍左／救援右、車車樂園中央、未來夢想島正下方偏左），讓 390 寬的小島 ≥120px、木牌互不疊、右下角空給 MapControls。資產、tile 契約、`stageSize`／`anchorUV` 兩版共用；直式只畫 6 條橋（rescue–ocean 不畫，會直穿主島）。OG 分享圖、deep link、桌機／橫向維持橫式零差。版面由 `layoutForViewport(w,h)`（`isMobilePortrait`：≤480 且 h>w）決定，SSR 恆橫式。
 - **人物比例尺＝小紅賽車**（黃金樣本內的那台紅車）：所有島的設施都以「相對於小紅車」的大小來畫，跨島一致。
 - **car-park 黃金樣本實測近正方（trim 約 228×253，比例 ~0.90）**，非早期估算的 3:2 橫幅。四島統一使用 `stageSize 264×260` 的同畫框 PNG。
 - **`stageSize` 量法：** 對 PNG **去背 trim 後**量外框寬高比，換算成 stage 單位填入 `IslandTile.stageSize`（car-park 約 `{ w: 300, h: 200 }`，以實際 trim 為準）。
@@ -202,6 +203,7 @@ fence, dirt mounds and traffic cones, matte clay, [Base style], transparent back
   - **副檔名現況**：`zoneArtTilePath()` 回傳 `.png`（1x fallback）；`getZoneArtSrcSet()` 組 width-descriptor srcset 接 `@2x/@3x`（SSG 無 Image Optimizer，不用 `next/image`）。同名 `.svg` 僅保留作 fallback / 歷史資產。
 - **漫遊者交付**：`public/adventures/roamers/{id}.png` + 同名 `.webp`（`npm run optimize:roamer-assets`）；前端 `<picture>` WebP 優先、PNG fallback；rear `fetchPriority="low"`。
 - **新島升級規則**：先建立同畫框 PNG + sidecar 數值，再登錄 `ZONE_ART_TILES`；不要回到 landmark/center 的舊契約。
+- **v7 版面對接**：所有 stage consumer（`UniverseMap` 舞台尺寸／viewBox、`MapBridgeLayer`、`MapRoamerLayer`、`UniverseMapParallax`、`MapDecorLayer`、`HotspotLayer`）一律讀 `resolveUniverseMap(layout).stage`／`getMapStage(layout)`，**不得再讀 `MAP_STAGE` 常數畫舞台**；`mapDepthZ` 的 label／hotspot／bubble 帶寬以最高的舞台（1400）為準。新島加入時 `worldPortrait`／`cameraPortrait` 為必填（schema 擋），並須通過 `lib/universe/map-portrait-layout.test.ts` 的 footprint／木牌／橋幾何契約。
 
 > **R1 接線補註（來自 v1.1 規劃審查，HIGH）：** island 模式渲染須以**錨點在圖內的相對位置 `anchorUV`** 對齊 `zone.coord`，而非「圖底中心」，否則島會上移約 16%。car-park 黃金樣本的 `anchorUV=(0.50, 0.84)` 已記於 sidecar `public/adventures/zones/car-park.tile.json`；R1 時於 `ZoneArtTile` 補 `anchorUV?: [number, number]` 欄位。
 

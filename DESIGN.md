@@ -124,6 +124,24 @@ meta `theme-color`（夜）對齊 `--bg`：`lib/theme.ts` 的 `NIGHT_THEME_COLOR
 > 不用 `backdrop-filter`／CSS `blur()`：iOS 合成成本高且歷史上在此頁 OOM 過。
 > 需要柔化一律走 SVG `feGaussianBlur` 或寬圓頭低透明描邊。
 
+### 宇宙地圖直式舞台（v7，2026-09-15 美術審 H3 登記）
+
+≤480 直向手機的世界層不再把橫式 1000×720 舞台 fit-to-width（五島擠成 335×244、每島 90px、上下各留大片海——zoom 槓桿已量測用盡：fit 被 `MIN_SCALE` 0.34 夾在地板），改用**第二套權威座標**：
+
+| 項目 | 規則 |
+|------|------|
+| 舞台 | `MAP_STAGE_PORTRAIT` 720×1400（`data/universe.ts`）；`Zone.worldPortrait`／`cameraPortrait` 五島必填（Zod 擋半套）。橫式 `MAP_STAGE`／`ZONES`／`world` 匯出不動：OG、deep link、`story-zones`、桌機與橫向**零差** |
+| 構圖（C-1 (b)） | 森林頂端置中、恐龍左／救援右（錯開 20px 高度）、車車樂園中央主島（螢幕約 53% 高）、未來夢想島**正下方偏左**把右下角讓給 MapControls；直式只畫 **6 條橋**（rescue–ocean 會直穿主島，不畫；ocean 是 planned 淡橋，手機另有島選擇列） |
+| 版面判準 | `layoutForViewport(w,h)`＝`isMobilePortrait`（≤480 且 h>w）單一式子，SSR 恆橫式；判定與首次 pose 在 `useMapCamera.measure()` 同一 tick，首幀不會先橫式再跳直式。**只在判準翻轉（旋轉）時** instant 重 fit／重對焦（不飛行，免得「島先跳、鏡頭再滑」）；一般 resize（iOS 網址列收放）維持只 clamp |
+| chrome-free 盒 | 直式不再扣整欄 `MAP_CHROME_RIGHT`（390 寬的 17%），改「底部帶」：世界層＝島選擇列 72＋8；進島＝控制鈕疊高（`MAP_CONTROLS_STACK_MOBILE`）。pose 置中與 `clampCamera` 都對這個盒算（`viewportInsetFor`）；橫式 inset 為零 |
+| 木牌 | `--label-offset-y` 翻到島上的門檻直式降為 0.4（`PORTRAIT_LABEL_FLIP_SCALE`），fit ≈ 0.47 時五張木牌仍下掛 |
+| 熱點標牌 | 直式一律收成 **icon 圓牌**（牌面→桿→底座語彙不變、命中區 48px 不變、可及名稱在 `<a aria-label>`）：實算三張帶字標牌在 ~300px 的島上，compact／下移任何擺法都蓋掉島心 33–68%，icon 圓牌 ≤17%。名稱由 hotspot modal 標題與 ZoneSheet 承擔。**不倒掛**（桿朝上會讀成吊牌、底座影變第二個接地） |
+| `.tapHint` 直式例外 | 上方「≤480 錨在天象帶之下」的前提「頂部反而是空的」只對橫式成立；直式群島填滿高度，那裡是森林小島的木牌。直式改錨地圖最頂 8px、寬度夾到日／月左緣再留 8px（`.map[data-layout="portrait"] .tapHint`），文字允許換行 |
+| 回滾 | `MAP_PORTRAIT_LAYOUT_ENABLED=false`（`lib/universe/dev-map-flags.ts`）恆橫式；資料保留無害 |
+| 契約測試 | `lib/universe/map-portrait-layout.test.ts`（footprint 不相交／橋不交叉不穿島／木牌不進他島／島身木牌 ∩ MapControls = ∅／各直向視窗直式不比橫式小）、`e2e/universe-map.spec.ts`「直式版面」組、`adventures-390-*` 視覺基線 |
+
+已知取捨：短機（375×667、360×640、320×568）直式仍被 `MIN_SCALE` 夾住、群島縱向溢出可拖曳（比橫式的橫向溢出小），120px 目標對 390×844／375×812 成立。
+
 ## 裝飾（v0.2：克制留白）
 
 插畫與封面是視覺主角；裝飾預設關閉，僅在品牌點綴處極少量使用。
