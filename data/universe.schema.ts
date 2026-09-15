@@ -45,7 +45,16 @@ export const zoneSchema = z.object({
     x: z.number().min(0).max(1),
     y: z.number().min(0).max(1),
   }),
+  // 直式舞台第二套權威座標：必填，五島不得半套（美術審 H3）。
+  worldPortrait: z.object({
+    x: z.number().min(0).max(1),
+    y: z.number().min(0).max(1),
+  }),
   camera: z.object({
+    center: z.tuple([z.number().min(0).max(1), z.number().min(0).max(1)]),
+    zoom: z.number().positive(),
+  }),
+  cameraPortrait: z.object({
     center: z.tuple([z.number().min(0).max(1), z.number().min(0).max(1)]),
     zoom: z.number().positive(),
   }),

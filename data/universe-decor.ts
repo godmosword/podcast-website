@@ -1,4 +1,9 @@
-import { MAP_STAGE } from "@/data/universe-zones";
+import {
+  MAP_STAGE,
+  MAP_STAGE_PORTRAIT,
+  type MapLayout,
+  type MapStage,
+} from "@/data/universe-zones";
 
 export type DecorKind = "bird" | "sailboat" | "fish" | "firefly";
 
@@ -140,5 +145,99 @@ export const MAP_DECOR: DecorItem[] = [
   },
 ];
 
+/**
+ * 直式舞台（720×1400）的填充件：座標對齊直式五島
+ * （forest 360,235；dino 175,580；rescue 545,600；car-park 360,980；ocean 330,1310），
+ * 落在島間水域與邊緣，避開 tile 與六條橋。橫式那組座標若直接沿用，
+ * 鳥／船會落在直式舞台外或壓在島上（工程審 (2)）。
+ */
+export const MAP_DECOR_PORTRAIT: DecorItem[] = [
+  { id: "p-boat-1", kind: "sailboat", x: 100, y: 250, size: 1, motion: "bob", periodMs: 3200 },
+  { id: "p-boat-2", kind: "sailboat", x: 610, y: 300, size: 0.9, motion: "bob", periodMs: 3600, delayMs: 800 },
+  { id: "p-boat-3", kind: "sailboat", x: 620, y: 760, size: 0.85, motion: "bob", periodMs: 3400, delayMs: 1500 },
+  { id: "p-fish-1", kind: "fish", x: 90, y: 800, size: 0.7, motion: "path", periodMs: 9000, travel: 80 },
+  { id: "p-fish-2", kind: "fish", x: 600, y: 1000, size: 0.6, motion: "path", periodMs: 11000, travel: 90, delayMs: 2000 },
+  { id: "p-fish-3", kind: "fish", x: 560, y: 1250, size: 0.7, motion: "path", periodMs: 10000, travel: 100, delayMs: 4000 },
+  {
+    id: "p-bird-1",
+    kind: "bird",
+    x: 60,
+    y: 60,
+    size: 0.8,
+    motion: "path",
+    periodMs: 14000,
+    travel: 160,
+    movingOnly: true,
+  },
+  {
+    id: "p-bird-2",
+    kind: "bird",
+    x: 520,
+    y: 80,
+    size: 0.6,
+    motion: "path",
+    periodMs: 17000,
+    travel: 150,
+    movingOnly: true,
+    delayMs: 3000,
+  },
+  {
+    id: "p-firefly-1",
+    kind: "firefly",
+    x: 110,
+    y: 700,
+    size: 0.5,
+    motion: "drift",
+    periodMs: 8000,
+    movingOnly: true,
+    nightOnly: true,
+  },
+  {
+    id: "p-firefly-2",
+    kind: "firefly",
+    x: 640,
+    y: 900,
+    size: 0.5,
+    motion: "drift",
+    periodMs: 7000,
+    delayMs: 1200,
+    movingOnly: true,
+    nightOnly: true,
+  },
+  {
+    id: "p-firefly-3",
+    kind: "firefly",
+    x: 100,
+    y: 1200,
+    size: 0.45,
+    motion: "drift",
+    periodMs: 9000,
+    delayMs: 600,
+    movingOnly: true,
+    nightOnly: true,
+  },
+  {
+    id: "p-firefly-4",
+    kind: "firefly",
+    x: 600,
+    y: 1330,
+    size: 0.5,
+    motion: "drift",
+    periodMs: 7500,
+    delayMs: 2100,
+    movingOnly: true,
+    nightOnly: true,
+  },
+];
+
+/** 依版面取填充件；`getMapDecor()` ≡ `MAP_DECOR`。 */
+export function getMapDecor(layout: MapLayout = "landscape"): DecorItem[] {
+  return layout === "portrait" ? MAP_DECOR_PORTRAIT : MAP_DECOR;
+}
+
 /** stage 邊界（供測試與驗證用） */
 export const MAP_DECOR_BOUNDS = MAP_STAGE;
+
+export function getMapDecorBounds(layout: MapLayout = "landscape"): MapStage {
+  return layout === "portrait" ? MAP_STAGE_PORTRAIT : MAP_STAGE;
+}

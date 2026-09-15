@@ -1,4 +1,4 @@
-import { MAP_STAGE } from "@/data/universe-zones";
+import { MAP_STAGE, type MapStage } from "@/data/universe-zones";
 import { mapDepthZ } from "@/lib/universe-depth";
 import type { ResolvedBridge } from "@/lib/universe-map";
 import styles from "./UniverseMap.module.css";
@@ -6,6 +6,8 @@ import styles from "./UniverseMap.module.css";
 type Props = {
   bridges: ResolvedBridge[];
   viewBox: string;
+  /** 本版面舞台尺寸（`resolveUniverseMap(layout).stage`）；預設橫式常數。 */
+  stage?: MapStage;
   paused: boolean;
 };
 
@@ -83,7 +85,12 @@ function ClayBridge({ d, muted }: { d: string; muted: boolean }) {
   );
 }
 
-export default function MapBridgeLayer({ bridges, viewBox, paused }: Props) {
+export default function MapBridgeLayer({
+  bridges,
+  viewBox,
+  stage = MAP_STAGE,
+  paused,
+}: Props) {
   return (
     <>
       {bridges.map((bridge) => (
@@ -93,8 +100,8 @@ export default function MapBridgeLayer({ bridges, viewBox, paused }: Props) {
             .filter(Boolean)
             .join(" ")}
           viewBox={viewBox}
-          width={MAP_STAGE.width}
-          height={MAP_STAGE.height}
+          width={stage.width}
+          height={stage.height}
           style={{ zIndex: mapDepthZ(bridge.depthY, "bridge") }}
           aria-hidden="true"
           focusable="false"

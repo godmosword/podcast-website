@@ -1,6 +1,7 @@
 .layer {
   position: absolute;
   inset: 0;
+  /* 尺寸由元件 inline 依版面舞台寫入（橫式 1000×720／直式 720×1400）；此處只留橫式 fallback。 */
   width: 1000px;
   height: 720px;
   pointer-events: none;

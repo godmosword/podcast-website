@@ -25,14 +25,25 @@ async function openMap(page: Page, theme: ThemeMode, width = 1280, height = 800)
 
 async function stageTransform(page: Page) {
   return page.evaluate(() => {
-    const stage = [...document.querySelectorAll<HTMLDivElement>("div")].find(
-      (el) =>
-        el.style.width === "1000px" &&
-        el.style.height === "720px" &&
-        el.style.transform.includes("scale"),
-    );
-    if (!stage) throw new Error("map stage not found");
+    // 舞台由 `data-map-stage` 標記；尺寸依版面（橫式 1000×720／直式 720×1400），
+    // 不可再用 1000×720 去找（美術審 H3 之後手機直向是另一個舞台）。
+    const stage = document.querySelector<HTMLDivElement>("[data-map-stage]");
+    if (!stage || !stage.style.transform.includes("scale")) {
+      throw new Error("map stage not found");
+    }
     return stage.style.transform;
+  });
+}
+
+async function stageLayout(page: Page) {
+  return page.evaluate(() => {
+    const stage = document.querySelector<HTMLDivElement>("[data-map-stage]");
+    if (!stage) throw new Error("map stage not found");
+    return {
+      layout: stage.getAttribute("data-layout"),
+      width: stage.style.width,
+      height: stage.style.height,
+    };
   });
 }
 
@@ -169,6 +180,8 @@ test.describe("車車宇宙樂園地圖 UX", () => {
   for (const theme of ["light", "night"] as const) {
     for (const viewport of [
       { width: 375, height: 812 },
+      // 直式版面（美術審 H3）：390 是主要目標尺寸，木牌不重疊的不變式在直式也要成立
+      { width: 390, height: 844 },
       { width: 1280, height: 800 },
     ]) {
       /**
@@ -717,5 +730,137 @@ test.describe("首訪 tap hint：窄屏幾何", () => {
     expect(Math.round(box.height)).toBeGreaterThanOrEqual(48);
     await close.click();
     await expect(page.getByTestId("universe-tap-hint")).toHaveCount(0);
+  });
+});
+
+/**
+ * 美術審 H3（2026-09-15）：≤480 直向改直式舞台（720×1400、第二套權威座標、6 條橋）。
+ * 這組測的是版面切換本身與它承諾的尺度；橫式構圖零差由上方既有 1280 案例保證。
+ */
+test.describe("直式版面：手機直向世界層", () => {
+  const PORTRAIT_VIEWPORTS = [
+    { width: 320, height: 568 },
+    { width: 360, height: 800 },
+    { width: 375, height: 812 },
+    { width: 390, height: 844 },
+  ];
+
+  for (const vp of PORTRAIT_VIEWPORTS) {
+    test(`${vp.width}×${vp.height}：舞台為直式 720×1400，五島皆在首屏`, async ({ page }) => {
+      await openMap(page, "light", vp.width, vp.height);
+      const stage = await stageLayout(page);
+      expect(stage.layout).toBe("portrait");
+      expect(stage.width).toBe("720px");
+      expect(stage.height).toBe("1400px");
+      // 直式只畫 6 條橋（rescue–ocean 在直式不畫）
+      const bridges = page.locator('svg[class*="bridgeSvg"]');
+      await expect(bridges).toHaveCount(6);
+      const app = page.getByRole("application", { name: /車車樂園互動地圖/ });
+      for (const id of ["car-park", "dino", "rescue", "ocean", "forest"]) {
+        await expect(app.locator(`button[data-zone="${id}"]`)).toBeInViewport();
+      }
+    });
+  }
+
+  test("390×844：小島 ≥120px、主島 ≥150px（比橫式 90px 大 1/3 以上）", async ({ page }) => {
+    await openMap(page, "light", 390, 844);
+    const app = page.getByRole("application", { name: /車車樂園互動地圖/ });
+    for (const id of ["dino", "rescue", "ocean", "forest"]) {
+      const box = (await app.locator(`button[data-zone="${id}"]`).boundingBox())!;
+      expect(box.width, `${id} 寬`).toBeGreaterThanOrEqual(120);
+    }
+    const hero = (await app.locator('button[data-zone="car-park"]').boundingBox())!;
+    expect(hero.width).toBeGreaterThanOrEqual(150);
+  });
+
+  test("390×844：世界層 MapControls 不壓到任何島身或木牌", async ({ page }) => {
+    await openMap(page, "light", 390, 844);
+    const controls = (await page.getByRole("group", { name: "地圖控制" }).boundingBox())!;
+    const app = page.getByRole("application", { name: /車車樂園互動地圖/ });
+    for (const id of ["car-park", "dino", "rescue", "ocean", "forest"]) {
+      const island = (await app.locator(`button[data-zone="${id}"]`).boundingBox())!;
+      // 島 button 是 tile box；只量中央 84%（tile 四周是透明邊）
+      const inset = { x: island.x + island.width * 0.08, w: island.width * 0.84, y: island.y + island.height * 0.22, h: island.height * 0.72 };
+      const overlap =
+        inset.x < controls.x + controls.width &&
+        controls.x < inset.x + inset.w &&
+        inset.y < controls.y + controls.height &&
+        controls.y < inset.y + inset.h;
+      expect(overlap, `${id} 島身被控制鈕壓到`).toBe(false);
+    }
+    const { labels } = await labelGeometry(page);
+    for (const label of labels) {
+      const overlap =
+        label.rect.left < controls.x + controls.width &&
+        controls.x < label.rect.right &&
+        label.rect.top < controls.y + controls.height &&
+        controls.y < label.rect.bottom;
+      expect(overlap, `${label.name} 木牌被控制鈕壓到`).toBe(false);
+    }
+  });
+
+  test("390×844：首訪提示錨在地圖最頂，不蓋森林小島的木牌", async ({ page }) => {
+    await openMap(page, "light", 390, 844);
+    const hint = page.getByTestId("universe-tap-hint");
+    await expect(hint).toBeVisible();
+    const hintBox = (await hint.boundingBox())!;
+    const frame = (await page.getByRole("region", { name: "車車宇宙樂園地圖" }).boundingBox())!;
+    expect(hintBox.y - frame.y).toBeLessThanOrEqual(12);
+    const { labels } = await labelGeometry(page);
+    const forest = labels.find((l) => l.name.includes("森林"))!;
+    const overlap =
+      forest.rect.left < hintBox.x + hintBox.width &&
+      hintBox.x < forest.rect.right &&
+      forest.rect.top < hintBox.y + hintBox.height &&
+      hintBox.y < forest.rect.bottom;
+    expect(overlap, "提示蓋住森林小島木牌").toBe(false);
+  });
+
+  test("旋轉：橫↔直只在 isMobilePortrait 翻轉時換舞台，桌機／橫向維持 1000×720", async ({ page }) => {
+    await openMap(page, "light", 390, 844);
+    expect((await stageLayout(page)).layout).toBe("portrait");
+    await page.setViewportSize({ width: 844, height: 390 });
+    await expect.poll(async () => (await stageLayout(page)).layout).toBe("landscape");
+    const landscape = await stageLayout(page);
+    expect(landscape.width).toBe("1000px");
+    expect(landscape.height).toBe("720px");
+    await expect(page.locator('svg[class*="bridgeSvg"]')).toHaveCount(7);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect.poll(async () => (await stageLayout(page)).layout).toBe("portrait");
+    // iOS 網址列收放：同版面 resize 不換舞台
+    await page.setViewportSize({ width: 390, height: 760 });
+    await page.waitForTimeout(200);
+    expect((await stageLayout(page)).layout).toBe("portrait");
+  });
+
+  test("進島直向：探索點收成 icon 圓牌、命中區 ≥44px、島本體 ≥280px", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.addInitScript(() => {
+      window.sessionStorage.setItem("cc-universe-tap-hint-shown", "1");
+      window.sessionStorage.setItem("cc-universe-entry-played", "1");
+    });
+    await page.goto("/adventures/dino");
+    const layer = page.getByLabel("恐龍島探索點");
+    await expect(layer).toHaveAttribute("data-layout", "portrait");
+    await page.waitForTimeout(900);
+    const app = page.getByRole("application", { name: /車車樂園互動地圖/ });
+    const island = (await app.locator('button[data-zone="dino"]').boundingBox())!;
+    expect(island.width).toBeGreaterThanOrEqual(280);
+    const pins = layer.locator("a[data-hotspot-id]");
+    await expect(pins).toHaveCount(3);
+    for (let i = 0; i < 3; i += 1) {
+      const pin = pins.nth(i);
+      await expect(pin).toHaveAttribute("data-side", /above|below/);
+      const hit = (await pin.boundingBox())!;
+      expect(hit.width).toBeGreaterThanOrEqual(44);
+      expect(hit.height).toBeGreaterThanOrEqual(44);
+      const plate = (await pin.locator('span[class*="signPlate"]').boundingBox())!;
+      expect(plate.width, "直式牌面應為 icon 圓牌").toBeLessThanOrEqual(34);
+    }
+    // 進島後旋轉成橫向：仍在恐龍島，探索點仍在
+    await page.setViewportSize({ width: 844, height: 390 });
+    await expect.poll(async () => (await stageLayout(page)).layout).toBe("landscape");
+    await expect(page.getByLabel("恐龍島探索點")).toHaveAttribute("data-layout", "landscape");
+    await expect(pins).toHaveCount(3);
   });
 });

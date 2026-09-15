@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useEffect, useRef, useState, type CSSProperties } from "react";
-import type { ZoneDef, ZoneStatus } from "@/data/universe-zones";
+import { MAP_STAGE, type ZoneDef, type ZoneStatus } from "@/data/universe-zones";
 import { islandHaze, mapDepthZ } from "@/lib/universe-depth";
 import type { ResolvedZone } from "@/lib/universe-map";
 import { getZoneArtTile, getZoneArtSrcSet } from "@/lib/universe/zone-art-tile";
@@ -45,6 +45,8 @@ type ZoneIslandProps = {
   invite?: boolean;
   /** 鏡頭目前停在這座島：再點一次＝回世界層（aria-label 需說明）。 */
   active?: boolean;
+  /** 本版面舞台高（大氣透視 `--island-haze` 以此正規化 depthY）；預設橫式 720。 */
+  stageHeight?: number;
 };
 
 function ZoneIsland({
@@ -58,6 +60,7 @@ function ZoneIsland({
   progress = null,
   invite = false,
   active = false,
+  stageHeight = MAP_STAGE.height,
 }: ZoneIslandProps) {
   const effectiveStatus = devStatusOverride ?? zone.status;
   const isOpen = effectiveStatus === "open";
@@ -184,7 +187,7 @@ function ZoneIsland({
                 同層 filter＋子層 scale 會在 iOS 造成重影（見 .tileArt 註解）。 */}
             <div
               className={styles.tileHaze}
-              style={{ "--island-haze": islandHaze(zone.depthY) } as CSSProperties}
+              style={{ "--island-haze": islandHaze(zone.depthY, stageHeight) } as CSSProperties}
             >
               <ZoneIslandTileArt
                 zoneId={zone.id}

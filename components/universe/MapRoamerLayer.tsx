@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { MAP_STAGE, type ZoneId } from "@/data/universe-zones";
+import { getMapStage, type MapLayout, type ZoneId } from "@/data/universe-zones";
 import {
-  MAP_ROAMERS,
-  ROAMER_ROUTES,
+  getMapRoamers,
+  getRoamerRoutes,
   getRoutePathD,
   isDevRoamersQuery,
   roamerGreeting,
@@ -29,6 +29,8 @@ type Props = {
   night: boolean;
   /** 鏡頭聚焦的島；有值時隱藏遠景車 */
   focusedZoneId: ZoneId | null;
+  /** 版面（預設橫式）：橋線路線與跨橋 idleSpot 由該版面的橋推導，舞台尺寸跟著換。 */
+  layout?: MapLayout;
 };
 
 export default function MapRoamerLayer({
@@ -36,7 +38,9 @@ export default function MapRoamerLayer({
   paused,
   night,
   focusedZoneId,
+  layout = "landscape",
 }: Props) {
+  const stage = getMapStage(layout);
   const [devRoamers, setDevRoamers] = useState(false);
   const [greeting, setGreeting] =
     useState<(RoamerGreetingState & { id: string }) | null>(null);
@@ -49,21 +53,21 @@ export default function MapRoamerLayer({
   }, []);
 
   const routes = useMemo(
-    () => ROAMER_ROUTES.filter((r) => r.kind === "map"),
-    [],
+    () => getRoamerRoutes(layout).filter((r) => r.kind === "map"),
+    [layout],
   );
 
   const visible = useMemo(
-    () => selectMapRoamers(MAP_ROAMERS, focusedZoneId, { devRoamers }),
-    [focusedZoneId, devRoamers],
+    () => selectMapRoamers(getMapRoamers(layout), focusedZoneId, { devRoamers }),
+    [focusedZoneId, devRoamers, layout],
   );
 
   const space = useMemo(
     () => ({
       kind: "map" as const,
-      stageH: MAP_STAGE.height,
+      stageH: stage.height,
     }),
-    [],
+    [stage.height],
   );
 
   const { pauseRoamer, startCrossing, anyCrossing } = useRoamerSim({
@@ -136,11 +140,16 @@ export default function MapRoamerLayer({
   }
 
   return (
-    <div ref={layerRef} className={styles.layer} aria-hidden="true">
+    <div
+      ref={layerRef}
+      className={styles.layer}
+      style={{ width: stage.width, height: stage.height }}
+      aria-hidden="true"
+    >
       {devRoamers && !focusedZoneId && (
         <svg
           className={styles.devPath}
-          viewBox={`0 0 ${MAP_STAGE.width} ${MAP_STAGE.height}`}
+          viewBox={`0 0 ${stage.width} ${stage.height}`}
           aria-hidden="true"
         >
           {routes.map((route) => (

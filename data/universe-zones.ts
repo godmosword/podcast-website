@@ -9,17 +9,22 @@ import {
 } from "@/data/landing-segments";
 import {
   MAP_STAGE,
+  MAP_STAGE_PORTRAIT,
   STATUS_META,
   ZONE_IDS,
+  getMapStage,
   universe,
   worldToStage,
+  zoneWorld,
+  type MapLayout,
+  type MapStage,
   type Zone,
   type ZoneId,
   type ZoneStatus,
 } from "@/data/universe";
 
-export { MAP_STAGE, ZONE_IDS, STATUS_META };
-export type { ZoneId, ZoneStatus };
+export { MAP_STAGE, MAP_STAGE_PORTRAIT, ZONE_IDS, STATUS_META, getMapStage };
+export type { MapLayout, MapStage, ZoneId, ZoneStatus };
 
 /** @deprecated 請改用 STATUS_META */
 export const ZONE_STATUS_META = STATUS_META;
@@ -61,14 +66,14 @@ export const ZONE_TERRAIN: Record<ZoneId, { sand: string; grass: string }> = {
   forest: { sand: "#ede0c4", grass: "#b8dfa8" },
 };
 
-/** Zone（0–1）→ ZoneDef（stage px），供既有元件消費。 */
-export function zoneToDef(zone: Zone): ZoneDef {
+/** Zone（0–1）→ ZoneDef（stage px），供既有元件消費。預設橫式；直式取 `worldPortrait`。 */
+export function zoneToDef(zone: Zone, layout: MapLayout = "landscape"): ZoneDef {
   return {
     id: zone.id,
     name: zone.name,
     shortName: zone.shortName,
     status: zone.status,
-    coord: worldToStage(zone.world),
+    coord: worldToStage(zoneWorld(zone, layout), layout),
     landmark: zone.landmark,
     artTile: zone.sprite,
     teaser: zone.tagline,
@@ -84,8 +89,18 @@ export function zoneToDef(zone: Zone): ZoneDef {
   };
 }
 
-/** 相容匯出：與重構前相同的五島 px 座標／狀態。 */
-export const ZONES: ZoneDef[] = universe.zones.map(zoneToDef);
+/** 相容匯出：與重構前相同的五島 px 座標／狀態（橫式）。 */
+export const ZONES: ZoneDef[] = universe.zones.map((zone) => zoneToDef(zone));
+
+const ZONES_BY_LAYOUT: Record<MapLayout, ZoneDef[]> = {
+  landscape: ZONES,
+  portrait: universe.zones.map((zone) => zoneToDef(zone, "portrait")),
+};
+
+/** 依版面取五島 ZoneDef（stage px）。`getZones()` ≡ `ZONES`。 */
+export function getZones(layout: MapLayout = "landscape"): ZoneDef[] {
+  return ZONES_BY_LAYOUT[layout];
+}
 
 // 編譯期確認 car-park 子設施仍掛 LANDING_SEGMENT_IDS（避免靜默丟段）
 const _carPark = ZONES.find((z) => z.id === "car-park");

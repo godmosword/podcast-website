@@ -6,6 +6,8 @@ import {
   MAP_STAGE,
   universe,
   zoneById,
+  zoneCamera,
+  type MapLayout,
   type Universe,
   type ZoneId,
 } from "@/data/universe";
@@ -32,18 +34,22 @@ export type IslandCameraTarget = Extract<CameraTarget, { level: "island" }>;
 
 const WORLD: CameraTarget = { key: "world", level: "world" };
 
-/** 相機目標是 pathname 的純函式 —— 巢狀導覽核心不變式 */
-export function targetFor(pathname: string): CameraTarget {
+/** 相機目標是 pathname 的純函式 —— 巢狀導覽核心不變式。`center` 依版面取（預設橫式）。 */
+export function targetFor(
+  pathname: string,
+  layout: MapLayout = "landscape",
+): CameraTarget {
   const segs = pathname.replace(/^\/adventures\/?/, "").split("/").filter(Boolean);
   if (segs.length === 0) return WORLD;
   const zone = zoneById(segs[0]!);
   if (!zone) return WORLD;
+  const camera = zoneCamera(zone, layout);
   return {
     key: `island:${zone.id}`,
     level: "island",
     zoneId: zone.id,
-    center: zone.camera.center,
-    zoom: zone.camera.zoom,
+    center: camera.center,
+    zoom: camera.zoom,
   };
 }
 
@@ -64,7 +70,10 @@ export function clamp(s: CameraState, u: Universe = universe): CameraState {
  *
  * 只吃島層：世界層請走 `useMapCamera.reset()`（傳世界層進來是編譯錯誤）。
  */
-export function targetToFlyParams(target: IslandCameraTarget): {
+export function targetToFlyParams(
+  target: IslandCameraTarget,
+  layout: MapLayout = "landscape",
+): {
   coord: { x: number; y: number };
   scale: number;
   fitBox: { w: number; h: number };
@@ -73,7 +82,7 @@ export function targetToFlyParams(target: IslandCameraTarget): {
     universe.camera.maxZoom,
     Math.max(universe.camera.minZoom, target.zoom),
   );
-  const focus = islandFocus(target.zoneId);
+  const focus = islandFocus(target.zoneId, layout);
   return {
     coord: focus.center,
     scale: zoom,

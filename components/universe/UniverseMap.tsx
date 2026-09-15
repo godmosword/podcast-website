@@ -14,8 +14,8 @@ import {
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ZONE_IDS } from "@/data/universe";
 import {
-  MAP_STAGE,
   ZONE_TERRAIN,
+  type MapLayout,
   type ZoneDef,
   type ZoneId,
   type ZoneStatus,
@@ -24,6 +24,7 @@ import { isIslandPath, targetFor, targetToFlyParams } from "@/lib/camera";
 import { resolveUniverseMap } from "@/lib/universe-map";
 import {
   MAP_PICKER_HEIGHT,
+  PORTRAIT_LABEL_FLIP_SCALE,
   RECENTER_IDLE_MS,
   anyPointVisible,
   bucketMapScale,
@@ -60,7 +61,7 @@ import UniverseMapParallax from "./UniverseMapParallax";
 import HotspotLayer from "./HotspotLayer";
 import ZoneIsland from "./ZoneIsland";
 import { UniverseCameraGateProvider } from "./UniverseCameraGateContext";
-import { useMapCamera } from "./useMapCamera";
+import { useMapCamera, type MapCamera } from "./useMapCamera";
 import { useSheetReadyLatch } from "./useSheetReadyLatch";
 import styles from "./UniverseMap.module.css";
 
@@ -84,9 +85,6 @@ function UniverseMapContent({
   zoneStoryPreviewsMap,
   children,
 }: MapContentProps) {
-  // useMemo 錨定引用：resolveUniverseMap 每次呼叫都產新 zone 物件，
-  // 不錨定的話 memo(ZoneIsland) 會被每 tick 全新的 zone prop 擊穿。
-  const { zones, bridges, viewBox } = useMemo(() => resolveUniverseMap(), []);
   // 進度中樞：孩子聽完的集數（localStorage，mount 後才讀）→ 各島星章
   const completedSlugs = useCompletedSlugs();
   const zoneProgress = useMemo(
@@ -101,7 +99,40 @@ function UniverseMapContent({
     lastPathnameRef.current = pathnameRaw;
   }
   const pathname = pathnameRaw ?? lastPathnameRef.current;
-  const cameraTarget = useMemo(() => targetFor(pathname), [pathname]);
+  const pathnameRef = useRef(pathname);
+  pathnameRef.current = pathname;
+  // 已套用的相機目標 key＋版面（避免 StrictMode／重渲染重複 fly；版面翻轉時以 instant 重套）。
+  const appliedTargetRef = useRef<{ key: string; layout: MapLayout } | null>(null);
+  const cameraApiRef = useRef<Pick<MapCamera, "flyTo" | "reset"> | null>(null);
+  // 旋轉翻版面：hook 在同一個 tick 回呼，這裡立刻以 instant 重套目前目標，
+  // 與 layout state 同一次 commit（工程審 blocking 2：不留「直式舞台＋橫式鏡頭」中間幀）。
+  const onLayoutChange = useCallback((nextLayout: MapLayout) => {
+    const api = cameraApiRef.current;
+    if (!api) return;
+    const target = targetFor(pathnameRef.current, nextLayout);
+    appliedTargetRef.current = { key: target.key, layout: nextLayout };
+    if (target.level === "island") {
+      const { coord, scale, fitBox } = targetToFlyParams(target, nextLayout);
+      api.flyTo(coord, scale, { fitBox, level: "island", instant: true });
+      return;
+    }
+    api.reset({ instant: true });
+  }, []);
+  // 島路徑 skip 進場降落，避免與 flyTo 目標島互搶鏡頭（session key 改由 hook effect 寫入）。
+  const camera = useMapCamera({
+    skipEntryAnimation: isIslandPath(pathname),
+    onLayoutChange,
+  });
+  cameraApiRef.current = { flyTo: camera.flyTo, reset: camera.reset };
+  /** 版面由相機量測決定（SSR 橫式）；所有 stage consumer 讀 `resolved.stage`，不讀 MAP_STAGE 常數。 */
+  const layout = camera.layout;
+  // useMemo 錨定引用：resolveUniverseMap 每次呼叫都產新 zone 物件，
+  // 不錨定的話 memo(ZoneIsland) 會被每 tick 全新的 zone prop 擊穿。只在版面翻轉時重算。
+  const { zones, bridges, viewBox, stage } = useMemo(
+    () => resolveUniverseMap(layout),
+    [layout],
+  );
+  const cameraTarget = useMemo(() => targetFor(pathname, layout), [pathname, layout]);
   const onIsland = cameraTarget.level === "island";
   const activeZoneId = useMemo<ZoneId | null>(() => {
     if (cameraTarget.level !== "island") return null;
@@ -109,10 +140,6 @@ function UniverseMapContent({
     return ZONE_IDS.includes(id as ZoneId) ? (id as ZoneId) : null;
   }, [cameraTarget]);
 
-  // 島路徑 skip 進場降落，避免與 flyTo 目標島互搶鏡頭（session key 改由 hook effect 寫入）。
-  const camera = useMapCamera({
-    skipEntryAnimation: isIslandPath(pathname),
-  });
   const {
     flyTo: cameraFlyTo,
     reset: cameraReset,
@@ -141,8 +168,6 @@ function UniverseMapContent({
   const paused = tabHidden || !mapInView || isInteracting;
   /** 迷路自救：viewport 元素引用（量測可見性用；camera.bind.ref 之外的旁支引用）。 */
   const viewportElRef = useRef<HTMLDivElement | null>(null);
-  // 已套用的相機目標 key（避免 StrictMode／重渲染重複 fly）。
-  const appliedTargetKeyRef = useRef<string | null>(null);
   // 首訪底部提示：screen-space；島路徑不顯示；dismiss 才寫 session key。
   const [tapHintPhase, setTapHintPhase] = useState<TapHintPhase>("pending");
   const tapHintScheduledRef = useRef(false);
@@ -200,25 +225,29 @@ function UniverseMapContent({
   // 首次 viewport 量測完成前 flyTo 會 no-op：以 isMeasured 判定 ready。
   useEffect(() => {
     if (!camera.isMeasured) return;
-    if (appliedTargetKeyRef.current === cameraTarget.key) return;
+    const applied = appliedTargetRef.current;
+    if (applied?.key === cameraTarget.key && applied.layout === layout) return;
+    // 旋轉切版面：同一目標、不同版面 → 座標瞬跳（.island 無 left/top transition），
+    // 鏡頭也 instant 重 fit，避免「島先跳、鏡頭再滑」（Motion with purpose）。
+    const layoutFlip = applied != null && applied.layout !== layout;
 
     if (cameraTarget.level === "island") {
-      appliedTargetKeyRef.current = cameraTarget.key;
-      const { coord, scale, fitBox } = targetToFlyParams(cameraTarget);
+      appliedTargetRef.current = { key: cameraTarget.key, layout };
+      const { coord, scale, fitBox } = targetToFlyParams(cameraTarget, layout);
       // 焦點是島圖視覺中心（非沙岸錨點），fitBox 再夾住「島放得進畫面」的縮放上限；
-      // 無底部選單，不需為 dock 預留 viewportOffsetY。
-      cameraFlyTo(coord, scale, { fitBox });
+      // level: "island" 讓直式以控制鈕疊高帶為 chrome-free 盒置中（橫式 inset 為零）。
+      cameraFlyTo(coord, scale, { fitBox, level: "island", instant: layoutFlip });
       return;
     }
 
-    // 世界層：若上一目標是島，才 reset（保留首訪進場動畫由 useMapCamera 處理）。
-    if (appliedTargetKeyRef.current?.startsWith("island:")) {
-      appliedTargetKeyRef.current = cameraTarget.key;
-      cameraReset();
+    // 世界層：若上一目標是島或版面翻轉，才 reset（保留首訪進場動畫由 useMapCamera 處理）。
+    if (applied?.key.startsWith("island:") || layoutFlip) {
+      appliedTargetRef.current = { key: cameraTarget.key, layout };
+      cameraReset({ instant: layoutFlip });
       return;
     }
-    appliedTargetKeyRef.current = cameraTarget.key;
-  }, [camera.isMeasured, cameraTarget, cameraFlyTo, cameraReset]);
+    appliedTargetRef.current = { key: cameraTarget.key, layout };
+  }, [camera.isMeasured, cameraTarget, layout, cameraFlyTo, cameraReset]);
 
   useEffect(() => {
     if (!daylightTrackedRef.current) {
@@ -304,6 +333,8 @@ function UniverseMapContent({
   }, [onIsland, router, cameraReset]);
 
   // 鏡頭視覺外置：連續 zoom／pan 只寫 DOM，不重跑本元件。
+  const layoutRef = useRef(layout);
+  layoutRef.current = layout;
   useEffect(() => {
     bindVisual((pose, meta) => {
       const visualMeta = {
@@ -311,7 +342,12 @@ function UniverseMapContent({
         flyDurationMs: meta.flyDurationMs,
         reducedMotion: reducedRef.current,
       };
-      applyStageCamera(stageElRef.current, pose, visualMeta);
+      // 直式 fit scale ≈ 0.47：木牌翻到島上的門檻要降到 0.4，否則五張木牌全蓋島（設計審必改 4）。
+      applyStageCamera(stageElRef.current, pose, {
+        ...visualMeta,
+        labelFlipBelowScale:
+          layoutRef.current === "portrait" ? PORTRAIT_LABEL_FLIP_SCALE : undefined,
+      });
       applySeaCamera(seaDayElRef.current, pose, visualMeta);
       if (seaNightElRef.current) {
         applySeaCamera(seaNightElRef.current, pose, visualMeta);
@@ -434,6 +470,7 @@ function UniverseMapContent({
     <section
       ref={sectionRef}
       className={styles.map}
+      data-layout={layout}
       aria-label="車車宇宙樂園地圖"
       style={
         !onIsland
@@ -493,16 +530,18 @@ function UniverseMapContent({
         <div
           ref={stageElRef}
           className={styles.stage}
+          data-map-stage
+          data-layout={layout}
           style={{
-            width: MAP_STAGE.width,
-            height: MAP_STAGE.height,
+            width: stage.width,
+            height: stage.height,
           }}
         >
           <svg
             className={sceneClass}
             viewBox={viewBox}
-            width={MAP_STAGE.width}
-            height={MAP_STAGE.height}
+            width={stage.width}
+            height={stage.height}
             style={{ zIndex: mapDepthZ(0, "sea") }}
             aria-hidden="true"
             focusable="false"
@@ -590,11 +629,11 @@ function UniverseMapContent({
               );
             })}
 
-            <MapDecorNearWater reduced={reduced} paused={paused} daylight={daylight} />
-            <MapDecorBirds reduced={reduced} paused={paused} daylight={daylight} />
+            <MapDecorNearWater reduced={reduced} paused={paused} daylight={daylight} layout={layout} />
+            <MapDecorBirds reduced={reduced} paused={paused} daylight={daylight} layout={layout} />
           </svg>
 
-          <MapBridgeLayer bridges={bridges} viewBox={viewBox} paused={paused} />
+          <MapBridgeLayer bridges={bridges} viewBox={viewBox} stage={stage} paused={paused} />
 
           <NightFireworks daylight={daylight} reduced={reduced} paused={paused} />
 
@@ -603,6 +642,7 @@ function UniverseMapContent({
             paused={paused}
             night={daylight === "night"}
             focusedZoneId={activeZoneId}
+            layout={layout}
           />
 
           {zones.map((zone) => (
@@ -618,11 +658,12 @@ function UniverseMapContent({
               progress={zoneProgress[zone.id] ?? null}
               invite={tapHintPhase === "visible" && zone.status === "open"}
               active={zone.id === activeZoneId}
+              stageHeight={stage.height}
             />
           ))}
 
           {activeZoneId ? (
-            <HotspotLayer zoneId={activeZoneId} paused={paused} />
+            <HotspotLayer zoneId={activeZoneId} paused={paused} layout={layout} />
           ) : null}
 
         </div>
@@ -632,6 +673,7 @@ function UniverseMapContent({
           layerRef={parallaxElRef}
           paused={paused}
           daylight={daylight}
+          layout={layout}
         />
       </div>
 

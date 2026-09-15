@@ -417,6 +417,21 @@
     transform: translateX(var(--tap-hint-x)) translateY(-8px);
   }
 
+  /* 直式版面（美術審 H3）：群島填滿高度，「天象帶之下」不再是空的——那裡是森林小島的木牌
+     （實測 390 時提示整顆蓋住木牌）。改錨到地圖最頂（8px）：森林 tile 頂 67px 以上只有透明邊，
+     日／月在右上（x ≥ 254），219px 膠囊左錨到不了。DESIGN §103 的「頂部反而是空的」
+     只對橫式成立，直式例外登記在同段。 */
+  .map[data-layout="portrait"] .tapHint {
+    top: 8px;
+    /* 頂部與日／月同一水平帶（--sky-top 36 ～ 100），改靠寬度讓開：
+       320／360 時 219px 膠囊左錨仍會撞到日／月，故夾到日／月左緣再留 8px；
+       文字允許換行（.tapHintText white-space: normal），窄機兩行即可。 */
+    max-width: calc(
+      100% - var(--sky-right, 72px) - var(--sky-size, 64px) - 12px - 8px -
+        var(--safe-left) - var(--safe-right)
+    );
+  }
+
   /* max-width 若配 nowrap 等於白設：flex item 的 min-width: auto 會被 nowrap
      的 min-content（＝整串文字寬）撐住，超長文案會直接溢出膠囊，正是本輪要
      殺掉的失效模式。允許換行讓夾制真的生效；頂部錨定不怕長高。 */

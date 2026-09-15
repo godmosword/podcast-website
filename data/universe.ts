@@ -8,8 +8,31 @@ import {
   type LandingSegmentId,
 } from "@/data/landing-segments";
 
-/** 虛擬地圖舞台（解析度無關的 px 空間；消費端仍用此單位）。 */
+/** 地圖版面：橫式（桌機／橫向／SSR 預設）或直式（≤480 直向手機，見 map-camera-utils `layoutForViewport`）。 */
+export type MapLayout = "landscape" | "portrait";
+
+export const MAP_LAYOUTS: readonly MapLayout[] = ["landscape", "portrait"];
+
+export type MapStage = { readonly width: number; readonly height: number };
+
+/** 虛擬地圖舞台（解析度無關的 px 空間；消費端仍用此單位）。橫式＝既有契約，OG／deep link／e2e 零差。 */
 export const MAP_STAGE = { width: 1000, height: 720 } as const;
+
+/**
+ * 直式舞台（2026-09-15 美術審 H3）：長寬比 0.514，對齊 390×844 扣掉頂欄／島選擇列後的可用盒。
+ * 五島直式座標是**第二套權威座標**（`Zone.worldPortrait`），不是橫式座標的縮放；
+ * 群島較高較窄，讓 ≤480 直向的島至少 120px 見方、木牌互不疊。
+ */
+export const MAP_STAGE_PORTRAIT = { width: 720, height: 1400 } as const;
+
+const MAP_STAGES: Record<MapLayout, MapStage> = {
+  landscape: MAP_STAGE,
+  portrait: MAP_STAGE_PORTRAIT,
+};
+
+export function getMapStage(layout: MapLayout = "landscape"): MapStage {
+  return MAP_STAGES[layout];
+}
 
 /** 進島預設縮放（對齊 UniverseMap FOCUS_SCALE）。 */
 export const ISLAND_FOCUS_ZOOM = 1.6;
@@ -57,10 +80,17 @@ export type Zone = {
   /** 卡片／清單副標（舊稱 teaser） */
   tagline: string;
   status: ZoneStatus;
-  /** 世界地圖座標 0–1 */
+  /** 世界地圖座標 0–1（橫式舞台 `MAP_STAGE`） */
   world: { x: number; y: number };
+  /** 直式舞台（`MAP_STAGE_PORTRAIT`）的世界座標 0–1；五島必填，不半套。 */
+  worldPortrait: { x: number; y: number };
   /** 進島相機目標（center 為 0–1；zoom 對齊既有 scale） */
   camera: {
+    center: [number, number];
+    zoom: number;
+  };
+  /** 直式舞台的進島相機目標（center 相對 `MAP_STAGE_PORTRAIT`）。 */
+  cameraPortrait: {
     center: [number, number];
     zoom: number;
   };
@@ -89,33 +119,69 @@ export type Universe = {
   zones: Zone[];
 };
 
-/** 0–1 → MAP_STAGE px（整數，對齊既有 coord 快照）。 */
-export function worldToStage(world: { x: number; y: number }): {
+/** 0–1 → 舞台 px（整數，對齊既有 coord 快照）。預設橫式。 */
+export function worldToStage(
+  world: { x: number; y: number },
+  layout: MapLayout = "landscape",
+): {
   x: number;
   y: number;
 } {
+  const stage = getMapStage(layout);
   return {
-    x: Math.round(world.x * MAP_STAGE.width),
-    y: Math.round(world.y * MAP_STAGE.height),
+    x: Math.round(world.x * stage.width),
+    y: Math.round(world.y * stage.height),
   };
 }
 
-/** MAP_STAGE px → 0–1。 */
-export function stageToWorld(coord: { x: number; y: number }): {
+/** 舞台 px → 0–1。預設橫式。 */
+export function stageToWorld(
+  coord: { x: number; y: number },
+  layout: MapLayout = "landscape",
+): {
   x: number;
   y: number;
 } {
+  const stage = getMapStage(layout);
   return {
-    x: coord.x / MAP_STAGE.width,
-    y: coord.y / MAP_STAGE.height,
+    x: coord.x / stage.width,
+    y: coord.y / stage.height,
   };
+}
+
+/** 依版面取 zone 的世界座標（0–1）。 */
+export function zoneWorld(
+  zone: Pick<Zone, "world" | "worldPortrait">,
+  layout: MapLayout = "landscape",
+): { x: number; y: number } {
+  return layout === "portrait" ? zone.worldPortrait : zone.world;
+}
+
+/** 依版面取 zone 的進島相機目標。 */
+export function zoneCamera(
+  zone: Pick<Zone, "camera" | "cameraPortrait">,
+  layout: MapLayout = "landscape",
+): Zone["camera"] {
+  return layout === "portrait" ? zone.cameraPortrait : zone.camera;
 }
 
 type HotspotDraft = Omit<Hotspot, "featured"> & { featured?: boolean };
 
 function zoneFromLegacyPx(
-  partial: Omit<Zone, "world" | "camera" | "sprite" | "links" | "hotspots"> & {
+  partial: Omit<
+    Zone,
+    | "world"
+    | "worldPortrait"
+    | "camera"
+    | "cameraPortrait"
+    | "sprite"
+    | "links"
+    | "hotspots"
+  > & {
+    /** 橫式舞台 px（`MAP_STAGE`） */
     coord: { x: number; y: number };
+    /** 直式舞台 px（`MAP_STAGE_PORTRAIT`），沙岸底中心，與 coord 同一錨點語意 */
+    coordPortrait: { x: number; y: number };
     sprite: string;
     zoom?: number;
     links?: Zone["links"];
@@ -123,6 +189,7 @@ function zoneFromLegacyPx(
   },
 ): Zone {
   const world = stageToWorld(partial.coord);
+  const worldPortrait = stageToWorld(partial.coordPortrait, "portrait");
   const zoom = partial.zoom ?? ISLAND_FOCUS_ZOOM;
   return {
     id: partial.id,
@@ -130,7 +197,9 @@ function zoneFromLegacyPx(
     tagline: partial.tagline,
     status: partial.status,
     world,
+    worldPortrait,
     camera: { center: [world.x, world.y], zoom },
+    cameraPortrait: { center: [worldPortrait.x, worldPortrait.y], zoom },
     sprite: partial.sprite,
     links: partial.links ?? [],
     hotspots: (partial.hotspots ?? []).map((hotspot) => ({
@@ -165,6 +234,8 @@ const raw = {
       name: "車車樂園",
       status: "open",
       coord: { x: 410, y: 495 },
+      // 直式：中央主島，螢幕約 53% 高（拇指區、視覺重心），四條橋由此出發
+      coordPortrait: { x: 360, y: 980 },
       landmark: "🎡",
       sprite: "/adventures/zones/car-park.png",
       tagline: "故事 · 睡前 · 黏土 · 安全",
@@ -226,6 +297,8 @@ const raw = {
       name: "恐龍島",
       status: "building",
       coord: { x: 175, y: 300 },
+      // 直式：左二；與 rescue 之間留 307–413 的縫給 car-park→forest 的橋
+      coordPortrait: { x: 175, y: 580 },
       landmark: "🦕",
       sprite: "/adventures/zones/dino.png",
       buildProgress: 60,
@@ -306,6 +379,8 @@ const raw = {
       name: "英雄救援隊",
       status: "coming",
       coord: { x: 785, y: 300 },
+      // 直式：右二，比 dino 低 20px 錯開木牌
+      coordPortrait: { x: 545, y: 600 },
       landmark: "🚓",
       sprite: "/adventures/zones/rescue.png",
       tagline: "冒險救援故事（救援小隊出動）",
@@ -367,6 +442,8 @@ const raw = {
       name: "未來夢想島",
       status: "planned",
       coord: { x: 825, y: 560 },
+      // 直式：正下方偏左，把右下角讓給 MapControls；rescue–ocean 橋在直式不畫
+      coordPortrait: { x: 330, y: 1310 },
       landmark: "🌊",
       sprite: "/adventures/zones/ocean.png",
       tagline: "海洋？太空？慢慢蒐集想法",
@@ -423,6 +500,8 @@ const raw = {
       // 偏東北，錯開車車樂園正上方，避免木牌壓到摩天輪
       // y 取 175：再往上 tile 頂會超出 MAP_STAGE，撐破島群 fit bbox
       coord: { x: 580, y: 175 },
+      // 直式：頂端置中；tile 頂 17 在舞台內
+      coordPortrait: { x: 360, y: 235 },
       landmark: "🌲",
       sprite: "/adventures/zones/forest.png",
       buildProgress: 45,

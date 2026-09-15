@@ -47,7 +47,15 @@ export type CameraVisualMeta = {
   isAnimating: boolean;
   flyDurationMs: number;
   reducedMotion: boolean;
+  /**
+   * 木牌改掛島上（-140px）的 scale 門檻；預設 0.5（橫式）。
+   * 直式 fit scale ≈ 0.47，門檻須降到 0.4，否則五張木牌全翻到島上蓋住地標。
+   */
+  labelFlipBelowScale?: number;
 };
+
+/** 橫式木牌翻轉門檻（舊行為）。 */
+export const LABEL_FLIP_SCALE = 0.5;
 
 /** 舞台 transform 與標籤反縮放 CSS 變數。 */
 export function applyStageCamera(
@@ -58,9 +66,10 @@ export function applyStageCamera(
   if (!el) return;
   el.style.transform = `translate(${cam.tx}px, ${cam.ty}px) scale(${cam.scale})`;
   el.style.setProperty("--map-scale", String(cam.scale));
+  const flipBelow = meta.labelFlipBelowScale ?? LABEL_FLIP_SCALE;
   el.style.setProperty(
     "--label-offset-y",
-    cam.scale < 0.5 ? "-140px" : "6px",
+    cam.scale < flipBelow ? "-140px" : "6px",
   );
   el.style.transition = meta.isAnimating
     ? `transform ${meta.flyDurationMs}ms cubic-bezier(0.22, 1, 0.36, 1)`

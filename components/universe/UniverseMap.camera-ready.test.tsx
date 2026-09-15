@@ -8,6 +8,7 @@ import type { MapCamera } from "./useMapCamera";
 const flyToMock = vi.fn();
 const resetMock = vi.fn();
 let setMeasuredExternal: ((value: boolean) => void) | null = null;
+let setLayoutExternal: ((value: "landscape" | "portrait") => void) | null = null;
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), prefetch: vi.fn() }),
@@ -25,12 +26,15 @@ vi.mock("./useMapCamera", () => ({
   ENTRY_PLAYED_KEY: "cc-universe-entry-played",
   useMapCamera: () => {
     const [isMeasured, setIsMeasured] = useState(false);
+    const [layout, setLayout] = useState<"landscape" | "portrait">("landscape");
     setMeasuredExternal = setIsMeasured;
+    setLayoutExternal = setLayout;
     const camera: MapCamera = {
       scale: 1,
       tx: 0,
       ty: 0,
       isMeasured,
+      layout,
       isAnimating: false,
       isInteracting: false,
       idleEpoch: 0,
@@ -129,5 +133,38 @@ describe("UniverseMap isMeasured → flyTo", () => {
     await waitFor(() => {
       expect(flyToMock).toHaveBeenCalledTimes(1);
     });
+    // 進島帶 level: "island"（直式 chrome-free 盒），首次不是 instant
+    expect(flyToMock.mock.calls[0]?.[2]).toMatchObject({ level: "island", instant: false });
+  });
+
+  it("版面翻轉：同一島目標以 instant 重套、座標換成直式 tileBox（美術審 H3）", async () => {
+    const { default: UniverseMap } = await import("./UniverseMap");
+    const { islandFocus } = await import("@/lib/universe/map-camera-utils");
+    render(
+      <ThemeProvider>
+        <UniverseMap />
+      </ThemeProvider>,
+    );
+    await act(async () => {
+      setMeasuredExternal?.(true);
+    });
+    await waitFor(() => {
+      expect(flyToMock).toHaveBeenCalledTimes(1);
+    });
+    expect(flyToMock.mock.calls[0]?.[0]).toEqual(islandFocus("dino", "landscape").center);
+
+    await act(async () => {
+      setLayoutExternal?.("portrait");
+    });
+    await waitFor(() => {
+      expect(flyToMock).toHaveBeenCalledTimes(2);
+    });
+    expect(flyToMock.mock.calls[1]?.[0]).toEqual(islandFocus("dino", "portrait").center);
+    expect(flyToMock.mock.calls[1]?.[2]).toMatchObject({ level: "island", instant: true });
+    // 舞台尺寸跟著版面換
+    const stage = document.querySelector("[data-map-stage]") as HTMLElement;
+    expect(stage.getAttribute("data-layout")).toBe("portrait");
+    expect(stage.style.width).toBe("720px");
+    expect(stage.style.height).toBe("1400px");
   });
 });

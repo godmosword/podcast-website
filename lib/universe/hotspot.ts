@@ -8,6 +8,7 @@ import {
   type Zone,
   type ZoneId,
 } from "@/data/universe";
+import type { MapLayout } from "@/data/universe-zones";
 import { resolveUniverseMap, type ResolvedZone } from "@/lib/universe-map";
 
 export type HotspotStagePoint = { x: number; y: number };
@@ -79,8 +80,11 @@ export function hotspotToStage(
   };
 }
 
-export function resolvedZoneById(zoneId: string): ResolvedZone | undefined {
-  return resolveUniverseMap().zones.find((z) => z.id === zoneId);
+export function resolvedZoneById(
+  zoneId: string,
+  layout: MapLayout = "landscape",
+): ResolvedZone | undefined {
+  return resolveUniverseMap(layout).zones.find((z) => z.id === zoneId);
 }
 
 /** 進島後應 prefetch 的 URL 清單（hotspot 詳情 + 動作目標）。 */

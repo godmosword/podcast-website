@@ -124,3 +124,46 @@ describe("HotspotLayer.module.css 視覺契約", () => {
     );
   });
 });
+
+describe("HotspotLayer 直式版面（美術審 H3）", () => {
+  afterEach(() => {
+    cleanup();
+    prefetch.mockClear();
+  });
+
+  it("layout=portrait：座標取直式 tileBox、層帶 data-layout、下半島熱點標 data-side=below", () => {
+    render(<HotspotLayer zoneId="dino" layout="portrait" />);
+    const layer = screen.getByLabelText("恐龍島探索點");
+    expect(layer.getAttribute("data-layout")).toBe("portrait");
+    const portrait = resolvedZoneById("dino", "portrait")!;
+    const landscape = resolvedZoneById("dino")!;
+    expect(portrait.tileBox).not.toEqual(landscape.tileBox);
+    const storyHouse = screen.getByLabelText("打開故事屋入口");
+    // pos (0.3, 0.72) → tileBox 內
+    const expectedLeft = portrait.tileBox.left + 0.3 * portrait.tileBox.w;
+    expect(parseFloat(storyHouse.style.left)).toBeCloseTo(expectedLeft, 1);
+    expect(storyHouse.getAttribute("data-side")).toBe("below");
+    expect(screen.getByLabelText("打開刷牙角落").getAttribute("data-side")).toBe("above");
+  });
+
+  it("預設橫式：data-layout=landscape，座標與舊行為一致", () => {
+    render(<HotspotLayer zoneId="dino" />);
+    const layer = screen.getByLabelText("恐龍島探索點");
+    expect(layer.getAttribute("data-layout")).toBe("landscape");
+    const landscape = resolvedZoneById("dino")!;
+    const storyHouse = screen.getByLabelText("打開故事屋入口");
+    expect(parseFloat(storyHouse.style.left)).toBeCloseTo(
+      landscape.tileBox.left + 0.3 * landscape.tileBox.w,
+      1,
+    );
+  });
+
+  it("CSS：直式只藏文字、牌面收成圓牌，命中區規則不變", () => {
+    const css = readFileSync(join(__dirname, "HotspotLayer.module.css"), "utf8");
+    expect(css).toMatch(/\.layer\[data-layout="portrait"\] \.label\s*\{[^}]*display:\s*none/);
+    expect(css).toMatch(/\.layer\[data-layout="portrait"\] \.signPlate\s*\{[^}]*border-radius:\s*var\(--radius-circle\)/);
+    // 48px 命中區沒有被直式覆寫
+    expect(css).not.toMatch(/\.layer\[data-layout="portrait"\] \.pin\b/);
+    expect(css).toMatch(/\.pin,\s*\.pinLocked\s*\{[^}]*min-width:\s*48px/);
+  });
+});

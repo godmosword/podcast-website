@@ -1,4 +1,12 @@
-import { MAP_STAGE, ZONES, type ZoneId } from "@/data/universe-zones";
+import {
+  MAP_STAGE,
+  getMapStage,
+  getZones,
+  type MapLayout,
+  type MapStage,
+  type ZoneId,
+} from "@/data/universe-zones";
+import { MAP_PORTRAIT_LAYOUT_ENABLED } from "@/lib/universe/dev-map-flags";
 import { getZoneArtTile } from "@/lib/universe/zone-art-tile";
 
 /** 鏡頭縮放下限（zoom-out 到底）。 */
@@ -27,14 +35,16 @@ export type IslandContentBounds = {
   height: number;
 };
 
-/** 五島 tile 聯集 bbox（含 CONTENT_FIT_PAD），供預設 fit 使用。 */
-export function islandContentBounds(): IslandContentBounds {
+/** 五島 tile 聯集 bbox（含 CONTENT_FIT_PAD），供預設 fit 使用。預設橫式。 */
+export function islandContentBounds(
+  layout: MapLayout = "landscape",
+): IslandContentBounds {
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
   let maxY = -Infinity;
 
-  for (const zone of ZONES) {
+  for (const zone of getZones(layout)) {
     const tile = getZoneArtTile(zone.id);
     if (tile.mode !== "island") continue;
     const [ax, ay] = tile.anchorUV;
@@ -86,9 +96,13 @@ export type IslandFocus = {
  * 直接把 zone.coord 置中會讓 84% 的島高落在畫面上緣（島頂被切）。
  * 故焦點取 tile box 視覺中心，再為木牌欄讓位。
  */
-export function islandFocus(zoneId: ZoneId): IslandFocus {
-  const zone = ZONES.find((z) => z.id === zoneId);
-  const coord = zone?.coord ?? { x: MAP_STAGE.width / 2, y: MAP_STAGE.height / 2 };
+export function islandFocus(
+  zoneId: ZoneId,
+  layout: MapLayout = "landscape",
+): IslandFocus {
+  const zone = getZones(layout).find((z) => z.id === zoneId);
+  const stage = getMapStage(layout);
+  const coord = zone?.coord ?? { x: stage.width / 2, y: stage.height / 2 };
   const tile = getZoneArtTile(zoneId);
   if (tile.mode !== "island") {
     return { center: { x: coord.x, y: coord.y }, box: { ...LANDMARK_BOX } };
@@ -117,9 +131,14 @@ export function fitScaleForBox(
   box: { w: number; h: number },
   viewportW: number,
   viewportH: number,
+  layout: MapLayout = "landscape",
 ): number {
   if (viewportW === 0 || viewportH === 0) return MAX_SCALE;
-  const { availW, availH } = fitAvailableViewport(viewportW, viewportH);
+  // 直式進島：底部帶（控制鈕疊高）預留＋盒內置中，不扣右欄（設計審必改 6）。
+  const { availW, availH } =
+    layout === "portrait"
+      ? insetAvailable(viewportW, viewportH, viewportInsetFor(viewportW, viewportH, layout, "island"))
+      : fitAvailableViewport(viewportW, viewportH);
   const pad = ISLAND_FIT_PAD * 2;
   return clampScale(
     Math.min(availW / (box.w + pad), availH / (box.h + pad)),
@@ -162,8 +181,10 @@ export function zoomCameraAt(
 }
 
 /** 島群 bbox 中心：預設鏡頭對齊此點，讓島群在視窗置中，而非偏向某一座島（避免單側空海）。 */
-export function islandContentCenter(): { x: number; y: number } {
-  const b = islandContentBounds();
+export function islandContentCenter(
+  layout: MapLayout = "landscape",
+): { x: number; y: number } {
+  const b = islandContentBounds(layout);
   return { x: (b.minX + b.maxX) / 2, y: (b.minY + b.maxY) / 2 };
 }
 
@@ -207,6 +228,87 @@ export const MAP_PICKER_HEIGHT = 72;
 /** 手機直向寬度門檻：與 IslandPickerStrip／MapControls 手機樣式一致。 */
 export const MAP_MOBILE_MAX_WIDTH = 480;
 
+/**
+ * 「手機直向」單一判準：≤480 且高大於寬。`fitAvailableViewport` 的 chrome 預留、
+ * `layoutForViewport` 的版面選擇都吃這一條式子，兩處不得各自漂移。
+ */
+export function isMobilePortrait(w: number, h: number): boolean {
+  return w > 0 && h > 0 && w <= MAP_MOBILE_MAX_WIDTH && h > w;
+}
+
+/**
+ * 依量測到的 viewport 選版面。SSR／未量測一律橫式；
+ * `MAP_PORTRAIT_LAYOUT_ENABLED=false` 時恆橫式（回滾閥）。
+ */
+export function layoutForViewport(w: number, h: number): MapLayout {
+  if (!MAP_PORTRAIT_LAYOUT_ENABLED) return "landscape";
+  return isMobilePortrait(w, h) ? "portrait" : "landscape";
+}
+
+/** 直式舞台 chrome 預留（螢幕 px）：上下左右扣掉後就是「chrome-free 盒」。 */
+export type ViewportInset = {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+};
+
+/** 直式木牌翻轉門檻：fit ≈ 0.47 仍維持 6px 下掛（橫式門檻 0.5 見 map-camera-visual）。 */
+export const PORTRAIT_LABEL_FLIP_SCALE = 0.4;
+
+/** ≤480 MapControls 疊高：三顆 56 + 兩段 gap 8 + 底距 10（對齊 `MapControls.module.css`）。 */
+export const MAP_CONTROLS_STACK_MOBILE = 10 + 56 * 3 + 8 * 2;
+
+/**
+ * 直式的 chrome 預留：不再扣整欄 `MAP_CHROME_RIGHT`（那是 390 寬的 17%，
+ * 也是島做不到 120px 的元兇），改成「底部帶」——世界層＝島選擇列＋一顆控制鈕淨空，
+ * 進島＝控制鈕疊高（召喚把手比它矮，取 max 即可）。構圖（ocean 偏左）負責讓右下角空出來，
+ * T1 幾何測試鎖住「島 footprint／木牌 ∩ MapControls 矩形 = ∅」。
+ */
+export function viewportInsetFor(
+  w: number,
+  h: number,
+  layout: MapLayout,
+  level: "world" | "island",
+): ViewportInset {
+  if (layout === "landscape") {
+    // 橫式維持舊行為：pose 不偏移、clamp 以整個視窗置中（零差）。
+    return { left: 0, top: 0, right: 0, bottom: 0 };
+  }
+  // 世界層只留島選擇列＋呼吸：控制鈕在右下角，直式構圖（ocean 偏左）已把那個角空出來，
+  // 不再像橫式那樣多扣一顆鈕高——實機 map 視窗是 100dvh−頂欄（390 寬約 779 高），
+  // 多扣 68px 會把小島壓回 113px。
+  const bottom =
+    level === "world"
+      ? MAP_PICKER_HEIGHT + 8
+      : Math.max(MAP_CONTROLS_STACK_MOBILE, MAP_SUMMON_BOTTOM);
+  return {
+    left: LABEL_SCREEN_PAD,
+    top: LABEL_SCREEN_PAD,
+    right: LABEL_SCREEN_PAD,
+    bottom,
+  };
+}
+
+function insetAvailable(
+  w: number,
+  h: number,
+  inset: ViewportInset,
+): { availW: number; availH: number } {
+  return {
+    availW: Math.max(1, w - inset.left - inset.right),
+    availH: Math.max(1, h - inset.top - inset.bottom),
+  };
+}
+
+/**
+ * chrome-free 盒中心相對視窗中心的位移（螢幕 px）；供 `poseFor` 的 offsetY。
+ * 底部帶比頂部厚時為負：舞台往上推，島群落在盒中央而不是視窗中央。
+ */
+export function insetCenterOffsetY(inset: ViewportInset): number {
+  return (inset.top - inset.bottom) / 2;
+}
+
 /** fit 可用視窗：扣木牌 pad 與右下／底部 chrome，避免島被控制鈕／選擇列蓋住。 */
 export function fitAvailableViewport(
   w: number,
@@ -215,7 +317,7 @@ export function fitAvailableViewport(
   const left = LABEL_SCREEN_PAD;
   const top = LABEL_SCREEN_PAD;
   const right = Math.max(LABEL_SCREEN_PAD, MAP_CHROME_RIGHT);
-  const mobilePortrait = w <= MAP_MOBILE_MAX_WIDTH && h > w;
+  const mobilePortrait = isMobilePortrait(w, h);
   // 選擇列貼底，MapControls 疊在列上方 → 直向手機預留列高 + 一顆控制鈕淨空
   const mobileWorldBottom = mobilePortrait
     ? MAP_PICKER_HEIGHT + 8 + 12 + 56
@@ -233,10 +335,22 @@ export function fitAvailableViewport(
 }
 
 /** 依 viewport 尺寸算預設島群 contain-fit 鏡頭倍率（含 FIT_MARGIN 與 clamp）。
- *  直向允許溫和放大（PORTRAIT_MAX_ZOOM），並扣 chrome／選擇列 inset。 */
-export function fitScaleFor(w: number, h: number): number {
+ *  橫式版面且 h>w（平板直立）允許溫和放大（PORTRAIT_MAX_ZOOM），並扣 chrome／選擇列 inset。
+ *  直式版面走純 contain：群島本身就是直式，底部帶已是呼吸，FIT_MARGIN 不再扣（設計審可選項）。 */
+export function fitScaleFor(
+  w: number,
+  h: number,
+  layout: MapLayout = "landscape",
+): number {
   if (w === 0 || h === 0) return 1;
-  const bounds = islandContentBounds();
+  const bounds = islandContentBounds(layout);
+  if (layout === "portrait") {
+    const inset = viewportInsetFor(w, h, layout, "world");
+    const { availW, availH } = insetAvailable(w, h, inset);
+    return clampScale(
+      Math.min(availW / bounds.width, availH / bounds.height),
+    );
+  }
   const { availW, availH } = fitAvailableViewport(w, h);
   const contain = Math.min(availW / bounds.width, availH / bounds.height);
   const scale =
@@ -254,22 +368,35 @@ function clamp(value: number, min: number, max: number): number {
 
 /**
  * 夾住鏡頭平移。
- * 舞台放得下時置中；放不下時允許任一舞台點移到 viewport 中心。
+ * 舞台放得下時置中；放不下時允許任一舞台點移到中心。
+ * 「中心」＝chrome-free 盒中心（`inset`）；未給 inset 即整個 viewport（橫式零差）。
  */
-export function clampCamera(next: Camera, viewportW: number, viewportH: number): Camera {
+export function clampCamera(
+  next: Camera,
+  viewportW: number,
+  viewportH: number,
+  stage: MapStage = MAP_STAGE,
+  inset?: ViewportInset,
+): Camera {
   if (viewportW === 0 || viewportH === 0) return next;
 
-  const stageW = MAP_STAGE.width * next.scale;
-  const stageH = MAP_STAGE.height * next.scale;
+  const stageW = stage.width * next.scale;
+  const stageH = stage.height * next.scale;
+  const left = inset?.left ?? 0;
+  const top = inset?.top ?? 0;
+  const boxW = viewportW - left - (inset?.right ?? 0);
+  const boxH = viewportH - top - (inset?.bottom ?? 0);
+  const cx = left + boxW / 2;
+  const cy = top + boxH / 2;
 
   const tx =
-    stageW <= viewportW
-      ? (viewportW - stageW) / 2
-      : clamp(next.tx, viewportW / 2 - stageW, viewportW / 2);
+    stageW <= boxW
+      ? left + (boxW - stageW) / 2
+      : clamp(next.tx, cx - stageW, cx);
   const ty =
-    stageH <= viewportH
-      ? (viewportH - stageH) / 2
-      : clamp(next.ty, viewportH / 2 - stageH, viewportH / 2);
+    stageH <= boxH
+      ? top + (boxH - stageH) / 2
+      : clamp(next.ty, cy - stageH, cy);
 
   return { scale: next.scale, tx, ty };
 }

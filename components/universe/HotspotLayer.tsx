@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { zoneById, type ZoneId } from "@/data/universe";
+import type { MapLayout } from "@/data/universe-zones";
 import {
   getFeaturedHotspots,
   hotspotDetailHref,
@@ -18,7 +19,15 @@ type HotspotLayerProps = {
   zoneId: ZoneId;
   /** 分頁隱藏／地圖不可見／拖曳中：保留狀態標記供地圖層協調。 */
   paused?: boolean;
+  /** 版面（預設橫式）：熱點座標取該版面的島 tileBox。 */
+  layout?: MapLayout;
 };
+
+/**
+ * 直向（≤480）：`pos.y` 在島下半的熱點，整支標牌下移站到島前沙灘（3/4 視角「畫面下方＝更靠近觀者」），
+ * 牌子仍正立、底座仍是接地點、48px 命中區留在錨點——不倒掛（設計審必改 5）。
+ */
+export const HOTSPOT_BELOW_THRESHOLD = 0.5;
 
 /**
  * 島內熱點座標層：掛在 stage 上，隨相機 transform。
@@ -28,10 +37,11 @@ type HotspotLayerProps = {
 export default function HotspotLayer({
   zoneId,
   paused = false,
+  layout = "landscape",
 }: HotspotLayerProps) {
   const router = useRouter();
   const zone = zoneById(zoneId);
-  const resolved = resolvedZoneById(zoneId);
+  const resolved = resolvedZoneById(zoneId, layout);
 
   useEffect(() => {
     if (!zone) return;
@@ -51,6 +61,7 @@ export default function HotspotLayer({
       className={styles.layer}
       style={{ zIndex: mapDepthZ(resolved.depthY, "hotspot") }}
       data-paused={paused || undefined}
+      data-layout={layout}
       aria-label={`${zone.name}探索點`}
     >
       {getFeaturedHotspots(zone.hotspots).map((hotspot) => {
@@ -76,6 +87,7 @@ export default function HotspotLayer({
             data-hotspot-id={hotspot.id}
             data-kind={kind}
             data-featured="true"
+            data-side={hotspot.pos.y >= HOTSPOT_BELOW_THRESHOLD ? "below" : "above"}
             scroll={false}
             onPointerDown={(e) => e.stopPropagation()}
           >

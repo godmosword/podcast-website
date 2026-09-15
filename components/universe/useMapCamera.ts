@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ZoneCoord } from "@/data/universe-zones";
+import { getMapStage, type MapLayout, type ZoneCoord } from "@/data/universe-zones";
 import {
   INERTIA_STOP_SPEED,
   MAX_SCALE,
@@ -17,11 +17,15 @@ import {
   fitScaleFor,
   fitScaleForBox,
   flyDurationFor,
+  insetCenterOffsetY,
   islandContentCenter,
   isDoubleTap,
+  layoutForViewport,
   poseFor,
+  viewportInsetFor,
   DOUBLE_TAP_ZOOM,
   type TapSample,
+  type ViewportInset,
   wheelZoomFactor,
   zoomCameraAt,
 } from "@/lib/universe/map-camera-utils";
@@ -58,7 +62,16 @@ type FlyToOptions = {
    * ISLAND_FOCUS_ZOOM，故不影響既有手感。
    */
   fitBox?: { w: number; h: number };
+  /**
+   * 鏡頭層級：決定直式版面的 chrome-free 盒（世界層＝島選擇列帶；進島＝控制鈕疊高帶）。
+   * pose 置中與 clamp 都對這個盒算；橫式版面 inset 為零，行為與舊版零差。
+   */
+  level?: "world" | "island";
+  /** 立刻到位（旋轉切版面重 fit）：不播飛行，reduced-motion 與否一致。 */
+  instant?: boolean;
 };
+
+export type ResetOptions = { instant?: boolean };
 
 export type UseMapCameraOptions = {
   /**
@@ -66,10 +79,22 @@ export type UseMapCameraOptions = {
    * 並在量測 effect 標記 ENTRY_PLAYED_KEY，避免離島後重播。
    */
   skipEntryAnimation?: boolean;
+  /**
+   * 版面翻轉（旋轉）時由 hook **同一個 tick** 回呼：消費端在此以 `instant` 重套目前目標
+   * （進島 flyTo／世界層 reset），與 `layout` state 同一次 commit，不會畫出
+   * 「直式舞台＋橫式鏡頭」的中間幀。未提供時 hook 只 clamp 舊鏡頭。
+   */
+  onLayoutChange?: (layout: MapLayout) => void;
 };
 
-/** 預設鏡頭錨點：島群 bbox 中心（首屏／reset／回樂園皆對齊此點，島群置中不偏一側）。 */
-const CONTENT_CENTER = islandContentCenter();
+/** 世界層 chrome-free 盒：橫式回 undefined（clamp／pose 走舊路徑，零差）。 */
+function worldInset(
+  w: number,
+  h: number,
+  layout: MapLayout,
+): ViewportInset | undefined {
+  return layout === "portrait" ? viewportInsetFor(w, h, layout, "world") : undefined;
+}
 
 type MapCameraBind = {
   ref: (el: HTMLDivElement | null) => void;
@@ -98,6 +123,11 @@ export type MapCamera = {
    * 深連結 flyTo 應等此旗標，勿用姿態啟發式（fit 後可能恰為 1,0,0）。
    */
   isMeasured: boolean;
+  /**
+   * 目前版面：SSR／未量測為橫式；`measure()` 與首次 pose 同一 tick 決定，
+   * 只在 `isMobilePortrait` 翻轉時改變（iOS 網址列收放那種 resize 不會）。
+   */
+  layout: MapLayout;
   isAnimating: boolean;
   /** 拖曳／pinch／滾輪／慣性進行中；供地圖降載動畫。 */
   isInteracting: boolean;
@@ -113,7 +143,7 @@ export type MapCamera = {
   /** 讀取本次 fly-to 的 transition 時長（毫秒）。 */
   getFlyDurationMs: () => number;
   flyTo: (coord: ZoneCoord, targetScale?: number, options?: FlyToOptions) => void;
-  reset: () => void;
+  reset: (options?: ResetOptions) => void;
   zoomBy: (delta: number) => void;
   panBy: (dx: number, dy: number) => void;
 };
@@ -136,8 +166,12 @@ export function useMapCamera(options: UseMapCameraOptions = {}): MapCamera {
   const [idleEpoch, setIdleEpoch] = useState(0);
   const [viewportEl, setViewportEl] = useState<HTMLDivElement | null>(null);
   const [isMeasured, setIsMeasured] = useState(false);
+  const [layout, setLayout] = useState<MapLayout>("landscape");
 
   const camRef = useRef<Camera>(cam);
+  const layoutRef = useRef<MapLayout>("landscape");
+  /** 最近一次 flyTo／reset 所用的 chrome-free 盒；後續 pan／zoom 的 clamp 沿用。 */
+  const activeInsetRef = useRef<ViewportInset | undefined>(undefined);
   const visualApplierRef = useRef<CameraVisualApplier | null>(null);
   const animatingRef = useRef(false);
   const sizeRef = useRef({ w: 0, h: 0, left: 0, top: 0 });
@@ -145,6 +179,8 @@ export function useMapCamera(options: UseMapCameraOptions = {}): MapCamera {
   const isMeasuredRef = useRef(false);
   const skipEntryAnimationRef = useRef(Boolean(options.skipEntryAnimation));
   skipEntryAnimationRef.current = Boolean(options.skipEntryAnimation);
+  const onLayoutChangeRef = useRef(options.onLayoutChange);
+  onLayoutChangeRef.current = options.onLayoutChange;
   const pointersRef = useRef(new Map<number, { x: number; y: number }>());
   const prevPinchRef = useRef<{ dist: number } | null>(null);
   const animTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -269,7 +305,13 @@ export function useMapCamera(options: UseMapCameraOptions = {}): MapCamera {
 
   const clampCam = useCallback((next: Camera): Camera => {
     const { w, h } = sizeRef.current;
-    return clampCamera(next, w, h);
+    return clampCamera(
+      next,
+      w,
+      h,
+      getMapStage(layoutRef.current),
+      activeInsetRef.current,
+    );
   }, []);
 
   /** 立即套用縮放（按鈕／flush）；會中止慣性。 */
@@ -380,28 +422,52 @@ export function useMapCamera(options: UseMapCameraOptions = {}): MapCamera {
       stopInertia();
       const { w, h } = sizeRef.current;
       if (w === 0 || h === 0) return;
+      const layoutNow = layoutRef.current;
       const wanted = clampScale(targetScale ?? camRef.current.scale);
       const ns = options?.fitBox
-        ? Math.min(wanted, fitScaleForBox(options.fitBox, w, h))
+        ? Math.min(wanted, fitScaleForBox(options.fitBox, w, h, layoutNow))
         : wanted;
-      const offsetY = options?.viewportOffsetY ?? 0;
+      // 直式：依層級換 chrome-free 盒，pose 置中與後續 clamp 都對它算；橫式 inset 為 undefined。
+      if (options?.level) {
+        activeInsetRef.current =
+          layoutNow === "portrait"
+            ? viewportInsetFor(w, h, layoutNow, options.level)
+            : undefined;
+      }
+      const inset = activeInsetRef.current;
+      const offsetY =
+        options?.viewportOffsetY ?? (inset ? insetCenterOffsetY(inset) : 0);
       const next = clampCam(poseFor(coord, ns, w, h, offsetY));
-      // 先開啟 transition，再寫 transform，CSS 才會插值。
-      if (!reduced) {
-        // 時長是距離的函式：近距離縮放自動變快、跨島飛行自動變慢。
-        const durationMs =
-          options?.durationMs ?? flyDurationFor(camRef.current, next, w, h);
-        flyDurationMsRef.current = durationMs;
-        animatingRef.current = true;
-        setAnimating(true);
-        if (animTimerRef.current) clearTimeout(animTimerRef.current);
-        animTimerRef.current = setTimeout(() => {
+      if (reduced || options?.instant) {
+        // 瞬間到位：把進行中的飛行收尾（timer／isAnimating／transition），
+        // 否則旋轉時若正處於進島 fly，視覺層會沿用舊 transition 把 instant 姿態滑過去。
+        if (animTimerRef.current) {
+          clearTimeout(animTimerRef.current);
+          animTimerRef.current = null;
+        }
+        if (animatingRef.current) {
           animatingRef.current = false;
           setAnimating(false);
-          paintVisual(camRef.current);
-          setIdleEpoch((n) => n + 1);
-        }, durationMs);
+        }
+        publishCam(next, "commit");
+        // reduced-motion 維持舊行為（不動 idleEpoch）；instant 是被中斷的飛行，補一次 idle。
+        if (options?.instant) setIdleEpoch((n) => n + 1);
+        return;
       }
+      // 先開啟 transition，再寫 transform，CSS 才會插值。
+      // 時長是距離的函式：近距離縮放自動變快、跨島飛行自動變慢。
+      const durationMs =
+        options?.durationMs ?? flyDurationFor(camRef.current, next, w, h);
+      flyDurationMsRef.current = durationMs;
+      animatingRef.current = true;
+      setAnimating(true);
+      if (animTimerRef.current) clearTimeout(animTimerRef.current);
+      animTimerRef.current = setTimeout(() => {
+        animatingRef.current = false;
+        setAnimating(false);
+        paintVisual(camRef.current);
+        setIdleEpoch((n) => n + 1);
+      }, durationMs);
       publishCam(next, "commit");
     },
     [clampCam, paintVisual, publishCam, reduced, stopInertia],
@@ -409,12 +475,19 @@ export function useMapCamera(options: UseMapCameraOptions = {}): MapCamera {
 
   const fitScale = useCallback((): number => {
     const { w, h } = sizeRef.current;
-    return fitScaleFor(w, h);
+    return fitScaleFor(w, h, layoutRef.current);
   }, []);
 
-  const reset = useCallback(() => {
-    flyTo(CONTENT_CENTER, fitScale());
-  }, [flyTo, fitScale]);
+  /** 世界層預設鏡頭：島群 bbox 中心（依版面）@ fit scale，置中於世界層 chrome-free 盒。 */
+  const reset = useCallback(
+    (options?: ResetOptions) => {
+      flyTo(islandContentCenter(layoutRef.current), fitScale(), {
+        level: "world",
+        instant: options?.instant,
+      });
+    },
+    [flyTo, fitScale],
+  );
 
   const zoomBy = useCallback(
     (delta: number) => {
@@ -444,15 +517,24 @@ export function useMapCamera(options: UseMapCameraOptions = {}): MapCamera {
     return rect;
   }, []);
 
-  // 量測 viewport 尺寸 + 首次置中島群（CONTENT_CENTER）。
+  // 量測 viewport 尺寸 + 首次置中島群（島群 bbox 中心，依版面）。
+  // 版面判定與首次 pose 在同一個 tick（設計審必改 7）：首幀不會出現橫式島再跳成直式。
   useEffect(() => {
     if (!viewportEl) return;
     const measure = () => {
       const rect = refreshViewportRect(viewportEl);
       if (rect.width === 0 || rect.height === 0) return;
+      const nextLayout = layoutForViewport(rect.width, rect.height);
       if (!initializedRef.current) {
         initializedRef.current = true;
-        const ns = fitScaleFor(rect.width, rect.height);
+        layoutRef.current = nextLayout;
+        setLayout(nextLayout);
+        activeInsetRef.current = worldInset(rect.width, rect.height, nextLayout);
+        const contentCenter = islandContentCenter(nextLayout);
+        const offsetY = activeInsetRef.current
+          ? insetCenterOffsetY(activeInsetRef.current)
+          : 0;
+        const ns = fitScaleFor(rect.width, rect.height, nextLayout);
 
         // 進場降落：首次進園從高空俯瞰整個群島，再飛向主島（每 session 一次）。
         // 島路徑以 skipEntryAnimation 跳過，不依賴 render 期預寫 sessionStorage。
@@ -476,17 +558,30 @@ export function useMapCamera(options: UseMapCameraOptions = {}): MapCamera {
         if (playEntry) {
           const es = clampScale(ns * ENTRY_START_FACTOR);
           publishCam(
-            clampCam(poseFor(CONTENT_CENTER, es, rect.width, rect.height)),
+            clampCam(poseFor(contentCenter, es, rect.width, rect.height, offsetY)),
             "commit",
           );
           requestAnimationFrame(() => {
-            requestAnimationFrame(() => flyTo(CONTENT_CENTER, ns));
+            requestAnimationFrame(() => flyTo(contentCenter, ns, { level: "world" }));
           });
         } else {
           publishCam(
-            clampCam(poseFor(CONTENT_CENTER, ns, rect.width, rect.height)),
+            clampCam(poseFor(contentCenter, ns, rect.width, rect.height, offsetY)),
             "commit",
           );
+        }
+      } else if (nextLayout !== layoutRef.current) {
+        // 只有 isMobilePortrait 翻轉才換版面（旋轉）。先更新 ref，再讓消費端在**同一個 tick**
+        // 以 instant 重套目前目標（進島 flyTo／世界層 reset）——與 setLayout 同一次 commit，
+        // 不會畫出「直式舞台＋橫式鏡頭」的中間幀；沒有回呼才退回只 clamp。
+        // 一般 resize（iOS 網址列收放）維持只 clamp，不 re-fit，免得把孩子拖到一半的鏡頭拉回。
+        layoutRef.current = nextLayout;
+        activeInsetRef.current = worldInset(rect.width, rect.height, nextLayout);
+        setLayout(nextLayout);
+        if (onLayoutChangeRef.current) {
+          onLayoutChangeRef.current(nextLayout);
+        } else {
+          publishCam(clampCam(camRef.current), "commit");
         }
       } else {
         publishCam(clampCam(camRef.current), "commit");
@@ -733,6 +828,7 @@ export function useMapCamera(options: UseMapCameraOptions = {}): MapCamera {
     tx: cam.tx,
     ty: cam.ty,
     isMeasured,
+    layout,
     isAnimating: animating,
     isInteracting: interacting,
     idleEpoch,

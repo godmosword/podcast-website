@@ -72,6 +72,16 @@ describe("UniverseMap.module.css tap hint", () => {
     expect(narrowBlock).toMatch(/transform:\s*translateX\(var\(--tap-hint-x\)\)\s*translateY\(-8px\)/);
   });
 
+  it("直式版面提示改錨地圖最頂（美術審 H3：天象帶之下是森林小島木牌）", () => {
+    // 只在 ≤480 區塊內、以 .map[data-layout="portrait"] 加權，橫式（含平板直立）維持天象帶之下
+    expect(narrowBlock).toMatch(
+      /\.map\[data-layout="portrait"\] \.tapHint\s*\{[\s\S]*?top:\s*8px/,
+    );
+    const base = css.indexOf("@media (max-width: 480px)", css.indexOf(".tapHint {"));
+    const portrait = css.indexOf('.map[data-layout="portrait"] .tapHint', base);
+    expect(portrait).toBeGreaterThan(base);
+  });
+
   it("≤480 覆寫必須排在 .tapHint 基礎規則之後（媒體查詢不加權重）", () => {
     // 兩處同為 (0,1,0)，靠 source order 決勝；寫進本檔上方那個 480 區塊會失效
     const base = css.indexOf(".tapHint {");

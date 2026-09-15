@@ -1,12 +1,15 @@
 import type { CSSProperties } from "react";
 import type { ThemePreference } from "@/lib/theme";
-import { MAP_DECOR, type DecorItem, type DecorKind } from "@/data/universe-decor";
+import { getMapDecor, type DecorItem, type DecorKind } from "@/data/universe-decor";
+import type { MapLayout } from "@/data/universe-zones";
 import styles from "./MapDecorLayer.module.css";
 
 type Props = {
   reduced: boolean;
   paused: boolean;
   daylight: ThemePreference;
+  /** 版面（預設橫式）：直式另一組填充件座標。 */
+  layout?: MapLayout;
 };
 
 function isVisibleDecor(item: DecorItem, daylight: ThemePreference): boolean {
@@ -107,15 +110,19 @@ function DecorItemGroup({ item, reduced }: { item: DecorItem; reduced: boolean }
   );
 }
 
-function filterDecor(daylight: ThemePreference, kinds: DecorKind[]): DecorItem[] {
-  return MAP_DECOR.filter(
+function filterDecor(
+  daylight: ThemePreference,
+  kinds: DecorKind[],
+  layout: MapLayout,
+): DecorItem[] {
+  return getMapDecor(layout).filter(
     (d) => kinds.includes(d.kind) && isVisibleDecor(d, daylight),
   );
 }
 
 /** 近水裝飾（帆船、魚）；回傳 SVG `<g>`，插入 scene 內橋之後。 */
-export function MapDecorNearWater({ reduced, paused, daylight }: Props) {
-  const items = filterDecor(daylight, ["sailboat", "fish"]);
+export function MapDecorNearWater({ reduced, paused, daylight, layout = "landscape" }: Props) {
+  const items = filterDecor(daylight, ["sailboat", "fish"], layout);
   const rootClass = [styles.decor, paused ? styles.paused : ""].filter(Boolean).join(" ");
   return (
     <g className={rootClass} aria-hidden="true">
@@ -127,8 +134,8 @@ export function MapDecorNearWater({ reduced, paused, daylight }: Props) {
 }
 
 /** 鳥 + 夜間螢火；paint order 最高。 */
-export function MapDecorBirds({ reduced, paused, daylight }: Props) {
-  const items = filterDecor(daylight, ["bird", "firefly"]);
+export function MapDecorBirds({ reduced, paused, daylight, layout = "landscape" }: Props) {
+  const items = filterDecor(daylight, ["bird", "firefly"], layout);
   const rootClass = [styles.decor, paused ? styles.paused : ""].filter(Boolean).join(" ");
   return (
     <g className={rootClass} aria-hidden="true">

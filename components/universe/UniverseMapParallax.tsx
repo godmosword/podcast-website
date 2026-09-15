@@ -1,5 +1,5 @@
 import type { CSSProperties, Ref } from "react";
-import { MAP_STAGE } from "@/data/universe-zones";
+import { MAP_STAGE, getMapStage, type MapLayout } from "@/data/universe-zones";
 import type { ThemePreference } from "@/lib/theme";
 import { cloudPath } from "@/lib/universe/map-art-src";
 import { pngToWebp } from "@/lib/universe/png-to-webp";
@@ -8,11 +8,100 @@ import styles from "./UniverseMapParallax.module.css";
 /** 黏土雲團（透明 PNG），飄在島群上方的近景雲影。cx/cy＝中心、w＝寬（stage 單位）。
  *  海洋滿版後無地平線帶，cy 散布全舞台 0–720。 */
 const CLOUDS = [
-  { id: "cloud-a", cx: 120, cy: 110, w: 150, dur: "58s", delay: "0s", opacity: 0.62 },
-  { id: "cloud-b", cx: 460, cy: 60, w: 190, dur: "72s", delay: "4s", opacity: 0.58 },
-  { id: "cloud-c", cx: 880, cy: 150, w: 150, dur: "64s", delay: "8s", opacity: 0.6 },
-  { id: "cloud-a", cx: 700, cy: 430, w: 120, dur: "50s", delay: "2s", opacity: 0.55 },
-  { id: "cloud-b", cx: 220, cy: 610, w: 200, dur: "68s", delay: "6s", opacity: 0.66 },
+  {
+    id: "cloud-a",
+    cx: 120,
+    cy: 110,
+    w: 150,
+    dur: "58s",
+    delay: "0s",
+    opacity: 0.62,
+  },
+  {
+    id: "cloud-b",
+    cx: 460,
+    cy: 60,
+    w: 190,
+    dur: "72s",
+    delay: "4s",
+    opacity: 0.58,
+  },
+  {
+    id: "cloud-c",
+    cx: 880,
+    cy: 150,
+    w: 150,
+    dur: "64s",
+    delay: "8s",
+    opacity: 0.6,
+  },
+  {
+    id: "cloud-a",
+    cx: 700,
+    cy: 430,
+    w: 120,
+    dur: "50s",
+    delay: "2s",
+    opacity: 0.55,
+  },
+  {
+    id: "cloud-b",
+    cx: 220,
+    cy: 610,
+    w: 200,
+    dur: "68s",
+    delay: "6s",
+    opacity: 0.66,
+  },
+] as const;
+
+/** 直式舞台（720×1400）雲團：沿用同一組 sprite，落在島間水域，橫式那組 cx 880 會出舞台。 */
+const CLOUDS_PORTRAIT = [
+  {
+    id: "cloud-a",
+    cx: 110,
+    cy: 120,
+    w: 150,
+    dur: "58s",
+    delay: "0s",
+    opacity: 0.62,
+  },
+  {
+    id: "cloud-b",
+    cx: 600,
+    cy: 90,
+    w: 170,
+    dur: "72s",
+    delay: "4s",
+    opacity: 0.58,
+  },
+  {
+    id: "cloud-c",
+    cx: 640,
+    cy: 470,
+    w: 130,
+    dur: "64s",
+    delay: "8s",
+    opacity: 0.6,
+  },
+  {
+    id: "cloud-a",
+    cx: 110,
+    cy: 900,
+    w: 120,
+    dur: "50s",
+    delay: "2s",
+    opacity: 0.55,
+  },
+  {
+    id: "cloud-b",
+    cx: 590,
+    cy: 1180,
+    w: 180,
+    dur: "68s",
+    delay: "6s",
+    opacity: 0.66,
+  },
 ] as const;
 
 type Props = {
@@ -20,6 +109,8 @@ type Props = {
   layerRef?: Ref<HTMLDivElement | null>;
   paused: boolean;
   daylight: ThemePreference;
+  /** 版面（預設橫式）：決定舞台尺寸與雲團座標集。 */
+  layout?: MapLayout;
 };
 
 /** 近景雲層：飄在島群上方、以較快速率跟隨 pan/zoom（海洋滿版後的頂層雲影）。 */
@@ -27,8 +118,11 @@ export default function UniverseMapParallax({
   layerRef,
   paused,
   daylight,
+  layout = "landscape",
 }: Props) {
   const isNight = daylight === "night";
+  const stage = layout === "landscape" ? MAP_STAGE : getMapStage(layout);
+  const clouds = layout === "portrait" ? CLOUDS_PORTRAIT : CLOUDS;
   const layerClass = [
     styles.layer,
     isNight ? styles.night : "",
@@ -43,19 +137,19 @@ export default function UniverseMapParallax({
       className={layerClass}
       aria-hidden="true"
       style={{
-        width: MAP_STAGE.width,
-        height: MAP_STAGE.height,
+        width: stage.width,
+        height: stage.height,
       }}
     >
       <svg
         className={styles.svg}
-        viewBox={`0 0 ${MAP_STAGE.width} ${MAP_STAGE.height}`}
-        width={MAP_STAGE.width}
-        height={MAP_STAGE.height}
+        viewBox={`0 0 ${stage.width} ${stage.height}`}
+        width={stage.width}
+        height={stage.height}
         focusable="false"
       >
         {/* 黏土雲團（drift 慢飄） */}
-        {CLOUDS.map((cloud, i) => {
+        {clouds.map((cloud, i) => {
           const h = cloud.w * 0.6;
           return (
             <image

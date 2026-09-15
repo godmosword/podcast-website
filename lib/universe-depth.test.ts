@@ -67,3 +67,19 @@ describe("islandHaze", () => {
     }
   });
 });
+
+describe("mapDepthZ 直式舞台（美術審 H3）", () => {
+  it("直式最下方的島（y 1310）仍在所有木牌／探索點之下", () => {
+    const lowestIsland = mapDepthZ(1400, "island");
+    expect(mapDepthZ(0, "label")).toBeGreaterThan(lowestIsland);
+    expect(mapDepthZ(0, "hotspot")).toBeGreaterThan(mapDepthZ(1400, "label"));
+    expect(mapDepthZ(0, "bubble")).toBeGreaterThan(mapDepthZ(1400, "hotspot"));
+  });
+
+  it("islandHaze 以該版面舞台高正規化：直式 y 1310 仍是近景", () => {
+    expect(islandHaze(1310, 1400)).toBeCloseTo(1 - 1310 / 1400, 5);
+    expect(islandHaze(235, 1400)).toBeGreaterThan(islandHaze(1310, 1400));
+    // 預設維持橫式 720
+    expect(islandHaze(360)).toBeCloseTo(0.5, 5);
+  });
+});

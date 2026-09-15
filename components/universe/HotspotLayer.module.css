@@ -193,6 +193,45 @@
   }
 }
 
+/*
+ * 直式版面（≤480 直向手機，由 HotspotLayer `data-layout="portrait"` 標記）：
+ * 三張帶字標牌在 ~300px 的島上，任何擺法都會蓋掉島心 33–68%（實算：compact／下移皆然），
+ * 故直式一律收成「icon 圓牌」：標牌語彙（牌面→桿→接地底座）不變，只拿掉可見文字。
+ * 可及名稱仍在 <a aria-label>，名稱由 hotspot modal 標題與 ZoneSheet 承擔；48px 命中區不變。
+ */
+.layer[data-layout="portrait"] .label {
+  display: none;
+}
+
+.layer[data-layout="portrait"] .signPlate {
+  min-height: 28px;
+  min-width: 28px;
+  padding: 0;
+  gap: 0;
+  border-radius: var(--radius-circle);
+  justify-content: center;
+}
+
+.layer[data-layout="portrait"] .signPlate::after {
+  bottom: -4px;
+  width: 7px;
+  height: 7px;
+}
+
+.layer[data-layout="portrait"] .signIcon {
+  width: 18px;
+  height: 18px;
+  font-size: 12px;
+}
+
+.layer[data-layout="portrait"] .signStem {
+  height: 10px;
+}
+
+.layer[data-layout="portrait"] .signBase {
+  width: 20px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sign,
   .pin:active .sign,

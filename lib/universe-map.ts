@@ -1,8 +1,11 @@
 /** 樂園地圖 resolver：把 zones 資料換算成 SVG 像素座標、橋路徑與 viewBox。 */
 import { LANDING_SEGMENTS, type LandingSegmentId } from "@/data/landing-segments";
 import {
-  MAP_STAGE,
   ZONES,
+  getMapStage,
+  getZones,
+  type MapLayout,
+  type MapStage,
   type ZoneDef,
   type ZoneId,
 } from "@/data/universe-zones";
@@ -39,8 +42,11 @@ export type ResolvedBridge = {
 };
 
 export type ResolvedUniverseMap = {
+  layout: MapLayout;
   zones: ResolvedZone[];
   bridges: ResolvedBridge[];
+  /** 本版面的舞台尺寸（stage px）；所有 stage consumer 一律讀這裡，不讀 `MAP_STAGE` 常數。 */
+  stage: MapStage;
   viewBox: string;
 };
 
@@ -79,9 +85,9 @@ function resolveTileBox(zone: ZoneDef, px: StagePoint): TileBox {
   };
 }
 
-function resolveZones(): ResolvedZone[] {
+function resolveZones(layout: MapLayout): ResolvedZone[] {
   // R0 採 1:1，px 直接用 coord，讓 SVG 與佔位圖共用座標。
-  return ZONES.map((zone) => {
+  return getZones(layout).map((zone) => {
     const px = { x: zone.coord.x, y: zone.coord.y };
     return {
       ...zone,
@@ -154,10 +160,30 @@ const BRIDGE_EDGES: ReadonlyArray<readonly [ZoneId, ZoneId]> = [
   ["rescue", "ocean"],
 ];
 
-function resolveBridges(zones: ResolvedZone[]): ResolvedBridge[] {
+/**
+ * 直式少一邊（6）：ocean 移到正下方偏左之後，rescue–ocean 會直直穿過主島。
+ * ocean 是 planned、本就是淡橋，手機另有島選擇列可直達（美術審 H3，C-1 (b)）。
+ */
+const PORTRAIT_OMITTED_EDGES: ReadonlyArray<readonly [ZoneId, ZoneId]> = [
+  ["rescue", "ocean"],
+];
+
+export function bridgeEdgesFor(
+  layout: MapLayout = "landscape",
+): ReadonlyArray<readonly [ZoneId, ZoneId]> {
+  if (layout === "landscape") return BRIDGE_EDGES;
+  return BRIDGE_EDGES.filter(
+    ([a, b]) => !PORTRAIT_OMITTED_EDGES.some(([x, y]) => x === a && y === b),
+  );
+}
+
+function resolveBridges(
+  zones: ResolvedZone[],
+  layout: MapLayout,
+): ResolvedBridge[] {
   const byId = new Map<ZoneId, ResolvedZone>(zones.map((z) => [z.id, z]));
   const bridges: ResolvedBridge[] = [];
-  for (const [fromId, toId] of BRIDGE_EDGES) {
+  for (const [fromId, toId] of bridgeEdgesFor(layout)) {
     const from = byId.get(fromId);
     const to = byId.get(toId);
     if (!from || !to) continue;
@@ -176,12 +202,17 @@ function resolveBridges(zones: ResolvedZone[]): ResolvedBridge[] {
   return bridges;
 }
 
-export function resolveUniverseMap(): ResolvedUniverseMap {
-  const zones = resolveZones();
+export function resolveUniverseMap(
+  layout: MapLayout = "landscape",
+): ResolvedUniverseMap {
+  const zones = resolveZones(layout);
+  const stage = getMapStage(layout);
   return {
+    layout,
     zones,
-    bridges: resolveBridges(zones),
-    viewBox: `0 0 ${MAP_STAGE.width} ${MAP_STAGE.height}`,
+    bridges: resolveBridges(zones, layout),
+    stage,
+    viewBox: `0 0 ${stage.width} ${stage.height}`,
   };
 }
 

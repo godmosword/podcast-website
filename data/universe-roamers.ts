@@ -1,4 +1,4 @@
-import type { ZoneId } from "@/data/universe-zones";
+import type { MapLayout, ZoneId } from "@/data/universe-zones";
 import { getCharacterName } from "@/data/characters";
 import { resolveUniverseMap } from "@/lib/universe-map";
 
@@ -102,8 +102,8 @@ export type Roamer = {
   joyrideRouteId?: string;
 };
 
-function buildBridgeRoutes(): MapRoamerRoute[] {
-  return resolveUniverseMap()
+function buildBridgeRoutes(layout: MapLayout = "landscape"): MapRoamerRoute[] {
+  return resolveUniverseMap(layout)
     .bridges.filter((b) => !b.dashed)
     .map((b) => ({
       id: `map-bridge-${b.id}`,
@@ -136,8 +136,19 @@ export const ROAMER_ROUTES: RoamerRoute[] = [
   ...buildBridgeRoutes(),
 ];
 
-function openIslandBridgeIdleSpot(): RoamerIdleSpot {
-  const bridge = resolveUniverseMap().bridges.find((b) => b.id === "car-park-dino");
+const ISLAND_ROUTES = ROAMER_ROUTES.filter((r) => r.kind === "island");
+const ROAMER_ROUTES_PORTRAIT: RoamerRoute[] = [
+  ...ISLAND_ROUTES,
+  ...buildBridgeRoutes("portrait"),
+];
+
+/** 依版面取路線：島內路線（tile 本地）兩版共用，橋線由該版面的橋推導。`getRoamerRoutes()` ≡ `ROAMER_ROUTES`。 */
+export function getRoamerRoutes(layout: MapLayout = "landscape"): RoamerRoute[] {
+  return layout === "portrait" ? ROAMER_ROUTES_PORTRAIT : ROAMER_ROUTES;
+}
+
+function openIslandBridgeIdleSpot(layout: MapLayout = "landscape"): RoamerIdleSpot {
+  const bridge = resolveUniverseMap(layout).bridges.find((b) => b.id === "car-park-dino");
   if (!bridge) {
     return { x: 346.9, y: 442.64, facing: "front", flip: -1 };
   }
@@ -227,6 +238,17 @@ export const MAP_ROAMERS: Roamer[] = [
     joyrideRouteId: "rescue-walkway",
   },
 ];
+
+const MAP_ROAMERS_PORTRAIT: Roamer[] = MAP_ROAMERS.map((roamer) =>
+  roamer.id === "map-xiaohong"
+    ? { ...roamer, idleSpot: openIslandBridgeIdleSpot("portrait") }
+    : roamer,
+);
+
+/** 依版面取 map 層漫遊車：只有跨橋 idleSpot 是 stage 座標，其餘（tile 本地）兩版共用。 */
+export function getMapRoamers(layout: MapLayout = "landscape"): Roamer[] {
+  return layout === "portrait" ? MAP_ROAMERS_PORTRAIT : MAP_ROAMERS;
+}
 
 /** 有 idleSpot ＝ prod 預設定點展示（不巡邏）。 */
 export function roamerUsesIdleSpot(roamer: Roamer): boolean {
