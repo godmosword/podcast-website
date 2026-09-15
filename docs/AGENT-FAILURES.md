@@ -39,6 +39,7 @@
 
 | 日期 | 命令／模型 | 症狀 | 處置與是否解除 |
 |------|------------|------|----------------|
+| 2026-09-15 | `codex exec -m gpt-5.6-luna`（codex-cli 0.144.5） | 啟動即 `Error loading config.toml: invalid type: map, expected a boolean in features`——`~/.codex/config.toml` 的 `[features.context_management]` 子表是較新 Codex 寫入的，0.144.5 不認得 | 非模型缺席，是本機設定。處置：以 `CODEX_HOME=<臨時目錄>`（複製 `auth.json` ＋ 去掉該子表的 `config.toml`）執行即恢復，探活與工程審皆正常；不改使用者原檔。CLI 升級後可解除 |
 | 2026-09-05 | `cursor-agent`／`cursor-grok-4.5-high-fast` + `grok` 備援 | 主路徑與 CLI 備援皆認證失敗；同一模型近期已有多筆未解除記錄 | 標「對抗審缺席／對抗性降級」；恢復前不重試，需重新登入或設定 API key |
 | 2026-08-29 | `cursor-agent`／`cursor-grok-4.5-high-fast` + `grok` 備援 | 主路徑與 CLI 備援認證失敗 | 與 2026-09-05 合併計入缺席判定；保留 Composer／Leader 替代路徑 |
 
