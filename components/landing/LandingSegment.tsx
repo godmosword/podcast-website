@@ -150,7 +150,7 @@ export default function LandingSegment({
               {segment.cta.external ? (
                 <Icon name="external" size={15} className={styles.ctaIcon} />
               ) : (
-                " →"
+                "\u00A0→"
               )}
             </Link>
             {skipAnchorId ? (

@@ -64,6 +64,8 @@ describe("LandingSegment", () => {
     expect(html).not.toContain("聽最新一集");
     expect(html).not.toMatch(/\/play\?autoplay=1/);
     expect(html).toContain("車車遊樂園的故事");
+    expect(html).toContain("\u00A0→");
+    expect(html).not.toContain(" →");
     expect(html).not.toContain("全部故事");
     expect(html).not.toContain("01 / 04");
     expect(html).toContain("車車與遊樂園的故事");

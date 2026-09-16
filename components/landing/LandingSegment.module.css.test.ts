@@ -106,7 +106,8 @@ describe("LandingSegment.module.css touch targets", () => {
     expect(ctaBlock).toMatch(/color:\s*var\(--on-dark\)/);
     expect(ctaBlock).toMatch(/var\(--gloss\)/);
     expect(ctaBlock).toMatch(/var\(--elev-2\)/);
-    expect(ctaBlock).toMatch(/white-space:\s*nowrap/);
+    expect(ctaBlock).toMatch(/min-width:\s*0/);
+    expect(ctaBlock).not.toMatch(/white-space:\s*nowrap/);
     expect(ctaBlock).not.toMatch(/linear-gradient/);
     expect(ctaBlock).not.toMatch(/--landing-cta-from/);
     expect(ctaBlock).not.toMatch(/backdrop-filter/);
