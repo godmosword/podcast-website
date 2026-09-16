@@ -89,8 +89,8 @@
   padding: 12px 20px;
   border: none;
   border-radius: var(--radius-pill);
-  background: var(--landing-brand-ink);
-  color: var(--on-dark);
+  background: var(--cta-solid-bg);
+  color: var(--cta-solid-fg);
   font-size: var(--fs-body);
   font-weight: 800;
   cursor: pointer;

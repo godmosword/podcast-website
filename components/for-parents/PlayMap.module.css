@@ -1249,8 +1249,8 @@
 }
 
 .navButton {
-  background: var(--landing-brand-ink);
-  color: var(--on-dark);
+  background: var(--cta-solid-bg);
+  color: var(--cta-solid-fg);
   box-shadow: var(--shadow-md);
   border: none;
 }

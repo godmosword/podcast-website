@@ -291,8 +291,8 @@
   margin-top: auto;
   padding: 12px 20px;
   border-radius: var(--radius-pill);
-  background: var(--landing-brand-ink);
-  color: var(--on-dark);
+  background: var(--cta-solid-bg);
+  color: var(--cta-solid-fg);
   font-weight: 800;
   text-decoration: none;
   box-shadow: var(--shadow-md);

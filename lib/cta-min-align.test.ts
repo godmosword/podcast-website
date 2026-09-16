@@ -3,7 +3,8 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 /**
- * 美術審 H1 第一刀：唯一主鈕底／字色對齊 Landing／留言牆。
+ * 美術審 H1 第一刀／綁別名：唯一主鈕底／字色走 --cta-solid-*
+ *（計算值仍等於 Landing／留言牆的 --landing-brand-ink／--on-dark）。
  * 以選擇器清單切規則——同一 class 可能先出現在共用高度規則，
  * 再出現在真正上色的規則；只看帶 `background:` 的那一條。
  */
@@ -67,15 +68,34 @@ const PRIMARY = [
 ] as const;
 
 describe("主鈕最小 alignment（H1 第一刀）", () => {
-  it("七處唯一主鈕是暖深墨底＋白字，不再用橘黃漸層當底板", () => {
+  it("七處唯一主鈕綁 --cta-solid-*，不再用橘黃漸層當底板", () => {
     for (const { file, className } of PRIMARY) {
       const css = readCss(...file.split("/"));
       const block = paintRule(css, className);
-      expect(block, file).toMatch(/background:\s*var\(--landing-brand-ink\)/);
-      expect(block, file).toMatch(/color:\s*var\(--on-dark\)/);
+      expect(block, file).toMatch(/background:\s*var\(--cta-solid-bg\)/);
+      expect(block, file).toMatch(/color:\s*var\(--cta-solid-fg\)/);
+      expect(block, file).not.toMatch(/--landing-brand-ink/);
       expect(block, file).not.toMatch(/--cta-warm-from/);
       expect(block, file).not.toMatch(/background:\s*linear-gradient/);
     }
+  });
+
+  it("Landing 分區 CTA 與留言送出仍直接寫品牌 token，不改綁 solid 別名", () => {
+    const landing = paintRule(
+      readCss("components", "landing", "LandingSegment.module.css"),
+      "cta",
+    );
+    expect(landing).toMatch(/background:\s*var\(--landing-brand-ink\)/);
+    expect(landing).toMatch(/color:\s*var\(--on-dark\)/);
+    expect(landing).not.toMatch(/--cta-solid-/);
+
+    const submit = paintRule(
+      readCss("components", "feedback", "FeedbackForm.module.css"),
+      "submit",
+    );
+    expect(submit).toMatch(/background:\s*var\(--landing-brand-ink\)/);
+    expect(submit).toMatch(/color:\s*var\(--on-dark\)/);
+    expect(submit).not.toMatch(/--cta-solid-/);
   });
 
   it("不改 --cta-warm token（貼紙／夜色仍用舊字色）", () => {
@@ -99,6 +119,7 @@ describe("主鈕最小 alignment（H1 第一刀）", () => {
     expect(replay).toMatch(/background:\s*var\(--cta-soft-bg\)/);
     expect(replay).toMatch(/color:\s*var\(--cta-soft-fg\)/);
     expect(replay).not.toMatch(/--landing-brand-ink/);
+    expect(replay).not.toMatch(/--cta-solid-/);
     expect(replay).not.toMatch(/--c-lilac/);
     expect(replay).not.toMatch(/--cta-warm-from/);
   });
@@ -218,5 +239,27 @@ describe("CTA 三階（H1 第二刀 soft／quiet）", () => {
     );
     expect(notFoundPrimary).not.toMatch(/--cta-soft-/);
     expect(notFoundPrimary).toMatch(/background:\s*var\(--card\)/);
+  });
+});
+
+describe("subscribeCta 去玻璃（H1 壓圖次鈕）", () => {
+  it("不透明白底＋暖深墨字，無 backdrop-filter／text-shadow／rgba 玻璃", () => {
+    const css = readCss("components", "landing", "LandingSegment.module.css");
+    const block = paintRule(css, "subscribeCta");
+    expect(block).toMatch(/background:\s*var\(--on-dark\)/);
+    expect(block).toMatch(/color:\s*var\(--landing-brand-ink\)/);
+    expect(block).toMatch(/min-height:\s*44px/);
+    expect(block).toMatch(/font-size:\s*var\(--fs-control\)/);
+    expect(block).toMatch(/box-shadow:\s*var\(--elev-1\)/);
+    expect(block).toMatch(
+      /border:\s*1px\s+solid\s+color-mix\(in srgb,\s*var\(--landing-brand-ink\)\s+22%/,
+    );
+    expect(block).not.toMatch(/backdrop-filter/);
+    expect(block).not.toMatch(/-webkit-backdrop-filter/);
+    expect(block).not.toMatch(/text-shadow/);
+    expect(block).not.toMatch(/rgba\(/);
+    expect(block).not.toMatch(/--cta-soft-/);
+    expect(block).not.toMatch(/--cta-solid-/);
+    expect(block).not.toMatch(/var\(--gloss\)/);
   });
 });

@@ -181,6 +181,25 @@ describe("LandingSegment.module.css touch targets", () => {
     );
   });
 
+  it(".subscribeCta 脫離玻璃：不透明白底＋暖深墨字，無 backdrop／text-shadow／rgba", () => {
+    const block = extractBlocks(".subscribeCta")[0] ?? "";
+    const hover = extractBlocks(".subscribeCta:hover")[0] ?? "";
+    const active = extractBlocks(".subscribeCta:active")[0] ?? "";
+    expect(block).toMatch(/min-height:\s*44px/);
+    expect(block).toMatch(/font-size:\s*var\(--fs-control\)/);
+    expect(block).toMatch(/background:\s*var\(--on-dark\)/);
+    expect(block).toMatch(/color:\s*var\(--landing-brand-ink\)/);
+    expect(block).toMatch(/box-shadow:\s*var\(--elev-1\)/);
+    expect(block).not.toMatch(/--cta-soft-/);
+    for (const part of [block, hover, active]) {
+      expect(part.length).toBeGreaterThan(0);
+      expect(part).not.toMatch(/backdrop-filter/);
+      expect(part).not.toMatch(/-webkit-backdrop-filter/);
+      expect(part).not.toMatch(/text-shadow/);
+      expect(part).not.toMatch(/rgba\(/);
+    }
+  });
+
   it("不得用 #segment-stories 解除 titleHidden 或 siteIntro sr-only", () => {
     expect(css).not.toMatch(/:global\(#segment-stories\)\s+\.titleHidden/);
     expect(css).not.toMatch(/:global\(#segment-stories\)\s+:global\(\.sr-only\)/);

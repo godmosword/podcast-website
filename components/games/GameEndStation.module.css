@@ -90,8 +90,8 @@
 
 .nextBtn {
   min-height: 54px;
-  color: var(--on-dark);
-  background: var(--landing-brand-ink);
+  color: var(--cta-solid-fg);
+  background: var(--cta-solid-bg);
   box-shadow:
     0 5px 0 color-mix(in srgb, var(--cta-warm-to) 70%, #4a2e14),
     inset 0 2px 0 color-mix(in srgb, #fff 70%, transparent);

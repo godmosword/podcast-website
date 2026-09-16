@@ -180,8 +180,8 @@
   --cta-warm-from: #ffe889;
   --cta-warm-to: #ffbd6f;
   --cta-warm-fg: #614018;
-  /* H1 CTA 三階。solid 別名對齊 Landing／第一刀主鈕；soft／quiet 給次要與備援。
-     --cta-warm-* 仍給貼紙／夜色，不是這三階。不建共用 React Button。 */
+  /* H1 CTA 三階。七處第一刀主鈕綁 --cta-solid-*（別名 Landing／留言牆色票）；
+     soft／quiet 給次要與備援。--cta-warm-* 仍給貼紙／夜色，不是這三階。不建共用 React Button。 */
   --cta-solid-bg: var(--landing-brand-ink);
   --cta-solid-fg: var(--on-dark);
   --cta-soft-bg: var(--card);

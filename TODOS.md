@@ -25,7 +25,7 @@
 - **後續（本輪不做）**：`.scrim` 左下 0.52 可調淡。
 - **Hero 橫向 2.5D 改版（規格已定；Phase 1／2／3／3b／4 已落地，視差帶已是預設、3D 只剩回滾）**：等距 diorama → 橫向視差帶；規格見 [Hero 橫向 2.5D 視差帶](./docs/specs/HERO-PARALLAX-SPEC.md)。四個 Phase、阻擋項與跨角色眼位決策（A/B/C）見該文 §5／§6／§2.5。`design · L · 需先決 §2.5`
 - **後續：拿掉 CTA `nowrap`**：把 `LandingSegment.tsx` 的 `" →"` 半形空白改不斷行空白，箭頭才不會孤行；同時避開 <348px Dudu 遮箭頭、文字級 200% 被 `.panel` 裁尾。
-- **後續：勿靜默啟用 `playCta`**：`LandingSegment.tsx` 三元式會讓主 CTA 從 56px／`--fs-h2`／不透明墨板退回 44px／玻璃 `.subscribeCta`，契約測不會紅。啟用前須讓 `.subscribeCta` 脫離玻璃語言。
+- **後續：勿靜默啟用 `playCta`**：`LandingSegment.tsx` 三元式會讓主 CTA 從 56px／`--fs-h2`／不透明墨板退回 44px／`.subscribeCta`，契約測不會紅。`.subscribeCta` 已脫離玻璃；啟用前仍須處理字級／高度落差，且不得把分區主 CTA 換成橘 `.playCta`。
 
 ### 本輪已完成（2026-09-15）
 
@@ -35,6 +35,7 @@
 | feat(universe): 宇宙地圖 ≤480 直向改直式舞台 720×1400（美術審 H3，Plan `docs/plans/2026-09-15-universe-map-portrait-layout.md`，C-1 (b)） | `f712c5d9` |
 | polish(ui): 主鈕最小 alignment——7 處橘黃漸層改暖深墨＋白字（美術審 H1 第一刀） | `3f519047` |
 | polish(ui): CTA 三階 token＋既有次要／三次鈕改 soft／quiet（美術審 H1 第二刀） | `2ca12d7c` |
+| polish(ui): `.subscribeCta` 去玻璃＋七處主鈕綁 `--cta-solid-*` | 見本 commit |
 
 > 美術審其餘未動：M1–M8、L1–L7。Darwin 視覺基線由本機重錄（H1 第一刀後）。不建 React `Button`。
 

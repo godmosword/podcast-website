@@ -242,7 +242,7 @@
   }
 
   .subscribeCta:hover {
-    background: rgba(255, 255, 255, 0.24);
+    background: color-mix(in srgb, var(--landing-brand-ink) 8%, var(--on-dark));
   }
 
   .moreSkip:hover {
@@ -257,23 +257,20 @@
   min-height: 44px;
   padding: 10px 18px;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  background: rgba(255, 255, 255, 0.16);
-  color: #fff;
+  /* 壓在 hero 上：不透明白底＋暖深墨字。不可吃 --cta-soft-bg（夜間 --card 會翻成深靛）。 */
+  border: 1px solid color-mix(in srgb, var(--landing-brand-ink) 22%, transparent);
+  background: var(--on-dark);
+  color: var(--landing-brand-ink);
   font-weight: 700;
   font-size: var(--fs-control);
   text-decoration: none;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px) saturate(140%);
-  -webkit-backdrop-filter: blur(10px) saturate(140%);
-  transition: transform var(--motion-press), background var(--motion-press),
-    opacity var(--motion-press);
+  box-shadow: var(--elev-1);
+  transition: transform var(--motion-press), background var(--motion-press);
 }
 
 .subscribeCta:active {
   transform: scale(0.98);
-  opacity: 0.92;
-  background: rgba(255, 255, 255, 0.24);
+  background: color-mix(in srgb, var(--landing-brand-ink) 8%, var(--on-dark));
 }
 
 /* 播放直達鈕：全段最高權重 CTA（陽光橘、含 ▶） */
@@ -291,7 +288,7 @@
   font-size: var(--fs-body);
   text-decoration: none;
   border: 1px solid rgba(120, 60, 10, 0.2);
-  /* 分區 .cta 與本鈕皆為實心黏土鈕，加 --gloss 上緣高光；玻璃 subscribeCta 不加。 */
+  /* 分區 .cta 與本鈕皆為實心黏土鈕，加 --gloss 上緣高光；subscribeCta 是壓圖次鈕，不加 gloss。 */
   box-shadow: 0 8px 22px rgba(120, 70, 20, 0.26), var(--gloss);
   transition: transform var(--motion-press), opacity var(--motion-press),
     box-shadow var(--motion-press);
