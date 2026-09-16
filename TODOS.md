@@ -1703,6 +1703,8 @@ GHA 同步新集並 push 成功後，`scripts/sync-alert.ts notify-live` 會開 
 
 **缺口已補（本機繞過 Actions 漏通知）：** 本機 `npm run sync:apple` push 後另跑 `npm run sync:notify`（同一 `notify-live` 路徑，讀 `.cache/sync-run-report.json` 開／去重 Issue）；可選 `npm run sync:notify:reconcile` 補漏（≤3 筆、跳過已存在 open/closed 同標題單）；`SYNC_ALERT_DRY_RUN=1` 預覽、`--strict` 讓本機失敗可非 0；`dryRun`／逾 24h stale report 拒絕開單。GHA workflow 未變動。詳見 README「同步通知」。`9586153`
 
+**同一集不再連開兩張：** 看門狗在第一次 sync 等待窗內（預設 8h，yaml `STALE_HOURS=3` 不提早開單）靜默；若已開 `sync-stale-rss`，上站後 `notify-live` 把**同一張**改成待生圖 checklist，不另開第二張、不加第二次 @mention。workflow YAML 未改。
+
 ### ~~同步 commit 訊息帶生圖提示~~　`P2 · S · 無`　〔eng+ops〕 ✅
 GHA commit body 已由 `scripts/post-sync-notify.ts` 產生，列出本輪新 slug、字幕狀態、`npm run illustrate -- ep-N` 與完整生圖 checklist。`95ba69a`
 

@@ -71,6 +71,13 @@ function makeDeps(
       if (args[0] === "issue" && args[1] === "create") {
         return responses["__issue_create__"] ?? "https://github.com/example/repo/issues/new";
       }
+      if (args[0] === "issue" && args[1] === "list") return "[]";
+      if (
+        args[0] === "issue" &&
+        (args[1] === "edit" || args[1] === "comment" || args[1] === "close")
+      ) {
+        return "";
+      }
       // gh label create 等未列出的呼叫：視為成功
       if (args[0] === "label" && args[1] === "create") return "";
       throw new Error(`unexpected gh call: ${key}`);
@@ -168,6 +175,79 @@ describe("sync-alert notify-live", () => {
       "illustration",
     ]);
     expect(calls.some((args) => args[0] === "issue" && args[1] === "create")).toBe(false);
+  });
+
+  it("promotes an open stale-rss issue into the illustration checklist instead of opening a second ticket", () => {
+    const { deps, calls, logs } = makeDeps({
+      "issue list --search in:title ep-18 待生圖 --state open --json number,title,url,labels --limit 20":
+        "[]",
+      "issue list --state open --label sync-alert --label sync-stale-rss --json number,title,url,labels --limit 1":
+        JSON.stringify([
+          {
+            number: 166,
+            title: "⚠️ RSS 有新集未上站",
+            url: "https://github.com/example/repo/issues/166",
+            labels: [{ name: "sync-alert" }, { name: "sync-stale-rss" }],
+          },
+        ]),
+    });
+    deps.env = { SYNC_ISSUE_MENTIONS: "@someone" };
+
+    const result = notifyLiveFromReport(sampleReport, deps);
+
+    expect(calls.some((args) => args[0] === "issue" && args[1] === "create")).toBe(
+      false,
+    );
+    const editCall = calls.find(
+      (args) => args[0] === "issue" && args[1] === "edit" && args[2] === "166",
+    );
+    expect(editCall).toBeDefined();
+    expect(editCall).toContain("[illustrate] 新集待生圖：ep-18");
+    expect(editCall).toContain("illustration");
+    expect(editCall).toContain("sync-stale-rss");
+    expect(editCall).toContain("sync-alert");
+    const body = editCall![editCall!.indexOf("--body") + 1];
+    expect(body).toContain("## 新集待生圖：ep-18");
+    expect(body).not.toContain("@someone");
+    expect(calls).toContainEqual([
+      "issue",
+      "comment",
+      "166",
+      "--body",
+      "✅ 站上已同步本集，**本單改為待生圖 checklist**（不再另開第二張 Issue）。",
+    ]);
+    expect(result.ok).toBe(1);
+    expect(logs.some((line) => line.includes("由 stale #166 升級"))).toBe(true);
+  });
+
+  it("catalog-only reconcile 不把 RSS stale 單改成待生圖", () => {
+    const { deps, calls } = makeDeps({
+      "issue list --search in:title ep-18 待生圖 --state open --json number,title,url,labels --limit 20":
+        "[]",
+      "issue list --state open --label sync-alert --label sync-stale-rss --json number,title,url,labels --limit 1":
+        JSON.stringify([
+          {
+            number: 166,
+            title: "⚠️ RSS 有新集未上站",
+            url: "https://github.com/example/repo/issues/166",
+            labels: [{ name: "sync-alert" }, { name: "sync-stale-rss" }],
+          },
+        ]),
+    });
+
+    notifyLiveFromReport(sampleReport, deps, { catalogOnly: true });
+
+    expect(calls.some((args) => args[0] === "issue" && args[1] === "create")).toBe(
+      true,
+    );
+    expect(
+      calls.some(
+        (args) =>
+          args[0] === "issue" &&
+          args[1] === "edit" &&
+          args.includes("--remove-label"),
+      ),
+    ).toBe(false);
   });
 
   it("creates an illustration issue when no exact title match is open", () => {

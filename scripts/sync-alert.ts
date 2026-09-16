@@ -2,9 +2,10 @@
 /**
  * 同步告警（只用 GitHub Issue）。集中 Issue 互動，供：
  *   - sync workflow：失敗即 `failure` 開／補 sync-job-failure Issue；
- *     push 後 `notify-live`（新集上站＋開 illustrate Issue）；成功 resolve 舊失敗單。
+ *     push 後 `notify-live`（新集上站＋開／升級 illustrate Issue）；成功 resolve 舊失敗單。
  *   - 本機：`npm run sync:notify`（push 後讀 `.cache/sync-run-report.json` 開 illustrate Issue）
  *   - watchdog：以 import 方式呼叫 openOrCommentIssue / resolveIssue。
+ *     新集等待第一次 sync 時不開 stale；若已開 stale，notify-live 把同一張改成待生圖，不另開第二張。
  *
  * 紅線：失敗 Issue 只做去重告警與 run 連結，詳細錯誤仍以 Actions logs 為準；
  * Issue 另保留人工動作：待生圖與 RSS stale。
@@ -137,10 +138,10 @@ function mentionPreamble(env: NodeJS.ProcessEnv = process.env): string {
   return mentions ? `${mentions}\n\n` : "";
 }
 
-function findOpenIssueNumber(
+function findOpenAlertIssue(
   kind: AlertKind,
   deps: SyncAlertDeps = {},
-): number | null {
+): GhIssue | null {
   try {
     const out = callGh([
       "issue",
@@ -152,13 +153,78 @@ function findOpenIssueNumber(
       "--label",
       kind,
       "--json",
-      "number",
+      "number,title,url,labels",
       "--limit",
       "1",
     ], deps);
-    const parsed = JSON.parse(out || "[]") as Array<{ number?: number }>;
-    return parsed[0]?.number ?? null;
+    const parsed = JSON.parse(out || "[]") as GhIssue[];
+    return parsed[0] ?? null;
   } catch {
+    return null;
+  }
+}
+
+function findOpenIssueNumber(
+  kind: AlertKind,
+  deps: SyncAlertDeps = {},
+): number | null {
+  return findOpenAlertIssue(kind, deps)?.number ?? null;
+}
+
+function alertIssueUrl(issue: GhIssue, env: NodeJS.ProcessEnv): string {
+  if (issue.url) return issue.url;
+  const repo = env.GITHUB_REPOSITORY?.trim();
+  if (repo && issue.number != null) {
+    return `https://github.com/${repo}/issues/${issue.number}`;
+  }
+  return issue.number != null ? `#${issue.number}` : "";
+}
+
+/** 把已開的 RSS stale 單改成待生圖 checklist，避免同一集連開兩張 Issue。 */
+function promoteStaleIssueToIllustration(
+  issue: GhIssue,
+  title: string,
+  body: string,
+  deps: SyncAlertDeps,
+): string | null {
+  if (issue.number == null) return null;
+  const env = deps.env ?? process.env;
+  try {
+    ensureLabel("illustration", "0e8a16", "新集待生圖", deps);
+    callGh(
+      [
+        "issue",
+        "edit",
+        String(issue.number),
+        "--title",
+        title,
+        "--body",
+        body,
+        "--add-label",
+        "illustration",
+        "--remove-label",
+        "sync-stale-rss",
+        "--remove-label",
+        BASE_LABEL,
+      ],
+      deps,
+    );
+    callGh(
+      [
+        "issue",
+        "comment",
+        String(issue.number),
+        "--body",
+        "✅ 站上已同步本集，**本單改為待生圖 checklist**（不再另開第二張 Issue）。",
+      ],
+      deps,
+    );
+    return alertIssueUrl(issue, env);
+  } catch (err) {
+    warn(
+      deps,
+      `stale→illustrate 升級失敗（改開新單）：${(err as Error).message}`,
+    );
     return null;
   }
 }
@@ -476,6 +542,33 @@ export function notifyLiveFromReport(
         log(deps, `NOTIFY_SKIPPED ${slug}（競態：Issue 已存在）`);
         result.skipped += 1;
         continue;
+      }
+
+      // 真實 sync 上站後：把看門狗的 stale 單改成待生圖，不另開第二張。
+      // catalog-only reconcile 不升級（stale 代表 RSS 還沒上站，跟補漏 catalog 不是同一件事）。
+      if (!options.catalogOnly) {
+        const stale = findOpenAlertIssue("sync-stale-rss", deps);
+        if (stale) {
+          const promotedBody = buildIssueBody(slug, report, {
+            trigger,
+            catalogOnly: options.catalogOnly,
+            mentions: "",
+          });
+          const promotedUrl = promoteStaleIssueToIllustration(
+            stale,
+            title,
+            promotedBody,
+            deps,
+          );
+          if (promotedUrl) {
+            log(
+              deps,
+              `NOTIFY_OK ${slug} → ${promotedUrl}（由 stale #${stale.number} 升級）`,
+            );
+            result.ok += 1;
+            continue;
+          }
+        }
       }
 
       const body = buildIssueBody(slug, report, {

@@ -150,5 +150,6 @@ GHA `sync-apple-podcast.yml` 在 `npm run sync:apple` 後**一律**跑 `npm run 
 - [SUBTITLE-PROOFREAD.md](./SUBTITLE-PROOFREAD.md) — Whisper 草稿校對清單與 `--mark` 閘門
 - [AGENT-WORKFLOW.md](./AGENT-WORKFLOW.md) — Meta 編排（`/agent-plan`、`/agent-action`）
 - [AGENT-DOMAIN.md](./AGENT-DOMAIN.md) — 本專案 Bootstrap、紅線、驗證矩陣
-- [README — illustrate](./README.md#每集劇情插圖自動生成npm-run-illustrate)
-- [TODOS — Phase 3 生圖管線](./TODOS.md)
+- [README — illustrate](../README.md#每集劇情插圖自動生成npm-run-illustrate)
+- [README — 同步通知](../README.md#同步通知) — 新集只發一張待生圖 Issue（stale 不會先另開一張）
+- [TODOS — Phase 3 生圖管線](../TODOS.md)

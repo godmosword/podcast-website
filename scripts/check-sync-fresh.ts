@@ -4,13 +4,14 @@
  * 不跑 whisper／build，秒級完成。
  *
  * 流程：
- *   1. 若 sync workflow 正在跑／排隊 → 靜默（避免長 job 期間誤報）。
- *   2. lookupFeedUrl → fetch → parseRssEpisodes（與 sync 同一 parser）。
- *   3. 以 sync 相同對照（isRssEpisodeOnSite）判斷最新集是否已上站。
- *   4. 未上站且 pubDate 有效且距今 > STALE_HOURS → 開/補 sync-stale-rss Issue；
- *      已上站 → 關閉該 Issue。pubDate 缺失／未來／invalid → 不告警。
+ *   1. lookupFeedUrl → fetch → parseRssEpisodes（與 sync 同一 parser）。
+ *   2. 以 sync 相同對照（isRssEpisodeOnSite）判斷最新集是否已上站。
+ *   3. 已上站 → 關閉 sync-stale-rss Issue。
+ *   4. 未上站：sync 正在跑、或仍在等待第一次 sync／合入（WAIT_FOR_SYNC_HOURS，預設至少 8h）
+ *      → 靜默，避免與之後的「待生圖」Issue 連開兩張。
+ *      超過等待窗才開／補 sync-stale-rss。
  *
- * 環境變數：STALE_HOURS（預設 3）、SYNC_ALERT_DRY_RUN=1。
+ * 環境變數：STALE_HOURS（yaml 仍可設 3，僅作下限）、WAIT_FOR_SYNC_HOURS、SYNC_ALERT_DRY_RUN=1。
  */
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
@@ -23,10 +24,17 @@ import {
   type CatalogEntry,
 } from "./lib/episode-match";
 import { openOrCommentIssue, resolveIssue } from "./sync-alert";
+import {
+  decideStaleRssAlert,
+  isSyncRunActive,
+  runsAfterPubDate,
+  waitForFirstSyncHoursFromEnv,
+  type SyncWorkflowRun,
+} from "./lib/sync-stale-policy";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SYNC_WORKFLOW = "sync-apple-podcast.yml";
-const STALE_HOURS = Number(process.env.STALE_HOURS ?? "3");
+const WAIT_FOR_SYNC_HOURS = waitForFirstSyncHoursFromEnv();
 
 type SyncState = { seenGuids?: string[] };
 
@@ -38,8 +46,7 @@ function readJson<T>(file: string, fallback: T): T {
   }
 }
 
-/** sync workflow 是否正在跑／排隊（避免長轉錄期間誤報 stale）。 */
-function syncIsActive(): boolean {
+function listSyncRuns(): SyncWorkflowRun[] {
   try {
     const out = execFileSync(
       "gh",
@@ -49,19 +56,15 @@ function syncIsActive(): boolean {
         "--workflow",
         SYNC_WORKFLOW,
         "--json",
-        "status",
+        "status,conclusion,createdAt,startedAt",
         "--limit",
         "10",
       ],
       { encoding: "utf8" },
     );
-    const runs = JSON.parse(out || "[]") as Array<{ status?: string }>;
-    return runs.some(
-      (r) => r.status === "in_progress" || r.status === "queued",
-    );
+    return JSON.parse(out || "[]") as SyncWorkflowRun[];
   } catch {
-    // 查不到狀態時，保守起見不抑制（寧可多查一次，也以 STALE_HOURS 緩衝避免誤報）
-    return false;
+    return [];
   }
 }
 
@@ -73,8 +76,8 @@ function ageHours(pubDate: string): number | null {
   return hours;
 }
 
-/** RSS 中尚未上站、且 pubDate 夠舊的最新一集（若有）。 */
-function findStaleEpisode(
+/** RSS 中尚未上站、且有有效 pubDate 的最新一集（若有）。 */
+function findMissingEpisode(
   rss: RssEpisode[],
   ctx: Parameters<typeof isRssEpisodeOnSite>[1],
 ): { item: RssEpisode; hours: number } | null {
@@ -82,17 +85,11 @@ function findStaleEpisode(
     .filter((item) => !isRssEpisodeOnSite(item, ctx))
     .map((item) => ({ item, hours: ageHours(item.pubDate) }))
     .filter((x): x is { item: RssEpisode; hours: number } => x.hours != null)
-    .filter((x) => x.hours > STALE_HOURS)
     .sort((a, b) => b.item.pubDate.localeCompare(a.item.pubDate));
   return missing[0] ?? null;
 }
 
 async function main(): Promise<void> {
-  if (syncIsActive()) {
-    console.log("sync workflow 正在跑／排隊，看門狗靜默。");
-    return;
-  }
-
   const feedUrl = await lookupFeedUrl();
   const res = await fetch(feedUrl, { signal: AbortSignal.timeout(60_000) });
   if (!res.ok) throw new Error(`RSS fetch failed: ${res.status}`);
@@ -107,9 +104,9 @@ async function main(): Promise<void> {
     slugs: new Set(catalog.map((s) => s.slug ?? "").filter(Boolean)),
   };
 
-  const stale = findStaleEpisode(rss, ctx);
-  if (!stale) {
-    console.log("RSS 最新集皆已上站（或在緩衝期內）。");
+  const missing = findMissingEpisode(rss, ctx);
+  if (!missing) {
+    console.log("RSS 最新集皆已上站。");
     resolveIssue({
       kind: "sync-stale-rss",
       comment: "✅ RSS 最新一集已確認上站，看門狗解除告警。",
@@ -117,7 +114,22 @@ async function main(): Promise<void> {
     return;
   }
 
-  const { item, hours } = stale;
+  const runs = listSyncRuns();
+  const syncActive = runs.some(isSyncRunActive);
+  const decision = decideStaleRssAlert({
+    onSite: false,
+    hours: missing.hours,
+    syncActive,
+    postPublishRuns: runsAfterPubDate(runs, missing.item.pubDate),
+    waitForFirstSyncHours: WAIT_FOR_SYNC_HOURS,
+  });
+
+  if (decision.action === "silent") {
+    console.log(decision.reason);
+    return;
+  }
+
+  const { item, hours } = missing;
   console.warn(`STALE：「${item.title}」距今 ${hours.toFixed(1)}h 仍未上站`);
   openOrCommentIssue({
     kind: "sync-stale-rss",
@@ -131,6 +143,8 @@ async function main(): Promise<void> {
       `- feed：${feedUrl}`,
       "",
       `請檢查 sync-apple-podcast workflow 最近的 run 是否失敗。`,
+      "",
+      `> 若稍後同步成功，\`notify-live\` 會把**本單**改成待生圖 checklist，不會另開第二張 Issue。`,
     ].join("\n"),
   });
 }

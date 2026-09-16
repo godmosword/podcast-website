@@ -426,6 +426,15 @@ describe("sync workflow contract", () => {
     expect(yaml).toContain("scripts/check-sync-fresh.ts");
   });
 
+  it("看門狗以政策決定 stale，不因 yaml STALE_HOURS=3 在第一次 sync 前開單", () => {
+    const src = readFileSync(join(ROOT, "scripts/check-sync-fresh.ts"), "utf8");
+    const yaml = readWorkflow("sync-watchdog.yml");
+
+    expect(src).toContain("decideStaleRssAlert");
+    expect(src).toContain("waitForFirstSyncHoursFromEnv");
+    expect(yaml).toContain('STALE_HOURS: "3"');
+  });
+
   it("notify-live 必須接受 report.gitHead 為 HEAD 祖先（GHA 先寫 report 再 commit）", () => {
     const alertSrc = readFileSync(join(ROOT, "scripts/sync-alert.ts"), "utf8");
     const reportSrc = readFileSync(join(ROOT, "scripts/lib/sync-report.ts"), "utf8");

@@ -229,10 +229,11 @@ npm run sync:apple                # 實際同步
 
 | 情況 | 行為 | Issue label |
 |------|------|-------------|
-| GHA 同步新集並 push 成功 | 自動開「待生圖」Issue | `illustration` |
-| **本機** `npm run sync:apple` 繞過 Actions 直接 push | **不會**自動開單，push 後須另跑 `npm run sync:notify`（見下） | `illustration` |
-| RSS 有新集但逾時未上站 | 看門狗開告警 Issue | `sync-alert` |
-| 單次 CI 失敗 | 細節在 Actions logs，不開 Issue | — |
+| GHA 同步新集並 push 成功 | 開「待生圖」Issue；若看門狗已開 RSS stale，**改那張單**、不另開第二張 | `illustration` |
+| **本機** `npm run sync:apple` 繞過 Actions 直接 push | **不會**自動開單，push 後須另跑 `npm run sync:notify`（同上，會升級已開的 stale） | `illustration` |
+| RSS 有新集、仍在等第一次 sync／合入（預設 ≥8h；yaml `STALE_HOURS=3` 不提早開單） | 看門狗靜默 | — |
+| RSS 逾時仍未上站（超過等待窗，且 sync 沒在跑） | 看門狗開告警；上站後由 `notify-live` 改成待生圖 | `sync-alert` + `sync-stale-rss` |
+| 單次 CI 失敗 | 細節在 Actions logs；workflow 失敗另開 `sync-job-failure`（與待生圖分開） | `sync-job-failure` |
 
 **本機務必先 `git push` 成功，再跑通知**（走與 GHA 相同的 `notify-live` 路徑，去重不重開）。  
 Issue 文案會寫「MVP 已上線」——若尚未 push 就 `sync:notify`，會開出站上還沒有的假「已上站」單。

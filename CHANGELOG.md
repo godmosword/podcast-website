@@ -33,6 +33,7 @@
 
 ### Changed
 
+- **同步通知整成一次：** 新集預設只發「待生圖」Issue。看門狗在第一次 sync／合入等待窗內（預設 8h，即使 yaml `STALE_HOURS=3`）不開 RSS stale。若已開 stale，`notify-live` 把同一張改成 checklist（不加第二次 @mention），不再另開第二張。`sync-job-failure` 仍獨立。**未改** Apple sync／watchdog workflow YAML。
 - **subscribeCta 去玻璃＋七處主鈕綁 `--cta-solid-*`（美術審 H1）**：未啟用的 Landing `.subscribeCta` 改不透明 `--on-dark` 底板＋`--landing-brand-ink` 字、細線、`--elev-1`，拿掉 backdrop-filter／text-shadow／rgba 玻璃；壓在 hero 上不吃夜間會翻色的 `--cta-soft-bg`。熱點主鈕、家長閘門送出、親子景點導航／詳情主行動、家長工具卡、遊戲載入開始／重試、結算「下一關」改綁 `--cta-solid-bg`／`--cta-solid-fg`（計算值不變）。不啟用 `playCta`、不拿 nowrap；Landing `.cta`、留言送出、`--cta-warm-*`、`PlayButton` 未改。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **CTA 三階 soft／quiet（美術審 H1 第二刀）**：新增 `--cta-solid-*`／`--cta-soft-*`／`--cta-quiet-fg`。結算再玩一次、遊戲載入次鈕、景點 compact 連結、場館次行動、錯誤頁次鈕改卡片底＋深墨字＋細線＋`--elev-1`；mailto、熱點回島、結算弱出口、閘門再試提示改透明底＋底線＋`--accent-ink`。不建 React `Button`；`--cta-warm-*`、Landing、`PlayButton`、`GameChrome`／`BlockDropView`、404 主鈕未改。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **主鈕最小 alignment（美術審 H1 第一刀）**：熱點主鈕、家長閘門送出、親子景點導航／詳情主行動、家長工具卡、遊戲載入開始／重試、結算「下一關」改 `--landing-brand-ink` 底板＋`--on-dark` 白字，對齊 Landing／留言牆。圓角、高度、文案、DOM、hover 位移不動；`--cta-warm-*` token、貼紙、Landing、`PlayButton`、單集色卡未改。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
