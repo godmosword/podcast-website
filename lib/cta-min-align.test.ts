@@ -96,7 +96,127 @@ describe("主鈕最小 alignment（H1 第一刀）", () => {
       readCss("components", "games", "GameEndStation.module.css"),
       "replayBtn",
     );
-    expect(replay).toMatch(/--c-lilac/);
+    expect(replay).toMatch(/background:\s*var\(--cta-soft-bg\)/);
+    expect(replay).toMatch(/color:\s*var\(--cta-soft-fg\)/);
     expect(replay).not.toMatch(/--landing-brand-ink/);
+    expect(replay).not.toMatch(/--c-lilac/);
+    expect(replay).not.toMatch(/--cta-warm-from/);
+  });
+});
+
+const SOFT = [
+  {
+    file: "components/games/GameEndStation.module.css",
+    className: "replayBtn",
+  },
+  {
+    file: "components/games/GameLoadOverlay.module.css",
+    className: "secondaryBtn",
+  },
+  {
+    file: "components/for-parents/PlayMap.module.css",
+    className: "placeLink",
+  },
+  {
+    file: "app/for-parents/play-map/[placeId]/page.module.css",
+    className: "secondaryAction",
+  },
+  {
+    file: "app/not-found.module.css",
+    className: "ctaSecondary",
+  },
+] as const;
+
+const QUIET = [
+  {
+    file: "components/feedback/FeedbackForm.module.css",
+    className: "mailtoButton",
+  },
+  {
+    file: "components/universe/HotspotModal.module.css",
+    className: "backBtn",
+  },
+  {
+    file: "components/games/GameEndStation.module.css",
+    className: "nextSoft",
+  },
+  {
+    file: "components/games/GameEndStation.module.css",
+    className: "hubLink",
+  },
+] as const;
+
+describe("CTA 三階（H1 第二刀 soft／quiet）", () => {
+  it("globals 有 solid／soft／quiet token，且不改 --cta-warm 字面值", () => {
+    const globals = readCss("app", "globals.css");
+    expect(globals).toMatch(/--cta-solid-bg:\s*var\(--landing-brand-ink\)/);
+    expect(globals).toMatch(/--cta-solid-fg:\s*var\(--on-dark\)/);
+    expect(globals).toMatch(/--cta-soft-bg:\s*var\(--card\)/);
+    expect(globals).toMatch(/--cta-soft-fg:\s*var\(--ink\)/);
+    expect(globals).toMatch(
+      /--cta-soft-line:\s*color-mix\(in srgb, var\(--ink\) 22%, transparent\)/,
+    );
+    expect(globals).toMatch(/--cta-quiet-fg:\s*var\(--accent-ink\)/);
+    expect(globals).toMatch(/--cta-warm-from:\s*#ffe889/);
+    expect(globals).toMatch(/--cta-warm-to:\s*#ffbd6f/);
+    expect(globals).toMatch(/--cta-warm-fg:\s*#614018/);
+  });
+
+  it("次行動吃 soft：卡片底、深墨字、細線、elev-1，無玻璃／橘黃", () => {
+    for (const { file, className } of SOFT) {
+      const css = readCss(...file.split("/"));
+      const block = paintRule(css, className);
+      expect(block, file).toMatch(/background:\s*var\(--cta-soft-bg\)/);
+      expect(block, file).toMatch(/color:\s*var\(--cta-soft-fg\)/);
+      expect(block, file).toMatch(/border:[^;]*var\(--cta-soft-line\)/);
+      expect(block, file).toMatch(/box-shadow:\s*var\(--elev-1\)/);
+      expect(block, file).not.toMatch(/backdrop-filter/);
+      expect(block, file).not.toMatch(/--cta-warm-from/);
+      expect(block, file).not.toMatch(/--c-lilac/);
+    }
+  });
+
+  it("三次／備援出口吃 quiet：透明底、底線、quiet 字色", () => {
+    for (const { file, className } of QUIET) {
+      const css = readCss(...file.split("/"));
+      const block = paintRule(css, className);
+      expect(block, file).toMatch(/background:\s*transparent/);
+      expect(block, file).toMatch(/color:\s*var\(--cta-quiet-fg\)/);
+      expect(block, file).toMatch(/text-decoration:\s*underline/);
+      expect(block, file).toMatch(/min-height:\s*(44|48)px/);
+    }
+
+    const retry = readCss(
+      "components",
+      "for-parents",
+      "ParentGate.module.css",
+    );
+    expect(retry).toMatch(/\.retry\s*\{[\s\S]*?color:\s*var\(--cta-quiet-fg\)/);
+  });
+
+  it("full sheet 次要出口維持 quiet 文字連結，不跟 compact 軟鈕同底板", () => {
+    const css = readCss("components", "for-parents", "PlayMap.module.css");
+    expect(css).toMatch(
+      /\.sheetSecondaryActions \.placeLink[\s\S]*?background:\s*transparent/,
+    );
+    expect(css).toMatch(
+      /\.sheetSecondaryActions \.placeLink[\s\S]*?color:\s*var\(--cta-quiet-fg\)/,
+    );
+  });
+
+  it("不碰遊戲內 Chrome／方塊次鈕、也不把 404 主鈕改 soft", () => {
+    const chrome = paintRule(
+      readCss("components", "games", "GameChrome.module.css"),
+      "secondaryBtn",
+    );
+    expect(chrome).toMatch(/background:\s*color-mix/);
+    expect(chrome).not.toMatch(/--cta-soft-/);
+
+    const notFoundPrimary = paintRule(
+      readCss("app", "not-found.module.css"),
+      "cta",
+    );
+    expect(notFoundPrimary).not.toMatch(/--cta-soft-/);
+    expect(notFoundPrimary).toMatch(/background:\s*var\(--card\)/);
   });
 });

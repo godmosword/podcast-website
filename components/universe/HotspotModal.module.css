@@ -45,7 +45,7 @@
   border: none;
   border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--ink-soft);
+  color: var(--cta-quiet-fg);
   font-size: var(--fs-control);
   font-weight: 700;
   text-decoration: underline;

@@ -32,6 +32,7 @@
 
 ### Changed
 
+- **CTA 三階 soft／quiet（美術審 H1 第二刀）**：新增 `--cta-solid-*`／`--cta-soft-*`／`--cta-quiet-fg`。結算再玩一次、遊戲載入次鈕、景點 compact 連結、場館次行動、錯誤頁次鈕改卡片底＋深墨字＋細線＋`--elev-1`；mailto、熱點回島、結算弱出口、閘門再試提示改透明底＋底線＋`--accent-ink`。不建 React `Button`；`--cta-warm-*`、Landing、`PlayButton`、`GameChrome`／`BlockDropView`、404 主鈕未改。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **主鈕最小 alignment（美術審 H1 第一刀）**：熱點主鈕、家長閘門送出、親子景點導航／詳情主行動、家長工具卡、遊戲載入開始／重試、結算「下一關」改 `--landing-brand-ink` 底板＋`--on-dark` 白字，對齊 Landing／留言牆。圓角、高度、文案、DOM、hover 位移不動；`--cta-warm-*` token、貼紙、Landing、`PlayButton`、單集色卡未改。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **`/feedback` hero 改卡丁車賽道實拍、標題改「留言給馬米跟Bonbon」**：邀請改兩行「告訴我們…」；alt／OG 描述同步。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、表單契約與法律頁政策版本。
 - **Landing 底列把分區 CTA、換段圓鈕與嘟嘟收成同一排**：圓鈕不再浮在中央偏上；左群組是 CTA 加圓鈕、右欄對齊小紅車，三者齊底、互不重疊。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。

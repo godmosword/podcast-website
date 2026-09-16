@@ -1213,6 +1213,9 @@
   padding: 10px 0;
   border: none;
   border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--cta-quiet-fg);
   font-size: var(--fs-control);
   font-weight: 600;
   text-decoration: underline;
@@ -1255,9 +1258,10 @@
 .placeLink,
 .officialLink,
 .moreButton {
-  border: 1px solid var(--warm-accent);
-  color: var(--accent-ink);
-  background: transparent;
+  border: 1px solid var(--cta-soft-line);
+  color: var(--cta-soft-fg);
+  background: var(--cta-soft-bg);
+  box-shadow: var(--elev-1);
 }
 
 .navButton:active,

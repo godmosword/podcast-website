@@ -33,9 +33,10 @@
 |----|------|
 | fix(ui): `/stories`、`/feedback` 桌機暖色底改全出血（美術審 H2） | `7d6f4e31` |
 | feat(universe): 宇宙地圖 ≤480 直向改直式舞台 720×1400（美術審 H3，Plan `docs/plans/2026-09-15-universe-map-portrait-layout.md`，C-1 (b)） | `f712c5d9` |
-| polish(ui): 主鈕最小 alignment——7 處橘黃漸層改暖深墨＋白字（美術審 H1 第一刀） | 見本 commit |
+| polish(ui): 主鈕最小 alignment——7 處橘黃漸層改暖深墨＋白字（美術審 H1 第一刀） | `3f519047` |
+| polish(ui): CTA 三階 token＋既有次要／三次鈕改 soft／quiet（美術審 H1 第二刀） | 見本 commit |
 
-> 美術審其餘未動：H1 三階 CTA 語彙（token／soft／quiet）、M1–M8、L1–L7。本輪只做主鈕底／字色對齊，不建三階。
+> 美術審其餘未動：M1–M8、L1–L7。Darwin 視覺基線由本機重錄（H1 第一刀後）。不建 React `Button`。
 
 ### 本輪已完成（2026-09-10）
 

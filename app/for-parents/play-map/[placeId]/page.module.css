@@ -170,9 +170,10 @@
 }
 
 .secondaryAction {
-  border: 1px solid var(--warm-accent);
-  background: var(--warm-surface);
-  color: var(--accent-ink);
+  border: 1px solid var(--cta-soft-line);
+  background: var(--cta-soft-bg);
+  color: var(--cta-soft-fg);
+  box-shadow: var(--elev-1);
 }
 
 .primaryAction:active,

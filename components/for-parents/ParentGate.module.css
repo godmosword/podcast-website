@@ -78,7 +78,7 @@
   margin: 0;
   font-size: var(--fs-control);
   font-weight: 700;
-  color: var(--accent-ink);
+  color: var(--cta-quiet-fg);
 }
 
 .submit {

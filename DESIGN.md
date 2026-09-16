@@ -76,6 +76,14 @@ Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範
 | `--on-dark` | `#ffffff` | 深色／品牌底上的文字與圖示 |
 | `--status-error` | `#b42318`（夜間 `#ffb4ab`） | 錯誤訊息 |
 
+CTA 三階（美術審 H1；token 在 `app/globals.css`）。不建共用 React `Button`。`--cta-warm-*` 仍給貼紙／夜色，不是這三階。Landing 分區 CTA、`PlayButton`、遊戲內 `GameChrome`／`BlockDropView` 不吃這組。
+
+| 階 | Token | 長相 | 用途 |
+|----|-------|------|------|
+| solid | `--cta-solid-bg`／`--cta-solid-fg` | 暖深墨底＋白字（別名 `--landing-brand-ink`／`--on-dark`） | 頁面唯一主行動 |
+| soft | `--cta-soft-bg`／`--cta-soft-fg`／`--cta-soft-line` | 卡片底、深墨字、細線、`--elev-1`；無玻璃／橘黃 | 次行動 |
+| quiet | `--cta-quiet-fg` | 透明底、底線、`--accent-ink`、觸控 ≥44px | 三次／備援出口 |
+
 多彩粉嫩 accent（裝飾、chip、邊框輪播）：
 
 | Token | 值 |

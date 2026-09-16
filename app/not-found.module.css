@@ -51,10 +51,11 @@
 }
 
 .ctaSecondary {
-  border-width: 1.5px;
-  box-shadow: none;
+  background: var(--cta-soft-bg);
+  color: var(--cta-soft-fg);
+  border: 1px solid var(--cta-soft-line);
+  box-shadow: var(--elev-1);
   font-weight: 600;
-  color: var(--ink-soft);
 }
 
 .cta:active {
@@ -67,7 +68,6 @@
   }
 
   .ctaSecondary:hover {
-    box-shadow: none;
-    color: var(--ink);
+    color: var(--cta-soft-fg);
   }
 }

@@ -82,9 +82,10 @@
 }
 
 .replayBtn {
-  color: var(--ink, #34302b);
-  background: color-mix(in srgb, var(--card) 88%, var(--c-lilac, #c5b3e6));
-  box-shadow: 0 3px 0 color-mix(in srgb, var(--ink, #34302b) 12%, transparent);
+  color: var(--cta-soft-fg);
+  background: var(--cta-soft-bg);
+  border: 1px solid var(--cta-soft-line);
+  box-shadow: var(--elev-1);
 }
 
 .nextBtn {
@@ -114,15 +115,17 @@
   align-items: center;
   min-height: 44px;
   padding-inline: var(--space-3);
-  color: var(--ink-soft);
+  border: none;
+  background: transparent;
+  color: var(--cta-quiet-fg);
   font-size: var(--fs-control);
   font-weight: 800;
-  text-decoration: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .nextSoft:hover {
   color: var(--ink, #34302b);
-  text-decoration: underline;
 }
 
 .hubLink {
@@ -131,7 +134,9 @@
   min-height: 44px;
   margin-top: 2px;
   padding-inline: var(--space-3);
-  color: var(--ink-soft);
+  border: none;
+  background: transparent;
+  color: var(--cta-quiet-fg);
   font-size: var(--fs-label);
   font-weight: 700;
   text-decoration: underline;

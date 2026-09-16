@@ -133,15 +133,16 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  border: 2px solid color-mix(in srgb, var(--ink, #34302b) 22%, transparent);
+  border: 1px solid var(--cta-soft-line);
   min-height: 48px;
   min-width: 120px;
-  background: transparent;
-  color: var(--ink, #34302b);
+  background: var(--cta-soft-bg);
+  color: var(--cta-soft-fg);
   font-weight: 800;
   font-size: var(--fs-control);
   padding: 8px 22px;
   border-radius: var(--radius-pill);
+  box-shadow: var(--elev-1);
   cursor: pointer;
 }
 
