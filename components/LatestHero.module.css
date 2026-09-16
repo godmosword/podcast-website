@@ -97,6 +97,10 @@
   border-radius: var(--radius-pill);
   font-size: var(--fs-control);
   font-weight: 700;
+  /* H1 三階 solid：與 Landing／留言送出同一顆主鈕（計算值 --landing-brand-ink／--on-dark）。 */
+  background: var(--cta-solid-bg);
+  color: var(--cta-solid-fg);
+  box-shadow: var(--elev-1);
 }
 
 @media (max-width: 480px) {

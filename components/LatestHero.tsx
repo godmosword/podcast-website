@@ -43,13 +43,9 @@ export default function LatestHero({ story }: LatestHeroProps) {
         {story.summary && (
           <span className={styles.summary}>{story.summary}</span>
         )}
-        {/* 同 StoryCard：story.color 僅供淡底，字色不覆寫以保 AA 對比。 */}
-        <span
-          className={styles.cta}
-          style={{ backgroundColor: `${story.color}22` }}
-        >
-          立即看故事 →
-        </span>
+        {/* 美術審 H1 收尾：/stories 的唯一主行動，改吃 --cta-solid-*（暖深墨＋白字）；
+            story.color 淡底留給列表 StoryCard 的 chip，主鈕不再是最弱的一顆。 */}
+        <span className={styles.cta}>立即看故事 →</span>
       </div>
     </Link>
   );

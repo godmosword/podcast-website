@@ -65,6 +65,11 @@ const PRIMARY = [
     file: "components/games/GameEndStation.module.css",
     className: "nextBtn",
   },
+  // H1 收尾（2026-09-16）：/stories 唯一主行動，原本是 story.color 22% 淡紫 pill
+  {
+    file: "components/LatestHero.module.css",
+    className: "cta",
+  },
 ] as const;
 
 describe("主鈕最小 alignment（H1 第一刀）", () => {
@@ -145,6 +150,11 @@ const SOFT = [
   {
     file: "app/not-found.module.css",
     className: "ctaSecondary",
+  },
+  // H1 收尾（2026-09-16）：育兒小筆記「另開 Threads」原本是 --warm-accent 描邊
+  {
+    file: "app/for-parents/page.module.css",
+    className: "threadsLink",
   },
 ] as const;
 

@@ -76,7 +76,7 @@ Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範
 | `--on-dark` | `#ffffff` | 深色／品牌底上的文字與圖示 |
 | `--status-error` | `#b42318`（夜間 `#ffb4ab`） | 錯誤訊息 |
 
-CTA 三階（美術審 H1；token 在 `app/globals.css`）。不建共用 React `Button`。`--cta-warm-*` 仍給貼紙／夜色，不是這三階。七處第一刀主鈕改綁 `--cta-solid-*`（計算值仍等於 `--landing-brand-ink`／`--on-dark`）。Landing 分區 CTA、留言送出、`PlayButton`、遊戲內 `GameChrome`／`BlockDropView` 不吃這組。未啟用的 `.subscribeCta` 壓在 hero 上走不透明 `--on-dark`＋`--landing-brand-ink`，不吃夜間會翻色的 `--cta-soft-bg`。
+CTA 三階（美術審 H1；token 在 `app/globals.css`）。不建共用 React `Button`。`--cta-warm-*` 仍給貼紙／夜色，不是這三階。七處第一刀主鈕改綁 `--cta-solid-*`（計算值仍等於 `--landing-brand-ink`／`--on-dark`）；H1 收尾（2026-09-16）再加 `LatestHero` 「立即看故事」（/stories 唯一主行動，原 `story.color` 22% 淡底）綁 solid、家長頁「另開 Threads」綁 soft。Landing 分區 CTA、留言送出、`PlayButton`、遊戲內 `GameChrome`／`BlockDropView` 不吃這組。未啟用的 `.subscribeCta` 壓在 hero 上走不透明 `--on-dark`＋`--landing-brand-ink`，不吃夜間會翻色的 `--cta-soft-bg`。
 
 | 階 | Token | 長相 | 用途 |
 |----|-------|------|------|
@@ -326,7 +326,7 @@ Hero 圖走 `images.edit` + `public/characters/` 定裝照參考圖，與單集�
 
 ### 全部故事（`/stories`）
 
-1. **SiteHeader** 大 Hero 黏土插畫
+1. **SiteHeader** 大 Hero 黏土插畫；**≥768 與「全部故事」標題並排成頁首列**（標題左、海報縮到 ≤300px 在右，`app/stories/page.module.css` `.headerBand`；美術審 M3：直式 4:5 海報在 1100 欄裡 420 寬會比 LatestHero 卡還小、重心失衡，沒有橫式資產故以版面解決，LatestHero 才是頁面主角）；<768 維持直向堆疊
 2. **LatestHero** 最新一集（elevated surface，`--elev-2` resting；無盒子描邊／1px 色環）
    LatestHero 說明最多 3 行（`StoryCard` 桌面 2 行、≤480px 3 行）；來源摘要於 Apple／SoundOn ingest 階段即截斷至約 68 字（CJK），clamp 為保險層。
 3. **FavoritesSection** 精選

@@ -32,6 +32,7 @@
 | ID | 說明 |
 |----|------|
 | fix(ui): `/stories`、`/feedback` 桌機暖色底改全出血（美術審 H2） | `7d6f4e31` |
+| polish(ui): `/stories` 桌機頁首列（M3）＋H1 收尾（LatestHero solid、Threads soft、9 張基線重錄） | 見本 commit |
 | feat(universe): 宇宙地圖 ≤480 直向改直式舞台 720×1400（美術審 H3，Plan `docs/plans/2026-09-15-universe-map-portrait-layout.md`，C-1 (b)） | `f712c5d9` |
 | polish(ui): 主鈕最小 alignment——7 處橘黃漸層改暖深墨＋白字（美術審 H1 第一刀） | `3f519047` |
 | polish(ui): CTA 三階 token＋既有次要／三次鈕改 soft／quiet（美術審 H1 第二刀） | `2ca12d7c` |
@@ -47,7 +48,30 @@
 > | H2 | `/stories`、`/feedback` 桌機暖色底全出血 | `7d6f4e31` |
 > | H3 | 宇宙地圖 ≤480 直向直式舞台 720×1400 | `f712c5d9` |
 >
-> **看板 M1–M8／L1–L7：** 本文不在 repo，無法對照現況。下面只列 DESIGN／TODOS／CHANGELOG **已寫、未貼 M／L 號**、且 H1 刻意沒做的後續（不是把它們編成 M1…）。
+> **看板 18 項入庫（2026-09-16，對照 main `c03f9c48`；看板 https://claude.ai/code/artifact/37642bf6-4e03-4eaa-8a67-70a2bf72501e）：**
+>
+> | ID | 項目 | 狀態 |
+> |----|------|------|
+> | H1 | CTA 一站七種，無主／次階層 | 已修：`3f519047`→`7652354d`＋收尾（LatestHero 綁 solid、Threads 綁 soft、9 張 Darwin 基線重錄）見本 commit |
+> | H2 | `/stories`、`/feedback` 桌機色底只鋪內容欄 | 已修 `7d6f4e31` |
+> | H3 | 宇宙地圖手機首屏島太小、熱點蓋島 | 已修 `f712c5d9`（三處與 Plan 不同已記於 Plan 實作紀錄） |
+> | M1 | 故事頁桌機三種欄寬、本集介紹卡懸中 | 未動 |
+> | M2 | 夜間 hero 亮度不一致（SiteHeader 無 scrim） | 未動 |
+> | M3 | `/stories` 桌機 hero 比 LatestHero 卡小；`/subscribe` 重複同圖 | 已修：≥768 頁首列（標題左、海報 ≤300px 右）見本 commit；`/subscribe` 桌面本已是兩欄 Option A，同圖沿用、不另生圖 |
+> | M4 | 角色圖鑑定裝照場景／棚拍兩套背景混排 | 未動 |
+> | M5 | 手機故事列表 88px 縮圖＋三行摘要像目錄 | 未動 |
+> | M6 | RelatedStories 與 StoryCard anatomy 不同 | 未動 |
+> | M7 | 家長頁育兒小筆記左緣色條容器；統計格第二列變高 | 未動 |
+> | M8 | `/subscribe` 登記關閉時是空殼 | 未動 |
+> | L1 | 頁尾 ConnectHub 390 折 3+1；分隔點孤懸行尾 | 未動 |
+> | L2 | 播放器「AI」鈕無說明；主播放鈕不夠主 | 未動 |
+> | L3 | EP chip 隨集變色；遊戲卡年齡出現兩次 | 未動 |
+> | L4 | 年齡「3–6」vs「約 3–7」；「勇氣」「勇敢」兩分類 | 未動 |
+> | L5 | `.site-root{min-height:100%}` 疊 65px 頂欄，水合前點圓鈕推頁 | 未動 |
+> | L6 | `/about` 全站唯一無圖頁（建議） | 未動 |
+> | L7 | Landing 首段桌機圖左上三分之一霧化（資產） | 未動 |
+>
+> 舊註「本文不在 repo，無法對照現況」已由上表取代。下面只列 DESIGN／TODOS／CHANGELOG **已寫、未貼 M／L 號**、且 H1 刻意沒做的後續（不是把它們編成 M1…）。
 >
 > | 來源 | 項目 | 對 H1–H3 |
 > |------|------|----------|

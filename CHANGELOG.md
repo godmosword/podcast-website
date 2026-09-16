@@ -21,6 +21,7 @@
 
 ### Fixed
 
+- **`/stories` 桌機頁首列（美術審 M3）＋ H1 收尾**：≥768 「全部故事」標題與 hero 海報左右並排成一列（海報縮到 ≤300px 在右），直式海報不再孤懸在 1100 欄裡比 LatestHero 卡還小；<768 不變。LatestHero「立即看故事」改綁 `--cta-solid-*`（原 `story.color` 22% 淡底，是 /stories 最弱的一顆主鈕）、家長頁「另開 Threads」改 soft；重錄 stories／for-parents-tools／place／stories-card 共 9 張 Darwin 基線（含 H1 之後過期的 3 張）。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、`PlayButton`。
 - **宇宙地圖手機直向改直式舞台（美術審 H3）**：≤480 直向不再把橫式 1000×720 舞台 fit-to-width（五島擠成 335×244、每島 90px、上下各留大片海），改用第二套權威座標 `MAP_STAGE_PORTRAIT` 720×1400：森林頂、恐龍左／救援右、車車樂園中央、未來夢想島正下方偏左，390 寬小島 125px、主島 156px，木牌互不疊、右下角讓給控制鈕；直式只畫 6 條橋（rescue–ocean 不畫）。進島探索點在直式收成 icon 圓牌（命中區 48px、可及名稱不變），首訪提示改錨地圖最頂。旋轉只在直向判準翻轉時瞬間重 fit。桌機、橫向、平板直立、OG、deep link 零差（1280 視覺基線 byte-identical）。回滾閥 `MAP_PORTRAIT_LAYOUT_ENABLED`。**未改** Apple sync workflow、`ZoneSheet`。
 - **`/stories`、`/feedback` 桌機暖色底不再只鋪在內容欄**：兩頁的 `--page-warm-*` 漸層原本畫在 640／1100 置中的 `.main` 上，≥1280 欄外純白、欄內奶油色，兩條硬直邊從頂欄下方劃到底。改鋪在新的全出血 `.page` 包層（與 `/characters`、`/for-parents` 同一做法），`.main` 只剩欄寬與內距。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **手機點 Landing「車車遊樂園的故事」不再掉進休息頁**：頂欄預載品牌字未先檢查 `requestIdleCallback`，部分行動 WebView／舊 Safari 進 `/stories` 會讓 root layout 拋錯、整頁變成「這一頁暫時休息中」。沒有 idle API 時改 `setTimeout`。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
