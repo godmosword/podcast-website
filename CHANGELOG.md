@@ -32,6 +32,7 @@
 
 ### Changed
 
+- **主鈕最小 alignment（美術審 H1 第一刀）**：熱點主鈕、家長閘門送出、親子景點導航／詳情主行動、家長工具卡、遊戲載入開始／重試、結算「下一關」改 `--landing-brand-ink` 底板＋`--on-dark` 白字，對齊 Landing／留言牆。圓角、高度、文案、DOM、hover 位移不動；`--cta-warm-*` token、貼紙、Landing、`PlayButton`、單集色卡未改。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **`/feedback` hero 改卡丁車賽道實拍、標題改「留言給馬米跟Bonbon」**：邀請改兩行「告訴我們…」；alt／OG 描述同步。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`、表單契約與法律頁政策版本。
 - **Landing 底列把分區 CTA、換段圓鈕與嘟嘟收成同一排**：圓鈕不再浮在中央偏上；左群組是 CTA 加圓鈕、右欄對齊小紅車，三者齊底、互不重疊。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **Landing 滑鼠滾輪換段改走圓鈕同一套短轉場**：垂直滾輪／觸控板往下（或往上）先 120ms 淡出再 `auto` 對齊，接著 280ms 淡入＋微縮放；一格或一次明確手勢只換一段。手指滑與方向鍵仍只靠 snap。`prefers-reduced-motion` 不攔截。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。

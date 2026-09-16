@@ -59,10 +59,10 @@
   margin-top: 0.35rem;
   padding: 0.6rem 1.1rem;
   border-radius: var(--radius-pill);
-  background: linear-gradient(var(--cta-warm-from), var(--cta-warm-to));
+  background: var(--landing-brand-ink);
   border: none;
   box-shadow: var(--shadow-sm);
-  color: var(--cta-warm-fg);
+  color: var(--on-dark);
   font-size: var(--fs-h4);
   font-weight: 800;
   text-decoration: none;

@@ -89,8 +89,8 @@
   padding: 12px 20px;
   border: none;
   border-radius: var(--radius-pill);
-  background: linear-gradient(180deg, var(--cta-warm-from), var(--cta-warm-to));
-  color: var(--cta-warm-fg);
+  background: var(--landing-brand-ink);
+  color: var(--on-dark);
   font-size: var(--fs-body);
   font-weight: 800;
   cursor: pointer;

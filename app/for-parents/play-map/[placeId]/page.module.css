@@ -164,8 +164,8 @@
 }
 
 .primaryAction {
-  background: linear-gradient(180deg, var(--cta-warm-from), var(--cta-warm-to));
-  color: var(--cta-warm-fg);
+  background: var(--landing-brand-ink);
+  color: var(--on-dark);
   box-shadow: var(--shadow-md);
 }
 

@@ -115,8 +115,8 @@
   border: none;
   min-height: 48px;
   min-width: 160px;
-  background: linear-gradient(180deg, var(--cta-warm-from), var(--cta-warm-to));
-  color: var(--cta-warm-fg);
+  background: var(--landing-brand-ink);
+  color: var(--on-dark);
   font-weight: 900;
   font-size: var(--fs-body);
   padding: 10px 26px;

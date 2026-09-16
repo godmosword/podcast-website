@@ -89,12 +89,8 @@
 
 .nextBtn {
   min-height: 54px;
-  color: var(--cta-warm-fg);
-  background: linear-gradient(
-    180deg,
-    var(--cta-warm-from),
-    var(--cta-warm-to)
-  );
+  color: var(--on-dark);
+  background: var(--landing-brand-ink);
   box-shadow:
     0 5px 0 color-mix(in srgb, var(--cta-warm-to) 70%, #4a2e14),
     inset 0 2px 0 color-mix(in srgb, #fff 70%, transparent);
