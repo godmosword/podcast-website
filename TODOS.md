@@ -57,7 +57,7 @@
 > | H3 | 宇宙地圖手機首屏島太小、熱點蓋島 | 已修 `f712c5d9`（三處與 Plan 不同已記於 Plan 實作紀錄） |
 > | M1 | 故事頁桌機三種欄寬、本集介紹卡懸中 | 未動 |
 > | M2 | 夜間 hero 亮度不一致（SiteHeader 無 scrim） | 已修：`.scene::after` 夜間 `--bedtime-veil` 漸層（同 Landing 配方）`3f298882` |
-> | M3 | `/stories` 桌機 hero 比 LatestHero 卡小；`/subscribe` 重複同圖 | 已修：≥768 頁首列（標題左、海報 ≤300px 右）見本 commit；`/subscribe` 桌面本已是兩欄 Option A，同圖沿用、不另生圖 |
+> | M3 | `/stories` 桌機 hero 比 LatestHero 卡小；`/subscribe` 重複同圖 | 頁首列已還原：hero 置中大圖、標題在下（使用者回饋主視覺被擠掉）；`/subscribe` 桌面本已是兩欄 Option A，同圖沿用、不另生圖 |
 > | M4 | 角色圖鑑定裝照場景／棚拍兩套背景混排 | 未動 |
 > | M5 | 手機故事列表 88px 縮圖＋三行摘要像目錄 | 未動 |
 > | M6 | RelatedStories 與 StoryCard anatomy 不同 | 未動 |

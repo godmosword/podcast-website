@@ -326,7 +326,7 @@ Hero 圖走 `images.edit` + `public/characters/` 定裝照參考圖，與單集�
 
 ### 全部故事（`/stories`）
 
-1. **SiteHeader** 大 Hero 黏土插畫；**≥768 與「全部故事」標題並排成頁首列**（標題左、海報縮到 ≤300px 在右，`app/stories/page.module.css` `.headerBand`；美術審 M3：直式 4:5 海報在 1100 欄裡 420 寬會比 LatestHero 卡還小、重心失衡，沒有橫式資產故以版面解決，LatestHero 才是頁面主角）；<768 維持直向堆疊
+1. **SiteHeader** 大 Hero 黏土插畫（置中、`max-width: 420px`；標題在圖下方。M3 桌機並排頁首列已還原）
 2. **LatestHero** 最新一集（elevated surface，`--elev-2` resting；無盒子描邊／1px 色環）
    LatestHero 說明最多 3 行（`StoryCard` 桌面 2 行、≤480px 3 行）；來源摘要於 Apple／SoundOn ingest 階段即截斷至約 68 字（CJK），clamp 為保險層。
 3. **FavoritesSection** 精選

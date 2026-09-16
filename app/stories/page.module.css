@@ -47,39 +47,6 @@
   color: var(--ink);
 }
 
-/*
- * 美術審 M3：直式 4:5 的 hero-home 在 1100 欄裡只有 420 寬，比下方 LatestHero 卡還小，
- * 頁首重心失衡。沒有橫式資產（生圖是付費紅線），改用版面解決：≥768 hero 與「全部故事」
- * 標題左右並排成一列頁首（圖左、標題右、垂直置中），<768 維持原本的直向堆疊。
- * SiteHeader 的外距與 .scene 置中在此就地歸零（同 /subscribe 桌面 Option A 的做法）。
- */
-@media (min-width: 768px) {
-  .headerBand {
-    display: grid;
-    /* 標題在左、海報縮成 300px 在右：海報退成頁首的封面，讓下方 LatestHero 卡當真正的主角。 */
-    grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
-    column-gap: clamp(24px, 4vw, 56px);
-    align-items: center;
-    margin-bottom: var(--space-6);
-  }
-
-  .headerBand > :global([class*="SiteHeader-module"]) {
-    margin: 0;
-    order: 2;
-  }
-
-  .headerBand > :global([class*="SiteHeader-module"]) :global([class*="__scene"]) {
-    margin: 0;
-  }
-
-  .headerBand .title {
-    margin: 0;
-    order: 1;
-    /* 與圖並排時升到 hero 標題級（globals 字階註記：SiteHeader 2.3rem > --fs-h1）；不用 clamp()+vw。 */
-    font-size: 2.3rem;
-  }
-}
-
 .lede {
   margin: 0 0 var(--space-6);
   font-size: var(--fs-body);

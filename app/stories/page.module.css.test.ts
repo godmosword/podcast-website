@@ -13,4 +13,9 @@ describe("stories/page.module.css 桌機欄寬", () => {
     const desktop = css.slice(css.indexOf("@media (min-width: 768px)"));
     expect(desktop).toMatch(/\.main\s*\{[\s\S]*?max-width:\s*1100px/);
   });
+
+  it("桌機不把 hero 與標題並排成頁首列", () => {
+    expect(css).not.toContain("headerBand");
+    expect(css).not.toMatch(/minmax\(220px,\s*300px\)/);
+  });
 });

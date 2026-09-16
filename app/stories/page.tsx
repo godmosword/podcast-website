@@ -49,11 +49,8 @@ export default function StoriesPage() {
     <div className={styles.page}>
       <main className={styles.main} data-deferred-brand-font="stories">
         <JsonLd data={podcastSeriesJsonLd()} />
-        {/* 美術審 M3：≥768 hero 與頁標題並排成頁首列，420px 直式圖不再孤懸在 1100 欄裡。 */}
-        <div className={styles.headerBand}>
-          <SiteHeader />
-          <StoriesIndexHeader lede={lede} titleClassName={styles.title} />
-        </div>
+        <SiteHeader />
+        <StoriesIndexHeader lede={lede} titleClassName={styles.title} />
         <HomeSectionList props={sectionProps} />
         <SiteFooter layout="home" />
       </main>
