@@ -37,7 +37,27 @@
 | polish(ui): CTA 三階 token＋既有次要／三次鈕改 soft／quiet（美術審 H1 第二刀） | `2ca12d7c` |
 | polish(ui): `.subscribeCta` 去玻璃＋七處主鈕綁 `--cta-solid-*` | 見本 commit |
 
-> 美術審其餘未動：M1–M8、L1–L7。Darwin 視覺基線由本機重錄（H1 第一刀後）。不建 React `Button`。
+> **美術審編號（C1）：** `DESIGN.md`／`CHANGELOG.md` **沒有** M1–M8、L1–L7 條目本文。唯一出處是 H3 登記時寫「其餘 16 項（H1 CTA 語彙、M1–M8、L1–L7）記在看板」——看板未入庫。下表**不發明** M／L 編號。
+>
+> **H 列對照（C2）：**
+>
+> | ID | 內容 | 狀態 |
+> |----|------|------|
+> | H1 | CTA 語彙：第一刀七處主鈕墨板白字；第二刀 soft／quiet token；`.subscribeCta` 去玻璃＋七處綁 `--cta-solid-*` | 程式完成（第三刀在 PR #165，未合 `main`）；Darwin 基線未重錄 |
+> | H2 | `/stories`、`/feedback` 桌機暖色底全出血 | `7d6f4e31` |
+> | H3 | 宇宙地圖 ≤480 直向直式舞台 720×1400 | `f712c5d9` |
+>
+> **看板 M1–M8／L1–L7：** 本文不在 repo，無法對照現況。下面只列 DESIGN／TODOS／CHANGELOG **已寫、未貼 M／L 號**、且 H1 刻意沒做的後續（不是把它們編成 M1…）。
+>
+> | 來源 | 項目 | 對 H1–H3 |
+> |------|------|----------|
+> | DESIGN §Landing、TODOS pending | 拿掉 CTA `nowrap`（半形「 →」孤行；<348px Dudu） | 未動；nowrap PR #164 已關、不復活 |
+> | DESIGN §Landing、TODOS pending | 不放／不靜默啟用 `playCta` | 未啟用；`.subscribeCta` 已去玻璃，字級／高度落差仍在 |
+> | DESIGN §CTA 三階 | 不建 React `Button` | 維持不做 |
+> | DESIGN §CTA 三階 | Landing `.cta`、留言送出、`PlayButton`、`GameChrome`／`BlockDropView` 不吃三階 | 刻意未吃 |
+> | CHANGELOG H1 | 404 主鈕、`--cta-warm-*` 貼紙 | 刻意未改 |
+> | TODOS | Darwin 視覺基線本機重錄 | H1 之後仍待本機 A |
+> | TODOS pending | `.scrim` 左下 0.52 可調淡 | 本輪不做；未宣稱是 M／L |
 
 ### 本輪已完成（2026-09-10）
 

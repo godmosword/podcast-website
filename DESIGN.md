@@ -84,6 +84,8 @@ CTA 三階（美術審 H1；token 在 `app/globals.css`）。不建共用 React 
 | soft | `--cta-soft-bg`／`--cta-soft-fg`／`--cta-soft-line` | 卡片底、深墨字、細線、`--elev-1`；無玻璃／橘黃 | 次行動 |
 | quiet | `--cta-quiet-fg` | 透明底、底線、`--accent-ink`、觸控 ≥44px | 三次／備援出口 |
 
+美術審 **M1–M8／L1–L7 編號清單不在本檔**（H3 登記時寫「記在看板」，看板未入庫）。對照與 H1–H3 消化狀態見 [TODOS.md](./TODOS.md) 本輪已完成（2026-09-15）。不發明編號。
+
 多彩粉嫩 accent（裝飾、chip、邊框輪播）：
 
 | Token | 值 |
