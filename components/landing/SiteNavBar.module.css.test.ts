@@ -120,6 +120,19 @@ describe("SiteNavBar.module.css 漢堡與抽屜", () => {
     expect(css).toMatch(/\.bar \.panel\s*\{[\s\S]*?pointer-events:\s*auto/);
   });
 
+  it("抽屜目前頁日間底色與頂欄同褐，並烤進桃色以免疊白變灰", () => {
+    const start = css.indexOf('.menuLink[aria-current="page"] {');
+    expect(start).toBeGreaterThan(-1);
+    const block = css.slice(start, css.indexOf("}", start));
+    expect(block).toMatch(
+      /color-mix\(\s*in srgb,\s*rgb\(107,\s*63,\s*30\)\s*14%,\s*var\(--landing-nav-cta-bg\)/,
+    );
+    expect(block).not.toMatch(/rgba\(120,\s*80,\s*40/);
+    expect(css).toMatch(
+      /\.navLink\[aria-current="page"\]\s*\{[\s\S]*?background:\s*rgba\(107,\s*63,\s*30,\s*0\.14\)/,
+    );
+  });
+
   it("目前頁與 hover 不共用同一底色（色彩不得為唯一編碼）", () => {
     expect(css).toMatch(
       /\.menuLink\[aria-current="page"\]\s*\{[\s\S]*?box-shadow:\s*inset/,

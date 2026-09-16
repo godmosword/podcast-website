@@ -205,20 +205,34 @@
 
 @media (hover: hover) {
   .menuLink:hover {
-    background: rgba(120, 80, 40, 0.08);
+    background: color-mix(
+      in srgb,
+      rgb(107, 63, 30) 9%,
+      var(--landing-nav-cta-bg)
+    );
   }
 }
 
 /* 目前頁與「滑過」必須可區分，且不得只靠顏色。
- * 選中列是黏土片（頂緣高光 + 左 accent 條），不是整列反色。 */
+ * 選中列是黏土片（頂緣高光 + 左 accent 條），不是整列反色。
+ * 頂欄 `.navLink` 的 rgba(107,63,30,0.14) 疊在桃色玻璃上；抽屜面板是白底，
+ * 同一層半透明褐會讀成灰米色。改烤進 --landing-nav-cta-bg，視覺對齊頂欄。 */
 .menuLink[aria-current="page"] {
-  background: rgba(120, 80, 40, 0.12);
+  background: color-mix(
+    in srgb,
+    rgb(107, 63, 30) 14%,
+    var(--landing-nav-cta-bg)
+  );
   font-weight: 800;
   box-shadow: inset 3px 0 0 var(--accent), var(--gloss);
 }
 
 .menuLink:active {
-  background: rgba(120, 80, 40, 0.14);
+  background: color-mix(
+    in srgb,
+    rgb(107, 63, 30) 18%,
+    var(--landing-nav-cta-bg)
+  );
 }
 
 .menuLink:focus-visible {
