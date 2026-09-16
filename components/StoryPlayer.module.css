@@ -1,6 +1,8 @@
 .player {
-  --controls-block: 156px;
+  --controls-block: 168px;
   --ctrl-size: 60px;
+  /* 美術審 L2：主播放鈕比鄰鈕大一階（+12px），不再只靠底色分主次。 */
+  --play-size: 72px;
   --time-size: 0.88rem;
   --seek-track: 7px;
   --seek-thumb: 22px;
@@ -37,8 +39,9 @@
 
 @media (min-width: 480px) {
   .player {
-    --controls-block: 168px;
+    --controls-block: 180px;
     --ctrl-size: 64px;
+    --play-size: 76px;
     --time-size: 0.95rem;
     --seek-track: 8px;
     --seek-thumb: 24px;
@@ -52,8 +55,9 @@
 
 @media (min-width: 768px) {
   .player {
-    --controls-block: 176px;
+    --controls-block: 188px;
     --ctrl-size: 68px;
+    --play-size: 80px;
     --time-size: 1.02rem;
     --seek-track: 8px;
     --seek-thumb: 26px;
@@ -789,8 +793,8 @@
 
 .playBtn {
   flex: 0 0 auto;
-  width: var(--ctrl-size);
-  height: var(--ctrl-size);
+  width: var(--play-size);
+  height: var(--play-size);
   border-radius: var(--radius-circle);
   display: flex;
   align-items: center;

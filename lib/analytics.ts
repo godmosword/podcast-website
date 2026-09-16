@@ -14,7 +14,9 @@ export type PlatformClickSource =
   | "subscription-cta"
   | "nav-bar"
   | "nav-dropdown"
-  | "nav-menu";
+  | "nav-menu"
+  /** /subscribe 登記關閉時的平台導流按鈕（美術審 M8） */
+  | "subscribe-closed";
 
 function safeTrack(event: string, data: Record<string, string | boolean>): void {
   try {

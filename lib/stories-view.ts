@@ -10,9 +10,9 @@ export const STORIES_VIEW_GRID_LABEL = "縮圖";
 export const STORIES_VIEW_LIST_LABEL = "完整";
 export const STORIES_VIEW_TOGGLE_LABEL = "故事列表顯示方式";
 
-/** 手機維持現況 sizes；桌機縮圖抓 400px，避免 sizes 含 vw 讓 srcset 衝到 3840。 */
+/** ≤480 跟 StoryCard 手機縮圖 120px（美術審 M5）；桌機縮圖抓 400px，避免 sizes 含 vw 讓 srcset 衝到 3840。 */
 export const STORIES_CATALOG_COVER_SIZES =
-  "(max-width: 480px) 80px, (max-width: 767px) 96px, 400px";
+  "(max-width: 480px) 120px, (max-width: 767px) 96px, 400px";
 
 /**
  * 在 paint 前還原「完整」模式，避免先閃縮圖。

@@ -79,7 +79,7 @@ export default async function VehiclePage({
       <ul className={styles.list}>
         {stories.map((story) => (
           <li key={story.slug}>
-            <StoryCard story={story} />
+            <StoryCard story={story} hideMeta />
           </li>
         ))}
       </ul>

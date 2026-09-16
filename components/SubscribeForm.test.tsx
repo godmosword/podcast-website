@@ -9,7 +9,7 @@ import {
   SUBSCRIBE_PRIVACY_NOTE,
   SUBSCRIBE_SUBMIT_LABEL,
   SUBSCRIBE_SUCCESS,
-  SUBSCRIBE_UNAVAILABLE_LINK,
+  SUBSCRIBE_UNAVAILABLE_NOTE,
 } from "@/lib/subscribe-copy";
 
 vi.stubGlobal("React", React);
@@ -59,10 +59,11 @@ describe("SubscribeForm", () => {
       }),
     );
     render(<SubscribeForm />);
-    const link = await screen.findByRole("link", {
-      name: SUBSCRIBE_UNAVAILABLE_LINK,
-    });
-    expect(link.getAttribute("href")).toBe("/subscribe#connect");
+    const spotify = await screen.findByRole("link", { name: "在 Spotify 收聽" });
+    expect(spotify.getAttribute("href")).toContain("open.spotify.com");
+    expect(spotify.getAttribute("href")).toContain("utm_medium=subscribe_cta");
+    expect(screen.getAllByRole("link").length).toBeGreaterThanOrEqual(4);
+    expect(screen.getByText(SUBSCRIBE_UNAVAILABLE_NOTE)).toBeTruthy();
   });
 
   test("送出成功後說明確認信，且不承諾立刻寄新集", async () => {

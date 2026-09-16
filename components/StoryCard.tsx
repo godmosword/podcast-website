@@ -43,14 +43,14 @@ export default function StoryCard({
   completedStories,
 }: StoryCardProps) {
   const isGrid = variant === "grid";
-  // 列表縮圖 96×96（≤480px 為 80×80）；grid 約 220px。避免預設 640px sizes。
+  // 列表縮圖 96×96（≤480px 為 120×120，美術審 M5）；grid 約 220px。避免預設 640px sizes。
   const thumbSizes =
     coverSizes ??
     (catalog
       ? STORIES_CATALOG_COVER_SIZES
       : isGrid
         ? "(max-width: 640px) 46vw, 220px"
-        : "(max-width: 480px) 80px, 96px");
+        : "(max-width: 480px) 120px, 96px");
   const staggerClass = `scrollEnterStagger${(index % 3) + 1}`;
 
   return (

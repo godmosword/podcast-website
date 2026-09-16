@@ -47,6 +47,56 @@
   line-height: 1.2;
 }
 
+/* ---- 主持人定裝照（美術審 L6） ---- */
+.hosts {
+  display: flex;
+  align-items: center;
+  gap: 0 14px;
+  margin: 0 0 var(--space-6);
+}
+
+.hostAvatar {
+  position: relative;
+  flex: 0 0 auto;
+  width: 96px;
+  height: 96px;
+  overflow: hidden;
+  border-radius: var(--radius-circle);
+  border: 3px solid var(--card);
+  background: var(--warm-portrait-bg, var(--bg-2));
+  box-shadow: var(--elev-2);
+  /* 內層圖有 transform：Safari 對 overflow hidden＋圓角裁切被 transform 的子層會漏，
+     容器自己也開合成層才能圓形裁乾淨。 */
+  isolation: isolate;
+  transform: translateZ(0);
+}
+
+.hostBonbon {
+  margin-left: -22px;
+}
+
+.hostImg {
+  object-fit: cover;
+}
+
+/* 馬米：吊卡人偶，臉在上方約 (48%, 25%)；Bonbon：場景半身，臉約 (62%, 30%)。 */
+.hostMami .hostImg {
+  transform: scale(2.4);
+  transform-origin: 48% 24%;
+}
+
+.hostBonbon .hostImg {
+  transform: scale(1.7);
+  transform-origin: 63% 30%;
+}
+
+.hostsCaption {
+  margin-left: 6px;
+  font-size: var(--fs-control);
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
 .lede {
   display: grid;
   gap: var(--space-4);

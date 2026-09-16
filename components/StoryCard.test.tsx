@@ -64,7 +64,7 @@ describe("StoryCard", () => {
 
     const html = renderToStaticMarkup(<StoryCard story={listStory} />);
 
-    expect(html).toContain('sizes="(max-width: 480px) 80px, 96px"');
+    expect(html).toContain('sizes="(max-width: 480px) 120px, 96px"');
     expect(html).not.toContain("46vw");
   });
 

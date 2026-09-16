@@ -1097,9 +1097,9 @@ export default function StoryPlayer({
                 type="button"
               >
                 {isPlaying ? (
-                  <PauseGlyph size={32} />
+                  <PauseGlyph size={38} />
                 ) : (
-                  <PlayGlyph size={32} className={styles.playGlyph} />
+                  <PlayGlyph size={38} className={styles.playGlyph} />
                 )}
               </button>
               <button

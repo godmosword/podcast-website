@@ -42,7 +42,9 @@ export default function RelatedStories({
           <ul className={styles.list}>
             {stories.map((story, i) => (
               <li key={story.slug}>
-                <StoryCard story={story} index={i} />
+                {/* 美術審 M6：與 /stories 目錄卡同一種密度——只留 EP chip，
+                    日期／時長／年齡不在相關故事卡上重複（單集頁 header 已有）。 */}
+                <StoryCard story={story} index={i} hideMeta />
               </li>
             ))}
           </ul>

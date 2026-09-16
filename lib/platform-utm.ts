@@ -16,6 +16,7 @@ const SOURCE_TO_MEDIUM: Record<PlatformClickSource, PlatformUtmMedium> = {
   "nav-bar": "subscribe_cta",
   "nav-dropdown": "subscribe_cta",
   "nav-menu": "subscribe_cta",
+  "subscribe-closed": "subscribe_cta",
 };
 
 export function platformUtmMedium(source: PlatformClickSource): PlatformUtmMedium {

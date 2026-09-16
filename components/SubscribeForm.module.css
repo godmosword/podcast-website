@@ -132,7 +132,90 @@
   font-weight: 700;
 }
 
-.unavailable a {
-  color: var(--accent-ink);
+/* ---- 登記關閉：平台導流（美術審 M8） ---- */
+.closed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.unavailable {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.platformList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.platformBtn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  /* 次行動 soft：卡片底、深墨字、細線、elev-1（同 CTA 三階） */
+  background: var(--cta-soft-bg);
+  color: var(--cta-soft-fg);
+  border: 1px solid var(--cta-soft-line);
+  box-shadow: var(--elev-1);
+  text-decoration: none;
   font-weight: 800;
+  font-size: var(--fs-control);
+  transition: transform var(--motion-press), background var(--motion-press);
+}
+
+.platformBtn:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .platformBtn:hover {
+    background: var(--bg-2);
+  }
+}
+
+.platformBtn:active {
+  transform: scale(0.98);
+}
+
+.platformBadge {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-circle);
+  color: var(--on-dark);
+  border: 2px solid var(--card);
+  box-shadow: var(--shadow-sm);
+}
+
+.platformIcon {
+  width: 22px;
+  height: 22px;
+}
+
+.platformLabel {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 360px) {
+  .platformList {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .platformBtn,
+  .platformBtn:active {
+    transform: none;
+    transition: none;
+  }
 }

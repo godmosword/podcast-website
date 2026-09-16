@@ -55,21 +55,21 @@
 > | H1 | CTA 一站七種，無主／次階層 | 已修：`3f519047`→`7652354d`＋收尾（LatestHero 綁 solid、Threads 綁 soft、9 張 Darwin 基線重錄）見本 commit |
 > | H2 | `/stories`、`/feedback` 桌機色底只鋪內容欄 | 已修 `7d6f4e31` |
 > | H3 | 宇宙地圖手機首屏島太小、熱點蓋島 | 已修 `f712c5d9`（三處與 Plan 不同已記於 Plan 實作紀錄） |
-> | M1 | 故事頁桌機三種欄寬、本集介紹卡懸中 | 未動 |
+> | M1 | 故事頁桌機三種欄寬、本集介紹卡懸中 | 待 /agent-plan（2026-09-16 決定：跨 StoryPlayer／Related／FAQ 欄寬，先出 Approved Plan） |
 > | M2 | 夜間 hero 亮度不一致（SiteHeader 無 scrim） | 已修：`.scene::after` 夜間 `--bedtime-veil` 漸層（同 Landing 配方）`3f298882` |
 > | M3 | `/stories` 桌機 hero 比 LatestHero 卡小；`/subscribe` 重複同圖 | 頁首列已還原：hero 置中大圖、標題在下（使用者回饋主視覺被擠掉）；`/subscribe` 桌面本已是兩欄 Option A，同圖沿用、不另生圖 |
-> | M4 | 角色圖鑑定裝照場景／棚拍兩套背景混排 | 未動 |
-> | M5 | 手機故事列表 88px 縮圖＋三行摘要像目錄 | 未動 |
-> | M6 | RelatedStories 與 StoryCard anatomy 不同 | 未動 |
+> | M4 | 角色圖鑑定裝照場景／棚拍兩套背景混排 | 已修（CSS 統一底墊，不重拍）：日間 multiply＋兩主題邊緣暈影 見本 commit |
+> | M5 | 手機故事列表 88px 縮圖＋三行摘要像目錄 | 已修：≤480 縮圖 120px、摘要 2 行 見本 commit |
+> | M6 | RelatedStories 與 StoryCard anatomy 不同 | 已修：相關／收藏／主題／車種列表一律 `hideMeta` 見本 commit |
 > | M7 | 家長頁育兒小筆記左緣色條容器；統計格第二列變高 | 已修：callout 改 hairline＋elevated 卡；統計格刪「同步檢查」剩三格，桌機直向堆疊 `3f298882` |
-> | M8 | `/subscribe` 登記關閉時是空殼 | 未動 |
+> | M8 | `/subscribe` 登記關閉時是空殼 | 已修：關閉時四平台大按鈕列成主內容 見本 commit |
 > | L1 | 頁尾 ConnectHub 390 折 3+1；分隔點孤懸行尾 | 已修：≤480 4 欄 grid；分隔點改 `.metaLegal::before`，折行時不畫 `3f298882` |
-> | L2 | 播放器「AI」鈕無說明；主播放鈕不夠主 | 未動 |
+> | L2 | 播放器「AI」鈕無說明；主播放鈕不夠主 | 已修：`--play-size` 大一階、圖示改 Aa 見本 commit |
 > | L3 | EP chip 隨集變色；遊戲卡年齡出現兩次 | 已修：EP chip 固定 `.marker-lilac`；遊戲卡拿掉封面角標 `3f298882` |
 > | L4 | 年齡「3–6」vs「約 3–7」；「勇氣」「勇敢」兩分類 | 已修：`ageRange` 統一「約 N–7 歲」、FAQ 3–7、「勇敢」併「勇氣」 `3f298882` |
 > | L5 | `.site-root{min-height:100%}` 疊 65px 頂欄，水合前點圓鈕推頁 | 已修：`min-height: calc(100% - var(--nav-h))` `3f298882` |
-> | L6 | `/about` 全站唯一無圖頁（建議） | 未動 |
-> | L7 | Landing 首段桌機圖左上三分之一霧化（資產） | 未動 |
+> | L6 | `/about` 全站唯一無圖頁（建議） | 已修：馬米＆Bonbon 圓形頭像（既有定裝照） 見本 commit |
+> | L7 | Landing 首段桌機圖左上三分之一霧化（資產） | 擱置（2026-09-16 決定）：需重生橫版圖，付費生圖紅線，下次重生時補左上景 |
 >
 > 舊註「本文不在 repo，無法對照現況」已由上表取代。下面只列 DESIGN／TODOS／CHANGELOG **已寫、未貼 M／L 號**、且 H1 刻意沒做的後續（不是把它們編成 M1…）。
 >

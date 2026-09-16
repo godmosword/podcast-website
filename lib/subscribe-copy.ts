@@ -13,11 +13,11 @@ export const SUBSCRIBE_PAGE_LEDE =
 
 export const SUBSCRIBE_LOADING_LABEL = "正在準備名單表單…";
 
-export const SUBSCRIBE_UNAVAILABLE_PREFIX = "線上登記暫時關閉，請改從頁尾的";
+/** 登記關閉時的說明（美術審 M8：關閉狀態把收聽平台拉成主內容，不再只剩一句提示）。 */
+export const SUBSCRIBE_UNAVAILABLE_NOTE =
+  "線上登記暫時關閉。新集照常上架，先在慣用的平台訂閱節目，就不會漏接。";
 
-export const SUBSCRIBE_UNAVAILABLE_LINK = "收聽平台";
-
-export const SUBSCRIBE_UNAVAILABLE_SUFFIX = "訂閱節目。";
+export const SUBSCRIBE_UNAVAILABLE_PLATFORMS_LABEL = "收聽平台";
 
 export const SUBSCRIBE_SUCCESS =
   "確認信已寄出，請到信箱點擊連結完成登記。目前尚未寄發新集上線通知。";

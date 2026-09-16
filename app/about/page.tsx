@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
 import styles from "./page.module.css";
@@ -18,6 +19,30 @@ export default function AboutPage() {
       </Link>
 
       <h1 className={styles.title}>關於車車遊樂園</h1>
+
+      {/* 美術審 L6：全站唯一無圖頁——用既有的角色圖鑑定裝照（不生新圖）把這封信錨在品牌裡。
+          兩張都是方圖，用 transform-origin 把臉推到圓框中央。 */}
+      <figure className={styles.hosts}>
+        <span className={`${styles.hostAvatar} ${styles.hostMami}`}>
+          <Image
+            src="/characters/馬米.jpg"
+            alt="馬米的定裝照"
+            fill
+            sizes="112px"
+            className={styles.hostImg}
+          />
+        </span>
+        <span className={`${styles.hostAvatar} ${styles.hostBonbon}`}>
+          <Image
+            src="/characters/Bonbon.jpg"
+            alt="Bonbon 的定裝照"
+            fill
+            sizes="112px"
+            className={styles.hostImg}
+          />
+        </span>
+        <figcaption className={styles.hostsCaption}>馬米 ＆ Bonbon</figcaption>
+      </figure>
 
       <section className={styles.lede} aria-label="關於我們">
         <p className={styles.text}>嗨嗨，我是馬米</p>

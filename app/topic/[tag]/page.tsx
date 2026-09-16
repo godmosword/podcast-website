@@ -79,7 +79,7 @@ export default async function TopicPage({
       <ul className={styles.list}>
         {stories.map((story, i) => (
           <li key={story.slug}>
-            <StoryCard story={story} index={i} />
+            <StoryCard story={story} index={i} hideMeta />
           </li>
         ))}
       </ul>

@@ -5,7 +5,6 @@ import {
   SUBSCRIBE_PRIVACY_NOTE,
   SUBSCRIBE_SUBMIT_LABEL,
   SUBSCRIBE_SUCCESS,
-  SUBSCRIBE_UNAVAILABLE_LINK,
 } from "../lib/subscribe-copy";
 
 async function mockSubscribeAvailable(
@@ -41,8 +40,11 @@ test.describe("SubscribeForm LIST-2", () => {
     await expect(page.getByRole("heading", { name: SUBSCRIBE_PAGE_TITLE })).toBeVisible();
     await expect(page.getByText("只收名單", { exact: false })).toBeVisible();
     await expect(page.getByText("不寄新集上線信", { exact: false })).toBeVisible();
+    // M8：關閉時四個平台按鈕就在首屏（不只頁尾）
     await expect(
-      page.getByRole("link", { name: SUBSCRIBE_UNAVAILABLE_LINK }),
+      page
+        .getByRole("region", { name: "新集通知名單表單" })
+        .getByRole("link", { name: "在 Spotify 收聽" }),
     ).toBeVisible();
   });
 

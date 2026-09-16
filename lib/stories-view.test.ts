@@ -77,8 +77,8 @@ describe("stories-view", () => {
     expect(readStoriesViewFromDocument()).toBe("grid");
   });
 
-  it("目錄封面 sizes 手機維持 80／96，桌機才放大", () => {
-    expect(STORIES_CATALOG_COVER_SIZES).toContain("(max-width: 480px) 80px");
+  it("目錄封面 sizes 手機 120／96（M5），桌機才放大", () => {
+    expect(STORIES_CATALOG_COVER_SIZES).toContain("(max-width: 480px) 120px");
     expect(STORIES_CATALOG_COVER_SIZES).toContain("(max-width: 767px) 96px");
     expect(STORIES_CATALOG_COVER_SIZES).toContain("400px");
     expect(STORIES_CATALOG_COVER_SIZES).not.toContain("vw");

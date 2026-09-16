@@ -39,6 +39,44 @@
   object-fit: cover;
 }
 
+/* 美術審 M4：定裝照一半是完整場景、一半是奶油白棚拍，同一格網像兩批素材。
+   不重拍、不生圖，只用 CSS 把兩套拉到同一塊「底墊」上：
+   (a) 日間 multiply——棚拍的奶油白乘上 --warm-portrait-bg 就等於底墊色，白方塊消失；
+       場景圖乘上淺奶油只暗 ~4%，看不出來。夜間底墊是深色，multiply 會把角色壓黑，不用。
+   (b) 兩主題都疊一層邊緣暈影，把四角淡入底墊——場景圖的邊界軟掉、棚拍的白底變成聚光，
+       兩套都讀成「同一個展示框裡的定裝照」。 */
+:global(html:not([data-theme="night"])) .portrait {
+  mix-blend-mode: multiply;
+}
+
+.portraitMat::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(
+      120% 100% at 50% 45%,
+      transparent 58%,
+      color-mix(in srgb, var(--warm-portrait-bg) 70%, transparent) 100%
+    ),
+    linear-gradient(180deg, transparent 70%, rgba(52, 48, 43, 0.08) 100%);
+}
+
+/* 夜間沒有 multiply 可用，暈影加重：棚拍白底從四角淡入深靛底墊、變成一盞聚光，
+   場景圖四角跟著入夜——同一種處理，兩套素材才一致。 */
+:global([data-theme="night"]) .portraitMat::after {
+  background:
+    radial-gradient(
+      105% 95% at 50% 42%,
+      transparent 40%,
+      color-mix(in srgb, var(--warm-portrait-bg) 55%, transparent) 78%,
+      color-mix(in srgb, var(--warm-portrait-bg) 92%, transparent) 100%
+    );
+}
+
 .statusSticker {
   position: absolute;
   top: 2px;

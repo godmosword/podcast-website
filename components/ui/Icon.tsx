@@ -99,10 +99,12 @@ function renderGlyph(name: IconName) {
         </g>
       );
     case "text-size":
+      // 美術審 L2：原本「A」＋「I」讀成 AI，改成大 A 小 a（單層 a：圓＋右豎）才是字級。
       return (
         <g {...STROKE}>
-          <path d="M5 18 9 6l4 12M6.4 13.5h5.2" />
-          <path d="M16 8.5h4M18 8.5v9M16 17.5h4" />
+          <path d="M3.5 18 8 6l4.5 12M5.2 13.5h5.6" />
+          <circle cx="17.5" cy="14.5" r="3.2" />
+          <path d="M20.7 11.3V18" />
         </g>
       );
     default: {

@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useId, useState, type FormEvent } from "react";
-import { trackSubscribeSubmit } from "@/lib/analytics";
+import { trackPlatformClick, trackSubscribeSubmit } from "@/lib/analytics";
+import { BrandSvg, PLATFORM_ICON_PATHS } from "@/lib/connect-icons";
+import { appendPlatformUtm } from "@/lib/platform-utm";
+import { visiblePlatforms } from "@/lib/platforms";
 import {
   SUBSCRIBE_CONSENT_AFTER_PRIVACY,
   SUBSCRIBE_CONSENT_BEFORE_PRIVACY,
@@ -15,9 +18,8 @@ import {
   SUBSCRIBE_SUBMIT_LABEL,
   SUBSCRIBE_SUBMITTING_LABEL,
   SUBSCRIBE_SUCCESS,
-  SUBSCRIBE_UNAVAILABLE_LINK,
-  SUBSCRIBE_UNAVAILABLE_PREFIX,
-  SUBSCRIBE_UNAVAILABLE_SUFFIX,
+  SUBSCRIBE_UNAVAILABLE_NOTE,
+  SUBSCRIBE_UNAVAILABLE_PLATFORMS_LABEL,
 } from "@/lib/subscribe-copy";
 import styles from "./SubscribeForm.module.css";
 
@@ -100,12 +102,35 @@ export default function SubscribeForm({ source = "subscribe_page" }: Props) {
   }
 
   if (state === "unavailable") {
+    // 美術審 M8：關閉狀態不是空殼——四個平台的大按鈕就是這頁的主內容，
+    // 頁尾 ConnectHub 仍在，這裡只是把同一組連結拉到首屏。
     return (
-      <p className={styles.unavailable}>
-        {SUBSCRIBE_UNAVAILABLE_PREFIX}{" "}
-        <Link href="/subscribe#connect">{SUBSCRIBE_UNAVAILABLE_LINK}</Link>{" "}
-        {SUBSCRIBE_UNAVAILABLE_SUFFIX}
-      </p>
+      <div className={styles.closed}>
+        <p className={styles.unavailable}>{SUBSCRIBE_UNAVAILABLE_NOTE}</p>
+        <nav
+          className={styles.platformList}
+          aria-label={SUBSCRIBE_UNAVAILABLE_PLATFORMS_LABEL}
+        >
+          {visiblePlatforms().map((p) => (
+            <a
+              key={p.label}
+              className={styles.platformBtn}
+              href={appendPlatformUtm(p.url, { source: "subscribe-closed" })}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`在 ${p.label} 收聽`}
+              onClick={() => trackPlatformClick(p.label, "subscribe-closed")}
+            >
+              <span className={styles.platformBadge} style={{ background: p.color }}>
+                <BrandSvg className={styles.platformIcon}>
+                  {PLATFORM_ICON_PATHS[p.icon]}
+                </BrandSvg>
+              </span>
+              <span className={styles.platformLabel}>{p.label}</span>
+            </a>
+          ))}
+        </nav>
+      </div>
     );
   }
 
