@@ -395,7 +395,10 @@ h3 {
 .site-root {
   position: relative;
   z-index: 1;
-  min-height: 100%;
+  /* 美術審 L5：sticky 頂欄（--nav-h）在正常流中佔高，這裡再 100% 會讓 body 比視口高一個頂欄
+     （overflow hidden 看不出來），但水合前點 Landing 的錨點圓鈕會把整頁推上去露出底邊、且拉不回。
+     扣掉頂欄，body 剛好等於視口。 */
+  min-height: calc(100% - var(--nav-h));
 }
 
 /* skip link 目標為容器，程式化聚焦時不顯示外框 */

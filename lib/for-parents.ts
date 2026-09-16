@@ -69,7 +69,7 @@ export function parentLandingFaqs(
 ): FaqItem[] {
   return [
     {
-      question: "有哪些適合 3–6 歲的中文車車 Podcast？",
+      question: "有哪些適合 3–7 歲的中文車車 Podcast？",
       answer: `車車遊樂園是適合 ${facts.ageRange} 親子共聽的${facts.language}車車故事 Podcast，目前官網收錄 ${facts.episodeCount} 集，包含車車、情緒、合作、好習慣等主題。`,
     },
     {

@@ -28,11 +28,6 @@ const GAME_TYPE_LABEL: Record<GameMeta["gameType"], string> = {
   coloring: "塗顏色",
 };
 
-/** 精簡年齡標：3–7 歲 → 3–7 */
-function ageShort(ageRange: string): string {
-  return ageRange.replace(/\s*歲\s*$/u, "");
-}
-
 /**
  * 家長在選卡當下就需要的判斷資訊（時長／有無時間壓力）。
  * 文案刻意短：meta 行要在 3 欄網格最窄的 234px 卡上仍保持單行，
@@ -87,7 +82,7 @@ function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
             priority={eager}
             {...(eager ? {} : { loading: "eager" as const })}
           />
-          <span className={styles.ageBadge}>{ageShort(game.ageRange)}</span>
+          {/* 美術審 L3：封面角標的年齡拿掉，只留下方 meta 列的「3–7 歲」（同一資訊不出現兩次）。 */}
           <span className={styles.playFab} aria-hidden>
             <Icon name="play" size={16} />
           </span>

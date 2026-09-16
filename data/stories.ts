@@ -78,8 +78,8 @@ export const manualStories: ManualStory[] = [
       327.3,
     ],
     summary: "安安救護車出任務時遇到困難，學會開口求助，和夥伴一起合作完成任務。",
-    ageRange: "3–7 歲",
-    tags: ["勇敢", "合作", "求助"],
+    ageRange: "約 3–7 歲",
+    tags: ["勇氣", "合作", "求助"],
     captions: [
       "介紹安安救護車",
       "安安救護車的特徵",
@@ -133,7 +133,7 @@ export const manualStories: ManualStory[] = [
       287.8,
     ],
     summary: "東東挖土機有點膽小，卻鼓起勇氣，一步步完成任務。",
-    ageRange: "3–7 歲",
+    ageRange: "約 3–7 歲",
     tags: ["勇氣", "成長"],
     captions: [
       "介紹東東挖土機",
@@ -183,7 +183,7 @@ export const manualStories: ManualStory[] = [
     ],
     summary:
       "鈴鈴清潔車的早安音樂鈴壞掉了，她仍努力提醒車車朋友起床，學會守信用、說到做到。",
-    ageRange: "3–7 歲",
+    ageRange: "約 3–7 歲",
     tags: ["守信用", "負責"],
     captions: [
       "介紹鈴鈴清潔車",
@@ -236,7 +236,7 @@ export const manualStories: ManualStory[] = [
     ],
     summary:
       "小紅賽車在比賽中遇到挫折，學會接受失敗、整理心情，明白不是第一名也沒關係。",
-    ageRange: "4–7 歲",
+    ageRange: "約 4–7 歲",
     tags: ["勇氣", "接受失敗"],
     captions: [
       "主持人介紹賽車故事",
@@ -299,7 +299,7 @@ export const manualStories: ManualStory[] = [
     ],
     summary:
       "在公園遇見可愛的無人機小飛，大家一起幫小妹妹找回小兔子，學會安全飛行、遵守規則。",
-    ageRange: "4–7 歲",
+    ageRange: "約 4–7 歲",
     tags: ["安全", "合作", "助人"],
     captions: [
       "故事開場與介紹",
@@ -341,7 +341,7 @@ export const manualStories: ManualStory[] = [
     pageCount: 21,
     summary:
       "Bonbon 發揮創意，想出有剪頭髮車、洗澡車、運動車的未來電動車，坐車不無聊還能完成好多事。",
-    ageRange: "3–7 歲",
+    ageRange: "約 3–7 歲",
     tags: ["想像力", "創意"],
     captionTimes: [
       0,

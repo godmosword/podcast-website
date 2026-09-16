@@ -97,10 +97,12 @@
   gap: var(--space-3);
   margin-top: var(--space-6);
   padding: 12px 16px;
+  /* 美術審 M7：拿掉左緣色條（DESIGN 明列不做的容器樣式），改與家長工具卡同一種
+     elevated surface：hairline＋卡片底＋elev-1。 */
   border: 1px solid var(--hairline);
-  border-left: 4px solid var(--warm-accent);
   border-radius: var(--radius-md);
-  background: var(--warm-chip-bg);
+  background: var(--surface-elevated);
+  box-shadow: var(--elev-1);
 }
 
 .threadsCallout h2 {
@@ -145,7 +147,8 @@
 
 .facts {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* M7：三格（刪「同步檢查」——營運細節不是家長要的數字），格高自然齊。 */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-3);
   margin: var(--space-4) 0 0;
 }
@@ -325,7 +328,8 @@
   }
 
   .facts {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* 三格一列（2 欄會剩一格孤兒） */
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .storyGrid {
@@ -369,7 +373,8 @@
     grid-column: 2;
     grid-row: 1 / span 4;
     align-self: stretch;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* 右欄約 300px：三格直向堆疊，格高一致（M7） */
+    grid-template-columns: minmax(0, 1fr);
     align-content: center;
     margin-top: 0;
   }

@@ -97,7 +97,7 @@ CTA 三階（美術審 H1；token 在 `app/globals.css`）。不建共用 React 
 | `--c-teal` | `#79c8c1` |
 | `--c-lilac` | `#c5b3e6` |
 
-頁面背景為純白（`--bg`），四角極淡多彩柔光由獨立節點 `.site-backdrop`（`position: fixed`）繪製，內容包在 `.site-root` 內；**不在 `body::before` 上畫 gradient**，避免 iOS Safari 上 sticky／合成層白塊跑版。柔光飽和度刻意偏低。實作見 `app/globals.css`、`app/layout.tsx`。
+頁面背景為純白（`--bg`），四角極淡多彩柔光由獨立節點 `.site-backdrop`（`position: fixed`）繪製，內容包在 `.site-root` 內（`min-height: calc(100% - var(--nav-h))`，扣掉固定頂欄高度，否則短頁 body 會比視窗高一個頂欄、水合前點圓鈕會推頁）；**不在 `body::before` 上畫 gradient**，避免 iOS Safari 上 sticky／合成層白塊跑版。柔光飽和度刻意偏低。實作見 `app/globals.css`、`app/layout.tsx`。
 每則故事另有 `story.color`（hex），用於 CTA、播放鈕（卡片本身不再用極淡色邊）。
 
 ### 夜間色票原則（暖夜靛）
@@ -167,7 +167,7 @@ meta `theme-color`（夜）對齊 `--bg`：`lib/theme.ts` 的 `NIGHT_THEME_COLOR
 
 ### 標籤底 `.marker`
 - 定義於 `app/globals.css`：柔和 pill 底色（無粗糙濾鏡、無歪斜）；僅用於少數標籤（如 StoryCard EP）。
-- 變體：`.marker-pink/sky/mint/lilac`，或以 inline `--marker-color`。
+- 變體：`.marker-pink/sky/mint/lilac`，或以 inline `--marker-color`。StoryCard 的 EP chip **固定 `.marker-lilac`**，不隨 `story.color` 逐集變色（美術審 L3：同一列表裡 chip 是導航元件，不是每集的品牌色）。
 
 ## 字型
 
@@ -262,14 +262,14 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 
 | 元件 | 說明 |
 |------|------|
-| `SiteHeader` | 吉祥物 + 標題（首頁完整版 / 內頁精簡版） |
+| `SiteHeader` | 吉祥物 + 標題（首頁完整版 / 內頁精簡版）；夜間 `.scene::after` 鋪 `--bedtime-veil` 漸層（上 38%／中 22%／底 12%，同 Landing scrim 配方），讓內頁 hero 亮度對齊 Landing 夜間，不做均勻降亮度 |
 | `StoryCard` | 封面、EP meta、elevated surface（`--elev-*`）；摘要 clamp 桌面 2 行、≤480px 3 行 |
 | `Chip` | 篩選與標籤 pill，`aria-pressed` |
 | `PlayButton` | 全寬 CTA，主題色底 |
 | `StoryMeta` | EP / 時長（標註） / 車種 chip |
 | `StoryProgressBadge` | 「已聽完」星章，貼封面右上角。語彙與宇宙地圖一致（`⭐` + `aria-label="已聽完"`）；只表達聽完單一狀態，不做「聽到一半」（progress store 的 `continue` 為全站單一欄位，標記會無預警消失） |
 | `StoryPlayer` | 全螢幕黑底、字幕底板、底部控制列 |
-| `SiteFooter` | 平台連結；不放「給家長：點播放鈕…」導讀、不放遊樂園入口（`/games` 走導覽）、不放安心訊號列；`ConnectHub` 區塊用 `--hairline` + `--elev-1`（頂欄膠囊白邊未改）。親子遊樂地圖仍可傳 `parentNote` |
+| `SiteFooter` | 平台連結；不放「給家長：點播放鈕…」導讀、不放遊樂園入口（`/games` 走導覽）、不放安心訊號列；`ConnectHub` 區塊用 `--hairline` + `--elev-1`（頂欄膠囊白邊未改）。 ≤480 每區塊四個圖示走 4 欄 grid（不折 3+1）；meta 列的法務連結分隔點由 `.metaLegal::before` 畫，法務連結獨立成行時不畫（無孤懸點）。親子遊樂地圖仍可傳 `parentNote` |
 | `GamePageShell` | 街機兩款遊戲共同外框，負責返回導覽、可及性與資產預載 |
 | `ColoringPageShell` | 繪本著色活動外框（不掛 GameKit） |
 | `GameChrome` | 遊戲內暫停、音效與設定對話框 |

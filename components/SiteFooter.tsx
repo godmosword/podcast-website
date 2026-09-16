@@ -95,10 +95,9 @@ export default function SiteFooter({
           <Link href="/studio" className={styles.metaLink}>
             節目數據
           </Link>
-          <span className={styles.metaSep} aria-hidden>
-            ·
-          </span>
-          <Link href="/legal" className={styles.metaLink}>
+          {/* 美術審 L1：法律連結獨立一段，≤480 自成一行（不再讓「·」孤懸在行尾）；
+              >480 的分隔點由 CSS ::before 掛在它自己身上，不會被換行拆開。 */}
+          <Link href="/legal" className={`${styles.metaLink} ${styles.metaLegal}`}>
             使用條款與免責聲明
           </Link>
         </nav>

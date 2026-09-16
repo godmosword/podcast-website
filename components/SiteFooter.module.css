@@ -140,9 +140,26 @@
   color: var(--ink-soft);
 }
 
+/* 法律連結：>480 與前面三個連結同一行，分隔點掛在自己身上（換行時一起走）；≤480 獨立一行置中。 */
+.metaLegal::before {
+  content: "·";
+  margin-right: 6px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  opacity: 0.55;
+}
+
 @media (max-width: 480px) {
   .metaStrip {
     row-gap: 0;
+  }
+
+  .metaLegal {
+    flex-basis: 100%;
+  }
+
+  .metaLegal::before {
+    content: none;
   }
 }
 

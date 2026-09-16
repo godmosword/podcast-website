@@ -111,13 +111,22 @@
     padding: 14px 14px 16px;
   }
 
+  /* 美術審 L1：四個平台在 390 折成 3+1（YouTube／Email 各自孤兒一列）。
+     ≤480 改固定 4 欄 grid，欄寬隨容器縮（320 仍 ≥65px，放得下 52px 徽章）。 */
   .row {
-    gap: 12px 10px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px 6px;
   }
 
   .item {
-    width: 80px;
+    width: auto;
+    min-width: 0;
     gap: var(--space-2);
+  }
+
+  .label {
+    overflow-wrap: anywhere;
   }
 
   .badge {

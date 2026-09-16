@@ -124,19 +124,6 @@
   transform: scale(1.04);
 }
 
-.ageBadge {
-  position: absolute;
-  z-index: 1;
-  left: 8px;
-  bottom: 8px;
-  padding: 4px 8px;
-  border-radius: var(--radius-pill);
-  color: var(--on-dark);
-  background: rgba(47, 41, 54, 0.76);
-  backdrop-filter: blur(6px);
-  font-size: var(--fs-meta);
-  font-weight: 900;
-}
 
 .playFab {
   position: absolute;

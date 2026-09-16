@@ -29,7 +29,7 @@ describe("parentLandingFaqs", () => {
     expect(faqs.length).toBeGreaterThanOrEqual(3);
     expect(faqs.map((faq) => faq.question)).toEqual(
       expect.arrayContaining([
-        "有哪些適合 3–6 歲的中文車車 Podcast？",
+        "有哪些適合 3–7 歲的中文車車 Podcast？",
         "車車遊樂園是什麼？",
         "如何陪孩子一起聽？",
       ]),

@@ -404,7 +404,7 @@ test("角色圖鑑與親子指南不含內頁 hero", async ({ page, request }) =
   ).toBeVisible();
   const tools = page.getByRole("heading", { name: "家長工具" });
   const podcastFaq = page.getByRole("heading", {
-    name: "有哪些適合 3–6 歲的中文車車 Podcast？",
+    name: "有哪些適合 3–7 歲的中文車車 Podcast？",
   });
   await expect(tools).toBeVisible();
   const toolsBox = await tools.boundingBox();

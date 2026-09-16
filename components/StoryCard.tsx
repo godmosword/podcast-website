@@ -88,12 +88,10 @@ export default function StoryCard({
 
       <span className={`${styles.body} ${isGrid ? styles.bodyGrid : ""}`}>
         <span className={styles.meta}>
-          <span
-            className={`${styles.ep} marker`}
-            style={{ ["--marker-color" as string]: story.color }}
-          >
-            EP {story.ep}
-          </span>
+          {/* 美術審 L3：EP chip 固定淡紫（與 LatestHero「NEW · EP」ribbon 同色），
+              不再隨 story.color 變——列表裡一片淡紫冒一顆黃會讀成錯誤而不是意義。
+              story.color 留給進度條／CTA 淡底。 */}
+          <span className={`${styles.ep} marker marker-lilac`}>EP {story.ep}</span>
           {!hideMeta && (
             <>
               <span>{formatDate(story.date)}</span>

@@ -70,10 +70,6 @@ export default function ForParentsPage() {
             <dt>適合年齡</dt>
             <dd>{facts.ageRange}</dd>
           </div>
-          <div>
-            <dt>同步檢查</dt>
-            <dd>{facts.syncCadence}</dd>
-          </div>
         </dl>
       </header>
 
@@ -135,7 +131,7 @@ export default function ForParentsPage() {
       ) : null}
 
       <section className={styles.answerSection} aria-labelledby="podcast-heading">
-        <h2 id="podcast-heading">有哪些適合 3–6 歲的中文車車 Podcast？</h2>
+        <h2 id="podcast-heading">有哪些適合 3–7 歲的中文車車 Podcast？</h2>
         <p>{faqs[0].answer}</p>
       </section>
 
