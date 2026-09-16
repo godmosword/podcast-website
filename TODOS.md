@@ -56,18 +56,18 @@
 > | H2 | `/stories`、`/feedback` 桌機色底只鋪內容欄 | 已修 `7d6f4e31` |
 > | H3 | 宇宙地圖手機首屏島太小、熱點蓋島 | 已修 `f712c5d9`（三處與 Plan 不同已記於 Plan 實作紀錄） |
 > | M1 | 故事頁桌機三種欄寬、本集介紹卡懸中 | 未動 |
-> | M2 | 夜間 hero 亮度不一致（SiteHeader 無 scrim） | 已修：`.scene::after` 夜間 `--bedtime-veil` 漸層（同 Landing 配方）見本 commit |
+> | M2 | 夜間 hero 亮度不一致（SiteHeader 無 scrim） | 已修：`.scene::after` 夜間 `--bedtime-veil` 漸層（同 Landing 配方）`3f298882` |
 > | M3 | `/stories` 桌機 hero 比 LatestHero 卡小；`/subscribe` 重複同圖 | 已修：≥768 頁首列（標題左、海報 ≤300px 右）見本 commit；`/subscribe` 桌面本已是兩欄 Option A，同圖沿用、不另生圖 |
 > | M4 | 角色圖鑑定裝照場景／棚拍兩套背景混排 | 未動 |
 > | M5 | 手機故事列表 88px 縮圖＋三行摘要像目錄 | 未動 |
 > | M6 | RelatedStories 與 StoryCard anatomy 不同 | 未動 |
-> | M7 | 家長頁育兒小筆記左緣色條容器；統計格第二列變高 | 已修：callout 改 hairline＋elevated 卡；統計格刪「同步檢查」剩三格，桌機直向堆疊 見本 commit |
+> | M7 | 家長頁育兒小筆記左緣色條容器；統計格第二列變高 | 已修：callout 改 hairline＋elevated 卡；統計格刪「同步檢查」剩三格，桌機直向堆疊 `3f298882` |
 > | M8 | `/subscribe` 登記關閉時是空殼 | 未動 |
-> | L1 | 頁尾 ConnectHub 390 折 3+1；分隔點孤懸行尾 | 已修：≤480 4 欄 grid；分隔點改 `.metaLegal::before`，折行時不畫 見本 commit |
+> | L1 | 頁尾 ConnectHub 390 折 3+1；分隔點孤懸行尾 | 已修：≤480 4 欄 grid；分隔點改 `.metaLegal::before`，折行時不畫 `3f298882` |
 > | L2 | 播放器「AI」鈕無說明；主播放鈕不夠主 | 未動 |
-> | L3 | EP chip 隨集變色；遊戲卡年齡出現兩次 | 已修：EP chip 固定 `.marker-lilac`；遊戲卡拿掉封面角標 見本 commit |
-> | L4 | 年齡「3–6」vs「約 3–7」；「勇氣」「勇敢」兩分類 | 已修：`ageRange` 統一「約 N–7 歲」、FAQ 3–7、「勇敢」併「勇氣」 見本 commit |
-> | L5 | `.site-root{min-height:100%}` 疊 65px 頂欄，水合前點圓鈕推頁 | 已修：`min-height: calc(100% - var(--nav-h))` 見本 commit |
+> | L3 | EP chip 隨集變色；遊戲卡年齡出現兩次 | 已修：EP chip 固定 `.marker-lilac`；遊戲卡拿掉封面角標 `3f298882` |
+> | L4 | 年齡「3–6」vs「約 3–7」；「勇氣」「勇敢」兩分類 | 已修：`ageRange` 統一「約 N–7 歲」、FAQ 3–7、「勇敢」併「勇氣」 `3f298882` |
+> | L5 | `.site-root{min-height:100%}` 疊 65px 頂欄，水合前點圓鈕推頁 | 已修：`min-height: calc(100% - var(--nav-h))` `3f298882` |
 > | L6 | `/about` 全站唯一無圖頁（建議） | 未動 |
 > | L7 | Landing 首段桌機圖左上三分之一霧化（資產） | 未動 |
 >
