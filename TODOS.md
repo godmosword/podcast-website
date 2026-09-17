@@ -69,7 +69,7 @@
 > | L4 | 年齡「3–6」vs「約 3–7」；「勇氣」「勇敢」兩分類 | 已修：`ageRange` 統一「約 N–7 歲」、FAQ 3–7、「勇敢」併「勇氣」 `3f298882` |
 > | L5 | `.site-root{min-height:100%}` 疊 65px 頂欄，水合前點圓鈕推頁 | 已修：`min-height: calc(100% - var(--nav-h))` `3f298882` |
 > | L6 | `/about` 全站唯一無圖頁（建議） | 已修：馬米＆Bonbon 圓形頭像（既有定裝照） `fc0467a1` |
-> | L7 | Landing 首段桌機圖左上三分之一霧化（資產） | 已修（不生圖）：hero-parallax props 合成遠景，腳本＋原稿在 `assets/landing/segment-stories/` 見本 commit |
+> | L7 | Landing 首段桌機圖左上三分之一霧化（資產） | 已修（不生圖）：hero-parallax props 合成遠景，腳本＋原稿在 `assets/landing/segment-stories/` `7b3b1d11` |
 >
 > 舊註「本文不在 repo，無法對照現況」已由上表取代。下面只列 DESIGN／TODOS／CHANGELOG **已寫、未貼 M／L 號**、且 H1 刻意沒做的後續（不是把它們編成 M1…）。
 >
