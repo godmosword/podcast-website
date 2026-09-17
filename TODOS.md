@@ -55,7 +55,7 @@
 > | H1 | CTA 一站七種，無主／次階層 | 已修：`3f519047`→`7652354d`＋收尾（LatestHero 綁 solid、Threads 綁 soft、9 張 Darwin 基線重錄）見本 commit |
 > | H2 | `/stories`、`/feedback` 桌機色底只鋪內容欄 | 已修 `7d6f4e31` |
 > | H3 | 宇宙地圖手機首屏島太小、熱點蓋島 | 已修 `f712c5d9`（三處與 Plan 不同已記於 Plan 實作紀錄） |
-> | M1 | 故事頁桌機三種欄寬、本集介紹卡懸中 | 待 /agent-plan（2026-09-16 決定：跨 StoryPlayer／Related／FAQ 欄寬，先出 Approved Plan） |
+> | M1 | 故事頁桌機三種欄寬、本集介紹卡懸中 | 已修：Plan `docs/plans/2026-09-17-story-desktop-intro-column.md`；介紹卡進左欄與 CTA 同軸、去左緣條 見本 commit |
 > | M2 | 夜間 hero 亮度不一致（SiteHeader 無 scrim） | 已修：`.scene::after` 夜間 `--bedtime-veil` 漸層（同 Landing 配方）`3f298882` |
 > | M3 | `/stories` 桌機 hero 比 LatestHero 卡小；`/subscribe` 重複同圖 | 頁首列已還原：hero 置中大圖、標題在下（使用者回饋主視覺被擠掉）；`/subscribe` 桌面本已是兩欄 Option A，同圖沿用、不另生圖 |
 > | M4 | 角色圖鑑定裝照場景／棚拍兩套背景混排 | 已修（CSS 統一底墊，不重拍）：日間 multiply＋兩主題邊緣暈影 `fc0467a1` |

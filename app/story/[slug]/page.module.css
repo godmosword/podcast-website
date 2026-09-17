@@ -160,7 +160,10 @@
   background: var(--surface-elevated);
 }
 
-/* 本集介紹：較窄、與封面留白，降成安靜輔助面（Content over chrome） */
+/* 本集介紹：較窄、與封面留白，降成安靜輔助面（Content over chrome）。
+   美術審 M1：卡身與 .contentSection 同一種卡（hairline＋elevated＋shadow-sm），
+   拿掉左緣色條（DESIGN「Content over chrome」：容器不做左緣色條）；標題不加短槓、
+   夜間不套 --warm-card-glow——它在 ≥980 是 hero 組合的一部分，不能再多一個亮點。 */
 .introSection {
   max-width: 380px;
   margin-top: var(--space-8);
@@ -168,7 +171,6 @@
   margin-bottom: var(--space-8);
   padding: var(--space-6) var(--space-4);
   border: 1px solid var(--hairline);
-  border-left: 3px solid color-mix(in srgb, var(--sun) 70%, var(--hairline));
   border-radius: var(--radius-lg);
   background: var(--surface-elevated);
   box-shadow: var(--shadow-sm);
@@ -177,8 +179,7 @@
 
 :global([data-theme="night"]) .introSection {
   border-color: var(--hairline);
-  border-left-color: color-mix(in srgb, var(--c-lilac) 45%, var(--hairline));
-  background: var(--surface-glass);
+  background: var(--surface-elevated);
   box-shadow: var(--shadow-sm);
 }
 
@@ -231,6 +232,8 @@
     max-width: 980px;
   }
 
+  /* 美術審 M1：本集介紹與共讀連結也進左欄（actions → intro → parent），
+     封面縱貫全部具名列；左欄只剩一個對齊軸＝CTA 的左緣與寬度。 */
   .article {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
@@ -239,7 +242,9 @@
       "subtitle cover"
       "meta     cover"
       "metaStack cover"
-      "actions  cover";
+      "actions  cover"
+      "intro    cover"
+      "parent   cover";
     column-gap: var(--space-8);
     align-items: start;
   }
@@ -282,6 +287,28 @@
   .actions {
     grid-area: actions;
     margin-top: var(--space-6);
+  }
+
+  /* 分享列跟著左欄靠左：ShareButton .row 預設置中，在左欄裡會變成
+     「滿寬鈕 → 置中列 → 靠左卡」的混合軸。 */
+  .actions .shareRow {
+    justify-content: flex-start;
+  }
+
+  /* (0,2,0) 壓過 .article > * 的橫跨；底 margin 保留 --space-8，
+     與 .contentSection 的頂 margin 合成 hero → 正文的 64px 層級間距。 */
+  .article > .introSection {
+    grid-area: intro;
+    max-width: none;
+    margin: var(--space-6) 0 var(--space-8);
+  }
+
+  /* 共讀連結接在介紹卡末句之後、離開 CTA 叢集，不再像第二個行動。
+     hasParentCoListen=false 時此列無項目、高 0。 */
+  .article > .parentCta {
+    grid-area: parent;
+    margin: 0;
+    text-align: left;
   }
 }
 
