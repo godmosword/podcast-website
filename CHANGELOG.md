@@ -21,6 +21,7 @@
 
 ### Fixed
 
+- **Landing 首段桌機圖左上補遠景（美術審 L7）**：`segment-stories.jpg` 原稿左上三分之一是空的奶油底、構圖重心偏右。不生圖：用同一套 `hero-parallax` 黏土 props（摩天輪、樹、灌木）以 PIL 合成成大氣透視的遠景（`assets/landing/segment-stories/compose-distant-park.py`，原稿另存），重出 WebP／AVIF（75KB，與原相同）。設計審（Opus）三點採納：遠景 haze 整體高於中景灌木（樹 0.34、灌木 0.28、飽和 ≤1.0、摩天輪 blur 1.4）、底部淡出改垂直漸層×兩端 taper＋16px 模糊（不再是齊頭霧線）、整組右移 25px 離開氣球區＋摩天輪 250→225。桌機 `object-position` 試過偏右 70% 會把補上的摩天輪切掉，維持 `center`。重錄 home 1280 ×2、landing-stories 1280 ×2 基線。**未改** Apple sync workflow、`LandingSegment` 版面、`useMapCamera`／`ZoneSheet`。
 - **故事頁桌機欄寬統一、本集介紹卡歸位（美術審 M1）**：≥980 原本三種寬度（左欄 488、介紹卡 380 懸中、其餘 940），介紹卡改進左欄、與「開始看故事」同左緣同寬，grid areas `actions → intro → parent`（共讀連結接在介紹卡之後，離開 CTA 叢集）；分享列一併靠左。介紹卡拿掉 3px 左緣色條（全寬度）、卡身與大綱卡同語彙，標題不加短槓、夜間不套暖黃 glow。實測 1280：`intro.left/width` 170/488 = actions、`contentSection` 頂從 950 提到 787；390／768 差異只落在介紹卡 bbox（左緣條），版面零差。DESIGN「Content over chrome」列補「容器不做左緣色條」全站規則。Plan：`docs/plans/2026-09-17-story-desktop-intro-column.md`（工程審 Reject→四點採納、設計審 Approve with changes→七點採納；實作後工程審無 blocker）。**未改** Apple sync workflow、`StoryPlayer`、`useMapCamera`／`ZoneSheet`。
 - **漢堡抽屜選中底對齊頂欄**：日間抽屜白底若直接疊 `rgba(107, 63, 30, 0.14)` 會讀成灰米色；改 `color-mix(14% 褐, --landing-nav-cta-bg)`，與頂欄 `.navLink` 疊在桃色玻璃上的結果一致。夜間抽屜仍走暖面板抬升（暖褐板上不用頂欄那層 teal）。左 accent 條保留。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
 - **`/stories` 桌機 hero 還原置中大圖**：M3 頁首列把「全部故事」放左、海報縮到右側 ≤300px，主視覺被擠掉。還原 SiteHeader 在上、標題在下；LatestHero solid CTA 與 Threads soft 保留。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。

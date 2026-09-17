@@ -336,3 +336,5 @@ Hero 圖走 `images.edit` + `public/characters/` 定裝照參考圖，與單集�
 5. **桌機列表顯示（僅 ≥768）**：預設「縮圖」——≥768 兩欄、≥1280 三欄直式卡（封面在上、標題最多 2 行、tag 靠底）。「完整」維持橫式一列，列表 `max-width: 56rem` 置中。切換鈕文案「縮圖／完整」，群組 `aria-label="故事列表顯示方式"`，`<768` `display: none`。旗標掛 `<html data-stories-view="list">`（有＝完整，沒有＝縮圖）；偏好 `localStorage` key `cheche:stories-view`。卡片 markup 共用，**不**用 React `variant` 切換。1280 只決定目錄欄數，不是新的全站 viewport 層。
 
 Landing segment hero 生圖：`npm run generate:landing-art -- --dry-run`（橫版）；直版 `--portrait`；approve 後覆蓋 `public/landing/`。
+
+首段橫版 `segment-stories.jpg` 是**合成圖**（美術審 L7，2026-09-17）：生圖原稿左上三分之一是空的奶油底，用同一套 `hero-parallax` 黏土 props（L1 摩天輪／樹、L2 灌木）以 `assets/landing/segment-stories/compose-distant-park.py` 貼成遠景（往天空色混 28–36%、飽和 ≤1.0、摩天輪 blur 1.4，遠景一律比原圖中景灌木更淡；底部垂直淡出×兩端 taper 再 16px 模糊；氣球區保留原圖），原稿存 `assets/landing/segment-stories/original-2026-06-25.jpg`。下次**重生**橫版時要把「左上補遠景遊樂設施」寫進 prompt，並刪掉這段合成；換圖後跑 `npm run optimize:lcp-images` 重出 WebP／AVIF。桌機 `object-position` 維持 `center 40%`——1280×835 會左右各裁 ~100px，偏右裁法會把補上的左側摩天輪切掉。

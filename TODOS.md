@@ -44,7 +44,7 @@
 >
 > | ID | 內容 | 狀態 |
 > |----|------|------|
-> | H1 | CTA 語彙：第一刀七處主鈕墨板白字；第二刀 soft／quiet token；`.subscribeCta` 去玻璃＋七處綁 `--cta-solid-*` | 程式完成（第三刀在 PR #165，未合 `main`）；Darwin 基線未重錄 |
+> | H1 | CTA 語彙：第一刀七處主鈕墨板白字；第二刀 soft／quiet token；`.subscribeCta` 去玻璃＋七處綁 `--cta-solid-*` | 已修：三刀皆入 `main`（#163、#165、`7652354d`），Darwin 基線已重錄 |
 > | H2 | `/stories`、`/feedback` 桌機暖色底全出血 | `7d6f4e31` |
 > | H3 | 宇宙地圖 ≤480 直向直式舞台 720×1400 | `f712c5d9` |
 >
@@ -69,7 +69,7 @@
 > | L4 | 年齡「3–6」vs「約 3–7」；「勇氣」「勇敢」兩分類 | 已修：`ageRange` 統一「約 N–7 歲」、FAQ 3–7、「勇敢」併「勇氣」 `3f298882` |
 > | L5 | `.site-root{min-height:100%}` 疊 65px 頂欄，水合前點圓鈕推頁 | 已修：`min-height: calc(100% - var(--nav-h))` `3f298882` |
 > | L6 | `/about` 全站唯一無圖頁（建議） | 已修：馬米＆Bonbon 圓形頭像（既有定裝照） `fc0467a1` |
-> | L7 | Landing 首段桌機圖左上三分之一霧化（資產） | 擱置（2026-09-16 決定）：需重生橫版圖，付費生圖紅線，下次重生時補左上景 |
+> | L7 | Landing 首段桌機圖左上三分之一霧化（資產） | 已修（不生圖）：hero-parallax props 合成遠景，腳本＋原稿在 `assets/landing/segment-stories/` 見本 commit |
 >
 > 舊註「本文不在 repo，無法對照現況」已由上表取代。下面只列 DESIGN／TODOS／CHANGELOG **已寫、未貼 M／L 號**、且 H1 刻意沒做的後續（不是把它們編成 M1…）。
 >
