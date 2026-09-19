@@ -27,6 +27,33 @@
 - **後續：拿掉 CTA `nowrap`**：把 `LandingSegment.tsx` 的 `" →"` 半形空白改不斷行空白，箭頭才不會孤行；同時避開 <348px Dudu 遮箭頭、文字級 200% 被 `.panel` 裁尾。
 - **後續：勿靜默啟用 `playCta`**：`LandingSegment.tsx` 三元式會讓主 CTA 從 56px／`--fs-h2`／不透明墨板退回 44px／`.subscribeCta`，契約測不會紅。`.subscribeCta` 已脫離玻璃；啟用前仍須處理字級／高度落差，且不得把分區主 CTA 換成橘 `.playCta`。
 
+### 遊樂園美術／可玩性審（2026-09-19）待做
+
+> **審法：** 對照 main `b8a7960d`，在 Vercel prod（`podcast-website-mu.vercel.app`）用 Playwright 實玩三款：390×844、390×664（Safari 有工具列的真實高度）、360×740、1280×800，日夜兩色；消消樂打完第 1 關進第 2 關、方塊「標準」堆到頂、著色本實際落筆。全部可載入、無 console error。
+> **總評：** hub 與封面（黏土 3D）很強；遊戲內部跟封面差一個世代；手機版面把遊戲本體擠成配角；另有 1 個真 bug。
+> **編號：** 前綴 `G-` 以免跟 2026-09-16 看板的 H／M／L 撞號。打 ✅ 時附 commit hash。
+> **建議順序：** G-C1 → G-H4（各 <1 小時）→ G-H1＋G-H2＋G-H3（手機版面，一起做）→ G-H5 → G-M1／G-M2（要出圖，走生圖 SOP＋人工審圖）。G-H 組建議開 `/agent-plan`。
+
+| ID | 級 | 項目 | 證據／根因 | 修法方向 | 位置 | 工時 | 狀態 |
+|----|----|------|-----------|---------|------|------|------|
+| G-C1 | C | **消消樂「暫停」壞掉**：按下後暫停鈕直接消失、沒有「繼續」，棋盤照常可點（按完暫停仍能消到 1/4） | controller 註冊 effect 的 deps 含 `startLevel` ← `armIdleHint` ← `inputPaused` ← host `status`；status 變 `paused` 就重跑 effect，呼叫 `instance.notifyReady("title")` 把 status 打回 `ready`（順帶關 BGM、`useVisibilityPause` 失效） | controller 用 ref 註冊；`notifyReady("title")` 只在 mount 跑一次；補回歸測試「pause 後 toolbar 有『繼續遊戲』且棋盤 disabled」 | `components/games/CandyMatchView.tsx` L333–349、L239–252；`lib/gamekit/games/candy-match/adapter.ts` | S | 待做 |
+| G-H1 | H | **方塊井在真實手機小到不能玩**：390×664 井寬 150px、格子 **15px**；360×740 是 17px；390×844 也只有 22px；桌機 1280×800 井底 824 > 800 要捲 | 井上方吃掉 ~380px：sticky 抬頭 84（≤430 標題換行）＋卡內「繽紛方塊」標題列＋難度 chip＋HUD 130＋教學橫幅 70；`boardScale` 用剩餘高度縮放、下限 300px | 局內 HUD 壓成單列（分數·Lv·下一個）、卡內標題拿掉（h1 已在抬頭）、教學橫幅改浮在井上的 toast、抬頭局內不換行；驗收：390×664 格子 ≥26px、井底＋觸控鍵同屏 | `components/games/BlockDropView.tsx` L1023–1036（縮放）、L88–118（layout metrics）；`components/games/GamePageShell.module.css` `.playHeader`／≤430 換行規則 | M | 待做 |
+| G-H2 | H | **方塊觸控左右鍵只有 29px 寬**（旋轉／落下 64px），6–12 歲拇指難按；DESIGN 觸控 ≥44px 紅線 | 側欄 pad `colW: 64` 內塞兩顆 | 左右各 64px 獨立一列，或改井下方橫列；`TouchControls.test.tsx` 補 ≥44 斷言 | `components/games/BlockDropView.tsx` `getLayoutMetrics` `touch` | S | 待做 |
+| G-H3 | H | **著色本色盤／工具列在手機看不到**：畫布 y=386–744，色盤 792、工具 909；664 高視窗要來回捲才能換色；桌機 800 高同樣（畫布 376–1096、色盤 1140） | 上方 nav＋「← 回遊樂園」＋h1＋標題列＋兩個說明框 ~385px | 色盤＋工具列 `position: sticky; bottom: 0`（含 safe-bottom）；桌機改畫布左、色盤右兩欄；「先選顏色…」與「準備開始創作」合併成一行；e2e 補「畫布可見時色盤 `elementFromPoint` 可命中」 | `components/coloring/ColoringCanvas.tsx`（L676 說明框）、`ColoringCanvas.module.css`、`ColoringToolbar.tsx`、`ColoringPalette.tsx` | M | 待做 |
+| G-H4 | H | 消消樂標題／地圖畫面下方 **200+px 空白**（手機、桌機皆有；title surface 480px vs 容器 684px） | `.playArea{min-height:min(684px,…)}` 是為 360×640 canvas 留的 CLS 空間，消消樂是 DOM | min-height 只給 canvas 遊戲（`[data-game-id="block-drop"]` 或由 GameHost `needsCanvas` 決定） | `components/games/GamePageShell.module.css` `.playArea` | S | 待做 |
+| G-H5 | H | 教學 overlay：① 「開始玩！」只是關閉、沒有真的開始（還要再按開始→地圖→關卡）；② backdrop 蓋不到 sticky 抬頭，抬頭沒變暗且可點（`elementFromPoint` 命中 `.back`） | ② overlay 在 `.playArea`／GameChrome 的 stacking context 內，`z-index:60` 出不去 | ① 文案改「知道了」或真的呼叫 `onStart`；② overlay `createPortal` 到 `document.body` | `lib/gamekit/react/TutorialOverlay.tsx`、`lib/gamekit/host/GameHost.tsx` L381–387 | S | 待做 |
+| G-M1 | M | **封面 vs 遊戲內落差**：封面 3D 黏土；消消樂內是平面向量車、方塊內是粉彩珠珠。方塊封面畫「深藍井＋鮮豔糖塊」，實際「粉彩井＋粉彩塊」對比極低 | `BlockDropView` 井底 `linear-gradient(#fff…)`＋粉彩棋盤格；`CandyMatchPieceArt` 純平面 | 方塊井底改深色／純色讓方塊跳出（封面已定方向）；消消樂棋子加黏土高光／厚度。不動 progress schema | `components/games/BlockDropView.tsx` 井 style、`components/games/CandyMatchPieceArt.tsx` | M | 待做 |
+| G-M2 | M | 消消樂「遊樂園地圖」只是 2×5 文字格＋🔒，3–7 歲不識字看不懂；10 個地點（彩虹入口、泡泡廣場…）局內只換漸層底色 | `CandyMatchView` map screen；`levels.ts` 只有 `themeA/themeB` | 地圖改路徑＋地點小圖（ClayIcons 或生圖）；每關至少一張淡背景 | `components/games/CandyMatchView.tsx` map screen、`lib/games/candy-match/levels.ts` | L | 待做 |
+| G-M3 | M | 局內大量 emoji 當 UI：道具 🫧🌈🧹💡、勝利 🎉⭐、鎖 🔒、方塊 🏆🌈🍭——違反 `docs/GAMEKIT-ART-BIBLE.md`「禁止 emoji 當主要 sprite（hub 卡片除外）」，且和 `ClayIcons` 混用 | — | 統一走 `components/games/ClayIcons.tsx`（缺的補 SVG） | `CandyMatchView.tsx` 道具列／勝利層、`GameEndStation.tsx`、`BlockDropView.tsx` HUD | S | 待做 |
+| G-M4 | M | 方塊背景把封面圖壓到 ~20% 透明度，看起來像圖沒載完 | — | 要嘛清楚一點當場景（加 scrim 保可讀），要嘛拿掉 | `components/games/BlockDropView.tsx` 背景層 | S | 待做 |
+| G-M5 | M | 命名：hub／h1 叫「繽紛樂園」，局內標題叫「繽紛方塊」 | `data/games.ts` title vs `BlockDropView` 內文 | 統一（建議局內拿掉，h1 已持有） | `components/games/BlockDropView.tsx` | S | 待做 |
+| G-M6 | M | 重複資訊：方塊 ready 畫面同時出現 3 組操作提示（modal 內、井下 HintChips、shell `.playHints`）；最佳分同時在抬頭 ⭐ 和 HUD 🏆；消消樂 `hasScore:false` 卻在抬頭顯示「最佳 ⭐ 500」 | `GameHost` `best>0` 就渲染；`GamePageShell` `controls` 恆顯示 | 各留一處；`hasScore:false` 的遊戲不顯示最佳分（或 `useBestScore` 不存） | `lib/gamekit/host/GameHost.tsx` toolbarRow、`components/games/GamePageShell.tsx`、`BlockDropView.tsx` | S | 待做 |
+| G-M7 | M | 著色本 chrome 不一致：只有它保留全站 nav，還疊「← 回遊樂園」「← 回封面」三層返回；桌機「← 回遊樂園」貼視窗左緣、內容置中不對齊 | `lib/is-story-play-route.ts` 把 `coloring-book` 排除在沉浸路由外（PLAY-IA-3 D5-A 決策「不動」） | 走 `GamePageShell` 同款 sticky 抬頭（返回＋h1＋主題），picker 的「回封面」併進抬頭 | `components/coloring/ColoringPageShell.tsx`、`lib/is-story-play-route.ts` | M | 待做（需先翻 D5-A） |
+| G-L1 | L | 方塊 Game Over 主 CTA 是「去玩：繽紛消消樂」，「再玩一次」變次要——挑戰型輸了應以重玩為主 | `GameEndStation` `mood="over"` 把 next-game 當 mainAction | `over` 時主鈕改 replay、下一站降為連結 | `components/games/GameEndStation.tsx` | S | 待做 |
+| G-L2 | L | 星星／車庫／貼紙經濟還在算（消消樂會給星），但 hub 進度列在 `a166997b` 改版時拿掉；`lib/games/hub-progress.ts` 只剩測試在用。孩子拿到星星沒地方看 | — | 二選一：hub 卡下方補一列低壓進度（星星／已玩／下一輛），或刪 `hub-progress.ts`＋測試（knip） | `app/games/page.tsx`、`lib/games/hub-progress.ts` | S | 待做（需決策） |
+| G-L3 | L | 蠟筆不受線稿區域限制（會塗出界）；同齡產品常見「自動不出線」模式 | — | 以 flood-fill 區域當筆刷遮罩（可選開關） | `components/coloring/ColoringCanvas.tsx` 引擎 | M | 待做 |
+| G-L4 | L | 檔案體質：`BlockDropView.tsx` 2637 行、`CandyMatchView.tsx` 1051 行，全 inline style；超過 800 行紅線很多 | — | 拆 HUD／overlay／touch pad／井渲染為子元件，style 進 module.css；行為不變（`game-logic-regressions.test.ts` 守） | `components/games/BlockDropView.tsx`、`CandyMatchView.tsx` | L | 待做（Wave C 決策「維持不做」，本條僅記票） |
+
 ### 本輪已完成（2026-09-15）
 
 | ID | 說明 |
