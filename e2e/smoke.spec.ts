@@ -636,6 +636,116 @@ test.describe("夜間漢堡抽屜", () => {
   }
 });
 
+/**
+ * 日間抽屜必須與頂欄同桃色，選中底才不會在白板上讀成灰米色島。
+ * 上下均勻＝沒有 `--gloss` 頂緣高光。390／1280 同一套規則，對齊電腦版。
+ */
+test.describe("日間漢堡抽屜選中底", () => {
+  const sampleBg = async (buf: Buffer): Promise<number[]> => {
+    const { data } = await sharp(buf)
+      .removeAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const counts = new Map<string, number>();
+    for (let i = 0; i < data.length; i += 3) {
+      const k = `${data[i]},${data[i + 1]},${data[i + 2]}`;
+      counts.set(k, (counts.get(k) ?? 0) + 1);
+    }
+    const top = [...counts].sort((a, b) => b[1] - a[1])[0][0];
+    return top.split(",").map(Number);
+  };
+
+  const measure = async (page: import("@playwright/test").Page, width: number) => {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto("/characters");
+    if (width < 980) {
+      await page.evaluate(() => window.scrollTo(0, 420));
+    }
+    await page.getByRole("button", { name: "開啟選單" }).click();
+    const current = page.getByRole("link", { name: "角色圖鑑" });
+    await expect(current).toHaveAttribute("aria-current", "page");
+    const other = page.getByRole("link", { name: "全部故事" });
+    await expect(other).toBeVisible();
+    await page.waitForTimeout(200);
+
+    const [currentBox, otherBox] = await Promise.all([
+      current.boundingBox(),
+      other.boundingBox(),
+    ]);
+    expect(currentBox, "選中列沒有版面盒").not.toBeNull();
+    expect(otherBox, "未選中列沒有版面盒").not.toBeNull();
+    const box = currentBox!;
+    const rest = otherBox!;
+    const fillX = box.x + Math.min(box.width * 0.62, box.width - 48);
+    const restX = rest.x + Math.min(rest.width * 0.62, rest.width - 48);
+
+    const clipAt = (x: number, y: number, w: number, h: number) =>
+      page.screenshot({ clip: { x, y, width: w, height: h } });
+
+    const [center, top, bottom, panel] = await Promise.all([
+      sampleBg(await clipAt(fillX, box.y + box.height / 2 - 4, 40, 8)),
+      sampleBg(await clipAt(fillX, box.y + 3, 40, 3)),
+      sampleBg(await clipAt(fillX, box.y + box.height - 6, 40, 3)),
+      sampleBg(await clipAt(restX, rest.y + rest.height / 2 - 4, 40, 8)),
+    ]);
+
+    let bar: number[] | null = null;
+    if (width < 980) {
+      const barEl = page.getByTestId("site-nav-bar");
+      const barBox = await barEl.boundingBox();
+      expect(barBox, "頂欄沒有版面盒").not.toBeNull();
+      bar = await sampleBg(
+        await clipAt(
+          barBox!.x + barBox!.width * 0.45,
+          barBox!.y + 8,
+          40,
+          Math.max(6, barBox!.height - 16),
+        ),
+      );
+    }
+    return { center, top, bottom, panel, bar };
+  };
+
+  const channelDelta = (a: number[], b: number[]) =>
+    Math.max(Math.abs(a[0] - b[0]), Math.abs(a[1] - b[1]), Math.abs(a[2] - b[2]));
+
+  test("390 與 1280：面板桃色、選中底上下均勻、兩斷點同色族", async ({
+    page,
+  }) => {
+    const mobile = await measure(page, 390);
+    const desktop = await measure(page, 1280);
+
+    for (const [label, sample] of [
+      ["390 面板", mobile.panel],
+      ["1280 面板", desktop.panel],
+    ] as const) {
+      // `--landing-nav-cta-bg` #fff8f2 = 255,248,242；白底會是 255,255,255
+      expect(sample[0], `${label} 應偏暖紅`).toBeGreaterThanOrEqual(248);
+      expect(sample[1], `${label} 不得是純白（G 會到 255）`).toBeLessThan(254);
+      expect(sample[0] - sample[2], `${label} 應是桃色不是灰`).toBeGreaterThanOrEqual(8);
+    }
+
+    for (const [label, sample] of [
+      ["390 選中", mobile.center],
+      ["1280 選中", desktop.center],
+    ] as const) {
+      expect(sample[0], `${label} R`).toBeGreaterThan(sample[1]);
+      expect(sample[1], `${label} G`).toBeGreaterThan(sample[2]);
+      // 疊在白板上的同一層褐 R−B 只有 ~11（灰米色島）；疊在桃色板上約 22
+      expect(sample[0] - sample[2], `${label} 不得是灰米色島`).toBeGreaterThanOrEqual(16);
+    }
+
+    expect(channelDelta(mobile.top, mobile.bottom), "390 選中列上下不均（疑似 gloss）").toBeLessThan(8);
+    expect(channelDelta(desktop.top, desktop.bottom), "1280 選中列上下不均（疑似 gloss）").toBeLessThan(8);
+    expect(channelDelta(mobile.center, desktop.center), "手機選中底未對齊電腦版").toBeLessThan(12);
+    expect(channelDelta(mobile.panel, desktop.panel), "手機面板未對齊電腦版").toBeLessThan(12);
+    expect(mobile.bar, "390 開啟態頂欄應取到像素").not.toBeNull();
+    expect(mobile.bar![1], "390 開啟態頂欄不得合成灰帶").toBeLessThan(254);
+    expect(mobile.bar![0] - mobile.bar![2], "390 開啟態頂欄應是桃色").toBeGreaterThanOrEqual(8);
+    expect(channelDelta(mobile.bar!, mobile.panel), "390 開啟態頂欄未銜接面板").toBeLessThan(12);
+  });
+});
+
 
 /**
  * 段底黏土圓鈕是可點換段控制，與 CTA／嘟嘟同一底列。

@@ -141,7 +141,9 @@
   overflow-y: auto;
   padding: 20px calc(16px + var(--safe-right))
     calc(24px + var(--safe-bottom)) calc(16px + var(--safe-left));
-  background: var(--bg);
+  /* 與頂欄同桃色。白底 (`--bg`) 上再疊選中褐會讀成灰米色島，
+   * 這就是手機「底色不均勻」——選中列像一塊髒色貼在白板上。 */
+  background: var(--landing-nav-cta-bg);
   color: var(--ink);
   border-top: 1px solid var(--line);
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
@@ -183,6 +185,7 @@
 }
 
 .menuLink {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -205,38 +208,38 @@
 
 @media (hover: hover) {
   .menuLink:hover {
-    background: color-mix(
-      in srgb,
-      rgb(107, 63, 30) 9%,
-      var(--landing-nav-cta-bg)
-    );
+    background: rgba(107, 63, 30, 0.09);
   }
 }
 
 /* 目前頁與「滑過」必須可區分，且不得只靠顏色。
- * 選中列是黏土片（頂緣高光 + 左 accent 條），不是整列反色。
- * 頂欄 `.navLink` 的 rgba(107,63,30,0.14) 疊在桃色玻璃上；抽屜面板是白底，
- * 同一層半透明褐會讀成灰米色。改烤進 --landing-nav-cta-bg，視覺對齊頂欄。 */
+ * 面板已與頂欄同桃色，選中底才能用 `.navLink` 同一層半透明褐。
+ * 先前把 14% 褐烤成不透明 color-mix 再疊白底，仍是灰米色島；
+ * `--gloss` 頂緣高光讓選中列上下不均。兩者都是使用者回報的手機不均。
+ * 左 accent 用 ::before 直條——inset box-shadow 會沿 --radius-sm 爬成碗狀。 */
 .menuLink[aria-current="page"] {
-  background: color-mix(
-    in srgb,
-    rgb(107, 63, 30) 14%,
-    var(--landing-nav-cta-bg)
-  );
+  background: rgba(107, 63, 30, 0.14);
   font-weight: 800;
-  box-shadow: inset 3px 0 0 var(--accent), var(--gloss);
+  box-shadow: none;
+}
+
+.menuLink[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--accent);
+  pointer-events: none;
 }
 
 .menuLink:active {
-  background: color-mix(
-    in srgb,
-    rgb(107, 63, 30) 18%,
-    var(--landing-nav-cta-bg)
-  );
+  background: rgba(107, 63, 30, 0.18);
 }
 
 .menuLink:focus-visible {
-  position: relative;
   z-index: 1;
   outline: 3px solid var(--focus-ring);
   outline-offset: -3px;
@@ -257,6 +260,14 @@
  * `@media (min-width: 980px) .bar { background: transparent }`（0,1,0），媒體查詢不加權重，
  * 若不限斷點，桌面夜間一開抽屜就會在懸浮膠囊外畫出一條橫貫視窗的色帶。 */
 @media (max-width: 979px) {
+  /* 日間開啟：頂欄改不透明桃色，避免半透明毛玻璃把卡片合成灰帶
+   * （與面板桃色斷層——設計審：捲動後再開選單會把「底色不均」從選中列搬到頂欄）。
+   * 必須用 html:not(night)（0,3,1）：裸 `.bar[data-menu-open]` 輸給
+   * html:has([data-landing-root]) .bar（0,2,1）與 .bar[data-nav-solid]（0,2,0）。 */
+  :global(html:not([data-theme="night"])) .bar[data-menu-open="true"] {
+    background: var(--landing-nav-cta-bg);
+  }
+
   :global(html[data-theme="night"]) .bar[data-menu-open="true"] {
     /* 基底＝面板色，佔比 10%：舊式 38% + `--bg` 會讓頂欄變 rgb(127,125,129)、
      * 與面板 rgb(30,36,56) 階差 3.78:1——那是一條灰帶壓在深藍板上，不是接縫。
@@ -293,7 +304,7 @@
 }
 
 :global(html[data-theme="night"]) .panel {
-  /* 夜間抽屜底改暖深褐（見 globals `--nav-panel-bg` 註解）；日間仍是 var(--bg)。
+  /* 夜間抽屜底改暖深褐（見 globals `--nav-panel-bg` 註解）；日間是桃色頂欄底。
    * ThemeToggle 軌道是 `--card` rgb(44,52,80)，仍比本底亮 → 維持「浮起」不需覆寫。 */
   background: var(--nav-panel-bg);
   /* 頂緣暖色 hairline 銜接（含開啟時微暗頂欄）；陰影改夜色 */
@@ -325,15 +336,13 @@
 }
 
 :global(html[data-theme="night"]) .menuLink[aria-current="page"] {
-  /* 面板色抬一階 + 微黃，對齊 ThemeToggle 軌道的「浮起」而不是反色。 */
+  /* 面板色抬一階 + 微黃，對齊 ThemeToggle 軌道的「浮起」而不是反色。
+   * 左 accent 走日間 ::before；不加頂緣 inset 高光（與日間同一條「選中列上下均勻」紅線）。 */
   background: color-mix(
     in srgb,
     var(--c-yellow) 8%,
     color-mix(in srgb, var(--on-dark) 7%, var(--nav-panel-bg))
   );
-  box-shadow:
-    inset 3px 0 0 var(--accent),
-    inset 0 1px 0 color-mix(in srgb, var(--on-dark) 16%, transparent);
 }
 
 :global(html[data-theme="night"]) .menuGroupStart::before {

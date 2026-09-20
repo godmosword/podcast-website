@@ -95,14 +95,17 @@ describe("SiteNavBar.module.css 漢堡與抽屜", () => {
       /html\[data-theme="night"\]\) \.panel\s*\{[\s\S]*?background:\s*var\(--nav-panel-bg\)/,
     );
     expect(css).not.toMatch(/color:\s*color-mix\(in srgb, var\(--landing-nav-ink\)/);
-    const openStates = css.match(
-      /\.bar\[data-menu-open="true"\][^{]*\{[\s\S]*?\n\s{2,4}\}/g,
+    const nightOpenStates = css.match(
+      /html\[data-theme="night"\]\) \.bar\[data-menu-open="true"\][^{]*\{[\s\S]*?\n\s{2,4}\}/g,
     );
-    expect(openStates?.length).toBe(2);
-    for (const block of openStates ?? []) {
+    expect(nightOpenStates?.length).toBe(2);
+    for (const block of nightOpenStates ?? []) {
       expect(block).toMatch(/var\(--nav-panel-bg\)/);
       expect(block).toMatch(/color:\s*var\(--ink\)/);
     }
+    expect(css).toMatch(
+      /html:not\(\[data-theme="night"\]\)\) \.bar\[data-menu-open="true"\]\s*\{[\s\S]*?background:\s*var\(--landing-nav-cta-bg\)/,
+    );
   });
 
   it("≥980 膠囊 padding-right 與 .panel right 同一數字；＜980 全寬 sheet", () => {
@@ -120,22 +123,43 @@ describe("SiteNavBar.module.css 漢堡與抽屜", () => {
     expect(css).toMatch(/\.bar \.panel\s*\{[\s\S]*?pointer-events:\s*auto/);
   });
 
-  it("抽屜目前頁日間底色與頂欄同褐，並烤進桃色以免疊白變灰", () => {
+  it("日間面板走桃色頂欄底，選中底與頂欄同一層半透明褐（不得烤成不透明混色疊白）", () => {
+    const panelStart = css.indexOf(".panel {");
+    expect(panelStart).toBeGreaterThan(-1);
+    const panel = css
+      .slice(panelStart, css.indexOf("}", panelStart + 1))
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(panel).toMatch(/background:\s*var\(--landing-nav-cta-bg\)/);
+    expect(panel).not.toMatch(/background:\s*var\(--bg\)/);
+
     const start = css.indexOf('.menuLink[aria-current="page"] {');
     expect(start).toBeGreaterThan(-1);
-    const block = css.slice(start, css.indexOf("}", start));
-    expect(block).toMatch(
-      /color-mix\(\s*in srgb,\s*rgb\(107,\s*63,\s*30\)\s*14%,\s*var\(--landing-nav-cta-bg\)/,
-    );
-    expect(block).not.toMatch(/rgba\(120,\s*80,\s*40/);
+    const block = css
+      .slice(start, css.indexOf("}", start))
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(block).toMatch(/background:\s*rgba\(107,\s*63,\s*30,\s*0\.14\)/);
+    expect(block).toMatch(/box-shadow:\s*none/);
+    expect(block).not.toMatch(/color-mix\(/);
+    expect(block).not.toMatch(/--gloss/);
     expect(css).toMatch(
       /\.navLink\[aria-current="page"\]\s*\{[\s\S]*?background:\s*rgba\(107,\s*63,\s*30,\s*0\.14\)/,
     );
   });
 
-  it("目前頁與 hover 不共用同一底色（色彩不得為唯一編碼）", () => {
-    expect(css).toMatch(
-      /\.menuLink\[aria-current="page"\]\s*\{[\s\S]*?box-shadow:\s*inset/,
+  it("目前頁與 hover 不共用同一底色（色彩不得為唯一編碼）；左 accent 是直條", () => {
+    const hoverStart = css.indexOf(".menuLink:hover {");
+    expect(hoverStart).toBeGreaterThan(-1);
+    const hover = css.slice(hoverStart, css.indexOf("}", hoverStart));
+    expect(hover).toMatch(/rgba\(107,\s*63,\s*30,\s*0\.09\)/);
+    expect(hover).not.toMatch(/0\.14/);
+
+    const accentStart = css.indexOf('.menuLink[aria-current="page"]::before {');
+    expect(accentStart).toBeGreaterThan(-1);
+    const accent = css.slice(accentStart, css.indexOf("}", accentStart));
+    expect(accent).toMatch(/width:\s*3px/);
+    expect(accent).toMatch(/background:\s*var\(--accent\)/);
+    expect(css).not.toMatch(
+      /\.menuLink\[aria-current="page"\]\s*\{[\s\S]*?box-shadow:\s*inset 3px 0 0/,
     );
   });
 
@@ -148,7 +172,11 @@ describe("SiteNavBar.module.css 漢堡與抽屜", () => {
     expect(block).toMatch(/--nav-panel-bg/);
     expect(block).toMatch(/--c-yellow/);
     expect(block).not.toMatch(/--c-teal/);
-    expect(block).toMatch(/box-shadow:\s*[\s\S]*inset 3px 0 0 var\(--accent\)/);
+    expect(block).not.toMatch(/inset 3px 0 0 var\(--accent\)/);
+    expect(block).not.toMatch(/inset 0 1px 0/);
+    expect(css).toMatch(
+      /\.menuLink\[aria-current="page"\]::before\s*\{[\s\S]*?background:\s*var\(--accent\)/,
+    );
     const hoverStart = css.indexOf(
       ':global(html[data-theme="night"]) .menuLink:hover {',
     );
