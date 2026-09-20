@@ -52,7 +52,7 @@
 | G-M7 | M | 著色本 chrome 不一致：只有它保留全站 nav，還疊「← 回遊樂園」「← 回封面」三層返回；桌機「← 回遊樂園」貼視窗左緣、內容置中不對齊 | `lib/is-story-play-route.ts` 把 `coloring-book` 排除在沉浸路由外（PLAY-IA-3 D5-A 決策「不動」） | 走 `GamePageShell` 同款 sticky 抬頭（返回＋h1＋主題），picker 的「回封面」併進抬頭 | `components/coloring/ColoringPageShell.tsx`、`lib/is-story-play-route.ts` | M | 待做（需先翻 D5-A） |
 | G-L1 | L | 方塊 Game Over 主 CTA 是「去玩：繽紛消消樂」，「再玩一次」變次要——挑戰型輸了應以重玩為主 | `GameEndStation` `mood="over"` 把 next-game 當 mainAction | `over` 時主鈕改 replay、下一站降為連結 | `components/games/GameEndStation.tsx` | S | ✅ `03c8ac20`（K-12 順帶） |
 | G-L2 | L | 星星／車庫／貼紙經濟還在算（消消樂會給星），但 hub 進度列在 `a166997b` 改版時拿掉；`lib/games/hub-progress.ts` 只剩測試在用。孩子拿到星星沒地方看 | — | 二選一：hub 卡下方補一列低壓進度（星星／已玩／下一輛），或刪 `hub-progress.ts`＋測試（knip） | `app/games/page.tsx`、`lib/games/hub-progress.ts` | S | ✅ `03c8ac20`（K-4：刪） |
-| G-L3 | L | 蠟筆不受線稿區域限制（會塗出界）；同齡產品常見「自動不出線」模式 | — | 以 flood-fill 區域當筆刷遮罩（可選開關） | `components/coloring/ColoringCanvas.tsx` 引擎 | M | 待做 |
+| G-L3 | L | 蠟筆不受線稿區域限制（會塗出界）；同齡產品常見「自動不出線」模式 | — | 以 flood-fill 區域當筆刷遮罩（可選開關） | `components/coloring/ColoringCanvas.tsx` 引擎 | M | ✅ `c33a7a4b`（無開關，預設不出線） |
 | G-L4 | L | 檔案體質：`BlockDropView.tsx` 2637 行、`CandyMatchView.tsx` 1051 行，全 inline style；超過 800 行紅線很多 | — | 拆 HUD／overlay／touch pad／井渲染為子元件，style 進 module.css；行為不變（`game-logic-regressions.test.ts` 守） | `components/games/BlockDropView.tsx`、`CandyMatchView.tsx` | L | 待做（Wave C 決策「維持不做」，本條僅記票） |
 
 ### 兒童減法審（2026-09-20）
