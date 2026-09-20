@@ -43,8 +43,8 @@
 | G-H3 | H | **著色本色盤／工具列在手機看不到**：畫布 y=386–744，色盤 792、工具 909；664 高視窗要來回捲才能換色；桌機 800 高同樣（畫布 376–1096、色盤 1140） | 上方 nav＋「← 回遊樂園」＋h1＋標題列＋兩個說明框 ~385px | 色盤＋工具列 `position: sticky; bottom: 0`（含 safe-bottom）；桌機改畫布左、色盤右兩欄；「先選顏色…」與「準備開始創作」合併成一行；e2e 補「畫布可見時色盤 `elementFromPoint` 可命中」 | `components/coloring/ColoringCanvas.tsx`（L676 說明框）、`ColoringCanvas.module.css`、`ColoringToolbar.tsx`、`ColoringPalette.tsx` | M | ✅ `6a7f6741` |
 | G-H4 | H | 消消樂標題／地圖畫面下方 **200+px 空白**（手機、桌機皆有；title surface 480px vs 容器 684px） | `.playArea{min-height:min(684px,…)}` 是為 360×640 canvas 留的 CLS 空間，消消樂是 DOM | min-height 只給 canvas 遊戲（`[data-game-id="block-drop"]` 或由 GameHost `needsCanvas` 決定） | `components/games/GamePageShell.module.css` `.playArea` | S | ✅ `6a7f6741` |
 | G-H5 | H | 教學 overlay：① 「開始玩！」只是關閉、沒有真的開始（還要再按開始→地圖→關卡）；② backdrop 蓋不到 sticky 抬頭，抬頭沒變暗且可點（`elementFromPoint` 命中 `.back`） | ② overlay 在 `.playArea`／GameChrome 的 stacking context 內，`z-index:60` 出不去 | ① 文案改「知道了」或真的呼叫 `onStart`；② overlay `createPortal` 到 `document.body` | `lib/gamekit/react/TutorialOverlay.tsx`、`lib/gamekit/host/GameHost.tsx` L381–387 | S | ✅ `6a7f6741` |
-| G-M1 | M | **封面 vs 遊戲內落差**：封面 3D 黏土；消消樂內是平面向量車、方塊內是粉彩珠珠。方塊封面畫「深藍井＋鮮豔糖塊」，實際「粉彩井＋粉彩塊」對比極低 | `BlockDropView` 井底 `linear-gradient(#fff…)`＋粉彩棋盤格；`CandyMatchPieceArt` 純平面 | 方塊井底改深色／純色讓方塊跳出（封面已定方向）；消消樂棋子加黏土高光／厚度。不動 progress schema | `components/games/BlockDropView.tsx` 井 style、`components/games/CandyMatchPieceArt.tsx` | M | 待做 |
-| G-M2 | M | 消消樂「遊樂園地圖」只是 2×5 文字格＋🔒，3–7 歲不識字看不懂；10 個地點（彩虹入口、泡泡廣場…）局內只換漸層底色 | `CandyMatchView` map screen；`levels.ts` 只有 `themeA/themeB` | 地圖改路徑＋地點小圖（ClayIcons 或生圖）；每關至少一張淡背景 | `components/games/CandyMatchView.tsx` map screen、`lib/games/candy-match/levels.ts` | L | 待做 |
+| G-M1 | M | **封面 vs 遊戲內落差**：封面 3D 黏土；消消樂內是平面向量車、方塊內是粉彩珠珠。方塊封面畫「深藍井＋鮮豔糖塊」，實際「粉彩井＋粉彩塊」對比極低 | `BlockDropView` 井底 `linear-gradient(#fff…)`＋粉彩棋盤格；`CandyMatchPieceArt` 純平面 | 方塊井底改深色／純色讓方塊跳出（封面已定方向）；消消樂棋子加黏土高光／厚度。不動 progress schema | `components/games/BlockDropView.tsx` 井 style、`components/games/CandyMatchPieceArt.tsx` | M | ✅ `61c8b277`（純 CSS／SVG，未出圖） |
+| G-M2 | M | 消消樂「遊樂園地圖」只是 2×5 文字格＋🔒，3–7 歲不識字看不懂；10 個地點（彩虹入口、泡泡廣場…）局內只換漸層底色 | `CandyMatchView` map screen；`levels.ts` 只有 `themeA/themeB` | 地圖改路徑＋地點小圖（ClayIcons 或生圖）；每關至少一張淡背景 | `components/games/CandyMatchView.tsx` map screen、`lib/games/candy-match/levels.ts` | L | ✅ `821f1cb9`（＝K-6） |
 | G-M3 | M | 局內大量 emoji 當 UI：道具 🫧🌈🧹💡、勝利 🎉⭐、鎖 🔒、方塊 🏆🌈🍭——違反 `docs/GAMEKIT-ART-BIBLE.md`「禁止 emoji 當主要 sprite（hub 卡片除外）」，且和 `ClayIcons` 混用 | — | 統一走 `components/games/ClayIcons.tsx`（缺的補 SVG） | `CandyMatchView.tsx` 道具列／勝利層、`GameEndStation.tsx`、`BlockDropView.tsx` HUD | S | ✅ `ab5e489e` |
 | G-M4 | M | 方塊背景把封面圖壓到 ~20% 透明度，看起來像圖沒載完 | — | 要嘛清楚一點當場景（加 scrim 保可讀），要嘛拿掉 | `components/games/BlockDropView.tsx` 背景層 | S | ✅ `ab5e489e` |
 | G-M5 | M | 命名：hub／h1 叫「繽紛樂園」，局內標題叫「繽紛方塊」 | `data/games.ts` title vs `BlockDropView` 內文 | 統一（建議局內拿掉，h1 已持有） | `components/games/BlockDropView.tsx` | S | ✅ `ab5e489e` |
@@ -68,13 +68,19 @@
 | K-3 | 卡片去 teaser | 卡片只留圖＋名字＋家長 meta；`data/games.ts` 欄位保留 | S | ✅ `a9e2d0ca` |
 | K-4 | G-L2 拍板 | 刪 `lib/games/hub-progress.ts`＋測試，不做貼紙／任務／動線提示 | S | ✅ `a9630107` |
 | K-5 | 消消樂任務卡壓一列 | 關名／挑戰標籤／任務句子拿掉，只留 icon 目標＋步數＋進度條 | S | ✅ `a9e2d0ca` |
-| K-6 | 消消樂地圖以圖代字 | ＝G-M2，排美術 SOP 第一位、優先於 G-M1 | L | 待做（出圖） |
+| K-6 | 消消樂地圖以圖代字 | ＝G-M2，排美術 SOP 第一位、優先於 G-M1 | L | ✅ `821f1cb9`（Codex image_gen 5×2 貼紙表切 10 張） |
 | K-7 | 連擊車車跳一下 | 棋子就是車，CSS 動畫；同時砍 combo 文字 toast | S | ✅ `a9630107` |
 | K-8 | 方塊 ready 面去難度區 | 「調整難度與模式」details 拿掉（齒輪設定已有） | S | ✅ `a9e2d0ca` |
 | K-9 | 操作提示改 icon chips | `.playHints` 以圖代字（文案 sr-only）；D1-A「留在遊戲旁」契約不變 | S | ✅ `a9630107` |
 | K-10 | 著色作品品牌邊框 | 下載圖加站名＋網址＋小車車角落，家長可直接貼 IG／Threads；不做圖章 | M | ✅ `158d5049` |
 | K-11 | 著色完成面減字 | summary 文字刪除、角色 icon 已在；音效待著色本接 audio | S | ✅ `a9630107`（音效未做） |
 | K-12 | `GameEndStation` 減法 | 角色 icon＋大 icon 圓鈕（主）＋小 icon 圓鈕（次），文字只剩標題／分數 | S | ✅ `a9630107` |
+
+### TEST-DEBT-1　`games-lifecycle` Candy 提示對 flake　`eng · S · 無`　待做
+
+`playHintMove` 點完提示對後 5s 內 `aria-valuenow` 沒動（"working"），本機重跑 10 次約 2 次紅，
+**與 K-6／G-M1 無關**（stash 掉工作樹後同樣紅）。加「等 board 無 data-falling／data-swap 再點」沒改善。
+懷疑點：兩次 click 之間 `selected` 狀態與 resolve 競態，或提示對在 `setHint` 後被 idle timer 清掉。要開 trace 看。
 
 ### 兒童減法審第三批（2026-09-20，Codex 第二輪 review 重評）
 
@@ -88,7 +94,7 @@
 | K-14 | hub 卡片：56px 玩法 play 鈕（蠟筆／交換／方塊落下）、首張呼吸、三字動作詞＋圖示、meta 只留年齡；FAB 夜間保持淺底 | ✅ `3e0a434a` |
 | K-15 | 方塊 ready 面純 CSS 無字玩法示範（掉進缺口→整列亮→消掉） | ✅ `3e0a434a` |
 | K-16 | 方塊 over 層夜間標題白字壓奶油底（釘回馬卡龍 --ink）；就寢時段 night 局內 .playArea 內距 12→4 保 ≥25px 格子 | ✅ `3e0a434a` |
-| K-17 | hero 站牌／玩法圖示／道路指向第一張卡 | 待做（出圖 SOP；先看 K-14 效果再決定） |
+| K-17 | hero 站牌／玩法圖示／道路指向第一張卡 | ✅ `296c75b4`（Codex image_gen，桌機＋手機直式） |
 | K-18 | 卡片縮圖玩法示範動畫 | 待做（出圖或 CSS 疊層） |
 
 ### 本輪已完成（2026-09-15）
