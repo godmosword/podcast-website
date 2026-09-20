@@ -1568,7 +1568,7 @@ export function BlockDropView({
     return {
       width: "100%",
       height: "100%",
-      background: `${BLOCK_SYMBOL_BG[type]}, radial-gradient(circle at 28% 22%, rgba(255,255,255,.72), transparent 28%), linear-gradient(145deg, ${color}, color-mix(in srgb, ${color} 72%, #8f6f86))`,
+      backgroundImage: `${BLOCK_SYMBOL_BG[type]}, radial-gradient(circle at 28% 22%, rgba(255,255,255,.72), transparent 28%), linear-gradient(145deg, ${color}, color-mix(in srgb, ${color} 72%, #8f6f86))`,
       backgroundSize: "38% 38%, 100% 100%, 100% 100%",
       backgroundPosition: "center, 0 0, 0 0",
       backgroundRepeat: "no-repeat, no-repeat, no-repeat",
