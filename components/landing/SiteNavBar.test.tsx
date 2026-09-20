@@ -573,22 +573,10 @@ describe("SiteNavBar active 狀態", () => {
     ).toBe(false);
   });
 
-  test("/games/coloring-book 抽屜遊樂園 active，無獨立著色本列", async () => {
+  test("/games/coloring-book 已是沉浸路由（G-M7 翻 D5-A），整個 SiteNavBar 不渲染", async () => {
     const view = await renderNavBarAt("/games/coloring-book");
-    const topRow = view.container.querySelector("header > div")!;
-    const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
-
-    const topRowOutsidePanel = Array.from(topRow.querySelectorAll("a")).filter(
-      (a) => !panel.contains(a),
-    );
-    expect(
-      topRowOutsidePanel.some((a) => a.getAttribute("href") === "/games"),
-    ).toBe(false);
-
-    expect(panel.querySelector('a[href="/games/coloring-book"]')).toBeNull();
-    expect(
-      panel.querySelector('a[href="/games"]')?.getAttribute("aria-current"),
-    ).toBe("page");
+    expect(view.container.querySelector("header")).toBeNull();
+    expect(view.container.querySelector('nav[aria-label="網站選單"]')).toBeNull();
   });
 
   test("首頁 aria-current 在常用組 .homeAction，抽屜無首頁列", async () => {

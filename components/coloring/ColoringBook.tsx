@@ -2,10 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import type { ColoringPage } from "@/data/coloring-pages";
-import {
-  coloringShellShowsTitle,
-  type ColoringStage,
-} from "@/lib/coloring/flow";
+import type { ColoringStage } from "@/lib/coloring/flow";
 import { listColoringPages } from "@/lib/coloring-query";
 import { ColoringCanvas } from "./ColoringCanvas";
 import { ColoringCover } from "./ColoringCover";
@@ -38,7 +35,6 @@ export default function ColoringBook() {
           setActive(page);
           setStage("canvas");
         }}
-        onBackToCover={() => setStage("cover")}
       />
     );
   } else {
@@ -46,11 +42,6 @@ export default function ColoringBook() {
   }
 
   return (
-    <ColoringPageShell
-      title="繪本著色"
-      showTitle={coloringShellShowsTitle(stage)}
-    >
-      {body}
-    </ColoringPageShell>
+    <ColoringPageShell title="繪本著色">{body}</ColoringPageShell>
   );
 }

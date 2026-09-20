@@ -144,8 +144,9 @@ test.describe("遊戲完整 lifecycle", () => {
     await page.getByRole("button", { name: "換一張塗" }).click();
     await expect(page.getByText("選一頁來塗")).toBeVisible();
 
-    await page.getByRole("button", { name: "回封面" }).click();
-    await expect(page.getByRole("button", { name: "打開著色本" })).toBeVisible();
+    // G-M7：唯一出口＝抬頭「← 回遊樂園」（回封面已拿掉）
+    await page.getByRole("link", { name: /回遊樂園/ }).click();
+    await expect(page).toHaveURL(/\/games$/);
   });
 });
 

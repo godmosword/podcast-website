@@ -11,7 +11,7 @@ type ColoringCoverProps = {
 /** 繪本著色封面開場：品牌＋一句話＋單一 CTA＋封面主視覺。 */
 export function ColoringCover({ onOpen }: ColoringCoverProps) {
   return (
-    <section className={styles.root} aria-labelledby="coloring-cover-title">
+    <section className={styles.root} aria-label="繪本著色封面">
       <div className={styles.hero} aria-hidden={false}>
         <Image
           src="/games/v2/coloring-book/cover.webp"
@@ -60,9 +60,7 @@ export function ColoringCover({ onOpen }: ColoringCoverProps) {
       </div>
       <div className={styles.copy}>
         <p className={styles.eyebrow}>車車遊樂園</p>
-        <h1 id="coloring-cover-title" className={styles.title}>
-          繪本著色
-        </h1>
+        {/* G-M7：遊戲名由 sticky 抬頭的 h1 持有，封面不再重複一次 */}
         <p className={styles.lead}>把故事裡的車車朋友，塗上你喜歡的顏色！</p>
         <button
           type="button"

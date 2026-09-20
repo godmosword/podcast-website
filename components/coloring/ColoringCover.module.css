@@ -62,14 +62,6 @@
   color: color-mix(in srgb, var(--coloring-ink) 62%, transparent);
 }
 
-.title {
-  margin: 0;
-  font-size: clamp(1.85rem, 6vw, 2.45rem);
-  font-weight: 900;
-  letter-spacing: 0.02em;
-  line-height: 1.15;
-  color: var(--coloring-ink);
-}
 
 .lead {
   margin: 0 0 0.35rem;

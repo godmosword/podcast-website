@@ -11,7 +11,6 @@
   --coloring-ui-surface-strong: var(--card-2);
   --coloring-canvas-surface: #fff;
   min-height: 100dvh;
-  padding: 0.75rem 1rem 1.5rem;
   color: var(--coloring-ink);
   background:
     radial-gradient(ellipse 80% 50% at 10% 0%, color-mix(in srgb, var(--coloring-sky) 35%, transparent), transparent 55%),
@@ -22,47 +21,4 @@
       color-mix(in srgb, var(--bg) 78%, var(--coloring-sky) 22%) 48%,
       color-mix(in srgb, var(--bg) 80%, var(--coloring-grass) 20%) 100%
     );
-}
-
-.skip {
-  position: absolute;
-  left: -9999px;
-  top: 0;
-  z-index: 10;
-  padding: 0.5rem 0.75rem;
-  background: var(--coloring-ui-surface);
-  color: var(--coloring-ink);
-}
-
-.skip:focus {
-  left: 0.75rem;
-  top: 0.75rem;
-}
-
-.back {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  margin-bottom: 0.35rem;
-  font-size: var(--fs-control);
-  font-weight: 600;
-  color: var(--coloring-ink);
-  text-decoration: none;
-}
-
-.back:hover {
-  color: var(--coloring-accent);
-}
-
-.back:focus-visible {
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 2px;
-  border-radius: var(--radius-xs);
-}
-
-.title {
-  margin: 0 0 0.75rem;
-  font-size: clamp(1.35rem, 4vw, 1.75rem);
-  font-weight: 800;
-  letter-spacing: 0.02em;
 }

@@ -5,7 +5,6 @@ import Image from "next/image";
 import type { ColoringPage } from "@/data/coloring-pages";
 import { listColoringDrafts, type ColoringDraft } from "@/lib/coloring/draft-storage";
 import {
-  COLORING_BACK_TO_COVER,
   COLORING_GALLERY_HEADING,
   COLORING_PICKER_LEAD,
 } from "@/lib/coloring/flow";
@@ -21,7 +20,6 @@ type ColoringPagePickerProps = {
   characters: readonly ColoringPage[];
   scenes: readonly ColoringPage[];
   onSelect: (page: ColoringPage) => void;
-  onBackToCover: () => void;
 };
 
 function draftToSrc(draft: ColoringDraft): { src: string; revoke: boolean } {
@@ -33,7 +31,6 @@ export function ColoringPagePicker({
   characters,
   scenes,
   onSelect,
-  onBackToCover,
 }: ColoringPagePickerProps) {
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
 
@@ -61,16 +58,7 @@ export function ColoringPagePicker({
 
   return (
     <div className={styles.root}>
-      <div className={styles.toolbar}>
-        <button
-          type="button"
-          className={styles.backCover}
-          onClick={onBackToCover}
-          aria-label={COLORING_BACK_TO_COVER}
-        >
-          ← {COLORING_BACK_TO_COVER}
-        </button>
-      </div>
+      {/* G-M7：「← 回封面」拿掉——唯一出口是抬頭的「← 回遊樂園」，封面只是入口 splash */}
       <p className={styles.lead}>{COLORING_PICKER_LEAD}</p>
       {gallery.length > 0 ? (
         <section className={styles.gallery} aria-labelledby="coloring-gallery">

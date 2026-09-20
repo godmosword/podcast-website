@@ -145,6 +145,35 @@ test.describe("遊樂園 hub", () => {
   });
 });
 
+/** G-M7（翻 D5-A）：著色本改走同款 sticky 抬頭——隱藏全站導覽、恰好一個 h1、三個階段都只有「回遊樂園」一個出口。 */
+test.describe("繪本著色：與遊戲頁同款抬頭", () => {
+  test("隱藏全站導覽、一個 h1、三階段皆有回遊樂園、無回封面", async ({ page }) => {
+    await page.setViewportSize(PHONE);
+    await page.goto("/games/coloring-book");
+    await page.waitForLoadState("networkidle");
+    await expect(page.getByRole("navigation", { name: "主要分區" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "開啟選單" })).toHaveCount(0);
+
+    const check = async () => {
+      await expect(page.locator("h1")).toHaveCount(1);
+      await expect(page.getByRole("link", { name: /回遊樂園/ })).toBeVisible();
+      await expect(page.getByRole("button", { name: "回封面" })).toHaveCount(0);
+    };
+    await check();
+    await page.getByRole("button", { name: "打開著色本" }).click();
+    await check();
+    await page.getByRole("button", { name: /^著色：/ }).first().click();
+    await page.waitForSelector("canvas");
+    await check();
+    // 往下捲後抬頭仍在（sticky），出口不消失
+    await page.mouse.wheel(0, 600);
+    await page.waitForTimeout(200);
+    const back = await page.getByRole("link", { name: /回遊樂園/ }).boundingBox();
+    expect(back!.y).toBeGreaterThanOrEqual(0);
+    expect(back!.y).toBeLessThan(120);
+  });
+});
+
 /** G-H1／G-H2：真實手機高度（Safari 有工具列）方塊井要玩得了，井底＋觸控鍵同屏。 */
 test.describe("繽紛樂園：手機井尺寸", () => {
   test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 664 } });

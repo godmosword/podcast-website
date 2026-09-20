@@ -1,32 +1,40 @@
 "use client";
 
 import type { ReactNode } from "react";
-import Link from "next/link";
+import {
+  GamePlayChromeProvider,
+  GamePlayHeader,
+} from "@/components/games/GamePlayChromeSlot";
+import shell from "@/components/games/GamePageShell.module.css";
 import styles from "./ColoringPageShell.module.css";
 
 type ColoringPageShellProps = {
   children: ReactNode;
   title?: string;
-  /** 封面態由 ColoringCover 承擔 h1，避免雙標題。 */
-  showTitle?: boolean;
 };
 
-/** 著色本頁輕量外框（不掛 GameKit）。 */
+/**
+ * 著色本頁外框（不掛 GameKit）。
+ * G-M7：改用與 `GamePageShell` 同款的 sticky 抬頭（返回＋唯一 h1＋日夜切換），
+ * 全站導覽由 `isImmersiveRoute` 隱藏；三層返回（nav／回遊樂園／回封面）收成一個出口。
+ */
 export function ColoringPageShell({
   children,
   title = "繪本著色",
-  showTitle = true,
 }: ColoringPageShellProps) {
   return (
-    <main className={styles.main} aria-label={title}>
-      <a href="#coloring-play" className={styles.skip}>
-        跳到著色區域
-      </a>
-      <Link href="/games" className={styles.back}>
-        ← 回遊樂園
-      </Link>
-      {showTitle ? <h1 className={styles.title}>{title}</h1> : null}
-      <div id="coloring-play">{children}</div>
-    </main>
+    <GamePlayChromeProvider>
+      <main
+        className={`${shell.main} ${styles.main}`}
+        aria-label={title}
+        data-game-id="coloring-book"
+      >
+        <a href="#coloring-play" className={shell.skip}>
+          跳到著色區域
+        </a>
+        <GamePlayHeader playTitle={title} />
+        <div id="coloring-play">{children}</div>
+      </main>
+    </GamePlayChromeProvider>
   );
 }

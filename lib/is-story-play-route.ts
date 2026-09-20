@@ -4,16 +4,13 @@ export function isStoryPlayRoute(pathname: string | null): boolean {
 }
 
 /**
- * 走 `GamePageShell` 的遊戲頁，不含 `/games/coloring-book`。
+ * 遊戲頁（含 `/games/coloring-book`）。
  *
- * 著色本用 `ColoringPageShell`（自有版型與返回鍵），未納入本次沉浸式改動，
- * 維持全站導覽以免它變成沒有 sticky 出口的活動頁。
+ * G-M7（2026-09-20 翻 PLAY-IA D5-A）：著色本改走與 `GamePageShell` 同款的 sticky 抬頭
+ * （返回＋唯一 h1＋日夜切換），因此一併納入沉浸路由，不再保留全站導覽。
  */
-const COLORING_BOOK_PATH = /^\/games\/coloring-book\/?$/;
-
 export function isGamePlayRoute(pathname: string | null): boolean {
   if (pathname == null) return false;
-  if (COLORING_BOOK_PATH.test(pathname)) return false;
   return /^\/games\/[^/]+\/?$/.test(pathname);
 }
 

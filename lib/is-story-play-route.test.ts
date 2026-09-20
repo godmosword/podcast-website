@@ -30,9 +30,9 @@ describe("isGamePlayRoute", () => {
     expect(isGamePlayRoute("/games/")).toBe(false);
   });
 
-  test("著色本走另一套 shell，不納入沉浸模式", () => {
-    expect(isGamePlayRoute("/games/coloring-book")).toBe(false);
-    expect(isGamePlayRoute("/games/coloring-book/")).toBe(false);
+  test("著色本已改走同款 sticky 抬頭（G-M7 翻 D5-A），納入沉浸模式", () => {
+    expect(isGamePlayRoute("/games/coloring-book")).toBe(true);
+    expect(isGamePlayRoute("/games/coloring-book/")).toBe(true);
   });
 
   test("巢狀路徑不誤判", () => {
