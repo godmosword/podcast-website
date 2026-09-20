@@ -107,6 +107,33 @@ test.describe("coloring book", () => {
     await expect(page.locator("canvas")).toBeVisible();
   });
 
+  /** K-10：下載圖是加了品牌邊框的版本——比 1024 作品高（底部品牌列）且寬高不等。 */
+  test("下載的作品帶品牌邊框", async ({ page }) => {
+    await openFirstColoringPage(page);
+    const [download] = await Promise.all([
+      page.waitForEvent("download"),
+      page.getByRole("button", { name: "下載" }).click(),
+    ]);
+    const stream = await download.createReadStream();
+    const head = await new Promise<Buffer>((resolve, reject) => {
+      const chunks: Buffer[] = [];
+      stream.on("data", (c: Buffer) => {
+        chunks.push(c);
+        if (Buffer.concat(chunks).length >= 24) {
+          stream.destroy();
+          resolve(Buffer.concat(chunks));
+        }
+      });
+      stream.on("end", () => resolve(Buffer.concat(chunks)));
+      stream.on("error", reject);
+    });
+    // PNG IHDR：寬在 offset 16、高在 offset 20（big-endian）
+    const width = head.readUInt32BE(16);
+    const height = head.readUInt32BE(20);
+    expect(width).toBeGreaterThan(1024);
+    expect(height).toBeGreaterThan(width);
+  });
+
   /** G-H3：畫布在視野內時，色盤與工具列不用捲動就搆得到（sticky 底欄／桌機右欄）。 */
   for (const vp of [
     { name: "390×664 手機", width: 390, height: 664 },

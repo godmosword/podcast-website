@@ -18,6 +18,7 @@ import {
   coloringCompletionCopy,
   type ColoringCompletionActivity,
 } from "@/lib/coloring/completion";
+import { renderFramedArtwork } from "@/lib/coloring/export-frame";
 import { COLORING_DONE_CTA } from "@/lib/coloring/flow";
 import {
   BRUSH_SIZES,
@@ -607,13 +608,20 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
     composite();
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     const display = displayRef.current;
     if (!display) return;
     composite();
+    // K-10：下載圖加品牌邊框（站名＋網址＋角落小車車），家長可直接分享
+    let framed: HTMLCanvasElement = display;
+    try {
+      framed = await renderFramedArtwork(display, { mascotSrc: "/mascot.png" });
+    } catch {
+      // 邊框失敗就給原圖，不擋下載
+    }
     const link = document.createElement("a");
     link.download = `${page.id}-著色.png`;
-    link.href = display.toDataURL("image/png");
+    link.href = framed.toDataURL("image/png");
     link.click();
   };
 
