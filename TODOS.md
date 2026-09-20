@@ -72,7 +72,7 @@
 | K-7 | 連擊車車跳一下 | 棋子就是車，CSS 動畫；同時砍 combo 文字 toast | S | ✅ `03c8ac20` |
 | K-8 | 方塊 ready 面去難度區 | 「調整難度與模式」details 拿掉（齒輪設定已有） | S | ✅ `a9e2d0ca` |
 | K-9 | 操作提示改 icon chips | `.playHints` 以圖代字（文案 sr-only）；D1-A「留在遊戲旁」契約不變 | S | ✅ `03c8ac20` |
-| K-10 | 著色作品品牌邊框 | 下載圖加站名＋小車車角落，家長可直接貼 IG／Threads；不做圖章 | M | 待做 |
+| K-10 | 著色作品品牌邊框 | 下載圖加站名＋網址＋小車車角落，家長可直接貼 IG／Threads；不做圖章 | M | ✅ `e535d3bd` |
 | K-11 | 著色完成面減字 | summary 文字刪除、角色 icon 已在；音效待著色本接 audio | S | ✅ `03c8ac20`（音效未做） |
 | K-12 | `GameEndStation` 減法 | 角色 icon＋大 icon 圓鈕（主）＋小 icon 圓鈕（次），文字只剩標題／分數 | S | ✅ `03c8ac20` |
 
