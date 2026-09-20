@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { TutorialStep } from "@/data/games";
 import styles from "./tutorial-overlay.module.css";
 
@@ -9,6 +10,11 @@ export type TutorialOverlayProps = {
   title: string;
   steps: readonly TutorialStep[];
   onClose: () => void;
+  /**
+   * 有給就顯示「開始玩！」並在關閉後真的開始；沒給（局中／暫停中打開教學）
+   * 主鈕只是「知道了」。G-H5 ①：不再用「開始玩！」當純關閉。
+   */
+  onStart?: () => void;
 };
 
 /**
@@ -58,9 +64,15 @@ function GestureDemo({ gesture }: { gesture: TutorialStep["gesture"] }) {
  * 首玩教學示範 overlay：圖示化操作示範，不寫入 localStorage，
  * 每次進遊戲從開始畫面可再看一次。
  */
-export function TutorialOverlay({ title, steps, onClose }: TutorialOverlayProps) {
+export function TutorialOverlay({ title, steps, onClose, onStart }: TutorialOverlayProps) {
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement | null>(null);
+  // G-H5 ②：portal 到 body，backdrop 才蓋得住 sticky 抬頭（否則困在 .playArea 的 stacking context）。
+  // SSR／首次 render 沒有 document，先掛空再 portal。
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    setPortalTarget(document.body);
+  }, []);
 
   useEffect(() => {
     // 開啟時記住觸發元素（如「怎麼玩？」鈕），關閉後把 focus 還回去
@@ -98,9 +110,16 @@ export function TutorialOverlay({ title, steps, onClose }: TutorialOverlayProps)
       document.removeEventListener("keydown", onKeyDown);
       trigger?.focus();
     };
-  }, [onClose]);
+  }, [onClose, portalTarget]);
 
-  return (
+  const handlePrimary = () => {
+    onClose();
+    onStart?.();
+  };
+
+  if (!portalTarget) return null;
+
+  return createPortal(
     <div className={styles.backdrop}>
       <div
         ref={dialogRef}
@@ -131,10 +150,11 @@ export function TutorialOverlay({ title, steps, onClose }: TutorialOverlayProps)
             </li>
           ))}
         </ol>
-        <button type="button" className={styles.startBtn} onClick={onClose}>
-          開始玩！
+        <button type="button" className={styles.startBtn} onClick={handlePrimary}>
+          {onStart ? "開始玩！" : "知道了"}
         </button>
       </div>
-    </div>
+    </div>,
+    portalTarget,
   );
 }

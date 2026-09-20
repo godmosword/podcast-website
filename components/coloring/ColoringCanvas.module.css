@@ -1,6 +1,56 @@
 .root {
   display: grid;
   gap: 0.85rem;
+  grid-template-areas:
+    "top"
+    "hint"
+    "stage"
+    "notice"
+    "controls";
+}
+
+.topBar { grid-area: top; }
+.completionHint { grid-area: hint; }
+.stage { grid-area: stage; }
+.saveNotice { grid-area: notice; }
+
+/* G-H3：手機／平板——色盤＋工具列黏在視窗底，畫布在視野內時不用來回捲就能換色換工具。 */
+.controls {
+  grid-area: controls;
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: grid;
+  gap: 0.5rem;
+  margin-inline: calc(-1 * var(--space-4, 16px));
+  padding: 0.5rem var(--space-4, 16px) calc(0.5rem + var(--safe-bottom, 0px));
+  background: color-mix(in srgb, var(--coloring-paper) 92%, transparent);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 -6px 18px color-mix(in srgb, var(--coloring-ink) 10%, transparent);
+}
+
+/* 桌機：畫布左、色盤＋工具列右欄（跟著捲動頂端黏住），畫布 720px 高時色盤不會掉到 1140px 以下。 */
+@media (min-width: 980px) {
+  .root {
+    grid-template-columns: minmax(0, 1fr) 280px;
+    grid-template-areas:
+      "top top"
+      "hint hint"
+      "stage controls"
+      "notice controls";
+    align-items: start;
+  }
+
+  .controls {
+    position: sticky;
+    top: 0.75rem;
+    bottom: auto;
+    margin-inline: 0;
+    padding: 0.75rem;
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--coloring-ui-surface) 85%, transparent);
+    box-shadow: 0 10px 28px color-mix(in srgb, var(--coloring-ink) 10%, transparent);
+  }
 }
 
 .topBar {
@@ -64,18 +114,6 @@
   place-items: center;
   padding: 1.25rem;
   background: color-mix(in srgb, var(--bg) 88%, transparent);
-}
-
-.guide {
-  margin: 0;
-  padding: 0.7rem 0.85rem;
-  border: 2px solid color-mix(in srgb, var(--coloring-grass) 28%, transparent);
-  border-radius: var(--radius-sm);
-  color: color-mix(in srgb, var(--coloring-ink) 78%, transparent);
-  background: color-mix(in srgb, var(--coloring-ui-surface) 78%, var(--coloring-grass));
-  font-size: var(--fs-label);
-  font-weight: 700;
-  line-height: 1.45;
 }
 
 .completionHint {

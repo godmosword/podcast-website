@@ -106,4 +106,31 @@ test.describe("coloring book", () => {
     await expect(page.getByRole("dialog", { name: "塗好了！" })).toHaveCount(0);
     await expect(page.locator("canvas")).toBeVisible();
   });
+
+  /** G-H3：畫布在視野內時，色盤與工具列不用捲動就搆得到（sticky 底欄／桌機右欄）。 */
+  for (const vp of [
+    { name: "390×664 手機", width: 390, height: 664 },
+    { name: "1280×800 桌機", width: 1280, height: 800 },
+  ]) {
+    test(`${vp.name}：畫布可見時色盤與工具列 elementFromPoint 可命中`, async ({ page }) => {
+      await page.setViewportSize({ width: vp.width, height: vp.height });
+      await openFirstColoringPage(page);
+      const hit = await page.evaluate(() => {
+        const canvas = document.querySelector("canvas")!.getBoundingClientRect();
+        const probe = (el: Element | null) => {
+          if (!el) return false;
+          const r = el.getBoundingClientRect();
+          if (r.top < 0 || r.bottom > innerHeight) return false;
+          const at = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+          return at === el || el.contains(at);
+        };
+        return {
+          canvasVisible: canvas.top < innerHeight && canvas.bottom > 0,
+          swatch: probe(document.querySelector('[role="option"]')),
+          tool: probe(document.querySelector('button[aria-label="油漆桶"]')),
+        };
+      });
+      expect(hit).toEqual({ canvasVisible: true, swatch: true, tool: true });
+    });
+  }
 });

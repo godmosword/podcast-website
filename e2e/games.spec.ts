@@ -144,3 +144,35 @@ test.describe("遊樂園 hub", () => {
     await expect(page.locator('main a[href^="/games/"]')).toHaveCount(3);
   });
 });
+
+/** G-H1／G-H2：真實手機高度（Safari 有工具列）方塊井要玩得了，井底＋觸控鍵同屏。 */
+test.describe("繽紛方塊：手機井尺寸", () => {
+  test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 664 } });
+
+  test("390×664：格子 ≥ 25px、井底與觸控鍵同屏、觸控鍵 ≥ 44px", async ({ page }) => {
+    await page.goto("/games/block-drop");
+    await page.getByRole("button", { name: /開始/ }).click();
+    await expect(page.locator('[data-status="playing"]')).toBeVisible();
+    await page.waitForTimeout(400);
+
+    const m = await page.evaluate(() => {
+      const well = document.querySelector<HTMLElement>(
+        '[data-status="playing"] [style*="grid-template-columns: repeat(10"]',
+      )!.getBoundingClientRect();
+      const pad = [...document.querySelectorAll('[data-testid="touch-control-pad"] button')].map(
+        (b) => b.getBoundingClientRect(),
+      );
+      return {
+        cellPx: well.width / 10,
+        wellBottom: well.bottom,
+        padBottom: Math.max(...pad.map((r) => r.bottom)),
+        minSide: Math.min(...pad.flatMap((r) => [r.width, r.height])),
+      };
+    });
+    expect(m.cellPx).toBeGreaterThanOrEqual(25);
+    expect(m.wellBottom).toBeLessThanOrEqual(664);
+    expect(m.padBottom).toBeLessThanOrEqual(664);
+    expect(m.minSide).toBeGreaterThanOrEqual(44);
+  });
+});
+

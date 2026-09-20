@@ -331,22 +331,33 @@ export function CandyMatchView({
     startLevel(levelIndexRef.current);
   }, [startLevel]);
 
+  /*
+   * G-C1：controller 一律經 ref 轉呼叫、只在 mount 註冊一次。
+   * 若把 startLevel 等放進 deps，host `status` 變 `paused` → `inputPaused`
+   * → `armIdleHint` → `startLevel` 連鎖換新，effect 重跑會再呼叫
+   * `notifyReady("title")` 把 adapter 打回 `ready`，暫停鈕直接消失、棋盤照常可點。
+   */
+  const controllerRef = useRef({ goToMap, goToTitle, startLevel, restartCurrentLevel });
+  controllerRef.current = { goToMap, goToTitle, startLevel, restartCurrentLevel };
+  const syncHostRef = useRef(syncHost);
+  syncHostRef.current = syncHost;
+
   useEffect(() => {
     instance.registerController({
-      goToMap,
-      goToTitle,
-      startLevel,
-      restartCurrentLevel,
+      goToMap: () => controllerRef.current.goToMap(),
+      goToTitle: () => controllerRef.current.goToTitle(),
+      startLevel: (index) => controllerRef.current.startLevel(index),
+      restartCurrentLevel: () => controllerRef.current.restartCurrentLevel(),
     });
     instance.notifyReady("title");
-    syncHost();
+    syncHostRef.current();
     return () => instance.registerController({
       goToMap: () => {},
       goToTitle: () => {},
       startLevel: () => {},
       restartCurrentLevel: () => {},
     });
-  }, [goToMap, goToTitle, instance, restartCurrentLevel, startLevel, syncHost]);
+  }, [instance]);
 
   const runResolve = useCallback(
     async (

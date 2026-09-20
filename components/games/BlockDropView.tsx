@@ -64,7 +64,7 @@ const BOARD_H = ROWS * CELL;
 const WIDE_MAX_BOARD_W = 460;
 const WIDE_SIDE_W = 150;
 
-type LayoutMode = "mobile" | "tablet" | "desktop";
+export type LayoutMode = "mobile" | "tablet" | "desktop";
 
 type TouchPadMetrics = {
   colW: number;
@@ -84,11 +84,11 @@ type LayoutMetrics = {
   hud: { hold: number; nextFirst: number; nextRest: number };
 };
 
-function getLayoutMetrics(mode: LayoutMode, isCoarse: boolean): LayoutMetrics {
+export function getLayoutMetrics(mode: LayoutMode, isCoarse: boolean): LayoutMetrics {
   switch (mode) {
     case "mobile":
       return {
-        shellPad: "10px 10px",
+        shellPad: "6px 10px 10px",
         shellMaxW: 420,
         sideColW: 0,
         boardMaxW: undefined,
@@ -606,15 +606,13 @@ const hintChip: CSSProperties = {
   whiteSpace: "nowrap",
 };
 
-function touchPadButton(metrics: TouchPadMetrics, variant: "full" | "half" = "full"): CSSProperties {
+function touchPadButton(metrics: TouchPadMetrics): CSSProperties {
   return {
     ...hintChip,
     borderRadius: 16,
     minHeight: metrics.btn,
     height: metrics.btn,
-    width: variant === "full" ? "100%" : undefined,
-    flex: variant === "half" ? "1 1 0" : undefined,
-    minWidth: variant === "half" ? 0 : undefined,
+    width: "100%",
     justifyContent: "center",
     padding: 0,
     boxShadow: "0 4px 12px rgba(126,96,112,.14)",
@@ -624,7 +622,7 @@ function touchPadButton(metrics: TouchPadMetrics, variant: "full" | "half" = "fu
 }
 
 /** 棋盤右側觸控鍵：旋轉、左右移、落下、暫存。 */
-function TouchControlPad({
+export function TouchControlPad({
   metrics,
   holdType,
   canHold,
@@ -645,8 +643,8 @@ function TouchControlPad({
   onDrop: () => void;
   onHold: () => void;
 }) {
+  // G-H2：左右鍵各自獨立一列（不再 half 併排），寬＝colW、高＝btn，皆 ≥44px（DESIGN 觸控紅線）。
   const full = touchPadButton(metrics);
-  const half = touchPadButton(metrics, "half");
   const { icon, gap, colW } = metrics;
   const holdCell = Math.max(7, Math.floor(metrics.btn / 5.5));
   const movePointerIdRef = useRef<number | null>(null);
@@ -698,30 +696,28 @@ function TouchControlPad({
       <button type="button" aria-label="旋轉" style={full} onClick={onRotate}>
         <IconRotate size={icon} />
       </button>
-      <div style={{ display: "flex", gap, minWidth: 0 }}>
-        <button
-          type="button"
-          aria-label="左移"
-          style={half}
-          onPointerDown={handleMoveDown(onMoveLeftDown)}
-          onPointerUp={handleMoveEnd}
-          onPointerCancel={handleMoveEnd}
-          onLostPointerCapture={handleMoveEnd}
-        >
-          <IconChevronLeft size={icon} />
-        </button>
-        <button
-          type="button"
-          aria-label="右移"
-          style={half}
-          onPointerDown={handleMoveDown(onMoveRightDown)}
-          onPointerUp={handleMoveEnd}
-          onPointerCancel={handleMoveEnd}
-          onLostPointerCapture={handleMoveEnd}
-        >
-          <IconChevronRight size={icon} />
-        </button>
-      </div>
+      <button
+        type="button"
+        aria-label="左移"
+        style={full}
+        onPointerDown={handleMoveDown(onMoveLeftDown)}
+        onPointerUp={handleMoveEnd}
+        onPointerCancel={handleMoveEnd}
+        onLostPointerCapture={handleMoveEnd}
+      >
+        <IconChevronLeft size={icon} />
+      </button>
+      <button
+        type="button"
+        aria-label="右移"
+        style={full}
+        onPointerDown={handleMoveDown(onMoveRightDown)}
+        onPointerUp={handleMoveEnd}
+        onPointerCancel={handleMoveEnd}
+        onLostPointerCapture={handleMoveEnd}
+      >
+        <IconChevronRight size={icon} />
+      </button>
       <button type="button" aria-label="落下" style={full} onClick={onDrop}>
         <IconSwipeDown size={icon} />
       </button>
@@ -1012,6 +1008,7 @@ export function BlockDropView({
 
   // ── 手機優先：棋盤填滿卡片寬度，連續縮放（DOM 方塊非像素畫，免整數倍）──
   const boardWrapRef = useRef<HTMLDivElement | null>(null);
+  const inRoundLayout = G.current.status === "playing" || G.current.status === "paused";
   const [boardScale, setBoardScale] = useState(1.6);
   const boardScaleRef = useRef(boardScale);
   boardScaleRef.current = boardScale;
@@ -1026,7 +1023,7 @@ export function BlockDropView({
       // 整頁呈現、玩到底不用捲動
       const top = el.getBoundingClientRect().top + window.scrollY;
       const reserve =
-        layoutMode === "desktop" ? 48 : layoutMode === "tablet" ? 40 : isCoarse ? 20 : 32;
+        layoutMode === "desktop" ? 48 : layoutMode === "tablet" ? 40 : isCoarse ? 12 : 32;
       const maxH = Math.max(300, (window.innerHeight || 800) - top - reserve);
       setBoardScale(Math.min(w / BOARD_W, maxH / BOARD_H));
     };
@@ -1038,7 +1035,8 @@ export function BlockDropView({
       ro.disconnect();
       window.removeEventListener("resize", apply);
     };
-  }, [wide, isCoarse, layoutMode]);
+    // G-H1：手機局內會收掉卡內標題列，井的 top 會變，ResizeObserver 量不到 → 以 inRoundLayout 觸發重算
+  }, [wide, isCoarse, layoutMode, inRoundLayout]);
 
   // ── 浮動回饋文字（消行／連擊／升級）──
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -1776,6 +1774,10 @@ export function BlockDropView({
           margin: "0 auto 8px",
           padding: "8px 10px",
           boxSizing: "border-box",
+          // G-H1：手機改成浮在井中段的 toast（頂端出生區、底部落點影子都要看得到），不再佔井上方 ~70px
+          ...(wide
+            ? {}
+            : { position: "absolute", top: "38%", left: 6, right: 6, width: "auto", margin: 0, zIndex: 5 }),
           border: "2px solid rgba(255,216,102,.8)",
           borderRadius: 14,
           color: MACARON_THEME.ink,
@@ -1966,6 +1968,81 @@ export function BlockDropView({
     </div>
   );
 
+  /** G-H1 手機單列 HUD：分數 · Lv（連擊時顯示 ×combo）＋細升級條。高度 ≈48px。 */
+  const compactScorePanel = (
+    <div
+      style={{
+        ...panelStyle,
+        flex: 1,
+        minWidth: 0,
+        display: "grid",
+        gap: 3,
+        padding: "4px 10px",
+        alignContent: "center",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "baseline",
+          justifyContent: "center",
+          gap: 8,
+          minWidth: 0,
+        }}
+      >
+        <span style={panelLabel}>分數</span>
+        <span
+          aria-label={`分數 ${g.score}`}
+          style={{ color: MACARON_THEME.ink, fontSize: 22, fontWeight: 900, lineHeight: 1 }}
+        >
+          {g.score}
+        </span>
+        {g.combo >= 2 && g.status === "playing" ? (
+          <span
+            style={{
+              color: MACARON_THEME.accentPink,
+              fontSize: 12,
+              fontWeight: 900,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 2,
+            }}
+          >
+            <IconFlame size={12} /> ×{g.combo}
+          </span>
+        ) : (
+          <span style={{ color: MACARON_THEME.inkSoft, fontSize: 12, fontWeight: 800 }}>
+            Lv {g.level}
+          </span>
+        )}
+      </div>
+      <div
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={10}
+        aria-valuenow={linesInLevel}
+        aria-label={`升級進度 ${linesInLevel}/10 行`}
+        style={{
+          height: 4,
+          overflow: "hidden",
+          borderRadius: 999,
+          background: "rgba(216,199,255,.46)",
+        }}
+      >
+        <span
+          style={{
+            display: "block",
+            width: `${Math.max(4, linesInLevel * 10)}%`,
+            height: "100%",
+            borderRadius: "inherit",
+            background: "linear-gradient(90deg,#b9f3db,#8ddff0,#c9b4ff)",
+            transition: "width .2s ease",
+          }}
+        />
+      </div>
+    </div>
+  );
+
   return (
     <div
       data-layout={layoutMode}
@@ -2016,15 +2093,18 @@ export function BlockDropView({
         }
       `}</style>
 
+      {/* G-H1：手機的 h1 已在 sticky 抬頭，卡內不重複標題；局內連難度 chip 也收掉（inRound 本就 disabled），把高度還給井 */}
+      {(wide || !inRound) && (
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: 10,
+          marginBottom: wide ? 10 : 6,
         }}
       >
         <div>
+          {wide && (
           <div
             style={{
               fontSize: layout.titleSize,
@@ -2034,13 +2114,14 @@ export function BlockDropView({
             }}
           >
             繽紛方塊{" "}
-            {kidsMode && <IconKid size={wide ? 19 : 16} style={{ verticalAlign: "-0.12em" }} />}
+            {kidsMode && <IconKid size={19} style={{ verticalAlign: "-0.12em" }} />}
           </div>
+          )}
           <div
             style={{
               display: "flex",
               gap: 6,
-              marginTop: 5,
+              marginTop: wide ? 5 : 0,
               flexWrap: "wrap",
             }}
           >
@@ -2089,24 +2170,25 @@ export function BlockDropView({
           </div>
         </div>
       </div>
+      )}
 
-      {/* 手機：分數＋下一個（觸控暫存改在右側操作鍵） */}
+      {/* 手機：G-H1 HUD 壓成單列（分數·Lv·下一個），最佳分交給抬頭 ⭐；觸控暫存在右側操作鍵 */}
       {!wide && (
         <div
           style={{
             display: "flex",
-            gap: 8,
-            marginBottom: 8,
+            gap: 6,
+            marginBottom: 6,
             alignItems: "stretch",
           }}
         >
           {!isCoarse && holdButton(layout.hud.hold)}
-          <div style={{ flex: 1, minWidth: 0 }}>{scorePanel}</div>
-          {nextPanel(layout.hud.nextFirst, layout.hud.nextRest, isCoarse)}
+          {compactScorePanel}
+          {nextPanel(layout.hud.nextFirst, layout.hud.nextRest, true)}
         </div>
       )}
 
-      {tutorialCard}
+      {wide && tutorialCard}
 
       {/* 寬螢幕（iPad／桌機）：左欄資訊、中間棋盤、右欄預覽＋觸控鍵 */}
       <div
@@ -2155,6 +2237,7 @@ export function BlockDropView({
           margin: "0 auto",
         }}
        >
+         {!wide && tutorialCard}
          <div
            style={{
              position: "absolute",

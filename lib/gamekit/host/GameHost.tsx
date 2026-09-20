@@ -382,6 +382,7 @@ export default function GameHost({
             title={title ?? adapter.id}
             steps={tutorial}
             onClose={() => setShowTutorial(false)}
+            onStart={status === "ready" ? handleStart : undefined}
           />
         )}
 

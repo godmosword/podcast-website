@@ -156,6 +156,7 @@ export function CandyMatchBoard({
   return (
     <div
       data-testid="candy-match-board"
+      aria-disabled={disabled || undefined}
       data-swap={swap ? `${swap.a}-${swap.b}` : undefined}
       data-falling={fallByTo.size > 0 ? "true" : undefined}
       style={{

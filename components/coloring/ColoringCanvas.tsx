@@ -672,10 +672,7 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
         </button>
       </div>
 
-      <p className={styles.guide}>
-        先選顏色，再用蠟筆塗一塗；想填滿一大片就用油漆桶。兩指可以放大找細節！
-      </p>
-
+      {/* G-H3：操作說明與完成提示併成一行；還沒動筆時提示文就是操作說明，省下一個說明框的高度。 */}
       <div
         className={styles.completionHint}
         data-testid="coloring-completion-hint"
@@ -684,7 +681,11 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
         aria-live="polite"
       >
         <strong>{completionFeedback.label}</strong>
-        <span>{completionFeedback.detail}</span>
+        <span>
+          {completionFeedback.tone === "start"
+            ? "先選顏色，再用蠟筆塗一塗；想填滿一大片就用油漆桶。兩指可以放大找細節！"
+            : completionFeedback.detail}
+        </span>
       </div>
 
       <div className={styles.stage} ref={stageRef}>
@@ -718,6 +719,8 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
         {saveError}
       </p>
 
+      {/* G-H3：色盤＋工具列黏在視窗底（手機）／畫布右欄（桌機），畫布可見時一定搆得到 */}
+      <div className={styles.controls} data-testid="coloring-controls">
       <ColoringPalette colorHex={colorHex} onChange={setColorHex} />
       <ColoringToolbar
         tool={tool}
@@ -733,6 +736,7 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
         viewActive={viewActive}
         onResetView={() => applyView(DEFAULT_VIEW)}
       />
+      </div>
 
       {doneOpen ? (
         <div className={styles.doneOverlay} role="presentation">

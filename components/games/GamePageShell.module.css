@@ -171,7 +171,11 @@
  */
 .playArea {
   border-radius: var(--radius-lg);
-  /* GameHost 的 canvas 是 360×640；載入閘門先保留同一垂直空間，避免 ready swap 造成 CLS。 */
+}
+
+/* G-H4：360×640 的垂直空間只為方塊井（ready swap 防 CLS）保留；
+ * 消消樂是 DOM 版面、標題面 480px，套同一 min-height 會在下方留 200+px 空白。 */
+.main[data-game-id="block-drop"] .playArea {
   min-height: min(684px, calc((100vw - 24px) * 16 / 9 + 44px));
 }
 
@@ -249,5 +253,29 @@
 
   .back {
     order: 1;
+  }
+
+  /* G-H1：局內（playing／paused）抬頭不換行、單列 52px，把高度還給井；
+   * 標題面／結算面仍換行完整顯示遊戲名。 */
+  .main:has([data-status="playing"], [data-status="paused"]) .playHeader {
+    flex-wrap: nowrap;
+    margin-bottom: var(--space-1);
+  }
+
+  /* 局內 h1 改視覺隱藏（仍是頁面唯一 h1、讀屏可讀）：窄機四顆控制鍵已佔滿一列，
+   * 用省略號只剩「繽…」反而更看不懂。 */
+  .main:has([data-status="playing"], [data-status="paused"]) .playTitle {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .main:has([data-status="playing"], [data-status="paused"]) .headerActions {
+    margin-left: auto;
   }
 }
