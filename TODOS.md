@@ -55,6 +55,27 @@
 | G-L3 | L | 蠟筆不受線稿區域限制（會塗出界）；同齡產品常見「自動不出線」模式 | — | 以 flood-fill 區域當筆刷遮罩（可選開關） | `components/coloring/ColoringCanvas.tsx` 引擎 | M | 待做 |
 | G-L4 | L | 檔案體質：`BlockDropView.tsx` 2637 行、`CandyMatchView.tsx` 1051 行，全 inline style；超過 800 行紅線很多 | — | 拆 HUD／overlay／touch pad／井渲染為子元件，style 進 module.css；行為不變（`game-logic-regressions.test.ts` 守） | `components/games/BlockDropView.tsx`、`CandyMatchView.tsx` | L | 待做（Wave C 決策「維持不做」，本條僅記票） |
 
+### 兒童減法審（2026-09-20）
+
+> **原則：** 3–7 歲不識字，孩子的「文字」是顏色／角色／動作／聲音；推廣看的是家長 3 秒能截圖分享的畫面，不是收集系統。方向是**拿掉孩子讀不懂的字、以圖代字**，不加回饋系統。
+> **來源：** Codex 對 `/games` 的 review 經重評——約四成「已經有了」（落點影子、預設輕鬆、首步可解、手勢教學、三星定義），三成與 PLAY-IA D2-C／美術審 L3／G-L2 的減法決策對撞（hero 疊字＋CTA、卡片「開始玩」鈕、類型徽章、貼紙／任務／三站動線、圖章收集品、改名）——**明確不做**。
+> **編號：** `K-` 前綴。打 ✅ 附 commit hash。
+
+| ID | 項目 | 做法 | 工時 | 狀態 |
+|----|------|------|------|------|
+| K-1 | hub hero 限高 | 桌機 `max-height: 420px`、手機 `min(36svh, 280px)` | S | ✅ `a9e2d0ca` |
+| K-2 | 三款三色 | 方塊卡 `accent` 粉紅 → `--c-yellow` | S | ✅ `a9e2d0ca` |
+| K-3 | 卡片去 teaser | 卡片只留圖＋名字＋家長 meta；`data/games.ts` 欄位保留 | S | ✅ `a9e2d0ca` |
+| K-4 | G-L2 拍板 | 刪 `lib/games/hub-progress.ts`＋測試（knip），不做貼紙／任務／動線提示 | S | 待做（需你確認） |
+| K-5 | 消消樂任務卡壓一列 | 關名／挑戰標籤／任務句子拿掉，只留 icon 目標＋步數＋進度條 | S | ✅ `a9e2d0ca` |
+| K-6 | 消消樂地圖以圖代字 | ＝G-M2，排美術 SOP 第一位、優先於 G-M1 | L | 待做（出圖） |
+| K-7 | 連擊車車跳一下 | 棋子就是車，CSS 動畫；同時砍 combo 文字 toast | S | 待做 |
+| K-8 | 方塊 ready 面去難度區 | 「調整難度與模式」details 拿掉（齒輪設定已有） | S | ✅ `a9e2d0ca` |
+| K-9 | 操作提示改 icon chips | shell 文字 `.playHints` 拿掉、改 icon；需翻 D1-A 契約＋改 e2e | S | 待做（需決策） |
+| K-10 | 著色作品品牌邊框 | 下載圖加站名＋小車車角落，家長可直接貼 IG／Threads；不做圖章 | M | 待做 |
+| K-11 | 著色完成面減字 | summary 文字縮成角色臉＋音效 | S | 待做 |
+| K-12 | `GameEndStation` 減法 | 角色 icon＋大 ▶（再玩）＋小 icon（去別站），文字只剩標題 | S | 待做 |
+
 ### 本輪已完成（2026-09-15）
 
 | ID | 說明 |
