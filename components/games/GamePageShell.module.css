@@ -185,6 +185,11 @@
   background: color-mix(in srgb, var(--card) 82%, var(--c-lilac));
 }
 
+/* 夜間就寢時段（自動 night）方塊局內把框內距收到 4px：12px 內距會讓 390×664 的格子掉到 24.6px（<25 驗收線） */
+:global([data-theme="night"]) .main[data-game-id="block-drop"]:has([data-status="playing"], [data-status="paused"]) .playArea {
+  padding: 4px;
+}
+
 /* 兒童向操作提示：緊貼遊戲下方，不隨家長說明一起下移。 */
 .playHints {
   display: flex;

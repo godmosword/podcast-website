@@ -338,3 +338,63 @@ export function IconSwipe({ size, color = "currentColor", style }: IconProps) {
     </Svg>
   );
 }
+
+/** 蠟筆（著色站玩法） */
+export function IconCrayon({ size, style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <path d="M6.5 15.5 15.2 6.8a2.3 2.3 0 0 1 3.3 0l.7.7a2.3 2.3 0 0 1 0 3.3L10.5 19.5H6.5v-4Z" fill="#ff9fb7" {...stroke("#d95f87")} strokeWidth={1.8} />
+      <path d="M13.5 8.5l3 3" {...stroke("#d95f87")} strokeWidth={1.6} />
+      <path d="M6.5 15.5l4 4" {...stroke("#d95f87")} strokeWidth={1.6} />
+      <path d="M3.5 20.5h5" {...stroke("#8ddff0")} strokeWidth={2.2} />
+    </Svg>
+  );
+}
+
+/** 交換（消消樂站玩法：兩格互換） */
+export function IconSwap({ size, color = "currentColor", style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <rect x="3" y="8" width="7" height="7" rx="2" fill="#ffd34d" {...stroke("#e0a93a")} strokeWidth={1.6} />
+      <rect x="14" y="8" width="7" height="7" rx="2" fill="#8ddff0" {...stroke("#5bb7d6")} strokeWidth={1.6} />
+      <path d="M8.5 5.5c2.5-2 4.5-2 7 0" {...stroke(color)} strokeWidth={2} />
+      <path d="M14.2 4.2l1.6 1.4-1.6 1.4" {...stroke(color)} strokeWidth={2} />
+      <path d="M15.5 18.5c-2.5 2-4.5 2-7 0" {...stroke(color)} strokeWidth={2} />
+      <path d="M9.8 19.8l-1.6-1.4 1.6-1.4" {...stroke(color)} strokeWidth={2} />
+    </Svg>
+  );
+}
+
+/** 方塊落下（方塊站玩法） */
+export function IconBlockFall({ size, color = "currentColor", style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <rect x="9" y="3" width="6" height="6" rx="1.6" fill="#c9b4ff" {...stroke("#9b84d6")} strokeWidth={1.6} />
+      <path d="M12 10.5v4" {...stroke(color)} strokeWidth={2} />
+      <path d="M9.6 12.6 12 15l2.4-2.4" {...stroke(color)} strokeWidth={2} />
+      <rect x="3" y="16" width="6" height="5" rx="1.4" fill="#ffb4cf" {...stroke("#e87aa0")} strokeWidth={1.4} />
+      <rect x="15" y="16" width="6" height="5" rx="1.4" fill="#b9f3db" {...stroke("#6fc8a3")} strokeWidth={1.4} />
+    </Svg>
+  );
+}
+
+/** 翻頁（著色「換一張」） */
+export function IconPageTurn({ size, color = "currentColor", style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <path d="M5 4.5h9l5 5v10H5v-15Z" {...stroke(color)} strokeWidth={2} />
+      <path d="M14 4.5v5h5" {...stroke(color)} strokeWidth={2} />
+      <path d="M8.5 14.5h7M8.5 11h3" {...stroke(color)} strokeWidth={1.8} />
+    </Svg>
+  );
+}
+
+/** 往前（下一關／前進） */
+export function IconArrowRight({ size, color = "currentColor", style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <path d="M4.5 12h14" {...stroke(color)} strokeWidth={2.6} />
+      <path d="M12.5 6l6 6-6 6" {...stroke(color)} strokeWidth={2.6} />
+    </Svg>
+  );
+}

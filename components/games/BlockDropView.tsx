@@ -18,6 +18,7 @@ import type { GameAudioBus, OverlayProps } from "@/lib/gamekit/adapter";
 import { GameEndStation } from "@/components/games/GameEndStation";
 import { GameJuiceToast } from "@/components/games/GameJuiceToast";
 import { GameResultActions } from "@/components/games/GameResultActions";
+import { BlockDropReadyDemo } from "@/components/games/BlockDropReadyDemo";
 import { useGameKitSettings } from "@/hooks/useGameKitSettings";
 import type { BlockDropDifficulty } from "@/lib/gamekit/progress/settings";
 import type { BlockDropInstance } from "@/lib/gamekit/games/block-drop/adapter";
@@ -34,7 +35,6 @@ import {
 } from "@/lib/games/block-drop/tutorial";
 import {
   IconBox,
-  IconCandy,
   IconChevronLeft,
   IconChevronRight,
   IconFlame,
@@ -2298,6 +2298,9 @@ export function BlockDropView({
                justifyContent: "center",
                gap: g.status === "paused" ? 10 : 12,
                color: MACARON_THEME.ink,
+               // 井面日夜都是奶油底；GameEndStation 標題吃 --ink，夜間會變白字壓白底，這裡把 token 釘回馬卡龍墨色
+               ["--ink" as string]: MACARON_THEME.ink,
+               ["--ink-soft" as string]: MACARON_THEME.inkSoft,
                textAlign: "center",
                padding: 16,
              }}
@@ -2342,7 +2345,8 @@ export function BlockDropView({
                   {g.status === "paused" ? (
                     <IconPauseGlyph size={44} color={MACARON_THEME.inkSoft} />
                   ) : (
-                    <IconCandy size={48} />
+                    /* 兒童減法審：ready 面用無字玩法示範取代裝飾糖果 icon */
+                    <BlockDropReadyDemo />
                   )}
                 </div>
                 <div style={{ fontSize: 22, fontWeight: 900 }}>

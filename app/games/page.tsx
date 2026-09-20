@@ -1,7 +1,7 @@
 import Image from "next/image";
 import type { Metadata } from "next";
 import Link from "next/link";
-import Icon from "@/components/ui/Icon";
+import { IconBlockFall, IconCrayon, IconSwap } from "@/components/games/ClayIcons";
 import { GAMES, gameParentTip, type GameMeta } from "@/data/games";
 import JsonLd from "@/components/JsonLd";
 import { gameListJsonLd } from "@/lib/json-ld";
@@ -29,22 +29,27 @@ const GAME_TYPE_LABEL: Record<GameMeta["gameType"], string> = {
 };
 
 /**
- * 家長在選卡當下就需要的判斷資訊（時長／有無時間壓力）。
- * 文案刻意短：meta 行要在 3 欄網格最窄的 234px 卡上仍保持單行，
- * 否則各卡文字基線會參差（見 /design-review 2026-08-12）。
+ * 兒童減法審（2026-09-20）：不識字的孩子靠「玩法圖示」認站——
+ * 蠟筆＝塗、兩格交換＝找一樣、方塊落下＝排一排。play 鈕與動作詞都用同一顆。
  */
-function paceLabel(game: GameMeta): string {
-  return game.hasTimer ? "有計時" : "不趕時間";
+function playIcon(game: GameMeta, size: number) {
+  switch (game.gameType) {
+    case "coloring":
+      return <IconCrayon size={size} />;
+    case "match":
+      return <IconSwap size={size} />;
+    case "blocks":
+      return <IconBlockFall size={size} />;
+  }
 }
 
 function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
   const parentTip = gameParentTip(game);
   const ariaParts = [
     game.title,
+    game.teaser,
     GAME_TYPE_LABEL[game.gameType],
     game.ageRange,
-    `約 ${game.estMinutes} 分鐘`,
-    paceLabel(game),
     game.desc,
     ...game.controls,
     parentTip,
@@ -81,18 +86,25 @@ function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
             priority={eager}
             {...(eager ? {} : { loading: "eager" as const })}
           />
-          {/* 美術審 L3：封面角標的年齡拿掉，只留下方 meta 列的「3–7 歲」（同一資訊不出現兩次）。 */}
-          <span className={styles.playFab} aria-hidden>
-            <Icon name="play" size={16} />
+          {/* 美術審 L3：封面角標的年齡拿掉，只留下方 meta 列的「3–7 歲」（同一資訊不出現兩次）。
+              兒童減法審：play 鈕 56px、依遊戲換玩法圖示（下一步按哪裡）；首張卡輕微呼吸 */}
+          <span
+            className={`${styles.playFab}${eager ? ` ${styles.playFabLead}` : ""}`}
+            aria-hidden
+          >
+            {playIcon(game, 30)}
           </span>
         </div>
         <span className={styles.cardBody}>
           <span className={styles.cardTitle}>{game.title}</span>
-          {/* 兒童減法審：teaser（「排滿一行就消掉！」）孩子讀不到、家長不需要，卡片只留圖＋名字＋meta */}
+          {/* 兒童減法審：三字動作詞＋同一顆玩法圖示（圖為主、字為輔）；
+              家長 meta 只留年齡——「約 N 分鐘」可有可無，「不趕時間」三張全同＝零資訊 */}
+          <span className={styles.cardVerb}>
+            {playIcon(game, 18)}
+            {game.teaser}
+          </span>
           <span className={styles.cardMeta}>
             <span>{game.ageRange}</span>
-            <span>約 {game.estMinutes} 分鐘</span>
-            <span>{paceLabel(game)}</span>
           </span>
         </span>
       </Link>

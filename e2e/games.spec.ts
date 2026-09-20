@@ -128,11 +128,18 @@ test.describe("遊樂園 hub", () => {
     expect(new Set(hrefs).size).toBe(hrefs.length);
   });
 
-  test("卡片直接顯示時長與有無時間壓力（家長決策資訊）", async ({ page }) => {
+  /** 兒童減法審：卡片＝圖＋名字＋三字動作詞（配玩法圖示）＋年齡；時長／趕不趕拿掉。 */
+  test("卡片只留三字動作詞與年齡，不再顯示時長與時間壓力", async ({ page }) => {
     await page.goto("/games");
     const firstCard = page.locator('main a[href^="/games/"]').first();
-    await expect(firstCard).toContainText(/約 \d+ 分鐘/);
-    await expect(firstCard).toContainText(/不趕時間|有計時/);
+    await expect(firstCard).toContainText(/塗一塗|找一樣|排一排/);
+    await expect(firstCard).toContainText(/\d+–\d+ 歲/);
+    await expect(firstCard).not.toContainText(/約 \d+ 分鐘/);
+    await expect(firstCard).not.toContainText(/不趕時間|有計時/);
+    // 玩法 play 鈕 ≥ 52px（下一步按哪裡）
+    const fab = firstCard.locator('[class*="playFab"]').first();
+    const box = await fab.boundingBox();
+    expect(box!.width).toBeGreaterThanOrEqual(52);
   });
 
   test("hub 只留三張遊戲卡，不顯示車庫進度", async ({ page }) => {

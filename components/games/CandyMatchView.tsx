@@ -1021,7 +1021,8 @@ export function CandyMatchView({
                   mainAction={
                     levelIndex < CANDY_MATCH_LEVELS.length - 1
                       ? {
-                          label: "下一關 ▶",
+                          label: "下一關",
+                          icon: "next",
                           onClick: () => startLevel(levelIndex + 1),
                         }
                       : undefined

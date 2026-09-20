@@ -1,0 +1,63 @@
+.well {
+  --cell: 20px;
+  --gap: 3px;
+  display: grid;
+  grid-template-columns: repeat(6, var(--cell));
+  grid-template-rows: repeat(4, var(--cell));
+  gap: var(--gap);
+  padding: 8px;
+  border-radius: 14px;
+  background: rgba(93, 74, 103, 0.08);
+  box-shadow: inset 0 2px 6px rgba(93, 74, 103, 0.12);
+}
+
+.cell {
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.bottom,
+.faller {
+  border-radius: 4px;
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.56),
+    inset -2px -3px 0 rgba(102, 74, 91, 0.18);
+}
+
+.faller {
+  background: #c9b4ff;
+  /* 從第 1 列掉到第 4 列＝往下 3 格（含 gap） */
+  animation: blockDemoFall 3s ease-in-out infinite;
+}
+
+.bottom {
+  animation: blockDemoRow 3s ease-in-out infinite;
+}
+
+@keyframes blockDemoFall {
+  0% { transform: translateY(0); opacity: 1; }
+  10% { transform: translateY(0); opacity: 1; }
+  45% { transform: translateY(calc(3 * (var(--cell) + var(--gap)))); opacity: 1; }
+  58% { transform: translateY(calc(3 * (var(--cell) + var(--gap)))); opacity: 1; filter: brightness(1.35); }
+  70% { transform: translateY(calc(3 * (var(--cell) + var(--gap)))); opacity: 0; }
+  100% { transform: translateY(0); opacity: 0; }
+}
+
+@keyframes blockDemoRow {
+  0%, 45% { opacity: 1; filter: brightness(1); }
+  58% { opacity: 1; filter: brightness(1.35); }
+  70% { opacity: 0; }
+  92% { opacity: 0; }
+  100% { opacity: 1; filter: brightness(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faller {
+    animation: none;
+    transform: translateY(calc(3 * (var(--cell) + var(--gap))));
+  }
+
+  .bottom {
+    animation: none;
+  }
+}

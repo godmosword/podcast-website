@@ -130,17 +130,46 @@
 .playFab {
   position: absolute;
   z-index: 1;
-  right: 8px;
-  bottom: 8px;
+  right: 10px;
+  bottom: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
+  width: 56px;
+  height: 56px;
   border-radius: var(--radius-circle);
+  /* 壓在黏土封面上的實體鈕：日夜都保持淺底深墨（用不隨主題翻轉的 token），圖示箭頭才看得見 */
+  color: var(--landing-brand-ink);
+  background: color-mix(in srgb, var(--surface-game-warm) 88%, var(--card-accent));
+  border: 2px solid color-mix(in srgb, var(--card-accent) 55%, var(--on-dark));
+  box-shadow: var(--shadow-md);
+}
+
+/* 首張卡（第一站）輕微呼吸：孩子不用讀字也知道「先按這裡」 */
+.playFabLead {
+  animation: playFabBreathe 2.4s ease-in-out infinite;
+}
+
+@keyframes playFabBreathe {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: var(--shadow-md);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: var(--shadow-md), 0 0 0 8px color-mix(in srgb, var(--card-accent) 28%, transparent);
+  }
+}
+
+/* 三字動作詞＋玩法圖示（圖為主） */
+.cardVerb {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   color: var(--ink);
-  background: color-mix(in srgb, var(--card) 92%, var(--card-accent));
-  box-shadow: var(--shadow-sm);
+  font-size: var(--fs-control);
+  font-weight: 800;
 }
 
 .cardBody {
@@ -200,6 +229,10 @@
   .gameCard,
   .thumbImage {
     transition: none;
+  }
+
+  .playFabLead {
+    animation: none;
   }
 
   .gameCard:hover .thumbImage,

@@ -757,7 +757,7 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
             gameSlug="coloring-book"
             onReplay={() => setDoneOpen(false)}
             replayLabel="再塗這一張"
-            mainAction={{ label: "換一張塗", onClick: onBack }}
+            mainAction={{ label: "換一張塗", icon: "page", onClick: onBack }}
           />
         </div>
       ) : null}

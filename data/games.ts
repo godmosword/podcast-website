@@ -26,6 +26,7 @@ export type GameMeta = {
   title: string;
   desc: string;
   /** Hub 主打卡短情緒句（≤14 字）。 */
+  /** 三字動作詞（兒童減法審：卡片上配玩法圖示顯示，不用長句） */
   teaser: string;
   href: string;
   emoji: string;
@@ -47,7 +48,7 @@ export const GAMES: GameMeta[] = [
     slug: "candy-match",
     title: "繽紛消消樂",
     desc: "小朋友的第一款消除遊戲：找一找、排一排、消一消，完成繽紛任務！",
-    teaser: "找一樣的，消掉它！",
+    teaser: "找一樣",
     href: "/games/candy-match",
     emoji: "🍭",
     accent: "var(--c-pink)",
@@ -73,7 +74,7 @@ export const GAMES: GameMeta[] = [
     slug: "block-drop",
     title: "繽紛樂園",
     desc: "黏土糖果風落下方塊，排滿整行就消除。",
-    teaser: "排滿一行就消掉！",
+    teaser: "排一排",
     href: "/games/block-drop",
     emoji: "🧩",
     // 三款三色（著色天空藍／消消樂粉紅／方塊黃）：顏色就是不識字孩子的分類標籤
@@ -100,7 +101,7 @@ export const GAMES: GameMeta[] = [
     slug: "coloring-book",
     title: "繪本著色",
     desc: "選定裝人物或故事場景線稿，用蠟筆與油漆桶輕輕塗上喜歡的顏色！",
-    teaser: "選顏色，塗一塗！",
+    teaser: "塗一塗",
     href: "/games/coloring-book",
     emoji: "🖍️",
     accent: "var(--c-sky)",

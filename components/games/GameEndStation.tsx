@@ -5,10 +5,11 @@ import { useRef } from "react";
 import { getNextGame } from "@/data/games";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import {
+  IconArrowRight,
   IconCheer,
   IconChevronRight,
   IconConfetti,
-  IconPlay,
+  IconPageTurn,
   IconRainbow,
   IconReplay,
   IconStar,
@@ -30,8 +31,8 @@ export type GameEndStationProps = {
   replayLabel?: string;
   /** 目前遊戲 slug；用來解析下一站。 */
   gameSlug?: string;
-  /** 手動指定下一站（優先於 gameSlug）。 */
-  nextGame?: { title: string; href: string; emoji?: string };
+  /** 手動指定下一站（優先於 gameSlug）。thumbnail 有給時，「去下一站」鈕顯示縮圖＋小箭頭。 */
+  nextGame?: { title: string; href: string; emoji?: string; thumbnail?: string };
   hubHref?: string;
   hubLabel?: string;
   /** 隱藏「回遊樂園」出口（遊戲內另有回地圖時用）。 */
@@ -40,7 +41,12 @@ export type GameEndStationProps = {
    * 取代「再玩」成為主 CTA（例如消消樂「下一關」、著色「換一張塗」）。
    * 有值時再玩降為小 icon。
    */
-  mainAction?: { label: string; onClick: () => void };
+  mainAction?: {
+    label: string;
+    onClick: () => void;
+    /** 圖示要能讓孩子看出「這顆帶我往哪」：next＝往前（下一關），page＝翻頁（換一張）。 */
+    icon?: "next" | "page";
+  };
   className?: string;
 };
 
@@ -89,6 +95,7 @@ export function GameEndStation({
           title: fromSlug.title,
           href: fromSlug.href,
           emoji: fromSlug.emoji,
+          thumbnail: fromSlug.art.thumbnail ?? fromSlug.art.cover,
         }
       : undefined);
 
@@ -147,7 +154,11 @@ export function GameEndStation({
               aria-label={mainAction.label}
               title={mainAction.label}
             >
-              <IconPlay size={34} />
+              {mainAction.icon === "page" ? (
+                <IconPageTurn size={34} />
+              ) : (
+                <IconArrowRight size={34} />
+              )}
             </button>
             <button
               type="button"
@@ -173,11 +184,21 @@ export function GameEndStation({
             {nextGame ? (
               <Link
                 href={nextGame.href}
-                className={styles.sideBtn}
+                className={nextGame.thumbnail ? styles.nextThumb : styles.sideBtn}
                 aria-label={`去玩：${nextGame.title}`}
                 title={`去玩：${nextGame.title}`}
               >
-                <IconChevronRight size={22} />
+                {nextGame.thumbnail ? (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element -- 結算站小縮圖，尺寸固定 */}
+                    <img src={nextGame.thumbnail} alt="" className={styles.nextThumbImg} />
+                    <span className={styles.nextThumbArrow} aria-hidden>
+                      <IconChevronRight size={16} />
+                    </span>
+                  </>
+                ) : (
+                  <IconChevronRight size={22} />
+                )}
               </Link>
             ) : null}
           </>
