@@ -25,6 +25,7 @@ import {
   ERASER_RADIUS_BONUS,
   cropImageDataRect,
   floodFillPaint,
+  regionMask,
   hexToRgba,
   stampBrush,
   unionDirtyRect,
@@ -83,6 +84,8 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
   const strokeImgRef = useRef<ImageData | null>(null);
   const strokeBaseRef = useRef<ImageData | null>(null);
   const strokeDirtyRef = useRef<DirtyRect | null>(null);
+  /** G-L3：本筆觸的「不出線」遮罩（蠟筆起筆時算，收筆清掉） */
+  const strokeMaskRef = useRef<Uint8Array | null>(null);
   const strokeColorRef = useRef<Rgba>(TRANSPARENT);
   const strokeRadiusRef = useRef(10);
   const drawingRef = useRef(false);
@@ -241,6 +244,7 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
         radius,
         color,
         lineDataRef.current ?? undefined,
+        strokeMaskRef.current,
       );
       dirty = unionDirtyRect(dirty, rect);
     }
@@ -270,6 +274,11 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
         1,
         Math.round(brushDisplayRadius(tool) * canvasScale()),
       );
+      // G-L3：蠟筆自動不出線——起筆點所在的封閉區域當遮罩；橡皮擦不限（要能擦掉出界的舊筆觸）
+      strokeMaskRef.current =
+        tool === "crayon" && lineDataRef.current
+          ? regionMask(lineDataRef.current, paint.width, paint.height, pt.x, pt.y)
+          : null;
       drawingRef.current = true;
       lastPtRef.current = pt;
       stampSegment(pt, pt);
@@ -292,6 +301,7 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
     strokeImgRef.current = null;
     strokeBaseRef.current = null;
     strokeDirtyRef.current = null;
+    strokeMaskRef.current = null;
   }, [requestComposite]);
 
   const finishStroke = useCallback(() => {
@@ -308,6 +318,7 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
     strokeImgRef.current = null;
     strokeBaseRef.current = null;
     strokeDirtyRef.current = null;
+    strokeMaskRef.current = null;
   }, [colorHex, pushUndoPatch, recordCompletionAction, scheduleSave, tool]);
 
   const runBucket = useCallback(

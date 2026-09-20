@@ -9,6 +9,7 @@ import {
   hexToRgba,
   parseColoringDraftPageId,
   pasteImageDataRect,
+  regionMask,
   stampBrush,
   unionDirtyRect,
 } from "@/lib/coloring/tools";
@@ -110,6 +111,33 @@ describe("coloring tools", () => {
     expect(paint.data[((3 * 7 + 4) * 4) + 3]).toBe(255); // 旁側已塗（alpha 由 0 → 255）
     expect(paint.data[((3 * 7 + 4) * 4) + 2]).toBe(255); // 旁側藍
     expect(rect).toEqual({ x: 1, y: 1, width: 5, height: 5 });
+  });
+
+  /** G-L3：蠟筆不出線——起筆點所在的封閉區域當遮罩，跨線的那一半圓不塗。 */
+  test("regionMask 以暗線為牆，只標起筆點可達的區域", () => {
+    // 7×7，x=3 一整條垂直黑線把畫面切成左右兩區
+    const line = makeLine(7, 7, (x) => x === 3);
+    const mask = regionMask(line, 7, 7, 1, 3);
+    expect(mask).not.toBeNull();
+    expect(mask![3 * 7 + 1]).toBe(1); // 左區
+    expect(mask![3 * 7 + 5]).toBe(0); // 右區不可達
+    expect(mask![3 * 7 + 3]).toBe(0); // 線本身不在區域內
+  });
+
+  test("regionMask 起筆在線上回 null（不套遮罩）", () => {
+    const line = makeLine(7, 7, (x) => x === 3);
+    expect(regionMask(line, 7, 7, 3, 3)).toBeNull();
+  });
+
+  test("stampBrush 帶遮罩時不塗到遮罩外（跨線另一側）", () => {
+    const paint = makeImageData(7, 7, [255, 255, 255, 0]);
+    const line = makeLine(7, 7, (x) => x === 3);
+    const mask = regionMask(line, 7, 7, 2, 3)!;
+    // 半徑 3 的圓心在 x=2，沒遮罩時 x=4、5 會被塗到
+    stampBrush(paint, 2, 3, 3, [255, 0, 0, 255], line, mask);
+    expect(paint.data[(3 * 7 + 1) * 4 + 3]).toBe(255); // 左側塗到
+    expect(paint.data[(3 * 7 + 4) * 4 + 3]).toBe(0); // 右側沒塗
+    expect(paint.data[(3 * 7 + 5) * 4 + 3]).toBe(0);
   });
 
   test("unionDirtyRect 合併與 null 傳遞", () => {

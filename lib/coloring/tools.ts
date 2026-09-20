@@ -254,7 +254,39 @@ export function floodFillPaint(
   return { filled, rect: filled > 0 ? boundsToRect(bounds) : null };
 }
 
-/** 在 paint 層畫圓點（蠟筆／橡皮擦）；回傳實際寫入的 dirty rect。 */
+/**
+ * G-L3「蠟筆不出線」：以暗線為牆，從起筆點 flood 出可達區域的遮罩（1＝可塗）。
+ * 起筆在線上（或超出範圍）回 null，表示不套遮罩、照舊自由塗。
+ * 用線稿而非 paint 層，所以已塗過的顏色不影響區域判定。
+ */
+export function regionMask(
+  lineData: Uint8ClampedArray,
+  width: number,
+  height: number,
+  x: number,
+  y: number,
+): Uint8Array | null {
+  const sx = Math.round(x);
+  const sy = Math.round(y);
+  if (sx < 0 || sy < 0 || sx >= width || sy >= height) return null;
+  if (lumaAt(lineData, width, sx, sy) < LINE_LUMA_WALL) return null;
+
+  const mask = new Uint8Array(width * height);
+  const stack: number[] = [sx, sy];
+  while (stack.length > 0) {
+    const cy = stack.pop()!;
+    const cx = stack.pop()!;
+    if (cx < 0 || cy < 0 || cx >= width || cy >= height) continue;
+    const idx = cy * width + cx;
+    if (mask[idx]) continue;
+    if (lumaAt(lineData, width, cx, cy) < LINE_LUMA_WALL) continue;
+    mask[idx] = 1;
+    stack.push(cx + 1, cy, cx - 1, cy, cx, cy + 1, cx, cy - 1);
+  }
+  return mask;
+}
+
+/** 在 paint 層畫圓點（蠟筆／橡皮擦）；回傳實際寫入的 dirty rect。mask 有給時只塗 mask=1 的像素。 */
 export function stampBrush(
   paint: ImageData,
   x: number,
@@ -262,6 +294,7 @@ export function stampBrush(
   radius: number,
   color: Rgba,
   lineData?: Uint8ClampedArray,
+  mask?: Uint8Array | null,
 ): DirtyRect | null {
   const { width, height, data } = paint;
   const r2 = radius * radius;
@@ -282,6 +315,7 @@ export function stampBrush(
       const dy = py - y;
       if (dx * dx + dy * dy > r2) continue;
       if (lineData && lumaAt(lineData, width, px, py) < LINE_LUMA_WALL) continue;
+      if (mask && !mask[py * width + px]) continue;
       writeColor(data, (py * width + px) * 4, color);
       expandBounds(bounds, px, py);
     }

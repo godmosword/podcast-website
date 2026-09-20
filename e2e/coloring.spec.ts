@@ -77,6 +77,27 @@ test.describe("coloring book", () => {
     expect(await countRedOnRow(page, 0.45, 0.55, 0.5)).toBe(0);
   }
 
+  /** G-L3：蠟筆自動不出線——從外底起筆拖進主體中心，中心那一列不該有紅。 */
+  test("蠟筆從外底拖進主體，不會塗出線（character 頁）", async ({ page }) => {
+    await openColoringPage(page, /^著色：恐龍車多多$/);
+    await page.getByRole("button", { name: "筆刷粗" }).click();
+    const box = await page.locator("canvas").boundingBox();
+    if (!box) throw new Error("canvas boundingBox 不存在");
+    const from = { x: box.x + box.width * 0.04, y: box.y + box.height * 0.04 };
+    const to = { x: box.x + box.width * 0.5, y: box.y + box.height * 0.5 };
+    await page.mouse.move(from.x, from.y);
+    await page.mouse.down();
+    for (let i = 1; i <= 30; i += 1) {
+      await page.mouse.move(from.x + ((to.x - from.x) * i) / 30, from.y + ((to.y - from.y) * i) / 30);
+    }
+    await page.mouse.up();
+    await page.waitForTimeout(200);
+    // 起筆區（外底）有塗到
+    expect(await countRedOnRow(page, 0.02, 0.1, 0.04)).toBeGreaterThan(0);
+    // 主體中心沒被塗到
+    expect(await countRedOnRow(page, 0.45, 0.55, 0.5)).toBe(0);
+  });
+
   test("油漆桶點外底不灌進主體（character 頁）", async ({ page }) => {
     await bucketExteriorStaysOut(page, /^著色：恐龍車多多$/);
   });
