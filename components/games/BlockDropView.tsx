@@ -48,12 +48,10 @@ import {
   IconPlay,
   IconRainbow,
   IconRotate,
-  IconSpaceKey,
   IconSprout,
   IconStar,
   IconSwipeDown,
-  IconSwipeUp,
-  IconTrophy,
+  IconBulb,
 } from "@/components/games/ClayIcons";
 
 const COLS = 10;
@@ -79,7 +77,6 @@ type LayoutMetrics = {
   sideColW: number;
   boardMaxW: number | undefined;
   playGap: number;
-  titleSize: number;
   touch: TouchPadMetrics | null;
   hud: { hold: number; nextFirst: number; nextRest: number };
 };
@@ -93,7 +90,6 @@ export function getLayoutMetrics(mode: LayoutMode, isCoarse: boolean): LayoutMet
         sideColW: 0,
         boardMaxW: undefined,
         playGap: 6,
-        titleSize: 15,
         touch: isCoarse ? { colW: 64, btn: 46, icon: 20, gap: 6 } : null,
         hud: { hold: 12, nextFirst: 9, nextRest: 6 },
       };
@@ -104,7 +100,6 @@ export function getLayoutMetrics(mode: LayoutMode, isCoarse: boolean): LayoutMet
         sideColW: WIDE_SIDE_W,
         boardMaxW: 400,
         playGap: 12,
-        titleSize: 18,
         touch: isCoarse ? { colW: 76, btn: 56, icon: 23, gap: 8 } : null,
         hud: { hold: 16, nextFirst: 13, nextRest: 9 },
       };
@@ -115,7 +110,6 @@ export function getLayoutMetrics(mode: LayoutMode, isCoarse: boolean): LayoutMet
         sideColW: WIDE_SIDE_W + 4,
         boardMaxW: WIDE_MAX_BOARD_W,
         playGap: 14,
-        titleSize: 20,
         touch: isCoarse ? { colW: 80, btn: 58, icon: 24, gap: 9 } : null,
         hud: { hold: 18, nextFirst: 16, nextRest: 11 },
       };
@@ -217,7 +211,6 @@ const MACARON_THEME = {
   ink: "#5d4a67",
   inkSoft: "#7c6886",
   accentPink: "#a5567a",
-  bestLabel: "#816882",
   mint: "#b9f3db",
   peach: "#ffc4a8",
   lemon: "#ffe889",
@@ -737,15 +730,6 @@ export function TouchControlPad({
   );
 }
 
-type HintItem = {
-  key: string;
-  icon: ReactNode;
-  label: string;
-  onPress?: () => void;
-  onPointerDown?: (e: ReactPointerEvent<HTMLButtonElement>) => void;
-  onPointerUp?: () => void;
-};
-
 function PanelTitle({ icon, text }: { icon: ReactNode; text: string }) {
   return (
     <div
@@ -765,104 +749,6 @@ function PanelTitle({ icon, text }: { icon: ReactNode; text: string }) {
   );
 }
 
-/** 操作提示／觸控虛擬鍵：iconOnly 時僅顯示圖示，aria-label 保留語意。 */
-function HintChips({
-  items,
-  small,
-  iconOnly,
-  disabled,
-  layout = "row",
-  size = "chip",
-}: {
-  items: HintItem[];
-  small?: boolean;
-  iconOnly?: boolean;
-  disabled?: boolean;
-  layout?: "row" | "column";
-  size?: "chip" | "side";
-}) {
-  const isSide = size === "side";
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: layout === "column" ? "column" : "row",
-        gap: isSide ? 10 : 6,
-        justifyContent: "center",
-        flexWrap: layout === "column" ? "nowrap" : "wrap",
-        width: layout === "column" ? 72 : undefined,
-        flexShrink: 0,
-        alignSelf: layout === "column" ? "stretch" : undefined,
-      }}
-    >
-      {items.map((item) => {
-        const chipStyle: CSSProperties = isSide
-          ? {
-              ...hintChip,
-              borderRadius: 20,
-              minWidth: 68,
-              minHeight: 68,
-              width: "100%",
-              justifyContent: "center",
-              padding: 16,
-              boxShadow: "0 6px 14px rgba(126,96,112,.16)",
-            }
-          : small
-            ? {
-                ...hintChip,
-                fontSize: 12,
-                padding: iconOnly ? "7px 12px" : "3px 10px",
-                gap: 5,
-              }
-            : { ...hintChip, gap: 6, padding: iconOnly ? "8px 14px" : hintChip.padding };
-
-        const content = iconOnly ? item.icon : (
-          <>
-            {item.icon}
-            {item.label}
-          </>
-        );
-
-        const interactive = item.onPress || item.onPointerDown;
-        if (interactive) {
-          return (
-            <button
-              key={item.key}
-              type="button"
-              aria-label={item.label}
-              disabled={disabled}
-              onClick={item.onPress}
-              onPointerDown={item.onPointerDown}
-              onPointerUp={item.onPointerUp}
-              onPointerLeave={item.onPointerUp}
-              onPointerCancel={item.onPointerUp}
-              style={{
-                ...chipStyle,
-                cursor: disabled ? "default" : "pointer",
-                opacity: disabled ? 0.45 : 1,
-                touchAction: "manipulation",
-              }}
-            >
-              {content}
-            </button>
-          );
-        }
-
-        return (
-          <span
-            key={item.key}
-            style={chipStyle}
-            aria-label={iconOnly ? item.label : undefined}
-          >
-            {content}
-          </span>
-        );
-      })}
-    </div>
-  );
-}
-
-/** 4×2 迷你方塊預覽（HOLD / NEXT 用，純色塊即可辨識形狀）。 */
 function PiecePreview({ type, cell }: { type: PieceType | null; cell: number }) {
   return (
     <div
@@ -902,25 +788,6 @@ function PiecePreview({ type, cell }: { type: PieceType | null; cell: number }) 
     </div>
   );
 }
-
-const TOUCH_HINTS: HintItem[] = [
-  { key: "rotate", icon: <IconRotate size={15} />, label: "轉" },
-  { key: "left", icon: <IconChevronLeft size={15} />, label: "左" },
-  { key: "right", icon: <IconChevronRight size={15} />, label: "右" },
-  { key: "down", icon: <IconSwipeDown size={15} />, label: "落" },
-];
-const TOUCH_HOLD_HINT: HintItem = {
-  key: "hold",
-  icon: <IconSwipeUp size={15} />,
-  label: "存",
-};
-const KEY_HINTS: HintItem[] = [
-  { key: "left", icon: null, label: "← 左" },
-  { key: "right", icon: null, label: "→ 右" },
-  { key: "rotate", icon: null, label: "↑ 轉" },
-  { key: "drop", icon: <IconSpaceKey size={16} />, label: "落" },
-];
-const KEY_HOLD_HINT: HintItem = { key: "hold", icon: null, label: "C 存" };
 
 type Toast = { id: number; text: string; big: boolean };
 type ClearFx = {
@@ -1741,7 +1608,6 @@ export function BlockDropView({
     moveRepeatRef.current = setInterval(() => move(dx), 90);
   };
 
-  const touchHintItems: HintItem[] = [...TOUCH_HINTS, TOUCH_HOLD_HINT];
   const layout = getLayoutMetrics(layoutMode, isCoarse);
   const showTouchPad = isCoarse && inRound && layout.touch != null;
 
@@ -1787,7 +1653,7 @@ export function BlockDropView({
           lineHeight: 1.35,
         }}
       >
-        <span aria-hidden style={{ fontSize: 20 }}>💡</span>
+        <IconBulb size={22} />
         <span style={{ flex: 1, minWidth: 0 }}>
           <strong style={{ display: "block", fontSize: 13 }}>
             {BLOCK_DROP_TUTORIAL_COPY[tutorialStep].title}
@@ -1906,20 +1772,6 @@ export function BlockDropView({
           Lv {g.level}
         </div>
       )}
-      <div
-        aria-label={`最佳分數 ${Math.max(best ?? 0, g.score)}`}
-        style={{
-          color: MACARON_THEME.bestLabel,
-          fontSize: 11,
-          fontWeight: 800,
-          display: "flex",
-          alignItems: "center",
-          gap: 3,
-        }}
-      >
-        <span>最佳</span>
-        <IconTrophy size={12} /> {Math.max(best ?? 0, g.score)}
-      </div>
       <div
         style={{
           width: "100%",
@@ -2050,8 +1902,9 @@ export function BlockDropView({
       data-theme="macaron-clay"
       style={{
         fontFamily: font,
+        // G-M4：拿掉壓到 ~20% 的封面底圖（看起來像圖沒載完）；封面留給 hub 卡，局內是乾淨的馬卡龍面
         background:
-          "linear-gradient(160deg,rgba(255,249,238,.94) 0%,rgba(243,251,255,.94) 52%,rgba(255,240,247,.94) 100%), url('/games/v2/block-drop/cover.webp') center/cover",
+          "linear-gradient(160deg,#fff9ee 0%,#f3fbff 52%,#fff0f7 100%)",
         padding: layout.shellPad,
         borderRadius: 28,
         width: "100%",
@@ -2093,7 +1946,8 @@ export function BlockDropView({
         }
       `}</style>
 
-      {/* G-H1：手機的 h1 已在 sticky 抬頭，卡內不重複標題；局內連難度 chip 也收掉（inRound 本就 disabled），把高度還給井 */}
+      {/* G-M5：卡內不再重複遊戲名（h1「繽紛樂園」已在 sticky 抬頭）；只留難度 chip 列。
+          G-H1：手機局內連 chip 也收掉（inRound 本就 disabled），把高度還給井 */}
       {(wide || !inRound) && (
       <div
         style={{
@@ -2104,27 +1958,15 @@ export function BlockDropView({
         }}
       >
         <div>
-          {wide && (
-          <div
-            style={{
-              fontSize: layout.titleSize,
-              fontWeight: 800,
-              color: MACARON_THEME.ink,
-              whiteSpace: "nowrap",
-            }}
-          >
-            繽紛方塊{" "}
-            {kidsMode && <IconKid size={19} style={{ verticalAlign: "-0.12em" }} />}
-          </div>
-          )}
           <div
             style={{
               display: "flex",
               gap: 6,
-              marginTop: wide ? 5 : 0,
+              alignItems: "center",
               flexWrap: "wrap",
             }}
           >
+            {kidsMode && <IconKid size={wide ? 19 : 16} />}
             <button
               type="button"
               onClick={cycleDifficulty}
@@ -2514,14 +2356,8 @@ export function BlockDropView({
                   )}
                 </div>
                 <div style={{ fontSize: 22, fontWeight: 900 }}>
-                  {g.status === "paused" ? "暫停中" : "繽紛方塊"}
+                  {g.status === "paused" ? "暫停中" : "繽紛樂園"}
                 </div>
-                {g.status === "ready" && (
-                  <HintChips
-                    items={isCoarse ? touchHintItems : KEY_HINTS}
-                    iconOnly={isCoarse}
-                  />
-                )}
                 {g.status === "ready" && (
                   <GameResultActions
                     onReplay={onStart}
@@ -2707,14 +2543,7 @@ export function BlockDropView({
         {!wide && showTouchPad && touchPad}
       </div>
 
-      {!isCoarse && (
-        <div style={{ marginTop: 9 }}>
-          <HintChips
-            small
-            items={wide ? [...KEY_HINTS, KEY_HOLD_HINT] : KEY_HINTS}
-          />
-        </div>
-      )}
+      {/* G-M6：操作提示只留 GamePageShell 的 `.playHints` 一處（ready 面 chips、井下鍵盤 chips 已移除） */}
     </div>
   );
 }

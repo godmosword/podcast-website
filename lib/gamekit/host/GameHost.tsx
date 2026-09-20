@@ -22,8 +22,9 @@ import { GameLoop } from "@/lib/gamekit/runtime/loop";
 import { reportGameSession } from "@/lib/gamekit/progress/session";
 import type { GameAdapter, GameInstance, GameStatus, OverlayProps } from "@/lib/gamekit/adapter";
 import type { GameAction } from "@/lib/gamekit/types";
-import type { TutorialStep } from "@/data/games";
+import { GAMES, type TutorialStep } from "@/data/games";
 import { BarTouchButton, touchControlStyles } from "@/lib/gamekit/react/TouchControls";
+import { IconStar } from "@/components/games/ClayIcons";
 import hostStyles from "./GameHost.module.css";
 
 export type GameHostProps = {
@@ -82,6 +83,8 @@ export default function GameHost({
   const { kidsMode, gameVolume, motionPreference } = useGameKitSettings();
   const reduced = useReducedMotion(motionPreference);
   const { best, saveBest } = useBestScore(adapter.id);
+  /** G-M6：`hasScore: false` 的遊戲（消消樂）不顯示也不存最佳分，抬頭不再冒出「最佳 ⭐ 500」。 */
+  const hasScore = GAMES.find((g) => g.slug === adapter.id)?.hasScore ?? true;
   const { useKeyboardInput } = useTouchControls();
   /** PLAY-IA-7：有 shell slot 就 portal；否則 fallback 畫布上方原列 */
   const chromeSlot = useGamePlayChromeSlot();
@@ -116,7 +119,7 @@ export default function GameHost({
       audio: { ensureAudio, tone },
       onSession: (result) => {
         // 每次 onSession 都寫入（中關／多賽道）；去重由各 adapter 負責。
-        if (best == null || result.score > best) {
+        if (hasScore && (best == null || result.score > best)) {
           void saveBest(result.score);
         }
         reportGameSession(result);
@@ -311,8 +314,10 @@ export default function GameHost({
           : hostStyles.toolbarRow
       }
     >
-      {(best ?? 0) > 0 ? (
-        <span className={hostStyles.bestScore}>最佳 ⭐ {best}</span>
+      {hasScore && (best ?? 0) > 0 ? (
+        <span className={hostStyles.bestScore}>
+          最佳 <IconStar size={14} /> {best}
+        </span>
       ) : null}
       <GameChromeToolbar
         canPause={status === "playing" || status === "paused"}

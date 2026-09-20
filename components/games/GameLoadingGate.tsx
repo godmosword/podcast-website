@@ -8,7 +8,7 @@ import { GameLoadOverlay } from "@/components/games/GameLoadOverlay";
 import styles from "./GameLoadingGate.module.css";
 
 const LABELS: Record<GameKitGameId, string> = {
-  "block-drop": "繽紛方塊",
+  "block-drop": "繽紛樂園",
   "candy-match": "繽紛消消樂",
 };
 

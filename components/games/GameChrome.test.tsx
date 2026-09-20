@@ -19,8 +19,8 @@ describe("GameChrome settings by gameId", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "遊戲設定" }));
     expect(screen.getByRole("dialog", { name: "遊戲設定" })).toBeTruthy();
-    expect(screen.queryByRole("radiogroup", { name: "繽紛方塊難度" })).toBeNull();
-    expect(screen.queryByRole("radiogroup", { name: "繽紛方塊特殊模式" })).toBeNull();
+    expect(screen.queryByRole("radiogroup", { name: "繽紛樂園難度" })).toBeNull();
+    expect(screen.queryByRole("radiogroup", { name: "繽紛樂園特殊模式" })).toBeNull();
     expect(screen.getByRole("radiogroup", { name: "動態效果" })).toBeTruthy();
   });
 
@@ -31,7 +31,7 @@ describe("GameChrome settings by gameId", () => {
       </GameChrome>,
     );
     fireEvent.click(screen.getByRole("button", { name: "遊戲設定" }));
-    expect(screen.getByRole("radiogroup", { name: "繽紛方塊難度" })).toBeTruthy();
-    expect(screen.getByRole("radiogroup", { name: "繽紛方塊特殊模式" })).toBeTruthy();
+    expect(screen.getByRole("radiogroup", { name: "繽紛樂園難度" })).toBeTruthy();
+    expect(screen.getByRole("radiogroup", { name: "繽紛樂園特殊模式" })).toBeTruthy();
   });
 });

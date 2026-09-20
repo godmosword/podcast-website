@@ -246,3 +246,73 @@ export function IconKid({ size, color = "#5d4a67", style }: IconProps) {
     </Svg>
   );
 }
+
+/** 泡泡（消消樂道具） */
+export function IconBubble({ size, style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <circle cx="10.5" cy="12.5" r="6.5" fill="#dff4ff" {...stroke("#7cc7ee")} strokeWidth={1.8} />
+      <path d="M7.4 10.6a3.6 3.6 0 0 1 2.6-2.4" {...stroke("#ffffff")} strokeWidth={1.8} />
+      <circle cx="18" cy="7" r="2.6" fill="#dff4ff" {...stroke("#7cc7ee")} strokeWidth={1.6} />
+      <circle cx="18.5" cy="16.5" r="1.6" fill="#dff4ff" {...stroke("#7cc7ee")} strokeWidth={1.4} />
+    </Svg>
+  );
+}
+
+/** 掃把（消消樂道具：掃整排） */
+export function IconBroom({ size, style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <path d="M15.5 3.5l-6 8" {...stroke("#b98a5c")} />
+      <path d="M11 9.5l4 3-3.2 6.2a2 2 0 0 1-2.9.8l-4-3a2 2 0 0 1-.5-2.9L8 9.4l3 .1Z" fill="#ffd34d" {...stroke("#e0a93a")} strokeWidth={1.8} />
+      <path d="M7.5 15.5l2.6 2M9.6 13.6l2.6 2" {...stroke("#e0a93a")} strokeWidth={1.4} />
+    </Svg>
+  );
+}
+
+/** 燈泡（提示／教學） */
+export function IconBulb({ size, style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3Z" fill="#ffe889" {...stroke("#e0a93a")} strokeWidth={1.8} />
+      <path d="M10 19h4M10.5 21h3" {...stroke("#8a6d60")} strokeWidth={1.8} />
+      <path d="M10.2 8.6a2.3 2.3 0 0 1 1.6-1.4" {...stroke("#ffffff")} strokeWidth={1.6} />
+    </Svg>
+  );
+}
+
+/** 鎖頭（未解鎖關卡） */
+export function IconLock({ size, color = "#b9a9c6", style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <rect x="5" y="10.5" width="14" height="10" rx="3" fill="#efe9f5" {...stroke(color)} strokeWidth={1.8} />
+      <path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" {...stroke(color)} strokeWidth={1.8} />
+      <circle cx="12" cy="15.5" r="1.4" fill={color} />
+    </Svg>
+  );
+}
+
+/** 彩帶／紙花（過關） */
+export function IconConfetti({ size, style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <path d="M4.5 19.5l4-11 7 7-11 4Z" fill="#ffd34d" {...stroke("#e0a93a")} strokeWidth={1.6} />
+      <path d="M7.2 14.8l2.2 2.2" {...stroke("#fff3c2")} strokeWidth={1.4} />
+      <circle cx="15.5" cy="6" r="1.6" fill="#ff9fb7" />
+      <circle cx="19.5" cy="11" r="1.4" fill="#7fd4a8" />
+      <path d="M13 9.5c1.5-1.5 3.5-1.5 4.5-3" {...stroke("#8ddff0")} strokeWidth={1.6} />
+      <path d="M17.5 15.5l1.5 1.5" {...stroke("#c9b4ff")} strokeWidth={1.8} />
+    </Svg>
+  );
+}
+
+/** 加油（再試一次） */
+export function IconCheer({ size, style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <path d="M12 20s-6.5-4.2-6.5-9A3.7 3.7 0 0 1 12 8.6 3.7 3.7 0 0 1 18.5 11c0 4.8-6.5 9-6.5 9Z" fill="#ffb4cf" {...stroke("#e87aa0")} strokeWidth={1.8} />
+      <path d="M8.6 10.6c.3-.9 1-1.4 1.8-1.6" {...stroke("#ffffff")} strokeWidth={1.6} />
+      <path d="M12 3.5v2M6.2 5.8l1.4 1.4M17.8 5.8l-1.4 1.4" {...stroke("#f0b429")} strokeWidth={1.8} />
+    </Svg>
+  );
+}

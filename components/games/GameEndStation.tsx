@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRef } from "react";
 import { getNextGame } from "@/data/games";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { IconCheer, IconConfetti, IconRainbow, IconStar } from "./ClayIcons";
 import styles from "./GameEndStation.module.css";
 
 export type GameEndMood = "win" | "retry" | "over";
@@ -98,8 +99,15 @@ export function GameEndStation({
       aria-modal="true"
       aria-label={resolvedTitle}
     >
+      {/* G-M3：主視覺走 ClayIcons，不用 emoji 當 sprite（GAMEKIT-ART-BIBLE） */}
       <p className={styles.moodEmoji} aria-hidden>
-        {mood === "win" ? "🎉" : mood === "retry" ? "💪" : "🌈"}
+        {mood === "win" ? (
+          <IconConfetti size={44} />
+        ) : mood === "retry" ? (
+          <IconCheer size={44} />
+        ) : (
+          <IconRainbow size={44} />
+        )}
       </p>
       <h2 className={styles.title}>{resolvedTitle}</h2>
 
@@ -107,10 +115,11 @@ export function GameEndStation({
         <div className={styles.scoreRow}>
           {starCount != null ? (
             <p className={styles.stars} aria-label={`${starCount} 顆星`}>
-              {"⭐".repeat(starCount)}
-              <span className={styles.starEmpty} aria-hidden>
-                {"☆".repeat(3 - starCount)}
-              </span>
+              {[0, 1, 2].map((i) => (
+                <span key={i} className={i < starCount ? undefined : styles.starEmpty} aria-hidden>
+                  <IconStar size={26} color={i < starCount ? "#ffd34d" : "#d9d0e0"} />
+                </span>
+              ))}
             </p>
           ) : null}
           {scoreLabel ? <p className={styles.scoreLabel}>{scoreLabel}</p> : null}

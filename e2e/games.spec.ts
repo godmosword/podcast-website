@@ -146,7 +146,7 @@ test.describe("遊樂園 hub", () => {
 });
 
 /** G-H1／G-H2：真實手機高度（Safari 有工具列）方塊井要玩得了，井底＋觸控鍵同屏。 */
-test.describe("繽紛方塊：手機井尺寸", () => {
+test.describe("繽紛樂園：手機井尺寸", () => {
   test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 664 } });
 
   test("390×664：格子 ≥ 25px、井底與觸控鍵同屏、觸控鍵 ≥ 44px", async ({ page }) => {

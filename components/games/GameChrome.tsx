@@ -194,10 +194,10 @@ function SettingsDialog({
         {showBlockDrop ? (
         <div className={styles.settingBlock}>
           <div className={styles.settingHeading}>
-            <strong>繽紛方塊難度</strong>
+            <strong>繽紛樂園難度</strong>
             <small>會調整落下速度、鎖定時間與結算加分。</small>
           </div>
-          <div className={styles.segmented} role="radiogroup" aria-label="繽紛方塊難度">
+          <div className={styles.segmented} role="radiogroup" aria-label="繽紛樂園難度">
             {BLOCK_DROP_DIFFICULTIES.map((option) => (
               <button
                 key={option.id}
@@ -261,7 +261,7 @@ function SettingsDialog({
             <strong>特殊模式</strong>
             <small>彩虹消除會在連續消行時給額外回饋。</small>
           </div>
-          <div className={styles.segmented} role="radiogroup" aria-label="繽紛方塊特殊模式">
+          <div className={styles.segmented} role="radiogroup" aria-label="繽紛樂園特殊模式">
             {BLOCK_DROP_SPECIAL_MODES.map((option) => (
               <button
                 key={option.id}

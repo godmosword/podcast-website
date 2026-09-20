@@ -12,7 +12,7 @@ import { CandyMatchBoard } from "@/components/games/CandyMatchBoard";
 import { DirtOverlay, PieceArt, PieceGift } from "@/components/games/CandyMatchPieceArt";
 import { GameEndStation } from "@/components/games/GameEndStation";
 import { GameJuiceToast } from "@/components/games/GameJuiceToast";
-import { IconSparkle, IconStar } from "@/components/games/ClayIcons";
+import { IconSparkle, IconStar, IconBubble, IconBroom, IconBulb, IconLock, IconRainbow } from "@/components/games/ClayIcons";
 import type { GameAudioBus, OverlayProps } from "@/lib/gamekit/adapter";
 import { loadPlayerProfile } from "@/lib/gamekit/progress/save";
 import { medalCount } from "@/lib/gamekit/progress/meta";
@@ -798,7 +798,7 @@ export function CandyMatchView({
                   }}
                 >
                   <span style={{ fontSize: 13, color: INK_SOFT, fontWeight: 800 }}>
-                    {locked ? "🔒" : nextPlay ? "下一關" : `第 ${i + 1} 關`}
+                    {locked ? <IconLock size={16} /> : nextPlay ? "下一關" : `第 ${i + 1} 關`}
                   </span>
                   <span style={{ fontSize: 16, fontWeight: 900 }}>{lv.place}</span>
                   <span aria-label={`${stars} 顆星`} className={styles.starSlots}>
@@ -908,9 +908,9 @@ export function CandyMatchView({
           >
             {(
               [
-                ["bubble", "🫧", "泡泡"],
-                ["rainbow", "🌈", "彩虹"],
-                ["broom", "🧹", "掃把"],
+                ["bubble", <IconBubble key="bubble" size={20} />, "泡泡"],
+                ["rainbow", <IconRainbow key="rainbow" size={20} />, "彩虹"],
+                ["broom", <IconBroom key="broom" size={20} />, "掃把"],
               ] as const
             ).map(([kind, icon, label]) => (
               <button
@@ -933,7 +933,7 @@ export function CandyMatchView({
               </button>
             ))}
             <button type="button" style={softBtn} onClick={manualHint} disabled={inputPaused}>
-              💡 提示
+              <IconBulb size={18} /> 提示
             </button>
           </div>
           {propMode && (

@@ -4,6 +4,7 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import GameHost from "./GameHost";
 import { candyMatchAdapter } from "@/lib/gamekit/games/candy-match/adapter";
+import { getBestScoreFromStore, saveBestScoreInStore } from "@/lib/progress-store";
 
 vi.stubGlobal("React", React);
 
@@ -14,6 +15,22 @@ vi.stubGlobal("React", React);
  */
 describe("GameHost × candy-match 暫停", () => {
   beforeEach(() => {
+    // jsdom 的 localStorage 在此環境不可用（--localstorage-file 警告），換記憶體版
+    const store = new Map<string, string>();
+    const localStorageMock = {
+      getItem: (key: string) => store.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        store.set(key, value);
+      },
+      removeItem: (key: string) => {
+        store.delete(key);
+      },
+      clear: () => store.clear(),
+      key: () => null,
+      length: 0,
+    };
+    Object.defineProperty(window, "localStorage", { value: localStorageMock, configurable: true });
+    vi.stubGlobal("localStorage", localStorageMock);
     vi.stubGlobal(
       "ResizeObserver",
       class {
@@ -54,5 +71,14 @@ describe("GameHost × candy-match 暫停", () => {
     await act(async () => {});
     expect(screen.getByRole("button", { name: "暫停遊戲" })).toBeTruthy();
     expect(board().getAttribute("aria-disabled")).toBeNull();
+  });
+
+  /** G-M6：消消樂 `hasScore: false`，即使舊資料存了分數，抬頭也不該冒出「最佳 ⭐」。 */
+  it("hasScore:false 的遊戲不顯示最佳分", async () => {
+    saveBestScoreInStore("candy-match", 500);
+    expect(getBestScoreFromStore("candy-match")).toBe(500);
+    render(<GameHost adapter={candyMatchAdapter} title="繽紛消消樂" />);
+    await act(async () => {});
+    expect(screen.queryByText(/最佳/)).toBeNull();
   });
 });
