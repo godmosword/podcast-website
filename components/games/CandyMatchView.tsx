@@ -11,7 +11,8 @@ import {
 import { CandyMatchBoard } from "@/components/games/CandyMatchBoard";
 import { DirtOverlay, PieceArt, PieceGift } from "@/components/games/CandyMatchPieceArt";
 import { GameEndStation } from "@/components/games/GameEndStation";
-import { IconSparkle, IconStar, IconBubble, IconBroom, IconBulb, IconLock, IconRainbow } from "@/components/games/ClayIcons";
+import { IconSparkle, IconBubble, IconBroom, IconBulb, IconRainbow } from "@/components/games/ClayIcons";
+import { CandyMatchMap } from "@/components/games/CandyMatchMap";
 import type { GameAudioBus, OverlayProps } from "@/lib/gamekit/adapter";
 import { loadPlayerProfile } from "@/lib/gamekit/progress/save";
 import { medalCount } from "@/lib/gamekit/progress/meta";
@@ -762,56 +763,18 @@ export function CandyMatchView({
           <h2 style={{ textAlign: "center", color: INK, fontSize: 22, fontWeight: 900, margin: "6px 0 8px" }}>
             遊樂園地圖
           </h2>
-          <p className={styles.starLegend}>
-            通關一顆星，沒用道具再一顆，步數還夠再一顆。做出特別糖更好玩
-          </p>
           <div style={{ textAlign: "center", marginBottom: 12 }}>
             <button type="button" style={softBtn} onClick={openTutorial}>
               怎麼玩？
             </button>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-            {CANDY_MATCH_LEVELS.map((lv, i) => {
-              const locked = i > maxCleared;
-              const stars = medalCount(medals[i] ?? 0);
-              const nextPlay = !locked && i === maxCleared;
-              return (
-                <button
-                  key={lv.index}
-                  type="button"
-                  disabled={locked}
-                  onClick={() => startLevel(i)}
-                  data-next={nextPlay ? "true" : undefined}
-                  className={nextPlay ? styles.mapNext : undefined}
-                  style={{
-                    ...softBtn,
-                    flexDirection: "column",
-                    gap: 2,
-                    padding: "12px 8px",
-                    opacity: locked ? 0.45 : 1,
-                    cursor: locked ? "default" : "pointer",
-                    background: locked ? "rgba(255,255,255,.5)" : "rgba(255,255,255,.85)",
-                  }}
-                >
-                  <span style={{ fontSize: 13, color: INK_SOFT, fontWeight: 800 }}>
-                    {locked ? <IconLock size={16} /> : nextPlay ? "下一關" : `第 ${i + 1} 關`}
-                  </span>
-                  <span style={{ fontSize: 16, fontWeight: 900 }}>{lv.place}</span>
-                  <span aria-label={`${stars} 顆星`} className={styles.starSlots}>
-                    {[0, 1, 2].map((s) => (
-                      <span
-                        key={s}
-                        className={s < stars ? styles.starFilled : styles.starEmpty}
-                        aria-hidden
-                      >
-                        <IconStar size={16} color={s < stars ? "#ffd34d" : "#d9d0e0"} />
-                      </span>
-                    ))}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          {/* K-6：地圖以圖代字——10 站沿小路排列、每站黏土小圖；星星規則句拿掉（星星自己會說話） */}
+          <CandyMatchMap
+            levels={CANDY_MATCH_LEVELS}
+            stars={CANDY_MATCH_LEVELS.map((_, i) => medalCount(medals[i] ?? 0))}
+            maxCleared={maxCleared}
+            onSelect={startLevel}
+          />
           <div style={{ textAlign: "center", marginTop: 14 }}>
             <button type="button" style={softBtn} onClick={goToTitle}>
               回標題

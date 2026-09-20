@@ -21,6 +21,8 @@ export type CandyMatchLevel = {
   name: string;
   /** 關卡地圖節點名（企劃第二節） */
   place: string;
+  /** K-6：地圖節點的黏土小圖（public/games/v2/candy-match/places/<placeIcon>.webp），孩子不識字靠圖認站 */
+  placeIcon: string;
   cols: number;
   rows: number;
   /** 使用前 N 種圖案 */
@@ -46,6 +48,7 @@ export const CANDY_MATCH_LEVELS: CandyMatchLevel[] = [
     index: 0,
     name: "認識消除",
     place: "彩虹入口",
+    placeIcon: "rainbow-gate",
     cols: 5,
     rows: 5,
     pieceKinds: 3,
@@ -58,6 +61,7 @@ export const CANDY_MATCH_LEVELS: CandyMatchLevel[] = [
     index: 1,
     name: "收集小紅",
     place: "泡泡廣場",
+    placeIcon: "bubble-plaza",
     cols: 5,
     rows: 5,
     pieceKinds: 4,
@@ -70,6 +74,7 @@ export const CANDY_MATCH_LEVELS: CandyMatchLevel[] = [
     index: 2,
     name: "計程車任務",
     place: "冰淇淋小店",
+    placeIcon: "ice-cream-shop",
     cols: 5,
     rows: 5,
     pieceKinds: 4,
@@ -82,6 +87,7 @@ export const CANDY_MATCH_LEVELS: CandyMatchLevel[] = [
     index: 3,
     name: "彩虹小巴",
     place: "旋轉木馬",
+    placeIcon: "carousel",
     cols: 6,
     rows: 6,
     pieceKinds: 4,
@@ -94,6 +100,7 @@ export const CANDY_MATCH_LEVELS: CandyMatchLevel[] = [
     index: 4,
     name: "清潔小廣場",
     place: "清潔廣場",
+    placeIcon: "clean-plaza",
     cols: 6,
     rows: 6,
     pieceKinds: 4,
@@ -107,6 +114,7 @@ export const CANDY_MATCH_LEVELS: CandyMatchLevel[] = [
     index: 5,
     name: "鈴鈴派對",
     place: "小小賽道",
+    placeIcon: "mini-track",
     cols: 6,
     rows: 6,
     pieceKinds: 5,
@@ -119,6 +127,7 @@ export const CANDY_MATCH_LEVELS: CandyMatchLevel[] = [
     index: 6,
     name: "摩天輪亮起來",
     place: "摩天輪",
+    placeIcon: "ferris-wheel",
     cols: 6,
     rows: 6,
     pieceKinds: 5,
@@ -131,6 +140,7 @@ export const CANDY_MATCH_LEVELS: CandyMatchLevel[] = [
     index: 7,
     name: "禮物送下來",
     place: "星星舞台",
+    placeIcon: "star-stage",
     cols: 6,
     rows: 6,
     pieceKinds: 4,
@@ -144,6 +154,7 @@ export const CANDY_MATCH_LEVELS: CandyMatchLevel[] = [
     index: 8,
     name: "繽紛大遊行",
     place: "甜甜圈屋",
+    placeIcon: "donut-house",
     cols: 6,
     rows: 6,
     pieceKinds: 5,
@@ -163,6 +174,7 @@ export const CANDY_MATCH_LEVELS: CandyMatchLevel[] = [
     index: 9,
     name: "煙火慶祝",
     place: "繽紛煙火",
+    placeIcon: "fireworks",
     cols: 6,
     rows: 6,
     pieceKinds: 5,

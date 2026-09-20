@@ -76,7 +76,8 @@ test.describe("遊戲完整 lifecycle", () => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/games/candy-match");
     await page.getByRole("button", { name: /開始/ }).click();
-    await page.getByRole("button", { name: "下一關" }).click();
+    // K-6：地圖站點以圖代字，下一站用 data-next 定位（aria-label＝「第 N 關 地名」）
+    await page.locator('button[data-next="true"]').click();
     await expect(page.getByTestId("candy-match-board")).toBeVisible();
     const firstChallenge = await page.locator("[data-challenge]").getAttribute("data-challenge");
     expect(firstChallenge).toBeTruthy();

@@ -1,0 +1,19 @@
+Use your image generation tool (image_gen) to create ONE landscape sticker sheet (1536x1024 or the closest landscape size). Image 1 is a style reference (claymation park scene): match its clay material, pastel palette and soft lighting.
+
+Layout (IMPORTANT, must be exact): a grid of 5 columns × 2 rows = 10 equal square cells filling the whole image edge to edge, each cell 1/5 of the width and 1/2 of the height. Every cell has the same flat, plain, very light cream background (#fff7ea) with NO border, NO frame, NO shadow between cells. In each cell one single clay icon sits centered, taking about 70% of the cell, fully inside its cell, never touching the cell edges, nothing overlapping into neighbouring cells.
+
+Icons, reading left to right, top row then bottom row:
+1. a small rainbow archway gate with a star on top
+2. a cluster of shiny soap bubbles (three or four bubbles)
+3. a tiny ice-cream shop kiosk with a big ice-cream cone on its roof
+4. a carousel (merry-go-round) with a striped canopy and two little horses
+5. a broom with sparkles, sweeping (clean plaza)
+6. a small oval race track with a checkered flag
+7. a ferris wheel with colorful cabins
+8. a little stage with a big star spotlight
+9. a donut-shaped house with pink icing and sprinkles
+10. colorful fireworks bursting (pink, yellow, mint, sky blue)
+
+Children's picture-book claymation style, rounded chunky shapes, matte plasticine, toddler-safe and friendly. Absolutely no text, letters, numbers, captions, logos or watermark. No people.
+
+After generating, copy the PNG to exactly: <OUTPUT_PATH> and reply with the final path only.

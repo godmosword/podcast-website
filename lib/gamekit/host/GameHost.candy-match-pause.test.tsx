@@ -52,7 +52,7 @@ describe("GameHost × candy-match 暫停", () => {
 
     // 標題 → 地圖 → 第 1 關
     fireEvent.click(screen.getByRole("button", { name: /開始/ }));
-    fireEvent.click(screen.getByText("下一關").closest("button")!);
+    fireEvent.click(screen.getByRole("button", { name: /^第 1 關/ }));
     await act(async () => {});
 
     const board = () => screen.getByTestId("candy-match-board");
