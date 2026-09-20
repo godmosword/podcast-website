@@ -124,7 +124,7 @@ describe("buildFullTranscriptVtt", () => {
     const vtt = buildFullTranscriptVtt("ep-1");
     expect(vtt).not.toBeNull();
     expect(vtt).toMatch(/^WEBVTT/);
-    expect(vtt).toContain("嗨,我是 Bonbon");
+    expect(vtt).toContain("嗨 我是 Bonbon");
     const cueCount = (vtt!.match(/^\d+$/gm) ?? []).length;
     expect(cueCount).toBeGreaterThan(50);
   });
