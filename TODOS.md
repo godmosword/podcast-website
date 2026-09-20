@@ -49,7 +49,7 @@
 | G-M4 | M | 方塊背景把封面圖壓到 ~20% 透明度，看起來像圖沒載完 | — | 要嘛清楚一點當場景（加 scrim 保可讀），要嘛拿掉 | `components/games/BlockDropView.tsx` 背景層 | S | ✅ `ab5e489e` |
 | G-M5 | M | 命名：hub／h1 叫「繽紛樂園」，局內標題叫「繽紛方塊」 | `data/games.ts` title vs `BlockDropView` 內文 | 統一（建議局內拿掉，h1 已持有） | `components/games/BlockDropView.tsx` | S | ✅ `ab5e489e` |
 | G-M6 | M | 重複資訊：方塊 ready 畫面同時出現 3 組操作提示（modal 內、井下 HintChips、shell `.playHints`）；最佳分同時在抬頭 ⭐ 和 HUD 🏆；消消樂 `hasScore:false` 卻在抬頭顯示「最佳 ⭐ 500」 | `GameHost` `best>0` 就渲染；`GamePageShell` `controls` 恆顯示 | 各留一處；`hasScore:false` 的遊戲不顯示最佳分（或 `useBestScore` 不存） | `lib/gamekit/host/GameHost.tsx` toolbarRow、`components/games/GamePageShell.tsx`、`BlockDropView.tsx` | S | ✅ `ab5e489e` |
-| G-M7 | M | 著色本 chrome 不一致：只有它保留全站 nav，還疊「← 回遊樂園」「← 回封面」三層返回；桌機「← 回遊樂園」貼視窗左緣、內容置中不對齊 | `lib/is-story-play-route.ts` 把 `coloring-book` 排除在沉浸路由外（PLAY-IA-3 D5-A 決策「不動」） | 走 `GamePageShell` 同款 sticky 抬頭（返回＋h1＋主題），picker 的「回封面」併進抬頭 | `components/coloring/ColoringPageShell.tsx`、`lib/is-story-play-route.ts` | M | 待做（需先翻 D5-A） |
+| G-M7 | M | 著色本 chrome 不一致：只有它保留全站 nav，還疊「← 回遊樂園」「← 回封面」三層返回；桌機「← 回遊樂園」貼視窗左緣、內容置中不對齊 | `lib/is-story-play-route.ts` 把 `coloring-book` 排除在沉浸路由外（PLAY-IA-3 D5-A 決策「不動」） | 走 `GamePageShell` 同款 sticky 抬頭（返回＋h1＋主題），picker 的「回封面」併進抬頭 | `components/coloring/ColoringPageShell.tsx`、`lib/is-story-play-route.ts` | M | ✅ `3b397f69`（D5-A 已翻：著色本納入沉浸路由） |
 | G-L1 | L | 方塊 Game Over 主 CTA 是「去玩：繽紛消消樂」，「再玩一次」變次要——挑戰型輸了應以重玩為主 | `GameEndStation` `mood="over"` 把 next-game 當 mainAction | `over` 時主鈕改 replay、下一站降為連結 | `components/games/GameEndStation.tsx` | S | ✅ `03c8ac20`（K-12 順帶） |
 | G-L2 | L | 星星／車庫／貼紙經濟還在算（消消樂會給星），但 hub 進度列在 `a166997b` 改版時拿掉；`lib/games/hub-progress.ts` 只剩測試在用。孩子拿到星星沒地方看 | — | 二選一：hub 卡下方補一列低壓進度（星星／已玩／下一輛），或刪 `hub-progress.ts`＋測試（knip） | `app/games/page.tsx`、`lib/games/hub-progress.ts` | S | ✅ `03c8ac20`（K-4：刪） |
 | G-L3 | L | 蠟筆不受線稿區域限制（會塗出界）；同齡產品常見「自動不出線」模式 | — | 以 flood-fill 區域當筆刷遮罩（可選開關） | `components/coloring/ColoringCanvas.tsx` 引擎 | M | ✅ `c33a7a4b`（無開關，預設不出線） |
@@ -1098,6 +1098,7 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 
 > **Gate：** `/agent-plan` 三審（Codex 工程／Grok 對抗／Opus 設計，v1 兩票 Reject 後改寫）；Approved Plan：[`/tmp/agent-plan-1785073210.md`](/tmp/agent-plan-1785073210.md)。
 > **決策：** D1-A（`GameIntro` 下移、操作提示留在遊戲旁）· D2-C（取消 featured 區塊，主打改分類內大卡）· D3-A（只做遊樂園動線）· D4-A（遊戲頁隱藏全站導覽）· D5-A（`coloring-book` 不動）。
+> **2026-09-20 修訂：** D5-A 已翻（G-M7 `3b397f69`）——著色本改走同款 sticky 抬頭並納入沉浸路由；D1-A 的操作提示改以圖代字（K-9），位置契約不變。
 > **紅線守住：** 未動 `lib/gamekit/progress/**` 進度／最佳分數／星星／貼紙 schema、未動 Candy Kart iframe bridge、未改 canvas 背景與遊戲內美術色。
 
 | ID | 優先 | 狀態 | 摘要 | 主要檔案 | 驗證 |
