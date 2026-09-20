@@ -9,7 +9,7 @@
 > **紀律：** 條目打 ✅ 時必須附 commit hash。
 > **資料基準（2026-09-02）：** `storiesByNewest()` **28 集**、最新 **`ep-28`**（2026-09-02，MVP 單封面，#145 `11f6d67`）。
 > **出圖落後：** 多頁插圖至 **`ep-24`（19 頁）**；`ep-25`／`ep-26`／`ep-27`／`ep-28` 仍為 `pageCount=1` MVP。最新全幕含 **`ep-21`（18 頁）**／**`ep-22`（24 頁）**／**`ep-23`（26 頁）**／**`ep-24`（19 頁）**。
-> 完整逐字稿覆蓋至 `ep-28`（含 `ep-28`，已 `--mark`）。`data/games.ts` 見下表。
+> 完整逐字稿覆蓋至 `ep-29`（ep-1–10 已補 `--mark`；ep-11 起原本已標記）。`data/games.ts` 見下表。
 >
 > **現役遊戲（canon，對齊 `data/games.ts`）：** `candy-match` 繽紛消消樂 · `block-drop` 繽紛樂園 · `coloring-book` 繪本著色。
 > **歷史 slug：** `kart`／`pirate-kart`／`car-star`／`car-mission` 已退役，見 [archive](./docs/archive/TODOS-completed-2026-07-11.md)。
