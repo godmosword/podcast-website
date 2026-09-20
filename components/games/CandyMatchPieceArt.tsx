@@ -23,6 +23,9 @@ function FaceBase({
     <>
       {/* 車身（圓潤方塊）＋車窗臉 */}
       <rect x="6" y="14" width="36" height="26" rx="9" fill={body} stroke={bodyDark} strokeWidth="2" />
+      {/* G-M1 黏土厚度：車身下緣一道暗帶＋左上高光，讓平面向量車有捏出來的體積感 */}
+      <path d="M8 33.5c2 4.5 6 6.5 16 6.5s14-2 16-6.5v-2H8Z" fill={bodyDark} opacity="0.28" />
+      <ellipse cx="13" cy="17" rx="4.2" ry="1.7" fill="#fff" opacity="0.55" />
       <rect x="11" y="18" width="26" height="13" rx="6.5" fill="#fff" opacity="0.92" />
       {/* 眼睛＋微笑 */}
       <circle cx="18.5" cy="24" r="2.1" fill="#4a3a52" />

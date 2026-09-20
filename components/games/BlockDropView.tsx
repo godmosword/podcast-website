@@ -53,6 +53,9 @@ import {
 const COLS = 10;
 const ROWS = 20;
 const CELL = 18;
+/** G-M1 井底深藍紫（封面同色系） */
+const WELL_BG_TOP = "#3d3f82";
+const WELL_BG_BOTTOM = "#2a2c5e";
 const BOARD_W = COLS * CELL;
 const BOARD_H = ROWS * CELL;
 const WIDE_MAX_BOARD_W = 460;
@@ -2085,11 +2088,11 @@ export function BlockDropView({
             height: BOARD_H,
             transform: `${boardTransform ?? ""} scale(${boardScale})`.trim(),
             transformOrigin: "top left",
-            background:
-              "linear-gradient(180deg,rgba(255,255,255,.96),rgba(255,250,242,.92))",
+            // G-M1：井底改深藍紫（對齊封面「深藍井＋鮮豔糖塊」），粉彩方塊才跳得出來
+            background: `linear-gradient(180deg, ${WELL_BG_TOP}, ${WELL_BG_BOTTOM})`,
             borderRadius: 16,
             boxShadow:
-              "inset 0 0 0 3px rgba(255,255,255,.95), inset 0 -10px 20px rgba(255,204,217,.18), 0 16px 28px rgba(146,106,121,.2)",
+              "inset 0 0 0 3px rgba(255,255,255,.55), inset 0 -12px 24px rgba(0,0,0,.18), 0 16px 28px rgba(60,50,110,.28)",
             display: "grid",
             gridTemplateColumns: `repeat(${COLS}, ${CELL}px)`,
             gridTemplateRows: `repeat(${ROWS}, ${CELL}px)`,
@@ -2128,8 +2131,8 @@ export function BlockDropView({
                     width: "100%",
                     height: "100%",
                     borderRadius: 6,
-                    border: `2px dashed color-mix(in srgb, ${ghostColor} 78%, ${MACARON_THEME.ink})`,
-                    background: `color-mix(in srgb, ${ghostColor} 28%, ${MACARON_THEME.board})`,
+                    border: `2px dashed color-mix(in srgb, ${ghostColor} 80%, #fff)`,
+                    background: `color-mix(in srgb, ${ghostColor} 32%, ${WELL_BG_BOTTOM})`,
                     boxSizing: "border-box",
                   }}
                 />
@@ -2145,9 +2148,9 @@ export function BlockDropView({
                   boxSizing: "border-box",
                   background:
                     (x + y) % 2 === 0
-                      ? "rgba(255,221,230,.18)"
-                      : "rgba(191,237,255,.14)",
-                  boxShadow: `inset 0 0 0 0.5px ${MACARON_THEME.boardLine}`,
+                      ? "rgba(255,255,255,.06)"
+                      : "rgba(255,255,255,.025)",
+                  boxShadow: "inset 0 0 0 0.5px rgba(255,255,255,.09)",
                   animation:
                     isClearing && !reduced ? "lineFlash .26s linear" : "none",
                 }}
