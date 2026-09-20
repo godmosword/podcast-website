@@ -646,14 +646,6 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
   };
 
   const completionFeedback = coloringCompletionCopy(completionActivity);
-  const completionSummary = [
-    page.title,
-    completionActivity.colors > 0 ? `用了 ${completionActivity.colors} 種顏色` : null,
-    `${completionActivity.operations} 次創作操作`,
-    "完成由你決定",
-  ]
-    .filter((part): part is string => Boolean(part))
-    .join(" · ");
 
   return (
     <div className={styles.root}>
@@ -743,7 +735,6 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
           <GameEndStation
             mood="win"
             title="塗好了！"
-            summary={completionSummary}
             gameSlug="coloring-book"
             onReplay={() => setDoneOpen(false)}
             replayLabel="再塗這一張"

@@ -11,7 +11,6 @@ import {
 import { CandyMatchBoard } from "@/components/games/CandyMatchBoard";
 import { DirtOverlay, PieceArt, PieceGift } from "@/components/games/CandyMatchPieceArt";
 import { GameEndStation } from "@/components/games/GameEndStation";
-import { GameJuiceToast } from "@/components/games/GameJuiceToast";
 import { IconSparkle, IconStar, IconBubble, IconBroom, IconBulb, IconLock, IconRainbow } from "@/components/games/ClayIcons";
 import type { GameAudioBus, OverlayProps } from "@/lib/gamekit/adapter";
 import { loadPlayerProfile } from "@/lib/gamekit/progress/save";
@@ -147,6 +146,9 @@ function computeScore(progress: Progress, movesLeft: number): number {
   return progress.collected.reduce((a, b) => a + b, 0) * 10 + movesLeft * 5;
 }
 
+/** K-7 車車跳一下的長度 */
+const CANDY_CHEER_MS = 520;
+
 export function CandyMatchView({
   kidsMode,
   reducedMotion,
@@ -175,9 +177,9 @@ export function CandyMatchView({
   const [shaking, setShaking] = useState<Set<number>>(new Set());
   const [overlay, setOverlay] = useState<"win" | "retry" | null>(null);
   const [winStars, setWinStars] = useState(0);
-  const [winSummary, setWinSummary] = useState("");
   const [message, setMessage] = useState("");
-  const [comboToast, setComboToast] = useState<string | null>(null);
+  /** K-7：連擊／特別糖引爆時整盤車車跳一下（以角色動作取代文字 toast） */
+  const [cheer, setCheer] = useState(false);
   const [swapMotion, setSwapMotion] = useState<{ a: number; b: number } | null>(null);
   const [fallMotion, setFallMotion] = useState<readonly CandyFallMotion[] | null>(null);
   const [sweepMotion, setSweepMotion] = useState<"row" | "color" | null>(null);
@@ -259,10 +261,10 @@ export function CandyMatchView({
   );
 
   useEffect(() => {
-    if (!comboToast) return;
-    const t = setTimeout(() => setComboToast(null), 900);
+    if (!cheer) return;
+    const t = setTimeout(() => setCheer(false), CANDY_CHEER_MS);
     return () => clearTimeout(t);
-  }, [comboToast]);
+  }, [cheer]);
 
   const startLevel = useCallback(
     (index: number) => {
@@ -295,7 +297,7 @@ export function CandyMatchView({
       setSwapMotion(null);
       setFallMotion(null);
       setSweepMotion(null);
-      setComboToast(null);
+      setCheer(false);
       usedPropRef.current = false;
       processingRef.current = false;
       setScreen("play");
@@ -399,9 +401,7 @@ export function CandyMatchView({
           setSweepMotion(planned.detonated[0]);
         }
         tone(523 + wave * 110, 0.12, "triangle", 0.06);
-        if (planned.detonated.includes("row")) setComboToast("掃把出發！");
-        else if (planned.detonated.includes("color")) setComboToast("彩虹全收！");
-        else if (wave >= 2) setComboToast("連連看！");
+        if (planned.detonated.length > 0 || wave >= 2) setCheer(true);
         await motionSleep(CANDY_POP_MS);
         const cleared = clearCells(
           pieces,
@@ -479,10 +479,6 @@ export function CandyMatchView({
         const flawless = !usedPropRef.current;
         const stars = 1 + (flawless ? 1 : 0) + (remainOk ? 1 : 0);
         setWinStars(stars);
-        setWinSummary(
-          [flawless ? "沒用道具" : "用了道具", remainOk || lv.moves === 0 ? "步數還很夠" : "步數剛好"]
-            .join(" · "),
-        );
         setOverlay("win");
         setMessage(pick(CHEER_WIN));
         [523, 659, 784, 1046].forEach((f, i) =>
@@ -884,13 +880,9 @@ export function CandyMatchView({
                 falls: fallMotion,
                 sweep: sweepMotion,
                 reduced: reducedMotion,
+                cheer,
               }}
             />
-            {comboToast ? (
-              <div className={styles.comboSlot}>
-                <GameJuiceToast text={comboToast} big reduced={reducedMotion} />
-              </div>
-            ) : null}
           </div>
 
           <div
@@ -1015,7 +1007,6 @@ export function CandyMatchView({
                       : "任務完成！"
                   }
                   stars={winStars}
-                  summary={winSummary}
                   gameSlug="candy-match"
                   onReplay={
                     levelIndex === CANDY_MATCH_LEVELS.length - 1

@@ -4,7 +4,15 @@ import Link from "next/link";
 import { useRef } from "react";
 import { getNextGame } from "@/data/games";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
-import { IconCheer, IconConfetti, IconRainbow, IconStar } from "./ClayIcons";
+import {
+  IconCheer,
+  IconChevronRight,
+  IconConfetti,
+  IconPlay,
+  IconRainbow,
+  IconReplay,
+  IconStar,
+} from "./ClayIcons";
 import styles from "./GameEndStation.module.css";
 
 export type GameEndMood = "win" | "retry" | "over";
@@ -13,12 +21,12 @@ export type GameEndStationProps = {
   mood: GameEndMood;
   /** 主標題；未給時依 mood 抽情緒句。 */
   title?: string;
+  /** 分數列（數字孩子看得懂，家長也要）。 */
   scoreLabel?: string;
   /** 0–3 顆星（可選）。 */
   stars?: number;
-  /** 通關摘要（步數／道具等），低壓說明不是成績單。 */
-  summary?: string;
   onReplay: () => void;
+  /** 再玩的無障礙名稱（K-12 後按鈕只有 icon，文字進 aria-label／title）。 */
   replayLabel?: string;
   /** 目前遊戲 slug；用來解析下一站。 */
   gameSlug?: string;
@@ -26,11 +34,11 @@ export type GameEndStationProps = {
   nextGame?: { title: string; href: string; emoji?: string };
   hubHref?: string;
   hubLabel?: string;
-  /** 隱藏「回遊樂園」文字鏈（遊戲內另有回地圖時用）。 */
+  /** 隱藏「回遊樂園」出口（遊戲內另有回地圖時用）。 */
   hideHubLink?: boolean;
   /**
-   * 取代「下一站」成為主 CTA（例如消消樂「下一關」）。
-   * 有值時下一站改為次要連結列。
+   * 取代「再玩」成為主 CTA（例如消消樂「下一關」、著色「換一張塗」）。
+   * 有值時再玩降為小 icon。
    */
   mainAction?: { label: string; onClick: () => void };
   className?: string;
@@ -52,13 +60,16 @@ function pickTitle(
   return pool[Math.abs(salt) % pool.length] ?? pool[0];
 }
 
-/** 三段式結束站：情緒 → 成績 → 再玩（次）／下一站（主）／回遊樂園（弱）。 */
+/**
+ * 結束站（K-12 兒童減法審）：角色 icon → 標題 → 星／分數 → 一顆大 icon 鈕（主）＋一顆小 icon 鈕（次）。
+ * 文字只剩標題與分數；按鈕文案進 aria-label／title 給讀屏與家長。
+ * 主鈕＝mainAction（下一關／換一張）或再玩；次鈕＝再玩（有 mainAction 時）或去下一站。
+ */
 export function GameEndStation({
   mood,
   title,
   scoreLabel,
   stars,
-  summary,
   onReplay,
   replayLabel = "再玩一次",
   gameSlug,
@@ -111,7 +122,7 @@ export function GameEndStation({
       </p>
       <h2 className={styles.title}>{resolvedTitle}</h2>
 
-      {(starCount != null || scoreLabel || summary) && (
+      {(starCount != null || scoreLabel) && (
         <div className={styles.scoreRow}>
           {starCount != null ? (
             <p className={styles.stars} aria-label={`${starCount} 顆星`}>
@@ -123,42 +134,61 @@ export function GameEndStation({
             </p>
           ) : null}
           {scoreLabel ? <p className={styles.scoreLabel}>{scoreLabel}</p> : null}
-          {summary ? <p className={styles.summary}>{summary}</p> : null}
         </div>
       )}
 
       <div className={styles.actions}>
         {mainAction ? (
-          <button
-            type="button"
-            className={styles.nextBtn}
-            onClick={mainAction.onClick}
-          >
-            {mainAction.label}
-          </button>
-        ) : nextGame ? (
-          <Link href={nextGame.href} className={styles.nextBtn}>
-            去玩：{nextGame.emoji ? `${nextGame.emoji} ` : ""}
-            {nextGame.title} ▶
-          </Link>
-        ) : null}
-
-        <button type="button" className={styles.replayBtn} onClick={onReplay}>
-          {replayLabel}
-        </button>
-
-        {mainAction && nextGame ? (
-          <Link href={nextGame.href} className={styles.nextSoft}>
-            或去玩 {nextGame.title}
-          </Link>
-        ) : null}
-
-        {!hideHubLink ? (
-          <Link href={hubHref} className={styles.hubLink}>
-            {hubLabel}
-          </Link>
-        ) : null}
+          <>
+            <button
+              type="button"
+              className={styles.mainBtn}
+              onClick={mainAction.onClick}
+              aria-label={mainAction.label}
+              title={mainAction.label}
+            >
+              <IconPlay size={34} />
+            </button>
+            <button
+              type="button"
+              className={styles.sideBtn}
+              onClick={onReplay}
+              aria-label={replayLabel}
+              title={replayLabel}
+            >
+              <IconReplay size={22} />
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              type="button"
+              className={styles.mainBtn}
+              onClick={onReplay}
+              aria-label={replayLabel}
+              title={replayLabel}
+            >
+              <IconReplay size={34} />
+            </button>
+            {nextGame ? (
+              <Link
+                href={nextGame.href}
+                className={styles.sideBtn}
+                aria-label={`去玩：${nextGame.title}`}
+                title={`去玩：${nextGame.title}`}
+              >
+                <IconChevronRight size={22} />
+              </Link>
+            ) : null}
+          </>
+        )}
       </div>
+
+      {!hideHubLink ? (
+        <Link href={hubHref} className={styles.hubLink}>
+          {hubLabel}
+        </Link>
+      ) : null}
     </div>
   );
 }

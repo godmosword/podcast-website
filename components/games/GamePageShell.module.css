@@ -197,12 +197,23 @@
 
 /* 對比：--ink-soft 疊在 c-sky 淡底上於夜間僅 4.43:1，未達 WCAG AA，故用 --ink。 */
 .playHints li {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
   padding: 6px 12px;
   border-radius: var(--radius-pill);
   color: var(--ink);
   background: color-mix(in srgb, var(--c-sky) 16%, var(--card));
   font-size: var(--fs-meta);
   font-weight: 800;
+}
+
+/* K-9：icon 版提示，兩顆 icon 併排時留一點縫 */
+.playHintIcon {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  line-height: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {

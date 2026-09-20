@@ -14,8 +14,10 @@ describe("game logic regressions", () => {
     expect(adapter).toContain("onSession");
     expect(view).toContain("HINT_IDLE_MS");
     expect(view).toContain("我們再試一次！");
-    expect(view).toContain("掃把出發！");
-    expect(view).toContain("彩虹全收！");
+    // K-7：連擊／特別糖不再出文字 toast，改整盤車車跳一下（角色動作）
+    expect(view).not.toContain("掃把出發！");
+    expect(view).not.toContain("彩虹全收！");
+    expect(view).toContain("setCheer(true)");
     expect(view).not.toContain("失敗");
     expect(view).not.toContain("Game Over");
     expect(view).not.toContain("你輸了");

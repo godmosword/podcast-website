@@ -8,7 +8,36 @@ import {
   GamePlayHeader,
 } from "@/components/games/GamePlayChromeSlot";
 import { GAMES } from "@/data/games";
+import {
+  IconChevronLeft,
+  IconChevronRight,
+  IconRotate,
+  IconSwipe,
+  IconSwipeDown,
+  IconTap,
+} from "@/components/games/ClayIcons";
 import styles from "./GamePageShell.module.css";
+
+/**
+ * K-9（兒童減法審）：操作提示以圖代字。key 對齊 `data/games.ts` 的 `controls` 文案，
+ * 文案本身留作 sr-only；沒對到 icon 的文案退回顯示文字，不會消失。
+ */
+const CONTROL_ICONS: Record<string, ReactNode> = {
+  點兩格交換: <IconTap size={22} />,
+  拖曳也可以: <IconSwipe size={22} />,
+  左右移動: (
+    <>
+      <IconChevronLeft size={22} />
+      <IconChevronRight size={22} />
+    </>
+  ),
+  旋轉與落下: (
+    <>
+      <IconRotate size={22} />
+      <IconSwipeDown size={22} />
+    </>
+  ),
+};
 
 type GamePageShellProps = {
   children: ReactNode;
@@ -59,9 +88,21 @@ export function GamePageShell({
 
         {controls.length > 0 ? (
           <ul className={styles.playHints} aria-label="操作提示">
-            {controls.map((control) => (
-              <li key={control}>{control}</li>
-            ))}
+            {controls.map((control) => {
+              const icon = CONTROL_ICONS[control];
+              return (
+                <li key={control} title={icon ? control : undefined}>
+                  {icon ? (
+                    <>
+                      <span aria-hidden className={styles.playHintIcon}>{icon}</span>
+                      <span className="sr-only">{control}</span>
+                    </>
+                  ) : (
+                    control
+                  )}
+                </li>
+              );
+            })}
           </ul>
         ) : null}
 

@@ -19,8 +19,8 @@ describe("GameEndStation", () => {
     );
 
     expect(html).toContain("好厲害！");
-    expect(html).toContain("再玩一次");
-    expect(html).toContain("繪本著色");
+    expect(html).toContain('aria-label="再玩一次"');
+    expect(html).toContain('aria-label="去玩：繪本著色"');
     expect(html).toContain("回遊樂園");
     expect(html).toContain('href="/games/coloring-book"');
   });
@@ -38,23 +38,27 @@ describe("GameEndStation", () => {
       />,
     );
 
-    expect(html).toContain("下一關 ▶");
-    expect(html).toContain("或去玩 繪本著色");
+    expect(html).toContain('aria-label="下一關 ▶"');
+    // K-12：有 mainAction 時再玩降為小 icon 鈕，不再出現「或去玩 …」文字連結
+    expect(html).toContain('aria-label="再玩一次"');
+    expect(html).not.toContain("或去玩");
     expect(html).not.toContain("回遊樂園");
   });
 
-  it("可選摘要列顯示三星條件說明", async () => {
+  it("K-12：按鈕只有 icon，文字只剩標題與分數", async () => {
     const { GameEndStation } = await import("./GameEndStation");
     const html = renderToStaticMarkup(
       <GameEndStation
         mood="win"
         title="任務完成！"
         stars={3}
-        summary="沒用道具 · 步數還很夠"
+        scoreLabel="分數 120"
         onReplay={() => undefined}
         hideHubLink
       />,
     );
-    expect(html).toContain("沒用道具 · 步數還很夠");
+    expect(html).toContain("分數 120");
+    // 按鈕內只有 svg，沒有可見文字
+    expect(html).toMatch(/<button[^>]*aria-label="再玩一次"[^>]*><svg/);
   });
 });

@@ -61,9 +61,10 @@ const PRIMARY = [
     file: "components/games/GameLoadOverlay.module.css",
     className: "startBtn",
   },
+  // K-12（2026-09-20）：結束站主鈕改成單顆大 icon 圓鈕 .mainBtn（原 .nextBtn）
   {
     file: "components/games/GameEndStation.module.css",
-    className: "nextBtn",
+    className: "mainBtn",
   },
   // H1 收尾（2026-09-16）：/stories 唯一主行動，原本是 story.color 22% 淡紫 pill
   {
@@ -116,10 +117,10 @@ describe("主鈕最小 alignment（H1 第一刀）", () => {
     expect(sticker).toMatch(/color:\s*var\(--cta-warm-fg\)/);
   });
 
-  it("遊戲「再玩一次」仍是次行動，不跟下一關同色", () => {
+  it("遊戲結束站的小 icon 鈕（再玩／去下一站）仍是次行動，不跟主鈕同色", () => {
     const replay = paintRule(
       readCss("components", "games", "GameEndStation.module.css"),
-      "replayBtn",
+      "sideBtn",
     );
     expect(replay).toMatch(/background:\s*var\(--cta-soft-bg\)/);
     expect(replay).toMatch(/color:\s*var\(--cta-soft-fg\)/);
@@ -133,7 +134,7 @@ describe("主鈕最小 alignment（H1 第一刀）", () => {
 const SOFT = [
   {
     file: "components/games/GameEndStation.module.css",
-    className: "replayBtn",
+    className: "sideBtn",
   },
   {
     file: "components/games/GameLoadOverlay.module.css",
@@ -167,10 +168,7 @@ const QUIET = [
     file: "components/universe/HotspotModal.module.css",
     className: "backBtn",
   },
-  {
-    file: "components/games/GameEndStation.module.css",
-    className: "nextSoft",
-  },
+  // K-12：.nextSoft（「或去玩 …」文字連結）已刪，次要去下一站改為 .sideBtn（soft）
   {
     file: "components/games/GameEndStation.module.css",
     className: "hubLink",

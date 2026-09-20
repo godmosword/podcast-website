@@ -48,84 +48,57 @@
   font-weight: 800;
 }
 
-.summary {
-  margin: 0;
-  color: var(--ink-soft);
-  font-size: var(--fs-label);
-  font-weight: 700;
-  line-height: 1.4;
-}
-
+/* K-12：主鈕＝一顆大 icon 圓鈕，次鈕＝小 icon 圓鈕，橫排置中 */
 .actions {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
   width: 100%;
   margin-top: var(--space-2);
 }
 
-.replayBtn,
-.nextBtn {
+.mainBtn,
+.sideBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 48px;
-  padding: 0 18px;
   border: none;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-circle);
   font: inherit;
-  font-weight: 900;
   text-decoration: none;
   cursor: pointer;
   transition: transform var(--motion-press);
 }
 
-.replayBtn {
+.mainBtn {
+  width: 76px;
+  height: 76px;
+  color: var(--cta-solid-fg);
+  background: var(--cta-solid-bg);
+  box-shadow:
+    0 5px 0 color-mix(in srgb, var(--cta-warm-to) 70%, #4a2e14),
+    inset 0 2px 0 color-mix(in srgb, #fff 70%, transparent);
+}
+
+.sideBtn {
+  width: 48px;
+  height: 48px;
   color: var(--cta-soft-fg);
   background: var(--cta-soft-bg);
   border: 1px solid var(--cta-soft-line);
   box-shadow: var(--elev-1);
 }
 
-.nextBtn {
-  min-height: 54px;
-  color: var(--cta-solid-fg);
-  background: var(--cta-solid-bg);
-  box-shadow:
-    0 5px 0 color-mix(in srgb, var(--cta-warm-to) 70%, #4a2e14),
-    inset 0 2px 0 color-mix(in srgb, #fff 70%, transparent);
-  font-size: var(--fs-h4);
-}
-
-.replayBtn:hover,
-.nextBtn:hover {
+.mainBtn:hover,
+.sideBtn:hover {
   transform: translateY(-2px);
 }
 
 /* DESIGN.md §互動：按壓用 scale(0.98)，不用厚底影下沉。 */
-.replayBtn:active,
-.nextBtn:active {
+.mainBtn:active,
+.sideBtn:active {
   transform: scale(0.98);
-}
-
-/* 兒童頁觸控底線 44px（DESIGN.md §間距）：這是玩完後最常按的離開動線。 */
-.nextSoft {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding-inline: var(--space-3);
-  border: none;
-  background: transparent;
-  color: var(--cta-quiet-fg);
-  font-size: var(--fs-control);
-  font-weight: 800;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.nextSoft:hover {
-  color: var(--ink, #34302b);
 }
 
 .hubLink {
@@ -147,24 +120,23 @@
   color: var(--ink, #34302b);
 }
 
-.replayBtn:focus-visible,
-.nextBtn:focus-visible,
-.nextSoft:focus-visible,
+.mainBtn:focus-visible,
+.sideBtn:focus-visible,
 .hubLink:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 3px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .replayBtn,
-  .nextBtn {
+  .mainBtn,
+  .sideBtn {
     transition: none;
   }
 
-  .replayBtn:hover,
-  .nextBtn:hover,
-  .replayBtn:active,
-  .nextBtn:active {
+  .mainBtn:hover,
+  .sideBtn:hover,
+  .mainBtn:active,
+  .sideBtn:active {
     transform: none;
   }
 }

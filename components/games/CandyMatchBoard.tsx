@@ -29,6 +29,8 @@ export type CandyMatchBoardMotion = {
   falls?: readonly CandyFallMotion[] | null;
   reduced?: boolean;
   sweep?: "row" | "color" | null;
+  /** K-7：連擊時整盤車車跳一下 */
+  cheer?: boolean;
 };
 
 type CandyMatchBoardProps = {
@@ -157,6 +159,7 @@ export function CandyMatchBoard({
     <div
       data-testid="candy-match-board"
       aria-disabled={disabled || undefined}
+      data-cheer={!reduced && motion?.cheer ? "true" : undefined}
       data-swap={swap ? `${swap.a}-${swap.b}` : undefined}
       data-falling={fallByTo.size > 0 ? "true" : undefined}
       style={{
@@ -235,7 +238,10 @@ export function CandyMatchBoard({
         ]
           .filter(Boolean)
           .join(" ");
-        const artStyle: CSSProperties = swapOff
+        const artStyle: CSSProperties = {
+          // K-7：跳一下依列錯開
+          ["--cheer-col" as string]: String(i % cols),
+          ...(swapOff
           ? {
               ["--swap-dx" as string]: `${swapOff.dx}px`,
               ["--swap-dy" as string]: `${swapOff.dy}px`,
@@ -248,7 +254,8 @@ export function CandyMatchBoard({
               }
             : sweep
               ? { ["--sweep-ms" as string]: `${CANDY_SWEEP_MS}ms` }
-              : {};
+              : {}),
+        };
         return (
           <button
             key={i}

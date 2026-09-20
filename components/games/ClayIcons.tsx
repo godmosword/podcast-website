@@ -316,3 +316,25 @@ export function IconCheer({ size, style }: IconProps) {
     </Svg>
   );
 }
+
+/** 點一下（手指＋漣漪；操作提示用） */
+export function IconTap({ size, color = "currentColor", style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <circle cx="12" cy="11" r="6.5" {...stroke(color)} strokeWidth={1.6} strokeDasharray="3 3" />
+      <path d="M12 8v6.5" {...stroke(color)} />
+      <path d="M12 14.5c0 2 1.2 3.5 3 4.5H9c1.8-1 3-2.5 3-4.5Z" fill={color} {...stroke(color)} strokeWidth={1.4} />
+    </Svg>
+  );
+}
+
+/** 拖曳／滑動（手指＋橫向箭頭；操作提示用） */
+export function IconSwipe({ size, color = "currentColor", style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <path d="M4 9.5h16" {...stroke(color)} />
+      <path d="M17 6.5l3 3-3 3M7 6.5l-3 3 3 3" {...stroke(color)} />
+      <path d="M12 12v3.5c0 1.8 1.1 3.2 2.8 4H9.2c1.7-.8 2.8-2.2 2.8-4V12Z" fill={color} {...stroke(color)} strokeWidth={1.4} />
+    </Svg>
+  );
+}

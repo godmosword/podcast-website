@@ -2312,11 +2312,6 @@ export function BlockDropView({
                       ? `分數 ${g.score} · 新紀錄！`
                       : `分數 ${g.score}`
                   }
-                  summary={
-                    g.lines > 0
-                      ? `消除 ${g.lines} 行 · 到達 Lv ${g.level}`
-                      : "先熟悉落下與旋轉，再來一局"
-                  }
                   onReplay={onRestart}
                   replayLabel="再玩一次"
                   gameSlug="block-drop"
