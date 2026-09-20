@@ -76,7 +76,8 @@ export const GAMES: GameMeta[] = [
     teaser: "排滿一行就消掉！",
     href: "/games/block-drop",
     emoji: "🧩",
-    accent: "var(--c-pink)",
+    // 三款三色（著色天空藍／消消樂粉紅／方塊黃）：顏色就是不識字孩子的分類標籤
+    accent: "var(--c-yellow)",
     ageBand: "challenge",
     ageRange: "6–12 歲",
     estMinutes: 10,

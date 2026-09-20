@@ -840,30 +840,27 @@ export function CandyMatchView({
               boxShadow: "0 6px 14px rgba(150,110,130,.12)",
             }}
           >
+            {/* 兒童減法審：任務卡壓成一列 icon 目標＋步數，關名／挑戰標籤／任務句子拿掉
+                （關名是設計者 metadata，任務句子已由下方角色氣泡講）；進度條留著，是非文字回饋。 */}
             <div className={styles.taskHeading}>
-              <span className={styles.taskKicker}>
-                第 {levelIndex + 1}/{CANDY_MATCH_LEVELS.length} 關 · {level.name}
-                {level.challengeLabel ? ` · ${level.challengeLabel}` : ""}
-                {nearComplete ? " · 快完成了！" : ""}
-              </span>
-              <strong>{taskIntro(level.task)}</strong>
+              <div className={styles.taskGoals}>
+                {currentGoals.map((g, i) => (
+                  <span key={i} className={styles.taskGoal}>
+                    {g.icon} {Math.min(g.got, g.need)}/{g.need}
+                  </span>
+                ))}
+              </div>
               {level.moves > 0 ? (
-                <span className={movesLeft <= 5 ? styles.movesWarning : styles.movesLabel}>
-                  還有 {movesLeft} 步
+                <span
+                  className={movesLeft <= 5 ? styles.movesWarning : styles.movesLabel}
+                  aria-label={`還有 ${movesLeft} 步`}
+                >
+                  {movesLeft} 步
                 </span>
-              ) : (
-                <span className={styles.movesLabel}>慢慢找，沒有時間限制</span>
-              )}
+              ) : null}
             </div>
             <div className={styles.taskProgressTrack} role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(goalProgress * 100)} aria-label="任務完成度">
               <span className={styles.taskProgressFill} style={{ width: `${Math.max(5, goalProgress * 100)}%` }} />
-            </div>
-            <div className={styles.taskGoals}>
-              {currentGoals.map((g, i) => (
-                <span key={i} className={styles.taskGoal}>
-                  {g.icon} {Math.min(g.got, g.need)}/{g.need}
-                </span>
-              ))}
             </div>
           </div>
 

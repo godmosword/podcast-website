@@ -161,16 +161,15 @@ test.describe("遊戲第二輪 P2 mobile regression", () => {
     }
   });
 
-  test("Block ready 先呈現開始，難度與模式收進 secondary settings", async ({ page }) => {
+  test("Block ready 只呈現開始，難度與模式只在齒輪設定裡", async ({ page }) => {
     await page.setViewportSize(MOBILE);
     await page.goto("/games/block-drop");
-    const options = page.getByTestId("block-drop-ready-options");
-    await expect(options).toBeVisible();
-    await expect(options).not.toHaveAttribute("open", "");
     await expect(page.getByRole("button", { name: /開始/ })).toBeVisible();
-    await options.locator("summary").click();
-    await expect(options).toHaveAttribute("open", "");
-    await expect(options.getByRole("radio").first()).toBeVisible();
+    // ready 面不再有難度／模式 radio（兒童減法審：孩子讀不懂，家長走齒輪）
+    await expect(page.getByRole("radio")).toHaveCount(0);
+    await page.getByRole("button", { name: "遊戲設定" }).click();
+    await expect(page.getByRole("radiogroup", { name: "繽紛樂園難度" })).toBeVisible();
+    await expect(page.getByRole("radiogroup", { name: "繽紛樂園特殊模式" })).toBeVisible();
   });
 
   test("Coloring mobile toolbar 可橫向探索、保留 active tool 與 44px touch target", async ({ page }) => {

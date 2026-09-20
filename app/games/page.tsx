@@ -41,7 +41,6 @@ function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
   const parentTip = gameParentTip(game);
   const ariaParts = [
     game.title,
-    game.teaser,
     GAME_TYPE_LABEL[game.gameType],
     game.ageRange,
     `約 ${game.estMinutes} 分鐘`,
@@ -89,7 +88,7 @@ function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
         </div>
         <span className={styles.cardBody}>
           <span className={styles.cardTitle}>{game.title}</span>
-          <span className={styles.cardTeaser}>{game.teaser}</span>
+          {/* 兒童減法審：teaser（「排滿一行就消掉！」）孩子讀不到、家長不需要，卡片只留圖＋名字＋meta */}
           <span className={styles.cardMeta}>
             <span>{game.ageRange}</span>
             <span>約 {game.estMinutes} 分鐘</span>

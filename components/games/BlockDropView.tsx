@@ -19,11 +19,7 @@ import { GameEndStation } from "@/components/games/GameEndStation";
 import { GameJuiceToast } from "@/components/games/GameJuiceToast";
 import { GameResultActions } from "@/components/games/GameResultActions";
 import { useGameKitSettings } from "@/hooks/useGameKitSettings";
-import {
-  BLOCK_DROP_DIFFICULTIES,
-  BLOCK_DROP_SPECIAL_MODES,
-  type BlockDropDifficulty,
-} from "@/lib/gamekit/progress/settings";
+import type { BlockDropDifficulty } from "@/lib/gamekit/progress/settings";
 import type { BlockDropInstance } from "@/lib/gamekit/games/block-drop/adapter";
 import {
   BLOCK_DROP_TUTORIAL_COPY,
@@ -842,7 +838,6 @@ export function BlockDropView({
     blockDropDifficulty,
     blockDropSpecialMode,
     setBlockDropDifficulty,
-    setBlockDropSpecialMode,
   } = useGameKitSettings();
   const difficultyRef = useRef(blockDropDifficulty);
   difficultyRef.current = blockDropDifficulty;
@@ -2374,107 +2369,8 @@ export function BlockDropView({
                     }}
                   />
                 )}
-                {g.status === "ready" && (
-                  <details
-                    data-testid="block-drop-ready-options"
-                    style={{
-                      display: "grid",
-                      gap: 8,
-                      width: "min(100%, 280px)",
-                    }}
-                  >
-                    <summary
-                      style={{
-                        minHeight: 44,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        padding: "6px 12px",
-                        borderRadius: 999,
-                        color: MACARON_THEME.ink,
-                        background: "rgba(255,255,255,.62)",
-                        border: "1px solid rgba(93,74,103,.12)",
-                        fontWeight: 800,
-                        cursor: "pointer",
-                        listStyle: "none",
-                      }}
-                    >
-                      調整難度與模式
-                    </summary>
-                    <div style={{ display: "grid", gap: 8, paddingTop: 2 }}>
-                    <div
-                      className="sr-only"
-                      id="block-drop-ready-diff-label"
-                    >
-                      難度
-                    </div>
-                    <div
-                      role="radiogroup"
-                      aria-labelledby="block-drop-ready-diff-label"
-                      style={{
-                        display: "flex",
-                        gap: 6,
-                        justifyContent: "center",
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      {BLOCK_DROP_DIFFICULTIES.map((option) => (
-                        <button
-                          key={option.id}
-                          type="button"
-                          role="radio"
-                          aria-checked={blockDropDifficulty === option.id}
-                          title={option.hint}
-                          onClick={() => setBlockDropDifficulty(option.id)}
-                          style={{
-                            ...secondaryBtn(font),
-                            minHeight: 44,
-                            padding: "6px 12px",
-                            boxShadow:
-                              blockDropDifficulty === option.id
-                                ? "0 0 0 3px rgba(247,168,196,.7)"
-                                : undefined,
-                          }}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                    </div>
-                    <div
-                      role="radiogroup"
-                      aria-label="特殊模式"
-                      style={{
-                        display: "flex",
-                        gap: 6,
-                        justifyContent: "center",
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      {BLOCK_DROP_SPECIAL_MODES.map((option) => (
-                        <button
-                          key={option.id}
-                          type="button"
-                          role="radio"
-                          aria-checked={blockDropSpecialMode === option.id}
-                          title={option.hint}
-                          onClick={() => setBlockDropSpecialMode(option.id)}
-                          style={{
-                            ...secondaryBtn(font),
-                            minHeight: 44,
-                            padding: "6px 12px",
-                            boxShadow:
-                              blockDropSpecialMode === option.id
-                                ? "0 0 0 3px rgba(197,179,230,.8)"
-                                : undefined,
-                          }}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                    </div>
-                    </div>
-                  </details>
-                )}
+                {/* 兒童減法審：ready 面不再放「調整難度與模式」（齒輪設定裡已有同一組 radiogroup）；
+                    ready 面只剩大 icon、開始、怎麼玩 */}
                 {g.status === "ready" && (
                   <button
                     type="button"
