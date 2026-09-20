@@ -1,0 +1,201 @@
+{
+  "slug": "ep-30",
+  "audioDuration": 531,
+  "model": "manual-semantic-ep30",
+  "generatedAt": "2026-09-16T13:05:00.000Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 0,
+      "end": 20.8,
+      "summary": "羅東林場裡，黑色的八號蒸汽火車載著木頭",
+      "prompt": "",
+      "characters": ["八號蒸汽火車"],
+      "keepCover": true,
+      "refPageHint": "Cover page 1 — keep published Apple cover. PRIMARY: 八號蒸汽火車 match portrait. Do not regenerate if cover exists."
+    },
+    {
+      "index": 2,
+      "start": 20.8,
+      "end": 48.9,
+      "summary": "今天要講八號尋找木頭、負責任的故事",
+      "prompt": "Clay hosts Bonbon and Mami standing on a forest-railway path introducing today's story, a small black steam locomotive numbered 8 waiting on rails in the background with a red conductor cap, sunny Luodong forestry mood, child-safe storybook framing, ONE face each, NO arms on the train",
+      "characters": ["Bonbon", "馬米", "八號蒸汽火車"],
+      "refPages": [1],
+      "refPageHint": "PRIMARY: Bonbon and 馬米 HUMAN clay match portraits. 八號蒸汽火車 small in background match cover — black boiler, gold 8 plate, red cap, puffy white steam, ONE face, NO arms."
+    },
+    {
+      "index": 3,
+      "start": 48.9,
+      "end": 82.4,
+      "summary": "八號接下任務：要把六根大木頭送到林場",
+      "prompt": "Black clay steam locomotive Number 8 parked on rails with six big brown logs stacked on a flatbed car behind it, determined cheerful eyes, forest starting point, mission-day energy, ONE face, NO arms NO hands NO limbs",
+      "characters": ["八號蒸汽火車"],
+      "refPages": [1],
+      "refPageHint": "PRIMARY: 八號蒸汽火車 match cover portrait — black body, gold 8, red cap, yellow coupling rod, ONE face, NO arms. Show six distinct logs on the trailing timber wagon."
+    },
+    {
+      "index": 4,
+      "start": 82.4,
+      "end": 104,
+      "summary": "出發前八號仔細數：一、二、三、四、五、六",
+      "prompt": "Close clay shot of Number 8 counting six logs one by one on the timber wagon, eyes tracking along the wood pile, careful responsible mood, forest rails, ONE face, NO arms — counting shown by gaze and six clearly numbered logs",
+      "characters": ["八號蒸汽火車"],
+      "refPages": [3],
+      "refPageHint": "PRIMARY: 八號蒸汽火車 match portrait. Six logs must be individually visible. No human hands pointing."
+    },
+    {
+      "index": 5,
+      "start": 104,
+      "end": 143.6,
+      "summary": "八號冒著白蒸汽，慢慢轉過森林彎道",
+      "prompt": "Black steam locomotive puffing big white clay steam clouds, slowly rounding a curved forest railway through tall trees, careful not to rush the bend, peaceful journey mood, rails and wooden sleepers, ONE face, NO arms",
+      "characters": ["八號蒸汽火車"],
+      "refPages": [1],
+      "refPageHint": "PRIMARY: 八號蒸汽火車 match cover — red cap, gold 8, yellow coupling rod. Emphasize the curved track and tall trees. ONE face."
+    },
+    {
+      "index": 6,
+      "start": 143.6,
+      "end": 163.9,
+      "summary": "經過小木橋時突然有聲音，八號回頭看",
+      "prompt": "Black steam locomotive crossing a small wooden bridge over a stream, pausing with a puzzled look back toward the timber wagon, a tiny unexplained rustle in the air, curious not scary, ONE face, NO arms",
+      "characters": ["八號蒸汽火車"],
+      "refPages": [5],
+      "refPageHint": "PRIMARY: 八號蒸汽火車 match portrait looking back. Wooden bridge and water must be readable. ONE face."
+    },
+    {
+      "index": 7,
+      "start": 163.9,
+      "end": 184.6,
+      "summary": "八號繼續往前，終於把木頭送到林場",
+      "prompt": "Black steam locomotive arriving at a sunny clay lumberyard with stacked timber and a small station, looking proud that the job seems done, white steam puff, welcoming lumberyard mood, ONE face, NO arms",
+      "characters": ["八號蒸汽火車"],
+      "refPages": [1],
+      "refPageHint": "PRIMARY: 八號蒸汽火車 match cover. Lumberyard destination, not the forest bend. ONE face."
+    },
+    {
+      "index": 8,
+      "start": 184.6,
+      "end": 213.3,
+      "summary": "卸木頭再數一遍，咦，怎麼只有五根",
+      "prompt": "At the lumberyard, five brown logs sitting on the ground beside the empty timber wagon, Number 8 looking shocked with wide round eyes, a clear empty gap where a sixth log should be, worried surprise mood, ONE face, NO arms",
+      "characters": ["八號蒸汽火車"],
+      "refPages": [7],
+      "refPageHint": "PRIMARY: 八號蒸汽火車 match portrait — shocked not crying hard. Show exactly five logs plus a missing-space gap. ONE face."
+    },
+    {
+      "index": 9,
+      "start": 213.3,
+      "end": 246.9,
+      "summary": "少了一根，任務還沒完成，掉在路上會擋到別的火車",
+      "prompt": "Number 8 staring down a long empty clay railway receding into the forest, looking tired but worried that a missing log might block another train, responsible anxious mood, ONE face, NO arms",
+      "characters": ["八號蒸汽火車"],
+      "refPages": [8],
+      "refPageHint": "PRIMARY: 八號蒸汽火車 match portrait. Long rails, no other named characters. ONE face."
+    },
+    {
+      "index": 10,
+      "start": 246.9,
+      "end": 275.6,
+      "summary": "八號雖然有一點累，還是搖搖頭說：我要回去找",
+      "prompt": "Black steam locomotive shaking off tiredness, turning around on the rails to head back into the forest, determined kind eyes, evening-leaning light still child-safe and bright, ONE face, NO arms",
+      "characters": ["八號蒸汽火車"],
+      "refPages": [9],
+      "refPageHint": "PRIMARY: 八號蒸汽火車 match portrait — determined, not sad collapse. Body turned to retrace the track. ONE face."
+    },
+    {
+      "index": 11,
+      "start": 275.6,
+      "end": 298.8,
+      "summary": "沿著鐵路往回開，木橋和大樹這裡都沒有",
+      "prompt": "Number 8 slowly retracing the forest railway, checking the wooden stream bridge then the tall trees, looking left and right, search-not-found mood, still hopeful, ONE face, NO arms",
+      "characters": ["八號蒸汽火車"],
+      "refPages": [6],
+      "refPageHint": "PRIMARY: 八號蒸汽火車 match portrait searching. Continuity with the earlier wooden bridge. No log visible yet. ONE face."
+    },
+    {
+      "index": 12,
+      "start": 298.8,
+      "end": 322.4,
+      "summary": "想起彎道那一聲，八號趕到彎道左看右看",
+      "prompt": "Black steam locomotive stopped at the curved forest track, looking left then right with a thinking expression, remembering a clunk sound, mystery-solving mood, ONE face, NO arms",
+      "characters": ["八號蒸汽火車"],
+      "refPages": [5],
+      "refPageHint": "PRIMARY: 八號蒸汽火車 match portrait at the same forest bend as page 5. Searching pose, log not found yet. ONE face."
+    },
+    {
+      "index": 13,
+      "start": 322.4,
+      "end": 352.9,
+      "summary": "草叢裡找到最後一根木頭，原來繩子鬆開滾下來了",
+      "prompt": "A big brown log lying in green clay bushes beside the curved rails, Number 8 looking relieved and close by, a slack rope dangling from the timber wagon, discovery mood, ONE face, NO arms — the train must not grab the log with hands",
+      "characters": ["八號蒸汽火車"],
+      "refPages": [12],
+      "refPageHint": "PRIMARY: 八號蒸汽火車 match portrait. The missing sixth log is the hero prop in the grass. Slack rope visible. ONE face, NO arms."
+    },
+    {
+      "index": 14,
+      "start": 352.9,
+      "end": 394.4,
+      "summary": "吊車阿公把木頭吊回去，八號把繩子綁緊",
+      "prompt": "Orange crane-truck grandpa using only his grey hook boom to lift the brown log back onto Number 8's timber wagon, then a neatly tied rope around the logs, teamwork caring mood, ONE face each, NO arms NO hands on either vehicle",
+      "characters": ["八號蒸汽火車", "吊車老爺爺"],
+      "refPages": [13],
+      "refPageHint": "PRIMARY: 八號蒸汽火車 match cover. 吊車老爺爺 match portrait — orange crane, long boom, grey hook only, warm grandfather eyes. Lift via hook, never hands. ONE face each."
+    },
+    {
+      "index": 15,
+      "start": 394.4,
+      "end": 413.6,
+      "summary": "八號載著最後一根木頭，嘟嘟嘟回到林場到站了",
+      "prompt": "Joyful black steam locomotive chuffing back toward the lumberyard with the sixth log securely tied, puffs of white steam like a little song, sunny arrival mood, ONE face, NO arms",
+      "characters": ["八號蒸汽火車"],
+      "refPages": [7, 14],
+      "refPageHint": "PRIMARY: 八號蒸汽火車 match portrait, happy. Timber wagon shows the recovered log tied tight. Lumberyard ahead. ONE face."
+    },
+    {
+      "index": 16,
+      "start": 413.6,
+      "end": 453.2,
+      "summary": "大家一起數到六，六根全部到齊囉",
+      "prompt": "Lumberyard celebration: six brown logs lined up neatly, Number 8 beaming with a big puff of white steam, tiny generic faceless helper vehicles nearby cheering, proud completed-mission mood, ONE face on Number 8 only",
+      "characters": ["八號蒸汽火車"],
+      "refPages": [8, 15],
+      "refPageHint": "PRIMARY: 八號蒸汽火車 match portrait — joyful steam puff. Show exactly six logs. Helper vehicles faceless. ONE named face."
+    },
+    {
+      "index": 17,
+      "start": 453.2,
+      "end": 478.1,
+      "summary": "負責任不只是做完，發現問題也要回頭處理好",
+      "prompt": "Gentle teaching tableau: Number 8 looking thoughtful beside the six delivered logs at the lumberyard, a soft glowing path looping back along the rails to show going back to fix a mistake, warm lesson mood, not preachy, ONE face, NO arms, NO text",
+      "characters": ["八號蒸汽火車"],
+      "refPages": [16],
+      "refPageHint": "PRIMARY: 八號蒸汽火車 match portrait. No written words or captions in the image. ONE face."
+    },
+    {
+      "index": 18,
+      "start": 478.1,
+      "end": 531,
+      "summary": "現在八號停在宜蘭林場，去的話記得跟他打招呼",
+      "prompt": "Present-day Luodong forestry park: the same black Number 8 steam locomotive displayed on rails among green trees, Bonbon and Mami waving goodbye in the foreground, inviting children to visit and say hello, warm farewell mood, ONE face each, train has NO arms",
+      "characters": ["Bonbon", "馬米", "八號蒸汽火車"],
+      "refPages": [1],
+      "refPageHint": "PRIMARY: Bonbon and 馬米 HUMAN clay match portraits waving. 八號蒸汽火車 match cover portrait as a parked display locomotive. Continuity with page 1. ONE face each."
+    }
+  ],
+  "newCharacters": [
+    {
+      "name": "八號蒸汽火車",
+      "aliases": [
+        "8號蒸汽火車",
+        "八號火車",
+        "八號"
+      ],
+      "vehicle": "steam train",
+      "desc": "a cute claymation black steam locomotive with a round boiler, a gold square plate showing the number 8 on the boiler side, a red conductor cap with a gold button on top of the cab, big round cartoon eyes on a white windshield panel and a small smile, yellow coupling rod across the front wheels, puffy white clay steam from a black chimney, chunky black wheels on rails, a PURE train — body, wheels, eyes and mouth ONLY, absolutely NO arms NO hands NO limbs",
+      "coverPage": 1
+    }
+  ]
+}

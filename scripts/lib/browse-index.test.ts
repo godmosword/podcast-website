@@ -27,6 +27,7 @@ describe("browse-index", () => {
 
   it("suggests emoji for new vehicle names", () => {
     expect(suggestVehicleEntry("消防車").emoji).toBe("🚒");
+    expect(suggestVehicleEntry("蒸汽火車").emoji).toBe("🚂");
   });
 
   it("reconcile adds catalog vehicles and tags", () => {

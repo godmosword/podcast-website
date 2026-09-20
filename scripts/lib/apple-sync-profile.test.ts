@@ -89,6 +89,16 @@ describe("inferVehicle", () => {
       ),
     ).toBe("消防車");
   });
+
+  it("EP30：蒸汽火車（標題，不被高鐵列車規則誤判）", () => {
+    expect(
+      inferVehicle(
+        "8號蒸汽火車尋找木頭的任務｜負責任的故事｜宜蘭林場生活探索故事",
+        "8號蒸汽火車載著六根大木頭出發，抵達林場後卻發現少了一根！",
+        [],
+      ),
+    ).toBe("蒸汽火車");
+  });
 });
 
 describe("applyVehicleInference", () => {

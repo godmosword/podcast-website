@@ -81,6 +81,7 @@ const VEHICLE_ZH: Record<string, string> = {
   host: "主持人",
   drone: "無人機",
   "high speed rail": "高鐵",
+  "steam train": "蒸汽火車",
   "MRT train": "捷運",
   "ferris wheel": "摩天輪",
   "camper van": "露營車",
