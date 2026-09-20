@@ -210,9 +210,9 @@
     margin-bottom: 12px;
   }
 
-  /* 保留直式構圖焦點；換圖改由 <picture>，不再用 content:url。 */
+  /* K-17 直式版：三個站牌在畫面 34–53%、兩台車在 62–84%，280px 高的橫帶取 55% 處置中，站牌與車都在。 */
   .heroImage {
-    object-position: 58% center;
+    object-position: center 55%;
   }
 
   .cardGrid {

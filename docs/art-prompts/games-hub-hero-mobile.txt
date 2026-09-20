@@ -1,0 +1,6 @@
+Use your image generation tool (image_gen) to create ONE portrait image (portrait size, e.g. 1024x1536). Image 1 is the approved desktop version of this scene: reuse exactly its claymation style, palette, characters and elements, but recompose them for a tall phone frame.
+
+Composition for portrait: soft pastel sky in the top 15%. Then the rainbow archway with the star on top and the ferris wheel behind it. Directly under / in front of the arch, the THREE round picture signposts sit in one horizontal row across the width (left: pink sign with crayon on open coloring book; center: yellow sign with three identical little yellow cars and two curved swap arrows; right: lilac sign with a purple block falling down onto a row of colorful blocks). Below the signs, the wide clay road comes toward the viewer and exits at the bottom center; the green dinosaur car (closed friendly smile, orange back spikes, blue side window) and the red race car with the number 2 sit on the road side by side facing the viewer. Clay bushes and flowers at the sides. Keep everything readable at small size: signs large and clear.
+No letters or words anywhere; the only number allowed is the "2" on the red race car. No captions, no logos, no watermark, no realistic humans, no photorealism.
+
+After generating, copy the PNG to exactly: <OUTPUT_PATH> and reply with the final path only.
