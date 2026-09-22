@@ -39,6 +39,7 @@
 
 ### Changed
 
+- **ep-31 字幕校對並 `--mark`**：《快樂烤肉的中秋節》181 句。撲撲豬→噗噗豬、挖土雞／咚咚→挖土機東東、小地→草地、津津口→津津有味，並修正烤得／吃得／傳得。未改幕級 `captions`、未改 Apple sync workflow。
 - **ep-1～ep-10 字幕校對並 `--mark`**：補舊集校對閘門（先前只有 ep-11 起有標記）。修專名／同音誤聽（小助手沃特、牙菌斑、鈴鈴清潔車、划龍舟、香香餐車等），刪 ep-3／ep-6 重複句。未改幕級 `captions`、未改 Apple sync workflow。
 - **同步通知整成一次：** 新集預設只發「待生圖」Issue。看門狗在第一次 sync／合入等待窗內（預設 8h，即使 yaml `STALE_HOURS=3`）不開 RSS stale。若已開 stale，`notify-live` 把同一張改成 checklist（不加第二次 @mention），不再另開第二張。`sync-job-failure` 仍獨立。**未改** Apple sync／watchdog workflow YAML。
 - **subscribeCta 去玻璃＋七處主鈕綁 `--cta-solid-*`（美術審 H1）**：未啟用的 Landing `.subscribeCta` 改不透明 `--on-dark` 底板＋`--landing-brand-ink` 字、細線、`--elev-1`，拿掉 backdrop-filter／text-shadow／rgba 玻璃；壓在 hero 上不吃夜間會翻色的 `--cta-soft-bg`。熱點主鈕、家長閘門送出、親子景點導航／詳情主行動、家長工具卡、遊戲載入開始／重試、結算「下一關」改綁 `--cta-solid-bg`／`--cta-solid-fg`（計算值不變）。不啟用 `playCta`、不拿 nowrap；Landing `.cta`、留言送出、`--cta-warm-*`、`PlayButton` 未改。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。
