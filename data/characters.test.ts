@@ -29,7 +29,7 @@ describe("getCharactersForStory", () => {
     expect(ids).toContain("ling-ling");
   });
 
-  it("ep-1 含沃特與蹦蹦", () => {
+  it("ep-1 含沃特與 Bonbon", () => {
     const ids = getCharactersForStory("ep-1").map((c) => c.id);
     expect(ids).toContain("watt");
     expect(ids).toContain("bong-bong");

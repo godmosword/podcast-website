@@ -39,6 +39,7 @@
 
 ### Changed
 
+- **人物名稱對齊圖鑑**：故事幕、字幕、幕標與畫面上的舊名改成圖鑑名稱（蹦蹦／阿蹦→Bonbon、吊車老爺爺→吊車阿公、萌萌→猛猛、金龜車小紅豆／嘟嘟小紅車→小紅豆金龜車）。別名仍留在名冊。八號蒸汽火車尚未進圖鑑。未重繪已出圖、未改 Apple sync workflow。
 - **阿蹦圖鑑更名 Bonbon、定裝換成附圖**：`public/characters/Bonbon.jpg` 改為棕捲髮、白底紅車 T 恤、黃背包的小男孩。卡片顯示 Bonbon、小男孩，描述為活潑充滿好奇心。未重繪已出圖、未改 Apple sync workflow。
 - **媽咪圖鑑更名馬米、定裝換成附圖**：`public/characters/馬米.jpg` 改為橘色耳機、白 T 恤、牛仔褲、坐在麥克風前揮手的那張。卡片顯示馬米、主講者，描述為溫暖引導與小朋友聊天。未重繪已出圖、未改 Apple sync workflow。
 - **無人機定裝換成附圖**：`public/characters/小飛.jpg` 改為奶油方身、黃閃電、四軸螺旋槳的那張。圖鑑仍顯示無人機。未重繪已出圖、未改 Apple sync workflow。

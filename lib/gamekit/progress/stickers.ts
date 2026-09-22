@@ -6,7 +6,7 @@ export const STICKER_LABELS: Record<string, string> = {
   // 少了 label 會在家長儀表板上顯示成生的英文 ID。
   "played-car-adventure": "玩過車車大冒險",
   "played-candy-kart": "玩過繽紛卡丁車",
-  "played-snowboard": "玩過阿蹦雪山衝刺",
+  "played-snowboard": "玩過Bonbon雪山衝刺",
   "garage-5": "認識好多車車朋友",
   "medal-master": "三顆星達人",
 };

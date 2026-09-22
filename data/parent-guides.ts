@@ -8,9 +8,9 @@ import type { ParentGuide } from "@/lib/geo-content-contract";
 const PARENT_GUIDES: Record<string, ParentGuide> = {
   "ep-1": {
     summary:
-      "這一集用慢慢充電、不跟別人比速度的說法，陪孩子聊耐心等待，也能延伸到 CARL 與嘟嘟之間的好友情境。",
+      "這一集用慢慢充電、不跟別人比速度的說法，陪孩子聊耐心等待，也能延伸到 CARL 與小紅豆金龜車之間的好友情境。",
     prompts: [
-      "聽完可以問孩子：你覺得嘟嘟什麼時候最需要等一下？",
+      "聽完可以問孩子：你覺得小紅豆金龜車什麼時候最需要等一下？",
       "若孩子願意，一起畫一台會自己找充電站的車車，並說說它要去哪裡。",
     ],
   },

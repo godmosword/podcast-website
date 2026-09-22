@@ -1,4 +1,4 @@
-/** 嘟嘟小紅車表情資料（canonical）。 */
+/** 小紅豆金龜車表情資料（canonical）。 */
 
 import type { LandingSegmentId } from "@/data/landing-segments";
 

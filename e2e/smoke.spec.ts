@@ -770,7 +770,7 @@ test.describe("首頁手機換段出口", () => {
       await expectNoOverlap(skip, cta, `${width}px 往下鍵不得蓋住分區 CTA`);
       await expectNoOverlap(
         skip,
-        page.getByRole("button", { name: /嘟嘟小紅車/ }),
+        page.getByRole("button", { name: /小紅豆金龜車/ }),
         `${width}px 往下鍵不得蓋住嘟嘟`,
       );
       await expectHitTestable(page, cta, `${width}px 分區 CTA`);

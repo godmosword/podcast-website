@@ -90,7 +90,7 @@ export default function DuduCompanion({ items, footerId }: DuduCompanionProps) {
       <DuduMoment
         variant="companion"
         emotion={shown}
-        label="嘟嘟小紅車"
+        label="小紅豆金龜車"
         interactive
         hidden={atFooter}
         className={styles.companion}

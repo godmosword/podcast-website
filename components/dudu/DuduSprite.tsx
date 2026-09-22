@@ -22,7 +22,7 @@ export default function DuduSprite({
     <img
       key={emotion}
       src={emotionSrc(emotion)}
-      alt={decorative ? "" : `嘟嘟小紅車：${DUDU_EMOTION_LABEL[emotion]}`}
+      alt={decorative ? "" : `小紅豆金龜車：${DUDU_EMOTION_LABEL[emotion]}`}
       decoding="async"
       className={classes}
       aria-hidden={decorative || undefined}

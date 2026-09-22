@@ -158,7 +158,7 @@
       "start": 313.3,
       "end": 342.7,
       "summary": "馬米與小朋友對話",
-      "prompt": "Clay podcast studio like ep-11: host Mami (馬米) warmly talking to children about not judging people by appearance after Aku's story, Bonbon (阿蹦) sitting beside her nodding, round wooden table with microphones, pink mug, ferris wheel and roller coaster playset background, gentle teaching mood",
+      "prompt": "Clay podcast studio like ep-11: host Mami (馬米) warmly talking to children about not judging people by appearance after Aku's story, Bonbon sitting beside her nodding, round wooden table with microphones, pink mug, ferris wheel and roller coaster playset background, gentle teaching mood",
       "characters": ["Bonbon", "馬米", "香香餐車", "阿酷鑽地車"],
       "refPages": [11, 14],
       "refPageHint": "PRIMARY: Bonbon and 馬米 MUST match their canonical host portraits exactly — Bonbon white tee with little red cars, yellow backpack, navy shorts, white sneakers; 馬米 orange headphones, white tee, blue jeans. Story heroes smaller in background mural or shelf toys: match 香香餐車 and 阿酷鑽地車 portraits. NO random humanoid blobs. Hosts are HUMAN clay children/adult, not cars."

@@ -19,9 +19,9 @@
       "end": 51.4,
       "summary": "被討厭的心酸（podcast 對話）",
       "prompt": "Podcast empathy scene: adult host Mami and boy Bonbon with yellow backpack talking warmly with one small child on a park bench about heartache when friends say I hate you, gentle hugging mood, soft pastel park background with faceless trees only, absolutely NO personified cars or vehicles with faces",
-      "characters": ["蹦蹦"],
+      "characters": ["Bonbon"],
       "refPages": [12],
-      "refPageHint": "Match Bonbon (蹦蹦 ref) and Mami adult human host exactly like scene 12 — two humans plus one child only. NO purple car, NO pink bear car, NO Ferris wheel, NO race car, NO vehicles with faces."
+      "refPageHint": "Match Bonbon (Bonbon ref) and Mami adult human host exactly like scene 12 — two humans plus one child only. NO purple car, NO pink bear car, NO Ferris wheel, NO race car, NO vehicles with faces."
     },
     {
       "index": 3,
@@ -119,9 +119,9 @@
       "end": 286.1,
       "summary": "故事教訓",
       "prompt": "Soft storybook moment at the amusement park at dusk, Bonbon and Mami speaking kindly to children about self-worth, Gaogao softly lit in far background, warm magic sparkles, NO foreground mascot cars",
-      "characters": ["蹦蹦", "高高摩天輪"],
+      "characters": ["Bonbon", "高高摩天輪"],
       "refPages": [2, 11],
-      "refPageHint": "Bonbon from 蹦蹦 ref and scene 2; Mami adult human host — each exactly ONE face, NO duplicate features, NO car-body hybrids. Gaogao distant background like scene 11. NO green dinosaur car in foreground."
+      "refPageHint": "Bonbon from Bonbon ref and scene 2; Mami adult human host — each exactly ONE face, NO duplicate features, NO car-body hybrids. Gaogao distant background like scene 11. NO green dinosaur car in foreground."
     },
     {
       "index": 13,
@@ -139,9 +139,9 @@
       "end": 326.8,
       "summary": "結尾對話（雲霄飛車）",
       "prompt": "Bonbon and Mami chatting with a child about fear of fast roller coasters versus liking slow Ferris wheels, playful honest mood at podcast studio corner with amusement park props, only two human hosts visible",
-      "characters": ["蹦蹦"],
+      "characters": ["Bonbon"],
       "refPages": [2],
-      "refPageHint": "Match Bonbon from 蹦蹦 ref and Mami from scene 2 — both human clay figures with exactly ONE face each, NO duplicate facial features, NO car-shaped bodies, NO personified vehicle characters in foreground."
+      "refPageHint": "Match Bonbon from Bonbon ref and Mami from scene 2 — both human clay figures with exactly ONE face each, NO duplicate facial features, NO car-shaped bodies, NO personified vehicle characters in foreground."
     },
     {
       "index": 15,
@@ -149,9 +149,9 @@
       "end": 350,
       "summary": "結尾道別",
       "prompt": "Cheerful goodbye wave from Bonbon and Mami, small clay Ferris wheel and yellow race car toys as props in background, inviting kids back to the car amusement park, only two human hosts in foreground",
-      "characters": ["蹦蹦"],
+      "characters": ["Bonbon"],
       "refPages": [2],
-      "refPageHint": "Match Bonbon from 蹦蹦 ref and Mami from scene 2 — human clay boy with yellow backpack and adult host, each exactly ONE face, NO duplicate features, NO car-body hybrids. Background toys are faceless props only."
+      "refPageHint": "Match Bonbon from Bonbon ref and Mami from scene 2 — human clay boy with yellow backpack and adult host, each exactly ONE face, NO duplicate features, NO car-body hybrids. Background toys are faceless props only."
     }
   ],
   "newCharacters": []

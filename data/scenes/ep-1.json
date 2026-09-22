@@ -17,7 +17,7 @@
       "index": 2,
       "start": 23,
       "end": 49.5,
-      "summary": "蹦蹦準備去動物園",
+      "summary": "Bonbon準備去動物園",
       "prompt": "Bong Bong, a little boy with a yellow backpack, excitedly announces his trip to the zoo.",
       "characters": []
     },
@@ -73,7 +73,7 @@
       "index": 9,
       "start": 163.5,
       "end": 183.8,
-      "summary": "蹦蹦的可愛反應",
+      "summary": "Bonbon的可愛反應",
       "prompt": "Bong Bong makes a funny face in the mirror, feeling happy after his haircut.",
       "characters": []
     },
@@ -81,7 +81,7 @@
       "index": 10,
       "start": 183.8,
       "end": 193.1,
-      "summary": "蹦蹦的可愛反應",
+      "summary": "Bonbon的可愛反應",
       "prompt": "Bong Bong makes a funny face in the mirror, feeling happy after his haircut.",
       "characters": []
     },
@@ -129,7 +129,7 @@
       "index": 16,
       "start": 276.6,
       "end": 298.5,
-      "summary": "蹦蹦想做更多事",
+      "summary": "Bonbon想做更多事",
       "prompt": "Bong Bong asks Watt what else he can do, leading to a fun dance session.",
       "characters": []
     },
@@ -137,7 +137,7 @@
       "index": 17,
       "start": 298.5,
       "end": 319.9,
-      "summary": "蹦蹦想做更多事",
+      "summary": "Bonbon想做更多事",
       "prompt": "Bong Bong asks Watt what else he can do, leading to a fun dance session.",
       "characters": []
     },
@@ -145,7 +145,7 @@
       "index": 18,
       "start": 319.9,
       "end": 347.5,
-      "summary": "蹦蹦想做更多事",
+      "summary": "Bonbon想做更多事",
       "prompt": "Bong Bong asks Watt what else he can do, leading to a fun dance session.",
       "characters": []
     },
@@ -184,7 +184,7 @@
       "desc": "A small, round robot with a polite demeanor, capable of various tasks inside the futuristic car."
     },
     {
-      "name": "蹦蹦",
+      "name": "Bonbon",
       "aliases": [],
       "desc": "A little boy with a yellow backpack, full of excitement and curiosity."
     }
