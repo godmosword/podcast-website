@@ -144,6 +144,11 @@ const REFLECTION_PROMPTS: Record<
     parentFollowUp:
       "陪孩子練習「停下來、數清楚、再回去找」，也聊聊請人幫忙（像吊車阿公）不算失敗。",
   },
+  "ep-31": {
+    child: "快樂烤肉的中秋節。聽完這個故事，你心裡最先想到什麼？",
+    parentFollowUp:
+      "先接住孩子的感覺，再一起聊聊故事裡學到的一件小事，不必急著給標準答案。",
+  },
 };
 
 export function getReflectionPrompt(slug: string) {
