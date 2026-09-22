@@ -41,6 +41,7 @@ const STORY_ZONES: Record<string, ZoneId> = {
   "ep-28": "car-park", // 小紅豆汽車故事
   "ep-29": "car-park", // 大黃卡車的運送任務
   "ep-30": "car-park", // 8號蒸汽火車尋找木頭的任務
+  "ep-31": "car-park", // 快樂烤肉的中秋節
 };
 
 export function getStoryZoneId(slug: string): ZoneId | undefined {
