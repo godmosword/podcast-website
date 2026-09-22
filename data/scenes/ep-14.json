@@ -21,7 +21,7 @@
       "prompt": "Other side of plaza, twin red fire engines Quanquan and Diandian facing away from each other arguing with angry puffed cheeks, speech tension lines, parked apart, popcorn smell wafting from distance, child-safe comedy not scary",
       "characters": ["消防車圈圈", "消防車點點"],
       "refPages": [1],
-      "refPageHint": "PRIMARY: Both twins match cover page 1 and 消防車圈圈/消防車點點 portraits exactly — identical red bodies, 圈圈 and 點點 labels on cab, yellow lights, grey ladder. Each twin ONE face only. NO third fire truck."
+      "refPageHint": "PRIMARY: Both twins match 消防車圈圈 and 消防車點點 portraits exactly. Both portraits have a blue windshield face, red nose, flame badge, grey ladder and yellow water cannon, and no name text on the cab. Each twin ONE face only. NO third fire truck."
     },
     {
       "index": 3,
@@ -31,7 +31,7 @@
       "prompt": "Presentation moment: identical bright red twin fire engines Quanquan (哥哥圈圈) and Diandian (弟弟點點) side by side showing matching water tank, long hose, flashing yellow emergency lights, proud then Quanquan starting to look worried",
       "characters": ["消防車圈圈", "消防車點點"],
       "refPages": [1],
-      "refPageHint": "PRIMARY: Match portraits — same design both twins, labels 圈圈/點點 readable. Show they look identical. Quanquan slightly sadder eyes by end."
+      "refPageHint": "PRIMARY: Match 消防車圈圈 and 消防車點點 portraits. No name text on either cab. Quanquan slightly sadder eyes by end."
     },
     {
       "index": 4,
@@ -51,7 +51,7 @@
       "prompt": "Quanquan and Diandian competing — spraying water jets at different angles, honking loud sirens, racing tires, fighting over same parking spot, comic rivalry energy in plaza",
       "characters": ["消防車圈圈", "消防車點點"],
       "refPages": [4],
-      "refPageHint": "PRIMARY: Both twins match prior scenes. Water spray playful not dangerous. Distinct 圈圈 vs 點點 labels visible."
+      "refPageHint": "PRIMARY: Both twins match prior scenes and their portraits. Water spray playful not dangerous. No name text on either cab."
     },
     {
       "index": 6,
@@ -71,7 +71,7 @@
       "prompt": "Sudden emergency: cream-red popcorn food truck with grandfather vendor panicking as black smoke and small orange flames appear from popcorn machine area, NOT horror — cartoon safe fire under truck, alarm mood",
       "characters": ["老爺爺爆米花餐車"],
       "refPages": [1],
-      "refPageHint": "PRIMARY: Match 老爺爺爆米花餐車 portrait — striped awning, grandfather with grey mustache, popcorn machine. Smoke and tiny flames under truck only. Child-safe."
+      "refPageHint": "PRIMARY: Match 老爺爺爆米花餐車 portrait — red truck, white mustache, round glasses, popcorn piled on the roof, striped awning. Smoke and tiny flames under truck only. Child-safe."
     },
     {
       "index": 8,
@@ -161,7 +161,7 @@
       "prompt": "Clay podcast studio: host Mami (馬米) warmly talking to children about siblings arguing and learning to cooperate, Bonbon beside her nodding, small toy models of red twin fire engines on table, ferris wheel background, gentle teaching mood",
       "characters": ["Bonbon", "馬米", "消防車圈圈", "消防車點點"],
       "refPages": [1, 14],
-      "refPageHint": "PRIMARY: Bonbon teal hoodie yellow backpack; Mami pink top coral skirt — match host portraits exactly. Twin fire engine toys on table match page 1 cover design. Hosts are HUMAN clay, not cars."
+      "refPageHint": "PRIMARY: Bonbon white tee with little red cars, yellow backpack, navy shorts; 馬米 orange headphones, white tee, blue jeans — match host portraits exactly. Twin fire engine toys on table match page 1 cover design. Hosts are HUMAN clay, not cars."
     },
     {
       "index": 17,

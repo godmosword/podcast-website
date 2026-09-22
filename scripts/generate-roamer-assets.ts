@@ -161,8 +161,8 @@ const ROAMER_SPECS: RoamerSpec[] = [
         "A cute super-deformed chibi clay toy car, short chunky stubby proportions, a rounded " +
         "chubby body, small chunky wheels with all four wheels clearly visible and separable. " +
         "The car is a small green dinosaur car: a chubby green car body with a friendly cartoon " +
-        "T-rex head at the front, orange spikes running along its back, big round cartoon eyes, " +
-        "and a wide happy mouth showing rows of teeth. It has four black wheels only — no arms, " +
+        "T-rex head at the front, orange spikes running along its back, thick black eyebrows, big round cartoon eyes, " +
+        "and a wide open mouth showing yellow teeth and a red tongue. It has four black wheels only — no arms, " +
         "no hands, no legs, no limbs. Shown in a three-quarter side view facing screen-left in a " +
         "gentle driving pose, upright and level on flat ground, viewed from a slight high angle " +
         "about 30 degrees to match a tabletop diorama. Handmade matte polymer clay, soft rounded " +
@@ -209,8 +209,8 @@ const ROAMER_SPECS: RoamerSpec[] = [
         "A cute super-deformed chibi claymation drill excavator named Aku, short chunky stubby " +
         "proportions, a bright yellow body on black rubber crawler tracks (no wheels), a hydraulic " +
         "arm at the front ending in a large dark spiral drill bit instead of a bucket. A stern cool " +
-        "expression with thick black eyebrows and focused round eyes, rarely smiling. A small pink " +
-        "frosted donut hangs from a little side hook. Shown in a three-quarter side view facing " +
+        "expression with thick black eyebrows and focused round eyes, rarely smiling. No donut. " +
+        "Shown in a three-quarter side view facing " +
         "screen-left, upright and level, with the crawler tracks flat on the ground and the track " +
         "contact line at the very bottom edge, viewed from a slight high angle about 30 degrees. " +
         "Handmade matte polymer clay, soft rounded pressed edges, subtle thumbprint texture, no " +
@@ -231,7 +231,7 @@ const ROAMER_SPECS: RoamerSpec[] = [
         "and large dark spiral drill bit visible from behind. Shown from a three-quarter REAR view " +
         "from behind, driving away toward screen-left, clearly showing the back of the excavator " +
         "body, rear crawler tracks and engine housing; the stern face is turned away and not visible. " +
-        "A small pink frosted donut still hangs from a little side hook. Upright and level with " +
+        "No donut. Upright and level with " +
         "crawler tracks flat on the ground and track contact at the very bottom edge, slight high " +
         "angle about 30 degrees. Handmade matte polymer clay, soft rounded pressed edges, subtle " +
         "thumbprint texture, no gloss. Soft even diffuse lighting, low contrast. On a plain solid " +
@@ -248,7 +248,7 @@ const ROAMER_SPECS: RoamerSpec[] = [
   },
   {
     id: "monster-truck",
-    characterName: "怪獸卡車",
+    characterName: "猛猛",
     front: {
       positive:
         "A cute super-deformed chibi claymation monster truck pickup named Mengmeng, short chunky " +

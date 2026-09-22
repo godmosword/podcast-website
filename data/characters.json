@@ -24,7 +24,7 @@
       "恐龍車多多"
     ],
     "vehicle": "dinosaur car",
-    "desc": "a cute claymation green dinosaur car, a small green car body with a friendly T-rex head, orange spikes along its back, big round cartoon eyes, wide happy mouth showing rows of teeth, four black wheels only — no arms, no hands, no limbs",
+    "desc": "a cute claymation green dinosaur car named Duoduo (恐龍車多多), a small green car body with a lighter green belly and a T-rex head, orange spikes along the head and back, thick black eyebrows, big round eyes on the head, a blue side window with no face on the glass, a wide open mouth with yellow teeth and a red tongue, four black wheels only. No arms, no hands, no limbs. The large blue toothbrush standing beside the car in the portrait is a prop, not part of the body",
     "ref": "characters/恐龍車多多.jpg",
     "firstSeen": "ep-9",
     "alsoIn": [
@@ -76,7 +76,7 @@
       "小藍巴士"
     ],
     "vehicle": "minibus",
-    "desc": "a cute claymation friendly sky-blue minibus with a rounded boxy body, cream lower trim, yellow round headlights, a small side door, big warm eyes and a gentle caring smile",
+    "desc": "a cute claymation friendly sky-blue minibus named the blue minibus (藍色小巴士), rounded boxy body, light-blue windshield with eyebrows and big round eyes on the glass, a gentle smile on the front panel below the glass, yellow round headlights, cream bumper with small orange indicator lights, cream lower trim, blue side mirrors, a row of dark-framed side windows, a small blue roof dome, black wheels. No name text. No arms, no hands, no human limbs",
     "ref": "characters/小藍巴士.jpg",
     "firstSeen": "ep-3"
   },
@@ -87,22 +87,24 @@
       "計程車"
     ],
     "vehicle": "taxi",
-    "desc": "a cute claymation bright yellow taxi cab with a black-and-white checker stripe along the side, a small taxi sign on the roof, round headlights, big cheerful eyes and a happy smile",
+    "desc": "a cute claymation bright yellow taxi named the yellow taxi (黃色計程車), light-blue windshield with eyebrows and big round eyes on the glass, a wide smile on the front panel below the glass, round headlights with yellow centers, small orange indicator lights, a grey bumper, a yellow roof sign reading TAXI in black letters, a black-and-white checker stripe along the side, blue side windows, a yellow side mirror, black wheels with yellow hubs. No arms, no hands, no human limbs. Distinct from the white self-driving taxi 知知",
     "ref": "characters/黃色計程車.jpg",
     "firstSeen": "ep-3"
   },
   {
-    "name": "怪獸卡車",
+    "name": "猛猛",
     "aliases": [
-      "怪獸車",
       "萌萌",
+      "怪獸卡車",
+      "怪獸車",
       "Monster Truck",
       "Monster Truck 萌萌",
+      "Monster Truck 猛猛",
       "怪獸卡車 Monster Truck"
     ],
     "vehicle": "monster truck",
-    "desc": "a cute claymation bright yellow monster truck pickup named Mengmeng (萌萌) with huge chunky black off-road tyres with yellow rims, yellow coil-spring suspension, a black roof bar with four round yellow spotlights, light-blue windshield with big friendly round eyes and a small smile on the bumper, grey textured grille, black roll bar in the truck bed, soft hand-sculpted clay texture",
-    "ref": "characters/怪獸卡車.jpg",
+    "desc": "a cute claymation bright yellow monster truck pickup named Mengmeng (猛猛) with huge chunky black off-road tyres with yellow rims, yellow coil-spring suspension, a black roof bar with four round yellow spotlights, light-blue windshield with big friendly round eyes and a happy open smile with a small tongue, grey textured grille, black roll bar in the truck bed, soft hand-sculpted clay texture. No arms, no hands, no human limbs",
+    "ref": "characters/猛猛.jpg",
     "firstSeen": "ep-8"
   },
   {
@@ -123,22 +125,24 @@
     ]
   },
   {
-    "name": "吊車老爺爺",
+    "name": "吊車阿公",
     "aliases": [
+      "吊車老爺爺",
       "吊車",
       "老爺爺",
       "吊車老爺",
       "大吊車阿公",
-      "吊車阿公",
       "大吊車",
       "阿公"
     ],
     "vehicle": "crane truck",
-    "desc": "a wise cute claymation orange crane truck with a long extending boom arm, grey hook at the end, cream cab windows, kind gentle eyes and a warm grandfather smile",
-    "ref": "characters/吊車老爺爺.jpg",
+    "desc": "a wise cute claymation orange crane truck with a long extending orange boom, a grey hook, a grey lower chassis, six black wheels with orange hubs, a cream front face with kind eyes, grey eyebrows and a grey handlebar mustache, and a warm grandfather smile. No arms, no hands, no human limbs",
+    "ref": "characters/吊車阿公.jpg",
     "firstSeen": "ep-5",
     "alsoIn": [
-      "ep-20"
+      "ep-20",
+      "ep-29",
+      "ep-30"
     ]
   },
   {
@@ -169,7 +173,7 @@
       "餐車"
     ],
     "vehicle": "food truck",
-    "desc": "a cute claymation pink food truck named Xiangxiang with kawaii round face, big sparkling eyes, open side window selling donuts (strawberry pink, chocolate, rainbow sprinkle), roof sign with donut icons, soft hand-sculpted clay texture",
+    "desc": "a cute claymation pink food truck named Xiangxiang (香香餐車), light-blue windshield with no eyes on the glass, big round eyes with white rings on the front face, a soft smile, yellow cheeks, a pink-and-white striped awning over an open serving window full of green leaf-wrapped zongzi, two smiling zongzi with little flowers sitting on the roof, a mint bumper and lower body, a green scalloped side panel with a flower, a pink side mirror, black wheels with yellow hubs and pink centers. No donuts. No arms, no hands, no human limbs. Distinct from the grandfather popcorn truck 老爺爺爆米花餐車",
     "ref": "characters/香香餐車.jpg",
     "firstSeen": "ep-10"
   },
@@ -193,7 +197,7 @@
       "宝宝"
     ],
     "vehicle": "child",
-    "desc": "a cute claymation boy host named Bonbon (阿蹦), thick messy brown clay hair, big cheerful dark eyes with rosy cheeks, light teal long-sleeve hoodie, navy blue shorts, bright red sneakers with white laces and white socks, bright yellow backpack, energetic curious open smile, soft hand-sculpted clay texture",
+    "desc": "a cute claymation boy named Bonbon, thick messy brown curly clay hair, big cheerful dark eyes, rosy cheeks, a wide open smile, white t-shirt printed with little red cars, navy blue shorts, white sneakers, a bright yellow backpack, one hand waving hello, soft hand-sculpted clay texture",
     "ref": "characters/Bonbon.jpg",
     "firstSeen": "ep-1"
   },
@@ -205,7 +209,7 @@
       "Mami"
     ],
     "vehicle": "host",
-    "desc": "a cute claymation adult woman host named Mami (馬米), shoulder-length wavy brown hair, big dark eyes with a small beauty mark below the right eye, warm friendly smile, large orange over-ear headphones, plain white short-sleeve t-shirt, high-waisted wide-leg pants with orange and white vertical stripes and drawstring waist, orange open-toed sandals, gentle welcoming podcast host energy, soft hand-sculpted clay texture",
+    "desc": "a cute claymation adult woman host named 馬米 (Mami), shoulder-length wavy brown hair, a small beauty mark under one eye, big dark eyes, warm open smile, large orange over-ear headphones, plain white short-sleeve t-shirt, blue jeans, sitting cross-legged and waving beside a podcast microphone, soft hand-sculpted clay texture",
     "ref": "characters/馬米.jpg",
     "firstSeen": "ep-11"
   },
@@ -215,7 +219,7 @@
       "無人機"
     ],
     "vehicle": "drone",
-    "desc": "a cute claymation personified drone named Xiao Fei, cream off-white rounded square clay body, yellow lightning bolt on forehead, big glossy black eyes, pink cheek blush, wide happy smile, black camera lens on lower face, two small green LED lights, four gray arms with spinning propellers, no legs",
+    "desc": "a cute claymation personified drone named Xiao Fei (小飛, also called 無人機), cream rounded-square clay body, yellow lightning bolt on the forehead, big glossy black eyes, pink cheek blush, wide happy smile, a black camera lens under the mouth, two small green LED lights, four gray arms with cream motor housings and spinning black propellers, no legs",
     "ref": "characters/小飛.jpg",
     "firstSeen": "ep-2"
   },
@@ -247,7 +251,7 @@
       "粉紅露營車"
     ],
     "vehicle": "camper van",
-    "desc": "a cute claymation small pink camper van named Xiaorou (小柔) with a rounded cozy body, cream-tinted windows, a tiny striped awning, gentle big round eyes with rosy cheeks and a soft warm smile, compact and calm feminine energy",
+    "desc": "a cute claymation small pink camper van named Xiaorou (小柔), rounded cozy pink body with a cream roof trim and cream bumper, a light-blue windshield with no eyes on the glass, big round eyes with white rings on the front face, a soft smile, rosy cheeks, yellow headlights, a pink heart on the front grille, a cream side door, a pink side mirror, a pink-and-white striped awning over a side window with a flower box of yellow purple and pink flowers, a small roof skylight, black wheels with cream hubs. No arms, no hands, no human limbs",
     "ref": "characters/小柔露營車.jpg",
     "firstSeen": "ep-11"
   },
@@ -258,7 +262,7 @@
       "黃色賽車"
     ],
     "vehicle": "race car",
-    "desc": "a cute claymation bright yellow race car named Xiaochong (小衝) with two bold black racing stripes on the hood, black tinted windows, a small rear spoiler, black wheels, impatient energetic eyes and a pouty speedy expression, sleek and distinct from red race car number 2",
+    "desc": "a cute claymation bright yellow race car named Xiaochong (小衝) with two bold black racing stripes down the hood, black tinted windows with no face on the glass, big round eyes set in the headlights, a small mouth on the front bumper, a black-and-yellow rear wing, yellow side mirrors, black tires with yellow hubs. No racing number. No arms, no hands, no human limbs. Distinct from red race car number 2 (小紅賽車) and from the mustache dad 紅爸",
     "ref": "characters/小衝賽車.jpg",
     "firstSeen": "ep-11"
   },
@@ -282,20 +286,22 @@
       "磚地車"
     ],
     "vehicle": "drill excavator",
-    "desc": "a cute claymation yellow drill excavator named Aku (阿酷) on black crawler tracks, hydraulic arm with a large dark spiral drill bit instead of a bucket, stern cool expression with thick black eyebrows and focused round eyes (rarely smiling), a small pink frosted donut hanging from a side hook, soft hand-sculpted clay texture, distinct from cheerful yellow bucket excavator Dongdong (東東挖土機)",
+    "desc": "a cute claymation yellow drill excavator named Aku (阿酷) on black crawler tracks with yellow hazard stripes, hydraulic arm with a large dark spiral drill bit instead of a bucket, stern cool expression with thick black eyebrows and focused round eyes (rarely smiling), grey cab face, soft hand-sculpted clay texture, distinct from cheerful yellow bucket excavator Dongdong (東東挖土機). No arms, no hands, no human limbs, no donut",
     "ref": "characters/阿酷鑽地車.jpg",
     "firstSeen": "ep-13"
   },
   {
-    "name": "嘟嘟小紅車",
+    "name": "小紅豆金龜車",
     "aliases": [
       "嘟嘟",
+      "嘟嘟小紅車",
       "小紅車",
-      "嘟嘟車"
+      "嘟嘟車",
+      "小紅豆"
     ],
-    "vehicle": "car",
-    "desc": "a cute claymation little red car named Dudu (嘟嘟), a plain glossy red rounded car body with a light-blue rounded windshield, small yellow round headlights, four black wheels with cream hubcaps, big round expressive googly eyes and a cheerful smile, soft hand-sculpted clay texture, no racing number and no stripes — distinct from the numbered race car 小紅賽車, very expressive and emotive (happy, starry-eyed, surprised, grumpy, laughing, waving)",
-    "ref": "characters/嘟嘟小紅車.jpg",
+    "vehicle": "beetle",
+    "desc": "a cute claymation rounded red beetle car named Xiaohongdou (小紅豆金龜車), compact soft red body, a light-blue windshield on the roof with no eyes on the glass, big round googly eyes with white rings and black pupils on the front face, a simple black smile, yellow round headlights at the front corners and yellow cheek dots, four black wheels with white hubs. No racing number, no stripes, no spoiler, no mustache, no pacifier. No arms, no hands, no human limbs. Distinct from the numbered race car 小紅賽車 and from the mustache dad 紅爸",
+    "ref": "characters/小紅豆金龜車.jpg",
     "firstSeen": "landing"
   },
   {
@@ -306,7 +312,7 @@
       "雙胞胎消防車圈圈"
     ],
     "vehicle": "fire engine",
-    "desc": "a cute claymation bright red twin fire engine named Quanquan (圈圈), identical to Diandian except labeled 圈圈 on the cab, light-blue windshield with big friendly eyes and smile, grey badge with flame icon on forehead, yellow emergency lights on roof, grey extendable ladder and yellow water cannon, large water tank, long hose, soft hand-sculpted clay texture",
+    "desc": "a cute claymation bright red fire engine named Quanquan (圈圈), older twin of Diandian (點點). Light-blue windshield face with big friendly eyes, a wide smile and a round red nose, yellow cheek dots, grey badge with a flame icon on the forehead, red-and-white roof light bar with yellow lamps, grey extendable ladder with a yellow water cannon, side hose reel with white and red concentric circles, grey bumper, black wheels with red hubs, yellow side panels. No name text on the cab. No arms, no hands, no human limbs",
     "ref": "characters/消防車圈圈.jpg",
     "firstSeen": "ep-14"
   },
@@ -318,7 +324,7 @@
       "雙胞胎消防車點點"
     ],
     "vehicle": "fire engine",
-    "desc": "a cute claymation bright red twin fire engine named Diandian (點點), identical to Quanquan except labeled 點點 on the cab, light-blue windshield with big friendly eyes and smile, grey badge with flame icon on forehead, yellow emergency lights on roof, grey extendable ladder and yellow water cannon, large water tank, long hose, soft hand-sculpted clay texture",
+    "desc": "a cute claymation bright red fire engine named Diandian (點點), younger twin of Quanquan (圈圈). Light-blue windshield face with big friendly eyes, a wide smile and a round red nose, yellow cheek dots, grey badge with a flame icon on the forehead, red-and-white roof light bar with yellow lamps, grey extendable ladder with a yellow water cannon, side hose reel with white and red concentric circles, grey bumper, black wheels with red hubs, yellow side panels. No name text on the cab. No arms, no hands, no human limbs",
     "ref": "characters/消防車點點.jpg",
     "firstSeen": "ep-14"
   },
@@ -330,7 +336,7 @@
       "老爺爺餐車"
     ],
     "vehicle": "food truck",
-    "desc": "a cute claymation vintage popcorn food truck with a friendly grandfather vendor, striped awning, popcorn machine on the side, warm cream and red clay colors, soft hand-sculpted clay texture",
+    "desc": "a cute claymation bright red popcorn food truck named the grandfather popcorn truck (老爺爺爆米花餐車). A grandfather vendor sits in the open cab with white hair, round grey glasses, a white mustache, an orange nose, and both hands on the steering wheel. The truck front has its own smile, yellow headlights, a grey bumper, and black side mirrors. A red-and-cream striped awning, a yellow side panel with a popcorn-bucket picture and yellow stars, a huge pile of popcorn on the roof, and an orange roof sign showing a red-and-white striped popcorn bucket. Black wheels with grey hubs. The grandfather stays in the cab; do not draw a second person standing beside the truck. Distinct from the other food trucks",
     "ref": "characters/老爺爺爆米花餐車.jpg",
     "firstSeen": "ep-14",
     "alsoIn": [
@@ -346,7 +352,7 @@
       "消毒車噴噴"
     ],
     "vehicle": "spray truck",
-    "desc": "a cute claymation white disinfectant spray truck named Penpen (噴噴), compact cream-white cab with a glossy shiny finish, light-blue windshield with proud round eyes and a confident smirk, a large cylindrical silver spray tank mounted on the flatbed with orange hazard stripes, a hose nozzle spraying a fine mist, small black wheels with cream hubcaps, soft hand-sculpted clay texture, distinct from street sweeper Lingling and cream ambulance An-An",
+    "desc": "a cute claymation cream disinfectant spray truck named Penpen (噴噴), cream cab, light-blue windshield with thick black eyebrows and big round eyes on the glass, a smile on the front panel below the glass, grey round headlights, small orange indicator lights, a dark grey bumper, an orange beacon on the cab roof, black side mirrors, a large silver cylindrical tank on the flatbed with orange diagonal hazard stripes, a cream hose with an orange nozzle spraying a fine mist, orange-and-white hazard stripes along the bed, black wheels. No arms, no hands, no human limbs. Distinct from the street sweeper 玲玲 and the cream ambulance 安安",
     "ref": "characters/消毒車噴噴.jpg",
     "firstSeen": "ep-15"
   },
@@ -418,19 +424,19 @@
       "智智"
     ],
     "vehicle": "robotaxi",
-    "desc": "a cute claymation modern white autonomous robotaxi named Zhizhi (知知), sleek rounded white SUV/crossover clay body, big glossy black round eyes on the front face each ringed with a thin glowing neon-blue circle, simple cheerful black smile below, thin glowing neon-blue LED headlight strips, white roof LiDAR sensor pod with a dark-blue cylindrical top lens and three forward camera lenses, small white camera pods on the front fenders, recessed black side door panels outlined in glowing blue, dark matte five-spoke wheels, soft hand-sculpted clay texture — NOT a classic yellow checker taxi",
+    "desc": "a cute claymation modern white autonomous robotaxi named Zhizhi (知知), cream-white rounded crossover body, opaque black windshield with no eyes on the glass, two big round eyes with glowing neon-blue rings on the front bumper, a small smile below the eyes, a glowing cyan light strip across the hood, slim blue headlight slits, a white roof sensor pod with a dark top camera and a row of forward cameras, black side mirrors and fender pods each with a blue camera lens, a recessed black side door outlined in neon blue, black five-spoke wheels. No arms, no hands, no human limbs. Distinct from the yellow checker taxi 黃色計程車",
     "ref": "characters/自動駕駛計程車知知.jpg",
     "firstSeen": "ep-21"
   },
   {
-    "name": "小紅賽車的爸爸",
+    "name": "紅爸",
     "aliases": [
-      "小紅的爸爸",
-      "紅爸"
+      "小紅賽車的爸爸",
+      "小紅的爸爸"
     ],
     "vehicle": "race car",
-    "desc": "a cute claymation adult bright red race car — dad of Xiao Hong (小紅賽車) — slightly larger and longer than the child race car, glossy red rounded body with a white racing stripe down the middle, blue and yellow accents, white circle with the number 1 (not 2). FACE LAYOUT (important): big warm mature round eyes ONLY on the windshield; the MOUTH is on the lower front bumper/grille of the car (車前臉), and a playful curly black handlebar mustache sits directly ABOVE that mouth on the front of the car — mustache and mouth are on the car front nose/bumper, NOT floating on the windshield. Soft friendly dad smile under the curled-up mustache tips (俏皮翹鬍子). Soft hand-sculpted clay texture, same family look as red race car number 2 but clearly an adult father car",
-    "ref": "characters/小紅賽車的爸爸.jpg",
+    "desc": "a cute claymation adult bright red race car named Hongba (紅爸), dad of Xiao Hong (小紅賽車), slightly larger rounded red body, white racing stripe down the middle of the hood, white circle with a blue number 1 on the door (not 2), blue windshield frame, blue side mirrors, blue rear spoiler, blue wheel rims with yellow hubs. FACE LAYOUT (important): big warm round black eyes ONLY on the windshield; yellow round headlights sit on the front beside the nose and are NOT the eyes; the MOUTH is on the lower front bumper, and a playful curly black handlebar mustache sits directly ABOVE that mouth on the front of the car — mustache and mouth are on the car front nose/bumper, NOT floating on the windshield. Soft friendly dad smile under the curled-up mustache tips (俏皮翹鬍子). Soft hand-sculpted clay texture. No arms, no hands, no human limbs. Same family look as red race car number 2 but clearly an adult father car",
+    "ref": "characters/紅爸.jpg",
     "firstSeen": "ep-23",
     "alsoIn": [
       "ep-24"
@@ -460,5 +466,15 @@
     "desc": "a cute claymation younger dad bright red race car — EXACTLY the large foreground father car from the ep-24 hero (小紅賽車的爸爸年輕版). FACE LAYOUT (critical, copy reference dad 1:1): front-facing (not long side-profile race car); large round white eyes with black pupils on the UPPER FRONT FACE; thick arched black eyebrows above the eyes on a small blue clay window band; prominent playful black curly handlebar mustache (俏皮翹鬍子) centered BELOW the eyes on the red front face; simple curved black smile under the mustache; two bright yellow round cheek/headlight dots beside the mustache. Compact rounded red clay body with pebbled/honeycomb texture matching the hero, blue side windows, small red round side mirrors, chunky black wheels with light hubs. NO long sports-car profile, NO grey bumper bar, NO door number badge required. Single character — NOT the tiny pacifier baby on the roof",
     "ref": "characters/小紅賽車的爸爸年輕版.jpg",
     "firstSeen": "ep-24"
+  },
+  {
+    "name": "大黃",
+    "aliases": [
+      "大黃卡車"
+    ],
+    "vehicle": "stake truck",
+    "desc": "a cute claymation bright yellow stake-bed truck with a railed yellow cargo bed, dark grey chassis and front grille, big round eyes on the cream windshield, a wide happy smile on the bumper, three small orange beacons on the roof, chunky black tires with yellow hubs. No arms, no hands, no human limbs",
+    "ref": "characters/大黃.jpg",
+    "firstSeen": "ep-29"
   }
 ]

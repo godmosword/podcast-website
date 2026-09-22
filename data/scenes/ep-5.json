@@ -37,9 +37,9 @@
       "index": 4,
       "start": 75.2,
       "end": 95.3,
-      "summary": "吊車老爺爺登場",
+      "summary": "吊車阿公登場",
       "prompt": "Orange crane truck grandpa rolls up kindly asking why Dong Dong stopped, Dong Dong hangs his bucket low admitting he wants to help but fears slopes and stones",
-      "characters": ["東東挖土機", "吊車老爺爺"],
+      "characters": ["東東挖土機", "吊車阿公"],
       "refPages": [3],
       "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
     },
@@ -49,7 +49,7 @@
       "end": 117.4,
       "summary": "勇敢是一小步",
       "prompt": "Crane grandpa explains bravery is feeling a little scared but still trying, telling Dong Dong he only needs one small step first, warm mentoring mood",
-      "characters": ["東東挖土機", "吊車老爺爺"],
+      "characters": ["東東挖土機", "吊車阿公"],
       "refPages": [4],
       "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
     },
@@ -59,7 +59,7 @@
       "end": 129.9,
       "summary": "來到小斜坡",
       "prompt": "Dong Dong nods and drives to a small grassy slope, his tracks trembling a little while crane grandpa waits behind encouraging him",
-      "characters": ["東東挖土機", "吊車老爺爺"],
+      "characters": ["東東挖土機", "吊車阿公"],
       "refPages": [5],
       "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
     },
@@ -69,7 +69,7 @@
       "end": 151,
       "summary": "深呼吸往上開",
       "prompt": "Dong Dong takes a deep breath, steadies his tracks and climbs the slope inch by inch while grandpa says breathe steady go slow",
-      "characters": ["東東挖土機", "吊車老爺爺"],
+      "characters": ["東東挖土機", "吊車阿公"],
       "refPages": [6],
       "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
     },
@@ -89,7 +89,7 @@
       "end": 182.5,
       "summary": "輕推大石頭",
       "prompt": "A big stone blocks the path, nervous Dong Dong lowers his bucket and pushes gently but the stone does not move, he looks disappointed",
-      "characters": ["東東挖土機", "吊車老爺爺"],
+      "characters": ["東東挖土機", "吊車阿公"],
       "refPages": [8],
       "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
     },
@@ -99,7 +99,7 @@
       "end": 202,
       "summary": "換角度推開",
       "prompt": "Grandpa says try another angle, Dong Dong adjusts position and pushes harder until the stone slowly rolls aside clearing the path",
-      "characters": ["東東挖土機", "吊車老爺爺"],
+      "characters": ["東東挖土機", "吊車阿公"],
       "refPages": [9],
       "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
     },
@@ -109,7 +109,7 @@
       "end": 222.2,
       "summary": "花瓣巷泥巴",
       "prompt": "Dong Dong arrives at petal lane facing lots of thick mud, his heart beating fast with nerves while crane grandpa reminds him of small steps",
-      "characters": ["東東挖土機", "吊車老爺爺"],
+      "characters": ["東東挖土機", "吊車阿公"],
       "refPages": [10],
       "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
     },
@@ -139,7 +139,7 @@
       "end": 276.3,
       "summary": "找到心裡勇氣",
       "prompt": "Crane grandpa praises Dong Dong for finding courage today, Dong Dong asks where courage is and touches his chest learning it lives inside",
-      "characters": ["東東挖土機", "吊車老爺爺"],
+      "characters": ["東東挖土機", "吊車阿公"],
       "refPages": [13],
       "refPageHint": "Match the same clay car amusement park style, lighting palette, and on-model character designs from the reference; only change composition and action."
     },

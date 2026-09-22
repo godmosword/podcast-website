@@ -50,9 +50,9 @@
       "end": 134.2,
       "summary": "阿尼又看見吊車把鋼筋舉得高高的，覺得吊車好厲害",
       "prompt": "Yellow cement mixer Ani looking up in awe as an orange crane truck lifts steel rebar high into the sky, Ani feeling not special enough, tall unfinished building silhouette, soft clay wonder mood",
-      "characters": ["水泥車阿尼", "吊車老爺爺"],
+      "characters": ["水泥車阿尼", "吊車阿公"],
       "refPages": [4],
-      "refPageHint": "PRIMARY: 水泥車阿尼 match portrait looking up. 吊車老爺爺 match portrait — orange crane, long boom, grey hook, warm grandfather eyes, ONE face each. Crane is impressive but distant."
+      "refPageHint": "PRIMARY: 水泥車阿尼 match portrait looking up. 吊車阿公 match portrait — orange crane, long boom, grey hook, warm grandfather eyes, ONE face each. Crane is impressive but distant."
     },
     {
       "index": 6,
@@ -70,9 +70,9 @@
       "end": 176.3,
       "summary": "工地好熱鬧：挖土機東東挖地基，大吊車阿公吊鋼筋",
       "prompt": "Busy clay construction site: yellow excavator Dongdong digging the foundation with his bucket, orange crane grandpa lifting rebar high, unfinished grey building frame, traffic cones and bricks, energetic teamwork wide shot",
-      "characters": ["東東挖土機", "吊車老爺爺"],
+      "characters": ["東東挖土機", "吊車阿公"],
       "refPages": [5],
-      "refPageHint": "PRIMARY: 東東挖土機 match portrait — yellow excavator on black tracks, happy digging. 吊車老爺爺 match portrait lifting rebar. ONE face each. No Ani in this establishing work shot."
+      "refPageHint": "PRIMARY: 東東挖土機 match portrait — yellow excavator on black tracks, happy digging. 吊車阿公 match portrait lifting rebar. ONE face each. No Ani in this establishing work shot."
     },
     {
       "index": 8,
@@ -100,9 +100,9 @@
       "end": 255.9,
       "summary": "大吊車阿公拍拍阿尼：100分很棒，101是再努力再勇敢一點點",
       "prompt": "Orange crane grandpa parked beside yellow cement mixer Ani, gently resting his grey crane hook near Ani's cab in a caring gesture — NO arms NO hands NO limbs on either vehicle — explaining that 100 is perfect but 101 means trying a little more and being a little braver, warm mentoring moment at the construction site",
-      "characters": ["吊車老爺爺", "水泥車阿尼"],
+      "characters": ["吊車阿公", "水泥車阿尼"],
       "refPages": [9, 5],
-      "refPageHint": "PRIMARY: 吊車老爺爺 match portrait — orange crane truck, long boom, grey hook only, warm grandfather face, absolutely NO arms NO hands NO mechanical limbs. 水泥車阿尼 match portrait listening. ONE face each. Comfort via crane hook proximity only."
+      "refPageHint": "PRIMARY: 吊車阿公 match portrait — orange crane truck, long boom, grey hook only, warm grandfather face, absolutely NO arms NO hands NO mechanical limbs. 水泥車阿尼 match portrait listening. ONE face each. Comfort via crane hook proximity only."
     },
     {
       "index": 11,
@@ -110,9 +110,9 @@
       "end": 278.6,
       "summary": "阿公說高樓最重要的是地基，沒有阿尼的穩固水泥就蓋不上去",
       "prompt": "Cross-section clay teaching shot at a construction site: orange crane truck grandpa with his long boom angled downward, grey hook lowered directly above a foundation cross-section filled with solid concrete, showing where the base meets the ground — the crane truck has NO limbs of any kind, only its boom and hook communicate. Yellow cement mixer Ani parked beside him, blinking thoughtfully with attentive round eyes, listening carefully, also with NO limbs of any kind. Behind them a tall unfinished building rises many storeys high with a visible steel skeleton frame, echoing the towering scale of the site — not a short three-floor stub. Bright daytime clay lighting, educational but playful mood",
-      "characters": ["吊車老爺爺", "水泥車阿尼"],
+      "characters": ["吊車阿公", "水泥車阿尼"],
       "refPages": [10, 9],
-      "refPageHint": "PRIMARY: 吊車老爺爺 and 水泥車阿尼 match portraits — BOTH characters have NO arms, NO hands, NO fingers, NO limbs of any kind. Crane conveys attention via its boom and hook lowered over the foundation cross-section, not a reaching gesture. Ani conveys listening via attentive blinking eyes only. Background unfinished building must read as a tall multi-storey skeleton (continuity with page 9's towering scale) — not a short 3-floor stub. Keep the foundation cross-section teaching visual clear. ONE face each."
+      "refPageHint": "PRIMARY: 吊車阿公 and 水泥車阿尼 match portraits — BOTH characters have NO arms, NO hands, NO fingers, NO limbs of any kind. Crane conveys attention via its boom and hook lowered over the foundation cross-section, not a reaching gesture. Ani conveys listening via attentive blinking eyes only. Background unfinished building must read as a tall multi-storey skeleton (continuity with page 9's towering scale) — not a short 3-floor stub. Keep the foundation cross-section teaching visual clear. ONE face each."
     },
     {
       "index": 12,
@@ -180,9 +180,9 @@
       "end": 415,
       "summary": "結尾道別，邀請小朋友下次再一起來車車遊樂園玩",
       "prompt": "Clay podcast studio closing shot: Bonbon and Mami, matching their established portraits, waving goodbye cheerfully to the camera. Behind them a mural or window view MUST clearly show the completed rainbow Taipei 101 tower — same as the episode cover: light-blue base with a clearly readable white '101' and a small blue door, stacked tiers rising green then yellow then orange then red-magenta then purple, a bright yellow five-pointed star on top, NOT a solid green or teal tower. In the mural near the tower, show three friend vehicles together: yellow cement mixer Ani with a blue-and-white spiral drum, orange crane truck grandpa with a long boom and grey hook, and yellow excavator Dongdong with a digging bucket — each vehicle has exactly ONE face and ABSOLUTELY NO arms, NO hands, NO limbs of any kind. Warm sunset studio glow, cheerful inviting farewell mood",
-      "characters": ["Bonbon", "馬米", "水泥車阿尼", "吊車老爺爺", "東東挖土機"],
+      "characters": ["Bonbon", "馬米", "水泥車阿尼", "吊車阿公", "東東挖土機"],
       "refPages": [17, 14, 1, 7],
-      "refPageHint": "PRIMARY: Bonbon and 馬米 HUMAN clay match portraits exactly, centered, waving goodbye (continuity with page 17). CRITICAL BUILDING: background mural must show the same completed rainbow 101 tower as reference page 1 cover / page 14 — light-blue base with readable white 101 and small blue door, green/yellow/orange/red-magenta/purple tiers, yellow star top, NOT solid green/teal. Background vehicles (continuity with page 7): 水泥車阿尼, 吊車老爺爺, 東東挖土機 each match portrait, ONE face each, NO arms NO hands NO limbs on all three. Warm inviting goodbye, invite next visit."
+      "refPageHint": "PRIMARY: Bonbon and 馬米 HUMAN clay match portraits exactly, centered, waving goodbye (continuity with page 17). CRITICAL BUILDING: background mural must show the same completed rainbow 101 tower as reference page 1 cover / page 14 — light-blue base with readable white 101 and small blue door, green/yellow/orange/red-magenta/purple tiers, yellow star top, NOT solid green/teal. Background vehicles (continuity with page 7): 水泥車阿尼, 吊車阿公, 東東挖土機 each match portrait, ONE face each, NO arms NO hands NO limbs on all three. Warm inviting goodbye, invite next visit."
     }
   ],
   "newCharacters": []

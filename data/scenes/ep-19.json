@@ -12,7 +12,7 @@
       "prompt": "Clay podcast studio: Bonbon and Mami chatting warmly, announcing today's story about Dodo the dinosaur car who gets into trouble by opening his car door carelessly, playful foreshadowing mood, cover-safe framing",
       "characters": ["Bonbon", "馬米"],
       "keepCover": true,
-      "refPageHint": "Cover page 1 — keep published cover if present. Hosts are HUMAN clay not cars. Bonbon teal hoodie yellow backpack; Mami orange headphones white tee — match portraits exactly."
+      "refPageHint": "Cover page 1 — keep published cover if present. Hosts are HUMAN clay not cars. Bonbon white tee with little red cars, yellow backpack; 馬米 orange headphones, white tee, blue jeans — match portraits exactly."
     },
     {
       "index": 2,
@@ -32,7 +32,7 @@
       "prompt": "Vintage clay popcorn food truck with a friendly grandfather vendor slowly rolling into a rainbow-colored plaza, popcorn machine popping golden kernels, striped awning fluttering, warm cream and red truck colors, cheerful morning light",
       "characters": ["老爺爺爆米花餐車"],
       "refPages": [2],
-      "refPageHint": "PRIMARY: 老爺爺爆米花餐車 match portrait — vintage popcorn food truck with grandfather vendor built into one vehicle, striped awning, cream/red clay colors. Exactly ONE face on the truck front. Do not draw a separate old man without a truck."
+      "refPageHint": "PRIMARY: 老爺爺爆米花餐車 match portrait — bright red truck, grandfather with white mustache and round glasses sitting in the cab, bumper smile, roof piled with popcorn, striped awning. Do not draw a separate old man standing beside the truck."
     },
     {
       "index": 4,

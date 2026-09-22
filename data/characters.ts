@@ -29,9 +29,9 @@ const ID_BY_CANONICAL_NAME: Record<string, string> = {
   小紅賽車: "xiao-hong",
   藍色小巴士: "lan-ba-shi",
   黃色計程車: "huang-ji-cheng",
-  怪獸卡車: "monster-truck",
+  猛猛: "monster-truck",
   東東挖土機: "dong-dong",
-  吊車老爺爺: "diao-che",
+  吊車阿公: "diao-che",
   小橘高鐵: "xiao-ju-hsr",
   小南: "xiao-nan",
   三輪車: "san-lun-che",
@@ -45,7 +45,7 @@ const ID_BY_CANONICAL_NAME: Record<string, string> = {
   小衝賽車: "xiao-chong",
   亮亮警車: "liang-liang",
   阿酷鑽地車: "a-ku",
-  嘟嘟小紅車: "dudu",
+  小紅豆金龜車: "dudu",
   消防車圈圈: "quan-quan",
   消防車點點: "dian-dian",
   老爺爺爆米花餐車: "popcorn-truck",
@@ -55,9 +55,10 @@ const ID_BY_CANONICAL_NAME: Record<string, string> = {
   海龜老師暖暖: "nuan-nuan-turtle",
   水泥車阿尼: "a-ni",
   自動駕駛計程車知知: "zhi-zhi",
-  小紅賽車的爸爸: "xiao-hong-dad",
+  紅爸: "xiao-hong-dad",
   小紅賽車年幼版: "xiao-hong-baby",
   小紅賽車的爸爸年輕版: "xiao-hong-dad-young",
+  大黃: "da-huang",
 };
 
 const VEHICLE_ZH: Record<string, string> = {
@@ -70,15 +71,14 @@ const VEHICLE_ZH: Record<string, string> = {
   minibus: "小巴士",
   taxi: "計程車",
   "monster truck": "怪獸卡車",
-  萌萌: "怪獸卡車",
   excavator: "挖土機",
   "drill excavator": "鑽地車",
   "crane truck": "吊車",
   tricycle: "三輪車",
   "food truck": "餐車",
   robot: "小機器人",
-  child: "小朋友",
-  host: "主持人",
+  child: "小男孩",
+  host: "主講者",
   drone: "無人機",
   "high speed rail": "高鐵",
   "steam train": "蒸汽火車",
@@ -87,6 +87,7 @@ const VEHICLE_ZH: Record<string, string> = {
   "camper van": "露營車",
   "police car": "警車",
   car: "小汽車",
+  beetle: "金龜車",
   "fire engine": "消防車",
   "spray truck": "消毒車",
   creature: "小怪獸",
@@ -94,6 +95,7 @@ const VEHICLE_ZH: Record<string, string> = {
   "sea turtle": "海龜",
   "cement mixer": "水泥車",
   robotaxi: "自動駕駛計程車",
+  "stake truck": "卡車",
 };
 
 /** 車種對應的手動維護集數 slug（與 firstSeen 合併）。 */
@@ -122,8 +124,8 @@ const PERSONALITY_BY_ID: Record<string, string> = {
   "duo-duo": "愛吃糖、學習好習慣",
   "xiang-xiang": "溫柔分享、把故事和祝福送給大家",
   watt: "客氣有禮、車內小幫手",
-  "bong-bong": "充滿好奇心與活力",
-  mami: "溫暖引導、和小朋友聊天",
+  "bong-bong": "活潑充滿好奇心",
+  mami: "溫暖引導與小朋友聊天",
   "xiao-fei": "樂於助人、遵守飛行安全規則",
   "xiao-ju-hsr": "溫柔說明狀況、把安全放在第一位",
   "xiao-nan": "可靠載送、溫暖陪伴轉乘",
@@ -145,13 +147,23 @@ const PERSONALITY_BY_ID: Record<string, string> = {
   "xiao-hong-dad": "溫柔耐心、陪小紅安全完成第一次穿越大山",
   "xiao-hong-baby": "小小軟軟、愛吸香草奶嘴、需要爸爸陪伴",
   "xiao-hong-dad-young": "年輕溫暖、陪 Baby 小紅慢慢練習長大",
+  "da-huang": "認真送貨、學會不用一次裝完",
 };
 
 function shortName(entry: RawCharacter, id: string): string {
+  if (
+    id === "diao-che" ||
+    id === "monster-truck" ||
+    id === "xiao-hong-dad" ||
+    id === "dudu" ||
+    id === "bong-bong" ||
+    id === "mami"
+  ) {
+    return entry.name;
+  }
   const aliases = entry.aliases ?? [];
   const preferred = aliases.find((a) => a.length <= 4 && !a.includes("車"));
   if (preferred) return preferred;
-  if (id === "monster-truck") return "怪獸卡車";
   return entry.name.replace(/車$/, "").slice(-2) || entry.name;
 }
 

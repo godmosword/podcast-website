@@ -21,7 +21,7 @@
       "prompt": "Pink donut food truck Xiangxiang parked with open side window showing shelves of pink strawberry, chocolate and rainbow sprinkle donuts, chalkboard sign reads noon sale, line of cute faceless clay cars queuing happily, festive amusement park background",
       "characters": ["香香餐車"],
       "refPages": [1],
-      "refPageHint": "PRIMARY: Xiangxiang pink donut truck match cover page 1 exactly — kawaii face, donut sign on roof, NOT zongzi. Queue of small clay cars only, each ONE face if named."
+      "refPageHint": "PRIMARY: Xiangxiang match 香香餐車 portrait — pink truck, eyes on the front face, striped awning, zongzi on the roof and in the window. Queue of small clay cars only, each ONE face if named."
     },
     {
       "index": 3,
@@ -51,7 +51,7 @@
       "prompt": "Flashback-style illustration of Aku drill excavator looking intimidating — huge dark spiral drill bit, thick black tracks, stern thick eyebrows, rarely smiling, loud rumble motion lines — small clay cars shivering and hiding, teaching why they feel scared",
       "characters": ["阿酷鑽地車"],
       "refPages": [1],
-      "refPageHint": "PRIMARY: Aku match 阿酷鑽地車 portrait and cover — yellow body, black drill, cool serious face, pink donut on side hook. NO friendly smile here. Each vehicle ONE face."
+      "refPageHint": "PRIMARY: Aku match 阿酷鑽地車 portrait and cover — yellow body, black crawler tracks, black spiral drill, cool serious face, no donut. NO friendly smile here. Each vehicle ONE face."
     },
     {
       "index": 6,
@@ -71,7 +71,7 @@
       "prompt": "Aku stopped, speaking politely with low gentle posture, one drill arm raised in courteous gesture, warning cars to stand back before loud drilling, Xiangxiang listening relieved, small cars stepping back safely",
       "characters": ["香香餐車", "阿酷鑽地車"],
       "refPages": [6],
-      "refPageHint": "PRIMARY: Aku expression softer but still cool — kind eyes not scary. Match portrait drill and colors. Xiangxiang same pink donut truck."
+      "refPageHint": "PRIMARY: Aku expression softer but still cool — kind eyes not scary. Match portrait drill and colors. Xiangxiang match 香香餐車 portrait."
     },
     {
       "index": 8,
@@ -161,7 +161,7 @@
       "prompt": "Clay podcast studio like ep-11: host Mami (馬米) warmly talking to children about not judging people by appearance after Aku's story, Bonbon (阿蹦) sitting beside her nodding, round wooden table with microphones, pink mug, ferris wheel and roller coaster playset background, gentle teaching mood",
       "characters": ["Bonbon", "馬米", "香香餐車", "阿酷鑽地車"],
       "refPages": [11, 14],
-      "refPageHint": "PRIMARY: Bonbon and Mami MUST match their canonical host portraits exactly — Bonbon teal hoodie yellow backpack red shoes; Mami pink top coral skirt long wavy brown hair. Story heroes smaller in background mural or shelf toys: pink donut Xiangxiang truck and yellow Aku drill excavator. NO random humanoid blobs. NO zongzi. Hosts are HUMAN clay children/adult, not cars."
+      "refPageHint": "PRIMARY: Bonbon and 馬米 MUST match their canonical host portraits exactly — Bonbon white tee with little red cars, yellow backpack, navy shorts, white sneakers; 馬米 orange headphones, white tee, blue jeans. Story heroes smaller in background mural or shelf toys: match 香香餐車 and 阿酷鑽地車 portraits. NO random humanoid blobs. Hosts are HUMAN clay children/adult, not cars."
     },
     {
       "index": 17,

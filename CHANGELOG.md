@@ -39,6 +39,26 @@
 
 ### Changed
 
+- **阿蹦圖鑑更名 Bonbon、定裝換成附圖**：`public/characters/Bonbon.jpg` 改為棕捲髮、白底紅車 T 恤、黃背包的小男孩。卡片顯示 Bonbon、小男孩，描述為活潑充滿好奇心。未重繪已出圖、未改 Apple sync workflow。
+- **媽咪圖鑑更名馬米、定裝換成附圖**：`public/characters/馬米.jpg` 改為橘色耳機、白 T 恤、牛仔褲、坐在麥克風前揮手的那張。卡片顯示馬米、主講者，描述為溫暖引導與小朋友聊天。未重繪已出圖、未改 Apple sync workflow。
+- **無人機定裝換成附圖**：`public/characters/小飛.jpg` 改為奶油方身、黃閃電、四軸螺旋槳的那張。圖鑑仍顯示無人機。未重繪已出圖、未改 Apple sync workflow。
+- **知知自動駕駛計程車定裝換成附圖**：`public/characters/自動駕駛計程車知知.jpg` 改為白色車身、保險桿藍圈眼睛、車頂感測器的那張。名字仍是知知。未重繪已出圖、未改 Apple sync workflow。
+- **恐龍車多多定裝換成附圖**：`public/characters/恐龍車多多.jpg` 改為綠色恐龍車、張大嘴露出黃牙、旁邊立著藍色牙刷的那張。名字仍是多多。未重繪已出圖與地圖漫遊圖、未改 Apple sync workflow。
+- **噴噴消毒車定裝換成附圖**：`public/characters/消毒車噴噴.jpg` 改為奶油色車頭、皺眉藍窗、銀色水箱噴霧的那張。名字仍是噴噴。未重繪已出圖、未改 Apple sync workflow。
+- **香香餐車定裝換成附圖**：`public/characters/香香餐車.jpg` 改為粉色車身、車頂兩顆笑臉粽子、條紋遮陽篷的那張。名字仍是香香。未重繪已出圖、未改 Apple sync workflow。
+- **老爺爺爆米花餐車定裝換成附圖**：`public/characters/老爺爺爆米花餐車.jpg` 改為紅色車身、白鬍子眼鏡老爺爺坐在駕駛座、車頂堆滿爆米花的那張。圖鑑仍顯示花餐。未重繪已出圖、未改 Apple sync workflow。
+- **黃色計程車定裝換成附圖**：`public/characters/黃色計程車.jpg` 改為車頂 TAXI 燈、藍窗眉毛大眼、黑白棋盤格側條的那張。圖鑑仍顯示計程。未改知知、未重繪已出圖、未改 Apple sync workflow。
+- **小藍巴士定裝換成附圖**：`public/characters/小藍巴士.jpg` 改為天藍車身、車窗有眉毛大眼、奶油保險桿的那張。正式名稱仍是藍色小巴士，圖鑑仍顯示小巴士。未重繪已出圖、未改 Apple sync workflow。
+- **小柔露營車定裝換成附圖**：`public/characters/小柔露營車.jpg` 改為粉色圓車身、車頭愛心、條紋遮陽篷與花箱的那張。名字仍是小柔。未重繪已出圖、未改 Apple sync workflow。
+- **圈圈消防車定裝換成附圖**：`public/characters/消防車圈圈.jpg` 改為正面藍窗笑臉、火焰徽章、灰色雲梯的那張。名字仍是圈圈。未改點點、未重繪已出圖、未改 Apple sync workflow。
+- **點點消防車定裝換成附圖**：`public/characters/消防車點點.jpg` 改為藍窗笑臉、火焰徽章、灰色雲梯的那張。名字仍是點點。未改圈圈、未重繪已出圖、未改 Apple sync workflow。
+- **小衝賽車定裝換成附圖**：`public/characters/小衝賽車.jpg` 改為黃色雙黑條、車頭大眼、黑黃尾翼的那張。名字仍是小衝。未重繪已出圖、未改 Apple sync workflow。
+- **嘟嘟定裝換成附圖、正式名稱改為小紅豆金龜車**：`public/characters/小紅豆金龜車.jpg` 取代舊的嘟嘟小紅車定裝（圓潤紅金龜車、車頂藍窗、車頭大眼）。圖鑑顯示小紅豆金龜車、車種金龜車。舊名嘟嘟留在別名。首頁角落六張表情圖未改。未改逐句字幕、未改 Apple sync workflow。
+- **小紅爸爸定裝換成附圖、正式名稱改為紅爸**：`public/characters/紅爸.jpg` 取代舊定裝（紅色賽車、白條紋、車門號碼 1、翹鬍子）。圖鑑顯示紅爸。年輕版爸爸與年幼小紅未改。未改逐句字幕、未重繪已出圖、未改 Apple sync workflow。
+- **萌萌定裝換成附圖、正式名稱改為猛猛**：`public/characters/猛猛.jpg` 取代舊的怪獸卡車定裝。圖鑑顯示猛猛、車種仍是怪獸卡車；ep-8／ep-12 幕標改猛猛。舊名萌萌留在別名。未改逐句字幕、未重繪地圖漫遊圖、未改 Apple sync workflow。
+- **阿酷鑽地車定裝換成附圖**：`public/characters/阿酷鑽地車.jpg` 改為黃色履帶、螺旋鑽頭、皺眉的那張。名冊描述拿掉側邊甜甜圈，與新定裝一致。未重繪地圖漫遊圖、未改 Apple sync workflow。
+- **新增大黃定裝**：黃色柵欄車斗卡車 `public/characters/大黃.jpg`，名冊正式名稱大黃，出場故事 ep-29。未改 Apple sync workflow。
+- **吊車定裝改為附圖、正式名稱改為吊車阿公**：`public/characters/吊車阿公.jpg` 取代舊定裝；圖鑑、ep-5 幕標與家長 FAQ 改顯示吊車阿公。舊名留在別名。未改逐句字幕、未改 Apple sync workflow。
 - **ep-31 字幕校對並 `--mark`**：《快樂烤肉的中秋節》181 句。撲撲豬→噗噗豬、挖土雞／咚咚→挖土機東東、小地→草地、津津口→津津有味，並修正烤得／吃得／傳得。未改幕級 `captions`、未改 Apple sync workflow。
 - **ep-1～ep-10 字幕校對並 `--mark`**：補舊集校對閘門（先前只有 ep-11 起有標記）。修專名／同音誤聽（小助手沃特、牙菌斑、鈴鈴清潔車、划龍舟、香香餐車等），刪 ep-3／ep-6 重複句。未改幕級 `captions`、未改 Apple sync workflow。
 - **同步通知整成一次：** 新集預設只發「待生圖」Issue。看門狗在第一次 sync／合入等待窗內（預設 8h，即使 yaml `STALE_HOURS=3`）不開 RSS stale。若已開 stale，`notify-live` 把同一張改成 checklist（不加第二次 @mention），不再另開第二張。`sync-job-failure` 仍獨立。**未改** Apple sync／watchdog workflow YAML。

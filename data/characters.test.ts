@@ -96,6 +96,11 @@ describe("getCharactersForStory", () => {
     expect(ids).toContain("xiao-hong");
   });
 
+  it("ep-29 含大黃", () => {
+    const ids = getCharactersForStory("ep-29").map((c) => c.id);
+    expect(ids).toContain("da-huang");
+  });
+
   it("ep-24 含小紅賽車的爸爸與小紅賽車", () => {
     const ids = getCharactersForStory("ep-24").map((c) => c.id);
     expect(ids).toContain("xiao-hong-dad");
@@ -111,9 +116,32 @@ describe("getCharacterName", () => {
     expect(getCharacterName("a-ku")).toBe("阿酷鑽地車");
     expect(getCharacterName("a-ni")).toBe("水泥車阿尼");
     expect(getCharacterName("zhi-zhi")).toBe("自動駕駛計程車知知");
-    expect(getCharacterName("xiao-hong-dad")).toBe("小紅賽車的爸爸");
+    expect(getCharacterName("dudu")).toBe("小紅豆金龜車");
+    expect(getCharacters().find((c) => c.id === "dudu")?.name).toBe("小紅豆金龜車");
+    expect(getCharacters().find((c) => c.id === "dudu")?.vehicle).toBe("金龜車");
+    expect(getCharacterName("xiao-hong-dad")).toBe("紅爸");
+    expect(getCharacters().find((c) => c.id === "xiao-hong-dad")?.name).toBe("紅爸");
     expect(getCharacterName("xiao-hong-baby")).toBe("小紅賽車年幼版");
     expect(getCharacterName("xiao-hong-dad-young")).toBe("小紅賽車的爸爸年輕版");
+    expect(getCharacterName("diao-che")).toBe("吊車阿公");
+    expect(getCharacters().find((c) => c.id === "diao-che")?.name).toBe("吊車阿公");
+    expect(getCharacterName("da-huang")).toBe("大黃");
+    expect(getCharacters().find((c) => c.id === "da-huang")?.name).toBe("大黃");
+    expect(getCharacterName("monster-truck")).toBe("猛猛");
+    expect(getCharacters().find((c) => c.id === "monster-truck")?.name).toBe("猛猛");
+    expect(getCharacters().find((c) => c.id === "monster-truck")?.vehicle).toBe(
+      "怪獸卡車",
+    );
+    expect(getCharacters().find((c) => c.id === "bong-bong")?.name).toBe("Bonbon");
+    expect(getCharacters().find((c) => c.id === "bong-bong")?.vehicle).toBe("小男孩");
+    expect(getCharacters().find((c) => c.id === "bong-bong")?.personality).toBe(
+      "活潑充滿好奇心",
+    );
+    expect(getCharacters().find((c) => c.id === "mami")?.name).toBe("馬米");
+    expect(getCharacters().find((c) => c.id === "mami")?.vehicle).toBe("主講者");
+    expect(getCharacters().find((c) => c.id === "mami")?.personality).toBe(
+      "溫暖引導與小朋友聊天",
+    );
   });
 
   it("查無角色時回傳 null", () => {

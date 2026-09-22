@@ -68,7 +68,7 @@ describe("小紅賽車角色設定書 SSOT", () => {
 
   it("三個對 ep-23／ep-24 已出圖的連貫性鎖沒有被動到", () => {
     // 這三個條目明文寫死臉部配置以對齊已出圖的畫面；canon 裁決後更不得改動。
-    expect(descOf("小紅賽車的爸爸")).toContain("eyes ONLY on the windshield");
+    expect(descOf("紅爸")).toContain("eyes ONLY on the windshield");
     expect(descOf("小紅賽車年幼版")).toContain("eyes are NOT headlights on the bumper");
     expect(descOf("小紅賽車的爸爸年輕版")).toContain("copy reference dad 1:1");
   });
