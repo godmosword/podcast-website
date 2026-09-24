@@ -53,19 +53,20 @@ describe("agent docs routing contract", () => {
       "gpt-5.6-luna-max-fast",
       "composer-2.5-fast",
       "claude-opus-5-thinking-high",
-      "gpt-5.6-luna",
-      "grok-4.6",
+      "codex exec -m gpt-6-luna -s read-only",
+      "--model grok-4.7-high-fast",
+      "grok -m grok-4.7 --permission-mode plan",
     ]) {
       expect(workflow, `workflow 須含 ${slug}`).toContain(slug);
     }
 
     for (const file of ROUTING_FILES) {
       const text = activeSection(file);
-      expect(text, `${file} 不得使用 Fable`).not.toMatch(
-        /Task[^\n]{0,120}claude-fable-5|model:\s*["']claude-fable-5/i,
-      );
       expect(text, `${file} 不得使用淘汰 slug`).not.toMatch(
         /grok-build-0\.1|grok-4\.3|cursor-grok-4\.5-medium-fast|grok-4\.5-fast-(?:medium|high)/,
+      );
+      expect(text, `${file} 不得用舊 Claude Code CLI 審查路由`).not.toMatch(
+        /codex exec -m (?:openai\/)?gpt-5|-m openai\/gpt-6|grok -m grok-4\.6|--model cursor-grok-4\.5-high-fast/,
       );
     }
   });
@@ -114,7 +115,7 @@ describe("agent docs routing contract", () => {
     }
   });
 
-  it("AUQ、Fable 與付費生圖安全防線仍存在", () => {
+  it("AUQ 與付費生圖安全防線仍存在", () => {
     const auq = readRepoFile(".cursor/rules/no-ask-user-questions.mdc");
     expect(frontmatterValue(auq, "alwaysApply")).toBe("true");
     for (const term of ["AskQuestion", "ask_user_questions", "get_answered_questions"]) {
@@ -125,7 +126,7 @@ describe("agent docs routing contract", () => {
     expect(hooks).toContain("beforeMCPExecution");
     expect(hooks).toContain("preToolUse");
     expect(hooks).toContain("block-auq.mjs");
-    expect(hooks).toContain("block-fable.mjs");
+    expect(hooks).not.toContain("block-fable.mjs");
 
     const podcast = readRepoFile(PODCAST_RULE);
     expect(podcast).toContain("禁止 AskQuestion／AUQ");

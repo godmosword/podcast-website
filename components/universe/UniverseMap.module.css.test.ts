@@ -20,7 +20,7 @@ describe("UniverseMap.module.css mobile chrome", () => {
 });
 
 /** 註解會提到「舊值不可再用」的 hex／關鍵字，negative 斷言必須先剝掉，
- * 否則說明文字本身會讓測試失敗（同 `.cursor/hooks/block-fable.mjs` 舊坑）。 */
+ * 否則說明文字本身會讓測試失敗（已移除的 block-fable hook 曾踩過同一個坑）。 */
 const stripComments = (input: string) => input.replace(/\/\*[\s\S]*?\*\//g, "");
 
 /** 首訪底部提示（2A）：screen-space 定位、pointer-events、不蓋 MapControls。 */

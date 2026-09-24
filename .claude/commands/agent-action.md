@@ -10,13 +10,13 @@ description: podcast-website Agent Action；依 canonical workflow 風險分級�
 
 - L0：Bash／Leader 直接執行最小命令。
 - L1：單一執行者；路徑不明才先只讀 explore。
-- L2：`cursor-agent --model cursor-grok-4.5-high-fast` 產生建議，Leader 落檔；必要時配一次獨立 readonly Codex 工程審。
-- L3／Protected／schema／sync／發布／付費 API：Leader 或 Opus 實作，工程、對抗、設計三審。
+- L2：Leader 實作；配一次獨立 readonly Codex 工程審，外部模型或安全風險再加 cursor-agent 對抗審。
+- L3／Protected／schema／sync／發布／付費 API：Leader 實作，工程、對抗、設計三審。
 - 同一檔案禁止多 agent 同時修改；顧問建議由 Leader 落檔；中文 Protected path 依 Domain 使用 Sonnet。
 
-每個子任務 prompt 必須包含 Goal、Context paths、Constraints、Do NOT、Verification、Deliverable。禁止派工 Fable 5（`claude-fable-5-*`）；hook `.cursor/hooks/block-fable.mjs` 仍硬擋。
+每個子任務 prompt 必須包含 Goal、Context paths、Constraints、Do NOT、Verification、Deliverable；送給 OpenAI、xAI 的 prompt 不得含個資、使用者資料或金鑰。
 
-Claude Code 顧問適配：工程審使用 `codex exec -m gpt-5.6-luna -c model_reasoning_effort="medium" "<prompt>" </dev/null`；Grok slug 拒收或認證失敗時依 active 表使用 `grok -m grok-4.6` 備援；設計審使用 Agent tool `model: "opus"`，全部 readonly。
+Claude Code 顧問適配：工程審使用 `codex exec -m gpt-6-luna -s read-only -c model_reasoning_effort="medium" "<prompt>" </dev/null`；對抗審使用 `cursor-agent -p --trust --mode ask --model grok-4.7-high-fast "<prompt>"`，失敗時備援 `grok -m grok-4.7 --permission-mode plan -p "<prompt>"`；設計審使用 Agent tool `model: "opus"`（Opus 5.5），全部 readonly。
 
 ## Verify、收尾與 Ship
 

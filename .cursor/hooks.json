@@ -12,17 +12,6 @@
         "command": ".cursor/hooks/block-auq.mjs",
         "matcher": "AskQuestion|CallMcpTool",
         "failClosed": true
-      },
-      {
-        "command": ".cursor/hooks/block-fable.mjs",
-        "matcher": "Task|CallDynamicTool|CallMcpTool",
-        "failClosed": true
-      }
-    ],
-    "subagentStart": [
-      {
-        "command": ".cursor/hooks/block-fable.mjs",
-        "failClosed": true
       }
     ]
   }

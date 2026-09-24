@@ -15,8 +15,8 @@
 | 模型／用途 | 探活與缺席處理 |
 |------|------|
 | GPT 5.6 Luna MAX fast（Cursor Task） | 無 CLI 探活；實際首次派最小 readonly Task，拒收即記錄並標缺席 |
-| GPT 5.6 Luna（Claude Code CLI） | `codex exec -m gpt-5.6-luna -c model_reasoning_effort="low" "回覆 OK" </dev/null`；檢查 stdout 與 stderr |
-| Cursor Grok Leader／對抗審 | `cursor-agent -p --model cursor-grok-4.5-high-fast --mode ask "回覆 OK"`；拒收或認證失敗依環境使用 `grok -p "回覆 OK" -m grok-4.6 --effort medium --no-plan` |
+| GPT 6 Luna（Claude Code CLI 工程審） | `codex exec -m gpt-6-luna -s read-only -c model_reasoning_effort="medium" "Reply with exactly: OK" </dev/null`；需 codex-cli ≥ 0.156（舊版報 `not supported`／`failed to load models cache`）；模型名不加 `openai/` |
+| Grok 4.7（Claude Code CLI 對抗審） | `cursor-agent -p --trust --mode ask --model grok-4.7-high-fast "Reply with exactly: OK"`（先 `cursor-agent login`；不用 `--yolo`／`-f`）；失敗改 `grok -m grok-4.7 --permission-mode plan -p "Reply with exactly: OK"`（可用模型以 `grok models` 核對） |
 | Composer 2.5（Cursor Task） | 首次使用派最小 readonly Task 或 `cursor-agent -p --model composer-2.5-fast --mode ask "回覆 OK"`；拒收即對抗審缺席，L1/L2 由 Leader 接手 |
 | Opus 設計審 | Agent tool `model: "opus"` 或 Cursor `claude-opus-5-thinking-high`；失敗記錄後依分級降級 |
 
@@ -27,8 +27,9 @@
 | 模型 | 狀態 | 處理 |
 |------|------|------|
 | `cursor-grok-4.5-high-fast` | 依最近 30 天記錄判定 | 首次使用先探活；連續未解除失敗則缺席 |
-| `grok-4.6` | 備援路徑 | 只有 Cursor slug 拒收或認證失敗才使用 |
-| `gpt-5.6-luna` | Claude Code CLI | 使用 `</dev/null`，檢查內容與 stderr |
+| `grok-4.7-high-fast` | Claude Code CLI 對抗審（cursor-agent） | 2026-09-24 探活 OK |
+| `grok-4.7` | 備援路徑（grok CLI） | 只有 cursor-agent 失敗才使用 |
+| `gpt-6-luna` | Claude Code CLI 工程審 | 2026-09-24 探活 OK（codex-cli 0.156.1）；必加 `-s read-only` 與 `</dev/null` |
 | `gpt-5.6-luna-max-fast` | Cursor Task | 只在 L2/L3 或實際工程審需要時派 |
 | `composer-2.5-fast` | Cursor Task | 只在 L2/L3 對抗審或實作需要時派 |
 | `claude-opus-5-thinking-high` | Cursor 設計審 | 只有 UI 風險或 L3 才派 |
@@ -39,15 +40,11 @@
 
 | 日期 | 命令／模型 | 症狀 | 處置與是否解除 |
 |------|------------|------|----------------|
-| 2026-09-15 | `codex exec -m gpt-5.6-luna`（codex-cli 0.144.5） | 啟動即 `Error loading config.toml: invalid type: map, expected a boolean in features`——`~/.codex/config.toml` 的 `[features.context_management]` 子表是較新 Codex 寫入的，0.144.5 不認得 | 非模型缺席，是本機設定。處置：以 `CODEX_HOME=<臨時目錄>`（複製 `auth.json` ＋ 去掉該子表的 `config.toml`）執行即恢復，探活與工程審皆正常；不改使用者原檔。CLI 升級後可解除 |
 | 2026-09-16 | `codex exec -m gpt-5.6-luna` readonly 工程審（美術審 Batch B diff，560 行） | 兩次皆超時（600s／480s）未回答：第一次跑去 `rg` 全 repo 撞 `docs/qa/mobile-performance/latest.json`；第二次已限定檔案與 8 次工具呼叫仍在 cat 檔案時逾時 | 模型可探活（同日 Batch A 前已正常審過）、屬單次任務失敗。處置：Leader 自審四項風險點（play-size／controls-block 對齊、_blank rel、multiply 在 preserve-3d 容器、about scale 圖）後入庫；下次工程審先縮 diff 或拆檔提交 |
-| 2026-09-05 | `cursor-agent`／`cursor-grok-4.5-high-fast` + `grok` 備援 | 主路徑與 CLI 備援皆認證失敗；同一模型近期已有多筆未解除記錄 | 標「對抗審缺席／對抗性降級」；恢復前不重試，需重新登入或設定 API key |
-| 2026-08-29 | `cursor-agent`／`cursor-grok-4.5-high-fast` + `grok` 備援 | 主路徑與 CLI 備援認證失敗 | 與 2026-09-05 合併計入缺席判定；保留 Composer／Leader 替代路徑 |
 
 新增案例時沿用上方欄位；解除後移至年度 archive 並標記解除日期。
 
 ## 相關安全案例
 
 - AUQ 阻塞防護：`.cursor/hooks/block-auq.mjs` 與 [`no-ask-user-questions.mdc`](../.cursor/rules/no-ask-user-questions.mdc)。
-- Fable 5 阻擋：`.cursor/hooks/block-fable.mjs`。
 - 付費生圖重抽紅線：[`podcast-image-cost.mdc`](../.cursor/rules/podcast-image-cost.mdc) 與 [`AGENT-DOMAIN.md`](AGENT-DOMAIN.md)。

@@ -44,9 +44,8 @@ Leader 綜合實際審查意見，標記 Approved 或待決策，列出模型路
 ## 模型與安全
 
 - Cursor Leader：`cursor-grok-4.5-high-fast`
-- Claude Code CLI 工程審：`codex exec -m gpt-5.6-luna`
+- Claude Code CLI 工程審：`codex exec -m gpt-6-luna -s read-only`
 - Cursor 工程審／Plan 細節：`gpt-5.6-luna-max-fast`
 - L1/L2 實作與對抗審：`composer-2.5-fast`
 - 設計審：`claude-opus-5-thinking-high`
-- 禁止 Fable 5（`claude-fable-5-*`）；hook `.cursor/hooks/block-fable.mjs` 仍硬擋。
 - 不使用 workflow SSOT 以外的舊路由；模型 slug 以 workflow SSOT 為準。

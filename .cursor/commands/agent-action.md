@@ -12,7 +12,7 @@
 - L3／Protected／schema／sync／發布／付費 API：Leader 或 Opus 實作，工程、對抗、設計三審。
 - 同一檔案禁止多 agent 同時修改；顧問建議由實作路徑或 Leader 落檔。
 
-每個子任務 prompt 必須包含 Goal、Context paths、Constraints、Do NOT、Verification、Deliverable。禁止派工 Fable 5（`claude-fable-5-*`）；hook `.cursor/hooks/block-fable.mjs` 仍硬擋。
+每個子任務 prompt 必須包含 Goal、Context paths、Constraints、Do NOT、Verification、Deliverable。
 
 ## Verify
 

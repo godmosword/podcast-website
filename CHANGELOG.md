@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **Agent 審查模型更新**：Claude Code 工程審改 Codex `gpt-6-luna`（`-s read-only`，需 codex-cli ≥ 0.156）、對抗審改 `cursor-agent` `grok-4.7-high-fast`（備援 grok CLI `grok-4.7`）、設計審 Opus 5.5；審查一律唯讀、送外部模型的 prompt 不含個資。移除 Fable 5 禁令與 `.cursor/hooks/block-fable.mjs`。Cursor Task slug 未改。
+
 ### Added
 
 - **Landing 可重回 3D 開場**：首段次要連結「看小紅開進遊樂園」（真 `<a href="/intro">`）。有 JS 時重開同頁覆蓋層、網址留在 `/`、頂欄仍可點；無 JS、修飾鍵或 `NEXT_PUBLIC_HERO_3D=0` 走進 `/intro`。不是自動導向，也不清 session 標記——重新整理仍不會自動再播。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。

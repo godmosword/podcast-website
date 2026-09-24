@@ -25,8 +25,7 @@ alwaysApply: false
 - Plan 細節與工程審：`gpt-5.6-luna-max-fast`
 - L1/L2 實作與對抗審：`composer-2.5-fast`
 - 設計審：`claude-opus-5-thinking-high`
-- Claude Code 工程 CLI：`codex exec -m gpt-5.6-luna`；Grok CLI 備援：`grok-4.6`
-- 禁止派工 Fable 5（`claude-fable-5-*`）；由 `.cursor/hooks/block-fable.mjs` 硬擋。
+- Claude Code 工程 CLI：`codex exec -m gpt-6-luna -s read-only`；對抗審 `cursor-agent --model grok-4.7-high-fast`；Grok CLI 備援：`grok-4.7`
 - 顧問一律 readonly；禁止多 agent 同時修改同一檔；commit／push 只由 Leader 在使用者明確要求時執行。
 
 ## 審查與完成

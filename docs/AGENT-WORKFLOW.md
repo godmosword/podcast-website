@@ -46,13 +46,13 @@
 
 | 用途 | Cursor／Task slug | Claude Code／CLI |
 |------|-------------------|------------------|
-| Leader 編排與整合 | `cursor-grok-4.5-high-fast` | 當前 session Leader |
-| Plan 細節或工程審 | `gpt-5.6-luna-max-fast` | `codex exec -m gpt-5.6-luna` |
-| L1/L2 實作或對抗審 | `composer-2.5-fast` | `cursor-agent --model cursor-grok-4.5-high-fast`；備援 `grok -m grok-4.6` |
-| 設計／UX 審 | `claude-opus-5-thinking-high` | Agent tool `model: "opus"` |
+| Leader 編排與整合 | `cursor-grok-4.5-high-fast` | 當前 Claude Code session（Claude Opus 5.5）；規劃、實作、所有寫檔 |
+| Plan 細節或工程審 | `gpt-5.6-luna-max-fast` | `codex exec -m gpt-6-luna -s read-only -c model_reasoning_effort="medium" "<prompt>" </dev/null` |
+| L1/L2 實作或對抗審 | `composer-2.5-fast` | 對抗審 `cursor-agent -p --trust --mode ask --model grok-4.7-high-fast "<prompt>"`；cursor-agent 失敗時備援 `grok -m grok-4.7 --permission-mode plan -p "<prompt>"` |
+| 設計／UX 審 | `claude-opus-5-thinking-high` | Agent tool `model: "opus"`（Opus 5.5；effort high 為目標，工具無法指定） |
 | 命令與本機驗證 | `shell` | Bash |
 
-禁止使用 Fable 5（`claude-fable-5-*`）作為任何 active 路由；Cursor hook [`block-fable.mjs`](../.cursor/hooks/block-fable.mjs) 仍硬擋。模型 slug 變更時先更新本表，再同步 adapter 與契約測試。
+Claude Code 審查者一律 readonly（Codex 必加 `-s read-only`；cursor-agent 用 `--mode ask`，不用 `--yolo`／`-f`），由 Leader 落檔；同一檔案不讓多個 agent 同時修改。送給外部模型（OpenAI、xAI）的 prompt 不得含個資、使用者資料或金鑰。Codex 模型名不加 `openai/` 前綴。模型 slug 變更時先更新本表，再同步 adapter 與契約測試。
 
 ## `/agent-plan` 合約
 
@@ -197,4 +197,5 @@
 
 | 日期 | 說明 |
 |------|------|
+| 2026-09-24 | Claude Code 審查路由改為 Codex `gpt-6-luna`（`-s read-only`）、cursor-agent `grok-4.7-high-fast`、備援 grok CLI `grok-4.7`、設計審 Opus 5.5；審查一律 readonly、外部 prompt 不含個資；移除 Fable 5 禁用條目與 Cursor `block-fable` hook |
 | 2026-09-06 | 依 Astra 成本審計改為風險分級、按需 Bootstrap、短規則與 active/archive 失敗記錄；保留 AUQ、Fable、付費生圖與 Protected path 紅線 |

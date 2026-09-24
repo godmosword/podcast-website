@@ -20,14 +20,14 @@ Plan 必須包含 Goal、Scope／Out of scope、Task DAG、Files、Verification�
 
 Claude Code 模型適配：
 
-- Leader：當前 Claude Code session，通常為 Opus。
-- 工程審：`codex exec -m gpt-5.6-luna -c model_reasoning_effort="medium" "<prompt>" </dev/null`。
-- 對抗審：`cursor-agent --model cursor-grok-4.5-high-fast`；拒收或認證失敗時依 active 表使用 `grok -m grok-4.6` 備援。
-- 設計審：Agent tool `model: "opus"`，readonly。
+- Leader：當前 Claude Code session（Claude Opus 5.5）；規劃、實作與所有寫檔。
+- 工程審：`codex exec -m gpt-6-luna -s read-only -c model_reasoning_effort="medium" "<prompt>" </dev/null`。
+- 對抗審：`cursor-agent -p --trust --mode ask --model grok-4.7-high-fast "<prompt>"`；cursor-agent 失敗時備援 `grok -m grok-4.7 --permission-mode plan -p "<prompt>"`。
+- 設計審：Agent tool `model: "opus"`（Opus 5.5），readonly。
+- 審查者一律 readonly，由 Leader 落檔；送給 OpenAI、xAI 的 prompt 不得含個資、使用者資料或金鑰。
 
 Leader 綜合實際審查意見，標記 Approved 或待決策，列出最小驗證命令並提示 `/agent-action`。收尾只列實際派出的角色；L2 不建立固定空白委員表，L3 列所有實際委員和缺席原因。
 
 ## 禁止
 
-- 禁止 Fable 5（`claude-fable-5-*`）；hook `.cursor/hooks/block-fable.mjs` 仍硬擋。
 - 禁止使用過期模型 slug 或把 Cursor Task slug 傳給 `codex exec`。
