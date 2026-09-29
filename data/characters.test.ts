@@ -117,7 +117,7 @@ describe("getCharacterName", () => {
     expect(getCharacterName("a-ni")).toBe("水泥車阿尼");
     expect(getCharacterName("zhi-zhi")).toBe("自動駕駛計程車知知");
     expect(getCharacterName("dudu")).toBe("小紅豆金龜車");
-    expect(getCharacters().find((c) => c.id === "dudu")?.name).toBe("小紅豆金龜車");
+    expect(getCharacters().find((c) => c.id === "dudu")?.name).toBe("小紅豆汽車");
     expect(getCharacters().find((c) => c.id === "dudu")?.vehicle).toBe("金龜車");
     expect(getCharacterName("xiao-hong-dad")).toBe("紅爸");
     expect(getCharacters().find((c) => c.id === "xiao-hong-dad")?.name).toBe("紅爸");
@@ -142,6 +142,33 @@ describe("getCharacterName", () => {
     expect(getCharacters().find((c) => c.id === "mami")?.personality).toBe(
       "溫暖引導與小朋友聊天",
     );
+  });
+
+  it("圖鑑卡片使用指定短名與描述", () => {
+    const byId = new Map(getCharacters().map((character) => [character.id, character]));
+    expect(byId.get("lan-ba-shi")).toMatchObject({
+      name: "小藍",
+      vehicle: "巴士",
+      personality: "溫柔安慰、鼓勵朋友完成比賽",
+    });
+    expect(byId.get("huang-ji-cheng")).toMatchObject({
+      name: "阿樂",
+      vehicle: "計程車",
+      personality: "開朗努力、贏了也會感謝對手",
+    });
+    expect(byId.get("popcorn-truck")).toMatchObject({
+      name: "爆米花老爺爺",
+      vehicle: "餐車",
+    });
+    expect(byId.get("pu-pu-pig")).toMatchObject({
+      name: "噗噗豬",
+      vehicle: "遊園車",
+    });
+    expect(byId.get("nuan-nuan-turtle")).toMatchObject({
+      name: "暖暖老師",
+      vehicle: "海龜",
+      personality: "擅長游泳、很有耐心的教小朋友",
+    });
   });
 
   it("查無角色時回傳 null", () => {

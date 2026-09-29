@@ -73,7 +73,8 @@
     "aliases": [
       "藍色的小巴士",
       "小巴士",
-      "小藍巴士"
+      "小藍巴士",
+      "小藍"
     ],
     "vehicle": "minibus",
     "desc": "a cute claymation friendly sky-blue minibus named the blue minibus (藍色小巴士), rounded boxy body, light-blue windshield with eyebrows and big round eyes on the glass, a gentle smile on the front panel below the glass, yellow round headlights, cream bumper with small orange indicator lights, cream lower trim, blue side mirrors, a row of dark-framed side windows, a small blue roof dome, black wheels. No name text. No arms, no hands, no human limbs",
@@ -84,7 +85,8 @@
     "name": "黃色計程車",
     "aliases": [
       "黃色的計程車",
-      "計程車"
+      "計程車",
+      "阿樂"
     ],
     "vehicle": "taxi",
     "desc": "a cute claymation bright yellow taxi named the yellow taxi (黃色計程車), light-blue windshield with eyebrows and big round eyes on the glass, a wide smile on the front panel below the glass, round headlights with yellow centers, small orange indicator lights, a grey bumper, a yellow roof sign reading TAXI in black letters, a black-and-white checker stripe along the side, blue side windows, a yellow side mirror, black wheels with yellow hubs. No arms, no hands, no human limbs. Distinct from the white self-driving taxi 知知",
@@ -298,7 +300,8 @@
       "金龜車小紅豆",
       "小紅車",
       "嘟嘟車",
-      "小紅豆"
+      "小紅豆",
+      "小紅豆汽車"
     ],
     "vehicle": "beetle",
     "desc": "a cute claymation rounded red beetle car named Xiaohongdou (小紅豆金龜車), compact soft red body, a light-blue windshield on the roof with no eyes on the glass, big round googly eyes with white rings and black pupils on the front face, a simple black smile, yellow round headlights at the front corners and yellow cheek dots, four black wheels with white hubs. No racing number, no stripes, no spoiler, no mustache, no pacifier. No arms, no hands, no human limbs. Distinct from the numbered race car 小紅賽車 and from the mustache dad 紅爸",

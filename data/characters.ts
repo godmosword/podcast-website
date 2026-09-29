@@ -68,7 +68,7 @@ const VEHICLE_ZH: Record<string, string> = {
   "race car": "賽車",
   "baby race car": "Baby 賽車",
   "young race car": "年輕賽車",
-  minibus: "小巴士",
+  minibus: "巴士",
   taxi: "計程車",
   "monster truck": "怪獸卡車",
   excavator: "挖土機",
@@ -141,7 +141,7 @@ const PERSONALITY_BY_ID: Record<string, string> = {
   "pen-pen": "驕傲愛逞強、後來學會酒精不能取代洗手",
   "dirty-germs": "調皮躲藏、怕肥皂和清水",
   "pu-pu-pig": "歡樂開朗、愛帶大家認識新地方",
-  "nuan-nuan-turtle": "溫柔耐心、教小朋友慢慢認識新朋友",
+  "nuan-nuan-turtle": "擅長游泳、很有耐心的教小朋友",
   "a-ni": "認真負責、默默把地基打穩",
   "zhi-zhi": "溫柔提醒、陪大家平安到達想去的地方",
   "xiao-hong-dad": "溫柔耐心、陪小紅安全完成第一次穿越大山",
@@ -150,12 +150,23 @@ const PERSONALITY_BY_ID: Record<string, string> = {
   "da-huang": "認真送貨、學會不用一次裝完",
 };
 
+/** 圖鑑卡片名稱。短於別名推斷、或和正式名稱不同時寫在這裡。 */
+const CATALOG_NAME_BY_ID: Record<string, string> = {
+  "lan-ba-shi": "小藍",
+  "huang-ji-cheng": "阿樂",
+  dudu: "小紅豆汽車",
+  "popcorn-truck": "爆米花老爺爺",
+  "pu-pu-pig": "噗噗豬",
+  "nuan-nuan-turtle": "暖暖老師",
+};
+
 function shortName(entry: RawCharacter, id: string): string {
+  const catalogName = CATALOG_NAME_BY_ID[id];
+  if (catalogName) return catalogName;
   if (
     id === "diao-che" ||
     id === "monster-truck" ||
     id === "xiao-hong-dad" ||
-    id === "dudu" ||
     id === "bong-bong" ||
     id === "mami"
   ) {
