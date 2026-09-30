@@ -1,0 +1,197 @@
+.article {
+  width: min(40rem, 100%);
+  margin-inline: auto;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-bottom: var(--space-4);
+  padding: 8px 16px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-pill);
+  background: var(--surface-elevated);
+  color: var(--ink-soft);
+  font-size: var(--fs-control);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.back:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .back:hover {
+    color: var(--ink);
+    background: var(--bg-2);
+  }
+}
+
+.header {
+  margin-bottom: var(--space-6);
+}
+
+.title {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-h1);
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.date {
+  display: block;
+  margin-top: 8px;
+  color: var(--warm-highlight);
+  font-size: var(--fs-meta);
+  font-weight: 800;
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  margin: 0 0 var(--space-6);
+  border-radius: var(--radius-md);
+  background: var(--warm-cover-bg);
+}
+
+.hero img {
+  object-fit: cover;
+}
+
+.body {
+  color: var(--ink);
+  font-size: 1.125rem;
+  line-height: 1.9;
+}
+
+.body p,
+.body li {
+  margin: 0.2em 0 0;
+}
+
+.body p:first-child {
+  margin-top: 0;
+}
+
+.body h2,
+.body h3 {
+  margin: 1.35em 0 0.45em;
+  color: var(--warm-heading);
+  line-height: 1.4;
+}
+
+.body h2 {
+  font-size: var(--fs-h2);
+}
+
+.body h3 {
+  font-size: var(--fs-h3);
+}
+
+.body ul {
+  margin: 0.45em 0 0;
+  padding-left: 1.4em;
+}
+
+.body li + li {
+  margin-top: 0.35em;
+}
+
+.spacer {
+  height: 0.95em;
+}
+
+.figure {
+  margin: 1.1em 0;
+}
+
+.figure img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+}
+
+.source {
+  margin: var(--space-6) 0 0;
+  color: var(--ink-soft);
+  font-size: var(--fs-meta);
+  line-height: 1.7;
+}
+
+.source a {
+  margin-left: 0.35em;
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
+.source a:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.seriesNav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+.seriesLink {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-height: 44px;
+  padding: 12px 16px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: var(--warm-surface);
+  color: inherit;
+  text-decoration: none;
+}
+
+.seriesLink:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.seriesLabel {
+  color: var(--accent-ink);
+  font-size: var(--fs-meta);
+  font-weight: 800;
+}
+
+.seriesTitle {
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+@media (min-width: 720px) {
+  .seriesNav {
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: space-between;
+  }
+
+  .seriesLink {
+    flex: 1;
+    max-width: calc(50% - 8px);
+  }
+
+  .seriesNext {
+    margin-left: auto;
+    text-align: right;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .back,
+  .seriesLink {
+    transition: none;
+  }
+}

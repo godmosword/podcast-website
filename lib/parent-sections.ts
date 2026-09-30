@@ -7,7 +7,8 @@ export const PARENT_SECTION_ITEMS = [
     label: "育兒文章分享",
     href: "/for-parents/articles",
     emoji: "📝",
-    description: "給家長看的育兒文章。內容整理中。",
+    description:
+      "車車遊樂園在方格子刊登的育兒文章。目前依序收錄視力保健系列三篇。",
   },
   {
     id: "parent-travel-abroad",
