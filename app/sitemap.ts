@@ -13,6 +13,10 @@ import {
   STATIC_PAGE_MODIFIED_DATES,
 } from "@/lib/page-freshness";
 import { playgroundDetailPath } from "@/lib/playground-detail";
+import {
+  listParentArticles,
+  parentArticlePath,
+} from "@/lib/parent-articles";
 import { getSiteUrl } from "@/lib/site-url";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -57,6 +61,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: STATIC_PAGE_MODIFIED_DATES["/for-parents/play-map"],
       changeFrequency: "monthly",
       priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/for-parents/articles`,
+      lastModified:
+        listParentArticles()[listParentArticles().length - 1]?.publishedAt,
+      changeFrequency: "monthly",
+      priority: 0.7,
     },
     {
       url: `${baseUrl}/subscribe`,
@@ -129,6 +140,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
+  const parentArticlePages: MetadataRoute.Sitemap = listParentArticles().map(
+    (article) => ({
+      url: `${baseUrl}${parentArticlePath(article.slug)}`,
+      lastModified: article.publishedAt,
+      changeFrequency: "yearly" as const,
+      priority: 0.65,
+    }),
+  );
+
   const storyPages: MetadataRoute.Sitemap = stories.map((story) => ({
     url: `${baseUrl}/story/${story.slug}`,
     lastModified: storyDateModified(story),
@@ -165,6 +185,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     ...staticPages,
+    ...parentArticlePages,
     ...collectionPages,
     ...playgroundPages,
     ...storyPages,
