@@ -243,7 +243,7 @@ describe("SiteNavBar", () => {
     expect(labels).toEqual(["給爸媽"]);
   });
 
-  test("抽屜恰好 7 個站內 href，不含首頁／著色本／mailto", async () => {
+  test("抽屜站內 href 含主列與給爸媽小字，不含首頁／著色本／mailto", async () => {
     const view = await renderNavBar();
     const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
     const panelHrefs = Array.from(panel.querySelectorAll("a")).map((a) =>
@@ -257,13 +257,17 @@ describe("SiteNavBar", () => {
       "/about",
       "/for-parents",
       "/for-parents/play-map",
+      "/for-parents/articles",
+      "/for-parents/travel-abroad",
+      "/for-parents/travel-taiwan",
+      "/for-parents/story-making",
     ]) {
       expect(panelHrefs).toContain(href);
     }
     expect(panelHrefs).not.toContain("/");
     expect(panelHrefs).not.toContain("/games/coloring-book");
     expect(panelHrefs.some((h) => h?.startsWith("mailto:"))).toBe(false);
-    expect(panelHrefs.length).toBe(7);
+    expect(panelHrefs.length).toBe(11);
   });
 
   test("抽屜兩組各為 role=list，家長組以 aria-labelledby 綁小標", async () => {
@@ -307,6 +311,10 @@ describe("SiteNavBar", () => {
       "遊樂園",
       "宇宙地圖",
       "關於我們",
+      "育兒文章分享",
+      "親子出國",
+      "國內旅遊",
+      "故事創作",
       "親子指南",
       "親子景點",
     ]) {
@@ -326,6 +334,28 @@ describe("SiteNavBar", () => {
     const playMapLink = mobileNav.querySelector('a[href="/for-parents/play-map"]');
     expect(playMapLink).toBeTruthy();
     expect(playMapLink?.textContent).toContain("親子景點");
+
+    const parentList = mobileNav.querySelectorAll('ul[role="list"]')[1]!;
+    const parentHrefs = Array.from(parentList.querySelectorAll("a")).map((a) =>
+      a.getAttribute("href"),
+    );
+    expect(parentHrefs).toEqual([
+      "/for-parents/articles",
+      "/for-parents/travel-abroad",
+      "/for-parents/travel-taiwan",
+      "/for-parents/story-making",
+      "/for-parents",
+      "/for-parents/play-map",
+    ]);
+    const noteTexts = Array.from(parentList.querySelectorAll("a"))
+      .slice(0, 4)
+      .map((a) => a.textContent?.replace(/\s/g, ""));
+    expect(noteTexts).toEqual([
+      "📝育兒文章分享",
+      "✈️親子出國",
+      "🏞️國內旅遊",
+      "✏️故事創作",
+    ]);
 
     expect(view.container.querySelector('form[action="/stories"]')).toBeNull();
     expect(view.container.querySelector('input[name="q"]')).toBeNull();
@@ -522,6 +552,20 @@ describe("SiteNavBar active 狀態", () => {
       expect(link?.getAttribute("aria-current")).toBe("page");
       cleanup();
     }
+  });
+
+  test("給爸媽小字路徑只標自己，不標親子指南", async () => {
+    const view = await renderNavBarAt("/for-parents/articles");
+    const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
+    expect(
+      panel.querySelector('a[href="/for-parents/articles"]')?.getAttribute("aria-current"),
+    ).toBe("page");
+    expect(
+      panel.querySelector('a[href="/for-parents"]')?.hasAttribute("aria-current"),
+    ).toBe(false);
+    expect(
+      panel.querySelector('a[href="/for-parents/play-map"]')?.hasAttribute("aria-current"),
+    ).toBe(false);
   });
 
   test("/for-parents/play-map 僅親子景點 active", async () => {

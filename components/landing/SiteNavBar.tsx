@@ -23,6 +23,10 @@ import {
   LANDING_SCROLL_ROOT_ATTR,
   transitionLandingToAnchor,
 } from "@/lib/landing-scroll";
+import {
+  PARENT_SECTION_ITEMS,
+  type ParentSectionId,
+} from "@/lib/parent-sections";
 import { scheduleWhenIdle } from "@/lib/schedule-idle";
 import styles from "./SiteNavBar.module.css";
 
@@ -35,7 +39,8 @@ type NavItemId =
   | "about"
   | "for-parents"
   | "play-map"
-  | "feedback";
+  | "feedback"
+  | ParentSectionId;
 
 type NavItem = {
   id: NavItemId;
@@ -49,7 +54,7 @@ const MOBILE_PARENT_GROUP_IDS = new Set<NavItemId>([
   "play-map",
 ]);
 
-/** 抽屜：探索 → 家長（7 列；著色本在遊樂園內，不佔獨立列）。 */
+/** 抽屜主列：探索 5 ＋家長 2（著色本在遊樂園內）。給爸媽小字不佔主列。 */
 const MENU_ROWS: readonly {
   id: NavItemId;
   emoji: string;
@@ -77,6 +82,11 @@ function navItems(): NavItem[] {
     { id: "about", label: "關於我們", href: "/about" },
     { id: "for-parents", label: "親子指南", href: "/for-parents" },
     { id: "play-map", label: "親子景點", href: "/for-parents/play-map" },
+    ...PARENT_SECTION_ITEMS.map((item) => ({
+      id: item.id,
+      label: item.label,
+      href: item.href,
+    })),
     { id: "feedback", label: "留言", href: feedbackHref() },
   ];
 }
@@ -298,6 +308,28 @@ export default function SiteNavBar() {
     );
   };
 
+  /** 給爸媽四項：與主列同一套 emoji 格，最長匹配避免跟親子指南搶 active。 */
+  const renderNote = (note: (typeof PARENT_SECTION_ITEMS)[number]) => {
+    const item = byId.get(note.id);
+    if (!item) return null;
+    const active = isInternalPathActive(pathname, item.href, internalHrefs);
+    return (
+      <li key={item.id}>
+        <Link
+          href={item.href}
+          className={styles.menuLink}
+          aria-current={active ? "page" : undefined}
+          onClick={closeAll}
+        >
+          <span className={styles.menuEmoji} aria-hidden>
+            {note.emoji}
+          </span>
+          <span>{item.label}</span>
+        </Link>
+      </li>
+    );
+  };
+
   return (
     <header
       ref={barRef}
@@ -393,6 +425,7 @@ export default function SiteNavBar() {
             role="list"
             aria-labelledby={parentLabelId}
           >
+            {PARENT_SECTION_ITEMS.map((note) => renderNote(note))}
             {parentRows.map((row) => renderRow(row))}
           </ul>
         </div>
