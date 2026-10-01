@@ -16,13 +16,6 @@
   margin: 0 auto var(--space-6);
 }
 
-.eyebrow {
-  margin: 0 0 6px;
-  color: var(--accent-ink);
-  font-size: var(--fs-label);
-  font-weight: 800;
-}
-
 .title {
   margin: 0;
   color: var(--ink);
@@ -31,12 +24,12 @@
   line-height: 1.2;
 }
 
-.intro {
-  max-width: 640px;
+.eyebrow {
   margin: 10px 0 0;
-  color: var(--ink-soft);
-  font-size: var(--fs-body);
-  line-height: 1.7;
+  color: var(--accent-ink);
+  font-size: var(--fs-label);
+  font-weight: 800;
+  line-height: 1.6;
 }
 
 .meta {

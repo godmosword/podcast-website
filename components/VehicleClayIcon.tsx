@@ -7,13 +7,18 @@ type VehicleClayIconProps = {
   className?: string;
 };
 
-/** 車種代表圖：取該車種第一則故事的黏土風封面縮圖。 */
+/** 選單圖示用角色定裝，不用該車種的故事封面。 */
+const PORTRAIT_ICON: Record<string, string> = {
+  遊園車: "/characters/噗噗豬.jpg",
+};
+
+/** 車種代表圖：指定車種用角色定裝，其餘取該車種第一則故事封面。 */
 export default function VehicleClayIcon({
   vehicle,
   size = 22,
   className = "",
 }: VehicleClayIconProps) {
-  const src = getVehicleCoverPath(vehicle);
+  const src = PORTRAIT_ICON[vehicle] ?? getVehicleCoverPath(vehicle);
   if (!src) return null;
 
   return (

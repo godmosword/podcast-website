@@ -41,7 +41,7 @@ test.describe("/stories 可分享篩選", () => {
   test("history back／forward 還原 deep link 篩選", async ({ page }) => {
     await page.goto("/stories");
     await expect(page.getByRole("button", { name: "選擇車車" })).toContainText(
-      "全部車車",
+      "車車角色",
     );
     await page.goto("/stories?vehicle=%E6%95%91%E8%AD%B7%E8%BB%8A");
     await expect(page.getByRole("button", { name: "選擇車車" })).toContainText(
@@ -50,7 +50,7 @@ test.describe("/stories 可分享篩選", () => {
     await page.goBack();
     await expect(page).toHaveURL(/\/stories$/);
     await expect(page.getByRole("button", { name: "選擇車車" })).toContainText(
-      "全部車車",
+      "車車角色",
     );
     await page.goForward();
     await expect(page).toHaveURL(/vehicle=/);
@@ -67,7 +67,7 @@ test.describe("/stories 可分享篩選", () => {
     await page.getByRole("button", { name: "清除篩選" }).click();
     await expect(page).toHaveURL(/\/stories$/);
     await expect(page.getByRole("button", { name: "選擇車車" })).toContainText(
-      "全部車車",
+      "車車角色",
     );
   });
 

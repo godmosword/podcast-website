@@ -59,12 +59,13 @@ export default function CharactersPage() {
       />
 
       <header className={styles.header}>
-        <p className={styles.eyebrow}>車車遊樂園原創角色</p>
         <h1 id="characters-title" className={styles.title}>
           角色圖鑑
         </h1>
-        <p className={styles.intro}>
-          認識車車遊樂園的原創角色：車種、個性與出場故事。聽完故事就會認識新朋友！
+        <p className={styles.eyebrow}>
+          你最喜歡哪一個角色呢？
+          <br />
+          聽完故事，你就會認識他哦
         </p>
         <p className={styles.meta}>{characters.length} 位角色</p>
       </header>

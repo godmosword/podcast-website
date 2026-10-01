@@ -4,7 +4,7 @@ import VehicleClayIcon from "./VehicleClayIcon";
 import FilterSelect, { type FilterSelectOption } from "./FilterSelect";
 
 const ALL_VEHICLES_VALUE = "__all__";
-const ALL_LABEL = "全部車車";
+const ALL_LABEL = "車車角色";
 
 type VehicleSelectProps = {
   vehicles: string[];
