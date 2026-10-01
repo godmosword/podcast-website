@@ -3,6 +3,11 @@ import React from "react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getCharacters } from "@/data/characters";
+import {
+  CATALOG_EPISODE_TITLE_MAX,
+  catalogEpisodeLabel,
+  catalogEpisodesFor,
+} from "@/lib/character-catalog";
 import CharacterCard from "./CharacterCard";
 
 vi.stubGlobal("React", React);
@@ -76,13 +81,29 @@ describe("CharacterCard", () => {
   });
 
   it("出場集數改為下拉並帶 10 字內標題", () => {
-    render(<CharacterCard character={lingLing()} recognized={false} />);
+    const character = lingLing();
+    render(<CharacterCard character={character} recognized={false} />);
 
     const select = screen.getByRole("combobox", { name: "玲玲的出場故事" });
     expect(select).toBeTruthy();
     expect(screen.queryByRole("link", { name: /EP / })).toBeNull();
-    expect(screen.getByRole("option", { name: "EP 4 守信用的鈴鈴清潔車" })).toBeTruthy();
-    expect(screen.getByRole("option", { name: "EP 9 恐龍車多多的大黃牙" })).toBeTruthy();
-    expect(screen.getByRole("option", { name: "EP 15 恐龍車多多洗手故事" })).toBeTruthy();
+
+    // 集數標題來自 Apple RSS，sync 會改寫主標。對齊 catalog 輸出，
+    // 避免寫死舊文案（例如 ep-9）讓同步 workflow 的單元測試失敗。
+    const episodes = catalogEpisodesFor(character.appearsIn);
+    expect(episodes.map((episode) => episode.slug)).toEqual([
+      "ep-4",
+      "ep-9",
+      "ep-15",
+    ]);
+    for (const episode of episodes) {
+      expect([...episode.title].length).toBeLessThanOrEqual(
+        CATALOG_EPISODE_TITLE_MAX,
+      );
+      const option = screen.getByRole("option", {
+        name: catalogEpisodeLabel(episode),
+      });
+      expect(option.getAttribute("value")).toBe(episode.slug);
+    }
   });
 });

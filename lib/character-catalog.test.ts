@@ -26,6 +26,9 @@ describe("catalogEpisodeTitle", () => {
     expect(catalogEpisodeTitle("恐龍車多多的大黃牙｜睡前刷牙故事", "ep-9")).toBe(
       "恐龍車多多的大黃牙",
     );
+    expect(catalogEpisodeTitle("刷牙故事｜恐龍車多多的大黃牙", "ep-9")).toBe(
+      "刷牙故事",
+    );
   });
 
   it("過長主標改用手寫簡述", () => {
