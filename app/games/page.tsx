@@ -96,15 +96,15 @@ function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
           </span>
         </div>
         <span className={styles.cardBody}>
-          <span className={styles.cardTitle}>{game.title}</span>
+          <span className={styles.cardTitleRow}>
+            <span className={styles.cardTitle}>{game.title}</span>
+            <span className={styles.cardMeta}>{game.ageRange}</span>
+          </span>
           {/* 兒童減法審：三字動作詞＋同一顆玩法圖示（圖為主、字為輔）；
-              家長 meta 只留年齡——「約 N 分鐘」可有可無，「不趕時間」三張全同＝零資訊 */}
+              年齡跟標題同一列，少一列才能跟海報一起留在首屏 */}
           <span className={styles.cardVerb}>
             {playIcon(game, 18)}
             {game.teaser}
-          </span>
-          <span className={styles.cardMeta}>
-            <span>{game.ageRange}</span>
           </span>
         </span>
       </Link>
