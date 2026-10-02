@@ -18,7 +18,7 @@ export default function ZoneBadge({ zoneId }: Props) {
       aria-label={`這個故事發生在${zone.name}，在樂園地圖上查看`}
     >
       <span aria-hidden="true">📍 </span>
-      這個故事發生在 {zone.name}
+      {zone.name}
     </Link>
   );
 }

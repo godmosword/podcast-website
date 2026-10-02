@@ -1,54 +1,47 @@
-import Link from "next/link";
+import type { ReactNode } from "react";
 import type { Story } from "@/data/content";
 import StoryCard from "./StoryCard";
-import { storyDisplayTitle } from "@/lib/story-title";
 import styles from "./RelatedStories.module.css";
 
 type RelatedStoriesProps = {
   stories: Story[];
-  /** 下一集（聽完接著聽），顯示於相關故事上方 */
+  /** 下一集，顯示為可點的封面卡 */
   nextStory?: Story | null;
-  accent?: string;
+  /** 頁尾與「下一集」同一列的島嶼連結 */
+  zone?: ReactNode;
 };
 
 export default function RelatedStories({
   stories,
   nextStory = null,
-  accent,
+  zone = null,
 }: RelatedStoriesProps) {
-  if (stories.length === 0 && !nextStory) return null;
+  if (stories.length === 0 && !nextStory && !zone) return null;
 
   return (
-    <section className={styles.section}>
+    <section className={styles.section} aria-label="接著看">
+      {nextStory || zone ? (
+        <div className={styles.nextHead}>
+          {nextStory ? <h2 className={styles.nextLabel}>下一集</h2> : null}
+          {zone}
+        </div>
+      ) : null}
+
       {nextStory ? (
-        <p className={styles.nextHint}>
-          聽完這集可以接著聽{" "}
-          {/* 單集色只當底線裝飾：拿它當文字色時，夜間 story.color（如 #7048e8）
-              壓 --card 只有 2.2:1（axe serious）。文字走 --accent-ink（雙主題 AA），
-              分工同 DESIGN.md：accent → 裝飾／邊框，accent-ink → 文字。 */}
-          <Link
-            href={`/story/${nextStory.slug}`}
-            className={styles.nextLink}
-            style={accent ? { textDecorationColor: accent } : undefined}
-          >
-            EP {nextStory.ep} {storyDisplayTitle(nextStory)}
-          </Link>
-        </p>
+        <div className={styles.nextCard}>
+          {/* 整張封面卡可點；accent 只留給卡上既有的 EP／箭頭淡底，不拿來當文字色。 */}
+          <StoryCard story={nextStory} hideMeta sharedCoverMorph={false} />
+        </div>
       ) : null}
 
       {stories.length > 0 ? (
-        <>
-          <h2 className={styles.heading}>相關故事</h2>
-          <ul className={styles.list}>
-            {stories.map((story, i) => (
-              <li key={story.slug}>
-                {/* 美術審 M6：與 /stories 目錄卡同一種密度——只留 EP chip，
-                    日期／時長／年齡不在相關故事卡上重複（單集頁 header 已有）。 */}
-                <StoryCard story={story} index={i} hideMeta />
-              </li>
-            ))}
-          </ul>
-        </>
+        <ul className={styles.list} aria-label="相關故事">
+          {stories.map((story, i) => (
+            <li key={story.slug}>
+              <StoryCard story={story} index={i} hideMeta />
+            </li>
+          ))}
+        </ul>
       ) : null}
     </section>
   );

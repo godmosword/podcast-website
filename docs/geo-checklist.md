@@ -24,10 +24,12 @@
 - [ ] Schema.org Validator：任選 3 個 `/story/<slug>` PodcastEpisode + FAQPage 無 error。
 - [ ] Schema.org Validator：`/characters` CreativeWork + Person 無 error。
 - [ ] `curl -L https://<domain>/story/ep-16` 原始 HTML：
-  - [ ] 可見區只有 **本集介紹一段**（定義式摘要），無第二段完整 `plainSummary`。
-  - [ ] 大綱／角色／家長延伸／其餘 FAQ 在 `<details>` 內（DOM 仍有全文，預設不展開）。
+  - [ ] 可見區有 **本集介紹一段**（定義式摘要，預設可見、不在 `<details>`），無第二段完整 `plainSummary`。
+  - [ ] 有 `story.captions` 時，故事大綱在 `<details>` 內（DOM 仍有全文，預設不展開）。沒有場景字幕時，頁面不出現模板大綱。
+  - [ ] 有出場角色時，角色條預設可見，不收進 `<details>`。沒有角色時不渲染「出場角色」。
+  - [ ] 家長共讀長文不在單集頁；單集只留「給爸媽：一起聊聊 →」。
   - [ ] `<script type="application/ld+json">` 仍含完整 FAQPage。
-- [ ] 有完整逐字稿（`data/subtitles/<slug>.json`）的集數：`curl -I` 或 view-source 確認 `alternates`／頁內連到 `/story/<slug>/transcript.vtt`；僅有場景 `captions` 的集不得出現「完整逐字稿」文案或 VTT 連結。
+- [ ] 有完整逐字稿（`data/subtitles/<slug>.json`）且該集有場景字幕：頁內「下載逐字稿」在故事大綱收合裡，連到 `/story/<slug>/transcript.vtt`。沒有場景字幕的集不在頁面寫 WebVTT；機器層仍走 RSS／JSON-LD。僅有場景 `captions` 的集不得出現「完整逐字稿」文案或 VTT 連結。
 
 ## 3. 單集頁預設可見字數（GEO 第二階段）
 
@@ -36,7 +38,7 @@
 - [ ] 代表集數 A（有 `familyActivity`，例 `ep-5`）：預設可見字數 ≤ **350 字**（含標題、本集介紹、卡片一題）。
 - [ ] 代表集數 B（無 `familyActivity`，例 `ep-16`）：預設可見字數 ≤ **280 字**。
 - [ ] 首屏 CTA 仍清楚：播放鈕、收藏／分享不需捲動即可看到（375px 寬實機）。
-- [ ] 展開 `<details>` 後仍可讀到完整大綱、角色、FAQ（家長深挖路徑正常）。
+- [ ] 展開故事大綱 `<details>` 後仍可讀到該集場景字幕。有角色的集數不展開也能看到角色條。
 
 ## 4. AI 引用實測 Prompt
 

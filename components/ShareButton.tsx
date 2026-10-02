@@ -12,6 +12,8 @@ type ShareButtonProps = {
   storySlug?: string;
   leading?: ReactNode;
   className?: string;
+  /** 單集頁：底線文字，保留可見字與複製狀態。 */
+  appearance?: "solid" | "quiet";
 };
 
 function LinkIcon() {
@@ -60,6 +62,7 @@ export default function ShareButton({
   storySlug,
   leading,
   className,
+  appearance = "solid",
 }: ShareButtonProps) {
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">(
     "idle",
@@ -86,7 +89,9 @@ export default function ShareButton({
       {leading}
       <button
         type="button"
-        className={styles.btn}
+        className={[styles.btn, appearance === "quiet" ? styles.quiet : ""]
+          .filter(Boolean)
+          .join(" ")}
         onClick={copyLink}
         aria-live="polite"
       >
@@ -103,7 +108,13 @@ export default function ShareButton({
       </button>
       <a
         href={lineUrl}
-        className={`${styles.btn} ${styles.line}`}
+        className={[
+          styles.btn,
+          styles.line,
+          appearance === "quiet" ? styles.quiet : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="以 LINE 分享"

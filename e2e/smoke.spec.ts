@@ -296,6 +296,36 @@ test("單集出場角色條連到圖鑑", async ({ page }) => {
   await expect(firstCast).toHaveAttribute("href", /\/characters#/);
 });
 
+test("375px 單集首屏看得到播放、收藏與分享", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto("/story/ep-3");
+
+  const targets = [
+    page.getByRole("link", { name: /開始看故事/ }),
+    page.getByRole("button", { name: /加入最愛|取消收藏/ }),
+    page.getByRole("button", { name: /複製連結|已複製連結|請長按複製/ }),
+    page.getByRole("link", { name: /LINE 分享|以 LINE 分享/ }),
+  ];
+
+  for (const target of targets) {
+    await expect(target).toBeVisible();
+    const box = await target.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.y).toBeGreaterThanOrEqual(0);
+    expect(box!.y + box!.height).toBeLessThanOrEqual(812);
+  }
+});
+
+test("沒有場景字幕與角色時不渲染模板大綱", async ({ page }) => {
+  await page.goto("/story/ep-32");
+  await expect(page.getByText("故事大綱")).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "出場角色" })).toHaveCount(0);
+  await expect(page.getByText(/WebVTT/)).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "本集介紹" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "給爸媽：一起聊聊 →" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /恐龍島/ })).toBeVisible();
+});
+
 test("404 頁面", async ({ page }) => {
   const response = await page.goto("/story/not-real-slug", {
     waitUntil: "networkidle",

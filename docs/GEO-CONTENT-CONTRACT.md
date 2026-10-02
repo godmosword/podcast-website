@@ -7,14 +7,14 @@
 ## 原則
 
 1. **一個意圖、一個欄位、一個主通路** — 同一句親子提問不要同時寫進 `familyActivity` 與 `parentGuide`。
-2. **可見層短、機器層全** — 頁面預設少字；完整語意走 JSON-LD、`llms-full`、VTT、RSS（見 `docs/geo-checklist.md`）。首頁與故事／主題／車種**聚合索引**的 answer-first 長導言以 `sr-only` 保留 SSR HTML；**單集 `definitionSummary`（本集介紹）仍預設可見**。
+2. **可見層短、機器層全** — 頁面預設少字；完整語意走 JSON-LD、`llms-full`、VTT、RSS（見 `docs/geo-checklist.md`）。首頁與故事／主題／車種**聚合索引**的 answer-first 長導言以 `sr-only` 保留 SSR HTML；**單集 `definitionSummary`（本集介紹）仍預設可見**，不收進 `<details>`、不改 `sr-only`。沒有 `story.captions` 時不渲染模板「故事大綱」。有場景字幕時，大綱預設收合，全文在 `<details>` 內。
 3. **互動與 SEO 分離** — 播放器／結束畫面的互動提示，不另塞一題進 FAQPage JSON-LD。
 
 ## 場景字幕 vs 完整逐字稿（P0 契約）
 
 | 種類 | 資料來源 | 粒度 | 允許對外稱「完整逐字稿」 | 主要通路 |
 |------|----------|------|--------------------------|----------|
-| **場景字幕** | `story.captions` + `captionTimes` | 每翻頁一幕一句（看圖提示／故事大綱） | **否** | 故事頁「故事大綱」HTML、播放器翻頁輔助 |
+| **場景字幕** | `story.captions` + `captionTimes` | 每翻頁一幕一句（看圖提示／故事大綱） | **否** | 有內容時才出現在故事頁「故事大綱」`<details>`（預設收合）；播放器翻頁輔助 |
 | **完整逐字稿** | `data/subtitles/<slug>.json`（`getSubtitles`） | 音檔逐句 `{ t, text }` | **是** | `/story/<slug>/transcript.vtt`、RSS `podcast:transcript`、JSON-LD `MediaObject`（`text/vtt`）、`llms-full`「完整逐字稿」行 |
 
 **程式錨點（單一真相）：** [`lib/transcript.ts`](../lib/transcript.ts) — `hasSceneCaptions`、`hasFullTranscript`／`validateFullTranscript`、`hasTranscriptVtt`、`buildFullTranscriptVtt`；字幕側車由 [`lib/subtitles.ts`](../lib/subtitles.ts) 驗證非空文字、非負且單調時間，build gate 另以 `data/scenes/<slug>.json` 的 `audioDuration` 檢查 cue 不超出音檔；舊名 `hasVtt`／`buildStoryVtt` 語意已對齊完整逐字稿。
@@ -142,7 +142,7 @@ type ParentGuide = {
 - **2026-07-25：** 開放島 `/adventures/<zone>` 納入 sitemap、`llms-full`「車車宇宙島嶼」、`verify:geo` `checkStaticPage`；路由列舉仍在 verify 腳本，不進本契約常數檔。
 - **2026-07-22：** 單集頁拿掉「常見問題」可見區塊（FAQ 僅留 FAQPage JSON-LD／llms）；角色圖鑑改掛頂欄；共讀／活動／指引遷至 `/for-parents#co-listen`；FAQ 曾短暫收合後改為不渲染 UI。
 - **2026-07-22：** 單集頁精簡：共讀／親子活動／家長指引遷至 `/for-parents#co-listen`；FAQ 預設收合；角色僅一行＋圖鑑連結；接著聽併入 RelatedStories。
-- **2026-07-20（Wave 1）：** 聚合頁 GEO 導言改 `sr-only`（SSR 保留）；單集本集介紹維持可見。
+- **2026-10-02：** 單集頁沒有 `captions` 時不渲染模板大綱；有場景字幕時大綱預設收合。本集介紹仍預設可見。完整逐字稿的可見連結「下載逐字稿」只放在該收合裡。
 - **2026-07-20（GEO P1）：** 新增 `episodeFaq` sidecar（每集專屬 1 題 FAQ），併入 `storyFaqs()` 第一題。
 - **2026-07-20（GEO P0）：** 場景字幕 vs 完整逐字稿契約；`transcript.vtt`／RSS／JSON-LD 僅認 `subtitles` 側車。
 - **2026-07-10（GEO-P3）：** 初版契約；`parentGuide` 仍待 REUSE-2 實作。

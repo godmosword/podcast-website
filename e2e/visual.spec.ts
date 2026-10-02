@@ -48,6 +48,7 @@ const VISUAL_PAGES = [
   { id: "home", name: "首頁", path: "/" },
   { id: "stories", name: "全部故事", path: "/stories" },
   { id: "games", name: "遊樂園", path: "/games" },
+  { id: "story-ep-3", name: "單集 ep-3", path: "/story/ep-3" },
   { id: "adventures", name: "宇宙地圖", path: "/adventures" },
   { id: "for-parents", name: "親子指南", path: "/for-parents" },
   { id: "characters", name: "角色圖鑑", path: "/characters" },
@@ -179,6 +180,7 @@ function volatileMasks(page: Page, pageId: VisualPageId): Locator[] {
       //     資料誠實紅線的 coverage footnote。
       return [];
     case "games":
+    case "story-ep-3":
     case "adventures":
     case "about":
     case "subscribe":

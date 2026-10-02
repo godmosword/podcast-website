@@ -38,6 +38,30 @@
   color: var(--brand-line-ink);
 }
 
+/* 單集頁三次出口：透明底、底線、字仍在（複製成功／失敗會換字）。 */
+.quiet {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 8px 2px;
+  color: var(--accent-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 0.12em;
+  text-underline-offset: 0.18em;
+}
+
+.quiet.line {
+  border-color: transparent;
+  color: var(--accent-ink);
+}
+
+:global([data-theme="night"]) .quiet,
+:global([data-theme="night"]) .quiet.line {
+  color: var(--night-link);
+  border-color: transparent;
+}
+
 :global([data-theme="night"]) .line {
   color: var(--night-share);
 }
@@ -50,6 +74,10 @@
   .btn:hover {
     transform: translateY(-1px);
     background: var(--bg-2);
+  }
+
+  .quiet:hover {
+    background: transparent;
   }
 }
 

@@ -44,20 +44,6 @@
   text-align: center;
 }
 
-/* EP／時長下方：區域徽章與主題 chips 垂直堆疊，避免 inline 與 flex 貼齊重疊 */
-.metaStack {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-3);
-  margin-top: var(--space-3);
-}
-
-.metaStack > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
 .coverWrap {
   position: relative;
   width: 100%;
@@ -241,7 +227,6 @@
       "title    cover"
       "subtitle cover"
       "meta     cover"
-      "metaStack cover"
       "actions  cover"
       "intro    cover"
       "parent   cover";
@@ -271,11 +256,6 @@
   .heroMeta {
     grid-area: meta;
     justify-content: flex-start;
-  }
-
-  .metaStack {
-    grid-area: metaStack;
-    align-items: flex-start;
   }
 
   .coverWrap {
@@ -411,5 +391,34 @@
 }
 
 .expandable[open] > summary::before {
+  content: "▾ ";
+}
+
+.outline {
+  padding-top: var(--space-3);
+}
+
+.outlineSummary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  margin: 0;
+  cursor: pointer;
+  font-size: var(--fs-h3-compact);
+  font-weight: 700;
+  color: var(--ink);
+  list-style: none;
+}
+
+.outlineSummary::-webkit-details-marker {
+  display: none;
+}
+
+.outlineSummary::before {
+  content: "▸ ";
+  color: var(--accent-ink);
+}
+
+.outline[open] > .outlineSummary::before {
   content: "▾ ";
 }

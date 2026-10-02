@@ -7,11 +7,8 @@ import { breadcrumbListJsonLd, faqPageJsonLd, podcastEpisodeJsonLd } from "@/lib
 import { lineShareUrl, storyLineShareText, storyShareUrl } from "@/lib/share-story";
 import {
   familyActivityFaq,
-  storyCharactersTeaser,
   storyDefinitionSummary,
   storyFaqs,
-  storyOutlineItems,
-  storyOutlinePreviewItems,
 } from "@/lib/story-geo";
 import { storyDetailMetadata } from "@/lib/story-metadata";
 import { hasFullTranscript } from "@/lib/transcript";
@@ -27,7 +24,7 @@ import ZoneBadge from "@/components/story/ZoneBadge";
 import SiteFooter from "@/components/SiteFooter";
 import StoryCoverMorph from "@/components/story/StoryCoverMorph";
 import StoryImage from "@/components/StoryImage";
-import StoryMeta, { StoryTags } from "@/components/StoryMeta";
+import StoryMeta from "@/components/StoryMeta";
 import styles from "./page.module.css";
 
 export function generateStaticParams() {
@@ -62,13 +59,10 @@ export default async function StoryDetailPage({
   const related = getRelated(slug, 3);
   const nextStory = getNextStory(slug);
   const definitionSummary = storyDefinitionSummary(story);
-  const outlinePreviewItems = storyOutlinePreviewItems(story);
-  const outlineItems = storyOutlineItems(story);
-  const hasFullOutline = outlineItems.length > outlinePreviewItems.length;
+  const sceneCaptions = (story.captions ?? []).filter((line) => line.trim().length > 0);
   const characters = getCharactersForStory(story.slug);
   const faqs = storyFaqs(story);
   const storyHasFullTranscript = hasFullTranscript(story);
-  const showOutlineDetails = hasFullOutline;
   // GEO：familyActivity 以 Q&A 併入 FAQPage（可見文案改掛家長指南）
   const activityFaq = familyActivityFaq(story);
   const jsonLdFaqs = activityFaq ? [...faqs, activityFaq] : faqs;
@@ -112,11 +106,6 @@ export default async function StoryDetailPage({
           </div>
 
           <StoryMeta story={story} showTags={false} className={styles.heroMeta} />
-
-          <div className={styles.metaStack}>
-            {story.zoneId ? <ZoneBadge zoneId={story.zoneId} /> : null}
-            <StoryTags story={story} />
-          </div>
         </div>
 
         <div className={styles.actions}>
@@ -139,14 +128,9 @@ export default async function StoryDetailPage({
             )}
             leading={<FavoriteButton slug={story.slug} />}
             className={styles.shareRow}
+            appearance="quiet"
           />
         </div>
-
-        {hasParentCoListen ? (
-          <p className={styles.parentCta}>
-            <Link href="/for-parents#co-listen">家長共讀與延伸 →</Link>
-          </p>
-        ) : null}
 
         <section
           className={styles.introSection}
@@ -158,53 +142,47 @@ export default async function StoryDetailPage({
           <p className={styles.definition}>{definitionSummary}</p>
         </section>
 
-        <section className={styles.contentSection} aria-labelledby="outline-heading">
-          <h2 id="outline-heading" className={styles.sectionHeading}>
-            故事大綱
-          </h2>
-          <ol className={styles.lines}>
-            {outlinePreviewItems.map((line, i) => (
-              <li key={`${story.slug}-outline-preview-${i}`}>{line}</li>
-            ))}
-          </ol>
-          {showOutlineDetails && (
-            <details className={styles.expandable}>
-              <summary>看詳細故事大綱</summary>
-              <ol className={styles.lines}>
-                {outlineItems.map((line, i) => (
-                  <li key={`${story.slug}-outline-${i}`}>{line}</li>
-                ))}
-              </ol>
-            </details>
-          )}
-          {storyHasFullTranscript && (
-            <Link
-              href={`/story/${story.slug}/transcript.vtt`}
-              className={styles.inlineLink}
-            >
-              下載完整逐字稿（WebVTT）
-            </Link>
-          )}
-        </section>
+        {hasParentCoListen ? (
+          <p className={styles.parentCta}>
+            <Link href="/for-parents#co-listen">給爸媽：一起聊聊 →</Link>
+          </p>
+        ) : null}
 
-        <section
-          className={styles.contentSection}
-          aria-labelledby="characters-heading"
-        >
-          <h2 id="characters-heading" className={styles.sectionHeading}>
-            出場角色
-          </h2>
-          {characters.length > 0 ? (
+        {sceneCaptions.length > 0 ? (
+          <details className={`${styles.contentSection} ${styles.outline}`}>
+            <summary className={styles.outlineSummary}>故事大綱</summary>
+            <ol className={styles.lines}>
+              {sceneCaptions.map((line, i) => (
+                <li key={`${story.slug}-caption-${i}`}>{line}</li>
+              ))}
+            </ol>
+            {storyHasFullTranscript ? (
+              <Link
+                href={`/story/${story.slug}/transcript.vtt`}
+                className={styles.inlineLink}
+              >
+                下載逐字稿
+              </Link>
+            ) : null}
+          </details>
+        ) : null}
+
+        {characters.length > 0 ? (
+          <section
+            className={styles.contentSection}
+            aria-labelledby="characters-heading"
+          >
+            <h2 id="characters-heading" className={styles.sectionHeading}>
+              出場角色
+            </h2>
             <CharacterCastBar characters={characters} />
-          ) : (
-            <p className={styles.teaser}>{storyCharactersTeaser(characters)}</p>
-          )}
-        </section>
+          </section>
+        ) : null}
 
         <RelatedStories
           stories={related}
           nextStory={nextStory}
-          accent={story.color}
+          zone={story.zoneId ? <ZoneBadge zoneId={story.zoneId} /> : null}
         />
       </article>
 

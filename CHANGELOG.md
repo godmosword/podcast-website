@@ -6,6 +6,8 @@
 
 ### Changed
 
+- **單集頁首屏**：拿掉主題膠囊與模板故事大綱。有場景字幕才收合「故事大綱」；有角色才顯示出場角色。分享改底線文字，收藏留在播放鈕旁。頁尾「下一集」改封面卡，島嶼只顯示島名。
+
 - **遊樂園 hub 首屏**：桌機海報高度跟著視窗縮（1280×720 仍看得到三張卡的名字與動作詞），年齡改跟標題同一列。手機橫帶高度不變。
 
 - **Agent 審查模型更新**：Claude Code 工程審改 Codex `gpt-6-luna`（`-s read-only`，需 codex-cli ≥ 0.156）、對抗審改 `cursor-agent` `grok-4.7-high-fast`（備援 grok CLI `grok-4.7`）、設計審 Opus 5.5；審查一律唯讀、送外部模型的 prompt 不含個資。移除 Fable 5 禁令與 `.cursor/hooks/block-fable.mjs`。Cursor Task slug 未改。
