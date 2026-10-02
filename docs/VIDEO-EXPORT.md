@@ -1,17 +1,17 @@
 # YouTube 整集影片匯出 Workflow
 
-將站上「看圖聽故事」素材匯出為 **1920×1080** mp4，供 **YouTube Studio 手動上傳**。換頁時間來自場景切分；字幕為 **`data/subtitles/<slug>.json` 原始逐句側車**（與播放器即時字幕相同），**burn-in** 燒進影片。
+將站上「看圖聽故事」素材匯出為 **1920×1080** mp4，供 **YouTube Studio 手動上傳**。換頁時間來自場景切分；字幕為 **`data/subtitles/<slug>.json` 原始逐句側車**（與播放器即時字幕相同），**burn-in** 燒進影片。本文件是**靜圖換頁**。要加無聲短片、結尾淡回插圖再停格，見 [VIDEO-GENERATE.md](./VIDEO-GENERATE.md)。
 
 > **不做**：YouTube API 自動上傳、9:16 Shorts（見 TODOS REUSE-3 二期）。
 
 ## 在營運管線中的位置
 
 ```
+proofread --mark
+    ↓
 illustrate --approve（全幕插圖上線）
     ↓
-proofread --mark（若尚未完成）
-    ↓
-【本文件】npm run export:video -- ep-N
+【本文件】npm run export:video -- <slug>
     ↓
 YouTube Studio 手動上傳 + 設定（兒童向／AI 標示）
 ```
@@ -99,4 +99,5 @@ export/video/ep-9/
 
 - [SUBTITLE-PROOFREAD.md](./SUBTITLE-PROOFREAD.md) — 校稿與 `--mark`
 - [EPISODE-WORKFLOW.md](./EPISODE-WORKFLOW.md) — 全幕生圖標準
+- [VIDEO-GENERATE.md](./VIDEO-GENERATE.md) — 全幕集生成會動的影片
 - [README — 字型維護](../README.md#字型維護)

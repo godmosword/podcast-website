@@ -95,6 +95,7 @@ npm run dev
 | `npm run transcribe` | whisper.cpp 本機轉錄字幕 → `data/subtitles/<slug>.json` |
 | `npm run proofread:subtitles` | 字幕 lint／fix／`--mark`（illustrate 前必做） |
 | `npm run illustrate` | OpenAI 切場景 + 生圖（需 `OPENAI_API_KEY`，CI 不生圖） |
+| `npm run export:video` | 靜圖匯出 1920×1080 mp4（`docs/VIDEO-EXPORT.md`）。會動的流程見 `docs/VIDEO-GENERATE.md`，片段 CLI 尚未落地 |
 | `npm run verify:episodes` | 對照 ep-9／ep-10 標準驗證集數接線 |
 | `npm run verify:browse-index` | 驗證 `browse-index.json` 與故事資料一致 |
 | `npm run generate:story-blurs` | 故事圖 blur placeholder |

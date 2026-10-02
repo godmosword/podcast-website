@@ -86,8 +86,9 @@ npm run sync:notify   # 務必先 push 成功再跑；走 GHA 同一路徑補開
 
 # 7. （可選）匯出 YouTube 整集影片
 npm run export:video -- <slug>
-#    → export/video/<slug>/<slug>.mp4（原始逐句字幕 burn-in）
+#    → export/video/<slug>/<slug>.mp4（原始逐句字幕 burn-in；今天是靜圖換頁）
 #    見 docs/VIDEO-EXPORT.md
+#    要讓畫面動起來（無聲短片 + 停格）見 docs/VIDEO-GENERATE.md
 
 # 8. （營運）SoundOn show notes 回鏈
 #    於 SoundOn 後台該集 show notes 尾段貼官網連結（含 UTM），見 docs/metrics/README.md
@@ -146,7 +147,8 @@ GHA `sync-apple-podcast.yml` 在 `npm run sync:apple` 後**一律**跑 `npm run 
 
 ## 相關文件
 
-- [VIDEO-EXPORT.md](./VIDEO-EXPORT.md) — YouTube 整集 mp4 匯出（原始字幕 burn-in）
+- [VIDEO-EXPORT.md](./VIDEO-EXPORT.md) — YouTube 整集 mp4 匯出（靜圖換頁、原始字幕 burn-in）
+- [VIDEO-GENERATE.md](./VIDEO-GENERATE.md) — 全幕集生成會動的 YouTube 影片（不指定集數）
 - [SUBTITLE-PROOFREAD.md](./SUBTITLE-PROOFREAD.md) — Whisper 草稿校對清單與 `--mark` 閘門
 - [AGENT-WORKFLOW.md](./AGENT-WORKFLOW.md) — Meta 編排（`/agent-plan`、`/agent-action`）
 - [AGENT-DOMAIN.md](./AGENT-DOMAIN.md) — 本專案 Bootstrap、紅線、驗證矩陣

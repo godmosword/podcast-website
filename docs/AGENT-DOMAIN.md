@@ -36,6 +36,7 @@ Skill／Agent 發現只掃描 repository 受版本控制的檔案；排除 `node
 | 任務類型 | 加讀 |
 |----------|------|
 | **單集插圖全流程** | [`EPISODE-WORKFLOW.md`](EPISODE-WORKFLOW.md)、[`SUBTITLE-PROOFREAD.md`](SUBTITLE-PROOFREAD.md) |
+| **YouTube 影片** | [`VIDEO-EXPORT.md`](VIDEO-EXPORT.md)（靜圖匯出）、[`VIDEO-GENERATE.md`](VIDEO-GENERATE.md)（無聲短片；尚未有 CLI） |
 | **字幕校對** | [`SUBTITLE-PROOFREAD.md`](SUBTITLE-PROOFREAD.md)、`data/subtitles/<slug>.json` |
 | **生圖 / 切場景** | README § illustrate、`scripts/lib/illustrate-core.ts`、`data/characters.json` |
 | **Apple 同步 / CI** | [`.github/workflows/sync-apple-podcast.yml`](../.github/workflows/sync-apple-podcast.yml) |
