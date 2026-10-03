@@ -146,14 +146,12 @@
   background: var(--surface-elevated);
 }
 
-/* 本集介紹：較窄、與封面留白，降成安靜輔助面（Content over chrome）。
+/* 本集介紹：與內容欄同寬同左緣（手機／平板不再 380px 置中或內縮 28px）。
    美術審 M1：卡身與 .contentSection 同一種卡（hairline＋elevated＋shadow-sm），
    拿掉左緣色條（DESIGN「Content over chrome」：容器不做左緣色條）；標題不加短槓、
    夜間不套 --warm-card-glow——它在 ≥980 是 hero 組合的一部分，不能再多一個亮點。 */
 .introSection {
-  max-width: 380px;
   margin-top: var(--space-8);
-  margin-inline: auto;
   margin-bottom: var(--space-8);
   padding: var(--space-6) var(--space-4);
   border: 1px solid var(--hairline);
@@ -313,9 +311,6 @@
   }
 
   .introSection {
-    /* 手機欄寬窄，用水平內縮拉開與滿寬封面的層次 */
-    max-width: none;
-    width: calc(100% - 28px);
     margin-top: 22px;
     margin-bottom: var(--space-8);
     padding: 14px 16px;

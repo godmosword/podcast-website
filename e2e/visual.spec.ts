@@ -377,6 +377,20 @@ for (const pageDef of VISUAL_PAGES) {
   }
 }
 
+test("visual：單集 ep-3 768 light", async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 900 });
+  await page.goto("/story/ep-3");
+  await stabilizeVisualPage(page, { theme: "light" });
+  const masks = volatileMasks(page, "story-ep-3");
+  await assertMasksResolve(masks, "story-ep-3");
+  await expect(page).toHaveScreenshot("story-ep-3-768-light.png", {
+    fullPage: true,
+    maxDiffPixelRatio: 0.02,
+    animations: "disabled",
+    mask: masks,
+  });
+});
+
 // 元件級 baseline：高度不隨資料變動，圖小且真的看得完，容差不會被面積稀釋。
 for (const shot of COMPONENT_SHOTS) {
   for (const theme of THEMES) {

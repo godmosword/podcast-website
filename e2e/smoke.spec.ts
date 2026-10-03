@@ -296,6 +296,19 @@ test("單集出場角色條連到圖鑑", async ({ page }) => {
   await expect(firstCast).toHaveAttribute("href", /\/characters#/);
 });
 
+test("單集介紹卡與播放鈕同左緣", async ({ page }) => {
+  for (const width of [375, 768, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/story/ep-3");
+    const play = await page.getByRole("link", { name: /開始看故事/ }).boundingBox();
+    const intro = await page.getByRole("region", { name: "本集介紹" }).boundingBox();
+    expect(play, `${width} 播放鈕`).not.toBeNull();
+    expect(intro, `${width} 介紹卡`).not.toBeNull();
+    expect(Math.round(intro!.x), `${width} 左緣`).toBe(Math.round(play!.x));
+    expect(Math.round(intro!.width), `${width} 寬度`).toBe(Math.round(play!.width));
+  }
+});
+
 test("375px 單集首屏看得到播放、收藏與分享", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/story/ep-3");
