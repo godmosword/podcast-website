@@ -1,0 +1,81 @@
+{
+  "slug": "ep-32",
+  "audioDuration": 436.4,
+  "model": "manual-image-cues",
+  "generatedAt": "2026-10-03T00:40:00.000Z",
+  "scenes": [
+    {
+      "index": 1,
+      "start": 0,
+      "end": 49.2,
+      "summary": "我們一起出發去",
+      "prompt": "",
+      "characters": []
+    },
+    {
+      "index": 2,
+      "start": 49.2,
+      "end": 108.3,
+      "summary": "我們今天要講的故事是",
+      "prompt": "",
+      "characters": []
+    },
+    {
+      "index": 3,
+      "start": 108.3,
+      "end": 201.8,
+      "summary": "多多呢急急忙忙的跑去找媽媽",
+      "prompt": "",
+      "characters": []
+    },
+    {
+      "index": 4,
+      "start": 201.8,
+      "end": 244.6,
+      "summary": "到了車車遊樂園",
+      "prompt": "",
+      "characters": []
+    },
+    {
+      "index": 5,
+      "start": 244.6,
+      "end": 273.0,
+      "summary": "直到有一天呢",
+      "prompt": "",
+      "characters": []
+    },
+    {
+      "index": 6,
+      "start": 273.0,
+      "end": 297.3,
+      "summary": "媽媽呢拿了鏡子給多多看",
+      "prompt": "",
+      "characters": []
+    },
+    {
+      "index": 7,
+      "start": 297.3,
+      "end": 357.3,
+      "summary": "多多呢 拿起自己的牙刷",
+      "prompt": "",
+      "characters": []
+    },
+    {
+      "index": 8,
+      "start": 357.3,
+      "end": 374.1,
+      "summary": "小朋友 如果有一天",
+      "prompt": "",
+      "characters": []
+    },
+    {
+      "index": 9,
+      "start": 374.1,
+      "end": 436.4,
+      "summary": "可以請爸爸媽媽準備乾淨的紗布",
+      "prompt": "",
+      "characters": []
+    }
+  ],
+  "newCharacters": []
+}

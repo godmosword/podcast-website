@@ -303,7 +303,7 @@
     {
       "index": 24,
       "start": 430.8,
-      "end": 449,
+      "end": 454.6,
       "summary": "大大的太陽和一道溫暖的陽光灑在小紅的車頂上；遠遠望去是一座又一座翠綠色的山，漂亮的蘭陽平原在眼前慢慢展開",
       "prompt": "LAYOUT LOCK (highest priority): EXACTLY TWO highway lanes. Cars each centered in their own lane, never straddling lines. NO third lane. NO arms/hands/limbs.\n\nSTORY BEAT: Wide, breathtaking clay landscape just past the tunnel exit: a big warm sun in a bright blue sky with fluffy clay clouds, a soft golden sunbeam pouring down onto 小紅賽車's roof, and in the distance range after range of lush emerald-green clay mountains opening onto the beautiful Lanyang Plain — a patchwork of green rice fields and little rooftops spreading out slowly below, with a hint of sea on the horizon. 小紅賽車 and 紅爸 roll down the highway together, small in the frame against the huge scenery. Match portrait 小紅賽車 exactly: glossy bright red race car, white racing stripe with a blue number 2, light-blue windshield, cream face panel with two big round blue-iris eyes and black eyebrows, ONE happy mouth on the front bumper, yellow headlights, black tyres with cream hubcaps. Match portrait 紅爸 exactly: larger adult red race car, white centre stripe, blue trim, white circle with blue number 1 (never 2), mature round eyes on the cream windshield panel, curly black handlebar mustache above a smiling mouth ON THE FRONT BUMPER/GRILLE. Exactly ONE face each. Both cars are pure vehicles — NO arms, NO hands, NO limbs, no fingers, no legs. Any distant car is tiny, generic and faceless with NO arms, NO hands, NO limbs. No text, no logos.",
       "characters": [
@@ -315,7 +315,7 @@
     },
     {
       "index": 25,
-      "start": 449,
+      "start": 454.6,
       "end": 466.9,
       "summary": "結語：Bonbon 和馬米問小朋友今天的故事有趣嗎，下次經過雪山隧道時也可以仔細找找看那個大大的方形牌子",
       "prompt": "Clay podcast studio: Bonbon and Mami sit at the round wooden table with their microphones, warmly asking the kids whether today's story was fun and suggesting that next time they pass through the Hsuehshan Tunnel they can look carefully for the big square numbered sign. On the table between the mics sits a SMALL clay toy of 小紅賽車 — bright red race car with the white racing stripe and blue number 2, light-blue windshield, two big round blue-iris eyes on the cream face panel and ONE smiling mouth on the front bumper, matching portrait 小紅賽車, exactly ONE face — plus a tiny plain square sign prop with a single numeral on it. Bonbon and 馬米 are HUMAN clay characters and keep their normal hands. The toy car is a pure vehicle: NO arms, NO hands, NO limbs, no fingers, no legs. No other text, no logos.",
