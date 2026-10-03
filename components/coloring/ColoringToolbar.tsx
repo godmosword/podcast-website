@@ -154,7 +154,7 @@ export function ColoringToolbar({
         </div>
       </div>
       <p id="coloring-toolbar-hint" className={styles.scrollHint}>
-        手機可左右滑動查看更多工具 →
+        → 右邊還有工具
       </p>
     </div>
   );

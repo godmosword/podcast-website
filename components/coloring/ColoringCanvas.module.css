@@ -3,16 +3,27 @@
   gap: 0.85rem;
   grid-template-areas:
     "top"
-    "hint"
     "stage"
     "notice"
     "controls";
 }
 
+/* 開場句是獨立一列，不包進 .controls。
+   .controls 必須是 .root 的格子，sticky 才能相對整頁黏住；
+   包在只和自己一樣高的容器裡，664 高的視窗會把工具列裁掉。 */
+.root:has(.openHint) {
+  grid-template-areas:
+    "top"
+    "stage"
+    "notice"
+    "cue"
+    "controls";
+}
+
 .topBar { grid-area: top; }
-.completionHint { grid-area: hint; }
 .stage { grid-area: stage; }
 .saveNotice { grid-area: notice; }
+.openHint { grid-area: cue; }
 
 /* G-H3：手機／平板——色盤＋工具列黏在視窗底，畫布在視野內時不用來回捲就能換色換工具。 */
 .controls {
@@ -29,16 +40,32 @@
   box-shadow: 0 -6px 18px color-mix(in srgb, var(--coloring-ink) 10%, transparent);
 }
 
+.openHint {
+  margin: 0;
+  padding: 0 0.15rem;
+  font-size: var(--fs-label);
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--coloring-ink);
+}
+
 /* 桌機：畫布左、色盤＋工具列右欄（跟著捲動頂端黏住），畫布 720px 高時色盤不會掉到 1140px 以下。 */
 @media (min-width: 980px) {
   .root {
     grid-template-columns: minmax(0, 1fr) 280px;
     grid-template-areas:
       "top top"
-      "hint hint"
       "stage controls"
       "notice controls";
     align-items: start;
+  }
+
+  .root:has(.openHint) {
+    grid-template-areas:
+      "top top"
+      "stage cue"
+      "stage controls"
+      "notice controls";
   }
 
   .controls {
@@ -110,31 +137,35 @@
   position: fixed;
   inset: 0;
   z-index: 20;
-  display: grid;
-  place-items: center;
+  display: flex;
+  overflow-y: auto;
   padding: 1.25rem;
   background: color-mix(in srgb, var(--bg) 88%, transparent);
 }
 
-.completionHint {
-  display: grid;
-  gap: 0.15rem;
-  padding: 0.65rem 0.8rem;
-  border: 2px solid color-mix(in srgb, var(--coloring-accent) 30%, transparent);
-  border-radius: var(--radius-sm);
-  color: var(--coloring-ink);
-  background: color-mix(in srgb, var(--coloring-ui-surface) 88%, var(--coloring-accent));
-  font-size: var(--fs-label);
-  line-height: 1.4;
+.doneSheet {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: min(100%, 28rem);
+  margin: auto;
 }
 
-.completionHint strong {
-  font-size: var(--fs-control);
+.doneSnapshot {
+  width: min(56vw, 34vh, 240px);
+  aspect-ratio: 1;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  flex-shrink: 0;
 }
 
-.completionHint[data-tone="rich"] {
-  border-color: color-mix(in srgb, var(--coloring-grass) 42%, transparent);
-  background: color-mix(in srgb, var(--coloring-ui-surface) 86%, var(--coloring-grass));
+@media (max-height: 480px) {
+  .doneSnapshot {
+    display: none;
+  }
 }
 
 .stage {

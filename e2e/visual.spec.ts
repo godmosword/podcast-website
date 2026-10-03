@@ -377,6 +377,24 @@ for (const pageDef of VISUAL_PAGES) {
   }
 }
 
+test("visual：著色本畫布 390 light", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto("/games/coloring-book");
+  await stabilizeVisualPage(page, { theme: "light" });
+  await page.getByRole("button", { name: "打開著色本" }).click();
+  await page.getByRole("button", { name: /^著色：/ }).first().click();
+  await page.waitForSelector("canvas");
+  await page.waitForFunction(
+    () => !document.body.textContent?.includes("載入線稿中"),
+  );
+  await expect(page).toHaveScreenshot("coloring-canvas-390-light.png", {
+    fullPage: true,
+    maxDiffPixelRatio: 0.02,
+    animations: "disabled",
+    mask: [],
+  });
+});
+
 test("visual：單集 ep-3 768 light", async ({ page }) => {
   await page.setViewportSize({ width: 768, height: 900 });
   await page.goto("/story/ep-3");

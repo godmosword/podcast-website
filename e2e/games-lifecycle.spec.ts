@@ -133,7 +133,7 @@ test.describe("遊戲完整 lifecycle", () => {
     await page.setViewportSize(MOBILE);
     await openColoringCanvas(page);
     await expect(page.getByRole("button", { name: "我塗好了" })).toBeVisible();
-    await expect(page.getByTestId("coloring-completion-hint")).toContainText("準備開始");
+    await expect(page.getByTestId("coloring-open-hint")).toHaveText("選一個顏色，用蠟筆塗塗看");
 
     await page.getByRole("button", { name: "我塗好了" }).click();
     await expect(page.getByRole("dialog", { name: "塗好了！" })).toBeVisible();

@@ -58,7 +58,7 @@ test.describe("coloring book", () => {
     await page.mouse.up();
 
     expect(await countRedOnRow(page, 0.5, 0.62, 0.55)).toBeGreaterThan(0);
-    await expect(page.getByTestId("coloring-completion-hint")).toHaveAttribute("data-tone", "growing");
+    await expect(page.getByTestId("coloring-open-hint")).toHaveCount(0);
 
     await page.getByRole("button", { name: "復原" }).click();
     expect(await countRedOnRow(page, 0.5, 0.62, 0.55)).toBe(0);
@@ -108,7 +108,7 @@ test.describe("coloring book", () => {
 
   test("工具列具備筆刷三檔與縮放還原", async ({ page }) => {
     await openFirstColoringPage(page);
-    await expect(page.getByText(/先選顏色，再用蠟筆/)).toBeVisible();
+    await expect(page.getByTestId("coloring-open-hint")).toHaveText("選一個顏色，用蠟筆塗塗看");
     for (const name of ["筆刷細", "筆刷中", "筆刷粗"]) {
       const sizeBtn = page.getByRole("button", { name });
       await expect(sizeBtn).toBeVisible();
@@ -117,6 +117,74 @@ test.describe("coloring book", () => {
     await expect(page.getByRole("button", { name: "蠟筆" })).not.toHaveText("蠟筆");
     await expect(page.getByRole("button", { name: "蠟筆" }).locator("svg")).toBeVisible();
     await expect(page.getByRole("button", { name: "縮放還原" })).toBeDisabled();
+  });
+
+  async function paintCrayonStroke(page: Page) {
+    const box = await page.locator("canvas").boundingBox();
+    if (!box) throw new Error("canvas boundingBox 不存在");
+    const y = box.y + box.height * 0.55;
+    await page.mouse.move(box.x + box.width * 0.5, y);
+    await page.mouse.down();
+    for (let i = 0; i <= 10; i += 1) {
+      await page.mouse.move(box.x + box.width * (0.5 + 0.012 * i), y);
+    }
+    await page.mouse.up();
+  }
+
+  /** 完成面快照 img 上的紅色像素數。 */
+  async function countRedInDoneSnapshot(page: Page) {
+    return page.evaluate(async () => {
+      const img = document.querySelector(
+        '[data-testid="coloring-done-snapshot"]',
+      ) as HTMLImageElement | null;
+      if (!img) return -1;
+      if (img.naturalWidth === 0) await img.decode();
+      const w = img.naturalWidth;
+      const h = img.naturalHeight;
+      if (w <= 0 || h <= 0) return -1;
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return -1;
+      ctx.drawImage(img, 0, 0);
+      const data = ctx.getImageData(0, 0, w, h).data;
+      let red = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i]! > 180 && data[i + 1]! < 140 && data[i + 2]! < 140) red += 1;
+      }
+      return red;
+    });
+  }
+
+  test("390×664：完成面顯示作品快照且行動鈕在視窗內", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 664 });
+    await openFirstColoringPage(page);
+    await paintCrayonStroke(page);
+    await page.getByRole("button", { name: "我塗好了" }).click();
+    await expect(page.getByRole("dialog", { name: "塗好了！" })).toBeVisible();
+    const snapshot = page.getByTestId("coloring-done-snapshot");
+    await expect(snapshot).toBeVisible();
+    expect(await countRedInDoneSnapshot(page)).toBeGreaterThan(0);
+
+    const changePage = page.getByRole("button", { name: "換一張塗" });
+    const replay = page.getByRole("button", { name: "再塗這一張" });
+    for (const btn of [changePage, replay]) {
+      const box = await btn.boundingBox();
+      expect(box).toBeTruthy();
+      expect(box!.y).toBeGreaterThanOrEqual(0);
+      expect(box!.y + box!.height).toBeLessThanOrEqual(664);
+    }
+    expect(await page.evaluate(() => document.scrollingElement?.scrollTop ?? 0)).toBe(0);
+  });
+
+  test("390×400：矮視窗完成面不顯示快照", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 400 });
+    await openFirstColoringPage(page);
+    await paintCrayonStroke(page);
+    await page.getByRole("button", { name: "我塗好了" }).click();
+    await expect(page.getByRole("dialog", { name: "塗好了！" })).toBeVisible();
+    await expect(page.getByTestId("coloring-done-snapshot")).toBeHidden();
   });
 
   test("我塗好了打開完成站，可再塗這一張", async ({ page }) => {

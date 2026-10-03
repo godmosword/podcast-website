@@ -14,10 +14,6 @@ import {
   loadColoringDraft,
   saveColoringDraft,
 } from "@/lib/coloring/draft-storage";
-import {
-  coloringCompletionCopy,
-  type ColoringCompletionActivity,
-} from "@/lib/coloring/completion";
 import { renderFramedArtwork } from "@/lib/coloring/export-frame";
 import { COLORING_DONE_CTA } from "@/lib/coloring/flow";
 import {
@@ -118,23 +114,28 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
   const [viewActive, setViewActive] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [doneOpen, setDoneOpen] = useState(false);
-  const [completionActivity, setCompletionActivity] = useState<ColoringCompletionActivity>({
-    operations: 0,
-    colors: 0,
-  });
-  const completionActivityRef = useRef(completionActivity);
-  completionActivityRef.current = completionActivity;
-  const usedColorsRef = useRef<Set<string>>(new Set());
+  const [doneSnapshotUrl, setDoneSnapshotUrl] = useState<string | null>(null);
+  const doneSnapshotUrlRef = useRef<string | null>(null);
+  const snapshotAliveRef = useRef(true);
+  const doneRequestRef = useRef(0);
+  const [hasPainted, setHasPainted] = useState(false);
 
-  const recordCompletionAction = useCallback((color: string | null) => {
-    if (color) usedColorsRef.current.add(color);
-    const next = {
-      operations: completionActivityRef.current.operations + 1,
-      colors: usedColorsRef.current.size,
-    };
-    completionActivityRef.current = next;
-    setCompletionActivity(next);
+  const revokeDoneSnapshot = useCallback(() => {
+    if (doneSnapshotUrlRef.current) {
+      URL.revokeObjectURL(doneSnapshotUrlRef.current);
+      doneSnapshotUrlRef.current = null;
+    }
+    setDoneSnapshotUrl(null);
   }, []);
+
+  const markPainted = useCallback(() => {
+    setHasPainted(true);
+  }, []);
+
+  const closeDoneOverlay = useCallback(() => {
+    setDoneOpen(false);
+    revokeDoneSnapshot();
+  }, [revokeDoneSnapshot]);
 
   const composite = useCallback(() => {
     const display = displayRef.current;
@@ -312,14 +313,14 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
     const dirty = strokeDirtyRef.current;
     if (base && dirty) {
       pushUndoPatch({ rect: dirty, pixels: cropImageDataRect(base, dirty) });
-      recordCompletionAction(tool === "eraser" ? null : colorHex);
+      markPainted();
       scheduleSave();
     }
     strokeImgRef.current = null;
     strokeBaseRef.current = null;
     strokeDirtyRef.current = null;
     strokeMaskRef.current = null;
-  }, [colorHex, pushUndoPatch, recordCompletionAction, scheduleSave, tool]);
+  }, [pushUndoPatch, markPainted, scheduleSave]);
 
   const runBucket = useCallback(
     (pt: Point) => {
@@ -341,12 +342,12 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
       );
       if (!rect) return;
       pushUndoPatch({ rect, pixels: cropImageDataRect(base, rect) });
-      recordCompletionAction(colorHex);
+      markPainted();
       ctx.putImageData(img, 0, 0, rect.x, rect.y, rect.width, rect.height);
       requestComposite();
       scheduleSave();
     },
-    [colorHex, pushUndoPatch, recordCompletionAction, requestComposite, scheduleSave],
+    [colorHex, pushUndoPatch, markPainted, requestComposite, scheduleSave],
   );
 
   const startGestureIfTwoPointers = useCallback(() => {
@@ -421,9 +422,9 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
     saveSeqRef.current += 1;
     setReady(false);
     setSaveError(null);
-    usedColorsRef.current.clear();
-    completionActivityRef.current = { operations: 0, colors: 0 };
-    setCompletionActivity(completionActivityRef.current);
+    setDoneOpen(false);
+    revokeDoneSnapshot();
+    setHasPainted(false);
     undoStackRef.current = [];
     setCanUndo(false);
     applyView(DEFAULT_VIEW);
@@ -474,11 +475,7 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
           const draftImg = new Image();
           draftImg.onload = () => {
             if (!cancelled) paintCtx.drawImage(draftImg, 0, 0, w, h);
-            if (!cancelled) {
-              const restoredActivity = { operations: 1, colors: 0 };
-              completionActivityRef.current = restoredActivity;
-              setCompletionActivity(restoredActivity);
-            }
+            if (!cancelled) setHasPainted(true);
             if (objectUrl) URL.revokeObjectURL(objectUrl);
             finishLoad();
           };
@@ -504,7 +501,16 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
       gestureRef.current = null;
       drawingRef.current = false;
     };
-  }, [page.id, page.lineArtSrc, composite, applyView]);
+  }, [page.id, page.lineArtSrc, composite, applyView, revokeDoneSnapshot]);
+
+  useEffect(() => {
+    snapshotAliveRef.current = true;
+    return () => {
+      snapshotAliveRef.current = false;
+      doneRequestRef.current += 1;
+      revokeDoneSnapshot();
+    };
+  }, [revokeDoneSnapshot]);
 
   const onPointerDown = (event: ReactPointerEvent<HTMLCanvasElement>) => {
     if (!ready) return;
@@ -613,9 +619,7 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveSeqRef.current += 1;
     void clearColoringDraft(page.id);
-    usedColorsRef.current.clear();
-    completionActivityRef.current = { operations: 0, colors: 0 };
-    setCompletionActivity(completionActivityRef.current);
+    setHasPainted(false);
     composite();
   };
 
@@ -661,10 +665,24 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
   const handleDone = () => {
     composite();
     playDoneTone();
-    setDoneOpen(true);
+    const display = displayRef.current;
+    if (!display) {
+      setDoneOpen(true);
+      return;
+    }
+    const request = doneRequestRef.current + 1;
+    doneRequestRef.current = request;
+    display.toBlob((blob) => {
+      if (!snapshotAliveRef.current || request !== doneRequestRef.current) return;
+      revokeDoneSnapshot();
+      if (blob) {
+        const url = URL.createObjectURL(blob);
+        doneSnapshotUrlRef.current = url;
+        setDoneSnapshotUrl(url);
+      }
+      setDoneOpen(true);
+    }, "image/png");
   };
-
-  const completionFeedback = coloringCompletionCopy(completionActivity);
 
   return (
     <div className={styles.root}>
@@ -681,22 +699,6 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
         >
           {COLORING_DONE_CTA}
         </button>
-      </div>
-
-      {/* G-H3：操作說明與完成提示併成一行；還沒動筆時提示文就是操作說明，省下一個說明框的高度。 */}
-      <div
-        className={styles.completionHint}
-        data-testid="coloring-completion-hint"
-        data-tone={completionFeedback.tone}
-        role="status"
-        aria-live="polite"
-      >
-        <strong>{completionFeedback.label}</strong>
-        <span>
-          {completionFeedback.tone === "start"
-            ? "先選顏色，再用蠟筆塗一塗；想填滿一大片就用油漆桶。兩指可以放大找細節！"
-            : completionFeedback.detail}
-        </span>
       </div>
 
       <div className={styles.stage} ref={stageRef}>
@@ -730,35 +732,52 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
         {saveError}
       </p>
 
+      {!hasPainted ? (
+        <p className={styles.openHint} data-testid="coloring-open-hint">
+          選一個顏色，用蠟筆塗塗看
+        </p>
+      ) : null}
       {/* G-H3：色盤＋工具列黏在視窗底（手機）／畫布右欄（桌機），畫布可見時一定搆得到 */}
       <div className={styles.controls} data-testid="coloring-controls">
-      <ColoringPalette colorHex={colorHex} onChange={setColorHex} />
-      <ColoringToolbar
-        tool={tool}
-        onToolChange={setTool}
-        brushSize={brushSize}
-        onBrushSizeChange={setBrushSize}
-        showPreview={showPreview}
-        onTogglePreview={() => setShowPreview((v) => !v)}
-        canUndo={canUndo}
-        onUndo={handleUndo}
-        onClear={handleClear}
-        onDownload={handleDownload}
-        viewActive={viewActive}
-        onResetView={() => applyView(DEFAULT_VIEW)}
-      />
+        <ColoringPalette colorHex={colorHex} onChange={setColorHex} />
+        <ColoringToolbar
+          tool={tool}
+          onToolChange={setTool}
+          brushSize={brushSize}
+          onBrushSizeChange={setBrushSize}
+          showPreview={showPreview}
+          onTogglePreview={() => setShowPreview((v) => !v)}
+          canUndo={canUndo}
+          onUndo={handleUndo}
+          onClear={handleClear}
+          onDownload={handleDownload}
+          viewActive={viewActive}
+          onResetView={() => applyView(DEFAULT_VIEW)}
+        />
       </div>
 
       {doneOpen ? (
         <div className={styles.doneOverlay} role="presentation">
-          <GameEndStation
-            mood="win"
-            title="塗好了！"
-            gameSlug="coloring-book"
-            onReplay={() => setDoneOpen(false)}
-            replayLabel="再塗這一張"
-            mainAction={{ label: "換一張塗", icon: "page", onClick: onBack }}
-          />
+          <div className={styles.doneSheet}>
+            {doneSnapshotUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- 完成面作品快照
+              <img
+                className={styles.doneSnapshot}
+                src={doneSnapshotUrl}
+                alt=""
+                aria-hidden="true"
+                data-testid="coloring-done-snapshot"
+              />
+            ) : null}
+            <GameEndStation
+              mood="win"
+              title="塗好了！"
+              gameSlug="coloring-book"
+              onReplay={closeDoneOverlay}
+              replayLabel="再塗這一張"
+              mainAction={{ label: "換一張塗", icon: "page", onClick: onBack }}
+            />
+          </div>
         </div>
       ) : null}
     </div>

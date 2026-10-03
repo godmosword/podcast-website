@@ -289,7 +289,7 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 - `/games` 呈現可玩活動，站序固定為 **繪本著色** → Candy Match（繽紛消消樂）→ Block Drop（繽紛樂園）；不放「製作中」或未承諾 placeholder。著色本是園內第一站，不佔漢堡獨立列。
 - Hub 首圖只放遊樂園底圖，其下直接三張遊戲卡；不疊標題／導言／chip，也不放「園裡的站」、星星進度、車庫或頁尾句。頁面 `h1` 走 sr-only。
 - Hub 排版：≥641px 三欄等寬；≤640px 著色本全寬（`.lead`）、另外兩款並排。
-- 繪本著色為 explore 活動：線稿來自既有定裝／場景圖，不併入 `GameKitGameId` 分數進度；路由仍為 `/games/coloring-book`。
+- 繪本著色為 explore 活動：線稿來自既有定裝／場景圖，不併入 `GameKitGameId` 分數進度；路由仍為 `/games/coloring-book`。完成面先給作品快照；開場只留一行，不佔畫布上方一張卡；矮視窗（`max-height: 480px`）不顯示快照。
 - Game Kit 只保留單一 `lib/gamekit/` 樹，分為 `react/`、`runtime/`、`progress/`、`games/` 與 `types.ts`（街機兩款）。
 - Consumer 必須匯入明確 leaf path，例如 `@/lib/gamekit/react/useGameAudio`；不使用 `@/lib/gamekit` 根目錄或 barrel。
 - 詳細邊界、import policy 與新增遊戲流程見 [GAMEKIT-ARCHITECTURE.md](./docs/GAMEKIT-ARCHITECTURE.md)。
