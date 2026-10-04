@@ -9,7 +9,7 @@ import SiteNavBar from "@/components/landing/SiteNavBar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { INTRO_GATE_INIT_SCRIPT, INTRO_PORTAL_ENABLED } from "@/lib/intro-gate";
 import { siteIdentityJsonLd } from "@/lib/json-ld";
-import { getSiteUrl } from "@/lib/site-url";
+import { DEFAULT_OG_IMAGE, getSiteUrl } from "@/lib/site-url";
 import { STORIES_VIEW_INIT_SCRIPT } from "@/lib/stories-view";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
@@ -66,13 +66,13 @@ export const metadata: Metadata = {
     locale: "zh_TW",
     type: "website",
     siteName: "車車遊樂園",
-    images: [{ url: "/mascot.png", alt: "車車遊樂園吉祥物" }],
+    images: [{ url: DEFAULT_OG_IMAGE, alt: "車車遊樂園吉祥物" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "車車遊樂園",
     description: "每天一個車車故事，陪孩子長大。",
-    images: ["/mascot.png"],
+    images: [DEFAULT_OG_IMAGE],
   },
   icons: {
     icon: [
