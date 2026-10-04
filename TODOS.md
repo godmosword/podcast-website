@@ -76,7 +76,7 @@
 | K-11 | 著色完成面減字 | summary 文字刪除、角色 icon 已在；音效待著色本接 audio | S | ✅ `a9630107`（音效未做） |
 | K-12 | `GameEndStation` 減法 | 角色 icon＋大 icon 圓鈕（主）＋小 icon 圓鈕（次），文字只剩標題／分數 | S | ✅ `a9630107` |
 
-### TEST-DEBT-1　`games-lifecycle` Candy 提示對 flake　`eng · S · 無`　已修（待 commit）
+### TEST-DEBT-1　`games-lifecycle` Candy 提示對 flake　`eng · S · 無`　✅ `3413de74`
 
 根因：測試假設「每個提示步都會推進任務進度」，但提示步只保證合法，不保證收到目前要的顏色。
 `playHintMove` 改成等「盤面標籤改變且棋盤恢復可操作」；Candy lifecycle 重複 4 次 24/24 通過。
@@ -86,10 +86,10 @@
 計劃：[plans/2026-10-04-candy-match-gameplay-update.md](./plans/2026-10-04-candy-match-gameplay-update.md)。
 任務列改回寫出任務句（「收集小紅，還差 12 個」），取代 K-5「只留 icon」的決定；圖示與數字仍在。
 
-- A 規則與生成：✅ 合法性集中到引擎、動畫與純解算共用 `stepWave`、保底盤、禮物分欄、髒格模板。
-- B 關卡與調校：✅ 十關 × 兩種玩法主線＋變體；`npx tsx scripts/candy-match-sim.ts` 出 200 seed 報表。
-- C 版面與互動：✅ 大棋盤、側欄、任務列、道具預覽、禮物出口、地圖大卡、結算條件、首次引導、鍵盤操作。
-- D 整合：✅ 單元／e2e／固定 seed 視覺基線；⬜ 人工試玩第 1、4、5、8、10 關，依時長與理解度再調數值。
+- A 規則與生成：✅ `3413de74` 合法性集中到引擎、動畫與純解算共用 `stepWave`、保底盤、禮物分欄、髒格模板。
+- B 關卡與調校：✅ `3413de74` 十關 × 兩種玩法主線＋變體；`npx tsx scripts/candy-match-sim.ts` 出 200 seed 報表。
+- C 版面與互動：✅ `3413de74` 大棋盤、側欄、任務列、道具預覽、禮物出口、地圖大卡、結算條件、首次引導、鍵盤操作。
+- D 整合：✅ `3413de74` 單元／e2e／固定 seed 視覺基線；⬜ 人工試玩第 1、4、5、8、10 關，依時長與理解度再調數值。
 - 後續（本輪不做）：320px 局內抬頭的主題鈕溢出 6px（GamePageShell 既有問題，消消樂未改抬頭）。
 
 ### 兒童減法審第三批（2026-09-20，Codex 第二輪 review 重評）
