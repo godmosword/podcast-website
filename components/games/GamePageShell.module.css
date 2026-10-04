@@ -190,6 +190,11 @@
   padding: 4px;
 }
 
+/* 消消樂沒有 data-status；局內才掛棋盤。夜間收到 4px，讓 6×6、44px 格在窄機不被裁切。 */
+:global([data-theme="night"]) .main[data-game-id="candy-match"]:has([data-testid="candy-match-board"]) .playArea {
+  padding: 4px;
+}
+
 /* 兒童向操作提示：緊貼遊戲下方，不隨家長說明一起下移。 */
 .playHints {
   display: flex;

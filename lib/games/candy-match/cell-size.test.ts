@@ -24,6 +24,10 @@ describe("candyMatchCellPx", () => {
   it("寬螢幕 6 欄上限 64", () => {
     expect(candyMatchCellPx(2000, 6)).toBe(64);
   });
+
+  it("算不滿 44 時停在 44，不縮成 40", () => {
+    expect(candyMatchCellPx(272, 6)).toBe(44);
+  });
 });
 
 describe("candyMatchSwapOffset", () => {

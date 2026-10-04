@@ -377,6 +377,21 @@ for (const pageDef of VISUAL_PAGES) {
   }
 }
 
+test("visual：消消樂第 1 關 390 light", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto("/games/candy-match");
+  await stabilizeVisualPage(page, { theme: "light" });
+  await page.getByRole("button", { name: /開始/ }).click();
+  await page.locator('button[data-next="true"]').click();
+  await expect(page.getByTestId("candy-match-board")).toBeVisible();
+  await expect(page).toHaveScreenshot("candy-level1-390-light.png", {
+    fullPage: true,
+    maxDiffPixelRatio: 0.02,
+    animations: "disabled",
+    mask: [page.getByTestId("candy-match-board")],
+  });
+});
+
 test("visual：著色本畫布 390 light", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 900 });
   await page.goto("/games/coloring-book");

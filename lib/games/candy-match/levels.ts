@@ -185,7 +185,7 @@ export const CANDY_MATCH_LEVELS: CandyMatchLevel[] = [
   },
 ];
 
-/** 兒童模式（3–4 歲）覆寫：5x5、最多 4 種圖案、不限步數。 */
+/** 兒童模式（3–4 歲）覆寫：第 1 關 5×5，其後 6×6；最多 4 種圖案、不限步數。 */
 export function kidsModeLevel(level: CandyMatchLevel): CandyMatchLevel {
   const gentlerCount = (count: number) => Math.max(1, Math.ceil(count * 0.75));
   const task: CandyMatchTask = (() => {
@@ -213,10 +213,11 @@ export function kidsModeLevel(level: CandyMatchLevel): CandyMatchLevel {
     }
   })();
 
+  const board = level.index === 0 ? 5 : 6;
   return {
     ...level,
-    cols: 5,
-    rows: 5,
+    cols: board,
+    rows: board,
     pieceKinds: Math.min(level.pieceKinds, 4),
     moves: 0,
     task,

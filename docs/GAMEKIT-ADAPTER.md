@@ -79,6 +79,6 @@ No new chrome / audio / progress code required.
 契約要點：
 
 - 虛擬鍵：**capture 後滑出＝續按**；放開三路＝`pointerup`／`pointercancel`／`lostpointercapture`（見 `DESIGN.md` 互動節）。BlockDrop 左右移鍵同約；`HintChips` 暫除外。
-- 消消樂格寬：`candyMatchCellPx(availableWidth, cols)`（`ResizeObserver` 量 `boardWrap`）；min 48／max 64；gap／padding 常數見 `lib/games/candy-match/cell-size.ts`。
+- 消消樂格寬：`candyMatchCellPx(availableWidth, cols)`（`ResizeObserver` 量 `boardWrap`）；min 44／max 64；gap／padding 常數見 `lib/games/candy-match/cell-size.ts`。
 - 單元測須 shim `setPointerCapture`／`releasePointerCapture` 並**斷言呼叫**（jsdom 無實作）。
 - `test:visual` 預設 skip ≠ visual 通過；勿以未 trusted 的 visual 當回歸綠燈。

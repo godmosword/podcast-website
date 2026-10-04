@@ -658,7 +658,7 @@ export function CandyMatchView({
       "0 20px 42px rgba(144,116,128,.2), inset 0 2px 0 rgba(255,255,255,.95)",
     maxWidth: 560,
     margin: "0 auto",
-    padding: 16,
+    padding: screen === "play" ? "16px 12px" : 16,
     userSelect: "none",
     minHeight: 480,
     position: "relative",

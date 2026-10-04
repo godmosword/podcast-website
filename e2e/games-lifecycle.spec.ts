@@ -105,6 +105,17 @@ test.describe("遊戲完整 lifecycle", () => {
     await expect(page.getByRole("dialog")).toHaveCount(0);
   });
 
+  test("兒童模式第 1 關 25 格、下一關 36 格", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/games/candy-match");
+    await page.getByRole("button", { name: /開始/ }).click();
+    await page.locator('button[data-next="true"]').click();
+    await expect(page.getByTestId("candy-match-board").locator("button")).toHaveCount(25);
+    await finishCandyLevel(page);
+    await page.getByRole("button", { name: "下一關" }).click();
+    await expect(page.getByTestId("candy-match-board").locator("button")).toHaveCount(36);
+  });
+
   test("Block Drop：開始 → gameplay → game over → replay → 再次 gameplay → 離開", async ({ page }) => {
     await page.goto("/games/block-drop");
     await page.getByRole("button", { name: /開始/ }).click();

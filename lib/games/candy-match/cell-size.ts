@@ -4,10 +4,10 @@ export const CANDY_MATCH_CELL_GAP = 4;
 /** 棋盤外框內距（px） */
 export const CANDY_MATCH_BOARD_PADDING = 6;
 
-/** 依可用棋盤寬度與欄數計算每格像素（min 48、max 64）。 */
+/** 依可用棋盤寬度與欄數計算每格像素（min 44、max 64）。格子本身是按鈕。 */
 export function candyMatchCellPx(availableWidth: number, cols: number): number {
   return Math.max(
-    48,
+    44,
     Math.min(
       64,
       Math.floor(

@@ -241,23 +241,27 @@ describe("reshuffle", () => {
 });
 
 describe("關卡資料", () => {
-  it("共 10 關、index 連續、棋盤不超過 6x6", () => {
+  it("共 10 關、index 連續；標準模式前 3 關 5×5、其後 6×6", () => {
     expect(CANDY_MATCH_LEVELS.length).toBe(10);
     CANDY_MATCH_LEVELS.forEach((lv, i) => {
       expect(lv.index).toBe(i);
-      expect(lv.cols).toBeLessThanOrEqual(6);
-      expect(lv.rows).toBeLessThanOrEqual(6);
+      expect(lv.cols).toBe(i < 3 ? 5 : 6);
+      expect(lv.rows).toBe(i < 3 ? 5 : 6);
       expect(lv.pieceKinds).toBeGreaterThanOrEqual(3);
       expect(lv.pieceKinds).toBeLessThanOrEqual(5);
     });
   });
 
-  it("兒童模式覆寫：5x5、最多 4 種、不限步數", () => {
-    const lv = kidsModeLevel(CANDY_MATCH_LEVELS[5]);
-    expect(lv.cols).toBe(5);
-    expect(lv.rows).toBe(5);
-    expect(lv.pieceKinds).toBeLessThanOrEqual(4);
-    expect(lv.moves).toBe(0);
+  it("兒童模式：第 1 關 5×5，其後 6×6、最多 4 種、不限步數", () => {
+    expect(kidsModeLevel(CANDY_MATCH_LEVELS[0]).cols).toBe(5);
+    expect(kidsModeLevel(CANDY_MATCH_LEVELS[0]).rows).toBe(5);
+    for (const lv of CANDY_MATCH_LEVELS.slice(1)) {
+      const kids = kidsModeLevel(lv);
+      expect(kids.cols).toBe(6);
+      expect(kids.rows).toBe(6);
+      expect(kids.pieceKinds).toBeLessThanOrEqual(4);
+      expect(kids.moves).toBe(0);
+    }
   });
 
   it("兒童模式降低任務量且不會製造無法完成的清潔任務", () => {
