@@ -132,6 +132,7 @@ export function useCandyMatchPlay(options: Options) {
   const busyRef = useRef(false);
   const [selected, setSelected] = useState<number | null>(null);
   const [hint, setHint] = useState<CandyMove | null>(null);
+  const [teachMove, setTeachMove] = useState<CandyMove | null>(null);
   const [popping, setPopping] = useState<ReadonlySet<number>>(EMPTY_SET);
   const [shaking, setShaking] = useState<ReadonlySet<number>>(EMPTY_SET);
   const [propMode, setPropMode] = useState<CandyPropKind | null>(null);
@@ -202,6 +203,7 @@ export function useCandyMatchPlay(options: Options) {
     if (!current) return;
     optsRef.current.onTipSeen(current);
     setTipState(null);
+    if (current === "swap") setTeachMove(null);
   }, [setTipState]);
 
   const armIdle = useCallback(() => {
@@ -393,6 +395,7 @@ export function useCandyMatchPlay(options: Options) {
         progress: countSwap(snap.progress),
       });
       if (tipRef.current === "swap") dismissTip();
+      else setTeachMove(null);
       const extra = new Set<number>();
       if (specials[a] !== "none") extra.add(a);
       if (specials[b] !== "none") extra.add(b);
@@ -541,7 +544,14 @@ export function useCandyMatchPlay(options: Options) {
       setMotion(NO_MOTION);
       setCheer(false);
       setMessage(introMessage(round.stage.goals));
-      setTipState(optsRef.current.tipsSeen.includes("swap") ? null : "swap");
+      const showSwapTeach = !optsRef.current.tipsSeen.includes("swap");
+      setTipState(showSwapTeach ? "swap" : null);
+      setTeachMove(
+        showSwapTeach
+          ? findGoalHint(board, round.stage.goals, snap.progress) ??
+            findHintMove(board.pieces, board.cols, board.rows, board.specials)
+          : null,
+      );
       armIdle();
     },
     [armIdle, clearTimers, setBusyState, setOutcomeState, setTipState],
@@ -580,6 +590,7 @@ export function useCandyMatchPlay(options: Options) {
     busy,
     selected,
     hint,
+    teachMove,
     popping,
     shaking,
     propMode,

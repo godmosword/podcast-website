@@ -115,6 +115,27 @@ test.describe("遊戲完整 lifecycle", () => {
     await expect(page.getByRole("dialog")).toHaveCount(0);
   });
 
+  test("第 1 關交換教學：點錯還在，換成功才收", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/games/candy-match");
+    await page.getByRole("button", { name: /開始冒險/ }).click();
+    await page.locator("button[data-next='true']").click();
+    const teach = page.locator("[data-teach='true']");
+    await expect(teach).toHaveCount(2);
+    const ids = await teach.evaluateAll((nodes) =>
+      nodes.map((node) => node.getAttribute("data-cell")),
+    );
+    await page
+      .locator("[data-testid='candy-match-board'] button")
+      .filter({ hasNot: page.locator("[data-teach='true']") })
+      .first()
+      .click();
+    await expect(teach).toHaveCount(2);
+    await page.locator(`[data-cell="${ids[0]}"]`).click();
+    await page.locator(`[data-cell="${ids[1]}"]`).click();
+    await expect(teach).toHaveCount(0);
+  });
+
   test("390×664 地圖第一屏有下一站，第 2 關棋子至少 56px", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 664 });
     await page.emulateMedia({ reducedMotion: "reduce" });

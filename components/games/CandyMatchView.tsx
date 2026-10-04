@@ -331,6 +331,9 @@ export function CandyMatchView({
           </div>
 
           <div ref={boardWrapRef} className={styles.boardWrap}>
+            {game.tip ? (
+              <CandyMatchTip tip={game.tip} selected={game.selected != null} onDismiss={actions.dismissTip} />
+            ) : null}
             <CandyMatchBoard
               board={play.board}
               cellPx={cellPx}
@@ -339,6 +342,7 @@ export function CandyMatchView({
               popping={game.popping}
               shaking={game.shaking}
               disabled={game.busy || game.outcome !== null || inputPaused}
+              teach={game.teachMove}
               onTapCell={actions.tapCell}
               onSwipeCell={actions.attemptSwap}
               preview={game.propPreview}
@@ -368,19 +372,13 @@ export function CandyMatchView({
               />
             </div>
             <div className={styles.encouragement}>
-              {game.tip ? (
-                <CandyMatchTip tip={game.tip} selected={game.selected != null} onDismiss={actions.dismissTip} />
-              ) : (
-                <>
-                  <span className={styles.buddy} aria-hidden>
-                    <PieceArt piece={3} size="100%" />
-                  </span>
-                  {/* 只有鼓勵句是 live 區；任務列每步都變，整面 live 會讓讀屏每步重唸 */}
-                  <span className={styles.bubble} aria-live="polite">
-                    {game.message}
-                  </span>
-                </>
-              )}
+              <span className={styles.buddy} aria-hidden>
+                <PieceArt piece={3} size="100%" />
+              </span>
+              {/* 只有鼓勵句是 live 區；任務列每步都變，整面 live 會讓讀屏每步重唸 */}
+              <span className={styles.bubble} aria-live="polite">
+                {game.message}
+              </span>
             </div>
           </div>
 

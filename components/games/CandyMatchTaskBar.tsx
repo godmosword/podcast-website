@@ -81,7 +81,8 @@ export function CandyMatchTaskBar({ round, progress, movesLeft }: CandyMatchTask
     >
       <div className={styles.taskHead}>
         <span className={styles.taskPlace}>
-          第 {round.index + 1} 站・{round.place}
+          第 {round.index + 1} 站
+          <span className={styles.taskPlaceName}>・{round.place}</span>
         </span>
         {round.stage.moves > 0 ? (
           <span

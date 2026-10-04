@@ -46,6 +46,8 @@ type CandyMatchBoardProps = {
   cellPx: number;
   selected: number | null;
   hint: { a: number; b: number } | null;
+  /** 第一局交換教學，獨立於閒置 hint，點錯不會清掉。 */
+  teach?: { a: number; b: number } | null;
   /** 正在 pop 消失的格子 */
   popping: ReadonlySet<number>;
   /** 非法交換搖頭中的兩格 */
@@ -69,6 +71,7 @@ export function CandyMatchBoard({
   cellPx,
   selected,
   hint,
+  teach = null,
   popping,
   shaking,
   disabled,
@@ -253,9 +256,19 @@ export function CandyMatchBoard({
                 ? swap.a
                 : null
             : null;
-          const swapOff = swapPeer != null
-            ? candyMatchSwapOffset(i, swapPeer, cols, cellPx)
-            : null;
+        const swapOff = swapPeer != null
+          ? candyMatchSwapOffset(i, swapPeer, cols, cellPx)
+          : null;
+        const teachPeer = teach && !swapOff
+          ? i === teach.a
+            ? teach.b
+            : i === teach.b
+              ? teach.a
+              : null
+          : null;
+        const teachOff = teachPeer != null
+          ? candyMatchSwapOffset(i, teachPeer, cols, cellPx)
+          : null;
           const fallRows = fallByTo.get(i) ?? 0;
           const cellStyle: CSSProperties = {
             position: "relative",
@@ -276,7 +289,7 @@ export function CandyMatchBoard({
               ? "0 0 0 3px #7a5cc9, 0 0 0 6px rgba(255,255,255,.85)"
               : isSelected
               ? "0 0 0 3px #ff9fb7, 0 6px 14px rgba(217,95,135,.3)"
-              : isHint
+              : isHint || (reduced && teachOff)
                 ? "0 0 0 3px rgba(255,211,77,.9), 0 0 14px rgba(255,211,77,.6)"
                 : "none",
             animation: reduced
@@ -293,6 +306,7 @@ export function CandyMatchBoard({
             isPopping ? styles.piecePop : "",
             v < 0 && v !== DROP_ITEM ? styles.pieceHidden : "",
             swapOff ? styles.pieceSwap : "",
+            teachOff && !reduced ? styles.pieceTeach : "",
             fallRows > 0 ? styles.pieceFall : "",
             isPopping && sweep ? styles.pieceSweep : "",
           ]
@@ -307,6 +321,11 @@ export function CandyMatchBoard({
                 ["--swap-dy" as string]: `${swapOff.dy}px`,
                 ["--swap-ms" as string]: `${CANDY_SWAP_MS}ms`,
               }
+            : teachOff
+              ? {
+                  ["--swap-dx" as string]: `${teachOff.dx}px`,
+                  ["--swap-dy" as string]: `${teachOff.dy}px`,
+                }
             : fallRows > 0
               ? {
                   ["--fall-from" as string]: `${-fallRows * (cellPx + CANDY_MATCH_CELL_GAP)}px`,
@@ -327,7 +346,8 @@ export function CandyMatchBoard({
               data-cell={i}
               data-selected={isSelected ? "true" : undefined}
               data-preview={isPreview ? "true" : undefined}
-              data-hint={isHint ? "true" : undefined}
+              data-hint={isHint || (reduced && teachOff) ? "true" : undefined}
+              data-teach={teachOff ? "true" : undefined}
               data-special={specialKind ?? undefined}
               data-sweep={isPopping && sweep ? sweep : undefined}
               data-swap={swapOff ? "true" : undefined}

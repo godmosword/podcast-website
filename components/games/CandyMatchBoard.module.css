@@ -20,6 +20,13 @@
   animation: candyMatchSwap var(--swap-ms, 180ms) ease-in-out both;
 }
 
+.pieceTeach {
+  z-index: 3;
+  opacity: 0.6;
+  transition: none;
+  animation: candyMatchTeach 1.4s ease-in-out infinite;
+}
+
 .pieceFall {
   transition: none;
   animation: candyMatchFall var(--fall-ms, 220ms) ease-out both;
@@ -44,6 +51,23 @@
   }
   to {
     transform: translate(var(--swap-dx, 0px), var(--swap-dy, 0px));
+  }
+}
+
+@keyframes candyMatchTeach {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(var(--swap-dx, 0px), var(--swap-dy, 0px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pieceTeach {
+    animation: none;
+    opacity: 1;
   }
 }
 

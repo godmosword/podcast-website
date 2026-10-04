@@ -223,6 +223,28 @@
   color: #7c6886;
 }
 
+@media (max-width: 480px) {
+  .taskPlaceName,
+  .progressTrack {
+    display: none;
+  }
+
+  .propButton {
+    position: relative;
+  }
+
+  .propLabel {
+    font-size: 18px;
+  }
+
+  .propCount {
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    font-size: 11px;
+  }
+}
+
 .propGuide {
   display: flex;
   align-items: center;
