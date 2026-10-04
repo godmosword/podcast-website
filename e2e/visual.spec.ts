@@ -377,6 +377,20 @@ for (const pageDef of VISUAL_PAGES) {
   }
 }
 
+test("visual：消消樂地圖 390 light", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto("/games/candy-match");
+  await stabilizeVisualPage(page, { theme: "light" });
+  await page.getByRole("button", { name: /開始/ }).click();
+  await expect(page.getByTestId("candy-match-map")).toBeVisible();
+  await expect(page).toHaveScreenshot("candy-map-390-light.png", {
+    fullPage: true,
+    maxDiffPixelRatio: 0.02,
+    animations: "disabled",
+    mask: [],
+  });
+});
+
 test("visual：消消樂第 1 關 390 light", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 900 });
   await page.goto("/games/candy-match");

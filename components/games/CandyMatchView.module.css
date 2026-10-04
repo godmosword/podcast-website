@@ -110,7 +110,7 @@
 }
 
 .taskProgressTrack {
-  height: 8px;
+  height: 6px;
   overflow: hidden;
   border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--c-lilac) 28%, white);
@@ -145,6 +145,8 @@
 
 .boardWrap {
   position: relative;
+  width: 100%;
+  min-width: 0;
   padding: 4px 0 2px;
 }
 

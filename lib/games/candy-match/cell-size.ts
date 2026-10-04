@@ -1,8 +1,8 @@
-/** 棋盤格間距（px） */
-export const CANDY_MATCH_CELL_GAP = 4;
+/** 棋盤格間距（px）。收成 3，讓 390 寬的 6 欄能到 56px。 */
+export const CANDY_MATCH_CELL_GAP = 3;
 
 /** 棋盤外框內距（px） */
-export const CANDY_MATCH_BOARD_PADDING = 6;
+export const CANDY_MATCH_BOARD_PADDING = 2;
 
 /** 依可用棋盤寬度與欄數計算每格像素（min 44、max 64）。格子本身是按鈕。 */
 export function candyMatchCellPx(availableWidth: number, cols: number): number {

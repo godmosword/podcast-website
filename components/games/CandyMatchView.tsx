@@ -658,7 +658,7 @@ export function CandyMatchView({
       "0 20px 42px rgba(144,116,128,.2), inset 0 2px 0 rgba(255,255,255,.95)",
     maxWidth: 560,
     margin: "0 auto",
-    padding: screen === "play" ? "16px 12px" : 16,
+    padding: screen === "play" ? "8px 2px" : 16,
     userSelect: "none",
     minHeight: 480,
     position: "relative",
@@ -717,20 +717,6 @@ export function CandyMatchView({
       data-candy-fonts={brandFontsEnabled ? "ready" : undefined}
       aria-live="polite"
     >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 10,
-        }}
-      >
-        {/* 遊戲名由 GamePageShell 的 h1 唯一持有，這裡只顯示目前關卡地點。 */}
-        <div className={styles.gameTitle} style={{ fontSize: 18, fontWeight: 900, color: INK, whiteSpace: "nowrap" }}>
-          {screen === "play" ? level.place : null}
-        </div>
-      </div>
-
       {screen === "title" && (
         <div className={styles.titleScreen} style={{ textAlign: "center", paddingTop: 46, paddingBottom: 40 }}>
           <div style={{ display: "flex", justifyContent: "center", gap: 10, marginBottom: 18 }}>
@@ -760,22 +746,19 @@ export function CandyMatchView({
 
       {screen === "map" && (
         <div className={styles.mapScreen} style={{ paddingBottom: 12 }}>
-          <h2 style={{ textAlign: "center", color: INK, fontSize: 22, fontWeight: 900, margin: "6px 0 8px" }}>
+          <h2 style={{ textAlign: "center", color: INK, fontSize: 18, fontWeight: 900, margin: "2px 0 8px" }}>
             遊樂園地圖
           </h2>
-          <div style={{ textAlign: "center", marginBottom: 12 }}>
-            <button type="button" style={softBtn} onClick={openTutorial}>
-              怎麼玩？
-            </button>
-          </div>
-          {/* K-6：地圖以圖代字——10 站沿小路排列、每站黏土小圖；星星規則句拿掉（星星自己會說話） */}
           <CandyMatchMap
             levels={CANDY_MATCH_LEVELS}
             stars={CANDY_MATCH_LEVELS.map((_, i) => medalCount(medals[i] ?? 0))}
             maxCleared={maxCleared}
             onSelect={startLevel}
           />
-          <div style={{ textAlign: "center", marginTop: 14 }}>
+          <div style={{ display: "flex", justifyContent: "center", gap: 10, marginTop: 10 }}>
+            <button type="button" style={softBtn} onClick={openTutorial}>
+              怎麼玩？
+            </button>
             <button type="button" style={softBtn} onClick={goToTitle}>
               回標題
             </button>
@@ -791,11 +774,11 @@ export function CandyMatchView({
             data-near-complete={nearComplete ? "true" : undefined}
             style={{
               display: "grid",
-              gap: 7,
+              gap: 4,
               background: "rgba(255,255,255,.82)",
               borderRadius: 18,
-              padding: "8px 14px",
-              marginBottom: 10,
+              padding: "6px 10px",
+              marginBottom: 6,
               boxShadow: "0 6px 14px rgba(150,110,130,.12)",
             }}
           >
@@ -853,9 +836,9 @@ export function CandyMatchView({
             style={{
               display: "flex",
               justifyContent: "center",
-              gap: 10,
-              marginTop: 12,
-              flexWrap: "wrap",
+              gap: 8,
+              marginTop: 8,
+              flexWrap: "nowrap",
             }}
           >
             {(
@@ -874,18 +857,32 @@ export function CandyMatchView({
                   setPropMode((m) => (m === kind ? null : kind));
                   tone(700, 0.05, "square", 0.04);
                 }}
+                aria-label={`${label}，還有 ${propsLeft[kind]} 個`}
                 style={{
                   ...softBtn,
-                  minHeight: 46,
+                  minWidth: 44,
+                  width: 52,
+                  minHeight: 48,
+                  padding: 0,
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  gap: 0,
                   opacity: propsLeft[kind] <= 0 ? 0.4 : 1,
                   boxShadow: propMode === kind ? "0 0 0 3px #ff9fb7" : "none",
                 }}
               >
-                <span aria-hidden>{icon}</span> {label} ×{propsLeft[kind]}
+                <span aria-hidden>{icon}</span>
+                <span aria-hidden style={{ fontSize: 11, lineHeight: 1 }}>×{propsLeft[kind]}</span>
               </button>
             ))}
-            <button type="button" style={softBtn} onClick={manualHint} disabled={inputPaused}>
-              <IconBulb size={18} /> 提示
+            <button
+              type="button"
+              style={{ ...softBtn, minWidth: 44, width: 52, minHeight: 48, padding: 0, justifyContent: "center" }}
+              onClick={manualHint}
+              disabled={inputPaused}
+              aria-label="提示"
+            >
+              <IconBulb size={18} />
             </button>
           </div>
           {propMode && (
@@ -901,8 +898,8 @@ export function CandyMatchView({
               alignItems: "center",
               gap: 8,
               justifyContent: "center",
-              marginTop: 12,
-              minHeight: 40,
+              marginTop: 8,
+              minHeight: 36,
             }}
           >
             <span style={{ width: 38, height: 38, flexShrink: 0 }}>

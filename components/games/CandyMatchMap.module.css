@@ -1,42 +1,71 @@
 .map {
-  position: relative;
-  width: min(100%, 360px);
-  aspect-ratio: 100 / 230;
-  margin: 0 auto;
-  border-radius: 22px;
-  background:
-    radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.7), transparent 40%),
-    linear-gradient(180deg, #eaf6ff 0%, #fff3f9 50%, #effaf2 100%);
-  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.9), 0 10px 24px rgba(150, 110, 130, 0.14);
-  overflow: visible;
-}
-
-.road {
-  position: absolute;
-  inset: 0;
+  display: grid;
+  gap: 12px;
   width: 100%;
-  height: 100%;
 }
 
-.roadBed {
-  fill: none;
-  stroke: #ffe1b3;
-  stroke-width: 9;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.hero {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
 }
 
-.roadDash {
-  fill: none;
-  stroke: #fff;
-  stroke-width: 1.6;
-  stroke-dasharray: 3 3;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.heroBadge {
+  display: block;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #fff7ea;
+  border: 3px solid #fff;
+  box-shadow: 0 8px 18px rgba(150, 110, 130, 0.22);
+}
+
+.heroStart {
+  min-height: 48px;
+  min-width: 96px;
+  padding: 0 22px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffe889, #ffbd6f);
+  color: #614018;
+  font-weight: 900;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.heroStart:focus-visible {
+  outline: 3px solid var(--focus-ring, #ff9fb7);
+  outline-offset: 2px;
+}
+
+.path {
+  display: grid;
+  gap: 10px;
+}
+
+.pathRow {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, 48px);
+  justify-content: space-between;
+}
+
+.pathRow::before {
+  content: "";
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  top: 20px;
+  height: 8px;
+  border-radius: 999px;
+  background: #e8a44a;
+  z-index: 0;
 }
 
 .node {
-  position: absolute;
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -44,7 +73,6 @@
   padding: 0;
   border: none;
   background: transparent;
-  transform: translate(-50%, -50%);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
@@ -56,14 +84,13 @@
 .badge {
   position: relative;
   display: block;
-  width: 72px;
-  height: 72px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   overflow: hidden;
   background: #fff7ea;
-  border: 3px solid #fff;
-  box-shadow: 0 6px 14px rgba(150, 110, 130, 0.22), inset 0 2px 0 rgba(255, 255, 255, 0.9);
-  transition: transform 0.15s ease;
+  border: 2px solid #fff;
+  box-shadow: 0 4px 10px rgba(150, 110, 130, 0.22);
 }
 
 .icon {
@@ -73,12 +100,9 @@
   object-fit: cover;
 }
 
-.node:not(:disabled):hover .badge {
-  transform: scale(1.06);
-}
-
-.node:not(:disabled):active .badge {
-  transform: scale(0.96);
+.next .badge {
+  box-shadow: 0 0 0 3px #ff9fb7, 0 4px 10px rgba(150, 110, 130, 0.22);
+  transform: scale(1.08);
 }
 
 .node:focus-visible {
@@ -86,42 +110,24 @@
 }
 
 .node:focus-visible .badge {
-  box-shadow: 0 0 0 4px var(--focus-ring, #ff9fb7), 0 6px 14px rgba(150, 110, 130, 0.22);
-}
-
-.locked .icon {
-  filter: grayscale(0.85) opacity(0.55);
+  box-shadow: 0 0 0 3px var(--focus-ring, #ff9fb7);
 }
 
 .lock {
   position: absolute;
-  right: 4px;
-  bottom: 4px;
+  right: -2px;
+  bottom: -2px;
   display: inline-flex;
-  padding: 2px;
+  padding: 1px;
   border-radius: 50%;
   background: #fff;
   line-height: 0;
 }
 
-/* 下一站：呼吸光圈——孩子不用讀字也知道按這裡 */
-.next .badge {
-  animation: candyMapPulse 2s ease-in-out infinite;
-}
-
-@keyframes candyMapPulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(255, 159, 183, 0.75), 0 6px 14px rgba(150, 110, 130, 0.22);
-  }
-  50% {
-    box-shadow: 0 0 0 10px rgba(255, 159, 183, 0), 0 6px 14px rgba(150, 110, 130, 0.22);
-  }
-}
-
 .stars {
   display: inline-flex;
   gap: 1px;
+  min-height: 12px;
   line-height: 0;
 }
 
@@ -131,11 +137,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .next .badge {
-    animation: none;
-    box-shadow: 0 0 0 4px rgba(255, 159, 183, 0.75), 0 6px 14px rgba(150, 110, 130, 0.22);
-  }
-
-  .badge {
-    transition: none;
+    transform: none;
   }
 }

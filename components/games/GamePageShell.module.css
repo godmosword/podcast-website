@@ -190,9 +190,9 @@
   padding: 4px;
 }
 
-/* 消消樂沒有 data-status；局內才掛棋盤。夜間收到 4px，讓 6×6、44px 格在窄機不被裁切。 */
+/* 消消樂沒有 data-status；局內才掛棋盤。夜間外框內距歸零，格寬才到得了 56px。卡片自己有邊。 */
 :global([data-theme="night"]) .main[data-game-id="candy-match"]:has([data-testid="candy-match-board"]) .playArea {
-  padding: 4px;
+  padding: 0;
 }
 
 /* 兒童向操作提示：緊貼遊戲下方，不隨家長說明一起下移。 */
@@ -297,6 +297,27 @@
   }
 
   .main:has([data-status="playing"], [data-status="paused"]) .headerActions {
+    margin-left: auto;
+  }
+
+  /* 消消樂局內沒有 data-status，用棋盤出現來收成同一列抬頭。 */
+  .main[data-game-id="candy-match"]:has([data-testid="candy-match-board"]) .playHeader {
+    flex-wrap: nowrap;
+    margin-bottom: var(--space-1);
+  }
+
+  .main[data-game-id="candy-match"]:has([data-testid="candy-match-board"]) .playTitle {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .main[data-game-id="candy-match"]:has([data-testid="candy-match-board"]) .headerActions {
     margin-left: auto;
   }
 }

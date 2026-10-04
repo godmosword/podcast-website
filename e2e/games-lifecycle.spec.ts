@@ -105,6 +105,90 @@ test.describe("遊戲完整 lifecycle", () => {
     await expect(page.getByRole("dialog")).toHaveCount(0);
   });
 
+  test("390×664 地圖第一屏有下一站，第 2 關棋子至少 56px", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 664 });
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/games/candy-match");
+    await page.getByRole("button", { name: /開始/ }).click();
+    await expect(page.getByTestId("candy-match-map")).toBeVisible();
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+    const next = page.locator("button[data-next='true']");
+    await expect(next).toBeVisible();
+    const nextBox = await next.boundingBox();
+    expect(nextBox).toBeTruthy();
+    expect(nextBox!.y).toBeGreaterThanOrEqual(0);
+    expect(nextBox!.y + nextBox!.height).toBeLessThanOrEqual(664);
+    const lockedIcon = page.locator("[data-locked='true'] img").first();
+    await expect(lockedIcon).toHaveCSS("opacity", "1");
+    await expect(lockedIcon).toHaveCSS("filter", "none");
+
+    await next.click();
+    await expect(page.getByTestId("candy-match-board").locator("button")).toHaveCount(25);
+    await finishCandyLevel(page);
+    await page.getByRole("button", { name: "下一關" }).click();
+    const board = page.getByTestId("candy-match-board");
+    await expect(board.locator("button")).toHaveCount(36);
+    await expect.poll(async () => page.evaluate(() => {
+      const el = document.querySelector('[data-testid="candy-match-board"]') as HTMLElement | null;
+      const wrap = el?.parentElement;
+      if (!el || !wrap) return 99;
+      return el.getBoundingClientRect().right - wrap.getBoundingClientRect().right;
+    })).toBeLessThanOrEqual(1);
+    const fit = await page.evaluate(() => {
+      const el = document.querySelector('[data-testid="candy-match-board"]') as HTMLElement | null;
+      const wrap = el?.parentElement;
+      const btn = el?.querySelector("button");
+      if (!el || !wrap || !btn) return null;
+      const br = el.getBoundingClientRect();
+      const wr = wrap.getBoundingClientRect();
+      const task = document.querySelector('[aria-label="本關任務進度"]')?.getBoundingClientRect();
+      const hint = document.querySelector('button[aria-label="提示"]')?.getBoundingClientRect();
+      return {
+        cell: btn.getBoundingClientRect().width,
+        clip: br.right - wr.right,
+        taskBottom: task?.bottom ?? 9999,
+        hintBottom: hint?.bottom ?? 9999,
+      };
+    });
+    expect(fit).toBeTruthy();
+    expect(fit!.cell).toBeGreaterThanOrEqual(56);
+    expect(fit!.clip).toBeLessThanOrEqual(1);
+    expect(fit!.taskBottom).toBeLessThanOrEqual(664);
+    expect(fit!.hintBottom).toBeLessThanOrEqual(664);
+  });
+
+  test("360×740 夜間第 2 關棋子至少 48px 且不裁切", async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem("cheche:progress", JSON.stringify({ preferences: { theme: "night" } }));
+    });
+    await page.setViewportSize({ width: 360, height: 740 });
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/games/candy-match");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "night");
+    await page.getByRole("button", { name: /開始/ }).click();
+    await page.locator("button[data-next='true']").click();
+    await finishCandyLevel(page);
+    await page.getByRole("button", { name: "下一關" }).click();
+    await expect.poll(async () => page.evaluate(() => {
+      const el = document.querySelector('[data-testid="candy-match-board"]') as HTMLElement | null;
+      const wrap = el?.parentElement;
+      if (!el || !wrap) return 99;
+      return el.getBoundingClientRect().right - wrap.getBoundingClientRect().right;
+    })).toBeLessThanOrEqual(1);
+    const fit = await page.evaluate(() => {
+      const el = document.querySelector('[data-testid="candy-match-board"]') as HTMLElement | null;
+      const wrap = el?.parentElement;
+      const btn = el?.querySelector("button");
+      if (!el || !wrap || !btn) return null;
+      const br = el.getBoundingClientRect();
+      const wr = wrap.getBoundingClientRect();
+      return { cell: btn.getBoundingClientRect().width, clip: br.right - wr.right };
+    });
+    expect(fit).toBeTruthy();
+    expect(fit!.cell).toBeGreaterThanOrEqual(48);
+    expect(fit!.clip).toBeLessThanOrEqual(1);
+  });
+
   test("兒童模式第 1 關 25 格、下一關 36 格", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/games/candy-match");

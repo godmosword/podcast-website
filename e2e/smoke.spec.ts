@@ -474,7 +474,7 @@ test("繽紛消消樂：標題 → 地圖 → 第 1 關棋盤", async ({ page })
   await expect(page.getByTestId("candy-match-board")).toBeVisible();
   await expect(page.getByRole("progressbar", { name: "任務完成度" })).toBeVisible();
   // 任務列與道具列存在
-  await expect(page.getByText(/泡泡/)).toBeVisible();
+  await expect(page.getByRole("button", { name: /泡泡/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /提示/ })).toBeVisible();
 });
 

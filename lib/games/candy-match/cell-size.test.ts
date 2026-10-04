@@ -9,31 +9,27 @@ import {
 } from "./cell-size";
 
 describe("candyMatchCellPx", () => {
-  it("6 欄 @ 320px 可用寬 → cell 48，外框 ≤ 340", () => {
-    const cellPx = candyMatchCellPx(320, 6);
-    expect(cellPx).toBe(48);
-    expect(candyMatchBoardOuterWidth(cellPx, 6)).toBeLessThanOrEqual(340);
-    expect(CANDY_MATCH_CELL_GAP).toBe(4);
-    expect(CANDY_MATCH_BOARD_PADDING).toBe(6);
+  it("6 欄可用寬對上 56／51／44，外框不超出可用寬", () => {
+    expect(CANDY_MATCH_CELL_GAP).toBe(3);
+    expect(CANDY_MATCH_BOARD_PADDING).toBe(2);
+    expect(candyMatchCellPx(358, 6)).toBe(56);
+    expect(candyMatchBoardOuterWidth(56, 6)).toBeLessThanOrEqual(358);
+    expect(candyMatchCellPx(328, 6)).toBe(51);
+    expect(candyMatchBoardOuterWidth(51, 6)).toBeLessThanOrEqual(328);
+    expect(candyMatchCellPx(288, 6)).toBe(44);
+    expect(candyMatchBoardOuterWidth(44, 6)).toBeLessThanOrEqual(288);
   });
 
-  it("6 欄 @ 390px 可用寬 → cell 59", () => {
-    expect(candyMatchCellPx(390, 6)).toBe(59);
-  });
-
-  it("寬螢幕 6 欄上限 64", () => {
+  it("寬螢幕 6 欄上限 64，算不滿 44 時停在 44", () => {
     expect(candyMatchCellPx(2000, 6)).toBe(64);
-  });
-
-  it("算不滿 44 時停在 44，不縮成 40", () => {
-    expect(candyMatchCellPx(272, 6)).toBe(44);
+    expect(candyMatchCellPx(200, 6)).toBe(44);
   });
 });
 
 describe("candyMatchSwapOffset", () => {
   it("相鄰格位移等於 cell + gap", () => {
-    expect(candyMatchCellStep(48)).toBe(52);
-    expect(candyMatchSwapOffset(0, 1, 3, 48)).toEqual({ dx: 52, dy: 0 });
-    expect(candyMatchSwapOffset(0, 3, 3, 48)).toEqual({ dx: 0, dy: 52 });
+    expect(candyMatchCellStep(48)).toBe(51);
+    expect(candyMatchSwapOffset(0, 1, 3, 48)).toEqual({ dx: 51, dy: 0 });
+    expect(candyMatchSwapOffset(0, 3, 3, 48)).toEqual({ dx: 0, dy: 51 });
   });
 });
