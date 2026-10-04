@@ -118,7 +118,9 @@ class CandyMatchInstance implements GameInstance {
     this.status = "ready";
   }
 
+  /** 每次開始新局（含 View 內「下一關／重玩」）都重置結算去重，同一局仍只回報一次。 */
   notifyPlaying(levelIndex: number, score: number): void {
+    this.sessionReported = false;
     this.screen = "play";
     this.levelIndex = levelIndex;
     this.score = score;

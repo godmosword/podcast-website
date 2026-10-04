@@ -1,0 +1,470 @@
+/* 消消樂局內元件：任務列、道具列、首次引導、結算。 */
+
+.taskBar {
+  display: grid;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1.5px solid color-mix(in srgb, var(--c-pink) 22%, transparent);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 6px 14px rgba(150, 110, 130, 0.12);
+  color: #5d4a67;
+}
+
+.taskBar[data-near-complete="true"] {
+  border-color: color-mix(in srgb, var(--c-yellow) 72%, var(--c-pink));
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--c-yellow) 18%, transparent);
+}
+
+.taskHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.taskPlace {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 900;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.movesLabel,
+.movesWarning {
+  flex-shrink: 0;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.movesLabel {
+  color: #5d4a67;
+  background: color-mix(in srgb, var(--c-sky) 22%, white);
+}
+
+.movesWarning {
+  color: #fff;
+  background: #a5567a;
+}
+
+.starChip {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  color: #5d4a67;
+  background: color-mix(in srgb, var(--c-yellow) 26%, white);
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 0;
+}
+
+.starChip span {
+  line-height: 1.4;
+}
+
+.starChip[data-spent="true"] {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.goalList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.goal {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 4px 8px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--c-yellow) 22%, white);
+}
+
+.goal[data-done="true"] {
+  background: color-mix(in srgb, var(--c-mint) 30%, white);
+}
+
+.goalIcon {
+  display: inline-flex;
+  width: 36px;
+  justify-content: center;
+}
+
+.iconPair,
+.iconStack {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+
+.iconStack > * + * {
+  margin-left: -6px;
+}
+
+.goalText {
+  display: grid;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.goalTitle {
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.goalRemain {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+/* 數字是孩子最常看的：獨立放大 */
+.goalNum {
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.goal[data-done="true"] .goalRemain {
+  color: #3f6b4f;
+}
+
+.goalCheck {
+  font-size: 20px;
+  font-weight: 900;
+  color: #3f8a5a;
+}
+
+.progressTrack {
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--radius-pill, 999px);
+  background: color-mix(in srgb, var(--c-lilac) 28%, white);
+}
+
+.progressFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--c-mint), var(--c-sky), var(--c-pink));
+  transition: width 220ms ease;
+}
+
+.propArea {
+  display: grid;
+  gap: 6px;
+}
+
+.propRow {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.propButton {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-width: 64px;
+  min-height: 56px;
+  padding: 4px 8px;
+  border: 2px solid rgba(93, 74, 103, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.86);
+  color: #5d4a67;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.propButton:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.propButton[aria-pressed="true"] {
+  border-color: #ff9fb7;
+  box-shadow: 0 0 0 3px #ff9fb7;
+}
+
+.propButton:focus-visible {
+  outline: 3px solid var(--focus-ring, #ff9fb7);
+  outline-offset: 2px;
+}
+
+.propIcon {
+  display: inline-flex;
+  line-height: 0;
+}
+
+.propLabel {
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.propCount {
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  color: #7c6886;
+}
+
+.propGuide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: #a5567a;
+  font-size: 14px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.propCancel,
+.tipDismiss,
+.mapButton {
+  min-height: 44px;
+  padding: 6px 16px;
+  border: 2px solid rgba(93, 74, 103, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #5d4a67;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.propCancel,
+.tipDismiss {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* 取消要和「知道了」分得出來：粉色底＋✕ */
+.propCancel {
+  border-color: #f3a6bf;
+  background: #fff0f4;
+  color: #a5567a;
+}
+
+.propCancel:focus-visible,
+.tipDismiss:focus-visible,
+.mapButton:focus-visible {
+  outline: 3px solid var(--focus-ring, #ff9fb7);
+  outline-offset: 2px;
+}
+
+.tip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  padding: 4px 6px 4px 12px;
+  border-radius: 999px;
+  background: #fff;
+  color: #5d4a67;
+  box-shadow: 0 6px 14px rgba(150, 110, 130, 0.16);
+}
+
+.tipIcon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.tipText {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.resultOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border: 2px solid color-mix(in srgb, var(--c-yellow) 35%, #fff);
+  border-radius: 28px;
+  background: rgba(255, 250, 242, 0.94);
+  backdrop-filter: blur(3px);
+  text-align: center;
+  overflow-y: auto;
+}
+
+.starRules {
+  display: grid;
+  gap: 6px;
+  margin: 0 auto 10px;
+  color: #5d4a67;
+}
+
+.starRules ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.starRules li {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #7c6886;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.starRules li[data-met="true"] {
+  color: #5d4a67;
+}
+
+.starRules li span[aria-hidden] {
+  color: #3f8a5a;
+  font-size: 16px;
+}
+
+.starRules li:not([data-met="true"]) span[aria-hidden] {
+  color: #b9a9c6;
+}
+
+.medalLine {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+  gap: 6px;
+  margin: 0;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--c-lilac) 22%, white);
+  font-size: 13px;
+  font-weight: 800;
+  color: #5d4a67;
+}
+
+.medalStars {
+  display: inline-flex;
+  gap: 1px;
+  line-height: 0;
+}
+
+.mapButton {
+  margin-top: 10px;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.confettiPiece {
+  position: absolute;
+  top: 8%;
+  left: var(--x);
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--c);
+  animation: confettiFall 900ms ease-out forwards;
+  animation-delay: var(--delay, 0ms);
+}
+
+@keyframes confettiFall {
+  from {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(240px) rotate(140deg);
+    opacity: 0;
+  }
+}
+
+/* 窄手機：道具按鈕縮小留白，四顆仍維持 ≥44px 觸控 */
+@media (max-width: 380px) {
+  .propRow {
+    gap: 6px;
+  }
+
+  .propButton {
+    min-width: 56px;
+    padding: 4px 6px;
+  }
+}
+
+/* 320–360 寬：多目標固定兩欄，不疊成一欄把棋盤往下推 */
+@media (max-width: 360px) {
+  .goalList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .goal {
+    gap: 4px;
+    padding: 4px 6px;
+  }
+
+  .goalIcon {
+    width: 30px;
+  }
+
+  .goalNum {
+    font-size: 18px;
+  }
+}
+
+/* 很矮的螢幕：任務列收緊，進度條省略（每項目標已有剩餘數） */
+@media (max-height: 640px) {
+  .taskBar {
+    gap: 4px;
+    padding: 6px 8px;
+  }
+
+  .progressTrack {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progressFill {
+    transition: none;
+  }
+
+  .confettiPiece {
+    animation: none;
+    opacity: 0;
+  }
+}

@@ -1,33 +1,84 @@
 "use client";
 
+import { useState } from "react";
 import type { CandyMatchLevel } from "@/lib/games/candy-match/levels";
+import { CANDY_MODES, type CandyMode } from "@/lib/games/candy-match/stages";
 import { IconLock, IconStar } from "@/components/games/ClayIcons";
+import { CandyGoalIcon } from "@/components/games/CandyMatchTaskBar";
+import type { CandyGoal } from "@/lib/games/candy-match/tasks";
 import styles from "./CandyMatchMap.module.css";
 
 /**
- * 選關：下一站是大卡，其餘站收成兩列小路。
- * 第一屏就看得到下一站，不再把 10 站拉成一張長卡。地名只進 aria-label。
+ * 選關：玩法切換＋站點大卡（關號、地名、任務、玩法、開始）＋兩列小路。
+ * 點已解鎖的站換成大卡預覽；點鎖住的站說明要先完成哪一站。
  */
+
+export type CandyStationPreview = {
+  goals: readonly CandyGoal[];
+  summary: string;
+  moves: number;
+  replay: boolean;
+};
 
 type CandyMatchMapProps = {
   levels: readonly CandyMatchLevel[];
-  /** 每關星數（0–3） */
+  /** 每關累積獎章星數（0–3） */
   stars: readonly number[];
   /** 已通關數＝下一個可玩的 index */
   maxCleared: number;
-  onSelect: (index: number) => void;
+  mode: CandyMode;
+  onModeChange: (mode: CandyMode) => void;
+  previewFor: (index: number) => CandyStationPreview;
+  onStart: (index: number) => void;
 };
 
-export function CandyMatchMap({ levels, stars, maxCleared, onSelect }: CandyMatchMapProps) {
-  const heroIndex = Math.min(maxCleared, Math.max(0, levels.length - 1));
-  const hero = levels[heroIndex];
+function ModeToggle({ mode, onChange }: { mode: CandyMode; onChange: (mode: CandyMode) => void }) {
+  return (
+    <div className={styles.modeToggle} role="radiogroup" aria-label="玩法">
+      {CANDY_MODES.map((m) => (
+        <button
+          key={m.id}
+          type="button"
+          role="radio"
+          aria-checked={mode === m.id}
+          className={styles.modeOption}
+          onClick={() => onChange(m.id)}
+        >
+          <span className={styles.modeLabel}>{m.label}</span>
+          <span className={styles.modeHint}>{m.hint}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function CandyMatchMap({
+  levels,
+  stars,
+  maxCleared,
+  mode,
+  onModeChange,
+  previewFor,
+  onStart,
+}: CandyMatchMapProps) {
+  const nextIndex = Math.min(maxCleared, Math.max(0, levels.length - 1));
   const finished = maxCleared >= levels.length;
+  const [picked, setPicked] = useState<number | null>(null);
+  const [notice, setNotice] = useState("");
+  const heroIndex = picked != null && picked <= maxCleared ? picked : nextIndex;
+  const hero = levels[heroIndex];
   const rows = [levels.slice(0, 5), levels.slice(5, 10)];
 
   if (!hero) return null;
+  const preview = previewFor(heroIndex);
+  const isNext = !finished && heroIndex === maxCleared;
+  const startLabel = heroIndex < maxCleared ? "再玩一次" : "開始";
+  const nextLevel = levels[nextIndex];
 
   return (
     <div className={styles.map} data-testid="candy-match-map">
+      <ModeToggle mode={mode} onChange={onModeChange} />
+
       <div className={styles.hero}>
         <span className={styles.heroBadge}>
           {/* eslint-disable-next-line @next/next/no-img-element -- 固定黏土小圖 */}
@@ -39,20 +90,40 @@ export function CandyMatchMap({ levels, stars, maxCleared, onSelect }: CandyMatc
             className={styles.icon}
           />
         </span>
+        <div className={styles.heroInfo}>
+          <p className={styles.heroStation}>
+            第 {heroIndex + 1} 站・{hero.place}
+          </p>
+          <p className={styles.heroTask}>
+            <span className={styles.heroGoalIcons} aria-hidden>
+              {preview.goals.map((goal, i) => (
+                <CandyGoalIcon key={i} goal={goal} size={24} />
+              ))}
+            </span>
+            {preview.summary}
+          </p>
+          {mode === "challenge" || preview.replay ? (
+            <p className={styles.heroMeta}>
+              {[mode === "challenge" ? `${preview.moves} 步內完成` : null, preview.replay ? "重玩換新任務" : null]
+                .filter(Boolean)
+                .join("・")}
+            </p>
+          ) : null}
+        </div>
         <button
           type="button"
           className={styles.heroStart}
-          data-next={finished ? undefined : "true"}
-          aria-label={
-            finished
-              ? `再走一次第 ${heroIndex + 1} 關 ${hero.place}`
-              : `開始第 ${heroIndex + 1} 關 ${hero.place}`
-          }
-          onClick={() => onSelect(heroIndex)}
+          data-next={isNext ? "true" : undefined}
+          aria-label={`${startLabel}：第 ${heroIndex + 1} 站 ${hero.place}`}
+          onClick={() => onStart(heroIndex)}
         >
-          {finished ? "再走一次" : "開始"}
+          {startLabel}
         </button>
       </div>
+
+      <p className={styles.notice} role="status">
+        {notice}
+      </p>
 
       <div className={styles.path}>
         {rows.map((row, rowIndex) => (
@@ -67,11 +138,21 @@ export function CandyMatchMap({ levels, stars, maxCleared, onSelect }: CandyMatc
                   key={lv.index}
                   type="button"
                   className={`${styles.node}${next ? ` ${styles.next}` : ""}`}
-                  disabled={locked}
+                  aria-disabled={locked || undefined}
+                  aria-current={i === heroIndex ? "true" : undefined}
                   data-locked={locked ? "true" : undefined}
-                  aria-label={`第 ${i + 1} 關 ${lv.place}${locked ? "（未解鎖）" : ""}`}
+                  aria-label={`第 ${i + 1} 站 ${lv.place}${locked ? "（未解鎖）" : `，${got} 顆星`}`}
                   title={lv.place}
-                  onClick={() => onSelect(i)}
+                  onClick={() => {
+                    if (locked) {
+                      // 大卡直接換成該先完成的那一站：畫面本身就是答案
+                      setPicked(nextIndex);
+                      setNotice(`先完成第 ${nextIndex + 1} 站「${nextLevel?.place ?? ""}」，就能往前走喔！`);
+                      return;
+                    }
+                    setNotice("");
+                    setPicked(i);
+                  }}
                 >
                   <span className={styles.badge}>
                     {/* eslint-disable-next-line @next/next/no-img-element -- 固定 256px 黏土小圖 */}
@@ -89,23 +170,22 @@ export function CandyMatchMap({ levels, stars, maxCleared, onSelect }: CandyMatc
                       </span>
                     ) : null}
                   </span>
-                  {!locked ? (
-                    <span className={styles.stars} aria-label={`${got} 顆星`}>
-                      {[0, 1, 2].map((s) => (
-                        <span key={s} aria-hidden className={s < got ? undefined : styles.starEmpty}>
-                          <IconStar size={12} color={s < got ? "#ffd34d" : "#d9d0e0"} />
-                        </span>
-                      ))}
-                    </span>
-                  ) : (
-                    <span className={styles.stars} aria-hidden />
-                  )}
+                  <span className={styles.stars} aria-hidden>
+                    {locked
+                      ? null
+                      : [0, 1, 2].map((s) => (
+                          <span key={s} className={s < got ? undefined : styles.starEmpty}>
+                            <IconStar size={12} color={s < got ? "#ffd34d" : "#d9d0e0"} />
+                          </span>
+                        ))}
+                  </span>
                 </button>
               );
             })}
           </div>
         ))}
       </div>
+      <p className={styles.medalNote}>星星是每站累積的獎章，兩種玩法都算。</p>
     </div>
   );
 }

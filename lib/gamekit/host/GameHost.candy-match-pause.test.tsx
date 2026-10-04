@@ -50,9 +50,9 @@ describe("GameHost × candy-match 暫停", () => {
   it("pause 後 toolbar 顯示「繼續遊戲」、棋盤 disabled；resume 後回到「暫停遊戲」", async () => {
     render(<GameHost adapter={candyMatchAdapter} title="繽紛消消樂" />);
 
-    // 標題 → 地圖 → 第 1 關
-    fireEvent.click(screen.getByRole("button", { name: /開始/ }));
-    fireEvent.click(screen.getByRole("button", { name: /^第 1 關/ }));
+    // 標題 → 地圖 → 第 1 站（大卡開始鈕）
+    fireEvent.click(screen.getByRole("button", { name: /開始冒險/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^開始：第 1 站/ }));
     await act(async () => {});
 
     const board = () => screen.getByTestId("candy-match-board");

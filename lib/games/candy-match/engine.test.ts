@@ -6,7 +6,6 @@ import {
   applyGravity,
   areAdjacent,
   clearCells,
-  createBoard,
   emptySpecials,
   expandClearsWithSpecials,
   planGravity,
@@ -14,16 +13,19 @@ import {
   planWaveClears,
   findHintMove,
   findMatches,
+  findSpecialMove,
   idx,
-  reshuffle,
+  isGiftDropSwap,
+  propAffectedCells,
   resolveBoard,
+  stepWave,
   swapCreatesMatch,
   swapIsLegal,
   swapped,
   type BoardState,
   type CandySpecial,
 } from "./engine";
-import { CANDY_MATCH_LEVELS, kidsModeLevel } from "./levels";
+import { createBoard, reshuffle } from "./board-gen";
 
 /** 決定性 RNG（LCG），讓測試可重現。 */
 function seededRng(seed: number): () => number {
@@ -167,6 +169,15 @@ describe("resolveBoard", () => {
     expect(findMatches(after.pieces, 3, 3).size).toBe(0);
   });
 
+  it("禮物送達後補滿空格，不留洞", () => {
+    const rng = seededRng(4);
+    // 2 欄 3 列：禮物已在底排，送達後該欄要補滿
+    const state = board(2, 3, [0, 1, 2, 0, DROP_ITEM, 1]);
+    const { state: after, events } = resolveBoard(state, 3, rng);
+    expect(events.dropped).toBe(1);
+    expect(after.pieces.every((v) => v >= 0)).toBe(true);
+  });
+
   it("掉落物到底排即送達", () => {
     const rng = seededRng(9);
     // 1 欄 3 列：禮物在頂、下面兩格將被消除？單欄無法三連，
@@ -175,6 +186,69 @@ describe("resolveBoard", () => {
     const { state: after, events } = resolveBoard(state, 3, rng);
     expect(events.dropped).toBe(1);
     expect(after.pieces.includes(DROP_ITEM)).toBe(false);
+  });
+});
+
+describe("交換合法性（唯一來源）", () => {
+  it("禮物只能和正下方的可消除格交換（往下送）", () => {
+    // 3×3：禮物在 (1,0)
+    const pieces = [
+      0, DROP_ITEM, 1,
+      2, 0, 2,
+      1, 2, 0,
+    ];
+    const specials = emptySpecials(9);
+    expect(isGiftDropSwap(pieces, 1, 4, 3)).toBe(true);
+    expect(isGiftDropSwap(pieces, 4, 1, 3)).toBe(true);
+    expect(isGiftDropSwap(pieces, 1, 0, 3)).toBe(false);
+    expect(swapIsLegal(pieces, specials, 1, 4, 3, 3)).toBe(true);
+    expect(swapIsLegal(pieces, specials, 1, 2, 3, 3)).toBe(false);
+  });
+
+  it("提示只找會消除的步，不把禮物下送當提示", () => {
+    const pieces = [
+      0, DROP_ITEM, 1,
+      1, 2, 0,
+      2, 0, 1,
+    ];
+    expect(findHintMove(pieces, 3, 3)).toBeNull();
+  });
+
+  it("findSpecialMove 找得到能做出四連的交換", () => {
+    // 4×2：第一列 0,0,1,0；換 (2,0)↔(2,1) 變四連
+    const pieces = [
+      0, 0, 1, 0,
+      1, 2, 0, 2,
+    ];
+    expect(findSpecialMove(pieces, 4, 2)).toEqual({ a: 2, b: 6 });
+    expect(findSpecialMove([0, 1, 2, 1, 2, 0], 3, 2)).toBeNull();
+  });
+});
+
+describe("stepWave 與事件", () => {
+  it("引爆的棋盤特殊糖計入 detonated，道具範圍與預覽一致", () => {
+    const rng = seededRng(21);
+    const state = board(4, 3, [
+      0, 0, 0, 1,
+      1, 2, 1, 2,
+      2, 1, 2, 1,
+    ]);
+    const specials: CandySpecial[] = emptySpecials(12);
+    specials[1] = "row";
+    const wave = stepWave({ ...state, specials }, 3, rng);
+    expect(wave).not.toBeNull();
+    expect(wave!.detonated).toEqual(["row"]);
+    expect(wave!.state.pieces.every((v) => v >= 0)).toBe(true);
+    const { events } = resolveBoard({ ...state, specials }, 3, seededRng(21));
+    expect(events.detonated).toBeGreaterThanOrEqual(1);
+  });
+
+  it("propAffectedCells：泡泡單格、掃把整排、彩虹同款（不含禮物）", () => {
+    const state = { cols: 3, pieces: [0, DROP_ITEM, 0, 1, 0, 2, 2, 1, 0] };
+    expect(propAffectedCells("bubble", state, 4)).toEqual([4]);
+    expect(propAffectedCells("bubble", state, 1)).toEqual([]);
+    expect(propAffectedCells("broom", state, 0)).toEqual([0, 2]);
+    expect(propAffectedCells("rainbow", state, 0)).toEqual([0, 2, 4, 8]);
   });
 });
 
@@ -237,53 +311,6 @@ describe("reshuffle", () => {
     expect(r.pieces.indexOf(DROP_ITEM)).toBe(dropAt);
     expect(findMatches(r.pieces, 6, 6).size).toBe(0);
     expect(findHintMove(r.pieces, 6, 6, r.specials)).not.toBeNull();
-  });
-});
-
-describe("關卡資料", () => {
-  it("共 10 關、index 連續；標準模式前 3 關 5×5、其後 6×6", () => {
-    expect(CANDY_MATCH_LEVELS.length).toBe(10);
-    CANDY_MATCH_LEVELS.forEach((lv, i) => {
-      expect(lv.index).toBe(i);
-      expect(lv.cols).toBe(i < 3 ? 5 : 6);
-      expect(lv.rows).toBe(i < 3 ? 5 : 6);
-      expect(lv.pieceKinds).toBeGreaterThanOrEqual(3);
-      expect(lv.pieceKinds).toBeLessThanOrEqual(5);
-    });
-  });
-
-  it("兒童模式：第 1 關 5×5，其後 6×6、最多 4 種、不限步數", () => {
-    expect(kidsModeLevel(CANDY_MATCH_LEVELS[0]).cols).toBe(5);
-    expect(kidsModeLevel(CANDY_MATCH_LEVELS[0]).rows).toBe(5);
-    for (const lv of CANDY_MATCH_LEVELS.slice(1)) {
-      const kids = kidsModeLevel(lv);
-      expect(kids.cols).toBe(6);
-      expect(kids.rows).toBe(6);
-      expect(kids.pieceKinds).toBeLessThanOrEqual(4);
-      expect(kids.moves).toBe(0);
-    }
-  });
-
-  it("兒童模式降低任務量且不會製造無法完成的清潔任務", () => {
-    const clean = kidsModeLevel(CANDY_MATCH_LEVELS[4]);
-    const parade = kidsModeLevel(CANDY_MATCH_LEVELS[8]);
-    expect(clean.dirtCount).toBe(3);
-    expect(clean.task.kind).toBe("clean-dirt");
-    if (clean.task.kind === "clean-dirt") {
-      expect(clean.task.count).toBeLessThanOrEqual(clean.dirtCount ?? 0);
-    }
-    expect(parade.task.kind).toBe("collect-multi");
-    if (parade.task.kind === "collect-multi") {
-      expect(parade.task.targets.every((target) => target.count <= 4)).toBe(true);
-    }
-  });
-
-  it("任務型涵蓋三種＋教學/慶祝關", () => {
-    const kinds = new Set(CANDY_MATCH_LEVELS.map((lv) => lv.task.kind));
-    expect(kinds.has("collect")).toBe(true);
-    expect(kinds.has("clean-dirt")).toBe(true);
-    expect(kinds.has("drop-item")).toBe(true);
-    expect(kinds.has("clear-any")).toBe(true);
   });
 });
 

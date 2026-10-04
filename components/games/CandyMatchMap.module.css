@@ -4,39 +4,155 @@
   width: 100%;
 }
 
+.modeToggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.modeOption {
+  display: grid;
+  gap: 1px;
+  min-height: 48px;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 14px;
+  background: transparent;
+  color: #7c6886;
+  cursor: pointer;
+  font: inherit;
+  text-align: center;
+}
+
+/* 選中只用白底描邊；黃橘漸層只留給唯一主按鈕「開始」 */
+.modeOption[aria-checked="true"] {
+  background: #fff;
+  color: #5d4a67;
+  box-shadow: inset 0 0 0 2px #ffbd6f;
+}
+
+.modeOption:focus-visible {
+  outline: 3px solid var(--focus-ring, #ff9fb7);
+  outline-offset: 2px;
+}
+
+.modeLabel {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.modeHint {
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .hero {
   display: grid;
-  justify-items: center;
-  gap: 8px;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "badge info"
+    "start start";
+  align-items: center;
+  gap: 8px 12px;
+  padding: 12px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 8px 18px rgba(150, 110, 130, 0.14);
 }
 
 .heroBadge {
+  grid-area: badge;
   display: block;
-  width: 140px;
-  height: 140px;
+  width: 88px;
+  height: 88px;
   border-radius: 50%;
   overflow: hidden;
   background: #fff7ea;
   border: 3px solid #fff;
-  box-shadow: 0 8px 18px rgba(150, 110, 130, 0.22);
+  box-shadow: 0 6px 14px rgba(150, 110, 130, 0.22);
+}
+
+.heroInfo {
+  grid-area: info;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  color: #5d4a67;
+}
+
+.heroInfo p {
+  margin: 0;
+}
+
+.heroStation {
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.heroTask {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.heroGoalIcons {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  line-height: 0;
+}
+
+.heroMeta {
+  font-size: 13px;
+  font-weight: 700;
+  color: #7c6886;
 }
 
 .heroStart {
-  min-height: 48px;
-  min-width: 96px;
+  grid-area: start;
+  min-height: 52px;
   padding: 0 22px;
   border: none;
   border-radius: 999px;
   background: linear-gradient(180deg, #ffe889, #ffbd6f);
   color: #614018;
   font-weight: 900;
-  font-size: 18px;
+  font-size: 19px;
   cursor: pointer;
+  box-shadow: 0 5px 0 rgba(203, 128, 52, 0.38);
 }
 
 .heroStart:focus-visible {
   outline: 3px solid var(--focus-ring, #ff9fb7);
   outline-offset: 2px;
+}
+
+.notice {
+  min-height: 20px;
+  margin: -4px 0 0;
+  color: #a5567a;
+  font-size: 14px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.notice:empty {
+  min-height: 0;
+  margin: 0;
+}
+
+.medalNote {
+  margin: 0;
+  color: #7c6886;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
 }
 
 .path {
@@ -77,17 +193,22 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.node:disabled {
+.node[aria-disabled="true"] {
   cursor: default;
 }
 
+.node[aria-current="true"] .badge {
+  box-shadow: 0 0 0 3px #ffbd6f, 0 4px 10px rgba(150, 110, 130, 0.22);
+}
+
+/* 圓形裁切放在圖上，鎖頭才不會被 badge 的圓切掉 */
 .badge {
   position: relative;
   display: block;
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  overflow: hidden;
+  overflow: visible;
   background: #fff7ea;
   border: 2px solid #fff;
   box-shadow: 0 4px 10px rgba(150, 110, 130, 0.22);
@@ -97,6 +218,7 @@
   display: block;
   width: 100%;
   height: 100%;
+  border-radius: 50%;
   object-fit: cover;
 }
 

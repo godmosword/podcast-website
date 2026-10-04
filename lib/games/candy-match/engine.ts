@@ -53,6 +53,10 @@ export type ResolveEvents = {
   dropped: number;
   /** 消除波數（一次交換的連鎖各算一波） */
   waves: number;
+  /** 實際引爆的棋盤特殊糖數（含連鎖引爆；工具列道具本身不算） */
+  detonated: number;
+  /** 本次解算新做出的特殊糖數 */
+  specialsMade: number;
   /** 每一波被消除的格子索引（供動畫用） */
   clearedByWave: number[][];
 };
@@ -75,7 +79,7 @@ export function swapped(pieces: number[], a: number, b: number): number[] {
   return next;
 }
 
-const matchable = (v: number): boolean => v >= 0;
+export const matchable = (v: number): boolean => v >= 0;
 
 export type CandyMatchRun = {
   cells: number[];
@@ -148,31 +152,21 @@ export function swapCreatesMatch(
   return findMatches(swapped(pieces, a, b), cols, rows).size > 0;
 }
 
-/** 找一步可消除的交換（提示用）；無解回傳 null。特殊糖可與鄰格交換啟動。 */
-export function findHintMove(
+/** 禮物例外：禮物與正下方的可消除格交換，即使沒湊三連也合法（把禮物往下送）。 */
+export function isGiftDropSwap(
   pieces: number[],
+  a: number,
+  b: number,
   cols: number,
-  rows: number,
-  specials: CandySpecial[] = emptySpecials(pieces.length),
-): { a: number; b: number } | null {
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const a = idx(c, r, cols);
-      if (c + 1 < cols) {
-        const b = a + 1;
-        if (swapIsLegal(pieces, specials, a, b, cols, rows)) return { a, b };
-      }
-      if (r + 1 < rows) {
-        const b = a + cols;
-        if (swapIsLegal(pieces, specials, a, b, cols, rows)) return { a, b };
-      }
-    }
-  }
-  return null;
+): boolean {
+  if (!areAdjacent(a, b, cols)) return false;
+  if (pieces[a] === DROP_ITEM && matchable(pieces[b])) return b === a + cols;
+  if (pieces[b] === DROP_ITEM && matchable(pieces[a])) return a === b + cols;
+  return false;
 }
 
-/** 特殊糖與可消除鄰格交換即合法（不必先湊三連）。 */
-export function swapIsLegal(
+/** 交換後會消除：湊出三連，或特殊糖與可消除鄰格交換。不含禮物例外。 */
+export function swapMakesClear(
   pieces: number[],
   specials: CandySpecial[],
   a: number,
@@ -187,6 +181,75 @@ export function swapIsLegal(
     return true;
   }
   return swapCreatesMatch(pieces, a, b, cols, rows);
+}
+
+/**
+ * 玩家交換合法性的唯一來源：會消除，或把禮物往下送。
+ * 提示、模擬與玩家交換都經這裡，不在 View 另寫例外。
+ */
+export function swapIsLegal(
+  pieces: number[],
+  specials: CandySpecial[],
+  a: number,
+  b: number,
+  cols: number,
+  rows: number,
+): boolean {
+  return (
+    swapMakesClear(pieces, specials, a, b, cols, rows) ||
+    isGiftDropSwap(pieces, a, b, cols)
+  );
+}
+
+/** 列出所有相鄰交換對（每對只出現一次：右鄰與下鄰）。 */
+export function adjacentPairs(cols: number, rows: number): Array<{ a: number; b: number }> {
+  const out: Array<{ a: number; b: number }> = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const a = idx(c, r, cols);
+      if (c + 1 < cols) out.push({ a, b: a + 1 });
+      if (r + 1 < rows) out.push({ a, b: a + cols });
+    }
+  }
+  return out;
+}
+
+/** 列出所有合法交換（含禮物例外）。 */
+export function listLegalMoves(state: BoardState): Array<{ a: number; b: number }> {
+  const specials = state.specials ?? emptySpecials(state.pieces.length);
+  return adjacentPairs(state.cols, state.rows).filter(({ a, b }) =>
+    swapIsLegal(state.pieces, specials, a, b, state.cols, state.rows),
+  );
+}
+
+/**
+ * 找一步會消除的交換（提示與「是否需要重排」用）；無解回傳 null。
+ * 只算會消除的步，禮物下送不算，避免只剩禮物步時卡關。
+ */
+export function findHintMove(
+  pieces: number[],
+  cols: number,
+  rows: number,
+  specials: CandySpecial[] = emptySpecials(pieces.length),
+): { a: number; b: number } | null {
+  for (const pair of adjacentPairs(cols, rows)) {
+    if (swapMakesClear(pieces, specials, pair.a, pair.b, cols, rows)) return pair;
+  }
+  return null;
+}
+
+/** 找一步能做出特殊糖（四連以上）的交換；無則 null。 */
+export function findSpecialMove(
+  pieces: number[],
+  cols: number,
+  rows: number,
+): { a: number; b: number } | null {
+  for (const pair of adjacentPairs(cols, rows)) {
+    if (!matchable(pieces[pair.a]) || !matchable(pieces[pair.b])) continue;
+    const next = swapped(pieces, pair.a, pair.b);
+    if (findMatchRuns(next, cols, rows).some((run) => run.length >= 4)) return pair;
+  }
+  return null;
 }
 
 export function planSpecialSpawns(
@@ -311,7 +374,7 @@ export function applySpecialSpawns(
   return next;
 }
 
-function randomPiece(kinds: number, rng: Rng): number {
+export function randomPiece(kinds: number, rng: Rng): number {
   return Math.floor(rng() * kinds);
 }
 
@@ -395,63 +458,197 @@ export function applyGravity(
   return { pieces: next, specials: nextSpecials };
 }
 
+/** 重力與禮物送達的一個段落：UI 依 falls 播掉落，再顯示 board。 */
+export type SettlePhase = {
+  falls: CandyFallMotion[];
+  board: BoardState;
+  /** 這段落開始前送達的禮物數 */
+  dropped: number;
+};
+
 /**
- * 解算整個消除流程（消除 → 清髒 → 重力補格 → 掉落物送達 → 連鎖），
- * 直到穩定。回傳新狀態與事件統計。
+ * 讓棋盤穩定：送達底排禮物 → 重力補格，重複到沒有空格與底排禮物。
+ * 禮物送達後空出的格子也會補滿，不會留下空洞。
+ */
+export function settleBoard(
+  state: BoardState,
+  kinds: number,
+  rng: Rng,
+): { state: BoardState; phases: SettlePhase[]; dropped: number } {
+  const { cols, rows } = state;
+  let pieces = state.pieces.slice();
+  let specials = (state.specials ?? emptySpecials(pieces.length)).slice();
+  const phases: SettlePhase[] = [];
+  let dropped = 0;
+  let guard = rows * cols + 4;
+  while (guard-- > 0) {
+    const drops = collectBottomDrops(pieces, cols, rows, specials);
+    pieces = drops.pieces;
+    specials = drops.specials;
+    dropped += drops.dropped;
+    if (!pieces.includes(EMPTY)) {
+      if (drops.dropped > 0) {
+        phases.push({ falls: [], board: { ...state, pieces, specials }, dropped: drops.dropped });
+      }
+      break;
+    }
+    const falls = planGravity(pieces, cols, rows);
+    const fallen = applyGravity(pieces, cols, rows, kinds, rng, specials);
+    pieces = fallen.pieces;
+    specials = fallen.specials;
+    phases.push({ falls, board: { ...state, pieces, specials }, dropped: drops.dropped });
+  }
+  return { state: { ...state, pieces, specials }, phases, dropped };
+}
+
+/** 一波消除的完整結果：動畫與純解算共用。 */
+export type WaveStep = {
+  cleared: number[];
+  detonated: Array<Exclude<CandySpecial, "none">>;
+  spawns: SpecialSpawn[];
+  /** 消除＋留下特殊糖後、重力前 */
+  afterClear: BoardState;
+  phases: SettlePhase[];
+  /** 本波結束的穩定盤面 */
+  state: BoardState;
+  collected: number[];
+  cleaned: number;
+  dropped: number;
+};
+
+export type WaveOptions = {
+  /** 額外要清的格（特殊糖交換、道具） */
+  extraCells?: Iterable<number>;
+  /** 新特殊糖優先留在這些格（交換的兩格） */
+  preferSpawnAt?: readonly number[];
+  /** 只清 extraCells，不看三連（道具） */
+  extraOnly?: boolean;
+};
+
+/** 解算一波；沒有可消除時回傳 null。 */
+export function stepWave(
+  state: BoardState,
+  kinds: number,
+  rng: Rng,
+  options: WaveOptions = {},
+): WaveStep | null {
+  const { cols, rows } = state;
+  const specials = state.specials ?? emptySpecials(state.pieces.length);
+  const planned = planWaveClears(
+    state.pieces,
+    specials,
+    cols,
+    rows,
+    options.extraCells,
+    options.preferSpawnAt ?? [],
+    Boolean(options.extraOnly),
+  );
+  if (planned.clear.size === 0 && planned.spawns.length === 0) return null;
+  const cleared = clearCells(state.pieces, state.dirt, planned.clear, kinds, specials);
+  const afterClear: BoardState = {
+    cols,
+    rows,
+    pieces: cleared.pieces,
+    dirt: cleared.dirt,
+    specials: applySpecialSpawns(cleared.specials, planned.spawns),
+  };
+  const settled = settleBoard(afterClear, kinds, rng);
+  return {
+    cleared: [...planned.clear],
+    detonated: planned.detonated,
+    spawns: planned.spawns,
+    afterClear,
+    phases: settled.phases,
+    state: settled.state,
+    collected: cleared.collected,
+    cleaned: cleared.cleaned,
+    dropped: settled.dropped,
+  };
+}
+
+/** 單次解算的連鎖上限。 */
+export const MAX_RESOLVE_WAVES = 100;
+
+export function emptyEvents(kinds: number): ResolveEvents {
+  return {
+    collected: Array<number>(kinds).fill(0),
+    cleaned: 0,
+    dropped: 0,
+    waves: 0,
+    detonated: 0,
+    specialsMade: 0,
+    clearedByWave: [],
+  };
+}
+
+/** 把一波結果累加進事件統計（回傳新物件）。 */
+export function addWaveEvents(events: ResolveEvents, wave: WaveStep): ResolveEvents {
+  return {
+    collected: events.collected.map((n, i) => n + (wave.collected[i] ?? 0)),
+    cleaned: events.cleaned + wave.cleaned,
+    dropped: events.dropped + wave.dropped,
+    waves: events.waves + 1,
+    detonated: events.detonated + wave.detonated.length,
+    specialsMade: events.specialsMade + wave.spawns.length,
+    clearedByWave: [...events.clearedByWave, wave.cleared],
+  };
+}
+
+/**
+ * 解算整個消除流程（先穩定 → 逐波消除、清髒、重力、送禮物、連鎖），
+ * 直到穩定。回傳新狀態與事件統計。第一波可帶 options（交換／道具）。
  */
 export function resolveBoard(
   state: BoardState,
   kinds: number,
   rng: Rng,
+  options: WaveOptions = {},
 ): { state: BoardState; events: ResolveEvents } {
-  const { cols, rows } = state;
-  let pieces = state.pieces.slice();
-  let dirt = state.dirt.slice();
-  let specials = (state.specials ?? emptySpecials(pieces.length)).slice();
-  const events: ResolveEvents = {
-    collected: Array<number>(kinds).fill(0),
-    cleaned: 0,
-    dropped: 0,
-    waves: 0,
-    clearedByWave: [],
-  };
-
-  // 掉落物可能已在底排（例如交換直接送到底）
-  const collectDrops = () => {
-    const collected = collectBottomDrops(pieces, cols, rows, specials);
-    pieces = collected.pieces;
-    specials = collected.specials;
-    events.dropped += collected.dropped;
-  };
-
-  let guard = 32;
+  const pre = settleBoard(
+    { ...state, specials: state.specials ?? emptySpecials(state.pieces.length) },
+    kinds,
+    rng,
+  );
+  let current = pre.state;
+  let events: ResolveEvents = { ...emptyEvents(kinds), dropped: pre.dropped };
+  // 連鎖超過上限（實務上不會發生）時回傳當下盤面；呼叫端見到仍有三連會重排
+  let guard = MAX_RESOLVE_WAVES;
+  let first = true;
   while (guard-- > 0) {
-    collectDrops();
-    if (pieces.includes(EMPTY)) {
-      const fallen = applyGravity(pieces, cols, rows, kinds, rng, specials);
-      pieces = fallen.pieces;
-      specials = fallen.specials;
-      continue;
-    }
-    const wave = planWaveClears(pieces, specials, cols, rows);
-    if (wave.clear.size === 0) break;
-    events.waves += 1;
-    events.clearedByWave.push([...wave.clear]);
-    const cleared = clearCells(pieces, dirt, wave.clear, kinds, specials);
-    pieces = cleared.pieces;
-    dirt = cleared.dirt;
-    specials = applySpecialSpawns(cleared.specials, wave.spawns);
-    events.collected.forEach((_, i) => {
-      events.collected[i] += cleared.collected[i] ?? 0;
-    });
-    events.cleaned += cleared.cleaned;
-    const fallen = applyGravity(pieces, cols, rows, kinds, rng, specials);
-    pieces = fallen.pieces;
-    specials = fallen.specials;
+    const wave = stepWave(current, kinds, rng, first ? options : {});
+    first = false;
+    if (!wave) break;
+    events = addWaveEvents(events, wave);
+    current = wave.state;
   }
-  collectDrops();
+  return { state: current, events };
+}
 
-  return { state: { cols, rows, pieces, dirt, specials }, events };
+/** 道具作用範圍（預覽與實際使用共用）：泡泡單格、掃把整排、彩虹同款。 */
+export function propAffectedCells(
+  kind: "bubble" | "broom" | "rainbow",
+  state: Pick<BoardState, "cols" | "pieces">,
+  target: number,
+): number[] {
+  const { cols, pieces } = state;
+  const v = pieces[target];
+  if (v == null) return [];
+  if (kind === "bubble") return v >= 0 ? [target] : [];
+  if (kind === "rainbow") {
+    if (v < 0) return [];
+    const out: number[] = [];
+    pieces.forEach((p, i) => {
+      if (p === v) out.push(i);
+    });
+    return out;
+  }
+  const row = Math.floor(target / cols);
+  const out: number[] = [];
+  for (let c = 0; c < cols; c++) {
+    const i = idx(c, row, cols);
+    if (pieces[i] >= 0) out.push(i);
+  }
+  return out;
 }
 
 /**
@@ -508,129 +705,4 @@ export function collectBottomDrops(
     }
   }
   return { pieces: next, specials: nextSpecials, dropped };
-}
-
-/** 生成棋盤：無初始三連、至少一步可解；髒髒格與掉落物依關卡配置。 */
-export function createBoard(
-  cols: number,
-  rows: number,
-  kinds: number,
-  rng: Rng,
-  options: {
-    dirtCount?: number;
-    dropCount?: number;
-    /** Replay 時避免直接重播上一盤完全相同的盤面。 */
-    avoidBoard?: Pick<BoardState, "pieces" | "dirt">;
-  } = {},
-): BoardState {
-  let guard = 64;
-  while (guard-- > 0) {
-    const pieces = Array<number>(cols * rows).fill(EMPTY);
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        let v = randomPiece(kinds, rng);
-        let tries = 12;
-        while (tries-- > 0 && createsImmediateRun(pieces, c, r, cols, v)) {
-          v = randomPiece(kinds, rng);
-        }
-        pieces[idx(c, r, cols)] = v;
-      }
-    }
-    // 掉落物放頂排（非消除物，覆蓋原圖案）
-    const dropCount = options.dropCount ?? 0;
-    for (let n = 0; n < dropCount; n++) {
-      const c = Math.floor(rng() * cols);
-      pieces[idx(c, 0, cols)] = DROP_ITEM;
-    }
-    const dirt = Array<boolean>(cols * rows).fill(false);
-    const dirtCount = options.dirtCount ?? 0;
-    let placed = 0;
-    let dirtGuard = 200;
-    while (placed < dirtCount && dirtGuard-- > 0) {
-      const i = Math.floor(rng() * cols * rows);
-      if (!dirt[i] && pieces[i] !== DROP_ITEM) {
-        dirt[i] = true;
-        placed += 1;
-      }
-    }
-    if (findMatches(pieces, cols, rows).size > 0) continue;
-    if (!findHintMove(pieces, cols, rows)) continue;
-    const previous = options.avoidBoard;
-    if (
-      previous &&
-      previous.pieces.length === pieces.length &&
-      previous.dirt.length === dirt.length &&
-      previous.pieces.every((piece, i) => piece === pieces[i]) &&
-      previous.dirt.every((isDirty, i) => isDirty === dirt[i])
-    ) {
-      continue;
-    }
-    return { cols, rows, pieces, dirt, specials: emptySpecials(cols * rows) };
-  }
-  // 理論上不會到這；保底回傳最後一次生成（仍可玩，靠重排修復）
-  const pieces = Array.from({ length: cols * rows }, () => randomPiece(kinds, rng));
-  return {
-    cols,
-    rows,
-    pieces,
-    dirt: Array<boolean>(cols * rows).fill(false),
-    specials: emptySpecials(cols * rows),
-  };
-}
-
-function createsImmediateRun(
-  pieces: number[],
-  c: number,
-  r: number,
-  cols: number,
-  v: number,
-): boolean {
-  if (
-    c >= 2 &&
-    pieces[idx(c - 1, r, cols)] === v &&
-    pieces[idx(c - 2, r, cols)] === v
-  ) {
-    return true;
-  }
-  if (
-    r >= 2 &&
-    pieces[idx(c, r - 1, cols)] === v &&
-    pieces[idx(c, r - 2, cols)] === v
-  ) {
-    return true;
-  }
-  return false;
-}
-
-/** 無解時重排：保留掉落物位置，重洗一般圖案直到無初始三連且有解。 */
-export function reshuffle(state: BoardState, rng: Rng): BoardState {
-  const { cols, rows } = state;
-  const specials = state.specials ?? emptySpecials(state.pieces.length);
-  const movable: { piece: number; special: CandySpecial }[] = [];
-  state.pieces.forEach((v, i) => {
-    if (matchable(v)) movable.push({ piece: v, special: specials[i] ?? "none" });
-  });
-  let guard = 64;
-  while (guard-- > 0) {
-    const pool = movable.slice();
-    for (let i = pool.length - 1; i > 0; i--) {
-      const j = Math.floor(rng() * (i + 1));
-      const t = pool[i];
-      pool[i] = pool[j];
-      pool[j] = t;
-    }
-    const pieces = state.pieces.slice();
-    const nextSpecials = specials.slice();
-    for (let i = 0; i < pieces.length; i++) {
-      if (!matchable(pieces[i])) continue;
-      const taken = pool.pop();
-      if (!taken) continue;
-      pieces[i] = taken.piece;
-      nextSpecials[i] = taken.special;
-    }
-    if (findMatches(pieces, cols, rows).size > 0) continue;
-    if (!findHintMove(pieces, cols, rows, nextSpecials)) continue;
-    return { ...state, pieces, specials: nextSpecials, dirt: state.dirt.slice() };
-  }
-  return state;
 }

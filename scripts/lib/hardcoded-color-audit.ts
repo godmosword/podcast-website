@@ -28,6 +28,11 @@ const HARDCODED_COLOR_ALLOWLIST = [
   "components/universe/ZoneNightLights.module.css",
   // 遊戲畫布與載入器（DESIGN.md §230）
   "components/games/CandyMatchView.module.css",
+  // 消消樂局內／地圖／棋盤：同一張淺色糖果卡面（原為 CandyMatchView inline style），
+  // 卡面夜間不反轉，墨色必須固定才維持對比；改吃主題 token 會在夜間變成淺字疊淺底
+  "components/games/CandyMatchPlay.module.css",
+  "components/games/CandyMatchMap.module.css",
+  "components/games/CandyMatchBoard.module.css",
   "components/games/GameLoadOverlay.module.css",
   "components/games/GameEndStation.module.css",
   // 著色畫布：底必須是純白，否則蠟筆顏色會被主題染色

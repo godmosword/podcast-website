@@ -82,6 +82,18 @@ describe("candyMatchAdapter", () => {
     expect(onSession).toHaveBeenCalledTimes(1);
   });
 
+  it("連續通過不同關卡（View 內直接開下一局）每關都回報一次", () => {
+    const onSession = vi.fn();
+    const inst = new CandyMatchInstance({ kidsMode: true, reducedMotion: false, onSession });
+    inst.notifyPlaying(0, 0);
+    inst.notifyWon({ score: 10, levelIndex: 0, cleared: true });
+    inst.notifyWon({ score: 10, levelIndex: 0, cleared: true });
+    inst.notifyPlaying(1, 0);
+    inst.notifyWon({ score: 20, levelIndex: 1, cleared: true });
+    expect(onSession).toHaveBeenCalledTimes(2);
+    expect(onSession.mock.calls.map(([r]) => r.levelIndex)).toEqual([0, 1]);
+  });
+
   it("notifyRetry 對應 over 狀態", () => {
     const inst = new CandyMatchInstance({ kidsMode: false, reducedMotion: false });
     inst.notifyPlaying(1, 0);

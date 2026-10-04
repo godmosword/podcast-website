@@ -15,13 +15,12 @@ async function openColoringCanvas(page: Page) {
 }
 
 async function playHintMove(page: Page) {
-  const progress = page.getByRole("progressbar", { name: "任務完成度" });
-  const before = Number(await progress.getAttribute("aria-valuenow"));
+  const board = page.getByTestId("candy-match-board");
   const hints = page.locator('[data-testid="candy-match-board"] button[data-hint="true"]');
   let hintCount = 0;
   for (let frame = 0; frame < 90; frame += 1) {
     if ((await page.getByTestId("candy-match-result").count()) > 0) return;
-    // 結算 overlay 可能在上一個 progress poll 後同一個 frame 才掛上；
+    // 結算 overlay 可能在上一個 poll 後同一個 frame 才掛上；
     // force 只避免背後按鈕被 overlay 擋住，下一輪立即以 result test id 收斂。
     await page.getByRole("button", { name: /提示/ }).click({ force: true });
     hintCount = await hints.count();
@@ -36,24 +35,32 @@ async function playHintMove(page: Page) {
   );
   expect(labels[0]).toBeTruthy();
   expect(labels[1]).toBeTruthy();
+  const before = await board
+    .locator("button")
+    .evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")).join("|"));
 
   await page.getByRole("button", { name: labels[0]!, exact: true }).click({ force: true });
   await page.getByRole("button", { name: labels[1]!, exact: true }).click({ force: true });
 
+  // 提示步一定合法，但不一定推進目前的收集色；等盤面變動且棋盤恢復可操作
   await expect
     .poll(
       async () => {
         if ((await page.getByTestId("candy-match-result").count()) > 0) return "done";
-        const now = Number(await progress.getAttribute("aria-valuenow"));
-        return now > before ? "progress" : "working";
+        if ((await board.getAttribute("aria-disabled")) === "true") return "working";
+        const now = await board
+          .locator("button")
+          .evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")).join("|"));
+        return now !== before ? "settled" : "working";
       },
       { timeout: 5_000 },
     )
-    .toMatch(/done|progress/);
+    .toMatch(/done|settled/);
 }
 
+// 新版關卡目標較大（首關收集 50 個），以目標導向提示逐步完成
 async function finishCandyLevel(page: Page) {
-  for (let attempt = 0; attempt < 8; attempt += 1) {
+  for (let attempt = 0; attempt < 40; attempt += 1) {
     if ((await page.getByTestId("candy-match-result").count()) > 0) return;
     await playHintMove(page);
   }
@@ -75,8 +82,8 @@ test.describe("遊戲完整 lifecycle", () => {
   test("Candy：開始 → 正確操作 → 完成 → replay 新盤面 → 再完成 → 回地圖", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/games/candy-match");
-    await page.getByRole("button", { name: /開始/ }).click();
-    // K-6：地圖站點以圖代字，下一站用 data-next 定位（aria-label＝「第 N 關 地名」）
+    await page.getByRole("button", { name: /開始冒險/ }).click();
+    // 地圖大卡的開始鈕；下一站用 data-next 定位（aria-label＝「開始：第 N 站 地名」）
     await page.locator('button[data-next="true"]').click();
     await expect(page.getByTestId("candy-match-board")).toBeVisible();
     const firstChallenge = await page.locator("[data-challenge]").getAttribute("data-challenge");
@@ -86,9 +93,12 @@ test.describe("遊戲完整 lifecycle", () => {
       .locator('[data-testid="candy-match-board"] button')
       .evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")));
     await finishCandyLevel(page);
-    await expect(page.getByRole("button", { name: "再玩這一關" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "再挑戰" })).toBeVisible();
+    // 結算面列出本局星星條件與累積獎章
+    await expect(page.getByRole("list", { name: "本局星星條件" })).toBeVisible();
 
-    await page.getByRole("button", { name: "再玩這一關" }).click();
+    // 已通關後重玩：抽同等難度的變體，不再是第一次的教學主線
+    await page.getByRole("button", { name: "再挑戰" }).click();
     await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(page.getByTestId("candy-match-board")).toBeVisible();
     const replayChallenge = await page.locator("[data-challenge]").getAttribute("data-challenge");
@@ -109,7 +119,7 @@ test.describe("遊戲完整 lifecycle", () => {
     await page.setViewportSize({ width: 390, height: 664 });
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/games/candy-match");
-    await page.getByRole("button", { name: /開始/ }).click();
+    await page.getByRole("button", { name: /開始冒險/ }).click();
     await expect(page.getByTestId("candy-match-map")).toBeVisible();
     expect(await page.evaluate(() => window.scrollY)).toBe(0);
     const next = page.locator("button[data-next='true']");
@@ -123,9 +133,9 @@ test.describe("遊戲完整 lifecycle", () => {
     await expect(lockedIcon).toHaveCSS("filter", "none");
 
     await next.click();
-    await expect(page.getByTestId("candy-match-board").locator("button")).toHaveCount(25);
+    await expect(page.getByTestId("candy-match-board").locator("button")).toHaveCount(36);
     await finishCandyLevel(page);
-    await page.getByRole("button", { name: "下一關" }).click();
+    await page.getByRole("button", { name: "下一站" }).click();
     const board = page.getByTestId("candy-match-board");
     await expect(board.locator("button")).toHaveCount(36);
     await expect.poll(async () => page.evaluate(() => {
@@ -165,10 +175,10 @@ test.describe("遊戲完整 lifecycle", () => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/games/candy-match");
     await expect(page.locator("html")).toHaveAttribute("data-theme", "night");
-    await page.getByRole("button", { name: /開始/ }).click();
+    await page.getByRole("button", { name: /開始冒險/ }).click();
     await page.locator("button[data-next='true']").click();
     await finishCandyLevel(page);
-    await page.getByRole("button", { name: "下一關" }).click();
+    await page.getByRole("button", { name: "下一站" }).click();
     await expect.poll(async () => page.evaluate(() => {
       const el = document.querySelector('[data-testid="candy-match-board"]') as HTMLElement | null;
       const wrap = el?.parentElement;
@@ -189,15 +199,60 @@ test.describe("遊戲完整 lifecycle", () => {
     expect(fit!.clip).toBeLessThanOrEqual(1);
   });
 
-  test("兒童模式第 1 關 25 格、下一關 36 格", async ({ page }) => {
+  test("棋盤逐步變大：1–2 關 36 格、3–5 關 42 格、6–10 關 48 格，連續通關每關都存獎章", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/games/candy-match");
-    await page.getByRole("button", { name: /開始/ }).click();
+    await page.getByRole("button", { name: /開始冒險/ }).click();
     await page.locator('button[data-next="true"]').click();
-    await expect(page.getByTestId("candy-match-board").locator("button")).toHaveCount(25);
-    await finishCandyLevel(page);
-    await page.getByRole("button", { name: "下一關" }).click();
     await expect(page.getByTestId("candy-match-board").locator("button")).toHaveCount(36);
+    await finishCandyLevel(page);
+    await page.getByRole("button", { name: "下一站" }).click();
+    await expect(page.getByTestId("candy-match-board").locator("button")).toHaveCount(36);
+    await finishCandyLevel(page);
+    // 回歸：View 內直接開下一局也要重置結算去重，兩關都要存到獎章
+    const medals = await page.evaluate(
+      () => JSON.parse(localStorage.getItem("cheche:progress") ?? "{}").gameProfile?.medals?.["candy-match"] ?? [],
+    );
+    expect(medals[0]).toBeGreaterThan(0);
+    expect(medals[1]).toBeGreaterThan(0);
+    await page.getByRole("button", { name: "下一站" }).click();
+    await expect(page.getByTestId("candy-match-board").locator("button")).toHaveCount(42);
+
+    await page.evaluate(() => {
+      const raw = JSON.parse(localStorage.getItem("cheche:progress") ?? "{}");
+      raw.gameProfile.medals["candy-match"] = [1, 1, 1, 1, 1];
+      localStorage.setItem("cheche:progress", JSON.stringify(raw));
+    });
+    await page.reload();
+    await page.getByRole("button", { name: /開始冒險/ }).click();
+    await page.locator('button[data-next="true"]').click();
+    await expect(page.getByTestId("candy-match-board").locator("button")).toHaveCount(48);
+  });
+
+  test("Candy 地圖：玩法切換沿用、鎖住的站說明前一站、道具先預覽可取消", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/games/candy-match");
+    await page.getByRole("button", { name: /開始冒險/ }).click();
+    await page.getByRole("radio", { name: /挑戰冒險/ }).click();
+    await expect(page.getByRole("radio", { name: /挑戰冒險/ })).toHaveAttribute("aria-checked", "true");
+    await expect(page.getByTestId("candy-match-map")).toContainText("步");
+    // aria-disabled 仍可點（點了會說明要先完成哪一站），Playwright 視為停用需 force
+    await page.getByRole("button", { name: /第 3 站 冰淇淋小店（未解鎖）/ }).click({ force: true });
+    await expect(page.getByRole("status").filter({ hasText: "先完成第 1 站" })).toBeVisible();
+
+    await page.reload();
+    await page.getByRole("button", { name: /開始冒險/ }).click();
+    await expect(page.getByRole("radio", { name: /挑戰冒險/ })).toHaveAttribute("aria-checked", "true");
+    await page.locator('button[data-next="true"]').click();
+    await expect(page.getByLabel(/還有 \d+ 步/)).toBeVisible();
+
+    const board = page.getByTestId("candy-match-board");
+    await page.getByRole("button", { name: /^掃把/ }).click();
+    await board.locator("button").nth(14).hover();
+    await expect(board.locator("button[data-preview='true']")).toHaveCount(6);
+    await page.getByRole("button", { name: "取消" }).click();
+    await expect(board.locator("button[data-preview='true']")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /^掃把/ })).toHaveAttribute("aria-label", /還有 1 個/);
   });
 
   test("Block Drop：開始 → gameplay → game over → replay → 再次 gameplay → 離開", async ({ page }) => {

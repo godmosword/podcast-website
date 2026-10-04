@@ -5,6 +5,7 @@ import {
   type VisualViewportId,
 } from "./visual-helpers";
 import { INTRO_PORTAL_ENABLED, skipIntroOverlay } from "./intro-gate";
+import { PROGRESS_STORAGE_KEY } from "../lib/progress-store";
 
 /**
  * D2 視覺回歸：Phase A smoke（5 頁 × 1280 light）+ Phase B 完整組合。
@@ -381,7 +382,7 @@ test("visual：消消樂地圖 390 light", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 900 });
   await page.goto("/games/candy-match");
   await stabilizeVisualPage(page, { theme: "light" });
-  await page.getByRole("button", { name: /開始/ }).click();
+  await page.getByRole("button", { name: /開始冒險/ }).click();
   await expect(page.getByTestId("candy-match-map")).toBeVisible();
   await expect(page).toHaveScreenshot("candy-map-390-light.png", {
     fullPage: true,
@@ -391,18 +392,70 @@ test("visual：消消樂地圖 390 light", async ({ page }) => {
   });
 });
 
-test("visual：消消樂第 1 關 390 light", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 900 });
-  await page.goto("/games/candy-match");
-  await stabilizeVisualPage(page, { theme: "light" });
-  await page.getByRole("button", { name: /開始/ }).click();
+/** 固定棋盤 seed（只有測試會設），可預設已通關站數以直接進後期大棋盤。 */
+async function seedCandy(page: Page, clearedLevels = 0) {
+  await page.addInitScript(
+    ({ storageKey, cleared }: { storageKey: string; cleared: number }) => {
+      (window as unknown as { __candyMatchSeed: number }).__candyMatchSeed = 11;
+      if (cleared <= 0) return;
+      const raw = localStorage.getItem(storageKey);
+      const parsed = raw ? JSON.parse(raw) : {};
+      parsed.gameProfile = {
+        version: 5,
+        ...(parsed.gameProfile ?? {}),
+        medals: { "candy-match": Array(cleared).fill(1) },
+      };
+      localStorage.setItem(storageKey, JSON.stringify(parsed));
+    },
+    { storageKey: PROGRESS_STORAGE_KEY, cleared: clearedLevels },
+  );
+}
+
+async function openCandyLevel(page: Page) {
+  await page.getByRole("button", { name: /開始冒險/ }).click();
   await page.locator('button[data-next="true"]').click();
   await expect(page.getByTestId("candy-match-board")).toBeVisible();
+}
+
+test("visual：消消樂第 1 關 390 light（固定棋盤）", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await seedCandy(page);
+  await page.goto("/games/candy-match");
+  await stabilizeVisualPage(page, { theme: "light" });
+  await openCandyLevel(page);
   await expect(page).toHaveScreenshot("candy-level1-390-light.png", {
     fullPage: true,
     maxDiffPixelRatio: 0.02,
     animations: "disabled",
-    mask: [page.getByTestId("candy-match-board")],
+    mask: [],
+  });
+});
+
+test("visual：消消樂第 8 站禮物 6×8 390 light（固定棋盤）", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await seedCandy(page, 7);
+  await page.goto("/games/candy-match");
+  await stabilizeVisualPage(page, { theme: "light" });
+  await openCandyLevel(page);
+  await expect(page).toHaveScreenshot("candy-level8-390-light.png", {
+    fullPage: true,
+    maxDiffPixelRatio: 0.02,
+    animations: "disabled",
+    mask: [],
+  });
+});
+
+test("visual：消消樂第 6 站 1280 寬螢幕側欄（固定棋盤）", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await seedCandy(page, 5);
+  await page.goto("/games/candy-match");
+  await stabilizeVisualPage(page, { theme: "light" });
+  await openCandyLevel(page);
+  await expect(page).toHaveScreenshot("candy-level6-1280-light.png", {
+    fullPage: true,
+    maxDiffPixelRatio: 0.02,
+    animations: "disabled",
+    mask: [],
   });
 });
 

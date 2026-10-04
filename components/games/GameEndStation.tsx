@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, type ReactNode } from "react";
 import { getNextGame } from "@/data/games";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import {
@@ -47,6 +47,10 @@ export type GameEndStationProps = {
     /** 圖示要能讓孩子看出「這顆帶我往哪」：next＝往前（下一關），page＝翻頁（換一張）。 */
     icon?: "next" | "page";
   };
+  /** 星星下方的補充資訊（例如消消樂的星數條件）；在對話框內，讀屏可讀。 */
+  details?: ReactNode;
+  /** 主次按鈕後的額外出口（例如「回地圖」）；放在對話框內才不會被焦點圈住擋掉。 */
+  extraActions?: ReactNode;
   className?: string;
 };
 
@@ -84,6 +88,8 @@ export function GameEndStation({
   hubLabel = "回遊樂園",
   hideHubLink = false,
   mainAction,
+  details,
+  extraActions,
   className,
 }: GameEndStationProps) {
   const resolvedTitle = pickTitle(mood, title, stars ?? scoreLabel?.length ?? 0);
@@ -143,6 +149,8 @@ export function GameEndStation({
           {scoreLabel ? <p className={styles.scoreLabel}>{scoreLabel}</p> : null}
         </div>
       )}
+
+      {details}
 
       <div className={styles.actions}>
         {mainAction ? (
@@ -204,6 +212,8 @@ export function GameEndStation({
           </>
         )}
       </div>
+
+      {extraActions}
 
       {!hideHubLink ? (
         <Link href={hubHref} className={styles.hubLink}>

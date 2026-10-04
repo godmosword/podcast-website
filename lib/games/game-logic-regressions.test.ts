@@ -7,13 +7,22 @@ function source(path: string): string {
 
 describe("game logic regressions", () => {
   it("繽紛消消樂走 gamekit 回報、無失敗用語、有自動提示與溫柔重試", () => {
-    const view = source("components/games/CandyMatchView.tsx");
+    // 局內流程拆到 useCandyMatchPlay、結算拆到 CandyMatchResult，三者一起檢查
+    const view = [
+      "components/games/CandyMatchView.tsx",
+      "components/games/useCandyMatchPlay.ts",
+      "components/games/CandyMatchResult.tsx",
+    ]
+      .map(source)
+      .join("\n");
     const adapter = source("lib/gamekit/games/candy-match/adapter.ts");
 
     expect(adapter).toContain('gameId: "candy-match"');
     expect(adapter).toContain("onSession");
-    expect(view).toContain("HINT_IDLE_MS");
-    expect(view).toContain("我們再試一次！");
+    // 輕鬆模式閒置先文字提示、較長閒置才亮交換對
+    expect(view).toContain("HINT_SOFT_MS");
+    expect(view).toContain("HINT_SHOW_MS");
+    expect(view).toContain("再試一次！");
     // K-7：連擊／特別糖不再出文字 toast，改整盤車車跳一下（角色動作）
     expect(view).not.toContain("掃把出發！");
     expect(view).not.toContain("彩虹全收！");

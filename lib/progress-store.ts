@@ -21,6 +21,11 @@ export type GameScoreId = GameKitGameId;
 export type BlockDropDifficultyPreference = "relaxed" | "standard" | "challenge";
 export type BlockDropSpecialModePreference = "classic" | "rainbow";
 export type MotionPreference = "system" | "on" | "off";
+/** 消消樂玩法；null＝尚未選過，由 kidsMode 決定初始玩法。 */
+export type CandyMatchModePreference = "easy" | "challenge" | null;
+/** 消消樂首次引導 id（交換、四連、五連）。道具的說明列本身就是引導，不另記。 */
+export const CANDY_MATCH_TIP_IDS = ["swap", "row", "color"] as const;
+export type CandyMatchTipId = (typeof CANDY_MATCH_TIP_IDS)[number];
 
 export type GameKitPreferenceStore = {
   kidsMode: boolean;
@@ -28,6 +33,8 @@ export type GameKitPreferenceStore = {
   blockDropSpecialMode: BlockDropSpecialModePreference;
   gameVolume: number;
   motionPreference: MotionPreference;
+  candyMatchMode: CandyMatchModePreference;
+  candyMatchTips: CandyMatchTipId[];
 };
 
 export type ContinueState = {
@@ -112,6 +119,8 @@ export const DEFAULT_PROGRESS: ProgressStore = {
       blockDropSpecialMode: "classic",
       gameVolume: 1,
       motionPreference: "system",
+      candyMatchMode: null,
+      candyMatchTips: [],
     },
     theme: "system",
     nightPromptDismissed: false,
@@ -199,6 +208,15 @@ function normalizeGameVolume(value: unknown): number {
     : 1;
 }
 
+function normalizeCandyMatchMode(value: unknown): CandyMatchModePreference {
+  return value === "easy" || value === "challenge" ? value : null;
+}
+
+function normalizeCandyMatchTips(value: unknown): CandyMatchTipId[] {
+  if (!Array.isArray(value)) return [];
+  return CANDY_MATCH_TIP_IDS.filter((id) => value.includes(id));
+}
+
 function normalizeGameKitPreferences(
   value: Partial<GameKitPreferenceStore> | undefined,
 ): GameKitPreferenceStore {
@@ -211,6 +229,8 @@ function normalizeGameKitPreferences(
     blockDropSpecialMode: normalizeBlockDropSpecialMode(value?.blockDropSpecialMode),
     gameVolume: normalizeGameVolume(value?.gameVolume),
     motionPreference: normalizeMotionPreference(value?.motionPreference),
+    candyMatchMode: normalizeCandyMatchMode(value?.candyMatchMode),
+    candyMatchTips: normalizeCandyMatchTips(value?.candyMatchTips),
   };
 }
 

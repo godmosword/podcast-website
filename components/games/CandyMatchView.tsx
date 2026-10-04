@@ -1,73 +1,34 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type ReactNode,
-} from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { CandyMatchBoard } from "@/components/games/CandyMatchBoard";
-import { DirtOverlay, PieceArt, PieceGift } from "@/components/games/CandyMatchPieceArt";
-import { GameEndStation } from "@/components/games/GameEndStation";
-import { IconSparkle, IconBubble, IconBroom, IconBulb, IconRainbow } from "@/components/games/ClayIcons";
-import { CandyMatchMap } from "@/components/games/CandyMatchMap";
+import { CandyMatchMap, type CandyStationPreview } from "@/components/games/CandyMatchMap";
+import { PieceArt } from "@/components/games/CandyMatchPieceArt";
+import { CandyMatchPropBar } from "@/components/games/CandyMatchPropBar";
+import { CandyMatchResult } from "@/components/games/CandyMatchResult";
+import { CandyMatchTaskBar } from "@/components/games/CandyMatchTaskBar";
+import { CandyMatchTip } from "@/components/games/CandyMatchTip";
 import type { GameAudioBus, OverlayProps } from "@/lib/gamekit/adapter";
-import { loadPlayerProfile } from "@/lib/gamekit/progress/save";
-import { medalCount } from "@/lib/gamekit/progress/meta";
-import { GAMEKIT_PROGRESS_EVENT } from "@/lib/gamekit/progress/session";
-import {
-  applyGravity,
-  applySpecialSpawns,
-  areAdjacent,
-  CANDY_FALL_MS,
-  CANDY_POP_MS,
-  CANDY_SWAP_MS,
-  clearCells,
-  collectBottomDrops,
-  createBoard,
-  findHintMove,
-  planGravity,
-  planWaveClears,
-  reshuffle,
-  swapIsLegal,
-  swapped,
-  swappedSpecials,
-  type BoardState,
-  type CandyFallMotion,
-  type CandySpecial,
-} from "@/lib/games/candy-match/engine";
-import {
-  CANDY_MATCH_LEVELS,
-  CANDY_MATCH_PIECES,
-  kidsModeLevel,
-  type CandyMatchLevel,
-  type CandyMatchTask,
-} from "@/lib/games/candy-match/levels";
-import {
-  applyCandyChallenge,
-  selectCandyChallenge,
-} from "@/lib/games/candy-match/challenges";
 import type { CandyMatchInstance } from "@/lib/gamekit/games/candy-match/adapter";
+import {
+  loadCandyMatchPrefs,
+  markCandyTipSeen,
+  resolveCandyMode,
+  saveCandyMatchMode,
+  type CandyMatchPrefs,
+  type CandyMatchTipId,
+} from "@/lib/gamekit/progress/candy-match-prefs";
+import { medalCount } from "@/lib/gamekit/progress/meta";
+import { loadPlayerProfile } from "@/lib/gamekit/progress/save";
+import { GAMEKIT_PROGRESS_EVENT } from "@/lib/gamekit/progress/session";
 import { candyMatchCellPx } from "@/lib/games/candy-match/cell-size";
+import { CANDY_MATCH_LEVELS } from "@/lib/games/candy-match/levels";
+import { buildRound, type CandyMatchRound, type CandyMode } from "@/lib/games/candy-match/stages";
+import { goalsSummary, goalTheme } from "@/lib/games/candy-match/tasks";
+import { useCandyMatchPlay } from "./useCandyMatchPlay";
 import styles from "./CandyMatchView.module.css";
 
-const INK = "#5d4a67";
-const INK_SOFT = "#7c6886";
-const ACCENT_PINK = "#a5567a";
-const HINT_IDLE_MS = 9_000;
-const PROPS_PER_LEVEL = { bubble: 2, rainbow: 1, broom: 1 };
-
 type Screen = "title" | "map" | "play";
-type PropKind = keyof typeof PROPS_PER_LEVEL;
-
-type Progress = {
-  collected: number[];
-  cleaned: number;
-  dropped: number;
-  waves: number;
-};
 
 export type CandyMatchController = {
   goToMap(): void;
@@ -85,70 +46,25 @@ export type CandyMatchViewProps = OverlayProps & {
 const noopAudio: GameAudioBus["ensureAudio"] = () => {};
 const noopTone: GameAudioBus["tone"] = () => {};
 
-const freshProgress = (): Progress => ({
-  collected: Array(CANDY_MATCH_PIECES.length).fill(0),
-  cleaned: 0,
-  dropped: 0,
-  waves: 0,
-});
+/** 寬螢幕與橫向手機：任務／道具放側欄，棋盤在主欄（與 CSS 斷點一致）。 */
+const WIDE_LAYOUT_QUERY =
+  "(min-width: 900px), (min-width: 640px) and (orientation: landscape) and (max-height: 520px)";
+/** 棋盤到下方道具列的 grid 間距（與 CSS .playLayout gap 一致）。 */
+const LAYOUT_GAP = 6;
+/** 道具列與鼓勵句之間的間距（CSS .playBelow gap）。 */
+const BELOW_GAP = 8;
+/** 卡面底部內距＋邊框＋棋盤框內距的保留量。 */
+const SURFACE_BOTTOM = 12;
+const GIFT_EXIT_ROW = 30;
+/** 鼓勵句一列的高度（與 CSS .encouragement min-height 一致；短螢幕 36）。引導氣泡等暫時內容不算。 */
+const MESSAGE_ROW = 44;
+const MESSAGE_ROW_SHORT = 36;
+const SHORT_SCREEN_MAX_HEIGHT = 720;
+const EMPTY_PREFS: CandyMatchPrefs = { mode: null, tipsSeen: [] };
 
-const CHEER_SUCCESS = ["哇！你找到了！", "好棒喔！", "太厲害了！", "你找到好多顏色！"];
-const CHEER_INVALID = ["沒關係，再試一次！", "找找三個一樣的圖案！", "差一點點，再找找看！"];
-const CHEER_HINT = ["需要幫忙嗎？看看發光的地方！"];
-const CHEER_WIN = ["任務完成！你超棒的！", "耶！我們做到了！"];
-
-const pick = (list: string[]) => list[Math.floor(Math.random() * list.length)];
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-function taskGoals(task: CandyMatchTask, p: Progress): { icon: ReactNode; got: number; need: number }[] {
-  switch (task.kind) {
-    case "clear-any":
-      return [{ icon: <IconSparkle size={22} />, got: p.waves, need: task.count }];
-    case "collect":
-      return [
-        {
-          icon: <PieceArt piece={task.piece} size={26} />,
-          got: p.collected[task.piece],
-          need: task.count,
-        },
-      ];
-    case "collect-multi":
-      return task.targets.map((t) => ({
-        icon: <PieceArt piece={t.piece} size={26} />,
-        got: p.collected[t.piece],
-        need: t.count,
-      }));
-    case "clean-dirt":
-      return [{ icon: <DirtOverlay size={24} />, got: p.cleaned, need: task.count }];
-    case "drop-item":
-      return [{ icon: <PieceGift size={24} />, got: p.dropped, need: task.count }];
-  }
+function roundKey(mode: CandyMode, index: number, replay: boolean): string {
+  return `${mode}:${index}:${replay ? "replay" : "main"}`;
 }
-
-const taskDone = (task: CandyMatchTask, p: Progress): boolean =>
-  taskGoals(task, p).every((g) => g.got >= g.need);
-
-function taskIntro(task: CandyMatchTask): string {
-  switch (task.kind) {
-    case "clear-any":
-      return "找到三個一樣的圖案吧！";
-    case "collect":
-      return `收集 ${task.count} 個${CANDY_MATCH_PIECES[task.piece].name}！`;
-    case "collect-multi":
-      return "收集三種指定圖案！";
-    case "clean-dirt":
-      return "幫廣場打掃乾淨吧！";
-    case "drop-item":
-      return "把禮物送到最下面！";
-  }
-}
-
-function computeScore(progress: Progress, movesLeft: number): number {
-  return progress.collected.reduce((a, b) => a + b, 0) * 10 + movesLeft * 5;
-}
-
-/** K-7 車車跳一下的長度 */
-const CANDY_CHEER_MS = 520;
 
 export function CandyMatchView({
   kidsMode,
@@ -165,158 +81,101 @@ export function CandyMatchView({
   const tone = audio?.tone ?? noopTone;
 
   const [screen, setScreen] = useState<Screen>("title");
-  const [levelIndex, setLevelIndex] = useState(0);
-  const [level, setLevel] = useState<CandyMatchLevel>(CANDY_MATCH_LEVELS[0]);
-  const [board, setBoard] = useState<BoardState | null>(null);
-  const [movesLeft, setMovesLeft] = useState(0);
-  const [progress, setProgress] = useState<Progress>(freshProgress());
-  const [propsLeft, setPropsLeft] = useState({ ...PROPS_PER_LEVEL });
-  const [propMode, setPropMode] = useState<PropKind | null>(null);
-  const [selected, setSelected] = useState<number | null>(null);
-  const [hint, setHint] = useState<{ a: number; b: number } | null>(null);
-  const [popping, setPopping] = useState<Set<number>>(new Set());
-  const [shaking, setShaking] = useState<Set<number>>(new Set());
-  const [overlay, setOverlay] = useState<"win" | "retry" | null>(null);
-  const [winStars, setWinStars] = useState(0);
-  const [message, setMessage] = useState("");
-  /** K-7：連擊／特別糖引爆時整盤車車跳一下（以角色動作取代文字 toast） */
-  const [cheer, setCheer] = useState(false);
-  const [swapMotion, setSwapMotion] = useState<{ a: number; b: number } | null>(null);
-  const [fallMotion, setFallMotion] = useState<readonly CandyFallMotion[] | null>(null);
-  const [sweepMotion, setSweepMotion] = useState<"row" | "color" | null>(null);
   const [medals, setMedals] = useState<number[]>([]);
+  const [prefs, setPrefs] = useState<CandyMatchPrefs>(EMPTY_PREFS);
   const [brandFontsEnabled, setBrandFontsEnabled] = useState(false);
   const [cellPx, setCellPx] = useState(56);
-  const lastBoardsRef = useRef<Record<number, BoardState | undefined>>({});
-  const lastChallengesRef = useRef<Record<number, string | undefined>>({});
-
-  const processingRef = useRef(false);
-  const usedPropRef = useRef(false);
-  const boardWrapRef = useRef<HTMLDivElement | null>(null);
-  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const boardRef = useRef<BoardState | null>(null);
-  boardRef.current = board;
-  const progressRef = useRef(progress);
-  progressRef.current = progress;
-  const movesRef = useRef(movesLeft);
-  movesRef.current = movesLeft;
-  const levelRef = useRef(level);
-  levelRef.current = level;
-  const levelIndexRef = useRef(levelIndex);
-  levelIndexRef.current = levelIndex;
-  const screenRef = useRef(screen);
-  screenRef.current = screen;
-  const reducedRef = useRef(reducedMotion);
-  reducedRef.current = reducedMotion;
-
-  const motionSleep = (ms: number) => sleep(reducedRef.current ? 0 : ms);
-
+  const mode = resolveCandyMode(prefs.mode, kidsMode);
   const inputPaused = instance.isInputPaused() || status === "paused";
+
+  const pendingRef = useRef<Record<string, CandyMatchRound>>({});
+  const lastStageRef = useRef<Record<string, string | undefined>>({});
+  const boardWrapRef = useRef<HTMLDivElement | null>(null);
+  const propSlotRef = useRef<HTMLDivElement | null>(null);
+
+  const onTipSeen = useCallback((id: CandyMatchTipId) => {
+    markCandyTipSeen(id);
+    setPrefs((p) => (p.tipsSeen.includes(id) ? p : { ...p, tipsSeen: [...p.tipsSeen, id] }));
+  }, []);
+
+  const game = useCandyMatchPlay({
+    instance,
+    ensureAudio,
+    tone,
+    reducedMotion,
+    inputPaused,
+    syncHost,
+    tipsSeen: prefs.tipsSeen,
+    onTipSeen,
+  });
+  const { play, actions } = game;
 
   const refreshMedals = useCallback(() => {
     setMedals(loadPlayerProfile().medals["candy-match"]?.slice() ?? []);
   }, []);
   useEffect(() => {
     refreshMedals();
+    setPrefs(loadCandyMatchPrefs());
     window.addEventListener(GAMEKIT_PROGRESS_EVENT, refreshMedals);
     return () => window.removeEventListener(GAMEKIT_PROGRESS_EVENT, refreshMedals);
   }, [refreshMedals]);
   const maxCleared = medals.reduce((m, f, i) => (medalCount(f) > 0 ? Math.max(m, i + 1) : m), 0);
 
-  useEffect(() => {
-    const el = boardWrapRef.current;
-    if (!el) return;
-    const apply = () => {
-      const cols = levelRef.current.cols;
-      const w = el.clientWidth;
-      setCellPx(
-        w > 0 ? candyMatchCellPx(w, cols) : candyMatchCellPx(window.innerWidth, cols),
-      );
-    };
-    apply();
-    const ro = new ResizeObserver(apply);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [screen, level]);
-
-  const armIdleHint = useCallback(() => {
-    if (idleTimer.current) clearTimeout(idleTimer.current);
-    setHint(null);
-    idleTimer.current = setTimeout(() => {
-      const b = boardRef.current;
-      if (!b || processingRef.current || screenRef.current !== "play" || inputPaused) return;
-      const move = findHintMove(b.pieces, b.cols, b.rows, b.specials);
-      if (move) {
-        setHint(move);
-        setMessage(pick(CHEER_HINT));
-        tone(1175, 0.12, "triangle", 0.05);
-      }
-    }, HINT_IDLE_MS);
-  }, [inputPaused, tone]);
-
-  useEffect(
-    () => () => {
-      if (idleTimer.current) clearTimeout(idleTimer.current);
+  /**
+   * 下一局的配置：地圖預覽與開始用同一份（pendingRef 快取，抽一次就固定）；
+   * 尚未通關＝教學主線，通關後＝重玩變體。
+   */
+  const planRound = useCallback(
+    (index: number): CandyMatchRound => {
+      const replay = medalCount(medals[index] ?? 0) > 0;
+      const key = roundKey(mode, index, replay);
+      const cached = pendingRef.current[key];
+      if (cached) return cached;
+      const round = buildRound(index, mode, {
+        replay,
+        previousId: lastStageRef.current[`${mode}:${index}`],
+        rng: Math.random,
+      });
+      pendingRef.current[key] = round;
+      return round;
     },
-    [],
+    [medals, mode],
   );
 
-  useEffect(() => {
-    if (!cheer) return;
-    const t = setTimeout(() => setCheer(false), CANDY_CHEER_MS);
-    return () => clearTimeout(t);
-  }, [cheer]);
+  const previewFor = useCallback(
+    (index: number): CandyStationPreview => {
+      const round = planRound(index);
+      return {
+        goals: round.stage.goals,
+        summary: goalsSummary(round.stage.goals),
+        moves: round.stage.moves,
+        replay: round.replay,
+      };
+    },
+    [planRound],
+  );
 
   const startLevel = useCallback(
     (index: number) => {
       ensureAudio();
-      const base = CANDY_MATCH_LEVELS[index];
-      const challenge = selectCandyChallenge(
-        index,
-        lastChallengesRef.current[index],
-        Math.random,
-      );
-      const configured = applyCandyChallenge(base, challenge);
-      const lv = kidsMode ? kidsModeLevel(configured) : configured;
-      lastChallengesRef.current[index] = challenge.id;
-      const nextBoard = createBoard(lv.cols, lv.rows, lv.pieceKinds, Math.random, {
-        dirtCount: lv.dirtCount,
-        dropCount: lv.dropCount,
-        avoidBoard: lastBoardsRef.current[index],
-      });
-      lastBoardsRef.current[index] = nextBoard;
-      setLevelIndex(index);
-      setLevel(lv);
-      setBoard(nextBoard);
-      setMovesLeft(lv.moves);
-      setProgress(freshProgress());
-      setPropsLeft({ ...PROPS_PER_LEVEL });
-      setPropMode(null);
-      setSelected(null);
-      setOverlay(null);
-      setPopping(new Set());
-      setSwapMotion(null);
-      setFallMotion(null);
-      setSweepMotion(null);
-      setCheer(false);
-      usedPropRef.current = false;
-      processingRef.current = false;
+      const round = planRound(index);
+      delete pendingRef.current[roundKey(round.mode, index, round.replay)];
+      lastStageRef.current[`${round.mode}:${index}`] = round.stage.id;
+      actions.start(round);
       setScreen("play");
-      setMessage(taskIntro(lv.task));
       instance.notifyPlaying(index, 0);
       syncHost();
-      armIdleHint();
     },
-    [armIdleHint, ensureAudio, instance, kidsMode, syncHost],
+    [actions, ensureAudio, instance, planRound, syncHost],
   );
 
   const goToMap = useCallback(() => {
+    actions.leave();
     setBrandFontsEnabled(true);
-    setOverlay(null);
     setScreen("map");
     instance.notifyReady("map");
     syncHost();
-  }, [instance, syncHost]);
+  }, [actions, instance, syncHost]);
 
   const openTutorial = useCallback(() => {
     setBrandFontsEnabled(true);
@@ -324,21 +183,27 @@ export function CandyMatchView({
   }, [onOpenTutorial]);
 
   const goToTitle = useCallback(() => {
-    setOverlay(null);
+    actions.leave();
     setScreen("title");
     instance.notifyReady("title");
     syncHost();
-  }, [instance, syncHost]);
+  }, [actions, instance, syncHost]);
 
+  const currentIndex = play?.round.index ?? 0;
   const restartCurrentLevel = useCallback(() => {
-    startLevel(levelIndexRef.current);
-  }, [startLevel]);
+    startLevel(currentIndex);
+  }, [currentIndex, startLevel]);
+
+  const changeMode = useCallback((next: CandyMode) => {
+    saveCandyMatchMode(next);
+    setPrefs((p) => ({ ...p, mode: next }));
+  }, []);
 
   /*
    * G-C1：controller 一律經 ref 轉呼叫、只在 mount 註冊一次。
    * 若把 startLevel 等放進 deps，host `status` 變 `paused` → `inputPaused`
-   * → `armIdleHint` → `startLevel` 連鎖換新，effect 重跑會再呼叫
-   * `notifyReady("title")` 把 adapter 打回 `ready`，暫停鈕直接消失、棋盤照常可點。
+   * 連鎖換新 callback，effect 重跑會再呼叫 `notifyReady("title")` 把 adapter
+   * 打回 `ready`，暫停鈕直接消失、棋盤照常可點。
    */
   const controllerRef = useRef({ goToMap, goToTitle, startLevel, restartCurrentLevel });
   controllerRef.current = { goToMap, goToTitle, startLevel, restartCurrentLevel };
@@ -354,390 +219,82 @@ export function CandyMatchView({
     });
     instance.notifyReady("title");
     syncHostRef.current();
-    return () => instance.registerController({
-      goToMap: () => {},
-      goToTitle: () => {},
-      startLevel: () => {},
-      restartCurrentLevel: () => {},
-    });
+    return () =>
+      instance.registerController({
+        goToMap: () => {},
+        goToTitle: () => {},
+        startLevel: () => {},
+        restartCurrentLevel: () => {},
+      });
   }, [instance]);
 
-  const runResolve = useCallback(
-    async (
-      startPieces: number[],
-      startDirt: boolean[],
-      startSpecials: CandySpecial[],
-      options?: {
-        preCleared?: Set<number>;
-        preferSpawnAt?: readonly number[];
-        extraOnly?: boolean;
-      },
-    ) => {
-      const lv = levelRef.current;
-      processingRef.current = true;
-      setHint(null);
-      let pieces = startPieces;
-      let dirt = startDirt;
-      let specials = startSpecials.slice();
-      const gained = freshProgress();
-      let wave = 0;
-      let guard = 24;
-      while (guard-- > 0) {
-        const extra = wave === 0 ? options?.preCleared : undefined;
-        const extraOnly = wave === 0 && Boolean(options?.extraOnly);
-        const preferSpawnAt = wave === 0 ? options?.preferSpawnAt ?? [] : [];
-        const planned = planWaveClears(
-          pieces,
-          specials,
-          lv.cols,
-          lv.rows,
-          extra,
-          preferSpawnAt,
-          extraOnly,
-        );
-        if (planned.clear.size === 0 && planned.spawns.length === 0) break;
-        wave += 1;
-        setPopping(new Set(planned.clear));
-        if (!reducedRef.current && planned.detonated[0]) {
-          setSweepMotion(planned.detonated[0]);
-        }
-        tone(523 + wave * 110, 0.12, "triangle", 0.06);
-        if (planned.detonated.length > 0 || wave >= 2) setCheer(true);
-        await motionSleep(CANDY_POP_MS);
-        const cleared = clearCells(
-          pieces,
-          dirt,
-          planned.clear,
-          CANDY_MATCH_PIECES.length,
-          specials,
-        );
-        pieces = cleared.pieces;
-        dirt = cleared.dirt;
-        specials = applySpecialSpawns(cleared.specials, planned.spawns);
-        cleared.collected.forEach((n, i) => {
-          gained.collected[i] += n;
-        });
-        if (cleared.cleaned > 0) {
-          gained.cleaned += cleared.cleaned;
-          tone(1046, 0.14, "triangle", 0.05);
-        }
-        gained.waves += 1;
-        setPopping(new Set());
-        setSweepMotion(null);
-        setBoard({ cols: lv.cols, rows: lv.rows, pieces, dirt, specials });
-        const falls = planGravity(pieces, lv.cols, lv.rows);
-        const fallen = applyGravity(
-          pieces,
-          lv.cols,
-          lv.rows,
-          lv.pieceKinds,
-          Math.random,
-          specials,
-        );
-        pieces = fallen.pieces;
-        specials = fallen.specials;
-        if (!reducedRef.current && falls.length > 0) {
-          setFallMotion(falls);
-          setBoard({ cols: lv.cols, rows: lv.rows, pieces, dirt, specials });
-          await sleep(CANDY_FALL_MS);
-          setFallMotion(null);
-        } else {
-          setBoard({ cols: lv.cols, rows: lv.rows, pieces, dirt, specials });
-          await motionSleep(180);
-        }
-        const drops = collectBottomDrops(pieces, lv.cols, lv.rows, specials);
-        pieces = drops.pieces;
-        specials = drops.specials;
-        if (drops.dropped > 0) {
-          gained.dropped += drops.dropped;
-          tone(784, 0.16, "triangle", 0.06);
-          setBoard({ cols: lv.cols, rows: lv.rows, pieces, dirt, specials });
-        }
-      }
-      const finalDrops = collectBottomDrops(pieces, lv.cols, lv.rows, specials);
-      if (finalDrops.dropped > 0) {
-        pieces = finalDrops.pieces;
-        specials = finalDrops.specials;
-        gained.dropped += finalDrops.dropped;
-        tone(784, 0.16, "triangle", 0.06);
-        setBoard({ cols: lv.cols, rows: lv.rows, pieces, dirt, specials });
-      }
+  const roundId = play ? `${play.round.mode}:${play.round.index}:${play.round.stage.id}` : "";
+  const roundCols = play?.round.cols ?? 6;
+  const roundRows = play?.round.rows ?? 6;
+  const hasGifts = Boolean(play?.round.stage.dropCount);
+  useEffect(() => {
+    const el = boardWrapRef.current;
+    if (!el || screen !== "play") return;
+    const apply = () => {
+      const wide = window.matchMedia?.(WIDE_LAYOUT_QUERY).matches ?? false;
+      const top = el.getBoundingClientRect().top + window.scrollY;
+      // 只算固定的道具列＋一列鼓勵句；道具說明、首次引導等暫時內容出現時讓整頁捲動，不回頭縮格子
+      const message = window.innerHeight <= SHORT_SCREEN_MAX_HEIGHT ? MESSAGE_ROW_SHORT : MESSAGE_ROW;
+      const below = wide ? 0 : LAYOUT_GAP + (propSlotRef.current?.offsetHeight ?? 0) + BELOW_GAP + message;
+      const exits = hasGifts ? GIFT_EXIT_ROW : 0;
+      const height = window.innerHeight - top - below - exits - SURFACE_BOTTOM;
+      const width = el.clientWidth > 0 ? el.clientWidth : window.innerWidth;
+      setCellPx(candyMatchCellPx(width, roundCols, height, roundRows));
+    };
+    apply();
+    // 只在寬度變化時重量；棋盤自己的高度變化（格寬改變）不必再觸發
+    let lastWidth = el.clientWidth;
+    const ro = new ResizeObserver(() => {
+      if (el.clientWidth === lastWidth) return;
+      lastWidth = el.clientWidth;
+      apply();
+    });
+    ro.observe(el);
+    window.addEventListener("resize", apply);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", apply);
+    };
+  }, [screen, roundId, roundCols, roundRows, hasGifts]);
 
-      const next: Progress = {
-        collected: progressRef.current.collected.map((n, i) => n + gained.collected[i]),
-        cleaned: progressRef.current.cleaned + gained.cleaned,
-        dropped: progressRef.current.dropped + gained.dropped,
-        waves: progressRef.current.waves + gained.waves,
-      };
-      setProgress(next);
-      instance.notifyScore(computeScore(next, movesRef.current));
-      syncHost();
-      if (gained.waves > 0) setMessage(pick(CHEER_SUCCESS));
-
-      if (taskDone(lv.task, next)) {
-        await sleep(350);
-        const remainOk = lv.moves === 0 || movesRef.current >= Math.ceil(lv.moves / 3);
-        const flawless = !usedPropRef.current;
-        const stars = 1 + (flawless ? 1 : 0) + (remainOk ? 1 : 0);
-        setWinStars(stars);
-        setOverlay("win");
-        setMessage(pick(CHEER_WIN));
-        [523, 659, 784, 1046].forEach((f, i) =>
-          setTimeout(() => tone(f, 0.18, "triangle", 0.07), i * 120),
-        );
-        const score = computeScore(next, movesRef.current);
-        instance.notifyWon({
-          score,
-          levelIndex: levelRef.current.index,
-          cleared: true,
-          flawless,
-          collectedAll: remainOk,
-        });
-        syncHost();
-        processingRef.current = false;
-        return;
-      }
-      if (lv.moves > 0 && movesRef.current <= 0) {
-        await sleep(350);
-        setOverlay("retry");
-        setMessage("我們再試一次！");
-        instance.notifyRetry();
-        syncHost();
-        processingRef.current = false;
-        return;
-      }
-      if (!findHintMove(pieces, lv.cols, lv.rows, specials)) {
-        await sleep(250);
-        const shuffled = reshuffle(
-          { cols: lv.cols, rows: lv.rows, pieces, dirt, specials },
-          Math.random,
-        );
-        setBoard(shuffled);
-        setMessage("圖案重新排隊囉！");
-      }
-      processingRef.current = false;
-      armIdleHint();
-    },
-    [armIdleHint, instance, syncHost, tone],
-  );
-
-  const shakePair = useCallback((a: number, b: number) => {
-    setShaking(new Set([a, b]));
-    tone(180, 0.1, "triangle", 0.05);
-    setMessage(pick(CHEER_INVALID));
-    setTimeout(() => setShaking(new Set()), 320);
-  }, [tone]);
-
-  const attemptSwap = useCallback(
-    (a: number, b: number) => {
-      const b0 = boardRef.current;
-      if (!b0 || processingRef.current || inputPaused) return;
-      ensureAudio();
-      armIdleHint();
-      setSelected(null);
-      if (!areAdjacent(a, b, b0.cols)) return;
-
-      const commitSwap = async () => {
-        processingRef.current = true;
-        if (!reducedRef.current) {
-          setSwapMotion({ a, b });
-          tone(660, 0.06, "square", 0.04);
-          await sleep(CANDY_SWAP_MS);
-          setSwapMotion(null);
-        } else {
-          tone(660, 0.06, "square", 0.04);
-        }
-        const nextPieces = swapped(b0.pieces, a, b);
-        const nextSpecials = swappedSpecials(b0.specials, a, b);
-        setBoard({ ...b0, pieces: nextPieces, specials: nextSpecials });
-        if (levelRef.current.moves > 0) setMovesLeft((m) => m - 1);
-        const extra = new Set<number>();
-        if (nextSpecials[a] !== "none") extra.add(a);
-        if (nextSpecials[b] !== "none") extra.add(b);
-        await runResolve(nextPieces, b0.dirt, nextSpecials, {
-          preCleared: extra.size > 0 ? extra : undefined,
-          preferSpawnAt: [a, b],
-        });
-      };
-
-      if (swapIsLegal(b0.pieces, b0.specials, a, b, b0.cols, b0.rows)) {
-        void commitSwap();
-      } else if (b0.pieces[a] === -2 || b0.pieces[b] === -2) {
-        const giftIdx = b0.pieces[a] === -2 ? a : b;
-        const otherIdx = giftIdx === a ? b : a;
-        if (otherIdx === giftIdx + b0.cols) {
-          void commitSwap();
-          return;
-        }
-        shakePair(a, b);
-      } else {
-        shakePair(a, b);
-      }
-    },
-    [armIdleHint, ensureAudio, inputPaused, runResolve, shakePair, tone],
-  );
-
-  const activateProp = useCallback(
-    (kind: PropKind, target: number) => {
-      const b0 = boardRef.current;
-      if (!b0 || processingRef.current || inputPaused) return;
-      const lv = levelRef.current;
-      const cells = new Set<number>();
-      if (kind === "bubble") {
-        if (b0.pieces[target] < 0) return;
-        cells.add(target);
-      } else if (kind === "rainbow") {
-        const v = b0.pieces[target];
-        if (v < 0) return;
-        b0.pieces.forEach((p, i) => {
-          if (p === v) cells.add(i);
-        });
-      } else {
-        const row = Math.floor(target / lv.cols);
-        for (let c = 0; c < lv.cols; c++) {
-          if (b0.pieces[row * lv.cols + c] >= 0) cells.add(row * lv.cols + c);
-        }
-      }
-      if (cells.size === 0) return;
-      usedPropRef.current = true;
-      setPropsLeft((p) => ({ ...p, [kind]: p[kind] - 1 }));
-      setPropMode(null);
-      tone(880, 0.12, "triangle", 0.06);
-      void runResolve(b0.pieces, b0.dirt, b0.specials, {
-        preCleared: cells,
-        extraOnly: true,
-      });
-    },
-    [inputPaused, runResolve, tone],
-  );
-
-  const onTapCell = useCallback(
-    (i: number) => {
-      if (inputPaused) return;
-      ensureAudio();
-      armIdleHint();
-      if (propMode) {
-        activateProp(propMode, i);
-        return;
-      }
-      const b0 = boardRef.current;
-      if (!b0 || processingRef.current) return;
-      if (selected == null) {
-        setSelected(i);
-        tone(520, 0.04, "square", 0.03);
-      } else if (selected === i) {
-        setSelected(null);
-      } else if (areAdjacent(selected, i, b0.cols)) {
-        attemptSwap(selected, i);
-      } else {
-        setSelected(i);
-        tone(520, 0.04, "square", 0.03);
-      }
-    },
-    [activateProp, armIdleHint, attemptSwap, ensureAudio, inputPaused, propMode, selected, tone],
-  );
-
-  const manualHint = useCallback(() => {
-    const b = boardRef.current;
-    if (!b || processingRef.current || inputPaused) return;
-    const move = findHintMove(b.pieces, b.cols, b.rows, b.specials);
-    if (move) {
-      setHint(move);
-      tone(1175, 0.12, "triangle", 0.05);
-    }
-  }, [inputPaused, tone]);
-
-  const font =
-    "var(--font-sans, 'PingFang TC','Microsoft JhengHei',system-ui,sans-serif)";
-  const wrapStyle: CSSProperties = {
-    fontFamily: font,
-    background: `linear-gradient(160deg, ${level.themeA} 0%, ${level.themeB} 100%)`,
-    borderRadius: 28,
-    border: "2px solid rgba(255,255,255,.92)",
-    boxShadow:
-      "0 20px 42px rgba(144,116,128,.2), inset 0 2px 0 rgba(255,255,255,.95)",
-    maxWidth: 560,
-    margin: "0 auto",
-    padding: screen === "play" ? "8px 2px" : 16,
-    userSelect: "none",
-    minHeight: 480,
-    position: "relative",
+  const theme = play && screen === "play" ? play.round : CANDY_MATCH_LEVELS[0]!;
+  const surfaceStyle: CSSProperties = {
+    background: `linear-gradient(160deg, ${theme.themeA} 0%, ${theme.themeB} 100%)`,
   };
-
-  const bigBtn: CSSProperties = {
-    border: "none",
-    minHeight: 58,
-    background: "linear-gradient(180deg,#ffe889,#ffbd6f)",
-    color: "#614018",
-    fontWeight: 900,
-    fontSize: 20,
-    padding: "14px 34px",
-    borderRadius: 999,
-    cursor: "pointer",
-    boxShadow:
-      "0 8px 0 rgba(203,128,52,.42), 0 16px 24px rgba(164,103,61,.18), inset 0 2px 0 rgba(255,255,255,.72)",
-    fontFamily: font,
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 8,
-  };
-  const softBtn: CSSProperties = {
-    border: "2px solid rgba(93,74,103,.12)",
-    minHeight: 48,
-    background: "rgba(255,255,255,.8)",
-    color: INK,
-    fontWeight: 800,
-    fontSize: 16,
-    padding: "10px 22px",
-    borderRadius: 999,
-    cursor: "pointer",
-    fontFamily: font,
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 6,
-  };
-
-  const currentGoals = taskGoals(level.task, progress);
-  const goalProgress = currentGoals.length
-    ? Math.min(
-        1,
-        currentGoals.reduce((sum, goal) => sum + Math.min(goal.got, goal.need), 0) /
-          currentGoals.reduce((sum, goal) => sum + goal.need, 0),
-      )
-      : 0;
-  const nearComplete = goalProgress >= 0.75 && goalProgress < 1;
+  const isLastLevel = play ? play.round.index === CANDY_MATCH_LEVELS.length - 1 : false;
 
   return (
     <div
-      style={wrapStyle}
+      style={surfaceStyle}
       className={styles.surface}
       data-screen={screen}
-      data-task={level.task.kind}
-      data-challenge={level.challengeId}
+      data-mode={mode}
+      data-task={play && screen === "play" ? goalTheme(play.round.stage.goals) : undefined}
+      data-challenge={play && screen === "play" ? play.round.stage.id : undefined}
       data-candy-fonts={brandFontsEnabled ? "ready" : undefined}
-      aria-live="polite"
     >
       {screen === "title" && (
-        <div className={styles.titleScreen} style={{ textAlign: "center", paddingTop: 46, paddingBottom: 40 }}>
-          <div style={{ display: "flex", justifyContent: "center", gap: 10, marginBottom: 18 }}>
+        <div className={styles.titleScreen}>
+          <div className={styles.titlePieces}>
             {[0, 1, 2, 3, 4].map((p) => (
-              <span key={p} style={{ width: 52, height: 52, display: "inline-block" }}>
+              <span key={p} className={styles.titlePiece}>
                 <PieceArt piece={p} size="100%" />
               </span>
             ))}
           </div>
           {/* 頁面唯一 h1 屬 GamePageShell；此處為關卡畫面標題，降為 h2 避免重複 h1。 */}
-          <h2 style={{ fontSize: 40, fontWeight: 900, color: ACCENT_PINK, margin: "0 0 8px" }}>
-            準備找糖果！
-          </h2>
-          <p style={{ color: INK_SOFT, fontWeight: 700, margin: "0 0 26px", fontSize: 15 }}>
-            找一找、排一排、消一消，完成小任務就有星星！
-          </p>
-          <div style={{ display: "flex", justifyContent: "center", gap: 10, flexWrap: "wrap" }}>
-            <button type="button" style={bigBtn} onClick={goToMap}>
-              ▶ 開始
+          <h2 className={styles.titleHeading}>準備找糖果！</h2>
+          <p className={styles.titleLead}>找一找、排一排、消一消，完成小任務就有星星！</p>
+          <div className={styles.titleActions}>
+            <button type="button" className={styles.bigButton} onClick={goToMap}>
+              ▶ 開始冒險
             </button>
-            <button type="button" style={softBtn} onClick={openTutorial}>
+            <button type="button" className={styles.softButton} onClick={openTutorial}>
               怎麼玩？
             </button>
           </div>
@@ -745,266 +302,101 @@ export function CandyMatchView({
       )}
 
       {screen === "map" && (
-        <div className={styles.mapScreen} style={{ paddingBottom: 12 }}>
-          <h2 style={{ textAlign: "center", color: INK, fontSize: 18, fontWeight: 900, margin: "2px 0 8px" }}>
-            遊樂園地圖
-          </h2>
+        <div className={styles.mapScreen}>
+          <h2 className={styles.mapHeading}>遊樂園地圖</h2>
           <CandyMatchMap
             levels={CANDY_MATCH_LEVELS}
             stars={CANDY_MATCH_LEVELS.map((_, i) => medalCount(medals[i] ?? 0))}
             maxCleared={maxCleared}
-            onSelect={startLevel}
+            mode={mode}
+            onModeChange={changeMode}
+            previewFor={previewFor}
+            onStart={startLevel}
           />
-          <div style={{ display: "flex", justifyContent: "center", gap: 10, marginTop: 10 }}>
-            <button type="button" style={softBtn} onClick={openTutorial}>
+          <div className={styles.mapActions}>
+            <button type="button" className={styles.softButton} onClick={openTutorial}>
               怎麼玩？
             </button>
-            <button type="button" style={softBtn} onClick={goToTitle}>
+            <button type="button" className={styles.softButton} onClick={goToTitle}>
               回標題
             </button>
           </div>
         </div>
       )}
 
-      {screen === "play" && board && (
-        <>
-          <div
-            className={styles.taskBar}
-            aria-label="本關任務進度"
-            data-near-complete={nearComplete ? "true" : undefined}
-            style={{
-              display: "grid",
-              gap: 4,
-              background: "rgba(255,255,255,.82)",
-              borderRadius: 18,
-              padding: "6px 10px",
-              marginBottom: 6,
-              boxShadow: "0 6px 14px rgba(150,110,130,.12)",
-            }}
-          >
-            {/* 兒童減法審：任務卡壓成一列 icon 目標＋步數，關名／挑戰標籤／任務句子拿掉
-                （關名是設計者 metadata，任務句子已由下方角色氣泡講）；進度條留著，是非文字回饋。 */}
-            <div className={styles.taskHeading}>
-              <div className={styles.taskGoals}>
-                {currentGoals.map((g, i) => (
-                  <span key={i} className={styles.taskGoal}>
-                    {g.icon} {Math.min(g.got, g.need)}/{g.need}
-                  </span>
-                ))}
-              </div>
-              {level.moves > 0 ? (
-                <span
-                  className={movesLeft <= 5 ? styles.movesWarning : styles.movesLabel}
-                  aria-label={`還有 ${movesLeft} 步`}
-                >
-                  {movesLeft} 步
-                </span>
-              ) : null}
-            </div>
-            <div className={styles.taskProgressTrack} role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(goalProgress * 100)} aria-label="任務完成度">
-              <span className={styles.taskProgressFill} style={{ width: `${Math.max(5, goalProgress * 100)}%` }} />
-            </div>
+      {screen === "play" && play && (
+        <div className={styles.playLayout}>
+          <div className={styles.playTask}>
+            <CandyMatchTaskBar round={play.round} progress={play.progress} movesLeft={play.movesLeft} />
           </div>
 
-          <div
-            ref={boardWrapRef}
-            className={styles.boardWrap}
-            style={{ display: "flex", justifyContent: "center" }}
-          >
+          <div ref={boardWrapRef} className={styles.boardWrap}>
             <CandyMatchBoard
-              board={board}
+              board={play.board}
               cellPx={cellPx}
-              selected={selected}
-              hint={hint}
-              popping={popping}
-              shaking={shaking}
-              disabled={processingRef.current || overlay !== null || inputPaused}
-              onTapCell={onTapCell}
-              onSwipeCell={attemptSwap}
+              selected={game.selected}
+              hint={game.hint}
+              popping={game.popping}
+              shaking={game.shaking}
+              disabled={game.busy || game.outcome !== null || inputPaused}
+              onTapCell={actions.tapCell}
+              onSwipeCell={actions.attemptSwap}
+              preview={game.propPreview}
+              onHoverCell={actions.hoverCell}
+              onCancel={actions.cancel}
               motion={{
-                swap: swapMotion,
-                falls: fallMotion,
-                sweep: sweepMotion,
+                swap: game.motion.swap,
+                falls: game.motion.falls,
+                sweep: game.motion.sweep,
                 reduced: reducedMotion,
-                cheer,
+                cheer: game.cheer,
               }}
             />
           </div>
 
-          <div
-            className={styles.actionRow}
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              gap: 8,
-              marginTop: 8,
-              flexWrap: "nowrap",
-            }}
-          >
-            {(
-              [
-                ["bubble", <IconBubble key="bubble" size={20} />, "泡泡"],
-                ["rainbow", <IconRainbow key="rainbow" size={20} />, "彩虹"],
-                ["broom", <IconBroom key="broom" size={20} />, "掃把"],
-              ] as const
-            ).map(([kind, icon, label]) => (
-              <button
-                key={kind}
-                type="button"
-                disabled={propsLeft[kind] <= 0 || inputPaused}
-                aria-pressed={propMode === kind}
-                onClick={() => {
-                  setPropMode((m) => (m === kind ? null : kind));
-                  tone(700, 0.05, "square", 0.04);
-                }}
-                aria-label={`${label}，還有 ${propsLeft[kind]} 個`}
-                style={{
-                  ...softBtn,
-                  minWidth: 44,
-                  width: 52,
-                  minHeight: 48,
-                  padding: 0,
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  gap: 0,
-                  opacity: propsLeft[kind] <= 0 ? 0.4 : 1,
-                  boxShadow: propMode === kind ? "0 0 0 3px #ff9fb7" : "none",
-                }}
-              >
-                <span aria-hidden>{icon}</span>
-                <span aria-hidden style={{ fontSize: 11, lineHeight: 1 }}>×{propsLeft[kind]}</span>
-              </button>
-            ))}
-            <button
-              type="button"
-              style={{ ...softBtn, minWidth: 44, width: 52, minHeight: 48, padding: 0, justifyContent: "center" }}
-              onClick={manualHint}
-              disabled={inputPaused}
-              aria-label="提示"
-            >
-              <IconBulb size={18} />
-            </button>
-          </div>
-          {propMode && (
-            <p style={{ textAlign: "center", color: ACCENT_PINK, fontWeight: 800, fontSize: 14, margin: "8px 0 0" }}>
-              {propMode === "broom" ? "點一格，掃掉整排！" : propMode === "rainbow" ? "點一個圖案，同款全收！" : "點一個圖案，啵一聲消掉！"}
-            </p>
-          )}
-
-          <div
-            className={styles.encouragement}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              justifyContent: "center",
-              marginTop: 8,
-              minHeight: 36,
-            }}
-          >
-            <span style={{ width: 38, height: 38, flexShrink: 0 }}>
-              <PieceArt piece={3} size="100%" />
-            </span>
-            <span
-              style={{
-                background: "rgba(255,255,255,.9)",
-                borderRadius: 999,
-                padding: "8px 16px",
-                fontWeight: 800,
-                color: INK,
-                fontSize: 15,
-                boxShadow: "0 6px 14px rgba(150,110,130,.12)",
-              }}
-            >
-              {message}
-            </span>
-          </div>
-
-          {overlay && (
-            <div
-              className={styles.resultOverlay}
-              data-testid="candy-match-result"
-              style={{
-                position: "absolute",
-                inset: 0,
-                borderRadius: 28,
-                background: "rgba(255,250,242,.92)",
-                backdropFilter: "blur(3px)",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 14,
-                textAlign: "center",
-                padding: 20,
-                zIndex: 5,
-              }}
-            >
-              {overlay === "win" && !reducedMotion ? (
-                <div className={styles.confetti} aria-hidden>
-                  {["var(--c-pink)", "var(--c-yellow)", "var(--c-mint)", "var(--c-sky)", "var(--c-lilac)"].flatMap(
-                    (color, i) =>
-                      [0, 1].map((copy) => (
-                        <span
-                          key={`${i}-${copy}`}
-                          className={styles.confettiPiece}
-                          style={{
-                            ["--x" as string]: `${12 + i * 18 + copy * 8}%`,
-                            ["--c" as string]: color,
-                            ["--delay" as string]: `${(i + copy) * 70}ms`,
-                          }}
-                        />
-                      )),
-                  )}
-                </div>
-              ) : null}
-              {overlay === "win" ? (
-                <GameEndStation
-                  mood="win"
-                  title={
-                    levelIndex === CANDY_MATCH_LEVELS.length - 1
-                      ? "全部完成！"
-                      : "任務完成！"
-                  }
-                  stars={winStars}
-                  gameSlug="candy-match"
-                  onReplay={
-                    levelIndex === CANDY_MATCH_LEVELS.length - 1
-                      ? () => startLevel(0)
-                      : restartCurrentLevel
-                  }
-                  replayLabel={
-                    levelIndex === CANDY_MATCH_LEVELS.length - 1
-                      ? "再玩一輪"
-                      : "再玩這一關"
-                  }
-                  mainAction={
-                    levelIndex < CANDY_MATCH_LEVELS.length - 1
-                      ? {
-                          label: "下一關",
-                          icon: "next",
-                          onClick: () => startLevel(levelIndex + 1),
-                        }
-                      : undefined
-                  }
-                  hideHubLink
-                />
-              ) : (
-                <GameEndStation
-                  mood="retry"
-                  title="我們再試一次！"
-                  gameSlug="candy-match"
-                  onReplay={restartCurrentLevel}
-                  replayLabel="再來一次"
-                  hideHubLink
-                />
-              )}
-              <button type="button" style={softBtn} onClick={goToMap}>
-                回地圖
-              </button>
+          <div className={styles.playBelow}>
+            <div ref={propSlotRef}>
+              <CandyMatchPropBar
+                offered={play.round.props}
+                left={play.propsLeft}
+                active={game.propMode}
+                hasPreview={game.propPreview.size > 0}
+                disabled={game.busy || game.outcome !== null || inputPaused}
+                onSelect={actions.selectProp}
+                onCancel={actions.cancel}
+                onHint={actions.manualHint}
+              />
             </div>
-          )}
-        </>
+            <div className={styles.encouragement}>
+              {game.tip ? (
+                <CandyMatchTip tip={game.tip} selected={game.selected != null} onDismiss={actions.dismissTip} />
+              ) : (
+                <>
+                  <span className={styles.buddy} aria-hidden>
+                    <PieceArt piece={3} size="100%" />
+                  </span>
+                  {/* 只有鼓勵句是 live 區；任務列每步都變，整面 live 會讓讀屏每步重唸 */}
+                  <span className={styles.bubble} aria-live="polite">
+                    {game.message}
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+
+          {game.outcome ? (
+            <CandyMatchResult
+              round={play.round}
+              outcome={game.outcome}
+              medalStars={medalCount(medals[play.round.index] ?? 0)}
+              isLastLevel={isLastLevel}
+              reducedMotion={reducedMotion}
+              onNext={() => startLevel(play.round.index + 1)}
+              onReplay={restartCurrentLevel}
+              onMap={goToMap}
+            />
+          ) : null}
+        </div>
       )}
     </div>
   );

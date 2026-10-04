@@ -1,14 +1,32 @@
 .surface {
-  border-color: color-mix(in srgb, var(--c-pink) 56%, #fff) !important;
-  box-shadow: 0 22px 46px rgba(144, 116, 128, 0.22), inset 0 2px 0 rgba(255, 255, 255, 0.96) !important;
+  --candy-ink: #5d4a67;
+  --candy-ink-soft: #7c6886;
+  --candy-accent: #a5567a;
+  /* 卡面夜間仍是淺色：焦點環改用深墨色，否則夜間金色焦點環在淺底上看不到 */
+  --focus-ring: var(--candy-ink);
+  position: relative;
+  max-width: 560px;
+  min-height: 480px;
+  margin: 0 auto;
+  padding: 16px;
+  border: 2px solid color-mix(in srgb, var(--c-pink) 56%, #fff);
+  border-radius: 28px;
+  box-shadow: 0 22px 46px rgba(144, 116, 128, 0.22), inset 0 2px 0 rgba(255, 255, 255, 0.96);
   overflow: hidden;
+  font-family: var(--font-sans, "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif);
+  user-select: none;
+}
+
+/* 局內：手機把外框留白收緊，棋盤拿到完整可用寬；寬螢幕放寬遊戲區 */
+.surface[data-screen="play"] {
+  max-width: 960px;
+  padding: 8px 2px;
 }
 
 /*
  * 背景主題化：低調裝飾（角落柔光斑點＋頂部弱光暈），疊在每關 themeA/B 漸層上。
  * z-index: -1 讓裝飾落在 surface 自身背景之上、但在棋盤／文字等實際內容之下，
- * 不影響可讀性；純靜態、不加動畫。依 task 類型微調色相（clean-dirt→薄荷/藍綠，
- * drop-item→薰衣草/天空藍，collect-multi→薰衣草/粉紅，其餘沿用預設粉／藍）。
+ * 不影響可讀性；純靜態、不加動畫。依 task 類型微調色相。
  */
 .surface::before,
 .surface::after {
@@ -49,153 +67,209 @@
     radial-gradient(100px 100px at -8% 102%, color-mix(in srgb, var(--c-pink) 55%, transparent), transparent 70%);
 }
 
-.gameTitle {
-  letter-spacing: 0.04em;
+.bigButton,
+.softButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.bigButton {
+  min-height: 58px;
+  padding: 14px 34px;
+  border: none;
+  background: linear-gradient(180deg, #ffe889, #ffbd6f);
+  color: #614018;
+  font-size: 20px;
+  font-weight: 900;
+  box-shadow: 0 8px 0 rgba(203, 128, 52, 0.42), 0 16px 24px rgba(164, 103, 61, 0.18), inset 0 2px 0 rgba(255, 255, 255, 0.72);
+}
+
+.softButton {
+  min-height: 48px;
+  padding: 10px 22px;
+  border: 2px solid rgba(93, 74, 103, 0.12);
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--candy-ink);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.bigButton:focus-visible,
+.softButton:focus-visible {
+  outline: 3px solid var(--focus-ring, #ff9fb7);
+  outline-offset: 2px;
 }
 
 .titleScreen {
-  min-height: 300px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  min-height: 300px;
+  padding: 30px 0 24px;
+  text-align: center;
 }
 
-.titleScreen button,
-.mapScreen button,
-.actionRow button,
-.resultOverlay button {
-  min-height: 48px;
+.titlePieces {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.titlePiece {
+  display: inline-block;
+  width: 52px;
+  height: 52px;
+}
+
+.titleHeading {
+  margin: 0 0 8px;
+  color: var(--candy-accent);
+  font-size: 40px;
+  font-weight: 900;
+}
+
+.titleLead {
+  margin: 0 0 26px;
+  color: var(--candy-ink-soft);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.titleActions,
+.mapActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
 }
 
 .mapScreen {
-  padding-inline: 4px;
+  display: grid;
+  gap: 10px;
+  padding: 0 4px 12px;
 }
 
-.mapScreen button:hover,
-.actionRow button:hover {
+.mapHeading {
+  margin: 2px 0 0;
+  color: var(--candy-ink);
+  font-size: 18px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.mapScreen button:hover {
   transform: translateY(-2px);
 }
 
-.taskBar {
-  border: 1.5px solid color-mix(in srgb, var(--c-pink) 22%, transparent);
-}
-
-.taskBar[data-near-complete="true"] {
-  border-color: color-mix(in srgb, var(--c-yellow) 72%, var(--c-pink));
-  box-shadow: 0 6px 16px color-mix(in srgb, var(--c-yellow) 18%, transparent);
-}
-
-.taskHeading {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  align-items: center;
-  color: #5d4a67;
-}
-
-.movesLabel,
-.movesWarning {
-  flex-shrink: 0;
-  font-size: var(--fs-body);
-  font-weight: 900;
-}
-
-.movesLabel {
-  color: #7c6886;
-}
-
-.movesWarning {
-  color: #a5567a;
-}
-
-.taskProgressTrack {
-  height: 6px;
-  overflow: hidden;
-  border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--c-lilac) 28%, white);
-}
-
-.taskProgressFill {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--c-mint), var(--c-sky), var(--c-pink));
-  transition: width 220ms ease;
-}
-
-.taskGoals {
-  display: flex;
-  flex-wrap: wrap;
+/* 局內閱讀順序：本關要做什麼 → 棋盤 → 我能用什麼 */
+.playLayout {
+  display: grid;
+  grid-template-areas:
+    "task"
+    "board"
+    "below";
   gap: 6px;
 }
 
-.taskGoal {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  min-height: 30px;
-  padding: 3px 8px;
-  border-radius: var(--radius-pill);
-  color: #5d4a67;
-  background: color-mix(in srgb, var(--c-yellow) 24%, white);
-  font-size: var(--fs-label);
-  font-weight: 900;
+.playTask {
+  grid-area: task;
+  justify-self: center;
+  width: min(100%, 600px);
+  min-width: 0;
 }
 
 .boardWrap {
+  grid-area: board;
   position: relative;
+  display: flex;
+  justify-content: center;
   width: 100%;
   min-width: 0;
-  padding: 4px 0 2px;
+  padding: 2px 0;
 }
 
-
-
-
-
-
-.confetti {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.confettiPiece {
-  position: absolute;
-  top: 8%;
-  left: var(--x);
-  width: 8px;
-  height: 12px;
-  border-radius: 2px;
-  background: var(--c);
-  animation: confettiFall 900ms ease-out forwards;
-  animation-delay: var(--delay, 0ms);
-}
-
-@keyframes confettiFall {
-  from {
-    transform: translateY(0) rotate(0deg);
-    opacity: 1;
-  }
-  to {
-    transform: translateY(240px) rotate(140deg);
-    opacity: 0;
-  }
-}
-
-.actionRow {
-  align-items: center;
+.playBelow {
+  grid-area: below;
+  display: grid;
+  justify-self: center;
+  gap: 8px;
+  width: min(100%, 600px);
+  min-width: 0;
 }
 
 .encouragement {
-  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
 }
 
-.resultOverlay {
-  border: 2px solid color-mix(in srgb, var(--c-yellow) 35%, #fff);
+.buddy {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+}
+
+.bubble {
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--candy-ink);
+  font-size: 15px;
+  font-weight: 800;
+  box-shadow: 0 6px 14px rgba(150, 110, 130, 0.12);
+}
+
+.bubble:empty {
+  display: none;
+}
+
+/* 寬螢幕與橫向手機：任務／道具放側欄，棋盤在主欄（與 View 的 WIDE_LAYOUT_QUERY 一致） */
+@media (min-width: 900px), (min-width: 640px) and (orientation: landscape) and (max-height: 520px) {
+  .playLayout {
+    grid-template-columns: minmax(240px, 300px) 1fr;
+    /* 第二列吃掉棋盤多出的高度，任務列與道具列緊貼在側欄上方 */
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "task board"
+      "below board";
+    align-items: start;
+    column-gap: 16px;
+    padding: 8px;
+  }
+
+  .playTask,
+  .playBelow {
+    width: auto;
+    justify-self: stretch;
+  }
+
+  .playBelow {
+    align-self: start;
+  }
+}
+
+/* 短螢幕先收掉角色頭像，空間留給任務、棋盤與道具 */
+@media (max-height: 720px) {
+  .buddy {
+    display: none;
+  }
+
+  .encouragement {
+    min-height: 36px;
+  }
+
+  .bubble {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -203,23 +277,13 @@
     min-height: 270px;
   }
 
-  .titleScreen h1 {
-    font-size: 2.1rem !important;
+  .titleHeading {
+    font-size: 2.1rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mapScreen button:hover,
-  .actionRow button:hover {
+  .mapScreen button:hover {
     transform: none;
-  }
-
-  .taskProgressFill {
-    transition: none;
-  }
-
-  .confettiPiece {
-    animation: none;
-    opacity: 0;
   }
 }
