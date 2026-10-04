@@ -8,6 +8,21 @@
   z-index: 1;
 }
 
+/* 桌面懸浮膠囊陰影會壓到海報上緣。內容與膠囊同寬，中間留約 40px。
+   海報最高再矮一截，720 高的視窗仍看得到三張卡的名字。 */
+@media (min-width: 980px) {
+  .main {
+    width: min(960px, calc(100% - 40px));
+    max-width: none;
+    padding-top: calc(40px + var(--safe-top));
+    padding-inline: 0;
+  }
+
+  .hero {
+    max-height: min(400px, max(200px, calc(100svh - var(--nav-h) - 356px)));
+  }
+}
+
 .gameCard:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 3px;
@@ -216,17 +231,17 @@
     padding-top: calc(14px + var(--safe-top));
   }
 
-  /* 第一張遊戲卡必須進首屏：直式底圖裁成橫帶，不讓整張 3:4 把卡片推下。 */
+  /* 直式底圖 940×1410。站牌約在 34–53%、車身約在 62–84%。
+     280px 橫帶取 55% 會切到車頭；加高並把取景下移，站牌與整台車都留在框裡。 */
   .hero {
     aspect-ratio: auto;
-    height: min(36svh, 280px);
+    height: min(46svh, 340px);
     max-height: none;
     margin-bottom: 12px;
   }
 
-  /* K-17 直式版：三個站牌在畫面 34–53%、兩台車在 62–84%，280px 高的橫帶取 55% 處置中，站牌與車都在。 */
   .heroImage {
-    object-position: center 55%;
+    object-position: center 64%;
   }
 
   .cardGrid {
