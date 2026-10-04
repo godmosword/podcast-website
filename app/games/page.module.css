@@ -252,6 +252,12 @@
   .lead {
     grid-column: 1 / -1;
   }
+
+  /* 海報要留整台車，全寬 4:3 會把消消樂、方塊的名字推出 844。
+     只壓第一站縮圖；高度用 390×844 實測，三個名字的底邊才進得了視窗。 */
+  .lead .thumb {
+    max-height: 156px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

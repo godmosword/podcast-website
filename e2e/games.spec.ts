@@ -87,6 +87,42 @@ test.describe("遊戲頁：兒童主路徑優先", () => {
 });
 
 test.describe("遊樂園 hub", () => {
+  test("390×844 三個遊戲名字都在首屏", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/games");
+    for (const name of ["繪本著色", "繽紛消消樂", "繽紛樂園"]) {
+      const box = await page.getByText(name, { exact: true }).boundingBox();
+      expect(box, name).toBeTruthy();
+      expect(box!.y + box!.height, name).toBeLessThanOrEqual(844);
+    }
+  });
+
+  test("390×700 看得到著色名字與另外兩張縮圖上緣", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 700 });
+    await page.goto("/games");
+    const coloring = await page.getByText("繪本著色", { exact: true }).boundingBox();
+    expect(coloring!.y + coloring!.height).toBeLessThanOrEqual(700);
+    for (const href of ["/games/candy-match", "/games/block-drop"]) {
+      const thumb = page.locator(`main a[href="${href}"] > div`).first();
+      const box = await thumb.boundingBox();
+      expect(box, href).toBeTruthy();
+      expect(box!.y, href).toBeLessThan(700);
+    }
+  });
+
+  test("窄螢幕遊戲名字沒有被裁成看不見", async ({ page }) => {
+    for (const width of [320, 375, 390, 430]) {
+      await page.setViewportSize({ width, height: 844 });
+      await page.goto("/games");
+      for (const name of ["繪本著色", "繽紛消消樂", "繽紛樂園"]) {
+        const title = page.getByText(name, { exact: true });
+        await expect(title, `${width} ${name}`).toBeVisible();
+        const clipped = await title.evaluate((el) => el.scrollWidth > el.clientWidth + 1);
+        expect(clipped, `${width} ${name}`).toBe(false);
+      }
+    }
+  });
+
   test("第一張遊戲卡進入首屏", async ({ page }) => {
     await page.setViewportSize(PHONE);
     await page.goto("/games");
