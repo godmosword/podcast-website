@@ -180,16 +180,19 @@ test.describe("遊樂園 hub", () => {
     expect(new Set(hrefs).size).toBe(hrefs.length);
   });
 
-  /** 兒童減法審：卡片＝圖＋名字＋三字動作詞（配玩法圖示）＋年齡；時長／趕不趕拿掉。 */
-  test("卡片只留三字動作詞與年齡，不再顯示時長與時間壓力", async ({ page }) => {
+  /** 卡片＝圖＋名字。動作詞、年齡、時長與時間壓力都不印在卡上。 */
+  test("卡片只留遊戲名稱，不顯示動作詞、年齡、時長與時間壓力", async ({ page }) => {
     await page.goto("/games");
-    const firstCard = page.locator('main a[href^="/games/"]').first();
-    await expect(firstCard).toContainText(/塗一塗|找一樣|排一排/);
-    await expect(firstCard).toContainText(/\d+–\d+ 歲/);
-    await expect(firstCard).not.toContainText(/約 \d+ 分鐘/);
-    await expect(firstCard).not.toContainText(/不趕時間|有計時/);
+    const cards = page.locator('main a[href^="/games/"]');
+    await expect(cards).toHaveCount(3);
+    for (const card of await cards.all()) {
+      await expect(card).not.toContainText(/塗一塗|找一樣|排一排/);
+      await expect(card).not.toContainText(/\d+–\d+ 歲/);
+      await expect(card).not.toContainText(/約 \d+ 分鐘/);
+      await expect(card).not.toContainText(/不趕時間|有計時/);
+    }
     // 玩法 play 鈕 ≥ 52px（下一步按哪裡）
-    const fab = firstCard.locator('[class*="playFab"]').first();
+    const fab = cards.first().locator('[class*="playFab"]').first();
     const box = await fab.boundingBox();
     expect(box!.width).toBeGreaterThanOrEqual(52);
   });

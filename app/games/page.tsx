@@ -30,7 +30,7 @@ const GAME_TYPE_LABEL: Record<GameMeta["gameType"], string> = {
 
 /**
  * 兒童減法審（2026-09-20）：不識字的孩子靠「玩法圖示」認站——
- * 蠟筆＝塗、兩格交換＝找一樣、方塊落下＝排一排。play 鈕與動作詞都用同一顆。
+ * 蠟筆＝塗、兩格交換＝找一樣、方塊落下＝排一排。封面圓鈕用這顆圖示，卡片不再印動作詞。
  */
 function playIcon(game: GameMeta, size: number) {
   switch (game.gameType) {
@@ -47,9 +47,7 @@ function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
   const parentTip = gameParentTip(game);
   const ariaParts = [
     game.title,
-    game.teaser,
     GAME_TYPE_LABEL[game.gameType],
-    game.ageRange,
     game.desc,
     ...game.controls,
     parentTip,
@@ -86,8 +84,7 @@ function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
             priority={eager}
             {...(eager ? {} : { loading: "eager" as const })}
           />
-          {/* 美術審 L3：封面角標的年齡拿掉，只留下方 meta 列的「3–7 歲」（同一資訊不出現兩次）。
-              兒童減法審：play 鈕 56px、依遊戲換玩法圖示（下一步按哪裡）；首張卡輕微呼吸 */}
+          {/* 封面只留玩法鈕：56px、依遊戲換圖示；首張卡輕微呼吸。副標與年齡不印在卡上。 */}
           <span
             className={`${styles.playFab}${eager ? ` ${styles.playFabLead}` : ""}`}
             aria-hidden
@@ -98,13 +95,6 @@ function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
         <span className={styles.cardBody}>
           <span className={styles.cardTitleRow}>
             <span className={styles.cardTitle}>{game.title}</span>
-            <span className={styles.cardMeta}>{game.ageRange}</span>
-          </span>
-          {/* 兒童減法審：三字動作詞＋同一顆玩法圖示（圖為主、字為輔）；
-              年齡跟標題同一列，少一列才能跟海報一起留在首屏 */}
-          <span className={styles.cardVerb}>
-            {playIcon(game, 18)}
-            {game.teaser}
           </span>
         </span>
       </Link>
@@ -114,7 +104,6 @@ function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
 
 /**
  * 著色本從漢堡收進遊樂園後當第一站，後面才是兩款街機。
- * 年齡徽章與 meta 行仍標 3–7／6–12，不再另切分區。
  */
 const HUB_STATION_ORDER: readonly GameMeta["slug"][] = [
   "coloring-book",
