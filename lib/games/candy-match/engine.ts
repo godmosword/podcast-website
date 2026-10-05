@@ -34,8 +34,8 @@ export type BoardState = {
   rows: number;
   /** 每格圖案索引（0..kinds-1）、EMPTY 或 DROP_ITEM */
   pieces: number[];
-  /** 髒髒格（在其上完成消除即清潔） */
-  dirt: boolean[];
+  /** 髒格層數：0 乾淨、1 掃一次就乾淨、2 厚污漬要再掃一次。黏在格子上，不跟著圖案掉。 */
+  dirt: number[];
   /** 與 pieces 等長；一般格為 none */
   specials: CandySpecial[];
 };
@@ -865,13 +865,13 @@ export function propAffectedCells(
  */
 export function clearCells(
   pieces: number[],
-  dirt: boolean[],
+  dirt: number[],
   cells: Iterable<number>,
   kinds: number,
   specials: CandySpecial[] = emptySpecials(pieces.length),
 ): {
   pieces: number[];
-  dirt: boolean[];
+  dirt: number[];
   specials: CandySpecial[];
   collected: number[];
   cleaned: number;
@@ -886,9 +886,11 @@ export function clearCells(
     if (v >= 0) collected[v] += 1;
     if (v !== DROP_ITEM) nextPieces[i] = EMPTY;
     nextSpecials[i] = "none";
-    if (nextDirt[i]) {
-      nextDirt[i] = false;
-      cleaned += 1;
+    const layer = nextDirt[i] ?? 0;
+    if (layer > 0) {
+      const left = layer - 1;
+      nextDirt[i] = left;
+      if (left === 0) cleaned += 1;
     }
   }
   return { pieces: nextPieces, dirt: nextDirt, specials: nextSpecials, collected, cleaned };

@@ -24,6 +24,8 @@ export type BoardGenOptions = {
   dirtCount?: number;
   /** 指定髒格位置（區域模板）；優先於 dirtCount */
   dirtCells?: readonly number[];
+  /** 厚污漬：必須是 dirtCells 的子集，開局層數為 2 */
+  thickDirtCells?: readonly number[];
   /** 禮物數：放頂排、各在不同欄 */
   dropCount?: number;
   /** 開局必須有一步能做出特殊糖（教學關） */
@@ -94,10 +96,11 @@ function generateCandidate(
   ).slice(0, dropCount);
   for (const c of columns) pieces[idx(c, 0, cols)] = DROP_ITEM;
 
-  const dirt = Array<boolean>(cols * rows).fill(false);
+  const dirt = Array<number>(cols * rows).fill(0);
+  const thick = new Set(options.thickDirtCells ?? []);
   if (options.dirtCells) {
     for (const i of options.dirtCells) {
-      if (i >= 0 && i < dirt.length) dirt[i] = true;
+      if (i >= 0 && i < dirt.length) dirt[i] = thick.has(i) ? 2 : 1;
     }
   } else {
     const want = Math.min(options.dirtCount ?? 0, cols * rows);
@@ -105,7 +108,7 @@ function generateCandidate(
       Array.from({ length: cols * rows }, (_, i) => i).filter((i) => pieces[i] !== DROP_ITEM),
       rng,
     );
-    for (const i of open.slice(0, want)) dirt[i] = true;
+    for (const i of open.slice(0, want)) dirt[i] = thick.has(i) ? 2 : 1;
   }
   return { cols, rows, pieces, dirt, specials: emptySpecials(cols * rows) };
 }
@@ -123,9 +126,10 @@ export function isValidStartBoard(state: BoardState, options: BoardGenOptions = 
   if (gifts.some((i) => i >= cols)) return false;
   if (new Set(gifts.map((i) => i % cols)).size !== gifts.length) return false;
 
-  const dirtCells = dirt.flatMap((d, i) => (d ? [i] : []));
+  const dirtCells = dirt.flatMap((d, i) => (d > 0 ? [i] : []));
   if (dirtCells.length !== expectedDirt(cols, rows, options)) return false;
   if (dirtCells.some((i) => pieces[i] === DROP_ITEM)) return false;
+  if ((options.thickDirtCells ?? []).some((i) => dirt[i] !== 2)) return false;
 
   if (options.requireSpecialMove && !findSpecialMove(pieces, cols, rows)) return false;
   return true;
@@ -142,12 +146,16 @@ function sameBoard(a: Pick<BoardState, "pieces" | "dirt">, b: Pick<BoardState, "
 
 function configSeed(cols: number, rows: number, kinds: number, options: BoardGenOptions): number {
   const dirt = options.dirtCells ? options.dirtCells.reduce((h, i) => (h * 31 + i) >>> 0, 7) : options.dirtCount ?? 0;
+  const thick = options.thickDirtCells?.length
+    ? options.thickDirtCells.reduce((h, i) => (h * 31 + i + 2) >>> 0, 11)
+    : 0;
   return (
     (cols * 73856093) ^
     (rows * 19349663) ^
     (kinds * 83492791) ^
     ((options.dropCount ?? 0) * 2654435761) ^
     (dirt * 40503) ^
+    (thick * 2246822519) ^
     (options.requireSpecialMove ? 0x5bd1e995 : 0)
   ) >>> 0;
 }

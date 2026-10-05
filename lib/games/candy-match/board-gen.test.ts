@@ -26,6 +26,7 @@ function stageConfigs(): Config[] {
           kinds: stage.pieceKinds,
           options: {
             dirtCells: stage.dirtCells,
+            thickDirtCells: stage.thickDirtCells,
             dropCount: stage.dropCount,
             requireSpecialMove: stage.requireSpecialMove,
           },
@@ -85,6 +86,15 @@ describe("createBoard：所有關卡 × 玩法 × 變體", () => {
     const cells = [0, 5, 30, 35];
     const board = createBoard(6, 6, 4, seededRng(3), { dirtCells: cells });
     expect(board.dirt.flatMap((d, i) => (d ? [i] : []))).toEqual(cells);
+    expect(board.dirt[0]).toBe(1);
+  });
+
+  it("厚污漬開局是兩層，而且是髒格的一部分", () => {
+    const board = createBoard(6, 7, 4, seededRng(4), { dirtCells: [31, 32, 33], thickDirtCells: [32, 33] });
+    expect(board.dirt[31]).toBe(1);
+    expect(board.dirt[32]).toBe(2);
+    expect(board.dirt[33]).toBe(2);
+    expect(isValidStartBoard(board, { dirtCells: [31, 32, 33], thickDirtCells: [32, 33] })).toBe(true);
   });
 
   it("replay 可避開上一盤完全相同的盤面", () => {
@@ -117,7 +127,7 @@ describe("reshuffle", () => {
       cols: 6,
       rows: 6,
       pieces: Array(36).fill(1),
-      dirt: Array(36).fill(false),
+      dirt: Array(36).fill(0),
       specials: emptySpecials(36),
     };
     const next = reshuffle(state, () => 0, 4);
@@ -131,7 +141,7 @@ describe("reshuffle", () => {
       cols: 6,
       rows: 8,
       pieces: Array(48).fill(2),
-      dirt: Array(48).fill(false),
+      dirt: Array(48).fill(0),
       specials: emptySpecials(48),
     };
     state.pieces[0] = DROP_ITEM;

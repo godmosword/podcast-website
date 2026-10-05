@@ -32,8 +32,33 @@
   animation: candyMatchFall var(--fall-ms, 220ms) ease-out both;
 }
 
-.pieceSweep {
+.pieceSweep,
+.sweepRow,
+.sweepColor,
+.sweepBurst,
+.sweepCross,
+.sweepBoard {
   animation: candySpecialSweep var(--sweep-ms, 280ms) ease both;
+}
+
+.sweepRow {
+  animation-name: candySweepRow;
+}
+
+.sweepColor {
+  animation-name: candySweepColor;
+}
+
+.sweepBurst {
+  animation-name: candySweepBurst;
+}
+
+.sweepCross {
+  animation-name: candySweepCross;
+}
+
+.sweepBoard {
+  animation-name: candySweepBoard;
 }
 
 .specialBadge {
@@ -43,6 +68,7 @@
   font-size: 0.72em;
   line-height: 1;
   pointer-events: none;
+  animation: candyBadge 1.6s ease-in-out infinite;
 }
 
 @keyframes candyMatchSwap {
@@ -91,6 +117,40 @@
   }
 }
 
+@keyframes candySweepRow {
+  0% { opacity: 1; transform: translateX(-28%) scale(1.05); }
+  100% { opacity: 0; transform: translateX(36%) scale(0.92); }
+}
+
+@keyframes candySweepColor {
+  0% { opacity: 1; transform: scale(1); filter: hue-rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.18); filter: hue-rotate(120deg); }
+  100% { opacity: 0; transform: scale(1.35); filter: hue-rotate(240deg); }
+}
+
+@keyframes candySweepBurst {
+  0% { opacity: 1; transform: scale(0.72); }
+  55% { opacity: 1; transform: scale(1.45); }
+  100% { opacity: 0; transform: scale(1.7); }
+}
+
+@keyframes candySweepCross {
+  0% { opacity: 1; transform: scale(1, 0.7); }
+  45% { opacity: 1; transform: scale(1.35, 0.82); }
+  100% { opacity: 0; transform: scale(0.82, 1.45); }
+}
+
+@keyframes candySweepBoard {
+  0% { opacity: 1; transform: scale(1); filter: brightness(1); }
+  35% { opacity: 1; transform: scale(1.08); filter: brightness(1.8); }
+  100% { opacity: 0; transform: scale(1.2); filter: brightness(1.2); }
+}
+
+@keyframes candyBadge {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.16); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pieceArt {
     transition: none;
@@ -98,7 +158,13 @@
 
   .pieceSwap,
   .pieceFall,
-  .pieceSweep {
+  .pieceSweep,
+  .sweepRow,
+  .sweepColor,
+  .sweepBurst,
+  .sweepCross,
+  .sweepBoard,
+  .specialBadge {
     animation: none;
   }
 }

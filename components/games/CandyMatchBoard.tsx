@@ -243,11 +243,13 @@ export function CandyMatchBoard({
           const isPopping = popping.has(i);
           const isShaking = shaking.has(i);
           const isPreview = preview.has(i);
+          const dirtLayer = dirt[i] ?? 0;
           const pieceName = v === DROP_ITEM
             ? "禮物盒"
             : v >= 0
               ? CANDY_MATCH_PIECES[v]?.name ?? "圖案"
               : "空格";
+          const dirtName = dirtLayer >= 2 ? "，厚污漬" : dirtLayer === 1 ? "，髒髒格" : "";
           const specialKind =
             specials[i] === "row" || specials[i] === "color" || specials[i] === "burst" ? specials[i] : null;
           const specialName =
@@ -311,7 +313,11 @@ export function CandyMatchBoard({
             swapOff ? styles.pieceSwap : "",
             teachOff && !reduced ? styles.pieceTeach : "",
             fallRows > 0 ? styles.pieceFall : "",
-            isPopping && sweep ? styles.pieceSweep : "",
+            isPopping && sweep === "row" ? styles.sweepRow : "",
+            isPopping && sweep === "color" ? styles.sweepColor : "",
+            isPopping && sweep === "burst" ? styles.sweepBurst : "",
+            isPopping && sweep === "cross" ? styles.sweepCross : "",
+            isPopping && sweep === "board" ? styles.sweepBoard : "",
           ]
             .filter(Boolean)
             .join(" ");
@@ -342,7 +348,7 @@ export function CandyMatchBoard({
             <button
               key={i}
               type="button"
-              aria-label={`第 ${Math.floor(i / cols) + 1} 列第 ${(i % cols) + 1} 格，${pieceName}${specialName ? `，${specialName}` : ""}${isPreview ? "，道具範圍" : ""}`}
+              aria-label={`第 ${Math.floor(i / cols) + 1} 列第 ${(i % cols) + 1} 格，${pieceName}${dirtName}${specialName ? `，${specialName}` : ""}${isPreview ? "，道具範圍" : ""}`}
               aria-pressed={isSelected}
               aria-disabled={disabled || undefined}
               tabIndex={i === rovingIndex ? 0 : -1}
@@ -351,6 +357,7 @@ export function CandyMatchBoard({
               data-preview={isPreview ? "true" : undefined}
               data-hint={isHint || (reduced && teachOff) ? "true" : undefined}
               data-teach={teachOff ? "true" : undefined}
+              data-dirt={dirtLayer > 0 ? String(dirtLayer) : undefined}
               data-special={specialKind ?? undefined}
               data-sweep={isPopping && sweep ? sweep : undefined}
               data-swap={swapOff ? "true" : undefined}
@@ -371,9 +378,9 @@ export function CandyMatchBoard({
               onPointerCancel={onPointerCancel}
               onLostPointerCapture={onLostPointerCapture}
             >
-              {dirt[i] && (
+              {dirtLayer > 0 && (
                 <span style={{ position: "absolute", inset: 0 }}>
-                  <DirtOverlay size="100%" />
+                  <DirtOverlay size="100%" thick={dirtLayer >= 2} />
                 </span>
               )}
               <span className={artClass} style={artStyle}>

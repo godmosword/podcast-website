@@ -128,16 +128,17 @@ export function PieceGift(props: ArtProps) {
   );
 }
 
-/** 髒髒格覆蓋（半透明泥點，蓋在格子底） */
-export function DirtOverlay(props: ArtProps) {
+/** 髒髒格覆蓋。thick 再疊一層深泥，表示要再掃一次。 */
+export function DirtOverlay({ thick, ...props }: ArtProps & { thick?: boolean }) {
   return (
     <Svg {...props}>
-      <rect x="2" y="2" width="44" height="44" rx="10" fill="#9b8468" opacity="0.4" />
+      <rect x="2" y="2" width="44" height="44" rx="10" fill="#9b8468" opacity={thick ? 0.62 : 0.4} />
       <circle cx="14" cy="15" r="4" fill="#7a6450" opacity="0.5" />
       <circle cx="33" cy="12" r="3" fill="#7a6450" opacity="0.45" />
       <circle cx="36" cy="33" r="4.6" fill="#7a6450" opacity="0.5" />
       <circle cx="13" cy="35" r="3.2" fill="#7a6450" opacity="0.45" />
       <circle cx="25" cy="24" r="2.6" fill="#7a6450" opacity="0.4" />
+      {thick ? <circle cx="24" cy="23" r="9" fill="#5c4638" opacity="0.55" /> : null}
     </Svg>
   );
 }

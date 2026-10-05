@@ -21,6 +21,8 @@ export type CandyStage = {
   pieceKinds: number;
   /** 髒格區域模板（格子索引） */
   dirtCells?: readonly number[];
+  /** 厚污漬：dirtCells 裡要掃兩次的格子 */
+  thickDirtCells?: readonly number[];
   /** 禮物數（頂排、不同欄） */
   dropCount?: number;
   /** 開局保證有一步能做出特殊糖 */
@@ -113,7 +115,16 @@ const EASY: readonly CandyStageSet[] = [
     ],
   },
   {
-    main: stage({ id: "e5-clean-bottom-8", goals: [{ kind: "clean-dirt", count: 8 }], moves: 0, pieceKinds: 4, dirtCells: T.bottom8, efficiency: 9 }),
+    main: stage({
+      id: "e5-clean-bottom-8",
+      goals: [{ kind: "clean-dirt", count: 8 }],
+      moves: 0,
+      pieceKinds: 4,
+      dirtCells: T.bottom8,
+      // 底部兩格是厚污漬，各要多清一次，效率星比單層髒格多留兩步。
+      thickDirtCells: [32, 33],
+      efficiency: 11,
+    }),
     variants: [
       stage({ id: "e5-clean-sides-8", label: "打掃兩邊", goals: [{ kind: "clean-dirt", count: 8 }], moves: 0, pieceKinds: 4, dirtCells: T.sides8, efficiency: 10 }),
       stage({ id: "e5-clean-middle-18", label: "打掃中間", goals: [{ kind: "clean-dirt", count: 18 }], moves: 0, pieceKinds: 4, dirtCells: T.middle18, efficiency: 10 }),
@@ -309,7 +320,13 @@ export function isStageFeasible(level: CandyMatchLevel, s: CandyStage): boolean 
         return goal.piece >= 0 && goal.piece < s.pieceKinds;
       case "clean-dirt": {
         const dirt = s.dirtCells ?? [];
-        return dirt.length >= goal.count && dirt.every((i) => i >= 0 && i < total);
+        const thick = s.thickDirtCells ?? [];
+        const dirtSet = new Set(dirt);
+        return (
+          dirt.length >= goal.count &&
+          dirt.every((i) => i >= 0 && i < total) &&
+          thick.every((i) => dirtSet.has(i))
+        );
       }
       case "drop-item":
         return (s.dropCount ?? 0) >= goal.count && (s.dropCount ?? 0) <= level.cols;

@@ -21,7 +21,9 @@ describe("Candy 模擬回歸", () => {
       const round = buildRound(li, "easy", { replay: false, rng: Math.random });
       const greedy = simulateMany(round, "greedy", SEEDS);
       expect(greedy.winRate, round.stage.id).toBe(1);
-      expect(greedy.quickWinRate, round.stage.id).toBeLessThanOrEqual(li === 0 || li === 4 ? 0.5 : 0.1);
+      // 第 8 關只有兩個禮物。特殊糖一次清掉底下整排時，禮物會跟著到底，三步內結束會略多於一成。
+      const quickCap = li === 0 || li === 4 ? 0.5 : li === 7 ? 0.15 : 0.1;
+      expect(greedy.quickWinRate, round.stage.id).toBeLessThanOrEqual(quickCap);
     }
   });
 

@@ -211,8 +211,11 @@ export function useCandyMatchPlay(options: Options) {
     if (!current) return;
     optsRef.current.onTipSeen(current);
     setTipState(null);
-    if (current === "swap") setTeachMove(null);
-  }, [setTipState]);
+    if (current === "swap") {
+      setTeachMove(null);
+      if (playRef.current?.board.dirt.some((layer) => layer >= 2)) showTip("thick");
+    }
+  }, [setTipState, showTip]);
 
   const armIdle = useCallback(() => {
     clearTimers();
@@ -546,6 +549,7 @@ export function useCandyMatchPlay(options: Options) {
       rngRef.current = roundRng(round.index);
       const board = createBoard(round.cols, round.rows, round.stage.pieceKinds, rngRef.current, {
         dirtCells: round.stage.dirtCells,
+        thickDirtCells: round.stage.thickDirtCells,
         dropCount: round.stage.dropCount,
         requireSpecialMove: round.stage.requireSpecialMove,
         avoidBoard: lastBoardsRef.current[round.index],
@@ -570,9 +574,11 @@ export function useCandyMatchPlay(options: Options) {
       setOutcomeState(null);
       setMotion(NO_MOTION);
       setCheer(false);
-      setMessage(introMessage(round.stage.goals));
+      const hasThick = board.dirt.some((layer) => layer >= 2);
+      setMessage(hasThick ? "有的污漬比較厚，要再掃一次！" : introMessage(round.stage.goals));
       const showSwapTeach = !optsRef.current.tipsSeen.includes("swap");
       setTipState(showSwapTeach ? "swap" : null);
+      if (!showSwapTeach && hasThick) showTip("thick");
       setTeachMove(
         showSwapTeach
           ? findGoalHint(board, round.stage.goals, snap.progress) ??
@@ -581,7 +587,7 @@ export function useCandyMatchPlay(options: Options) {
       );
       armIdle();
     },
-    [armIdle, clearTimers, setBusyState, setOutcomeState, setTipState],
+    [armIdle, clearTimers, setBusyState, setOutcomeState, setTipState, showTip],
   );
 
   /** 離開局內（回地圖／標題）：停掉進行中的動畫與提示計時。 */

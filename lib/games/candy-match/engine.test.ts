@@ -41,7 +41,7 @@ function board(cols: number, rows: number, pieces: number[]): BoardState {
     cols,
     rows,
     pieces,
-    dirt: Array(cols * rows).fill(false),
+    dirt: Array(cols * rows).fill(0),
     specials: Array(cols * rows).fill("none"),
   };
 }
@@ -159,12 +159,12 @@ describe("resolveBoard", () => {
       1, 2, 1,
       2, 1, 2,
     ]);
-    state.dirt[1] = true;
+    state.dirt[1] = 1;
     const { state: after, events } = resolveBoard(state, 3, rng);
     expect(events.waves).toBeGreaterThanOrEqual(1);
     expect(events.collected[0]).toBeGreaterThanOrEqual(3);
     expect(events.cleaned).toBe(1);
-    expect(after.dirt[1]).toBe(false);
+    expect(after.dirt[1]).toBe(0);
     expect(after.pieces.every((v) => v >= 0)).toBe(true);
     expect(findMatches(after.pieces, 3, 3).size).toBe(0);
   });
@@ -465,7 +465,7 @@ describe("特殊糖", () => {
     expect(wave.spawns).toEqual([{ index: 2, kind: "burst" }]);
     expect(wave.clear.has(2)).toBe(false);
     expect(wave.detonated).toEqual([]);
-    const cleared = clearCells(pieces, Array(12).fill(false), wave.clear, 4, specials);
+    const cleared = clearCells(pieces, Array(12).fill(0), wave.clear, 4, specials);
     expect(applySpecialSpawns(cleared.specials, wave.spawns)[2]).toBe("burst");
   });
 
@@ -508,10 +508,24 @@ describe("特殊糖", () => {
     expect(wave.spawns).toEqual([{ index: 0, kind: "row" }]);
     expect(wave.clear.has(0)).toBe(false);
     expect(wave.clear.size).toBe(3);
-    const cleared = clearCells(pieces, Array(12).fill(false), wave.clear, 3, specials);
+    const cleared = clearCells(pieces, Array(12).fill(0), wave.clear, 3, specials);
     const nextSpecials = applySpecialSpawns(cleared.specials, wave.spawns);
     expect(cleared.pieces[0]).toBe(0);
     expect(nextSpecials[0]).toBe("row");
     expect(cleared.pieces.filter((v) => v === 0).length).toBe(1);
+  });
+});
+
+describe("厚污漬", () => {
+  it("掃一次變薄，再掃一次才算打掃完成", () => {
+    const pieces = [0, 1, 2, 1, 0, 2];
+    const dirt = [2, 1, 0, 0, 0, 0];
+    const once = clearCells(pieces, dirt, [0, 1], 3);
+    expect(once.dirt[0]).toBe(1);
+    expect(once.dirt[1]).toBe(0);
+    expect(once.cleaned).toBe(1);
+    const twice = clearCells(once.pieces, once.dirt, [0], 3);
+    expect(twice.dirt[0]).toBe(0);
+    expect(twice.cleaned).toBe(1);
   });
 });

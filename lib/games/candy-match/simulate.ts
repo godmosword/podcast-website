@@ -38,6 +38,7 @@ export const SIM_MAX_SWAPS = 150;
 export function startBoardFor(round: CandyMatchRound, rng: Rng): BoardState {
   return createBoard(round.cols, round.rows, round.stage.pieceKinds, rng, {
     dirtCells: round.stage.dirtCells,
+    thickDirtCells: round.stage.thickDirtCells,
     dropCount: round.stage.dropCount,
     requireSpecialMove: round.stage.requireSpecialMove,
   });

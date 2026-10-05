@@ -26,7 +26,7 @@ function makeBoard(cols = 3, rows = 3): BoardState {
     cols,
     rows,
     pieces: Array.from({ length: cols * rows }, (_, i) => i % 5),
-    dirt: Array(cols * rows).fill(false),
+    dirt: Array(cols * rows).fill(0),
     specials: Array(cols * rows).fill("none"),
   };
 }
@@ -181,6 +181,30 @@ describe("CandyMatchBoard pointer capture", () => {
     expect(
       screen.getByRole("button", { name: /第 2 列第 1 格/ }).getAttribute("data-fall-rows"),
     ).toBe("2");
+  });
+
+  it("厚污漬標成兩層，普通髒格是一層", () => {
+    const board = makeBoard();
+    board.dirt[0] = 2;
+    board.dirt[1] = 1;
+    render(
+      <CandyMatchBoard
+        board={board}
+        cellPx={48}
+        selected={null}
+        hint={null}
+        popping={new Set()}
+        shaking={new Set()}
+        disabled={false}
+        onTapCell={vi.fn()}
+        onSwipeCell={vi.fn()}
+      />,
+    );
+    const thick = screen.getByRole("button", { name: /厚污漬/ });
+    const thin = screen.getByRole("button", { name: /髒髒格/ });
+    expect(thick.getAttribute("data-dirt")).toBe("2");
+    expect(thin.getAttribute("data-dirt")).toBe("1");
+    expect(thin.getAttribute("aria-label")).not.toContain("厚污漬");
   });
 
   it("爆炸糖顯示徽章", () => {
