@@ -330,13 +330,14 @@ test("375px 單集首屏看得到播放、收藏與分享", async ({ page }) => 
 });
 
 test("沒有場景字幕與角色時不渲染模板大綱", async ({ page }) => {
-  await page.goto("/story/ep-32");
+  // ep-32 已有場景字幕；ep-31 仍沒有 captions，用來守「沒大綱就不渲染」。
+  await page.goto("/story/ep-31");
   await expect(page.getByText("故事大綱")).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "出場角色" })).toHaveCount(0);
   await expect(page.getByText(/WebVTT/)).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "本集介紹" })).toBeVisible();
   await expect(page.getByRole("link", { name: "給爸媽：一起聊聊 →" })).toBeVisible();
-  await expect(page.getByRole("link", { name: /恐龍島/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /車車樂園/ })).toBeVisible();
 });
 
 test("404 頁面", async ({ page }) => {
