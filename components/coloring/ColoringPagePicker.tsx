@@ -48,6 +48,7 @@ export function ColoringPagePicker({
   const [loadingMore, setLoadingMore] = useState(false);
   const artworkUrls = useRef<string[]>([]);
   const returnFocus = useRef<HTMLElement | null>(null);
+  const heading = useRef<HTMLParagraphElement>(null);
   const appendArtworks = (entries: ArtworkPreview[]) => {
     const items = entries.map((a) => {
       const src = URL.createObjectURL(a.thumbnailBlob);
@@ -61,7 +62,7 @@ export function ColoringPagePicker({
     setLoadingMore(true);
     try {
       appendArtworks(
-        await listColoringArtworks(12, artworks.at(-1)?.createdAt),
+        await listColoringArtworks(12, artworks.at(-1)),
       );
     } catch {
       setError("作品暫時讀不到，請稍後再試。");
@@ -115,7 +116,7 @@ export function ColoringPagePicker({
   return (
     <div className={styles.root}>
       {/* G-M7：「← 回封面」拿掉——唯一出口是抬頭的「← 回遊樂園」，封面只是入口 splash */}
-      <p className={styles.lead}>{COLORING_PICKER_LEAD}</p>
+      <p ref={heading} tabIndex={-1} className={styles.lead}>{COLORING_PICKER_LEAD}</p>
       {gallery.length > 0 ? (
         <section className={styles.gallery} aria-labelledby="coloring-gallery">
           <h2 id="coloring-gallery" className={styles.heading}>
@@ -145,7 +146,7 @@ export function ColoringPagePicker({
         </section>
       ) : null}
       {error ? <p role="status">{error}</p> : null}
-      {artworks.length > 0 ? (
+      {artworks.length > 0 || hasMore ? (
         <section className={styles.gallery} aria-label="作品收藏">
           <h2 className={styles.heading}>{COLORING_GALLERY_HEADING}</h2>
           <p className={styles.localNote}>作品存在這台裝置</p>
@@ -182,6 +183,16 @@ export function ColoringPagePicker({
       {selected ? (
         <ColoringArtworkViewer
           preview={selected}
+          onDelete={() => {
+            const removed = artworks.find((a) => a.id === selected.id);
+            if (removed) {
+              URL.revokeObjectURL(removed.src);
+              artworkUrls.current = artworkUrls.current.filter((src) => src !== removed.src);
+            }
+            setArtworks((current) => current.filter((a) => a.id !== selected.id));
+            setSelected(null);
+            heading.current?.focus();
+          }}
           onClose={() => {
             setSelected(null);
             returnFocus.current?.focus();

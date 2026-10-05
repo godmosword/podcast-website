@@ -34,13 +34,31 @@ export async function saveColoringArtwork(
 }
 export function listColoringArtworks(
   limit = 12,
-  before?: number,
+  before?: number | Pick<ArtworkPreview, "createdAt" | "id">,
 ): Promise<ArtworkPreview[]> {
   if (typeof indexedDB === "undefined") return Promise.resolve([]);
-  return listColoringValues("artwork-previews", "createdAt", limit, before);
+  return listColoringValues(
+    "artwork-previews",
+    "createdAt",
+    limit,
+    typeof before === "number" || before === undefined
+      ? before
+      : { value: before.createdAt, key: before.id },
+  );
 }
 export function loadColoringArtwork(
   id: string,
 ): Promise<ColoringArtwork | undefined> {
   return readColoringValue("artworks", id);
+}
+/** Remove the completed copy and its preview together; the editable draft stays intact. */
+export function deleteColoringArtwork(id: string): Promise<void> {
+  return coloringTransaction<void>(
+    ["artworks", "artwork-previews"],
+    "readwrite",
+    (tx) => {
+      tx.objectStore("artworks").delete(id);
+      tx.objectStore("artwork-previews").delete(id);
+    },
+  );
 }

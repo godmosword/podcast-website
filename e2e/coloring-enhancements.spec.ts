@@ -166,6 +166,61 @@ test("same-page completed artworks coexist, survive a new draft, and open indepe
   await expect(cards.last()).toBeFocused();
 });
 
+test("deleting one completed artwork asks first, keeps the draft, and persists", async ({
+  page,
+}) => {
+  await open(page, RED);
+  await stroke(page);
+  await page.getByRole("button", { name: "我塗好了" }).click();
+  await expect(
+    page.getByText("作品已收藏在這台裝置", { exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "換一張塗", exact: true }).click();
+  const card = page.getByRole("button", {
+    name: "看作品：小紅賽車",
+    exact: true,
+  });
+  await card.click();
+  const dialog = page.getByRole("dialog", { name: "收藏作品" });
+  await dialog.getByRole("button", { name: "刪除這份收藏", exact: true }).click();
+  await dialog.getByRole("button", { name: "保留作品", exact: true }).click();
+  await expect(card).toHaveCount(1);
+  await dialog.getByRole("button", { name: "刪除這份收藏", exact: true }).click();
+  await dialog.getByRole("button", { name: "確認刪除", exact: true }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(card).toHaveCount(0);
+  await expect(page.getByText("選一頁來塗", { exact: true })).toBeFocused();
+  await expect(
+    page.getByRole("button", { name: "繼續塗：小紅賽車", exact: true }),
+  ).toBeVisible();
+  // The picker loads lists asynchronously, so count the stores directly.
+  const stored = await page.evaluate(
+    () =>
+      new Promise<number[]>((resolve, reject) => {
+        const req = indexedDB.open("coloring-drafts");
+        req.onerror = () => reject(req.error);
+        req.onsuccess = () => {
+          const db = req.result;
+          const tx = db.transaction(["artworks", "artwork-previews"]);
+          const counts = [
+            tx.objectStore("artworks").count(),
+            tx.objectStore("artwork-previews").count(),
+          ];
+          tx.oncomplete = () => {
+            db.close();
+            resolve(counts.map((r) => r.result));
+          };
+          tx.onerror = () => reject(tx.error);
+        };
+      }),
+  );
+  expect(stored).toEqual([0, 0]);
+  await page.goto("/games/coloring-book");
+  await expect(
+    page.getByRole("button", { name: "繼續塗：小紅賽車", exact: true }),
+  ).toBeVisible();
+});
+
 test("load failure offers retry and unavailable storage never reports success", async ({
   page,
 }) => {

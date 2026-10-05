@@ -26,3 +26,22 @@ test("empty, erased, and restored pixels determine completion", () => {
   pixels[3] = 0;
   expect(hasColoringPaint(pixels)).toBe(false);
 });
+test("a thick intersection chooses the nearest white pixel by distance", () => {
+  const data = new Uint8ClampedArray(12 * 12 * 4);
+  for (const [x, y] of [[9, 9], [10, 5]])
+    data.fill(255, (y! * 12 + x!) * 4, (y! * 12 + x!) * 4 + 4);
+  const mask = new ColoringRegions(data, 12, 12).resolve(5, 5, 6)!;
+  expect(mask[5 * 12 + 10]).toBe(1);
+  expect(mask[9 * 12 + 9]).toBe(0);
+});
+test("edge and one-pixel regions remain isolated and the ninth mask evicts the oldest", () => {
+  const data = new Uint8ClampedArray(5 * 19 * 4);
+  for (let y = 0; y < 19; y += 2)
+    data.fill(255, y * 5 * 4, (y + 1) * 5 * 4);
+  const regions = new ColoringRegions(data, 5, 19);
+  const first = regions.resolve(0, 0)!;
+  expect(first[0]).toBe(1);
+  expect(first[5]).toBe(0);
+  for (let y = 2; y <= 16; y += 2) regions.resolve(0, y);
+  expect(regions.resolve(0, 0)).not.toBe(first);
+});

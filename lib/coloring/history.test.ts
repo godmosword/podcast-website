@@ -26,4 +26,17 @@ describe("coloring patch history", () => {
     h.clear();
     expect(h.bytes).toBe(0);
   });
+  test("long drawing sessions retain only the allowed steps and bytes", () => {
+    const h = new ColoringHistory(12, 2);
+    for (let i = 0; i < 1000; i++) {
+      h.push(patch(i % 255));
+      h.take("undo", () => patch(1));
+      expect(h.bytes).toBeLessThanOrEqual(12);
+      expect(h.undo.length + h.redo.length).toBeLessThanOrEqual(2);
+      h.take("redo", () => patch(2));
+    }
+    expect(h.undo).toHaveLength(2);
+    h.push({ rect: { x: 0, y: 0, width: 4, height: 1 }, pixels: new Uint8ClampedArray(16) });
+    expect(h.bytes).toBe(0);
+  });
 });

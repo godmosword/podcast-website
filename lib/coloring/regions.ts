@@ -12,8 +12,9 @@ export class ColoringRegions {
       sy = Math.floor(y);
     if (sx < 0 || sy < 0 || sx >= this.width || sy >= this.height) return null;
     let seed: { x: number; y: number } | null = null;
-    for (let r = 0; r <= Math.min(24, Math.ceil(radius)) && !seed; r++) {
-      let distance = Infinity;
+    let distance = Infinity;
+    const maxRadius = Math.min(24, Math.max(0, Math.ceil(radius)));
+    for (let r = 0; r <= maxRadius && r * r <= distance; r++) {
       for (let dy = -r; dy <= r; dy++)
         for (let dx = -r; dx <= r; dx++) {
           if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
@@ -23,7 +24,7 @@ export class ColoringRegions {
             continue;
           if (lumaAt(this.line, this.width, px, py) < LINE_LUMA_WALL) continue;
           const d = dx * dx + dy * dy;
-          if (d < distance) {
+          if (d <= maxRadius * maxRadius && d < distance) {
             distance = d;
             seed = { x: px, y: py };
           }

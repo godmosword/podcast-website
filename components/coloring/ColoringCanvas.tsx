@@ -610,6 +610,7 @@ export function ColoringCanvas({
   };
 
   const handleHistory = (direction: "undo" | "redo") => {
+    if (doneBusyRef.current) return;
     const ctx = paintRef.current?.getContext("2d");
     if (!ctx || !applyHistory(direction, ctx)) return;
     composite();
@@ -632,6 +633,7 @@ export function ColoringCanvas({
   };
 
   const handleClear = () => {
+    if (doneBusyRef.current) return;
     const paint = paintRef.current;
     const ctx = paint?.getContext("2d");
     if (!paint || !ctx) return;
@@ -714,10 +716,15 @@ export function ColoringCanvas({
     finishStroke();
     composite();
     const display = displayRef.current;
-    if (!display) return;
+    if (!display) {
+      doneBusyRef.current = false;
+      setDoneBusy(false);
+      return;
+    }
     const request = ++doneRequestRef.current;
     try {
       const snapshot = await canvasBlob(display);
+      const thumbnail = await canvasBlob(thumbnailCanvas(display));
       if (!snapshotAliveRef.current || request !== doneRequestRef.current)
         return;
       revokeDoneSnapshot();
@@ -734,7 +741,7 @@ export function ColoringCanvas({
             lineArtRevision: page.lineArtRevision,
             createdAt: Date.now(),
             compositeBlob: snapshot,
-            thumbnailBlob: await canvasBlob(thumbnailCanvas(display)),
+            thumbnailBlob: thumbnail,
           });
           completedRevisionRef.current = paintRevisionRef.current;
         }
@@ -872,7 +879,7 @@ export function ColoringCanvas({
           onBrushSizeChange={setBrushSize}
           showPreview={showPreview}
           onTogglePreview={() => setShowPreview((v) => !v)}
-          ready={ready}
+          ready={ready && !doneBusy}
           colorGroup={colorGroup}
           onColorGroupChange={setColorGroup}
           guided={guided}

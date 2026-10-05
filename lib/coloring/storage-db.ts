@@ -9,6 +9,7 @@ export function openColoringDb(): Promise<IDBDatabase> {
       return;
     }
     const req = indexedDB.open(COLORING_DB, COLORING_DB_VERSION);
+    let blocked = false;
     req.onupgradeneeded = () => {
       const db = req.result;
       if (!db.objectStoreNames.contains("drafts"))
@@ -29,8 +30,17 @@ export function openColoringDb(): Promise<IDBDatabase> {
       }
     };
     req.onerror = () => reject(req.error ?? new Error("無法開啟作品收藏"));
-    req.onblocked = () => reject(new Error("請關閉其他著色本分頁後重試"));
+    req.onblocked = () => {
+      blocked = true;
+      reject(new Error("請關閉其他著色本分頁後重試"));
+    };
     req.onsuccess = () => {
+      // An open request cannot be cancelled after onblocked rejects. If it
+      // later succeeds, close its unused connection instead of leaking it.
+      if (blocked) {
+        req.result.close();
+        return;
+      }
       req.result.onversionchange = () => req.result.close();
       resolve(req.result);
     };
@@ -75,12 +85,15 @@ export function readColoringValue<T>(
   });
 }
 
+export type ColoringListCursor = { value: number; key: IDBValidKey };
+
 export async function listColoringValues<T>(
   store: string,
   index: string,
   limit: number,
-  before?: number,
+  before?: number | ColoringListCursor,
 ): Promise<T[]> {
+  if (limit <= 0) return [];
   return coloringTransaction<T[]>(store, "readonly", (tx, result) => {
     const items: T[] = [];
     result(items);
@@ -88,12 +101,27 @@ export async function listColoringValues<T>(
       .objectStore(store)
       .index(index)
       .openCursor(
-        before === undefined ? null : IDBKeyRange.upperBound(before, true),
+        before === undefined
+          ? null
+          : typeof before === "number"
+            ? IDBKeyRange.upperBound(before, true)
+            : IDBKeyRange.upperBound(before.value),
         "prev",
       );
     req.onsuccess = () => {
       const cursor = req.result;
       if (!cursor || items.length >= limit) return;
+      // IndexedDB sorts equal index values by primary key. Retain that tie-break
+      // in the page cursor so two artworks created in one millisecond both show.
+      if (
+        before !== undefined &&
+        typeof before !== "number" &&
+        cursor.key === before.value &&
+        indexedDB.cmp(cursor.primaryKey, before.key) >= 0
+      ) {
+        cursor.continue();
+        return;
+      }
       items.push(cursor.value as T);
       if (items.length < limit) cursor.continue();
     };

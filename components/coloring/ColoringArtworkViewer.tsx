@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import {
   loadColoringArtwork,
+  deleteColoringArtwork,
   type ArtworkPreview,
   type ColoringArtwork,
 } from "@/lib/coloring/artwork-storage";
@@ -16,13 +17,17 @@ import styles from "./ColoringPagePicker.module.css";
 export function ColoringArtworkViewer({
   preview,
   onClose,
+  onDelete,
 }: {
   preview: ArtworkPreview;
   onClose: () => void;
+  onDelete: () => void;
 }) {
   const [art, setArt] = useState<ColoringArtwork | null>(null),
     [url, setUrl] = useState(""),
     [error, setError] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
   useFocusTrap(true, panel);
   useEffect(() => {
@@ -100,6 +105,34 @@ export function ColoringArtworkViewer({
             </button>
           </div>
         ) : null}
+        {confirmDelete ? (
+          <div>
+            <p>刪除這份收藏？正在塗的草稿會保留。</p>
+            <div className={styles.viewerActions}>
+              <button type="button" disabled={deleting} onClick={() => setConfirmDelete(false)}>
+                保留作品
+              </button>
+              <button
+                type="button"
+                disabled={deleting}
+                onClick={async () => {
+                  setDeleting(true);
+                  try {
+                    await deleteColoringArtwork(preview.id);
+                    onDelete();
+                  } catch {
+                    setError("作品還沒刪除，請再試一次。");
+                    setDeleting(false);
+                  }
+                }}
+              >
+                確認刪除
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button type="button" onClick={() => setConfirmDelete(true)}>刪除這份收藏</button>
+        )}
         <p role="status">{error}</p>
         <small>作品存在這台裝置</small>
       </div>
