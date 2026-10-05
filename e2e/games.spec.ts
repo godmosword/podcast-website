@@ -87,26 +87,42 @@ test.describe("遊戲頁：兒童主路徑優先", () => {
 });
 
 test.describe("遊樂園 hub", () => {
-  test("390×844 三個遊戲名字都在首屏", async ({ page }) => {
+  test("390×844 完整首圖後可捲動到三個遊戲入口", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/games");
     for (const name of ["繪本著色", "繽紛消消樂", "繽紛樂園"]) {
-      const box = await page.getByText(name, { exact: true }).boundingBox();
-      expect(box, name).toBeTruthy();
-      expect(box!.y + box!.height, name).toBeLessThanOrEqual(844);
+      const title = page.getByText(name, { exact: true });
+      await title.scrollIntoViewIfNeeded();
+      await expect(title).toBeInViewport();
     }
   });
 
-  test("390×700 看得到著色名字與另外兩張縮圖上緣", async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 700 });
-    await page.goto("/games");
-    const coloring = await page.getByText("繪本著色", { exact: true }).boundingBox();
-    expect(coloring!.y + coloring!.height).toBeLessThanOrEqual(700);
-    for (const href of ["/games/candy-match", "/games/block-drop"]) {
-      const thumb = page.locator(`main a[href="${href}"] > div`).first();
-      const box = await thumb.boundingBox();
-      expect(box, href).toBeTruthy();
-      expect(box!.y, href).toBeLessThan(700);
+  test("不同寬度與視窗高度都保留首圖原始比例，角色不裁切", async ({ page }) => {
+    for (const viewport of [
+      { width: 320, height: 568 },
+      { width: 390, height: 700 },
+      { width: 640, height: 900 },
+      { width: 768, height: 1024 },
+      { width: 1280, height: 720 },
+      { width: 1980, height: 1440 },
+    ]) {
+      await page.setViewportSize(viewport);
+      await page.goto("/games");
+      const image = page.locator("main > header picture img");
+      await expect(image).toBeVisible();
+      await expect.poll(() => image.evaluate((el: HTMLImageElement) =>
+        el.complete && el.naturalWidth > 0,
+      )).toBe(true);
+      const geometry = await image.evaluate((el: HTMLImageElement) => {
+        const box = el.getBoundingClientRect();
+        return {
+          ratio: box.width / box.height,
+          sourceRatio: el.naturalWidth / el.naturalHeight,
+          fit: getComputedStyle(el).objectFit,
+        };
+      });
+      expect(geometry.ratio).toBeCloseTo(geometry.sourceRatio, 2);
+      expect(geometry.fit).toBe("contain");
     }
   });
 
@@ -131,7 +147,7 @@ test.describe("遊樂園 hub", () => {
     await expect(firstCard).toHaveAttribute("href", "/games/coloring-book");
     const box = await firstCard.boundingBox();
     expect(box).not.toBeNull();
-    expect(box!.y).toBeLessThan(560);
+    expect(box!.y).toBeLessThan(PHONE.height);
   });
 
   test("hub 保留全站導覽（非沉浸路由）", async ({ page }) => {

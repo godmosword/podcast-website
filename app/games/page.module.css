@@ -8,18 +8,13 @@
   z-index: 1;
 }
 
-/* 桌面懸浮膠囊陰影會壓到海報上緣。內容與膠囊同寬，中間留約 40px。
-   海報最高再矮一截，720 高的視窗仍看得到三張卡的名字。 */
+/* 桌面懸浮膠囊陰影會壓到海報上緣。內容與膠囊同寬，中間留約 40px。 */
 @media (min-width: 980px) {
   .main {
     width: min(960px, calc(100% - 40px));
     max-width: none;
     padding-top: calc(40px + var(--safe-top));
     padding-inline: 0;
-  }
-
-  .hero {
-    max-height: min(400px, max(200px, calc(100svh - var(--nav-h) - 356px)));
   }
 }
 
@@ -36,12 +31,7 @@
   position: relative;
   aspect-ratio: 1672 / 941;
   width: 100%;
-  /*
-   * 1280×720 要同時看到海報和三張卡的名字。
-   * 預留頂欄、主區上距、卡列（4:3 縮圖＋標題列＋動作詞）約 336px。
-   * 高視窗仍停在 400，避免海報又把名字擠出首屏。
-   */
-  max-height: min(400px, max(220px, calc(100svh - var(--nav-h) - 336px)));
+  /* 保留原圖比例與完整角色；遊戲卡自然往下排，不用視窗高度壓縮海報。 */
   margin: 0 0 12px;
   border-radius: var(--radius-xl);
   overflow: hidden;
@@ -68,9 +58,8 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  /* 海報變矮時往下取景：站牌在上、兩台車在下，天空先裁。 */
-  object-position: center 60%;
+  object-fit: contain;
+  object-position: center;
   color: transparent;
 }
 
@@ -231,17 +220,10 @@
     padding-top: calc(14px + var(--safe-top));
   }
 
-  /* 直式底圖 940×1410。站牌約在 34–53%、車身約在 62–84%。
-     280px 橫帶取 55% 會切到車頭；加高並把取景下移，站牌與整台車都留在框裡。 */
+  /* 手機使用直式原圖比例，站牌、車身與輪胎完整保留。 */
   .hero {
-    aspect-ratio: auto;
-    height: min(46svh, 340px);
-    max-height: none;
+    aspect-ratio: 940 / 1410;
     margin-bottom: 12px;
-  }
-
-  .heroImage {
-    object-position: center 64%;
   }
 
   .cardGrid {
@@ -253,8 +235,7 @@
     grid-column: 1 / -1;
   }
 
-  /* 海報要留整台車，全寬 4:3 會把消消樂、方塊的名字推出 844。
-     只壓第一站縮圖；高度用 390×844 實測，三個名字的底邊才進得了視窗。 */
+  /* 首張全寬卡使用較矮縮圖，讓後面的兩個入口更快出現。 */
   .lead .thumb {
     max-height: 156px;
   }
