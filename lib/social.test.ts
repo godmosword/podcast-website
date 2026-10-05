@@ -6,7 +6,7 @@ describe("visibleSocials", () => {
     const email = visibleSocials().find((social) => social.label === "Email");
 
     expect(email).toMatchObject({
-      url: "mailto:bonboncarstory@gmail.com",
+      url: "mailto:carcarplayground@gmail.com",
       icon: "email",
     });
   });

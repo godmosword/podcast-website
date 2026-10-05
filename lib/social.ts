@@ -44,7 +44,7 @@ const SOCIALS: Social[] = [
   },
   {
     label: "Email",
-    url: "mailto:bonboncarstory@gmail.com",
+    url: "mailto:carcarplayground@gmail.com",
     background: "linear-gradient(135deg, var(--c-sky), var(--c-mint))",
     icon: "email",
   },
