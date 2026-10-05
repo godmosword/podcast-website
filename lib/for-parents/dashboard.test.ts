@@ -1,10 +1,32 @@
 import { describe, expect, it } from "vitest";
+import { emptyActivityLog, localDateKey, type ActivityLogV1 } from "@/lib/activity-log";
 import { DEFAULT_PROGRESS } from "@/lib/progress-store";
 import {
   buildParentDashboardSnapshot,
   buildRecentStoryRows,
+  buildStoryProgressRows,
+  buildWeeklySummary,
+  formatWeeklySummaryLine,
   recommendStoriesForParent,
 } from "./dashboard";
+
+const TODAY = new Date(2026, 9, 5, 12, 0, 0).getTime();
+
+function activityWithToday(): ActivityLogV1 {
+  return {
+    ...emptyActivityLog("device-test-1111"),
+    days: {
+      [localDateKey(TODAY)]: {
+        stories: {
+          "ep-15": { seconds: 2520, plays: 2, completions: 1 },
+        },
+        games: {
+          "candy-match": { seconds: 600, sessions: 3, clears: 1 },
+        },
+      },
+    },
+  };
+}
 
 describe("buildParentDashboardSnapshot", () => {
   it("彙整遊戲、收聽與偏好為家長儀表板快照", () => {
@@ -82,5 +104,71 @@ describe("recommendStoriesForParent", () => {
 
     expect(picks.every((s) => s.slug !== "ep-16")).toBe(true);
     expect(picks.length).toBeGreaterThan(0);
+  });
+});
+
+describe("buildWeeklySummary", () => {
+  it("彙整近 7 天的收聽與遊戲時間", () => {
+    const summary = buildWeeklySummary(activityWithToday(), TODAY);
+
+    expect(summary.days).toHaveLength(7);
+    expect(summary.days[6]?.date).toBe(localDateKey(TODAY));
+    expect(summary.days[6]?.weekday).toBe("一");
+    expect(summary.storiesTouched).toBe(1);
+    expect(summary.storySeconds).toBe(2520);
+    expect(summary.gameSeconds).toBe(600);
+    expect(summary.activeDays).toBe(1);
+    expect(formatWeeklySummaryLine(summary)).toBe(
+      "這週聽了 1 集、共 42 分鐘，遊戲 10 分鐘。",
+    );
+    expect(formatWeeklySummaryLine(buildWeeklySummary(emptyActivityLog(), TODAY))).toBe(
+      "這週還沒有收聽或遊戲紀錄。",
+    );
+  });
+});
+
+describe("buildStoryProgressRows", () => {
+  it("完播、續播與還沒聽分成三種狀態，進行中排在前面", () => {
+    const rows = buildStoryProgressRows(
+      {
+        continue: {
+          slug: "ep-16",
+          page: 1,
+          time: 12,
+          updatedAt: 1,
+        },
+        engagement: {
+          storiesCompleted: [],
+          reflectionShown: [],
+          platformClicks: {},
+        },
+      },
+      activityWithToday(),
+    );
+    const ep15 = rows.find((row) => row.slug === "ep-15");
+    const ep16 = rows.find((row) => row.slug === "ep-16");
+    const untouched = rows.find((row) => row.slug === "ep-1");
+
+    expect(ep15).toMatchObject({
+      status: "completed",
+      plays: 2,
+      lastDate: localDateKey(TODAY),
+    });
+    expect(ep16?.status).toBe("in-progress");
+    expect(untouched?.status).toBe("not-started");
+    expect(rows.findIndex((row) => row.slug === "ep-16")).toBeLessThan(
+      rows.findIndex((row) => row.slug === "ep-15"),
+    );
+  });
+});
+
+describe("buildParentDashboardSnapshot activity", () => {
+  it("把本週遊戲時間併進遊戲列", () => {
+    const snap = buildParentDashboardSnapshot(DEFAULT_PROGRESS, activityWithToday(), TODAY);
+    const candy = snap.games.find((game) => game.gameId === "candy-match");
+    expect(candy?.weekSeconds).toBe(600);
+    expect(candy?.weekSessions).toBe(3);
+    expect(snap.weekly.storiesTouched).toBe(1);
+    expect(snap.storyProgress.some((row) => row.slug === "ep-15" && row.status === "completed")).toBe(true);
   });
 });

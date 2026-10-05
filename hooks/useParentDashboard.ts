@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { readActivityLog, subscribeActivity } from "@/lib/activity-log";
 import {
   DEFAULT_PROGRESS,
   getProgressSync,
@@ -18,12 +19,17 @@ export function useParentDashboard(): ParentDashboardSnapshot {
   );
 
   const refresh = useCallback(() => {
-    setSnapshot(buildParentDashboardSnapshot(getProgressSync()));
+    setSnapshot(buildParentDashboardSnapshot(getProgressSync(), readActivityLog()));
   }, []);
 
   useEffect(() => {
     refresh();
-    return subscribeProgress(refresh);
+    const unsubscribeProgress = subscribeProgress(refresh);
+    const unsubscribeActivity = subscribeActivity(refresh);
+    return () => {
+      unsubscribeProgress();
+      unsubscribeActivity();
+    };
   }, [refresh]);
 
   return snapshot;

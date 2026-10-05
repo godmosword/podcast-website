@@ -1,9 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import ParentTrustStrip from "@/components/ParentTrustStrip";
 import { useParentDashboard } from "@/hooks/useParentDashboard";
-import type { ParentStoryRow } from "@/lib/for-parents/dashboard";
+import { clearActivityLog } from "@/lib/activity-log";
+import {
+  formatActivityDate,
+  formatDurationLabel,
+  formatWeeklySummaryLine,
+  type ParentStoryRow,
+  type StoryProgressStatus,
+} from "@/lib/for-parents/dashboard";
 import {
   saveGameKitSettingsToStore,
   setSfxEnabledInStore,
@@ -11,12 +19,130 @@ import {
 import { storyDisplayTitle } from "@/lib/story-title";
 import styles from "./parent-dashboard.module.css";
 
+const STORY_PROGRESS_PREVIEW = 8;
+
+const PROGRESS_LABEL: Record<StoryProgressStatus, string> = {
+  completed: "聽完了",
+  "in-progress": "聽到一半",
+  "not-started": "還沒聽",
+};
+
 const REASON_LABEL: Record<ParentStoryRow["reason"], string> = {
   continue: "繼續收聽中",
   favorite: "已收藏",
   completed: "聽完了",
   reflection: "聊過互動提問",
 };
+
+function barHeight(seconds: number, maxSeconds: number): string {
+  if (seconds <= 0 || maxSeconds <= 0) return "2px";
+  const ratio = Math.max(0.08, seconds / maxSeconds);
+  return `${Math.round(ratio * 100)}%`;
+}
+
+function WeeklySummaryCard() {
+  const snap = useParentDashboard();
+  const maxSeconds = Math.max(
+    1,
+    ...snap.weekly.days.map((day) => Math.max(day.storySeconds, day.gameSeconds)),
+  );
+
+  return (
+    <section className={styles.card} aria-labelledby="weekly-heading">
+      <h2 id="weekly-heading" className={styles.cardTitle}>
+        本週摘要
+      </h2>
+      <p className={styles.cardHint}>
+        依這台裝置的收聽與遊戲時間整理，不是成績單。
+      </p>
+      <p className={styles.summaryLine}>{formatWeeklySummaryLine(snap.weekly)}</p>
+      <ul className={styles.weekChart}>
+        {snap.weekly.days.map((day) => (
+          <li
+            key={day.date}
+            className={styles.weekCol}
+            aria-label={`${day.label}，收聽 ${formatDurationLabel(day.storySeconds)}，遊戲 ${formatDurationLabel(day.gameSeconds)}`}
+          >
+            <div className={styles.weekBars} aria-hidden="true">
+              <span
+                className={`${styles.weekBar} ${styles.weekBarStory}`}
+                style={{ height: barHeight(day.storySeconds, maxSeconds) }}
+              />
+              <span
+                className={`${styles.weekBar} ${styles.weekBarGame}`}
+                style={{ height: barHeight(day.gameSeconds, maxSeconds) }}
+              />
+            </div>
+            <span className={styles.weekLabel} aria-hidden="true">
+              {day.weekday}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p className={styles.legend}>
+        <span className={styles.legendItem}>
+          <span className={`${styles.swatch} ${styles.swatchStory}`} aria-hidden="true" />
+          收聽
+        </span>
+        <span className={styles.legendItem}>
+          <span className={`${styles.swatch} ${styles.swatchGame}`} aria-hidden="true" />
+          遊戲
+        </span>
+      </p>
+    </section>
+  );
+}
+
+function StoryProgressCard() {
+  const snap = useParentDashboard();
+  const [expanded, setExpanded] = useState(false);
+  const rows = expanded
+    ? snap.storyProgress
+    : snap.storyProgress.slice(0, STORY_PROGRESS_PREVIEW);
+  const canToggle = snap.storyProgress.length > STORY_PROGRESS_PREVIEW;
+
+  return (
+    <section className={styles.card} aria-labelledby="progress-heading">
+      <h2 id="progress-heading" className={styles.cardTitle}>
+        故事進度
+      </h2>
+      <p className={styles.cardHint}>
+        看哪些集聽完、哪些聽到一半。次數只算這台裝置最近 90 天。
+      </p>
+      {rows.length === 0 ? (
+        <p className={styles.empty}>目前沒有故事可以顯示。</p>
+      ) : (
+        <ul className={styles.storyList}>
+          {rows.map((row) => (
+            <li key={row.slug}>
+              <Link href={row.href} className={styles.storyLink}>
+                <span>
+                  {row.title}
+                  <span className={styles.reason}>
+                    {PROGRESS_LABEL[row.status]}
+                    {row.plays > 0 ? ` · 聽過 ${row.plays} 次` : ""}
+                    {row.lastDate ? ` · ${formatActivityDate(row.lastDate)}` : ""}
+                  </span>
+                </span>
+                <span className={styles.storyEp}>EP {row.ep}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+      {canToggle ? (
+        <button
+          type="button"
+          className={styles.actionButton}
+          aria-expanded={expanded}
+          onClick={() => setExpanded((open) => !open)}
+        >
+          {expanded ? "收合" : "看全部"}
+        </button>
+      ) : null}
+    </section>
+  );
+}
 
 function GameProgressSummary() {
   const snap = useParentDashboard();
@@ -55,14 +181,23 @@ function GameProgressSummary() {
             <span className={styles.gameMeta}>
               <span className={styles.gameTitle}>{game.title}</span>
               <span className={styles.gameDetail}>
-                {game.played
-                  ? [
-                      game.medalStars > 0 ? `${game.medalStars} 顆關卡星` : null,
-                      game.bestScore != null ? `最佳 ${game.bestScore}` : null,
-                    ]
-                      .filter(Boolean)
-                      .join(" · ") || "已開始探索"
-                  : "還沒玩過"}
+                {[
+                  game.played
+                    ? [
+                        game.medalStars > 0 ? `${game.medalStars} 顆關卡星` : null,
+                        game.bestScore != null ? `最佳 ${game.bestScore}` : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ") || "已開始探索"
+                    : game.weekSeconds > 0 || game.weekSessions > 0
+                      ? null
+                      : "還沒玩過",
+                  game.weekSeconds > 0 || game.weekSessions > 0
+                    ? `本週 ${formatDurationLabel(game.weekSeconds)} · ${game.weekSessions} 局`
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
               </span>
             </span>
           </li>
@@ -185,8 +320,60 @@ function ParentQuickSettings() {
             <span className={styles.toggleKnob} aria-hidden />
           </button>
         </div>
+        <ClearActivityControl />
       </div>
     </section>
+  );
+}
+
+function ClearActivityControl() {
+  const [confirming, setConfirming] = useState(false);
+
+  if (!confirming) {
+    return (
+      <div className={`${styles.settingRow} ${styles.clearRow}`}>
+        <div>
+          <span className={styles.settingLabel}>活動紀錄</span>
+          <span className={styles.settingHint}>
+            只清除這台裝置上的收聽與遊戲時間
+          </span>
+        </div>
+        <button
+          type="button"
+          className={styles.actionButton}
+          onClick={() => setConfirming(true)}
+        >
+          清除活動紀錄
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.confirmBlock}>
+      <p className={styles.settingHint}>
+        會清掉這台裝置上的收聽與遊戲時間。收藏、星星和聽完紀錄會保留。
+      </p>
+      <div className={styles.confirmActions}>
+        <button
+          type="button"
+          className={styles.actionButton}
+          onClick={() => setConfirming(false)}
+        >
+          取消
+        </button>
+        <button
+          type="button"
+          className={`${styles.actionButton} ${styles.actionButtonStrong}`}
+          onClick={() => {
+            clearActivityLog();
+            setConfirming(false);
+          }}
+        >
+          確定清除
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -196,6 +383,12 @@ export function ParentDashboard() {
     <div className={styles.parentDashboard}>
       <ParentTrustStrip variant="compact" />
       <div className={styles.grid}>
+        <div className={styles.gridWide}>
+          <WeeklySummaryCard />
+        </div>
+        <div className={styles.gridWide}>
+          <StoryProgressCard />
+        </div>
         <div className={styles.gridWide}>
           <GameProgressSummary />
         </div>

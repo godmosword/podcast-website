@@ -166,6 +166,7 @@ describe("SiteNavBar", () => {
       "關於我們",
       "親子景點",
       "親子指南",
+      "親子進度",
     ]) {
       expect(html).toContain(label);
     }
@@ -256,6 +257,7 @@ describe("SiteNavBar", () => {
       "/adventures",
       "/about",
       "/for-parents",
+      "/for-parents/dashboard",
       "/for-parents/play-map",
       "/for-parents/articles",
       "/for-parents/travel-abroad",
@@ -267,7 +269,7 @@ describe("SiteNavBar", () => {
     expect(panelHrefs).not.toContain("/");
     expect(panelHrefs).not.toContain("/games/coloring-book");
     expect(panelHrefs.some((h) => h?.startsWith("mailto:"))).toBe(false);
-    expect(panelHrefs.length).toBe(11);
+    expect(panelHrefs.length).toBe(12);
   });
 
   test("抽屜兩組各為 role=list，家長組以 aria-labelledby 綁小標", async () => {
@@ -315,6 +317,7 @@ describe("SiteNavBar", () => {
       "親子出國",
       "國內旅遊",
       "故事創作",
+      "親子進度",
       "親子指南",
       "親子景點",
     ]) {
@@ -344,6 +347,7 @@ describe("SiteNavBar", () => {
       "/for-parents/travel-abroad",
       "/for-parents/travel-taiwan",
       "/for-parents/story-making",
+      "/for-parents/dashboard",
       "/for-parents",
       "/for-parents/play-map",
     ]);
@@ -486,7 +490,16 @@ describe("isInternalPathActive 最長匹配", () => {
       true,
     );
     expect(
-      isInternalPathActive("/for-parents/dashboard", "/for-parents", hrefs),
+      isInternalPathActive("/for-parents/dashboard", "/for-parents", [
+        ...hrefs,
+        "/for-parents/dashboard",
+      ]),
+    ).toBe(false);
+    expect(
+      isInternalPathActive("/for-parents/dashboard", "/for-parents/dashboard", [
+        ...hrefs,
+        "/for-parents/dashboard",
+      ]),
     ).toBe(true);
   });
 
@@ -544,14 +557,26 @@ describe("SiteNavBar active 狀態", () => {
     );
   }
 
-  test("/for-parents 與子路徑在抽屜標 aria-current（家長項已不在桌面主列）", async () => {
-    for (const pathname of ["/for-parents", "/for-parents/dashboard"]) {
-      const view = await renderNavBarAt(pathname);
-      const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
-      const link = panel.querySelector('a[href="/for-parents"]');
-      expect(link?.getAttribute("aria-current")).toBe("page");
-      cleanup();
-    }
+  test("/for-parents 在抽屜標親子指南；進度頁只標親子進度", async () => {
+    const guide = await renderNavBarAt("/for-parents");
+    const guidePanel = guide.container.querySelector('nav[aria-label="網站選單"]')!;
+    expect(
+      guidePanel.querySelector('a[href="/for-parents"]')?.getAttribute("aria-current"),
+    ).toBe("page");
+    expect(
+      guidePanel.querySelector('a[href="/for-parents/dashboard"]')?.hasAttribute("aria-current"),
+    ).toBe(false);
+    cleanup();
+
+    const progress = await renderNavBarAt("/for-parents/dashboard");
+    const progressPanel = progress.container.querySelector('nav[aria-label="網站選單"]')!;
+    expect(
+      progressPanel.querySelector('a[href="/for-parents/dashboard"]')?.getAttribute("aria-current"),
+    ).toBe("page");
+    expect(
+      progressPanel.querySelector('a[href="/for-parents"]')?.hasAttribute("aria-current"),
+    ).toBe(false);
+    cleanup();
   });
 
   test("給爸媽小字路徑只標自己，不標親子指南", async () => {

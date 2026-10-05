@@ -38,6 +38,7 @@ type NavItemId =
   | "adventures"
   | "about"
   | "for-parents"
+  | "parent-progress"
   | "play-map"
   | "feedback"
   | ParentSectionId;
@@ -51,10 +52,11 @@ type NavItem = {
 /** 抽屜家長組 id（小標「給爸媽」落在實際首個可見項）。 */
 const MOBILE_PARENT_GROUP_IDS = new Set<NavItemId>([
   "for-parents",
+  "parent-progress",
   "play-map",
 ]);
 
-/** 抽屜主列：探索 5 ＋家長 2（著色本在遊樂園內）。給爸媽小字不佔主列。 */
+/** 抽屜主列：探索 5 ＋家長 3（著色本在遊樂園內）。給爸媽小字不佔主列。 */
 const MENU_ROWS: readonly {
   id: NavItemId;
   emoji: string;
@@ -64,6 +66,7 @@ const MENU_ROWS: readonly {
   { id: "games", emoji: "🎡" },
   { id: "adventures", emoji: "🗺️" },
   { id: "about", emoji: "💛" },
+  { id: "parent-progress", emoji: "📒" },
   { id: "for-parents", emoji: "🧭" },
   { id: "play-map", emoji: "📍" },
 ] as const;
@@ -81,6 +84,7 @@ function navItems(): NavItem[] {
     { id: "adventures", label: "宇宙地圖", href: "/adventures" },
     { id: "about", label: "關於我們", href: "/about" },
     { id: "for-parents", label: "親子指南", href: "/for-parents" },
+    { id: "parent-progress", label: "親子進度", href: "/for-parents/dashboard" },
     { id: "play-map", label: "親子景點", href: "/for-parents/play-map" },
     ...PARENT_SECTION_ITEMS.map((item) => ({
       id: item.id,

@@ -23,6 +23,15 @@ import {
   setMediaSessionPositionState,
 } from "@/lib/media-session";
 import { trackStoryCompleted, trackStoryPlayStart } from "@/lib/analytics";
+import {
+  addStorySeconds,
+  createPlaybackClock,
+  notePlaybackTime,
+  recordStoryCompletion,
+  recordStoryPlay,
+  takePendingSeconds,
+  type PlaybackClock,
+} from "@/lib/activity-log";
 import { takeLandingPlayback } from "@/lib/landing-playback";
 import { playSfx, isSfxEnabled } from "@/lib/sfx";
 import {
@@ -180,12 +189,21 @@ export default function StoryPlayer({
   const nightPromptRef = useRef<HTMLDivElement>(null);
   const completionRecorded = useRef(false);
   const playStartRecorded = useRef(false);
+  const playbackClockRef = useRef<PlaybackClock>(createPlaybackClock());
+  const hiddenMediaTimeRef = useRef<number | null>(null);
+  const pageHiddenRef = useRef(false);
+
+  const flushStoryActivity = useCallback(() => {
+    const seconds = takePendingSeconds(playbackClockRef.current);
+    if (seconds > 0) addStorySeconds(slug, seconds);
+  }, [slug]);
 
   const recordPlayStart = useCallback(
     (source: "story_page" | "landing") => {
       if (playStartRecorded.current) return;
       playStartRecorded.current = true;
       trackStoryPlayStart(slug, source);
+      recordStoryPlay(slug);
     },
     [slug],
   );
@@ -288,6 +306,38 @@ export default function StoryPlayer({
     document.addEventListener("visibilitychange", update);
     return () => document.removeEventListener("visibilitychange", update);
   }, []);
+
+  // 分頁隱藏時先把已播放秒數寫入。回到前景時，用音檔時間差補上背景播放，
+  // 不走 2 秒跳躍上限（那個上限只拿來忽略拖曳）。
+  useEffect(() => {
+    const onVisibility = () => {
+      const el = audioRef.current;
+      if (document.visibilityState === "hidden") {
+        pageHiddenRef.current = true;
+        flushStoryActivity();
+        hiddenMediaTimeRef.current =
+          el && Number.isFinite(el.currentTime) ? el.currentTime : null;
+        return;
+      }
+      pageHiddenRef.current = false;
+      const start = hiddenMediaTimeRef.current;
+      hiddenMediaTimeRef.current = null;
+      if (el && start != null && !el.paused && Number.isFinite(el.currentTime)) {
+        const delta = el.currentTime - start;
+        const whole = Math.floor(delta);
+        if (whole > 0 && whole <= 30 * 60) addStorySeconds(slug, whole);
+      }
+      if (el && Number.isFinite(el.currentTime)) {
+        playbackClockRef.current.lastMediaTime = el.currentTime;
+        playbackClockRef.current.pendingSeconds = 0;
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      flushStoryActivity();
+    };
+  }, [flushStoryActivity, slug]);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -483,8 +533,10 @@ export default function StoryPlayer({
   useEffect(() => {
     const el = audioRef.current;
     if (!el) return;
+    playbackClockRef.current = createPlaybackClock();
 
     const handleEnded = () => {
+      flushStoryActivity();
       if (repeat) {
         el.currentTime = 0;
         setPage(0);
@@ -495,7 +547,10 @@ export default function StoryPlayer({
       setHasEnded(true);
       clearContinue();
     };
-    const handlePause = () => setIsPlaying(false);
+    const handlePause = () => {
+      flushStoryActivity();
+      setIsPlaying(false);
+    };
     const handlePlay = () => {
       recordPlayStart(adoptLandingPlayback ? "landing" : "story_page");
       setIsPlaying(true);
@@ -505,6 +560,9 @@ export default function StoryPlayer({
     const subTimes = hasSubtitles ? subtitles!.map((s) => s.t) : null;
     const handleTimeUpdate = () => {
       const t = el.currentTime;
+      if (!pageHiddenRef.current && notePlaybackTime(playbackClockRef.current, t, !el.paused)) {
+        flushStoryActivity();
+      }
       setCurrentTime(t);
       if (el.duration && Number.isFinite(el.duration)) {
         setDuration(el.duration);
@@ -542,6 +600,7 @@ export default function StoryPlayer({
     el.addEventListener("loadstart", handleLoadStart);
 
     return () => {
+      flushStoryActivity();
       el.removeEventListener("ended", handleEnded);
       el.removeEventListener("pause", handlePause);
       el.removeEventListener("play", handlePlay);
@@ -553,6 +612,7 @@ export default function StoryPlayer({
   }, [
     adoptLandingPlayback,
     captionTimes,
+    flushStoryActivity,
     hasCueTimes,
     hasSubtitles,
     recordPlayStart,
@@ -705,6 +765,7 @@ export default function StoryPlayer({
     completionRecorded.current = true;
     // 完播口徑見 lib/analytics.ts trackStoryCompleted JSDoc（本機去重＋對外每次完播計一次）
     trackStoryCompleted(slug);
+    recordStoryCompletion(slug);
   }, [hasEnded, slug]);
 
   // 鍵盤：空白鍵播放/暫停，左右方向鍵跳上一張／下一張插圖（與控制列一致）。

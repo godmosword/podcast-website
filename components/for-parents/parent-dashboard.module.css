@@ -44,6 +44,129 @@
   color: var(--ink-soft);
 }
 
+.summaryLine {
+  margin: 0 0 14px;
+  font-size: var(--fs-control);
+  font-weight: 800;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.weekChart {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.weekCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.weekBars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
+  width: 100%;
+  height: 72px;
+}
+
+.weekBar {
+  display: block;
+  width: 8px;
+  max-width: 36%;
+  border-radius: var(--radius-pill) var(--radius-pill) 4px 4px;
+  background: var(--line);
+}
+
+.weekBarStory {
+  background: var(--accent);
+}
+
+.weekBarGame {
+  background: var(--c-sky);
+}
+
+.weekLabel {
+  font-size: var(--fs-meta);
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 12px 0 0;
+  font-size: var(--fs-meta);
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.swatchStory {
+  background: var(--accent);
+}
+
+.swatchGame {
+  background: var(--c-sky);
+}
+
+.actionButton {
+  min-height: 44px;
+  margin-top: 12px;
+  padding: 8px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.actionButton:focus-visible {
+  outline: 2px solid var(--accent-ink);
+  outline-offset: 2px;
+}
+
+.actionButtonStrong {
+  border-color: var(--accent-ink);
+  color: var(--accent-ink);
+}
+
+.confirmBlock {
+  padding-top: 10px;
+}
+
+.confirmActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.confirmActions .actionButton {
+  margin-top: 8px;
+}
+
 .empty {
   margin: 0;
   font-size: var(--fs-control);
@@ -200,6 +323,15 @@
   gap: var(--space-3);
   padding: 10px 0;
   border-bottom: 1px dashed var(--line);
+}
+
+.clearRow {
+  flex-wrap: wrap;
+}
+
+.clearRow .actionButton {
+  margin-top: 0;
+  flex-shrink: 0;
 }
 
 .settingRow:last-child {

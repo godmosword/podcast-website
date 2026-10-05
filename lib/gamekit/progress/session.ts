@@ -11,6 +11,7 @@ import {
 } from "./save";
 import { medalFlags, medalCount } from "./meta";
 import { saveBestScoreInStore } from "@/lib/progress-store";
+import { recordGameSession } from "@/lib/activity-log";
 import { trackGameSessionComplete } from "@/lib/analytics";
 
 import { GAMEKIT_PROGRESS_EVENT } from "../runtime/constants";
@@ -90,6 +91,7 @@ export function reportGameSession(result: GameSessionResult): PlayerProfile {
   profile = checkBonusStickers(profile);
 
   savePlayerProfile(profile);
+  recordGameSession(result.gameId, Boolean(result.cleared));
   if (typeof window !== "undefined") {
     trackGameSessionComplete(result.gameId, Boolean(result.cleared));
     window.dispatchEvent(
