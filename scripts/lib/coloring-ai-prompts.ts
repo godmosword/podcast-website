@@ -6,10 +6,7 @@ const SHARED_LINE_RULES =
   "no transparency, no shading, no clay texture, no gray tones, no color fills. " +
   "Every contour must be fully closed so each region can be flood-filled. " +
   "No text, letters, or numbers anywhere. " +
-  "Keep characters exactly on-model with the reference image(s): same proportions, face, and distinctive features. " +
-  "Preschool coloring page for ages 3 to 6: round, soft outlines, generous white space, and large regions a small hand can fill. " +
-  "A row of teeth is 4 to 6 big teeth, brush bristles are a few blobs, and a pile of candy is at most four large sweets. " +
-  "Do not draw grids of tiny circles or individual bristles.";
+  "Keep characters exactly on-model with the reference image(s): same proportions, face, and distinctive features.";
 
 /** 角色定裝頁：保大型道具，只刪紋理與微人群。 */
 export const CHARACTER_LINE_ART_PROMPT =
@@ -47,7 +44,6 @@ export const COLORING_LINEART_REVIEW_CHECKLIST: readonly string[] = [
   "是否擅自改成無關戶外太陽雲場（場景頁嚴禁）",
   "角色臉／車身定裝是否 on-model（比例、眼睛、編號圈等）",
   "輪廓是否閉合、大區塊可塗（gate 已過仍須目視）",
-  "小色塊是否少到小朋友一眼知道從哪裡塗（牙齒、刷毛、糖果不要碎成一格格）",
 ] as const;
 
 export function formatColoringReviewChecklist(): string {
