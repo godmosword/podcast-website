@@ -59,7 +59,7 @@ export function coloringDraftKey(pageId: string): string {
 }
 
 /** 線稿世代；重生／替換 line.png 時 +1，讓舊草稿失效（舊塗鴉對不上新線稿）。 */
-export const COLORING_LINEART_REV = 2;
+export const COLORING_LINEART_REV = 3;
 
 /** IndexedDB 草稿 key（綁線稿世代）。 */
 export function coloringDraftStorageKey(pageId: string): string {

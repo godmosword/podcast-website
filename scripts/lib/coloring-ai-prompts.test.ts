@@ -32,6 +32,9 @@ describe("coloring AI prompts", () => {
     expect(joined).toContain("主角");
     expect(joined).toContain("地標");
     expect(joined).toContain("太陽雲");
+    expect(joined).toContain("小朋友");
+    expect(CHARACTER_LINE_ART_PROMPT).toMatch(/ages 3 to 6/i);
+    expect(SCENE_LINE_ART_PROMPT).toMatch(/4 to 6 big teeth/i);
     expect(formatColoringReviewChecklist()).toContain("人工審核清單");
   });
 });
