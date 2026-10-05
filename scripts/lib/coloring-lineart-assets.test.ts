@@ -34,49 +34,49 @@ describe("coloring lineart assets contract", () => {
     }
   });
 
-  test("恐龍車多多線稿是大色塊，小格不再鋪滿整頁", async () => {
-    const page = COLORING_PAGES.find((item) => item.id === "char-恐龍車多多");
-    expect(page).toBeTruthy();
-    const path = join(PUBLIC_DIR, page!.lineArtSrc.replace(/^\//, ""));
-    const { data, info } = await sharp(path).greyscale().raw().toBuffer({ resolveWithObject: true });
-    const width = info.width;
-    const height = info.height;
-    const ink = new Uint8Array(width * height);
-    for (let i = 0; i < ink.length; i += 1) ink[i] = (data[i] ?? 255) < 128 ? 1 : 0;
+  test("八頁線稿都是大色塊，小格不再鋪滿整頁", async () => {
+    for (const page of COLORING_PAGES) {
+      const path = join(PUBLIC_DIR, page.lineArtSrc.replace(/^\//, ""));
+      const { data, info } = await sharp(path).greyscale().raw().toBuffer({ resolveWithObject: true });
+      const width = info.width;
+      const height = info.height;
+      const ink = new Uint8Array(width * height);
+      for (let i = 0; i < ink.length; i += 1) ink[i] = (data[i] ?? 255) < 128 ? 1 : 0;
 
-    const labels = new Int32Array(ink.length);
-    let regions = 0;
-    const stack: number[] = [];
-    for (let start = 0; start < ink.length; start += 1) {
-      if (ink[start] || labels[start]) continue;
-      let touchesBorder = false;
-      labels[start] = 1;
-      stack.push(start);
-      while (stack.length > 0) {
-        const idx = stack.pop()!;
-        const x = idx % width;
-        const y = (idx - x) / width;
-        if (x === 0 || y === 0 || x === width - 1 || y === height - 1) touchesBorder = true;
-        for (const [dx, dy] of [
-          [1, 0],
-          [-1, 0],
-          [0, 1],
-          [0, -1],
-        ] as const) {
-          const nx = x + dx;
-          const ny = y + dy;
-          if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
-          const next = ny * width + nx;
-          if (ink[next] || labels[next]) continue;
-          labels[next] = 1;
-          stack.push(next);
+      const labels = new Int32Array(ink.length);
+      let regions = 0;
+      const stack: number[] = [];
+      for (let start = 0; start < ink.length; start += 1) {
+        if (ink[start] || labels[start]) continue;
+        let touchesBorder = false;
+        labels[start] = 1;
+        stack.push(start);
+        while (stack.length > 0) {
+          const idx = stack.pop()!;
+          const x = idx % width;
+          const y = (idx - x) / width;
+          if (x === 0 || y === 0 || x === width - 1 || y === height - 1) touchesBorder = true;
+          for (const [dx, dy] of [
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1],
+          ] as const) {
+            const nx = x + dx;
+            const ny = y + dy;
+            if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+            const next = ny * width + nx;
+            if (ink[next] || labels[next]) continue;
+            labels[next] = 1;
+            stack.push(next);
+          }
         }
+        if (!touchesBorder) regions += 1;
       }
-      if (!touchesBorder) regions += 1;
-    }
 
-    // 舊線稿約 156 個內白區；大色塊版本應一眼分得出車身、嘴巴、輪子。
-    expect(regions).toBeLessThanOrEqual(50);
+      const cap = page.kind === "scene" ? 70 : 55;
+      expect(regions, page.id).toBeLessThanOrEqual(cap);
+    }
   });
 
   test("遊樂園封面 cover.webp 為 1448×1086 webp", async () => {

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" fill="#ffffff"/>
+  <g fill="none" stroke="#111111" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="22" y="22" width="980" height="980" rx="28"/>
+
+    <path d="M700 80c0-20 16-34 36-34 6 0 12 2 16 5 6-14 26-18 38-8 8 8 10 20 4 30 12 2 22 12 22 28 0 16-14 30-32 30h-56c-18 0-28-12-28-26z"/>
+    <path d="M860 120c0-16 14-28 30-28 6 0 10 2 14 4 4-12 22-16 32-6 8 6 8 16 4 24 10 2 18 10 18 22 0 14-12 24-26 24h-48c-14 0-24-8-24-20z"/>
+
+    <circle cx="120" cy="280" r="70"/>
+    <rect x="100" y="330" width="40" height="120" rx="14"/>
+    <path d="M200 360c30-40 80-20 70 30"/>
+    <path d="M240 300l30 80h-20z"/>
+
+    <circle cx="430" cy="220" r="64"/>
+    <circle cx="430" cy="220" r="14"/>
+    <path d="M430 156v128M366 220h128"/>
+    <circle cx="430" cy="150" r="12" fill="#111111" stroke="#111111"/>
+    <circle cx="496" cy="220" r="12" fill="#111111" stroke="#111111"/>
+    <circle cx="430" cy="290" r="12" fill="#111111" stroke="#111111"/>
+    <circle cx="364" cy="220" r="12" fill="#111111" stroke="#111111"/>
+
+    <path d="M620 260c80-20 220 20 280 80 20 80-40 120-120 100-80 40-200 10-220-60-10-40 10-100 60-120z"/>
+    <path d="M700 340h200"/>
+    <path d="M720 360v30M780 360v30M840 360v30"/>
+
+    <path d="M420 830c90 16 180 8 260-8"/>
+    <ellipse cx="820" cy="620" rx="90" ry="50"/>
+    <rect x="760" y="500" width="90" height="70" rx="20"/>
+    <ellipse cx="790" cy="530" rx="12" ry="14"/>
+    <path d="M770 555q16-16 36 0"/>
+    <circle cx="800" cy="590" r="22"/>
+    <rect x="860" y="560" width="50" height="36" rx="8"/>
+
+    <rect x="80" y="560" width="280" height="180" rx="36"/>
+    <rect x="150" y="520" width="140" height="46" rx="20"/>
+    <path d="M220 520v46"/>
+    <rect x="110" y="600" width="130" height="70" rx="16"/>
+    <ellipse cx="150" cy="632" rx="14" ry="16"/>
+    <ellipse cx="200" cy="632" rx="14" ry="16"/>
+    <path d="M140 660q30 16 70 0"/>
+    <path d="M250 640h36M268 622v36"/>
+    <rect x="250" y="690" width="90" height="22" rx="8"/>
+    <circle cx="150" cy="760" r="32"/>
+    <circle cx="150" cy="760" r="12"/>
+    <circle cx="280" cy="760" r="32"/>
+    <circle cx="280" cy="760" r="12"/>
+
+    <circle cx="160" cy="900" r="22"/>
+    <circle cx="160" cy="900" r="8"/>
+    <path d="M160 922v24"/>
+    <circle cx="860" cy="860" r="22"/>
+    <circle cx="860" cy="860" r="8"/>
+    <path d="M860 882v24"/>
+    <path d="M40 960h80M140 960h20M200 960h80"/>
+  </g>
+  <g fill="#111111">
+    <circle cx="150" cy="636" r="6"/>
+    <circle cx="200" cy="636" r="6"/>
+    <circle cx="790" cy="534" r="5"/>
+  </g>
+</svg>

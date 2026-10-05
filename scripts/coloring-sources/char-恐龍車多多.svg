@@ -2,6 +2,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
   <rect width="1024" height="1024" fill="#ffffff"/>
   <g fill="none" stroke="#111111" stroke-width="16" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="22" y="22" width="980" height="980" rx="28"/>
+
     <circle cx="118" cy="108" r="40"/>
     <path d="M118 46v16M118 154v16M56 108h16M164 108h16M72 62l12 12M152 142l12 12M164 62l-12 12M84 142l-12 12"/>
     <path d="M292 118c0-22 20-38 44-38 8 0 14 2 20 6 6-16 28-20 42-8 10 8 12 22 6 34 16 2 28 16 28 34 0 20-16 34-38 34h-70c-20 0-32-12-32-28z"/>
