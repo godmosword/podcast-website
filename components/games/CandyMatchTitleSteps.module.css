@@ -1,0 +1,125 @@
+/* 標題頁三步驟：卡寬依容器縮放（320 手機到桌機），角色圖案用 cqi 跟著卡寬走 */
+.steps {
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  width: min(100%, 432px);
+  margin: 0 0 18px;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 12px 4px 10px;
+  border: 2px solid rgba(93, 74, 103, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 6px 14px rgba(144, 116, 128, 0.1), inset 0 2px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* 步驟之間的小箭頭，落在 gap 正中 */
+.step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -11px;
+  width: 7px;
+  height: 7px;
+  border-top: 2.5px solid var(--candy-accent);
+  border-right: 2.5px solid var(--candy-accent);
+  border-radius: 1px;
+  opacity: 0.55;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.art {
+  --piece: clamp(20px, 7.4cqi, 32px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(var(--piece) + 8px);
+}
+
+.piece {
+  display: inline-block;
+  width: var(--piece);
+  height: var(--piece);
+}
+
+/* 排一排：三個並排、略為相疊，底下一條黃色光帶表示「連成一排」 */
+.row {
+  padding: 0 4px;
+  border-radius: 999px;
+  /* 卡面夜間仍是淺色，光帶用固定淺黃；--c-yellow 夜間會變暗、在淺卡上發灰 */
+  background: rgba(255, 216, 102, 0.42);
+}
+
+.row .piece + .piece {
+  margin-left: calc(var(--piece) * -0.12);
+}
+
+.swap {
+  flex: none;
+  width: calc(var(--piece) * 0.7);
+  height: calc(var(--piece) * 0.7);
+  margin: 0 1px;
+  color: var(--candy-accent);
+}
+
+.star,
+.sparkle {
+  display: inline-block;
+}
+
+.star {
+  width: calc(var(--piece) * 1.15);
+  height: calc(var(--piece) * 1.15);
+}
+
+.sparkle {
+  width: calc(var(--piece) * 0.62);
+  height: calc(var(--piece) * 0.62);
+}
+
+.sparkle:first-child {
+  align-self: flex-end;
+}
+
+.sparkle:last-child {
+  align-self: flex-start;
+}
+
+.star svg,
+.sparkle svg {
+  width: 100%;
+  height: 100%;
+}
+
+.label {
+  color: var(--candy-ink);
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 380px) {
+  .steps {
+    gap: 10px;
+  }
+
+  .step:not(:last-child)::after {
+    right: -8px;
+    width: 5px;
+    height: 5px;
+    border-width: 2px;
+  }
+
+  .label {
+    font-size: 14px;
+  }
+}

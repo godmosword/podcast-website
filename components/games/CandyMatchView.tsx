@@ -8,6 +8,7 @@ import { CandyMatchPropBar } from "@/components/games/CandyMatchPropBar";
 import { CandyMatchResult } from "@/components/games/CandyMatchResult";
 import { CandyMatchTaskBar } from "@/components/games/CandyMatchTaskBar";
 import { CandyMatchTip } from "@/components/games/CandyMatchTip";
+import { CandyMatchTitleSteps } from "@/components/games/CandyMatchTitleSteps";
 import type { GameAudioBus, OverlayProps } from "@/lib/gamekit/adapter";
 import type { CandyMatchInstance } from "@/lib/gamekit/games/candy-match/adapter";
 import {
@@ -289,7 +290,8 @@ export function CandyMatchView({
           </div>
           {/* 頁面唯一 h1 屬 GamePageShell；此處為關卡畫面標題，降為 h2 避免重複 h1。 */}
           <h2 className={styles.titleHeading}>準備找糖果！</h2>
-          <p className={styles.titleLead}>找一找、排一排、消一消，完成小任務就有星星！</p>
+          <CandyMatchTitleSteps />
+          <p className={styles.titleLead}>完成小任務，就有星星！</p>
           <div className={styles.titleActions}>
             <button type="button" className={styles.bigButton} onClick={goToMap}>
               ▶ 開始冒險

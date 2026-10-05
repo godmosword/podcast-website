@@ -104,13 +104,20 @@
   outline-offset: 2px;
 }
 
+/* 標題頁：卡片保留地圖／棋盤用的 min-height，標題內容撐滿並垂直置中，不在底部留一大塊空白 */
+.surface[data-screen="title"] {
+  display: flex;
+  flex-direction: column;
+}
+
 .titleScreen {
   display: flex;
+  flex: 1;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 300px;
-  padding: 30px 0 24px;
+  padding: 24px 0 20px;
   text-align: center;
 }
 
@@ -121,21 +128,22 @@
   margin-bottom: 18px;
 }
 
+/* 320 寬時 5 個 52px 會貼齊卡緣，跟著視窗寬縮到 40px */
 .titlePiece {
   display: inline-block;
-  width: 52px;
-  height: 52px;
+  width: clamp(40px, 13vw, 52px);
+  height: clamp(40px, 13vw, 52px);
 }
 
 .titleHeading {
-  margin: 0 0 8px;
+  margin: 0 0 18px;
   color: var(--candy-accent);
   font-size: 40px;
   font-weight: 900;
 }
 
 .titleLead {
-  margin: 0 0 26px;
+  margin: 0 0 22px;
   color: var(--candy-ink-soft);
   font-size: 15px;
   font-weight: 700;
