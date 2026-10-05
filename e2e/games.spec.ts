@@ -90,7 +90,7 @@ test.describe("遊樂園 hub", () => {
   test("390×844 完整首圖後可捲動到三個遊戲入口", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/games");
-    for (const name of ["繪本著色", "繽紛消消樂", "繽紛樂園"]) {
+    for (const name of ["繪本塗塗鴉", "車車消消樂", "方塊轉轉"]) {
       const title = page.getByText(name, { exact: true });
       await title.scrollIntoViewIfNeeded();
       await expect(title).toBeInViewport();
@@ -130,7 +130,7 @@ test.describe("遊樂園 hub", () => {
     for (const width of [320, 375, 390, 430]) {
       await page.setViewportSize({ width, height: 844 });
       await page.goto("/games");
-      for (const name of ["繪本著色", "繽紛消消樂", "繽紛樂園"]) {
+      for (const name of ["繪本塗塗鴉", "車車消消樂", "方塊轉轉"]) {
         const title = page.getByText(name, { exact: true });
         await expect(title, `${width} ${name}`).toBeVisible();
         const clipped = await title.evaluate((el) => el.scrollWidth > el.clientWidth + 1);
@@ -205,7 +205,7 @@ test.describe("遊樂園 hub", () => {
 });
 
 /** G-M7（翻 D5-A）：著色本改走同款 sticky 抬頭——隱藏全站導覽、恰好一個 h1、三個階段都只有「回遊樂園」一個出口。 */
-test.describe("繪本著色：與遊戲頁同款抬頭", () => {
+test.describe("繪本塗塗鴉：與遊戲頁同款抬頭", () => {
   test("隱藏全站導覽、一個 h1、三階段皆有回遊樂園、無回封面", async ({ page }) => {
     await page.setViewportSize(PHONE);
     await page.goto("/games/coloring-book");
@@ -234,7 +234,7 @@ test.describe("繪本著色：與遊戲頁同款抬頭", () => {
 });
 
 /** G-H1／G-H2：真實手機高度（Safari 有工具列）方塊井要玩得了，井底＋觸控鍵同屏。 */
-test.describe("繽紛樂園：手機井尺寸", () => {
+test.describe("方塊轉轉：手機井尺寸", () => {
   test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 664 } });
 
   test("390×664：格子 ≥ 25px、井底與觸控鍵同屏、觸控鍵 ≥ 44px", async ({ page }) => {

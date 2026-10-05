@@ -47,7 +47,7 @@ describe("games v2 presentation metadata", () => {
     }
   });
 
-  test("入口第一張卡是繽紛消消樂", () => {
+  test("入口第一張卡是車車消消樂", () => {
     expect(GAMES[0]?.slug).toBe("candy-match");
   });
 });

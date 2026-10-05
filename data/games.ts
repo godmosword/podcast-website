@@ -46,7 +46,7 @@ export type GameMeta = {
 export const GAMES: GameMeta[] = [
   {
     slug: "candy-match",
-    title: "繽紛消消樂",
+    title: "車車消消樂",
     desc: "小朋友的第一款消除遊戲：找一找、排一排、消一消，完成繽紛任務！",
     teaser: "找一樣",
     href: "/games/candy-match",
@@ -62,7 +62,7 @@ export const GAMES: GameMeta[] = [
     art: {
       cover: "/games/v2/candy-match/cover.webp",
       thumbnail: "/games/v2/candy-match/cover.webp",
-      alt: "粉紅黏土遊樂園裡的繽紛消消樂方塊與車車",
+      alt: "粉紅黏土遊樂園裡的車車消消樂方塊與車車",
     },
     tutorial: [
       { text: "點兩個相鄰的圖案", gesture: "tap" },
@@ -72,7 +72,7 @@ export const GAMES: GameMeta[] = [
   },
   {
     slug: "block-drop",
-    title: "繽紛樂園",
+    title: "方塊轉轉",
     desc: "黏土糖果風落下方塊，排滿整行就消除。",
     teaser: "排一排",
     href: "/games/block-drop",
@@ -99,7 +99,7 @@ export const GAMES: GameMeta[] = [
   },
   {
     slug: "coloring-book",
-    title: "繪本著色",
+    title: "繪本塗塗鴉",
     desc: "選一臺車車或一個故事畫面，先用蠟筆塗塗看，再用填滿把整塊塗上顏色！",
     teaser: "塗一塗",
     href: "/games/coloring-book",

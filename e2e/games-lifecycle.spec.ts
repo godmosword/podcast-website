@@ -335,9 +335,9 @@ test.describe("遊戲第二輪 P2 mobile regression", () => {
     for (const width of NARROW_WIDTHS) {
       await page.setViewportSize({ width, height: 844 });
       await page.goto("/games/candy-match");
-      const title = page.getByRole("heading", { name: "繽紛消消樂" });
+      const title = page.getByRole("heading", { name: "車車消消樂" });
       await expect(title).toBeVisible();
-      await expect(title).toContainText("繽紛消消樂");
+      await expect(title).toContainText("車車消消樂");
       await expect(title).toHaveCSS("white-space", "normal");
     }
   });
@@ -349,8 +349,8 @@ test.describe("遊戲第二輪 P2 mobile regression", () => {
     // ready 面不再有難度／模式 radio（兒童減法審：孩子讀不懂，家長走齒輪）
     await expect(page.getByRole("radio")).toHaveCount(0);
     await page.getByRole("button", { name: "遊戲設定" }).click();
-    await expect(page.getByRole("radiogroup", { name: "繽紛樂園難度" })).toBeVisible();
-    await expect(page.getByRole("radiogroup", { name: "繽紛樂園特殊模式" })).toBeVisible();
+    await expect(page.getByRole("radiogroup", { name: "方塊轉轉難度" })).toBeVisible();
+    await expect(page.getByRole("radiogroup", { name: "方塊轉轉特殊模式" })).toBeVisible();
   });
 
   test("Coloring mobile toolbar 可橫向探索、保留 active tool 與 44px touch target", async ({ page }) => {

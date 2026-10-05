@@ -140,7 +140,7 @@ export default function ColoringBook() {
         });
       }}
     >
-      <ColoringPageShell title="繪本著色">
+      <ColoringPageShell title="繪本塗塗鴉">
         {message ? <p role="status">{message}</p> : null}
         {body}
       </ColoringPageShell>

@@ -2353,7 +2353,7 @@ export function BlockDropView({
                   )}
                 </div>
                 <div style={{ fontSize: 22, fontWeight: 900 }}>
-                  {g.status === "paused" ? "暫停中" : "繽紛樂園"}
+                  {g.status === "paused" ? "暫停中" : "方塊轉轉"}
                 </div>
                 {g.status === "ready" && (
                   <GameResultActions

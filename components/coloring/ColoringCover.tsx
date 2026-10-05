@@ -13,11 +13,11 @@ type ColoringCoverProps = {
 /** 繪本著色封面開場：品牌＋一句話＋單一 CTA＋封面主視覺。 */
 export function ColoringCover({ onOpen, recent }: ColoringCoverProps) {
   return (
-    <section className={styles.root} aria-label="繪本著色封面">
+    <section className={styles.root} aria-label="繪本塗塗鴉封面">
       <div className={styles.hero} aria-hidden={false}>
         <Image
           src="/games/v2/coloring-book/cover.webp"
-          alt="小紅賽車定裝照，繪本著色封面"
+          alt="小紅賽車定裝照，繪本塗塗鴉封面"
           fill
           priority
           sizes="(max-width: 720px) 100vw, 720px"

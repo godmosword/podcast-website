@@ -212,7 +212,7 @@ test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   await expect(drawerNav.getByRole("link", { name: "主題分類" })).toHaveCount(0);
   await expect(drawerNav.getByRole("link", { name: "角色圖鑑" })).toBeVisible();
   await expect(drawerNav.getByRole("link", { name: "遊樂園" })).toBeVisible();
-  await expect(drawerNav.getByRole("link", { name: "繪本著色" })).toHaveCount(0);
+  await expect(drawerNav.getByRole("link", { name: "繪本塗塗鴉" })).toHaveCount(0);
   const drawerParentGuide = drawerNav.getByRole("link", { name: "親子指南" });
   await expect(drawerParentGuide).toBeVisible();
   await expect(drawerParentGuide).toHaveAttribute("href", /\/for-parents/);
@@ -351,9 +351,9 @@ test("遊樂園 v2 入口與遊戲卡片", async ({ page }) => {
   await page.goto("/games");
   await expect(page.getByRole("heading", { name: "車車遊樂園" })).toBeAttached();
   await expect(page.getByRole("heading", { name: "園裡的站" })).toHaveCount(0);
-  await expect(page.getByRole("link", { name: /繽紛消消樂.*開始玩/ })).toBeVisible();
-  await expect(page.getByRole("link", { name: /繽紛樂園.*開始玩/ })).toBeVisible();
-  await expect(page.getByRole("link", { name: /繪本著色.*開始玩/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /車車消消樂.*開始玩/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /方塊轉轉.*開始玩/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /繪本塗塗鴉.*開始玩/ })).toBeVisible();
 });
 
 test("關於頁面", async ({ page }) => {
@@ -421,7 +421,7 @@ test("首頁 Hero 不含節目數據入口", async ({ page }) => {
   await expect(header.getByRole("link", { name: "節目數據" })).toHaveCount(0);
 });
 
-test("繽紛樂園（Block Drop）頁面可載入", async ({ page }) => {
+test("方塊轉轉（Block Drop）頁面可載入", async ({ page }) => {
   await page.goto("/games/block-drop");
   await expect(page.getByRole("link", { name: "回遊樂園" })).toBeVisible();
   await expect(page.getByLabel(/^分數 /)).toBeVisible({ timeout: 15_000 });
@@ -466,9 +466,9 @@ test("家庭儀表板頁面可載入", async ({ page }) => {
   await expect(main.getByLabel("家長安心資訊")).toBeVisible();
 });
 
-test("繽紛消消樂：標題 → 地圖 → 第 1 關棋盤", async ({ page }) => {
+test("車車消消樂：標題 → 地圖 → 第 1 關棋盤", async ({ page }) => {
   await page.goto("/games/candy-match");
-  await expect(page.getByRole("heading", { name: "繽紛消消樂" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "車車消消樂" })).toBeVisible();
   await page.getByRole("button", { name: /開始冒險/ }).click();
   await expect(page.getByText("遊樂園地圖")).toBeVisible();
   await page.locator('button[data-next="true"]').click();

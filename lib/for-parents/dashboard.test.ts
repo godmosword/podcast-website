@@ -59,7 +59,7 @@ describe("buildParentDashboardSnapshot", () => {
     expect(snap.gamesPlayedCount).toBe(1);
     expect(snap.totalMedalStars).toBe(5);
     expect(snap.profileStars).toBe(4);
-    expect(snap.stickerLabels).toContain("玩過繽紛樂園");
+    expect(snap.stickerLabels).toContain("玩過方塊轉轉");
     expect(snap.games.find((g) => g.gameId === "block-drop")?.played).toBe(
       true,
     );

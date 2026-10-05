@@ -20,7 +20,7 @@ type ColoringPageShellProps = {
  */
 export function ColoringPageShell({
   children,
-  title = "繪本著色",
+  title = "繪本塗塗鴉",
 }: ColoringPageShellProps) {
   return (
     <GamePlayChromeProvider>

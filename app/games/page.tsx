@@ -13,11 +13,11 @@ export const metadata: Metadata = {
   // 「車車遊樂園 · 車車遊樂園」。用導覽列同一個詞「遊樂園」。
   title: "遊樂園",
   description:
-    "和故事裡的車車朋友一起玩小遊戲：繽紛消消樂、繪本著色與繽紛樂園，適合 3–12 歲親子。",
+    "和故事裡的車車朋友一起玩小遊戲：車車消消樂、繪本塗塗鴉與方塊轉轉，適合 3–12 歲親子。",
   alternates: { canonical: "/games" },
   openGraph: {
     title: "車車遊樂園 · 小遊戲",
-    description: "黏土風親子小遊戲與繪本著色，一起探索車車遊樂園。",
+    description: "黏土風親子小遊戲與繪本塗塗鴉，一起探索車車遊樂園。",
     url: `${getSiteUrl()}/games`,
   },
 };

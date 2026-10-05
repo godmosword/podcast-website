@@ -20,7 +20,7 @@ describe("GameEndStation", () => {
 
     expect(html).toContain("好厲害！");
     expect(html).toContain('aria-label="再玩一次"');
-    expect(html).toContain('aria-label="去玩：繪本著色"');
+    expect(html).toContain('aria-label="去玩：繪本塗塗鴉"');
     // 去下一站＝下一款的縮圖（孩子看得出按了會去哪），不是抽象箭頭
     expect(html).toContain('src="/games/v2/coloring-book/');
     expect(html).toContain("回遊樂園");

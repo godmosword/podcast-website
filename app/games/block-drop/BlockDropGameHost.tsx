@@ -10,7 +10,7 @@ export default function BlockDropGameHost() {
   return (
     <GameHost
       adapter={blockDropAdapter}
-      title="繽紛樂園"
+      title="方塊轉轉"
       tutorial={BLOCK_DROP_META?.tutorial ?? []}
     />
   );

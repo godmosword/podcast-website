@@ -170,7 +170,7 @@ describe("SiteNavBar", () => {
     ]) {
       expect(html).toContain(label);
     }
-    expect(html).not.toContain("繪本著色");
+    expect(html).not.toContain("繪本塗塗鴉");
     expect(html).not.toContain("主題分類");
     expect(html).not.toContain("指南首頁");
     expect(html).not.toContain("聯絡我們");
@@ -323,7 +323,7 @@ describe("SiteNavBar", () => {
     ]) {
       expect(view.getAllByText(label).length).toBeGreaterThan(0);
     }
-    expect(view.queryByText("繪本著色")).toBeNull();
+    expect(view.queryByText("繪本塗塗鴉")).toBeNull();
     expect(view.queryByText("主題分類")).toBeNull();
     expect(view.queryByText("育兒專欄")).toBeNull();
     expect(view.queryByText("聯絡我們")).toBeNull();

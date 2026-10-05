@@ -10,7 +10,7 @@ export default function CandyMatchGameHost() {
   return (
     <GameHost
       adapter={candyMatchAdapter}
-      title="繽紛消消樂"
+      title="車車消消樂"
       tutorial={CANDY_MATCH_META?.tutorial ?? []}
     />
   );

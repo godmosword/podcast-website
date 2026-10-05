@@ -7,11 +7,11 @@ import { gameBySlug } from "@/data/games";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  title: "繽紛樂園",
+  title: "方塊轉轉",
   description: "黏土風落下方塊小遊戲，排滿整行就有糖果般的消除回饋。",
   alternates: { canonical: "/games/block-drop" },
   openGraph: {
-    title: "繽紛樂園 · 車車遊樂園",
+    title: "方塊轉轉 · 車車遊樂園",
     description: "黏土風落下方塊小遊戲，排滿整行就有糖果般的消除回饋。",
     url: `${getSiteUrl()}/games/block-drop`,
   },
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function BlockDropPage() {
   return (
-    <GamePageShell title="繽紛樂園" gameId="block-drop">
+    <GamePageShell title="方塊轉轉" gameId="block-drop">
       <JsonLd data={videoGameJsonLd(gameBySlug("block-drop"))} />
       <BlockDropGameHost />
     </GamePageShell>

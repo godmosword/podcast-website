@@ -542,7 +542,7 @@ describe("videoGameJsonLd", () => {
   it("輸出 VideoGame，網址與圖片皆為絕對路徑", () => {
     const data = videoGameJsonLd(gameBySlug("candy-match"));
     expect(data["@type"]).toBe("VideoGame");
-    expect(data.name).toBe("繽紛消消樂");
+    expect(data.name).toBe("車車消消樂");
     expect(String(data.url)).toMatch(/^https?:\/\/.+\/games\/candy-match$/);
     expect(String(data.image)).toMatch(/^https?:\/\//);
     expect(data.typicalAgeRange).toBe("3-7");
