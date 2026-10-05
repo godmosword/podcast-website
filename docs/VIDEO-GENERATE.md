@@ -2,6 +2,8 @@
 
 多一條影片，不取代 podcast。聲音仍用該集的 `audio.mp3`。Apple、Spotify、RSS 都不動。
 
+這份是生片路，這一輪不做。現在要做的出片路是用現有插圖接片，見 [VIDEO-STILL.md](./VIDEO-STILL.md)。
+
 適用對象是**已經全幕上線**的集：`pageCount > 1`，而且 `data/scenes/<slug>.json` 與 `public/stories/<slug>/NN.jpg` 都在。`pageCount = 1` 的單張封面不走這份；那種集仍用 [VIDEO-EXPORT.md](./VIDEO-EXPORT.md) 的單圖匯出。
 
 `<slug>` 換成該集代號。這份不指定哪一集先做。
@@ -23,7 +25,7 @@
 2. 匯出時只用審過的片段。片段結尾淡回該幕插圖，停在插圖直到該幕 `end`。沒有片段的幕維持靜圖。整支影片只用一種墊邊顏色。
 3. 旁路檔 `data/youtube-ids.ts` 以 slug 對應 YouTube 影片編號。有非空編號，`/story/<slug>/play` 才嵌 `youtube-nocookie.com`。沒有編號就維持 `StoryPlayer`。
 
-片段生成與「匯出改接片段」都還沒有 CLI。在那兩段落地之前，`npm run export:video -- <slug>` 仍然只出靜圖。
+片段生成與「匯出改接片段」都還沒有 CLI。在那兩段落地之前，`npm run export:video -- <slug>` 仍然只出靜圖。這一輪要改的靜圖匯出規格在 [VIDEO-STILL.md](./VIDEO-STILL.md)，不在這份裡先加生片。
 
 ## 步驟
 
@@ -223,6 +225,7 @@ npm run export:video -- <slug>
 
 ## 相關文件
 
+- [VIDEO-STILL.md](./VIDEO-STILL.md) — 這一輪要做的：用現有插圖接片
 - [VIDEO-EXPORT.md](./VIDEO-EXPORT.md) — 現有靜圖 mp4 匯出
 - [EPISODE-WORKFLOW.md](./EPISODE-WORKFLOW.md) — 全幕插圖與校對閘門
 - [SUBTITLE-PROOFREAD.md](./SUBTITLE-PROOFREAD.md) — `--mark`
