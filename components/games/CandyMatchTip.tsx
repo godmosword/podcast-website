@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { IconBroom, IconRainbow, IconTap } from "@/components/games/ClayIcons";
+import { IconBroom, IconRainbow, IconSparkle, IconTap } from "@/components/games/ClayIcons";
 import type { CandyMatchTipId } from "@/lib/gamekit/progress/candy-match-prefs";
 import styles from "./CandyMatchPlay.module.css";
 
@@ -12,6 +12,7 @@ const TIPS: Record<CandyMatchTipId, { icon: ReactNode; text: (selected: boolean)
   },
   row: { icon: <IconBroom size={22} />, text: () => "四個一樣 → 掃把糖：換一下就掃掉一整排！" },
   color: { icon: <IconRainbow size={22} />, text: () => "五個一樣 → 彩虹糖：換一下就收走同一種！" },
+  burst: { icon: <IconSparkle size={22} />, text: () => "轉個彎排在一起 → 爆炸糖：換一下就炸掉周圍！" },
 };
 
 type CandyMatchTipProps = {

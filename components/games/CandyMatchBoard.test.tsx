@@ -183,6 +183,27 @@ describe("CandyMatchBoard pointer capture", () => {
     ).toBe("2");
   });
 
+  it("爆炸糖顯示徽章", () => {
+    const board = makeBoard();
+    board.specials[0] = "burst";
+    render(
+      <CandyMatchBoard
+        board={board}
+        cellPx={48}
+        selected={null}
+        hint={null}
+        popping={new Set()}
+        shaking={new Set()}
+        disabled={false}
+        onTapCell={vi.fn()}
+        onSwipeCell={vi.fn()}
+      />,
+    );
+    const cell = screen.getByRole("button", { name: /爆炸糖/ });
+    expect(cell.getAttribute("data-special")).toBe("burst");
+    expect(cell.textContent).toContain("💥");
+  });
+
   it("掃把糖顯示徽章；reduced 不標 data-sweep", () => {
     const board = makeBoard();
     board.specials[0] = "row";

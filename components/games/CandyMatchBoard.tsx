@@ -15,6 +15,7 @@ import {
   DROP_ITEM,
   emptySpecials,
   type BoardState,
+  type CandySweepKind,
 } from "@/lib/games/candy-match/engine";
 import {
   CANDY_MATCH_BOARD_PADDING,
@@ -36,7 +37,7 @@ export type CandyMatchBoardMotion = {
   swap?: { a: number; b: number } | null;
   falls?: readonly CandyFallMotion[] | null;
   reduced?: boolean;
-  sweep?: "row" | "color" | null;
+  sweep?: CandySweepKind | null;
   /** K-7：連擊時整盤車車跳一下 */
   cheer?: boolean;
 };
@@ -247,8 +248,10 @@ export function CandyMatchBoard({
             : v >= 0
               ? CANDY_MATCH_PIECES[v]?.name ?? "圖案"
               : "空格";
-          const specialKind = specials[i] === "row" || specials[i] === "color" ? specials[i] : null;
-          const specialName = specialKind === "row" ? "掃把糖" : specialKind === "color" ? "彩虹糖" : "";
+          const specialKind =
+            specials[i] === "row" || specials[i] === "color" || specials[i] === "burst" ? specials[i] : null;
+          const specialName =
+            specialKind === "row" ? "掃把糖" : specialKind === "color" ? "彩虹糖" : specialKind === "burst" ? "爆炸糖" : "";
           const swapPeer = swap
             ? i === swap.a
               ? swap.b
@@ -377,7 +380,7 @@ export function CandyMatchBoard({
                 {v === DROP_ITEM ? <PieceGift size="100%" /> : v >= 0 ? <PieceArt piece={v} size="100%" /> : null}
                 {specialKind ? (
                   <span className={styles.specialBadge} aria-hidden>
-                    {specialKind === "row" ? "🧹" : "🌈"}
+                    {specialKind === "row" ? "🧹" : specialKind === "color" ? "🌈" : "💥"}
                   </span>
                 ) : null}
                 {v === DROP_ITEM ? (

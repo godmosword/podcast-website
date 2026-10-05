@@ -8,6 +8,7 @@ import { createBoard, reshuffle } from "@/lib/games/candy-match/board-gen";
 import {
   addWaveEvents,
   areAdjacent,
+  CANDY_COMBO_MS,
   CANDY_FALL_MS,
   CANDY_POP_MS,
   CANDY_SWAP_MS,
@@ -21,7 +22,9 @@ import {
   swapped,
   swappedSpecials,
   type BoardState,
+  type CandyComboKind,
   type CandyFallMotion,
+  type CandySweepKind,
   type ResolveEvents,
   type Rng,
   type SettlePhase,
@@ -57,7 +60,7 @@ export type CandyPlaySnapshot = {
 export type CandyMotion = {
   swap: CandyMove | null;
   falls: readonly CandyFallMotion[] | null;
-  sweep: "row" | "color" | null;
+  sweep: CandySweepKind | null;
 };
 
 type Options = {
@@ -87,6 +90,11 @@ const CHEER_INVALID = ["再找找看！", "要三個一樣喔", "換別的試試
 const CHEER_WIN = ["任務完成！", "耶！做到了！"];
 const CHEER_SOFT = "找找三個一樣的圖案！";
 const CHEER_HINT = "看看發光的地方！";
+const COMBO_LINE: Record<CandyComboKind, string> = {
+  cross: "掃把碰掃把，十字掃乾淨！",
+  "color-brooms": "彩虹碰到掃把，同色都變掃把！",
+  "clear-board": "兩顆彩虹，整盤一起收！",
+};
 
 /**
  * 視覺回歸用：測試在載入前設 `window.__candyMatchSeed`，棋盤生成與補格改用固定 seed。
@@ -340,9 +348,28 @@ export function useCandyMatchPlay(options: Options) {
         const wave = stepWave(state, kinds, rngRef.current, first ? waveOptions : {});
         first = false;
         if (!wave) break;
+        if (wave.combo) {
+          setMessage(COMBO_LINE[wave.combo.kind]);
+          if (!reducedRef.current) {
+            if (wave.combo.kind === "color-brooms" && wave.combo.becomeRow.length > 0) {
+              const specials = state.specials.slice();
+              for (const i of wave.combo.becomeRow) specials[i] = "row";
+              commit({ board: { ...state, specials } });
+            }
+            await sleep(CANDY_COMBO_MS);
+            if (token !== tokenRef.current) return;
+          }
+        }
         const n = events.waves + 1;
+        const sweep: CandySweepKind | null = wave.combo
+          ? wave.combo.kind === "cross"
+            ? "cross"
+            : wave.combo.kind === "clear-board"
+              ? "board"
+              : "row"
+          : (wave.detonated[0] ?? null);
         setPopping(new Set(wave.cleared));
-        setMotion((m) => ({ ...m, sweep: reducedRef.current ? null : wave.detonated[0] ?? null }));
+        setMotion((m) => ({ ...m, sweep: reducedRef.current ? null : sweep }));
         if (wave.detonated.length > 0 || n >= 2) setCheer(true);
         optsRef.current.tone(523 + n * 110, 0.12, "triangle", 0.06);
         await motionSleep(CANDY_POP_MS);

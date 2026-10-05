@@ -355,19 +355,118 @@ describe("特殊糖", () => {
     expect(cleared).toEqual(new Set([0, 2, 4]));
   });
 
-  it("雙特殊糖相換：先掃把再彩虹", () => {
+  it("L 形留下爆炸糖，留在交換到的那一格", () => {
+    const pieces = [
+      0, 0, 0, 1,
+      0, 2, 3, 2,
+      0, 3, 1, 2,
+    ];
+    expect(planSpecialSpawns(pieces, 4, 3, [2])).toEqual([{ index: 2, kind: "burst" }]);
+  });
+
+  it("T 的長臂即使有四連，仍是爆炸糖而不是掃把", () => {
+    const pieces = [
+      0, 0, 0, 0,
+      2, 0, 1, 2,
+      3, 0, 2, 1,
+    ];
+    expect(planSpecialSpawns(pieces, 4, 3)).toEqual([{ index: 0, kind: "burst" }]);
+  });
+
+  it("五連即使多一條轉彎，仍是彩虹糖", () => {
+    const pieces = [
+      0, 0, 0, 0, 0,
+      1, 0, 2, 1, 2,
+      2, 0, 1, 2, 1,
+    ];
+    expect(planSpecialSpawns(pieces, 5, 3, [2])).toEqual([{ index: 2, kind: "color" }]);
+  });
+
+  it("爆炸糖清掉周圍 3×3，禮物不消", () => {
     const pieces = [
       0, 1, 2, 3,
-      1, 0, 1, 2,
+      1, 0, 2, 3,
+      2, 3, DROP_ITEM, 0,
     ];
-    const specials: CandySpecial[] = emptySpecials(8);
+    const specials: CandySpecial[] = emptySpecials(12);
+    specials[5] = "burst";
+    const cleared = expandClearsWithSpecials(pieces, specials, [5], 4);
+    expect(cleared).toEqual(new Set([0, 1, 2, 4, 5, 6, 8, 9]));
+  });
+
+  it("掃把＋掃把是十字，不是只掃兩排", () => {
+    const pieces = [
+      0, 1, 2, 3,
+      1, 2, 3, 0,
+      2, 3, 0, 1,
+    ];
+    const specials: CandySpecial[] = emptySpecials(12);
+    specials[0] = "row";
+    specials[1] = "row";
+    const wave = planWaveClears(pieces, specials, 4, 3, [0, 1], [0, 1], false);
+    expect(wave.combo).toEqual({ kind: "cross", becomeRow: [] });
+    expect(wave.clear).toEqual(new Set([0, 1, 2, 3, 4, 5, 8, 9]));
+    expect(wave.detonated).toEqual(["row", "row"]);
+  });
+
+  it("掃把＋彩虹：同色先變掃把，再掃掉那些排", () => {
+    const pieces = [
+      2, 1, 0,
+      3, 2, 1,
+      0, 3, 4,
+    ];
+    const specials: CandySpecial[] = emptySpecials(9);
     specials[0] = "row";
     specials[1] = "color";
-    const wave = planWaveClears(pieces, specials, 4, 2, [0, 1], [0, 1], false);
-    expect(wave.detonated[0]).toBe("row");
-    expect(wave.detonated).toContain("color");
-    expect(wave.clear.has(0)).toBe(true);
-    expect(wave.clear.has(1)).toBe(true);
+    const wave = planWaveClears(pieces, specials, 3, 3, [0, 1], [0, 1], false);
+    expect(wave.combo).toEqual({ kind: "color-brooms", becomeRow: [0, 4] });
+    expect(wave.clear).toEqual(new Set([0, 1, 2, 3, 4, 5]));
+    expect(wave.detonated).toEqual(["row", "color"]);
+  });
+
+  it("彩虹＋彩虹清掉可消除格，禮物留著", () => {
+    const pieces = [
+      0, 1, 2,
+      1, DROP_ITEM, 0,
+      2, 0, 1,
+    ];
+    const specials: CandySpecial[] = emptySpecials(9);
+    specials[0] = "color";
+    specials[1] = "color";
+    const wave = planWaveClears(pieces, specials, 3, 3, [0, 1], [0, 1], false);
+    expect(wave.combo?.kind).toBe("clear-board");
+    expect(wave.clear.has(4)).toBe(false);
+    expect(wave.clear.size).toBe(8);
+    expect(wave.detonated).toEqual(["color", "color"]);
+  });
+
+  it("道具只清指定格，不會把兩顆掃把當成十字", () => {
+    const pieces = [
+      0, 1, 2, 3,
+      1, 2, 3, 0,
+      2, 3, 0, 1,
+    ];
+    const specials: CandySpecial[] = emptySpecials(12);
+    specials[0] = "row";
+    specials[1] = "row";
+    const wave = planWaveClears(pieces, specials, 4, 3, [0, 1], [], true);
+    expect(wave.combo).toBeUndefined();
+    expect(wave.clear).toEqual(new Set([0, 1, 2, 3]));
+  });
+
+  it("做出來的爆炸糖留在盤上，這一波不引爆", () => {
+    const pieces = [
+      0, 0, 0, 1,
+      0, 2, 3, 2,
+      0, 3, 1, 2,
+    ];
+    const specials = emptySpecials(12);
+    const wave = planWaveClears(pieces, specials, 4, 3, undefined, [2]);
+    expect(wave.spawns).toEqual([{ index: 2, kind: "burst" }]);
+    expect(wave.clear.has(2)).toBe(false);
+    expect(wave.detonated).toEqual([]);
+    const cleared = clearCells(pieces, Array(12).fill(false), wave.clear, 4, specials);
+    expect(applySpecialSpawns(cleared.specials, wave.spawns)[2]).toBe("burst");
   });
 
   it("特殊糖與鄰格交換不必先湊三連", () => {

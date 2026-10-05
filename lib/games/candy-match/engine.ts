@@ -9,8 +9,20 @@ export const DROP_ITEM = -2;
 
 export type Rng = () => number;
 
-/** 棋盤特殊糖：4 連掃把（消一排）、5 連彩虹（消同色）。 */
-export type CandySpecial = "none" | "row" | "color";
+/** 棋盤特殊糖：4 連掃把（消一排）、5 連彩虹（消同色）、L/T 爆炸糖（周圍 3×3）。 */
+export type CandySpecial = "none" | "row" | "color" | "burst";
+
+/** 兩顆特殊糖相換才有的組合。掃把＋爆炸糖仍走各自引爆，不另造一句新規則。 */
+export type CandyComboKind = "cross" | "color-brooms" | "clear-board";
+
+export type CandyCombo = {
+  kind: CandyComboKind;
+  /** 掃把＋彩虹：結算前先變成掃把的格子（不含彩虹那格）。 */
+  becomeRow: number[];
+};
+
+/** 消除演出種類：特殊糖本身，或組合的十字／清盤。 */
+export type CandySweepKind = Exclude<CandySpecial, "none"> | "cross" | "board";
 
 export type SpecialSpawn = {
   index: number;
@@ -238,7 +250,7 @@ export function findHintMove(
   return null;
 }
 
-/** 找一步能做出特殊糖（四連以上）的交換；無則 null。 */
+/** 找一步能做出直線特殊糖（四連以上）的交換；無則 null。L/T 不在這裡，開局仍先教掃把。 */
 export function findSpecialMove(
   pieces: number[],
   cols: number,
@@ -252,30 +264,118 @@ export function findSpecialMove(
   return null;
 }
 
+function runDirection(cells: readonly number[]): "h" | "v" {
+  return cells.length >= 2 && cells[1]! - cells[0]! === 1 ? "h" : "v";
+}
+
+/**
+ * 一連線一個特殊糖。五連優先於交叉；交叉（L/T，含其中一臂是四連）留下爆炸糖；
+ * 單純四連留下掃把。特殊糖留在交換格（preferCells），讓孩子看見是自己做出來的。
+ */
 export function planSpecialSpawns(
   pieces: number[],
   cols: number,
   rows: number,
   preferCells: readonly number[] = [],
 ): SpecialSpawn[] {
-  const runs = findMatchRuns(pieces, cols, rows).filter((run) => run.length >= 4);
+  const runs = findMatchRuns(pieces, cols, rows);
+  const parent = runs.map((_, i) => i);
+  const find = (i: number): number => (parent[i] === i ? i : (parent[i] = find(parent[i]!)));
+  const unite = (a: number, b: number) => {
+    const pa = find(a);
+    const pb = find(b);
+    if (pa !== pb) parent[pa] = pb;
+  };
+  const owner = new Map<number, number>();
+  runs.forEach((run, i) => {
+    for (const cell of run.cells) {
+      const prev = owner.get(cell);
+      if (prev == null) owner.set(cell, i);
+      else unite(prev, i);
+    }
+  });
+  const groups = new Map<number, number[]>();
+  runs.forEach((_, i) => {
+    const root = find(i);
+    const list = groups.get(root);
+    if (list) list.push(i);
+    else groups.set(root, [i]);
+  });
+
   const spawns: SpecialSpawn[] = [];
   const used = new Set<number>();
-  for (const run of runs) {
-    const kind: Exclude<CandySpecial, "none"> = run.length >= 5 ? "color" : "row";
-    const preferred = preferCells.find((cell) => run.cells.includes(cell) && !used.has(cell));
-    const fallback = run.cells.find((cell) => !used.has(cell));
-    const index = preferred ?? fallback;
+  for (const indexes of groups.values()) {
+    let maxLen = 0;
+    let hasH = false;
+    let hasV = false;
+    const cells: number[] = [];
+    const seen = new Set<number>();
+    for (const i of indexes) {
+      const run = runs[i]!;
+      maxLen = Math.max(maxLen, run.length);
+      if (runDirection(run.cells) === "h") hasH = true;
+      else hasV = true;
+      for (const cell of run.cells) {
+        if (seen.has(cell)) continue;
+        seen.add(cell);
+        cells.push(cell);
+      }
+    }
+    const kind: Exclude<CandySpecial, "none"> | null =
+      maxLen >= 5 ? "color" : hasH && hasV ? "burst" : maxLen >= 4 ? "row" : null;
+    if (!kind) continue;
+    const preferred = preferCells.find((cell) => seen.has(cell) && !used.has(cell));
+    const index = preferred ?? cells.find((cell) => !used.has(cell));
     if (index == null) continue;
     used.add(index);
-    const existing = spawns.find((spawn) => spawn.index === index);
-    if (existing) {
-      if (kind === "color") existing.kind = "color";
-    } else {
-      spawns.push({ index, kind });
-    }
+    spawns.push({ index, kind });
   }
   return spawns;
+}
+
+function boardRows(pieces: number[], cols: number): number {
+  return cols > 0 ? Math.floor(pieces.length / cols) : 0;
+}
+
+/** 爆炸糖：以自身為中心的 3×3，超出棋盤的部分不算，禮物與空格不消。 */
+function burstCells(pieces: number[], origin: number, cols: number): number[] {
+  const rows = boardRows(pieces, cols);
+  const col = origin % cols;
+  const row = Math.floor(origin / cols);
+  const out: number[] = [];
+  for (let dr = -1; dr <= 1; dr++) {
+    for (let dc = -1; dc <= 1; dc++) {
+      const nc = col + dc;
+      const nr = row + dr;
+      if (nc < 0 || nr < 0 || nc >= cols || nr >= rows) continue;
+      const i = idx(nc, nr, cols);
+      if (pieces[i] >= 0) out.push(i);
+    }
+  }
+  return out;
+}
+
+/** 掃把＋掃把：兩顆所在的橫排與直欄組成十字。 */
+function crossCells(pieces: number[], a: number, b: number, cols: number): number[] {
+  const rows = boardRows(pieces, cols);
+  const rowSet = new Set([Math.floor(a / cols), Math.floor(b / cols)]);
+  const colSet = new Set([a % cols, b % cols]);
+  const out: number[] = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (!rowSet.has(r) && !colSet.has(c)) continue;
+      const i = idx(c, r, cols);
+      if (pieces[i] >= 0) out.push(i);
+    }
+  }
+  return out;
+}
+
+function specialRank(kind: CandySpecial): number {
+  if (kind === "burst") return 0;
+  if (kind === "row") return 1;
+  if (kind === "color") return 2;
+  return 3;
 }
 
 export function cellsClearedBySpecial(
@@ -285,10 +385,11 @@ export function cellsClearedBySpecial(
   cols: number,
 ): number[] {
   const kind = specials[origin];
-  if (kind === "none") return [];
-  const out: number[] = [];
+  if (kind === "none" || kind == null) return [];
+  if (kind === "burst") return burstCells(pieces, origin, cols);
   if (kind === "row") {
     const row = Math.floor(origin / cols);
+    const out: number[] = [];
     for (let c = 0; c < cols; c++) {
       const i = idx(c, row, cols);
       if (pieces[i] >= 0) out.push(i);
@@ -296,7 +397,8 @@ export function cellsClearedBySpecial(
     return out;
   }
   const color = pieces[origin];
-  if (color < 0) return out;
+  if (color < 0) return [];
+  const out: number[] = [];
   pieces.forEach((piece, i) => {
     if (piece === color) out.push(i);
   });
@@ -309,14 +411,12 @@ export function expandClearsWithSpecials(
   initial: Iterable<number>,
   cols: number,
 ): Set<number> {
-  const rank = (i: number): number =>
-    specials[i] === "row" ? 0 : specials[i] === "color" ? 1 : 2;
   const out = new Set(initial);
   const queue = [...out];
   while (queue.length > 0) {
-    queue.sort((a, b) => rank(a) - rank(b));
+    queue.sort((a, b) => specialRank(specials[a] ?? "none") - specialRank(specials[b] ?? "none"));
     const i = queue.shift();
-    if (i == null || specials[i] === "none") continue;
+    if (i == null || specials[i] === "none" || specials[i] == null) continue;
     for (const j of cellsClearedBySpecial(pieces, specials, i, cols)) {
       if (!out.has(j)) {
         out.add(j);
@@ -325,6 +425,87 @@ export function expandClearsWithSpecials(
     }
   }
   return out;
+}
+
+function comboKind(a: CandySpecial, b: CandySpecial): CandyComboKind | null {
+  const key = [a, b].sort().join("+");
+  if (key === "row+row") return "cross";
+  if (key === "color+row") return "color-brooms";
+  if (key === "color+color") return "clear-board";
+  return null;
+}
+
+/** 玩家把兩顆相鄰特殊糖換在一起時才成立；道具與連鎖引爆不走這裡。 */
+function readCombo(
+  extraCells: Iterable<number> | undefined,
+  specials: CandySpecial[],
+  cols: number,
+): { a: number; b: number; kind: CandyComboKind } | null {
+  if (!extraCells) return null;
+  const cells = [...new Set(extraCells)];
+  if (cells.length !== 2) return null;
+  const a = cells[0];
+  const b = cells[1];
+  if (a == null || b == null || !areAdjacent(a, b, cols)) return null;
+  const ka = specials[a] ?? "none";
+  const kb = specials[b] ?? "none";
+  const kind = comboKind(ka, kb);
+  if (!kind) return null;
+  return { a, b, kind };
+}
+
+function colorBroomClear(
+  pieces: number[],
+  specials: CandySpecial[],
+  a: number,
+  b: number,
+  cols: number,
+): { clear: Set<number>; becomeRow: number[] } {
+  const broom = specials[a] === "row" ? a : b;
+  const rainbow = broom === a ? b : a;
+  const color = pieces[broom] ?? EMPTY;
+  const becomeRow: number[] = [];
+  if (color >= 0) {
+    pieces.forEach((piece, i) => {
+      if (piece === color && i !== rainbow) becomeRow.push(i);
+    });
+  }
+  const virtual = specials.slice();
+  virtual[rainbow] = "none";
+  for (const i of becomeRow) virtual[i] = "row";
+  const clear = expandClearsWithSpecials(pieces, virtual, [broom, rainbow, ...becomeRow], cols);
+  return { clear, becomeRow };
+}
+
+function mergeUnmatched(
+  clear: Set<number>,
+  pieces: number[],
+  specials: CandySpecial[],
+  matches: ReadonlySet<number>,
+  cols: number,
+): Set<number> {
+  let added = false;
+  const seed = new Set(clear);
+  for (const i of matches) {
+    if (seed.has(i)) continue;
+    seed.add(i);
+    added = true;
+  }
+  if (!added) return clear;
+  return expandClearsWithSpecials(pieces, specials, seed, cols);
+}
+
+function collectDetonated(
+  clear: ReadonlySet<number>,
+  specials: CandySpecial[],
+): Array<Exclude<CandySpecial, "none">> {
+  const detonated: Array<Exclude<CandySpecial, "none">> = [];
+  for (const i of clear) {
+    const kind = specials[i];
+    if (kind && kind !== "none") detonated.push(kind);
+  }
+  detonated.sort((a, b) => specialRank(a) - specialRank(b));
+  return detonated;
 }
 
 export function planWaveClears(
@@ -339,30 +520,52 @@ export function planWaveClears(
   clear: Set<number>;
   spawns: SpecialSpawn[];
   detonated: Array<Exclude<CandySpecial, "none">>;
+  combo?: CandyCombo;
 } {
   const matches = extraOnly ? new Set<number>() : findMatches(pieces, cols, rows);
-  const initial = new Set(matches);
-  if (extraCells) {
-    for (const i of extraCells) initial.add(i);
+  const pair = extraOnly ? null : readCombo(extraCells, specials, cols);
+  let clear = new Set<number>();
+  let combo: CandyCombo | undefined;
+
+  if (pair?.kind === "cross") {
+    clear = expandClearsWithSpecials(pieces, specials, crossCells(pieces, pair.a, pair.b, cols), cols);
+    clear = mergeUnmatched(clear, pieces, specials, matches, cols);
+    combo = { kind: "cross", becomeRow: [] };
+  } else if (pair?.kind === "clear-board") {
+    pieces.forEach((piece, i) => {
+      if (piece >= 0) clear.add(i);
+    });
+    combo = { kind: "clear-board", becomeRow: [] };
+  } else if (pair?.kind === "color-brooms") {
+    const turned = colorBroomClear(pieces, specials, pair.a, pair.b, cols);
+    const virtual = specials.slice();
+    const rainbow = specials[pair.a] === "color" ? pair.a : pair.b;
+    virtual[rainbow] = "none";
+    for (const i of turned.becomeRow) virtual[i] = "row";
+    clear = mergeUnmatched(turned.clear, pieces, virtual, matches, cols);
+    combo = { kind: "color-brooms", becomeRow: turned.becomeRow };
+  } else {
+    const initial = new Set(matches);
+    if (extraCells) {
+      for (const i of extraCells) initial.add(i);
+    }
+    if (initial.size === 0) return { clear, spawns: [], detonated: [] };
+    clear = expandClearsWithSpecials(pieces, specials, initial, cols);
   }
-  if (initial.size === 0) {
-    return { clear: new Set(), spawns: [], detonated: [] };
-  }
-  const clear = expandClearsWithSpecials(pieces, specials, initial, cols);
-  const detonated: Array<Exclude<CandySpecial, "none">> = [];
-  for (const i of clear) {
-    if (specials[i] === "row" || specials[i] === "color") detonated.push(specials[i]);
-  }
-  detonated.sort((a, b) => (a === "row" && b === "color" ? -1 : a === "color" && b === "row" ? 1 : 0));
-  const spawns = extraOnly
-    ? []
-    : planSpecialSpawns(pieces, cols, rows, preferSpawnAt).filter((spawn) => {
-        if (!matches.has(spawn.index)) return false;
-        if (specials[spawn.index] !== "none") return false;
-        return true;
-      });
+
+  const detonated = collectDetonated(clear, specials);
+  const becomeRow = new Set(combo?.becomeRow ?? []);
+  const spawns =
+    extraOnly || combo?.kind === "clear-board"
+      ? []
+      : planSpecialSpawns(pieces, cols, rows, preferSpawnAt).filter((spawn) => {
+          if (!matches.has(spawn.index)) return false;
+          if (specials[spawn.index] !== "none") return false;
+          if (becomeRow.has(spawn.index)) return false;
+          return true;
+        });
   for (const spawn of spawns) clear.delete(spawn.index);
-  return { clear, spawns, detonated };
+  return { clear, spawns, detonated, combo };
 }
 
 export function applySpecialSpawns(
@@ -386,6 +589,8 @@ export const CANDY_FALL_MS = 220;
 export const CANDY_POP_MS = 280;
 /** 特殊糖掃過動畫時長（ms）。減少動態時應跳過。 */
 export const CANDY_SWEEP_MS = 280;
+/** 特殊糖組合：先讓孩子看見效果，再進入消除。減少動態時應跳過。 */
+export const CANDY_COMBO_MS = 320;
 
 /** 單格重力位移：目的地格子與往下掉幾列。 */
 export type CandyFallMotion = {
@@ -506,6 +711,8 @@ export type WaveStep = {
   cleared: number[];
   detonated: Array<Exclude<CandySpecial, "none">>;
   spawns: SpecialSpawn[];
+  /** 這波是特殊糖組合時才有；先演出再結算。 */
+  combo?: CandyCombo;
   /** 消除＋留下特殊糖後、重力前 */
   afterClear: BoardState;
   phases: SettlePhase[];
@@ -557,6 +764,7 @@ export function stepWave(
     cleared: [...planned.clear],
     detonated: planned.detonated,
     spawns: planned.spawns,
+    combo: planned.combo,
     afterClear,
     phases: settled.phases,
     state: settled.state,

@@ -23,8 +23,8 @@ export type BlockDropSpecialModePreference = "classic" | "rainbow";
 export type MotionPreference = "system" | "on" | "off";
 /** 消消樂玩法；null＝尚未選過，由 kidsMode 決定初始玩法。 */
 export type CandyMatchModePreference = "easy" | "challenge" | null;
-/** 消消樂首次引導 id（交換、四連、五連）。道具的說明列本身就是引導，不另記。 */
-export const CANDY_MATCH_TIP_IDS = ["swap", "row", "color"] as const;
+/** 消消樂首次引導 id（交換、四連、五連、L/T）。道具的說明列本身就是引導，不另記。 */
+export const CANDY_MATCH_TIP_IDS = ["swap", "row", "color", "burst"] as const;
 export type CandyMatchTipId = (typeof CANDY_MATCH_TIP_IDS)[number];
 
 export type GameKitPreferenceStore = {
