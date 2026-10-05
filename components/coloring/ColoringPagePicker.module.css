@@ -3,7 +3,6 @@
   gap: 0.85rem;
 }
 
-
 .lead {
   margin: 0;
   font-size: clamp(1.2rem, 3.5vw, 1.45rem);
@@ -27,8 +26,14 @@
     linear-gradient(
       165deg,
       var(--coloring-ui-surface) 0%,
-      color-mix(in srgb, var(--coloring-ui-surface) 86%, var(--c-yellow) 14%) 55%,
-      color-mix(in srgb, var(--coloring-ui-surface) 86%, var(--coloring-sky) 14%) 100%
+      color-mix(in srgb, var(--coloring-ui-surface) 86%, var(--c-yellow) 14%)
+        55%,
+      color-mix(
+          in srgb,
+          var(--coloring-ui-surface) 86%,
+          var(--coloring-sky) 14%
+        )
+        100%
     );
   box-shadow:
     inset 0 0 0 1px color-mix(in srgb, var(--coloring-ink) 8%, transparent),
@@ -70,7 +75,11 @@
   padding: 0.35rem;
   border: none;
   border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--coloring-ui-surface-strong) 92%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--coloring-ui-surface-strong) 92%,
+    transparent
+  );
   box-shadow: 0 1px 0 color-mix(in srgb, var(--coloring-ink) 8%, transparent);
   cursor: pointer;
   text-align: left;
@@ -93,7 +102,11 @@
   aspect-ratio: 1;
   border-radius: var(--radius-xs);
   overflow: hidden;
-  background: color-mix(in srgb, var(--coloring-ui-surface-strong) 88%, var(--coloring-sky));
+  background: color-mix(
+    in srgb,
+    var(--coloring-ui-surface-strong) 88%,
+    var(--coloring-sky)
+  );
 }
 
 .thumbImg {
@@ -135,7 +148,11 @@
   padding: 0.3rem;
   border: none;
   border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--coloring-ui-surface-strong) 92%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--coloring-ui-surface-strong) 92%,
+    transparent
+  );
   cursor: pointer;
   color: inherit;
   text-align: left;
@@ -152,7 +169,11 @@
   height: 88px;
   object-fit: cover;
   border-radius: var(--radius-xs);
-  background: color-mix(in srgb, var(--coloring-ui-surface-strong) 88%, var(--coloring-sky));
+  background: color-mix(
+    in srgb,
+    var(--coloring-ui-surface-strong) 88%,
+    var(--coloring-sky)
+  );
 }
 
 .galleryTitle {
@@ -170,4 +191,50 @@
   .card:hover {
     transform: none;
   }
+}
+.localNote {
+  margin: 0;
+  font-size: 12px;
+}
+.viewerBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+.viewer {
+  display: grid;
+  gap: 12px;
+  width: min(100%, 480px);
+  max-height: calc(100svh - 32px);
+  overflow: auto;
+  padding: 16px;
+  background: var(--surface-elevated);
+  border-radius: var(--radius-lg);
+}
+.viewer h2 {
+  margin: 0;
+  font-size: 18px;
+}
+.viewer img {
+  width: 100%;
+  max-height: 50svh;
+  object-fit: contain;
+}
+.viewer button {
+  min-height: 44px;
+  padding: 8px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-sm);
+  background: var(--surface-elevated);
+  color: var(--ink);
+  cursor: pointer;
+}
+.viewerActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }

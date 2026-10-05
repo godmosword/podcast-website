@@ -25,7 +25,7 @@ describe("coloring lineart assets contract", () => {
     }
   });
 
-  test("全 8 頁過品質 gate（白底、不透明、雙峰、覆蓋率、噪點、漏色；依 kind 分檔）", async () => {
+  test("全部線稿過品質 gate（白底、不透明、雙峰、覆蓋率、噪點、漏色；依 kind 分檔）", async () => {
     for (const page of COLORING_PAGES) {
       const path = join(PUBLIC_DIR, page.lineArtSrc.replace(/^\//, ""));
       const buf = await sharp(readFileSync(path)).png().toBuffer();

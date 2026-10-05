@@ -5,6 +5,10 @@ export type ColoringPageKind = "character" | "scene";
 
 export type ColoringPage = {
   id: string;
+  lineArtRevision: number;
+  variant?: "simple";
+  storySlug?: string;
+  activity?: string;
   title: string;
   kind: ColoringPageKind;
   /** 相對於 public/ 的既有 JPG（腳本輸入）。 */
@@ -25,6 +29,7 @@ export type ColoringPage = {
 export const COLORING_PAGES: readonly ColoringPage[] = [
   {
     id: "char-恐龍車多多",
+    lineArtRevision: 2,
     title: "恐龍車多多",
     kind: "character",
     sourcePath: "characters/恐龍車多多.jpg",
@@ -33,6 +38,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
   },
   {
     id: "char-安安救護車",
+    lineArtRevision: 2,
     title: "安安救護車",
     kind: "character",
     sourcePath: "characters/安安救護車.jpg",
@@ -41,6 +47,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
   },
   {
     id: "char-鈴鈴清潔車",
+    lineArtRevision: 2,
     title: "鈴鈴清潔車",
     kind: "character",
     sourcePath: "characters/鈴鈴清潔車.jpg",
@@ -49,6 +56,9 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
   },
   {
     id: "char-小紅賽車",
+    storySlug: "ep-3",
+    activity: "幫小紅設計一臺彩虹賽車，顏色由你決定！",
+    lineArtRevision: 2,
     title: "小紅賽車",
     kind: "character",
     sourcePath: "characters/小紅賽車.jpg",
@@ -57,6 +67,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
   },
   {
     id: "scene-ep-3-05",
+    lineArtRevision: 2,
     title: "小紅賽車的練習場",
     kind: "scene",
     sourcePath: "stories/ep-3/05.jpg",
@@ -67,6 +78,9 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
   },
   {
     id: "scene-ep-9-05",
+    storySlug: "ep-9",
+    activity: "幫多多和糖果換上你喜歡的顏色，再看看刷牙的故事！",
+    lineArtRevision: 2,
     title: "恐龍車多多的大黃牙",
     kind: "scene",
     sourcePath: "stories/ep-9/05.jpg",
@@ -77,6 +91,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
   },
   {
     id: "scene-ep-6-05",
+    lineArtRevision: 2,
     title: "安安救護車出任務",
     kind: "scene",
     sourcePath: "stories/ep-6/05.jpg",
@@ -87,6 +102,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
   },
   {
     id: "scene-ep-16-05",
+    lineArtRevision: 2,
     title: "噗噗豬的水上樂園",
     kind: "scene",
     sourcePath: "stories/ep-16/05.jpg",
@@ -94,6 +110,30 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
     previewSrc: "/stories/ep-16/05.jpg",
     zoneId: "ocean",
     referencePaths: ["characters/噗噗豬.jpg"],
+  },
+  {
+    id: "char-恐龍車多多-simple",
+    lineArtRevision: 1,
+    variant: "simple",
+    title: "恐龍車多多 · 大色塊",
+    kind: "character",
+    sourcePath: "characters/恐龍車多多.jpg",
+    lineArtSrc: "/coloring/char-恐龍車多多-simple/line.png",
+    previewSrc: "/characters/恐龍車多多.jpg",
+    storySlug: "ep-9",
+    activity: "幫多多和牙刷換上新顏色，牙齒也可以塗成你喜歡的樣子！",
+  },
+  {
+    id: "char-小紅賽車-simple",
+    lineArtRevision: 1,
+    variant: "simple",
+    title: "小紅賽車 · 大色塊",
+    kind: "character",
+    sourcePath: "characters/小紅賽車.jpg",
+    lineArtSrc: "/coloring/char-小紅賽車-simple/line.png",
+    previewSrc: "/characters/小紅賽車.jpg",
+    storySlug: "ep-3",
+    activity: "幫小紅設計一臺彩虹賽車，顏色由你決定！",
   },
 ] as const;
 

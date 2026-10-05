@@ -1,9 +1,16 @@
+/* eslint-disable @next/next/no-img-element -- Local IndexedDB Blob URLs cannot use the remote image optimizer. */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import type { ColoringPage } from "@/data/coloring-pages";
-import { listColoringDrafts, type ColoringDraft } from "@/lib/coloring/draft-storage";
+import { type ColoringDraftRecord } from "@/lib/coloring/draft-storage";
+import { catalogColoringDrafts } from "@/lib/coloring/catalog-drafts";
+import {
+  listColoringArtworks,
+  type ArtworkPreview,
+} from "@/lib/coloring/artwork-storage";
+import { ColoringArtworkViewer } from "./ColoringArtworkViewer";
 import {
   COLORING_GALLERY_HEADING,
   COLORING_PICKER_CHARACTERS,
@@ -16,6 +23,8 @@ type GalleryItem = {
   page: ColoringPage;
   src: string;
   revoke: boolean;
+  key: string;
+  current: boolean;
 };
 
 type ColoringPagePickerProps = {
@@ -24,37 +33,82 @@ type ColoringPagePickerProps = {
   onSelect: (page: ColoringPage) => void;
 };
 
-function draftToSrc(draft: ColoringDraft): { src: string; revoke: boolean } {
-  if (typeof draft === "string") return { src: draft, revoke: false };
-  return { src: URL.createObjectURL(draft), revoke: true };
-}
-
 export function ColoringPagePicker({
   characters,
   scenes,
   onSelect,
 }: ColoringPagePickerProps) {
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
+  const [artworks, setArtworks] = useState<
+    (ArtworkPreview & { src: string })[]
+  >([]);
+  const [selected, setSelected] = useState<ArtworkPreview | null>(null);
+  const [error, setError] = useState("");
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const artworkUrls = useRef<string[]>([]);
+  const returnFocus = useRef<HTMLElement | null>(null);
+  const appendArtworks = (entries: ArtworkPreview[]) => {
+    const items = entries.map((a) => {
+      const src = URL.createObjectURL(a.thumbnailBlob);
+      artworkUrls.current.push(src);
+      return { ...a, src };
+    });
+    setArtworks((old) => [...old, ...items]);
+    setHasMore(entries.length === 12);
+  };
+  const loadMore = async () => {
+    setLoadingMore(true);
+    try {
+      appendArtworks(
+        await listColoringArtworks(12, artworks.at(-1)?.createdAt),
+      );
+    } catch {
+      setError("作品暫時讀不到，請稍後再試。");
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
     const created: string[] = [];
     const catalog = [...characters, ...scenes];
-    void listColoringDrafts().then((entries) => {
-      if (cancelled) return;
-      const items: GalleryItem[] = [];
-      for (const entry of entries) {
-        const page = catalog.find((p) => p.id === entry.pageId);
-        if (!page) continue;
-        const { src, revoke } = draftToSrc(entry.draft);
-        if (revoke) created.push(src);
-        items.push({ page, src, revoke });
-      }
-      setGallery(items);
-    });
+    void catalogColoringDrafts(catalog)
+      .then((entries: ColoringDraftRecord[]) => {
+        if (cancelled) return;
+        const items: GalleryItem[] = [];
+        for (const entry of entries) {
+          const page = catalog.find((p) => p.id === entry.pageId);
+          if (!page || !entry.thumbnailBlob) continue;
+          const src = URL.createObjectURL(entry.thumbnailBlob);
+          created.push(src);
+          items.push({
+            page,
+            src,
+            revoke: true,
+            key: entry.key,
+            current: page.lineArtRevision === entry.lineArtRevision,
+          });
+        }
+        setGallery(items);
+      })
+      .catch(() => {
+        if (!cancelled)
+          setError("草稿暫時讀不到，請重新整理後再試；作品仍保留。");
+      });
+    void listColoringArtworks()
+      .then((entries) => {
+        if (!cancelled) appendArtworks(entries);
+      })
+      .catch(() => {
+        if (!cancelled) setError("收藏暫時讀不到，請稍後再試。");
+      });
     return () => {
       cancelled = true;
-      for (const src of created) URL.revokeObjectURL(src);
+      for (const src of [...created, ...artworkUrls.current])
+        URL.revokeObjectURL(src);
+      artworkUrls.current = [];
     };
   }, [characters, scenes]);
 
@@ -65,25 +119,74 @@ export function ColoringPagePicker({
       {gallery.length > 0 ? (
         <section className={styles.gallery} aria-labelledby="coloring-gallery">
           <h2 id="coloring-gallery" className={styles.heading}>
-            {COLORING_GALLERY_HEADING}
+            繼續塗
           </h2>
           <ul className={styles.galleryList}>
             {gallery.map((item) => (
-              <li key={item.page.id}>
+              <li key={item.key}>
                 <button
                   type="button"
                   className={styles.galleryCard}
-                  onClick={() => onSelect(item.page)}
+                  onClick={() => {
+                    if (item.current) onSelect(item.page);
+                  }}
+                  disabled={!item.current}
                   aria-label={`繼續塗：${item.page.title}`}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element -- 本機草稿 blob／data URL */}
                   <img src={item.src} alt="" className={styles.galleryThumb} />
-                  <span className={styles.galleryTitle}>{item.page.title}</span>
+                  <span className={styles.galleryTitle}>
+                    {item.page.title}
+                    {!item.current ? " · 舊版本" : ""}
+                  </span>
                 </button>
               </li>
             ))}
           </ul>
         </section>
+      ) : null}
+      {error ? <p role="status">{error}</p> : null}
+      {artworks.length > 0 ? (
+        <section className={styles.gallery} aria-label="作品收藏">
+          <h2 className={styles.heading}>{COLORING_GALLERY_HEADING}</h2>
+          <p className={styles.localNote}>作品存在這台裝置</p>
+          <ul className={styles.galleryList}>
+            {artworks.map((a) => (
+              <li key={a.id}>
+                <button
+                  type="button"
+                  className={styles.galleryCard}
+                  onClick={(e) => {
+                    returnFocus.current = e.currentTarget;
+                    setSelected(a);
+                  }}
+                  aria-label={`看作品：${a.title}`}
+                >
+                  <img
+                    src={a.src}
+                    alt=""
+                    loading="lazy"
+                    className={styles.galleryThumb}
+                  />
+                  <span className={styles.galleryTitle}>{a.title}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          {hasMore ? (
+            <button type="button" disabled={loadingMore} onClick={loadMore}>
+              更多作品
+            </button>
+          ) : null}
+        </section>
+      ) : null}
+      {selected ? (
+        <ColoringArtworkViewer
+          preview={selected}
+          onClose={() => {
+            setSelected(null);
+            returnFocus.current?.focus();
+          }}
+        />
       ) : null}
       <div className={styles.book}>
         <section className={styles.spread} aria-labelledby="coloring-chars">
@@ -109,6 +212,9 @@ export function ColoringPagePicker({
                     />
                   </span>
                   <span className={styles.cardTitle}>{page.title}</span>
+                  {gallery.some((g) => g.page.id === page.id && g.current) ? (
+                    <small>有草稿 · 可以繼續塗</small>
+                  ) : null}
                 </button>
               </li>
             ))}
@@ -137,6 +243,9 @@ export function ColoringPagePicker({
                     />
                   </span>
                   <span className={styles.cardTitle}>{page.title}</span>
+                  {gallery.some((g) => g.page.id === page.id && g.current) ? (
+                    <small>有草稿 · 可以繼續塗</small>
+                  ) : null}
                 </button>
               </li>
             ))}

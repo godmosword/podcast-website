@@ -20,10 +20,18 @@
     "controls";
 }
 
-.topBar { grid-area: top; }
-.stage { grid-area: stage; }
-.saveNotice { grid-area: notice; }
-.openHint { grid-area: cue; }
+.topBar {
+  grid-area: top;
+}
+.stage {
+  grid-area: stage;
+}
+.saveNotice {
+  grid-area: notice;
+}
+.openHint {
+  grid-area: cue;
+}
 
 /* G-H3：手機／平板——色盤＋工具列黏在視窗底，畫布在視野內時不用來回捲就能換色換工具。 */
 .controls {
@@ -37,7 +45,8 @@
   padding: 0.5rem var(--space-4, 16px) calc(0.5rem + var(--safe-bottom, 0px));
   background: color-mix(in srgb, var(--coloring-paper) 92%, transparent);
   backdrop-filter: blur(10px);
-  box-shadow: 0 -6px 18px color-mix(in srgb, var(--coloring-ink) 10%, transparent);
+  box-shadow: 0 -6px 18px
+    color-mix(in srgb, var(--coloring-ink) 10%, transparent);
 }
 
 .openHint {
@@ -76,7 +85,8 @@
     padding: 0.75rem;
     border-radius: var(--radius-md);
     background: color-mix(in srgb, var(--coloring-ui-surface) 85%, transparent);
-    box-shadow: 0 10px 28px color-mix(in srgb, var(--coloring-ink) 10%, transparent);
+    box-shadow: 0 10px 28px
+      color-mix(in srgb, var(--coloring-ink) 10%, transparent);
   }
 }
 
@@ -177,7 +187,8 @@
   overflow: hidden;
   /* Keep the artwork surface white so the line art and palette retain their intended colors. */
   background: var(--coloring-canvas-surface);
-  box-shadow: 0 10px 28px color-mix(in srgb, var(--coloring-ink) 12%, transparent);
+  box-shadow: 0 10px 28px
+    color-mix(in srgb, var(--coloring-ink) 12%, transparent);
   touch-action: none;
 }
 
@@ -201,7 +212,8 @@
   position: absolute;
   display: none;
   border: 2px solid color-mix(in srgb, var(--coloring-ink) 75%, transparent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--coloring-canvas-surface) 85%, transparent);
+  box-shadow: 0 0 0 1px
+    color-mix(in srgb, var(--coloring-canvas-surface) 85%, transparent);
   border-radius: var(--radius-circle);
   transform: translate(-50%, -50%);
   pointer-events: none;
@@ -214,7 +226,8 @@
   padding: 0;
   border-radius: var(--radius-sm);
   border: 3px solid var(--coloring-canvas-surface);
-  box-shadow: 0 4px 14px color-mix(in srgb, var(--coloring-ink) 25%, transparent);
+  box-shadow: 0 4px 14px
+    color-mix(in srgb, var(--coloring-ink) 25%, transparent);
   overflow: hidden;
   cursor: pointer;
   background: var(--coloring-canvas-surface);
@@ -267,6 +280,57 @@
   display: grid;
   place-items: center;
   margin: 0;
-  background: color-mix(in srgb, var(--coloring-canvas-surface) 80%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--coloring-canvas-surface) 80%,
+    transparent
+  );
   font-weight: 700;
+}
+.activity {
+  grid-area: activity;
+  margin: 0;
+  font-size: var(--fs-label);
+  font-weight: 700;
+  color: var(--coloring-ink);
+}
+.root:has(.activity) {
+  grid-template-areas: "top" "activity" "stage" "notice" "controls";
+}
+.root:has(.activity):has(.openHint) {
+  grid-template-areas: "top" "activity" "stage" "notice" "cue" "controls";
+}
+.doneActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+.doneActions button,
+.doneActions a,
+.loading button,
+.saveNotice button {
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--hairline);
+  background: var(--surface-elevated);
+  color: var(--ink);
+  cursor: pointer;
+}
+@media (min-width: 980px) {
+  .root:has(.activity) {
+    grid-template-areas: "top top" "activity activity" "stage controls" "notice controls";
+  }
+  .root:has(.activity):has(.openHint) {
+    grid-template-areas: "top top" "activity activity" "stage cue" "stage controls" "notice controls";
+  }
+}
+@media (max-height: 700px) {
+  .doneSheet {
+    gap: 8px;
+  }
+  .doneSnapshot {
+    width: min(42vw, 22vh, 160px);
+  }
 }

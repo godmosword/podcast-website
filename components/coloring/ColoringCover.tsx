@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- Local IndexedDB Blob URLs cannot use the remote image optimizer. */
 "use client";
 
 import Image from "next/image";
@@ -6,10 +7,11 @@ import styles from "./ColoringCover.module.css";
 
 type ColoringCoverProps = {
   onOpen: () => void;
+  recent?: { title: string; src: string; onContinue: () => void };
 };
 
 /** 繪本著色封面開場：品牌＋一句話＋單一 CTA＋封面主視覺。 */
-export function ColoringCover({ onOpen }: ColoringCoverProps) {
+export function ColoringCover({ onOpen, recent }: ColoringCoverProps) {
   return (
     <section className={styles.root} aria-label="繪本著色封面">
       <div className={styles.hero} aria-hidden={false}>
@@ -34,7 +36,14 @@ export function ColoringCover({ onOpen }: ColoringCoverProps) {
             strokeWidth="2.2"
             strokeLinecap="round"
           />
-          <circle cx="18" cy="96" r="4" fill="none" stroke="currentColor" strokeWidth="2" />
+          <circle
+            cx="18"
+            cy="96"
+            r="4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          />
         </svg>
         <svg
           className={styles.doodleRight}
@@ -62,6 +71,16 @@ export function ColoringCover({ onOpen }: ColoringCoverProps) {
         <p className={styles.eyebrow}>車車遊樂園</p>
         {/* G-M7：遊戲名由 sticky 抬頭的 h1 持有，封面不再重複一次 */}
         <p className={styles.lead}>把故事裡的車車朋友，塗上你喜歡的顏色！</p>
+        {recent ? (
+          <button
+            type="button"
+            className={styles.resume}
+            onClick={recent.onContinue}
+          >
+            <img src={recent.src} alt="" />
+            繼續塗：{recent.title}
+          </button>
+        ) : null}
         <button
           type="button"
           className={styles.cta}

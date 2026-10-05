@@ -58,7 +58,10 @@ test.describe("coloring book", () => {
     await page.mouse.up();
 
     expect(await countRedOnRow(page, 0.5, 0.62, 0.55)).toBeGreaterThan(0);
-    await expect(page.getByTestId("coloring-open-hint")).toHaveAttribute("data-step", "fill");
+    await expect(page.getByTestId("coloring-open-hint")).toHaveAttribute(
+      "data-step",
+      "fill",
+    );
     await expect(page.getByRole("button", { name: "我塗好了" })).toBeVisible();
 
     await page.getByRole("button", { name: "復原" }).click();
@@ -81,7 +84,9 @@ test.describe("coloring book", () => {
   /** G-L3：蠟筆自動不出線——從外底起筆拖進主體中心，中心那一列不該有紅。 */
   test("蠟筆從外底拖進主體，不會塗出線（character 頁）", async ({ page }) => {
     await openColoringPage(page, /^著色：恐龍車多多$/);
+    await page.getByRole("button", { name: "更多", exact: true }).click();
     await page.getByRole("button", { name: "筆刷粗" }).click();
+    await page.getByRole("button", { name: "關閉", exact: true }).click();
     const box = await page.locator("canvas").boundingBox();
     if (!box) throw new Error("canvas boundingBox 不存在");
     const from = { x: box.x + box.width * 0.04, y: box.y + box.height * 0.04 };
@@ -89,7 +94,10 @@ test.describe("coloring book", () => {
     await page.mouse.move(from.x, from.y);
     await page.mouse.down();
     for (let i = 1; i <= 30; i += 1) {
-      await page.mouse.move(from.x + ((to.x - from.x) * i) / 30, from.y + ((to.y - from.y) * i) / 30);
+      await page.mouse.move(
+        from.x + ((to.x - from.x) * i) / 30,
+        from.y + ((to.y - from.y) * i) / 30,
+      );
     }
     await page.mouse.up();
     await page.waitForTimeout(200);
@@ -109,15 +117,25 @@ test.describe("coloring book", () => {
 
   test("工具列具備筆刷三檔與縮放還原", async ({ page }) => {
     await openFirstColoringPage(page);
-    await expect(page.getByTestId("coloring-open-hint")).toHaveAttribute("data-step", "draw");
+    await expect(page.getByTestId("coloring-open-hint")).toHaveAttribute(
+      "data-step",
+      "draw",
+    );
     await expect(page.getByRole("button", { name: "我塗好了" })).toHaveCount(0);
+    await page.getByRole("button", { name: "更多", exact: true }).click();
     for (const name of ["筆刷細", "筆刷中", "筆刷粗"]) {
       const sizeBtn = page.getByRole("button", { name });
       await expect(sizeBtn).toBeVisible();
       await expect(sizeBtn).not.toHaveText(name.replace("筆刷", ""));
     }
-    await expect(page.getByRole("button", { name: "蠟筆" })).toContainText("蠟筆");
-    await expect(page.getByRole("button", { name: "蠟筆" }).locator("svg")).toBeVisible();
+    await page.getByRole("button", { name: "關閉", exact: true }).click();
+    await expect(page.getByRole("button", { name: "蠟筆" })).toContainText(
+      "蠟筆",
+    );
+    await expect(
+      page.getByRole("button", { name: "蠟筆" }).locator("svg"),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "更多", exact: true }).click();
     await expect(page.getByRole("button", { name: "縮放還原" })).toBeDisabled();
   });
 
@@ -153,7 +171,8 @@ test.describe("coloring book", () => {
       const data = ctx.getImageData(0, 0, w, h).data;
       let red = 0;
       for (let i = 0; i < data.length; i += 4) {
-        if (data[i]! > 180 && data[i + 1]! < 140 && data[i + 2]! < 140) red += 1;
+        if (data[i]! > 180 && data[i + 1]! < 140 && data[i + 2]! < 140)
+          red += 1;
       }
       return red;
     });
@@ -177,7 +196,9 @@ test.describe("coloring book", () => {
       expect(box!.y).toBeGreaterThanOrEqual(0);
       expect(box!.y + box!.height).toBeLessThanOrEqual(664);
     }
-    expect(await page.evaluate(() => document.scrollingElement?.scrollTop ?? 0)).toBe(0);
+    expect(
+      await page.evaluate(() => document.scrollingElement?.scrollTop ?? 0),
+    ).toBe(0);
   });
 
   test("390×400：矮視窗完成面不顯示快照", async ({ page }) => {
@@ -194,9 +215,24 @@ test.describe("coloring book", () => {
       pointerType: "mouse",
       button: 0,
     };
-    await canvas.dispatchEvent("pointerdown", { ...pointer, clientX: start.x, clientY: start.y, buttons: 1 });
-    await canvas.dispatchEvent("pointermove", { ...pointer, clientX: end.x, clientY: end.y, buttons: 1 });
-    await canvas.dispatchEvent("pointerup", { ...pointer, clientX: end.x, clientY: end.y, buttons: 0 });
+    await canvas.dispatchEvent("pointerdown", {
+      ...pointer,
+      clientX: start.x,
+      clientY: start.y,
+      buttons: 1,
+    });
+    await canvas.dispatchEvent("pointermove", {
+      ...pointer,
+      clientX: end.x,
+      clientY: end.y,
+      buttons: 1,
+    });
+    await canvas.dispatchEvent("pointerup", {
+      ...pointer,
+      clientX: end.x,
+      clientY: end.y,
+      buttons: 0,
+    });
     await page.getByRole("button", { name: "我塗好了" }).click();
     await expect(page.getByRole("dialog", { name: "塗好了！" })).toBeVisible();
     await expect(page.getByTestId("coloring-done-snapshot")).toBeHidden();
@@ -217,7 +253,10 @@ test.describe("coloring book", () => {
     await openFirstColoringPage(page);
     const [download] = await Promise.all([
       page.waitForEvent("download"),
-      page.getByRole("button", { name: "下載" }).click(),
+      (async () => {
+        await page.getByRole("button", { name: "更多", exact: true }).click();
+        await page.getByRole("button", { name: "下載", exact: true }).click();
+      })(),
     ]);
     const stream = await download.createReadStream();
     const head = await new Promise<Buffer>((resolve, reject) => {
@@ -244,16 +283,23 @@ test.describe("coloring book", () => {
     { name: "390×664 手機", width: 390, height: 664 },
     { name: "1280×800 桌機", width: 1280, height: 800 },
   ]) {
-    test(`${vp.name}：畫布可見時色盤與工具列 elementFromPoint 可命中`, async ({ page }) => {
+    test(`${vp.name}：畫布可見時色盤與工具列 elementFromPoint 可命中`, async ({
+      page,
+    }) => {
       await page.setViewportSize({ width: vp.width, height: vp.height });
       await openFirstColoringPage(page);
       const hit = await page.evaluate(() => {
-        const canvas = document.querySelector("canvas")!.getBoundingClientRect();
+        const canvas = document
+          .querySelector("canvas")!
+          .getBoundingClientRect();
         const probe = (el: Element | null) => {
           if (!el) return false;
           const r = el.getBoundingClientRect();
           if (r.top < 0 || r.bottom > innerHeight) return false;
-          const at = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+          const at = document.elementFromPoint(
+            r.x + r.width / 2,
+            r.y + r.height / 2,
+          );
           return at === el || el.contains(at);
         };
         return {

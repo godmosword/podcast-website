@@ -10,9 +10,14 @@ import {
 const PUBLIC_DIR = join(process.cwd(), "public");
 
 describe("coloring-pages catalog", () => {
-  test("MVP 固定 8 頁：4 定裝 + 4 場景", () => {
-    expect(COLORING_PAGES).toHaveLength(8);
-    expect(COLORING_PAGES.filter((p) => p.kind === "character")).toHaveLength(4);
+  test("保留 8 頁原圖，新增 2 頁簡易版", () => {
+    expect(COLORING_PAGES.filter((p) => !p.variant)).toHaveLength(8);
+    expect(COLORING_PAGES.filter((p) => p.variant === "simple")).toHaveLength(
+      2,
+    );
+    expect(COLORING_PAGES.filter((p) => p.kind === "character")).toHaveLength(
+      6,
+    );
     expect(COLORING_PAGES.filter((p) => p.kind === "scene")).toHaveLength(4);
   });
 
@@ -26,12 +31,18 @@ describe("coloring-pages catalog", () => {
     for (const page of COLORING_PAGES) {
       assertPageShape(page);
       expect(existsSync(join(PUBLIC_DIR, page.sourcePath))).toBe(true);
+      expect(existsSync(join(PUBLIC_DIR, page.lineArtSrc))).toBe(true);
+      expect(page.lineArtRevision).toBeGreaterThan(0);
     }
   });
 
   test("場景頁覆蓋 car-park / dino / rescue / ocean", () => {
-    const zones = COLORING_PAGES.filter((p) => p.kind === "scene").map((p) => p.zoneId);
-    expect(new Set(zones)).toEqual(new Set(["car-park", "dino", "rescue", "ocean"]));
+    const zones = COLORING_PAGES.filter((p) => p.kind === "scene").map(
+      (p) => p.zoneId,
+    );
+    expect(new Set(zones)).toEqual(
+      new Set(["car-park", "dino", "rescue", "ocean"]),
+    );
   });
 });
 

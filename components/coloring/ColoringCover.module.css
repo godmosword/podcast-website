@@ -11,7 +11,11 @@
   aspect-ratio: 4 / 3;
   border-radius: var(--radius-xl);
   overflow: hidden;
-  background: color-mix(in srgb, var(--coloring-sky) 22%, var(--coloring-paper));
+  background: color-mix(
+    in srgb,
+    var(--coloring-sky) 22%,
+    var(--coloring-paper)
+  );
   box-shadow:
     0 1px 0 color-mix(in srgb, var(--coloring-ink) 8%, transparent),
     0 18px 36px color-mix(in srgb, var(--coloring-ink) 12%, transparent);
@@ -62,7 +66,6 @@
   color: color-mix(in srgb, var(--coloring-ink) 62%, transparent);
 }
 
-
 .lead {
   margin: 0 0 0.35rem;
   max-width: 28ch;
@@ -88,7 +91,9 @@
   letter-spacing: 0.02em;
   cursor: pointer;
   box-shadow: 0 6px 0 var(--coloring-accent-shadow);
-  transition: transform 160ms ease, box-shadow 160ms ease;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .cta:hover {
@@ -142,4 +147,26 @@
     transform: none;
     box-shadow: 0 6px 0 var(--coloring-accent-shadow);
   }
+}
+.resume {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 2px solid var(--coloring-accent);
+  border-radius: var(--radius-md);
+  background: var(--coloring-ui-surface);
+  color: var(--coloring-ink);
+  font-weight: 800;
+  cursor: pointer;
+}
+.resume img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #fff;
 }

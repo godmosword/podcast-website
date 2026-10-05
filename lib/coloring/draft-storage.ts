@@ -1,129 +1,139 @@
-/**
- * 著色草稿儲存：IndexedDB 存 PNG Blob（不受 localStorage ~5MB 配額限制）。
- * key 綁線稿世代（COLORING_LINEART_REV）：線稿重生後舊草稿自動失效，
- * 避免舊塗鴉對不上新線稿。舊 localStorage 草稿（coloring:v1:*）屬舊線稿，
- * 不再遷移，僅於清除時順手移除。
- * save 失敗會 throw，由 UI 顯示提示（不再靜默吞掉）。
- */
-import { coloringDraftKey, coloringDraftStorageKey, parseColoringDraftPageId } from "@/lib/coloring/tools";
+import {
+  coloringDraftKey,
+  coloringDraftStorageKey,
+  COLORING_LINEART_REV,
+} from "@/lib/coloring/tools";
+import {
+  coloringTransaction,
+  listColoringValues,
+  readColoringValue,
+} from "./storage-db";
 
-const DB_NAME = "coloring-drafts";
-const DB_VERSION = 1;
-const STORE = "drafts";
-
-/** 草稿內容：新版為 Blob，遷移自 localStorage 的舊草稿為 data URL 字串。 */
 export type ColoringDraft = Blob | string;
-
-function canUseIndexedDb(): boolean {
-  try {
-    return typeof indexedDB !== "undefined";
-  } catch {
-    return false;
-  }
+export type ColoringDraftRecord = {
+  key: string;
+  pageId: string;
+  lineArtRevision: number;
+  paintBlob: ColoringDraft;
+  thumbnailBlob?: Blob;
+  updatedAt: number;
+  hasPaint: boolean;
+};
+export function draftRecordKey(
+  pageId: string,
+  revision = COLORING_LINEART_REV,
+) {
+  return `${pageId}@r${revision}`;
 }
 
-function openDb(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = () => {
-      const db = req.result;
-      if (!db.objectStoreNames.contains(STORE)) {
-        db.createObjectStore(STORE);
+/** Throws read failures so a blank canvas never silently overwrites an unreadable draft. */
+export async function loadColoringDraftRecord(
+  pageId: string,
+  revision = COLORING_LINEART_REV,
+): Promise<ColoringDraftRecord | null> {
+  if (typeof indexedDB === "undefined") return null;
+  const record = await readColoringValue<ColoringDraftRecord>(
+    "draft-records",
+    draftRecordKey(pageId, revision),
+  );
+  if (record) return record;
+  if (revision !== COLORING_LINEART_REV) return null;
+  const legacy = await readColoringValue<ColoringDraft>(
+    "drafts",
+    coloringDraftStorageKey(pageId),
+  );
+  return legacy
+    ? {
+        key: draftRecordKey(pageId, revision),
+        pageId,
+        lineArtRevision: revision,
+        paintBlob: legacy,
+        updatedAt: 0,
+        hasPaint: true,
       }
-    };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error ?? new Error("indexedDB open failed"));
+    : null;
+}
+export async function loadColoringDraft(
+  pageId: string,
+): Promise<ColoringDraft | null> {
+  return (await loadColoringDraftRecord(pageId))?.paintBlob ?? null;
+}
+export async function saveColoringDraftRecord(
+  record: ColoringDraftRecord,
+): Promise<void> {
+  await coloringTransaction<void>("draft-records", "readwrite", (tx) => {
+    tx.objectStore("draft-records").put(record);
   });
 }
-
-function requestToPromise<T>(req: IDBRequest<T>): Promise<T> {
-  return new Promise((resolve, reject) => {
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error ?? new Error("indexedDB request failed"));
-  });
-}
-
-async function withStore<T>(
-  mode: IDBTransactionMode,
-  run: (store: IDBObjectStore) => IDBRequest<T>,
-): Promise<T> {
-  const db = await openDb();
-  try {
-    return await requestToPromise(run(db.transaction(STORE, mode).objectStore(STORE)));
-  } finally {
-    db.close();
-  }
-}
-
-function removeLegacyDraft(pageId: string): void {
-  try {
-    if (typeof window === "undefined" || !window.localStorage) return;
-    window.localStorage.removeItem(coloringDraftKey(pageId));
-  } catch {
-    // ignore
-  }
-}
-
-/** 讀取草稿（僅當前線稿世代；舊世代草稿視為不存在）。 */
-export async function loadColoringDraft(pageId: string): Promise<ColoringDraft | null> {
-  if (!canUseIndexedDb()) return null;
-  try {
-    const stored = await withStore<ColoringDraft | undefined>("readonly", (store) =>
-      store.get(coloringDraftStorageKey(pageId)),
-    );
-    return stored ?? null;
-  } catch {
-    return null;
-  }
-}
-
-/** 儲存草稿；失敗會 throw（配額、私密模式等），呼叫端負責提示。 */
 export async function saveColoringDraft(
   pageId: string,
   draft: ColoringDraft,
 ): Promise<void> {
-  if (!canUseIndexedDb()) {
-    throw new Error("此瀏覽器無法儲存草稿（indexedDB 不可用）");
-  }
-  await withStore("readwrite", (store) => store.put(draft, coloringDraftStorageKey(pageId)));
+  await saveColoringDraftRecord({
+    key: draftRecordKey(pageId),
+    pageId,
+    lineArtRevision: COLORING_LINEART_REV,
+    paintBlob: draft,
+    updatedAt: Date.now(),
+    hasPaint: true,
+  });
 }
-
-export async function clearColoringDraft(pageId: string): Promise<void> {
-  removeLegacyDraft(pageId);
-  if (!canUseIndexedDb()) return;
+export async function clearColoringDraft(
+  pageId: string,
+  revision = COLORING_LINEART_REV,
+): Promise<void> {
+  await coloringTransaction<void>(
+    ["drafts", "draft-records"],
+    "readwrite",
+    (tx) => {
+      tx.objectStore("draft-records").delete(draftRecordKey(pageId, revision));
+      if (revision === COLORING_LINEART_REV)
+        tx.objectStore("drafts").delete(coloringDraftStorageKey(pageId));
+    },
+  );
   try {
-    await withStore("readwrite", (store) => store.delete(coloringDraftStorageKey(pageId)));
+    localStorage.removeItem(coloringDraftKey(pageId));
   } catch {
-    // 清除失敗無害，忽略
+    /* old localStorage is optional */
   }
 }
-
-/** 列出當前世代草稿（本機作品牆用；不上傳）。 */
+export async function listColoringDraftRecords(
+  limit = 20,
+): Promise<ColoringDraftRecord[]> {
+  if (typeof indexedDB === "undefined") return [];
+  return listColoringValues("draft-records", "updatedAt", limit);
+}
+/** Compatibility API; old original-store values remain readable until migrated by the catalog. */
 export async function listColoringDrafts(): Promise<
   { pageId: string; draft: ColoringDraft }[]
 > {
-  if (!canUseIndexedDb()) return [];
-  try {
-    const db = await openDb();
-    try {
-      const store = db.transaction(STORE, "readonly").objectStore(STORE);
-      const keys = await requestToPromise(
-        store.getAllKeys() as IDBRequest<IDBValidKey[]>,
-      );
-      const values = await requestToPromise(
-        store.getAll() as IDBRequest<ColoringDraft[]>,
-      );
-      const out: { pageId: string; draft: ColoringDraft }[] = [];
-      for (let i = 0; i < keys.length; i++) {
-        const pageId = parseColoringDraftPageId(String(keys[i]));
-        const draft = values[i];
-        if (pageId && draft) out.push({ pageId, draft });
-      }
-      return out;
-    } finally {
-      db.close();
-    }
-  } catch {
-    return [];
-  }
+  return (await listColoringDraftRecords())
+    .filter((r) => r.hasPaint)
+    .map((r) => ({ pageId: r.pageId, draft: r.paintBlob }));
+}
+
+/** Migration cannot overwrite a newer edit produced while the preview was being composed. */
+export async function migrateColoringDraftRecord(
+  candidate: ColoringDraftRecord,
+): Promise<ColoringDraftRecord> {
+  return coloringTransaction<ColoringDraftRecord>(
+    "draft-records",
+    "readwrite",
+    (tx, result) => {
+      const store = tx.objectStore("draft-records"),
+        req = store.get(candidate.key);
+      req.onsuccess = () => {
+        const current = req.result as ColoringDraftRecord | undefined;
+        if (
+          current &&
+          (current.updatedAt !== candidate.updatedAt || current.thumbnailBlob)
+        ) {
+          result(current);
+          return;
+        }
+        store.put(candidate);
+        result(candidate);
+      };
+    },
+  );
 }
