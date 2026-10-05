@@ -378,6 +378,23 @@ for (const pageDef of VISUAL_PAGES) {
   }
 }
 
+/** 標題頁只截卡片：抬頭的遊戲名稱另有改動，不讓它牽動這張基準。 */
+for (const [width, height, theme] of [
+  [390, 844, "light"],
+  [1280, 800, "night"],
+] as const) {
+  test(`visual：消消樂標題 ${width} ${theme}`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    await page.goto("/games/candy-match");
+    await stabilizeVisualPage(page, { theme });
+    await expect(page.getByRole("list", { name: "玩法三步驟" })).toBeVisible();
+    await expect(page.locator('[data-screen="title"]')).toHaveScreenshot(
+      `candy-title-${width}-${theme}.png`,
+      { maxDiffPixelRatio: 0.02, animations: "disabled" },
+    );
+  });
+}
+
 test("visual：消消樂地圖 390 light", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 900 });
   await page.goto("/games/candy-match");
