@@ -8,7 +8,7 @@ import { getSiteUrl } from "@/lib/site-url";
 export const metadata: Metadata = {
   title: "繪本著色",
   description:
-    "選故事裡的定裝人物或場景線稿，用蠟筆與油漆桶輕鬆著色。適合 3–7 歲親子一起玩。",
+    "選一臺車車或一個故事畫面來塗。先用蠟筆塗塗看，再用填滿把整塊塗上顏色。適合 3–7 歲。",
   alternates: { canonical: "/games/coloring-book" },
   openGraph: {
     title: "繪本著色 · 車車遊樂園",

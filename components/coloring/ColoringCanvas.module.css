@@ -181,6 +181,13 @@
   touch-action: none;
 }
 
+@media (max-height: 480px) {
+  /* 矮視窗把畫布縮小，底下的色盤和畫具才不會蓋住可塗的區域。 */
+  .stage {
+    width: min(100%, 34vh);
+  }
+}
+
 .canvas {
   display: block;
   width: 100%;

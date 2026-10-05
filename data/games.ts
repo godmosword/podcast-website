@@ -100,7 +100,7 @@ export const GAMES: GameMeta[] = [
   {
     slug: "coloring-book",
     title: "繪本著色",
-    desc: "選定裝人物或故事場景線稿，用蠟筆與油漆桶輕輕塗上喜歡的顏色！",
+    desc: "選一臺車車或一個故事畫面，先用蠟筆塗塗看，再用填滿把整塊塗上顏色！",
     teaser: "塗一塗",
     href: "/games/coloring-book",
     emoji: "🖍️",
@@ -111,7 +111,7 @@ export const GAMES: GameMeta[] = [
     hasScore: false,
     hasTimer: false,
     gameType: "coloring",
-    controls: ["選顏色塗一塗", "油漆桶一次填滿"],
+    controls: ["選顏色塗一塗", "點填滿，整塊上色"],
     art: {
       cover: "/games/v2/coloring-book/cover.webp",
       thumbnail: "/games/v2/coloring-book/cover.webp",
@@ -121,7 +121,7 @@ export const GAMES: GameMeta[] = [
     tutorial: [
       { text: "點顏色選一種", gesture: "tap" },
       { text: "點線稿塗上顏色", gesture: "tap" },
-      { text: "油漆桶一次填滿", gesture: "tap" },
+      { text: "點填滿，整塊上色", gesture: "tap" },
     ],
   },
 ];

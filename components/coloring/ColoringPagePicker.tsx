@@ -6,7 +6,9 @@ import type { ColoringPage } from "@/data/coloring-pages";
 import { listColoringDrafts, type ColoringDraft } from "@/lib/coloring/draft-storage";
 import {
   COLORING_GALLERY_HEADING,
+  COLORING_PICKER_CHARACTERS,
   COLORING_PICKER_LEAD,
+  COLORING_PICKER_SCENES,
 } from "@/lib/coloring/flow";
 import styles from "./ColoringPagePicker.module.css";
 
@@ -86,7 +88,7 @@ export function ColoringPagePicker({
       <div className={styles.book}>
         <section className={styles.spread} aria-labelledby="coloring-chars">
           <h2 id="coloring-chars" className={styles.heading}>
-            定裝人物
+            {COLORING_PICKER_CHARACTERS}
           </h2>
           <ul className={styles.grid}>
             {characters.map((page) => (
@@ -99,11 +101,11 @@ export function ColoringPagePicker({
                 >
                   <span className={styles.thumb}>
                     <Image
-                      src={page.previewSrc}
+                      src={page.lineArtSrc}
                       alt=""
                       fill
                       sizes="(max-width: 640px) 46vw, 200px"
-                      className={styles.thumbImg}
+                      className={`${styles.thumbImg} ${styles.lineThumb}`}
                     />
                   </span>
                   <span className={styles.cardTitle}>{page.title}</span>
@@ -114,7 +116,7 @@ export function ColoringPagePicker({
         </section>
         <section className={styles.spread} aria-labelledby="coloring-scenes">
           <h2 id="coloring-scenes" className={styles.heading}>
-            故事場景
+            {COLORING_PICKER_SCENES}
           </h2>
           <ul className={styles.grid}>
             {scenes.map((page) => (
@@ -127,11 +129,11 @@ export function ColoringPagePicker({
                 >
                   <span className={styles.thumb}>
                     <Image
-                      src={page.previewSrc}
+                      src={page.lineArtSrc}
                       alt=""
                       fill
                       sizes="(max-width: 640px) 46vw, 200px"
-                      className={styles.thumbImg}
+                      className={`${styles.thumbImg} ${styles.lineThumb}`}
                     />
                   </span>
                   <span className={styles.cardTitle}>{page.title}</span>

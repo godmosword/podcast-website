@@ -1,5 +1,67 @@
 .wrap {
   min-width: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.primary {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.toolBtn {
+  display: inline-flex;
+  flex: 0 0 auto;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  min-height: 44px;
+  height: 44px;
+  width: auto;
+  min-width: 44px;
+  padding: 0 0.55rem;
+  border-radius: var(--radius-pill);
+  border: 2px solid color-mix(in srgb, var(--coloring-ink) 22%, transparent);
+  background: var(--coloring-ui-surface);
+  color: var(--coloring-ink);
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.toolLabel {
+  pointer-events: none;
+}
+
+.toolBtn:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.cue {
+  box-shadow: 0 0 0 3px var(--coloring-accent);
+}
+
+.armed {
+  box-shadow: 0 0 0 3px var(--coloring-accent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cue {
+    animation: coloring-tool-cue 1.2s ease-in-out infinite;
+  }
+}
+
+@keyframes coloring-tool-cue {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
 }
 
 .bar {
@@ -102,6 +164,14 @@
   .group {
     flex: 0 0 auto;
     flex-wrap: nowrap;
+  }
+
+  .primary {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    flex: 0 0 auto;
+    background: color-mix(in srgb, var(--coloring-paper, var(--coloring-ui-surface)) 96%, transparent);
   }
 
   .group + .group {

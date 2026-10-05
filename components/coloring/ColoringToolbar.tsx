@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { BRUSH_SIZES, type BrushSizeId, type ColoringTool } from "@/lib/coloring/tools";
 import {
   BucketIcon,
@@ -26,6 +27,8 @@ type ColoringToolbarProps = {
   onDownload: () => void;
   viewActive: boolean;
   onResetView: () => void;
+  /** 下一步要點的畫具；給那顆鈕一圈提示。 */
+  cueTool?: ColoringTool | null;
 };
 
 const TOOLS: {
@@ -34,8 +37,8 @@ const TOOLS: {
   Icon: typeof CrayonIcon;
 }[] = [
   { id: "crayon", label: "蠟筆", Icon: CrayonIcon },
-  { id: "bucket", label: "油漆桶", Icon: BucketIcon },
-  { id: "eraser", label: "橡皮擦", Icon: EraserIcon },
+  { id: "bucket", label: "填滿", Icon: BucketIcon },
+  { id: "eraser", label: "擦掉", Icon: EraserIcon },
 ];
 
 function sizeDotPx(displayRadius: number) {
@@ -55,7 +58,25 @@ export function ColoringToolbar({
   onDownload,
   viewActive,
   onResetView,
+  cueTool = null,
 }: ColoringToolbarProps) {
+  const [clearArmed, setClearArmed] = useState(false);
+
+  useEffect(() => {
+    if (!clearArmed) return;
+    const timer = setTimeout(() => setClearArmed(false), 2500);
+    return () => clearTimeout(timer);
+  }, [clearArmed]);
+
+  const requestClear = () => {
+    if (!clearArmed) {
+      setClearArmed(true);
+      return;
+    }
+    setClearArmed(false);
+    onClear();
+  };
+
   return (
     <div className={styles.wrap}>
       <div
@@ -64,18 +85,24 @@ export function ColoringToolbar({
         aria-label="著色工具"
         aria-describedby="coloring-toolbar-hint"
       >
-        <div className={styles.group} role="group" aria-label="畫具">
+        <div className={styles.primary} role="group" aria-label="畫具">
           {TOOLS.map((item) => (
             <button
               key={item.id}
               type="button"
-              className={`${styles.btn} ${tool === item.id ? styles.active : ""}`}
+              className={`${styles.toolBtn} ${tool === item.id ? styles.active : ""} ${
+                cueTool === item.id ? styles.cue : ""
+              }`}
               aria-label={item.label}
               aria-pressed={tool === item.id}
               title={item.label}
-              onClick={() => onToolChange(item.id)}
+              onClick={() => {
+                setClearArmed(false);
+                onToolChange(item.id);
+              }}
             >
               <item.Icon className={styles.icon} />
+              <span className={styles.toolLabel}>{item.label}</span>
             </button>
           ))}
         </div>
@@ -115,10 +142,10 @@ export function ColoringToolbar({
           </button>
           <button
             type="button"
-            className={styles.btn}
-            onClick={onClear}
-            aria-label="清空"
-            title="清空"
+            className={`${styles.btn} ${clearArmed ? styles.armed : ""}`}
+            onClick={requestClear}
+            aria-label={clearArmed ? "再按一次清空" : "清空"}
+            title={clearArmed ? "再按一次清空" : "清空"}
           >
             <ClearIcon className={styles.icon} />
           </button>
@@ -135,9 +162,9 @@ export function ColoringToolbar({
           <button
             type="button"
             className={`${styles.btn} ${showPreview ? styles.active : ""}`}
-            aria-label="看原圖"
+            aria-label="故事照片"
             aria-pressed={showPreview}
-            title="看原圖"
+            title="故事照片"
             onClick={onTogglePreview}
           >
             <PreviewIcon className={styles.icon} />
@@ -154,7 +181,7 @@ export function ColoringToolbar({
         </div>
       </div>
       <p id="coloring-toolbar-hint" className={styles.scrollHint}>
-        → 右邊還有工具
+        → 右邊可以調筆、清空、存圖
       </p>
     </div>
   );

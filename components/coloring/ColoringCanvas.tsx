@@ -15,7 +15,7 @@ import {
   saveColoringDraft,
 } from "@/lib/coloring/draft-storage";
 import { renderFramedArtwork } from "@/lib/coloring/export-frame";
-import { COLORING_DONE_CTA } from "@/lib/coloring/flow";
+import { COLORING_DONE_CTA, COLORING_HINT_DRAW, COLORING_HINT_FILL } from "@/lib/coloring/flow";
 import {
   BRUSH_SIZES,
   ERASER_RADIUS_BONUS,
@@ -119,6 +119,7 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
   const snapshotAliveRef = useRef(true);
   const doneRequestRef = useRef(0);
   const [hasPainted, setHasPainted] = useState(false);
+  const [usedBucket, setUsedBucket] = useState(false);
 
   const revokeDoneSnapshot = useCallback(() => {
     if (doneSnapshotUrlRef.current) {
@@ -343,6 +344,7 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
       if (!rect) return;
       pushUndoPatch({ rect, pixels: cropImageDataRect(base, rect) });
       markPainted();
+      setUsedBucket(true);
       ctx.putImageData(img, 0, 0, rect.x, rect.y, rect.width, rect.height);
       requestComposite();
       scheduleSave();
@@ -425,6 +427,7 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
     setDoneOpen(false);
     revokeDoneSnapshot();
     setHasPainted(false);
+    setUsedBucket(false);
     undoStackRef.current = [];
     setCanUndo(false);
     applyView(DEFAULT_VIEW);
@@ -620,6 +623,7 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
     saveSeqRef.current += 1;
     void clearColoringDraft(page.id);
     setHasPainted(false);
+    setUsedBucket(false);
     composite();
   };
 
@@ -691,14 +695,11 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
           ← 換一張
         </button>
         <p className={styles.pageTitle}>{page.title}</p>
-        <button
-          type="button"
-          className={styles.doneBtn}
-          onClick={handleDone}
-          disabled={!ready}
-        >
-          {COLORING_DONE_CTA}
-        </button>
+        {hasPainted ? (
+          <button type="button" className={styles.doneBtn} onClick={handleDone}>
+            {COLORING_DONE_CTA}
+          </button>
+        ) : null}
       </div>
 
       <div className={styles.stage} ref={stageRef}>
@@ -732,9 +733,13 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
         {saveError}
       </p>
 
-      {!hasPainted ? (
-        <p className={styles.openHint} data-testid="coloring-open-hint">
-          選一個顏色，用蠟筆塗塗看
+      {!usedBucket ? (
+        <p
+          className={styles.openHint}
+          data-testid="coloring-open-hint"
+          data-step={hasPainted ? "fill" : "draw"}
+        >
+          {hasPainted ? COLORING_HINT_FILL : COLORING_HINT_DRAW}
         </p>
       ) : null}
       {/* G-H3：色盤＋工具列黏在視窗底（手機）／畫布右欄（桌機），畫布可見時一定搆得到 */}
@@ -753,6 +758,7 @@ export function ColoringCanvas({ page, onBack }: ColoringCanvasProps) {
           onDownload={handleDownload}
           viewActive={viewActive}
           onResetView={() => applyView(DEFAULT_VIEW)}
+          cueTool={hasPainted && !usedBucket ? "bucket" : null}
         />
       </div>
 

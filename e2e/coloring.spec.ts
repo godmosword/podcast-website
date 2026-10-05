@@ -58,7 +58,8 @@ test.describe("coloring book", () => {
     await page.mouse.up();
 
     expect(await countRedOnRow(page, 0.5, 0.62, 0.55)).toBeGreaterThan(0);
-    await expect(page.getByTestId("coloring-open-hint")).toHaveCount(0);
+    await expect(page.getByTestId("coloring-open-hint")).toHaveAttribute("data-step", "fill");
+    await expect(page.getByRole("button", { name: "我塗好了" })).toBeVisible();
 
     await page.getByRole("button", { name: "復原" }).click();
     expect(await countRedOnRow(page, 0.5, 0.62, 0.55)).toBe(0);
@@ -67,7 +68,7 @@ test.describe("coloring book", () => {
   /** 油漆桶點外底：外框可上色，但不得灌進主體中心（輪廓閉合防漏色）。 */
   async function bucketExteriorStaysOut(page: Page, pickerName: RegExp) {
     await openColoringPage(page, pickerName);
-    await page.getByRole("button", { name: "油漆桶" }).click();
+    await page.getByRole("button", { name: "填滿" }).click();
 
     const box = await page.locator("canvas").boundingBox();
     if (!box) throw new Error("canvas boundingBox 不存在");
@@ -108,13 +109,14 @@ test.describe("coloring book", () => {
 
   test("工具列具備筆刷三檔與縮放還原", async ({ page }) => {
     await openFirstColoringPage(page);
-    await expect(page.getByTestId("coloring-open-hint")).toHaveText("選一個顏色，用蠟筆塗塗看");
+    await expect(page.getByTestId("coloring-open-hint")).toHaveAttribute("data-step", "draw");
+    await expect(page.getByRole("button", { name: "我塗好了" })).toHaveCount(0);
     for (const name of ["筆刷細", "筆刷中", "筆刷粗"]) {
       const sizeBtn = page.getByRole("button", { name });
       await expect(sizeBtn).toBeVisible();
       await expect(sizeBtn).not.toHaveText(name.replace("筆刷", ""));
     }
-    await expect(page.getByRole("button", { name: "蠟筆" })).not.toHaveText("蠟筆");
+    await expect(page.getByRole("button", { name: "蠟筆" })).toContainText("蠟筆");
     await expect(page.getByRole("button", { name: "蠟筆" }).locator("svg")).toBeVisible();
     await expect(page.getByRole("button", { name: "縮放還原" })).toBeDisabled();
   });
@@ -181,7 +183,20 @@ test.describe("coloring book", () => {
   test("390×400：矮視窗完成面不顯示快照", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 400 });
     await openFirstColoringPage(page);
-    await paintCrayonStroke(page);
+    const canvas = page.locator("canvas");
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error("canvas boundingBox 不存在");
+    const start = { x: box.x + box.width * 0.5, y: box.y + box.height * 0.5 };
+    const end = { x: start.x + 16, y: start.y };
+    const pointer = {
+      bubbles: true,
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+    };
+    await canvas.dispatchEvent("pointerdown", { ...pointer, clientX: start.x, clientY: start.y, buttons: 1 });
+    await canvas.dispatchEvent("pointermove", { ...pointer, clientX: end.x, clientY: end.y, buttons: 1 });
+    await canvas.dispatchEvent("pointerup", { ...pointer, clientX: end.x, clientY: end.y, buttons: 0 });
     await page.getByRole("button", { name: "我塗好了" }).click();
     await expect(page.getByRole("dialog", { name: "塗好了！" })).toBeVisible();
     await expect(page.getByTestId("coloring-done-snapshot")).toBeHidden();
@@ -189,6 +204,7 @@ test.describe("coloring book", () => {
 
   test("我塗好了打開完成站，可再塗這一張", async ({ page }) => {
     await openFirstColoringPage(page);
+    await paintCrayonStroke(page);
     await page.getByRole("button", { name: "我塗好了" }).click();
     await expect(page.getByRole("dialog", { name: "塗好了！" })).toBeVisible();
     await page.getByRole("button", { name: "再塗這一張" }).click();
@@ -243,7 +259,7 @@ test.describe("coloring book", () => {
         return {
           canvasVisible: canvas.top < innerHeight && canvas.bottom > 0,
           swatch: probe(document.querySelector('[role="option"]')),
-          tool: probe(document.querySelector('button[aria-label="油漆桶"]')),
+          tool: probe(document.querySelector('button[aria-label="填滿"]')),
         };
       });
       expect(hit).toEqual({ canvasVisible: true, swatch: true, tool: true });

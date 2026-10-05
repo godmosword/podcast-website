@@ -303,8 +303,16 @@ test.describe("遊戲完整 lifecycle", () => {
   test("Coloring：選頁 → 畫布 → 完成 → 再塗 → 再完成 → 換一張並離開", async ({ page }) => {
     await page.setViewportSize(MOBILE);
     await openColoringCanvas(page);
+    await expect(page.getByRole("button", { name: "我塗好了" })).toHaveCount(0);
+    await expect(page.getByTestId("coloring-open-hint")).toHaveAttribute("data-step", "draw");
+    const box = await page.locator("canvas").boundingBox();
+    if (!box) throw new Error("canvas boundingBox 不存在");
+    const y = box.y + box.height * 0.55;
+    await page.mouse.move(box.x + box.width * 0.5, y);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.56, y);
+    await page.mouse.up();
     await expect(page.getByRole("button", { name: "我塗好了" })).toBeVisible();
-    await expect(page.getByTestId("coloring-open-hint")).toHaveText("選一個顏色，用蠟筆塗塗看");
 
     await page.getByRole("button", { name: "我塗好了" }).click();
     await expect(page.getByRole("dialog", { name: "塗好了！" })).toBeVisible();
@@ -355,13 +363,14 @@ test.describe("遊戲第二輪 P2 mobile regression", () => {
       clientWidth: node.clientWidth,
     }));
     expect(scrollState.scrollWidth).toBeGreaterThan(scrollState.clientWidth);
-    const bucket = page.getByRole("button", { name: "油漆桶" });
+    const bucket = page.getByRole("button", { name: "填滿" });
     await bucket.click();
     await expect(bucket).toHaveAttribute("aria-pressed", "true");
     await expect(bucket).toHaveCSS("min-height", "44px");
 
     await page.setViewportSize({ width: 844, height: 390 });
     await expect(toolbar).toBeVisible();
-    await expect(page.getByRole("button", { name: "我塗好了" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "我塗好了" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "填滿" })).toBeVisible();
   });
 });

@@ -100,6 +100,11 @@
   object-fit: cover;
 }
 
+.lineThumb {
+  object-fit: contain;
+  background: var(--coloring-canvas-surface);
+}
+
 .cardTitle {
   font-weight: 700;
   font-size: var(--fs-control);

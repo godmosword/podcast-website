@@ -35,12 +35,12 @@ function renderToolbar(
 }
 
 describe("ColoringToolbar", () => {
-  it("畫具與筆刷是圖示鈕，可及名稱仍是中文", () => {
+  it("畫具有圖示和看得到的名字", () => {
     renderToolbar();
 
-    for (const name of ["蠟筆", "油漆桶", "橡皮擦"] as const) {
+    for (const name of ["蠟筆", "填滿", "擦掉"] as const) {
       const btn = screen.getByRole("button", { name });
-      expect(btn.textContent).toBe("");
+      expect(btn.textContent).toContain(name);
       expect(btn.querySelector("svg")).toBeTruthy();
     }
 
@@ -60,7 +60,7 @@ describe("ColoringToolbar", () => {
       "disabled",
       false,
     );
-    expect(screen.getByRole("button", { name: "看原圖" }).getAttribute("aria-pressed")).toBe(
+    expect(screen.getByRole("button", { name: "故事照片" }).getAttribute("aria-pressed")).toBe(
       "true",
     );
     expect(screen.getByRole("button", { name: "下載" }).querySelector("svg")).toBeTruthy();
@@ -72,7 +72,16 @@ describe("ColoringToolbar", () => {
     expect(renderToStaticMarkup(<EraserIcon />)).toContain("#f781c6");
   });
 
-  it("點油漆桶會切工具，筆刷三檔此時不可按", () => {
+  it("清空要再按一次才會清掉", () => {
+    const onClear = vi.fn();
+    renderToolbar({ onClear });
+    fireEvent.click(screen.getByRole("button", { name: "清空" }));
+    expect(onClear).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "再按一次清空" }));
+    expect(onClear).toHaveBeenCalledOnce();
+  });
+
+  it("點填滿會切工具，筆刷三檔此時不可按", () => {
     const onToolChange = vi.fn();
     renderToolbar({ tool: "bucket", onToolChange });
 
