@@ -670,11 +670,11 @@ test.describe("夜間漢堡抽屜", () => {
       }, width);
       const rgb = { surface: surfacePx, panel: panelPx, text: textPx };
 
-      // 色帶：舊式 38%+--bg 是 3.78:1；現行 10%+--nav-panel-bg 實測 1.35:1
+      // 色帶：舊式 38%+--bg 是 3.78:1；現行 10%+--nav-panel-bg 計算值 1.34:1
       expect(contrast(rgb.surface, rgb.panel)).toBeLessThan(2);
       // 開啟態頂欄文字：舊值 color-mix(--landing-nav-ink 48%, --ink) 僅 1.48:1
       expect(contrast(rgb.text, rgb.surface)).toBeGreaterThanOrEqual(4.5);
-      // 面板不得再是深靛藍：--bg #1e2438 的 b−r = +26
+      // 面板不得偏藍：舊暖夜靛 --bg #1e2438 的 b−r = +26；現行面板 b−r = −20
       expect(rgb.panel[2] - rgb.panel[0]).toBeLessThan(10);
     });
   }

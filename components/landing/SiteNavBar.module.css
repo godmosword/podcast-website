@@ -271,14 +271,14 @@
   :global(html[data-theme="night"]) .bar[data-menu-open="true"] {
     /* 基底＝面板色，佔比 10%：舊式 38% + `--bg` 會讓頂欄變 rgb(127,125,129)、
      * 與面板 rgb(30,36,56) 階差 3.78:1——那是一條灰帶壓在深藍板上，不是接縫。
-     * 10% → rgb(60,55,60)，與面板階差 1.27:1。 */
+     * 10% → rgb(62,52,43)，與面板階差 1.34:1。 */
     background: color-mix(
       in srgb,
       var(--landing-nav-cta-bg) 10%,
       var(--nav-panel-bg)
     );
     /* 舊值 color-mix(--landing-nav-ink 48%, --ink) = rgb(176,152,127)，
-     * 對開啟態底僅 **1.48:1**——抽屜一開，頂欄四個詞幾乎看不見。改純 --ink → 9.68:1。 */
+     * 對開啟態底僅 **1.48:1**——抽屜一開，頂欄四個詞幾乎看不見。改純 --ink → 10.09:1。 */
     color: var(--ink);
     border-bottom-color: color-mix(
       in srgb,
@@ -305,17 +305,17 @@
 
 :global(html[data-theme="night"]) .panel {
   /* 夜間抽屜底改暖深褐（見 globals `--nav-panel-bg` 註解）；日間是桃色頂欄底。
-   * ThemeToggle 軌道是 `--card` rgb(44,52,80)，仍比本底亮 → 維持「浮起」不需覆寫。 */
+   * ThemeToggle 軌道另由下方 `.themeSlot > *` 就地抬一階。 */
   background: var(--nav-panel-bg);
   /* 頂緣暖色 hairline 銜接（含開啟時微暗頂欄）；陰影改夜色 */
   border-top: 1px solid color-mix(in srgb, var(--landing-nav-border) 55%, var(--hairline));
   box-shadow:
     inset 0 1px 0 color-mix(in srgb, var(--c-yellow) 12%, transparent),
-    0 18px 32px rgba(8, 12, 28, 0.45);
+    0 18px 32px rgba(0, 0, 0, 0.5);
 }
 
-/* 抽屜內的 ThemeToggle 軌道底是 `--card`(#2c3450，靛藍)。面板暖化後它會變成
- * 暖褐板上唯一的藍色島（也是使用者要求去掉的那個藍）。就地抬一階＝面板色 + 白 8%，
+/* 抽屜內的 ThemeToggle 軌道底是 `--card`(#272422)，對暖褐面板只有 1.05:1，
+ * 貼平在板上看不出是一顆控制項。就地抬一階＝面板色 + 白 8%（對面板 1.27:1），
  * 維持「比面板亮＝浮起」的高度階梯，且不動 ThemeToggle 元件本身（他處仍用 --card）。
  *
  * 以 `.themeSlot > *` 定位，**不要**用 `[class*="compact"]` 之類的 class 子字串比對：

@@ -257,7 +257,7 @@
   min-height: 44px;
   padding: 10px 18px;
   border-radius: var(--radius-pill);
-  /* 壓在 hero 上：不透明白底＋暖深墨字。不可吃 --cta-soft-bg（夜間 --card 會翻成深靛）。 */
+  /* 壓在 hero 上：不透明白底＋暖深墨字。不可吃 --cta-soft-bg（夜間 --card 會翻成深炭）。 */
   border: 1px solid color-mix(in srgb, var(--landing-brand-ink) 22%, transparent);
   background: var(--on-dark);
   color: var(--landing-brand-ink);

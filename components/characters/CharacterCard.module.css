@@ -65,7 +65,7 @@
     linear-gradient(180deg, transparent 70%, rgba(52, 48, 43, 0.08) 100%);
 }
 
-/* 夜間沒有 multiply 可用，暈影加重：棚拍白底從四角淡入深靛底墊、變成一盞聚光，
+/* 夜間沒有 multiply 可用，暈影加重：棚拍白底從四角淡入深色底墊、變成一盞聚光，
    場景圖四角跟著入夜——同一種處理，兩套素材才一致。 */
 :global([data-theme="night"]) .portraitMat::after {
   background:

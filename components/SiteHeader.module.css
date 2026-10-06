@@ -24,7 +24,7 @@
 }
 
 /* 美術審 M2：夜間 hero 亮度對齊 Landing——Landing 夜間有 scrim＋月亮，SiteHeader 的正午藍天
-   卻在深靛頁上全亮，睡前主題被第一屏打斷。同一組 --bedtime-veil 漸層（LandingBedtimeLayer .veil），
+   卻在深色頁上全亮，睡前主題被第一屏打斷。同一組 --bedtime-veil 漸層（LandingBedtimeLayer .veil），
    上方入夜、中段透一點、底部再壓一層，不做均勻降亮度（會把黏土變灰）。 */
 [data-theme="night"] .scene::after {
   content: "";

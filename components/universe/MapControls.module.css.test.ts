@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 /**
  * 地圖控制鈕的色票契約：必須走 --map-chip*（日夜不反轉）。
- * 用 --card／--cta-warm-fg 會在夜間變成深靛底＋深棕字，壓在深靛夜海上
+ * 用 --card／--cta-warm-fg 會在夜間變成深色底＋深棕字，壓在深靛夜海上
  * 輪廓與字都消失（正式站回饋 2026-07-27）。
  */
 describe("MapControls.module.css 夜間可辨契約", () => {

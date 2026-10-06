@@ -18,7 +18,7 @@
   border-radius: var(--radius-md);
   /* 奶油／木質暖底，呼應全站手繪黏土風與木牌名牌，不用扁平白卡。
      色票走 --map-chip*（日夜不反轉）：原本的 --card／--cta-warm-fg 在夜間是
-     深靛底＋深棕字，壓在深靛夜海上輪廓與字都不見了。 */
+     深色底＋深棕字，壓在深靛夜海上輪廓與字都不見了。 */
   background: linear-gradient(var(--map-chip), var(--map-chip-2));
   color: var(--map-chip-ink);
   font-size: 1.55rem;

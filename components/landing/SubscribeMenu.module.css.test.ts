@@ -36,8 +36,8 @@ describe("SubscribeMenu.module.css trigger 去框", () => {
     expect(trigger).not.toMatch(/font-size:/);
   });
 
-  it("夜間下拉底與漢堡抽屜同底（不得留在偏藍的 --card）", () => {
-    // 兩者都是頂欄浮層；抽屜暖化後下拉若留 --card(#2c3450 靛藍)，
+  it("夜間下拉底與漢堡抽屜同底（不得留在 --card）", () => {
+    // 兩者都是頂欄浮層；抽屜是暖深褐，下拉若留 --card(#272422 炭黑)，
     // 同一列會出現兩個浮層兩種底色。快照拍不到（下拉要點開才出現）。
     const start = css.indexOf('html[data-theme="night"]) .dropdown {');
     expect(start).toBeGreaterThan(-1);

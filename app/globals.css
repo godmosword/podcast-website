@@ -211,7 +211,7 @@
   --surface-game-warm: #fff9ee;
   --surface-game-sky: #f3fbff;
   --surface-game-pink: #fff0f7;
-  --bedtime-veil: #0c1230;
+  --bedtime-veil: #0d0b0a;
   --status-error: #b42318;
   --float-amp: 4px;
   /* 螢光筆色塊上的文字：底色恆為淺色（黃/粉/薄荷…），文字需恆深，
@@ -247,18 +247,19 @@ body:has(main[data-deferred-brand-font][data-brand-fonts="ready"]) {
   font-size-adjust: none;
 }
 
-/* ============ 夜晚模式（睡前・暖夜靛） ============ */
+/* ============ 夜晚模式（睡前・暖炭黑） ============ */
 [data-theme="night"] {
   color-scheme: dark;
 
-  /* 底色略暖；bg → card → card-2 拉開明度，搜尋／卡片才有浮層 */
-  --bg: #1e2438;
-  --bg-2: #262d45;
-  --bg-dot: #2e3652;
+  /* 近黑帶一點棕（b < r），不用純黑：OLED 捲動不拖影，卡片也還浮得起來。
+     黑底上 --elev-* 陰影幾乎看不見，浮層只能靠明度階差：bg→card 1.20:1、card→card-2 1.14:1。 */
+  --bg: #141312;
+  --bg-2: #1c1a18;
+  --bg-dot: #232120;
   --ink: #f0ead8;
   --ink-soft: #bdb6a4;
-  --card: #2c3450;
-  --card-2: #353e5c;
+  --card: #272422;
+  --card-2: #312e2a;
   --hairline: rgba(255, 255, 255, 0.12);
   --line: var(--hairline);
 
@@ -270,8 +271,8 @@ body:has(main[data-deferred-brand-font][data-brand-fonts="ready"]) {
   --c-teal: #549890;
   --c-lilac: #8f82b0;
 
-  --sky: #2e3652;
-  --sky-2: #363e5c;
+  --sky: #232120;
+  --sky-2: #2b2926;
   --sun: #dcc87a;
   --leaf: #7fa86c;
   --sky-blue: #5f98b0;
@@ -291,10 +292,10 @@ body:has(main[data-deferred-brand-font][data-brand-fonts="ready"]) {
   --motion-pop: 0.48s var(--ease-spring);
   --motion-float: 9s ease-in-out;
 
-  --mix-base: #2c3450;
+  --mix-base: #272422;
   --illus-warm: brightness(0.9) sepia(0.1);
   --focus-ring: var(--c-yellow);
-  --chip-active-fg: #1e2438;
+  --chip-active-fg: #141312;
   --float-amp: 2px;
 
   --landing-brand: #d9701a;
@@ -307,12 +308,11 @@ body:has(main[data-deferred-brand-font][data-brand-fonts="ready"]) {
   --page-warm-mid: color-mix(in srgb, var(--c-teal) 10%, var(--bg));
   --page-warm-to: color-mix(in srgb, var(--c-yellow) 4%, var(--bg-2));
   --warm-surface: color-mix(in srgb, var(--card) 88%, var(--c-yellow) 12%);
-  /* 漢堡抽屜面板底。刻意**不**用 `--bg`（#1e2438 深靛）也不用 `--warm-surface`：
-     前者是使用者反映的「深藍底色」；後者站內已有 8 處消費（for-parents ×3、
-     play-map/[placeId] ×4、CharacterCard ×1），改它會波及那些頁。
-     往 `--c-yellow` 加暖是死路——黃是亮色，加到 16% 抽屜「給爸媽」小標就掉出 AA(4.49)，
-     而藍要到 24% 才中和掉。改摻深暖褐 `--landing-brand-ink`：暖且暗，
-     rgb(43,38,44)、b−r=+1（藍已中和），--ink 12.33:1、--ink-soft 7.34:1。 */
+  /* 漢堡抽屜面板底。刻意**不**用 `--bg`（與頁面同色，抽屜會沒有邊界）也不用 `--warm-surface`：
+     後者站內已有 8 處消費（for-parents ×3、play-map/[placeId] ×4、CharacterCard ×1），
+     改它會波及那些頁。往 `--c-yellow` 加暖是死路——黃是亮色，加多了抽屜「給爸媽」小標會掉出 AA。
+     改摻深暖褐 `--landing-brand-ink`：暖且暗，rgb(41,30,21)、b−r=−20，
+     --ink 13.53:1、--ink-soft 8.05:1、--c-yellow 8.12:1。 */
   --nav-panel-bg: color-mix(in srgb, var(--card) 50%, var(--landing-brand-ink) 50%);
   --warm-surface-2: color-mix(in srgb, var(--c-teal) 14%, var(--card));
   --warm-accent: var(--c-teal);

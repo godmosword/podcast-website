@@ -17,7 +17,7 @@ export const NIGHT_THEME: ThemePreference = "night";
 export const LIGHT_THEME: ThemePreference = "light";
 export const SYSTEM_THEME_MODE: ThemeMode = "system";
 /** 狀態列底色；`app/layout.tsx` 的 viewport 與本檔的 runtime 更新共用。 */
-export const NIGHT_THEME_COLOR = "#1e2438";
+export const NIGHT_THEME_COLOR = "#141312";
 export const LIGHT_THEME_COLOR = "#ffffff";
 
 const DARK_SCHEME_QUERY = "(prefers-color-scheme: dark)";
