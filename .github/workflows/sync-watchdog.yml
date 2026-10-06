@@ -18,6 +18,8 @@ permissions:
   contents: read
   issues: write
   actions: read
+  # 未合入的 sync/apple-* PR 不算「RSS 卡住」；列 PR 需要這個權限。
+  pull-requests: read
 
 jobs:
   watchdog:

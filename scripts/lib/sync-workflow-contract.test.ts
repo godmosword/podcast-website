@@ -256,6 +256,17 @@ describe("sync workflow contract", () => {
     expect(pkg.overrides?.browserslist).toBe("^4.28.7");
   });
 
+  it("package.json 必須釘 overrides.source-map-js 為 1.2.2（修補 GHSA-68fv-2mgg-jv7q）", () => {
+    const pkg = JSON.parse(
+      readFileSync(join(ROOT, "package.json"), "utf8"),
+    ) as { overrides?: Record<string, string> };
+    const lock = readFileSync(join(ROOT, "package-lock.json"), "utf8");
+
+    expect(pkg.overrides?.["source-map-js"]).toBe("1.2.2");
+    expect(lock).toContain("source-map-js-1.2.2.tgz");
+    expect(lock).not.toContain("source-map-js-1.2.1.tgz");
+  });
+
   it("GH013 fallback 的 rerun 必須可重用既有 sync branch", () => {
     const yaml = readWorkflow("sync-apple-podcast.yml");
     expect(yaml).toContain('git checkout -B "$branch"');
@@ -392,6 +403,11 @@ describe("sync workflow contract", () => {
     expect(yaml).toContain("if: failure()");
     expect(yaml).toContain("continue-on-error: true");
     expect(yaml).toContain("scripts/sync-alert.ts failure --kind=sync-job-failure");
+    expect(yaml).toContain("sync-alert-skip");
+    expect(yaml).toContain("pending-merge");
+    expect(yaml).toContain("sync-failure-context.txt");
+    expect(yaml).toContain("sync-pr-url.txt");
+    expect(yaml).toContain("::error::等待 sync PR merge 逾時");
     expect(yaml).not.toContain("actions/github-script");
     expect(yaml).not.toContain("github.rest.issues.create");
   });
@@ -432,7 +448,10 @@ describe("sync workflow contract", () => {
 
     expect(src).toContain("decideStaleRssAlert");
     expect(src).toContain("waitForFirstSyncHoursFromEnv");
+    expect(src).toContain("hasOpenSyncLandingPr");
+    expect(src).toContain("syncLandingPending");
     expect(yaml).toContain('STALE_HOURS: "3"');
+    expect(yaml).toContain("pull-requests: read");
   });
 
   it("notify-live 必須接受 report.gitHead 為 HEAD 祖先（GHA 先寫 report 再 commit）", () => {

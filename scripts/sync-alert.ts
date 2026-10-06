@@ -7,7 +7,9 @@
  *   - watchdog：以 import 方式呼叫 openOrCommentIssue / resolveIssue。
  *     新集等待第一次 sync 時不開 stale；若已開 stale，notify-live 把同一張改成待生圖，不另開第二張。
  *
- * 紅線：失敗 Issue 只做去重告警與 run 連結，詳細錯誤仍以 Actions logs 為準；
+ * 紅線：失敗 Issue 集中去重，並附上失敗步驟、workflow 寫下的原因與 sync PR。
+ * 詳細 log 仍以 Actions 為準。auto-merge 已設定但 checks 還沒跑完
+ * （SYNC_ALERT_SKIP=pending-merge）不開單。@mention 只在開新單時加一次。
  * Issue 另保留人工動作：待生圖與 RSS stale。
  *
  * notify-live 路徑：dryRun／過期 report 拒絕開單；gitHead 須為目前 HEAD 或其近期祖先
@@ -17,8 +19,11 @@
  * 環境變數：
  *   SYNC_REPORT_PATH      — sync 寫入的 JSON（notify-live 用；未設時 default `.cache/sync-run-report.json`）
  *   SYNC_ISSUE_ASSIGNEES  — 逗號分隔 GitHub username
- *   SYNC_ISSUE_MENTIONS   — Issue 開頭 @mention
+ *   SYNC_ISSUE_MENTIONS   — Issue 開頭 @mention（只加在新開的單，內文不要再加）
  *   SYNC_ALERT_DRY_RUN=1  — 不實際呼叫 gh，只印出將執行的動作
+ *   SYNC_FAILURE_CONTEXT  — workflow 寫下的失敗原因（failure 內文的「原因」）
+ *   SYNC_PR_URL           — GH013 fallback 的 sync PR
+ *   SYNC_ALERT_SKIP       — 設為 pending-merge 時不開失敗單
  */
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
@@ -299,18 +304,82 @@ function runUrl(env: NodeJS.ProcessEnv = process.env): string {
   return repo && runId ? `${server}/${repo}/actions/runs/${runId}` : "(本機)";
 }
 
-function syncFailureBody(env: NodeJS.ProcessEnv = process.env): string {
+export type SyncFailureExtra = {
+  failedSteps?: string[];
+  context?: string;
+  prUrl?: string;
+};
+
+/**
+ * 失敗單內文。@mention 只由 openOrCommentIssue 在開新單時加一次，這裡不要再加。
+ */
+export function buildSyncFailureBody(
+  env: NodeJS.ProcessEnv = process.env,
+  extra: SyncFailureExtra = {},
+): string {
   const run = runUrl(env);
   const sha = env.GITHUB_SHA?.slice(0, 12) || "(unknown)";
   const ref = env.GITHUB_REF_NAME || env.GITHUB_REF || "(unknown)";
-  return `${mentionPreamble(env)}## Apple sync workflow 失敗
+  const failedSteps = (extra.failedSteps ?? []).filter((name) => name.trim());
+  const context = (extra.context ?? env.SYNC_FAILURE_CONTEXT ?? "").trim();
+  const prUrl = (extra.prUrl ?? env.SYNC_PR_URL ?? "").trim();
+  const lines = [
+    "## Apple sync workflow 失敗",
+    "",
+    `- **Run**：${run === "(本機)" ? run : `[查看 Actions log](${run})`}`,
+    `- **Commit**：\`${sha}\``,
+    `- **Branch**：\`${ref}\``,
+  ];
+  if (failedSteps.length > 0) {
+    lines.push(
+      `- **失敗步驟**：${failedSteps.map((name) => `\`${name}\``).join("、")}`,
+    );
+  }
+  if (context) {
+    lines.push(`- **原因**：${context}`);
+  }
+  if (prUrl) {
+    lines.push(`- **Sync PR**：${prUrl}`);
+  }
+  lines.push(
+    "",
+    "這張 Issue 代表這次 job 沒有把結果留在 main。RSS 下載可能已經成功；常見卡點是單元測試、quality，或 protect-main-web（GH013）。",
+    "",
+    "請先查看 Run 裡第一個失敗的 step 與錯誤訊息；本 Issue 只負責把失敗即時集中、去重，不以 watchdog 的 stale 判斷取代原始 CI 證據。",
+  );
+  return `${lines.join("\n")}\n`;
+}
 
-- **Run**：${run === "(本機)" ? run : `[查看 Actions log](${run})`}
-- **Commit**：\`${sha}\`
-- **Branch**：\`${ref}\`
+const REPORT_SYNC_FAILURE_STEP = "Report sync failure";
 
-請先查看 Run 裡第一個失敗的 step 與錯誤訊息；本 Issue 只負責把失敗即時集中、去重，不以 watchdog 的 stale 判斷取代原始 CI 證據。
-`;
+/** 從這次 sync run 取出 conclusion=failure 的 step；告警步驟本身不算。gh 失敗時回空陣列。 */
+function failedStepNamesFromRun(
+  env: NodeJS.ProcessEnv,
+  deps: SyncAlertDeps,
+): string[] {
+  const runId = env.GITHUB_RUN_ID?.trim();
+  if (!runId) return [];
+  try {
+    const out = callGh(["run", "view", runId, "--json", "jobs"], deps);
+    const parsed = JSON.parse(out || "{}") as {
+      jobs?: Array<{
+        steps?: Array<{ name?: string; conclusion?: string | null }>;
+      }>;
+    };
+    const names: string[] = [];
+    for (const job of parsed.jobs ?? []) {
+      for (const step of job.steps ?? []) {
+        if (step.conclusion !== "failure") continue;
+        const name = step.name?.trim();
+        if (!name || name === REPORT_SYNC_FAILURE_STEP) continue;
+        if (!names.includes(name)) names.push(name);
+      }
+    }
+    return names;
+  } catch (err) {
+    warn(deps, `讀取失敗步驟失敗（忽略）：${(err as Error).message}`);
+    return [];
+  }
 }
 
 type GhIssue = {
@@ -755,13 +824,23 @@ export function runSyncAlertMode(
         comment: `✅ 同步已恢復正常。\n\n- Run：${runUrl(env)}`,
       }, deps);
       break;
-    case "failure":
+    case "failure": {
+      const skip = env.SYNC_ALERT_SKIP?.trim();
+      if (skip === "pending-merge") {
+        log(
+          deps,
+          "略過同步失敗發報：sync PR 已設定 auto-merge，checks 尚未完成。",
+        );
+        break;
+      }
+      const failedSteps = failedStepNamesFromRun(env, deps);
       openOrCommentIssue({
         kind: kindArg ?? "sync-job-failure",
         title: "[sync] Apple Podcast workflow 失敗",
-        body: syncFailureBody(env),
+        body: buildSyncFailureBody(env, { failedSteps }),
       }, deps);
       break;
+    }
     default:
       console.error(`未知模式：${mode}（notify-live | resolve | failure）`);
   }

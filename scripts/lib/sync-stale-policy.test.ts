@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   decideStaleRssAlert,
+  hasOpenSyncLandingPr,
   runsAfterPubDate,
   waitForFirstSyncHoursFromEnv,
 } from "./sync-stale-policy";
@@ -100,5 +101,29 @@ describe("decideStaleRssAlert", () => {
       waitForFirstSyncHours: wait,
     });
     expect(decision.action).toBe("open");
+  });
+
+  it("sync PR 已開、尚未合入 → 靜默", () => {
+    const decision = decideStaleRssAlert({
+      onSite: false,
+      hours: 10,
+      syncActive: false,
+      postPublishRuns: [],
+      waitForFirstSyncHours: wait,
+      syncLandingPending: true,
+    });
+    expect(decision.action).toBe("silent");
+    expect(decision.reason).toContain("sync PR 已開");
+  });
+});
+
+describe("hasOpenSyncLandingPr", () => {
+  it("只認 sync/apple- 開頭的 head", () => {
+    expect(hasOpenSyncLandingPr([{ headRefName: "sync/apple-123" }])).toBe(true);
+    expect(hasOpenSyncLandingPr([{ headRefName: "cursor/ep32-hero-cover" }])).toBe(
+      false,
+    );
+    expect(hasOpenSyncLandingPr([])).toBe(false);
+    expect(hasOpenSyncLandingPr([{ headRefName: "" }])).toBe(false);
   });
 });

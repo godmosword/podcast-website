@@ -121,6 +121,7 @@ jobs:
           # 防止新增同步產物未列入 git add 時被「成功但未上站」地靜默遺漏。
           if [ -n "$(git diff --name-only)" ] || [ -n "$(git ls-files --others --exclude-standard)" ]; then
             echo "::error::sync 產生了未 stage 的檔案；請更新 workflow 的 git add 白名單。"
+            printf '%s\n' "sync 產生了未 stage 的檔案；請更新 workflow 的 git add 白名單。" > "$RUNNER_TEMP/sync-failure-context.txt"
             git diff --name-only
             git ls-files --others --exclude-standard
             exit 1
@@ -166,6 +167,7 @@ jobs:
             else
               echo "::notice::沿用既有 sync PR ${pr}"
             fi
+            printf '%s\n' "$pr" > "$RUNNER_TEMP/sync-pr-url.txt"
             # GITHUB_TOKEN 產生的 push／PR event 不會再觸發 pull_request CI；
             # workflow_dispatch 是例外，明確在同一個 sync branch 上只補跑 required checks；
             # 完整 child-path e2e 仍由正常 push／PR CI 執行，不讓非 required job 阻塞 sync。
@@ -175,6 +177,7 @@ jobs:
             sha=$(git rev-parse HEAD)
             list_out=$(gh run list --workflow=ci.yml --branch="$branch" --event=workflow_dispatch --limit=20 --json databaseId,headSha,createdAt 2>&1) || {
               echo "::error::gh run list 失敗（branch=${branch}）"
+              printf '%s\n' "gh run list 失敗（branch=${branch}）" > "$RUNNER_TEMP/sync-failure-context.txt"
               echo "$list_out"
               return 1
             }
@@ -185,6 +188,7 @@ jobs:
             for wait_i in $(seq 1 12); do
               list_out=$(gh run list --workflow=ci.yml --branch="$branch" --event=workflow_dispatch --limit=20 --json databaseId,headSha,createdAt 2>&1) || {
                 echo "::error::gh run list 失敗（branch=${branch}）"
+                printf '%s\n' "gh run list 失敗（branch=${branch}）" > "$RUNNER_TEMP/sync-failure-context.txt"
                 echo "$list_out"
                 return 1
               }
@@ -196,6 +200,7 @@ jobs:
             done
             if [ -z "$ci_run_id" ] || [ "$ci_run_id" = "null" ]; then
               echo "::error::找不到 workflow_dispatch CI run（branch=${branch} sha=${sha}）"
+              printf '%s\n' "找不到 workflow_dispatch CI run（branch=${branch} sha=${sha}）" > "$RUNNER_TEMP/sync-failure-context.txt"
               return 1
             fi
             echo "::notice::GH013 waiter 觀測 CI run ${ci_run_id}（sha=${sha}）"
@@ -206,6 +211,7 @@ jobs:
             for i in $(seq 1 80); do
               state=$(gh pr view "$pr" --json state --jq .state 2>&1) || {
                 echo "::error::gh pr view 失敗（pr=${pr}）"
+                printf '%s\n' "gh pr view 失敗（pr=${pr}）" > "$RUNNER_TEMP/sync-failure-context.txt"
                 echo "$state"
                 return 1
               }
@@ -214,10 +220,12 @@ jobs:
               fi
               if [ "$state" = "CLOSED" ]; then
                 echo "::error::sync PR 未合併就被關閉：$pr"
+                printf '%s\n' "sync PR 未合併就被關閉：$pr" > "$RUNNER_TEMP/sync-failure-context.txt"
                 return 1
               fi
               jobs_out=$(gh run view "$ci_run_id" --json jobs 2>&1) || {
                 echo "::error::gh run view 失敗（run=${ci_run_id}）"
+                printf '%s\n' "gh run view 失敗（run=${ci_run_id}）" > "$RUNNER_TEMP/sync-failure-context.txt"
                 echo "$jobs_out"
                 return 1
               }
@@ -226,12 +234,14 @@ jobs:
               case "$quality_conc" in
                 failure|cancelled)
                   echo "::error::CI job 失敗：quality（conclusion=${quality_conc}）"
+                  printf '%s\n' "CI job 失敗：quality（conclusion=${quality_conc}）" > "$RUNNER_TEMP/sync-failure-context.txt"
                   return 1
                   ;;
               esac
               case "$build_conc" in
                 failure|cancelled)
                   echo "::error::CI job 失敗：build-and-public-e2e（conclusion=${build_conc}）"
+                  printf '%s\n' "CI job 失敗：build-and-public-e2e（conclusion=${build_conc}）" > "$RUNNER_TEMP/sync-failure-context.txt"
                   return 1
                   ;;
               esac
@@ -245,6 +255,7 @@ jobs:
               fi
               status_out=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${sha}/status" 2>&1) || {
                 echo "::error::commit status API 失敗（sha=${sha}）"
+                printf '%s\n' "commit status API 失敗（sha=${sha}）" > "$RUNNER_TEMP/sync-failure-context.txt"
                 echo "$status_out"
                 return 1
               }
@@ -254,6 +265,7 @@ jobs:
                 vercel_state="pending"
               elif [ "$vercel_state" = "failure" ] || [ "$vercel_state" = "error" ]; then
                 echo "::error::Vercel commit status 失敗（state=${vercel_state}）"
+                printf '%s\n' "Vercel commit status 失敗（state=${vercel_state}）" > "$RUNNER_TEMP/sync-failure-context.txt"
                 return 1
               elif [ "$vercel_state" = "success" ]; then
                 vercel_ok=true
@@ -261,6 +273,7 @@ jobs:
               if [ "$quality_ok" = true ] && [ "$quality_mirrored" != true ]; then
                 gh api "repos/${GITHUB_REPOSITORY}/statuses/${sha}" -f state=success -f context=quality -f description="mirror workflow_dispatch quality" -f target_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${ci_run_id}" >/dev/null || {
                   echo "::error::寫入 quality commit status 失敗（sha=${sha}）"
+                  printf '%s\n' "寫入 quality commit status 失敗（sha=${sha}）" > "$RUNNER_TEMP/sync-failure-context.txt"
                   return 1
                 }
                 quality_mirrored=true
@@ -269,6 +282,7 @@ jobs:
               if [ "$build_ok" = true ] && [ "$build_mirrored" != true ]; then
                 gh api "repos/${GITHUB_REPOSITORY}/statuses/${sha}" -f state=success -f context=build-and-public-e2e -f description="mirror workflow_dispatch build-and-public-e2e" -f target_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${ci_run_id}" >/dev/null || {
                   echo "::error::寫入 build-and-public-e2e commit status 失敗（sha=${sha}）"
+                  printf '%s\n' "寫入 build-and-public-e2e commit status 失敗（sha=${sha}）" > "$RUNNER_TEMP/sync-failure-context.txt"
                   return 1
                 }
                 build_mirrored=true
@@ -281,7 +295,10 @@ jobs:
               fi
               sleep 15
             done
+            printf '%s\n' "pending-merge" > "$RUNNER_TEMP/sync-alert-skip"
+            echo "::notice::sync PR 已設定 auto-merge，checks 尚未完成，這次不開失敗 Issue。"
             echo "::error::等待 sync PR merge 逾時：$pr（run=${ci_run_id} sha=${sha}）"
+            printf '%s\n' "等待 sync PR merge 逾時：$pr（run=${ci_run_id} sha=${sha}）" > "$RUNNER_TEMP/sync-failure-context.txt"
             return 1
           }
           for attempt in 1 2 3; do
@@ -343,4 +360,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           SYNC_ISSUE_ASSIGNEES: ${{ secrets.SYNC_ISSUE_ASSIGNEES }}
           SYNC_ISSUE_MENTIONS: ${{ secrets.SYNC_ISSUE_MENTIONS }}
-        run: npx tsx scripts/sync-alert.ts failure --kind=sync-job-failure
+        run: |
+          if [ -f "$RUNNER_TEMP/sync-alert-skip" ]; then
+            echo "略過同步失敗發報：$(cat "$RUNNER_TEMP/sync-alert-skip")"
+            exit 0
+          fi
+          if [ -f "$RUNNER_TEMP/sync-failure-context.txt" ]; then
+            SYNC_FAILURE_CONTEXT=$(cat "$RUNNER_TEMP/sync-failure-context.txt")
+            export SYNC_FAILURE_CONTEXT
+          fi
+          if [ -f "$RUNNER_TEMP/sync-pr-url.txt" ]; then
+            SYNC_PR_URL=$(cat "$RUNNER_TEMP/sync-pr-url.txt")
+            export SYNC_PR_URL
+          fi
+          npx tsx scripts/sync-alert.ts failure --kind=sync-job-failure

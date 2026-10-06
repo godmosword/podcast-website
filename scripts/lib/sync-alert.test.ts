@@ -496,6 +496,72 @@ describe("sync-alert notify-live", () => {
       "sync-job-failure",
     ]);
   });
+
+  it("failure issue 的 @mention 只出現一次", () => {
+    const { deps, calls } = makeDeps({});
+    deps.env = { SYNC_ISSUE_MENTIONS: "@godmosword" };
+
+    runSyncAlertMode("failure", ["--kind=sync-job-failure"], deps);
+
+    const create = calls.find((args) => args[0] === "issue" && args[1] === "create");
+    expect(create).toBeDefined();
+    const body = create![create!.indexOf("--body") + 1];
+    expect(body.match(/@godmosword/g)).toEqual(["@godmosword"]);
+    expect(body.startsWith("@godmosword\n\n## Apple sync workflow 失敗")).toBe(true);
+  });
+
+  it("failure issue 帶入失敗步驟、原因與 sync PR，且略過告警步驟本身", () => {
+    const { deps, calls } = makeDeps({
+      "run view 99 --json jobs": JSON.stringify({
+        jobs: [
+          {
+            steps: [
+              { name: "Commit and push", conclusion: "failure" },
+              { name: "Report sync failure", conclusion: "failure" },
+              { name: "Run unit tests", conclusion: "success" },
+            ],
+          },
+        ],
+      }),
+    });
+    deps.env = {
+      GITHUB_RUN_ID: "99",
+      SYNC_FAILURE_CONTEXT: "CI job 失敗：quality（conclusion=failure）",
+      SYNC_PR_URL: "https://github.com/example/repo/pull/140",
+    };
+
+    runSyncAlertMode("failure", ["--kind=sync-job-failure"], deps);
+
+    const create = calls.find((args) => args[0] === "issue" && args[1] === "create");
+    const body = create![create!.indexOf("--body") + 1];
+    expect(body).toContain("`Commit and push`");
+    expect(body).toContain("CI job 失敗：quality（conclusion=failure）");
+    expect(body).toContain("https://github.com/example/repo/pull/140");
+    expect(body).toContain("沒有把結果留在 main");
+    expect(body).not.toContain("Report sync failure");
+  });
+
+  it("讀不到 run jobs 時仍開失敗單", () => {
+    const { deps, calls, warns } = makeDeps({});
+    deps.env = { GITHUB_RUN_ID: "99" };
+
+    runSyncAlertMode("failure", ["--kind=sync-job-failure"], deps);
+
+    expect(warns.some((line) => line.includes("讀取失敗步驟失敗"))).toBe(true);
+    expect(calls.some((args) => args[0] === "issue" && args[1] === "create")).toBe(
+      true,
+    );
+  });
+
+  it("SYNC_ALERT_SKIP=pending-merge 不開失敗單", () => {
+    const { deps, calls, logs } = makeDeps({});
+    deps.env = { SYNC_ALERT_SKIP: "pending-merge" };
+
+    runSyncAlertMode("failure", ["--kind=sync-job-failure"], deps);
+
+    expect(calls.some((args) => args[0] === "issue")).toBe(false);
+    expect(logs.some((line) => line.includes("略過同步失敗發報"))).toBe(true);
+  });
 });
 
 describe("isReportStale", () => {

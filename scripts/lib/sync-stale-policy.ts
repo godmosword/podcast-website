@@ -55,12 +55,20 @@ export function runsAfterPubDate(
   });
 }
 
+export function hasOpenSyncLandingPr(
+  prs: Array<{ headRefName?: string }>,
+): boolean {
+  return prs.some((pr) => (pr.headRefName ?? "").startsWith("sync/apple-"));
+}
+
 export function decideStaleRssAlert(input: {
   onSite: boolean;
   hours: number | null;
   syncActive: boolean;
   postPublishRuns: SyncWorkflowRun[];
   waitForFirstSyncHours: number;
+  /** 已有 sync/apple-* PR 等 checks／auto-merge，集數還沒在 main。 */
+  syncLandingPending?: boolean;
 }): StaleRssDecision {
   if (input.onSite) {
     return { action: "resolve", reason: "RSS 最新集已上站" };
@@ -70,6 +78,12 @@ export function decideStaleRssAlert(input: {
   }
   if (input.syncActive || input.postPublishRuns.some(isSyncRunActive)) {
     return { action: "silent", reason: "sync workflow 正在跑／排隊，看門狗靜默" };
+  }
+  if (input.syncLandingPending) {
+    return {
+      action: "silent",
+      reason: "sync PR 已開、尚未合入 main，看門狗靜默",
+    };
   }
   if (input.hours <= input.waitForFirstSyncHours) {
     return {

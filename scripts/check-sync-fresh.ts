@@ -7,9 +7,9 @@
  *   1. lookupFeedUrl → fetch → parseRssEpisodes（與 sync 同一 parser）。
  *   2. 以 sync 相同對照（isRssEpisodeOnSite）判斷最新集是否已上站。
  *   3. 已上站 → 關閉 sync-stale-rss Issue。
- *   4. 未上站：sync 正在跑、或仍在等待第一次 sync／合入（WAIT_FOR_SYNC_HOURS，預設至少 8h）
- *      → 靜默，避免與之後的「待生圖」Issue 連開兩張。
- *      超過等待窗才開／補 sync-stale-rss。
+ *   4. 未上站：sync 正在跑、已有 sync/apple-* PR 尚未合入，或仍在等待第一次 sync
+ *      （WAIT_FOR_SYNC_HOURS，預設至少 8h）→ 靜默，避免與之後的「待生圖」Issue 連開兩張。
+ *      超過等待窗且沒有在等合入的 sync PR，才開／補 sync-stale-rss。
  *
  * 環境變數：STALE_HOURS（yaml 仍可設 3，僅作下限）、WAIT_FOR_SYNC_HOURS、SYNC_ALERT_DRY_RUN=1。
  */
@@ -26,6 +26,7 @@ import {
 import { openOrCommentIssue, resolveIssue } from "./sync-alert";
 import {
   decideStaleRssAlert,
+  hasOpenSyncLandingPr,
   isSyncRunActive,
   runsAfterPubDate,
   waitForFirstSyncHoursFromEnv,
@@ -43,6 +44,30 @@ function readJson<T>(file: string, fallback: T): T {
     return JSON.parse(readFileSync(path.join(ROOT, file), "utf8")) as T;
   } catch {
     return fallback;
+  }
+}
+
+/** gh 失敗時回 false，避免清單失敗把真的卡住靜默掉。 */
+function syncLandingPending(): boolean {
+  try {
+    const out = execFileSync(
+      "gh",
+      [
+        "pr",
+        "list",
+        "--state",
+        "open",
+        "--limit",
+        "20",
+        "--json",
+        "headRefName,title",
+      ],
+      { encoding: "utf8" },
+    );
+    const prs = JSON.parse(out || "[]") as Array<{ headRefName?: string }>;
+    return hasOpenSyncLandingPr(prs);
+  } catch {
+    return false;
   }
 }
 
@@ -122,6 +147,7 @@ async function main(): Promise<void> {
     syncActive,
     postPublishRuns: runsAfterPubDate(runs, missing.item.pubDate),
     waitForFirstSyncHours: WAIT_FOR_SYNC_HOURS,
+    syncLandingPending: syncLandingPending(),
   });
 
   if (decision.action === "silent") {
