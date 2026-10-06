@@ -425,6 +425,8 @@ export function BlockDropView({
       data-layout={layoutMode}
       data-status={g.status}
       data-screen={screen}
+      /* 首頁與地圖還沒有井，外框的操作提示（左右移動…）此時沒有對象，先收起 */
+      data-play-hints={onPlayScreen ? undefined : "off"}
       data-mode={round ? round.mode : screen === "play" ? "free" : undefined}
       data-stage={round?.stage.id}
       data-theme="macaron-clay"

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import Image from "next/image";
 import { CandyMatchBoard } from "@/components/games/CandyMatchBoard";
 import { CandyMatchMap, type CandyStationPreview } from "@/components/games/CandyMatchMap";
 import { PieceArt } from "@/components/games/CandyMatchPieceArt";
@@ -26,6 +27,7 @@ import { candyMatchCellPx } from "@/lib/games/candy-match/cell-size";
 import { CANDY_MATCH_LEVELS } from "@/lib/games/candy-match/levels";
 import { buildRound, type CandyMatchRound, type CandyMode } from "@/lib/games/candy-match/stages";
 import { goalsSummary, goalTheme } from "@/lib/games/candy-match/tasks";
+import { gameBySlug } from "@/data/games";
 import { useCandyMatchPlay } from "./useCandyMatchPlay";
 import styles from "./CandyMatchView.module.css";
 
@@ -44,6 +46,8 @@ export type CandyMatchViewProps = OverlayProps & {
 };
 
 /** 無音效環境的穩定 fallback（見 CandyMatchView 內 ensureAudio／tone）。 */
+/** 標題頁封面：與遊樂園卡片同一張圖（data/games.ts 為唯一來源）。 */
+const TITLE_COVER_SRC = gameBySlug("candy-match").art.cover;
 const noopAudio: GameAudioBus["ensureAudio"] = () => {};
 const noopTone: GameAudioBus["tone"] = () => {};
 
@@ -278,27 +282,42 @@ export function CandyMatchView({
       data-task={play && screen === "play" ? goalTheme(play.round.stage.goals) : undefined}
       data-challenge={play && screen === "play" ? play.round.stage.id : undefined}
       data-candy-fonts={brandFontsEnabled ? "ready" : undefined}
+      /* 標題頁與地圖還沒有棋盤，外框的操作提示（點兩格交換…）此時沒有對象，先收起 */
+      data-play-hints={screen === "play" ? undefined : "off"}
     >
       {screen === "title" && (
         <div className={styles.titleScreen}>
-          <div className={styles.titlePieces}>
-            {[0, 1, 2, 3, 4].map((p) => (
-              <span key={p} className={styles.titlePiece}>
-                <PieceArt piece={p} size="100%" />
-              </span>
-            ))}
-          </div>
-          {/* 頁面唯一 h1 屬 GamePageShell；此處為關卡畫面標題，降為 h2 避免重複 h1。 */}
-          <h2 className={styles.titleHeading}>準備找糖果！</h2>
-          <CandyMatchTitleSteps />
-          <p className={styles.titleLead}>完成小任務，就有星星！</p>
-          <div className={styles.titleActions}>
-            <button type="button" className={styles.bigButton} onClick={goToMap}>
-              ▶ 開始冒險
-            </button>
-            <button type="button" className={styles.softButton} onClick={openTutorial}>
-              怎麼玩？
-            </button>
+          {/* 封面舞台：與遊樂園卡片同一張封面，點進來看到的是同一個畫面。小朋友會去點這張最大的圖，
+              點了也進冒險；它與「開始冒險」重複，所以對讀屏與鍵盤隱藏（aria-hidden＋tabIndex -1）。 */}
+          <button
+            type="button"
+            className={styles.titleArt}
+            onClick={goToMap}
+            tabIndex={-1}
+            aria-hidden="true"
+          >
+            <Image
+              src={TITLE_COVER_SRC}
+              alt=""
+              fill
+              priority
+              sizes="(max-width: 799px) calc(100vw - 64px), 55vw"
+              className={styles.titleArtImg}
+            />
+          </button>
+          <div className={styles.titlePanel}>
+            {/* 頁面唯一 h1 屬 GamePageShell；此處為關卡畫面標題，降為 h2 避免重複 h1。 */}
+            <h2 className={styles.titleHeading}>準備找糖果！</h2>
+            <CandyMatchTitleSteps />
+            <p className={styles.titleLead}>完成小任務，就有星星！</p>
+            <div className={styles.titleActions}>
+              <button type="button" className={styles.bigButton} onClick={goToMap}>
+                ▶ 開始冒險
+              </button>
+              <button type="button" className={styles.softButton} onClick={openTutorial}>
+                怎麼玩？
+              </button>
+            </div>
           </div>
         </div>
       )}

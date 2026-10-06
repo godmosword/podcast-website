@@ -45,12 +45,22 @@ test.describe("遊戲頁：兒童主路徑優先", () => {
     });
   }
 
-  test("操作提示留在遊戲正下方", async ({ page }) => {
+  test("操作提示只在有棋盤時出現，帶文字、留在遊戲正下方", async ({ page }) => {
     await page.setViewportSize(PHONE);
     await page.goto("/games/candy-match");
 
+    // 標題頁還沒有棋盤：提示沒有對象，收起
     const hints = page.getByLabel("操作提示");
+    await expect(hints).toBeHidden();
+
+    await page.getByRole("button", { name: /開始冒險/ }).click();
+    await page.locator('button[data-next="true"]').click();
+    await expect(page.getByTestId("candy-match-board")).toBeVisible();
+
     await expect(hints).toBeVisible();
+    // 圖示必須搭配可見文字；只靠 title 提示，觸控裝置看不到
+    await expect(hints).toContainText("點兩格交換");
+    await expect(hints).toContainText("拖曳也可以");
 
     const playBox = await page.locator("#game-play").boundingBox();
     const hintsBox = await hints.boundingBox();

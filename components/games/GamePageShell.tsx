@@ -18,8 +18,9 @@ import {
 import styles from "./GamePageShell.module.css";
 
 /**
- * K-9（兒童減法審）：操作提示以圖代字。key 對齊 `data/games.ts` 的 `controls` 文案，
- * 文案本身留作 sr-only；沒對到 icon 的文案退回顯示文字，不會消失。
+ * 操作提示圖示。key 對齊 `data/games.ts` 的 `controls` 文案；沒對到 icon 的文案只顯示文字。
+ * K-9（兒童減法審）曾改成「以圖代字」、文案只留 sr-only，2026-10-06 改回「圖示＋可見文字」：
+ * 只有圖示時說明藏在 title，觸控裝置看不到，家長回報看不懂那兩顆是做什麼的。
  */
 const CONTROL_ICONS: Record<string, ReactNode> = {
   點兩格交換: <IconTap size={22} />,
@@ -64,6 +65,8 @@ export function GamePageShell({
   /**
    * 操作提示屬兒童資訊，留在遊戲正下方。
    * 全部顯示，不做靜默截斷——截斷會讓新增的第三條提示無聲消失。
+   * 遊戲畫面還沒有可操作的棋盤時（標題頁、地圖），遊戲在自身根節點標
+   * `data-play-hints="off"`，由 CSS 收起提示。
    */
   const controls = game?.controls ?? [];
 
@@ -89,15 +92,10 @@ export function GamePageShell({
             {controls.map((control) => {
               const icon = CONTROL_ICONS[control];
               return (
-                <li key={control} title={icon ? control : undefined}>
-                  {icon ? (
-                    <>
-                      <span aria-hidden className={styles.playHintIcon}>{icon}</span>
-                      <span className="sr-only">{control}</span>
-                    </>
-                  ) : (
-                    control
-                  )}
+                <li key={control}>
+                  {/* 圖示一律搭配可見文字：只放圖示時說明只在滑鼠停留出現，觸控裝置看不到 */}
+                  {icon ? <span aria-hidden className={styles.playHintIcon}>{icon}</span> : null}
+                  {control}
                 </li>
               );
             })}

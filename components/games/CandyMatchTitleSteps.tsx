@@ -20,6 +20,7 @@ function SwapArrows() {
 
 /**
  * 標題頁三步驟圖解：3–7 歲多半還不識字，用圖示範「換位置 → 排成三個 → 消掉拿星星」。
+ * 三格圖框同高、圖案視覺重量一致，不替任何一格加底色，免得看起來像「選中」。
  * 圖全部 aria-hidden，讀屏只唸每步的短動詞。
  */
 export function CandyMatchTitleSteps() {
@@ -35,7 +36,7 @@ export function CandyMatchTitleSteps() {
             <PieceArt piece={0} size="100%" />
           </span>
         </span>
-        <span className={styles.label}>找一找</span>
+        <span className={styles.label}>換一換</span>
       </li>
       <li className={styles.step}>
         <span className={`${styles.art} ${styles.row}`} aria-hidden>

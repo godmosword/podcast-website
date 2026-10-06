@@ -4,8 +4,8 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
-  width: min(100%, 432px);
-  margin: 0 0 18px;
+  width: min(100%, var(--steps-max, 480px));
+  margin: 0;
   padding: 0;
   list-style: none;
 }
@@ -38,7 +38,7 @@
 }
 
 .art {
-  --piece: clamp(20px, 7.4cqi, 32px);
+  --piece: clamp(20px, 7.4cqi, var(--step-piece-max, 36px));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -51,13 +51,7 @@
   height: var(--piece);
 }
 
-/* 排一排：三個並排、略為相疊，底下一條黃色光帶表示「連成一排」 */
-.row {
-  padding: 0 4px;
-  border-radius: 999px;
-  /* 卡面夜間仍是淺色，光帶用固定淺黃；--c-yellow 夜間會變暗、在淺卡上發灰 */
-  background: rgba(255, 216, 102, 0.42);
-}
+/* 排一排：三個並排、略為相疊。不加光帶底色——只有這格有底會像被選中，三格就不一致了 */
 
 .row .piece + .piece {
   margin-left: calc(var(--piece) * -0.12);
@@ -77,8 +71,8 @@
 }
 
 .star {
-  width: calc(var(--piece) * 1.15);
-  height: calc(var(--piece) * 1.15);
+  width: var(--piece);
+  height: var(--piece);
 }
 
 .sparkle {
@@ -102,7 +96,7 @@
 
 .label {
   color: var(--candy-ink);
-  font-size: 15px;
+  font-size: var(--step-label-size, 15px);
   font-weight: 900;
   letter-spacing: 0.04em;
 }

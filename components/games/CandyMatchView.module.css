@@ -2,6 +2,7 @@
   --candy-ink: #5d4a67;
   --candy-ink-soft: #7c6886;
   --candy-accent: #a5567a;
+  --candy-blush: #fde7ef;
   /* 卡面夜間仍是淺色：焦點環改用深墨色，否則夜間金色焦點環在淺底上看不到 */
   --focus-ring: var(--candy-ink);
   position: relative;
@@ -105,52 +106,186 @@
   outline-offset: 2px;
 }
 
-/* 標題頁：卡片保留地圖／棋盤用的 min-height，標題內容撐滿並垂直置中，不在底部留一大塊空白 */
+/*
+ * 標題頁「封面舞台」：卡片保留地圖／棋盤用的 min-height，空間交給遊樂園卡片同一張封面。
+ * 以卡片寬度（容器查詢）決定版型：窄版上圖下文，≥720 左圖右文；不看視窗寬，
+ * 因為卡片寬會隨頁面留白與側欄變動。
+ */
 .surface[data-screen="title"] {
   display: flex;
   flex-direction: column;
+  container: candy-title / inline-size;
 }
 
 .titleScreen {
   display: flex;
   flex: 1;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  gap: 16px;
   min-height: 300px;
-  padding: 24px 0 20px;
   text-align: center;
 }
 
-.titlePieces {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 18px;
+.titleArt {
+  position: relative;
+  flex: none;
+  width: 100%;
+  min-height: 0;
+  aspect-ratio: 4 / 3;
+  max-height: 46vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--candy-blush);
+  box-shadow: 0 10px 24px rgba(165, 86, 122, 0.16);
+  cursor: pointer;
 }
 
-/* 320 寬時 5 個 52px 會貼齊卡緣，跟著視窗寬縮到 40px */
-.titlePiece {
-  display: inline-block;
-  width: clamp(40px, 13vw, 52px);
-  height: clamp(40px, 13vw, 52px);
+.titleArtImg {
+  object-fit: cover;
+  object-position: 50% 45%;
+}
+
+.titlePanel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 14px;
+  min-width: 0;
+  padding: 4px 4px 8px;
 }
 
 .titleHeading {
-  margin: 0 0 18px;
+  margin: 0;
   color: var(--candy-accent);
-  font-size: 40px;
+  font-size: clamp(2rem, 5.2cqi, 3.25rem);
   font-weight: 900;
+  line-height: 1.15;
 }
 
 .titleLead {
-  margin: 0 0 22px;
+  margin: 0;
   color: var(--candy-ink-soft);
-  font-size: 15px;
+  font-size: var(--fs-body);
   font-weight: 700;
 }
 
-.titleActions,
+/* 主次兩顆同高、同厚度底邊，用顏色分主次；窄卡上下滿寬 */
+.titleActions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  width: min(100%, var(--title-col-max, 480px));
+}
+
+.titleActions .bigButton,
+.titleActions .softButton {
+  justify-content: center;
+  min-height: 56px;
+  padding-block: 0;
+}
+
+.titleActions .bigButton {
+  font-size: var(--fs-h3);
+  box-shadow: 0 6px 0 rgba(203, 128, 52, 0.42), 0 12px 20px rgba(164, 103, 61, 0.16), inset 0 2px 0 rgba(255, 255, 255, 0.72);
+}
+
+.titleActions .softButton {
+  font-size: var(--fs-h4);
+  box-shadow: 0 6px 0 rgba(93, 74, 103, 0.12);
+}
+
+@container candy-title (min-width: 480px) {
+  .titleActions {
+    grid-template-columns: 1.6fr 1fr;
+  }
+
+  .titleActions .bigButton,
+  .titleActions .softButton {
+    min-height: 60px;
+  }
+}
+
+@container candy-title (min-width: 720px) {
+  .titleScreen {
+    flex-direction: row;
+    gap: 24px;
+  }
+
+  .titleArt {
+    flex: 1.25 1 0;
+    aspect-ratio: auto;
+    max-height: none;
+  }
+
+  .titlePanel {
+    flex: 1 1 0;
+    padding: 16px 12px;
+    justify-content: center;
+    gap: 22px;
+  }
+}
+
+/* 大螢幕：右欄跟著放大，教學內容的份量才撐得住旁邊的大封面 */
+@container candy-title (min-width: 1100px) {
+  .titlePanel {
+    --title-col-max: 600px;
+    --steps-max: 600px;
+    --step-piece-max: 48px;
+    --step-label-size: var(--fs-h3);
+    gap: 28px;
+  }
+
+  .titleHeading {
+    font-size: 4rem;
+  }
+
+  .titleLead {
+    font-size: var(--fs-h4);
+  }
+
+  .titleActions .bigButton,
+  .titleActions .softButton {
+    min-height: 68px;
+  }
+}
+
+/* 矮的直向手機（320×568 等）：封面讓位，「開始冒險」才留在首屏 */
+@media (max-height: 640px) and (orientation: portrait) {
+  .titleArt {
+    max-height: 24vh;
+  }
+}
+
+/* 橫向手機等矮卡：收小字級與按鈕，避免內容被卡片 overflow 裁掉 */
+@media (max-height: 520px) {
+  .titleScreen {
+    min-height: 0;
+  }
+
+  .titlePanel {
+    gap: 10px;
+    padding-block: 0;
+  }
+
+  .titleHeading {
+    font-size: 1.75rem;
+  }
+
+  .titleLead {
+    font-size: 14px;
+  }
+
+  .titleActions .bigButton,
+  .titleActions .softButton {
+    min-height: 48px;
+  }
+}
+
 .mapActions {
   display: flex;
   flex-wrap: wrap;
@@ -281,16 +416,6 @@
   .bubble {
     padding: 6px 12px;
     font-size: 14px;
-  }
-}
-
-@media (max-width: 480px) {
-  .titleScreen {
-    min-height: 270px;
-  }
-
-  .titleHeading {
-    font-size: 2.1rem;
   }
 }
 

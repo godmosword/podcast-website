@@ -39,9 +39,8 @@
   transform: scale(0.98);
 }
 
-.toolBtn[aria-pressed="true"] {
-  background: color-mix(in srgb, var(--c-yellow) 32%, var(--card));
-}
+/* 不替 aria-pressed 加黃底：音效／暫停的圖示本身就會換（喇叭↔靜音、暫停↔播放），
+ * 預設「音效開」又是常態，加底色只會讓一排鈕看起來一黃一灰、長相不一。 */
 
 .toolBtn:focus-visible {
   outline: 3px solid var(--focus-ring);

@@ -8,7 +8,7 @@ test("three ordered steps read only their short verbs; artwork stays decorative"
   const list = screen.getByRole("list", { name: "玩法三步驟" });
   expect(list.tagName).toBe("OL");
   const items = within(list).getAllByRole("listitem");
-  expect(items.map((li) => li.textContent)).toEqual(["找一找", "排一排", "消一消"]);
+  expect(items.map((li) => li.textContent)).toEqual(["換一換", "排一排", "消一消"]);
   for (const svg of list.querySelectorAll("svg"))
     expect(svg.closest("[aria-hidden]")).not.toBeNull();
 });

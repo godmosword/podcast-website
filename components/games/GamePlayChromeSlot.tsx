@@ -68,7 +68,9 @@ export function GamePlayHeader({ playTitle }: GamePlayHeaderProps) {
           className={styles.chromeSlot}
           data-testid="game-chrome-slot"
         />
-        <ThemeToggle iconOnly />
+        <span className={styles.themeSlot}>
+          <ThemeToggle iconOnly />
+        </span>
       </div>
     </header>
   );
