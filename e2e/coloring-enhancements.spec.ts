@@ -35,61 +35,47 @@ async function closeMore(page: Page) {
   await page.getByRole("button", { name: "關閉", exact: true }).click();
 }
 
-test("last stroke survives immediate page switch, thumbnail has black lines, and cover resumes it", async ({
+test("unfinished paint is forgotten; a confirmed page stays in the collection", async ({
   page,
 }) => {
   await open(page);
   await stroke(page);
-  const before = await redPixels(page);
-  expect(before).toBeGreaterThan(0);
+  expect(await redPixels(page)).toBeGreaterThan(0);
   await page.getByRole("button", { name: "← 換一張", exact: true }).click();
-  const recent = page.getByRole("button", {
-    name: `繼續塗：恐龍車多多`,
-    exact: true,
-  });
-  await expect(recent).toBeVisible();
-  const ink = await recent.locator("img").evaluate(async (el) => {
-    const image = el as HTMLImageElement;
-    await image.decode();
-    const c = document.createElement("canvas");
-    c.width = image.naturalWidth;
-    c.height = image.naturalHeight;
-    const ctx = c.getContext("2d")!;
-    ctx.drawImage(image, 0, 0);
-    const data = ctx.getImageData(0, 0, c.width, c.height).data;
-    let n = 0;
-    for (let i = 0; i < data.length; i += 4)
-      if (data[i]! < 96 && data[i + 1]! < 96 && data[i + 2]! < 96) n++;
-    return n;
-  });
-  expect(ink).toBeGreaterThan(100);
+  await expect(page.getByText("選一頁來塗", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: /繼續塗/ })).toHaveCount(0);
   await page
-    .getByRole("button", { name: "著色：小紅賽車", exact: true })
+    .getByRole("button", { name: "著色：恐龍車多多", exact: true })
     .click();
   await expect(
     page.getByRole("button", { name: "蠟筆", exact: true }),
   ).toBeEnabled();
   expect(await redPixels(page)).toBe(0);
-  await page.getByRole("button", { name: "← 換一張", exact: true }).click();
-  await recent.click();
+  await stroke(page);
+  await page.getByRole("button", { name: "我塗好了" }).click();
   await expect(
-    page.getByRole("button", { name: "蠟筆", exact: true }),
-  ).toBeEnabled();
-  expect(await redPixels(page)).toBe(before);
-  await page.goto("/games/coloring-book");
-  await expect(
-    page.getByRole("button", { name: "繼續塗：恐龍車多多", exact: true }),
+    page.getByText("作品已收藏在這台裝置", { exact: true }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "換一張塗", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "看作品：恐龍車多多", exact: true }),
+  ).toBeVisible();
+  await page.goto("/games/coloring-book");
+  await page.getByRole("button", { name: "打開著色本" }).click();
+  await expect(
+    page.getByRole("button", { name: "看作品：恐龍車多多", exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: /繼續塗/ })).toHaveCount(0);
 });
 
-test("hub navigation waits for the pending draft", async ({ page }) => {
+test("leaving for the hub drops unfinished paint", async ({ page }) => {
   await open(page);
   await stroke(page);
-  const before = await redPixels(page);
+  expect(await redPixels(page)).toBeGreaterThan(0);
   await page.getByRole("link", { name: "回遊樂園", exact: true }).click();
   await expect(page).toHaveURL(/\/games$/);
   await open(page);
-  expect(await redPixels(page)).toBe(before);
+  expect(await redPixels(page)).toBe(0);
 });
 
 test("undo, redo, clear, restore, and new strokes preserve history and nonempty completion", async ({
@@ -133,7 +119,7 @@ test("bucket-only painting enables completion and clearing removes it", async ({
   await expect(page.getByRole("button", { name: "我塗好了" })).toHaveCount(0);
 });
 
-test("same-page completed artworks coexist, survive a new draft, and open independently", async ({
+test("same-page completed artworks coexist after a fresh start and open independently", async ({
   page,
 }) => {
   await open(page, RED);
@@ -166,7 +152,7 @@ test("same-page completed artworks coexist, survive a new draft, and open indepe
   await expect(cards.last()).toBeFocused();
 });
 
-test("deleting one completed artwork asks first, keeps the draft, and persists", async ({
+test("deleting one completed artwork asks first and persists", async ({
   page,
 }) => {
   await open(page, RED);
@@ -190,9 +176,7 @@ test("deleting one completed artwork asks first, keeps the draft, and persists",
   await expect(dialog).toHaveCount(0);
   await expect(card).toHaveCount(0);
   await expect(page.getByText("選一頁來塗", { exact: true })).toBeFocused();
-  await expect(
-    page.getByRole("button", { name: "繼續塗：小紅賽車", exact: true }),
-  ).toBeVisible();
+  await expect(page.getByRole("button", { name: /繼續塗/ })).toHaveCount(0);
   // The picker loads lists asynchronously, so count the stores directly.
   const stored = await page.evaluate(
     () =>
@@ -216,9 +200,11 @@ test("deleting one completed artwork asks first, keeps the draft, and persists",
   );
   expect(stored).toEqual([0, 0]);
   await page.goto("/games/coloring-book");
+  await page.getByRole("button", { name: "打開著色本" }).click();
   await expect(
-    page.getByRole("button", { name: "繼續塗：小紅賽車", exact: true }),
-  ).toBeVisible();
+    page.getByRole("button", { name: "看作品：小紅賽車", exact: true }),
+  ).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /繼續塗/ })).toHaveCount(0);
 });
 
 test("load failure offers retry and unavailable storage never reports success", async ({
@@ -246,8 +232,15 @@ test("load failure offers retry and unavailable storage never reports success", 
   await open(page);
   await stroke(page);
   await page.getByRole("button", { name: "← 換一張", exact: true }).click();
-  await expect(page.getByText(/草稿沒有存起來/)).toBeVisible();
-  await expect(page.locator("canvas")).toBeVisible();
+  await expect(page.getByText("選一頁來塗", { exact: true })).toBeVisible();
+  await expect(page.getByText(/草稿沒有存起來/)).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "著色：恐龍車多多", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "蠟筆", exact: true }),
+  ).toBeEnabled();
+  await stroke(page);
   await page.getByRole("button", { name: "我塗好了" }).click();
   await expect(page.getByText(/作品尚未收藏/)).toBeVisible();
 });
@@ -398,21 +391,16 @@ async function seedOldDraft(page: Page, corrupt = false) {
   );
 }
 
-test("version-one PNG migrates to a composed preview while the old store stays untouched", async ({
+test("an old unfinished draft is not resumed and the stored blob stays put", async ({
   page,
 }) => {
   await seedOldDraft(page);
-  await page.goto("/games/coloring-book");
-  const resume = page.getByRole("button", {
-    name: "繼續塗：恐龍車多多",
-    exact: true,
-  });
-  await expect(resume).toBeVisible();
-  await resume.click();
+  await page.goto(`/games/coloring-book?page=${encodeURIComponent(DUO)}`);
   await expect(
     page.getByRole("button", { name: "蠟筆", exact: true }),
   ).toBeEnabled();
-  expect(await redPixels(page)).toBeGreaterThan(0);
+  expect(await redPixels(page)).toBe(0);
+  await expect(page.getByRole("button", { name: /繼續塗/ })).toHaveCount(0);
   const preserved = await page.evaluate(async (id) => {
     const db = await new Promise<IDBDatabase>((resolve) => {
       const r = indexedDB.open("coloring-drafts", 2);
@@ -428,25 +416,14 @@ test("version-one PNG migrates to a composed preview while the old store stays u
   expect(preserved).toBeGreaterThan(0);
 });
 
-test("a corrupt draft cannot silently turn into an empty saved draft", async ({
-  page,
-}) => {
+test("a corrupt old draft does not block a fresh page", async ({ page }) => {
   await seedOldDraft(page, true);
   await page.goto(`/games/coloring-book?page=${encodeURIComponent(DUO)}`);
   await expect(
-    page.getByText("草稿暫時讀不到，請重試；原本的作品仍保留。", {
-      exact: true,
-    }),
-  ).toBeVisible();
-  await expect(
     page.getByRole("button", { name: "蠟筆", exact: true }),
-  ).toBeDisabled();
-  await page.getByRole("button", { name: "重試", exact: true }).click();
-  await expect(
-    page.getByText("草稿暫時讀不到，請重試；原本的作品仍保留。", {
-      exact: true,
-    }),
-  ).toBeVisible();
+  ).toBeEnabled();
+  expect(await redPixels(page)).toBe(0);
+  await expect(page.getByText(/草稿暫時讀不到/)).toHaveCount(0);
 });
 
 test("completed collection failure still offers download and does not claim success", async ({

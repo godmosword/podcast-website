@@ -5,6 +5,19 @@ function source(path: string): string {
   return readFileSync(path, "utf8");
 }
 
+/** 繽紛樂園 View 拆成 hook＋HUD／井／結算層元件後，一起檢查。 */
+function blockDropSources(): string {
+  return [
+    "components/games/BlockDropView.tsx",
+    "components/games/useBlockDropGame.ts",
+    "components/games/BlockDropOverlay.tsx",
+    "components/games/BlockDropHud.tsx",
+    "components/games/BlockDropWell.tsx",
+  ]
+    .map(source)
+    .join("\n");
+}
+
 describe("game logic regressions", () => {
   it("繽紛消消樂走 gamekit 回報、無失敗用語、有自動提示與溫柔重試", () => {
     // 局內流程拆到 useCandyMatchPlay、結算拆到 CandyMatchResult，三者一起檢查
@@ -33,7 +46,7 @@ describe("game logic regressions", () => {
   });
 
   it("繽紛方塊走 gamekit 回報，鍵盤主操作只由 GameInput 統一處理一次", () => {
-    const view = source("components/games/BlockDropView.tsx");
+    const view = blockDropSources();
     const adapter = source("lib/gamekit/games/block-drop/adapter.ts");
 
     expect(adapter).toContain('gameId: "block-drop"');
@@ -50,9 +63,12 @@ describe("game logic regressions", () => {
   });
 
   it("繽紛方塊提供難度、彩虹模式與到頂重新開始引導", () => {
-    const view = source("components/games/BlockDropView.tsx");
+    const view = blockDropSources();
+    const scoring = source("lib/games/block-drop/scoring.ts");
 
-    expect(view).toContain("DIFFICULTY_CONFIG");
+    // 難度數值抽到 scoring.ts，View 只留標籤
+    expect(scoring).toContain("FREE_DIFFICULTY");
+    expect(view).toContain("DIFFICULTY_LABEL");
     expect(view).toContain('specialMode === "rainbow"');
     expect(view).toContain("方塊堆到頂了");
     expect(view).toContain("switchToRelaxedAndRestart");
@@ -65,9 +81,7 @@ describe("game logic regressions", () => {
     expect(shell).toContain("var(--safe-top)");
     expect(shell).toContain("min-height: 52px");
     expect(pageShell.indexOf('id="game-play"')).toBeGreaterThan(-1);
-    expect(pageShell.indexOf("<GameIntro")).toBeGreaterThan(
-      pageShell.indexOf('id="game-play"'),
-    );
+    expect(pageShell).not.toContain("<GameIntro");
   });
 
   it("GameHost 工具列無條件渲染且透過 shell slot 顯示", () => {
@@ -82,7 +96,7 @@ describe("game logic regressions", () => {
   });
 
   it("繽紛方塊暫停層含回遊樂園出口", () => {
-    const block = source("components/games/BlockDropView.tsx");
+    const block = blockDropSources();
 
     expect(block).toContain('href="/games"');
     expect(block).toContain("回遊樂園");

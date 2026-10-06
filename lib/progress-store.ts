@@ -26,6 +26,11 @@ export type CandyMatchModePreference = "easy" | "challenge" | null;
 /** 消消樂首次引導 id（交換、四連、五連、L/T、厚污漬）。道具的說明列本身就是引導，不另記。 */
 export const CANDY_MATCH_TIP_IDS = ["swap", "row", "color", "burst", "thick"] as const;
 export type CandyMatchTipId = (typeof CANDY_MATCH_TIP_IDS)[number];
+/** 繽紛樂園玩法；null＝尚未選過，由 kidsMode 決定（兒童模式＝輕鬆冒險）。 */
+export type BlockDropModePreference = "easy" | "challenge" | "free" | null;
+/** 繽紛樂園自由堆疊三步教學（移動、旋轉、消排）。 */
+export const BLOCK_DROP_TIP_IDS = ["move", "rotate", "line"] as const;
+export type BlockDropTipId = (typeof BLOCK_DROP_TIP_IDS)[number];
 
 export type GameKitPreferenceStore = {
   kidsMode: boolean;
@@ -35,6 +40,8 @@ export type GameKitPreferenceStore = {
   motionPreference: MotionPreference;
   candyMatchMode: CandyMatchModePreference;
   candyMatchTips: CandyMatchTipId[];
+  blockDropMode: BlockDropModePreference;
+  blockDropTips: BlockDropTipId[];
 };
 
 export type ContinueState = {
@@ -121,6 +128,8 @@ export const DEFAULT_PROGRESS: ProgressStore = {
       motionPreference: "system",
       candyMatchMode: null,
       candyMatchTips: [],
+      blockDropMode: null,
+      blockDropTips: [],
     },
     theme: "system",
     nightPromptDismissed: false,
@@ -217,6 +226,15 @@ function normalizeCandyMatchTips(value: unknown): CandyMatchTipId[] {
   return CANDY_MATCH_TIP_IDS.filter((id) => value.includes(id));
 }
 
+function normalizeBlockDropMode(value: unknown): BlockDropModePreference {
+  return value === "easy" || value === "challenge" || value === "free" ? value : null;
+}
+
+function normalizeBlockDropTips(value: unknown): BlockDropTipId[] {
+  if (!Array.isArray(value)) return [];
+  return BLOCK_DROP_TIP_IDS.filter((id) => value.includes(id));
+}
+
 function normalizeGameKitPreferences(
   value: Partial<GameKitPreferenceStore> | undefined,
 ): GameKitPreferenceStore {
@@ -231,6 +249,8 @@ function normalizeGameKitPreferences(
     motionPreference: normalizeMotionPreference(value?.motionPreference),
     candyMatchMode: normalizeCandyMatchMode(value?.candyMatchMode),
     candyMatchTips: normalizeCandyMatchTips(value?.candyMatchTips),
+    blockDropMode: normalizeBlockDropMode(value?.blockDropMode),
+    blockDropTips: normalizeBlockDropTips(value?.blockDropTips),
   };
 }
 

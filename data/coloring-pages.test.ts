@@ -10,15 +10,12 @@ import {
 const PUBLIC_DIR = join(process.cwd(), "public");
 
 describe("coloring-pages catalog", () => {
-  test("保留 8 頁原圖，新增 2 頁簡易版", () => {
-    expect(COLORING_PAGES.filter((p) => !p.variant)).toHaveLength(8);
-    expect(COLORING_PAGES.filter((p) => p.variant === "simple")).toHaveLength(
-      2,
-    );
+  test("七個角色、七個故事畫面，全部是大色塊線稿", () => {
+    expect(COLORING_PAGES.filter((p) => p.variant)).toHaveLength(0);
     expect(COLORING_PAGES.filter((p) => p.kind === "character")).toHaveLength(
-      6,
+      7,
     );
-    expect(COLORING_PAGES.filter((p) => p.kind === "scene")).toHaveLength(4);
+    expect(COLORING_PAGES.filter((p) => p.kind === "scene")).toHaveLength(7);
   });
 
   test("id 唯一且與 COLORING_PAGE_IDS 對齊", () => {

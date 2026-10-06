@@ -6,37 +6,6 @@ export function canvasBlob(canvas: HTMLCanvasElement): Promise<Blob> {
     ),
   );
 }
-export async function decodeColoringImage(
-  src: Blob | string,
-): Promise<HTMLImageElement> {
-  const url = typeof src === "string" ? src : URL.createObjectURL(src);
-  try {
-    const image = new Image();
-    image.src = url;
-    await image.decode();
-    return image;
-  } finally {
-    if (typeof src !== "string") URL.revokeObjectURL(url);
-  }
-}
-export function composeColoring(
-  paint: CanvasImageSource,
-  line: CanvasImageSource,
-  width: number,
-  height: number,
-): HTMLCanvasElement {
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("無法開啟畫布");
-  ctx.fillStyle = "white";
-  ctx.fillRect(0, 0, width, height);
-  ctx.drawImage(paint, 0, 0, width, height);
-  ctx.globalCompositeOperation = "multiply";
-  ctx.drawImage(line, 0, 0, width, height);
-  return canvas;
-}
 export function thumbnailCanvas(
   source: CanvasImageSource,
   size = 160,

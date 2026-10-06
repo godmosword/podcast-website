@@ -194,8 +194,8 @@ function SettingsDialog({
         {showBlockDrop ? (
         <div className={styles.settingBlock}>
           <div className={styles.settingHeading}>
-            <strong>方塊轉轉難度</strong>
-            <small>會調整落下速度、鎖定時間與結算加分。</small>
+            <strong>自由堆疊速度</strong>
+            <small>只影響自由堆疊：落下速度、鎖定時間與結算加分。</small>
           </div>
           <div className={styles.segmented} role="radiogroup" aria-label="方塊轉轉難度">
             {BLOCK_DROP_DIFFICULTIES.map((option) => (

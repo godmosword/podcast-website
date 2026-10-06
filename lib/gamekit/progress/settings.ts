@@ -19,9 +19,9 @@ export const BLOCK_DROP_DIFFICULTIES: {
   label: string;
   hint: string;
 }[] = [
-  { id: "relaxed", label: "輕鬆", hint: "慢一點，到頂先救援一次" },
-  { id: "standard", label: "標準", hint: "正常節奏，適合挑戰高分" },
-  { id: "challenge", label: "挑戰", hint: "速度更快，分數倍率更高" },
+  { id: "relaxed", label: "慢慢", hint: "慢一點，到頂先救援一次" },
+  { id: "standard", label: "一般", hint: "正常節奏，適合挑戰高分" },
+  { id: "challenge", label: "快快", hint: "速度更快，分數倍率更高" },
 ];
 
 export const BLOCK_DROP_SPECIAL_MODES: {

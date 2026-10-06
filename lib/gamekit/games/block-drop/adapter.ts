@@ -9,17 +9,19 @@ import type {
   OverlayProps,
 } from "@/lib/gamekit/adapter";
 import type { GameAction } from "@/lib/gamekit/types";
+import type { GameSessionResult } from "@/lib/gamekit/progress/session";
 import {
   BlockDropView,
   type BlockDropController,
 } from "@/components/games/BlockDropView";
 
-/** 局內 Status → GameStatus（無 won；堆到頂即 over）。 */
+/** 局內 Status → GameStatus（任務冒險過關＝won；到頂、塊數用完、收尾＝over）。 */
 export const BLOCK_DROP_STATUS_MAP = {
   ready: "ready",
   playing: "playing",
   paused: "paused",
   over: "over",
+  won: "won",
 } as const satisfies Record<string, GameStatus>;
 
 class BlockDropInstance implements GameInstance {
@@ -28,6 +30,7 @@ class BlockDropInstance implements GameInstance {
   private status: GameStatus = "ready";
   private score = 0;
   private sessionReported = false;
+  private adventure = false;
   private controller: BlockDropController | null = null;
 
   constructor(private readonly options: GameCreateOptions) {}
@@ -80,9 +83,38 @@ class BlockDropInstance implements GameInstance {
     this.controller = ctrl;
   }
 
-  notifyPlaying(score: number): void {
+  /**
+   * 每次開新局（含 View 內「下一站／再挑戰」）都重置結算去重，同一局只回報一次。
+   * 暫停後繼續、救援後繼續也會呼叫，傳 `newRound: false` 不重置。
+   */
+  notifyPlaying(score: number, options: { newRound?: boolean; adventure?: boolean } = {}): void {
+    if (options.newRound) {
+      this.sessionReported = false;
+      this.adventure = Boolean(options.adventure);
+    }
     this.status = "playing";
     this.score = score;
+  }
+
+  /** 任務冒險過關：回報獎章（分數固定 0，不影響自由堆疊最佳分）。 */
+  notifyWon(payload: Omit<GameSessionResult, "gameId" | "score">): void {
+    this.status = "won";
+    this.score = 0;
+    if (!this.sessionReported) {
+      this.sessionReported = true;
+      this.options.onSession?.({ gameId: "block-drop", score: 0, ...payload });
+    }
+  }
+
+  /** 任務冒險沒過（塊數用完、到頂、收尾）：不回報 session。 */
+  notifyRoundEnded(): void {
+    this.status = "over";
+    this.score = 0;
+  }
+
+  /** 抬頭的「最佳 ⭐」只在自由堆疊顯示。 */
+  showsScore(): boolean {
+    return !this.adventure;
   }
 
   notifyPaused(): void {

@@ -148,25 +148,3 @@
     box-shadow: 0 6px 0 var(--coloring-accent-shadow);
   }
 }
-.resume {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-height: 48px;
-  width: 100%;
-  padding: 8px 12px;
-  border: 2px solid var(--coloring-accent);
-  border-radius: var(--radius-md);
-  background: var(--coloring-ui-surface);
-  color: var(--coloring-ink);
-  font-weight: 800;
-  cursor: pointer;
-}
-.resume img {
-  width: 56px;
-  height: 56px;
-  object-fit: contain;
-  border-radius: 8px;
-  background: #fff;
-}

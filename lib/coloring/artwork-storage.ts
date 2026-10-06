@@ -51,7 +51,7 @@ export function loadColoringArtwork(
 ): Promise<ColoringArtwork | undefined> {
   return readColoringValue("artworks", id);
 }
-/** Remove the completed copy and its preview together; the editable draft stays intact. */
+/** Remove the completed copy and its preview together. */
 export function deleteColoringArtwork(id: string): Promise<void> {
   return coloringTransaction<void>(
     ["artworks", "artwork-previews"],

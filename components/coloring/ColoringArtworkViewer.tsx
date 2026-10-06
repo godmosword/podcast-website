@@ -107,7 +107,7 @@ export function ColoringArtworkViewer({
         ) : null}
         {confirmDelete ? (
           <div>
-            <p>刪除這份收藏？正在塗的草稿會保留。</p>
+            <p>刪除這份收藏？這台裝置上就看不到了。</p>
             <div className={styles.viewerActions}>
               <button type="button" disabled={deleting} onClick={() => setConfirmDelete(false)}>
                 保留作品

@@ -314,7 +314,7 @@ export default function GameHost({
           : hostStyles.toolbarRow
       }
     >
-      {hasScore && (best ?? 0) > 0 ? (
+      {hasScore && (best ?? 0) > 0 && (instanceRef.current?.showsScore?.() ?? true) ? (
         <span className={hostStyles.bestScore}>
           最佳 <IconStar size={14} /> {best}
         </span>

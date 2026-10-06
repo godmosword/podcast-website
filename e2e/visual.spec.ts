@@ -476,6 +476,48 @@ test("visual：消消樂第 6 站 1280 寬螢幕側欄（固定棋盤）", async
   });
 });
 
+/** 繽紛樂園固定 seed：7-bag 固定、重力凍結，命令序列產生固定盤面（計劃 §7 零差異證據）。 */
+async function playBlockDropSeeded(page: Page, width: number, height: number) {
+  await page.setViewportSize({ width, height });
+  await page.addInitScript(() => {
+    (window as unknown as { __blockDropSeed: number }).__blockDropSeed = 2026;
+    localStorage.setItem(
+      "cheche:block-drop-tutorial-v1",
+      JSON.stringify({ move: true, rotate: true, line: true }),
+    );
+  });
+  await page.goto("/games/block-drop");
+  await stabilizeVisualPage(page, { theme: "light" });
+  await page.getByRole("button", { name: "自由堆疊" }).click();
+  await expect(page.locator('[data-status="playing"]')).toBeVisible();
+  const keys = ["ArrowLeft", "ArrowLeft", "ArrowLeft", " ", "ArrowRight", "ArrowRight", " ", "ArrowUp", " ", "ArrowLeft", " ", "ArrowRight", "ArrowRight", "ArrowRight", " "];
+  for (const key of keys) {
+    await page.keyboard.press(key);
+    await page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
+    await page.waitForTimeout(300);
+  }
+}
+
+test("visual：繽紛樂園局內 390 light（固定 seed）", async ({ page }) => {
+  await playBlockDropSeeded(page, 390, 844);
+  await expect(page).toHaveScreenshot("block-drop-play-390-light.png", {
+    fullPage: true,
+    maxDiffPixelRatio: 0.02,
+    animations: "disabled",
+    mask: [],
+  });
+});
+
+test("visual：繽紛樂園局內 1280 light（固定 seed）", async ({ page }) => {
+  await playBlockDropSeeded(page, 1280, 800);
+  await expect(page).toHaveScreenshot("block-drop-play-1280-light.png", {
+    fullPage: true,
+    maxDiffPixelRatio: 0.02,
+    animations: "disabled",
+    mask: [],
+  });
+});
+
 test("visual：著色本畫布 390 light", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 900 });
   await page.goto("/games/coloring-book");

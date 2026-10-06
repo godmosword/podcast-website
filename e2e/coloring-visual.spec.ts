@@ -52,7 +52,7 @@ for (const viewport of viewports)
       await capture(page, `${prefix}-cover`, a11y);
       await page.getByRole("button", { name: "打開著色本" }).click();
       await capture(page, `${prefix}-picker`, a11y);
-      await page.getByRole("button", { name: "著色：恐龍車多多 · 大色塊", exact: true }).click();
+      await page.getByRole("button", { name: "著色：恐龍車多多", exact: true }).click();
       await expect(page.getByRole("button", { name: "蠟筆", exact: true })).toBeEnabled();
       await capture(page, `${prefix}-canvas`, a11y);
       for (const name of ["蠟筆", "填滿", "擦掉", "復原", "更多"]) {
@@ -74,10 +74,8 @@ for (const viewport of viewports)
       await expect(page.getByRole("button", { name: /看作品/ })).toBeVisible();
       await capture(page, `${prefix}-collection`, a11y);
       await page.getByRole("button", { name: /看作品/ }).click();
-      await expect(page.getByAltText("恐龍車多多 · 大色塊完成作品")).toBeVisible();
+      await expect(page.getByAltText("恐龍車多多完成作品")).toBeVisible();
       await capture(page, `${prefix}-viewer`, a11y);
       await page.keyboard.press("Escape");
-      await page.goto("/games/coloring-book");
-      await expect(page.getByRole("button", { name: /繼續塗：/ })).toBeVisible();
-      await capture(page, `${prefix}-resume`, a11y);
+      await expect(page.getByRole("button", { name: /繼續塗/ })).toHaveCount(0);
     });

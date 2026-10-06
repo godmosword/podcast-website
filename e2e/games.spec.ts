@@ -12,7 +12,7 @@ const TABLET = { width: 768, height: 1024 };
 
 test.describe("遊戲頁：兒童主路徑優先", () => {
   for (const slug of SHELL_ROUTES) {
-    test(`${slug}：遊戲區排在家長說明之前，且首屏可見`, async ({ page }) => {
+    test(`${slug}：遊戲區在首屏，且沒有家長說明`, async ({ page }) => {
       await page.setViewportSize(PHONE);
       await page.goto(`/games/${slug}`);
 
@@ -23,18 +23,8 @@ test.describe("遊戲頁：兒童主路徑優先", () => {
       expect(box).not.toBeNull();
       // 量遊戲區本身的起點，而不是外層空容器被推到哪裡
       expect(box!.y).toBeLessThan(160);
-
-      // DOM 順序：遊戲區必須在家長說明之前
-      const order = await page.evaluate(() => {
-        const play = document.querySelector("#game-play");
-        const intro = document.querySelector('[data-testid="game-parent-intro"]');
-        if (!play || !intro) return null;
-        return play.compareDocumentPosition(intro) &
-          Node.DOCUMENT_POSITION_FOLLOWING
-          ? "intro-after-play"
-          : "intro-before-play";
-      });
-      expect(order).toBe("intro-after-play");
+      await expect(page.getByTestId("game-parent-intro")).toHaveCount(0);
+      await expect(page.getByRole("heading", { name: "給家長的說明" })).toHaveCount(0);
     });
 
     test(`${slug}：整頁恰好一個 h1`, async ({ page }) => {
@@ -55,25 +45,16 @@ test.describe("遊戲頁：兒童主路徑優先", () => {
     });
   }
 
-  test("家長說明的 aria-labelledby 指向實際存在的標題", async ({ page }) => {
-    await page.goto("/games/candy-match");
-    const labelledBy = await page
-      .getByTestId("game-parent-intro")
-      .getAttribute("aria-labelledby");
-    expect(labelledBy).toBeTruthy();
-    await expect(page.locator(`#${labelledBy}`)).toHaveCount(1);
-  });
-
-  test("操作提示留在遊戲旁，不跟著家長說明下移", async ({ page }) => {
+  test("操作提示留在遊戲正下方", async ({ page }) => {
     await page.setViewportSize(PHONE);
     await page.goto("/games/candy-match");
 
     const hints = page.getByLabel("操作提示");
     await expect(hints).toBeVisible();
 
+    const playBox = await page.locator("#game-play").boundingBox();
     const hintsBox = await hints.boundingBox();
-    const introBox = await page.getByTestId("game-parent-intro").boundingBox();
-    expect(hintsBox!.y).toBeLessThan(introBox!.y);
+    expect(hintsBox!.y).toBeGreaterThanOrEqual(playBox!.y + playBox!.height - 1);
   });
 
   test("橫向與平板下遊戲區仍在首屏", async ({ page }) => {
@@ -242,7 +223,7 @@ test.describe("方塊轉轉：手機井尺寸", () => {
 
   test("390×664：格子 ≥ 25px、井底與觸控鍵同屏、觸控鍵 ≥ 44px", async ({ page }) => {
     await page.goto("/games/block-drop");
-    await page.getByRole("button", { name: /開始/ }).click();
+    await page.getByRole("button", { name: "自由堆疊" }).click();
     await expect(page.locator('[data-status="playing"]')).toBeVisible();
     await page.waitForTimeout(400);
 
@@ -266,4 +247,3 @@ test.describe("方塊轉轉：手機井尺寸", () => {
     expect(m.minSide).toBeGreaterThanOrEqual(44);
   });
 });
-

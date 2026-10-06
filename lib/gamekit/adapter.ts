@@ -91,6 +91,9 @@ export interface GameInstance {
    */
   renderOverlay?(props: OverlayProps): ReactNode;
 
+  /** 抬頭是否顯示最佳分（例如繽紛樂園任務冒險隱藏）；未實作視為顯示。 */
+  showsScore?(): boolean;
+
   /**
    * Optional list of actions this game needs touch buttons for.
    * Host can render a generic touch bar when coarse pointer is detected.

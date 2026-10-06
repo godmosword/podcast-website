@@ -1,4 +1,4 @@
-/** Version 2 keeps the original drafts store intact for lazy, reversible migration. */
+/** Completed pages live in artworks. Legacy draft stores stay so older databases still open. */
 export const COLORING_DB = "coloring-drafts";
 export const COLORING_DB_VERSION = 2;
 

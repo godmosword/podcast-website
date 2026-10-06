@@ -278,7 +278,7 @@ test.describe("遊戲完整 lifecycle", () => {
 
   test("Block Drop：開始 → gameplay → game over → replay → 再次 gameplay → 離開", async ({ page }) => {
     await page.goto("/games/block-drop");
-    await page.getByRole("button", { name: /開始/ }).click();
+    await page.getByRole("button", { name: "自由堆疊" }).click();
     await expect(page.locator('[data-status="playing"]')).toBeVisible();
     const tutorial = page.getByTestId("block-drop-tutorial");
     await expect(tutorial).toHaveAttribute("data-step", "move");

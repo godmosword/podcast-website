@@ -1,825 +1,97 @@
 "use client";
 
-import {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  type CSSProperties,
-  type PointerEvent as ReactPointerEvent,
-  type ReactNode,
-} from "react";
-import Link from "next/link";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
-import { useDomJuice } from "@/hooks/useDomJuice";
-import { useGameLoop } from "@/lib/gamekit/react/useGameLoop";
-import { useTouchControls } from "@/lib/gamekit/react/useTouchControls";
 import type { GameAudioBus, OverlayProps } from "@/lib/gamekit/adapter";
-import { GameEndStation } from "@/components/games/GameEndStation";
-import { GameJuiceToast } from "@/components/games/GameJuiceToast";
-import { GameResultActions } from "@/components/games/GameResultActions";
-import { BlockDropReadyDemo } from "@/components/games/BlockDropReadyDemo";
+import { BlockDropOverlay } from "@/components/games/BlockDropOverlay";
+import { BlockDropWell } from "@/components/games/BlockDropWell";
+import {
+  BlockDropCompactScorePanel,
+  BlockDropHoldButton,
+  BlockDropNextPanel,
+  BlockDropScorePanel,
+  BlockDropTutorialCard,
+} from "@/components/games/BlockDropHud";
+import { BlockDropMap, type BlockStationPreview } from "@/components/games/BlockDropMap";
+import { BlockDropResult } from "@/components/games/BlockDropResult";
+import { BlockDropTaskBar } from "@/components/games/BlockDropTaskBar";
+import { releaseBoardPointerCapture, useBlockDropGame } from "@/components/games/useBlockDropGame";
 import { useGameKitSettings } from "@/hooks/useGameKitSettings";
-import type { BlockDropDifficulty } from "@/lib/gamekit/progress/settings";
+import { BLOCK_DROP_DIFFICULTIES, type BlockDropDifficulty } from "@/lib/gamekit/progress/settings";
 import type { BlockDropInstance } from "@/lib/gamekit/games/block-drop/adapter";
+import { loadBlockDropPrefs, saveBlockDropMode, type BlockDropMode } from "@/lib/gamekit/progress/block-drop-prefs";
+import { medalCount } from "@/lib/gamekit/progress/meta";
+import { loadPlayerProfile } from "@/lib/gamekit/progress/save";
+import { GAMEKIT_PROGRESS_EVENT } from "@/lib/gamekit/progress/session";
+import { blockGoalsSummary } from "@/lib/games/block-drop/goals";
 import {
-  BLOCK_DROP_TUTORIAL_COPY,
-  BLOCK_DROP_TUTORIAL_STORAGE_KEY,
-  EMPTY_BLOCK_DROP_TUTORIAL,
-  completeBlockDropTutorialStep,
-  isBlockDropBoardNearLine,
-  skipBlockDropTutorial,
-  stepAfterBlockDropAction,
-  type BlockDropTutorialProgress,
-  type BlockDropTutorialStep,
-} from "@/lib/games/block-drop/tutorial";
+  BLOCK_STATIONS,
+  buildBlockRound,
+  dangerRowFor,
+  type BlockMode,
+  type BlockRound,
+} from "@/lib/games/block-drop/stages";
 import {
-  IconBox,
-  IconChevronLeft,
-  IconChevronRight,
+  BlockDropKeys,
+  getLayoutMetrics,
+  layoutModeFor,
+  type LayoutMode,
+} from "@/components/games/BlockDropControls";
+import { CELL, MACARON_THEME, secondaryBtn } from "@/components/games/blockDropTheme";
+import {
   IconFlame,
   IconKid,
-  IconNext,
-  IconPauseGlyph,
-  IconPlay,
   IconRainbow,
-  IconRotate,
   IconSprout,
   IconStar,
-  IconSwipeDown,
-  IconBulb,
 } from "@/components/games/ClayIcons";
 
-const COLS = 10;
-const ROWS = 20;
-const CELL = 18;
-/** G-M1 井底深藍紫（封面同色系） */
-const WELL_BG_TOP = "#3d3f82";
-const WELL_BG_BOTTOM = "#2a2c5e";
-const BOARD_W = COLS * CELL;
-const BOARD_H = ROWS * CELL;
-const WIDE_MAX_BOARD_W = 460;
-const WIDE_SIDE_W = 150;
-
-export type LayoutMode = "mobile" | "tablet" | "desktop";
-
-type TouchPadMetrics = {
-  colW: number;
-  btn: number;
-  icon: number;
-  gap: number;
-};
-
-type LayoutMetrics = {
-  shellPad: string;
-  shellMaxW: number;
-  sideColW: number;
-  boardMaxW: number | undefined;
-  playGap: number;
-  touch: TouchPadMetrics | null;
-  hud: { hold: number; nextFirst: number; nextRest: number };
-};
-
-export function getLayoutMetrics(mode: LayoutMode, isCoarse: boolean): LayoutMetrics {
-  switch (mode) {
-    case "mobile":
-      return {
-        shellPad: "6px 10px 10px",
-        shellMaxW: 420,
-        sideColW: 0,
-        boardMaxW: undefined,
-        playGap: 6,
-        touch: isCoarse ? { colW: 64, btn: 46, icon: 20, gap: 6 } : null,
-        hud: { hold: 12, nextFirst: 9, nextRest: 6 },
-      };
-    case "tablet":
-      return {
-        shellPad: "16px 18px",
-        shellMaxW: WIDE_MAX_BOARD_W + WIDE_SIDE_W * 2 + 56,
-        sideColW: WIDE_SIDE_W,
-        boardMaxW: 400,
-        playGap: 12,
-        touch: isCoarse ? { colW: 76, btn: 56, icon: 23, gap: 8 } : null,
-        hud: { hold: 16, nextFirst: 13, nextRest: 9 },
-      };
-    case "desktop":
-      return {
-        shellPad: "18px 22px",
-        shellMaxW: WIDE_MAX_BOARD_W + WIDE_SIDE_W * 2 + 80,
-        sideColW: WIDE_SIDE_W + 4,
-        boardMaxW: WIDE_MAX_BOARD_W,
-        playGap: 14,
-        touch: isCoarse ? { colW: 80, btn: 58, icon: 24, gap: 9 } : null,
-        hud: { hold: 18, nextFirst: 16, nextRest: 11 },
-      };
-  }
-}
-
-const LOCK_DELAY = 450;
-const DAS_DELAY = 170;
-const DAS_REPEAT = 50;
-type PieceType = "I" | "O" | "T" | "S" | "Z" | "J" | "L";
-type Cell = PieceType | null;
-type Status = "ready" | "playing" | "paused" | "over";
-type OverReason = "topout" | null;
-
-const DIFFICULTY_CONFIG: Record<
-  BlockDropDifficulty,
-  {
-    label: string;
-    gravityScale: number;
-    lockDelayMs: number;
-    scoreMultiplier: number;
-    rescueLimit: number;
-  }
-> = {
-  relaxed: {
-    label: "輕鬆",
-    gravityScale: 1.35,
-    lockDelayMs: 620,
-    scoreMultiplier: 1,
-    rescueLimit: 1,
-  },
-  standard: {
-    label: "標準",
-    gravityScale: 1,
-    lockDelayMs: LOCK_DELAY,
-    scoreMultiplier: 1,
-    rescueLimit: 0,
-  },
-  challenge: {
-    label: "挑戰",
-    gravityScale: 0.82,
-    lockDelayMs: 360,
-    scoreMultiplier: 1.35,
-    rescueLimit: 0,
-  },
-};
+/** 自由堆疊速度（與設定面板同一份標籤：慢慢／一般／快快，避免和輕鬆／挑戰冒險撞名）。 */
+const DIFFICULTY_LABEL = Object.fromEntries(
+  BLOCK_DROP_DIFFICULTIES.map((d) => [d.id, d.label]),
+) as Record<BlockDropDifficulty, string>;
 const DIFFICULTY_ICON: Record<BlockDropDifficulty, ReactNode> = {
-  relaxed: <IconSprout size={14} />,
-  standard: <IconStar size={14} />,
-  challenge: <IconFlame size={14} />,
+  relaxed: <IconSprout size={16} />,
+  standard: <IconStar size={16} />,
+  challenge: <IconFlame size={16} />,
 };
 const DIFFICULTY_ORDER: BlockDropDifficulty[] = [
   "relaxed",
   "standard",
   "challenge",
 ];
+/** 第 1–3 站缺口加亮框（教「填缺口」） */
+const GAP_HINT_LAST_STATION = 2;
+/** 井下鍵列與井之間的距離（BlockDropKeys bar marginTop） */
+const KEY_BAR_GAP = 6;
+const MIN_BOARD_H_PORTRAIT = 300;
+const MIN_BOARD_H_LANDSCAPE = 200;
+/** 遊戲列比這矮時，待機面省略玩法示範動畫 */
+const COMPACT_OVERLAY_H = 420;
+const FONT = "var(--font-sans, 'PingFang TC','Microsoft JhengHei',system-ui,sans-serif)";
 
-interface Piece {
-  type: PieceType;
-  rot: number;
-  x: number;
-  y: number;
-}
+type Screen = "home" | "map" | "play";
 
-interface GameState {
-  board: Cell[][];
-  active: Piece | null;
-  bag: PieceType[];
-  hold: PieceType | null;
-  canHold: boolean;
-  score: number;
-  level: number;
-  lines: number;
-  combo: number;
-  status: Status;
-  grounded: boolean;
-  lockTimer: number;
-  resets: number;
-  dropAcc: number;
-  softDrop: boolean;
-  clearing: boolean;
-  clearRows: number[];
-  clearUntil: number;
-  rescues: number;
-  overReason: OverReason;
-  lastTime: number | null;
-  dirty: boolean;
-  metaReported: boolean;
-}
-
-const TYPES: PieceType[] = ["I", "O", "T", "S", "Z", "J", "L"];
-const LINE_SCORE = [0, 100, 300, 500, 800];
-const CLEAR_LABEL = ["", "好耶", "太棒了", "漂亮", "彩虹全消"];
-// UX-T6：inkSoft／accentPink 較原始配色加深（往 ink 方向混色），
-// 讓文字／HUD 在淺色殼／面板上達 WCAG AA（4.5:1）；裝飾色（mint/peach/…）不動。
-const MACARON_THEME = {
-  shell: "#fff7ed",
-  shellDeep: "#ffe9d6",
-  ink: "#5d4a67",
-  inkSoft: "#7c6886",
-  accentPink: "#a5567a",
-  mint: "#b9f3db",
-  peach: "#ffc4a8",
-  lemon: "#ffe889",
-  lavender: "#d8c7ff",
-  sky: "#bde7ff",
-  berry: "#ffb4cf",
-  board: "#fffaf2",
-  boardLine: "rgba(117,88,119,.08)",
-};
-const CLAY_BLOCK_COLORS: Record<PieceType, string> = {
-  I: "#8ddff0",
-  O: "#ffe16f",
-  T: "#c9b4ff",
-  S: "#9de7b8",
-  Z: "#ff9fb7",
-  J: "#9dbbff",
-  L: "#ffc28a",
-};
-const COLORS: Record<PieceType, string> = {
-  ...CLAY_BLOCK_COLORS,
-};
-
-function readBlockDropTutorialProgress(): BlockDropTutorialProgress {
-  if (typeof window === "undefined") return { ...EMPTY_BLOCK_DROP_TUTORIAL };
-  try {
-    const raw = window.localStorage.getItem(BLOCK_DROP_TUTORIAL_STORAGE_KEY);
-    if (!raw) return { ...EMPTY_BLOCK_DROP_TUTORIAL };
-    const parsed = JSON.parse(raw) as Partial<BlockDropTutorialProgress>;
-    return {
-      move: parsed.move === true,
-      rotate: parsed.rotate === true,
-      line: parsed.line === true,
-    };
-  } catch {
-    return { ...EMPTY_BLOCK_DROP_TUTORIAL };
-  }
-}
-
-function saveBlockDropTutorialProgress(progress: BlockDropTutorialProgress): void {
-  try {
-    window.localStorage.setItem(BLOCK_DROP_TUTORIAL_STORAGE_KEY, JSON.stringify(progress));
-  } catch {
-    // 私密瀏覽或 storage quota 不可用時，仍保留本局教學。
-  }
-}
-
-// UX-T6：色盲／低對比友善的非顏色標記——七種方塊各配一個低調內嵌符號
-// （圓／方／三角／菱形／十字／半月／星），以 data-URI SVG 疊加在方塊底色
-// 上，不改動方塊本體色相。用純 CSS background-image 疊層而非額外 React
-// 節點／SVG 元素，逐 cell 成本僅多一個字串比對，盤面 200 格重繪也不會有
-// 明顯效能負擔。
-const BLOCK_SYMBOL_SHAPES: Record<PieceType, string> = {
-  I: '<circle cx="12" cy="12" r="4.4"/>',
-  O: '<rect x="7.4" y="7.4" width="9.2" height="9.2" rx="1.8"/>',
-  T: '<polygon points="12,6.8 17.2,17.2 6.8,17.2"/>',
-  S: '<polygon points="12,6.3 17.7,12 12,17.7 6.3,12"/>',
-  Z: '<path d="M9.6,6 h4.8 v3.6 h3.6 v4.8 h-3.6 v3.6 h-4.8 v-3.6 h-3.6 v-4.8 h3.6 z"/>',
-  J: '<path d="M12,6.4 A5.6,5.6 0 0 1 12,17.6 Z"/>',
-  L: '<polygon points="12,6.8 13.23,10.3 16.95,10.39 14,12.65 15.06,16.21 12,14.1 8.94,16.21 10,12.65 7.05,10.39 10.77,10.3"/>',
-};
-function makeBlockSymbolBg(type: PieceType): string {
-  const shape = BLOCK_SYMBOL_SHAPES[type];
-  const svg =
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">` +
-    `<g fill="rgba(93,74,103,.4)" stroke="rgba(255,255,255,.55)" stroke-width="0.6">${shape}</g>` +
-    `</svg>`;
-  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
-}
-// 模組層級預先算好每種方塊的符號 data-URI，避免每次 render 重新編碼字串。
-const BLOCK_SYMBOL_BG: Record<PieceType, string> = TYPES.reduce(
-  (acc, t) => {
-    acc[t] = makeBlockSymbolBg(t);
-    return acc;
-  },
-  {} as Record<PieceType, string>,
-);
-const SHAPES: Record<PieceType, [number, number][][]> = {
-  I: [
-    [
-      [0, 1],
-      [1, 1],
-      [2, 1],
-      [3, 1],
-    ],
-    [
-      [2, 0],
-      [2, 1],
-      [2, 2],
-      [2, 3],
-    ],
-    [
-      [0, 2],
-      [1, 2],
-      [2, 2],
-      [3, 2],
-    ],
-    [
-      [1, 0],
-      [1, 1],
-      [1, 2],
-      [1, 3],
-    ],
-  ],
-  O: [
-    [
-      [1, 0],
-      [2, 0],
-      [1, 1],
-      [2, 1],
-    ],
-    [
-      [1, 0],
-      [2, 0],
-      [1, 1],
-      [2, 1],
-    ],
-    [
-      [1, 0],
-      [2, 0],
-      [1, 1],
-      [2, 1],
-    ],
-    [
-      [1, 0],
-      [2, 0],
-      [1, 1],
-      [2, 1],
-    ],
-  ],
-  T: [
-    [
-      [1, 0],
-      [0, 1],
-      [1, 1],
-      [2, 1],
-    ],
-    [
-      [1, 0],
-      [1, 1],
-      [2, 1],
-      [1, 2],
-    ],
-    [
-      [0, 1],
-      [1, 1],
-      [2, 1],
-      [1, 2],
-    ],
-    [
-      [1, 0],
-      [0, 1],
-      [1, 1],
-      [1, 2],
-    ],
-  ],
-  S: [
-    [
-      [1, 0],
-      [2, 0],
-      [0, 1],
-      [1, 1],
-    ],
-    [
-      [1, 0],
-      [1, 1],
-      [2, 1],
-      [2, 2],
-    ],
-    [
-      [1, 1],
-      [2, 1],
-      [0, 2],
-      [1, 2],
-    ],
-    [
-      [0, 0],
-      [0, 1],
-      [1, 1],
-      [1, 2],
-    ],
-  ],
-  Z: [
-    [
-      [0, 0],
-      [1, 0],
-      [1, 1],
-      [2, 1],
-    ],
-    [
-      [2, 0],
-      [1, 1],
-      [2, 1],
-      [1, 2],
-    ],
-    [
-      [0, 1],
-      [1, 1],
-      [1, 2],
-      [2, 2],
-    ],
-    [
-      [1, 0],
-      [0, 1],
-      [1, 1],
-      [0, 2],
-    ],
-  ],
-  J: [
-    [
-      [0, 0],
-      [0, 1],
-      [1, 1],
-      [2, 1],
-    ],
-    [
-      [1, 0],
-      [2, 0],
-      [1, 1],
-      [1, 2],
-    ],
-    [
-      [0, 1],
-      [1, 1],
-      [2, 1],
-      [2, 2],
-    ],
-    [
-      [1, 0],
-      [1, 1],
-      [0, 2],
-      [1, 2],
-    ],
-  ],
-  L: [
-    [
-      [2, 0],
-      [0, 1],
-      [1, 1],
-      [2, 1],
-    ],
-    [
-      [1, 0],
-      [1, 1],
-      [1, 2],
-      [2, 2],
-    ],
-    [
-      [0, 1],
-      [1, 1],
-      [2, 1],
-      [0, 2],
-    ],
-    [
-      [0, 0],
-      [1, 0],
-      [1, 1],
-      [1, 2],
-    ],
-  ],
-};
-const KICKS: [number, number][] = [
-  [0, 0],
-  [-1, 0],
-  [1, 0],
-  [0, -1],
-  [-1, -1],
-  [1, -1],
-  [-2, 0],
-  [2, 0],
-];
-
-const emptyBoard = (): Cell[][] =>
-  Array.from({ length: ROWS }, () => Array<Cell>(COLS).fill(null));
-
-function freshGame(): GameState {
-  return {
-    board: emptyBoard(),
-    active: null,
-    bag: [],
-    hold: null,
-    canHold: true,
-    score: 0,
-    level: 1,
-    lines: 0,
-    combo: 0,
-    status: "ready",
-    grounded: false,
-    lockTimer: 0,
-    resets: 0,
-    dropAcc: 0,
-    softDrop: false,
-    clearing: false,
-    clearRows: [],
-    clearUntil: 0,
-    rescues: 0,
-    overReason: null,
-    lastTime: null,
-    dirty: true,
-    metaReported: false,
-  };
-}
-
-function valid(p: Piece, board: Cell[][]): boolean {
-  for (const [c, r] of SHAPES[p.type][p.rot]) {
-    const x = p.x + c;
-    const y = p.y + r;
-    if (x < 0 || x >= COLS || y >= ROWS) return false;
-    if (y >= 0 && board[y][x]) return false;
-  }
-  return true;
-}
-
-function merge(p: Piece, board: Cell[][]): Cell[][] {
-  const nb = board.map((row) => row.slice());
-  for (const [c, r] of SHAPES[p.type][p.rot]) {
-    const x = p.x + c;
-    const y = p.y + r;
-    if (y >= 0) nb[y][x] = p.type;
-  }
-  return nb;
-}
-
-const gravityMs = (level: number) => Math.max(70, 800 - (level - 1) * 70);
-
-function primaryBtn(font: string): CSSProperties {
-  return {
-    border: "none",
-    minHeight: 56,
-    background: `linear-gradient(180deg,${MACARON_THEME.lemon},#ffbd6f)`,
-    color: "#614018",
-    fontWeight: 900,
-    fontSize: 19,
-    padding: "13px 30px",
-    borderRadius: 999,
-    cursor: "pointer",
-    boxShadow:
-      "0 8px 0 rgba(203,128,52,.42), 0 16px 24px rgba(164,103,61,.18), inset 0 2px 0 rgba(255,255,255,.72)",
-    fontFamily: font,
-  };
-}
-
-function secondaryBtn(font: string): CSSProperties {
-  return {
-    border: "2px solid rgba(93,74,103,.12)",
-    minHeight: 52,
-    background: "rgba(255,255,255,.72)",
-    color: MACARON_THEME.ink,
-    fontWeight: 800,
-    fontSize: 15,
-    padding: "10px 20px",
-    borderRadius: 999,
-    cursor: "pointer",
-    fontFamily: font,
-  };
-}
-
-const panelStyle: CSSProperties = {
-  background:
-    "linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,246,238,.82))",
-  border: "1px solid rgba(255,255,255,.9)",
-  borderRadius: 18,
-  padding: "8px 10px",
-  textAlign: "center",
-  boxShadow:
-    "0 8px 18px rgba(158,118,122,.12), inset 0 1px 0 rgba(255,255,255,.85)",
-};
-
-const panelLabel: CSSProperties = {
-  color: MACARON_THEME.inkSoft,
-  fontSize: 11,
-  fontWeight: 900,
-};
-
-const hintChip: CSSProperties = {
-  display: "inline-flex",
-  alignItems: "center",
-  gap: 4,
-  background: "rgba(255,255,255,.82)",
-  border: "1px solid rgba(255,255,255,.95)",
-  borderRadius: 999,
-  padding: "5px 12px",
-  fontSize: 14,
-  fontWeight: 900,
-  color: MACARON_THEME.ink,
-  boxShadow: "0 4px 10px rgba(126,96,112,.12)",
-  whiteSpace: "nowrap",
-};
-
-function touchPadButton(metrics: TouchPadMetrics): CSSProperties {
-  return {
-    ...hintChip,
-    borderRadius: 16,
-    minHeight: metrics.btn,
-    height: metrics.btn,
-    width: "100%",
-    justifyContent: "center",
-    padding: 0,
-    boxShadow: "0 4px 12px rgba(126,96,112,.14)",
-    touchAction: "manipulation",
-    cursor: "pointer",
-  };
-}
-
-/** 棋盤右側觸控鍵：旋轉、左右移、落下、暫存。 */
-export function TouchControlPad({
-  metrics,
-  holdType,
-  canHold,
-  onRotate,
-  onMoveLeftDown,
-  onMoveRightDown,
-  onMoveStop,
-  onDrop,
-  onHold,
-}: {
-  metrics: TouchPadMetrics;
-  holdType: PieceType | null;
-  canHold: boolean;
-  onRotate: () => void;
-  onMoveLeftDown: () => void;
-  onMoveRightDown: () => void;
-  onMoveStop: () => void;
-  onDrop: () => void;
-  onHold: () => void;
-}) {
-  // G-H2：左右鍵各自獨立一列（不再 half 併排），寬＝colW、高＝btn，皆 ≥44px（DESIGN 觸控紅線）。
-  const full = touchPadButton(metrics);
-  const { icon, gap, colW } = metrics;
-  const holdCell = Math.max(7, Math.floor(metrics.btn / 5.5));
-  const movePointerIdRef = useRef<number | null>(null);
-
-  const releaseMoveCapture = (el: HTMLButtonElement, pointerId: number) => {
-    try {
-      if (el.hasPointerCapture?.(pointerId)) {
-        el.releasePointerCapture(pointerId);
-      }
-    } catch {
-      // 部分環境不支援 capture
-    }
-  };
-
-  const handleMoveDown =
-    (startMove: () => void) => (e: ReactPointerEvent<HTMLButtonElement>) => {
-      e.preventDefault();
-      try {
-        e.currentTarget.setPointerCapture(e.pointerId);
-      } catch {
-        // 部分環境不支援 capture
-      }
-      movePointerIdRef.current = e.pointerId;
-      startMove();
-    };
-
-  const handleMoveEnd = (e: ReactPointerEvent<HTMLButtonElement>) => {
-    if (movePointerIdRef.current !== null && e.pointerId !== movePointerIdRef.current) return;
-    releaseMoveCapture(e.currentTarget, e.pointerId);
-    movePointerIdRef.current = null;
-    onMoveStop();
-  };
-
-  return (
-    <div
-      data-testid="touch-control-pad"
-      style={{
-        width: colW,
-        maxWidth: colW,
-        flexShrink: 0,
-        display: "flex",
-        flexDirection: "column",
-        gap,
-        alignSelf: "stretch",
-        justifyContent: "center",
-        overflow: "hidden",
-      }}
-    >
-      <button type="button" aria-label="旋轉" style={full} onClick={onRotate}>
-        <IconRotate size={icon} />
-      </button>
-      <button
-        type="button"
-        aria-label="左移"
-        style={full}
-        onPointerDown={handleMoveDown(onMoveLeftDown)}
-        onPointerUp={handleMoveEnd}
-        onPointerCancel={handleMoveEnd}
-        onLostPointerCapture={handleMoveEnd}
-      >
-        <IconChevronLeft size={icon} />
-      </button>
-      <button
-        type="button"
-        aria-label="右移"
-        style={full}
-        onPointerDown={handleMoveDown(onMoveRightDown)}
-        onPointerUp={handleMoveEnd}
-        onPointerCancel={handleMoveEnd}
-        onLostPointerCapture={handleMoveEnd}
-      >
-        <IconChevronRight size={icon} />
-      </button>
-      <button type="button" aria-label="落下" style={full} onClick={onDrop}>
-        <IconSwipeDown size={icon} />
-      </button>
-      <button
-        type="button"
-        aria-label="暫存"
-        style={{ ...full, opacity: canHold ? 1 : 0.45 }}
-        onClick={onHold}
-      >
-        {holdType ? (
-          <PiecePreview type={holdType} cell={holdCell} />
-        ) : (
-          <IconBox size={icon} color={MACARON_THEME.inkSoft} />
-        )}
-      </button>
-    </div>
-  );
-}
-
-function PanelTitle({ icon, text }: { icon: ReactNode; text: string }) {
-  return (
-    <div
-      aria-hidden
-      style={{
-        ...panelLabel,
-        marginBottom: 5,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 4,
-      }}
-    >
-      {icon}
-      <span>{text}</span>
-    </div>
-  );
-}
-
-function PiecePreview({ type, cell }: { type: PieceType | null; cell: number }) {
-  return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: `repeat(4, ${cell}px)`,
-        gridTemplateRows: `repeat(2, ${cell}px)`,
-        gap: 2,
-        justifyContent: "center",
-      }}
-    >
-      {Array.from({ length: 8 }).map((_, i) => {
-        const c = i % 4;
-        const r = Math.floor(i / 4);
-        const on = type && SHAPES[type][0].some(([cc, rr]) => cc === c && rr === r);
-        return (
-          <div
-            key={i}
-            style={
-              on
-                ? {
-                    width: "100%",
-                    height: "100%",
-                    background: `${BLOCK_SYMBOL_BG[type as PieceType]}, ${COLORS[type as PieceType]}`,
-                    backgroundSize: "42% 42%, 100% 100%",
-                    backgroundPosition: "center, 0 0",
-                    backgroundRepeat: "no-repeat, no-repeat",
-                    borderRadius: Math.max(5, cell / 2.8),
-                    boxShadow:
-                      "inset 2px 2px 0 rgba(255,255,255,.62), inset -2px -2px 0 rgba(111,72,86,.16), 0 3px 6px rgba(117,88,119,.16)",
-                  }
-                : { background: "transparent" }
-            }
-          />
-        );
-      })}
-    </div>
-  );
-}
-
-type Toast = { id: number; text: string; big: boolean };
-type ClearFx = {
-  id: number;
-  text: string;
-  kind: "spark" | "wave" | "confetti";
-};
-
-/** 棋盤手勢層：釋放 pointer capture（可單元測試）。 */
-export function releaseBoardPointerCapture(target: HTMLElement, pointerId: number): void {
-  try {
-    if (target.hasPointerCapture?.(pointerId)) {
-      target.releasePointerCapture(pointerId);
-    }
-  } catch {
-    // 部分環境不支援 capture
-  }
-}
-
-export type BlockDropController = {
-  begin(): void;
-  pause(): void;
-  resume(): void;
-};
+export type { BlockDropController } from "@/components/games/useBlockDropGame";
 
 export type BlockDropViewProps = OverlayProps & {
   audio?: GameAudioBus;
   instance: BlockDropInstance;
 };
 
+export { releaseBoardPointerCapture };
+
+function roundKey(mode: BlockMode, index: number, replay: boolean): string {
+  return `${mode}:${index}:${replay ? "replay" : "main"}`;
+}
+
+/** 偏好存的是上次在地圖選的玩法；沒選過（或舊值 free）依兒童模式。 */
+function mapModeOf(pref: BlockDropMode | null, kidsMode: boolean): BlockMode {
+  if (pref === "easy" || pref === "challenge") return pref;
+  return kidsMode ? "easy" : "challenge";
+}
+
 export function BlockDropView({
-  status: hostStatus,
-  score: hostScore,
   best,
   kidsMode,
   reducedMotion,
@@ -831,66 +103,191 @@ export function BlockDropView({
   audio,
   instance,
 }: BlockDropViewProps) {
-
-  const G = useRef<GameState>(freshGame());
-  const dasRef = useRef({ dir: 0, nextAt: 0 });
-  const reduced = reducedMotion;
-  const { useKeyboardInput } = useTouchControls();
   const isCoarse = useCoarsePointer();
   const {
     blockDropDifficulty,
     blockDropSpecialMode,
     setBlockDropDifficulty,
   } = useGameKitSettings();
-  const difficultyRef = useRef(blockDropDifficulty);
-  difficultyRef.current = blockDropDifficulty;
-  const specialModeRef = useRef(blockDropSpecialMode);
-  specialModeRef.current = blockDropSpecialMode;
-  const { juice, boardTransform } = useDomJuice(reduced);
+  const boardScaleRef = useRef(1.6);
+  const [screen, setScreen] = useState<Screen>("home");
+  const [medals, setMedals] = useState<number[]>([]);
+  const [prefMode, setPrefMode] = useState<BlockDropMode | null>(null);
+  const mapMode = mapModeOf(prefMode, kidsMode);
+  const pendingRef = useRef<Record<string, BlockRound>>({});
+  const lastStageRef = useRef<Record<string, string | undefined>>({});
+  const hostBeginRef = useRef<() => void>(() => undefined);
 
-  const [, force] = useState(0);
-  const tone = audio?.tone ?? (() => undefined);
+  const {
+    G,
+    roundRef,
+    outcome,
+    idleHint,
+    dropMode,
+    startGame,
+    leaveRound,
+    dropPress,
+    dropRelease,
+    boardTransform,
+    difficultyRef,
+    toasts,
+    clearFx,
+    tutorialStep,
+    skipTutorial,
+    lockFxRef,
+    newBestRef,
+    rotate,
+    holdPiece,
+    startMoveRepeat,
+    stopMoveRepeat,
+    gestures,
+  } = useBlockDropGame({
+    instance,
+    audio,
+    best,
+    reducedMotion,
+    onStart,
+    syncHost,
+    blockDropDifficulty,
+    blockDropSpecialMode,
+    boardScaleRef,
+    onHostBegin: () => hostBeginRef.current(),
+  });
+  const reduced = reducedMotion;
 
-  const repaint = useCallback(() => force((n) => n + 1), []);
-  void hostStatus;
-  void hostScore;
-
-  // ── 手機 / iPad / 桌機三段版面，同步玩法但微調資訊密度 ──
-  const [layoutMode, setLayoutMode] = useState<"mobile" | "tablet" | "desktop">(
-    "mobile",
-  );
+  const refreshMedals = useCallback(() => {
+    setMedals(loadPlayerProfile().medals["block-drop"]?.slice() ?? []);
+  }, []);
   useEffect(() => {
-    const apply = () => {
-      const w = window.innerWidth || 390;
-      const h = window.innerHeight || 844;
-      setLayoutMode(w >= 980 && h >= 620 ? "desktop" : w >= 700 ? "tablet" : "mobile");
-    };
+    refreshMedals();
+    setPrefMode(loadBlockDropPrefs().mode);
+    window.addEventListener(GAMEKIT_PROGRESS_EVENT, refreshMedals);
+    return () => window.removeEventListener(GAMEKIT_PROGRESS_EVENT, refreshMedals);
+  }, [refreshMedals]);
+  const maxCleared = medals.reduce((m, f, i) => (medalCount(f) > 0 ? Math.max(m, i + 1) : m), 0);
+
+  /** 地圖預覽與開始用同一份配置（抽一次就固定）；通關過的站重玩換變體。 */
+  const planRound = useCallback(
+    (index: number): BlockRound => {
+      const replay = medalCount(medals[index] ?? 0) > 0;
+      const key = roundKey(mapMode, index, replay);
+      const cached = pendingRef.current[key];
+      if (cached) return cached;
+      const round = buildBlockRound(index, mapMode, {
+        replay,
+        previousId: lastStageRef.current[`${mapMode}:${index}`],
+        rng: Math.random,
+      });
+      pendingRef.current[key] = round;
+      return round;
+    },
+    [medals, mapMode],
+  );
+
+  const previewFor = useCallback(
+    (index: number): BlockStationPreview => {
+      const round = planRound(index);
+      return {
+        stones: round.stage.stones,
+        goals: round.stage.goals,
+        summary: blockGoalsSummary(round.stage.goals),
+        pieceCap: round.stage.pieceCap,
+        replay: round.replay,
+      };
+    },
+    [planRound],
+  );
+
+  const startStation = useCallback(
+    (index: number) => {
+      const round = planRound(index);
+      delete pendingRef.current[roundKey(round.mode, index, round.replay)];
+      lastStageRef.current[`${round.mode}:${index}`] = round.stage.id;
+      setScreen("play");
+      startGame(round);
+    },
+    [planRound, startGame],
+  );
+
+  const startFree = useCallback(() => {
+    setScreen("play");
+    startGame(null);
+  }, [startGame]);
+
+  const goToMap = useCallback(() => {
+    leaveRound();
+    setScreen("map");
+  }, [leaveRound]);
+
+  const goHome = useCallback(() => {
+    leaveRound();
+    setScreen("home");
+  }, [leaveRound]);
+
+  const changeMode = useCallback((next: BlockMode) => {
+    saveBlockDropMode(next);
+    setPrefMode(next);
+  }, []);
+
+  // Host 的開始／確認鍵／再玩一次：標題面進地圖；地圖與冒險結算有自己的按鈕；其餘重開目前玩法
+  hostBeginRef.current = () => {
+    if (screen === "home") {
+      setScreen("map");
+      return;
+    }
+    if (screen === "map") return;
+    const round = roundRef.current;
+    const status = G.current.status;
+    if (round && (status === "over" || status === "won")) return;
+    if (round) startStation(round.station.index);
+    else startGame(null);
+  };
+
+  // ── 直向手機／平板／桌機／橫向手機四種版面 ──
+  const [layoutMode, setLayoutMode] = useState<LayoutMode>("mobile");
+  useEffect(() => {
+    const apply = () => setLayoutMode(layoutModeFor(window.innerWidth || 390, window.innerHeight || 844));
     apply();
     window.addEventListener("resize", apply);
     return () => window.removeEventListener("resize", apply);
   }, []);
-  const wide = layoutMode !== "mobile";
+  const wide = layoutMode === "tablet" || layoutMode === "desktop";
+  const landscape = layoutMode === "landscape";
+  const layout = getLayoutMetrics(layoutMode, isCoarse);
+  const keys = layout.keys;
+  const barKeys = keys != null && layout.keyLayout === "bar";
+  const keyBarH = barKeys && keys ? keys.key + KEY_BAR_GAP : 0;
 
-  // ── 手機優先：棋盤填滿卡片寬度，連續縮放（DOM 方塊非像素畫，免整數倍）──
+  const g = G.current;
+  const cols = g.board[0]?.length ?? 10;
+  const rows = g.board.length;
+  const round = screen === "play" ? roundRef.current : null;
+  const inRound = g.status === "playing" || g.status === "paused";
+
+  // ── 棋盤填滿可用寬高，連續縮放（DOM 方塊非像素畫，免整數倍）；井下鍵列的高度先扣掉 ──
   const boardWrapRef = useRef<HTMLDivElement | null>(null);
-  const inRoundLayout = G.current.status === "playing" || G.current.status === "paused";
   const [boardScale, setBoardScale] = useState(1.6);
-  const boardScaleRef = useRef(boardScale);
   boardScaleRef.current = boardScale;
-
+  const hasRound = round != null;
   useEffect(() => {
     const el = boardWrapRef.current;
     if (!el) return;
     const apply = () => {
       const w = el.clientWidth;
       if (w <= 0) return;
-      // 用棋盤頂端的實際位置動態計算可用高度（下方保留提示行＋卡片內距），
-      // 整頁呈現、玩到底不用捲動
       const top = el.getBoundingClientRect().top + window.scrollY;
-      const reserve =
-        layoutMode === "desktop" ? 48 : layoutMode === "tablet" ? 40 : isCoarse ? 12 : 32;
-      const maxH = Math.max(300, (window.innerHeight || 800) - top - reserve);
-      setBoardScale(Math.min(w / BOARD_W, maxH / BOARD_H));
+      const reserve = landscape
+        ? 6
+        : layoutMode === "desktop"
+          ? 48
+          : layoutMode === "tablet"
+            ? 40
+            : isCoarse
+              ? 8
+              : 32;
+      const minH = landscape ? MIN_BOARD_H_LANDSCAPE : MIN_BOARD_H_PORTRAIT;
+      const maxH = Math.max(minH, (window.innerHeight || 800) - top - reserve - keyBarH);
+      setBoardScale(Math.min(w / (cols * CELL), maxH / (rows * CELL)));
     };
     apply();
     const ro = new ResizeObserver(apply);
@@ -900,996 +297,126 @@ export function BlockDropView({
       ro.disconnect();
       window.removeEventListener("resize", apply);
     };
-    // G-H1：手機局內會收掉卡內標題列，井的 top 會變，ResizeObserver 量不到 → 以 inRoundLayout 觸發重算
-  }, [wide, isCoarse, layoutMode, inRoundLayout]);
+    // 局內會收掉卡內 chip 列、任務列出現，井的 top 會變 → 以 inRound／hasRound 觸發重算
+  }, [isCoarse, layoutMode, landscape, keyBarH, inRound, hasRound, cols, rows, screen]);
 
-  // ── 浮動回饋文字（消行／連擊／升級）──
-  const [toasts, setToasts] = useState<Toast[]>([]);
-  const [clearFx, setClearFx] = useState<ClearFx | null>(null);
-  const toastId = useRef(0);
-  const toastTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const clearFxTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const addToast = useCallback((text: string, big = false) => {
-    const id = ++toastId.current;
-    setToasts((list) => [...list.slice(-3), { id, text, big }]);
-    toastTimers.current.push(
-      setTimeout(() => {
-        setToasts((list) => list.filter((t) => t.id !== id));
-      }, 1000),
-    );
-  }, []);
-  const celebrateClear = useCallback((lines: number, combo: number) => {
-    const id = performance.now();
-    const kind: ClearFx["kind"] =
-      lines >= 3 ? "confetti" : lines === 2 ? "wave" : "spark";
-    const text = lines >= 3 ? "太棒了！" : lines === 2 ? "好厲害！" : "好耶！";
-    setClearFx({ id, text, kind });
-    if (clearFxTimer.current) clearTimeout(clearFxTimer.current);
-    clearFxTimer.current = setTimeout(() => setClearFx(null), combo >= 2 ? 950 : 760);
-  }, []);
-  useEffect(
-    () => () => {
-      toastTimers.current.forEach(clearTimeout);
-      if (clearFxTimer.current) clearTimeout(clearFxTimer.current);
-    },
-    [],
-  );
-
-  const newBestRef = useRef(false);
-
-  const [tutorialProgress, setTutorialProgress] = useState<BlockDropTutorialProgress>(
-    () => readBlockDropTutorialProgress(),
-  );
-  const tutorialProgressRef = useRef(tutorialProgress);
-  tutorialProgressRef.current = tutorialProgress;
-  const [tutorialStep, setTutorialStep] = useState<BlockDropTutorialStep | null>(null);
-  const tutorialStepRef = useRef<BlockDropTutorialStep | null>(null);
-
-  const setVisibleTutorialStep = (step: BlockDropTutorialStep | null) => {
-    tutorialStepRef.current = step;
-    setTutorialStep(step);
-  };
-
-  const recordTutorialStep = (step: BlockDropTutorialStep) => {
-    const current = tutorialProgressRef.current;
-    if (current[step]) return;
-    const next = completeBlockDropTutorialStep(current, step);
-    tutorialProgressRef.current = next;
-    setTutorialProgress(next);
-    saveBlockDropTutorialProgress(next);
-    setVisibleTutorialStep(
-      step === "move" ? stepAfterBlockDropAction(next, "move") : null,
-    );
-  };
-
-  const showLineTutorialIfNeeded = (board: readonly (readonly Cell[])[]) => {
-    const current = tutorialProgressRef.current;
-    if (current.line || tutorialStepRef.current || !current.move || !current.rotate) return;
-    if (isBlockDropBoardNearLine(board)) setVisibleTutorialStep("line");
-  };
-
-  const skipTutorial = () => {
-    const next = skipBlockDropTutorial();
-    tutorialProgressRef.current = next;
-    setTutorialProgress(next);
-    saveBlockDropTutorialProgress(next);
-    setVisibleTutorialStep(null);
-  };
-
-  // ── 落地擠壓（squash）：剛鎖定的格子做一拍 Q 彈動畫 ──
-  const lockFxRef = useRef<{ cells: Set<number>; until: number }>({
-    cells: new Set(),
-    until: 0,
-  });
-  const lockFxTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(
-    () => () => {
-      if (lockFxTimer.current) clearTimeout(lockFxTimer.current);
-    },
-    [],
-  );
-  const triggerLockSquash = (piece: Piece) => {
-    if (reduced) return;
-    const cells = new Set<number>();
-    for (const [c, r] of SHAPES[piece.type][piece.rot]) {
-      const x = piece.x + c;
-      const y = piece.y + r;
-      if (y >= 0) cells.add(y * COLS + x);
-    }
-    lockFxRef.current = { cells, until: performance.now() + 240 };
-    if (lockFxTimer.current) clearTimeout(lockFxTimer.current);
-    lockFxTimer.current = setTimeout(() => {
-      lockFxRef.current = { cells: new Set(), until: 0 };
-      repaint();
-    }, 260);
-  };
-
-  const sMove = () => tone(220, 0.03, "square", 0.025);
-  const sRotate = () => tone(420, 0.04, "square", 0.03);
-  const sLock = () => tone(160, 0.06, "triangle", 0.04);
-  const sLine = (n: number) =>
-    [523, 659, 784, 1046]
-      .slice(0, Math.max(2, n))
-      .forEach((f, i) => setTimeout(() => tone(f, 0.12, "triangle", 0.06), i * 70));
-  const sLevel = () =>
-    [523, 784, 1046].forEach((f, i) =>
-      setTimeout(() => tone(f, 0.14, "triangle", 0.06), i * 100),
-    );
-  const sOver = () =>
-    [440, 330, 220].forEach((f, i) =>
-      setTimeout(() => tone(f, 0.22, "sawtooth", 0.06), i * 160),
-    );
-
-  // UX-P2-1：blockDropDifficulty 是持久化偏好（見 useGameKitSettings），預設值
-  // 已與 kidsMode 預設開啟同步為 relaxed；使用者明確切換過的難度會持久化並
-  // 沿用於之後每一局，此處只讀取現值，不因 kidsMode 覆寫使用者的明確選擇。
-  const difficultyConfig = () => DIFFICULTY_CONFIG[difficultyRef.current];
-
-  const scoreValue = (base: number) =>
-    Math.round(base * difficultyConfig().scoreMultiplier);
-
-  const shouldRescue = (g: GameState) => g.rescues < difficultyConfig().rescueLimit;
-
-  const refill = (g: GameState) => {
-    if (g.bag.length <= 7) {
-      const b = [...TYPES];
-      for (let i = b.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [b[i], b[j]] = [b[j], b[i]];
-      }
-      g.bag.push(...b);
-    }
-  };
-
-  const updateGrounded = (g: GameState) => {
-    if (g.active) {
-      g.grounded = !valid({ ...g.active, y: g.active.y + 1 }, g.board);
-    }
-  };
-
-  const resetLock = (g: GameState) => {
-    if (g.grounded && g.resets < 15) {
-      g.lockTimer = 0;
-      g.resets++;
-    }
-  };
-
-  const forgiveStack = (g: GameState) => {
-    for (let y = 0; y < 4; y++) g.board[y] = Array<Cell>(COLS).fill(null);
-    if (g.active) {
-      g.active.y = 0;
-      g.active.x = 3;
-    }
-    g.rescues += 1;
-    g.status = "playing";
-    g.overReason = null;
-    g.metaReported = false;
-    g.dirty = true;
-    addToast("救援啟動，清出空間！", true);
-    instance.notifyPlaying(g.score);
-    syncHost();
-  };
-
-  const gameOver = (g: GameState, reason: OverReason = null) => {
-    g.status = "over";
-    g.overReason = reason;
-    newBestRef.current = g.score > 0 && g.score > (best ?? 0);
-    sOver();
-    g.dirty = true;
-    if (!g.metaReported) {
-      g.metaReported = true;
-      instance.notifyOver(g.score);
-    }
-    syncHost();
-  };
-
-  const spawnNext = (g: GameState) => {
-    refill(g);
-    const type = g.bag.shift()!;
-    g.active = { type, rot: 0, x: 3, y: 0 };
-    g.canHold = true;
-    g.grounded = false;
-    g.lockTimer = 0;
-    g.resets = 0;
-    if (!valid(g.active, g.board)) {
-      if (shouldRescue(g)) forgiveStack(g);
-      else gameOver(g, "topout");
-    } else {
-      updateGrounded(g);
-    }
-  };
-
-  const finishClear = (g: GameState) => {
-    const set = new Set(g.clearRows);
-    const nb = g.board.filter((_, y) => !set.has(y));
-    while (nb.length < ROWS) nb.unshift(Array<Cell>(COLS).fill(null));
-    g.board = nb;
-    const n = g.clearRows.length;
-    if (n > 0) recordTutorialStep("line");
-    g.lines += n;
-    const lineScore = scoreValue(LINE_SCORE[n] * g.level);
-    g.score += lineScore;
-    addToast(`${CLEAR_LABEL[n]} +${lineScore}`, n >= 4);
-    g.combo += 1;
-    celebrateClear(n, g.combo);
-    if (g.combo >= 2) {
-      const bonus = scoreValue(50 * (g.combo - 1) * g.level);
-      g.score += bonus;
-      addToast(`連擊 ×${g.combo} +${bonus}`);
-    }
-    const specialMode = specialModeRef.current;
-    if (specialMode === "rainbow" && g.combo >= 2) {
-      const rainbow = scoreValue(120 * g.combo * n);
-      g.score += rainbow;
-      addToast(`彩虹消除 +${rainbow}`, true);
-      setClearFx({ id: performance.now(), text: "太棒了！", kind: "confetti" });
-      if (!reduced) juice.shake.trigger(0.16, 4);
-    }
-    if (g.board.every((row) => row.every((c) => !c))) {
-      const bonus = scoreValue(1000 * g.level);
-      g.score += bonus;
-      addToast(`全部清光 +${bonus}`, true);
-      if (!reduced) juice.shake.trigger(0.2, 5);
-    }
-    const lv = Math.floor(g.lines / 10) + 1;
-    if (lv > g.level) {
-      g.level = lv;
-      addToast(`升級 Lv ${lv}！`, true);
-      sLevel();
-    }
-    g.clearing = false;
-    g.clearRows = [];
-    spawnNext(g);
-    g.dirty = true;
-  };
-
-  const lockPiece = (g: GameState) => {
-    if (!g.active) return;
-    dragRef.current = null;
-    if (SHAPES[g.active.type][g.active.rot].some(([, r]) => g.active!.y + r < 0)) {
-      if (shouldRescue(g)) {
-        forgiveStack(g);
-        return;
-      }
-      gameOver(g, "topout");
-      return;
-    }
-    triggerLockSquash(g.active);
-    g.board = merge(g.active, g.board);
-    showLineTutorialIfNeeded(g.board);
-    sLock();
-    const full: number[] = [];
-    g.board.forEach((row, y) => {
-      if (row.every((c) => c)) full.push(y);
-    });
-    if (full.length) {
-      g.clearing = true;
-      g.clearRows = full;
-      g.clearUntil = performance.now() + 260;
-      sLine(full.length);
-      if (!reduced) juice.shake.trigger(0.12, 2 + full.length);
-    } else {
-      g.combo = 0;
-      spawnNext(g);
-    }
-    g.dirty = true;
-  };
-
-  const gravityStep = (g: GameState) => {
-    if (!g.active) return;
-    const np = { ...g.active, y: g.active.y + 1 };
-    if (valid(np, g.board)) {
-      g.active = np;
-      if (g.softDrop) g.score += 1;
-      g.grounded = false;
-      g.lockTimer = 0;
-      g.dirty = true;
-    } else {
-      g.grounded = true;
-    }
-  };
-
-  const move = (dx: number): boolean => {
-    const g = G.current;
-    if (g.status !== "playing" || g.clearing || !g.active) return false;
-    const np = { ...g.active, x: g.active.x + dx };
-    if (!valid(np, g.board)) return false;
-    g.active = np;
-    updateGrounded(g);
-    resetLock(g);
-    sMove();
-    recordTutorialStep("move");
-    g.dirty = true;
-    repaint();
-    return true;
-  };
-
-  const rotate = (dir: number) => {
-    const g = G.current;
-    if (g.status !== "playing" || g.clearing || !g.active) return;
-    const nr = (g.active.rot + dir + 4) % 4;
-    for (const [dx, dy] of KICKS) {
-      const np: Piece = {
-        type: g.active.type,
-        rot: nr,
-        x: g.active.x + dx,
-        y: g.active.y + dy,
-      };
-      if (valid(np, g.board)) {
-        g.active = np;
-        updateGrounded(g);
-        resetLock(g);
-        sRotate();
-        recordTutorialStep("rotate");
-        g.dirty = true;
-        repaint();
-        return;
-      }
-    }
-  };
-
-  const hardDrop = () => {
-    const g = G.current;
-    if (g.status !== "playing" || g.clearing || !g.active) return;
-    let n = 0;
-    while (valid({ ...g.active, y: g.active.y + 1 }, g.board)) {
-      g.active = { ...g.active, y: g.active.y + 1 };
-      n++;
-    }
-    g.score += scoreValue(n * 2);
-    if (n > 0 && !reduced) juice.shake.trigger(0.07, 1.5);
-    lockPiece(g);
-    repaint();
-  };
-
-  const holdPiece = () => {
-    const g = G.current;
-    if (g.status !== "playing" || g.clearing || !g.active || !g.canHold) return;
-    dragRef.current = null;
-    const cur = g.active.type;
-    if (g.hold == null) {
-      g.hold = cur;
-      spawnNext(g);
-    } else {
-      const h = g.hold;
-      g.hold = cur;
-      g.active = { type: h, rot: 0, x: 3, y: 0 };
-      if (!valid(g.active, g.board)) {
-        if (shouldRescue(g)) forgiveStack(g);
-        else gameOver(g, "topout");
-      } else {
-        updateGrounded(g);
-      }
-    }
-    g.canHold = false;
-    g.lockTimer = 0;
-    g.dirty = true;
-    repaint();
-  };
-
-  // 遊戲迴圈的區域函式每 render 重建（彼此互相引用，無法逐一 useCallback 化）。
-  // 以 ref 鏡射最新版：useCallback／effect 依賴保持穩定（鍵盤訂閱不必每 render
-  // 重掛），呼叫到的仍是最新閉包，行為與直接呼叫一致。
-  const liveFnsRef = useRef({ spawnNext, rotate, holdPiece });
-  liveFnsRef.current = { spawnNext, rotate, holdPiece };
-
-  const begin = useCallback(() => {
-    audio?.ensureAudio();
-    const g = freshGame();
-    g.status = "playing";
-    const savedTutorial = readBlockDropTutorialProgress();
-    tutorialProgressRef.current = savedTutorial;
-    setTutorialProgress(savedTutorial);
-    const initialTutorialStep: BlockDropTutorialStep | null = savedTutorial.move
-      ? savedTutorial.rotate
-        ? null
-        : "rotate"
-      : "move";
-    tutorialStepRef.current = initialTutorialStep;
-    setTutorialStep(initialTutorialStep);
-    newBestRef.current = false;
-    refill(g);
-    liveFnsRef.current.spawnNext(g);
-    g.lastTime = null;
-    G.current = g;
-    setToasts([]);
-    instance.notifyPlaying(g.score);
-    syncHost();
-    repaint();
-  }, [audio, instance, syncHost, repaint]);
-
-  const applyPause = useCallback(() => {
-    const g = G.current;
-    if (g.status !== "playing") return;
-    g.status = "paused";
-    instance.notifyPaused();
-    syncHost();
-    repaint();
-  }, [instance, syncHost, repaint]);
-
-  const applyResume = useCallback(() => {
-    const g = G.current;
-    if (g.status !== "paused") return;
-    g.status = "playing";
-    g.lastTime = null;
-    instance.notifyPlaying(g.score);
-    syncHost();
-    repaint();
-  }, [instance, syncHost, repaint]);
-
-  const togglePause = useCallback(() => {
-    const g = G.current;
-    if (g.status === "playing") applyPause();
-    else if (g.status === "paused") applyResume();
-  }, [applyPause, applyResume]);
-
-  useEffect(() => {
-    instance.registerController({
-      begin,
-      pause: applyPause,
-      resume: applyResume,
-    });
-    return () => {
-      instance.registerController({
-        begin: () => undefined,
-        pause: () => undefined,
-        resume: () => undefined,
-      });
-    };
-  }, [instance, begin, applyPause, applyResume]);
-
-  const playStatus = G.current.status;
-  useKeyboardInput(
-    (input) => {
-      const g = G.current;
-      if (g.status === "playing") {
-        if (input.wasPressed("pause")) {
-          togglePause();
-          return;
-        }
-        const now = performance.now();
-        const das = dasRef.current;
-        if (input.wasPressed("move-left")) {
-          move(-1);
-          das.dir = -1;
-          das.nextAt = now + DAS_DELAY;
-        }
-        if (input.wasPressed("move-right")) {
-          move(1);
-          das.dir = 1;
-          das.nextAt = now + DAS_DELAY;
-        }
-        if (das.dir !== 0) {
-          if (!input.isHeld(das.dir < 0 ? "move-left" : "move-right")) {
-            das.dir = 0;
-          } else {
-            while (now >= das.nextAt) {
-              move(das.dir);
-              das.nextAt += DAS_REPEAT;
-            }
-          }
-        }
-        if (input.wasPressed("move-up")) rotate(1);
-        if (input.wasPressed("action")) hardDrop();
-        g.softDrop = input.isHeld("move-down");
-      } else if (g.status === "paused" && input.wasPressed("pause")) {
-        togglePause();
-      }
-    },
-    playStatus === "playing" || playStatus === "paused",
-  );
-
-  useGameLoop({
-    onFrame: (dt, now) => {
-      const g = G.current;
-      if (g.status === "playing") {
-        if (g.clearing) {
-          if (now >= g.clearUntil) finishClear(g);
-        } else if (g.active) {
-          const config = difficultyConfig();
-          const interval = (g.softDrop ? 45 : gravityMs(g.level)) * config.gravityScale;
-          g.dropAcc += dt;
-          while (!g.clearing && g.dropAcc >= interval) {
-            g.dropAcc -= interval;
-            gravityStep(g);
-          }
-          if (g.grounded) {
-            g.lockTimer += dt;
-            if (g.lockTimer >= config.lockDelayMs) lockPiece(g);
-          }
-        }
-        if (g.dirty) {
-          g.dirty = false;
-          repaint();
-        }
-      }
-    },
-  });
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const g = G.current;
-      const k = e.key;
-      if (["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp", " "].includes(k)) {
-        e.preventDefault();
-      }
-      if (g.status === "ready" || g.status === "over") {
-        if (k === " " || k === "Enter") onStart();
-        return;
-      }
-      if (g.status !== "playing") return;
-      const { rotate: doRotate, holdPiece: doHold } = liveFnsRef.current;
-      if (k === "z" || k === "Z") doRotate(-1);
-      else if (k === "x" || k === "X") doRotate(1);
-      else if (k === "c" || k === "C" || k === "Shift") doHold();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [onStart]);
-
-  // ── 棋盤手勢：左右拖曳移動、點一下旋轉、快速下滑硬降、上滑暫存 ──
-  const dragRef = useRef<{
-    pid: number;
-    x0: number;
-    y0: number;
-    t0: number;
-    startCol: number;
-    dropped: number;
-    moved: boolean;
-  } | null>(null);
-  const moveRepeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const stopMoveRepeat = useCallback(() => {
-    if (moveRepeatRef.current) {
-      clearInterval(moveRepeatRef.current);
-      moveRepeatRef.current = null;
-    }
-  }, []);
-
-  useEffect(() => () => stopMoveRepeat(), [stopMoveRepeat]);
-
-  const dragSoftStep = (): boolean => {
-    const g = G.current;
-    if (g.status !== "playing" || g.clearing || !g.active) return false;
-    const np = { ...g.active, y: g.active.y + 1 };
-    if (!valid(np, g.board)) return false;
-    g.active = np;
-    g.score += 1;
-    g.dropAcc = 0;
-    updateGrounded(g);
-    g.dirty = true;
-    repaint();
-    return true;
-  };
-
-  const onBoardPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
-    const g = G.current;
-    if (g.status !== "playing" || !g.active || dragRef.current) return;
-    try {
-      e.currentTarget.setPointerCapture(e.pointerId);
-    } catch {
-      // 部分環境（合成事件）不支援 capture，手勢仍可運作
-    }
-    dragRef.current = {
-      pid: e.pointerId,
-      x0: e.clientX,
-      y0: e.clientY,
-      t0: performance.now(),
-      startCol: g.active.x,
-      dropped: 0,
-      moved: false,
-    };
-  };
-
-  const onBoardPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
-    const d = dragRef.current;
-    if (!d || d.pid !== e.pointerId) return;
-    const g = G.current;
-    if (g.status !== "playing" || g.clearing || !g.active) return;
-    const px = CELL * boardScaleRef.current;
-    const dx = e.clientX - d.x0;
-    const dy = e.clientY - d.y0;
-    const targetCol = d.startCol + Math.round(dx / px);
-    let guard = COLS * 2;
-    while (g.active && g.active.x !== targetCol && guard-- > 0) {
-      if (!move(g.active.x < targetCol ? 1 : -1)) break;
-    }
-    const wantDrop = Math.floor(dy / px);
-    while (d.dropped < wantDrop) {
-      d.dropped++;
-      if (!dragSoftStep()) break;
-    }
-    if (Math.hypot(dx, dy) > 10) d.moved = true;
-  };
-
-  const onBoardPointerUp = (e: ReactPointerEvent<HTMLDivElement>) => {
-    const d = dragRef.current;
-    if (!d || d.pid !== e.pointerId) return;
-    releaseBoardPointerCapture(e.currentTarget, e.pointerId);
-    dragRef.current = null;
-    const g = G.current;
-    if (g.status !== "playing") return;
-    const dt = Math.max(1, performance.now() - d.t0);
-    const dx = e.clientX - d.x0;
-    const dy = e.clientY - d.y0;
-    const px = CELL * boardScaleRef.current;
-    if (!d.moved && dt < 350) {
-      rotate(1);
-      return;
-    }
-    if (dy < -px && Math.abs(dy) > Math.abs(dx)) {
-      holdPiece();
-      return;
-    }
-    if (dy > px * 2 && dy / dt > 0.45 && Math.abs(dy) > Math.abs(dx) * 1.4) {
-      hardDrop();
-    }
-  };
-
-  const onBoardPointerCancel = (e: ReactPointerEvent<HTMLDivElement>) => {
-    const d = dragRef.current;
-    if (d && d.pid === e.pointerId) {
-      releaseBoardPointerCapture(e.currentTarget, e.pointerId);
-      dragRef.current = null;
-    }
-  };
-
-  const onBoardLostPointerCapture = (e: ReactPointerEvent<HTMLDivElement>) => {
-    const d = dragRef.current;
-    if (d && d.pid === e.pointerId) {
-      dragRef.current = null;
-    }
-  };
-
-  const g = G.current;
-  const view = g.board.map((row) => row.slice());
-  const activeSet = new Set<number>();
-  const ghostSet = new Set<number>();
-  if (g.active) {
-    let gy = g.active.y;
-    while (valid({ ...g.active, y: gy + 1 }, g.board)) gy++;
-    for (const [c, r] of SHAPES[g.active.type][g.active.rot]) {
-      const x = g.active.x + c;
-      const y = gy + r;
-      if (y >= 0) ghostSet.add(y * COLS + x);
-    }
-    for (const [c, r] of SHAPES[g.active.type][g.active.rot]) {
-      const x = g.active.x + c;
-      const y = g.active.y + r;
-      if (y >= 0) activeSet.add(y * COLS + x);
-    }
-  }
-  const clearSet = new Set(g.clearing ? g.clearRows : []);
-
-  const blockStyle = (
-    type: PieceType,
-    glow?: boolean,
-  ): CSSProperties => {
-    const color = COLORS[type];
-    return {
-      width: "100%",
-      height: "100%",
-      backgroundImage: `${BLOCK_SYMBOL_BG[type]}, radial-gradient(circle at 28% 22%, rgba(255,255,255,.72), transparent 28%), linear-gradient(145deg, ${color}, color-mix(in srgb, ${color} 72%, #8f6f86))`,
-      backgroundSize: "38% 38%, 100% 100%, 100% 100%",
-      backgroundPosition: "center, 0 0, 0 0",
-      backgroundRepeat: "no-repeat, no-repeat, no-repeat",
-      borderRadius: 7,
-      boxShadow: `inset 2px 2px 0 rgba(255,255,255,.56), inset -2px -3px 0 rgba(102,74,91,.18), 0 2px 5px rgba(121,83,99,.18)${glow ? `, 0 0 10px ${color}` : ""}`,
-    };
-  };
-
-  const font = "var(--font-sans, 'PingFang TC','Microsoft JhengHei',system-ui,sans-serif)";
-  const boardDisplayH = Math.round(BOARD_H * boardScale);
-  const currentDifficulty = DIFFICULTY_CONFIG[blockDropDifficulty];
+  const boardDisplayW = Math.round(cols * CELL * boardScale);
+  const boardDisplayH = Math.round(rows * CELL * boardScale);
+  const currentDifficultyLabel = DIFFICULTY_LABEL[blockDropDifficulty];
   const specialMode = blockDropSpecialMode;
   const topOut = g.status === "over" && g.overReason === "topout";
-  const linesInLevel = g.lines % 10;
+  const showHold = round ? round.stage.hold : true;
 
   const switchToRelaxedAndRestart = () => {
     difficultyRef.current = "relaxed";
     setBlockDropDifficulty("relaxed");
-    begin();
+    startGame(null);
   };
 
-  const inRound = g.status === "playing" || g.status === "paused";
   const cycleDifficulty = () => {
     if (inRound) return;
     const i = DIFFICULTY_ORDER.indexOf(blockDropDifficulty);
     setBlockDropDifficulty(DIFFICULTY_ORDER[(i + 1) % DIFFICULTY_ORDER.length]);
   };
 
-  const startMoveRepeat = (dx: number) => {
-    stopMoveRepeat();
-    move(dx);
-    moveRepeatRef.current = setInterval(() => move(dx), 90);
-  };
+  const keyProps = keys
+    ? {
+        metrics: keys,
+        dropMode,
+        showHold,
+        holdType: g.hold,
+        canHold: g.status === "playing" && g.canHold,
+        dropGlow: idleHint,
+        onRotate: () => rotate(1),
+        onMoveLeftDown: () => startMoveRepeat(-1),
+        onMoveRightDown: () => startMoveRepeat(1),
+        onMoveStop: stopMoveRepeat,
+        onDropDown: dropPress,
+        onDropUp: dropRelease,
+        onHold: holdPiece,
+      }
+    : null;
+  // 鍵列在局外也佔位（隱藏），開局時井不跳動
+  const keysHidden = !inRound;
 
-  const layout = getLayoutMetrics(layoutMode, isCoarse);
-  const showTouchPad = isCoarse && inRound && layout.touch != null;
-
-  const touchPad = layout.touch ? (
-    <TouchControlPad
-      metrics={layout.touch}
-      holdType={g.hold}
-      canHold={g.status === "playing" && g.canHold}
-      onRotate={() => rotate(1)}
-      onMoveLeftDown={() => startMoveRepeat(-1)}
-      onMoveRightDown={() => startMoveRepeat(1)}
-      onMoveStop={stopMoveRepeat}
-      onDrop={hardDrop}
-      onHold={holdPiece}
-    />
-  ) : null;
-
-  const tutorialCard =
-    tutorialStep && g.status === "playing" ? (
-      <div
-        role="status"
-        aria-live="polite"
-        data-testid="block-drop-tutorial"
-        data-step={tutorialStep}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          width: "min(100%, 420px)",
-          margin: "0 auto 8px",
-          padding: "8px 10px",
-          boxSizing: "border-box",
-          // G-H1：手機改成浮在井中段的 toast（頂端出生區、底部落點影子都要看得到），不再佔井上方 ~70px
-          ...(wide
-            ? {}
-            : { position: "absolute", top: "38%", left: 6, right: 6, width: "auto", margin: 0, zIndex: 5 }),
-          border: "2px solid rgba(255,216,102,.8)",
-          borderRadius: 14,
-          color: MACARON_THEME.ink,
-          background: "rgba(255,255,255,.88)",
-          boxShadow: "0 6px 14px rgba(126,96,112,.12)",
-          fontSize: 12,
-          lineHeight: 1.35,
-        }}
-      >
-        <IconBulb size={22} />
-        <span style={{ flex: 1, minWidth: 0 }}>
-          <strong style={{ display: "block", fontSize: 13 }}>
-            {BLOCK_DROP_TUTORIAL_COPY[tutorialStep].title}
-          </strong>
-          {BLOCK_DROP_TUTORIAL_COPY[tutorialStep].body}
-        </span>
-        <button
-          type="button"
-          onClick={skipTutorial}
-          style={{
-            minHeight: 44,
-            flexShrink: 0,
-            padding: "4px 9px",
-            border: "1px solid rgba(93,74,103,.18)",
-            borderRadius: 999,
-            color: MACARON_THEME.ink,
-            background: "rgba(255,255,255,.72)",
-            fontWeight: 800,
-            cursor: "pointer",
-          }}
-        >
-          略過教學
-        </button>
-      </div>
-    ) : null;
-
-  const holdButton = (cell: number) => (
-    <button
-      type="button"
-      onClick={holdPiece}
-      aria-label="暫存方塊"
-      style={{
-        ...panelStyle,
-        border: "none",
-        cursor: "pointer",
-        fontFamily: font,
-        opacity: g.status === "playing" && !g.canHold ? 0.45 : 1,
-      }}
-    >
-      <PanelTitle
-        icon={<IconBox size={15} color={MACARON_THEME.inkSoft} />}
-        text="暫存"
+  const adventureResult =
+    round && outcome ? (
+      <BlockDropResult
+        round={round}
+        outcome={outcome}
+        medalStars={medalCount(medals[round.station.index] ?? 0)}
+        isLast={round.station.index === BLOCK_STATIONS.length - 1}
+        font={FONT}
+        onNext={() => startStation(round.station.index + 1)}
+        onReplay={() => startStation(round.station.index)}
+        onEasier={() => startStation(Math.max(0, round.station.index - 1))}
+        onMap={goToMap}
       />
-      <PiecePreview type={g.hold} cell={cell} />
-    </button>
-  );
+    ) : undefined;
 
-  // 固定三格高度（空位用透明占位）：待機／遊玩中版面高度一致，棋盤不會被擠到破版
-  const nextQueue: (PieceType | null)[] = [
-    g.bag[0] ?? null,
-    g.bag[1] ?? null,
-    g.bag[2] ?? null,
-  ];
-  const nextPanel = (firstCell: number, restCell: number, compact = false) => (
-    <div
-      style={{
-        ...panelStyle,
-        flexShrink: compact ? 0 : undefined,
-      }}
-      role="img"
-      aria-label="下一個方塊預覽"
-    >
-      <PanelTitle
-        icon={<IconNext size={15} color={MACARON_THEME.inkSoft} />}
-        text="下一個"
-      />
-      <div style={{ display: "flex", flexDirection: "column", gap: compact ? 3 : 5 }}>
-        {(compact ? nextQueue.slice(0, 1) : nextQueue).map((t, i) => (
-          <PiecePreview key={i} type={t} cell={i === 0 ? firstCell : restCell} />
-        ))}
-      </div>
-    </div>
-  );
+  const showChips = screen === "home" || (screen === "play" && !round && (wide || !inRound));
+  const showLocalHold = showHold && !keys;
+  // 標題面只有待機卡：HUD、側欄與鍵列等開局後才出現
+  const onPlayScreen = screen === "play";
 
-  const scorePanel = (
-    <div
-      style={{
-        ...panelStyle,
-        flex: wide ? undefined : 1,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 2,
-        padding: wide ? "10px 8px" : "8px 6px",
-        minWidth: 0,
-      }}
-    >
-      <div style={{ ...panelLabel, marginBottom: 2 }}>分數</div>
-      <div
-        aria-label={`分數 ${g.score}`}
-        style={{
-          color: MACARON_THEME.ink,
-          fontSize: layoutMode === "desktop" ? 32 : layoutMode === "tablet" ? 28 : 24,
-          fontWeight: 900,
-          lineHeight: 1.1,
-        }}
-      >
-        {g.score}
-      </div>
-      {g.combo >= 2 && g.status === "playing" ? (
-        <div
-          style={{
-            color: MACARON_THEME.accentPink,
-            fontSize: 12,
-            fontWeight: 900,
-            display: "flex",
-            alignItems: "center",
-            gap: 3,
-          }}
-        >
-          <IconFlame size={13} /> ×{g.combo}
-        </div>
-      ) : (
-        <div style={{ color: MACARON_THEME.inkSoft, fontSize: 11, fontWeight: 800 }}>
-          Lv {g.level}
-        </div>
-      )}
-      <div
-        style={{
-          width: "100%",
-          marginTop: 5,
-          display: "grid",
-          gap: 3,
-        }}
-        aria-label={`升級進度 ${linesInLevel}/10 行`}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            color: MACARON_THEME.inkSoft,
-            fontSize: 10,
-            fontWeight: 800,
-          }}
-        >
-          <span>升級進度</span>
-          <span>{linesInLevel}/10 行</span>
-        </div>
-        <div
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={10}
-          aria-valuenow={linesInLevel}
-          style={{
-            height: 6,
-            overflow: "hidden",
-            borderRadius: 999,
-            background: "rgba(216,199,255,.46)",
-          }}
-        >
-          <span
-            style={{
-              display: "block",
-              width: `${Math.max(4, linesInLevel * 10)}%`,
-              height: "100%",
-              borderRadius: "inherit",
-              background: "linear-gradient(90deg,#b9f3db,#8ddff0,#c9b4ff)",
-              transition: "width .2s ease",
-            }}
-          />
-        </div>
-      </div>
-    </div>
-  );
+  const taskOrScore = (compact: boolean) =>
+    round ? (
+      <BlockDropTaskBar round={round} g={g} />
+    ) : compact ? (
+      <BlockDropCompactScorePanel g={g} />
+    ) : (
+      <BlockDropScorePanel g={g} wide={wide} layoutMode={layoutMode} />
+    );
 
-  /** G-H1 手機單列 HUD：分數 · Lv（連擊時顯示 ×combo）＋細升級條。高度 ≈48px。 */
-  const compactScorePanel = (
+  const well = (
     <div
+      ref={boardWrapRef}
       style={{
-        ...panelStyle,
         flex: 1,
         minWidth: 0,
-        display: "grid",
-        gap: 3,
-        padding: "4px 10px",
-        alignContent: "center",
+        maxWidth: layout.boardMaxW,
+        height: boardDisplayH,
+        margin: wide || landscape ? "0 auto" : 0,
       }}
     >
+      {/* 內層與縮放後的棋盤同寬：遮罩、手勢層、提示都貼齊棋盤本體 */}
       <div
         style={{
-          display: "flex",
-          alignItems: "baseline",
-          justifyContent: "center",
-          gap: 8,
-          minWidth: 0,
+          position: "relative",
+          width: boardDisplayW,
+          maxWidth: "100%",
+          height: "100%",
+          margin: "0 auto",
         }}
       >
-        <span style={panelLabel}>分數</span>
-        <span
-          aria-label={`分數 ${g.score}`}
-          style={{ color: MACARON_THEME.ink, fontSize: 22, fontWeight: 900, lineHeight: 1 }}
-        >
-          {g.score}
-        </span>
-        {g.combo >= 2 && g.status === "playing" ? (
-          <span
-            style={{
-              color: MACARON_THEME.accentPink,
-              fontSize: 12,
-              fontWeight: 900,
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 2,
-            }}
-          >
-            <IconFlame size={12} /> ×{g.combo}
-          </span>
-        ) : (
-          <span style={{ color: MACARON_THEME.inkSoft, fontSize: 12, fontWeight: 800 }}>
-            Lv {g.level}
-          </span>
-        )}
-      </div>
-      <div
-        role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={10}
-        aria-valuenow={linesInLevel}
-        aria-label={`升級進度 ${linesInLevel}/10 行`}
-        style={{
-          height: 4,
-          overflow: "hidden",
-          borderRadius: 999,
-          background: "rgba(216,199,255,.46)",
-        }}
-      >
-        <span
-          style={{
-            display: "block",
-            width: `${Math.max(4, linesInLevel * 10)}%`,
-            height: "100%",
-            borderRadius: "inherit",
-            background: "linear-gradient(90deg,#b9f3db,#8ddff0,#c9b4ff)",
-            transition: "width .2s ease",
-          }}
+        <BlockDropWell
+          g={g}
+          boardScale={boardScale}
+          boardTransform={boardTransform}
+          reduced={reduced}
+          lockFxRef={lockFxRef}
+          gestures={gestures}
+          clearFx={clearFx}
+          toasts={toasts}
+          dangerRow={round ? dangerRowFor(rows) : undefined}
+          highlightGaps={round != null && round.station.index <= GAP_HINT_LAST_STATION}
         />
       </div>
+    </div>
+  );
+
+  const sideColumn = (children: ReactNode) => (
+    <div
+      style={{
+        position: "relative",
+        width: layout.sideColW,
+        flexShrink: 0,
+        display: "flex",
+        flexDirection: "column",
+        gap: landscape ? 8 : 10,
+      }}
+    >
+      {children}
     </div>
   );
 
@@ -1897,9 +424,12 @@ export function BlockDropView({
     <div
       data-layout={layoutMode}
       data-status={g.status}
+      data-screen={screen}
+      data-mode={round ? round.mode : screen === "play" ? "free" : undefined}
+      data-stage={round?.stage.id}
       data-theme="macaron-clay"
       style={{
-        fontFamily: font,
+        fontFamily: FONT,
         // G-M4：拿掉壓到 ~20% 的封面底圖（看起來像圖沒載完）；封面留給 hub 卡，局內是乾淨的馬卡龍面
         background:
           "linear-gradient(160deg,#fff9ee 0%,#f3fbff 52%,#fff0f7 100%)",
@@ -1944,504 +474,170 @@ export function BlockDropView({
         }
       `}</style>
 
-      {/* G-M5：卡內不再重複遊戲名（h1「繽紛樂園」已在 sticky 抬頭）；只留難度 chip 列。
-          G-H1：手機局內連 chip 也收掉（inRound 本就 disabled），把高度還給井 */}
-      {(wide || !inRound) && (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: wide ? 10 : 6,
-        }}
-      >
-        <div>
-          <div
-            style={{
-              display: "flex",
-              gap: 6,
-              alignItems: "center",
-              flexWrap: "wrap",
-            }}
-          >
-            {kidsMode && <IconKid size={wide ? 19 : 16} />}
-            <button
-              type="button"
-              onClick={cycleDifficulty}
-              aria-label={`難度 ${currentDifficulty.label}，點一下切換`}
-              disabled={inRound}
-              style={{
-                color: MACARON_THEME.ink,
-                background: "rgba(255,255,255,.68)",
-                border: "1px solid rgba(255,255,255,.9)",
-                borderRadius: 999,
-                padding: "4px 11px",
-                fontSize: 12,
-                fontWeight: 900,
-                boxShadow: "0 4px 10px rgba(126,96,112,.1)",
-                cursor: inRound ? "default" : "pointer",
-                opacity: inRound ? 0.55 : 1,
-                fontFamily: font,
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 4,
-              }}
-            >
-              {DIFFICULTY_ICON[blockDropDifficulty]} {currentDifficulty.label}
-            </button>
-            {specialMode === "rainbow" && (
-              <span
-                role="img"
-                aria-label="彩虹消除模式"
+      {screen === "map" ? (
+        <BlockDropMap
+          stations={BLOCK_STATIONS}
+          stars={BLOCK_STATIONS.map((_, i) => medalCount(medals[i] ?? 0))}
+          maxCleared={maxCleared}
+          mode={mapMode}
+          font={FONT}
+          onModeChange={changeMode}
+          previewFor={previewFor}
+          onStart={startStation}
+          onFree={startFree}
+          onHome={goHome}
+        />
+      ) : (
+        <>
+          {/* 標題面與自由堆疊局外：速度 chip（≥44px）；任務冒險不顯示（速度由站點決定） */}
+          {showChips && (
+            <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap", marginBottom: wide ? 10 : 6 }}>
+              {kidsMode && <IconKid size={wide ? 19 : 16} />}
+              <button
+                type="button"
+                onClick={cycleDifficulty}
+                aria-label={`落下速度 ${currentDifficultyLabel}，點一下切換`}
+                disabled={inRound}
                 style={{
-                  background: "linear-gradient(90deg,#ffe889,#b9f3db,#d8c7ff)",
+                  color: MACARON_THEME.ink,
+                  background: "rgba(255,255,255,.68)",
+                  border: "1px solid rgba(255,255,255,.9)",
                   borderRadius: 999,
-                  padding: "4px 9px",
-                  fontSize: 12,
+                  minHeight: 44,
+                  padding: "4px 14px",
+                  fontSize: 14,
                   fontWeight: 900,
                   boxShadow: "0 4px 10px rgba(126,96,112,.1)",
+                  cursor: inRound ? "default" : "pointer",
+                  opacity: inRound ? 0.55 : 1,
+                  fontFamily: FONT,
                   display: "inline-flex",
                   alignItems: "center",
+                  gap: 6,
                 }}
               >
-                <IconRainbow size={16} />
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-      )}
-
-      {/* 手機：G-H1 HUD 壓成單列（分數·Lv·下一個），最佳分交給抬頭 ⭐；觸控暫存在右側操作鍵 */}
-      {!wide && (
-        <div
-          style={{
-            display: "flex",
-            gap: 6,
-            marginBottom: 6,
-            alignItems: "stretch",
-          }}
-        >
-          {!isCoarse && holdButton(layout.hud.hold)}
-          {compactScorePanel}
-          {nextPanel(layout.hud.nextFirst, layout.hud.nextRest, true)}
-        </div>
-      )}
-
-      {wide && tutorialCard}
-
-      {/* 寬螢幕（iPad／桌機）：左欄資訊、中間棋盤、右欄預覽＋觸控鍵 */}
-      <div
-        style={{
-          display: "flex",
-          gap: layout.playGap,
-          alignItems: "flex-start",
-          justifyContent: "center",
-          width: "100%",
-          minWidth: 0,
-          overflow: "hidden",
-        }}
-      >
-        {wide && (
-          <div
-            style={{
-              width: layout.sideColW,
-              flexShrink: 0,
-              display: "flex",
-              flexDirection: "column",
-              gap: 10,
-            }}
-          >
-            {scorePanel}
-            {holdButton(layout.hud.hold)}
-          </div>
-        )}
-
-      <div
-        ref={boardWrapRef}
-        style={{
-          flex: 1,
-          minWidth: 0,
-          maxWidth: layout.boardMaxW,
-          height: boardDisplayH,
-          margin: wide ? "0 auto" : 0,
-        }}
-      >
-       {/* 內層與縮放後的棋盤同寬：遮罩、手勢層、提示都貼齊棋盤本體 */}
-       <div
-        style={{
-          position: "relative",
-          width: Math.round(BOARD_W * boardScale),
-          maxWidth: "100%",
-          height: "100%",
-          margin: "0 auto",
-        }}
-       >
-         {!wide && tutorialCard}
-         <div
-           style={{
-             position: "absolute",
-             top: 0,
-            left: "50%",
-            marginLeft: -(BOARD_W * boardScale) / 2,
-            width: BOARD_W,
-            height: BOARD_H,
-            transform: `${boardTransform ?? ""} scale(${boardScale})`.trim(),
-            transformOrigin: "top left",
-            // G-M1：井底改深藍紫（對齊封面「深藍井＋鮮豔糖塊」），粉彩方塊才跳得出來
-            background: `linear-gradient(180deg, ${WELL_BG_TOP}, ${WELL_BG_BOTTOM})`,
-            borderRadius: 16,
-            boxShadow:
-              "inset 0 0 0 3px rgba(255,255,255,.55), inset 0 -12px 24px rgba(0,0,0,.18), 0 16px 28px rgba(60,50,110,.28)",
-            display: "grid",
-            gridTemplateColumns: `repeat(${COLS}, ${CELL}px)`,
-            gridTemplateRows: `repeat(${ROWS}, ${CELL}px)`,
-            overflow: "hidden",
-          }}
-        >
-          {Array.from({ length: ROWS * COLS }).map((_, idx) => {
-            const x = idx % COLS;
-            const y = Math.floor(idx / COLS);
-            const isClearing = clearSet.has(y);
-            let cell: ReactNode = null;
-            if (activeSet.has(idx) && g.active) {
-              cell = <div style={blockStyle(g.active.type, true)} />;
-            } else if (view[y][x]) {
-              const squashing =
-                lockFxRef.current.cells.has(idx) &&
-                performance.now() < lockFxRef.current.until;
-              cell = (
-                <div
-                  style={
-                    squashing
-                      ? {
-                          ...blockStyle(view[y][x] as PieceType),
-                          animation: "blockSquash .24s ease-out",
-                          transformOrigin: "50% 100%",
-                        }
-                      : blockStyle(view[y][x] as PieceType)
-                  }
-                />
-              );
-            } else if (ghostSet.has(idx) && g.active) {
-              const ghostColor = COLORS[g.active.type];
-              cell = (
-                <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: 6,
-                    border: `2px dashed color-mix(in srgb, ${ghostColor} 80%, #fff)`,
-                    background: `color-mix(in srgb, ${ghostColor} 32%, ${WELL_BG_BOTTOM})`,
-                    boxSizing: "border-box",
-                  }}
-                />
-              );
-            }
-            return (
-              <div
-                key={idx}
-                style={{
-                  width: CELL,
-                  height: CELL,
-                  padding: 1,
-                  boxSizing: "border-box",
-                  background:
-                    (x + y) % 2 === 0
-                      ? "rgba(255,255,255,.06)"
-                      : "rgba(255,255,255,.025)",
-                  boxShadow: "inset 0 0 0 0.5px rgba(255,255,255,.09)",
-                  animation:
-                    isClearing && !reduced ? "lineFlash .26s linear" : "none",
-                }}
-              >
-                {isClearing ? (
-                  <div
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      background: "linear-gradient(135deg,#fff,#ffe889,#b9f3db)",
-                      borderRadius: 8,
-                      boxShadow: "0 0 10px rgba(255,210,111,.45)",
-                    }}
-                  />
-                ) : (
-                  cell
-                )}
-              </div>
-            );
-             })}
-         </div>
-
-        <div
-          aria-hidden
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            top: Math.max(0, Math.round(CELL * 4 * boardScale) - 2),
-            zIndex: 2,
-            height: 2,
-            background:
-              "linear-gradient(90deg,transparent,rgba(255,159,183,.85),transparent)",
-            boxShadow: "0 0 10px rgba(255,159,183,.34)",
-            pointerEvents: "none",
-          }}
-        />
-        {g.status === "playing" && (
-          <div
-            aria-hidden
-            data-testid="board-gesture"
-            onPointerDown={onBoardPointerDown}
-            onPointerMove={onBoardPointerMove}
-            onPointerUp={onBoardPointerUp}
-            onPointerCancel={onBoardPointerCancel}
-            onLostPointerCapture={onBoardLostPointerCapture}
-            style={{
-              position: "absolute",
-              inset: 0,
-              zIndex: 3,
-              touchAction: "none",
-              WebkitTapHighlightColor: "transparent",
-            }}
-          />
-        )}
-
-         <div
-           style={{
-             position: "absolute",
-             top: 10,
-            left: 0,
-            right: 0,
-            zIndex: 4,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 6,
-             pointerEvents: "none",
-           }}
-         >
-          {clearFx && (
-            <div
-              key={clearFx.id}
-              aria-hidden
-              style={{
-                position: "absolute",
-                left: "50%",
-                top: "42%",
-                transform: "translate(-50%,-50%)",
-                minWidth: 150,
-                padding: "12px 22px",
-                borderRadius: 999,
-                color: MACARON_THEME.ink,
-                background:
-                  clearFx.kind === "confetti"
-                    ? "linear-gradient(90deg,#ffe889,#b9f3db,#d8c7ff,#ffb4cf)"
-                    : "rgba(255,255,255,.88)",
-                border: "2px solid rgba(255,255,255,.95)",
-                boxShadow:
-                  "0 12px 26px rgba(146,106,121,.2), inset 0 2px 0 rgba(255,255,255,.78)",
-                fontSize: 24,
-                fontWeight: 900,
-                textAlign: "center",
-                animation: reduced ? "none" : "clearBurst .82s ease-out forwards",
-              }}
-            >
-              {clearFx.text}
-              {Array.from({ length: clearFx.kind === "confetti" ? 14 : 8 }).map((_, i) => (
+                {DIFFICULTY_ICON[blockDropDifficulty]} {currentDifficultyLabel}
+              </button>
+              {specialMode === "rainbow" && (
                 <span
-                  key={i}
+                  role="img"
+                  aria-label="彩虹消除模式"
                   style={{
-                    position: "absolute",
-                    left: `${8 + ((i * 23) % 84)}%`,
-                    top: `${clearFx.kind === "wave" ? 68 : 38 + ((i * 17) % 24)}%`,
-                    width: clearFx.kind === "wave" ? 18 : 9,
-                    height: clearFx.kind === "wave" ? 5 : 9,
-                    borderRadius: clearFx.kind === "spark" ? 2 : 4,
-                    background:
-                      [
-                        MACARON_THEME.lemon,
-                        MACARON_THEME.mint,
-                        MACARON_THEME.sky,
-                        MACARON_THEME.berry,
-                        MACARON_THEME.lavender,
-                      ][i % 5],
-                    transform: `rotate(${i * 31}deg)`,
-                    animation: reduced ? "none" : `candyPop .72s ease-out ${i * 0.025}s forwards`,
-                  }}
-                />
-              ))}
-            </div>
-          )}
-          {toasts.map((t) => (
-            <GameJuiceToast
-              key={t.id}
-              text={t.text}
-              big={t.big}
-              reduced={reduced}
-            />
-          ))}
-        </div>
-
-         {g.status !== "playing" && (
-           <div
-             style={{
-               position: "absolute",
-               inset: 0,
-               zIndex: 5,
-               background:
-                 g.status === "paused"
-                   ? "rgba(255,250,242,.76)"
-                   : "rgba(255,250,242,.9)",
-               backdropFilter: "blur(3px)",
-               borderRadius: 16,
-               display: "flex",
-               flexDirection: "column",
-               alignItems: "center",
-               justifyContent: "center",
-               gap: g.status === "paused" ? 10 : 12,
-               color: MACARON_THEME.ink,
-               // 井面日夜都是奶油底；GameEndStation 標題吃 --ink，夜間會變白字壓白底，這裡把 token 釘回馬卡龍墨色
-               ["--ink" as string]: MACARON_THEME.ink,
-               ["--ink-soft" as string]: MACARON_THEME.inkSoft,
-               textAlign: "center",
-               padding: 16,
-             }}
-          >
-            {g.status === "over" ? (
-              <>
-                <GameEndStation
-                  mood="over"
-                  title={topOut ? "方塊堆到頂了" : "這局好玩！"}
-                  scoreLabel={
-                    newBestRef.current
-                      ? `分數 ${g.score} · 新紀錄！`
-                      : `分數 ${g.score}`
-                  }
-                  onReplay={onRestart}
-                  replayLabel="再玩一次"
-                  gameSlug="block-drop"
-                />
-                {topOut && blockDropDifficulty !== "relaxed" ? (
-                  <button
-                    type="button"
-                    onClick={switchToRelaxedAndRestart}
-                    style={{
-                      ...secondaryBtn(font),
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 6,
-                    }}
-                  >
-                    <IconSprout size={16} /> 換輕鬆
-                  </button>
-                ) : null}
-              </>
-            ) : (
-              <>
-                <div
-                  style={{
-                    lineHeight: 0,
-                    animation: reduced ? "none" : "popIn .35s ease-out",
+                    background: "linear-gradient(90deg,#ffe889,#b9f3db,#d8c7ff)",
+                    borderRadius: 999,
+                    minHeight: 44,
+                    padding: "4px 12px",
+                    boxSizing: "border-box",
+                    boxShadow: "0 4px 10px rgba(126,96,112,.1)",
+                    display: "inline-flex",
+                    alignItems: "center",
                   }}
                 >
-                  {g.status === "paused" ? (
-                    <IconPauseGlyph size={44} color={MACARON_THEME.inkSoft} />
-                  ) : (
-                    /* 兒童減法審：ready 面用無字玩法示範取代裝飾糖果 icon */
-                    <BlockDropReadyDemo />
-                  )}
-                </div>
-                <div style={{ fontSize: 22, fontWeight: 900 }}>
-                  {g.status === "paused" ? "暫停中" : "方塊轉轉"}
-                </div>
-                {g.status === "ready" && (
-                  <GameResultActions
-                    onReplay={onStart}
-                    replayLabel={
-                      <>
-                        <IconPlay size={19} /> 開始
-                      </>
-                    }
-                    replayStyle={{
-                      ...primaryBtn(font),
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 8,
-                    }}
-                  />
-                )}
-                {/* 兒童減法審：ready 面不再放「調整難度與模式」（齒輪設定裡已有同一組 radiogroup）；
-                    ready 面只剩大 icon、開始、怎麼玩 */}
-                {g.status === "ready" && (
-                  <button
-                    type="button"
-                    onClick={onOpenTutorial}
-                    style={{
-                      ...secondaryBtn(font),
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 6,
-                    }}
-                  >
-                    怎麼玩？
-                  </button>
-                )}
-                {g.status === "paused" ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={onResume}
-                      style={{
-                        ...primaryBtn(font),
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 8,
-                      }}
-                    >
-                      <IconPlay size={19} /> 繼續
-                    </button>
-                    {/* PLAY-IA-6：暫停層補兒童最自然的離站出口（對齊 GamePageShell） */}
-                    <Link
-                      href="/games"
-                      style={{
-                        ...secondaryBtn(font),
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        textDecoration: "none",
-                      }}
-                    >
-                      回遊樂園
-                    </Link>
-                  </>
-                ) : null}
-              </>
-            )}
-          </div>
-        )}
-       </div>
-      </div>
+                  <IconRainbow size={18} />
+                </span>
+              )}
+            </div>
+          )}
 
-        {wide && (
+          {/* 直向手機：單列 HUD（任務列或分數·Lv）＋下一個；自由堆疊教學蓋在這一列上 */}
+          {onPlayScreen && !wide && !landscape && (
+            <div style={{ position: "relative", display: "flex", gap: 6, marginBottom: 6, alignItems: "stretch" }}>
+              {showLocalHold && <BlockDropHoldButton g={g} font={FONT} cell={layout.hud.hold} holdPiece={holdPiece} />}
+              {taskOrScore(true)}
+              <BlockDropNextPanel g={g} firstCell={layout.hud.nextFirst} restCell={layout.hud.nextRest} compact />
+              <BlockDropTutorialCard g={g} wide={false} tutorialStep={tutorialStep} skipTutorial={skipTutorial} />
+            </div>
+          )}
+
+          {wide && <BlockDropTutorialCard g={g} wide tutorialStep={tutorialStep} skipTutorial={skipTutorial} />}
+
+          {/* 寬螢幕：左欄資訊、中間棋盤、右欄預覽。橫向手機：兩側鍵欄夾著井 */}
           <div
             style={{
-              width: layout.sideColW,
-              flexShrink: 0,
+              position: "relative",
               display: "flex",
-              flexDirection: "column",
-              gap: 10,
+              gap: layout.playGap,
+              alignItems: landscape ? "center" : "flex-start",
+              justifyContent: "center",
+              width: "100%",
+              minWidth: 0,
+              overflow: "hidden",
             }}
           >
-            {nextPanel(layout.hud.nextFirst, layout.hud.nextRest)}
-            {showTouchPad && touchPad}
+            {onPlayScreen && wide &&
+              sideColumn(
+                <>
+                  {taskOrScore(false)}
+                  {showLocalHold && <BlockDropHoldButton g={g} font={FONT} cell={layout.hud.hold} holdPiece={holdPiece} />}
+                </>,
+              )}
+            {onPlayScreen && landscape &&
+              sideColumn(
+                <>
+                  {taskOrScore(true)}
+                  {keyProps && (
+                    <div style={{ visibility: keysHidden ? "hidden" : "visible" }}>
+                      <BlockDropKeys {...keyProps} part="left" />
+                    </div>
+                  )}
+                  {showLocalHold && <BlockDropHoldButton g={g} font={FONT} cell={layout.hud.hold} holdPiece={holdPiece} />}
+                  <BlockDropTutorialCard g={g} wide={false} tutorialStep={tutorialStep} skipTutorial={skipTutorial} />
+                </>,
+              )}
+
+            {well}
+
+            {onPlayScreen && wide &&
+              sideColumn(<BlockDropNextPanel g={g} firstCell={layout.hud.nextFirst} restCell={layout.hud.nextRest} />)}
+            {onPlayScreen && landscape &&
+              sideColumn(
+                <>
+                  <BlockDropNextPanel g={g} firstCell={layout.hud.nextFirst} restCell={layout.hud.nextRest} compact />
+                  {keyProps && (
+                    <div style={{ visibility: keysHidden ? "hidden" : "visible" }}>
+                      <BlockDropKeys {...keyProps} part="right" />
+                    </div>
+                  )}
+                </>,
+              )}
+            {/* 待機／暫停／結算蓋住整個遊戲列（不只井）：窄井（8 欄、橫向）也放得下結算卡 */}
+            <BlockDropOverlay
+              g={g}
+              topOut={topOut}
+              newBest={newBestRef.current}
+              font={FONT}
+              reduced={reduced}
+              blockDropDifficulty={blockDropDifficulty}
+              onResume={onResume}
+              onRestart={onRestart}
+              onOpenTutorial={onOpenTutorial}
+              switchToRelaxedAndRestart={switchToRelaxedAndRestart}
+              onAdventure={() => setScreen("map")}
+              onFree={startFree}
+              adventure={adventureResult}
+              compact={landscape || boardDisplayH < COMPACT_OVERLAY_H}
+              exitAction={
+                <button
+                  type="button"
+                  onClick={round ? goToMap : goHome}
+                  style={{ ...secondaryBtn(FONT), display: "inline-flex", alignItems: "center", justifyContent: "center" }}
+                >
+                  {round ? "回地圖" : "回標題"}
+                </button>
+              }
+            />
           </div>
-        )}
 
-        {!wide && showTouchPad && touchPad}
-      </div>
+          {/* 井下鍵列：◀ ▶ 左拇指、轉／↓／暫存右拇指（直向手機、平板觸控） */}
+          {onPlayScreen && barKeys && keyProps && (
+            <div style={{ visibility: keysHidden ? "hidden" : "visible", maxWidth: wide ? 520 : undefined, margin: wide ? "0 auto" : undefined }}>
+              <BlockDropKeys {...keyProps} part="bar" />
+            </div>
+          )}
+        </>
+      )}
 
-      {/* G-M6：操作提示只留 GamePageShell 的 `.playHints` 一處（ready 面 chips、井下鍵盤 chips 已移除） */}
+      {/* G-M6：操作提示只留 GamePageShell 的 `.playHints` 一處 */}
     </div>
   );
 }

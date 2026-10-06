@@ -9,7 +9,6 @@ import {
 } from "react";
 import { GameEndStation } from "@/components/games/GameEndStation";
 import type { ColoringPage } from "@/data/coloring-pages";
-import { loadColoringDraftRecord } from "@/lib/coloring/draft-storage";
 import { renderFramedArtwork } from "@/lib/coloring/export-frame";
 import {
   COLORING_DONE_CTA,
@@ -32,7 +31,6 @@ import {
 import { ColoringPalette } from "./ColoringPalette";
 import { ColoringToolbar } from "./ColoringToolbar";
 import styles from "./ColoringCanvas.module.css";
-import { useColoringPersistence } from "./useColoringPersistence";
 import { useColoringHistory } from "./useColoringHistory";
 import {
   canvasBlob,
@@ -73,13 +71,11 @@ const PREVIEW_CORNERS = [
 type ColoringCanvasProps = {
   page: ColoringPage;
   onBack: () => void;
-  registerLeave?: (flush: (() => Promise<boolean>) | null) => void;
 };
 
 export function ColoringCanvas({
   page,
   onBack,
-  registerLeave,
 }: ColoringCanvasProps) {
   const stageRef = useRef<HTMLDivElement>(null);
   const displayRef = useRef<HTMLCanvasElement>(null);
@@ -107,11 +103,6 @@ export function ColoringCanvas({
     canUndo,
     canRedo,
   } = history;
-  const {
-    schedule: scheduleSave,
-    flush: flushSave,
-    status: saveStatus,
-  } = useColoringPersistence(page, paintRef, lineRef);
   const regionsRef = useRef<ColoringRegions | null>(null);
   const rafRef = useRef<number | null>(null);
 
@@ -348,13 +339,12 @@ export function ColoringCanvas({
     if (base && dirty) {
       pushUndoPatch({ rect: dirty, pixels: cropImageDataRect(base, dirty) });
       markPainted();
-      scheduleSave();
     }
     strokeImgRef.current = null;
     strokeBaseRef.current = null;
     strokeDirtyRef.current = null;
     strokeMaskRef.current = null;
-  }, [pushUndoPatch, markPainted, scheduleSave]);
+  }, [pushUndoPatch, markPainted]);
 
   const runBucket = useCallback(
     (pt: Point) => {
@@ -380,9 +370,8 @@ export function ColoringCanvas({
       ctx.putImageData(img, 0, 0, rect.x, rect.y, rect.width, rect.height);
       markPainted();
       requestComposite();
-      scheduleSave();
     },
-    [colorHex, pushUndoPatch, markPainted, requestComposite, scheduleSave],
+    [colorHex, pushUndoPatch, markPainted, requestComposite],
   );
 
   const startGestureIfTwoPointers = useCallback(() => {
@@ -454,45 +443,10 @@ export function ColoringCanvas({
       lineDataRef.current = lineCtx.getImageData(0, 0, w, h).data;
       regionsRef.current = new ColoringRegions(lineDataRef.current, w, h);
 
-      const finishLoad = () => {
-        if (cancelled) return;
+      if (!cancelled) {
         composite();
         setReady(true);
-      };
-
-      loadColoringDraftRecord(page.id, page.lineArtRevision)
-        .then((draft) => {
-          if (cancelled || draft == null) {
-            finishLoad();
-            return;
-          }
-          const paintBlob = draft.paintBlob;
-          const objectUrl =
-            typeof paintBlob === "string"
-              ? null
-              : URL.createObjectURL(paintBlob);
-          const draftImg = new Image();
-          draftImg.onload = () => {
-            if (!cancelled) paintCtx.drawImage(draftImg, 0, 0, w, h);
-            if (!cancelled) {
-              setHasPainted(
-                hasColoringPaint(paintCtx.getImageData(0, 0, w, h).data),
-              );
-              if (!draft.thumbnailBlob) scheduleSave();
-            }
-            if (objectUrl) URL.revokeObjectURL(objectUrl);
-            finishLoad();
-          };
-          draftImg.onerror = () => {
-            if (objectUrl) URL.revokeObjectURL(objectUrl);
-            if (!cancelled)
-              setLoadError("草稿暫時讀不到，請重試；原本的作品仍保留。");
-          };
-          draftImg.src = objectUrl ?? (paintBlob as string);
-        })
-        .catch(() => {
-          if (!cancelled) setLoadError("草稿暫時讀不到，請重試。");
-        });
+      }
     };
     img.onerror = () => {
       if (!cancelled) setLoadError("線稿暫時打不開，請重試或換一張。");
@@ -511,13 +465,11 @@ export function ColoringCanvas({
   }, [
     page.id,
     page.lineArtSrc,
-    page.lineArtRevision,
     composite,
     applyView,
     revokeDoneSnapshot,
     resetHistory,
     retry,
-    scheduleSave,
     gestureRef,
     pointersRef,
   ]);
@@ -615,22 +567,9 @@ export function ColoringCanvas({
     if (!ctx || !applyHistory(direction, ctx)) return;
     composite();
     markPainted();
-    scheduleSave();
   };
   const handleUndo = () => handleHistory("undo");
   const handleRedo = () => handleHistory("redo");
-
-  const leave = useCallback(async () => {
-    finishStroke();
-    return ready ? flushSave() : true;
-  }, [finishStroke, flushSave, ready]);
-  useEffect(() => {
-    registerLeave?.(leave);
-    return () => registerLeave?.(null);
-  }, [registerLeave, leave]);
-  const handleBack = async () => {
-    if (await leave()) onBack();
-  };
 
   const handleClear = () => {
     if (doneBusyRef.current) return;
@@ -646,8 +585,6 @@ export function ColoringCanvas({
     const current = ctx.getImageData(0, 0, paint.width, paint.height);
     pushUndoPatch({ rect, pixels: cropImageDataRect(current, rect) });
     ctx.clearRect(0, 0, paint.width, paint.height);
-    scheduleSave();
-    void flushSave();
     markPainted();
     composite();
   };
@@ -731,7 +668,6 @@ export function ColoringCanvas({
       const url = URL.createObjectURL(snapshot);
       doneSnapshotUrlRef.current = url;
       setDoneSnapshotUrl(url);
-      const saved = await flushSave();
       try {
         if (completedRevisionRef.current !== paintRevisionRef.current) {
           await saveColoringArtwork({
@@ -745,9 +681,7 @@ export function ColoringCanvas({
           });
           completedRevisionRef.current = paintRevisionRef.current;
         }
-        setCollectionStatus(
-          saved ? "作品已收藏在這台裝置" : "作品已收藏；草稿尚未存好",
-        );
+        setCollectionStatus("作品已收藏在這台裝置");
       } catch {
         setCollectionStatus("作品尚未收藏，請下載保存，或重試收藏。");
       }
@@ -762,18 +696,16 @@ export function ColoringCanvas({
       if (snapshotAliveRef.current) setDoneBusy(false);
     }
   };
-  const startNew = async () => {
+  const startNew = () => {
     handleClear();
-    if (await flushSave()) {
-      closeDoneOverlay();
-      completedRevisionRef.current = -1;
-    }
+    closeDoneOverlay();
+    completedRevisionRef.current = -1;
   };
 
   return (
     <div className={styles.root}>
       <div className={styles.topBar}>
-        <button type="button" className={styles.backPage} onClick={handleBack}>
+        <button type="button" className={styles.backPage} onClick={onBack}>
           ← 換一張
         </button>
         <p className={styles.pageTitle}>{page.title}</p>
@@ -832,26 +764,11 @@ export function ColoringCanvas({
         ) : null}
       </div>
 
-      <p role="status" aria-live="polite" className={styles.saveNotice}>
-        {saveStatus === "saving"
-          ? "儲存中…"
-          : saveStatus === "saved"
-            ? "已存在這台裝置"
-            : saveStatus === "error"
-              ? "草稿沒有存起來，可用下載保存作品。"
-              : ""}
-        {saveStatus === "error" ? (
-          <>
-            <button type="button" onClick={() => void flushSave()}>
-              重試保存
-            </button>
-            <button type="button" onClick={onBack}>
-              不保存，換一張
-            </button>
-          </>
-        ) : null}
-        {actionError}
-      </p>
+      {actionError ? (
+        <p role="status" aria-live="polite" className={styles.saveNotice}>
+          {actionError}
+        </p>
+      ) : null}
 
       {page.activity ? (
         <p className={styles.activity}>{page.activity}</p>
@@ -919,7 +836,7 @@ export function ColoringCanvas({
               mainAction={{
                 label: "換一張塗",
                 icon: "page",
-                onClick: () => void handleBack(),
+                onClick: onBack,
               }}
               details={<p role="status">{collectionStatus}</p>}
               extraActions={

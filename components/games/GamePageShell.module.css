@@ -15,9 +15,13 @@
 }
 
 .main {
-  padding: 1rem 1rem 2.5rem;
-  padding-top: clamp(0.75rem, 2vh, 1.25rem);
-  max-width: 60rem;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-height: 100dvh;
+  padding: 0.75rem 0.75rem max(0.75rem, var(--safe-bottom));
+  padding-top: clamp(0.5rem, 1.5vh, 0.75rem);
+  max-width: none;
   margin: 0 auto;
 }
 
@@ -170,7 +174,40 @@
  * 把硬邊變成階梯。刻意不碰 canvas 自身 background（DESIGN.md「不做：改遊戲畫布」）。
  */
 .playArea {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
   border-radius: var(--radius-lg);
+}
+
+/* flex 容器會把 JSON-LD 的 script 排成可見項目，結構化資料必須維持隱藏。 */
+.playArea > script {
+  display: none !important;
+}
+
+/* 消消樂卡片跟著剩餘視窗長高、拉寬。外框是 GameChrome，遊戲面在它裡面。 */
+.main[data-game-id="candy-match"] .playArea > * {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+}
+
+/* GameHost 在外框裡多包一層，這層也要跟著拉高，卡片才會吃滿。 */
+.main[data-game-id="candy-match"] .playArea > * > div:not(:global(.sr-only)) {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+}
+
+.main[data-game-id="candy-match"] .playArea [data-screen] {
+  flex: 1 1 auto;
+  width: 100%;
 }
 
 /* G-H4：360×640 的垂直空間只為方塊井（ready swap 防 CLS）保留；
@@ -200,7 +237,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
-  margin: var(--space-3) 0 var(--space-6);
+  margin: var(--space-2) 0 0;
   padding: 0;
   list-style: none;
 }
@@ -319,5 +356,47 @@
 
   .main[data-game-id="candy-match"]:has([data-testid="candy-match-board"]) .headerActions {
     margin-left: auto;
+  }
+}
+
+/* 繽紛樂園橫向手機局內（計劃 §2）：抬頭收成 44px 一列、外框與提示讓位，
+ * 井與兩側鍵欄同屏、不整頁捲動。只限 block-drop 局內，不影響其他遊戲與標題面。 */
+@media (orientation: landscape) and (max-height: 520px) {
+  .main[data-game-id="block-drop"]:has([data-status="playing"], [data-status="paused"]) {
+    padding-top: calc(2px + var(--safe-top));
+    padding-bottom: 4px;
+  }
+
+  .main[data-game-id="block-drop"]:has([data-status="playing"], [data-status="paused"]) .playHeader {
+    flex-wrap: nowrap;
+    min-height: 44px;
+    margin-bottom: 2px;
+  }
+
+  .main[data-game-id="block-drop"]:has([data-status="playing"], [data-status="paused"]) .back {
+    min-height: 44px;
+  }
+
+  .main[data-game-id="block-drop"]:has([data-status="playing"], [data-status="paused"]) .playTitle {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .main[data-game-id="block-drop"]:has([data-status="playing"], [data-status="paused"]) .headerActions {
+    margin-left: auto;
+  }
+
+  .main[data-game-id="block-drop"] .playArea {
+    min-height: 0;
+  }
+
+  :global([data-theme="night"]) .main[data-game-id="block-drop"]:has([data-status="playing"], [data-status="paused"]) .playArea {
+    padding: 2px;
   }
 }

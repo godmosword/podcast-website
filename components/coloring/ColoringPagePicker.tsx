@@ -4,8 +4,6 @@
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import type { ColoringPage } from "@/data/coloring-pages";
-import { type ColoringDraftRecord } from "@/lib/coloring/draft-storage";
-import { catalogColoringDrafts } from "@/lib/coloring/catalog-drafts";
 import {
   listColoringArtworks,
   type ArtworkPreview,
@@ -19,14 +17,6 @@ import {
 } from "@/lib/coloring/flow";
 import styles from "./ColoringPagePicker.module.css";
 
-type GalleryItem = {
-  page: ColoringPage;
-  src: string;
-  revoke: boolean;
-  key: string;
-  current: boolean;
-};
-
 type ColoringPagePickerProps = {
   characters: readonly ColoringPage[];
   scenes: readonly ColoringPage[];
@@ -38,7 +28,6 @@ export function ColoringPagePicker({
   scenes,
   onSelect,
 }: ColoringPagePickerProps) {
-  const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [artworks, setArtworks] = useState<
     (ArtworkPreview & { src: string })[]
   >([]);
@@ -73,78 +62,31 @@ export function ColoringPagePicker({
 
   useEffect(() => {
     let cancelled = false;
-    const created: string[] = [];
-    const catalog = [...characters, ...scenes];
-    void catalogColoringDrafts(catalog)
-      .then((entries: ColoringDraftRecord[]) => {
-        if (cancelled) return;
-        const items: GalleryItem[] = [];
-        for (const entry of entries) {
-          const page = catalog.find((p) => p.id === entry.pageId);
-          if (!page || !entry.thumbnailBlob) continue;
-          const src = URL.createObjectURL(entry.thumbnailBlob);
-          created.push(src);
-          items.push({
-            page,
-            src,
-            revoke: true,
-            key: entry.key,
-            current: page.lineArtRevision === entry.lineArtRevision,
-          });
-        }
-        setGallery(items);
-      })
-      .catch(() => {
-        if (!cancelled)
-          setError("草稿暫時讀不到，請重新整理後再試；作品仍保留。");
-      });
     void listColoringArtworks()
       .then((entries) => {
-        if (!cancelled) appendArtworks(entries);
+        if (cancelled) return;
+        const items = entries.map((a) => {
+          const src = URL.createObjectURL(a.thumbnailBlob);
+          artworkUrls.current.push(src);
+          return { ...a, src };
+        });
+        setArtworks(items);
+        setHasMore(entries.length === 12);
       })
       .catch(() => {
         if (!cancelled) setError("收藏暫時讀不到，請稍後再試。");
       });
     return () => {
       cancelled = true;
-      for (const src of [...created, ...artworkUrls.current])
-        URL.revokeObjectURL(src);
+      for (const src of artworkUrls.current) URL.revokeObjectURL(src);
       artworkUrls.current = [];
     };
-  }, [characters, scenes]);
+  }, []);
 
   return (
     <div className={styles.root}>
       {/* G-M7：「← 回封面」拿掉——唯一出口是抬頭的「← 回遊樂園」，封面只是入口 splash */}
       <p ref={heading} tabIndex={-1} className={styles.lead}>{COLORING_PICKER_LEAD}</p>
-      {gallery.length > 0 ? (
-        <section className={styles.gallery} aria-labelledby="coloring-gallery">
-          <h2 id="coloring-gallery" className={styles.heading}>
-            繼續塗
-          </h2>
-          <ul className={styles.galleryList}>
-            {gallery.map((item) => (
-              <li key={item.key}>
-                <button
-                  type="button"
-                  className={styles.galleryCard}
-                  onClick={() => {
-                    if (item.current) onSelect(item.page);
-                  }}
-                  disabled={!item.current}
-                  aria-label={`繼續塗：${item.page.title}`}
-                >
-                  <img src={item.src} alt="" className={styles.galleryThumb} />
-                  <span className={styles.galleryTitle}>
-                    {item.page.title}
-                    {!item.current ? " · 舊版本" : ""}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
       {error ? <p role="status">{error}</p> : null}
       {artworks.length > 0 || hasMore ? (
         <section className={styles.gallery} aria-label="作品收藏">
@@ -223,9 +165,6 @@ export function ColoringPagePicker({
                     />
                   </span>
                   <span className={styles.cardTitle}>{page.title}</span>
-                  {gallery.some((g) => g.page.id === page.id && g.current) ? (
-                    <small>有草稿 · 可以繼續塗</small>
-                  ) : null}
                 </button>
               </li>
             ))}
@@ -254,9 +193,6 @@ export function ColoringPagePicker({
                     />
                   </span>
                   <span className={styles.cardTitle}>{page.title}</span>
-                  {gallery.some((g) => g.page.id === page.id && g.current) ? (
-                    <small>有草稿 · 可以繼續塗</small>
-                  ) : null}
                 </button>
               </li>
             ))}

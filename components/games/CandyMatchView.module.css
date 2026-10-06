@@ -5,9 +5,10 @@
   /* 卡面夜間仍是淺色：焦點環改用深墨色，否則夜間金色焦點環在淺底上看不到 */
   --focus-ring: var(--candy-ink);
   position: relative;
-  max-width: 560px;
-  min-height: 480px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  min-height: 100%;
+  margin: 0;
   padding: 16px;
   border: 2px solid color-mix(in srgb, var(--c-pink) 56%, #fff);
   border-radius: 28px;
@@ -19,7 +20,7 @@
 
 /* 局內：手機把外框留白收緊，棋盤拿到完整可用寬；寬螢幕放寬遊戲區 */
 .surface[data-screen="play"] {
-  max-width: 960px;
+  max-width: none;
   padding: 8px 2px;
 }
 
