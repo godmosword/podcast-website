@@ -1,4 +1,4 @@
-/** 線上著色本：大色塊線稿。角色七頁、故事畫面七頁；缺頁待補畫。 */
+/** 線上著色本：角色八頁、故事畫面八頁。安安出任務仍是舊細線稿。 */
 import type { ZoneId } from "@/data/universe-zones";
 
 export type ColoringPageKind = "character" | "scene";
@@ -105,6 +105,17 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
     previewSrc: "/characters/亮亮警車.jpg",
   },
   {
+    id: "char-噗噗豬",
+    storySlug: "ep-16",
+    activity: "幫噗噗豬的水砲和救生圈換上新顏色！",
+    lineArtRevision: 1,
+    title: "噗噗豬",
+    kind: "character",
+    sourcePath: "characters/噗噗豬.jpg",
+    lineArtSrc: "/coloring/char-噗噗豬/line.png",
+    previewSrc: "/characters/噗噗豬.jpg",
+  },
+  {
     id: "scene-ep-3-05",
     storySlug: "ep-3",
     lineArtRevision: 3,
@@ -144,7 +155,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
   {
     id: "scene-ep-16-05",
     storySlug: "ep-16",
-    lineArtRevision: 2,
+    lineArtRevision: 3,
     title: "噗噗豬的水上樂園",
     kind: "scene",
     sourcePath: "stories/ep-16/05.jpg",
@@ -188,6 +199,19 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
     previewSrc: "/stories/ep-12/07.jpg",
     zoneId: "rescue",
     referencePaths: ["characters/亮亮警車.jpg", "characters/小藍巴士.jpg"],
+  },
+  {
+    id: "scene-ep-5-05",
+    storySlug: "ep-5",
+    activity: "幫東東的土堆和挖斗換上新顏色！",
+    lineArtRevision: 1,
+    title: "東東挖土機的工地",
+    kind: "scene",
+    sourcePath: "stories/ep-5/05.jpg",
+    lineArtSrc: "/coloring/scene-ep-5-05/line.png",
+    previewSrc: "/stories/ep-5/05.jpg",
+    zoneId: "forest",
+    referencePaths: ["characters/東東挖土機.jpg"],
   },
 ] as const;
 

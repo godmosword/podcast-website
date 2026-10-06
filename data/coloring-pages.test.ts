@@ -10,12 +10,12 @@ import {
 const PUBLIC_DIR = join(process.cwd(), "public");
 
 describe("coloring-pages catalog", () => {
-  test("七個角色、七個故事畫面，全部是大色塊線稿", () => {
+  test("八個角色、八個故事畫面", () => {
     expect(COLORING_PAGES.filter((p) => p.variant)).toHaveLength(0);
     expect(COLORING_PAGES.filter((p) => p.kind === "character")).toHaveLength(
-      7,
+      8,
     );
-    expect(COLORING_PAGES.filter((p) => p.kind === "scene")).toHaveLength(7);
+    expect(COLORING_PAGES.filter((p) => p.kind === "scene")).toHaveLength(8);
   });
 
   test("id 唯一且與 COLORING_PAGE_IDS 對齊", () => {
@@ -33,12 +33,12 @@ describe("coloring-pages catalog", () => {
     }
   });
 
-  test("場景頁覆蓋 car-park / dino / rescue / ocean", () => {
+  test("場景頁覆蓋 car-park / dino / rescue / ocean / forest", () => {
     const zones = COLORING_PAGES.filter((p) => p.kind === "scene").map(
       (p) => p.zoneId,
     );
     expect(new Set(zones)).toEqual(
-      new Set(["car-park", "dino", "rescue", "ocean"]),
+      new Set(["car-park", "dino", "rescue", "ocean", "forest"]),
     );
   });
 });

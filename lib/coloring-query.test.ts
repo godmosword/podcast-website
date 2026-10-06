@@ -12,8 +12,8 @@ describe("coloring-query", () => {
   });
 
   test("listColoringPages 可依 kind 篩選", () => {
-    expect(listColoringPages("character")).toHaveLength(7);
-    expect(listColoringPages("scene")).toHaveLength(7);
+    expect(listColoringPages("character")).toHaveLength(8);
+    expect(listColoringPages("scene")).toHaveLength(8);
     expect(listColoringPages("character").every((p) => p.kind === "character")).toBe(
       true,
     );
