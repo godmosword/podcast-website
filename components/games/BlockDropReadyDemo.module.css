@@ -25,7 +25,6 @@
 }
 
 .faller {
-  background: #c9b4ff;
   /* 從第 1 列掉到第 4 列＝往下 3 格（含 gap） */
   animation: blockDemoFall 3s ease-in-out infinite;
 }

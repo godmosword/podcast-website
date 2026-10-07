@@ -1,4 +1,5 @@
 import styles from "./BlockDropReadyDemo.module.css";
+import { CLAY_BLOCK_COLORS } from "./blockDropTheme";
 
 const COLS = 6;
 const ROWS = 4;
@@ -29,7 +30,10 @@ export function BlockDropReadyDemo() {
           />
         ),
       )}
-      <span className={styles.faller} style={{ gridColumn: GAP_COL + 1, gridRow: 1 }} />
+      <span
+        className={styles.faller}
+        style={{ gridColumn: GAP_COL + 1, gridRow: 1, background: CLAY_BLOCK_COLORS.T }}
+      />
     </div>
   );
 }
