@@ -9,8 +9,8 @@ import type { CandyGoal } from "@/lib/games/candy-match/tasks";
 import styles from "./CandyMatchMap.module.css";
 
 /**
- * 選關：玩法切換＋站點大卡（關號、地名、任務、玩法、開始）＋兩列小路。
- * 點已解鎖的站換成大卡預覽；點鎖住的站說明要先完成哪一站。
+ * 選關：一行玩法＋下一站與任務＋開始＋兩列小路。
+ * 點已解鎖的站換成預覽；點鎖住的站說明要先完成哪一站。
  */
 
 export type CandyStationPreview = {
@@ -42,10 +42,10 @@ function ModeToggle({ mode, onChange }: { mode: CandyMode; onChange: (mode: Cand
           role="radio"
           aria-checked={mode === m.id}
           className={styles.modeOption}
+          aria-label={`${m.label}。${m.hint}`}
           onClick={() => onChange(m.id)}
         >
           <span className={styles.modeLabel}>{m.label}</span>
-          <span className={styles.modeHint}>{m.hint}</span>
         </button>
       ))}
     </div>
@@ -80,16 +80,6 @@ export function CandyMatchMap({
       <ModeToggle mode={mode} onChange={onModeChange} />
 
       <div className={styles.hero}>
-        <span className={styles.heroBadge}>
-          {/* eslint-disable-next-line @next/next/no-img-element -- 固定黏土小圖 */}
-          <img
-            src={`/games/v2/candy-match/places/${hero.placeIcon}.webp`}
-            alt=""
-            width={256}
-            height={256}
-            className={styles.icon}
-          />
-        </span>
         <div className={styles.heroInfo}>
           <p className={styles.heroStation}>
             第 {heroIndex + 1} 站・{hero.place}
@@ -97,18 +87,13 @@ export function CandyMatchMap({
           <p className={styles.heroTask}>
             <span className={styles.heroGoalIcons} aria-hidden>
               {preview.goals.map((goal, i) => (
-                <CandyGoalIcon key={i} goal={goal} size={24} />
+                <CandyGoalIcon key={i} goal={goal} size={22} />
               ))}
             </span>
             {preview.summary}
+            {mode === "challenge" ? `・${preview.moves} 步` : ""}
+            {preview.replay ? "・換新任務" : ""}
           </p>
-          {mode === "challenge" || preview.replay ? (
-            <p className={styles.heroMeta}>
-              {[mode === "challenge" ? `${preview.moves} 步內完成` : null, preview.replay ? "重玩換新任務" : null]
-                .filter(Boolean)
-                .join("・")}
-            </p>
-          ) : null}
         </div>
         <button
           type="button"
@@ -185,7 +170,6 @@ export function CandyMatchMap({
           </div>
         ))}
       </div>
-      <p className={styles.medalNote}>星星是每站累積的獎章，兩種玩法都算。</p>
     </div>
   );
 }

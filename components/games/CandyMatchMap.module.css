@@ -15,9 +15,9 @@
 
 .modeOption {
   display: grid;
-  gap: 1px;
-  min-height: 48px;
-  padding: 6px 8px;
+  place-items: center;
+  min-height: 44px;
+  padding: 8px;
   border: none;
   border-radius: 14px;
   background: transparent;
@@ -44,45 +44,14 @@
   font-weight: 900;
 }
 
-.modeHint {
-  font-size: 12px;
-  font-weight: 700;
-}
-
-@media (max-width: 480px) {
-  .modeHint {
-    display: none;
-  }
-}
-
 .hero {
   display: grid;
-  grid-template-columns: auto 1fr;
-  grid-template-areas:
-    "badge info"
-    "start start";
-  align-items: center;
-  gap: 8px 12px;
-  padding: 12px;
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.82);
-  box-shadow: 0 8px 18px rgba(150, 110, 130, 0.14);
-}
-
-.heroBadge {
-  grid-area: badge;
-  display: block;
-  width: 88px;
-  height: 88px;
-  border-radius: 50%;
-  overflow: hidden;
-  background: #fff7ea;
-  border: 3px solid #fff;
-  box-shadow: 0 6px 14px rgba(150, 110, 130, 0.22);
+  gap: 8px;
+  justify-items: center;
+  text-align: center;
 }
 
 .heroInfo {
-  grid-area: info;
   display: grid;
   gap: 2px;
   min-width: 0;
@@ -102,6 +71,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 4px 6px;
   font-size: 15px;
   font-weight: 800;
@@ -114,22 +84,16 @@
   line-height: 0;
 }
 
-.heroMeta {
-  font-size: 13px;
-  font-weight: 700;
-  color: #7c6886;
-}
-
 .heroStart {
-  grid-area: start;
-  min-height: 52px;
+  width: min(100%, 280px);
+  min-height: 48px;
   padding: 0 22px;
   border: none;
   border-radius: 999px;
   background: linear-gradient(180deg, #ffe889, #ffbd6f);
   color: #614018;
   font-weight: 900;
-  font-size: 19px;
+  font-size: 18px;
   cursor: pointer;
   box-shadow: 0 5px 0 rgba(203, 128, 52, 0.38);
 }
@@ -153,14 +117,6 @@
   margin: 0;
 }
 
-.medalNote {
-  margin: 0;
-  color: #7c6886;
-  font-size: 12px;
-  font-weight: 700;
-  text-align: center;
-}
-
 .path {
   display: grid;
   gap: 10px;
@@ -169,16 +125,16 @@
 .pathRow {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(5, 48px);
+  grid-template-columns: repeat(5, 56px);
   justify-content: space-between;
 }
 
 .pathRow::before {
   content: "";
   position: absolute;
-  left: 24px;
-  right: 24px;
-  top: 20px;
+  left: 28px;
+  right: 28px;
+  top: 24px;
   height: 8px;
   border-radius: 999px;
   background: #e8a44a;
@@ -211,8 +167,8 @@
 .badge {
   position: relative;
   display: block;
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   overflow: visible;
   background: #fff7ea;

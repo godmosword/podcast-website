@@ -25,6 +25,13 @@
   padding: 8px 2px;
 }
 
+/* 地圖內容變短之後，整組置中，避免上半截資訊、下半截空白 */
+.surface[data-screen="map"] {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 /*
  * 背景主題化：低調裝飾（角落柔光斑點＋頂部弱光暈），疊在每關 themeA/B 漸層上。
  * z-index: -1 讓裝飾落在 surface 自身背景之上、但在棋盤／文字等實際內容之下，
@@ -290,7 +297,16 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 10px;
+  gap: 4px;
+}
+
+.mapActions .softButton {
+  min-height: 44px;
+  padding: 4px 12px;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  font-size: 15px;
 }
 
 .mapScreen {
