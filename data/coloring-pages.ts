@@ -17,6 +17,8 @@ export type ColoringPage = {
   lineArtSrc: string;
   /** 原圖公開路徑（小預覽）。 */
   previewSrc: string;
+  /** 參考彩圖：與線稿逐區對齊、只用色盤 12 色（generate:coloring-reference 產出）。 */
+  referenceSrc: string;
   /** 場景頁對應樂園 zone。 */
   zoneId?: ZoneId;
   /**
@@ -36,6 +38,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
     kind: "character",
     sourcePath: "characters/小紅賽車.jpg",
     lineArtSrc: "/coloring/char-小紅賽車/line.png",
+    referenceSrc: "/coloring/char-小紅賽車/color.webp",
     previewSrc: "/characters/小紅賽車.jpg",
   },
   {
@@ -47,6 +50,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
     kind: "character",
     sourcePath: "characters/恐龍車多多.jpg",
     lineArtSrc: "/coloring/char-恐龍車多多/line.png",
+    referenceSrc: "/coloring/char-恐龍車多多/color.webp",
     previewSrc: "/characters/恐龍車多多.jpg",
   },
   {
@@ -58,6 +62,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
     kind: "character",
     sourcePath: "characters/安安救護車.jpg",
     lineArtSrc: "/coloring/char-安安救護車/line.png",
+    referenceSrc: "/coloring/char-安安救護車/color.webp",
     previewSrc: "/characters/安安救護車.jpg",
   },
   {
@@ -69,6 +74,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
     kind: "character",
     sourcePath: "characters/鈴鈴清潔車.jpg",
     lineArtSrc: "/coloring/char-鈴鈴清潔車/line.png",
+    referenceSrc: "/coloring/char-鈴鈴清潔車/color.webp",
     previewSrc: "/characters/鈴鈴清潔車.jpg",
   },
   {
@@ -80,6 +86,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
     kind: "character",
     sourcePath: "characters/猛猛.jpg",
     lineArtSrc: "/coloring/char-猛猛/line.png",
+    referenceSrc: "/coloring/char-猛猛/color.webp",
     previewSrc: "/characters/猛猛.jpg",
   },
   {
@@ -91,6 +98,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
     kind: "character",
     sourcePath: "characters/東東挖土機.jpg",
     lineArtSrc: "/coloring/char-東東挖土機/line.png",
+    referenceSrc: "/coloring/char-東東挖土機/color.webp",
     previewSrc: "/characters/東東挖土機.jpg",
   },
   {
@@ -102,6 +110,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
     kind: "character",
     sourcePath: "characters/亮亮警車.jpg",
     lineArtSrc: "/coloring/char-亮亮警車/line.png",
+    referenceSrc: "/coloring/char-亮亮警車/color.webp",
     previewSrc: "/characters/亮亮警車.jpg",
   },
   {
@@ -113,6 +122,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
     kind: "character",
     sourcePath: "characters/噗噗豬.jpg",
     lineArtSrc: "/coloring/char-噗噗豬/line.png",
+    referenceSrc: "/coloring/char-噗噗豬/color.webp",
     previewSrc: "/characters/噗噗豬.jpg",
   },
   {
@@ -123,6 +133,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
     kind: "scene",
     sourcePath: "stories/ep-3/05.jpg",
     lineArtSrc: "/coloring/scene-ep-3-05/line.png",
+    referenceSrc: "/coloring/scene-ep-3-05/color.webp",
     previewSrc: "/stories/ep-3/05.jpg",
     zoneId: "car-park",
     referencePaths: ["characters/小紅賽車.jpg"],
@@ -136,6 +147,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
     kind: "scene",
     sourcePath: "stories/ep-9/05.jpg",
     lineArtSrc: "/coloring/scene-ep-9-05/line.png",
+    referenceSrc: "/coloring/scene-ep-9-05/color.webp",
     previewSrc: "/stories/ep-9/05.jpg",
     zoneId: "dino",
     referencePaths: ["characters/恐龍車多多.jpg"],
@@ -148,6 +160,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
     kind: "scene",
     sourcePath: "stories/ep-6/05.jpg",
     lineArtSrc: "/coloring/scene-ep-6-05/line.png",
+    referenceSrc: "/coloring/scene-ep-6-05/color.webp",
     previewSrc: "/stories/ep-6/05.jpg",
     zoneId: "rescue",
     referencePaths: ["characters/安安救護車.jpg"],
@@ -160,6 +173,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
     kind: "scene",
     sourcePath: "stories/ep-16/05.jpg",
     lineArtSrc: "/coloring/scene-ep-16-05/line.png",
+    referenceSrc: "/coloring/scene-ep-16-05/color.webp",
     previewSrc: "/stories/ep-16/05.jpg",
     zoneId: "ocean",
     referencePaths: ["characters/噗噗豬.jpg"],
@@ -172,6 +186,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
     kind: "scene",
     sourcePath: "stories/ep-4/05.jpg",
     lineArtSrc: "/coloring/scene-ep-4-05/line.png",
+    referenceSrc: "/coloring/scene-ep-4-05/color.webp",
     previewSrc: "/stories/ep-4/05.jpg",
     zoneId: "car-park",
     referencePaths: ["characters/鈴鈴清潔車.jpg"],
@@ -184,6 +199,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
     kind: "scene",
     sourcePath: "stories/ep-8/05.jpg",
     lineArtSrc: "/coloring/scene-ep-8-05/line.png",
+    referenceSrc: "/coloring/scene-ep-8-05/color.webp",
     previewSrc: "/stories/ep-8/05.jpg",
     zoneId: "dino",
     referencePaths: ["characters/猛猛.jpg"],
@@ -196,6 +212,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
     kind: "scene",
     sourcePath: "stories/ep-12/07.jpg",
     lineArtSrc: "/coloring/scene-ep-12-07/line.png",
+    referenceSrc: "/coloring/scene-ep-12-07/color.webp",
     previewSrc: "/stories/ep-12/07.jpg",
     zoneId: "rescue",
     referencePaths: ["characters/亮亮警車.jpg", "characters/小藍巴士.jpg"],
@@ -209,6 +226,7 @@ export const COLORING_PAGES: readonly ColoringPage[] = [
     kind: "scene",
     sourcePath: "stories/ep-5/05.jpg",
     lineArtSrc: "/coloring/scene-ep-5-05/line.png",
+    referenceSrc: "/coloring/scene-ep-5-05/color.webp",
     previewSrc: "/stories/ep-5/05.jpg",
     zoneId: "forest",
     referencePaths: ["characters/東東挖土機.jpg"],
