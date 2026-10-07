@@ -118,6 +118,38 @@
   background: var(--coloring-canvas-surface);
 }
 
+/* 右下三角是彩圖；第四點落在對角線中心，hover 時移到左上角就整張翻成彩圖。 */
+.colorThumb {
+  object-fit: contain;
+  clip-path: polygon(100% 0, 100% 100%, 0 100%, 50% 50%);
+  transition: clip-path 260ms ease;
+}
+
+.thumb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom right,
+    transparent calc(50% - 2px),
+    var(--coloring-canvas-surface) calc(50% - 2px),
+    var(--coloring-canvas-surface) calc(50% + 2px),
+    transparent calc(50% + 2px)
+  );
+  pointer-events: none;
+  transition: opacity 200ms ease;
+}
+
+.card:hover .colorThumb,
+.card:focus-visible .colorThumb {
+  clip-path: polygon(100% 0, 100% 100%, 0 100%, 0 0);
+}
+
+.card:hover .thumb::after,
+.card:focus-visible .thumb::after {
+  opacity: 0;
+}
+
 .cardTitle {
   font-weight: 700;
   font-size: var(--fs-control);
@@ -184,7 +216,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card {
+  .card,
+  .colorThumb,
+  .thumb::after {
     transition: none;
   }
 

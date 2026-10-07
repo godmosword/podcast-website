@@ -7,6 +7,7 @@ import {
   COLORING_LINEART_MAX_SIDE,
   evaluateLineArtGate,
 } from "./coloring-lineart";
+import { REFERENCE_RECIPES } from "./coloring-reference-overrides";
 
 const PUBLIC_DIR = join(process.cwd(), "public");
 
@@ -32,6 +33,27 @@ describe("coloring lineart assets contract", () => {
       const { ok, problems } = await evaluateLineArtGate(buf, page.kind);
       expect(ok, `${page.id}: ${problems.join("; ")}`).toBe(true);
     }
+  });
+
+  test("每頁參考彩圖 color.webp 存在、與線稿同比例", async () => {
+    for (const page of COLORING_PAGES) {
+      const ref = join(PUBLIC_DIR, page.referenceSrc.replace(/^\//, ""));
+      expect(existsSync(ref), ref).toBe(true);
+      const [color, line] = await Promise.all([
+        sharp(ref).metadata(),
+        sharp(join(PUBLIC_DIR, page.lineArtSrc.replace(/^\//, ""))).metadata(),
+      ]);
+      expect(color.format, page.id).toBe("webp");
+      expect((color.width ?? 0) / (color.height ?? 1)).toBeCloseTo(
+        (line.width ?? 0) / (line.height ?? 1),
+        3,
+      );
+    }
+  });
+
+  test("修色配方只指向現有頁面", () => {
+    const ids = new Set(COLORING_PAGES.map((p) => p.id));
+    for (const id of Object.keys(REFERENCE_RECIPES)) expect(ids.has(id), id).toBe(true);
   });
 
   test("遊樂園封面 cover.webp 為 1448×1086 webp", async () => {

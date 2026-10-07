@@ -29,6 +29,7 @@ import {
   type Rgba,
 } from "@/lib/coloring/tools";
 import { ColoringPalette } from "./ColoringPalette";
+import { ColoringReference, ColoringReferencePeek } from "./ColoringReference";
 import { ColoringToolbar } from "./ColoringToolbar";
 import styles from "./ColoringCanvas.module.css";
 import { useColoringHistory } from "./useColoringHistory";
@@ -53,6 +54,8 @@ import {
   useColoringGesture,
   DEFAULT_COLORING_VIEW as DEFAULT_VIEW,
 } from "./useColoringGesture";
+import { useReferenceSampler } from "./useReferenceSampler";
+import { paletteName } from "@/lib/coloring/reference-pick";
 
 const TRANSPARENT: Rgba = [255, 255, 255, 0];
 
@@ -60,13 +63,6 @@ const TRANSPARENT: Rgba = [255, 255, 255, 0];
 const BUCKET_MOVE_TOLERANCE = 10;
 
 type Point = { x: number; y: number };
-
-const PREVIEW_CORNERS = [
-  "cornerBr",
-  "cornerBl",
-  "cornerTl",
-  "cornerTr",
-] as const;
 
 type ColoringCanvasProps = {
   page: ColoringPage;
@@ -121,8 +117,10 @@ export function ColoringCanvas({
   const [tool, setTool] = useState<ColoringTool>("crayon");
   const [colorHex, setColorHex] = useState("#e85d4c");
   const [brushSize, setBrushSize] = useState<BrushSizeId>("medium");
-  const [showPreview, setShowPreview] = useState(false);
-  const [previewCorner, setPreviewCorner] = useState(0);
+  const [peek, setPeek] = useState(false);
+  const [pickStatus, setPickStatus] = useState("");
+  const peekTriggerRef = useRef<HTMLButtonElement>(null);
+  const sampleReference = useReferenceSampler(page.referenceSrc);
 
   const [loadError, setLoadError] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
@@ -183,6 +181,17 @@ export function ColoringCanvas({
         usedBucket,
       });
   }, [tool, colorHex, brushSize, guided, usedBucket, preferencesReady]);
+
+  /** 從彩圖拿顏色；拿著橡皮擦時順便換回蠟筆，點下去才看得到顏色。 */
+  const pickReferenceColor = useCallback((hex: string) => {
+    setColorHex(hex);
+    setTool((current) => (current === "eraser" ? "crayon" : current));
+    setPickStatus(`換成${paletteName(hex)}了`);
+  }, []);
+  const closePeek = useCallback(() => {
+    setPeek(false);
+    peekTriggerRef.current?.focus({ preventScroll: true });
+  }, []);
 
   const closeDoneOverlay = useCallback(() => {
     setDoneOpen(false);
@@ -721,6 +730,17 @@ export function ColoringCanvas({
         ) : null}
       </div>
 
+      <div className={styles.reference}>
+        <ColoringReference
+          ref={peekTriggerRef}
+          page={page}
+          sample={sampleReference}
+          onPick={pickReferenceColor}
+          onPeek={() => setPeek(true)}
+          status={pickStatus}
+        />
+      </div>
+
       <div className={styles.stage} ref={stageRef}>
         <canvas
           ref={displayRef}
@@ -734,18 +754,13 @@ export function ColoringCanvas({
           onPointerLeave={hideCursorRing}
         />
         <div ref={cursorRef} className={styles.cursorRing} aria-hidden="true" />
-        {showPreview ? (
-          <button
-            type="button"
-            className={`${styles.preview} ${styles[PREVIEW_CORNERS[previewCorner % PREVIEW_CORNERS.length]!]}`}
-            onClick={() =>
-              setPreviewCorner((c) => (c + 1) % PREVIEW_CORNERS.length)
-            }
-            aria-label="原圖參考換角落"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element -- canvas 旁小預覽 */}
-            <img src={page.previewSrc} alt={`${page.title}原圖參考`} />
-          </button>
+        {peek ? (
+          <ColoringReferencePeek
+            page={page}
+            sample={sampleReference}
+            onPick={pickReferenceColor}
+            onClose={closePeek}
+          />
         ) : null}
         {!ready ? (
           <div className={styles.loading} role="status">
@@ -770,9 +785,6 @@ export function ColoringCanvas({
         </p>
       ) : null}
 
-      {page.activity ? (
-        <p className={styles.activity}>{page.activity}</p>
-      ) : null}
       {!usedBucket ? (
         <p
           className={styles.openHint}
@@ -794,8 +806,6 @@ export function ColoringCanvas({
           onToolChange={setTool}
           brushSize={brushSize}
           onBrushSizeChange={setBrushSize}
-          showPreview={showPreview}
-          onTogglePreview={() => setShowPreview((v) => !v)}
           ready={ready && !doneBusy}
           colorGroup={colorGroup}
           onColorGroupChange={setColorGroup}

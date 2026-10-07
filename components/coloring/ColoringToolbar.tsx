@@ -13,7 +13,6 @@ import {
   CrayonIcon,
   DownloadIcon,
   EraserIcon,
-  PreviewIcon,
   ResetViewIcon,
   UndoIcon,
 } from "./ColoringToolbarIcons";
@@ -23,8 +22,6 @@ type Props = {
   onToolChange: (t: ColoringTool) => void;
   brushSize: BrushSizeId;
   onBrushSizeChange: (s: BrushSizeId) => void;
-  showPreview: boolean;
-  onTogglePreview: () => void;
   canUndo: boolean;
   onUndo: () => void;
   canRedo?: boolean;
@@ -218,18 +215,6 @@ export function ColoringToolbar(p: Props) {
                 >
                   <ResetViewIcon className={styles.icon} />
                   縮放還原
-                </button>
-                <button
-                  type="button"
-                  aria-label="故事照片"
-                  aria-pressed={p.showPreview}
-                  onClick={() => {
-                    p.onTogglePreview();
-                    close();
-                  }}
-                >
-                  <PreviewIcon className={styles.icon} />
-                  故事照片
                 </button>
                 <button
                   type="button"

@@ -12,3 +12,8 @@ export const COLORING_GALLERY_HEADING = "我的作品";
 export const COLORING_HINT_DRAW = "點一個顏色，用蠟筆在圖上塗塗看";
 /** 已經有顏色、還沒用過填滿。 */
 export const COLORING_HINT_FILL = "再點「填滿」，點一下塗滿一整塊";
+/** 參考彩圖卡。 */
+export const COLORING_REFERENCE_TITLE = "照著塗";
+export const COLORING_REFERENCE_CAPTION = "點彩圖上的顏色，蠟筆就換成一樣的顏色。也可以塗成你喜歡的樣子！";
+export const COLORING_REFERENCE_PEEK = "放大看彩圖";
+export const COLORING_REFERENCE_PEEK_HINT = "點一個顏色，就用它來塗";

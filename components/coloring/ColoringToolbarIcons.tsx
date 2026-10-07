@@ -137,19 +137,6 @@ export function ResetViewIcon({ className }: IconProps) {
   );
 }
 
-/** 看原圖：相框小圖。 */
-export function PreviewIcon({ className }: IconProps) {
-  return (
-    <svg {...BOX} className={className}>
-      <g {...STROKE}>
-        <rect x="3.6" y="5.2" width="16.8" height="13.6" rx="2.2" />
-        <path d="M6.4 15.6 9.6 11.8l3.1 3.3 2.1-2.3 3.8 2.8" />
-        <circle cx="15.4" cy="9.1" r="1.15" fill="currentColor" stroke="none" />
-      </g>
-    </svg>
-  );
-}
-
 /** 下載：箭頭落入托盤。 */
 export function DownloadIcon({ className }: IconProps) {
   return (

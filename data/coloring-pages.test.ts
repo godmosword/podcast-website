@@ -29,6 +29,7 @@ describe("coloring-pages catalog", () => {
       assertPageShape(page);
       expect(existsSync(join(PUBLIC_DIR, page.sourcePath))).toBe(true);
       expect(existsSync(join(PUBLIC_DIR, page.lineArtSrc))).toBe(true);
+      expect(existsSync(join(PUBLIC_DIR, page.referenceSrc))).toBe(true);
       expect(page.lineArtRevision).toBeGreaterThan(0);
     }
   });
@@ -49,6 +50,7 @@ function assertPageShape(page: ColoringPage): void {
   expect(["character", "scene"]).toContain(page.kind);
   expect(page.sourcePath).toMatch(/\.(jpe?g)$/i);
   expect(page.lineArtSrc).toBe(`/coloring/${page.id}/line.png`);
+  expect(page.referenceSrc).toBe(`/coloring/${page.id}/color.webp`);
   expect(page.previewSrc.startsWith("/")).toBe(true);
   if (page.kind === "scene") {
     expect(page.zoneId).toBeDefined();

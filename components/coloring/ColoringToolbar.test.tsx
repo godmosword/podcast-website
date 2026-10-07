@@ -21,8 +21,6 @@ function renderToolbar(
       onToolChange={NOOP}
       brushSize="medium"
       onBrushSizeChange={NOOP}
-      showPreview={false}
-      onTogglePreview={NOOP}
       canUndo
       onUndo={NOOP}
       onClear={NOOP}
@@ -53,7 +51,7 @@ describe("ColoringToolbar", () => {
   });
 
   it("操作列圖示鈕保留原本可及名稱", () => {
-    renderToolbar({ canUndo: false, viewActive: true, showPreview: true });
+    renderToolbar({ canUndo: false, viewActive: true });
 
     expect(screen.getByRole("button", { name: "復原" })).toHaveProperty(
       "disabled",
@@ -67,11 +65,7 @@ describe("ColoringToolbar", () => {
       "disabled",
       false,
     );
-    expect(
-      screen
-        .getByRole("button", { name: "故事照片" })
-        .getAttribute("aria-pressed"),
-    ).toBe("true");
+    expect(screen.queryByRole("button", { name: "故事照片" })).toBeNull();
     expect(
       screen.getByRole("button", { name: "下載" }).querySelector("svg"),
     ).toBeTruthy();

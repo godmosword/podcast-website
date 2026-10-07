@@ -148,25 +148,7 @@ export function ColoringPagePicker({
           </h2>
           <ul className={styles.grid}>
             {characters.map((page) => (
-              <li key={page.id}>
-                <button
-                  type="button"
-                  className={styles.card}
-                  onClick={() => onSelect(page)}
-                  aria-label={`著色：${page.title}`}
-                >
-                  <span className={styles.thumb}>
-                    <Image
-                      src={page.lineArtSrc}
-                      alt=""
-                      fill
-                      sizes="(max-width: 640px) 46vw, 200px"
-                      className={`${styles.thumbImg} ${styles.lineThumb}`}
-                    />
-                  </span>
-                  <span className={styles.cardTitle}>{page.title}</span>
-                </button>
-              </li>
+              <PageCard key={page.id} page={page} onSelect={onSelect} />
             ))}
           </ul>
         </section>
@@ -176,29 +158,49 @@ export function ColoringPagePicker({
           </h2>
           <ul className={styles.grid}>
             {scenes.map((page) => (
-              <li key={page.id}>
-                <button
-                  type="button"
-                  className={styles.card}
-                  onClick={() => onSelect(page)}
-                  aria-label={`著色：${page.title}`}
-                >
-                  <span className={styles.thumb}>
-                    <Image
-                      src={page.lineArtSrc}
-                      alt=""
-                      fill
-                      sizes="(max-width: 640px) 46vw, 200px"
-                      className={`${styles.thumbImg} ${styles.lineThumb}`}
-                    />
-                  </span>
-                  <span className={styles.cardTitle}>{page.title}</span>
-                </button>
-              </li>
+              <PageCard key={page.id} page={page} onSelect={onSelect} />
             ))}
           </ul>
         </section>
       </div>
     </div>
+  );
+}
+
+/** 左上是線稿、右下是參考彩圖：一眼看到「塗完會像這樣」。 */
+function PageCard({
+  page,
+  onSelect,
+}: {
+  page: ColoringPage;
+  onSelect: (page: ColoringPage) => void;
+}) {
+  return (
+    <li>
+      <button
+        type="button"
+        className={styles.card}
+        onClick={() => onSelect(page)}
+        aria-label={`著色：${page.title}`}
+      >
+        <span className={styles.thumb}>
+          <Image
+            src={page.lineArtSrc}
+            alt=""
+            fill
+            sizes="(max-width: 640px) 46vw, 200px"
+            className={`${styles.thumbImg} ${styles.lineThumb}`}
+          />
+          <Image
+            src={page.referenceSrc}
+            alt=""
+            fill
+            sizes="(max-width: 640px) 46vw, 200px"
+            className={`${styles.thumbImg} ${styles.colorThumb}`}
+          />
+        </span>
+        <span className={styles.cardTitle}>{page.title}</span>
+      </button>
+    </li>
   );
 }

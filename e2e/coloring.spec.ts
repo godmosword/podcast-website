@@ -312,3 +312,47 @@ test.describe("coloring book", () => {
     });
   }
 });
+
+test.describe("coloring book 參考彩圖", () => {
+  const selectedSwatch = (page: Page) =>
+    page.locator('[role="option"][aria-selected="true"]');
+
+  test("桌機：點彩圖直接換色，拿橡皮擦時換回蠟筆", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await openColoringPage(page, /^著色：猛猛$/);
+    await page.getByRole("button", { name: "擦掉", exact: true }).click();
+    const figure = page.getByRole("button", { name: /參考彩圖，點一下拿顏色/ });
+    const box = (await figure.boundingBox())!;
+    // 左緣中段是天空（彩圖只用色盤色）
+    await page.mouse.click(box.x + box.width * 0.04, box.y + box.height * 0.5);
+    await expect(selectedSwatch(page)).toHaveAttribute("aria-label", "天空藍");
+    await expect(page.getByText("換成天空藍了")).toBeVisible();
+    await expect(page.getByRole("button", { name: "蠟筆", exact: true })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  test("手機：點小圖放大到畫布上，點顏色後回去塗", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await openColoringPage(page, /^著色：猛猛$/);
+    await page.getByRole("button", { name: /參考彩圖，點一下拿顏色/ }).click();
+    const peek = page.getByRole("group", { name: "猛猛參考彩圖" });
+    await expect(peek).toBeVisible();
+    const image = page.getByRole("button", { name: "點彩圖上的顏色，回去塗" });
+    const box = (await image.boundingBox())!;
+    await page.mouse.click(box.x + box.width * 0.04, box.y + box.height * 0.5);
+    await expect(peek).toHaveCount(0);
+    await expect(selectedSwatch(page)).toHaveAttribute("aria-label", "天空藍");
+  });
+
+  test("放大圖可用 Esc 關閉", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await openColoringPage(page, /^著色：猛猛$/);
+    await page.getByRole("button", { name: /參考彩圖，點一下拿顏色/ }).click();
+    await expect(page.getByRole("button", { name: "回去塗", exact: true })).toBeFocused();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("group", { name: "猛猛參考彩圖" })).toHaveCount(0);
+  });
+});
+

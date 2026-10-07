@@ -1,0 +1,271 @@
+/* 手機：橫條（縮圖＋說明）；桌機：右欄大彩圖。彩圖本身是作品，不跟夜間模式變色。 */
+.card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: var(--radius-md);
+  background: var(--coloring-ui-surface);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--coloring-ink) 8%, transparent),
+    0 6px 18px color-mix(in srgb, var(--coloring-ink) 8%, transparent);
+}
+
+.figure {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 3px solid var(--coloring-canvas-surface);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--coloring-canvas-surface);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--coloring-ink) 18%, transparent);
+  cursor: zoom-in;
+  touch-action: manipulation;
+}
+
+.figure img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.figure:focus-visible,
+.peekBtn:focus-visible,
+.peekImage:focus-visible,
+.peekClose:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.broken {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 0.25rem;
+  font-size: var(--fs-meta);
+  font-weight: 700;
+  color: var(--coloring-art-ink);
+}
+
+.marker {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-circle);
+  border: 3px solid var(--coloring-canvas-surface);
+  box-shadow: 0 0 0 2px var(--coloring-art-ink);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: markerPop 260ms ease-out;
+}
+
+@keyframes markerPop {
+  from {
+    transform: translate(-50%, -50%) scale(0.4);
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.body {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+  justify-items: start;
+}
+
+/* 字用墨色（夜間橘字對比不到 4.5:1），橘色只留給前面的小色條。 */
+.title {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  font-size: var(--fs-label);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--coloring-ink);
+}
+
+.title::before {
+  content: "";
+  width: 0.3rem;
+  height: 1em;
+  border-radius: var(--radius-pill);
+  background: var(--coloring-accent);
+}
+
+.caption {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  font-size: var(--fs-label);
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--coloring-ink);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.tapHint {
+  font-weight: 700;
+  color: var(--coloring-ink);
+  opacity: 0.75;
+}
+
+/* 手機與平板：小圖本身就是放大鈕，不另放按鈕，畫布才不會被往下擠。 */
+.peekBtn {
+  display: none;
+  min-height: 44px;
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--radius-pill);
+  border: 2px solid color-mix(in srgb, var(--coloring-ink) 20%, transparent);
+  background: var(--coloring-ui-surface-strong);
+  color: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* 手機與平板只給讀螢幕軟體唸（橫條不能長高）；live region 永遠在，不切 display。 */
+.status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  font-size: var(--fs-meta);
+  font-weight: 700;
+  color: var(--coloring-ink);
+}
+
+@media (min-width: 980px) {
+  .card {
+    grid-template-columns: 92px minmax(0, 1fr);
+    padding: 0.5rem;
+  }
+
+  .caption {
+    -webkit-line-clamp: 3;
+  }
+}
+
+/* 寬桌機左欄：彩圖夠大，點彩圖直接取色，另外給一顆放大鈕。 */
+@media (min-width: 1200px) {
+  .figure {
+    cursor: copy;
+  }
+
+  .tapHint {
+    display: none;
+  }
+
+  .peekBtn {
+    display: inline-block;
+  }
+
+  .caption {
+    display: block;
+  }
+
+  .card {
+    grid-template-columns: 1fr;
+    padding: 0.75rem;
+  }
+
+  .status {
+    position: static;
+    width: auto;
+    height: auto;
+    min-height: 1.3em;
+    overflow: visible;
+    clip-path: none;
+  }
+}
+
+/* 疊在畫布上的放大彩圖 */
+.peek {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  background: var(--coloring-canvas-surface);
+  animation: peekIn 180ms ease-out;
+}
+
+@keyframes peekIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.peekImage {
+  grid-area: 1 / 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: copy;
+  touch-action: manipulation;
+}
+
+.peekImage img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.peekHint {
+  grid-area: 1 / 1;
+  align-self: start;
+  justify-self: center;
+  margin: 0.6rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--coloring-canvas-surface) 92%, transparent);
+  color: var(--coloring-art-ink);
+  font-size: var(--fs-label);
+  font-weight: 800;
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--coloring-art-ink) 20%, transparent);
+  pointer-events: none;
+}
+
+.peekClose {
+  grid-area: 1 / 1;
+  align-self: end;
+  justify-self: center;
+  margin: 0.75rem;
+  min-height: 48px;
+  padding: 0.35rem 1.25rem;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-weight: 800;
+  cursor: pointer;
+  color: var(--coloring-accent-fg);
+  background: var(--coloring-accent);
+  box-shadow: 0 3px 0 var(--coloring-accent-shadow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marker,
+  .peek {
+    animation: none;
+  }
+}

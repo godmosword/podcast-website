@@ -10,6 +10,8 @@
   --coloring-ui-surface: var(--card);
   --coloring-ui-surface-strong: var(--card-2);
   --coloring-canvas-surface: #fff;
+  /* 疊在作品上的固定墨色（取色標記、彩圖上的提示字），夜間不反轉。 */
+  --coloring-art-ink: #2f2f2f;
   min-height: 100dvh;
   color: var(--coloring-ink);
   background:
