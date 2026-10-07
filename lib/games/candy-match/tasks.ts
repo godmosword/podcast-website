@@ -149,7 +149,7 @@ export function goalLine(goal: CandyGoal, p: CandyProgress): string {
   return `${goalTitle(goal)}，${goalRemainingLabel(goal, p)}`;
 }
 
-/** 地圖卡任務摘要，例如「小紅、計程車各 12 個＋啟動特殊糖 1 次」。 */
+/** 地圖卡任務摘要，例如「收集小紅、計程車各 12 個＋啟動特殊糖 1 次」。 */
 export function goalsSummary(goals: readonly CandyGoal[]): string {
   const parts: string[] = [];
   const collects = goals.filter(
@@ -158,9 +158,9 @@ export function goalsSummary(goals: readonly CandyGoal[]): string {
   if (collects.length > 0) {
     const sameCount = collects.every((goal) => goal.count === collects[0]!.count);
     if (collects.length > 1 && sameCount) {
-      parts.push(`${collects.map((goal) => pieceName(goal.piece)).join("、")}各 ${collects[0]!.count} 個`);
+      parts.push(`收集${collects.map((goal) => pieceName(goal.piece)).join("、")}各 ${collects[0]!.count} 個`);
     } else {
-      parts.push(collects.map((goal) => `${pieceName(goal.piece)} ${goal.count} 個`).join("、"));
+      parts.push(`收集${collects.map((goal) => `${pieceName(goal.piece)} ${goal.count} 個`).join("、")}`);
     }
   }
   for (const goal of goals) {

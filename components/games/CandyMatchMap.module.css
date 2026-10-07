@@ -1,13 +1,23 @@
 .map {
+  --node-size: 56px;
   display: grid;
-  gap: 12px;
+  gap: 14px;
+  min-width: 0;
   width: 100%;
+}
+
+.modeArea {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: 8px;
 }
 
 .modeToggle {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 6px;
+  min-width: 0;
   padding: 4px;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.7);
@@ -15,9 +25,12 @@
 
 .modeOption {
   display: grid;
-  place-items: center;
-  min-height: 44px;
-  padding: 8px;
+  align-content: center;
+  justify-items: center;
+  gap: 2px;
+  min-width: 0;
+  min-height: 58px;
+  padding: 6px 8px;
   border: none;
   border-radius: 14px;
   background: transparent;
@@ -27,14 +40,14 @@
   text-align: center;
 }
 
-/* 選中只用白底描邊；黃橘漸層只留給唯一主按鈕「開始」 */
 .modeOption[aria-checked="true"] {
   background: #fff;
   color: #5d4a67;
   box-shadow: inset 0 0 0 2px #ffbd6f;
 }
 
-.modeOption:focus-visible {
+.modeOption:focus-visible,
+.helpButton:focus-visible {
   outline: 3px solid var(--focus-ring, #ff9fb7);
   outline-offset: 2px;
 }
@@ -44,16 +57,42 @@
   font-weight: 900;
 }
 
+.modeHint {
+  color: #74637b;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.helpButton {
+  min-width: 92px;
+  min-height: 48px;
+  align-self: center;
+  padding: 8px 14px;
+  border: 2px solid rgba(93, 74, 103, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #5d4a67;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
 .hero {
   display: grid;
-  gap: 8px;
   justify-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 8px 20px rgba(150, 110, 130, 0.12);
   text-align: center;
 }
 
 .heroInfo {
   display: grid;
-  gap: 2px;
+  gap: 4px;
   min-width: 0;
   color: #5d4a67;
 }
@@ -63,7 +102,7 @@
 }
 
 .heroStation {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 900;
 }
 
@@ -73,8 +112,10 @@
   align-items: center;
   justify-content: center;
   gap: 4px 6px;
-  font-size: 15px;
+  color: #65536e;
+  font-size: 16px;
   font-weight: 800;
+  line-height: 1.4;
 }
 
 .heroGoalIcons {
@@ -85,8 +126,8 @@
 }
 
 .heroStart {
-  width: min(100%, 280px);
-  min-height: 48px;
+  width: min(100%, 240px);
+  min-height: 52px;
   padding: 0 22px;
   border: none;
   border-radius: 999px;
@@ -104,41 +145,62 @@
 }
 
 .notice {
-  min-height: 20px;
-  margin: -4px 0 0;
-  color: #a5567a;
-  font-size: 14px;
+  min-height: 0;
+  margin: 0;
+  color: #87506d;
+  font-size: 15px;
   font-weight: 800;
   text-align: center;
 }
 
+.notice:not(:empty) {
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
 .notice:empty {
-  min-height: 0;
-  margin: 0;
+  display: none;
 }
 
 .path {
+  --path-row-gap: 14px;
   display: grid;
-  gap: 10px;
+  gap: var(--path-row-gap);
+  width: min(100%, 1040px);
+  min-width: 0;
+  margin-inline: auto;
 }
 
 .pathRow {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(5, 56px);
-  justify-content: space-between;
+  grid-template-columns: repeat(5, minmax(var(--node-size), 1fr));
+  align-items: start;
+}
+
+.pathRow::before,
+.pathRow:first-child::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  border-radius: 999px;
+  background: #e8a44a;
+  pointer-events: none;
 }
 
 .pathRow::before {
-  content: "";
-  position: absolute;
-  left: 28px;
-  right: 28px;
-  top: 24px;
+  right: 10%;
+  left: 10%;
+  top: calc(var(--node-size) / 2 - 4px);
   height: 8px;
-  border-radius: 999px;
-  background: #e8a44a;
-  z-index: 0;
+}
+
+.pathRow:first-child::after {
+  right: calc(10% - 4px);
+  top: calc(var(--node-size) / 2);
+  width: 8px;
+  height: calc(100% + var(--path-row-gap));
 }
 
 .node {
@@ -148,10 +210,12 @@
   flex-direction: column;
   align-items: center;
   gap: 2px;
+  min-width: var(--node-size);
   padding: 0;
   border: none;
   background: transparent;
   cursor: pointer;
+  direction: ltr;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -163,16 +227,15 @@
   box-shadow: 0 0 0 3px #ffbd6f, 0 4px 10px rgba(150, 110, 130, 0.22);
 }
 
-/* 圓形裁切放在圖上，鎖頭才不會被 badge 的圓切掉 */
 .badge {
   position: relative;
   display: block;
-  width: 56px;
-  height: 56px;
+  width: var(--node-size);
+  height: var(--node-size);
+  border: 2px solid #fff;
   border-radius: 50%;
   overflow: visible;
   background: #fff7ea;
-  border: 2px solid #fff;
   box-shadow: 0 4px 10px rgba(150, 110, 130, 0.22);
 }
 
@@ -184,9 +247,37 @@
   object-fit: cover;
 }
 
+.nodeNumber {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  display: grid;
+  place-items: center;
+  min-width: 23px;
+  height: 23px;
+  padding: 0 3px;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: #5d4a67;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 2px 5px rgba(93, 74, 103, 0.2);
+}
+
 .next .badge {
   box-shadow: 0 0 0 3px #ff9fb7, 0 4px 10px rgba(150, 110, 130, 0.22);
   transform: scale(1.08);
+}
+
+.next .nodeNumber {
+  background: #ffbd6f;
+  color: #614018;
+}
+
+.node[data-locked="true"] .nodeNumber {
+  background: #88798f;
 }
 
 .node:focus-visible {
@@ -211,12 +302,129 @@
 .stars {
   display: inline-flex;
   gap: 1px;
-  min-height: 12px;
+  min-height: 14px;
   line-height: 0;
 }
 
 .starEmpty {
   opacity: 0.6;
+}
+
+.rewardNote {
+  margin: 0;
+  color: #65536e;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.rewardStar {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+@media (min-width: 760px) {
+  .map {
+    --node-size: 68px;
+    --path-row-gap: 18px;
+    gap: 16px;
+  }
+
+  .modeOption {
+    min-height: 64px;
+  }
+
+  .modeLabel {
+    font-size: 17px;
+  }
+
+  .modeHint {
+    font-size: 14px;
+  }
+
+  .helpButton {
+    min-width: 112px;
+    font-size: 16px;
+  }
+
+  .hero {
+    grid-template-columns: minmax(0, 1fr) auto;
+    justify-items: stretch;
+    gap: 20px;
+    padding: 20px 24px;
+    text-align: left;
+  }
+
+  .heroTask {
+    justify-content: flex-start;
+  }
+
+  .heroStart {
+    width: 200px;
+  }
+
+  .path {
+    --path-row-gap: 18px;
+  }
+}
+
+@media (max-width: 355px) {
+  .map {
+    --node-size: 48px;
+  }
+
+  .modeArea {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .modeOption {
+    min-height: 48px;
+    padding-inline: 4px;
+  }
+
+  .modeLabel {
+    font-size: 15px;
+  }
+
+  .modeHint {
+    font-size: 12px;
+  }
+
+  .helpButton {
+    justify-self: start;
+    min-height: 44px;
+  }
+}
+
+@media (max-height: 640px) {
+  .map {
+    gap: 10px;
+  }
+
+  .modeOption {
+    min-height: 50px;
+    padding-block: 4px;
+  }
+
+  .hero {
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .heroStart {
+    min-height: 46px;
+  }
+
+  .path {
+    --path-row-gap: 8px;
+  }
+
+  .rewardNote {
+    font-size: 14px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

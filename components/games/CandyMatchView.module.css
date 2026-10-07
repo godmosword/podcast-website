@@ -297,28 +297,31 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 4px;
+  gap: 8px;
 }
 
 .mapActions .softButton {
-  min-height: 44px;
-  padding: 4px 12px;
-  border: none;
-  background: transparent;
-  box-shadow: none;
-  font-size: 15px;
+  min-height: 48px;
+  padding: 8px 20px;
+  border: 2px solid rgba(93, 74, 103, 0.14);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 3px 0 rgba(93, 74, 103, 0.08);
+  font-size: 16px;
 }
 
 .mapScreen {
   display: grid;
-  gap: 10px;
-  padding: 0 4px 12px;
+  align-self: center;
+  box-sizing: border-box;
+  width: min(100%, 1200px);
+  gap: 16px;
+  padding: 0 8px 16px;
 }
 
 .mapHeading {
   margin: 2px 0 0;
   color: var(--candy-ink);
-  font-size: 18px;
+  font-size: clamp(20px, 1.6vw, 24px);
   font-weight: 900;
   text-align: center;
 }

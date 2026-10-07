@@ -58,10 +58,10 @@ describe("Candy 任務判定", () => {
 
   it("地圖摘要與背景主題", () => {
     expect(goalsSummary([{ kind: "collect", piece: 0, count: 12 }, { kind: "collect", piece: 1, count: 12 }])).toBe(
-      "小紅、計程車各 12 個",
+      "收集小紅、計程車各 12 個",
     );
     expect(goalsSummary([{ kind: "collect", piece: 2, count: 18 }, { kind: "detonate", count: 1 }])).toBe(
-      "小巴士 18 個＋啟動特殊糖 1 次",
+      "收集小巴士 18 個＋啟動特殊糖 1 次",
     );
     expect(goalsSummary([{ kind: "drop-item", count: 2 }])).toBe("送達 2 個禮物");
     expect(goalTheme([{ kind: "drop-item", count: 2 }, { kind: "collect", piece: 0, count: 3 }])).toBe("drop-item");

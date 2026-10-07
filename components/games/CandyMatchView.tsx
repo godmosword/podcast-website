@@ -331,13 +331,11 @@ export function CandyMatchView({
             maxCleared={maxCleared}
             mode={mode}
             onModeChange={changeMode}
+            onTutorial={openTutorial}
             previewFor={previewFor}
             onStart={startLevel}
           />
           <div className={styles.mapActions}>
-            <button type="button" className={styles.softButton} onClick={openTutorial}>
-              怎麼玩？
-            </button>
             <button type="button" className={styles.softButton} onClick={goToTitle}>
               回標題
             </button>

@@ -9,7 +9,7 @@ import type { CandyGoal } from "@/lib/games/candy-match/tasks";
 import styles from "./CandyMatchMap.module.css";
 
 /**
- * 選關：一行玩法＋下一站與任務＋開始＋兩列小路。
+ * 選關：玩法提示、下一站與任務、開始按鈕及 1–10 站蛇行路線。
  * 點已解鎖的站換成預覽；點鎖住的站說明要先完成哪一站。
  */
 
@@ -28,6 +28,7 @@ type CandyMatchMapProps = {
   maxCleared: number;
   mode: CandyMode;
   onModeChange: (mode: CandyMode) => void;
+  onTutorial: () => void;
   previewFor: (index: number) => CandyStationPreview;
   onStart: (index: number) => void;
 };
@@ -46,6 +47,7 @@ function ModeToggle({ mode, onChange }: { mode: CandyMode; onChange: (mode: Cand
           onClick={() => onChange(m.id)}
         >
           <span className={styles.modeLabel}>{m.label}</span>
+          <span className={styles.modeHint}>{m.hint}</span>
         </button>
       ))}
     </div>
@@ -58,6 +60,7 @@ export function CandyMatchMap({
   maxCleared,
   mode,
   onModeChange,
+  onTutorial,
   previewFor,
   onStart,
 }: CandyMatchMapProps) {
@@ -77,7 +80,12 @@ export function CandyMatchMap({
 
   return (
     <div className={styles.map} data-testid="candy-match-map">
-      <ModeToggle mode={mode} onChange={onModeChange} />
+      <div className={styles.modeArea}>
+        <ModeToggle mode={mode} onChange={onModeChange} />
+        <button type="button" className={styles.helpButton} onClick={onTutorial}>
+          怎麼玩？
+        </button>
+      </div>
 
       <div className={styles.hero}>
         <div className={styles.heroInfo}>
@@ -111,65 +119,77 @@ export function CandyMatchMap({
       </p>
 
       <div className={styles.path}>
-        {rows.map((row, rowIndex) => (
-          <div key={rowIndex} className={styles.pathRow}>
-            {row.map((lv, col) => {
-              const i = rowIndex * 5 + col;
-              const locked = i > maxCleared;
-              const next = !locked && i === maxCleared;
-              const got = Math.max(0, Math.min(3, stars[i] ?? 0));
-              return (
-                <button
-                  key={lv.index}
-                  type="button"
-                  className={`${styles.node}${next ? ` ${styles.next}` : ""}`}
-                  aria-disabled={locked || undefined}
-                  aria-current={i === heroIndex ? "true" : undefined}
-                  data-locked={locked ? "true" : undefined}
-                  aria-label={`第 ${i + 1} 站 ${lv.place}${locked ? "（未解鎖）" : `，${got} 顆星`}`}
-                  title={lv.place}
-                  onClick={() => {
-                    if (locked) {
-                      // 大卡直接換成該先完成的那一站：畫面本身就是答案
-                      setPicked(nextIndex);
-                      setNotice(`先完成第 ${nextIndex + 1} 站「${nextLevel?.place ?? ""}」，就能往前走喔！`);
-                      return;
-                    }
-                    setNotice("");
-                    setPicked(i);
-                  }}
-                >
-                  <span className={styles.badge}>
-                    {/* eslint-disable-next-line @next/next/no-img-element -- 固定 256px 黏土小圖 */}
-                    <img
-                      src={`/games/v2/candy-match/places/${lv.placeIcon}.webp`}
-                      alt=""
-                      width={256}
-                      height={256}
-                      className={styles.icon}
-                      loading={i < 4 ? "eager" : "lazy"}
-                    />
-                    {locked ? (
-                      <span className={styles.lock} aria-hidden>
-                        <IconLock size={24} />
+        {rows.map((row, rowIndex) => {
+          const visualRow = rowIndex === 1 ? row.slice().reverse() : row;
+          return (
+            <div key={rowIndex} className={styles.pathRow} data-row={rowIndex}>
+              {visualRow.map((lv) => {
+                const i = lv.index;
+                const locked = i > maxCleared;
+                const next = !locked && i === maxCleared;
+                const got = Math.max(0, Math.min(3, stars[i] ?? 0));
+                return (
+                  <button
+                    key={lv.index}
+                    type="button"
+                    className={`${styles.node}${next ? ` ${styles.next}` : ""}`}
+                    aria-disabled={locked || undefined}
+                    aria-current={i === heroIndex ? "true" : undefined}
+                    data-locked={locked ? "true" : undefined}
+                    aria-label={`第 ${i + 1} 站 ${lv.place}${locked ? "（未解鎖）" : `，${got} 顆星`}`}
+                    title={lv.place}
+                    onClick={() => {
+                      if (locked) {
+                        // 大卡直接換成該先完成的那一站：畫面本身就是答案
+                        setPicked(nextIndex);
+                        setNotice(`先完成第 ${nextIndex + 1} 站「${nextLevel?.place ?? ""}」，就能往前走喔！`);
+                        return;
+                      }
+                      setNotice("");
+                      setPicked(i);
+                    }}
+                  >
+                    <span className={styles.badge}>
+                      {/* eslint-disable-next-line @next/next/no-img-element -- 固定 256px 黏土小圖 */}
+                      <img
+                        src={`/games/v2/candy-match/places/${lv.placeIcon}.webp`}
+                        alt=""
+                        width={256}
+                        height={256}
+                        className={styles.icon}
+                        loading={i < 4 ? "eager" : "lazy"}
+                      />
+                      <span className={styles.nodeNumber} aria-hidden>
+                        {i + 1}
                       </span>
-                    ) : null}
-                  </span>
-                  <span className={styles.stars} aria-hidden>
-                    {locked
-                      ? null
-                      : [0, 1, 2].map((s) => (
-                          <span key={s} className={s < got ? undefined : styles.starEmpty}>
-                            <IconStar size={12} color={s < got ? "#ffd34d" : "#d9d0e0"} />
-                          </span>
-                        ))}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        ))}
+                      {locked ? (
+                        <span className={styles.lock} aria-hidden>
+                          <IconLock size={24} />
+                        </span>
+                      ) : null}
+                    </span>
+                    <span className={styles.stars} aria-hidden>
+                      {locked
+                        ? null
+                        : [0, 1, 2].map((s) => (
+                            <span key={s} className={s < got ? undefined : styles.starEmpty}>
+                              <IconStar size={12} color={s < got ? "#ffd34d" : "#d9d0e0"} />
+                            </span>
+                          ))}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          );
+        })}
       </div>
+      <p className={styles.rewardNote}>
+        <span className={styles.rewardStar} aria-hidden>
+          <IconStar size={18} color="#e8a44a" />
+        </span>
+        星星是每站累積的獎章，兩種玩法都算。
+      </p>
     </div>
   );
 }
