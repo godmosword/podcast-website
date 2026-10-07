@@ -1,11 +1,43 @@
 /**
  * 參考彩圖人工修色：座標為 0–1 比例（看 --debug 格線圖，格號 n 對應 0.n）。
  * 只修自動取色取錯的區塊；顏色限色盤 id。
- * 戶外頁一律天空塗天空藍、雲塗白色，整本看起來是同一套。
+ * 雲一律白色；底色每頁輪換（見 BACKGROUNDS），選頁格子裡左右上下不撞色，
+ * 故事頁也不跟同一台車的角色頁同色。
  */
-import type { ReferenceOverride, ReferenceRecipe } from "./coloring-reference";
+import type {
+  PaletteId,
+  ReferenceOverride,
+  ReferenceRecipe,
+} from "./coloring-reference";
 
-const SKY: ReferenceOverride = { at: [0.01, 0.01], color: "sky" };
+/**
+ * 背景底色。順序照選頁格子（每列四張），相鄰格不同色；
+ * 主角是黃車就不配黃底、藍車不配天空藍，主角才跳得出來。
+ */
+export const BACKGROUNDS: Readonly<Record<string, PaletteId>> = {
+  "char-小紅賽車": "yellow",
+  "char-恐龍車多多": "pink",
+  "char-安安救護車": "orange",
+  "char-鈴鈴清潔車": "sky",
+  "char-猛猛": "pink",
+  "char-東東挖土機": "lime",
+  "char-亮亮警車": "yellow",
+  "char-噗噗豬": "orange",
+  "scene-ep-3-05": "sky",
+  "scene-ep-9-05": "yellow",
+  "scene-ep-6-05": "lime",
+  "scene-ep-16-05": "sky",
+  "scene-ep-4-05": "orange",
+  "scene-ep-8-05": "lime",
+  "scene-ep-12-07": "pink",
+  "scene-ep-5-05": "green",
+};
+
+/** 背景區塊（左上角那一大塊），顏色查 BACKGROUNDS。 */
+const background = (id: string): ReferenceOverride => ({
+  at: [0.01, 0.01],
+  color: BACKGROUNDS[id]!,
+});
 const cloud = (x: number, y: number): ReferenceOverride => ({
   at: [x, y],
   color: "white",
@@ -14,7 +46,7 @@ const cloud = (x: number, y: number): ReferenceOverride => ({
 export const REFERENCE_RECIPES: Readonly<Record<string, ReferenceRecipe>> = {
   "char-小紅賽車": {
     paint: [
-      SKY,
+      background("char-小紅賽車"),
       cloud(0.25, 0.17),
       cloud(0.8, 0.22),
       { at: [0.06, 0.37], color: "red" },
@@ -27,11 +59,11 @@ export const REFERENCE_RECIPES: Readonly<Record<string, ReferenceRecipe>> = {
     ],
   },
   "char-恐龍車多多": {
-    paint: [SKY, cloud(0.2, 0.15), cloud(0.87, 0.15), { at: [0.25, 0.47], color: "sky" }],
+    paint: [background("char-恐龍車多多"), cloud(0.2, 0.15), cloud(0.87, 0.15), { at: [0.25, 0.47], color: "sky" }],
   },
   "char-安安救護車": {
     paint: [
-      SKY,
+      background("char-安安救護車"),
       { at: [0.43, 0.28], color: "red" },
       { at: [0.5, 0.29], color: "red" },
       { at: [0.58, 0.29], color: "red" },
@@ -42,7 +74,7 @@ export const REFERENCE_RECIPES: Readonly<Record<string, ReferenceRecipe>> = {
   },
   "char-鈴鈴清潔車": {
     paint: [
-      SKY,
+      background("char-鈴鈴清潔車"),
       cloud(0.88, 0.12),
       { at: [0.73, 0.4], color: "white" },
       { at: [0.77, 0.55], color: "green" },
@@ -53,7 +85,7 @@ export const REFERENCE_RECIPES: Readonly<Record<string, ReferenceRecipe>> = {
   "char-猛猛": {
     remap: { orange: "yellow" },
     paint: [
-      SKY,
+      background("char-猛猛"),
       cloud(0.27, 0.15),
       cloud(0.83, 0.15),
       { at: [0.6, 0.38], color: "sky" },
@@ -65,14 +97,14 @@ export const REFERENCE_RECIPES: Readonly<Record<string, ReferenceRecipe>> = {
   },
   "char-東東挖土機": {
     remap: { orange: "yellow" },
-    paint: [SKY, cloud(0.12, 0.11), cloud(0.85, 0.11), { at: [0.78, 0.45], color: "sky" }],
+    paint: [background("char-東東挖土機"), cloud(0.12, 0.11), cloud(0.85, 0.11), { at: [0.78, 0.45], color: "sky" }],
   },
   "char-亮亮警車": {
-    paint: [SKY, cloud(0.2, 0.13), cloud(0.79, 0.14), { at: [0.26, 0.63], color: "yellow" }],
+    paint: [background("char-亮亮警車"), cloud(0.2, 0.13), cloud(0.79, 0.14), { at: [0.26, 0.63], color: "yellow" }],
   },
   "char-噗噗豬": {
     paint: [
-      SKY,
+      background("char-噗噗豬"),
       cloud(0.17, 0.1),
       cloud(0.88, 0.1),
       { at: [0.39, 0.6], color: "pink" },
@@ -84,7 +116,7 @@ export const REFERENCE_RECIPES: Readonly<Record<string, ReferenceRecipe>> = {
   "scene-ep-3-05": {
     remap: { orange: "white" },
     paint: [
-      { at: [0.01, 0.3], color: "sky" },
+      { at: [0.01, 0.3], color: BACKGROUNDS["scene-ep-3-05"]! },
       cloud(0.17, 0.12),
       cloud(0.5, 0.12),
       { at: [0.7, 0.05], color: "yellow" },
@@ -98,13 +130,13 @@ export const REFERENCE_RECIPES: Readonly<Record<string, ReferenceRecipe>> = {
   },
   "scene-ep-9-05": {
     source: "characters/恐龍車多多.jpg",
-    paint: [SKY, cloud(0.2, 0.15), cloud(0.87, 0.15)],
+    paint: [background("scene-ep-9-05"), cloud(0.2, 0.15), cloud(0.87, 0.15)],
   },
   "scene-ep-6-05": {
     // 公園頁：天空與地面沒有分界線、是同一塊，整塊當草地。
     remap: { orange: "lime" },
     paint: [
-      { at: [0.5, 0.03], color: "lime" },
+      { at: [0.5, 0.03], color: BACKGROUNDS["scene-ep-6-05"]! },
       cloud(0.52, 0.08),
       cloud(0.75, 0.08),
       cloud(0.18, 0.11),
@@ -128,7 +160,7 @@ export const REFERENCE_RECIPES: Readonly<Record<string, ReferenceRecipe>> = {
   "scene-ep-16-05": {
     source: "stories/ep-16/05.jpg",
     paint: [
-      { at: [0.5, 0.05], color: "sky" },
+      { at: [0.5, 0.05], color: BACKGROUNDS["scene-ep-16-05"]! },
       cloud(0.33, 0.12),
       cloud(0.73, 0.07),
       { at: [0.39, 0.6], color: "pink" },
@@ -138,7 +170,7 @@ export const REFERENCE_RECIPES: Readonly<Record<string, ReferenceRecipe>> = {
   },
   "scene-ep-4-05": {
     paint: [
-      SKY,
+      background("scene-ep-4-05"),
       cloud(0.17, 0.11),
       cloud(0.83, 0.15),
       { at: [0.82, 0.4], color: "white" },
@@ -154,7 +186,7 @@ export const REFERENCE_RECIPES: Readonly<Record<string, ReferenceRecipe>> = {
     source: "characters/猛猛.jpg",
     remap: { orange: "yellow" },
     paint: [
-      SKY,
+      background("scene-ep-8-05"),
       cloud(0.22, 0.12),
       cloud(0.8, 0.13),
       // 猛猛車身
@@ -176,7 +208,6 @@ export const REFERENCE_RECIPES: Readonly<Record<string, ReferenceRecipe>> = {
       // 小車
       { at: [0.75, 0.7], color: "red" },
       { at: [0.8, 0.55], color: "red" },
-      { at: [0.69, 0.585], color: "sky" },
       { at: [0.87, 0.6], color: "sky" },
       // 路邊草地與石頭
       ...([
@@ -187,7 +218,7 @@ export const REFERENCE_RECIPES: Readonly<Record<string, ReferenceRecipe>> = {
   "scene-ep-12-07": {
     source: "stories/ep-12/07.jpg",
     paint: [
-      SKY,
+      background("scene-ep-12-07"),
       cloud(0.17, 0.12),
       cloud(0.49, 0.17),
       { at: [0.78, 0.07], color: "red" },
@@ -204,6 +235,6 @@ export const REFERENCE_RECIPES: Readonly<Record<string, ReferenceRecipe>> = {
   },
   "scene-ep-5-05": {
     remap: { orange: "yellow" },
-    paint: [SKY, cloud(0.13, 0.1), cloud(0.67, 0.1), { at: [0.85, 0.45], color: "sky" }],
+    paint: [background("scene-ep-5-05"), cloud(0.13, 0.1), cloud(0.67, 0.1), { at: [0.85, 0.45], color: "sky" }],
   },
 };

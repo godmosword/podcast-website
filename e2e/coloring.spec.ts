@@ -1,4 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
+import { COLORING_PALETTE } from "../lib/coloring/tools";
+import { BACKGROUNDS } from "../scripts/lib/coloring-reference-overrides";
 
 /**
  * 著色本 P0 防回歸：線稿 line.png 為不透明白底 RGB，
@@ -316,6 +318,10 @@ test.describe("coloring book", () => {
 test.describe("coloring book 參考彩圖", () => {
   const selectedSwatch = (page: Page) =>
     page.locator('[role="option"][aria-selected="true"]');
+  /** 猛猛彩圖左緣中段是背景，顏色照 BACKGROUNDS。 */
+  const backgroundName = COLORING_PALETTE.find(
+    (s) => s.id === BACKGROUNDS["char-猛猛"],
+  )!.name;
 
   test("桌機：點彩圖直接換色，拿橡皮擦時換回蠟筆", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
@@ -323,10 +329,9 @@ test.describe("coloring book 參考彩圖", () => {
     await page.getByRole("button", { name: "擦掉", exact: true }).click();
     const figure = page.getByRole("button", { name: /參考彩圖，點一下拿顏色/ });
     const box = (await figure.boundingBox())!;
-    // 左緣中段是天空（彩圖只用色盤色）
     await page.mouse.click(box.x + box.width * 0.04, box.y + box.height * 0.5);
-    await expect(selectedSwatch(page)).toHaveAttribute("aria-label", "天空藍");
-    await expect(page.getByText("換成天空藍了")).toBeVisible();
+    await expect(selectedSwatch(page)).toHaveAttribute("aria-label", backgroundName);
+    await expect(page.getByText(`換成${backgroundName}了`)).toBeVisible();
     await expect(page.getByRole("button", { name: "蠟筆", exact: true })).toHaveAttribute(
       "aria-pressed",
       "true",
@@ -343,7 +348,7 @@ test.describe("coloring book 參考彩圖", () => {
     const box = (await image.boundingBox())!;
     await page.mouse.click(box.x + box.width * 0.04, box.y + box.height * 0.5);
     await expect(peek).toHaveCount(0);
-    await expect(selectedSwatch(page)).toHaveAttribute("aria-label", "天空藍");
+    await expect(selectedSwatch(page)).toHaveAttribute("aria-label", backgroundName);
   });
 
   test("放大圖可用 Esc 關閉", async ({ page }) => {
