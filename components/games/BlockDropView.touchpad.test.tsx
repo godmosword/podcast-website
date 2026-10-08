@@ -2,11 +2,21 @@
 import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { BlockDropKeys, getLayoutMetrics, layoutModeFor, type LayoutMode } from "./BlockDropControls";
+import {
+  BlockDropKeys,
+  MIN_KEY_GAP,
+  MIN_KEY_W,
+  getLayoutMetrics,
+  layoutModeFor,
+  type LayoutMode,
+} from "./BlockDropControls";
 
 vi.stubGlobal("React", React);
 
-/** 兒童觸控鍵：邊長 ≥48px、相鄰鍵間距 ≥12px（計劃 §2 井下鍵列）。 */
+/**
+ * 兒童觸控鍵：平常邊長 ≥48px、相鄰鍵間距 ≥12px（計劃 §2 井下鍵列）；
+ * 窄到放不下時才縮，但不低於 DESIGN §觸控 的 44px／8px（實際排版由 e2e 量）。
+ */
 const MIN_KEY = 48;
 const MIN_GAP = 12;
 const MODES: LayoutMode[] = ["mobile", "tablet", "desktop", "landscape"];
@@ -39,7 +49,8 @@ describe("BlockDrop 觸控鍵", () => {
       );
       for (const name of ["旋轉", "左移", "右移", "落下", "暫存"]) {
         const btn = screen.getByRole("button", { name });
-        expect(parseFloat(btn.style.minWidth)).toBeGreaterThanOrEqual(MIN_KEY);
+        expect(parseFloat(btn.style.width)).toBeGreaterThanOrEqual(MIN_KEY);
+        expect(parseFloat(btn.style.minWidth)).toBeGreaterThanOrEqual(MIN_KEY_W);
         expect(parseFloat(btn.style.height)).toBeGreaterThanOrEqual(MIN_KEY);
       }
     });
@@ -91,5 +102,10 @@ describe("BlockDrop 觸控鍵", () => {
     expect(layoutModeFor(390, 664)).toBe("mobile");
     expect(layoutModeFor(768, 1024)).toBe("tablet");
     expect(layoutModeFor(1280, 800)).toBe("desktop");
+  });
+
+  it("窄螢幕縮鍵的下限守住 DESIGN §觸控（44px／8px）", () => {
+    expect(MIN_KEY_W).toBeGreaterThanOrEqual(44);
+    expect(MIN_KEY_GAP).toBeGreaterThanOrEqual(8);
   });
 });

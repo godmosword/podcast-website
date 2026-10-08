@@ -257,3 +257,93 @@ test.describe("方塊轉轉：手機井尺寸", () => {
     expect(m.minSide).toBeGreaterThanOrEqual(44);
   });
 });
+
+/**
+ * 矮手機自由堆疊：分數／下一個／教學改放井旁窄欄，井才放得下 25px 格子；
+ * 窄欄（含教學卡）不得比井高、不得把鍵列擠出畫面。冒險模式（8 欄）維持上方任務列。
+ */
+test.describe("方塊轉轉：矮手機窄欄 HUD", () => {
+  test.use({ hasTouch: true, isMobile: true });
+
+  const measure = (page: import("@playwright/test").Page) =>
+    page.evaluate(() => {
+      const well = document.querySelector<HTMLElement>(
+        '[data-status="playing"] [style*="grid-template-columns: repeat(10"]',
+      )!.getBoundingClientRect();
+      const score = document.querySelector('[aria-label^="分數 "]');
+      const column = score?.closest<HTMLElement>('[style*="width: 64px"]');
+      const pad = [...document.querySelectorAll('[data-testid="touch-control-pad"] button')].map(
+        (b) => b.getBoundingClientRect(),
+      );
+      return {
+        cellPx: well.width / 10,
+        side: !!column,
+        columnBottom: column?.getBoundingClientRect().bottom ?? 0,
+        wellBottom: well.bottom,
+        padBottom: Math.max(...pad.map((r) => r.bottom)),
+        tutorial: !!document.querySelector('[data-testid="block-drop-tutorial"]'),
+      };
+    });
+
+  for (const viewport of [
+    { width: 390, height: 664 },
+    { width: 320, height: 568 },
+  ]) {
+    test(`${viewport.width}×${viewport.height}：窄欄 HUD、教學卡不超出井、鍵列同屏`, async ({ page }) => {
+      await page.setViewportSize(viewport);
+      await page.goto("/games/block-drop");
+      await page.getByRole("button", { name: "自由堆疊" }).click();
+      await expect(page.locator('[data-status="playing"]')).toBeVisible();
+      await page.waitForTimeout(400);
+      const m = await measure(page);
+      expect(m.side).toBe(true);
+      expect(m.tutorial).toBe(true);
+      expect(m.columnBottom).toBeLessThanOrEqual(m.wellBottom + 1);
+      expect(m.padBottom).toBeLessThanOrEqual(viewport.height);
+      if (viewport.height >= 664) expect(m.cellPx).toBeGreaterThanOrEqual(25);
+    });
+  }
+
+  test("390×844 高手機維持上方 HUD 列", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/games/block-drop");
+    await page.getByRole("button", { name: "自由堆疊" }).click();
+    await expect(page.locator('[data-status="playing"]')).toBeVisible();
+    await page.waitForTimeout(400);
+    expect((await measure(page)).side).toBe(false);
+  });
+});
+
+/** 窄手機（320／360）：五顆觸控鍵都在鍵列裡，不被切掉；鍵 ≥44px、間距 ≥8px（DESIGN §觸控）。 */
+test.describe("方塊轉轉：窄手機觸控鍵", () => {
+  for (const width of [320, 360]) {
+    test(`${width}px：五顆鍵都在鍵列內`, async ({ browser }) => {
+      const ctx = await browser.newContext({
+        hasTouch: true,
+        isMobile: true,
+        viewport: { width, height: 640 },
+      });
+      const page = await ctx.newPage();
+      await page.goto("/games/block-drop");
+      await page.getByRole("button", { name: "自由堆疊" }).click();
+      await expect(page.locator('[data-status="playing"]')).toBeVisible();
+      const m = await page.evaluate(() => {
+        const bar = document.querySelector('[data-testid="touch-control-pad"]')!.getBoundingClientRect();
+        const keys = [...document.querySelectorAll('[data-testid="touch-control-pad"] button')]
+          .map((b) => b.getBoundingClientRect())
+          .sort((a, b) => a.left - b.left);
+        return {
+          count: keys.length,
+          overflow: Math.max(...keys.map((k) => k.right)) - bar.right,
+          minW: Math.min(...keys.map((k) => k.width)),
+          minGap: Math.min(...keys.slice(1).map((k, i) => k.left - keys[i]!.right)),
+        };
+      });
+      expect(m.count).toBe(5);
+      expect(m.overflow).toBeLessThanOrEqual(0.5);
+      expect(m.minW).toBeGreaterThanOrEqual(44);
+      expect(m.minGap).toBeGreaterThanOrEqual(8);
+      await ctx.close();
+    });
+  }
+});

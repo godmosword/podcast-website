@@ -14,17 +14,19 @@ import { PanelTitle, PiecePreview, type LayoutMode } from "./BlockDropControls";
 import { MACARON_THEME, panelLabel, panelStyle } from "./blockDropTheme";
 
 /**
- * 自由堆疊三步教學。寬螢幕放在棋盤上方；手機浮在 HUD 列上（不擋井中央的方塊與落點影子）。
- * 「略過」是 ✕ 圖示鍵（≥44px）。
+ * 自由堆疊三步教學。寬螢幕放在棋盤上方；手機浮在 HUD 列上（不擋井中央的方塊與落點影子）；
+ * 矮手機改走井旁窄欄時（narrow）直排在欄內。「略過」是 ✕ 圖示鍵（≥44px）。
  */
 export function BlockDropTutorialCard({
   g,
   wide,
+  narrow = false,
   tutorialStep,
   skipTutorial,
 }: {
   g: GameState;
   wide: boolean;
+  narrow?: boolean;
   tutorialStep: BlockDropTutorialStep | null;
   skipTutorial: () => void;
 }) {
@@ -38,27 +40,24 @@ export function BlockDropTutorialCard({
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 8,
-          width: "min(100%, 420px)",
-          margin: "0 auto 8px",
-          padding: "8px 10px",
           boxSizing: "border-box",
-          // 手機蓋在 HUD 列上（分數／下一個暫時讓位），井中央保持乾淨
-          ...(wide
-            ? {}
-            : { position: "absolute", top: 0, left: 0, right: 0, width: "auto", margin: 0, padding: "4px 4px 4px 10px", zIndex: 6 }),
           border: "2px solid rgba(255,216,102,.8)",
           borderRadius: 14,
           color: MACARON_THEME.ink,
           background: "rgba(255,255,255,.88)",
           boxShadow: "0 6px 14px rgba(126,96,112,.12)",
-          fontSize: 12,
           lineHeight: 1.35,
+          // 手機蓋在 HUD 列上（分數／下一個暫時讓位），井中央保持乾淨
+          ...(narrow
+            ? { flexDirection: "column", width: "100%", margin: 0, padding: "6px 4px", gap: 4, textAlign: "center", fontSize: 11 }
+            : wide
+              ? { width: "min(100%, 420px)", margin: "0 auto 8px", padding: "8px 10px", gap: 8, fontSize: 12 }
+              : { position: "absolute", top: 0, left: 0, right: 0, width: "auto", margin: 0, padding: "4px 4px 4px 10px", gap: 8, fontSize: 12, zIndex: 6 }),
         }}
       >
         <IconBulb size={22} />
         <span style={{ flex: 1, minWidth: 0 }}>
-          <strong style={{ display: "block", fontSize: 13 }}>
+          <strong style={{ display: "block", fontSize: narrow ? 12 : 13 }}>
             {BLOCK_DROP_TUTORIAL_COPY[tutorialStep].title}
           </strong>
           {BLOCK_DROP_TUTORIAL_COPY[tutorialStep].body}
@@ -129,11 +128,14 @@ export function BlockDropNextPanel({
   firstCell,
   restCell,
   compact = false,
+  narrow = false,
 }: {
   g: GameState;
   firstCell: number;
   restCell: number;
   compact?: boolean;
+  /** 井旁窄欄：只留字，不然「下一個」會被圖示擠成兩行 */
+  narrow?: boolean;
 }) {
   // 固定三格高度（空位用透明占位）：待機／遊玩中版面高度一致，棋盤不會被擠到破版
   const nextQueue: (PieceType | null)[] = [
@@ -151,7 +153,7 @@ export function BlockDropNextPanel({
       aria-label="下一個方塊預覽"
     >
       <PanelTitle
-        icon={<IconNext size={15} color={MACARON_THEME.inkSoft} />}
+        icon={narrow ? null : <IconNext size={15} color={MACARON_THEME.inkSoft} />}
         text="下一個"
       />
       <div style={{ display: "flex", flexDirection: "column", gap: compact ? 3 : 5 }}>
@@ -266,34 +268,50 @@ export function BlockDropScorePanel({
   );
 }
 
-/** G-H1 手機單列 HUD：分數 · Lv（連擊時顯示 ×combo）＋細升級條。高度 ≈48px。 */
-export function BlockDropCompactScorePanel({ g }: { g: GameState }) {
+/**
+ * G-H1 手機單列 HUD：分數 · Lv（連擊時顯示 ×combo）＋細升級條。高度 ≈48px。
+ * narrow：矮手機井旁窄欄，分數、Lv 改直排、字縮一號，五位數也放得下。
+ */
+export function BlockDropCompactScorePanel({
+  g,
+  narrow = false,
+}: {
+  g: GameState;
+  narrow?: boolean;
+}) {
   const linesInLevel = g.lines % 10;
   return (
     <div
       style={{
         ...panelStyle,
-        flex: 1,
+        flex: narrow ? undefined : 1,
         minWidth: 0,
         display: "grid",
         gap: 3,
-        padding: "4px 10px",
+        padding: narrow ? "6px 4px" : "4px 10px",
         alignContent: "center",
       }}
     >
       <div
         style={{
           display: "flex",
-          alignItems: "baseline",
+          flexDirection: narrow ? "column" : "row",
+          alignItems: narrow ? "center" : "baseline",
           justifyContent: "center",
-          gap: 8,
+          gap: narrow ? 2 : 8,
           minWidth: 0,
         }}
       >
         <span style={panelLabel}>分數</span>
         <span
           aria-label={`分數 ${g.score}`}
-          style={{ color: MACARON_THEME.ink, fontSize: 22, fontWeight: 900, lineHeight: 1 }}
+          style={{
+            color: MACARON_THEME.ink,
+            fontSize: narrow ? 18 : 22,
+            fontWeight: 900,
+            lineHeight: 1,
+            fontVariantNumeric: "tabular-nums",
+          }}
         >
           {g.score}
         </span>

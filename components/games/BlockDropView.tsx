@@ -68,6 +68,12 @@ const MIN_BOARD_H_PORTRAIT = 300;
 const MIN_BOARD_H_LANDSCAPE = 200;
 /** 遊戲列比這矮時，待機面省略玩法示範動畫 */
 const COMPACT_OVERLAY_H = 420;
+/** 直向手機 HUD 列與井之間的距離 */
+const HUD_ROW_GAP = 6;
+/** G-H1：小朋友點得準、看得清的最小格子（390×664 等有工具列的真實手機高度也要達到） */
+const MIN_COMFORT_CELL = 25;
+/** 矮手機自由堆疊把分數／下一個移到井旁的窄欄寬度 */
+const PHONE_SIDE_W = 64;
 const FONT = "var(--font-sans, 'PingFang TC','Microsoft JhengHei',system-ui,sans-serif)";
 
 type Screen = "home" | "map" | "play";
@@ -268,6 +274,12 @@ export function BlockDropView({
   const boardWrapRef = useRef<HTMLDivElement | null>(null);
   const [boardScale, setBoardScale] = useState(1.6);
   boardScaleRef.current = boardScale;
+  // 直向手機自由堆疊：井上方那列 HUD 會讓 10×20 的井在矮螢幕縮到 25px 以下；
+  // 這時改把 HUD 放到井旁窄欄（hudSide），多出一整列高度給井。
+  const [hudSide, setHudSide] = useState(false);
+  const hudRowRef = useRef<HTMLDivElement | null>(null);
+  /** HUD 列（含與井的間距）高度；窄欄模式量不到時沿用上次量到的值 */
+  const hudRowHRef = useRef(59 + HUD_ROW_GAP);
   const hasRound = round != null;
   useEffect(() => {
     const el = boardWrapRef.current;
@@ -286,8 +298,32 @@ export function BlockDropView({
               ? 8
               : 32;
       const minH = landscape ? MIN_BOARD_H_LANDSCAPE : MIN_BOARD_H_PORTRAIT;
-      const maxH = Math.max(minH, (window.innerHeight || 800) - top - reserve - keyBarH);
+      const avail = (window.innerHeight || 800) - top - reserve - keyBarH;
+      const side = wantsSideHud(el, w, avail);
+      if (side !== hudSide) {
+        // 換版面後井的位置與寬度會變，等下一輪 effect 用新版面重算
+        setHudSide(side);
+        return;
+      }
+      const maxH = Math.max(minH, avail);
       setBoardScale(Math.min(w / (cols * CELL), maxH / (rows * CELL)));
+    };
+    /** 只在直向手機自由堆疊、而且原版面格子不到 MIN_COMFORT_CELL 時才改窄欄。 */
+    const wantsSideHud = (el: HTMLElement, w: number, avail: number): boolean => {
+      const freePlay = screen === "play" && !hasRound;
+      if (wide || landscape || !freePlay) return false;
+      const rowEl = hudRowRef.current;
+      if (rowEl) hudRowHRef.current = rowEl.getBoundingClientRect().height + HUD_ROW_GAP;
+      const rowW = el.parentElement?.clientWidth ?? w;
+      const rowAvail = hudSide ? avail - hudRowHRef.current : avail;
+      const sideAvail = hudSide ? avail : avail + hudRowHRef.current;
+      // 與實際縮放同一套下限，極矮螢幕的估算才對得上
+      const rowCell = Math.min(rowW / cols, Math.max(MIN_BOARD_H_PORTRAIT, rowAvail) / rows);
+      const sideCell = Math.min(
+        (rowW - PHONE_SIDE_W - layout.playGap) / cols,
+        Math.max(MIN_BOARD_H_PORTRAIT, sideAvail) / rows,
+      );
+      return rowCell < MIN_COMFORT_CELL && sideCell > rowCell + 0.5;
     };
     apply();
     const ro = new ResizeObserver(apply);
@@ -298,7 +334,7 @@ export function BlockDropView({
       window.removeEventListener("resize", apply);
     };
     // 局內會收掉卡內 chip 列、任務列出現，井的 top 會變 → 以 inRound／hasRound 觸發重算
-  }, [isCoarse, layoutMode, landscape, keyBarH, inRound, hasRound, cols, rows, screen]);
+  }, [isCoarse, layoutMode, landscape, wide, keyBarH, inRound, hasRound, cols, rows, screen, hudSide, layout.playGap]);
 
   const boardDisplayW = Math.round(cols * CELL * boardScale);
   const boardDisplayH = Math.round(rows * CELL * boardScale);
@@ -405,11 +441,13 @@ export function BlockDropView({
     </div>
   );
 
-  const sideColumn = (children: ReactNode) => (
+  const sideColumn = (children: ReactNode, width: number = layout.sideColW, maxHeight?: number) => (
     <div
       style={{
         position: "relative",
-        width: layout.sideColW,
+        width,
+        maxHeight,
+        overflow: maxHeight == null ? undefined : "hidden",
         flexShrink: 0,
         display: "flex",
         flexDirection: "column",
@@ -541,9 +579,13 @@ export function BlockDropView({
             </div>
           )}
 
-          {/* 直向手機：單列 HUD（任務列或分數·Lv）＋下一個；自由堆疊教學蓋在這一列上 */}
-          {onPlayScreen && !wide && !landscape && (
-            <div style={{ position: "relative", display: "flex", gap: 6, marginBottom: 6, alignItems: "stretch" }}>
+          {/* 直向手機：單列 HUD（任務列或分數·Lv）＋下一個；自由堆疊教學蓋在這一列上。
+              矮手機自由堆疊改放井旁窄欄（hudSide），見下方遊戲列。 */}
+          {onPlayScreen && !wide && !landscape && !hudSide && (
+            <div
+              ref={hudRowRef}
+              style={{ position: "relative", display: "flex", gap: 6, marginBottom: HUD_ROW_GAP, alignItems: "stretch" }}
+            >
               {showLocalHold && <BlockDropHoldButton g={g} font={FONT} cell={layout.hud.hold} holdPiece={holdPiece} />}
               {taskOrScore(true)}
               <BlockDropNextPanel g={g} firstCell={layout.hud.nextFirst} restCell={layout.hud.nextRest} compact />
@@ -591,6 +633,18 @@ export function BlockDropView({
 
             {onPlayScreen && wide &&
               sideColumn(<BlockDropNextPanel g={g} firstCell={layout.hud.nextFirst} restCell={layout.hud.nextRest} />)}
+            {/* 窄欄不得比井高：長出去會把井下鍵列擠出畫面 */}
+            {onPlayScreen && hudSide &&
+              sideColumn(
+                <>
+                  {showLocalHold && <BlockDropHoldButton g={g} font={FONT} cell={layout.hud.hold} holdPiece={holdPiece} />}
+                  <BlockDropCompactScorePanel g={g} narrow />
+                  <BlockDropNextPanel g={g} firstCell={layout.hud.nextFirst} restCell={layout.hud.nextRest} compact narrow />
+                  <BlockDropTutorialCard g={g} wide={false} narrow tutorialStep={tutorialStep} skipTutorial={skipTutorial} />
+                </>,
+                PHONE_SIDE_W,
+                boardDisplayH,
+              )}
             {onPlayScreen && landscape &&
               sideColumn(
                 <>

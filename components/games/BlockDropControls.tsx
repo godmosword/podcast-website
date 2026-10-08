@@ -100,13 +100,27 @@ export function getLayoutMetrics(mode: LayoutMode, isCoarse: boolean): LayoutMet
   }
 }
 
+/** DESIGN §觸控：目標下限 44px、相鄰間距下限 8px（平常用 52／12）。 */
+export const MIN_KEY_W = 44;
+export const MIN_KEY_GAP = 8;
+
+/**
+ * 井下鍵列放不下時才縮：320 寬的手機五顆 52px 鍵＋12px 間距要 308px，
+ * 鍵列只有 262px，「落下」整顆被切掉。間距先縮到 8px，鍵再由 flex 縮到不低於 44px；
+ * 360 以上幾乎不變，平板與橫向（兩側鍵欄是固定格線）維持原尺寸。
+ */
+const keyGap = (metrics: KeyMetrics) =>
+  `clamp(${MIN_KEY_GAP}px, calc(10vw - 24px), ${metrics.gap}px)`;
+
 function keyStyle(metrics: KeyMetrics, extra: CSSProperties = {}): CSSProperties {
   return {
     ...hintChip,
     flexDirection: "column",
     gap: 2,
     borderRadius: 16,
-    minWidth: metrics.key,
+    width: metrics.key,
+    minWidth: MIN_KEY_W,
+    flexShrink: 1,
     minHeight: metrics.key,
     height: metrics.key,
     justifyContent: "center",
@@ -277,15 +291,15 @@ export function BlockDropKeys(props: KeysProps & { part?: "bar" | "left" | "righ
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        gap: metrics.gap,
+        gap: keyGap(metrics),
         width: "100%",
         marginTop: 6,
       }}
     >
-      <div style={{ display: "flex", gap: metrics.gap }}>
+      <div style={{ display: "flex", gap: keyGap(metrics), minWidth: 0 }}>
         <MoveKeys {...props} />
       </div>
-      <div style={{ display: "flex", gap: metrics.gap }}>
+      <div style={{ display: "flex", gap: keyGap(metrics), minWidth: 0 }}>
         <ActionKeys {...props} />
       </div>
     </div>
