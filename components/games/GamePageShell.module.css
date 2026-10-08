@@ -386,6 +386,33 @@
   }
 }
 
+/* 320 寬手機局內：返回＋三顆工具＋日夜切換塞不進一列，日夜鈕會被擠出畫面。
+ * 360 以下才把四顆方鈕與返回鈕收到觸控下限 44px、間距 4px（與 GameChrome 同斷點）；
+ * 「回遊樂園」文字保留。 */
+@media (max-width: 359.98px) {
+  .playHeader {
+    gap: 4px;
+    min-height: 48px;
+  }
+
+  .headerActions,
+  .chromeSlot {
+    gap: 4px;
+  }
+
+  .headerActions .themeSlot > button {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .back {
+    min-height: 44px;
+    padding: 0 var(--space-2);
+  }
+}
+
 /* 繽紛樂園橫向手機局內（計劃 §2）：抬頭收成 44px 一列、外框與提示讓位，
  * 井與兩側鍵欄同屏、不整頁捲動。只限 block-drop 局內，不影響其他遊戲與標題面。 */
 @media (orientation: landscape) and (max-height: 520px) {

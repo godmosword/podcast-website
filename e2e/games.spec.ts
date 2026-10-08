@@ -314,6 +314,35 @@ test.describe("方塊轉轉：矮手機窄欄 HUD", () => {
   });
 });
 
+/** 320 寬局內：返回＋三顆工具＋日夜切換都在畫面裡，觸控 ≥44px（<360 才收到 44）。 */
+test.describe("遊戲抬頭：320 寬局內", () => {
+  test.use({ hasTouch: true, isMobile: true, viewport: { width: 320, height: 640 } });
+
+  const headerFits = (page: import("@playwright/test").Page) =>
+    page.evaluate(() => {
+      const header = document.querySelector("header")!;
+      const items = [...header.querySelectorAll("a, button")]
+        .map((el) => el.getBoundingClientRect())
+        .filter((r) => r.width > 0);
+      return {
+        count: items.length,
+        right: Math.max(...items.map((r) => r.right)),
+        minSide: Math.min(...items.flatMap((r) => [r.width, r.height])),
+      };
+    });
+
+  test("方塊轉轉自由堆疊", async ({ page }) => {
+    await page.goto("/games/block-drop");
+    await page.getByRole("button", { name: "自由堆疊" }).click();
+    await expect(page.locator('[data-status="playing"]')).toBeVisible();
+    const m = await headerFits(page);
+    expect(m.count).toBeGreaterThanOrEqual(5);
+    expect(m.right).toBeLessThanOrEqual(320);
+    expect(m.minSide).toBeGreaterThanOrEqual(44);
+    await expect(page.getByRole("link", { name: /回遊樂園/ })).toContainText("回遊樂園");
+  });
+});
+
 /** 窄手機（320／360）：五顆觸控鍵都在鍵列裡，不被切掉；鍵 ≥44px、間距 ≥8px（DESIGN §觸控）。 */
 test.describe("方塊轉轉：窄手機觸控鍵", () => {
   for (const width of [320, 360]) {

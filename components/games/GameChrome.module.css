@@ -221,6 +221,20 @@
   }
 }
 
+/* 320 寬局內：返回＋三顆工具＋日夜切換要 325px，只有 296px。
+ * 360 以下才縮到觸控下限 44px（DESIGN §觸控），配合 GamePageShell 同一斷點。 */
+@media (max-width: 359.98px) {
+  .toolbar {
+    gap: 4px;
+  }
+
+  .toolBtn {
+    min-width: 44px;
+    min-height: 44px;
+    padding-inline: 6px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .toolBtn,
   .primaryBtn,
