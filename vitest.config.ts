@@ -13,6 +13,8 @@ export default defineConfig({
     // The large PlayMap jsdom file can block a threads worker long enough for
     // Vitest's onTaskUpdate RPC to time out. Forks keep that runner healthy.
     pool: "forks",
+    // 測試之間讓出 event loop，CPU 密集的檔案才不會讓 onTaskUpdate RPC 逾時（見檔內說明）。
+    setupFiles: ["./vitest.setup.ts"],
     // 只跑專案內 *.test.ts；避免 vitest 預設掃到 .cache/whisper-cpp 的 *.spec.js
     include: ["**/*.test.ts", "**/*.test.tsx"],
     exclude: [
