@@ -424,6 +424,11 @@ test("首頁 Hero 不含節目數據入口", async ({ page }) => {
 test("方塊轉轉（Block Drop）頁面可載入", async ({ page }) => {
   await page.goto("/games/block-drop");
   await expect(page.getByRole("link", { name: "回遊樂園" })).toBeVisible();
+  // 432bf019 起先停在標題頁（開始冒險／自由堆疊），按下去才有分數列。
+  const freePlay = page.getByRole("button", { name: "自由堆疊" });
+  await expect(freePlay).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole("button", { name: "開始冒險" })).toBeVisible();
+  await freePlay.click();
   await expect(page.getByLabel(/^分數 /)).toBeVisible({ timeout: 15_000 });
   await expect(page.getByRole("progressbar")).toBeVisible();
 });

@@ -81,17 +81,23 @@ describe("石頭模板與開局盤（可解第 1 點）", () => {
   });
 });
 
+const challengeStages = BLOCK_STAGES.challenge.flatMap((set) => [set.main, ...set.variants]);
+
 describe("解題器（可解第 2 點）", () => {
-  it("挑戰主線與變體在塊數上限內 ≥98% seed 有解（完整 200 seed 見 sim 腳本）", () => {
-    for (const set of BLOCK_STAGES.challenge) {
-      for (const stage of [set.main, ...set.variants]) {
-        let solved = 0;
-        const N = 30;
-        for (let seed = 1; seed <= N; seed++) if (solveStage(stage, seed, { beam: 32 }).solved) solved++;
-        expect(solved / N, stage.id).toBeGreaterThanOrEqual(0.96);
-      }
-    }
-  }, 120_000);
+  // 每個配置拆成一個 test：全部塞在同一個同步迴圈裡，CI 慢機會跑到 62 秒，
+  // 超過 vitest worker 回報進度的 60 秒逾時（Timeout calling "onTaskUpdate"），
+  // 測試全過卻整輪失敗（#187）。拆開後每個 test 之間會讓出 event loop。
+  it.each(challengeStages.map((stage) => stage.id))(
+    "挑戰 %s 在塊數上限內 ≥96% seed 有解（完整 200 seed 見 sim 腳本）",
+    (id) => {
+      const stage = challengeStages.find((s) => s.id === id)!;
+      const N = 30;
+      let solved = 0;
+      for (let seed = 1; seed <= N; seed++) if (solveStage(stage, seed, { beam: 32 }).solved) solved++;
+      expect(solved / N, stage.id).toBeGreaterThanOrEqual(0.96);
+    },
+    30_000,
+  );
 
   it("出塊順序與引擎 7-bag 相同，且只出本站方塊", () => {
     const stage = BLOCK_STAGES.easy[0]!.main;
