@@ -8,13 +8,12 @@ type StabilizeOptions = {
   theme?: VisualTheme;
 };
 
-/** D2：固定主題、停動畫、等圖載入，降低截圖抖動。 */
-export async function stabilizeVisualPage(
-  page: Page,
-  options: StabilizeOptions = {},
-): Promise<void> {
-  const theme = options.theme ?? "light";
-
+/**
+ * 之後每次載入都用固定主題。預設「跟隨系統」會在當地 19:00–06:00 自動轉夜間；
+ * CI 是 UTC，台灣早上跑的 CI 也會被當成睡前（#187：日間抽屜測試因此紅）。
+ * 只對下一次 navigation 生效，要在 goto 前呼叫。
+ */
+export async function pinTheme(page: Page, theme: VisualTheme): Promise<void> {
   await page.addInitScript(
     ({
       storageKey,
@@ -39,6 +38,15 @@ export async function stabilizeVisualPage(
     },
     { storageKey: PROGRESS_STORAGE_KEY, themeMode: theme },
   );
+}
+
+/** D2：固定主題、停動畫、等圖載入，降低截圖抖動。 */
+export async function stabilizeVisualPage(
+  page: Page,
+  options: StabilizeOptions = {},
+): Promise<void> {
+  const theme = options.theme ?? "light";
+  await pinTheme(page, theme);
 
   // addInitScript 只會在下一次 navigation 執行；呼叫端通常已先 goto，
   // reload 讓 ThemeProvider 在 mount 前讀到固定主題，避免當地 bedtime 污染截圖。

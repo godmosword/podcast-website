@@ -4,6 +4,7 @@ import { PROGRESS_STORAGE_KEY } from "../lib/progress-store";
 import sharp from "sharp";
 import { skipIntroOverlay } from "./intro-gate";
 import { expectHitTestable, expectNoOverlap } from "./overlay-geometry";
+import { pinTheme } from "./visual-helpers";
 
 test.describe.configure({ mode: "serial" });
 
@@ -690,6 +691,9 @@ test.describe("夜間漢堡抽屜", () => {
  * 上下均勻＝沒有 `--gloss` 頂緣高光。390／1280 同一套規則，對齊電腦版。
  */
 test.describe("日間漢堡抽屜選中底", () => {
+  // 測的是日間主題，不能交給當下時間決定（CI 是 UTC，台灣上午會落在睡前時段）。
+  test.beforeEach(({ page }) => pinTheme(page, "light"));
+
   const sampleBg = async (buf: Buffer): Promise<number[]> => {
     const { data } = await sharp(buf)
       .removeAlpha()
