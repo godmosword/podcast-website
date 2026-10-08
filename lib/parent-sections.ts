@@ -1,12 +1,14 @@
+import type { IconName } from "@/data/icons";
+
 /**
- * 漢堡抽屜「給爸媽」連結。字級與主列相同，各列自帶 emoji。
+ * 漢堡抽屜「給爸媽」連結。字級與主列相同，各列自帶線條圖示。
  */
 export const PARENT_SECTION_ITEMS = [
   {
     id: "parent-articles",
     label: "育兒文章分享",
     href: "/for-parents/articles",
-    emoji: "📝",
+    icon: "notebook",
     description:
       "車車遊樂園在方格子刊登的育兒文章。目前依序收錄視力保健系列三篇。",
   },
@@ -14,24 +16,30 @@ export const PARENT_SECTION_ITEMS = [
     id: "parent-travel-abroad",
     label: "親子出國",
     href: "/for-parents/travel-abroad",
-    emoji: "✈️",
+    icon: "plane",
     description: "親子出國的準備與行程。內容整理中。",
   },
   {
     id: "parent-travel-taiwan",
     label: "國內旅遊",
     href: "/for-parents/travel-taiwan",
-    emoji: "🏞️",
+    icon: "mountain",
     description: "國內親子旅遊的行程與景點。內容整理中。",
   },
   {
     id: "parent-story-making",
     label: "故事創作",
     href: "/for-parents/story-making",
-    emoji: "✏️",
+    icon: "pencil",
     description: "和孩子一起把生活變成故事。內容整理中。",
   },
-] as const;
+] as const satisfies readonly {
+  id: string;
+  label: string;
+  href: string;
+  icon: IconName;
+  description: string;
+}[];
 
 export type ParentSectionId = (typeof PARENT_SECTION_ITEMS)[number]["id"];
 

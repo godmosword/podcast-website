@@ -13,6 +13,7 @@ import {
 import ThemeToggle from "@/components/ThemeToggle";
 import ConnectMenu from "@/components/landing/SubscribeMenu";
 import Icon from "@/components/ui/Icon";
+import type { IconName } from "@/data/icons";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useLandingFooterNavSolid } from "@/hooks/useLandingFooterNavSolid";
 import { feedbackHref, isContactExternal } from "@/lib/contact";
@@ -56,19 +57,22 @@ const MOBILE_PARENT_GROUP_IDS = new Set<NavItemId>([
   "play-map",
 ]);
 
-/** 抽屜主列：探索 5 ＋家長 3（著色本在遊樂園內）。給爸媽小字不佔主列。 */
+/**
+ * 抽屜主列：探索 5 ＋家長 3（著色本在遊樂園內）。給爸媽小字不佔主列。
+ * 圖示用全站線條 Icon（不用 emoji：各裝置長相不同、夜間只能降飽和，和頁面配色對不上）。
+ */
 const MENU_ROWS: readonly {
   id: NavItemId;
-  emoji: string;
+  icon: IconName;
 }[] = [
-  { id: "stories", emoji: "📖" },
-  { id: "characters", emoji: "🚗" },
-  { id: "games", emoji: "🎡" },
-  { id: "adventures", emoji: "🗺️" },
-  { id: "about", emoji: "💛" },
-  { id: "parent-progress", emoji: "📒" },
-  { id: "for-parents", emoji: "🧭" },
-  { id: "play-map", emoji: "📍" },
+  { id: "stories", icon: "book" },
+  { id: "characters", icon: "car" },
+  { id: "games", icon: "ferris-wheel" },
+  { id: "adventures", icon: "map" },
+  { id: "about", icon: "heart" },
+  { id: "parent-progress", icon: "notebook-check" },
+  { id: "for-parents", icon: "compass" },
+  { id: "play-map", icon: "map-pin" },
 ] as const;
 
 /** 桌面常駐主列的斷點，與 CSS `@media (min-width: 980px)` 必須一致。 */
@@ -272,9 +276,7 @@ export default function SiteNavBar() {
     const active = isInternalPathActive(pathname, item.href, internalHrefs);
     const inner = (
       <>
-        <span className={styles.menuEmoji} aria-hidden>
-          {row.emoji}
-        </span>
+        <Icon name={row.icon} size={24} className={styles.menuIcon} />
         <span>{item.label}</span>
       </>
     );
@@ -312,7 +314,7 @@ export default function SiteNavBar() {
     );
   };
 
-  /** 給爸媽四項：與主列同一套 emoji 格，最長匹配避免跟親子指南搶 active。 */
+  /** 給爸媽四項：與主列同一套圖示格，最長匹配避免跟親子指南搶 active。 */
   const renderNote = (note: (typeof PARENT_SECTION_ITEMS)[number]) => {
     const item = byId.get(note.id);
     if (!item) return null;
@@ -325,9 +327,7 @@ export default function SiteNavBar() {
           aria-current={active ? "page" : undefined}
           onClick={closeAll}
         >
-          <span className={styles.menuEmoji} aria-hidden>
-            {note.emoji}
-          </span>
+          <Icon name={note.icon} size={24} className={styles.menuIcon} />
           <span>{item.label}</span>
         </Link>
       </li>

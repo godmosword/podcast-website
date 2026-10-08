@@ -198,12 +198,15 @@
   border-radius: var(--radius-sm);
 }
 
-.menuEmoji {
+/* 線條圖示：平常用次要墨色、目前頁換成 accent（和左側直條同色），日夜都跟著 token 走。 */
+.menuIcon {
   flex: none;
-  width: 32px;
-  font-size: var(--fs-h2);
-  line-height: 1;
-  text-align: center;
+  margin-inline: 4px;
+  color: var(--ink-soft);
+}
+
+.menuLink[aria-current="page"] .menuIcon {
+  color: var(--accent);
 }
 
 @media (hover: hover) {
@@ -324,10 +327,6 @@
  * `.themeSlot` 是本檔自有的 class，直接子元素就是 ThemeToggle 的根節點。 */
 :global(html[data-theme="night"]) .themeSlot > * {
   background: color-mix(in srgb, #ffffff 8%, var(--nav-panel-bg));
-}
-
-:global(html[data-theme="night"]) .menuEmoji {
-  filter: saturate(0.55) brightness(0.92);
 }
 
 :global(html[data-theme="night"]) .menuLink:hover {

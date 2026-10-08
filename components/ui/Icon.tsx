@@ -108,6 +108,95 @@ function renderGlyph(name: IconName) {
           <path d="M20.7 11.3V18" />
         </g>
       );
+    case "book":
+      return (
+        <g {...STROKE}>
+          <path d="M3 5.5c2.6-1 5.6-.7 9 1.3v12.6c-3.4-2-6.4-2.3-9-1.3z" />
+          <path d="M21 5.5c-2.6-1-5.6-.7-9 1.3v12.6c3.4-2 6.4-2.3 9-1.3z" />
+        </g>
+      );
+    case "car":
+      // 側面小車＋一隻眼睛，對齊站上的車車 logo；正面帶臉的版本縮到 24px 會像遊戲手把
+      return (
+        <g {...STROKE}>
+          <path d="M5 16.5H3.5v-3.8c0-.6.4-1.1 1-1.3l2-.6 2.4-3.5c.3-.5.8-.8 1.4-.8h4.5c.6 0 1.1.3 1.4.7l2.6 3.6 1.7.5c.6.2 1 .7 1 1.3v3.9H19" />
+          <path d="M9 16.5h6" />
+          <circle cx="7" cy="16.5" r="2" />
+          <circle cx="17" cy="16.5" r="2" />
+          <path d="M14.5 11.4h.01" />
+        </g>
+      );
+    case "ferris-wheel":
+      return (
+        <g {...STROKE}>
+          <circle cx="12" cy="10" r="6.5" />
+          <circle cx="12" cy="10" r="1.3" />
+          <path d="M12 3.5v13M5.5 10h13M7.4 5.4l9.2 9.2M16.6 5.4l-9.2 9.2M9 21l3-4.8 3 4.8M7.5 21h9" />
+        </g>
+      );
+    case "map":
+      return (
+        <g {...STROKE}>
+          <path d="M3.5 6.5 9 4.5l6 2 5.5-2v13l-5.5 2-6-2-5.5 2z" />
+          <path d="M9 4.5v13M15 6.5v13" />
+        </g>
+      );
+    case "heart":
+      return (
+        <path
+          d="M12 19.5s-7.5-4.4-7.5-9.6A4.2 4.2 0 0 1 12 7.6a4.2 4.2 0 0 1 7.5 2.3c0 5.2-7.5 9.6-7.5 9.6z"
+          {...STROKE}
+        />
+      );
+    case "notebook-check":
+      return (
+        <g {...STROKE}>
+          <rect x="5" y="3.5" width="14" height="17" rx="2" />
+          <path d="m8.8 12.3 2.3 2.3 4.2-4.6" />
+        </g>
+      );
+    case "compass":
+      return (
+        <g {...STROKE}>
+          <circle cx="12" cy="12" r="8" />
+          <path d="m14.8 9.2-1.6 4-4 1.6 1.6-4z" />
+        </g>
+      );
+    case "map-pin":
+      return (
+        <g {...STROKE}>
+          <path d="M12 20.5s6-5.5 6-10.5a6 6 0 0 0-12 0c0 5 6 10.5 6 10.5z" />
+          <circle cx="12" cy="10" r="2.2" />
+        </g>
+      );
+    case "notebook":
+      return (
+        <g {...STROKE}>
+          <rect x="5" y="3.5" width="14" height="17" rx="2" />
+          <path d="M8.5 8h7M8.5 11.5h7M8.5 15h4" />
+        </g>
+      );
+    case "plane":
+      return (
+        <path
+          d="M10.5 19.5 12 14l-5.5-1.5-2 2-1-.5 1.2-3L3.5 8l1-.5 2 2L12 8 10.5 2.5l1.5-.5 4 6.5 4-1a1.5 1.5 0 0 1 .8 2.9L16.8 11l-2.8 7.2z"
+          {...STROKE}
+        />
+      );
+    case "mountain":
+      return (
+        <g {...STROKE}>
+          <path d="m3 19 6.5-10 3.5 5.4 2-3 6 7.6z" />
+          <circle cx="17" cy="6.5" r="1.6" />
+        </g>
+      );
+    case "pencil":
+      return (
+        <g {...STROKE}>
+          <path d="M15.5 4.5 19.5 8.5 9 19H5v-4z" />
+          <path d="m13.5 6.5 4 4" />
+        </g>
+      );
     default: {
       const _exhaustive: never = name;
       return _exhaustive;

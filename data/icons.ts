@@ -13,6 +13,19 @@ export const ICON_NAMES = [
   "timer",
   "text-size",
   "external",
+  // 漢堡抽屜各頁（取代 emoji：每台裝置長相不同、夜間只能降飽和）
+  "book",
+  "car",
+  "ferris-wheel",
+  "map",
+  "heart",
+  "notebook-check",
+  "compass",
+  "map-pin",
+  "notebook",
+  "plane",
+  "mountain",
+  "pencil",
 ] as const;
 
 export type IconName = (typeof ICON_NAMES)[number];

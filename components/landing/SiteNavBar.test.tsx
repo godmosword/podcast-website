@@ -354,12 +354,16 @@ describe("SiteNavBar", () => {
     const noteTexts = Array.from(parentList.querySelectorAll("a"))
       .slice(0, 4)
       .map((a) => a.textContent?.replace(/\s/g, ""));
-    expect(noteTexts).toEqual([
-      "📝育兒文章分享",
-      "✈️親子出國",
-      "🏞️國內旅遊",
-      "✏️故事創作",
-    ]);
+    expect(noteTexts).toEqual(["育兒文章分享", "親子出國", "國內旅遊", "故事創作"]);
+
+    // 每列前面是全站線條圖示（aria-hidden 的 svg），不再用 emoji
+    const allRows = Array.from(mobileNav.querySelectorAll('ul[role="list"] a'));
+    for (const row of allRows) {
+      const icon = row.querySelector("svg");
+      expect(icon, row.textContent ?? "").not.toBeNull();
+      expect(icon?.getAttribute("aria-hidden")).toBe("true");
+      expect(row.textContent ?? "").not.toMatch(/\p{Extended_Pictographic}/u);
+    }
 
     expect(view.container.querySelector('form[action="/stories"]')).toBeNull();
     expect(view.container.querySelector('input[name="q"]')).toBeNull();
