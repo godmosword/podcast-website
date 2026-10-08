@@ -10,8 +10,10 @@
     "vehicle": "street sweeper",
     "desc": "a cute claymation street-sweeper truck, cream/off-white cab with a bright green lower body, an orange light-bar on the roof, a black cube wake-up speaker with one large circular driver sitting on a small pink rectangular base mounted on the roof behind the light bar, two big round yellow spinning brushes at the front bottom, big friendly round eyes and a cheerful smile",
     "ref": "characters/鈴鈴清潔車.jpg",
-    "firstSeen": "ep-9",
+    "firstSeen": "ep-4",
     "alsoIn": [
+      "ep-9",
+      "ep-14",
       "ep-15"
     ]
   },
@@ -45,6 +47,7 @@
     "ref": "characters/安安救護車.jpg",
     "firstSeen": "ep-6",
     "alsoIn": [
+      "ep-4",
       "ep-16",
       "ep-19"
     ]
@@ -61,6 +64,11 @@
     "ref": "characters/小紅賽車.jpg",
     "firstSeen": "ep-3",
     "alsoIn": [
+      "ep-4",
+      "ep-6",
+      "ep-9",
+      "ep-10",
+      "ep-12",
       "ep-15",
       "ep-16",
       "ep-18",
@@ -79,7 +87,11 @@
     "vehicle": "minibus",
     "desc": "a cute claymation friendly sky-blue minibus named the blue minibus (藍色小巴士), rounded boxy body, light-blue windshield with eyebrows and big round eyes on the glass, a gentle smile on the front panel below the glass, yellow round headlights, cream bumper with small orange indicator lights, cream lower trim, blue side mirrors, a row of dark-framed side windows, a small blue roof dome, black wheels. No name text. No arms, no hands, no human limbs",
     "ref": "characters/小藍巴士.jpg",
-    "firstSeen": "ep-3"
+    "firstSeen": "ep-3",
+    "alsoIn": [
+      "ep-6",
+      "ep-12"
+    ]
   },
   {
     "name": "黃色計程車",
@@ -107,7 +119,10 @@
     "vehicle": "monster truck",
     "desc": "a cute claymation bright yellow monster truck pickup named Mengmeng (猛猛) with huge chunky black off-road tyres with yellow rims, yellow coil-spring suspension, a black roof bar with four round yellow spotlights, light-blue windshield with big friendly round eyes and a happy open smile with a small tongue, grey textured grille, black roll bar in the truck bed, soft hand-sculpted clay texture. No arms, no hands, no human limbs",
     "ref": "characters/猛猛.jpg",
-    "firstSeen": "ep-8"
+    "firstSeen": "ep-8",
+    "alsoIn": [
+      "ep-12"
+    ]
   },
   {
     "name": "東東挖土機",
@@ -121,9 +136,12 @@
     "ref": "characters/東東挖土機.jpg",
     "firstSeen": "ep-5",
     "alsoIn": [
+      "ep-6",
+      "ep-10",
       "ep-15",
       "ep-20",
-      "ep-22"
+      "ep-22",
+      "ep-29"
     ]
   },
   {
@@ -177,7 +195,10 @@
     "vehicle": "food truck",
     "desc": "a cute claymation pink food truck named Xiangxiang (香香餐車), light-blue windshield with no eyes on the glass, big round eyes with white rings on the front face, a soft smile, yellow cheeks, a pink-and-white striped awning over an open serving window full of green leaf-wrapped zongzi, two smiling zongzi with little flowers sitting on the roof, a mint bumper and lower body, a green scalloped side panel with a flower, a pink side mirror, black wheels with yellow hubs and pink centers. No donuts. No arms, no hands, no human limbs. Distinct from the grandfather popcorn truck 老爺爺爆米花餐車",
     "ref": "characters/香香餐車.jpg",
-    "firstSeen": "ep-10"
+    "firstSeen": "ep-10",
+    "alsoIn": [
+      "ep-13"
+    ]
   },
   {
     "name": "沃特",
@@ -213,7 +234,10 @@
     "vehicle": "host",
     "desc": "a cute claymation adult woman host named 馬米 (Mami), shoulder-length wavy brown hair, a small beauty mark under one eye, big dark eyes, warm open smile, large orange over-ear headphones, plain white short-sleeve t-shirt, blue jeans, sitting cross-legged and waving beside a podcast microphone, soft hand-sculpted clay texture",
     "ref": "characters/馬米.jpg",
-    "firstSeen": "ep-11"
+    "firstSeen": "ep-1",
+    "alsoIn": [
+      "ep-11"
+    ]
   },
   {
     "name": "小飛",
@@ -306,7 +330,10 @@
     "vehicle": "beetle",
     "desc": "a cute claymation rounded red beetle car named Xiaohongdou (小紅豆金龜車), compact soft red body, a light-blue windshield on the roof with no eyes on the glass, big round googly eyes with white rings and black pupils on the front face, a simple black smile, yellow round headlights at the front corners and yellow cheek dots, four black wheels with white hubs. No racing number, no stripes, no spoiler, no mustache, no pacifier. No arms, no hands, no human limbs. Distinct from the numbered race car 小紅賽車 and from the mustache dad 紅爸",
     "ref": "characters/小紅豆金龜車.jpg",
-    "firstSeen": "landing"
+    "firstSeen": "ep-27",
+    "alsoIn": [
+      "ep-28"
+    ]
   },
   {
     "name": "消防車圈圈",
@@ -402,7 +429,9 @@
     "alsoIn": [
       "ep-17",
       "ep-18",
-      "ep-22"
+      "ep-22",
+      "ep-27",
+      "ep-28"
     ]
   },
   {

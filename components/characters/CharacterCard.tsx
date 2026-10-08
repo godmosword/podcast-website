@@ -10,10 +10,14 @@ type CharacterCardProps = {
   recognized: boolean;
 };
 
+function shouldShowVehicle(character: Character): boolean {
+  return !character.name.includes(character.vehicle);
+}
+
 function identityLabel(character: Character): string {
-  return character.vehicle === character.name
-    ? character.name
-    : `${character.name}，${character.vehicle}`;
+  return shouldShowVehicle(character)
+    ? `${character.name}，${character.vehicle}`
+    : character.name;
 }
 
 export default function CharacterCard({
@@ -60,7 +64,7 @@ export default function CharacterCard({
       <div className={styles.cardBody}>
         <h2 className={styles.cardTitle}>
           <span className={styles.name}>{character.name}</span>
-          {character.vehicle !== character.name && (
+          {shouldShowVehicle(character) && (
             <>
               {" "}
               <span className={styles.vehicle}>{character.vehicle}</span>

@@ -17,8 +17,9 @@ type RawCharacter = {
   vehicle: string;
   desc: string;
   ref: string;
+  /** 角色第一次出場的故事 slug。 */
   firstSeen?: string;
-  /** 除 firstSeen／車種預設集外，另出現的 slug */
+  /** 除首次出場外，其他確認出場的故事 slug。 */
   alsoIn?: string[];
 };
 
@@ -98,19 +99,6 @@ const VEHICLE_ZH: Record<string, string> = {
   "stake truck": "卡車",
 };
 
-/** 車種對應的手動維護集數 slug（與 firstSeen 合併）。 */
-const VEHICLE_STORY_SLUG: Record<string, string> = {
-  "street sweeper": "ep-4",
-  ambulance: "ep-6",
-  "race car": "ep-3",
-  excavator: "ep-5",
-  "high speed rail": "ep-7",
-  "monster truck": "ep-8",
-  "ferris wheel": "ep-11",
-  "camper van": "ep-11",
-  "police car": "ep-12",
-};
-
 const PERSONALITY_BY_ID: Record<string, string> = {
   "an-an": "勇敢、願意開口求助",
   "dong-dong": "有點膽小但願意嘗試",
@@ -152,9 +140,14 @@ const PERSONALITY_BY_ID: Record<string, string> = {
 
 /** 圖鑑卡片名稱。短於別名推斷、或和正式名稱不同時寫在這裡。 */
 const CATALOG_NAME_BY_ID: Record<string, string> = {
+  "ling-ling": "鈴鈴",
   "lan-ba-shi": "小藍",
   "huang-ji-cheng": "阿樂",
+  "san-lun-che": "三輪車",
+  "xiao-fei": "小飛",
+  "xiao-nan": "小南",
   dudu: "小紅豆汽車",
+  "dirty-germs": "髒髒的小怪獸",
   "popcorn-truck": "爆米花老爺爺",
   "pu-pu-pig": "噗噗豬",
   "nuan-nuan-turtle": "暖暖老師",
@@ -182,8 +175,6 @@ function appearsInFor(entry: RawCharacter): string[] {
   const slugs = new Set<string>();
   if (entry.firstSeen) slugs.add(entry.firstSeen);
   for (const slug of entry.alsoIn ?? []) slugs.add(slug);
-  const vehicleSlug = VEHICLE_STORY_SLUG[entry.vehicle];
-  if (vehicleSlug) slugs.add(vehicleSlug);
   return Array.from(slugs);
 }
 
