@@ -34,14 +34,21 @@ async function more(page: Page) {
 async function closeMore(page: Page) {
   await page.getByRole("button", { name: "關閉", exact: true }).click();
 }
+/** 塗了還沒收就離開會先問；選「不要了」。 */
+async function discardOnLeave(page: Page) {
+  const sheet = page.getByRole("alertdialog", { name: "還沒收起來喔" });
+  await expect(sheet).toBeVisible();
+  await sheet.getByRole("button", { name: "不要了" }).click();
+}
 
-test("unfinished paint is forgotten; a confirmed page stays in the collection", async ({
+test("unfinished paint asks first, is forgotten when discarded; a confirmed page stays in the collection", async ({
   page,
 }) => {
   await open(page);
   await stroke(page);
   expect(await redPixels(page)).toBeGreaterThan(0);
   await page.getByRole("button", { name: "← 換一張", exact: true }).click();
+  await discardOnLeave(page);
   await expect(page.getByText("選一頁來塗", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: /繼續塗/ })).toHaveCount(0);
   await page
@@ -68,11 +75,12 @@ test("unfinished paint is forgotten; a confirmed page stays in the collection", 
   await expect(page.getByRole("button", { name: /繼續塗/ })).toHaveCount(0);
 });
 
-test("leaving for the hub drops unfinished paint", async ({ page }) => {
+test("leaving for the hub asks first, then drops unfinished paint when discarded", async ({ page }) => {
   await open(page);
   await stroke(page);
   expect(await redPixels(page)).toBeGreaterThan(0);
   await page.getByRole("link", { name: "回遊樂園", exact: true }).click();
+  await discardOnLeave(page);
   await expect(page).toHaveURL(/\/games$/);
   await open(page);
   expect(await redPixels(page)).toBe(0);
@@ -232,6 +240,12 @@ test("load failure offers retry and unavailable storage never reports success", 
   await open(page);
   await stroke(page);
   await page.getByRole("button", { name: "← 換一張", exact: true }).click();
+  // 存不了時「收起來」要說沒收好、留在原地，不能假裝成功。
+  const sheet = page.getByRole("alertdialog", { name: "還沒收起來喔" });
+  await sheet.getByRole("button", { name: "收起來" }).click();
+  await expect(sheet.getByText("沒收好，再按一次試試。")).toBeVisible();
+  await expect(page.getByText("選一頁來塗", { exact: true })).toHaveCount(0);
+  await discardOnLeave(page);
   await expect(page.getByText("選一頁來塗", { exact: true })).toBeVisible();
   await expect(page.getByText(/草稿沒有存起來/)).toHaveCount(0);
   await page

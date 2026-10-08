@@ -361,3 +361,84 @@ test.describe("coloring book 參考彩圖", () => {
   });
 });
 
+test.describe("coloring book 離開提醒與塗過標記", () => {
+  /** 用填滿點畫布左上角（背景）塗一塊。 */
+  async function paintBackground(page: Page) {
+    await page.getByRole("button", { name: "填滿", exact: true }).click();
+    await page.locator("canvas").click({ position: { x: 6, y: 6 } });
+    await expect(page.getByRole("button", { name: "我塗好了" })).toBeVisible();
+  }
+
+  test("塗了沒收就按換一張：先問，繼續塗留在原地，不要了才回選頁", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await openColoringPage(page, /^著色：猛猛$/);
+    await paintBackground(page);
+    await page.getByRole("button", { name: "← 換一張", exact: true }).click();
+    const sheet = page.getByRole("alertdialog", { name: "還沒收起來喔" });
+    await expect(sheet).toBeVisible();
+    await expect(sheet.getByRole("button", { name: "繼續塗" })).toBeFocused();
+    await sheet.getByRole("button", { name: "繼續塗" }).click();
+    await expect(sheet).toHaveCount(0);
+    await expect(page.locator("canvas")).toBeVisible();
+
+    await page.getByRole("button", { name: "← 換一張", exact: true }).click();
+    await sheet.getByRole("button", { name: "不要了" }).click();
+    await expect(page.getByText("選一頁來塗", { exact: true })).toBeVisible();
+  });
+
+  test("按回遊樂園選收起來：存好作品再離開，回來那頁貼了塗過", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await openColoringPage(page, /^著色：猛猛$/);
+    await paintBackground(page);
+    await page.getByRole("link", { name: /回遊樂園/ }).click();
+    const sheet = page.getByRole("alertdialog", { name: "還沒收起來喔" });
+    await expect(sheet).toBeVisible();
+    await sheet.getByRole("button", { name: "收起來" }).click();
+    await expect(page).toHaveURL(/\/games$/);
+
+    await page.goto("/games/coloring-book");
+    await page.waitForLoadState("networkidle");
+    await page.getByRole("button", { name: "開始塗", exact: true }).click();
+    await expect(page.getByRole("button", { name: "看作品：猛猛", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "著色：猛猛", exact: true }),
+    ).toHaveAccessibleDescription("塗過");
+    await expect(
+      page.getByRole("button", { name: "著色：噗噗豬", exact: true }),
+    ).not.toHaveAccessibleDescription("塗過");
+  });
+
+  test("沒塗或已收藏時直接離開，不跳提醒", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await openColoringPage(page, /^著色：猛猛$/);
+    await page.getByRole("button", { name: "← 換一張", exact: true }).click();
+    await expect(page.getByText("選一頁來塗", { exact: true })).toBeVisible();
+
+    await page.getByRole("button", { name: "著色：猛猛", exact: true }).click();
+    await paintBackground(page);
+    await page.getByRole("button", { name: "我塗好了" }).click();
+    await expect(page.getByText("作品已收藏在這台裝置", { exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "換一張塗", exact: true }).click();
+    await expect(page.getByRole("alertdialog")).toHaveCount(0);
+    await expect(page.getByText("選一頁來塗", { exact: true })).toBeVisible();
+  });
+
+  for (const vp of [
+    { width: 320, height: 568 },
+    { width: 390, height: 664 },
+  ]) {
+    test(`${vp.width}×${vp.height}：畫布中心沒被黏底色盤蓋住`, async ({ page }) => {
+      await page.setViewportSize(vp);
+      await openFirstColoringPage(page);
+      const hitsCanvas = await page.evaluate(() => {
+        const canvas = document.querySelector("canvas")!;
+        const r = canvas.getBoundingClientRect();
+        const y = r.top + r.height / 2;
+        if (y < 0 || y > innerHeight) return false;
+        return document.elementFromPoint(r.left + r.width / 2, y) === canvas;
+      });
+      expect(hitsCanvas).toBe(true);
+    });
+  }
+});
+

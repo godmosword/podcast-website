@@ -1,0 +1,98 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(4px);
+}
+
+.sheet {
+  display: grid;
+  justify-items: center;
+  gap: 0.85rem;
+  width: min(100%, 24rem);
+  padding: 1.25rem 1rem 1rem;
+  border-radius: var(--radius-lg);
+  background: var(--coloring-ui-surface);
+  color: var(--coloring-ink);
+  box-shadow: 0 18px 40px color-mix(in srgb, var(--coloring-ink) 22%, transparent);
+}
+
+.thumb {
+  width: min(42vw, 9rem);
+  aspect-ratio: 1;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  background: var(--coloring-canvas-surface);
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--coloring-ink) 16%, transparent);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fs-h3);
+  font-weight: 900;
+  text-align: center;
+}
+
+/* 三顆一樣大的圖示鈕，主要動作「收起來」放最前面、用主色。 */
+.actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.actions button {
+  display: grid;
+  justify-items: center;
+  gap: 0.3rem;
+  min-height: 88px;
+  padding: 0.6rem 0.25rem;
+  border-radius: var(--radius-md);
+  border: 2px solid color-mix(in srgb, var(--coloring-ink) 18%, transparent);
+  background: var(--coloring-ui-surface-strong);
+  color: var(--coloring-ink);
+  font-size: var(--fs-control);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.actions button:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.actions button:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+.actions .save {
+  border-color: transparent;
+  background: var(--coloring-accent);
+  color: var(--coloring-accent-fg);
+  box-shadow: 0 4px 0 var(--coloring-accent-shadow);
+}
+
+.icon {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.star {
+  fill: var(--c-yellow);
+  stroke: var(--coloring-art-ink);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+
+.error {
+  margin: 0;
+  min-height: 1.2em;
+  font-size: var(--fs-label);
+  font-weight: 700;
+  text-align: center;
+}

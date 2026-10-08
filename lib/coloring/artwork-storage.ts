@@ -46,6 +46,19 @@ export function listColoringArtworks(
       : { value: before.createdAt, key: before.id },
   );
 }
+/** 收藏過作品的頁面 id（選頁卡片貼「塗過」用）；沒有 IndexedDB 時回空集合。 */
+export async function listColoredPageIds(): Promise<Set<string>> {
+  if (typeof indexedDB === "undefined") return new Set();
+  const previews = await coloringTransaction<ArtworkPreview[]>(
+    "artwork-previews",
+    "readonly",
+    (tx, result) => {
+      const req = tx.objectStore("artwork-previews").getAll();
+      req.onsuccess = () => result(req.result as ArtworkPreview[]);
+    },
+  );
+  return new Set(previews.map((p) => p.pageId));
+}
 export function loadColoringArtwork(
   id: string,
 ): Promise<ColoringArtwork | undefined> {

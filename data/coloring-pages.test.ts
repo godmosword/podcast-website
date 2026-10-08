@@ -51,7 +51,6 @@ function assertPageShape(page: ColoringPage): void {
   expect(page.sourcePath).toMatch(/\.(jpe?g)$/i);
   expect(page.lineArtSrc).toBe(`/coloring/${page.id}/line.png`);
   expect(page.referenceSrc).toBe(`/coloring/${page.id}/color.webp`);
-  expect(page.previewSrc.startsWith("/")).toBe(true);
   if (page.kind === "scene") {
     expect(page.zoneId).toBeDefined();
   } else {

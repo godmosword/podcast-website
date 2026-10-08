@@ -290,12 +290,15 @@ export function subjectOutlineFromRgba(
 }
 
 /**
- * 對黑線做 morph close（dilate→erode）封小缺口，再額外 dilate 一次加粗。
+ * 對黑線做 morph close（dilate→erode）封小缺口，預設再額外 dilate 一次加粗並清掉 3px 外框。
+ * 給已上線線稿補漏線時傳 { thicken: false, clearMargin: false }：只封缺口，
+ * 線寬不變，也不清外框（清外框會把貼邊的輪廓打開）。
  * 輸入／輸出皆為白底黑線 PNG buffer。
  */
 export async function closeAndThickenLineArt(
   pngOrRaw: Buffer,
   radius = MORPH_CLOSE_RADIUS,
+  { thicken = true, clearMargin = true }: { thicken?: boolean; clearMargin?: boolean } = {},
 ): Promise<{ width: number; height: number; buffer: Buffer }> {
   const { data, info } = await sharp(pngOrRaw)
     .greyscale()
@@ -314,9 +317,9 @@ export async function closeAndThickenLineArt(
   for (let i = 0; i < radius; i += 1) {
     cur = erodeBlack(cur, width, height);
   }
-  cur = dilateBlack(cur, width, height);
+  if (thicken) cur = dilateBlack(cur, width, height);
 
-  const margin = 3;
+  const margin = clearMargin ? 3 : 0;
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < width; x += 1) {
       if (x < margin || y < margin || x >= width - margin || y >= height - margin) {

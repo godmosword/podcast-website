@@ -169,6 +169,30 @@
   --coloring-curl: 205%;
 }
 
+/* 塗過的頁：右上角貼一顆星，跟封面「存起來」那格同一顆。 */
+.coloredStar {
+  position: absolute;
+  top: 6%;
+  right: 6%;
+  z-index: 1;
+  width: 26%;
+  max-width: 3rem;
+  fill: var(--c-yellow);
+  stroke: var(--coloring-art-ink);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--coloring-art-ink) 30%, transparent));
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .cardTitle {
   font-weight: 700;
   font-size: var(--fs-control);

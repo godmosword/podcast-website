@@ -3,8 +3,13 @@ import { useState } from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, test, vi } from "vitest";
 import { COLORING_PALETTE } from "@/lib/coloring/tools";
+import { playSfx } from "@/lib/sfx";
 import { ColoringPalette } from "./ColoringPalette";
-afterEach(cleanup);
+vi.mock("@/lib/sfx", () => ({ playSfx: vi.fn() }));
+afterEach(() => {
+  cleanup();
+  vi.mocked(playSfx).mockClear();
+});
 function Palette() {
   const [color, setColor] = useState(COLORING_PALETTE[0]!.hex);
   return <ColoringPalette colorHex={color} onChange={setColor} />;
@@ -30,4 +35,9 @@ test("a color group never changes the artist's selected color on its own", () =>
   expect(screen.queryByRole("option", { selected: true })).toBeNull();
   fireEvent.click(screen.getAllByRole("option")[0]!);
   expect(change).toHaveBeenCalledOnce();
+});
+test("點色票有輕輕的 tap 音（音效開關由 lib/sfx 把關）", () => {
+  render(<Palette />);
+  fireEvent.click(screen.getAllByRole("option")[3]!);
+  expect(playSfx).toHaveBeenCalledWith("tap");
 });

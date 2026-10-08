@@ -353,20 +353,22 @@ test.describe("遊戲第二輪 P2 mobile regression", () => {
     await expect(page.getByRole("radiogroup", { name: "方塊轉轉特殊模式" })).toBeVisible();
   });
 
-  test("Coloring mobile toolbar 可橫向探索、保留 active tool 與 44px touch target", async ({ page }) => {
+  test("Coloring mobile toolbar 五顆工具都在畫面內、保留 active tool 與 44px touch target", async ({ page }) => {
     await page.setViewportSize(MOBILE);
     await openColoringCanvas(page);
     const toolbar = page.getByRole("toolbar", { name: "著色工具" });
     await expect(toolbar).toBeVisible();
-    const scrollState = await toolbar.evaluate((node) => ({
-      scrollWidth: node.scrollWidth,
-      clientWidth: node.clientWidth,
-    }));
-    expect(scrollState.scrollWidth).toBeGreaterThan(scrollState.clientWidth);
-    const bucket = page.getByRole("button", { name: "填滿" });
+    // 工具列是五欄格，不再橫捲：每顆都要整顆落在視窗內且夠大。
+    for (const name of ["蠟筆", "填滿", "擦掉", "復原", "更多"]) {
+      const box = (await page.getByRole("button", { name, exact: true }).boundingBox())!;
+      expect(box.x, name).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width, name).toBeLessThanOrEqual(MOBILE.width);
+      expect(box.width, name).toBeGreaterThanOrEqual(44);
+      expect(box.height, name).toBeGreaterThanOrEqual(44);
+    }
+    const bucket = page.getByRole("button", { name: "填滿", exact: true });
     await bucket.click();
     await expect(bucket).toHaveAttribute("aria-pressed", "true");
-    await expect(bucket).toHaveCSS("min-height", "44px");
 
     await page.setViewportSize({ width: 844, height: 390 });
     await expect(toolbar).toBeVisible();

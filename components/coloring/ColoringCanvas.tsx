@@ -7,14 +7,9 @@ import {
   useState,
   type PointerEvent as ReactPointerEvent,
 } from "react";
-import { GameEndStation } from "@/components/games/GameEndStation";
 import type { ColoringPage } from "@/data/coloring-pages";
-import { renderFramedArtwork } from "@/lib/coloring/export-frame";
-import {
-  COLORING_DONE_CTA,
-  COLORING_HINT_DRAW,
-  COLORING_HINT_FILL,
-} from "@/lib/coloring/flow";
+import { COLORING_DONE_CTA } from "@/lib/coloring/flow";
+import { playSfx } from "@/lib/sfx";
 import {
   BRUSH_SIZES,
   ERASER_RADIUS_BONUS,
@@ -28,28 +23,23 @@ import {
   type DirtyRect,
   type Rgba,
 } from "@/lib/coloring/tools";
+import { ColoringDoneSheet } from "./ColoringDoneSheet";
+import { ColoringHint } from "./ColoringHint";
+import { ColoringLeaveSheet } from "./ColoringLeaveSheet";
 import { ColoringPalette } from "./ColoringPalette";
 import { ColoringReference, ColoringReferencePeek } from "./ColoringReference";
 import { ColoringToolbar } from "./ColoringToolbar";
 import styles from "./ColoringCanvas.module.css";
 import { useColoringHistory } from "./useColoringHistory";
-import {
-  canvasBlob,
-  hasColoringPaint,
-  thumbnailCanvas,
-} from "@/lib/coloring/bitmap";
-import { saveColoringArtwork } from "@/lib/coloring/artwork-storage";
+import { hasColoringPaint } from "@/lib/coloring/bitmap";
 import {
   loadColoringPreferences,
   saveColoringPreferences,
 } from "@/lib/coloring/preferences";
-import {
-  downloadColoringBlob,
-  shareColoringBlob,
-  printColoringImage,
-} from "@/lib/coloring/export-actions";
 import { ColoringRegions } from "@/lib/coloring/regions";
-import Link from "next/link";
+import { useColoringArtworkSave } from "./useColoringArtworkSave";
+import { useColoringExport } from "./useColoringExport";
+import { useColoringLeave } from "./useColoringLeave";
 import {
   useColoringGesture,
   DEFAULT_COLORING_VIEW as DEFAULT_VIEW,
@@ -131,8 +121,8 @@ export function ColoringCanvas({
   const [preferencesReady, setPreferencesReady] = useState(false);
   const [collectionStatus, setCollectionStatus] = useState("");
   const [actionError, setActionError] = useState("");
-  const completedRevisionRef = useRef(-1);
-  const paintRevisionRef = useRef(0);
+  const artwork = useColoringArtworkSave(page);
+  const { notePaint } = artwork;
   const [doneOpen, setDoneOpen] = useState(false);
   const [doneBusy, setDoneBusy] = useState(false);
   const doneBusyRef = useRef(false);
@@ -154,13 +144,12 @@ export function ColoringCanvas({
   const markPainted = useCallback(() => {
     const p = paintRef.current;
     if (!p) return;
-    setHasPainted(
-      hasColoringPaint(
-        p.getContext("2d")!.getImageData(0, 0, p.width, p.height).data,
-      ),
+    const painted = hasColoringPaint(
+      p.getContext("2d")!.getImageData(0, 0, p.width, p.height).data,
     );
-    paintRevisionRef.current += 1;
-  }, []);
+    setHasPainted(painted);
+    notePaint(painted);
+  }, [notePaint]);
 
   useEffect(() => {
     const p = loadColoringPreferences();
@@ -187,6 +176,7 @@ export function ColoringCanvas({
     setColorHex(hex);
     setTool((current) => (current === "eraser" ? "crayon" : current));
     setPickStatus(`換成${paletteName(hex)}了`);
+    playSfx("tap");
   }, []);
   const closePeek = useCallback(() => {
     setPeek(false);
@@ -376,6 +366,7 @@ export function ColoringCanvas({
       if (!rect) return;
       pushUndoPatch({ rect, pixels: cropImageDataRect(base, rect) });
       setUsedBucket(true);
+      playSfx("tap");
       ctx.putImageData(img, 0, 0, rect.x, rect.y, rect.width, rect.height);
       markPainted();
       requestComposite();
@@ -598,62 +589,15 @@ export function ColoringCanvas({
     composite();
   };
 
-  const exportBlob = async () => {
-    const display = displayRef.current;
-    if (!display) throw new Error("畫布尚未載入");
+  const getComposited = useCallback(() => {
     composite();
-    let framed = display;
-    try {
-      framed = await renderFramedArtwork(display, { mascotSrc: "/mascot.png" });
-    } catch {
-      /* original is still exportable */
-    }
-    return canvasBlob(framed);
-  };
-  const handleDownload = async () => {
-    try {
-      downloadColoringBlob(await exportBlob(), `${page.title}-著色`);
-    } catch {
-      setActionError("圖片暫時無法存下，請再試一次。");
-    }
-  };
-  const handleShare = async () => {
-    try {
-      const result = await shareColoringBlob(await exportBlob(), page.title);
-      if (result === "downloaded") setActionError("已改用下載保存圖片。");
-    } catch {
-      setActionError("分享暫時無法開啟，可以先下載圖片。");
-    }
-  };
-  const handlePrint = async (source: Blob | string) => {
-    try {
-      await printColoringImage(source, page.title);
-    } catch {
-      setActionError("列印暫時無法開啟，可以先下載圖片。");
-    }
-  };
-
-  const playDoneTone = () => {
-    try {
-      const AudioCtx = window.AudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-      [523, 659, 784].forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = "triangle";
-        osc.frequency.value = freq;
-        gain.gain.value = 0.05;
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        const start = ctx.currentTime + i * 0.12;
-        osc.start(start);
-        osc.stop(start + 0.18);
-      });
-    } catch {
-      // 無音效環境略過
-    }
-  };
+    return displayRef.current;
+  }, [composite]);
+  const exporter = useColoringExport({
+    title: page.title,
+    getComposited,
+    onError: setActionError,
+  });
 
   const handleDone = async () => {
     if (!ready || !hasPainted || doneBusyRef.current) return;
@@ -669,27 +613,15 @@ export function ColoringCanvas({
     }
     const request = ++doneRequestRef.current;
     try {
-      const snapshot = await canvasBlob(display);
-      const thumbnail = await canvasBlob(thumbnailCanvas(display));
+      const captured = await artwork.capture(display);
       if (!snapshotAliveRef.current || request !== doneRequestRef.current)
         return;
       revokeDoneSnapshot();
-      const url = URL.createObjectURL(snapshot);
+      const url = URL.createObjectURL(captured.snapshot);
       doneSnapshotUrlRef.current = url;
       setDoneSnapshotUrl(url);
       try {
-        if (completedRevisionRef.current !== paintRevisionRef.current) {
-          await saveColoringArtwork({
-            id: crypto.randomUUID(),
-            pageId: page.id,
-            title: page.title,
-            lineArtRevision: page.lineArtRevision,
-            createdAt: Date.now(),
-            compositeBlob: snapshot,
-            thumbnailBlob: thumbnail,
-          });
-          completedRevisionRef.current = paintRevisionRef.current;
-        }
+        await artwork.save(captured);
         setCollectionStatus("作品已收藏在這台裝置");
       } catch {
         setCollectionStatus("作品尚未收藏，請下載保存，或重試收藏。");
@@ -697,7 +629,7 @@ export function ColoringCanvas({
       if (!snapshotAliveRef.current || request !== doneRequestRef.current)
         return;
       setDoneOpen(true);
-      playDoneTone();
+      playSfx("collect");
     } catch {
       setActionError("作品圖片暫時無法產生，請再試一次。");
     } finally {
@@ -708,13 +640,29 @@ export function ColoringCanvas({
   const startNew = () => {
     handleClear();
     closeDoneOverlay();
-    completedRevisionRef.current = -1;
+    artwork.forgetSaved();
   };
+
+  const leave = useColoringLeave({
+    unsaved: artwork.unsaved,
+    getDisplay: getComposited,
+    onBack,
+    saveNow: async () => {
+      finishStroke();
+      const display = getComposited();
+      if (!display) throw new Error("畫布尚未載入");
+      await artwork.save(await artwork.capture(display));
+    },
+  });
 
   return (
     <div className={styles.root}>
       <div className={styles.topBar}>
-        <button type="button" className={styles.backPage} onClick={onBack}>
+        <button
+          type="button"
+          className={styles.backPage}
+          onClick={() => leave.requestLeave("picker")}
+        >
           ← 換一張
         </button>
         <p className={styles.pageTitle}>{page.title}</p>
@@ -786,13 +734,11 @@ export function ColoringCanvas({
       ) : null}
 
       {!usedBucket ? (
-        <p
+        <ColoringHint
           className={styles.openHint}
-          data-testid="coloring-open-hint"
-          data-step={hasPainted ? "fill" : "draw"}
-        >
-          {hasPainted ? COLORING_HINT_FILL : COLORING_HINT_DRAW}
-        </p>
+          step={hasPainted ? "fill" : "draw"}
+          colorHex={colorHex}
+        />
       ) : null}
       {/* G-H3：色盤＋工具列黏在視窗底（手機）／畫布右欄（桌機），畫布可見時一定搆得到 */}
       <div className={styles.controls} data-testid="coloring-controls">
@@ -813,11 +759,11 @@ export function ColoringCanvas({
           onGuidedChange={setGuided}
           canRedo={canRedo}
           onRedo={handleRedo}
-          onPrint={() => void handlePrint(page.lineArtSrc)}
+          onPrint={() => void exporter.print(page.lineArtSrc)}
           canUndo={canUndo}
           onUndo={handleUndo}
           onClear={handleClear}
-          onDownload={handleDownload}
+          onDownload={exporter.download}
           viewActive={viewActive}
           onResetView={() => applyView(DEFAULT_VIEW)}
           cueTool={hasPainted && !usedBucket ? "bucket" : null}
@@ -825,66 +771,23 @@ export function ColoringCanvas({
       </div>
 
       {doneOpen ? (
-        <div className={styles.doneOverlay} role="presentation">
-          <div className={styles.doneSheet}>
-            {doneSnapshotUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element -- 完成面作品快照
-              <img
-                className={styles.doneSnapshot}
-                src={doneSnapshotUrl}
-                alt=""
-                aria-hidden="true"
-                data-testid="coloring-done-snapshot"
-              />
-            ) : null}
-            <GameEndStation
-              mood="win"
-              title="塗好了！"
-              gameSlug="coloring-book"
-              onReplay={closeDoneOverlay}
-              replayLabel="再塗這一張"
-              mainAction={{
-                label: "換一張塗",
-                icon: "page",
-                onClick: onBack,
-              }}
-              details={<p role="status">{collectionStatus}</p>}
-              extraActions={
-                <div className={styles.doneActions}>
-                  {collectionStatus.startsWith("作品尚未") ? (
-                    <button type="button" onClick={() => void handleDone()}>
-                      重試收藏
-                    </button>
-                  ) : null}
-                  <button type="button" onClick={handleDownload}>
-                    存圖片
-                  </button>
-                  <button type="button" onClick={handleShare}>
-                    分享作品
-                  </button>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      if (displayRef.current) {
-                        composite();
-                        await handlePrint(await canvasBlob(displayRef.current));
-                      }
-                    }}
-                  >
-                    列印作品
-                  </button>
-                  <button type="button" onClick={startNew}>
-                    開新稿
-                  </button>
-                  {page.storySlug ? (
-                    <Link href={`/story/${page.storySlug}`}>看這個故事</Link>
-                  ) : null}
-                </div>
-              }
-            />
-          </div>
-        </div>
+        <ColoringDoneSheet
+          page={page}
+          snapshotUrl={doneSnapshotUrl}
+          collectionStatus={collectionStatus}
+          saveFailed={collectionStatus.startsWith("作品尚未")}
+          unsaved={artwork.unsaved}
+          onReplay={closeDoneOverlay}
+          onChangePage={() => leave.requestLeave("picker")}
+          onRetrySave={() => void handleDone()}
+          onDownload={exporter.download}
+          onShare={exporter.share}
+          onPrint={exporter.printArtwork}
+          onStartNew={startNew}
+        />
       ) : null}
+
+      {leave.sheet ? <ColoringLeaveSheet {...leave.sheet} /> : null}
     </div>
   );
 }

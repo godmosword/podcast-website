@@ -9,16 +9,17 @@
     "controls";
 }
 
-/* 開場句是獨立一列，不包進 .controls。
+/* 開場提示是獨立一列，不包進 .controls。
    .controls 必須是 .root 的格子，sticky 才能相對整頁黏住；
-   包在只和自己一樣高的容器裡，664 高的視窗會把工具列裁掉。 */
+   包在只和自己一樣高的容器裡，664 高的視窗會把工具列裁掉。
+   手機放在畫布上方：放下面會被黏底的色盤蓋住，孩子看不到。 */
 .root:has(.openHint) {
   grid-template-areas:
     "top"
     "ref"
+    "cue"
     "stage"
     "notice"
-    "cue"
     "controls";
 }
 
@@ -55,14 +56,6 @@
     color-mix(in srgb, var(--coloring-ink) 10%, transparent);
 }
 
-.openHint {
-  margin: 0;
-  padding: 0 0.15rem;
-  font-size: var(--fs-label);
-  font-weight: 700;
-  line-height: 1.4;
-  color: var(--coloring-ink);
-}
 
 /* 平板橫放／小筆電：畫布左；右欄由上而下是參考彩圖（橫條）、提示、色盤＋工具列。 */
 @media (min-width: 980px) {

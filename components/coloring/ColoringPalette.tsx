@@ -1,6 +1,7 @@
 "use client";
 
 import { COLORING_PALETTE } from "@/lib/coloring/tools";
+import { playSfx } from "@/lib/sfx";
 import styles from "./ColoringPalette.module.css";
 
 type ColoringPaletteProps = {
@@ -64,7 +65,10 @@ export function ColoringPalette({
             aria-label={swatch.name}
             className={`${styles.swatch} ${selected ? styles.selected : ""}`}
             style={{ background: swatch.hex }}
-            onClick={() => onChange(swatch.hex)}
+            onClick={() => {
+              playSfx("tap");
+              onChange(swatch.hex);
+            }}
           />
         );
       })}

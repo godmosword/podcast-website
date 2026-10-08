@@ -5,9 +5,11 @@ import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import type { ColoringPage } from "@/data/coloring-pages";
 import {
+  listColoredPageIds,
   listColoringArtworks,
   type ArtworkPreview,
 } from "@/lib/coloring/artwork-storage";
+import { playSfx } from "@/lib/sfx";
 import { ColoringArtworkViewer } from "./ColoringArtworkViewer";
 import {
   COLORING_GALLERY_HEADING,
@@ -34,6 +36,7 @@ export function ColoringPagePicker({
   const [selected, setSelected] = useState<ArtworkPreview | null>(null);
   const [error, setError] = useState("");
   const [hasMore, setHasMore] = useState(false);
+  const [colored, setColored] = useState<ReadonlySet<string>>(new Set());
   const [loadingMore, setLoadingMore] = useState(false);
   const artworkUrls = useRef<string[]>([]);
   const returnFocus = useRef<HTMLElement | null>(null);
@@ -59,6 +62,23 @@ export function ColoringPagePicker({
       setLoadingMore(false);
     }
   };
+
+  const refreshColored = (isLive: () => boolean = () => true) => {
+    void listColoredPageIds()
+      .then((ids) => {
+        if (isLive()) setColored(ids);
+      })
+      .catch(() => {
+        /* 讀不到就不貼星星，不影響選頁 */
+      });
+  };
+  useEffect(() => {
+    let live = true;
+    refreshColored(() => live);
+    return () => {
+      live = false;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -132,6 +152,7 @@ export function ColoringPagePicker({
               artworkUrls.current = artworkUrls.current.filter((src) => src !== removed.src);
             }
             setArtworks((current) => current.filter((a) => a.id !== selected.id));
+            refreshColored();
             setSelected(null);
             heading.current?.focus();
           }}
@@ -148,7 +169,12 @@ export function ColoringPagePicker({
           </h2>
           <ul className={styles.grid}>
             {characters.map((page) => (
-              <PageCard key={page.id} page={page} onSelect={onSelect} />
+              <PageCard
+                key={page.id}
+                page={page}
+                colored={colored.has(page.id)}
+                onSelect={onSelect}
+              />
             ))}
           </ul>
         </section>
@@ -158,7 +184,12 @@ export function ColoringPagePicker({
           </h2>
           <ul className={styles.grid}>
             {scenes.map((page) => (
-              <PageCard key={page.id} page={page} onSelect={onSelect} />
+              <PageCard
+                key={page.id}
+                page={page}
+                colored={colored.has(page.id)}
+                onSelect={onSelect}
+              />
             ))}
           </ul>
         </section>
@@ -170,18 +201,25 @@ export function ColoringPagePicker({
 /** 線稿像一頁紙蓋在參考彩圖上，右下角掀起：一眼看到「塗完會像這樣」。 */
 function PageCard({
   page,
+  colored,
   onSelect,
 }: {
   page: ColoringPage;
+  colored: boolean;
   onSelect: (page: ColoringPage) => void;
 }) {
+  const coloredId = `colored-${page.id}`;
   return (
     <li>
       <button
         type="button"
         className={styles.card}
-        onClick={() => onSelect(page)}
+        onClick={() => {
+          playSfx("flip");
+          onSelect(page);
+        }}
         aria-label={`著色：${page.title}`}
+        aria-describedby={colored ? coloredId : undefined}
       >
         <span className={styles.thumb}>
           <Image
@@ -198,8 +236,18 @@ function PageCard({
             sizes="(max-width: 640px) 46vw, 200px"
             className={`${styles.thumbImg} ${styles.lineThumb}`}
           />
+          {colored ? (
+            <svg className={styles.coloredStar} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 2.5l2.9 6 6.6.8-4.9 4.6 1.3 6.5L12 17.2 6.1 20.4l1.3-6.5L2.5 9.3l6.6-.8z" />
+            </svg>
+          ) : null}
         </span>
         <span className={styles.cardTitle}>{page.title}</span>
+        {colored ? (
+          <span id={coloredId} className={styles.srOnly}>
+            塗過
+          </span>
+        ) : null}
       </button>
     </li>
   );

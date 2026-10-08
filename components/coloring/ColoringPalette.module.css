@@ -30,6 +30,24 @@
   box-shadow: 0 0 0 3px var(--coloring-ui-surface), 0 0 0 5px var(--coloring-ink);
 }
 
+/* 矮手機：色盤收成一列橫滑，黏底的色盤＋工具列少一排，畫布露出來。 */
+@media (max-width: 979px) and (max-height: 740px) {
+  .wrap {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    padding-inline: 0.25rem;
+    scrollbar-width: thin;
+  }
+
+  .swatch {
+    flex: none;
+    scroll-snap-align: start;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .swatch {
     transition: none;
