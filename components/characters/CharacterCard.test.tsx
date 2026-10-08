@@ -61,12 +61,12 @@ describe("CharacterCard", () => {
   it("名稱與職責同一排，未認識不顯示貼紙", () => {
     render(<CharacterCard character={lingLing()} recognized={false} />);
 
-    const title = screen.getByRole("heading", { level: 2, name: "玲玲 清潔車" });
-    expect(title.textContent).toBe("玲玲 清潔車");
+    const title = screen.getByRole("heading", { level: 2, name: "鈴鈴 清潔車" });
+    expect(title.textContent).toBe("鈴鈴 清潔車");
     expect(screen.queryByText("待認識")).toBeNull();
     expect(screen.queryByText("已認識")).toBeNull();
     expect(screen.getByRole("article").getAttribute("aria-label")).toBe(
-      "玲玲，清潔車",
+      "鈴鈴，清潔車",
     );
   });
 
@@ -76,7 +76,7 @@ describe("CharacterCard", () => {
     expect(screen.getByText("已認識")).toBeTruthy();
     expect(screen.queryByText("待認識")).toBeNull();
     expect(screen.getByRole("article").getAttribute("aria-label")).toBe(
-      "玲玲，清潔車，已認識",
+      "鈴鈴，清潔車，已認識",
     );
   });
 
@@ -84,7 +84,7 @@ describe("CharacterCard", () => {
     const character = lingLing();
     render(<CharacterCard character={character} recognized={false} />);
 
-    const select = screen.getByRole("combobox", { name: "玲玲的出場故事" });
+    const select = screen.getByRole("combobox", { name: "鈴鈴的出場故事" });
     expect(select).toBeTruthy();
     expect(screen.queryByRole("link", { name: /EP / })).toBeNull();
 
@@ -94,6 +94,7 @@ describe("CharacterCard", () => {
     expect(episodes.map((episode) => episode.slug)).toEqual([
       "ep-4",
       "ep-9",
+      "ep-14",
       "ep-15",
     ]);
     for (const episode of episodes) {
