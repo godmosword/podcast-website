@@ -61,7 +61,7 @@ test("unfinished paint is forgotten; a confirmed page stays in the collection", 
     page.getByRole("button", { name: "看作品：恐龍車多多", exact: true }),
   ).toBeVisible();
   await page.goto("/games/coloring-book");
-  await page.getByRole("button", { name: "打開著色本" }).click();
+  await page.getByRole("button", { name: "開始塗", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "看作品：恐龍車多多", exact: true }),
   ).toBeVisible();
@@ -200,7 +200,7 @@ test("deleting one completed artwork asks first and persists", async ({
   );
   expect(stored).toEqual([0, 0]);
   await page.goto("/games/coloring-book");
-  await page.getByRole("button", { name: "打開著色本" }).click();
+  await page.getByRole("button", { name: "開始塗", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "看作品：小紅賽車", exact: true }),
   ).toHaveCount(0);

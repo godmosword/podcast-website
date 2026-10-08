@@ -167,7 +167,7 @@ export function ColoringPagePicker({
   );
 }
 
-/** 左上是線稿、右下是參考彩圖：一眼看到「塗完會像這樣」。 */
+/** 線稿像一頁紙蓋在參考彩圖上，右下角掀起：一眼看到「塗完會像這樣」。 */
 function PageCard({
   page,
   onSelect,
@@ -185,18 +185,18 @@ function PageCard({
       >
         <span className={styles.thumb}>
           <Image
-            src={page.lineArtSrc}
-            alt=""
-            fill
-            sizes="(max-width: 640px) 46vw, 200px"
-            className={`${styles.thumbImg} ${styles.lineThumb}`}
-          />
-          <Image
             src={page.referenceSrc}
             alt=""
             fill
             sizes="(max-width: 640px) 46vw, 200px"
             className={`${styles.thumbImg} ${styles.colorThumb}`}
+          />
+          <Image
+            src={page.lineArtSrc}
+            alt=""
+            fill
+            sizes="(max-width: 640px) 46vw, 200px"
+            className={`${styles.thumbImg} ${styles.lineThumb}`}
           />
         </span>
         <span className={styles.cardTitle}>{page.title}</span>

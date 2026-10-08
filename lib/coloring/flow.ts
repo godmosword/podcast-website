@@ -2,7 +2,9 @@
 
 export type ColoringStage = "cover" | "picker" | "canvas";
 
-export const COLORING_COVER_CTA = "打開著色本";
+export const COLORING_COVER_CTA = "開始塗";
+/** 封面三格圖解的字：看圖就懂，每格三個字。 */
+export const COLORING_COVER_STEPS = ["選一張", "塗顏色", "存起來"] as const;
 export const COLORING_PICKER_LEAD = "選一頁來塗";
 export const COLORING_PICKER_CHARACTERS = "車車朋友";
 export const COLORING_PICKER_SCENES = "故事畫面";

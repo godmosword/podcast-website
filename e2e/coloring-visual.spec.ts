@@ -48,9 +48,9 @@ for (const viewport of viewports)
       const a11y = viewport.width === 390 && viewport.height === 844;
       await page.goto("/games/coloring-book");
       await stabilizeVisualPage(page, { theme: theme as VisualTheme });
-      await expect(page.getByRole("button", { name: "打開著色本" })).toBeVisible();
+      await expect(page.getByRole("button", { name: "開始塗", exact: true })).toBeVisible();
       await capture(page, `${prefix}-cover`, a11y);
-      await page.getByRole("button", { name: "打開著色本" }).click();
+      await page.getByRole("button", { name: "開始塗", exact: true }).click();
       await capture(page, `${prefix}-picker`, a11y);
       await page.getByRole("button", { name: "著色：恐龍車多多", exact: true }).click();
       await expect(page.getByRole("button", { name: "蠟筆", exact: true })).toBeEnabled();

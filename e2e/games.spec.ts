@@ -213,7 +213,7 @@ test.describe("繪本塗塗鴉：與遊戲頁同款抬頭", () => {
       await expect(page.getByRole("button", { name: "回封面" })).toHaveCount(0);
     };
     await check();
-    await page.getByRole("button", { name: "打開著色本" }).click();
+    await page.getByRole("button", { name: "開始塗", exact: true }).click();
     await check();
     await page.getByRole("button", { name: /^著色：/ }).first().click();
     await page.waitForSelector("canvas");

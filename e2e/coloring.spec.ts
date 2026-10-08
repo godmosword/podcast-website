@@ -11,7 +11,7 @@ import { BACKGROUNDS } from "../scripts/lib/coloring-reference-overrides";
 async function openColoringPage(page: Page, name: RegExp) {
   await page.goto("/games/coloring-book");
   await page.waitForLoadState("networkidle"); // 等 hydration，點擊才有 handler
-  await page.getByRole("button", { name: "打開著色本" }).click();
+  await page.getByRole("button", { name: "開始塗", exact: true }).click();
   await page.getByRole("button", { name }).first().click();
   await page.waitForSelector("canvas");
   await page.waitForFunction(

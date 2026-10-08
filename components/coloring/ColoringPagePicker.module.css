@@ -118,36 +118,55 @@
   background: var(--coloring-canvas-surface);
 }
 
-/* 右下三角是彩圖；第四點落在對角線中心，hover 時移到左上角就整張翻成彩圖。 */
-.colorThumb {
-  object-fit: contain;
-  clip-path: polygon(100% 0, 100% 100%, 0 100%, 50% 50%);
-  transition: clip-path 260ms ease;
+/* 翻角：整張是要塗的線稿，右下角像紙頁掀起、露出底下的彩圖；
+   滑過去或鍵盤聚焦時整頁掀開。--coloring-curl 是掀起的邊長。 */
+@property --coloring-curl {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 28%;
 }
 
+.thumb {
+  --coloring-curl: 28%;
+  transition: --coloring-curl 650ms cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+
+.colorThumb {
+  object-fit: contain;
+}
+
+.lineThumb {
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--coloring-curl)),
+    calc(100% - var(--coloring-curl)) 100%,
+    0 100%
+  );
+}
+
+/* 掀起來的紙背：鏡射在摺線左上側，靠摺線那邊比較暗。 */
 .thumb::after {
   content: "";
   position: absolute;
-  inset: 0;
+  right: 0;
+  bottom: 0;
+  width: var(--coloring-curl);
+  height: var(--coloring-curl);
   background: linear-gradient(
-    to bottom right,
-    transparent calc(50% - 2px),
-    var(--coloring-canvas-surface) calc(50% - 2px),
-    var(--coloring-canvas-surface) calc(50% + 2px),
-    transparent calc(50% + 2px)
+    135deg,
+    color-mix(in srgb, var(--coloring-canvas-surface) 94%, var(--coloring-art-ink)) 0%,
+    color-mix(in srgb, var(--coloring-canvas-surface) 94%, var(--coloring-art-ink)) 36%,
+    color-mix(in srgb, var(--coloring-canvas-surface) 80%, var(--coloring-art-ink)) 50%,
+    transparent 50%
   );
+  filter: drop-shadow(-3px -3px 4px color-mix(in srgb, var(--coloring-art-ink) 22%, transparent));
   pointer-events: none;
-  transition: opacity 200ms ease;
 }
 
-.card:hover .colorThumb,
-.card:focus-visible .colorThumb {
-  clip-path: polygon(100% 0, 100% 100%, 0 100%, 0 0);
-}
-
-.card:hover .thumb::after,
-.card:focus-visible .thumb::after {
-  opacity: 0;
+.card:hover .thumb,
+.card:focus-visible .thumb {
+  --coloring-curl: 205%;
 }
 
 .cardTitle {
@@ -217,8 +236,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .card,
-  .colorThumb,
-  .thumb::after {
+  .thumb {
     transition: none;
   }
 

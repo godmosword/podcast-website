@@ -6,7 +6,7 @@ const NARROW_WIDTHS = [320, 375, 390, 430];
 async function openColoringCanvas(page: Page) {
   await page.goto("/games/coloring-book");
   await page.waitForLoadState("networkidle");
-  await page.getByRole("button", { name: "打開著色本" }).click();
+  await page.getByRole("button", { name: "開始塗", exact: true }).click();
   await page.getByRole("button", { name: /^著色：/ }).first().click();
   await page.waitForSelector("canvas");
   await page.waitForFunction(

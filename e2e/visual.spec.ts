@@ -522,7 +522,7 @@ test("visual：著色本畫布 390 light", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 900 });
   await page.goto("/games/coloring-book");
   await stabilizeVisualPage(page, { theme: "light" });
-  await page.getByRole("button", { name: "打開著色本" }).click();
+  await page.getByRole("button", { name: "開始塗", exact: true }).click();
   await page.getByRole("button", { name: /^著色：/ }).first().click();
   await page.waitForSelector("canvas");
   await page.waitForFunction(
