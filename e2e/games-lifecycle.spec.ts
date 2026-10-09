@@ -258,7 +258,8 @@ test.describe("遊戲完整 lifecycle", () => {
     await page.getByRole("button", { name: /開始冒險/ }).click();
     await page.getByRole("radio", { name: /挑戰冒險/ }).click();
     await expect(page.getByRole("radio", { name: /挑戰冒險/ })).toHaveAttribute("aria-checked", "true");
-    await expect(page.getByTestId("candy-match-map")).toContainText("步");
+    // 步數畫成腳印＋數字，「N 步內」整句在任務圖案的 aria-label
+    await expect(page.getByTestId("candy-match-map").getByLabel(/\d+ 步內/)).toBeVisible();
     // aria-disabled 仍可點（點了會說明要先完成哪一站），Playwright 視為停用需 force
     await page.getByRole("button", { name: /第 3 站 冰淇淋小店（未解鎖）/ }).click({ force: true });
     await expect(page.getByRole("status").filter({ hasText: "先完成第 1 站" })).toBeVisible();

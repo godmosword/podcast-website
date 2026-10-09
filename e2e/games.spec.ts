@@ -47,24 +47,35 @@ test.describe("遊戲頁：兒童主路徑優先", () => {
 
   test("操作提示只在有棋盤時出現，帶文字、留在遊戲正下方", async ({ page }) => {
     await page.setViewportSize(PHONE);
-    await page.goto("/games/candy-match");
+    await page.goto("/games/block-drop");
 
-    // 標題頁還沒有棋盤：提示沒有對象，收起
+    // 開始畫面還沒有方塊：提示沒有對象，收起
     const hints = page.getByLabel("操作提示");
     await expect(hints).toBeHidden();
 
-    await page.getByRole("button", { name: /開始冒險/ }).click();
-    await page.locator('button[data-next="true"]').click();
-    await expect(page.getByTestId("candy-match-board")).toBeVisible();
+    await page.getByRole("button", { name: "自由堆疊" }).click();
+    await expect(page.locator('[data-status="playing"]')).toBeVisible();
 
     await expect(hints).toBeVisible();
     // 圖示必須搭配可見文字；只靠 title 提示，觸控裝置看不到
-    await expect(hints).toContainText("點兩格交換");
-    await expect(hints).toContainText("拖曳也可以");
+    await expect(hints).toContainText("左右移動");
+    await expect(hints).toContainText("旋轉與落下");
 
     const playBox = await page.locator("#game-play").boundingBox();
     const hintsBox = await hints.boundingBox();
     expect(hintsBox!.y).toBeGreaterThanOrEqual(playBox!.y + playBox!.height - 1);
+  });
+
+  test("消消樂不放外框提示：第 1 站只靠棋盤上的手指示範", async ({ page }) => {
+    await page.setViewportSize(PHONE);
+    await page.goto("/games/candy-match");
+    await page.getByRole("button", { name: /開始冒險/ }).click();
+    await page.locator('button[data-next="true"]').click();
+    await expect(page.getByTestId("candy-match-board")).toBeVisible();
+
+    await expect(page.getByLabel("操作提示")).toBeHidden();
+    await expect(page.locator('[data-teach-hand="true"]')).toHaveCount(1);
+    await expect(page.getByText("① 先點一個圖案")).toHaveCount(0);
   });
 
   test("橫向與平板下遊戲區仍在首屏", async ({ page }) => {

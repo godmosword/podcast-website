@@ -27,6 +27,30 @@
   animation: candyMatchTeach 1.4s ease-in-out infinite;
 }
 
+/* 示範手指：壓在要先點的那一格右下，輕輕點兩下 */
+.teachHand {
+  position: absolute;
+  right: -18%;
+  bottom: -26%;
+  z-index: 4;
+  display: inline-flex;
+  color: #5d4a67;
+  line-height: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 2px rgba(93, 74, 103, 0.35));
+  animation: candyMatchTapHint 1.4s ease-in-out infinite;
+}
+
+@keyframes candyMatchTapHint {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  40% {
+    transform: translate(-10%, -12%) scale(0.92);
+  }
+}
+
 .pieceFall {
   transition: none;
   animation: candyMatchFall var(--fall-ms, 220ms) ease-out both;
@@ -101,6 +125,10 @@
   .pieceTeach {
     animation: none;
     opacity: 1;
+  }
+
+  .teachHand {
+    animation: none;
   }
 }
 

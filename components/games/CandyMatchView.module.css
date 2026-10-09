@@ -76,43 +76,6 @@
     radial-gradient(100px 100px at -8% 102%, color-mix(in srgb, var(--c-pink) 55%, transparent), transparent 70%);
 }
 
-.bigButton,
-.softButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border-radius: 999px;
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.bigButton {
-  min-height: 58px;
-  padding: 14px 34px;
-  border: none;
-  background: linear-gradient(180deg, #ffe889, #ffbd6f);
-  color: #614018;
-  font-size: 20px;
-  font-weight: 900;
-  box-shadow: 0 8px 0 rgba(203, 128, 52, 0.42), 0 16px 24px rgba(164, 103, 61, 0.18), inset 0 2px 0 rgba(255, 255, 255, 0.72);
-}
-
-.softButton {
-  min-height: 48px;
-  padding: 10px 22px;
-  border: 2px solid rgba(93, 74, 103, 0.12);
-  background: rgba(255, 255, 255, 0.8);
-  color: var(--candy-ink);
-  font-size: 16px;
-  font-weight: 800;
-}
-
-.bigButton:focus-visible,
-.softButton:focus-visible {
-  outline: 3px solid var(--focus-ring, #ff9fb7);
-  outline-offset: 2px;
-}
-
 /*
  * 標題頁「封面舞台」：卡片保留地圖／棋盤用的 min-height，空間交給遊樂園卡片同一張封面。
  * 以卡片寬度（容器查詢）決定版型：窄版上圖下文，≥720 左圖右文；不看視窗寬，
@@ -174,47 +137,69 @@
   line-height: 1.15;
 }
 
-.titleLead {
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* 拿到幾顆星：圖＋數字 */
+.titleStars {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   margin: 0;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 3px 10px rgba(150, 110, 130, 0.14);
+  color: var(--candy-ink);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.titleStars b {
+  font-weight: 900;
+}
+
+.titleStars span {
   color: var(--candy-ink-soft);
-  font-size: var(--fs-body);
   font-weight: 700;
 }
 
-/* 主次兩顆同高、同厚度底邊，用顏色分主次；窄卡上下滿寬 */
-.titleActions {
+/* 唯一的主要動作：大圓「開始」，下面兩個字 */
+.titleStart {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
-  width: min(100%, var(--title-col-max, 480px));
+  justify-items: center;
+  gap: 8px;
 }
 
-.titleActions .bigButton,
-.titleActions .softButton {
-  justify-content: center;
-  min-height: 56px;
-  padding-block: 0;
+.startButton {
+  display: grid;
+  place-items: center;
+  width: var(--start-size, 104px);
+  height: var(--start-size, 104px);
+  padding: 0 0 0 6px;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ffe889, #ffbd6f);
+  color: #614018;
+  cursor: pointer;
+  box-shadow: 0 8px 0 rgba(203, 128, 52, 0.42), 0 16px 24px rgba(164, 103, 61, 0.18), inset 0 2px 0 rgba(255, 255, 255, 0.72);
 }
 
-.titleActions .bigButton {
-  font-size: var(--fs-h3);
-  box-shadow: 0 6px 0 rgba(203, 128, 52, 0.42), 0 12px 20px rgba(164, 103, 61, 0.16), inset 0 2px 0 rgba(255, 255, 255, 0.72);
+.startButton:focus-visible {
+  outline: 3px solid var(--focus-ring, #ff9fb7);
+  outline-offset: 4px;
 }
 
-.titleActions .softButton {
+.startCaption {
+  color: var(--candy-ink);
   font-size: var(--fs-h4);
-  box-shadow: 0 6px 0 rgba(93, 74, 103, 0.12);
-}
-
-@container candy-title (min-width: 480px) {
-  .titleActions {
-    grid-template-columns: 1.6fr 1fr;
-  }
-
-  .titleActions .bigButton,
-  .titleActions .softButton {
-    min-height: 60px;
-  }
+  font-weight: 900;
 }
 
 @container candy-title (min-width: 720px) {
@@ -251,20 +236,38 @@
     font-size: 4rem;
   }
 
-  .titleLead {
-    font-size: var(--fs-h4);
-  }
-
-  .titleActions .bigButton,
-  .titleActions .softButton {
-    min-height: 68px;
+  .titleStart {
+    --start-size: 124px;
   }
 }
 
-/* 矮的直向手機（320×568 等）：封面讓位，「開始冒險」才留在首屏 */
+/* 矮的直向手機（390×664、320×568 等）：封面與開始鈕縮小，「開始」才留在首屏 */
+@media (max-height: 760px) and (orientation: portrait) {
+  .titleArt {
+    max-height: 28vh;
+  }
+
+  .titlePanel {
+    gap: 10px;
+  }
+
+  .titleStart {
+    --start-size: 84px;
+    gap: 4px;
+  }
+}
+
 @media (max-height: 640px) and (orientation: portrait) {
   .titleArt {
-    max-height: 24vh;
+    max-height: 22vh;
+  }
+
+  .titleHeading {
+    font-size: 1.75rem;
+  }
+
+  .titleStart {
+    --start-size: 76px;
   }
 }
 
@@ -283,30 +286,10 @@
     font-size: 1.75rem;
   }
 
-  .titleLead {
-    font-size: 14px;
+  .titleStart {
+    --start-size: 72px;
+    gap: 4px;
   }
-
-  .titleActions .bigButton,
-  .titleActions .softButton {
-    min-height: 48px;
-  }
-}
-
-.mapActions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-}
-
-.mapActions .softButton {
-  min-height: 48px;
-  padding: 8px 20px;
-  border: 2px solid rgba(93, 74, 103, 0.14);
-  background: rgba(255, 255, 255, 0.82);
-  box-shadow: 0 3px 0 rgba(93, 74, 103, 0.08);
-  font-size: 16px;
 }
 
 .mapScreen {
@@ -316,14 +299,6 @@
   width: min(100%, 1200px);
   gap: 16px;
   padding: 0 8px 16px;
-}
-
-.mapHeading {
-  margin: 2px 0 0;
-  color: var(--candy-ink);
-  font-size: clamp(20px, 1.6vw, 24px);
-  font-weight: 900;
-  text-align: center;
 }
 
 .mapScreen button:hover {
@@ -369,72 +344,27 @@
   min-width: 0;
 }
 
-.encouragement {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 44px;
-}
-
-.buddy {
-  flex-shrink: 0;
-  width: 38px;
-  height: 38px;
-}
-
-.bubble {
-  padding: 8px 16px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.9);
-  color: var(--candy-ink);
-  font-size: 15px;
-  font-weight: 800;
-  box-shadow: 0 6px 14px rgba(150, 110, 130, 0.12);
-}
-
-.bubble:empty {
-  display: none;
-}
-
-/* 寬螢幕與橫向手機：任務／道具放側欄，棋盤在主欄（與 View 的 WIDE_LAYOUT_QUERY 一致） */
+/*
+ * 寬螢幕與橫向手機：任務在左、棋盤在中、道具直排在右（與 View 的 WIDE_LAYOUT_QUERY 一致）。
+ * 三欄都垂直置中，棋盤兩側不再空一大片。
+ */
 @media (min-width: 900px), (min-width: 640px) and (orientation: landscape) and (max-height: 520px) {
   .playLayout {
-    grid-template-columns: minmax(240px, 300px) 1fr;
-    /* 第二列吃掉棋盤多出的高度，任務列與道具列緊貼在側欄上方 */
-    grid-template-rows: auto 1fr;
-    grid-template-areas:
-      "task board"
-      "below board";
-    align-items: start;
-    column-gap: 16px;
-    padding: 8px;
+    grid-template-columns: minmax(200px, 260px) minmax(0, 1fr) auto;
+    grid-template-areas: "task board below";
+    align-items: center;
+    column-gap: 20px;
+    /* 三欄整組置中：任務和道具貼著棋盤，不散到畫面兩端 */
+    width: min(100%, 1040px);
+    margin-inline: auto;
+    padding: 8px 12px;
+    box-sizing: border-box;
   }
 
   .playTask,
   .playBelow {
     width: auto;
     justify-self: stretch;
-  }
-
-  .playBelow {
-    align-self: start;
-  }
-}
-
-/* 短螢幕先收掉角色頭像，空間留給任務、棋盤與道具 */
-@media (max-height: 720px) {
-  .buddy {
-    display: none;
-  }
-
-  .encouragement {
-    min-height: 36px;
-  }
-
-  .bubble {
-    padding: 6px 12px;
-    font-size: 14px;
   }
 }
 

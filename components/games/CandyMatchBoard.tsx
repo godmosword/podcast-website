@@ -25,6 +25,7 @@ import {
 import { CANDY_MATCH_PIECES } from "@/lib/games/candy-match/levels";
 import { DirtOverlay, PieceArt, PieceGift } from "@/components/games/CandyMatchPieceArt";
 import { IconBroom, IconConfetti, IconRainbow } from "@/components/games/ClayIcons";
+import { IconPointingHand } from "@/components/games/CandyMatchIcons";
 import styles from "./CandyMatchBoard.module.css";
 
 /** 特殊糖角落徽章：站上黏土圖示（取代 🧹🌈💥，各裝置長相一致、跟棋盤同畫風）。 */
@@ -402,6 +403,12 @@ export function CandyMatchBoard({
                   <span className={styles.giftArrow} aria-hidden>▼</span>
                 ) : null}
               </span>
+              {/* 第一步示範：手指點在要換的那一格，取代「① 先點一個圖案」的文字泡泡 */}
+              {teachOff && teach && i === teach.a ? (
+                <span className={styles.teachHand} data-teach-hand="true" aria-hidden>
+                  <IconPointingHand size={Math.round(cellPx * 0.7)} />
+                </span>
+              ) : null}
             </button>
           );
         })}

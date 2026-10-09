@@ -7,9 +7,9 @@ import type { CandyPropKind } from "./useCandyMatchPlay";
 import styles from "./CandyMatchPlay.module.css";
 
 const PROP_INFO: Record<CandyPropKind, { label: string; range: string; icon: ReactNode }> = {
-  bubble: { label: "泡泡", range: "消掉一格", icon: <IconBubble size={22} /> },
-  broom: { label: "掃把", range: "掃掉一整排", icon: <IconBroom size={22} /> },
-  rainbow: { label: "彩虹", range: "收走同一種", icon: <IconRainbow size={22} /> },
+  bubble: { label: "泡泡", range: "消掉一格", icon: <IconBubble size={32} /> },
+  broom: { label: "掃把", range: "掃掉一整排", icon: <IconBroom size={32} /> },
+  rainbow: { label: "彩虹", range: "收走同一種", icon: <IconRainbow size={32} /> },
 };
 
 const ORDER: readonly CandyPropKind[] = ["bubble", "broom", "rainbow"];
@@ -26,7 +26,10 @@ type CandyMatchPropBarProps = {
   onHint: () => void;
 };
 
-/** 「我能用什麼」：道具有名稱與次數；選了先預覽範圍，點亮框裡的格子才用掉，可取消。 */
+/**
+ * 「我能用什麼」：只有圖示的大圓鈕，右上角是剩下幾個；名稱與範圍在 aria-label。
+ * 選了先預覽範圍，點亮框裡的格子才用掉，可取消。
+ */
 export function CandyMatchPropBar({
   offered,
   left,
@@ -55,8 +58,7 @@ export function CandyMatchPropBar({
               onClick={() => onSelect(kind)}
             >
               <span className={styles.propIcon} aria-hidden>{info.icon}</span>
-              <span className={styles.propLabel} aria-hidden>{info.label}</span>
-              <span className={styles.propCount} aria-hidden>×{count}</span>
+              <span className={styles.propCount} aria-hidden>{count}</span>
             </button>
           );
         })}
@@ -67,8 +69,7 @@ export function CandyMatchPropBar({
           disabled={disabled}
           aria-label="提示"
         >
-          <span className={styles.propIcon} aria-hidden><IconBulb size={20} /></span>
-          <span className={styles.propLabel} aria-hidden>提示</span>
+          <span className={styles.propIcon} aria-hidden><IconBulb size={30} /></span>
         </button>
       </div>
       {active ? (

@@ -4,12 +4,12 @@ import { useCallback, useEffect, useRef, useState, type CSSProperties } from "re
 import Image from "next/image";
 import { CandyMatchBoard } from "@/components/games/CandyMatchBoard";
 import { CandyMatchMap, type CandyStationPreview } from "@/components/games/CandyMatchMap";
-import { PieceArt } from "@/components/games/CandyMatchPieceArt";
 import { CandyMatchPropBar } from "@/components/games/CandyMatchPropBar";
 import { CandyMatchResult } from "@/components/games/CandyMatchResult";
 import { CandyMatchTaskBar } from "@/components/games/CandyMatchTaskBar";
 import { CandyMatchTip } from "@/components/games/CandyMatchTip";
 import { CandyMatchTitleSteps } from "@/components/games/CandyMatchTitleSteps";
+import { IconPlay, IconStar } from "@/components/games/ClayIcons";
 import type { GameAudioBus, OverlayProps } from "@/lib/gamekit/adapter";
 import type { CandyMatchInstance } from "@/lib/gamekit/games/candy-match/adapter";
 import {
@@ -56,15 +56,9 @@ const WIDE_LAYOUT_QUERY =
   "(min-width: 900px), (min-width: 640px) and (orientation: landscape) and (max-height: 520px)";
 /** 棋盤到下方道具列的 grid 間距（與 CSS .playLayout gap 一致）。 */
 const LAYOUT_GAP = 6;
-/** 道具列與鼓勵句之間的間距（CSS .playBelow gap）。 */
-const BELOW_GAP = 8;
 /** 卡面底部內距＋邊框＋棋盤框內距的保留量。 */
 const SURFACE_BOTTOM = 12;
 const GIFT_EXIT_ROW = 30;
-/** 鼓勵句一列的高度（與 CSS .encouragement min-height 一致；短螢幕 36）。引導氣泡等暫時內容不算。 */
-const MESSAGE_ROW = 44;
-const MESSAGE_ROW_SHORT = 36;
-const SHORT_SCREEN_MAX_HEIGHT = 720;
 const EMPTY_PREFS: CandyMatchPrefs = { mode: null, tipsSeen: [] };
 
 function roundKey(mode: CandyMode, index: number, replay: boolean): string {
@@ -76,7 +70,6 @@ export function CandyMatchView({
   reducedMotion,
   status,
   syncHost,
-  onOpenTutorial,
   audio,
   instance,
 }: CandyMatchViewProps) {
@@ -125,6 +118,8 @@ export function CandyMatchView({
     return () => window.removeEventListener(GAMEKIT_PROGRESS_EVENT, refreshMedals);
   }, [refreshMedals]);
   const maxCleared = medals.reduce((m, f, i) => (medalCount(f) > 0 ? Math.max(m, i + 1) : m), 0);
+  const starsGot = CANDY_MATCH_LEVELS.reduce((sum, _, i) => sum + medalCount(medals[i] ?? 0), 0);
+  const starsTotal = CANDY_MATCH_LEVELS.length * 3;
 
   /**
    * 下一局的配置：地圖預覽與開始用同一份（pendingRef 快取，抽一次就固定）；
@@ -182,11 +177,6 @@ export function CandyMatchView({
     syncHost();
   }, [actions, instance, syncHost]);
 
-  const openTutorial = useCallback(() => {
-    setBrandFontsEnabled(true);
-    onOpenTutorial();
-  }, [onOpenTutorial]);
-
   const goToTitle = useCallback(() => {
     actions.leave();
     setScreen("title");
@@ -243,9 +233,8 @@ export function CandyMatchView({
     const apply = () => {
       const wide = window.matchMedia?.(WIDE_LAYOUT_QUERY).matches ?? false;
       const top = el.getBoundingClientRect().top + window.scrollY;
-      // 只算固定的道具列＋一列鼓勵句；道具說明、首次引導等暫時內容出現時讓整頁捲動，不回頭縮格子
-      const message = window.innerHeight <= SHORT_SCREEN_MAX_HEIGHT ? MESSAGE_ROW_SHORT : MESSAGE_ROW;
-      const below = wide ? 0 : LAYOUT_GAP + (propSlotRef.current?.offsetHeight ?? 0) + BELOW_GAP + message;
+      // 只算固定的道具列；道具說明、特殊糖引導等暫時內容出現時讓整頁捲動，不回頭縮格子
+      const below = wide ? 0 : LAYOUT_GAP + (propSlotRef.current?.offsetHeight ?? 0);
       const exits = hasGifts ? GIFT_EXIT_ROW : 0;
       const height = window.innerHeight - top - below - exits - SURFACE_BOTTOM;
       const width = el.clientWidth > 0 ? el.clientWidth : window.innerWidth;
@@ -282,8 +271,8 @@ export function CandyMatchView({
       data-task={play && screen === "play" ? goalTheme(play.round.stage.goals) : undefined}
       data-challenge={play && screen === "play" ? play.round.stage.id : undefined}
       data-candy-fonts={brandFontsEnabled ? "ready" : undefined}
-      /* 標題頁與地圖還沒有棋盤，外框的操作提示（點兩格交換…）此時沒有對象，先收起 */
-      data-play-hints={screen === "play" ? undefined : "off"}
+      /* 外框的操作提示（點兩格交換…）一律收起：第 1 站棋盤上的手指示範就是說明，不再重複講三次 */
+      data-play-hints="off"
     >
       {screen === "title" && (
         <div className={styles.titleScreen}>
@@ -308,15 +297,21 @@ export function CandyMatchView({
           <div className={styles.titlePanel}>
             {/* 頁面唯一 h1 屬 GamePageShell；此處為關卡畫面標題，降為 h2 避免重複 h1。 */}
             <h2 className={styles.titleHeading}>準備找糖果！</h2>
+            {/* 拿到幾顆星：圖＋數字，不寫「完成小任務，就有星星」這種要讀的句子 */}
+            <p className={styles.titleStars} aria-label={`已經拿到 ${starsGot} 顆星，全部 ${starsTotal} 顆`}>
+              <IconStar size={22} />
+              <b aria-hidden>{starsGot}</b>
+              <span aria-hidden>/ {starsTotal}</span>
+            </p>
             <CandyMatchTitleSteps />
-            <p className={styles.titleLead}>完成小任務，就有星星！</p>
-            <div className={styles.titleActions}>
-              <button type="button" className={styles.bigButton} onClick={goToMap}>
-                ▶ 開始冒險
+            {/* 只留一顆大圓「開始」；「怎麼玩」改在第 1 站棋盤上用手指示範 */}
+            <div className={styles.titleStart}>
+              <button type="button" className={styles.startButton} onClick={goToMap} aria-label="開始冒險">
+                <IconPlay size={46} />
               </button>
-              <button type="button" className={styles.softButton} onClick={openTutorial}>
-                怎麼玩？
-              </button>
+              <span className={styles.startCaption} aria-hidden>
+                開始
+              </span>
             </div>
           </div>
         </div>
@@ -324,22 +319,16 @@ export function CandyMatchView({
 
       {screen === "map" && (
         <div className={styles.mapScreen}>
-          <h2 className={styles.mapHeading}>遊樂園地圖</h2>
+          <h2 className={styles.visuallyHidden}>遊樂園地圖</h2>
           <CandyMatchMap
             levels={CANDY_MATCH_LEVELS}
             stars={CANDY_MATCH_LEVELS.map((_, i) => medalCount(medals[i] ?? 0))}
             maxCleared={maxCleared}
             mode={mode}
             onModeChange={changeMode}
-            onTutorial={openTutorial}
             previewFor={previewFor}
             onStart={startLevel}
           />
-          <div className={styles.mapActions}>
-            <button type="button" className={styles.softButton} onClick={goToTitle}>
-              回標題
-            </button>
-          </div>
         </div>
       )}
 
@@ -350,7 +339,8 @@ export function CandyMatchView({
           </div>
 
           <div ref={boardWrapRef} className={styles.boardWrap}>
-            {game.tip ? (
+            {/* 交換教學只靠棋盤上的手指；特殊糖、厚污漬這些新東西第一次出現時才用小泡泡 */}
+            {game.tip && game.tip !== "swap" ? (
               <CandyMatchTip tip={game.tip} selected={game.selected != null} onDismiss={actions.dismissTip} />
             ) : null}
             <CandyMatchBoard
@@ -390,22 +380,16 @@ export function CandyMatchView({
                 onHint={actions.manualHint}
               />
             </div>
-            <div className={styles.encouragement}>
-              <span className={styles.buddy} aria-hidden>
-                <PieceArt piece={3} size="100%" />
-              </span>
-              {/* 只有鼓勵句是 live 區；任務列每步都變，整面 live 會讓讀屏每步重唸 */}
-              <span className={styles.bubble} aria-live="polite">
-                {game.message}
-              </span>
-            </div>
+            {/* 鼓勵句只給讀屏（畫面上的鼓勵交給音效和閃光）；任務列每步都變，整面 live 會讓讀屏每步重唸 */}
+            <p className={styles.visuallyHidden} aria-live="polite">
+              {game.message}
+            </p>
           </div>
 
           {game.outcome ? (
             <CandyMatchResult
               round={play.round}
               outcome={game.outcome}
-              medalStars={medalCount(medals[play.round.index] ?? 0)}
               isLastLevel={isLastLevel}
               reducedMotion={reducedMotion}
               onNext={() => startLevel(play.round.index + 1)}

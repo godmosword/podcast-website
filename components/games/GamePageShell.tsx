@@ -66,7 +66,7 @@ export function GamePageShell({
    * 操作提示屬兒童資訊，留在遊戲正下方。
    * 全部顯示，不做靜默截斷——截斷會讓新增的第三條提示無聲消失。
    * 遊戲畫面還沒有可操作的棋盤時（標題頁、地圖），遊戲在自身根節點標
-   * `data-play-hints="off"`，由 CSS 收起提示。
+   * `data-play-hints="off"`，由 CSS 收起提示。消消樂一律收起：第 1 站棋盤上有手指示範。
    */
   const controls = game?.controls ?? [];
 

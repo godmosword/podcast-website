@@ -24,21 +24,37 @@
 }
 
 .taskPlace {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   min-width: 0;
   overflow: hidden;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 900;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
+.taskPlaceIcon {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* 挑戰模式步數：腳印＋數字 */
 .movesLabel,
 .movesWarning {
+  display: inline-flex;
   flex-shrink: 0;
-  padding: 2px 10px;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
   border-radius: 999px;
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 900;
+  line-height: 1;
 }
 
 .movesLabel {
@@ -51,31 +67,9 @@
   background: #a5567a;
 }
 
-.starChip {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 10px;
-  border-radius: 999px;
-  color: #5d4a67;
-  background: color-mix(in srgb, var(--c-yellow) 26%, white);
-  font-size: 14px;
-  font-weight: 900;
-  line-height: 0;
-}
-
-.starChip span {
-  line-height: 1.4;
-}
-
-.starChip[data-spent="true"] {
-  background: rgba(255, 255, 255, 0.7);
-}
-
 .goalList {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
   gap: 6px;
   margin: 0;
   padding: 0;
@@ -83,12 +77,12 @@
 }
 
 .goal {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  min-height: 40px;
-  padding: 4px 8px;
+  min-height: 48px;
+  padding: 4px 10px;
   border-radius: 14px;
   background: color-mix(in srgb, var(--c-yellow) 22%, white);
 }
@@ -99,8 +93,9 @@
 
 .goalIcon {
   display: inline-flex;
-  width: 36px;
+  width: 40px;
   justify-content: center;
+  line-height: 0;
 }
 
 .iconPair,
@@ -114,37 +109,17 @@
   margin-left: -6px;
 }
 
-.goalText {
-  display: grid;
-  min-width: 0;
-  line-height: 1.2;
-}
-
-.goalTitle {
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.goalRemain {
-  font-size: 14px;
-  font-weight: 800;
-}
-
 /* 數字是孩子最常看的：獨立放大 */
 .goalNum {
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 900;
   line-height: 1;
 }
 
-.goal[data-done="true"] .goalRemain {
-  color: #3f6b4f;
-}
-
 .goalCheck {
-  font-size: 20px;
-  font-weight: 900;
+  display: inline-flex;
   color: #3f8a5a;
+  line-height: 0;
 }
 
 .progressTrack {
@@ -173,21 +148,21 @@
   gap: 8px;
 }
 
+/* 道具：只有圖示的大圓鈕，次數是右上角徽章；名稱和範圍在 aria-label */
 .propButton {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1px;
-  min-width: 64px;
-  min-height: 56px;
-  padding: 4px 8px;
-  border: 2px solid rgba(93, 74, 103, 0.12);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.86);
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 2px solid rgba(93, 74, 103, 0.1);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
   color: #5d4a67;
   cursor: pointer;
   font-family: inherit;
+  box-shadow: 0 4px 0 rgba(93, 74, 103, 0.1);
 }
 
 .propButton:disabled {
@@ -210,17 +185,23 @@
   line-height: 0;
 }
 
-.propLabel {
+.propCount {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: #5d4a67;
+  color: #fff;
   font-size: 13px;
   font-weight: 900;
-  line-height: 1.1;
-}
-
-.propCount {
-  font-size: 12px;
-  font-weight: 800;
   line-height: 1;
-  color: #7c6886;
 }
 
 @media (max-width: 480px) {
@@ -228,20 +209,36 @@
   .progressTrack {
     display: none;
   }
+}
+
+/* 寬螢幕與橫向手機：道具直排在棋盤右側、任務卡放大（與 View 的 WIDE_LAYOUT_QUERY 一致） */
+@media (min-width: 900px), (min-width: 640px) and (orientation: landscape) and (max-height: 520px) {
+  .taskBar {
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .goalList {
+    grid-template-columns: 1fr;
+  }
+
+  .goal {
+    min-height: 64px;
+  }
+
+  .goalNum {
+    font-size: 34px;
+  }
+
+  .propRow {
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
 
   .propButton {
-    position: relative;
-  }
-
-  .propLabel {
-    font-size: 18px;
-  }
-
-  .propCount {
-    position: absolute;
-    top: 2px;
-    right: 4px;
-    font-size: 11px;
+    width: 76px;
+    height: 76px;
   }
 }
 
@@ -331,67 +328,104 @@
   overflow-y: auto;
 }
 
-.starRules {
+.mapButton {
   display: grid;
-  gap: 6px;
-  margin: 0 auto 10px;
-  color: #5d4a67;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  min-height: 0;
+  margin-top: 10px;
+  padding: 0;
+  border-radius: 50%;
 }
 
-.starRules ul {
+/* 結算三顆星：星星在上、條件圖在下、兩三個字給大人 */
+.starRules {
   display: grid;
-  gap: 4px;
-  margin: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  width: min(100%, 300px);
+  margin: 4px auto 14px;
   padding: 0;
   list-style: none;
+  color: #5d4a67;
 }
 
 .starRules li {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 6px;
-  color: #7c6886;
-  font-size: 14px;
-  font-weight: 800;
 }
 
-.starRules li[data-met="true"] {
-  color: #5d4a67;
+/* 中間那顆略高，三顆排成小弧 */
+.starRules li:nth-child(2) {
+  margin-top: -10px;
 }
 
-.starRules li span[aria-hidden] {
-  color: #3f8a5a;
-  font-size: 16px;
-}
-
-.starRules li:not([data-met="true"]) span[aria-hidden] {
-  color: #b9a9c6;
-}
-
-.medalLine {
+.ruleStar {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  justify-self: center;
-  gap: 6px;
-  margin: 0;
-  padding: 4px 12px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--c-lilac) 22%, white);
-  font-size: 13px;
-  font-weight: 800;
-  color: #5d4a67;
+  line-height: 0;
+  filter: drop-shadow(0 3px 0 rgba(224, 162, 26, 0.55));
 }
 
-.medalStars {
-  display: inline-flex;
-  gap: 1px;
+.starRules li:not([data-met="true"]) .ruleStar {
+  filter: none;
+}
+
+.ruleMark {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
   line-height: 0;
 }
 
-.mapButton {
-  margin-top: 10px;
+.starRules li[data-tone="flag"] .ruleMark {
+  background: #e3f6ea;
+  color: #23744a;
+}
+
+.starRules li[data-tone="props"] .ruleMark {
+  background: #e2f2ff;
+}
+
+.starRules li[data-tone="moves"] .ruleMark {
+  background: #eef3ff;
+  color: #3159a8;
+}
+
+/* 沒拿到的那顆：條件圖跟著淡掉，一眼看出差哪一個 */
+.starRules li:not([data-met="true"]) .ruleMark {
+  opacity: 0.45;
+}
+
+.ruleCaption {
+  color: #6b5c73;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.noProps {
+  position: relative;
+  display: inline-flex;
+  line-height: 0;
+}
+
+.noPropsSlash {
+  position: absolute;
+  inset: -4px;
+  width: calc(100% + 8px);
+  height: calc(100% + 8px);
+  overflow: visible;
+}
+
+.noPropsSlash path {
+  fill: none;
+  stroke: #d6336c;
+  stroke-width: 2.6;
+  stroke-linecap: round;
 }
 
 .visuallyHidden {
@@ -436,22 +470,26 @@
   }
 }
 
-/* 窄手機：道具按鈕縮小留白，四顆仍維持 ≥44px 觸控 */
+/* 窄手機：四顆道具仍排得下，維持 ≥44px 觸控 */
 @media (max-width: 380px) {
   .propRow {
     gap: 6px;
   }
 
   .propButton {
-    min-width: 56px;
-    padding: 4px 6px;
+    width: 58px;
+    height: 58px;
   }
 }
 
-/* 320–360 寬：多目標固定兩欄，不疊成一欄把棋盤往下推 */
+/* 320–360 寬：多目標固定兩欄，不疊成一欄把棋盤往下推；只有一個目標就佔滿 */
 @media (max-width: 360px) {
   .goalList {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .goalList[data-count="1"] {
+    grid-template-columns: 1fr;
   }
 
   .goal {
@@ -460,11 +498,11 @@
   }
 
   .goalIcon {
-    width: 30px;
+    width: 32px;
   }
 
   .goalNum {
-    font-size: 18px;
+    font-size: 22px;
   }
 }
 

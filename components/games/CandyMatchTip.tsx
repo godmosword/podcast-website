@@ -6,6 +6,7 @@ import type { CandyMatchTipId } from "@/lib/gamekit/progress/candy-match-prefs";
 import styles from "./CandyMatchPlay.module.css";
 
 const TIPS: Record<CandyMatchTipId, { icon: ReactNode; text: (selected: boolean) => string }> = {
+  // 交換教學已改成棋盤上的手指示範，View 不再渲染 "swap" 泡泡；型別要求每個 id 都有一筆，文字留著當讀屏與日後參考。
   swap: {
     icon: <IconTap size={22} />,
     text: (selected) => (selected ? "② 再點旁邊的圖案，換位置湊三個！" : "① 先點一個圖案"),
