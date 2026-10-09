@@ -177,6 +177,24 @@
   outline-offset: 2px;
 }
 
+/* 著色本：圖示方鈕，跟右側工具一樣大，避免和「換一張」擠成兩行小字。 */
+.backIcon {
+  position: relative;
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  padding: 0;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .playTitle {
   flex: 1 1 auto;
   min-width: 0;

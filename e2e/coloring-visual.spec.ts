@@ -55,14 +55,15 @@ for (const viewport of viewports)
       await page.getByRole("button", { name: "著色：恐龍車多多", exact: true }).click();
       await expect(page.getByRole("button", { name: "蠟筆", exact: true })).toBeEnabled();
       await capture(page, `${prefix}-canvas`, a11y);
-      for (const name of ["蠟筆", "填滿", "擦掉", "復原", "更多"]) {
+      for (const name of ["蠟筆", "填滿", "擦掉", "復原", "關閉聲音"]) {
         const box = await page.getByRole("button", { name, exact: true }).boundingBox();
-        expect(box!.width).toBeGreaterThanOrEqual(44);
-        expect(box!.height).toBeGreaterThanOrEqual(44);
+        expect(box!.width).toBeGreaterThanOrEqual(48);
+        expect(box!.height).toBeGreaterThanOrEqual(48);
         expect(box!.x).toBeGreaterThanOrEqual(0);
         expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
       }
-      await page.getByRole("button", { name: "更多", exact: true }).click();
+      await page.getByRole("button", { name: "家長工具", exact: true }).focus();
+      await page.keyboard.press("Enter");
       await capture(page, `${prefix}-more`, a11y);
       await page.getByRole("button", { name: "關閉", exact: true }).click();
       await page.getByRole("button", { name: "填滿", exact: true }).click();

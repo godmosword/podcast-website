@@ -23,6 +23,13 @@ async function openFirstColoringPage(page: Page) {
   await openColoringPage(page, /^著色：/);
 }
 
+async function openAdultTools(page: Page) {
+  const gate = page.getByRole("button", { name: "家長工具", exact: true });
+  await gate.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("dialog", { name: "更多著色工具" })).toBeVisible();
+}
+
 /** 統計 display canvas 一段水平列上的紅色像素數。 */
 async function countRedOnRow(page: Page, fx0: number, fx1: number, fy: number) {
   return page.evaluate(
@@ -86,7 +93,7 @@ test.describe("coloring book", () => {
   /** G-L3：蠟筆自動不出線——從外底起筆拖進主體中心，中心那一列不該有紅。 */
   test("蠟筆從外底拖進主體，不會塗出線（character 頁）", async ({ page }) => {
     await openColoringPage(page, /^著色：恐龍車多多$/);
-    await page.getByRole("button", { name: "更多", exact: true }).click();
+    await openAdultTools(page);
     await page.getByRole("button", { name: "筆刷粗" }).click();
     await page.getByRole("button", { name: "關閉", exact: true }).click();
     const box = await page.locator("canvas").boundingBox();
@@ -124,7 +131,7 @@ test.describe("coloring book", () => {
       "draw",
     );
     await expect(page.getByRole("button", { name: "我塗好了" })).toHaveCount(0);
-    await page.getByRole("button", { name: "更多", exact: true }).click();
+    await openAdultTools(page);
     for (const name of ["筆刷細", "筆刷中", "筆刷粗"]) {
       const sizeBtn = page.getByRole("button", { name });
       await expect(sizeBtn).toBeVisible();
@@ -137,7 +144,7 @@ test.describe("coloring book", () => {
     await expect(
       page.getByRole("button", { name: "蠟筆" }).locator("svg"),
     ).toBeVisible();
-    await page.getByRole("button", { name: "更多", exact: true }).click();
+    await openAdultTools(page);
     await expect(page.getByRole("button", { name: "縮放還原" })).toBeDisabled();
   });
 
@@ -256,7 +263,7 @@ test.describe("coloring book", () => {
     const [download] = await Promise.all([
       page.waitForEvent("download"),
       (async () => {
-        await page.getByRole("button", { name: "更多", exact: true }).click();
+        await openAdultTools(page);
         await page.getByRole("button", { name: "下載", exact: true }).click();
       })(),
     ]);
@@ -369,21 +376,22 @@ test.describe("coloring book 離開提醒與塗過標記", () => {
     await expect(page.getByRole("button", { name: "我塗好了" })).toBeVisible();
   }
 
-  test("塗了沒收就按換一張：先問，繼續塗留在原地，不要了才回選頁", async ({ page }) => {
+  test("塗了沒收就按換一張：先問，繼續塗留在原地，收起來才回選頁", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openColoringPage(page, /^著色：猛猛$/);
     await paintBackground(page);
-    await page.getByRole("button", { name: "← 換一張", exact: true }).click();
-    const sheet = page.getByRole("alertdialog", { name: "還沒收起來喔" });
+    await page.getByRole("button", { name: "換一張", exact: true }).click();
+    const sheet = page.getByRole("alertdialog", { name: "要換地方嗎" });
     await expect(sheet).toBeVisible();
     await expect(sheet.getByRole("button", { name: "繼續塗" })).toBeFocused();
     await sheet.getByRole("button", { name: "繼續塗" }).click();
     await expect(sheet).toHaveCount(0);
     await expect(page.locator("canvas")).toBeVisible();
 
-    await page.getByRole("button", { name: "← 換一張", exact: true }).click();
-    await sheet.getByRole("button", { name: "不要了" }).click();
+    await page.getByRole("button", { name: "換一張", exact: true }).click();
+    await sheet.getByRole("button", { name: /收起來/ }).click();
     await expect(page.getByText("選一頁來塗", { exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "看作品：猛猛", exact: true })).toBeVisible();
   });
 
   test("按回遊樂園選收起來：存好作品再離開，回來那頁貼了塗過", async ({ page }) => {
@@ -391,9 +399,9 @@ test.describe("coloring book 離開提醒與塗過標記", () => {
     await openColoringPage(page, /^著色：猛猛$/);
     await paintBackground(page);
     await page.getByRole("link", { name: /回遊樂園/ }).click();
-    const sheet = page.getByRole("alertdialog", { name: "還沒收起來喔" });
+    const sheet = page.getByRole("alertdialog", { name: "要換地方嗎" });
     await expect(sheet).toBeVisible();
-    await sheet.getByRole("button", { name: "收起來" }).click();
+    await sheet.getByRole("button", { name: /收起來/ }).click();
     await expect(page).toHaveURL(/\/games$/);
 
     await page.goto("/games/coloring-book");
@@ -408,10 +416,14 @@ test.describe("coloring book 離開提醒與塗過標記", () => {
     ).not.toHaveAccessibleDescription("塗過");
   });
 
-  test("沒塗或已收藏時直接離開，不跳提醒", async ({ page }) => {
+  test("沒塗也要再確認才離開；塗好了從完成面換頁不再問一次", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openColoringPage(page, /^著色：猛猛$/);
-    await page.getByRole("button", { name: "← 換一張", exact: true }).click();
+    await page.getByRole("button", { name: "換一張", exact: true }).click();
+    const sheet = page.getByRole("alertdialog", { name: "要換地方嗎" });
+    await expect(sheet).toBeVisible();
+    await expect(page.getByText("選一頁來塗", { exact: true })).toHaveCount(0);
+    await sheet.getByRole("button", { name: "換一張", exact: true }).click();
     await expect(page.getByText("選一頁來塗", { exact: true })).toBeVisible();
 
     await page.getByRole("button", { name: "著色：猛猛", exact: true }).click();
@@ -438,6 +450,67 @@ test.describe("coloring book 離開提醒與塗過標記", () => {
         return document.elementFromPoint(r.left + r.width / 2, y) === canvas;
       });
       expect(hitsCanvas).toBe(true);
+    });
+  }
+
+  for (const vp of [
+    { width: 390, height: 844 },
+    { width: 505, height: 896 },
+    { width: 320, height: 568 },
+    { width: 768, height: 1024 },
+    { width: 1024, height: 768 },
+    { width: 844, height: 390 },
+    { width: 1280, height: 800 },
+  ]) {
+    test(`${vp.width}×${vp.height}：畫布和全部顏色不用捲動就看得到`, async ({ page }) => {
+      await page.setViewportSize(vp);
+      await openFirstColoringPage(page);
+      const fit = await page.evaluate(() => {
+        const canvas = document.querySelector("canvas")!.getBoundingClientRect();
+        const controls = document
+          .querySelector("[data-testid='coloring-controls']")!
+          .getBoundingClientRect();
+        const swatches = [...document.querySelectorAll('[role="option"]')].map((el) =>
+          el.getBoundingClientRect(),
+        );
+        const doc = document.scrollingElement!;
+        const hit = (x: number, y: number) => document.elementFromPoint(x, y);
+        const bottomHit = hit(canvas.left + canvas.width / 2, Math.min(canvas.bottom - 2, window.innerHeight - 1));
+        const separated =
+          canvas.right <= controls.left + 1 ||
+          controls.right <= canvas.left + 1 ||
+          canvas.bottom <= controls.top + 1 ||
+          controls.bottom <= canvas.top + 1;
+        return {
+          noScroll: doc.scrollHeight <= doc.clientHeight + 1,
+          noHorizontal: doc.scrollWidth <= doc.clientWidth + 1,
+          canvasInView: canvas.top >= 0 && canvas.bottom <= window.innerHeight + 1,
+          canvasClearOfControls: separated,
+          bottomIsCanvas: bottomHit === document.querySelector("canvas"),
+          swatchCount: swatches.length,
+          swatchesInView: swatches.every(
+            (r) =>
+              r.top >= -1 &&
+              r.bottom <= window.innerHeight + 1 &&
+              r.left >= -1 &&
+              r.right <= window.innerWidth + 1 &&
+              r.width >= 48 &&
+              r.height >= 48,
+          ),
+        };
+      });
+      expect(fit).toEqual({
+        noScroll: true,
+        noHorizontal: true,
+        canvasInView: true,
+        canvasClearOfControls: true,
+        bottomIsCanvas: true,
+        swatchCount: 12,
+        swatchesInView: true,
+      });
+      const back = await page.getByRole("link", { name: "回遊樂園", exact: true }).boundingBox();
+      const swap = await page.getByRole("button", { name: "換一張", exact: true }).boundingBox();
+      expect(swap!.x).toBeGreaterThan(back!.x + back!.width + 48);
     });
   }
 });

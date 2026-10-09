@@ -2,9 +2,18 @@
 "use client";
 
 import Link from "next/link";
+import StarBurst from "@/components/celebration/StarBurst";
 import { GameEndStation } from "@/components/games/GameEndStation";
 import type { ColoringPage } from "@/data/coloring-pages";
+import { createRadialBurstParticles } from "@/lib/celebration-dom";
 import styles from "./ColoringCanvas.module.css";
+
+const DONE_BURST = createRadialBurstParticles({
+  count: 8,
+  radius: 72,
+  seed: 3,
+  colors: ["#f2c94c", "#e85d4c", "#56ccf2", "#6fcf97", "#f781c6"],
+});
 
 type ColoringDoneSheetProps = {
   page: ColoringPage;
@@ -40,15 +49,18 @@ export function ColoringDoneSheet({
   return (
     <div className={styles.doneOverlay} role="presentation">
       <div className={styles.doneSheet}>
-        {snapshotUrl ? (
-          <img
-            className={styles.doneSnapshot}
-            src={snapshotUrl}
-            alt=""
-            aria-hidden="true"
-            data-testid="coloring-done-snapshot"
-          />
-        ) : null}
+        <div className={styles.doneBurst}>
+          {snapshotUrl ? (
+            <img
+              className={styles.doneSnapshot}
+              src={snapshotUrl}
+              alt=""
+              aria-hidden="true"
+              data-testid="coloring-done-snapshot"
+            />
+          ) : null}
+          <StarBurst particles={DONE_BURST} />
+        </div>
         <GameEndStation
           mood="win"
           title="塗好了！"

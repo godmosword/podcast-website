@@ -7,6 +7,9 @@ import {
   useState,
   type PointerEvent as ReactPointerEvent,
 } from "react";
+import { createPortal } from "react-dom";
+import { IconPageTurn, IconStar } from "@/components/games/ClayIcons";
+import { useGamePlayChromeSlot } from "@/components/games/GamePlayChromeSlot";
 import type { ColoringPage } from "@/data/coloring-pages";
 import { COLORING_DONE_CTA } from "@/lib/coloring/flow";
 import { playSfx } from "@/lib/sfx";
@@ -48,6 +51,7 @@ import { useReferenceSampler } from "./useReferenceSampler";
 import { paletteName } from "@/lib/coloring/reference-pick";
 
 const TRANSPARENT: Rgba = [255, 255, 255, 0];
+const COACH_KEY = "cc-coloring-coach";
 
 /** 油漆桶：pointerup 前位移超過此值（螢幕 px）視為手勢，不填色。 */
 const BUCKET_MOVE_TOLERANCE = 10;
@@ -132,6 +136,9 @@ export function ColoringCanvas({
   const doneRequestRef = useRef(0);
   const [hasPainted, setHasPainted] = useState(false);
   const [usedBucket, setUsedBucket] = useState(false);
+  const [spark, setSpark] = useState(0);
+  const [showCoach, setShowCoach] = useState(false);
+  const chromeSlot = useGamePlayChromeSlot();
 
   const revokeDoneSnapshot = useCallback(() => {
     if (doneSnapshotUrlRef.current) {
@@ -176,7 +183,7 @@ export function ColoringCanvas({
     setColorHex(hex);
     setTool((current) => (current === "eraser" ? "crayon" : current));
     setPickStatus(`換成${paletteName(hex)}了`);
-    playSfx("tap");
+    playSfx("pick");
   }, []);
   const closePeek = useCallback(() => {
     setPeek(false);
@@ -366,7 +373,8 @@ export function ColoringCanvas({
       if (!rect) return;
       pushUndoPatch({ rect, pixels: cropImageDataRect(base, rect) });
       setUsedBucket(true);
-      playSfx("tap");
+      setSpark((n) => n + 1);
+      playSfx("fill");
       ctx.putImageData(img, 0, 0, rect.x, rect.y, rect.width, rect.height);
       markPainted();
       requestComposite();
@@ -629,7 +637,7 @@ export function ColoringCanvas({
       if (!snapshotAliveRef.current || request !== doneRequestRef.current)
         return;
       setDoneOpen(true);
-      playSfx("collect");
+      playSfx("celebrate");
     } catch {
       setActionError("作品圖片暫時無法產生，請再試一次。");
     } finally {
@@ -643,6 +651,22 @@ export function ColoringCanvas({
     artwork.forgetSaved();
   };
 
+  useEffect(() => {
+    try {
+      setShowCoach(localStorage.getItem(COACH_KEY) !== "1");
+    } catch {
+      setShowCoach(true);
+    }
+  }, []);
+  useEffect(() => {
+    if (!usedBucket) return;
+    try {
+      localStorage.setItem(COACH_KEY, "1");
+    } catch {
+      /* 記不住就下次再示範一次 */
+    }
+  }, [usedBucket]);
+
   const leave = useColoringLeave({
     unsaved: artwork.unsaved,
     getDisplay: getComposited,
@@ -655,120 +679,136 @@ export function ColoringCanvas({
     },
   });
 
+  const switchButton = (
+    <button
+      type="button"
+      className={styles.navBtn}
+      aria-label="換一張"
+      onClick={() => leave.requestLeave("picker")}
+    >
+      <IconPageTurn size={28} />
+    </button>
+  );
+
   return (
-    <div className={styles.root}>
-      <div className={styles.topBar}>
-        <button
-          type="button"
-          className={styles.backPage}
-          onClick={() => leave.requestLeave("picker")}
-        >
-          ← 換一張
-        </button>
-        <p className={styles.pageTitle}>{page.title}</p>
-        {hasPainted ? (
-          <button
-            type="button"
-            className={styles.doneBtn}
-            onClick={handleDone}
-            disabled={doneBusy}
-          >
-            {COLORING_DONE_CTA}
-          </button>
-        ) : null}
-      </div>
+    <div className={styles.root} data-coloring-root="">
+      {chromeSlot ? (
+        createPortal(switchButton, chromeSlot)
+      ) : (
+        <div className={styles.navFallback}>{switchButton}</div>
+      )}
 
-      <div className={styles.reference}>
-        <ColoringReference
-          ref={peekTriggerRef}
-          page={page}
-          sample={sampleReference}
-          onPick={pickReferenceColor}
-          onPeek={() => setPeek(true)}
-          status={pickStatus}
-        />
-      </div>
-
-      <div className={styles.stage} ref={stageRef}>
-        <canvas
-          ref={displayRef}
-          className={styles.canvas}
-          role="img"
-          aria-label={`${page.title}著色畫布`}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerEnd}
-          onPointerCancel={onPointerEnd}
-          onPointerLeave={hideCursorRing}
-        />
-        <div ref={cursorRef} className={styles.cursorRing} aria-hidden="true" />
-        {peek ? (
-          <ColoringReferencePeek
+      <div className={styles.fit}>
+        <div className={styles.reference}>
+          <ColoringReference
+            ref={peekTriggerRef}
             page={page}
             sample={sampleReference}
             onPick={pickReferenceColor}
-            onClose={closePeek}
+            onPeek={() => setPeek(true)}
+            status={pickStatus}
           />
-        ) : null}
-        {!ready ? (
-          <div className={styles.loading} role="status">
-            <span>{loadError ?? "載入線稿中…"}</span>
-            {loadError ? (
-              <div>
-                <button type="button" onClick={() => setRetry((n) => n + 1)}>
-                  重試
-                </button>
-                <button type="button" onClick={onBack}>
-                  換一張
-                </button>
+        </div>
+
+        <div className={styles.stageSlot}>
+          <div className={styles.stageFrame}>
+            <div className={styles.stage} ref={stageRef}>
+            <canvas
+              ref={displayRef}
+              className={styles.canvas}
+              role="img"
+              aria-label={`${page.title}著色畫布`}
+              onPointerDown={onPointerDown}
+              onPointerMove={onPointerMove}
+              onPointerUp={onPointerEnd}
+              onPointerCancel={onPointerEnd}
+              onPointerLeave={hideCursorRing}
+            />
+            <div ref={cursorRef} className={styles.cursorRing} aria-hidden="true" />
+            {spark > 0 ? (
+              <span key={spark} className={styles.fillSpark} aria-hidden="true" />
+            ) : null}
+            {peek ? (
+              <ColoringReferencePeek
+                page={page}
+                sample={sampleReference}
+                onPick={pickReferenceColor}
+                onClose={closePeek}
+              />
+            ) : null}
+            {!ready ? (
+              <div className={styles.loading} role="status">
+                <span>{loadError ?? "載入線稿中…"}</span>
+                {loadError ? (
+                  <div>
+                    <button type="button" onClick={() => setRetry((n) => n + 1)}>
+                      重試
+                    </button>
+                    <button type="button" onClick={onBack}>
+                      換一張
+                    </button>
+                  </div>
+                ) : null}
               </div>
             ) : null}
+            </div>
           </div>
-        ) : null}
+        </div>
+
+        <div className={styles.controls} data-testid="coloring-controls">
+          {actionError ? (
+            <p role="status" aria-live="polite" className={styles.saveNotice}>
+              {actionError}
+            </p>
+          ) : null}
+          {hasPainted ? (
+            <button
+              type="button"
+              className={styles.doneBtn}
+              aria-label={COLORING_DONE_CTA}
+              onClick={handleDone}
+              disabled={doneBusy}
+            >
+              <span className={styles.doneBadge}>
+                <IconStar size={28} />
+              </span>
+            </button>
+          ) : null}
+          <ColoringPalette
+            colorHex={colorHex}
+            onChange={setColorHex}
+            group={colorGroup}
+          />
+          <ColoringToolbar
+            tool={tool}
+            onToolChange={setTool}
+            brushSize={brushSize}
+            onBrushSizeChange={setBrushSize}
+            ready={ready && !doneBusy}
+            colorGroup={colorGroup}
+            onColorGroupChange={setColorGroup}
+            guided={guided}
+            onGuidedChange={setGuided}
+            canRedo={canRedo}
+            onRedo={handleRedo}
+            onPrint={() => void exporter.print(page.lineArtSrc)}
+            canUndo={canUndo}
+            onUndo={handleUndo}
+            onClear={handleClear}
+            onDownload={exporter.download}
+            viewActive={viewActive}
+            onResetView={() => applyView(DEFAULT_VIEW)}
+            cueTool={hasPainted && !usedBucket ? "bucket" : null}
+          />
+        </div>
       </div>
 
-      {actionError ? (
-        <p role="status" aria-live="polite" className={styles.saveNotice}>
-          {actionError}
-        </p>
-      ) : null}
-
-      {!usedBucket ? (
+      {showCoach && !usedBucket ? (
         <ColoringHint
-          className={styles.openHint}
           step={hasPainted ? "fill" : "draw"}
           colorHex={colorHex}
         />
       ) : null}
-      {/* G-H3：色盤＋工具列黏在視窗底（手機）／畫布右欄（桌機），畫布可見時一定搆得到 */}
-      <div className={styles.controls} data-testid="coloring-controls">
-        <ColoringPalette
-          colorHex={colorHex}
-          onChange={setColorHex}
-          group={colorGroup}
-        />
-        <ColoringToolbar
-          tool={tool}
-          onToolChange={setTool}
-          brushSize={brushSize}
-          onBrushSizeChange={setBrushSize}
-          ready={ready && !doneBusy}
-          colorGroup={colorGroup}
-          onColorGroupChange={setColorGroup}
-          guided={guided}
-          onGuidedChange={setGuided}
-          canRedo={canRedo}
-          onRedo={handleRedo}
-          onPrint={() => void exporter.print(page.lineArtSrc)}
-          canUndo={canUndo}
-          onUndo={handleUndo}
-          onClear={handleClear}
-          onDownload={exporter.download}
-          viewActive={viewActive}
-          onResetView={() => applyView(DEFAULT_VIEW)}
-          cueTool={hasPainted && !usedBucket ? "bucket" : null}
-        />
-      </div>
 
       {doneOpen ? (
         <ColoringDoneSheet
@@ -778,7 +818,10 @@ export function ColoringCanvas({
           saveFailed={collectionStatus.startsWith("作品尚未")}
           unsaved={artwork.unsaved}
           onReplay={closeDoneOverlay}
-          onChangePage={() => leave.requestLeave("picker")}
+          onChangePage={() => {
+            if (artwork.unsaved) leave.requestLeave("picker");
+            else onBack();
+          }}
           onRetrySave={() => void handleDone()}
           onDownload={exporter.download}
           onShare={exporter.share}

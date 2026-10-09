@@ -3,30 +3,57 @@
 }
 .bar {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
   gap: 4px;
 }
 .toolBtn {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  width: 100%;
   min-height: 48px;
-  min-width: 0;
-  padding: 4px 1px;
+  min-width: 48px;
+  padding: 4px;
   border: 2px solid color-mix(in srgb, var(--coloring-ink) 20%, transparent);
   border-radius: var(--radius-sm);
   background: var(--coloring-ui-surface);
   color: var(--coloring-ink);
-  font-size: 12px;
-  font-weight: 800;
   cursor: pointer;
+  touch-action: manipulation;
+}
+.toolBtn [data-sr],
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 .icon {
-  width: 22px;
-  height: 22px;
+  width: 28px;
+  height: 28px;
   flex-shrink: 0;
+}
+.adultGate {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid color-mix(in srgb, var(--ink) 12%, var(--line));
+  background: color-mix(in srgb, var(--card) 90%, var(--c-sky));
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--ink) 10%, transparent);
+  color: var(--ink);
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
 }
 .active,
 .option[aria-pressed="true"] {
@@ -42,6 +69,7 @@
   cursor: default;
 }
 .toolBtn:focus-visible,
+.adultGate:focus-visible,
 .panel button:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;

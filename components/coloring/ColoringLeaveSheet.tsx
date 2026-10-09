@@ -1,83 +1,106 @@
-/* eslint-disable @next/next/no-img-element -- 畫布縮圖是本機 data URL */
 "use client";
 
-import { useEffect, useRef } from "react";
-import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { IconPageTurn, IconStar } from "@/components/games/ClayIcons";
+import type { LeaveTarget } from "./useColoringLeave";
 import { ClearIcon, CrayonIcon } from "./ColoringToolbarIcons";
+import {
+  ColoringPictureDialog,
+  type PictureAction,
+} from "./ColoringPictureDialog";
 import styles from "./ColoringLeaveSheet.module.css";
 
 type ColoringLeaveSheetProps = {
   thumbnailUrl: string | null;
   busy: boolean;
   error: string;
-  onSave: () => void;
+  destination: LeaveTarget;
+  unsaved: boolean;
   onStay: () => void;
+  /** 有顏色就先收起來再走；沒有就直接走。 */
+  onGo: () => void;
+  /** 收不起來時才給的離開（會丟掉還沒存的顏色）。 */
   onDiscard: () => void;
 };
 
+function ParkGateIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path
+        d="M3.5 20V9.2L12 3.6l8.5 5.6V20"
+        fill="#b9f3db"
+        stroke="#2f2f2f"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M9 20v-6.2h6V20"
+        fill="#fff6ea"
+        stroke="#2f2f2f"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="8" r="1.35" fill="#e85d4c" />
+    </svg>
+  );
+}
+
 /**
- * 塗了還沒收起來就要離開時問一次：收起來／繼續塗／不要了。
- * 3–7 歲看圖示就懂，字只有三個；預設焦點在「繼續塗」，Esc 也是繼續塗。
+ * 換一張／回遊樂園前先給看圖：大蠟筆＝繼續塗。
+ * 小圖是目的地；塗過的話那一顆會先把作品收起來，不識字也不會按掉進度。
+ * 「不要了」只在收不起來時出現，避免一開始就有一顆會丟掉顏色的鈕。
  */
 export function ColoringLeaveSheet({
   thumbnailUrl,
   busy,
   error,
-  onSave,
+  destination,
+  unsaved,
   onStay,
+  onGo,
   onDiscard,
 }: ColoringLeaveSheetProps) {
-  const sheetRef = useRef<HTMLDivElement>(null);
-  const stayRef = useRef<HTMLButtonElement>(null);
-  useFocusTrap(true, sheetRef);
-
-  useEffect(() => {
-    stayRef.current?.focus();
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onStay();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onStay]);
+  const place = destination === "picker" ? "換一張" : "回遊樂園";
+  const goLabel = unsaved ? `收起來，${place}` : place;
+  const actions: PictureAction[] = [
+    {
+      label: "繼續塗",
+      tone: "stay",
+      icon: <CrayonIcon />,
+      onClick: onStay,
+    },
+    {
+      label: goLabel,
+      tone: "go",
+      icon: (
+        <span className={styles.goMark}>
+          {destination === "picker" ? <IconPageTurn size={36} /> : <ParkGateIcon />}
+          {unsaved ? (
+            <span className={styles.badge}>
+              <IconStar size={16} style={{ width: 16, height: 16 }} />
+            </span>
+          ) : null}
+        </span>
+      ),
+      onClick: onGo,
+      disabled: busy,
+    },
+  ];
+  if (error) {
+    actions.push({
+      label: "不要了",
+      tone: "danger",
+      icon: <ClearIcon />,
+      onClick: onDiscard,
+      disabled: busy,
+    });
+  }
 
   return (
-    <div className={styles.backdrop} role="presentation">
-      <div
-        ref={sheetRef}
-        className={styles.sheet}
-        role="alertdialog"
-        aria-modal="true"
-        aria-labelledby="coloring-leave-title"
-      >
-        {thumbnailUrl ? (
-          <img className={styles.thumb} src={thumbnailUrl} alt="" aria-hidden="true" />
-        ) : null}
-        <h2 id="coloring-leave-title" className={styles.title}>
-          還沒收起來喔
-        </h2>
-        <div className={styles.actions}>
-          <button type="button" className={styles.save} onClick={onSave} disabled={busy}>
-            <svg className={styles.icon} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path
-                className={styles.star}
-                d="M12 2.5l2.9 6 6.6.8-4.9 4.6 1.3 6.5L12 17.2 6.1 20.4l1.3-6.5L2.5 9.3l6.6-.8z"
-              />
-            </svg>
-            收起來
-          </button>
-          <button ref={stayRef} type="button" className={styles.stay} onClick={onStay}>
-            <CrayonIcon className={styles.icon} />
-            繼續塗
-          </button>
-          <button type="button" className={styles.discard} onClick={onDiscard} disabled={busy}>
-            <ClearIcon className={styles.icon} />
-            不要了
-          </button>
-        </div>
-        <p className={styles.error} role="status" aria-live="polite">
-          {error}
-        </p>
-      </div>
-    </div>
+    <ColoringPictureDialog
+      label="要換地方嗎"
+      thumbnailUrl={thumbnailUrl}
+      actions={actions}
+      error={error}
+    />
   );
 }

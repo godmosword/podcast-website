@@ -60,7 +60,7 @@ export default function ColoringBook() {
   else
     body = <ColoringCover onOpen={() => setStage("picker")} />;
   return (
-    <ColoringPageShell title="繪本塗塗鴉">
+    <ColoringPageShell title="繪本塗塗鴉" stage={stage}>
       {message ? <p role="status">{message}</p> : null}
       {body}
     </ColoringPageShell>

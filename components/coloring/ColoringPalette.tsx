@@ -50,6 +50,7 @@ export function ColoringPalette({
               ? choices.length - 1
               : (Math.max(0, index) + delta + choices.length) % choices.length;
         onChange(choices[next]!.hex);
+        playSfx("pick");
         e.currentTarget.querySelectorAll("button")[next]?.focus();
       }}
     >
@@ -65,9 +66,13 @@ export function ColoringPalette({
             aria-label={swatch.name}
             className={`${styles.swatch} ${selected ? styles.selected : ""}`}
             style={{ background: swatch.hex }}
-            onClick={() => {
-              playSfx("tap");
+            onClick={(event) => {
+              playSfx("pick");
               onChange(swatch.hex);
+              const el = event.currentTarget;
+              el.classList.remove(styles.pop);
+              void el.offsetWidth;
+              el.classList.add(styles.pop);
             }}
           />
         );

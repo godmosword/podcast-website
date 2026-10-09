@@ -1,0 +1,112 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(4px);
+}
+
+.sheet {
+  display: grid;
+  justify-items: center;
+  gap: 0.85rem;
+  width: min(100%, 22rem);
+  padding: 1.1rem 1rem 0.9rem;
+  border-radius: var(--radius-lg);
+  background: var(--coloring-ui-surface, var(--card));
+  color: var(--coloring-ink, var(--ink));
+  box-shadow: 0 18px 40px color-mix(in srgb, var(--ink) 22%, transparent);
+}
+
+.thumb {
+  width: min(42vw, 8.5rem);
+  aspect-ratio: 1;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  background: var(--coloring-canvas-surface, #fff);
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--ink) 16%, transparent);
+}
+
+.action {
+  position: relative;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-md);
+  border: 2px solid color-mix(in srgb, var(--ink) 18%, transparent);
+  background: var(--coloring-ui-surface-strong, var(--card-2));
+  color: inherit;
+  cursor: pointer;
+}
+
+.action:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.action:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+/* 安全選項最大、單獨一列，小手最容易按到的是「留下來」。 */
+.stay {
+  width: 100%;
+  min-height: 96px;
+  border-color: transparent;
+  background: var(--coloring-accent, var(--support-from));
+  color: var(--coloring-accent-fg, var(--support-fg));
+  box-shadow: 0 4px 0 var(--coloring-accent-shadow, var(--support-to));
+}
+
+.rest {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.go,
+.danger {
+  width: 88px;
+  min-height: 72px;
+}
+
+.danger {
+  background: var(--coloring-canvas-surface, #fff);
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+}
+
+.icon svg {
+  width: 40px;
+  height: 40px;
+}
+
+.stay .icon svg {
+  width: 48px;
+  height: 48px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.error {
+  margin: 0;
+  min-height: 1.2em;
+  font-size: var(--fs-label);
+  font-weight: 700;
+  text-align: center;
+}

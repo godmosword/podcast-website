@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import type { ComponentProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ColoringToolbar } from "./ColoringToolbar";
 import { BucketIcon, CrayonIcon, EraserIcon } from "./ColoringToolbarIcons";
@@ -11,6 +11,12 @@ afterEach(() => {
 });
 
 const NOOP = () => {};
+
+function openAdultTools() {
+  fireEvent.keyDown(screen.getByRole("button", { name: "家長工具" }), {
+    key: "Enter",
+  });
+}
 
 function renderToolbar(
   overrides: Partial<ComponentProps<typeof ColoringToolbar>> = {},
@@ -33,16 +39,16 @@ function renderToolbar(
 }
 
 describe("ColoringToolbar", () => {
-  it("畫具有圖示和看得到的名字", () => {
+  it("畫具有圖示，名字留給讀螢幕", () => {
     renderToolbar();
 
     for (const name of ["蠟筆", "填滿", "擦掉"] as const) {
       const btn = screen.getByRole("button", { name });
-      expect(btn.textContent).toContain(name);
+      expect(btn.querySelector("[data-sr]")?.textContent).toBe(name);
       expect(btn.querySelector("svg")).toBeTruthy();
     }
 
-    fireEvent.click(screen.getByRole("button", { name: "更多" }));
+    openAdultTools();
     for (const name of ["筆刷細", "筆刷中", "筆刷粗"] as const) {
       const btn = screen.getByRole("button", { name });
       expect(btn.textContent).toBe("");
@@ -57,7 +63,7 @@ describe("ColoringToolbar", () => {
       "disabled",
       true,
     );
-    fireEvent.click(screen.getByRole("button", { name: "更多" }));
+    openAdultTools();
     expect(
       screen.getByRole("button", { name: "清空" }).querySelector("svg"),
     ).toBeTruthy();
@@ -77,14 +83,40 @@ describe("ColoringToolbar", () => {
     expect(renderToStaticMarkup(<EraserIcon />)).toContain("#f781c6");
   });
 
-  it("清空要再按一次才會清掉", () => {
+  it("清空要看圖確認，留下顏色不會清掉", () => {
     const onClear = vi.fn();
     renderToolbar({ onClear });
-    fireEvent.click(screen.getByRole("button", { name: "更多" }));
+    openAdultTools();
     fireEvent.click(screen.getByRole("button", { name: "清空" }));
     expect(onClear).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "再按一次清空" }));
+    fireEvent.click(screen.getByRole("button", { name: "先不要清空" }));
+    expect(onClear).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "清空" }));
+    fireEvent.click(screen.getByRole("button", { name: "清空畫布" }));
     expect(onClear).toHaveBeenCalledOnce();
+  });
+
+  it("短按家長工具不會打開，按住才會", () => {
+    vi.useFakeTimers();
+    try {
+      renderToolbar();
+      const gate = screen.getByRole("button", { name: "家長工具" });
+      fireEvent.click(gate);
+      expect(screen.queryByRole("dialog")).toBeNull();
+      fireEvent.pointerDown(gate);
+      act(() => {
+        vi.advanceTimersByTime(699);
+      });
+      expect(screen.queryByRole("dialog")).toBeNull();
+      act(() => {
+        vi.advanceTimersByTime(1);
+      });
+      expect(
+        screen.getByRole("dialog", { name: "更多著色工具" }),
+      ).toBeTruthy();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("點填滿會切工具，筆刷三檔此時不可按", () => {
@@ -94,7 +126,7 @@ describe("ColoringToolbar", () => {
     fireEvent.click(screen.getByRole("button", { name: "蠟筆" }));
     expect(onToolChange).toHaveBeenCalledWith("crayon");
 
-    fireEvent.click(screen.getByRole("button", { name: "更多" }));
+    openAdultTools();
     expect(screen.getByRole("button", { name: "筆刷細" })).toHaveProperty(
       "disabled",
       true,
