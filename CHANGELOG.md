@@ -67,6 +67,8 @@
 
 ### Fixed
 
+- **元件樣式不再被全域 class 反蓋**：`app/layout.tsx` 的 `globals.css` 原本排在元件 import 之後；著色本新增 CSS module 後 Turbopack 併 chunk，把一批元件 CSS 排到 globals 前面，同權重的全域 class 反過來蓋掉元件（故事卡 EP 標籤變小、故事頁分享列多 12px）。改成第一個 import。故事頁對 PlayButton／ShareButton 的覆寫也改成不靠載入順序：播放鈕版面交回 PlayButton 自己的 flex，分享列 `margin-top: 0` 提到 (0,2,0)。
+
 - **Landing 首段桌機圖左上補遠景（美術審 L7）**：`segment-stories.jpg` 原稿左上三分之一是空的奶油底、構圖重心偏右。不生圖：用同一套 `hero-parallax` 黏土 props（摩天輪、樹、灌木）以 PIL 合成成大氣透視的遠景（`assets/landing/segment-stories/compose-distant-park.py`，原稿另存），重出 WebP／AVIF（75KB，與原相同）。設計審（Opus）三點採納：遠景 haze 整體高於中景灌木（樹 0.34、灌木 0.28、飽和 ≤1.0、摩天輪 blur 1.4）、底部淡出改垂直漸層×兩端 taper＋16px 模糊（不再是齊頭霧線）、整組右移 25px 離開氣球區＋摩天輪 250→225。桌機 `object-position` 試過偏右 70% 會把補上的摩天輪切掉，維持 `center`。重錄 home 1280 ×2、landing-stories 1280 ×2 基線。**未改** Apple sync workflow、`LandingSegment` 版面、`useMapCamera`／`ZoneSheet`。
 - **故事頁桌機欄寬統一、本集介紹卡歸位（美術審 M1）**：≥980 原本三種寬度（左欄 488、介紹卡 380 懸中、其餘 940），介紹卡改進左欄、與「開始看故事」同左緣同寬，grid areas `actions → intro → parent`（共讀連結接在介紹卡之後，離開 CTA 叢集）；分享列一併靠左。介紹卡拿掉 3px 左緣色條（全寬度）、卡身與大綱卡同語彙，標題不加短槓、夜間不套暖黃 glow。實測 1280：`intro.left/width` 170/488 = actions、`contentSection` 頂從 950 提到 787；390／768 差異只落在介紹卡 bbox（左緣條），版面零差。DESIGN「Content over chrome」列補「容器不做左緣色條」全站規則。Plan：`docs/plans/2026-09-17-story-desktop-intro-column.md`（工程審 Reject→四點採納、設計審 Approve with changes→七點採納；實作後工程審無 blocker）。**未改** Apple sync workflow、`StoryPlayer`、`useMapCamera`／`ZoneSheet`。
 - **漢堡抽屜日間底改與頂欄同桃色**：先前把選中底烤成不透明 color-mix 仍疊在白板上，讀成灰米色島，再加上 `--gloss` 頂緣高光讓選中列上下不均。面板改 `--landing-nav-cta-bg`，選中底改回與頂欄 `.navLink` 同一層 `rgba(107,63,30,0.14)`；左 accent 改 `::before` 直條（不再 inset 沿圓角爬）。＜980 日間開啟時頂欄改不透明同色，避免半透明毛玻璃把頁面合成灰帶。夜間面板不變。**未改** Apple sync workflow、`useMapCamera`／`ZoneSheet`。

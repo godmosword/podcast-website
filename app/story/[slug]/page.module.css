@@ -86,19 +86,14 @@
   margin: var(--space-8) 0 var(--space-3);
 }
 
+/* 只補寬度：版面交給 PlayButton 自己的 flex。同權重的覆寫誰贏要看 CSS chunk 順序，
+   新增別的 module 就可能翻盤，所以不在這裡改 display。 */
 .playMain {
-  display: block;
   width: 100%;
 }
 
-.playMain a {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-}
-
-.shareRow {
+/* (0,2,0) 壓過 ShareButton .row 的 margin-top，不靠 chunk 載入順序；間距交給 .actions 的 gap。 */
+.actions .shareRow {
   margin-top: 0;
 }
 

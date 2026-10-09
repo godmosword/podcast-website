@@ -1,3 +1,6 @@
+// 全域樣式一定要第一個 import：CSS 順序跟著 import 順序走，放在元件後面時，
+// Turbopack 併 chunk 會讓 globals 排到元件 module 之後，同權重的全域 class（.marker 等）就反蓋元件樣式。
+import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import { Fredoka, Gochi_Hand } from "next/font/google";
 import localFont from "next/font/local";
@@ -12,7 +15,6 @@ import { siteIdentityJsonLd } from "@/lib/json-ld";
 import { getSiteUrl } from "@/lib/site-url";
 import { STORIES_VIEW_INIT_SCRIPT } from "@/lib/stories-view";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
-import "./globals.css";
 
 // 童趣圓潤字型，避免使用 Inter/Arial 等通用字型。
 const fredoka = Fredoka({
