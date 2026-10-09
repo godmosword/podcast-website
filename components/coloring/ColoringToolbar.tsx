@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useGamePlayChromeSlot } from "@/components/games/GamePlayChromeSlot";
 import SfxToggle from "@/components/SfxToggle";
+import Icon from "@/components/ui/Icon";
 import {
   BRUSH_SIZES,
   type BrushSizeId,
@@ -18,7 +19,6 @@ import {
   CrayonIcon,
   DownloadIcon,
   EraserIcon,
-  KeyIcon,
   ResetViewIcon,
   UndoIcon,
 } from "./ColoringToolbarIcons";
@@ -58,6 +58,7 @@ const ADULT_HOLD_MS = 700;
 export function ColoringToolbar(p: Props) {
   const [open, setOpen] = useState(false);
   const [clearAsked, setClearAsked] = useState(false);
+  const [holding, setHolding] = useState(false);
   const hintId = useId();
   const trigger = useRef<HTMLButtonElement>(null);
   const clearBtn = useRef<HTMLButtonElement>(null);
@@ -69,6 +70,7 @@ export function ColoringToolbar(p: Props) {
   useFocusTrap(open && !clearAsked, panel);
 
   const clearHold = () => {
+    setHolding(false);
     if (holdTimer.current !== null) {
       window.clearTimeout(holdTimer.current);
       holdTimer.current = null;
@@ -93,13 +95,14 @@ export function ColoringToolbar(p: Props) {
     <button
       ref={trigger}
       type="button"
-      className={styles.adultGate}
+      className={`${styles.adultGate} ${holding ? styles.holding : ""}`}
       aria-label="家長工具"
       aria-expanded={open}
       aria-haspopup="dialog"
       aria-describedby={hintId}
       onPointerDown={() => {
         clearHold();
+        setHolding(true);
         holdTimer.current = window.setTimeout(() => {
           holdTimer.current = null;
           suppressClick.current = true;
@@ -121,7 +124,10 @@ export function ColoringToolbar(p: Props) {
         setOpen(true);
       }}
     >
-      <KeyIcon className={styles.icon} />
+      <Icon name="settings" size={24} />
+      <svg className={styles.holdRing} viewBox="0 0 48 48" aria-hidden focusable="false">
+        <circle cx="24" cy="24" r="20" />
+      </svg>
       <span id={hintId} className={styles.srOnly}>
         按住才會打開
       </span>

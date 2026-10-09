@@ -165,7 +165,8 @@
 }
 
 .card:hover .thumb,
-.card:focus-visible .thumb {
+.card:focus-visible .thumb,
+.card[data-revealed="true"] .thumb {
   --coloring-curl: 205%;
 }
 
@@ -282,6 +283,7 @@
   padding: 16px;
 }
 .viewer {
+  position: relative;
   display: grid;
   gap: 12px;
   width: min(100%, 480px);
@@ -291,26 +293,88 @@
   background: var(--surface-elevated);
   border-radius: var(--radius-lg);
 }
+.viewerHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 .viewer h2 {
+  flex: 1;
+  min-width: 0;
   margin: 0;
-  font-size: 18px;
+  font-size: var(--fs-h4);
+  font-weight: 800;
 }
 .viewer img {
   width: 100%;
   max-height: 50svh;
   object-fit: contain;
 }
-.viewer button {
-  min-height: 44px;
-  padding: 8px;
-  border: 1px solid var(--hairline);
+.iconBtn {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: none;
   border-radius: var(--radius-sm);
-  background: var(--surface-elevated);
-  color: var(--ink);
+  background: transparent;
+  color: var(--ink-soft);
   cursor: pointer;
 }
-.viewerActions {
+.iconBtn:focus-visible,
+.viewerRow:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.viewerMenu {
+  display: grid;
+  margin: 0;
+  padding: 0;
+}
+.viewerRow {
+  position: relative;
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 48px;
+  padding: 13px 10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  font-size: var(--fs-h4);
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+.viewerRow:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.viewerRow svg {
+  flex: none;
+  margin-inline: 4px;
+  color: var(--ink-soft);
+}
+@media (hover: hover) {
+  .viewerRow:hover,
+  .iconBtn:hover {
+    background: rgba(107, 63, 30, 0.09);
+  }
+}
+.confirmNote {
+  margin: 0;
+  padding: 0 10px;
+  font-weight: 700;
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

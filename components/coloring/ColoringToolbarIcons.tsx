@@ -156,12 +156,14 @@ export function BlankPageIcon({ className }: IconProps) {
   );
 }
 
-/** 鑰匙：家長才會按住的入口。 */
-export function KeyIcon({ className }: IconProps) {
+/** 換一張：兩張圖卡疊在一起，跟漢堡選單一樣的細線。 */
+export function PictureStackIcon({ className, size = 24 }: IconProps & { size?: number }) {
   return (
-    <svg {...BOX} className={className}>
-      <circle cx="8.2" cy="10" r="3.4" fill="#f2c94c" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M11.2 10H20l-1.6 2.2H16.2L15 10" {...STROKE} />
+    <svg className={className} viewBox="0 0 24 24" width={size} height={size} aria-hidden focusable="false">
+      <rect x="7" y="3.5" width="13" height="13" rx="2" {...STROKE} />
+      <rect x="3.5" y="7.5" width="13" height="13" rx="2" {...STROKE} fill="var(--card, #fff)" />
+      <circle cx="7.6" cy="11.2" r="1.1" fill="currentColor" />
+      <path d="m5.2 18 3.2-3.1 2.1 2 2.2-2.4 2.6 3.5" {...STROKE} />
     </svg>
   );
 }

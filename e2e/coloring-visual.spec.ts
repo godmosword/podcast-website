@@ -52,7 +52,9 @@ for (const viewport of viewports)
       await capture(page, `${prefix}-cover`, a11y);
       await page.getByRole("button", { name: "開始塗", exact: true }).click();
       await capture(page, `${prefix}-picker`, a11y);
-      await page.getByRole("button", { name: "著色：恐龍車多多", exact: true }).click();
+      const card = page.getByRole("button", { name: "著色：恐龍車多多", exact: true });
+      await card.click();
+      await card.click();
       await expect(page.getByRole("button", { name: "蠟筆", exact: true })).toBeEnabled();
       await capture(page, `${prefix}-canvas`, a11y);
       for (const name of ["蠟筆", "填滿", "擦掉", "復原", "關閉聲音"]) {
