@@ -7,7 +7,9 @@ async function openColoringCanvas(page: Page) {
   await page.goto("/games/coloring-book");
   await page.waitForLoadState("networkidle");
   await page.getByRole("button", { name: "開始塗", exact: true }).click();
-  await page.getByRole("button", { name: /^著色：/ }).first().click();
+  const card = page.getByRole("button", { name: /^著色：/ }).first();
+  await card.click();
+  await card.click();
   await page.waitForSelector("canvas");
   await page.waitForFunction(
     () => !document.body.textContent?.includes("載入線稿中"),

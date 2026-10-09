@@ -37,6 +37,7 @@ export function ColoringPagePicker({
   const [error, setError] = useState("");
   const [hasMore, setHasMore] = useState(false);
   const [colored, setColored] = useState<ReadonlySet<string>>(new Set());
+  const [revealedId, setRevealedId] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const artworkUrls = useRef<string[]>([]);
   const returnFocus = useRef<HTMLElement | null>(null);
@@ -173,6 +174,8 @@ export function ColoringPagePicker({
                 key={page.id}
                 page={page}
                 colored={colored.has(page.id)}
+                revealedId={revealedId}
+                onReveal={setRevealedId}
                 onSelect={onSelect}
               />
             ))}
@@ -188,6 +191,8 @@ export function ColoringPagePicker({
                 key={page.id}
                 page={page}
                 colored={colored.has(page.id)}
+                revealedId={revealedId}
+                onReveal={setRevealedId}
                 onSelect={onSelect}
               />
             ))}
@@ -202,20 +207,31 @@ export function ColoringPagePicker({
 function PageCard({
   page,
   colored,
+  revealedId,
+  onReveal,
   onSelect,
 }: {
   page: ColoringPage;
   colored: boolean;
+  revealedId: string | null;
+  onReveal: (id: string) => void;
   onSelect: (page: ColoringPage) => void;
 }) {
   const coloredId = `colored-${page.id}`;
+  const revealed = revealedId === page.id;
   return (
     <li>
       <button
         type="button"
         className={styles.card}
+        data-revealed={revealed ? "true" : "false"}
+        aria-pressed={revealed}
         onClick={() => {
-          playSfx("flip");
+          playSfx(revealed ? "tap" : "flip");
+          if (!revealed) {
+            onReveal(page.id);
+            return;
+          }
           onSelect(page);
         }}
         aria-label={`著色：${page.title}`}

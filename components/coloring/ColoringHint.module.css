@@ -19,9 +19,11 @@
   position: absolute;
   left: 0;
   top: 0;
-  width: 4.5rem;
-  height: 4.5rem;
-  margin: -0.4rem 0 0 -0.2rem;
+  width: 3.25rem;
+  height: 3.25rem;
+  /* 指尖在 64 viewBox 的 (34, 11)，對準色點中心，而不是方框左上角。 */
+  transform-origin: 53% 17%;
+  transform: translate(calc(var(--x1) - 53%), calc(var(--y1) - 17%));
 }
 
 .finger {
@@ -34,10 +36,11 @@
 
 .dot {
   position: absolute;
-  left: 0.15rem;
-  top: 0.05rem;
-  width: 1.35rem;
-  height: 1.35rem;
+  left: 53%;
+  top: 17%;
+  width: 1.15rem;
+  height: 1.15rem;
+  transform: translate(-50%, -50%);
   border-radius: var(--radius-circle);
   border: 3px solid var(--coloring-canvas-surface);
   box-shadow: 0 0 0 2px var(--coloring-art-ink);
@@ -52,31 +55,31 @@
 @keyframes coach-tap {
   0%,
   18% {
-    transform: translate(var(--x1), var(--y1)) scale(1);
+    transform: translate(calc(var(--x1) - 53%), calc(var(--y1) - 17%)) scale(1);
   }
   28% {
-    transform: translate(var(--x1), var(--y1)) scale(0.84);
+    transform: translate(calc(var(--x1) - 53%), calc(var(--y1) - 17%)) scale(0.86);
   }
   48%,
   70% {
-    transform: translate(var(--x2), var(--y2)) scale(1);
+    transform: translate(calc(var(--x2) - 53%), calc(var(--y2) - 17%)) scale(1);
   }
   80% {
-    transform: translate(var(--x2), var(--y2)) scale(0.84);
+    transform: translate(calc(var(--x2) - 53%), calc(var(--y2) - 17%)) scale(0.86);
   }
   100% {
-    transform: translate(var(--x1), var(--y1)) scale(1);
+    transform: translate(calc(var(--x1) - 53%), calc(var(--y1) - 17%)) scale(1);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .finger {
     animation: none;
-    transform: translate(var(--x1), var(--y1));
+    transform: translate(calc(var(--x1) - 53%), calc(var(--y1) - 17%));
   }
 
   .fingerStill {
     display: block;
-    transform: translate(var(--x2), var(--y2));
+    transform: translate(calc(var(--x2) - 53%), calc(var(--y2) - 17%));
   }
 }

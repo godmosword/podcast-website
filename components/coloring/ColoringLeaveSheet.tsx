@@ -1,6 +1,7 @@
 "use client";
 
-import { IconPageTurn, IconStar } from "@/components/games/ClayIcons";
+import { IconStar } from "@/components/games/ClayIcons";
+import { PictureStackIcon } from "./ColoringToolbarIcons";
 import type { LeaveTarget } from "./useColoringLeave";
 import { ClearIcon, CrayonIcon } from "./ColoringToolbarIcons";
 import {
@@ -73,7 +74,7 @@ export function ColoringLeaveSheet({
       tone: "go",
       icon: (
         <span className={styles.goMark}>
-          {destination === "picker" ? <IconPageTurn size={36} /> : <ParkGateIcon />}
+          {destination === "picker" ? <PictureStackIcon size={32} /> : <ParkGateIcon />}
           {unsaved ? (
             <span className={styles.badge}>
               <IconStar size={16} style={{ width: 16, height: 16 }} />

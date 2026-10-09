@@ -29,7 +29,9 @@ export function ColoringHint({ step, colorHex }: ColoringHintProps) {
 
     const place = () => {
       const base = root.getBoundingClientRect();
-      const swatch = root.querySelector('[role="option"]');
+      const swatch =
+        root.querySelector('[role="option"][aria-selected="true"]') ??
+        root.querySelector('[role="option"]');
       const canvas = root.querySelector("canvas");
       if (!swatch || !canvas) return;
       const color = swatch.getBoundingClientRect();
@@ -52,7 +54,7 @@ export function ColoringHint({ step, colorHex }: ColoringHintProps) {
       observer.disconnect();
       window.removeEventListener("resize", place);
     };
-  }, [step]);
+  }, [step, colorHex]);
 
   const vars = from && to
     ? ({

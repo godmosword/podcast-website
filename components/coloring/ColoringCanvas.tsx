@@ -8,7 +8,8 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { createPortal } from "react-dom";
-import { IconPageTurn, IconStar } from "@/components/games/ClayIcons";
+import { IconStar } from "@/components/games/ClayIcons";
+import { PictureStackIcon } from "./ColoringToolbarIcons";
 import { useGamePlayChromeSlot } from "@/components/games/GamePlayChromeSlot";
 import type { ColoringPage } from "@/data/coloring-pages";
 import { COLORING_DONE_CTA } from "@/lib/coloring/flow";
@@ -686,7 +687,7 @@ export function ColoringCanvas({
       aria-label="換一張"
       onClick={() => leave.requestLeave("picker")}
     >
-      <IconPageTurn size={28} />
+      <PictureStackIcon />
     </button>
   );
 

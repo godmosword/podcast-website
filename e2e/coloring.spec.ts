@@ -12,7 +12,11 @@ async function openColoringPage(page: Page, name: RegExp) {
   await page.goto("/games/coloring-book");
   await page.waitForLoadState("networkidle"); // 等 hydration，點擊才有 handler
   await page.getByRole("button", { name: "開始塗", exact: true }).click();
-  await page.getByRole("button", { name }).first().click();
+  const card = page.getByRole("button", { name }).first();
+  await card.click();
+  await expect(card).toHaveAttribute("data-revealed", "true");
+  await expect(page.locator("canvas")).toHaveCount(0);
+  await card.click();
   await page.waitForSelector("canvas");
   await page.waitForFunction(
     () => !document.body.textContent?.includes("載入線稿中"),
@@ -426,7 +430,9 @@ test.describe("coloring book 離開提醒與塗過標記", () => {
     await sheet.getByRole("button", { name: "換一張", exact: true }).click();
     await expect(page.getByText("選一頁來塗", { exact: true })).toBeVisible();
 
-    await page.getByRole("button", { name: "著色：猛猛", exact: true }).click();
+    const again = page.getByRole("button", { name: "著色：猛猛", exact: true });
+    await again.click();
+    await again.click();
     await paintBackground(page);
     await page.getByRole("button", { name: "我塗好了" }).click();
     await expect(page.getByText("作品已收藏在這台裝置", { exact: true })).toBeVisible();
