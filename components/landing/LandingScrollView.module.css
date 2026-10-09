@@ -24,14 +24,12 @@
 @media (max-width: 480px) {
   .root {
     --landing-gutter: 16px;
-    --landing-skip: 44px;
   }
 }
 
 @media (max-width: 360px) {
   .root {
     --landing-gutter: 10px;
-    --landing-skip: 44px;
   }
 }
 

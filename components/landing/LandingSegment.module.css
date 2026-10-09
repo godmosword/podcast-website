@@ -174,7 +174,10 @@
 .cta {
   display: inline-flex;
   align-items: center;
-  min-height: 56px;
+  /* 外框與換段圓鈕同一顆 --landing-skip。只寫 min-height 時，字級＋上下 padding 會把長條鈕撐過定高圓鈕。 */
+  height: var(--landing-skip);
+  min-height: var(--landing-skip);
+  line-height: 1;
   gap: 6px;
   padding: 14px 26px;
   border-radius: var(--radius-pill);
@@ -471,7 +474,6 @@
 
   .cta {
     flex: none;
-    min-height: 56px;
     padding: 12px 22px;
     font-size: var(--fs-h3);
   }
@@ -487,7 +489,6 @@
   }
 
   .cta {
-    min-height: 56px;
     padding: 12px 20px;
     font-size: var(--fs-h4);
   }
@@ -496,7 +497,7 @@
 @media (max-width: 480px) {
   .panel {
     --landing-gutter: 16px;
-    --landing-skip: 44px;
+    /* 圓鈕維持 --landing-skip 56px，與分區 CTA 外框同高。縮成 44 會讓兩顆框底對齊、頂不齊。 */
   }
 
   .cta {
@@ -511,7 +512,6 @@
 @media (max-width: 360px) {
   .panel {
     --landing-gutter: 10px;
-    --landing-skip: 44px;
   }
 
   .cta {

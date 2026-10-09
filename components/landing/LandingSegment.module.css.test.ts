@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-/** UX-P1-1：分區 CTA min-height 56px；換段黏土圓鈕 ≥44px，與 CTA／嘟嘟同一底列。 */
+/** UX-P1-1：分區 CTA 與換段圓鈕外框同為 --landing-skip 56px；圓鈕下限 ≥44px，與 CTA／嘟嘟同一底列。 */
 describe("LandingSegment.module.css touch targets", () => {
   const css = readFileSync(
     join(import.meta.dirname, "LandingSegment.module.css"),
@@ -78,9 +78,18 @@ describe("LandingSegment.module.css touch targets", () => {
     );
   });
 
-  it("CTA min-height 56px", () => {
+  it("CTA 與換段圓鈕外框同高 56px，窄螢幕不再縮成 44", () => {
     const base = extractBlocks(".cta")[0] ?? "";
-    expect(base).toMatch(/min-height:\s*56px/);
+    expect(base).toMatch(/height:\s*var\(--landing-skip\)/);
+    expect(base).toMatch(/min-height:\s*var\(--landing-skip\)/);
+    expect(css).toMatch(/--landing-skip:\s*56px/);
+    expect(css).not.toMatch(/--landing-skip:\s*44px/);
+    const scroll = readFileSync(
+      join(import.meta.dirname, "LandingScrollView.module.css"),
+      "utf8",
+    );
+    expect(scroll).toMatch(/--landing-skip:\s*56px/);
+    expect(scroll).not.toMatch(/--landing-skip:\s*44px/);
   });
 
   it("CTA 不用橘色漸層 pill", () => {
@@ -97,7 +106,8 @@ describe("LandingSegment.module.css touch targets", () => {
 
   it("分區 CTA 為不透明暖深墨板＋白字＋黏土 gloss／elev-2", () => {
     const ctaBlock = extractBlocks(".cta")[0] ?? "";
-    expect(ctaBlock).toMatch(/min-height:\s*56px/);
+    expect(ctaBlock).toMatch(/height:\s*var\(--landing-skip\)/);
+    expect(ctaBlock).toMatch(/min-height:\s*var\(--landing-skip\)/);
     expect(ctaBlock).toMatch(/font-size:\s*var\(--fs-h2\)/);
     expect(ctaBlock).toMatch(
       /border:\s*2px\s+solid\s+color-mix\(in srgb,\s*var\(--on-dark\)\s+88%/,
