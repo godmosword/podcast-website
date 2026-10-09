@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import type { ColoringStage } from "@/lib/coloring/flow";
 import {
   GamePlayChromeProvider,
   GamePlayHeader,
@@ -11,6 +12,7 @@ import styles from "./ColoringPageShell.module.css";
 type ColoringPageShellProps = {
   children: ReactNode;
   title?: string;
+  stage?: ColoringStage;
 };
 
 /**
@@ -21,6 +23,7 @@ type ColoringPageShellProps = {
 export function ColoringPageShell({
   children,
   title = "繪本塗塗鴉",
+  stage,
 }: ColoringPageShellProps) {
   return (
     <GamePlayChromeProvider>
@@ -28,11 +31,12 @@ export function ColoringPageShell({
         className={`${shell.main} ${styles.main}`}
         aria-label={title}
         data-game-id="coloring-book"
+        data-coloring-stage={stage}
       >
         <a href="#coloring-play" className={shell.skip}>
           跳到著色區域
         </a>
-        <GamePlayHeader playTitle={title} />
+        <GamePlayHeader playTitle={title} iconBack />
         <div id="coloring-play">{children}</div>
       </main>
     </GamePlayChromeProvider>

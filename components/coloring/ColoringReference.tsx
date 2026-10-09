@@ -15,6 +15,7 @@ import {
   COLORING_REFERENCE_PEEK_HINT,
   COLORING_REFERENCE_TITLE,
 } from "@/lib/coloring/flow";
+import { CrayonIcon } from "./ColoringToolbarIcons";
 import styles from "./ColoringReference.module.css";
 
 /** 縮圖比這窄時點一下改成放大看，免得小手點不準。 */
@@ -157,8 +158,14 @@ export function ColoringReferencePeek({
         <img src={page.referenceSrc} alt="" draggable={false} />
       </button>
       <p className={styles.peekHint}>{COLORING_REFERENCE_PEEK_HINT}</p>
-      <button ref={closeRef} type="button" className={styles.peekClose} onClick={onClose}>
-        回去塗
+      <button
+        ref={closeRef}
+        type="button"
+        className={styles.peekClose}
+        aria-label="回去塗"
+        onClick={onClose}
+      >
+        <CrayonIcon />
       </button>
     </div>
   );

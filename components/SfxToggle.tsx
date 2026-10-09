@@ -14,10 +14,16 @@ import { VolumeOffIcon, VolumeOnIcon } from "./decor/PlayerIcon";
 type SfxToggleProps = {
   className?: string;
   audioRef?: RefObject<HTMLAudioElement | null>;
+  /** 不顯示 title 泡泡。著色本給不識字的孩子，只留圖示和無障礙名稱。 */
+  hideTitle?: boolean;
 };
 
 /** 音量切換：旁白 muted + UI 互動短音一鍵控制。 */
-export default function SfxToggle({ className = "", audioRef }: SfxToggleProps) {
+export default function SfxToggle({
+  className = "",
+  audioRef,
+  hideTitle = false,
+}: SfxToggleProps) {
   const [on, setOn] = useState(true);
 
   useEffect(() => {
@@ -59,7 +65,7 @@ export default function SfxToggle({ className = "", audioRef }: SfxToggleProps) 
       onClick={toggle}
       aria-pressed={on}
       aria-label={on ? "關閉聲音" : "開啟聲音"}
-      title={on ? "聲音：開" : "聲音：關"}
+      title={hideTitle ? undefined : on ? "聲音：開" : "聲音：關"}
     >
       {on ? <VolumeOnIcon size={24} /> : <VolumeOffIcon size={24} />}
     </button>

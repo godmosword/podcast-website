@@ -38,6 +38,18 @@ const click = (el: HTMLElement, init?: MouseEventInit) =>
   fireEvent.click(el, { button: 0, ...init });
 
 describe("GamePlayHeader 離開守門", () => {
+  it("圖示返回仍叫回遊樂園", () => {
+    render(
+      <GamePlayChromeProvider>
+        <GamePlayHeader playTitle="繪本塗塗鴉" iconBack />
+      </GamePlayChromeProvider>,
+    );
+    const link = screen.getByRole("link", { name: "回遊樂園" });
+    expect(link.querySelector("svg")).toBeTruthy();
+    expect(link.textContent).toContain("回遊樂園");
+    expect(link.textContent).not.toContain("←");
+  });
+
   it("沒註冊時照常離開", () => {
     expect(click(renderHeader(null))).toBe(true);
   });

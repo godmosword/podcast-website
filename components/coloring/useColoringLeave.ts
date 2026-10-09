@@ -20,9 +20,9 @@ type Options = {
 };
 
 /**
- * 換一張／回遊樂園／重新整理前，塗了還沒收藏就先問一次。
- * 回傳 requestLeave 給按鈕用，sheet 不為 null 時顯示 ColoringLeaveSheet。
- * 瀏覽器返回鍵（客戶端 popstate）不攔。
+ * 畫布上的「換一張／回遊樂園」一律先問，避免小孩誤觸就離開。
+ * 有還沒收藏的顏色時，確認離開會先收起來，不把進度丟掉。
+ * 瀏覽器返回鍵（客戶端 popstate）不攔。重新整理仍走瀏覽器自己的確認。
  */
 export function useColoringLeave({ unsaved, getDisplay, onBack, saveNow }: Options) {
   const router = useRouter();
@@ -45,15 +45,19 @@ export function useColoringLeave({ unsaved, getDisplay, onBack, saveNow }: Optio
   const requestLeave = useCallback(
     (to: LeaveTarget) => {
       const display = getDisplay();
-      if (!unsaved || !display) {
-        leaveTo(to);
-        return;
+      if (display) {
+        try {
+          setThumbnailUrl(thumbnailCanvas(display).toDataURL("image/png"));
+        } catch {
+          setThumbnailUrl(null);
+        }
+      } else {
+        setThumbnailUrl(null);
       }
-      setThumbnailUrl(thumbnailCanvas(display).toDataURL("image/png"));
       setError("");
       setTarget(to);
     },
-    [unsaved, getDisplay, leaveTo],
+    [getDisplay],
   );
 
   // 守門函式只註冊一次，讀最新的狀態，不必每次 render 重掛。
@@ -62,7 +66,6 @@ export function useColoringLeave({ unsaved, getDisplay, onBack, saveNow }: Optio
     latest.current = { unsaved, requestLeave };
   }, [unsaved, requestLeave]);
   const headerGuard = useCallback(() => {
-    if (!latest.current.unsaved) return true;
     latest.current.requestLeave("games");
     return false;
   }, []);
@@ -86,8 +89,12 @@ export function useColoringLeave({ unsaved, getDisplay, onBack, saveNow }: Optio
   const onDiscard = useCallback(() => {
     if (target) leaveTo(target);
   }, [target, leaveTo]);
-  const onSave = useCallback(async () => {
+  const onGo = useCallback(async () => {
     if (!target) return;
+    if (!unsaved) {
+      leaveTo(target);
+      return;
+    }
     cancelledRef.current = false;
     setBusy(true);
     try {
@@ -99,10 +106,21 @@ export function useColoringLeave({ unsaved, getDisplay, onBack, saveNow }: Optio
     } finally {
       setBusy(false);
     }
-  }, [target, saveNow, leaveTo]);
+  }, [target, unsaved, saveNow, leaveTo]);
 
   return {
     requestLeave,
-    sheet: target ? { thumbnailUrl, busy, error, onSave, onStay, onDiscard } : null,
+    sheet: target
+      ? {
+          thumbnailUrl,
+          busy,
+          error,
+          destination: target,
+          unsaved,
+          onStay,
+          onGo,
+          onDiscard,
+        }
+      : null,
   };
 }

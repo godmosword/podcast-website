@@ -242,34 +242,63 @@
 }
 
 .peekHint {
-  grid-area: 1 / 1;
-  align-self: start;
-  justify-self: center;
-  margin: 0.6rem;
-  padding: 0.35rem 0.85rem;
-  border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--coloring-canvas-surface) 92%, transparent);
-  color: var(--coloring-art-ink);
-  font-size: var(--fs-label);
-  font-weight: 800;
-  box-shadow: 0 2px 10px color-mix(in srgb, var(--coloring-art-ink) 20%, transparent);
-  pointer-events: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .peekClose {
   grid-area: 1 / 1;
   align-self: end;
   justify-self: center;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
   margin: 0.75rem;
-  min-height: 48px;
-  padding: 0.35rem 1.25rem;
+  padding: 0;
   border: none;
-  border-radius: var(--radius-pill);
-  font-weight: 800;
+  border-radius: var(--radius-circle);
   cursor: pointer;
   color: var(--coloring-accent-fg);
   background: var(--coloring-accent);
   box-shadow: 0 3px 0 var(--coloring-accent-shadow);
+}
+
+.peekClose svg {
+  width: 32px;
+  height: 32px;
+}
+
+/* 直式手機與矮視窗：彩圖收成一顆小圖，說明留給讀螢幕，畫布才放得下。 */
+@media (max-width: 979px), (max-height: 639px) {
+  .title,
+  .caption,
+  .tapHint {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .card {
+    width: max-content;
+    grid-template-columns: 64px;
+    gap: 0;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .figure {
+    width: 64px;
+    height: 64px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

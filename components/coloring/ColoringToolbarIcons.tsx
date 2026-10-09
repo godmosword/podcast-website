@@ -137,6 +137,35 @@ export function ResetViewIcon({ className }: IconProps) {
   );
 }
 
+/** 空白畫紙：清空確認裡的「清掉」圖。 */
+export function BlankPageIcon({ className }: IconProps) {
+  return (
+    <svg {...BOX} className={className}>
+      <rect
+        x="5"
+        y="3.2"
+        width="14"
+        height="17.6"
+        rx="2"
+        fill="#fff"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <path d="M8 8.2h8M8 12h8M8 15.8h5" {...STROKE} />
+    </svg>
+  );
+}
+
+/** 鑰匙：家長才會按住的入口。 */
+export function KeyIcon({ className }: IconProps) {
+  return (
+    <svg {...BOX} className={className}>
+      <circle cx="8.2" cy="10" r="3.4" fill="#f2c94c" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M11.2 10H20l-1.6 2.2H16.2L15 10" {...STROKE} />
+    </svg>
+  );
+}
+
 /** 下載：箭頭落入托盤。 */
 export function DownloadIcon({ className }: IconProps) {
   return (

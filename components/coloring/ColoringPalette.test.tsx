@@ -39,5 +39,5 @@ test("a color group never changes the artist's selected color on its own", () =>
 test("點色票有輕輕的 tap 音（音效開關由 lib/sfx 把關）", () => {
   render(<Palette />);
   fireEvent.click(screen.getAllByRole("option")[3]!);
-  expect(playSfx).toHaveBeenCalledWith("tap");
+  expect(playSfx).toHaveBeenCalledWith("pick");
 });

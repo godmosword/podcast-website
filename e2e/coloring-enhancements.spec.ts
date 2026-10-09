@@ -29,27 +29,43 @@ async function redPixels(page: Page) {
   });
 }
 async function more(page: Page) {
-  await page.getByRole("button", { name: "更多", exact: true }).click();
+  const gate = page.getByRole("button", { name: "家長工具", exact: true });
+  await gate.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("dialog", { name: "更多著色工具" })).toBeVisible();
 }
 async function closeMore(page: Page) {
   await page.getByRole("button", { name: "關閉", exact: true }).click();
 }
-/** 塗了還沒收就離開會先問；選「不要了」。 */
-async function discardOnLeave(page: Page) {
-  const sheet = page.getByRole("alertdialog", { name: "還沒收起來喔" });
+async function clearPaint(page: Page) {
+  await more(page);
+  await page.getByRole("button", { name: "清空", exact: true }).click();
+  await page.getByRole("button", { name: "清空畫布", exact: true }).click();
+}
+/** 離開前先問。有顏色就收起來再走，進度留在作品裡。 */
+async function keepOnLeave(page: Page) {
+  const sheet = page.getByRole("alertdialog", { name: "要換地方嗎" });
   await expect(sheet).toBeVisible();
-  await sheet.getByRole("button", { name: "不要了" }).click();
+  await sheet.getByRole("button", { name: /收起來/ }).click();
 }
 
-test("unfinished paint asks first, is forgotten when discarded; a confirmed page stays in the collection", async ({
+test("unfinished paint asks first and is kept when leaving; a confirmed page stays in the collection", async ({
   page,
 }) => {
   await open(page);
   await stroke(page);
   expect(await redPixels(page)).toBeGreaterThan(0);
-  await page.getByRole("button", { name: "← 換一張", exact: true }).click();
-  await discardOnLeave(page);
+  await page.getByRole("button", { name: "換一張", exact: true }).click();
+  const stay = page.getByRole("alertdialog", { name: "要換地方嗎" });
+  await expect(stay.getByRole("button", { name: "繼續塗", exact: true })).toBeFocused();
+  await stay.getByRole("button", { name: "繼續塗", exact: true }).click();
+  await expect(stay).toHaveCount(0);
+  await page.getByRole("button", { name: "換一張", exact: true }).click();
+  await keepOnLeave(page);
   await expect(page.getByText("選一頁來塗", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "看作品：恐龍車多多", exact: true }),
+  ).toBeVisible();
   await expect(page.getByRole("button", { name: /繼續塗/ })).toHaveCount(0);
   await page
     .getByRole("button", { name: "著色：恐龍車多多", exact: true })
@@ -66,22 +82,27 @@ test("unfinished paint asks first, is forgotten when discarded; a confirmed page
   await page.getByRole("button", { name: "換一張塗", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "看作品：恐龍車多多", exact: true }),
-  ).toBeVisible();
+  ).toHaveCount(2);
+  await page.goto("/games/coloring-book");
+  await page.getByRole("button", { name: "開始塗", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "看作品：恐龍車多多", exact: true }),
+  ).toHaveCount(2);
+  await expect(page.getByRole("button", { name: /繼續塗/ })).toHaveCount(0);
+});
+
+test("leaving for the hub asks first, then keeps unfinished paint in the gallery", async ({ page }) => {
+  await open(page);
+  await stroke(page);
+  expect(await redPixels(page)).toBeGreaterThan(0);
+  await page.getByRole("link", { name: "回遊樂園", exact: true }).click();
+  await keepOnLeave(page);
+  await expect(page).toHaveURL(/\/games$/);
   await page.goto("/games/coloring-book");
   await page.getByRole("button", { name: "開始塗", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "看作品：恐龍車多多", exact: true }),
   ).toBeVisible();
-  await expect(page.getByRole("button", { name: /繼續塗/ })).toHaveCount(0);
-});
-
-test("leaving for the hub asks first, then drops unfinished paint when discarded", async ({ page }) => {
-  await open(page);
-  await stroke(page);
-  expect(await redPixels(page)).toBeGreaterThan(0);
-  await page.getByRole("link", { name: "回遊樂園", exact: true }).click();
-  await discardOnLeave(page);
-  await expect(page).toHaveURL(/\/games$/);
   await open(page);
   expect(await redPixels(page)).toBe(0);
 });
@@ -99,9 +120,7 @@ test("undo, redo, clear, restore, and new strokes preserve history and nonempty 
   await page.getByRole("button", { name: "↪ 重做", exact: true }).click();
   await closeMore(page);
   expect(await redPixels(page)).toBe(before);
-  await more(page);
-  await page.getByRole("button", { name: "清空", exact: true }).click();
-  await page.getByRole("button", { name: "再按一次清空", exact: true }).click();
+  await clearPaint(page);
   expect(await redPixels(page)).toBe(0);
   await page.getByRole("button", { name: "復原", exact: true }).click();
   expect(await redPixels(page)).toBe(before);
@@ -121,9 +140,7 @@ test("bucket-only painting enables completion and clearing removes it", async ({
   const b = await page.locator("canvas").boundingBox();
   await page.mouse.click(b!.x + b!.width * 0.04, b!.y + b!.height * 0.04);
   await expect(page.getByRole("button", { name: "我塗好了" })).toBeVisible();
-  await more(page);
-  await page.getByRole("button", { name: "清空", exact: true }).click();
-  await page.getByRole("button", { name: "再按一次清空", exact: true }).click();
+  await clearPaint(page);
   await expect(page.getByRole("button", { name: "我塗好了" })).toHaveCount(0);
 });
 
@@ -239,13 +256,13 @@ test("load failure offers retry and unavailable storage never reports success", 
   );
   await open(page);
   await stroke(page);
-  await page.getByRole("button", { name: "← 換一張", exact: true }).click();
+  await page.getByRole("button", { name: "換一張", exact: true }).click();
   // 存不了時「收起來」要說沒收好、留在原地，不能假裝成功。
-  const sheet = page.getByRole("alertdialog", { name: "還沒收起來喔" });
-  await sheet.getByRole("button", { name: "收起來" }).click();
+  const sheet = page.getByRole("alertdialog", { name: "要換地方嗎" });
+  await sheet.getByRole("button", { name: /收起來/ }).click();
   await expect(sheet.getByText("沒收好，再按一次試試。")).toBeVisible();
   await expect(page.getByText("選一頁來塗", { exact: true })).toHaveCount(0);
-  await discardOnLeave(page);
+  await sheet.getByRole("button", { name: "不要了", exact: true }).click();
   await expect(page.getByText("選一頁來塗", { exact: true })).toBeVisible();
   await expect(page.getByText(/草稿沒有存起來/)).toHaveCount(0);
   await page
@@ -271,17 +288,19 @@ for (const width of [320, 390, 430])
         .boundingBox();
       expect(box!.x).toBeGreaterThanOrEqual(0);
       expect(box!.x + box!.width).toBeLessThanOrEqual(width);
-      expect(box!.height).toBeGreaterThanOrEqual(44);
+      expect(box!.width).toBeGreaterThanOrEqual(48);
+      expect(box!.height).toBeGreaterThanOrEqual(48);
     }
+    const gate = page.getByRole("button", { name: "家長工具", exact: true });
+    await gate.click();
+    await expect(page.getByRole("dialog", { name: "更多著色工具" })).toHaveCount(0);
     await more(page);
     await page.keyboard.press("Shift+Tab");
     await expect(
       page.getByRole("dialog", { name: "更多著色工具" }),
     ).toContainText("自由塗");
     await page.keyboard.press("Escape");
-    await expect(
-      page.getByRole("button", { name: "更多", exact: true }),
-    ).toBeFocused();
+    await expect(gate).toBeFocused();
     expect(await redPixels(page)).toBe(0);
   });
 

@@ -68,13 +68,40 @@ export function useGamePlayLeaveGuard(guard: GamePlayLeaveGuard | null): void {
 
 type GamePlayHeaderProps = {
   playTitle: string;
+  /**
+   * 著色本：只留遊樂園圖示。文字仍在無障礙名稱裡。
+   * 其他遊戲維持「← 回遊樂園」，避免只剩箭頭認不出路。
+   */
+  iconBack?: boolean;
 };
+
+function ParkGateIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path
+        d="M3.5 20V9.2L12 3.6l8.5 5.6V20"
+        fill="#b9f3db"
+        stroke="#2f2f2f"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M9 20v-6.2h6V20"
+        fill="#fff6ea"
+        stroke="#2f2f2f"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="8" r="1.35" fill="#e85d4c" />
+    </svg>
+  );
+}
 
 /**
  * 沉浸遊戲頁單列 sticky 抬頭：返回 + 唯一 h1 + chrome slot + 日夜切換。
  * PLAY-IA-7／PLAY-IA-8。
  */
-export function GamePlayHeader({ playTitle }: GamePlayHeaderProps) {
+export function GamePlayHeader({ playTitle, iconBack = false }: GamePlayHeaderProps) {
   const slotRef = useContext(GamePlayChromeSlotRefContext);
   const leaveGuard = useContext(GamePlayLeaveGuardContext);
   const onBack = (event: MouseEvent<HTMLAnchorElement>) => {
@@ -85,8 +112,13 @@ export function GamePlayHeader({ playTitle }: GamePlayHeaderProps) {
 
   return (
     <header className={styles.playHeader}>
-      <Link href="/games" className={styles.back} onClick={onBack}>
-        <span aria-hidden>←</span> 回遊樂園
+      <Link
+        href="/games"
+        className={iconBack ? `${styles.back} ${styles.backIcon}` : styles.back}
+        onClick={onBack}
+      >
+        {iconBack ? <ParkGateIcon /> : <span aria-hidden>←</span>}
+        <span className={iconBack ? styles.srOnly : undefined}>回遊樂園</span>
       </Link>
       <h1 id="game-play-title" className={styles.playTitle}>
         {playTitle}

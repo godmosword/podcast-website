@@ -8,7 +8,14 @@ import {
   setSfxEnabledInStore,
 } from "@/lib/progress-store";
 
-export type SfxKind = "tap" | "flip" | "collect" | "horn";
+export type SfxKind =
+  | "tap"
+  | "flip"
+  | "collect"
+  | "horn"
+  | "pick"
+  | "fill"
+  | "celebrate";
 
 export const SFX_CHANGE_EVENT = "cc:sfx-change";
 
@@ -58,40 +65,54 @@ type Tone = {
   dur: number;
   gain: number;
   slideTo?: number;
+  /** 相對這次播放起點的延遲（秒）。 */
+  delay?: number;
 };
 
-const TONES: Record<SfxKind, Tone> = {
-  tap: { freq: 660, type: "sine", dur: 0.09, gain: 0.12 },
-  flip: { freq: 520, type: "triangle", dur: 0.12, gain: 0.1, slideTo: 760 },
-  collect: { freq: 720, type: "sine", dur: 0.2, gain: 0.14, slideTo: 1080 },
-  horn: { freq: 523, type: "triangle", dur: 0.16, gain: 0.12, slideTo: 659 },
+const TONES: Record<SfxKind, readonly Tone[]> = {
+  tap: [{ freq: 660, type: "sine", dur: 0.09, gain: 0.12 }],
+  flip: [{ freq: 520, type: "triangle", dur: 0.12, gain: 0.1, slideTo: 760 }],
+  collect: [{ freq: 720, type: "sine", dur: 0.2, gain: 0.14, slideTo: 1080 }],
+  horn: [{ freq: 523, type: "triangle", dur: 0.16, gain: 0.12, slideTo: 659 }],
+  // 著色本：選色、填滿、塗好了。短、小聲，避免蓋過旁白或嚇到小朋友。
+  pick: [{ freq: 784, type: "sine", dur: 0.07, gain: 0.06 }],
+  fill: [{ freq: 392, type: "sine", dur: 0.18, gain: 0.07, slideTo: 587 }],
+  celebrate: [
+    { freq: 523, type: "sine", dur: 0.12, gain: 0.06 },
+    { freq: 659, type: "sine", dur: 0.12, gain: 0.06, delay: 0.11 },
+    { freq: 784, type: "sine", dur: 0.22, gain: 0.07, delay: 0.22 },
+  ],
 };
 
-/** 播放一個短音；未啟用或環境不支援時靜默 no-op。 */
+function playTone(c: AudioContext, tone: Tone, start: number): void {
+  const osc = c.createOscillator();
+  const gain = c.createGain();
+  osc.type = tone.type;
+  osc.frequency.setValueAtTime(tone.freq, start);
+  if (tone.slideTo) {
+    osc.frequency.exponentialRampToValueAtTime(tone.slideTo, start + tone.dur);
+  }
+  // 快起快落的包絡，避免爆音。
+  gain.gain.setValueAtTime(0.0001, start);
+  gain.gain.exponentialRampToValueAtTime(tone.gain, start + 0.012);
+  gain.gain.exponentialRampToValueAtTime(0.0001, start + tone.dur);
+  osc.connect(gain).connect(c.destination);
+  osc.start(start);
+  osc.stop(start + tone.dur + 0.02);
+}
+
+/**
+ * 播放一個短音；未啟用或環境不支援時靜默 no-op。
+ * 只在使用者手勢的呼叫端使用：瀏覽器會把 AudioContext 留在 suspended，
+ * 這裡的 resume 必須發生在那個手勢裡，不能在載入時自動播。
+ */
 export function playSfx(kind: SfxKind): void {
   if (!isSfxEnabled()) return;
   const c = getCtx();
   if (!c) return;
 
-  const tone = TONES[kind];
   const now = c.currentTime;
-  const osc = c.createOscillator();
-  const gain = c.createGain();
-
-  osc.type = tone.type;
-  osc.frequency.setValueAtTime(tone.freq, now);
-  if (tone.slideTo) {
-    osc.frequency.exponentialRampToValueAtTime(tone.slideTo, now + tone.dur);
-  }
-
-  // 快起快落的包絡，避免爆音。
-  gain.gain.setValueAtTime(0.0001, now);
-  gain.gain.exponentialRampToValueAtTime(tone.gain, now + 0.012);
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + tone.dur);
-
-  osc.connect(gain).connect(c.destination);
-  osc.start(now);
-  osc.stop(now + tone.dur + 0.02);
+  for (const tone of TONES[kind]) playTone(c, tone, now + (tone.delay ?? 0));
 }
 
 /** 外部 store 更新時重置快取。 */

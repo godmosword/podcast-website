@@ -359,12 +359,12 @@ test.describe("遊戲第二輪 P2 mobile regression", () => {
     const toolbar = page.getByRole("toolbar", { name: "著色工具" });
     await expect(toolbar).toBeVisible();
     // 工具列是五欄格，不再橫捲：每顆都要整顆落在視窗內且夠大。
-    for (const name of ["蠟筆", "填滿", "擦掉", "復原", "更多"]) {
+    for (const name of ["蠟筆", "填滿", "擦掉", "復原", "關閉聲音"]) {
       const box = (await page.getByRole("button", { name, exact: true }).boundingBox())!;
       expect(box.x, name).toBeGreaterThanOrEqual(0);
       expect(box.x + box.width, name).toBeLessThanOrEqual(MOBILE.width);
-      expect(box.width, name).toBeGreaterThanOrEqual(44);
-      expect(box.height, name).toBeGreaterThanOrEqual(44);
+      expect(box.width, name).toBeGreaterThanOrEqual(48);
+      expect(box.height, name).toBeGreaterThanOrEqual(48);
     }
     const bucket = page.getByRole("button", { name: "填滿", exact: true });
     await bucket.click();
