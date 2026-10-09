@@ -69,6 +69,8 @@
 
 ### Fixed
 
+- **島嶼面板關閉鈕不再被故事卡蓋住**：車車樂園沒有提示句，故事卡頂到面板最上面；卡片是 `position: relative`、DOM 又排在關閉鈕後面，整顆 ✕ 被蓋掉，點那個角會進故事。關閉鈕墊 `z-index: 1`；關閉鈕後面若不是提示句，第一塊內容從關閉鈕下緣開始排；提示句右側讓出 40px。390／320／844×390 實測 `elementFromPoint` 命中關閉鈕。
+
 - **元件樣式不再被全域 class 反蓋**：`app/layout.tsx` 的 `globals.css` 原本排在元件 import 之後；著色本新增 CSS module 後 Turbopack 併 chunk，把一批元件 CSS 排到 globals 前面，同權重的全域 class 反過來蓋掉元件（故事卡 EP 標籤變小、故事頁分享列多 12px）。改成第一個 import。故事頁對 PlayButton／ShareButton 的覆寫也改成不靠載入順序：播放鈕版面交回 PlayButton 自己的 flex，分享列 `margin-top: 0` 提到 (0,2,0)。
 
 - **Landing 首段桌機圖左上補遠景（美術審 L7）**：`segment-stories.jpg` 原稿左上三分之一是空的奶油底、構圖重心偏右。不生圖：用同一套 `hero-parallax` 黏土 props（摩天輪、樹、灌木）以 PIL 合成成大氣透視的遠景（`assets/landing/segment-stories/compose-distant-park.py`，原稿另存），重出 WebP／AVIF（75KB，與原相同）。設計審（Opus）三點採納：遠景 haze 整體高於中景灌木（樹 0.34、灌木 0.28、飽和 ≤1.0、摩天輪 blur 1.4）、底部淡出改垂直漸層×兩端 taper＋16px 模糊（不再是齊頭霧線）、整組右移 25px 離開氣球區＋摩天輪 250→225。桌機 `object-position` 試過偏右 70% 會把補上的摩天輪切掉，維持 `center`。重錄 home 1280 ×2、landing-stories 1280 ×2 基線。**未改** Apple sync workflow、`LandingSegment` 版面、`useMapCamera`／`ZoneSheet`。

@@ -152,8 +152,11 @@
   }
 }
 
+/* 右上 8+48px 是關閉鈕的位置。故事卡是 position: relative，DOM 又排在後面，
+   不墊 z-index 就會把關閉鈕整顆蓋掉，點那個角會跑進故事而不是關抽屜。 */
 .close {
   position: absolute;
+  z-index: 1;
   top: 8px;
   right: 8px;
   width: 48px;
@@ -332,8 +335,10 @@
   border-radius: var(--radius-pill);
 }
 
+/* 右側讓出關閉鈕的寬度，長句換行時不會鑽到它底下 */
 .childHint {
   margin: 0 0 0.65rem;
+  padding-right: 40px;
   font-size: var(--fs-h4);
   font-weight: 800;
   line-height: 1.45;
@@ -616,6 +621,12 @@
 
 .stories {
   margin: 0 0 0.75rem;
+}
+
+/* 沒有提示句時（車車樂園）第一塊是故事卡或地點清單：從關閉鈕下緣開始排，
+   右上角整列留給關閉鈕。面板上襯 1rem＋44px ≈ 關閉鈕底（8+48px）再留一點縫。 */
+.close + :not(.childHint) {
+  margin-top: 44px;
 }
 
 .storiesHeading {
