@@ -5,8 +5,8 @@ export const CANDY_MATCH_CELL_GAP = 3;
 export const CANDY_MATCH_BOARD_PADDING = 2;
 
 /** 格子是按鈕：觸控下限 44px；寬螢幕上限 80px。 */
-export const CANDY_MATCH_CELL_MIN = 44;
-export const CANDY_MATCH_CELL_MAX = 80;
+const CANDY_MATCH_CELL_MIN = 44;
+const CANDY_MATCH_CELL_MAX = 80;
 
 function fit(available: number, count: number): number {
   return Math.floor(

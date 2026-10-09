@@ -3,18 +3,18 @@ import { canonicalStorySlug } from "@/lib/story-slug-aliases";
 
 /** 本機活動紀錄。與 cheche:progress 分開，方便之後只同步這一份白名單。 */
 export const ACTIVITY_STORAGE_KEY = "cheche:activity";
-export const ACTIVITY_CHANGE_EVENT = "cheche:activity-change";
+const ACTIVITY_CHANGE_EVENT = "cheche:activity-change";
 
 /** 含今天在內往前保留的天數。比這更舊的日期在寫入與讀取時刪除。 */
-export const ACTIVITY_RETENTION_DAYS = 90;
+const ACTIVITY_RETENTION_DAYS = 90;
 /** 正規化後的 JSON 超過此大小就整份重來，避免壞資料把 localStorage 撐滿。 */
 export const ACTIVITY_MAX_BYTES = 64 * 1024;
 /** 播放器單次 timeupdate 前進超過這個秒數，視為拖曳，不計入收聽。 */
-export const MAX_PLAYED_DELTA_SECONDS = 2;
+const MAX_PLAYED_DELTA_SECONDS = 2;
 /** 累計到這個秒數就寫入一次。 */
 export const ACTIVITY_FLUSH_SECONDS = 15;
 /** 遊戲頁計時若一次跳超過這個秒數（例如電腦睡眠），只記到上限。 */
-export const MAX_VISIBLE_SLICE_SECONDS = 20;
+const MAX_VISIBLE_SLICE_SECONDS = 20;
 
 const DATE_KEY = /^\d{4}-\d{2}-\d{2}$/;
 const SLUG_KEY = /^[a-z0-9-]{1,64}$/;
@@ -23,13 +23,13 @@ const MAX_DAY_SECONDS = 86_400;
 const MAX_COUNT = 999;
 const GAME_IDS: readonly GameKitGameId[] = ["block-drop", "candy-match"];
 
-export type StoryActivity = {
+type StoryActivity = {
   seconds: number;
   plays: number;
   completions: number;
 };
 
-export type GameActivity = {
+type GameActivity = {
   seconds: number;
   sessions: number;
   clears: number;
@@ -215,7 +215,7 @@ function shiftLocalDays(at: number, days: number): number {
   return date.getTime();
 }
 
-export function pruneActivityLog(
+function pruneActivityLog(
   log: ActivityLogV1,
   now = Date.now(),
 ): ActivityLogV1 {
@@ -233,7 +233,7 @@ export function pruneActivityLog(
 }
 
 /** 讀出並正規化。頂層格式不對、或正規化後超過大小上限，回傳 null。 */
-export function parseActivityLog(raw: unknown): ActivityLogV1 | null {
+function parseActivityLog(raw: unknown): ActivityLogV1 | null {
   if (!raw || typeof raw !== "object") return null;
   const record = raw as Partial<ActivityLogV1>;
   if (record.schemaVersion !== 1) return null;

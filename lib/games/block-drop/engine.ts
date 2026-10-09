@@ -33,8 +33,8 @@ import {
 import type { BlockDropDifficultyPreference } from "@/lib/progress-store";
 import type { Rng } from "./rng";
 
-export type Status = "ready" | "playing" | "paused" | "over" | "won";
-export type OverReason = "topout" | "outOfPieces" | "wrapUp" | null;
+type Status = "ready" | "playing" | "paused" | "over" | "won";
+type OverReason = "topout" | "outOfPieces" | "wrapUp" | null;
 
 export interface GameState {
   board: Board;
@@ -68,7 +68,7 @@ export interface GameState {
 }
 
 /** top4＝清上方 4 列（自由堆疊）；halfStack＝清掉石頭以上所有玩家方塊（任務冒險輕鬆）。 */
-export type RescueKind = "top4" | "halfStack";
+type RescueKind = "top4" | "halfStack";
 
 export type EngineConfig = {
   /** 每下降一格的毫秒數 */
@@ -92,7 +92,7 @@ export type EngineConfig = {
   isComplete?: (g: GameState) => boolean;
 };
 
-export type EngineEvent =
+type EngineEvent =
   | { type: "lockStart" }
   | { type: "moved" }
   | { type: "rotated" }
@@ -189,7 +189,7 @@ export function refill(g: GameState, ctx: EngineContext): void {
   }
 }
 
-export function updateGrounded(g: GameState): void {
+function updateGrounded(g: GameState): void {
   if (g.active) {
     g.grounded = !valid({ ...g.active, y: g.active.y + 1 }, g.board);
   }
@@ -243,7 +243,7 @@ function topOut(g: GameState, ctx: EngineContext): void {
   else gameOver(g, ctx, ctx.config.rescueKind === "halfStack" ? "wrapUp" : "topout");
 }
 
-export function spawnNext(g: GameState, ctx: EngineContext): void {
+function spawnNext(g: GameState, ctx: EngineContext): void {
   refill(g, ctx);
   const type = g.bag.shift()!;
   g.active = { type, rot: 0, x: spawnX(boardCols(g.board)), y: 0 };
@@ -333,7 +333,7 @@ export function finishClear(g: GameState, ctx: EngineContext): void {
   g.dirty = true;
 }
 
-export function lockPiece(g: GameState, ctx: EngineContext, now: number): void {
+function lockPiece(g: GameState, ctx: EngineContext, now: number): void {
   if (!g.active) return;
   emit(ctx, { type: "lockStart" });
   const piece = g.active;
@@ -360,7 +360,7 @@ export function lockPiece(g: GameState, ctx: EngineContext, now: number): void {
   g.dirty = true;
 }
 
-export function gravityStep(g: GameState): void {
+function gravityStep(g: GameState): void {
   if (!g.active) return;
   const np = { ...g.active, y: g.active.y + 1 };
   if (valid(np, g.board)) {

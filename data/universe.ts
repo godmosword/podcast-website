@@ -11,8 +11,6 @@ import {
 /** 地圖版面：橫式（桌機／橫向／SSR 預設）或直式（≤480 直向手機，見 map-camera-utils `layoutForViewport`）。 */
 export type MapLayout = "landscape" | "portrait";
 
-export const MAP_LAYOUTS: readonly MapLayout[] = ["landscape", "portrait"];
-
 export type MapStage = { readonly width: number; readonly height: number };
 
 /** 虛擬地圖舞台（解析度無關的 px 空間；消費端仍用此單位）。橫式＝既有契約，OG／deep link／e2e 零差。 */
@@ -54,7 +52,7 @@ export const ZONE_STATUSES = [
 ] as const;
 export type ZoneStatus = (typeof ZONE_STATUSES)[number];
 
-export type HotspotAction =
+type HotspotAction =
   | { type: "link"; href: string }
   | { type: "story"; slug: string }
   | { type: "locked"; hint: string };
@@ -68,7 +66,7 @@ export type Hotspot = {
   action: HotspotAction;
 };
 
-export type ZoneLink = {
+type ZoneLink = {
   label: string;
   href: string;
   external?: boolean;
@@ -135,7 +133,7 @@ export function worldToStage(
 }
 
 /** 舞台 px → 0–1。預設橫式。 */
-export function stageToWorld(
+function stageToWorld(
   coord: { x: number; y: number },
   layout: MapLayout = "landscape",
 ): {
@@ -567,7 +565,6 @@ export const statusCounts = (
 
 /**
  * 狀態顯示文字／圖示／色票（單一來源；元件勿各自 switch）。
- * `ZONE_STATUS_META` 為相容別名。
  */
 export const STATUS_META: Record<
   ZoneStatus,
@@ -614,6 +611,3 @@ export const STATUS_META: Record<
     tapBubble: "先逛逛吧！",
   },
 };
-
-/** @deprecated 請改用 STATUS_META；保留給既有 import。 */
-export const ZONE_STATUS_META = STATUS_META;

@@ -31,7 +31,7 @@ export const BLOCK_POLICIES: Readonly<Record<"kid" | "skilled", BlockPolicy>> = 
   skilled: { name: "有點技巧", thinkSeconds: 1.6, temperature: 1.5, mistake: 0.05, usesHold: true },
 };
 
-export type BlockSimResult = {
+type BlockSimResult = {
   won: boolean;
   pieces: number;
   rescues: number;
@@ -81,7 +81,7 @@ function fallRows(p: Placement): number {
   return Math.max(1, p.y);
 }
 
-export function simulateBlockRound(round: BlockRound, policy: BlockPolicy, seed: number, maxPieces = 80): BlockSimResult {
+function simulateBlockRound(round: BlockRound, policy: BlockPolicy, seed: number, maxPieces = 80): BlockSimResult {
   const rng = seededRng(seed * 7919 + 13);
   const ctx: EngineContext = { config: stageEngineConfig(round), rng: seededRng(seed), events: [] };
   const g = freshGame(round.stage.cols, round.stage.rows, buildStageStart(round.stage));

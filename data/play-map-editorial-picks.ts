@@ -1,6 +1,6 @@
 import { listPlaygrounds, type Playground } from "./playgrounds";
 
-export const PLAY_MAP_EDITORIAL_INTENTS = [
+const PLAY_MAP_EDITORIAL_INTENTS = [
   "rainy-day",
   "free",
   "high-energy",

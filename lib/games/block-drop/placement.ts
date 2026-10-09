@@ -35,7 +35,7 @@ function uniqueRotations(type: PieceType): number[] {
   return out;
 }
 
-export function clearFullRows(board: Board): { board: Board; lines: number; stoneRows: number } {
+function clearFullRows(board: Board): { board: Board; lines: number; stoneRows: number } {
   const cols = board[0]?.length ?? 0;
   const kept = board.filter((row) => !row.every(Boolean));
   const lines = board.length - kept.length;

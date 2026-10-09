@@ -102,7 +102,7 @@ function titleStem(title: string): string {
   return head || title.trim() || "這個故事";
 }
 
-export function resolveGitShortSha(root: string): string {
+function resolveGitShortSha(root: string): string {
   try {
     return execFileSync("git", ["rev-parse", "--short", "HEAD"], {
       cwd: root,

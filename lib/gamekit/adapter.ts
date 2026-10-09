@@ -101,6 +101,3 @@ export interface GameAdapter {
   readonly id: GameKitGameId;
   create(options: GameCreateOptions): GameInstance;
 }
-
-/** Registry helper – keeps discovery simple for routes / AI loaders. */
-export type AdapterRegistry = Partial<Record<GameKitGameId, GameAdapter>>;

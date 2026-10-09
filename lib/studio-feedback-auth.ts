@@ -17,11 +17,11 @@ import {
 export const FEEDBACK_MOD_COOKIE = "cc_feedback_mod";
 
 /** session 有效期：8 小時，避免共用電腦長期留存。 */
-export const FEEDBACK_MOD_MAX_AGE_SEC = 8 * 60 * 60;
+const FEEDBACK_MOD_MAX_AGE_SEC = 8 * 60 * 60;
 
 /** 登入失敗鎖定：同 IP 每 15 分鐘 5 次。 */
-export const FEEDBACK_MOD_LOGIN_LIMIT = 5;
-export const FEEDBACK_MOD_LOGIN_WINDOW_SEC = 15 * 60;
+const FEEDBACK_MOD_LOGIN_LIMIT = 5;
+const FEEDBACK_MOD_LOGIN_WINDOW_SEC = 15 * 60;
 
 const TOKEN_NAMESPACE = "chechecar:feedback-moderation:v1";
 
@@ -125,7 +125,7 @@ export function isSameOriginRequest(request: Request): boolean {
   }
 }
 
-export type ModerationGuardFailure = {
+type ModerationGuardFailure = {
   ok: false;
   status: 401 | 403 | 503;
   reason: "not_configured" | "unauthorized" | "cross_origin";

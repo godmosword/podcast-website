@@ -27,7 +27,7 @@ type HotspotLayerProps = {
  * 直向（≤480）：`pos.y` 在島下半的熱點，整支標牌下移站到島前沙灘（3/4 視角「畫面下方＝更靠近觀者」），
  * 牌子仍正立、底座仍是接地點、48px 命中區留在錨點——不倒掛（設計審必改 5）。
  */
-export const HOTSPOT_BELOW_THRESHOLD = 0.5;
+const HOTSPOT_BELOW_THRESHOLD = 0.5;
 
 /**
  * 島內熱點座標層：掛在 stage 上，隨相機 transform。

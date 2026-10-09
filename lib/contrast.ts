@@ -56,7 +56,3 @@ export function contrastRatio(a: string, b: string): number {
 
 /** AA 內文門檻（< 18.66px bold／< 24px regular）。 */
 export const AA_NORMAL_TEXT = 4.5;
-/** AA 大字門檻。 */
-export const AA_LARGE_TEXT = 3;
-/** AA 非文字（圖示、表單邊框）門檻。 */
-export const AA_NON_TEXT = 3;

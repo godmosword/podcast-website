@@ -20,7 +20,7 @@ export type PlaygroundType = (typeof PLAYGROUND_TYPES)[number];
 
 export type PlaygroundSourceKind = "official" | "gov" | "editorial";
 
-export type PlaygroundSource = {
+type PlaygroundSource = {
   kind: PlaygroundSourceKind;
   name: string;
   url: string;

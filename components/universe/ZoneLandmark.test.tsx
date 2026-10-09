@@ -9,10 +9,10 @@ vi.stubGlobal("React", React);
 describe("ZoneLandmark", () => {
   it("有 artTile 時渲染 img", () => {
     const html = renderToStaticMarkup(
-      <ZoneLandmark zoneId="car-park" artTile="/adventures/zones/car-park.svg" />,
+      <ZoneLandmark zoneId="car-park" artTile="/adventures/zones/car-park.png" />,
     );
     expect(html).toContain("<img");
-    expect(html).toContain('src="/adventures/zones/car-park.svg"');
+    expect(html).toContain('src="/adventures/zones/car-park.png"');
   });
 
   it("無 artTile 時 fallback inline SVG", () => {

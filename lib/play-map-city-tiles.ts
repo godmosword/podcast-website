@@ -59,7 +59,7 @@ export const CITY_WALL_SLOTS: readonly CityTileSlot[] = [
  * `uncatalogued`＝整個縣市尚未收錄資料。後兩者對家長的意義完全不同，
  * 混成同一種灰色會讓人以為當地沒地方玩。
  */
-export type PlayMapCityTileStatus = "covered" | "empty" | "uncatalogued";
+type PlayMapCityTileStatus = "covered" | "empty" | "uncatalogued";
 
 export type PlayMapCityTile = {
   city: string;

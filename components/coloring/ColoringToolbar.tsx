@@ -6,20 +6,18 @@ import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useGamePlayChromeSlot } from "@/components/games/GamePlayChromeSlot";
 import SfxToggle from "@/components/SfxToggle";
 import Icon from "@/components/ui/Icon";
-import {
-  BRUSH_SIZES,
-  type BrushSizeId,
-  type ColoringTool,
+import type {
+  BrushSizeId,
+  ColorGroupId,
+  ColoringTool,
 } from "@/lib/coloring/tools";
+import { ColoringParentTools } from "./ColoringParentTools";
 import { ColoringPictureDialog } from "./ColoringPictureDialog";
 import {
   BlankPageIcon,
   BucketIcon,
-  ClearIcon,
   CrayonIcon,
-  DownloadIcon,
   EraserIcon,
-  ResetViewIcon,
   UndoIcon,
 } from "./ColoringToolbarIcons";
 import styles from "./ColoringToolbar.module.css";
@@ -35,12 +33,10 @@ type Props = {
   onRedo?: () => void;
   onClear: () => void;
   onDownload: () => void;
-  viewActive: boolean;
-  onResetView: () => void;
   cueTool?: ColoringTool | null;
   ready?: boolean;
-  colorGroup?: "all" | "rainbow" | "forest";
-  onColorGroupChange?: (g: "all" | "rainbow" | "forest") => void;
+  colorGroup?: ColorGroupId;
+  onColorGroupChange?: (g: ColorGroupId) => void;
   guided?: boolean;
   onGuidedChange?: (v: boolean) => void;
   onPrint?: () => void;
@@ -201,119 +197,24 @@ export function ColoringToolbar(p: Props) {
                 if (event.target === event.currentTarget) close();
               }}
             >
-              <div
-                ref={panel}
-                role="dialog"
-                aria-modal="true"
-                aria-label="更多著色工具"
-                className={styles.panel}
-                onKeyDown={(event) => {
-                  if (event.key === "Escape") {
-                    event.stopPropagation();
-                    close();
-                  }
-                }}
-              >
-                <div className={styles.panelHeader}>
-                  <strong>更多著色工具</strong>
-                  <button type="button" onClick={close}>
-                    關閉
-                  </button>
-                </div>
-                <div role="group" aria-label="筆刷大小" className={styles.group}>
-                  {BRUSH_SIZES.map((size) => (
-                    <button
-                      key={size.id}
-                      type="button"
-                      className={`${styles.btn} ${p.brushSize === size.id ? styles.active : ""}`}
-                      aria-label={`筆刷${size.name}`}
-                      aria-pressed={p.brushSize === size.id}
-                      disabled={p.tool === "bucket" || p.ready === false}
-                      onClick={() => p.onBrushSizeChange(size.id)}
-                    >
-                      <span
-                        data-size-dot
-                        className={styles.sizeDot}
-                        style={{
-                          width: Math.min(22, Math.max(8, size.displayRadius * 1.15)),
-                          height: Math.min(22, Math.max(8, size.displayRadius * 1.15)),
-                        }}
-                      />
-                    </button>
-                  ))}
-                </div>
-                <div role="group" aria-label="塗色模式" className={styles.group}>
-                  {[true, false].map((guided) => (
-                    <button
-                      key={String(guided)}
-                      type="button"
-                      className={styles.option}
-                      aria-pressed={(p.guided !== false) === guided}
-                      onClick={() => p.onGuidedChange?.(guided)}
-                    >
-                      {guided ? "安心塗 · 不出線" : "自由塗 · 畫花紋"}
-                    </button>
-                  ))}
-                </div>
-                <div role="group" aria-label="色組" className={styles.group}>
-                  {(["all", "rainbow", "forest"] as const).map((g) => (
-                    <button
-                      type="button"
-                      key={g}
-                      aria-pressed={(p.colorGroup ?? "all") === g}
-                      onClick={() => p.onColorGroupChange?.(g)}
-                    >
-                      {g === "all" ? "全部顏色" : g === "rainbow" ? "彩虹色" : "森林色"}
-                    </button>
-                  ))}
-                </div>
-                <div className={styles.options}>
-                  <button
-                    type="button"
-                    disabled={!p.canRedo || p.ready === false}
-                    onClick={p.onRedo}
-                  >
-                    ↪ 重做
-                  </button>
-                  <button
-                    ref={clearBtn}
-                    type="button"
-                    disabled={p.ready === false}
-                    aria-label="清空"
-                    onClick={() => setClearAsked(true)}
-                  >
-                    <ClearIcon className={styles.icon} />
-                    清空
-                  </button>
-                  <button
-                    type="button"
-                    disabled={!p.viewActive}
-                    onClick={() => {
-                      p.onResetView();
-                      close();
-                    }}
-                    aria-label="縮放還原"
-                  >
-                    <ResetViewIcon className={styles.icon} />
-                    縮放還原
-                  </button>
-                  <button
-                    type="button"
-                    disabled={p.ready === false}
-                    onClick={p.onDownload}
-                    aria-label="下載"
-                  >
-                    <DownloadIcon className={styles.icon} />
-                    下載
-                  </button>
-                  {p.onPrint ? (
-                    <button type="button" disabled={p.ready === false} onClick={p.onPrint}>
-                      列印線稿
-                    </button>
-                  ) : null}
-                </div>
-                <p className={styles.note}>清空後可以按復原。作品只存在這台裝置。</p>
-              </div>
+              <ColoringParentTools
+                panelRef={panel}
+                clearButtonRef={clearBtn}
+                onClose={close}
+                ready={p.ready !== false}
+                brushSize={p.brushSize}
+                brushDisabled={p.tool === "bucket" || p.ready === false}
+                onBrushSizeChange={p.onBrushSizeChange}
+                guided={p.guided !== false}
+                onGuidedChange={p.onGuidedChange}
+                colorGroup={p.colorGroup ?? "all"}
+                onColorGroupChange={p.onColorGroupChange}
+                canRedo={p.canRedo === true}
+                onRedo={p.onRedo}
+                onDownload={p.onDownload}
+                onPrint={p.onPrint}
+                onAskClear={() => setClearAsked(true)}
+              />
             </div>,
             document.body,
           )

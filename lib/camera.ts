@@ -3,7 +3,6 @@
  * 點島只改路由；相機是路由的結果，不是原因。
  */
 import {
-  MAP_STAGE,
   universe,
   zoneById,
   zoneCamera,
@@ -94,5 +93,3 @@ export function targetToFlyParams(
 export function isIslandPath(pathname: string): boolean {
   return targetFor(pathname).level === "island";
 }
-
-export { MAP_STAGE, WORLD };

@@ -56,7 +56,7 @@ export async function writeModernSiblings(jpgPath: string): Promise<void> {
   );
 }
 
-export function listStoryIllustrationJpgTargets(publicDir: string): string[] {
+function listStoryIllustrationJpgTargets(publicDir: string): string[] {
   const storiesDir = join(publicDir, "stories");
   if (!existsSync(storiesDir)) return [];
   const files: string[] = [];

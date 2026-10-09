@@ -55,21 +55,3 @@ export default function StoryMeta({
     </>
   );
 }
-
-export function StoryTags({
-  story,
-  align = "center",
-}: Pick<StoryMetaProps, "story" | "align">) {
-  return (
-    <div
-      className={`${styles.tags} ${align === "left" ? styles.tagsLeft : ""}`}
-    >
-      <TagChip variant="vehicle" color={story.color}>
-        {story.vehicle}
-      </TagChip>
-      {story.tags?.map((tag) => (
-        <TagChip key={tag}>{tag}</TagChip>
-      ))}
-    </div>
-  );
-}

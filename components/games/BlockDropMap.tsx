@@ -25,7 +25,7 @@ const MODES: readonly { id: BlockMode; label: string; hint: string }[] = [
 ];
 
 /** 迷你起始盤：8 欄石頭排（由下往上），缺口留白。 */
-export function MiniStoneBoard({ stones, cell = 6 }: { stones: readonly string[]; cell?: number }) {
+function MiniStoneBoard({ stones, cell = 6 }: { stones: readonly string[]; cell?: number }) {
   const rows = [...stones].reverse();
   return (
     <span

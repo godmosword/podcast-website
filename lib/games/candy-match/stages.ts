@@ -56,7 +56,7 @@ const block = (c0: number, c1: number, r0: number, r1: number): number[] => {
 };
 
 /** 6×7 髒格區域模板：中央、四角、底部、兩側。 */
-export const CANDY_DIRT_TEMPLATES = {
+const CANDY_DIRT_TEMPLATES = {
   center8: cells([[2, 2], [3, 2], [1, 3], [2, 3], [3, 3], [4, 3], [2, 4], [3, 4]]),
   corners8: cells([[0, 0], [1, 0], [4, 0], [5, 0], [0, 6], [1, 6], [4, 6], [5, 6]]),
   bottom8: block(1, 4, 5, 6),
@@ -259,7 +259,7 @@ export function candyProps(mode: CandyMode, levelIndex: number): CandyProps {
   return { bubble: 2, broom: 1, rainbow: levelIndex >= 1 ? 1 : 0 };
 }
 
-export function stageSet(mode: CandyMode, levelIndex: number): CandyStageSet {
+function stageSet(mode: CandyMode, levelIndex: number): CandyStageSet {
   const set = CANDY_STAGES[mode][levelIndex];
   if (!set) throw new Error(`Missing Candy stage for ${mode} level ${levelIndex}`);
   return set;

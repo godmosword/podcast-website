@@ -6,27 +6,27 @@ import type { FeedbackKind, FeedbackStatus } from "@/lib/feedback-schema";
 import styles from "./FeedbackModerationPanel.module.css";
 
 /** 後台文案（繁中）；公開頁文案在 `lib/feedback-copy.ts`，兩邊不共用。 */
-export const MOD_LOADING = "正在確認登入狀態…";
+const MOD_LOADING = "正在確認登入狀態…";
 export const MOD_SECRET_LABEL = "審核密語";
 export const MOD_LOGIN_SUBMIT = "進入審核";
-export const MOD_LOGIN_HINT = "這是製作團隊專用頁面，密語只在伺服器端比對。";
+const MOD_LOGIN_HINT = "這是製作團隊專用頁面，密語只在伺服器端比對。";
 export const MOD_LOGIN_FAILED = "密語不對，請再確認一次。";
 export const MOD_LOGIN_RATE_LIMITED = "嘗試次數太多，請稍後再試。";
-export const MOD_LOGIN_ERROR = "登入失敗，請稍後再試。";
+const MOD_LOGIN_ERROR = "登入失敗，請稍後再試。";
 export const MOD_UNAVAILABLE = "審核後台暫時無法使用（資料庫或密語未設定）。";
-export const MOD_LOAD_ERROR = "讀取留言失敗，請重新整理。";
-export const MOD_ACTION_ERROR = "操作失敗，請再試一次。";
+const MOD_LOAD_ERROR = "讀取留言失敗，請重新整理。";
+const MOD_ACTION_ERROR = "操作失敗，請再試一次。";
 export const MOD_EMPTY = "目前沒有任何留言。";
-export const MOD_LIST_HEADING = "留言列表";
-export const MOD_STATS_HEADING = "則數統計";
-export const MOD_LOGOUT = "登出審核";
+const MOD_LIST_HEADING = "留言列表";
+const MOD_STATS_HEADING = "則數統計";
+const MOD_LOGOUT = "登出審核";
 export const MOD_PII_FLAG = "疑似個資，請先確認再核准";
 export const MOD_APPROVE = "核准公開";
 export const MOD_HIDE = "隱藏";
-export const MOD_REOPEN = "退回待審";
+const MOD_REOPEN = "退回待審";
 export const MOD_DELETE = "刪除";
-export const MOD_EMAIL_PREFIX = "信箱";
-export const MOD_DELETE_CONFIRM = (nickname: string): string =>
+const MOD_EMAIL_PREFIX = "信箱";
+const MOD_DELETE_CONFIRM = (nickname: string): string =>
   `確定要永久刪除「${nickname}」的留言嗎？暱稱、信箱與正文都會一併消失，無法復原。`;
 
 const STATUS_LABEL: Record<FeedbackStatus, string> = {

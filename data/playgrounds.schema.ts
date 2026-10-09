@@ -5,7 +5,7 @@
 import { z } from "zod";
 import { PLAYGROUND_TYPES } from "./playgrounds";
 
-export const playgroundSourceSchema = z.object({
+const playgroundSourceSchema = z.object({
   kind: z.enum(["official", "gov", "editorial"]),
   name: z.string().min(1),
   url: z.string().min(1),

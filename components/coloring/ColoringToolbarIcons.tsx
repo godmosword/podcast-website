@@ -114,6 +114,62 @@ export function UndoIcon({ className }: IconProps) {
   );
 }
 
+/** 重做：順時針彎箭頭（復原的鏡像）。 */
+export function RedoIcon({ className }: IconProps) {
+  return (
+    <svg {...BOX} className={className}>
+      <g {...STROKE}>
+        <path d="M15.5 7.2h3.7l-3.4-3.3" />
+        <path d="M18.8 7.2h-6.4a6 6 0 1 0 1.2 11.9" />
+      </g>
+    </svg>
+  );
+}
+
+/** 列印線稿：印表機吐出一張紙。 */
+export function PrintIcon({ className }: IconProps) {
+  return (
+    <svg {...BOX} className={className}>
+      <g {...STROKE}>
+        <path d="M7.2 9V4.4h9.6V9" />
+        <rect x="4" y="9" width="16" height="7.6" rx="2" />
+        <path d="M7.2 13.8h9.6v6H7.2z" />
+      </g>
+    </svg>
+  );
+}
+
+/** 塗法「不出線」：框框裡塗滿。 */
+export function InsideLinesIcon({ className }: IconProps) {
+  return (
+    <svg {...BOX} className={className}>
+      <rect x="4" y="4" width="16" height="16" rx="4" {...STROKE} />
+      <rect x="8.5" y="8.5" width="7" height="7" rx="1.5" fill="currentColor" />
+    </svg>
+  );
+}
+
+/** 塗法「自由塗」：一道隨手的花紋。 */
+export function FreeDrawIcon({ className }: IconProps) {
+  return (
+    <svg {...BOX} className={className}>
+      <path d="M3 15c2.5-6 5-6 6 0s3.5 6 6 0 3.5-4.5 6-1.5" {...STROKE} />
+    </svg>
+  );
+}
+
+/** 只存在這台裝置：手機。 */
+export function DeviceIcon({ className }: IconProps) {
+  return (
+    <svg {...BOX} className={className}>
+      <g {...STROKE}>
+        <rect x="7" y="3" width="10" height="18" rx="2" />
+        <path d="M11 18h2" />
+      </g>
+    </svg>
+  );
+}
+
 /** 清空：垃圾桶。 */
 export function ClearIcon({ className }: IconProps) {
   return (

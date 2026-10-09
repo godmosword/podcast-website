@@ -27,7 +27,7 @@ export type RobotsPolicyRule = {
   disallow?: string | string[];
 };
 
-export function normalizeRobotsRules(
+function normalizeRobotsRules(
   rules: MetadataRoute.Robots["rules"],
 ): RobotsPolicyRule[] {
   if (!rules) return [];
@@ -108,14 +108,14 @@ export function verifyRobotsPolicy(
   return { ok: errors.length === 0, errors };
 }
 
-export type RobotsTxtRuleGroup = {
+type RobotsTxtRuleGroup = {
   userAgents: string[];
   allow: string[];
   disallow: string[];
 };
 
 /** 解析 robots.txt 文字為規則群組（忽略註解與空行）。 */
-export function parseRobotsTxt(text: string): RobotsTxtRuleGroup[] {
+function parseRobotsTxt(text: string): RobotsTxtRuleGroup[] {
   const groups: RobotsTxtRuleGroup[] = [];
   let current: RobotsTxtRuleGroup | null = null;
 

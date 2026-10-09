@@ -6,7 +6,7 @@ export type ColoringPreferences = {
   guided: boolean;
   usedBucket: boolean;
 };
-export const COLORING_PREFERENCES_KEY = "coloring:preferences:v2";
+const COLORING_PREFERENCES_KEY = "coloring:preferences:v2";
 export const DEFAULT_COLORING_PREFERENCES: ColoringPreferences = {
   tool: "crayon",
   colorHex: "#e85d4c",

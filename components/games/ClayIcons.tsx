@@ -63,17 +63,6 @@ export function IconNext({ size, color = "currentColor", style }: IconProps) {
   );
 }
 
-/** 獎盃（最佳分數／新紀錄） */
-export function IconTrophy({ size, color = "#f5b73c", style }: IconProps) {
-  return (
-    <Svg size={size} style={style}>
-      <path d="M8 4h8v6a4 4 0 0 1-8 0V4Z" fill={color} {...stroke(color)} />
-      <path d="M8 5.5H4.8v1A3.2 3.2 0 0 0 8 9.7M16 5.5h3.2v1A3.2 3.2 0 0 1 16 9.7" {...stroke(color)} />
-      <path d="M12 14v3.5M8.5 20h7" {...stroke(color)} />
-    </Svg>
-  );
-}
-
 /** 火焰（連擊／挑戰難度） */
 export function IconFlame({ size, color = "#ff8a5c", style }: IconProps) {
   return (
@@ -163,25 +152,6 @@ export function IconSwipeDown({ size, color = "currentColor", style }: IconProps
   );
 }
 
-/** 上滑 */
-export function IconSwipeUp({ size, color = "currentColor", style }: IconProps) {
-  return (
-    <Svg size={size} style={style}>
-      <path d="M12 19.5v-14" {...stroke(color)} />
-      <path d="M6.5 11L12 5.5 17.5 11" {...stroke(color)} />
-    </Svg>
-  );
-}
-
-/** 空白鍵 */
-export function IconSpaceKey({ size, color = "currentColor", style }: IconProps) {
-  return (
-    <Svg size={size} style={style}>
-      <path d="M5 10.5v3.5a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 14v-3.5" {...stroke(color)} />
-    </Svg>
-  );
-}
-
 /** 再玩一次（循環箭頭） */
 export function IconReplay({ size, color = "currentColor", style }: IconProps) {
   return (
@@ -207,18 +177,6 @@ export function IconPauseGlyph({ size, color = "currentColor", style }: IconProp
     <Svg size={size} style={style}>
       <rect x="6.5" y="5" width="3.6" height="14" rx="1.8" fill={color} />
       <rect x="13.9" y="5" width="3.6" height="14" rx="1.8" fill={color} />
-    </Svg>
-  );
-}
-
-/** 糖果（待機畫面主視覺） */
-export function IconCandy({ size, style }: IconProps) {
-  return (
-    <Svg size={size} style={style}>
-      <path d="M17 9.5 21 7l-1.3 5L21 17l-4-2.5" fill="#ffd1df" {...stroke("#ff9fb7")} strokeWidth={1.8} />
-      <path d="M7 9.5 3 7l1.3 5L3 17l4-2.5" fill="#ffd1df" {...stroke("#ff9fb7")} strokeWidth={1.8} />
-      <circle cx="12" cy="12" r="4.6" fill="#ffb4cf" {...stroke("#ff9fb7")} strokeWidth={1.8} />
-      <path d="M9.6 10.2c1.6 1 3.2 1 4.8 0M9.6 13.8c1.6 1 3.2 1 4.8 0" {...stroke("#fff")} strokeWidth={1.6} />
     </Svg>
   );
 }

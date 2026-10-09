@@ -3,7 +3,7 @@
 import type { BlockDropDifficultyPreference } from "@/lib/progress-store";
 
 export const LINE_SCORE = [0, 100, 300, 500, 800] as const;
-export const LOCK_DELAY = 450;
+const LOCK_DELAY = 450;
 export const DAS_DELAY = 170;
 export const DAS_REPEAT = 50;
 /** 軟降（按住往下／快落）每格毫秒。 */

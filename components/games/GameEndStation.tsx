@@ -16,7 +16,7 @@ import {
 } from "./ClayIcons";
 import styles from "./GameEndStation.module.css";
 
-export type GameEndMood = "win" | "retry" | "over";
+type GameEndMood = "win" | "retry" | "over";
 
 export type GameEndStationProps = {
   mood: GameEndMood;

@@ -55,7 +55,7 @@ export type CameraVisualMeta = {
 };
 
 /** 橫式木牌翻轉門檻（舊行為）。 */
-export const LABEL_FLIP_SCALE = 0.5;
+const LABEL_FLIP_SCALE = 0.5;
 
 /** 舞台 transform 與標籤反縮放 CSS 變數。 */
 export function applyStageCamera(

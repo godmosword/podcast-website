@@ -31,7 +31,7 @@ const DRIVE_BANDS = [
  */
 export const DRIVE_GROUP_NOTE = "車程為直線距離粗估，不含即時路況與停車時間。";
 
-export type PlayMapGroupItem = {
+type PlayMapGroupItem = {
   place: Playground;
   /** 跨組連續編號；批次遮蔽（VISIBLE_STEP）的唯一真相。 */
   displayIndex: number;

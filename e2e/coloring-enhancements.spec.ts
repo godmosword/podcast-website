@@ -32,7 +32,7 @@ async function more(page: Page) {
   const gate = page.getByRole("button", { name: "家長工具", exact: true });
   await gate.focus();
   await page.keyboard.press("Enter");
-  await expect(page.getByRole("dialog", { name: "更多著色工具" })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "家長工具" })).toBeVisible();
 }
 async function closeMore(page: Page) {
   await page.getByRole("button", { name: "關閉", exact: true }).click();
@@ -117,7 +117,7 @@ test("undo, redo, clear, restore, and new strokes preserve history and nonempty 
   expect(await redPixels(page)).toBe(0);
   await expect(page.getByRole("button", { name: "我塗好了" })).toHaveCount(0);
   await more(page);
-  await page.getByRole("button", { name: "↪ 重做", exact: true }).click();
+  await page.getByRole("button", { name: "重做", exact: true }).click();
   await closeMore(page);
   expect(await redPixels(page)).toBe(before);
   await clearPaint(page);
@@ -128,7 +128,7 @@ test("undo, redo, clear, restore, and new strokes preserve history and nonempty 
   await stroke(page);
   await more(page);
   await expect(
-    page.getByRole("button", { name: "↪ 重做", exact: true }),
+    page.getByRole("button", { name: "重做", exact: true }),
   ).toBeDisabled();
 });
 
@@ -293,11 +293,11 @@ for (const width of [320, 390, 430])
     }
     const gate = page.getByRole("button", { name: "家長工具", exact: true });
     await gate.click();
-    await expect(page.getByRole("dialog", { name: "更多著色工具" })).toHaveCount(0);
+    await expect(page.getByRole("dialog", { name: "家長工具" })).toHaveCount(0);
     await more(page);
     await page.keyboard.press("Shift+Tab");
     await expect(
-      page.getByRole("dialog", { name: "更多著色工具" }),
+      page.getByRole("dialog", { name: "家長工具" }),
     ).toContainText("自由塗");
     await page.keyboard.press("Escape");
     await expect(gate).toBeFocused();
@@ -346,12 +346,15 @@ test("pinch cancels the first finger's dot, zoom reset preserves paint", async (
   });
   // 畫布在下一個 animation frame 合成；等待取消筆觸的結果顯示。
   await expect.poll(() => redPixels(page)).toBe(0);
-  await more(page);
+  // 放大後縮放還原才浮在畫布上，不用開家長工具。
   await expect(
     page.getByRole("button", { name: "縮放還原", exact: true }),
-  ).toBeEnabled();
+  ).toBeVisible();
   await page.getByRole("button", { name: "縮放還原", exact: true }).click();
   await expect(canvas).toHaveCSS("transform", "matrix(1, 0, 0, 1, 0, 0)");
+  await expect(
+    page.getByRole("button", { name: "縮放還原", exact: true }),
+  ).toHaveCount(0);
 });
 
 test("share falls back to PNG download and print contains the full artwork on A4", async ({

@@ -7,7 +7,7 @@ import type { BrowserContext, Page } from "@playwright/test";
  * 用 `addInitScript` 而不是先進站再寫 storage：閘門的判斷發生在首次繪製前，
  * 事後才寫已經來不及。
  */
-export const INTRO_GATE_STORAGE_KEY = "cheche:intro-seen-v1";
+const INTRO_GATE_STORAGE_KEY = "cheche:intro-seen-v1";
 
 /** 與 `lib/intro-gate.ts` 同一把產品開關；開場下架時保留規格、不跑舊契約。 */
 export { INTRO_PORTAL_ENABLED } from "../lib/intro-gate";

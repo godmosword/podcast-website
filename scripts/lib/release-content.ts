@@ -1,9 +1,9 @@
 import type { Story } from "../../data/content";
 import type { WorkflowIssue } from "./episode-workflow";
 
-export type ReleaseIssueKind = "release-blocker" | "accepted-warning";
+type ReleaseIssueKind = "release-blocker" | "accepted-warning";
 
-export type ReleaseIssue = WorkflowIssue & {
+type ReleaseIssue = WorkflowIssue & {
   kind: ReleaseIssueKind;
 };
 

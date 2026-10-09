@@ -14,7 +14,7 @@ export type PlayMapViewportChangeSource = "user" | "programmatic";
 
 const BOUNDS_PRECISION = 1_000;
 
-export function normalizePlayMapBounds(
+function normalizePlayMapBounds(
   bounds: PlaygroundBounds,
 ): PlaygroundBounds {
   return {

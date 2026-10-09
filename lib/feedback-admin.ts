@@ -68,7 +68,7 @@ const MAX_ADMIN_LIMIT = 500;
  * 狀態機：pending → published → hidden，且 hidden 可回 published 或退回待審。
  * 已公開的留言不能直接跳回 pending（要先隱藏，公開牆才會立即撤下）。
  */
-export const ALLOWED_STATUS_TRANSITIONS: Record<
+const ALLOWED_STATUS_TRANSITIONS: Record<
   FeedbackStatus,
   readonly FeedbackStatus[]
 > = {

@@ -79,7 +79,7 @@ const NAMED_COLORS = new Set([
   "snow",
 ]);
 
-export const FONT_SIZE_TOKEN_STEPS = [
+const FONT_SIZE_TOKEN_STEPS = [
   { name: "--fs-h1", rem: 1.85 },
   { name: "--fs-h2", rem: 1.35 },
   { name: "--fs-h3", rem: 1.25 },
@@ -87,14 +87,14 @@ export const FONT_SIZE_TOKEN_STEPS = [
   { name: "--fs-meta", rem: 0.78 },
 ] as const;
 
-export const NEAR_TOKEN_DELTA_REM = 0.06;
+const NEAR_TOKEN_DELTA_REM = 0.06;
 
-export type DimensionStat = {
+type DimensionStat = {
   token: number;
   bare: number;
 };
 
-export type FileStat = {
+type FileStat = {
   file: string;
   fontSize: DimensionStat;
   radius: DimensionStat;
@@ -109,7 +109,7 @@ export type FontSizeNearest = {
   delta: number;
 };
 
-export type FontSizeBucket = {
+type FontSizeBucket = {
   value: string;
   count: number;
   nearest: FontSizeNearest | null;
@@ -155,7 +155,7 @@ function emptyAudit(): CssAudit {
   };
 }
 
-export function adoptionPercent(stat: DimensionStat): number | null {
+function adoptionPercent(stat: DimensionStat): number | null {
   const total = stat.token + stat.bare;
   if (total === 0) return null;
   return Math.round((100 * stat.token) / total);
@@ -175,7 +175,7 @@ function listCssModules(dir: string, root: string, out: string[]): void {
   }
 }
 
-export function listCssModulePaths(repoRoot: string): string[] {
+function listCssModulePaths(repoRoot: string): string[] {
   const files: string[] = [];
   for (const scanRoot of SCAN_ROOTS) {
     listCssModules(join(repoRoot, scanRoot), repoRoot, files);
@@ -639,7 +639,7 @@ function formatDelta(nearest: FontSizeNearest): string {
   return `${nearest.name} (${nearest.rem}) ${signed}`;
 }
 
-export function remNearTokenOccurrences(report: DesignTokenReport): number {
+function remNearTokenOccurrences(report: DesignTokenReport): number {
   let n = 0;
   for (const bucket of report.fontSizes) {
     if (!/^[\d.]+rem$/i.test(bucket.value) || bucket.nearest == null) continue;

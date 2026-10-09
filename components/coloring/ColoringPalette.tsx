@@ -1,13 +1,13 @@
 "use client";
 
-import { COLORING_PALETTE } from "@/lib/coloring/tools";
+import { paletteForGroup, type ColorGroupId } from "@/lib/coloring/tools";
 import { playSfx } from "@/lib/sfx";
 import styles from "./ColoringPalette.module.css";
 
 type ColoringPaletteProps = {
   colorHex: string;
   onChange: (hex: string) => void;
-  group?: "all" | "rainbow" | "forest";
+  group?: ColorGroupId;
 };
 
 export function ColoringPalette({
@@ -15,15 +15,7 @@ export function ColoringPalette({
   onChange,
   group = "all",
 }: ColoringPaletteProps) {
-  const choices = COLORING_PALETTE.filter(
-    (s) =>
-      group === "all" ||
-      (group === "rainbow"
-        ? ["red", "orange", "yellow", "green", "blue", "pink"].includes(s.id)
-        : ["green", "lime", "brown", "yellow", "black", "white"].includes(
-            s.id,
-          )),
-  );
+  const choices = paletteForGroup(group);
   const selectedIndex = choices.findIndex(
     (s) => s.hex.toLowerCase() === colorHex.toLowerCase(),
   );

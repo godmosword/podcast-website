@@ -45,7 +45,7 @@ export type StoryProgressRow = {
   lastDate: string | null;
 };
 
-export type WeeklyDay = {
+type WeeklyDay = {
   date: string;
   weekday: string;
   label: string;
@@ -104,7 +104,7 @@ function shiftLocalDays(at: number, days: number): number {
 }
 
 /** 含今天在內的 7 個本地日期，舊的在前。 */
-export function weekDateKeys(today: number): string[] {
+function weekDateKeys(today: number): string[] {
   const keys: string[] = [];
   for (let offset = 6; offset >= 0; offset -= 1) {
     keys.push(localDateKey(shiftLocalDays(today, -offset)));

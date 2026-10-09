@@ -1,7 +1,7 @@
 import { expect, type Locator } from "@playwright/test";
 
 /** DESIGN.md：兒童主路徑觸控區下限。 */
-export const MIN_TOUCH_PX = 44;
+const MIN_TOUCH_PX = 44;
 
 export async function expectTouchTarget(
   locator: Locator,

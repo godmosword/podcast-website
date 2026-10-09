@@ -31,8 +31,6 @@ function renderToolbar(
       onUndo={NOOP}
       onClear={NOOP}
       onDownload={NOOP}
-      viewActive={false}
-      onResetView={NOOP}
       {...overrides}
     />,
   );
@@ -56,25 +54,60 @@ describe("ColoringToolbar", () => {
     }
   });
 
-  it("操作列圖示鈕保留原本可及名稱", () => {
-    renderToolbar({ canUndo: false, viewActive: true });
+  it("家長面板的動作都是圖示磚，縮放還原不在面板裡", () => {
+    renderToolbar({ canUndo: false, onPrint: NOOP });
 
     expect(screen.getByRole("button", { name: "復原" })).toHaveProperty(
       "disabled",
       true,
     );
     openAdultTools();
-    expect(
-      screen.getByRole("button", { name: "清空" }).querySelector("svg"),
-    ).toBeTruthy();
-    expect(screen.getByRole("button", { name: "縮放還原" })).toHaveProperty(
-      "disabled",
-      false,
-    );
+    for (const name of ["重做", "下載", "列印線稿", "清空"] as const) {
+      expect(
+        screen.getByRole("button", { name }).querySelector("svg"),
+      ).toBeTruthy();
+    }
+    expect(screen.queryByRole("button", { name: "縮放還原" })).toBeNull();
     expect(screen.queryByRole("button", { name: "故事照片" })).toBeNull();
-    expect(
-      screen.getByRole("button", { name: "下載" }).querySelector("svg"),
-    ).toBeTruthy();
+  });
+
+  it("家長面板分三塊設定，每塊都有標題", () => {
+    renderToolbar();
+    openAdultTools();
+
+    const dialog = screen.getByRole("dialog", { name: "家長工具" });
+    for (const name of ["筆刷粗細", "塗法", "色盤"] as const) {
+      expect(
+        dialog.querySelector(`[role="group"][aria-label="${name}"]`),
+      ).toBeTruthy();
+      expect(screen.getByRole("heading", { name })).toBeTruthy();
+    }
+    expect(dialog.textContent).toContain("作品只存在這台裝置");
+  });
+
+  it("塗法與色盤點了會回報，選中的那個標 aria-pressed", () => {
+    const onGuidedChange = vi.fn();
+    const onColorGroupChange = vi.fn();
+    renderToolbar({
+      guided: true,
+      colorGroup: "all",
+      onGuidedChange,
+      onColorGroupChange,
+    });
+    openAdultTools();
+
+    const guidedBtn = screen.getByRole("button", { name: /^不出線/ });
+    expect(guidedBtn.getAttribute("aria-pressed")).toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: /^自由塗/ }));
+    expect(onGuidedChange).toHaveBeenCalledWith(false);
+
+    const all = screen.getByRole("button", { name: "全部" });
+    expect(all.getAttribute("aria-pressed")).toBe("true");
+    expect(all.querySelectorAll("[data-swatch]")).toHaveLength(12);
+    const rainbow = screen.getByRole("button", { name: "彩虹" });
+    expect(rainbow.querySelectorAll("[data-swatch]")).toHaveLength(6);
+    fireEvent.click(rainbow);
+    expect(onColorGroupChange).toHaveBeenCalledWith("rainbow");
   });
 
   it("畫具圖示用色盤色，不是單色剪影", () => {
@@ -112,7 +145,7 @@ describe("ColoringToolbar", () => {
         vi.advanceTimersByTime(1);
       });
       expect(
-        screen.getByRole("dialog", { name: "更多著色工具" }),
+        screen.getByRole("dialog", { name: "家長工具" }),
       ).toBeTruthy();
     } finally {
       vi.useRealTimers();

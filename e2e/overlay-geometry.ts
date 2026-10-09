@@ -20,7 +20,7 @@ import { expect, type Locator, type Page } from "@playwright/test";
 
 /** 地圖 chrome 的邊距慣例（MapControls 10px、其餘浮層 12px）。
  *  注意：DESIGN §206-209 是**觸控密度**條款，**沒有**螢幕邊距規定，勿再誤引。 */
-export const OVERLAY_MIN_INSET = 12;
+const OVERLAY_MIN_INSET = 12;
 
 type Rect = { top: number; right: number; bottom: number; left: number };
 

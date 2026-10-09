@@ -23,7 +23,7 @@ import {
   type ZoneStatus,
 } from "@/data/universe";
 
-export { MAP_STAGE, MAP_STAGE_PORTRAIT, ZONE_IDS, STATUS_META, getMapStage };
+export { MAP_STAGE, MAP_STAGE_PORTRAIT, ZONE_IDS, getMapStage };
 export type { MapLayout, MapStage, ZoneId, ZoneStatus };
 
 /** @deprecated 請改用 STATUS_META */

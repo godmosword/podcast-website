@@ -37,7 +37,7 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
  * 預設時長已改由 `flyDurationFor` 依起訖鏡頭距離推導；此常數僅作為
  * 視覺層在尚未收到任何 flyTo 前的初值。
  */
-export const FLY_DURATION_MS = 450;
+const FLY_DURATION_MS = 450;
 /** 進場降落動畫：起始鏡頭相對 fit 的倍率（從高空俯瞰整個群島再飛向主島）。 */
 const ENTRY_START_FACTOR = 0.55;
 /**
@@ -71,7 +71,7 @@ type FlyToOptions = {
   instant?: boolean;
 };
 
-export type ResetOptions = { instant?: boolean };
+type ResetOptions = { instant?: boolean };
 
 export type UseMapCameraOptions = {
   /**
@@ -109,7 +109,7 @@ export type CameraVisualMeta = {
   flyDurationMs: number;
 };
 
-export type CameraVisualApplier = (
+type CameraVisualApplier = (
   cam: Camera,
   meta: CameraVisualMeta,
 ) => void;

@@ -25,7 +25,7 @@ export const INTRO_GATE_ON = "on";
 export const INTRO_PORTAL_ENABLED = false;
 
 /** 覆蓋層出現的頻率。切成 `always` 就是每次進首頁都播。 */
-export const INTRO_GATE_FREQUENCY: "session" | "always" = "session";
+const INTRO_GATE_FREQUENCY: "session" | "always" = "session";
 
 export type IntroGateInput = {
   /** `location.pathname`；覆蓋層只屬於首頁。 */

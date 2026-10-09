@@ -1,0 +1,284 @@
+/* 面板 portal 到 body，拿不到 .main 的 --coloring-*，一律用全站 token。
+   磚底比面板深一階、凹槽再一階：日間往墨色靠、夜間往奶油色靠，兩種主題都分得出層次。 */
+.panel {
+  --tile: color-mix(in srgb, var(--ink) 5%, var(--card));
+  --well: color-mix(in srgb, var(--ink) 10%, var(--card));
+  /* 次要字：--ink-soft 放在磚底／選中淡底上只有 3.5–4.3:1，往墨色收三成才過 AA */
+  --soft: color-mix(in srgb, var(--ink-soft) 70%, var(--ink));
+  --pick: var(--support-from);
+  --pick-fg: var(--support-fg);
+  width: min(100%, 400px);
+  max-height: calc(100svh - 32px);
+  overflow: auto;
+  box-sizing: border-box;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: var(--elev-2);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  container-type: inline-size;
+}
+
+.panel button {
+  margin: 0;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.panel button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.panel button:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fs-h3);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.close {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: var(--radius-circle);
+  background: var(--tile);
+}
+
+.tile {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: var(--tile);
+}
+
+.caption {
+  margin: 0;
+  font-size: var(--fs-label);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--soft);
+}
+
+/* 筆刷：一條分段鈕，選中那格填滿 */
+.segment {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  background: var(--well);
+}
+
+.segment button {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-height: 48px;
+  padding: 0;
+  border-radius: 11px;
+  background: transparent;
+}
+
+.segment button[aria-pressed="true"] {
+  background: var(--pick);
+  color: var(--pick-fg);
+}
+
+.dot {
+  display: block;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* 塗法、色盤：一張張可選的卡，選中加色框和淡底 */
+.choices2,
+.choices3 {
+  display: grid;
+  gap: 8px;
+}
+
+.choices2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.choices3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  min-height: 64px;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  background: var(--well);
+  text-align: start;
+}
+
+.choice[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--pick) 16%, var(--tile));
+  box-shadow: inset 0 0 0 2px var(--pick);
+}
+
+.choiceIcon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: var(--tile);
+  color: var(--soft);
+}
+
+.choiceIcon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.choice[aria-pressed="true"] .choiceIcon {
+  background: var(--pick);
+  color: var(--pick-fg);
+}
+
+.choiceText {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.choiceName {
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+
+.choiceDesc {
+  font-size: var(--fs-meta);
+  color: var(--soft);
+}
+
+.groupChoice {
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  min-height: 72px;
+  padding: 10px 6px;
+  text-align: center;
+}
+
+/* 色盤卡直接畫出那組有哪些顏色；12 色排兩列，6 色一列置中 */
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(6, 10px);
+  gap: 3px;
+  justify-content: center;
+  align-content: center;
+  height: 23px;
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 28%, transparent);
+}
+
+/* 動作：2×2 圖示磚，清空在最後一格 */
+.actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 84px;
+  padding: 8px;
+  border-radius: var(--radius-md);
+  background: var(--tile);
+  font-size: var(--fs-control);
+  font-weight: 700;
+}
+
+.action svg {
+  width: 26px;
+  height: 26px;
+}
+
+/* 清空：淡粉底提醒「這顆要小心」，字維持墨色保對比；按下去還會先看圖確認 */
+.danger {
+  background: color-mix(in srgb, var(--c-pink) 24%, var(--tile));
+}
+
+.danger svg {
+  color: color-mix(in srgb, var(--c-pink) 55%, var(--ink));
+}
+
+.note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
+  font-size: var(--fs-label);
+  color: var(--soft);
+}
+
+.noteIcon {
+  width: 16px;
+  height: 16px;
+}
+
+/* 320 寬手機（面板內寬約 288px）：塗法卡改上下排，色點縮小，字不再一字一行、色點不溢出 */
+@container (max-width: 340px) {
+  .choices2 .choice {
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    text-align: center;
+  }
+
+  .choiceText {
+    justify-items: center;
+  }
+
+  .swatches {
+    grid-template-columns: repeat(6, 8px);
+    gap: 2px;
+    height: 18px;
+  }
+
+  .swatch {
+    width: 8px;
+    height: 8px;
+  }
+}

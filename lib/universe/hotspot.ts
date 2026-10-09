@@ -55,11 +55,6 @@ export function hotspotActionHref(
   return hotspotPath(zoneId, hotspot.id);
 }
 
-/** 是否應以站內 hotspot 路由開啟（modal／詳情），而非直接外連。 */
-export function usesHotspotRoute(hotspot: Hotspot): boolean {
-  return hotspot.action.type === "locked" || hotspot.action.type === "story";
-}
-
 /**
  * link 型：可直接去目的地，也可開 hotspot 詳情頁。
  * M2 統一先走 hotspot 路由（可攔截為 modal），詳情內再給主 CTA。

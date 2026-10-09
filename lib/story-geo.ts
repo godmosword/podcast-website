@@ -169,11 +169,6 @@ export function familyActivityFaq(story: Story): FaqItem | null {
   };
 }
 
-/** 有 episodeFaq（sidecar，見 data/episode-faqs.ts）的故事 slug；供 verify:geo 覆蓋率摘要用。 */
-export function slugsWithEpisodeUniqueFaq(stories: Story[]): string[] {
-  return stories.filter((story) => Boolean(story.episodeFaq)).map((story) => story.slug);
-}
-
 /** 3 題模板化通用 FAQ；episodeFaq（若有）由 storyFaqs() 併在最前面。 */
 function genericStoryFaqs(story: Story): FaqItem[] {
   return [

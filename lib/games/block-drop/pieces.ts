@@ -249,7 +249,3 @@ export function ghostY(p: Piece, board: readonly (readonly Cell[])[]): number {
   while (valid({ ...p, y: gy + 1 }, board)) gy++;
   return gy;
 }
-
-export function pieceCells(p: Piece): Array<readonly [number, number]> {
-  return SHAPES[p.type][p.rot].map(([c, r]) => [p.x + c, p.y + r] as const);
-}

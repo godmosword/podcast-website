@@ -635,7 +635,7 @@ export async function measureLineArtQuality(pngBuffer: Buffer): Promise<LineArtQ
 }
 
 /** AI 原稿殘灰清除門檻（luma ≥ 此值 → 白）；淺灰陰影歸白、深線歸黑。 */
-export const AI_LINE_THRESHOLD = 150;
+const AI_LINE_THRESHOLD = 150;
 
 /**
  * AI 生成原稿 → 純黑白閉合線稿：壓平透明、統一 1024 方圖（白邊 pad）、

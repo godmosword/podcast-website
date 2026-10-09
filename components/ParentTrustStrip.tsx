@@ -6,7 +6,7 @@ type ParentTrustStripProps = {
 };
 
 /** 家長安心訊號（宇宙地圖／家長儀表等獨立 strip；頁尾不再重複）。 */
-export const PARENT_TRUST_TEXT =
+const PARENT_TRUST_TEXT =
   "無廣告 · 不收孩子帳號 · 進度留在這台裝置 · 外連會清楚標示";
 
 export default function ParentTrustStrip({

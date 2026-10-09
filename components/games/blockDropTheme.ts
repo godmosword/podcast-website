@@ -6,13 +6,10 @@ import type { CSSProperties } from "react";
 import { TYPES, type PieceType } from "@/lib/games/block-drop/pieces";
 
 export const COLS = 10;
-export const ROWS = 20;
 export const CELL = 18;
 /** G-M1 井底深藍紫（封面同色系） */
 export const WELL_BG_TOP = "#3d3f82";
 export const WELL_BG_BOTTOM = "#2a2c5e";
-export const BOARD_W = COLS * CELL;
-export const BOARD_H = ROWS * CELL;
 export const WIDE_MAX_BOARD_W = 460;
 export const WIDE_SIDE_W = 150;
 

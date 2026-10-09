@@ -23,7 +23,7 @@ class SceneBoundary extends Component<{ children: ReactNode; onFailure: () => vo
 type Connection = EventTarget & { saveData?: boolean; effectiveType?: string };
 
 /** Capability check is intentionally tiny and runs before the WebGL chunk. */
-export function canUseWebGL(): boolean {
+function canUseWebGL(): boolean {
   try {
     const canvas = document.createElement("canvas");
     // Software WebGL (for example headless Chromium) is still a valid

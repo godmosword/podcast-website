@@ -38,7 +38,7 @@ const BADGE_FILL = { width: "100%", height: "100%" } as const;
  * 道具預覽格以虛線框標出；有禮物的欄在棋盤下方標出口。
  */
 
-export type CandyMatchBoardMotion = {
+type CandyMatchBoardMotion = {
   swap?: { a: number; b: number } | null;
   falls?: readonly CandyFallMotion[] | null;
   reduced?: boolean;

@@ -36,7 +36,7 @@ export function estimateDriveMinutes(km: number): number {
   return Math.min(MAX_DRIVE_MINUTES, Math.max(MIN_DRIVE_MINUTES, raw));
 }
 
-export function formatDriveMinutesLabel(minutes: number): string {
+function formatDriveMinutesLabel(minutes: number): string {
   return `約 ${minutes} 分鐘`;
 }
 

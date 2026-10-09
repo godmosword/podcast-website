@@ -43,8 +43,8 @@ export const TREE_PLACEMENTS = [
   [-2.8, -2.95, .82], [-.7, -3.28, .75], [4.7, .8, .65], [-4.6, 1.8, .64],
 ] as const;
 export const ARRIVAL_SECONDS = 18;
-export const DRIVE_CLIP_SECONDS = 2;
-export const WHEEL_RADIUS = .275;
+const DRIVE_CLIP_SECONDS = 2;
+const WHEEL_RADIUS = .275;
 export const ROAD_START_ANGLE = -.95;
 const PATH_A = 3.98;
 const PATH_B = 2.48;

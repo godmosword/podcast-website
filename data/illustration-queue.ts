@@ -4,7 +4,7 @@ import { z } from "zod";
 
 export const ILLUSTRATION_QUEUE_RELATIVE_PATH = "data/illustration-queue.json";
 
-export const ILLUSTRATION_QUEUE_STATUSES = [
+const ILLUSTRATION_QUEUE_STATUSES = [
   "awaiting-illustrate",
   "approved",
 ] as const;
@@ -34,7 +34,7 @@ const itemSchema = z.object({
   status: z.enum(ILLUSTRATION_QUEUE_STATUSES),
 });
 
-export const illustrationQueueFileSchema = z.array(itemSchema);
+const illustrationQueueFileSchema = z.array(itemSchema);
 
 export function episodeNumberFromSlug(slug: string): number | null {
   const match = /^ep-(\d+)$/.exec(slug);
@@ -42,7 +42,7 @@ export function episodeNumberFromSlug(slug: string): number | null {
   return Number(match[1]);
 }
 
-export function isIllustrationSlug(slug: string): boolean {
+function isIllustrationSlug(slug: string): boolean {
   return episodeNumberFromSlug(slug) !== null;
 }
 

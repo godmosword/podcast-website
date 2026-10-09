@@ -16,14 +16,14 @@ export function illustrationQueueFilePath(rootDir: string = ROOT): string {
   return join(rootDir, ILLUSTRATION_QUEUE_RELATIVE_PATH);
 }
 
-export function isSubtitleReadyOnDisk(
+function isSubtitleReadyOnDisk(
   slug: string,
   rootDir: string = ROOT,
 ): boolean {
   return existsSync(join(rootDir, proofreadMarkerRelPath(slug)));
 }
 
-export function readIllustrationQueueFile(
+function readIllustrationQueueFile(
   rootDir: string = ROOT,
 ): IllustrationQueueItem[] {
   const path = illustrationQueueFilePath(rootDir);
@@ -31,7 +31,7 @@ export function readIllustrationQueueFile(
   return parseIllustrationQueue(JSON.parse(readFileSync(path, "utf8")) as unknown);
 }
 
-export function writeIllustrationQueueFile(
+function writeIllustrationQueueFile(
   items: IllustrationQueueItem[],
   rootDir: string = ROOT,
 ): void {

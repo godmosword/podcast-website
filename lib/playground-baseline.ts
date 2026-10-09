@@ -32,7 +32,7 @@ export const CANDIDATE_FAMILIES = [
   "indoor",
   "rainy-day",
 ] as const;
-export type CandidateFamily = (typeof CANDIDATE_FAMILIES)[number];
+type CandidateFamily = (typeof CANDIDATE_FAMILIES)[number];
 
 export const HIGH_INTENT_CANDIDATE_SLUGS = [
   "taoyuan-indoor",
@@ -78,9 +78,9 @@ export const PLAYGROUND_STATUS_SEMANTICS = {
   hasOpenClosedEnum: false,
 } as const;
 
-export type TypeDistribution = Record<PlaygroundType, number>;
+type TypeDistribution = Record<PlaygroundType, number>;
 
-export type GlobalBaseline = {
+type GlobalBaseline = {
   total: number;
   operating: number;
   temporarilyClosed: number;
@@ -93,7 +93,7 @@ export type GlobalBaseline = {
   outdoor: number;
 };
 
-export type CityBaseline = {
+type CityBaseline = {
   city: string;
   slug: string;
   total: number;
@@ -110,7 +110,7 @@ export type CityBaseline = {
   hasLaunchedCityCollection: boolean;
 };
 
-export type LaunchRegistry = {
+type LaunchRegistry = {
   total: number;
   cityCount: number;
   freeCount: number;
@@ -123,7 +123,7 @@ export type LaunchRegistry = {
   unlaunchedCitySlugs: string[];
 };
 
-export type ThresholdContract = {
+type ThresholdContract = {
   minimumActiveCount: number;
   usesActiveCount: boolean;
   excludesTemporarilyClosed: boolean;
@@ -131,7 +131,7 @@ export type ThresholdContract = {
   appliesTo: readonly string[];
 };
 
-export type CollectionCandidate = {
+type CollectionCandidate = {
   slug: string;
   city: string;
   family: CandidateFamily;
@@ -149,13 +149,13 @@ export type CollectionCandidate = {
   };
 };
 
-export type DuplicatePair = {
+type DuplicatePair = {
   slugA: string;
   slugB: string;
   activePlaceIds: string[];
 };
 
-export type NearThresholdRow = {
+type NearThresholdRow = {
   slug: string;
   city: string;
   family: CandidateFamily;
@@ -168,14 +168,14 @@ export type NearThresholdRow = {
   highIntent: boolean;
 };
 
-export type OptionalFieldStat = {
+type OptionalFieldStat = {
   present: number;
   missing: number;
   missingLikelyDebt: number;
   required: boolean;
 };
 
-export type OptionalFieldBaseline = {
+type OptionalFieldBaseline = {
   officialUrl: OptionalFieldStat;
   feeNote: OptionalFieldStat;
   coverageNote: OptionalFieldStat;
@@ -195,7 +195,7 @@ export type OptionalFieldBaseline = {
   };
 };
 
-export type PaidFeeClarity = {
+type PaidFeeClarity = {
   activePaid: number;
   paidWithFeeNote: number;
   paidWithoutFeeNote: number;
@@ -204,7 +204,7 @@ export type PaidFeeClarity = {
   paidWithoutFeeNoteIds: string[];
 };
 
-export type TipsDebtBaseline = {
+type TipsDebtBaseline = {
   count: number;
   placeIds: string[];
   byCity: Record<string, number>;
@@ -212,7 +212,7 @@ export type TipsDebtBaseline = {
   batchA2SelectionRule: string;
 };
 
-export type RelatedEpisodesBaseline = {
+type RelatedEpisodesBaseline = {
   schema: "optional string[] of story slugs";
   recordsWithField: number;
   recordsWithLinks: number;
@@ -237,11 +237,11 @@ export type PlaygroundBaseline = {
   invariantIssues: string[];
 };
 
-export function isActivePlayground(place: Playground): boolean {
+function isActivePlayground(place: Playground): boolean {
   return place.status !== "temporarily-closed";
 }
 
-export function citySlugFor(city: string): string {
+function citySlugFor(city: string): string {
   const slug = PLAYGROUND_CITY_SLUGS[city];
   if (!slug) {
     throw new Error(`未登錄的 playground city slug：${city}`);
@@ -249,7 +249,7 @@ export function citySlugFor(city: string): string {
   return slug;
 }
 
-export function candidateSlug(city: string, family: CandidateFamily): string {
+function candidateSlug(city: string, family: CandidateFamily): string {
   const citySlug = citySlugFor(city);
   if (family === "city") return citySlug;
   return `${citySlug}-${family}`;

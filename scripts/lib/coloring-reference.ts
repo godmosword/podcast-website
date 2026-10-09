@@ -74,7 +74,7 @@ export function labelRegions(line: Uint8Array, size: number): RegionMap {
   return { label, count, size };
 }
 
-export function mapPixel(p: number, size: number, a: Alignment): number {
+function mapPixel(p: number, size: number, a: Alignment): number {
   const x = p % size;
   const y = (p - x) / size;
   const sx = Math.round(((x / size - 0.5) * a.scale + 0.5 + a.dx) * size);

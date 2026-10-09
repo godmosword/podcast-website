@@ -15,7 +15,7 @@ export type StaleRssDecision = {
 };
 
 /** yaml 仍可設 STALE_HOURS=3；未另設 WAIT_FOR_SYNC_HOURS 時，第一次開 stale 至少等 8 小時。 */
-export const DEFAULT_WAIT_FOR_FIRST_SYNC_HOURS = 8;
+const DEFAULT_WAIT_FOR_FIRST_SYNC_HOURS = 8;
 
 export function waitForFirstSyncHoursFromEnv(
   env: NodeJS.ProcessEnv = process.env,

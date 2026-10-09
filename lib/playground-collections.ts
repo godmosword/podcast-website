@@ -12,8 +12,7 @@ import { isHighEnergy } from "@/lib/playground-context";
 
 export const MIN_INDEXABLE_COLLECTION_SIZE = 5;
 
-export const COLLECTION_FAMILIES = ["city", "free", "indoor"] as const;
-export type CollectionFamily = (typeof COLLECTION_FAMILIES)[number];
+export type CollectionFamily = "city" | "free" | "indoor";
 
 type CollectionFilter = Pick<
   PlaygroundFilter,
@@ -287,7 +286,7 @@ export function listCollectionDefinitions(
   return allDefinitions.filter((definition) => definition.family === family);
 }
 
-export function collectionMapQuery(
+function collectionMapQuery(
   definition: CollectionDefinition,
 ): PlayMapQuery {
   return {
@@ -321,7 +320,7 @@ export function collectionMapCtaLabel(
   return `在地圖上看${definition.cityDisplayName}${suffix}`;
 }
 
-export function collectionConditionLabel(
+function collectionConditionLabel(
   definition: CollectionDefinition,
 ): string {
   switch (definition.family) {

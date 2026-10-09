@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 /** 與 LandingHub footer snap pane 的 id 一致。 */
-export const LANDING_FOOT_ELEMENT_ID = "landing-foot";
+const LANDING_FOOT_ELEMENT_ID = "landing-foot";
 
 /** IntersectionObserver 門檻：footer 進入視窗比例達此值即視為需實心頂欄。 */
 export const LANDING_FOOT_SOLID_RATIO = 0.12;

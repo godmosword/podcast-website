@@ -1,12 +1,14 @@
 import { describe, expect, test } from "vitest";
 import {
   BRUSH_SIZES,
+  COLOR_GROUPS,
   COLORING_PALETTE,
   coloringDraftKey,
   coloringDraftStorageKey,
   cropImageDataRect,
   floodFillPaint,
   hexToRgba,
+  paletteForGroup,
   parseColoringDraftPageId,
   pasteImageDataRect,
   regionMask,
@@ -169,5 +171,22 @@ describe("coloring draft key", () => {
     expect(parseColoringDraftPageId(coloringDraftStorageKey("char-x"))).toBe("char-x");
     expect(parseColoringDraftPageId("char-x@r1")).toBeNull();
     expect(parseColoringDraftPageId("char-x")).toBeNull();
+  });
+});
+
+describe("color groups", () => {
+  test("全部＝整盤 12 色，彩虹與森林各 6 色且都在色盤裡", () => {
+    expect(paletteForGroup("all")).toEqual(COLORING_PALETTE);
+    const ids = (group: "rainbow" | "forest") => paletteForGroup(group).map((s) => s.id);
+    expect(ids("rainbow")).toEqual(["red", "orange", "yellow", "green", "blue", "pink"]);
+    expect(ids("forest")).toEqual(["yellow", "lime", "green", "brown", "black", "white"]);
+  });
+
+  test("家長面板的三組依序是全部、彩虹、森林", () => {
+    expect(COLOR_GROUPS.map((g) => [g.id, g.name])).toEqual([
+      ["all", "全部"],
+      ["rainbow", "彩虹"],
+      ["forest", "森林"],
+    ]);
   });
 });

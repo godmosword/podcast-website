@@ -33,9 +33,9 @@ export type CandySimResult = {
 };
 
 /** 輕鬆模式沒有步數上限；模擬以此截斷避免無限局。 */
-export const SIM_MAX_SWAPS = 150;
+const SIM_MAX_SWAPS = 150;
 
-export function startBoardFor(round: CandyMatchRound, rng: Rng): BoardState {
+function startBoardFor(round: CandyMatchRound, rng: Rng): BoardState {
   return createBoard(round.cols, round.rows, round.stage.pieceKinds, rng, {
     dirtCells: round.stage.dirtCells,
     thickDirtCells: round.stage.thickDirtCells,
@@ -45,7 +45,7 @@ export function startBoardFor(round: CandyMatchRound, rng: Rng): BoardState {
 }
 
 /** 套用一次玩家交換並解算到穩定（與 View 的規則一致）。 */
-export function playSwap(
+function playSwap(
   state: BoardState,
   move: CandyMove,
   kinds: number,
@@ -127,10 +127,10 @@ export type CandySimSummary = {
 };
 
 /** 兒童每步思考時間與每波動畫時間的粗估（調校用，不是試玩結果）。 */
-export const SIM_THINK_SECONDS = 4;
-export const SIM_WAVE_SECONDS = 0.55;
+const SIM_THINK_SECONDS = 4;
+const SIM_WAVE_SECONDS = 0.55;
 
-export function estimateSeconds(result: Pick<CandySimResult, "swaps" | "waves">): number {
+function estimateSeconds(result: Pick<CandySimResult, "swaps" | "waves">): number {
   return result.swaps * SIM_THINK_SECONDS + result.waves * SIM_WAVE_SECONDS;
 }
 
@@ -139,7 +139,7 @@ function percentile(sorted: readonly number[], p: number): number {
   return sorted[Math.min(sorted.length - 1, Math.floor(p * sorted.length))]!;
 }
 
-export function summarize(results: readonly CandySimResult[]): CandySimSummary {
+function summarize(results: readonly CandySimResult[]): CandySimSummary {
   const n = results.length || 1;
   const wins = results.filter((r) => r.won);
   const swaps = wins.map((r) => r.swaps).sort((a, b) => a - b);

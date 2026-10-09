@@ -134,7 +134,7 @@ function keyStyle(metrics: KeyMetrics, extra: CSSProperties = {}): CSSProperties
   };
 }
 
-export type DropMode = "hard" | "soft";
+type DropMode = "hard" | "soft";
 
 type KeysProps = {
   metrics: KeyMetrics;

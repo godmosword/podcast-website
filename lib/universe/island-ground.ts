@@ -10,7 +10,7 @@
 import type { ZoneId } from "@/data/universe-zones";
 import { getZoneArtTile } from "./zone-art-tile";
 
-export type GroundEllipse = { cx: number; cy: number; rx: number; ry: number };
+type GroundEllipse = { cx: number; cy: number; rx: number; ry: number };
 
 export type IslandGround = {
   /** 島底單一短柔接地陰影（Art Bible §2）。 */

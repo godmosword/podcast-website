@@ -17,7 +17,7 @@ export function ClayGrad({ id, light, mid, dark }: ClayGradProps) {
   );
 }
 
-export function ClaySoftShadow({ id }: { id: string }) {
+function ClaySoftShadow({ id }: { id: string }) {
   return (
     <filter id={id} x="-25%" y="-25%" width="150%" height="150%">
       <feDropShadow

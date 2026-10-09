@@ -41,8 +41,6 @@ export const FEEDBACK_RATE_LIMITED = "留言有點多，請稍後再試。";
 
 export const FEEDBACK_MAILTO_LINK = "用 email 留言";
 
-export const FEEDBACK_MAILTO_SUBJECT = "留言給車車遊樂園";
-
 export const FEEDBACK_LOADING_LABEL = "正在準備留言牆…";
 
 export const FEEDBACK_WALL_HEADING = "大家的留言";

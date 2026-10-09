@@ -9,9 +9,9 @@ import {
 } from "@/data/landing-segments";
 import { ZONE_IDS, ZONE_STATUSES } from "./universe";
 
-export const zoneStatusSchema = z.enum(ZONE_STATUSES);
+const zoneStatusSchema = z.enum(ZONE_STATUSES);
 
-export const hotspotSchema = z.object({
+const hotspotSchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/),
   name: z.string(),
   featured: z.boolean().default(false),
@@ -36,7 +36,7 @@ const landingSegmentIdSchema = z.enum(
   LANDING_SEGMENT_IDS as [LandingSegmentId, ...LandingSegmentId[]],
 );
 
-export const zoneSchema = z.object({
+const zoneSchema = z.object({
   id: z.enum(ZONE_IDS),
   name: z.string(),
   tagline: z.string(),

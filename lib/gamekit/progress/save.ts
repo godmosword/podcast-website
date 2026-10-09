@@ -9,7 +9,7 @@ import {
   migrateV2ToV3,
 } from "./economy";
 
-export const SAVE_VERSION = 5;
+const SAVE_VERSION = 5;
 
 const DEFAULT_PROFILE: PlayerProfile = {
   version: SAVE_VERSION,
@@ -36,7 +36,7 @@ function migrateV1(parsed: Partial<PlayerProfile>): PlayerProfile {
 }
 
 /** v3→v4：保留既有資料並標記相容版本。 */
-export function migrateV3ToV4(
+function migrateV3ToV4(
   profile: Partial<PlayerProfile>,
 ): PlayerProfile {
   return {
@@ -47,7 +47,7 @@ export function migrateV3ToV4(
 }
 
 /** v4→v5：保留既有資料並標記目前存檔版本。 */
-export function migrateV4ToV5(
+function migrateV4ToV5(
   profile: Partial<PlayerProfile>,
 ): PlayerProfile {
   return {

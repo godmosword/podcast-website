@@ -198,5 +198,3 @@ export function StoryFilterHost(props: StoryFilterDataProps) {
     </>
   );
 }
-
-export default StoryFilterHost;

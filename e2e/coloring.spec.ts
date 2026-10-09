@@ -31,7 +31,7 @@ async function openAdultTools(page: Page) {
   const gate = page.getByRole("button", { name: "家長工具", exact: true });
   await gate.focus();
   await page.keyboard.press("Enter");
-  await expect(page.getByRole("dialog", { name: "更多著色工具" })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "家長工具" })).toBeVisible();
 }
 
 /** 統計 display canvas 一段水平列上的紅色像素數。 */
@@ -128,7 +128,7 @@ test.describe("coloring book", () => {
     await bucketExteriorStaysOut(page, /^著色：恐龍車多多的大黃牙$/);
   });
 
-  test("工具列具備筆刷三檔與縮放還原", async ({ page }) => {
+  test("工具列具備筆刷三檔，縮放還原只在放大後出現", async ({ page }) => {
     await openFirstColoringPage(page);
     await expect(page.getByTestId("coloring-open-hint")).toHaveAttribute(
       "data-step",
@@ -148,8 +148,7 @@ test.describe("coloring book", () => {
     await expect(
       page.getByRole("button", { name: "蠟筆" }).locator("svg"),
     ).toBeVisible();
-    await openAdultTools(page);
-    await expect(page.getByRole("button", { name: "縮放還原" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "縮放還原" })).toHaveCount(0);
   });
 
   async function paintCrayonStroke(page: Page) {

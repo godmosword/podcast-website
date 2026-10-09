@@ -1,5 +1,11 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "scripts/block-drop-sim.ts",
+    "scripts/candy-match-sim.ts",
+    "scripts/capture-intro-evidence.mjs",
+    "scripts/capture-intro-polish.mjs"
+  ],
   "ignore": [
     "lib/podcast-apple.ts",
     "lib/universe/roamer-coords.ts",

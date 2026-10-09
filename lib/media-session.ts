@@ -13,7 +13,7 @@
  */
 
 /** 專輯封面來源；`sizes` 用 `"512x512"` 這種 MediaImage 格式。 */
-export type MediaSessionArtwork = {
+type MediaSessionArtwork = {
   src: string;
   sizes: string;
   type: string;

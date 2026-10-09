@@ -23,11 +23,13 @@ import {
   stampBrush,
   unionDirtyRect,
   type BrushSizeId,
+  type ColorGroupId,
   type ColoringTool,
   type DirtyRect,
   type Rgba,
 } from "@/lib/coloring/tools";
 import { ColoringDoneSheet } from "./ColoringDoneSheet";
+import { ColoringResetView } from "./ColoringResetView";
 import { ColoringHint } from "./ColoringHint";
 import { ColoringLeaveSheet } from "./ColoringLeaveSheet";
 import { ColoringPalette } from "./ColoringPalette";
@@ -120,9 +122,7 @@ export function ColoringCanvas({
   const [loadError, setLoadError] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
   const [guided, setGuided] = useState(true);
-  const [colorGroup, setColorGroup] = useState<"all" | "rainbow" | "forest">(
-    "all",
-  );
+  const [colorGroup, setColorGroup] = useState<ColorGroupId>("all");
   const [preferencesReady, setPreferencesReady] = useState(false);
   const [collectionStatus, setCollectionStatus] = useState("");
   const [actionError, setActionError] = useState("");
@@ -729,6 +729,9 @@ export function ColoringCanvas({
             {spark > 0 ? (
               <span key={spark} className={styles.fillSpark} aria-hidden="true" />
             ) : null}
+            {viewActive && !peek ? (
+              <ColoringResetView onReset={() => applyView(DEFAULT_VIEW)} />
+            ) : null}
             {peek ? (
               <ColoringReferencePeek
                 page={page}
@@ -797,8 +800,6 @@ export function ColoringCanvas({
             onUndo={handleUndo}
             onClear={handleClear}
             onDownload={exporter.download}
-            viewActive={viewActive}
-            onResetView={() => applyView(DEFAULT_VIEW)}
             cueTool={hasPainted && !usedBucket ? "bucket" : null}
           />
         </div>

@@ -1,8 +1,8 @@
 /** Completed pages live in artworks. Legacy draft stores stay so older databases still open. */
-export const COLORING_DB = "coloring-drafts";
-export const COLORING_DB_VERSION = 2;
+const COLORING_DB = "coloring-drafts";
+const COLORING_DB_VERSION = 2;
 
-export function openColoringDb(): Promise<IDBDatabase> {
+function openColoringDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     if (typeof indexedDB === "undefined") {
       reject(new Error("此瀏覽器無法儲存作品"));

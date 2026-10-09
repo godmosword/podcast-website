@@ -29,7 +29,7 @@ const W = {
 } as const;
 
 /** 交換後第一波要清的格、引爆與新特殊糖（不改盤面）。 */
-export function previewSwap(state: BoardState, move: CandyMove) {
+function previewSwap(state: BoardState, move: CandyMove) {
   const specials = state.specials ?? emptySpecials(state.pieces.length);
   const pieces = swapped(state.pieces, move.a, move.b);
   const nextSpecials = swappedSpecials(specials, move.a, move.b);
@@ -74,7 +74,7 @@ function unmet(goals: readonly CandyGoal[], progress: CandyProgress) {
 }
 
 /** 單步分數：越能推進「尚未完成」的目標越高。 */
-export function scoreMove(
+function scoreMove(
   state: BoardState,
   move: CandyMove,
   goals: readonly CandyGoal[],

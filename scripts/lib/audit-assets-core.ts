@@ -12,9 +12,12 @@ import {
   LANDING_SEGMENTS,
 } from "../../data/landing-segments";
 import { DUDU_EMOTIONS, emotionSrc } from "../../data/dudu-emotions";
+import { CANDY_MATCH_LEVELS } from "../../lib/games/candy-match/levels";
 import { MAP_ROAMERS } from "../../data/universe-roamers";
 import { ZONE_MOTION } from "../../data/universe-zone-motion";
 import { ZONE_IDS } from "../../data/universe-zones";
+import { PARALLAX_ASSET_PATH, PARALLAX_LAYERS } from "../../components/landing/hero-parallax/layers";
+import { MODEL_PATH } from "../../components/landing/hero-world/config";
 import {
   cloudPath,
   CLOUD_IDS,
@@ -25,6 +28,7 @@ import {
   sunWebpPath,
 } from "../../lib/universe/map-art-src";
 import { pngToWebp } from "../../lib/universe/png-to-webp";
+import { roamerPngToWebp } from "../../lib/universe/roamer-art-src";
 import {
   getZoneArtSrcSet,
   getZoneNightArtSrcSet,
@@ -49,6 +53,7 @@ const SOURCE_SCAN_DIRS = ["app", "components", "data", "lib", "scripts"] as cons
 
 const STATIC_PUBLIC_ASSETS = [
   "/hero-home.jpg",
+  "/hero-home-mobile.avif",
   "/feedback/hero.jpg",
   "/mascot.png",
   "/icon-192.png",
@@ -118,7 +123,7 @@ export function listDeployedImagePaths(root: string): string[] {
     tracked = out
       .split("\n")
       .map((line) => line.trim())
-      .filter((line) => line.length > 0 && isImageFile(line));
+      .filter((line) => line.length > 0 && isImageFile(line) && existsSync(join(root, line)));
   } catch {
     tracked = walkFiles(join(root, "public"))
       .map((abs) => relative(root, abs).replaceAll("\\", "/"))
@@ -179,8 +184,12 @@ export function collectDynamicReferencePaths(): string[] {
   }
 
   for (const seg of LANDING_SEGMENTS) {
-    refs.add(seg.heroImage);
-    refs.add(seg.heroImagePortrait);
+    for (const source of [seg.heroImage, seg.heroImagePortrait]) {
+      const modern = modernRasterPaths(source);
+      refs.add(modern.jpg);
+      refs.add(modern.webp);
+      refs.add(modern.avif);
+    }
   }
   refs.add(LANDING_CLAY_EXTERNAL.image);
 
@@ -211,12 +220,27 @@ export function collectDynamicReferencePaths(): string[] {
 
   for (const roamer of MAP_ROAMERS) {
     refs.add(roamer.src);
+    refs.add(roamerPngToWebp(roamer.src));
     if (roamer.sprites) {
       for (const sprite of Object.values(roamer.sprites)) {
-        if (sprite) refs.add(sprite);
+        if (!sprite) continue;
+        refs.add(sprite);
+        refs.add(roamerPngToWebp(sprite));
       }
     }
   }
+
+  for (const level of CANDY_MATCH_LEVELS) {
+    refs.add(`/games/v2/candy-match/places/${level.placeIcon}.webp`);
+  }
+
+  for (const layer of PARALLAX_LAYERS) {
+    refs.add(`${PARALLAX_ASSET_PATH}/${layer.file}`);
+  }
+  refs.add(`${PARALLAX_ASSET_PATH}/l3-road-mobile.webp`);
+
+  refs.add(`${MODEL_PATH}/poster.webp`);
+  refs.add(`${MODEL_PATH}/poster-mobile.webp`);
 
   for (const parts of Object.values(ZONE_MOTION)) {
     if (!parts) continue;
@@ -235,7 +259,8 @@ export function collectDynamicReferencePaths(): string[] {
 
 /** 掃描原始碼中的字面量 `/…圖檔` 路徑（補充動態推導未涵蓋者）。 */
 function collectStaticSourceReferencePaths(root: string): string[] {
-  const pattern = /["'`](\/[^"'` ]+\.(?:jpe?g|png|webp|gif|svg|avif))["'`]/gi;
+  const literalPattern = /(["'`])([\s\S]*?)\1/g;
+  const imagePathPattern = /(?:^|[\s,])(\/[^\s,"'`]+\.(?:jpe?g|png|webp|gif|svg|avif))(?=$|[\s,])/gi;
   const refs = new Set<string>();
 
   const walkSource = (dir: string): void => {
@@ -248,8 +273,10 @@ function collectStaticSourceReferencePaths(root: string): string[] {
       }
       if (!/\.(tsx?|css|json)$/.test(entry.name)) continue;
       const text = readFileSync(child, "utf8");
-      for (const match of text.matchAll(pattern)) {
-        refs.add(match[1]!);
+      for (const literal of text.matchAll(literalPattern)) {
+        for (const match of literal[2]!.matchAll(imagePathPattern)) {
+          refs.add(match[1]!);
+        }
       }
     }
   };

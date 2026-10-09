@@ -27,6 +27,27 @@ export const COLORING_PALETTE: readonly {
   { id: "white", name: "白色", hex: "#ffffff", rgba: [255, 255, 255, 255] },
 ] as const;
 
+export type ColorGroupId = "all" | "rainbow" | "forest";
+
+/** 家長面板的色盤選項：少一點顏色，小小孩比較好挑。 */
+export const COLOR_GROUPS: readonly { id: ColorGroupId; name: string }[] = [
+  { id: "all", name: "全部" },
+  { id: "rainbow", name: "彩虹" },
+  { id: "forest", name: "森林" },
+];
+
+const GROUP_COLOR_IDS: Record<Exclude<ColorGroupId, "all">, readonly string[]> = {
+  rainbow: ["red", "orange", "yellow", "green", "blue", "pink"],
+  forest: ["green", "lime", "brown", "yellow", "black", "white"],
+};
+
+/** 某組實際出現在色盤上的顏色，順序跟整盤一樣。 */
+export function paletteForGroup(group: ColorGroupId): typeof COLORING_PALETTE {
+  if (group === "all") return COLORING_PALETTE;
+  const ids = GROUP_COLOR_IDS[group];
+  return COLORING_PALETTE.filter((swatch) => ids.includes(swatch.id));
+}
+
 /** 筆刷三檔；radius 以「螢幕顯示像素」為準，落筆時依畫布縮放換算成 canvas px。 */
 export const BRUSH_SIZES: readonly {
   id: string;
@@ -45,7 +66,7 @@ export const ERASER_RADIUS_BONUS = 4;
 /** 線稿亮度低於此視為「線／牆」，油漆桶不可穿過。 */
 export const LINE_LUMA_WALL = 96;
 /** 油漆桶填完後，顏色向線稿暗區滲入的深度（px）；消除抗鋸齒白邊縫隙。 */
-export const FILL_BLEED_PX = 2;
+const FILL_BLEED_PX = 2;
 
 export function hexToRgba(hex: string): Rgba {
   const h = hex.replace("#", "");
@@ -59,7 +80,7 @@ export function coloringDraftKey(pageId: string): string {
 }
 
 /** 線稿世代；重生／替換 line.png 時 +1，讓舊草稿失效（舊塗鴉對不上新線稿）。 */
-export const COLORING_LINEART_REV = 2;
+const COLORING_LINEART_REV = 2;
 
 /** IndexedDB 草稿 key（綁線稿世代）。 */
 export function coloringDraftStorageKey(pageId: string): string {

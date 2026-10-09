@@ -8,7 +8,7 @@
  */
 
 import type { EngineConfig, GameState } from "./engine";
-import { allBlockGoalsDone, stoneRowCount, type BlockGoal } from "./goals";
+import { allBlockGoalsDone, type BlockGoal } from "./goals";
 import { emptyBoard, type Board, type PieceType } from "./pieces";
 import { pickIndex, type Rng } from "./rng";
 import { SOFT_DROP_MS } from "./scoring";
@@ -160,7 +160,7 @@ export const BLOCK_STAGES: Readonly<Record<BlockMode, readonly BlockStageSet[]>>
   challenge: BLOCK_STATIONS.map((s) => stageSetFor("challenge", s.index)),
 };
 
-export function blockStageSet(mode: BlockMode, index: number): BlockStageSet {
+function blockStageSet(mode: BlockMode, index: number): BlockStageSet {
   const set = BLOCK_STAGES[mode][index];
   if (!set) throw new Error(`Missing block-drop stage ${mode} ${index}`);
   return set;
@@ -224,5 +224,3 @@ export function blockStars(stage: Pick<BlockStage, "efficiency">, g: Pick<GameSt
   const efficient = g.pieces <= stage.efficiency;
   return { flawless, efficient, stars: 1 + (flawless ? 1 : 0) + (efficient ? 1 : 0) };
 }
-
-export { stoneRowCount };

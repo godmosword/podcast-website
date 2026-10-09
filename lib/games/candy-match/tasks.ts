@@ -5,7 +5,7 @@
 
 import type { ResolveEvents } from "./engine";
 
-export const CANDY_PIECE_NAMES = ["小紅", "計程車", "小巴士", "鈴鈴", "多多"] as const;
+const CANDY_PIECE_NAMES = ["小紅", "計程車", "小巴士", "鈴鈴", "多多"] as const;
 
 export type CandyGoal =
   | { kind: "collect-any"; count: number }
@@ -14,8 +14,6 @@ export type CandyGoal =
   | { kind: "drop-item"; count: number }
   /** 啟動棋盤特殊糖（含連鎖引爆）；工具列道具本身不算 */
   | { kind: "detonate"; count: number };
-
-export type CandyGoalKind = CandyGoal["kind"];
 
 export type CandyProgress = {
   collected: number[];
@@ -139,7 +137,7 @@ export function goalTitle(goal: CandyGoal): string {
 }
 
 /** 剩餘量文案，例如「還差 12 個」；完成時為「完成」。 */
-export function goalRemainingLabel(goal: CandyGoal, p: CandyProgress): string {
+function goalRemainingLabel(goal: CandyGoal, p: CandyProgress): string {
   const status = goalStatus(goal, p);
   return status.done ? "完成" : `還差 ${status.remaining} ${unit(goal)}`;
 }

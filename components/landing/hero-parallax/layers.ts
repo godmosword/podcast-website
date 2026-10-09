@@ -7,7 +7,7 @@
  */
 export const PARALLAX_ASSET_PATH = "/landing/hero-parallax";
 
-export type ParallaxLayerId = "l1" | "l2" | "l3" | "l5";
+type ParallaxLayerId = "l1" | "l2" | "l3" | "l5";
 
 export type ParallaxLayer = {
   id: ParallaxLayerId;

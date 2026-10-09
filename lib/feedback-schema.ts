@@ -12,7 +12,7 @@ export type FeedbackKind = (typeof FEEDBACK_KINDS)[number];
 export const FEEDBACK_DEFAULT_STATUS: FeedbackStatus = "pending";
 export const FEEDBACK_DEFAULT_KIND: FeedbackKind = "general";
 
-export const FEEDBACK_NICKNAME_MAX = 40;
+const FEEDBACK_NICKNAME_MAX = 40;
 export const FEEDBACK_MESSAGE_MAX = 200;
 
 export const feedbackBodySchema = z
@@ -35,5 +35,3 @@ export const feedbackBodySchema = z
   })
   // 政策版本與同意時間一律由 server 寫入，這裡不接受 client 欄位。
   .strip();
-
-export type FeedbackBody = z.infer<typeof feedbackBodySchema>;
