@@ -222,9 +222,11 @@
   border: 1px solid color-mix(in srgb, var(--c-sky) 25%, transparent);
 }
 
-.gameEmoji {
-  font-size: 1.4rem;
-  line-height: 1;
+.gameIcon {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  line-height: 0;
 }
 
 .gameMeta {

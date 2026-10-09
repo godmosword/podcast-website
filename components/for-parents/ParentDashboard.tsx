@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { GamePlayIcon } from "@/components/games/GamePlayIcon";
 import ParentTrustStrip from "@/components/ParentTrustStrip";
 import { useParentDashboard } from "@/hooks/useParentDashboard";
 import { clearActivityLog } from "@/lib/activity-log";
@@ -175,8 +176,8 @@ function GameProgressSummary() {
             key={game.gameId}
             className={`${styles.gameRow}${game.played ? "" : ` ${styles.notPlayed}`}`}
           >
-            <span className={styles.gameEmoji} aria-hidden>
-              {game.emoji}
+            <span className={styles.gameIcon} aria-hidden>
+              {game.gameType ? <GamePlayIcon gameType={game.gameType} size={28} /> : null}
             </span>
             <span className={styles.gameMeta}>
               <span className={styles.gameTitle}>{game.title}</span>

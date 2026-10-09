@@ -66,8 +66,7 @@
 }
 
 .summonHandleGlyph {
-  font-size: var(--fs-h3);
-  line-height: 1;
+  flex: none;
 }
 
 .summonHandle:focus-visible {
@@ -408,9 +407,9 @@
   box-shadow: none;
 }
 
-.segmentEmoji {
-  font-size: 2.4rem;
-  line-height: 1;
+.segmentIcon {
+  flex: none;
+  color: var(--accent);
 }
 
 .segmentLabel {
@@ -658,12 +657,13 @@
   outline-offset: 2px;
 }
 
-.storyCardEmoji {
+/* 故事封面小圖（取代車種 emoji：每集封面比 emoji 好認） */
+.storyCardCover {
   flex-shrink: 0;
-  width: 3.2rem;
-  font-size: 2.7rem;
-  line-height: 1;
-  text-align: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
 }
 
 .storyCardBody {
@@ -722,7 +722,9 @@
 .storyCardDone {
   margin-left: auto;
   flex-shrink: 0;
-  font-size: 1.3rem;
+  display: block;
+  line-height: 0;
+  color: var(--c-yellow);
 }
 
 .storiesMore {

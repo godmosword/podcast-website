@@ -1,6 +1,7 @@
 "use client";
 
 import type { Playground } from "@/data/playgrounds";
+import Icon from "@/components/ui/Icon";
 import styles from "./PlayMap.module.css";
 
 export type PlayMapEditorialPickProps = {
@@ -23,7 +24,8 @@ export function PlayMapEditorialPick({
         id="play-map-editorial-pick-heading"
         className={styles.editorialPickEyebrow}
       >
-        ⭐ 媽米先幫你看
+        <Icon name="star" size={16} className={styles.editorialPickStar} />
+        媽米先幫你看
       </h3>
       <p className={styles.editorialPickName}>
         {place.name}

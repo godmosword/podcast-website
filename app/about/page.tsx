@@ -71,7 +71,7 @@ export default function AboutPage() {
           陪著孩子一起探索、一起長大。
         </p>
         <p className={styles.tagline}>
-          🚗 小小車車，大大冒險。
+          小小車車，大大冒險。
           <br />
           我們一起出發去《車車遊樂園》
         </p>

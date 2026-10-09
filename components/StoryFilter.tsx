@@ -129,8 +129,7 @@ export function StoryFilter({
       ) : (
         <div className={styles.empty} role="status">
           <p className={styles.emptyText}>
-            沒有符合的故事，試試其他車車或主題吧{" "}
-            <span aria-hidden>🚗</span>
+            沒有符合的故事，試試其他車車或主題吧
           </p>
           {hasFilter ? (
             <button

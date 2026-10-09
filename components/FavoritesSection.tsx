@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getStories, getStory } from "@/data/content";
 import { getFavorites } from "@/lib/favorites";
 import StoryCard from "./StoryCard";
+import Icon from "./ui/Icon";
 import styles from "./FavoritesSection.module.css";
 
 export default function FavoritesSection() {
@@ -22,7 +23,7 @@ export default function FavoritesSection() {
   return (
     <section className={styles.section}>
       <h2 className={styles.heading}>
-        <span aria-hidden>❤️</span> 常聽的故事
+        <Icon name="heart" size={22} className={styles.headingIcon} /> 常聽的故事
       </h2>
       <ul className={styles.list}>
         {favoriteStories.map((story, i) => (

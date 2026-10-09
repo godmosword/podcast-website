@@ -74,10 +74,6 @@ class BlockDropInstance implements GameInstance {
     }
   }
 
-  getTouchActions(): readonly GameAction[] {
-    // 觸控板由 View 自管（含 hold／硬降手勢）。
-    return [];
-  }
 
   registerController(ctrl: BlockDropController): void {
     this.controller = ctrl;

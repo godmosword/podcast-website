@@ -8,7 +8,6 @@ type ZoneStoryPreview = {
   slug: string;
   ep: number;
   title: string;
-  emoji: string;
 };
 
 export type ZoneStoriesBundle = {
@@ -29,7 +28,6 @@ function toPreview(story: Story): ZoneStoryPreview {
     slug: story.slug,
     ep: story.ep,
     title: story.title,
-    emoji: story.emoji,
   };
 }
 

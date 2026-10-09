@@ -3,6 +3,7 @@ import ConnectHub from "@/components/ConnectHub";
 import { contactHref, isContactExternal } from "@/lib/contact";
 import Doodle from "@/components/decor/Doodle";
 import decor from "@/components/decor/decor.module.css";
+import Icon from "@/components/ui/Icon";
 import styles from "./SiteFooter.module.css";
 
 // 贊助 / 支持連結（選填）。
@@ -115,7 +116,8 @@ export default function SiteFooter({
           rel="noopener noreferrer"
           className={styles.support}
         >
-          💛 支持我們繼續說故事
+          <Icon name="heart" size={18} className={styles.supportIcon} />
+          支持我們繼續說故事
         </a>
       )}
     </footer>

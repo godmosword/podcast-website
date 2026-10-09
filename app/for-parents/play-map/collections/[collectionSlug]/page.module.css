@@ -36,6 +36,12 @@
   text-decoration: none;
 }
 
+.editorialStar {
+  flex: none;
+  vertical-align: -2px;
+  color: var(--c-yellow);
+}
+
 .breadcrumbs a:hover,
 .backLink:hover,
 .relatedList a:hover,

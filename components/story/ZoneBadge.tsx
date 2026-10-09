@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ZONES, type ZoneId } from "@/data/universe-zones";
+import Icon from "@/components/ui/Icon";
 import styles from "./ZoneBadge.module.css";
 
 type Props = {
@@ -17,7 +18,7 @@ export default function ZoneBadge({ zoneId }: Props) {
       className={styles.badge}
       aria-label={`這個故事發生在${zone.name}，在樂園地圖上查看`}
     >
-      <span aria-hidden="true">📍 </span>
+      <Icon name="map-pin" size={16} className={styles.icon} />
       {zone.name}
     </Link>
   );

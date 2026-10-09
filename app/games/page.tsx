@@ -1,7 +1,7 @@
 import Image from "next/image";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { IconBlockFall, IconCrayon, IconSwap } from "@/components/games/ClayIcons";
+import { GamePlayIcon } from "@/components/games/GamePlayIcon";
 import { GAMES, gameParentTip, type GameMeta } from "@/data/games";
 import JsonLd from "@/components/JsonLd";
 import { gameListJsonLd } from "@/lib/json-ld";
@@ -28,19 +28,9 @@ const GAME_TYPE_LABEL: Record<GameMeta["gameType"], string> = {
   coloring: "塗顏色",
 };
 
-/**
- * 兒童減法審（2026-09-20）：不識字的孩子靠「玩法圖示」認站——
- * 蠟筆＝塗、兩格交換＝找一樣、方塊落下＝排一排。封面圓鈕用這顆圖示，卡片不再印動作詞。
- */
+/** 封面圓鈕用玩法圖示（GamePlayIcon），卡片不再印動作詞。 */
 function playIcon(game: GameMeta, size: number) {
-  switch (game.gameType) {
-    case "coloring":
-      return <IconCrayon size={size} />;
-    case "match":
-      return <IconSwap size={size} />;
-    case "blocks":
-      return <IconBlockFall size={size} />;
-  }
+  return <GamePlayIcon gameType={game.gameType} size={size} />;
 }
 
 function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {

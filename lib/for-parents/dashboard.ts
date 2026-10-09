@@ -1,4 +1,4 @@
-import { GAMES } from "@/data/games";
+import { GAMES, type GameType } from "@/data/games";
 import { getStories, getStory, storiesByNewest, type Story } from "@/data/content";
 import {
   emptyActivityLog,
@@ -15,7 +15,8 @@ const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"] as const;
 type ParentGameRow = {
   gameId: GameKitGameId;
   title: string;
-  emoji: string;
+  /** 玩法類型：畫面用 GamePlayIcon 顯示，和遊樂園卡片同一組黏土圖示。 */
+  gameType: GameType | null;
   played: boolean;
   bestScore: number | null;
   medalStars: number;
@@ -301,7 +302,7 @@ function buildGameRows(
     return {
       gameId,
       title: meta?.title ?? gameId,
-      emoji: meta?.emoji ?? "🎮",
+      gameType: meta?.gameType ?? null,
       played: profile.gamesPlayed[gameId] === true,
       bestScore: typeof best === "number" && best > 0 ? best : null,
       medalStars,

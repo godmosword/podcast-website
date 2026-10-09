@@ -1,6 +1,6 @@
 type AgeBand = "explore" | "challenge";
 
-type GameType = "match" | "blocks" | "coloring";
+export type GameType = "match" | "blocks" | "coloring";
 
 type GameArt = {
   cover: string;

@@ -172,7 +172,9 @@
 }
 
 .support {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   margin-top: 18px;
   font-size: var(--fs-control);
   font-weight: 700;
@@ -182,6 +184,10 @@
   border-radius: var(--radius-pill);
   box-shadow: var(--shadow-md), var(--gloss);
   transition: transform var(--motion-press), box-shadow var(--motion-press);
+}
+
+.supportIcon {
+  flex: none;
 }
 
 .support:active {

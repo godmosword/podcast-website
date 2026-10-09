@@ -61,12 +61,19 @@
   animation-name: candySweepBoard;
 }
 
+/* 白底小圓托住黏土圖示：糖果底色五顏六色，沒底會糊在一起 */
 .specialBadge {
   position: absolute;
-  right: 0;
-  bottom: 0;
-  font-size: 0.72em;
-  line-height: 1;
+  right: -4%;
+  bottom: -4%;
+  width: 44%;
+  aspect-ratio: 1;
+  padding: 6%;
+  box-sizing: border-box;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.92);
+  box-shadow: 0 1px 3px rgb(93 74 103 / 0.35);
+  line-height: 0;
   pointer-events: none;
   animation: candyBadge 1.6s ease-in-out infinite;
 }

@@ -74,7 +74,7 @@
   color: var(--accent-ink);
 }
 
-/* 夜間：段控浮層更清楚；emoji 與選單一致降飽和 */
+/* 夜間：段控浮層更清楚 */
 :global(html[data-theme="night"]) .group {
   background: var(--card-2);
   border-color: color-mix(in srgb, var(--ink) 16%, transparent);
@@ -85,16 +85,18 @@
   color: color-mix(in srgb, var(--c-teal) 35%, var(--ink));
 }
 
-:global(html[data-theme="night"]) .glyph {
-  filter: saturate(0.55) brightness(0.92);
+/* 線條圖示跟著按鈕字色；選中段用 accent，未選中用次要墨色 */
+.glyph {
+  flex: none;
+  color: var(--ink-soft);
 }
 
-.glyph {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.35em;
-  height: 1.35em;
+.segmentActive .glyph {
+  color: currentColor;
+}
+
+.iconOnly .glyph {
+  color: var(--ink);
 }
 
 .label {

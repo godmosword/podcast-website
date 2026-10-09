@@ -283,10 +283,9 @@
   line-height: 1.78;
 }
 
-.toolEmoji {
-  margin: 0;
-  font-size: 1.6rem;
-  line-height: 1;
+.toolIcon {
+  display: block;
+  color: var(--accent);
 }
 
 .toolCta {

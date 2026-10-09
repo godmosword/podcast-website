@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import type { Hotspot } from "@/data/universe";
@@ -18,7 +19,10 @@ import {
 } from "@/lib/universe/hotspot";
 import type { ZoneStoriesBundle } from "@/lib/story-zone-query";
 import ParentTrustStrip from "@/components/ParentTrustStrip";
+import Icon from "@/components/ui/Icon";
 import IconButton from "@/components/ui/IconButton";
+import type { IconName } from "@/data/icons";
+import { storyCoverPath } from "@/lib/story-utils";
 import ZoneWishForm from "./ZoneWishForm";
 import { useUniverseCameraGate } from "./UniverseCameraGateContext";
 import { storyDisplayTitle } from "@/lib/story-title";
@@ -40,12 +44,12 @@ type ZoneSheetProps = {
   inert?: boolean;
 };
 
-/** 四段內容支柱的學齡前語意 emoji（純呈現；href 仍由 getCarParkLinks 單一資料源）。 */
-const SEGMENT_EMOJI: Record<LandingSegmentId, string> = {
-  stories: "📚",
-  bedtime: "🌙",
-  clay: "🎨",
-  health: "🦺",
+/** 四段內容支柱的線條圖示（純呈現；href 仍由 getCarParkLinks 單一資料源）。 */
+const SEGMENT_ICON: Record<LandingSegmentId, IconName> = {
+  stories: "book",
+  bedtime: "moon",
+  clay: "palette",
+  health: "shield-plus",
 };
 
 export default function ZoneSheet({
@@ -163,9 +167,7 @@ export default function ZoneSheet({
           aria-expanded="false"
           disabled={!sheetReady || inert}
         >
-          <span className={styles.summonHandleGlyph} aria-hidden="true">
-            👋
-          </span>
+          <Icon name="chevron-up" size={22} className={styles.summonHandleGlyph} />
           <span>來這裡逛逛</span>
         </button>
       </div>
@@ -223,9 +225,14 @@ export default function ZoneSheet({
                       trackUniverseSheetLink(zone.id, `/story/${story.slug}`)
                     }
                   >
-                    <span className={styles.storyCardEmoji} aria-hidden="true">
-                      {story.emoji}
-                    </span>
+                    <Image
+                      className={styles.storyCardCover}
+                      src={storyCoverPath(story.slug)}
+                      alt=""
+                      width={52}
+                      height={52}
+                      sizes="52px"
+                    />
                     <span className={styles.storyCardBody}>
                       <span className={styles.storyCardEp}>
                         EP {story.ep}
@@ -241,7 +248,7 @@ export default function ZoneSheet({
                         role="img"
                         aria-label="已聽完"
                       >
-                        ⭐
+                        <Icon name="star" size={22} />
                       </span>
                     ) : null}
                   </a>
@@ -373,9 +380,7 @@ export default function ZoneSheet({
                             }
                           : {})}
                       >
-                        <span className={styles.segmentEmoji} aria-hidden="true">
-                          {SEGMENT_EMOJI[link.id]}
-                        </span>
+                        <Icon name={SEGMENT_ICON[link.id]} size={36} className={styles.segmentIcon} />
                         <span className={styles.segmentLabel}>
                           {link.label}
                           {link.external ? (

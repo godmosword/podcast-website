@@ -45,7 +45,7 @@ export default function StoryMeta({
           className={`${styles.tags} ${align === "left" ? styles.tagsLeft : ""}`}
         >
           <TagChip variant="vehicle" color={story.color}>
-            {story.emoji} {story.vehicle}
+            {story.vehicle}
           </TagChip>
           {story.tags?.map((tag) => (
             <TagChip key={tag}>{tag}</TagChip>
@@ -65,7 +65,7 @@ export function StoryTags({
       className={`${styles.tags} ${align === "left" ? styles.tagsLeft : ""}`}
     >
       <TagChip variant="vehicle" color={story.color}>
-        {story.emoji} {story.vehicle}
+        {story.vehicle}
       </TagChip>
       {story.tags?.map((tag) => (
         <TagChip key={tag}>{tag}</TagChip>

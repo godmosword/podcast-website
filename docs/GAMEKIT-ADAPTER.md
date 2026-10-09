@@ -27,7 +27,6 @@ interface GameInstance {
   fixedUpdate?(dt: number);   // canvas / physics
   render?(ctx, alpha);        // canvas
   renderOverlay?(props);      // menus, HUD, result
-  getTouchActions?();
 }
 ```
 
@@ -39,7 +38,7 @@ interface GameInstance {
 - Owns best-score + `reportGameSession`（每次 `onSession` 都寫入；中關通關可多次，終局由 adapter 去重）。
 - Maps keyboard / touch / gamepad → `setAction`.
 - Runs the shared `GameLoop` when the instance exposes `fixedUpdate`.
-- Renders a generic touch bar when coarse pointer is detected.
+- 不提供共用觸控列：觸控鍵由各遊戲 View 自己做（消消樂點格、方塊轉轉井下鍵列），Host 只接 `setAction`。
 
 ## Migration Order
 

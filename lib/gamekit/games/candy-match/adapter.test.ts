@@ -14,10 +14,6 @@ describe("candyMatchAdapter", () => {
     expect(inst.getScore()).toBe(0);
   });
 
-  it("getTouchActions 回傳空陣列（點格遊戲）", () => {
-    const inst = candyMatchAdapter.create({ kidsMode: false, reducedMotion: false });
-    expect(inst.getTouchActions?.()).toEqual([]);
-  });
 
   it("pause / resume 凍結與恢復 playing 狀態", () => {
     const inst = new CandyMatchInstance({ kidsMode: false, reducedMotion: false });

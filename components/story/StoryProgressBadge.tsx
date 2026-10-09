@@ -1,6 +1,7 @@
 "use client";
 
 import { useCompletedStories } from "@/hooks/useCompletedStories";
+import Icon from "@/components/ui/Icon";
 import styles from "./StoryProgressBadge.module.css";
 
 type StoryProgressBadgeProps = {
@@ -12,7 +13,7 @@ type StoryProgressBadgeProps = {
 function Badge() {
   return (
     <span className={styles.badge} role="img" aria-label="已聽完">
-      ⭐
+      <Icon name="star" size={18} />
     </span>
   );
 }

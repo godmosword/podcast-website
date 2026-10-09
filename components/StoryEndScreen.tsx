@@ -5,6 +5,7 @@ import Link from "next/link";
 import DuduMoment from "@/components/dudu/DuduMoment";
 import { requestCelebration } from "@/lib/celebration";
 import Sparkle from "./decor/Sparkle";
+import Icon from "./ui/Icon";
 import decor from "./decor/decor.module.css";
 import styles from "./StoryPlayer.module.css";
 
@@ -70,7 +71,9 @@ export default function StoryEndScreen({
         className={`${styles.endSparkle} ${styles.endSparkle2} ${decor.sparkleAnim}`}
         size={18}
       />
-      <p className={styles.endTitle}>故事聽完囉 🌙</p>
+      <p className={styles.endTitle}>
+        故事聽完囉 <Icon name="moon" size={24} className={styles.endTitleIcon} />
+      </p>
       <p className={styles.endSubtitle}>{title}</p>
 
       <div className={styles.endActions}>

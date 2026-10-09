@@ -2,6 +2,12 @@
   margin-bottom: var(--space-8);
 }
 
+/* 愛心保留一點暖色，和頁尾支持連結同一顆 */
+.headingIcon {
+  flex: none;
+  color: color-mix(in srgb, var(--c-pink) 60%, var(--ink));
+}
+
 .heading {
   display: flex;
   align-items: center;

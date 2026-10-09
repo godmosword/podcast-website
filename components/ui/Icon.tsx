@@ -197,6 +197,75 @@ function renderGlyph(name: IconName) {
           <path d="m13.5 6.5 4 4" />
         </g>
       );
+    case "sun":
+      return (
+        <g {...STROKE}>
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4" />
+        </g>
+      );
+    case "moon":
+      return <path d="M19.5 14.5A7.5 7.5 0 0 1 9.5 4.5a7.5 7.5 0 1 0 10 10z" {...STROKE} />;
+    case "theme-system":
+      // 半圓：一半日一半夜＝跟隨系統
+      return (
+        <>
+          <circle cx="12" cy="12" r="8" {...STROKE} />
+          <path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor" />
+        </>
+      );
+    case "chat":
+      return (
+        <g {...STROKE}>
+          <path d="M5.5 5h13A1.5 1.5 0 0 1 20 6.5v8a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 3.5V16A1.5 1.5 0 0 1 4 14.5v-8A1.5 1.5 0 0 1 5.5 5z" />
+          <path d="M8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01" />
+        </g>
+      );
+    case "star":
+      // 實心：「聽完／推薦」是拿到的獎勵，填色比線條好認；顏色由 currentColor 決定
+      return (
+        <path
+          d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"
+          {...STROKE}
+          fill="currentColor"
+        />
+      );
+    case "palette":
+      return (
+        <g {...STROKE}>
+          <path d="M12 3.5a8.5 8.5 0 0 0 0 17c1.4 0 2-1 1.4-2.1-.6-1.2.1-2.4 1.5-2.4H17a3.5 3.5 0 0 0 3.5-3.5c0-5-3.8-9-8.5-9z" />
+          <circle cx="7.8" cy="11" r="1" />
+          <circle cx="10.5" cy="7.5" r="1" />
+          <circle cx="15" cy="8" r="1" />
+        </g>
+      );
+    case "shield-plus":
+      return (
+        <g {...STROKE}>
+          <path d="M12 3.5 5 6v5.5c0 4.4 3 7.6 7 9 4-1.4 7-4.6 7-9V6z" />
+          <path d="M12 9v6M9 12h6" />
+        </g>
+      );
+    case "chevron-up":
+      return (
+        <g {...STROKE}>
+          <path d="m6 14.5 6-6 6 6" />
+        </g>
+      );
+    case "flag":
+      return (
+        <g {...STROKE}>
+          <path d="M6 20.5V4.5" />
+          <path d="M6 5h11l-2.5 4L17 13H6" />
+        </g>
+      );
+    case "bar-chart":
+      return (
+        <g {...STROKE}>
+          <path d="M4 20h16" />
+          <path d="M7 16.5v-5M12 16.5V7M17 16.5v-8" />
+        </g>
+      );
     default: {
       const _exhaustive: never = name;
       return _exhaustive;

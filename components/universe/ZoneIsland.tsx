@@ -10,6 +10,7 @@ import { playSfx } from "@/lib/sfx";
 import { requestCelebration } from "@/lib/celebration";
 import { ISLAND_BURST_PRESET, createRadialBurstParticles } from "@/lib/celebration-dom";
 import StarBurst from "@/components/celebration/StarBurst";
+import Icon from "@/components/ui/Icon";
 import IslandRoamerLayer from "./IslandRoamerLayer";
 import ZoneLandmark from "./ZoneLandmark";
 import ZoneMotionLayer from "./ZoneMotionLayer";
@@ -241,9 +242,7 @@ function ZoneIsland({
         >
           <span className={styles.name} aria-hidden="true">
             {isOpen ? (
-              <span className={styles.openBeacon} aria-hidden="true">
-                🎈
-              </span>
+              <Icon name="flag" size={14} className={styles.openBeacon} />
             ) : null}
             {zone.name}
           </span>
@@ -258,7 +257,8 @@ function ZoneIsland({
                   className={styles.progressChipInner}
                   data-celebrate={chipCelebrate || undefined}
                 >
-                  ⭐ {progress!.completed}/{progress!.total}
+                  <Icon name="star" size={11} className={styles.progressStar} />
+                  {progress!.completed}/{progress!.total}
                 </span>
               </span>
             </span>

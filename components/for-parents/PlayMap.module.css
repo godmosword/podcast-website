@@ -771,11 +771,20 @@
 
 .editorialPickEyebrow {
   grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 5px;
   margin: 0;
   color: var(--accent-ink);
   font-size: var(--fs-meta);
   font-weight: 800;
   line-height: 1.35;
+}
+
+/* 推薦星：實心黃（和故事「已聽完」同一顆） */
+.editorialPickStar {
+  flex: none;
+  color: var(--c-yellow);
 }
 
 .editorialPickName {

@@ -109,13 +109,13 @@ describe("ZoneIsland", () => {
       />,
     );
 
-    expect(noProgress).not.toContain("⭐");
-    expect(zeroProgress).not.toContain("⭐");
+    expect(noProgress).not.toContain("progressStar");
+    expect(zeroProgress).not.toContain("progressStar");
     expect(noProgress).not.toContain("data-progress");
     expect(zeroProgress).not.toContain("data-progress");
   });
 
-  it("有進度時木牌顯示 ⭐ n/N chip（不拆離散空星）", () => {
+  it("有進度時木牌顯示 ★ n/N chip（線條實心星，不拆離散空星）", () => {
     const zone = resolveUniverseMap().zones.find((z) => z.id === "car-park")!;
     const html = renderToStaticMarkup(
       <ZoneIsland
@@ -128,7 +128,9 @@ describe("ZoneIsland", () => {
       />,
     );
 
-    expect(html).toContain("⭐ 3/6");
+    expect(html).toContain("progressStar");
+    expect(html).toContain("3/6");
+    expect(html).not.toContain("⭐");
     expect(html).toContain("data-progress");
   });
 
@@ -148,7 +150,7 @@ describe("ZoneIsland", () => {
     expect(html).toContain('aria-label="車車樂園，已聽完 2 集"');
   });
 
-  it("滿星時 chip 帶 data-full-stars、文案仍為 ⭐ n/N", () => {
+  it("滿星時 chip 帶 data-full-stars、文案仍為 ★ n/N", () => {
     const zone = resolveUniverseMap().zones.find((z) => z.id === "car-park")!;
     const html = renderToStaticMarkup(
       <ZoneIsland
@@ -161,7 +163,8 @@ describe("ZoneIsland", () => {
       />,
     );
 
-    expect(html).toContain("⭐ 6/6");
+    expect(html).toContain("progressStar");
+    expect(html).toContain("6/6");
     expect(html).toContain("data-full-stars");
     expect(html).toContain("progressChipInner");
   });
@@ -200,7 +203,7 @@ describe("ZoneIsland", () => {
     expect(html).not.toContain("data-full-stars");
   });
 
-  it("開放島顯示「可以進去玩」氣球訊號，鎖島不顯示", () => {
+  it("開放島顯示「可以進去玩」小旗訊號，鎖島不顯示", () => {
     const zones = resolveUniverseMap().zones;
     const openHtml = renderToStaticMarkup(
       <ZoneIsland
@@ -221,8 +224,9 @@ describe("ZoneIsland", () => {
       />,
     );
 
-    expect(openHtml).toContain("🎈");
+    // 開放島木牌插一面小旗（取代 🎈）
+    expect(openHtml).toContain("openBeacon");
     expect(openHtml).not.toContain("開放中");
-    expect(lockedHtml).not.toContain("🎈");
+    expect(lockedHtml).not.toContain("openBeacon");
   });
 });

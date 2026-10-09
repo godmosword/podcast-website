@@ -8,7 +8,6 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useGameKitSettings } from "@/hooks/useGameKitSettings";
 import GameChrome, { GameChromeToolbar } from "@/components/games/GameChrome";
@@ -23,7 +22,6 @@ import { reportGameSession } from "@/lib/gamekit/progress/session";
 import type { GameAdapter, GameInstance, GameStatus, OverlayProps } from "@/lib/gamekit/adapter";
 import type { GameAction } from "@/lib/gamekit/types";
 import { GAMES, type TutorialStep } from "@/data/games";
-import { BarTouchButton, touchControlStyles } from "@/lib/gamekit/react/TouchControls";
 import { IconStar } from "@/components/games/ClayIcons";
 import hostStyles from "./GameHost.module.css";
 
@@ -42,18 +40,6 @@ export type GameHostProps = {
   canvasHeight?: number;
   /** Children rendered below the canvas / overlay (rare). */
   children?: ReactNode;
-};
-
-const TOUCH_LABEL: Partial<Record<GameAction, string>> = {
-  "move-left": "⬅️",
-  "move-right": "➡️",
-  "move-up": "⬆️",
-  "move-down": "⬇️",
-  dash: "💨",
-  action: "✨",
-  pause: "⏸",
-  confirm: "▶",
-  cancel: "✕",
 };
 
 /**
@@ -79,7 +65,6 @@ export default function GameHost({
   const loopRef = useRef<GameLoop | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const isCoarse = useCoarsePointer();
   const { kidsMode, gameVolume, motionPreference } = useGameKitSettings();
   const reduced = useReducedMotion(motionPreference);
   const { best, saveBest } = useBestScore(adapter.id);
@@ -293,10 +278,6 @@ export default function GameHost({
     syncHost,
   };
 
-  const touchActions =
-    instanceRef.current?.getTouchActions?.() ??
-    (["move-left", "move-right", "action"] as const);
-
   const needsCanvas = Boolean(instanceRef.current?.fixedUpdate);
 
   /*
@@ -365,22 +346,6 @@ export default function GameHost({
         )}
 
         {instanceRef.current?.renderOverlay?.(overlayProps)}
-
-        {isCoarse && status === "playing" && (
-          <div className={touchControlStyles.touchBar}>
-            {touchActions.map((action) => (
-              <BarTouchButton
-                key={action}
-                label={action}
-                coarse
-                onDown={() => instanceRef.current?.setAction(action, true)}
-                onUp={() => instanceRef.current?.setAction(action, false)}
-              >
-                {TOUCH_LABEL[action] ?? action}
-              </BarTouchButton>
-            ))}
-          </div>
-        )}
 
         {showTutorial && tutorial.length > 0 && (
           <TutorialOverlay

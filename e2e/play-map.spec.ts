@@ -135,9 +135,9 @@ test.describe("親子遊樂地圖", () => {
     await page.goto("/for-parents/play-map?city=%E6%A1%83%E5%9C%92%E5%B8%82");
     await waitForPlayMapReady(page);
 
-    await expect(page.getByText("⭐ 媽米先幫你看")).toBeVisible();
+    await expect(page.getByText("媽米先幫你看")).toBeVisible();
     await expect(
-      page.getByRole("heading", { level: 3, name: "⭐ 媽米先幫你看" }),
+      page.getByRole("heading", { level: 3, name: "媽米先幫你看" }),
     ).toBeVisible();
     await page.getByRole("button", { name: /桃園市立兒童美術館，看看這個/ }).click();
 
@@ -302,7 +302,7 @@ test.describe("親子遊樂地圖", () => {
     await expect(map).toBeVisible({ timeout: 15_000 });
     await expect(page.getByRole("region", { name: "地圖結果" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "返回名單" })).toBeVisible();
-    await expect(page.getByText("⭐ 媽米先幫你看")).toHaveCount(0);
+    await expect(page.getByText("媽米先幫你看")).toHaveCount(0);
 
     await page.waitForFunction(
       () => !document.querySelector(".leaflet-zoom-anim"),

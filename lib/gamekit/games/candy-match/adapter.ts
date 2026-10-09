@@ -104,9 +104,6 @@ class CandyMatchInstance implements GameInstance {
     }
   }
 
-  getTouchActions(): readonly GameAction[] {
-    return [];
-  }
 
   registerController(ctrl: CandyMatchController): void {
     this.controller = ctrl;

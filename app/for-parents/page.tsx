@@ -15,6 +15,7 @@ import { breadcrumbListJsonLd, faqPageJsonLd } from "@/lib/json-ld";
 import { STATIC_PAGE_MODIFIED_DATES } from "@/lib/page-freshness";
 import { visibleSocials } from "@/lib/social";
 import { storyCoverPath } from "@/lib/story-utils";
+import Icon from "@/components/ui/Icon";
 import styles from "./page.module.css";
 import { storyDisplayTitle } from "@/lib/story-title";
 
@@ -79,9 +80,7 @@ export default function ForParentsPage() {
         </h2>
         <div className={styles.toolGrid}>
           <article className={styles.toolCard} aria-labelledby="play-map-heading">
-            <p className={styles.toolEmoji} aria-hidden>
-              📍
-            </p>
+            <Icon name="map-pin" size={30} className={styles.toolIcon} />
             <h3 id="play-map-heading">附近哪裡適合放電？</h3>
             <p>
               用地圖找適合 3–8 歲的公園與室內樂園，可依室內／免費篩選，並一鍵開啟 Google
@@ -93,9 +92,7 @@ export default function ForParentsPage() {
           </article>
 
           <article className={styles.toolCard} aria-labelledby="dashboard-heading">
-            <p className={styles.toolEmoji} aria-hidden>
-              📊
-            </p>
+            <Icon name="bar-chart" size={30} className={styles.toolIcon} />
             <h3 id="dashboard-heading">這台裝置上的親子進度</h3>
             <p>
               查看小遊戲探索、最近收聽與推薦共讀故事。所有資料只留在您的瀏覽器，不會上傳到伺服器。

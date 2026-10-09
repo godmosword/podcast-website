@@ -41,8 +41,8 @@ afterEach(() => {
 
 const zoneStoriesFixture: ZoneStoriesBundle = {
   previews: [
-    { slug: "dino-01", ep: 1, title: "恐龍島的第一天", emoji: "🦕" },
-    { slug: "dino-02", ep: 2, title: "恐龍島的大冒險", emoji: "🦖" },
+    { slug: "dino-01", ep: 1, title: "恐龍島的第一天" },
+    { slug: "dino-02", ep: 2, title: "恐龍島的大冒險" },
   ],
   total: 2,
   slugs: ["dino-01", "dino-02"],
@@ -62,9 +62,10 @@ describe("ZoneSheet", () => {
 
     expect(screen.getByRole("button", { name: "來這裡逛逛" })).toBeTruthy();
     expect(screen.queryByRole("region")).toBeNull();
-    expect(container.querySelector('[aria-hidden="true"]')?.textContent).toContain(
-      "👋",
-    );
+    // 把手前是往上拉的箭頭圖示（取代 👋）
+    expect(
+      screen.getByRole("button", { name: "來這裡逛逛" }).querySelector('svg[aria-hidden="true"]'),
+    ).not.toBeNull();
     // 收合態不掛 scrim class（印刷地圖不被壓暗）
     expect(container.firstElementChild?.className ?? "").not.toMatch(
       /overlayScrim/,
@@ -143,7 +144,7 @@ describe("ZoneSheet", () => {
     expect(screen.getByText("想留一句話")).toBeTruthy();
   });
 
-  it("故事清單改為大圖卡：顯示 EP 字樣、標題與 emoji，第一集標「最新」，已聽完帶星星徽章", () => {
+  it("故事清單改為大圖卡：顯示 EP 字樣、標題與故事封面，第一集標「最新」，已聽完帶星星徽章", () => {
     const zone = ZONES.find((item) => item.id === "dino")!;
     const html = renderToStaticMarkup(
       <ZoneSheet
@@ -158,7 +159,9 @@ describe("ZoneSheet", () => {
     expect(html).toContain("恐龍島的第一天");
     expect(html).toContain("EP 2");
     expect(html).toContain("恐龍島的大冒險");
-    expect(html).toContain("🦕");
+    // 封面小圖取代車種 emoji
+    expect(html).toContain("dino-01");
+    expect(html).not.toMatch(/\p{Extended_Pictographic}/u);
     expect(html).toContain("最新");
     expect(html).toContain('href="/story/dino-01"');
     expect(html).toContain('href="/story/dino-02"');

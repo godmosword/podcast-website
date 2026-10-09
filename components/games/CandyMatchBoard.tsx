@@ -24,7 +24,12 @@ import {
 } from "@/lib/games/candy-match/cell-size";
 import { CANDY_MATCH_PIECES } from "@/lib/games/candy-match/levels";
 import { DirtOverlay, PieceArt, PieceGift } from "@/components/games/CandyMatchPieceArt";
+import { IconBroom, IconConfetti, IconRainbow } from "@/components/games/ClayIcons";
 import styles from "./CandyMatchBoard.module.css";
+
+/** 特殊糖角落徽章：站上黏土圖示（取代 🧹🌈💥，各裝置長相一致、跟棋盤同畫風）。 */
+const SPECIAL_BADGE = { row: IconBroom, color: IconRainbow, burst: IconConfetti } as const;
+const BADGE_FILL = { width: "100%", height: "100%" } as const;
 
 /**
  * 消除棋盤：渲染格子＋圖案，處理「點兩下相鄰」與「拖一下」兩種交換手勢，
@@ -386,8 +391,11 @@ export function CandyMatchBoard({
               <span className={artClass} style={artStyle}>
                 {v === DROP_ITEM ? <PieceGift size="100%" /> : v >= 0 ? <PieceArt piece={v} size="100%" /> : null}
                 {specialKind ? (
-                  <span className={styles.specialBadge} aria-hidden>
-                    {specialKind === "row" ? "🧹" : specialKind === "color" ? "🌈" : "💥"}
+                  <span className={styles.specialBadge} data-kind={specialKind} aria-hidden>
+                    {(() => {
+                      const Badge = SPECIAL_BADGE[specialKind];
+                      return <Badge style={BADGE_FILL} />;
+                    })()}
                   </span>
                 ) : null}
                 {v === DROP_ITEM ? (

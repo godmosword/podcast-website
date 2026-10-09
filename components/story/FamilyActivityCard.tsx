@@ -1,4 +1,5 @@
 import type { FamilyActivity } from "@/data/family-activities";
+import Icon from "@/components/ui/Icon";
 import styles from "./FamilyActivityCard.module.css";
 
 type Props = {
@@ -18,7 +19,8 @@ export default function FamilyActivityCard({ slug, familyActivity, accent }: Pro
       aria-labelledby={headingId}
     >
       <h2 id={headingId} className={styles.heading}>
-        <span aria-hidden="true">🏡 </span>聽完聊一聊
+        <Icon name="chat" size={22} className={styles.headingIcon} />
+        聽完聊一聊
       </h2>
       <p className={styles.question}>{familyActivity.question}</p>
       {familyActivity.activity ? (

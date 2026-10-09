@@ -16,13 +16,6 @@ describe("blockDropAdapter", () => {
     expect(inst.getScore()).toBe(0);
   });
 
-  it("getTouchActions 回傳空（觸控由 View 自管）", () => {
-    const inst = blockDropAdapter.create({
-      kidsMode: false,
-      reducedMotion: false,
-    });
-    expect(inst.getTouchActions?.()).toEqual([]);
-  });
 
   it("pause / resume 委派 controller", () => {
     const pause = vi.fn();

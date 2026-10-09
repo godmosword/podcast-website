@@ -217,7 +217,7 @@ export function resolveUniverseMap(
 }
 
 export type CarParkLink = {
-  /** 來源 segment id（供 UI 配 emoji／排序，href 仍為單一資料源）。 */
+  /** 來源 segment id（供 UI 配圖示／排序，href 仍為單一資料源）。 */
   id: LandingSegmentId;
   label: string;
   href: string;

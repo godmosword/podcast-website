@@ -26,6 +26,17 @@ export const ICON_NAMES = [
   "plane",
   "mountain",
   "pencil",
+  // 全站其他 emoji（日夜切換、故事頁、宇宙地圖、家長頁）
+  "sun",
+  "moon",
+  "theme-system",
+  "chat",
+  "star",
+  "palette",
+  "shield-plus",
+  "chevron-up",
+  "flag",
+  "bar-chart",
 ] as const;
 
 export type IconName = (typeof ICON_NAMES)[number];

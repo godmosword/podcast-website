@@ -7,6 +7,8 @@ import {
   SYSTEM_THEME_MODE,
   type ThemeMode,
 } from "@/lib/theme";
+import Icon from "@/components/ui/Icon";
+import type { IconName } from "@/data/icons";
 import styles from "./ThemeToggle.module.css";
 
 type ThemeToggleProps = {
@@ -29,10 +31,11 @@ const MODE_SHORT_LABELS: Record<ThemeMode, string> = {
   night: "夜",
 };
 
-const MODE_GLYPHS: Record<ThemeMode, string> = {
-  system: "🌓",
-  light: "☀️",
-  night: "🌙",
+/** 全站線條圖示（不用 emoji：各裝置長相不同、夜間只能降飽和）。 */
+const MODE_ICONS: Record<ThemeMode, IconName> = {
+  system: "theme-system",
+  light: "sun",
+  night: "moon",
 };
 
 export default function ThemeToggle({
@@ -51,9 +54,7 @@ export default function ThemeToggle({
         aria-label={`目前：${MODE_LABELS[mode]}，點擊切換`}
         aria-pressed={theme === NIGHT_THEME}
       >
-        <span className={styles.glyph} aria-hidden>
-          {MODE_GLYPHS[mode]}
-        </span>
+        <Icon name={MODE_ICONS[mode]} size={24} className={styles.glyph} />
       </button>
     );
   }
@@ -75,11 +76,7 @@ export default function ThemeToggle({
             aria-pressed={active}
             aria-label={MODE_LABELS[option]}
           >
-            {!textOnly && (
-              <span className={styles.glyph} aria-hidden>
-                {MODE_GLYPHS[option]}
-              </span>
-            )}
+            {!textOnly && <Icon name={MODE_ICONS[option]} size={20} className={styles.glyph} />}
             {textOnly ? (
               <span className={styles.label}>{MODE_SHORT_LABELS[option]}</span>
             ) : (

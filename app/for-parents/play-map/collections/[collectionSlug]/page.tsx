@@ -23,6 +23,7 @@ import {
 import { breadcrumbListJsonLd, playgroundCollectionJsonLd } from "@/lib/json-ld";
 import { PlayMapCollectionCard } from "@/components/for-parents/PlayMapCollectionCard";
 import { clipParentVoice } from "@/lib/playground-parent-voice";
+import Icon from "@/components/ui/Icon";
 import styles from "./page.module.css";
 
 type CollectionPageProps = {
@@ -172,7 +173,7 @@ export default async function PlaygroundCollectionPage({
             </p>
             {editorialPick ? (
               <p className={styles.editorialInline}>
-                <span aria-hidden>⭐</span>
+                <Icon name="star" size={16} className={styles.editorialStar} />
                 <span>媽米先看：</span>{" "}
                 <Link
                   href={`/for-parents/play-map/${encodeURIComponent(editorialPick.place.id)}`}

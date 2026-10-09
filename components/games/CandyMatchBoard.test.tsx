@@ -225,7 +225,9 @@ describe("CandyMatchBoard pointer capture", () => {
     );
     const cell = screen.getByRole("button", { name: /爆炸糖/ });
     expect(cell.getAttribute("data-special")).toBe("burst");
-    expect(cell.textContent).toContain("💥");
+    // 角落徽章是黏土圖示（svg），不再是 emoji
+    expect(cell.querySelector('[data-kind="burst"] svg')).not.toBeNull();
+    expect(cell.textContent).not.toMatch(/\p{Extended_Pictographic}/u);
   });
 
   it("掃把糖顯示徽章；reduced 不標 data-sweep", () => {

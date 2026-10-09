@@ -614,7 +614,15 @@
 }
 
 .progressChipInner {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+/* 進度星：實心暖金，比 chip 字色亮一階 */
+.progressStar {
+  flex: none;
+  color: #e0a21a;
 }
 
 .progressChipInner[data-celebrate] {
@@ -661,11 +669,11 @@
 
 /* 開放島「可以進去玩」訊號（T5，無文字語意）：木牌名前的小氣球輕輕上下飄，
    與待機浮動同語彙但更小幅；reduced-motion 時靜態。 */
+/* 開放中的島：木牌上一面小旗（取代 🎈），跟著木牌字色 */
 .openBeacon {
   display: inline-block;
   margin-right: 3px;
-  font-size: 13px;
-  line-height: 1;
+  vertical-align: -2px;
   animation: beaconBob 2.2s ease-in-out infinite;
 }
 

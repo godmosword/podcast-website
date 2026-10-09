@@ -94,11 +94,7 @@ export interface GameInstance {
   /** 抬頭是否顯示最佳分（例如繽紛樂園任務冒險隱藏）；未實作視為顯示。 */
   showsScore?(): boolean;
 
-  /**
-   * Optional list of actions this game needs touch buttons for.
-   * Host can render a generic touch bar when coarse pointer is detected.
-   */
-  getTouchActions?(): readonly GameAction[];
+  // 觸控鍵由各遊戲 View 自己做（兒童鍵規格不同）；Host 不再提供共用觸控列。
 }
 
 export interface GameAdapter {

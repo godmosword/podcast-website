@@ -3,13 +3,22 @@
   padding: 1rem 1.1rem;
   border-radius: var(--radius-sm);
   border-left: 4px solid var(--accent);
-  background: rgba(255, 255, 255, 0.72);
+  /* 跟著日夜主題走：寫死白底會讓夜間變成淺底淺字 */
+  background: color-mix(in srgb, var(--card) 72%, transparent);
 }
 
 .heading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin: 0 0 0.5rem;
   font-size: var(--fs-body);
   font-weight: 700;
+}
+
+.headingIcon {
+  flex: none;
+  color: var(--accent);
 }
 
 .question {

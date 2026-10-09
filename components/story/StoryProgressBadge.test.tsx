@@ -30,7 +30,10 @@ describe("StoryProgressBadge", () => {
   it("已聽完顯示星章", () => {
     mockCompleted.mockReturnValue(new Set(["ep-1"]));
     render(<StoryProgressBadge slug="ep-1" />);
-    expect(screen.getByRole("img", { name: "已聽完" }).textContent).toBe("⭐");
+    // 實心星線條圖示（取代 ⭐）；可及名稱由外層 role="img" 提供
+    const badge = screen.getByRole("img", { name: "已聽完" });
+    expect(badge.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
+    expect(badge.textContent).toBe("");
   });
 
   it("aria-label 與宇宙地圖星章一致（同一語彙）", () => {

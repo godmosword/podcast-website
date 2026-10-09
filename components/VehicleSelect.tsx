@@ -1,6 +1,7 @@
 "use client";
 
 import VehicleClayIcon from "./VehicleClayIcon";
+import Icon from "./ui/Icon";
 import FilterSelect, { type FilterSelectOption } from "./FilterSelect";
 
 const ALL_VEHICLES_VALUE = "__all__";
@@ -23,7 +24,8 @@ export default function VehicleSelect({
     {
       value: ALL_VEHICLES_VALUE,
       label: ALL_LABEL,
-      icon: <span aria-hidden>🚗</span>,
+      // 其他選項是車種封面小圖；「全部」用線條小車區隔
+      icon: <Icon name="car" size={22} />,
     },
     ...vehicles.map((v) => ({
       value: v,
