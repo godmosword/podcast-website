@@ -479,17 +479,8 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
-  /* 膠囊的毛玻璃同樣放在 ::before（見 .bar::before），膠囊裡的字才不會在 Safari 糊掉 */
-  .inner::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    border-radius: inherit;
-    pointer-events: none;
-    backdrop-filter: blur(18px) saturate(150%);
-    -webkit-backdrop-filter: blur(18px) saturate(150%);
-  }
+  /* 膠囊不另加毛玻璃：.bar::before 已經模糊整條（含膠囊後面），膠囊只疊底色。
+     以前 .inner 自己的 backdrop-filter 被 .bar 的濾鏡擋住、實際沒作用；再加一層會變成模糊兩次。 */
 
   /* 漢堡在最右：面板右錨膠囊，勿再 left:8px（會假綠「在膠囊內」） */
   .panel {
