@@ -129,3 +129,24 @@
     display: none;
   }
 }
+
+/* 很矮的螢幕（320×568 等）：任務列收緊，井的格子才保得住 25px */
+@media (max-height: 640px) {
+  .taskBar {
+    gap: 2px;
+    padding: 4px 6px;
+  }
+
+  .goal {
+    min-height: 32px;
+  }
+
+  .goalNum {
+    font-size: 22px;
+  }
+
+  .pieces {
+    padding: 2px 8px;
+    font-size: 15px;
+  }
+}
