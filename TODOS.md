@@ -1510,7 +1510,7 @@ D0 → D2-A(smoke) → D1 → D13-剩餘 → D3 → D14 → D6 ∥ D12
 每集故事結尾、`parentGuide` 或詳情頁 CTA 連結對應 `craft` 教學；明確傳達「螢幕引導你動手做」。車車版循環：聽故事（線上）→ 跟著做（線下）→ 完成後解鎖圖鑑（見 STEM-P3）。
 
 #### 多多壽司屋（dino-sushi）　`STEM-P2 · M · 無`　〔eng+design〕
-✅ 2026-10-10 第一版（單一 PR，Vercel 預覽試玩後合併）：選飯→加料→給多多吃，點餐 5 單＋自由做，終身最多 3 星，遊樂園改四張卡。新增遊戲 checklist 見 [docs/GAMEKIT-ADAPTER.md](./docs/GAMEKIT-ADAPTER.md)。
+✅ 2026-10-10 第一版（使用者決定直推 main，`6ae5faa0`）：選飯→加料→給多多吃，點餐 5 單＋自由做，終身最多 3 星，遊樂園改四張卡。新增遊戲 checklist 見 [docs/GAMEKIT-ADAPTER.md](./docs/GAMEKIT-ADAPTER.md)。
 後續：
 - [ ] 遊樂園卡片封面目前是程式畫的暫代圖；付費生 1 張（使用者確認張數後才生）。
 - [ ] 視覺 baseline：Mac 補錄 dino-sushi 標題／廚房／結算與四卡 hub（`npm run test:visual:trusted -- --update-snapshots`）。
