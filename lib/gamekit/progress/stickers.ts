@@ -2,6 +2,7 @@
 const STICKER_LABELS: Record<string, string> = {
   "played-block-drop": "玩過方塊轉轉",
   "played-candy-match": "玩過車車消消樂",
+  "played-dino-sushi": "玩過多多壽司屋",
   // 已退役遊戲：舊存檔仍留著這些貼紙，孩子賺到的就不收回；
   // 少了 label 會在家長儀表板上顯示成生的英文 ID。
   "played-car-adventure": "玩過車車大冒險",

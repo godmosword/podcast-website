@@ -1,9 +1,9 @@
 import type { GameType } from "@/data/games";
-import { IconBlockFall, IconCrayon, IconSwap } from "./ClayIcons";
+import { IconBlockFall, IconCrayon, IconSushi, IconSwap } from "./ClayIcons";
 
 /**
  * 兒童減法審（2026-09-20）：不識字的孩子靠「玩法圖示」認站——
- * 蠟筆＝塗、兩格交換＝找一樣、方塊落下＝排一排。遊樂園卡片與親子進度共用。
+ * 蠟筆＝塗、兩格交換＝找一樣、握壽司＝做壽司、方塊落下＝排一排。遊樂園卡片與親子進度共用。
  */
 export function GamePlayIcon({ gameType, size }: { gameType: GameType; size: number }) {
   switch (gameType) {
@@ -13,5 +13,9 @@ export function GamePlayIcon({ gameType, size }: { gameType: GameType; size: num
       return <IconSwap size={size} />;
     case "blocks":
       return <IconBlockFall size={size} />;
+    case "cooking":
+      return <IconSushi size={size} />;
+    default:
+      return null;
   }
 }

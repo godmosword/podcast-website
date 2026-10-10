@@ -127,6 +127,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
     },
     {
+      url: `${baseUrl}/games/dino-sushi`,
+      lastModified: STATIC_PAGE_MODIFIED_DATES["/games/dino-sushi"],
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
       url: `${baseUrl}/games/coloring-book`,
       lastModified: STATIC_PAGE_MODIFIED_DATES["/games/coloring-book"],
       changeFrequency: "monthly",

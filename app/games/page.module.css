@@ -64,17 +64,23 @@
 }
 
 /*
- * 桌機固定 3 欄而非 auto-fit：auto-fit 會摺疊空軌道，
- * 單卡分類時那張卡會撐成整條 928px，跟同頁其他卡差了 2.5 倍。
- * ≤640 改兩欄，著色本 `.lead` 全寬當第一站。
+ * 四張卡：<980 排 2×2、≥980 一排四欄。固定欄數而非 auto-fit：auto-fit 會摺疊空軌道，
+ * 單卡分類時那張卡會撐成整條寬，跟同頁其他卡差好幾倍。
+ * 不再做手機置頂全寬大卡：四張時第 4 張會落單。
  */
 .cardGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-4);
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+@media (min-width: 980px) {
+  .cardGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 .gridItem {
@@ -208,17 +214,7 @@
   }
 
   .cardGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-3);
-  }
-
-  .lead {
-    grid-column: 1 / -1;
-  }
-
-  /* 首張全寬卡使用較矮縮圖，讓後面的兩個入口更快出現。 */
-  .lead .thumb {
-    max-height: 156px;
   }
 }
 

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   // 「車車遊樂園 · 車車遊樂園」。用導覽列同一個詞「遊樂園」。
   title: "遊樂園",
   description:
-    "和故事裡的車車朋友一起玩小遊戲：車車消消樂、繪本塗塗鴉與方塊轉轉，適合 3–12 歲親子。",
+    "和故事裡的車車朋友一起玩小遊戲：繪本塗塗鴉、車車消消樂、多多壽司屋與方塊轉轉，適合 3–12 歲親子。",
   alternates: { canonical: "/games" },
   openGraph: {
     title: "車車遊樂園 · 小遊戲",
@@ -26,6 +26,7 @@ const GAME_TYPE_LABEL: Record<GameMeta["gameType"], string> = {
   match: "找一找",
   blocks: "堆疊挑戰",
   coloring: "塗顏色",
+  cooking: "做壽司",
 };
 
 /** 封面圓鈕用玩法圖示（GamePlayIcon），卡片不再印動作詞。 */
@@ -45,9 +46,7 @@ function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
   ].filter(Boolean);
 
   return (
-    <li
-      className={`${styles.gridItem} ${game.slug === "coloring-book" ? styles.lead : ""}`}
-    >
+    <li className={styles.gridItem}>
       <Link
         href={game.href}
         className={`${styles.gameCard} scrollEnter press-squash`}
@@ -61,15 +60,11 @@ function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
             src={game.art.thumbnail ?? game.art.cover}
             alt={game.art.alt}
             fill
-            /* 每張卡同寬，sizes 必須貼齊實際渲染寬度，否則會下載到過小的檔再放大。 */
-            sizes={
-              game.slug === "coloring-book"
-                ? "(max-width: 640px) calc(100vw - 32px), 300px"
-                : "(max-width: 640px) calc(50vw - 24px), 300px"
-            }
+            /* 每張卡同寬（<980 兩欄、≥980 四欄），sizes 必須貼齊實際渲染寬度，否則會下載到過小的檔再放大。 */
+            sizes="(max-width: 979px) calc(50vw - 24px), 240px"
             className={styles.thumbImage}
             style={{ objectPosition: game.art.position ?? "50% 50%" }}
-            /* 只有 3 張卡：首張 preload（LCP），其餘 eager 但不佔 preload 預算。
+            /* 只有 4 張卡：首張 preload（LCP），其餘 eager 但不佔 preload 預算。
                卡片本身由 .scrollEnter 淡入，圖若還在 lazy 佇列會再疊一層延遲。 */
             priority={eager}
             {...(eager ? {} : { loading: "eager" as const })}
@@ -93,11 +88,12 @@ function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
 }
 
 /**
- * 著色本從漢堡收進遊樂園後當第一站，後面才是兩款街機。
+ * 著色本從漢堡收進遊樂園後當第一站；3–7 歲的消消樂、壽司屋在前，6–12 歲的方塊轉轉最後。
  */
 const HUB_STATION_ORDER: readonly GameMeta["slug"][] = [
   "coloring-book",
   "candy-match",
+  "dino-sushi",
   "block-drop",
 ];
 
@@ -110,7 +106,7 @@ const ORDERED_GAMES: GameMeta[] = HUB_STATION_ORDER.map((slug) => {
 export default function GamesHubPage() {
   return (
     <main className={styles.main} aria-label="車車遊樂園小遊戲">
-      <JsonLd data={gameListJsonLd()} />
+      <JsonLd data={gameListJsonLd(ORDERED_GAMES)} />
       <header className={styles.hero}>
         <h1 className="sr-only">車車遊樂園</h1>
         {/* picture 依 viewport 只下載一張 hero，避免 mobile 先抓 desktop 再被 CSS 換圖 */}

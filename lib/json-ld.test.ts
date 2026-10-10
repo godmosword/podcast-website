@@ -560,7 +560,7 @@ describe("videoGameJsonLd", () => {
     expect(data.publisher).toEqual({ "@id": organizationId });
   });
 
-  it("三款遊戲都輸出合法的 typicalAgeRange（無全形字元）", () => {
+  it("每款遊戲都輸出合法的 typicalAgeRange（無全形字元）", () => {
     for (const game of GAMES) {
       expect(String(videoGameJsonLd(game).typicalAgeRange)).toMatch(
         /^\d+-\d+$/,

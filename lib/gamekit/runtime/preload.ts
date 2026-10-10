@@ -6,6 +6,8 @@ const GAME_PRELOAD_SHEETS: Record<GameKitGameId, SheetId[]> = {
   "block-drop": ["blocks-drop"],
   // candy-match 全 SVG/DOM 繪製，無程序生成 sheet
   "candy-match": [],
+  // dino-sushi 同樣全 SVG/DOM 繪製
+  "dino-sushi": [],
 };
 
 const warmed = new Set<string>();

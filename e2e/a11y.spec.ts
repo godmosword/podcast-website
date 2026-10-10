@@ -26,6 +26,11 @@ const PAGES: { name: string; path: string; exclude?: string }[] = [
     path: "/games/candy-match",
     exclude: "canvas, iframe, [class*=titleScreen], [class*=gameTitle]",
   },
+  {
+    name: "遊戲頁（多多壽司屋）",
+    path: "/games/dino-sushi",
+    exclude: "canvas, iframe, [class*=titleScreen], [class*=gameTitle]",
+  },
   { name: "宇宙地圖", path: "/adventures" },
   { name: "親子指南", path: "/for-parents" },
   { name: "家庭儀表板", path: "/for-parents/dashboard" },

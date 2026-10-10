@@ -356,3 +356,14 @@ export function IconArrowRight({ size, color = "currentColor", style }: IconProp
     </Svg>
   );
 }
+
+/** 握壽司（壽司站玩法：做一個壽司） */
+export function IconSushi({ size, style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <path d="M3.5 16.5c-.8-3 1.8-4.8 8.5-4.8s9.3 1.8 8.5 4.8c-.4 1.6-3.6 2.3-8.5 2.3s-8.1-.7-8.5-2.3Z" fill="#fffdf6" {...stroke("#bfb3a3")} strokeWidth={1.6} />
+      <path d="M4.5 12.5c1.5-4 6-6 11.5-5.2 3 .4 4.3 2 3.4 3.6-1.4 2.6-6.2 3.6-11.7 3.2-2.3-.2-3.6-.8-3.2-1.6Z" fill="#ff8f5a" {...stroke("#e0663a")} strokeWidth={1.6} />
+      <path d="M9 8.6c-.3 1.8 0 3.6.6 5.2M13.2 7.6c-.3 2 0 4 .6 5.8" {...stroke("#fff3e8")} strokeWidth={1.4} />
+    </Svg>
+  );
+}

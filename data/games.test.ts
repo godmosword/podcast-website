@@ -34,7 +34,7 @@ describe("games parent tip (UX-P0-4)", () => {
 describe("games v2 presentation metadata", () => {
   test("每款遊戲都有入口視覺、類型、操作提示與短 teaser", () => {
     for (const game of GAMES) {
-      expect(["match", "adventure", "blocks", "racing", "coloring"]).toContain(
+      expect(["match", "blocks", "coloring", "cooking"]).toContain(
         game.gameType,
       );
       expect(game.controls.length).toBeGreaterThanOrEqual(2);
@@ -79,7 +79,8 @@ describe("games next-station flow", () => {
   });
 
   test("getNextGame 回傳正確下一站", () => {
-    expect(getNextGame("candy-match")?.slug).toBe("coloring-book");
+    expect(getNextGame("candy-match")?.slug).toBe("dino-sushi");
+    expect(getNextGame("dino-sushi")?.slug).toBe("coloring-book");
     expect(getNextGame("coloring-book")?.slug).toBe("block-drop");
     expect(getNextGame("block-drop")?.slug).toBe("candy-match");
     expect(getNextGame("nope")).toBeNull();

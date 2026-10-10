@@ -496,6 +496,22 @@ test("車車消消樂：標題 → 地圖 → 第 1 關棋盤", async ({ page })
   await expect(page.getByRole("button", { name: /提示/ })).toBeVisible();
 });
 
+test("多多壽司屋：照點餐做一盤，多多吃完疊盤", async ({ page }) => {
+  await page.addInitScript(() => {
+    (window as Window & { __dinoSushiSeed?: number }).__dinoSushiSeed = 7;
+  });
+  await page.goto("/games/dino-sushi");
+  await expect(page.getByRole("heading", { name: "多多肚子餓了！" })).toBeVisible();
+  await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+  const label = await page.getByRole("img", { name: /^第 1 單/ }).getAttribute("aria-label");
+  const [base, ...toppings] = label!.split("多多想吃：")[1]!.split("、");
+  await page.getByRole("button", { name: `選${base}` }).click();
+  for (const t of toppings) await page.getByRole("button", { name: `加${t}` }).click();
+  await page.getByRole("button", { name: "給多多吃" }).click();
+  await expect(page.getByRole("img", { name: "吃完 1 盤" })).toBeVisible();
+  await expect(page.getByRole("img", { name: /^第 2 單/ })).toBeVisible();
+});
+
 test.describe("內頁不掛 KidsPlayDock", () => {
   for (const { path, width, height } of [
     { path: "/", width: 1280, height: 800 },
@@ -506,6 +522,7 @@ test.describe("內頁不掛 KidsPlayDock", () => {
     { path: "/adventures", width: 390, height: 844 },
     { path: "/story/ep-27/play", width: 390, height: 844 },
     { path: "/games/candy-match", width: 390, height: 844 },
+    { path: "/games/dino-sushi", width: 390, height: 844 },
   ] as const) {
     test(`${path}（${width}）不掛去玩 dock`, async ({ page }) => {
       await page.setViewportSize({ width, height });

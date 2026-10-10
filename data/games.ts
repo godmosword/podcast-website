@@ -1,6 +1,6 @@
 type AgeBand = "explore" | "challenge";
 
-export type GameType = "match" | "blocks" | "coloring";
+export type GameType = "match" | "blocks" | "coloring" | "cooking";
 
 type GameArt = {
   cover: string;
@@ -71,6 +71,32 @@ export const GAMES: GameMeta[] = [
     ],
   },
   {
+    slug: "dino-sushi",
+    title: "多多壽司屋",
+    desc: "幫恐龍車多多做壽司：選飯、放料、送上迴轉帶，看多多吃得好開心！沒有倒數，做錯了也能補。",
+    teaser: "做壽司",
+    href: "/games/dino-sushi",
+    emoji: "🍣",
+    accent: "var(--c-mint)",
+    ageBand: "explore",
+    ageRange: "3–7 歲",
+    estMinutes: 5,
+    hasScore: false,
+    hasTimer: false,
+    gameType: "cooking",
+    controls: ["點飯和料做壽司", "按「給多多吃」送出"],
+    art: {
+      cover: "/games/v2/dino-sushi/cover.webp",
+      thumbnail: "/games/v2/dino-sushi/cover.webp",
+      alt: "恐龍車多多在黏土迴轉壽司店前，張大嘴等著吃壽司",
+    },
+    tutorial: [
+      { text: "先選一種飯", gesture: "tap" },
+      { text: "點料放到飯上", gesture: "tap" },
+      { text: "按「給多多吃」", gesture: "tap" },
+    ],
+  },
+  {
     slug: "block-drop",
     title: "方塊轉轉",
     desc: "黏土糖果風落下方塊，排滿整行就消除。",
@@ -129,7 +155,8 @@ export const GAMES: GameMeta[] = [
 /** 遊樂園動線：玩完 A 建議去 B。 */
 /** 下一站動線：必須是走得完的單一環，否則有遊戲永遠不會被推薦到。 */
 export const GAME_NEXT: Record<string, string> = {
-  "candy-match": "coloring-book",
+  "candy-match": "dino-sushi",
+  "dino-sushi": "coloring-book",
   "coloring-book": "block-drop",
   "block-drop": "candy-match",
 };

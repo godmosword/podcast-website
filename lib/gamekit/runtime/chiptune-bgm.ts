@@ -64,6 +64,23 @@ const BGM_THEMES: Record<GameKitGameId, BgmTheme> = {
       [C3, R, R, R, E3, R, R, R, D3, R, R, R, G3, R, R, R],
     ],
   },
+  // 多多壽司屋：迴轉壽司店的輕快小調，比消消樂稍快但同樣柔和
+  "dino-sushi": {
+    bpm: 100,
+    stepsPerBeat: 4,
+    melodyWave: "triangle",
+    bassWave: "sine",
+    melodyVol: 0.065,
+    bassVol: 0.05,
+    melody: [
+      [G5, R, E5, R, C5, R, E5, G5, A5, R, G5, R, E5, R, R, R],
+      [D5, R, E5, R, G5, R, E5, D5, C5, R, D5, R, C5, R, R, R],
+    ],
+    bass: [
+      [C3, R, G3, R, A3, R, G3, R, C3, R, G3, R, E3, R, G3, R],
+      [D3, R, A3, R, G3, R, E3, R, C3, R, G3, R, C3, R, R, R],
+    ],
+  },
 };
 
 function validateBgmTheme(theme: BgmTheme): boolean {

@@ -80,7 +80,86 @@ async function topOutBlock(page: Page) {
   await expect(page.locator('[data-status="over"]')).toBeVisible();
 }
 
+/** 照泡泡做第 n 單並送出（n 從 1 起）。 */
+async function serveSushiOrder(page: Page, n: number, opts: { skipLast?: boolean } = {}) {
+  const label = await page.getByRole("img", { name: new RegExp(`^第 ${n} 單`) }).getAttribute("aria-label");
+  const [base, ...toppings] = label!.split("多多想吃：")[1]!.split("、");
+  await page.getByRole("button", { name: `選${base}` }).click();
+  const put = opts.skipLast ? toppings.slice(0, -1) : toppings;
+  for (const t of put) await page.getByRole("button", { name: `加${t}` }).click();
+  await page.getByRole("button", { name: "給多多吃" }).click();
+  return toppings;
+}
+
 test.describe("遊戲完整 lifecycle", () => {
+  test("多多壽司屋：5 單一次做對 → 三星存檔 → 再做一輪 → 回標題", async ({ page }) => {
+    await page.addInitScript(() => {
+      (window as Window & { __dinoSushiSeed?: number }).__dinoSushiSeed = 7;
+    });
+    await page.setViewportSize(MOBILE);
+    await page.goto("/games/dino-sushi");
+    await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+    for (let n = 1; n <= 5; n++) {
+      await serveSushiOrder(page, n);
+      await expect(page.getByRole("img", { name: `吃完 ${n} 盤` }).or(page.getByTestId("dino-sushi-result")).first()).toBeVisible();
+    }
+    const result = page.getByTestId("dino-sushi-result");
+    await expect(result).toBeVisible();
+    await expect(result.getByRole("img", { name: "拿到 3 顆星，共 3 顆" })).toBeVisible();
+    await expect
+      .poll(() => page.evaluate(() => JSON.parse(localStorage.getItem("cheche:progress") ?? "{}").gameProfile?.medals?.["dino-sushi"]))
+      .toEqual([7]);
+    await result.getByRole("button", { name: "再做一輪" }).click();
+    await expect(page.getByRole("img", { name: /^第 1 單/ })).toBeVisible();
+    await expect(page.getByRole("img", { name: "吃完 0 盤" })).toBeAttached();
+  });
+
+  test("多多壽司屋：少放一樣送出，多多不吃、壽司留著，只補那一樣", async ({ page }) => {
+    await page.addInitScript(() => {
+      (window as Window & { __dinoSushiSeed?: number }).__dinoSushiSeed = 7;
+    });
+    await page.goto("/games/dino-sushi");
+    await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+    const toppings = await serveSushiOrder(page, 1, { skipLast: true });
+    const missing = toppings.at(-1)!;
+    // 字卡看得到（讀屏另由 live 區宣告同一句）
+    await expect(page.getByText(`還想要${missing}！`).first()).toBeVisible();
+    await expect(page.getByRole("img", { name: /^第 1 單/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /^換飯：/ })).toBeVisible();
+    await page.getByRole("button", { name: `加${missing}` }).click();
+    await page.getByRole("button", { name: "給多多吃" }).click();
+    await expect(page.getByRole("img", { name: /^第 2 單/ })).toBeVisible();
+  });
+
+  test("多多壽司屋：送盤後馬上暫停，暫停中不會吃完；繼續才吃完", async ({ page }) => {
+    await page.addInitScript(() => {
+      (window as Window & { __dinoSushiSeed?: number }).__dinoSushiSeed = 7;
+    });
+    await page.goto("/games/dino-sushi");
+    await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+    await serveSushiOrder(page, 1);
+    await page.getByRole("button", { name: "暫停遊戲" }).click();
+    await page.waitForTimeout(3000);
+    await expect(page.getByRole("img", { name: "吃完 0 盤" })).toBeAttached();
+    await page.getByRole("button", { name: "繼續遊戲" }).first().click();
+    await expect(page.getByRole("img", { name: "吃完 1 盤" })).toBeAttached();
+  });
+
+  test("多多壽司屋：自由做 → 多多吃飽了 → 結算沒有星星", async ({ page }) => {
+    await page.goto("/games/dino-sushi");
+    await page.getByRole("button", { name: "自由做" }).click();
+    await page.getByRole("button", { name: "選軍艦" }).click();
+    await page.getByRole("button", { name: "給多多吃" }).click();
+    await expect(page.getByRole("img", { name: "吃完 1 盤" })).toBeVisible();
+    await page.getByRole("button", { name: "多多吃飽了" }).click();
+    const result = page.getByTestId("dino-sushi-result");
+    await expect(result).toBeVisible();
+    await expect(result.getByRole("img", { name: /顆星/ })).toHaveCount(0);
+    await expect
+      .poll(() => page.evaluate(() => JSON.parse(localStorage.getItem("cheche:progress") ?? "{}").gameProfile?.gamesPlayed?.["dino-sushi"]))
+      .toBe(true);
+  });
+
   test("Candy：開始 → 正確操作 → 完成 → replay 新盤面 → 再完成 → 回地圖", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/games/candy-match");

@@ -1,0 +1,757 @@
+/*
+ * 多多壽司屋廚房。直向：上＝多多＋泡泡＋疊盤；中＝砧板＋「給多多吃」；下＝托盤 2×4。
+ * 320×568 必須一屏放下；橫向手機與寬螢幕三欄（多多｜砧板｜托盤 4×2），斷點同消消樂 WIDE_LAYOUT_QUERY。
+ * 輸送帶平時靜止；動畫只在送盤、提示、晃動時出現，減少動態時全部收掉。
+ */
+.kitchen {
+  --duo-h: clamp(150px, 30svh, 230px);
+  --tray-art: 34px;
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-areas:
+    "duo"
+    "board"
+    "tray";
+  /* 直向：多多區吃掉剩下的高度，廚房上下不留大片空白 */
+  grid-template-rows: minmax(var(--duo-h), 1fr) auto auto;
+  gap: 8px;
+  width: min(100%, 560px);
+  margin-inline: auto;
+}
+
+/* ── 多多區 ───────────────────────────────────────────── */
+.duoArea {
+  grid-area: duo;
+  position: relative;
+  min-height: var(--duo-h);
+  overflow: hidden;
+  border-radius: 20px;
+  background: radial-gradient(120% 100% at 30% 10%, #eef8ff 0%, #d4ecf8 70%, #c3e2f2 100%);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.8);
+}
+
+.duo {
+  position: absolute;
+  inset: 0;
+}
+
+.duoArt {
+  position: absolute;
+  left: 2%;
+  bottom: 10px;
+  height: calc(100% - 26px);
+  aspect-ratio: 138 / 110;
+  max-width: 62%;
+}
+
+.duoArt > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.belt {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 12px;
+  background: repeating-linear-gradient(90deg, #c9b8a4 0 14px, #b5a28c 14px 16px), #c9b8a4;
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.45);
+}
+
+.servingPlate {
+  position: absolute;
+  z-index: 2;
+  left: 30%;
+  bottom: 6px;
+  display: grid;
+  width: min(30%, 110px);
+}
+
+.servingPlate > svg {
+  grid-area: 1 / 1;
+  width: 100%;
+  height: auto;
+}
+
+.servingPlate > svg:first-child:not(:last-child) {
+  z-index: 1;
+  transform: translateY(-36%);
+}
+
+.servingPlate[data-phase="slide"] {
+  animation: sushiSlide 450ms cubic-bezier(0.3, 0.7, 0.4, 1) both;
+}
+
+@keyframes sushiSlide {
+  from {
+    transform: translateX(170%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* 點餐泡泡：右上，尾巴指向多多 */
+.bubble {
+  position: absolute;
+  z-index: 3;
+  top: 6px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 60%;
+  margin: 0;
+  padding: 5px 8px;
+  border: 2px solid #d9cbb5;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(80, 70, 50, 0.14);
+}
+
+.bubble::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  bottom: -9px;
+  width: 14px;
+  height: 14px;
+  border-right: 2px solid #d9cbb5;
+  border-bottom: 2px solid #d9cbb5;
+  background: #fff;
+  transform: rotate(45deg) skew(10deg, 10deg);
+}
+
+.bubbleItem {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+
+.bubbleItem > svg:first-child {
+  width: 100%;
+  height: 100%;
+}
+
+.bubbleItem[data-done="true"] > svg:first-child {
+  opacity: 0.55;
+}
+
+.bubbleItem[data-flash="true"] {
+  background: #fff1d6;
+  box-shadow: 0 0 0 3px #ff9a3d;
+  animation: sushiFlash 400ms ease-in-out 3;
+}
+
+@keyframes sushiFlash {
+  50% {
+    transform: scale(1.18);
+  }
+}
+
+.check {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  width: 20px;
+  height: 20px;
+}
+
+.caption {
+  position: absolute;
+  z-index: 4;
+  top: 70px;
+  right: 8px;
+  max-width: 58%;
+  margin: 0;
+  padding: 6px 12px;
+  border: 2px solid #b7df9b;
+  border-radius: 14px;
+  background: #fff;
+  color: #3f3a2e;
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1.3;
+  box-shadow: 0 4px 10px rgba(80, 70, 50, 0.14);
+}
+
+.caption[data-mood="love"] {
+  border-color: #ffb4cf;
+}
+
+.caption[data-mood="sweet"] {
+  border-color: #ffd34d;
+}
+
+.caption[data-mood="look"] {
+  border-color: #ff9a3d;
+}
+
+.plates {
+  position: absolute;
+  z-index: 1;
+  right: 10px;
+  bottom: 10px;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  width: 54px;
+}
+
+.plate {
+  display: block;
+  width: 54px;
+  height: 18px;
+  margin-top: -9px;
+}
+
+.plate > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.plateCount {
+  position: absolute;
+  right: -4px;
+  top: -14px;
+  min-width: 22px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #3f7f2a;
+  color: #fff;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.foam {
+  position: absolute;
+  left: 38%;
+  top: 48%;
+  width: 40%;
+  height: 30%;
+  background:
+    radial-gradient(circle at 20% 40%, #fff 0 9%, transparent 10%),
+    radial-gradient(circle at 50% 20%, #fff 0 11%, transparent 12%),
+    radial-gradient(circle at 75% 55%, #fff 0 8%, transparent 9%),
+    radial-gradient(circle at 40% 75%, #e6f7ff 0 9%, transparent 10%);
+  pointer-events: none;
+}
+
+/* 左上角是空的天空：不擋多多的臉；只晃 3 次 */
+.brushButton {
+  position: absolute;
+  z-index: 5;
+  left: 8px;
+  top: 8px;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  padding: 6px;
+  border: 3px solid #8ddff0;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 0 6px 0 rgba(61, 127, 214, 0.25);
+  animation: sushiWiggle 1.2s ease-in-out 3;
+}
+
+.brushButton > svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes sushiWiggle {
+  0%,
+  100% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+}
+
+/* 自由做「多多吃飽了」：右上（自由做沒有泡泡），離「給多多吃」遠 */
+.fullButton {
+  position: absolute;
+  z-index: 3;
+  top: 6px;
+  right: 8px;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 2px solid color-mix(in srgb, #7fa86c 55%, #fff);
+  border-radius: 999px;
+  background: #fff;
+  color: #3f7f2a;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* ── 砧板 ─────────────────────────────────────────────── */
+.board {
+  grid-area: board;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: 8px;
+  padding: 8px;
+  border: 2px solid #e3c9a0;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #f8e6c8, #f1d9b2);
+}
+
+.board[data-choosing="true"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.boardMain {
+  display: grid;
+  grid-template-rows: auto auto;
+  justify-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.boardMain[data-shaking="true"] {
+  animation: sushiShake 280ms ease-in-out;
+}
+
+@keyframes sushiShake {
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+.sushiButton {
+  position: relative;
+  width: min(100%, 132px);
+  aspect-ratio: 96 / 72;
+  min-height: 64px;
+  padding: 0;
+  border: 2px dashed transparent;
+  border-radius: 16px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.sushiButton > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.slots {
+  display: flex;
+  gap: 6px;
+}
+
+.slot,
+.slotEmpty {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 48px;
+  height: 48px;
+  padding: 3px;
+  border-radius: 14px;
+}
+
+.slot {
+  position: relative;
+  border: 2px solid #d9c29c;
+  background: #fff;
+  cursor: pointer;
+}
+
+.slot > svg {
+  width: 100%;
+  height: 100%;
+}
+
+.slotEmpty {
+  border: 2px dashed #c9ae84;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.basePicker {
+  grid-row: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-self: stretch;
+  gap: 6px;
+  width: 100%;
+}
+
+.baseButton {
+  position: relative;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  place-items: center;
+  min-height: 110px;
+  padding: 6px 2px;
+  border: 2px solid #d9c29c;
+  border-radius: 16px;
+  background: #fffaf0;
+  color: #3f3a2e;
+  font: inherit;
+  cursor: pointer;
+}
+
+.baseButton[aria-pressed="true"] {
+  border-color: #7fa86c;
+  box-shadow: inset 0 0 0 2px #b7df9b;
+}
+
+.baseArt {
+  width: 100%;
+  max-width: 72px;
+  aspect-ratio: 96 / 72;
+}
+
+.baseArt > svg {
+  width: 100%;
+  height: 100%;
+}
+
+.baseLabel {
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.serveButton {
+  position: relative;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 2px;
+  width: 104px;
+  min-height: 96px;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #ffe889, #ffbd6f);
+  color: #614018;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 900;
+  line-height: 1.2;
+  cursor: pointer;
+  box-shadow: 0 6px 0 rgba(203, 128, 52, 0.42), inset 0 2px 0 rgba(255, 255, 255, 0.72);
+}
+
+/* 點餐還沒做齊：仍可按（按了多多會看泡泡），但不搶托盤亮框的眼 */
+.serveButton[data-muted="true"]:not(:disabled) {
+  filter: saturate(0.45);
+}
+
+.serveButton:disabled {
+  opacity: 0.55;
+  cursor: default;
+  box-shadow: 0 3px 0 rgba(203, 128, 52, 0.25);
+}
+
+.serveArt {
+  width: 56px;
+  aspect-ratio: 96 / 32;
+}
+
+.serveArt > svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── 托盤 ─────────────────────────────────────────────── */
+.tray {
+  grid-area: tray;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+/* 中明度底：白色的飯、蟹肉棒才不會融進底色 */
+.trayButton {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto;
+  place-items: center;
+  gap: 1px;
+  min-height: 60px;
+  padding: 4px 2px;
+  border: 2px solid #d9c29c;
+  border-radius: 14px;
+  background: #f2e2c6;
+  color: #3f3a2e;
+  font: inherit;
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(150, 120, 80, 0.22);
+}
+
+.trayButton[data-kind="sweet"] {
+  background: #fbe0e6;
+  border-color: #efb3c2;
+}
+
+.trayButton[data-kind="wasabi"] {
+  background: #e3f0d2;
+  border-color: #b9d79a;
+}
+
+.trayButton:disabled,
+.slot:disabled,
+.sushiButton:disabled,
+.baseButton:disabled {
+  cursor: default;
+}
+
+.trayButton:disabled {
+  opacity: 0.5;
+}
+
+.trayArt {
+  width: var(--tray-art);
+  height: var(--tray-art);
+}
+
+.trayArt > svg {
+  width: 100%;
+  height: 100%;
+}
+
+.trayLabel {
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+/* 下一個該點的：亮框；首單再加手指 */
+.kitchen [data-hint="true"] {
+  box-shadow: 0 0 0 4px #ffd34d, 0 0 14px 4px rgba(255, 211, 77, 0.6);
+  animation: sushiGlow 1.2s ease-in-out infinite;
+}
+
+.serveButton[data-hint="true"] {
+  box-shadow: 0 6px 0 rgba(203, 128, 52, 0.42), 0 0 0 4px #ffd34d, 0 0 14px 4px rgba(255, 211, 77, 0.6);
+}
+
+/* 只閃光暈、不縮放：按鈕本身不動，孩子點得準 */
+@keyframes sushiGlow {
+  50% {
+    outline: 4px solid rgba(255, 211, 77, 0.55);
+    outline-offset: 4px;
+  }
+}
+
+.finger {
+  position: absolute;
+  z-index: 6;
+  top: -12px;
+  right: -10px;
+  color: #3f3a2e;
+  filter: drop-shadow(0 2px 2px rgba(255, 255, 255, 0.9));
+  pointer-events: none;
+  animation: sushiFinger 1.1s ease-in-out infinite;
+}
+
+@keyframes sushiFinger {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(-6px, -8px);
+  }
+}
+
+.trayButton:focus-visible,
+.slot:focus-visible,
+.sushiButton:focus-visible,
+.baseButton:focus-visible,
+.serveButton:focus-visible,
+.brushButton:focus-visible,
+.fullButton:focus-visible {
+  outline: 3px solid var(--focus-ring, #34302b);
+  outline-offset: 3px;
+}
+
+/* 矮直向手機（320×568）：多多區與托盤再收一點 */
+@media (max-height: 640px) and (orientation: portrait) {
+  .kitchen {
+    --duo-h: 148px;
+    --tray-art: 30px;
+    gap: 6px;
+  }
+
+  .board {
+    padding: 6px;
+  }
+
+  .sushiButton {
+    width: min(100%, 104px);
+  }
+
+  .serveButton {
+    width: 92px;
+    min-height: 88px;
+  }
+
+  .baseButton {
+    min-height: 96px;
+  }
+
+  .trayButton {
+    min-height: 56px;
+  }
+}
+
+/* 寬螢幕與橫向手機：三欄 多多｜砧板｜托盤 4×2 */
+@media (min-width: 900px), (min-width: 640px) and (orientation: landscape) and (max-height: 520px) {
+  .kitchen {
+    --duo-h: 0px;
+    flex: 0 0 auto;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 0.85fr);
+    grid-template-rows: auto;
+    grid-template-areas: "duo board tray";
+    align-items: stretch;
+    width: min(100%, 1040px);
+  }
+
+  .duoArea {
+    min-height: 220px;
+  }
+
+  .board {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 1fr auto;
+    align-content: center;
+  }
+
+  .serveButton {
+    justify-self: center;
+    justify-content: center;
+    width: min(100%, 180px);
+    min-height: 64px;
+    grid-auto-flow: column;
+    gap: 8px;
+  }
+
+  .tray {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: center;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .duoArea {
+    min-height: 0;
+  }
+
+  .baseButton {
+    min-height: 84px;
+  }
+
+  .trayButton {
+    min-height: 56px;
+  }
+}
+
+@media (min-width: 900px) {
+  .kitchen {
+    --tray-art: 48px;
+    min-height: min(480px, calc(100svh - 160px));
+  }
+
+  .basePicker {
+    align-self: center;
+  }
+
+  .baseButton {
+    min-height: 200px;
+  }
+
+  .baseArt {
+    max-width: 112px;
+  }
+
+  .plates {
+    width: 80px;
+  }
+
+  .plate {
+    width: 80px;
+    height: 27px;
+    margin-top: -13px;
+  }
+
+  .duoArea {
+    min-height: 360px;
+  }
+
+  .duoArt {
+    left: 4%;
+    bottom: 16px;
+    width: 88%;
+    height: auto;
+    max-width: none;
+  }
+
+  .trayButton {
+    min-height: 84px;
+  }
+
+  .trayLabel {
+    font-size: 0.95rem;
+  }
+
+  .sushiButton {
+    width: min(100%, 220px);
+  }
+
+  .slot,
+  .slotEmpty {
+    width: 60px;
+    height: 60px;
+  }
+
+  .caption {
+    top: 82px;
+    font-size: 1.15rem;
+  }
+
+  .bubbleItem {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .servingPlate[data-phase="slide"],
+  .boardMain[data-shaking="true"],
+  .bubbleItem[data-flash="true"],
+  .finger,
+  .brushButton {
+    animation: none;
+  }
+
+  .kitchen [data-hint="true"] {
+    animation: none;
+  }
+}
+
+.kitchen[data-reduced="true"] .servingPlate,
+.kitchen[data-reduced="true"] .boardMain,
+.kitchen[data-reduced="true"] .bubbleItem,
+.kitchen[data-reduced="true"] [data-hint="true"],
+.kitchen[data-reduced="true"] .finger,
+.kitchen[data-reduced="true"] .brushButton {
+  animation: none;
+}

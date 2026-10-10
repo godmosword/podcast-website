@@ -14,7 +14,7 @@ describe("GameEndStation", () => {
         title="好厲害！"
         stars={2}
         onReplay={() => undefined}
-        gameSlug="candy-match"
+        gameSlug="dino-sushi"
       />,
     );
 

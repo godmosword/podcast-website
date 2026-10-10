@@ -1,4 +1,4 @@
-import type { GameKitGameId } from "@/lib/gamekit/types";
+import { GAMEKIT_GAME_IDS, type GameKitGameId } from "@/lib/gamekit/types";
 import { canonicalStorySlug } from "@/lib/story-slug-aliases";
 
 /** 本機活動紀錄。與 cheche:progress 分開，方便之後只同步這一份白名單。 */
@@ -21,7 +21,7 @@ const SLUG_KEY = /^[a-z0-9-]{1,64}$/;
 const DEVICE_KEY = /^[A-Za-z0-9:+_-]{8,96}$/;
 const MAX_DAY_SECONDS = 86_400;
 const MAX_COUNT = 999;
-const GAME_IDS: readonly GameKitGameId[] = ["block-drop", "candy-match"];
+const GAME_IDS: readonly GameKitGameId[] = GAMEKIT_GAME_IDS;
 
 type StoryActivity = {
   seconds: number;

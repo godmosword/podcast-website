@@ -1,0 +1,330 @@
+/*
+ * 多多壽司屋外層：標題、結算、卡面。
+ * 卡面日夜不反轉：底是固定淺色，墨色、CTA、陰影、焦點環都釘在日間值（同消消樂）。
+ */
+.surface {
+  --sushi-ink: #3f3a2e;
+  --sushi-ink-soft: #6f6758;
+  --sushi-accent: #3f7f2a;
+  --sushi-cream: #fff8ea;
+  --ink: #34302b;
+  --ink-soft: #7a7268;
+  --card: #ffffff;
+  --cta-warm-from: #ffe889;
+  --cta-warm-to: #ffbd6f;
+  --cta-warm-fg: #614018;
+  --cta-solid-bg: #3a2410;
+  --cta-solid-fg: #fff;
+  --cta-soft-bg: #fff;
+  --cta-soft-fg: #3f3a2e;
+  --cta-soft-line: rgba(63, 58, 46, 0.16);
+  --elev-1: 0 1px 2px rgba(52, 48, 43, 0.04), 0 8px 24px rgba(52, 48, 43, 0.08);
+  --focus-ring: #34302b;
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 12px;
+  border: 2px solid color-mix(in srgb, #b7df9b 60%, #fff);
+  border-radius: 28px;
+  background: linear-gradient(170deg, #fffaf0 0%, #fdeed6 100%);
+  box-shadow: 0 22px 46px rgba(120, 110, 80, 0.2), inset 0 2px 0 rgba(255, 255, 255, 0.96);
+  overflow: hidden;
+  color: var(--sushi-ink);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.surface[data-screen="kitchen"],
+.surface[data-screen="result"] {
+  padding: 8px;
+}
+
+/* 寬螢幕：廚房在卡片裡垂直置中，不要全擠在上半 */
+.surface[data-screen="kitchen"] {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.surface[data-screen="title"] {
+  display: flex;
+  flex-direction: column;
+  container: sushi-title / inline-size;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ── 標題 ─────────────────────────────────────────────── */
+.titleScreen {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 300px;
+  text-align: center;
+}
+
+.titleStage {
+  position: relative;
+  flex: none;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  max-height: 40vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: none;
+  border-radius: var(--radius-md, 20px);
+  background: radial-gradient(120% 90% at 50% 20%, #e8f6ff 0%, #cdeaf7 60%, #b7dcef 100%);
+  box-shadow: 0 10px 24px rgba(80, 120, 140, 0.16);
+  cursor: pointer;
+}
+
+.titleDuo {
+  position: absolute;
+  left: 6%;
+  bottom: 14%;
+  width: 58%;
+  aspect-ratio: 138 / 110;
+}
+
+.titleDish {
+  position: absolute;
+  right: 6%;
+  bottom: 13%;
+  display: grid;
+  width: 32%;
+}
+
+.titleDish > svg {
+  grid-area: 1 / 1;
+}
+
+.titleDish > svg:first-child {
+  z-index: 1;
+  transform: translateY(-34%);
+}
+
+.titleBelt {
+  position: absolute;
+  inset: auto 0 6% 0;
+  height: 10%;
+  background:
+    repeating-linear-gradient(90deg, #c9b8a4 0 14px, #b5a28c 14px 16px),
+    #c9b8a4;
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.45), 0 3px 0 rgba(120, 100, 80, 0.3);
+}
+
+.titlePanel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 12px;
+  min-width: 0;
+  padding: 4px 4px 8px;
+}
+
+.titleHeading {
+  margin: 0;
+  color: var(--sushi-accent);
+  font-size: clamp(1.75rem, 5.2cqi, 3rem);
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.titleStars {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 3px 10px rgba(120, 110, 80, 0.14);
+  color: var(--sushi-ink);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.titleStars b {
+  font-weight: 900;
+}
+
+.titleStars span {
+  color: var(--sushi-ink-soft);
+  font-weight: 700;
+}
+
+.titleStart {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+
+/* 與消消樂、方塊轉轉同一顆大圓「開始」 */
+.startButton {
+  display: grid;
+  place-items: center;
+  width: var(--start-size, 104px);
+  height: var(--start-size, 104px);
+  padding: 0 0 0 6px;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ffe889, #ffbd6f);
+  color: #614018;
+  cursor: pointer;
+  box-shadow: 0 8px 0 rgba(203, 128, 52, 0.42), 0 16px 24px rgba(164, 103, 61, 0.18), inset 0 2px 0 rgba(255, 255, 255, 0.72);
+}
+
+.startButton:focus-visible,
+.freeButton:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 4px;
+}
+
+.startCaption {
+  color: var(--sushi-ink);
+  font-size: var(--fs-h4, 1.05rem);
+  font-weight: 900;
+}
+
+/* 自由做：小膠囊，離主鈕有距離 */
+.freeButton {
+  min-height: 48px;
+  padding: 0 22px;
+  border: 2px solid color-mix(in srgb, #7fa86c 55%, #fff);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--sushi-accent);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(63, 127, 42, 0.18);
+}
+
+@container sushi-title (min-width: 720px) {
+  .titleScreen {
+    flex-direction: row;
+    gap: 24px;
+  }
+
+  .titleStage {
+    flex: 1.25 1 0;
+    aspect-ratio: auto;
+    max-height: none;
+  }
+
+  .titlePanel {
+    flex: 1 1 0;
+    justify-content: center;
+    gap: 20px;
+  }
+}
+
+@media (max-height: 760px) and (orientation: portrait) {
+  .titleStage {
+    max-height: 30vh;
+  }
+
+  .titlePanel {
+    gap: 8px;
+  }
+
+  .titleStart {
+    --start-size: 84px;
+    gap: 2px;
+  }
+}
+
+@media (max-height: 640px) and (orientation: portrait) {
+  .titleStage {
+    max-height: 24vh;
+  }
+
+  .titleHeading {
+    font-size: 1.6rem;
+  }
+
+  .titleStart {
+    --start-size: 76px;
+  }
+}
+
+@media (max-height: 520px) {
+  .titleScreen {
+    min-height: 0;
+  }
+
+  .titlePanel {
+    gap: 8px;
+    padding-block: 0;
+  }
+
+  .titleHeading {
+    font-size: 1.6rem;
+  }
+
+  .titleStart {
+    --start-size: 72px;
+  }
+}
+
+/* ── 結算 ─────────────────────────────────────────────── */
+.resultOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  border-radius: 26px;
+  background: rgba(255, 250, 240, 0.95);
+  text-align: center;
+  overflow-y: auto;
+}
+
+.resultPlates {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px;
+  margin: 0 0 8px;
+}
+
+.resultPlate {
+  display: block;
+  width: 44px;
+  height: 15px;
+}
+
+.resultPlate > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.hintPlate {
+  display: inline-block;
+  width: 26px;
+  height: 10px;
+  line-height: 0;
+}
+
+.hintPlate > svg {
+  width: 100%;
+  height: 100%;
+}

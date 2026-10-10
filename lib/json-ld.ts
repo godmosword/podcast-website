@@ -272,7 +272,7 @@ export function videoGameJsonLd(game: GameMeta): Record<string, unknown> {
   };
 }
 
-/** 遊戲 hub 的 ItemList：讓爬蟲一次看到三款遊戲與其排序。 */
+/** 遊戲 hub 的 ItemList：讓爬蟲一次看到每款遊戲與其排序（hub 傳入站序排好的清單）。 */
 export function gameListJsonLd(
   games: readonly GameMeta[] = GAMES,
 ): Record<string, unknown> {
@@ -284,7 +284,7 @@ export function gameListJsonLd(
     "@id": `${siteUrl}/games#games`,
     name: "車車遊樂園小遊戲",
     description:
-      "車車遊樂園的親子小遊戲清單：車車消消樂、繪本塗塗鴉與方塊轉轉。",
+      "車車遊樂園的親子小遊戲清單：繪本塗塗鴉、車車消消樂、多多壽司屋與方塊轉轉。",
     url: `${siteUrl}/games`,
     numberOfItems: games.length,
     itemListElement: games.map((game, index) => ({

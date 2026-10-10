@@ -287,6 +287,7 @@ function buildGameRows(
 ): ParentGameRow[] {
   const ids: GameKitGameId[] = [
     "candy-match",
+    "dino-sushi",
     "block-drop",
   ];
   return ids.map((gameId) => {

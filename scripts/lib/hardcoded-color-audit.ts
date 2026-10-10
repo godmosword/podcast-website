@@ -39,6 +39,10 @@ const HARDCODED_COLOR_ALLOWLIST = [
   "components/games/BlockDropTitle.module.css",
   "components/games/BlockDropMap.module.css",
   "components/games/BlockDropTaskBar.module.css",
+  // 多多壽司屋：廚房、托盤、砧板與結算同一張奶油卡面＋天藍多多舞台（程式畫的黏土美術），
+  // 卡面夜間不反轉，墨色、CTA 與焦點環都釘在日間值，改吃主題 token 會在夜間變成淺字疊淺底
+  "components/games/DinoSushiView.module.css",
+  "components/games/DinoSushiKitchen.module.css",
   // 結算星星與小籤：消消樂、方塊轉轉共用，疊在固定淺色的結算卡面上（日夜不反轉）
   "components/games/ResultStars.module.css",
   // 著色畫布：底必須是純白，否則蠟筆顏色會被主題染色

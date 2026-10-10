@@ -1,9 +1,10 @@
 import { test, expect } from "@playwright/test";
 import { PROGRESS_STORAGE_KEY } from "../lib/progress-keys";
 
-/** 走 GamePageShell 的兩款；coloring-book 用 ColoringPageShell，另行驗收。 */
+/** 走 GamePageShell 的三款；coloring-book 用 ColoringPageShell，另行驗收。 */
 const SHELL_ROUTES = [
   "candy-match",
+  "dino-sushi",
   "block-drop",
 ] as const;
 
@@ -90,10 +91,10 @@ test.describe("遊戲頁：兒童主路徑優先", () => {
 });
 
 test.describe("遊樂園 hub", () => {
-  test("390×844 完整首圖後可捲動到三個遊戲入口", async ({ page }) => {
+  test("390×844 完整首圖後可捲動到四個遊戲入口", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/games");
-    for (const name of ["繪本塗塗鴉", "車車消消樂", "方塊轉轉"]) {
+    for (const name of ["繪本塗塗鴉", "車車消消樂", "多多壽司屋", "方塊轉轉"]) {
       const title = page.getByText(name, { exact: true });
       await title.scrollIntoViewIfNeeded();
       await expect(title).toBeInViewport();
@@ -133,7 +134,7 @@ test.describe("遊樂園 hub", () => {
     for (const width of [320, 375, 390, 430]) {
       await page.setViewportSize({ width, height: 844 });
       await page.goto("/games");
-      for (const name of ["繪本塗塗鴉", "車車消消樂", "方塊轉轉"]) {
+      for (const name of ["繪本塗塗鴉", "車車消消樂", "多多壽司屋", "方塊轉轉"]) {
         const title = page.getByText(name, { exact: true });
         await expect(title, `${width} ${name}`).toBeVisible();
         const clipped = await title.evaluate((el) => el.scrollWidth > el.clientWidth + 1);
@@ -187,9 +188,9 @@ test.describe("遊樂園 hub", () => {
   test("卡片只留遊戲名稱，不顯示動作詞、年齡、時長與時間壓力", async ({ page }) => {
     await page.goto("/games");
     const cards = page.locator('main a[href^="/games/"]');
-    await expect(cards).toHaveCount(3);
+    await expect(cards).toHaveCount(4);
     for (const card of await cards.all()) {
-      await expect(card).not.toContainText(/塗一塗|找一樣|排一排/);
+      await expect(card).not.toContainText(/塗一塗|找一樣|做壽司|排一排/);
       await expect(card).not.toContainText(/\d+–\d+ 歲/);
       await expect(card).not.toContainText(/約 \d+ 分鐘/);
       await expect(card).not.toContainText(/不趕時間|有計時/);
@@ -200,13 +201,82 @@ test.describe("遊樂園 hub", () => {
     expect(box!.width).toBeGreaterThanOrEqual(52);
   });
 
-  test("hub 只留三張遊戲卡，不顯示車庫進度", async ({ page }) => {
+  test("hub 只留四張遊戲卡，不顯示車庫進度", async ({ page }) => {
     await page.goto("/games");
     await expect(page.getByRole("heading", { name: "園裡的站" })).toHaveCount(0);
     await expect(page.getByText(/收集了 \d+ 顆星星/)).toHaveCount(0);
     await expect(page.getByRole("list", { name: "車庫" })).toHaveCount(0);
     await expect(page.getByRole("list", { name: "小遊戲" })).toBeVisible();
-    await expect(page.locator('main a[href^="/games/"]')).toHaveCount(3);
+    await expect(page.locator('main a[href^="/games/"]')).toHaveCount(4);
+  });
+
+  test("手機 2×2、桌面一排四欄，站序著色 → 消消樂 → 壽司 → 方塊", async ({ page }) => {
+    const order = ["/games/coloring-book", "/games/candy-match", "/games/dino-sushi", "/games/block-drop"];
+    for (const [viewport, cols] of [
+      [{ width: 390, height: 844 }, 2],
+      [{ width: 1280, height: 800 }, 4],
+    ] as const) {
+      await page.setViewportSize(viewport);
+      await page.goto("/games");
+      const cards = page.locator('main a[href^="/games/"]');
+      expect(await cards.evaluateAll((nodes) => nodes.map((n) => n.getAttribute("href")))).toEqual(order);
+      const tops = await cards.evaluateAll((nodes) => nodes.map((n) => Math.round(n.getBoundingClientRect().top)));
+      expect(new Set(tops).size, `${viewport.width}`).toBe(4 / cols);
+    }
+  });
+});
+
+test.describe("多多壽司屋", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      (window as Window & { __dinoSushiSeed?: number }).__dinoSushiSeed = 7;
+    });
+  });
+
+  test("320×568：廚房（多多、砧板、給多多吃、8 格托盤）一屏放下", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 568 });
+    await page.goto("/games/dino-sushi");
+    await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+    const tray = page.getByRole("group", { name: "壽司料" });
+    await expect(tray.getByRole("button")).toHaveCount(8);
+    const bottom = await page.getByTestId("dino-sushi").evaluate((el) => el.getBoundingClientRect().bottom);
+    expect(bottom).toBeLessThanOrEqual(568);
+    const width = await page.evaluate(() => document.documentElement.scrollWidth);
+    expect(width).toBeLessThanOrEqual(320);
+  });
+
+  test("兒童觸控鈕夠大：托盤、飯型、給多多吃 ≥56px，料位 ≥48px", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 568 });
+    await page.goto("/games/dino-sushi");
+    await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+    for (const name of ["選握壽司", "選軍艦", "選手捲"]) {
+      const box = await page.getByRole("button", { name }).boundingBox();
+      expect(Math.min(box!.width, box!.height), name).toBeGreaterThanOrEqual(56);
+    }
+    await page.getByRole("button", { name: "選握壽司" }).click();
+    for (const btn of await page.getByRole("group", { name: "壽司料" }).getByRole("button").all()) {
+      const box = await btn.boundingBox();
+      expect(Math.min(box!.width, box!.height)).toBeGreaterThanOrEqual(56);
+    }
+    const serve = await page.getByRole("button", { name: "給多多吃" }).boundingBox();
+    expect(Math.min(serve!.width, serve!.height)).toBeGreaterThanOrEqual(56);
+    await page.getByRole("group", { name: "壽司料" }).getByRole("button").first().click();
+    const slot = await page.getByRole("button", { name: /^拿掉/ }).boundingBox();
+    expect(Math.min(slot!.width, slot!.height)).toBeGreaterThanOrEqual(48);
+  });
+
+  test("觸控點一下只加一層料", async ({ browser }) => {
+    const ctx = await browser.newContext({ hasTouch: true, viewport: { width: 390, height: 844 } });
+    const touch = await ctx.newPage();
+    await touch.addInitScript(() => {
+      (window as Window & { __dinoSushiSeed?: number }).__dinoSushiSeed = 7;
+    });
+    await touch.goto("/games/dino-sushi");
+    await touch.getByRole("button", { name: "開始幫多多做壽司" }).tap();
+    await touch.getByRole("button", { name: "選握壽司" }).tap();
+    await touch.getByRole("group", { name: "壽司料" }).getByRole("button").first().tap();
+    await expect(touch.getByRole("button", { name: /^拿掉/ })).toHaveCount(1);
+    await ctx.close();
   });
 });
 

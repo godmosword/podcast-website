@@ -10,6 +10,7 @@ import styles from "./GameLoadingGate.module.css";
 const LABELS: Record<GameKitGameId, string> = {
   "block-drop": "方塊轉轉",
   "candy-match": "車車消消樂",
+  "dino-sushi": "多多壽司屋",
 };
 
 type GameLoadingGateProps = {

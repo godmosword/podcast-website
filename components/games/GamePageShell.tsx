@@ -12,6 +12,7 @@ import {
   IconChevronRight,
   IconRotate,
   IconSwipe,
+  IconSushi,
   IconSwipeDown,
   IconTap,
 } from "@/components/games/ClayIcons";
@@ -31,6 +32,8 @@ const CONTROL_ICONS: Record<string, ReactNode> = {
       <IconChevronRight size={22} />
     </>
   ),
+  點飯和料做壽司: <IconTap size={22} />,
+  "按「給多多吃」送出": <IconSushi size={22} />,
   旋轉與落下: (
     <>
       <IconRotate size={22} />
