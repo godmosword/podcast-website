@@ -335,6 +335,7 @@
   --cta-soft-fg: #5d4a67;
   --cta-soft-line: rgba(93, 74, 103, 0.16);
   --elev-1: 0 1px 2px rgba(52, 48, 43, 0.04), 0 8px 24px rgba(52, 48, 43, 0.08);
+  --c-lilac: #c5b3e6;
 }
 
 /* 結算三顆星：一排、由左往右亮，中間那顆大一號；只有星星，沒有別的東西要對齊 */
@@ -366,7 +367,7 @@
 /* 沒拿到：灰色剪影，金邊也一起淡掉，一眼看出是空的 */
 .resultStar:not([data-met="true"]) {
   filter: grayscale(1);
-  opacity: 0.55;
+  opacity: 0.7;
 }
 
 .starRow[data-animate="true"] .resultStar[data-met="true"] {
@@ -410,7 +411,7 @@
   padding: 3px 10px 3px 3px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--c-lilac) 18%, white);
-  color: #6b5c73;
+  color: var(--candy-ink, #5d4a67);
   font-size: 14px;
   font-weight: 800;
   line-height: 1.2;
@@ -435,7 +436,7 @@
   display: inline-flex;
   align-items: center;
   gap: 1px;
-  color: #c98a0b;
+  color: #8a5a00;
   line-height: 0;
 }
 

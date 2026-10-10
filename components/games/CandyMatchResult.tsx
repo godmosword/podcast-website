@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { GameEndStation } from "@/components/games/GameEndStation";
-import { IconBubble, IconStar } from "@/components/games/ClayIcons";
+import { IconBubble, IconStar, IconSwap } from "@/components/games/ClayIcons";
 import { IconFootprints, IconMapFold } from "@/components/games/CandyMatchIcons";
 import type { CandyMatchRound } from "@/lib/games/candy-match/stages";
 import type { CandyRoundOutcome } from "./useCandyMatchPlay";
@@ -41,8 +41,10 @@ function missedRules(round: CandyMatchRound, outcome: CandyWin) {
   if (!outcome.efficient) {
     missed.push({
       key: "efficient",
-      text: round.stage.moves > 0 ? `剩 ${round.stage.efficiency} 步以上` : `${round.stage.efficiency} 次交換內`,
-      mark: <IconFootprints size={18} />,
+      // 挑戰＝步數（腳印，和地圖、任務列同一個圖）；輕鬆＝交換次數（換位圖）
+      ...(round.stage.moves > 0
+        ? { text: `剩 ${round.stage.efficiency} 步以上`, mark: <IconFootprints size={18} /> }
+        : { text: `${round.stage.efficiency} 次交換內`, mark: <IconSwap size={20} /> }),
     });
   }
   return missed;
@@ -129,7 +131,7 @@ export function CandyMatchResult({
       ) : (
         <GameEndStation
           mood="retry"
-          title="步數用完了，再試一次！"
+          title="步數用完了！"
           gameSlug="candy-match"
           onReplay={onReplay}
           replayLabel="再來一次"
