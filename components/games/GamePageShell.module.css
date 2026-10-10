@@ -93,9 +93,11 @@
 .playHeader {
   position: sticky;
   /*
-   * 抬頭要貼齊畫面頂端、底色完全不透明、不用 backdrop-filter：iOS 26 在狀態列下方加的漸層模糊，
-   * 只有頂端貼著不透明的 sticky／fixed 色條時才會改用色條顏色（詳見 SiteNavBar .bar 的說明）。
-   * 所以抬頭往上延伸蓋住 .main 的上留白，sticky 位置也往上補同樣距離：靜止和捲動時內容都在原位。
+   * iOS 26 在狀態列下方加的漸層模糊（詳見 SiteNavBar .bar 的說明）：
+   * - Safari 分頁：畫面頂端那一點要落在 sticky 抬頭裡，系統才改用抬頭底色、不加模糊。以前靜止時
+   *   那一點落在 .main 的上留白，所以抬頭往上延伸蓋住它，sticky 位置也往上補同樣距離，
+   *   靜止和捲動時內容都在原位。不用 backdrop-filter。
+   * - 主畫面 App：關不掉，內容在 safe-top 之外再空 --edge-ramp（其他情況為 0）。
    * min-height 含 padding，一併加上同樣距離。
    */
   top: calc(-1 * var(--main-pad-top));
@@ -103,10 +105,10 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  min-height: calc(52px + var(--main-pad-top));
+  min-height: calc(52px + var(--main-pad-top) + var(--edge-ramp));
   margin-top: calc(-1 * var(--main-pad-top));
   margin-bottom: var(--space-3);
-  padding-top: calc(var(--main-pad-top) + var(--safe-top));
+  padding-top: calc(var(--main-pad-top) + var(--safe-top) + var(--edge-ramp));
   background: var(--bg);
 }
 
@@ -419,7 +421,7 @@
 @media (max-width: 359.98px) {
   .playHeader {
     gap: 4px;
-    min-height: calc(48px + var(--main-pad-top));
+    min-height: calc(48px + var(--main-pad-top) + var(--edge-ramp));
   }
 
   .headerActions,
@@ -451,7 +453,7 @@
 
   .main[data-game-id="block-drop"]:has([data-status="playing"], [data-status="paused"]) .playHeader {
     flex-wrap: nowrap;
-    min-height: calc(44px + var(--main-pad-top));
+    min-height: calc(44px + var(--main-pad-top) + var(--edge-ramp));
     margin-bottom: 2px;
   }
 

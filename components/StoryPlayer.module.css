@@ -395,7 +395,8 @@
   display: flex;
   align-items: center;
   gap: var(--top-tool-gap);
-  padding: calc(10px + var(--safe-top)) calc(12px + var(--safe-right)) 16px
+  /* --edge-ramp：iOS 主畫面 App 狀態列下方的模糊帶，工具鍵放在它下面（見 globals.css） */
+  padding: calc(10px + var(--safe-top) + var(--edge-ramp)) calc(12px + var(--safe-right)) 16px
     calc(12px + var(--safe-left));
   background: linear-gradient(
     to bottom,

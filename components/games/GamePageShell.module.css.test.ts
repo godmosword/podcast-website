@@ -16,7 +16,8 @@ describe("GamePageShell.module.css 抬頭", () => {
     expect(css).not.toMatch(/backdrop-filter/);
   });
 
-  // iOS 26 只在畫面頂端貼著不透明的 sticky 色條時，才不在狀態列下方加漸層模糊（同 SiteNavBar）
+  // iOS 26 狀態列下方的漸層模糊（同 SiteNavBar）：Safari 分頁要頂端那一點落在 sticky 抬頭裡，
+  // 主畫面 App 要把內容放到 --edge-ramp 模糊帶下面
   it("抬頭底色完全不透明", () => {
     expect(playHeader).toMatch(/background:\s*var\(--bg\);/);
   });
@@ -24,7 +25,9 @@ describe("GamePageShell.module.css 抬頭", () => {
   it("抬頭往上延伸蓋住 .main 上留白，sticky 也補同樣距離（內容位置不變）", () => {
     expect(playHeader).toMatch(/top:\s*calc\(-1 \* var\(--main-pad-top\)\)/);
     expect(playHeader).toMatch(/margin-top:\s*calc\(-1 \* var\(--main-pad-top\)\)/);
-    expect(playHeader).toMatch(/padding-top:\s*calc\(var\(--main-pad-top\) \+ var\(--safe-top\)\)/);
+    expect(playHeader).toMatch(
+      /padding-top:\s*calc\(var\(--main-pad-top\) \+ var\(--safe-top\) \+ var\(--edge-ramp\)\)/,
+    );
   });
 
   it("所有改 .main 上留白的規則都走 --main-pad-top（含著色本），抬頭才延伸得剛好", () => {
@@ -39,9 +42,12 @@ describe("GamePageShell.module.css 抬頭", () => {
     }
   });
 
-  it("抬頭 min-height 都含 --main-pad-top（min-height 含 padding）", () => {
+  it("抬頭 min-height 都含 --main-pad-top 與 --edge-ramp（min-height 含 padding）", () => {
     const minHeights = [...css.matchAll(/\.playHeader\s*\{[^}]*?min-height:\s*([^;]+);/g)].map((m) => m[1]);
     expect(minHeights.length).toBeGreaterThanOrEqual(3);
-    for (const value of minHeights) expect(value).toContain("var(--main-pad-top)");
+    for (const value of minHeights) {
+      expect(value).toContain("var(--main-pad-top)");
+      expect(value).toContain("var(--edge-ramp)");
+    }
   });
 });

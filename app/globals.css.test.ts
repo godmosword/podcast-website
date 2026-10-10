@@ -34,3 +34,32 @@ describe("globals.css intro overlay stacking", () => {
     expect(css).not.toMatch(/html\[data-intro-gate="on"\]\s+\.site-root\s*\{[^}]*z-index:\s*60/);
   });
 });
+
+/**
+ * iOS 主畫面 App 的頂端模糊帶（iOS 26 捲動邊緣效果，頁面關不掉）：頂欄、遊戲抬頭、故事播放器頂排
+ * 都要在 safe-top 之外再空 --edge-ramp，字才落在模糊帶下面。只在 iOS standalone 生效，其餘為 0。
+ */
+describe("globals.css --edge-ramp", () => {
+  const css = readFileSync(join(import.meta.dirname, "globals.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  const read = (path: string) => readFileSync(join(import.meta.dirname, "..", path), "utf8");
+
+  it("預設 0，只在 iOS（-webkit-touch-callout）的 standalone 改成 32px", () => {
+    expect(css).toMatch(/:root\s*\{[^}]*--edge-ramp:\s*0px;/);
+    expect(css).toMatch(
+      /@supports \(-webkit-touch-callout: none\)\s*\{\s*@media \(display-mode: standalone\)\s*\{\s*:root\s*\{\s*--edge-ramp:\s*32px;/,
+    );
+  });
+
+  it("--nav-h 兩個斷點都含 --edge-ramp（landing pane、地圖高度都靠它）", () => {
+    expect(css).toContain("--nav-h: calc(64px + var(--safe-top) + var(--edge-ramp));");
+    expect(css).toContain("--nav-h: calc(66px + var(--safe-top) + var(--edge-ramp));");
+  });
+
+  it("頂欄、遊戲抬頭、故事播放器頂排都用 --edge-ramp", () => {
+    expect(read("components/landing/SiteNavBar.module.css")).toContain("var(--edge-ramp)");
+    expect(read("components/games/GamePageShell.module.css")).toContain("var(--edge-ramp)");
+    expect(read("components/StoryPlayer.module.css")).toMatch(
+      /\.topBar\s*\{[^}]*padding:\s*calc\(10px \+ var\(--safe-top\) \+ var\(--edge-ramp\)\)/,
+    );
+  });
+});

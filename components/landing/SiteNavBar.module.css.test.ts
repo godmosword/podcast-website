@@ -22,37 +22,23 @@ describe("SiteNavBar.module.css 漢堡與抽屜", () => {
     expect(desktopBlock).not.toMatch(/\.panel\s*\{[^}]*display:\s*none/);
   });
 
-  describe("iOS 26 頂端漸層模糊：頂欄必須是不透明色條", () => {
-    // 系統只在畫面頂端貼著全寬、不透明的 sticky／fixed 色條時改用色條顏色，否則在狀態列下方加漸層模糊，
-    // 頂欄的字會糊（2026-10-10 實機回報三次）。半透明與毛玻璃都會被當成「好幾種顏色」。
+  describe("iOS 26 頂端漸層模糊", () => {
+    // Safari 分頁：畫面頂端那一點落在 sticky 的 .bar 裡，系統改用它的底色、不加模糊；帶 backdrop-filter
+    // 會被判成「好幾種顏色」。主畫面 App：頁面關不掉，字要落在 --edge-ramp 模糊帶下面（見 globals.css）。
     const code = css.replace(/\/\*[\s\S]*?\*\//g, "");
-    // 最內層的規則區塊；選擇器最後一段是 .bar（可帶屬性選擇器）才算頂欄本體，排除 .bar .inner 等子元素
-    const barRules = [...code.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(([, selector]) =>
-      selector.split(",").some((s) => /\.bar(\[[^\]]*\])*\s*$/.test(s.trim())),
-    );
 
     it("不得用 backdrop-filter", () => {
       expect(code).not.toMatch(/backdrop-filter/);
     });
 
     it("頂欄本體預設底色是不透明的 --landing-nav-cta-bg", () => {
-      const base = barRules.find(([, selector]) => selector.trim() === ".bar");
-      expect(base?.[2]).toMatch(/background:\s*var\(--landing-nav-cta-bg\);/);
+      expect(code).toMatch(/(^|\})\s*\.bar\s*\{[^}]*background:\s*var\(--landing-nav-cta-bg\);/);
     });
 
-    it("頂欄本體任何狀態都不得混透明色（color-mix … transparent）", () => {
-      expect(barRules.length).toBeGreaterThan(3);
-      for (const [, selector, body] of barRules) {
-        expect(body, selector.trim()).not.toMatch(/background:[^;]*color-mix\([^;]*transparent/);
-      }
-    });
-
-    it("安裝成主畫面 App 的 ≥980 外層也鋪不透明底，首頁不穿透點擊", () => {
-      const start = code.indexOf("@media (min-width: 980px) and (display-mode: standalone)");
-      expect(start).toBeGreaterThan(-1);
-      const block = code.slice(start);
-      expect(block).toMatch(/background:\s*var\(--landing-nav-cta-bg\)/);
-      expect(block).toMatch(/pointer-events:\s*auto/);
+    it("手機 .inner 與 ≥980 外層 .bar 的上內距都含 --edge-ramp", () => {
+      expect(code).toMatch(/\.inner\s*\{[^}]*padding:\s*calc\(10px \+ var\(--safe-top\) \+ var\(--edge-ramp\)\)/);
+      const desktop = code.slice(code.indexOf("@media (min-width: 980px) {"));
+      expect(desktop).toMatch(/\.bar\s*\{[^}]*padding:\s*calc\(10px \+ var\(--safe-top\) \+ var\(--edge-ramp\)\) 20px 0;/);
     });
   });
 

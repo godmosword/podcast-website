@@ -134,13 +134,21 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
+  /*
+   * iOS 主畫面 App 的頂端模糊帶：iOS 26 起，加到主畫面的網頁 App 會在狀態列下方加一道往下淡出的
+   * 漸層模糊（捲動邊緣效果），頁面的 CSS 關不掉。Safari 分頁裡頂端貼著 sticky 頂欄時系統會改用
+   * 頂欄顏色，不會糊；主畫面 App 裡不會。2026-10-10 實機截圖量到模糊延伸到狀態列下方約 42px，
+   * 同一個字上半部比下半部糊。頂欄與遊戲抬頭在 safe-top 之外再空這段，字就落在模糊帶外，
+   * 模糊只蓋到純色底，看不出來。只在 iOS（-webkit-touch-callout）的 standalone 生效，其餘為 0。
+   */
+  --edge-ramp: 0px;
 
   /* Landing Hub（Storyline 式頂欄） */
   /* 陽光橘 + 深咖字：對比 6.3:1（WCAG AA）。亮且不刺眼，同時供頂欄與 CTA 鈕共用。 */
   --landing-brand: #ff8c2b;
   --landing-brand-ink: #3a2410;
-  /* sticky 頂欄高度：按鈕 44 + 上下 padding 20 + 瀏海安全區 */
-  --nav-h: calc(64px + var(--safe-top));
+  /* sticky 頂欄高度：按鈕 44 + 上下 padding 20 + 瀏海安全區 + iOS 主畫面 App 模糊帶 */
+  --nav-h: calc(64px + var(--safe-top) + var(--edge-ramp));
   /* ≥980px 改 1c 懸浮膠囊（與 SiteNavBar 桌面斷點對齊），landing pane／地圖高度共用 */
   --landing-heading: #2a9d8f;
 
@@ -349,7 +357,16 @@ body:has(main[data-deferred-brand-font][data-brand-fonts="ready"]) {
 /* 1c 懸浮膠囊頂欄（SiteNavBar ≥980px）：膠囊 56px + 上緣 10px */
 @media (min-width: 980px) {
   :root {
-    --nav-h: calc(66px + var(--safe-top));
+    --nav-h: calc(66px + var(--safe-top) + var(--edge-ramp));
+  }
+}
+
+/* iOS 主畫面 App 才有頂端模糊帶（見 :root 的 --edge-ramp）；Android／桌機安裝的 PWA 不受影響 */
+@supports (-webkit-touch-callout: none) {
+  @media (display-mode: standalone) {
+    :root {
+      --edge-ramp: 32px;
+    }
   }
 }
 
@@ -590,7 +607,7 @@ html[data-intro-gate="on"] [data-intro-overlay] {
   display: flex;
   flex-direction: column;
   /* 頂欄留在覆蓋層之上可點；內容從 --nav-h 起排，標題才不會卡在導覽後面。
-     奶油底仍滿版，毛玻璃頂欄會透出開場色。 */
+     奶油底仍滿版。 */
   padding-top: var(--nav-h);
   box-sizing: border-box;
 }

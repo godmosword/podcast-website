@@ -2,7 +2,7 @@
   position: sticky;
   top: 0;
   z-index: 40;
-  /* 行動：不透明底 + hairline；不隨 night 反轉。底色必須完全不透明（見下方說明） */
+  /* 行動：不透明底 + hairline；不隨 night 反轉。不用 backdrop-filter（見下方說明） */
   background: var(--landing-nav-cta-bg);
   color: var(--landing-nav-ink);
   border-bottom: 1px solid var(--landing-nav-border);
@@ -15,12 +15,12 @@
 }
 
 /*
- * 頂欄底色必須完全不透明，也不得用 backdrop-filter。
- * iOS 26 起，iPhone／iPad 會在狀態列下方加一道往下淡出的漸層模糊（Liquid Glass 的捲動邊緣效果），
- * 主畫面 App 一定有、Safari 也會出現，CSS 和 meta 都關不掉。只有畫面頂端貼著一條全寬、不透明的
- * sticky／fixed 色條時，系統才改用那條的顏色往上延伸、不加模糊。半透明（color-mix … transparent）
- * 或毛玻璃都算「好幾種顏色」，頂欄的字就被糊掉：2026-10-10 實機回報三次，截圖量到同一個字
- * 上半部比下半部糊、漢堡三條線由上往下越來越清楚。
+ * iOS 26 頂端漸層模糊：iPhone／iPad 會在狀態列下方加一道往下淡出的模糊（捲動邊緣效果）。
+ * - Safari 分頁：畫面頂端中點往下 4px 落在 sticky／fixed、夠寬的盒子裡（就是這條 .bar）時，系統改用
+ *   它的底色往上延伸、不加模糊。這條盒子不得帶 backdrop-filter（會被判成「好幾種顏色」）。
+ * - 主畫面 App：頂欄一直符合上面的條件，實機仍然糊（2026-10-10 回報三次，截圖量到同一個字上半部
+ *   比下半部糊、漢堡三條線由上往下越來越清楚），頁面 CSS 關不掉。所以 .inner 在 safe-top 之外再空
+ *   --edge-ramp，讓字落在模糊帶下面（見 globals.css）。
  */
 
 /* 首頁 landing 與 footer snap：同樣不透明。權重高於 ≥980 的透明外層，所以首頁桌機是整條桃色底＋膠囊 */
@@ -34,7 +34,7 @@
   position: relative;
   max-width: 960px;
   margin: 0 auto;
-  padding: calc(10px + var(--safe-top)) calc(16px + var(--safe-right))
+  padding: calc(10px + var(--safe-top) + var(--edge-ramp)) calc(16px + var(--safe-right))
     10px calc(16px + var(--safe-left));
   display: flex;
   align-items: center;
@@ -260,8 +260,7 @@
  * `@media (min-width: 980px) .bar { background: transparent }`（0,1,0），媒體查詢不加權重，
  * 若不限斷點，桌面夜間一開抽屜就會在懸浮膠囊外畫出一條橫貫視窗的色帶。 */
 @media (max-width: 979px) {
-  /* 日間開啟：頂欄改不透明桃色，避免半透明毛玻璃把卡片合成灰帶
-   * （與面板桃色斷層——設計審：捲動後再開選單會把「底色不均」從選中列搬到頂欄）。
+  /* 日間開啟：頂欄與面板同為不透明桃色（現在等同 .bar 底色；留著鎖住開啟態，日後改 .bar 底色時不會跟面板斷層）。
    * 必須用 html:not(night)（0,3,1）：裸 `.bar[data-menu-open]` 輸給
    * html:has([data-landing-root]) .bar（0,2,1）與 .bar[data-nav-solid]（0,2,0）。 */
   :global(html:not([data-theme="night"])) .bar[data-menu-open="true"] {
@@ -444,7 +443,7 @@
     background: transparent;
     border-bottom: none;
     box-shadow: none;
-    padding: calc(10px + var(--safe-top)) 20px 0;
+    padding: calc(10px + var(--safe-top) + var(--edge-ramp)) 20px 0;
   }
 
   .inner {
@@ -461,7 +460,7 @@
   }
 
   /* 膠囊同樣不用毛玻璃（見 .bar 上方說明）。膠囊不貼畫面頂端，可以略透；
-   * 安裝成主畫面 App 時外層改不透明，見檔尾 display-mode: standalone */
+   * 外層透明的 .bar 仍是頂端那個 sticky 盒子，Safari 分頁照樣改用色條、不加模糊 */
 
   /* 漢堡在最右：面板右錨膠囊，勿再 left:8px（會假綠「在膠囊內」） */
   .panel {
@@ -497,18 +496,5 @@
 
   .bar[data-nav-solid="true"] .inner {
     background: color-mix(in srgb, var(--landing-nav-cta-bg) 96%, transparent);
-  }
-}
-
-/*
- * 安裝成主畫面 App 的大螢幕（iPad 橫向等 ≥980）：透明外層讓畫面頂端沒有不透明色條，膠囊會吃到
- * iOS 26 的頂端漸層模糊（見 .bar 上方說明）。外層改鋪不透明桃色，跟首頁桌機同一個樣子。
- * 首頁也不再讓點擊穿透外層：WebKit 用命中測試找畫面頂端的色條，pointer-events: none 可能讓它略過頂欄。
- */
-@media (min-width: 980px) and (display-mode: standalone) {
-  .bar,
-  :global(html:has([data-landing-root])) .bar {
-    background: var(--landing-nav-cta-bg);
-    pointer-events: auto;
   }
 }
