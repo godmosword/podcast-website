@@ -87,7 +87,7 @@ export default function ForParentsPage() {
               地圖導航。{playMapCoverage}。
             </p>
             <Link href="/for-parents/play-map" className={styles.toolCta}>
-              開啟親子遊樂地圖 →
+              開啟親子遊樂地圖<Icon name="arrow-right" size={16} className="icon-trail" />
             </Link>
           </article>
 
@@ -98,7 +98,7 @@ export default function ForParentsPage() {
               查看小遊戲探索、最近收聽與推薦共讀故事。所有資料只留在您的瀏覽器，不會上傳到伺服器。
             </p>
             <Link href="/for-parents/dashboard" className={styles.toolCta}>
-              開啟家庭儀表板 →
+              開啟家庭儀表板<Icon name="arrow-right" size={16} className="icon-trail" />
             </Link>
           </article>
         </div>
@@ -122,7 +122,7 @@ export default function ForParentsPage() {
             rel="noopener noreferrer"
             aria-label="到 Threads 看育兒小筆記（另開視窗）"
           >
-            另開 Threads →
+            另開 Threads<Icon name="external" size={16} className="icon-trail" />
           </a>
         </section>
       ) : null}

@@ -4,6 +4,7 @@ import EngagementMetricsPanel from "@/components/studio/EngagementMetricsPanel";
 import IllustrationQueuePanel from "@/components/studio/IllustrationQueuePanel";
 import PlatformStudioCard from "@/components/studio/PlatformStudioCard";
 import { studioPlatforms } from "@/lib/studio/platforms";
+import Icon from "@/components/ui/Icon";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
@@ -21,7 +22,7 @@ export default function StudioPage() {
   return (
     <main className={styles.main}>
       <Link href="/" className={styles.back}>
-        ← 回故事屋
+        <Icon name="arrow-left" size={16} className="icon-lead" />回故事屋
       </Link>
 
       <h1 className={styles.title}>節目數據中心</h1>

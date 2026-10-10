@@ -1,6 +1,7 @@
 import Link from "next/link";
 import NotFoundHero from "@/components/not-found/NotFoundHero";
 import SiteFooter from "@/components/SiteFooter";
+import Icon from "@/components/ui/Icon";
 import styles from "./not-found.module.css";
 
 export default function NotFound() {
@@ -12,7 +13,7 @@ export default function NotFound() {
         可能是網址打錯了，或這集故事還在準備中。
       </p>
       <Link href="/" className={styles.cta}>
-        ← 回故事屋
+        <Icon name="arrow-left" size={16} className="icon-lead" />回故事屋
       </Link>
       <SiteFooter />
     </main>

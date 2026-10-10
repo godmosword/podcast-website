@@ -14,7 +14,7 @@
      範式同外層 ParentCoListenSection 的 `.summary`（本元件就巢在它裡面）。
      **刻意不用 `display: flex`**——Safari 對 `<summary>` 改 display 會破壞
      `<details>` 的開合；本檔已用 `list-style: none` ＋ 隱藏 webkit marker
-     ＋ `::before` 自繪箭頭，走 padding 是唯一安全解。 */
+     ＋ 行內共用 chevron 圖示（icon-disclosure），走 padding 是唯一安全解。 */
   min-height: 44px;
   padding: 12px 0;
   font-size: var(--fs-control);
@@ -25,14 +25,6 @@
 
 .summary::-webkit-details-marker {
   display: none;
-}
-
-.summary::before {
-  content: "▸ ";
-}
-
-.wrap[open] .summary::before {
-  content: "▾ ";
 }
 
 .body {

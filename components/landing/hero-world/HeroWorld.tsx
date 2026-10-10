@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Component, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { HERO_STAGE_DEFAULT, MODEL_PATH, chooseQuality, resolveHeroStage, type HeroStage, type MotionPhase, type Quality } from "./config";
 import HeroParallax from "../hero-parallax/HeroParallax";
+import Icon from "@/components/ui/Icon";
 import styles from "./HeroWorld.module.css";
 import { getActiveClock, LOAD_TIMEOUT_MS, MAX_TICK_DELTA_MS, TICK_MS } from "./active-clock";
 import { EXIT_TRANSITION_MS, TRANSITION_RESET_MS, markEnterIntent, resolveEnterAction } from "./enter-transition";
@@ -234,8 +235,8 @@ export default function HeroWorld({ mode = "page", onDismiss }: { mode?: HeroWor
       </div>
       <div className={styles.actions}>
         {overlay
-          ? <button type="button" className={styles.cta} data-intro-dismiss onClick={enter}>進入車車遊樂園 <span aria-hidden="true">→</span></button>
-          : <Link href="/?enter=1" replace className={styles.cta} onClick={enter}>進入車車遊樂園 <span aria-hidden="true">→</span></Link>}
+          ? <button type="button" className={styles.cta} data-intro-dismiss onClick={enter}>進入車車遊樂園<Icon name="arrow-right" size={18} className={styles.ctaIcon} /></button>
+          : <Link href="/?enter=1" replace className={styles.cta} onClick={enter}>進入車車遊樂園<Icon name="arrow-right" size={18} className={styles.ctaIcon} /></Link>}
       </div>
       </div>
       {parallax ? (

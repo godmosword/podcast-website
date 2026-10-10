@@ -9,6 +9,7 @@ import { vehicleDefinitionSummary, vehicleFaqs } from "@/lib/vehicle-geo";
 import JsonLd from "@/components/JsonLd";
 import SiteFooter from "@/components/SiteFooter";
 import StoryCard from "@/components/StoryCard";
+import Icon from "@/components/ui/Icon";
 import styles from "./page.module.css";
 
 export function generateStaticParams() {
@@ -69,7 +70,7 @@ export default async function VehiclePage({
         ])}
       />
       <Link href="/" className={styles.back}>
-        ← 回故事屋
+        <Icon name="arrow-left" size={16} className="icon-lead" />回故事屋
       </Link>
 
       <h1 className={styles.title}>{vehicle}故事屋</h1>

@@ -148,9 +148,9 @@ export default function LandingSegment({
             >
               {segment.cta.label}
               {segment.cta.external ? (
-                <Icon name="external" size={15} className={styles.ctaIcon} />
+                <Icon name="external" size={16} className={styles.ctaIcon} />
               ) : (
-                " →"
+                <Icon name="arrow-right" size={16} className={styles.ctaIcon} />
               )}
             </Link>
             {skipAnchorId ? (
@@ -162,22 +162,7 @@ export default function LandingSegment({
                 aria-label={loopToFirst ? "捲動回第一個專區" : "捲動到下一個專區"}
                 onClick={goToSkip}
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  width="18"
-                  height="18"
-                  aria-hidden
-                  focusable="false"
-                >
-                  <path
-                    d="M7 9.5 L12 14.5 L17 9.5"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.4"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <Icon name="chevron-down" size={18} />
               </a>
             ) : null}
           </div>

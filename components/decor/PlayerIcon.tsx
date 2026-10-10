@@ -1,3 +1,5 @@
+import Icon, { ICON_LINE } from "@/components/ui/Icon";
+
 type IconProps = {
   size?: number;
   className?: string;
@@ -7,15 +9,8 @@ type IconProps = {
  * 播放器控制列線性圖示（白色描邊，跨平台一致、銳利）。
  * 取代 emoji（🔁⏪⏩⏹），在深色播放器與亮背景照片上都清楚。
  * 用 currentColor，可由父層 color 控制（重複開啟態套主題色）。
+ * 線條畫法同全站共用圖示（ICON_LINE）；和 Icon 重複的播放、暫停、音量直接轉用 Icon。
  */
-
-const STROKE = {
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 2,
-  strokeLinecap: "round" as const,
-  strokeLinejoin: "round" as const,
-};
 
 function base(size: number, className?: string) {
   return {
@@ -32,7 +27,7 @@ function base(size: number, className?: string) {
 export function RepeatIcon({ size = 22, className }: IconProps) {
   return (
     <svg {...base(size, className)}>
-      <g {...STROKE}>
+      <g {...ICON_LINE}>
         <path d="M5 8a4 4 0 0 1 4-4h7l-2.2-2.2M16 4l-2.2 2.2" />
         <path d="M19 16a4 4 0 0 1-4 4H8l2.2 2.2M8 20l2.2-2.2" />
       </g>
@@ -44,7 +39,7 @@ export function RepeatIcon({ size = 22, className }: IconProps) {
 export function RewindIcon({ size = 22, className }: IconProps) {
   return (
     <svg {...base(size, className)}>
-      <g {...STROKE}>
+      <g {...ICON_LINE}>
         <path d="M11.5 6.5 5 12l6.5 5.5" />
         <path d="M19 6.5 12.5 12 19 17.5" />
       </g>
@@ -56,7 +51,7 @@ export function RewindIcon({ size = 22, className }: IconProps) {
 export function ForwardIcon({ size = 22, className }: IconProps) {
   return (
     <svg {...base(size, className)}>
-      <g {...STROKE}>
+      <g {...ICON_LINE}>
         <path d="M12.5 6.5 19 12l-6.5 5.5" />
         <path d="M5 6.5 11.5 12 5 17.5" />
       </g>
@@ -75,21 +70,12 @@ export function StopIcon({ size = 20, className }: IconProps) {
 
 /** 播放（三角形，實心）。 */
 export function PlayGlyph({ size = 28, className }: IconProps) {
-  return (
-    <svg {...base(size, className)}>
-      <path d="M8 5.5v13l11-6.5z" fill="currentColor" />
-    </svg>
-  );
+  return <Icon name="play" size={size} className={className} />;
 }
 
 /** 暫停（雙豎條，實心）。 */
 export function PauseGlyph({ size = 28, className }: IconProps) {
-  return (
-    <svg {...base(size, className)}>
-      <rect x="7" y="5" width="3.6" height="14" rx="1.4" fill="currentColor" />
-      <rect x="13.4" y="5" width="3.6" height="14" rx="1.4" fill="currentColor" />
-    </svg>
-  );
+  return <Icon name="pause" size={size} className={className} />;
 }
 
 /** 收藏（愛心）；filled 為已加入最愛。 */
@@ -122,7 +108,7 @@ export function HeartIcon({
 export function CaptionsIcon({ size = 20, className }: IconProps) {
   return (
     <svg {...base(size, className)}>
-      <g {...STROKE}>
+      <g {...ICON_LINE}>
         <rect x="3" y="5" width="18" height="14" rx="2.5" />
         <path d="M7.5 11.5h2.2a1.8 1.8 0 0 1 0 3.6H7.5M14.3 11.5h2.2a1.8 1.8 0 0 1 0 3.6h-2.2" />
       </g>
@@ -132,24 +118,10 @@ export function CaptionsIcon({ size = 20, className }: IconProps) {
 
 /** 音量開啟。 */
 export function VolumeOnIcon({ size = 22, className }: IconProps) {
-  return (
-    <svg {...base(size, className)}>
-      <g {...STROKE}>
-        <path d="M5 9.5v5h3.5L14 19V5L8.5 9.5H5z" fill="currentColor" stroke="none" />
-        <path d="M16.5 9.5a3.5 3.5 0 0 1 0 5M18.8 7.2a6.5 6.5 0 0 1 0 9.6" />
-      </g>
-    </svg>
-  );
+  return <Icon name="volume-on" size={size} className={className} />;
 }
 
 /** 靜音。 */
 export function VolumeOffIcon({ size = 22, className }: IconProps) {
-  return (
-    <svg {...base(size, className)}>
-      <g {...STROKE}>
-        <path d="M5 9.5v5h3.5L14 19V5L8.5 9.5H5z" fill="currentColor" stroke="none" />
-        <path d="M17 9l4 6M21 9l-4 6" />
-      </g>
-    </svg>
-  );
+  return <Icon name="volume-off" size={size} className={className} />;
 }

@@ -49,13 +49,18 @@
 
 .arrow {
   flex: none;
-  font-size: 0.75rem;
   color: var(--ink-soft);
   transition: transform var(--motion-press);
 }
 
 .trigger[aria-expanded="true"] .arrow {
   transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arrow {
+    transition: none;
+  }
 }
 
 .iconSlot {
@@ -120,8 +125,6 @@
 
 .check {
   flex: none;
-  font-size: var(--fs-meta);
-  font-weight: 800;
 }
 
 @media (hover: hover) {

@@ -6,6 +6,7 @@ import {
   LEGAL_POLICY_UPDATED_AT,
   LEGAL_POLICY_VERSION,
 } from "@/lib/legal-policy";
+import Icon from "@/components/ui/Icon";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
@@ -20,7 +21,7 @@ export default function LegalPage() {
     <>
       <main className={styles.main}>
         <Link href="/" className={styles.back}>
-          ← 回故事屋
+          <Icon name="arrow-left" size={16} className="icon-lead" />回故事屋
         </Link>
 
         <h1 className={styles.title}>版權、隱私與使用條款</h1>

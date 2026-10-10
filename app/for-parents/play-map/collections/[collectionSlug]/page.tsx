@@ -78,17 +78,21 @@ function Breadcrumbs({ title }: { title: string }) {
       <ol>
         <li>
           <Link href="/">首頁</Link>
+          <Icon name="chevron-right" size={14} className={styles.crumbSep} />
         </li>
         <li>
           <Link href="/for-parents">家長專區</Link>
+          <Icon name="chevron-right" size={14} className={styles.crumbSep} />
         </li>
         <li>
           <Link href="/for-parents/play-map">親子遊樂地圖</Link>
+          <Icon name="chevron-right" size={14} className={styles.crumbSep} />
         </li>
         <li>
           <Link href="/for-parents/play-map/collections">
             各地親子景點整理
           </Link>
+          <Icon name="chevron-right" size={14} className={styles.crumbSep} />
         </li>
         <li aria-current="page">{title}</li>
       </ol>
@@ -150,7 +154,7 @@ export default async function PlaygroundCollectionPage({
       <div className={styles.shell}>
         <Breadcrumbs title={definition.title} />
         <Link className={styles.backLink} href="/for-parents/play-map/collections">
-          ← 回各地親子景點整理
+          <Icon name="arrow-left" size={16} className="icon-lead" />回各地親子景點整理
         </Link>
 
         <article>
@@ -216,7 +220,7 @@ export default async function PlaygroundCollectionPage({
                 {related.map((relatedDefinition) => (
                   <li key={relatedDefinition.slug}>
                     <Link href={collectionPath(relatedDefinition.slug)}>
-                      {relatedDefinition.title} →
+                      {relatedDefinition.title}<Icon name="arrow-right" size={16} className="icon-trail" />
                     </Link>
                   </li>
                 ))}

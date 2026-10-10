@@ -6,6 +6,7 @@ import {
   type CatalogEpisodeOption,
 } from "@/lib/character-catalog";
 import { playSfx } from "@/lib/sfx";
+import Icon from "@/components/ui/Icon";
 import styles from "./CharacterCard.module.css";
 
 type CharacterEpisodeSelectProps = {
@@ -46,7 +47,7 @@ export default function CharacterEpisodeSelect({
           ))}
         </select>
         <span className={styles.episodeSelectArrow} aria-hidden>
-          ▾
+          <Icon name="chevron-down" size={16} />
         </span>
       </span>
     </label>

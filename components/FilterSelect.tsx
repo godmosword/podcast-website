@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { playSfx } from "@/lib/sfx";
+import Icon from "@/components/ui/Icon";
 import styles from "./FilterSelect.module.css";
 
 export type FilterSelectOption = {
@@ -128,9 +129,7 @@ export default function FilterSelect({
           {current.icon != null && renderIcon(current.icon)}
           <span className={styles.triggerLabel}>{current.label}</span>
         </span>
-        <span className={styles.arrow} aria-hidden>
-          ▾
-        </span>
+        <Icon name="chevron-down" size={16} className={styles.arrow} />
       </button>
 
       {open && (
@@ -158,9 +157,7 @@ export default function FilterSelect({
                 {opt.icon != null && renderIcon(opt.icon)}
                 <span className={styles.optionLabel}>{opt.label}</span>
                 {active && (
-                  <span className={styles.check} aria-hidden>
-                    ✓
-                  </span>
+                  <Icon name="check" size={16} className={styles.check} />
                 )}
               </button>
             );

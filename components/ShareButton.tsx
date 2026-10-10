@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { trackShareClick } from "@/lib/analytics";
+import Icon from "@/components/ui/Icon";
 import styles from "./ShareButton.module.css";
 
 type ShareButtonProps = {
@@ -15,35 +16,6 @@ type ShareButtonProps = {
   /** 單集頁：底線文字，保留可見字與複製狀態。 */
   appearance?: "solid" | "quiet";
 };
-
-function LinkIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      width={18}
-      height={18}
-      aria-hidden
-      focusable="false"
-    >
-      <path
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
-      />
-      <path
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
-      />
-    </svg>
-  );
-}
 
 function LineIcon() {
   return (
@@ -96,7 +68,7 @@ export default function ShareButton({
         aria-live="polite"
       >
         <span className={styles.icon}>
-          <LinkIcon />
+          <Icon name="link" size={18} />
         </span>
         <span>
           {copyState === "copied"

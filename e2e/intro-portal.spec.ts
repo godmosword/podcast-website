@@ -155,7 +155,7 @@ test.describe("Intro Portal · Phase 4 route and entry", () => {
   test("Landing to story back and forward stays on content", async ({ page }) => {
     await skipIntroOverlay(page);
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    await page.getByRole("link", { name: "車車遊樂園的故事 →" }).click();
+    await page.getByRole("link", { name: "車車遊樂園的故事" }).click();
     await expect(page).toHaveURL(/\/stories/);
     await page.goBack({ waitUntil: "domcontentloaded" });
     await expect(page).toHaveURL(/\/$/);

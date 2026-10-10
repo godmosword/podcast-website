@@ -12,6 +12,7 @@ import {
   playgroundItemListJsonLd,
 } from "@/lib/json-ld";
 import { STATIC_PAGE_MODIFIED_DATES } from "@/lib/page-freshness";
+import Icon from "@/components/ui/Icon";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
@@ -48,7 +49,7 @@ export default function PlayMapPage() {
       </Suspense>
       <div className={styles.collectionsLinkWrap}>
         <Link className={styles.collectionsLink} href="/for-parents/play-map/collections">
-          看各地親子景點整理 <span aria-hidden>→</span>
+          看各地親子景點整理<Icon name="arrow-right" size={16} className={styles.collectionsIcon} />
         </Link>
       </div>
       <SiteFooter

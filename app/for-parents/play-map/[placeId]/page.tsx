@@ -86,12 +86,15 @@ function Breadcrumbs({ placeName }: { placeName: string }) {
       <ol>
         <li>
           <Link href="/">首頁</Link>
+          <Icon name="chevron-right" size={14} className={styles.crumbSep} />
         </li>
         <li>
           <Link href="/for-parents">家長專區</Link>
+          <Icon name="chevron-right" size={14} className={styles.crumbSep} />
         </li>
         <li>
           <Link href="/for-parents/play-map">親子遊樂地圖</Link>
+          <Icon name="chevron-right" size={14} className={styles.crumbSep} />
         </li>
         <li aria-current="page">{placeName}</li>
       </ol>
@@ -150,7 +153,7 @@ export default async function PlaygroundDetailPage({
       <div className={styles.shell}>
         <Breadcrumbs placeName={place.name} />
         <Link href="/for-parents/play-map" className={styles.backLink}>
-          ← 回親子遊樂地圖
+          <Icon name="arrow-left" size={16} className="icon-lead" />回親子遊樂地圖
         </Link>
 
         <article className={styles.article}>

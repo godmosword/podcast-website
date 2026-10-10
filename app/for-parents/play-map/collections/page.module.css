@@ -22,10 +22,11 @@
   list-style: none;
 }
 
-.breadcrumbs li:not(:last-child)::after {
+/* 麵包屑分隔：共用細線向右箭頭（chevron-right），和景點詳情頁同一套 */
+.crumbSep {
   margin-left: 10px;
   color: var(--ink-soft);
-  content: "/";
+  vertical-align: -0.15em;
 }
 
 .breadcrumbs a,
@@ -146,9 +147,8 @@
 
 .linkArrow {
   flex: 0 0 auto;
+  display: flex;
   color: var(--accent-ink);
-  font-size: var(--fs-h3);
-  font-weight: 800;
 }
 
 .note {

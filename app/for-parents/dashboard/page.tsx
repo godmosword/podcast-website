@@ -4,6 +4,7 @@ import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import { ParentDashboard } from "@/components/for-parents/ParentDashboard";
 import { ParentGate } from "@/components/for-parents/ParentGate";
+import Icon from "@/components/ui/Icon";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
@@ -30,7 +31,7 @@ export default function ParentDashboardPage() {
           在這台裝置上，看看這週聽了多久、哪些故事聽到一半、小遊戲玩了多久。不做成績排名，只幫家長掌握共讀與探索節奏。
         </p>
         <Link href="/for-parents" className={styles.guideLink}>
-          ← 回到親子指南
+          <Icon name="arrow-left" size={16} className="icon-lead" />回到親子指南
         </Link>
       </header>
       <ParentGate>

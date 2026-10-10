@@ -13,6 +13,7 @@ import {
 } from "react";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
+import Icon from "@/components/ui/Icon";
 import styles from "./GamePageShell.module.css";
 
 const GamePlayChromeSlotContext = createContext<HTMLElement | null>(null);
@@ -70,7 +71,7 @@ type GamePlayHeaderProps = {
   playTitle: string;
   /**
    * 著色本：只留遊樂園圖示。文字仍在無障礙名稱裡。
-   * 其他遊戲維持「← 回遊樂園」，避免只剩箭頭認不出路。
+   * 其他遊戲維持「箭頭＋回遊樂園」文字，避免只剩圖示認不出路。
    */
   iconBack?: boolean;
 };
@@ -117,7 +118,7 @@ export function GamePlayHeader({ playTitle, iconBack = false }: GamePlayHeaderPr
         className={iconBack ? `${styles.back} ${styles.backIcon}` : styles.back}
         onClick={onBack}
       >
-        {iconBack ? <ParkGateIcon /> : <span aria-hidden>←</span>}
+        {iconBack ? <ParkGateIcon /> : <Icon name="arrow-left" size={18} />}
         <span className={iconBack ? styles.srOnly : undefined}>回遊樂園</span>
       </Link>
       <h1 id="game-play-title" className={styles.playTitle}>

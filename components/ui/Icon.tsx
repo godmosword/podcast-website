@@ -7,13 +7,27 @@ export type IconProps = {
   className?: string;
 };
 
+/**
+ * 線寬寫在根 <svg> 上讓子元素繼承（見 lineWidthFor），所以這裡不寫 strokeWidth。
+ * 其他元件自畫同一套線性圖時用 ICON_LINE（含 2 的線寬）。
+ */
 const STROKE = {
   fill: "none",
   stroke: "currentColor",
-  strokeWidth: 2,
   strokeLinecap: "round" as const,
   strokeLinejoin: "round" as const,
 };
+
+/** 全站線性圖示的畫法：24 格、2 單位線、圓角收尾、跟字色走。 */
+export const ICON_LINE = { ...STROKE, strokeWidth: 2 };
+
+/**
+ * 線寬（viewBox 單位）。24 格畫 2 單位線，圖示縮小時線也跟著變細：14px 只剩約 1.2px，
+ * 比旁邊 20px 的圖示和粗字淡一截。小於 20px 時補到「實際約 1.67px」，和 20px 的預設尺寸一樣粗。
+ */
+export function lineWidthFor(size: number): number {
+  return size < DEFAULT_ICON_SIZE ? Math.round(((2 * DEFAULT_ICON_SIZE) / size) * 100) / 100 : 2;
+}
 
 function svgProps(size: number, className?: string) {
   return {
@@ -21,6 +35,7 @@ function svgProps(size: number, className?: string) {
     width: size,
     height: size,
     className,
+    strokeWidth: lineWidthFor(size),
     "aria-hidden": true as const,
     focusable: "false" as const,
   };
@@ -67,6 +82,51 @@ function renderGlyph(name: IconName) {
       return (
         <g {...STROKE}>
           <path d="m6 9.5 6 6 6-6" />
+        </g>
+      );
+    case "arrow-left":
+      return (
+        <g {...STROKE}>
+          <path d="M19 12H5M11 6l-6 6 6 6" />
+        </g>
+      );
+    case "arrow-right":
+      return (
+        <g {...STROKE}>
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </g>
+      );
+    case "check":
+      return (
+        <g {...STROKE}>
+          <path d="m5 12.5 4.5 4.5L19 7.5" />
+        </g>
+      );
+    case "plus":
+      return (
+        <g {...STROKE}>
+          <path d="M12 5v14M5 12h14" />
+        </g>
+      );
+    case "minus":
+      return (
+        <g {...STROKE}>
+          <path d="M5 12h14" />
+        </g>
+      );
+    case "link":
+      return (
+        <g {...STROKE}>
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+        </g>
+      );
+    case "home":
+      return (
+        <g {...STROKE}>
+          <path d="M3 11.5 12 4l9 7.5" />
+          <path d="M5.5 10.5V20h13v-9.5" />
+          <path d="M10 20v-5h4v5" />
         </g>
       );
     case "settings":
@@ -228,11 +288,13 @@ function renderGlyph(name: IconName) {
         </g>
       );
     case "star":
-      // 實心：「聽完／推薦」是拿到的獎勵，填色比線條好認；顏色由 currentColor 決定
+      // 實心：「聽完／推薦」是拿到的獎勵，填色比線條好認；顏色由 currentColor 決定。
+      // 描邊只為圓角，固定 2：跟著 lineWidthFor 加粗會讓小星星整顆變胖、角變鈍。
       return (
         <path
           d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"
           {...STROKE}
+          strokeWidth={2}
           fill="currentColor"
         />
       );

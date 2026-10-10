@@ -9,6 +9,7 @@ import { topicDefinitionSummary, topicFaqs } from "@/lib/topic-geo";
 import JsonLd from "@/components/JsonLd";
 import SiteFooter from "@/components/SiteFooter";
 import StoryCard from "@/components/StoryCard";
+import Icon from "@/components/ui/Icon";
 import styles from "./page.module.css";
 
 export function generateStaticParams() {
@@ -69,7 +70,7 @@ export default async function TopicPage({
         ])}
       />
       <Link href="/" className={styles.back}>
-        ← 回故事屋
+        <Icon name="arrow-left" size={16} className="icon-lead" />回故事屋
       </Link>
 
       <h1 className={styles.title}>{tag}主題故事</h1>
@@ -85,7 +86,7 @@ export default async function TopicPage({
       </ul>
 
       <p className={styles.more}>
-        <Link href="/topic">瀏覽其他主題 →</Link>
+        <Link href="/topic">瀏覽其他主題<Icon name="arrow-right" size={16} className="icon-trail" /></Link>
         {" · "}
         <Link href="/for-parents">親子指南</Link>
       </p>

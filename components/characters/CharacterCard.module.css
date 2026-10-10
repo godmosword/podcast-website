@@ -188,7 +188,6 @@
   align-items: center;
   pointer-events: none;
   color: var(--accent-ink);
-  font-size: 0.75rem;
 }
 
 @media (max-width: 640px) {

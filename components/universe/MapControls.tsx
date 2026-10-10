@@ -1,5 +1,6 @@
 "use client";
 
+import Icon from "@/components/ui/Icon";
 import styles from "./MapControls.module.css";
 
 type MapControlsProps = {
@@ -27,38 +28,7 @@ export default function MapControls({
         onClick={onReset}
         aria-label="回樂園（置中車車樂園）"
       >
-        <svg
-          viewBox="0 0 24 24"
-          width="20"
-          height="20"
-          aria-hidden="true"
-          focusable="false"
-        >
-          <path
-            d="M3 11.5 12 4l9 7.5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M5.5 10.5V20h13v-9.5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M10 20v-5h4v5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <Icon name="home" size={20} />
         <span className={styles.homeLabel}>回樂園</span>
       </button>
       <button
@@ -68,7 +38,7 @@ export default function MapControls({
         aria-label="放大地圖（右下角加號）"
         disabled={!canZoomIn}
       >
-        ＋
+        <Icon name="plus" size={24} />
       </button>
       <button
         type="button"
@@ -77,7 +47,7 @@ export default function MapControls({
         aria-label="縮小地圖（右下角減號）"
         disabled={!canZoomOut}
       >
-        －
+        <Icon name="minus" size={24} />
       </button>
     </div>
   );

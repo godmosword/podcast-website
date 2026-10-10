@@ -6,6 +6,7 @@ import {
   parentArticlePath,
   parentArticlesIndexPath,
 } from "@/lib/parent-articles";
+import Icon from "@/components/ui/Icon";
 import styles from "./ParentArticleView.module.css";
 
 function ArticleBlock({
@@ -60,7 +61,7 @@ export function ParentArticleView({
   return (
     <article className={styles.article}>
       <Link className={styles.back} href={parentArticlesIndexPath()}>
-        ← 回到育兒文章分享
+        <Icon name="arrow-left" size={16} className="icon-lead" />回到育兒文章分享
       </Link>
       <header className={styles.header}>
         <h1 className={styles.title}>{article.title}</h1>

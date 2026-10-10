@@ -1,4 +1,5 @@
 import type { ParentGuide } from "@/lib/geo-content-contract";
+import Icon from "@/components/ui/Icon";
 import styles from "./ShowNotes.module.css";
 
 type Props = {
@@ -13,7 +14,10 @@ export default function ShowNotes({ slug, parentGuide }: Props) {
 
   return (
     <details className={styles.wrap}>
-      <summary className={styles.summary}>這集可以聊什麼（家長共讀指引）</summary>
+      <summary className={styles.summary}>
+        <Icon name="chevron-right" size={16} className="icon-lead icon-disclosure" />
+        這集可以聊什麼（家長共讀指引）
+      </summary>
       <div className={styles.body}>
         <p id={summaryId} className={styles.lede}>
           {parentGuide.summary}

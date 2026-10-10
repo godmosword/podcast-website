@@ -27,6 +27,11 @@
   box-shadow: var(--shadow-sm);
 }
 
+/* 已有 gap，箭頭不再加 icon-trail 外距 */
+.collectionsIcon {
+  flex: none;
+}
+
 .collectionsLink:hover {
   text-decoration: underline;
   text-underline-offset: 3px;

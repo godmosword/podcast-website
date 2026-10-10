@@ -25,8 +25,8 @@ test.describe("UX-P1-5 親子指南與播放頁觸控", () => {
       }),
     ).toBeVisible();
 
-    const mapCta = page.getByRole("link", { name: "開啟親子遊樂地圖 →" });
-    const dashCta = page.getByRole("link", { name: "開啟家庭儀表板 →" });
+    const mapCta = page.getByRole("link", { name: "開啟親子遊樂地圖" });
+    const dashCta = page.getByRole("link", { name: "開啟家庭儀表板" });
     await expectTouchTarget(mapCta, "親子遊樂地圖 CTA");
     await expectTouchTarget(dashCta, "家庭儀表板 CTA");
 
@@ -34,7 +34,7 @@ test.describe("UX-P1-5 親子指南與播放頁觸控", () => {
     await expect(page).toHaveURL(/\/for-parents\/play-map/);
 
     await page.goto("/for-parents");
-    await page.getByRole("link", { name: "開啟家庭儀表板 →" }).click();
+    await page.getByRole("link", { name: "開啟家庭儀表板" }).click();
     await expect(page).toHaveURL(/\/for-parents\/dashboard/);
   });
 
@@ -213,7 +213,7 @@ test.describe("每集共讀區觸控目標", () => {
         const item = outer.nth(i);
         await item.locator("> summary").click();
 
-        const storyLink = item.getByRole("link", { name: "打開這一集 →" });
+        const storyLink = item.getByRole("link", { name: "打開這一集" });
         await expectTouchTarget(storyLink, `第 ${i + 1} 集「打開這一集」`);
 
         // ShowNotes 是巢在內層的另一個 <details>，只有 parentGuide 存在時才渲染

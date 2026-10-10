@@ -8,6 +8,7 @@ import { topicIndexDefinitionSummary } from "@/lib/topic-index-geo";
 import StoryImage from "@/components/StoryImage";
 import TopicIcon from "@/components/TopicIcon";
 import SiteFooter from "@/components/SiteFooter";
+import Icon from "@/components/ui/Icon";
 import styles from "./page.module.css";
 
 export function generateMetadata(): Metadata {
@@ -41,7 +42,7 @@ export default function TopicIndexPage() {
   return (
     <main className={styles.main}>
       <Link href="/" className={styles.back}>
-        ← 回故事屋
+        <Icon name="arrow-left" size={16} className="icon-lead" />回故事屋
       </Link>
 
       <h1 className={styles.title}>主題分類</h1>
