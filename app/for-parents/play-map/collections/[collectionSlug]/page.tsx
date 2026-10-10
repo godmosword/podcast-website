@@ -150,7 +150,7 @@ export default async function PlaygroundCollectionPage({
       <div className={styles.shell}>
         <Breadcrumbs title={definition.title} />
         <Link className={styles.backLink} href="/for-parents/play-map/collections">
-          ← 回各地親子景點整理
+          <Icon name="arrow-left" size={16} className="icon-lead" />回各地親子景點整理
         </Link>
 
         <article>
@@ -216,7 +216,7 @@ export default async function PlaygroundCollectionPage({
                 {related.map((relatedDefinition) => (
                   <li key={relatedDefinition.slug}>
                     <Link href={collectionPath(relatedDefinition.slug)}>
-                      {relatedDefinition.title} →
+                      {relatedDefinition.title}<Icon name="arrow-right" size={16} className="icon-trail" />
                     </Link>
                   </li>
                 ))}

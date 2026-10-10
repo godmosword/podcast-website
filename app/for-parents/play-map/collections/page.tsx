@@ -10,6 +10,7 @@ import {
 } from "@/lib/playground-collections";
 import { breadcrumbListJsonLd } from "@/lib/json-ld";
 import styles from "./page.module.css";
+import Icon from "@/components/ui/Icon";
 
 export const metadata: Metadata = {
   title: { absolute: "各地親子景點整理｜車車遊樂園" },
@@ -60,8 +61,8 @@ function CollectionLink({
           <strong>{title}</strong>
           <small>{count} 個可以去的景點</small>
         </span>
-        <span className={styles.linkArrow} aria-hidden>
-          →
+        <span className={styles.linkArrow}>
+          <Icon name="arrow-right" size={22} />
         </span>
       </Link>
     </li>
@@ -92,7 +93,7 @@ export default function PlaygroundCollectionsIndexPage() {
       <div className={styles.shell}>
         <Breadcrumbs />
         <Link className={styles.backLink} href="/for-parents/play-map">
-          ← 回親子遊樂地圖
+          <Icon name="arrow-left" size={16} className="icon-lead" />回親子遊樂地圖
         </Link>
 
         <header className={styles.hero}>

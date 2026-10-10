@@ -96,9 +96,9 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   expect(introBox, "GEO 導言應在 DOM").toBeTruthy();
   expect(introBox!.width).toBeLessThanOrEqual(2);
   expect(introBox!.height).toBeLessThanOrEqual(2);
-  await expect(page.getByRole("link", { name: "車車遊樂園的故事 →" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "車車遊樂園的故事" })).toBeVisible();
   await expect(
-    page.getByRole("link", { name: "車車遊樂園的故事 →" }),
+    page.getByRole("link", { name: "車車遊樂園的故事" }),
   ).toHaveAttribute("href", "/stories");
   await expect(page.getByRole("link", { name: "看小紅開進遊樂園" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: /聽最新一集/ })).toHaveCount(0);
@@ -232,7 +232,7 @@ test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
 
 async function expectStoriesFromLanding(page: import("@playwright/test").Page) {
   await page.goto("/");
-  await page.getByRole("link", { name: "車車遊樂園的故事 →" }).click();
+  await page.getByRole("link", { name: "車車遊樂園的故事" }).click();
   await expect(page).toHaveURL(/\/stories/);
   await expect(page.getByRole("heading", { name: "找故事" })).toBeVisible();
 }
@@ -240,10 +240,10 @@ async function expectStoriesFromLanding(page: import("@playwright/test").Page) {
 test("Landing 四段 CTA href", async ({ page }) => {
   await page.goto("/");
   const expected = [
-    { label: "車車遊樂園的故事 →", href: "/stories" },
-    { label: "數綿羊123．睡前故事 →", href: "/topic/睡前" },
+    { label: "車車遊樂園的故事", href: "/stories" },
+    { label: "數綿羊123．睡前故事", href: "/topic/睡前" },
     { label: "好好玩的捏黏土（另開視窗）", href: /youtube\.com/ },
-    { label: "好習慣故事 →", href: "/topic/安全" },
+    { label: "好習慣故事", href: "/topic/安全" },
   ] as const;
   for (const { label, href } of expected) {
     const link = page.getByRole("link", { name: label }).first();
@@ -337,7 +337,7 @@ test("沒有場景字幕與角色時不渲染模板大綱", async ({ page }) => 
   await expect(page.getByRole("heading", { name: "出場角色" })).toHaveCount(0);
   await expect(page.getByText(/WebVTT/)).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "本集介紹" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "給爸媽：一起聊聊 →" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "給爸媽：一起聊聊" })).toBeVisible();
   await expect(page.getByRole("link", { name: /車車樂園/ })).toBeVisible();
 });
 

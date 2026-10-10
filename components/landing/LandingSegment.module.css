@@ -225,6 +225,12 @@
   animation: none;
 }
 
+/* 停掉漂移動畫時「回第一個專區」仍要朝上（方向原本寫在 keyframes 裡） */
+.moreSkip[data-skip-direction="first"]:active svg,
+.moreSkip[data-skip-direction="first"]:focus-visible svg {
+  transform: rotate(180deg);
+}
+
 .moreSkip:focus-visible {
   outline: 3px solid var(--on-dark);
   outline-offset: 3px;

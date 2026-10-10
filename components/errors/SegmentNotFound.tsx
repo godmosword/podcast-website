@@ -1,6 +1,7 @@
 import Link from "next/link";
 import NotFoundHero from "@/components/not-found/NotFoundHero";
 import styles from "@/app/not-found.module.css";
+import Icon from "@/components/ui/Icon";
 
 type SegmentNotFoundProps = {
   title: string;
@@ -28,7 +29,7 @@ export default function SegmentNotFound({
       <h1 className={styles.title}>{title}</h1>
       <p className={styles.message}>{message}</p>
       <Link href={backHref} className={styles.cta}>
-        ← {backLabel}
+        <Icon name="arrow-left" size={16} className="icon-lead" />{backLabel}
       </Link>
     </main>
   );

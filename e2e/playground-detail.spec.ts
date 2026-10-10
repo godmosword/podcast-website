@@ -35,7 +35,7 @@ test.describe("親子景點 detail pages", () => {
     await expect(page.getByRole("heading", { name: "媽米帶孩子時會注意" })).toBeVisible();
     await expect(page.getByRole("link", { name: /開始導航前往/ })).toBeVisible();
     await expect(page.getByRole("link", { name: /官方網站/ })).toBeVisible();
-    await expect(page.getByRole("link", { name: "← 回親子遊樂地圖" })).toHaveAttribute(
+    await expect(page.getByRole("link", { name: "回親子遊樂地圖" })).toHaveAttribute(
       "href",
       "/for-parents/play-map",
     );

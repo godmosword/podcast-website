@@ -14,6 +14,7 @@ import {
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import styles from "./GamePageShell.module.css";
+import Icon from "@/components/ui/Icon";
 
 const GamePlayChromeSlotContext = createContext<HTMLElement | null>(null);
 const GamePlayChromeSlotRefContext = createContext<
@@ -117,7 +118,7 @@ export function GamePlayHeader({ playTitle, iconBack = false }: GamePlayHeaderPr
         className={iconBack ? `${styles.back} ${styles.backIcon}` : styles.back}
         onClick={onBack}
       >
-        {iconBack ? <ParkGateIcon /> : <span aria-hidden>←</span>}
+        {iconBack ? <ParkGateIcon /> : <Icon name="arrow-left" size={18} />}
         <span className={iconBack ? styles.srOnly : undefined}>回遊樂園</span>
       </Link>
       <h1 id="game-play-title" className={styles.playTitle}>

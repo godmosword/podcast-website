@@ -1,5 +1,7 @@
 /** 著色工具列圖示：小孩認得出的實物畫具，家長操作列用線性圖。 */
 
+import { ICON_LINE } from "@/components/ui/Icon";
+
 type IconProps = {
   className?: string;
 };
@@ -12,13 +14,8 @@ const BOX = {
   focusable: "false" as const,
 };
 
-const STROKE = {
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 2,
-  strokeLinecap: "round" as const,
-  strokeLinejoin: "round" as const,
-};
+/** 家長操作列的線條：同全站共用圖示（components/ui/Icon 的 ICON_LINE）。 */
+const STROKE = ICON_LINE;
 
 /** 與著色色盤同色，選中時靠 currentColor 描邊維持輪廓。 */
 const CRAYON_TIP = "#f4a261";

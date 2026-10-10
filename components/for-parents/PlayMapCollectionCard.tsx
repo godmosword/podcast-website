@@ -4,6 +4,7 @@ import { formatAgeRangeLabel } from "@/lib/playground-distance";
 import { composeParentBlurb, clipParentVoice } from "@/lib/playground-parent-voice";
 import { playgroundDetailPath } from "@/lib/playground-detail";
 import styles from "./PlayMapCollectionCard.module.css";
+import Icon from "@/components/ui/Icon";
 
 type PlayMapCollectionCardProps = {
   place: Playground;
@@ -28,8 +29,8 @@ export function PlayMapCollectionCard({
         <article>
           <div className={styles.heading}>
             <h3>{place.name}</h3>
-            <span className={styles.arrow} aria-hidden>
-              →
+            <span className={styles.arrow}>
+              <Icon name="arrow-right" size={22} />
             </span>
           </div>
           <p className={styles.meta}>

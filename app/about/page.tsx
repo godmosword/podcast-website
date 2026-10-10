@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
 import styles from "./page.module.css";
+import Icon from "@/components/ui/Icon";
 
 export const metadata: Metadata = {
   title: "關於我們",
@@ -15,7 +16,7 @@ export default function AboutPage() {
   return (
     <main className={styles.main}>
       <Link href="/" className={styles.back}>
-        ← 回故事屋
+        <Icon name="arrow-left" size={16} className="icon-lead" />回故事屋
       </Link>
 
       <h1 className={styles.title}>關於車車遊樂園</h1>

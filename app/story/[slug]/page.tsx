@@ -26,6 +26,7 @@ import StoryCoverMorph from "@/components/story/StoryCoverMorph";
 import StoryImage from "@/components/StoryImage";
 import StoryMeta from "@/components/StoryMeta";
 import styles from "./page.module.css";
+import Icon from "@/components/ui/Icon";
 
 export function generateStaticParams() {
   return getStories().map((story) => ({ slug: story.slug }));
@@ -85,7 +86,7 @@ export default async function StoryDetailPage({
         ])}
       />
       <Link href="/stories" className={styles.back}>
-        ← 回故事屋
+        <Icon name="arrow-left" size={16} className="icon-lead" />回故事屋
       </Link>
 
       <article className={styles.article}>
@@ -144,13 +145,16 @@ export default async function StoryDetailPage({
 
         {hasParentCoListen ? (
           <p className={styles.parentCta}>
-            <Link href="/for-parents#co-listen">給爸媽：一起聊聊 →</Link>
+            <Link href="/for-parents#co-listen">給爸媽：一起聊聊<Icon name="arrow-right" size={16} className="icon-trail" /></Link>
           </p>
         ) : null}
 
         {sceneCaptions.length > 0 ? (
           <details className={`${styles.contentSection} ${styles.outline}`}>
-            <summary className={styles.outlineSummary}>故事大綱</summary>
+            <summary className={styles.outlineSummary}>
+              <Icon name="chevron-right" size={18} className={`icon-lead icon-disclosure ${styles.outlineIcon}`} />
+              故事大綱
+            </summary>
             <ol className={styles.lines}>
               {sceneCaptions.map((line, i) => (
                 <li key={`${story.slug}-caption-${i}`}>{line}</li>

@@ -10,6 +10,7 @@ import styles from "./HeroWorld.module.css";
 import { getActiveClock, LOAD_TIMEOUT_MS, MAX_TICK_DELTA_MS, TICK_MS } from "./active-clock";
 import { EXIT_TRANSITION_MS, TRANSITION_RESET_MS, markEnterIntent, resolveEnterAction } from "./enter-transition";
 import { dismissIntroGate } from "@/lib/intro-gate";
+import Icon from "@/components/ui/Icon";
 
 const Scene = dynamic(() => import("./HeroScene"), { ssr: false });
 
@@ -234,8 +235,8 @@ export default function HeroWorld({ mode = "page", onDismiss }: { mode?: HeroWor
       </div>
       <div className={styles.actions}>
         {overlay
-          ? <button type="button" className={styles.cta} data-intro-dismiss onClick={enter}>進入車車遊樂園 <span aria-hidden="true">→</span></button>
-          : <Link href="/?enter=1" replace className={styles.cta} onClick={enter}>進入車車遊樂園 <span aria-hidden="true">→</span></Link>}
+          ? <button type="button" className={styles.cta} data-intro-dismiss onClick={enter}>進入車車遊樂園<Icon name="arrow-right" size={18} className="icon-trail" /></button>
+          : <Link href="/?enter=1" replace className={styles.cta} onClick={enter}>進入車車遊樂園<Icon name="arrow-right" size={18} className="icon-trail" /></Link>}
       </div>
       </div>
       {parallax ? (

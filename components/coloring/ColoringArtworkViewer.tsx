@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- Local IndexedDB Blob URLs cannot use the remote image optimizer. */
 "use client";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import Icon from "@/components/ui/Icon";
+import Icon, { ICON_LINE } from "@/components/ui/Icon";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import {
   loadColoringArtwork,
@@ -16,13 +16,7 @@ import {
 } from "@/lib/coloring/export-actions";
 import styles from "./ColoringPagePicker.module.css";
 
-const LINE = {
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 2,
-  strokeLinecap: "round" as const,
-  strokeLinejoin: "round" as const,
-};
+const LINE = ICON_LINE;
 
 /** 跟漢堡抽屜同一種 24px 細線圖，不用另一套填色圖示。 */
 function LineIcon({ children }: { children: ReactNode }) {

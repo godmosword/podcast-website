@@ -1,6 +1,38 @@
 @import "./motion.css";
 @import "./scroll-driven.css";
 
+/* 文字旁的共用線性圖示（components/ui/Icon）：「← 回…」用 icon-lead、「… →」與外部連結用 icon-trail。
+   對齊字的中線、和字之間留一點空；在 flex 容器裡不被壓縮。介面不再用「←」「→」等文字符號。 */
+.icon-lead,
+.icon-trail {
+  flex: none;
+  vertical-align: -0.15em;
+}
+
+.icon-lead {
+  margin-inline-end: 0.3em;
+}
+
+.icon-trail {
+  margin-inline-start: 0.3em;
+}
+
+/* 展開收合（<details>）的標記：共用 chevron-right（配 icon-lead），打開時轉 90° 朝下。
+   只看自己這層 summary（子選擇器），巢狀的 details 各自轉；減少動態時直接切換。 */
+.icon-disclosure {
+  transition: transform var(--motion-press);
+}
+
+details[open] > summary .icon-disclosure {
+  transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .icon-disclosure {
+    transition: none;
+  }
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

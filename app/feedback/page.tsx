@@ -17,6 +17,7 @@ import {
 import { isFeedbackDbConfigured } from "@/lib/feedback-db";
 import { modernRasterPaths } from "@/lib/modern-image-src";
 import styles from "./page.module.css";
+import Icon from "@/components/ui/Icon";
 
 const FEEDBACK_HERO = modernRasterPaths(FEEDBACK_HERO_SRC);
 
@@ -54,7 +55,7 @@ export default function FeedbackPage() {
     <div className={styles.page}>
       <main className={styles.main}>
         <Link href="/" className={styles.back}>
-          ← 回故事屋
+          <Icon name="arrow-left" size={16} className="icon-lead" />回故事屋
         </Link>
 
         <header className={styles.header}>

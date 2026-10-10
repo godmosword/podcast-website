@@ -44,13 +44,9 @@
   display: none;
 }
 
-.summary::before {
-  content: "▸ ";
+/* 展開標記：共用 chevron-right（全域 icon-disclosure 負責開合轉向） */
+.summaryIcon {
   color: var(--accent-ink);
-}
-
-.details[open] > .summary::before {
-  content: "▾ ";
 }
 
 .body {

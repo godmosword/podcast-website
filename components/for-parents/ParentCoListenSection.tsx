@@ -4,6 +4,7 @@ import FamilyActivityCard from "@/components/story/FamilyActivityCard";
 import ShowNotes from "@/components/story/ShowNotes";
 import { storyDisplayTitle } from "@/lib/story-title";
 import styles from "./ParentCoListenSection.module.css";
+import Icon from "@/components/ui/Icon";
 
 type Props = {
   stories: Story[];
@@ -28,6 +29,7 @@ export default function ParentCoListenSection({ stories }: Props) {
           <li key={story.slug} className={styles.item}>
             <details className={styles.details}>
               <summary className={styles.summary}>
+                <Icon name="chevron-right" size={18} className={`icon-lead icon-disclosure ${styles.summaryIcon}`} />
                 EP {story.ep}　{storyDisplayTitle(story)}
               </summary>
               <div className={styles.body}>
@@ -52,7 +54,7 @@ export default function ParentCoListenSection({ stories }: Props) {
                   </div>
                 ) : null}
                 <Link href={`/story/${story.slug}`} className={styles.storyLink}>
-                  打開這一集 →
+                  打開這一集<Icon name="arrow-right" size={16} className="icon-trail" />
                 </Link>
               </div>
             </details>

@@ -342,48 +342,6 @@
   color: var(--ink-soft);
 }
 
-.expandable {
-  margin-top: var(--space-3);
-}
-
-.expandable > summary {
-  display: flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 8px 10px;
-  margin: 0 -10px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-size: var(--fs-control);
-  font-weight: 700;
-  color: var(--accent-ink);
-  list-style: none;
-  transition: background var(--motion-press);
-}
-
-@media (hover: hover) {
-  .expandable > summary:hover {
-    background: var(--bg-2);
-  }
-}
-
-.expandable > summary:focus-visible {
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-
-.expandable > summary::-webkit-details-marker {
-  display: none;
-}
-
-.expandable > summary::before {
-  content: "▸ ";
-}
-
-.expandable[open] > summary::before {
-  content: "▾ ";
-}
-
 .outline {
   padding-top: var(--space-3);
 }
@@ -404,11 +362,7 @@
   display: none;
 }
 
-.outlineSummary::before {
-  content: "▸ ";
+/* 展開標記：共用 chevron-right（全域 icon-disclosure 負責開合轉向） */
+.outlineIcon {
   color: var(--accent-ink);
-}
-
-.outline[open] > .outlineSummary::before {
-  content: "▾ ";
 }
