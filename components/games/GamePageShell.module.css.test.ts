@@ -8,9 +8,7 @@ describe("GamePageShell.module.css 抬頭", () => {
     "",
   );
 
-  it("毛玻璃只放在 ::before：.playHeader 本身不得有 backdrop-filter（Safari 會連「回遊樂園」一起糊）", () => {
-    const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)];
-    const withBackdrop = rules.filter(([, , body]) => /backdrop-filter/.test(body!));
-    expect(withBackdrop.map(([, selector]) => selector!.trim())).toEqual([".playHeader::before"]);
+  it("抬頭不得用 backdrop-filter（iOS Safari 上 sticky 抬頭帶毛玻璃，「回遊樂園」會糊）", () => {
+    expect(css).not.toMatch(/backdrop-filter/);
   });
 });
