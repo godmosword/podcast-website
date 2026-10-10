@@ -22,6 +22,15 @@ describe("SiteNavBar.module.css 漢堡與抽屜", () => {
     expect(desktopBlock).not.toMatch(/\.panel\s*\{[^}]*display:\s*none/);
   });
 
+  it("毛玻璃只放在 ::before：.bar／.inner 本身不得有 backdrop-filter（Safari 會連裡面的字一起糊）", () => {
+    const rules = [...css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^{}]*)\}/g)];
+    const withBackdrop = rules.filter(([, , body]) => /backdrop-filter/.test(body!));
+    expect(withBackdrop.length).toBeGreaterThan(0);
+    for (const [, selector] of withBackdrop) {
+      expect(selector!.trim()).toMatch(/::before$/);
+    }
+  });
+
   it("抽屜關閉時以 display:none 隱藏，而非只用 opacity", () => {
     expect(css).toMatch(/\.panel\[data-open="false"\]\s*\{[\s\S]*?display:\s*none/);
   });
