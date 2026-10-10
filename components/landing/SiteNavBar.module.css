@@ -2,8 +2,8 @@
   position: sticky;
   top: 0;
   z-index: 40;
-  /* 行動：近不透明底 + hairline；不隨 night 反轉。不用 backdrop-filter（見下方說明） */
-  background: color-mix(in srgb, var(--landing-nav-cta-bg) 94%, transparent);
+  /* 行動：不透明底 + hairline；不隨 night 反轉。底色必須完全不透明（見下方說明） */
+  background: var(--landing-nav-cta-bg);
   color: var(--landing-nav-ink);
   border-bottom: 1px solid var(--landing-nav-border);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
@@ -15,22 +15,17 @@
 }
 
 /*
- * 頂欄不用 backdrop-filter：iPhone／iPad Safari 上，sticky 頂欄只要帶毛玻璃（放在 .bar 本身或
- * ::before 都一樣），品牌字與連結就會被合成得很糊（2026-10-10 實機回報兩次）。改用近不透明底色，
- * 後面內容幾乎不透出，不靠模糊也讀得清楚。新增毛玻璃前先在 iOS 實機確認字仍清楚。
+ * 頂欄底色必須完全不透明，也不得用 backdrop-filter。
+ * iOS 26 起，iPhone／iPad 會在狀態列下方加一道往下淡出的漸層模糊（Liquid Glass 的捲動邊緣效果），
+ * 主畫面 App 一定有、Safari 也會出現，CSS 和 meta 都關不掉。只有畫面頂端貼著一條全寬、不透明的
+ * sticky／fixed 色條時，系統才改用那條的顏色往上延伸、不加模糊。半透明（color-mix … transparent）
+ * 或毛玻璃都算「好幾種顏色」，頂欄的字就被糊掉：2026-10-10 實機回報三次，截圖量到同一個字
+ * 上半部比下半部糊、漢堡三條線由上往下越來越清楚。
  */
 
-/* 首頁 landing：同樣近不透明 */
-:global(html:has([data-landing-root])) .bar {
-  background: color-mix(in srgb, var(--landing-nav-cta-bg) 95%, transparent);
-}
-
-/* footer snap 進視窗：頂欄近不透明，避免白底頁尾 meta 透過 */
+/* 首頁 landing 與 footer snap：同樣不透明。權重高於 ≥980 的透明外層，所以首頁桌機是整條桃色底＋膠囊 */
+:global(html:has([data-landing-root])) .bar,
 .bar[data-nav-solid="true"] {
-  background: color-mix(in srgb, var(--landing-nav-cta-bg) 96%, transparent);
-}
-
-:global(html:has([data-landing-root])) .bar[data-nav-solid="true"] {
   background: var(--landing-nav-cta-bg);
 }
 
@@ -465,7 +460,8 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
-  /* 膠囊同樣不用毛玻璃（見 .bar 上方說明），底色調到近不透明，壓在首圖上也讀得清楚 */
+  /* 膠囊同樣不用毛玻璃（見 .bar 上方說明）。膠囊不貼畫面頂端，可以略透；
+   * 安裝成主畫面 App 時外層改不透明，見檔尾 display-mode: standalone */
 
   /* 漢堡在最右：面板右錨膠囊，勿再 left:8px（會假綠「在膠囊內」） */
   .panel {
@@ -501,5 +497,18 @@
 
   .bar[data-nav-solid="true"] .inner {
     background: color-mix(in srgb, var(--landing-nav-cta-bg) 96%, transparent);
+  }
+}
+
+/*
+ * 安裝成主畫面 App 的大螢幕（iPad 橫向等 ≥980）：透明外層讓畫面頂端沒有不透明色條，膠囊會吃到
+ * iOS 26 的頂端漸層模糊（見 .bar 上方說明）。外層改鋪不透明桃色，跟首頁桌機同一個樣子。
+ * 首頁也不再讓點擊穿透外層：WebKit 用命中測試找畫面頂端的色條，pointer-events: none 可能讓它略過頂欄。
+ */
+@media (min-width: 980px) and (display-mode: standalone) {
+  .bar,
+  :global(html:has([data-landing-root])) .bar {
+    background: var(--landing-nav-cta-bg);
+    pointer-events: auto;
   }
 }

@@ -15,12 +15,14 @@
 }
 
 .main {
+  /* 上留白寫成變數：.playHeader 要往上延伸同樣距離。改上留白一律改這個變數（含著色本） */
+  --main-pad-top: clamp(0.5rem, 1.5vh, 0.75rem);
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
   min-height: 100dvh;
   padding: 0.75rem 0.75rem max(0.75rem, var(--safe-bottom));
-  padding-top: clamp(0.5rem, 1.5vh, 0.75rem);
+  padding-top: var(--main-pad-top);
   max-width: none;
   margin: 0 auto;
 }
@@ -90,16 +92,22 @@
  */
 .playHeader {
   position: sticky;
-  top: 0;
+  /*
+   * 抬頭要貼齊畫面頂端、底色完全不透明、不用 backdrop-filter：iOS 26 在狀態列下方加的漸層模糊，
+   * 只有頂端貼著不透明的 sticky／fixed 色條時才會改用色條顏色（詳見 SiteNavBar .bar 的說明）。
+   * 所以抬頭往上延伸蓋住 .main 的上留白，sticky 位置也往上補同樣距離：靜止和捲動時內容都在原位。
+   * min-height 含 padding，一併加上同樣距離。
+   */
+  top: calc(-1 * var(--main-pad-top));
   z-index: 20;
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  min-height: 52px;
+  min-height: calc(52px + var(--main-pad-top));
+  margin-top: calc(-1 * var(--main-pad-top));
   margin-bottom: var(--space-3);
-  padding-top: var(--safe-top);
-  /* 不用 backdrop-filter：iOS Safari 上 sticky 抬頭帶毛玻璃，「回遊樂園」和標題會糊（同 SiteNavBar） */
-  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  padding-top: calc(var(--main-pad-top) + var(--safe-top));
+  background: var(--bg);
 }
 
 .headerActions {
@@ -320,8 +328,9 @@
 
 @media (max-width: 640px) {
   .main {
+    --main-pad-top: calc(0.5rem + var(--safe-top));
     padding-inline: calc(12px + var(--safe-left)) calc(12px + var(--safe-right));
-    padding-top: calc(0.5rem + var(--safe-top));
+    padding-top: var(--main-pad-top);
   }
 
   .playHeader {
@@ -410,7 +419,7 @@
 @media (max-width: 359.98px) {
   .playHeader {
     gap: 4px;
-    min-height: 48px;
+    min-height: calc(48px + var(--main-pad-top));
   }
 
   .headerActions,
@@ -435,13 +444,14 @@
  * 井與兩側鍵欄同屏、不整頁捲動。只限 block-drop 局內，不影響其他遊戲與標題面。 */
 @media (orientation: landscape) and (max-height: 520px) {
   .main[data-game-id="block-drop"]:has([data-status="playing"], [data-status="paused"]) {
-    padding-top: calc(2px + var(--safe-top));
+    --main-pad-top: calc(2px + var(--safe-top));
+    padding-top: var(--main-pad-top);
     padding-bottom: 4px;
   }
 
   .main[data-game-id="block-drop"]:has([data-status="playing"], [data-status="paused"]) .playHeader {
     flex-wrap: nowrap;
-    min-height: 44px;
+    min-height: calc(44px + var(--main-pad-top));
     margin-bottom: 2px;
   }
 

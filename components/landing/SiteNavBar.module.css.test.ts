@@ -22,9 +22,38 @@ describe("SiteNavBar.module.css 漢堡與抽屜", () => {
     expect(desktopBlock).not.toMatch(/\.panel\s*\{[^}]*display:\s*none/);
   });
 
-  it("頂欄不得用 backdrop-filter（iOS Safari 上 sticky 頂欄帶毛玻璃，字會糊）", () => {
+  describe("iOS 26 頂端漸層模糊：頂欄必須是不透明色條", () => {
+    // 系統只在畫面頂端貼著全寬、不透明的 sticky／fixed 色條時改用色條顏色，否則在狀態列下方加漸層模糊，
+    // 頂欄的字會糊（2026-10-10 實機回報三次）。半透明與毛玻璃都會被當成「好幾種顏色」。
     const code = css.replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(code).not.toMatch(/backdrop-filter/);
+    // 最內層的規則區塊；選擇器最後一段是 .bar（可帶屬性選擇器）才算頂欄本體，排除 .bar .inner 等子元素
+    const barRules = [...code.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(([, selector]) =>
+      selector.split(",").some((s) => /\.bar(\[[^\]]*\])*\s*$/.test(s.trim())),
+    );
+
+    it("不得用 backdrop-filter", () => {
+      expect(code).not.toMatch(/backdrop-filter/);
+    });
+
+    it("頂欄本體預設底色是不透明的 --landing-nav-cta-bg", () => {
+      const base = barRules.find(([, selector]) => selector.trim() === ".bar");
+      expect(base?.[2]).toMatch(/background:\s*var\(--landing-nav-cta-bg\);/);
+    });
+
+    it("頂欄本體任何狀態都不得混透明色（color-mix … transparent）", () => {
+      expect(barRules.length).toBeGreaterThan(3);
+      for (const [, selector, body] of barRules) {
+        expect(body, selector.trim()).not.toMatch(/background:[^;]*color-mix\([^;]*transparent/);
+      }
+    });
+
+    it("安裝成主畫面 App 的 ≥980 外層也鋪不透明底，首頁不穿透點擊", () => {
+      const start = code.indexOf("@media (min-width: 980px) and (display-mode: standalone)");
+      expect(start).toBeGreaterThan(-1);
+      const block = code.slice(start);
+      expect(block).toMatch(/background:\s*var\(--landing-nav-cta-bg\)/);
+      expect(block).toMatch(/pointer-events:\s*auto/);
+    });
   });
 
   it("抽屜關閉時以 display:none 隱藏，而非只用 opacity", () => {
