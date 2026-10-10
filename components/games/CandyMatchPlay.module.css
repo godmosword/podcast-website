@@ -255,8 +255,7 @@
 }
 
 .propCancel,
-.tipDismiss,
-.mapButton {
+.tipDismiss {
   min-height: 44px;
   padding: 6px 16px;
   border: 2px solid rgba(93, 74, 103, 0.14);
@@ -283,8 +282,7 @@
 }
 
 .propCancel:focus-visible,
-.tipDismiss:focus-visible,
-.mapButton:focus-visible {
+.tipDismiss:focus-visible {
   outline: 3px solid var(--focus-ring, #ff9fb7);
   outline-offset: 2px;
 }
@@ -326,85 +324,119 @@
   backdrop-filter: blur(3px);
   text-align: center;
   overflow-y: auto;
+  /* 卡面日夜不反轉：底是固定淺色，結算站的墨色與按鈕色票也釘在日間值，
+     否則自動夜間時標題變淺字、小圓鈕變黑塊。 */
+  --ink: #34302b;
+  --ink-soft: #7a7268;
+  --cta-solid-bg: #3a2410;
+  --cta-solid-fg: #fff;
+  --cta-warm-to: #ffbd6f;
+  --cta-soft-bg: #fff;
+  --cta-soft-fg: #5d4a67;
+  --cta-soft-line: rgba(93, 74, 103, 0.16);
+  --elev-1: 0 1px 2px rgba(52, 48, 43, 0.04), 0 8px 24px rgba(52, 48, 43, 0.08);
 }
 
-.mapButton {
-  display: grid;
-  place-items: center;
-  width: 52px;
-  height: 52px;
-  min-height: 0;
-  margin-top: 10px;
-  padding: 0;
-  border-radius: 50%;
-}
-
-/* 結算三顆星：星星在上、條件圖在下、兩三個字給大人 */
-.starRules {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
-  width: min(100%, 300px);
-  margin: 4px auto 14px;
-  padding: 0;
-  list-style: none;
-  color: #5d4a67;
-}
-
-.starRules li {
+/* 結算三顆星：一排、由左往右亮，中間那顆大一號；只有星星，沒有別的東西要對齊 */
+.resultStars {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 10px;
+  margin: 2px 0 6px;
+}
+
+.starRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
   gap: 6px;
-}
-
-/* 中間那顆略高，三顆排成小弧 */
-.starRules li:nth-child(2) {
-  margin-top: -10px;
-}
-
-.ruleStar {
-  display: inline-flex;
+  margin: 0;
   line-height: 0;
-  filter: drop-shadow(0 3px 0 rgba(224, 162, 26, 0.55));
 }
 
-.starRules li:not([data-met="true"]) .ruleStar {
-  filter: none;
+.resultStar {
+  display: inline-flex;
 }
 
-.ruleMark {
+.resultStar[data-met="true"] {
+  filter: drop-shadow(0 3px 0 rgba(224, 162, 26, 0.45));
+}
+
+/* 沒拿到：灰色剪影，金邊也一起淡掉，一眼看出是空的 */
+.resultStar:not([data-met="true"]) {
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+
+.starRow[data-animate="true"] .resultStar[data-met="true"] {
+  animation: starPop 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.starRow[data-animate="true"] .resultStar:nth-child(2) {
+  animation-delay: 140ms;
+}
+
+.starRow[data-animate="true"] .resultStar:nth-child(3) {
+  animation-delay: 280ms;
+}
+
+@keyframes starPop {
+  from {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 沒拿滿才出現：每個沒達成的條件一張小籤（條件圖＋兩三個字＋＋★），窄螢幕自動換行置中 */
+.starHints {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.starHint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 3px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--c-lilac) 18%, white);
+  color: #6b5c73;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.starHintMark {
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
+  background: #fff;
   line-height: 0;
 }
 
-.starRules li[data-tone="flag"] .ruleMark {
-  background: #e3f6ea;
-  color: #23744a;
-}
-
-.starRules li[data-tone="props"] .ruleMark {
-  background: #e2f2ff;
-}
-
-.starRules li[data-tone="moves"] .ruleMark {
-  background: #eef3ff;
+.starHint[data-rule="efficient"] .starHintMark {
   color: #3159a8;
 }
 
-/* 沒拿到的那顆：條件圖跟著淡掉，一眼看出差哪一個 */
-.starRules li:not([data-met="true"]) .ruleMark {
-  opacity: 0.45;
-}
-
-.ruleCaption {
-  color: #6b5c73;
-  font-size: 13px;
-  font-weight: 800;
+.starHintPlus {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  color: #c98a0b;
+  line-height: 0;
 }
 
 .noProps {
@@ -426,17 +458,6 @@
   stroke: #d6336c;
   stroke-width: 2.6;
   stroke-linecap: round;
-}
-
-.visuallyHidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
 }
 
 .confetti {
@@ -526,5 +547,9 @@
   .confettiPiece {
     animation: none;
     opacity: 0;
+  }
+
+  .starRow[data-animate="true"] .resultStar[data-met="true"] {
+    animation: none;
   }
 }

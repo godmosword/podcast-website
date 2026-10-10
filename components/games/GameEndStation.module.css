@@ -21,6 +21,9 @@
   font-size: clamp(1.45rem, 4vw, 1.85rem);
   font-weight: 900;
   line-height: 1.25;
+  /* 中文標題只在標點／空白處換行（「步數用完了，／再試一次！」），太長才硬斷 */
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 .scoreRow {
@@ -88,6 +91,10 @@
   background: var(--cta-soft-bg);
   border: 1px solid var(--cta-soft-line);
   box-shadow: var(--elev-1);
+}
+
+.leadingBtn {
+  order: -1;
 }
 
 /* 去下一站＝下一款遊戲的縮圖＋右下小箭頭：孩子看得出「按了會去哪」 */

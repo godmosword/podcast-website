@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { GameEndStation } from "@/components/games/GameEndStation";
 import { IconBubble, IconStar } from "@/components/games/ClayIcons";
-import { IconFlag, IconFootprints, IconMapFold } from "@/components/games/CandyMatchIcons";
+import { IconFootprints, IconMapFold } from "@/components/games/CandyMatchIcons";
 import type { CandyMatchRound } from "@/lib/games/candy-match/stages";
 import type { CandyRoundOutcome } from "./useCandyMatchPlay";
 import styles from "./CandyMatchPlay.module.css";
@@ -20,17 +20,13 @@ type CandyMatchResultProps = {
 
 const CONFETTI = ["var(--c-pink)", "var(--c-yellow)", "var(--c-mint)", "var(--c-sky)", "var(--c-lilac)"];
 
-function efficiencyRule(round: CandyMatchRound): string {
-  return round.stage.moves > 0
-    ? `剩 ${round.stage.efficiency} 步以上完成`
-    : `${round.stage.efficiency} 次交換內完成`;
-}
+type CandyWin = Extract<CandyRoundOutcome, { kind: "win" }>;
 
 /** 「沒用道具」：泡泡加一道斜線。 */
 function NoPropsMark() {
   return (
     <span className={styles.noProps}>
-      <IconBubble size={26} />
+      <IconBubble size={18} />
       <svg viewBox="0 0 24 24" aria-hidden focusable="false" className={styles.noPropsSlash}>
         <path d="M5 19L19 5" />
       </svg>
@@ -38,49 +34,57 @@ function NoPropsMark() {
   );
 }
 
-type StarRule = { key: string; caption: string; rule: string; met: boolean; mark: ReactNode; tone: string };
+/** 沒拿到的星各自差哪個條件；拿滿三顆時是空的。 */
+function missedRules(round: CandyMatchRound, outcome: CandyWin) {
+  const missed: { key: string; text: string; mark: ReactNode }[] = [];
+  if (!outcome.flawless) missed.push({ key: "flawless", text: "不用道具", mark: <NoPropsMark /> });
+  if (!outcome.efficient) {
+    missed.push({
+      key: "efficient",
+      text: round.stage.moves > 0 ? `剩 ${round.stage.efficiency} 步以上` : `${round.stage.efficiency} 次交換內`,
+      mark: <IconFootprints size={18} />,
+    });
+  }
+  return missed;
+}
 
 /**
- * 三顆星各對一個條件，條件畫成圖（旗子＝完成任務、泡泡劃線＝沒用道具、腳印＝步數內），
- * 下面兩三個字給大人；完整條件與達成與否給讀屏。
+ * 結算星星：三顆一排、由左往右亮（孩子只看亮幾顆）。
+ * 沒拿滿才在下面放小籤「條件圖＋兩三個字＋＋★」告訴大人還差什麼；拿滿就只有星星。
  */
-function StarRules({ round, outcome }: { round: CandyMatchRound; outcome: Extract<CandyRoundOutcome, { kind: "win" }> }) {
-  const rules: StarRule[] = [
-    { key: "done", caption: "完成任務", rule: "完成任務", met: true, mark: <IconFlag size={24} />, tone: "flag" },
-    { key: "flawless", caption: "沒用道具", rule: "不用道具", met: outcome.flawless, mark: <NoPropsMark />, tone: "props" },
-    {
-      key: "efficient",
-      caption: round.stage.moves > 0 ? "省步數" : "換得快",
-      rule: efficiencyRule(round),
-      met: outcome.efficient,
-      mark: <IconFootprints size={24} />,
-      tone: "moves",
-    },
-  ];
+function ResultStars({ round, outcome, animate }: { round: CandyMatchRound; outcome: CandyWin; animate: boolean }) {
+  const stars = Math.max(1, Math.min(3, outcome.stars));
+  const missed = missedRules(round, outcome);
   return (
-    <ul className={styles.starRules} aria-label="本局星星條件">
-      {rules.map((r) => (
-        <li key={r.key} data-met={r.met ? "true" : undefined} data-tone={r.tone}>
-          <span className={styles.ruleStar} aria-hidden>
-            <IconStar size={48} color={r.met ? "#ffd34d" : "#e2d9e8"} />
+    <div className={styles.resultStars}>
+      <p className={styles.starRow} role="img" aria-label={`拿到 ${stars} 顆星，共 3 顆`} data-animate={animate ? "true" : undefined}>
+        {[0, 1, 2].map((i) => (
+          <span key={i} className={styles.resultStar} data-met={i < stars ? "true" : undefined} aria-hidden>
+            <IconStar size={i === 1 ? 64 : 52} color={i < stars ? "#ffd34d" : "#e7e1ea"} />
           </span>
-          <span className={styles.ruleMark} aria-hidden>
-            {r.mark}
-          </span>
-          <span className={styles.ruleCaption} aria-hidden>
-            {r.caption}
-          </span>
-          <span className={styles.visuallyHidden}>
-            {r.rule}
-            {r.met ? "，達成" : "，未達成"}
-          </span>
-        </li>
-      ))}
-    </ul>
+        ))}
+      </p>
+      {missed.length > 0 ? (
+        <ul className={styles.starHints} aria-label="還能多拿星星">
+          {missed.map((m) => (
+            <li key={m.key} className={styles.starHint} data-rule={m.key}>
+              <span className={styles.starHintMark} aria-hidden>
+                {m.mark}
+              </span>
+              {m.text}
+              <span className={styles.starHintPlus} aria-hidden>
+                +<IconStar size={16} />
+              </span>
+              <span className="sr-only">過關，多拿一顆星</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
   );
 }
 
-/** 結算：三顆星與各自的條件圖；主按鈕下一站，次按鈕再挑戰，地圖是圖示鈕。 */
+/** 結算：標題＋三顆星（沒拿滿才多一行提示）；按鈕一排「回地圖｜下一站｜再挑戰」，主鈕在中線。 */
 export function CandyMatchResult({
   round,
   outcome,
@@ -90,11 +94,7 @@ export function CandyMatchResult({
   onReplay,
   onMap,
 }: CandyMatchResultProps) {
-  const mapButton = (
-    <button type="button" className={styles.mapButton} onClick={onMap} aria-label="回地圖" title="回地圖">
-      <IconMapFold size={24} />
-    </button>
-  );
+  const mapAction = { label: "回地圖", icon: <IconMapFold size={22} />, onClick: onMap };
   return (
     <div className={styles.resultOverlay} data-testid="candy-match-result">
       {outcome.kind === "win" && !reducedMotion ? (
@@ -122,8 +122,8 @@ export function CandyMatchResult({
           onReplay={onReplay}
           replayLabel="再挑戰"
           mainAction={isLastLevel ? undefined : { label: "下一站", icon: "next", onClick: onNext }}
-          details={<StarRules round={round} outcome={outcome} />}
-          extraActions={mapButton}
+          details={<ResultStars round={round} outcome={outcome} animate={!reducedMotion} />}
+          leadingAction={mapAction}
           hideHubLink
         />
       ) : (
@@ -133,7 +133,7 @@ export function CandyMatchResult({
           gameSlug="candy-match"
           onReplay={onReplay}
           replayLabel="再來一次"
-          extraActions={mapButton}
+          leadingAction={mapAction}
           hideHubLink
         />
       )}

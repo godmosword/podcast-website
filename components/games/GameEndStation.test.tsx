@@ -78,4 +78,19 @@ describe("GameEndStation", () => {
     // 按鈕內只有 svg，沒有可見文字
     expect(html).toMatch(/<button[^>]*aria-label="再玩一次"[^>]*><svg/);
   });
+
+  it("leadingAction 和主次鈕同一排，DOM 排在主鈕後（開啟時焦點先落主鈕）", async () => {
+    const { GameEndStation } = await import("./GameEndStation");
+    const html = renderToStaticMarkup(
+      <GameEndStation
+        mood="win"
+        onReplay={() => undefined}
+        mainAction={{ label: "下一站", icon: "next", onClick: () => undefined }}
+        leadingAction={{ label: "回地圖", icon: <svg />, onClick: () => undefined }}
+        hideHubLink
+      />,
+    );
+    const order = [...html.matchAll(/aria-label="(下一站|再玩一次|回地圖)"/g)].map((m) => m[1]);
+    expect(order).toEqual(["下一站", "再玩一次", "回地圖"]);
+  });
 });

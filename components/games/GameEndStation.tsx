@@ -51,6 +51,11 @@ export type GameEndStationProps = {
   details?: ReactNode;
   /** 主次按鈕後的額外出口（例如「回地圖」）；放在對話框內才不會被焦點圈住擋掉。 */
   extraActions?: ReactNode;
+  /**
+   * 主鈕左側、與次鈕同尺寸的 icon 鈕（例如消消樂「回地圖」），讓三顆鈕左右對稱、主鈕落在中線。
+   * DOM 排在主次鈕之後（視覺用 CSS order 移到左邊），開啟時焦點仍先落在主鈕。
+   */
+  leadingAction?: { label: string; icon: ReactNode; onClick: () => void };
   className?: string;
 };
 
@@ -90,6 +95,7 @@ export function GameEndStation({
   mainAction,
   details,
   extraActions,
+  leadingAction,
   className,
 }: GameEndStationProps) {
   const resolvedTitle = pickTitle(mood, title, stars ?? scoreLabel?.length ?? 0);
@@ -211,6 +217,17 @@ export function GameEndStation({
             ) : null}
           </>
         )}
+        {leadingAction ? (
+          <button
+            type="button"
+            className={`${styles.sideBtn} ${styles.leadingBtn}`}
+            onClick={leadingAction.onClick}
+            aria-label={leadingAction.label}
+            title={leadingAction.label}
+          >
+            {leadingAction.icon}
+          </button>
+        ) : null}
       </div>
 
       {extraActions}

@@ -96,8 +96,8 @@ test.describe("遊戲完整 lifecycle", () => {
       .evaluateAll((nodes) => nodes.map((node) => node.getAttribute("aria-label")));
     await finishCandyLevel(page);
     await expect(page.getByRole("button", { name: "再挑戰" })).toBeVisible();
-    // 結算面列出本局星星條件與累積獎章
-    await expect(page.getByRole("list", { name: "本局星星條件" })).toBeVisible();
+    // 結算面：三顆星一排（由左往右亮）
+    await expect(page.getByRole("img", { name: /^拿到 [1-3] 顆星，共 3 顆$/ })).toBeVisible();
 
     // 已通關後重玩：抽同等難度的變體，不再是第一次的教學主線
     await page.getByRole("button", { name: "再挑戰" }).click();
