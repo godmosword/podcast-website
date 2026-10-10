@@ -17,4 +17,16 @@ describe("Icon", () => {
     const html = renderToStaticMarkup(<Icon name="close" />);
     expect(html).toContain('stroke="currentColor"');
   });
+
+  it("chevron-down 與 chevron-right 同一種畫法（2px 圓角線），只是方向不同", () => {
+    const strokeAttrs = (html: string) =>
+      ["fill", "stroke", "stroke-width", "stroke-linecap", "stroke-linejoin"].map(
+        (attr) => html.match(new RegExp(`${attr}="([^"]+)"`))?.[1],
+      );
+    const down = renderToStaticMarkup(<Icon name="chevron-down" />);
+    const right = renderToStaticMarkup(<Icon name="chevron-right" />);
+    expect(strokeAttrs(down)).toEqual(strokeAttrs(right));
+    expect(strokeAttrs(down)).toEqual(["none", "currentColor", "2", "round", "round"]);
+    expect(down).not.toEqual(right);
+  });
 });

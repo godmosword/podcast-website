@@ -29,6 +29,7 @@ import {
   resolveNearbyPlaces,
 } from "@/lib/playground-nearby";
 import { formatVerifiedMonthLabel } from "@/lib/playground-parent-voice";
+import Icon from "@/components/ui/Icon";
 import styles from "./page.module.css";
 import { storyDisplayTitle } from "@/lib/story-title";
 
@@ -209,7 +210,8 @@ export default async function PlaygroundDetailPage({
                 rel="noopener noreferrer"
                 aria-label={`開啟 ${place.name} 官方網站（另開視窗）`}
               >
-                官方網站 <span aria-hidden>↗</span>
+                官方網站
+                <Icon name="external" size={15} className={styles.externalIcon} />
               </a>
             ) : null}
           </div>

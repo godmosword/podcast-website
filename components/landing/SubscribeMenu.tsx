@@ -16,6 +16,7 @@ import { appendPlatformUtm } from "@/lib/platform-utm";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { visiblePlatforms } from "@/lib/platforms";
 import { visibleNavSocials } from "@/lib/social";
+import Icon from "@/components/ui/Icon";
 import styles from "./SubscribeMenu.module.css";
 
 /** 受控開闔：由 `SiteNavBar` 統一管理，確保同時只有一個浮層開著
@@ -130,9 +131,7 @@ export default function ConnectMenu({
         onClick={() => setOpen(!open)}
       >
         {label}
-        <span className={styles.chevron} aria-hidden>
-          ▾
-        </span>
+        <Icon name="chevron-down" size={14} className={styles.chevron} />
       </button>
       {open ? (
         <ul id={menuId} ref={dropdownRef} className={styles.dropdown} role="menu">

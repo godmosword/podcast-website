@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { uncataloguedNotice } from "@/lib/play-map-city-tiles";
 import type { PlayMapCityWallProps } from "./PlayMapContract";
+import Icon from "@/components/ui/Icon";
 import styles from "./PlayMapCityWall.module.css";
 
 const CITY_WALL_HEADING_ID = "play-map-city-wall-heading";
@@ -77,7 +78,7 @@ export function PlayMapCityWall({
           onClick={handleCollapsedCancel}
         >
           <span>{selectedCity}</span>
-          <span aria-hidden>✕</span>
+          <Icon name="close" size={16} />
         </button>
       </div>
 

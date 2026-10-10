@@ -6,6 +6,7 @@ export const ICON_NAMES = [
   "menu",
   "menu-close",
   "chevron-right",
+  "chevron-down",
   "settings",
   "volume-on",
   "volume-off",

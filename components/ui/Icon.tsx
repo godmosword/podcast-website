@@ -63,6 +63,12 @@ function renderGlyph(name: IconName) {
           <path d="M9 6l6 6-6 6" />
         </g>
       );
+    case "chevron-down":
+      return (
+        <g {...STROKE}>
+          <path d="m6 9.5 6 6 6-6" />
+        </g>
+      );
     case "settings":
       // 齒輪，不用「圓心＋光芒」：那是亮度符號，跟遊戲抬頭的日夜切換並排時會被看成「切白天」
       return (

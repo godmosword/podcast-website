@@ -423,6 +423,14 @@
   line-height: 1.3;
 }
 
+/* 外部連結：共用「外部連結」細線圖示；在文字行內時往下對齊字的中線 */
+.externalIcon {
+  display: inline-block;
+  flex: none;
+  margin-left: 3px;
+  vertical-align: -2px;
+}
+
 /* 主 CTA「全部故事」：沿用 landing CTA 橘色漸層，整行置頂（其餘三顆為次要） */
 .linkBtnPrimary {
   grid-column: 1 / -1;

@@ -274,8 +274,11 @@
   white-space: nowrap;
 }
 
-/* 取消要和「知道了」分得出來：粉色底＋✕ */
+/* 取消要和「知道了」分得出來：粉色底＋關閉圖示 */
 .propCancel {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   border-color: #f3a6bf;
   background: #fff0f4;
   color: #a5567a;
