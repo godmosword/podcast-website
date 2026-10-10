@@ -1,7 +1,7 @@
 /* 方塊轉轉冒險地圖（對齊消消樂地圖）。卡面日夜不反轉，顏色固定。 */
 .map {
-  --node-size: 60px;
-  --row-h: 84px;
+  --node-size: 68px;
+  --row-h: 100px;
   --path-ink: #e8a44a;
   --ink: #5d4a67;
   --ink-soft: #7c6886;
@@ -258,10 +258,6 @@
   transition: transform 180ms ease;
 }
 
-.node[data-locked="true"] .badge {
-  color: #9a8ca1;
-}
-
 .node[aria-current="true"] .badge {
   box-shadow: 0 0 0 4px #ffbd6f, 0 6px 14px rgba(150, 110, 130, 0.26);
 }
@@ -344,12 +340,15 @@
 
 @media (min-width: 760px) {
   .map {
-    --node-size: 68px;
-    --row-h: 108px;
+    --node-size: 76px;
+    --row-h: 118px;
     gap: 16px;
   }
 
+  /* 大卡限寬置中：寬螢幕上開始鈕不會離站名一大段 */
   .hero {
+    justify-self: center;
+    width: min(100%, 720px);
     padding: 16px 20px;
     gap: 18px;
   }
@@ -388,8 +387,8 @@
 
 @media (max-width: 355px) {
   .map {
-    --node-size: 54px;
-    --row-h: 76px;
+    --node-size: 60px;
+    --row-h: 88px;
   }
 
   .hero {

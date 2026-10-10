@@ -311,8 +311,12 @@
   }
 }
 
-/* 橫向手機等矮卡 */
+/* 橫向手機等矮卡：封面不撐出最小高度 */
 @media (max-height: 520px) {
+  .cover {
+    min-height: 0;
+  }
+
   .panel {
     gap: 10px;
     padding-block: 0;

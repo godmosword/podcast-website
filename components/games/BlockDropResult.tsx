@@ -63,7 +63,7 @@ export function BlockDropResult({ round, outcome, isLast, font, reducedMotion, o
         extraActions={
           round.station.index > 0 ? (
             <button type="button" onClick={onEasier} style={{ ...secondaryBtn(font), marginTop: 8 }}>
-              換簡單一點的盤
+              換簡單的
             </button>
           ) : null
         }

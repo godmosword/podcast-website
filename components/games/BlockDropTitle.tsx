@@ -3,7 +3,7 @@
 import Image from "next/image";
 import type { CSSProperties } from "react";
 import { IconChevronLeft, IconChevronRight, IconPlay, IconRotate, IconSparkle, IconStar } from "@/components/games/ClayIcons";
-import { IconPieces } from "@/components/games/BlockDropIcons";
+import { IconFreeStack } from "@/components/games/BlockDropIcons";
 import { CLAY_BLOCK_COLORS } from "@/components/games/blockDropTheme";
 import { gameBySlug } from "@/data/games";
 import type { PieceType } from "@/lib/games/block-drop/pieces";
@@ -22,7 +22,7 @@ function Block({ type, col, row }: { type: PieceType; col?: number; row?: number
 
 /**
  * 標題頁三步驟圖解：孩子多半還不識字，用遊戲裡的方塊示範「左右移 → 轉一轉 → 排滿消掉」。
- * 三格圖框同大小、都不加底色；圖全部 aria-hidden，讀屏只唸每步的短動詞。
+ * 三格圖框同大小、同一種淡白底，不替任何一格加強調色（會像被選中）；圖全部 aria-hidden，讀屏只唸每步的短動詞。
  */
 function TitleSteps() {
   return (
@@ -100,7 +100,7 @@ export function BlockDropTitle({ starsGot, starsTotal, onStart, onFree }: BlockD
         <div className={styles.panel}>
           {/* 頁面唯一 h1 屬 GamePageShell；這裡是畫面標題，用 h2 */}
           <h2 className={styles.heading}>準備疊方塊！</h2>
-          <p className={styles.stars} aria-label={`已經拿到 ${starsGot} 顆星，全部 ${starsTotal} 顆`}>
+          <p className={styles.stars} role="img" aria-label={`已經拿到 ${starsGot} 顆星，全部 ${starsTotal} 顆`}>
             <IconStar size={22} />
             <b aria-hidden>{starsGot}</b>
             <span aria-hidden>/ {starsTotal}</span>
@@ -115,7 +115,7 @@ export function BlockDropTitle({ starsGot, starsTotal, onStart, onFree }: BlockD
             </span>
           </div>
           <button type="button" className={styles.free} onClick={onFree}>
-            <IconPieces size={18} />
+            <IconFreeStack size={18} />
             自由堆疊
           </button>
         </div>

@@ -30,6 +30,22 @@ export function IconPieces({ size = 18, className }: IconProps) {
   );
 }
 
+/** 自由堆疊（無盡模式）：一座越疊越高的小塔，跟「挑戰」的 T 形方塊分開。 */
+export function IconFreeStack({ size = 18, className }: IconProps) {
+  return (
+    <svg {...svgProps(size, className)}>
+      <g fill="currentColor">
+        <rect x="2.6" y="15.2" width="5.6" height="5.6" rx="1.4" />
+        <rect x="9.2" y="15.2" width="5.6" height="5.6" rx="1.4" />
+        <rect x="15.8" y="15.2" width="5.6" height="5.6" rx="1.4" />
+        <rect x="5.9" y="8.8" width="5.6" height="5.6" rx="1.4" />
+        <rect x="12.5" y="8.8" width="5.6" height="5.6" rx="1.4" />
+        <rect x="9.2" y="2.4" width="5.6" height="5.6" rx="1.4" />
+      </g>
+    </svg>
+  );
+}
+
 /** 結算條件「方塊沒越過黃線」：虛線黃線＋線下的一塊方塊。 */
 export function IconUnderLine({ size = 20, className }: IconProps) {
   return (

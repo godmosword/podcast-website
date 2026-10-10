@@ -57,8 +57,8 @@
   gap: 4px;
   padding: 3px 10px;
   border-radius: 999px;
-  background: #e4f4ff;
-  color: #3159a8;
+  background: #e6f5fc;
+  color: #5d4a67;
   font-size: 17px;
   font-weight: 900;
   line-height: 1;
@@ -118,14 +118,17 @@
   }
 }
 
-/* 側欄窄卡：目標疊成一欄，站名收起 */
+/* 側欄窄卡：目標疊成一欄，站名收起（迷你盤留著，認站靠它）；剩幾塊放不下就換到下一行 */
 @container block-task (max-width: 200px) {
+  .head {
+    flex-wrap: wrap;
+  }
+
   .goals {
     grid-template-columns: 1fr;
   }
 
-  .placeName,
-  .placeMini {
+  .placeName {
     display: none;
   }
 }

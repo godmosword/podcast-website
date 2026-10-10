@@ -26,7 +26,7 @@ export function BlockDropTaskBar({ round, g }: { round: BlockRound; g: GameState
       <div className={styles.head}>
         <span className={styles.place}>
           <span className={styles.placeMini}>
-            <MiniStoneBoard stones={stage.stones} rows={3} cell={3} />
+            <MiniStoneBoard stones={stage.stones} rows={3} cell={5} />
           </span>
           第 {station.index + 1} 站
           <span className={styles.placeName}>・{station.name}</span>
@@ -53,7 +53,7 @@ export function BlockDropTaskBar({ round, g }: { round: BlockRound; g: GameState
               aria-label={`${blockGoalTitle(goal)}，${s.done ? "完成" : `還差 ${s.remaining} ${UNIT[goal.kind]}`}`}
             >
               <span className={styles.goalIcon} aria-hidden>
-                <BlockGoalIcon goal={goal} cell={9} />
+                <BlockGoalIcon goal={goal} cell={12} />
               </span>
               {s.done ? (
                 <span className={styles.goalCheck} aria-hidden>

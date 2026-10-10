@@ -9,7 +9,7 @@
 import { useState, type CSSProperties } from "react";
 import { IconLeaf } from "@/components/games/CandyMatchIcons";
 import { IconLock, IconPlay, IconStar } from "@/components/games/ClayIcons";
-import { BlockGoalIcon, IconPieces, MiniStoneBoard } from "@/components/games/BlockDropIcons";
+import { BlockGoalIcon, IconFreeStack, IconPieces, MiniStoneBoard } from "@/components/games/BlockDropIcons";
 import { blockGoalCount, type BlockGoal } from "@/lib/games/block-drop/goals";
 import type { BlockMode, BlockStation } from "@/lib/games/block-drop/stages";
 import styles from "./BlockDropMap.module.css";
@@ -116,7 +116,7 @@ export function BlockDropMap({ stations, stars, maxCleared, mode, onModeChange, 
           <p className={styles.heroGoals} aria-label={goalsLabel(preview, mode)}>
             {preview.goals.map((goal, i) => (
               <span key={i} className={styles.heroGoal}>
-                <BlockGoalIcon goal={goal} cell={8} />
+                <BlockGoalIcon goal={goal} cell={10} />
                 <b aria-hidden>×{blockGoalCount(goal, preview.stones.length)}</b>
               </span>
             ))}
@@ -206,7 +206,7 @@ export function BlockDropMap({ stations, stars, maxCleared, mode, onModeChange, 
       </div>
 
       <button type="button" className={styles.free} onClick={onFree}>
-        <IconPieces size={18} />
+        <IconFreeStack size={18} />
         自由堆疊
       </button>
     </div>
