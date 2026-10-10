@@ -56,26 +56,26 @@ export function IconUnderLine({ size = 20, className }: IconProps) {
   );
 }
 
-const miniBlock = (cell: number, color: string, border: string): CSSProperties => ({
-  width: cell,
-  height: cell,
-  borderRadius: Math.max(1.5, cell * 0.28),
-  background: color,
-  border: `1px solid ${border}`,
-  boxSizing: "border-box",
-});
-
-/** 目標圖示（任務列與地圖大卡共用）：一排方塊＝消排、兩排石頭＝清石頭、兩排黃方塊＝一次消兩排。 */
+/** 目標圖示（任務列與地圖大卡共用）：一排方塊＝消排、兩排石頭＝清石頭、兩排黃方塊＝一次消兩排。
+ *  格子大小吃 `--goal-cell`（外層 CSS 依版面調整），沒設就用 `cell`。 */
 export function BlockGoalIcon({ goal, cell = 7 }: { goal: BlockGoal; cell?: number }) {
-  const gap = cell >= 9 ? 2 : 1;
+  const size = `var(--goal-cell, ${cell}px)`;
+  const block = (color: string, border: string): CSSProperties => ({
+    width: size,
+    height: size,
+    borderRadius: 3,
+    background: color,
+    border: `1px solid ${border}`,
+    boxSizing: "border-box",
+  });
   const row = (color: string, border: string) => (
-    <span style={{ display: "flex", gap }}>
+    <span style={{ display: "flex", gap: 2 }}>
       {[0, 1, 2, 3].map((i) => (
-        <span key={i} style={miniBlock(cell, color, border)} />
+        <span key={i} style={block(color, border)} />
       ))}
     </span>
   );
-  const box: CSSProperties = { display: "inline-grid", gap, alignContent: "center" };
+  const box: CSSProperties = { display: "inline-grid", gap: 2, alignContent: "center" };
   if (goal.kind === "clear-stones") {
     return <span aria-hidden style={box}>{row("#cdbfb2", "#6f6258")}{row("#cdbfb2", "#6f6258")}</span>;
   }

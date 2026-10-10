@@ -1,9 +1,8 @@
 /*
- * 方塊轉轉冒險任務列（對齊消消樂任務列）。放在直向手機的 HUD 列、寬螢幕與橫向手機的側欄，
- * 所以版型看自己的寬度（容器查詢）：窄欄把目標疊成一欄、收起站名。卡面日夜不反轉，顏色固定。
+ * 方塊轉轉冒險任務列（對齊消消樂任務列）。data-layout＝row：直向手機 HUD 列（目標並排、不換行）；
+ * side：寬螢幕與橫向手機的側欄（目標疊一欄、收起站名）。卡面日夜不反轉，顏色固定。
  */
 .taskBar {
-  container: block-task / inline-size;
   flex: 1;
   min-width: 0;
   display: grid;
@@ -70,8 +69,9 @@
 }
 
 .goals {
+  --goal-cell: 12px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
   gap: 6px;
   margin: 0;
   padding: 0;
@@ -118,19 +118,39 @@
   }
 }
 
-/* 側欄窄卡：目標疊成一欄，站名收起（迷你盤留著，認站靠它）；剩幾塊放不下就換到下一行 */
-@container block-task (max-width: 200px) {
-  .head {
-    flex-wrap: wrap;
+/* HUD 列兩個目標：並排不換行，圖示縮小才放得下（320 寬每格約 80px） */
+.taskBar[data-layout="row"] .goals[data-count="2"] {
+  --goal-cell: 9px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 360px) {
+  .taskBar[data-layout="row"] .goals[data-count="2"] {
+    --goal-cell: 7px;
+    gap: 4px;
   }
 
-  .goals {
-    grid-template-columns: 1fr;
+  .taskBar[data-layout="row"] .goals[data-count="2"] .goal {
+    gap: 4px;
+    padding: 2px 4px;
   }
 
-  .placeName {
-    display: none;
+  .taskBar[data-layout="row"] .goals[data-count="2"] .goalNum {
+    font-size: 22px;
   }
+}
+
+/* 側欄：目標疊成一欄，站名收起（迷你盤留著，認站靠它）；剩幾塊放不下就換到下一行 */
+.taskBar[data-layout="side"] .head {
+  flex-wrap: wrap;
+}
+
+.taskBar[data-layout="side"] .goals {
+  grid-template-columns: 1fr;
+}
+
+.taskBar[data-layout="side"] .placeName {
+  display: none;
 }
 
 /* 很矮的螢幕（320×568 等）：任務列收緊，井的格子才保得住 25px */

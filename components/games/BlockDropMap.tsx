@@ -113,7 +113,7 @@ export function BlockDropMap({ stations, stars, maxCleared, mode, onModeChange, 
         <div className={styles.heroInfo}>
           <p className={styles.heroStation}>第 {heroIndex + 1} 站</p>
           <p className={styles.heroPlace}>{hero.name}</p>
-          <p className={styles.heroGoals} aria-label={goalsLabel(preview, mode)}>
+          <p className={styles.heroGoals} role="img" aria-label={goalsLabel(preview, mode)}>
             {preview.goals.map((goal, i) => (
               <span key={i} className={styles.heroGoal}>
                 <BlockGoalIcon goal={goal} cell={10} />

@@ -174,8 +174,13 @@
   background: rgba(255, 255, 255, 0.72);
 }
 
+/* 空的時候只做視覺隱藏：role="status" 要一直在無障礙樹裡，之後填字才唸得出來 */
 .notice:empty {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
 }
 
 /*

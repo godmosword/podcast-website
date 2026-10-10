@@ -111,7 +111,7 @@ export function BlockDropOverlay({
                   </button>
                 ) : null}
               </>
-            ) : (
+            ) : g.status === "paused" ? (
               <>
                 <div
                   style={{
@@ -149,7 +149,7 @@ export function BlockDropOverlay({
                   回遊樂園
                 </Link>
               </>
-            )}
+            ) : null}
           </div>
         )}
     </>

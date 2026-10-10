@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import type { GameAudioBus, OverlayProps } from "@/lib/gamekit/adapter";
 import { BlockDropOverlay } from "@/components/games/BlockDropOverlay";
@@ -282,7 +282,8 @@ export function BlockDropView({
   /** HUD 列（含與井的間距）高度；窄欄模式量不到時沿用上次量到的值 */
   const hudRowHRef = useRef(59 + HUD_ROW_GAP);
   const hasRound = round != null;
-  useEffect(() => {
+  // layout effect：從標題頁進局時井才第一次出現，先量好再畫，第一幀不會用預設縮放閃一下
+  useLayoutEffect(() => {
     const el = boardWrapRef.current;
     if (!el) return;
     const apply = () => {
@@ -396,9 +397,9 @@ export function BlockDropView({
   const showLocalHold = showHold && !keys;
   const onPlayScreen = screen === "play";
 
-  const taskOrScore = (compact: boolean) =>
+  const taskOrScore = (compact: boolean, side = false) =>
     round ? (
-      <BlockDropTaskBar round={round} g={g} />
+      <BlockDropTaskBar round={round} g={g} side={side} />
     ) : compact ? (
       <BlockDropCompactScorePanel g={g} />
     ) : (
@@ -617,14 +618,14 @@ export function BlockDropView({
             {onPlayScreen && wide &&
               sideColumn(
                 <>
-                  {taskOrScore(false)}
+                  {taskOrScore(false, true)}
                   {showLocalHold && <BlockDropHoldButton g={g} font={FONT} cell={layout.hud.hold} holdPiece={holdPiece} />}
                 </>,
               )}
             {onPlayScreen && landscape &&
               sideColumn(
                 <>
-                  {taskOrScore(true)}
+                  {taskOrScore(true, true)}
                   {keyProps && (
                     <div style={{ visibility: keysHidden ? "hidden" : "visible" }}>
                       <BlockDropKeys {...keyProps} part="left" />

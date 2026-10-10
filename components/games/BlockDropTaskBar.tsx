@@ -17,12 +17,16 @@ const UNIT: Record<BlockGoal["kind"], string> = { "clear-rows": "排", "clear-st
 /** 挑戰模式剩這麼多塊時，塊數改粉紅提醒 */
 const PIECES_WARN = 3;
 
-export function BlockDropTaskBar({ round, g }: { round: BlockRound; g: GameState }) {
+/**
+ * `side`：放在寬螢幕／橫向手機的側欄（目標疊一欄、剩幾塊換行）；預設是直向手機 HUD 列（目標並排）。
+ * 版面由呼叫端決定、不看任務列自己的寬度：320 寬直向手機的 HUD 列也很窄，但不能疊成兩排吃掉井的高度。
+ */
+export function BlockDropTaskBar({ round, g, side = false }: { round: BlockRound; g: GameState; side?: boolean }) {
   const { stage, station, mode } = round;
   const initialStones = stage.stones.length;
   const piecesLeft = mode === "challenge" ? Math.max(0, stage.pieceCap - g.pieces) : null;
   return (
-    <section className={styles.taskBar} aria-label="本站任務進度">
+    <section className={styles.taskBar} data-layout={side ? "side" : "row"} aria-label="本站任務進度">
       <div className={styles.head}>
         <span className={styles.place}>
           <span className={styles.placeMini}>
@@ -35,6 +39,7 @@ export function BlockDropTaskBar({ round, g }: { round: BlockRound; g: GameState
           <span
             className={styles.pieces}
             data-warn={piecesLeft <= PIECES_WARN ? "true" : undefined}
+            role="img"
             aria-label={`還能放 ${piecesLeft} 塊`}
           >
             <IconPieces size={16} />
