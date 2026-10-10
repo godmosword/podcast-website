@@ -6,8 +6,8 @@ import Ribbon from "./decor/Ribbon";
 import Sparkle from "./decor/Sparkle";
 import decor from "./decor/decor.module.css";
 import { storyDisplayTitle } from "@/lib/story-title";
-import styles from "./LatestHero.module.css";
 import Icon from "@/components/ui/Icon";
+import styles from "./LatestHero.module.css";
 
 type LatestHeroProps = {
   story: Story;

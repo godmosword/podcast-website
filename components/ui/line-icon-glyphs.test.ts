@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
  * 介面圖示一律用共用的線性 Icon（漢堡抽屜那一套），不用文字符號：
  * 「▾」「✕」「×」「↗」在不同手機字型上大小、粗細、高低都不一樣，旁邊的線條圖示一比就不同套。
  * 2026-10-10 線性圖示統一第一批：頂欄下拉、關閉鍵、外部連結。
- * 第二批：返回「←」、前往「→」、下拉「▾」與勾選「✓」、展開收合「▸▾」。
+ * 第二批：返回「←」、前往「→」、下拉「▾」與勾選「✓」、展開收合「▸▾」、地圖縮放「＋－」。
  */
 const ROOT = join(import.meta.dirname, "..", "..");
 const read = (path: string) =>
@@ -61,6 +61,7 @@ const BATCH_2: readonly { file: string; glyphs: string; icons: readonly string[]
   { file: "components/landing/hero-world/HeroWorld.tsx", glyphs: "→", icons: ["arrow-right"] },
   { file: "components/story/ShowNotes.tsx", glyphs: "▸▾", icons: ["chevron-right"] },
   { file: "components/story/ShowNotes.module.css", glyphs: "▸▾", icons: [] },
+  { file: "components/universe/MapControls.tsx", glyphs: "＋－", icons: ["home", "plus", "minus"] },
 ];
 
 /** 原本各自畫一份、現在改用共用 Icon 的地方：那份路徑不再出現在元件裡。 */
@@ -149,5 +150,31 @@ describe("介面圖示不用文字符號", () => {
     expect(css).toMatch(/\.icon-lead,\s*\.icon-trail\s*\{[^}]*flex:\s*none;[^}]*vertical-align:\s*-0\.15em/);
     expect(css).toMatch(/\.icon-lead\s*\{[^}]*margin-inline-end:\s*0\.3em/);
     expect(css).toMatch(/\.icon-trail\s*\{[^}]*margin-inline-start:\s*0\.3em/);
+  });
+
+  it("親子景點三層的麵包屑分隔都用 chevron-right（不再是「→」或「/」），顏色比連結輕", () => {
+    for (const page of [
+      "app/for-parents/play-map/collections/page",
+      "app/for-parents/play-map/collections/[collectionSlug]/page",
+      "app/for-parents/play-map/[placeId]/page",
+    ]) {
+      expect(read(`${page}.tsx`), page).toContain('<Icon name="chevron-right" size={14} className={styles.crumbSep} />');
+      const css = readFileSync(join(ROOT, `${page}.module.css`), "utf8");
+      expect(css, page).not.toMatch(/\.breadcrumbs li[^{]*::after/);
+      expect(css, page).toMatch(/\.crumbSep\s*\{[^}]*color:\s*var\(--ink-soft\)/);
+    }
+  });
+
+  it("首頁四段 CTA 的箭頭用 em 寬高跟著字級縮放（字在 320 約 14px、1280 約 22px）", () => {
+    const css = readFileSync(join(ROOT, "components/landing/LandingSegment.module.css"), "utf8");
+    expect(css).toMatch(/\.ctaIcon\s*\{[^}]*width:\s*0\.95em;[^}]*height:\s*0\.95em/);
+  });
+
+  it("容器已有 gap 的地方不疊 icon-trail 外距", () => {
+    for (const file of ["components/landing/hero-world/HeroWorld.tsx", "app/for-parents/play-map/page.tsx"]) {
+      const code = read(file);
+      expect(code, file).toContain('name="arrow-right"');
+      expect(code, file).not.toContain("icon-trail");
+    }
   });
 });

@@ -102,6 +102,18 @@ function renderGlyph(name: IconName) {
           <path d="m5 12.5 4.5 4.5L19 7.5" />
         </g>
       );
+    case "plus":
+      return (
+        <g {...STROKE}>
+          <path d="M12 5v14M5 12h14" />
+        </g>
+      );
+    case "minus":
+      return (
+        <g {...STROKE}>
+          <path d="M5 12h14" />
+        </g>
+      );
     case "link":
       return (
         <g {...STROKE}>
@@ -276,11 +288,13 @@ function renderGlyph(name: IconName) {
         </g>
       );
     case "star":
-      // 實心：「聽完／推薦」是拿到的獎勵，填色比線條好認；顏色由 currentColor 決定
+      // 實心：「聽完／推薦」是拿到的獎勵，填色比線條好認；顏色由 currentColor 決定。
+      // 描邊只為圓角，固定 2：跟著 lineWidthFor 加粗會讓小星星整顆變胖、角變鈍。
       return (
         <path
           d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"
           {...STROKE}
+          strokeWidth={2}
           fill="currentColor"
         />
       );

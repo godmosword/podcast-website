@@ -35,7 +35,7 @@
 /* 麵包屑分隔：共用細線向右箭頭（chevron-right），不用文字「→」 */
 .crumbSep {
   margin-left: 6px;
-  color: var(--ink);
+  color: var(--ink-soft);
   vertical-align: -0.15em;
 }
 

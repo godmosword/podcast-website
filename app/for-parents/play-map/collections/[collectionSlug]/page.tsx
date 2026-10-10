@@ -78,17 +78,21 @@ function Breadcrumbs({ title }: { title: string }) {
       <ol>
         <li>
           <Link href="/">首頁</Link>
+          <Icon name="chevron-right" size={14} className={styles.crumbSep} />
         </li>
         <li>
           <Link href="/for-parents">家長專區</Link>
+          <Icon name="chevron-right" size={14} className={styles.crumbSep} />
         </li>
         <li>
           <Link href="/for-parents/play-map">親子遊樂地圖</Link>
+          <Icon name="chevron-right" size={14} className={styles.crumbSep} />
         </li>
         <li>
           <Link href="/for-parents/play-map/collections">
             各地親子景點整理
           </Link>
+          <Icon name="chevron-right" size={14} className={styles.crumbSep} />
         </li>
         <li aria-current="page">{title}</li>
       </ol>

@@ -12,8 +12,8 @@ import {
   playgroundItemListJsonLd,
 } from "@/lib/json-ld";
 import { STATIC_PAGE_MODIFIED_DATES } from "@/lib/page-freshness";
-import styles from "./page.module.css";
 import Icon from "@/components/ui/Icon";
+import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "親子遊樂地圖：台灣 15 縣市適合 3–8 歲的公園與親子景點",
@@ -49,7 +49,7 @@ export default function PlayMapPage() {
       </Suspense>
       <div className={styles.collectionsLinkWrap}>
         <Link className={styles.collectionsLink} href="/for-parents/play-map/collections">
-          看各地親子景點整理<Icon name="arrow-right" size={16} className="icon-trail" />
+          看各地親子景點整理<Icon name="arrow-right" size={16} className={styles.collectionsIcon} />
         </Link>
       </div>
       <SiteFooter

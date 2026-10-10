@@ -10,6 +10,8 @@ export const ICON_NAMES = [
   "arrow-left",
   "arrow-right",
   "check",
+  "plus",
+  "minus",
   "link",
   "home",
   "settings",

@@ -190,7 +190,7 @@
   font-size: var(--fs-h2);
   letter-spacing: 0.02em;
   text-decoration: none;
-  /* 最窄 320px 長句若換行，「 →」會孤行；nowrap 讓鈕維持單行 56px */
+  /* 最窄 320px 長句若換行，尾端箭頭會孤行；nowrap 讓鈕維持單行 56px */
   white-space: nowrap;
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--landing-brand-ink) 55%, #000),
@@ -314,6 +314,9 @@
 
 .ctaIcon {
   flex: none;
+  /* CTA 字級隨螢幕放大（320 約 14px、1280 約 22px），箭頭跟著字走，不固定 px */
+  width: 0.95em;
+  height: 0.95em;
   margin-left: 2px;
 }
 

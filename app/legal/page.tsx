@@ -6,8 +6,8 @@ import {
   LEGAL_POLICY_UPDATED_AT,
   LEGAL_POLICY_VERSION,
 } from "@/lib/legal-policy";
-import styles from "./page.module.css";
 import Icon from "@/components/ui/Icon";
+import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "版權、隱私與使用條款",

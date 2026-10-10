@@ -25,8 +25,8 @@ import SiteFooter from "@/components/SiteFooter";
 import StoryCoverMorph from "@/components/story/StoryCoverMorph";
 import StoryImage from "@/components/StoryImage";
 import StoryMeta from "@/components/StoryMeta";
-import styles from "./page.module.css";
 import Icon from "@/components/ui/Icon";
+import styles from "./page.module.css";
 
 export function generateStaticParams() {
   return getStories().map((story) => ({ slug: story.slug }));

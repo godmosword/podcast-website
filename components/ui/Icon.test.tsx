@@ -1,6 +1,7 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
+import { ICON_NAMES } from "@/data/icons";
 import Icon, { lineWidthFor } from "./Icon";
 
 vi.stubGlobal("React", React);
@@ -30,8 +31,8 @@ describe("Icon", () => {
     expect(down).not.toEqual(right);
   });
 
-  it("返回／前往箭頭、勾選、連結、房子都是線性描邊（取代文字「←」「→」「✓」與各元件自畫的圖）", () => {
-    for (const name of ["arrow-left", "arrow-right", "check", "link", "home"] as const) {
+  it("返回／前往箭頭、勾選、加減、連結、房子都是線性描邊（取代文字「←」「→」「✓」「＋」「－」與各元件自畫的圖）", () => {
+    for (const name of ["arrow-left", "arrow-right", "check", "link", "home", "plus", "minus"] as const) {
       const html = renderToStaticMarkup(<Icon name={name} />);
       expect(html, name).toContain('stroke="currentColor"');
       expect(html, name).toContain('stroke-linecap="round"');
@@ -48,5 +49,18 @@ describe("Icon", () => {
     }
     const html = renderToStaticMarkup(<Icon name="arrow-left" size={16} />);
     expect(html).toContain('stroke-width="2.5"');
+  });
+
+  it("線寬只寫在根 <svg>：子元素自己寫死線寬就吃不到小尺寸補償", () => {
+    for (const name of ICON_NAMES) {
+      const html = renderToStaticMarkup(<Icon name={name} size={16} />);
+      const widths = html.match(/stroke-width="[^"]+"/g) ?? [];
+      if (name === "star") {
+        // 實心星星的描邊只為圓角：固定 2，不跟著加粗（否則小星星整顆變胖）
+        expect(widths, name).toEqual(['stroke-width="2.5"', 'stroke-width="2"']);
+      } else {
+        expect(widths, name).toEqual(['stroke-width="2.5"']);
+      }
+    }
   });
 });

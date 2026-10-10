@@ -1,7 +1,7 @@
 import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
-import styles from "./ParentSectionPage.module.css";
 import Icon from "@/components/ui/Icon";
+import styles from "./ParentSectionPage.module.css";
 
 export function ParentSectionPage({ title }: { title: string }) {
   return (

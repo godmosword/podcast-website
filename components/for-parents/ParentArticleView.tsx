@@ -6,8 +6,8 @@ import {
   parentArticlePath,
   parentArticlesIndexPath,
 } from "@/lib/parent-articles";
-import styles from "./ParentArticleView.module.css";
 import Icon from "@/components/ui/Icon";
+import styles from "./ParentArticleView.module.css";
 
 function ArticleBlock({
   block,

@@ -1,8 +1,8 @@
 import Link from "next/link";
 import NotFoundHero from "@/components/not-found/NotFoundHero";
 import SiteFooter from "@/components/SiteFooter";
-import styles from "./not-found.module.css";
 import Icon from "@/components/ui/Icon";
+import styles from "./not-found.module.css";
 
 export default function NotFound() {
   return (

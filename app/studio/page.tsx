@@ -4,8 +4,8 @@ import EngagementMetricsPanel from "@/components/studio/EngagementMetricsPanel";
 import IllustrationQueuePanel from "@/components/studio/IllustrationQueuePanel";
 import PlatformStudioCard from "@/components/studio/PlatformStudioCard";
 import { studioPlatforms } from "@/lib/studio/platforms";
-import styles from "./page.module.css";
 import Icon from "@/components/ui/Icon";
+import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "節目數據中心",

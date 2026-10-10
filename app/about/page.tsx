@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
-import styles from "./page.module.css";
 import Icon from "@/components/ui/Icon";
+import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "關於我們",

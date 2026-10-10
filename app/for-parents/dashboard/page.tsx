@@ -4,8 +4,8 @@ import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import { ParentDashboard } from "@/components/for-parents/ParentDashboard";
 import { ParentGate } from "@/components/for-parents/ParentGate";
-import styles from "./page.module.css";
 import Icon from "@/components/ui/Icon";
+import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "家庭儀表板",

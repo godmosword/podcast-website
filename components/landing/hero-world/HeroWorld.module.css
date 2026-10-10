@@ -31,6 +31,8 @@
 .actions { position: absolute; z-index: 2; left: 6%; bottom: 23%; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .cta { display: inline-flex; gap: 14px; align-items: center; justify-content: center; min-height: 56px; padding: 12px 26px; border: 2px solid #fff7e8; border-radius: var(--radius-pill); background: #315e52; color: #fff; font-size: var(--fs-h4); font-weight: 700; text-decoration: none; box-shadow: 0 5px 18px #315e521a; transition: transform 220ms, box-shadow 500ms; }
 .cta:hover { transform: translateY(-2px); }
+/* 已有 gap，箭頭不再加 icon-trail 外距 */
+.ctaIcon { flex: none; }
 .cta:active { transform: scale(.98); }
 .hero[data-greeting="true"] .cta { box-shadow: 0 0 0 5px #315e5214, 0 6px 24px #315e5226; }
 .skip { position: absolute; z-index: 3; right: max(4%, env(safe-area-inset-right)); bottom: max(24px, env(safe-area-inset-bottom)); display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px 16px; color: #71583f; font-size: var(--fs-label); text-underline-offset: 5px; }

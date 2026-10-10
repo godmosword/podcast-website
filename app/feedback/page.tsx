@@ -16,8 +16,8 @@ import {
 } from "@/lib/feedback-copy";
 import { isFeedbackDbConfigured } from "@/lib/feedback-db";
 import { modernRasterPaths } from "@/lib/modern-image-src";
-import styles from "./page.module.css";
 import Icon from "@/components/ui/Icon";
+import styles from "./page.module.css";
 
 const FEEDBACK_HERO = modernRasterPaths(FEEDBACK_HERO_SRC);
 

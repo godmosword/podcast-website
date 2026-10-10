@@ -256,11 +256,15 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 ### 介面圖示（2026-10-10 線性圖示統一）
 
 - 介面圖示一律用共用 `components/ui/Icon`（名稱登記在 `data/icons.ts`）：24 格、2 單位線、圓角收尾與轉角、跟字色走（`currentColor`）、`aria-hidden`——和漢堡選單同一套圓角單線（Lucide／Feather 一族）。
-- **不用文字符號當圖示**：「←」「→」「▾」「▸」「✓」「✕」「×」「↗」在不同手機字型上大小、粗細、高低都不一樣，排在線條圖示旁一看就不同套。返回連結用 `arrow-left`、前往用 `arrow-right`、下拉用 `chevron-down`、勾選用 `check`、關閉用 `close`、離站連結用 `external`、站內連結標記與麵包屑分隔用 `chevron-right`。句子裡的「A → B」與數量「×3」是文字，不在此限。
-- 文字旁的圖示：前置用全域 `.icon-lead`、後置用 `.icon-trail`（對齊字的中線、和字之間 0.3em、在 flex 容器裡不被壓縮）。圖示不進可及名稱：連結名稱就是可見文字，e2e 也用不含箭頭的名稱找。
-- 展開收合（`<details>`）：`chevron-right` 配 `icon-lead icon-disclosure`，打開時轉 90° 朝下；下拉箭頭打開時轉 180°。兩者在 `prefers-reduced-motion` 時直接切換、不轉場。`<summary>` 不改 `display`（Safari 會壞開合），圖示當行內元素放。
-- 小尺寸補線寬：Icon 依 `lineWidthFor(size)` 自動加粗小於 20px 的圖示，實際線寬維持約 1.67px（和 20px 一樣），不會比旁邊的粗字淡一截。
-- 元件專屬的圖形（播放器的重播／快轉、著色家長操作列）可以自己畫，但線條一律用 `ICON_LINE`；和 Icon 重複的圖形（播放、暫停、音量、連結、房子）直接用 Icon，不另畫一份。品牌標誌（LINE 等平台 logo）與實物插畫（著色工具的蠟筆、油漆桶）不在此限。
+- **不用文字符號當圖示**：「←」「→」「▾」「▸」「✓」「✕」「×」「↗」「＋」「－」在不同手機字型上大小、粗細、高低都不一樣，排在線條圖示旁一看就不同套。對照：
+  - 文字連結與按鈕：返回用 `arrow-left`、前往用 `arrow-right`、離站用 `external`。
+  - 列表或卡片整列可點的「進入」標記（地圖熱點、ZoneSheet 列）用 `chevron-right`；麵包屑分隔也用 `chevron-right`（14px、`--ink-soft`，比連結字輕）。
+  - 下拉用 `chevron-down`、勾選用 `check`、關閉用 `close`、放大縮小用 `plus`／`minus`。
+  - 句子裡的「A → B」與數量「×3」是文字，不在此限。
+- 文字旁的圖示：前置用全域 `.icon-lead`、後置用 `.icon-trail`（對齊字的中線、和字之間 0.3em、在 flex 容器裡不被壓縮）。**容器已有 `gap` 時不加這兩個 class**（會疊成兩份間距），改用只有 `flex: none` 的元件 class。按鈕字級隨螢幕變（如首頁四段 CTA）時，圖示用 `em` 寬高跟字走，不固定 px。圖示不進可及名稱：連結名稱就是可見文字，e2e 也用不含箭頭的名稱找。
+- 展開收合（`<details>`）：`chevron-right` 配 `icon-lead icon-disclosure`，放在 `<summary>` 第一個子元素，打開時轉 90° 朝下；下拉箭頭打開時轉 180°。兩者在 `prefers-reduced-motion` 時直接切換、不轉場。新寫的 `<summary>` 維持 block、圖示當行內元素放（ShowNotes 註解記載 Safari 對 `<summary>` 改 `display` 會壞開合）；故事大綱沿用既有的 flex 寫法。
+- 小尺寸補線寬：Icon 依 `lineWidthFor(size)` 自動加粗小於 20px 的圖示，實際線寬維持約 1.67px（和 20px 一樣），不會比旁邊的粗字淡一截。實心的 `star` 例外：描邊只為圓角，固定 2，否則小星星整顆變胖。
+- 元件專屬的圖形（播放器的重播／快轉、著色家長操作列）可以自己畫，但線條一律用 `ICON_LINE`（固定 2，只適合 20px 以上；更小的請加進 Icon）；和 Icon 重複的圖形（播放、暫停、音量、連結、房子）直接用 Icon，不另畫一份。品牌標誌（LINE 等平台 logo）與實物插畫（著色工具的蠟筆、油漆桶）不在此限。
 - `components/ui/line-icon-glyphs.test.ts` 守住已改的檔案不再用文字符號、不再自畫重複的圖。
 
 ### 色彩分層

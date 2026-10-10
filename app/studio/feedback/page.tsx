@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import FeedbackModerationPanel from "@/components/studio/FeedbackModerationPanel";
 import { isFeedbackModerationConfigured } from "@/lib/studio-feedback-auth";
-import styles from "./page.module.css";
 import Icon from "@/components/ui/Icon";
+import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "留言審核",

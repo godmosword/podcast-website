@@ -3,8 +3,8 @@ import type { Story } from "@/data/content";
 import FamilyActivityCard from "@/components/story/FamilyActivityCard";
 import ShowNotes from "@/components/story/ShowNotes";
 import { storyDisplayTitle } from "@/lib/story-title";
-import styles from "./ParentCoListenSection.module.css";
 import Icon from "@/components/ui/Icon";
+import styles from "./ParentCoListenSection.module.css";
 
 type Props = {
   stories: Story[];

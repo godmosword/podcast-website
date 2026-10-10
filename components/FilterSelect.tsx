@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { playSfx } from "@/lib/sfx";
-import styles from "./FilterSelect.module.css";
 import Icon from "@/components/ui/Icon";
+import styles from "./FilterSelect.module.css";
 
 export type FilterSelectOption = {
   value: string;

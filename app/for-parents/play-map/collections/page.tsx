@@ -9,8 +9,8 @@ import {
   resolveCollection,
 } from "@/lib/playground-collections";
 import { breadcrumbListJsonLd } from "@/lib/json-ld";
-import styles from "./page.module.css";
 import Icon from "@/components/ui/Icon";
+import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: { absolute: "各地親子景點整理｜車車遊樂園" },
@@ -32,12 +32,15 @@ function Breadcrumbs() {
       <ol>
         <li>
           <Link href="/">首頁</Link>
+          <Icon name="chevron-right" size={14} className={styles.crumbSep} />
         </li>
         <li>
           <Link href="/for-parents">家長專區</Link>
+          <Icon name="chevron-right" size={14} className={styles.crumbSep} />
         </li>
         <li>
           <Link href="/for-parents/play-map">親子遊樂地圖</Link>
+          <Icon name="chevron-right" size={14} className={styles.crumbSep} />
         </li>
         <li aria-current="page">各地親子景點整理</li>
       </ol>

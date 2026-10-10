@@ -8,8 +8,8 @@ import { topicIndexDefinitionSummary } from "@/lib/topic-index-geo";
 import StoryImage from "@/components/StoryImage";
 import TopicIcon from "@/components/TopicIcon";
 import SiteFooter from "@/components/SiteFooter";
-import styles from "./page.module.css";
 import Icon from "@/components/ui/Icon";
+import styles from "./page.module.css";
 
 export function generateMetadata(): Metadata {
   const themes = allTags().map((tag) => ({

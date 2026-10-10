@@ -9,8 +9,8 @@ import { topicDefinitionSummary, topicFaqs } from "@/lib/topic-geo";
 import JsonLd from "@/components/JsonLd";
 import SiteFooter from "@/components/SiteFooter";
 import StoryCard from "@/components/StoryCard";
-import styles from "./page.module.css";
 import Icon from "@/components/ui/Icon";
+import styles from "./page.module.css";
 
 export function generateStaticParams() {
   return allTags().map((tag) => ({ tag }));

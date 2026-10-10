@@ -40,9 +40,8 @@
 
 .arrow {
   flex: 0 0 auto;
+  display: flex;
   color: var(--accent-ink);
-  font-size: var(--fs-h3);
-  font-weight: 700;
 }
 
 .meta {

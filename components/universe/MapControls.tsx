@@ -38,7 +38,7 @@ export default function MapControls({
         aria-label="放大地圖（右下角加號）"
         disabled={!canZoomIn}
       >
-        ＋
+        <Icon name="plus" size={24} />
       </button>
       <button
         type="button"
@@ -47,7 +47,7 @@ export default function MapControls({
         aria-label="縮小地圖（右下角減號）"
         disabled={!canZoomOut}
       >
-        －
+        <Icon name="minus" size={24} />
       </button>
     </div>
   );

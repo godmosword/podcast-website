@@ -6,8 +6,8 @@ import {
   type CatalogEpisodeOption,
 } from "@/lib/character-catalog";
 import { playSfx } from "@/lib/sfx";
-import styles from "./CharacterCard.module.css";
 import Icon from "@/components/ui/Icon";
+import styles from "./CharacterCard.module.css";
 
 type CharacterEpisodeSelectProps = {
   characterName: string;
