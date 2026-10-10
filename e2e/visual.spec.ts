@@ -538,6 +538,73 @@ test("visual：著色本畫布 390 light", async ({ page }) => {
   });
 });
 
+/** 多多壽司屋固定 seed（只有測試會設）：同一盤托盤、同一串訂單，截圖可重現。 */
+async function openDinoSushi(page: Page, width: number, height: number, theme: VisualTheme) {
+  await page.setViewportSize({ width, height });
+  await page.addInitScript(() => {
+    (window as unknown as { __dinoSushiSeed: number }).__dinoSushiSeed = 7;
+  });
+  await page.goto("/games/dino-sushi");
+  await stabilizeVisualPage(page, { theme });
+  await expect(page.getByRole("heading", { name: "多多肚子餓了！" })).toBeVisible();
+}
+
+/** 照第 n 單的泡泡選飯、放料；serve 時順便送出並等多多吃完。 */
+async function makeDinoOrder(page: Page, n: number, serve: boolean) {
+  const label = await page.getByRole("img", { name: new RegExp(`^第 ${n} 單`) }).getAttribute("aria-label");
+  const [base, ...toppings] = label!.split("多多想吃：")[1]!.split("、");
+  await page.getByRole("button", { name: `選${base}` }).click();
+  for (const t of toppings) await page.getByRole("button", { name: `加${t}` }).click();
+  if (!serve) return;
+  await page.getByRole("button", { name: "給多多吃" }).click();
+  await expect(
+    page.getByRole("img", { name: `吃完 ${n} 盤` }).or(page.getByTestId("dino-sushi-result")).first(),
+  ).toBeVisible();
+}
+
+/** 標題頁只截卡片：抬頭的遊戲名稱與工具列另有基準。 */
+for (const [width, height, theme] of [
+  [390, 844, "light"],
+  [1280, 800, "night"],
+] as const) {
+  test(`visual：多多壽司屋標題 ${width} ${theme}`, async ({ page }) => {
+    await openDinoSushi(page, width, height, theme);
+    await expect(page.getByTestId("dino-sushi")).toHaveScreenshot(`dino-sushi-title-${width}-${theme}.png`, {
+      maxDiffPixelRatio: 0.02,
+      animations: "disabled",
+    });
+  });
+}
+
+/** 廚房：第 1 單做齊（泡泡全打勾、料位三格、托盤 2×4）。直向、橫向手機三欄、桌面夜間三欄。 */
+for (const [width, height, theme] of [
+  [390, 844, "light"],
+  [844, 390, "light"],
+  [1280, 800, "night"],
+] as const) {
+  test(`visual：多多壽司屋廚房 ${width}×${height} ${theme}（固定 seed）`, async ({ page }) => {
+    await openDinoSushi(page, width, height, theme);
+    await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+    await makeDinoOrder(page, 1, false);
+    await expect(page.getByTestId("dino-sushi")).toHaveScreenshot(
+      `dino-sushi-kitchen-${width}x${height}-${theme}.png`,
+      { maxDiffPixelRatio: theme === "night" ? 0.03 : 0.02, animations: "disabled" },
+    );
+  });
+}
+
+test("visual：多多壽司屋結算 390 light（5 單一次做對、三星）", async ({ page }) => {
+  await openDinoSushi(page, 390, 844, "light");
+  await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+  for (let n = 1; n <= 5; n++) await makeDinoOrder(page, n, true);
+  const result = page.getByTestId("dino-sushi-result");
+  await expect(result.getByRole("img", { name: "拿到 3 顆星，共 3 顆" })).toBeVisible();
+  await expect(result).toHaveScreenshot("dino-sushi-result-390-light.png", {
+    maxDiffPixelRatio: 0.02,
+    animations: "disabled",
+  });
+});
+
 test("visual：單集 ep-3 768 light", async ({ page }) => {
   await page.setViewportSize({ width: 768, height: 900 });
   await page.goto("/story/ep-3");

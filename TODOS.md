@@ -1513,8 +1513,8 @@ D0 → D2-A(smoke) → D1 → D13-剩餘 → D3 → D14 → D6 ∥ D12
 ✅ 2026-10-10 第一版（使用者決定直推 main，`6ae5faa0`）：選飯→加料→給多多吃，點餐 5 單＋自由做，終身最多 3 星，遊樂園改四張卡。新增遊戲 checklist 見 [docs/GAMEKIT-ADAPTER.md](./docs/GAMEKIT-ADAPTER.md)。
 後續：
 - [x] 遊樂園卡片封面：2026-10-11 付費生 1 張（images.edit＋多多定裝照，`npm run generate:dino-sushi-cover`），使用者審圖通過後換上。
-- [ ] 視覺 baseline：Mac 補錄 dino-sushi 標題／廚房／結算與四卡 hub（`npm run test:visual:trusted -- --update-snapshots`）。
-- [ ] 實機 QA（iOS Safari、主畫面 App safe area）後再評估拖曳放料。
+- [x] 視覺 baseline：四卡 hub（`52cddaed`）；`e2e/visual.spec.ts` 新增壽司屋標題（390 日／1280 夜）、廚房（390×844、844×390、1280 夜）、結算三星共 6 張（2026-10-11）。
+- [ ] 實機 QA：`GAME_PHYSICAL_DEVICE_QA.md` 已加壽司屋 5 項；Playwright WebKit iPhone 15 模擬 12 項 e2e 全過，並修掉 iPhone 橫向（扣掉 Safari 工具列約 343px 高）托盤第四列被切的問題。真機（iOS Safari、主畫面 App safe area）待使用者勾，之後再評估拖曳放料。
 - [ ] 語音（請 Bonbon／馬米錄 5–6 句短語音）另案。
 - [ ] 多多美食圖鑑（需新存檔欄位＋遷移，L3）另案；宇宙地圖恐龍島第二入口另案。
 

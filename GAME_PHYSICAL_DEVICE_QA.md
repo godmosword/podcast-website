@@ -9,6 +9,11 @@
 - [ ] **iPhone Safari — Block Drop 快速操作**：快速點按左右／旋轉／下降控制，確認方塊與 pause 狀態正常。
 - [ ] **iPhone Safari — Block Drop 切 App 回來**：遊戲中切到另一個 App 約 5 秒再回來，確認已暫停且可繼續。
 - [ ] **iPhone Safari — Block Drop 旋轉**：playing/paused 間 portrait ↔ landscape，確認棋盤尺寸與操作列仍可用。
+- [ ] **iPhone Safari — 多多壽司屋完整一輪**：開始 → 照泡泡做完 5 單，確認選飯、加料、拿掉料位、「給多多吃」、多多吃的動畫與疊盤都正常，結算三星與「再做一輪」可用。
+- [ ] **iPhone Safari — 多多壽司屋快速連點**：同一格托盤快速連點、兩指同時點兩格、點完立刻按「給多多吃」，確認每點一下只加一層、第 4 料只輕晃、吃的時候點不動。
+- [ ] **iPhone Safari — 多多壽司屋切 App 回來**：送出後立刻切到另一個 App 約 5 秒再回來，確認已暫停、多多還沒吃完，按繼續才吃完並出下一單。
+- [ ] **iPhone Safari — 多多壽司屋旋轉**：廚房中 portrait ↔ landscape，確認直向三段、橫向三欄（多多｜砧板｜托盤）都一屏放得下、不水平溢出。
+- [ ] **iPhone Safari — 多多壽司屋 sound**：首次互動後有加料、送出與多多反應的音效；靜音後全部安靜。
 - [ ] **iPhone Safari — Coloring 長時間畫線**：連續畫線約 30 秒，確認線條不中斷、頁面不捲動、不白屏。
 - [ ] **iPhone Safari — Coloring toolbar**：左右滑動工具列，切換蠟筆／油漆桶／橡皮擦，確認 active tool 與 touch target。
 - [ ] **iPhone Safari — Coloring 旋轉**：畫布中 portrait ↔ landscape，確認畫面、工具列與完成 CTA 仍可見。
@@ -18,7 +23,7 @@
 - [ ] **iPhone Safari — Back / Forward**：遊戲頁與 hub 間使用 Safari Back/Forward，確認不出現空白頁或重複 modal。
 - [ ] **iPhone Safari — reload**：ready、playing、result 三種狀態各 reload 一次，確認頁面可重新進入且不白屏。
 - [ ] **iPhone Safari — result modal**：完成或 game over 後確認 focus 落在 modal，Tab/VoiceOver 可到 replay、下一站與離開 CTA。
-- [ ] **iPad Safari — portrait / landscape / Split View**：分別檢查 Candy、Block Drop、Coloring 的主要操作；在 Split View 窄 viewport 確認沒有水平溢出與遮擋。
+- [ ] **iPad Safari — portrait / landscape / Split View**：分別檢查 Candy、Block Drop、多多壽司屋、Coloring 的主要操作；在 Split View 窄 viewport 確認沒有水平溢出與遮擋。
 
 ## Notes
 
