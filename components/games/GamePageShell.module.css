@@ -99,7 +99,18 @@
   margin-bottom: var(--space-3);
   padding-top: var(--safe-top);
   background: color-mix(in srgb, var(--bg) 88%, transparent);
+}
+
+/* 毛玻璃放在 ::before、不放在抬頭本身：Safari 會把帶 backdrop-filter 的 sticky 元素連字一起
+   用較低解析度合成，「回遊樂園」和標題看起來糊（同 SiteNavBar .bar::before） */
+.playHeader::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .headerActions {
