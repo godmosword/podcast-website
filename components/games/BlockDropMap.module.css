@@ -1,14 +1,28 @@
+/* 方塊轉轉冒險地圖（對齊消消樂地圖）。卡面日夜不反轉，顏色固定。 */
 .map {
   --node-size: 68px;
   --row-h: 100px;
   --path-ink: #e8a44a;
+  --ink: #5d4a67;
+  --ink-soft: #7c6886;
+  --focus-ring: #5d4a67;
   display: grid;
   gap: 14px;
   min-width: 0;
   width: 100%;
+  color: var(--ink);
 }
 
-/* 玩法：葉子＝輕鬆、腳印＝挑戰；只留兩個字，說明在 aria-label */
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* 玩法：葉子＝輕鬆、方塊＝挑戰；只留兩個字，說明在 aria-label */
 .modeToggle {
   display: inline-flex;
   justify-self: center;
@@ -28,7 +42,7 @@
   border: none;
   border-radius: 14px;
   background: transparent;
-  color: #7c6886;
+  color: var(--ink-soft);
   cursor: pointer;
   font: inherit;
   font-size: 17px;
@@ -48,11 +62,11 @@
 }
 
 .modeOption:focus-visible {
-  outline: 3px solid var(--focus-ring, #ff9fb7);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
-/* 下一站大卡：站點圖｜站名＋任務圖案｜大圓開始鈕 */
+/* 下一站大卡：迷你起始盤｜站號＋站名＋任務圖案｜大圓開始鈕 */
 .hero {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
@@ -64,28 +78,21 @@
   box-shadow: 0 8px 20px rgba(150, 110, 130, 0.14);
 }
 
+/* 迷你盤格子：一般 7px、寬螢幕 9px、320 寬 5px */
 .heroArt {
+  --mini-cell: 7px;
   display: grid;
   place-items: center;
-  width: 84px;
-  height: 84px;
-  border-radius: 50%;
+  padding: 6px;
+  border-radius: 16px;
   background: #fff7ea;
   box-shadow: inset 0 0 0 3px #ffbd6f;
-}
-
-.heroArt img {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  object-fit: cover;
 }
 
 .heroInfo {
   display: grid;
   gap: 2px;
   min-width: 0;
-  color: #5d4a67;
 }
 
 .heroInfo p {
@@ -93,7 +100,7 @@
 }
 
 .heroStation {
-  color: #7c6886;
+  color: var(--ink-soft);
   font-size: 14px;
   font-weight: 800;
 }
@@ -118,7 +125,7 @@
 .heroGoal {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   line-height: 0;
 }
 
@@ -128,7 +135,7 @@
   line-height: 1;
 }
 
-.heroMoves {
+.heroCap {
   display: inline-flex;
   align-items: center;
   gap: 3px;
@@ -146,7 +153,7 @@
   place-items: center;
   width: 72px;
   height: 72px;
-  padding: 0;
+  padding: 0 0 0 4px;
   border: none;
   border-radius: 50%;
   background: linear-gradient(180deg, #ffe889, #ffbd6f);
@@ -156,7 +163,7 @@
 }
 
 .heroStart:focus-visible {
-  outline: 3px solid var(--focus-ring, #ff9fb7);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 3px;
 }
 
@@ -230,6 +237,7 @@
   border-radius: 50%;
   background: transparent;
   cursor: pointer;
+  font: inherit;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -237,24 +245,22 @@
   cursor: default;
 }
 
+/* 站點沒有插圖：圓章上直接寫大站號 */
 .badge {
   position: relative;
-  display: block;
+  display: grid;
+  place-items: center;
   width: var(--node-size);
   height: var(--node-size);
   border: 3px solid #fff;
   border-radius: 50%;
   background: #fff7ea;
   box-shadow: 0 4px 12px rgba(150, 110, 130, 0.24);
+  color: var(--ink);
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1;
   transition: transform 180ms ease;
-}
-
-.icon {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
 }
 
 .node[aria-current="true"] .badge {
@@ -263,35 +269,9 @@
 
 /* 下一站：放大、粉紅外圈，一眼看出「現在要去這裡」 */
 .next .badge {
+  background: linear-gradient(180deg, #fff3c4, #ffd9a0);
   box-shadow: 0 0 0 4px #ff9fb7, 0 8px 18px rgba(150, 110, 130, 0.28);
   transform: scale(1.16);
-}
-
-.nodeNumber {
-  position: absolute;
-  top: -6px;
-  left: -6px;
-  display: grid;
-  place-items: center;
-  min-width: 24px;
-  height: 24px;
-  padding: 0 3px;
-  border: 2px solid #fff;
-  border-radius: 999px;
-  background: #5d4a67;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 900;
-  line-height: 1;
-}
-
-.next .nodeNumber {
-  background: #ffbd6f;
-  color: #614018;
-}
-
-.node[data-locked="true"] .nodeNumber {
-  background: #88798f;
 }
 
 .node:focus-visible {
@@ -299,13 +279,13 @@
 }
 
 .node:focus-visible .badge {
-  box-shadow: 0 0 0 4px var(--focus-ring, #ff9fb7);
+  box-shadow: 0 0 0 4px var(--focus-ring);
 }
 
 .lock {
   position: absolute;
-  right: -4px;
-  bottom: -4px;
+  right: -6px;
+  bottom: -6px;
   display: inline-flex;
   padding: 2px;
   border-radius: 50%;
@@ -329,6 +309,30 @@
   transform: translateX(-50%);
 }
 
+/* 次要入口：自由堆疊 */
+.free {
+  display: inline-flex;
+  justify-self: center;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  margin-top: 6px;
+  padding: 0 18px;
+  border: 1.5px solid rgba(93, 74, 103, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.free:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
 @media (hover: hover) {
   .node:not([aria-disabled="true"]):hover .badge {
     transform: translateY(-2px);
@@ -346,19 +350,16 @@
     gap: 16px;
   }
 
+  /* 大卡限寬置中：寬螢幕上開始鈕不會離站名一大段 */
   .hero {
+    justify-self: center;
+    width: min(100%, 720px);
     padding: 16px 20px;
     gap: 18px;
   }
 
   .heroArt {
-    width: 96px;
-    height: 96px;
-  }
-
-  .heroArt img {
-    width: 80px;
-    height: 80px;
+    --mini-cell: 9px;
   }
 
   .heroPlace {
@@ -401,13 +402,8 @@
   }
 
   .heroArt {
-    width: 64px;
-    height: 64px;
-  }
-
-  .heroArt img {
-    width: 54px;
-    height: 54px;
+    --mini-cell: 5px;
+    padding: 4px;
   }
 
   .heroStart {

@@ -35,6 +35,12 @@ const HARDCODED_COLOR_ALLOWLIST = [
   "components/games/CandyMatchBoard.module.css",
   "components/games/GameLoadOverlay.module.css",
   "components/games/GameEndStation.module.css",
+  // 方塊轉轉標題頁、地圖、任務列：同一張馬卡龍奶油卡面（原為 inline style，見 blockDropTheme），夜間不反轉
+  "components/games/BlockDropTitle.module.css",
+  "components/games/BlockDropMap.module.css",
+  "components/games/BlockDropTaskBar.module.css",
+  // 結算星星與小籤：消消樂、方塊轉轉共用，疊在固定淺色的結算卡面上（日夜不反轉）
+  "components/games/ResultStars.module.css",
   // 著色畫布：底必須是純白，否則蠟筆顏色會被主題染色
   "components/coloring/ColoringPageShell.module.css",
   // 真實世界地圖：類型剪影 #34302b／「其他」淺沙 #cfcac2 為固定美術色

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { PROGRESS_STORAGE_KEY } from "../lib/progress-keys";
 
 /** 走 GamePageShell 的兩款；coloring-book 用 ColoringPageShell，另行驗收。 */
 const SHELL_ROUTES = [
@@ -268,6 +269,37 @@ test.describe("方塊轉轉：手機井尺寸", () => {
     expect(m.wellBottom).toBeLessThanOrEqual(664);
     expect(m.padBottom).toBeLessThanOrEqual(664);
     expect(m.minSide).toBeGreaterThanOrEqual(44);
+  });
+});
+
+/** 冒險任務列：兩個目標的站在直向手機要並排（不疊兩排吃掉井），16 排的井格子仍 ≥ 25px。 */
+test.describe("方塊轉轉：冒險任務列不吃掉井", () => {
+  test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 664 } });
+
+  test("390×664 挑戰第 6 站（兩個目標）：目標並排、格子 ≥ 25px", async ({ page }) => {
+    await page.addInitScript((storageKey: string) => {
+      const raw = localStorage.getItem(storageKey);
+      const parsed = raw ? JSON.parse(raw) : {};
+      parsed.gameProfile = { version: 5, ...(parsed.gameProfile ?? {}), medals: { "block-drop": [1, 1, 1, 1, 1] } };
+      localStorage.setItem(storageKey, JSON.stringify(parsed));
+    }, PROGRESS_STORAGE_KEY);
+    await page.goto("/games/block-drop");
+    await page.getByRole("button", { name: "開始冒險" }).click();
+    await page.getByRole("radio", { name: /挑戰冒險/ }).click();
+    await page.locator('button[data-next="true"]').click();
+    await expect(page.locator('[data-status="playing"]')).toBeVisible();
+    await page.waitForTimeout(400);
+
+    const m = await page.evaluate(() => {
+      const wells = [...document.querySelectorAll<HTMLElement>('[data-status="playing"] [style*="grid-template-columns: repeat(8"]')]
+        .map((el) => el.getBoundingClientRect())
+        .sort((a, b) => b.width - a.width);
+      const goals = [...document.querySelectorAll('[aria-label="本站任務進度"] li')].map((li) => li.getBoundingClientRect().top);
+      return { cellPx: wells[0]!.width / 8, goalTops: goals };
+    });
+    expect(m.goalTops).toHaveLength(2);
+    expect(Math.abs(m.goalTops[0]! - m.goalTops[1]!)).toBeLessThan(1);
+    expect(m.cellPx).toBeGreaterThanOrEqual(25);
   });
 });
 

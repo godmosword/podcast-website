@@ -1,0 +1,175 @@
+/*
+ * 方塊轉轉冒險任務列（對齊消消樂任務列）。data-layout＝row：直向手機 HUD 列（目標並排、不換行）；
+ * side：寬螢幕與橫向手機的側欄（目標疊一欄、收起站名）。卡面日夜不反轉，顏色固定。
+ */
+.taskBar {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  padding: 6px 8px;
+  border: 1.5px solid rgba(255, 196, 168, 0.55);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 246, 238, 0.86));
+  box-shadow: 0 8px 18px rgba(158, 118, 122, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  color: #5d4a67;
+  text-align: left;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-width: 0;
+}
+
+.place {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.placeMini {
+  display: inline-flex;
+  flex: none;
+  line-height: 0;
+}
+
+.placeName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 挑戰模式剩幾塊：方塊圖示＋數字 */
+.pieces {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #e6f5fc;
+  color: #5d4a67;
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.pieces[data-warn="true"] {
+  background: #a5567a;
+  color: #fff;
+}
+
+.goals {
+  --goal-cell: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.goal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  background: #fff6d8;
+}
+
+.goal[data-done="true"] {
+  background: #e3f8ee;
+}
+
+.goalIcon {
+  display: inline-flex;
+  line-height: 0;
+}
+
+/* 數字是孩子最常看的：獨立放大 */
+.goalNum {
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.goalCheck {
+  display: inline-flex;
+  color: #3f8a5a;
+  line-height: 0;
+}
+
+/* 窄螢幕（≤480）：站名收起，只留「第 N 站」 */
+@media (max-width: 480px) {
+  .placeName {
+    display: none;
+  }
+}
+
+/* HUD 列兩個目標：並排不換行，圖示縮小才放得下（320 寬每格約 80px） */
+.taskBar[data-layout="row"] .goals[data-count="2"] {
+  --goal-cell: 9px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 360px) {
+  .taskBar[data-layout="row"] .goals[data-count="2"] {
+    --goal-cell: 7px;
+    gap: 4px;
+  }
+
+  .taskBar[data-layout="row"] .goals[data-count="2"] .goal {
+    gap: 4px;
+    padding: 2px 4px;
+  }
+
+  .taskBar[data-layout="row"] .goals[data-count="2"] .goalNum {
+    font-size: 22px;
+  }
+}
+
+/* 側欄：目標疊成一欄，站名收起（迷你盤留著，認站靠它）；剩幾塊放不下就換到下一行 */
+.taskBar[data-layout="side"] .head {
+  flex-wrap: wrap;
+}
+
+.taskBar[data-layout="side"] .goals {
+  grid-template-columns: 1fr;
+}
+
+.taskBar[data-layout="side"] .placeName {
+  display: none;
+}
+
+/* 很矮的螢幕（320×568 等）：任務列收緊，井的格子才保得住 25px */
+@media (max-height: 640px) {
+  .taskBar {
+    gap: 2px;
+    padding: 4px 6px;
+  }
+
+  .goal {
+    min-height: 32px;
+  }
+
+  .goalNum {
+    font-size: 22px;
+  }
+
+  .pieces {
+    padding: 2px 8px;
+    font-size: 15px;
+  }
+}

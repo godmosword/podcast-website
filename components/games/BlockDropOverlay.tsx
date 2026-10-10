@@ -1,13 +1,11 @@
 "use client";
 
 /**
- * 《繽紛樂園》待機／暫停／結算層（原樣搬自 BlockDropView）。
+ * 《繽紛樂園》暫停／結算層。標題頁由 BlockDropTitle 負責，這裡不再有待機面。
  */
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { BlockDropReadyDemo } from "@/components/games/BlockDropReadyDemo";
 import { GameEndStation } from "@/components/games/GameEndStation";
-import { GameResultActions } from "@/components/games/GameResultActions";
 import { IconPauseGlyph, IconPlay, IconSprout } from "@/components/games/ClayIcons";
 import type { GameState } from "@/lib/games/block-drop/engine";
 import type { BlockDropDifficulty } from "@/lib/gamekit/progress/settings";
@@ -22,10 +20,7 @@ export function BlockDropOverlay({
   blockDropDifficulty,
   onResume,
   onRestart,
-  onOpenTutorial,
   switchToRelaxedAndRestart,
-  onAdventure,
-  onFree,
   adventure,
   exitAction,
   compact = false,
@@ -38,22 +33,17 @@ export function BlockDropOverlay({
   blockDropDifficulty: BlockDropDifficulty;
   onResume: () => void;
   onRestart: () => void;
-  onOpenTutorial: () => void;
   switchToRelaxedAndRestart: () => void;
-  /** 待機面主按鈕：進冒險地圖 */
-  onAdventure: () => void;
-  /** 待機面次按鈕：自由堆疊 */
-  onFree: () => void;
   /** 任務冒險的結算（過關／重來／收尾），有值時取代自由堆疊的結算 */
   adventure?: ReactNode;
   /** 暫停層與自由堆疊結算的「回地圖／回標題」 */
   exitAction?: ReactNode;
-  /** 矮版面（橫向手機）：待機面不放示範動畫 */
+  /** 矮版面（橫向手機）：內距收小 */
   compact?: boolean;
 }) {
   return (
     <>
-         {g.status !== "playing" && (
+         {(g.status === "paused" || g.status === "over" || g.status === "won") && (
            <div
              style={{
                position: "absolute",
@@ -71,9 +61,19 @@ export function BlockDropOverlay({
                justifyContent: "center",
                gap: g.status === "paused" ? 10 : 12,
                color: MACARON_THEME.ink,
-               // 井面日夜都是奶油底；GameEndStation 標題吃 --ink，夜間會變白字壓白底，這裡把 token 釘回馬卡龍墨色
+               // 井面日夜都是奶油底；GameEndStation 的標題與按鈕吃主題 token，夜間會變白字壓白底、
+               // 小圓鈕變黑塊，這裡把 token 釘回日間值（同消消樂結算層）
                ["--ink" as string]: MACARON_THEME.ink,
                ["--ink-soft" as string]: MACARON_THEME.inkSoft,
+               ["--cta-solid-bg" as string]: "#3a2410",
+               ["--cta-solid-fg" as string]: "#fff",
+               ["--cta-warm-to" as string]: "#ffbd6f",
+               ["--cta-soft-bg" as string]: "#fff",
+               ["--cta-soft-fg" as string]: MACARON_THEME.ink,
+               ["--cta-soft-line" as string]: "rgba(93,74,103,.16)",
+               ["--cta-quiet-fg" as string]: "#1f7268",
+               ["--elev-1" as string]: "0 1px 2px rgba(52,48,43,.04), 0 8px 24px rgba(52,48,43,.08)",
+               ["--focus-ring" as string]: MACARON_THEME.ink,
                textAlign: "center",
                padding: compact ? 8 : 16,
                overflowY: "auto",
@@ -111,7 +111,7 @@ export function BlockDropOverlay({
                   </button>
                 ) : null}
               </>
-            ) : (
+            ) : g.status === "paused" ? (
               <>
                 <div
                   style={{
@@ -119,90 +119,37 @@ export function BlockDropOverlay({
                     animation: reduced ? "none" : "popIn .35s ease-out",
                   }}
                 >
-                  {g.status === "paused" ? (
-                    <IconPauseGlyph size={44} color={MACARON_THEME.inkSoft} />
-                  ) : compact ? null : (
-                    /* 兒童減法審：ready 面用無字玩法示範取代裝飾糖果 icon */
-                    <BlockDropReadyDemo />
-                  )}
+                  <IconPauseGlyph size={44} color={MACARON_THEME.inkSoft} />
                 </div>
-                <div style={{ fontSize: 22, fontWeight: 900 }}>
-                  {g.status === "paused" ? "暫停中" : "方塊轉轉"}
-                </div>
-                {g.status === "ready" && (
-                  <>
-                    {/* 主按鈕「開始冒險」進地圖；自由堆疊（無盡模式）是次要入口 */}
-                    <GameResultActions
-                      onReplay={onAdventure}
-                      replayLabel={
-                        <>
-                          <IconPlay size={19} /> 開始冒險
-                        </>
-                      }
-                      replayStyle={{
-                        ...primaryBtn(font),
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 8,
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={onFree}
-                      style={{ ...secondaryBtn(font), display: "inline-flex", alignItems: "center", gap: 6 }}
-                    >
-                      自由堆疊
-                    </button>
-                  </>
-                )}
-                {/* 兒童減法審：ready 面不再放「調整難度與模式」（齒輪設定裡已有同一組 radiogroup）；
-                    ready 面只剩大 icon、開始、怎麼玩 */}
-                {g.status === "ready" && (
-                  <button
-                    type="button"
-                    onClick={onOpenTutorial}
-                    style={{
-                      ...secondaryBtn(font),
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 6,
-                    }}
-                  >
-                    怎麼玩？
-                  </button>
-                )}
-                {g.status === "paused" ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={onResume}
-                      style={{
-                        ...primaryBtn(font),
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 8,
-                      }}
-                    >
-                      <IconPlay size={19} /> 繼續
-                    </button>
-                    {exitAction}
-                    {/* PLAY-IA-6：暫停層補兒童最自然的離站出口（對齊 GamePageShell） */}
-                    <Link
-                      href="/games"
-                      style={{
-                        ...secondaryBtn(font),
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        textDecoration: "none",
-                      }}
-                    >
-                      回遊樂園
-                    </Link>
-                  </>
-                ) : null}
+                <div style={{ fontSize: 22, fontWeight: 900 }}>暫停中</div>
+                <button
+                  type="button"
+                  onClick={onResume}
+                  style={{
+                    ...primaryBtn(font),
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
+                  <IconPlay size={19} /> 繼續
+                </button>
+                {exitAction}
+                {/* PLAY-IA-6：暫停層補兒童最自然的離站出口（對齊 GamePageShell） */}
+                <Link
+                  href="/games"
+                  style={{
+                    ...secondaryBtn(font),
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    textDecoration: "none",
+                  }}
+                >
+                  回遊樂園
+                </Link>
               </>
-            )}
+            ) : null}
           </div>
         )}
     </>

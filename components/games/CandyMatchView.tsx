@@ -298,7 +298,7 @@ export function CandyMatchView({
             {/* 頁面唯一 h1 屬 GamePageShell；此處為關卡畫面標題，降為 h2 避免重複 h1。 */}
             <h2 className={styles.titleHeading}>準備找糖果！</h2>
             {/* 拿到幾顆星：圖＋數字，不寫「完成小任務，就有星星」這種要讀的句子 */}
-            <p className={styles.titleStars} aria-label={`已經拿到 ${starsGot} 顆星，全部 ${starsTotal} 顆`}>
+            <p className={styles.titleStars} role="img" aria-label={`已經拿到 ${starsGot} 顆星，全部 ${starsTotal} 顆`}>
               <IconStar size={22} />
               <b aria-hidden>{starsGot}</b>
               <span aria-hidden>/ {starsTotal}</span>

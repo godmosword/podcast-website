@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import type { GameAudioBus, OverlayProps } from "@/lib/gamekit/adapter";
 import { BlockDropOverlay } from "@/components/games/BlockDropOverlay";
@@ -15,6 +15,7 @@ import {
 import { BlockDropMap, type BlockStationPreview } from "@/components/games/BlockDropMap";
 import { BlockDropResult } from "@/components/games/BlockDropResult";
 import { BlockDropTaskBar } from "@/components/games/BlockDropTaskBar";
+import { BlockDropTitle } from "@/components/games/BlockDropTitle";
 import { releaseBoardPointerCapture, useBlockDropGame } from "@/components/games/useBlockDropGame";
 import { useGameKitSettings } from "@/hooks/useGameKitSettings";
 import { BLOCK_DROP_DIFFICULTIES, type BlockDropDifficulty } from "@/lib/gamekit/progress/settings";
@@ -66,7 +67,7 @@ const GAP_HINT_LAST_STATION = 2;
 const KEY_BAR_GAP = 6;
 const MIN_BOARD_H_PORTRAIT = 300;
 const MIN_BOARD_H_LANDSCAPE = 200;
-/** 遊戲列比這矮時，待機面省略玩法示範動畫 */
+/** 遊戲列比這矮時，暫停／結算層內距收小 */
 const COMPACT_OVERLAY_H = 420;
 /** 直向手機 HUD 列與井之間的距離 */
 const HUD_ROW_GAP = 6;
@@ -104,7 +105,6 @@ export function BlockDropView({
   onStart,
   onResume,
   onRestart,
-  onOpenTutorial,
   syncHost,
   audio,
   instance,
@@ -171,6 +171,7 @@ export function BlockDropView({
     return () => window.removeEventListener(GAMEKIT_PROGRESS_EVENT, refreshMedals);
   }, [refreshMedals]);
   const maxCleared = medals.reduce((m, f, i) => (medalCount(f) > 0 ? Math.max(m, i + 1) : m), 0);
+  const starsGot = BLOCK_STATIONS.reduce((sum, _, i) => sum + medalCount(medals[i] ?? 0), 0);
 
   /** 地圖預覽與開始用同一份配置（抽一次就固定）；通關過的站重玩換變體。 */
   const planRound = useCallback(
@@ -281,7 +282,8 @@ export function BlockDropView({
   /** HUD 列（含與井的間距）高度；窄欄模式量不到時沿用上次量到的值 */
   const hudRowHRef = useRef(59 + HUD_ROW_GAP);
   const hasRound = round != null;
-  useEffect(() => {
+  // layout effect：從標題頁進局時井才第一次出現，先量好再畫，第一幀不會用預設縮放閃一下
+  useLayoutEffect(() => {
     const el = boardWrapRef.current;
     if (!el) return;
     const apply = () => {
@@ -380,9 +382,9 @@ export function BlockDropView({
       <BlockDropResult
         round={round}
         outcome={outcome}
-        medalStars={medalCount(medals[round.station.index] ?? 0)}
         isLast={round.station.index === BLOCK_STATIONS.length - 1}
         font={FONT}
+        reducedMotion={reduced}
         onNext={() => startStation(round.station.index + 1)}
         onReplay={() => startStation(round.station.index)}
         onEasier={() => startStation(Math.max(0, round.station.index - 1))}
@@ -390,14 +392,14 @@ export function BlockDropView({
       />
     ) : undefined;
 
-  const showChips = screen === "home" || (screen === "play" && !round && (wide || !inRound));
+  // 速度 chip 只在自由堆疊局外（與寬螢幕局內）出現；標題頁的速度交給齒輪設定
+  const showChips = screen === "play" && !round && (wide || !inRound);
   const showLocalHold = showHold && !keys;
-  // 標題面只有待機卡：HUD、側欄與鍵列等開局後才出現
   const onPlayScreen = screen === "play";
 
-  const taskOrScore = (compact: boolean) =>
+  const taskOrScore = (compact: boolean, side = false) =>
     round ? (
-      <BlockDropTaskBar round={round} g={g} />
+      <BlockDropTaskBar round={round} g={g} side={side} />
     ) : compact ? (
       <BlockDropCompactScorePanel g={g} />
     ) : (
@@ -514,18 +516,23 @@ export function BlockDropView({
         }
       `}</style>
 
-      {screen === "map" ? (
+      {screen === "home" ? (
+        <BlockDropTitle
+          starsGot={starsGot}
+          starsTotal={BLOCK_STATIONS.length * 3}
+          onStart={() => setScreen("map")}
+          onFree={startFree}
+        />
+      ) : screen === "map" ? (
         <BlockDropMap
           stations={BLOCK_STATIONS}
           stars={BLOCK_STATIONS.map((_, i) => medalCount(medals[i] ?? 0))}
           maxCleared={maxCleared}
           mode={mapMode}
-          font={FONT}
           onModeChange={changeMode}
           previewFor={previewFor}
           onStart={startStation}
           onFree={startFree}
-          onHome={goHome}
         />
       ) : (
         <>
@@ -611,14 +618,14 @@ export function BlockDropView({
             {onPlayScreen && wide &&
               sideColumn(
                 <>
-                  {taskOrScore(false)}
+                  {taskOrScore(false, true)}
                   {showLocalHold && <BlockDropHoldButton g={g} font={FONT} cell={layout.hud.hold} holdPiece={holdPiece} />}
                 </>,
               )}
             {onPlayScreen && landscape &&
               sideColumn(
                 <>
-                  {taskOrScore(true)}
+                  {taskOrScore(true, true)}
                   {keyProps && (
                     <div style={{ visibility: keysHidden ? "hidden" : "visible" }}>
                       <BlockDropKeys {...keyProps} part="left" />
@@ -666,10 +673,7 @@ export function BlockDropView({
               blockDropDifficulty={blockDropDifficulty}
               onResume={onResume}
               onRestart={onRestart}
-              onOpenTutorial={onOpenTutorial}
               switchToRelaxedAndRestart={switchToRelaxedAndRestart}
-              onAdventure={() => setScreen("map")}
-              onFree={startFree}
               adventure={adventureResult}
               compact={landscape || boardDisplayH < COMPACT_OVERLAY_H}
               exitAction={
