@@ -45,16 +45,6 @@ export function IconFootprints({ size = 20, className }: IconProps) {
   );
 }
 
-/** 結算條件「完成任務」：插旗。 */
-export function IconFlag({ size = 24, className }: IconProps) {
-  return (
-    <svg {...svgProps(size, className)}>
-      <path d="M6 21V4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-      <path d="M6.5 4.5h11l-2.2 4 2.2 4h-11z" fill="currentColor" />
-    </svg>
-  );
-}
-
 /** 回地圖：摺起來的地圖。 */
 export function IconMapFold({ size = 24, className }: IconProps) {
   return (
