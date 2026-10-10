@@ -353,9 +353,6 @@
   border-radius: var(--radius-pill);
   background: transparent;
   color: var(--map-chip-ink);
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1;
   cursor: pointer;
   transition: transform 120ms ease, opacity 120ms ease;
 }

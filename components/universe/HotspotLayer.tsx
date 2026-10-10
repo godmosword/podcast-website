@@ -70,8 +70,18 @@ export default function HotspotLayer({
         const href = hotspotDetailHref(zoneId, hotspot);
         const locked = hotspot.action.type === "locked";
         const kind = locked ? "locked" : hotspot.action.type;
+        // 連結熱點多半是站內頁；只有離站（http 開頭）才用「外部連結」圖示
         const icon =
-          kind === "story" ? "✦" : kind === "link" ? <Icon name="external" size={11} /> : "·";
+          hotspot.action.type === "story" ? (
+            "✦"
+          ) : hotspot.action.type === "link" ? (
+            <Icon
+              name={/^https?:/.test(hotspot.action.href) ? "external" : "chevron-right"}
+              size={13}
+            />
+          ) : (
+            "·"
+          );
         return (
           <Link
             key={hotspot.id}

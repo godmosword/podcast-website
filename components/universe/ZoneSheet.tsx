@@ -321,12 +321,16 @@ export default function ZoneSheet({
                         const href = hotspotDetailHref(zone.id, spot);
                         const action = spot.action;
                         const locked = action.type === "locked";
+                        // 連結熱點多半是站內頁；只有離站（http 開頭）才用「外部連結」圖示
                         const icon = locked ? (
                           "·"
                         ) : action.type === "story" ? (
                           "✦"
                         ) : (
-                          <Icon name="external" size={13} />
+                          <Icon
+                            name={/^https?:/.test(action.href) ? "external" : "chevron-right"}
+                            size={15}
+                          />
                         );
                         const className = [
                           locked ? styles.hotspotLocked : styles.hotspotLink,

@@ -79,8 +79,8 @@ export function CandyMatchPropBar({
             {PROP_INFO[active].label}會{PROP_INFO[active].range}。
             {hasPreview ? "點亮框裡的格子就用掉！" : "先點一格看看範圍。"}
           </span>
-          <button type="button" className={styles.propCancel} onClick={onCancel} aria-label="取消">
-            <Icon name="close" size={16} />
+          <button type="button" className={styles.propCancel} onClick={onCancel}>
+            <Icon name="close" size={18} />
             取消
           </button>
         </div>

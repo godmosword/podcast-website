@@ -31,14 +31,29 @@ describe("介面圖示不用文字符號", () => {
     it(`${file}：用 Icon「${icon}」，不用 ${glyphs.join(" ")}`, () => {
       const code = read(file);
       for (const glyph of glyphs) expect(code).not.toContain(glyph);
-      expect(code).toContain(`name="${icon}"`);
+      // name="close"，或 name={條件 ? "external" : "chevron-right"}
+      expect(code).toMatch(new RegExp(`name=(\\{[^}]*)?"${icon}"`));
     });
   }
+
+  it("地圖熱點的連結標記：只有離站（http 開頭）才用外部連結，站內用向右箭頭", () => {
+    for (const file of ["components/universe/HotspotLayer.tsx", "components/universe/ZoneSheet.tsx"]) {
+      const code = read(file);
+      expect(code, file).toMatch(/\/\^https\?:\/\.test\([^)]*\.href\) \? "external" : "chevron-right"/);
+    }
+  });
 
   it("頂欄下拉箭頭打開時轉 180°，減少動態時不轉場", () => {
     const css = readFileSync(join(ROOT, "components/landing/SubscribeMenu.module.css"), "utf8");
     expect(css).toMatch(/\.trigger\[aria-expanded="true"\] \.chevron\s*\{[^}]*transform:\s*rotate\(180deg\)/);
     const reduced = css.slice(css.indexOf("@media (prefers-reduced-motion: reduce)"));
     expect(reduced).toMatch(/\.chevron\s*\{[^}]*transition:\s*none/);
+  });
+
+  it("頂欄下拉箭頭不加寬按鈕：14px 並以負外距抵掉圖示留白（320 寬時「留言」才不壓到漢堡）", () => {
+    const tsx = read("components/landing/SubscribeMenu.tsx");
+    expect(tsx).toContain('<Icon name="chevron-down" size={14} className={styles.chevron} />');
+    const css = readFileSync(join(ROOT, "components/landing/SubscribeMenu.module.css"), "utf8");
+    expect(css).toMatch(/\.chevron\s*\{[^}]*margin-inline:\s*-3px/);
   });
 });

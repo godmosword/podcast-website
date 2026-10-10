@@ -38,8 +38,6 @@
   border-radius: var(--radius-sm, 12px);
   background: color-mix(in srgb, var(--ink, #34302b) 8%, transparent);
   color: var(--ink, #34302b);
-  font-size: 1.25rem;
-  font-weight: 700;
   cursor: pointer;
 }
 

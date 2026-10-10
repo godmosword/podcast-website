@@ -78,9 +78,6 @@ export function BlockDropTutorialCard({
             borderRadius: 999,
             color: MACARON_THEME.ink,
             background: "rgba(255,255,255,.72)",
-            fontSize: 18,
-            fontWeight: 900,
-            lineHeight: 1,
             cursor: "pointer",
           }}
         >
