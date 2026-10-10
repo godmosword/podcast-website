@@ -434,6 +434,17 @@ test("方塊轉轉（Block Drop）頁面可載入", async ({ page }) => {
   await expect(page.getByRole("progressbar")).toBeVisible();
 });
 
+test("方塊轉轉：標題 → 地圖 → 第 1 站任務列", async ({ page }) => {
+  await page.goto("/games/block-drop");
+  await expect(page.getByRole("heading", { name: "準備疊方塊！" })).toBeVisible();
+  await page.getByRole("button", { name: "開始冒險" }).click();
+  await expect(page.getByTestId("block-drop-map")).toBeVisible();
+  await expect(page.getByRole("radio", { name: /輕鬆冒險/ })).toBeVisible();
+  await page.locator('button[data-next="true"]').click();
+  await expect(page.locator('[data-status="playing"]')).toBeVisible();
+  await expect(page.getByRole("region", { name: "本站任務進度" })).toContainText("第 1 站");
+});
+
 test("角色圖鑑與親子指南不含內頁 hero", async ({ page, request }) => {
   for (const path of ["/characters", "/for-parents"]) {
     const response = await request.get(path);

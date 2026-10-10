@@ -1,0 +1,425 @@
+/* 方塊轉轉冒險地圖（對齊消消樂地圖）。卡面日夜不反轉，顏色固定。 */
+.map {
+  --node-size: 60px;
+  --row-h: 84px;
+  --path-ink: #e8a44a;
+  --ink: #5d4a67;
+  --ink-soft: #7c6886;
+  --focus-ring: #5d4a67;
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  width: 100%;
+  color: var(--ink);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* 玩法：葉子＝輕鬆、方塊＝挑戰；只留兩個字，說明在 aria-label */
+.modeToggle {
+  display: inline-flex;
+  justify-self: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1.5px solid rgba(93, 74, 103, 0.1);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.modeOption {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.modeOption[data-mode="easy"][aria-checked="true"] {
+  background: #e3f6ea;
+  color: #23744a;
+  box-shadow: inset 0 0 0 2px currentColor;
+}
+
+.modeOption[data-mode="challenge"][aria-checked="true"] {
+  background: #eef3ff;
+  color: #3159a8;
+  box-shadow: inset 0 0 0 2px currentColor;
+}
+
+.modeOption:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* 下一站大卡：迷你起始盤｜站號＋站名＋任務圖案｜大圓開始鈕 */
+.hero {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 8px 20px rgba(150, 110, 130, 0.14);
+}
+
+/* 迷你盤格子：一般 7px、寬螢幕 9px、320 寬 5px */
+.heroArt {
+  --mini-cell: 7px;
+  display: grid;
+  place-items: center;
+  padding: 6px;
+  border-radius: 16px;
+  background: #fff7ea;
+  box-shadow: inset 0 0 0 3px #ffbd6f;
+}
+
+.heroInfo {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.heroInfo p {
+  margin: 0;
+}
+
+.heroStation {
+  color: var(--ink-soft);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.heroPlace {
+  overflow: hidden;
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.heroGoals {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin-top: 2px;
+}
+
+.heroGoal {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  line-height: 0;
+}
+
+.heroGoal b {
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.heroCap {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #eef3ff;
+  color: #3159a8;
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.heroStart {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  padding: 0 0 0 4px;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ffe889, #ffbd6f);
+  color: #614018;
+  cursor: pointer;
+  box-shadow: 0 5px 0 rgba(203, 128, 52, 0.42), 0 10px 18px rgba(164, 103, 61, 0.18);
+}
+
+.heroStart:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.notice {
+  margin: 0;
+  color: #87506d;
+  font-size: 15px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.notice:not(:empty) {
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.notice:empty {
+  display: none;
+}
+
+/*
+ * 路線：同一份節點，手機排成直向蛇形（3 欄 × 10 列），寬螢幕排成兩排蛇行（5 欄 × 2 列）。
+ * 每站的格位放在 --nc/--nr（窄）與 --wc/--wr（寬），線是拉伸填滿的 SVG。
+ */
+.path {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: var(--row-h);
+  width: min(100%, 420px);
+  margin-inline: auto;
+}
+
+.pathNarrow,
+.pathWide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.pathNarrow polyline,
+.pathWide polyline {
+  fill: none;
+  stroke: var(--path-ink);
+  stroke-width: 8px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pathWide {
+  display: none;
+}
+
+.node {
+  position: relative;
+  z-index: 1;
+  grid-column: var(--nc);
+  grid-row: var(--nr);
+  place-self: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.node[aria-disabled="true"] {
+  cursor: default;
+}
+
+/* 站點沒有插圖：圓章上直接寫大站號 */
+.badge {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--node-size);
+  height: var(--node-size);
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #fff7ea;
+  box-shadow: 0 4px 12px rgba(150, 110, 130, 0.24);
+  color: var(--ink);
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1;
+  transition: transform 180ms ease;
+}
+
+.node[data-locked="true"] .badge {
+  color: #9a8ca1;
+}
+
+.node[aria-current="true"] .badge {
+  box-shadow: 0 0 0 4px #ffbd6f, 0 6px 14px rgba(150, 110, 130, 0.26);
+}
+
+/* 下一站：放大、粉紅外圈，一眼看出「現在要去這裡」 */
+.next .badge {
+  background: linear-gradient(180deg, #fff3c4, #ffd9a0);
+  box-shadow: 0 0 0 4px #ff9fb7, 0 8px 18px rgba(150, 110, 130, 0.28);
+  transform: scale(1.16);
+}
+
+.node:focus-visible {
+  outline: none;
+}
+
+.node:focus-visible .badge {
+  box-shadow: 0 0 0 4px var(--focus-ring);
+}
+
+.lock {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 50%;
+  background: #fff;
+  line-height: 0;
+  box-shadow: 0 1px 4px rgba(93, 74, 103, 0.2);
+}
+
+/* 星星壓在站點下緣，不另佔一列：站點中心才會對準路線 */
+.stars {
+  position: absolute;
+  left: 50%;
+  bottom: -12px;
+  display: inline-flex;
+  gap: 1px;
+  padding: 2px 5px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(93, 74, 103, 0.18);
+  line-height: 0;
+  transform: translateX(-50%);
+}
+
+/* 次要入口：自由堆疊 */
+.free {
+  display: inline-flex;
+  justify-self: center;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  margin-top: 6px;
+  padding: 0 18px;
+  border: 1.5px solid rgba(93, 74, 103, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.free:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .node:not([aria-disabled="true"]):hover .badge {
+    transform: translateY(-2px);
+  }
+
+  .next:hover .badge {
+    transform: scale(1.16) translateY(-2px);
+  }
+}
+
+@media (min-width: 760px) {
+  .map {
+    --node-size: 68px;
+    --row-h: 108px;
+    gap: 16px;
+  }
+
+  .hero {
+    padding: 16px 20px;
+    gap: 18px;
+  }
+
+  .heroArt {
+    --mini-cell: 9px;
+  }
+
+  .heroPlace {
+    font-size: 24px;
+  }
+
+  .heroStart {
+    width: 84px;
+    height: 84px;
+  }
+
+  .path {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    width: min(100%, 980px);
+  }
+
+  .pathNarrow {
+    display: none;
+  }
+
+  .pathWide {
+    display: block;
+  }
+
+  .node {
+    grid-column: var(--wc);
+    grid-row: var(--wr);
+  }
+}
+
+@media (max-width: 355px) {
+  .map {
+    --node-size: 54px;
+    --row-h: 76px;
+  }
+
+  .hero {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .heroArt {
+    --mini-cell: 5px;
+    padding: 4px;
+  }
+
+  .heroStart {
+    width: 60px;
+    height: 60px;
+  }
+
+  .modeOption {
+    padding: 0 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge {
+    transition: none;
+  }
+
+  .next .badge,
+  .next:hover .badge,
+  .node:not([aria-disabled="true"]):hover .badge {
+    transform: none;
+  }
+}

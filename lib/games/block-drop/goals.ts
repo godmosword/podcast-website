@@ -68,6 +68,11 @@ export function blockGoalRemainingLabel(goal: BlockGoal, g: Stats, initialStoneR
   }
 }
 
+/** 地圖大卡「圖案 ×N」的 N：清石頭沒有 count，用起始盤的石頭排數。 */
+export function blockGoalCount(goal: BlockGoal, initialStoneRows: number): number {
+  return goal.kind === "clear-stones" ? initialStoneRows : goal.count;
+}
+
 export function blockGoalsSummary(goals: readonly BlockGoal[]): string {
   return goals.map(blockGoalTitle).join("＋");
 }

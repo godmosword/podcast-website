@@ -1,15 +1,18 @@
 "use client";
 
 /**
- * 《繽紛樂園》任務冒險地圖：玩法切換＋站點大卡（關號、站名、迷你起始盤、任務、開始）＋兩列小路。
- * 結構對齊消消樂地圖；站點圖示用 CSS 迷你盤（石頭＋缺口），不出圖。
+ * 《繽紛樂園》任務冒險地圖（對齊消消樂）：玩法切換、下一站大卡（迷你起始盤＋任務圖案＋大圓開始鈕）、
+ * 1–10 站蛇形小路、底部「自由堆疊」。孩子看圖認站、看圖案和數字認任務；整句任務只給讀屏。
+ * 站點沒有插圖：大卡用 CSS 迷你盤（石頭＋缺口），小路上用站號。
+ * 點已解鎖的站換成預覽；點鎖住的站說明要先完成哪一站。
  */
 import { useState, type CSSProperties } from "react";
-import { IconLock, IconStar } from "@/components/games/ClayIcons";
-import type { BlockGoal } from "@/lib/games/block-drop/goals";
+import { IconLeaf } from "@/components/games/CandyMatchIcons";
+import { IconLock, IconPlay, IconStar } from "@/components/games/ClayIcons";
+import { BlockGoalIcon, IconPieces, MiniStoneBoard } from "@/components/games/BlockDropIcons";
+import { blockGoalCount, type BlockGoal } from "@/lib/games/block-drop/goals";
 import type { BlockMode, BlockStation } from "@/lib/games/block-drop/stages";
-import { BlockGoalIcon } from "./BlockDropTaskBar";
-import { MACARON_THEME, primaryBtn, secondaryBtn } from "./blockDropTheme";
+import styles from "./BlockDropMap.module.css";
 
 export type BlockStationPreview = {
   stones: readonly string[];
@@ -19,41 +22,41 @@ export type BlockStationPreview = {
   replay: boolean;
 };
 
-const MODES: readonly { id: BlockMode; label: string; hint: string }[] = [
-  { id: "easy", label: "輕鬆冒險", hint: "慢慢落、不會輸" },
-  { id: "challenge", label: "挑戰冒險", hint: "有塊數限制" },
+const MODES: readonly { id: BlockMode; label: string; short: string; hint: string }[] = [
+  { id: "easy", label: "輕鬆冒險", short: "輕鬆", hint: "慢慢落、不會輸" },
+  { id: "challenge", label: "挑戰冒險", short: "挑戰", hint: "有塊數限制" },
 ];
 
-/** 迷你起始盤：8 欄石頭排（由下往上），缺口留白。 */
-function MiniStoneBoard({ stones, cell = 6 }: { stones: readonly string[]; cell?: number }) {
-  const rows = [...stones].reverse();
-  return (
-    <span
-      aria-hidden
-      style={{
-        display: "inline-grid",
-        gridTemplateColumns: `repeat(8, ${cell}px)`,
-        gap: 1,
-        padding: 3,
-        borderRadius: 6,
-        background: "linear-gradient(180deg,#3d3f82,#2a2c5e)",
-      }}
-    >
-      {rows.flatMap((row, r) =>
-        [...row].map((ch, c) => (
-          <span
-            key={`${r}-${c}`}
-            style={{
-              width: cell,
-              height: cell,
-              borderRadius: 1,
-              background: ch === "X" ? "#cdbfb2" : "rgba(255,232,137,.45)",
-            }}
-          />
-        )),
-      )}
-    </span>
-  );
+/** 手機直向蛇形：左、中、右、中、左…每站一列（3 欄）。 */
+const NARROW_LANE_CYCLE = [1, 2, 3, 2] as const;
+const NARROW_COLS = 3;
+/** 寬螢幕蛇行：每排 5 站，單數排左到右、雙數排右到左。 */
+const WIDE_COLS = 5;
+
+function narrowCell(index: number): { col: number; row: number } {
+  return { col: NARROW_LANE_CYCLE[index % NARROW_LANE_CYCLE.length]!, row: index + 1 };
+}
+
+function wideCell(index: number): { col: number; row: number } {
+  const row = Math.floor(index / WIDE_COLS) + 1;
+  const step = index % WIDE_COLS;
+  return { col: row % 2 === 1 ? step + 1 : WIDE_COLS - step, row };
+}
+
+/** 路線用每格中心點連起來：一格在 viewBox 裡佔 2 單位，中心是 2n-1。 */
+function pathFor(count: number, cell: (i: number) => { col: number; row: number }, cols: number) {
+  const cells = Array.from({ length: count }, (_, i) => cell(i));
+  const rows = cells.reduce((max, c) => Math.max(max, c.row), 1);
+  return {
+    viewBox: `0 0 ${cols * 2} ${rows * 2}`,
+    points: cells.map(({ col, row }) => `${col * 2 - 1},${row * 2 - 1}`).join(" "),
+  };
+}
+
+function goalsLabel(preview: BlockStationPreview, mode: BlockMode): string {
+  const cap = mode === "challenge" && preview.pieceCap > 0 ? `，${preview.pieceCap} 塊內完成` : "";
+  const replay = preview.replay ? "，重玩換新盤" : "";
+  return `${preview.summary}${cap}${replay}`;
 }
 
 type Props = {
@@ -61,26 +64,13 @@ type Props = {
   stars: readonly number[];
   maxCleared: number;
   mode: BlockMode;
-  font: string;
   onModeChange: (mode: BlockMode) => void;
   previewFor: (index: number) => BlockStationPreview;
   onStart: (index: number) => void;
   onFree: () => void;
-  onHome: () => void;
 };
 
-export function BlockDropMap({
-  stations,
-  stars,
-  maxCleared,
-  mode,
-  font,
-  onModeChange,
-  previewFor,
-  onStart,
-  onFree,
-  onHome,
-}: Props) {
+export function BlockDropMap({ stations, stars, maxCleared, mode, onModeChange, previewFor, onStart, onFree }: Props) {
   const nextIndex = Math.min(maxCleared, stations.length - 1);
   const finished = maxCleared >= stations.length;
   const [picked, setPicked] = useState<number | null>(null);
@@ -90,172 +80,135 @@ export function BlockDropMap({
   const preview = previewFor(heroIndex);
   const isNext = !finished && heroIndex === maxCleared;
   const startLabel = heroIndex < maxCleared ? "再玩一次" : "開始";
-  const card: CSSProperties = {
-    display: "grid",
-    gap: 10,
-    padding: 12,
-    borderRadius: 22,
-    background: "rgba(255,255,255,.86)",
-    boxShadow: "0 8px 18px rgba(150,110,130,.14)",
-    color: MACARON_THEME.ink,
-  };
+  const showCap = mode === "challenge" && preview.pieceCap > 0;
+  const narrowPath = pathFor(stations.length, narrowCell, NARROW_COLS);
+  const widePath = pathFor(stations.length, wideCell, WIDE_COLS);
+
   return (
-    <div data-testid="block-drop-map" style={{ display: "grid", gap: 10, fontFamily: font }}>
-      <h2 style={{ margin: 0, textAlign: "center", fontSize: 18, fontWeight: 900, color: MACARON_THEME.ink }}>
-        冒險地圖
-      </h2>
-      <div role="radiogroup" aria-label="玩法" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, padding: 4, borderRadius: 18, background: "rgba(255,255,255,.7)" }}>
+    <div className={styles.map} data-testid="block-drop-map">
+      <h2 className={styles.visuallyHidden}>冒險地圖</h2>
+      {/* 玩法：葉子＝輕鬆、方塊＝挑戰；只留兩個字，說明在 aria-label */}
+      <div className={styles.modeToggle} role="radiogroup" aria-label="玩法">
         {MODES.map((m) => (
           <button
             key={m.id}
             type="button"
             role="radio"
             aria-checked={mode === m.id}
+            className={styles.modeOption}
+            data-mode={m.id}
+            aria-label={`${m.label}。${m.hint}`}
             onClick={() => onModeChange(m.id)}
-            style={{
-              display: "grid",
-              gap: 1,
-              minHeight: 48,
-              padding: "6px 8px",
-              border: "none",
-              borderRadius: 14,
-              cursor: "pointer",
-              fontFamily: font,
-              color: MACARON_THEME.ink,
-              background: mode === m.id ? "#fff" : "transparent",
-              boxShadow: mode === m.id ? "inset 0 0 0 2px #ffbd6f" : "none",
-            }}
           >
-            <span style={{ fontSize: 16, fontWeight: 900 }}>{m.label}</span>
-            <span style={{ fontSize: 12, fontWeight: 700, color: MACARON_THEME.inkSoft }}>{m.hint}</span>
+            {m.id === "easy" ? <IconLeaf size={20} /> : <IconPieces size={20} />}
+            {m.short}
           </button>
         ))}
       </div>
 
-      <div style={card}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <MiniStoneBoard stones={preview.stones} cell={7} />
-          <div style={{ display: "grid", gap: 3, minWidth: 0 }}>
-            <p style={{ margin: 0, fontSize: 18, fontWeight: 900 }}>
-              第 {heroIndex + 1} 站・{hero.name}
-            </p>
-            <p style={{ margin: 0, display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, fontSize: 15, fontWeight: 800 }}>
-              {preview.goals.map((goal, i) => (
-                <BlockGoalIcon key={i} goal={goal} />
-              ))}
-              {preview.summary}
-            </p>
-            {mode === "challenge" || preview.replay ? (
-              <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: MACARON_THEME.inkSoft }}>
-                {[mode === "challenge" ? `${preview.pieceCap} 塊內完成` : null, preview.replay ? "重玩換新盤" : null]
-                  .filter(Boolean)
-                  .join("・")}
-              </p>
+      <div className={styles.hero}>
+        <span className={styles.heroArt}>
+          <MiniStoneBoard stones={preview.stones} />
+        </span>
+        <div className={styles.heroInfo}>
+          <p className={styles.heroStation}>第 {heroIndex + 1} 站</p>
+          <p className={styles.heroPlace}>{hero.name}</p>
+          <p className={styles.heroGoals} aria-label={goalsLabel(preview, mode)}>
+            {preview.goals.map((goal, i) => (
+              <span key={i} className={styles.heroGoal}>
+                <BlockGoalIcon goal={goal} cell={8} />
+                <b aria-hidden>×{blockGoalCount(goal, preview.stones.length)}</b>
+              </span>
+            ))}
+            {showCap ? (
+              <span className={styles.heroCap} aria-hidden>
+                <IconPieces size={16} />
+                {preview.pieceCap}
+              </span>
             ) : null}
-          </div>
+          </p>
         </div>
         <button
           type="button"
+          className={styles.heroStart}
           data-next={isNext ? "true" : undefined}
           aria-label={`${startLabel}：第 ${heroIndex + 1} 站 ${hero.name}`}
+          title={startLabel}
           onClick={() => onStart(heroIndex)}
-          style={{ ...primaryBtn(font), width: "100%" }}
         >
-          {startLabel}
+          <IconPlay size={32} />
         </button>
       </div>
 
-      <p role="status" style={{ margin: 0, minHeight: notice ? 20 : 0, textAlign: "center", fontSize: 14, fontWeight: 800, color: MACARON_THEME.accentPink }}>
+      <p className={styles.notice} role="status">
         {notice}
       </p>
 
-      <div style={{ display: "grid", gap: 10 }}>
-        {[stations.slice(0, 5), stations.slice(5, 10)].map((row, r) => (
-          <div key={r} style={{ position: "relative", display: "grid", gridTemplateColumns: "repeat(5, 52px)", justifyContent: "space-between" }}>
-            <span aria-hidden style={{ position: "absolute", left: 26, right: 26, top: 22, height: 6, borderRadius: 999, background: "#e8a44a" }} />
-            {row.map((st) => {
-              const i = st.index;
-              const locked = i > maxCleared;
-              const got = Math.max(0, Math.min(3, stars[i] ?? 0));
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  aria-disabled={locked || undefined}
-                  aria-current={i === heroIndex ? "true" : undefined}
-                  data-locked={locked ? "true" : undefined}
-                  aria-label={`第 ${i + 1} 站 ${st.name}${locked ? "（未解鎖）" : `，${got} 顆星`}`}
-                  onClick={() => {
-                    if (locked) {
-                      setPicked(nextIndex);
-                      setNotice(`先完成第 ${nextIndex + 1} 站「${stations[nextIndex]?.name ?? ""}」，就能往前走喔！`);
-                      return;
-                    }
-                    setNotice("");
-                    setPicked(i);
-                  }}
-                  style={{
-                    position: "relative",
-                    zIndex: 1,
-                    display: "grid",
-                    justifyItems: "center",
-                    gap: 2,
-                    minHeight: 52,
-                    padding: 0,
-                    border: "none",
-                    background: "transparent",
-                    cursor: locked ? "default" : "pointer",
-                    fontFamily: font,
-                  }}
-                >
-                  <span
-                    style={{
-                      position: "relative",
-                      display: "grid",
-                      placeItems: "center",
-                      width: 48,
-                      height: 48,
-                      borderRadius: "50%",
-                      background: "#fff7ea",
-                      border: "2px solid #fff",
-                      boxShadow:
-                        i === heroIndex
-                          ? "0 0 0 3px #ffbd6f, 0 4px 10px rgba(150,110,130,.22)"
-                          : "0 4px 10px rgba(150,110,130,.22)",
-                      color: MACARON_THEME.ink,
-                      fontSize: 17,
-                      fontWeight: 900,
-                    }}
-                  >
-                    {i + 1}
-                    {locked ? (
-                      <span aria-hidden style={{ position: "absolute", right: -4, bottom: -4, lineHeight: 0, background: "#fff", borderRadius: "50%", padding: 1 }}>
-                        <IconLock size={20} />
-                      </span>
-                    ) : null}
+      <div className={styles.path}>
+        <svg className={styles.pathNarrow} viewBox={narrowPath.viewBox} preserveAspectRatio="none" aria-hidden>
+          <polyline points={narrowPath.points} vectorEffect="non-scaling-stroke" />
+        </svg>
+        <svg className={styles.pathWide} viewBox={widePath.viewBox} preserveAspectRatio="none" aria-hidden>
+          <polyline points={widePath.points} vectorEffect="non-scaling-stroke" />
+        </svg>
+        {stations.map((st) => {
+          const i = st.index;
+          const locked = i > maxCleared;
+          const next = !locked && i === maxCleared;
+          const got = Math.max(0, Math.min(3, stars[i] ?? 0));
+          const narrow = narrowCell(i);
+          const wide = wideCell(i);
+          const cell = {
+            "--nc": String(narrow.col),
+            "--nr": String(narrow.row),
+            "--wc": String(wide.col),
+            "--wr": String(wide.row),
+          } as CSSProperties;
+          return (
+            <button
+              key={i}
+              type="button"
+              className={`${styles.node}${next ? ` ${styles.next}` : ""}`}
+              style={cell}
+              aria-disabled={locked || undefined}
+              aria-current={i === heroIndex ? "true" : undefined}
+              data-locked={locked ? "true" : undefined}
+              aria-label={`第 ${i + 1} 站 ${st.name}${locked ? "（未解鎖）" : `，${got} 顆星`}`}
+              title={st.name}
+              onClick={() => {
+                if (locked) {
+                  // 大卡直接換成該先完成的那一站：畫面本身就是答案
+                  setPicked(nextIndex);
+                  setNotice(`先完成第 ${nextIndex + 1} 站「${stations[nextIndex]?.name ?? ""}」，就能往前走喔！`);
+                  return;
+                }
+                setNotice("");
+                setPicked(i);
+              }}
+            >
+              <span className={styles.badge} aria-hidden>
+                {i + 1}
+                {locked ? (
+                  <span className={styles.lock}>
+                    <IconLock size={20} />
                   </span>
-                  <span aria-hidden style={{ display: "inline-flex", gap: 1, minHeight: 12, lineHeight: 0 }}>
-                    {locked
-                      ? null
-                      : [0, 1, 2].map((s) => <IconStar key={s} size={12} color={s < got ? "#ffd34d" : "#d9d0e0"} />)}
+                ) : (
+                  <span className={styles.stars}>
+                    {[0, 1, 2].map((s) => (
+                      <IconStar key={s} size={12} color={s < got ? "#ffd34d" : "#e2d9e8"} />
+                    ))}
                   </span>
-                </button>
-              );
-            })}
-          </div>
-        ))}
+                )}
+              </span>
+            </button>
+          );
+        })}
       </div>
-      <p style={{ margin: 0, textAlign: "center", fontSize: 12, fontWeight: 700, color: MACARON_THEME.inkSoft }}>
-        星星是每站累積的獎章，兩種玩法都算。
-      </p>
-      <div style={{ display: "flex", justifyContent: "center", gap: 10, flexWrap: "wrap" }}>
-        <button type="button" onClick={onFree} style={secondaryBtn(font)}>
-          自由堆疊
-        </button>
-        <button type="button" onClick={onHome} style={secondaryBtn(font)}>
-          回標題
-        </button>
-      </div>
+
+      <button type="button" className={styles.free} onClick={onFree}>
+        <IconPieces size={18} />
+        自由堆疊
+      </button>
     </div>
   );
 }
