@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { TutorialStep } from "@/data/games";
+import Icon from "@/components/ui/Icon";
 import styles from "./tutorial-overlay.module.css";
 
 export type TutorialOverlayProps = {
@@ -135,7 +136,7 @@ export function TutorialOverlay({ title, steps, onClose, onStart }: TutorialOver
           onClick={onClose}
           aria-label="關閉教學"
         >
-          ✕
+          <Icon name="close" size={20} />
         </button>
         <h2 id={titleId} className={styles.title}>
           怎麼玩：{title}

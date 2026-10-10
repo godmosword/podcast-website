@@ -63,6 +63,7 @@ import ZoneIsland from "./ZoneIsland";
 import { UniverseCameraGateProvider } from "./UniverseCameraGateContext";
 import { useMapCamera, type MapCamera } from "./useMapCamera";
 import { useSheetReadyLatch } from "./useSheetReadyLatch";
+import Icon from "@/components/ui/Icon";
 import styles from "./UniverseMap.module.css";
 
 /** 首訪底部提示：每個分頁 session 僅 dismiss 後才寫入（StrictMode 安全）。 */
@@ -707,7 +708,7 @@ function UniverseMapContent({
             aria-label="關閉提示"
             onClick={dismissTapHint}
           >
-            <span aria-hidden="true">×</span>
+            <Icon name="close" size={18} />
           </button>
         </div>
       ) : null}

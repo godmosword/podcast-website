@@ -17,4 +17,11 @@ describe("Icon", () => {
     const html = renderToStaticMarkup(<Icon name="close" />);
     expect(html).toContain('stroke="currentColor"');
   });
+
+  it("chevron-down 與 chevron-right 同一種畫法（2px 圓角線）", () => {
+    const down = renderToStaticMarkup(<Icon name="chevron-down" />);
+    expect(down).toContain('stroke-width="2"');
+    expect(down).toContain('stroke-linecap="round"');
+    expect(down).toContain('d="m6 9.5 6 6 6-6"');
+  });
 });

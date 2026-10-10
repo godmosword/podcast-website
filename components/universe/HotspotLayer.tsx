@@ -13,6 +13,7 @@ import {
   resolvedZoneById,
 } from "@/lib/universe/hotspot";
 import { mapDepthZ } from "@/lib/universe-depth";
+import Icon from "@/components/ui/Icon";
 import styles from "./HotspotLayer.module.css";
 
 type HotspotLayerProps = {
@@ -70,7 +71,7 @@ export default function HotspotLayer({
         const locked = hotspot.action.type === "locked";
         const kind = locked ? "locked" : hotspot.action.type;
         const icon =
-          kind === "story" ? "✦" : kind === "link" ? "↗" : "·";
+          kind === "story" ? "✦" : kind === "link" ? <Icon name="external" size={11} /> : "·";
         return (
           <Link
             key={hotspot.id}

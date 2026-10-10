@@ -169,6 +169,12 @@
   box-shadow: var(--shadow-md);
 }
 
+/* 外部連結：共用「外部連結」細線圖示，和全站同一套 */
+.externalIcon {
+  flex: none;
+  margin-left: 4px;
+}
+
 .secondaryAction {
   border: 1px solid var(--cta-soft-line);
   background: var(--cta-soft-bg);

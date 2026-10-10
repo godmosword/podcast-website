@@ -51,10 +51,15 @@
   background: color-mix(in srgb, var(--c-teal) 14%, transparent);
 }
 
+/* 細線向下箭頭（共用 Icon，和漢堡同一套）；下拉打開時轉 180°，多一個「已打開」的提示 */
 .chevron {
-  font-size: 0.72rem;
-  line-height: 1;
+  flex: none;
   opacity: 0.9;
+  transition: transform var(--motion-press);
+}
+
+.trigger[aria-expanded="true"] .chevron {
+  transform: rotate(180deg);
 }
 
 .dropdown {
@@ -129,7 +134,8 @@
 
 /* 與 SiteNavBar 同一列的三顆鈕須有一致的動態與焦點對比標準 */
 @media (prefers-reduced-motion: reduce) {
-  .trigger {
+  .trigger,
+  .chevron {
     transition: none;
   }
 

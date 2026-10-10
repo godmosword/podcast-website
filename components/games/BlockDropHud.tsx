@@ -4,6 +4,7 @@
  * 《繽紛樂園》HUD：教學卡、暫存、下一個、分數（原樣搬自 BlockDropView）。
  */
 import { IconBox, IconBulb, IconFlame, IconNext } from "@/components/games/ClayIcons";
+import Icon from "@/components/ui/Icon";
 import type { GameState } from "@/lib/games/block-drop/engine";
 import type { PieceType } from "@/lib/games/block-drop/pieces";
 import {
@@ -83,7 +84,7 @@ export function BlockDropTutorialCard({
             cursor: "pointer",
           }}
         >
-          <span aria-hidden>✕</span>
+          <Icon name="close" size={18} />
         </button>
       </div>
     ) : null

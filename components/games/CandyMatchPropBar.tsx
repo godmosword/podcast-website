@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { IconBroom, IconBubble, IconBulb, IconRainbow } from "@/components/games/ClayIcons";
+import Icon from "@/components/ui/Icon";
 import type { CandyProps } from "@/lib/games/candy-match/stages";
 import type { CandyPropKind } from "./useCandyMatchPlay";
 import styles from "./CandyMatchPlay.module.css";
@@ -79,7 +80,8 @@ export function CandyMatchPropBar({
             {hasPreview ? "點亮框裡的格子就用掉！" : "先點一格看看範圍。"}
           </span>
           <button type="button" className={styles.propCancel} onClick={onCancel} aria-label="取消">
-            ✕ 取消
+            <Icon name="close" size={16} />
+            取消
           </button>
         </div>
       ) : null}

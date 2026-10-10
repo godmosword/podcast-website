@@ -321,8 +321,13 @@ export default function ZoneSheet({
                         const href = hotspotDetailHref(zone.id, spot);
                         const action = spot.action;
                         const locked = action.type === "locked";
-                        const icon =
-                          locked ? "·" : action.type === "story" ? "✦" : "↗";
+                        const icon = locked ? (
+                          "·"
+                        ) : action.type === "story" ? (
+                          "✦"
+                        ) : (
+                          <Icon name="external" size={13} />
+                        );
                         const className = [
                           locked ? styles.hotspotLocked : styles.hotspotLink,
                           spot.featured ? styles.hotspotFeatured : "",
@@ -384,7 +389,7 @@ export default function ZoneSheet({
                         <span className={styles.segmentLabel}>
                           {link.label}
                           {link.external ? (
-                            <span aria-hidden="true"> ↗</span>
+                            <Icon name="external" size={14} className={styles.externalIcon} />
                           ) : null}
                         </span>
                       </a>
@@ -411,7 +416,7 @@ export default function ZoneSheet({
                       >
                         {link.label}
                         {link.external ? (
-                          <span aria-hidden="true"> ↗</span>
+                          <Icon name="external" size={14} className={styles.externalIcon} />
                         ) : null}
                       </a>
                     ))}
