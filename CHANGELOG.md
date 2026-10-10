@@ -85,6 +85,8 @@
 
 ### Fixed
 
+- **iPhone／iPad 主畫面 App 頂端的字避開 iOS 26 模糊帶**：iOS 26 會在狀態列下方加一道往下淡出的模糊，加到主畫面的 App 裡頁面關不掉（實機截圖量到同一個字上半部比下半部糊，模糊延伸到狀態列下方約 42px）。新增 `--edge-ramp`：只在 iOS 主畫面 App 為 32px，頂欄、遊戲／著色本抬頭、故事播放器頂排都往下多空這段，字落在模糊帶下面。Safari 分頁靠頂端的 sticky 色條就不會糊：遊戲抬頭改不透明並往上延伸到畫面頂端（內容位置不變），頂欄底色改不透明、維持不用毛玻璃。
+
 - **島嶼面板關閉鈕不再被故事卡蓋住**：車車樂園沒有提示句，故事卡頂到面板最上面；卡片是 `position: relative`、DOM 又排在關閉鈕後面，整顆 ✕ 被蓋掉，點那個角會進故事。關閉鈕墊 `z-index: 1`；關閉鈕後面若不是提示句，第一塊內容從關閉鈕下緣開始排；提示句右側讓出 40px。390／320／844×390 實測 `elementFromPoint` 命中關閉鈕。
 
 - **元件樣式不再被全域 class 反蓋**：`app/layout.tsx` 的 `globals.css` 原本排在元件 import 之後；著色本新增 CSS module 後 Turbopack 併 chunk，把一批元件 CSS 排到 globals 前面，同權重的全域 class 反過來蓋掉元件（故事卡 EP 標籤變小、故事頁分享列多 12px）。改成第一個 import。故事頁對 PlayButton／ShareButton 的覆寫也改成不靠載入順序：播放鈕版面交回 PlayButton 自己的 flex，分享列 `margin-top: 0` 提到 (0,2,0)。

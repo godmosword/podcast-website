@@ -15,12 +15,14 @@
 }
 
 .main {
+  /* 上留白寫成變數：.playHeader 要往上延伸同樣距離。改上留白一律改這個變數（含著色本） */
+  --main-pad-top: clamp(0.5rem, 1.5vh, 0.75rem);
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
   min-height: 100dvh;
   padding: 0.75rem 0.75rem max(0.75rem, var(--safe-bottom));
-  padding-top: clamp(0.5rem, 1.5vh, 0.75rem);
+  padding-top: var(--main-pad-top);
   max-width: none;
   margin: 0 auto;
 }
@@ -90,27 +92,24 @@
  */
 .playHeader {
   position: sticky;
-  top: 0;
+  /*
+   * iOS 26 在狀態列下方加的漸層模糊（詳見 SiteNavBar .bar 的說明）：
+   * - Safari 分頁：畫面頂端那一點要落在 sticky 抬頭裡，系統才改用抬頭底色、不加模糊。以前靜止時
+   *   那一點落在 .main 的上留白，所以抬頭往上延伸蓋住它，sticky 位置也往上補同樣距離，
+   *   靜止和捲動時內容都在原位。不用 backdrop-filter。
+   * - 主畫面 App：關不掉，內容在 safe-top 之外再空 --edge-ramp（其他情況為 0）。
+   * min-height 含 padding，一併加上同樣距離。
+   */
+  top: calc(-1 * var(--main-pad-top));
   z-index: 20;
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  min-height: 52px;
+  min-height: calc(52px + var(--main-pad-top) + var(--edge-ramp));
+  margin-top: calc(-1 * var(--main-pad-top));
   margin-bottom: var(--space-3);
-  padding-top: var(--safe-top);
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
-}
-
-/* 毛玻璃放在 ::before、不放在抬頭本身：Safari 會把帶 backdrop-filter 的 sticky 元素連字一起
-   用較低解析度合成，「回遊樂園」和標題看起來糊（同 SiteNavBar .bar::before） */
-.playHeader::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  padding-top: calc(var(--main-pad-top) + var(--safe-top) + var(--edge-ramp));
+  background: var(--bg);
 }
 
 .headerActions {
@@ -331,8 +330,9 @@
 
 @media (max-width: 640px) {
   .main {
+    --main-pad-top: calc(0.5rem + var(--safe-top));
     padding-inline: calc(12px + var(--safe-left)) calc(12px + var(--safe-right));
-    padding-top: calc(0.5rem + var(--safe-top));
+    padding-top: var(--main-pad-top);
   }
 
   .playHeader {
@@ -421,7 +421,7 @@
 @media (max-width: 359.98px) {
   .playHeader {
     gap: 4px;
-    min-height: 48px;
+    min-height: calc(48px + var(--main-pad-top) + var(--edge-ramp));
   }
 
   .headerActions,
@@ -446,13 +446,14 @@
  * 井與兩側鍵欄同屏、不整頁捲動。只限 block-drop 局內，不影響其他遊戲與標題面。 */
 @media (orientation: landscape) and (max-height: 520px) {
   .main[data-game-id="block-drop"]:has([data-status="playing"], [data-status="paused"]) {
-    padding-top: calc(2px + var(--safe-top));
+    --main-pad-top: calc(2px + var(--safe-top));
+    padding-top: var(--main-pad-top);
     padding-bottom: 4px;
   }
 
   .main[data-game-id="block-drop"]:has([data-status="playing"], [data-status="paused"]) .playHeader {
     flex-wrap: nowrap;
-    min-height: 44px;
+    min-height: calc(44px + var(--main-pad-top) + var(--edge-ramp));
     margin-bottom: 2px;
   }
 

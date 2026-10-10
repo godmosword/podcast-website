@@ -79,7 +79,7 @@ describe("game logic regressions", () => {
     const pageShell = source("components/games/GamePageShell.tsx");
 
     expect(shell).toContain("var(--safe-top)");
-    expect(shell).toContain("min-height: 52px");
+    expect(shell).toContain("min-height: calc(52px + var(--main-pad-top) + var(--edge-ramp))");
     expect(pageShell.indexOf('id="game-play"')).toBeGreaterThan(-1);
     expect(pageShell).not.toContain("<GameIntro");
   });

@@ -22,13 +22,24 @@ describe("SiteNavBar.module.css 漢堡與抽屜", () => {
     expect(desktopBlock).not.toMatch(/\.panel\s*\{[^}]*display:\s*none/);
   });
 
-  it("毛玻璃只放在 ::before：.bar／.inner 本身不得有 backdrop-filter（Safari 會連裡面的字一起糊）", () => {
-    const rules = [...css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^{}]*)\}/g)];
-    const withBackdrop = rules.filter(([, , body]) => /backdrop-filter/.test(body!));
-    expect(withBackdrop.length).toBeGreaterThan(0);
-    for (const [, selector] of withBackdrop) {
-      expect(selector!.trim()).toMatch(/::before$/);
-    }
+  describe("iOS 26 頂端漸層模糊", () => {
+    // Safari 分頁：畫面頂端那一點落在 sticky 的 .bar 裡，系統改用它的底色、不加模糊；帶 backdrop-filter
+    // 會被判成「好幾種顏色」。主畫面 App：頁面關不掉，字要落在 --edge-ramp 模糊帶下面（見 globals.css）。
+    const code = css.replace(/\/\*[\s\S]*?\*\//g, "");
+
+    it("不得用 backdrop-filter", () => {
+      expect(code).not.toMatch(/backdrop-filter/);
+    });
+
+    it("頂欄本體預設底色是不透明的 --landing-nav-cta-bg", () => {
+      expect(code).toMatch(/(^|\})\s*\.bar\s*\{[^}]*background:\s*var\(--landing-nav-cta-bg\);/);
+    });
+
+    it("手機 .inner 與 ≥980 外層 .bar 的上內距都含 --edge-ramp", () => {
+      expect(code).toMatch(/\.inner\s*\{[^}]*padding:\s*calc\(10px \+ var\(--safe-top\) \+ var\(--edge-ramp\)\)/);
+      const desktop = code.slice(code.indexOf("@media (min-width: 980px) {"));
+      expect(desktop).toMatch(/\.bar\s*\{[^}]*padding:\s*calc\(10px \+ var\(--safe-top\) \+ var\(--edge-ramp\)\) 20px 0;/);
+    });
   });
 
   it("抽屜關閉時以 display:none 隱藏，而非只用 opacity", () => {

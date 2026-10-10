@@ -2,8 +2,8 @@
   position: sticky;
   top: 0;
   z-index: 40;
-  /* 行動：薄毛玻璃 + hairline，減少厚漸層塊感；不隨 night 反轉 */
-  background: color-mix(in srgb, var(--landing-nav-cta-bg) 82%, transparent);
+  /* 行動：不透明底 + hairline；不隨 night 反轉。不用 backdrop-filter（見下方說明） */
+  background: var(--landing-nav-cta-bg);
   color: var(--landing-nav-ink);
   border-bottom: 1px solid var(--landing-nav-border);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
@@ -15,37 +15,18 @@
 }
 
 /*
- * 毛玻璃放在 ::before，不放在 .bar 本身：iPad／iPhone Safari 會把帶 backdrop-filter 的 sticky 元素
- * 整層（含裡面的字）用較低解析度合成，品牌字與連結看起來糊。濾鏡層移到文字下面，字留在一般圖層。
- * 底色仍在 .bar 上（各狀態只改 background），::before 只負責模糊，畫出來與原本相同。
+ * iOS 26 頂端漸層模糊：iPhone／iPad 會在狀態列下方加一道往下淡出的模糊（捲動邊緣效果）。
+ * - Safari 分頁：畫面頂端中點往下 4px 落在 sticky／fixed、夠寬的盒子裡（就是這條 .bar）時，系統改用
+ *   它的底色往上延伸、不加模糊。這條盒子不得帶 backdrop-filter（會被判成「好幾種顏色」）。
+ * - 主畫面 App：頂欄一直符合上面的條件，實機仍然糊（2026-10-10 回報三次，截圖量到同一個字上半部
+ *   比下半部糊、漢堡三條線由上往下越來越清楚），頁面 CSS 關不掉。所以 .inner 在 safe-top 之外再空
+ *   --edge-ramp，讓字落在模糊帶下面（見 globals.css）。
  */
-.bar::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-}
 
-/* 首頁 landing：預設略提高不透明度，中段捲動少透字；仍保留毛玻璃 */
-:global(html:has([data-landing-root])) .bar {
-  background: color-mix(in srgb, var(--landing-nav-cta-bg) 86%, transparent);
-}
-
-/* footer snap 進視窗：頂欄近不透明，避免白底頁尾 meta 透過 */
+/* 首頁 landing 與 footer snap：同樣不透明。權重高於 ≥980 的透明外層，所以首頁桌機是整條桃色底＋膠囊 */
+:global(html:has([data-landing-root])) .bar,
 .bar[data-nav-solid="true"] {
-  background: color-mix(in srgb, var(--landing-nav-cta-bg) 96%, transparent);
-}
-
-:global(html:has([data-landing-root])) .bar[data-nav-solid="true"] {
   background: var(--landing-nav-cta-bg);
-}
-
-:global(html:has([data-landing-root])) .bar[data-nav-solid="true"]::before {
-  backdrop-filter: blur(10px) saturate(130%);
-  -webkit-backdrop-filter: blur(10px) saturate(130%);
 }
 
 .inner {
@@ -53,7 +34,7 @@
   position: relative;
   max-width: 960px;
   margin: 0 auto;
-  padding: calc(10px + var(--safe-top)) calc(16px + var(--safe-right))
+  padding: calc(10px + var(--safe-top) + var(--edge-ramp)) calc(16px + var(--safe-right))
     10px calc(16px + var(--safe-left));
   display: flex;
   align-items: center;
@@ -279,8 +260,7 @@
  * `@media (min-width: 980px) .bar { background: transparent }`（0,1,0），媒體查詢不加權重，
  * 若不限斷點，桌面夜間一開抽屜就會在懸浮膠囊外畫出一條橫貫視窗的色帶。 */
 @media (max-width: 979px) {
-  /* 日間開啟：頂欄改不透明桃色，避免半透明毛玻璃把卡片合成灰帶
-   * （與面板桃色斷層——設計審：捲動後再開選單會把「底色不均」從選中列搬到頂欄）。
+  /* 日間開啟：頂欄與面板同為不透明桃色（現在等同 .bar 底色；留著鎖住開啟態，日後改 .bar 底色時不會跟面板斷層）。
    * 必須用 html:not(night)（0,3,1）：裸 `.bar[data-menu-open]` 輸給
    * html:has([data-landing-root]) .bar（0,2,1）與 .bar[data-nav-solid]（0,2,0）。 */
   :global(html:not([data-theme="night"])) .bar[data-menu-open="true"] {
@@ -463,7 +443,7 @@
     background: transparent;
     border-bottom: none;
     box-shadow: none;
-    padding: calc(10px + var(--safe-top)) 20px 0;
+    padding: calc(10px + var(--safe-top) + var(--edge-ramp)) 20px 0;
   }
 
   .inner {
@@ -472,15 +452,15 @@
     /* padding-right 與下方 .panel right 必須同一數字，漢堡才不掉出圓角 */
     padding: 0 16px 0 16px;
     justify-content: flex-start;
-    background: color-mix(in srgb, var(--landing-nav-cta-bg) 72%, transparent);
+    background: color-mix(in srgb, var(--landing-nav-cta-bg) 92%, transparent);
     border: 1px solid rgba(255, 255, 255, 0.65);
     border-radius: var(--radius-pill);
     box-shadow: 0 8px 28px rgba(120, 70, 25, 0.14),
       inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
-  /* 膠囊不另加毛玻璃：.bar::before 已經模糊整條（含膠囊後面），膠囊只疊底色。
-     以前 .inner 自己的 backdrop-filter 被 .bar 的濾鏡擋住、實際沒作用；再加一層會變成模糊兩次。 */
+  /* 膠囊同樣不用毛玻璃（見 .bar 上方說明）。膠囊不貼畫面頂端，可以略透；
+   * 外層透明的 .bar 仍是頂端那個 sticky 盒子，Safari 分頁照樣改用色條、不加模糊 */
 
   /* 漢堡在最右：面板右錨膠囊，勿再 left:8px（會假綠「在膠囊內」） */
   .panel {
@@ -506,7 +486,7 @@
 
   :global(html:has([data-landing-root])) .bar .inner {
     pointer-events: auto;
-    background: color-mix(in srgb, var(--landing-nav-cta-bg) 78%, transparent);
+    background: color-mix(in srgb, var(--landing-nav-cta-bg) 93%, transparent);
   }
 
   :global(html:has([data-landing-root])) .bar[data-nav-solid="true"] .inner {
