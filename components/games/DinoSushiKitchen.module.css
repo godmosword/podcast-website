@@ -755,3 +755,19 @@
 .kitchen[data-reduced="true"] .brushButton {
   animation: none;
 }
+
+/* iPhone 橫向扣掉 Safari 工具列只剩約 340px 高：收緊間距（托盤鈕仍 ≥56px），托盤四列才不被切掉 */
+@media (orientation: landscape) and (max-height: 400px) {
+  .kitchen {
+    gap: 6px;
+  }
+
+  .tray {
+    gap: 4px;
+  }
+
+  .board {
+    gap: 6px;
+    padding: 6px;
+  }
+}

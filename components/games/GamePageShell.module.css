@@ -284,6 +284,13 @@
   padding: 0;
 }
 
+/* 壽司屋矮橫向（iPhone 橫拿約 340px 高）：抬頭與卡片的間距收小，托盤第四列才放得下 */
+@media (orientation: landscape) and (max-height: 400px) {
+  .main[data-game-id="dino-sushi"]:has([data-screen="kitchen"]) .playHeader {
+    margin-bottom: var(--space-1);
+  }
+}
+
 /* 壽司屋：夜間外框 12px 內距會讓 320 寬只剩 272px，托盤四欄塞不下。卡片自己有邊。 */
 :global([data-theme="night"]) .main[data-game-id="dino-sushi"] .playArea {
   padding: 0;

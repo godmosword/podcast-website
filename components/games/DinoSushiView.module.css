@@ -328,3 +328,9 @@
   width: 100%;
   height: 100%;
 }
+
+@media (orientation: landscape) and (max-height: 400px) {
+  .surface[data-screen="kitchen"] {
+    padding: 4px;
+  }
+}
